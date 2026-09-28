@@ -23,22 +23,23 @@
     "confidence_level": null,
     "multiple_testing": "Holm over the predeclared family (spec §10.3)",
     "match_tolerance_lengths": null,
-    "bootstrap_reps": null,
-    "bootstrap_seed": null,
     "alpha": null,
     "direction": null,
     "min_blocks_per_pair": null,
-    "min_allocations_per_pair": null
+    "min_allocations_per_pair": null,
+    "confirmation_requires_new_allocation": null,
+    "bootstrap_reps_descriptive_ci": null
   },
   "selectors": {
     "random_seeds": null,
     "shape_only_alignment_units": null,
     "shape_only_alignment_justification": null,
     "compile_probe_budget_fraction": null,
-    "budgets_ns": null
+    "budgets_ns": null,
+    "report_overhead_ns": null
   },
   "signature": {
-    "version": "sig-v1",
+    "version": "sig-v2",
     "primary": "opt-report",
     "probe_stage": null
   },

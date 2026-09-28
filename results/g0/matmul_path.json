@@ -1,0 +1,74 @@
+{
+  "matmul_path": "compiler-generated",
+  "evidence": {
+    "blas_like_imports": [],
+    "n_matmul_gemm_report_records": 98,
+    "matmul_report_summary": {
+      "SIMD:onnx.Gemm": {
+        "n": 70,
+        "applied": 69,
+        "values": {
+          "16": 69,
+          "0": 1
+        },
+        "messages": {
+          "simd directly in output tiles": 69,
+          "no simd because of small j trip count": 1
+        }
+      },
+      "SIMD:onnx.MatMul": {
+        "n": 28,
+        "applied": 28,
+        "values": {
+          "8": 28
+        },
+        "messages": {
+          "simd for mat * mat along j dim": 28
+        }
+      }
+    }
+  },
+  "dynamic_imports": [
+    "_ITM_deregisterTMCloneTable",
+    "_ITM_registerTMCloneTable",
+    "__assert_fail@GLIBC_2.2.5",
+    "__cxa_finalize@GLIBC_2.2.5",
+    "__errno_location@GLIBC_2.2.5",
+    "__gmon_start__",
+    "expf@GLIBC_2.27",
+    "feof@GLIBC_2.2.5",
+    "fflush@GLIBC_2.2.5",
+    "fgetc@GLIBC_2.2.5",
+    "fgets@GLIBC_2.2.5",
+    "fopen@GLIBC_2.2.5",
+    "fprintf@GLIBC_2.2.5",
+    "fputc@GLIBC_2.2.5",
+    "fputs@GLIBC_2.2.5",
+    "free@GLIBC_2.2.5",
+    "fwrite@GLIBC_2.2.5",
+    "getenv@GLIBC_2.2.5",
+    "getpid@GLIBC_2.2.5",
+    "gettimeofday@GLIBC_2.2.5",
+    "malloc@GLIBC_2.2.5",
+    "memcpy@GLIBC_2.14",
+    "memset@GLIBC_2.2.5",
+    "pclose@GLIBC_2.2.5",
+    "popen@GLIBC_2.2.5",
+    "powf@GLIBC_2.27",
+    "printf@GLIBC_2.2.5",
+    "snprintf@GLIBC_2.2.5",
+    "stderr@GLIBC_2.2.5",
+    "stdout@GLIBC_2.2.5",
+    "strcspn@GLIBC_2.2.5",
+    "strlen@GLIBC_2.2.5",
+    "strncmp@GLIBC_2.2.5",
+    "strncpy@GLIBC_2.2.5",
+    "tanhf@GLIBC_2.2.5"
+  ],
+  "flags": [
+    "-O3",
+    "--march=x86-64",
+    "--mcpu=emeraldrapids"
+  ],
+  "length": 128
+}

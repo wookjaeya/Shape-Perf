@@ -78,14 +78,18 @@ class ReplayBackend:
         d = self.dense[s]
         if d.get("failure_type"):
             return {"failure_type": d["failure_type"], "compile_ns": d.get("compile_ns", 0),
+                    "report_ns": d.get("report_ns", 0) if d.get("compile_ns") else 0,
                     "verify_ns": d.get("verify_ns", 0)}
         p = d["processes"][int(self.rng.integers(len(d["processes"])))]
         return {"latency_ns": p["median_ns"], "signature": d.get("signature"),
                 "compile_ns": d["compile_ns"], "extract_ns": d.get("extract_ns", 0),
+                "report_ns": d.get("report_ns", 0),
                 "verify_ns": d.get("verify_ns", 0), "warmup_ns": p["warmup_ns"], "measure_ns": p["measure_ns"]}
 
     def probe(self, s):
         d = self.dense[s]
+        if "probe_ns" not in d:
+            raise KeyError(f"no probe data for length {s} (census must cover the whole valid set)")
         if d.get("probe_failure_type"):
             return {"failure_type": d["probe_failure_type"], "probe_ns": d.get("probe_ns", 0)}
         return {"signature": d.get("probe_signature", d.get("signature")), "probe_ns": d["probe_ns"],

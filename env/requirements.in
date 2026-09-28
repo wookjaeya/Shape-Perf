@@ -11,3 +11,5 @@ pytest-xdist==3.8.0
 # history, not a compatibility statement (spec §5.4).
 onnxruntime==1.23.2
 six==1.17.0
+# t distribution for the minimum-effect test of answer table A (spec §9.3, §10.3)
+scipy==1.15.3

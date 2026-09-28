@@ -1,0 +1,362 @@
+{
+  "harness_commit": "8ca6ddf5695f8b1e5747517b32222240dae919c0-dirty",
+  "onnx_mlir_version": "onnx-mlir version 0.5.1, onnx version 1.21.0 (https://github.com/onnx/onnx-mlir 1e017c9fcd7ae7218731ae799f13a957e0cbc80b)\nLLVM version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)\nOptimized build with assertions.\nDefault target: x86_64-unknown-linux-gnu\nHost CPU: emeraldrapids",
+  "compiler_commit": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b",
+  "llvm_commit": "1053047a4be7d1fece3adaf5e7597f838058c947",
+  "model": "A_reexport",
+  "length": 128,
+  "target_cpu": "emeraldrapids",
+  "role": "dev functional verification",
+  "help_evidence": {
+    "onnx_mlir_has_shapeInformation": true,
+    "RunONNXModel_has_shape_info": true,
+    "note": "static specialization is checked below from the compiled entry signature and IR"
+  },
+  "full_compile": {
+    "command": [
+      "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+      "-O3",
+      "--march=x86-64",
+      "--mcpu=emeraldrapids",
+      "--shapeInformation=0:1,1:1x128,2:1x128,3:1x128",
+      "-o",
+      "/home/user/Shape-Perf/results/compile/g0/full/model",
+      "--opt-report=Simd",
+      "--EmitLib",
+      "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+    ],
+    "failure_type": null,
+    "compile_wall_ns": 78489316473,
+    "cpu_user_s": 67.021967,
+    "peak_rss_bytes": 2768609280,
+    "artifact_hash": "b8529c683e6ac7a0532ef1ba4cb76281d5b002db6680e6f1f07b6a08d3841926",
+    "artifact_bytes": 435165416,
+    "constants_files": [],
+    "ir_signature": "b741b410095a0717",
+    "report_n_records": 582,
+    "matmul_path": "compiler-generated",
+    "matmul_path_evidence": {
+      "blas_like_imports": [],
+      "n_matmul_gemm_report_records": 98,
+      "matmul_report_summary": {
+        "SIMD:onnx.Gemm": {
+          "n": 70,
+          "applied": 69,
+          "values": {
+            "16": 69,
+            "0": 1
+          },
+          "messages": {
+            "simd directly in output tiles": 69,
+            "no simd because of small j trip count": 1
+          }
+        },
+        "SIMD:onnx.MatMul": {
+          "n": 28,
+          "applied": 28,
+          "values": {
+            "8": 28
+          },
+          "messages": {
+            "simd for mat * mat along j dim": 28
+          }
+        }
+      }
+    },
+    "dynamic_imports": [
+      "_ITM_deregisterTMCloneTable",
+      "_ITM_registerTMCloneTable",
+      "__assert_fail@GLIBC_2.2.5",
+      "__cxa_finalize@GLIBC_2.2.5",
+      "__errno_location@GLIBC_2.2.5",
+      "__gmon_start__",
+      "expf@GLIBC_2.27",
+      "feof@GLIBC_2.2.5",
+      "fflush@GLIBC_2.2.5",
+      "fgetc@GLIBC_2.2.5",
+      "fgets@GLIBC_2.2.5",
+      "fopen@GLIBC_2.2.5",
+      "fprintf@GLIBC_2.2.5",
+      "fputc@GLIBC_2.2.5",
+      "fputs@GLIBC_2.2.5",
+      "free@GLIBC_2.2.5",
+      "fwrite@GLIBC_2.2.5",
+      "getenv@GLIBC_2.2.5",
+      "getpid@GLIBC_2.2.5",
+      "gettimeofday@GLIBC_2.2.5",
+      "malloc@GLIBC_2.2.5",
+      "memcpy@GLIBC_2.14",
+      "memset@GLIBC_2.2.5",
+      "pclose@GLIBC_2.2.5",
+      "popen@GLIBC_2.2.5",
+      "powf@GLIBC_2.27",
+      "printf@GLIBC_2.2.5",
+      "snprintf@GLIBC_2.2.5",
+      "stderr@GLIBC_2.2.5",
+      "stdout@GLIBC_2.2.5",
+      "strcspn@GLIBC_2.2.5",
+      "strlen@GLIBC_2.2.5",
+      "strncmp@GLIBC_2.2.5",
+      "strncpy@GLIBC_2.2.5",
+      "tanhf@GLIBC_2.2.5"
+    ],
+    "stderr_tail": null
+  },
+  "probe_compile": {
+    "failure_type": null,
+    "probe_wall_ns": 7743590891,
+    "peak_rss_bytes": 942182400,
+    "ir_signature": "b741b410095a0717",
+    "ir_structure_signature": "4353b37c3c2fe944",
+    "entry_signature": [
+      "memref<1xi64>",
+      "memref<1x128xi64>",
+      "memref<1x128xi64>",
+      "memref<1x128xi64>"
+    ],
+    "stderr_tail": null
+  },
+  "probe_and_full_report_signature_equal": true,
+  "signature_determinism": {
+    "report_equal": true,
+    "ir_structure_equal": true,
+    "raw_ir_equal": true,
+    "report_integrity": [
+      "ok",
+      "ok",
+      "ok"
+    ],
+    "signature_version": "sig-v2"
+  },
+  "compiler_warnings": [
+    "Warning: Got values for both --march and --mcpu, ignore --mcpu. Please remove deprecated --mcpu in the near future.",
+    "Warning: ONNX GlobalAveragePool in your model is using Opset 1, which is quite old. Please consider regenerating your model with a newer Opset.",
+    "Warning: ONNX Identity in your model is using Opset 1, which is quite old. Please consider regenerating your model with a newer Opset.",
+    "Warning: ONNX Reshape in your model is using Opset 5, which is quite old. Please consider regenerating your model with a newer Opset.",
+    "Warning: ONNX Shape in your model is using Opset 1, which is quite old. Please consider regenerating your model with a newer Opset.",
+    "Warning: ONNX Transpose in your model is using Opset 1, which is quite old. Please consider regenerating your model with a newer Opset."
+  ],
+  "expected_entry_dims": [
+    [
+      1
+    ],
+    [
+      1,
+      128
+    ],
+    [
+      1,
+      128
+    ],
+    [
+      1,
+      128
+    ]
+  ],
+  "probe_ir_static": true,
+  "pyruntime_signature": {
+    "in": [
+      {
+        "type": "i64",
+        "dims": [
+          1
+        ],
+        "name": "unique_ids_raw_output___9:0"
+      },
+      {
+        "type": "i64",
+        "dims": [
+          1,
+          128
+        ],
+        "name": "segment_ids:0"
+      },
+      {
+        "type": "i64",
+        "dims": [
+          1,
+          128
+        ],
+        "name": "input_mask:0"
+      },
+      {
+        "type": "i64",
+        "dims": [
+          1,
+          128
+        ],
+        "name": "input_ids:0"
+      }
+    ],
+    "out": [
+      {
+        "type": "f32",
+        "dims": [
+          1,
+          128
+        ],
+        "name": "unstack:1"
+      },
+      {
+        "type": "f32",
+        "dims": [
+          1,
+          128
+        ],
+        "name": "unstack:0"
+      },
+      {
+        "type": "i64",
+        "dims": [
+          1
+        ],
+        "name": "unique_ids:0"
+      }
+    ]
+  },
+  "static_specialization_verified": true,
+  "correctness": {
+    "padded_length": 128,
+    "n_features": 9,
+    "worst_max_abs_valid": 1.52587890625e-05,
+    "argmax_all_equal": true,
+    "correctness_status": "unjudged (tolerance not preregistered)"
+  },
+  "final_artifact": {
+    "available": true,
+    "hash": "88916c23cb941283",
+    "calls": [
+      "__assert_fail@plt",
+      "__cxa_finalize@plt",
+      "__errno_location@plt",
+      "_mlir_ciface_main_graph_model@plt",
+      "deregister_tm_clones",
+      "expf@plt",
+      "feof@plt",
+      "fflush@plt",
+      "fgetc@plt",
+      "fgets@plt",
+      "flushRecordBuffer",
+      "fopen@plt",
+      "fprintf@plt",
+      "fputc@plt",
+      "fputs@plt",
+      "free@plt",
+      "fwrite@plt",
+      "getInstrumentFile@plt",
+      "getenv@plt",
+      "getpid@plt",
+      "gettimeofday@plt",
+      "main_graph_model@plt",
+      "malloc@plt",
+      "memcpy@plt",
+      "memset@plt",
+      "omTensorCreate",
+      "omTensorCreateUntyped@plt",
+      "omTensorDestroy@plt",
+      "omTensorGetDataPtr@plt",
+      "omTensorGetDataType@plt",
+      "omTensorGetRank@plt",
+      "omTensorGetShape@plt",
+      "omTensorGetStrides@plt",
+      "omTensorListCreate@plt",
+      "omTensorListGetOmtArray@plt",
+      "omTensorListGetSize@plt",
+      "omTensorSetDataPtr@plt",
+      "omTensorSetDataType@plt",
+      "om_f16_to_f32@plt",
+      "pclose@plt",
+      "popen@plt",
+      "powf@plt",
+      "printData",
+      "printElement",
+      "printSignature",
+      "printf@plt",
+      "snprintf@plt",
+      "strcspn@plt",
+      "strlen@plt",
+      "strncmp@plt",
+      "strncpy@plt",
+      "tanhf@plt"
+    ],
+    "register_class_counts": {
+      "gpr": 31742,
+      "ymm": 26011,
+      "zmm": 36323,
+      "xmm": 10051
+    }
+  },
+  "simd_model_by_march": {
+    "march=x86-64": {
+      "command": [
+        "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--shapeInformation=0:1,1:1x128,2:1x128,3:1x128",
+        "--opt-report=Simd",
+        "--EmitMLIR",
+        "-o",
+        "/home/user/Shape-Perf/results/compile/g0/march_x86-64/model",
+        "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+      ],
+      "returncode": 0,
+      "vl_histogram": {
+        "applied=False,VL=0": 127,
+        "applied=None,VL=None": 1,
+        "applied=True,VL=16": 81,
+        "applied=True,VL=32": 345,
+        "applied=True,VL=8": 28
+      },
+      "n_simd_applied": 454,
+      "report_signature": "9ea443221261862b",
+      "stderr_tail": null
+    },
+    "march=unset": {
+      "command": [
+        "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+        "-O3",
+        "--mcpu=emeraldrapids",
+        "--shapeInformation=0:1,1:1x128,2:1x128,3:1x128",
+        "--opt-report=Simd",
+        "--EmitMLIR",
+        "-o",
+        "/home/user/Shape-Perf/results/compile/g0/march_unset/model",
+        "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+      ],
+      "returncode": 0,
+      "vl_histogram": {
+        "applied=False,VL=0": 407,
+        "applied=None,VL=None": 1,
+        "applied=True,VL=16": 69,
+        "applied=True,VL=8": 28
+      },
+      "n_simd_applied": 97,
+      "report_signature": "9eff52ca106bb462",
+      "stderr_tail": null
+    },
+    "march=native": {
+      "command": [
+        "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+        "-O3",
+        "--march=native",
+        "--shapeInformation=0:1,1:1x128,2:1x128,3:1x128",
+        "--opt-report=Simd",
+        "--EmitMLIR",
+        "-o",
+        "/home/user/Shape-Perf/results/compile/g0/march_native/model",
+        "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+      ],
+      "returncode": 0,
+      "vl_histogram": {
+        "applied=False,VL=0": 407,
+        "applied=None,VL=None": 1,
+        "applied=True,VL=16": 69,
+        "applied=True,VL=8": 28
+      },
+      "n_simd_applied": 97,
+      "report_signature": "dd0f018fcb5dad5a",
+      "stderr_tail": null
+    }
+  }
+}

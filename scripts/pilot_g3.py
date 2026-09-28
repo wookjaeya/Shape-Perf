@@ -23,6 +23,7 @@ import math
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -118,6 +119,9 @@ def main():
             "args": vars(args), "harness_commit": git_head(), "anchor_feature": anchor}
     write_json(out / "plan.json", plan)
 
+    flagsets = read_json(REPO_ROOT / "configs/compile_flags.json")["flagsets"]
+    if f"{args.flagset}_noreport" not in flagsets:
+        print(f"note: no flag set {args.flagset}_noreport; opt-report overhead is not measured")
     comp = {}
     for s in lengths:
         full = compile_shape(args.model, s, args.flagset, args.target_cpu, "full", out / f"full_s{s}",
@@ -129,17 +133,20 @@ def main():
         probe = compile_shape(args.model, s, args.flagset, args.target_cpu, "probe", out / f"probe_s{s}",
                               allow_native=args.allow_native)
         comp[s] = {"full": full, "probe": probe}
-        if lengths.index(s) < args.report_overhead_lengths:
-            nr = compile_shape(args.model, s, "default_noreport", args.target_cpu, "full", out / f"noreport_s{s}",
+        noreport_fs = f"{args.flagset}_noreport"
+        if lengths.index(s) < args.report_overhead_lengths and noreport_fs in flagsets:
+            nr = compile_shape(args.model, s, noreport_fs, args.target_cpu, "full", out / f"noreport_s{s}",
                                allow_native=args.allow_native)
             comp[s]["noreport"] = {"compile_wall_ns": nr.get("compile_wall_ns"), "artifact_hash": nr.get("artifact_hash"),
                                    "failure_type": nr.get("failure_type")}
         v = None
         if not full.get("failure_type"):
+            t_v = time.monotonic_ns()
             p = subprocess.run([sys.executable, str(REPO_ROOT / "validate_shapes.py"), "--artifact",
                                 full["artifact_path"], "--model", args.model, "--length", str(s),
                                 "--out", str(out / "validation.jsonl")], capture_output=True, text=True)
             v = json.loads(p.stdout.strip().splitlines()[-1]) if p.returncode == 0 else {"error": p.stderr[-2000:]}
+            comp[s]["verify_wall_ns"] = time.monotonic_ns() - t_v
         comp[s]["validation"] = v
         print("compiled", s, full.get("failure_type"), probe.get("failure_type"), flush=True)
 
@@ -184,7 +191,8 @@ def main():
             row["kalibera_jones"] = kj_iterations(
                 vc["iteration_var"], vc["process_var"], n_it, per_iter,
                 row["process_wall_ns"] - row["measurement_wall_ns_per_process"])
-            full_cost = (row["compile_wall_ns"] or 0) + row["process_wall_ns"]
+            full_cost = (row["compile_wall_ns"] or 0) + (c.get("verify_wall_ns") or 0) + row["process_wall_ns"]
+            row["verify_wall_ns"] = c.get("verify_wall_ns")
             row["probe_to_measured_query_cost_ratio"] = (row["probe_wall_ns"] / full_cost
                                                          if row["probe_wall_ns"] and full_cost else None)
         report["per_length"][s] = row
@@ -192,10 +200,15 @@ def main():
     for a, b in adj:
         pa, pb = comp[a]["probe"].get("ir_signature"), comp[b]["probe"].get("ir_signature")
         fa, fb = comp[a]["full"].get("final_signature"), comp[b]["full"].get("final_signature")
+        if None in (pa, pb, fa, fb):
+            mism.append({"pair": [a, b], "unavailable": True})
+            continue
         mism.append({"pair": [a, b], "probe_changed": pa != pb, "final_changed": fa != fb,
                      "mismatch": (pa != pb) != (fa != fb)})
+    usable = [x for x in mism if not x.get("unavailable")]
     report["probe_vs_final_changepoint_mismatch"] = {
-        "pairs": mism, "rate": float(np.mean([x["mismatch"] for x in mism])) if mism else None,
+        "pairs": mism, "rate": float(np.mean([x["mismatch"] for x in usable])) if usable else None,
+        "n_unavailable": len(mism) - len(usable),
         "note": "tiny sample; the census-scale rate needs full compiles of adjacent lengths"}
     report["probe_vs_full_report_signature_equal"] = {
         s: comp[s]["probe"].get("ir_signature") == comp[s]["full"].get("ir_signature") for s in lengths}

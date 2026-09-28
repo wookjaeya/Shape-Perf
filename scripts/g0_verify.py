@@ -28,7 +28,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shapeperf import signature as S  # noqa: E402
 from shapeperf import toolchain  # noqa: E402
-from shapeperf.compile import compile_shape, expected_entry_dims, model_def, shape_information  # noqa: E402
+from shapeperf.compile import (compile_shape, expected_entry_dims, line_buffered, model_def,  # noqa: E402
+                               model_node_names, shape_information)
 from shapeperf.util import REPO_ROOT, git_head, write_json  # noqa: E402
 
 
@@ -43,7 +44,7 @@ def raw_compile(model, length, flags, out, emit="--EmitMLIR"):
     out.mkdir(parents=True, exist_ok=True)
     cmd = [str(toolchain.onnx_mlir_bin()), *flags, f"--shapeInformation={shape_information(model, length)}",
            "--opt-report=Simd", emit, "-o", str(out / "model"), model["abs_path"]]
-    p = subprocess.run(cmd, capture_output=True, text=True)
+    p = subprocess.run(line_buffered(cmd), capture_output=True, text=True)
     return cmd, p.returncode, p.stdout, p.stderr[-3000:]
 
 
@@ -88,6 +89,17 @@ def main():
                                                       "ir_signature", "ir_structure_signature", "entry_signature",
                                                       "stderr_tail"]}
     rep["probe_and_full_report_signature_equal"] = full.get("ir_signature") == probe.get("ir_signature")
+    # signature determinism: the same length probed again must give the same signature (sig-v2)
+    probe2 = compile_shape(args.model, args.length, "default", args.target_cpu, "probe", work / "probe_repeat",
+                           allow_native=args.allow_native)
+    rep["signature_determinism"] = {
+        "report_equal": probe.get("ir_signature") == probe2.get("ir_signature"),
+        "ir_structure_equal": probe.get("ir_structure_signature") == probe2.get("ir_structure_signature"),
+        "raw_ir_equal": probe.get("raw_ir_hash") == probe2.get("raw_ir_hash"),
+        "report_integrity": [probe.get("report_integrity"), probe2.get("report_integrity"),
+                             full.get("report_integrity")],
+        "signature_version": probe.get("signature_version")}
+    rep["compiler_warnings"] = full.get("compiler_warnings")
     exp = expected_entry_dims(m, args.length)
     rep["expected_entry_dims"] = exp
     if probe.get("entry_signature"):
@@ -127,13 +139,16 @@ def main():
         hist, recs = vl_histogram(so)
         rep["simd_model_by_march"][name] = {"command": cmd, "returncode": rc, "vl_histogram": hist,
                                             "n_simd_applied": sum(1 for r in recs if r.get("applied")),
-                                            "report_signature": S.report_signature(recs)["hash"],
+                                            "report_signature": S.report_signature(
+                                                recs, model_node_names(m["abs_path"]))["hash"],
                                             "stderr_tail": se if rc else None}
     write_json(out / "g0_verification.json", rep)
     print(json.dumps({"version": rep["onnx_mlir_version"][:200],
                       "full_failure": rep["full_compile"]["failure_type"],
                       "static_specialization_verified": rep.get("static_specialization_verified"),
                       "matmul_path": rep["full_compile"]["matmul_path"],
+                      "probe_eq_full": rep["probe_and_full_report_signature_equal"],
+                      "determinism": rep["signature_determinism"],
                       "correctness": rep.get("correctness", {}).get("correctness_status")
                       if isinstance(rep.get("correctness"), dict) else rep.get("correctness"),
                       "simd": {k: v["vl_histogram"] for k, v in rep["simd_model_by_march"].items()}}, indent=1))

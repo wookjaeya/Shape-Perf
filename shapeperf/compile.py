@@ -12,9 +12,11 @@ time and the largest single-process RSS include opt/llc/linker children.
 """
 import json
 import os
+import shutil
 import signal
 import subprocess
 import time
+from functools import lru_cache
 from pathlib import Path
 
 from . import signature as sigmod
@@ -28,6 +30,21 @@ def model_def(model_key):
     m["key"] = model_key
     m["abs_path"] = str(REPO_ROOT / m["path"])
     return m
+
+
+@lru_cache(maxsize=4)
+def model_node_names(path):
+    """ONNX node names of the model file (sig-v2 canonicalization)."""
+    import onnx
+    m = onnx.load(path, load_external_data=False)
+    return frozenset(n.name for n in m.graph.node if n.name)
+
+
+def line_buffered(cmd):
+    """Run the compiler with line-buffered stdout so the C printf opt-report and
+    LLVM's own stream cannot interleave inside a report line (seen at G0)."""
+    sb = shutil.which("stdbuf")
+    return ([sb, "-oL", "-eL"] + cmd) if sb else cmd
 
 
 def shape_information(model, length, batch=1):
@@ -110,7 +127,7 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
         raise ValueError(mode)
     cmd.append(model["abs_path"])
 
-    res = _run_tree(cmd, out_dir, out_dir / "stdout.txt", out_dir / "stderr.txt", timeout_s)
+    res = _run_tree(line_buffered(cmd), out_dir, out_dir / "stdout.txt", out_dir / "stderr.txt", timeout_s)
     stderr = (out_dir / "stderr.txt").read_text(errors="replace")
     stdout = (out_dir / "stdout.txt").read_text(errors="replace")
     failure = classify_failure(res, stderr)
@@ -120,7 +137,8 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
         "padded_length": length, "batch": batch, "dtype": "float32",
         **toolchain.compiler_ids(), "target": target_cpu, "compile_flags": fs["flags"],
         "flagset": flagset, "shape_information": shape_info, "mode": mode,
-        "command": cmd, "returncode": res["returncode"], "failure_type": failure,
+        "command": cmd, "launcher": line_buffered([])[:3] or None,
+        "returncode": res["returncode"], "failure_type": failure,
         "cpu_user_s": res["cpu_user_s"], "cpu_sys_s": res["cpu_sys_s"],
         "peak_rss_bytes": res["peak_rss_bytes"],
         "compile_wall_ns": res["wall_ns"] if mode == "full" else None,
@@ -134,10 +152,14 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
     # ---- information extraction (charged separately, §8.4) ----
     t0 = time.monotonic_ns()
     recs = sigmod.parse_opt_report(stdout)
-    rsig = sigmod.report_signature(recs)
-    rec["ir_signature"] = rsig["hash"]
+    rsig = sigmod.report_signature(recs, model_node_names(model["abs_path"]))
+    rec["ir_signature"] = rsig["hash"] if rsig["integrity"] == "ok" else f"CORRUPT:{rsig['hash']}"
+    rec["signature_version"] = rsig["version"]
     rec["signature_stage"] = f"opt-report:{fs['report']}" if fs["report"] else None
     rec["report_n_records"] = rsig["n_records"]
+    rec["report_integrity"] = rsig["integrity"]
+    rec["compiler_warnings"] = sorted({l.strip() for l in (stdout + stderr).splitlines()
+                                       if l.strip().startswith("Warning:")})
     (out_dir / "report_signature.json").write_text(json.dumps(rsig, indent=1))
     if mode == "probe":
         ir_path = Path(str(base) + ".onnx.mlir")

@@ -200,6 +200,7 @@ def run_block(items, out_jsonl, seed, block_id=None, vm_allocation_id="unavailab
         rec.update({"run_id": new_run_id("meas"), "order_in_block": pos, "plan_index": k,
                     "artifact": item["artifact"], "artifact_hash": item.get("artifact_hash"),
                     "model_key": item["model_key"], "padded_length": item["length"],
+                    "flagset": item.get("flagset", "default"),
                     "feature_index": item["feature_index"], "warmup": item["warmup"],
                     "iterations": item["iterations"], "unix_time": time.time()})
         append_jsonl(out_jsonl, rec)

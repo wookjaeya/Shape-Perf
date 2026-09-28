@@ -15,7 +15,6 @@ Full-dev-set EM/F1 of the re-export (§7.4) is done by
 scripts/g1_reference_eval.py --model <re-export>.
 """
 import argparse
-import pickle
 import sys
 from pathlib import Path
 
@@ -60,9 +59,6 @@ def main():
     del off_m
 
     feat = squad.load_features(REPO_ROOT / "data/features/A/features.npz")
-    ros, _, _ = squad.load_official()
-    with open(REPO_ROOT / "data/features/A/features_extra.pkl", "rb") as f:
-        ex = pickle.load(f)
     rng = np.random.default_rng(args.seed)
     qids = sorted(set(feat["qas_id"].tolist()))
     chosen_q = set(rng.choice(qids, size=min(args.n_questions, len(qids)), replace=False).tolist())

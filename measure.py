@@ -14,7 +14,6 @@ Run this only on a machine that satisfies the §5 measurement controls; elsewher
 the output is a functional smoke test (experiment_phase=dev-smoke).
 """
 import argparse
-import json
 import sys
 from pathlib import Path
 

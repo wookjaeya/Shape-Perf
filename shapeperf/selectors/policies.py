@@ -10,6 +10,7 @@ Conventions fixed here (to be copied into preregistration.md):
     with a failed endpoint gets first-priority score 0.
   * Random uses numpy's default_rng(seed) permutation of the valid set.
 """
+import bisect
 import math
 
 import numpy as np
@@ -79,24 +80,35 @@ class RandomSelector(Selector):
 
 
 def alignment_priority_set(valid, units):
-    """Multiples of each unit and their immediate neighbours inside the valid
-    set (spec §8.1 Shape-only). Units must come from preregistered target facts."""
-    vs = set(valid)
+    """Multiples of each unit and their immediate neighbours in the valid set
+    (spec §8.1 Shape-only). For a contiguous set this is {m-1, m, m+1}; across
+    a gap the nearest valid shapes on each side of m are used. Units must come
+    from preregistered target facts; units <= 1 are ignored."""
+    vs = sorted(valid)
+    if not vs:
+        return set()
     pri = set()
     for u in units:
         if u <= 1:
             continue
-        for m in range(u, max(vs) + 2, u):
-            for s in (m - 1, m, m + 1):
-                if s in vs:
-                    pri.add(s)
+        for m in range(max(u, (vs[0] // u) * u), vs[-1] + 2, u):
+            i = bisect.bisect_left(vs, m)
+            if i < len(vs) and vs[i] == m:
+                pri.add(m)
+                if i + 1 < len(vs):
+                    pri.add(vs[i + 1])
+            elif i < len(vs):
+                pri.add(vs[i])
+            if i > 0:
+                pri.add(vs[i - 1])
     return pri
 
 
 def has_aligned_boundary(a, b, units):
-    """True if some boundary (x, x+1) with a <= x < b has x or x+1 a multiple
-    of a unit - the same B_align definition as evaluate.aligned_boundaries."""
-    return any(u > 1 and (x % u == 0 or (x + 1) % u == 0) for x in range(a, b) for u in units)
+    """True if the closed range [a, b] contains a multiple of a unit (> 1): the
+    same B_align definition as evaluate.aligned_boundaries, for contiguous and
+    gapped valid sets alike."""
+    return any(u > 1 and (b // u) * u >= a for u in units)
 
 
 class ShapeOnlySelector(Selector):
@@ -164,7 +176,7 @@ class CompileGuidedSelector(Selector):
         a, b, _ = iv
         if _sig(view, a) == _sig(view, b):
             return 0.0
-        if self.align_only_units:
+        if self.align_only_units is not None:     # [] = no aligned boundary exists -> Uniform order
             return 1.0 if has_aligned_boundary(a, b, self.align_only_units) else 0.0
         return 1.0
 
@@ -195,7 +207,7 @@ class CompileProbeSelector(Selector):
     Uniform measurements instead of stopping.
     """
     name = "compile_probe"
-    sees_signatures = True
+    sees_signatures = False    # full-compile signatures are not used (and not charged)
     uses_probe = True
 
     def __init__(self, seed=None, budget_fraction=None, hybrid_uniform=False, **params):

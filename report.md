@@ -12,6 +12,10 @@
 | 2026-09-28 | G1 | `tokenization.py`가 TensorFlow를 `tf.gfile.GFile`에만 사용 | TF 미설치 시 `open(encoding="utf-8")` 대체 모듈 등록(토크나이저 로직 불변) |
 | 2026-09-28 | G1 | 공식 vocab 배포처(storage.googleapis.com)가 개발 환경 egress에서 403 | 고정 commit의 독립 미러 2곳에서 바이트 일치 교차검증; 기능 검증은 EM/F1 재현 |
 | 2026-09-28 | G2 | tf2onnx 재수출은 바이트 결정적이지 않음(노드 순서/자동 이름, `PYTHONHASHSEED=0`에서도) | 반복 수출 4회의 순서·이름 무관 의미 지문 동일 확인. 해시 고정 파일 자체를 artifact로 VM에 복사(재수출 금지) |
+| 2026-09-28 | G0 | signature `sig-v1`이 같은 길이의 반복 컴파일에서도 달라짐(컴파일러 생성 노드 이름의 카운터 접미사), opt-report 줄이 출력 버퍼 경합으로 잘림 | `sig-v2`(ONNX 노드 이름으로 정규화) + 컴파일러 줄 단위 버퍼링. 성능 데이터를 보기 전의 재현성 점검에 따른 변경 |
+| 2026-09-28 | G0 | 초기 소스 판독의 "`--march`가 x86-64가 아니면 SIMD가 꺼진다"는 주장이 부분적으로 틀림(요소별 연산만 해당, Gemm/MatMul은 SIMD 유지) | 실측으로 정정해 `docs/STATUS.md`, `preregistration.md`, `configs/compile_flags.json`에 반영 |
+| 2026-09-28 | 설계 | 정답표 A의 검정을 백분위 부트스트랩에서 t 기반 최소효과 검정으로 변경 | 다중 에이전트 검증에서 부트스트랩 p값이 적은 블록 수에서 Holm 수준 반보수적임을 시뮬레이션으로 확인. 본실험 데이터를 보기 전의 변경 |
+| 2026-09-28 | 설계 | 탐색기 격리를 같은 프로세스 audit hook → 별도 프로세스 → OS 감옥(chroot·setuid·netns)으로 강화 | 검증에서 앞의 두 방식의 우회 경로가 재현됨 |
 
 ## 한계 (현재까지)
 

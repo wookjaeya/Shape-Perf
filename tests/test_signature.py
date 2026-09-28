@@ -81,3 +81,23 @@ def test_matmul_path_classification():
     assert S.matmul_path(["malloc", "free"], recs)[0] == "compiler-generated"
     assert S.matmul_path(["cblas_sgemm"], recs)[0] == "external-library"
     assert S.matmul_path(None, recs)[0] == "unknown"
+
+
+def test_sig_v2_canonicalizes_compiler_counters():
+    known = {"enc/layer_0/mul_3", "enc/layer_0/q/MatMul", "enc/Reshape_1", "enc/Rsqrt__518"}
+    assert S.canonical_node("enc/layer_0/mul_3_12", known) == "enc/layer_0/mul_3"
+    assert S.canonical_node("enc/layer_0/mul_3", known) == "enc/layer_0/mul_3"
+    assert S.canonical_node("enc/Rsqrt__518", known) == "enc/Rsqrt__518"          # original name kept
+    assert S.canonical_node("enc/layer_0/q/MatMul-enc/Reshape_1_80", known) == "enc/layer_0/q/MatMul-enc/Reshape_1"
+    a = "==SIMD-REPORT==, onnx.Gelu-simd, enc/layer_0/mul_3_12, unary fully flattened, 16, 98304\n"
+    b = a.replace("mul_3_12", "mul_3_13")
+    ha = S.report_signature(S.parse_opt_report(a), known)
+    hb = S.report_signature(S.parse_opt_report(b), known)
+    assert ha["hash"] == hb["hash"] and ha["version"] == "sig-v2"
+    assert S.report_signature(S.parse_opt_report(a))["hash"] != S.report_signature(S.parse_opt_report(b))["hash"]
+
+
+def test_corrupt_report_is_flagged():
+    text = REPORT_128 + "==SIMD-REPORT==, onnx.Sqrt-simd, x/Rsqrt, unary f\n"
+    sig = S.report_signature(S.parse_opt_report(text))
+    assert sig["integrity"] == "corrupt" and sig["n_unparsed"] == 1

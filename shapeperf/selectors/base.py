@@ -23,47 +23,51 @@ class View:
     measured         : length -> latency estimate (ns) or None if the policy is
                        not entitled to timing (Uniform/Random/Shape-only/Compile-*)
     signatures       : length -> signature from the FULL compile of a measured
-                       shape (only for policies entitled to compile information)
+                       shape (only for policies that consume full-compile signatures)
     probe_signatures : length -> signature from a PROBE compile (probe stage);
                        kept separate so the two stages are never compared (§8.2b)
     failed           : length -> failure type of a measurement query
     probed           : lengths that were probed (compile-only)
-    spent_ns         : cumulative cost charged so far
     budget_ns        : total budget of this run (used by Compile-probe's split)
     probe_spent_ns   : actual probe cost so far (tracked even when not charged)
+    The cumulative cost is deliberately NOT part of the view: it contains
+    measurement durations and would leak timing to policies not entitled to it.
     """
     valid_lengths: Tuple[int, ...]
     measured: MappingProxyType
     signatures: MappingProxyType
     failed: MappingProxyType
     probed: frozenset
-    spent_ns: int
     budget_ns: int
     probe_spent_ns: int = 0
     probe_signatures: MappingProxyType = field(default_factory=lambda: MappingProxyType({}))
 
 
-def make_view(valid, measured, signatures, failed, probed, spent, budget, probe_spent=0,
-              probe_signatures=None):
-    return View(tuple(valid), MappingProxyType(dict(measured)), MappingProxyType(dict(signatures)),
-                MappingProxyType(dict(failed)), frozenset(probed), int(spent), int(budget),
+def make_view(valid, measured, signatures, failed, probed, budget, probe_spent=0, probe_signatures=None):
+    return View(tuple(int(v) for v in valid), MappingProxyType(dict(measured)), MappingProxyType(dict(signatures)),
+                MappingProxyType(dict(failed)), frozenset(probed), int(budget),
                 int(probe_spent), MappingProxyType(dict(probe_signatures or {})))
 
 
+def _num(x):
+    return None if x is None else float(x)
+
+
 def view_to_json(v):
-    """Plain-JSON form of a View for the out-of-process selector runner."""
-    return {"valid_lengths": list(v.valid_lengths),
-            "measured": [[k, x] for k, x in v.measured.items()],
-            "signatures": [[k, x] for k, x in v.signatures.items()],
-            "probe_signatures": [[k, x] for k, x in v.probe_signatures.items()],
-            "failed": [[k, x] for k, x in v.failed.items()],
-            "probed": sorted(v.probed), "spent_ns": v.spent_ns, "budget_ns": v.budget_ns,
-            "probe_spent_ns": v.probe_spent_ns}
+    """Plain-JSON form of a View for the out-of-process selector runner
+    (numpy scalars are converted; lengths are ints, latencies floats)."""
+    return {"valid_lengths": [int(x) for x in v.valid_lengths],
+            "measured": [[int(k), _num(x)] for k, x in v.measured.items()],
+            "signatures": [[int(k), str(x)] for k, x in v.signatures.items()],
+            "probe_signatures": [[int(k), str(x)] for k, x in v.probe_signatures.items()],
+            "failed": [[int(k), str(x)] for k, x in v.failed.items()],
+            "probed": sorted(int(x) for x in v.probed), "budget_ns": int(v.budget_ns),
+            "probe_spent_ns": int(v.probe_spent_ns)}
 
 
 def view_from_json(d):
     return make_view(d["valid_lengths"], dict(map(tuple, d["measured"])), dict(map(tuple, d["signatures"])),
-                     dict(map(tuple, d["failed"])), d["probed"], d["spent_ns"], d["budget_ns"],
+                     dict(map(tuple, d["failed"])), d["probed"], d["budget_ns"],
                      d["probe_spent_ns"], dict(map(tuple, d["probe_signatures"])))
 
 

@@ -24,9 +24,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shapeperf import evaluate as E  # noqa: E402
-from shapeperf import toolchain  # noqa: E402
+from shapeperf import prereg, toolchain  # noqa: E402
 from shapeperf.compile import compile_shape  # noqa: E402
-from shapeperf.util import CENSUS_DIR, REPO_ROOT, append_jsonl, git_head, read_json, read_jsonl, write_json  # noqa: E402
+from shapeperf.util import CENSUS_DIR, append_jsonl, git_head, read_jsonl, write_json  # noqa: E402
 
 
 def parse_range(txt):
@@ -79,21 +79,23 @@ def main():
         print(s, rec.get("failure_type") or rec.get("ir_signature"), rec.get("probe_wall_ns"), flush=True)
 
     recs = {r["padded_length"]: r for r in read_jsonl(recs_path)}
-    sig = {s: (r.get("ir_signature") if not r.get("failure_type") else f"FAILED:{r['failure_type']}")
-           for s, r in recs.items()}
-    # failed lengths keep their place in the sequence as their own value, so a
-    # failure boundary is reported at its real position
+    missing = [s for s in lengths if s not in recs]
+    # failed lengths keep their place in the sequence as their own value; the
+    # boundaries they create are reported separately and do not count as
+    # lowering-decision changes for H1 (spec §1.2)
     fail = {s: f"FAILED:{r['failure_type']}" for s, r in recs.items() if r.get("failure_type")}
+    corrupt = [s for s, r in recs.items() if str(r.get("ir_signature", "")).startswith("CORRUPT:")]
+    sig = {s: fail.get(s, r.get("ir_signature")) for s, r in recs.items()}
     sig_ir = {s: fail.get(s, r.get("ir_structure_signature")) for s, r in recs.items()}
     raw = {s: fail.get(s, r.get("raw_ir_hash")) for s, r in recs.items()}
-    c_sig = E.change_points(sig, lengths)
-    c_ir = E.change_points(sig_ir, lengths)
-    c_raw = E.change_points(raw, lengths)
+    c_sig, fail_b = E.split_failure_boundaries(sig, lengths)
+    c_ir, _ = E.split_failure_boundaries(sig_ir, lengths)
+    c_raw, _ = E.split_failure_boundaries(raw, lengths)
 
-    prereg = read_json(REPO_ROOT / "configs/preregistration.json")
-    pre_units = prereg["selectors"]["shape_only_alignment_units"]
+    p, label = prereg.require(["selectors.shape_only_alignment_units"], allow_unfrozen=True)
+    pre_units = p["selectors"]["shape_only_alignment_units"]      # [] is a valid preregistered value
     unit_sets = {}
-    if pre_units:
+    if pre_units is not None:
         unit_sets["preregistered"] = pre_units
     for u in args.units:
         unit_sets[f"analysis_u{u}"] = [u]
@@ -107,27 +109,36 @@ def main():
     if args.keep_raw_ir != "all":
         keep = set()
         if args.keep_raw_ir == "changepoints":
-            for c in set(c_sig) | set(c_ir):
+            for c in set(c_sig) | set(c_ir) | set(fail_b):
                 keep |= {c, next((x for x in lengths if x > c), c)}
         for s in lengths:
             gz = work / f"s{s:04d}" / "model.onnx.mlir.gz"
             if gz.exists() and s not in keep:
                 gz.unlink()
 
+    if missing or corrupt:
+        verdict = f"INCOMPLETE census (missing {missing[:5]}, corrupt reports {corrupt[:5]}) - no H1 verdict"
+    elif pre_units is None:
+        verdict = "units not preregistered - no H1 verdict"
+    elif align["preregistered"]["C_sig_nonalign"]:
+        verdict = "C_nonalign non-empty (H1 not rejected)"
+    else:
+        verdict = "C_nonalign EMPTY: H1 rejected -> stop before G4 (spec §13 item 15)"
     table = {
         "model": args.model, "flagset": args.flagset, "target_cpu": args.target_cpu,
-        **toolchain.compiler_ids(), "lengths": [lengths[0], lengths[-1]], "n_lengths": len(lengths),
-        "n_failed": sum(1 for r in recs.values() if r.get("failure_type")),
+        **toolchain.compiler_ids(), "lengths": [lengths[0], lengths[-1]], "valid_lengths": lengths,
+        "n_lengths": len(lengths), "missing_lengths": missing, "corrupt_reports": corrupt,
+        "n_failed": len(fail), "failed_lengths": sorted(fail),
+        "failure_boundaries": fail_b,
         "signature_primary": "opt-report", "C_sig": c_sig,
-        "C_ir_structure": c_ir, "n_raw_ir_hash_changes": len(c_raw),
-        "alignment": align,
-        "H1_verdict": ("units not preregistered - no H1 verdict" if not pre_units else
-                       ("C_nonalign non-empty (H1 not rejected)" if align["preregistered"]["C_sig_nonalign"]
-                        else "C_nonalign EMPTY: H1 rejected -> stop before G4 (spec §13 item 15)")),
+        "C_ir_structure": c_ir, "C_raw": c_raw, "n_raw_ir_hash_changes": len(c_raw),
+        "alignment": align, "preregistration": label,
+        "H1_verdict": verdict,
         "matmul_path": sorted({r.get("matmul_path") for r in recs.values() if r.get("matmul_path")}) or
                        "not available in probe mode (needs full compile: see results/g0)",
         "probe_wall_ns_total": sum(r.get("probe_wall_ns") or 0 for r in recs.values()),
-        "normalization": "shapeperf/signature.py NORMALIZATION_RULES[sig-v1]",
+        "normalization": "shapeperf/signature.py NORMALIZATION_RULES[" +
+                         ",".join(sorted({str(r.get("signature_version")) for r in recs.values()})) + "]",
         "access": "evaluator only; selectors are blocked from this directory",
     }
     write_json(root / "census_table.json", table)

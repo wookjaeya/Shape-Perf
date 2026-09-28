@@ -15,9 +15,18 @@ import re
 import subprocess
 from collections import Counter
 
-SIG_VERSION = "sig-v1"
+SIG_VERSION = "sig-v2"
 
 NORMALIZATION_RULES = {
+    "sig-v2": [
+        "sig-v1 rules, plus: node names are canonicalized to ONNX node names of the model. ONNX-MLIR "
+        "names ops it creates while rewriting as '<original>_<counter>' (fused ops: '<a>-<b>_<counter>'); "
+        "the counter differed between two compiles of the SAME length at G0 (e.g. mul_3_12 vs mul_3_13), "
+        "so it is removed: a name not in the model loses one trailing _<digits>, each '-'-separated part "
+        "is mapped the same way, and any remaining unknown digit run becomes <N>.",
+        "report lines that do not parse (e.g. interleaved output) make the report 'corrupt'; the "
+        "compiler is run with line-buffered stdout (stdbuf -oL) to prevent interleaving.",
+    ],
     "sig-v1": [
         "opt-report: each record keeps (report kind, lowered op name incl. -simd/-par suffix, "
         "ONNX node name, message with integers replaced by <N>, VL (SIMD) or loop level (PAR)).",
@@ -66,12 +75,40 @@ def parse_opt_report(text):
     return recs
 
 
-def report_signature(recs):
+_SUFFIX_RE = re.compile(r"_\d+$")
+
+
+def canonical_node(name, known):
+    """Map a compiler-generated node name back to ONNX node names (sig-v2)."""
+    if not known or name in known:
+        return name
+
+    def one(part):
+        if part in known:
+            return part
+        base = _SUFFIX_RE.sub("", part)
+        if base in known:
+            return base
+        return _INT_RE.sub("<N>", part)
+    if "-" in name:
+        stripped = _SUFFIX_RE.sub("", name)
+        parts = stripped.split("-")
+        mapped = [one(p) for p in parts]
+        if all(m in known for m in mapped):
+            return "-".join(mapped)
+    return one(name)
+
+
+def report_signature(recs, known_nodes=None):
+    """Sorted multiset of decision tuples. known_nodes: ONNX node names of the
+    model (enables sig-v2 canonicalization; without it the result is sig-v1)."""
     items = sorted(
-        (r["kind"], r.get("op", ""), r.get("applied", False), r.get("node", ""),
+        (r["kind"], r.get("op", ""), r.get("applied", False), canonical_node(r.get("node", ""), known_nodes),
          _INT_RE.sub("<N>", r.get("message", r.get("unparsed", ""))), r.get("value", 0))
         for r in recs)
-    return {"version": SIG_VERSION, "n_records": len(items), "hash": _h(items), "items": items}
+    unparsed = sum(1 for r in recs if "unparsed" in r)
+    return {"version": SIG_VERSION if known_nodes else "sig-v1", "n_records": len(items), "hash": _h(items),
+            "n_unparsed": unparsed, "integrity": "ok" if unparsed == 0 else "corrupt", "items": items}
 
 
 def report_summary(recs):

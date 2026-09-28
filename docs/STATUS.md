@@ -12,7 +12,7 @@
 | G0 환경 고정 | 개발 환경 기능 검증 완료 | ONNX-MLIR v0.5.1.1 (`1e017c9f`)·LLVM `1053047a`·protobuf v33.5 소스 빌드 성공. 공식 빌드 테스트 `check-onnx-lit`: 450개 중 304 통과·146 미지원(NNPA 등)·실패 0 (`check-mlir`은 미실행). 실제 컴파일로 확인: 정적 특수화, matmul은 컴파일러 생성 코드(외부 BLAS 없음), `--march`별 SIMD 적용 양상, signature 결정성, ORT 대비 정확도 | `results/g0/g0_verification.json`, `results/g0/matmul_path.json` |
 | G1 원본 재현 | 완료 | 공식 전처리 재현: 질문 10,570 / feature 12,006 / 고유 유효 길이 216 (41–256). ORT가 zoo test_data_set 출력을 max abs 6.2e-6로 재현. **원본@256 전체 dev set: EM 80.6717 / F1 88.0716 — 모델 카드 EM 80.67171과 일치** | `data/features/A/catalog.json`, `results/g1/*/reference_eval.json` |
 | G2 shape 적합성 | 완료 (재수출본, 개발 환경) | 원본 artifact는 **길이 변경 불가**(길이 256 상수 70개). 동일 가중치 재수출본: 원본 대비 logits 1.1e-5, 139쌍에서 padding 의미 보존. §7.4: 재수출본을 feature별 L(x)로 실행해도 EM/F1 동일·답 변경 0건. ONNX-MLIR@128: 정적 특수화 확인, ORT 대비 유효 위치 logits max abs 1.5e-5·argmax 일치(허용치는 미등록) | `results/g2/*.json`, `results/g0/validation.jsonl` |
-| G2.5 census | 코드만 | 평가자 전용 실행기(실패 경계 분리, 원문 IR 해시 변화 위치 저장) | `scripts/run_census.py`, `census/README.md` |
+| G2.5 census | **개발 환경 전 범위 실행(41–256), 판정 보류** | 기본 flag set에서 opt-report signature 변화점 **0개**(216개 길이 모두 같은 결정). IR 구조는 모든 인접 길이에서 바뀌며, 대부분 4·8·32 주기(정렬), 일부는 L의 약수(3·5·7)에 따른 transpose 루프 unroll. 명세 §13-15에 따른 사용자 결정 필요 — 아래 "G2.5 개발 census" | `results/g2_5/census_dev_table.json`, `results/g2_5/census_dev_analysis.json`, `scripts/analyze_census.py` |
 | G3 파일럿 | 코드만 | warmup 추이·계층 분산·Kalibera–Jones 제안·probe:측정 비용비(검증 비용 포함)·probe/최종 불일치율·opt-report 출력 비용 | `scripts/pilot_g3.py` |
 | G4 유한 공간 평가 | 코드만 | 발견/확인 역할 분리 조밀 측정(여러 flag set을 같은 블록에서), 정답표 A, R(s)/Q(s), 다른 입력으로 경계 재현 | `scripts/groundtruth_dense.py`, `scripts/replicate_boundaries.py`, `evaluate.py` |
 | G5 탐색 비교 | 코드만 (합성 데이터 테스트) | 7개 정책 + ablation(align-only, hybrid, 비용 제외, raw-IR/IR-구조 signature), 실측 비용 재생, δ별·seed 불확실성 | `evaluate.py compare`, `tests/` |
@@ -39,6 +39,17 @@
 
 1. **노드 이름의 비결정적 접미사**: ONNX-MLIR는 재작성 중 만든 연산에 `<원래 이름>_<카운터>`(융합 연산은 `<a>-<b>_<카운터>`) 이름을 붙이는데, 같은 길이를 두 번 컴파일해도 카운터가 달랐다(예: `mul_3_12` vs `mul_3_13`). 그대로 두면 모든 인접 길이가 가짜 변화점이 된다. → `sig-v2`는 모델의 ONNX 노드 이름으로 정규화한다.
 2. **보고 줄 뒤섞임**: opt-report(C `printf`)와 LLVM 자체 출력 스트림이 같은 파일에 따로 flush되어 보고 한 줄이 잘렸다. → 컴파일러를 `stdbuf -oL`로 실행하고, 파싱 불가 줄이 있으면 signature를 `CORRUPT:`로 표시한다.
+
+## G2.5 개발 census (2026-09-28, 개발 환경, 사전등록 미고정 — 결과 아님)
+
+설정: 모델 A 재수출본, flag set `default`(`-O3 --march=x86-64 --mcpu=emeraldrapids`, `--opt-report=Simd`), probe 단계(`--EmitMLIR`), 길이 41–256 전부(216개), 실패 0·손상 보고 0·IR 누락 0. probe 합계 597초(길이당 약 2.8초).
+
+- **opt-report signature(주 signature)**: 216개 길이 모두 같다. 노드 이름을 빼고 (연산, 적용 여부, 사유, VL) 다중집합으로 비교해도 1종류 — 정규화가 차이를 지운 것이 아니다. 길이마다 582개 보고, 바뀌는 것은 trip count뿐(설계상 제외). trip count가 L인 77개 보고(LayerNorm류 요소별 연산)는 모든 L에서 VL 32로 SIMD 적용. "small j trip count" 미적용 1건은 출력 2개짜리 마지막 Gemm(길이 무관). 즉 이 컴파일러에서 SIMD 결정은 L ≥ 41에서 길이와 무관하다(명세 §1.2 마지막 문단이 예상한 경우). ONNX-MLIR는 `--march`가 있으면 자체 결정에 `--mcpu`를 쓰지 않으므로 측정 VM에서도 같을 가능성이 높다(VM에서 재확인 필요).
+- **IR 구조 signature(보조, 사전 정의됨)**: 215개 인접 경계 모두 변화. 바뀌는 특징 25개 중 21개는 L의 주기 4·8·32 함수(나머지 루프 처리 = 정렬). `affine.load/store/apply` 3개는 L의 약수 여부로 결정된다: 12개 층마다 있는 4차원 transpose 루프(trip count L)가 L이 작은 수(예: 7)로 나누어지면 그 수로 unroll된다(L=41 소수는 unroll 없음, L=49는 step 7). `arith.constant`는 단순 규칙 없음(L 값 자체가 상수로 들어감).
+- **최종 실행물**: 파일럿의 151→152(8의 배수)에서 명령어 구성이 크게 바뀜(범용 레지스터 명령 51,797→32,924) — opt-report는 이를 보지 못한다(probe/최종 불일치율 1.0, 한 쌍).
+- 정렬 단위 후보별(분석용): u=8 B_align 53, u=16 27, u=32 13. opt-report 기준 C_nonalign은 모든 단위에서 0. IR 구조 기준 C_nonalign은 162/188/202(대부분 약수 기반 unroll과 4 주기 변화).
+
+**명세상 의미**: 주 signature(opt-report)로는 `C_sig = ∅`이므로 `C_nonalign = ∅` — 명세 §13-15는 "G4 이후를 진행하지 말고 그 사실과 census 표를 보고"하라고 한다(§14 축소·중단 근거). 이 결과에서 Compile-guided/Compile-probe는 opt-report로는 정보가 없어 Uniform과 같아진다. IR 구조에는 정렬 밖 변화(약수 기반 unroll)가 있지만, 그 signature로 바꾸는 것은 census를 본 뒤의 선택이므로 이탈로 기록해야 한다. 어느 쪽으로 갈지는 연구자 결정이다.
 
 ## G1 상세
 

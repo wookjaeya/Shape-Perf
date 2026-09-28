@@ -1,0 +1,48 @@
+{
+  "harness_commit": "unavailable",
+  "onnxruntime": "1.23.2",
+  "threads": 1,
+  "model": "/home/user/Shape-Perf/data/artifacts/bertsquad-12.onnx",
+  "model_sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+  "length_policy": "official",
+  "zoo_test_data": [
+    {
+      "dataset": "bertsquad-12/test_data_set_0",
+      "outputs": {
+        "unstack:1": {
+          "max_abs": 6.198883056640625e-06,
+          "max_rel": 1.0185384975428933e-06,
+          "shape": [
+            1,
+            256
+          ]
+        },
+        "unstack:0": {
+          "max_abs": 4.76837158203125e-06,
+          "max_rel": 9.072725699021761e-07,
+          "shape": [
+            1,
+            256
+          ]
+        },
+        "unique_ids:0": {
+          "equal": true,
+          "shape": [
+            1
+          ]
+        }
+      }
+    }
+  ],
+  "inference_seconds_total_not_a_benchmark": 4924.5,
+  "n_features_evaluated": 12006,
+  "official_eval": {
+    "exact_match": 80.6717123935667,
+    "f1": 88.07164270138964
+  },
+  "model_card_em": 80.67171,
+  "em_minus_model_card": 2.3935666888519336e-06,
+  "adaptations": [
+    "tensorflow not installed: tokenization.py's tf.gfile.GFile replaced by open(encoding='utf-8'); tokenizer logic unchanged"
+  ]
+}

@@ -61,6 +61,10 @@
   },
   "probe": {
     "emit": "--EmitMLIR",
-    "_comment": "Probe stage candidate (spec §8.2b): ONNX->Krnl->Affine, where the opt-report is printed. Whether this stage determines all §6.2 features, and the probe/final mismatch rate, are G3 measurements."
+    "_comment": "Probe stage candidate (spec §8.2b): ONNX->Krnl->Affine, where the opt-report is printed. Whether this stage determines all §6.2 features, and the probe/final mismatch rate, are G3 measurements. print_flags elide large constants from the probe IR text: at G0/smoke the unelided IR was 834 MB per length (weights printed inline). Printing options do not change compilation; the IR-structure signature ignores constants, and the raw-IR hash (ablation 11.2-3) then excludes constant payloads.",
+    "print_flags": [
+      "--mlir-elide-elementsattrs-if-larger=16",
+      "--mlir-elide-resource-strings-if-larger=64"
+    ]
   }
 }

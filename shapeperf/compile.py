@@ -120,7 +120,9 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
     if fs["report"]:
         cmd.append(f"--opt-report={fs['report']}")
     if mode == "probe":
-        cmd.append(read_json(REPO_ROOT / "configs/compile_flags.json")["probe"]["emit"])
+        pcfg = read_json(REPO_ROOT / "configs/compile_flags.json")["probe"]
+        cmd += pcfg.get("print_flags", [])
+        cmd.append(pcfg["emit"])
     elif mode == "full":
         cmd.append("--EmitLib")
     else:

@@ -101,6 +101,8 @@ def main():
     ap.add_argument("--phase", default="pilot")
     ap.add_argument("--report-overhead-lengths", type=int, default=2,
                     help="first k pilot lengths are also compiled without --opt-report (spec §8.4 overhead check)")
+    ap.add_argument("--keep-artifacts", action="store_true",
+                    help="keep compiled .so files after measurement (about 0.4 GB each for model A)")
     ap.add_argument("--analysis-skip", type=int, default=0,
                     help="iterations dropped ONLY for the variance/KJ analysis (recorded; not a warmup decision)")
     ap.add_argument("--out", default=None)
@@ -159,6 +161,16 @@ def main():
         run_block(items, raw, seed=args.seed * 1000 + b, vm_allocation_id=args.vm_allocation_id,
                   experiment_phase=args.phase)
 
+    if not args.keep_artifacts:            # hashes stay in the compile records
+        for s in lengths:
+            for key in ("full", "noreport"):
+                c = comp[s].get(key) or {}
+                so = c.get("artifact_path")
+                if so and Path(so).exists():
+                    Path(so).unlink()
+            for pd in (out / f"probe_s{s}", out / f"full_s{s}", out / f"noreport_s{s}"):
+                for f in list(pd.glob("model.onnx.mlir")) + list(pd.glob("model.tmp")):
+                    f.unlink()
     recs = [r for r in read_jsonl(raw) if not r.get("failure_type")]
     report = {"plan": plan, "per_length": {}, "failures": {}}
     for s in lengths:

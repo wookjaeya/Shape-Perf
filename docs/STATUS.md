@@ -31,7 +31,8 @@
 - **정적 특수화**: `--shapeInformation=0:1,1:1x128,2:1x128,3:1x128`으로 만든 `.so`의 PyRuntime 입력 signature가 `[1]`, `[1,128]`×3, probe IR의 `main_graph` 인자가 `memref<1x128xi64>` 등 정적 memref임을 확인. `RunONNXModel.py --shape-info`는 실행 입력 생성 옵션임을 `--help`로 기록.
 - **matmul/attention lowering 경로**: 컴파일러 생성 코드. `.so`의 동적 import에 BLAS류 심볼이 없고(`expf`, `tanhf`, `powf`, `malloc` 등 libc/libm만), opt-report에 Gemm 81건·MatMul 28건의 SIMD 기록이 있다.
 - **SIMD 적용 양상 (opt-report 실측, 길이 128)**: `--march=x86-64`에서 요소별·축약 연산 SIMD(보고 VL 32), Gemm VL 16, MatMul VL 8. `--march` 미지정·`native`에서는 요소별·축약 연산 407건이 SIMD 미적용이고 Gemm/MatMul만 SIMD. **초기 소스 판독에서 "그 외 `--march`면 SIMD가 꺼진다"고 적었던 것은 요소별 연산에만 맞았다**. `--march`와 `--mcpu`를 함께 주면 ONNX-MLIR 자체 결정은 `--mcpu`를 무시한다고 경고하지만, LLVM에는 전달되어 최종 `.so`가 zmm(AVX-512) 명령을 쓴다. 기본 flag set `-O3 --march=x86-64 --mcpu=<VM CPU>`는 여전히 후보이며 측정 VM에서 같은 확인을 반복한다.
-- **컴파일 비용(길이 128, 개발 환경)**: 전체 컴파일 78초·최대 RSS 2.8 GB·`.so` 435 MB(상수 내장), probe(`--EmitMLIR`) 7.7–8.2초·0.94 GB. probe : 전체 컴파일 ≈ 0.1 (H3의 첫 근거; 측정 VM의 G3에서 다시 측정).
+- **컴파일 비용(길이 128, 개발 환경)**: 전체 컴파일 78초·최대 RSS 2.8 GB·`.so` 435 MB(상수 내장). probe(`--EmitMLIR`)는 상수를 그대로 출력하면 IR 834 MB·7.7–8.2초였고, 큰 상수 생략 출력(`--mlir-elide-*`, 컴파일 결과·signature 불변 확인)으로 IR 2.3 MB·2.9초. probe : 전체 컴파일 ≈ 0.04 (H3의 첫 근거; 측정 VM의 G3에서 다시 측정).
+- **디스크 요구(측정 VM 준비용)**: 모델 A의 `.so`는 길이마다 약 0.42 GB라 G4 조밀 측정(216개 길이, 블록 내 무작위 순서 때문에 동시 보관 필요)에는 artifact만 약 90 GB가 든다. 추가 flag set 하나당 같은 양이 더 필요하다.
 - **signature 결정성**: 같은 길이를 두 번 probe해도 opt-report·IR 구조·원문 IR 해시 모두 동일, probe와 전체 컴파일의 opt-report signature 동일, 보고 무결성 정상 (`sig-v2`, 아래 참고).
 
 ### G0에서 발견해 고친 signature 문제 (성능 결과를 보기 전)

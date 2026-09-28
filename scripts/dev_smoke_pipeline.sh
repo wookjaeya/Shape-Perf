@@ -25,10 +25,13 @@ PRE="${OUT}/prereg_smoke.json"
 import json, sys
 p = json.load(open("configs/preregistration.json"))
 p["_comment"] = "SMOKE ONLY - toy values, not a preregistration"
-p["measurement"].update(warmup_iterations=1, timed_iterations=3, processes_per_shape=2, blocks=1,
+p["measurement"].update(warmup_iterations=1, timed_iterations=3, processes_per_shape=2, blocks=2,
                         process_statistic="mean", cpus=None)
 p["correctness"]["logit_abs_tolerance"] = None
-p["events"].update(delta_min_effect=0.05, alpha=0.05, confidence_level=0.95, match_tolerance_lengths=0)
+p["events"].update(delta_min_effect=0.05, alpha=0.05, confidence_level=0.95, match_tolerance_lengths=0,
+                   direction="two-sided", min_blocks_per_pair=2, min_allocations_per_pair=1,
+                   min_allocations_confirmation=1, confirmation_requires_new_allocation=True)
+# 2 blocks x 2 processes: the answer-table tests actually run (1 block is 'insufficient')
 p["replication"]["features_per_event"] = 2
 p["selectors"].update(random_seeds=[1, 2], shape_only_alignment_units=[8], report_overhead_ns=0,
                       compile_probe_budget_fraction=0.3, budgets_ns=[5e11, 5e12])

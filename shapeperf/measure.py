@@ -127,6 +127,8 @@ def worker_main(spec):
         stop = perf()
         samples.append(stop - start)
         outs = new
+        if first_hash is None:          # warmup == 0: compare against the first timed output
+            first_hash = _out_hash(outs)
     measurement_ns = time.monotonic_ns() - t_m0
     last_hash = _out_hash(outs)
     if first_hash is not None and last_hash != first_hash:

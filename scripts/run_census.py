@@ -51,12 +51,15 @@ def main():
     ap.add_argument("--keep-raw-ir", choices=["all", "changepoints", "none"], default="changepoints")
     ap.add_argument("--timeout", type=float, default=None)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--census-root", default=str(CENSUS_DIR),
+                    help="evaluator-only output root (smoke runs use a separate directory)")
     args = ap.parse_args()
 
-    root = CENSUS_DIR / args.model / args.flagset / (args.target_cpu or "unset")
+    croot = Path(args.census_root)
+    root = croot / args.model / args.flagset / (args.target_cpu or "unset")
     work = root / "work"
     root.mkdir(parents=True, exist_ok=True)
-    os.chmod(CENSUS_DIR, 0o700)
+    os.chmod(croot, 0o700)
     os.chmod(root, 0o700)
     recs_path = root / "census.jsonl"
     done = {r["padded_length"] for r in read_jsonl(recs_path)} if (args.resume and recs_path.exists()) else set()

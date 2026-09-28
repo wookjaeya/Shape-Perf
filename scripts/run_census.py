@@ -81,8 +81,11 @@ def main():
     recs = {r["padded_length"]: r for r in read_jsonl(recs_path)}
     sig = {s: (r.get("ir_signature") if not r.get("failure_type") else f"FAILED:{r['failure_type']}")
            for s, r in recs.items()}
-    sig_ir = {s: r.get("ir_structure_signature") for s, r in recs.items() if not r.get("failure_type")}
-    raw = {s: r.get("raw_ir_hash") for s, r in recs.items() if not r.get("failure_type")}
+    # failed lengths keep their place in the sequence as their own value, so a
+    # failure boundary is reported at its real position
+    fail = {s: f"FAILED:{r['failure_type']}" for s, r in recs.items() if r.get("failure_type")}
+    sig_ir = {s: fail.get(s, r.get("ir_structure_signature")) for s, r in recs.items()}
+    raw = {s: fail.get(s, r.get("raw_ir_hash")) for s, r in recs.items()}
     c_sig = E.change_points(sig, lengths)
     c_ir = E.change_points(sig_ir, lengths)
     c_raw = E.change_points(raw, lengths)

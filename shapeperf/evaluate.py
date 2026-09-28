@@ -62,6 +62,9 @@ def hier_bootstrap(by_group, reps, rng):
     groups = [np.asarray(v, float) for v in by_group.values() if len(v)]
     if not groups:
         return None
+    if len(groups) == 1:                       # vectorized single-allocation case
+        x = groups[0]
+        return x[rng.integers(0, len(x), (reps, len(x)))].mean(axis=1)
     out = np.empty(reps)
     g = len(groups)
     for i in range(reps):
@@ -73,21 +76,37 @@ def hier_bootstrap(by_group, reps, rng):
     return out
 
 
-def effect_test(by_alloc, delta, reps, rng, conf_level):
-    """Estimate, CI and bootstrap p-value for H0: |effect| <= log(1+delta)."""
+def effect_test(by_alloc, delta, reps, rng, conf_level, direction="two-sided",
+                min_blocks=2, min_allocations=1):
+    """Estimate, CI and bootstrap p-value for H0: effect within [-thr, thr],
+    thr = log(1+delta).
+
+    direction: "two-sided"  H1: |effect| > thr, p = 2 * min of the two tails
+               "increase"   H1: effect > thr   (latency grows from s to t)
+               "decrease"   H1: effect < -thr
+    With fewer than min_blocks paired blocks (or min_allocations allocations)
+    the bootstrap is degenerate, so the pair is reported as insufficient."""
     allv = [x for v in by_alloc.values() for x in v]
-    if not allv:
-        return None
+    n_alloc = sum(1 for v in by_alloc.values() if len(v))
+    if len(allv) < max(1, min_blocks) or n_alloc < max(1, min_allocations):
+        return {"insufficient": True, "n_blocks": len(allv), "n_allocations": n_alloc}
     est = float(np.mean(allv))
     boot = hier_bootstrap(by_alloc, reps, rng)
     lo, hi = np.quantile(boot, [(1 - conf_level) / 2, 1 - (1 - conf_level) / 2])
     thr = math.log1p(delta)
-    if est >= 0:
-        p = float(np.mean(boot <= thr))
+    floor = 1.0 / reps
+    p_up = max(float(np.mean(boot <= thr)), floor)       # evidence for effect > thr
+    p_down = max(float(np.mean(boot >= -thr)), floor)    # evidence for effect < -thr
+    if direction == "two-sided":
+        p = min(1.0, 2 * min(p_up, p_down))
+    elif direction == "increase":
+        p = p_up
+    elif direction == "decrease":
+        p = p_down
     else:
-        p = float(np.mean(boot >= -thr))
+        raise ValueError(direction)
     return {"log_effect": est, "ratio": math.exp(est), "ci_log": [float(lo), float(hi)],
-            "p_exceeds_delta": max(p, 1.0 / reps), "n_blocks": len(allv), "n_allocations": len(by_alloc)}
+            "p_exceeds_delta": p, "direction": direction, "n_blocks": len(allv), "n_allocations": n_alloc}
 
 
 # ---------------------------------------------------------------------------
@@ -102,14 +121,18 @@ def bert_flops(s, cfg):
     return N * per_layer + 4 * s * H
 
 
-def continuous_indicators(table, valid, reps, seed, conf_level, delta, flop_cfg=None):
+def continuous_indicators(table, valid, reps, seed, conf_level, delta, flop_cfg=None,
+                          direction="two-sided", min_blocks=2, min_allocations=1):
+    """One row per adjacent pair (s, t) of the sorted valid set - the predefined
+    test family. Pairs without enough paired data are kept as 'missing'."""
     rng = np.random.default_rng(seed)
     vs = sorted(valid)
     rows = []
     for s, t in zip(vs, vs[1:]):
-        r = effect_test(paired_log_ratios(table, s, t), delta, reps, rng, conf_level)
-        if r is None:
-            rows.append({"s": s, "t": t, "missing": True})
+        r = effect_test(paired_log_ratios(table, s, t), delta, reps, rng, conf_level, direction,
+                        min_blocks, min_allocations)
+        if r.get("insufficient"):
+            rows.append({"s": s, "t": t, "missing": True, **r})
             continue
         r.update(s=s, t=t)
         if flop_cfg:
@@ -120,27 +143,35 @@ def continuous_indicators(table, valid, reps, seed, conf_level, delta, flop_cfg=
     return rows
 
 
-def answer_table_a(discovery_rows, confirmation_table, delta, alpha, reps, seed, conf_level):
+def answer_table_a(discovery_rows, confirmation_table, delta, alpha, reps, seed, conf_level,
+                   direction="two-sided", min_blocks=2, min_allocations=1):
     """Candidates: Holm-adjusted p < alpha on discovery data over the family of
-    all adjacent pairs. Events: candidates whose effect exceeds delta in the
-    same direction on independent confirmation data (Holm over the candidates).
+    ALL adjacent valid pairs (pairs without data enter with p = 1, so the family
+    does not depend on the data, spec §10.3). Events: candidates whose effect
+    exceeds delta in the discovery direction on independent confirmation data
+    (one-sided in that fixed direction, Holm over the candidates).
     Signatures play no role (spec §9.3)."""
-    rows = [r for r in discovery_rows if not r.get("missing")]
-    if rows and reps < len(rows) / alpha:
-        # the smallest bootstrap p-value is 1/reps; Holm multiplies it by the family size
+    rows = list(discovery_rows)
+    m = len(rows)
+    pmin = (2.0 if direction == "two-sided" else 1.0) / reps
+    if m and pmin * m >= alpha:
+        # the smallest bootstrap p-value times the family size can never reach alpha
+        need = math.ceil((2 if direction == "two-sided" else 1) * m / alpha) + 1
         raise ValueError(f"bootstrap reps={reps} cannot reach Holm significance for a family of "
-                         f"{len(rows)} at alpha={alpha}; need reps >= {math.ceil(len(rows) / alpha)}")
-    adj = holm([r["p_exceeds_delta"] for r in rows]) if rows else []
+                         f"{m} at alpha={alpha}; need reps >= {need}")
+    adj = holm([1.0 if r.get("missing") else r["p_exceeds_delta"] for r in rows]) if rows else []
     cands = []
     for r, a in zip(rows, adj):
         r["p_holm"] = float(a)
-        if a < alpha:
+        if not r.get("missing") and a < alpha:
             cands.append(r)
     rng = np.random.default_rng(seed + 1)
     conf = []
     for r in cands:
-        c = effect_test(paired_log_ratios(confirmation_table, r["s"], r["t"]), delta, reps, rng, conf_level)
-        conf.append(c)
+        d = "increase" if r["log_effect"] > 0 else "decrease"
+        c = effect_test(paired_log_ratios(confirmation_table, r["s"], r["t"]), delta, reps, rng,
+                        conf_level, d, min_blocks, min_allocations)
+        conf.append(None if c.get("insufficient") else c)
     padj = holm([c["p_exceeds_delta"] if c else 1.0 for c in conf]) if conf else []
     events = []
     for r, c, a in zip(cands, conf, padj):
@@ -149,7 +180,9 @@ def answer_table_a(discovery_rows, confirmation_table, delta, alpha, reps, seed,
         events.append({"s": r["s"], "t": r["t"], "discovery": r, "confirmation": c,
                        "confirmation_p_holm": float(a), "confirmed": ok})
     return {"candidates": [e["s"] for e in events], "events": [e["s"] for e in events if e["confirmed"]],
-            "detail": events, "family_size": len(rows)}
+            "event_pairs": [[e["s"], e["t"]] for e in events if e["confirmed"]],
+            "detail": events, "family_size": m,
+            "n_missing_pairs": sum(1 for r in rows if r.get("missing"))}
 
 
 # ---------------------------------------------------------------------------
@@ -195,37 +228,55 @@ def census_metrics(c_sig, b_align, e_a, tol):
 # Policy comparison (spec §11.1)
 
 
+def _next_valid(valid, s):
+    i = valid.index(s)
+    return valid[i + 1] if i + 1 < len(valid) else None
+
+
 def discoveries(run, events, require_confirmation):
-    """Events found by one broker run: both endpoints measured successfully by
-    queries completed within budget; optionally also confirmed by the broker's
-    confirmation procedure. Returns {event_s: cumulative cost at discovery}."""
+    """Events found by one broker run. An event is identified by its left
+    endpoint s; its right endpoint is the next shape of the valid set. Found =
+    both endpoints measured successfully by queries completed within budget
+    (and, if required, confirmed by a within-budget confirmation).
+    Returns {event_s: cumulative cost at discovery}."""
+    valid = run["valid"]
+    pairs = {s: _next_valid(valid, s) for s in events if s in valid}
+    ok_q = {q["query_index"] for q in run["timeline"] if q["within_budget"]}
+    conf_at = {tuple(c["pair"]): c for c in run["candidates"] if c["confirmed"] and c["query_index"] in ok_q}
     measured, found = set(), {}
-    conf_at = {tuple(c["pair"]): c for c in run["candidates"] if c["confirmed"]}
-    ev = set(events)
     for q in run["timeline"]:
         if not q["within_budget"]:
             break
         if q["action"] == "measure" and not q.get("failure_type"):
             measured.add(q["padded_length"])
-        for s in list(ev - set(found)):
-            if s in measured and (s + 1) in measured:
+        for s, t in pairs.items():
+            if s in found or t is None:
+                continue
+            if s in measured and t in measured:
                 if not require_confirmation:
                     found[s] = q["cumulative_cost_ns"]
-                elif (s, s + 1) in conf_at:
-                    found[s] = conf_at[(s, s + 1)]["cumulative_cost_ns"]
+                elif (s, t) in conf_at:
+                    found[s] = conf_at[(s, t)]["cumulative_cost_ns"]
     return found
 
 
 def recall_cost(runs_by_budget, events, require_confirmation):
-    """runs_by_budget: {budget_ns: [run per seed]} -> rows with recall stats."""
+    """runs_by_budget: {budget_ns: [run per seed]} -> rows with recall stats.
+    Candidates count only if their query completed within the budget (§8.4)."""
     rows = []
     for b, runs in sorted(runs_by_budget.items()):
-        rec = [len(discoveries(r, events, require_confirmation)) / len(events) if events else float("nan")
-               for r in runs]
-        cands = [len(r["candidates"]) for r in runs]
-        conf = [sum(c["confirmed"] for c in r["candidates"]) for r in runs]
+        rec, cands, conf, unused = [], [], [], []
+        for r in runs:
+            rec.append(len(discoveries(r, events, require_confirmation)) / len(events) if events else float("nan"))
+            ok_q = {q["query_index"] for q in r["timeline"] if q["within_budget"]}
+            cs = [c for c in r["candidates"] if c["query_index"] in ok_q]
+            cands.append(len(cs))
+            conf.append(sum(c["confirmed"] for c in cs))
+            used = max([q["cumulative_cost_ns"] for q in r["timeline"] if q["within_budget"]] or [0])
+            unused.append(1 - used / b if b else 0.0)
         rows.append({"budget_ns": b, "n_runs": len(runs), "recall_mean": float(np.mean(rec)),
                      "recall_min": float(np.min(rec)), "recall_max": float(np.max(rec)),
                      "candidates_mean": float(np.mean(cands)),
-                     "confirmed_fraction": (float(np.sum(conf)) / np.sum(cands)) if np.sum(cands) else None})
+                     "confirmed_fraction": (float(np.sum(conf)) / np.sum(cands)) if np.sum(cands) else None,
+                     "unused_budget_fraction_mean": float(np.mean(unused))})
     return rows

@@ -4,7 +4,7 @@
   "correctness": {
     "logit_abs_tolerance": null,
     "logit_tolerance_justification": null,
-    "compare_positions": "valid positions [0, L(x)) only; padding outputs depend on the length (spec \u00a77.2)"
+    "compare_positions": "valid positions [0, L(x)) only; padding outputs depend on the length (spec §7.2)"
   },
   "measurement": {
     "warmup_iterations": null,
@@ -21,11 +21,14 @@
     "delta_source": null,
     "sensitivity_deltas": null,
     "confidence_level": null,
-    "multiple_testing": "Holm over the predeclared family (spec \u00a710.3)",
+    "multiple_testing": "Holm over the predeclared family (spec §10.3)",
     "match_tolerance_lengths": null,
     "bootstrap_reps": null,
     "bootstrap_seed": null,
-    "alpha": null
+    "alpha": null,
+    "direction": null,
+    "min_blocks_per_pair": null,
+    "min_allocations_per_pair": null
   },
   "selectors": {
     "random_seeds": null,

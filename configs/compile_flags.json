@@ -48,6 +48,15 @@
       ],
       "report": "Simd",
       "purpose": "DIAGNOSTIC instrumented build (spec §6.1): per-op time + shapes via the R1 workflow; never a main performance number"
+    },
+    "default_noreport": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}"
+      ],
+      "report": null,
+      "purpose": "same as default without --opt-report: G3 measures the report's emission overhead, which otherwise sits in the common compile cost (spec §8.4)"
     }
   },
   "probe": {

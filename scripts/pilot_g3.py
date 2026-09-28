@@ -98,6 +98,8 @@ def main():
     ap.add_argument("--cpus", type=int, nargs="*", default=None)
     ap.add_argument("--vm-allocation-id", default="unavailable")
     ap.add_argument("--phase", default="pilot")
+    ap.add_argument("--report-overhead-lengths", type=int, default=2,
+                    help="first k pilot lengths are also compiled without --opt-report (spec §8.4 overhead check)")
     ap.add_argument("--analysis-skip", type=int, default=0,
                     help="iterations dropped ONLY for the variance/KJ analysis (recorded; not a warmup decision)")
     ap.add_argument("--out", default=None)
@@ -127,6 +129,11 @@ def main():
         probe = compile_shape(args.model, s, args.flagset, args.target_cpu, "probe", out / f"probe_s{s}",
                               allow_native=args.allow_native)
         comp[s] = {"full": full, "probe": probe}
+        if lengths.index(s) < args.report_overhead_lengths:
+            nr = compile_shape(args.model, s, "default_noreport", args.target_cpu, "full", out / f"noreport_s{s}",
+                               allow_native=args.allow_native)
+            comp[s]["noreport"] = {"compile_wall_ns": nr.get("compile_wall_ns"), "artifact_hash": nr.get("artifact_hash"),
+                                   "failure_type": nr.get("failure_type")}
         v = None
         if not full.get("failure_type"):
             p = subprocess.run([sys.executable, str(REPO_ROOT / "validate_shapes.py"), "--artifact",
@@ -157,7 +164,10 @@ def main():
                "report_signature_probe": c["probe"].get("ir_signature"),
                "final_signature": c["full"].get("final_signature"),
                "matmul_path": c["full"].get("matmul_path"),
-               "validation": c["validation"]}
+               "validation": c["validation"],
+               "no_report_compile": c.get("noreport"),
+               "report_emission_overhead_ns": ((c["full"].get("compile_wall_ns") or 0) - c["noreport"]["compile_wall_ns"]
+                                               if c.get("noreport") and c["noreport"].get("compile_wall_ns") else None)}
         if rs:
             per_iter = np.mean([np.mean(r["latency_ns"]) for r in rs])
             row.update(warmup_profile_ns=warmup_profile(rs),

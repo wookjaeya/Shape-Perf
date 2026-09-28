@@ -38,6 +38,14 @@
 
 ## 격리 증명 (G2.5·G5 진입 조건)
 
-- 정적: `shapeperf/selectors/*.py`는 허용 목록(math, bisect, dataclasses, types, typing, numpy, collections)만 import, 파일·프로세스 API와 `census` 문자열 사용 금지.
-- 런타임: broker가 모든 정책 결정을 audit-hook sandbox 안에서 실행 — 파일 열기·디렉터리 조회·프로세스 생성·소켓·평가자 모듈 import 시 `SelectorIsolationError`.
+- 정적: `shapeperf/selectors/*.py`는 허용 목록(math, bisect, dataclasses, types, typing, numpy, collections)만 import, 파일·프로세스·프레임 API와 `census` 문자열 사용 금지.
+- 프로세스 경계(기본): 탐색기는 `shapeperf/selector_worker.py` 별도 프로세스에서 실행되며 자기 View(JSON)만 받는다. 정답표·census·backend 객체는 broker 프로세스에만 있으므로 frame 탐색이나 이미 로드된 평가자 모듈 import로 닿을 수 없다.
+- 프로세스 안 sandbox: 파일 열기·디렉터리 조회·프로세스 생성·소켓·동적 로딩·신규 import·frame 조회(`sys._getframe`, `tb_frame` 등) 시 `SelectorIsolationError`. 위반은 sticky라 탐색기가 예외를 잡아도 결정 종료 시 다시 발생한다.
+- 테스트: 악의적 탐색기(파일 읽기, 예외 삼키기, 디렉터리 조회, frame 탐색, 평가자 import)가 두 격리 모드에서 모두 차단됨 (`tests/test_isolation.py`, `tests/malicious_selectors.py`).
 - 권한: census 디렉터리 0700/파일 0600. OS 수준 분리(탐색기를 다른 UID로 실행)는 측정 VM에서 권장.
+
+## 독립 코드 검토 반영 (2026-09-28)
+
+별도 검토 에이전트가 정책·비용 회계·평가 코드를 명세와 대조해 결함 9건과 해석 문제 6건을 보고했고, 모두 재현 테스트와 함께 수정했다:
+Compile-probe의 probe/전체 컴파일 signature 혼합, align-only 경계 off-by-one, sandbox 예외 삼키기 우회, 이미 로드된 모듈·frame 탐색을 통한 격리 우회(→ 프로세스 분리), `--census` 없는 compare 충돌, 사전등록 `[]` 처리, 블록 1개일 때 부트스트랩 퇴화(→ 최소 블록), 부호로 방향을 고른 비보정 단측 검정(→ 양측 2·min), 예산 초과 질의의 후보 집계,
+그리고 비용 제외 변형의 probe 상한, 유효 집합 이웃 기준 인접성, 데이터와 무관한 검정 족, 미사용 예산 비율 보고, opt-report 출력 비용(G3에서 `default_noreport`로 측정).

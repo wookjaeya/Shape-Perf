@@ -56,3 +56,26 @@ def test_failures_stay_in_history():
     f = [q for q in r["timeline"] if q["failure_type"]]
     assert [q["padded_length"] for q in f] == [5]
     assert sorted(q["padded_length"] for q in r["timeline"]) == list(range(1, 9))
+
+
+def test_cost_free_variant_keeps_probe_cap():
+    b = SyntheticBackend({}, [], noise=0.0, compile_ns=10, probe_ns=10, extract_ns=0, verify_ns=0, measure_ns=0)
+    charged = QueryBroker(b, range(1, 257)).run(CompileProbeSelector(budget_fraction=0.2), 1000)
+    free = QueryBroker(b, range(1, 257), charge_policy_extra=False).run(CompileProbeSelector(budget_fraction=0.2), 1000)
+    n = lambda r: sum(q["action"] == "probe" for q in r["timeline"])
+    assert n(free) <= n(charged) + 2 and free["probe_spent_ns"] <= 0.2 * 1000 + 10
+
+
+def test_candidates_after_budget_are_not_counted():
+    from shapeperf.evaluate import recall_cost
+
+    def big():  # costs >> real selector wall time (~1e5 ns), so the budget boundary is deterministic
+        return SyntheticBackend({9: 2.0}, [9], noise=0.0, compile_ns=1e9, probe_ns=3e8, extract_ns=7e7,
+                                verify_ns=5e7, measure_ns=1e8)
+    full = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), 10**15)
+    cq = full["candidates"][0]["query_index"]
+    cut = full["timeline"][cq]["cumulative_cost_ns"] - full["timeline"][cq]["confirmation_ns"] // 2
+    r = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), cut)
+    assert r["timeline"][-1]["query_index"] == cq and not r["timeline"][-1]["within_budget"]
+    row = recall_cost({cut: [r]}, [8], require_confirmation=True)[0]
+    assert row["recall_mean"] == 0 and row["candidates_mean"] == 0

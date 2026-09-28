@@ -45,7 +45,7 @@ def test_evaluator_pipeline(tmp_path):
     at = tmp_path / "at.json"
     # prereg values are null in the repo -> pass them through a temporary preregistration copy
     pre = json.loads((ROOT / "configs/preregistration.json").read_text())
-    pre["events"].update(delta_min_effect=0.2, alpha=0.05, confidence_level=0.95, bootstrap_reps=1000,
+    pre["events"].update(delta_min_effect=0.2, alpha=0.05, confidence_level=0.95, bootstrap_reps=3000,
                          bootstrap_seed=0, match_tolerance_lengths=0)
     pre["measurement"]["process_statistic"] = "mean"
     pre["selectors"].update(random_seeds=[1, 2], shape_only_alignment_units=[8],
@@ -74,3 +74,15 @@ def test_evaluator_pipeline(tmp_path):
     assert {"uniform", "compile_probe", "compile_guided[align_only]", "timing_only[cost-free]"} <= set(cmp["results"])
     last = {k: v["recall_cost"][-1]["recall_mean"] for k, v in cmp["results"].items()}
     assert last["compile_probe"] == 1.0
+
+
+def test_compare_without_census_skips_probe_variants(tmp_path):
+    test_evaluator_pipeline(tmp_path)          # builds the synthetic files
+    env = {**os.environ, "SHAPEPERF_PREREG": str(tmp_path / "prereg.json")}
+    p = subprocess.run([sys.executable, str(ROOT / "evaluate.py"), "compare", "--compile", str(tmp_path / "compile.jsonl"),
+                        "--measurements", str(tmp_path / "d.jsonl"), "--answer-table", str(tmp_path / "at.json"),
+                        "--out", str(tmp_path / "cmp2.json"), "--allow-unfrozen"],
+                       capture_output=True, text=True, cwd=ROOT, env=env)
+    assert p.returncode == 0, p.stderr
+    out = json.loads((tmp_path / "cmp2.json").read_text())
+    assert out["skipped_variants"] and not any(k.startswith("compile_probe") for k in out["results"])

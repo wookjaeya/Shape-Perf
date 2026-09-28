@@ -18,12 +18,20 @@
 | Compile-guided | 1순위: 두 끝점 signature 상이 | `policies.py` |
 | Compile-probe | 끝점은 측정(전체 컴파일이 signature 제공), 확정 변화점 양쪽 측정 큐 우선, probe 지출이 `budget_fraction × 예산`에 도달하면 probe 중단. hybrid(Uniform 채우기)는 ablation 전용 | `policies.py` |
 | Timing-adaptive [선택] | log latency에 2차 다항식 추세 적합, 구간 관측 log 비와 추세 log 비의 차 | `policies.py` |
-| 예산 경계 | 완료 시각 ≤ 예산인 질의만 인정, 초과 질의는 기록만 | `broker.py` |
-| 비용 분리 | 공통(전체 컴파일·검증·워밍업·측정·확인) vs 정책 추가(정보 추출, probe) | `broker.py` |
+| Compile-probe 단계 분리 | probe 단계 signature끼리만 비교하고 전체 컴파일 signature와 섞지 않음. 두 단계 불일치는 `probe_vs_full_signatures`로 기록(G3) | `policies.py`, `broker.py` |
+| Align-only ablation | 구간 [a,b] 안에 B_align 경계가 있을 때만 signature 차이를 인정(B_align과 동일 정의) | `policies.py: has_aligned_boundary` |
+| 예산 경계 | 완료 시각 ≤ 예산인 질의만 인정, 초과 질의는 기록만. 후보·확인도 예산 내 질의의 것만 셈 | `broker.py`, `evaluate.py: discoveries, recall_cost` |
+| 비용 분리 | 공통(전체 컴파일·검증·워밍업·측정·확인) vs 정책 추가(정보 추출, probe). 비용 제외 변형(§11.2-2)에서도 실제 probe 지출로 probe 상한 적용 | `broker.py` |
+| 후보 확인 | 유효 집합에서 인접한 두 shape가 모두 측정되는 순간 한 번 검사, 관측 \|log 비\| ≥ log(1+δ)이면 확인 절차 실행 | `broker.py` |
+| 탐색기 격리 | 탐색기는 별도 프로세스에서 자기 View만 받음 + 그 안에서 파일·프레임 조회·신규 import 차단(위반은 except로 숨길 수 없음) | `broker.py`, `selector_worker.py`, `guard.py` |
 | signature 정규화 | `sig-v1` (trip count·정수 literal·SSA·위치 제외, 결정 필드만) | `shapeperf/signature.py` |
-| 정답표 A | 발견 데이터에서 Holm 보정 후보 → 독립 확인 데이터에서 같은 방향·δ 초과(Holm) | `shapeperf/evaluate.py` |
-| 부트스트랩 해상도 | `reps ≥ 족 크기/α` 미만이면 실행 거부 (예: 216개 경계·α=0.05 → 4,320 이상) | `evaluate.py: answer_table_a` |
+| 검정 | 기본 양측: p = 2·min(두 꼬리). 방향(`events.direction`)은 사전등록 | `evaluate.py: effect_test` |
+| 검정 족 | 유효 집합의 모든 인접 쌍(데이터가 없는 쌍은 p=1로 포함) — 데이터와 무관하게 고정 | `evaluate.py: answer_table_a` |
+| 최소 블록 | 짝지은 블록이 `min_blocks_per_pair` 미만인 쌍은 '불충분'(부트스트랩 퇴화 방지) | `evaluate.py: effect_test` |
+| 정답표 A | 발견 데이터에서 Holm 보정 후보 → 독립 확인 데이터에서 발견 방향 단측·δ 초과(Holm) | `shapeperf/evaluate.py` |
+| 부트스트랩 해상도 | 최소 p(양측 2/reps) × 족 크기 ≥ α이면 실행 거부 (예: 215개 경계·α=0.05·양측 → 8,601 이상) | `evaluate.py: answer_table_a` |
 | B_align 정의 | 경계 (s, s+1)에서 s 또는 s+1이 정렬 단위의 배수 | `evaluate.py: aligned_boundaries` |
+| CLI 값 우선순위 | 사전등록 값이 우선, `[]`도 유효한 값. 고정된 실행에서 CLI 대체값 거부 | `evaluate.py: pick` |
 
 ## B. 파일럿(G3) 이후 고정할 값 — 모두 미정
 
@@ -36,6 +44,8 @@
 | `measurement.process_statistic` | mean 또는 median (프로세스 내 요약) | 미정 |
 | `events.delta_min_effect` (+`delta_source`), `sensitivity_deltas` | 배포 요구가 없으면 연구 목적·측정 정밀도 근거 (§9.2) | 미정 |
 | `events.alpha`, `confidence_level` | 관례에 따른 분석 선택으로 명시 (§10.3) | 미정 |
+| `events.direction` | 양측(two-sided) 또는 증가만(increase) — 연구 질문의 "급락" 정의 | 미정 |
+| `events.min_blocks_per_pair`, `min_allocations_per_pair` | G3 블록 수·재할당 계획 | 미정 |
 | `events.bootstrap_reps`, `bootstrap_seed` | 해상도 가드 충족 | 미정 |
 | `events.match_tolerance_lengths` | ±0 또는 ±1 (§9.4) | 미정 |
 | `selectors.random_seeds` | seed 수는 파일럿 분산으로 (§10.3) | 미정 |

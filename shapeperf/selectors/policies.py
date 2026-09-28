@@ -13,6 +13,8 @@ Conventions fixed here (to be copied into preregistration.md):
 import math
 
 import numpy as np
+import numpy.linalg  # noqa: F401  (loaded eagerly: lazy imports are blocked in the sandbox)
+import numpy.random  # noqa: F401
 
 from .base import (MEASURE, PROBE, Action, Selector, done_set, endpoint_action,
                    intervals, lower_middle)
@@ -91,6 +93,12 @@ def alignment_priority_set(valid, units):
     return pri
 
 
+def has_aligned_boundary(a, b, units):
+    """True if some boundary (x, x+1) with a <= x < b has x or x+1 a multiple
+    of a unit - the same B_align definition as evaluate.aligned_boundaries."""
+    return any(u > 1 and (x % u == 0 or (x + 1) % u == 0) for x in range(a, b) for u in units)
+
+
 class ShapeOnlySelector(Selector):
     """Alignment boundaries first (uniform coverage order inside the priority
     set), then Uniform. Units come from params['units'] and are fixed before
@@ -157,8 +165,7 @@ class CompileGuidedSelector(Selector):
         if _sig(view, a) == _sig(view, b):
             return 0.0
         if self.align_only_units:
-            pri = alignment_priority_set(range(a, b + 1), self.align_only_units)
-            return 1.0 if pri else 0.0
+            return 1.0 if has_aligned_boundary(a, b, self.align_only_units) else 0.0
         return 1.0
 
     def next_action(self, view):
@@ -172,15 +179,18 @@ class CompileGuidedSelector(Selector):
 class CompileProbeSelector(Selector):
     """Two-stage policy (spec §8.2b).
 
-    1. min/max are probed and measured (common first queries; a full compile
-       also yields the signature, so no separate probe is issued for them).
-    2. Probe intervals are adjacent *probed-or-measured* shapes with unprobed
-       shapes inside; priority: signatures differ, then §8.2 b/c ties.
-    3. When an adjacent pair has different signatures and nothing unprobed in
-       between, it is a confirmed change point; both sides go to the
-       measurement queue. The queue has priority over new probes.
-    4. Probing stops once probe spending reaches budget_fraction * budget
-       (preregistered from the G3 probe:measure cost ratio).
+    1. min and max are measured (common first queries) AND probed.
+    2. Probe intervals are adjacent probed shapes with unprobed shapes inside;
+       priority: probe signatures differ, then §8.2 b/c ties; probe the middle.
+    3. An adjacent probed pair with different probe signatures and nothing
+       unprobed in between is a confirmed change point; both sides go to the
+       measurement queue, which has priority over new probes.
+    4. After the endpoint probes, probing stops once actual probe spending
+       reaches budget_fraction * budget (preregistered from the G3 probe :
+       measurement cost ratio).
+    Only probe-stage signatures are compared with each other; full-compile
+    signatures of measured shapes are never mixed in (the probe/final mismatch
+    is a separate G3 measurement).
     params['hybrid_uniform'] (ablation only, §8.2b): fill leftover budget with
     Uniform measurements instead of stopping.
     """
@@ -199,22 +209,25 @@ class CompileProbeSelector(Selector):
         a = endpoint_action(view)
         if a:
             return a
+        probed = set(view.probed)
+        for s in (min(view.valid_lengths), max(view.valid_lengths)):
+            if s not in probed:
+                return Action(PROBE, s)
         measured = done_set(view)
-        sig_known = set(view.probed) | measured
-        # confirmed change points -> measurement queue
-        ks = sorted(sig_known)
+        psig = view.probe_signatures
+        ks = sorted(probed)
         vs = set(view.valid_lengths)
         queue = []
         for x, y in zip(ks, ks[1:]):
-            gap_unknown = any(v in vs and v not in sig_known for v in range(x + 1, y))
-            if not gap_unknown and _sig(view, x) != _sig(view, y):
+            gap_unprobed = any(v in vs and v not in probed for v in range(x + 1, y))
+            if not gap_unprobed and psig.get(x) != psig.get(y):
                 for s in (x, y):
                     if s not in measured and s not in queue:
                         queue.append(s)
         if queue:
             return Action(MEASURE, queue[0])
         if view.probe_spent_ns < self.budget_fraction * view.budget_ns:
-            s = _pick(view, sig_known, lambda iv: float(_sig(view, iv[0]) != _sig(view, iv[1])))
+            s = _pick(view, probed, lambda iv: float(psig.get(iv[0]) != psig.get(iv[1])))
             if s is not None:
                 return Action(PROBE, s)
         if self.hybrid_uniform:

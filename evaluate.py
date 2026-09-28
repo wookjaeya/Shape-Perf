@@ -29,9 +29,28 @@ def _load(paths):
     return [r for p in paths for r in read_jsonl(p)]
 
 
+def pick(pre_value, cli_value, label, name):
+    """Preregistered value wins; a CLI fallback is allowed only for unfrozen
+    development runs, and an explicit preregistered [] stays []."""
+    if pre_value is not None:
+        if cli_value is not None and cli_value != pre_value:
+            raise SystemExit(f"{name}: CLI value {cli_value!r} conflicts with preregistered {pre_value!r}")
+        return pre_value
+    if cli_value is not None and label.startswith("frozen"):
+        raise SystemExit(f"{name}: not preregistered; CLI fallbacks are refused for frozen runs")
+    return cli_value
+
+
+def _event_kw(ev):
+    return {"direction": ev.get("direction") or "two-sided",
+            "min_blocks": ev.get("min_blocks_per_pair") or 2,
+            "min_allocations": ev.get("min_allocations_per_pair") or 1}
+
+
 def cmd_answer_table(a):
     p, label = prereg.require(["events.delta_min_effect", "events.alpha", "events.confidence_level",
-                               "events.bootstrap_reps", "events.bootstrap_seed",
+                               "events.bootstrap_reps", "events.bootstrap_seed", "events.direction",
+                               "events.min_blocks_per_pair", "events.min_allocations_per_pair",
                                "measurement.process_statistic"], a.allow_unfrozen)
     ev, stat = p["events"], p["measurement"]["process_statistic"] or "mean"
     disc_recs, conf_recs = _load(a.discovery), _load(a.confirmation)
@@ -49,9 +68,9 @@ def cmd_answer_table(a):
            "by_delta": {}}
     for d in deltas:
         rows = E.continuous_indicators(disc, lengths, ev["bootstrap_reps"], ev["bootstrap_seed"],
-                                       ev["confidence_level"], d, flop_cfg)
+                                       ev["confidence_level"], d, flop_cfg, **_event_kw(ev))
         tab = E.answer_table_a(rows, conf, d, ev["alpha"], ev["bootstrap_reps"], ev["bootstrap_seed"],
-                               ev["confidence_level"])
+                               ev["confidence_level"], **_event_kw(ev))
         out["by_delta"][str(d)] = {"continuous": rows, "answer_table_A": tab}
     write_json(a.out, out)
     primary = out["by_delta"][str(deltas[0])]["answer_table_A"]
@@ -66,12 +85,14 @@ def cmd_census(a):
     d0 = next(iter(at["by_delta"]))
     e_a = at["by_delta"][d0]["answer_table_A"]["events"]
     lo, hi = table["lengths"]
-    units = p["selectors"]["shape_only_alignment_units"] or a.units
-    b_align = E.aligned_boundaries(range(lo, hi + 1), units or [])
-    res = {"preregistration": label, "units": units, "delta": d0,
-           "opt_report": E.census_metrics(table["C_sig"], b_align, e_a, p["events"]["match_tolerance_lengths"] or 0),
-           "ir_structure": E.census_metrics(table["C_ir_structure"], b_align, e_a,
-                                            p["events"]["match_tolerance_lengths"] or 0)}
+    units = pick(p["selectors"]["shape_only_alignment_units"], a.units, label, "alignment units")
+    tol = pick(p["events"]["match_tolerance_lengths"], a.match_tolerance, label, "match tolerance")
+    if units is None or tol is None:
+        raise SystemExit("alignment units and match tolerance are required (preregistration or CLI for dev runs)")
+    b_align = E.aligned_boundaries(range(lo, hi + 1), units)
+    res = {"preregistration": label, "units": units, "delta": d0, "match_tolerance": tol,
+           "opt_report": E.census_metrics(table["C_sig"], b_align, e_a, tol),
+           "ir_structure": E.census_metrics(table["C_ir_structure"], b_align, e_a, tol)}
     write_json(a.out, res)
     print(json.dumps(res["opt_report"], indent=1))
 
@@ -117,14 +138,23 @@ def cmd_compare(a):
     valid = sorted(dense)
     conf_cost = {s: float(np.mean([pp["measure_ns"] + pp["warmup_ns"] for pp in d["processes"]]))
                  if d["processes"] else 0.0 for s, d in dense.items()}
-    seeds = sp["random_seeds"] or a.seeds
-    budgets = sp["budgets_ns"] or a.budgets
-    thr = float(np.log1p(ev["delta_min_effect"] or a.delta))
-    params = {"random": {}, "shape_only": {"units": sp["shape_only_alignment_units"] or a.units},
-              "compile_probe": {"budget_fraction": sp["compile_probe_budget_fraction"] or a.probe_fraction}}
+    seeds = pick(sp["random_seeds"], a.seeds, label, "seeds")
+    budgets = pick(sp["budgets_ns"], a.budgets, label, "budgets")
+    delta = pick(ev["delta_min_effect"], a.delta, label, "delta")
+    units = pick(sp["shape_only_alignment_units"], a.units, label, "alignment units")
+    frac = pick(sp["compile_probe_budget_fraction"], a.probe_fraction, label, "probe budget fraction")
+    if None in (seeds, budgets, delta, units, frac):
+        raise SystemExit("seeds, budgets, delta, units and probe fraction are required")
+    thr = float(np.log1p(delta))
+    params = {"shape_only": {"units": units}, "compile_probe": {"budget_fraction": frac}}
+    has_probe = any("probe_ns" in d for d in dense.values())
     variants = [(n, {}) for n in REGISTRY]
-    variants += [("compile_guided", {"align_only_units": params["shape_only"]["units"], "_tag": "align_only"}),
+    variants += [("compile_guided", {"align_only_units": units, "_tag": "align_only"}),
                  ("compile_probe", {"hybrid_uniform": True, "_tag": "hybrid"})]
+    skipped = []
+    if not has_probe:
+        skipped = [v for v in variants if v[0] == "compile_probe"]
+        variants = [v for v in variants if v[0] != "compile_probe"]
     results = {}
     for name, extra in variants:
         tag = name + (f"[{extra.pop('_tag')}]" if "_tag" in extra else "")
@@ -146,6 +176,7 @@ def cmd_compare(a):
                             "cost_to_find": {str(e): [E.discoveries(r, [e], True).get(e) for r in by_b[max(by_b)]]
                                              for e in events}}
     out = {"preregistration": label, "harness_commit": git_head(), "E_A": events, "delta": d0,
+           "skipped_variants": [{"variant": n, "reason": "no probe data (--census not given)"} for n, _ in skipped],
            "seeds": seeds, "budgets_ns": budgets, "results": results,
            "note": "ReplayBackend charges recorded real costs; common vs policy-extra costs are split per query"}
     write_json(a.out, out)
@@ -165,6 +196,7 @@ def main():
     s2.add_argument("--census-table", required=True)
     s2.add_argument("--answer-table", required=True)
     s2.add_argument("--units", type=int, nargs="*", default=None)
+    s2.add_argument("--match-tolerance", type=int, default=None)
     s2.add_argument("--out", default=str(REPO_ROOT / "results/eval/census_metrics.json"))
     s3 = sub.add_parser("compare")
     s3.add_argument("--compile", nargs="+", required=True)

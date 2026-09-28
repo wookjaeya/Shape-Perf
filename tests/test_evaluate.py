@@ -40,8 +40,8 @@ def _records(steps, blocks=6, procs=3, seed=0, alloc="vm1", noise=0.01):
 def test_answer_table_finds_step_and_ignores_trend():
     disc = E.block_table(_records({11: 1.3}, seed=1), "mean")
     conf = E.block_table(_records({11: 1.3}, seed=2), "mean")
-    rows = E.continuous_indicators(disc, range(1, 21), reps=500, seed=0, conf_level=0.95, delta=0.1)
-    tab = E.answer_table_a(rows, conf, delta=0.1, alpha=0.05, reps=500, seed=0, conf_level=0.95)
+    rows = E.continuous_indicators(disc, range(1, 21), reps=2000, seed=0, conf_level=0.95, delta=0.1)
+    tab = E.answer_table_a(rows, conf, delta=0.1, alpha=0.05, reps=2000, seed=0, conf_level=0.95)
     assert tab["events"] == [10]
     r10 = next(r for r in rows if r["s"] == 10)
     assert abs(r10["ratio"] - 1.3 * (1 + 0.02 * 11) / (1 + 0.02 * 10)) < 0.02
@@ -50,9 +50,35 @@ def test_answer_table_finds_step_and_ignores_trend():
 def test_answer_table_requires_independent_confirmation():
     disc = E.block_table(_records({11: 1.3}, seed=1), "mean")
     conf = E.block_table(_records({}, seed=2), "mean")          # effect absent in confirmation
-    rows = E.continuous_indicators(disc, range(1, 21), reps=500, seed=0, conf_level=0.95, delta=0.1)
-    tab = E.answer_table_a(rows, conf, delta=0.1, alpha=0.05, reps=500, seed=0, conf_level=0.95)
+    rows = E.continuous_indicators(disc, range(1, 21), reps=2000, seed=0, conf_level=0.95, delta=0.1)
+    tab = E.answer_table_a(rows, conf, delta=0.1, alpha=0.05, reps=2000, seed=0, conf_level=0.95)
     assert tab["candidates"] == [10] and tab["events"] == []
+
+
+def test_single_block_is_insufficient():
+    rng = np.random.default_rng(0)
+    r = E.effect_test({"vm1": [math.log(1.25)]}, 0.1, 2000, rng, 0.95)
+    assert r.get("insufficient")
+    r2 = E.effect_test({"vm1": [math.log(1.25)] * 3}, 0.1, 2000, rng, 0.95, min_blocks=4)
+    assert r2.get("insufficient")
+
+
+def test_two_sided_test_is_calibrated_under_null():
+    rng = np.random.default_rng(1)
+    alpha, rej, n = 0.1, 0, 300
+    for _ in range(n):
+        x = rng.normal(0, 1, 30).tolist()
+        r = E.effect_test({"vm": x}, 0.0, 400, rng, 0.95, direction="two-sided")
+        rej += r["p_exceeds_delta"] < alpha
+    assert rej / n < 0.16, rej / n            # the old sign-chosen one-sided rule gave ~0.2
+
+
+def test_holm_family_is_fixed_in_advance():
+    disc = E.block_table(_records({11: 1.3}, seed=1), "mean")
+    rows = E.continuous_indicators(disc, range(1, 25), reps=2000, seed=0, conf_level=0.95, delta=0.1)
+    assert sum(r.get("missing", False) for r in rows) == 4          # 20..24 have no data
+    tab = E.answer_table_a(rows, disc, delta=0.1, alpha=0.05, reps=2000, seed=0, conf_level=0.95)
+    assert tab["family_size"] == 23 and tab["n_missing_pairs"] == 4
 
 
 def test_bootstrap_resolution_guard():

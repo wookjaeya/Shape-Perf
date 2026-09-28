@@ -17,6 +17,7 @@ if [ -e "${OUT}/census" ] || [ -e "${OUT}/g4_disc" ]; then
     echo "${OUT} already holds a smoke run; use a fresh directory" >&2; exit 2
 fi
 mkdir -p "${OUT}"
+OUT="$(cd "${OUT}" && pwd)"          # absolute: SHAPEPERF_PREREG must not depend on the cwd
 
 # toy preregistration (never the real one)
 PRE="${OUT}/prereg_smoke.json"
@@ -33,7 +34,7 @@ p["selectors"].update(random_seeds=[1, 2], shape_only_alignment_units=[8], repor
                       compile_probe_budget_fraction=0.3, budgets_ns=[5e11, 5e12])
 json.dump(p, open(sys.argv[1], "w"), indent=1)
 PY
-export SHAPEPERF_PREREG="${PWD}/${PRE}" SHAPEPERF_TARGET_CPU="${CPU}"
+export SHAPEPERF_PREREG="${PRE}" SHAPEPERF_TARGET_CPU="${CPU}"
 
 echo "== G3 pilot (toy)"
 "${PY}" scripts/pilot_g3.py --seed 1 --n-lengths 1 --adjacent-pairs 1 --processes 2 --iterations 6 \

@@ -1,0 +1,20 @@
+# Large or re-fetchable inputs (hashes are in artifacts.lock.json)
+data/artifacts/
+data/reference/
+data/features/*/features.npz
+data/features/*/features_extra.pkl
+third_party/
+# Compiled artifacts and raw IR (regenerable; records keep their hashes)
+results/**/*.so
+results/**/*.constants.bin
+results/**/*.onnx.mlir
+results/**/*.onnx.mlir.gz
+results/**/nbest_predictions.json
+results/compile/
+# Evaluator-only census data (census/README.md is tracked)
+census/*
+!census/README.md
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

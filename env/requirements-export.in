@@ -1,0 +1,10 @@
+# Separate environment for the §4.4 step-2 re-export only (TF1-style BERT graph ->
+# tf2onnx). Never used for timing. TF 2.15 is the last release whose
+# tf.compat.v1.layers work without Keras 3, which Google BERT modeling.py needs.
+tensorflow-cpu==2.15.1
+tf_slim==1.1.0
+tf2onnx==1.16.1
+numpy==1.26.4
+protobuf==3.20.3
+onnx==1.16.2
+onnxruntime==1.18.1

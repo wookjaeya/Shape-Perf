@@ -1,0 +1,36 @@
+{
+  "source_artifact": "/home/user/Shape-Perf/data/artifacts/bertsquad-12.onnx",
+  "source_sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+  "output": "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx",
+  "output_sha256": "b443d8dca3672930cbb81972fa6a085da7393d250ea563583c2e2f2dfd7e968d",
+  "exporter": "tf2onnx 1.16.1",
+  "tensorflow": "2.15.1",
+  "opset": 12,
+  "export_seconds": 18.6,
+  "bert_config_derived_from_artifact": {
+    "vocab_size": 30522,
+    "hidden_size": 768,
+    "num_hidden_layers": 12,
+    "num_attention_heads": 12,
+    "intermediate_size": 3072,
+    "hidden_act": "gelu",
+    "hidden_dropout_prob": 0.1,
+    "attention_probs_dropout_prob": 0.1,
+    "max_position_embeddings": 512,
+    "type_vocab_size": 2,
+    "initializer_range": 0.02
+  },
+  "google_bert_commit": "eedf5716ce1268e56f0a50264a88cafad334ac61",
+  "modeling_py_sha256": "6f5e7c2d157ef46c092f8bc0538e60775f9fa0d40f957c8a3529ead18ff4dded",
+  "run_squad_py_sha256": "163fd48c7f6b5135a29e25f2cbdae65dbff9697cbff41ce3ebd7d16fdf2ea230",
+  "modeling_py_tf2_port_diff": "--- modeling.py\n+++ modeling.py (TF2 compat port)\n@@ -25,7 +25,8 @@\n import re\n import numpy as np\n import six\n-import tensorflow as tf\n+import tensorflow.compat.v1 as tf\n+import tf_slim\n \n \n class BertConfig(object):\n@@ -361,7 +362,7 @@\n \n def layer_norm(input_tensor, name=None):\n   \"\"\"Run layer normalization on the last dimension of the tensor.\"\"\"\n-  return tf.contrib.layers.layer_norm(\n+  return tf_slim.layers.layer_norm(\n       inputs=input_tensor, begin_norm_axis=-1, begin_params_axis=-1, scope=name)\n \n \n",
+  "create_model_source": "def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,\n                 use_one_hot_embeddings):\n  \"\"\"Creates a classification model.\"\"\"\n  model = modeling.BertModel(\n      config=bert_config,\n      is_training=is_training,\n      input_ids=input_ids,\n      input_mask=input_mask,\n      token_type_ids=segment_ids,\n      use_one_hot_embeddings=use_one_hot_embeddings)\n\n  final_hidden = model.get_sequence_output()\n\n  final_hidden_shape = modeling.get_shape_list(final_hidden, expected_rank=3)\n  batch_size = final_hidden_shape[0]\n  seq_length = final_hidden_shape[1]\n  hidden_size = final_hidden_shape[2]\n\n  output_weights = tf.get_variable(\n      \"cls/squad/output_weights\", [2, hidden_size],\n      initializer=tf.truncated_normal_initializer(stddev=0.02))\n\n  output_bias = tf.get_variable(\n      \"cls/squad/output_bias\", [2], initializer=tf.zeros_initializer())\n\n  final_hidden_matrix = tf.reshape(final_hidden,\n                                   [batch_size * seq_length, hidden_size])\n  logits = tf.matmul(final_hidden_matrix, output_weights, transpose_b=True)\n  logits = tf.nn.bias_add(logits, output_bias)\n\n  logits = tf.reshape(logits, [batch_size, seq_length, 2])\n  logits = tf.transpose(logits, [2, 0, 1])\n\n  unstacked_logits = tf.unstack(logits, axis=0)\n\n  (start_logits, end_logits) = (unstacked_logits[0], unstacked_logits[1])\n\n  return (start_logits, end_logits)",
+  "n_tf_variables": 201,
+  "n_loaded_from_artifact": 199,
+  "tf_variables_not_in_artifact_and_pruned": [
+    "bert/pooler/dense/kernel:0",
+    "bert/pooler/dense/bias:0"
+  ],
+  "artifact_weights_not_used": [],
+  "label": "re-export of the ONNX Model Zoo bertsquad-12 weights (NOT the Model Zoo artifact)"
+}

@@ -1,0 +1,126 @@
+{
+  "_comment": "Artifact sources (spec §4.1 step 1-2). scripts/fetch_artifacts.py downloads each entry, tries urls in order, and writes artifacts.lock.json (URL actually used, SHA-256, size, license). expected_sha256=null means 'first fetch defines the lock'; once artifacts.lock.json exists, later fetches must match it.",
+  "artifacts": [
+    {
+      "name": "bertsquad-12.onnx",
+      "role": "model A (spec §3.1), FP32, opset 12",
+      "dest": "data/artifacts/bertsquad-12.onnx",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/model/bertsquad-12.onnx",
+      "urls": [
+        "https://media.githubusercontent.com/media/onnx/models/{commit}/{path}"
+      ],
+      "license": "Apache-2.0 (onnx/models repository LICENSE)",
+      "expected_sha256": null
+    },
+    {
+      "name": "bertsquad-12.tar.gz",
+      "role": "model A with the zoo's test_data_set_* (reference input/output pairs for G1)",
+      "dest": "data/artifacts/bertsquad-12.tar.gz",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/model/bertsquad-12.tar.gz",
+      "urls": [
+        "https://media.githubusercontent.com/media/onnx/models/{commit}/{path}"
+      ],
+      "license": "Apache-2.0 (onnx/models repository LICENSE)",
+      "expected_sha256": null,
+      "optional": true
+    },
+    {
+      "name": "run_onnx_squad.py",
+      "role": "official preprocessing/postprocessing for model A (R7)",
+      "dest": "third_party/bert_squad/run_onnx_squad.py",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/dependencies/run_onnx_squad.py",
+      "urls": [
+        "https://raw.githubusercontent.com/onnx/models/{commit}/{path}"
+      ],
+      "license": "Apache-2.0",
+      "expected_sha256": null
+    },
+    {
+      "name": "tokenization.py",
+      "role": "official WordPiece tokenizer used by run_onnx_squad.py",
+      "dest": "third_party/bert_squad/tokenization.py",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/dependencies/tokenization.py",
+      "urls": [
+        "https://raw.githubusercontent.com/onnx/models/{commit}/{path}"
+      ],
+      "license": "Apache-2.0",
+      "expected_sha256": null
+    },
+    {
+      "name": "vocab.txt",
+      "role": "uncased_L-12_H-768_A-12 vocabulary named in the bert-squad README",
+      "dest": "data/artifacts/uncased_L-12_H-768_A-12/vocab.txt",
+      "official_source": "https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip (vocab.txt inside)",
+      "urls": [
+        "https://raw.githubusercontent.com/NVIDIA/DeepLearningExamples/729963dd47e7c8bd462ad10bfac7a7b0b604e6dd/PyTorch/LanguageModeling/BERT/vocab/vocab"
+      ],
+      "cross_check_urls": [
+        "https://raw.githubusercontent.com/microsoft/SDNet/3cf7d36ea561994992d2343b282bf8209939d411/bert_vocab_files/bert-base-uncased-vocab.txt"
+      ],
+      "provenance_note": "The official zip on storage.googleapis.com returned HTTP 403 from the development environment's egress proxy. The file is taken from a pinned mirror and cross-checked byte-for-byte against a second independent mirror. Functional check: G1 EM/F1 reproduction against the model card value.",
+      "license": "Apache-2.0 (google-research/bert)",
+      "expected_sha256": null
+    },
+    {
+      "name": "dev-v1.1.json",
+      "role": "SQuAD v1.1 development set (R12)",
+      "dest": "data/artifacts/squad/dev-v1.1.json",
+      "repo": "https://github.com/rajpurkar/SQuAD-explorer",
+      "commit": "eee5fdbf62f8613a7812b03419e6b29617b74fd1",
+      "path": "dataset/dev-v1.1.json",
+      "urls": [
+        "https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json",
+        "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/{commit}/{path}"
+      ],
+      "license": "CC BY-SA 4.0",
+      "expected_sha256": null
+    },
+    {
+      "name": "evaluate_v1.1.py",
+      "role": "official SQuAD v1.1 evaluation script (copy vendored by MLCommons, R9)",
+      "dest": "third_party/squad/evaluate_v1.1.py",
+      "repo": "https://github.com/mlcommons/inference",
+      "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+      "path": "language/bert/evaluate_v1.1.py",
+      "urls": [
+        "https://raw.githubusercontent.com/mlcommons/inference/{commit}/{path}"
+      ],
+      "license": "Apache-2.0",
+      "expected_sha256": null
+    },
+    {
+      "name": "bert_modeling.py",
+      "role": "Google BERT model code (TF1) used by the original training/export pipeline; needed for the §4.4 step-2 re-export",
+      "dest": "third_party/google_bert/modeling.py",
+      "repo": "https://github.com/google-research/bert",
+      "commit": "eedf5716ce1268e56f0a50264a88cafad334ac61",
+      "path": "modeling.py",
+      "urls": [
+        "https://raw.githubusercontent.com/google-research/bert/{commit}/{path}"
+      ],
+      "license": "Apache-2.0",
+      "expected_sha256": null
+    },
+    {
+      "name": "bert_run_squad.py",
+      "role": "Google BERT SQuAD head (create_model) used by the original pipeline; re-export reuses create_model",
+      "dest": "third_party/google_bert/run_squad.py",
+      "repo": "https://github.com/google-research/bert",
+      "commit": "eedf5716ce1268e56f0a50264a88cafad334ac61",
+      "path": "run_squad.py",
+      "urls": [
+        "https://raw.githubusercontent.com/google-research/bert/{commit}/{path}"
+      ],
+      "license": "Apache-2.0",
+      "expected_sha256": null
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "_comment": "Machine-readable twin of preregistration.md. Every null is an UNFIXED value that the G3 pilot (or a justified argument) must set BEFORE the main experiment. Code refuses main-phase runs while a required value is null.",
+  "status": "draft - nothing fixed yet",
+  "correctness": {
+    "logit_abs_tolerance": null,
+    "logit_tolerance_justification": null,
+    "compare_positions": "valid positions [0, L(x)) only; padding outputs depend on the length (spec \u00a77.2)"
+  },
+  "measurement": {
+    "warmup_iterations": null,
+    "timed_iterations": null,
+    "processes_per_shape": null,
+    "blocks": null,
+    "vm_allocations": null,
+    "cpus": null,
+    "threads": 1,
+    "process_statistic": null
+  },
+  "events": {
+    "delta_min_effect": null,
+    "delta_source": null,
+    "sensitivity_deltas": null,
+    "confidence_level": null,
+    "multiple_testing": "Holm over the predeclared family (spec \u00a710.3)",
+    "match_tolerance_lengths": null,
+    "bootstrap_reps": null,
+    "bootstrap_seed": null,
+    "alpha": null
+  },
+  "selectors": {
+    "random_seeds": null,
+    "shape_only_alignment_units": null,
+    "shape_only_alignment_justification": null,
+    "compile_probe_budget_fraction": null,
+    "budgets_ns": null
+  },
+  "signature": {
+    "version": "sig-v1",
+    "primary": "opt-report",
+    "probe_stage": null
+  },
+  "frozen": false,
+  "frozen_sha256": null
+}

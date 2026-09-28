@@ -1,0 +1,916 @@
+{
+  "model": "/home/user/Shape-Perf/data/artifacts/bertsquad-12.onnx",
+  "model_sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+  "producer": "tf2onnx 1.5.2",
+  "opset": [
+    [
+      "",
+      12
+    ]
+  ],
+  "inputs": [
+    {
+      "name": "unique_ids_raw_output___9:0",
+      "elem_type": "INT64",
+      "dims": [
+        "unk__492"
+      ]
+    },
+    {
+      "name": "segment_ids:0",
+      "elem_type": "INT64",
+      "dims": [
+        "unk__493",
+        256
+      ]
+    },
+    {
+      "name": "input_mask:0",
+      "elem_type": "INT64",
+      "dims": [
+        "unk__494",
+        256
+      ]
+    },
+    {
+      "name": "input_ids:0",
+      "elem_type": "INT64",
+      "dims": [
+        "unk__495",
+        256
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "unstack:1",
+      "elem_type": "FLOAT",
+      "dims": [
+        "unk__496",
+        256
+      ]
+    },
+    {
+      "name": "unstack:0",
+      "elem_type": "FLOAT",
+      "dims": [
+        "unk__497",
+        256
+      ]
+    },
+    {
+      "name": "unique_ids:0",
+      "elem_type": "INT64",
+      "dims": [
+        "unk__498"
+      ]
+    }
+  ],
+  "op_histogram": {
+    "Unsqueeze": 191,
+    "Mul": 186,
+    "Add": 185,
+    "MatMul": 98,
+    "Reshape": 71,
+    "Cast": 70,
+    "Sub": 62,
+    "Transpose": 62,
+    "Concat": 56,
+    "ReduceMean": 50,
+    "Identity": 28,
+    "Sqrt": 25,
+    "Reciprocal": 25,
+    "Softmax": 12,
+    "Pow": 12,
+    "Tanh": 12,
+    "Squeeze": 7,
+    "Slice": 6,
+    "Shape": 5,
+    "ConstantOfShape": 1,
+    "Gather": 1,
+    "OneHot": 1,
+    "Split": 1
+  },
+  "length_constants": {
+    "length": 256,
+    "n_constants_containing_length": 70,
+    "consumer_op_counts": {
+      "Mul": 13,
+      "Slice": 1,
+      "Unsqueeze": 42,
+      "Reshape": 13,
+      "Cast": 1
+    },
+    "constants": [
+      {
+        "const": "mul/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "mul"
+          }
+        ]
+      },
+      {
+        "const": "const_slice__41",
+        "value": [
+          256,
+          2147483647
+        ],
+        "consumers": [
+          {
+            "op": "Slice",
+            "node": "bert/embeddings/Slice"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/ones/packed/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/ones/packed_Unsqueeze__19"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_9/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_9/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_9/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_9/attention/self/Reshape_2/shape_Unsqueeze__86"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_9/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_9/attention/self/Reshape_1/shape_Unsqueeze__91"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_9/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_9/attention/self/Reshape/shape_Unsqueeze__96"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_9/attention/self/ExpandDims__28",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_9/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_8/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_8/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_8/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_8/attention/self/Reshape_2/shape_Unsqueeze__104"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_8/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_8/attention/self/Reshape_1/shape_Unsqueeze__109"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_8/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_8/attention/self/Reshape/shape_Unsqueeze__114"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_8/attention/self/ExpandDims__29",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_8/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_7/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_7/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_7/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_7/attention/self/Reshape_2/shape_Unsqueeze__122"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_7/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_7/attention/self/Reshape_1/shape_Unsqueeze__127"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_7/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_7/attention/self/Reshape/shape_Unsqueeze__132"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_7/attention/self/ExpandDims__30",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_7/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_6/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_6/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_6/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_6/attention/self/Reshape_2/shape_Unsqueeze__140"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_6/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_6/attention/self/Reshape_1/shape_Unsqueeze__145"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_6/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_6/attention/self/Reshape/shape_Unsqueeze__150"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_6/attention/self/ExpandDims__31",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_6/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_5/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_5/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_5/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_5/attention/self/Reshape_2/shape_Unsqueeze__158"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_5/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_5/attention/self/Reshape_1/shape_Unsqueeze__163"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_5/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_5/attention/self/Reshape/shape_Unsqueeze__168"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_5/attention/self/ExpandDims__32",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_5/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_4/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_4/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_4/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_4/attention/self/Reshape_2/shape_Unsqueeze__176"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_4/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_4/attention/self/Reshape_1/shape_Unsqueeze__181"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_4/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_4/attention/self/Reshape/shape_Unsqueeze__186"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_4/attention/self/ExpandDims__33",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_4/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_3/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_3/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_3/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_3/attention/self/Reshape_2/shape_Unsqueeze__194"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_3/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_3/attention/self/Reshape_1/shape_Unsqueeze__199"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_3/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_3/attention/self/Reshape/shape_Unsqueeze__204"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_3/attention/self/ExpandDims__34",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_3/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_2/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_2/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_2/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_2/attention/self/Reshape_2/shape_Unsqueeze__212"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_2/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_2/attention/self/Reshape_1/shape_Unsqueeze__217"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_2/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_2/attention/self/Reshape/shape_Unsqueeze__222"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_2/attention/self/ExpandDims__35",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_2/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_11/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_11/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_11/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_11/attention/self/Reshape_2/shape_Unsqueeze__230"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_11/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_11/attention/self/Reshape_1/shape_Unsqueeze__235"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_11/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_11/attention/self/Reshape/shape_Unsqueeze__240"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_11/attention/self/ExpandDims__36",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_11/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_10/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_10/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_10/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_10/attention/self/Reshape_2/shape_Unsqueeze__248"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_10/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_10/attention/self/Reshape_1/shape_Unsqueeze__253"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_10/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_10/attention/self/Reshape/shape_Unsqueeze__258"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_10/attention/self/ExpandDims__37",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_10/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_1/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_1/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_1/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_1/attention/self/Reshape_2/shape_Unsqueeze__266"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_1/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_1/attention/self/Reshape_1/shape_Unsqueeze__271"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_1/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_1/attention/self/Reshape/shape_Unsqueeze__276"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_1/attention/self/ExpandDims__38",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_1/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_0/attention/self/mul_2/y:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Mul",
+            "node": "bert/encoder/layer_0/attention/self/mul_2"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_0/attention/self/Reshape_2/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_0/attention/self/Reshape_2/shape_Unsqueeze__284"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_0/attention/self/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_0/attention/self/Reshape_1/shape_Unsqueeze__289"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_0/attention/self/Reshape/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/layer_0/attention/self/Reshape/shape_Unsqueeze__294"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/layer_0/attention/self/ExpandDims__39",
+        "value": [
+          -1,
+          1,
+          256,
+          256
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/encoder/layer_0/attention/self/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/Reshape_13/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/Reshape_13/shape_Unsqueeze__299"
+          }
+        ]
+      },
+      {
+        "const": "bert/encoder/Reshape/shape/2:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/encoder/Reshape/shape_Unsqueeze__25"
+          }
+        ]
+      },
+      {
+        "const": "bert/embeddings/Reshape_4/shape:0",
+        "value": [
+          1,
+          256,
+          768
+        ],
+        "consumers": [
+          {
+            "op": "Cast",
+            "node": "bert/embeddings/Reshape_4__42"
+          }
+        ]
+      },
+      {
+        "const": "bert/embeddings/Reshape_3/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/embeddings/Reshape_3/shape_Unsqueeze__68"
+          }
+        ]
+      },
+      {
+        "const": "bert/embeddings/Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "bert/embeddings/Reshape_1/shape_Unsqueeze__56"
+          }
+        ]
+      },
+      {
+        "const": "bert/embeddings/ExpandDims__48",
+        "value": [
+          -1,
+          256,
+          1
+        ],
+        "consumers": [
+          {
+            "op": "Reshape",
+            "node": "bert/embeddings/ExpandDims"
+          }
+        ]
+      },
+      {
+        "const": "Reshape_1/shape/1:0",
+        "value": 256,
+        "consumers": [
+          {
+            "op": "Unsqueeze",
+            "node": "Reshape_1/shape_Unsqueeze__479"
+          }
+        ]
+      }
+    ]
+  },
+  "runtime_probes": [
+    {
+      "length": 256,
+      "metadata_only_edit": false,
+      "status": "ran",
+      "output_shapes": [
+        [
+          1,
+          256
+        ],
+        [
+          1,
+          256
+        ]
+      ]
+    },
+    {
+      "length": 255,
+      "metadata_only_edit": true,
+      "status": "failed",
+      "error": "[ONNXRuntimeError] : 6 : RUNTIME_EXCEPTION : Non-zero status code returned while running Reshape node. Name:'bert/embeddings/ExpandDims' Status Message: /onnxruntime_src/onnxruntime/core/providers/cpu/tensor/reshape_helper.h:39 onnxruntime::ReshapeHelper::ReshapeHelper(const onnxruntime::TensorShape&, onnxruntime::TensorShapeVector&, bool) size != 0 && (input_shape_size % size) == 0 was false. The input tensor cannot be reshaped to the requested shape. Input shape:{1,255}, requested shape:{-1,256,1}\n"
+    },
+    {
+      "length": 128,
+      "metadata_only_edit": true,
+      "status": "failed",
+      "error": "[ONNXRuntimeError] : 6 : RUNTIME_EXCEPTION : Non-zero status code returned while running Reshape node. Name:'bert/embeddings/ExpandDims' Status Message: /onnxruntime_src/onnxruntime/core/providers/cpu/tensor/reshape_helper.h:39 onnxruntime::ReshapeHelper::ReshapeHelper(const onnxruntime::TensorShape&, onnxruntime::TensorShapeVector&, bool) size != 0 && (input_shape_size % size) == 0 was false. The input tensor cannot be reshaped to the requested shape. Input shape:{1,128}, requested shape:{-1,256,1}\n"
+    },
+    {
+      "length": 41,
+      "metadata_only_edit": true,
+      "status": "failed",
+      "error": "[ONNXRuntimeError] : 6 : RUNTIME_EXCEPTION : Non-zero status code returned while running Reshape node. Name:'bert/embeddings/ExpandDims' Status Message: /onnxruntime_src/onnxruntime/core/providers/cpu/tensor/reshape_helper.h:39 onnxruntime::ReshapeHelper::ReshapeHelper(const onnxruntime::TensorShape&, onnxruntime::TensorShapeVector&, bool) size != 0 && (input_shape_size % size) == 0 was false. The input tensor cannot be reshaped to the requested shape. Input shape:{1,41}, requested shape:{-1,256,1}\n"
+    }
+  ],
+  "onnxruntime": "1.23.2",
+  "harness_commit": "unavailable",
+  "verdict": "NOT_SUPPORTED: official artifact has length-specific internal constants; spec \u00a74.4 step 2 (re-export from the same weights) required"
+}

@@ -1,0 +1,259 @@
+{
+  "role": "dev",
+  "note": "development environment: functional checks only, not a controlled measurement VM (spec \u00a75.1)",
+  "collected_unix": 1790585185.0237687,
+  "harness_commit": "unavailable",
+  "vm": {
+    "provider": "unavailable",
+    "region": "unavailable",
+    "instance_type": "unavailable",
+    "allocation_id": "unavailable",
+    "allocation_created": "unavailable",
+    "vcpus": 4,
+    "mem_total": "MemTotal:       16481900 kB",
+    "lscpu": {
+      "Architecture": "x86_64",
+      "CPU op-mode(s)": "32-bit, 64-bit",
+      "Address sizes": "52 bits physical, 57 bits virtual",
+      "Byte Order": "Little Endian",
+      "CPU(s)": "4",
+      "On-line CPU(s) list": "0-3",
+      "Vendor ID": "GenuineIntel",
+      "Model name": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+      "CPU family": "6",
+      "Model": "207",
+      "Thread(s) per core": "1",
+      "Core(s) per socket": "4",
+      "Socket(s)": "1",
+      "Stepping": "2",
+      "BogoMIPS": "4200.00",
+      "Flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 arch_capabilities",
+      "Hypervisor vendor": "KVM",
+      "Virtualization type": "full",
+      "L1d cache": "192 KiB (4 instances)",
+      "L1i cache": "128 KiB (4 instances)",
+      "L2 cache": "8 MiB (4 instances)",
+      "L3 cache": "260 MiB (1 instance)",
+      "NUMA node(s)": "1",
+      "NUMA node0 CPU(s)": "0-3",
+      "Vulnerability Gather data sampling": "Not affected",
+      "Vulnerability Ghostwrite": "Not affected",
+      "Vulnerability Indirect target selection": "Not affected",
+      "Vulnerability Itlb multihit": "Not affected",
+      "Vulnerability L1tf": "Not affected",
+      "Vulnerability Mds": "Not affected",
+      "Vulnerability Meltdown": "Not affected",
+      "Vulnerability Mmio stale data": "Not affected",
+      "Vulnerability Old microcode": "Not affected",
+      "Vulnerability Reg file data sampling": "Not affected",
+      "Vulnerability Retbleed": "Not affected",
+      "Vulnerability Spec rstack overflow": "Not affected",
+      "Vulnerability Spec store bypass": "Mitigation; Speculative Store Bypass disabled via prctl",
+      "Vulnerability Spectre v1": "Mitigation; usercopy/swapgs barriers and __user pointer sanitization",
+      "Vulnerability Spectre v2": "Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI Vulnerable",
+      "Vulnerability Srbds": "Not affected",
+      "Vulnerability Tsa": "Not affected",
+      "Vulnerability Tsx async abort": "Not affected",
+      "Vulnerability Vmscape": "Not affected"
+    },
+    "numa": "NUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3",
+    "hypervisor": "Hypervisor vendor:                       KVM",
+    "virtualization": "docker",
+    "cpu_flags_avx": [
+      "avx",
+      "avx2",
+      "avx512_bf16",
+      "avx512_bitalg",
+      "avx512_fp16",
+      "avx512_vbmi2",
+      "avx512_vnni",
+      "avx512_vpopcntdq",
+      "avx512bw",
+      "avx512cd",
+      "avx512dq",
+      "avx512f",
+      "avx512ifma",
+      "avx512vbmi",
+      "avx512vl",
+      "avx_vnni"
+    ]
+  },
+  "os": {
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo",
+    "kernel": "6.18.44-fc-v42",
+    "glibc": "glibc 2.39",
+    "container_runtime": "docker",
+    "cgroup": {
+      "cgroup_self": "9:name=systemd:/\n8:pids:/\n7:blkio:/\n6:freezer:/\n5:devices:/\n4:memory:/process_api/01a0e707-891a-76c6-9078-d38fa36fa429/claude-code-bash\n3:cpuset:/\n2:cpuacct:/\n1:cpu:/\n0::/",
+      "cpu.max": "unavailable",
+      "memory.max": "unavailable",
+      "cpuset.cpus.effective": "unavailable",
+      "cpu.cfs_quota_us": "-1",
+      "cpu.cfs_period_us": "100000",
+      "memory.limit_in_bytes": "9223372036854771712",
+      "cpuset.cpus": "0-3"
+    },
+    "image_id": "unavailable",
+    "transparent_hugepage": "always [madvise] never"
+  },
+  "compiler": {
+    "pins": {
+      "ONNX_MLIR_REPO": "https://github.com/onnx/onnx-mlir.git",
+      "ONNX_MLIR_TAG": "v0.5.1.1",
+      "ONNX_MLIR_SHA": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b",
+      "LLVM_REPO": "https://github.com/llvm/llvm-project.git",
+      "LLVM_SHA": "1053047a4be7d1fece3adaf5e7597f838058c947",
+      "PROTOBUF_REPO": "https://github.com/protocolbuffers/protobuf.git",
+      "PROTOBUF_TAG": "v33.5"
+    },
+    "onnx_mlir_bin": "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+    "onnx_mlir_version": "not built",
+    "build_manifest": {
+      "onnx_mlir": {
+        "tag": "v0.5.1.1",
+        "sha": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b",
+        "checked_out": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b"
+      },
+      "llvm": {
+        "sha": "1053047a4be7d1fece3adaf5e7597f838058c947",
+        "checked_out": "not built"
+      },
+      "protobuf": {
+        "tag": "v33.5",
+        "prefix": "/usr/local"
+      },
+      "cc": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+      "cxx": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+      "cmake": "cmake version 3.28.3",
+      "ninja": "1.11.1",
+      "nproc_used": 4,
+      "link_jobs": 2,
+      "deviations": [
+        "LLVM: -DLLVM_USE_LINKER=lld and -DLLVM_PARALLEL_LINK_JOBS=2 (link speed/memory on a small VM)",
+        "LLVM/protobuf/onnx-mlir: shallow git fetch of the pinned SHA instead of a full clone",
+        "protobuf: python wheel from PyPI (protobuf==6.33.5) instead of a bazel build of the python package",
+        "python deps installed into a venv (/home/user/work/venv) instead of --prefix=/usr"
+      ],
+      "stage_logs": {
+        "protobuf.build.json": {
+          "label": "protobuf-build",
+          "cmd": [
+            "cmake",
+            "--build",
+            ".",
+            "--parallel",
+            "4"
+          ],
+          "cwd": "/home/user/work/protobuf/build",
+          "start_unix": 1790582876.645656,
+          "wall_ns": 261229377062,
+          "cpu_user_s": 955.009199,
+          "cpu_sys_s": 53.62428,
+          "max_rss_single_proc_kb": 486384,
+          "peak_system_mem_used_kb": 2970616,
+          "returncode": 0
+        }
+      },
+      "disk_usage": ""
+    },
+    "openmp_runtime": "not found",
+    "cc": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "gcc": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "matmul_lowering_path": "not yet determined (G0: needs a real compile)"
+  },
+  "python": {
+    "executable": "/home/user/work/venv/bin/python",
+    "version": "3.11.15 (main, Mar  3 2026, 09:26:23) [GCC 13.3.0]",
+    "venv_freeze": "coloredlogs==15.0.1\nexecnet==2.1.2\nflatbuffers==25.12.19\nhumanfriendly==10.0\niniconfig==2.3.0\nlit==15.0.7\nml_dtypes==0.6.0\nmpmath==1.3.0\nnumpy==2.2.6\nonnx==1.23.0\nonnxruntime==1.23.2\npackaging==26.3\npip==26.2.1\npluggy==1.6.0\nprotobuf==6.33.5\nPygments==2.21.0\npytest==9.0.2\npytest-xdist==3.8.0\nsetuptools==84.0.0\nsix==1.17.0\nsympy==1.14.0\ntyping_extensions==4.16.0"
+  },
+  "model": {
+    "artifacts": {
+      "bertsquad-12.onnx": {
+        "sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+        "url_used": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.onnx"
+      },
+      "bertsquad-12.tar.gz": {
+        "sha256": "4cd041010ab4ad11c23c0eb7f056c4e4286a894b6d712ef09445b955763fb1b1",
+        "url_used": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.tar.gz"
+      },
+      "run_onnx_squad.py": {
+        "sha256": "ba2f93aa9036866c266d281a3c7d51883a831ee8148b83c0d670ff2a521c93b3",
+        "url_used": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/run_onnx_squad.py"
+      },
+      "tokenization.py": {
+        "sha256": "2ca43665e813d8d45aad09db86bd0440bc38d56419d8c7121fae00c6fe270948",
+        "url_used": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/tokenization.py"
+      },
+      "vocab.txt": {
+        "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+        "url_used": "https://raw.githubusercontent.com/NVIDIA/DeepLearningExamples/729963dd47e7c8bd462ad10bfac7a7b0b604e6dd/PyTorch/LanguageModeling/BERT/vocab/vocab"
+      },
+      "dev-v1.1.json": {
+        "sha256": "95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9",
+        "url_used": "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset/dev-v1.1.json"
+      },
+      "evaluate_v1.1.py": {
+        "sha256": "72b7761f82ab8b844dc3a530e9c691c2419f0bf16d0b515015f6ca872f7618a5",
+        "url_used": "https://raw.githubusercontent.com/mlcommons/inference/3fbc329939999c13d0a7b5e67fb2092287e06047/language/bert/evaluate_v1.1.py"
+      },
+      "bert_modeling.py": {
+        "sha256": "6f5e7c2d157ef46c092f8bc0538e60775f9fa0d40f957c8a3529ead18ff4dded",
+        "url_used": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/modeling.py"
+      },
+      "bert_run_squad.py": {
+        "sha256": "163fd48c7f6b5135a29e25f2cbdae65dbff9697cbff41ce3ebd7d16fdf2ea230",
+        "url_used": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/run_squad.py"
+      }
+    },
+    "derived": {
+      "bertsquad-12-reexport-dynseq.onnx": {
+        "output_sha256": "b443d8dca3672930cbb81972fa6a085da7393d250ea563583c2e2f2dfd7e968d",
+        "source_sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+        "exporter": "tf2onnx 1.16.1",
+        "tensorflow": "2.15.1",
+        "opset": 12,
+        "label": "re-export of the ONNX Model Zoo bertsquad-12 weights (NOT the Model Zoo artifact)"
+      }
+    },
+    "preprocessing": {
+      "dataset_sha256": "95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9",
+      "vocab_sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+      "run_onnx_squad_sha256": "ba2f93aa9036866c266d281a3c7d51883a831ee8148b83c0d670ff2a521c93b3",
+      "tokenization_sha256": "2ca43665e813d8d45aad09db86bd0440bc38d56419d8c7121fae00c6fe270948",
+      "harness_commit": "unavailable",
+      "adaptations": [
+        "tensorflow not installed: tokenization.py's tf.gfile.GFile replaced by open(encoding='utf-8'); tokenizer logic unchanged"
+      ]
+    }
+  },
+  "execution": {
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "thread_env": {
+      "OMP_NUM_THREADS": "unset",
+      "OMP_PROC_BIND": "unset",
+      "OMP_PLACES": "unset",
+      "OMP_WAIT_POLICY": "unset"
+    },
+    "perf_counter": "namespace(implementation='clock_gettime(CLOCK_MONOTONIC)', monotonic=True, adjustable=False, resolution=1e-09)"
+  },
+  "state": {
+    "loadavg": [
+      5.37060546875,
+      5.5068359375,
+      4.87841796875
+    ],
+    "swap": "SwapTotal:             0 kB\nSwapFree:              0 kB",
+    "cpu_total_steal_ticks": 231,
+    "governors": "unavailable",
+    "intel_pstate_no_turbo": "unavailable",
+    "boost": "unavailable",
+    "smt_active": "0",
+    "thermal_throttle_core_count_cpu0": "unavailable",
+    "running_processes_top": "%CPU COMMAND\n99.8 python\n74.7 clang++\n65.8 clang++\n64.9 clang++\n64.1 clang++\n28.2 python\n 2.4 claude"
+  }
+}

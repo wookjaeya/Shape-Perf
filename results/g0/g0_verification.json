@@ -1,5 +1,5 @@
 {
-  "harness_commit": "8ca6ddf5695f8b1e5747517b32222240dae919c0-dirty",
+  "harness_commit": "df327fda808c7b410f534805b397d7b2b3aea70a-dirty",
   "onnx_mlir_version": "onnx-mlir version 0.5.1, onnx version 1.21.0 (https://github.com/onnx/onnx-mlir 1e017c9fcd7ae7218731ae799f13a957e0cbc80b)\nLLVM version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)\nOptimized build with assertions.\nDefault target: x86_64-unknown-linux-gnu\nHost CPU: emeraldrapids",
   "compiler_commit": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b",
   "llvm_commit": "1053047a4be7d1fece3adaf5e7597f838058c947",
@@ -26,9 +26,9 @@
       "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
     ],
     "failure_type": null,
-    "compile_wall_ns": 78489316473,
-    "cpu_user_s": 67.021967,
-    "peak_rss_bytes": 2768609280,
+    "compile_wall_ns": 80116058715,
+    "cpu_user_s": 69.940447,
+    "peak_rss_bytes": 2787508224,
     "artifact_hash": "b8529c683e6ac7a0532ef1ba4cb76281d5b002db6680e6f1f07b6a08d3841926",
     "artifact_bytes": 435165416,
     "constants_files": [],
@@ -104,8 +104,8 @@
   },
   "probe_compile": {
     "failure_type": null,
-    "probe_wall_ns": 7743590891,
-    "peak_rss_bytes": 942182400,
+    "probe_wall_ns": 7658361841,
+    "peak_rss_bytes": 943128576,
     "ir_signature": "b741b410095a0717",
     "ir_structure_signature": "4353b37c3c2fe944",
     "entry_signature": [
@@ -303,13 +303,12 @@
       "returncode": 0,
       "vl_histogram": {
         "applied=False,VL=0": 127,
-        "applied=None,VL=None": 1,
         "applied=True,VL=16": 81,
-        "applied=True,VL=32": 345,
+        "applied=True,VL=32": 346,
         "applied=True,VL=8": 28
       },
-      "n_simd_applied": 454,
-      "report_signature": "9ea443221261862b",
+      "n_simd_applied": 455,
+      "report_signature": "b741b410095a0717",
       "stderr_tail": null
     },
     "march=unset": {
@@ -326,13 +325,12 @@
       ],
       "returncode": 0,
       "vl_histogram": {
-        "applied=False,VL=0": 407,
-        "applied=None,VL=None": 1,
+        "applied=False,VL=0": 408,
         "applied=True,VL=16": 69,
         "applied=True,VL=8": 28
       },
       "n_simd_applied": 97,
-      "report_signature": "9eff52ca106bb462",
+      "report_signature": "f5bb010090e2c622",
       "stderr_tail": null
     },
     "march=native": {
@@ -349,13 +347,12 @@
       ],
       "returncode": 0,
       "vl_histogram": {
-        "applied=False,VL=0": 407,
-        "applied=None,VL=None": 1,
+        "applied=False,VL=0": 408,
         "applied=True,VL=16": 69,
         "applied=True,VL=8": 28
       },
       "n_simd_applied": 97,
-      "report_signature": "dd0f018fcb5dad5a",
+      "report_signature": "f5bb010090e2c622",
       "stderr_tail": null
     }
   }

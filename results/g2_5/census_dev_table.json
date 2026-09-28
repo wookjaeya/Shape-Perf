@@ -230,6 +230,11 @@
   "missing_lengths": [],
   "corrupt_reports": [],
   "probe_ir_missing": [],
+  "signature_versions": [
+    "sig-v3"
+  ],
+  "raw_ir_kept": "changepoints",
+  "raw_ir_missing_for_changepoints": [],
   "n_failed": 0,
   "failed_lengths": [],
   "failure_boundaries": [],
@@ -2404,6 +2409,7 @@
       "B_align_size": 53,
       "C_sig_nonalign": [],
       "C_sig_nonalign_spans": [],
+      "C_sig_unresolved_spans": [],
       "C_ir_nonalign": [
         41,
         42,
@@ -2576,6 +2582,7 @@
       "B_align_size": 27,
       "C_sig_nonalign": [],
       "C_sig_nonalign_spans": [],
+      "C_sig_unresolved_spans": [],
       "C_ir_nonalign": [
         41,
         42,
@@ -2774,6 +2781,7 @@
       "B_align_size": 13,
       "C_sig_nonalign": [],
       "C_sig_nonalign_spans": [],
+      "C_sig_unresolved_spans": [],
       "C_ir_nonalign": [
         41,
         42,
@@ -2983,7 +2991,7 @@
   "preregistration": "unfrozen-preregistration(missing=['selectors.shape_only_alignment_units'])",
   "H1_verdict": "units not preregistered - no H1 verdict",
   "matmul_path": "not available in probe mode (needs full compile: see results/g0)",
-  "probe_wall_ns_total": 596514101316,
-  "normalization": "shapeperf/signature.py NORMALIZATION_RULES[sig-v2]",
+  "probe_wall_ns_total": 588327322589,
+  "normalization": "shapeperf/signature.py NORMALIZATION_RULES[sig-v3]",
   "access": "evaluator only; selectors are blocked from this directory"
 }

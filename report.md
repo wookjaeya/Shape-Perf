@@ -8,6 +8,8 @@
 **범위와 조건.** 모델 A(`bertsquad-12`와 같은 가중치의 가변 길이 재수출본), batch 1, FP32, ONNX-MLIR v0.5.1.1(`1e017c9f`),
 flag set `default` = `-O3 --march=x86-64 --mcpu=emeraldrapids` + `--opt-report=Simd`, probe 단계(`--EmitMLIR`).
 유효 길이 41–256 전부(216개; 41은 anchor feature의 자연 길이). 컴파일 실패 0, 손상 보고 0, IR 누락 0.
+정규화 규칙 `sig-v3`(4차 검토 뒤 버전을 올려 전 길이를 다시 컴파일했고, `sig-v2` 표기로 먼저 얻은 결과와 같다).
+원문 probe IR은 변화점 길이(IR 구조 기준으로는 전 길이)마다 평가자 전용 `census/` 아래에 gzip으로 보관했다(583 MB, git 제외).
 개발 컨테이너에서 실행했고 사전등록은 고정되지 않았다. 컴파일 결정은 결정적이며, ONNX-MLIR는 `--march`가 주어지면
 자체 결정에 `--mcpu`를 쓰지 않는다(G0 경고 확인). 따라서 이 표는 측정 VM과 같을 가능성이 높지만, VM에서 확인하지는 않았다.
 

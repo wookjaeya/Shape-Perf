@@ -42,7 +42,7 @@
 
 ## G2.5 개발 census (2026-09-28, 개발 환경, 사전등록 미고정 — 결과 아님)
 
-설정: 모델 A 재수출본, flag set `default`(`-O3 --march=x86-64 --mcpu=emeraldrapids`, `--opt-report=Simd`), probe 단계(`--EmitMLIR`), 길이 41–256 전부(216개), 실패 0·손상 보고 0·IR 누락 0. probe 합계 597초(길이당 약 2.8초).
+설정: 모델 A 재수출본, flag set `default`(`-O3 --march=x86-64 --mcpu=emeraldrapids`, `--opt-report=Simd`), probe 단계(`--EmitMLIR`), 길이 41–256 전부(216개), 실패 0·손상 보고 0·IR 누락 0, 정규화 `sig-v3`(버전을 올린 뒤 다시 실행, 결과 동일). probe 합계 588초(길이당 약 2.7초). 원문 IR은 평가자 전용 `census/`에 보관.
 
 - **opt-report signature(주 signature)**: 216개 길이 모두 같다. 노드 이름을 빼고 (연산, 적용 여부, 사유, VL) 다중집합으로 비교해도 1종류 — 정규화가 차이를 지운 것이 아니다. 길이마다 582개 보고, 바뀌는 것은 trip count뿐(설계상 제외). trip count가 L인 77개 보고(LayerNorm류 요소별 연산)는 모든 L에서 VL 32로 SIMD 적용. "small j trip count" 미적용 1건은 출력 2개짜리 마지막 Gemm(길이 무관). 즉 이 컴파일러에서 SIMD 결정은 L ≥ 41에서 길이와 무관하다(명세 §1.2 마지막 문단이 예상한 경우). ONNX-MLIR는 `--march`가 있으면 자체 결정에 `--mcpu`를 쓰지 않으므로 측정 VM에서도 같을 가능성이 높다(VM에서 재확인 필요).
 - **IR 구조 signature(보조, 사전 정의됨)**: 215개 인접 경계 모두 변화. 바뀌는 특징 25개 중 21개는 L의 주기 4·8·32 함수(나머지 루프 처리 = 정렬). `affine.load/store/apply` 3개는 L의 약수 여부로 결정된다: 12개 층마다 있는 4차원 transpose 루프(trip count L)가 L이 작은 수(예: 7)로 나누어지면 그 수로 unroll된다(L=41 소수는 unroll 없음, L=49는 step 7). `arith.constant`는 단순 규칙 없음(L 값 자체가 상수로 들어감).

@@ -44,7 +44,7 @@
     "features_per_event_justification": null
   },
   "signature": {
-    "version": "sig-v2",
+    "version": "sig-v3",
     "primary": "opt-report",
     "probe_stage": null
   },

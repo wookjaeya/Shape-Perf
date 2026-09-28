@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Freeze configs/preregistration.json (spec §10.2 step 4). Refuses while any
-value in the listed sections is null. After freezing, any edit changes the
+value in any section is null. After freezing, any edit changes the
 content hash and main-phase scripts refuse to run until it is re-frozen - which
 must then be reported as a deviation in report.md."""
 import json
@@ -10,7 +10,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shapeperf import prereg  # noqa: E402
 
-SECTIONS = ["correctness", "measurement", "events", "selectors", "signature"]
 
 
 def nulls(d, prefix=""):
@@ -27,7 +26,9 @@ def nulls(d, prefix=""):
 
 def main():
     p = prereg.load()
-    missing = [n for s in SECTIONS for n in nulls(p[s], s + ".")]
+    # every section, so sections added later (e.g. 'replication') are covered too
+    missing = [n for s, v in p.items() if isinstance(v, dict) and not s.startswith("_")
+               for n in nulls(v, s + ".")]
     if missing:
         sys.exit("cannot freeze, unfixed values:\n  " + "\n  ".join(missing))
     p["frozen"] = True

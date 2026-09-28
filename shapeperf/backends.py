@@ -89,12 +89,14 @@ class ReplayBackend:
     def measure(self, s):
         d = self.dense[s]
         if d.get("failure_type"):
+            # extract/report/init are present only when the compile itself succeeded (dense_table)
             return {"failure_type": d["failure_type"], "compile_ns": d.get("compile_ns", 0),
-                    "extract_ns": d.get("extract_ns", 0) if d.get("compile_ns") else 0,
-                    "verify_ns": d.get("verify_ns", 0)}
+                    "extract_ns": d.get("extract_ns", 0), "report_ns": d.get("report_ns", 0),
+                    "signature_init_ns": d.get("signature_init_ns", 0), "verify_ns": d.get("verify_ns", 0)}
         p = d["processes"][int(self.rng.integers(len(d["processes"])))]
         base = {"compile_ns": d["compile_ns"], "extract_ns": d.get("extract_ns", 0),
-                "report_ns": d.get("report_ns", 0), "verify_ns": d.get("verify_ns", 0)}
+                "report_ns": d.get("report_ns", 0), "signature_init_ns": d.get("signature_init_ns", 0),
+                "verify_ns": d.get("verify_ns", 0)}
         if p.get("failure_type"):
             return {**base, "failure_type": f"runtime:{p['failure_type']}", "measure_ns": p.get("wall_ns", 0)}
         return {**base, "latency_ns": p["median_ns"], "signature": usable_signature(d.get("signature")),
@@ -108,7 +110,8 @@ class ReplayBackend:
         if d.get("probe_failure_type"):
             return {"failure_type": d["probe_failure_type"], "probe_ns": d.get("probe_ns", 0)}
         return {"signature": usable_signature(d.get("probe_signature")), "probe_ns": d["probe_ns"],
-                "extract_ns": d.get("probe_extract_ns", 0)}
+                "extract_ns": d.get("probe_extract_ns", 0),
+                "signature_init_ns": d.get("probe_signature_init_ns", 0)}
 
     def confirm(self, a, b):
         ok = bool(self.confirm_fn(a, b)) if self.confirm_fn else False
@@ -150,7 +153,8 @@ class LiveBackend:
         from .measure import run_item, worker_env
         d = self._dir("measure", s)
         c = compile_shape(self.model_key, s, self.flagset, self.target_cpu, "full", d)
-        out = {"compile_ns": c["compile_wall_ns"], "extract_ns": c.get("feature_extract_wall_ns", 0)}
+        out = {"compile_ns": c["compile_wall_ns"], "extract_ns": c.get("feature_extract_wall_ns", 0),
+               "signature_init_ns": c.get("node_names_load_ns", 0)}
         if c.get("failure_type"):
             out["failure_type"] = c["failure_type"]
             return out
@@ -198,7 +202,8 @@ class LiveBackend:
         if c.get("failure_type"):
             return {"failure_type": c["failure_type"], "probe_ns": c["probe_wall_ns"]}
         return {"signature": usable_signature(c.get("ir_signature")), "probe_ns": c["probe_wall_ns"],
-                "extract_ns": c.get("feature_extract_wall_ns", 0)}
+                "extract_ns": c.get("feature_extract_wall_ns", 0),
+                "signature_init_ns": c.get("node_names_load_ns", 0)}
 
     def confirm(self, a, b):
         raise NotImplementedError("live confirmation procedure is fixed at G3/G4 (preregistration)")

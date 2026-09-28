@@ -227,8 +227,9 @@ def check_independent(discovery_records, confirmation_records, require_new_alloc
             the per-process run_id; records without it make run identity
             'unverified' (callers refuse that for frozen runs)
     order : the block seeds that fix the process order within blocks
-    allocation: a missing vm_allocation_id is the allocation 'unavailable' on
-            both sides, i.e. shared (it is analysed as one allocation)"""
+    allocation: a missing/empty vm_allocation_id is 'unavailable' (as in
+            block_table). When a new allocation is required, 'unavailable' on
+            EITHER side fails: an unknown allocation cannot be shown to be new"""
     def ids(recs, key, missing=None):
         out = set()
         for r in recs:
@@ -242,8 +243,10 @@ def check_independent(discovery_records, confirmation_records, require_new_alloc
     d_runs, c_runs = ids(discovery_records, "g4_run_id"), ids(confirmation_records, "g4_run_id")
     shared_runs = d_runs & c_runs
     shared_seeds = ids(discovery_records, "seed") & ids(confirmation_records, "seed")
-    shared_alloc = (ids(discovery_records, "vm_allocation_id", "unavailable")
-                    & ids(confirmation_records, "vm_allocation_id", "unavailable"))
+    def allocs(recs):
+        return {r.get("vm_allocation_id") or "unavailable" for r in recs}
+    d_alloc, c_alloc = allocs(discovery_records), allocs(confirmation_records)
+    shared_alloc = d_alloc & c_alloc
     wrong_role = sorted({r.get("g4_role") for r in confirmation_records if r.get("g4_role") not in (None, "confirmation")}
                         | {str(r.get("experiment_phase")) for r in confirmation_records
                            if str(r.get("experiment_phase", "")).startswith("g4-discovery")})
@@ -258,9 +261,11 @@ def check_independent(discovery_records, confirmation_records, require_new_alloc
         problems.append(f"confirmation records labelled {wrong_role[:3]}")
     if problems:
         raise ValueError("confirmation data are not independent: " + "; ".join(problems))
+    if require_new_allocation and "unavailable" in d_alloc | c_alloc:
+        raise ValueError("a new VM allocation is required but some records have no vm_allocation_id "
+                         "('unavailable'), so the allocations cannot be shown to differ")
     if require_new_allocation and shared_alloc:
-        raise ValueError(f"confirmation shares VM allocation(s) {sorted(shared_alloc)} with discovery "
-                         "(records without vm_allocation_id count as the shared allocation 'unavailable')")
+        raise ValueError(f"confirmation shares VM allocation(s) {sorted(shared_alloc)} with discovery")
     no_run_id = (any(r.get("g4_run_id") is None for r in discovery_records)
                  or any(r.get("g4_run_id") is None for r in confirmation_records))
     return {"shared_allocations": sorted(shared_alloc),
@@ -344,43 +349,52 @@ def alternative_indicators(default_table, alt_table, valid, conf_level):
             "note": "R>1: the alternative is faster at s; Q: change of R across the boundary (spec §9.1)"}
 
 
-def natural_weighted_impact(mean_ns_by_len, event_pairs, length_freq, valid):
+def natural_weighted_impact(select_means, eval_means, event_pairs, length_freq, valid):
     """Spec §11.1 secondary, descriptive: natural-length-weighted avoidable
-    padding excess.
+    padding excess, cross-fitted.
 
     A feature of natural length L can run at any valid padded length s >= L.
-    excess(L) = T(L) / min_{s >= L, measured} T(s) - 1 is the latency it loses by
-    running at L instead of the best longer padding (0 when L itself is best).
-    The total weights excess(L) by the SQuAD natural-length frequency. The part
-    'across confirmed events' counts lengths whose best padding lies across a
-    confirmed event boundary (s < t with L <= s < t <= best). Uses per-shape
-    means (pass the independent confirmation data to avoid selection bias).
-    This is a property of the SQuAD preprocessing distribution, not a service
-    effect. Returns 'unavailable' without a frequency catalog."""
+    The best padding best(L) = argmin_{s >= L} T_select(s) is chosen on one data
+    set (discovery) and the excess T_eval(L) / T_eval(best(L)) - 1 is evaluated
+    on the other (independent confirmation), so noise in the minimum does not
+    make the excess positive by construction; the estimate can be negative. The
+    total weights it by the SQuAD natural-length frequency over lengths in the
+    valid set that both data sets measured. The part 'across confirmed events'
+    counts lengths whose best padding lies across a confirmed event boundary
+    (L <= s < t <= best). A point estimate without an interval; a property of
+    the SQuAD preprocessing distribution, not a service effect. Returns
+    'unavailable' without a frequency catalog."""
     if not length_freq:
         return {"status": "unavailable (no natural-length frequency catalog)"}
     freq = {int(k): v for k, v in length_freq.items()}
     n = sum(freq.values())
-    meas = {int(k): float(v) for k, v in mean_ns_by_len.items() if v is not None}
-    valid = sorted(int(v) for v in valid)
+    vs = sorted(int(v) for v in valid)
+    vset = set(vs)
+
+    def restrict(m):
+        return {int(k): float(v) for k, v in m.items() if v is not None and int(k) in vset}
+    sel, ev = restrict(select_means), restrict(eval_means)
     rows, tot, tot_ev, covered = [], 0.0, 0.0, 0
     for L in sorted(freq):
-        if L not in meas:
+        if L not in sel or L not in ev:
             continue
-        cand = [s for s in valid if s >= L and s in meas]
-        best = min(cand, key=lambda s: (meas[s], s))
-        ex = meas[L] / meas[best] - 1.0
+        cand = [s for s in vs if s >= L and s in sel and s in ev]
+        if not cand:
+            continue
+        best = min(cand, key=lambda s: (sel[s], s))
+        ex = ev[L] / ev[best] - 1.0
         w = freq[L] / n if n else 0.0
-        across = any(L <= a and b <= best for a, b in event_pairs)
+        across = best > L and any(L <= a and b <= best for a, b in event_pairs)
         covered += freq[L]
         tot += w * ex
         tot_ev += w * ex if across else 0.0
-        if ex > 0:
+        if best != L:
             rows.append({"L": L, "best_padding": best, "excess": ex, "freq": freq[L],
                          "across_confirmed_event": across})
-    return {"status": "ok", "definition": "sum_L freq(L)/N * (T(L)/min_{s>=L} T(s) - 1)",
+    return {"status": "ok", "definition": "sum_L freq(L)/N * (T_conf(L)/T_conf(argmin_{s>=L} T_disc(s)) - 1)",
             "total_weighted_excess": tot, "weighted_excess_across_confirmed_events": tot_ev,
-            "frequency_covered": covered / n if n else None, "lengths_with_excess": rows}
+            "frequency_covered": covered / n if n else None, "lengths_with_other_best_padding": rows,
+            "note": "descriptive point estimate (cross-fitted), no interval"}
 
 
 # ---------------------------------------------------------------------------

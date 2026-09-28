@@ -98,10 +98,18 @@ def _jail(jail_dir, keep_fds):
     return ("partial:" + "+".join(parts)) if parts else "audit-only (jail failed)"
 
 
+# modules a test-only class_path module may have imported for it before the
+# jail: the selectors' own allow-list (tests/test_isolation.py) plus what the
+# test selectors need. Nothing is derived from the module text alone, so no
+# other module's import-time code runs unjailed.
+PREIMPORT_ALLOWED = {"__future__", "math", "bisect", "dataclasses", "types", "typing", "collections",
+                     "functools", "itertools", "os", "pathlib", "numpy",
+                     "shapeperf.selectors", "shapeperf.selectors.base", "shapeperf.selectors.policies"}
+
+
 def _preimport_dependencies(text):
-    """Import, before the jail, the standard-library and shapeperf modules that
-    a class_path module imports (the jail has no file system to import from).
-    Nothing else is imported: other modules would run their code unjailed."""
+    """Import, before the jail, the allow-listed modules a class_path module
+    imports (the jail has no file system to import from)."""
     import ast
     import importlib
     names = set()
@@ -110,10 +118,32 @@ def _preimport_dependencies(text):
             names |= {a.name for a in node.names}
         elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
             names.add(node.module)
+            names |= {f"{node.module}.{a.name}" for a in node.names}
     for n in sorted(names):
-        top = n.split(".")[0]
-        if top in sys.stdlib_module_names or top == "shapeperf":
+        if n in PREIMPORT_ALLOWED or n.startswith("numpy."):
             importlib.import_module(n)
+
+
+def _locate(mod):
+    """Module spec of a dotted class_path WITHOUT importing its parents (a
+    parent's __init__ would run unjailed). Parents must be namespace packages
+    or already imported."""
+    import importlib.machinery
+    parts = mod.split(".")
+    path = None
+    for i, part in enumerate(parts):
+        spec = importlib.machinery.PathFinder.find_spec(part, path)
+        if spec is None:
+            raise ModuleNotFoundError(f"class_path module {mod!r} not found")
+        name = ".".join(parts[:i + 1])
+        if i < len(parts) - 1:
+            if spec.origin is not None and name not in sys.modules:
+                raise RuntimeError(f"class_path parent {name!r} is a regular package: its __init__ would "
+                                   "run outside the jail (use a namespace package or a top-level module)")
+            path = spec.submodule_search_locations
+    if spec.origin is None or not spec.origin.endswith(".py"):
+        raise RuntimeError(f"class_path module {mod!r} must be a single .py file")
+    return spec
 
 
 def _plain_action(a):
@@ -145,21 +175,22 @@ def main():
         if first.get("class_path"):          # test-only: selectors outside the registry
             if os.environ.get("SHAPEPERF_ALLOW_CLASS_PATH") != "1":
                 raise RuntimeError("class_path selectors are test-only (set SHAPEPERF_ALLOW_CLASS_PATH=1)")
-            import importlib.util
             mod, qual = first["class_path"].split(":")
-            spec = importlib.util.find_spec(mod)
+            spec = _locate(mod)
             with open(spec.origin) as f:
-                src = (mod, qual, spec.origin, f.read())
+                src = (mod, qual, spec, f.read())
             _preimport_dependencies(src[3])
         elif klass is None:
             raise KeyError(f"unknown selector {first['name']!r}")
         level = _jail(jail_dir, {req_fd, rep_fd})
         if src is not None:
             # the module's top-level code runs jailed (no file system, no network)
-            mod, qual, origin, text = src
-            ns = {"__name__": mod, "__file__": origin}
-            exec(compile(text, origin, "exec"), ns)
-            klass = ns[qual.split(".")[0]]
+            import importlib.util
+            mod, qual, spec, text = src
+            module = importlib.util.module_from_spec(spec)      # __spec__, __package__, __file__ set
+            sys.modules[mod] = module                           # e.g. dataclasses looks it up
+            exec(compile(text, spec.origin, "exec"), module.__dict__)
+            klass = getattr(module, qual.split(".")[0])
             for part in qual.split(".")[1:]:
                 klass = getattr(klass, part)
             level += "+test-class"
@@ -172,7 +203,7 @@ def main():
     except SelectorIsolationError as e:
         reply({"seq": seq, "ok": False, "error": str(e), "isolation": True})
         return
-    except Exception as e:
+    except BaseException as e:            # SystemExit from selector code is reported, not fatal
         reply({"seq": seq, "ok": False, "error": f"{type(e).__name__}: {e}", "isolation": False})
         return
 

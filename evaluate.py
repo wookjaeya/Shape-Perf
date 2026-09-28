@@ -129,11 +129,13 @@ def cmd_answer_table(a):
            "per_shape": {"discovery": E.per_shape_summary(disc_recs, stat),
                          "confirmation": E.per_shape_summary(conf_recs, stat)},
            "by_delta": {}}
+    disc_means = {int(k): v["mean_ns"] for k, v in out["per_shape"]["discovery"].items()}
     conf_means = {int(k): v["mean_ns"] for k, v in out["per_shape"]["confirmation"].items()}
     for d in deltas:
         tab = E.answer_table_a(valid, disc, conf, d, alpha, conf_level, flop_cfg=flop_cfg,
                                reps=ev.get("bootstrap_reps_descriptive_ci") or 0, seed=0, **kw)
-        tab["natural_length_weighted_impact"] = E.natural_weighted_impact(conf_means, tab["event_pairs"], freq, valid)
+        tab["natural_length_weighted_impact"] = E.natural_weighted_impact(disc_means, conf_means, tab["event_pairs"],
+                                                                         freq, valid)
         out["by_delta"][str(d)] = {"answer_table_A": tab}
     write_json(a.out, out)
     primary = out["by_delta"][str(delta)]["answer_table_A"]
@@ -174,9 +176,16 @@ def census_integrity(table):
         probs.append(f"probe IR missing {table['probe_ir_missing'][:5]}")
     if str(table.get("H1_verdict", "")).startswith("INCOMPLETE"):
         probs.append(table["H1_verdict"])
-    for k in ("C_sig", "C_ir_structure", "C_raw"):
+    for k in ("C_sig", "C_ir_structure", "C_raw", "C_sig_spans", "C_ir_structure_spans", "C_raw_spans",
+              "probe_ir_missing", "signature_versions"):
         if k not in table:
             probs.append(f"{k} absent (older census format)")
+    from shapeperf.signature import SIG_VERSION
+    vers = table.get("signature_versions") or []
+    if vers and vers != [SIG_VERSION]:
+        probs.append(f"signature versions {vers} (current {SIG_VERSION})")
+    if table.get("raw_ir_missing_for_changepoints"):
+        probs.append(f"raw IR missing for change-point lengths {table['raw_ir_missing_for_changepoints'][:5]}")
     return probs
 
 
@@ -204,7 +213,7 @@ def cmd_census(a):
         res["WARNING"] = "census table incomplete - metrics are NOT valid results"
 
     def spans(key):
-        sp = table.get(key + "_spans")
+        sp = table.get(key + "_spans")       # an older table without spans is flagged by census_integrity
         return sp if sp is not None else table.get(key, [])
     for d, blk in at["by_delta"].items():
         e_a = blk["answer_table_A"]["events"]
@@ -226,20 +235,34 @@ def _proc_wall(r):
     return w
 
 
+def compiled_ok(failure_type):
+    """The full compile itself succeeded (a correctness failure comes after it)."""
+    return not failure_type or str(failure_type).startswith("correctness:")
+
+
 def dense_table(valid, compile_recs, meas_recs, census_recs, stat, report_ns, flagset="default"):
     """Per valid length: recorded costs + recorded process attempts (for
     ReplayBackend), for ONE flag set. Lengths without a compile record are
-    failures ('not_compiled'). Failed process attempts are kept (their wall
-    time is charged when replayed, spec §8.4 'failed attempts'). report_ns is
-    attached only to successful compiles."""
+    'not_compiled', compiled lengths without measurement records
+    'no_measurement' (both mean the inputs are partial; compare refuses them in
+    frozen runs). Failed process attempts are kept (their wall time is charged
+    when replayed, spec §8.4 'failed attempts'). report_ns is attached to every
+    compile that succeeded, including ones that later failed the correctness
+    check. signature_init_ns is the one-time node-name load that only
+    signature-consuming policies need (charged once per run by the broker)."""
     dense = {s: {"failure_type": "not_compiled", "compile_ns": 0, "processes": []} for s in valid}
-    for c in compile_recs:
+    comp = [c for c in compile_recs if c.get("flagset", "default") == flagset]
+    init_full = max([c.get("node_names_load_ns") or 0 for c in comp] or [0])
+    init_probe = max([r.get("node_names_load_ns") or 0 for r in census_recs] or [0])
+    for c in comp:
         s = c["padded_length"]
-        if s not in dense or c.get("flagset", "default") != flagset:
+        if s not in dense:
             continue
-        dense[s] = {"compile_ns": c.get("compile_wall_ns") or 0, "extract_ns": c.get("feature_extract_wall_ns") or 0,
+        ok = compiled_ok(c.get("failure_type"))
+        dense[s] = {"compile_ns": c.get("compile_wall_ns") or 0,
+                    "extract_ns": (c.get("feature_extract_wall_ns") or 0) if ok else 0,
                     "verify_ns": c.get("verify_wall_ns") or 0, "signature": c.get("ir_signature"),
-                    "report_ns": 0 if c.get("failure_type") else report_ns,
+                    "report_ns": report_ns if ok else 0, "signature_init_ns": init_full if ok else 0,
                     "failure_type": c.get("failure_type"), "processes": []}
     for r in meas_recs:
         s = r["padded_length"]
@@ -259,7 +282,9 @@ def dense_table(valid, compile_recs, meas_recs, census_recs, stat, report_ns, fl
             probe_cov.add(s)
             dense[s]["probe_ns"] = r.get("probe_wall_ns") or 0
             dense[s]["probe_extract_ns"] = r.get("feature_extract_wall_ns") or 0
-            dense[s]["probe_ablation_extract_ns"] = r.get("ablation_extract_wall_ns") or 0
+            dense[s]["probe_signature_init_ns"] = init_probe
+            dense[s]["probe_ir_structure_extract_ns"] = r.get("ir_structure_extract_wall_ns") or 0
+            dense[s]["probe_raw_ir_extract_ns"] = r.get("raw_ir_extract_wall_ns") or 0
             dense[s]["probe_signature"] = r.get("ir_signature")
             dense[s]["probe_signature_ir"] = r.get("ir_structure_signature")
             dense[s]["probe_signature_raw"] = r.get("raw_ir_hash")
@@ -284,18 +309,23 @@ def confirmation_costs(conf_recs, flagset="default"):
 class _SigKeyReplay(ReplayBackend):
     """Ablation 11.2-3: Compile-probe driven by another probe signature field."""
 
+    COST_KEY = {"probe_signature_ir": "probe_ir_structure_extract_ns",
+                "probe_signature_raw": "probe_raw_ir_extract_ns"}
+
     def __init__(self, dense, seed, key, **kw):
         super().__init__(dense, seed, **kw)
         self.key = key
 
     def probe(self, s):
-        """The ablation signature needs the probe IR: its extraction cost is
-        charged, and a missing IR value is an extraction failure."""
+        """The ablation signature comes from the probe IR: it is charged its own
+        extraction (IR read + that signature) instead of the opt-report parse,
+        needs no node names, and a missing IR value is an extraction failure."""
         r = super().probe(s)
         if not r.get("failure_type"):
             v = self.dense[s].get(self.key)
             r["signature"] = v if v is not None else "FAILED:probe_ir_missing"
-            r["extract_ns"] = r.get("extract_ns", 0) + (self.dense[s].get("probe_ablation_extract_ns") or 0)
+            r["extract_ns"] = self.dense[s].get(self.COST_KEY[self.key]) or 0
+            r["signature_init_ns"] = 0
         return r
 
 
@@ -331,8 +361,14 @@ def cmd_compare(a):
     if label.startswith("frozen") and probe_missing:
         raise SystemExit(f"frozen comparison needs a complete census (Compile-probe is a preregistered policy); "
                          f"no probe data for {probe_missing[:5]}")
+    partial = sorted(s for s, d in dense.items() if d["failure_type"] in ("not_compiled", "no_measurement"))
+    if partial and label.startswith("frozen"):
+        raise SystemExit(f"partial inputs: no compile or no measurement records for lengths {partial[:5]} "
+                         "(a complete G4 run has both for every valid length)")
     conf_cost = confirmation_costs(_load(a.confirmation_measurements), flagset)
-    no_conf = [s for s in valid if s not in conf_cost]
+    # a confirmation can only involve lengths that were measured successfully
+    need = [s for s in valid if any("median_ns" in p for p in dense[s]["processes"])]
+    no_conf = [s for s in need if s not in conf_cost]
     if no_conf and label.startswith("frozen"):
         raise SystemExit(f"confirmation data missing for lengths {no_conf[:5]}")
     variants = [(n, {}, None) for n in REGISTRY]
@@ -353,6 +389,7 @@ def cmd_compare(a):
         runs_path.unlink()
     out = {"preregistration": label, "harness_commit": git_head(), "valid_lengths": valid, "flagset": flagset,
            "skipped_variants": skipped, "seeds": seeds, "budgets_ns": budgets,
+           "partial_input_lengths": partial, "confirmation_data_missing": no_conf,
            "confirmation_cost": "wall time of all confirmation-run process attempts at both endpoints",
            "report_overhead_ns": report_ns, "runs_file": str(runs_path), "by_delta": {},
            "note": "ReplayBackend charges recorded real costs; common vs policy-extra costs are split per entry"}

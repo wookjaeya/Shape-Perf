@@ -26,7 +26,8 @@ def _meas(seed, step_at, lengths, blocks=3, procs=2):
             base = 1e6 * (1 + 0.01 * s) * (1.5 if s >= step_at else 1.0)
             for k in range(procs):
                 out.append({"padded_length": s, "block_id": f"{seed}-b{b}", "vm_allocation_id": f"vm{seed}",
-                            "run_id": f"r{seed}-{b}-{s}-{k}",
+                            "run_id": f"r{seed}-{b}-{s}-{k}", "g4_run_id": f"g4-{seed}", "seed": seed * 1000 + b,
+                            "g4_role": "discovery" if seed == 1 else "confirmation",
                             "latency_ns": (base * np.exp(rng.normal(0, 0.005, 10))).tolist(),
                             "failure_type": None, "warmup_wall_ns": 1e6, "measurement_wall_ns": 1e7})
     return out
@@ -168,3 +169,43 @@ def test_compare_refuses_measurements_without_compile_records(synthetic):
              "--confirmation-measurements", str(t / "c.jsonl"), "--answer-table", str(t / "at.json"),
              "--out", str(t / "x.json"), ok=False)
     assert p.returncode != 0 and "without compile records" in p.stderr
+
+
+def _frozen(tmp_path):
+    """A complete, frozen scratch preregistration (never the repository's)."""
+    from shapeperf import prereg
+    env = _prereg(tmp_path)
+    pre = json.loads(Path(env["SHAPEPERF_PREREG"]).read_text())
+    pre["events"].update(direction="two-sided", min_blocks_per_pair=2, min_allocations_per_pair=1,
+                         min_allocations_confirmation=1, confirmation_requires_new_allocation=True)
+    pre["frozen"], pre["frozen_sha256"] = True, None
+    pre["frozen_sha256"] = prereg.content_hash(pre)
+    Path(env["SHAPEPERF_PREREG"]).write_text(json.dumps(pre))
+    return env
+
+
+def _run_frozen(env, *args, ok=True):
+    p = subprocess.run([sys.executable, str(ROOT / "evaluate.py"), *args], capture_output=True, text=True,
+                       cwd=ROOT, env=env)
+    if ok:
+        assert p.returncode == 0, p.stderr
+    return p
+
+
+@pytest.mark.skipif(os.getuid() != 0, reason="frozen compare needs the OS jail")
+def test_frozen_compare_accepts_failed_lengths_and_refuses_partial_inputs(synthetic):
+    t = synthetic                                  # length 30 failed to compile: no measurements anywhere
+    env = _frozen(t)
+    _run_frozen(env, "answer-table", "--discovery", str(t / "d.jsonl"), "--confirmation", str(t / "c.jsonl"),
+                "--valid", "10-41", "--out", str(t / "at.json"))
+    assert json.loads((t / "at.json").read_text())["preregistration"].startswith("frozen:")
+    common = ["--measurements", str(t / "d.jsonl"), "--confirmation-measurements", str(t / "c.jsonl"),
+              "--census", str(t / "census.jsonl"), "--answer-table", str(t / "at.json")]
+    _run_frozen(env, "compare", "--compile", str(t / "compile.jsonl"), *common, "--out", str(t / "cmp.json"))
+    comp = [json.loads(line) for line in (t / "compile.jsonl").read_text().splitlines()]
+    _write(t / "compile_part.jsonl", [c for c in comp if c["padded_length"] != 12])
+    _write(t / "d_part.jsonl", [json.loads(line) for line in (t / "d.jsonl").read_text().splitlines()
+                                if json.loads(line)["padded_length"] != 12])
+    p = _run_frozen(env, "compare", "--compile", str(t / "compile_part.jsonl"), "--measurements",
+                    str(t / "d_part.jsonl"), *common[2:], "--out", str(t / "x.json"), ok=False)
+    assert p.returncode != 0 and "partial inputs" in p.stderr

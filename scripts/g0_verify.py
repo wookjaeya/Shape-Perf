@@ -62,7 +62,7 @@ def main():
     ap.add_argument("--allow-native", action="store_true")
     ap.add_argument("--length", type=int, default=128)
     ap.add_argument("--determinism-lengths", type=int, nargs="*", default=[],
-                    help="extra lengths probed twice to check sig-v2 determinism (in addition to --length)")
+                    help="extra lengths probed twice to check signature determinism (in addition to --length)")
     ap.add_argument("--out", default=str(REPO_ROOT / "results/g0"))
     args = ap.parse_args()
     out = Path(args.out)
@@ -98,7 +98,7 @@ def main():
                                                       "ir_signature", "ir_structure_signature", "entry_signature",
                                                       "stderr_tail"]}
     rep["probe_and_full_report_signature_equal"] = same(full.get("ir_signature"), probe.get("ir_signature"))
-    # signature determinism: the same length probed again must give the same signature (sig-v2)
+    # signature determinism: the same length probed again must give the same signature
     probe2 = compile_shape(args.model, args.length, "default", args.target_cpu, "probe", work / "probe_repeat",
                            allow_native=args.allow_native)
 

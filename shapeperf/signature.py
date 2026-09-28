@@ -15,9 +15,20 @@ import re
 import subprocess
 from collections import Counter
 
-SIG_VERSION = "sig-v2"
+SIG_VERSION = "sig-v3"
 
 NORMALIZATION_RULES = {
+    "sig-v3": [
+        "sig-v2 rules with two changes to node-name canonicalization (made before any performance "
+        "data, after the third code review): (1) counters are stripped REPEATEDLY until a model node "
+        "name is reached ('X_5_7' -> 'X_5' -> 'X'); (2) with the model's node op types, a generated "
+        "name that equals a DIFFERENT original node of another op type is mapped to its base instead "
+        "(e.g. a generated Mul 'mul_3_1' when the model's 'mul_3_1' is an Add). Names derived from "
+        "the op name (e.g. 'onnx.MatMul_2') keep only '<N>' for the counter.",
+        "report lines with trailing foreign text in the numeric fields are unparsed (report 'corrupt').",
+        "known limitation: a generated op that reuses the name of an original node of the SAME op "
+        "type (e.g. after that node was removed) cannot be told apart.",
+    ],
     "sig-v2": [
         "sig-v1 rules, plus: node names are canonicalized to ONNX node names of the model. ONNX-MLIR "
         "names ops it creates while rewriting as '<original>_<counter>' (fused ops: '<a>-<b>_<counter>'); "
@@ -94,7 +105,7 @@ def _op_matches(report_op, onnx_op_type):
 
 
 def canonical_node(name, known, op=None):
-    """Map a compiler-generated node name back to ONNX node names (sig-v2).
+    """Map a compiler-generated node name back to ONNX node names (sig-v3).
 
     known: set of ONNX node names, or dict name -> ONNX op_type (preferred).
     With op types, a generated name that happens to equal a different original
@@ -132,7 +143,7 @@ def canonical_node(name, known, op=None):
 
 def report_signature(recs, known_nodes=None):
     """Sorted multiset of decision tuples. known_nodes: ONNX node names of the
-    model (enables sig-v2 canonicalization; without it the result is sig-v1)."""
+    model (enables sig-v3 canonicalization; without it the result is sig-v1)."""
     items = sorted(
         (r["kind"], r.get("op", ""), r.get("applied", False),
          canonical_node(r.get("node", ""), known_nodes, r.get("op")),

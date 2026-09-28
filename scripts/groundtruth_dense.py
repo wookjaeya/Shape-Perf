@@ -26,7 +26,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shapeperf import prereg  # noqa: E402
 from shapeperf.compile import compile_shape, model_def  # noqa: E402
 from shapeperf.measure import run_block  # noqa: E402
-from shapeperf.util import REPO_ROOT, append_jsonl, git_head, new_run_id, read_json, read_jsonl, write_json  # noqa: E402
+from shapeperf.util import (REPO_ROOT, append_jsonl, git_head, new_run_id, read_json, read_jsonl,  # noqa: E402
+                            sha256_file, write_json)
+
+
+def compiled_ok(failure_type):
+    """The compile itself succeeded (a correctness failure comes after it)."""
+    return not failure_type or str(failure_type).startswith("correctness:")
 
 
 def main():
@@ -57,18 +63,11 @@ def main():
     else:
         a, b = max(m["valid_lengths"][0], cat["anchor"]["valid_length"]), m["valid_lengths"][1]
     lengths = list(range(a, b + 1))
-    run_id = new_run_id(f"g4-{args.role}")
-    out = Path(args.out or REPO_ROOT / "results/g4" / run_id)
-    out.mkdir(parents=True, exist_ok=True)
-    write_json(out / "manifest.json", {"run_id": run_id, "role": args.role, "lengths": [a, b],
-                                       "seed": args.seed, "vm_allocation_id": args.vm_allocation_id,
-                                       "flagsets": args.flagsets,
-                                       "preregistration": label, "harness_commit": git_head(),
-                                       "args": vars(args), "evaluator_only": True})
-
     strict = label.startswith("frozen")     # correctness gate follows the preregistration, not a CLI flag
-    comp_path = out / "compile.jsonl"
-    compiled = {}
+    tol = p["correctness"]["logit_abs_tolerance"]
+
+    # validate reused compile records BEFORE writing anything
+    reused = {}
     if args.reuse_compile:
         for r in read_jsonl(args.reuse_compile):
             key = (r.get("flagset", "default"), r["padded_length"])
@@ -78,14 +77,51 @@ def main():
                                                     ("target", args.target_cpu)) if r.get(k) != v]
             if bad:
                 raise SystemExit(f"--reuse-compile record for {key} does not match this run: {bad}")
-            if not os.path.exists(r.get("artifact_path") or ""):
-                raise SystemExit(f"--reuse-compile artifact for {key} is missing: {r.get('artifact_path')}")
-            r = {**r, "reused_from": str(args.reuse_compile)}
-            if strict and not r.get("failure_type") and r.get("correctness_status") != "pass":
-                # an unfrozen run measured it anyway; a frozen run may not
+            if compiled_ok(r.get("failure_type")):         # only artifacts that can be measured must exist
+                art = r.get("artifact_path") or ""
+                if not os.path.exists(art) or sha256_file(art) != r.get("artifact_hash"):
+                    raise SystemExit(f"--reuse-compile artifact for {key} is missing or changed: {art}")
+            reused[key] = r
+
+    run_id = new_run_id(f"g4-{args.role}")
+    out = Path(args.out or REPO_ROOT / "results/g4" / run_id)
+    out.mkdir(parents=True, exist_ok=True)
+    write_json(out / "manifest.json", {"run_id": run_id, "role": args.role, "lengths": [a, b],
+                                       "seed": args.seed, "vm_allocation_id": args.vm_allocation_id,
+                                       "flagsets": args.flagsets,
+                                       "preregistration": label, "harness_commit": git_head(),
+                                       "args": vars(args), "evaluator_only": True})
+    comp_path = out / "compile.jsonl"
+
+    def verify(rec, s):
+        """Correctness check under THIS run's preregistration (spec §7)."""
+        t0 = time.monotonic_ns()
+        v = subprocess.run([sys.executable, str(REPO_ROOT / "validate_shapes.py"), "--artifact",
+                            rec["artifact_path"], "--model", args.model, "--length", str(s),
+                            "--out", str(out / "validation.jsonl")], capture_output=True, text=True)
+        rec["verify_wall_ns"] = time.monotonic_ns() - t0
+        res = json.loads(v.stdout.strip().splitlines()[-1]) if v.returncode == 0 else {}
+        rec["correctness_status"] = res.get("correctness_status", "error")
+        rec["correctness_tolerance"] = res.get("tolerance")
+        rec["correctness_preregistration"] = res.get("preregistration")
+        if rec["correctness_status"] != "pass" and strict:
+            rec["failure_type"] = f"correctness:{rec['correctness_status']}"
+
+    compiled = {}
+    for key, r in reused.items():
+        r = {**r, "reused_from": str(args.reuse_compile)}
+        if compiled_ok(r.get("failure_type")):
+            judged_here = (r.get("correctness_preregistration") == label
+                           and r.get("correctness_tolerance") == tol)
+            if strict and not judged_here:
+                # a verdict made under another preregistration/tolerance is not reused
+                r.pop("failure_type", None)
+                verify(r, key[1])
+                r["reverified"] = True
+            elif strict and r.get("correctness_status") != "pass":
                 r["failure_type"] = f"correctness:{r.get('correctness_status')}"
-            compiled[key] = r
-            append_jsonl(comp_path, r)   # the run directory lists every artifact it measured
+        compiled[key] = r
+        append_jsonl(comp_path, r)   # the run directory lists every artifact it measured
     for fs in args.flagsets:
         for s in lengths:
             if (fs, s) in compiled:
@@ -94,16 +130,7 @@ def main():
                                 allow_native=args.allow_native)
             rec["flagset"] = fs
             if not rec.get("failure_type"):
-                t0 = time.monotonic_ns()
-                v = subprocess.run([sys.executable, str(REPO_ROOT / "validate_shapes.py"), "--artifact",
-                                    rec["artifact_path"], "--model", args.model, "--length", str(s),
-                                    "--out", str(out / "validation.jsonl")], capture_output=True, text=True)
-                rec["verify_wall_ns"] = time.monotonic_ns() - t0
-                st = (json.loads(v.stdout.strip().splitlines()[-1])["correctness_status"]
-                      if v.returncode == 0 else "error")
-                rec["correctness_status"] = st
-                if st != "pass" and strict:
-                    rec["failure_type"] = f"correctness:{st}"
+                verify(rec, s)
             append_jsonl(comp_path, rec)
             compiled[(fs, s)] = rec
             print("compiled", fs, s, rec.get("failure_type"), rec.get("correctness_status"), flush=True)

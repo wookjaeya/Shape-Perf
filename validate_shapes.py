@@ -88,7 +88,8 @@ def main():
            **toolchain.compiler_ids()}
     append_jsonl(args.out, rec)
     print(json.dumps({k: rec[k] for k in ["padded_length", "n_features", "worst_max_abs_valid",
-                                          "argmax_all_equal", "correctness_status"]}))
+                                          "argmax_all_equal", "correctness_status", "tolerance",
+                                          "preregistration"]}))
 
 
 if __name__ == "__main__":

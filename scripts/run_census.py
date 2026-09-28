@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from shapeperf import evaluate as E  # noqa: E402
 from shapeperf import prereg, toolchain  # noqa: E402
 from shapeperf.compile import compile_shape  # noqa: E402
+from shapeperf.signature import SIG_VERSION  # noqa: E402
 from shapeperf.util import CENSUS_DIR, append_jsonl, git_head, read_jsonl, write_json  # noqa: E402
 
 
@@ -46,10 +47,12 @@ def _latest(path):
 
 
 def _incomplete(r):
-    """A record that does not give a usable census value for its length."""
+    """A record that does not give a usable census value for its length
+    (including one made under another signature version)."""
     if r.get("failure_type"):
         return False                     # a real compile failure is a value (FAILED:<type>)
-    return (str(r.get("ir_signature", "")).startswith("CORRUPT:") or r.get("ir_signature") is None
+    return (r.get("signature_version") != SIG_VERSION
+            or str(r.get("ir_signature", "")).startswith("CORRUPT:") or r.get("ir_signature") is None
             or r.get("probe_ir_missing") is not None or r.get("ir_structure_signature") is None
             or r.get("raw_ir_hash") is None)
 
@@ -126,41 +129,69 @@ def main():
         unit_sets[f"analysis_u{u}"] = [u]
     align = {}
     def nonalign(spans, units):
+        """Spans with no multiple of a unit in [a, b]: certainly non-aligned."""
         us = [u for u in units if u > 1]
         return [[a, b] for a, b in spans if not any((b // u) * u >= a for u in us)]
+
+    def unresolved(spans, units):
+        """Spans across failed lengths that contain a multiple but also a
+        non-aligned boundary: the change may be non-aligned - position unknown."""
+        b_align = set(E.aligned_boundaries(lengths, units))
+        out = []
+        for a, b in spans:
+            inner = [x for x in lengths if a <= x < b]
+            if len(inner) > 1 and not all(x in b_align for x in inner) and [a, b] not in nonalign([(a, b)], units):
+                out.append([a, b])
+        return out
     for name, units in unit_sets.items():
         b = E.aligned_boundaries(lengths, units)
         align[name] = {"units": units, "B_align_size": len(b),
                        "C_sig_nonalign": [a for a, _ in nonalign(sp_sig, units)],
                        "C_sig_nonalign_spans": nonalign(sp_sig, units),
+                       "C_sig_unresolved_spans": unresolved(sp_sig, units),
                        "C_ir_nonalign": [a for a, _ in nonalign(sp_ir, units)]}
 
-    if args.keep_raw_ir != "all":
+    incomplete = bool(missing or corrupt or ir_missing or n_ok < 2)
+    keep = set(lengths)
+    if args.keep_raw_ir == "changepoints":
         keep = set()
-        if args.keep_raw_ir == "changepoints":
-            for a, b in sp_sig + sp_ir:
-                keep |= {a, b}
-            for c in fail_b:
-                keep |= {c, next((x for x in lengths if x > c), c)}
+        for a, b in sp_sig + sp_ir:
+            keep |= {a, b}
+        for c in fail_b:
+            keep |= {c, next((x for x in lengths if x > c), c)}
+    elif args.keep_raw_ir == "none":
+        keep = set()
+    # while the census is incomplete the change points are not final: delete nothing yet
+    if args.keep_raw_ir != "all" and not incomplete:
         for s in lengths:
             gz = work / f"s{s:04d}" / "model.onnx.mlir.gz"
             if gz.exists() and s not in keep:
                 gz.unlink()
+    raw_missing = sorted(s for s in keep if s in recs and not recs[s].get("failure_type")
+                         and not (work / f"s{s:04d}" / "model.onnx.mlir.gz").exists())
+    versions = sorted({str(r.get("signature_version")) for r in recs.values() if not r.get("failure_type")})
 
-    if missing or corrupt or ir_missing or n_ok < 2:
+    if incomplete:
         verdict = (f"INCOMPLETE census (missing {missing[:5]}, corrupt reports {corrupt[:5]}, "
                    f"probe IR missing {ir_missing[:5]}, successful lengths {n_ok}) - no H1 verdict")
     elif pre_units is None:
         verdict = "units not preregistered - no H1 verdict"
     elif align["preregistered"]["C_sig_nonalign"]:
         verdict = "C_nonalign non-empty (H1 not rejected)"
+    elif align["preregistered"]["C_sig_unresolved_spans"]:
+        verdict = (f"H1 undetermined: changes across failed lengths "
+                   f"{align['preregistered']['C_sig_unresolved_spans'][:5]} may be non-aligned")
     else:
         verdict = "C_nonalign EMPTY: H1 rejected -> stop before G4 (spec §13 item 15)"
+    if fail and not verdict.startswith(("INCOMPLETE", "units")):
+        verdict += f" [{len(fail)} failed lengths: changes hidden inside a failed run are not observable]"
     table = {
         "model": args.model, "flagset": args.flagset, "target_cpu": args.target_cpu,
         **toolchain.compiler_ids(), "lengths": [lengths[0], lengths[-1]], "valid_lengths": lengths,
         "n_lengths": len(lengths), "missing_lengths": missing, "corrupt_reports": corrupt,
-        "probe_ir_missing": ir_missing,
+        "probe_ir_missing": ir_missing, "signature_versions": versions,
+        "raw_ir_kept": args.keep_raw_ir,
+        "raw_ir_missing_for_changepoints": raw_missing if args.keep_raw_ir != "none" else [],
         "n_failed": len(fail), "failed_lengths": sorted(fail),
         "failure_boundaries": fail_b,
         "signature_primary": "opt-report", "C_sig": c_sig, "C_sig_spans": [list(x) for x in sp_sig],

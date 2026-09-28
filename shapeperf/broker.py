@@ -14,7 +14,8 @@ Cost split (§8.4 'compile cost attribution'):
                   warmup, measurement; confirmations. Every policy pays these.
   policy_extra_ns information extraction, and opt-report emission, for policies
                   that consume full-compile signatures (Compile-guided); every
-                  probe compile (Compile-probe).
+                  probe compile (Compile-probe); once per run, the model
+                  node-name load the signature needs (signature_init_ns).
   selection_ns    wall time of the selector's own decision logic (measured in
                   the selector process; IPC excluded).
 The backend reports `report_ns` = the opt-report emission overhead contained
@@ -277,6 +278,7 @@ class QueryBroker:
         timeline, candidates, sig_pairs = [], [], []
         checked_pairs = set()
         stop = False
+        init_paid = False     # one-time node-name load, paid by the first signature-consuming query
 
         def append(rec, charged):
             nonlocal spent, stop
@@ -316,6 +318,10 @@ class QueryBroker:
                 common = compile_ns - report_ns
                 if selector.sees_signatures:
                     extra = r.get("extract_ns", 0) + report_ns
+                    if not init_paid and r.get("signature_init_ns"):
+                        extra += r["signature_init_ns"]
+                        rec["signature_init_ns"] = r["signature_init_ns"]
+                        init_paid = True
                 common += sum(r.get(k, 0) for k in ("verify_ns", "warmup_ns", "measure_ns", "process_overhead_ns"))
                 rec.update(failure_type=r.get("failure_type"))
                 if r.get("failure_type"):
@@ -334,6 +340,10 @@ class QueryBroker:
                     raise ValueError(f"{selector.name} re-probed {s}")
                 r = self.backend.probe(s)
                 extra = r.get("probe_ns", 0) + r.get("extract_ns", 0)
+                if not init_paid and r.get("signature_init_ns"):
+                    extra += r["signature_init_ns"]
+                    rec["signature_init_ns"] = r["signature_init_ns"]
+                    init_paid = True
                 rec.update(failure_type=r.get("failure_type"))
                 probed.add(s)
                 psigs[s] = f"FAILED:{r['failure_type']}" if r.get("failure_type") else r["signature"]

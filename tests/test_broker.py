@@ -175,3 +175,24 @@ def test_no_events_gives_undefined_recall_not_nan():
     assert row["recall_mean"] is None and row["recall_ci_mean"] is None and row["recall_note"]
     one = recall_cost({10**9: [r]}, [8], require_confirmation=False)[0]
     assert one["recall_ci_mean"] is None                  # one seed: no seed-to-seed interval
+
+
+class InitBackend(SyntheticBackend):
+    def measure(self, s):
+        return {**super().measure(s), "signature_init_ns": 1000}
+
+    def probe(self, s):
+        return {**super().probe(s), "signature_init_ns": 1000}
+
+
+def test_node_name_load_is_charged_once_to_signature_policies_only():
+    mk = lambda: InitBackend({}, [], noise=0.0, compile_ns=100, probe_ns=30, extract_ns=7, verify_ns=5,
+                             measure_ns=10)
+    tl_u = QueryBroker(mk(), range(1, 9)).run(UniformSelector(), 10**9)["timeline"]
+    tl_c = QueryBroker(mk(), range(1, 9)).run(CompileGuidedSelector(), 10**9)["timeline"]
+    tl_p = QueryBroker(mk(), range(1, 9)).run(CompileProbeSelector(budget_fraction=1.0), 10**9)["timeline"]
+    assert all(q["policy_extra_ns"] == 0 for q in tl_u)
+    assert [q["policy_extra_ns"] for q in tl_c[:2]] == [7 + 1000, 7]
+    probes = [q for q in tl_p if q["action"] == "probe"]
+    assert probes[0]["policy_extra_ns"] == 30 + 7 + 1000 and probes[1]["policy_extra_ns"] == 30 + 7
+    assert sum("signature_init_ns" in q for q in tl_p) == 1

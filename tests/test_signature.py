@@ -93,7 +93,7 @@ def test_sig_v2_canonicalizes_compiler_counters():
     b = a.replace("mul_3_12", "mul_3_13")
     ha = S.report_signature(S.parse_opt_report(a), known)
     hb = S.report_signature(S.parse_opt_report(b), known)
-    assert ha["hash"] == hb["hash"] and ha["version"] == "sig-v2"
+    assert ha["hash"] == hb["hash"] and ha["version"] == S.SIG_VERSION == "sig-v3"
     assert S.report_signature(S.parse_opt_report(a))["hash"] != S.report_signature(S.parse_opt_report(b))["hash"]
 
 

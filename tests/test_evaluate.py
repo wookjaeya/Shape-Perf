@@ -202,15 +202,24 @@ def test_per_shape_summary_and_natural_impact():
     assert E.per_shape_summary(recs + alt, "mean", "default") == ps     # other flag sets are not pooled
 
 
-def test_natural_weighted_impact_is_avoidable_padding_excess():
+def test_natural_weighted_impact_is_cross_fitted_avoidable_padding_excess():
     # an isolated slow length 11 (x1.5): features of length 11 would run faster padded to 12
     T = {10: 100.0, 11: 150.0, 12: 110.0, 13: 115.0}
-    imp = E.natural_weighted_impact(T, [[10, 11], [11, 12]], {"11": 20, "12": 30, "5": 50}, [10, 11, 12, 13])
+    imp = E.natural_weighted_impact(T, T, [[10, 11], [11, 12]], {"11": 20, "12": 30, "5": 50}, [10, 11, 12, 13])
     assert imp["status"] == "ok"
     assert math.isclose(imp["total_weighted_excess"], 0.2 * (150 / 110 - 1))
     assert math.isclose(imp["weighted_excess_across_confirmed_events"], imp["total_weighted_excess"])
-    assert imp["frequency_covered"] == 0.5 and imp["lengths_with_excess"][0]["best_padding"] == 12
-    assert E.natural_weighted_impact(T, [], {}, [10, 11])["status"].startswith("unavailable")
+    assert imp["frequency_covered"] == 0.5 and imp["lengths_with_other_best_padding"][0]["best_padding"] == 12
+    assert E.natural_weighted_impact(T, T, [], {}, [10, 11])["status"].startswith("unavailable")
+    # the best padding is chosen on one data set and evaluated on the other: noise can make it negative
+    disc = {10: 100.0, 11: 100.0, 12: 99.0}
+    conf = {10: 100.0, 11: 100.0, 12: 101.0}
+    imp = E.natural_weighted_impact(disc, conf, [], {"11": 1}, [10, 11, 12])
+    assert imp["total_weighted_excess"] < 0
+    # measured lengths outside the valid set are ignored (no crash above max(valid), no negative excess below)
+    wide = {k: 100.0 + k for k in range(5, 20)}
+    imp = E.natural_weighted_impact(wide, wide, [], {"15": 3, "7": 1, "11": 1}, [10, 11, 12])
+    assert imp["frequency_covered"] == 1 / 5 and imp["total_weighted_excess"] == 0
 
 
 def test_alternative_indicators_r_and_q():
@@ -288,8 +297,97 @@ def test_census_resume_recompiles_unusable_records():
     spec = importlib.util.spec_from_file_location("run_census", ROOT / "scripts/run_census.py")
     rc = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rc)
-    ok = {"ir_signature": "a", "ir_structure_signature": "x", "raw_ir_hash": "h"}
+    ok = {"ir_signature": "a", "ir_structure_signature": "x", "raw_ir_hash": "h", "signature_version": rc.SIG_VERSION}
     assert not rc._incomplete(ok)
+    assert rc._incomplete(dict(ok, signature_version="sig-v2"))      # made under an older normalization
     assert not rc._incomplete({"failure_type": "timeout"})          # a real failure is a census value
     assert rc._incomplete(dict(ok, ir_signature="CORRUPT:1"))
     assert rc._incomplete(dict(ok, raw_ir_hash=None, probe_ir_missing="/x"))
+
+
+def test_unknown_allocation_on_either_side_fails_the_new_allocation_rule():
+    a = _tag(_records({}, seed=1, tag="x", blocks=2), g4_run_id="g4-d", seed=11000, vm_allocation_id="A")
+    b = _tag(_records({}, seed=2, tag="y", blocks=2), g4_run_id="g4-c", seed=12000, vm_allocation_id="B")
+    for unknown in (None, "", "unavailable"):
+        with pytest.raises(ValueError, match="cannot be shown"):
+            E.check_independent(a, _tag(b, vm_allocation_id=unknown), True)
+    assert E.check_independent(a, _tag(b, vm_allocation_id=None), False)["shared_allocations"] == []
+
+
+def test_dense_table_keeps_report_overhead_for_correctness_failures():
+    EV, comp, meas = _dense_inputs()
+    comp = comp + [{"padded_length": 3, "compile_wall_ns": 50, "feature_extract_wall_ns": 2, "verify_wall_ns": 1,
+                    "failure_type": "correctness:fail", "node_names_load_ns": 700}]
+    dense, _ = EV.dense_table([1, 2, 3], comp, meas, [], "mean", report_ns=40)
+    assert dense[3]["report_ns"] == 40 and dense[3]["extract_ns"] == 2 and dense[2]["report_ns"] == 0
+    assert dense[1]["signature_init_ns"] == 700 and dense[2]["signature_init_ns"] == 0
+    from shapeperf.backends import ReplayBackend
+    r = ReplayBackend(dense, seed=0).measure(3)
+    assert r["failure_type"] == "correctness:fail" and r["report_ns"] == 40
+
+
+def test_ablation_probes_are_charged_their_own_extraction_only():
+    import evaluate as EV
+    dense = {1: {"compile_ns": 1, "processes": [{"median_ns": 1.0, "warmup_ns": 0, "measure_ns": 0}],
+                 "probe_ns": 10, "probe_extract_ns": 3, "probe_signature_init_ns": 700, "probe_signature": "A",
+                 "probe_signature_ir": "I", "probe_signature_raw": "R",
+                 "probe_ir_structure_extract_ns": 50, "probe_raw_ir_extract_ns": 20}}
+    from shapeperf.backends import ReplayBackend
+    assert ReplayBackend(dense, 0).probe(1)["extract_ns"] == 3
+    ir = EV._SigKeyReplay(dense, 0, "probe_signature_ir").probe(1)
+    raw = EV._SigKeyReplay(dense, 0, "probe_signature_raw").probe(1)
+    assert (ir["signature"], ir["extract_ns"], ir["signature_init_ns"]) == ("I", 50, 0)
+    assert (raw["signature"], raw["extract_ns"]) == ("R", 20)
+
+
+def test_freeze_covers_every_section(tmp_path):
+    import json
+    import subprocess
+    import sys
+    pre = json.loads((ROOT / "configs/preregistration.json").read_text())
+
+    def fill(d):
+        for k, v in d.items():
+            if isinstance(v, dict):
+                fill(v)
+            elif v is None:
+                d[k] = 1
+    for k, v in pre.items():
+        if isinstance(v, dict) and k != "replication":
+            fill(v)
+    f = tmp_path / "p.json"
+    f.write_text(json.dumps(pre))
+    env = {**__import__("os").environ, "SHAPEPERF_PREREG": str(f)}
+    p = subprocess.run([sys.executable, str(ROOT / "scripts/freeze_prereg.py")], capture_output=True, text=True, env=env)
+    assert p.returncode != 0 and "replication.features_per_event" in p.stderr
+
+
+def _census_run(tmp_path, monkeypatch, sig_of, failed=()):
+    import importlib.util
+    import json
+    spec = importlib.util.spec_from_file_location("run_census_t", ROOT / "scripts/run_census.py")
+    rc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rc)
+
+    def fake(model, s, flagset, target, mode, d, allow_native=False, timeout_s=None):
+        if s in failed:
+            return {"padded_length": s, "failure_type": "compile_error", "probe_wall_ns": 1}
+        return {"padded_length": s, "failure_type": None, "ir_signature": sig_of(s), "ir_structure_signature": "x",
+                "raw_ir_hash": "h", "signature_version": rc.SIG_VERSION, "probe_wall_ns": 1}
+    monkeypatch.setattr(rc, "compile_shape", fake)
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    pre = json.loads((ROOT / "configs/preregistration.json").read_text())
+    pre["selectors"]["shape_only_alignment_units"] = [8, 16, 32]
+    (tmp_path / "p.json").write_text(json.dumps(pre))
+    monkeypatch.setenv("SHAPEPERF_PREREG", str(tmp_path / "p.json"))
+    monkeypatch.setattr("sys.argv", ["run_census.py", "--lengths", "41-256", "--keep-raw-ir", "none",
+                                     "--census-root", str(tmp_path / "c"), "--target-cpu", "t"])
+    rc.main()
+    return json.loads((tmp_path / "c/A_reexport/default/t/census_table.json").read_text())
+
+
+def test_census_verdict_is_undetermined_when_a_change_hides_behind_failed_lengths(tmp_path, monkeypatch):
+    t = _census_run(tmp_path, monkeypatch, lambda s: "A" if s <= 96 else "B", failed=range(97, 112))
+    assert t["C_sig_spans"] == [[96, 112]] and t["H1_verdict"].startswith("H1 undetermined")
+    t = _census_run(tmp_path / "2", monkeypatch, lambda s: "A" if s < 96 else "B")      # aligned change only
+    assert t["C_sig_spans"] == [[95, 96]] and t["H1_verdict"].startswith("C_nonalign EMPTY")

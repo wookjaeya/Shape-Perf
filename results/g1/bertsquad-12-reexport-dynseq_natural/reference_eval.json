@@ -1,0 +1,19 @@
+{
+  "harness_commit": "e39c3e273c065f49b8ddcc8c6961d987754a9a33-dirty",
+  "onnxruntime": "1.23.2",
+  "threads": 1,
+  "model": "data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx",
+  "model_sha256": "b443d8dca3672930cbb81972fa6a085da7393d250ea563583c2e2f2dfd7e968d",
+  "length_policy": "natural",
+  "inference_seconds_total_not_a_benchmark": 3207.7,
+  "n_features_evaluated": 12006,
+  "official_eval": {
+    "exact_match": 80.6717123935667,
+    "f1": 88.07164270138964
+  },
+  "model_card_em": 80.67171,
+  "em_minus_model_card": 2.3935666888519336e-06,
+  "adaptations": [
+    "tensorflow not installed: tokenization.py's tf.gfile.GFile replaced by open(encoding='utf-8'); tokenizer logic unchanged"
+  ]
+}

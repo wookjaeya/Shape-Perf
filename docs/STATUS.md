@@ -10,7 +10,7 @@
 |---|---|---|---|
 | G0 환경 고정 | 부분 (빌드 진행 중) | ONNX-MLIR v0.5.1.1 (`1e017c9f`), LLVM `1053047a`(그 commit의 `utils/clone-mlir.sh`), protobuf v33.5. 공식 문서 플래그 + 기록된 빌드 속도용 이탈 | `env/toolchain.env`, `env/build_toolchain.sh`, 빌드 manifest |
 | G1 원본 재현 | 완료 (원본 artifact) | 공식 전처리 재현: 질문 10,570 / feature 12,006 / 고유 유효 길이 216 (41–256). ORT가 zoo test_data_set 출력을 max abs 6.2e-6로 재현. **원본@256 전체 dev set: EM 80.6717 / F1 88.0716 — 모델 카드 EM 80.67171과 일치.** 재수출본@256·재수출본@L(x) 평가 진행 중 | `data/features/A/catalog.json`, `results/g1/bertsquad-12_official/reference_eval.json` |
-| G2 shape 적합성 | 부분 | 원본 artifact: **길이 변경 불가**(길이 256 상수 70개, 255/128/41에서 ORT 실패). 동일 가중치 재수출본: 256에서 원본 대비 logits max abs 1.1e-5, 256 상수 0개, s∈{L,L+1,64,128,129,255,256} 139쌍에서 유효 위치 logits max abs 1.1e-5·argmax 100% 일치. ONNX-MLIR 정적 특수화·정확도는 빌드 후 확인 | `results/g2/*.json` |
+| G2 shape 적합성 | 부분 | §7.4 과제 수준: 재수출본을 feature별 L(x)로 실행 시 EM/F1이 원본@256과 동일, 답 변경 0건. 원본 artifact: **길이 변경 불가**(길이 256 상수 70개, 255/128/41에서 ORT 실패). 동일 가중치 재수출본: 256에서 원본 대비 logits max abs 1.1e-5, 256 상수 0개, s∈{L,L+1,64,128,129,255,256} 139쌍에서 유효 위치 logits max abs 1.1e-5·argmax 100% 일치. ONNX-MLIR 정적 특수화·정확도는 빌드 후 확인 | `results/g2/*.json` |
 | G2.5 census | 코드만 | 평가자 전용 실행기, 격리 테스트 통과 | `scripts/run_census.py`, `census/README.md`, `tests/test_isolation.py` |
 | G3 파일럿 | 코드만 | warmup 추이·계층 분산·Kalibera–Jones 제안·probe:측정 비용비·probe/최종 불일치율 수집 | `scripts/pilot_g3.py` |
 | G4 유한 공간 평가 | 코드만 | 발견/확인 역할 분리 조밀 측정, 정답표 A(Holm+독립 확인), 연속 지표 A(s)와 연산량 비 | `scripts/groundtruth_dense.py`, `evaluate.py answer-table` |
@@ -39,7 +39,7 @@
   | 모델 | 길이 정책 | EM | F1 | 모델 카드 EM |
   |---|---|---|---|---|
   | 원본 `bertsquad-12` | 256 고정 | 80.6717 | 88.0716 | 80.67171 |
-  | 재수출본 | feature별 L(x) | 진행 중 | | |
+  | 재수출본 | feature별 L(x) | 80.6717 | 88.0716 | — (원본@256과 답 텍스트 10,570/10,570 동일) |
   | 재수출본 | 256 고정 | 진행 중 | | |
 
 ## 격리 증명 (G2.5·G5 진입 조건)

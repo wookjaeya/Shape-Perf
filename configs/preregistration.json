@@ -1,0 +1,53 @@
+{
+  "_comment": "Machine-readable twin of preregistration.md. Every null is an UNFIXED value that the G3 pilot (or a justified argument) must set BEFORE the main experiment. Code refuses main-phase runs while a required value is null.",
+  "status": "draft - nothing fixed yet",
+  "correctness": {
+    "logit_abs_tolerance": null,
+    "logit_tolerance_justification": null,
+    "compare_positions": "valid positions [0, L(x)) only; padding outputs depend on the length (spec §7.2)"
+  },
+  "measurement": {
+    "warmup_iterations": null,
+    "timed_iterations": null,
+    "processes_per_shape": null,
+    "blocks": null,
+    "vm_allocations": null,
+    "cpus": null,
+    "threads": 1,
+    "process_statistic": null
+  },
+  "events": {
+    "delta_min_effect": null,
+    "delta_source": null,
+    "sensitivity_deltas": null,
+    "confidence_level": null,
+    "multiple_testing": "Holm over the predeclared family (spec §10.3)",
+    "match_tolerance_lengths": null,
+    "alpha": null,
+    "direction": null,
+    "min_blocks_per_pair": null,
+    "min_allocations_per_pair": null,
+    "min_allocations_confirmation": null,
+    "confirmation_requires_new_allocation": null,
+    "bootstrap_reps_descriptive_ci": null
+  },
+  "selectors": {
+    "random_seeds": null,
+    "shape_only_alignment_units": null,
+    "shape_only_alignment_justification": null,
+    "compile_probe_budget_fraction": null,
+    "budgets_ns": null,
+    "report_overhead_ns": null
+  },
+  "replication": {
+    "features_per_event": null,
+    "features_per_event_justification": null
+  },
+  "signature": {
+    "version": "sig-v3",
+    "primary": "opt-report",
+    "probe_stage": null
+  },
+  "frozen": false,
+  "frozen_sha256": null
+}

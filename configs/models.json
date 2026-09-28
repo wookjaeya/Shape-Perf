@@ -1,0 +1,33 @@
+{
+  "_comment": "Model definitions for compile/measure. 'axes' names the meaning of every input dimension: B=batch, S=sequence length. compile_shape.py builds --shapeInformation from this, so no dimension is guessed from the file.",
+  "models": {
+    "A_reexport": {
+      "path": "data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx",
+      "label": "re-export of the ONNX Model Zoo bertsquad-12 weights with a variable sequence axis (spec §4.4 step 2); NOT the Model Zoo artifact",
+      "official_length": 256,
+      "valid_lengths": [1, 256],
+      "features": "data/features/A",
+      "inputs": [
+        {"name": "unique_ids_raw_output___9:0", "axes": ["B"], "dtype": "int64", "feature_key": "unique_ids"},
+        {"name": "segment_ids:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "segment_ids"},
+        {"name": "input_mask:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "input_mask"},
+        {"name": "input_ids:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "input_ids"}
+      ],
+      "outputs": {"start": "unstack:0", "end": "unstack:1", "unique_ids": "unique_ids:0"}
+    },
+    "A_official": {
+      "path": "data/artifacts/bertsquad-12.onnx",
+      "label": "ONNX Model Zoo bertsquad-12 (fixed length 256 only; see results/g2/original_artifact_shape_check.json)",
+      "official_length": 256,
+      "valid_lengths": [256, 256],
+      "features": "data/features/A",
+      "inputs": [
+        {"name": "unique_ids_raw_output___9:0", "axes": ["B"], "dtype": "int64", "feature_key": "unique_ids"},
+        {"name": "segment_ids:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "segment_ids"},
+        {"name": "input_mask:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "input_mask"},
+        {"name": "input_ids:0", "axes": ["B", "S"], "dtype": "int64", "feature_key": "input_ids"}
+      ],
+      "outputs": {"start": "unstack:0", "end": "unstack:1", "unique_ids": "unique_ids:0"}
+    }
+  }
+}

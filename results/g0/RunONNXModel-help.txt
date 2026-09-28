@@ -1,0 +1,108 @@
+usage: RunONNXModel.py [-h] [-m MODEL] [--config-file PATH] [-c COMPILE_ARGS]
+                       [-C] [--print-input] [--print-output]
+                       [--print-signatures] [--print-compilation-info]
+                       [--save-onnx PATH] [--verify {onnxruntime,ref}]
+                       [--verify-all-ops] [--verify-with-softmax AXIS_INDEX]
+                       [--verify-every-value] [--rtol RTOL] [--atol ATOL]
+                       [-onnxmlir-args ONNXMLIR_ARGS]
+                       [--save-model PATH | --load-model PATH | --cache-model PATH]
+                       [-o MODEL_NAME] [--save-ref PATH]
+                       [--load-ref PATH | --inputs-from-arrays INPUTS_FROM_ARRAYS | --load-ref-from-numpy PATH | --shape-info SHAPE_INFO]
+                       [--lower-bound LOWER_BOUND] [--upper-bound UPPER_BOUND]
+                       [-w WARMUP] [-n N_ITERATION] [--seed SEED]
+                       [--write-compile-log [PATH]]
+                       [--write-runtime-log [PATH]]
+
+options:
+  -h, --help            show this help message and exit
+  -m MODEL, --model MODEL
+                        Path to an ONNX model (.onnx or .mlir).
+  --config-file PATH    File to the configuration, a .yaml file. This file
+                        allows user todefine their own default value for
+                        arguments.An example can be found at utils/example-
+                        cfg.yaml
+  -c COMPILE_ARGS, --compile-args COMPILE_ARGS
+                        Arguments passed directly to onnx-mlir command. See
+                        bin/onnx-mlir --help.
+  -C, --compile-only    Only compile the input model.
+  --print-input         Print out inputs.
+  --print-output        Print out inference outputs produced by onnx-mlir.
+  --print-signatures    Print out the input and output signatures of the
+                        model.
+  --print-compilation-info
+                        Print out the compilation info stored in the compiled
+                        model.
+  --save-onnx PATH      File path to save the onnx model. Only effective if
+                        --verify=onnxruntime.
+  --verify {onnxruntime,ref}
+                        Verify the output by using onnxruntime or reference
+                        inputs/outputs. By default, no verification. When
+                        being enabled, --verify-with-softmax or --verify-
+                        every-value must be used to specify verification mode.
+  --verify-all-ops      Verify all operation outputs when using onnxruntime.
+  --verify-with-softmax AXIS_INDEX
+                        Verify the result obtained by applying softmax along
+                        with specific axis. The axis can be specified by
+                        --verify-with-softmax=<axis>.
+  --verify-every-value  Verify every value of the output using atol and rtol.
+  --rtol RTOL           Relative tolerance for verification.
+  --atol ATOL           Absolute tolerance for verification.
+  -onnxmlir-args ONNXMLIR_ARGS
+                        Options passed to onnxmlir. Used with --use-onnxmlir
+  --save-model PATH     Path to a folder to save the compiled model.The file
+                        name for the model is determined by --default-model-
+                        name
+  --load-model PATH     Path to a folder to load a compiled model (.so) for
+                        inference, and the ONNX model will not be re-
+                        compiled.The file name for the model is determined by
+                        --default-model-name
+  --cache-model PATH    Path to a folder to save the load a compiled model if
+                        the compiled model exists.Otherwise, compile model and
+                        save it into this folder.This argument is the
+                        combination of --load-model and --save-model
+  -o MODEL_NAME, --default-model-name MODEL_NAME
+                        Change the default model name that is used for two
+                        generated files: .so and .constants.bin. Default is
+                        model.
+  --save-ref PATH       Path to a folder to save the inputs and outputs in
+                        protobuf.
+  --load-ref PATH       Path to a folder containing reference inputs and
+                        outputs stored in protobuf. If --verify=ref, inputs
+                        and outputs are reference data for verification.
+  --inputs-from-arrays INPUTS_FROM_ARRAYS
+                        List of numpy arrays used as inputs for inference.
+  --load-ref-from-numpy PATH
+                        Path to a python script that defines variables inputs
+                        and outputs that are a list of numpy arrays. For
+                        example, inputs = [np.array([1], dtype=np.int64),
+                        np.array([2], dtype=np.float32]. Variable outputs can
+                        be omitted if --verify is not used.
+  --shape-info SHAPE_INFO
+                        Shape for each dynamic input of the model, e.g.
+                        0:1x10x20,1:7x5x3. Used to generate random inputs for
+                        the model if --load-ref is not set.
+  --lower-bound LOWER_BOUND
+                        Lower bound values for each data type. Used inputs.
+                        E.g. --lower-bound=int64:-10,float32:-0.2,uint8:1.
+                        Supported types are bool, uint8, int8, uint16, int16,
+                        uint32, int32, uint64, int64,float16, float32,
+                        float64.
+  --upper-bound UPPER_BOUND
+                        Upper bound values for each data type. Used to
+                        generate random inputs. E.g. --upper-
+                        bound=int64:10,float32:0.2,uint8:9. Supported types
+                        are bool, uint8, int8, uint16, int16, uint32, int32,
+                        uint64, int64, float16, float32, float64.
+  -w WARMUP, --warmup WARMUP
+                        The number of warmup inference runs.
+  -n N_ITERATION, --n-iteration N_ITERATION
+                        The number of inference runs excluding warmup.
+  --seed SEED           seed to initialize the random num generator for
+                        inputs.
+  --write-compile-log [PATH]
+                        Output compilation messages to file, default
+                        compile.log.
+  --write-runtime-log [PATH]
+                        Output runtime profile info to file, default
+                        runtime.log. These information will be printed out if
+                        the model is compiled with --profile-ir flag

@@ -1,0 +1,259 @@
+{
+  "census_dir": "census/A_reexport/default/emeraldrapids",
+  "harness_commit": "6eb769a9e8ed72b8b22a7c7acf736df773c7eb68",
+  "lengths": [
+    41,
+    256
+  ],
+  "table_verdict": "units not preregistered - no H1 verdict",
+  "n_C_sig": 0,
+  "n_C_ir_structure": 215,
+  "n_C_raw": 215,
+  "alignment": {
+    "analysis_u8": {
+      "units": [
+        8
+      ],
+      "B_align_size": 53,
+      "n_C_sig_nonalign": 0,
+      "n_C_ir_nonalign": 162
+    },
+    "analysis_u16": {
+      "units": [
+        16
+      ],
+      "B_align_size": 27,
+      "n_C_sig_nonalign": 0,
+      "n_C_ir_nonalign": 188
+    },
+    "analysis_u32": {
+      "units": [
+        32
+      ],
+      "B_align_size": 13,
+      "n_C_sig_nonalign": 0,
+      "n_C_ir_nonalign": 202
+    }
+  },
+  "opt_report": {
+    "n_distinct_decision_multisets": 1,
+    "n_records_per_length": [
+      582
+    ],
+    "records_with_trip_count_equal_length": [
+      {
+        "kind": "SIMD",
+        "op": "onnx.Add",
+        "message": "variadic fully flattened",
+        "value": 32,
+        "n": 25
+      },
+      {
+        "kind": "SIMD",
+        "op": "onnx.Sqrt",
+        "message": "unary fully flattened",
+        "value": 32,
+        "n": 25
+      },
+      {
+        "kind": "SIMD",
+        "op": "onnx.Reciprocal",
+        "message": "unary fully flattened",
+        "value": 32,
+        "n": 25
+      },
+      {
+        "kind": "SIMD",
+        "op": "onnx.Cast",
+        "message": "unary fully flattened",
+        "value": 32,
+        "n": 1
+      },
+      {
+        "kind": "SIMD",
+        "op": "onnx.Mul",
+        "message": "variadic with manageable broadcast",
+        "value": 32,
+        "n": 1
+      }
+    ]
+  },
+  "ir_structure_varying_features": [
+    {
+      "feature": "main_graph:loops:affine.for@10",
+      "min": 1,
+      "max": 106,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:loops:affine.for@11",
+      "min": 0,
+      "max": 12,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:loops:affine.for@4",
+      "min": 424,
+      "max": 437,
+      "period": 32,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:loops:affine.for@7",
+      "min": 3,
+      "max": 4,
+      "period": 4,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:loops:affine.for@8",
+      "min": 95,
+      "max": 99,
+      "period": 4,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:loops:affine.for@9",
+      "min": 2,
+      "max": 110,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:affine.apply",
+      "min": 2655,
+      "max": 2956,
+      "period": null,
+      "determined_by_divisibility_up_to": 32
+    },
+    {
+      "feature": "main_graph:ops:affine.for",
+      "min": 2395,
+      "max": 2638,
+      "period": 32,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:affine.if",
+      "min": 98,
+      "max": 195,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:affine.load",
+      "min": 2496,
+      "max": 2727,
+      "period": null,
+      "determined_by_divisibility_up_to": 32
+    },
+    {
+      "feature": "main_graph:ops:affine.min",
+      "min": 2,
+      "max": 194,
+      "period": 32,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:affine.store",
+      "min": 3101,
+      "max": 3319,
+      "period": null,
+      "determined_by_divisibility_up_to": 32
+    },
+    {
+      "feature": "main_graph:ops:arith.addf",
+      "min": 264,
+      "max": 288,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:arith.addi",
+      "min": 7866,
+      "max": 8738,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:arith.constant",
+      "min": 3905,
+      "max": 4113,
+      "period": null,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:arith.mulf",
+      "min": 168,
+      "max": 181,
+      "period": 32,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:memref.load",
+      "min": 1596,
+      "max": 1729,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:memref.store",
+      "min": 17,
+      "max": 29,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:memref.view",
+      "min": 0,
+      "max": 92,
+      "period": 32,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:vector.broadcast",
+      "min": 1648,
+      "max": 1745,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:vector.fma",
+      "min": 1544,
+      "max": 1641,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:vector.load",
+      "min": 2531,
+      "max": 2725,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:ops:vector.store",
+      "min": 796,
+      "max": 893,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:vectors:vector<16xf32>",
+      "min": 6818,
+      "max": 7439,
+      "period": 4,
+      "determined_by_divisibility_up_to": null
+    },
+    {
+      "feature": "main_graph:vectors:vector<8xf32>",
+      "min": 2676,
+      "max": 2928,
+      "period": 8,
+      "determined_by_divisibility_up_to": null
+    }
+  ],
+  "note": "descriptive only; evaluator-side; decides nothing"
+}

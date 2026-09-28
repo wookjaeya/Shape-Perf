@@ -1,0 +1,212 @@
+{
+  "artifacts": {
+    "bertsquad-12.onnx": {
+      "dest": "data/artifacts/bertsquad-12.onnx",
+      "role": "model A (spec \u00a73.1), FP32, opset 12",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/model/bertsquad-12.onnx",
+      "url_used": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.onnx",
+      "attempts": [
+        {
+          "url": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.onnx",
+          "status": "ok",
+          "seconds": 12.0
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "5f0d96a9e6b8a4a2e59f9636f8bbad09ee8a0c58c8212027cc17c5fcc9659e55",
+      "size_bytes": 435852736,
+      "license": "Apache-2.0 (onnx/models repository LICENSE)",
+      "fetched_at_unix": 1790583050
+    },
+    "bertsquad-12.tar.gz": {
+      "dest": "data/artifacts/bertsquad-12.tar.gz",
+      "role": "model A with the zoo's test_data_set_* (reference input/output pairs for G1)",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/model/bertsquad-12.tar.gz",
+      "url_used": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.tar.gz",
+      "attempts": [
+        {
+          "url": "https://media.githubusercontent.com/media/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/model/bertsquad-12.tar.gz",
+          "status": "ok",
+          "seconds": 7.0
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "4cd041010ab4ad11c23c0eb7f056c4e4286a894b6d712ef09445b955763fb1b1",
+      "size_bytes": 403082198,
+      "license": "Apache-2.0 (onnx/models repository LICENSE)",
+      "fetched_at_unix": 1790583057
+    },
+    "run_onnx_squad.py": {
+      "dest": "third_party/bert_squad/run_onnx_squad.py",
+      "role": "official preprocessing/postprocessing for model A (R7)",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/dependencies/run_onnx_squad.py",
+      "url_used": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/run_onnx_squad.py",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/run_onnx_squad.py",
+          "status": "ok",
+          "seconds": 0.3
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "ba2f93aa9036866c266d281a3c7d51883a831ee8148b83c0d670ff2a521c93b3",
+      "size_bytes": 23646,
+      "license": "Apache-2.0",
+      "fetched_at_unix": 1790583057
+    },
+    "tokenization.py": {
+      "dest": "third_party/bert_squad/tokenization.py",
+      "role": "official WordPiece tokenizer used by run_onnx_squad.py",
+      "repo": "https://github.com/onnx/models",
+      "commit": "4f43949841cb55a0b98dc8fcd045431ccafd9f96",
+      "path": "validated/text/machine_comprehension/bert-squad/dependencies/tokenization.py",
+      "url_used": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/tokenization.py",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/onnx/models/4f43949841cb55a0b98dc8fcd045431ccafd9f96/validated/text/machine_comprehension/bert-squad/dependencies/tokenization.py",
+          "status": "ok",
+          "seconds": 0.2
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "2ca43665e813d8d45aad09db86bd0440bc38d56419d8c7121fae00c6fe270948",
+      "size_bytes": 12296,
+      "license": "Apache-2.0",
+      "fetched_at_unix": 1790583057
+    },
+    "vocab.txt": {
+      "dest": "data/artifacts/uncased_L-12_H-768_A-12/vocab.txt",
+      "role": "uncased_L-12_H-768_A-12 vocabulary named in the bert-squad README",
+      "repo": null,
+      "commit": null,
+      "path": null,
+      "url_used": "https://raw.githubusercontent.com/NVIDIA/DeepLearningExamples/729963dd47e7c8bd462ad10bfac7a7b0b604e6dd/PyTorch/LanguageModeling/BERT/vocab/vocab",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/NVIDIA/DeepLearningExamples/729963dd47e7c8bd462ad10bfac7a7b0b604e6dd/PyTorch/LanguageModeling/BERT/vocab/vocab",
+          "status": "ok",
+          "seconds": 0.3
+        }
+      ],
+      "official_source": "https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip (vocab.txt inside)",
+      "provenance_note": "The official zip on storage.googleapis.com returned HTTP 403 from the development environment's egress proxy. The file is taken from a pinned mirror and cross-checked byte-for-byte against a second independent mirror. Functional check: G1 EM/F1 reproduction against the model card value.",
+      "cross_check": [
+        {
+          "url": "https://raw.githubusercontent.com/microsoft/SDNet/3cf7d36ea561994992d2343b282bf8209939d411/bert_vocab_files/bert-base-uncased-vocab.txt",
+          "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+          "match": true
+        }
+      ],
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+      "size_bytes": 231508,
+      "license": "Apache-2.0 (google-research/bert)",
+      "fetched_at_unix": 1790583058
+    },
+    "dev-v1.1.json": {
+      "dest": "data/artifacts/squad/dev-v1.1.json",
+      "role": "SQuAD v1.1 development set (R12)",
+      "repo": "https://github.com/rajpurkar/SQuAD-explorer",
+      "commit": "eee5fdbf62f8613a7812b03419e6b29617b74fd1",
+      "path": "dataset/dev-v1.1.json",
+      "url_used": "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset/dev-v1.1.json",
+      "attempts": [
+        {
+          "url": "https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json",
+          "status": "failed: URLError(OSError('Tunnel connection failed: 403 Forbidden'))"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset/dev-v1.1.json",
+          "status": "ok",
+          "seconds": 0.4
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9",
+      "size_bytes": 4854279,
+      "license": "CC BY-SA 4.0",
+      "fetched_at_unix": 1790583059
+    },
+    "evaluate_v1.1.py": {
+      "dest": "third_party/squad/evaluate_v1.1.py",
+      "role": "official SQuAD v1.1 evaluation script (copy vendored by MLCommons, R9)",
+      "repo": "https://github.com/mlcommons/inference",
+      "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+      "path": "language/bert/evaluate_v1.1.py",
+      "url_used": "https://raw.githubusercontent.com/mlcommons/inference/3fbc329939999c13d0a7b5e67fb2092287e06047/language/bert/evaluate_v1.1.py",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/mlcommons/inference/3fbc329939999c13d0a7b5e67fb2092287e06047/language/bert/evaluate_v1.1.py",
+          "status": "ok",
+          "seconds": 0.2
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "72b7761f82ab8b844dc3a530e9c691c2419f0bf16d0b515015f6ca872f7618a5",
+      "size_bytes": 4557,
+      "license": "Apache-2.0",
+      "fetched_at_unix": 1790583059
+    },
+    "bert_modeling.py": {
+      "dest": "third_party/google_bert/modeling.py",
+      "role": "Google BERT model code (TF1) used by the original training/export pipeline; needed for the \u00a74.4 step-2 re-export",
+      "repo": "https://github.com/google-research/bert",
+      "commit": "eedf5716ce1268e56f0a50264a88cafad334ac61",
+      "path": "modeling.py",
+      "url_used": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/modeling.py",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/modeling.py",
+          "status": "ok",
+          "seconds": 0.5
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "6f5e7c2d157ef46c092f8bc0538e60775f9fa0d40f957c8a3529ead18ff4dded",
+      "size_bytes": 37922,
+      "license": "Apache-2.0",
+      "fetched_at_unix": 1790583457
+    },
+    "bert_run_squad.py": {
+      "dest": "third_party/google_bert/run_squad.py",
+      "role": "Google BERT SQuAD head (create_model) used by the original pipeline; re-export reuses create_model",
+      "repo": "https://github.com/google-research/bert",
+      "commit": "eedf5716ce1268e56f0a50264a88cafad334ac61",
+      "path": "run_squad.py",
+      "url_used": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/run_squad.py",
+      "attempts": [
+        {
+          "url": "https://raw.githubusercontent.com/google-research/bert/eedf5716ce1268e56f0a50264a88cafad334ac61/run_squad.py",
+          "status": "ok",
+          "seconds": 0.3
+        }
+      ],
+      "official_source": null,
+      "provenance_note": null,
+      "cross_check": [],
+      "sha256": "163fd48c7f6b5135a29e25f2cbdae65dbff9697cbff41ce3ebd7d16fdf2ea230",
+      "size_bytes": 46532,
+      "license": "Apache-2.0",
+      "fetched_at_unix": 1790583457
+    }
+  }
+}

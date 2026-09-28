@@ -1,0 +1,70 @@
+{
+  "_comment": "Named onnx-mlir flag sets. ${TARGET_CPU} must be supplied explicitly (compile_shape.py --target-cpu or SHAPEPERF_TARGET_CPU) and is recorded; 'native' is refused unless --allow-native (spec §5.4 step 6). G0 facts (results/g0/g0_verification.json, length 128, v0.5.1.1): with --march=x86-64 the opt-report shows SIMD on elementwise/reduction ops (reported VL 32), Gemm (VL 16) and MatMul (VL 8); with --march unset or native the elementwise/reduction ops are NOT simdized (408 records 'applied=False') while Gemm/MatMul still are. ONNX-MLIR warns 'Got values for both --march and --mcpu, ignore --mcpu' for its own decisions, but --mcpu is still passed to the LLVM toolchain (the .so uses zmm/AVX-512 registers with --mcpu=emeraldrapids). The reported VL is the op's SIMD width as printed by the compiler, not the target register width.",
+  "flagsets": {
+    "default": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}"
+      ],
+      "report": "Simd",
+      "purpose": "main single-thread configuration (spec §5.3) - candidate, to be confirmed at G0"
+    },
+    "default_parallel": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}",
+        "--parallel"
+      ],
+      "report": "Parallel",
+      "purpose": "multi-thread extension (spec §5.3); reported separately from single-thread results"
+    },
+    "O3_nosimd": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}",
+        "--disable-simd"
+      ],
+      "report": "Simd",
+      "purpose": "diagnostic alternative for answer table B (spec §9.3): documented flag, SIMD off"
+    },
+    "O0": {
+      "flags": [
+        "-O0",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}"
+      ],
+      "report": "Simd",
+      "purpose": "correctness/diagnostic path only; not assumed to be a competitive alternative (spec §9.3)"
+    },
+    "diag_profile": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}",
+        "--profile-ir-with-sig=Onnx"
+      ],
+      "report": "Simd",
+      "purpose": "DIAGNOSTIC instrumented build (spec §6.1): per-op time + shapes via the R1 workflow; never a main performance number"
+    },
+    "default_noreport": {
+      "flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=${TARGET_CPU}"
+      ],
+      "report": null,
+      "purpose": "same as default without --opt-report: G3 measures the report's emission overhead, which otherwise sits in the common compile cost (spec §8.4)"
+    }
+  },
+  "probe": {
+    "emit": "--EmitMLIR",
+    "_comment": "Probe stage candidate (spec §8.2b): ONNX->Krnl->Affine, where the opt-report is printed. Whether this stage determines all §6.2 features, and the probe/final mismatch rate, are G3 measurements. print_flags elide large constants from the probe IR text: at G0/smoke the unelided IR was 834 MB per length (weights printed inline). Printing options do not change compilation; the IR-structure signature ignores constants, and the raw-IR hash (ablation 11.2-3) then excludes constant payloads.",
+    "print_flags": [
+      "--mlir-elide-elementsattrs-if-larger=16",
+      "--mlir-elide-resource-strings-if-larger=64"
+    ]
+  }
+}

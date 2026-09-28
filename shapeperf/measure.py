@@ -181,9 +181,10 @@ def run_item(item, env):
 
 
 def run_block(items, out_jsonl, seed, block_id=None, vm_allocation_id="unavailable",
-              experiment_phase="dev-smoke", threads=1):
+              experiment_phase="dev-smoke", threads=1, extra=None):
     """Run plan items in a seeded random order within one block, each in a
-    fresh process (spec §10.1). Raw records are appended, never rewritten."""
+    fresh process (spec §10.1). Raw records are appended, never rewritten.
+    extra: fields added to every record (e.g. the G4 run id and role)."""
     rng = np.random.default_rng(seed)
     order = rng.permutation(len(items)).tolist()
     block_id = block_id or new_run_id("block")
@@ -191,7 +192,8 @@ def run_block(items, out_jsonl, seed, block_id=None, vm_allocation_id="unavailab
     thread_env = {k: env.get(k) for k in THREAD_ENV_KEYS}
     common = {"block_id": block_id, "seed": seed, "vm_allocation_id": vm_allocation_id,
               "experiment_phase": experiment_phase, "harness_commit": git_head(),
-              "host": platform.node(), "thread_config": {"threads": threads, "env": thread_env}}
+              "host": platform.node(), "thread_config": {"threads": threads, "env": thread_env},
+              **(extra or {})}
     results = []
     for pos, k in enumerate(order):
         item = items[k]

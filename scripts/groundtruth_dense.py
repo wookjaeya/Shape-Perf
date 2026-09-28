@@ -66,10 +66,26 @@ def main():
                                        "preregistration": label, "harness_commit": git_head(),
                                        "args": vars(args), "evaluator_only": True})
 
+    strict = label.startswith("frozen")     # correctness gate follows the preregistration, not a CLI flag
     comp_path = out / "compile.jsonl"
     compiled = {}
     if args.reuse_compile:
-        compiled = {(r.get("flagset", "default"), r["padded_length"]): r for r in read_jsonl(args.reuse_compile)}
+        for r in read_jsonl(args.reuse_compile):
+            key = (r.get("flagset", "default"), r["padded_length"])
+            if key[0] not in args.flagsets or key[1] not in lengths:
+                continue
+            bad = [f"{k}={r.get(k)!r}" for k, v in (("model_key", args.model), ("mode", "full"),
+                                                    ("target", args.target_cpu)) if r.get(k) != v]
+            if bad:
+                raise SystemExit(f"--reuse-compile record for {key} does not match this run: {bad}")
+            if not os.path.exists(r.get("artifact_path") or ""):
+                raise SystemExit(f"--reuse-compile artifact for {key} is missing: {r.get('artifact_path')}")
+            r = {**r, "reused_from": str(args.reuse_compile)}
+            if strict and not r.get("failure_type") and r.get("correctness_status") != "pass":
+                # an unfrozen run measured it anyway; a frozen run may not
+                r["failure_type"] = f"correctness:{r.get('correctness_status')}"
+            compiled[key] = r
+            append_jsonl(comp_path, r)   # the run directory lists every artifact it measured
     for fs in args.flagsets:
         for s in lengths:
             if (fs, s) in compiled:
@@ -86,7 +102,7 @@ def main():
                 st = (json.loads(v.stdout.strip().splitlines()[-1])["correctness_status"]
                       if v.returncode == 0 else "error")
                 rec["correctness_status"] = st
-                if st != "pass" and not args.allow_unfrozen:
+                if st != "pass" and strict:
                     rec["failure_type"] = f"correctness:{st}"
             append_jsonl(comp_path, rec)
             compiled[(fs, s)] = rec
@@ -101,7 +117,8 @@ def main():
                  for fs in args.flagsets for s in lengths if not compiled[(fs, s)].get("failure_type")
                  for _ in range(meas["processes_per_shape"] or 1)]
         run_block(items, raw, seed=args.seed * 1000 + blk, vm_allocation_id=args.vm_allocation_id,
-                  experiment_phase=f"g4-{args.role} {label}", threads=meas["threads"])
+                  experiment_phase=f"g4-{args.role} {label}", threads=meas["threads"],
+                  extra={"g4_run_id": run_id, "g4_role": args.role, "g4_seed": args.seed})
         print("block done", blk, flush=True)
     print("output:", out)
 

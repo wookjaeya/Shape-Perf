@@ -13,6 +13,9 @@ PY="${WORK}/venv/bin/python"
 CPU="${SHAPEPERF_TARGET_CPU:?set SHAPEPERF_TARGET_CPU}"
 OUT="${1:-results/dev_smoke}"
 LO="${SMOKE_LO:-41}"; HI="${SMOKE_HI:-44}"
+if [ -e "${OUT}/census" ] || [ -e "${OUT}/g4_disc" ]; then
+    echo "${OUT} already holds a smoke run; use a fresh directory" >&2; exit 2
+fi
 mkdir -p "${OUT}"
 
 # toy preregistration (never the real one)
@@ -25,6 +28,7 @@ p["measurement"].update(warmup_iterations=1, timed_iterations=3, processes_per_s
                         process_statistic="mean", cpus=None)
 p["correctness"]["logit_abs_tolerance"] = None
 p["events"].update(delta_min_effect=0.05, alpha=0.05, confidence_level=0.95, match_tolerance_lengths=0)
+p["replication"]["features_per_event"] = 2
 p["selectors"].update(random_seeds=[1, 2], shape_only_alignment_units=[8], report_overhead_ns=0,
                       compile_probe_budget_fraction=0.3, budgets_ns=[5e11, 5e12])
 json.dump(p, open(sys.argv[1], "w"), indent=1)
@@ -52,6 +56,6 @@ CT="${OUT}/census/A_reexport/default/${CPU}/census_table.json"
 "${PY}" evaluate.py census --census-table "${CT}" --answer-table "${OUT}/answer_table.json" \
     --allow-unfrozen --out "${OUT}/census_metrics.json"
 "${PY}" evaluate.py compare --compile "${OUT}/g4_disc/compile.jsonl" --measurements "${OUT}/g4_disc/measurements.jsonl" \
-    --census "${OUT}/census/A_reexport/default/${CPU}/census.jsonl" --answer-table "${OUT}/answer_table.json" \
+    --confirmation-measurements "${OUT}/g4_conf/measurements.jsonl" --census "${OUT}/census/A_reexport/default/${CPU}/census.jsonl" --answer-table "${OUT}/answer_table.json" \
     --allow-unfrozen --out "${OUT}/policy_comparison.json"
 echo "smoke pipeline finished: ${OUT} (NOT results)"

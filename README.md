@@ -52,9 +52,14 @@ python scripts/run_census.py --lengths 41-256            # 평가자 전용
 python scripts/pilot_g3.py --seed ... --n-lengths ... --adjacent-pairs ... --processes ... --iterations ... --blocks ...
 python scripts/groundtruth_dense.py --role discovery    --seed ... --vm-allocation-id ...
 python scripts/groundtruth_dense.py --role confirmation --seed ... --vm-allocation-id ...
-python evaluate.py answer-table --discovery ... --confirmation ...
+python evaluate.py answer-table --discovery <disc>/measurements.jsonl --confirmation <conf>/measurements.jsonl \
+    --manifest <disc>/manifest.json            # or --valid 41-256: the valid set must be explicit
+python evaluate.py alt-indicators --measurements <disc>/measurements.jsonl --manifest <disc>/manifest.json \
+    --alternative-flagset O3_nosimd           # R(s), Q(s) (spec §9.1)
 python evaluate.py census --census-table census/.../census_table.json --answer-table results/eval/answer_table_A.json
-python evaluate.py compare --compile ... --measurements ... --census ... --answer-table ...
+python evaluate.py compare --compile <disc>/compile.jsonl --measurements <disc>/measurements.jsonl \
+    --confirmation-measurements <conf>/measurements.jsonl --census census/.../census.jsonl \
+    --answer-table results/eval/answer_table_A.json
 
 # 테스트 (합성 데이터; 결과 숫자 아님)
 python -m pytest -q tests

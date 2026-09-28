@@ -52,7 +52,8 @@ def test_probe_is_policy_extra_only():
 
 def test_budget_crossing_entry_is_recorded_but_not_counted():
     r0 = QueryBroker(big(), range(1, 17)).run(UniformSelector(), 10**15)
-    budget = r0["timeline"][2]["cumulative_cost_ns"] + 1
+    # half of entry 3's cost as margin: selector wall-time jitter (~1e5 ns) cannot move the crossing
+    budget = r0["timeline"][2]["cumulative_cost_ns"] + r0["timeline"][3]["charged_ns"] // 2
     r = QueryBroker(big(), range(1, 17)).run(UniformSelector(), budget)
     tl = r["timeline"]
     assert len(tl) == 4 and tl[-1]["within_budget"] is False and tl[-1]["cumulative_cost_ns"] > budget
@@ -85,12 +86,15 @@ def test_cost_free_variant_keeps_probe_cap():
 
 def test_candidates_after_budget_are_not_counted():
     full = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), 10**15)
-    ci = full["candidates"][0]["query_index"]
+    ci = full["candidates"][0]["confirm_index"]
+    assert full["candidates"][0]["query_index"] == full["candidates"][0]["created_at_index"] < ci
     cut = full["timeline"][ci]["cumulative_cost_ns"] - full["timeline"][ci]["common_ns"] // 2
     r = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), cut)
     assert r["timeline"][-1]["action"] == "confirm" and not r["timeline"][-1]["within_budget"]
     row = recall_cost({cut: [r]}, [8], require_confirmation=True)[0]
-    assert row["recall_mean"] == 0 and row["candidates_mean"] == 0
+    # the candidate was created by a within-budget measurement (it counts); its confirmation did not complete
+    assert row["recall_mean"] == 0 and row["candidates_mean"] == 1 and row["confirmed_fraction"] == 0
+    assert r["candidates"][0]["confirmation_status"] == "done (crossed budget)"
     # the measurement that made the pair adjacent completed within budget
     assert recall_cost({cut: [r]}, [8], require_confirmation=False)[0]["recall_mean"] == 1
 
@@ -129,3 +133,45 @@ def test_probe_full_mismatch_log_ignores_failures():
     r = QueryBroker(b, range(1, 9)).run(CompileProbeSelector(budget_fraction=1.0), 10**15)
     assert all(not str(p["probe"]).startswith("FAILED") and not str(p["full"]).startswith("FAILED")
                for p in r["probe_vs_full_signatures"])
+
+
+def test_candidate_created_by_crossing_measurement_is_recorded_without_confirmation():
+    full = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), 10**15)
+    k = full["candidates"][0]["created_at_index"]
+    cut = full["timeline"][k]["cumulative_cost_ns"] - full["timeline"][k]["common_ns"] // 2
+    r = QueryBroker(big(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), cut)
+    c = r["candidates"][0]
+    assert c["created_within_budget"] is False and c["confirm_index"] is None
+    assert c["confirmation_status"].startswith("not_run")
+    assert not any(q["action"] == "confirm" for q in r["timeline"])
+    assert recall_cost({cut: [r]}, [8], require_confirmation=True)[0]["candidates_mean"] == 0
+
+
+def test_timeline_entries_carry_query_index():
+    r = QueryBroker(be(), range(1, 17), confirm_log_threshold=0.1).run(UniformSelector(), 10**9)
+    assert all(q["query_index"] == q["timeline_index"] == i for i, q in enumerate(r["timeline"]))
+
+
+class EarlyFailBackend(SyntheticBackend):
+    def measure(self, s):
+        r = super().measure(s)
+        if s == 16:
+            return {"failure_type": "compile_error", "compile_ns": 10, "report_ns": 40}
+        r["report_ns"] = 40
+        return r
+
+
+def test_report_overhead_never_exceeds_compile_time():
+    r = QueryBroker(EarlyFailBackend({}, [], noise=0.0, compile_ns=100, extract_ns=7, verify_ns=5, measure_ns=10),
+                    range(1, 17)).run(CompileGuidedSelector(), 10**9)
+    q = next(q for q in r["timeline"] if q["padded_length"] == 16)
+    assert q["common_ns"] == 0 and q["policy_extra_ns"] == 10 and q["charged_ns"] >= 0
+    assert all(q["charged_ns"] >= 0 for q in r["timeline"])
+
+
+def test_no_events_gives_undefined_recall_not_nan():
+    r = QueryBroker(be(), range(1, 17)).run(UniformSelector(), 10**9)
+    row = recall_cost({10**9: [r, r]}, [], require_confirmation=True)[0]
+    assert row["recall_mean"] is None and row["recall_ci_mean"] is None and row["recall_note"]
+    one = recall_cost({10**9: [r]}, [8], require_confirmation=False)[0]
+    assert one["recall_ci_mean"] is None                  # one seed: no seed-to-seed interval

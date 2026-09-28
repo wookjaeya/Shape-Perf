@@ -55,7 +55,7 @@ def block_table(records, stat, flagset=None):
             continue
         if flagset is not None and r.get("flagset", "default") != flagset:
             continue
-        t[(r.get("vm_allocation_id", "unavailable"), r["block_id"])][r["padded_length"]].append(
+        t[(r.get("vm_allocation_id") or "unavailable", r["block_id"])][r["padded_length"]].append(
             process_stat(r["latency_ns"], stat))
     return t
 
@@ -179,13 +179,17 @@ def continuous_indicators(table, valid, conf_level, delta, flop_cfg=None, direct
 
 
 def answer_table_a(valid, discovery_table, confirmation_table, delta, alpha, conf_level,
-                   direction="two-sided", min_blocks=2, min_allocations=1, flop_cfg=None, reps=0, seed=0):
+                   direction="two-sided", min_blocks=2, min_allocations=1, flop_cfg=None, reps=0, seed=0,
+                   min_allocations_confirmation=None):
     """Candidates: Holm-adjusted p < alpha on discovery data over the family of
     ALL adjacent pairs of the explicit valid set (pairs without data enter with
     p = 1, so the family does not depend on which lengths failed, §10.3).
     Events: candidates whose effect exceeds delta in the discovery direction on
     independent confirmation data (one-sided, Holm over the candidates).
-    Signatures play no role (spec §9.3)."""
+    Signatures play no role (spec §9.3). The confirmation stage has its own
+    allocation minimum (one new allocation is the usual design)."""
+    if min_allocations_confirmation is None:
+        min_allocations_confirmation = min_allocations
     rows = continuous_indicators(discovery_table, valid, conf_level, delta, flop_cfg, direction,
                                  min_blocks, min_allocations, reps, seed)
     adj = holm([1.0 if r.get("missing") else r["p_exceeds_delta"] for r in rows]) if rows else []
@@ -198,7 +202,7 @@ def answer_table_a(valid, discovery_table, confirmation_table, delta, alpha, con
     for r in cands:
         d = "increase" if r["log_effect"] > 0 else "decrease"
         c = effect_test(paired_log_ratios(confirmation_table, r["s"], r["t"]), delta, conf_level, d,
-                        min_blocks, min_allocations)
+                        min_blocks, min_allocations_confirmation)
         conf.append(None if c.get("insufficient") else c)
     padj = holm([c["p_exceeds_delta"] if c else 1.0 for c in conf]) if conf else []
     events = []
@@ -215,26 +219,68 @@ def answer_table_a(valid, discovery_table, confirmation_table, delta, alpha, con
 
 
 def check_independent(discovery_records, confirmation_records, require_new_allocation):
-    """Spec §9.3: confirmation must come from a separate run/order (and, if
-    preregistered, a separate VM allocation). Raises ValueError otherwise."""
-    def ids(recs, key):
-        return {r.get(key) for r in recs if r.get(key) is not None}
+    """Spec §9.3: confirmation must come from a separate run and comparison
+    order (and, if preregistered, a separate VM allocation). Raises ValueError
+    otherwise.
+
+    run   : the G4 run id (g4_run_id, one per groundtruth_dense invocation), not
+            the per-process run_id; records without it make run identity
+            'unverified' (callers refuse that for frozen runs)
+    order : the block seeds that fix the process order within blocks
+    allocation: a missing vm_allocation_id is the allocation 'unavailable' on
+            both sides, i.e. shared (it is analysed as one allocation)"""
+    def ids(recs, key, missing=None):
+        out = set()
+        for r in recs:
+            v = r.get(key)
+            if v is None:
+                v = missing
+            if v is not None:
+                out.add(v)
+        return out
     shared_blocks = ids(discovery_records, "block_id") & ids(confirmation_records, "block_id")
-    shared_runs = ids(discovery_records, "run_id") & ids(confirmation_records, "run_id")
-    shared_alloc = ids(discovery_records, "vm_allocation_id") & ids(confirmation_records, "vm_allocation_id")
-    if shared_blocks or shared_runs:
-        raise ValueError(f"confirmation data are not independent: shared blocks {sorted(shared_blocks)[:3]}, "
-                         f"shared runs {sorted(shared_runs)[:3]}")
+    d_runs, c_runs = ids(discovery_records, "g4_run_id"), ids(confirmation_records, "g4_run_id")
+    shared_runs = d_runs & c_runs
+    shared_seeds = ids(discovery_records, "seed") & ids(confirmation_records, "seed")
+    shared_alloc = (ids(discovery_records, "vm_allocation_id", "unavailable")
+                    & ids(confirmation_records, "vm_allocation_id", "unavailable"))
+    wrong_role = sorted({r.get("g4_role") for r in confirmation_records if r.get("g4_role") not in (None, "confirmation")}
+                        | {str(r.get("experiment_phase")) for r in confirmation_records
+                           if str(r.get("experiment_phase", "")).startswith("g4-discovery")})
+    problems = []
+    if shared_blocks:
+        problems.append(f"shared blocks {sorted(shared_blocks)[:3]}")
+    if shared_runs:
+        problems.append(f"shared G4 runs {sorted(shared_runs)[:3]}")
+    if shared_seeds:
+        problems.append(f"same block order seeds {sorted(shared_seeds)[:3]}")
+    if wrong_role:
+        problems.append(f"confirmation records labelled {wrong_role[:3]}")
+    if problems:
+        raise ValueError("confirmation data are not independent: " + "; ".join(problems))
     if require_new_allocation and shared_alloc:
-        raise ValueError(f"confirmation shares VM allocation(s) {sorted(shared_alloc)} with discovery")
-    return {"shared_allocations": sorted(shared_alloc)}
+        raise ValueError(f"confirmation shares VM allocation(s) {sorted(shared_alloc)} with discovery "
+                         "(records without vm_allocation_id count as the shared allocation 'unavailable')")
+    no_run_id = (any(r.get("g4_run_id") is None for r in discovery_records)
+                 or any(r.get("g4_run_id") is None for r in confirmation_records))
+    return {"shared_allocations": sorted(shared_alloc),
+            "run_identity": "unverified (records without g4_run_id)" if no_run_id else "verified",
+            "discovery_g4_runs": sorted(d_runs), "confirmation_g4_runs": sorted(c_runs)}
 
 
-def per_shape_summary(records, stat):
-    """Spec §10.3: per shape n, mean latency and dispersion of process statistics."""
+def select_flagset(records, flagset):
+    """Records of one flag set (records without the field are 'default')."""
+    if flagset is None:
+        return list(records)
+    return [r for r in records if r.get("flagset", "default") == flagset]
+
+
+def per_shape_summary(records, stat, flagset=None):
+    """Spec §10.3: per shape n, mean latency and dispersion of process statistics
+    for one flag set."""
     by = defaultdict(list)
     fails = Counter()
-    for r in records:
+    for r in select_flagset(records, flagset):
         if r.get("failure_type"):
             fails[r["padded_length"]] += 1
             continue
@@ -255,13 +301,17 @@ def alternative_indicators(default_table, alt_table, valid, conf_level):
     keys = set(default_table) & set(alt_table)
     r_rows, q_rows = [], []
 
-    def ci(x):
-        x = np.asarray(x, float)
+    def ci(by_alloc):
+        """t interval over the test units (allocation means when >= 2
+        allocations, else blocks - the same rule as effect_test)."""
+        units, kind = test_units(by_alloc)
+        x = np.asarray(units, float)
+        info = {"unit": kind, "n_units": int(x.size), "n_allocations": sum(1 for v in by_alloc.values() if v)}
         if x.size < 2:
-            return None
+            return None, info
         se = x.std(ddof=1) / math.sqrt(x.size)
         q = float(st.t.ppf(1 - (1 - conf_level) / 2, x.size - 1))
-        return [float(x.mean() - q * se), float(x.mean() + q * se)]
+        return [float(x.mean() - q * se), float(x.mean() + q * se)], info
 
     def logr(k, s):
         d, a = default_table[k], alt_table[k]
@@ -269,39 +319,68 @@ def alternative_indicators(default_table, alt_table, valid, conf_level):
             return math.log(np.mean(d[s]) / np.mean(a[s]))
         return None
 
+    def row(by_alloc, name):
+        units = test_units(by_alloc)[0]
+        c, info = ci(by_alloc)
+        m = float(np.mean(units)) if units else None
+        return {"n_blocks": sum(len(v) for v in by_alloc.values()), f"log_{name}": m,
+                name: math.exp(m) if m is not None else None, f"ci_log_{name}": c, **info}
+
     for s in sorted(valid):
-        v = [x for x in (logr(k, s) for k in keys) if x is not None]
-        r_rows.append({"s": s, "n_blocks": len(v), "log_R": float(np.mean(v)) if v else None,
-                       "R": math.exp(np.mean(v)) if v else None, "ci_log_R": ci(v)})
+        by_alloc = defaultdict(list)
+        for k in keys:
+            x = logr(k, s)
+            if x is not None:
+                by_alloc[k[0]].append(x)
+        r_rows.append({"s": s, **row(by_alloc, "R")})
     for s, t in adjacent_pairs(valid):
-        v = []
+        by_alloc = defaultdict(list)
         for k in keys:
             a, b = logr(k, s), logr(k, t)
             if a is not None and b is not None:
-                v.append(b - a)
-        q_rows.append({"s": s, "t": t, "n_blocks": len(v), "log_Q": float(np.mean(v)) if v else None,
-                       "Q": math.exp(np.mean(v)) if v else None, "ci_log_Q": ci(v)})
+                by_alloc[k[0]].append(b - a)
+        q_rows.append({"s": s, "t": t, **row(by_alloc, "Q")})
     return {"R": r_rows, "Q": q_rows,
             "note": "R>1: the alternative is faster at s; Q: change of R across the boundary (spec §9.1)"}
 
 
-def natural_weighted_impact(event_detail, length_freq):
-    """Spec §11.1 secondary: SQuAD-derived impact of confirmed events. An event
-    (s, t) with ratio r affects features whose natural length is t; the impact
-    is sum over events of freq(t)/N * (r - 1). This is a property of the SQuAD
-    preprocessing distribution, not a service effect."""
-    n = sum(length_freq.values())
-    rows = []
-    tot = 0.0
-    for e in event_detail:
-        if not e.get("confirmed"):
+def natural_weighted_impact(mean_ns_by_len, event_pairs, length_freq, valid):
+    """Spec §11.1 secondary, descriptive: natural-length-weighted avoidable
+    padding excess.
+
+    A feature of natural length L can run at any valid padded length s >= L.
+    excess(L) = T(L) / min_{s >= L, measured} T(s) - 1 is the latency it loses by
+    running at L instead of the best longer padding (0 when L itself is best).
+    The total weights excess(L) by the SQuAD natural-length frequency. The part
+    'across confirmed events' counts lengths whose best padding lies across a
+    confirmed event boundary (s < t with L <= s < t <= best). Uses per-shape
+    means (pass the independent confirmation data to avoid selection bias).
+    This is a property of the SQuAD preprocessing distribution, not a service
+    effect. Returns 'unavailable' without a frequency catalog."""
+    if not length_freq:
+        return {"status": "unavailable (no natural-length frequency catalog)"}
+    freq = {int(k): v for k, v in length_freq.items()}
+    n = sum(freq.values())
+    meas = {int(k): float(v) for k, v in mean_ns_by_len.items() if v is not None}
+    valid = sorted(int(v) for v in valid)
+    rows, tot, tot_ev, covered = [], 0.0, 0.0, 0
+    for L in sorted(freq):
+        if L not in meas:
             continue
-        f = length_freq.get(str(e["t"]), length_freq.get(e["t"], 0))
-        r = e["discovery"]["ratio"]
-        w = f / n if n else 0.0
-        rows.append({"s": e["s"], "t": e["t"], "ratio": r, "freq_t": f, "weighted_excess": w * (r - 1)})
-        tot += w * (r - 1)
-    return {"total_weighted_excess": tot, "events": rows}
+        cand = [s for s in valid if s >= L and s in meas]
+        best = min(cand, key=lambda s: (meas[s], s))
+        ex = meas[L] / meas[best] - 1.0
+        w = freq[L] / n if n else 0.0
+        across = any(L <= a and b <= best for a, b in event_pairs)
+        covered += freq[L]
+        tot += w * ex
+        tot_ev += w * ex if across else 0.0
+        if ex > 0:
+            rows.append({"L": L, "best_padding": best, "excess": ex, "freq": freq[L],
+                         "across_confirmed_event": across})
+    return {"status": "ok", "definition": "sum_L freq(L)/N * (T(L)/min_{s>=L} T(s) - 1)",
+            "total_weighted_excess": tot, "weighted_excess_across_confirmed_events": tot_ev,
+            "frequency_covered": covered / n if n else None, "lengths_with_excess": rows}
 
 
 # ---------------------------------------------------------------------------
@@ -320,14 +399,25 @@ def change_points(sig_by_len, valid):
     return [s for s, _ in change_pairs(sig_by_len, valid)]
 
 
+def _is_failed(x):
+    return x is None or str(x).startswith(("FAILED:", "CORRUPT:"))
+
+
 def split_failure_boundaries(sig_by_len, valid):
-    """(decision change points, failure boundaries): a boundary touching a
-    failed length is not a lowering-decision change (spec §1.2 H1)."""
-    dec, fail = [], []
-    for s, t in change_pairs(sig_by_len, valid):
-        a, b = str(sig_by_len[s]), str(sig_by_len[t])
-        (fail if a.startswith("FAILED:") or b.startswith("FAILED:") else dec).append(s)
-    return dec, fail
+    """-> (decision change points, failure boundaries, decision change spans).
+
+    A boundary touching a failed length is not itself a lowering-decision change
+    (spec §1.2 H1); it is listed in failure boundaries. The decision is instead
+    compared between the nearest successful lengths on either side of a run of
+    failed lengths: if they differ, the change lies somewhere in [a, b] and is
+    reported as the span (a, b) with change point a. Adjacent successful pairs
+    give spans (s, t). Unusable values (None, CORRUPT:) count as failed here."""
+    valid = sorted(valid)
+    fail = [s for s, t in change_pairs(sig_by_len, valid)
+            if str(sig_by_len[s]).startswith("FAILED:") or str(sig_by_len[t]).startswith("FAILED:")]
+    ok = [s for s in valid if s in sig_by_len and not _is_failed(sig_by_len[s])]
+    spans = [(a, b) for a, b in zip(ok, ok[1:]) if sig_by_len[a] != sig_by_len[b]]
+    return [a for a, _ in spans], fail, spans
 
 
 def aligned_boundaries(valid, units):
@@ -344,19 +434,37 @@ def _match(xs, ys, tol):
     return {x for x in xs if any(abs(x - y) <= tol for y in ys)}
 
 
-def census_metrics(c_sig, b_align, e_a, tol):
-    c_sig, b_align, e_a = set(c_sig), set(b_align), set(e_a)
-    c_non = c_sig - b_align
-    hit = _match(c_sig, e_a, tol)
-    ev_hit = _match(e_a, c_sig, tol)
-    ev_non = _match(e_a, c_non, tol)
+def census_metrics(c_sig, b_align, e_a, tol, units=None):
+    """c_sig: change points s (adjacent pair (s, s+1 in the valid set)) or spans
+    [a, b] (a change somewhere in [a, b], e.g. across failed lengths). A span
+    matches an event e when a - tol <= e <= b - 1 + tol; it is aligned when
+    [a, b] contains a multiple of a unit (needs units) - for adjacent pairs this
+    is exactly B_align."""
+    spans = sorted({(int(c[0]), int(c[1])) if isinstance(c, (list, tuple)) else (int(c), None) for c in c_sig})
+    b_align, e_a = set(b_align), set(e_a)
+    us = [u for u in (units or []) if u > 1]
+
+    def aligned(a, b):
+        if b is None or units is None:
+            return a in b_align
+        return any(math.floor(b / u) * u >= a for u in us)
+
+    def hits(a, b, e):
+        hi = (b - 1) if b is not None else a
+        return a - tol <= e <= hi + tol
+
+    non = [(a, b) for a, b in spans if not aligned(a, b)]
+    hit = [c for c in spans if any(hits(*c, e) for e in e_a)]
+    ev_hit = {e for e in e_a if any(hits(*c, e) for c in spans)}
+    ev_non = {e for e in e_a if any(hits(*c, e) for c in non)}
     return {
-        "n_C_sig": len(c_sig), "n_B_align": len(b_align), "n_C_nonalign": len(c_non), "n_E_A": len(e_a),
-        "C_nonalign": sorted(c_non),
-        "Prec_sig": len(hit) / len(c_sig) if c_sig else None,
+        "n_C_sig": len(spans), "n_B_align": len(b_align), "n_C_nonalign": len(non), "n_E_A": len(e_a),
+        "C_nonalign": sorted(a for a, _ in non),
+        "C_nonalign_spans": [[a, b] for a, b in non if b is not None],
+        "Prec_sig": len(hit) / len(spans) if spans else None,
         "Rec_sig": len(ev_hit) / len(e_a) if e_a else None,
         "nonalign_contribution": len(ev_non) / len(e_a) if e_a else None,
-        "H1_nonanalytic_changes_exist": bool(c_non),
+        "H1_nonanalytic_changes_exist": bool(non),
         "match_tolerance": tol,
     }
 
@@ -399,9 +507,13 @@ def discoveries(run, events, require_confirmation):
 
 
 def _mean_ci(x, conf_level=0.95):
+    """t interval of the mean over seeds; None with fewer than 2 values (one
+    seed carries no information about seed-to-seed variation)."""
     x = np.asarray(x, float)
-    if x.size < 2 or np.all(x == x[0]):
-        return [float(x.mean()), float(x.mean())] if x.size else [None, None]
+    if x.size < 2:
+        return None
+    if np.all(x == x[0]):
+        return [float(x[0]), float(x[0])]
     se = x.std(ddof=1) / math.sqrt(x.size)
     q = float(st.t.ppf(1 - (1 - conf_level) / 2, x.size - 1))
     return [float(x.mean() - q * se), float(x.mean() + q * se)]
@@ -415,20 +527,26 @@ def recall_cost(runs_by_budget, events, require_confirmation, conf_level=0.95):
     for b, runs in sorted(runs_by_budget.items()):
         rec, cands, conf, unused, common, extra, sel = [], [], [], [], [], [], []
         for r in runs:
-            rec.append(len(discoveries(r, events, require_confirmation)) / len(events) if events else float("nan"))
+            if events:
+                rec.append(len(discoveries(r, events, require_confirmation)) / len(events))
             ok = [q for q in r["timeline"] if q["within_budget"]]
-            cs = [q for q in ok if q["action"] == "confirm"]
+            # candidates created by within-budget entries; confirmed = within-budget confirmation succeeded
+            cs = [c for c in r.get("candidates", []) if c.get("created_within_budget")]
             cands.append(len(cs))
-            conf.append(sum(bool(q.get("confirmed")) for q in cs))
+            conf.append(sum(1 for c in cs if c.get("confirmed") and c.get("confirmation_status") == "done"))
             used = max([q["cumulative_cost_ns"] for q in ok] or [0])
             unused.append(1 - used / b if b else 0.0)
             common.append(sum(q.get("common_ns", 0) for q in ok))
             extra.append(sum(q.get("policy_extra_ns", 0) for q in ok))
             sel.append(sum(q.get("selection_ns", 0) for q in ok))
-        rows.append({"budget_ns": b, "n_runs": len(runs), "recall_mean": float(np.mean(rec)),
-                     "recall_min": float(np.min(rec)), "recall_max": float(np.max(rec)),
-                     "recall_ci_mean": _mean_ci(rec, conf_level),
-                     "recall_q025_q975": [float(np.quantile(rec, 0.025)), float(np.quantile(rec, 0.975))],
+        rows.append({"budget_ns": b, "n_runs": len(runs),
+                     "recall_mean": float(np.mean(rec)) if rec else None,
+                     "recall_min": float(np.min(rec)) if rec else None,
+                     "recall_max": float(np.max(rec)) if rec else None,
+                     "recall_ci_mean": _mean_ci(rec, conf_level) if rec else None,
+                     "recall_q025_q975": [float(np.quantile(rec, 0.025)), float(np.quantile(rec, 0.975))]
+                     if rec else None,
+                     "recall_note": None if events else "E_A empty: recall undefined",
                      "candidates_mean": float(np.mean(cands)),
                      "confirmed_fraction": (float(np.sum(conf)) / np.sum(cands)) if np.sum(cands) else None,
                      "unused_budget_fraction_mean": float(np.mean(unused)),

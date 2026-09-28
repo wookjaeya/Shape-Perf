@@ -34,10 +34,10 @@ def model_def(model_key):
 
 @lru_cache(maxsize=4)
 def model_node_names(path):
-    """ONNX node names of the model file (sig-v2 canonicalization)."""
+    """ONNX node name -> op_type of the model file (sig-v2 canonicalization)."""
     import onnx
     m = onnx.load(path, load_external_data=False)
-    return frozenset(n.name for n in m.graph.node if n.name)
+    return {n.name: n.op_type for n in m.graph.node if n.name}
 
 
 def line_buffered(cmd):
@@ -152,9 +152,15 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
         return rec
 
     # ---- information extraction (charged separately, §8.4) ----
+    # feature_extract_wall_ns = what the primary signature costs (parse the
+    # opt-report + hash); the model's node names are loaded before timing.
+    # IR reading/structure/raw hashing is only needed by ablation 11.2-3 and is
+    # timed separately (ablation_extract_wall_ns).
+    known = model_node_names(model["abs_path"])
     t0 = time.monotonic_ns()
     recs = sigmod.parse_opt_report(stdout)
-    rsig = sigmod.report_signature(recs, model_node_names(model["abs_path"]))
+    rsig = sigmod.report_signature(recs, known)
+    rec["feature_extract_wall_ns"] = time.monotonic_ns() - t0
     rec["ir_signature"] = rsig["hash"] if rsig["integrity"] == "ok" else f"CORRUPT:{rsig['hash']}"
     rec["signature_version"] = rsig["version"]
     rec["signature_stage"] = f"opt-report:{fs['report']}" if fs["report"] else None
@@ -164,6 +170,7 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
                                        if l.strip().startswith("Warning:")})
     (out_dir / "report_signature.json").write_text(json.dumps(rsig, indent=1))
     if mode == "probe":
+        t1 = time.monotonic_ns()
         ir_path = Path(str(base) + ".onnx.mlir")
         if ir_path.exists():
             ir = ir_path.read_text(errors="replace")
@@ -176,8 +183,9 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
                 ir_path.unlink()
         else:
             rec["ir_structure_signature"] = None
+            rec["raw_ir_hash"] = None
             rec["probe_ir_missing"] = str(ir_path)
-    rec["feature_extract_wall_ns"] = time.monotonic_ns() - t0
+        rec["ablation_extract_wall_ns"] = time.monotonic_ns() - t1
 
     if mode == "full":
         so = Path(str(base) + ".so")

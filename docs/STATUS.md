@@ -30,7 +30,7 @@
 - R1 문서(`docs/PerformanceTesting.md`)는 태그 이후 main에만 있으나, 문서가 설명하는 `--profile-ir-with-sig` 옵션은 태그 소스에도 있음을 확인.
 - **정적 특수화**: `--shapeInformation=0:1,1:1x128,2:1x128,3:1x128`으로 만든 `.so`의 PyRuntime 입력 signature가 `[1]`, `[1,128]`×3, probe IR의 `main_graph` 인자가 `memref<1x128xi64>` 등 정적 memref임을 확인. `RunONNXModel.py --shape-info`는 실행 입력 생성 옵션임을 `--help`로 기록.
 - **matmul/attention lowering 경로**: 컴파일러 생성 코드. `.so`의 동적 import에 BLAS류 심볼이 없고(`expf`, `tanhf`, `powf`, `malloc` 등 libc/libm만), opt-report에 Gemm 81건·MatMul 28건의 SIMD 기록이 있다.
-- **SIMD 적용 양상 (opt-report 실측, 길이 128)**: `--march=x86-64`에서 요소별·축약 연산 SIMD(보고 VL 32), Gemm VL 16, MatMul VL 8. `--march` 미지정·`native`에서는 요소별·축약 연산 407건이 SIMD 미적용이고 Gemm/MatMul만 SIMD. **초기 소스 판독에서 "그 외 `--march`면 SIMD가 꺼진다"고 적었던 것은 요소별 연산에만 맞았다**. `--march`와 `--mcpu`를 함께 주면 ONNX-MLIR 자체 결정은 `--mcpu`를 무시한다고 경고하지만, LLVM에는 전달되어 최종 `.so`가 zmm(AVX-512) 명령을 쓴다. 기본 flag set `-O3 --march=x86-64 --mcpu=<VM CPU>`는 여전히 후보이며 측정 VM에서 같은 확인을 반복한다.
+- **SIMD 적용 양상 (opt-report 실측, 길이 128)**: `--march=x86-64`에서 요소별·축약 연산 SIMD(보고 VL 32), Gemm VL 16, MatMul VL 8. `--march` 미지정·`native`에서는 요소별·축약 연산 408건이 SIMD 미적용이고 Gemm/MatMul만 SIMD. **초기 소스 판독에서 "그 외 `--march`면 SIMD가 꺼진다"고 적었던 것은 요소별 연산에만 맞았다**. `--march`와 `--mcpu`를 함께 주면 ONNX-MLIR 자체 결정은 `--mcpu`를 무시한다고 경고하지만, LLVM에는 전달되어 최종 `.so`가 zmm(AVX-512) 명령을 쓴다. 기본 flag set `-O3 --march=x86-64 --mcpu=<VM CPU>`는 여전히 후보이며 측정 VM에서 같은 확인을 반복한다.
 - **컴파일 비용(길이 128, 개발 환경)**: 전체 컴파일 78초·최대 RSS 2.8 GB·`.so` 435 MB(상수 내장). probe(`--EmitMLIR`)는 상수를 그대로 출력하면 IR 834 MB·7.7–8.2초였고, 큰 상수 생략 출력(`--mlir-elide-*`, 컴파일 결과·signature 불변 확인)으로 IR 2.3 MB·2.9초. probe : 전체 컴파일 ≈ 0.04 (H3의 첫 근거; 측정 VM의 G3에서 다시 측정).
 - **디스크 요구(측정 VM 준비용)**: 모델 A의 `.so`는 길이마다 약 0.42 GB라 G4 조밀 측정(216개 길이, 블록 내 무작위 순서 때문에 동시 보관 필요)에는 artifact만 약 90 GB가 든다. 추가 flag set 하나당 같은 양이 더 필요하다.
 - **signature 결정성**: 같은 길이를 두 번 probe해도 opt-report·IR 구조·원문 IR 해시 모두 동일, probe와 전체 컴파일의 opt-report signature 동일, 보고 무결성 정상 (`sig-v2`, 아래 참고).
@@ -74,3 +74,24 @@
 - 예산: 같은 질의 안의 두 번째 확인이 예산을 넘으면 첫 번째 확인까지 무효화 → 확인을 별도 timeline 항목으로.
 - Compile-probe가 쓰지 않는 전체 컴파일 signature 추출 비용을 내던 문제, `[]` 정렬 단위의 잔여 처리, census 실패 경계가 H1 판정을 뒤집던 문제, 부분 census로 인한 충돌, 미고정 정답표의 혼입, 확인 데이터 독립성 미강제, View의 누적 비용 누출.
 - 명세 누락 구현: R(s)/Q(s), ablation 3(원문 IR 해시)·4(다른 입력 재현), δ별 결과와 seed 불확실성, per-shape 요약, 자연 길이 가중 효과, 공통/정책 추가 비용 분리 출력, 실행별 timeline 보존.
+
+**3차 (다중 에이전트 검증 워크플로 2회차: 2차 수정 재검증)**: 20건 확인 + 경미 27건. 주요 수정:
+- 비용: probe 추출 비용에 ablation 전용 IR 해싱(대용량 IR 읽기)과 ONNX 모델 로딩이 섞여 Compile-probe가 약 5배 과다 청구 → 주 signature 추출(opt-report 파싱·해시)만 `feature_extract_wall_ns`, IR 구조·원문 해시는 `ablation_extract_wall_ns`로 분리해 ablation 변형에만 청구. G3 probe:측정 비용비도 같은 정의(probe 컴파일 + 추출)로 계산.
+- 비용: 빠르게 실패한 컴파일에서 `compile_ns - report_ns`가 음수가 되어 예산을 돌려주던 문제 → `report_ns`는 성공한 컴파일에만, 컴파일 시간을 넘지 않게. LiveBackend도 사전등록 `report_ns`를 같은 규칙으로 사용.
+- 비용: 확인 절차를 프로세스 1개 비용으로 청구하던 문제 → 정답표 A가 실제로 쓴 확인 run의 두 끝점 프로세스 시도 전체의 wall time. 실패한 측정 시도도 재생 시 비용과 실패로 반영, 프로세스 기동 비용 포함.
+- census: 실패 길이 너머의 결정 변화가 사라지고, 전부 실패해도 "H1 기각 → 중단"이 나오던 문제 → 실패 구간 양쪽의 가장 가까운 성공 길이를 비교해 구간(span)으로 기록, 성공 길이가 2개 미만·손상 보고·IR 누락이면 INCOMPLETE. `--resume`은 손상·IR 누락 길이를 다시 컴파일, 요청 범위 밖 기록은 무시.
+- CORRUPT signature가 실제 값처럼 쓰이던 문제 → 탐색기에는 `FAILED:corrupt_report`(사전등록 실패 규칙), census에서는 실패처럼 건너뜀, `evaluate census`는 불완전한 표를 고정 실행에서 거부하고 개발 실행에서는 경고.
+- 독립성 검사가 실제로는 작동하지 않던 문제(run_id가 프로세스마다 새로 생김) → G4 run id·블록 순서 seed·역할을 기록하고 비교, 할당 id가 없으면 공유로 간주. 고정 실행은 run id가 검증돼야 함.
+- 정답표·per-shape 요약·compare가 flag set을 섞던 문제, compile 기록 없는 측정 길이를 무료 실패로 재생하던 문제(`--reuse-compile` 기록도 새 run에 복사), 고정 G4가 정확도 실패 artifact를 측정할 수 있던 문제, `validate_shapes.py`가 `SHAPEPERF_PREREG`를 무시하던 문제.
+- 통계: R(s)/Q(s) CI를 할당 단위로, 확인 단계 할당 최소를 별도 사전등록 값으로, seed 1개일 때 CI 없음, 사건이 없으면 recall 정의 안 됨(NaN 대신 null).
+- 자연 길이 가중 영향: 사건 비율을 끝점 빈도로 곱하던 정의 → "피할 수 있었던 padding 초과" `T(L)/min_{s≥L}T(s) − 1`을 자연 길이 빈도로 가중(확인 데이터의 per-shape 평균), 카탈로그가 없으면 "unavailable".
+- 파싱: 보고 줄 끝에 이물 텍스트가 붙으면 예외로 중단 → 파싱 불가 줄로 기록(`CORRUPT:`). 위치 정보 제거 정규식이 `memref.alloc(` 안의 `loc(`까지 지우던 문제. 생성 이름이 다른 원래 노드 이름과 겹칠 때 op 종류로 구분, 카운터가 여러 개인 이름 처리.
+- 격리: 테스트 전용 `class_path` 모듈의 최상위 코드가 감옥 밖에서 실행되던 문제 → 소스만 먼저 읽고 감옥 안에서 실행, 환경변수로 명시적으로 허용할 때만 사용, 격리 수준에 `+test-class` 표시. 작업자가 보고한 선택 시간·행동 형식 검증.
+- 기타: timeline에 §12 조인 키 `query_index` 복원, 후보는 생성 시점에 기록(예산 소진으로 확인을 못 해도), 재현 스크립트의 정답표 라벨·표본 수·신뢰수준을 사전등록에서.
+
+### 남은 한계 (알고 있는 것)
+
+- **생성 노드 이름의 모호성**: ONNX-MLIR의 이름 부여 순서가 포인터 주소 순이라, 생성 연산이 **원래 모델에 있던 이름**(예: 제거된 `X_1`)을 재사용하면 sig-v2도 구분하지 못할 수 있다. 길이 128에서는 반복 컴파일 signature가 같았다. 측정 VM의 G0에서 `scripts/g0_verify.py --determinism-lengths ...`로 여러 길이에서 반복 컴파일 결정성을 확인한다.
+- **시간 부채널**: 탐색기는 자기 결정 시간을 `time.perf_counter`로 잴 수 있고(정적 검사는 `time` import를 막지만 런타임은 막지 않음), 이는 측정 결과가 아니라 자기 계산 시간이므로 정보 누출로 보지 않는다.
+- **LiveBackend 확인 절차**: G5 실시간 실행의 확인 절차는 G3/G4 이후 사전등록으로 고정한다(현재 `NotImplementedError`).
+

@@ -179,14 +179,19 @@ def main():
         row = {"compile_wall_ns": c["full"].get("compile_wall_ns"), "probe_wall_ns": c["probe"].get("probe_wall_ns"),
                "compile_peak_rss": c["full"].get("peak_rss_bytes"), "probe_peak_rss": c["probe"].get("peak_rss_bytes"),
                "feature_extract_wall_ns": c["full"].get("feature_extract_wall_ns"),
+               "probe_feature_extract_wall_ns": c["probe"].get("feature_extract_wall_ns"),
+               "probe_ablation_extract_wall_ns": c["probe"].get("ablation_extract_wall_ns"),
                "report_signature_full": c["full"].get("ir_signature"),
                "report_signature_probe": c["probe"].get("ir_signature"),
                "final_signature": c["full"].get("final_signature"),
                "matmul_path": c["full"].get("matmul_path"),
                "validation": c["validation"],
                "no_report_compile": c.get("noreport"),
-               "report_emission_overhead_ns": ((c["full"].get("compile_wall_ns") or 0) - c["noreport"]["compile_wall_ns"]
-                                               if c.get("noreport") and c["noreport"].get("compile_wall_ns") else None)}
+               "report_emission_overhead_ns": (c["full"]["compile_wall_ns"] - c["noreport"]["compile_wall_ns"]
+                                               if c.get("noreport") and not c["noreport"].get("failure_type")
+                                               and not c["full"].get("failure_type")
+                                               and c["noreport"].get("compile_wall_ns")
+                                               and c["full"].get("compile_wall_ns") else None)}
         if rs:
             per_iter = np.mean([np.mean(r["latency_ns"]) for r in rs])
             row.update(warmup_profile_ns=warmup_profile(rs),
@@ -205,13 +210,22 @@ def main():
                 row["process_wall_ns"] - row["measurement_wall_ns_per_process"])
             full_cost = (row["compile_wall_ns"] or 0) + (c.get("verify_wall_ns") or 0) + row["process_wall_ns"]
             row["verify_wall_ns"] = c.get("verify_wall_ns")
-            row["probe_to_measured_query_cost_ratio"] = (row["probe_wall_ns"] / full_cost
-                                                         if row["probe_wall_ns"] and full_cost else None)
+            # a probe costs what the broker charges it: probe compile + its (opt-report) extraction
+            probe_cost = (row["probe_wall_ns"] or 0) + (row["probe_feature_extract_wall_ns"] or 0)
+            row["probe_to_measured_query_cost_ratio"] = (probe_cost / full_cost
+                                                         if row["probe_wall_ns"] and full_cost
+                                                         and not c["probe"].get("failure_type") else None)
         report["per_length"][s] = row
+    def usable_sig(c, key):
+        """None for failed compiles, missing or corrupt signatures (not comparable)."""
+        v = c.get(key)
+        if c.get("failure_type") or v is None or str(v).startswith("CORRUPT:"):
+            return None
+        return v
     mism = []
     for a, b in adj:
-        pa, pb = comp[a]["probe"].get("ir_signature"), comp[b]["probe"].get("ir_signature")
-        fa, fb = comp[a]["full"].get("final_signature"), comp[b]["full"].get("final_signature")
+        pa, pb = usable_sig(comp[a]["probe"], "ir_signature"), usable_sig(comp[b]["probe"], "ir_signature")
+        fa, fb = usable_sig(comp[a]["full"], "final_signature"), usable_sig(comp[b]["full"], "final_signature")
         if None in (pa, pb, fa, fb):
             mism.append({"pair": [a, b], "unavailable": True})
             continue
@@ -222,8 +236,11 @@ def main():
         "pairs": mism, "rate": float(np.mean([x["mismatch"] for x in usable])) if usable else None,
         "n_unavailable": len(mism) - len(usable),
         "note": "tiny sample; the census-scale rate needs full compiles of adjacent lengths"}
-    report["probe_vs_full_report_signature_equal"] = {
-        s: comp[s]["probe"].get("ir_signature") == comp[s]["full"].get("ir_signature") for s in lengths}
+    eq = {}
+    for s in lengths:
+        ps, fs_ = usable_sig(comp[s]["probe"], "ir_signature"), usable_sig(comp[s]["full"], "ir_signature")
+        eq[s] = None if None in (ps, fs_) else ps == fs_
+    report["probe_vs_full_report_signature_equal"] = eq
     write_json(out / "pilot_report.json", report)
     print("pilot report:", out / "pilot_report.json")
     print("NOTE: choose warmup/iterations/processes from these data and write them into "

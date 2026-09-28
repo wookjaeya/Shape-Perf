@@ -63,14 +63,19 @@ def parse_opt_report(text):
             continue
         op = parts[0]
         suffix = "-simd" if m.group(1) == "SIMD" else "-par"
+        try:
+            value, trip = int(parts[-2]), int(parts[-1])
+        except ValueError:                 # interleaved foreign text after a field
+            recs.append({"kind": m.group(1), "unparsed": line.strip()})
+            continue
         recs.append({
             "kind": m.group(1),
             "op": op[:-len(suffix)] if op.endswith(suffix) else op,
             "applied": op.endswith(suffix),
             "node": ", ".join(parts[1:-3]),
             "message": parts[-3],
-            "value": int(parts[-2]),      # SIMD: vector length; PAR: loop level
-            "trip_count": int(parts[-1]),  # excluded from the signature
+            "value": value,               # SIMD: vector length; PAR: loop level
+            "trip_count": trip,           # excluded from the signature
         })
     return recs
 
@@ -78,17 +83,43 @@ def parse_opt_report(text):
 _SUFFIX_RE = re.compile(r"_\d+$")
 
 
-def canonical_node(name, known):
-    """Map a compiler-generated node name back to ONNX node names (sig-v2)."""
-    if not known or name in known:
+_OPV_RE = re.compile(r"V\d+$")
+
+
+def _op_matches(report_op, onnx_op_type):
+    """'onnx.ReduceMeanV13' matches ONNX op_type 'ReduceMean'."""
+    if not report_op or not onnx_op_type:
+        return True
+    return _OPV_RE.sub("", report_op.split(".")[-1]) == onnx_op_type
+
+
+def canonical_node(name, known, op=None):
+    """Map a compiler-generated node name back to ONNX node names (sig-v2).
+
+    known: set of ONNX node names, or dict name -> ONNX op_type (preferred).
+    With op types, a generated name that happens to equal a different original
+    node (e.g. generated 'mul_3_1' from 'mul_3' while an original 'mul_3_1'
+    exists) is recognised by the op mismatch and mapped to its base."""
+    if not known:
+        return name
+    types = known if isinstance(known, dict) else None
+    if name in known:
+        if types is None or _op_matches(op, types.get(name)):
+            return name
+        base = _SUFFIX_RE.sub("", name)
+        if base in known and _op_matches(op, types.get(base)):
+            return base
         return name
 
     def one(part):
-        if part in known:
-            return part
-        base = _SUFFIX_RE.sub("", part)
-        if base in known:
-            return base
+        cur = part
+        while True:                  # generated names can carry several counters: X_5_7 -> X_5 -> X
+            if cur in known:
+                return cur
+            nxt = _SUFFIX_RE.sub("", cur)
+            if nxt == cur:
+                break
+            cur = nxt
         return _INT_RE.sub("<N>", part)
     if "-" in name:
         stripped = _SUFFIX_RE.sub("", name)
@@ -103,7 +134,8 @@ def report_signature(recs, known_nodes=None):
     """Sorted multiset of decision tuples. known_nodes: ONNX node names of the
     model (enables sig-v2 canonicalization; without it the result is sig-v1)."""
     items = sorted(
-        (r["kind"], r.get("op", ""), r.get("applied", False), canonical_node(r.get("node", ""), known_nodes),
+        (r["kind"], r.get("op", ""), r.get("applied", False),
+         canonical_node(r.get("node", ""), known_nodes, r.get("op")),
          _INT_RE.sub("<N>", r.get("message", r.get("unparsed", ""))), r.get("value", 0))
         for r in recs)
     unparsed = sum(1 for r in recs if "unparsed" in r)
@@ -130,7 +162,7 @@ def report_summary(recs):
 # ---------------------------------------------------------------------------
 # Probe IR structure
 
-_LOC_RE = re.compile(r"\s*loc\((?:[^()]|\([^()]*\))*\)")
+_LOC_RE = re.compile(r"\s*(?<![\w.%$@])loc\((?:[^()]|\([^()]*\))*\)")
 _OPNAME_RE = re.compile(r'^\s*(?:(?:%[\w#.:]+(?::\d+)?(?:,\s*)?)+\s*=\s*)?"?([a-z_][\w]*\.[\w.]+)"?')
 _VEC_RE = re.compile(r"vector<(?:\d+x)*[a-z]+\d*>")
 _LOOP_OPS = {"affine.for", "scf.for", "affine.parallel", "scf.parallel", "krnl.iterate",

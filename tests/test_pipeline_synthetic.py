@@ -89,6 +89,7 @@ def test_evaluator_pipeline(synthetic):
     assert cm["opt_report"]["Prec_sig"] == 1.0 and cm["opt_report"]["C_nonalign"] == [26]
     assert cm["raw_ir_hash (ablation 11.2-3)"]["Prec_sig"] < 0.1
     _run(env, "compare", "--compile", str(t / "compile.jsonl"), "--measurements", str(t / "d.jsonl"),
+         "--confirmation-measurements", str(t / "c.jsonl"),
          "--census", str(t / "census.jsonl"), "--answer-table", str(at), "--out", str(t / "cmp.json"))
     cmp = json.loads((t / "cmp.json").read_text())
     res = cmp["by_delta"]["0.2"]["results"]
@@ -110,6 +111,7 @@ def test_compare_without_or_with_partial_census_skips_probe_variants(synthetic):
     _write(t / "census_part.jsonl", part)
     for extra in ([], ["--census", str(t / "census_part.jsonl")]):
         _run(env, "compare", "--compile", str(t / "compile.jsonl"), "--measurements", str(t / "d.jsonl"),
+         "--confirmation-measurements", str(t / "c.jsonl"),
              "--answer-table", str(t / "at.json"), "--out", str(t / "cmp2.json"), *extra)
         out = json.loads((t / "cmp2.json").read_text())
         assert out["skipped_variants"]
@@ -139,3 +141,30 @@ def test_empty_preregistered_units_stay_empty(synthetic):
          "--out", str(t / "cm.json"))
     cm = json.loads((t / "cm.json").read_text())
     assert cm["units"] == [] and cm["by_delta"]["0.2"]["opt_report"]["n_B_align"] == 0
+
+
+def test_census_metrics_flag_an_incomplete_census(synthetic):
+    t = synthetic
+    env = _prereg(t)
+    _run(env, "answer-table", "--discovery", str(t / "d.jsonl"), "--confirmation", str(t / "c.jsonl"),
+         "--valid", "10-41", "--out", str(t / "at.json"))
+    tab = json.loads((t / "census_table.json").read_text())
+    tab.update(corrupt_reports=[12], H1_verdict="INCOMPLETE census (...) - no H1 verdict")
+    (t / "ct_bad.json").write_text(json.dumps(tab))
+    _run(env, "census", "--census-table", str(t / "ct_bad.json"), "--answer-table", str(t / "at.json"),
+         "--out", str(t / "cm.json"))
+    cm = json.loads((t / "cm.json").read_text())
+    assert cm["census_integrity"] != "ok" and "NOT valid" in cm["WARNING"]
+
+
+def test_compare_refuses_measurements_without_compile_records(synthetic):
+    t = synthetic
+    env = _prereg(t)
+    _run(env, "answer-table", "--discovery", str(t / "d.jsonl"), "--confirmation", str(t / "c.jsonl"),
+         "--valid", "10-41", "--out", str(t / "at.json"))
+    part = [json.loads(line) for line in (t / "compile.jsonl").read_text().splitlines()][:20]
+    _write(t / "compile_part.jsonl", part)          # e.g. a --reuse-compile run that listed only new compiles
+    p = _run(env, "compare", "--compile", str(t / "compile_part.jsonl"), "--measurements", str(t / "d.jsonl"),
+             "--confirmation-measurements", str(t / "c.jsonl"), "--answer-table", str(t / "at.json"),
+             "--out", str(t / "x.json"), ok=False)
+    assert p.returncode != 0 and "without compile records" in p.stderr

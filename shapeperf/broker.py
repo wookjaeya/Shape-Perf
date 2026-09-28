@@ -18,7 +18,11 @@ Cost split (§8.4 'compile cost attribution'):
   selection_ns    wall time of the selector's own decision logic (measured in
                   the selector process; IPC excluded).
 The backend reports `report_ns` = the opt-report emission overhead contained
-in compile_ns (preregistered from the G3 pilot); baselines do not pay it.
+in compile_ns (preregistered from the G3 pilot); baselines do not pay it. It is
+capped at compile_ns (a compile that died early did not pay more than it took).
+
+Every timeline entry carries query_index (= its position in the run, the spec
+§12 join key; timeline_index is the same value).
 With charge_policy_extra=False the extra cost is recorded but not charged
 (the 'cost virtually excluded' auxiliary analysis, §11.2-2). Actual probe
 spend is tracked either way, so Compile-probe's probe cap still applies.
@@ -30,8 +34,11 @@ Confirmations are separate entries, so a confirmation that crosses B does not
 invalidate the measurement (or an earlier confirmation) before it.
 
 Candidate confirmation: when two *adjacent valid* shapes are both measured and
-their observed |log ratio| >= confirm_log_threshold, the broker runs the
-backend's confirmation procedure. A pair is checked once. The selector never
+their observed |log ratio| >= confirm_log_threshold, the pair becomes a
+candidate (recorded with the entry that created it) and the broker runs the
+backend's confirmation procedure as its own entry - unless the budget is
+already exhausted, in which case the candidate is recorded with
+confirmation_status 'not_run'. A pair is checked once. The selector never
 sees confirmation results, and it never sees the cumulative cost (that would
 leak measurement durations to policies not entitled to timing, §8.3).
 
@@ -158,9 +165,21 @@ class _ProcessSelector:
             return ""
 
     def next_action(self, view):
+        t0 = time.perf_counter_ns()
         r = self._call({"cmd": "next", "view": view_to_json(view)})
-        act = None if r["action"] is None else Action(r["action"][0], int(r["action"][1]))
-        return act, r["selection_ns"], r.get("warnings", [])
+        round_trip = time.perf_counter_ns() - t0
+        sel = r.get("selection_ns")
+        # the worker times the decision; it can never exceed the round trip
+        if type(sel) is not int or not 0 <= sel <= round_trip:
+            raise SelectorIsolationError(f"selector {self.name}: implausible selection_ns {sel!r} "
+                                         f"(round trip {round_trip} ns)")
+        act = None
+        if r["action"] is not None:
+            kind, length = r["action"]
+            if kind not in (MEASURE, PROBE) or type(length) is not int:
+                raise SelectorIsolationError(f"selector {self.name}: malformed action {r['action']!r}")
+            act = Action(kind, length)
+        return act, sel, r.get("warnings", [])
 
     def describe(self):
         return self.described
@@ -263,7 +282,7 @@ class QueryBroker:
             nonlocal spent, stop
             spent += charged
             rec.update(charged_ns=charged, cumulative_cost_ns=spent, within_budget=spent <= budget_ns,
-                       timeline_index=len(timeline))
+                       timeline_index=len(timeline), query_index=len(timeline))
             timeline.append(rec)
             if spent >= budget_ns:
                 stop = True
@@ -292,13 +311,12 @@ class QueryBroker:
                 if s in measured or s in failed:
                     raise ValueError(f"{selector.name} re-measured {s}")
                 r = self.backend.measure(s)
-                report_ns = r.get("report_ns", 0)
+                compile_ns = max(0, r.get("compile_ns", 0))
+                report_ns = min(max(0, r.get("report_ns", 0)), compile_ns)
+                common = compile_ns - report_ns
                 if selector.sees_signatures:
                     extra = r.get("extract_ns", 0) + report_ns
-                    common = r.get("compile_ns", 0) - report_ns
-                else:
-                    common = r.get("compile_ns", 0) - report_ns
-                common += sum(r.get(k, 0) for k in ("verify_ns", "warmup_ns", "measure_ns"))
+                common += sum(r.get(k, 0) for k in ("verify_ns", "warmup_ns", "measure_ns", "process_overhead_ns"))
                 rec.update(failure_type=r.get("failure_type"))
                 if r.get("failure_type"):
                     failed[s] = r["failure_type"]
@@ -330,24 +348,31 @@ class QueryBroker:
             if action.kind == MEASURE and s in measured and self.confirm_log_threshold is not None:
                 prev, nxt = neighbours(self.valid, s)
                 for a, b in ((prev, s), (s, nxt)):
-                    if stop:
-                        break
                     if a in measured and b in measured and (a, b) not in checked_pairs:
                         checked_pairs.add((a, b))
                         lr = math.log(lat[b] / lat[a])
-                        if abs(lr) >= self.confirm_log_threshold:
+                        if abs(lr) < self.confirm_log_threshold:
+                            continue
+                        cand = {"pair": [a, b], "observed_log_ratio": lr,
+                                "query_index": rec["query_index"],        # the entry that created it
+                                "created_at_index": rec["query_index"],
+                                "created_cost_ns": rec["cumulative_cost_ns"],
+                                "created_within_budget": rec["within_budget"],
+                                "confirmed": None, "confirm_index": None, "confirmation_ns": None,
+                                "cumulative_cost_ns": None, "confirmation_status": "not_run (budget exhausted)"}
+                        if not stop:
                             c = self.backend.confirm(a, b)
                             crec = append({"selector": selector.name, "action": "confirm", "pair": [a, b],
+                                           "padded_length": None, "candidate_query_index": rec["query_index"],
                                            "observed_log_ratio": lr, "confirmed": c["confirmed"],
                                            "common_ns": c["cost_ns"], "policy_extra_ns": 0, "selection_ns": 0},
                                           c["cost_ns"])
-                            candidates.append({"pair": [a, b], "observed_log_ratio": lr,
-                                               "confirmed": c["confirmed"],
-                                               "created_at_index": rec["timeline_index"],
-                                               "created_cost_ns": rec["cumulative_cost_ns"],
-                                               "query_index": crec["timeline_index"],
-                                               "confirmation_ns": c["cost_ns"],
-                                               "cumulative_cost_ns": crec["cumulative_cost_ns"]})
+                            cand.update(confirmed=c["confirmed"], confirm_index=crec["query_index"],
+                                        confirmation_ns=c["cost_ns"],
+                                        cumulative_cost_ns=crec["cumulative_cost_ns"],
+                                        confirmation_status="done" if crec["within_budget"] else
+                                        "done (crossed budget)")
+                        candidates.append(cand)
         return {"selector": selector.describe(), "budget_ns": budget_ns, "valid": self.valid,
                 "isolation": self.isolation, "charge_policy_extra": self.charge_policy_extra,
                 "timeline": timeline, "candidates": candidates,

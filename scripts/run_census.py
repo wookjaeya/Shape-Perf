@@ -40,6 +40,20 @@ def parse_range(txt):
     return sorted(set(out))
 
 
+def _latest(path):
+    """Last record per length (append-only file; retries are appended)."""
+    return {r["padded_length"]: r for r in read_jsonl(path)} if path.exists() else {}
+
+
+def _incomplete(r):
+    """A record that does not give a usable census value for its length."""
+    if r.get("failure_type"):
+        return False                     # a real compile failure is a value (FAILED:<type>)
+    return (str(r.get("ir_signature", "")).startswith("CORRUPT:") or r.get("ir_signature") is None
+            or r.get("probe_ir_missing") is not None or r.get("ir_structure_signature") is None
+            or r.get("raw_ir_hash") is None)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="A_reexport")
@@ -62,8 +76,12 @@ def main():
     os.chmod(croot, 0o700)
     os.chmod(root, 0o700)
     recs_path = root / "census.jsonl"
-    done = {r["padded_length"] for r in read_jsonl(recs_path)} if (args.resume and recs_path.exists()) else set()
     lengths = parse_range(args.lengths)
+    if recs_path.exists() and not args.resume:
+        raise SystemExit(f"{recs_path} exists: pass --resume to continue it, or use a fresh --census-root")
+    # --resume: a length is done only if its last record is usable; corrupt
+    # reports and missing probe IR are compiled again (the later record wins)
+    done = {s for s, r in _latest(recs_path).items() if not _incomplete(r)} if args.resume else set()
 
     for s in lengths:
         if s in done:
@@ -81,19 +99,23 @@ def main():
         append_jsonl(recs_path, rec)
         print(s, rec.get("failure_type") or rec.get("ir_signature"), rec.get("probe_wall_ns"), flush=True)
 
-    recs = {r["padded_length"]: r for r in read_jsonl(recs_path)}
+    wanted = set(lengths)
+    recs = {s: r for s, r in _latest(recs_path).items() if s in wanted}   # only the requested lengths
     missing = [s for s in lengths if s not in recs]
-    # failed lengths keep their place in the sequence as their own value; the
-    # boundaries they create are reported separately and do not count as
-    # lowering-decision changes for H1 (spec §1.2)
+    # failed lengths keep their place as their own value; boundaries touching
+    # them are listed separately, and the lowering decision is compared between
+    # the nearest successful lengths across a failed run (spec §1.2 H1)
     fail = {s: f"FAILED:{r['failure_type']}" for s, r in recs.items() if r.get("failure_type")}
-    corrupt = [s for s, r in recs.items() if str(r.get("ir_signature", "")).startswith("CORRUPT:")]
+    corrupt = sorted(s for s, r in recs.items() if str(r.get("ir_signature", "")).startswith("CORRUPT:"))
+    ir_missing = sorted(s for s, r in recs.items() if not r.get("failure_type") and _incomplete(r)
+                        and s not in corrupt)
     sig = {s: fail.get(s, r.get("ir_signature")) for s, r in recs.items()}
     sig_ir = {s: fail.get(s, r.get("ir_structure_signature")) for s, r in recs.items()}
     raw = {s: fail.get(s, r.get("raw_ir_hash")) for s, r in recs.items()}
-    c_sig, fail_b = E.split_failure_boundaries(sig, lengths)
-    c_ir, _ = E.split_failure_boundaries(sig_ir, lengths)
-    c_raw, _ = E.split_failure_boundaries(raw, lengths)
+    c_sig, fail_b, sp_sig = E.split_failure_boundaries(sig, lengths)
+    c_ir, _, sp_ir = E.split_failure_boundaries(sig_ir, lengths)
+    c_raw, _, sp_raw = E.split_failure_boundaries(raw, lengths)
+    n_ok = len(lengths) - len(missing) - len(fail)
 
     p, label = prereg.require(["selectors.shape_only_alignment_units"], allow_unfrozen=True)
     pre_units = p["selectors"]["shape_only_alignment_units"]      # [] is a valid preregistered value
@@ -103,24 +125,31 @@ def main():
     for u in args.units:
         unit_sets[f"analysis_u{u}"] = [u]
     align = {}
+    def nonalign(spans, units):
+        us = [u for u in units if u > 1]
+        return [[a, b] for a, b in spans if not any((b // u) * u >= a for u in us)]
     for name, units in unit_sets.items():
         b = E.aligned_boundaries(lengths, units)
         align[name] = {"units": units, "B_align_size": len(b),
-                       "C_sig_nonalign": sorted(set(c_sig) - set(b)),
-                       "C_ir_nonalign": sorted(set(c_ir) - set(b))}
+                       "C_sig_nonalign": [a for a, _ in nonalign(sp_sig, units)],
+                       "C_sig_nonalign_spans": nonalign(sp_sig, units),
+                       "C_ir_nonalign": [a for a, _ in nonalign(sp_ir, units)]}
 
     if args.keep_raw_ir != "all":
         keep = set()
         if args.keep_raw_ir == "changepoints":
-            for c in set(c_sig) | set(c_ir) | set(fail_b):
+            for a, b in sp_sig + sp_ir:
+                keep |= {a, b}
+            for c in fail_b:
                 keep |= {c, next((x for x in lengths if x > c), c)}
         for s in lengths:
             gz = work / f"s{s:04d}" / "model.onnx.mlir.gz"
             if gz.exists() and s not in keep:
                 gz.unlink()
 
-    if missing or corrupt:
-        verdict = f"INCOMPLETE census (missing {missing[:5]}, corrupt reports {corrupt[:5]}) - no H1 verdict"
+    if missing or corrupt or ir_missing or n_ok < 2:
+        verdict = (f"INCOMPLETE census (missing {missing[:5]}, corrupt reports {corrupt[:5]}, "
+                   f"probe IR missing {ir_missing[:5]}, successful lengths {n_ok}) - no H1 verdict")
     elif pre_units is None:
         verdict = "units not preregistered - no H1 verdict"
     elif align["preregistered"]["C_sig_nonalign"]:
@@ -131,10 +160,13 @@ def main():
         "model": args.model, "flagset": args.flagset, "target_cpu": args.target_cpu,
         **toolchain.compiler_ids(), "lengths": [lengths[0], lengths[-1]], "valid_lengths": lengths,
         "n_lengths": len(lengths), "missing_lengths": missing, "corrupt_reports": corrupt,
+        "probe_ir_missing": ir_missing,
         "n_failed": len(fail), "failed_lengths": sorted(fail),
         "failure_boundaries": fail_b,
-        "signature_primary": "opt-report", "C_sig": c_sig,
-        "C_ir_structure": c_ir, "C_raw": c_raw, "n_raw_ir_hash_changes": len(c_raw),
+        "signature_primary": "opt-report", "C_sig": c_sig, "C_sig_spans": [list(x) for x in sp_sig],
+        "C_ir_structure": c_ir, "C_ir_structure_spans": [list(x) for x in sp_ir],
+        "C_raw": c_raw, "C_raw_spans": [list(x) for x in sp_raw], "n_raw_ir_hash_changes": len(c_raw),
+        "span_note": "a span [a, b] with b > next(a) is a decision change across failed lengths",
         "alignment": align, "preregistration": label,
         "H1_verdict": verdict,
         "matmul_path": sorted({r.get("matmul_path") for r in recs.values() if r.get("matmul_path")}) or

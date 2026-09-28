@@ -8,7 +8,9 @@ For a compiled artifact at length s:
     same input: max |diff| over valid positions and over all positions,
     start/end argmax agreement over valid positions
   - ONNX Runtime at s vs the ORT run at the official length (valid positions)
-The verdict uses configs/preregistration.json correctness.logit_abs_tolerance.
+The verdict uses correctness.logit_abs_tolerance of the preregistration the
+calling run uses (shapeperf.prereg.path(): SHAPEPERF_PREREG or
+configs/preregistration.json); the record carries that preregistration label.
 While it is null the verdict is "unjudged": no tolerance is invented here and
 none may be changed after seeing which configuration is fast (spec §7).
 """
@@ -20,7 +22,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from shapeperf import toolchain  # noqa: E402
+from shapeperf import prereg, toolchain  # noqa: E402
 from shapeperf.compile import model_def  # noqa: E402
 from shapeperf.inputs import inputs_for  # noqa: E402
 from shapeperf.squad import load_features  # noqa: E402
@@ -55,7 +57,8 @@ def main():
     om = OMExecutionSession(shared_lib_path=str(Path(args.artifact).resolve()))
     om_out_names = [d["name"] for d in json.loads(om.output_signature())]
 
-    tol = read_json(REPO_ROOT / "configs/preregistration.json")["correctness"]["logit_abs_tolerance"]
+    pre, pre_label = prereg.require(["correctness.logit_abs_tolerance"], allow_unfrozen=True)
+    tol = pre["correctness"]["logit_abs_tolerance"]
     rows = []
     for i in idxs:
         L = int(feat["valid_length"][i])
@@ -80,7 +83,7 @@ def main():
            "model_key": args.model, "model_hash": sha256_file(m["abs_path"]),
            "padded_length": args.length, "n_features": len(rows), "seed": args.seed,
            "worst_max_abs_valid": worst, "argmax_all_equal": argmax_ok,
-           "tolerance": tol, "correctness_status": verdict, "rows": rows,
+           "tolerance": tol, "preregistration": pre_label, "correctness_status": verdict, "rows": rows,
            "onnxruntime": ort.__version__, "harness_commit": git_head(),
            **toolchain.compiler_ids()}
     append_jsonl(args.out, rec)

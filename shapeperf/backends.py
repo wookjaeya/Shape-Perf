@@ -16,6 +16,15 @@ from pathlib import Path
 import numpy as np
 
 
+def usable_signature(sig):
+    """A corrupt opt-report (compile.py 'CORRUPT:<hash>') is an extraction
+    failure: selectors see it as the failure value 'FAILED:corrupt_report', like
+    any other failed shape (preregistered failure rule), never as a real value."""
+    if isinstance(sig, str) and sig.startswith("CORRUPT:"):
+        return "FAILED:corrupt_report"
+    return sig
+
+
 class SyntheticBackend:
     """Latency(s) = base * s-trend * product of step factors, lognormal noise.
     Signatures change at `sig_changes` (sorted list of s where sig(s) != sig(s-1)).
@@ -62,10 +71,13 @@ class SyntheticBackend:
 
 
 class ReplayBackend:
-    """dense: {s: {"compile_ns", "extract_ns", "verify_ns", "probe_ns", "signature",
-    "probe_signature", "failure_type", "processes": [{"median_ns", "warmup_ns",
-    "measure_ns"}...]}}; confirm_fn(a, b) -> bool is the evaluator's predefined
-    confirmation decision on independent data (answer table A procedure)."""
+    """dense: {s: {"compile_ns", "extract_ns", "verify_ns", "report_ns", "probe_ns",
+    "signature", "probe_signature", "failure_type", "processes": [{"median_ns",
+    "warmup_ns", "measure_ns", "process_overhead_ns"} or {"failure_type",
+    "wall_ns"} ...]}}; confirm_fn(a, b) -> bool is the evaluator's predefined
+    confirmation decision on independent data (answer table A procedure).
+    A measure query replays one recorded process attempt chosen uniformly;
+    a failed attempt makes the query fail and charges its wall time."""
     synthetic = False
 
     def __init__(self, dense, seed, confirm_fn=None, confirm_cost_fn=None):
@@ -78,13 +90,16 @@ class ReplayBackend:
         d = self.dense[s]
         if d.get("failure_type"):
             return {"failure_type": d["failure_type"], "compile_ns": d.get("compile_ns", 0),
-                    "report_ns": d.get("report_ns", 0) if d.get("compile_ns") else 0,
+                    "extract_ns": d.get("extract_ns", 0) if d.get("compile_ns") else 0,
                     "verify_ns": d.get("verify_ns", 0)}
         p = d["processes"][int(self.rng.integers(len(d["processes"])))]
-        return {"latency_ns": p["median_ns"], "signature": d.get("signature"),
-                "compile_ns": d["compile_ns"], "extract_ns": d.get("extract_ns", 0),
-                "report_ns": d.get("report_ns", 0),
-                "verify_ns": d.get("verify_ns", 0), "warmup_ns": p["warmup_ns"], "measure_ns": p["measure_ns"]}
+        base = {"compile_ns": d["compile_ns"], "extract_ns": d.get("extract_ns", 0),
+                "report_ns": d.get("report_ns", 0), "verify_ns": d.get("verify_ns", 0)}
+        if p.get("failure_type"):
+            return {**base, "failure_type": f"runtime:{p['failure_type']}", "measure_ns": p.get("wall_ns", 0)}
+        return {**base, "latency_ns": p["median_ns"], "signature": usable_signature(d.get("signature")),
+                "warmup_ns": p["warmup_ns"], "measure_ns": p["measure_ns"],
+                "process_overhead_ns": p.get("process_overhead_ns", 0)}
 
     def probe(self, s):
         d = self.dense[s]
@@ -92,7 +107,7 @@ class ReplayBackend:
             raise KeyError(f"no probe data for length {s} (census must cover the whole valid set)")
         if d.get("probe_failure_type"):
             return {"failure_type": d["probe_failure_type"], "probe_ns": d.get("probe_ns", 0)}
-        return {"signature": d.get("probe_signature", d.get("signature")), "probe_ns": d["probe_ns"],
+        return {"signature": usable_signature(d.get("probe_signature")), "probe_ns": d["probe_ns"],
                 "extract_ns": d.get("probe_extract_ns", 0)}
 
     def confirm(self, a, b):
@@ -109,9 +124,14 @@ class LiveBackend:
     def __init__(self, model_key, flagset, target_cpu, out_root, prereg, feature_index,
                  cpus=None, threads=1, block_seed=0, vm_allocation_id="unavailable"):
         m = prereg["measurement"]
-        for k in ("warmup_iterations", "timed_iterations"):
+        for k in ("warmup_iterations", "timed_iterations", "process_statistic"):
             if m.get(k) is None:
                 raise ValueError(f"preregistration.measurement.{k} is not fixed (G3)")
+        # opt-report emission overhead inside every full compile: the broker
+        # moves it from common to Compile-guided's extra cost (as in replay)
+        self.report_ns = prereg["selectors"].get("report_overhead_ns")
+        if self.report_ns is None:
+            raise ValueError("preregistration.selectors.report_overhead_ns is not fixed (G3)")
         self.model_key, self.flagset, self.target_cpu = model_key, flagset, target_cpu
         self.out_root = Path(out_root)
         self.prereg = prereg
@@ -134,6 +154,7 @@ class LiveBackend:
         if c.get("failure_type"):
             out["failure_type"] = c["failure_type"]
             return out
+        out["report_ns"] = int(self.report_ns)
         t0 = time.monotonic_ns()
         v = self._verify(c["artifact_path"], s)
         out["verify_ns"] = time.monotonic_ns() - t0
@@ -146,10 +167,15 @@ class LiveBackend:
                 "warmup": m["warmup_iterations"], "iterations": m["timed_iterations"], "cpus": self.cpus}
         r = run_item(item, worker_env(self.threads))
         if r.get("failure_type"):
-            out["failure_type"] = r["failure_type"]
+            out["failure_type"] = f"runtime:{r['failure_type']}"
+            out["measure_ns"] = r.get("process_wall_ns", 0)      # a failed attempt still costs its time
             return out
-        out.update(latency_ns=float(np.median(r["latency_ns"])), signature=c.get("ir_signature"),
-                   warmup_ns=r["warmup_wall_ns"], measure_ns=r["measurement_wall_ns"])
+        stat = self.prereg["measurement"]["process_statistic"]
+        lat = np.asarray(r["latency_ns"], float)
+        w, mns = r["warmup_wall_ns"], r["measurement_wall_ns"]
+        out.update(latency_ns=float(lat.mean() if stat == "mean" else np.median(lat)),
+                   signature=usable_signature(c.get("ir_signature")), warmup_ns=w, measure_ns=mns,
+                   process_overhead_ns=max(0, r.get("process_wall_ns", 0) - w - mns))
         return out
 
     def _verify(self, artifact, s):
@@ -171,7 +197,7 @@ class LiveBackend:
         c = compile_shape(self.model_key, s, self.flagset, self.target_cpu, "probe", self._dir("probe", s))
         if c.get("failure_type"):
             return {"failure_type": c["failure_type"], "probe_ns": c["probe_wall_ns"]}
-        return {"signature": c.get("ir_signature"), "probe_ns": c["probe_wall_ns"],
+        return {"signature": usable_signature(c.get("ir_signature")), "probe_ns": c["probe_wall_ns"],
                 "extract_ns": c.get("feature_extract_wall_ns", 0)}
 
     def confirm(self, a, b):

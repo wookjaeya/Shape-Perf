@@ -47,20 +47,37 @@ def main():
     ap.add_argument("--answer-table", required=True)
     ap.add_argument("--delta", default=None, help="answer-table delta key (default: first)")
     ap.add_argument("--compile", nargs="+", required=True, help="G4 compile.jsonl with the artifacts")
-    ap.add_argument("--features-per-event", type=int, required=True)
+    ap.add_argument("--features-per-event", type=int, default=None,
+                    help="dev runs only; frozen runs use replication.features_per_event (spec §4.3)")
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--vm-allocation-id", required=True)
     ap.add_argument("--allow-unfrozen", action="store_true")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     p, label = prereg.require(["measurement.warmup_iterations", "measurement.timed_iterations",
-                               "measurement.blocks", "measurement.process_statistic"], a.allow_unfrozen)
+                               "measurement.blocks", "measurement.process_statistic",
+                               "events.confidence_level", "replication.features_per_event"], a.allow_unfrozen)
     meas = p["measurement"]
+    frozen = label.startswith("frozen")
+    n_feat = (p.get("replication") or {}).get("features_per_event")
+    if n_feat is None:
+        if frozen or a.features_per_event is None:
+            raise SystemExit("features per event is not preregistered (replication.features_per_event)")
+        n_feat = a.features_per_event
+    elif a.features_per_event not in (None, n_feat):
+        raise SystemExit(f"--features-per-event {a.features_per_event} conflicts with preregistered {n_feat}")
+    conf_level = p["events"]["confidence_level"] or 0.95
     at = read_json(a.answer_table)
+    if frozen and at.get("preregistration") != label:
+        raise SystemExit(f"answer table was produced under {at.get('preregistration')!r}, not {label!r}")
+    flagset = at.get("flagset", "default")
     dkey = a.delta or next(iter(at["by_delta"]))
     events = at["by_delta"][dkey]["answer_table_A"]["event_pairs"]
     arts = {r["padded_length"]: r for f in a.compile for r in read_jsonl(f)
-            if r.get("flagset", "default") == "default" and not r.get("failure_type")}
+            if r.get("flagset", "default") == flagset and not r.get("failure_type")}
+    no_art = [[s, t] for s, t in events if s not in arts or t not in arts]
+    if no_art and frozen:
+        raise SystemExit(f"no compiled artifact for events {no_art[:5]} (pass the G4 compile.jsonl files)")
     m = model_def(a.model)
     feat = load_features(REPO_ROOT / m["features"] / "features.npz")
     anchor = read_json(REPO_ROOT / m["features"] / "catalog.json")["anchor"]["feature_index"]
@@ -69,10 +86,10 @@ def main():
     for s, t in events:
         if s not in arts or t not in arts:
             continue
-        for fi in sample_features(feat, s, a.features_per_event, rng, {anchor}):
+        for fi in sample_features(feat, s, n_feat, rng, {anchor}):
             for L in (s, t):
                 plan.append({"artifact": arts[L]["artifact_path"], "artifact_hash": arts[L]["artifact_hash"],
-                             "model_key": a.model, "length": L, "feature_index": fi,
+                             "model_key": a.model, "length": L, "feature_index": fi, "flagset": flagset,
                              "warmup": meas["warmup_iterations"] or 0, "iterations": meas["timed_iterations"] or 1,
                              "cpus": meas.get("cpus")})
     run_id = new_run_id("replicate")
@@ -90,6 +107,9 @@ def main():
         cells[(r["feature_index"], r["padded_length"], r["block_id"])].append(E.process_stat(r["latency_ns"], stat))
     summary = []
     for s, t in events:
+        if [s, t] in no_art:
+            summary.append({"s": s, "t": t, "status": "not measured: artifact missing from --compile"})
+            continue
         effects = []
         feats = sorted({fi for (fi, L, _b) in cells if L == s})
         for fi in feats:
@@ -102,13 +122,15 @@ def main():
         x = np.asarray(effects, float)
         summary.append({"s": s, "t": t, "n_features": int(x.size),
                         "mean_log_effect": float(x.mean()) if x.size else None,
-                        "ci_log": E._mean_ci(x.tolist()) if x.size >= 2 else None,
+                        "ci_log": E._mean_ci(x.tolist(), conf_level) if x.size >= 2 else None,
+                        "confidence_level": conf_level,
                         "fraction_same_direction_as_anchor": None if not x.size else float(np.mean(
                             np.sign(x) == np.sign(next(e["discovery"]["log_effect"] for e in
                                                         at["by_delta"][dkey]["answer_table_A"]["detail"]
                                                         if e["s"] == s))))})
     write_json(out / "replication.json", {"answer_table": a.answer_table, "delta": dkey, "preregistration": label,
-                                          "seed": a.seed, "harness_commit": git_head(), "events": summary,
+                                          "seed": a.seed, "features_per_event": n_feat, "flagset": flagset,
+                                          "harness_commit": git_head(), "events": summary,
                                           "note": "an event not reproduced on other inputs is an anchor-only case (§4.3)"})
     print("wrote", out / "replication.json")
 

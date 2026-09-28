@@ -48,12 +48,21 @@ def raw_compile(model, length, flags, out, emit="--EmitMLIR"):
     return cmd, p.returncode, p.stdout, p.stderr[-3000:]
 
 
+def same(a, b):
+    """Equality as evidence: None when either value is missing or corrupt."""
+    if a is None or b is None or str(a).startswith("CORRUPT:") or str(b).startswith("CORRUPT:"):
+        return None
+    return a == b
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="A_reexport")
     ap.add_argument("--target-cpu", default=os.environ.get("SHAPEPERF_TARGET_CPU"), required=False)
     ap.add_argument("--allow-native", action="store_true")
     ap.add_argument("--length", type=int, default=128)
+    ap.add_argument("--determinism-lengths", type=int, nargs="*", default=[],
+                    help="extra lengths probed twice to check sig-v2 determinism (in addition to --length)")
     ap.add_argument("--out", default=str(REPO_ROOT / "results/g0"))
     args = ap.parse_args()
     out = Path(args.out)
@@ -88,17 +97,29 @@ def main():
     rep["probe_compile"] = {k: probe.get(k) for k in ["failure_type", "probe_wall_ns", "peak_rss_bytes",
                                                       "ir_signature", "ir_structure_signature", "entry_signature",
                                                       "stderr_tail"]}
-    rep["probe_and_full_report_signature_equal"] = full.get("ir_signature") == probe.get("ir_signature")
+    rep["probe_and_full_report_signature_equal"] = same(full.get("ir_signature"), probe.get("ir_signature"))
     # signature determinism: the same length probed again must give the same signature (sig-v2)
     probe2 = compile_shape(args.model, args.length, "default", args.target_cpu, "probe", work / "probe_repeat",
                            allow_native=args.allow_native)
-    rep["signature_determinism"] = {
-        "report_equal": probe.get("ir_signature") == probe2.get("ir_signature"),
-        "ir_structure_equal": probe.get("ir_structure_signature") == probe2.get("ir_structure_signature"),
-        "raw_ir_equal": probe.get("raw_ir_hash") == probe2.get("raw_ir_hash"),
-        "report_integrity": [probe.get("report_integrity"), probe2.get("report_integrity"),
-                             full.get("report_integrity")],
-        "signature_version": probe.get("signature_version")}
+
+    def determinism(p1, p2):
+        return {"report_equal": same(p1.get("ir_signature"), p2.get("ir_signature")),
+                "ir_structure_equal": same(p1.get("ir_structure_signature"), p2.get("ir_structure_signature")),
+                "raw_ir_equal": same(p1.get("raw_ir_hash"), p2.get("raw_ir_hash")),
+                "report_integrity": [p1.get("report_integrity"), p2.get("report_integrity")]}
+    rep["signature_determinism"] = {**determinism(probe, probe2),
+                                    "full_report_integrity": full.get("report_integrity"),
+                                    "signature_version": probe.get("signature_version")}
+    extra = {}
+    for L in args.determinism_lengths:
+        if L == args.length:
+            continue
+        a = compile_shape(args.model, L, "default", args.target_cpu, "probe", work / f"det_s{L}_a",
+                          allow_native=args.allow_native, keep_ir=False)
+        b = compile_shape(args.model, L, "default", args.target_cpu, "probe", work / f"det_s{L}_b",
+                          allow_native=args.allow_native, keep_ir=False)
+        extra[L] = determinism(a, b)
+    rep["signature_determinism_other_lengths"] = extra
     rep["compiler_warnings"] = full.get("compiler_warnings")
     exp = expected_entry_dims(m, args.length)
     rep["expected_entry_dims"] = exp

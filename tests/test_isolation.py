@@ -166,3 +166,16 @@ def test_process_and_inprocess_decisions_identical():
         assert [(q["action"], q["padded_length"]) for q in a["timeline"]] == \
                [(q["action"], q["padded_length"]) for q in b["timeline"]]
     assert UniformSelector.sees_timing is False
+
+
+@pytest.mark.skipif(not ROOT, reason="OS jail needs root (chroot/setuid)")
+def test_class_path_module_code_runs_inside_the_jail():
+    from tests.malicious_module_level import ModuleLevelReader
+    run = _broker().run(SelectorSpec(ModuleLevelReader), budget_ns=10**15)   # no AssertionError('LEAK')
+    assert run["isolation_level"].startswith("os:") and run["isolation_level"].endswith("+test-class")
+
+
+def test_class_path_selectors_need_explicit_test_opt_in(monkeypatch):
+    monkeypatch.delenv("SHAPEPERF_ALLOW_CLASS_PATH", raising=False)
+    with pytest.raises(RuntimeError, match="test-only"):
+        _broker().run(SelectorSpec(InitReader), budget_ns=10**15)

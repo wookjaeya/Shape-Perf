@@ -7,7 +7,9 @@ anything but their own query history - by accident or by construction. The
 guarantee comes from the operating system, not from Python-level checks:
 
 1. Everything the selector needs is imported first (numpy submodules etc.).
-2. The init request is read; a test-only class_path selector is imported.
+2. The init request is read. A test-only class_path selector (allowed only
+   with SHAPEPERF_ALLOW_CLASS_PATH=1) has its module SOURCE read here; the
+   module's code itself runs only after step 3, inside the jail.
 3. The process jails itself (when started as root):
      - unshare(CLONE_NEWNET): no network
      - chroot(<empty directory>): no file system at all
@@ -96,6 +98,24 @@ def _jail(jail_dir, keep_fds):
     return ("partial:" + "+".join(parts)) if parts else "audit-only (jail failed)"
 
 
+def _preimport_dependencies(text):
+    """Import, before the jail, the standard-library and shapeperf modules that
+    a class_path module imports (the jail has no file system to import from).
+    Nothing else is imported: other modules would run their code unjailed."""
+    import ast
+    import importlib
+    names = set()
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.Import):
+            names |= {a.name for a in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names.add(node.module)
+    for n in sorted(names):
+        top = n.split(".")[0]
+        if top in sys.stdlib_module_names or top == "shapeperf":
+            importlib.import_module(n)
+
+
 def _plain_action(a):
     if a is None:
         return None
@@ -121,13 +141,28 @@ def main():
         if first.get("cmd") != "init":
             raise RuntimeError("first request must be init")
         klass = REGISTRY.get(first["name"])
+        src = None
         if first.get("class_path"):          # test-only: selectors outside the registry
-            import importlib
-            mod, cls = first["class_path"].split(":")
-            klass = getattr(importlib.import_module(mod), cls)
-        if klass is None:
+            if os.environ.get("SHAPEPERF_ALLOW_CLASS_PATH") != "1":
+                raise RuntimeError("class_path selectors are test-only (set SHAPEPERF_ALLOW_CLASS_PATH=1)")
+            import importlib.util
+            mod, qual = first["class_path"].split(":")
+            spec = importlib.util.find_spec(mod)
+            with open(spec.origin) as f:
+                src = (mod, qual, spec.origin, f.read())
+            _preimport_dependencies(src[3])
+        elif klass is None:
             raise KeyError(f"unknown selector {first['name']!r}")
         level = _jail(jail_dir, {req_fd, rep_fd})
+        if src is not None:
+            # the module's top-level code runs jailed (no file system, no network)
+            mod, qual, origin, text = src
+            ns = {"__name__": mod, "__file__": origin}
+            exec(compile(text, origin, "exec"), ns)
+            klass = ns[qual.split(".")[0]]
+            for part in qual.split(".")[1:]:
+                klass = getattr(klass, part)
+            level += "+test-class"
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             with selector_sandbox():

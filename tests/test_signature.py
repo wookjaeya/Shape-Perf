@@ -101,3 +101,28 @@ def test_corrupt_report_is_flagged():
     text = REPORT_128 + "==SIMD-REPORT==, onnx.Sqrt-simd, x/Rsqrt, unary f\n"
     sig = S.report_signature(S.parse_opt_report(text))
     assert sig["integrity"] == "corrupt" and sig["n_unparsed"] == 1
+
+
+def test_interleaved_numeric_field_is_flagged_not_raised():
+    txt = ("==SIMD-REPORT==, onnx.Add-simd, add_1, successful, 32, 98[2/6] Compiling foo\n"
+           "==SIMD-REPORT==, onnx.Add-simd, add_2, successful, 32, 98\n")
+    recs = S.parse_opt_report(txt)
+    assert "unparsed" in recs[0] and recs[1]["trip_count"] == 98
+    assert S.report_signature(recs)["integrity"] == "corrupt"
+
+
+def test_strip_locations_keeps_alloc():
+    ir = '%0 = memref.alloc() {alignment = 16 : i64} : memref<2xf32> loc("x")\n%1 = memref.reshape %alloc(%a) loc(#loc3)'
+    out = S.strip_locations(ir)
+    assert "memref.alloc()" in out and "%alloc(%a)" in out and " loc(" not in out
+
+
+def test_canonical_node_uses_op_types_and_repeated_counters():
+    known = {"mm": "MatMul", "mm_1": "MatMul", "mul_3": "Mul", "mul_3_1": "Add"}
+    # a generated Mul named 'mul_3_1' collides with the original Add 'mul_3_1': op type says it is mul_3
+    assert S.canonical_node("mul_3_1", known, "onnx.Mul") == "mul_3"
+    assert S.canonical_node("mul_3_1", known, "onnx.Add") == "mul_3_1"
+    assert S.canonical_node("mm_1_7", known, "onnx.MatMul") == "mm_1"     # two counters
+    assert S.canonical_node("mm_5_7", known, "onnx.MatMul") == "mm"
+    assert S.canonical_node("onnx.MatMul_2", known) == "onnx.MatMul_<N>"   # op-name based: counter-free
+    assert S.canonical_node("mm_1", {"mm", "mm_1"}) == "mm_1"              # plain set still accepted

@@ -9,7 +9,7 @@
 
 | 게이트 | 상태 | 요약 | 증거 |
 |---|---|---|---|
-| G0 환경 고정 | 개발 환경 기능 검증 완료 (`check-onnx-lit` 진행 중) | ONNX-MLIR v0.5.1.1 (`1e017c9f`)·LLVM `1053047a`·protobuf v33.5 소스 빌드 성공. 실제 컴파일로 확인: 정적 특수화, matmul은 컴파일러 생성 코드(외부 BLAS 없음), `--march`별 SIMD 적용 양상, signature 결정성, ORT 대비 정확도 | `results/g0/g0_verification.json`, `results/g0/matmul_path.json` |
+| G0 환경 고정 | 개발 환경 기능 검증 완료 | ONNX-MLIR v0.5.1.1 (`1e017c9f`)·LLVM `1053047a`·protobuf v33.5 소스 빌드 성공. 공식 빌드 테스트 `check-onnx-lit`: 450개 중 304 통과·146 미지원(NNPA 등)·실패 0 (`check-mlir`은 미실행). 실제 컴파일로 확인: 정적 특수화, matmul은 컴파일러 생성 코드(외부 BLAS 없음), `--march`별 SIMD 적용 양상, signature 결정성, ORT 대비 정확도 | `results/g0/g0_verification.json`, `results/g0/matmul_path.json` |
 | G1 원본 재현 | 완료 (원본 artifact) | 공식 전처리 재현: 질문 10,570 / feature 12,006 / 고유 유효 길이 216 (41–256). ORT가 zoo test_data_set 출력을 max abs 6.2e-6로 재현. **원본@256 전체 dev set: EM 80.6717 / F1 88.0716 — 모델 카드 EM 80.67171과 일치** | `data/features/A/catalog.json`, `results/g1/*/reference_eval.json` |
 | G2 shape 적합성 | 완료 (재수출본, 개발 환경) | 원본 artifact는 **길이 변경 불가**(길이 256 상수 70개). 동일 가중치 재수출본: 원본 대비 logits 1.1e-5, 139쌍에서 padding 의미 보존. §7.4: 재수출본을 feature별 L(x)로 실행해도 EM/F1 동일·답 변경 0건. ONNX-MLIR@128: 정적 특수화 확인, ORT 대비 유효 위치 logits max abs 1.5e-5·argmax 일치(허용치는 미등록) | `results/g2/*.json`, `results/g0/validation.jsonl` |
 | G2.5 census | 코드만 | 평가자 전용 실행기(실패 경계 분리, 원문 IR 해시 변화 위치 저장) | `scripts/run_census.py`, `census/README.md` |

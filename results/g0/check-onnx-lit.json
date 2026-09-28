@@ -1,0 +1,18 @@
+{
+  "label": "check-onnx-lit",
+  "cmd": [
+    "cmake",
+    "--build",
+    ".",
+    "--target",
+    "check-onnx-lit"
+  ],
+  "cwd": "/home/user/work/onnx-mlir/build",
+  "start_unix": 1790595668.4105732,
+  "wall_ns": 9374640898,
+  "cpu_user_s": 19.977443,
+  "cpu_sys_s": 4.013457,
+  "max_rss_single_proc_kb": 78964,
+  "peak_system_mem_used_kb": 1961776,
+  "returncode": 0
+}

@@ -19,8 +19,37 @@ def onnx_mlir_build():
                                str(work_dir() / "onnx-mlir/build/Release")))
 
 
-def onnx_mlir_bin():
-    return onnx_mlir_build() / "bin" / "onnx-mlir"
+def onnx_mlir_bin(build=None):
+    """The compiler binary of `build` (a directory with bin/onnx-mlir and lib/), or of the
+    default/SHAPEPERF_ONNX_MLIR_BUILD build. Variants of the pinned compiler (e.g. one
+    patched build per experimental arm) live in their own directories."""
+    return Path(build or onnx_mlir_build()) / "bin" / "onnx-mlir"
+
+
+@lru_cache(maxsize=16)
+def _sha256(path, mtime_ns, size):
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def compiler_identity(build=None):
+    """Which compiler binary actually ran: variant label, path and SHA-256 (cached per file
+    state). Recorded in every compile record so an arm can never be confused with another."""
+    b = onnx_mlir_bin(build)
+    real = Path(os.path.realpath(b))
+    try:
+        st = real.stat()
+        sha = _sha256(str(real), st.st_mtime_ns, st.st_size)
+        size = st.st_size
+    except OSError:
+        sha, size = "unavailable", None
+    return {"compiler_variant": Path(build).name if build else os.environ.get("SHAPEPERF_COMPILER_VARIANT")
+            or onnx_mlir_build().name,
+            "compiler_bin": str(b), "compiler_bin_sha256": sha, "compiler_bin_bytes": size}
 
 
 def pyruntime_dir():
@@ -45,14 +74,17 @@ def toolchain_pins():
     return env
 
 
-@lru_cache(maxsize=1)
-def onnx_mlir_version():
+@lru_cache(maxsize=16)
+def _version_of(binary):
     try:
-        out = subprocess.run([str(onnx_mlir_bin()), "--version"], capture_output=True,
-                             text=True, timeout=60)
+        out = subprocess.run([binary, "--version"], capture_output=True, text=True, timeout=60)
         return (out.stdout + out.stderr).strip()
     except Exception as e:
         return f"unavailable: {e!r}"
+
+
+def onnx_mlir_version(build=None):
+    return _version_of(str(onnx_mlir_bin(build)))
 
 
 def compiler_ids():

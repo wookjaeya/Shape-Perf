@@ -5,6 +5,7 @@ import os
 import subprocess
 import time
 import uuid
+from functools import lru_cache
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -29,7 +30,11 @@ def sha256_bytes(b):
     return hashlib.sha256(b).hexdigest()
 
 
+@lru_cache(maxsize=None)
 def git_head(path=REPO_ROOT):
+    """HEAD (+'-dirty') of the checkout, frozen at the FIRST call of this process. A commit made
+    while a long run is in progress must not relabel records written by code that was already
+    loaded (v2 census records changed their harness_commit mid-run)."""
     try:
         out = subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"],
                              capture_output=True, text=True, check=True).stdout.strip()

@@ -165,8 +165,9 @@ def worker_env(threads, extra=None):
 
 
 def run_item(item, env):
-    """Spawn a fresh worker process for one plan item; returns its record."""
-    cmd = [sys.executable, "-m", "shapeperf.measure", "--worker", json.dumps(item)]
+    """Spawn a fresh worker process for one plan item; returns its record. item['worker_module']
+    selects another module with a `--worker <json>` entry point (default: this one)."""
+    cmd = [sys.executable, "-m", item.get("worker_module", "shapeperf.measure"), "--worker", json.dumps(item)]
     t0 = time.monotonic_ns()
     p = subprocess.run(cmd, cwd=REPO_ROOT, env=env, capture_output=True, text=True,
                        timeout=item.get("timeout_s"))

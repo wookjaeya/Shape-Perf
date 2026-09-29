@@ -103,9 +103,10 @@ def classify_failure(res, stderr_text):
 
 
 def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1,
-                  allow_native=False, timeout_s=None, keep_ir=True):
+                  allow_native=False, timeout_s=None, keep_ir=True, compiler_build=None):
     """Returns a record with §12 keys. Never raises on compiler failure; the
-    failure is part of the record (spec §7: failures stay in the denominator)."""
+    failure is part of the record (spec §7: failures stay in the denominator).
+    compiler_build: directory of a compiler variant (bin/onnx-mlir, lib/); default = pinned build."""
     model = model_def(model_key)
     lo, hi = model["valid_lengths"]
     if not lo <= length <= hi:
@@ -115,7 +116,7 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
     out_dir.mkdir(parents=True, exist_ok=True)
     base = out_dir / "model"
     shape_info = shape_information(model, length, batch)
-    cmd = [str(toolchain.onnx_mlir_bin()), *fs["flags"], f"--shapeInformation={shape_info}",
+    cmd = [str(toolchain.onnx_mlir_bin(compiler_build)), *fs["flags"], f"--shapeInformation={shape_info}",
            "-o", str(base)]
     if fs["report"]:
         cmd.append(f"--opt-report={fs['report']}")
@@ -137,7 +138,8 @@ def compile_shape(model_key, length, flagset, target_cpu, mode, out_dir, batch=1
     rec = {
         "model_key": model_key, "model_hash": sha256_file(model["abs_path"]),
         "padded_length": length, "batch": batch, "dtype": "float32",
-        **toolchain.compiler_ids(), "target": target_cpu, "compile_flags": fs["flags"],
+        **toolchain.compiler_ids(), **toolchain.compiler_identity(compiler_build),
+        "target": target_cpu, "compile_flags": fs["flags"],
         "flagset": flagset, "shape_information": shape_info, "mode": mode,
         "command": cmd, "launcher": line_buffered([])[:3] or None,
         "returncode": res["returncode"], "failure_type": failure,

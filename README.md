@@ -8,6 +8,10 @@ ONNX-MLIR CPU 백엔드 × FP32 BERT-SQuAD × batch=1 × sequence length 한 축
 > 실행하지 않은 단계는 미실행으로 표시합니다. 이 저장소의 어떤 숫자도
 > 통제된 측정 VM에서 얻은 성능 결과가 아닙니다.
 
+> **v3 (`docs/research_plan_v3.md`, 재설계안)의 G0–G2 실행 결과는 [`docs/STATUS_v3.md`](docs/STATUS_v3.md)와
+> [`design_amendment.md`](design_amendment.md)에 있습니다.** 주 대조는 Transpose unroll 상한 8 대 1(`patches/transpose_unroll_cap1.patch`)이며,
+> v2 탐색기 연구는 G2.5 중단 상태 그대로입니다.
+
 ## 구성 (명세 §12 제안 인터페이스와의 대응)
 
 | 명세 §12 | 이 저장소 | 역할 |

@@ -44,7 +44,7 @@ KINDS = {"K": {"perm": [0, 2, 3, 1], "node": "bert/encoder/layer_0/attention/sel
 HEADS, HEAD_DIM = 12, 64
 
 
-def activations(lengths):
+def activations(lengths, kinds=("K", "Q")):
     """Real input tensor of each layer-0 transpose at every length (ORT, controlled anchor input)."""
     import onnx
     import onnxruntime as ort
@@ -54,7 +54,7 @@ def activations(lengths):
     anchor = read_json(REPO_ROOT / model["features"] / "catalog.json")["anchor"]["feature_index"]
     m = onnx.load(model["abs_path"])
     tensors = {}
-    for kind, spec in KINDS.items():
+    for kind, spec in ((k, KINDS[k]) for k in kinds):
         node = next(n for n in m.graph.node if n.name == spec["node"])
         assert node.op_type == "Transpose" and list(node.attribute[0].ints) == spec["perm"], node.name
         tensors[kind] = node.input[0]
@@ -110,7 +110,7 @@ def cmd_build(a):
     out = Path(a.out)
     prov = provenance.freeze(out / "provenance_build.json", compiler_builds=list(ARMS.values()),
                              extra={"role": "g2-subgraph-build", "lengths": a.lengths})
-    acts = activations(a.lengths)
+    acts = activations(a.lengths, a.kinds)
     jobs = []
     for (kind, L), x in sorted(acts.items()):
         d = out / kind / f"L{L:04d}"
@@ -188,14 +188,68 @@ def cmd_measure(a):
         print(f"{kind} L={L} done", flush=True)
 
 
+def cmd_scan(a):
+    """Interleaved in-process pair timing over many lengths (exploratory map of the kernel-level effect)."""
+    import json
+    import os
+    from shapeperf.util import append_jsonl, new_run_id
+    built, out = Path(a.built), Path(a.out)
+    prov = provenance.freeze(out / f"provenance_scan_{a.seed}.json",
+                             extra={"role": "g2-subgraph-scan", "seed": a.seed, "cpu": a.cpu,
+                                    "note": "development container: NOT a result"})
+    raw = out / "measurements.jsonl"
+    rng = np.random.default_rng(a.seed)
+    order = [a.lengths[i] for i in rng.permutation(len(a.lengths))]
+    env = dict(os.environ)
+    env.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+    for L in order:
+        d = built / "K" / f"L{L:04d}"
+        arms = {"S8": d / "S8_full" / "model.so", "S1": d / "S1_full" / "model.so"}
+        if not a.no_aa:
+            aa = d / "AA_full" / "model.so"
+            aa.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(arms["S8"], aa)
+            arms["AA"] = aa
+        for b in range(a.blocks):
+            spec = {"artifacts": {k: str(v) for k, v in arms.items()}, "input_npy": str(d / "input.npy"),
+                    "expected_npy": str(d / "expected.npy"), "calls": a.calls, "rounds": a.rounds,
+                    "warmup_calls": a.warmup_calls, "cpus": [a.cpu], "seed": int(a.seed * 100003 + L * 101 + b)}
+            p = subprocess.run([sys.executable, "-m", "shapeperf.paired", "--pair-worker", json.dumps(spec)],
+                               cwd=REPO_ROOT, env=env, capture_output=True, text=True)
+            block = new_run_id("block")
+            if p.returncode != 0:
+                append_jsonl(raw, {"padded_length": L, "block_id": block, "model_key": "subgraph:K", "flagset": "S8",
+                                   "failure_type": "runtime_error", "stderr_tail": p.stderr[-1500:]})
+                continue
+            res = json.loads(p.stdout.strip().splitlines()[-1])
+            for arm, samples in res["samples"].items():
+                append_jsonl(raw, {"padded_length": L, "block_id": block, "model_key": "subgraph:K", "flagset": arm,
+                                   "latency_ns": samples, "exact_permutation": res["exact"][arm], "failure_type": None,
+                                   "pid": res["pid"], "cpus": res["cpus"], "instrument": "in-process interleaved",
+                                   "experiment_phase": "v3-g2 DEV-CONTAINER SCAN (not a result)",
+                                   "provenance_id": prov["provenance_id"], "vm_allocation_id": a.allocation_id})
+        if not a.no_aa:
+            shutil.rmtree(d / "AA_full")
+        print(f"L={L} done", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("scan")
+    s.add_argument("--lengths", type=int, nargs="+", required=True)
+    s.add_argument("--built", required=True)
+    s.add_argument("--out", required=True)
+    for k in ("calls", "rounds", "warmup-calls", "blocks", "seed", "cpu"):
+        s.add_argument(f"--{k}", type=int, required=True)
+    s.add_argument("--allocation-id", default="dev-container")
+    s.add_argument("--no-aa", action="store_true")
     b = sub.add_parser("build")
     b.add_argument("--lengths", type=int, nargs="+", required=True)
     b.add_argument("--out", required=True)
     b.add_argument("--target-cpu", default="emeraldrapids")
     b.add_argument("--jobs", type=int, default=3)
+    b.add_argument("--kinds", nargs="+", default=["K", "Q"])
     m = sub.add_parser("measure")
     m.add_argument("--lengths", type=int, nargs="+", required=True)
     m.add_argument("--kinds", nargs="+", default=["K", "Q"])
@@ -206,7 +260,7 @@ def main():
     m.add_argument("--allocation-id", default="dev-container")
     m.add_argument("--no-aa", action="store_true")
     a = ap.parse_args()
-    {"build": cmd_build, "measure": cmd_measure}[a.cmd](a)
+    {"build": cmd_build, "measure": cmd_measure, "scan": cmd_scan}[a.cmd](a)
 
 
 if __name__ == "__main__":

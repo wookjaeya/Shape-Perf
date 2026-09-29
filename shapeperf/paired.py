@@ -87,6 +87,46 @@ def subgraph_worker(spec):
             "static_shape_verified": None, "outputs_stable": True}
 
 
+def subgraph_pair_worker(spec):
+    """Fresh process, ALL arms loaded in it and timed INTERLEAVED (exploratory scan instrument).
+    Each round times `calls` calls of every arm in a seeded random order; a sample is the mean time per
+    call. One process is one paired block: arm differences share the process, so process start-up
+    cost is paid once. Less faithful to the one-process-per-unit protocol of the model-level pilot
+    (amendment §11.1) - used only to map where a kernel-level effect exists.
+    spec: artifacts {arm: path}, input_npy, expected_npy, calls, rounds, warmup_calls, cpus, seed."""
+    import os
+    import time
+    from . import toolchain
+    if spec.get("cpus"):
+        os.sched_setaffinity(0, set(spec["cpus"]))
+    x = np.load(spec["input_npy"])
+    expected = np.load(spec["expected_npy"])
+    om = toolchain.import_pyruntime()
+    sess = {arm: om(shared_lib_path=path) for arm, path in spec["artifacts"].items()}
+    exact = {}
+    for arm, s in sess.items():
+        out = s.run([x])
+        exact[arm] = bool(len(out) == 1 and np.array_equal(out[0], expected))
+        for _ in range(spec["warmup_calls"]):
+            out = s.run([x])
+    rng = np.random.default_rng(spec["seed"])
+    arms = list(spec.get("timed") or sess)      # all artifacts are loaded (in spec order); only these are timed
+    perf = time.perf_counter_ns
+    samples = {arm: [] for arm in arms}
+    if spec.get("order") == "blocked":      # all rounds of an arm in a row, arms in the given order
+        schedule = [arm for arm in arms for _ in range(spec["rounds"])]
+    else:                                   # default: every round visits all arms in a seeded random order
+        schedule = [arms[i] for _ in range(spec["rounds"]) for i in rng.permutation(len(arms))]
+    for arm in schedule:
+        s = sess[arm]
+        t0 = perf()
+        for _ in range(spec["calls"]):
+            out = s.run([x])
+        samples[arm].append((perf() - t0) / spec["calls"])
+    return {"samples": samples, "exact": exact, "calls_per_sample": spec["calls"], "pid": os.getpid(),
+            "cpus": sorted(os.sched_getaffinity(0))}
+
+
 # ------------------------------------------------------------------ analysis
 
 PROCESS_STATS = {"mean": np.mean, "median": np.median, "min": np.min}
@@ -170,6 +210,8 @@ def required_blocks(sd_block, delta_log, alpha=0.05, power=0.8):
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "--verify-worker":
         print(json.dumps(verify_worker(json.loads(sys.argv[2]))))
+    elif len(sys.argv) == 3 and sys.argv[1] == "--pair-worker":
+        print(json.dumps(subgraph_pair_worker(json.loads(sys.argv[2]))))
     elif len(sys.argv) == 3 and sys.argv[1] == "--worker":
         print(json.dumps(subgraph_worker(json.loads(sys.argv[2]))))
     else:

@@ -1,0 +1,39 @@
+{
+  "labels": {
+    "environment": "development container",
+    "not_a_result": true
+  },
+  "source": {
+    "path": "/home/user/work/onnx-mlir",
+    "HEAD": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b",
+    "porcelain_status": "",
+    "clean": true
+  },
+  "patch": {
+    "file": "patches/transpose_unroll_cap1.patch",
+    "sha256": "3e1b6f5a28b13389653445b67877e9f7cc4cc3ebcdb593df6aeb117a47a0ba8c",
+    "applies_to_clean_tree": true,
+    "apply_check_stderr": ""
+  },
+  "compiler_binary_sha256": {
+    "restored_main_build": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+    "saved_S8": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+    "saved_S1": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396"
+  },
+  "restored_build_equals_S8": true,
+  "S1_differs_from_S8": true,
+  "check_mlir": {
+    "log_sha256": "b3c5d47540ec922caae825bd670dc3fbd150ad1f5696f312452af60b058053c4",
+    "start": "2026-09-29T08:11:38Z",
+    "end": "2026-09-29T08:15:16Z",
+    "exit_code": 0,
+    "total_discovered": 3891,
+    "counts": {
+      "Unsupported": 582,
+      "Passed": 3308,
+      "Expectedly Failed": 1
+    },
+    "header": "-- Testing: 3113 tests, 4 workers --"
+  },
+  "check_mlir_scope": "LLVM/MLIR project tests of the pinned LLVM build (target check-mlir); the ONNX-MLIR lit tests are check-onnx-lit (v2 results/g0)"
+}

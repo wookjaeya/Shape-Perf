@@ -113,6 +113,24 @@ def paired_log_ratios(table, length, arm_a, arm_b):
             for (L, _b), d in table.items() if L == length and d.get(arm_a) and d.get(arm_b)]
 
 
+def paired_abs_diffs(table, length, arm_a, arm_b):
+    """Per block: mean(arm_a process values) - mean(arm_b process values), in the table's unit (ns)."""
+    return [float(np.mean(d[arm_a]) - np.mean(d[arm_b]))
+            for (L, _b), d in table.items() if L == length and d.get(arm_a) and d.get(arm_b)]
+
+
+def abs_summary(values, conf_level=0.95):
+    """Mean, sd and t interval of absolute paired differences (ns) over blocks."""
+    x = np.asarray(values, float)
+    n = int(x.size)
+    if n < 2:
+        return {"n_blocks": n, "mean_ns": float(x.mean()) if n else None, "sd_ns": None, "ci_ns": None}
+    sd = float(x.std(ddof=1))
+    q = float(st.t.ppf(1 - (1 - conf_level) / 2, n - 1))
+    m = float(x.mean())
+    return {"n_blocks": n, "mean_ns": m, "sd_ns": sd, "ci_ns": [m - q * sd / math.sqrt(n), m + q * sd / math.sqrt(n)]}
+
+
 def effect_summary(values, conf_level=0.95):
     """Mean, sd, t interval over blocks (one allocation: the claim is limited to it)."""
     x = np.asarray(values, float)

@@ -153,7 +153,8 @@ def cmd_build(a):
 
 
 def cmd_measure(a):
-    out = Path(a.out)
+    out = Path(a.out)                 # measurement records go here
+    built = Path(a.built or a.out)    # artifacts and inputs come from the `build` output
     prov = provenance.freeze(out / f"provenance_measure_{a.seed}.json",
                              extra={"role": "g2-subgraph-timing", "seed": a.seed, "cpu": a.cpu,
                                     "note": "development container: NOT a result"})
@@ -162,7 +163,7 @@ def cmd_measure(a):
     cells = [(k, L) for k in a.kinds for L in a.lengths]
     for i in rng.permutation(len(cells)):
         kind, L = cells[i]
-        d = out / kind / f"L{L:04d}"
+        d = built / kind / f"L{L:04d}"
         arms = {"S8": d / "S8_full" / "model.so", "S1": d / "S1_full" / "model.so"}
         if not a.no_aa:
             aa = d / "AA_full" / "model.so"
@@ -199,6 +200,7 @@ def main():
     m.add_argument("--lengths", type=int, nargs="+", required=True)
     m.add_argument("--kinds", nargs="+", default=["K", "Q"])
     m.add_argument("--out", required=True)
+    m.add_argument("--built", default=None, help="the `build` output directory (default: --out)")
     for k in ("calls", "reps", "warmup-calls", "processes", "blocks", "seed", "cpu"):
         m.add_argument(f"--{k}", type=int, required=True)
     m.add_argument("--allocation-id", default="dev-container")

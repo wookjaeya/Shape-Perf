@@ -1,0 +1,61 @@
+{
+  "created_unix": 1790661070.5212677,
+  "source": {
+    "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+    "dirty": true,
+    "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+    "untracked_files": [
+      "analysis/specialization_effects.py",
+      "design_amendment.md",
+      "docs/native_reproduction.md",
+      "docs/research_plan_v3.md",
+      "patches/transpose_unroll_cap1.patch",
+      "results/v3/g1/g1_lengths.json",
+      "scripts/build_shape_pair.py",
+      "scripts/make_protocol_v3.py",
+      "scripts/run_g1_pilot.sh",
+      "scripts/run_paired_benchmark.py",
+      "scripts/run_subgraph_benchmark.py",
+      "shapeperf/lowering_diff.py",
+      "shapeperf/paired.py",
+      "shapeperf/provenance.py",
+      "tests/test_lowering_diff.py"
+    ],
+    "untracked_sha256": "e5c331d56c636364d0e036100c74d1fa4b19d78282f167ae316a2ee93842994e"
+  },
+  "dependencies": {
+    "python": "3.11.15",
+    "n_packages": 24,
+    "packages_sha256": "5b9ecf3d8e4a2429c12b0f9a48b53dc0d3641435dbee4e7b7751663569cf4401",
+    "key": {
+      "numpy": "2.2.6",
+      "onnx": "1.23.0",
+      "onnxruntime": "1.23.2",
+      "protobuf": "6.33.5",
+      "scipy": "1.15.3"
+    }
+  },
+  "host": {
+    "kernel": "6.18.44-fc-v49",
+    "machine": "x86_64",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "n_cpus": 4,
+    "node": "vm",
+    "cfs_quota_us": "unavailable"
+  },
+  "compilers": [],
+  "extra": {
+    "role": "g1-dev-pilot-timing",
+    "seed": 20260930,
+    "cpu": 3,
+    "lengths": [
+      41,
+      64,
+      100,
+      124,
+      140
+    ],
+    "note": "development container: NOT a result"
+  },
+  "provenance_id": "eddede38ea3f30cf"
+}

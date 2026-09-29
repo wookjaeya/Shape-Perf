@@ -1,0 +1,27 @@
+Analyse PERF
+Gather stats from 14 measurement sets with 2 warmup;  keep inner 6 experiment(s)
+Report using runtime file "/home/user/work/v3/profile/L64/runtime.log"
+Statistic legend:
+  op-name: num, average time (ms), cumulative time (ms), percent of total 
+
+Statistics start all ops ordered_by time, tot_time,  258.1375000
+  onnx.Gemm, 70, 2.4205500, 169.4385000, 65.6%
+  onnx.Gelu, 12, 5.9462639, 71.3551667, 27.6%
+  onnx.MatMul, 28, 0.4285357, 11.9990000, 4.6%
+  onnx.Softmax, 12, 0.2085833, 2.5030000, 1.0%
+  onnx.Mul, 103, 0.0094175, 0.9700000, 0.4%
+  onnx.Add, 91, 0.0102399, 0.9318333, 0.4%
+  onnx.Transpose, 49, 0.0168129, 0.8238333, 0.3%
+  onnx.Sub, 51, 0.0123497, 0.6298333, 0.2%
+  onnx.ReduceMeanV13, 50, 0.0033367, 0.1668333, 0.1%
+  onnx.Gather, 1, 0.0460000, 0.0460000, 0.0%
+  onnx.Cast, 1, 0.0010000, 0.0010000, 0.0%
+  onnx.OneHot, 1, 0.0008333, 0.0008333, 0.0%
+  onnx.Sqrt, 25, 0.0000267, 0.0006667, 0.0%
+  onnx.Split, 1, 0.0006667, 0.0006667, 0.0%
+  onnx.Reciprocal, 25, 0.0000200, 0.0005000, 0.0%
+  onnx.Constant, 205, 0.0000000, 0.0000000, 0.0%
+  onnx.Reshape, 58, 0.0000000, 0.0000000, 0.0%
+  onnx.Unsqueeze, 2, 0.0000000, 0.0000000, 0.0%
+  onnx.Squeeze, 2, 0.0000000, 0.0000000, 0.0%
+Statistics end all ops ordered_by time, tot_time,  258.1375000

@@ -220,7 +220,7 @@ float64 참조와 비교한 최대 절대 오차다. 비교를 위해 ORT 값을
 
 <!-- R1_SQUAD -->
 **미완료(07:12Z 중단, 연구 방향 전환)**. 판정 기준은 protocol에 고정된 대로 답 변경 ≤ 10개, |ΔEM|·|ΔF1| ≤ 0.1이다.
-- orig: feature 12,006개 중 10,000개의 logits를 저장했다(`results/r1/squad/orig/shard*_part*.npz`, git 추적 제외, `/home/user/work` 밖 저장소 경로).
+- orig: feature 12,006개 중 10,000개의 logits를 저장했다(`results/r1/squad/orig/shard*_part*.npz`, git 추적 제외).
 - r1b: 시작하지 않았다.
 - 같은 명령으로 다시 실행하면 남은 feature만 이어서 계산한다(`scripts/r1_squad_eval.py`, 드라이버 `/home/user/work/r1_squad_driver.sh`).
 - 따라서 **H3의 "정확도를 해치지 않는다" 부분은 아직 판정되지 않았다.** 단일 연산 수치(7.3절)만 있다.

@@ -1,0 +1,58 @@
+{
+  "arms": {
+    "AA": {
+      "path": "/home/user/work/v3_followup/e1/orig_aa/AA_full/model.so",
+      "tag": null,
+      "copy_of": "S8"
+    },
+    "S1": {
+      "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+      "tag": null
+    },
+    "S8": {
+      "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "tag": null
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "S8"
+    ],
+    [
+      "load",
+      "S1"
+    ],
+    [
+      "load",
+      "AA"
+    ],
+    [
+      "call",
+      "S8"
+    ],
+    [
+      "call",
+      "S1"
+    ],
+    [
+      "call",
+      "AA"
+    ],
+    [
+      "call",
+      "S1"
+    ],
+    [
+      "call",
+      "AA"
+    ],
+    [
+      "call",
+      "S8"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3/g2/K/L0064/input.npy",
+  "expected_npy": "/home/user/work/v3/g2/K/L0064/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/calls_ld_lazy.jsonl"
+}

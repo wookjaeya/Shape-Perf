@@ -1,0 +1,3 @@
+{"step": 0, "op": "load", "arm": "AA", "path": "/home/user/work/v3_followup/e1/orig_aa/AA_full/model.so", "tag": null}
+{"step": 1, "op": "call", "arm": "AA", "call_index": 0, "exact_permutation": true}
+{"step": 2, "op": "call", "arm": "AA", "call_index": 1, "exact_permutation": true}

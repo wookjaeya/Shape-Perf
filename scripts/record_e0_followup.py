@@ -75,8 +75,10 @@ def main():
                                             for arm in ("S8", "S1")}
     cell["AA_full/model.so"] = {"status": "missing (by design)", "why": "cmd_measure copied S8_full/model.so to "
                                 "AA_full/model.so before each cell and deleted it afterwards (scripts/run_subgraph_"
-                                "benchmark.py cmd_measure); the copy is byte-identical to S8 by construction, and its "
-                                "per-record artifact_hash equals the S8 hash (field artifact_hash of the AA records)"}
+                                "benchmark.py cmd_measure); the copy is byte-identical to S8 only by construction (shutil.copyfile). "
+                                "The artifact_hash field of the AA records is COPIED from the S8 build hash "
+                                "(run_subgraph_benchmark.py cmd_measure 'hashes'), not computed from the AA file, "
+                                "so it is not independent evidence of byte identity"}
 
     # 2. compile argv: not recorded in v3 (build.json has no command) -> reconstructed; optionally re-run
     fs = toolchain.resolve_flagset("default", "emeraldrapids")

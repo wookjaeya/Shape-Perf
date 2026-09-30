@@ -1,0 +1,28 @@
+{
+  "kind": "K",
+  "length": 64,
+  "u": 8,
+  "input_sha256": "39cf8b687e4db4a94fcc5a464239a8bf71fb047c20b121ae4847593fae13361b",
+  "unrolled_loops": {
+    "S8": 1,
+    "S1": 0
+  },
+  "predicted_unrolled_loops": {
+    "S8": 1,
+    "S1": 0
+  },
+  "ir_identical": false,
+  "predicted_ir_identical": false,
+  "normalized_diff": {
+    "hunks": 1,
+    "changed_lines": 23
+  },
+  "so_hash": {
+    "S8": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+    "S1": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497"
+  },
+  "so_identical": false,
+  "compile_ok": true,
+  "provenance_id": "2f3da961b190f5f6",
+  "prediction_holds": true
+}

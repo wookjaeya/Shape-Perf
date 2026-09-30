@@ -1,0 +1,351 @@
+{
+  "purpose": "follow-up E0: inventory of the v3 L=64 kernel comparison; results/v3 is not modified",
+  "provenance_id": "0d686edbc3ec96a5",
+  "cell": {
+    "dir": "/home/user/work/v3/g2/K/L0064",
+    "files": {
+      "model.onnx": {
+        "path": "/home/user/work/v3/g2/K/L0064/model.onnx",
+        "sha256": "e0b1404e26aa8a1f3238312d148a79ffbe8cfec430800f1a0d771e881ab9698d",
+        "bytes": 135,
+        "status": "present"
+      },
+      "input.npy": {
+        "path": "/home/user/work/v3/g2/K/L0064/input.npy",
+        "sha256": "2993eb7af23301d784cfa2bd9b8d411a77c44b534432415201c28893dc414a95",
+        "bytes": 196736,
+        "status": "present"
+      },
+      "expected.npy": {
+        "path": "/home/user/work/v3/g2/K/L0064/expected.npy",
+        "sha256": "36431537e53cfd31be09d3a544e72b3227e1a8911b217574d3fe83073fef8562",
+        "bytes": 196736,
+        "status": "present"
+      },
+      "build.json": {
+        "path": "/home/user/work/v3/g2/K/L0064/build.json",
+        "sha256": "87298469e09b5cf112b4f6c73fe3f6bc35a0facd8fba2800f7e2633b303eb252",
+        "bytes": 661,
+        "status": "present"
+      },
+      "S8_full/model.so": {
+        "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+        "bytes": 42008,
+        "status": "present"
+      },
+      "S1_full/model.so": {
+        "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+        "bytes": 46104,
+        "status": "present"
+      },
+      "S8_probe/model.onnx.mlir": {
+        "path": "/home/user/work/v3/g2/K/L0064/S8_probe/model.onnx.mlir",
+        "sha256": "b336f62d6ba6eb179ac8684e34dcad1aef1918590a636bfef6a12ca68e7c60c4",
+        "bytes": 3200,
+        "status": "present"
+      },
+      "S1_probe/model.onnx.mlir": {
+        "path": "/home/user/work/v3/g2/K/L0064/S1_probe/model.onnx.mlir",
+        "sha256": "0c84b7816afd828d482bf7f7cd05e8dbd0592002723ef3559177f8ac9277bc36",
+        "bytes": 1426,
+        "status": "present"
+      },
+      "input_bytes_sha256_matches_build_json": true,
+      "so_sha256_matches_build_json": {
+        "S8": true,
+        "S1": true
+      },
+      "AA_full/model.so": {
+        "status": "missing (by design)",
+        "why": "cmd_measure copied S8_full/model.so to AA_full/model.so before each cell and deleted it afterwards (scripts/run_subgraph_benchmark.py cmd_measure); the copy is byte-identical to S8 by construction, and its per-record artifact_hash equals the S8 hash (field artifact_hash of the AA records)"
+      }
+    },
+    "build_json": {
+      "kind": "K",
+      "length": 64,
+      "u": 8,
+      "input_sha256": "39cf8b687e4db4a94fcc5a464239a8bf71fb047c20b121ae4847593fae13361b",
+      "unrolled_loops": {
+        "S8": 1,
+        "S1": 0
+      },
+      "predicted_unrolled_loops": {
+        "S8": 1,
+        "S1": 0
+      },
+      "ir_identical": false,
+      "predicted_ir_identical": false,
+      "normalized_diff": {
+        "hunks": 1,
+        "changed_lines": 23
+      },
+      "so_hash": {
+        "S8": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+        "S1": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497"
+      },
+      "so_identical": false,
+      "compile_ok": true,
+      "provenance_id": "2f3da961b190f5f6",
+      "prediction_holds": true
+    },
+    "preserved_copy": "results/v3_followup/e0/artifacts_L0064"
+  },
+  "compile": {
+    "status": "reconstructed, not recorded",
+    "source": "scripts/run_subgraph_benchmark.py compile_arm at the build commit ebd96be60af64a1684203522875bf66b955b7541 (clean tree)",
+    "argv": {
+      "S8": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "-o",
+        "/home/user/work/v3/g2/K/L0064/S8_full/model",
+        "--EmitLib",
+        "/home/user/work/v3/g2/K/L0064/model.onnx"
+      ],
+      "S1": [
+        "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "-o",
+        "/home/user/work/v3/g2/K/L0064/S1_full/model",
+        "--EmitLib",
+        "/home/user/work/v3/g2/K/L0064/model.onnx"
+      ]
+    },
+    "tag": "none (--tag absent): the compiler derives tag 'model' from -o",
+    "compilers": {
+      "S8": {
+        "compiler_variant": "orig",
+        "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+        "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+        "compiler_bin_bytes": 153922704
+      },
+      "S1": {
+        "compiler_variant": "cap1",
+        "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+        "compiler_bin_bytes": 153922704
+      }
+    },
+    "recompile_check": {
+      "S8": {
+        "argv": [
+          "/home/user/work/variants/orig/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "-o",
+          "/home/user/work/v3_followup/e0_recompile/S8_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e0_recompile/model.onnx"
+        ],
+        "returncode": 0,
+        "sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+        "equals_recorded_so_hash": true
+      },
+      "S1": {
+        "argv": [
+          "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "-o",
+          "/home/user/work/v3_followup/e0_recompile/S1_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e0_recompile/model.onnx"
+        ],
+        "returncode": 0,
+        "sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+        "equals_recorded_so_hash": true
+      }
+    }
+  },
+  "run": {
+    "status": "reconstructed from code; per-process fields are in the records",
+    "argv": "[python, -m, shapeperf.paired, --worker, <item json>] via shapeperf.measure.run_item (subprocess, a new exec per process; one artifact per process)",
+    "drivers": {
+      "run_g2_measure.sh": {
+        "path": "/home/user/work/v3/run_g2_measure.sh",
+        "sha256": "543976ee11743ccad2a33e538a74653e08b25f9c48a36dc7ca1d4e0347ffb1c3",
+        "bytes": 653,
+        "status": "present"
+      },
+      "run_g2_replicate.sh": {
+        "path": "/home/user/work/v3/run_g2_replicate.sh",
+        "sha256": "469b190e065b0ef262eca386877ef50a8a2bd48a5734dab21fb4f61519eeac7b",
+        "bytes": 645,
+        "status": "present"
+      }
+    },
+    "worker": "shapeperf.paired.subgraph_worker: load 1 artifact (no tag) -> 1 correctness call -> warmup_calls calls -> reps x (calls consecutive calls, timed as one interval); every output kept alive until the next call returns"
+  },
+  "records": {
+    "fresh_process.jsonl": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process.jsonl",
+      "sha256": "c119025124e739e8333b964bdbfea5dd8cf470c9deedc967fab8a0cdf90e5d99",
+      "bytes": 1252430,
+      "status": "present"
+    },
+    "fresh_process_replicate.jsonl": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process_replicate.jsonl",
+      "sha256": "3e7fe08cfbcaf65483eb8d97a4c19f13b5d5d5380fc2db62106f6dabf567557e",
+      "bytes": 597590,
+      "status": "present"
+    },
+    "interleaved_in_process_test.jsonl": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/interleaved_in_process_test.jsonl",
+      "sha256": "829276abd7172aef0ca16c1a8232036e995b10580508fc6e45d1eee02b7aacda",
+      "bytes": 14038,
+      "status": "present"
+    },
+    "provenance_measure_11.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_11.json",
+      "sha256": "23c6acac3d5a2f5f8b568f784f1495ba264f217b78be9122ecabc5ee5fb326ed",
+      "bytes": 1047,
+      "status": "present"
+    },
+    "provenance_measure_12.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_12.json",
+      "sha256": "ad07f17a9a78d0c2eb9fdba9b0e6c3ef6b10201520039bd72309336717532632",
+      "bytes": 1048,
+      "status": "present"
+    },
+    "provenance_measure_21.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_21.json",
+      "sha256": "cf863ccecd6ee8e023761c282c60b037f403d5167b602d8ddbbb7643ac8e6c55",
+      "bytes": 1047,
+      "status": "present"
+    },
+    "provenance_measure_22.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_22.json",
+      "sha256": "53bb8d9bb928e3cebea2d87d88ffb915e6488b26db4e48471b9e66cbb22cd23c",
+      "bytes": 1048,
+      "status": "present"
+    },
+    "context_L64_default.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json",
+      "sha256": "2c17311e081f5d4a5b1df1ebd7c2e9eba55fb384e1890b2a9af4b63347d39f76",
+      "bytes": 2616,
+      "status": "present"
+    },
+    "context_L64_malloc_mmap_threshold_16MiB.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_16MiB.json",
+      "sha256": "a9612f9646de6c894b7518f371fefd5d80f6f93e51bb9a1f84a2c21524a7cf3a",
+      "bytes": 870,
+      "status": "present"
+    },
+    "context_L64_malloc_mmap_threshold_and_top_pad_16MiB.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_and_top_pad_16MiB.json",
+      "sha256": "60c208d5eff0339092f1a0d32e312af8419a36c275495db865ef0140ed7f3827",
+      "bytes": 925,
+      "status": "present"
+    },
+    "loadorder_factorial_L63.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json",
+      "sha256": "5782f90e310a533070b8cb083fae97b9091589f4273e58fb795a0a31d425dcfd",
+      "bytes": 2213,
+      "status": "present"
+    },
+    "loadorder_factorial_L64.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L64.json",
+      "sha256": "d2d834300619cf54afb57408df8f56a51be1358b42d4651b9db4267a75e05f20",
+      "bytes": 1704,
+      "status": "present"
+    },
+    "loadorder_factorial_L96.json": {
+      "path": "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json",
+      "sha256": "6dafbe059eed2afdd48690f02f2106bab0001fea60d32c0a7df2cf8e45a145f0",
+      "bytes": 2221,
+      "status": "present"
+    }
+  },
+  "logs": {
+    "v3_g2_build.log": {
+      "path": "/home/user/work/logs/v3_g2_build.log",
+      "sha256": "0b7f3b9f07d37929cce128185554d818d4a7eb0d899c3ce5b97446caaf1b2762",
+      "bytes": 3922,
+      "status": "present"
+    },
+    "v3_g2_measure.log": {
+      "path": "/home/user/work/logs/v3_g2_measure.log",
+      "sha256": "528b5cb69bd43896f6c4cf05ef045a3494d0517a740706d2f07d7e3233906e02",
+      "bytes": 323,
+      "status": "present"
+    },
+    "v3_g2_replicate.log": {
+      "path": "/home/user/work/logs/v3_g2_replicate.log",
+      "sha256": "844f40995a8e7879f7460792fcd67125cf29ef382e78ece5ecc33b637be176ea",
+      "bytes": 164,
+      "status": "present"
+    },
+    "v3_g1_pilot.log": {
+      "path": "/home/user/work/logs/v3_g1_pilot.log",
+      "sha256": "cf066f9786d13f824dd6bdb936332279710d4fda5473552112c8bb74918ef005",
+      "bytes": 6007,
+      "status": "present"
+    },
+    "onnx-mlir.cap1.build.log": {
+      "path": "/home/user/work/logs/onnx-mlir.cap1.build.log",
+      "sha256": "2422fdd52b88c003b618e10e2f9a8347a2649beb56580fa49c381816611820b6",
+      "bytes": 764,
+      "status": "present"
+    },
+    "onnx-mlir.revert.build.log": {
+      "path": "/home/user/work/logs/onnx-mlir.revert.build.log",
+      "sha256": "2422fdd52b88c003b618e10e2f9a8347a2649beb56580fa49c381816611820b6",
+      "bytes": 764,
+      "status": "present"
+    }
+  },
+  "runtime": {
+    "pyruntime": [
+      {
+        "path": "/home/user/work/onnx-mlir/build/Release/lib/PyRuntimeC.cpython-311-x86_64-linux-gnu.so",
+        "sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+        "bytes": 348456,
+        "status": "present",
+        "mtime_unix": 1790594275.6340718
+      }
+    ],
+    "loader": "dlopen(RTLD_LAZY | RTLD_GLOBAL); entry via dlsym(handle, 'run_main_graph_<tag>') (onnx-mlir src/Runtime/ExecutionSession.cpp at 1e017c9f, lines 88-132, 238-247)"
+  },
+  "repository": {
+    "HEAD": "ade4f116e68184d9bcc13fcba1bca070a9b9b7ec",
+    "diff_file": "repo_state/git_diff.binary.patch",
+    "untracked_copied": [
+      "scripts/gdb_identity_trace.py",
+      "scripts/record_e0_followup.py",
+      "scripts/verify_execution_identity.py",
+      "shapeperf/elfinfo.py",
+      "shapeperf/identity.py",
+      "tests/test_loader_identity.py"
+    ],
+    "dependency_lock": {
+      "requirements.freeze.txt": {
+        "path": "/home/user/work/requirements.freeze.txt",
+        "sha256": "b68d6902ab2aa39a6c940b1bba0461b3bb5c547d258d5afcee843537ab5cda6c",
+        "bytes": 394,
+        "status": "present"
+      },
+      "requirements-export.freeze.txt": {
+        "path": "/home/user/work/requirements-export.freeze.txt",
+        "sha256": "822be8545bdd81dbdac86312a5c8bcce504babbe1b191d8d628e0e109eccc3d1",
+        "bytes": 879,
+        "status": "present"
+      }
+    }
+  },
+  "audit": null,
+  "missing": [
+    "compile argv of the v3 L=64 build (reconstructed from code; see compile.recompile_check)",
+    "AA_full/model.so used during timing (deleted by design; byte copy of S8)",
+    "per-process stdout/stderr of the timing workers (only the driver logs exist)",
+    "PyRuntime SHA-256 at measurement time (not recorded by v3 provenance; current file and mtime recorded)",
+    "the exact tree state of dirty v3 runs, unless recovered in the audit (see audit.provenance)"
+  ]
+}

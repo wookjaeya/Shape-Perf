@@ -1,0 +1,21 @@
+{
+ "method": "objdump -d --no-show-raw-insn of the compute function; absolute targets, rip-relative displacements, objdump comments and the tag suffix removed",
+ "result": {
+  "S8_alpha": {
+   "instructions": 419,
+   "instruction_sequence_equal_to_untagged_modulo_addresses": true
+  },
+  "S8_bravo": {
+   "instructions": 419,
+   "instruction_sequence_equal_to_untagged_modulo_addresses": true
+  },
+  "S1_bravo": {
+   "instructions": 982,
+   "instruction_sequence_equal_to_untagged_modulo_addresses": true
+  },
+  "S1_alpha": {
+   "instructions": 982,
+   "instruction_sequence_equal_to_untagged_modulo_addresses": true
+  }
+ }
+}

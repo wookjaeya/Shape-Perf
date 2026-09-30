@@ -11,6 +11,9 @@ ONNX-MLIR CPU 백엔드 × FP32 BERT-SQuAD × batch=1 × sequence length 한 축
 > **v3 (`docs/research_plan_v3.md`, 재설계안)의 G0–G2 실행 결과는 [`docs/STATUS_v3.md`](docs/STATUS_v3.md)와
 > [`design_amendment.md`](design_amendment.md)에 있습니다.** 주 대조는 Transpose unroll 상한 8 대 1(`patches/transpose_unroll_cap1.patch`)이며,
 > v2 탐색기 연구는 G2.5 중단 상태 그대로입니다.
+>
+> **v3 후속(E0–E1, 실행 식별)**: [`docs/followup_v3_review.md`](docs/followup_v3_review.md). v3의 공동 로딩 비교는 무효였고
+> (같은 tag의 모델 라이브러리가 먼저 로드된 쪽 계산 코드를 실행), 단독 실행 비교는 유효한 실행 경로였습니다.
 
 ## 구성 (명세 §12 제안 인터페이스와의 대응)
 

@@ -1,0 +1,18 @@
+Breakpoint 1 (main_graph_alpha) pending.
+Breakpoint 2 (main_graph_bravo) pending.
+Breakpoint 3 (run_main_graph_alpha) pending.
+Breakpoint 4 (run_main_graph_bravo) pending.
+Breakpoint 5 (_mlir_ciface_main_graph_alpha) pending.
+Breakpoint 6 (_mlir_ciface_main_graph_bravo) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+{"pid": 5645, "n_calls": 3, "all_exact": true}
+[Inferior 1 (process 5645) exited normally]
+Function "main_graph_alpha" not defined.
+Function "main_graph_bravo" not defined.
+Function "run_main_graph_alpha" not defined.
+Function "run_main_graph_bravo" not defined.
+Function "_mlir_ciface_main_graph_alpha" not defined.
+Function "_mlir_ciface_main_graph_bravo" not defined.
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model.so"
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so"

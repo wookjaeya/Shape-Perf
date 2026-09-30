@@ -1,0 +1,2250 @@
+{
+  "set": "orig",
+  "cell": "/home/user/work/v3/g2/K/L0064",
+  "provenance_id": "510f2a5fcdeb9904",
+  "source": {
+    "git_head": "1865924fc22477ff376da2c0dabeef3eddf0542c",
+    "dirty": true,
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked_files": [
+      "results/v3_followup/e0/artifacts_L0064/build.json",
+      "results/v3_followup/e0/artifacts_L0064/expected.npy",
+      "results/v3_followup/e0/artifacts_L0064/input.npy",
+      "results/v3_followup/e0/artifacts_L0064/model.onnx",
+      "results/v3_followup/e0/logs/v3_g2_build.log",
+      "results/v3_followup/e0/logs/v3_g2_measure.log",
+      "results/v3_followup/e0/logs/v3_g2_replicate.log",
+      "results/v3_followup/e0/manifest.json",
+      "results/v3_followup/e0/provenance.json",
+      "results/v3_followup/e0/repo_state/git_diff.binary.patch",
+      "results/v3_followup/e1/elf_orig/s1.disasm.txt",
+      "results/v3_followup/e1/elf_orig/s1.dynamic.txt",
+      "results/v3_followup/e1/elf_orig/s1.dynsym.txt",
+      "results/v3_followup/e1/elf_orig/s1.notes.txt",
+      "results/v3_followup/e1/elf_orig/s1.reloc.txt",
+      "results/v3_followup/e1/elf_orig/s8.disasm.txt",
+      "results/v3_followup/e1/elf_orig/s8.dynamic.txt",
+      "results/v3_followup/e1/elf_orig/s8.dynsym.txt",
+      "results/v3_followup/e1/elf_orig/s8.notes.txt",
+      "results/v3_followup/e1/elf_orig/s8.reloc.txt",
+      "results/v3_followup/e1/elf_orig/sha256.txt"
+    ],
+    "untracked_sha256": "3de52cedaa7a4696b4e006ea7cd2b33f402b8e807db38622e75d93f84c19bcb1"
+  },
+  "runtime": {
+    "pyruntime": [
+      "/home/user/work/onnx-mlir/build/Release/lib/PyRuntimeC.cpython-311-x86_64-linux-gnu.so"
+    ],
+    "pyruntime_sha256": [
+      "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f"
+    ],
+    "python": "3.11.15 (main, Mar  3 2026, 09:26:23) [GCC 13.3.0]",
+    "libc": "ldd (Ubuntu GLIBC 2.39-0ubuntu8.7) 2.39",
+    "gdb": "GNU gdb (Ubuntu 15.1-1ubuntu1~24.04.1) 15.1",
+    "kernel": "6.18.44-fc-v50"
+  },
+  "artifacts": {
+    "S8": {
+      "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "tag": null,
+      "sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "build_id": "fce9b3dd242f05ff0cb05bd5798d240bb76a12a8",
+      "compute_function_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401"
+    },
+    "S1": {
+      "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+      "tag": null,
+      "sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "build_id": "ce55e3f192d398dc869eaaa93e5d92b92c812580",
+      "compute_function_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582"
+    },
+    "AA": {
+      "path": "/home/user/work/v3_followup/e1/orig_aa/AA_full/model.so",
+      "tag": null,
+      "copy_of": "S8",
+      "sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "build_id": "fce9b3dd242f05ff0cb05bd5798d240bb76a12a8",
+      "compute_function_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "I8",
+      "description": "isolated",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I8/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I8/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5313, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I8/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5314, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "I1",
+      "description": "isolated",
+      "steps": [
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S1"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I1/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I1/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5325, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/I1/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5326, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "IAA",
+      "description": "isolated",
+      "steps": [
+        [
+          "load",
+          "AA"
+        ],
+        [
+          "call",
+          "AA"
+        ],
+        [
+          "call",
+          "AA"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5337, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5338, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "C81-8",
+      "description": "co-loaded",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-8/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-8/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5349, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-8/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5350, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "C81-1",
+      "description": "co-loaded",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-1/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-1/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5361, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-1/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5362, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "C18-8",
+      "description": "co-loaded",
+      "steps": [
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-8/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-8/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5373, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-8/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5374, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "C18-1",
+      "description": "co-loaded",
+      "steps": [
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-1/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-1/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5385, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C18-1/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5386, \"n_calls\": 4, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "SEQ81",
+      "description": "co-loaded, load-then-call",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ81/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ81/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5397, \"n_calls\": 3, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ81/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5398, \"n_calls\": 3, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "SEQ18",
+      "description": "co-loaded, load-then-call",
+      "steps": [
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ18/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ18/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5409, \"n_calls\": 3, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SEQ18/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5410, \"n_calls\": 3, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "description": "v3 scan harness order",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "load",
+          "S1"
+        ],
+        [
+          "load",
+          "AA"
+        ],
+        [
+          "call",
+          "S8"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "AA"
+        ],
+        [
+          "call",
+          "S1"
+        ],
+        [
+          "call",
+          "AA"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5421, \"n_calls\": 6, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5438, \"n_calls\": 6, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    },
+    {
+      "case_id": "CAA-S8-AA",
+      "description": "co-loaded A/A",
+      "steps": [
+        [
+          "load",
+          "S8"
+        ],
+        [
+          "load",
+          "AA"
+        ],
+        [
+          "call",
+          "AA"
+        ],
+        [
+          "call",
+          "S8"
+        ]
+      ],
+      "runs": {
+        "gdb": {
+          "argv": [
+            "gdb",
+            "-batch",
+            "-nx",
+            "-x",
+            "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+            "--args",
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_gdb.json"
+          ],
+          "returncode": 0
+        },
+        "ld_lazy": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_ld_lazy.json"
+          ],
+          "env": {},
+          "returncode": 0,
+          "stdout": "{\"pid\": 5449, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        },
+        "ld_bindnow": {
+          "argv": [
+            "/home/user/work/venv/bin/python",
+            "-m",
+            "shapeperf.identity",
+            "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_ld_bindnow.json"
+          ],
+          "env": {
+            "LD_BIND_NOW": "1"
+          },
+          "returncode": 0,
+          "stdout": "{\"pid\": 5450, \"n_calls\": 2, \"all_exact\": true}",
+          "stderr_tail": "",
+          "filter": "lines containing 'binding file' and one of the artifact paths"
+        }
+      }
+    }
+  ],
+  "rows": [
+    {
+      "case_id": "I8",
+      "call_index": 0,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8"
+      ],
+      "first_call_order": [
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/I8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "I8",
+      "call_index": 1,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8"
+      ],
+      "first_call_order": [
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/I8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "I1",
+      "call_index": 0,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1"
+      ],
+      "first_call_order": [
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/I1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "I1",
+      "call_index": 1,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1"
+      ],
+      "first_call_order": [
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/I1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "IAA",
+      "call_index": 0,
+      "requested_arm": "AA",
+      "load_order": [
+        "AA"
+      ],
+      "first_call_order": [
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/IAA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "AA",
+      "actual_compute_arm": "AA",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "IAA",
+      "call_index": 1,
+      "requested_arm": "AA",
+      "load_order": [
+        "AA"
+      ],
+      "first_call_order": [
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/IAA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "AA",
+      "actual_compute_arm": "AA",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-8",
+      "call_index": 0,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-8",
+      "call_index": 1,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-8",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-8",
+      "call_index": 2,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-8",
+      "call_index": 3,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-8",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-1",
+      "call_index": 0,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-1",
+      "call_index": 1,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-1",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-1",
+      "call_index": 2,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C81-1",
+      "call_index": 3,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C81-1",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-8",
+      "call_index": 0,
+      "requested_arm": "S8",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-8",
+      "call_index": 1,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-8",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-8",
+      "call_index": 2,
+      "requested_arm": "S8",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-8",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-8",
+      "call_index": 3,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-8",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-1",
+      "call_index": 0,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-1",
+      "call_index": 1,
+      "requested_arm": "S8",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-1",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-1",
+      "call_index": 2,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-1",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "C18-1",
+      "call_index": 3,
+      "requested_arm": "S8",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/C18-1",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ81",
+      "call_index": 0,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ81",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ81",
+      "call_index": 1,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ81",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ81",
+      "call_index": 2,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ81",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ18",
+      "call_index": 0,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ18",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ18",
+      "call_index": 1,
+      "requested_arm": "S8",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ18",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SEQ18",
+      "call_index": 2,
+      "requested_arm": "S1",
+      "load_order": [
+        "S1",
+        "S8"
+      ],
+      "first_call_order": [
+        "S1",
+        "S8"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SEQ18",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S1",
+      "actual_compute_arm": "S1",
+      "actual_compute_module_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+      "executed_bytes_match_arms": [
+        "S1"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S1"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 0,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 1,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 2,
+      "requested_arm": "AA",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 3,
+      "requested_arm": "S1",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "S1",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 4,
+      "requested_arm": "AA",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "SCAN-S8-S1-AA",
+      "call_index": 5,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "first_call_order": [
+        "S8",
+        "S1",
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "CAA-S8-AA",
+      "call_index": 0,
+      "requested_arm": "AA",
+      "load_order": [
+        "S8",
+        "AA"
+      ],
+      "first_call_order": [
+        "AA",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/CAA-S8-AA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_other",
+      "reasons": []
+    },
+    {
+      "case_id": "CAA-S8-AA",
+      "call_index": 1,
+      "requested_arm": "S8",
+      "load_order": [
+        "S8",
+        "AA"
+      ],
+      "first_call_order": [
+        "AA",
+        "S8"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/CAA-S8-AA",
+      "entry_dso_arm": "S8",
+      "wrapper_dso_arm": "S8",
+      "actual_compute_arm": "S8",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA",
+        "S8"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    }
+  ],
+  "verdict_counts": {
+    "verified_own": 21,
+    "verified_other": 15,
+    "unresolved": 0
+  },
+  "method": "For every case (an explicit sequence of model loads and calls) three FRESH processes are started\nwith `exec` (never reused, never forked from a process that loaded a model):\n  1. under gdb (scripts/gdb_identity_trace.py): breakpoints on the entry, the C wrapper and the\n     compute function of every artifact; each hit records the DSO that contains the program counter,\n     the module-relative address and the SHA-256 of the function bytes read from process memory;\n  2. LD_DEBUG=bindings, default lazy binding: the dynamic linker's own record of which object each\n     symbol reference of each artifact was bound to;\n  3. LD_DEBUG=bindings with LD_BIND_NOW=1: auxiliary (binding time changed), never a substitute for 2.\nEvery call also checks its output against the exact expected permutation.",
+  "note": "nothing timed; development container"
+}

@@ -1,0 +1,150 @@
+{
+  "case_id": "IAA",
+  "description": "isolated",
+  "steps": [
+    [
+      "load",
+      "AA"
+    ],
+    [
+      "call",
+      "AA"
+    ],
+    [
+      "call",
+      "AA"
+    ]
+  ],
+  "arms": {
+    "AA": {
+      "path": "/home/user/work/v3_followup/e1/orig_aa/AA_full/model.so",
+      "tag": null,
+      "copy_of": "S8"
+    }
+  },
+  "symbols": [
+    "compute=main_graph_model",
+    "entry=run_main_graph_model",
+    "wrapper=_mlir_ciface_main_graph_model"
+  ],
+  "runs": {
+    "gdb": {
+      "argv": [
+        "gdb",
+        "-batch",
+        "-nx",
+        "-x",
+        "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+        "--args",
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_gdb.json"
+      ],
+      "returncode": 0
+    },
+    "ld_lazy": {
+      "argv": [
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_ld_lazy.json"
+      ],
+      "env": {},
+      "returncode": 0,
+      "stdout": "{\"pid\": 5337, \"n_calls\": 2, \"all_exact\": true}",
+      "stderr_tail": "",
+      "filter": "lines containing 'binding file' and one of the artifact paths"
+    },
+    "ld_bindnow": {
+      "argv": [
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/spec_ld_bindnow.json"
+      ],
+      "env": {
+        "LD_BIND_NOW": "1"
+      },
+      "returncode": 0,
+      "stdout": "{\"pid\": 5338, \"n_calls\": 2, \"all_exact\": true}",
+      "stderr_tail": "",
+      "filter": "lines containing 'binding file' and one of the artifact paths"
+    }
+  },
+  "dir": "/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA",
+  "rows": [
+    {
+      "case_id": "IAA",
+      "call_index": 0,
+      "requested_arm": "AA",
+      "load_order": [
+        "AA"
+      ],
+      "first_call_order": [
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/IAA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "AA",
+      "actual_compute_arm": "AA",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "IAA",
+      "call_index": 1,
+      "requested_arm": "AA",
+      "load_order": [
+        "AA"
+      ],
+      "first_call_order": [
+        "AA"
+      ],
+      "artifact_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "model (file name, no --tag)",
+      "entry_symbol": "run_main_graph_model",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_orig/IAA",
+      "entry_dso_arm": "AA",
+      "wrapper_dso_arm": "AA",
+      "actual_compute_arm": "AA",
+      "actual_compute_module_sha256": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "actual_compute_symbol_or_offset": "main_graph_model+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+      "executed_bytes_match_arms": [
+        "AA"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "AA"
+        }
+      },
+      "identity_verdict": "verified_own",
+      "reasons": []
+    }
+  ]
+}

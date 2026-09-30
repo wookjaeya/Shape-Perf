@@ -85,16 +85,29 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
 |---|---|---|---|---|---|
 | G1 모델 전체 timing (`g1/timing/measurements.jsonl`) | 매번 새 `exec` | 1 | 없음 | 없음 | 기록 450개 = pid 450개. pid마다 artifact 1개 |
 | G1 정확성 (`g1/verify/*`) | 매번 새 `exec`, arm별 따로 | 1 (부모는 ORT만) | 없음 | 없음(코드 근거) | 기록에 pid가 없어 기록으로는 확인 불가 |
-| G1 L=128 점검 (`g1/check128/verify_L0128.json`) | 알 수 없음 | 알 수 없음 | 알 수 없음 | 알 수 없음 | 당시 코드가 커밋 전이었고 보존되지 않음 |
+| G1 L=128 점검 (`g1/check128/verify_L0128.json`) | 알 수 없음 | 알 수 없음 | 알 수 없음 | 알 수 없음 | 당시 코드가 커밋 전이었고, 기록 해시로도 복원되지 않음 |
+| G1 L=128 timing과 AA 재시험 (작업 디렉터리만) | 매번 새 `exec` | 1 | 없음 | 없음 | 성공 16개 = pid 16개. AA 8개는 `model_AA.so`라는 이름 때문에 `omQueryEntryPoints_model_aa`를 못 찾아 실패했다(tag는 파일명에서 나온다) |
 | G2 단독 timing (`g2/timing/fresh_process.jsonl`) | 매번 새 `exec` | 1 | 없음 | 없음 | 기록 900개 = pid 900개 |
 | G2 반복 (`fresh_process_replicate.jsonl`) | 매번 새 `exec` | 1 | 없음 | 없음 | 기록 432개 = pid 432개 |
 | G2 scan (`interleaved_in_process_test.jsonl`) | 새 `exec`, 한 프로세스에 3 arm | 3 (S8 → S1 → AA) | **있음** | **있음**: S1·AA가 S8 코드 실행 | pid 9개 × 3 arm. L=64에서 S1 27.30 µs(단독 18.98 µs) |
-| G2 진단 `context_L64_*` | 새 `exec` | `*_alone`은 1, 나머지 2 | 25개 중 15개 프로세스 | 2개 올린 프로세스는 **있음** | 기록에 pid·provenance 없음. 코드와 블록×변형 수로 셈 |
+| G2 진단 `context_L64_*` | 새 `exec` | `*_alone`은 1, 나머지 2 | 25개 중 15개 프로세스 | 2개 올린 프로세스는 **있음** | 기록에 pid·provenance 없음. 코드와 블록×변형 수로 셈. `interleaved`의 로드 순서(S1 → S8)는 이후 코드에서 **추정**한 것이다(파일은 보존되지 않은 이전 수정본에서 나옴) |
 | G2 진단 `loadorder_factorial_*` | 새 `exec` | L=64는 모두 2, L=63·96은 30개 중 20개가 2 | **있음** | **있음**: 시간이 잰 arm이 아니라 로드 순서를 따름 | 위와 같음 |
-| direction probe (`direction_probe/`) | 한 번 실행 | 1(계측 빌드, S8/S1 아님) | 없음 | 해당 없음 | ORT 수치는 원자료 없음 |
+| direction probe (`direction_probe/`) | 두 번 실행(아래 주의) | 1(계측 빌드, S8/S1 아님) | 없음 | 해당 없음 | ORT 수치는 원자료 없음 |
 
 모든 단독 timing 파일(G1, G2 본 측정, 반복, 규모 시험; 기록 1,785개)에서 한 pid가 모델을 두 개 이상 쓴 적이 없다.
 한 pid가 여러 arm을 쓴 기록 파일은 scan 하나뿐이다.
+
+두 감사가 서로 다르게 본 점은 대조 에이전트가 다시 확인했다(`audit.json`의 `reconciled.disagreements`). E1 결론과 충돌하는 것은 없었다.
+추가로 기록할 점은 다음과 같다.
+
+- **공동 로딩 시간은 먼저 로드된 코드를 대략적으로만 따른다.** 같은 계산 코드를 실행했는데도 차이가 남았다.
+  - L=64에서 잰 arm이 S8일 때가 S1일 때보다 두 순서 모두 1.3–1.4 µs 길었다(19.03 대 20.36, 27.80 대 29.20).
+  - L=96에서 S1을 먼저 로드하고 S8을 재면 65.47 µs였다. S1 단독(63.36)과 S8 단독(70.11)의 중간이다.
+  - 당시 구간은 0을 포함했다. entry wrapper·런타임 도우미의 결합 차이, 배치, 잡음 가운데 무엇인지는 알 수 없다(H-layout/H-state 후보).
+- **할당기 설정이 단독 실행 시간을 크게 바꿨다.** `MALLOC_MMAP_THRESHOLD_`만 16 MiB로 바꾸자 S1 단독이 19.08에서 35.79 µs, S8 단독이 27.38에서 45.71 µs가 됐다.
+  계산 함수가 호출마다 출력 버퍼(196,624 B)를 `malloc`하므로 측정 시간에 할당기 동작이 들어 있다. E2의 측정 경계에서 다뤄야 한다(7절).
+- **direction probe의 op 프로파일은 두 프로세스의 계측을 섞은 요약이다.** 실패한 `diag_profile.py` 워커(CPU 고정 없음)도 모델을 끝까지 실행했고,
+  같은 `runtime.log`에 이어 썼다. 그 뒤 `run_instrumented.py`(CPU 3)가 실행됐다. op별 비중 수치는 이 혼합 자료에서 나왔다.
 
 
 ### 2.5 provenance 복원
@@ -268,6 +281,8 @@ v3 문서(`docs/STATUS_v3.md`, `design_amendment.md` 8.3절)는 원문을 지우
    AA-tag는 S8-alpha 대 S8-bravo다.
 3. **측정 경계 명시**: 지표 이름은 "Python `session.run` 호출 지연"이다. 입력 wrapping, 출력 버퍼 `malloc`(계산 함수 안), 출력 텐서
    생성·해제가 포함된다. 순수 kernel time이 아니다. 필요하면 C entry 보조 측정을 추가한다.
+   할당기 설정만으로 단독 실행 시간이 +70–90% 바뀐 관측이 있다(2.4절). 따라서 할당기 환경(`MALLOC_*`, `GLIBC_TUNABLES`)을 고정·기록하고,
+   출력 수명과 할당 반복 패턴을 양 arm에 똑같이 적용한다.
 4. **calibration(탐색 자료)**: 시간 순서별 지연과 drift, timer·wrapper 비용, iteration/process/block 분산, 계층별 비용, 목표 CI 폭별 비용을 잰다.
    calibration 자료는 확인 자료와 분리한다.
 5. **`protocol_v3_followup.json` 동결**: 계획서 §12의 필수 항목(scope, provenance, identity 증거, contrast family, 격리·경계, tag·순서·seed,
@@ -285,3 +300,4 @@ v3 문서(`docs/STATUS_v3.md`, `design_amendment.md` 8.3절)는 원문을 지우
 - 단독 실행에서 작은 L의 S8이 왜 느렸는지는 조사하지 않았다(E2–E3).
 - 모든 작업은 개발 컨테이너에서 했다. E0·E1에는 시간 수치가 없다.
 - 이 계획서 범위 밖의 관측(Gelu의 scalar `tanhf`/`powf` 호출, `results/v3/direction_probe/`)은 이번 작업에서 다루지 않았다.
+  단 그 op 비중 수치는 두 프로세스(CPU 고정이 다름)의 계측을 섞은 요약이라는 점을 감사에서 확인했다(2.4절). `tanhf`/`powf` 호출 지점 수는 정적 사실이라 영향이 없다.

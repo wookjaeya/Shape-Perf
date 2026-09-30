@@ -1,203 +1,382 @@
-diff --git a/scripts/diag_subgraph_context.py b/scripts/diag_subgraph_context.py
-index 3a735bc..1082224 100644
---- a/scripts/diag_subgraph_context.py
-+++ b/scripts/diag_subgraph_context.py
-@@ -8,6 +8,12 @@ Times the K transpose of one length in fresh processes under different arm compo
- The same compiled artifacts are used everywhere. If an arm's time changes with the composition, the
- difference is not a property of the arm's code alone.
- 
-+FOLLOW-UP E1 (2026-09-30): the co-loaded variants of this script were INVALID S8-vs-S1 comparisons. The
-+v3 artifacts were compiled without --tag (all model.so), and the runtime opens them RTLD_GLOBAL: every
-+call of the later-loaded arm ran the FIRST loaded arm's compute code (gdb + LD_DEBUG, L=64,
-+results/v3_followup/e1/identity_orig). The "load order sets the level" observation was the level of
-+the code that actually ran. The pair worker now refuses such co-loading.
-+
-   python scripts/diag_subgraph_context.py --built <g2 dir> --length 64 --blocks 4 --out <json>
- """
- import argparse
-diff --git a/scripts/run_subgraph_benchmark.py b/scripts/run_subgraph_benchmark.py
-index 722fd41..c09d570 100644
---- a/scripts/run_subgraph_benchmark.py
-+++ b/scripts/run_subgraph_benchmark.py
-@@ -36,7 +36,7 @@ from shapeperf import provenance, toolchain  # noqa: E402
- from shapeperf.compile import model_def  # noqa: E402
- from shapeperf.measure import run_block  # noqa: E402
- from shapeperf.squad import load_features  # noqa: E402
--from shapeperf.util import REPO_ROOT, read_json, write_json  # noqa: E402
-+from shapeperf.util import REPO_ROOT, read_json, sha256_file, write_json  # noqa: E402
- 
- ARMS = {"S8": "/home/user/work/variants/orig", "S1": "/home/user/work/variants/cap1"}
- KINDS = {"K": {"perm": [0, 2, 3, 1], "node": "bert/encoder/layer_0/attention/self/MatMul__324"},
-@@ -88,15 +88,16 @@ def write_single_op_model(path, length, perm):
- 
- 
- def compile_arm(job):
--    kind, length, arm, mode, model_path, out_dir, target = job
-+    kind, length, arm, mode, model_path, out_dir, target, *rest = job
-+    tag = rest[0] if rest else None      # None: no --tag (the compiler derives the tag from `-o`, i.e. "model")
-     out_dir = Path(out_dir)
-     out_dir.mkdir(parents=True, exist_ok=True)
-     fs = toolchain.resolve_flagset("default", target)
-     binary = toolchain.onnx_mlir_bin(ARMS[arm])
--    cmd = [str(binary), *fs["flags"], "-o", str(out_dir / "model"),
-+    cmd = [str(binary), *fs["flags"], *([f"--tag={tag}"] if tag else []), "-o", str(out_dir / "model"),
-            "--EmitLib" if mode == "full" else "--EmitMLIR", str(model_path)]
-     p = subprocess.run(cmd, capture_output=True, text=True)
--    rec = {"kind": kind, "length": length, "arm": arm, "mode": mode, "returncode": p.returncode,
-+    rec = {"kind": kind, "length": length, "arm": arm, "mode": mode, "tag": tag, "returncode": p.returncode,
-            "command": cmd, "stderr_tail": p.stderr[-500:] if p.returncode else "",
-            **toolchain.compiler_identity(ARMS[arm])}
-     so = out_dir / "model.so"
-@@ -152,6 +153,54 @@ def cmd_build(a):
-     write_json(out / "build_summary.json", summary)
- 
- 
-+def _tag_normalized(text, tag):
-+    """Probe IR with the model tag replaced by a placeholder, so that builds that differ ONLY in
-+    `--tag` can be compared for lowering/computation structure. The module attributes that record
-+    the tag (the `--tag=` compile option and `onnx-mlir.symbol-postfix`) are normalized too."""
-+    text = text.replace(f" --tag={tag}", "")
-+    text = text.replace(f'"onnx-mlir.symbol-postfix" = "{tag}"', '"onnx-mlir.symbol-postfix" = "<TAG>"')
-+    return text.replace(f"_{tag}", "_<TAG>")
-+
-+
-+def cmd_build_tagged(a):
-+    """Rebuild an existing (kind, length) cell with explicit, distinct model tags (follow-up E1-C).
-+
-+    Reuses the cell's model.onnx and input/expected tensors unchanged (hash-checked), adds only
-+    `--tag=<tag>` to the compile command, and writes <out>/<arm>_<tag>_{probe,full}/. Each tagged probe
-+    is compared with the untagged probe of the same arm after replacing the tag by a placeholder:
-+    the lowering must be unchanged by the tag."""
-+    src, out = Path(a.src), Path(a.out)
-+    out.mkdir(parents=True, exist_ok=True)
-+    prov = provenance.freeze(out / "provenance_build.json", compiler_builds=list(ARMS.values()),
-+                             extra={"role": "followup-e1c-tagged-build", "src": str(src), "tags": a.tags})
-+    src_build = read_json(src / "build.json")
-+    x = np.load(src / "input.npy")
-+    if hashlib.sha256(x.tobytes()).hexdigest() != src_build["input_sha256"]:
-+        raise SystemExit("input.npy does not match the recorded input_sha256 of the source cell")
-+    files = {}
-+    for name in ("model.onnx", "input.npy", "expected.npy"):
-+        shutil.copyfile(src / name, out / name)
-+        files[name] = sha256_file(out / name)
-+    pairs = [t.split("=", 1) for t in a.tags]              # e.g. S8=alpha S1=bravo S8=bravo S1=alpha
-+    jobs = [(src_build["kind"], src_build["length"], arm, mode, out / "model.onnx", out / f"{arm}_{tag}_{mode}",
-+             a.target_cpu, tag) for arm, tag in pairs for mode in ("probe", "full")]
-+    with ThreadPoolExecutor(max_workers=a.jobs) as ex:
-+        recs = list(ex.map(compile_arm, jobs))
-+    builds = []
-+    for (arm, tag), (probe, full) in zip(pairs, zip(recs[0::2], recs[1::2])):
-+        tagged = (out / f"{arm}_{tag}_probe" / "model.onnx.mlir").read_text(errors="replace")
-+        untagged = (src / f"{arm}_probe" / "model.onnx.mlir").read_text(errors="replace")
-+        same = _tag_normalized(tagged, tag) == _tag_normalized(untagged, "model")
-+        builds.append({"arm": arm, "tag": tag, "probe": probe, "full": full,
-+                       "lowering_equal_to_untagged_after_tag_normalization": same,
-+                       "normalized_diff_vs_untagged": LD.diff_hunks(_tag_normalized(untagged, "model"),
-+                                                                    _tag_normalized(tagged, tag))})
-+        print(f"{arm} tag={tag} full rc={full['returncode']} so={full.get('artifact_hash', '-')[:16]} "
-+              f"lowering_equal_to_untagged={same}", flush=True)
-+    write_json(out / "build_tagged.json", {"source_cell": str(src), "source_build": src_build, "files": files,
-+                                           "provenance_id": prov["provenance_id"], "builds": builds})
-+
-+
- def cmd_measure(a):
-     out = Path(a.out)                 # measurement records go here
-     built = Path(a.built or a.out)    # artifacts and inputs come from the `build` output
-@@ -189,7 +238,9 @@ def cmd_measure(a):
- 
- 
- def cmd_scan(a):
--    """Interleaved in-process pair timing over many lengths (exploratory map of the kernel-level effect)."""
-+    """Interleaved in-process pair timing over many lengths (exploratory map of the kernel-level effect).
-+    Untagged artifacts cannot be co-loaded (follow-up E1: the later-loaded arms ran the first arm's
-+    compute code); the pair worker refuses them. Needs artifacts built with distinct --tag values."""
-     import json
-     import os
-     from shapeperf.util import append_jsonl, new_run_id
-@@ -250,6 +301,12 @@ def main():
-     b.add_argument("--target-cpu", default="emeraldrapids")
-     b.add_argument("--jobs", type=int, default=3)
-     b.add_argument("--kinds", nargs="+", default=["K", "Q"])
-+    t = sub.add_parser("build-tagged", help="rebuild one existing cell with explicit model tags (E1-C)")
-+    t.add_argument("--src", required=True, help="existing cell directory, e.g. <g2>/K/L0064")
-+    t.add_argument("--out", required=True)
-+    t.add_argument("--tags", nargs="+", required=True, help="ARM=TAG pairs, e.g. S8=alpha S1=bravo")
-+    t.add_argument("--target-cpu", default="emeraldrapids")
-+    t.add_argument("--jobs", type=int, default=2)
-     m = sub.add_parser("measure")
-     m.add_argument("--lengths", type=int, nargs="+", required=True)
-     m.add_argument("--kinds", nargs="+", default=["K", "Q"])
-@@ -260,7 +317,7 @@ def main():
-     m.add_argument("--allocation-id", default="dev-container")
-     m.add_argument("--no-aa", action="store_true")
-     a = ap.parse_args()
--    {"build": cmd_build, "measure": cmd_measure, "scan": cmd_scan}[a.cmd](a)
-+    {"build": cmd_build, "build-tagged": cmd_build_tagged, "measure": cmd_measure, "scan": cmd_scan}[a.cmd](a)
- 
- 
- if __name__ == "__main__":
-diff --git a/shapeperf/measure.py b/shapeperf/measure.py
-index 757d558..7194fc3 100644
---- a/shapeperf/measure.py
-+++ b/shapeperf/measure.py
-@@ -97,7 +97,8 @@ def worker_main(spec):
- 
-     OMExecutionSession = toolchain.import_pyruntime()
-     t_load0 = time.monotonic_ns()
--    sess = OMExecutionSession(shared_lib_path=spec["artifact"])
-+    sess = (OMExecutionSession(shared_lib_path=spec["artifact"], tag=spec["tag"]) if spec.get("tag")
-+            else OMExecutionSession(shared_lib_path=spec["artifact"]))
-     load_ns = time.monotonic_ns() - t_load0
-     try:
-         in_sig = json.loads(sess.input_signature())
-diff --git a/shapeperf/paired.py b/shapeperf/paired.py
-index 648e70b..1fa887d 100644
---- a/shapeperf/paired.py
-+++ b/shapeperf/paired.py
-@@ -34,7 +34,8 @@ def verify_worker(spec):
-     model = model_def(spec["model_key"])
-     feat = load_features(REPO_ROOT / model["features"] / "features.npz")
-     arrs, _ = inputs_for(model, feat, spec["feature_index"], spec["length"])
--    sess = toolchain.import_pyruntime()(shared_lib_path=spec["artifact"])
-+    from .identity import open_session
-+    sess = open_session(toolchain.import_pyruntime(), spec["artifact"], spec.get("tag"))
-     declared = [d.get("dims") for d in json.loads(sess.input_signature())]
-     first = sess.run(arrs)
-     second = sess.run(arrs)
-@@ -68,7 +69,8 @@ def subgraph_worker(spec):
-         os.sched_setaffinity(0, set(spec["cpus"]))
-     x = np.load(spec["input_npy"])
-     expected = np.load(spec["expected_npy"])
--    sess = toolchain.import_pyruntime()(shared_lib_path=spec["artifact"])
-+    from .identity import open_session
-+    sess = open_session(toolchain.import_pyruntime(), spec["artifact"], spec.get("tag"))
-     out = sess.run([x])
-     exact = bool(len(out) == 1 and np.array_equal(out[0], expected) and out[0].dtype == expected.dtype)
-     for _ in range(spec["warmup_calls"]):
-@@ -93,16 +95,24 @@ def subgraph_pair_worker(spec):
-     call. One process is one paired block: arm differences share the process, so process start-up
-     cost is paid once. Less faithful to the one-process-per-unit protocol of the model-level pilot
-     (amendment §11.1) - used only to map where a kernel-level effect exists.
--    spec: artifacts {arm: path}, input_npy, expected_npy, calls, rounds, warmup_calls, cpus, seed."""
-+
-+    INVALID for untagged artifacts: every v3 artifact was compiled without --tag (all named model.so),
-+    so the later-loaded arms ran the FIRST loaded arm's compute code (follow-up E1). The artifacts are
-+    now checked before loading and co-loading libraries that share model symbols is refused.
-+    spec: artifacts {arm: path or {"path", "tag"}}, input_npy, expected_npy, calls, rounds,
-+    warmup_calls, cpus, seed."""
-     import os
-     import time
-     from . import toolchain
-+    from .identity import assert_no_shared_model_symbols, open_session
-+    arts = {arm: (v if isinstance(v, dict) else {"path": v, "tag": None}) for arm, v in spec["artifacts"].items()}
-+    assert_no_shared_model_symbols([v["path"] for v in arts.values()])
-     if spec.get("cpus"):
-         os.sched_setaffinity(0, set(spec["cpus"]))
-     x = np.load(spec["input_npy"])
-     expected = np.load(spec["expected_npy"])
-     om = toolchain.import_pyruntime()
--    sess = {arm: om(shared_lib_path=path) for arm, path in spec["artifacts"].items()}
-+    sess = {arm: open_session(om, v["path"], v.get("tag")) for arm, v in arts.items()}
-     exact = {}
-     for arm, s in sess.items():
-         out = s.run([x])
+diff --git a/results/v3_followup/e0/provenance.json b/results/v3_followup/e0/provenance.json
+index 6790182..e973848 100644
+--- a/results/v3_followup/e0/provenance.json
++++ b/results/v3_followup/e0/provenance.json
+@@ -1,365 +1,13 @@
+ {
+-  "created_unix": 1790732522.0923257,
++  "created_unix": 1790734884.9460912,
+   "source": {
+-    "git_head": "ade4f116e68184d9bcc13fcba1bca070a9b9b7ec",
++    "git_head": "1cd40fa3f0246d9b214a2992dfaba98b91f6f69d",
+     "dirty": true,
+-    "diff_sha256": "9859d815d3e67c2b6d250acb5e15c7e71b8175f49a9ac7165ed609a75e87e06e",
++    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "untracked_files": [
+-      "results/v3_followup/e0/artifacts_L0064/build.json",
+-      "results/v3_followup/e0/artifacts_L0064/expected.npy",
+-      "results/v3_followup/e0/artifacts_L0064/input.npy",
+-      "results/v3_followup/e0/artifacts_L0064/model.onnx",
+-      "results/v3_followup/e0/logs/v3_g2_build.log",
+-      "results/v3_followup/e0/logs/v3_g2_measure.log",
+-      "results/v3_followup/e0/logs/v3_g2_replicate.log",
+-      "results/v3_followup/e0/provenance.json",
+-      "results/v3_followup/e0/repo_state/git_diff.binary.patch",
+-      "results/v3_followup/e0/repo_state/untracked/scripts/gdb_identity_trace.py",
+-      "results/v3_followup/e0/repo_state/untracked/scripts/record_e0_followup.py",
+-      "results/v3_followup/e0/repo_state/untracked/scripts/verify_execution_identity.py",
+-      "results/v3_followup/e0/repo_state/untracked/shapeperf/elfinfo.py",
+-      "results/v3_followup/e0/repo_state/untracked/shapeperf/identity.py",
+-      "results/v3_followup/e0/repo_state/untracked/tests/test_loader_identity.py",
+-      "results/v3_followup/e1/elf_orig/s1.disasm.txt",
+-      "results/v3_followup/e1/elf_orig/s1.dynamic.txt",
+-      "results/v3_followup/e1/elf_orig/s1.dynsym.txt",
+-      "results/v3_followup/e1/elf_orig/s1.notes.txt",
+-      "results/v3_followup/e1/elf_orig/s1.reloc.txt",
+-      "results/v3_followup/e1/elf_orig/s8.disasm.txt",
+-      "results/v3_followup/e1/elf_orig/s8.dynamic.txt",
+-      "results/v3_followup/e1/elf_orig/s8.dynsym.txt",
+-      "results/v3_followup/e1/elf_orig/s8.notes.txt",
+-      "results/v3_followup/e1/elf_orig/s8.reloc.txt",
+-      "results/v3_followup/e1/elf_orig/sha256.txt",
+-      "results/v3_followup/e1/identity_orig/C18-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-1/case.json",
+-      "results/v3_followup/e1/identity_orig/C18-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/C18-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/C18-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/C18-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/C18-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/C18-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/C18-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-8/case.json",
+-      "results/v3_followup/e1/identity_orig/C18-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/C18-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/C18-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/C18-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/C18-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/C18-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/C18-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/C81-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-1/case.json",
+-      "results/v3_followup/e1/identity_orig/C81-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/C81-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/C81-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/C81-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/C81-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/C81-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/C81-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-8/case.json",
+-      "results/v3_followup/e1/identity_orig/C81-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/C81-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/C81-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/C81-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/C81-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/C81-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/C81-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/case.json",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/CAA-S8-AA/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/I1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/I1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/I1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/I1/case.json",
+-      "results/v3_followup/e1/identity_orig/I1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/I1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/I1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/I1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/I1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/I1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/I1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/I8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/I8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/I8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/I8/case.json",
+-      "results/v3_followup/e1/identity_orig/I8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/I8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/I8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/I8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/I8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/I8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/I8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/IAA/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/IAA/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/IAA/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/IAA/case.json",
+-      "results/v3_followup/e1/identity_orig/IAA/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/IAA/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/IAA/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/IAA/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/IAA/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/IAA/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/IAA/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/case.json",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/SCAN-S8-S1-AA/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/SEQ18/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ18/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ18/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ18/case.json",
+-      "results/v3_followup/e1/identity_orig/SEQ18/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ18/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ18/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ18/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ18/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/SEQ18/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/SEQ18/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/SEQ81/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ81/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ81/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ81/case.json",
+-      "results/v3_followup/e1/identity_orig/SEQ81/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_orig/SEQ81/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ81/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ81/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_orig/SEQ81/spec_gdb.json",
+-      "results/v3_followup/e1/identity_orig/SEQ81/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_orig/SEQ81/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_orig/identity_table.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/case.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/case.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C1a8b-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/case.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/case.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C1b8a-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/case.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/case.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C8a1b-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/case.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/case.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/C8b1a-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/case.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8a8b/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/case.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/I1a/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1a/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1a/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1a/case.json",
+-      "results/v3_followup/e1/identity_tagged/I1a/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1a/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/I1a/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/I1a/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/I1a/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/I1a/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/I1a/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/I1b/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1b/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1b/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1b/case.json",
+-      "results/v3_followup/e1/identity_tagged/I1b/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I1b/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/I1b/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/I1b/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/I1b/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/I1b/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/I1b/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/I8a/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8a/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8a/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8a/case.json",
+-      "results/v3_followup/e1/identity_tagged/I8a/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8a/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/I8a/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/I8a/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/I8a/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/I8a/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/I8a/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/I8b/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8b/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8b/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8b/case.json",
+-      "results/v3_followup/e1/identity_tagged/I8b/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/I8b/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/I8b/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/I8b/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/I8b/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/I8b/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/I8b/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/case.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/case.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/SAMETAG-8a1a-1/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/case.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ1b8a/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/calls_gdb.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/calls_ld_bindnow.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/calls_ld_lazy.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/case.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/gdb_hits.jsonl",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/gdb_stdout.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/ld_bindings_bindnow.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/ld_bindings_lazy.txt",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/spec_gdb.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/spec_ld_bindnow.json",
+-      "results/v3_followup/e1/identity_tagged/SEQ8a1b/spec_ld_lazy.json",
+-      "results/v3_followup/e1/identity_tagged/identity_table.json",
+-      "scripts/gdb_identity_trace.py",
+-      "scripts/record_e0_followup.py",
+-      "scripts/verify_execution_identity.py",
+-      "shapeperf/elfinfo.py",
+-      "shapeperf/identity.py",
+-      "tests/test_loader_identity.py"
++      "results/v3_followup/e0/audit.json"
+     ],
+-    "untracked_sha256": "b812fcb65d6e918211b11c00f989136c4db1b83e53a4e65fc5064462478a8956"
++    "untracked_sha256": "fe0c0e6caf6694ced427a52afebdfb0f99c310837837baa5ac8d3d34aec8fefe"
+   },
+   "dependencies": {
+     "python": "3.11.15",
+@@ -400,5 +48,5 @@
+   "extra": {
+     "role": "followup-e0-inventory"
+   },
+-  "provenance_id": "0d686edbc3ec96a5"
++  "provenance_id": "e3733545f760e697"
+ }

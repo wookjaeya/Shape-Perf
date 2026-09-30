@@ -1,6 +1,6 @@
 {
   "purpose": "follow-up E0: inventory of the v3 L=64 kernel comparison; results/v3 is not modified",
-  "provenance_id": "0d686edbc3ec96a5",
+  "provenance_id": "e3733545f760e697",
   "cell": {
     "dir": "/home/user/work/v3/g2/K/L0064",
     "files": {
@@ -59,7 +59,7 @@
       },
       "AA_full/model.so": {
         "status": "missing (by design)",
-        "why": "cmd_measure copied S8_full/model.so to AA_full/model.so before each cell and deleted it afterwards (scripts/run_subgraph_benchmark.py cmd_measure); the copy is byte-identical to S8 by construction, and its per-record artifact_hash equals the S8 hash (field artifact_hash of the AA records)"
+        "why": "cmd_measure copied S8_full/model.so to AA_full/model.so before each cell and deleted it afterwards (scripts/run_subgraph_benchmark.py cmd_measure); the copy is byte-identical to S8 only by construction (shutil.copyfile). The artifact_hash field of the AA records is COPIED from the S8 build hash (run_subgraph_benchmark.py cmd_measure 'hashes'), not computed from the AA file, so it is not independent evidence of byte identity"
       }
     },
     "build_json": {
@@ -315,16 +315,10 @@
     "loader": "dlopen(RTLD_LAZY | RTLD_GLOBAL); entry via dlsym(handle, 'run_main_graph_<tag>') (onnx-mlir src/Runtime/ExecutionSession.cpp at 1e017c9f, lines 88-132, 238-247)"
   },
   "repository": {
-    "HEAD": "ade4f116e68184d9bcc13fcba1bca070a9b9b7ec",
+    "HEAD": "1cd40fa3f0246d9b214a2992dfaba98b91f6f69d",
     "diff_file": "repo_state/git_diff.binary.patch",
-    "untracked_copied": [
-      "scripts/gdb_identity_trace.py",
-      "scripts/record_e0_followup.py",
-      "scripts/verify_execution_identity.py",
-      "shapeperf/elfinfo.py",
-      "shapeperf/identity.py",
-      "tests/test_loader_identity.py"
-    ],
+    "untracked_archive": null,
+    "untracked_files": {},
     "dependency_lock": {
       "requirements.freeze.txt": {
         "path": "/home/user/work/requirements.freeze.txt",
@@ -340,7 +334,1215 @@
       }
     }
   },
-  "audit": null,
+  "audit": {
+    "note": "E0 audit by independent agents (read-only): two instrument audits (code lens, records lens), their reconciliation, provenance recovery by hash match, runtime identity. Scratch work of the provenance agent: scratchpad/e0_prov (not kept).",
+    "code_audit": {
+      "instruments": [
+        {
+          "name": "G1 model-level pilot timing (results/v3/g1/timing/measurements.jsonl): run_paired_benchmark.py measure -> shapeperf.measure.run_block/run_item -> worker shapeperf.measure.worker_main",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/timing/measurements.jsonl",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260930.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260931.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260932.json",
+            "/home/user/work/logs/v3_g1_pilot.log"
+          ],
+          "code_version_used": "The code is the 1d781b6 code for all 3 batches. Batch 3 (pilot_seed 20260932, provenance c6c679c2902fad04) ran on 1d781b6 with a clean tree. Batches 1 and 2 (seeds 20260930 and 20260931, provenance eddede38ea3f30cf and d4d013682baf24a6) ran on HEAD 28382a9 with a dirty tree. I checked that sha256(git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/measure.py shapeperf/toolchain.py shapeperf/util.py) equals source.diff_sha256 db0c588f... in both provenance files. I also recomputed untracked_sha256 from the 1d781b6 blobs of the listed untracked files (scripts/run_paired_benchmark.py, shapeperf/paired.py, shapeperf/provenance.py and the rest) and got e5c331d5... and be4dd716..., the recorded values. So at freeze time the dirty tree matched 1d781b6 byte for byte. Batch 1 only lacked scripts/collect_lowering_trace.py, which is not on the measuring path. Records: harness_commit '28382a9...-dirty' x300 and '1d781b6...' x150. The provenance is a snapshot taken at measure start (run_paired_benchmark.py:104 @1d781b6). Children re-import shapeperf from the working tree at each exec, so edits made in the middle of a run cannot be excluded. The batch-2 snapshot equals batch 1, and batch 3 is clean 1d781b6 with the same content.",
+          "process_creation": "Fresh exec per process-level unit. The parent is scripts/run_paired_benchmark.py measure (cmd_measure, 1d781b6:98-131). Each block builds items [S8,S8,S1,S1,AA,AA] (1d781b6:122-125, processes=2). run_block shuffles them with a seeded rng (shapeperf/measure.py:189-190 @1d781b6) and runs them one at a time through run_item. run_item calls subprocess.run([sys.executable, '-m', 'shapeperf.measure', '--worker', json]) (measure.py:170-173); the items have no worker_module, so the default applies. It blocks until the child exits, so only one worker runs at a time. The parent never loads an ONNX-MLIR model: cmd_measure has no import_pyruntime call, and its module imports (run_paired_benchmark.py:33-37) are paired/provenance/compile/measure/squad/util, none of which call PyRuntime at import time. No multiprocessing or fork is used for workers. The data agrees: 450 records, 450 distinct pid values.",
+          "models_loaded_per_process": "Exactly one ONNX-MLIR model per worker process: spec['artifact'] = <pairs>/L{L:04d}/{S8|S1|AA}_full/model.so (run_paired_benchmark.py:42-43, 112, 116-118). AA is a shutil.copyfile of S8 (line 115) into another directory with the same basename. The model is loaded by OMExecutionSession(shared_lib_path=...) at measure.py:100. PyRuntime is imported from $SHAPEPERF_ONNX_MLIR_BUILD or $SHAPEPERF_WORK/onnx-mlir/build/Release/lib (toolchain.py:17-19, 55-65 @1d781b6). The actual path and hash of PyRuntime used are not recorded.",
+          "tags_passed": "None. OMExecutionSession(shared_lib_path=spec['artifact']) at measure.py:100 has no tag argument, and the PyRuntime default is tag='' (onnx-mlir src/Runtime/python/PyExecutionSession.hpp:84). The runtime then derives the tag from the basename, so model.so gives tag 'model' (src/Runtime/ExecutionSession.cpp:88-104). The entry point is dlsym(handle,'run_main_graph_model') (ExecutionSession.cpp:211, 247). Artifacts were compiled with '-o .../S8_full/model' and no --tag (command field in results/v3/g1/pairs/L0064/pair.json).",
+          "call_order": "Worker order in measure.py @1d781b6: sched_setaffinity to cpu 3 (91-92) -> load features and build inputs (94-96) -> import PyRuntime (98) -> create session with load_ns timed (99-101) -> input_signature() (103) -> 2 warmup sess.run calls, each rebinding outs so the previous output is freed after run returns (113-115) -> hash of the warmup output (118) -> 16 timed iterations: start=perf(); new=sess.run(arrs); stop=perf(); then outs=new (124-129). The previous output list is freed after stop, outside the timed interval, and each new output is allocated while the previous one is still alive. The last output is hashed (133) and kept until the process exits. The session is never deleted explicitly, so there is no in-process unload/reload. Record fields match: warmup=2, iterations=16, len(latency_ns)=16, cpus=[3].",
+          "co_loading": "no",
+          "interposition_risk": "No. Each measuring process dlopens only one model .so, so there is no second definition of run_main_graph_model/_mlir_ciface_main_graph_model/main_graph_model to bind to. The S8-vs-S1 comparison is between separate processes. The AA byte copy also runs alone in its own process. Caveat: the BERT .so files were deleted after each batch (cleanup, run_paired_benchmark.py:134-142; log line 'deleted 4.35 GB of artifacts'), so their ELF cannot be inspected now. Only the process structure is established.",
+          "evidence": [
+            "git show 1d781b6:shapeperf/measure.py lines 83-152 (worker_main), 167-181 (run_item: subprocess.run of sys.executable -m <worker_module> --worker), 184-211 (run_block: seeded permutation, sequential)",
+            "git show 1d781b6:scripts/run_paired_benchmark.py lines 98-131 (cmd_measure: AA copy line 115, items 122-125, run_block 126-128)",
+            "git show 1d781b6:scripts/run_g1_pilot.sh lines 21-26 (build -> verify -> measure -> cleanup per batch; seed SEED+n, cpu 3, warmup 2, iterations 16, processes 2, blocks 5)",
+            "results/v3/g1/timing/measurements.jsonl: 450 records, 450 unique pid, flagset S8/S1/AA x150, harness_commit 28382a9-dirty x300 and 1d781b6 x150, provenance_id eddede38ea3f30cf/d4d013682baf24a6/c6c679c2902fad04",
+            "provenance_measure_2026093{0,1}.json source.diff_sha256 db0c588f... equals sha256(git diff 28382a9 1d781b6 -- shapeperf/{compile,measure,toolchain,util}.py); untracked_sha256 reproduces from 1d781b6 blobs (computed read-only)",
+            "/home/user/work/onnx-mlir (HEAD 1e017c9f) src/Runtime/ExecutionSession.cpp:88-104 (tag from filename), 132 (dlopen RTLD_LAZY|RTLD_GLOBAL), 211 (setEntryPoint run_main_graph+_tag), 216-224 (dlclose only in destructor)",
+            "sha256 of repo copy results/v3/g1/timing/measurements.jsonl == /home/user/work/v3/g1/timing/measurements.jsonl (c8c2833f...)"
+          ]
+        },
+        {
+          "name": "G1 correctness verify (results/v3/g1/verify/verify_L*.json): run_paired_benchmark.py verify -> worker shapeperf.paired.verify_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/verify/verify_L0041.json ... verify_L0256.json (15 files)",
+            "/home/user/Shape-Perf/results/v3/g1/verify/provenance_verify.json"
+          ],
+          "code_version_used": "The 1d781b6 code. The verify rows carry provenance_id adc92cb95bd4760e (L41-140), 7c459e350be9b197 (L141-147) and 6759c492f20c560b (L149-256). provenance_verify.json is written to the same path on every batch (run_paired_benchmark.py:63), so only batch 3 survives (6759c492f20c560b, 1d781b6 clean, 2026-09-29T06:44:30Z). For batches 1 and 2, I recomputed the provenance id from the measure snapshots of the same batch (same source/dependencies/host, extra={'role':'g1-verify'}, compilers=[]). The results equal adc92cb95bd4760e and 7c459e350be9b197 exactly. So verify batches 1-2 ran from the same source state, which matches 1d781b6 byte for byte (see the G1 timing entry).",
+          "process_creation": "Fresh exec per (length, input kind, arm). The parent loops L -> {anchor, natural} -> arm in ('S8','S1') and calls subprocess.run([sys.executable, '-m', 'shapeperf.paired', '--verify-worker', json]) (run_paired_benchmark.py:75-80 @1d781b6), running them one at a time. The parent loads onnxruntime and creates an ORT InferenceSession of the full BERT model in-process for the reference (lines 53-60). It never loads an ONNX-MLIR model. Children are exec'd, so the parent's ORT state is not inherited.",
+          "models_loaded_per_process": "One ONNX-MLIR model per worker: <pairs>/L{L:04d}/{S8|S1}_full/model.so (paired.py:37 @1d781b6). There is no AA arm in verify. The ORT model is loaded only in the parent.",
+          "tags_passed": "None (paired.py:37: toolchain.import_pyruntime()(shared_lib_path=spec['artifact'])), so the tag is 'model'.",
+          "call_order": "verify_worker (paired.py:27-46 @1d781b6): load features and build inputs (34-36) -> create session (37) -> input_signature (38) -> first=sess.run (39) -> second=sess.run (40) -> output_signature (41) -> np.savez(first) (42). Both outputs stay alive until the process exits. There is no affinity and no timing. The parent then compares S8 and S1 outputs loaded from the npz files of two different processes (run_paired_benchmark.py:88-91).",
+          "co_loading": "no",
+          "interposition_risk": "No. Each verify process holds one model. The bitwise S8==S1 result compares outputs of two separate processes, each of which only had its own .so mapped.",
+          "evidence": [
+            "git show 1d781b6:scripts/run_paired_benchmark.py lines 52-95",
+            "git show 1d781b6:shapeperf/paired.py lines 27-46, 152-156",
+            "verify_L*.json rows: workers.S8/workers.S1 each with repeat_identical=True and static_shape_verified=True; provenance_id per batch as listed",
+            "recomputed provenance ids (sha256 of json.dumps(body, sort_keys=True)[:16], provenance.py:85-86 @1d781b6) for batch 1/2 match adc92cb95bd4760e / 7c459e350be9b197",
+            "/home/user/work/logs/v3_g1_pilot.log verify lines per batch"
+          ]
+        },
+        {
+          "name": "G1 check128 verify (results/v3/g1/check128/verify_L0128.json): run_paired_benchmark.py verify on a dirty pre-commit tree",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/check128/verify_L0128.json",
+            "/home/user/work/v3/check128/verify/provenance_verify.json",
+            "/home/user/work/logs/v3_check128.log"
+          ],
+          "code_version_used": "Dirty 28382a9 tree at 2026-09-29T05:40:26Z (provenance 0448533827b1553e in /home/user/work/v3/check128/verify/provenance_verify.json). source.diff_sha256 be34a457... equals git diff 28382a9 1d781b6 restricted to shapeperf/compile.py, toolchain.py and util.py, so measure.py was still the 28382a9 version at that time. untracked_sha256 e1ef902e... does NOT reproduce from the 1d781b6 blobs of its 7 untracked files. At least one of scripts/run_paired_benchmark.py, shapeperf/paired.py, scripts/build_shape_pair.py, shapeperf/lowering_diff.py, shapeperf/provenance.py, tests/test_lowering_diff.py or results/v3/g1/g1_lengths.json therefore differed from 1d781b6. The exact code is unknown. 1d781b6 is the nearest committed version and is used here only as an approximation.",
+          "process_creation": "Unknown exactly because the code differs from any commit. In the nearest version (1d781b6:75-80) each arm runs as a fresh exec of shapeperf.paired --verify-worker. The row structure (workers.S8 and workers.S1 as separate worker records, each with repeat_identical and static_shape_verified) matches that design.",
+          "models_loaded_per_process": "Unknown exactly. The nearest version loads one model per worker: /home/user/work/v3/check128/L0128/{S8|S1}_full/model.so.",
+          "tags_passed": "No tag in any committed version. Unknown for the dirty state, but no v3 code at any commit passes tag=.",
+          "call_order": "Nearest version: load -> input_signature -> run -> run -> output_signature -> savez (paired.py:37-42 @1d781b6). Unverified for the dirty state.",
+          "co_loading": "unknown",
+          "interposition_risk": "Unknown, because the exact code is not recoverable. It is low if the dirty code matched the committed structure (one model per exec), but that cannot be proven from the recorded hashes.",
+          "evidence": [
+            "/home/user/work/v3/check128/verify/provenance_verify.json source fields",
+            "read-only hash recomputation: tracked diff matches only the {compile,toolchain,util}.py subset; untracked hash mismatch vs 1d781b6 blobs",
+            "sha256 repo copy == /home/user/work/v3/check128/verify/verify_L0128.json (85c52c72...)"
+          ]
+        },
+        {
+          "name": "G2 single-op fresh-process timing (fresh_process.jsonl, fresh_process_replicate.jsonl): run_subgraph_benchmark.py measure -> run_block/run_item -> worker shapeperf.paired.subgraph_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process_replicate.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_11.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_12.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_21.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_22.json",
+            "/home/user/work/v3/run_g2_measure.sh",
+            "/home/user/work/v3/run_g2_replicate.sh",
+            "/home/user/work/logs/v3_g2_measure.log",
+            "/home/user/work/logs/v3_g2_replicate.log"
+          ],
+          "code_version_used": "K run, seed 11 (675 records, provenance d148589336195b72, 07:21:01Z): HEAD ebd96be with a dirty tree. source.diff_sha256 6d197847... equals sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py), checked read-only, and untracked is empty. So the parent script is exactly the eefb40d version, and shapeperf/paired.py and measure.py are the ebd96be versions (paired.py and measure.py unchanged since 1d781b6). eefb40d only adds analysis functions to paired.py; subgraph_worker is unchanged. Records say harness_commit 'ebd96be...-dirty'. Q run, seed 12 (225 records), and the replicate runs, seeds 21/22 (72 + 360 records): eefb40d with a clean tree. Records say harness_commit 'eefb40d...'. The repo copies are byte-identical to /home/user/work/v3/g2/timing/measurements.jsonl and /home/user/work/v3/g2/timing_rep/measurements.jsonl (sha256 c1190251... and 3e7fe08c...).",
+          "process_creation": "Fresh exec per process-level unit. cmd_measure (eefb40d:155-188) builds items with worker_module 'shapeperf.paired' (176). run_block (measure.py:184-211) shuffles and runs them one at a time. run_item runs subprocess.run([sys.executable, '-m', 'shapeperf.paired', '--worker', json]) (measure.py:170-173); paired.py:155-156 dispatches --worker to subgraph_worker. The parent never loads a model: activations() and ORT are used only in cmd_build, and there is no import_pyruntime in cmd_measure. The data agrees: 900/900 and 432/432 distinct pid values.",
+          "models_loaded_per_process": "Exactly one: <built>/{K|Q}/L{L:04d}/{S8|S1|AA}_full/model.so (eefb40d:166-172; AA is a copyfile of S8 with the same basename). The built dir was /home/user/work/v3/g2 for the main run and replicate L=64, and /home/user/work/v3/g2b for the neighbours 63/65/96/128/192 (run_g2_replicate.sh; the record 'artifact' fields agree). The L64 files on disk still match build.json so_hash: S8 6e8faed1..., S1 01328b45....",
+          "tags_passed": "None: paired.py:71 @1d781b6/eefb40d toolchain.import_pyruntime()(shared_lib_path=spec['artifact']), so the tag is 'model'. Compile commands use '-o <dir>/model' with no --tag (eefb40d:96).",
+          "call_order": "subgraph_worker (paired.py:59-87): sched_setaffinity cpu 3 (67-68) -> np.load of input and expected (69-70) -> create session (71) -> first call plus exact-permutation check, untimed (72-73) -> 300 warmup calls (74-75) -> 15 reps, each timing 1000 consecutive calls as one interval: t0=perf(); for calls: out=sess.run([x]); sample=(perf()-t0)/calls (79-83). Rebinding out frees the previous output inside the timed interval, unlike G1 where the release happens after stop. The last output lives until the process exits. Record fields: warmup 300, calls_per_sample 1000, 15 samples, cpus [3].",
+          "co_loading": "no",
+          "interposition_risk": "No. Only one model .so is dlopened per process, so the process-global symbol scope has one definition of run_main_graph_model/_mlir_ciface_main_graph_model/main_graph_model. S8, S1 and AA always run in different processes. This instrument is not affected by the co-loading binding mechanism.",
+          "evidence": [
+            "git show eefb40d:scripts/run_subgraph_benchmark.py lines 155-188",
+            "git show 1d781b6:shapeperf/paired.py lines 59-87, 155-156 (unchanged in eefb40d)",
+            "git show 1d781b6:shapeperf/measure.py lines 167-211",
+            "provenance_measure_11.json diff_sha256 6d197847... == sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py)",
+            "fresh_process.jsonl: 900 records, 900 unique pid, harness_commit ebd96be-dirty x675 (K) and eefb40d x225 (Q); record keys exact_permutation/calls_per_sample/warmup_wall_ns=0 are subgraph_worker's return keys",
+            "fresh_process_replicate.jsonl: 432 records, 432 unique pid, provenance 8902c5c865b2eafb (L64, g2) x72, 607c265de23788f4 (g2b) x360"
+          ]
+        },
+        {
+          "name": "G2 scale test (/home/user/work/v3/g2_scale/measurements.jsonl): run_subgraph_benchmark.py measure (fresh process) at K L=147",
+          "result_files": [
+            "/home/user/work/v3/g2_scale/measurements.jsonl",
+            "/home/user/work/v3/g2_scale/provenance_measure_1.json"
+          ],
+          "code_version_used": "Provenance 8adb2be9af5cdb15 (07:20:43Z): HEAD ebd96be with a dirty tree, and diff_sha256 6d197847... is the same as the seed-11 K run. So it is the same code: ebd96be plus run_subgraph_benchmark.py @eefb40d. Records say harness_commit 'ebd96be...-dirty'.",
+          "process_creation": "Fresh exec per item via run_block/run_item -> python -m shapeperf.paired --worker (same path as the G2 fresh-process entry). 3 records, 3 distinct pid values, one block.",
+          "models_loaded_per_process": "One per process: /home/user/work/v3/g2/K/L0147/{S8,S1,AA}_full/model.so (record 'artifact' fields).",
+          "tags_passed": "None, so the tag is 'model'.",
+          "call_order": "subgraph_worker order: first call plus check, then 100 warmup calls, then 5 reps x 200 calls timed per rep (record fields warmup=100, calls_per_sample=200, 5 samples). Output release happens inside the timed batch.",
+          "co_loading": "no",
+          "interposition_risk": "No, because there is one model per process.",
+          "evidence": [
+            "/home/user/work/v3/g2_scale/measurements.jsonl record fields",
+            "/home/user/work/v3/g2_scale/provenance_measure_1.json source.diff_sha256 6d197847...",
+            "git show eefb40d:scripts/run_subgraph_benchmark.py 155-188; git show 1d781b6:shapeperf/paired.py 59-87"
+          ]
+        },
+        {
+          "name": "G2 interleaved in-process scan (interleaved_in_process_test.jsonl): run_subgraph_benchmark.py scan -> worker shapeperf.paired.subgraph_pair_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/interleaved_in_process_test.jsonl",
+            "/home/user/work/v3/g2_scan_test/measurements.jsonl",
+            "/home/user/work/v3/g2_scan_test/provenance_scan_5.json"
+          ],
+          "code_version_used": "Uncommitted at run time. provenance_scan_5.json (id 01b2b25b4549fa31, 08:06:01Z) has HEAD eefb40d, dirty=True, diff_sha256 4679d467... and untracked_files [], so scripts/diag_subgraph_context.py did not exist yet. The diff hash does NOT equal git diff eefb40d dd29e19 for run_subgraph_benchmark.py and/or paired.py, with or without README/design_amendment, so the exact code is unknown. The nearest committed version is dd29e19 (08:21:56Z), used here as an APPROXIMATION. The record key set and the per-block arm order S8,S1,AA match dd29e19 cmd_scan:225-230 and pair-worker samples-dict order. Records carry no harness_commit, artifact path, artifact hash or calls value. The repo copy is byte-identical to the work original (sha256 829276ab...).",
+          "process_creation": "Fresh exec per block (dd29e19 run_subgraph_benchmark.py:213-218): subprocess.run([sys.executable, '-m', 'shapeperf.paired', '--pair-worker', json(spec)]), run sequentially. The parent (cmd_scan 191-233) loads no model; it only copies AA and spawns. One process equals one block, which holds all arms: 9 blocks give 27 records, 3 per pid (pids 10099-10110).",
+          "models_loaded_per_process": "Three model .so files in ONE process, all named model.so, loaded in spec['artifacts'] dict order S8 -> S1 -> AA (dd29e19 run_subgraph_benchmark.py:207-212, 214; paired.py:105 dict comprehension in insertion order). The built dir is not recorded. The only K/L0064, L0147 and L0256 cells under /home/user/work are in /home/user/work/v3/g2/K.",
+          "tags_passed": "None for all three sessions (paired.py:105 @dd29e19: om(shared_lib_path=path)). All three get tag 'model' and the same entry name run_main_graph_model.",
+          "call_order": "dd29e19 paired.py:100-125. Setaffinity. Load S8, S1, AA (all dlopen RTLD_GLOBAL before any call). Then, per arm in load order S8, S1, AA: first call plus exact check, then warmup_calls calls (107-111). So the S8 entry is called first. Then 12 rounds, each a seeded random permutation of [S8,S1,AA] (119). For each scheduled arm: t0=perf(), `calls` x out=s.run([x]), sample=(perf()-t0)/calls (120-125). 12 samples per arm in the records means rounds=12. `calls` and `warmup_calls` are not recorded, so unknown. The variable `out` is shared across arms, so the first call of each timed batch frees the previous arm's output inside the current arm's timed interval. All sessions stay alive until process exit.",
+          "co_loading": "yes",
+          "interposition_risk": "Yes. The session for the 2nd/3rd loaded library (S1, AA) gets its OWN run_main_graph_model through dlsym(handle) (ExecutionSession.cpp:247). That function calls _mlir_ciface_main_graph_model through a PLT slot (R_X86_64_JUMP_SLOT), and every inspected artifact exports these symbols as GLOBAL DEFAULT with no DT_SYMBOLIC or BIND_NOW. With RTLD_LAZY|RTLD_GLOBAL and S8 opened first, lazy resolution searches the global scope first, which predicts that S1's and AA's calls run S8's compute code. No binding trace or address check was done here (read-only task), so this is the code-level mechanism, not an observed binding. Evidence for L64 is in the working-tree untracked ELF dumps: results/v3_followup/e1/elf_orig/s1.reloc.txt:66,70 and s8.reloc.txt:66,70, plus s1.disasm.txt:1372 and s8.disasm.txt:809 (run_main_graph_model -> call _mlir_ciface_main_graph_model@plt). For L147/L256 I ran readelf on the /home/user/work/v3/g2/K cells: all 4 .so files have a JUMP_SLOT for _mlir_ciface_main_graph_model; S8 at L147/L256 has main_graph_model inlined into _mlir_ciface and no main_graph_model JUMP_SLOT.",
+          "evidence": [
+            "git show dd29e19:shapeperf/paired.py lines 90-127, 213-214",
+            "git show dd29e19:scripts/run_subgraph_benchmark.py lines 191-233",
+            "/home/user/work/v3/g2_scan_test/provenance_scan_5.json (dirty eefb40d, untracked [])",
+            "interleaved_in_process_test.jsonl: 27 records, instrument 'in-process interleaved', 3 arms per pid, 12 samples each, no harness_commit/artifact fields",
+            "readelf --dyn-syms/-rW/-dW on /home/user/work/v3/g2/K/L0147 and L0256 S8/S1 model.so (sha256 equals build.json so_hash)",
+            "/home/user/work/onnx-mlir src/Runtime/ExecutionSession.cpp:132 (RTLD_LAZY|RTLD_GLOBAL), 247 (dlsym(handle,...))"
+          ]
+        },
+        {
+          "name": "G2 load-order and context diagnostics, co-loaded variants (interleaved, blocked_S1_then_S8, blocked_S8_then_S1, load_S1_S8__time_*, load_S8_S1__time_*): scripts/diag_subgraph_context.py -> subgraph_pair_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L64.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json",
+            "/home/user/work/v3/g2/diag_context_L64.json",
+            "/home/user/work/v3/g2/diag_loadorder_L63.json",
+            "/home/user/work/v3/g2/diag_loadorder_L64.json",
+            "/home/user/work/v3/g2/diag_loadorder_L96.json"
+          ],
+          "code_version_used": "Uncommitted at run time. The original files have mtimes from 08:07:37Z (context) to 08:10:40Z (loadorder L96). diag_subgraph_context.py first appears in dd29e19 (08:21:56Z) and did not exist at 08:06:01Z (scan provenance untracked=[]). The files record no provenance, git state, artifact paths or hashes, or built dir. context_L64_default.json has NO 'extra_env' key, but dd29e19 diag_subgraph_context.py:68 writes 'extra_env' unconditionally, so that file came from an EARLIER uncommitted revision (5 variants; no --env). The three loadorder files have extra_env=[], which fits a dd29e19-like revision. The factorial summaries contain only the timed arm, which needs the 'timed' support seen in dd29e19 paired.py:113. The nearest committed code (dd29e19) is an APPROXIMATION. The repo copies are byte-identical to the /home/user/work/v3/g2/diag_*.json originals (sha256 2c17311e..., 5782f90e..., d2d83430..., 6dafbe05...).",
+          "process_creation": "Fresh exec per (block, variant): subprocess.run([sys.executable, '-m', 'shapeperf.paired', '--pair-worker', json(spec)]) (dd29e19 diag_subgraph_context.py:61-62), with the variant order randomized per block (54). The parent imports only numpy and shapeperf.util (13-23) and loads no model.",
+          "models_loaded_per_process": "Two model .so files per process, both named model.so, in the variant's load order (VARIANTS, dd29e19:26-31): interleaved = [S1,S8]; blocked_S1_then_S8 = [S1,S8]; blocked_S8_then_S1 = [S8,S1]; load_S1_S8__time_X = [S1,S8]; load_S8_S1__time_X = [S8,S1]. Paths are <built>/K/L{L:04d}/{arm}_full/model.so (57). The built dir is not recorded. The only K/L0064 cell is in /home/user/work/v3/g2, and the only K/L0063 and L0096 cells are in /home/user/work/v3/g2b.",
+          "tags_passed": "None (paired.py:105 @dd29e19), so both sessions use tag 'model' and dlsym 'run_main_graph_model' on their own handle.",
+          "call_order": "Worker (dd29e19 paired.py:100-125) with spec warmup_calls=200, calls=500, rounds=12 (diag:59; file fields calls 500, rounds 12). Both libraries are dlopened first (105). Then, in LOAD order, each arm gets its first call (exact check) and 200 warmup calls, including arms that are not timed (107-111). So the first-loaded arm is also the first called. Timed schedule: 'random' = 12 rounds x permutation of [S1,S8] for interleaved; 'blocked' = all 12 rounds of arms[0] then all of arms[1], where arms is the load order; for load_*__time_X, timed=[X] and only X is timed (12 x 500 calls). Output release happens inside the timed batch, and `out` is shared across arms. Sessions stay alive until exit.",
+          "co_loading": "yes",
+          "interposition_risk": "Yes, by the same mechanism as the scan. The second-loaded library's run_main_graph_model reaches _mlir_ciface_main_graph_model via JUMP_SLOT, and lazy RTLD_GLOBAL resolution predicts the first-loaded library's definition. I checked with readelf on /home/user/work/v3/g2b/K/L0063 and L0096 and /home/user/work/v3/g2/K/L0064 (followup dumps): all S8/S1 .so files export GLOBAL DEFAULT run_main_graph_model/_mlir_ciface_main_graph_model/main_graph_model and have a JUMP_SLOT for _mlir_ciface_main_graph_model, with no SYMBOLIC or BIND_NOW. So in these variants both 'arms' may execute ONE compute implementation, the first-loaded one. No binding trace confirms it. The recorded numbers follow that pattern: the timing level follows the first-loaded arm in every co-loaded variant. L64 context: load S1 first gives S1 19.65/S8 19.71 (interleaved) and 18.73/18.37 (blocked); load S8 first gives 27.81/27.62. Alone: S1 19.08, S8 27.38. L64 factorial: 19.03/20.36 vs 27.8/29.2. L63: 18.35/18.54 vs 28.62/30.36.",
+          "evidence": [
+            "git show dd29e19:scripts/diag_subgraph_context.py lines 26-31, 47-69",
+            "git show dd29e19:shapeperf/paired.py lines 90-127",
+            "context_L64_default.json keys (no extra_env) vs dd29e19 diag_subgraph_context.py:68",
+            "loadorder_factorial_L6{3,4}/L96 summary fields",
+            "ls --full-time /home/user/work/v3/g2/diag_*.json (08:07:37Z-08:10:40Z) vs git log dd29e19 08:21:56Z",
+            "readelf on g2b/K/L0063, g2b/K/L0096 S8/S1 model.so (hash equals build.json so_hash); results/v3_followup/e1/elf_orig/{s8,s1}.{dynsym,reloc,dynamic,disasm}.txt (working tree, untracked) for L64"
+          ]
+        },
+        {
+          "name": "G2 diagnostics, single-arm variants (S1_alone, S8_alone) inside context_L64_*.json and loadorder_factorial_L63/L96.json",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_16MiB.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_and_top_pad_16MiB.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json"
+          ],
+          "code_version_used": "Same uncommitted diag revisions as the co-loaded entry; dd29e19 is the approximation. The malloc files record extra_env GLIBC_TUNABLES=glibc.malloc.mmap_threshold=16777216 (and :glibc.malloc.top_pad=16777216) and contain only S1_alone/S8_alone. The originals are /home/user/work/v3/g2/diag_context_L64_d281d5.json and diag_context_L64_71beb4.json (sha256 identical: a9612f96..., 60c208d5...).",
+          "process_creation": "Fresh exec per (block, variant) through subprocess.run of python -m shapeperf.paired --pair-worker (dd29e19 diag:61-62).",
+          "models_loaded_per_process": "One: VARIANTS S1_alone=(['S1'],None,None) and S8_alone=(['S8'],None,None) (dd29e19 diag:26), i.e. <built>/K/L{L}/{arm}_full/model.so only.",
+          "tags_passed": "None, so the tag is 'model'.",
+          "call_order": "Load -> first call plus check -> 200 warmup calls -> 12 rounds x 500 calls timed per round, with output release inside the timed batch (dd29e19 paired.py:105-125).",
+          "co_loading": "no",
+          "interposition_risk": "No. One model per process. The pair-worker code path is shared with the co-loaded variants, but only one library is mapped.",
+          "evidence": [
+            "git show dd29e19:scripts/diag_subgraph_context.py line 26, 48-49 (--env applied to worker env)",
+            "context_L64_malloc_*.json extra_env fields and summaries containing only *_alone"
+          ]
+        },
+        {
+          "name": "Direction probe per-op profile (results/v3/direction_probe/): scripts/run_instrumented.py run in-process",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L64.txt",
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L256.txt",
+            "/home/user/Shape-Perf/results/v3/direction_probe/summary.json",
+            "/home/user/work/v3/profile/L64/runtime.log",
+            "/home/user/work/v3/profile/L64/run_stdout.txt",
+            "/home/user/work/v3/profile/L256/runtime.log",
+            "/home/user/work/logs/v3_profile.log"
+          ],
+          "code_version_used": "Uncommitted at run time. run_stdout.txt mtimes are 08:36:55Z (L64) and 08:38:25Z (L256), and run_instrumented.py was first committed in ade4f11 at 08:40:25Z. ade4f11 is the approximation. The previous attempt with scripts/diag_profile.py (28382a9 version, fresh exec via measure.run_item) built the models but failed with a JSONDecodeError because instrumentation text went to stdout (v3_profile.log). That attempt produced no timing results.",
+          "process_creation": "In-process. The script itself loads and runs the model; there are no child processes (ade4f11 scripts/run_instrumented.py:19-27). The exact argv (model path, warmup, iterations) is not recorded. summary.json states '2 warmup + 5 iterations'. The ORT reference latency has no script in the repo; its process creation and method are unknown beyond summary.json 'ort_reference_latency_ms.how'.",
+          "models_loaded_per_process": "One ONNX-MLIR model. The only model.so under /home/user/work/v3/profile/L64 and L256 is build/model.so (sha256 aa0055fc... and 3ed7b881...). It was compiled by /home/user/work/onnx-mlir/build/Release/bin/onnx-mlir, whose sha e34bcd6a... is the same as variants/orig, i.e. the S8 policy, with flagset diag_profile (--profile-ir-with-sig=Onnx) and '-o .../build/model' with no --tag (profile/L64/build/compile.json 'command'). Which path was passed as argv is not recorded.",
+          "tags_passed": "None (run_instrumented.py:25: toolchain.import_pyruntime()(shared_lib_path=so)), so the tag is 'model'.",
+          "call_order": "sched_setaffinity {3} (20) -> build inputs (21-24) -> create session (25) -> warm+it calls of S.run(arrs) with the result discarded immediately (26-27). Timing comes from the in-library instrumentation (ONNX_MLIR_INSTRUMENT_FILE), not from the script; make-report -w 2 drops the warmup sets.",
+          "co_loading": "no",
+          "interposition_risk": "No. Only one ONNX-MLIR model is loaded in the process.",
+          "evidence": [
+            "git show ade4f11:scripts/run_instrumented.py lines 19-27",
+            "git log: ade4f11 2026-09-29T08:40:25Z; ls --full-time /home/user/work/v3/profile/L64/run_stdout.txt 08:36:55Z",
+            "/home/user/work/v3/profile/L64/build/compile.json compiler_bin_sha256 e34bcd6a..., command",
+            "/home/user/work/logs/v3_profile.log (diag_profile.py run_item JSONDecodeError)",
+            "results/v3/direction_probe/summary.json per_op_profile.how and ort_reference_latency_ms.how"
+          ]
+        }
+      ],
+      "other_findings": [
+        "No v3 code at any commit passes a tag to OMExecutionSession: git grep 'tag=' in scripts/ and shapeperf/ finds 0 hits at 1d781b6, eefb40d, dd29e19 and ade4f11. The shared_lib_path call sites are measure.py:100, paired.py:37, paired.py:71, paired.py:105 (dd29e19+), run_instrumented.py:25 and g0_verify.py:132. Every artifact was compiled with '-o <dir>/model' and no --tag, so every session uses tag 'model'. run_paired_benchmark.py:112 @1d781b6 already notes 'same basename: the entry-point symbols are derived from it'.",
+        "Split by instrument. Instruments that load exactly one model per fresh exec, and so are NOT exposed to cross-library symbol binding: G1 timing (measurements.jsonl), G1 verify, G2 fresh_process(.jsonl/_replicate), g2_scale, the diag *_alone variants, and the direction probe. Instruments that load 2-3 models into one process and ARE exposed: the G2 interleaved scan (S8->S1->AA) and every co-loaded diag variant. The docs/STATUS_v3.md statement that 'the first-loaded .so sets the process timing level' rests only on co-loaded instruments. The code makes a cross-DSO binding mechanism available there, so that observation cannot be used to label the fresh-process S8/S1 difference an artifact until binding is traced.",
+        "ELF facts relevant to binding, from read-only readelf/objdump. For K L63/L64/L96/L147/L256, S8 and S1: run_main_graph_model, _mlir_ciface_main_graph_model and main_graph_model are GLOBAL DEFAULT, and run_main_graph_model calls _mlir_ciface_main_graph_model through a PLT JUMP_SLOT. There is no DT_SYMBOLIC or BIND_NOW in the dynamic section (results/v3_followup/e1/elf_orig/s1.dynamic.txt for L64). S1 at all these lengths and S8 at L63/L64 also have a JUMP_SLOT for main_graph_model. S8 at L96/L147/L256 does not, because main_graph_model is inlined into _mlir_ciface (objdump of g2/K/L0147/S8_full/model.so shows no call to main_graph_model). The entry-to-ciface PLT hop is present in every artifact, so the mechanism does not depend on the length.",
+        "All the co-loaded diag numbers follow the first-loaded arm, which is what first-loaded-definition binding predicts. The pair worker loads both libraries before any call and then first-calls them in load order (dd29e19 paired.py:105-111), so load order and first-call order were never separated. This is consistent with the binding mechanism, not a verification of it.",
+        "Output release differs between instruments. In G1 worker_main the previous output is freed after stop, outside the timed interval (measure.py:125-129 @1d781b6). In subgraph_worker and the pair worker it is freed inside the timed batch (paired.py:81-83 @1d781b6; dd29e19 paired.py:123-124). In the pair worker `out` is shared across arms, so each timed batch starts by freeing the previous arm's output. Output buffers are owned by numpy through a py::capsule that calls free() (onnx-mlir src/Runtime/python/PyExecutionSession.cpp:425-442).",
+        "Record artifact_hash values are copied from build records, not recomputed at load time. The AA hash is S8's recorded hash (run_paired_benchmark.py:119-120 @1d781b6; run_subgraph_benchmark.py:173-174 @eefb40d). The scan and diag files record no artifact path or hash at all. I checked that the current files on disk for K L63/64/96/147/256 still match build.json so_hash.",
+        "The path and hash of the PyRuntime module are recorded nowhere. provenance.freeze(compilers=[]) is used for measure/verify, and import_pyruntime resolves $SHAPEPERF_ONNX_MLIR_BUILD or $SHAPEPERF_WORK/onnx-mlir/build/Release/lib (toolchain.py:17-19, 55-65 @1d781b6). The G2 drivers export SHAPEPERF_WORK=/home/user/work. The environment of the G1 driver invocation is unknown.",
+        "Runtime side effect in co-loading: ExecutionSession::loadModel sets OM_CONSTANT_PATH with setenv(..., overwrite=0) (ExecutionSession.cpp:84). A second model in the same process inherits the first model's constant directory. This does not matter for the single-op transposes, which have no external constants, but a future co-loaded BERT design with external constants would need to account for it. Sessions are never destroyed before process exit in any worker; dlclose happens only in the destructor (ExecutionSession.cpp:216-224).",
+        "Provenance-file overwrite. provenance_verify.json keeps only the last batch (run_paired_benchmark.py:63). I recovered batches 1-2 of G1 verify by recomputing the ids adc92cb95bd4760e and 7c459e350be9b197 from the same-batch measure snapshots, and both match exactly.",
+        "The working tree is dirty on HEAD ade4f11. scripts/run_subgraph_benchmark.py has uncommitted E1-C changes: a build-tagged subcommand and an optional --tag in compile_arm. There is also an untracked results/v3_followup/ directory containing the L64 ELF dumps cited above. The tag change is applied at compile time only; cmd_measure, cmd_scan and paired.py still pass no tag to OMExecutionSession. None of these changes produced any v3 result.",
+        "Repo result copies are byte-identical (sha256) to their /home/user/work originals: g1 timing measurements.jsonl, g1 verify_L0064, check128 verify_L0128, g2 fresh_process/replicate, interleaved_in_process_test, and all six diagnostics files."
+      ]
+    },
+    "records_audit": {
+      "instruments": [
+        {
+          "name": "G1 model-level fresh-process timing pilot (run_paired_benchmark.py measure)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/timing/measurements.jsonl",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260930.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260931.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260932.json",
+            "/home/user/work/v3/g1/timing/measurements.jsonl (cmp: byte-identical to the results copy)",
+            "/home/user/work/logs/v3_g1_pilot.log"
+          ],
+          "code_version_used": "Every G1 record corresponds to code byte-identical to commit 1d781b6. Batch 3 has 150 records (L149/150/156/160/256) with harness_commit=1d781b6 on a clean tree. It carries provenance_id c6c679c2902fad04, and provenance_measure_20260932.json records dirty=false. Batches 1-2 have 300 records with harness_commit='28382a9...-dirty' (provenance eddede38ea3f30cf and d4d013682baf24a6). I recomputed their dirty-tree hashes with the provenance.py source_state algorithm (1d781b6:shapeperf/provenance.py:33-46). diff_sha256 db0c588f... equals sha256 of `git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/measure.py shapeperf/toolchain.py shapeperf/util.py`. untracked_sha256 e5c331d5... (batch 1, 15 files) and be4dd716... (batch 2, 16 files) equal the hashes of the 1d781b6 contents of the listed untracked files. So all three batches ran the 1d781b6 harness. shapeperf/measure.py has not changed after 1d781b6 (git log -- shapeperf/measure.py).",
+          "process_creation": "One fresh exec per record. run_block (1d781b6:shapeperf/measure.py:184-211) calls run_item for each plan item. run_item runs subprocess.run([sys.executable,'-m','shapeperf.measure','--worker',json]) at measure.py:170-173. The worker_main function loads spec['artifact'] once (OMExecutionSession(shared_lib_path=...) at measure.py:98-100) and reports os.getpid() at measure.py:150. The driver is 1d781b6:scripts/run_g1_pilot.sh and the call site is run_paired_benchmark.py:126.",
+          "models_loaded_per_process": "Exactly one model .so per process. There are 450 records and 450 distinct pids (3554..6324), and every pid has 1 record, 1 artifact and 1 flagset. The artifacts are pairs/L*/S8_full/model.so, S1_full/model.so and AA_full/model.so, 150 each. AA is a shutil.copyfile of S8 made just before measuring (1d781b6:scripts/run_paired_benchmark.py:113-115). No pid ever shows a second artifact.",
+          "tags_passed": "No --tag. The build command in results/v3/g1/pairs/L0064/pair.json full.S1.command is `.../cap1/bin/onnx-mlir -O3 --march=x86-64 --mcpu=emeraldrapids --shapeInformation=... -o .../S1_full/model --opt-report=Simd --EmitLib ...`. The pair.json files and check128/pair.json contain 0 occurrences of '--tag'. All three arms therefore carry the default tag 'model'.",
+          "call_order": "Each worker process does load, then warmup=2 runs, then iterations=16 timed sess.run calls, then exits (record fields warmup=2, iterations=16; measure.py:106-127). Outputs live only as long as the process. Each block has 6 processes (3 arms x 2) run one after another in seeded random order (order_in_block 0-5, plan_index). There are 75 blocks (15 lengths x 5 blocks x 6 = 450). Across all 449 consecutive record pairs, unix_time is monotone, pid strictly increases, and no process's [end - process_wall_ns, end] interval overlaps the previous record. Lengths ran batch by batch, and a length's 5 blocks ran together (log lines 'L=41 done (5 blocks x 3 arms x 2 processes)'). Time span: 2026-09-29 05:51:14Z to 07:16:48Z.",
+          "co_loading": "no",
+          "interposition_risk": "No. Each process loads a single ONNX-MLIR model .so, so the identical GLOBAL symbols run_main_graph_model, _mlir_ciface_main_graph_model and main_graph_model have only one definer in the process. The pid and artifact fields show this for all 450 records.",
+          "evidence": [
+            "results/v3/g1/timing/measurements.jsonl: 450 records, 450 distinct pid, per-pid (nrec,nartifact,nflagset)=(1,1,1) for all",
+            "harness_commit: 28382a9...-dirty x300, 1d781b6 x150; provenance_id eddede38ea3f30cf/d4d013682baf24a6/c6c679c2902fad04 x150 each",
+            "sha256(git diff 28382a9 1d781b6 -- shapeperf/{compile,measure,toolchain,util}.py) == db0c588f7f63... (diff_sha256 in provenance_measure_20260930/31.json)",
+            "untracked_sha256 e5c331d5.../be4dd716... reproduced exactly from 1d781b6 file contents",
+            "1d781b6:shapeperf/measure.py:170-173 (fresh exec), :98-100 (single OMExecutionSession), :150 (pid from worker)",
+            "cpus=[3] for all records; experiment_phase 'v3-g1 DEV-CONTAINER PILOT (not a result)'"
+          ]
+        },
+        {
+          "name": "G1 correctness verify, 15 lengths (run_paired_benchmark.py verify -> paired.verify_worker)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/verify/verify_L0041.json ... verify_L0256.json (15 files)",
+            "/home/user/Shape-Perf/results/v3/g1/verify/provenance_verify.json",
+            "/home/user/work/v3/g1/verify/ (original copies, same set)"
+          ],
+          "code_version_used": "Each record carries a provenance_id, but only one provenance file survives. L41-140 have adc92cb95bd4760e, L141-147 have 7c459e350be9b197, and L149-256 have 6759c492f20c560b. provenance_verify.json is rewritten on every batch (1d781b6:scripts/run_paired_benchmark.py:61), so only 6759c492f20c560b remains: git_head 1d781b6, dirty=false, created_unix 1790664270.8 (06:44:30Z). No file survives for batches 1-2. They were run from the same driver invocations as the timing batches, whose provenance matches 1d781b6 content, so the same code is likely but it is not recorded.",
+          "process_creation": "The parent process runs ORT in-process with ort.InferenceSession on the .onnx file (1d781b6:scripts/run_paired_benchmark.py:53-59). For each arm in ('S8','S1') it spawns one fresh exec: subprocess.run([sys.executable,'-m','shapeperf.paired','--verify-worker',spec]) at run_paired_benchmark.py:75-80. verify_worker loads one artifact (1d781b6:shapeperf/paired.py:37), runs it twice, and saves the outputs to an npz. The parent then compares.",
+          "models_loaded_per_process": "From code: one ONNX-MLIR model .so per worker process, and the parent holds only ORT, which is not an ONNX-MLIR model. The records have NO pid field, so this cannot be confirmed from records. Each record's 'workers' dict holds separate S8 and S1 entries (static_shape_verified, repeat_identical, finite).",
+          "tags_passed": "No --tag (pair.json commands). Artifacts are pairs/L*/{S8,S1}_full/model.so.",
+          "call_order": "For each length and each input (anchor, natural): the ORT reference runs in the parent, then the S8 worker, then the S1 worker, each as its own process (run_paired_benchmark.py:75). The worker runs sess.run twice and keeps the first output (paired.py:38-41). Worker outputs survive only as a temporary npz. Work-copy mtimes are 05:50-05:51 for batch 1, 06:13 for batch 2 and 06:44-06:45 for batch 3.",
+          "co_loading": "no",
+          "interposition_risk": "No, by code evidence: S8 and S1 are each loaded alone in separate processes, so their S8==S1 bitwise results are not contaminated by symbol binding. Record-level confirmation is impossible because pid is absent. All 30 rows report S8_vs_S1.bitwise_identical=true.",
+          "evidence": [
+            "verify_L*.json rows: keys contain no 'pid' (checked all 15 files)",
+            "provenance_id per file: adc92cb95bd4760e (L41-140), 7c459e350be9b197 (L141-147), 6759c492f20c560b (L149-256)",
+            "1d781b6:scripts/run_paired_benchmark.py:75-80 per-arm subprocess; :59 ORT in parent",
+            "1d781b6:shapeperf/paired.py:27-46 verify_worker loads a single artifact"
+          ]
+        },
+        {
+          "name": "check128 correctness verify L=128 (earlier uncommitted verify code)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/check128/verify_L0128.json",
+            "/home/user/work/v3/check128/verify/verify_L0128.json (cmp: identical)",
+            "/home/user/work/v3/check128/verify/provenance_verify.json",
+            "/home/user/work/logs/v3_check128.log"
+          ],
+          "code_version_used": "Record provenance_id is 0448533827b1553e. Its provenance file (/home/user/work/v3/check128/verify/provenance_verify.json, created 05:40:26Z) records git_head 28382a9, dirty=true, diff_sha256 be34a457... This equals sha256(git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/toolchain.py shapeperf/util.py), so measure.py was still unmodified at that point. The untracked set has 7 files (results/v3/g1/g1_lengths.json, scripts/build_shape_pair.py, scripts/run_paired_benchmark.py, shapeperf/lowering_diff.py, shapeperf/paired.py, shapeperf/provenance.py, tests/test_lowering_diff.py). Their untracked_sha256 e1ef902e... does NOT match the 1d781b6 contents. At least one of those files, possibly run_paired_benchmark.py or paired.py, differed from every commit, so the exact code is unknown and not preserved.",
+          "process_creation": "Unknown from preserved code. The record layout is the same as the later version ('workers' dict with separate S8 and S1 entries), which suggests per-arm worker processes, but this is not proven.",
+          "models_loaded_per_process": "Unknown: the record has no pid, and the code that produced it is not preserved.",
+          "tags_passed": "No --tag (results/v3/g1/check128/pair.json has 0 '--tag'; full.S8.command uses -o .../S8_full/model).",
+          "call_order": "unknown (code not preserved); the log v3_check128.log records only the build/probe steps.",
+          "co_loading": "unknown",
+          "interposition_risk": "Unknown. The records contain no pid, and the code is not preserved.",
+          "evidence": [
+            "verify_L0128.json provenance_id 0448533827b1553e, no pid field",
+            "/home/user/work/v3/check128/verify/provenance_verify.json: diff_sha256 be34a457... == sha256(git diff 28382a9 1d781b6 -- compile.py toolchain.py util.py); untracked_sha256 e1ef902e... != 1d781b6 contents"
+          ]
+        },
+        {
+          "name": "G2 single-op fresh-process timing, main run K x15 lengths + Q x5 (run_subgraph_benchmark.py measure -> paired.subgraph_worker)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_11.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_12.json",
+            "/home/user/work/v3/g2/timing/measurements.jsonl (cmp: identical)",
+            "/home/user/work/logs/v3_g2_measure.log",
+            "/home/user/work/v3/run_g2_measure.sh"
+          ],
+          "code_version_used": "K run: 675 records with harness_commit ebd96be-dirty and provenance d148589336195b72 (created 07:21:01Z). diff_sha256 6d197847... equals sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py), and there are no untracked files. The K run therefore used eefb40d's run_subgraph_benchmark.py plus ebd96be's paired.py (whose subgraph_worker is unchanged since 1d781b6) and the 1d781b6 measure.py. Q run: 225 records with harness_commit eefb40d on a clean tree, provenance 16031b7969ab98af (07:48:02Z). eefb40d was committed at 07:32:57Z, in the middle of the K run. git_head is lru_cached (1d781b6:shapeperf/util.py:33), so all K records keep the ebd96be-dirty label; K records span 07:21:03-07:48:01 and Q records span 07:48:02-07:51:24.",
+          "process_creation": "One fresh exec per record. run_block calls run_item, which runs subprocess.run([sys.executable,'-m','shapeperf.paired','--worker',spec]) (1d781b6:shapeperf/measure.py:170-173). worker_module is set at eefb40d:scripts/run_subgraph_benchmark.py:176. The __main__ '--worker' branch dispatches to subgraph_worker (eefb40d:shapeperf/paired.py:173), which loads one artifact (paired.py:71) and reports os.getpid() (paired.py:86).",
+          "models_loaded_per_process": "One model .so per process. There are 900 records and 900 distinct pids (7504..8972); every pid has 1 record, 1 artifact and 1 flagset (S8/S1/AA 300 each). The artifacts are /home/user/work/v3/g2/{K,Q}/L*/{S8,S1,AA}_full/model.so.",
+          "tags_passed": "No --tag. Builds use `-o out_dir/model` (ebd96be and eefb40d:scripts/run_subgraph_benchmark.py:96); build provenance 2f3da961b190f5f6 is ebd96be clean. Each directory holds only model.so (e.g. /home/user/work/v3/g2/K/L0064/S8_full/model.so). build.json and build_summary do not record the command.",
+          "call_order": "Each worker does load, one correctness call, 300 warmup calls, then 15 samples x 1000 calls (fields warmup=300, iterations=15, calls_per_sample=1000; paired.py:70-84). The previous output is kept alive until the next call returns (comment in paired.py). Each block has 9 processes (3 arms x --processes 3) run one after another in seeded random order; there are 100 blocks. Across all 899 consecutive pairs, pids strictly increase, unix_time is monotone and no processes overlap. cpus=[3].",
+          "co_loading": "no",
+          "interposition_risk": "No. Each process holds only one model .so (pid/artifact fields for all 900 records).",
+          "evidence": [
+            "fresh_process.jsonl: 900 records, 900 distinct pids, per-pid (1,1,1)",
+            "sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py) == 6d197847... (provenance_measure_11.json diff_sha256)",
+            "harness_commit/time split: ebd96be-dirty K 07:21:03-07:48:01; eefb40d Q 07:48:02-07:51:24",
+            "1d781b6:shapeperf/measure.py:170-173; eefb40d:shapeperf/paired.py:71,86,173"
+          ]
+        },
+        {
+          "name": "G2 single-op fresh-process replicate (L64 + neighbours 63/65/96/128/192)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process_replicate.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_21.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_22.json",
+            "/home/user/work/v3/g2/timing_rep/measurements.jsonl (cmp: identical)",
+            "/home/user/work/logs/v3_g2_replicate.log",
+            "/home/user/work/v3/run_g2_replicate.sh"
+          ],
+          "code_version_used": "All 432 records have harness_commit eefb40d on a clean tree. Provenance 8902c5c865b2eafb (seed 21, L64 from --built v3/g2, 72 records) and 607c265de23788f4 (seed 22, L63/65/96/128/192 from --built v3/g2b, 360 records) both record dirty=false. g2b build provenance 88c6bbf672a9e990 is also eefb40d clean.",
+          "process_creation": "Same as the main G2 run: fresh exec per record through measure.py run_item (1d781b6:shapeperf/measure.py:170-173), dispatching to paired.subgraph_worker (eefb40d:shapeperf/paired.py:59-92).",
+          "models_loaded_per_process": "One model .so per process. There are 432 records and 432 distinct pids (9366..10050); per-pid (records, artifacts, flagsets) is (1,1,1). Flagsets are S8/S1/AA 144 each.",
+          "tags_passed": "No --tag (eefb40d:scripts/run_subgraph_benchmark.py:96); every artifact is named model.so.",
+          "call_order": "Same per-process protocol as the main run (300 warmup calls, 15 samples x 1000 calls). There are 48 blocks x 9 processes, run sequentially, with strictly increasing pids and no overlap. Span: 07:53:02-08:04:57Z.",
+          "co_loading": "no",
+          "interposition_risk": "No. Each process holds a single model .so.",
+          "evidence": [
+            "fresh_process_replicate.jsonl: 432 records, 432 distinct pids, per-pid (1,1,1)",
+            "provenance_measure_21/22.json: git_head eefb40d, dirty=false"
+          ]
+        },
+        {
+          "name": "G2 scale test (work dir only)",
+          "result_files": [
+            "/home/user/work/v3/g2_scale/measurements.jsonl",
+            "/home/user/work/v3/g2_scale/provenance_measure_1.json"
+          ],
+          "code_version_used": "harness_commit is ebd96be-dirty and provenance is 8adb2be9af5cdb15 (created 07:20:43Z). diff_sha256 is 6d197847..., identical to the main K run, so the code is eefb40d's run_subgraph_benchmark.py on ebd96be. There are no untracked files.",
+          "process_creation": "Fresh exec per record through measure.py run_item (same path as the main G2 run).",
+          "models_loaded_per_process": "One model .so per process. There are 3 records and 3 distinct pids (7467-7469): S8, S1 and AA, all K L147.",
+          "tags_passed": "No --tag (same build as the main G2 run; model.so).",
+          "call_order": "One block of 3 processes, 07:20:43.9-07:20:45.2Z, run sequentially.",
+          "co_loading": "no",
+          "interposition_risk": "No. Each process holds a single model .so.",
+          "evidence": [
+            "g2_scale/measurements.jsonl: 3 records, 3 pids, per-pid (1,1,1)",
+            "provenance_measure_1.json diff_sha256 6d197847..."
+          ]
+        },
+        {
+          "name": "G2 in-process interleaved scan (run_subgraph_benchmark.py scan -> paired.subgraph_pair_worker)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/interleaved_in_process_test.jsonl",
+            "/home/user/work/v3/g2_scan_test/measurements.jsonl (cmp: identical)",
+            "/home/user/work/v3/g2_scan_test/provenance_scan_5.json (NOT copied into results/v3)"
+          ],
+          "code_version_used": "Code state unknown and not preserved. The records carry no harness_commit. Provenance 01b2b25b4549fa31 (created 08:06:01Z) records git_head eefb40d, dirty=true, diff_sha256 4679d467..., no untracked files. That hash does not match `git diff eefb40d dd29e19` (nor caeb079 or ade4f11) for any subset of the modified files, so the code was an uncommitted intermediate. The record key set (13 keys: padded_length, block_id, model_key, flagset, latency_ns, exact_permutation, failure_type, pid, cpus, instrument, experiment_phase, provenance_id, vm_allocation_id) matches exactly the dict written by dd29e19:scripts/run_subgraph_benchmark.py:226-230, so it is close to dd29e19.",
+          "process_creation": "(dd29e19 version) One fresh exec per block: subprocess.run([sys.executable,'-m','shapeperf.paired','--pair-worker',spec]) at dd29e19:scripts/run_subgraph_benchmark.py:217. subgraph_pair_worker loads ALL arms into that one process: `sess = {arm: om(shared_lib_path=path) for arm, path in spec['artifacts'].items()}` (dd29e19:shapeperf/paired.py:105).",
+          "models_loaded_per_process": "Three model .so files per process. There are 27 records but only 9 distinct pids (10099-10103, 10107-10110). Every pid has exactly 3 records, flagsets S8, S1 and AA, sharing one block_id: 3 processes each for L147, L256 and L64. From dd29e19 code, the load order is the spec dict order S8, then S1, then AA (run_subgraph_benchmark.py:207-212). Record order per pid (S8, S1, AA) matches the samples dict order, which follows load order (paired.py:113). The records have no artifact path, so load order is not recorded directly.",
+          "tags_passed": "No --tag; the artifacts are the G2 model.so builds (eefb40d:scripts/run_subgraph_benchmark.py:96). AA is a copy named AA_full/model.so (dd29e19 run_subgraph_benchmark.py:209-211).",
+          "call_order": "(dd29e19 code) All three arms are loaded first, then each arm gets an exactness check and warmup in turn, then rounds visit every arm in seeded random order ('random'); each record has 12 samples. calls and rounds are not recorded, and there is no unix_time. Blocks run 08:06:04-08:06:29Z according to the block_id timestamps.",
+          "co_loading": "yes",
+          "interposition_risk": "YES. All three libraries export identical GLOBAL symbols and S8 is loaded first, so S1's and AA's PLT calls can bind to S8's compute. The records fit this. At L=64 the scan per-arm means are S8 27.59, S1 27.30 and AA 27.61 us/call, while fresh_process.jsonl (one .so per pid) gives S8 27.86, S1 18.98 and AA 28.39 us/call. The co-loaded S1 behaves like S8. At L147/256 neither instrument shows an S8/S1 gap, so those lengths are uninformative. exact_permutation=true for every arm cannot detect this, because S8 and S1 compute identical results.",
+          "evidence": [
+            "interleaved_in_process_test.jsonl: 9 pids x {S8,S1,AA}; every record instrument='in-process interleaved'",
+            "provenance_scan_5.json: eefb40d dirty, diff 4679d467... matches no committed diff",
+            "dd29e19:shapeperf/paired.py:105 (all arms loaded in one process); dd29e19:scripts/run_subgraph_benchmark.py:207-217",
+            "scan vs fresh-process L64 means computed from the two record files"
+          ]
+        },
+        {
+          "name": "G2 context diagnostic L=64 (diag_subgraph_context.py: alone / interleaved / blocked; plus GLIBC_TUNABLES variants)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json (= /home/user/work/v3/g2/diag_context_L64.json, mtime 08:07:37Z)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_16MiB.json (= diag_context_L64_d281d5.json, 08:08:28Z)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_and_top_pad_16MiB.json (= diag_context_L64_71beb4.json, 08:08:35Z)"
+          ],
+          "code_version_used": "Unknown or unpreserved. The files record no provenance_id, harness_commit, pid, timestamp or built dir. The script was uncommitted when run and first appears in dd29e19 (08:21:56Z). context_L64_default.json has NO 'extra_env' key, but dd29e19:scripts/diag_subgraph_context.py:68 always writes one, so this file came from an earlier, unpreserved version. The two GLIBC_TUNABLES files do contain extra_env, which is consistent with the dd29e19 script but not proven. The worker, paired.subgraph_pair_worker, was also uncommitted at run time.",
+          "process_creation": "(dd29e19) One fresh exec per (block, variant), in randomized variant order: diag_subgraph_context.py:53-62 runs subprocess `python -m shapeperf.paired --pair-worker`.",
+          "models_loaded_per_process": "No pid is recorded; counts come from blocks x variants and the n per variant. context_L64_default has 5 blocks x 5 variants = 25 processes. S1_alone and S8_alone (10 processes) load one .so each. interleaved (load S1 then S8), blocked_S1_then_S8 (S1 then S8) and blocked_S8_then_S1 (S8 then S1) together are 15 processes that load two .so each. These compositions come from dd29e19 VARIANTS at diag_subgraph_context.py:26-28, assumed the same in the earlier version. The two GLIBC_TUNABLES files contain only the alone variants: 10 processes each, one .so each.",
+          "tags_passed": "No --tag; the artifacts are K/L0064/{S1,S8}_full/model.so. The built dir is not recorded; L0064 exists only under /home/user/work/v3/g2/K.",
+          "call_order": "Per process: load in the variant's order, warmup_calls=200 per arm (dd29e19:59), then 12 rounds x 500 calls ('random' or 'blocked'). raw_us stores the per-process mean in us.",
+          "co_loading": "yes",
+          "interposition_risk": "YES for the 15 two-library processes in context_L64_default.json. In the records, both arms' times follow the FIRST-loaded library: interleaved (S1 first) gives S1 19.65 and S8 19.71; blocked_S1_then_S8 gives S1 18.73 and S8 18.37; blocked_S8_then_S1 gives S1 27.81 and S8 27.62; alone gives S1 19.08 and S8 27.38 us. The GLIBC_TUNABLES files are single-library only, so they carry no interposition risk, but the environment differs.",
+          "evidence": [
+            "context_L64_default.json keys: length, blocks, calls, rounds, summary, raw_us, note (no extra_env)",
+            "dd29e19:scripts/diag_subgraph_context.py:26-31 VARIANTS, :61 subprocess, :68 writes extra_env",
+            "summary means quoted above from the files"
+          ]
+        },
+        {
+          "name": "G2 load-order factorial L63/L64/L96 (diag_subgraph_context.py load_X_Y__time_Z variants)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json (= /home/user/work/v3/g2/diag_loadorder_L63.json, 08:10:12Z)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L64.json (= diag_loadorder_L64.json, 08:09:28Z)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json (= diag_loadorder_L96.json, 08:10:40Z)"
+          ],
+          "code_version_used": "Uncommitted when run (08:09-08:10Z) and committed later in dd29e19. The files carry no provenance or commit. Their 'extra_env': [] key and variant names match dd29e19:scripts/diag_subgraph_context.py:29-31 and :68, but byte identity to that version is unknown.",
+          "process_creation": "(dd29e19) One fresh exec per (block, variant): diag_subgraph_context.py:53-62, running --pair-worker.",
+          "models_loaded_per_process": "No pid is recorded. L64 has 6 blocks x 4 variants = 24 processes, all loading two .so files (S1+S8 in the stated order) with one arm timed. L63 and L96 each have 5 blocks x 6 variants = 30 processes: 10 alone with one .so, and 20 with two .so. The built dir is not recorded; L0063 and L0096 exist only under /home/user/work/v3/g2b/K, and L0064 only under /home/user/work/v3/g2/K.",
+          "tags_passed": "No --tag; all artifacts are model.so (eefb40d:scripts/run_subgraph_benchmark.py:96 for both g2 and g2b builds).",
+          "call_order": "Both libraries are loaded in the variant's order and only the 'timed' arm runs 12 rounds x 500 calls (dd29e19:shapeperf/paired.py:113; spec 'timed').",
+          "co_loading": "yes",
+          "interposition_risk": "YES. This instrument in effect measures interposition: in the records, time follows load order, not the timed arm. L64: S1-first gives S1 19.03 and S8 20.36; S8-first gives S1 27.80 and S8 29.20. L63: alone S1 17.75, S8 30.18; S1-first 18.35/18.54; S8-first 28.62/30.36. L96: alone 63.36/70.11; S1-first 62.23/65.47; S8-first 68.97/70.93 us/call.",
+          "evidence": [
+            "loadorder_factorial_L{63,64,96}.json summary blocks",
+            "dd29e19:scripts/diag_subgraph_context.py:29-31 (both libraries loaded, one timed)"
+          ]
+        },
+        {
+          "name": "Direction probe: instrumented per-op profile (run_instrumented.py) + ORT reference",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/direction_probe/summary.json",
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L64.txt",
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L256.txt",
+            "/home/user/work/v3/profile/L64/{runtime.log,run_stdout.txt,build/compile.json}",
+            "/home/user/work/v3/profile/L256/{runtime.log,run_stdout.txt,build/compile.json}",
+            "/home/user/work/logs/v3_profile.log"
+          ],
+          "code_version_used": "No provenance or harness_commit is recorded. scripts/run_instrumented.py first appears in ade4f11 (08:40:25Z), after the runtime.log writes (08:36:55Z and 08:38:25Z). The first attempt used scripts/diag_profile.py (in git since 28382a9) and failed after the worker ran, with JSONDecodeError in the parent at measure.py:178 (v3_profile.log). Exact script bytes at run time are unknown.",
+          "process_creation": "run_instrumented.py loads the .so in its own process (ade4f11:scripts/run_instrumented.py:25) and runs it warm+it times (:26-27). The invocation command is not recorded. The earlier diag_profile.py attempt used a fresh exec through run_item (ade4f11:scripts/diag_profile.py:47 then measure.py:170).",
+          "models_loaded_per_process": "One .so per run: the flagset diag_profile build (compile.json: flagset 'diag_profile', flags -O3 --march=x86-64 --mcpu=emeraldrapids --profile-ir-with-sig=Onnx, artifact /home/user/work/v3/profile/L64/build/model.so hash aa0055fc...). It is not S8, S1 or AA. No pid is recorded.",
+          "tags_passed": "No --tag in compile_flags (compile.json); the output is model.so.",
+          "call_order": "run_stdout.txt has 7 lines per length (2 warmup + 5 iterations, as summary.json states). However, each runtime.log contains 14 '==START-REPORT==' markers, and make-report prints 'Gather stats from 14 measurement sets with 2 warmup; keep inner 6'. The log therefore appears to hold 14 runs, likely from two processes appending (the failed diag_profile.py worker plus run_instrumented.py). That split is inferred and not recorded.",
+          "co_loading": "no",
+          "interposition_risk": "No for S8 vs S1: this instrument makes no S8/S1 comparison and loads one instrumented .so per run. The ORT reference latencies (L64 111.8 ms, L256 396.7 ms) exist only as summary numbers, with no raw records, pid or code in the repo, so their process setup is unknown.",
+          "evidence": [
+            "ade4f11:scripts/run_instrumented.py:19-27",
+            "v3_profile.log JSONDecodeError at shapeperf/measure.py:178 for both L=64 and L=256",
+            "grep -c '==START-REPORT==' runtime.log = 14 (L64 and L256); run_stdout.txt 7 lines",
+            "compile.json flagset diag_profile"
+          ]
+        }
+      ],
+      "other_findings": [
+        "The records directly confirm that entry symbols are derived from the file name. /home/user/work/v3/check128/timing/measurements.jsonl (28382a9-dirty, provenance 8d65cb8787dc1cd0) has 24 records. The 16 successful records have 16 distinct pids with one artifact each. The 8 AA records used the file model_AA.so, failed with 'RuntimeError: Cannot load symbol: omQueryEntryPoints_model_aa', and carry no pid. After that, AA was created as AA_full/model.so (check128/timing_aa_test: 3 records, 3 pids; comment at 1d781b6:scripts/run_paired_benchmark.py:114, 'same basename: the entry-point symbols are derived from it').",
+        "The artifact_hash field on AA records is copied from S8's build hash, not computed from the AA file (1d781b6:scripts/run_paired_benchmark.py:119; eefb40d:scripts/run_subgraph_benchmark.py:174). It is therefore not independent evidence that AA is byte-identical to S8; only the shutil.copyfile call shows that.",
+        "Across the 4 fresh-process timing files (G1 timing, G2 main, G2 replicate, G2 scale; 1785 records in all), no pid ever has more than one artifact or arm. The only record files where one pid holds several arms are the scan (9 pids x 3 arms). The diagnostics files have no pid, but their code co-loads 2 libraries in 15 of 25 (context default), 20 of 30 (L63, L96) and 24 of 24 (L64) processes.",
+        "Pattern in the records: whenever S8 and S1 share a process, both arms take the timing of the first-loaded library (scan L64: S1 27.30 vs fresh-process 18.98; factorial L63/64/96; context interleaved and blocked). One-library processes show a real S8>S1 gap at L63, L64 and L96. Every in-process result (scan and diagnostics) should be treated as contaminated by interposition.",
+        "Provenance gaps: G1 verify provenance for batches 1-2 (adc92cb95bd4760e, 7c459e350be9b197) was overwritten, because provenance_verify.json is a single file per out dir. provenance_scan_5.json exists only in /home/user/work/v3/g2_scan_test and not in results/v3. The diagnostics JSONs have no provenance, commit, pid, timestamp or built-dir fields at all. The scan records lack harness_commit, unix_time, artifact and calls.",
+        "The 'provenance <id>' lines in v3_g1_pilot.log (ebc443807748cd24, 27df5131bfe8bab4, efe05ca1411a3e35) are build (pair) provenance ids and match pair.json provenance_id for L0041, L0141 and L0149. They are not the measurement provenance ids (eddede38..., d4d01368..., c6c679c2...).",
+        "The working tree has an uncommitted change to scripts/run_subgraph_benchmark.py (adds --tag support to compile_arm) and an untracked results/v3_followup/. None of the v3 records examined carry a provenance state matching that change."
+      ]
+    },
+    "reconciled": {
+      "instruments": [
+        {
+          "name": "G1 model-level fresh-process timing pilot (results/v3/g1/timing/measurements.jsonl): run_paired_benchmark.py measure -> shapeperf.measure.run_block/run_item -> worker shapeperf.measure.worker_main",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/timing/measurements.jsonl",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260930.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260931.json",
+            "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260932.json",
+            "/home/user/work/v3/g1/timing/measurements.jsonl (sha256 c8c2833f..., byte-identical to the repo copy, re-checked)",
+            "/home/user/work/logs/v3_g1_pilot.log"
+          ],
+          "code_version_used": "Content equal to commit 1d781b6 at each batch's measure-start snapshot. Batch 3 (150 records, harness_commit 1d781b6, provenance c6c679c2902fad04) was a clean tree. Batches 1-2 (300 records, harness_commit '28382a9...-dirty', provenance eddede38ea3f30cf and d4d013682baf24a6): I recomputed diff_sha256 db0c588f... = sha256(git diff 28382a9 1d781b6 -- shapeperf/{compile,measure,toolchain,util}.py). I also recomputed untracked_sha256 e5c331d5... (15 files) and be4dd716... (16 files, adding scripts/collect_lowering_trace.py) from the 1d781b6 blobs (algorithm: 1d781b6:shapeperf/provenance.py:33-46). All match. The snapshot is taken once, at measure start (1d781b6:scripts/run_paired_benchmark.py:104). Every worker is a new exec that re-imports shapeperf from the working tree, so the records cannot rule out an edit made during a run (A's caveat is correct; B's 'every record byte-identical to 1d781b6' overstates). git_head is lru_cached per process (1d781b6:shapeperf/util.py:33-37). Note: HEAD is now 1cd40fa, not ade4f11. measure.py changed later in 1865924 (tag passing), after all v3 runs, so it does not affect these records.",
+          "process_creation": "Fresh exec per record, sequential. cmd_measure (1d781b6:scripts/run_paired_benchmark.py:98-131) builds 6 items per block (arms S8,S1,AA x processes 2; lines 121-125). run_block (1d781b6:shapeperf/measure.py:184-211) permutes them with a seeded rng (189-190). run_item runs subprocess.run([sys.executable,'-m','shapeperf.measure','--worker',json]) (170-173) and blocks until the child exits. The parent never calls import_pyruntime. Records (re-checked): 450 records, 450 distinct pids (3554-6324), per-pid (records, artifacts, flagsets)=(1,1,1). unix_time is monotone, pids strictly increase, and no [unix_time - process_wall_ns, unix_time] interval overlaps the previous one. Span 05:51:14-07:16:48Z. 75 blocks (15 lengths x 5).",
+          "models_loaded_per_process": "One ONNX-MLIR model per worker: <pairs>/L{L:04d}/{S8|S1|AA}_full/model.so (1d781b6:scripts/run_paired_benchmark.py:42-43, 111-118), loaded at 1d781b6:shapeperf/measure.py:100. AA is shutil.copyfile(S8) with the same basename (line 115) and is removed after each length (line 130). The AA artifact_hash is copied from S8's pair.json entry, not computed from the file (119-120). The BERT .so files were deleted after each batch (cleanup 134-142; log lines 43/87/131 'deleted 4.35 GB'; no .so remains under /home/user/work/v3/g1), so their ELF cannot be inspected. The PyRuntime path and hash used are not recorded (1d781b6:shapeperf/toolchain.py:17-19, 55-65).",
+          "tags_passed": "None. OMExecutionSession(shared_lib_path=...) at 1d781b6:shapeperf/measure.py:100, and the PyRuntime default is tag='' (onnx-mlir 1e017c9f src/Runtime/python/PyExecutionSession.hpp:84). The runtime then uses the lowercased filename stem, 'model' (src/Runtime/ExecutionSession.cpp:88-104), and dlsym(handle,'run_main_graph_model') (211, 247). 0 occurrences of '--tag' in the 15 results/v3/g1/pairs/*/pair.json files plus check128/pair.json. git grep 'tag=' in scripts/ and shapeperf/ gives 0 hits at 1d781b6, ebd96be, eefb40d, dd29e19 and ade4f11.",
+          "call_order": "1d781b6:shapeperf/measure.py: sched_setaffinity (91-92) -> inputs (94-96) -> import PyRuntime (98) -> load, timed as load_ns (99-101) -> input_signature (103) -> 2 warmup runs (113-115) -> hash (118) -> 16 timed iterations: start=perf(); new=sess.run(); stop=perf(); outs=new (124-129). The previous output is freed at line 129, after stop, outside the timed interval. The last output is hashed (133) and lives until exit. There is no in-process unload. Record fields: warmup=2, iterations=16, 16 latencies, cpus=[3] for all 450 records.",
+          "co_loading": "no",
+          "interposition_risk": "No. Each measuring process maps exactly one model .so, so run_main_graph_model, _mlir_ciface_main_graph_model and main_graph_model have a single definer in that process. S8, S1 and AA always ran in different processes. The BERT .so files no longer exist, so the no-risk verdict rests on process structure, not on ELF. Supporting evidence on other artifacts: E1 traced single-model processes on the G2 L=64 artifacts, and each ran its own compute (results/v3_followup/e1/identity_orig/identity_table.json cases I8/I1/IAA verified_own, commits b1fa951/eebe88a).",
+          "evidence": [
+            "git show 1d781b6:shapeperf/measure.py lines 83-152, 167-211",
+            "git show 1d781b6:scripts/run_paired_benchmark.py lines 98-142; git show 1d781b6:scripts/run_g1_pilot.sh lines 14-26",
+            "recomputed: sha256(git diff 28382a9 1d781b6 -- shapeperf/{compile,measure,toolchain,util}.py)=db0c588f...; untracked hashes e5c331d5/be4dd716 reproduced from 1d781b6 blobs",
+            "measurements.jsonl: 450 records / 450 pids, per-pid (1,1,1); harness_commit 28382a9-dirty x300, 1d781b6 x150; provenance ids x150 each; monotone, non-overlapping",
+            "/home/user/work/onnx-mlir (1e017c9f) src/Runtime/ExecutionSession.cpp:84, 88-104, 132, 211, 222, 247"
+          ]
+        },
+        {
+          "name": "G1 correctness verify, 15 lengths (results/v3/g1/verify/verify_L*.json): run_paired_benchmark.py verify -> shapeperf.paired.verify_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/verify/verify_L0041.json ... verify_L0256.json (15 files, 30 rows)",
+            "/home/user/Shape-Perf/results/v3/g1/verify/provenance_verify.json",
+            "/home/user/work/v3/g1/verify/ (originals)"
+          ],
+          "code_version_used": "1d781b6 content for all three batches. Batch 3 (L149-256): provenance_verify.json 6759c492f20c560b, 1d781b6 clean, created 06:44:30Z. The file is overwritten on every batch (1d781b6:scripts/run_paired_benchmark.py:63; B's ':61' is wrong, line 61 reads the model output names). Batches 1-2: I recomputed provenance ids with the provenance.py:85-86 formula over the same-batch measure snapshot, with extra={'role':'g1-verify'} and compilers=[]. This gives adc92cb95bd4760e and 7c459e350be9b197, exactly the ids in the rows for L41-140 and L141-147. The same method reproduces the surviving batch-3 id 6759c492f20c560b. So the verify runs had the same source-state hashes as the timing runs, which match 1d781b6 content. A's recovery holds; B's 'likely but not recorded' is superseded.",
+          "process_creation": "The parent (1d781b6:scripts/run_paired_benchmark.py:52-95) holds an ORT InferenceSession (59) and runs the reference (73). For each (L, input), arms S8 then S1 each get a fresh exec: subprocess.run([sys.executable,'-m','shapeperf.paired','--verify-worker',spec]) (75-80), run sequentially. The parent loads no ONNX-MLIR model.",
+          "models_loaded_per_process": "From code: one ONNX-MLIR model per worker (1d781b6:shapeperf/paired.py:37), <pairs>/L*/{S8|S1}_full/model.so. There is no AA arm. The records have no pid field (checked all 30 rows), so the records cannot confirm this.",
+          "tags_passed": "None (paired.py:37 passes only shared_lib_path), so the tag is 'model'.",
+          "call_order": "verify_worker (1d781b6:shapeperf/paired.py:34-42): inputs -> load (37) -> input_signature (38) -> run (39) -> run (40) -> output_signature (41) -> savez of the first output (42). Outputs live until exit. There is no affinity or timing. The parent compares the npz files of the two processes (run_paired_benchmark.py:85-91).",
+          "co_loading": "no",
+          "interposition_risk": "No (code evidence): S8 and S1 are each loaded alone in separate processes. All 30 rows report S8_vs_S1.bitwise_identical=true. This comparison could not detect mis-binding anyway, because both arms compute the same values (docs/followup_v3_review.md section 3.2 at b1fa951).",
+          "evidence": [
+            "git show 1d781b6:scripts/run_paired_benchmark.py lines 52-95",
+            "git show 1d781b6:shapeperf/paired.py lines 27-46",
+            "recomputed verify ids from provenance_measure_2026093{0,1,2}.json -> adc92cb95bd4760e / 7c459e350be9b197 / 6759c492f20c560b",
+            "verify rows: provenance adc92cb95bd4760e L41-140, 7c459e350be9b197 L141-147, 6759c492f20c560b L149-256; no pid; 30/30 bitwise_identical"
+          ]
+        },
+        {
+          "name": "G1 check128 verify (results/v3/g1/check128/verify_L0128.json): run_paired_benchmark.py verify on an unpreserved pre-commit tree",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g1/check128/verify_L0128.json",
+            "/home/user/work/v3/check128/verify/verify_L0128.json (sha256 85c52c72..., identical)",
+            "/home/user/work/v3/check128/verify/provenance_verify.json",
+            "/home/user/work/logs/v3_check128.log"
+          ],
+          "code_version_used": "Unknown exactly. Provenance 0448533827b1553e was created 05:40:26Z at 28382a9 with a dirty tree. diff_sha256 be34a457... = sha256(git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/toolchain.py shapeperf/util.py), recomputed, so measure.py was still the 28382a9 version. untracked_sha256 e1ef902e... does not reproduce from the 1d781b6 blobs of its 7 untracked files (I get 5a56fc91...; the ebd96be blobs give the same). So at least one of run_paired_benchmark.py, paired.py, build_shape_pair.py, provenance.py, lowering_diff.py, test_lowering_diff.py or g1_lengths.json differed from every commit. 1d781b6 is only an approximation.",
+          "process_creation": "Unknown. The parent and the verify worker were untracked files with unpreserved content. The row layout (workers.S8 and workers.S1 as separate dicts with the verify_worker keys finite/input_dims/output_names/repeat_identical/static_shape_verified) matches the 1d781b6 per-arm worker design, but this does not prove it.",
+          "models_loaded_per_process": "Unknown. There is no pid in the records and the code is not preserved. The nearest version loads one model per worker: /home/user/work/v3/check128/L0128/{S8|S1}_full/model.so.",
+          "tags_passed": "No --tag at compile (results/v3/g1/check128/pair.json has 0 '--tag'; -o .../S8_full/model). The runtime tag argument is unknown for the unpreserved code; no committed v3 code passes one.",
+          "call_order": "Unknown. In the nearest version (1d781b6:shapeperf/paired.py:37-42): load -> run -> run -> savez. v3_check128.log records only the build/probe steps.",
+          "co_loading": "unknown",
+          "interposition_risk": "Unknown. The exact code and the per-process composition are not recoverable from the recorded hashes or the records.",
+          "evidence": [
+            "/home/user/work/v3/check128/verify/provenance_verify.json source fields",
+            "recomputed diff hash be34a457 (compile/toolchain/util subset); untracked hash 5a56fc91 (from 1d781b6 blobs) != recorded e1ef902e",
+            "verify_L0128.json: 2 rows, no pid, provenance_id 0448533827b1553e"
+          ]
+        },
+        {
+          "name": "G1 check128 timing and AA re-test (work dir only; reported by B in other_findings, missing from A)",
+          "result_files": [
+            "/home/user/work/v3/check128/timing/measurements.jsonl",
+            "/home/user/work/v3/check128/timing/provenance_measure_7.json",
+            "/home/user/work/v3/check128/timing_aa_test/measurements.jsonl",
+            "/home/user/work/v3/check128/timing_aa_test/provenance_measure_1.json",
+            "/home/user/work/logs/v3_measure128.log"
+          ],
+          "code_version_used": "28382a9 with a dirty tree. Provenance 8d65cb8787dc1cd0 (05:41:09Z) for timing and 69609c046a3c2d2d (05:43:59Z) for timing_aa_test. Both have diff_sha256 be34a457..., so the tracked shapeperf/measure.py was the 28382a9 version: worker_main loads one session at 28382a9:shapeperf/measure.py:100, and run_item does a fresh exec of 'shapeperf.measure --worker' (167-172, no worker_module option). The parent script run_paired_benchmark.py was untracked, and its content is unknown: the untracked hashes do not reproduce from the 1d781b6 blobs. The records carry harness_commit '28382a9...-dirty'.",
+          "process_creation": "Fresh exec per record through measure.run_item at 28382a9. The records carry the run_block fields order_in_block, plan_index and block_id. timing: 24 records, of which 16 succeeded with 16 distinct pids (1331-1457) and 8 AA failures without a pid. v3_measure128.log: 'L=128 done (4 blocks x 3 arms x 2 processes)'. timing_aa_test: 3 records, 3 pids (1533, 1538, 1539).",
+          "models_loaded_per_process": "One per process: L0128/S8_full/model.so and L0128/S1_full/model.so. The failed AA arm was L0128/S8_full/model_AA.so, a copy under another basename in the S8 directory. It failed with \"RuntimeError: Cannot load symbol: 'omQueryEntryPoints_model_aa'\", because the tag is the lowercased filename stem (ExecutionSession.cpp:88-104). The AA re-test used L0128/AA_full/model.so and succeeded.",
+          "tags_passed": "None. The tag is 'model', except for the failed model_AA.so, which got 'model_aa'.",
+          "call_order": "worker_main order (28382a9 measure.py). Record fields: warmup 2, iterations 12, cpus [3] on the successful records.",
+          "co_loading": "no",
+          "interposition_risk": "No for the successful records: each pid has one artifact. The failed AA records never loaded an entry point.",
+          "evidence": [
+            "check128/timing/measurements.jsonl: per-pid (1,1,1) x16 plus 8 pid-less runtime_error AA records, with stderr_tail 'omQueryEntryPoints_model_aa'",
+            "provenance_measure_7.json and timing_aa_test/provenance_measure_1.json: git_head 28382a9, diff be34a457",
+            "git show 28382a9:shapeperf/measure.py lines 100, 167-172"
+          ]
+        },
+        {
+          "name": "G2 single-op fresh-process timing, main run K x15 + Q x5 (results/v3/g2/timing/fresh_process.jsonl): run_subgraph_benchmark.py measure -> measure.run_block/run_item -> shapeperf.paired.subgraph_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_11.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_12.json",
+            "/home/user/work/v3/g2/timing/measurements.jsonl (sha256 c1190251..., identical)",
+            "/home/user/work/v3/run_g2_measure.sh",
+            "/home/user/work/logs/v3_g2_measure.log"
+          ],
+          "code_version_used": "K run: 675 records, provenance d148589336195b72, created 07:21:01Z. The snapshot shows ebd96be dirty with diff_sha256 6d197847... = sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py) (recomputed) and untracked []. ebd96be has no shapeperf/ or scripts/ diff from 1d781b6. So at start: eefb40d's run_subgraph_benchmark.py plus the 1d781b6 paired.py and measure.py. eefb40d (committed 07:32:57Z) also adds analysis functions to shapeperf/paired.py, so the working-tree paired.py must have been edited during the K run (records span 07:21:03-07:48:01Z). Workers exec'd after the edit imported the edited file. subgraph_worker (paired.py:59-87) is identical at both endpoints, and all 675 records have failure_type None, but intermediate edit states are unrecorded. Neither audit stated this; B came closer by noting the mid-run commit. The records keep 'ebd96be-dirty' because git_head is lru_cached in the parent (1d781b6:shapeperf/util.py:33). Q run: 225 records, provenance 16031b7969ab98af (07:48:02Z), eefb40d clean.",
+          "process_creation": "Fresh exec per record. Items carry worker_module 'shapeperf.paired' (eefb40d:scripts/run_subgraph_benchmark.py:176). run_item runs subprocess.run([sys.executable,'-m','shapeperf.paired','--worker',json]) (1d781b6:shapeperf/measure.py:170-173). '--worker' dispatches to subgraph_worker at 1d781b6:shapeperf/paired.py:155-156, which is the same code as eefb40d:shapeperf/paired.py:173-174 (both audits' line numbers are right for their commit). cmd_measure loads no model. Records: 900 records, 900 distinct pids (7504-8972), per-pid (1,1,1), sequential and non-overlapping (re-checked). 100 blocks x 9 processes (run_g2_measure.sh: --processes 3 --blocks 5).",
+          "models_loaded_per_process": "One: /home/user/work/v3/g2/{K|Q}/L{L:04d}/{S8|S1|AA}_full/model.so (record artifact roots are all 'g2'). AA is shutil.copyfile(S8) with the same basename (eefb40d:171) and is removed after each cell (187). The AA artifact_hash is copied from S8's build.json (174). The L64 files on disk still match build.json so_hash (S8 6e8faed1..., S1 01328b45...; re-checked).",
+          "tags_passed": "None. subgraph_worker passes only shared_lib_path (paired.py:71), so the tag is 'model'. Builds use '-o <dir>/model' with no --tag (ebd96be = eefb40d scripts/run_subgraph_benchmark.py:96; the ebd96be->eefb40d diff does not touch compile_arm). Build provenance 2f3da961b190f5f6 is ebd96be clean.",
+          "call_order": "subgraph_worker (paired.py:67-87): affinity -> np.load input/expected -> load (71) -> first call and exact-permutation check, untimed (72-73) -> 300 warmup calls (74-75) -> 15 reps, each timing 1000 consecutive calls as one interval (79-83). Rebinding `out` frees the previous output inside the timed interval, after the next call returns (the line-82 comment). B's and A's descriptions are compatible. Record fields: warmup 300, calls_per_sample 1000, 15 samples, cpus [3].",
+          "co_loading": "no",
+          "interposition_risk": "No. One model .so per process. E1 traced single-model processes on the same L=64 artifacts (hashes 6e8faed1/01328b45), and each executed its own compute (identity_orig I8, I1, IAA: verified_own 2/2 each; docs/followup_v3_review.md section 3.2 at b1fa951). Other lengths were not traced, but they have the same process structure.",
+          "evidence": [
+            "git show eefb40d:scripts/run_subgraph_benchmark.py lines 90-100, 155-188",
+            "git show 1d781b6:shapeperf/paired.py 59-87, 155-156; git show eefb40d:shapeperf/paired.py 59-87, 173-174; git diff 1d781b6 eefb40d -- shapeperf/paired.py adds only paired_abs_diffs/abs_summary",
+            "recomputed sha256(git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py)=6d197847... = provenance_measure_11.json diff_sha256",
+            "fresh_process.jsonl: 900/900 pids, per-pid (1,1,1); K 07:21:03-07:48:01 ebd96be-dirty, Q 07:48:02-07:51:24 eefb40d",
+            "git log: eefb40d 2026-09-29T07:32:57Z"
+          ]
+        },
+        {
+          "name": "G2 single-op fresh-process replicate: L64 plus neighbours 63/65/96/128/192 (results/v3/g2/timing/fresh_process_replicate.jsonl)",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/fresh_process_replicate.jsonl",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_21.json",
+            "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_22.json",
+            "/home/user/work/v3/g2/timing_rep/measurements.jsonl (sha256 3e7fe08c..., identical)",
+            "/home/user/work/v3/run_g2_replicate.sh",
+            "/home/user/work/logs/v3_g2_replicate.log"
+          ],
+          "code_version_used": "eefb40d, clean tree. Provenance 8902c5c865b2eafb (seed 21, 07:53:01Z, 72 records, L64 built in /home/user/work/v3/g2) and 607c265de23788f4 (seed 22, 07:54:06Z, 360 records, built in /home/user/work/v3/g2b). The g2b build provenance 88c6bbf672a9e990 is also eefb40d clean. All 432 records have harness_commit eefb40d.",
+          "process_creation": "Same path as the main run: a fresh exec per record through run_item into paired.subgraph_worker. 432 records, 432 distinct pids (9366-10050), per-pid (1,1,1). 48 blocks x 9 processes (--blocks 8: 8 blocks for L64 plus 5 lengths x 8). Span 07:53:02-08:04:57Z.",
+          "models_loaded_per_process": "One: /home/user/work/v3/g2/K/L0064/{S8,S1,AA}_full/model.so, or /home/user/work/v3/g2b/K/L{0063,0065,0096,0128,0192}/{S8,S1,AA}_full/model.so (record artifact fields). The on-disk L63/L96 S8/S1 files match build.json so_hash (re-checked).",
+          "tags_passed": "None. The tag is 'model' (paired.py:71; compile '-o <dir>/model', eefb40d:96).",
+          "call_order": "Same as the main run: 300 warmup calls, then 15 x 1000-call samples. The output is released inside each timed batch.",
+          "co_loading": "no",
+          "interposition_risk": "No. One model per process. At L64 this is backed by E1 single-model traces (verified_own). L63/65/96/128/192 were not traced.",
+          "evidence": [
+            "fresh_process_replicate.jsonl: 432/432 pids, per-pid (1,1,1); provenance 8902c5c865b2eafb x72 (g2 L64), 607c265de23788f4 x360 (g2b)",
+            "provenance_measure_21/22.json: eefb40d, dirty=false",
+            "/home/user/work/v3/run_g2_replicate.sh"
+          ]
+        },
+        {
+          "name": "G2 scale test, K L=147 (work dir only: /home/user/work/v3/g2_scale/measurements.jsonl)",
+          "result_files": [
+            "/home/user/work/v3/g2_scale/measurements.jsonl",
+            "/home/user/work/v3/g2_scale/provenance_measure_1.json"
+          ],
+          "code_version_used": "Provenance 8adb2be9af5cdb15 (07:20:43Z): ebd96be dirty, diff_sha256 6d197847... (the same as the K run), untracked []. That is ebd96be plus eefb40d's run_subgraph_benchmark.py. It ran before the paired.py edit that eefb40d contains. Records carry harness_commit ebd96be-dirty.",
+          "process_creation": "Fresh exec per record through run_item -> paired.subgraph_worker. One block: 3 records, 3 pids (7467-7469).",
+          "models_loaded_per_process": "One: /home/user/work/v3/g2/K/L0147/{S1,AA,S8}_full/model.so (record artifact fields; pids 7467 S1, 7468 AA, 7469 S8).",
+          "tags_passed": "None. The tag is 'model'.",
+          "call_order": "subgraph_worker order: first call and check, 100 warmup calls, then 5 x 200-call samples (record fields warmup 100, calls_per_sample 200, 5 samples). The output is released inside the timed batch.",
+          "co_loading": "no",
+          "interposition_risk": "No. One model per process.",
+          "evidence": [
+            "g2_scale/measurements.jsonl: 3 records, 3 pids, per-pid (1,1,1)",
+            "provenance_measure_1.json diff_sha256 6d197847..."
+          ]
+        },
+        {
+          "name": "G2 in-process interleaved scan (results/v3/g2/timing/interleaved_in_process_test.jsonl): run_subgraph_benchmark.py scan -> shapeperf.paired.subgraph_pair_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/timing/interleaved_in_process_test.jsonl",
+            "/home/user/work/v3/g2_scan_test/measurements.jsonl (sha256 829276ab..., identical)",
+            "/home/user/work/v3/g2_scan_test/provenance_scan_5.json (not copied into results/v3)"
+          ],
+          "code_version_used": "Unknown and unpreserved. Provenance 01b2b25b4549fa31 (08:06:01Z): eefb40d dirty, diff_sha256 4679d467..., untracked []. So scripts/diag_subgraph_context.py, record_g0_v3.py and tests/test_paired.py, which are new in dd29e19, did not exist yet. I re-checked every subset of up to 6 tracked changed files (README, design_amendment, STATUS_v3, protocol_v3.json, run_subgraph_benchmark.py, paired.py, ...) for dd29e19, caeb079 and ade4f11: none reproduces 4679d467. dd29e19 is an approximation. The records' 13-key set and the per-pid arm order S8,S1,AA match dd29e19 cmd_scan:226-230 and the samples-dict order (paired.py:113-115). Records carry no harness_commit, artifact, artifact_hash, calls or unix_time.",
+          "process_creation": "(dd29e19 approximation) One fresh exec per block: subprocess.run([sys.executable,'-m','shapeperf.paired','--pair-worker',json(spec)]) (dd29e19:scripts/run_subgraph_benchmark.py:217-218), run sequentially. The parent loads no model. Records: 27 records, 9 distinct pids: 10099-10103 and 10107-10110 (B's exact list; A's '10099-10110' is only the range). Each pid has 3 records (S8, S1, AA) sharing one block_id, 3 pids each for L147, L256 and L64.",
+          "models_loaded_per_process": "Three model .so files per process, all named model.so. They are loaded in spec dict order S8 -> S1 -> AA (dd29e19:scripts/run_subgraph_benchmark.py:207-212, 214; dd29e19:shapeperf/paired.py:105). The built dir is not recorded. The only surviving K/L0064, L0147 and L0256 cells are in /home/user/work/v3/g2/K (g2b/K has L0063/65/96/128/192 only).",
+          "tags_passed": "None (dd29e19 paired.py:105 om(shared_lib_path=path)). All three sessions get tag 'model' and entry run_main_graph_model.",
+          "call_order": "(dd29e19 approximation) Affinity, then load S8, S1, AA (all dlopen'ed RTLD_LAZY|RTLD_GLOBAL before any call). Then, per arm in load order, a first call with the exact check followed by warmup_calls calls (107-111), so S8 is called first. Then rounds, each a seeded permutation of the 3 arms (119), with `calls` calls timed per sample (120-125). 12 samples per arm implies rounds=12. calls and warmup_calls are not recorded. `out` is shared across arms, so each timed batch begins by freeing the previous arm's output. block_id is created after the worker exits (dd29e19:219), so the block_id times 08:06:04-08:06:29Z are block END times (a correction to B).",
+          "co_loading": "yes",
+          "interposition_risk": "Yes, and observed at L=64 by a re-run. E1 case SCAN-S8-S1-AA reloaded the same L64 artifacts (sha 6e8faed1 and 01328b45, the same as v3 build.json) in the scan's S8 -> S1 -> AA order. gdb plus LD_DEBUG (lazy and BIND_NOW) show the S1 and AA calls executing S8's compute function: verified_other 4/4, and S8 verified_own 2/2 (identity_table.json, unchanged between b1fa951, eebe88a and 1cd40fa). This was traced in new processes, not in the original 08:06 processes, and the PyRuntime hash at v3 time is not recorded. Record pattern at L64: scan S8 27.59, S1 27.30, AA 27.61 us/call vs fresh_process S8 27.86, S1 18.98, AA 28.39 (re-computed). At L147/L256 the mechanism is present: every S8/S1 .so has GLOBAL DEFAULT entry, ciface and compute symbols, a JUMP_SLOT for _mlir_ciface_main_graph_model, and no FLAGS/BIND_NOW/SYMBOLIC (re-checked with readelf). These lengths were not traced, and neither instrument shows an S8/S1 gap there. exact_permutation=true cannot detect mis-binding.",
+          "evidence": [
+            "/home/user/work/v3/g2_scan_test/provenance_scan_5.json",
+            "git show dd29e19:shapeperf/paired.py 90-127, 213-214; git show dd29e19:scripts/run_subgraph_benchmark.py 191-233",
+            "interleaved_in_process_test.jsonl: 9 pids x {S8,S1,AA}; L64 means computed above",
+            "git show b1fa951:results/v3_followup/e1/identity_orig/identity_table.json (cell /home/user/work/v3/g2/K/L0064; SCAN-S8-S1-AA rows)",
+            "readelf -rW/-dW/--dyn-syms on g2/K/L0147, L0256 S8/S1 model.so"
+          ]
+        },
+        {
+          "name": "G2 diagnostics, co-loaded variants: interleaved, blocked_S1_then_S8, blocked_S8_then_S1 (context_L64_default.json) and load_X_Y__time_Z (loadorder_factorial_L63/L64/L96.json); scripts/diag_subgraph_context.py -> subgraph_pair_worker",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json (= /home/user/work/v3/g2/diag_context_L64.json, 08:07:37Z, sha256 2c17311e...)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json (= diag_loadorder_L63.json, 08:10:12Z, 5782f90e...)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L64.json (= diag_loadorder_L64.json, 08:09:28Z, d2d83430...)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json (= diag_loadorder_L96.json, 08:10:40Z, 6dafbe05...)"
+          ],
+          "code_version_used": "Uncommitted at run time. The files predate dd29e19 (08:21:56Z), and at 08:06:01Z diag_subgraph_context.py did not exist (scan provenance untracked []). The files record no provenance, commit, pid, timestamp, artifact path or built dir. context_L64_default.json has no 'extra_env' key, while dd29e19:scripts/diag_subgraph_context.py:68 always writes one, so that file came from an earlier, unpreserved revision. The loadorder files have extra_env [], consistent with dd29e19 but not proven byte-identical. dd29e19 is only an approximation.",
+          "process_creation": "(dd29e19 approximation) One fresh exec per (block, variant), with the variant order randomized per block: subprocess.run([sys.executable,'-m','shapeperf.paired','--pair-worker',spec]) (dd29e19 diag:53-62). The parent imports only numpy and shapeperf.util and loads no model.",
+          "models_loaded_per_process": "Two model.so files in the co-loaded variants, in dd29e19 VARIANTS order (diag:26-31): interleaved [S1,S8]; blocked_S1_then_S8 [S1,S8]; blocked_S8_then_S1 [S8,S1]; load_S1_S8__* [S1,S8]; load_S8_S1__* [S8,S1]. Process counts come from blocks x variants (no pid is recorded): context default 15 of 25 two-library processes; factorial L64 24 of 24 (6 blocks x 4 variants); L63 and L96 20 of 30 each. For context_L64_default (the earlier revision), the [S1,S8] order of 'interleaved' comes only from dd29e19 code; the blocked variants carry their order in their names. The built dir is not recorded. L0064 exists only in /home/user/work/v3/g2/K, and L0063/L0096 only in /home/user/work/v3/g2b/K.",
+          "tags_passed": "None (dd29e19 paired.py:105). Both sessions use tag 'model' and dlsym 'run_main_graph_model' on their own handle.",
+          "call_order": "(dd29e19) Both libraries are dlopen'ed first (105). Then each arm, in LOAD order, gets a first call and 200 warmup calls, including arms that are not timed (107-111). Then 12 rounds x 500 calls, 'random' or 'blocked', or only the timed arm for load_*__time_X (113-125; diag:59; file fields calls 500, rounds 12). `out` is shared across arms and released inside the timed batch. In v3 the load order equals the first-call order. E1 later separated the two (see interposition_risk).",
+          "co_loading": "yes",
+          "interposition_risk": "Yes, and observed at L=64 by re-runs on the same artifacts. E1 cases C18-1, C18-8, SEQ18 (load S1 then S8): requested S8 executed S1's compute, verified_other 5/5. Cases C81-1, C81-8, SEQ81 (load S8 then S1): requested S1 executed S8's compute, 5/5. The first-loaded arm ran its own code (6/6), regardless of which arm was called first (identity_table.json at b1fa951/1cd40fa). L63 and L96 were not traced (docs/followup_v3_review.md section 0 item 5 at b1fa951); their S8/S1 .so files have the same GLOBAL DEFAULT symbols and ciface JUMP_SLOT, with no BIND_NOW/SYMBOLIC (re-checked). Record pattern (re-computed): context L64 interleaved S1 19.65/S8 19.71, blocked_S1_then_S8 18.73/18.37, blocked_S8_then_S1 27.81/27.62, vs alone S1 19.08/S8 27.38. Factorial L64: S1-first 19.03/20.36, S8-first 27.80/29.20. L63: alone 17.75/30.18, S1-first 18.35/18.54, S8-first 28.62/30.36. L96: alone 63.36/70.11, S1-first 62.23/65.47 (sd 6.07), S8-first 68.97/70.93. Both audits say the timing 'follows the first-loaded arm', but that is only approximate: at L96 the S1-first/time-S8 value sits between the alone levels, and at L64 the timed S8 is 1.3-1.4 us above the timed S1 in both load orders.",
+          "evidence": [
+            "git show dd29e19:scripts/diag_subgraph_context.py lines 26-31, 47-69",
+            "git show dd29e19:shapeperf/paired.py lines 90-127",
+            "diagnostics JSON keys and summaries (re-read); ls --full-time /home/user/work/v3/g2/diag_*.json",
+            "git show b1fa951:results/v3_followup/e1/identity_orig/identity_table.json cases C18-*, C81-*, SEQ18, SEQ81",
+            "readelf on g2b/K/L0063, g2b/K/L0096, g2/K/L0064 S8/S1 model.so (sha256 = build.json so_hash)"
+          ]
+        },
+        {
+          "name": "G2 diagnostics, single-arm variants (S1_alone, S8_alone) in context_L64_default.json, the two GLIBC_TUNABLES context files and loadorder_factorial_L63/L96.json",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_default.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_16MiB.json (= /home/user/work/v3/g2/diag_context_L64_d281d5.json, a9612f96...)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/context_L64_malloc_mmap_threshold_and_top_pad_16MiB.json (= diag_context_L64_71beb4.json, 60c208d5...)",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L63.json",
+            "/home/user/Shape-Perf/results/v3/g2/diagnostics/loadorder_factorial_L96.json"
+          ],
+          "code_version_used": "The same uncommitted diag revisions as the co-loaded entry, with dd29e19 as the approximation. The malloc files record extra_env ['GLIBC_TUNABLES=glibc.malloc.mmap_threshold=16777216'] and [...':glibc.malloc.top_pad=16777216'], and contain only S1_alone and S8_alone (n=5 each).",
+          "process_creation": "One fresh exec per (block, variant) via python -m shapeperf.paired --pair-worker (dd29e19 diag:61-62). --env is applied to the worker environment (diag:48-49).",
+          "models_loaded_per_process": "One: S1_alone=(['S1'],None,None) or S8_alone=(['S8'],None,None) (dd29e19 diag:26), i.e. <built>/K/L{L}/{arm}_full/model.so. The built dir is not recorded.",
+          "tags_passed": "None. The tag is 'model'.",
+          "call_order": "Load -> first call and check -> 200 warmup calls -> 12 rounds x 500 calls. The output is released inside the timed batch (dd29e19 paired.py:105-125).",
+          "co_loading": "no",
+          "interposition_risk": "No. One model per process. The GLIBC_TUNABLES runs change the environment, not the binding: mmap_threshold-only gives S1 35.79/S8 45.71 us, vs 19.08/27.38 by default and 18.83/27.91 with top_pad. That environment effect is separate from interposition.",
+          "evidence": [
+            "git show dd29e19:scripts/diag_subgraph_context.py lines 26, 48-49, 61-62",
+            "context_L64_malloc_*.json extra_env and summaries (re-read)"
+          ]
+        },
+        {
+          "name": "Direction probe per-op profile (results/v3/direction_probe/): failed diag_profile.py worker plus scripts/run_instrumented.py, both appending to one instrumentation log",
+          "result_files": [
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L64.txt",
+            "/home/user/Shape-Perf/results/v3/direction_probe/op_profile_L256.txt",
+            "/home/user/Shape-Perf/results/v3/direction_probe/summary.json",
+            "/home/user/work/v3/profile/L64/{runtime.log,run_stdout.txt,build/compile.json}",
+            "/home/user/work/v3/profile/L256/{runtime.log,run_stdout.txt,build/compile.json}",
+            "/home/user/work/logs/v3_profile.log"
+          ],
+          "code_version_used": "No provenance was recorded. scripts/run_instrumented.py first appears in ade4f11 (08:40:25Z), after run_stdout.txt and runtime.log were last written (08:36:55Z for L64, 08:38:25Z for L256), so ade4f11 is an approximation. scripts/diag_profile.py has not changed since 28382a9 (git log), so A's '28382a9 version' and B's 'ade4f11:scripts/diag_profile.py' are the same content. measure.py is unchanged between 1d781b6 and ade4f11.",
+          "process_creation": "Two processes per length wrote the data in runtime.log. (1) The diag_profile.py attempt (v3_profile.log '== L=64 08:34:48', '== L=256 08:36:20') set ONNX_MLIR_INSTRUMENT_FILE=<out>/runtime.log (diag_profile.py:45-46) and ran a fresh-exec worker through measure.run_item with cpus None (47-48; measure.py:170). That worker completed its runs: the parent's JSONDecodeError 'Extra data: line 1 column 14 (char 13)' (measure.py:178) is the 13-character instrumentation prefix '1.482197e-323' that also ends every run_stdout.txt line. (2) run_instrumented.py ran in-process with affinity {3} (ade4f11:19-27). The runtime opens the log in append mode (onnx-mlir src/Runtime/OMInstrument.c:292 fopen(fileName, \"a\")). runtime.log holds 14 '==START-REPORT==' sets for both L64 and L256, run_stdout.txt has 7 lines, and op_profile_L*.txt line 2 reads 'Gather stats from 14 measurement sets with 2 warmup; keep inner 6'. The 7+7 split is inferred: diag_profile's --warmup/--iterations are not logged. B is right. A's 'in-process, no child processes', 'make-report -w 2 drops the warmup sets' and 'that attempt produced no timing results' are wrong or incomplete. summary.json's '2 warmup + 5 iterations ... CPU 3' does not describe the 14 sets actually summarized. The ORT reference has no script or raw records.",
+          "models_loaded_per_process": "One per process: /home/user/work/v3/profile/L{64,256}/build/model.so (artifact_hash aa0055fc... and 3ed7b881...). This is the diag_profile flagset (-O3 --march=x86-64 --mcpu=emeraldrapids --profile-ir-with-sig=Onnx), compiled by the onnx-mlir binary with sha e34bcd6a... (= /home/user/work/variants/orig/bin/onnx-mlir, the S8 policy). It is not S8, S1 or AA as measured. The diag_profile worker used compile.json's artifact_path. The run_instrumented argv is not recorded; the .so was not rebuilt after 08:36:16 (L64) or 08:37:34 (L256).",
+          "tags_passed": "None (run_instrumented.py:25 and measure.py:100 pass only shared_lib_path), so the tag is 'model'. The compile command has no --tag.",
+          "call_order": "run_instrumented: affinity {3} -> inputs -> load -> warm+it calls with results discarded (ade4f11:20-27; 7 stdout lines imply 7 calls). diag_profile worker: worker_main order, with W/N unknown and no explicit affinity. Each ==START-REPORT== set is one run. make-report was run with -w 2 over all 14 sets, so the second process's warmups are not excluded by -w (they may or may not be trimmed by 'keep inner 6').",
+          "co_loading": "no",
+          "interposition_risk": "No. Each process loads one instrumented .so, and this instrument makes no S8/S1 comparison. It is exposed instead to mixing two processes with different CPU pinning in one per-op profile.",
+          "evidence": [
+            "git show ade4f11:scripts/run_instrumented.py 1-27; git show ade4f11:scripts/diag_profile.py 38-56",
+            "/home/user/work/onnx-mlir src/Runtime/OMInstrument.c:287-298",
+            "grep -c '==START-REPORT==' runtime.log = 14 (L64, L256); run_stdout.txt 7 lines each; op_profile_L64.txt/L256.txt line 2",
+            "/home/user/work/logs/v3_profile.log JSONDecodeError at measure.py:178 for L=64 and L=256",
+            "compile.json artifact_hash/compiler_bin_sha256; sha256 variants/orig/bin/onnx-mlir = e34bcd6a..."
+          ]
+        }
+      ],
+      "disagreements": [
+        "Repository state: the task says HEAD is ade4f11. During this audit HEAD moved to b1fa951 and then to 1cd40fa (commits 1865924, b1fa951, 14674fa, eebe88a, 1cd40fa, 2026-09-30T01:43-02:14Z). Another session is committing concurrently. A's 'working tree dirty, uncommitted E1-C tag change, untracked results/v3_followup/' is stale: those files are now committed. git diff ade4f11 HEAD -- results/v3 is empty, so no v3 raw data changed.",
+        "Both audits say co-loaded interposition is mechanism-only, with no binding trace. That is superseded. results/v3_followup/e1/identity_orig/identity_table.json (b1fa951; the same verdicts after the rerun in eebe88a/1cd40fa) traced the v3 L=64 artifacts (sha 6e8faed1/01328b45) in new processes with gdb and LD_DEBUG (lazy and BIND_NOW). Result: 21 verified_own, 15 verified_other, 0 unresolved. Every later-loaded arm ran the first-loaded arm's compute, for both load orders and both first-call orders, and for the scan's S8->S1->AA order. This also settles A's point that load order and first-call order were never separated. It was not traced at L63/L96/L147/L256 or in the original v3 processes, and the PyRuntime hash at v3 time is unrecorded.",
+        "G1 verify batches 1-2 code version: A has the better evidence. A said the provenance ids were recovered by recomputation; B said 'likely but not recorded'. I recomputed adc92cb95bd4760e and 7c459e350be9b197 from the same-batch measure snapshots with extra={'role':'g1-verify'}. The same method reproduces the surviving batch-3 id 6759c492f20c560b.",
+        "G1 verify provenance overwrite line: A has it right. The freeze of provenance_verify.json is at 1d781b6:scripts/run_paired_benchmark.py:63, not :61 as B says.",
+        "G1 timing code identity: A is more accurate. B states every record ran code byte-identical to 1d781b6. The evidence is a start-of-run snapshot only (run_paired_benchmark.py:104), and workers re-import from the working tree, so mid-run edits cannot be excluded. B's 'measure.py has not changed after 1d781b6' is now false (1865924 changed it), although that change came after all v3 runs.",
+        "G1 timing output release: A is more precise. The previous output is freed at 1d781b6:shapeperf/measure.py:129, after stop, outside the timed interval. B's 'outputs live only as long as the process' is loose, and its cited line range 106-127 is imprecise.",
+        "G2 main K run code: neither audit is complete. A says paired.py was 'the ebd96be version'. B notes that eefb40d was committed at 07:32:57Z, in the middle of the K run (07:21:03-07:48:01Z). Since eefb40d adds functions to shapeperf/paired.py and the 07:21:01Z snapshot diff covered only run_subgraph_benchmark.py, paired.py was edited in the working tree during the run. Later workers imported the edited file. subgraph_worker is identical at both endpoints and all 675 records succeeded, but intermediate states are unrecorded. B is closer.",
+        "G2 fresh-process dispatch line: no real conflict. A's 1d781b6:shapeperf/paired.py:155-156 and B's eefb40d:shapeperf/paired.py:173(-174) are the same code at different commits.",
+        "G2 output release: no real conflict. A's 'freed inside the timed interval' and B's 'kept alive until the next call returns' describe the same rebinding at paired.py:82. A states the timing consequence.",
+        "Scan pids: B is precise. There are 9 pids, 10099-10103 and 10107-10110; A's '10099-10110' is only the range. Both are consistent with 3 arms per pid.",
+        "Scan block times: B says blocks ran 08:06:04-08:06:29Z by block_id. In dd29e19 the block_id is created after the worker exits (scripts/run_subgraph_benchmark.py:219), so these are block end times. Neither audit noted this.",
+        "Scan code search: B searched more widely (dd29e19, caeb079, ade4f11); A searched only dd29e19. I re-checked all subsets of up to 6 tracked changed files at all three commits: none reproduces diff_sha256 4679d467. Both conclude unknown, and that holds.",
+        "Co-loaded diag pattern: both audits say the timing follows the first-loaded arm. That is only approximate. At L96, S1-first with S8 timed gives 65.47 +- 6.07 us, between S1 alone (63.36) and S8 alone (70.11). At L64 the timed S8 is 1.3-1.4 us above the timed S1 in both load orders (19.03 vs 20.36; 27.80 vs 29.20). Neither audit mentions these residuals.",
+        "context_L64_default 'interleaved' load order: both audits take [S1,S8] from dd29e19 VARIANTS, but the file came from an earlier, unpreserved revision (it has no extra_env key). Only the blocked variants carry their order in their names. The order of 'interleaved' in that file is therefore code-inferred, not recorded.",
+        "Direction probe: B has the better evidence. The data summarized in op_profile_L*.txt comes from 14 instrumentation sets written by two processes: the failed diag_profile.py fresh-exec worker (cpus None, ONNX_MLIR_INSTRUMENT_FILE=<out>/runtime.log, diag_profile.py:45-48) and run_instrumented.py (CPU 3). Evidence: fopen in append mode at OMInstrument.c:292; 14 START-REPORT sets but 7 stdout lines; op_profile line 2 says 14 sets. The JSONDecodeError at char 13 matches the 13-character '1.482197e-323' stdout prefix, which shows that the worker completed its runs. A's in-process-only description, 'make-report -w 2 drops the warmup sets', and 'that attempt produced no timing results' are wrong or incomplete.",
+        "Instrument coverage: B reports the check128 timing and AA re-test only in other_findings, and A omits them. They are one-model-per-exec instruments: 16 successful records with 16 pids, plus 8 pid-less AA failures on S8_full/model_AA.so with 'omQueryEntryPoints_model_aa', because the tag is the lowercased filename stem (ExecutionSession.cpp:88-104). The tracked measure.py was the 28382a9 version (diff be34a457 excludes it). I added them as a separate entry.",
+        "Minor, no conflict: A's claim that the G1 BERT .so files were deleted is confirmed (no .so under /home/user/work/v3/g1; pilot log lines 43/87/131). B's claim that the pilot-log 'provenance <id>' lines are pair/build ids is confirmed (L0041 ebc443807748cd24, L0141 27df5131bfe8bab4, L0149 efe05ca1411a3e35). All repo result copies are byte-identical to the work originals (re-checked sha256)."
+      ]
+    },
+    "provenance": {
+      "hash_algorithm": "shapeperf/provenance.py was added in 1d781b6 and never changed after that. `git log -- shapeperf/provenance.py` lists only 1d781b6, and the working tree at b1fa951 is identical. The copy that ran as an untracked file before 1d781b6 (Write tool at 05:35:09) is byte-identical to 1d781b6: the sandbox replay ends equal to 1d781b6 for all 20 files.\n\nAlgorithm, citing provenance.py@1d781b6:\n- :25-30 _git() runs `git -C REPO_ROOT ...` with capture_output=True, text=True and check=True. stdout is decoded with the locale and universal newlines. On any exception it returns None.\n- :35 diff = output of `git diff HEAD`, which covers staged and unstaged tracked changes but not untracked files.\n- :45 diff_sha256 = sha256((diff or \"\").encode()).hexdigest(). A clean tree therefore gives e3b0c442...b855, the hash of the empty string.\n- :36 untracked = sorted(output of `git ls-files --others --exclude-standard`, split on whitespace). These are non-ignored untracked files, listed individually.\n- :37-42 builds one running sha256. For each file f in that sorted order it adds f.encode() + b\"\\0\" + the raw bytes of REPO_ROOT/f, with no length prefix or separator between files. An unreadable file adds f + b\"\\0unreadable\" instead.\n- :46 untracked_sha256 = that digest; the file list is also stored as untracked_files.\n- :44 dirty = bool(diff) or bool(untracked).\n- :85-86 provenance_id = sha256(json.dumps(snapshot minus created_unix, sort_keys=True, default=str))[:16], taken over source, dependencies, host, compilers and extra.\n\nI checked this by recomputing provenance_id for all 17 provenance JSONs under /home/user/work/v3 from their own bodies; all 17 match. Gitignored files (.gitignore at HEAD: data/artifacts/, third_party/, results/**/*.so, __pycache__/, census/*) are covered by neither hash.",
+      "runs": [
+        {
+          "provenance_file": "/home/user/work/v3/check128/provenance.json (named provenance.json, not provenance_*.json; the check128 build)",
+          "provenance_id": "2bec7a2a3dea0eb0",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "be34a457f6b9959802ef8f3aebe8fdbd336af060fcbddeae4129c393677f1106",
+          "untracked_sha256": "5c31ebe881ba8c7f008e994dcd1d31ade57ee16027f593c243343cd63dd95aee",
+          "recovered": "yes",
+          "how": "Frozen at 05:38:01. Tracked diff: `git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/toolchain.py shapeperf/util.py` hashes to be34a457 (MATCH); measure.py is still at 28382a9. Untracked files: rebuilt by replaying the session transcript /root/.claude/projects/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78.jsonl in the sandbox (script rp/replay1.py), recomputed hash 5c31ebe8 (MATCH). The 5 files match 1d781b6 except scripts/build_shape_pair.py, which is the Write-tool version from 05:37:52 (transcript record 3503) before the 05:40:14 edit (record 3547). Snapshot: rp/snap_check128_build_0538; diff: rp/diff_check128_build_0538.patch. rp = /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/e0_prov/rp."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/check128/verify/provenance_verify.json",
+          "provenance_id": "0448533827b1553e",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "be34a457f6b9959802ef8f3aebe8fdbd336af060fcbddeae4129c393677f1106",
+          "untracked_sha256": "e1ef902ec7e90b9cdaefb440999e4b147d1924407e435136d5cc3129fcc05296",
+          "recovered": "yes",
+          "how": "Frozen at 05:40:26. Tracked diff is the same as the check128 build (MATCH). Transcript replay after records 3526 (Write paired.py), 3545 (Write run_paired_benchmark.py) and 3547 (edit build_shape_pair.py) gives untracked hash e1ef902e (MATCH). Files that differ from 1d781b6: shapeperf/paired.py (still the 05:39:19 Write, without PROCESS_STATS and subgraph_worker), scripts/run_paired_benchmark.py (05:40:10 Write; AA arm named model_AA.so), and measure.py (still at 28382a9). Snapshot: rp/snap_check128_verify_0540."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/check128/timing/provenance_measure_7.json",
+          "provenance_id": "8d65cb8787dc1cd0",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "be34a457f6b9959802ef8f3aebe8fdbd336af060fcbddeae4129c393677f1106",
+          "untracked_sha256": "8add39668e675dcf2756afc7cece46e9da8b3132884fee61d49bb2c5a5ab46a9",
+          "recovered": "yes",
+          "how": "Frozen at 05:41:09. Tracked diff MATCH. Replay adds analysis/specialization_effects.py: the heredoc of record 3564 (the pyflakes failure in that command stopped the run it would have started), then the `sed -i` of record 3571, which removed two imports and launched this run. Untracked hash 8add3966 (MATCH). The AA arm used the basename model_AA.so (snap run_paired_benchmark.py:112 `aa = src.with_name(\"model_AA.so\")`). All 8 AA records in /home/user/work/v3/check128/timing/measurements.jsonl failed with runtime_error \"Cannot load symbol: 'omQueryEntryPoints_model_aa'\", which is consistent with the entry symbol being derived from the file name. Snapshot: rp/snap_check128_timing7_0541."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/check128/timing_aa_test/provenance_measure_1.json",
+          "provenance_id": "69609c046a3c2d2d",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "be34a457f6b9959802ef8f3aebe8fdbd336af060fcbddeae4129c393677f1106",
+          "untracked_sha256": "f7c54f2c8aeda8510202c4758d9ab893206ef13361dcb68e6d81b7fd1a3291f3",
+          "recovered": "yes",
+          "how": "Frozen at 05:43:59. Tracked diff MATCH. Replay adds:\n- the record 3577 copies: docs/research_plan_v3.md from /root/.claude/uploads/.../ee5ee0d5-...20260929.md (sha256 d1daa11c, equal to 1d781b6), and patches/transpose_unroll_cap1.patch from scratchpad/transpose_unroll_cap1.patch (sha256 3e1b6f5a, equal to 1d781b6);\n- record 3593 (Write design_amendment.md);\n- record 3627 (edits to run_paired_benchmark.py, paired.py and specialization_effects.py, run before the measurement in the same command).\n\nUntracked hash f7c54f2c (MATCH). Only shapeperf/paired.py (no subgraph_worker yet) and measure.py (28382a9) differ from 1d781b6. Snapshot: rp/snap_check128_aa1_0543."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g1/timing/provenance_measure_20260930.json",
+          "provenance_id": "eddede38ea3f30cf",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "e5c331d56c636364d0e036100c74d1fa4b19d78282f167ae316a2ee93842994e",
+          "recovered": "yes",
+          "how": "Frozen at 05:51:10. Recovered from git alone: `git diff 28382a9 1d781b6 -- shapeperf/compile.py shapeperf/measure.py shapeperf/toolchain.py shapeperf/util.py` hashes to db0c588f (MATCH). All 15 listed untracked files at their 1d781b6 content (`git show 1d781b6:<f>`) hash to e5c331d5 (MATCH), and the transcript replay agrees. Code state = the 1d781b6 tree minus scripts/collect_lowering_trace.py, which was not written until 05:53:52."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g1/timing/provenance_measure_20260931.json",
+          "provenance_id": "d4d013682baf24a6",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "be4dd716102fb8f65957db998fd8eed8a3b6771767a8841508de225b107bb088",
+          "recovered": "yes",
+          "how": "Frozen at 06:13:39. Tracked diff is the same 4-file diff (MATCH). All 16 untracked files at 1d781b6 content hash to be4dd716 (MATCH). Code state = exactly the non-ignored tree of 1d781b6, which was committed at 06:29:26 with no content change."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g1/timing/provenance_measure_20260932.json",
+          "provenance_id": "c6c679c2902fad04",
+          "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at 1d781b6: both hashes are sha256 of the empty input and untracked_files is []."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g1/verify/provenance_verify.json",
+          "provenance_id": "6759c492f20c560b",
+          "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at 1d781b6. This is the batch-3 verify; the batch-1 and batch-2 verify provenances that used to be at this path were overwritten (see the reconstructed entries)."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g1/pairs/provenance.json (named provenance.json; batch-3 build)",
+          "provenance_id": "efe05ca1411a3e35",
+          "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at 1d781b6, frozen at 06:39:02. It overwrote the batch-1 and batch-2 build provenances (see the reconstructed entries). /home/user/Shape-Perf/results/v3/g1/pairs/provenance.json is byte-identical (cmp)."
+        },
+        {
+          "provenance_file": "(overwritten; was /home/user/work/v3/g1/pairs/provenance.json) g1 batch-1 build",
+          "provenance_id": "ebc443807748cd24",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "be34a457f6b9959802ef8f3aebe8fdbd336af060fcbddeae4129c393677f1106",
+          "untracked_sha256": "3737a52840b8e2e116d4532ca74a872cccfb167fe6c2ac7f89953b3189b4367f",
+          "recovered": "yes",
+          "how": "The id is referenced by results/v3/g1/pairs/L0041..L0140/pair.json and appears in /home/user/work/logs/v3_g1_pilot.log:2 ('provenance ebc443807748cd24 dirty', batch 1 at 05:45:34). I rebuilt the frozen body (rp/replay3.py):\n- source = the replay state just after record 3644 (run_g1_pilot.sh created, 05:45:33) and before record 3659: the 11 files of the aa_1 state plus scripts/run_g1_pilot.sh, tracked diff be34a457;\n- dependencies, host and compilers copied from the neighbouring runs, which are identical in all 17 files;\n- extra = {role: g1-pair-build, lengths: [41, 64, 100, 124, 140]}.\n\nsha256[:16] of this body = ebc443807748cd24 (MATCH). The diff and untracked hashes above are recomputed, not read from a file."
+        },
+        {
+          "provenance_file": "(overwritten; was /home/user/work/v3/g1/verify/provenance_verify.json) g1 batch-1 verify",
+          "provenance_id": "adc92cb95bd4760e",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "e5c331d56c636364d0e036100c74d1fa4b19d78282f167ae316a2ee93842994e",
+          "recovered": "yes",
+          "how": "The id is referenced by results/v3/g1/verify/verify_L0041..L0140.json. Reconstructed body with extra {role: g1-verify} and compilers []. It matches only the state after record 3695 (05:48:46), which is the same code state as g1 run 20260930: sha256[:16] = adc92cb95bd4760e (MATCH). The exact freeze time is unknown; it lies between 05:48:46 and 05:51:10."
+        },
+        {
+          "provenance_file": "(overwritten; was /home/user/work/v3/g1/pairs/provenance.json) g1 batch-2 build",
+          "provenance_id": "27df5131bfe8bab4",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "be4dd716102fb8f65957db998fd8eed8a3b6771767a8841508de225b107bb088",
+          "recovered": "yes",
+          "how": "The id is referenced by results/v3/g1/pairs/L0141..L0147/pair.json and v3_g1_pilot.log:46 (batch 2 at 06:07:29). Reconstructed body with extra {role: g1-pair-build, lengths: [141, 142, 144, 145, 147]} and the build compilers list, over the 1d781b6-equivalent state: MATCH."
+        },
+        {
+          "provenance_file": "(overwritten; was /home/user/work/v3/g1/verify/provenance_verify.json) g1 batch-2 verify",
+          "provenance_id": "7c459e350be9b197",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "be4dd716102fb8f65957db998fd8eed8a3b6771767a8841508de225b107bb088",
+          "recovered": "yes",
+          "how": "The id is referenced by results/v3/g1/verify/verify_L0141..L0147.json. Reconstructed body with extra {role: g1-verify} and compilers [] over the 1d781b6-equivalent state: MATCH. The freeze time is unknown; it lies between 06:07:29 and 06:13:39."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2/provenance_build.json",
+          "provenance_id": "2f3da961b190f5f6",
+          "git_head": "ebd96be60af64a1684203522875bf66b955b7541",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at ebd96be."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2_scale/provenance_measure_1.json",
+          "provenance_id": "8adb2be9af5cdb15",
+          "git_head": "ebd96be60af64a1684203522875bf66b955b7541",
+          "dirty": true,
+          "diff_sha256": "6d197847772bdf2eb883911f8e8a50ac866c528caf7c97ff5e90419ca9352a0a",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "yes",
+          "how": "Frozen at 07:20:43. Recovered from git alone: `git diff ebd96be eefb40d -- scripts/run_subgraph_benchmark.py` hashes to 6d197847 (MATCH), and it is the only match among 288 combinations of committed versions of the 5 tracked files that change later. Replaying transcript record 3916 (07:20:41) on ebd96be in a scratch clone gives the same hash (rp/replay2.py). Code state = ebd96be with scripts/run_subgraph_benchmark.py at its eefb40d content (--built option); there are no untracked files."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2/timing/provenance_measure_11.json",
+          "provenance_id": "d148589336195b72",
+          "git_head": "ebd96be60af64a1684203522875bf66b955b7541",
+          "dirty": true,
+          "diff_sha256": "6d197847772bdf2eb883911f8e8a50ac866c528caf7c97ff5e90419ca9352a0a",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "yes",
+          "how": "Frozen at 07:21:01, in the same state as g2_scale (MATCH by both methods). Caveat: this is freeze-time only. Record 3929 edited shapeperf/paired.py at 07:21:55, during the K run. Workers launched afterwards with `-m shapeperf.paired --worker` imported that version. The change adds only paired_abs_diffs and abs_summary (git diff ebd96be eefb40d -- shapeperf/paired.py, one hunk at @@ -113); subgraph_worker is unchanged at paired.py:59 in both commits."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2/timing/provenance_measure_12.json",
+          "provenance_id": "16031b7969ab98af",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at eefb40d."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2/timing_rep/provenance_measure_21.json",
+          "provenance_id": "8902c5c865b2eafb",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at eefb40d. There were no tracked-file edits between 07:32:56 and 08:05:59, and the replicate log ends at 08:04:57 (mtime of /home/user/work/logs/v3_g2_replicate.log)."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2/timing_rep/provenance_measure_22.json",
+          "provenance_id": "607c265de23788f4",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at eefb40d."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2b/provenance_build.json",
+          "provenance_id": "88c6bbf672a9e990",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Clean at eefb40d. There is no copy under results/v3; the id is referenced by results/v3/g2/build_summary_g2b.json."
+        },
+        {
+          "provenance_file": "/home/user/work/v3/g2_scan_test/provenance_scan_5.json",
+          "provenance_id": "01b2b25b4549fa31",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": true,
+          "diff_sha256": "4679d46750a493daa86dfdb41d56c81baed97cb3f11e151ba13acdbf233c33e2",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "yes",
+          "how": "Frozen at 08:06:01. No combination of committed versions matches (162 combinations). Replaying the python edit heredoc of transcript record 4010 (08:05:59; the same command then ran this scan) on eefb40d in a scratch clone gives `git diff HEAD` hash 4679d467 (MATCH).\n\nCode state:\n- eefb40d, with scripts/run_subgraph_benchmark.py equal to its dd29e19 content;\n- shapeperf/paired.py equal to dd29e19 except subgraph_pair_worker, which lacks the spec 'timed' and 'order' options added later (dd29e19 paired.py lines 113-125; added by records 4021 at 08:07:17 and 4036 at 08:09:10).\n\nSnapshot: rp/snap_g2_scan5_0806; diff: rp/diff_g2_scan5_0806.patch. This instrument loads S8, S1 and AA (all named model.so) into ONE process (subgraph_pair_worker: sess = {arm: om(shared_lib_path=path) ...}), so it is in the suspect co-loading class. Its records are results/v3/g2/timing/interleaved_in_process_test.jsonl."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260930.json",
+          "provenance_id": "eddede38ea3f30cf",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "e5c331d56c636364d0e036100c74d1fa4b19d78282f167ae316a2ee93842994e",
+          "recovered": "yes",
+          "how": "Byte-identical (cmp) to /home/user/work/v3/g1/timing/provenance_measure_20260930.json; recovered as described there."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260931.json",
+          "provenance_id": "d4d013682baf24a6",
+          "git_head": "28382a9deaa502db95098d4140e92b809f52d3df",
+          "dirty": true,
+          "diff_sha256": "db0c588f7f6316d78c681946629a1bb4d8ab98352674835d805eb2569eec86a7",
+          "untracked_sha256": "be4dd716102fb8f65957db998fd8eed8a3b6771767a8841508de225b107bb088",
+          "recovered": "yes",
+          "how": "Byte-identical (cmp) to the work/v3 original; recovered (the 1d781b6 tree)."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g1/timing/provenance_measure_20260932.json",
+          "provenance_id": "c6c679c2902fad04",
+          "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to the work/v3 original; clean."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g1/verify/provenance_verify.json",
+          "provenance_id": "6759c492f20c560b",
+          "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to the work/v3 original; clean."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g2/provenance_build.json",
+          "provenance_id": "2f3da961b190f5f6",
+          "git_head": "ebd96be60af64a1684203522875bf66b955b7541",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to the work/v3 original; clean."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_11.json",
+          "provenance_id": "d148589336195b72",
+          "git_head": "ebd96be60af64a1684203522875bf66b955b7541",
+          "dirty": true,
+          "diff_sha256": "6d197847772bdf2eb883911f8e8a50ac866c528caf7c97ff5e90419ca9352a0a",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "yes",
+          "how": "Byte-identical (cmp) to /home/user/work/v3/g2/timing/provenance_measure_11.json; recovered as ebd96be + run_subgraph_benchmark.py@eefb40d. The mid-run paired.py caveat also applies."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_12.json",
+          "provenance_id": "16031b7969ab98af",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to the work/v3 original; clean."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_21.json",
+          "provenance_id": "8902c5c865b2eafb",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to /home/user/work/v3/g2/timing_rep/provenance_measure_21.json; clean."
+        },
+        {
+          "provenance_file": "/home/user/Shape-Perf/results/v3/g2/timing/provenance_measure_22.json",
+          "provenance_id": "607c265de23788f4",
+          "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+          "dirty": false,
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "recovered": "not_needed",
+          "how": "Byte-identical (cmp) to /home/user/work/v3/g2/timing_rep/provenance_measure_22.json; clean."
+        }
+      ],
+      "missing": [
+        "Every dirty v3 provenance was recovered by hash match (8 dirty provenance_*.json files, the extra check128/provenance.json, and the 4 overwritten g1 batch-1/2 snapshots). The gaps below are things that have no hash to check against.",
+        "The 4 overwritten g1 provenance JSON files (ids ebc443807748cd24, 27df5131bfe8bab4, adc92cb95bd4760e, 7c459e350be9b197) are gone from disk. Their bodies were rebuilt and match their ids, but created_unix cannot be recovered. The pilot log gives only the build start times 05:45:34 and 06:07:29 (v3_g1_pilot.log:1,45). The verify freeze times are bounded only: 05:48:46-05:51:10 and 06:07:29-06:13:39.",
+        "The load-order and context diagnostics carry no provenance at all, so their code state is unknown by hash. Files: results/v3/g2/diagnostics/loadorder_factorial_L63/L64/L96.json, context_L64_*.json, and /home/user/work/v3/g2/diag_*.json. diag_subgraph_context.py@dd29e19:68 writes JSON without a provenance_id. These are exactly the co-loading instruments that are suspect under the key fact. The only lead is the transcript timeline: diag_subgraph_context.py was created by record 4021 at 08:07:17 and edited by records 4030 and 4036, and paired.py was edited by records 4021 and 4036. Nothing confirms that state by hash.",
+        "Gitignored inputs are not covered by either hash: data/artifacts/, data/reference/, third_party/, results/**/*.so, results/compile/, __pycache__/, census/* (per .gitignore at HEAD). Model .so identity comes only from the records' artifact_hash, and compiler identity only from the provenance 'compilers' field. That field is empty ([]) for every measure and verify run.",
+        "Provenance is frozen once at the start of a run. Worker processes spawned later import the files as they are at spawn time. The only v3 case with an edit during a run is g2 timing_11: a paired.py edit at 07:21:55 that added analysis functions only. For every other run, no edit to a file the run imports happened while it was running, going by the transcript timestamps.",
+        "The hash matches depend on candidate contents taken from the session transcript /root/.claude/projects/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78.jsonl, read only. Record numbers are 0-based line indices in that file. Each recovered state is confirmed by its sha256 match, not by the transcript alone. The replay's end state also equals 1d781b6 byte-for-byte for all 20 files.",
+        "Out of scope, not examined: /home/user/work/v3_followup/**/provenance*.json and results/v3_followup/**/provenance*.json.",
+        "Nothing under /home/user/Shape-Perf or /home/user/work was modified; `git status --short` shows nothing. HEAD moved from 1865924 to b1fa951 during this task because of a commit made by another session. All scratch work is under /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/e0_prov/ (ph.py, bash_0929.txt, writes_0929.txt, and rp/ with replay1-3.py, event dumps in ev/, snapshots snap_*, diff_*.patch, and a scratch clone). Files there from an earlier attempt (diffh.py, hunks.py, variants.py, untracked.py, paired_dd29e19.py, repo/) were left untouched."
+      ]
+    },
+    "runtime": {
+      "items": [
+        {
+          "component": "PyRuntimeC extension (the actual native runtime loaded by import_pyruntime)",
+          "path": "/home/user/work/onnx-mlir/build/Release/lib/PyRuntimeC.cpython-311-x86_64-linux-gnu.so",
+          "sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+          "bytes": 348456,
+          "mtime_utc": "2026-09-28T11:17:55.634071825Z (ctime 11:17:55.634202534Z, birth 11:17:55.622190830Z, inode 1657138, nlink 1)",
+          "version_or_note": "Built from onnx-mlir 1e017c9f (/home/user/work/build_manifest.json onnx_mlir.sha). GNU build-id 5eb4e5507da8537fba9fdd6bd02dfe0ecc865331. How it is resolved: shapeperf/toolchain.py:13-19 (onnx_mlir_build = $SHAPEPERF_ONNX_MLIR_BUILD or $SHAPEPERF_WORK/onnx-mlir/build/Release, where SHAPEPERF_WORK defaults to ~/shapeperf-work), :55-56 (pyruntime_dir = build/lib) and :59-65 (sys.path.insert(0, dir); from PyRuntime import OMExecutionSession). The same code is at 28382a9:shapeperf/toolchain.py:13-35, and there is no diff ade4f11..b1fa951..working tree. PyRuntime.py:18 then imports PyRuntimeC from the same directory. It is the only PyRuntimeC*.so on the filesystem (find / -xdev; /, /home/user and /tmp are all /dev/vda). .ninja_log line 805 is its only link, with restat mtime 1790594275634071825 ns, which equals the current mtime to the nanosecond.",
+          "linked_libraries": "DT_NEEDED: libstdc++.so.6, libm.so.6, libgcc_s.so.1, libc.so.6, ld-linux-x86-64.so.2. No RPATH or RUNPATH. ldd resolves them to /lib/x86_64-linux-gnu/{libstdc++.so.6 -> libstdc++.so.6.0.33, libm.so.6, libgcc_s.so.1, libc.so.6} and /lib64/ld-linux-x86-64.so.2. It links no onnx-mlir or protobuf shared libraries."
+        },
+        {
+          "component": "PyRuntime.py wrapper (the Python module import_pyruntime actually imports)",
+          "path": "/home/user/work/onnx-mlir/build/Release/lib/PyRuntime.py",
+          "sha256": "77d24ae6540a8e32e0084e715582d43cfbeeaf90ab326a57b261c2a4f3db0dd9",
+          "bytes": 2243,
+          "mtime_utc": "2026-09-28T10:39:17.858053056Z (ctime 10:39:17.864656082Z, birth 10:39:17.858053056Z)",
+          "version_or_note": "Byte-identical to the source /home/user/work/onnx-mlir/src/Runtime/python/PyRuntime.py (same sha256, mtime 2026-09-28T08:02:52Z). Lines 28-45: OMExecutionSession.run calls _runImplementation(..., False, False). Its cached bytecode is __pycache__/PyRuntime.cpython-311.pyc (sha256 13972f6f10abb5eb1c1cc2aac8e64bff39ac672e2b97ddfcb87555a135c097d2, 2814 bytes, mtime 2026-09-28T11:25:32.445904561Z). The .pyc header records source mtime 2026-09-28T10:39:17Z and size 2243, which match the source, so the .pyc is valid."
+        },
+        {
+          "component": "S8 compiler (pinned, arm S8)",
+          "path": "/home/user/work/variants/orig/bin/onnx-mlir",
+          "sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+          "bytes": 153922704,
+          "mtime_utc": "2026-09-28T11:19:38.598196952Z (preserved from the build tree; ctime 2026-09-29T05:32:14.436697138Z, birth 2026-09-29T05:32:13.920697107Z)",
+          "version_or_note": "The recorded version is 'onnx-mlir version 0.5.1, onnx version 1.21.0 (onnx-mlir 1e017c9fcd7ae7218731ae799f13a957e0cbc80b) LLVM version 23.0.0git (llvm-project 1053047a4be7d...)' (results/v3/g1/pairs/provenance.json .compilers[0].version; I did not run the binary). The recorded compiler_bin_sha256 e34bcd6a... and bytes 153922704 in results/v3/g1/pairs/provenance.json .compilers[0] and results/v3/g2/provenance_build.json .compilers[0] equal the current file. variants/orig/lib is a symlink to /home/user/work/onnx-mlir/build/Release/lib.",
+          "linked_libraries": "/usr/local/lib/libprotobuf.so.33.5.0, about 70 /usr/local/lib/libabsl_*.so.2505.0.0, libutf8_range/libutf8_validity.so.33.5.0, plus system libm, libz, libstdc++, libgcc_s, libc and ld-linux (ldd)."
+        },
+        {
+          "component": "S1 compiler (transpose unroll cap 1, arm S1)",
+          "path": "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+          "bytes": 153922704,
+          "mtime_utc": "2026-09-29T05:33:46.100702587Z (ctime 05:34:02.556703565Z, birth 05:34:02.492703561Z)",
+          "version_or_note": "The mtime equals the .ninja_log cap1 relink restat 1790660026100702587 ns (the Release/bin/onnx-mlir line after the Transpose.cpp.o rebuild; /home/user/work/logs/onnx-mlir.cap1.build.log, 6 steps). The recorded sha256 fcea1caa... in results/v3/g1/pairs/provenance.json .compilers[1] and results/v3/g2/provenance_build.json .compilers[1] equals the current file. The recorded version string is the same as S8's. variants/cap1/lib is a symlink to Release/lib.",
+          "linked_libraries": "Same set as the S8 compiler (ldd output identical apart from load addresses)."
+        },
+        {
+          "component": "Main build-tree compiler (default onnx_mlir_bin())",
+          "path": "/home/user/work/onnx-mlir/build/Release/bin/onnx-mlir",
+          "sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+          "bytes": 153922704,
+          "mtime_utc": "2026-09-29T05:34:33.696705416Z (ctime 05:34:33.700198073Z, birth 05:34:28.056705081Z)",
+          "version_or_note": "Rebuilt by the revert step (.ninja_log last line, restat 1790660073696705416 ns; /home/user/work/logs/onnx-mlir.revert.build.log). It is byte-identical to variants/orig/bin/onnx-mlir: the revert reproduced the pinned binary bit for bit. libOMONNXToKrnl.a was also rebuilt then (mtime 2026-09-29T05:34:28Z, sha256 75ffc6c8...).",
+          "linked_libraries": "Same set as the S8 compiler."
+        },
+        {
+          "component": "Python interpreter",
+          "path": "/home/user/work/venv/bin/python -> python3 -> /usr/local/bin/python3 -> /usr/bin/python3.11",
+          "sha256": "f56a588548dd013906ae1dcd1b6faa417f4e204da634ff354840d9643e78ff9e",
+          "bytes": 6639992,
+          "mtime_utc": "2026-03-03T09:26:23Z (ctime same; birth not recorded by the filesystem)",
+          "version_or_note": "Python 3.11.15 (main, Mar 3 2026, 09:26:23) [GCC 13.3.0]. dpkg package python3.11 3.11.15-1+noble1, installed 2026-03-31 13:25:32 (/var/log/dpkg.log). dpkg -V python3.11 and libpython3.11-stdlib report no content mismatch (only doc and man files missing). venv/pyvenv.cfg: version 3.11.15, include-system-site-packages false. The venv symlinks have mtime 2026-09-28T08:07Z.",
+          "linked_libraries": "libm.so.6, libz.so.1, libexpat.so.1, libc.so.6, ld-linux-x86-64.so.2"
+        },
+        {
+          "component": "numpy 2.2.6 (venv)",
+          "path": "/home/user/work/venv/lib/python3.11/site-packages/numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so",
+          "sha256": "baee53945a118d872f22f335606a7a87387ef5bab39e00d1e229a5972f8dc0f7",
+          "bytes": 10445089,
+          "mtime_utc": "2026-09-28T08:07:35.841512005Z (ctime 08:07:35.849512005Z)",
+          "version_or_note": "numpy-2.2.6.dist-info/METADATA Version 2.2.6. All 20 .so files listed in RECORD match their RECORD hashes. The version matches dependencies.key.numpy in every results/v3 provenance file."
+        },
+        {
+          "component": "onnx 1.23.0 (venv)",
+          "path": "/home/user/work/venv/lib/python3.11/site-packages/onnx/onnx_cpp2py_export.cpython-311-x86_64-linux-gnu.so",
+          "sha256": "28f4bf76a6b5d0a4d76c7bb25427830cb84e8d7471e824f2b326ba8394f5952f",
+          "bytes": 7000568,
+          "mtime_utc": "2026-09-28T08:07:39.109512199Z (ctime same)",
+          "version_or_note": "METADATA Version 1.23.0. It matches its RECORD hash. The version matches dependencies.key.onnx in the v3 provenance files."
+        },
+        {
+          "component": "onnxruntime 1.23.2 (venv)",
+          "path": "/home/user/work/venv/lib/python3.11/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-311-x86_64-linux-gnu.so",
+          "sha256": "f22a6994fbadefe3888cd3a5300a63021884372dafecaea9875987dce697c8c1",
+          "bytes": 23251992,
+          "mtime_utc": "2026-09-28T08:07:38.473512161Z (ctime same)",
+          "version_or_note": "METADATA Version 1.23.2. Both .so files in RECORD match, including libonnxruntime_providers_shared.so (sha256 086ec1d5..., 14632 bytes). The version matches dependencies.key.onnxruntime in the v3 provenance files."
+        },
+        {
+          "component": "glibc libc",
+          "path": "/lib/x86_64-linux-gnu/libc.so.6 -> /usr/lib/x86_64-linux-gnu/libc.so.6",
+          "sha256": "d8db8739a1633c972cec6a4fe0566bdcec6fd088f98723492ab0361f66238f75",
+          "bytes": 2125328,
+          "mtime_utc": "2026-01-30T08:27:54Z (ctime same; birth not recorded)",
+          "version_or_note": "Ubuntu GLIBC 2.39-0ubuntu8.7 (ldd --version). The dpkg upgrade to 2.39-0ubuntu8.7 is dated 2026-02-17 02:09:26 in /var/log/dpkg.log. dpkg -V libc6 shows only missing doc files, no content mismatch. OS: Ubuntu 24.04.4 LTS."
+        },
+        {
+          "component": "glibc dynamic loader ld.so",
+          "path": "/lib64/ld-linux-x86-64.so.2 -> /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "sha256": "1cd555ac46b7887edeaf3c42aac5408c8135e52f6b37870da2cf82d5fe14e829",
+          "bytes": 236616,
+          "mtime_utc": "2026-01-30T08:27:54Z (ctime same)",
+          "version_or_note": "'ld.so (Ubuntu GLIBC 2.39-0ubuntu8.7) stable release version 2.39.' Package libc6, which dpkg -V shows clean."
+        },
+        {
+          "component": "glibc libm (called by the compiled Gelu code, per the ade4f11 direction probe)",
+          "path": "/lib/x86_64-linux-gnu/libm.so.6 -> /usr/lib/x86_64-linux-gnu/libm.so.6",
+          "sha256": "1b87a1a50b496cfead2b0ad134c2ff536705c82608db240c7e8aa48d6c0e4217",
+          "bytes": 952616,
+          "mtime_utc": "2026-01-30T08:27:54Z (ctime same)",
+          "version_or_note": "libc6 2.39-0ubuntu8.7; dpkg -V clean."
+        },
+        {
+          "component": "libstdc++",
+          "path": "/lib/x86_64-linux-gnu/libstdc++.so.6 -> /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+          "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+          "bytes": 2592224,
+          "mtime_utc": "2025-12-18T21:36:50Z (ctime same)",
+          "version_or_note": "libstdc++6 14.2.0-4ubuntu2~24.04.1; dpkg -V clean."
+        },
+        {
+          "component": "libgcc_s",
+          "path": "/lib/x86_64-linux-gnu/libgcc_s.so.1 -> /usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+          "bytes": 183024,
+          "mtime_utc": "2025-12-18T21:36:50Z (ctime same)",
+          "version_or_note": "libgcc-s1 14.2.0-4ubuntu2~24.04.1; dpkg -V clean."
+        },
+        {
+          "component": "zlib (linked by python and the compilers)",
+          "path": "/lib/x86_64-linux-gnu/libz.so.1 -> /usr/lib/x86_64-linux-gnu/libz.so.1.3",
+          "sha256": "9b64150b28505a33d6bc3ecf709c279f6de97a1c184dbda65d06ee4537f6d286",
+          "bytes": 113000,
+          "mtime_utc": "2024-08-09T02:33:20Z",
+          "version_or_note": "zlib1g 1:1.3.dfsg-3.1ubuntu2.1; dpkg -V clean."
+        },
+        {
+          "component": "protobuf shared library (compilers only, not the runtime)",
+          "path": "/usr/local/lib/libprotobuf.so.33.5.0",
+          "sha256": "4d2426a045cd4f7dd1ab184117fb57c8778deba1b24bec1ef4a07a1432bcb03f",
+          "bytes": 3665408,
+          "mtime_utc": "2026-09-28T08:12:17Z",
+          "version_or_note": "protobuf v33.5 built from source with prefix /usr/local (build_manifest.json protobuf.tag/prefix; logs/protobuf.install.log mtime 2026-09-28T08:12:18Z). PyRuntimeC does not link it."
+        },
+        {
+          "component": "libcruntime.a (static onnx-mlir C runtime archive in lib/)",
+          "path": "/home/user/work/onnx-mlir/build/Release/lib/libcruntime.a",
+          "sha256": "8d81a07a6b020e19dfae6ef89e686f40e9ea47ab2200a9e2702ff25c16f0ee9f",
+          "bytes": 112022,
+          "mtime_utc": "2026-09-28T11:17:39.832945735Z",
+          "version_or_note": ".ninja_log line 755 is its only build (restat 1790594259832945735 ns, equal to the current mtime). The cap1 and revert rebuilds did not touch it. libOMExecutionSession.a (sha256 5ca2f726..., mtime 2026-09-28T11:17:42.489085169Z, .ninja_log line 762) was also built only once. Whether, and how, libcruntime is linked into each model.so was not checked in this task."
+        },
+        {
+          "component": "Kernel (not a container file; no sha256)",
+          "path": "/proc/version",
+          "sha256": "n/a (VM kernel, not hashable from inside the container)",
+          "mtime_utc": "n/a; current boot 2026-09-30T01:25:52Z (/proc/stat btime 1790731552)",
+          "version_or_note": "Now: 'Linux version 6.18.44-fc-v50 (builder@sandboxing) (gcc (GCC) 15.3.0, GNU ld (GNU Binutils) 2.46) #1 SMP PREEMPT_DYNAMIC'. Every results/v3/**/provenance*.json (10 files, created 2026-09-29T05:51:10Z to 07:54:06Z) records host.kernel 6.18.44-fc-v49. The first fc-v50 record is results/v3_followup/e0/provenance.json (created 2026-09-30T01:42:02Z). CPU recorded then: 'Intel(R) Xeon(R) Processor @ 2.10GHz', 4 CPUs."
+        }
+      ],
+      "unchanged_since_measurements": "PyRuntimeC is almost certainly the same file, but this is inferred, not recorded. No v3 provenance file records a PyRuntime path or hash. The provenance schema (shapeperf/provenance.py:49-77) records only source, dependencies, host and compilers. results/v3_followup/e0/manifest.json:348 itself lists 'PyRuntime SHA-256 at measurement time (not recorded by v3 provenance...)' as a gap. The earliest recorded hash, 2187aa58..., is in results/v3_followup/e0/manifest.json runtime.pyruntime[0] and in e1/identity_{orig,tagged}/identity_table.json, all written on 2026-09-30 under fc-v50, after the restart.\n\nEvidence that the current file is the one used on 2026-09-29:\n- The measurement window was 2026-09-29 05:39Z to 08:40Z. v3 timing provenance created_unix runs from 05:51:10Z (g1/timing/provenance_measure_20260930.json) to 07:54:06Z (g2/timing/provenance_measure_22.json). The driver logs cover 05:39-08:37Z: logs/v3_check128.log mtime 05:39:26Z; v3_g1_pilot.log first batch 05:45:34; v3_g2_replicate.log finished 08:04:57; v3_profile.log mtime 08:37:43Z. The log clock agrees with UTC: v3_g2_measure.log shows 'K (07:21:01)' and provenance_measure_11 was created at 07:21:01.83Z.\n- The PyRuntimeC inode was born 2026-09-28T11:17:55.622Z, with mtime 11:17:55.634071825Z and ctime 11:17:55.634202534Z. Any later content write, touch, chmod or rename-replacement would have moved ctime or birth past 2026-09-28. So the inode present now existed unmodified through the whole window, and through the fc-v49 to fc-v50 restart; the disk persisted, as the 09-28 birth times under /home/user/work show.\n- .ninja_log line 805 is the only PyRuntimeC link, and its restat value equals the current mtime to the nanosecond. The only later builds are the 09-29 cap1 relink and the revert relink (05:33:46Z and 05:34:33Z, both before the window). Each rebuilt only Transpose.cpp.o, libOMONNXToKrnl.a and bin/onnx-mlir (logs/onnx-mlir.cap1.build.log and onnx-mlir.revert.build.log).\n- PyRuntime.py (mtime and birth 2026-09-28T10:39:17Z) and its valid .pyc (11:25:32Z) also predate the window.\n- It is the only PyRuntimeC on the filesystem. variants/{orig,cap1}/lib are symlinks to the same Release/lib, so pointing SHAPEPERF_ONNX_MLIR_BUILD at a variant dir would load the same file.\n\nWhich directory import_pyruntime resolved on 09-29 was not recorded; SHAPEPERF_WORK and SHAPEPERF_ONNX_MLIR_BUILD were not logged. It is constrained, though. scripts/run_g1_pilot.sh:10-11 at 1d781b6 runs ${SHAPEPERF_WORK:-$HOME/shapeperf-work}/venv/bin/python. The only venv is /home/user/work/venv, /root/shapeperf-work does not exist now, and the pilot succeeded. That implies SHAPEPERF_WORK=/home/user/work, but whether /root/shapeperf-work existed on 09-29 is unknown.\n\nCompilers (compile-time, not runtime): these have direct recorded evidence. The recorded compiler_bin_sha256 values e34bcd6a... (orig) and fcea1caa... (cap1), with bytes 153922704, in results/v3/g1/pairs/provenance.json and results/v3/g2/provenance_build.json equal the current files. Their ctimes (05:32:14Z and 05:34:02Z on 09-29) predate the window.\n\nPython and packages also have direct recorded evidence. Every v3 provenance file records python 3.11.15, n_packages 24 and packages_sha256 5b9ecf3d8e4a2429c12b0f9a48b53dc0d3641435dbee4e7b7751663569cf4401. Recomputing with the same algorithm today gives the identical value. The venv .so files match their wheel RECORD hashes, with mtime and ctime of 2026-09-28T08:07Z.\n\nSystem libraries (libc, libm, ld.so, libstdc++, libgcc_s, zlib, python3.11): no hash or version was recorded on 09-29, so identity at that time is unknown from records. Now they match their dpkg md5sums (dpkg -V clean). Their ctimes are from the image (2025-12 to 2026-03), and /var/log/dpkg.log has no install or upgrade after 2026-03-31 (only a ca-certificates-java trigger on 2026-09-28 08:00). That is consistent with them being unchanged.\n\nThe kernel did change: fc-v49 during every v3 measurement, fc-v50 now (boot 2026-09-30T01:25:52Z). That is a real environment difference, not a file identity question.",
+      "notes": [
+        "The repo HEAD is not ade4f11 as the task stated. At the start of this session it was 1865924. It then moved to b1fa951 (2026-09-30T01:52:50Z, 'Follow-up E0/E1 results...'), committed by another process during this session, and the working tree is now clean. shapeperf/toolchain.py is identical at ade4f11, 1865924, b1fa951 and in the working tree. The resolution functions are the same at 28382a9 (lines 13-35) and at 1d781b6, ebd96be and eefb40d.",
+        "Callers of import_pyruntime: shapeperf/paired.py:38,73,114; shapeperf/measure.py:98; shapeperf/identity.py:65; validate_shapes.py:56; scripts/g0_verify.py:132; scripts/run_instrumented.py:25. scripts/record_e0_followup.py:124 and scripts/verify_execution_identity.py:267 glob pyruntime_dir() to record the file (working tree).",
+        "No script in the repo sets SHAPEPERF_ONNX_MLIR_BUILD or SHAPEPERF_COMPILER_VARIANT (grep of *.py, *.sh, *.env and *.md outside results). The arm paths are hard-coded, for example scripts/build_shape_pair.py:29 and scripts/run_subgraph_benchmark.py:41 at 1d781b6.",
+        "The container clock is UTC (/etc/timezone Etc/UTC), so all ls/stat times above are UTC.",
+        "PyRuntimeC links only libstdc++, libm, libgcc_s, libc and ld.so. The compiled model.so files are opened by it at run time; they are not DT_NEEDED dependencies of PyRuntimeC.",
+        "The main build tree was modified on 09-29 (libOMONNXToKrnl.a and bin/onnx-mlir at 05:34:28-33Z, the revert). Its compiler is byte-identical to variants/orig (sha256 e34bcd6a...), so the pinned compiler was reproduced exactly.",
+        "Not done, per the rules: no model or benchmark was run, and onnx-mlir --version was not executed. Compiler version strings are quoted from the provenance records.",
+        "The v3 provenance fields that do exist: source.git_head/dirty/diff_sha256, dependencies.python/n_packages/packages_sha256/key, host.kernel/machine/cpu_model/n_cpus/node/cfs_quota_us, compilers[] (only in g1/pairs and g2/provenance_build), and extra. None records the PyRuntime path or hash, the glibc version, the interpreter path or hash, or SHAPEPERF_* env values."
+      ]
+    }
+  },
   "missing": [
     "compile argv of the v3 L=64 build (reconstructed from code; see compile.recompile_check)",
     "AA_full/model.so used during timing (deleted by design; byte copy of S8)",

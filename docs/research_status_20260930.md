@@ -96,6 +96,10 @@
 
 - **원인**: 런타임의 `dlopen(RTLD_LAZY | RTLD_GLOBAL)`과, 파일명에서 온 같은 tag(`model`) 때문이다.
   entry는 자기 것이 실행되지만, entry가 PLT로 부르는 `_mlir_ciface_main_graph_model`은 먼저 로드된 정의에 결합된다.
+- **선행 보고(09-30 확인)**: 이 부류의 문제는 2023년에 upstream에 보고됐다([onnx/onnx-mlir#2342](https://github.com/onnx/onnx-mlir/issues/2342)).
+  [onnx/onnx-mlir#2381](https://github.com/onnx/onnx-mlir/pull/2381)이 `--tag`로 고쳤다. tag를 주지 않으면 확장자를 뺀 파일명이 tag가 된다.
+  v3가 겪은 것은 그 **잔여 경우**다. 서로 다른 디렉터리의 `model.so` 둘은 같은 기본 tag를 갖는다.
+  upstream main의 `ExecutionSession.cpp`도 `RTLD_GLOBAL`을 쓰고 중복 tag를 검사하지 않는다. 새 현상이 아니라 **알려진 문제의 잔여 경우**로 기록한다.
 - **증거**: 네 가지 방법이 모든 호출에서 일치했다.
   - gdb: 실행 PC가 속한 DSO, 메모리의 함수 바이트 해시(ASLR 켬)
   - `LD_DEBUG=bindings`: lazy와 BIND_NOW 모두
@@ -173,6 +177,8 @@ protocol은 측정 전에 고정했다(`results/r1/protocol_r1.json`). 결과는
 - **기전은 세 가지다**(고정 소스로 확인):
   1. **패턴 선점**(tanh, exp, log, sin, cos와 이를 쓰는 sigmoid·softmax·Gelu): MathToLLVM에 intrinsic 변환이 있는 op는 우선순위가 같은 근사 패턴을 이긴다.
      **자연 대조군**이 있다. Erf는 MathToLLVM에 변환 패턴이 **없어** 경쟁 없이 원래부터 근사되고, libm 호출이 0이다.
+     tanh의 intrinsic 패턴은 LLVM PR #125753(2025-02)이 추가했다(deep-research 3-0 확인). 그 전에는 tanh도 erf처럼 근사됐을 가능성이 크다(추론, 이전 LLVM 빌드로 확인 가능).
+     upstream MLIR은 이 우선순위를 정하는 benefit 인자를 PR #130782로 제공했지만, ONNX-MLIR은 main에서도 benefit 없는 옛 API를 쓴다(코드 비교, main 빌드는 안 함).
   2. **생성 방식**(Gelu의 x³): `math.pow`로 생성되어 libm `powf`가 된다. SIMD 비용 모델에는 pow 항목이 없다.
   3. **방언 우회**(Atan): ONNX-MLIR이 Atan을 `math.atan`이 아니라 `KrnlAtanOp`로 내리고, 이것이 곧바로 libm `atanf` 호출이 된다(`KrnlUnaryMath.cpp`).
      그래서 근사 패턴이 볼 기회가 없고, I1으로도 바뀌지 않는다.
@@ -237,6 +243,9 @@ _진행 중: 전체 dev 평가(orig → r1b)를 다시 실행하고 있다. 판�
 | v3 STATUS | "zmm은 S8에만" | L=96의 S8은 zmm 0개 | objdump |
 | 방향 탐색 | op 비중 요약 | 두 프로세스 계측을 섞은 요약이었음 | E0 감사 |
 | R1 노트 | "MLIR의 성능 결함 탐지는 빈 영역" | MLIR-Smith(2026)가 missed optimization을 다룸 → 신규성을 좁힘 | deep-research 반박 |
+| R1 노트 | "remark 대 바이너리 검사기는 신규 공헌" | 근거 불충분(0-3 반박). 신규성 근거에서 뺌 | deep-research 교차 검증 |
+| R1 노트 | "x86 AVX-512 tanh의 해법은 MLIR 근사뿐" | AMD libm 표에는 VF16 tanh 행이 있다. glibc·SVML 환경에 한정한 말이다 | deep-research 교차 검증 |
+| R2 노트 | 공동 로딩 교차 실행을 연구 2순위로 둠 | upstream에 2023년 보고·수정(#2342, #2381)된 부류의 잔여 경우 → 3순위 | 이슈·PR·main 소스 직접 확인 |
 | R1 실험 전 | "13개 수학 op가 모두 SIMD로 보고" | SIMD 주장은 Gelu(tanh)·Sigmoid 등 일부. 나머지는 "SIMD 안 함"인데도 근사 의도가 미실현 | R1 스캔 |
 | R1 protocol | 고정 시각 "05:50Z" | 추정값이었음. 실제 파일 작성 시각은 05:37:19Z(첫 모델 컴파일 05:39:10Z보다 앞섬) | 파일 mtime |
 
@@ -250,7 +259,7 @@ _진행 중: 전체 dev 평가(orig → r1b)를 다시 실행하고 있다. 판�
 | R1 upstream | ONNX-MLIR에 패치 제안(op별 우선순위, pow 전개). 정확도 게이트 결과가 전제 | 연구자 |
 | E2(v3 후속) | protocol 동결: 예산, 목표 정밀도, 할당기 환경 | 연구자 |
 | 측정 VM | 모든 시간 결과의 정식 확인 | 연구자(확보 여부) |
-| deep-research 검증 | 세션 한도로 중단된 교차 검증을 재개함(진행 중) | — |
+| deep-research 검증 | **완료**: 주장 25건 중 확인 17, 반박 8. R1 원인 사슬은 모두 확인됐다. 결과는 연구 아이템 노트(저장소 밖, 별도 전달) 9절에 있다 | — |
 
 ---
 

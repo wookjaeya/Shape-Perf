@@ -31,7 +31,7 @@
 |---|---|---|
 | E0-1 v3 원자료 보존, 별도 디렉터리 | 완료 | `results/v3/` 무수정, 새 결과는 `results/v3_followup/` |
 | E0-2 L=64 artifact·입력·argv·출력·시간 기록 식별 | 완료(일부 복원) | compile argv는 기록되지 않았으나 복원한 argv로 **비트 단위 재현**. AA 파일은 설계상 삭제됨 |
-| E0-3 compiler·runtime 바이너리 식별 | 완료 | 측정 당시의 runtime 해시는 기록되지 않았다. 현재 파일과 mtime은 기록했다(2.3절) |
+| E0-3 compiler·runtime 바이너리 식별 | 완료 | 측정 당시의 runtime 해시는 기록되지 않았다. 현재 파일·mtime·빌드 이력으로 동일성을 추정했다(2.3절) |
 | E0-4 저장소 상태·diff·미추적 파일 | 완료 | `repo_state/` |
 | E0-5 공동 로딩 하니스의 순서 복원 | 완료 | 2.4절 |
 | E0-6 프로세스별 모델 로드 목록 | 완료 | 2.4절 (기록의 pid·코드로 확인) |
@@ -67,7 +67,14 @@ S8 `e34bcd6a…`(`variants/orig`), S1 `fcea1caa…`(`variants/cap1`). v3 G0 기�
 `PyRuntimeC.cpython-311-x86_64-linux-gnu.so` `2187aa58…`. mtime은 v3 측정보다 앞선다. 측정 당시 해시는 기록되지 않았다.
 Loader 동작은 고정 커밋 `src/Runtime/ExecutionSession.cpp`에서 확인했다. 파일명에서 tag를 만들고(88–119행),
 `dlopen(RTLD_LAZY | RTLD_GLOBAL)`(132행)으로 연 뒤, entry를 `dlsym(handle, "run_main_graph_<tag>")`(238–247행)로 찾는다.
-<!-- RUNTIME_AUDIT -->
+
+- **런타임 식별**(독립 감사). `PyRuntimeC`의 mtime은 2026-09-28T11:17:55Z다. `.ninja_log`상 유일한 빌드이고, v3 측정 창(09-29 05:39–08:40Z)보다 앞선다.
+  그래서 측정에 쓰인 것이 현재 파일이라는 것은 **거의 확실하지만 기록이 아니라 추정**이다.
+  - v3 provenance 스키마는 런타임 경로·해시를 기록하지 않았다.
+  - `libcruntime.a`(모델 `.so`에 정적으로 들어가는 C 런타임)도 한 번만 빌드됐다. cap1 빌드와 원복 빌드는 이것을 다시 만들지 않았다.
+  - 주 빌드 트리의 컴파일러는 원복 때(09-29 05:34Z) 다시 링크됐고, `variants/orig`와 바이트가 같다(`e34bcd6a…`).
+  - Python 3.11.15, numpy 2.2.6, onnx 1.23.0, onnxruntime 1.23.2, glibc 2.39-0ubuntu8.7이다. 패키지 파일은 RECORD 해시와 `dpkg -V`로 온전함을 확인했다.
+  - 커널은 컨테이너 재시작으로 `fc-v49`에서 `fc-v50`으로 바뀌었다(v3 기록은 v49).
 
 ### 2.4 v3 측정 도구별 프로세스 구성
 
@@ -92,7 +99,26 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
 
 ### 2.5 provenance 복원
 
-<!-- PROVENANCE -->
+v3 provenance는 코드 상태를 해시(`diff_sha256`, `untracked_sha256`)로만 남겼다. 독립 에이전트가 후보 코드 내용으로 같은 해시를 다시 계산해
+**dirty 실행의 코드 상태를 모두 복원**했다(`results/v3_followup/e0/audit.json`).
+
+| 실행 | 당시 상태 | 복원 결과 |
+|---|---|---|
+| G1 timing 배치 1·2, G1 검증 배치 1·2, G1 빌드 배치 1·2 | `28382a9` + 미커밋 변경 | **복원**: 코드 상태는 정확히 `1d781b6` 트리다(추적 파일 4개의 diff와 미추적 파일 16개가 해시 일치). 덮어써진 스냅샷 4개도 본문을 재구성해 id가 일치한다(생성 시각만 복원 불가) |
+| G1 배치 3 | `1d781b6` clean | 복원 불필요 |
+| check128 빌드·검증·timing·AA 시험 | `28382a9` + 미커밋 변경 | **복원**: 세션 기록 재생으로 해시 일치 |
+| G2 빌드 | `ebd96be` clean | 복원 불필요 |
+| G2 규모 시험, G2 본 측정(`provenance_measure_11`) | `ebd96be` + 미커밋 변경 | **복원**: `run_subgraph_benchmark.py@eefb40d`를 얹은 상태(288개 조합 중 유일 일치). 단 본 측정 도중(07:21:55) `paired.py`에 분석 함수만 추가하는 수정이 있었고, 그 뒤 시작된 워커는 수정본을 import했다 |
+| G2 Q 측정, 반복 측정 | `eefb40d` clean | 복원 불필요 |
+| G2 scan | `eefb40d` + 미커밋 변경 | **복원**: 세션 기록 재생으로 해시 일치 |
+| 진단 `context_*`, `loadorder_*` | provenance **없음** | **해시로 확인 불가**. 스크립트는 실행 당시 미커밋이었다 |
+
+남는 공백:
+- 진단 파일의 코드 상태.
+- 덮어써진 G1 스냅샷 4개의 생성 시각.
+- 측정 기록에 컴파일러 식별(`compilers: []`)과 런타임 해시가 없다는 점.
+- `.gitignore` 대상 입력(모델 `.so` 등)은 기록의 `artifact_hash`로만 식별된다는 점.
+
 
 ## 3. E1 — L=64 실행 구현 식별
 

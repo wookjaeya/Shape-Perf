@@ -97,7 +97,8 @@ def worker_main(spec):
 
     OMExecutionSession = toolchain.import_pyruntime()
     t_load0 = time.monotonic_ns()
-    sess = OMExecutionSession(shared_lib_path=spec["artifact"])
+    sess = (OMExecutionSession(shared_lib_path=spec["artifact"], tag=spec["tag"]) if spec.get("tag")
+            else OMExecutionSession(shared_lib_path=spec["artifact"]))
     load_ns = time.monotonic_ns() - t_load0
     try:
         in_sig = json.loads(sess.input_signature())

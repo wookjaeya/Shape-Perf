@@ -8,6 +8,12 @@ Times the K transpose of one length in fresh processes under different arm compo
 The same compiled artifacts are used everywhere. If an arm's time changes with the composition, the
 difference is not a property of the arm's code alone.
 
+FOLLOW-UP E1 (2026-09-30): the co-loaded variants of this script were INVALID S8-vs-S1 comparisons. The
+v3 artifacts were compiled without --tag (all model.so), and the runtime opens them RTLD_GLOBAL: every
+call of the later-loaded arm ran the FIRST loaded arm's compute code (gdb + LD_DEBUG, L=64,
+results/v3_followup/e1/identity_orig). The "load order sets the level" observation was the level of
+the code that actually ran. The pair worker now refuses such co-loading.
+
   python scripts/diag_subgraph_context.py --built <g2 dir> --length 64 --blocks 4 --out <json>
 """
 import argparse

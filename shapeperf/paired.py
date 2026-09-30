@@ -34,7 +34,8 @@ def verify_worker(spec):
     model = model_def(spec["model_key"])
     feat = load_features(REPO_ROOT / model["features"] / "features.npz")
     arrs, _ = inputs_for(model, feat, spec["feature_index"], spec["length"])
-    sess = toolchain.import_pyruntime()(shared_lib_path=spec["artifact"])
+    from .identity import open_session
+    sess = open_session(toolchain.import_pyruntime(), spec["artifact"], spec.get("tag"))
     declared = [d.get("dims") for d in json.loads(sess.input_signature())]
     first = sess.run(arrs)
     second = sess.run(arrs)
@@ -68,7 +69,8 @@ def subgraph_worker(spec):
         os.sched_setaffinity(0, set(spec["cpus"]))
     x = np.load(spec["input_npy"])
     expected = np.load(spec["expected_npy"])
-    sess = toolchain.import_pyruntime()(shared_lib_path=spec["artifact"])
+    from .identity import open_session
+    sess = open_session(toolchain.import_pyruntime(), spec["artifact"], spec.get("tag"))
     out = sess.run([x])
     exact = bool(len(out) == 1 and np.array_equal(out[0], expected) and out[0].dtype == expected.dtype)
     for _ in range(spec["warmup_calls"]):
@@ -93,16 +95,24 @@ def subgraph_pair_worker(spec):
     call. One process is one paired block: arm differences share the process, so process start-up
     cost is paid once. Less faithful to the one-process-per-unit protocol of the model-level pilot
     (amendment §11.1) - used only to map where a kernel-level effect exists.
-    spec: artifacts {arm: path}, input_npy, expected_npy, calls, rounds, warmup_calls, cpus, seed."""
+
+    INVALID for untagged artifacts: every v3 artifact was compiled without --tag (all named model.so),
+    so the later-loaded arms ran the FIRST loaded arm's compute code (follow-up E1). The artifacts are
+    now checked before loading and co-loading libraries that share model symbols is refused.
+    spec: artifacts {arm: path or {"path", "tag"}}, input_npy, expected_npy, calls, rounds,
+    warmup_calls, cpus, seed."""
     import os
     import time
     from . import toolchain
+    from .identity import assert_no_shared_model_symbols, open_session
+    arts = {arm: (v if isinstance(v, dict) else {"path": v, "tag": None}) for arm, v in spec["artifacts"].items()}
+    assert_no_shared_model_symbols([v["path"] for v in arts.values()])
     if spec.get("cpus"):
         os.sched_setaffinity(0, set(spec["cpus"]))
     x = np.load(spec["input_npy"])
     expected = np.load(spec["expected_npy"])
     om = toolchain.import_pyruntime()
-    sess = {arm: om(shared_lib_path=path) for arm, path in spec["artifacts"].items()}
+    sess = {arm: open_session(om, v["path"], v.get("tag")) for arm, v in arts.items()}
     exact = {}
     for arm, s in sess.items():
         out = s.run([x])

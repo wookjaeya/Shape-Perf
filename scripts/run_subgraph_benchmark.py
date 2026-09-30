@@ -36,7 +36,7 @@ from shapeperf import provenance, toolchain  # noqa: E402
 from shapeperf.compile import model_def  # noqa: E402
 from shapeperf.measure import run_block  # noqa: E402
 from shapeperf.squad import load_features  # noqa: E402
-from shapeperf.util import REPO_ROOT, read_json, write_json  # noqa: E402
+from shapeperf.util import REPO_ROOT, read_json, sha256_file, write_json  # noqa: E402
 
 ARMS = {"S8": "/home/user/work/variants/orig", "S1": "/home/user/work/variants/cap1"}
 KINDS = {"K": {"perm": [0, 2, 3, 1], "node": "bert/encoder/layer_0/attention/self/MatMul__324"},
@@ -88,15 +88,16 @@ def write_single_op_model(path, length, perm):
 
 
 def compile_arm(job):
-    kind, length, arm, mode, model_path, out_dir, target = job
+    kind, length, arm, mode, model_path, out_dir, target, *rest = job
+    tag = rest[0] if rest else None      # None: no --tag (the compiler derives the tag from `-o`, i.e. "model")
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     fs = toolchain.resolve_flagset("default", target)
     binary = toolchain.onnx_mlir_bin(ARMS[arm])
-    cmd = [str(binary), *fs["flags"], "-o", str(out_dir / "model"),
+    cmd = [str(binary), *fs["flags"], *([f"--tag={tag}"] if tag else []), "-o", str(out_dir / "model"),
            "--EmitLib" if mode == "full" else "--EmitMLIR", str(model_path)]
     p = subprocess.run(cmd, capture_output=True, text=True)
-    rec = {"kind": kind, "length": length, "arm": arm, "mode": mode, "returncode": p.returncode,
+    rec = {"kind": kind, "length": length, "arm": arm, "mode": mode, "tag": tag, "returncode": p.returncode,
            "command": cmd, "stderr_tail": p.stderr[-500:] if p.returncode else "",
            **toolchain.compiler_identity(ARMS[arm])}
     so = out_dir / "model.so"
@@ -152,6 +153,54 @@ def cmd_build(a):
     write_json(out / "build_summary.json", summary)
 
 
+def _tag_normalized(text, tag):
+    """Probe IR with the model tag replaced by a placeholder, so that builds that differ ONLY in
+    `--tag` can be compared for lowering/computation structure. The module attributes that record
+    the tag (the `--tag=` compile option and `onnx-mlir.symbol-postfix`) are normalized too."""
+    text = text.replace(f" --tag={tag}", "")
+    text = text.replace(f'"onnx-mlir.symbol-postfix" = "{tag}"', '"onnx-mlir.symbol-postfix" = "<TAG>"')
+    return text.replace(f"_{tag}", "_<TAG>")
+
+
+def cmd_build_tagged(a):
+    """Rebuild an existing (kind, length) cell with explicit, distinct model tags (follow-up E1-C).
+
+    Reuses the cell's model.onnx and input/expected tensors unchanged (hash-checked), adds only
+    `--tag=<tag>` to the compile command, and writes <out>/<arm>_<tag>_{probe,full}/. Each tagged probe
+    is compared with the untagged probe of the same arm after replacing the tag by a placeholder:
+    the lowering must be unchanged by the tag."""
+    src, out = Path(a.src), Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    prov = provenance.freeze(out / "provenance_build.json", compiler_builds=list(ARMS.values()),
+                             extra={"role": "followup-e1c-tagged-build", "src": str(src), "tags": a.tags})
+    src_build = read_json(src / "build.json")
+    x = np.load(src / "input.npy")
+    if hashlib.sha256(x.tobytes()).hexdigest() != src_build["input_sha256"]:
+        raise SystemExit("input.npy does not match the recorded input_sha256 of the source cell")
+    files = {}
+    for name in ("model.onnx", "input.npy", "expected.npy"):
+        shutil.copyfile(src / name, out / name)
+        files[name] = sha256_file(out / name)
+    pairs = [t.split("=", 1) for t in a.tags]              # e.g. S8=alpha S1=bravo S8=bravo S1=alpha
+    jobs = [(src_build["kind"], src_build["length"], arm, mode, out / "model.onnx", out / f"{arm}_{tag}_{mode}",
+             a.target_cpu, tag) for arm, tag in pairs for mode in ("probe", "full")]
+    with ThreadPoolExecutor(max_workers=a.jobs) as ex:
+        recs = list(ex.map(compile_arm, jobs))
+    builds = []
+    for (arm, tag), (probe, full) in zip(pairs, zip(recs[0::2], recs[1::2])):
+        tagged = (out / f"{arm}_{tag}_probe" / "model.onnx.mlir").read_text(errors="replace")
+        untagged = (src / f"{arm}_probe" / "model.onnx.mlir").read_text(errors="replace")
+        same = _tag_normalized(tagged, tag) == _tag_normalized(untagged, "model")
+        builds.append({"arm": arm, "tag": tag, "probe": probe, "full": full,
+                       "lowering_equal_to_untagged_after_tag_normalization": same,
+                       "normalized_diff_vs_untagged": LD.diff_hunks(_tag_normalized(untagged, "model"),
+                                                                    _tag_normalized(tagged, tag))})
+        print(f"{arm} tag={tag} full rc={full['returncode']} so={full.get('artifact_hash', '-')[:16]} "
+              f"lowering_equal_to_untagged={same}", flush=True)
+    write_json(out / "build_tagged.json", {"source_cell": str(src), "source_build": src_build, "files": files,
+                                           "provenance_id": prov["provenance_id"], "builds": builds})
+
+
 def cmd_measure(a):
     out = Path(a.out)                 # measurement records go here
     built = Path(a.built or a.out)    # artifacts and inputs come from the `build` output
@@ -189,7 +238,9 @@ def cmd_measure(a):
 
 
 def cmd_scan(a):
-    """Interleaved in-process pair timing over many lengths (exploratory map of the kernel-level effect)."""
+    """Interleaved in-process pair timing over many lengths (exploratory map of the kernel-level effect).
+    Untagged artifacts cannot be co-loaded (follow-up E1: the later-loaded arms ran the first arm's
+    compute code); the pair worker refuses them. Needs artifacts built with distinct --tag values."""
     import json
     import os
     from shapeperf.util import append_jsonl, new_run_id
@@ -250,6 +301,12 @@ def main():
     b.add_argument("--target-cpu", default="emeraldrapids")
     b.add_argument("--jobs", type=int, default=3)
     b.add_argument("--kinds", nargs="+", default=["K", "Q"])
+    t = sub.add_parser("build-tagged", help="rebuild one existing cell with explicit model tags (E1-C)")
+    t.add_argument("--src", required=True, help="existing cell directory, e.g. <g2>/K/L0064")
+    t.add_argument("--out", required=True)
+    t.add_argument("--tags", nargs="+", required=True, help="ARM=TAG pairs, e.g. S8=alpha S1=bravo")
+    t.add_argument("--target-cpu", default="emeraldrapids")
+    t.add_argument("--jobs", type=int, default=2)
     m = sub.add_parser("measure")
     m.add_argument("--lengths", type=int, nargs="+", required=True)
     m.add_argument("--kinds", nargs="+", default=["K", "Q"])
@@ -260,7 +317,7 @@ def main():
     m.add_argument("--allocation-id", default="dev-container")
     m.add_argument("--no-aa", action="store_true")
     a = ap.parse_args()
-    {"build": cmd_build, "measure": cmd_measure, "scan": cmd_scan}[a.cmd](a)
+    {"build": cmd_build, "build-tagged": cmd_build_tagged, "measure": cmd_measure, "scan": cmd_scan}[a.cmd](a)
 
 
 if __name__ == "__main__":

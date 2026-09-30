@@ -1,6 +1,6 @@
 {
   "title": "R1 minimal experiment: intent-to-binary fidelity of math lowering in ONNX-MLIR (development container)",
-  "frozen_at_utc": "2026-09-30T05:50Z (written before any R1 compile, correctness or timing run)",
+  "frozen_at_utc": "2026-09-30T05:37:19Z (file mtime; the value first written here, 05:50Z, was an estimate and is corrected). Written while the compiler variants were being built and before any model compile (first: 05:39:10Z single-op scan), correctness or timing run",
   "basis": "MLIR research-item note R1 (scratchpad MLIR_연구아이템_노트_20260930.md), sections 2.3-2.7",
   "arms": {
     "orig": "pinned compiler, variants/orig, sha256 e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",

@@ -1,0 +1,35 @@
+{
+  "title": "R1 minimal experiment: intent-to-binary fidelity of math lowering in ONNX-MLIR (development container)",
+  "frozen_at_utc": "2026-09-30T05:50Z (written before any R1 compile, correctness or timing run)",
+  "basis": "MLIR research-item note R1 (scratchpad MLIR_연구아이템_노트_20260930.md), sections 2.3-2.7",
+  "arms": {
+    "orig": "pinned compiler, variants/orig, sha256 e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+    "r1a": "I1 only: patches/r1_i1_math_approx_benefit.patch (legacy approximation op set, PatternBenefit 2 > MathToLLVM 1)",
+    "r1b": "I1 + I2: plus patches/r1_i2_gelu_pow_to_mul.patch (Gelu x^3 as x*(x*x) instead of math.pow)",
+    "r1c": "I2 only",
+    "identity": "each variant is identified by its binary SHA-256 (recorded at build time); the reverted rebuild must equal orig"
+  },
+  "compile": "default flagset: -O3 --march=x86-64 --mcpu=emeraldrapids (+ --opt-report=Simd for full models); every model built with an explicit distinct --tag or loaded alone in its own process",
+  "hypotheses_and_predictions": {
+    "H1_static": "orig: the vector Gelu loop calls scalar tanhf and powf once per lane. r1a removes tanhf (and other libm calls of approximated ops) but not powf; r1c removes powf but not tanhf; r1b removes both. Falsified if the calls remain.",
+    "H2_detection": "the libm call-site count per op in the final .so, compared with the opt-report SIMD claim, identifies every op whose reported vector code calls scalar libm per lane, without timing.",
+    "H3_effect": "r1b makes the Gelu kernel and the BERT model substantially faster than orig without changing answers (see gates)."
+  },
+  "metrics": {
+    "static_primary": "libm call sites per symbol (tanhf, powf, expf, erff, logf, sinf, cosf, ...) in each .so; opt-report SIMD lines per op kind",
+    "single_op_numerics": "max abs and max relative error vs a float64 numpy reference, and vs ONNX Runtime, on a fixed seeded input set; descriptive (no pass/fail threshold)",
+    "model_numerics": "start/end logits max abs difference vs the orig arm and vs the saved ORT@256 reference logits; descriptive",
+    "timing": "fresh process per arm (one model per process), block-randomized order, CPU 3, 1 thread; per block log ratio; mean and 95% t-interval over blocks. Development container: NOT a result"
+  },
+  "gates_fixed_before_measurement": {
+    "semantic_gate_model": "full SQuAD v1.1 dev set (all 12,006 features) at L=256 with the official postprocessing: (a) questions whose predicted answer text differs between r1b and orig <= 10 (0.1% of 10,570), and (b) |EM(r1b)-EM(orig)| <= 0.1 and |F1(r1b)-F1(orig)| <= 0.1 points. Researcher's choice: it tolerates rare argmax flips at near-ties, not a systematic change. Checked once; not tuned afterwards.",
+    "timing_interpretation": "a timing effect is interpreted only if |relative effect| >= 10% (about 3-5x the 2-3% block sd of this container) and its 95% interval excludes 0; otherwise reported as not distinguishable here"
+  },
+  "stop_or_shrink": [
+    "calls remain after the intervention -> H1 rejected for that op; report as is",
+    "semantic gate fails -> accuracy problem of the approximation path; report, do not tune",
+    "only Gelu shows the divergence in the single-op scan -> bug report + upstream patch, not a paper",
+    "vectorized approximation not faster -> H3 rejected"
+  ],
+  "not_done_by_design": ["IREE comparison (installation not attempted)", "LLVM rebuild before PR #125753 (drift reproduction)", "measurement VM"]
+}

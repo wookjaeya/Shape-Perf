@@ -1,0 +1,2369 @@
+{
+  "shape": [
+    1,
+    64,
+    3072
+  ],
+  "flags": [
+    "-O3",
+    "--march=x86-64",
+    "--mcpu=emeraldrapids",
+    "--opt-report=Simd"
+  ],
+  "compilers": {
+    "orig": {
+      "path": "/home/user/work/variants/orig/bin/onnx-mlir",
+      "sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0"
+    },
+    "r1a": {
+      "path": "/home/user/work/variants/r1a/bin/onnx-mlir",
+      "sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032"
+    },
+    "r1b": {
+      "path": "/home/user/work/variants/r1b/bin/onnx-mlir",
+      "sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2"
+    },
+    "r1c": {
+      "path": "/home/user/work/variants/r1c/bin/onnx-mlir",
+      "sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5"
+    }
+  },
+  "rows": [
+    {
+      "op": "Tanh",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=tanh_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Tanh/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Tanh/model.onnx"
+      ],
+      "so_sha256": "78651a04f76d5b797b96e620a57b827de8612dcb57c674887285b28bd175a03e",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Tanh, tanh_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "tanhf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.665008038339806e-08,
+        "max_rel": 1.538784154455607e-07,
+        "max_ulp_f32": 2.057080030441284,
+        "mean_abs": 1.6387567142439398e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 3.1978793369772814e-07,
+        "max_ulp_f32": 4.0,
+        "mean_abs": 3.861969250877154e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.602490670744473e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.36625481210649,
+        "mean_abs": 3.9041193056194936e-08
+      }
+    },
+    {
+      "op": "Tanh",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=tanh_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Tanh/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Tanh/model.onnx"
+      ],
+      "so_sha256": "a780fb9364183535fca9bfe83597fdbd1cf2b6049fb57c91916c5e56c53b5c0f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Tanh, tanh_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.403850702936694e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.032992247492075,
+        "mean_abs": 3.9320097015584895e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 3.5762786865234375e-07,
+        "max_rel": 3.5762799655008193e-07,
+        "max_ulp_f32": 6.0,
+        "mean_abs": 5.399393524877875e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.602490670744473e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.36625481210649,
+        "mean_abs": 3.9041193056194936e-08
+      }
+    },
+    {
+      "op": "Tanh",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=tanh_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Tanh/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Tanh/model.onnx"
+      ],
+      "so_sha256": "09bab8db4e673f618523c671ef59724f51ac8912da1a4efe69de6997952fa10b",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Tanh, tanh_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.403850702936694e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.032992247492075,
+        "mean_abs": 3.9320097015584895e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 3.5762786865234375e-07,
+        "max_rel": 3.5762799655008193e-07,
+        "max_ulp_f32": 6.0,
+        "mean_abs": 5.399393524877875e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.602490670744473e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.36625481210649,
+        "mean_abs": 3.9041193056194936e-08
+      }
+    },
+    {
+      "op": "Tanh",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=tanh_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Tanh/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Tanh/model.onnx"
+      ],
+      "so_sha256": "a318383c046f80e414bfd30885163d0d4226f301a05140dbc40940e2afb9cb1f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Tanh, tanh_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "tanhf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.665008038339806e-08,
+        "max_rel": 1.538784154455607e-07,
+        "max_ulp_f32": 2.057080030441284,
+        "mean_abs": 1.6387567142439398e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 3.1978793369772814e-07,
+        "max_ulp_f32": 4.0,
+        "mean_abs": 3.861969250877154e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.602490670744473e-07,
+        "max_rel": 2.629751256416618e-07,
+        "max_ulp_f32": 4.36625481210649,
+        "mean_abs": 3.9041193056194936e-08
+      }
+    },
+    {
+      "op": "Erf",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=erf_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Erf/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Erf/model.onnx"
+      ],
+      "so_sha256": "83fa6411deb4829933388cd100b400e78b9012cfec23ac783c8418f972296345",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Erf, erf_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.731732900995709e-07,
+        "max_rel": 2.757389825269319e-07,
+        "max_ulp_f32": 4.583087293431163,
+        "mean_abs": 2.9677124345847958e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.980232238769531e-07,
+        "max_rel": 3.008223037838392e-07,
+        "max_ulp_f32": 5.0,
+        "mean_abs": 2.8218280138473755e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 5.6579309237747566e-08,
+        "max_rel": 8.032486603644975e-08,
+        "max_ulp_f32": 0.9492432922124863,
+        "mean_abs": 1.2644134179904324e-08
+      }
+    },
+    {
+      "op": "Erf",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=erf_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Erf/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Erf/model.onnx"
+      ],
+      "so_sha256": "6e5be8896bbb864b8aa45d1c66ea788c29c1de090b22b51f085e7f3b31aa4dc0",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Erf, erf_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.731732900995709e-07,
+        "max_rel": 2.757389825269319e-07,
+        "max_ulp_f32": 4.583087293431163,
+        "mean_abs": 2.9677124345847958e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.980232238769531e-07,
+        "max_rel": 3.008223037838392e-07,
+        "max_ulp_f32": 5.0,
+        "mean_abs": 2.8218280138473755e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 5.6579309237747566e-08,
+        "max_rel": 8.032486603644975e-08,
+        "max_ulp_f32": 0.9492432922124863,
+        "mean_abs": 1.2644134179904324e-08
+      }
+    },
+    {
+      "op": "Erf",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=erf_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Erf/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Erf/model.onnx"
+      ],
+      "so_sha256": "ce6e5201a651e8689ef0effe9780e4b6d7c192ddebc488617ac94713d5cde93b",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Erf, erf_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.731732900995709e-07,
+        "max_rel": 2.757389825269319e-07,
+        "max_ulp_f32": 4.583087293431163,
+        "mean_abs": 2.9677124345847958e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.980232238769531e-07,
+        "max_rel": 3.008223037838392e-07,
+        "max_ulp_f32": 5.0,
+        "mean_abs": 2.8218280138473755e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 5.6579309237747566e-08,
+        "max_rel": 8.032486603644975e-08,
+        "max_ulp_f32": 0.9492432922124863,
+        "mean_abs": 1.2644134179904324e-08
+      }
+    },
+    {
+      "op": "Erf",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=erf_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Erf/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Erf/model.onnx"
+      ],
+      "so_sha256": "2fab3353a8c2a566823b812ecffcd379ab74165ba508d9015e8cd743db78b735",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Erf, erf_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.731732900995709e-07,
+        "max_rel": 2.757389825269319e-07,
+        "max_ulp_f32": 4.583087293431163,
+        "mean_abs": 2.9677124345847958e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.980232238769531e-07,
+        "max_rel": 3.008223037838392e-07,
+        "max_ulp_f32": 5.0,
+        "mean_abs": 2.8218280138473755e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 5.6579309237747566e-08,
+        "max_rel": 8.032486603644975e-08,
+        "max_ulp_f32": 0.9492432922124863,
+        "mean_abs": 1.2644134179904324e-08
+      }
+    },
+    {
+      "op": "Exp",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=exp_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Exp/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Exp/model.onnx"
+      ],
+      "so_sha256": "d280edd0252c4cef661f28afdf1d0e6f8c64e80e1cbad02acad7f01e8ffb4ffe",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Exp, exp_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "expf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.468463435988717e+27,
+        "max_rel": 5.939583882255449e-08,
+        "max_ulp_f32": 0.50130195915699,
+        "mean_abs": 7.862125575491258e+24
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.951760157141521e+27,
+        "max_rel": 1.1878623277065086e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 2.2536722301958708e+24
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.2553950541426247e+27,
+        "max_rel": 7.24585499976837e-08,
+        "max_ulp_f32": 0.8328224066644907,
+        "mean_abs": 8.156563975017014e+24
+      }
+    },
+    {
+      "op": "Exp",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=exp_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Exp/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Exp/model.onnx"
+      ],
+      "so_sha256": "bc466b2c6636ba0973cc8692bf1c65244425d90404b6022f4d979af80a6c60f8",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Exp, exp_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.740255095323762e+27,
+        "max_rel": 8.199047221730628e-08,
+        "max_ulp_f32": 0.9947735909372568,
+        "mean_abs": 8.339070891706358e+24
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.951760157141521e+27,
+        "max_rel": 1.1878623277065086e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 2.9501237142913995e+24
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.2553950541426247e+27,
+        "max_rel": 7.24585499976837e-08,
+        "max_ulp_f32": 0.8328224066644907,
+        "mean_abs": 8.156563975017014e+24
+      }
+    },
+    {
+      "op": "Exp",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=exp_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Exp/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Exp/model.onnx"
+      ],
+      "so_sha256": "56de49789ac51b26aa4aa91e40e669c66dae84796d4d56d7b77ab7041de1013a",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Exp, exp_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.740255095323762e+27,
+        "max_rel": 8.199047221730628e-08,
+        "max_ulp_f32": 0.9947735909372568,
+        "mean_abs": 8.339070891706358e+24
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.951760157141521e+27,
+        "max_rel": 1.1878623277065086e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 2.9501237142913995e+24
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.2553950541426247e+27,
+        "max_rel": 7.24585499976837e-08,
+        "max_ulp_f32": 0.8328224066644907,
+        "mean_abs": 8.156563975017014e+24
+      }
+    },
+    {
+      "op": "Exp",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=exp_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Exp/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Exp/model.onnx"
+      ],
+      "so_sha256": "ff8620dc7610ea6e737b6ad013b9de137b584b179de0e6c3c8b448acd447f42c",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Exp, exp_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "expf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.468463435988717e+27,
+        "max_rel": 5.939583882255449e-08,
+        "max_ulp_f32": 0.50130195915699,
+        "mean_abs": 7.862125575491258e+24
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.951760157141521e+27,
+        "max_rel": 1.1878623277065086e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 2.2536722301958708e+24
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.2553950541426247e+27,
+        "max_rel": 7.24585499976837e-08,
+        "max_ulp_f32": 0.8328224066644907,
+        "mean_abs": 8.156563975017014e+24
+      }
+    },
+    {
+      "op": "Log",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=log_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Log/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Log/model.onnx"
+      ],
+      "so_sha256": "822180d5068e72a9fcd43a46ad6a1eec9a288257a079e89fa3af5e83a4622775",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Log, log_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "logf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3810906757404382e-07,
+        "max_rel": 7.054025516911098e-08,
+        "max_ulp_f32": 0.7487326562404633,
+        "mean_abs": 5.439097820208928e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 2.1432919249333435e-07,
+        "max_ulp_f32": 2.0,
+        "mean_abs": 1.3014202752496354e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 1.7597148423027847e-07,
+        "max_ulp_f32": 2.3103092089295387,
+        "mean_abs": 5.585235322436471e-08
+      }
+    },
+    {
+      "op": "Log",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=log_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Log/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Log/model.onnx"
+      ],
+      "so_sha256": "1b0d326e43064991ea990d6aa1603c4bc93e25453747cbe536d466e0691c6eef",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Log, log_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 8.149742300777456e-08,
+        "max_ulp_f32": 0.828408857807517,
+        "mean_abs": 5.530450716654404e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.1432919249333435e-07,
+        "max_ulp_f32": 2.0,
+        "mean_abs": 8.135531063639215e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 1.7597148423027847e-07,
+        "max_ulp_f32": 2.3103092089295387,
+        "mean_abs": 5.585235322436471e-08
+      }
+    },
+    {
+      "op": "Log",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=log_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Log/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Log/model.onnx"
+      ],
+      "so_sha256": "0a0bf6f1bb704e3cb153e0763c2963e589ff9c44340bc5af403823aabdfe0dcc",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Log, log_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 8.149742300777456e-08,
+        "max_ulp_f32": 0.828408857807517,
+        "mean_abs": 5.530450716654404e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.1432919249333435e-07,
+        "max_ulp_f32": 2.0,
+        "mean_abs": 8.135531063639215e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 1.7597148423027847e-07,
+        "max_ulp_f32": 2.3103092089295387,
+        "mean_abs": 5.585235322436471e-08
+      }
+    },
+    {
+      "op": "Log",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=log_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Log/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Log/model.onnx"
+      ],
+      "so_sha256": "31eccbc7be05816c411912e41e330fb20c9fa8296a3b91d4f635caf63c208a7d",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Log, log_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "logf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3810906757404382e-07,
+        "max_rel": 7.054025516911098e-08,
+        "max_ulp_f32": 0.7487326562404633,
+        "mean_abs": 5.439097820208928e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 2.1432919249333435e-07,
+        "max_ulp_f32": 2.0,
+        "mean_abs": 1.3014202752496354e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.652623658505604e-07,
+        "max_rel": 1.7597148423027847e-07,
+        "max_ulp_f32": 2.3103092089295387,
+        "mean_abs": 5.585235322436471e-08
+      }
+    },
+    {
+      "op": "Sigmoid",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sigmoid_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Sigmoid/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sigmoid/model.onnx"
+      ],
+      "so_sha256": "4dc9dde3575a47d9bd04ca6af5a32baae400e459b69ab47e052cb458ae63d9d9",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sigmoid-simd, sigmoid_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {
+        "expf": 64
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.873402002063102e-08,
+        "max_rel": 1.1699633560996032e-07,
+        "max_ulp_f32": 1.935125833377242,
+        "mean_abs": 1.5754512608944788e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 1.7881393432617188e-07,
+        "max_rel": 0.020241185238486843,
+        "max_ulp_f32": 176428.0,
+        "mean_abs": 2.3549706109950625e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.2533907434164604e-07,
+        "max_rel": 0.01983961702221982,
+        "max_ulp_f32": 176428.0813411437,
+        "mean_abs": 2.08646869161714e-08
+      }
+    },
+    {
+      "op": "Sigmoid",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sigmoid_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Sigmoid/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sigmoid/model.onnx"
+      ],
+      "so_sha256": "3957b653d68c4c5583588c2b006fb593ce22ab34ae760a01388de19372897fa0",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sigmoid-simd, sigmoid_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.873402002063102e-08,
+        "max_rel": 1.1656347907637123e-07,
+        "max_ulp_f32": 1.932614665478468,
+        "mean_abs": 1.5706334613718465e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 1.7881393432617188e-07,
+        "max_rel": 0.020241185238486843,
+        "max_ulp_f32": 176428.0,
+        "mean_abs": 2.347131081969119e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.2533907434164604e-07,
+        "max_rel": 0.01983961702221982,
+        "max_ulp_f32": 176428.0813411437,
+        "mean_abs": 2.08646869161714e-08
+      }
+    },
+    {
+      "op": "Sigmoid",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sigmoid_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Sigmoid/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sigmoid/model.onnx"
+      ],
+      "so_sha256": "a2a7cfa153a72080d7458815cd801f3465645e38e577475434f14dd79949a6f2",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sigmoid-simd, sigmoid_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.873402002063102e-08,
+        "max_rel": 1.1656347907637123e-07,
+        "max_ulp_f32": 1.932614665478468,
+        "mean_abs": 1.5706334613718465e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 1.7881393432617188e-07,
+        "max_rel": 0.020241185238486843,
+        "max_ulp_f32": 176428.0,
+        "mean_abs": 2.347131081969119e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.2533907434164604e-07,
+        "max_rel": 0.01983961702221982,
+        "max_ulp_f32": 176428.0813411437,
+        "mean_abs": 2.08646869161714e-08
+      }
+    },
+    {
+      "op": "Sigmoid",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sigmoid_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Sigmoid/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sigmoid/model.onnx"
+      ],
+      "so_sha256": "e1e8fbbe88a1d753234edef0aae594824ad45c2b2325bb46ec391bcf9af96e9b",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sigmoid-simd, sigmoid_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {
+        "expf": 64
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.873402002063102e-08,
+        "max_rel": 1.1699633560996032e-07,
+        "max_ulp_f32": 1.935125833377242,
+        "mean_abs": 1.5754512608944788e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 1.7881393432617188e-07,
+        "max_rel": 0.020241185238486843,
+        "max_ulp_f32": 176428.0,
+        "mean_abs": 2.3549706109950625e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.2533907434164604e-07,
+        "max_rel": 0.01983961702221982,
+        "max_ulp_f32": 176428.0813411437,
+        "mean_abs": 2.08646869161714e-08
+      }
+    },
+    {
+      "op": "Softmax",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=softmax_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Softmax/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Softmax/model.onnx"
+      ],
+      "so_sha256": "38ccdc3aee69e9e3c579d73c9db197c5acf7f9a3160039a2ab0058e4934e3ccc",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Softmax, softmax_node, unsupported, 0, 0"
+      ],
+      "libm_calls": {
+        "expf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.742265210435967e-06,
+        "max_rel": 3.4765808987970794e-06,
+        "max_ulp_f32": 55.00402058660984,
+        "mean_abs": 2.795814579413445e-10
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.086162567138672e-06,
+        "max_rel": 2.7794695868700636e-06,
+        "max_ulp_f32": 45.0,
+        "mean_abs": 2.745755279200087e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.438973567027048e-07,
+        "max_rel": 1.4541914363981758e-06,
+        "max_ulp_f32": 23.82758246548474,
+        "mean_abs": 3.293736384455102e-11
+      }
+    },
+    {
+      "op": "Softmax",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=softmax_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Softmax/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Softmax/model.onnx"
+      ],
+      "so_sha256": "c32ed8087678fe21d273734d57b0bedb3f2900330155aee5f0568d3179c24a30",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Softmax, softmax_node, unsupported, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.742265210435967e-06,
+        "max_rel": 3.4765808987970794e-06,
+        "max_ulp_f32": 55.00402058660984,
+        "mean_abs": 2.8135918792851916e-10
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.086162567138672e-06,
+        "max_rel": 2.7794695868700636e-06,
+        "max_ulp_f32": 44.0,
+        "mean_abs": 2.763900028642976e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.438973567027048e-07,
+        "max_rel": 1.4541914363981758e-06,
+        "max_ulp_f32": 23.82758246548474,
+        "mean_abs": 3.293736384455102e-11
+      }
+    },
+    {
+      "op": "Softmax",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=softmax_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Softmax/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Softmax/model.onnx"
+      ],
+      "so_sha256": "93ed7512468313352d67edc0cf0d8d2aeb98bb83f719c623e318898614babc65",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Softmax, softmax_node, unsupported, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.742265210435967e-06,
+        "max_rel": 3.4765808987970794e-06,
+        "max_ulp_f32": 55.00402058660984,
+        "mean_abs": 2.8135918792851916e-10
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.086162567138672e-06,
+        "max_rel": 2.7794695868700636e-06,
+        "max_ulp_f32": 44.0,
+        "mean_abs": 2.763900028642976e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.438973567027048e-07,
+        "max_rel": 1.4541914363981758e-06,
+        "max_ulp_f32": 23.82758246548474,
+        "mean_abs": 3.293736384455102e-11
+      }
+    },
+    {
+      "op": "Softmax",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=softmax_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Softmax/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Softmax/model.onnx"
+      ],
+      "so_sha256": "06278192e0d1d59ca0b43ab125c2f539c13e3809d272c427f995e7bf69f2f11e",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Softmax, softmax_node, unsupported, 0, 0"
+      ],
+      "libm_calls": {
+        "expf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 1.742265210435967e-06,
+        "max_rel": 3.4765808987970794e-06,
+        "max_ulp_f32": 55.00402058660984,
+        "mean_abs": 2.795814579413445e-10
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.086162567138672e-06,
+        "max_rel": 2.7794695868700636e-06,
+        "max_ulp_f32": 45.0,
+        "mean_abs": 2.745755279200087e-10
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.438973567027048e-07,
+        "max_rel": 1.4541914363981758e-06,
+        "max_ulp_f32": 23.82758246548474,
+        "mean_abs": 3.293736384455102e-11
+      }
+    },
+    {
+      "op": "Gelu_tanh",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_tanh_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_tanh/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_tanh/model.onnx"
+      ],
+      "so_sha256": "5707303d90cbe3319eaac1de5ae63391957d297d160032b0bc275643dc296a43",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_tanh_node, unary fully flattened, 16, 196608"
+      ],
+      "libm_calls": {
+        "powf": 32,
+        "tanhf": 32
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.328390392771553e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16776814.619740099,
+        "mean_abs": 3.429571029401165e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 9.5367431640625e-07,
+        "max_rel": 4.405948743624321e+23,
+        "max_ulp_f32": 3.144190089259268e+38,
+        "mean_abs": 4.1043723916590315e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 4.833991225647436,
+        "max_ulp_f32": 59102534.19212982,
+        "mean_abs": 5.429563049464498e-08
+      }
+    },
+    {
+      "op": "Gelu_tanh",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_tanh_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_tanh/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_tanh/model.onnx"
+      ],
+      "so_sha256": "bec21b4319efe2a3cfe456ec1052ecf85b62b3ca0d6445270848bd2f267e4cfb",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_tanh_node, unary fully flattened, 16, 196608"
+      ],
+      "libm_calls": {
+        "powf": 32
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16776814.619740099,
+        "mean_abs": 5.632122131952651e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 9.5367431640625e-07,
+        "max_rel": 3.0,
+        "max_ulp_f32": 30613437.0,
+        "mean_abs": 2.5119356033443997e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 4.833991225647436,
+        "max_ulp_f32": 59102534.19212982,
+        "mean_abs": 5.429563049464498e-08
+      }
+    },
+    {
+      "op": "Gelu_tanh",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_tanh_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_tanh/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_tanh/model.onnx"
+      ],
+      "so_sha256": "6798f29061983ad828466a3e13f0f4f69bfa4f3558b1916a0774abc83dab7a3f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_tanh_node, unary fully flattened, 16, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16776814.619740099,
+        "mean_abs": 5.6308520290264576e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 9.5367431640625e-07,
+        "max_rel": 3.0,
+        "max_ulp_f32": 30613437.0,
+        "mean_abs": 2.5259534242183756e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 4.833991225647436,
+        "max_ulp_f32": 59102534.19212982,
+        "mean_abs": 5.429563049464498e-08
+      }
+    },
+    {
+      "op": "Gelu_tanh",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_tanh_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_tanh/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_tanh/model.onnx"
+      ],
+      "so_sha256": "a5c820719bf31e26b9dfbbda2a829d67c6853ece10a08dbce987b58deb7850f0",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_tanh_node, unary fully flattened, 16, 196608"
+      ],
+      "libm_calls": {
+        "tanhf": 32
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.328390392771553e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16776814.619740099,
+        "mean_abs": 3.429769463453737e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 9.5367431640625e-07,
+        "max_rel": 4.405948743624321e+23,
+        "max_ulp_f32": 3.144190089259268e+38,
+        "mean_abs": 4.104272323557078e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 7.794175180819707e-07,
+        "max_rel": 4.833991225647436,
+        "max_ulp_f32": 59102534.19212982,
+        "mean_abs": 5.429563049464498e-08
+      }
+    },
+    {
+      "op": "Gelu_none",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_none_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_none/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_none/model.onnx"
+      ],
+      "so_sha256": "33fd12d1ca5f847a149334acf14d2d42146f5718a997fc4c50af248b4ac6439d",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_none_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.801597688341985e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 5.364530018932475e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 11623353.0,
+        "mean_abs": 3.5990473183514574e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.4689047307144847e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 3.654260743592278e-08
+      }
+    },
+    {
+      "op": "Gelu_none",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_none_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_none/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_none/model.onnx"
+      ],
+      "so_sha256": "62535d849c160850b4c9e25f24a1fef6204384331c0552fbffb454ab0edac2f8",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_none_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.801597688341985e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 5.364530018932475e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 11623353.0,
+        "mean_abs": 3.5990473183514574e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.4689047307144847e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 3.654260743592278e-08
+      }
+    },
+    {
+      "op": "Gelu_none",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_none_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_none/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_none/model.onnx"
+      ],
+      "so_sha256": "6472396eb5b96d35dd27ab1fa181ae4dc7061e6b9d8dd9afc73888b3a03b2c5a",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_none_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.801597688341985e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 5.364530018932475e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 11623353.0,
+        "mean_abs": 3.5990473183514574e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.4689047307144847e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 3.654260743592278e-08
+      }
+    },
+    {
+      "op": "Gelu_none",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=gelu_none_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Gelu_none/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Gelu_none/model.onnx"
+      ],
+      "so_sha256": "784bc179ac17b88ec38a274be5b2d9935c43ac8b3d3f4954bf9d0fa731d45374",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Gelu-simd, gelu_none_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.801597688341985e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 5.364530018932475e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 4.76837158203125e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 11623353.0,
+        "mean_abs": 3.5990473183514574e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 4.4689047307144847e-07,
+        "max_rel": 1.0,
+        "max_ulp_f32": 16774959.582448483,
+        "mean_abs": 3.654260743592278e-08
+      }
+    },
+    {
+      "op": "Pow3",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=pow3_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Pow3/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Pow3/model.onnx"
+      ],
+      "so_sha256": "35066c340988005121b79c8630ada81097c2772a7ecf40c6b7ed13ba842e1a6d",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_0, variadic fully flattened, 32, 196608",
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_1, variadic fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      }
+    },
+    {
+      "op": "Pow3",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=pow3_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Pow3/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Pow3/model.onnx"
+      ],
+      "so_sha256": "ce1df85d3bec153f9c11fc4c6311bda9f16edbb4e9d3c293225f777237d9b581",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_0, variadic fully flattened, 32, 196608",
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_1, variadic fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      }
+    },
+    {
+      "op": "Pow3",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=pow3_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Pow3/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Pow3/model.onnx"
+      ],
+      "so_sha256": "856ce016e6b188d7cadf5e8d5286a81c2bf0fb62b21816ae5d71a3dfa5917b5f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_0, variadic fully flattened, 32, 196608",
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_1, variadic fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      }
+    },
+    {
+      "op": "Pow3",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=pow3_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Pow3/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Pow3/model.onnx"
+      ],
+      "so_sha256": "4cf9b1867dfa8fcd913e984b1694ede63b438c3a936b6872b63e378ca2803cdc",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_0, variadic fully flattened, 32, 196608",
+        "==SIMD-REPORT==, onnx.Mul-simd, pow3_node_1, variadic fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 0.00019564764716051286,
+        "max_rel": 1.1730202244275425e-07,
+        "max_ulp_f32": 1.2755298092961311,
+        "mean_abs": 1.252093681760527e-06
+      }
+    },
+    {
+      "op": "Sin",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sin_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Sin/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sin/model.onnx"
+      ],
+      "so_sha256": "d3a39421e991b071c33003dda419affb90896c1bb806de846a6e1f1f9fd04532",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sin, sin_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "sinf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.238295909202549e-08,
+        "max_rel": 6.30856111007152e-08,
+        "max_ulp_f32": 0.5595965888351202,
+        "mean_abs": 1.1695795685554968e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 5.960464477539063e-08,
+        "max_rel": 1.1920059314215148e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 6.819882825137569e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.193847778059649e-08,
+        "max_rel": 1.378508640269987e-07,
+        "max_ulp_f32": 1.4351489041000605,
+        "mean_abs": 1.3709798379370596e-08
+      }
+    },
+    {
+      "op": "Sin",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sin_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Sin/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sin/model.onnx"
+      ],
+      "so_sha256": "6a28ed53bd439364867b07e623ae4ab4b1cbc812ba8901b39dc6088be3c2b994",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sin, sin_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.655371116565275e-06,
+        "max_rel": 4.154892706686815,
+        "max_ulp_f32": 34865319.37926531,
+        "mean_abs": 4.773328388584875e-07
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.6561319828033447e-06,
+        "max_rel": 4.154892473701315,
+        "max_ulp_f32": 34865319.0,
+        "mean_abs": 4.76468121723437e-07
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.193847778059649e-08,
+        "max_rel": 1.378508640269987e-07,
+        "max_ulp_f32": 1.4351489041000605,
+        "mean_abs": 1.3709798379370596e-08
+      }
+    },
+    {
+      "op": "Sin",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sin_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Sin/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sin/model.onnx"
+      ],
+      "so_sha256": "67f2774b64f51249499827cf7b600d2616a5172def466d2fa296a42f8c683ad6",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sin, sin_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.655371116565275e-06,
+        "max_rel": 4.154892706686815,
+        "max_ulp_f32": 34865319.37926531,
+        "mean_abs": 4.773328388584875e-07
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.6561319828033447e-06,
+        "max_rel": 4.154892473701315,
+        "max_ulp_f32": 34865319.0,
+        "mean_abs": 4.76468121723437e-07
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.193847778059649e-08,
+        "max_rel": 1.378508640269987e-07,
+        "max_ulp_f32": 1.4351489041000605,
+        "mean_abs": 1.3709798379370596e-08
+      }
+    },
+    {
+      "op": "Sin",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sin_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Sin/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sin/model.onnx"
+      ],
+      "so_sha256": "cf642818bd62e5a44fa4614bf33591544256446277e9d8697cbd498b71135548",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sin, sin_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "sinf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.238295909202549e-08,
+        "max_rel": 6.30856111007152e-08,
+        "max_ulp_f32": 0.5595965888351202,
+        "mean_abs": 1.1695795685554968e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 5.960464477539063e-08,
+        "max_rel": 1.1920059314215148e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 6.819882825137569e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.193847778059649e-08,
+        "max_rel": 1.378508640269987e-07,
+        "max_ulp_f32": 1.4351489041000605,
+        "mean_abs": 1.3709798379370596e-08
+      }
+    },
+    {
+      "op": "Cos",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=cos_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Cos/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Cos/model.onnx"
+      ],
+      "so_sha256": "bae5781b27ad7fcd206b85f2d3d54164c87eb73ba85557ead30e2db2e62bbca6",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Cos, cos_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "cosf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.236473722356692e-08,
+        "max_rel": 6.316261610961024e-08,
+        "max_ulp_f32": 0.5587889179587364,
+        "mean_abs": 1.1615440304277228e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 5.960464477539063e-08,
+        "max_rel": 1.1920836585238214e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 7.029150964991497e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.234949222529764e-08,
+        "max_rel": 1.4438840122240857e-07,
+        "max_ulp_f32": 1.4335316568613052,
+        "mean_abs": 1.3733220820232845e-08
+      }
+    },
+    {
+      "op": "Cos",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=cos_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Cos/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Cos/model.onnx"
+      ],
+      "so_sha256": "3c32b2ff87c5f332f7020211ffdbb0606c643fa3744cce235c4b96a5356d8159",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Cos, cos_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.7219276302267725e-06,
+        "max_rel": 0.06985183009708312,
+        "max_ulp_f32": 730159.8624295834,
+        "mean_abs": 4.818966199462603e-07
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.7194619178771973e-06,
+        "max_rel": 0.06985184417727346,
+        "max_ulp_f32": 730160.0,
+        "mean_abs": 4.809491191415383e-07
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.234949222529764e-08,
+        "max_rel": 1.4438840122240857e-07,
+        "max_ulp_f32": 1.4335316568613052,
+        "mean_abs": 1.3733220820232845e-08
+      }
+    },
+    {
+      "op": "Cos",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=cos_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Cos/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Cos/model.onnx"
+      ],
+      "so_sha256": "17f31c0c5a51e6cb99b3e34880b201bb3e349d965555dcc1a07f541946a410cf",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Cos, cos_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.7219276302267725e-06,
+        "max_rel": 0.06985183009708312,
+        "max_ulp_f32": 730159.8624295834,
+        "mean_abs": 4.818966199462603e-07
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.7194619178771973e-06,
+        "max_rel": 0.06985184417727346,
+        "max_ulp_f32": 730160.0,
+        "mean_abs": 4.809491191415383e-07
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.234949222529764e-08,
+        "max_rel": 1.4438840122240857e-07,
+        "max_ulp_f32": 1.4335316568613052,
+        "mean_abs": 1.3733220820232845e-08
+      }
+    },
+    {
+      "op": "Cos",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=cos_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Cos/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Cos/model.onnx"
+      ],
+      "so_sha256": "8950b875b132535d0dd86ef1865496007bebf83bcc3794a7cd87504569d6672f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Cos, cos_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "cosf": 48
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 3.236473722356692e-08,
+        "max_rel": 6.316261610961024e-08,
+        "max_ulp_f32": 0.5587889179587364,
+        "mean_abs": 1.1615440304277228e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 5.960464477539063e-08,
+        "max_rel": 1.1920836585238214e-07,
+        "max_ulp_f32": 1.0,
+        "mean_abs": 7.029150964991497e-09
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 8.234949222529764e-08,
+        "max_rel": 1.4438840122240857e-07,
+        "max_ulp_f32": 1.4335316568613052,
+        "mean_abs": 1.3733220820232845e-08
+      }
+    },
+    {
+      "op": "Sqrt",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sqrt_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Sqrt/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sqrt/model.onnx"
+      ],
+      "so_sha256": "1521a245b953e3a8c8dda73f3ab8012a84bde1acb9df13a47f6de739b3cd5d10",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sqrt-simd, sqrt_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      }
+    },
+    {
+      "op": "Sqrt",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sqrt_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Sqrt/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sqrt/model.onnx"
+      ],
+      "so_sha256": "473b4cd5dc4a9000266ff3e42d888d5f0f5790f99bdebdd3cf0c435223ff719c",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sqrt-simd, sqrt_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      }
+    },
+    {
+      "op": "Sqrt",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sqrt_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Sqrt/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sqrt/model.onnx"
+      ],
+      "so_sha256": "846399f8dc1b4d0a898eb4c8c80bf721633c1f11a58ab73f05699860420278d4",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sqrt-simd, sqrt_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      }
+    },
+    {
+      "op": "Sqrt",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=sqrt_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Sqrt/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Sqrt/model.onnx"
+      ],
+      "so_sha256": "1bb6bc90f70dca3b49e4f46fbfbe21f1887194e8b2ce96f4bcce6f9fc6e2585f",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Sqrt-simd, sqrt_node, unary fully flattened, 32, 196608"
+      ],
+      "libm_calls": {},
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 0.0,
+        "max_rel": 0.0,
+        "max_ulp_f32": 0.0,
+        "mean_abs": 0.0
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.3841632135201962e-07,
+        "max_rel": 5.9586883089200095e-08,
+        "max_ulp_f32": 0.4999962281435728,
+        "mean_abs": 9.741626178920021e-08
+      }
+    },
+    {
+      "op": "Atan",
+      "variant": "orig",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=atan_orig",
+        "-o",
+        "/home/user/work/r1/math_scan/Atan/orig/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Atan/model.onnx"
+      ],
+      "so_sha256": "f86e448aa4ad3a5c5cb61d4522357c877ba7171e383b2a4b0de17ee0fda25efc",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Atan, atan_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "atanf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.022030966754357e-08,
+        "max_rel": 8.18313258372751e-08,
+        "max_ulp_f32": 0.8352429457008839,
+        "mean_abs": 2.336533182682525e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.3532866943287674e-07,
+        "max_ulp_f32": 3.0,
+        "mean_abs": 3.792038905103823e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.1761040103207563e-07,
+        "max_rel": 2.2607291567982295e-07,
+        "max_ulp_f32": 3.2793183233588934,
+        "mean_abs": 4.173381041903894e-08
+      }
+    },
+    {
+      "op": "Atan",
+      "variant": "r1a",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1a/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=atan_r1a",
+        "-o",
+        "/home/user/work/r1/math_scan/Atan/r1a/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Atan/model.onnx"
+      ],
+      "so_sha256": "12001cb58b6e85430c2baf79460b0c99cd5e017d34d2f4c35adfcaf9675abff6",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Atan, atan_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "atanf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.022030966754357e-08,
+        "max_rel": 8.18313258372751e-08,
+        "max_ulp_f32": 0.8352429457008839,
+        "mean_abs": 2.336533182682525e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.3532866943287674e-07,
+        "max_ulp_f32": 3.0,
+        "mean_abs": 3.792038905103823e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.1761040103207563e-07,
+        "max_rel": 2.2607291567982295e-07,
+        "max_ulp_f32": 3.2793183233588934,
+        "mean_abs": 4.173381041903894e-08
+      }
+    },
+    {
+      "op": "Atan",
+      "variant": "r1b",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1b/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=atan_r1b",
+        "-o",
+        "/home/user/work/r1/math_scan/Atan/r1b/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Atan/model.onnx"
+      ],
+      "so_sha256": "effec7022e72073ebdd2ea51edbc218379efe981c31ccf26b91b3e83595a428e",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Atan, atan_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "atanf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.022030966754357e-08,
+        "max_rel": 8.18313258372751e-08,
+        "max_ulp_f32": 0.8352429457008839,
+        "mean_abs": 2.336533182682525e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.3532866943287674e-07,
+        "max_ulp_f32": 3.0,
+        "mean_abs": 3.792038905103823e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.1761040103207563e-07,
+        "max_rel": 2.2607291567982295e-07,
+        "max_ulp_f32": 3.2793183233588934,
+        "mean_abs": 4.173381041903894e-08
+      }
+    },
+    {
+      "op": "Atan",
+      "variant": "r1c",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "compile_rc": 0,
+      "command": [
+        "/home/user/work/variants/r1c/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--opt-report=Simd",
+        "--tag=atan_r1c",
+        "-o",
+        "/home/user/work/r1/math_scan/Atan/r1c/model",
+        "--EmitLib",
+        "/home/user/work/r1/math_scan/Atan/model.onnx"
+      ],
+      "so_sha256": "1103a60c92faed41680cd880981214106b90b73e8a947a424f45cce0ab93d70e",
+      "simd_report": [
+        "==SIMD-REPORT==, onnx.Atan, atan_node, no simd in unary because could not find beneficial VL, 0, 0"
+      ],
+      "libm_calls": {
+        "atanf": 16
+      },
+      "vs_float64_reference": {
+        "finite": true,
+        "max_abs": 9.022030966754357e-08,
+        "max_rel": 8.18313258372751e-08,
+        "max_ulp_f32": 0.8352429457008839,
+        "mean_abs": 2.336533182682525e-08
+      },
+      "vs_ort": {
+        "finite": true,
+        "max_abs": 2.384185791015625e-07,
+        "max_rel": 2.3532866943287674e-07,
+        "max_ulp_f32": 3.0,
+        "mean_abs": 3.792038905103823e-08
+      },
+      "ort_vs_float64_reference": {
+        "finite": true,
+        "max_abs": 2.1761040103207563e-07,
+        "max_rel": 2.2607291567982295e-07,
+        "max_ulp_f32": 3.2793183233588934,
+        "mean_abs": 4.173381041903894e-08
+      }
+    }
+  ],
+  "note": "static counts and numerics only; nothing timed"
+}

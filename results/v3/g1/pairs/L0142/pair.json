@@ -1,0 +1,99 @@
+{
+  "length": 142,
+  "provenance_id": "27df5131bfe8bab4",
+  "probe_failures": {
+    "S8": null,
+    "S1": null
+  },
+  "ir_check": {
+    "length": 142,
+    "u": 2,
+    "unrolled_loops": {
+      "S8": 13,
+      "S1": 0
+    },
+    "predicted_unrolled_loops": {
+      "S8": 13,
+      "S1": 0
+    },
+    "ir_identical": false,
+    "predicted_ir_identical": false,
+    "normalized_diff": {
+      "hunks": 13,
+      "changed_lines": 65
+    },
+    "prediction_holds": true
+  },
+  "probe_signatures": {
+    "S8": {
+      "opt_report": "b741b410095a0717",
+      "ir_structure": "30076451eee46564",
+      "raw_ir_hash": "b1cda34376d1fe37"
+    },
+    "S1": {
+      "opt_report": "b741b410095a0717",
+      "ir_structure": "f60e7fa35ca37a54",
+      "raw_ir_hash": "0b7fb1678a3c96cc"
+    }
+  },
+  "full": {
+    "S8": {
+      "failure_type": null,
+      "artifact_path": "/home/user/work/v3/g1/pairs/L0142/S8_full/model.so",
+      "artifact_hash": "3cfb85ccde26656dd177574f4f691ca400e1707d9162adb2453db58f0d902e52",
+      "artifact_bytes": 435345640,
+      "compile_wall_ns": 88377250978,
+      "peak_rss_bytes": 2779344896,
+      "compiler_variant": "orig",
+      "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compile_flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids"
+      ],
+      "command": [
+        "/home/user/work/variants/orig/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--shapeInformation=0:1,1:1x142,2:1x142,3:1x142",
+        "-o",
+        "/home/user/work/v3/g1/pairs/L0142/S8_full/model",
+        "--opt-report=Simd",
+        "--EmitLib",
+        "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+      ],
+      "matmul_path": "compiler-generated"
+    },
+    "S1": {
+      "failure_type": null,
+      "artifact_path": "/home/user/work/v3/g1/pairs/L0142/S1_full/model.so",
+      "artifact_hash": "29c84933982c720cd15da8205621c188924d90e95bf2deb292535799ef71a45c",
+      "artifact_bytes": 435345640,
+      "compile_wall_ns": 87104055392,
+      "peak_rss_bytes": 2788769792,
+      "compiler_variant": "cap1",
+      "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+      "compile_flags": [
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids"
+      ],
+      "command": [
+        "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "-O3",
+        "--march=x86-64",
+        "--mcpu=emeraldrapids",
+        "--shapeInformation=0:1,1:1x142,2:1x142,3:1x142",
+        "-o",
+        "/home/user/work/v3/g1/pairs/L0142/S1_full/model",
+        "--opt-report=Simd",
+        "--EmitLib",
+        "/home/user/Shape-Perf/data/artifacts/derived/bertsquad-12-reexport-dynseq.onnx"
+      ],
+      "matmul_path": "compiler-generated"
+    }
+  },
+  "so_identical": false,
+  "predicted_so_identical": false
+}

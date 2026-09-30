@@ -1,0 +1,1 @@
+{"name": "SAME_L1a8a_C8a", "arts": {"S1a": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so", "tag": "alpha"}, "S8a": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so", "tag": "alpha"}}, "steps": [["load", "S1a"], ["load", "S8a"], ["call", "S8a"], ["call", "S1a"]]}

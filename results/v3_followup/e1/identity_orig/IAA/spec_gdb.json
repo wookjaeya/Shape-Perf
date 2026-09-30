@@ -1,0 +1,26 @@
+{
+  "arms": {
+    "AA": {
+      "path": "/home/user/work/v3_followup/e1/orig_aa/AA_full/model.so",
+      "tag": null,
+      "copy_of": "S8"
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "AA"
+    ],
+    [
+      "call",
+      "AA"
+    ],
+    [
+      "call",
+      "AA"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3/g2/K/L0064/input.npy",
+  "expected_npy": "/home/user/work/v3/g2/K/L0064/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/IAA/calls_gdb.jsonl"
+}

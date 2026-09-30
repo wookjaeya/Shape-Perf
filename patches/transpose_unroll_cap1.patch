@@ -1,0 +1,13 @@
+diff --git a/src/Conversion/ONNXToKrnl/Tensor/Transpose.cpp b/src/Conversion/ONNXToKrnl/Tensor/Transpose.cpp
+index b0f7a33..bbfdd32 100644
+--- a/src/Conversion/ONNXToKrnl/Tensor/Transpose.cpp
++++ b/src/Conversion/ONNXToKrnl/Tensor/Transpose.cpp
+@@ -204,7 +204,7 @@ private:
+ 
+     SmallVector<Value, 4> optimizedLoopDef = loopDef;
+     // Test for easy unrolling for the innermost store dimension.
+-    const int64_t unroll = 8;
++    const int64_t unroll = 1; // shapeperf experiment: was 8
+     int64_t uDim = rank - 1;
+     if (parId < uDim) {
+       int64_t tripCount;

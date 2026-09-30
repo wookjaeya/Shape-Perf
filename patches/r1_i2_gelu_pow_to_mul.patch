@@ -1,0 +1,23 @@
+diff --git a/src/Conversion/ONNXToKrnl/Math/Elementwise.cpp b/src/Conversion/ONNXToKrnl/Math/Elementwise.cpp
+index 9e76816..e8323e2 100644
+--- a/src/Conversion/ONNXToKrnl/Math/Elementwise.cpp
++++ b/src/Conversion/ONNXToKrnl/Math/Elementwise.cpp
+@@ -390,12 +390,15 @@ Value emitScalarOpFor<ONNXGeluOp>(ConversionPatternRewriter &rewriter,
+   // * (x + 0.044715 * x^3)))
+   if (approximate.equals_insensitive("tanh")) {
+     // Create constants
+-    Value three = create.math.constant(elementType, 3);
+     Value decimal = create.math.constant(elementType, 0.044715);
+     Value sqrtTwoOverPi = create.math.constant(elementType, sqrt(2 / M_PI));
+     // Calculations
+-    Value dec = create.math.add(
+-        operand, create.math.mul(decimal, create.math.pow(operand, three)));
++    // shapeperf R1 (I2): x^3 as x * (x * x) instead of math.pow(x, 3), which
++    // lowers to a scalar libm powf call per vector lane.
++    Value cube =
++        create.math.mul(operand, create.math.mul(operand, operand));
++    Value dec =
++        create.math.add(operand, create.math.mul(decimal, cube));
+     Value tanhApprox = create.math.tanh(create.math.mul(sqrtTwoOverPi, dec));
+     return create.math.mul(halfTimesOperand, create.math.add(one, tanhApprox));
+   }

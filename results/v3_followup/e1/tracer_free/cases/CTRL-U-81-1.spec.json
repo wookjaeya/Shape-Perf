@@ -1,0 +1,39 @@
+{
+ "case_id": "CTRL-U-81-1",
+ "artifacts": {
+  "S1": {
+   "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+   "tag": null
+  },
+  "S8": {
+   "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+   "tag": null
+  }
+ },
+ "steps": [
+  [
+   "load",
+   "S8"
+  ],
+  [
+   "load",
+   "S1"
+  ],
+  [
+   "call",
+   "S1"
+  ],
+  [
+   "call",
+   "S8"
+  ],
+  [
+   "call",
+   "S1"
+  ],
+  [
+   "call",
+   "S8"
+  ]
+ ]
+}

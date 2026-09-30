@@ -1,0 +1,16 @@
+{
+  "compilers": {
+    "orig": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+    "r1a": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+    "r1b": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+    "r1c": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5"
+  },
+  "patches": {
+    "r1_i1_math_approx_benefit.patch": "6261a6799805d677ff7b1b951c72ba2795f712ef16f5a72d2d0a85e317994bce",
+    "r1_i2_gelu_pow_to_mul.patch": "3ba037ec79c86381d28cceea74caab8c58c0e4335d76d9f88ead9c5d70d5d977"
+  },
+  "reverted_rebuild_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+  "reverted_equals_orig": true,
+  "procedure": "scripts/build_r1_variants.sh (log: results/r1/r1_variants.build.log)",
+  "onnx_mlir_head": "1e017c9fcd7ae7218731ae799f13a957e0cbc80b"
+}

@@ -1,0 +1,69 @@
+diff --git a/src/Conversion/KrnlToLLVM/ConvertKrnlToLLVM.cpp b/src/Conversion/KrnlToLLVM/ConvertKrnlToLLVM.cpp
+index f921d79..529b431 100644
+--- a/src/Conversion/KrnlToLLVM/ConvertKrnlToLLVM.cpp
++++ b/src/Conversion/KrnlToLLVM/ConvertKrnlToLLVM.cpp
+@@ -36,6 +36,7 @@
+ #include "mlir/Dialect/Func/IR/FuncOps.h"
+ #include "mlir/Dialect/Func/Transforms/Passes.h"
+ #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
++#include "mlir/Dialect/Math/IR/Math.h"
+ #include "mlir/Dialect/Math/Transforms/Passes.h"
+ #include "mlir/Dialect/MemRef/Transforms/Passes.h"
+ #include "mlir/Dialect/MemRef/Transforms/Transforms.h"
+@@ -222,7 +223,55 @@ void populateAffineAndKrnlToLLVMConversion(RewritePatternSet &patterns,
+   memref::populateExpandOpsPatterns(patterns);
+   // Use polynomial approximation for math.{tanh, sin, cos and exp} for better
+   // performance.
+-  populateMathPolynomialApproximationPatterns(patterns);
++  // shapeperf R1 (I1): the same ops as the legacy overload of
++  // populateMathPolynomialApproximationPatterns, but with a benefit above the
++  // MathToLLVM patterns added to this same pattern set, so that the intended
++  // approximation is not pre-empted by the math -> LLVM intrinsic lowering.
++  {
++    const PatternBenefit approxBenefit = 2;
++    populateMathF32ExpansionPatterns(
++        patterns,
++        [](StringRef name) -> bool {
++          return llvm::is_contained(
++              {math::AtanOp::getOperationName(),
++                  math::Atan2Op::getOperationName(),
++                  math::TanhOp::getOperationName(),
++                  math::LogOp::getOperationName(),
++                  math::Log2Op::getOperationName(),
++                  math::Log1pOp::getOperationName(),
++                  math::ErfOp::getOperationName(),
++                  math::ErfcOp::getOperationName(),
++                  math::ExpOp::getOperationName(),
++                  math::ExpM1Op::getOperationName(),
++                  math::CbrtOp::getOperationName(),
++                  math::SinOp::getOperationName(),
++                  math::CosOp::getOperationName()},
++              name);
++        },
++        approxBenefit);
++    populateMathPolynomialApproximationPatterns(
++        patterns,
++        [](StringRef name) -> bool {
++          return llvm::is_contained(
++              {math::AtanOp::getOperationName(),
++                  math::Atan2Op::getOperationName(),
++                  math::TanhOp::getOperationName(),
++                  math::LogOp::getOperationName(),
++                  math::Log2Op::getOperationName(),
++                  math::Log1pOp::getOperationName(),
++                  math::ErfOp::getOperationName(),
++                  math::ErfcOp::getOperationName(),
++                  math::AsinOp::getOperationName(),
++                  math::AcosOp::getOperationName(),
++                  math::ExpOp::getOperationName(),
++                  math::ExpM1Op::getOperationName(),
++                  math::CbrtOp::getOperationName(),
++                  math::SinOp::getOperationName(),
++                  math::CosOp::getOperationName()},
++              name);
++        },
++        approxBenefit);
++  }
+   arith::populateArithExpandOpsPatterns(patterns);
+   populateMathToLLVMConversionPatterns(typeConverter, patterns);
+   populateFuncToLLVMConversionPatterns(typeConverter, patterns);

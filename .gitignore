@@ -18,3 +18,5 @@ census/*
 __pycache__/
 *.pyc
 .pytest_cache/
+# In-progress working files of the resumable R1 SQuAD evaluation (merged into logits.npz at the end)
+results/r1/squad/*/shard*

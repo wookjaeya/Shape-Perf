@@ -1,0 +1,41 @@
+{
+  "arms": {
+    "S1": {
+      "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+      "tag": null
+    },
+    "S8": {
+      "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "tag": null
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "S8"
+    ],
+    [
+      "load",
+      "S1"
+    ],
+    [
+      "call",
+      "S8"
+    ],
+    [
+      "call",
+      "S1"
+    ],
+    [
+      "call",
+      "S8"
+    ],
+    [
+      "call",
+      "S1"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3/g2/K/L0064/input.npy",
+  "expected_npy": "/home/user/work/v3/g2/K/L0064/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_orig/C81-8/calls_gdb.jsonl"
+}

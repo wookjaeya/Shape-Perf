@@ -1,0 +1,1 @@
+{"name": "T_L8a1b_C8a", "arts": {"S1b": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model.so", "tag": "bravo"}, "S8a": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so", "tag": "alpha"}}, "steps": [["load", "S8a"], ["load", "S1b"], ["call", "S8a"], ["call", "S1b"], ["call", "S8a"], ["call", "S1b"]]}

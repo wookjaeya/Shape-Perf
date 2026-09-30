@@ -1,0 +1,56 @@
+{
+  "length": 256,
+  "flagset": "default",
+  "arms": {
+    "orig": {
+      "so_sha256": "104db65ea839620e45d05342d4f0eb1e38cde794a85876ca818b18f94cbbb6e6",
+      "compiler_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "libm_call_sites": {
+        "expf": 96,
+        "powf": 192,
+        "tanhf": 192
+      },
+      "simd_report_lines": 582,
+      "simd_report_sha256_without_node_names": "593cd7b3cb2a2b422777eeef062520de77177ee45c36d5a54a05532a9714af93",
+      "gelu_reports": [
+        "unary fully flattened,16,786432"
+      ]
+    },
+    "r1a": {
+      "so_sha256": "366bab970cde7f8704ada1b7247873b4d9212f645ab891a03ab369a64411616b",
+      "compiler_sha256": "a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032",
+      "libm_call_sites": {
+        "powf": 192
+      },
+      "simd_report_lines": 582,
+      "simd_report_sha256_without_node_names": "593cd7b3cb2a2b422777eeef062520de77177ee45c36d5a54a05532a9714af93",
+      "gelu_reports": [
+        "unary fully flattened,16,786432"
+      ]
+    },
+    "r1b": {
+      "so_sha256": "4cba4021eca380e66dac6306a0e8fbce5d8b2b693ba2fe97b8d29396bcc52b71",
+      "compiler_sha256": "366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2",
+      "libm_call_sites": {},
+      "simd_report_lines": 582,
+      "simd_report_sha256_without_node_names": "593cd7b3cb2a2b422777eeef062520de77177ee45c36d5a54a05532a9714af93",
+      "gelu_reports": [
+        "unary fully flattened,16,786432"
+      ]
+    },
+    "r1c": {
+      "so_sha256": "9625ab6249000fca0ee02bad113c7c282a4e5ffe6e547b139bf590a669cba612",
+      "compiler_sha256": "bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5",
+      "libm_call_sites": {
+        "expf": 96,
+        "tanhf": 192
+      },
+      "simd_report_lines": 582,
+      "simd_report_sha256_without_node_names": "593cd7b3cb2a2b422777eeef062520de77177ee45c36d5a54a05532a9714af93",
+      "gelu_reports": [
+        "unary fully flattened,16,786432"
+      ]
+    }
+  },
+  "note": "libm call sites counted in the final .so (objdump); opt-report lines compared after removing node names"
+}

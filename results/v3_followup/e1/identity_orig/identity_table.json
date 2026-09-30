@@ -1,35 +1,235 @@
 {
   "set": "orig",
   "cell": "/home/user/work/v3/g2/K/L0064",
-  "provenance_id": "510f2a5fcdeb9904",
+  "provenance_id": "2aac731608d0c27f",
   "source": {
-    "git_head": "1865924fc22477ff376da2c0dabeef3eddf0542c",
+    "git_head": "14674fabbbd6e331c2da49449e913e127b261762",
     "dirty": true,
-    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diff_sha256": "4c5a4e91e0645c955f206bb542cfc3d2973a069be792bbafa143b8f78a3041ff",
     "untracked_files": [
-      "results/v3_followup/e0/artifacts_L0064/build.json",
-      "results/v3_followup/e0/artifacts_L0064/expected.npy",
-      "results/v3_followup/e0/artifacts_L0064/input.npy",
-      "results/v3_followup/e0/artifacts_L0064/model.onnx",
-      "results/v3_followup/e0/logs/v3_g2_build.log",
-      "results/v3_followup/e0/logs/v3_g2_measure.log",
-      "results/v3_followup/e0/logs/v3_g2_replicate.log",
-      "results/v3_followup/e0/manifest.json",
-      "results/v3_followup/e0/provenance.json",
-      "results/v3_followup/e0/repo_state/git_diff.binary.patch",
-      "results/v3_followup/e1/elf_orig/s1.disasm.txt",
-      "results/v3_followup/e1/elf_orig/s1.dynamic.txt",
-      "results/v3_followup/e1/elf_orig/s1.dynsym.txt",
-      "results/v3_followup/e1/elf_orig/s1.notes.txt",
-      "results/v3_followup/e1/elf_orig/s1.reloc.txt",
-      "results/v3_followup/e1/elf_orig/s8.disasm.txt",
-      "results/v3_followup/e1/elf_orig/s8.dynamic.txt",
-      "results/v3_followup/e1/elf_orig/s8.dynsym.txt",
-      "results/v3_followup/e1/elf_orig/s8.notes.txt",
-      "results/v3_followup/e1/elf_orig/s8.reloc.txt",
-      "results/v3_followup/e1/elf_orig/sha256.txt"
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "calls",
+      "log)/calls_ld_bindnow.jsonl",
+      "log)/calls_ld_lazy.jsonl",
+      "log)/case.json",
+      "log)/gdb_hits.jsonl",
+      "log)/gdb_stdout.txt",
+      "log)/ld_bindings_bindnow.txt",
+      "log)/ld_bindings_lazy.txt",
+      "log)/spec_gdb.json",
+      "log)/spec_ld_bindnow.json",
+      "log)/spec_ld_lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/drive.py",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/extra.py",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/probe.py",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L18_C8.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L18_C8.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L18_C8.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L81_C1.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L81_C1.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/CTRL_L81_C1.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S1.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S1.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S1.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S8.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S8.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/ISO_S8.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C1a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C1a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C1a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C8a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L1a8a_C8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C1a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C1a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C1a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C8a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/SAME_L8a1a_C8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C1b.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C1b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C1b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C8a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L1b8a_C8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C1b.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C1b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C1b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C8a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_L8a1b_C8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_1b_8a.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_1b_8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_1b_8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_8a_1b.bindnow.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_8a_1b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/T_SEQ_8a_1b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L1a8b_C8b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L1a8b_C8b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8a8b_C8b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8a8b_C8b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8b1a_C1a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8b1a_C1a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8b8a_C8a.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_L8b8a_C8a.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_SAME_L1b8b_C8b.lazy.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/runs/X_SAME_L1b8b_C8b.spec.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/static.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/static_info.py",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/summarize.py",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/summary.json",
+      "results/v3_followup/e1/tracer_free/AC_gotcheck/summary.txt",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/got_probe.py",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/make_poison.py",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_18_callEarlierFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_18_callLaterFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_81_callEarlierFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_81_callLaterFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_I1.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/lazy_I8.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_18_callEarlierFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_18_callLaterFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_81_callEarlierFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_81_callLaterFirst.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_I1.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/runs/now_I8.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/summarize.py",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/trap_matrix.json",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/trap_matrix.py",
+      "results/v3_followup/e1/tracer_free/B_tracerfree/trap_run.py",
+      "results/v3_followup/e1/tracer_free/cases/A-ISO-S1.out.json",
+      "results/v3_followup/e1/tracer_free/cases/A-ISO-S1.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/A-ISO-S8.out.json",
+      "results/v3_followup/e1/tracer_free/cases/A-ISO-S8.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-1b8a-1b.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-1b8a-1b.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-1b8a-8a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-1b8a-8a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a1b-1b.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a1b-1b.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a1b-8a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a1b-8a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a8b-8b.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-8a8b-8b.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-SEQ-1b-call-8a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-SEQ-1b-call-8a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/C-SEQ-8a-call-1b.out.json",
+      "results/v3_followup/e1/tracer_free/cases/C-SEQ-8a-call-1b.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/CTRL-U-18-8.out.json",
+      "results/v3_followup/e1/tracer_free/cases/CTRL-U-18-8.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/CTRL-U-81-1.out.json",
+      "results/v3_followup/e1/tracer_free/cases/CTRL-U-81-1.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-1a8a-1a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-1a8a-1a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-1a8a-8a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-1a8a-8a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-8a1a-1a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-8a1a-1a.spec.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-8a1a-8a.out.json",
+      "results/v3_followup/e1/tracer_free/cases/SAME-8a1a-8a.spec.json",
+      "results/v3_followup/e1/tracer_free/dis_S1_alpha_full_main_graph.txt",
+      "results/v3_followup/e1/tracer_free/dis_S1_bravo_full_main_graph.txt",
+      "results/v3_followup/e1/tracer_free/dis_S1_full_main_graph.txt",
+      "results/v3_followup/e1/tracer_free/dis_S8_alpha_full_main_graph.txt",
+      "results/v3_followup/e1/tracer_free/dis_S8_full_main_graph.txt",
+      "results/v3_followup/e1/tracer_free/got_probe.py",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callEarlierFirst_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callEarlierFirst_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callEarlierFirst_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callEarlierFirst_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterFirst_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterFirst_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterFirst_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterFirst_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterOnly_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterOnly_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterOnly_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C18_callLaterOnly_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callEarlierFirst_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callEarlierFirst_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callEarlierFirst_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callEarlierFirst_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterFirst_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterFirst_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterFirst_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterFirst_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterOnly_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterOnly_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterOnly_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/C81_callLaterOnly_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I1_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I1_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I1_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I1_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I8_bindnow.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I8_bindnow.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I8_lazy.json",
+      "results/v3_followup/e1/tracer_free/got_runs/I8_lazy.spec.json",
+      "results/v3_followup/e1/tracer_free/got_runs/index.json",
+      "results/v3_followup/e1/tracer_free/got_runs_stdout.txt",
+      "results/v3_followup/e1/tracer_free/gotprobe.py",
+      "results/v3_followup/e1/tracer_free/none/f.c",
+      "results/v3_followup/e1/tracer_free/nosh/f.c",
+      "results/v3_followup/e1/tracer_free/run_cases.py",
+      "results/v3_followup/e1/tracer_free/run_got.py",
+      "results/v3_followup/e1/tracer_free/run_probe.py",
+      "results/v3_followup/e1/tracer_free/run_probe_aa.py",
+      "results/v3_followup/e1/tracer_free/sim/baseline/calls_gdb.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/baseline/calls_ld_bindnow.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/baseline/calls_ld_lazy.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/baseline/case.json",
+      "results/v3_followup/e1/tracer_free/sim/baseline/gdb_hits.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/baseline/gdb_stdout.txt",
+      "results/v3_followup/e1/tracer_free/sim/baseline/ld_bindings_bindnow.txt",
+      "results/v3_followup/e1/tracer_free/sim/baseline/ld_bindings_lazy.txt",
+      "results/v3_followup/e1/tracer_free/sim/baseline/spec_gdb.json",
+      "results/v3_followup/e1/tracer_free/sim/baseline/spec_ld_bindnow.json",
+      "results/v3_followup/e1/tracer_free/sim/baseline/spec_ld_lazy.json",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/calls_gdb.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/calls_ld_bindnow.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/calls_ld_lazy.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/case.json",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/gdb_hits.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/gdb_stdout.txt",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/ld_bindings_bindnow.txt",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/ld_bindings_lazy.txt",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/spec_gdb.json",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/spec_ld_bindnow.json",
+      "results/v3_followup/e1/tracer_free/sim/first_entry_hit_missing/spec_ld_lazy.json",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/gdb_worker_crashed(no",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/calls_gdb.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/calls_ld_bindnow.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/calls_ld_lazy.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/case.json",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/gdb_hits.jsonl",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/gdb_stdout.txt",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/ld_bindings_bindnow.txt",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/ld_bindings_lazy.txt",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/spec_gdb.json",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/spec_ld_bindnow.json",
+      "results/v3_followup/e1/tracer_free/sim/ld_debug_found_nothing/spec_ld_lazy.json",
+      "results/v3_followup/e1/tracer_free/static_info.py",
+      "results/v3_followup/e1/tracer_free/summarize.py",
+      "results/v3_followup/e1/tracer_free/verification_summary.json"
     ],
-    "untracked_sha256": "3de52cedaa7a4696b4e006ea7cd2b33f402b8e807db38622e75d93f84c19bcb1"
+    "untracked_sha256": "a5ca6e5691590eac663b0df07fcda41b5606a07581b23d2c7f474ec6442da1e8"
   },
   "runtime": {
     "pyruntime": [
@@ -110,7 +310,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5313, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9710, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -125,7 +325,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5314, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9711, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -173,7 +373,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5325, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9736, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -188,7 +388,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5326, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9749, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -236,7 +436,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5337, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9760, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -251,7 +451,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5338, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9761, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -311,7 +511,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5349, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9772, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -326,7 +526,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5350, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9773, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -386,7 +586,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5361, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9784, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -401,7 +601,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5362, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9785, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -461,7 +661,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5373, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9798, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -476,7 +676,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5374, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9807, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -536,7 +736,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5385, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9818, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -551,7 +751,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5386, \"n_calls\": 4, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9819, \"n_calls\": 4, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -607,7 +807,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5397, \"n_calls\": 3, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9830, \"n_calls\": 3, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -622,7 +822,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5398, \"n_calls\": 3, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9831, \"n_calls\": 3, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -678,7 +878,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5409, \"n_calls\": 3, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9842, \"n_calls\": 3, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -693,7 +893,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5410, \"n_calls\": 3, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9843, \"n_calls\": 3, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -765,7 +965,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5421, \"n_calls\": 6, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9863, \"n_calls\": 6, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -780,7 +980,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5438, \"n_calls\": 6, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9864, \"n_calls\": 6, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -832,7 +1032,7 @@
           ],
           "env": {},
           "returncode": 0,
-          "stdout": "{\"pid\": 5449, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9875, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         },
@@ -847,7 +1047,7 @@
             "LD_BIND_NOW": "1"
           },
           "returncode": 0,
-          "stdout": "{\"pid\": 5450, \"n_calls\": 2, \"all_exact\": true}",
+          "stdout": "{\"pid\": 9876, \"n_calls\": 2, \"all_exact\": true}",
           "stderr_tail": "",
           "filter": "lines containing 'binding file' and one of the artifact paths"
         }
@@ -888,6 +1088,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -924,6 +1125,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -960,6 +1162,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -996,6 +1199,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1032,6 +1236,7 @@
           "wrapper_reference_of_requested_bound_to": "AA"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1068,6 +1273,7 @@
           "wrapper_reference_of_requested_bound_to": "AA"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1106,6 +1312,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1144,6 +1351,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1182,6 +1390,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1220,6 +1429,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1258,6 +1468,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1296,6 +1507,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1334,6 +1546,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1372,6 +1585,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1410,6 +1624,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1448,6 +1663,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1486,6 +1702,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1524,6 +1741,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1562,6 +1780,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1600,6 +1819,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1638,6 +1858,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1676,6 +1897,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1714,6 +1936,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1752,6 +1975,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1790,6 +2014,7 @@
           "wrapper_reference_of_requested_bound_to": "S8"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1828,6 +2053,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1866,6 +2092,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -1904,6 +2131,7 @@
           "wrapper_reference_of_requested_bound_to": "S1"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1946,6 +2174,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -1988,6 +2217,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -2030,6 +2260,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -2072,6 +2303,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -2114,6 +2346,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -2156,6 +2389,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -2196,6 +2430,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -2236,6 +2471,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     }
@@ -2244,6 +2480,11 @@
     "verified_own": 21,
     "verified_other": 15,
     "unresolved": 0
+  },
+  "ld_debug_corroboration_counts": {
+    "agrees": 36,
+    "missing": 0,
+    "disagrees": 0
   },
   "method": "For every case (an explicit sequence of model loads and calls) three FRESH processes are started\nwith `exec` (never reused, never forked from a process that loaded a model):\n  1. under gdb (scripts/gdb_identity_trace.py): breakpoints on the entry, the C wrapper and the\n     compute function of every artifact; each hit records the DSO that contains the program counter,\n     the module-relative address and the SHA-256 of the function bytes read from process memory;\n  2. LD_DEBUG=bindings, default lazy binding: the dynamic linker's own record of which object each\n     symbol reference of each artifact was bound to;\n  3. LD_DEBUG=bindings with LD_BIND_NOW=1: auxiliary (binding time changed), never a substitute for 2.\nEvery call also checks its output against the exact expected permutation.",
   "note": "nothing timed; development container"

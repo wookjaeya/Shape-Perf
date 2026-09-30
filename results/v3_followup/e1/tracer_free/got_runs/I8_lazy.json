@@ -1,0 +1,114 @@
+{
+ "pid": 30153,
+ "env_LD": {},
+ "tracer_pid": "0",
+ "compute_file_sha256": {
+  "S8": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+  "S1": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582"
+ },
+ "log": [
+  {
+   "step": "after load S8",
+   "bases": {
+    "S8": "0x7f2183386000"
+   },
+   "got": {
+    "S8": {
+     "run_main_graph_model": {
+      "slot": "0x7f218338f020",
+      "value": "0x7f2183388076",
+      "classified": "S8:.plt+0x56 (UNRESOLVED lazy stub)",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": null
+     },
+     "_mlir_ciface_main_graph_model": {
+      "slot": "0x7f218338f098",
+      "value": "0x7f2183388166",
+      "classified": "S8:.plt+0x146 (UNRESOLVED lazy stub)",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": null
+     },
+     "main_graph_model": {
+      "slot": "0x7f218338f078",
+      "value": "0x7f2183388126",
+      "classified": "S8:.plt+0x106 (UNRESOLVED lazy stub)",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": null
+     }
+    }
+   },
+   "compute_mem_sha256": {
+    "S8": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401"
+   }
+  },
+  {
+   "step": "after call S8",
+   "bases": {
+    "S8": "0x7f2183386000"
+   },
+   "got": {
+    "S8": {
+     "run_main_graph_model": {
+      "slot": "0x7f218338f020",
+      "value": "0x7f2183388076",
+      "classified": "S8:.plt+0x56 (UNRESOLVED lazy stub)",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": null
+     },
+     "_mlir_ciface_main_graph_model": {
+      "slot": "0x7f218338f098",
+      "value": "0x7f2183388f90",
+      "classified": "S8:_mlir_ciface_main_graph_model+0",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": "_mlir_ciface_main_graph_model"
+     },
+     "main_graph_model": {
+      "slot": "0x7f218338f078",
+      "value": "0x7f21833883b0",
+      "classified": "S8:main_graph_model+0",
+      "maps_path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "dladdr_sname": "main_graph_model"
+     }
+    }
+   },
+   "compute_mem_sha256": {
+    "S8": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401"
+   },
+   "output_exact": true
+  },
+  {
+   "step": "entry-check",
+   "entries": {
+    "S8": {
+     "run_main_graph_model": {
+      "dlsym_handle": "0x7f2183388ff0",
+      "handle_dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "handle_classified": "S8:run_main_graph_model+0",
+      "dlsym_RTLD_DEFAULT": "0x7f2183388ff0",
+      "default_classified": "S8:run_main_graph_model+0"
+     },
+     "_mlir_ciface_main_graph_model": {
+      "dlsym_handle": "0x7f2183388f90",
+      "handle_dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "handle_classified": "S8:_mlir_ciface_main_graph_model+0",
+      "dlsym_RTLD_DEFAULT": "0x7f2183388f90",
+      "default_classified": "S8:_mlir_ciface_main_graph_model+0"
+     },
+     "main_graph_model": {
+      "dlsym_handle": "0x7f21833883b0",
+      "handle_dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+      "handle_classified": "S8:main_graph_model+0",
+      "dlsym_RTLD_DEFAULT": "0x7f21833883b0",
+      "default_classified": "S8:main_graph_model+0"
+     }
+    }
+   }
+  }
+ ]
+}

@@ -115,7 +115,7 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
 - `LD_DEBUG=bindings` + `LD_BIND_NOW=1`: 보조 조건.
 
 세 방법이 모든 호출에서 일치했다. 증거는 `results/v3_followup/e1/identity_{orig,tagged}/<case>/`에 있고,
-요약 표는 `identity_table.json`이다(생성: `scripts/verify_execution_identity.py`, 커밋 `1865924`).
+요약 표는 `identity_table.json`이다(생성: `scripts/verify_execution_identity.py`, 커밋 `14674fa`). LD_DEBUG 교차 확인은 94개 호출 모두 "agrees"다.
 
 | artifact/tag 체계 | load order | requested arm | actual compute artifact | output | 판정 | 증거 경로 |
 |---|---|---|---|---|---|---|
@@ -138,7 +138,23 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
 
 **출력은 모든 호출에서 기대한 정확한 순열과 같았다.** 오결합된 호출도 마찬가지였다. S8과 S1은 같은 계산을 하기 때문이다.
 그래서 **출력 일치는 실행 식별의 증거가 될 수 없다**(계획서 §6 E1-D).
-<!-- TRACER_FREE -->
+
+**추적기 없는 독립 확인(적대적 검증, `results/v3_followup/e1/tracer_free/`)**. 별도 에이전트 둘이 위 판정을 반박하려고 시도했다.
+gdb·LD_DEBUG·저장소 코드는 쓰지 않았다. 두 검증 모두 판정이 **유지**됐다.
+
+- **GOT 직접 읽기**: 평범한 Python 프로세스(TracerPid=0, `LD_*` 없음)에서 호출 뒤 각 라이브러리의 `_mlir_ciface_*`·`main_graph_*` GOT 슬롯을
+  ctypes로 읽었다. 주소는 `dladdr`와 `/proc/self/maps`로 DSO에 대응시켰다. 무태그 두 순서 × 두 첫 호출 × {lazy, BIND_NOW}에서,
+  나중 로드 라이브러리의 `_mlir_ciface` 슬롯이 먼저 로드된 라이브러리(예: S8+0x2f90)를 가리켰다. 단독과 고유 tag에서는 자기 DSO였다
+  (프로세스 33개, 호출 86개).
+- **`ud2` 트랩 행렬**: S8·S1 복사본의 entry(E), wrapper(C), compute(M) 시작에 `ud2`를 심었다.
+  6개 변형 × 2 로드 순서 × 2 호출 대상 × {lazy, BIND_NOW}로 새 프로세스 48개를 돌렸다.
+  - E를 심은 복사본은 자신이 호출될 때만 트랩했다.
+  - C나 M을 심은 복사본은 **먼저 로드됐을 때** 어느 쪽을 호출하든 트랩했다. 나중에 로드됐을 때는 자신이 호출돼도 트랩하지 않았고, 출력도 정확했다.
+  - 48개 모두 (B)의 예측과 일치했다. "각자 자기 코드" 모델은 32개만 맞았고, 두 모델이 갈리는 16개는 모두 (B) 쪽이었다.
+- **정밀화**: 나중 로드 라이브러리의 **entry는 자기 것**이 실행된다. 오결합은 entry가 `_mlir_ciface_*@plt`를 부르는 지점에서 일어난다.
+  그 wrapper가 먼저 로드된 라이브러리 **자신의** GOT로 `main_graph`를 부르므로, 나중 라이브러리의 `main_graph` 슬롯은 쓰이지 않는다
+  (lazy에서는 끝까지 미해결로 남는다). 표의 entry=own / wrapper=other / compute=other와 같다.
+
 
 ### 3.3 E1-C 고유 tag 빌드
 
@@ -155,6 +171,10 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
   - 공유 함수는 모두 주소를 빼면 같은 코드다.
   - 계산 함수 `main_graph_<tag>`는 `malloc` 외에 아무것도 호출하지 않는다. 따라서 계산 경로에는 닿지 않는다.
   - 다만 공동 로딩에서는 이것이 **상태·배치 차이(H-state/H-layout)** 로 남는다(`e1/shared_symbols_tagged_*.json`).
+    나중 로드 모델의 entry wrapper(`run_main_graph_<tag>`)는 먼저 로드된 모델의 텐서 도우미 코드를 부른다.
+    `LD_BIND_NOW`에서는 `getInstrumentFile`, `omTensorDestroy`, `om_f16_to_f32`, `om_f32_to_f16`도 넘어간다(독립 검증).
+  - tag 빌드도 `run_main_graph`, `omQueryEntryPoints` 등 tag 없는 이름을 계속 내보낸다. 우리 런타임 경로는 tag 붙은 이름만 쓴다.
+    `--tag=NONE`이나 tag 없는 entry를 쓰는 소비자는 검증하지 않았다(guard는 `--tag=NONE`의 `main_graph` 충돌도 거부한다).
 
 ### 3.4 회귀 방지
 
@@ -163,10 +183,14 @@ v3의 각 측정·검증 도구가 프로세스마다 어떤 모델을 몇 개, 
   그래서 v3의 scan과 진단 스크립트는 이제 무태그 산출물로는 실행되지 않는다.
 - **tag 전달**: 모든 worker가 `tag`를 받아 런타임에 넘긴다. tag 빌드를 tag 없이 열면 런타임이 `omQueryEntryPoints_model`을
   찾지 못해 **요란하게 실패한다**. 조용히 오결합하지 않는다(테스트로 확인).
-- **테스트 8개**(`tests/test_loader_identity.py`):
+- **테스트 11개**(`tests/test_loader_identity.py`):
   - C fixture로 RTLD_GLOBAL 오결합을 재현한다(같은 tag: 먼저 로드된 쪽 값, 다른 tag: 각자 값).
   - guard의 거부·허용, worker가 로드 전에 거부하는지와 tag를 전달하는지 확인한다.
   - 실제 L=64 산출물로 무태그 오결합, tag 해결, tag 누락 실패를 확인한다. 이 3개는 산출물·gdb가 없으면 건너뛴다.
+  - `--tag=NONE` 형태 라이브러리와 심볼을 읽을 수 없는 라이브러리에 대해 guard가 거부하는지(fail closed) 확인한다.
+  - 합성 증거로 판정 로직을 검사한다. own/other를 가르는지, 워커가 끝나지 않으면 호출을 버리지 않고 unresolved로 남기는지,
+    LD_DEBUG 교차 확인이 비면 "missing"으로 표시하는지 본다.
+  - 이 보강은 코드 리뷰에서 나온 사소한 결함 4개를 고친 결과다. 현재 결과표의 판정은 바뀌지 않았다.
 
 ## 4. 원인 판단
 
@@ -203,7 +227,7 @@ v3 문서(`docs/STATUS_v3.md`, `design_amendment.md` 8.3절)는 원문을 지우
 
 | 질문 | 지지 / 반박 / 판단 불가 | 근거 | 남은 대안 설명 | 다음 행동 |
 |---|---|---|---|---|
-| 실행 구현 식별 | **해결**: 단독 실행과 고유 tag 공동 로딩은 own, 무태그 공동 로딩은 other | E1-B, 3중 증거 + 추적 없는 GOT 확인 | L=64 K형만 추적함 | E2에서도 모든 측정 산출물의 식별을 기록 |
+| 실행 구현 식별 | **해결**: 단독 실행과 고유 tag 공동 로딩은 own, 무태그 공동 로딩은 other | E1-B의 3중 증거(gdb, 실행 바이트, LD_DEBUG) + 추적기 없는 GOT 읽기와 `ud2` 트랩 행렬 | L=64 K형만 추적함 | E2에서도 모든 측정 산출물의 식별을 기록 |
 | 정책 효과(S8 대 S1) | 판단 불가 | 유효한 비교는 v3의 단독 실행뿐이다(개발 컨테이너, protocol 미동결) | H-state, H-layout, 잡음 | E2 calibration → 동결 → 재측정 |
 | lowering 원인 | 판단 불가 | IR·기계어 차이는 확인됐다. 실행 비용과의 연결은 E2 결과에 달렸다 | 명령 수·gather·zmm 차이는 설명 후보일 뿐이다 | E3(조건부) |
 | 모델/커널 연구 가치 | 판단 불가 | K형 12개는 모델 시간의 0.1–0.3%(단독 실행 커널 시간 기준 산술)다. 모델 수준 효과는 작을 가능성이 크다 | — | E2 이후 결정. BERT 성능 개선 주장은 하지 않는다 |

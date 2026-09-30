@@ -72,7 +72,7 @@
       ],
       "env": {},
       "returncode": 0,
-      "stdout": "{\"pid\": 5661, \"n_calls\": 4, \"all_exact\": true}",
+      "stdout": "{\"pid\": 10084, \"n_calls\": 4, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     },
@@ -87,7 +87,7 @@
         "LD_BIND_NOW": "1"
       },
       "returncode": 0,
-      "stdout": "{\"pid\": 5662, \"n_calls\": 4, \"all_exact\": true}",
+      "stdout": "{\"pid\": 10085, \"n_calls\": 4, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     }
@@ -131,6 +131,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -171,6 +172,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -211,6 +213,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -251,6 +254,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     }

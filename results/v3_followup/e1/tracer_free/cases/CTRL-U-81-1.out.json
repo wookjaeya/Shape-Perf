@@ -1,0 +1,5827 @@
+{
+ "case_id": "CTRL-U-81-1",
+ "pid": 29875,
+ "LD_BIND_NOW": null,
+ "load_order": [
+  "S8",
+  "S1"
+ ],
+ "call_order": [
+  "S1",
+  "S8",
+  "S1",
+  "S8"
+ ],
+ "disk_compute_sha256": {
+  "S1": "7f634c2591d4c20386a3c90fc61ddf0c56a9548642448abf17542444db604582",
+  "S8": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401"
+ },
+ "calls": [
+  {
+   "entry_dso": "S1",
+   "ciface_slot_of_entry": {
+    "addr": "0x7f6408722f90",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2f90",
+    "section": ".text",
+    "sym": "_mlir_ciface_main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "wrapper_dso": "S8",
+   "main_graph_slot_of_wrapper_dso": {
+    "addr": "0x7f64087223b0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x23b0",
+    "section": ".text",
+    "sym": "main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "compute_dso": "S8",
+   "compute_mem_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+   "compute_bytes_match": [
+    "S8"
+   ],
+   "call_index": 0,
+   "requested": "S1",
+   "output_exact": true,
+   "dlsym_entry": {
+    "addr": "0x7f6406e88a70",
+    "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+    "artifact": "S1",
+    "rel": "0x3a70",
+    "section": ".text",
+    "sym": "run_main_graph_model+0x0"
+   }
+  },
+  {
+   "entry_dso": "S8",
+   "ciface_slot_of_entry": {
+    "addr": "0x7f6408722f90",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2f90",
+    "section": ".text",
+    "sym": "_mlir_ciface_main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "wrapper_dso": "S8",
+   "main_graph_slot_of_wrapper_dso": {
+    "addr": "0x7f64087223b0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x23b0",
+    "section": ".text",
+    "sym": "main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "compute_dso": "S8",
+   "compute_mem_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+   "compute_bytes_match": [
+    "S8"
+   ],
+   "call_index": 1,
+   "requested": "S8",
+   "output_exact": true,
+   "dlsym_entry": {
+    "addr": "0x7f6408722ff0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2ff0",
+    "section": ".text",
+    "sym": "run_main_graph_model+0x0"
+   }
+  },
+  {
+   "entry_dso": "S1",
+   "ciface_slot_of_entry": {
+    "addr": "0x7f6408722f90",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2f90",
+    "section": ".text",
+    "sym": "_mlir_ciface_main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "wrapper_dso": "S8",
+   "main_graph_slot_of_wrapper_dso": {
+    "addr": "0x7f64087223b0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x23b0",
+    "section": ".text",
+    "sym": "main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "compute_dso": "S8",
+   "compute_mem_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+   "compute_bytes_match": [
+    "S8"
+   ],
+   "call_index": 2,
+   "requested": "S1",
+   "output_exact": true,
+   "dlsym_entry": {
+    "addr": "0x7f6406e88a70",
+    "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+    "artifact": "S1",
+    "rel": "0x3a70",
+    "section": ".text",
+    "sym": "run_main_graph_model+0x0"
+   }
+  },
+  {
+   "entry_dso": "S8",
+   "ciface_slot_of_entry": {
+    "addr": "0x7f6408722f90",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2f90",
+    "section": ".text",
+    "sym": "_mlir_ciface_main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "wrapper_dso": "S8",
+   "main_graph_slot_of_wrapper_dso": {
+    "addr": "0x7f64087223b0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x23b0",
+    "section": ".text",
+    "sym": "main_graph_model+0x0",
+    "reloc": "R_X86_64_JUMP_SLOT"
+   },
+   "compute_dso": "S8",
+   "compute_mem_sha256": "49916aecd05b41f25d7f57dd9a2193673848925d6ac96a15139103cebdb4e401",
+   "compute_bytes_match": [
+    "S8"
+   ],
+   "call_index": 3,
+   "requested": "S8",
+   "output_exact": true,
+   "dlsym_entry": {
+    "addr": "0x7f6408722ff0",
+    "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+    "artifact": "S8",
+    "rel": "0x2ff0",
+    "section": ".text",
+    "sym": "run_main_graph_model+0x0"
+   }
+  }
+ ],
+ "snapshots": [
+  {
+   "after": "load S8",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087220a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087220d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f64087220e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f64087220f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6408722126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408722136",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2136",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6408722146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f6408722156",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2156",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722166",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2166",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087221d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f64087221e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f6408722296",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2296",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087222a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f64087222b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f64087222c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  },
+  {
+   "after": "load S1",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087220a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087220d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f64087220e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f64087220f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6408722126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408722136",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2136",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6408722146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f6408722156",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2156",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722166",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2166",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087221d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f64087221e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f6408722296",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2296",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087222a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f64087222b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f64087222c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    },
+    "S1": {
+     "base": "0x7f6406e85000",
+     "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6406e87036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6406e87046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6406e87056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6406e87066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6406e87076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6406e87086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6406e87096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f6406e870a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f6406e870b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f6406e870c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f6406e870d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6406e870e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6406e870f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6406e87106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6406e87116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6406e87126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6406e87136",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2136",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6406e87146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f6406e87156",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2156",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6406e87166",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2166",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6406e87176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6406e87186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6406e87196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f6406e871a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f6406e871b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f6406e871c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f6406e871d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6406e871e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f6406e871f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6406e87206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6406e87216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6406e87226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6406e87236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6406e87246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6406e87256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6406e87266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6406e87276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6406e87286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f6406e87296",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2296",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f6406e872a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6406e872b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6406e872c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f6406e872d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  },
+  {
+   "after": "call S1 #0",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087220a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087220d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f64087220e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f64087220f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f64087223b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x23b0",
+       "section": ".text",
+       "sym": "main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408722136",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2136",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6409da1340",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f6408722156",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2156",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722166",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2166",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087221d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6409cad670",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f6408722296",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2296",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087222a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f64087222b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f64087222c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    },
+    "S1": {
+     "base": "0x7f6406e85000",
+     "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6406e87036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6406e87046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6406e87056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6406e87066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6406e87076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6406e87086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6406e87096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f6406e870b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f6406e870c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6406e87106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6406e87116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6406e87126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6406e87146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6406e87176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6406e87186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6406e87196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f6406e871a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f6406e871b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f6406e871c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6406e871e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f6406e871f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6406e87206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6406e87216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6406e87226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6406e87236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6406e87246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6406e87256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6406e87266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6406e87276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6406e87286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f6406e872d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  },
+  {
+   "after": "call S8 #1",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f64087223b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x23b0",
+       "section": ".text",
+       "sym": "main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6409da1340",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6409cad670",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    },
+    "S1": {
+     "base": "0x7f6406e85000",
+     "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6406e87036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6406e87046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6406e87056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6406e87066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6406e87076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6406e87086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6406e87096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f6406e870b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f6406e870c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6406e87106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6406e87116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6406e87126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6406e87146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6406e87176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6406e87186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6406e87196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f6406e871a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f6406e871b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f6406e871c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6406e871e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f6406e871f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6406e87206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6406e87216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6406e87226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6406e87236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6406e87246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6406e87256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6406e87266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6406e87276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6406e87286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f6406e872d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  },
+  {
+   "after": "call S1 #2",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f64087223b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x23b0",
+       "section": ".text",
+       "sym": "main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6409da1340",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6409cad670",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    },
+    "S1": {
+     "base": "0x7f6406e85000",
+     "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6406e87036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6406e87046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6406e87056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6406e87066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6406e87076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6406e87086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6406e87096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f6406e870b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f6406e870c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6406e87106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6406e87116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6406e87126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6406e87146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6406e87176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6406e87186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6406e87196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f6406e871a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f6406e871b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f6406e871c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6406e871e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f6406e871f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6406e87206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6406e87216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6406e87226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6406e87236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6406e87246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6406e87256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6406e87266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6406e87276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6406e87286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f6406e872d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  },
+  {
+   "after": "call S8 #3",
+   "modules": {
+    "S8": {
+     "base": "0x7f6408720000",
+     "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6408722036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6408722046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6408722056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6408722066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6408722076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6408722086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6408722096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f64087220b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f64087220c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6408722106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6408722116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f64087223b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x23b0",
+       "section": ".text",
+       "sym": "main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6409da1340",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6408722176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6408722186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6408722196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f64087221a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f64087221b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f64087221c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6409cad670",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f64087221f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6408722206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6408722216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6408722226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6408722236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6408722246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6408722256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6408722266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6408722276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6408722286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f64087222d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    },
+    "S1": {
+     "base": "0x7f6406e85000",
+     "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+     "tag": "model",
+     "slots": {
+      "_entry_point_0_model": {
+       "addr": "0x7f6408726547",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6547",
+       "section": ".rodata",
+       "sym": "_entry_point_0_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_model": {
+       "addr": "0x7f6408726490",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6490",
+       "section": ".rodata",
+       "sym": "_entry_point_1_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stdout": {
+       "addr": "0xa548c8",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__cxa_finalize": {
+       "addr": "0x7f6409c472c0",
+       "dso": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_out_sig_model": {
+       "addr": "0x7f64087265b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x65b0",
+       "section": ".rodata",
+       "sym": "_entry_point_0_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_in_sig_model": {
+       "addr": "0x7f64087264b0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x64b0",
+       "section": ".rodata",
+       "sym": "_entry_point_1_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_1_out_sig_model": {
+       "addr": "0x7f6408726500",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6500",
+       "section": ".rodata",
+       "sym": "_entry_point_1_out_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "stderr": {
+       "addr": "0xa548c0",
+       "dso": "/usr/bin/python3.11",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "bufferIndex": {
+       "addr": "0x7f6408729238",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9238",
+       "section": ".bss",
+       "sym": "bufferIndex+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_SIZE": {
+       "addr": "0x7f6408726d20",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6d20",
+       "section": ".rodata",
+       "sym": "OM_DATA_TYPE_SIZE+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_entry_point_0_in_sig_model": {
+       "addr": "0x7f6408726560",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x6560",
+       "section": ".rodata",
+       "sym": "_entry_point_0_in_sig_model+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "startReportPrinted": {
+       "addr": "0x7f6408729231",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9231",
+       "section": ".bss",
+       "sym": "startReportPrinted+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_deregisterTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__gmon_start__": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "OM_DATA_TYPE_NAME": {
+       "addr": "0x7f6408729170",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x9170",
+       "section": ".data",
+       "sym": "OM_DATA_TYPE_NAME+0x0",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "_ITM_registerTMCloneTable": {
+       "addr": "0x0",
+       "dso": "<unmapped>",
+       "reloc": "R_X86_64_GLOB_DAT"
+      },
+      "__errno_location": {
+       "addr": "0x7f6406e87036",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2036",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "printf": {
+       "addr": "0x7f6406e87046",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2046",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getInstrumentFile": {
+       "addr": "0x7f6406e87056",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2056",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strcspn": {
+       "addr": "0x7f6406e87066",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2066",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "run_main_graph_model": {
+       "addr": "0x7f6406e87076",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2076",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorDestroy": {
+       "addr": "0x7f6406e87086",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2086",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "popen": {
+       "addr": "0x7f6406e87096",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2096",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataPtr": {
+       "addr": "0x7f64087237d0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37d0",
+       "section": ".text",
+       "sym": "omTensorGetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strlen": {
+       "addr": "0x7f6406e870b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncmp": {
+       "addr": "0x7f6406e870c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x20c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataPtr": {
+       "addr": "0x7f64087237e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x37e0",
+       "section": ".text",
+       "sym": "omTensorSetDataPtr+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetShape": {
+       "addr": "0x7f6408723830",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3830",
+       "section": ".text",
+       "sym": "omTensorGetShape+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetRank": {
+       "addr": "0x7f6408723a80",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3a80",
+       "section": ".text",
+       "sym": "omTensorGetRank+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "strncpy": {
+       "addr": "0x7f6406e87106",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2106",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "__assert_fail": {
+       "addr": "0x7f6406e87116",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2116",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "main_graph_model": {
+       "addr": "0x7f6406e87126",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2126",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetStrides": {
+       "addr": "0x7f6408723880",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3880",
+       "section": ".text",
+       "sym": "omTensorGetStrides+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "memcpy": {
+       "addr": "0x7f6406e87146",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2146",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetOmtArray": {
+       "addr": "0x7f64087251f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x51f0",
+       "section": ".text",
+       "sym": "omTensorListGetOmtArray+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "addr": "0x7f6408722f90",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x2f90",
+       "section": ".text",
+       "sym": "_mlir_ciface_main_graph_model+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputs": {
+       "addr": "0x7f6406e87176",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2176",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fflush": {
+       "addr": "0x7f6406e87186",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2186",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fopen": {
+       "addr": "0x7f6406e87196",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2196",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "free": {
+       "addr": "0x7f6406e871a6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21a6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getenv": {
+       "addr": "0x7f6406e871b6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21b6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fputc": {
+       "addr": "0x7f6406e871c6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21c6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListCreate": {
+       "addr": "0x7f64087250f0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x50f0",
+       "section": ".text",
+       "sym": "omTensorListCreate+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "malloc": {
+       "addr": "0x7f6406e871e6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21e6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f32_to_f16": {
+       "addr": "0x7f6406e871f6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x21f6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "pclose": {
+       "addr": "0x7f6406e87206",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2206",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fprintf": {
+       "addr": "0x7f6406e87216",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2216",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "getpid": {
+       "addr": "0x7f6406e87226",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2226",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "feof": {
+       "addr": "0x7f6406e87236",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2236",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgetc": {
+       "addr": "0x7f6406e87246",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2246",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fgets": {
+       "addr": "0x7f6406e87256",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2256",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "snprintf": {
+       "addr": "0x7f6406e87266",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2266",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "gettimeofday": {
+       "addr": "0x7f6406e87276",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2276",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "om_f16_to_f32": {
+       "addr": "0x7f6406e87286",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x2286",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorCreateUntyped": {
+       "addr": "0x7f64087235e0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x35e0",
+       "section": ".text",
+       "sym": "omTensorCreateUntyped+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorSetDataType": {
+       "addr": "0x7f64087239a0",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x39a0",
+       "section": ".text",
+       "sym": "omTensorSetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorListGetSize": {
+       "addr": "0x7f6408725200",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x5200",
+       "section": ".text",
+       "sym": "omTensorListGetSize+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "omTensorGetDataType": {
+       "addr": "0x7f6408723990",
+       "dso": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+       "artifact": "S8",
+       "rel": "0x3990",
+       "section": ".text",
+       "sym": "omTensorGetDataType+0x0",
+       "reloc": "R_X86_64_JUMP_SLOT"
+      },
+      "fwrite": {
+       "addr": "0x7f6406e872d6",
+       "dso": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+       "artifact": "S1",
+       "rel": "0x22d6",
+       "section": ".plt",
+       "sym": null,
+       "reloc": "R_X86_64_JUMP_SLOT"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

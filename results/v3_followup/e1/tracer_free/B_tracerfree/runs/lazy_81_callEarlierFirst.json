@@ -1,0 +1,666 @@
+{
+ "pid": 32670,
+ "ld_env": {},
+ "tracer_pid": 0,
+ "steps": [
+  [
+   "load",
+   "S8"
+  ],
+  [
+   "load",
+   "S1"
+  ],
+  [
+   "call",
+   "S8"
+  ],
+  [
+   "call",
+   "S1"
+  ],
+  [
+   "call",
+   "S8"
+  ]
+ ],
+ "static": {
+  "S8": {
+   "slots": {
+    "run_main_graph_model": "0x9020",
+    "main_graph_model": "0x9078",
+    "_mlir_ciface_main_graph_model": "0x9098"
+   },
+   "plt": {
+    "run_main_graph_model": "0x2070",
+    "main_graph_model": "0x2120",
+    "_mlir_ciface_main_graph_model": "0x2160"
+   },
+   "syms": {
+    "run_main_graph_model": "0x2ff0",
+    "main_graph_model": "0x23b0",
+    "_mlir_ciface_main_graph_model": "0x2f90"
+   }
+  },
+  "S1": {
+   "slots": {
+    "run_main_graph_model": "0xa020",
+    "main_graph_model": "0xa078",
+    "_mlir_ciface_main_graph_model": "0xa098"
+   },
+   "plt": {
+    "run_main_graph_model": "0x2070",
+    "main_graph_model": "0x2120",
+    "_mlir_ciface_main_graph_model": "0x2160"
+   },
+   "syms": {
+    "run_main_graph_model": "0x3a70",
+    "main_graph_model": "0x23b0",
+    "_mlir_ciface_main_graph_model": "0x3a10"
+   }
+  }
+ },
+ "snapshots": [
+  {
+   "label": "after step 0: load S8",
+   "bases": {
+    "S8": "0x7f097bf20000"
+   },
+   "arms": {
+    "S8": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097bf29020",
+       "got_off": "0x9020",
+       "value": "0x7f097bf22076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097bf29078",
+       "got_off": "0x9078",
+       "value": "0x7f097bf22126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097bf29098",
+       "got_off": "0x9098",
+       "value": "0x7f097bf22166",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2166"
+      }
+     },
+     "handle": "0xc0e2ee0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8",
+      "module_relative": "0x2ff0",
+      "elf_st_value": "0x2ff0"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    }
+   }
+  },
+  {
+   "label": "after step 1: load S1",
+   "bases": {
+    "S8": "0x7f097bf20000",
+    "S1": "0x7f097a685000"
+   },
+   "arms": {
+    "S8": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097bf29020",
+       "got_off": "0x9020",
+       "value": "0x7f097bf22076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097bf29078",
+       "got_off": "0x9078",
+       "value": "0x7f097bf22126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097bf29098",
+       "got_off": "0x9098",
+       "value": "0x7f097bf22166",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2166"
+      }
+     },
+     "handle": "0xc0e2ee0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8",
+      "module_relative": "0x2ff0",
+      "elf_st_value": "0x2ff0"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    },
+    "S1": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097a68f020",
+       "got_off": "0xa020",
+       "value": "0x7f097a687076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097a68f078",
+       "got_off": "0xa078",
+       "value": "0x7f097a687126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097a68f098",
+       "got_off": "0xa098",
+       "value": "0x7f097a687166",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2166"
+      }
+     },
+     "handle": "0xc0e33f0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097a688a70",
+      "maps_arm": "S1",
+      "module_relative": "0x3a70",
+      "elf_st_value": "0x3a70"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    }
+   }
+  },
+  {
+   "label": "after step 2: call S8",
+   "bases": {
+    "S8": "0x7f097bf20000",
+    "S1": "0x7f097a685000"
+   },
+   "arms": {
+    "S8": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097bf29020",
+       "got_off": "0x9020",
+       "value": "0x7f097bf22076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097bf29078",
+       "got_off": "0x9078",
+       "value": "0x7f097bf223b0",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "main_graph_model",
+        "saddr": "0x7f097bf223b0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x23b0"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097bf29098",
+       "got_off": "0x9098",
+       "value": "0x7f097bf22f90",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "_mlir_ciface_main_graph_model",
+        "saddr": "0x7f097bf22f90"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2f90"
+      }
+     },
+     "handle": "0xc0e2ee0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8",
+      "module_relative": "0x2ff0",
+      "elf_st_value": "0x2ff0"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    },
+    "S1": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097a68f020",
+       "got_off": "0xa020",
+       "value": "0x7f097a687076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097a68f078",
+       "got_off": "0xa078",
+       "value": "0x7f097a687126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097a68f098",
+       "got_off": "0xa098",
+       "value": "0x7f097a687166",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2166"
+      }
+     },
+     "handle": "0xc0e33f0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097a688a70",
+      "maps_arm": "S1",
+      "module_relative": "0x3a70",
+      "elf_st_value": "0x3a70"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    }
+   }
+  },
+  {
+   "label": "after step 3: call S1",
+   "bases": {
+    "S8": "0x7f097bf20000",
+    "S1": "0x7f097a685000"
+   },
+   "arms": {
+    "S8": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097bf29020",
+       "got_off": "0x9020",
+       "value": "0x7f097bf22076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097bf29078",
+       "got_off": "0x9078",
+       "value": "0x7f097bf223b0",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "main_graph_model",
+        "saddr": "0x7f097bf223b0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x23b0"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097bf29098",
+       "got_off": "0x9098",
+       "value": "0x7f097bf22f90",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "_mlir_ciface_main_graph_model",
+        "saddr": "0x7f097bf22f90"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2f90"
+      }
+     },
+     "handle": "0xc0e2ee0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8",
+      "module_relative": "0x2ff0",
+      "elf_st_value": "0x2ff0"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    },
+    "S1": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097a68f020",
+       "got_off": "0xa020",
+       "value": "0x7f097a687076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097a68f078",
+       "got_off": "0xa078",
+       "value": "0x7f097a687126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097a68f098",
+       "got_off": "0xa098",
+       "value": "0x7f097bf22f90",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "_mlir_ciface_main_graph_model",
+        "saddr": "0x7f097bf22f90"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2f90"
+      }
+     },
+     "handle": "0xc0e33f0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097a688a70",
+      "maps_arm": "S1",
+      "module_relative": "0x3a70",
+      "elf_st_value": "0x3a70"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    }
+   }
+  },
+  {
+   "label": "after step 4: call S8",
+   "bases": {
+    "S8": "0x7f097bf20000",
+    "S1": "0x7f097a685000"
+   },
+   "arms": {
+    "S8": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097bf29020",
+       "got_off": "0x9020",
+       "value": "0x7f097bf22076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097bf29078",
+       "got_off": "0x9078",
+       "value": "0x7f097bf223b0",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "main_graph_model",
+        "saddr": "0x7f097bf223b0"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x23b0"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097bf29098",
+       "got_off": "0x9098",
+       "value": "0x7f097bf22f90",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "_mlir_ciface_main_graph_model",
+        "saddr": "0x7f097bf22f90"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2f90"
+      }
+     },
+     "handle": "0xc0e2ee0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8",
+      "module_relative": "0x2ff0",
+      "elf_st_value": "0x2ff0"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    },
+    "S1": {
+     "slots": {
+      "run_main_graph_model": {
+       "got_addr": "0x7f097a68f020",
+       "got_off": "0xa020",
+       "value": "0x7f097a687076",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2076"
+      },
+      "main_graph_model": {
+       "got_addr": "0x7f097a68f078",
+       "got_off": "0xa078",
+       "value": "0x7f097a687126",
+       "lazy_unresolved": true,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+        "fbase": "0x7f097a685000",
+        "sname": null,
+        "saddr": "0x0"
+       },
+       "dladdr_arm": "S1",
+       "maps_arm": "S1",
+       "module_relative_in_target": "0x2126"
+      },
+      "_mlir_ciface_main_graph_model": {
+       "got_addr": "0x7f097a68f098",
+       "got_off": "0xa098",
+       "value": "0x7f097bf22f90",
+       "lazy_unresolved": false,
+       "dladdr": {
+        "fname": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+        "fbase": "0x7f097bf20000",
+        "sname": "_mlir_ciface_main_graph_model",
+        "saddr": "0x7f097bf22f90"
+       },
+       "dladdr_arm": "S8",
+       "maps_arm": "S8",
+       "module_relative_in_target": "0x2f90"
+      }
+     },
+     "handle": "0xc0e33f0",
+     "entry_dlsym_handle": {
+      "value": "0x7f097a688a70",
+      "maps_arm": "S1",
+      "module_relative": "0x3a70",
+      "elf_st_value": "0x3a70"
+     },
+     "entry_dlsym_RTLD_DEFAULT": {
+      "value": "0x7f097bf22ff0",
+      "maps_arm": "S8"
+     }
+    }
+   }
+  }
+ ],
+ "calls": [
+  {
+   "step": 2,
+   "arm": "S8",
+   "exact": true
+  },
+  {
+   "step": 3,
+   "arm": "S1",
+   "exact": true
+  },
+  {
+   "step": 4,
+   "arm": "S8",
+   "exact": true
+  }
+ ]
+}

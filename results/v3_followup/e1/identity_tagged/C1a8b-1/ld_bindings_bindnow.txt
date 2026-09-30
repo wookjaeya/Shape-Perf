@@ -1,124 +1,124 @@
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stdout' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__cxa_finalize' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_in_sig_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_in_sig_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stderr' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_out_sig_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `bufferIndex'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_SIZE'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `startReportPrinted'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_NAME'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_out_sig_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__errno_location' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `printf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `getInstrumentFile'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_mlir_ciface_main_graph_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strcspn' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorDestroy'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `popen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `run_main_graph_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataPtr'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strlen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncmp' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataPtr'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetShape'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetRank'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncpy' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__assert_fail' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetStrides'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `memcpy' [GLIBC_2.14]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetOmtArray'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputs' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fflush' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fopen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `free' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getenv' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListCreate'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `malloc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f32_to_f16'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `pclose' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fprintf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getpid' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `feof' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgetc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgets' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `snprintf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `gettimeofday' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f16_to_f32'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorCreateUntyped'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataType'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetSize'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataType'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `main_graph_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fwrite' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omQueryEntryPoints_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omInputSignature_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omOutputSignature_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omCompilationInfo_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omInstrumentPrint'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `run_main_graph_alpha'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stdout' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_out_sig_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__cxa_finalize' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_in_sig_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stderr' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `bufferIndex'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_SIZE'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `startReportPrinted'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_out_sig_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_NAME'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_in_sig_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__errno_location' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `printf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `getInstrumentFile'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strcspn' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorDestroy'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `popen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataPtr'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strlen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncmp' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataPtr'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetShape'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetRank'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncpy' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__assert_fail' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `main_graph_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetStrides'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `memcpy' [GLIBC_2.14]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetOmtArray'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_mlir_ciface_main_graph_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputs' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fflush' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fopen' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `free' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getenv' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListCreate'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `malloc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f32_to_f16'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `pclose' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fprintf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `run_main_graph_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getpid' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `feof' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgetc' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgets' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `snprintf' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `gettimeofday' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f16_to_f32'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorCreateUntyped'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataType'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetSize'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataType'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fwrite' [GLIBC_2.2.5]
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omQueryEntryPoints_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omInputSignature_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omOutputSignature_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omCompilationInfo_bravo'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omInstrumentPrint'
-      5612:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `run_main_graph_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stdout' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__cxa_finalize' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_in_sig_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_in_sig_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stderr' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_0_out_sig_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `bufferIndex'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_SIZE'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `startReportPrinted'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_NAME'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_entry_point_1_out_sig_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__errno_location' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `printf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `getInstrumentFile'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `_mlir_ciface_main_graph_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strcspn' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorDestroy'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `popen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `run_main_graph_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataPtr'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strlen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncmp' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataPtr'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetShape'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetRank'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncpy' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__assert_fail' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetStrides'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `memcpy' [GLIBC_2.14]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetOmtArray'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputs' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fflush' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fopen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `free' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getenv' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListCreate'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `malloc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f32_to_f16'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `pclose' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fprintf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getpid' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `feof' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgetc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgets' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `snprintf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `gettimeofday' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f16_to_f32'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorCreateUntyped'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataType'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetSize'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataType'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `main_graph_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fwrite' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omQueryEntryPoints_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omInputSignature_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omOutputSignature_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omCompilationInfo_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omInstrumentPrint'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `run_main_graph_alpha'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stdout' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_out_sig_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__cxa_finalize' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_1_in_sig_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/venv/bin/python [0]: normal symbol `stderr' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `bufferIndex'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_SIZE'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `startReportPrinted'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_out_sig_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `OM_DATA_TYPE_NAME'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_entry_point_0_in_sig_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__errno_location' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `printf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `getInstrumentFile'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strcspn' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorDestroy'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `popen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataPtr'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strlen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncmp' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataPtr'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetShape'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetRank'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `strncpy' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `__assert_fail' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `main_graph_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetStrides'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `memcpy' [GLIBC_2.14]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetOmtArray'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `_mlir_ciface_main_graph_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputs' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fflush' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fopen' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `free' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getenv' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fputc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListCreate'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `malloc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f32_to_f16'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `pclose' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fprintf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `run_main_graph_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `getpid' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `feof' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgetc' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fgets' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `snprintf' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `gettimeofday' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `om_f16_to_f32'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorCreateUntyped'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorSetDataType'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorListGetSize'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so [0]: normal symbol `omTensorGetDataType'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /lib/x86_64-linux-gnu/libc.so.6 [0]: normal symbol `fwrite' [GLIBC_2.2.5]
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omQueryEntryPoints_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omInputSignature_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omOutputSignature_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omCompilationInfo_bravo'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `omInstrumentPrint'
+     10049:	binding file /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0] to /home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so [0]: normal symbol `run_main_graph_bravo'

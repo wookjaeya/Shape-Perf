@@ -1,0 +1,2114 @@
+{
+ "/home/user/work/v3/g2/K/L0064/S8_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 14768,
+   "OM_DATA_TYPE_SIZE": 27936,
+   "omTensorCreateUntyped": 13792,
+   "OMInstrumentPoint": 21600,
+   "omTensorSetShape": 14400,
+   "omTensorPrint": 15504,
+   "_entry_point_0_model": 25927,
+   "omTensorListDestroyShallow": 20928,
+   "omQueryEntryPoints": 12928,
+   "om_f16_to_f32": 21040,
+   "_entry_point_0_out_sig_model": 26032,
+   "omTensorGetStrides": 14464,
+   "omTensorListDestroy": 20832,
+   "run_main_graph_model": 12272,
+   "omTensorListGetOmtByIndex": 21008,
+   "omTensorGetDataType": 14736,
+   "main_graph_model": 9136,
+   "omCompilationInfo_model": 13280,
+   "omInstrumentPrint": 21504,
+   "omTensorGetOwning": 15456,
+   "omTensorGetShape": 14384,
+   "__truncsfhf2": 13360,
+   "omTensorCreateWithOwnership": 13760,
+   "_entry_point_0_in_sig_model": 25952,
+   "omTensorDestroy": 14224,
+   "omTensorGetRank": 14976,
+   "omTensorListGetOmtArray": 20976,
+   "omQueryEntryPoints_model": 12896,
+   "omTensorSetStridesWithPyArrayStrides": 14544,
+   "getInstrumentFile": 21312,
+   "_mlir_ciface_main_graph_model": 12176,
+   "omTensorListCreate": 20720,
+   "omTensorListGetSize": 20992,
+   "__truncdfhf2": 13376,
+   "omTensorGetAllocatedPtr": 15488,
+   "_entry_point_1_in_sig_model": 25776,
+   "run_main_graph": 12880,
+   "timing_nest_level": 37440,
+   "omTensorSetDataPtr": 14304,
+   "OM_DATA_TYPE_NAME": 37232,
+   "omTensorCreate": 13392,
+   "omCompilationInfo": 13296,
+   "omOutputSignature_model": 13120,
+   "omTensorCreateEmpty": 13936,
+   "om_f32_to_bf16": 21232,
+   "_entry_point_1_model": 25744,
+   "__extendhfsf2": 13312,
+   "_entry_point_1_out_sig_model": 25856,
+   "bufferIndex": 37432,
+   "startReportPrinted": 37425,
+   "om_bf16_to_f32": 21216,
+   "omInputSignature_model": 12960,
+   "__gnu_h2f_ieee": 13328,
+   "omTensorGetDataPtr": 14288,
+   "__gnu_f2h_ieee": 13344,
+   "omTensorGetNumElems": 14992,
+   "omOutputSignature": 13200,
+   "om_f32_to_f16": 21104,
+   "omTensorSetOwning": 15472,
+   "omTensorSetDataType": 14752,
+   "omTensorSetStrides": 14480,
+   "omInputSignature": 13040
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    14768,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    27936,
+    92
+   ],
+   "omTensorCreateUntyped": [
+    13792,
+    142
+   ],
+   "OMInstrumentPoint": [
+    21600,
+    1198
+   ],
+   "omTensorSetShape": [
+    14400,
+    50
+   ],
+   "omTensorPrint": [
+    15504,
+    847
+   ],
+   "_entry_point_0_model": [
+    25927,
+    15
+   ],
+   "omTensorListDestroyShallow": [
+    20928,
+    39
+   ],
+   "omQueryEntryPoints": [
+    12928,
+    20
+   ],
+   "om_f16_to_f32": [
+    21040,
+    59
+   ],
+   "_entry_point_0_out_sig_model": [
+    26032,
+    71
+   ],
+   "omTensorGetStrides": [
+    14464,
+    13
+   ],
+   "omTensorListDestroy": [
+    20832,
+    82
+   ],
+   "run_main_graph_model": [
+    12272,
+    607
+   ],
+   "omTensorListGetOmtByIndex": [
+    21008,
+    29
+   ],
+   "omTensorGetDataType": [
+    14736,
+    12
+   ],
+   "main_graph_model": [
+    9136,
+    3026
+   ],
+   "omCompilationInfo_model": [
+    13280,
+    8
+   ],
+   "omInstrumentPrint": [
+    21504,
+    91
+   ],
+   "omTensorGetOwning": [
+    15456,
+    13
+   ],
+   "omTensorGetShape": [
+    14384,
+    13
+   ],
+   "__truncsfhf2": [
+    13360,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    13760,
+    20
+   ],
+   "_entry_point_0_in_sig_model": [
+    25952,
+    72
+   ],
+   "omTensorDestroy": [
+    14224,
+    52
+   ],
+   "omTensorGetRank": [
+    14976,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    20976,
+    12
+   ],
+   "omQueryEntryPoints_model": [
+    12896,
+    20
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    14544,
+    180
+   ],
+   "getInstrumentFile": [
+    21312,
+    189
+   ],
+   "_mlir_ciface_main_graph_model": [
+    12176,
+    81
+   ],
+   "omTensorListCreate": [
+    20720,
+    110
+   ],
+   "omTensorListGetSize": [
+    20992,
+    13
+   ],
+   "__truncdfhf2": [
+    13376,
+    9
+   ],
+   "omTensorGetAllocatedPtr": [
+    15488,
+    12
+   ],
+   "_entry_point_1_in_sig_model": [
+    25776,
+    72
+   ],
+   "run_main_graph": [
+    12880,
+    5
+   ],
+   "timing_nest_level": [
+    37440,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    14304,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    37232,
+    184
+   ],
+   "omTensorCreate": [
+    13392,
+    362
+   ],
+   "omCompilationInfo": [
+    13296,
+    8
+   ],
+   "omOutputSignature_model": [
+    13120,
+    71
+   ],
+   "omTensorCreateEmpty": [
+    13936,
+    275
+   ],
+   "om_f32_to_bf16": [
+    21232,
+    80
+   ],
+   "_entry_point_1_model": [
+    25744,
+    21
+   ],
+   "__extendhfsf2": [
+    13312,
+    5
+   ],
+   "_entry_point_1_out_sig_model": [
+    25856,
+    71
+   ],
+   "bufferIndex": [
+    37432,
+    8
+   ],
+   "startReportPrinted": [
+    37425,
+    1
+   ],
+   "om_bf16_to_f32": [
+    21216,
+    8
+   ],
+   "omInputSignature_model": [
+    12960,
+    71
+   ],
+   "__gnu_h2f_ieee": [
+    13328,
+    5
+   ],
+   "omTensorGetDataPtr": [
+    14288,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    13344,
+    5
+   ],
+   "omTensorGetNumElems": [
+    14992,
+    449
+   ],
+   "omOutputSignature": [
+    13200,
+    71
+   ],
+   "om_f32_to_f16": [
+    21104,
+    109
+   ],
+   "omTensorSetOwning": [
+    15472,
+    10
+   ],
+   "omTensorSetDataType": [
+    14752,
+    9
+   ],
+   "omTensorSetStrides": [
+    14480,
+    50
+   ],
+   "omInputSignature": [
+    13040,
+    71
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 36880,
+   "run_main_graph_model": 36896,
+   "omTensorDestroy": 36904,
+   "omTensorGetDataPtr": 36920,
+   "omTensorSetDataPtr": 36944,
+   "omTensorGetShape": 36952,
+   "omTensorGetRank": 36960,
+   "main_graph_model": 36984,
+   "omTensorGetStrides": 36992,
+   "omTensorListGetOmtArray": 37008,
+   "_mlir_ciface_main_graph_model": 37016,
+   "omTensorListCreate": 37072,
+   "om_f32_to_f16": 37088,
+   "om_f16_to_f32": 37160,
+   "omTensorCreateUntyped": 37168,
+   "omTensorSetDataType": 37176,
+   "omTensorListGetSize": 37184,
+   "omTensorGetDataType": 37192
+  },
+  "gdat": {
+   "_entry_point_0_model": 36752,
+   "_entry_point_1_model": 36768,
+   "_entry_point_0_out_sig_model": 36728,
+   "_entry_point_1_in_sig_model": 36736,
+   "_entry_point_1_out_sig_model": 36744,
+   "bufferIndex": 36776,
+   "OM_DATA_TYPE_SIZE": 36784,
+   "_entry_point_0_in_sig_model": 36792,
+   "startReportPrinted": 36800,
+   "OM_DATA_TYPE_NAME": 36824
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ },
+ "/home/user/work/v3/g2/K/L0064/S1_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 17456,
+   "OM_DATA_TYPE_SIZE": 31840,
+   "omTensorCreateUntyped": 16480,
+   "OMInstrumentPoint": 24288,
+   "omTensorSetShape": 17088,
+   "omTensorPrint": 18192,
+   "_entry_point_0_model": 29895,
+   "omTensorListDestroyShallow": 23616,
+   "omQueryEntryPoints": 15616,
+   "om_f16_to_f32": 23728,
+   "_entry_point_0_out_sig_model": 30000,
+   "omTensorGetStrides": 17152,
+   "omTensorListDestroy": 23520,
+   "run_main_graph_model": 14960,
+   "omTensorListGetOmtByIndex": 23696,
+   "omTensorGetDataType": 17424,
+   "main_graph_model": 9136,
+   "omCompilationInfo_model": 15968,
+   "omInstrumentPrint": 24192,
+   "omTensorGetOwning": 18144,
+   "omTensorGetShape": 17072,
+   "__truncsfhf2": 16048,
+   "omTensorCreateWithOwnership": 16448,
+   "_entry_point_0_in_sig_model": 29920,
+   "omTensorDestroy": 16912,
+   "omTensorGetRank": 17664,
+   "omTensorListGetOmtArray": 23664,
+   "omQueryEntryPoints_model": 15584,
+   "omTensorSetStridesWithPyArrayStrides": 17232,
+   "getInstrumentFile": 24000,
+   "_mlir_ciface_main_graph_model": 14864,
+   "omTensorListCreate": 23408,
+   "omTensorListGetSize": 23680,
+   "__truncdfhf2": 16064,
+   "omTensorGetAllocatedPtr": 18176,
+   "_entry_point_1_in_sig_model": 29744,
+   "run_main_graph": 15568,
+   "timing_nest_level": 41536,
+   "omTensorSetDataPtr": 16992,
+   "OM_DATA_TYPE_NAME": 41328,
+   "omTensorCreate": 16080,
+   "omCompilationInfo": 15984,
+   "omOutputSignature_model": 15808,
+   "omTensorCreateEmpty": 16624,
+   "om_f32_to_bf16": 23920,
+   "_entry_point_1_model": 29712,
+   "__extendhfsf2": 16000,
+   "_entry_point_1_out_sig_model": 29824,
+   "bufferIndex": 41528,
+   "startReportPrinted": 41521,
+   "om_bf16_to_f32": 23904,
+   "omInputSignature_model": 15648,
+   "__gnu_h2f_ieee": 16016,
+   "omTensorGetDataPtr": 16976,
+   "__gnu_f2h_ieee": 16032,
+   "omTensorGetNumElems": 17680,
+   "omOutputSignature": 15888,
+   "om_f32_to_f16": 23792,
+   "omTensorSetOwning": 18160,
+   "omTensorSetDataType": 17440,
+   "omTensorSetStrides": 17168,
+   "omInputSignature": 15728
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    17456,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    31840,
+    92
+   ],
+   "omTensorCreateUntyped": [
+    16480,
+    142
+   ],
+   "OMInstrumentPoint": [
+    24288,
+    1198
+   ],
+   "omTensorSetShape": [
+    17088,
+    50
+   ],
+   "omTensorPrint": [
+    18192,
+    847
+   ],
+   "_entry_point_0_model": [
+    29895,
+    15
+   ],
+   "omTensorListDestroyShallow": [
+    23616,
+    39
+   ],
+   "omQueryEntryPoints": [
+    15616,
+    20
+   ],
+   "om_f16_to_f32": [
+    23728,
+    59
+   ],
+   "_entry_point_0_out_sig_model": [
+    30000,
+    71
+   ],
+   "omTensorGetStrides": [
+    17152,
+    13
+   ],
+   "omTensorListDestroy": [
+    23520,
+    82
+   ],
+   "run_main_graph_model": [
+    14960,
+    607
+   ],
+   "omTensorListGetOmtByIndex": [
+    23696,
+    29
+   ],
+   "omTensorGetDataType": [
+    17424,
+    12
+   ],
+   "main_graph_model": [
+    9136,
+    5728
+   ],
+   "omCompilationInfo_model": [
+    15968,
+    8
+   ],
+   "omInstrumentPrint": [
+    24192,
+    91
+   ],
+   "omTensorGetOwning": [
+    18144,
+    13
+   ],
+   "omTensorGetShape": [
+    17072,
+    13
+   ],
+   "__truncsfhf2": [
+    16048,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    16448,
+    20
+   ],
+   "_entry_point_0_in_sig_model": [
+    29920,
+    72
+   ],
+   "omTensorDestroy": [
+    16912,
+    52
+   ],
+   "omTensorGetRank": [
+    17664,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    23664,
+    12
+   ],
+   "omQueryEntryPoints_model": [
+    15584,
+    20
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    17232,
+    180
+   ],
+   "getInstrumentFile": [
+    24000,
+    189
+   ],
+   "_mlir_ciface_main_graph_model": [
+    14864,
+    81
+   ],
+   "omTensorListCreate": [
+    23408,
+    110
+   ],
+   "omTensorListGetSize": [
+    23680,
+    13
+   ],
+   "__truncdfhf2": [
+    16064,
+    9
+   ],
+   "omTensorGetAllocatedPtr": [
+    18176,
+    12
+   ],
+   "_entry_point_1_in_sig_model": [
+    29744,
+    72
+   ],
+   "run_main_graph": [
+    15568,
+    5
+   ],
+   "timing_nest_level": [
+    41536,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    16992,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    41328,
+    184
+   ],
+   "omTensorCreate": [
+    16080,
+    362
+   ],
+   "omCompilationInfo": [
+    15984,
+    8
+   ],
+   "omOutputSignature_model": [
+    15808,
+    71
+   ],
+   "omTensorCreateEmpty": [
+    16624,
+    275
+   ],
+   "om_f32_to_bf16": [
+    23920,
+    80
+   ],
+   "_entry_point_1_model": [
+    29712,
+    21
+   ],
+   "__extendhfsf2": [
+    16000,
+    5
+   ],
+   "_entry_point_1_out_sig_model": [
+    29824,
+    71
+   ],
+   "bufferIndex": [
+    41528,
+    8
+   ],
+   "startReportPrinted": [
+    41521,
+    1
+   ],
+   "om_bf16_to_f32": [
+    23904,
+    8
+   ],
+   "omInputSignature_model": [
+    15648,
+    71
+   ],
+   "__gnu_h2f_ieee": [
+    16016,
+    5
+   ],
+   "omTensorGetDataPtr": [
+    16976,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    16032,
+    5
+   ],
+   "omTensorGetNumElems": [
+    17680,
+    449
+   ],
+   "omOutputSignature": [
+    15888,
+    71
+   ],
+   "om_f32_to_f16": [
+    23792,
+    109
+   ],
+   "omTensorSetOwning": [
+    18160,
+    10
+   ],
+   "omTensorSetDataType": [
+    17440,
+    9
+   ],
+   "omTensorSetStrides": [
+    17168,
+    50
+   ],
+   "omInputSignature": [
+    15728,
+    71
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 40976,
+   "run_main_graph_model": 40992,
+   "omTensorDestroy": 41000,
+   "omTensorGetDataPtr": 41016,
+   "omTensorSetDataPtr": 41040,
+   "omTensorGetShape": 41048,
+   "omTensorGetRank": 41056,
+   "main_graph_model": 41080,
+   "omTensorGetStrides": 41088,
+   "omTensorListGetOmtArray": 41104,
+   "_mlir_ciface_main_graph_model": 41112,
+   "omTensorListCreate": 41168,
+   "om_f32_to_f16": 41184,
+   "om_f16_to_f32": 41256,
+   "omTensorCreateUntyped": 41264,
+   "omTensorSetDataType": 41272,
+   "omTensorListGetSize": 41280,
+   "omTensorGetDataType": 41288
+  },
+  "gdat": {
+   "_entry_point_0_model": 40848,
+   "_entry_point_1_model": 40864,
+   "_entry_point_0_out_sig_model": 40824,
+   "_entry_point_1_in_sig_model": 40832,
+   "_entry_point_1_out_sig_model": 40840,
+   "bufferIndex": 40872,
+   "OM_DATA_TYPE_SIZE": 40880,
+   "_entry_point_0_in_sig_model": 40888,
+   "startReportPrinted": 40896,
+   "OM_DATA_TYPE_NAME": 40920
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ },
+ "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 14768,
+   "OM_DATA_TYPE_SIZE": 27968,
+   "omCompilationInfo_alpha": 13280,
+   "omTensorCreateUntyped": 13792,
+   "OMInstrumentPoint": 21600,
+   "omTensorSetShape": 14400,
+   "_entry_point_0_in_sig_alpha": 25968,
+   "omTensorPrint": 15504,
+   "omTensorListDestroyShallow": 20928,
+   "omQueryEntryPoints": 12928,
+   "om_f16_to_f32": 21040,
+   "omQueryEntryPoints_alpha": 12896,
+   "omTensorGetStrides": 14464,
+   "omTensorListDestroy": 20832,
+   "_mlir_ciface_main_graph_alpha": 12176,
+   "omTensorListGetOmtByIndex": 21008,
+   "omTensorGetDataType": 14736,
+   "omInstrumentPrint": 21504,
+   "omTensorGetOwning": 15456,
+   "omTensorGetShape": 14384,
+   "_entry_point_1_in_sig_alpha": 25792,
+   "__truncsfhf2": 13360,
+   "omTensorCreateWithOwnership": 13760,
+   "omTensorDestroy": 14224,
+   "omTensorGetRank": 14976,
+   "omTensorListGetOmtArray": 20976,
+   "_entry_point_1_alpha": 25760,
+   "omOutputSignature_alpha": 13120,
+   "_entry_point_1_out_sig_alpha": 25872,
+   "omTensorSetStridesWithPyArrayStrides": 14544,
+   "getInstrumentFile": 21312,
+   "omTensorListCreate": 20720,
+   "omTensorListGetSize": 20992,
+   "__truncdfhf2": 13376,
+   "omInputSignature_alpha": 12960,
+   "omTensorGetAllocatedPtr": 15488,
+   "run_main_graph": 12880,
+   "timing_nest_level": 37440,
+   "omTensorSetDataPtr": 14304,
+   "OM_DATA_TYPE_NAME": 37232,
+   "omTensorCreate": 13392,
+   "omCompilationInfo": 13296,
+   "omTensorCreateEmpty": 13936,
+   "om_f32_to_bf16": 21232,
+   "__extendhfsf2": 13312,
+   "bufferIndex": 37432,
+   "startReportPrinted": 37425,
+   "om_bf16_to_f32": 21216,
+   "__gnu_h2f_ieee": 13328,
+   "omTensorGetDataPtr": 14288,
+   "__gnu_f2h_ieee": 13344,
+   "omTensorGetNumElems": 14992,
+   "omOutputSignature": 13200,
+   "_entry_point_0_alpha": 25943,
+   "om_f32_to_f16": 21104,
+   "omTensorSetOwning": 15472,
+   "_entry_point_0_out_sig_alpha": 26048,
+   "run_main_graph_alpha": 12272,
+   "omTensorSetDataType": 14752,
+   "omTensorSetStrides": 14480,
+   "omInputSignature": 13040,
+   "main_graph_alpha": 9136
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    14768,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    27968,
+    92
+   ],
+   "omCompilationInfo_alpha": [
+    13280,
+    8
+   ],
+   "omTensorCreateUntyped": [
+    13792,
+    142
+   ],
+   "OMInstrumentPoint": [
+    21600,
+    1198
+   ],
+   "omTensorSetShape": [
+    14400,
+    50
+   ],
+   "_entry_point_0_in_sig_alpha": [
+    25968,
+    72
+   ],
+   "omTensorPrint": [
+    15504,
+    847
+   ],
+   "omTensorListDestroyShallow": [
+    20928,
+    39
+   ],
+   "omQueryEntryPoints": [
+    12928,
+    20
+   ],
+   "om_f16_to_f32": [
+    21040,
+    59
+   ],
+   "omQueryEntryPoints_alpha": [
+    12896,
+    20
+   ],
+   "omTensorGetStrides": [
+    14464,
+    13
+   ],
+   "omTensorListDestroy": [
+    20832,
+    82
+   ],
+   "_mlir_ciface_main_graph_alpha": [
+    12176,
+    81
+   ],
+   "omTensorListGetOmtByIndex": [
+    21008,
+    29
+   ],
+   "omTensorGetDataType": [
+    14736,
+    12
+   ],
+   "omInstrumentPrint": [
+    21504,
+    91
+   ],
+   "omTensorGetOwning": [
+    15456,
+    13
+   ],
+   "omTensorGetShape": [
+    14384,
+    13
+   ],
+   "_entry_point_1_in_sig_alpha": [
+    25792,
+    72
+   ],
+   "__truncsfhf2": [
+    13360,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    13760,
+    20
+   ],
+   "omTensorDestroy": [
+    14224,
+    52
+   ],
+   "omTensorGetRank": [
+    14976,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    20976,
+    12
+   ],
+   "_entry_point_1_alpha": [
+    25760,
+    21
+   ],
+   "omOutputSignature_alpha": [
+    13120,
+    71
+   ],
+   "_entry_point_1_out_sig_alpha": [
+    25872,
+    71
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    14544,
+    180
+   ],
+   "getInstrumentFile": [
+    21312,
+    189
+   ],
+   "omTensorListCreate": [
+    20720,
+    110
+   ],
+   "omTensorListGetSize": [
+    20992,
+    13
+   ],
+   "__truncdfhf2": [
+    13376,
+    9
+   ],
+   "omInputSignature_alpha": [
+    12960,
+    71
+   ],
+   "omTensorGetAllocatedPtr": [
+    15488,
+    12
+   ],
+   "run_main_graph": [
+    12880,
+    5
+   ],
+   "timing_nest_level": [
+    37440,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    14304,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    37232,
+    184
+   ],
+   "omTensorCreate": [
+    13392,
+    362
+   ],
+   "omCompilationInfo": [
+    13296,
+    8
+   ],
+   "omTensorCreateEmpty": [
+    13936,
+    275
+   ],
+   "om_f32_to_bf16": [
+    21232,
+    80
+   ],
+   "__extendhfsf2": [
+    13312,
+    5
+   ],
+   "bufferIndex": [
+    37432,
+    8
+   ],
+   "startReportPrinted": [
+    37425,
+    1
+   ],
+   "om_bf16_to_f32": [
+    21216,
+    8
+   ],
+   "__gnu_h2f_ieee": [
+    13328,
+    5
+   ],
+   "omTensorGetDataPtr": [
+    14288,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    13344,
+    5
+   ],
+   "omTensorGetNumElems": [
+    14992,
+    449
+   ],
+   "omOutputSignature": [
+    13200,
+    71
+   ],
+   "_entry_point_0_alpha": [
+    25943,
+    15
+   ],
+   "om_f32_to_f16": [
+    21104,
+    109
+   ],
+   "omTensorSetOwning": [
+    15472,
+    10
+   ],
+   "_entry_point_0_out_sig_alpha": [
+    26048,
+    71
+   ],
+   "run_main_graph_alpha": [
+    12272,
+    607
+   ],
+   "omTensorSetDataType": [
+    14752,
+    9
+   ],
+   "omTensorSetStrides": [
+    14480,
+    50
+   ],
+   "omInputSignature": [
+    13040,
+    71
+   ],
+   "main_graph_alpha": [
+    9136,
+    3026
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 36880,
+   "_mlir_ciface_main_graph_alpha": 36888,
+   "omTensorDestroy": 36904,
+   "run_main_graph_alpha": 36920,
+   "omTensorGetDataPtr": 36928,
+   "omTensorSetDataPtr": 36952,
+   "omTensorGetShape": 36960,
+   "omTensorGetRank": 36968,
+   "omTensorGetStrides": 36992,
+   "omTensorListGetOmtArray": 37008,
+   "omTensorListCreate": 37064,
+   "om_f32_to_f16": 37080,
+   "om_f16_to_f32": 37152,
+   "omTensorCreateUntyped": 37160,
+   "omTensorSetDataType": 37168,
+   "omTensorListGetSize": 37176,
+   "omTensorGetDataType": 37184,
+   "main_graph_alpha": 37192
+  },
+  "gdat": {
+   "_entry_point_0_alpha": 36736,
+   "_entry_point_1_alpha": 36800,
+   "_entry_point_0_in_sig_alpha": 36728,
+   "_entry_point_1_in_sig_alpha": 36744,
+   "_entry_point_0_out_sig_alpha": 36760,
+   "bufferIndex": 36768,
+   "OM_DATA_TYPE_SIZE": 36776,
+   "startReportPrinted": 36784,
+   "OM_DATA_TYPE_NAME": 36816,
+   "_entry_point_1_out_sig_alpha": 36824
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ },
+ "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 17456,
+   "OM_DATA_TYPE_SIZE": 31856,
+   "omTensorCreateUntyped": 16480,
+   "OMInstrumentPoint": 24288,
+   "omTensorSetShape": 17088,
+   "omTensorPrint": 18192,
+   "omQueryEntryPoints_bravo": 15584,
+   "_mlir_ciface_main_graph_bravo": 14864,
+   "omTensorListDestroyShallow": 23616,
+   "omQueryEntryPoints": 15616,
+   "om_f16_to_f32": 23728,
+   "omTensorGetStrides": 17152,
+   "omTensorListDestroy": 23520,
+   "_entry_point_1_in_sig_bravo": 29760,
+   "omTensorListGetOmtByIndex": 23696,
+   "omTensorGetDataType": 17424,
+   "omInstrumentPrint": 24192,
+   "omTensorGetOwning": 18144,
+   "omTensorGetShape": 17072,
+   "_entry_point_1_bravo": 29728,
+   "omOutputSignature_bravo": 15808,
+   "__truncsfhf2": 16048,
+   "omTensorCreateWithOwnership": 16448,
+   "omTensorDestroy": 16912,
+   "_entry_point_1_out_sig_bravo": 29840,
+   "omTensorGetRank": 17664,
+   "omTensorListGetOmtArray": 23664,
+   "omInputSignature_bravo": 15648,
+   "omTensorSetStridesWithPyArrayStrides": 17232,
+   "getInstrumentFile": 24000,
+   "omTensorListCreate": 23408,
+   "omTensorListGetSize": 23680,
+   "__truncdfhf2": 16064,
+   "omTensorGetAllocatedPtr": 18176,
+   "run_main_graph": 15568,
+   "timing_nest_level": 41536,
+   "omTensorSetDataPtr": 16992,
+   "OM_DATA_TYPE_NAME": 41328,
+   "omTensorCreate": 16080,
+   "omCompilationInfo": 15984,
+   "omTensorCreateEmpty": 16624,
+   "om_f32_to_bf16": 23920,
+   "__extendhfsf2": 16000,
+   "bufferIndex": 41528,
+   "startReportPrinted": 41521,
+   "om_bf16_to_f32": 23904,
+   "__gnu_h2f_ieee": 16016,
+   "_entry_point_0_bravo": 29911,
+   "omTensorGetDataPtr": 16976,
+   "__gnu_f2h_ieee": 16032,
+   "omTensorGetNumElems": 17680,
+   "omOutputSignature": 15888,
+   "_entry_point_0_out_sig_bravo": 30016,
+   "om_f32_to_f16": 23792,
+   "run_main_graph_bravo": 14960,
+   "main_graph_bravo": 9136,
+   "omTensorSetOwning": 18160,
+   "omCompilationInfo_bravo": 15968,
+   "omTensorSetDataType": 17440,
+   "omTensorSetStrides": 17168,
+   "omInputSignature": 15728,
+   "_entry_point_0_in_sig_bravo": 29936
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    17456,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    31856,
+    92
+   ],
+   "omTensorCreateUntyped": [
+    16480,
+    142
+   ],
+   "OMInstrumentPoint": [
+    24288,
+    1198
+   ],
+   "omTensorSetShape": [
+    17088,
+    50
+   ],
+   "omTensorPrint": [
+    18192,
+    847
+   ],
+   "omQueryEntryPoints_bravo": [
+    15584,
+    20
+   ],
+   "_mlir_ciface_main_graph_bravo": [
+    14864,
+    81
+   ],
+   "omTensorListDestroyShallow": [
+    23616,
+    39
+   ],
+   "omQueryEntryPoints": [
+    15616,
+    20
+   ],
+   "om_f16_to_f32": [
+    23728,
+    59
+   ],
+   "omTensorGetStrides": [
+    17152,
+    13
+   ],
+   "omTensorListDestroy": [
+    23520,
+    82
+   ],
+   "_entry_point_1_in_sig_bravo": [
+    29760,
+    72
+   ],
+   "omTensorListGetOmtByIndex": [
+    23696,
+    29
+   ],
+   "omTensorGetDataType": [
+    17424,
+    12
+   ],
+   "omInstrumentPrint": [
+    24192,
+    91
+   ],
+   "omTensorGetOwning": [
+    18144,
+    13
+   ],
+   "omTensorGetShape": [
+    17072,
+    13
+   ],
+   "_entry_point_1_bravo": [
+    29728,
+    21
+   ],
+   "omOutputSignature_bravo": [
+    15808,
+    71
+   ],
+   "__truncsfhf2": [
+    16048,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    16448,
+    20
+   ],
+   "omTensorDestroy": [
+    16912,
+    52
+   ],
+   "_entry_point_1_out_sig_bravo": [
+    29840,
+    71
+   ],
+   "omTensorGetRank": [
+    17664,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    23664,
+    12
+   ],
+   "omInputSignature_bravo": [
+    15648,
+    71
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    17232,
+    180
+   ],
+   "getInstrumentFile": [
+    24000,
+    189
+   ],
+   "omTensorListCreate": [
+    23408,
+    110
+   ],
+   "omTensorListGetSize": [
+    23680,
+    13
+   ],
+   "__truncdfhf2": [
+    16064,
+    9
+   ],
+   "omTensorGetAllocatedPtr": [
+    18176,
+    12
+   ],
+   "run_main_graph": [
+    15568,
+    5
+   ],
+   "timing_nest_level": [
+    41536,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    16992,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    41328,
+    184
+   ],
+   "omTensorCreate": [
+    16080,
+    362
+   ],
+   "omCompilationInfo": [
+    15984,
+    8
+   ],
+   "omTensorCreateEmpty": [
+    16624,
+    275
+   ],
+   "om_f32_to_bf16": [
+    23920,
+    80
+   ],
+   "__extendhfsf2": [
+    16000,
+    5
+   ],
+   "bufferIndex": [
+    41528,
+    8
+   ],
+   "startReportPrinted": [
+    41521,
+    1
+   ],
+   "om_bf16_to_f32": [
+    23904,
+    8
+   ],
+   "__gnu_h2f_ieee": [
+    16016,
+    5
+   ],
+   "_entry_point_0_bravo": [
+    29911,
+    15
+   ],
+   "omTensorGetDataPtr": [
+    16976,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    16032,
+    5
+   ],
+   "omTensorGetNumElems": [
+    17680,
+    449
+   ],
+   "omOutputSignature": [
+    15888,
+    71
+   ],
+   "_entry_point_0_out_sig_bravo": [
+    30016,
+    71
+   ],
+   "om_f32_to_f16": [
+    23792,
+    109
+   ],
+   "run_main_graph_bravo": [
+    14960,
+    607
+   ],
+   "main_graph_bravo": [
+    9136,
+    5728
+   ],
+   "omTensorSetOwning": [
+    18160,
+    10
+   ],
+   "omCompilationInfo_bravo": [
+    15968,
+    8
+   ],
+   "omTensorSetDataType": [
+    17440,
+    9
+   ],
+   "omTensorSetStrides": [
+    17168,
+    50
+   ],
+   "omInputSignature": [
+    15728,
+    71
+   ],
+   "_entry_point_0_in_sig_bravo": [
+    29936,
+    72
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 40976,
+   "omTensorDestroy": 40992,
+   "omTensorGetDataPtr": 41008,
+   "omTensorSetDataPtr": 41032,
+   "omTensorGetShape": 41040,
+   "omTensorGetRank": 41048,
+   "main_graph_bravo": 41072,
+   "omTensorGetStrides": 41080,
+   "omTensorListGetOmtArray": 41096,
+   "_mlir_ciface_main_graph_bravo": 41104,
+   "omTensorListCreate": 41160,
+   "om_f32_to_f16": 41176,
+   "run_main_graph_bravo": 41200,
+   "om_f16_to_f32": 41256,
+   "omTensorCreateUntyped": 41264,
+   "omTensorSetDataType": 41272,
+   "omTensorListGetSize": 41280,
+   "omTensorGetDataType": 41288
+  },
+  "gdat": {
+   "_entry_point_0_bravo": 40920,
+   "_entry_point_1_bravo": 40840,
+   "_entry_point_1_out_sig_bravo": 40816,
+   "_entry_point_1_in_sig_bravo": 40832,
+   "bufferIndex": 40856,
+   "OM_DATA_TYPE_SIZE": 40864,
+   "startReportPrinted": 40872,
+   "_entry_point_0_out_sig_bravo": 40888,
+   "OM_DATA_TYPE_NAME": 40904,
+   "_entry_point_0_in_sig_bravo": 40928
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ },
+ "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 14768,
+   "OM_DATA_TYPE_SIZE": 27968,
+   "omTensorCreateUntyped": 13792,
+   "OMInstrumentPoint": 21600,
+   "omTensorSetShape": 14400,
+   "omTensorPrint": 15504,
+   "omQueryEntryPoints_bravo": 12896,
+   "_mlir_ciface_main_graph_bravo": 12176,
+   "omTensorListDestroyShallow": 20928,
+   "omQueryEntryPoints": 12928,
+   "om_f16_to_f32": 21040,
+   "omTensorGetStrides": 14464,
+   "omTensorListDestroy": 20832,
+   "_entry_point_1_in_sig_bravo": 25792,
+   "omTensorListGetOmtByIndex": 21008,
+   "omTensorGetDataType": 14736,
+   "omInstrumentPrint": 21504,
+   "omTensorGetOwning": 15456,
+   "omTensorGetShape": 14384,
+   "_entry_point_1_bravo": 25760,
+   "omOutputSignature_bravo": 13120,
+   "__truncsfhf2": 13360,
+   "omTensorCreateWithOwnership": 13760,
+   "omTensorDestroy": 14224,
+   "_entry_point_1_out_sig_bravo": 25872,
+   "omTensorGetRank": 14976,
+   "omTensorListGetOmtArray": 20976,
+   "omInputSignature_bravo": 12960,
+   "omTensorSetStridesWithPyArrayStrides": 14544,
+   "getInstrumentFile": 21312,
+   "omTensorListCreate": 20720,
+   "omTensorListGetSize": 20992,
+   "__truncdfhf2": 13376,
+   "omTensorGetAllocatedPtr": 15488,
+   "run_main_graph": 12880,
+   "timing_nest_level": 37440,
+   "omTensorSetDataPtr": 14304,
+   "OM_DATA_TYPE_NAME": 37232,
+   "omTensorCreate": 13392,
+   "omCompilationInfo": 13296,
+   "omTensorCreateEmpty": 13936,
+   "om_f32_to_bf16": 21232,
+   "__extendhfsf2": 13312,
+   "bufferIndex": 37432,
+   "startReportPrinted": 37425,
+   "om_bf16_to_f32": 21216,
+   "__gnu_h2f_ieee": 13328,
+   "_entry_point_0_bravo": 25943,
+   "omTensorGetDataPtr": 14288,
+   "__gnu_f2h_ieee": 13344,
+   "omTensorGetNumElems": 14992,
+   "omOutputSignature": 13200,
+   "_entry_point_0_out_sig_bravo": 26048,
+   "om_f32_to_f16": 21104,
+   "run_main_graph_bravo": 12272,
+   "main_graph_bravo": 9136,
+   "omTensorSetOwning": 15472,
+   "omCompilationInfo_bravo": 13280,
+   "omTensorSetDataType": 14752,
+   "omTensorSetStrides": 14480,
+   "omInputSignature": 13040,
+   "_entry_point_0_in_sig_bravo": 25968
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    14768,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    27968,
+    92
+   ],
+   "omTensorCreateUntyped": [
+    13792,
+    142
+   ],
+   "OMInstrumentPoint": [
+    21600,
+    1198
+   ],
+   "omTensorSetShape": [
+    14400,
+    50
+   ],
+   "omTensorPrint": [
+    15504,
+    847
+   ],
+   "omQueryEntryPoints_bravo": [
+    12896,
+    20
+   ],
+   "_mlir_ciface_main_graph_bravo": [
+    12176,
+    81
+   ],
+   "omTensorListDestroyShallow": [
+    20928,
+    39
+   ],
+   "omQueryEntryPoints": [
+    12928,
+    20
+   ],
+   "om_f16_to_f32": [
+    21040,
+    59
+   ],
+   "omTensorGetStrides": [
+    14464,
+    13
+   ],
+   "omTensorListDestroy": [
+    20832,
+    82
+   ],
+   "_entry_point_1_in_sig_bravo": [
+    25792,
+    72
+   ],
+   "omTensorListGetOmtByIndex": [
+    21008,
+    29
+   ],
+   "omTensorGetDataType": [
+    14736,
+    12
+   ],
+   "omInstrumentPrint": [
+    21504,
+    91
+   ],
+   "omTensorGetOwning": [
+    15456,
+    13
+   ],
+   "omTensorGetShape": [
+    14384,
+    13
+   ],
+   "_entry_point_1_bravo": [
+    25760,
+    21
+   ],
+   "omOutputSignature_bravo": [
+    13120,
+    71
+   ],
+   "__truncsfhf2": [
+    13360,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    13760,
+    20
+   ],
+   "omTensorDestroy": [
+    14224,
+    52
+   ],
+   "_entry_point_1_out_sig_bravo": [
+    25872,
+    71
+   ],
+   "omTensorGetRank": [
+    14976,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    20976,
+    12
+   ],
+   "omInputSignature_bravo": [
+    12960,
+    71
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    14544,
+    180
+   ],
+   "getInstrumentFile": [
+    21312,
+    189
+   ],
+   "omTensorListCreate": [
+    20720,
+    110
+   ],
+   "omTensorListGetSize": [
+    20992,
+    13
+   ],
+   "__truncdfhf2": [
+    13376,
+    9
+   ],
+   "omTensorGetAllocatedPtr": [
+    15488,
+    12
+   ],
+   "run_main_graph": [
+    12880,
+    5
+   ],
+   "timing_nest_level": [
+    37440,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    14304,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    37232,
+    184
+   ],
+   "omTensorCreate": [
+    13392,
+    362
+   ],
+   "omCompilationInfo": [
+    13296,
+    8
+   ],
+   "omTensorCreateEmpty": [
+    13936,
+    275
+   ],
+   "om_f32_to_bf16": [
+    21232,
+    80
+   ],
+   "__extendhfsf2": [
+    13312,
+    5
+   ],
+   "bufferIndex": [
+    37432,
+    8
+   ],
+   "startReportPrinted": [
+    37425,
+    1
+   ],
+   "om_bf16_to_f32": [
+    21216,
+    8
+   ],
+   "__gnu_h2f_ieee": [
+    13328,
+    5
+   ],
+   "_entry_point_0_bravo": [
+    25943,
+    15
+   ],
+   "omTensorGetDataPtr": [
+    14288,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    13344,
+    5
+   ],
+   "omTensorGetNumElems": [
+    14992,
+    449
+   ],
+   "omOutputSignature": [
+    13200,
+    71
+   ],
+   "_entry_point_0_out_sig_bravo": [
+    26048,
+    71
+   ],
+   "om_f32_to_f16": [
+    21104,
+    109
+   ],
+   "run_main_graph_bravo": [
+    12272,
+    607
+   ],
+   "main_graph_bravo": [
+    9136,
+    3026
+   ],
+   "omTensorSetOwning": [
+    15472,
+    10
+   ],
+   "omCompilationInfo_bravo": [
+    13280,
+    8
+   ],
+   "omTensorSetDataType": [
+    14752,
+    9
+   ],
+   "omTensorSetStrides": [
+    14480,
+    50
+   ],
+   "omInputSignature": [
+    13040,
+    71
+   ],
+   "_entry_point_0_in_sig_bravo": [
+    25968,
+    72
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 36880,
+   "omTensorDestroy": 36896,
+   "omTensorGetDataPtr": 36912,
+   "omTensorSetDataPtr": 36936,
+   "omTensorGetShape": 36944,
+   "omTensorGetRank": 36952,
+   "main_graph_bravo": 36976,
+   "omTensorGetStrides": 36984,
+   "omTensorListGetOmtArray": 37000,
+   "_mlir_ciface_main_graph_bravo": 37008,
+   "omTensorListCreate": 37064,
+   "om_f32_to_f16": 37080,
+   "run_main_graph_bravo": 37104,
+   "om_f16_to_f32": 37160,
+   "omTensorCreateUntyped": 37168,
+   "omTensorSetDataType": 37176,
+   "omTensorListGetSize": 37184,
+   "omTensorGetDataType": 37192
+  },
+  "gdat": {
+   "_entry_point_0_bravo": 36824,
+   "_entry_point_1_bravo": 36744,
+   "_entry_point_1_out_sig_bravo": 36720,
+   "_entry_point_1_in_sig_bravo": 36736,
+   "bufferIndex": 36760,
+   "OM_DATA_TYPE_SIZE": 36768,
+   "startReportPrinted": 36776,
+   "_entry_point_0_out_sig_bravo": 36792,
+   "OM_DATA_TYPE_NAME": 36808,
+   "_entry_point_0_in_sig_bravo": 36832
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ },
+ "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so": {
+  "dynsym": {
+   "omTensorGetBufferSize": 17456,
+   "OM_DATA_TYPE_SIZE": 31856,
+   "omCompilationInfo_alpha": 15968,
+   "omTensorCreateUntyped": 16480,
+   "OMInstrumentPoint": 24288,
+   "omTensorSetShape": 17088,
+   "_entry_point_0_in_sig_alpha": 29936,
+   "omTensorPrint": 18192,
+   "omTensorListDestroyShallow": 23616,
+   "omQueryEntryPoints": 15616,
+   "om_f16_to_f32": 23728,
+   "omQueryEntryPoints_alpha": 15584,
+   "omTensorGetStrides": 17152,
+   "omTensorListDestroy": 23520,
+   "_mlir_ciface_main_graph_alpha": 14864,
+   "omTensorListGetOmtByIndex": 23696,
+   "omTensorGetDataType": 17424,
+   "omInstrumentPrint": 24192,
+   "omTensorGetOwning": 18144,
+   "omTensorGetShape": 17072,
+   "_entry_point_1_in_sig_alpha": 29760,
+   "__truncsfhf2": 16048,
+   "omTensorCreateWithOwnership": 16448,
+   "omTensorDestroy": 16912,
+   "omTensorGetRank": 17664,
+   "omTensorListGetOmtArray": 23664,
+   "_entry_point_1_alpha": 29728,
+   "omOutputSignature_alpha": 15808,
+   "_entry_point_1_out_sig_alpha": 29840,
+   "omTensorSetStridesWithPyArrayStrides": 17232,
+   "getInstrumentFile": 24000,
+   "omTensorListCreate": 23408,
+   "omTensorListGetSize": 23680,
+   "__truncdfhf2": 16064,
+   "omInputSignature_alpha": 15648,
+   "omTensorGetAllocatedPtr": 18176,
+   "run_main_graph": 15568,
+   "timing_nest_level": 41536,
+   "omTensorSetDataPtr": 16992,
+   "OM_DATA_TYPE_NAME": 41328,
+   "omTensorCreate": 16080,
+   "omCompilationInfo": 15984,
+   "omTensorCreateEmpty": 16624,
+   "om_f32_to_bf16": 23920,
+   "__extendhfsf2": 16000,
+   "bufferIndex": 41528,
+   "startReportPrinted": 41521,
+   "om_bf16_to_f32": 23904,
+   "__gnu_h2f_ieee": 16016,
+   "omTensorGetDataPtr": 16976,
+   "__gnu_f2h_ieee": 16032,
+   "omTensorGetNumElems": 17680,
+   "omOutputSignature": 15888,
+   "_entry_point_0_alpha": 29911,
+   "om_f32_to_f16": 23792,
+   "omTensorSetOwning": 18160,
+   "_entry_point_0_out_sig_alpha": 30016,
+   "run_main_graph_alpha": 14960,
+   "omTensorSetDataType": 17440,
+   "omTensorSetStrides": 17168,
+   "omInputSignature": 15728,
+   "main_graph_alpha": 9136
+  },
+  "funcs": {
+   "omTensorGetBufferSize": [
+    17456,
+    202
+   ],
+   "OM_DATA_TYPE_SIZE": [
+    31856,
+    92
+   ],
+   "omCompilationInfo_alpha": [
+    15968,
+    8
+   ],
+   "omTensorCreateUntyped": [
+    16480,
+    142
+   ],
+   "OMInstrumentPoint": [
+    24288,
+    1198
+   ],
+   "omTensorSetShape": [
+    17088,
+    50
+   ],
+   "_entry_point_0_in_sig_alpha": [
+    29936,
+    72
+   ],
+   "omTensorPrint": [
+    18192,
+    847
+   ],
+   "omTensorListDestroyShallow": [
+    23616,
+    39
+   ],
+   "omQueryEntryPoints": [
+    15616,
+    20
+   ],
+   "om_f16_to_f32": [
+    23728,
+    59
+   ],
+   "omQueryEntryPoints_alpha": [
+    15584,
+    20
+   ],
+   "omTensorGetStrides": [
+    17152,
+    13
+   ],
+   "omTensorListDestroy": [
+    23520,
+    82
+   ],
+   "_mlir_ciface_main_graph_alpha": [
+    14864,
+    81
+   ],
+   "omTensorListGetOmtByIndex": [
+    23696,
+    29
+   ],
+   "omTensorGetDataType": [
+    17424,
+    12
+   ],
+   "omInstrumentPrint": [
+    24192,
+    91
+   ],
+   "omTensorGetOwning": [
+    18144,
+    13
+   ],
+   "omTensorGetShape": [
+    17072,
+    13
+   ],
+   "_entry_point_1_in_sig_alpha": [
+    29760,
+    72
+   ],
+   "__truncsfhf2": [
+    16048,
+    5
+   ],
+   "omTensorCreateWithOwnership": [
+    16448,
+    20
+   ],
+   "omTensorDestroy": [
+    16912,
+    52
+   ],
+   "omTensorGetRank": [
+    17664,
+    13
+   ],
+   "omTensorListGetOmtArray": [
+    23664,
+    12
+   ],
+   "_entry_point_1_alpha": [
+    29728,
+    21
+   ],
+   "omOutputSignature_alpha": [
+    15808,
+    71
+   ],
+   "_entry_point_1_out_sig_alpha": [
+    29840,
+    71
+   ],
+   "omTensorSetStridesWithPyArrayStrides": [
+    17232,
+    180
+   ],
+   "getInstrumentFile": [
+    24000,
+    189
+   ],
+   "omTensorListCreate": [
+    23408,
+    110
+   ],
+   "omTensorListGetSize": [
+    23680,
+    13
+   ],
+   "__truncdfhf2": [
+    16064,
+    9
+   ],
+   "omInputSignature_alpha": [
+    15648,
+    71
+   ],
+   "omTensorGetAllocatedPtr": [
+    18176,
+    12
+   ],
+   "run_main_graph": [
+    15568,
+    5
+   ],
+   "timing_nest_level": [
+    41536,
+    4
+   ],
+   "omTensorSetDataPtr": [
+    16992,
+    70
+   ],
+   "OM_DATA_TYPE_NAME": [
+    41328,
+    184
+   ],
+   "omTensorCreate": [
+    16080,
+    362
+   ],
+   "omCompilationInfo": [
+    15984,
+    8
+   ],
+   "omTensorCreateEmpty": [
+    16624,
+    275
+   ],
+   "om_f32_to_bf16": [
+    23920,
+    80
+   ],
+   "__extendhfsf2": [
+    16000,
+    5
+   ],
+   "bufferIndex": [
+    41528,
+    8
+   ],
+   "startReportPrinted": [
+    41521,
+    1
+   ],
+   "om_bf16_to_f32": [
+    23904,
+    8
+   ],
+   "__gnu_h2f_ieee": [
+    16016,
+    5
+   ],
+   "omTensorGetDataPtr": [
+    16976,
+    13
+   ],
+   "__gnu_f2h_ieee": [
+    16032,
+    5
+   ],
+   "omTensorGetNumElems": [
+    17680,
+    449
+   ],
+   "omOutputSignature": [
+    15888,
+    71
+   ],
+   "_entry_point_0_alpha": [
+    29911,
+    15
+   ],
+   "om_f32_to_f16": [
+    23792,
+    109
+   ],
+   "omTensorSetOwning": [
+    18160,
+    10
+   ],
+   "_entry_point_0_out_sig_alpha": [
+    30016,
+    71
+   ],
+   "run_main_graph_alpha": [
+    14960,
+    607
+   ],
+   "omTensorSetDataType": [
+    17440,
+    9
+   ],
+   "omTensorSetStrides": [
+    17168,
+    50
+   ],
+   "omInputSignature": [
+    15728,
+    71
+   ],
+   "main_graph_alpha": [
+    9136,
+    5728
+   ]
+  },
+  "jslot": {
+   "getInstrumentFile": 40976,
+   "_mlir_ciface_main_graph_alpha": 40984,
+   "omTensorDestroy": 41000,
+   "run_main_graph_alpha": 41016,
+   "omTensorGetDataPtr": 41024,
+   "omTensorSetDataPtr": 41048,
+   "omTensorGetShape": 41056,
+   "omTensorGetRank": 41064,
+   "omTensorGetStrides": 41088,
+   "omTensorListGetOmtArray": 41104,
+   "omTensorListCreate": 41160,
+   "om_f32_to_f16": 41176,
+   "om_f16_to_f32": 41248,
+   "omTensorCreateUntyped": 41256,
+   "omTensorSetDataType": 41264,
+   "omTensorListGetSize": 41272,
+   "omTensorGetDataType": 41280,
+   "main_graph_alpha": 41288
+  },
+  "gdat": {
+   "_entry_point_0_alpha": 40832,
+   "_entry_point_1_alpha": 40896,
+   "_entry_point_0_in_sig_alpha": 40824,
+   "_entry_point_1_in_sig_alpha": 40840,
+   "_entry_point_0_out_sig_alpha": 40856,
+   "bufferIndex": 40864,
+   "OM_DATA_TYPE_SIZE": 40872,
+   "startReportPrinted": 40880,
+   "OM_DATA_TYPE_NAME": 40912,
+   "_entry_point_1_out_sig_alpha": 40920
+  },
+  "plt": [
+   8224,
+   8928
+  ]
+ }
+}

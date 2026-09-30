@@ -60,7 +60,7 @@
       ],
       "env": {},
       "returncode": 0,
-      "stdout": "{\"pid\": 5449, \"n_calls\": 2, \"all_exact\": true}",
+      "stdout": "{\"pid\": 9875, \"n_calls\": 2, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     },
@@ -75,7 +75,7 @@
         "LD_BIND_NOW": "1"
       },
       "returncode": 0,
-      "stdout": "{\"pid\": 5450, \"n_calls\": 2, \"all_exact\": true}",
+      "stdout": "{\"pid\": 9876, \"n_calls\": 2, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     }
@@ -119,6 +119,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_other",
       "reasons": []
     },
@@ -159,6 +160,7 @@
         }
       },
       "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     }

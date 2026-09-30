@@ -72,7 +72,7 @@
       ],
       "env": {},
       "returncode": 0,
-      "stdout": "{\"pid\": 5611, \"n_calls\": 4, \"all_exact\": true}",
+      "stdout": "{\"pid\": 10048, \"n_calls\": 4, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     },
@@ -87,7 +87,7 @@
         "LD_BIND_NOW": "1"
       },
       "returncode": 0,
-      "stdout": "{\"pid\": 5612, \"n_calls\": 4, \"all_exact\": true}",
+      "stdout": "{\"pid\": 10049, \"n_calls\": 4, \"all_exact\": true}",
       "stderr_tail": "",
       "filter": "lines containing 'binding file' and one of the artifact paths"
     }
@@ -129,6 +129,7 @@
           "wrapper_reference_of_requested_bound_to": "S1a"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -167,6 +168,7 @@
           "wrapper_reference_of_requested_bound_to": "S8b"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -205,6 +207,7 @@
           "wrapper_reference_of_requested_bound_to": "S1a"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     },
@@ -243,6 +246,7 @@
           "wrapper_reference_of_requested_bound_to": "S8b"
         }
       },
+      "ld_debug_corroboration": "agrees",
       "identity_verdict": "verified_own",
       "reasons": []
     }

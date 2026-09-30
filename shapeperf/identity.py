@@ -21,10 +21,12 @@ import sys
 from . import elfinfo
 
 # Model-specific symbols that ONNX-MLIR suffixes with the model tag (`--tag`, default: the output file
-# name without extension). Untagged wrappers (run_main_graph, omQueryEntryPoints, ...) and the runtime
-# functions are shared by every model library and are not listed.
-MODEL_SYMBOL_RE = re.compile(r"^(run_main_graph|_mlir_ciface_main_graph|main_graph|omQueryEntryPoints|"
-                             r"omInputSignature|omOutputSignature|omCompilationInfo)_.+")
+# name without extension). The untagged wrappers (run_main_graph, omQueryEntryPoints, ...) and the runtime
+# functions are exported by every model library and are not listed - EXCEPT the compute path itself:
+# with `--tag=NONE` the compute function and its C wrapper are exported as plain `main_graph` and
+# `_mlir_ciface_main_graph`, and two such libraries clash on them.
+MODEL_SYMBOL_RE = re.compile(r"^(?:(?:run_main_graph|omQueryEntryPoints|omInputSignature|omOutputSignature|"
+                             r"omCompilationInfo)_.+|(?:_mlir_ciface_main_graph|main_graph)(?:_.+)?)$")
 
 
 def model_symbols(path):
@@ -43,7 +45,10 @@ def assert_no_shared_model_symbols(paths):
     owner, clashes = {}, []
     for p in paths:
         real = os.path.realpath(p)
-        for sym in sorted(model_symbols(p)):
+        syms = model_symbols(p)
+        if not syms:          # fail closed: e.g. section headers stripped, or not an ONNX-MLIR model library
+            raise ValueError(f"cannot read the model-specific symbols of {real}; refusing to co-load it")
+        for sym in sorted(syms):
             if sym in owner and owner[sym] != real:
                 clashes.append(f"{sym}: {owner[sym]} and {real}")
             owner.setdefault(sym, real)

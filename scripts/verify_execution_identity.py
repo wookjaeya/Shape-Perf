@@ -179,6 +179,14 @@ def analyse_case(res, arms, runtime_sha):
     by_path = {_real(arms[a]["path"]): a for a in res["arms"]}
     calls = [json.loads(ln) for ln in (d / "calls_gdb.jsonl").read_text().splitlines()] if (d / "calls_gdb.jsonl").exists() else []
     calls = [c for c in calls if c["op"] == "call"]
+    planned = [a for op, a in res["steps"] if op == "call"]
+    run_failed = [k for k, r in res.get("runs", {}).items() if r.get("returncode") not in (0, None)]
+    if len(calls) != len(planned) or [c["arm"] for c in calls] != planned:
+        # the traced worker did not complete: every planned call is unresolved (never silently dropped)
+        return [{"case_id": res["case_id"], "call_index": k, "requested_arm": a, "identity_verdict": "unresolved",
+                 "output_check": "not run", "reasons": [f"traced worker logged {len(calls)} of {len(planned)} planned "
+                                                        f"calls; failed runs: {run_failed or 'none'}"]}
+                for k, a in enumerate(planned)]
     hits = [json.loads(ln) for ln in (d / "gdb_hits.jsonl").read_text().splitlines()] if (d / "gdb_hits.jsonl").exists() else []
     groups, cur = [], None
     for h in hits:
@@ -239,9 +247,18 @@ def analyse_case(res, arms, runtime_sha):
         else:
             verdict, reasons = "unresolved", reasons + ["executed bytes do not match the artifact mapped at that address"]
         lazy = row["ld_debug"]["lazy"]["wrapper_reference_of_requested_bound_to"]
+        ld_failed = [m for m in ("lazy", "bindnow") if res.get("runs", {}).get(f"ld_{m}", {}).get("returncode") not in (0, None)]
         if lazy is not None and lazy != wrap_arm:
             reasons.append(f"LD_DEBUG lazy binding ({lazy}) disagrees with gdb wrapper DSO ({wrap_arm})")
             verdict = "unresolved"
+            row["ld_debug_corroboration"] = "disagrees"
+        elif lazy is None or ld_failed:
+            # no corroboration is not evidence of correct binding; it is reported, never silently skipped
+            row["ld_debug_corroboration"] = "missing"
+            reasons.append("LD_DEBUG corroboration missing" + (f" (run failed: {ld_failed})" if ld_failed else
+                                                               " (no binding line for the wrapper reference)"))
+        else:
+            row["ld_debug_corroboration"] = "agrees"
         row.update(identity_verdict=verdict, reasons=reasons)
         rows.append(row)
     return rows
@@ -288,6 +305,8 @@ def main():
                "runtime": runtime, "artifacts": artifacts, "cases": results,
                "rows": rows, "verdict_counts": {v: sum(r["identity_verdict"] == v for r in rows)
                                                 for v in ("verified_own", "verified_other", "unresolved")},
+               "ld_debug_corroboration_counts": {v: sum(r.get("ld_debug_corroboration") == v for r in rows)
+                                                 for v in ("agrees", "missing", "disagrees")},
                "method": __doc__.split("\n\n")[1], "note": "nothing timed; development container"}
     write_json(out / "identity_table.json", summary)
     print(json.dumps(summary["verdict_counts"]))

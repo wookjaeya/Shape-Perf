@@ -1,0 +1,1864 @@
+{
+ "summary": {
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.opt.mlir": {
+   "defined_funcs": 5,
+   "api_calls_by_family": {
+    "CFE_ES_api": 13,
+    "CFE_EVS_api": 39,
+    "CFE_MSG_api": 2,
+    "CFE_SB_api": 9,
+    "CFE_TBL_api": 21
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_ES_PoolCreate": 2,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 5,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 37,
+    "CFE_MSG_Init": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 6,
+    "CFE_TBL_GetAddress": 6,
+    "CFE_TBL_Load": 3,
+    "CFE_TBL_Manage": 6,
+    "CFE_TBL_Register": 6
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 2,
+    "CFE_SB_Subscribe#0: direct_const": 6
+   },
+   "msgptr": {
+    "CFE_MSG_Init: HK_AppData.": 2
+   },
+   "global_store_fields": {
+    "HK_AppData.RunStatus": 5,
+    "HK_AppData.CommandCounter": 3,
+    "HK_AppData.CommandErrorCounter": 3,
+    "HK_AppData.CombinedPacketsSent": 3,
+    "HK_AppData.MissingDataCtr": 3
+   },
+   "global_store_value_kinds": {
+    "direct_const": 17
+   },
+   "global_load_fields": 6,
+   "global_loads": 29,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 89,
+    "llvm.getelementptr:known": 32,
+    "llvm.load:known": 30,
+    "llvm.mlir.addressof:unknown": 14,
+    "llvm.mlir.addressof:known": 46,
+    "llvm.mlir.constant:unknown": 20,
+    "llvm.mlir.constant:known": 63,
+    "llvm.store:known": 18,
+    "other:unknown": 2,
+    "other:known": 219
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.opt.mlir": {
+   "defined_funcs": 4,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 2,
+    "CFE_SB_api": 2
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {
+    "CFE_SB_TransmitMsg: HK_AppData.": 1
+   },
+   "global_store_fields": {
+    "HK_AppData.Payload.CommandCounter": 1,
+    "HK_AppData.Payload.CommandErrorCounter": 1,
+    "HK_AppData.Payload.MissingDataCtr": 1,
+    "HK_AppData.Payload.CombinedPacketsSent": 1,
+    "HK_AppData.Payload.MemPoolHandle": 1,
+    "HK_AppData.RunStatus": 1,
+    "HK_AppData.CommandCounter": 1
+   },
+   "global_store_value_kinds": {
+    "global": 5,
+    "direct_const": 1,
+    "other": 1
+   },
+   "global_load_fields": 5,
+   "global_loads": 6,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 7,
+    "llvm.getelementptr:known": 16,
+    "llvm.load:known": 7,
+    "llvm.mlir.addressof:known": 4,
+    "llvm.mlir.constant:known": 14,
+    "llvm.store:known": 7,
+    "other:known": 16
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.opt.mlir": {
+   "defined_funcs": 11,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 14,
+    "CFE_MSG_api": 36,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 14,
+    "CFE_MSG_GetFcnCode": 9,
+    "CFE_MSG_GetMsgId": 15,
+    "CFE_MSG_GetSize": 12,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "HK_AppData.CommandErrorCounter": 8,
+    "HK_AppPipe.CMD_MID.Value": 1,
+    "HK_AppPipe.SEND_HK_MID.Value": 1,
+    "HK_AppPipe.SEND_COMBINED_PKT_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 8,
+    "direct_const": 3
+   },
+   "global_load_fields": 4,
+   "global_loads": 12,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 62,
+    "llvm.getelementptr:known": 22,
+    "llvm.load:known": 64,
+    "llvm.mlir.addressof:unknown": 6,
+    "llvm.mlir.addressof:known": 12,
+    "llvm.mlir.constant:unknown": 33,
+    "llvm.mlir.constant:known": 48,
+    "llvm.store:known": 32,
+    "other:unknown": 6,
+    "other:known": 397
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.opt.mlir": {
+   "defined_funcs": 13,
+   "api_calls_by_family": {
+    "CFE_ES_api": 6,
+    "CFE_EVS_api": 35,
+    "CFE_MSG_api": 6,
+    "CFE_SB_api": 21,
+    "CFE_TBL_api": 14
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_GetPoolBuf": 3,
+    "CFE_ES_PutPoolBuf": 3,
+    "CFE_EVS_SendEvent": 35,
+    "CFE_MSG_GetMsgId": 2,
+    "CFE_MSG_GetSize": 1,
+    "CFE_MSG_Init": 3,
+    "CFE_SB_IsValidMsgId": 13,
+    "CFE_SB_Subscribe": 3,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_SB_Unsubscribe": 3,
+    "CFE_TBL_DumpToBuffer": 2,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_TBL_GetStatus": 4,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Update": 2,
+    "CFE_TBL_Validate": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: load_other": 3,
+    "CFE_SB_Subscribe#0: load_other": 3,
+    "CFE_SB_Unsubscribe#0: load_other": 3
+   },
+   "msgptr": {
+    "CFE_MSG_Init: alloca[1 store(s)]->other outparam_of:CFE_ES_GetPoolBuf": 3,
+    "CFE_SB_TransmitMsg: other": 1
+   },
+   "global_store_fields": {
+    "HK_AppData.MissingDataCtr": 1,
+    "HK_AppData.CombinedPacketsSent": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2
+   },
+   "global_load_fields": 8,
+   "global_loads": 50,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 86,
+    "llvm.getelementptr:known": 224,
+    "llvm.load:known": 161,
+    "llvm.mlir.addressof:unknown": 10,
+    "llvm.mlir.addressof:known": 38,
+    "llvm.mlir.constant:unknown": 33,
+    "llvm.mlir.constant:known": 86,
+    "llvm.store:known": 31,
+    "other:unknown": 2,
+    "other:known": 991
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.opt.mlir",
+   "n_defined_funcs": 5,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "HK_AppInit",
+    "HK_AppMain",
+    "HK_ResetHkData",
+    "HK_TableInit"
+   ],
+   "calls": {
+    "CFE_ES_|api": 13,
+    "CFE_MSG_|api": 2,
+    "CFE_EVS_|api": 39,
+    "CFE_SB_|api": 9,
+    "CFE_TBL_|api": 21
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_MSG_Init": 2,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 5,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_EVS_SendEvent": 37,
+    "CFE_SB_Subscribe": 6,
+    "CFE_ES_PoolCreate": 2,
+    "CFE_TBL_Register": 6,
+    "CFE_TBL_Load": 3,
+    "CFE_TBL_Manage": 6,
+    "CFE_TBL_GetAddress": 6,
+    "CFE_ES_RunLoop": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_ES_ExitApp": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2203
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:428"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:461"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:480"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:499"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2203
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:428"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:461"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:480"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:499"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:428"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:428"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:422"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:596"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:597"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:598"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:599"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:319"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:350"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:359"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:422"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:596"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:597"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:598"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:599"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:596"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:597"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:598"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:599"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:458"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:477"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:496"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:672"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:686"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:700"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:714"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:728"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:742"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:743"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:330"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:367"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:458"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:477"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:496"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:672"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:686"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:700"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:714"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:728"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:742"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:743"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:672"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:686"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:700"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:714"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:728"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:742"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_app.imp.mlir:743"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.opt.mlir",
+   "n_defined_funcs": 4,
+   "defined_funcs": [
+    "HK_NoopCmd",
+    "HK_ResetCountersCmd",
+    "HK_SendCombinedPktCmd",
+    "HK_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_SB_|api": 2,
+    "CFE_EVS_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_EVS_SendEvent": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [
+    {
+     "func": "HK_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:210"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CommandCounter"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:192"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CommandErrorCounter"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:196"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "MissingDataCtr"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:200"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CombinedPacketsSent"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:204"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "MemPoolHandle"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "MemPoolHandle"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:208"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:215"
+    },
+    {
+     "func": "HK_NoopCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:242"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:189"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:193"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:197"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:201"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:205"
+    },
+    {
+     "func": "HK_NoopCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_cmds.imp.mlir:240"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.opt.mlir",
+   "n_defined_funcs": 11,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "HK_AppPipe",
+    "HK_AppProcessCmd",
+    "HK_NoopVerifyDispatch",
+    "HK_ResetCountersVerifyDispatch",
+    "HK_SendCombinedPktVerifyDispatch",
+    "HK_SendHkVerifyDispatch",
+    "HK_VerifyCmdLength",
+    "HK_VerifyMsgLength"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 36,
+    "CFE_EVS_|api": 14,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 12,
+    "CFE_MSG_GetMsgId": 15,
+    "CFE_MSG_GetFcnCode": 9,
+    "CFE_EVS_SendEvent": 14,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "HK_NoopVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:382"
+    },
+    {
+     "func": "HK_ResetCountersVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:415"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:382"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:415"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:472"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:506"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:512"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_COMBINED_PKT_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:518"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:382"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:415"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:472"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_NoopVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:380"
+    },
+    {
+     "func": "HK_ResetCountersVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:413"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:380"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:413"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:470"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:498"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:526"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_COMBINED_PKT_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:536"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:546"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:380"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:413"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_dispatch.imp.mlir:470"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.opt.mlir",
+   "n_defined_funcs": 13,
+   "defined_funcs": [
+    "CFE_ResourceId_ToInteger",
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "HK_CheckForMissingData",
+    "HK_CheckStatusOfCopyTable",
+    "HK_CheckStatusOfDumpTable",
+    "HK_CheckStatusOfTables",
+    "HK_ProcessIncomingHkData",
+    "HK_ProcessNewCopyTable",
+    "HK_SendCombinedHkPacket",
+    "HK_SetFlagsToNotPresent",
+    "HK_TearDownOldCopyTable",
+    "HK_ValidateHkCopyTable"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 6,
+    "CFE_EVS_|api": 35,
+    "CFE_SB_|api": 21,
+    "CFE_ES_|api": 6,
+    "CFE_TBL_|api": 14
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetMsgId": 2,
+    "CFE_MSG_GetSize": 1,
+    "CFE_EVS_SendEvent": 35,
+    "CFE_SB_IsValidMsgId": 13,
+    "CFE_ES_GetPoolBuf": 3,
+    "CFE_MSG_Init": 3,
+    "CFE_SB_Subscribe": 3,
+    "CFE_ES_PutPoolBuf": 3,
+    "CFE_SB_Unsubscribe": 3,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_TBL_GetStatus": 4,
+    "CFE_TBL_Validate": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Update": 2,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_TBL_DumpToBuffer": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1181"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1475"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1475"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1181"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1475"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1181"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "kind": "other",
+      "op": "llvm.inttoptr"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1670"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1150"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1655"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1673"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_ProcessIncomingHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:525"
+    },
+    {
+     "func": "HK_ProcessIncomingHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:530"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1096"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1178"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1395"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1456"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1472"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1597"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1747"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1752"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1653"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1671"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1852"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1857"
+    },
+    {
+     "func": "HK_CheckForMissingData",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1747"
+    },
+    {
+     "func": "HK_CheckForMissingData",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1752"
+    },
+    {
+     "func": "HK_SetFlagsToNotPresent",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1852"
+    },
+    {
+     "func": "HK_SetFlagsToNotPresent",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1857"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1967"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1974"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1992"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1993"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1395"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1456"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1472"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1995"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2002"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2009"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2016"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2017"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1096"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1178"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2090"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2097"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1967"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1974"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1992"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1993"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1395"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1456"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1472"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1995"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2002"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2009"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2016"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2017"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1096"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:1178"
+    },
+    {
+     "func": "HK_CheckStatusOfDumpTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2090"
+    },
+    {
+     "func": "HK_CheckStatusOfDumpTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/hk_utils.imp.mlir:2097"
+    }
+   ],
+   "global_memops": []
+  }
+ ]
+}

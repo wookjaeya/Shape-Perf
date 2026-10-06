@@ -1,0 +1,19 @@
+pid=30024
+  TID CLS RTPRIO PRI PSR COMMAND
+30024  TS      -  19   1 core-cpu1
+30025  TS      -  19   3 core-cpu1
+30026  TS      -  19   1 core-cpu1
+30030  TS      -  19   0 CFE_ES
+30031  TS      -  19   0 ES_BG_TASK
+30032  TS      -  19   0 CFE_EVS
+30033  TS      -  19   0 CFE_SB
+30034  TS      -  19   0 CFE_TBL
+30035  TS      -  19   0 CFE_TIME
+30036  TS      -  19   0 TIME_TONE_TASK
+30037  TS      -  19   0 TIME_ONEHZ_TASK
+30038  TS      -  19   2 PROBE_LO
+30039  TS      -  19   1 PROBE_HI
+30040  TS      -  19   0 PROBE_SLOW
+30041  TS      -  19   2 PROBE_OWN
+30042  TS      -  19   3 PROBE_SHR
+exit done

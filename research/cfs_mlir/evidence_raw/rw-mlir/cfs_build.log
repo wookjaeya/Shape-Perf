@@ -1,0 +1,62 @@
+make: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[1]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+[  5%] Building C object cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu1.dir/cfeconfig_platformdata_table.c.o
+[ 10%] Building C object tools/commandline-tools/CMakeFiles/cmd_send.dir/src/cmd_send.c.o
+[ 15%] Building C object cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu2.dir/cfeconfig_platformdata_table.c.o
+[ 21%] Building C object tools/tblCRCTool/CMakeFiles/cfe_ts_crc.dir/cfe_ts_crc.c.o
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+2 errors generated.
+2 errors generated.
+make[2]: *** [cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu2.dir/build.make:76: cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu2.dir/cfeconfig_platformdata_table.c.o] Error 1
+make[2]: *** [cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu1.dir/build.make:76: cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu1.dir/cfeconfig_platformdata_table.c.o] Error 1
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[1]: *** [CMakeFiles/Makefile2:1259: cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu1.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+make[1]: *** [CMakeFiles/Makefile2:1311: cfeconfig_platformdata_tool/CMakeFiles/cfeconfig_platformdata_native_default_cpu2.dir/all] Error 2
+[ 26%] Building C object tools/commandline-tools/CMakeFiles/cmd_send.dir/src/console_utils.c.o
+[ 31%] Building C object tools/commandline-tools/CMakeFiles/cmd_send.dir/src/send_udp.c.o
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+2 errors generated.
+make[2]: *** [tools/tblCRCTool/CMakeFiles/cfe_ts_crc.dir/build.make:76: tools/tblCRCTool/CMakeFiles/cfe_ts_crc.dir/cfe_ts_crc.c.o] Error 1
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[1]: *** [CMakeFiles/Makefile2:1390: tools/tblCRCTool/CMakeFiles/cfe_ts_crc.dir/all] Error 2
+2 errors generated.
+2 errors generated.
+make[2]: *** [tools/commandline-tools/CMakeFiles/cmd_send.dir/build.make:104: tools/commandline-tools/CMakeFiles/cmd_send.dir/src/console_utils.c.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[2]: *** [tools/commandline-tools/CMakeFiles/cmd_send.dir/build.make:76: tools/commandline-tools/CMakeFiles/cmd_send.dir/src/cmd_send.c.o] Error 1
+[ 36%] Building C object tools/commandline-tools/CMakeFiles/cmd_send.dir/src/passthru_encode.c.o
+2 errors generated.
+make[2]: *** [tools/commandline-tools/CMakeFiles/cmd_send.dir/build.make:90: tools/commandline-tools/CMakeFiles/cmd_send.dir/src/send_udp.c.o] Error 1
+error: unknown warning option '-Wno-stringop-overflow'; did you mean '-Wno-shift-overflow'? [-Werror,-Wunknown-warning-option]
+error: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Werror,-Wunknown-warning-option]
+2 errors generated.
+make[2]: *** [tools/commandline-tools/CMakeFiles/cmd_send.dir/build.make:118: tools/commandline-tools/CMakeFiles/cmd_send.dir/src/passthru_encode.c.o] Error 1
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make[1]: *** [CMakeFiles/Makefile2:1416: tools/commandline-tools/CMakeFiles/cmd_send.dir/all] Error 2
+make[1]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'
+make: *** [Makefile:146: all] Error 2
+make: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana'

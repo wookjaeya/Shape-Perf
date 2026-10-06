@@ -1,0 +1,29 @@
+clang version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)
+taint.yaml:
+Propagations:
+  - Name: CFE_SB_ReceiveBuffer
+    DstArgs: [0]
+Sinks:
+  - Name: Control
+    Args: [0]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_direct.c
+[end rx_direct.c]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_direct_int.c
+rx_direct_int.c:6:92: warning: Untrusted data is passed to a user-defined sink [optin.taint.GenericTaint]
+rx_direct_int.c:7:116: warning: Untrusted data is passed to a user-defined sink [optin.taint.GenericTaint]
+[end rx_direct_int.c]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_loop.c
+[end rx_loop.c]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_loop_int.c
+[end rx_loop_int.c]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_loop_int_static.c
+[end rx_loop_int_static.c]
+
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml inval.c
+inval.c:7:93: warning: Untrusted data is passed to a user-defined sink [optin.taint.GenericTaint]
+[end inval.c]

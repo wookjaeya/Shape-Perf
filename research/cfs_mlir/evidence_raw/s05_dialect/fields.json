@@ -1,0 +1,932 @@
+[
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 620,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 645,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 660,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 682,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 697,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 708,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 739,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 740,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 19,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 741,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 742,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 18,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 754,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles.[%147]"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 811,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 813,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 826,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 828,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 861,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 863,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 876,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 877,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 910,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 912,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 926,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 928,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 929,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 964,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1012,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1014,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1027,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1029,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1066,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 1072,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 1121,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 1146,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 1161,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 1183,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 1221,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 1222,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 19,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 1223,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 1224,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 18,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 1236,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles.[%14]"
+ },
+ {
+  "fn": "SAMPLE_APP_NoopCmd",
+  "line": 1258,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_NoopCmd",
+  "line": 1260,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ResetCountersCmd",
+  "line": 1273,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ResetCountersCmd",
+  "line": 1274,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 1294,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 1296,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 1297,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 1332,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_DisplayParamCmd",
+  "line": 1360,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_DisplayParamCmd",
+  "line": 1362,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_VerifyCmdLength",
+  "line": 1416,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_VerifyCmdLength",
+  "line": 1418,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1517,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1519,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1532,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1534,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1567,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1569,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1582,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1583,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1616,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1618,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1633,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1635,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1636,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1671,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1719,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1721,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1734,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessGroundCommand",
+  "line": 1736,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1836,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1837,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 19,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1838,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1839,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 18,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1851,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles.[%69]"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1908,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1910,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1923,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1925,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1958,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1960,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1973,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 1974,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2007,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2009,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2024,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2026,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2027,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2062,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2110,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2112,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2125,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_TaskPipe",
+  "line": 2127,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ }
+]

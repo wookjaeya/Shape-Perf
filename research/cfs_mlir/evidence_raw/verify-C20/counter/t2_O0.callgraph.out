@@ -1,0 +1,26 @@
+Testing : <<NULL ATTRIBUTE>>
+// ---- CallGraph ----
+// - Node : 'llvm.func' - Region #0 : <H1>
+//
+// - Node : 'llvm.func' - Region #0 : <H2>
+//
+// - Node : 'llvm.func' - Region #0 : <Dispatch>
+// -- Call-Edge : <Unknown-Callee-Node>
+//
+// -- SCCs --
+// - SCC : 
+// -- Node :'llvm.func' - Region #0 : <H1>
+
+// - SCC : 
+// -- Node :'llvm.func' - Region #0 : <H2>
+
+// - SCC : 
+// -- Node :<Unknown-Callee-Node>
+
+// - SCC : 
+// -- Node :'llvm.func' - Region #0 : <Dispatch>
+
+// - SCC : 
+// -- Node :<External-Caller-Node>
+
+// -------------------

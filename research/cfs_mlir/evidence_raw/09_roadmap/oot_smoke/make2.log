@@ -1,0 +1,17 @@
+make: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[1]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[3]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[3]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[3]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[ 50%] Building CXX object CMakeFiles/dense-smoke.dir/tools/dense-smoke.cpp.o
+[100%] Linking CXX executable dense-smoke
+make[3]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[100%] Built target dense-smoke
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[1]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+
+real	0m12.419s
+user	0m8.350s
+sys	0m1.024s

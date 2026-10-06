@@ -1,0 +1,309 @@
+## 5. cfs dialect와 lifting 설계
+
+이 절은 원노트 §11의 `cfs` dialect 구상을 타입, 속성, op, effect, verifier 규칙으로 구체화한다. 이어서 각 op를 C 코드에서 어떻게 인식하는지 적는다. frontend마다 잃는 정보와 되찾는 방법도 정리한다. 마지막으로 NASA sample_app 코드를 이 dialect로 올린 예제를 보인다.
+
+**[설계 제안]** 이 절의 dialect, pass, 규칙은 모두 설계 제안이다. 구현된 것은 없다. 탐지율이나 분석 결과도 없다.
+
+이 절의 실측은 세 종류다. 첫째, frontend 출력에 필요한 정보가 남아 있는지 측정했다. 둘째, IRDL로 dialect의 구조만 선언하고, 손으로 쓴 lifted IR을 그 선언으로 검사했다. 셋째, inlining 범위를 바꿨을 때 정보가 어떻게 달라지는지 측정했다.
+
+**[원노트 구상]** 원노트 §11은 `cfs.sb.*`, `cfs.app*`, `cfs.state.*`, `cfs.tbl.*`, `cfs.lifecycle.*`, `cfs.sync.*`라는 op 이름을 제안했다. 수정본 §9.1은 이 이름들을 검증되지 않은 설계로 분류했다. 이 절은 그 이름에서 출발한다. 다만 op 하나를 cFE API 하나에 대응시키고, 측정으로 확인한 frontend 사실에 맞춘다. 대응 관계는 §5.5.8에 있다.
+
+### 5.0 근거, 고정 버전, 산출물
+
+| 항목 | 값 | 근거 |
+| --- | --- | --- |
+| cFE | `546a002515be5a1e3b66f9ae2c14f948d9cec76f` | **[확인된 사실]** commit record [S25]. cFS bundle `5a9b075c`가 이 commit을 고정한다 (`$N/probe/submodules.txt`, §3.0). |
+| sample_app | `199476a34827ae84d50d66f97619227854cd971a` | **[확인된 사실]** bundle `5a9b075c`의 submodule 고정값이다. 수정본의 S21은 `dev`의 `b07a4317`을 기록했다. 이 절의 줄 번호는 모두 `199476a3` 기준이다. |
+| to_lab, sch_lab | `d27c6014`, `607e2f90` | **[확인된 사실]** 같은 bundle의 submodule 고정값이다. |
+| LLVM·MLIR | local `1053047a` (읽기 전용), upstream main `ccac700c`과 대조 | **[실측]** `/home/user/work/llvm-project/build/bin`의 clang, opt, llvm-link, mlir-translate, mlir-opt |
+| 작업 디렉터리 | `$W` = `$N/s05_dialect` | `$N`은 문서 머리의 정의를 따른다. |
+
+| `$W`의 산출물 | 내용 |
+| --- | --- |
+| `sample_app_linked_o1np.ll` | sample_app의 4개 TU를 `-O1 -Xclang -disable-llvm-passes -g`로 컴파일한 probe 출력(`$N/probe/ir_o1np/sample_app/`)을 `llvm-link`로 합친 것 |
+| `linked.raw.mlir`, `linked.opt.mlir` | 위 파일의 import 결과와, `--inline --sroa --mem2reg --canonicalize --cse`를 돌린 결과 |
+| `linked_noinl.ll`, `linked_noinl.opt.mlir` | 앱 함수 12개에 `noinline`을 붙인 뒤 같은 pipeline을 돌린 결과 (§5.8 P0) |
+| `api_sites.py`, `resolve_fields.py`, `dedupe_sites.py`와 `.out` | API 호출 위치, 전역 field 접근, 위치 기준 중복 제거를 세는 regex probe. 분석기가 아니다. |
+| `cfs_irdl.mlir` | IRDL로 쓴 dialect 구조 선언. effect는 표현하지 못한다. |
+| `sample_app_lifted.mlir` | 손으로 쓴 lifting 목표 IR. pass의 출력이 아니다. |
+| `neg1.mlir`, `neg2.mlir`, `neg3.mlir`, `neg_sig.mlir`, `neg.out` | 구조 검사의 음성 시험 |
+
+### 5.1 설계 원칙
+
+**D1. overlay.** **[설계 제안]** cfs op는 새 함수 형식을 만들지 않는다. import된 `llvm.func` 몸체 안에서 `llvm.call @CFE_*`를 같은 위치의 cfs op로 바꾼다. load, store, 분기, 산술은 LLVM dialect 그대로 둔다. **[확인된 사실]** 근거는 import 경로가 이미 작동한다는 것이다. cFE module 5개와 앱 디렉터리 17개, 모두 154개 파일이 진단 0개로 import되었다. 단 이 결과는 clang으로 설정한 build tree에서 `-Werror`를 뺀 조건의 것이다 (조건은 §7.5.2, 검증 C17 정정 문구). 공식 문서 [S16]는 LLVM IR에서의 번역을 experimental subset으로 기술한다. 이 범위의 cFS 코드에서는 그 제한이 import를 막지 않았다 (§7.5). **[해석]** C 의미를 새 dialect로 다시 정의하면 오류 가능성만 늘어난다.
+
+**D2. out-parameter 명시화.** **[설계 제안]** API가 포인터 인자로 값을 돌려주면 그 값을 op의 SSA 결과로 꺼낸다. 바로 뒤에 원래 포인터로 raw 값을 쓰는 op를 둔다. 대상이 앱 전역 field면 `cfs.state.update`이고, 지역 변수면 `llvm.store`다. **[확인된 사실]** §7.8의 실측은 `CFE_SB_CreatePipe(&SAMPLE_APP_Data.CommandPipe, …)`와 `CFE_TBL_Register(&…TblHandles[0], …)` 같은 out-parameter 쓰기가 store로 보이지 않아 state 정의에서 빠진다고 보고했다.
+
+**D3. handle은 함수 안에서만 타입을 갖는다.** **[설계 제안]** `!cfs.pipe`, `!cfs.tbl` 같은 handle 타입은 함수 몸체 안에서만 쓴다. 함수 경계와 메모리에서는 raw 정수로 남긴다. 둘 사이는 `cfs.handle.wrap`과 `cfs.handle.raw`로 바꾼다. **[실측]** `llvm.func @f(%p: !cfs.pipe …)`는 `custom op 'llvm.func' failed to construct function type: expected LLVM type for function arguments`로 거부된다 (`$W/neg.out`).
+
+**D4. 거친 resource, operand가 정하는 정체성.** **[설계 제안]** SB route 표, SB queue, ES 상태, TBL registry, EVS 상태, perf log를 비주소(non-addressable) resource로 둔다. 어느 pipe·MID·table인지는 resource로 나누지 않는다. op의 operand와 속성이 그 정체성을 갖는다. **[확인된 사실]** main `ccac700c`의 header는 resource 위계가 "deliberately *not* intended for fine-grained regions with specific addresses/sizes, or for alias classes / offset-based disambiguation"이라고 적는다 ([SideEffectInterfaces.h L80-L87](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Interfaces/SideEffectInterfaces.h#L80-L87)). 비주소 resource effect에 Value를 붙이면 fatal error다 ([L339-L343](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Interfaces/SideEffectInterfaces.h#L339-L343)).
+
+**D5. verifier와 lint를 나눈다.** **[설계 제안]** verifier는 IR 표현의 불변식만 검사한다. 상태 미검사나 구독 전 수신 같은 프로그램 성질은 별도 `cfs-lint` pass가 위치와 함께 보고한다. **[해석]** verifier 오류는 module 전체를 무효로 만든다. 실제 앱의 결함 후보 때문에 IR이 거부되면 분석 자체를 할 수 없다.
+
+**D6. 위치를 보존한다.** **[설계 제안]** cfs op는 대체한 `llvm.call`의 Location을 그대로 갖는다. inlining이 만든 `callsite(… at …)`도 지우지 않는다. 코드 밖에서 온 선언(table, startup script)은 `FusedLoc`에 출처 file:line을 담는다. 실측 근거는 §5.7에 있다.
+
+**D7. 모르는 것은 모른다고 적는다.** **[설계 제안]** MID, field, handler를 정하지 못하면 추측하지 않는다. `cfs.mid.from_value`와 `#cfs.mid_src`로 값의 출처 종류만 남긴다. 이후 분석은 그 값을 ⊤로 다룬다.
+
+**D8. closed world.** **[설계 제안]** `cfs-close-world` pass가 entry가 아닌 함수에 `sym_visibility = "private"`을 붙인다. entry는 startup script의 entry 함수와, 주소가 API 인자로 넘어간 callback(예: `SAMPLE_APP_TblValidationFunc`)이다. **[확인된 사실]** importer는 visibility를 정하지 않는다. DeadCodeAnalysis는 public 함수의 predecessor를 미지로 본다 (검증 C20 (c), §4.5.3).
+
+### 5.2 타입
+
+| 타입 | C 원형 (cFE 546a0025) | raw 표현 | 의미와 생성 | 경계 규칙 |
+| --- | --- | --- | --- | --- |
+| `!cfs.pipe` | `CFE_SB_PipeId_t` = `CFE_RESOURCEID_BASE_TYPE` ([default_cfe_sb_extern_typedefs.h L112](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/config/default_cfe_sb_extern_typedefs.h#L112)) | **[실측]** i32 (`SAMPLE_APP_Data_t`의 5번째 원소, byte offset 24) | **[설계 제안]** pipe 하나. `cfs.sb.create_pipe` 또는 `cfs.handle.wrap`이 만든다. | **[설계 제안]** 함수 경계·메모리에서는 i32 |
+| `!cfs.msgid` | `CFE_SB_MsgId_t` (`Value` 하나를 가진 struct) | **[실측]** 호출 인자에서 i32로 coerce된다 (`$N/probe/ir/sample_app/sample_app.ll` L143-L149) | **[설계 제안]** MID 값. `cfs.mid.const`, `cfs.mid.from_value`, `cfs.msg.get_msgid`가 만든다. | **[설계 제안]** 메모리에서는 `struct<(i32)>` 그대로 둔다 |
+| `!cfs.buf` | `CFE_SB_Buffer_t *` (ReceiveBuffer의 out-parameter) | ptr | **[설계 제안]** 수신 buffer의 수명 토큰. 포인터는 `cfs.sb.buf_ptr`로만 꺼낸다. | **[설계 제안]** 함수에는 꺼낸 ptr만 넘긴다. M6(§3.8)의 "다음 receive까지 유효" 검사를 위해 토큰을 따로 둔다. |
+| `!cfs.tbl` | `CFE_TBL_Handle_t` | **[확인된 사실]** 기본 build는 `int16`이다. `CFE_OMIT_DEPRECATED_6_8`이면 `CFE_TBL_HandleId_t`다 ([cfe_tbl_api_typedefs.h L145-L170](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl_api_typedefs.h#L145-L170)). **[실측]** 이 build에서 i16이다. | **[설계 제안]** table descriptor 하나. `cfs.tbl.register`, `cfs.tbl.share`, `cfs.handle.wrap`이 만든다. | **[설계 제안]** raw 폭은 module 속성 `cfs.abi`에 적고 verifier가 대조한다 |
+| `!cfs.appid` | `CFE_ES_AppId_t` = `CFE_RESOURCEID_BASE_TYPE` ([default_cfe_es_extern_typedefs.h L314](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/config/default_cfe_es_extern_typedefs.h#L314)) | **[미확인]** sample_app은 쓰지 않아 IR 폭을 보지 않았다 | **[설계 제안]** 앱 인스턴스. `cfs.es.get_app_id`가 만든다. 재시작 뒤 같은 값이 유지되는지는 M9(§3.8)의 모델을 따른다. | **[설계 제안]** raw 정수 |
+
+### 5.3 속성과 소스 위치
+
+| 속성 | 매개변수 | 값의 출처 | 비고 |
+| --- | --- | --- | --- |
+| `#cfs.mid<value, kind, name>` | **[설계 제안]** `value: i32`, `kind: "cmd"\|"tlm"\|"unknown"`, `name: string` (macro 이름 또는 빈 문자열) | **[설계 제안]** value는 IR 상수에서, kind와 name은 AST·preprocessor sidecar에서 온다 (§5.7.3) | name이 비어도 유효하다. kind는 값의 bit에서 추론하지 않는다. 쓰인 macro(`…_CMD_PLATFORM_MIDVAL`, `…_TLM_PLATFORM_MIDVAL`)에서 정한다 ([default_sample_app_msgids.h L29-L31](https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/config/default_sample_app_msgids.h#L29-L31)). |
+| `#cfs.mid_src<kind, ref>` | **[설계 제안]** `kind: code_const\|param\|table_image\|cmd_payload\|runtime_fn\|unknown`, `ref: "file:line"` | **[설계 제안]** P3, P7 (§5.8) | D7. **[확인된 사실]** `table_image`, `cmd_payload`의 실제 예는 HK copy table, TO_LAB 구독 table과 명령, SCH_LAB schedule이다 (검증 C18). |
+| `#cfs.tbl_opts<buffering, load, critical>` | **[설계 제안]** `"single"\|"double"`, `"load_dump"\|"dump_only"\|"user_addr"`, `bool` | **[확인된 사실]** `CFE_TBL_OPT_*` 상수 ([cfe_tbl_api_typedefs.h L50-L67](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl_api_typedefs.h#L50-L67)) | sample_app은 `CFE_TBL_OPT_DEFAULT` = `SNGL_BUFFER \| LOAD_DUMP`를 쓴다. |
+| `#cfs.timeout<kind, ms>` | **[설계 제안]** `pend_forever\|poll\|ms`, `i32` | **[확인된 사실]** `CFE_SB_PEND_FOREVER` = -1, `CFE_SB_POLL` = 0 ([cfe_sb_api_typedefs.h L45-L46](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb_api_typedefs.h#L45-L46)) | 상수일 때만 붙인다. operand가 원본이다. |
+| `#cfs.sys_state<s>` | **[설계 제안]** `CFE_ES_SystemState_*` 이름 | **[확인된 사실]** UNDEFINED 0부터 SHUTDOWN 6까지 ([default_cfe_es_extern_typedefs.h L184-L214](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/config/default_cfe_es_extern_typedefs.h#L184-L214)) | `cfs.es.wait_system_state`의 상수 인자에만 붙인다. |
+
+**소스 위치.** **[설계 제안]** 위치는 속성이 아니라 MLIR Location으로 둔다. 종류는 세 가지다.
+
+- 직접 호출: DI에서 온 `FileLineColLoc`를 그대로 쓴다.
+- inline된 호출: `CallSiteLoc(callee 위치 at 호출 위치)`를 그대로 쓴다.
+- 코드 밖 선언: `FusedLoc<#cfs.origin<"table">>[loc("sch_lab_table.c":66:9)]`처럼 출처 종류를 metadata로 둔다.
+
+### 5.4 resource와 effect 모델
+
+**[설계 제안]** 아래 resource를 둔다. effect 표기는 이렇다. `W(R)`·`R(R)`은 resource R에 대한 MemWrite·MemRead이고 Value가 없다. `W(%x)`·`R(%x)`는 DefaultResource에 대한 effect이고 Value %x를 갖는다. `A(R)`·`F(R)`은 Allocate·Free다.
+
+| resource | 주소성 | 대상 상태 | 쓰는 op | 읽는 op | §3 근거 |
+| --- | --- | --- | --- | --- | --- |
+| `CFS_Runtime` | 비주소 (root) | 아래 비주소 resource의 부모 | — | — | — |
+| `CFS_SBRoutes` | 비주소 | MID → destination 목록, MsgLim, route sequence | `sb.subscribe`, `sb.unsubscribe`, `sb.delete_pipe`, `sb.transmit`(sequence) | `sb.transmit`, `evs.send_event` | SB-2, SB-6, SB-11 |
+| `CFS_SBQueues` | 비주소 | pipe queue 내용, buffer pool, 수신 buffer 수명 | `sb.create_pipe`(A), `sb.delete_pipe`(F), `sb.transmit`(put), `sb.receive`(get) | — | SB-3, SB-7, SB-9, OS-1 |
+| `CFS_ESState` | 비주소 | SystemState, AppState, 제어 요청, child task | `es.run_loop`, `es.wait_*`, `es.exit_app`, `es.create_child_task`, `es.restart_app` | `es.get_app_id`, `es.wait_*` | ES-1–ES-10 |
+| `CFS_TBLRegistry` | 비주소 | registry, descriptor의 lock·buf, load 진행 상태 | `tbl.register`, `share`, `load`, `get_address`, `release_address`, `manage`, `update`, `unregister` | `tbl.get_status`, `tbl.get_info` | TBL-1–TBL-9 |
+| `CFS_EVSState` | 비주소 | 등록, filter 상태, event 수 | `evs.register`, `evs.send_event` | — | EVT-1–EVT-3 |
+| `CFS_PerfLog` | 비주소 | perf 기록 | `es.perf_log` | — | — |
+| `CFS_TBLBuffers` | 주소 (DefaultResource의 자식) | table buffer의 내용 | `tbl.load`, `tbl.manage`, `tbl.update` | `get_address`가 준 포인터를 통한 load | TBL-4, TBL-5 |
+
+**[확인된 사실] local과 main의 차이.**
+
+- local `1053047a`의 `Resource`에는 위계와 주소성이 없다 (`/home/user/work/llvm-project/mlir/include/mlir/Interfaces/SideEffectInterfaces.h` L79-L85).
+- local `LocalAliasAnalysis::getModRef`는 Value가 없는 effect를 모든 위치와 MayAlias로 본다 (`/home/user/work/llvm-project/mlir/lib/Analysis/AliasAnalysis/LocalAliasAnalysis.cpp` L528).
+- main `ccac700c`에는 `getParent`, `isAddressable`, `isDisjointFrom`이 있다 ([L131-L151](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Interfaces/SideEffectInterfaces.h#L131-L151)).
+- main의 `getModRef`는 Value 없는 비주소 effect를 NoAlias로 건너뛴다 ([LocalAliasAnalysis.cpp L528-L535](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/lib/Analysis/AliasAnalysis/LocalAliasAnalysis.cpp#L528-L535)).
+- main은 "주소 resource는 비주소 부모를 갖지 않는다"는 불변식을 둔다. 검사는 `EXPENSIVE_CHECKS` build에서만 돈다 ([L159-L171](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Interfaces/SideEffectInterfaces.h#L159-L171)). 그래서 `CFS_TBLBuffers`는 `CFS_Runtime`이 아니라 DefaultResource 아래에 둔다.
+- local과 main 모두 `EffectInstance`가 `Attribute parameters`를 받는다 (local L173-L204, main [L248-L255](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Interfaces/SideEffectInterfaces.h#L248-L255)).
+
+**[설계 제안] 결정.**
+
+- main의 위계로 옮기면 cfs op의 비주소 effect는 C 메모리 질의에서 NoAlias가 된다. local에 머물면 같은 효과를 domain alias 구현으로 얻어야 한다. **[확인된 사실]** local `AliasAnalysis`에는 `addAnalysisImplementation`이 있다 (`mlir/include/mlir/Analysis/AliasAnalysis.h` L263). SYCL-MLIR은 `LocalAliasAnalysis`를 상속한 domain 규칙을 쓴다 (§4.5.1).
+- 상수로 알려진 MID·pipe site는 effect의 `parameters`에 `{mid = #cfs.mid<…>, pipe = @site}`로 담을 수 있다. **[해석]** upstream 분석은 이 값을 읽지 않는다. 이 연구의 분석은 operand를 직접 읽으므로 `parameters`는 보조 수단이다.
+- **domain alias 규칙 AL1.** `cfs.sb.buf_ptr`의 결과는 앱 전역(`llvm.mlir.addressof`)과 `llvm.alloca`에 대해 NoAlias다. **[해석]** 수신 buffer는 SB buffer pool에 있다 (SB-9, SB-10).
+- **domain alias 규칙 AL2.** `cfs.tbl.get_address`의 결과는 앱 전역과 `llvm.alloca`에 대해 NoAlias다. 예외는 `#cfs.tbl_opts`의 load가 `"user_addr"`인 table이다. **[해석]** `CFE_TBL_OPT_USR_DEF_ADDR`(0x0006)는 사용자가 정한 주소를 쓰므로 앱 메모리를 가리킬 수 있다 ([cfe_tbl_api_typedefs.h L59-L60](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl_api_typedefs.h#L59-L60)).
+
+### 5.5 op 정의
+
+**[설계 제안]** 아래는 ODS 형식을 따른 초안이다. 컴파일하지 않았다. 대표 op 다섯 개는 ODS로 쓰고, 나머지는 표로 정리한다. §5.5의 op, operand, 결과, 속성, effect, verifier 연결은 모두 설계 제안이다. 표 안의 **[확인된 사실]**은 대체하는 C API의 위치와 동작에만 붙는다.
+
+```tablegen
+// [설계 제안] 구현되지 않음. llvm-project 1053047a의 ODS 문법을 따른 초안.
+def CFS_SBRoutes   : Resource<"::cfs::SBRoutesResource">;    // C++에서 isAddressable() = false (main)
+def CFS_SBQueues   : Resource<"::cfs::SBQueuesResource">;
+def CFS_TBLRegistry: Resource<"::cfs::TBLRegistryResource">;
+
+def CFS_PipeType  : CFS_Type<"Pipe",  "pipe">;
+def CFS_MsgIdType : CFS_Type<"MsgId", "msgid">;
+def CFS_BufType   : CFS_Type<"Buf",   "buf">;
+def CFS_TblType   : CFS_Type<"Tbl",   "tbl">;
+
+def CFS_MidAttr : CFS_Attr<"Mid", "mid"> {
+  let parameters = (ins "uint32_t":$value, "::cfs::MidKind":$kind, StringRefParameter<>:$name);
+}
+
+def CFS_SBSubscribeOp : CFS_Op<"sb.subscribe",
+    [MemoryEffects<[MemWrite<CFS_SBRoutes>]>, AttrSizedOperandSegments]> {
+  let arguments = (ins CFS_MsgIdType:$mid, CFS_PipeType:$pipe, Optional<I16>:$msglim,
+                       CFS_SubscribeVariantAttr:$variant,          // plain | ex | local
+                       OptionalAttr<CFS_QosAttr>:$qos);
+  let results   = (outs I32:$status);
+  let hasVerifier = 1;   // V3
+}
+
+def CFS_SBReceiveOp : CFS_Op<"sb.receive", [MemoryEffects<[MemWrite<CFS_SBQueues>]>]> {
+  let arguments = (ins CFS_PipeType:$pipe, I32:$timeout, OptionalAttr<CFS_TimeoutAttr>:$timeout_kind);
+  let results   = (outs I32:$status, CFS_BufType:$buf);
+}
+
+def CFS_SBTransmitOp : CFS_Op<"sb.transmit",
+    [DeclareOpInterfaceMethods<MemoryEffectOpInterface>]> {   // R(%msg), R/W(SBRoutes), W(SBQueues)
+  let arguments = (ins Arg<LLVM_AnyPointer, "message", [MemRead]>:$msg, I1:$is_origination,
+                       CFS_TransmitVariantAttr:$variant,           // msg | buffer
+                       OptionalAttr<CFS_MidAttr>:$mid, OptionalAttr<CFS_MidSrcAttr>:$mid_src);
+  let results   = (outs I32:$status);
+  let hasVerifier = 1;   // V7
+}
+
+def CFS_TBLGetAddressOp : CFS_Op<"tbl.get_address", [MemoryEffects<[MemWrite<CFS_TBLRegistry>]>]> {
+  let arguments = (ins CFS_TblType:$handle);
+  let results   = (outs I32:$status, LLVM_AnyPointer:$ptr);       // AL2
+}
+
+def CFS_StateUpdateOp : CFS_Op<"state.update"> {
+  let arguments = (ins Arg<LLVM_AnyPointer, "field address", [MemWrite]>:$addr, AnyType:$value,
+                       FlatSymbolRefAttr:$field,                   // -> cfs.field
+                       CFS_UpdateViaAttr:$via);                    // store | out_param | memset
+  let hasVerifier = 1;   // V5
+}
+```
+
+#### 5.5.1 선언 op
+
+| op | 위치 | 속성 | 의미 | verifier |
+| --- | --- | --- | --- | --- |
+| `cfs.app` | module | `sym_name`, `entry: FlatSymbolRef`, `startup: {line, priority, stack}` | **[설계 제안]** 앱 하나. ODS 판은 `SymbolTable`, `NoTerminator`, `SingleBlock` region에 아래 선언들을 담는다. | V9 |
+| `cfs.task` | `cfs.app` 안 | `sym_name`, `entry`, `role: main\|child` | **[설계 제안]** 실행 단위. 정체성은 앱 단위다 (M8). | V10 |
+| `cfs.pipe_site` | `cfs.app` 안 | `sym_name`, `pipe_name`, `depth_req: i16` | **[설계 제안]** `CreatePipe` 호출 위치 하나. 실행 중 pipe 하나와 대응한다. | — |
+| `cfs.tbl_site` | `cfs.app` 안 | `sym_name`, `tbl_name`, `opts: #cfs.tbl_opts` | **[설계 제안]** `Register` 또는 `Share` 위치 하나 | — |
+| `cfs.field` | `cfs.app` 안 | `sym_name`, `global`, `byte_offset`, `size`, `kind: counter\|control\|handle\|tlm_payload\|msg_state` | **[설계 제안]** 앱 전역의 field 하나. 원노트의 `cfs.state.define`에 해당한다. | V5 |
+| `cfs.dispatch_case` | `cfs.app` 안 | `pipe`, `mid: #cfs.mid`, `cc: i32` (-1은 CC 무관), `handler` | **[설계 제안]** P6가 만든 (pipe, MID, CC) → handler 관계 | V6 |
+| `cfs.config_send`, `cfs.config_subscribe` | module | `app`, `mid`, `msglim?`, `source` | **[설계 제안]** table image에서 온 발행·구독 | V11 |
+
+**[실측]** IRDL은 `NoTerminator`를 표현하지 못한다. region에 선언 op를 담은 IRDL op는 "block with no terminator"로 거부되었다. 그래서 IRDL 검사에서는 선언을 module 수준에 평평하게 두었다 (`$W/cfs_irdl.mlir`).
+
+#### 5.5.2 handle과 MID op
+
+| op | 대체하는 C 요소 | operands → results | 속성 | effect | verifier |
+| --- | --- | --- | --- | --- | --- |
+| `cfs.handle.wrap` | 메모리에서 읽은 handle | `(i32\|i16) → !cfs.pipe\|!cfs.tbl\|!cfs.appid` | `site?` | Pure | V1, V2 |
+| `cfs.handle.raw` | handle을 메모리에 쓰기 | `(!cfs.*) → i32\|i16` | — | Pure | V2 |
+| `cfs.mid.const` | 상수 MID | `() → !cfs.msgid` | `value: #cfs.mid` | Pure, ConstantLike | V4 |
+| `cfs.mid.from_value` | 상수가 아닌 `CFE_SB_ValueToMsgId` ([cfe_sb.h L936](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L936)) | `(i32) → !cfs.msgid` | `src: #cfs.mid_src` | Pure | — |
+| `cfs.mid.raw` | `CFE_SB_MsgIdToValue` ([L907](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L907)) | `(!cfs.msgid) → i32` | — | Pure | — |
+| `cfs.mid.equal` | `CFE_SB_MsgId_Equal` ([L876](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L876)) | `(!cfs.msgid, !cfs.msgid) → i1` | — | Pure | — |
+| `cfs.mid.is_valid` | `CFE_SB_IsValidMsgId` ([L856](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L856)) | `(!cfs.msgid) → i1` | — | Pure | — |
+
+**[확인된 사실]** `CFE_SB_IsValidMsgId`는 값이 0이 아니고 `CFE_PLATFORM_SB_HIGHEST_VALID_MSGID` 이하인지만 본다 ([cfe_sb_msg_id_util.c L200-L204](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_msg_id_util.c#L200-L204)). **[설계 제안]** 그래서 외부 함수지만 Pure로 모델링한다. P6가 static cache의 지연 초기화를 풀 때 이 의미를 쓴다.
+
+#### 5.5.3 SB·MSG op
+
+| op | C API (cfe_sb.h, cfe_msg.h) | operands → results | 속성 | effect | out-parameter 처리 |
+| --- | --- | --- | --- | --- | --- |
+| `cfs.sb.create_pipe` | `CFE_SB_CreatePipe` ([L89](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L89)) | `(depth: i16, name: ptr) → (status: i32, pipe)` | `site` | A(SBQueues), R(%name) | `PipeIdPtr` → `pipe` 결과 + `handle.raw` + `state.update{via=out_param}` |
+| `cfs.sb.delete_pipe` | `CFE_SB_DeletePipe` ([L118](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L118)) | `(pipe) → status` | — | F(SBQueues), W(SBRoutes) | — |
+| `cfs.sb.subscribe` | `Subscribe`·`SubscribeEx`·`SubscribeLocal` ([L302](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L302), [L267](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L267), [L337](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L337)) | `(mid, pipe, msglim?) → status` | `variant`, `qos?` | W(SBRoutes) | — |
+| `cfs.sb.unsubscribe` | `Unsubscribe`·`UnsubscribeLocal` ([L362](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L362), [L388](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L388)) | `(mid, pipe) → status` | `variant` | W(SBRoutes) | — |
+| `cfs.sb.receive` | `CFE_SB_ReceiveBuffer` ([L479](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L479)) | `(pipe, timeout: i32) → (status, buf)` | `timeout_kind?` | W(SBQueues) | `BufPtr` → `buf` 결과. 이후 `sb.buf_ptr`로 ptr을 꺼내 원래 지역에 store |
+| `cfs.sb.buf_ptr` | 수신 포인터의 사용 | `(buf) → ptr` | — | Pure, AL1 | — |
+| `cfs.sb.transmit` | `TransmitMsg`·`TransmitBuffer` ([L438](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L438), [L634](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L634)) | `(msg: ptr, is_origination: i1) → status` | `variant`, `mid?`, `mid_src?` | R(%msg), R·W(SBRoutes), W(SBQueues). buffer 변형은 F(SBQueues)를 더한다 | — |
+| `cfs.msg.init` | `CFE_MSG_Init` ([cfe_msg.h L61](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_msg.h#L61)) | `(msg: ptr, mid, size: i64) → status` | — | W(%msg) | — |
+| `cfs.msg.get_msgid` | `CFE_MSG_GetMsgId` ([L657](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_msg.h#L657)) | `(msg) → (status, mid)` | — | R(%msg) | `MsgId` → `mid` 결과 + 지역 store |
+| `cfs.msg.get_fcncode` | `CFE_MSG_GetFcnCode` ([L582](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_msg.h#L582)) | `(msg) → (status, cc: i16)` | — | R(%msg) | 같음 |
+| `cfs.msg.get_size` | `CFE_MSG_GetSize` ([L83](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_msg.h#L83)) | `(msg) → (status, size: i64)` | — | R(%msg) | 같음 |
+| `cfs.msg.timestamp` | `CFE_SB_TimeStampMsg` ([cfe_sb.h L717](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L717)) | `(msg) → ()` | — | W(%msg) | — |
+
+**[설계 제안]** 위 표의 op와 effect는 모두 설계 제안이다. `cfs.sb.transmit`은 원본 `%msg`에 쓰지 않는다. **[확인된 사실]** §3.8 M1의 모델에서 SB는 메시지를 복사한 뒤 복사본에 sequence와 시각을 쓴다.
+
+#### 5.5.4 ES op
+
+| op | C API (cfe_es.h) | operands → results | 속성 | effect | 비고 |
+| --- | --- | --- | --- | --- | --- |
+| `cfs.es.run_loop` | `CFE_ES_RunLoop` ([L388](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L388)) | `(run_status: ptr) → i1` | — | R(%run_status), W(%run_status), W(ESState) | **[확인된 사실]** `*RunStatus`를 읽고([cfe_es_api.c L453](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L453)), AppState를 RUNNING으로 올리며(L471), `*RunStatus`를 쓸 수 있다(L489). |
+| `cfs.es.exit_app` | `CFE_ES_ExitApp` ([L346](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L346)) | `(status: i32) → ()` | — | W(ESState) | — |
+| `cfs.es.wait_system_state` | `CFE_ES_WaitForSystemState` ([L418](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L418)) | `(min: i32, timeout_ms: i32) → status` | `state?` | R·W(ESState) | 성공 반환만 R-sync-1 간선을 만든다 (§3.3) |
+| `cfs.es.wait_startup_sync` | `CFE_ES_WaitForStartupSync` ([L449](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L449)) | `(timeout_ms: i32) → ()` | — | R·W(ESState) | **[확인된 사실]** void라 timeout 여부가 IR에 없다 (M7). |
+| `cfs.es.create_child_task` | `CFE_ES_CreateChildTask` ([L822](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L822)) | `(name, entry: ptr, stack, size, prio, flags) → (status, task: i32)` | `entry_sym?` | W(ESState), R(%name) | **[설계 제안]** entry가 상수면 P7이 `cfs.task{role = child}`를 만든다 |
+| `cfs.es.restart_app` | `CFE_ES_RestartApp` ([L263](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L263)) | `(app: !cfs.appid) → status` | — | W(ESState) | M9 |
+| `cfs.es.get_app_id` | `CFE_ES_GetAppID` ([L525](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L525)) | `() → (status, !cfs.appid)` | — | R(ESState) | out-parameter → 결과 |
+| `cfs.es.perf_log` | `CFE_ES_PerfLogAdd` ([L1574](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L1574)) | `() → ()` | `id`, `kind: entry\|exit` | W(PerfLog) | **[확인된 사실]** `PerfLogEntry`·`PerfLogExit`는 macro다 (L1520, L1539). IR에는 `PerfLogAdd(id, 0\|1)`만 남는다. |
+
+#### 5.5.5 TBL op
+
+| op | C API (cfe_tbl.h) | operands → results | 속성 | effect |
+| --- | --- | --- | --- | --- |
+| `cfs.tbl.register` | `CFE_TBL_Register` ([L234](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L234)) | `(name, size: i64, opts: i16, validator: ptr) → (status, tbl)` | `site`, `opts` | W(TBLRegistry), R(%name) |
+| `cfs.tbl.share` | `CFE_TBL_Share` ([L275](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L275)) | `(name) → (status, tbl)` | `site?` | W(TBLRegistry) |
+| `cfs.tbl.unregister` | `CFE_TBL_Unregister` ([L314](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L314)) | `(tbl) → status` | — | W(TBLRegistry) |
+| `cfs.tbl.load` | `CFE_TBL_Load` ([L372](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L372)) | `(tbl, src_type: i32, src: ptr) → status` | `src_kind: file\|address` | W(TBLRegistry), W(TBLBuffers), address일 때 R(%src) |
+| `cfs.tbl.get_address` | `CFE_TBL_GetAddress` ([L567](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L567)) | `(tbl) → (status, ptr)` | — | W(TBLRegistry). 결과 ptr은 AL2 |
+| `cfs.tbl.release_address` | `CFE_TBL_ReleaseAddress` ([L597](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L597)) | `(tbl) → status` | — | W(TBLRegistry) |
+| `cfs.tbl.manage` | `CFE_TBL_Manage` ([L459](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L459)) | `(tbl) → status` | — | W(TBLRegistry), W(TBLBuffers). validator callback을 부를 수 있다 |
+| `cfs.tbl.update` | `CFE_TBL_Update` ([L400](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L400)) | `(tbl) → status` | — | W(TBLRegistry), W(TBLBuffers) |
+| `cfs.tbl.get_status` | `CFE_TBL_GetStatus` ([L721](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L721)) | `(tbl) → status` | — | R(TBLRegistry) |
+| `cfs.tbl.get_info` | `CFE_TBL_GetInfo` ([L752](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L752)) | `(info: ptr, name: ptr) → status` | — | R(TBLRegistry), W(%info) |
+
+**[설계 제안]** 위 표의 op와 effect는 모두 설계 제안이다. TBL op의 추상 상태는 §3.8 M10의 `desc(h) = {lock, buf, updated}`를 그대로 쓴다. op는 상태를 바꾸는 사건만 표시한다. 상태 전이 함수는 §6의 분석에 둔다. validator callback이 어느 task 문맥에서 실행되는지는 **[미확인]**이다.
+
+#### 5.5.6 EVS op
+
+| op | C API (cfe_evs.h) | operands → results | effect |
+| --- | --- | --- | --- |
+| `cfs.evs.register` | `CFE_EVS_Register` ([L105](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_evs.h#L105)) | `(filters: ptr, n: i16, scheme: i16) → status` | **[설계 제안]** W(EVSState) |
+| `cfs.evs.send_event` | `CFE_EVS_SendEvent` ([L155](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_evs.h#L155)) | `(eid: i16, type: i16, fmt: ptr, args: variadic) → status` | **[설계 제안]** W(EVSState), R(SBRoutes), W(SBQueues) |
+
+**[확인된 사실]** EVS long event는 SB 메시지 `0x808`로 나간다. 모든 실행에서 OPERATIONAL 전에 이 MID의 "No subscribers" event가 기록되었다 (§7.4.3). **[설계 제안]** 그래서 `send_event`도 SB effect를 갖는다.
+
+#### 5.5.7 state op
+
+| op | 대체하는 C 요소 | operands → results | 속성 | effect | verifier |
+| --- | --- | --- | --- | --- | --- |
+| `cfs.state.read` | 앱 전역 field의 `llvm.load` | `(addr: ptr) → T` | `field` | R(%addr) | V5 |
+| `cfs.state.update` | 앱 전역 field의 `llvm.store`, out-parameter 쓰기, `memset` | `(addr: ptr, value: T) → ()` | `field`, `via` | W(%addr) | V5 |
+
+**[설계 제안]** state op는 DefaultResource에 Value를 붙인 effect를 쓴다. 그래서 upstream alias·modref 질의가 계속 작동한다. field 정체성은 `field` 속성에 있다. **[확인된 사실]** upstream `LocalAliasAnalysis`는 한 struct의 서로 다른 field를 MustAlias로 본다 (검증 C20 (a)). **[설계 제안]** 이 연구의 분석은 field 비교에 `field` 속성을 쓴다.
+
+**[설계 제안]** `memset`처럼 구간 전체를 쓰는 연산은 `via = memset`인 `state.update`를 겹치는 field마다 하나씩 만든다. **[실측]** `SAMPLE_APP_Init`의 `memset`(sample_app.c L117)은 TBAA tag가 없어 §5.7.4의 field resolver가 잡지 못했다.
+
+#### 5.5.8 원노트 op 이름과의 대응
+
+| 원노트 §11 이름 **[원노트 구상]** | 이 절의 처리 **[설계 제안]** | 이유 |
+| --- | --- | --- |
+| `cfs.sb.create_pipe`, `subscribe`, `unsubscribe`, `receive` | 그대로 둔다. `subscribe`에 `variant`·`msglim`을 더한다 | MsgLim이 drop을 정한다 (M4) |
+| `cfs.sb.publish` | `cfs.sb.transmit` | cFE API 이름(`TransmitMsg`, `TransmitBuffer`)에 맞춘다 |
+| `cfs.sb.dispatch` | op가 아니라 선언 `cfs.dispatch_case` | **[확인된 사실]** dispatch는 API가 아니라 `if`·`switch` 코드다 (sample_app_dispatch.c L149-L164) |
+| `cfs.app`, `cfs.app.init`, `cfs.app.runloop`, `cfs.app.ready` | `cfs.app`·`cfs.task` 선언, `cfs.es.run_loop` | **[확인된 사실]** init은 앱 함수이고 API가 아니다. 준비 완료 선언은 `RunLoop`·`WaitFor*` 호출이 한다 (M7). |
+| `cfs.state.define`, `update`, `read` | `cfs.field`, `cfs.state.update`, `cfs.state.read` | — |
+| `cfs.state.consume` | 두지 않는다 | **[해석]** 소비는 다른 task의 `state.read`이고 분석이 정한다 |
+| `cfs.tbl.acquire`, `release` | `cfs.tbl.get_address`, `cfs.tbl.release_address` | API 이름에 맞춘다 |
+| `cfs.sync.startup`, `cfs.sync.system_state` | `cfs.es.wait_startup_sync`, `cfs.es.wait_system_state` | — |
+| `cfs.sync.handshake` | 두지 않는다 | **[해석]** 대응하는 cFE API가 없다. 앱 사이 handshake는 SB 메시지 쌍으로 나타난다 |
+| `cfs.lifecycle.*` | `cfs.es.exit_app`, `cfs.es.restart_app` | 재시작 창의 사건열은 §3.8 M9 모델에 둔다 |
+
+### 5.6 verifier 규칙과 lint 규칙
+
+**[설계 제안]** verifier 규칙(V)은 IR 표현만 검사한다.
+
+| ID | 규칙 |
+| --- | --- |
+| V1 | `cfs.handle.wrap`의 `site`는 같은 module의 `cfs.pipe_site`·`cfs.tbl_site`를 가리킨다. 결과 타입은 site의 종류와 같다. |
+| V2 | `handle.wrap`의 입력과 `handle.raw`의 결과 폭은 module 속성 `cfs.abi`가 정한 폭과 같다. sample_app build에서 pipe는 i32, table은 i16이다. |
+| V3 | `cfs.sb.subscribe`의 `variant`가 `plain`이면 `msglim`이 없다. `ex`·`local`이면 `msglim`이 있다. |
+| V4 | `#cfs.mid`의 `kind`는 cmd, tlm, unknown 중 하나다. module에 MID 표(`cfs.mid_table`)가 있고 `name`이 비어 있지 않으면 값이 표와 같다. |
+| V5 | `cfs.state.*`의 `field`는 `cfs.field`를 가리킨다. 값의 폭은 field 크기와 같다. 주소가 상수 GEP로 전역에 뿌리를 두면 byte offset이 field와 같다. |
+| V6 | `cfs.dispatch_case`의 `pipe`는 `cfs.pipe_site`, `handler`는 ptr 하나를 받는 `llvm.func`다. (pipe, mid, cc) 조합은 한 번만 나온다. |
+| V7 | `cfs.sb.transmit`에 `mid`가 있으면 `mid_src`도 있다. |
+| V8 | status 결과는 i32다. **[확인된 사실]** `CFE_Status_t`는 `int32`다 ([cfe_error.h L43](https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_error.h#L43)). |
+| V9 | `cfs.app`의 `entry`는 인자가 없는 `llvm.func`다. |
+| V10 | `cfs.task`의 `role = main`은 앱마다 하나다. |
+| V11 | `cfs.config_*`의 `source`는 비어 있지 않다. |
+
+**[설계 제안]** lint 규칙(L)은 프로그램 성질이다. `cfs-lint`가 위치와 함께 보고하고 IR은 유효하게 남긴다. 판정 방법은 §6에서 다룬다.
+
+| ID | 후보 | 근거 |
+| --- | --- | --- |
+| L1 | `create_pipe`, `subscribe`, `tbl.register`, `get_address`의 status를 쓰지 않는다 | SB-8, TBL-9 |
+| L2 | `!cfs.buf`에서 꺼낸 포인터를 같은 pipe의 다음 `sb.receive` 뒤에 쓴다 | M6 |
+| L3 | `get_address`의 status가 음수인 경로에서 ptr을 역참조한다. `release_address` 뒤에 ptr을 쓴다 | TBL-1, M10, M11 |
+| L4 | `mid_src`가 `code_const`가 아닌 `transmit`·`subscribe` | 통신 그래프가 불완전함을 알린다 (M14) |
+| L5 | 모델이 없는 `CFE_*`·`OS_*` 호출이 남았다 | D7 |
+
+### 5.7 frontend별 인식 방법
+
+#### 5.7.1 세 frontend 비교
+
+| 정보 | LLVM import, `-O0` | LLVM import, `-O1 -Xclang -disable-llvm-passes` + MLIR pipeline | ClangIR [S17] | Clang AST (LibTooling, S18) |
+| --- | --- | --- | --- | --- |
+| 가용성 | **[실측]** 작동. 154개 파일 범위는 §5.1 D1의 조건과 같다 (검증 C17 정정) | **[실측]** sample_app 4개 TU에서 작동 | **[실측]** 로컬에서 쓸 수 없다. `-emit-cir`는 rebuild를 요구하고, `-fclangir -S -emit-llvm`은 조용히 무시된다 (검증 C19) | **[실측]** `-ast-dump` 작동 (`$N/probe/cir/ast_SAMPLE_APP_Init.txt`) |
+| API 호출 | **[실측]** callee 이름. 154개 파일의 per-file import에서 `llvm.call` 8830개와 `llvm.load` 26378개가 모두 file:line:col을 갖는다 (검증 C17 정정) | **[실측]** 같음. inlining이 호출을 복제한다 (§5.7.2) | **[미확인]** `cir.call` (문서 수준) | **[실측]** `CallExpr` |
+| MID 값 | **[실측]** 상수가 아니다. `ValueToMsgId(const)` → alloca store → load (검증 C18) | **[실측]** call site의 직접 상수 (검증 C18) | **[미확인]** | **[실측]** literal 식. `6144`가 `global_core_api_base_msgid_values.h:30:34`, `131`이 `sample_app_topicids.h:31:52` (§7.7.3) |

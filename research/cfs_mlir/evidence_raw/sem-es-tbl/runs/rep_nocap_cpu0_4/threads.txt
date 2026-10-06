@@ -1,0 +1,19 @@
+pid=31520
+  TID CLS RTPRIO PRI PSR COMMAND
+31520  TS      -  19   0 core-cpu1
+31521  TS      -  19   0 core-cpu1
+31522  TS      -  19   0 core-cpu1
+31533  TS      -  19   0 CFE_ES
+31534  TS      -  19   0 ES_BG_TASK
+31535  TS      -  19   0 CFE_EVS
+31536  TS      -  19   0 CFE_SB
+31537  TS      -  19   0 CFE_TBL
+31538  TS      -  19   0 CFE_TIME
+31539  TS      -  19   0 TIME_TONE_TASK
+31540  TS      -  19   0 TIME_ONEHZ_TASK
+31541  TS      -  19   0 PROBE_LO
+31542  TS      -  19   0 PROBE_HI
+31543  TS      -  19   0 PROBE_SLOW
+31544  TS      -  19   0 PROBE_OWN
+31545  TS      -  19   0 PROBE_SHR
+exit done

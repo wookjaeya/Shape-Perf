@@ -1,0 +1,44 @@
+# pack-refs with: peeled fully-peeled sorted 
+9018162724deb6046692ba73ff73522e154d9a16 refs/heads/2766-assign-appropriate-osal_config_max_cpus-to-multicore-platforms
+ea20cb3d08e9f4478f88253d134e51811e6c9e84 refs/heads/6.8.dev
+02b1c1d0be79c8f84ac3cd7ace98e86d1803ffc3 refs/heads/dependabot/github_actions/dot-github/workflows/dawidd6/action-download-artifact-6
+546a002515be5a1e3b66f9ae2c14f948d9cec76f refs/heads/dev
+dad8440ab024b9798e66796fd8490bb7ab98e21c refs/heads/dev-clang-format
+c1ab1b77f9e0760381a80ff68e2e3487f4fbcf07 refs/heads/draco-integration
+24f7b3195d13ad703aff4977be6bad5cbe201eea refs/heads/eval-cert2
+fdff65e494bb3317c4d9531571b67e1187347808 refs/heads/fix-2695-time-ext-met-coverage
+ae2aee9660bf415fe4cde5dcdeee5e986b180d03 refs/heads/fix-2728-describe-tags
+33bd3b4a42428b276a4ae13983e8999f8adfcbd8 refs/heads/fix-2737-cfe-use-of-strcpy
+bdb29a7ecc94f55562215a7541841d96852434bd refs/heads/fix-2778-perf-mask-hk-reporting
+5bbdb3e54159814e3ffe82897bea8777850a5a15 refs/heads/fix-2800-perflog-complexity
+2612eb058cc0c17e774c30e3f833ebb9f93d0d12 refs/heads/fix-2801-file-init-complexity
+5d4c3f0edb91382aa05e94eddba0ccd63c87d615 refs/heads/fix-2822-format
+0638041374b2db721c68d1dee3923829c186f8a9 refs/heads/gh-pages
+153b158df518f7df523b04ef4e07a4f6c5f2523f refs/heads/integration-candidate
+12cb84fc3ef22e584d94dba571e0c4f9a59397cb refs/heads/main
+3f25ed3c8c6fb656f5b0bf1691c13a1afd88970a refs/heads/v7.0.1-integration
+5452953d214ed494349c48726329c8c3e5eb12c9 refs/heads/v7.0.1-version-update
+1b0780ba1a9d49414905fc9cfe3fb5774d4e0924 refs/tags/6.7.0-bv
+^c6abd3779ea836cf63007b1f9bd4c1985d9a9519
+3e60d950370423968744c198c4f10cd2d2252750 refs/tags/6.7.3-bv
+a6c6b65a43fceb623bbac5bfc305c68b03317982 refs/tags/draco-rc1
+b581e0d0f30bdbb5e011fe9082f893644658cb00 refs/tags/draco-rc2
+9ebdf2e901174531541f962b0d39a12a9713f187 refs/tags/draco-rc3
+6d96c6e856a654f7c96e66a87b003aa01ff96874 refs/tags/draco-rc4
+fa5031f3f5db91b482e947f4dc08d9103019d48e refs/tags/draco-rc5
+fa5031f3f5db91b482e947f4dc08d9103019d48e refs/tags/equuleus-rc1
+40e7d511575937789b0b5afd356ace8fff0680d8 refs/tags/v6.5.0a
+^b2765d9f905aa11f0c3b419b62233597366a7db9
+8811c92094512975e14fd545df355705141560b2 refs/tags/v6.6.0a
+2105b9324eca7dd58b4d6aea17628d10956dcfdb refs/tags/v6.7.0
+42f97122fd74100a3de65b3fe4d481cec11485b0 refs/tags/v6.8.0-rc1
+^5ac3f0a02038b82894c1803339f92b294ae9f0b7
+1801f201b50d7b5dea84934d4ac2b935276be1f7 refs/tags/v6.8.0-rc1+dev393
+^178fbadf9c8be4ded85dd1a65a34aa610eafb18e
+27cc7df54a33da0a5d2b3996e10e3d0a533208c9 refs/tags/v6.8.0-rc2
+215e2243735c2e2465fcf8629c29af5ba22d4d33 refs/tags/v7.0.0
+0850b19a09417dd7730e9c1b44e0f5687ef0f721 refs/tags/v7.0.0-rc1
+5e41330979586bcdb113f491ea6c38ff9975fc72 refs/tags/v7.0.0-rc2
+64a6a59456fa9e47dc93e4bb9cecacc3d86d1862 refs/tags/v7.0.0-rc3
+98f78e8604c19415fd1e199eae94196a781539b8 refs/tags/v7.0.0-rc4
+c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd refs/tags/v7.0.1

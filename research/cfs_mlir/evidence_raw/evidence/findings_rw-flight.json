@@ -1,0 +1,333 @@
+{
+ "summary": "Prior work on verifying cFS and other flight-software frameworks, checked under heavy egress limits. Only GitHub (git clone, raw.githubusercontent) was reachable. NTRS, IEEE, ACM, Springer, arXiv, UPM, author sites and Scholar Gateway were all blocked or errored (logged in access_log.txt). The academic papers are therefore known only from search-index snippets: Ganesan ISSRE 2016, Valente TECS 2025 and its 2023 record, Perez TACAS 2022, Havelund TSE 2001, the 2020 IV&V report, the IKOS/BioSentinel slides, ROSDiscover and ROSInfer. They are marked partial or unverified. The tool and framework evidence was read directly from pinned commits: F'/FPP, the F' CodeQL queries, fprime-topo-analysis, Ogma, IKOS, EdsLib, the cFE/cFS CI, HK, TO_LAB and Space ROS docs.\n\nMain confirmed points:\n(1) F' fixes startup order in generated code. `setup` runs initComponents → configComponents → setBaseIds → connectComponents → regCommands → readParameters → loadParameters → startTasks. Calling an output port asserts that it is connected, async queues are created in init, and a full async queue asserts by default.\n(2) A recent hybrid static analyzer, fprime-topo-analysis (Aug–Sep 2026, not peer-reviewed), already joins the framework topology (fpp-to-json) with C++ handler call graphs (libclang). It checks deadlock, data races, queue pressure, unconnected ports and dead telemetry. It does not model runtime guards, run-time routing, or user-written threads and callbacks beyond those it recovers. It is the closest structural precedent, for F' rather than cFS.\n(3) In Ogma's cFS template, each subscribed message is copied into a global variable and then all monitors are evaluated. So the monitors see latest values from separately updated messages, and the template never calls ES startup sync.\n(4) IKOS assumes a single-threaded program and that external functions do not update globals. Its checks are for runtime errors only.\n(5) Static analysis on cFS in CI is generic: cppcheck plus CodeQL with JPL/MISRA rules, with JPL rule 14 (checking return values) excluded. CodeSonar is used, shown by in-source suppression comments. Klocwork was used by IV&V (snippet only).\n(6) cFE's EDS declares, per app, the command topics it receives and the telemetry topics it publishes (with types, all marked async). It does not declare which apps consume telemetry, any ordering, or any state machines.\n(7) In HK and TO_LAB, publisher-to-subscriber links live in table data and in ground commands. HK tears down and re-subscribes when its table is updated, and tracks per-packet data-present flags.\n(8) Pub/sub architecture recovery from source is established in ROS (ROSDiscover, ROSInfer, HAROS).\n\nI found no paper or tool that statically analyzes ordering or temporal state across cFS apps. That absence is limited by the search and is not a proof.",
+ "findings": [
+  {
+   "id": "rwf-01",
+   "topic": "Ganesan et al. ISSRE 2016 (cFS Software Bus model-based testing)",
+   "claim": "Ganesan, Lindvall, Hafsteinsson, Cleaveland, Strege and Moleski (ISSRE 2016, pp. 445-454, DOI 10.1109/ISSRE.2016.47) applied model-based testing to the cFS Software Bus API, which uses a concurrent publish-subscribe design. They wrote a requirements-derived model in Microsoft Spec Explorer (C#), had the tool generate tests, and built a test-automation setup for concurrent inter-task communication. Per the slides, messages were modeled as integers and pipes as sets of integers. Input: a hand-written model of requirements, run against the real SB API. Property: SB API behavior matching the requirements under concurrent use. Guarantee: test-based, limited to the model and the tests generated, with no proof. Tool availability: I found no public model or harness.",
+   "evidence": [
+    "https://ieeexplore.ieee.org/document/7774542/ (WebSearch snippet; host blocked for fetch)",
+    "https://www.slideserve.com/mike_john/dharma-summit (snippet of slides 'Requirement-driven Model-based Testing of the cFS Software Bus Service')",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/snippet_sources.txt [GANESAN16]"
+   ],
+   "scope_checked": "Search-index snippets of the abstract and of the slides only. Full text was unreachable: IEEE, Fraunhofer CESE (publica.fraunhofer.de, cma.fraunhofer.org), 2016.issre.net, slideshare/slideserve and Semantic Scholar were all egress-blocked.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: this is the most direct cFS concurrency precedent, but it tests the SB framework service against its own requirements. The snippets do not show whether it models app-level state built from messages, cross-app ordering, or startup. Per the revision note's rule, absence must not be claimed until the full text is read. Comparisons should be framed as 'framework-service conformance testing' versus 'source analysis of app-level ordering'."
+  },
+  {
+   "id": "rwf-02",
+   "topic": "Ganesan et al. SPLC 2009 (architecture-rule checking of the cFS product line)",
+   "claim": "Ganesan, Lindvall, Ackermann, McComas and Bartholomew (SPLC 2009, pp. 161-170; NTRS 20090016208) checked whether the CFS product-line implementation follows architectural design rules taken from the developer's guide, using Fraunhofer's SAVE tool. Their consistency checking found architecturally significant deviations that code reviews had missed. Input: source code plus hand-written rules. Property: conformance to the architecture rules. Guarantee: static, but whole-program soundness is not stated.",
+   "evidence": [
+    "https://www.semanticscholar.org/paper/058ac667c1adba4f8910a8ee3a6c1cc796814702 (snippet)",
+    "listed in the awesome-cfs README under Verification and Validation: raw.githubusercontent.com/mbacch/awesome-cfs @ ccf3bfca0ce7163ab484b08070fbbf9da2d27f22, README.md line 181; local copy /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/raw/mbacch_awesome-cfs_main_README.md"
+   ],
+   "scope_checked": "Search snippets of the abstract only. NTRS and Semantic Scholar were blocked.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: static recovery of cFS architecture from source and checking it against rules predates this agenda by about 15 years. Any claim of being 'first to recover cFS app structure from source' would be wrong. Whether SAVE recovered SB/MID communication edges is unverified."
+  },
+  {
+   "id": "rwf-03",
+   "topic": "Valente et al. TECS 2025 (cFS + TASTE) and the 2023 UPM record",
+   "claim": "Valente, de Miguel, Pérez-Muñoz, Alonso, Zamorano and de la Puente (ACM TECS 24(3), Art. 51, 2025, DOI 10.1145/3706587) integrate cFS with ESA's TASTE. Modeling plus automatic code generation keep design and implementation consistent, with UPMSat-2 as the case study. The UPM record oa.upm.es/74294 ('Model-based toolchain for cFS embedded systems for microsatellites') is dated 13 March 2023 and filed under Transactions on Embedded Computing Systems, with an almost identical abstract. Input: TASTE design models. Property: design-to-code consistency through generation. Guarantee: correct by construction for the generated parts only (inference).",
+   "evidence": [
+    "https://doi.org/10.1145/3706587 (snippet)",
+    "https://portalcientifico.upm.es/es/ipublic/item/10381027 (snippet)",
+    "https://oa.upm.es/74294/ (snippet: title, authors, date 13 March 2023, venue field, abstract)",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/snippet_sources.txt [VALENTE25],[VALENTE23]"
+   ],
+   "scope_checked": "Search snippets of the abstracts only. dl.acm.org and oa.upm.es were egress-blocked, so no full text or artifact was read.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: the 2023 record is probably an early deposit of the same TECS work. It must not be counted as independent evidence (the revision note already warns of this). Valente targets generating apps from models, not analyzing hand-written app C code. Whether the toolchain checks ordering is unknown. A search-engine summary claimed it 'enables model checking', but that came from the separate TASTE model-checking papers (rwf-04), not from Valente, and must not be attributed to Valente."
+  },
+  {
+   "id": "rwf-04",
+   "topic": "TASTE model checking (design-level message-sequence properties)",
+   "claim": "Separate TASTE work model-checks system designs with the IF model checker. Properties can be written as Boolean Stop Conditions, Message Sequence Charts (desired or undesired I/O event sequences between functions) or SDL observers. Papers: arXiv 2111.10132 (2021), MODELS-C 2022 (DOI 10.1145/3550356.3561541), ISSE 2025 (DOI 10.1007/s11334-025-00607-3). Input: TASTE AADL/SDL models. Guarantee: exhaustive model checking over the finite model.",
+   "evidence": [
+    "https://arxiv.org/pdf/2111.10132 (snippet)",
+    "https://dl.acm.org/doi/10.1145/3550356.3561541 (snippet)",
+    "https://link.springer.com/article/10.1007/s11334-025-00607-3 (snippet)"
+   ],
+   "scope_checked": "Search snippets only. arXiv, ACM, Springer and indico.esa.int were blocked.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: ordering properties between communicating functions can already be checked at the design-model level, when such a model exists. The agenda's distinct input is hand-written cFS C source without such a model. This should go in the related-work comparison of input type (source vs. design model)."
+  },
+  {
+   "id": "rwf-05",
+   "topic": "Perez et al. TACAS 2022 and the Ogma cFS app generator",
+   "claim": "FRET → Ogma → Copilot produces real-time C99 runtime monitors (TACAS 2022, DOI 10.1007/978-3-030-99524-9_21; snippet). The generated cFS app works as follows. It creates one pipe and subscribes to the MIDs listed in a variable database, checking each status. Its main loop calls CFE_SB_ReceiveBuffer with a 500 ms timeout. It dispatches on the MID, copies the payload (or one field) into a global variable, and then calls copilot_step(), which evaluates all monitors. The template never calls CFE_ES_WaitForStartupSync or WaitForSystemState. The example variable DB maps the globals position and velocity to separate MIDs (ICAROUS_POSITION_MID, ICAROUS_VELOCITY_MID). Input: requirements plus a MID/variable database. Property: temporal-logic monitors over observed values. Guarantee: only executions actually observed are checked.",
+   "evidence": [
+    "https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c#L68-L80 (receive loop)",
+    "https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c#L116-L153 (CreatePipe/Subscribe)",
+    "https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c#L174-L239 (MID dispatch; global = msg->field; copilot_step())",
+    "https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/ogma-cli/examples/cfs-variable-db.json",
+    "https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/README.md#L194-L260",
+    "local: grep -c 'WaitForStartupSync\\|WaitForSystemState' copilot_cfs.c -> 0 (evidence_extracts.txt E14)",
+    "https://link.springer.com/chapter/10.1007/978-3-030-99524-9_21 (snippet; the revision note's R09 records §3-5 as read earlier)"
+   ],
+   "scope_checked": "Read the full Ogma template C file and the README cFS section at the pinned commit. The TACAS paper itself was not re-opened (Springer blocked); only search snippets were seen.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the generated monitor app has exactly the structure the agenda studies. Separate messages update separate globals, and the monitors then evaluate those latest values together, with no startup synchronization. This makes Ogma-generated apps (for example the ICAROUS position/velocity example) natural public evaluation subjects. It also shows that runtime monitoring assumes latest-value sampling and cannot see paths that were never executed, which is where a static analysis would add something. Running Ogma was not done."
+  },
+  {
+   "id": "rwf-06",
+   "topic": "NASA IV&V cFS report 2020 (NTRS 20205010026)",
+   "claim": "Per search snippets of the report: Klocwork static code analysis was run as a gauge of code maturity and dependability, and higher-impact issues were delivered to the cFS team. 'With the exception of string processing, the cFS software is generally free of the kinds of potential bugs that SCA readily identifies.' IV&V has a tradition of not repeating SCA with the same tools on the same code. Snippets of §2.1 (static analysis) and §2.2 (design analysis) showed no ordering or startup findings, but the report itself was not read.",
+   "evidence": [
+    "https://ntrs.nasa.gov/citations/20205010026 (snippet; host blocked for both curl and WebFetch)",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/access_log.txt (ntrs.nasa.gov BLOCKED)",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/snippet_sources.txt [IVV20]"
+   ],
+   "scope_checked": "Search snippets only. The PDF could not be downloaded, so §2.1/§2.2 and any ordering or startup findings remain unread in this pass. The revision note's S07 says p.19 (§2.1) and p.23 (§2.2) were read earlier by the editor.",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "Inference: the IV&V static analysis relied on a commercial generic C analyzer (Klocwork). There is no snippet evidence that it targeted cross-app ordering. It must not be used as a baseline or as evidence of absence until §2.1-2.2 are read on a machine with NTRS access."
+  },
+  {
+   "id": "rwf-07",
+   "topic": "Havelund, Lowry, Penix TSE 2001 (SPIN on DS1 Remote Agent) and the LFM 2000 follow-up",
+   "claim": "The ESL services that manage interacting parallel goal- and event-driven processes in the DS1 Remote Agent plan-execution module were hand-translated into PROMELA and checked with SPIN. This found five previously unknown concurrency errors. A bug with the same pattern elsewhere escaped testing and deadlocked the spacecraft in flight on 18 May 1999. The cause was a missing critical section creating a race between two EXEC threads; a quick post-flight 'cleanroom' SPIN effort found it. Input: a hand-built finite model. Property: deadlock and assertion violations. Guarantee: exhaustive over the model only. Tool: SPIN (public); the models' availability was not checked.",
+   "evidence": [
+    "https://www.semanticscholar.org/paper/a06bf55a3bee974e6abd559583cfe789129a3beb (snippet: TSE 27(8):749-765)",
+    "https://ntrs.nasa.gov/api/citations/20000055731/downloads/20000055731.pdf (snippet of 'Formal Analysis of the Remote Agent Before and After Flight')"
+   ],
+   "scope_checked": "Search snippets only. havelund.com, NTRS, IEEE and Semantic Scholar were blocked. Model details and how the five errors break down were not read.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: this is a documented flight case in which a thread-level ordering fault (shared state with a missing critical section) caused an in-flight failure, and model checking found the pattern. It concerns threads and locks inside one subsystem, not pub/sub between apps. It supports the claim that ordering faults matter in flight, not the agenda's specific fault class. Its main cost is manual modeling, which source-level recovery aims to reduce."
+  },
+  {
+   "id": "rwf-08",
+   "topic": "F Prime: framework-fixed startup order",
+   "claim": "FPP generates the topology `setup` function to call, in this order: initComponents, configComponents, setBaseIds, connectComponents, regCommands, readParameters, loadParameters, startTasks. Teardown runs stopTasks, freeThreads, tearDownComponents, deinitComponents. The user's guide documents these as named execution phases, into which init specifiers paste user C++ code. The generated init of an active component creates its message queue.",
+   "evidence": [
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/compiler/lib/src/main/scala/codegen/CppWriter/TopologyCppWriter/TopSetupTeardownFns.scala#L40-L68",
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/docs/users-guide/Defining-Component-Instances.adoc#L429-L640",
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/compiler/tools/fpp-to-cpp/test/component/base/ActiveSerialComponentAc.ref.cpp#L107-L112 and #L1158-L1163 (createQueue inside init)"
+   ],
+   "scope_checked": "Read the generator source for setup/teardown, the user's-guide phase table, and the generated reference code for active-component init (init starts at L107; createQueue at L1159, with no function-closing brace in between).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: in F', every port connection and every queue exists before any component task starts, so the cFS-style 'publish before the subscriber has subscribed' problem cannot arise from wiring inside one F' topology. Orderings still left to user code, and so still worth analyzing, include: code in configComponents (which runs before connectComponents), the order tasks start within startTasks, and readiness of data rather than of wiring. This contrast is a clean way to explain why cFS needs the analysis: cFS subscriptions are runtime calls each app makes after it starts."
+  },
+  {
+   "id": "rwf-09",
+   "topic": "F Prime: connection and queue semantics vs. cFS",
+   "claim": "A generated typed output-port invoke asserts FW_ASSERT(port.isConnected()) before invoking. An async input port's queue-full behavior is one of assert, block, drop or hook, with assert as the default. fpp-check runs semantic analysis and, with -u, writes unconnected port instances to a file. A grep of the FPP spec found cycle checks only for state machines and module templates, not for topology connection graphs.",
+   "evidence": [
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/compiler/tools/fpp-to-cpp/test/component/base/PassiveSerialComponentAc.ref.cpp#L3146-L3176",
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/docs/spec/Specifiers/Port-Instance-Specifiers.adoc#L145-L166",
+    "https://github.com/nasa/fpp/blob/91b474097ea1a5503139440bed661aee5e16a8ad/docs/users-guide/Analyzing-and-Translating-Models.adoc#L11-L137",
+    "local command: grep -rn -i -E 'cycle|deadlock' fpp/docs/spec -> only Module-Template-Definitions.adoc:60, State-Machine-Definitions.adoc:128, Topology-Definitions.adoc:529 (an identifier)"
+   ],
+   "scope_checked": "Read the generated reference C++, the spec section on port semantics, and the user's-guide section on checking models. Neither fpp-check nor any other tool was run.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: in F', an unwired output fails loudly at runtime, and FPP flags it statically. The revision note (S12) shows that cFS TransmitMsg with zero subscribers takes a normal zero-pipe path. A missing consumer in cFS is therefore silent by design, which justifies an explicit 'required consumer' check in a cFS analyzer rather than treating every unsubscribed MID as a defect."
+  },
+  {
+   "id": "rwf-10",
+   "topic": "F Prime framework-aware CodeQL queries",
+   "claim": "The nasa/fprime repo includes custom CodeQL queries tied to F' semantics, each with unit tests in CI. Examples: (a) every path through a *_cmdHandler must call cmdResponse_out or save opCode/cmdSeq for a deferred response; (b) calling a *_internalInterfaceHandler directly bypasses the component queue and threading model; (c) no blocking operations in rate-group (schedIn) handlers; (d) no synchronous file I/O while holding a lock or in schedIn.",
+   "evidence": [
+    "https://github.com/nasa/fprime/blob/4b58f3666fe4ca8a3cacd389aed5faf1fb32b063/.github/codeql/fprime-queries/FprimeCommandResponse.ql#L1-L15",
+    "https://github.com/nasa/fprime/blob/4b58f3666fe4ca8a3cacd389aed5faf1fb32b063/.github/codeql/fprime-queries/FprimeInternalPortInvoke.ql#L1-L28",
+    "https://github.com/nasa/fprime/blob/4b58f3666fe4ca8a3cacd389aed5faf1fb32b063/.github/codeql/fprime-queries/FprimeNoBlockingInSchedIn.ql#L1-L24",
+    "https://github.com/nasa/fprime/blob/4b58f3666fe4ca8a3cacd389aed5faf1fb32b063/.github/workflows/codeql-query-tests.yml"
+   ],
+   "scope_checked": "Read the headers and bodies of 4 of roughly 30 .ql files plus the test workflow. With a shallow clone, the date each query was introduced could not be determined.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: checks that encode framework semantics (for example 'every path must respond') already exist for flight software. They are pattern queries within one component, not analyses across components. They are a natural intra-app baseline: a CodeQL query for 'CFE_SB_Subscribe status unchecked' or 'state read before first receive' could serve as a simpler alternative that the MLIR approach must beat."
+  },
+  {
+   "id": "rwf-11",
+   "topic": "fprime-topo-analysis (hybrid topology + C++ static concurrency analyzer for F')",
+   "claim": "A standalone analyzer, FireflySpace/fprime-topo-analysis (17 commits, 2026-08-29 to 2026-09-14, author Will MacCormack, v0.1.0, not peer-reviewed). It joins inter-component edges from fpp-to-json (each input port tagged sync, guarded or async) with intra-component handler-to-output-port flow from libclang and compile_commands.json. Analyses: lock-order deadlocks (self-deadlock, ABBA), member data races (readers and writers per thread, lock-aware), async-queue producers, priorities and fill rates, unconnected-port, sync-cycle, dead-telemetry, buffer-ownership, assert-taint reachability, among 15 checks. Handlers it cannot resolve are a hard error unless --permissive is set. Stated non-goals: user-written threads and callbacks (beyond Os::Task routines it recovers), runtime guards (assumed taken), and run-time port routing. It assumes command registration happens single-threaded at startup, before tasks.",
+   "evidence": [
+    "https://github.com/FireflySpace/fprime-topo-analysis/blob/f0db61c55e04c2e60a076656eddaf9490316be69/README.md#L1-L53",
+    "https://github.com/FireflySpace/fprime-topo-analysis/blob/f0db61c55e04c2e60a076656eddaf9490316be69/README.md#L294-L436",
+    "https://github.com/FireflySpace/fprime-topo-analysis/blob/f0db61c55e04c2e60a076656eddaf9490316be69/README.md#L545-L560",
+    "https://github.com/FireflySpace/fprime-topo-analysis/blob/f0db61c55e04c2e60a076656eddaf9490316be69/src/fprime_topology_analysis/checks.py#L50-L53",
+    "local: git log in /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/repos/fprime-topo-analysis (17 commits)"
+   ],
+   "scope_checked": "Read the full README (588 lines), the pyproject and git history, and grepped the source for startup, staleness and ordering terms (no analysis of message ordering or freshness found). The tool was not run.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: this is the closest structural precedent to the agenda. 'Framework connection model + source-level handler flow, joined for concurrency analysis' already exists for F' (with lockdep-style deadlocks and lock-aware data races). The agenda's distinct claims must be: (a) cFS, where the connection model is not declared and must be recovered from MIDs, tables and runtime subscribe calls; (b) data provenance from message to state field to use, and ordering, startup and freshness properties rather than locks and data races. Its explicit non-goals (runtime guards, routing) are exactly the agenda's guard and dispatch analysis. It should be cited and contrasted, and could serve as an architectural baseline."
+  },
+  {
+   "id": "rwf-12",
+   "topic": "IKOS (NASA abstract interpretation) on flight software / cFS",
+   "claim": "IKOS checks runtime errors only: buffer overflow, division by zero, null dereference, uninitialized variables, integer overflow, shifts, pointer overflow and comparison, function-pointer type, dead code, double free and use-after-free. It also has a soundness check and an assertion prover. Its documented assumptions are that the program is single-threaded (L535) and that external functions do not update global variables (L538). Per a snippet of NASA slides (NTRS 20190032510), each BioSentinel (cFS-based) application was analyzed with IKOS using a model of the CFE framework of about 1200 LOC, with a warning rate of about 1.31% and about 17 real bugs found.",
+   "evidence": [
+    "https://github.com/NASA-SW-VnV/ikos/blob/ac7f7c1738976cabc58c6a53413df6e458995c38/analyzer/README.md#L237-L257",
+    "https://github.com/NASA-SW-VnV/ikos/blob/ac7f7c1738976cabc58c6a53413df6e458995c38/analyzer/README.md#L528-L546",
+    "https://ntrs.nasa.gov/api/citations/20190032510/downloads/20190032510.pdf (snippet only; blocked)"
+   ],
+   "scope_checked": "Read the IKOS checks and analysis-assumptions sections at the pinned commit. The BioSentinel numbers come from a search snippet only.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: precedent exists for 'framework model + sound abstract interpretation on cFS apps', but for runtime errors under a single-threaded assumption, with cFE calls modeled as not touching app globals. So IKOS by design does not see state updated through SB delivery or orderings across tasks. The ~1200-LOC CFE model is a concrete precedent for how much modeling effort the agenda's cFS semantic layer might need (unverified until the slides are read)."
+  },
+  {
+   "id": "rwf-13",
+   "topic": "Space ROS static analysis (ROS-based space software)",
+   "claim": "Space ROS ships IKOS in its Docker image, integrates it into the ament build and test system through ament_ikos and its fork of ament_lint_common, and gathers analyzer output as SARIF bundles viewed in a Code Analysis Dashboard. IKOS is listed with Cobra, among other analyzers.",
+   "evidence": [
+    "https://github.com/space-ros/docs/blob/5fa4e62f0141a78c6372bbba76f1dec4e167684b/source/Related-Projects/IKOS.rst#L33-L39",
+    "https://github.com/space-ros/docs/blob/5fa4e62f0141a78c6372bbba76f1dec4e167684b/source/Introduction/How-Space-ROS-Differs.rst#L36-L65"
+   ],
+   "scope_checked": "Read the Space ROS docs sources at the pinned commit. Space ROS code itself was not inspected.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: ROS-based space software uses generic C/C++ analyzers, with IKOS as the sound one, to produce certification evidence. Nothing found there analyzes topic ordering or message-derived state."
+  },
+  {
+   "id": "rwf-14",
+   "topic": "Static analyzers actually applied to cFS/cFE (CI and history)",
+   "claim": "cFE CI runs cppcheck, in strict mode for core modules, using compile_commands.json. cFS CI runs CodeQL with the security-and-quality, security-extended, and JPL/MISRA subset queries; the JPL subset excludes JPL rule 14 'checking-return-values' and rule 15 'checking-parameter-values'. In-source 'SAD' comments suppress CodeSonar ignored-return-value warnings (cfe_sb_api.c:436, cfe_assert_io.c:92). Across 2153 cFE commits, commit messages mention CodeSonar 4×, CodeQL 13×, cppcheck 11×, 'static analysis' 17×, and Coverity, Polyspace, Klocwork, IKOS and Frama-C 0×. I found no evidence of Frama-C, Polyspace or Coverity being applied to cFS.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/.github/workflows/static-analysis.yml#L45-L52",
+    "https://github.com/nasa/cFS/blob/5a9b075cd4c818ee8555f349a9f78ba5632d0384/.github/codeql/jpl-misra.qls#L1-L25",
+    "https://github.com/nasa/cFS/blob/5a9b075cd4c818ee8555f349a9f78ba5632d0384/.github/codeql/codeql-security.yml",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L436",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/cfe_assert/src/cfe_assert_io.c#L92",
+    "local command: git -C repos/cFE log --all -i --oneline --grep=<tool> | wc -l (results above)"
+   ],
+   "scope_checked": "Read the CI workflow and CodeQL config files and grepped the full cFE history (non-shallow clone at the pinned commit). Only commit messages were searched, not issue or PR text. App repos were not examined.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the analyzers routinely applied to cFS are generic C checkers (lint, CWE/JPL/MISRA patterns), plus commercial CodeSonar and (via IV&V) Klocwork. The CodeQL config deliberately turns off return-value checking, so unchecked statuses from CFE_SB_Subscribe, ReceiveBuffer or WaitForSystemState are not enforced by the public CI. That is a concrete, checkable gap the agenda's status-aware lifting could address. Absence of Frama-C, Polyspace or Coverity is from limited search, not proof."
+  },
+  {
+   "id": "rwf-15",
+   "topic": "Historical race/deadlock fixes inside cFE (candidate cases)",
+   "claim": "cFE commit history includes fixes described as: #950 'race condition in control request' (6932f1fe, 2020; the ES lock released during cleanup while an app record can change state, fixed with a two-phase approach); #591 'Avoid deadlock in CFE_ES_CreateObjects' (1b03958c, 2020); #456 perflog race (merge 04f1fddb); #2523 'add mutex around EVS counter increment' (dd596c96, 2025); #2427 'Race condition in TestCreateChild' (25ccc0ce, 2023).",
+   "evidence": [
+    "https://github.com/nasa/cFE/commit/6932f1fe9180f4fd3f6756e4074b2c4b27a703cf",
+    "https://github.com/nasa/cFE/commit/1b03958cb10b3c254460d38a0324bbb3a1dfb8e4",
+    "https://github.com/nasa/cFE/commit/dd596c9618c2d425570295419ed55b7e61862783",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/evidence_extracts.txt section E21"
+   ],
+   "scope_checked": "Commit messages and diffstats only. The linked issues were not read and nothing was reproduced.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: these are mostly races on shared state or locks inside cFE services (ES, EVS), not message-ordering faults between apps. They are useful for scoping: they belong to data-race/lock analysis (rwf-11-style or TSan baselines), not to the agenda's main fault class. None should be presented as a flight incident or as an agenda benchmark without reproducing it."
+  },
+  {
+   "id": "rwf-16",
+   "topic": "CCSDS EDS in cFS as a message-metadata source",
+   "claim": "Each cFE module ships an EDS XML file (CCSDS 876.0 schema; EdsLib generates headers and runtime structures). In cfe_sb.xml: 'Telemetry' is the 'pipe publication interface' and 'Telecommand' the 'pipe listener interface'; both carry TopicId and InstanceNumber parameters and an 'indication' command with mode=\"async\". Each app's 'Application' component lists required Telecommand and Telemetry interfaces with payload types and fixed TopicIds. A comment states that TC and TM streams have 'no direct relationship'. No cFE EDS XML file uses StateMachine (0 files), although the EdsLib parser recognizes StateMachineSet and StateMachine tags. cFS also builds an OpenC3 COSMOS command/telemetry plugin (cosmos-gem workflow), which has an EDS-enabled option.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/eds/cfe_sb.xml#L970-L1033",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/eds/cfe_sb.xml#L1068-L1135",
+    "https://github.com/nasa/EdsLib/blob/8ec0656888e79f34c28fc857b3f53879abc3e058/README.md#L1-L30",
+    "https://github.com/nasa/EdsLib/blob/8ec0656888e79f34c28fc857b3f53879abc3e058/tool/src/seds_xmlparser.c#L199-L200",
+    "https://github.com/nasa/cFS/blob/5a9b075cd4c818ee8555f349a9f78ba5632d0384/EDS_Integration_Guide.md#L16-L30",
+    "https://github.com/nasa/cFS/blob/5a9b075cd4c818ee8555f349a9f78ba5632d0384/.github/workflows/cosmos-gem.yml",
+    "local command: grep -rl StateMachine repos/cFE --include=*.xml | wc -l -> 0"
+   ],
+   "scope_checked": "Read the SB EDS XML (interfaces and Application component), the EdsLib README, the parser tag table and the EDS guide introduction. Other modules' EDS were not read in detail, app EDS files were not checked, and CCSDS 876.0-B-1 was not opened.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: EDS can give the analyzer typed topic identity per app ('app X publishes TopicId T of type P' and 'listens to command TopicId C'). That helps resolve MIDs and type payloads for message operations without parsing macros. But EDS, as used by cFE, does not say which app consumes another app's telemetry, gives no ordering, timing or freshness, and no behavior (state machines unused). So EDS can be an input for MID/type resolution but not a source of required orderings."
+  },
+  {
+   "id": "rwf-17",
+   "topic": "cFS app dependencies live in table data and ground commands, not only in code",
+   "claim": "HK subscribes to input MIDs read from its copy table: CFE_SB_Subscribe(OuterCpyEntry->InputMid, ...) at hk_utils.c:322, with the MIDs listed as data in hk_cpy_tbl.c. When the table is updated, HK unsubscribes, releases the table address, calls CFE_TBL_Update, gets the address again and re-subscribes. HK tracks per-entry DataPresent flags, raises a 'missing data' event, and sends incomplete combined packets unless HK_DISCARD_INCOMPLETE_COMBO==1. TO_LAB subscribes to MIDs from its subscription table and also on a ground command (CFE_SB_SubscribeEx in to_lab_cmds.c:218). In fprime_cfs_reference, TO_LAB's subscription to the F' packet MID 0x0820 is set in a table file.",
+   "evidence": [
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L316-L324",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L545-L640",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L483-L500",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L696-L760",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/tables/hk_cpy_tbl.c#L36-L64",
+    "https://github.com/nasa/to_lab/blob/d27c6014cb5d2979140500f635876ee87b81995b/fsw/src/to_lab_app.c#L500-L506",
+    "https://github.com/nasa/to_lab/blob/d27c6014cb5d2979140500f635876ee87b81995b/fsw/src/to_lab_cmds.c#L216-L219",
+    "https://github.com/fprime-community/fprime_cfs_reference/blob/20a3e615cf311027fb355dd3454d714d6b20497a/README.md (lines 13-16)"
+   ],
+   "scope_checked": "Read the relevant HK and TO_LAB functions and tables at the pinned commits, and the fprime_cfs_reference README. Nothing was built or run.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: a cFS message graph built from source alone (grep or lifting of CFE_SB_Subscribe with constant MIDs) is incomplete. Real edges come from table images, can change on table update, and can be added by ground command. The analyzer's inputs must include table definitions, and it must treat subscription sets as changing over time. HK combines the agenda's Table lifecycle and message-topology concerns and already has an explicit data-presence guard, so it is a strong but nontrivial evaluation subject: a naive 'stale snapshot' warning there would likely be a false positive."
+  },
+  {
+   "id": "rwf-18",
+   "topic": "Static recovery of pub/sub architecture from source (ROS precedents)",
+   "claim": "ROSDiscover (ICSA 2022) builds component models from ROS source, composes them using launch files into the run-time architecture, and checks it against first-order-logic rules. It detects, for example, dangling publishers or subscribers and misrouted messages. Its C++ recovery (rosdiscover-cxx-recover) is a Clang/LLVM-11 static analyzer. ROSInfer (ICSE 2024) uses API-call-guided static analysis to infer state-machine models of reactive, periodic and state-dependent behavior: 534 components in 5 systems, with causal triggers found for 87% of architectural behaviors versus 155 hand-made models (snippet). HAROS performs static analysis of ROS1 code.",
+   "evidence": [
+    "https://github.com/cmu-rss-lab/rosdiscover/blob/78301b86fca119cda9ad55500dcf800e56bb9504/README.rst (Description section)",
+    "https://github.com/cmu-rss-lab/rosdiscover-cxx-recover/blob/dc41cb6c299f0893bffcc1cf80bfbb81658cf8f5/README.rst (requires LLVM11)",
+    "https://dl.acm.org/doi/10.1145/3597503.3639206 (ROSInfer; snippet)",
+    "https://github.com/git-afsantos/haros (repo description via GitHub search)",
+    "https://arxiv.org/pdf/2507.10235 (ROS interaction bugs; snippet: 19.01% interaction-topology problems)"
+   ],
+   "scope_checked": "Read the ROSDiscover and cxx-recover READMEs at the pinned commits. ROSDiscover, ROSInfer and the iBug study are known from search snippets only (ACM, IEEE, arXiv and the authors' pages were blocked).",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: recovering a pub/sub topology from C/C++ source with Clang, and even inferring behavior that depends on message-driven state, is established in ROS. The agenda's novelty cannot be 'recovering the message graph from source'. It must rest on cFS-specific semantics (MIDs, pipes, MsgLim, ES startup states, TBL lifecycle, table-driven subscriptions) plus provenance from message to state field and ordering or freshness properties. ROSInfer is the closest prior work for the agenda's 'state updated by messages' modeling and should be read in full."
+  },
+  {
+   "id": "rwf-19",
+   "topic": "Recent (2022-2026) cFS analysis literature is security-focused",
+   "claim": "Recent cFS analysis papers found: Schalk et al., MILCOM 2022 (SB vulnerabilities, unauthenticated SB commands); Falco & Thummala, 'WannaFly', IEEE SMC-IT 2023 (static analysis of cFS with an automated tool to map module and app dependencies, picking cfe_sb_api.c as the attack target); Jero et al., SpaceSec 2024 (attack-surface analysis of cFS compared with F Prime and others); Furgala et al., SpaceSec 2026 (cFS on seL4); Vanlyssel et al., arXiv 2608.14532, Aug 2026 (cFS components treated as trusted peers, NOS3 experiments); Idan et al., arXiv 2609.15425, Sep 2026 (static analysis of 126 satellite repos, 2,827 findings); Khor & Lutz, RE 2023 (cFS variability constraints). A small tool, cfs-msgid-guard, statically detects MID collisions from topicid headers.",
+   "evidence": [
+    "https://ieeexplore.ieee.org/document/10017967/ (snippet)",
+    "https://www.researchgate.net/publication/373064255_WannaFly_An_Approach_to_Satellite_Ransomware (snippet)",
+    "https://www.ndss-symposium.org/wp-content/uploads/spacesec2024-57-paper.pdf (snippet)",
+    "https://arxiv.org/abs/2608.14532 (snippet)",
+    "https://arxiv.org/abs/2609.15425 (snippet)",
+    "https://arxiv.org/abs/2309.03392 (snippet)",
+    "https://github.com/macaris64/cfs-msgid-guard/blob/4dda7e0ec384bdf10afdea33af015f7263572a2b/README.md (read)"
+   ],
+   "scope_checked": "Search snippets only for all papers (hosts blocked). Read the cfs-msgid-guard README.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: the 2022-2026 cFS analysis work I could find targets security and trust boundaries, dependency mapping for attack targeting, or generic SAST findings, not ordering or temporal-state correctness between apps. WannaFly's dependency mapping and cfs-msgid-guard show that coarse static dependency or MID extraction on cFS is already done and simple, which again puts the agenda's contribution in semantics and properties. This absence is limited by the search."
+  },
+  {
+   "id": "rwf-20",
+   "topic": "Overall gap: no static cross-app ordering/temporal-state analysis for cFS found",
+   "claim": "I found nothing that statically analyzes, for cFS apps, the ordering between message publish and subscribe, the receive → state-field update → use chain, startup readiness, or freshness. Closest neighbors by axis: cFS SB conformance testing (rwf-01); cFS architecture-rule checking (rwf-02); model-level generation and checking (rwf-03/04); runtime monitors (rwf-05); sound runtime-error analysis of single-threaded code (rwf-12); F' topology+C++ lock and data-race analysis (rwf-11); ROS architecture and behavior recovery (rwf-18).",
+   "evidence": [
+    "all findings rwf-01..rwf-19 above",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/snippet_sources.txt",
+    "local: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/access_log.txt"
+   ],
+   "scope_checked": "About 30 web searches and GitHub repo searches (GitHub code search timed out), plus direct reading of the listed repos. Full texts of the key papers were unreachable.",
+   "status": "unverified",
+   "importance": "central",
+   "implication": "Inference: the agenda currently has a plausible niche: cFS-specific semantics (table- and command-driven subscriptions, zero-subscriber publish, MsgLim, ES startup states, TBL lifecycle) combined with provenance from message to state and ordering. This is an absence-of-evidence claim and must not appear in a paper as 'no prior work' until Ganesan 2016, Valente 2025, ROSInfer and the IV&V report are read in full. Two strongest baselines: fprime-topo-analysis-style topology+source joining, and CodeQL-style framework pattern queries."
+  }
+ ],
+ "gaps": [
+  "NTRS (ntrs.nasa.gov) is blocked for both curl and WebFetch. Unread as a result: the 2020 IV&V report §2.1 static analysis and §2.2 design analysis, including any ordering or startup findings; the IKOS/BioSentinel slides (NTRS 20190032510); Ganesan SPLC 2009 (NTRS 20090016208); the LFM 2000 Remote Agent paper (NTRS 20000055731). The figures quoted for these come from search snippets only.",
+  "IEEE Xplore, dl.acm.org, link.springer.com, arXiv, oa.upm.es, Fraunhofer CESE, havelund.com, rob-bocchino.net, indico.esa.int, ndss-symposium.org and clairelegoues.com are all egress-blocked. No full text was read for: Ganesan ISSRE 2016, Valente TECS 2025 and the 2023 UPM record, Perez TACAS 2022 (relying on the revision note's earlier §3-5 reading), Havelund TSE 2001, the FPP IEEE Aerospace 2022 paper, the TASTE model-checking papers, ROSDiscover, ROSInfer, or the 2022-2026 cFS security papers.",
+  "The Scholar Gateway MCP returned 'INVALID_QUERY: Could not resolve user identity from CONNECT', so the full-text academic corpus could not be queried.",
+  "Whether the 2023 UPM record (oa.upm.es/74294) is the same work as TECS 2025 or a distinct predecessor is unresolved; only the snippet metadata was seen.",
+  "Unknown without full texts: whether Ganesan 2016 models app-level state or ordering properties beyond SB API conformance; what rules SAVE checked in 2009; whether the Valente toolchain uses TASTE model checking for cFS designs.",
+  "No tool was executed: fpp-check, fprime-topo-analysis, Ogma, IKOS and CodeQL were not run. All tool claims come from source and docs, not from runs.",
+  "GitHub code search (MCP) timed out and repository search handled multi-word queries poorly, so cFS analysis tools on GitHub may have been missed. The absence of Frama-C, Polyspace or Coverity on cFS rests only on cFE commit messages and web search, not on issues, PRs or app repos.",
+  "The CCSDS 876.0-B-1 EDS standard itself was not opened; EDS conclusions rest on cFE's EDS files and EdsLib only. Command/telemetry databases beyond the cfs-cosmos-plugin README were not examined.",
+  "F' startup: the order tasks start within startTasks, and whether messages can be queued to an active component before its task runs, were not traced in fprime's runtime (Os/Fw) code; only the generated code was checked.",
+  "The shallow F' clone prevented dating when the framework-specific CodeQL queries were introduced."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/evidence_extracts.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/snippet_sources.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/access_log.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/repo_pins.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/fprime_cfs_reference_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/raw/mbacch_awesome-cfs_main_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/raw/macaris64_cfs-msgid-guard_main_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/raw/cfs-cosmos-plugin_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-flight/repos/ (clones: cFE@546a0025 full history, cFS, fpp, fprime, ogma, ikos, EdsLib, HK, to_lab, fprime-topo-analysis, rosdiscover, rosdiscover-cxx-recover, spaceros-docs; ~230 MB total)"
+ ]
+}

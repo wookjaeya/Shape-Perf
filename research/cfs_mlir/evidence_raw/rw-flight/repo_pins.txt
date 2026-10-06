@@ -1,0 +1,17 @@
+EdsLib 8ec0656888e79f34c28fc857b3f53879abc3e058 2026-09-24T15:56:51-04:00 https://github.com/nasa/EdsLib
+cFE 546a002515be5a1e3b66f9ae2c14f948d9cec76f 2026-09-25T14:23:07-04:00 https://github.com/nasa/cFE
+cFS 5a9b075cd4c818ee8555f349a9f78ba5632d0384 2026-09-30T11:53:12-04:00 https://github.com/nasa/cFS
+fpp 91b474097ea1a5503139440bed661aee5e16a8ad 2026-09-30T15:17:01-07:00 https://github.com/nasa/fpp
+fprime 4b58f3666fe4ca8a3cacd389aed5faf1fb32b063 2026-09-30T16:56:19-07:00 https://github.com/nasa/fprime
+ikos ac7f7c1738976cabc58c6a53413df6e458995c38 2025-04-23T23:54:45-07:00 https://github.com/NASA-SW-VnV/ikos
+ogma 08b384b4335cce324fac74577adc7f08e61b7cce 2026-09-27T10:55:36-07:00 https://github.com/nasa/ogma
+rosdiscover 78301b86fca119cda9ad55500dcf800e56bb9504 2023-11-28T11:35:17-05:00
+rosdiscover-cxx-recover dc41cb6c299f0893bffcc1cf80bfbb81658cf8f5 2023-06-29T21:41:16-04:00
+fprime-topo-analysis f0db61c55e04c2e60a076656eddaf9490316be69 2026-09-14T12:11:59-05:00
+spaceros-docs 5fa4e62f0141a78c6372bbba76f1dec4e167684b 2025-10-08T13:31:00-06:00
+HK 0dc16b7a7bab71747b9c063cf405ad59a65a40a5 2026-09-24T11:58:53-04:00
+to_lab d27c6014cb5d2979140500f635876ee87b81995b 2026-09-24T14:44:07-04:00
+fprime_cfs_reference(README via raw devel) 20a3e615cf311027fb355dd3454d714d6b20497a
+cfs-cosmos-plugin(README via raw main) b892af37763fb2c094ea7d977126f3cda0d0c73b
+cfs-msgid-guard(README via raw main) 4dda7e0ec384bdf10afdea33af015f7263572a2b
+awesome-cfs(README via raw main) ccf3bfca0ce7163ab484b08070fbbf9da2d27f22

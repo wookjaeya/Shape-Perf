@@ -1,0 +1,341 @@
+**[확인된 사실]** IRDL만으로는 효과를 선언할 수 없다. IRDL로 정의한 op는 `MemoryEffectOpInterface`를 구현하지 않는다. `--test-side-effects`는 `cfs` op에 대해 아무것도 보고하지 않았고, 남은 remark 한 줄은 `arith.constant`의 것이었다 (`$N/rw-mlir/mlir_probe/cfs_irdl.out`, `cfs_use.mlir` L2–L4; §4.5.3). **[해석]** 효과가 필요한 op는 ODS/C++로 정의해야 한다.
+
+#### 6.4.2 전이 표
+
+**[설계 제안]** 아래 표는 op마다의 추상 전이다. `σ♯ = (Prov, Mem, Aux, Facts)`이다. "성공 분기"는 status가 SUCCESS(또는 표에 적은 코드)인 CFG 간선을 뜻한다. status를 분기하지 않으면 모든 경우의 합류로 처리하고 `unchecked`를 붙인다.
+
+| op | 사건 | Prov·Mem 전이 | Aux 전이 | 근거 |
+| --- | --- | --- | --- | --- |
+| `cfs.sb.create_pipe` | — | 성공 분기에서 pipe id를 `OutParam(CreatePipe, site)`로 쓴다 | — | §3 SB-1 |
+| `cfs.sb.subscribe` | 성공 분기에 `sub(a,m,p)` | — | 성공 분기에서 `subs ∪= {(m,p,msglim)}` | §3 SB-2 |
+| `cfs.sb.unsubscribe` | 성공 분기에 `unsub` | — | `subs −= {(m,p,·)}` | §3 SB-6 |
+| `cfs.msg.init(buf, mid, size)` | — | — | 지역 메시지 buffer `buf`에 `mid`를 묶는다 | §1.1 `pub` 행 |
+| `cfs.sb.transmit(msg)` | `tx.b`, `tx.e` (enq/drop은 S7에서) | `Out(m, site) := {출처(msg.g) | g}`. 상태 field는 바꾸지 않는다 | — | §3 SB-3, SB-8 |
+| `cfs.sb.receive(p, t)` | 성공 분기에 `rcv(b,p)` | 성공 분기에서 새 활성화 class `c`를 연다 | 모든 경로(인자가 유효할 때): `bufOf[*]`의 pipe `p` 항목을 `live:=false`. 성공 분기: `bufOf[buf] := (p, site, c, mid=?, live)` | §3 SB-9, M6 |
+| `cfs.msg.get_msgid(buf)` + `cfs.mid_equal` 분기 | 참 분기에 `hdl(b,m,cc)` | 참 분기에서 `bufOf[buf].mid := m` | — | §3 SB-13 |
+| `cfs.state.update(f, v)` | `w(b,f,o)` | 각 Joint `J`: `J.asg[f] := origin(v)`. `J.cls[f] := class(origin(v))`. `J.upd[β] ∪= {f}`. `f ∈ CondField`이면 `J.val[f] := const(v)` 또는 `⊤`. `Mem(f) := WRITTEN` | — | 6.3.1–6.3.3 |
+| `cfs.state.read(f)` | `r(b,f,u)` | 변경 없음. 사용 기록 `(u, f, Prov|f)`를 남긴다 | — | §1.1 |
+| `cfs.es.wait_system_state(S, t)` | op 위치에 `ready(b, raise(S))`, 성공 분기에 `waitok(b,S)` | — | `readyMark := YES` | §3 ES-5 |
+| `cfs.es.wait_startup_sync(t)` | `ready(b, RUNNING)`만 | — | `readyMark := YES`. 이후 경로는 성공·timeout을 구별하지 않는다 | §3 ES-6 |
+| `cfs.es.run_loop(rs)` | 처음 도달에서 `ready(b, RUNNING)` | false 분기: 종료 경로 | `readyMark := YES` | §3 ES-7 |
+| `cfs.es.restart_app(name)` | `rst.req(target)` | — | — | §3 ES-9 |
+| `cfs.tbl.register` / `share` | `treg(a,t,st)` | 성공 분기에서 handle을 `OutParam` 출처로 쓴다 | `DUPLICATE_NOT_OWNED` 분기를 따로 둔다 | §3 TBL-7 |
+| `cfs.tbl.get_address(h)` | `tget(h,st,v)` | — | SUCCESS·INFO_UPDATED 분기: `tblPtr[ptr] := (h,t,PROTECTED)`, 새 활성화 class를 연다. 같은 `h`로 얻은 이전 포인터는 `UNPROTECTED`. NEVER_LOADED·UNREGISTERED 분기: `tblPtr[ptr] := NULL` | §3 TBL-1, TBL-2 |
+| `cfs.tbl.release_address(h)` | `trel(h)` | 활성화를 닫는다 | `h`로 얻은 포인터 모두 `RELEASED` | §3 TBL-2 |
+| table 포인터를 통한 load | `r` 또는 F6 후보 | 출처 `Tbl(t, path)`, 활성화 class는 해당 `tget`의 class | `NULL`·`RELEASED`·`UNPROTECTED`이면 F6 후보를 기록한다 | §3 TBL-1–TBL-5 |
+| `cfs.tbl.load` / `update` / `manage` | 활성화 경로에 `tact(t,v)` | — | single + `INFO_TABLE_LOCKED`: pending 표시. double + `NO_BUFFER_AVAIL`: pending 없음 | §3 TBL-4, TBL-5 |
+| `cfs.msg.timestamp(buf)` | — | header 시각의 출처를 `publication`으로 둔다 | — | §3 EVT-6 |
+| `CFE_TIME_GetTime` | — | 결과 출처 `Time(cfe)`. 여러 field가 같은 version에서 온다 | — | §3 EVT-5, A9 |
+| 모델 없는 외부 호출 | — | 인자로 넘긴 포인터가 가리키는 field와 escape된 전역의 field에 `Unknown(call)`을 쓴다 | 정밀도 표시 `unknownCall` | 6.5.4 |
+
+#### 6.4.3 핵심 전이의 의사 코드
+
+```text
+# [설계 제안] DenseForwardDataFlowAnalysis<CfsLattice>::visitOperation(op, before, after)
+# (로컬 DenseAnalysis.h L217: visitOperation(Operation*, const LatticeT &before, LatticeT *after))
+def visit(op, before, after):
+  s = copy(before)
+  match op:
+    case SbReceive(pipe=p, timeout=t) -> (st, buf):
+      for b in s.aux.bufOf: if b.pipe == p: b.live = False          # SB-9: 결과와 무관하게 이전 buffer 해제
+      s.pending_edge[st == SUCCESS] = lambda x: (x.aux.bufOf.put(buf, (p, op.site, fresh_cls(x), None, True)),
+                                                 x.facts.add(Rcv(app, p, op.site)))
+    case StateUpdate(field=f, value=v):
+      o = origin_of(v, s)                 # SSA 역추적: load(bufOf[ptr]) → Msg(mid, path, rcvSite); const → Const;
+                                          # tblPtr → Tbl; call result → OutParam/Unknown
+      for J in s.prov.joints():
+        J.asg[f] = o; J.cls[f] = class_of(o, s)
+        for beta in J.upd: J.upd[beta].add(f)
+        if f in CondField: J.val[f] = const_or_top(v)
+      s.mem[f] = WRITTEN; s.facts.add(W(app, f, o, op.site))
+    case CondBranch(cond) where cond reads f ∈ CondField:
+      # 경로 필터: 각 후속 블록에서 cond를 만족할 수 없는 Joint를 버린다 (guard 인식)
+      s.edge_filter[true]  = lambda J: sat(cond, J.val)
+      s.edge_filter[false] = lambda J: sat(not cond, J.val)
+    case TblGetAddress(tbl=h) -> (st, ptr):
+      for q, e in s.aux.tblPtr.items(): if e.h == h and e.state == PROTECTED: e.state = UNPROTECTED  # TBL-2
+      s.pending_edge[st in {SUCCESS, INFO_UPDATED}] = lambda x: x.aux.tblPtr.put(ptr, (h, tbl_of(h), PROTECTED))
+      s.pending_edge[st in {NEVER_LOADED, UNREGISTERED}] = lambda x: x.aux.tblPtr.put(ptr, (h, tbl_of(h), NULL))
+    case EsWaitSystemState(min_state=S) -> st:
+      s.facts.add(Ready(app, raise(S), op.site)); s.aux.readyMark = YES
+      s.pending_edge[st == SUCCESS] = lambda x: x.facts.add(WaitOk(app, S, op.site))
+    ...
+  if s.prov.size() > K: s.prov = NonRel(project(s.prov), lostAt=op.loc)
+  return propagateIfChanged(after, after.join(s))
+```
+
+**[설계 제안]** status에 따른 간선별 갱신(`pending_edge`)은 결과 status SSA 값을 쓰는 첫 `llvm.cond_br`·`llvm.switch`에서 적용한다. status가 분기에 쓰이지 않으면 모든 경우를 합류한다.
+
+**[확인된 사실]** MLIR dense forward 분석은 간선 단위 전이 hook을 제공한다. `visitBlockTransfer(Block *block, ProgramPoint *point, Block *predecessor, const LatticeT &before, LatticeT *after)`는 predecessor 끝의 상태 `before`를 block 시작의 상태 `after`로 옮긴다. 기본 구현은 `join(after, before)`이고 하위 분석이 override할 수 있다 (로컬 `mlir/include/mlir/Analysis/DataFlow/DenseAnalysis.h` L278–L288, 추상 선언 L130–L139). **[설계 제안]** `edge_filter`와 `pending_edge`는 이 hook의 override로 구현한다. override는 `predecessor`의 terminator(`llvm.cond_br`·`llvm.switch`)와 `block`이 그 terminator의 몇 번째 후속인지로 간선의 조건을 정한다. 그 조건을 만족할 수 없는 Joint를 버리고, 해당 status 경우의 `pending_edge`를 적용한 뒤 `after`에 합류한다. `visit()`은 분기 op에서 조건만 기록하고 상태를 바꾸지 않는다.
+
+---
+
+### 6.5 함수 사이 분석
+
+#### 6.5.1 앱·task·dispatch 구조 복원
+
+**[설계 제안]**
+
+1. startup script의 `CFE_APP` 항목에서 앱과 main entry를 얻는다.
+2. `CFE_ES_CreateChildTask`의 함수 포인터 인자를 상수로 풀어 child task entry를 얻는다. 풀지 못하면 `unknown task`를 기록한다.
+3. main entry에서 `cfs.es.run_loop`이 지배하는 loop를 run loop로 표시한다. 그 안의 `cfs.sb.receive` 성공 분기 아래 MID 비교를 dispatch로 복원한다.
+4. dispatch 비교가 함수 static cache를 읽으면, 그 static에 대한 상수 store를 흐름과 무관하게 모은다. **[실측]** sample_app·hk·ci_lab의 dispatch는 `CFE_MSG_GetMsgId` out-parameter를 처음 호출 때 채워지는 static cache와 비교한다. opt pipeline 이후 cache 쓰기는 `...CMD_MID.Value`에 대한 상수 store가 된다 (§7.7.3; `$N/probe/mlir_opt/sample_app.json`).
+
+#### 6.5.2 solver 설정
+
+**[확인된 사실] upstream 기본 동작.**
+
+- solver는 기본으로 interprocedural이다 ([DataFlowFramework.h L300 @ccac700c](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlowFramework.h#L300); 로컬 L281–L298의 `DataFlowConfig::setInterprocedural`).
+- 사용자 분석이 돌려면 `DeadCodeAnalysis`와 `SparseConstantPropagation`을 먼저 load해야 한다. 헤더는 이를 'interim fix'라고 부른다 ([Utils.h L23–L32 @ccac700c](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlow/Utils.h#L23-L32)).
+- callee entry에서는 알려진 모든 call site의 상태를 합류한다. 즉 context-insensitive다 (§4.5.1).
+- 몸체가 없는 callee, 또는 non-interprocedural 설정의 모든 call은 `visitCallControlFlowTransfer(..., ExternalCallee, ...)`로 간다. 기본 구현은 `setToEntryState`다 (로컬 `mlir/lib/Analysis/DataFlow/DenseAnalysis.cpp` L92–L110, 판정 L107; [DenseAnalysis.h L163–L173 @ccac700c](https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlow/DenseAnalysis.h#L163-L173)).
+- return site를 모두 알지 못하면 entry 상태가 된다 (로컬 같은 파일 L117).
+
+**[해석] 그대로 쓸 때의 문제.** context-insensitive 합류는 6.3.1의 상관을 깬다. `SetState(x)`를 두 handler가 부르면 callee entry에서 두 caller의 Joint가 합쳐진다. 그 결과가 두 caller 모두에게 돌아간다. **[실측]** upstream의 테스트 분석 `-test-last-modified`는 원노트 §44 예(`HandleAttitude → SetState → global.att → Guidance`)에서 `<unknown>`을 돌려준다. private visibility와 driver를 붙여도 같다 (`$N/rw-mlir/mlir_probe/lastmod_llvm.out`, `$N/verify-C20/counter/s44_O0_priv_driver_lastmod.out`). 이 분석은 SSA 값을 기준으로 메모리를 식별하는 테스트 분석이다. 이 결과는 upstream이 제공하지 않는 부분을 보여 줄 뿐, MLIR로 표현할 수 없다는 뜻은 아니다.
+
+**[설계 제안] 선택한 설정.**
+
+1. frontend의 `--inline`으로 작은 helper를 먼저 펼친다 (S1).
+2. solver를 `setInterprocedural(false)`로 둔다.
+3. 남은 호출은 모두 `ExternalCallee` hook으로 오게 한다. 이 hook을 override해 summary(6.5.3) 또는 API 모델(6.5.4)을 적용한다.
+4. `loadBaselineAnalyses`는 그대로 먼저 load한다.
+
+#### 6.5.3 summary
+
+**[설계 제안]** 함수 summary는 호출 그래프의 SCC를 아래에서 위로 계산한다.
+
+```text
+Summary(fn) = { writes : Field ⇀ Expr(Param(i), Global(f′), Const, Unknown),   # 반환 시점의 마지막 쓰기
+                events : 정규 사건열 (예: 'w(f) ; tx(m)?'),                       # 사건 추출용
+                ptrOut : 반환·out-param 포인터의 출처,
+                pathCond : 쓰기마다의 경로 조건 (CondField 위의 술어) }
+apply(Summary, call, σ♯):
+  각 Joint J에 대해 writes를 call site의 실인자 출처로 치환해 적용한다.
+  pathCond가 J.val로 결정되면 그 경로만 적용하고, 결정되지 않으면 두 경우를 모두 J로 나눈다.
+재귀 SCC: writes가 고정점에 이르지 않으면 해당 field를 Unknown(recursion)으로 둔다.
+```
+
+**[해석]** caller마다 따로 적용하므로 caller 사이의 Joint가 섞이지 않는다. 원노트 §44의 `global.att ← ATTITUDE_MID`는 `writes(SetState) = {att ↦ Param(0)}`와 `HandleAttitude`의 실인자 출처 `Msg(ATTITUDE_MID, att, site)`의 결합으로 얻는다.
+
+#### 6.5.4 외부 호출
+
+| 대상 | 처리 **[설계 제안]** | 근거 |
+| --- | --- | --- |
+| lifted cFE API | 6.4의 전이 | §3 |
+| OSAL·PSP·libc 목록 | 기본 가정 `A_ext`: 포인터 인자가 가리키는 객체만 쓴다. 앱 전역은 쓰지 않는다. 보고서마다 이 가정을 적는다 | **[확인된 사실]** IKOS도 "Extern functions (without implementation) do not update global variables"를 가정한다 ([analyzer/README.md L528–L546 @ac7f7c17](https://github.com/NASA-SW-VnV/ikos/blob/ac7f7c1738976cabc58c6a53413df6e458995c38/analyzer/README.md#L528-L546)). **[해석]** 여기서는 숨은 가정이 아니라 보고되는 가정으로 둔다 |
+| 그 밖의 unknown | 인자 포인터 대상과 escape된 전역 field에 `Unknown(call)`. 관련 후보는 `unknown` 수준 | AP4 |
+
+#### 6.5.5 함수 포인터와 dispatch table
+
+**[실측]**
+
+- import한 mission 모듈(cFE 5개 module과 17개 앱 디렉터리, 154개 파일)에 indirect `llvm.call`이 73곳 있다 (`$N/rw-mlir/import_exp/import_summary.txt` L5). 73곳 중 55곳이 세 곳에 몰려 있다. SBN 계열 30곳(`sbn_app.c` 17, `sbn_udp_if.c` 10, 그 밖 3), CF 16곳(7개 파일), ES generic pool 9곳(`cfe_es_generic_pool.c`)이다 (`$N/rw-mlir/import_exp/import_results.json`의 파일별 `indirect_calls`; §7.5.2).
+- `static const` 함수 포인터 table을 통한 호출은 MLIR `CallGraph`에서 `<Unknown-Callee-Node>` 간선 하나만 갖는다. -O0과 -O2 모두 같다 (`$N/rw-mlir/cir_test/t2.callgraph.out`, `$N/verify-C20/counter/t2_O2.callgraph.out`; 로컬 `mlir/lib/Analysis/CallGraph.cpp` L154).
+
+**[설계 제안] 해결 순서.**
+
+1. 상수 table: `llvm.mlir.global constant` 초기화자의 `llvm.mlir.addressof @fn` 목록과 GEP index에서 대상 집합을 얻는다. index가 상수가 아니면 table 전체를 대상 집합으로 둔다.
+2. task entry: `CFE_ES_CreateChildTask`의 함수 포인터 인자를 같은 방법으로 푼다.
+3. 나머지: 외부 points-to 결과를 대상 집합으로 받는다. 예: SVF. **[확인된 사실]** SVF README는 field·flow-sensitive points-to를 제공한다고 쓴다 (§4.5.2, README만 확인; 실행하지 않음). **[확인된 사실]** MLIR 기반 points-to인 PoTATo는 로컬 LLVM 1053047a에 대해 build가 실패했다 (`$N/rw-mlir/potato_build.log`).
+4. 그래도 풀리지 않으면 `ExternalCallee`로 처리하고 정밀도 표시 `unknownCallee`를 붙인다.
+
+#### 6.5.6 task 사이 분석은 solver 밖에서
+
+**[확인된 사실]** MLIR DataFlow 헤더에는 thread·interleaving 개념이 없다 (`grep -i 'thread|interleav|concurren|parallel'` 결과 없음, §4.5.1, 검증 C20). **[설계 제안]** 그래서 task 사이 순서는 별도 그래프 엔진에서 계산한다. 입력은 task마다 solver가 남긴 사건 기록(Facts)과 summary의 정규 사건열이다. 사건 그래프는 MLIR module 안의 `cfs.system` 영역에 기록하여 source location을 유지할 수 있다. 계산은 6.2의 `BUILD_HB`다.
+
+---
+
+### 6.6 RequiredHB를 얻는 방법
+
+**[원노트 구상]** 원노트 §48은 필요 순서의 출처로 framework semantics, data dependency, explicit contract를 든다. 원노트 §49는 annotation·외부 계약을 허용한다. **[확인된 사실]** TaxDC §8.4는 메시지 타이밍 결함 검출이 order·atomicity 명세의 획득과 그 위반의 정적·동적 검출에 집중해야 한다고 제안한다. 명시적 오류 검사에서 거꾸로 명세를 추론하는 방법도 제안한다. 다만 이것은 구현·평가된 도구가 아니라 연구 방향의 제안이다 (TaxDC [R12] §8.4; §1.1). **[해석]** 따라서 아래 규칙의 기여는 '명세 후 검사'라는 틀이 아니라 cFS에서 `Req`를 만드는 구체 규칙에 있다.
+
+**[설계 제안] 비순환 규칙.** `Req`의 생성은 `G0`·`G_A`를 입력으로 받지 않는다 (AP2). 코드가 "이미 순서를 지키는 것처럼 보인다"는 이유로 `Req`를 지우지 않는다. `Req`는 6.7에서 `G` 증명으로만 해소된다. 모든 `Req`는 근거 ID를 가진다.
+
+| 규칙 | 범주 | 생성되는 `Req` | 생성 조건 | 계약 없을 때의 기본값 | 근거 |
+| --- | --- | --- | --- | --- | --- |
+| R-F1c | F1 | `sub(b,m,p) ≺ first tx(a,m)` | 계약 `must_receive_first(b, m)` | 생성하지 않음 | **[확인된 사실]** SB에는 durability·latch가 없다 (§3 M3) |
+| R-F1i | F1 (추론, 신뢰 낮음) | 같음 | ① `tx(a,m)`이 `once`다. ② `b`의 소비 `r(b,f,u)`가 `Msg(m)` 출처를 요구한다(R-F2 참조). ③ `m`의 다른 발행 site가 없다. ④ `b`가 `m`을 다시 요청하는 경로(request–reply, 재전송)가 소스에 없다 | — | **[해석]** 주기 발행이면 다음 메시지로 회복되므로 생성하지 않는다 (수정본 §4.4) |
+| R-F2 | F2 | `w(b,f,Msg(m)) ≺ r(b,f,u)` | `u`에서 어떤 Joint의 `asg(f)`가 `Init`·`Const`이고, 다른 Joint에서는 `Msg`·`Tbl`이다. 즉 코드가 메시지 값을 쓰는 경로와 기본값을 쓰는 경로가 같은 사용에 섞인다 | 생성한다. 단 `allows_default(f)` 계약이 있으면 생성하지 않는다 | **[해석]** 데이터 의존에서 나온 필요 순서다. 원노트 §48의 2번 |
+| R-F3 | F3 | `w(b,f) ≺ hdl(b,m_β)` (각 β 주기 안에서) | 계약 `requires_updated_since(f, β)` | 생성하지 않음. 사용 위치·출처는 정보로만 출력 | §1.2 F3 |
+| R-F4 | F4 | `u`가 읽는 `F′`의 `cls`가 모두 같다 | 계약 `requires_same_instance(F′)` 또는 `requires_same_cycle(F′, β)` | 생성하지 않음. latest-value 조합 목록만 출력 | **[해석]** 수정본 §6.3: 다른 시점의 값이 섞인 것만으로 오류가 아니다 |
+| R-F5 | F5 | `provide(R) ≺ use(R)` | ① API 전제: `CFE_TBL_Share(name)`에는 owner의 `Register` 성공, `OS_*GetIdByName(name)`에는 같은 이름의 생성이 앞서야 한다. ② 늦은 초기화: `b`의 handler가 읽는 field가 `b`의 init 경로(`ready(b)` 이후 포함)에서만 설정되면, 그 init 쓰기 ≺ 그 handler의 MID를 보내는 다른 앱 `a`의 첫 발행 | 생성한다 (API 규칙) | **[확인된 사실]** CF #184·cFE #198 (§1 F5) |
+| R-F6 | F6 | typestate: `tget(h,SUCCESS∨INFO) ≺ 사용 ≺ trel(h)`, 재`tget` 이후 옛 포인터 사용 금지, NULL 포인터 역참조 금지 | API 규칙 | 생성한다. 순서 결함과 API 오용을 따로 센다 (§1.2) | **[확인된 사실]** §3 TBL-1, TBL-2, M10, M11 |
+| R-F7c | F7 | `rcv_c(m1) ≺ rcv_c(m2)` | 계약 `order(c, m1, m2)` | — | §1.2 F7 |
+| R-F7i | F7 (추론) | 같음 | ① `m2`의 발행자가 `m1`을 받은 handler 안에서 `m2`를 보낸다(인과 사슬). ② `c`의 `m2` handler가 `m1` handler가 쓴 field를 읽는다 | — | **[해석]** 데이터 의존과 인과에서 나온 필요 순서다. **[실측]** v7.0.x의 relay 역전 (§3 SB-4) |
+| R-F8 | F8 | sharer의 `UNREGISTERED` 분기에 `tunreg`가 있다 ≺ owner 재등록 | API 규칙 (cFE ≥ v7.0.0) | 생성한다 | **[확인된 사실]** §3 TBL-7 |
+
+**[설계 제안] 계약 문법.** 원노트 §49의 형식을 P 언어의 deferred·ignored 개념으로 넓힌다. **[확인된 사실]** P는 상태마다 deferred·ignored event 집합을 두고, 둘 다 아닌 event가 처리되지 않으면 'unhandled event'로 보고한다 (MSR-TR-2012-116 [R26], §2).
+
+```text
+# [설계 제안] 앱별 외부 계약 파일 (YAML 또는 MLIR attribute로 같은 내용)
+contract GUIDANCE {
+  must_receive_first   ATTITUDE_INIT_MID            # F1: 첫 메시지를 놓치면 안 됨
+  may_drop             CFE_EVS_LONG_EVENT_MSG_MID   # F1 계열 경고 억제 (TO_LAB 같은 의도된 지연)
+  allows_default       GUIDANCE_Data.gain           # F2: 기본값 사용 허용
+  validate(ATTITUDE_MID) = GUIDANCE_ValidateAtt     # Val(f) 판정용 검증 술어
+  requires_same_instance { att.q, att.w }           # F4: 같은 packet
+  requires_same_cycle   { att.q, pos.r } boundary SCH_WAKEUP_MID   # F4: 같은 β 주기
+  requires_updated_since pos.r boundary SCH_WAKEUP_MID             # F3
+  timestamp att.t kind=measurement clock=CFE_TIME unit=subseconds  # 6.3.3 timestamp 층
+  order(CONTROL, ARM_MID, FIRE_MID)                 # F7
+}
+```
+
+**[설계 제안] 오류 처리에서 추론하는 `Req` (선택).** TaxDC의 방법을 따른다. 사용 직전의 명시적 오류 검사를 단서로 쓴다. 예: `if (ptr == NULL) { CFE_EVS_SendEvent(..., CFE_EVS_EventType_ERROR, ...); return; }`. 이런 검사가 있으면 개발자가 그 반대 순서를 오류로 본다는 단서로 쓴다. 이렇게 얻은 `Req`는 `inferred-from-error`로 표시하고 신뢰 수준을 낮게 둔다.
+
+---
+
+### 6.7 판정: 후보 → 실행 가능성 → 재현
+
+#### 6.7.1 판정 수준
+
+| 판정 | 조건 **[설계 제안]** | 보고 |
+| --- | --- | --- |
+| `GUARANTEED` | `G0 ⊢ e1 ≺ e2` | 보고하지 않음. 증명 경로만 기록 |
+| `GUARANTEED_UNDER(A′)` | `G0 ⊬`이고 `G_A ⊢ e1 ≺ e2`. `A′`는 쓰인 가정 | 정보로 보고. 가정 목록 포함 |
+| `VIOLATED_ALWAYS` | `G0 ⊢ e2 ≺ e1` | 후보로 보고. 순서와 무관한 결정적 결함이면 순서 결함 집계에서 뺀다 (§1.4) |
+| `CANDIDATE` | 위 셋이 아님 | 실행 가능성 확인으로 넘긴다 |
+| `UNKNOWN` | 관련 사건·출처에 정밀도 표시(`corrLost`, `unknownCall`, `unknownCallee`, `unresolvedMid`, `eds`)가 있다 | 따로 센다 (AP4) |
+
+**[설계 제안] 조건 4(관측 가능한 차이) 확인.** `CANDIDATE`가 되기 전에 다음을 확인한다. 순서가 뒤집힌 경우 사용 `u`에 도달하는 출처가 바뀌는가? 즉 `u`의 Joint 집합에 `Init`·`Const`·옛 class의 출처가 남는가? 그 차이가 분기·출력·`cfs.sb.transmit` payload로 흘러가는가? 흘러가지 않으면 `NO_EFFECT`로 기록하고 보고하지 않는다.
+
+#### 6.7.2 실행 가능성 확인 (모델상 가능)
+
+**[설계 제안]** 후보마다 관련 앱만 잘라 유한 상태 모델을 만든다.
+
+| 모델 요소 | 내용 | Σ 매개변수 |
+| --- | --- | --- |
+| task | 후보 사건에 이르는 task의 CFG를 사건 alphabet으로 사영한 자동자. CondField 값과 사용 field의 출처 class만 상태로 둔다 | — |
+| pipe | 길이 `depth_eff(p)`의 FIFO와 (MID, pipe)별 `MsgLim` 계수기 | `depth_eff = min(요청, 배치 상한)`; **[실측]** non-root native에서 상한 10 (§3 SB-1, OS-2) |
+| SB transmit | §3 M1의 put 열. sender 선점 지점은 put 사이 | cFE 버전 (AP6) |
+| ES startup | `sys(S)` 진행과 soft timeout을 비결정 선택으로 둔다 | `STARTUP_SCRIPT_TIMEOUT_MSEC` |
+| scheduler | Σ1: 1 CPU, 고정 priority 선점. 같은 priority는 비결정. Σ2: 다중 CPU, 임의 interleaving | **[확인된 사실]** OSAL→Linux priority 대응과 permissive fallback (§3 OS-5) |
+| 한계 | MID별 발행 수, loop 반복 수, 탐색 깊이 | 보고서에 기록 (수정본 §12.5) |
+
+**[설계 제안]** 탐색기는 `e2`가 `e1`보다 먼저 일어나고 6.7.1의 차이 조건이 성립하는 trace를 찾는다. 찾으면 그 trace가 witness다. witness는 사건 열과 각 사건의 source location(file:line:col), Σ, 한계를 가진다. 찾지 못하면 "한계 안에서 발견 안 됨"으로 남긴다. 이 결과를 안전 증명으로 바꾸지 않는다 (수정본 §12.5). 탐색 도구(TLA+, Promela, 자체 탐색기)는 아직 정하지 않았다. **[확인된 사실]** 비교 사례로, ROSInfer는 추론한 상태기계를 PlusCal/TLA+로 내보내 LTL 성질을 검사한다 (ROSInfer PDF [R15], 전문; 검증 C02).
+
+**[확인된 사실] source location의 가용성.** `--mlir-print-debuginfo`로 import한 파일별 결과에서 `llvm.call` 8830개와 `llvm.load` 26378개가 모두 file:line:col을 가졌다 (`$N/rw-mlir/import_exp/loc_by_op.txt`). 상수 operand에는 위치가 없다. 그래서 MID 값의 위치는 그 값을 쓰는 op의 위치와 S2의 AST 위치로 보고한다 (§7.9).
+
+#### 6.7.3 선택: native cFS build에서의 재현
+
+**[설계 제안]** witness를 native cFS build에서 재생한다. 성공하면 수준을 `재현`으로 올린다.
+
+| 항목 | 방법 | 근거 |
+| --- | --- | --- |
+| build | bundle README 절차: `make native_std.prep`, `make native_std.install` | **[실측]** install 48.8 s, compile warning 0, gcc 13.3.0 (`$N/probe/install.log`, `$N/probe/prep.log`) |
+| 실행 권한 | Σ1: root + private IPC namespace(`unshare --ipc`, 내부 `msg_max` 상향). Σ2: `setpriv` uid 65534 | **[실측]** `CAP_SYS_RESOURCE` 없는 root는 `mq_open` EINVAL로 abort(exit 134)했다. uid 65534에서는 queue 깊이가 10으로 잘리고 RT priority가 꺼졌다 (`$N/probe/run_root.log`, `run_nobody.log`, `run_root_ipcns.log`) |
+| CPU | Σ1에서 `taskset -c 0` | **[실측]** RR+cpu0에서만 priority 순서로 시작했다 (5/5; `$N/sem-es-tbl/runs/order_repeats.txt`) |
+| 순서 강제 | startup script의 priority와 순서. 시험 전용 패치로 witness 지점에 `OS_TaskDelay`를 넣는다 | **[실측]** probe 앱의 2.5 s 사전 지연으로 'Startup Sync failed' → OPERATIONAL 경로를 24/24 실행에서 재현했다 (§3 ES-4) |
+| 관측 | `CLOCK_MONOTONIC` 기록. syslog 시각은 쓰지 않는다 | **[확인된 사실]** syslog 시각은 TIME init 때 뛴다 (§3 EVT-4) |
+| 기록 | uid, `msg_max`, permissive mode, CPU 집합, cFE·OSAL·PSP commit | §1.3 |
+
+**[해석]** 재현 결과는 Linux native Σ에 대한 것이다. RTOS 비행 build의 증거로 쓰지 않는다 (§3.0).
+
+#### 6.7.4 전체 판정 절차
+
+```text
+# [설계 제안] 입력: System, Σ, Contracts, K, bounds
+procedure ANALYZE(System, Σ, Contracts):
+  M      := FRONTEND(System)                                  # S1–S4
+  Tasks  := RECOVER_STRUCTURE(M, System.startup_script)        # S5
+  for T in Tasks: (Prov[T], Facts[T]) := SOLVE_DENSE(M, T)     # S6: 6.3–6.5
+  Ev     := EXTRACT_EVENTS(Facts)                              # once / first / each
+  (G0,GA):= BUILD_HB(Ev, Pub, Sub, System.cfe, A_all)          # S7: 6.2
+  Req    := DERIVE_REQ(Ev, Prov, Contracts, API_RULES)         # S8: 6.6, G를 보지 않음
+  for (e1, e2, src) in Req:
+    if precision_flags(e1, e2):            emit(UNKNOWN, flags);            continue
+    if G0 ⊢ e1 ≺ e2:                        record(GUARANTEED, path);        continue
+    if GA ⊢ e1 ≺ e2:                        emit(GUARANTEED_UNDER, assumptions(path)); continue
+    eff := EFFECT(e1, e2, Prov)                                # 조건 4
+    if not eff:                             record(NO_EFFECT);               continue
+    sup := FP_CONTROL(e1, e2, eff, Contracts)                  # 6.8
+    if sup:                                 record(SUPPRESSED, sup.reason);  continue
+    lvl := VIOLATED_ALWAYS if G0 ⊢ e2 ≺ e1 else CANDIDATE
+    w   := FEASIBLE(slice(e1, e2), Σ, bounds)                  # 6.7.2
+    if w: lvl := MODEL_POSSIBLE
+    if w and replay_enabled:
+       r := REPLAY(w, native_build, Σ)                         # 6.7.3
+       if r.observed: lvl := REPRODUCED
+    emit(lvl, root_cause_key(src, e1.site, e2.site), witness=w, Σ, bounds)
+```
+
+---
+
+### 6.8 오경고 통제
+
+**[설계 제안]** 아래 통제는 후보를 지우지 않는다. `SUPPRESSED`, `NO_EFFECT`, `GUARANTEED_UNDER`로 이유와 함께 기록한다. 평가에서 정상 대조 사례의 결과를 이 기록으로 확인한다 (§1 H2′).
+
+| 통제 | 분석 안의 기제 | 정상 대조 사례 | 남기는 출력 |
+| --- | --- | --- | --- |
+| FP1 guard·validity flag | CondField의 값을 Joint에 두고 분기마다 Joint를 거른다 (6.3.2, 6.4.3). 참 분기에서 모든 Joint가 `Msg` 출처이면 F2 `Req`가 생기지 않는다 | **[원노트 구상]** 수정본 §6.1의 `attitude_valid` 패턴. **[확인된 사실]** ROSInfer 구현([states_analyzer.py L30–L61 @78301b86](https://github.com/cmu-rss-lab/rosdiscover/blob/78301b86fca119cda9ad55500dcf800e56bb9504/src/rosdiscover/recover/states_analyzer.py#L30-L61))은 publish의 경로 조건에 쓰이고 다른 함수에서 대입되는 변수를 state 변수로 본다. 논문의 휴리스틱은 이보다 넓다 (검증 C02) | guard 위치와 flag 이름 |
+| FP2 status 경로 | 성공 분기에만 사건을 둔다 (AP3). INFO 코드는 양수로 처리한다 | **[확인된 사실]** sample_app #101: `CFE_TBL_INFO_UPDATED`를 실패로 다루어 release를 빠뜨렸다 (수정 61f657d [S60]; §1 F6) | 코드 집합 |
+| FP3 설정된 정책 | 앱 설정 macro와 그 분기를 정책으로 인식한다 | **[확인된 사실]** HK는 입력마다 `DataPresent`를 두고, 누락이 있으면 `MissingDataCtr`를 올린다. 기본 `HK_DISCARD_INCOMPLETE_COMBO`=0이면 불완전한 combined packet도 보낸다 ([hk_utils.c L483–L504](https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L483-L504), [hk_internal_cfg.h L57–L69](https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/inc/hk_internal_cfg.h#L57-L69)) | 정책 이름과 설정값 |
+| FP4 주기 회복 | 발행 site가 run loop 안에 있거나 SCH table 항목이면 R-F1i를 만들지 않는다. F2는 "첫 수신 전 창"으로 정보 보고한다 | **[확인된 사실]** SCH_LAB은 table의 `MessageID`를 rate counter에 따라 보낸다 ([sch_lab_app.c L125–L248](https://github.com/nasa/sch_lab/blob/607e2f90c5f828f3f3ae655a4debacf8b2cc4bbb/fsw/src/sch_lab_app.c#L125-L248)) | 주기 근거(site 또는 table 행) |
+| FP5 허용된 기본값 | `allows_default(f)` 계약 | 수정본 §6.2 | 계약 위치 |
+| FP6 의도된 늦은 구독 | `must_receive_first`가 없으면 R-F1c를 만들지 않는다. `may_drop`을 계약으로 받는다 | **[확인된 사실]** TO_LAB은 table 기반 telemetry 구독을 `WaitForStartupSync` 뒤로 미룬다. 주석은 시작 시 event 폭주로 생기는 MsgLimit 오류를 피하기 위해서라고 쓴다 ([to_lab_app.c L66–L73](https://github.com/nasa/to_lab/blob/d27c6014cb5d2979140500f635876ee87b81995b/fsw/src/to_lab_app.c#L66-L73)) | — |
+| FP7 설계된 latest-value 조합 | `requires_same_*` 계약이 없으면 F4 `Req`를 만들지 않는다. 조합 목록만 출력 | **[확인된 사실]** Ogma 생성 템플릿은 메시지 값을 전역에 복사하고, active 입력일 때만 `copilot_step()`을 부른다 ([copilot_cfs.c L218–L239](https://github.com/nasa/ogma/blob/08b384b4335cce324fac74577adc7f08e61b7cce/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c#L218-L239)). **[해석]**(이견 있음) 입력을 둘 이상 고르면 monitor는 따로 갱신되는 전역의 마지막 값을 함께 읽는다. 이 일반화에는 검증자 사이에 이견이 있었다 (검증 C06; §4 Ogma 템플릿 상세). 그래서 Ogma 생성 앱은 입력 선택과 active/passive 설정을 고정한 경우에만 대조 사례로 쓴다 | 조합 목록 |
+| FP8 프레임워크 보장 | §3.9의 A1–A11을 `G0`의 규칙으로 쓴다. 예: core API 사용은 HB-CORE로 해소된다. TIME 기준값의 여러 field는 같은 version에서 온다(A9) | **[확인된 사실]** core 앱 시작은 직렬화되어 있다 (§3 ES-2). TIME은 versioned read를 한다 (§3 EVT-5) | 사용한 규칙 ID |
+| FP9 정밀도 손실 | `corrLost`, `unknownCall`, `unknownCallee`, `unresolvedMid`, `eds`가 있으면 `UNKNOWN` | AP4 | 손실 위치 |
+| FP10 다중 writer | 한 field를 같은 앱의 둘 이상의 task가 쓰면, run-to-completion 전제(§1 F4)가 깨진다. F4는 `UNKNOWN(atomicity)`로 보고한다 | **[해석]** §1 F4의 전제 | writer task 목록 |
+| FP11 중복 제거 | 근본 원인 키 `(Req 규칙, e1 site, e2 site)`로 묶는다 | 수정본 §12.1 | 묶인 경고 수 |
+
+**[설계 제안] validity flag 판정의 설명 규칙.** 6.3의 경로 필터가 실제 계산을 한다. 아래 조건은 진단 설명용이다. `v`가 field 집합 `F`의 validity flag이려면 다음 세 조건이 필요하다.
+
+1. `v := 참` 쓰기마다 같은 활성화에서 `F`의 모든 field가 `Msg`·`Tbl` 출처로 쓰인다.
+2. `v := 거짓` 쓰기(초기값 포함)는 `F`의 무효 상태와 함께 있다.
+3. `F`를 소비하는 사용이 `v`의 참 분기에 지배된다.
+
+---
+
+### 6.9 진단 형식
+
+**[설계 제안]** 진단은 원노트 §67의 형식에 근거와 증거 수준을 더한다. 아래는 합성 예제를 가정한 출력 예다. 실제 실행 결과가 아니다.
+
+```text
+[F2-CANDIDATE → MODEL_POSSIBLE]  root-cause key: (R-F2, guid.c:88, guid.c:142)
+Consumer      GUIDANCE::GUID_Step() guid.c:142:17   r(GUIDANCE_Data.att.q)  consume → Control()
+Origins at u  Disj{ {att.q ↦ Msg(NAV_ATT_MID, payload.q, guid.c:61)}, {att.q ↦ Init(GUIDANCE_Data)} }
+Req           w(att.q, Msg(NAV_ATT_MID)) ≺ r(att.q)   source=R-F2 (data dependence)
+G0 proof      none. Missing link: hdl(GUIDANCE, NAV_ATT_MID) vs hdl(GUIDANCE, SCH_WAKEUP_MID)
+G_A proof     none (HB-FIFO not applicable: different senders NAV, SCH_LAB)
+Guards        none found on path guid.c:120→142 (CondField: GUIDANCE_Data.att_valid not tested)
+Witness (Σ1: 1 CPU, RR, cFE 546a0025, bounds: 2 msgs/MID, 3 loop iters)
+  1. SCH_LAB tx(SCH_WAKEUP_MID)        sch_lab_app.c:131
+  2. GUIDANCE rcv + hdl(SCH_WAKEUP_MID) guid.c:118 → GUID_Step() guid.c:142 reads Init value
+  3. NAV tx(NAV_ATT_MID)               nav.c:77
+Assumptions   A_ext (OSAL/libc do not write app globals)
+Unknowns      none
+Not claimed   reproduction on native build (replay not run)
+```
+
+---
+
+### 6.10 구현 위험과 남은 미확인 항목
+
+| 위험 | 근거 | 완화 **[설계 제안]** |
+| --- | --- | --- |
+| upstream이 field·전역 구분 메모리 모델을 주지 않는다 | **[실측]** 6.3 서두 | 6.3의 field 식별과 출처 도메인을 직접 구현한다 |
+| import된 함수의 visibility | **[실측]** S3 | closed-world pass |
+| context-insensitive 합류 | **[확인된 사실]** 6.5.2 | `setInterprocedural(false)`와 summary |
+| indirect call | **[실측]** 73곳, Unknown-Callee | 상수 table 해석, 외부 points-to |
+| MLIR 분석 API 변화 | **[실측]** PoTATo가 로컬 LLVM에 대해 `RegionSuccessor`·DataFlow API 오류로 build 실패 (`$N/rw-mlir/potato_build.log`, `potato_build2.log`) | LLVM commit을 고정한다. 자원 효과는 main 쪽 기능에 의존하므로 고정 commit을 정할 때 함께 확인한다 (6.4.1) |
+| lifting이 놓치는 쓰기 | **[실측]** offset 0 field, out-parameter, 지역 포인터 (S4) | `cfs.field`의 byte 범위로 offset 0을 식별한다. API 모델에 out-parameter 쓰기를 넣는다. 포인터 대상은 SSA·summary로 추적한다 |
+| MID가 table·명령에서 온다 | **[실측]** `CFE_SB_Subscribe*` 47곳 중 8곳 (§1 RQ1) | table 이미지 입력. 명령 기반 간선은 `Pub(m)` 불완전으로 처리(HB-MSG 조건 ②) |
+| ClangIR 경로 | **[실측]** 로컬 clang은 CIR을 쓸 수 없다. `-fclangir -S -emit-llvm`은 일반 codegen과 같은 출력을 낸다 (`$N/probe/cir/emit_cir.log`) | LLVM dialect 경로로 시작한다. CIR은 CIR을 켠 build를 고정한 뒤 비교 실험으로 둔다 |
+| 같은 모델을 쓴 대안이 같은 결과를 낼 수 있다 | **[확인된 사실]** CodeQL global data flow는 전역을 통해 함수 사이를 순서와 무관하게 잇는다 ([DataFlowPrivate.qll L93–L120](https://github.com/github/codeql/blob/f1d3f1defc5ca73bcf1ed48031fb31c62fd91952/cpp/ql/lib/semmle/code/cpp/ir/dataflow/internal/DataFlowPrivate.qll#L93-L120)). **[실측]** Clang Static Analyzer의 taint는 double payload에서, 그리고 불투명 호출 뒤에서 사라졌다 (`$N/rw-mlir/csa_exp/csa_all.log`) | §1 RQ5·RQ6의 기준선을 같은 SB·ES·TBL 모델로 만들어 비교한다 |
+
+**[미확인]** 다음 항목은 이 설계의 결론에 쓰지 않았다.
+
+- 6.3 도메인의 구체 의미에 대한 건전성 증명과 K 값.
+- HB-SYS1을 lock 없는 일반 메모리 쓰기의 가시성으로 넓힐 때 필요한 다중 코어 메모리 순서(`MemOrder`). HB-TACT의 owner `Load` 경로(§3 TBL-6). HB-OSAL의 OSAL 이름 조회 의미. HB-ATX(옛 버전의 atomic tx)의 실행 확인.
+- VxWorks queue 순서(HB-FIFO 조건 ④).
+- child task가 부모 AppState와 TBL 잠금에 주는 영향의 실행 확인 (§3 ES-8).
+- 실행 가능성 탐색기의 선택과 그 비용. 재현 실행에서 순서를 강제하는 패치의 부작용.
+- SBN·원격 구독, EDS build, mission의 MSG·MID mapping override.
+- 이 설계가 정상 대조 사례에서 실제로 경고 0을 내는지, 주입 사례에서 후보를 내는지. 이 판단은 구현과 평가 뒤에만 할 수 있다.
+
+---
+
+## 7. 실현 가능성 실측
+
+이 절은 이 컨테이너에서 직접 실행한 결과를 보고한다. 질문은 하나다. 원노트 §10의 초기 경로(C → LLVM IR → MLIR LLVM dialect → cFS API 인식)가 고정한 실제 cFS 코드에서 작동하는가?

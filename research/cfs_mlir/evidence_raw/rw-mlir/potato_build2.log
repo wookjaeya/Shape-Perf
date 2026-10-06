@@ -1,0 +1,301 @@
+ninja: Entering directory `build'
+[1/22] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o
+FAILED: lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o -MF lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o.d -o lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:590:61: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  590 |                 operands = branch.getEntrySuccessorOperands(successor);
+      |                                                             ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:405:74: note: passing argument to parameter 'successor' here
+  405 |   ::mlir::OperandRange getEntrySuccessorOperands(::mlir::RegionSuccessor successor);
+      |                                                                          ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:594:67: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  594 |                 operands = region_terminator.getSuccessorOperands(successor);
+      |                                                                   ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:600:71: note: passing argument to parameter 'successor' here
+  600 |     ::mlir::OperandRange getSuccessorOperands(::mlir::RegionSuccessor successor) {
+      |                                                                       ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching conversion for functional-style cast from 'mlir::ResultRange' to 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::ResultRange' to 'const RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::ResultRange' to 'RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::ResultRange' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 1 was provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+/home/user/work/llvm-project/llvm/include/llvm/ADT/STLExtras.h:1299:3: note: candidate template ignored: requirement 'std::is_constructible<mlir::RegionSuccessor, llvm::iterator_range<llvm::detail::indexed_accessor_range_base<mlir::ResultRange, mlir::detail::OpResultImpl *, mlir::OpResult, mlir::OpResult, mlir::OpResult>::iterator>>::value' was not satisfied [with RangeT = mlir::RegionSuccessor]
+ 1299 |   operator RangeT() const {
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+5 errors generated.
+[2/22] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o
+FAILED: lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o -MF lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o.d -o lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:590:61: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  590 |                 operands = branch.getEntrySuccessorOperands(successor);
+      |                                                             ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:405:74: note: passing argument to parameter 'successor' here
+  405 |   ::mlir::OperandRange getEntrySuccessorOperands(::mlir::RegionSuccessor successor);
+      |                                                                          ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:594:67: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  594 |                 operands = region_terminator.getSuccessorOperands(successor);
+      |                                                                   ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:600:71: note: passing argument to parameter 'successor' here
+  600 |     ::mlir::OperandRange getSuccessorOperands(::mlir::RegionSuccessor successor) {
+      |                                                                       ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching conversion for functional-style cast from 'mlir::ResultRange' to 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::ResultRange' to 'const RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::ResultRange' to 'RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::ResultRange' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 1 was provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+/home/user/work/llvm-project/llvm/include/llvm/ADT/STLExtras.h:1299:3: note: candidate template ignored: requirement 'std::is_constructible<mlir::RegionSuccessor, llvm::iterator_range<llvm::detail::indexed_accessor_range_base<mlir::ResultRange, mlir::detail::OpResultImpl *, mlir::OpResult, mlir::OpResult, mlir::OpResult>::iterator>>::value' was not satisfied [with RangeT = mlir::RegionSuccessor]
+ 1299 |   operator RangeT() const {
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+5 errors generated.
+[3/22] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/steensgaard.cpp.o
+[4/22] Building CXX object lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o
+FAILED: lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o -MF lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o.d -o lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:10:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:590:61: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  590 |                 operands = branch.getEntrySuccessorOperands(successor);
+      |                                                             ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:405:74: note: passing argument to parameter 'successor' here
+  405 |   ::mlir::OperandRange getEntrySuccessorOperands(::mlir::RegionSuccessor successor);
+      |                                                                          ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:10:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:594:67: error: no viable conversion from 'mlir::RegionBranchPoint' to '::mlir::RegionSuccessor'
+  594 |                 operands = region_terminator.getSuccessorOperands(successor);
+      |                                                                   ^~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'const RegionSuccessor &' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::RegionBranchPoint' to 'RegionSuccessor &&' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::RegionBranchPoint' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/build/tools/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h.inc:600:71: note: passing argument to parameter 'successor' here
+  600 |     ::mlir::OperandRange getSuccessorOperands(::mlir::RegionSuccessor successor) {
+      |                                                                       ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:10:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching conversion for functional-style cast from 'mlir::ResultRange' to 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'mlir::ResultRange' to 'const RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'mlir::ResultRange' to 'RegionSuccessor' for 1st argument
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: no known conversion from 'mlir::ResultRange' to 'Region *' for 1st argument
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 1 was provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+/home/user/work/llvm-project/llvm/include/llvm/ADT/STLExtras.h:1299:3: note: candidate template ignored: requirement 'std::is_constructible<mlir::RegionSuccessor, llvm::iterator_range<llvm::detail::indexed_accessor_range_base<mlir::ResultRange, mlir::detail::OpResultImpl *, mlir::OpResult, mlir::OpResult, mlir::OpResult>::iterator>>::value' was not satisfied [with RangeT = mlir::RegionSuccessor]
+ 1299 |   operator RangeT() const {
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:10:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:9:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:6:
+/home/user/work/llvm-project/mlir/include/mlir/Analysis/DataFlow/DenseAnalysis.h:207:7: error: static assertion failed due to requirement 'std::is_base_of<mlir::dataflow::AbstractDenseLattice, potato::analysis::aa_lattice>::value': analysis state class expected to subclass AbstractDenseLattice
+  207 |       std::is_base_of<AbstractDenseLattice, LatticeT>::value,
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:23:24: note: in instantiation of template class 'mlir::dataflow::DenseForwardDataFlowAnalysis<potato::analysis::aa_lattice>' requested here
+   23 | struct llvm_andersen : mlir::dataflow::DenseForwardDataFlowAnalysis< aa_lattice >{
+      |                        ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:27:17: error: 'propagateIfChanged' is a protected member of 'mlir::DataFlowAnalysis'
+   27 |     using base::propagateIfChanged;
+      |                 ^
+/home/user/work/llvm-project/mlir/include/mlir/Analysis/DataFlowFramework.h:639:8: note: declared protected here
+  639 |   void propagateIfChanged(AnalysisState *state, ChangeResult changed);
+      |        ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:48:101: error: only virtual member functions can be marked 'override'
+   48 |     logical_result visitOperation(mlir::Operation *op, const aa_lattice &before, aa_lattice *after) override;
+      |                                                                                                     ^~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:52:58: error: only virtual member functions can be marked 'override'
+   52 |                                       aa_lattice *after) override;
+      |                                                          ^~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:53:47: error: only virtual member functions can be marked 'override'
+   53 |     void setToEntryState(aa_lattice *lattice) override;
+      |                                               ^~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:54:56: error: only virtual member functions can be marked 'override'
+   54 |     mlir::LogicalResult initialize(mlir_operation *op) override;
+      |                                                        ^~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:62:34: error: no member named 'info_t' in 'potato::analysis::aa_lattice'
+   62 |     std::unique_ptr< aa_lattice::info_t > relation;
+      |                                  ^~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:57:11: error: type 'base' (aka 'mlir::dataflow::DenseForwardDataFlowAnalysis<aa_lattice>') is not a direct or virtual base of 'potato::analysis::trad::llvm_andersen'
+   57 |         : base(solver),
+      |           ^~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:58:50: error: no member named 'info_t' in 'potato::analysis::aa_lattice'
+   58 |           relation(std::make_unique< aa_lattice::info_t >())
+      |                                                  ^~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:15:27: error: no member named 'new_alloca' in 'potato::analysis::aa_lattice'
+   15 |         changed |= after->new_alloca(op.getResult());
+      |                    ~~~~~  ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:16:9: error: use of undeclared identifier 'propagateIfChanged'
+   16 |         propagateIfChanged(after, changed);
+      |         ^~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:22:29: error: no member named 'lookup' in 'potato::analysis::aa_lattice'
+   22 |         auto *addr = before.lookup(op.getAddr());
+      |                      ~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:24:20: error: use of undeclared identifier 'propagateIfChanged'
+   24 |             return propagateIfChanged(after, changed);
+      |                    ^~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:28:35: error: no member named 'lookup' in 'potato::analysis::aa_lattice'
+   28 |         const auto value = before.lookup(op.getValue());
+      |                            ~~~~~~ ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+ninja: build stopped: subcommand failed.

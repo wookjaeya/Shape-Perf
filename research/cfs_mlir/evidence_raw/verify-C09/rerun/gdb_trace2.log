@@ -1,0 +1,170 @@
+Breakpoint 1 at 0x2cdf0: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/evs/fsw/src/cfe_evs_task.c, line 1479.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+OS_BSP_Initialize():Maximum user msg queue depth = 10
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+OS_Posix_TaskAPI_Impl_Init():419:Could not setschedparam in main thread: Operation not permitted (1)
+[New Thread 0x7ffff7fba6c0 (LWP 9984)]
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+[New Thread 0x7ffff7e696c0 (LWP 9985)]
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FFFF7B80000, Size = 00080000 Status = 0
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-02:43:19.80460 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-02:43:19.80467 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-02:43:19.81110 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-02:43:19.81111 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-02:43:19.81111 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-02:43:19.81112 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-02:43:19.81126 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-02:43:19.81128 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-02:43:19.81128 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-02:43:19.81128 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-02:43:19.81158 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-02:43:19.81196 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+[New Thread 0x7ffff7e606c0 (LWP 9987)]
+[Switching to Thread 0x7ffff7e606c0 (LWP 9987)]
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05592 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05674 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 21128
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05735 66/1/CFE_ES 91: Version Info: Mission SampleMission, version (null)
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05790 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05862 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05914 66/1/CFE_ES 91: Version Info: Module ES, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.05986 66/1/CFE_ES 91: Version Info: Module EVS, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06066 66/1/CFE_ES 91: Version Info: Module FS, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06150 66/1/CFE_ES 91: Version Info: Module SB, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06221 66/1/CFE_ES 91: Version Info: Module TBL, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06283 66/1/CFE_ES 91: Version Info: Module TIME, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06343 66/1/CFE_ES 91: Version Info: Module OSAL, version git:dad0ee9
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06419 66/1/CFE_ES 91: Version Info: Module PSP, version git:53df1d5
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06497 66/1/CFE_ES 91: Version Info: Module MSG, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06561 66/1/CFE_ES 91: Version Info: Module SBR, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06629 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:546a002
+GDB GetTypeEnable type=2 callerAppIdx=1 active=1
+EVS Port1 1980-012-14:03:20.06698 66/1/CFE_ES 92: Build 202610010610 by root@vm, config sample
+[New Thread 0x7ffff7e266c0 (LWP 9988)]
+[New Thread 0x7ffff7e206c0 (LWP 9989)]
+[Switching to Thread 0x7ffff7e206c0 (LWP 9989)]
+GDB GetTypeEnable type=2 callerAppIdx=2 active=1
+EVS Port1 1980-012-14:03:20.15460 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+[New Thread 0x7ffff7e196c0 (LWP 9990)]
+1980-012-14:03:20.25400 CFE_SB_AppInit: Registered 4 events for filtering
+[Switching to Thread 0x7ffff7e196c0 (LWP 9990)]
+GDB GetTypeEnable type=2 callerAppIdx=3 active=1
+EVS Port1 1980-012-14:03:20.25617 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB GetTypeEnable type=2 callerAppIdx=3 active=1
+EVS Port1 1980-012-14:03:20.25689 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+[New Thread 0x7ffff7b7f6c0 (LWP 9991)]
+[Switching to Thread 0x7ffff7b7f6c0 (LWP 9991)]
+GDB GetTypeEnable type=2 callerAppIdx=4 active=1
+EVS Port1 1980-012-14:03:20.35697 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB GetTypeEnable type=2 callerAppIdx=4 active=1
+EVS Port1 1980-012-14:03:20.35786 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+[New Thread 0x7ffff7b786c0 (LWP 9992)]
+[New Thread 0x7ffff7b716c0 (LWP 9993)]
+[New Thread 0x7ffff7b6b6c0 (LWP 9994)]
+[Switching to Thread 0x7ffff7b786c0 (LWP 9992)]
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:03:20.45909 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:03:20.45997 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+1980-012-14:03:20.50589 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50592 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50594 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50603 CFE_ES_ParseFileEntry: Loading file: /cf/sbprobe.so, APP: SBPROBE
+[New Thread 0x7ffff7b5e6c0 (LWP 9995)]
+1980-012-14:03:20.56187 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+1980-012-14:03:20.56191 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+SBPROBE SCHED who=MAIN policy=OTHER prio=0 cpu=0
+[Switching to Thread 0x7ffff7b5e6c0 (LWP 9995)]
+GDB GetTypeEnable type=2 callerAppIdx=6 active=0
+SBPROBE T1 never_subscribed rc=0x00000000 NoSubDelta=1 MsgSendErrDelta=0
+SBPROBE T1 subscribed_then_unsubscribed rc=0x00000000 NoSubDelta=0 MsgSendErrDelta=0
+SBPROBE T2 seq_first=1 seq_after_3_unsubscribed_sends=5 diff=4
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+SBPROBE T3 msglim=2 depth=10 sent=5 rc=[0,0,0,0,0] received=2 MsgLimErrDelta=3 MsgSendErrDelta=3
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+SBPROBE T4 msglim=10 depth=3 sent=5 rc=[0,0,0,0,0] received=3 PipeOverflowDelta=2 MsgSendErrDelta=2
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+GDB GetTypeEnable type=3 callerAppIdx=6 active=0
+SBPROBE T4b requested_depth=20 sent=20 received=10 PipeOverflowDelta=10
+[New Thread 0x7ffff7b556c0 (LWP 9996)]
+[New Thread 0x7ffff7b4c6c0 (LWP 9997)]
+[New Thread 0x7ffff7b436c0 (LWP 9998)]
+SBPROBE SCHED who=ORD1 policy=OTHER prio=0 cpu=0
+SBPROBE SCHED who=ORD0 policy=OTHER prio=0 cpu=0
+SBPROBE SCHED who=ORD2 policy=OTHER prio=0 cpu=0
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(3,2,1) count=109
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(1,3,2) count=10
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(3,1,2) count=36
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(2,3,1) count=45
+SBPROBE T5 trials=200 all_three_received_before_TransmitMsg_returned=34
+[New Thread 0x7ffff7b3a6c0 (LWP 9999)]
+SBPROBE SCHED who=RELAY_HI policy=OTHER prio=0 cpu=0
+[Switching to Thread 0x7ffff7b786c0 (LWP 9992)]
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:03:21.00210 66/1/CFE_TIME 21: Stop FLYWHEEL
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:03:21.00349 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+SBPROBE T6 relay_prio_higher_than_sender trials=500 relay_output_before_trigger=65 trigger_before_relay_output=435 other=0
+[New Thread 0x7ffff7b316c0 (LWP 10000)]
+SBPROBE SCHED who=RELAY_LO policy=OTHER prio=0 cpu=0
+SBPROBE T6 relay_prio_lower_than_sender trials=500 relay_output_before_trigger=13 trigger_before_relay_output=487 other=0
+SBPROBE DONE
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:04:12.00195 66/1/CFE_TIME 21: Stop FLYWHEEL
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+[Switching to Thread 0x7ffff7b6b6c0 (LWP 9994)]
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1
+EVS Port1 1980-012-14:04:13.00163 66/1/CFE_TIME 20: Start FLYWHEEL
+GDB GetTypeEnable type=2 callerAppIdx=5 active=1

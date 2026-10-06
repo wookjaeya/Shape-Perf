@@ -1,0 +1,2 @@
+ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f  cFE-6.4.1-OSS-release.tar.gz
+c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f  cFE-6.4.2-OSS-release.tar.gz

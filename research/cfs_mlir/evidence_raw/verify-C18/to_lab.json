@@ -1,0 +1,2201 @@
+{
+ "summary": {
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.opt.mlir": {
+   "defined_funcs": 13,
+   "api_calls_by_family": {
+    "CFE_ES_api": 16,
+    "CFE_EVS_api": 45,
+    "CFE_MSG_api": 2,
+    "CFE_PSP_api": 2,
+    "CFE_SB_api": 32,
+    "CFE_TBL_api": 12,
+    "OS_api": 13
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WaitForStartupSync": 1,
+    "CFE_ES_WriteToSysLog": 6,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 43,
+    "CFE_MSG_Init": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "CFE_SB_CreatePipe": 4,
+    "CFE_SB_IsValidMsgId": 10,
+    "CFE_SB_ReceiveBuffer": 4,
+    "CFE_SB_Subscribe": 5,
+    "CFE_SB_SubscribeEx": 4,
+    "CFE_SB_Unsubscribe": 5,
+    "CFE_TBL_GetAddress": 4,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_Manage": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "OS_SocketAddrFromString": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketOpen": 1,
+    "OS_SocketSendTo": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "OS_close": 1,
+    "OS_printf": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 2,
+    "CFE_SB_Subscribe#0: direct_const": 4,
+    "CFE_SB_Unsubscribe#0: global": 5,
+    "CFE_SB_SubscribeEx#0: load_other": 4,
+    "CFE_SB_Subscribe#0: param": 1
+   },
+   "msgptr": {
+    "CFE_MSG_Init: TO_LAB_Global.HkTlm": 2
+   },
+   "global_store_fields": {
+    "TO_LAB_Global.AllowPassthru": 2,
+    "TO_LAB_Global.downlink_on": 2,
+    "TO_LAB_Global.SubsTblPtr": 2,
+    "TO_LAB_Global.ActiveSubs.[dyn].Value": 5,
+    "TO_LAB_Global.ActiveSubCount": 9,
+    "TO_LAB_Global.suppress_sendto": 2
+   },
+   "global_store_value_kinds": {
+    "direct_const": 16,
+    "alloca[0 store(s)]-> outparam_of:CFE_TBL_GetAddress": 2,
+    "unknown": 4
+   },
+   "global_load_fields": 8,
+   "global_loads": 55,
+   "global_memops": [
+    "memset TO_LAB_Global. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:563",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808",
+    "memset TO_LAB_Global. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:563",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 128,
+    "llvm.getelementptr:known": 87,
+    "llvm.load:known": 97,
+    "llvm.mlir.addressof:unknown": 18,
+    "llvm.mlir.addressof:known": 54,
+    "llvm.mlir.constant:unknown": 55,
+    "llvm.mlir.constant:known": 94,
+    "llvm.store:known": 24,
+    "other:known": 629
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.opt.mlir": {
+   "defined_funcs": 11,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 12,
+    "CFE_MSG_api": 1,
+    "CFE_SB_api": 7
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 12,
+    "CFE_MSG_Init": 1,
+    "CFE_SB_MessageStringGet": 1,
+    "CFE_SB_SubscribeEx": 1,
+    "CFE_SB_TimeStampMsg": 2,
+    "CFE_SB_TransmitMsg": 2,
+    "CFE_SB_Unsubscribe": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 1,
+    "CFE_SB_SubscribeEx#0: load_other": 1,
+    "CFE_SB_Unsubscribe#0: load_other": 1
+   },
+   "msgptr": {
+    "CFE_MSG_Init: TO_LAB_Global.DataTypesTlm": 1,
+    "CFE_SB_TransmitMsg: TO_LAB_Global.DataTypesTlm": 1,
+    "CFE_SB_TransmitMsg: TO_LAB_Global.HkTlm": 1
+   },
+   "global_store_fields": {
+    "TO_LAB_Global.suppress_sendto": 1,
+    "TO_LAB_Global.downlink_on": 1,
+    "TO_LAB_Global.HkTlm.Payload": 8,
+    "TO_LAB_Global.HkTlm.Payload.CommandErrorCounter": 6,
+    "TO_LAB_Global.DataTypesTlm.Payload": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.bl1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.bl2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b3": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b4": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.w1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.w2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.dw1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.dw2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.f1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.f2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.df1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.df2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.str.[dyn]": 1,
+    "TO_LAB_Global.ActiveSubCount": 2,
+    "TO_LAB_Global.ActiveSubs.[dyn].Value": 1
+   },
+   "global_store_value_kinds": {
+    "direct_const": 16,
+    "other": 18,
+    "load_other": 1
+   },
+   "global_load_fields": 6,
+   "global_loads": 21,
+   "global_memops": [
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:750"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 23,
+    "llvm.getelementptr:known": 75,
+    "llvm.load:known": 40,
+    "llvm.mlir.addressof:known": 26,
+    "llvm.mlir.constant:unknown": 1,
+    "llvm.mlir.constant:known": 77,
+    "llvm.store:known": 35,
+    "other:known": 128
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.opt.mlir": {
+   "defined_funcs": 5,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 3,
+    "CFE_MSG_api": 3,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetFcnCode": 2,
+    "CFE_MSG_GetMsgId": 1,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "TO_LAB_Global.HkTlm.Payload.CommandErrorCounter": 2,
+    "TO_LAB_TaskPipe.CMD_MID.Value": 1,
+    "TO_LAB_TaskPipe.SEND_HK_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2,
+    "direct_const": 2
+   },
+   "global_load_fields": 3,
+   "global_loads": 5,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 22,
+    "llvm.getelementptr:known": 9,
+    "llvm.load:known": 12,
+    "llvm.mlir.addressof:unknown": 2,
+    "llvm.mlir.addressof:known": 5,
+    "llvm.mlir.constant:unknown": 7,
+    "llvm.mlir.constant:known": 11,
+    "llvm.store:known": 6,
+    "other:unknown": 17,
+    "other:known": 214
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_passthru_encode.opt.mlir": {
+   "defined_funcs": 1,
+   "api_calls_by_family": {
+    "CFE_MSG_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 0,
+   "global_loads": 0,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 1,
+    "llvm.load:known": 1,
+    "llvm.mlir.constant:known": 2,
+    "llvm.store:known": 3,
+    "other:known": 8
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.opt.mlir",
+   "n_defined_funcs": 13,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_AppMain",
+    "TO_LAB_CmdSubscribe",
+    "TO_LAB_ManageTables",
+    "TO_LAB_UnsubscribeFromTlmPipe",
+    "TO_LAB_UpdateSubscriptionsFromTable",
+    "TO_LAB_ValidateSubTable",
+    "TO_LAB_delete_callback",
+    "TO_LAB_forward_telemetry",
+    "TO_LAB_init",
+    "TO_LAB_openTLM",
+    "TO_LAB_process_commands"
+   ],
+   "calls": {
+    "CFE_ES_|api": 16,
+    "CFE_EVS_|api": 45,
+    "CFE_MSG_|api": 2,
+    "CFE_TBL_|api": 12,
+    "CFE_SB_|api": 32,
+    "OS_|api": 13,
+    "CFE_PSP_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 6,
+    "CFE_MSG_Init": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_EVS_SendEvent": 43,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_GetAddress": 4,
+    "CFE_SB_CreatePipe": 4,
+    "CFE_SB_Subscribe": 5,
+    "OS_TaskInstallDeleteHandler": 2,
+    "CFE_ES_WaitForStartupSync": 1,
+    "CFE_SB_IsValidMsgId": 10,
+    "CFE_SB_Unsubscribe": 5,
+    "CFE_SB_SubscribeEx": 4,
+    "CFE_ES_RunLoop": 1,
+    "CFE_PSP_GetProcessorId": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketAddrFromString": 2,
+    "CFE_SB_ReceiveBuffer": 4,
+    "OS_SocketSendTo": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Manage": 2,
+    "CFE_ES_ExitApp": 1,
+    "OS_printf": 1,
+    "OS_close": 1,
+    "OS_SocketOpen": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2176
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:585"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1240"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1240"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1344"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:788"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1344"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:788"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2176
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:585"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1240"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1240"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1344"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:788"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1344"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:788"
+    },
+    {
+     "func": "TO_LAB_CmdSubscribe",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "param",
+      "arg": "%arg0"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1240"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1344"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:585"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:585"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "AllowPassthru"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:564"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:565"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "value": {
+      "kind": "alloca",
+      "n_stores": 0,
+      "stored": [],
+      "outparam_of": [
+       "CFE_TBL_GetAddress"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:645"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1365"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1381"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:855"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:971"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1365"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1381"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:855"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "AllowPassthru"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:564"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:565"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "value": {
+      "kind": "alloca",
+      "n_stores": 0,
+      "stored": [],
+      "outparam_of": [
+       "CFE_TBL_GetAddress"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:645"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1365"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1381"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:855"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:971"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1365"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1381"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:855"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1365"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1381"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:602"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:619"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1237"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1237"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1336"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1341"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1343"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1352"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:764"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:779"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:923"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:930"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:937"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:955"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1015"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1048"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1050"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1052"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1336"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1341"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1343"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1352"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:764"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:779"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:602"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:619"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1237"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1237"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1336"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1341"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1343"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1352"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:764"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:779"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:923"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:930"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:937"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:955"
+    },
+    {
+     "func": "TO_LAB_process_commands",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1015"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1048"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1050"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1052"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1336"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1341"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1343"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1352"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:764"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:779"
+    },
+    {
+     "func": "TO_LAB_delete_callback",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1085"
+    },
+    {
+     "func": "TO_LAB_delete_callback",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1089"
+    },
+    {
+     "func": "TO_LAB_CmdSubscribe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1237"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1336"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1341"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1343"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:1352"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memset",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:563"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808"
+    },
+    {
+     "func": "TO_LAB_init",
+     "op": "memset",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:563"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_app.imp.mlir:808"
+    }
+   ]
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.opt.mlir",
+   "n_defined_funcs": 11,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_AddPacketCmd",
+    "TO_LAB_EnableOutputCmd",
+    "TO_LAB_NoopCmd",
+    "TO_LAB_RemoveAllCmd",
+    "TO_LAB_RemovePacketCmd",
+    "TO_LAB_ResetCountersCmd",
+    "TO_LAB_SendDataTypesCmd",
+    "TO_LAB_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_SB_|api": 7,
+    "CFE_EVS_|api": 12,
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_SB_MessageStringGet": 1,
+    "CFE_EVS_SendEvent": 12,
+    "CFE_MSG_Init": 1,
+    "CFE_SB_TimeStampMsg": 2,
+    "CFE_SB_TransmitMsg": 2,
+    "CFE_SB_SubscribeEx": 1,
+    "CFE_SB_Unsubscribe": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2177
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:509"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:727"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:914"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "DataTypesTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:509"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "DataTypesTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:549"
+    },
+    {
+     "func": "TO_LAB_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:586"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:365"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:372"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:377"
+    },
+    {
+     "func": "TO_LAB_NoopCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:412"
+    },
+    {
+     "func": "TO_LAB_ResetCountersCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:432"
+    },
+    {
+     "func": "TO_LAB_ResetCountersCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:433"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 26985
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:511"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "bl1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:512"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "bl2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:513"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 16
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:514"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 127
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:515"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b3"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 127
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:516"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b4"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 69
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:517"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "w1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 9320
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:518"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "w2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 32767
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:519"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "dw1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 305419896
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:520"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "dw2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": -2023406815
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:521"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "f1"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(9.001000e+01"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:522"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "f2"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(4.500000e-06"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:523"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "df1"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(9.990000e+01"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:524"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "df2"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(4.444000e-01"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:525"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "str",
+      "[dyn]"
+     ],
+     "value": {
+      "kind": "load_other"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:541"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:552"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:650"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:667"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:712"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:742"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:753"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:776"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:906"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:929"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:939"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:943"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:952"
+    },
+    {
+     "func": "TO_LAB_RemoveAllCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:987"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:367"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:375"
+    },
+    {
+     "func": "TO_LAB_NoopCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:410"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:550"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:637"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:648"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:665"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:686"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:710"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:717"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:740"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:745"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:751"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:774"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:880"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:904"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:911"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:927"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:941"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:950"
+    },
+    {
+     "func": "TO_LAB_RemoveAllCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:985"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_cmds.imp.mlir:750"
+    }
+   ]
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.opt.mlir",
+   "n_defined_funcs": 5,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_ProcessGroundCommand",
+    "TO_LAB_TaskPipe"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 3,
+    "CFE_EVS_|api": 3,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetFcnCode": 2,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_SB_IsValidMsgId": 1,
+    "CFE_MSG_GetMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "TO_LAB_ProcessGroundCommand",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:199"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:242"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:248"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:199"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_ProcessGroundCommand",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:197"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:234"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:256"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:266"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_dispatch.imp.mlir:197"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/to_lab_passthru_encode.opt.mlir",
+   "n_defined_funcs": 1,
+   "defined_funcs": [
+    "TO_LAB_EncodeOutputMessage"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [],
+   "global_loads": [],
+   "global_memops": []
+  }
+ ]
+}

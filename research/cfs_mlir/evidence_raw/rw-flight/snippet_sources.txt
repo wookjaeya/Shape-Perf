@@ -1,0 +1,56 @@
+# Search-index snippet sources (WebSearch, 2026-10-01). FULL TEXT NOT OPENED for any item below:
+# publisher/NTRS/arXiv/author hosts are blocked by the container egress proxy (see access_log.txt).
+# Each line = what the snippet said; treat as abstract/metadata-level evidence only.
+
+[GANESAN16] Ganesan, Lindvall, Hafsteinsson, Cleaveland, Strege, Moleski. "Experience Report: Model-Based Test Automation of a Concurrent Flight Software Bus." ISSRE 2016, pp. 445-454. DOI 10.1109/ISSRE.2016.47. https://ieeexplore.ieee.org/document/7774542/
+  - snippet: MBT technique applied to cFS software bus module API (concurrent publisher-subscriber); Spec Explorer; tester builds model from requirements, tool generates tests.
+  - snippet (slides, slideserve/slideshare 'Requirement-driven Model-based Testing of the cFS Software Bus Service'): model in C# (Spec Explorer), messages modeled as integers, pipes as sets of integers; test automation architecture for concurrent inter-task communication; investigated issue types found and code coverage. https://www.slideserve.com/mike_john/dharma-summit
+  - NOT seen: number/kind of defects found, whether model covers app-level state, ordering properties.
+
+[GANESAN09] Ganesan, Lindvall, Ackermann, McComas, Bartholomew. "Verifying architectural design rules of the flight software product line." SPLC 2009, pp. 161-170. NTRS 20090016208. https://www.semanticscholar.org/paper/058ac667c1adba4f8910a8ee3a6c1cc796814702
+  - snippet: checks whether CFS implementation is consistent with architectural rules derived from developer's guide; consistency checking found architecturally significant deviations missed in code reviews. SAVE tool (Fraunhofer) applied to CFS.
+  - NOT seen: rule list, whether SB/MID communication relations were recovered.
+
+[VALENTE25] Valente, de Miguel, Perez-Munoz, Alonso, Zamorano, de la Puente. "Model-based Toolchain for Core Flight System (cFS) Embedded Systems." ACM TECS 24(3), Art. 51, 2025. DOI 10.1145/3706587.
+  - snippet: integrates cFS with ESA TASTE; modeling + automatic code generation; consistency across development stages; UPMSat-2 case study.
+[VALENTE23] "Model-based toolchain for cFS embedded systems for microsatellites", UPM record https://oa.upm.es/74294/
+  - snippet: authors Valente, de Miguel Cabello, Perez Munoz, Alonso Munoz, Zamorano Flores; dated 13 March 2023; listed under "Transactions on Embedded Computing Systems"; abstract text nearly identical to VALENTE25.
+  - INFERENCE (unverified): likely a pre-publication deposit of the same TECS work, not an independent study.
+[TASTE-MC] TASTE model checking (separate works, not Valente): "Formal verification of space systems designed with TASTE" (arXiv 2111.10132, MBSE workshop 2021); "Model-checking of space systems designed with TASTE/SDL" (MODELS-C 2022, DOI 10.1145/3550356.3561541); "Specification and model-checking of space systems in the TASTE toolset" (ISSE 2025, DOI 10.1007/s11334-025-00607-3).
+  - snippet: IF model checker backend; property formalisms Boolean Stop Conditions, MSCs (desired/undesired I/O event sequences between functions), SDL observers.
+
+[PEREZ22] Perez, Mavridou, Pressburger, Goodloe, Giannakopoulou. "Automated Translation of Natural Language Requirements to Runtime Monitors." TACAS 2022, LNCS 13243, 387-395. DOI 10.1007/978-3-030-99524-9_21.
+  - snippet: FRET -> Ogma -> Copilot; real-time C monitors for embedded systems; open-source toolchain. (Revision note R09 records §3-5 were read previously by the editor.)
+[ICAROUS-MON] "From Requirements to Autonomous Flight: An Overview of the Monitoring ICAROUS Project" (FMAS 2020). snippet: Ogma generates a cFS app that subscribes to ICAROUS apps and makes data available to Copilot monitors.
+
+[HAVELUND01] Havelund, Lowry, Penix. "Formal Analysis of a Space-Craft Controller Using SPIN." IEEE TSE 27(8):749-765, 2001.
+  - snippet: SPIN on multithreaded plan-execution module of DS1 Remote Agent; ESL services (multithreaded Common Lisp) hand-translated to PROMELA; five previously undiscovered concurrency errors; an identical-pattern bug in another part escaped testing and deadlocked in flight.
+[HAVELUND00] Havelund et al. "Formal Analysis of the Remote Agent Before and After Flight" (LFM 2000; NTRS 20000055731).
+  - snippet: 18 May 1999 DS1 deadlock, manually interrupted/restarted from ground; cause: missing critical section in plan-execution code -> race between two EXEC threads; post-flight 'cleanroom' SPIN effort found it; isomorphic to a pre-flight-found error.
+
+[IVV20] Bradbury. NASA/CR-20205010026 (2020) cFS FSW V&V Final Summary. https://ntrs.nasa.gov/citations/20205010026
+  - snippet: Klocwork static code analysis completed as gauge of code maturity/dependability; higher-impact SCA issues delivered to cFS team; "with the exception of string processing, the cFS software is generally free of the kinds of potential bugs that SCA readily identifies"; IV&V tradition not to repeat SCA with same tools on same code.
+  - NOT seen: §2.1/§2.2 content beyond this; any ordering/startup findings.
+
+[IKOS-BIOSENTINEL] Arthaud, "IKOS: Sound Static Program Analysis" (slides, NTRS 20190032510).
+  - snippet: each BioSentinel (cFS-based) application analyzed with IKOS; CFE framework modeled (~1200 LOC); ~1.31% average warning rate; ~17 real bugs; example buffer-overflow warning.
+[IKOS14] Brat, Navas, Shi, Venet. "IKOS: A Framework for Static Analysis based on Abstract Interpretation." SEFM 2014 (NTRS 20140012995).
+
+[KHOR23] Khor, Lutz. "Requirements Analysis of Variability Constraints in a Configurable Flight Software System." RE 2023. arXiv 2309.03392.
+  - snippet: cFS variability-related requirement constraints dispersed across documents; proposes a variability (feature-like) model.
+[WANNAFLY23] Falco, Thummala. "WannaFly: An Approach to Satellite Ransomware." IEEE SMC-IT 2023.
+  - snippet: static code analysis of cFS with an automated tool to map module/app dependencies; SB API (cfe_sb_api.c) identified as target.
+[SCHALK22] Schalk, Brodnik, Brown. "Analysis of Vulnerabilities in Satellite Software Bus Network Architecture." MILCOM 2022. https://ieeexplore.ieee.org/document/10017967/
+  - snippet: cFS vulnerable via SB entry point (no authentication on SB commands); exploits demonstrated.
+[JERO24] Jero et al. (MIT LL). "Securing the Satellite Software Stack." SpaceSec 2024. snippet: attack-surface/threat-model analysis of a notional C&DH on cFS, compared with F Prime, KubOS, NMF, CORDET.
+[FURGALA26] Furgala, Jero, Lin, Skowyra. "Porting NASA's core Flight System to the Formally Verified seL4 Microkernel." SpaceSec 2026.
+[VANLYSSEL26] Vanlyssel, Roman, Cook, Rahaman, Anwar. "Trust Without Boundaries: An Architectural Analysis of Satellite Flight Software." arXiv 2608.14532 (Aug 2026). snippet: cFS components treated as trusted peers; 5 experiments with malicious onboard component in NOS3.
+[IDAN26] Idan, Cohen Galor, Shabtai, Elovici. "An Empirical Security Analysis of Open-Source Software Used in Onboard Satellite Systems." arXiv 2609.15425 (Sep 2026). snippet: 126 repos, 2,827 static-analysis findings, memory safety/code quality dominate.
+
+[ROSDISCOVER22] Timperley et al. "ROSDiscover: Statically Detecting Run-Time Architecture Misconfigurations in Robotics Systems." ICSA 2022.
+  - snippet: component models from source + launch-file composition -> recovered run-time architecture -> first-order-logic architectural rules; detects dangling publishers/subscribers, misrouted/dropped messages.
+[ROSINFER24] Durschmid et al. "ROSInfer: Statically Inferring Behavioral Component Models for ROS-based Robotics Systems." ICSE 2024. DOI 10.1145/3597503.3639206.
+  - snippet: API-call-guided static analysis infers state-machine models of reactive, periodic, state-dependent behavior; 5 systems / 534 components; causal triggers inferred for 87% of architectural behaviors (vs 155 hand-made models).
+[ROSIBUG25] "An Empirical Study of Interaction Bugs in ROS-based Software." arXiv 2507.10235 (2025). snippet: 121 sampled iBugs, 19.01% interaction-topology problems.
+[FPP22] Bocchino et al. "FPP: A Modeling Language for F Prime." IEEE Aerospace Conf. 2022 (ieeexplore 9843754). snippet: FPP checks port connection correctness (connected, direction, port numbers, connection type).
+[FPRIME18] Bocchino, Canham, Watney, Reder, Levison. "F Prime: An Open-Source Framework for Small-Scale Flight Software Systems." SmallSat 2018.

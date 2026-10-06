@@ -1,0 +1,39 @@
+=== cmd: mlir-opt lastmod_llvm.mlir -test-last-modified=''
+test_tag: read_valid_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_extcall:
+ operand #0
+  - <unknown>
+test_tag: read_att_in_Guidance:
+ operand #0
+  - <unknown>
+=== cmd: mlir-opt lastmod_llvm.mlir -test-last-modified='interprocedural=false'
+test_tag: read_valid_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_extcall:
+ operand #0
+  - <unknown>
+test_tag: read_att_in_Guidance:
+ operand #0
+  - <unknown>
+=== cmd: mlir-opt lastmod_llvm.mlir -test-last-modified='assume-func-writes=true'
+test_tag: read_valid_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_call:
+ operand #0
+  - <unknown>
+test_tag: read_att_after_extcall:
+ operand #0
+  - <unknown>
+test_tag: read_att_in_Guidance:
+ operand #0
+  - <unknown>

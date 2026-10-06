@@ -1,0 +1,289 @@
+{
+ "summary": "Fact-check of the claims both notes rely on. Many hosts were blocked, which limits how verbatim the evidence is: gcn.nasa.gov, ntrs.nasa.gov, software.nasa.gov, arxiv.org, clang.llvm.org, mlir.llvm.org and the GitHub REST API were all blocked by the egress proxy. GitHub HTML (through WebFetch), git and raw.githubusercontent.com worked, and the GitHub MCP issue search returned metadata for nasa/cFE.\n\n(a) Swift/BAT. Four Circulars (22706, 32397, 34691, 43470) were checked through search-engine snippets only. They support the dates and the key sentences. 34691's \"7 minute problem\" is not linked by the Circular to the 22706 attitude race and does not mention attitude. An earlier Circular, 21077 (2017-05-08), also cites the \"known race condition\". No public technical explanation of the race was found. No source links Swift/BAT to cFS: per search snippets, BAT flight software (2004) was C++ on VxWorks/RAD6000 with a Triana-heritage \"Command and Data Handling Software Bus\", and cFE first flew on LRO (2009).\n\n(b) cFE #73 and #71. The issue bodies were read via GitHub HTML, and the search API gave metadata (milestone 6.4.2, 14 and 25 comments, bulk-imported on 2019-09-30). The original note's #73 narrative is confirmed, with one correction: the segfault came from EVS's own AppID sentinel 0xFFFFFFFF reaching EVS_IsFiltered without a range check, while SB's AppId was 0. The 14 Trac-migrated comments, including the revision's 2015-05-06 and 2015-06-16 dates, could not be read. The fixes are present in v6.5.0a code: per-core-app ApplicationSyncDelay plus a panic, an EVS_AppID range check, and an SB GetAppID call. Related issues #72 and #105 were found; #105 says the startup-sync fix (#71) was in the 6.4.2 timeframe and that its child-start verification check was removed so unit tests would pass. At the pinned commit 546a002, core apps start in the order es, evs, fs, sb, tbl, time, each followed by a RUNNING-state sync. SB CreatePipe still sends an unconditional EVS event using SB's AppId, and open issue #2663 (2025) reports a silent CFE_EVS_APP_ILLEGAL_APP_ID during startup. Open issue #1466 corroborates that CFE_ES_WaitForStartupSync returns no status.\n\n(c) GSC-16917-1. The verbatim entry was obtained from the NASA Software Catalog 2025-26, printed p.207. It describes SBN as a peer-to-peer bridge between cFE instances and processors, not as the local Software Bus. The original note's use of it is therefore partial.\n\n(d) NASA/CR-20205010026. The report itself could not be opened. Snippets support only: a SARP V&V review, Klocwork static code analysis with \"higher impact SCA issues\" delivered to the cFS team, and a reference to cFE 6.5.0. Whether any startup or ordering issues were reported is unverified. One search summary falsely attributed #71 to the Klocwork findings.\n\n(e) Official docs. The ClangIR warning, the MLIR \"experimental ... substantially limited subset\" import wording, and the DataFlowFramework.h solver description are confirmed verbatim, with file:line at llvm-project main 1e8550c2 and/or the local checkout 1053047a. The local clang lacks CIR (\"rebuild clang with -DCLANG_ENABLE_CIR=ON\"). The MLIR DataFlow tutorial cited by the revision documents ForwardDataFlowAnalysis and LatticeElement, which do not exist in the current headers. A one-snippet smoke test showed that C → LLVM IR → `mlir-translate -import-llvm` works at -O0 -g, but field accesses become positional indices and MID macros are folded to constants.",
+ "findings": [
+  {
+   "id": "factcheck-a1",
+   "topic": "Swift/BAT GCN 22706",
+   "claim": "GCN 22706 (2018-05-11 18:59:18Z, 'Swift trigger 831888: misidentification of 4U 1416-62') attributes the false trigger to a known race condition that applied incorrect spacecraft attitude information to a known source. Original-note claim (lines 167-172): CONFIRMED in substance. Correction: the Circular says 'incorrect' attitude, not stale or earlier-epoch attitude. The original's 'Observation(t1)+Attitude(t0)' diagram (lines 187-205, 1068-1106) is the note's inference, not the Circular's content.",
+   "evidence": [
+    "Search-index rendering of https://gcn.nasa.gov/circulars/22706 (WebSearch, 2026-10-01): 'ground analysis showed that BAT trigger #831888 was due to misidentification of 4U 1416-62 (also known as 2S 1417-624 and H 1417-624). The misidentification was caused by a known race condition in the Swift/BAT software, which leads to incorrect spacecraft attitude information to be applied to a known source.'",
+    "Same snippet: '4U 1416-62 was undergoing a giant outburst at the time, which was detected by MAXI and the BAT transient monitor.' Date/time 2018-05-11 18:59:18Z per search snippet.",
+    "Direct fetch blocked: WebFetch https://gcn.nasa.gov/circulars/22706 returned EGRESS_BLOCKED; curl to gcn.nasa.gov gave CONNECT 403."
+   ],
+   "scope_checked": "Search-engine snippets only (title, date, summary sentences). The Circular page and .txt/.json endpoints could not be opened, so exact verbatim wording, author list and line breaks are not confirmed.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: the note can cite 22706 for 'a known race condition led to incorrect attitude being applied to a known source', but must not describe the mechanism as stale or mixed-epoch attitude. Quote it as snippet-verified until the page itself is read."
+  },
+  {
+   "id": "factcheck-a2",
+   "topic": "Swift/BAT GCN 32397",
+   "claim": "GCN 32397 (2022-07-14), titled 'Swift/BAT Trigger 1116172 (=GRB 220714A) is not a real astrophysical event', states that a known race condition in the onboard software caused the currently active source Cen X-3 to be misidentified. Original claim (line 174): CONFIRMED.",
+   "evidence": [
+    "Search snippet for https://gcn.nasa.gov/circulars/32397: 'a known race condition in the onboard software caused the currently-active source Cen X-3 to be misidentified'.",
+    "Snippet authors: S. Laha (GSFC/UMBC), K. L. Page (U Leicester), D. M. Palmer (LANL), T. M. Parsotan (GSFC/UMBC/CRESSTII), on behalf of the Neil Gehrels Swift Observatory Team; ADS bibcode page 2022GCN.32397....1L listed in results."
+   ],
+   "scope_checked": "Search-engine snippets; page itself blocked.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: the wording is supported; note that the GRB designation was retracted ('not a real astrophysical event')."
+  },
+  {
+   "id": "factcheck-a3",
+   "topic": "Swift/BAT GCN 34691 and the '7 minute problem'",
+   "claim": "GCN 34691 (2023-09-14 08:43:14 GMT; C. Gronwall, K. L. Page, D. M. Palmer) says BAT 'misidentified the location of a strong image peak due to a known race condition (the '7 minute problem') in the on-board software'. Original claim (line 177), that 'it was named the 7 minute problem as the same family of known race condition': PARTIAL. The Circular does not say this is the same race as the 22706 attitude race, does not mention attitude, and does not explain '7 minute'. Corrected wording: 'GCN 34691 attributes a mislocated image peak (SWIFT J1727.8-1613) to a known on-board race condition that the team calls the \"7 minute problem\"; its relation to the attitude race in GCN 22706 is not stated.'",
+   "evidence": [
+    "Search snippet for https://gcn.nasa.gov/circulars/34691: 'At 08:11:59 UT on 2023-09-14, the Swift Burst Alert Telescope (BAT) misidentified the location of a strong image peak due to a known race condition (the '7 minute problem') in the on-board software. The image peak was due to the source SWIFT J1727.8-1613, at levels consistent with other measurements in its current bright outburst and does not represent a sudden rate increase.'",
+    "Title per search: 'Swift Trigger 1191994 is not an astrophysical event'; date 2023-09-14 08:43:14 GMT; authors C. Gronwall (PSU), K. L. Page (U Leicester), D. M. Palmer (LANL).",
+    "Searches for an explanation of the '7 minute problem' (queries on 'Swift BAT 7 minute problem on-board software race condition explanation', and BAT flight software and attitude) returned no technical explanation."
+   ],
+   "scope_checked": "Search-engine snippets; Circular page blocked; 3 explanation searches.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: the note should not chain 22706 and 34691 into a single mechanism or 'family' without a source. '7 minute problem' should stay an unexplained team label."
+  },
+  {
+   "id": "factcheck-a4",
+   "topic": "Swift/BAT GCN 43470",
+   "claim": "GCN 43470 (2026-01-20), titled 'Trigger 1442421: Swift detection of HMXB 1A 1118-61', says the source was misidentified on board because of a known race condition in the software, which produced spurious GCN Notices that did not name the source. Original claim (line 180): CONFIRMED. Nuance: the Circular is primarily a detection report of a real source, and the race affected on-board identification and Notices.",
+   "evidence": [
+    "Search snippet for https://gcn.nasa.gov/circulars/43470: 'The source was misidentified on board due to a known race condition in the software, leading to some spurious GCN Notices which did not identify the source name.'",
+    "Snippet: issued 2026-01-20; the source was previously reported in GCN 43435 and 43442."
+   ],
+   "scope_checked": "Search-engine snippets; page blocked.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: supported as a 2026 recurrence of the team's 'known race condition' attribution. It gives no root cause."
+  },
+  {
+   "id": "factcheck-a5",
+   "topic": "Swift/BAT other Circulars (completeness)",
+   "claim": "The four Circulars are not the full set. GCN 21077 (2017-05-08, S. D. Barthelmy et al.), 'Trigger 751928: Swift misidentification of Cen X-3', already attributes a misidentification to 'a known race condition in the Swift/BAT software'. A search summary also mentions a GRS 1716-249 misidentification case (Circular number not verified). GCN 10315 (XTE J1752-223) attributes a wrong position to a 'temporary pointing error', not a race. The original note's 'not a one-off' statement holds, but the earliest public mention found is 2017, not 2018.",
+   "evidence": [
+    "Search snippet for https://gcn.nasa.gov/circulars/21077: 'At 12:23:00 UT, due to a known race condition in the Swift/BAT software, BAT misidentified Cen X-3 as a different source (Trigger 751928)... This is not an interesting astrophysical event.' Issued 2017-05-08.",
+    "Search summary (query on BAT race condition, attitude and Palmer) listed GCN 10315 'Swift Trigger #382159 is due to XTE J1752-223' with 'due to a temporary pointing error'."
+   ],
+   "scope_checked": "Search snippets only. No systematic enumeration of all Circulars citing the race.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: avoid counting incidents or implying a rate. If a count is needed, enumerate the Circulars systematically, for example from the GCN archive tarball, which was not reachable here."
+  },
+  {
+   "id": "factcheck-a6",
+   "topic": "Swift flight software heritage vs cFS",
+   "claim": "No source found connects Swift/BAT on-board software to cFS/cFE. Available evidence points to separate software. Per an Aug-2004 BAT paper, BAT flight software is C++ on VxWorks on a RAD6000, with engineering code including a 'Command and Data Handling Software Bus' originally developed for Triana. Swift launched 2004-11-20. cFE's first flight use is reported as LRO (launched 2009). The original note does not claim a cFS link, but presents Swift in a cFS-focused 'real flight software cases' section, and its line 2432 ('Swift ... onboard race repeatedly reported') is used as motivation for a cFS analyzer. Correction: state explicitly that Swift is a non-cFS example. Do not equate BAT's Triana-heritage 'Software Bus' with the cFE Software Bus; their lineage is unknown.",
+   "evidence": [
+    "Search snippet attributed to arXiv:astro-ph/0408494v1 (26 Aug 2004), 'The BAT-Swift Science Software': 'The Rad6000 software runs under the VxWorks operating system and is written in C++. Significant parts of the engineering code (e.g., the Command and Data Handling Software Bus) were originally developed for the Triana spacecraft.'",
+    "Search snippet: Swift launched November 20, 2004, 17:16:00 UTC, Delta II 7320-10C (iopscience 'Swift Gamma-Ray Burst Explorer: The First Results').",
+    "Search snippets citing NASA sources (nasa.gov Lunar Gateway article, Goddard tech-transfer newsletter): cFE 'first used on the Lunar Reconnaissance Orbiter (LRO) launched in 2009'. Pages themselves blocked (www.nasa.gov, etd.gsfc.nasa.gov EGRESS_BLOCKED).",
+    "Also blocked: arxiv.org, ar5iv, export.arxiv, osti.gov. Scholar Gateway returned 'Could not resolve user identity'."
+   ],
+   "scope_checked": "Search snippets only; no primary document opened. Not checked: Swift spacecraft-bus (Spectrum Astro) flight software.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: the note should label Swift as 'motivating incident in a non-cFS, C++/VxWorks instrument flight software', and keep it out of any cFS benchmark."
+  },
+  {
+   "id": "factcheck-b1",
+   "topic": "cFE #73 body and metadata",
+   "claim": "cFE #73 'Race conditions / dependencies between CFE core apps': label bug, milestone 6.4.2, closed (completed). Created 2019-09-30T17:50:27Z and closed 10 s later at 17:50:37Z, i.e. a bulk import; 14 comments. Platform: 'the Microblaze processor used by the EVA team at GRC'. Original claims (lines 219-258): title CONFIRMED; 'race conditions during startup can cause serious problems' CONFIRMED; creation order EVS, SB, ES, TIME, TBL CONFIRMED (the body says 'BL' [sic] in step 1); priorities 61/64/68/60/70 CONFIRMED; 'TIME runs first' CONFIRMED; 'TIME calls CFE_SB_CreatePipe before SB init' CONFIRMED; 'SB calls EVS, which is not initialized' CONFIRMED. 'Uninitialized AppID used → segfault' is PARTIAL. Corrected wording: 'TIME's CFE_SB_CreatePipe() called CFE_EVS_SendEventWithAppID() with CFE_SB.AppId (uninitialized, value 0, which is a valid AppID of another app). EVS, not yet initialized, went through EVS_NotRegistered()/EVS_SendEvent(), which called EVS_IsFiltered() with CFE_EVS_GlobalData.EVS_AppId = 0xFFFFFFFF. That value was not range-checked, and the access segfaulted and crashed the cFE core.'",
+   "evidence": [
+    "WebFetch of https://github.com/nasa/cFE/issues/73 (body copied in a code block): 'There are some race conditions during the startup phase that can pose some serious problems if things are not executed in the right order.'",
+    "Same body: '1. As dictated by the table within \"cfe_es_objtab.c\", the CFE core applications are started (Tasks Created) in the order of EVS, SB, ES, TIME, BL. 2. In the default/example platform configuration, these have respective priorities of 61(EVS), 64(SB), 68(ES), 60(TIME), and 70(TBL). 3. TIME task will run it's TaskMain first even though it is 4th in the start sequence.'",
+    "Same body: '4. ... it calls CFE_SB_CreatePipe() which in turn calls CFE_EVS_SendEventWithAppID() in several places (for errors as well as an unconditional \"debug event\" at the end). The AppId supplied is \"CFE_SB.AppId\" which is uninitialized since SB has not executed yet. In this case the value used is actually 0. 5. ... EVS_NotRegistered() (since CFE_EVS_TaskInit has not run) and then EVS_SendEvent() ... 6. EVS_SendEvent() calls EVS_IsFiltered() with the contents of CFE_EVS_GlobalData.EVS_AppId, which is also uninitialized but set to \"0xFFFFFFFF\" ... 7. This appID value is not range-checked by EVS_IsFiltered and ultimately segfaults and crashes CFE core.'",
+    "Same body, proposed fixes: 'Start up code should synchronize at least the \"core\" applications and ensure that each one has reached it's respective \"RunLoop\" before starting the next one, regardless of what the platform config sets the priority to (likely depends on ... #71)'; 'EVS_IsFiltered should range check ...'; 'CFE SB and EVS (at least) populate different values into their own \"AppID\" global variable before initialization...'.",
+    "GitHub MCP search_issues (repo nasa/cFE): number 73, created_at 2019-09-30T17:50:27Z, closed_at 2019-09-30T17:50:37Z, comments 14, milestone '6.4.2', state_reason completed.",
+    "Corroborating code at v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9): https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h#L1225 (EVS 61), #L1248 (SB 64), #L1271 (ES 68), #L1298 (TIME 60), #L1327 (TBL 70); objtab order at cfe/fsw/cfe-core/src/es/cfe_es_objtab.c#L144-L187."
+   ],
+   "scope_checked": "Full issue body as rendered by WebFetch (model-mediated copy, so minor characters are not byte-verified). Issue metadata from the GitHub search API. The 14 comments were NOT visible.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: #73 is a well-documented historical startup-order defect on one platform (Microblaze), with a clear chain: service used before the provider initialized, then a sentinel AppID used without a guard. The priority-to-order link is stated in the issue; that OSAL treats a lower number as higher priority is background inference."
+  },
+  {
+   "id": "factcheck-b2",
+   "topic": "cFE #73 Trac-era comments and dates",
+   "claim": "Not verified: the revision note's claims that the Trac-migrated comments contain a 2015-05-06 original creation date, 2015 fix and test discussion, and a 2015-06-16 test record on cFE 6.4.2, with anchors issuecomment-536673864/-867/-881/-921. The 14 comments exist per API metadata but could not be read.",
+   "evidence": [
+    "WebFetch of https://github.com/nasa/cFE/issues/73#issuecomment-536673864 returned 'NO COMMENTS IN CONTENT' (about 15k chars, body only).",
+    "api.github.com/repos/nasa/cFE/issues/73 and /comments returned HTTP 403 via WebFetch. mcp__github__issue_read refused ('repository nasa/cfe is not configured for this session'). r.jina.ai blocked.",
+    "GitHub search metadata: comments=14 (#73), comments=25 (#71)."
+   ],
+   "scope_checked": "Attempted HTML, REST, MCP and reader-relay routes; all failed for comments.",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "Inference: until the comments are read, cite only the milestone (6.4.2) and the 2019 import date. Mark the 2015 dates as 'reported by the 2026-10-01 revision, not re-verified'."
+  },
+  {
+   "id": "factcheck-b3",
+   "topic": "cFE #73/#71 fix and version",
+   "claim": "Fix: the milestone of #71, #72, #73 and #105 is 6.4.2. The 6.4.2 source is not in the GitHub history, which begins 2017-06-29 with 'Add 6.5.0a from Sourceforge release'. v6.5.0a (README dated June 7, 2016) contains the fixes #73 proposed: (1) after each core-app creation, CFE_ES_ApplicationSyncDelay waits until AppReadyCount == AppStartedCount, i.e. until the new task calls CFE_ES_WaitForStartupSync/RunLoop, and panics if 'Core App %s did not complete initialization'; (2) EVS_SendEvent range-checks EVS_AppID < CFE_ES_MAX_APPLICATIONS before EVS_IsFiltered; (3) EVS_AppID is initialized to CFE_EVS_UNDEF_APPID and SB obtains its AppId via CFE_ES_GetAppID. #105 shows the startup-sync fix (#71) was part of the 6.4.2 work, and that its child-start verification check was removed so unit tests would pass. Correct wording: 'addressed under the 6.4.2 milestone; fix present in 6.5.0a code'.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L934-L950: '* CFE_ES_ApplicationSyncDelay() will delay this thread until the * newly-started thread calls CFE_ES_WaitForStartupSync()' / 'ES Startup: Core App %s did not complete initialization' then CFE_PSP_Panic(CFE_PSP_PANIC_CORE_APP).",
+    "Same file #L1000-L1037: ApplicationSyncDelay loops while 'CFE_ES_Global.AppReadyCount != CFE_ES_Global.AppStartedCount', polling CFE_ES_STARTUP_SYNC_POLL_MSEC (50), with timeout CFE_CORE_MAX_STARTUP_MSEC (30000) per cfe_platform_cfg.h#L1812,#L1836.",
+    "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L615-L617: '/* Unlikely, but possible that an EVS event filter was added by command */ if (CFE_EVS_GlobalData.EVS_AppID < CFE_ES_MAX_APPLICATIONS && EVS_IsFiltered(...'",
+    "cfe/fsw/cfe-core/src/evs/cfe_evs_task.c#L173 'CFE_EVS_GlobalData.EVS_AppID = CFE_EVS_UNDEF_APPID;'; cfe/fsw/cfe-core/src/sb/cfe_sb_task.c#L206 'CFE_ES_GetAppID(&CFE_SB.AppId);'; cfe/fsw/cfe-core/src/time/cfe_time_task.c#L196 'CFE_ES_WaitForStartupSync(CFE_CORE_MAX_STARTUP_MSEC);'.",
+    "WebFetch of https://github.com/nasa/cFE/issues/105 (milestone 6.4.2, labels bug, wontfix): 'The startup sync fix (#71) caused some unit test failures. ... As an interim fix this check will be removed from the main code. This will make unit tests pass in 6.4.2. Ironically, this is making the main code slightly less robust in order to appease unit tests.'",
+    "git log of the blobless clone: earliest commits 26ffd61 2017-06-29 'Initial commit', 792f5e3 2017-06-29 'Add 6.5.0a from Sourceforge release.'; cfe-OSS-readme.txt at v6.5.0a: 'cFE Release 6.5.0 ... Date: June 7, 2016' (no #73/#71 mention)."
+   ],
+   "scope_checked": "Read v6.5.0a cfe_es_start.c (header log, CreateObjects, ApplicationSyncDelay), cfe_evs_utils.c EVS_SendEvent/EVS_IsFiltered, cfe_evs_task.c, cfe_sb_task.c, cfe_time_task.c, platform cfg. Did not see 6.4.2 code.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: for a historical reproduction, v6.5.0a is the earliest public 'after' snapshot. A 'before' snapshot is not publicly available in git, so #73 cannot be reproduced on its original revision from GitHub alone. A source-derived reconstruction must be labelled as such."
+  },
+  {
+   "id": "factcheck-b4",
+   "topic": "cFE #71 and related #72",
+   "claim": "#71 'CFE ES \"StartupSyncSemaphore\" subject to multiple race conditions': milestone 6.4.2, label bug, closed; imported 2019-09-30T17:50:02Z (closed 17:50:19Z); 25 comments. Found by 'the EVA team at GRC ... deploying CFS on the Xilinx Microblaze platform'. The revision's description (semaphore, flag, counter) is CONFIRMED. The related #72 ('Race condition within CFE_ES_AppCreate', milestone 6.4.2) describes an unlock-relock window that can make CFE_ES_GetAppID() fail early in child init. It states that core-app creation (CFE_ES_CreateObjects) holds the lock and is safe.",
+   "evidence": [
+    "WebFetch https://github.com/nasa/cFE/issues/71 body: 'The \"Startup Sync\" mechanisms are based on a binary semaphore, a boolean flag, and a counter. The handling of these various separate entities leaves several opportunities for race conditions to occur. At a minimum, this could cause \"WaitForStarupSync\" [sic] to pend incorrectly, but could have other more serious side effects (unknown) depending on how the apps are using this. This is one problem that the EVA team at GRC are experiencing while deploying CFS on the Xilinx Microblaze platform.'",
+    "GitHub MCP search_issues: number 71, created_at 2019-09-30T17:50:02Z, closed_at 2019-09-30T17:50:19Z, comments 25.",
+    "WebFetch https://github.com/nasa/cFE/issues/72 body: '...CFE ES calls \"CFE_ES_UnlockSharedData()\" before OS_TaskCreate(), then calls CFE_ES_LockSharedData() again ... CFE_ES_GetAppID() (which many tasks call very early in their init procedures) will fail, which can have a serious snowball effect. Note that the initial core app creation (CFE_ES_CreateObjects) and child tasks (CFE_ES_CreateChildTask) keeps the global lock for the entire procedure, so these are safe.'"
+   ],
+   "scope_checked": "Bodies via WebFetch and metadata via search API; comments not readable.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: #71, #72, #73 and #105 form one porting episode (GRC EVA team, Microblaze). Count them as one historical case cluster, not independent incidents."
+  },
+  {
+   "id": "factcheck-b5",
+   "topic": "Current cFE (pinned 546a002) startup ordering and related open issues",
+   "claim": "At the pinned commit, core modules initialize in CMake list order es, evs, fs, sb, tbl, time. ES creates them in two phases (EarlyInit, then TaskMain); after each core TaskMain it waits with CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, CFE_PLATFORM_CORE_MAX_STARTUP_MSEC) and panics on failure. CFE_SB_CreatePipe still emits an unconditional debug event via CFE_EVS_SendEventWithAppID(..., CFE_SB_Global.AppId, ...). EVS now returns CFE_EVS_APP_ILLEGAL_APP_ID for an unknown AppID instead of indexing blindly. Open issue #2663 (2025-08-06, NASA/GSFC) reports that ES/EVS init calls SB APIs, which call SendEventWithAppID with SB's AppId before SB is registered with EVS, and the resulting CFE_EVS_APP_ILLEGAL_APP_ID is silently ignored. Open #1466 confirms 'CFE_ES_WaitForStartupSync doesn't return status'. Open #1509 reports possible table-sharing races found by inspection.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/cmake/mission_defaults.cmake#L26-L40: '# For the CFE core, the order of this list is the order in which they will be initialized' / set(MISSION_CORE_MODULES \"config\" \"es\" \"evs\" \"fs\" \"sb\" \"tbl\" \"time\" ...).",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_start.c#L777 '/* Phase 1: EarlyInit */', #L801 '/* Phase 2: TaskMain */', #L861 'ReturnCode = CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, CFE_PLATFORM_CORE_MAX_STARTUP_MSEC);' (blob 83be95daba81c8465b3ced89c7d29705bffe8026).",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L272-L281: '/* send debug event */ CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_ADDED_EID, CFE_EVS_EventType_DEBUG, CFE_SB_Global.AppId, \"Pipe Created:name %s,id %d,app %s\", ...' (blob 39c0c4c48bc84c43e01bf2dd243f56b04e99b171).",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs.c#L185-L188: 'AppDataPtr = EVS_GetAppDataByID(AppID); if (AppDataPtr == NULL) { Status = CFE_EVS_APP_ILLEGAL_APP_ID;' (blob b985701f6dd4dfce7f2d14b90b04639e2d2fcaf3).",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L616-L619: 'void CFE_ES_WaitForStartupSync(uint32 TimeOutMilliseconds) { CFE_ES_WaitForSystemState(CFE_ES_SystemState_OPERATIONAL, TimeOutMilliseconds); }' (blob 435a1b115ca22af66275c31929f0e0cf841f4bc2, same as revision S11).",
+    "WebFetch https://github.com/nasa/cFE/issues/2663 (open, bug): 'When the ES and the EVS tasks initializes, they make various CFE_SB API calls (i.e. CFE_SB_CreatePipe() and CFE_SB_Subscribe()) which in turn call CFE_EVS_SendEventWithAppID() passing in the AppId for the CFE_SB. CFE_EVS_SendEventWithAppID() then returns a CFE_EVS_APP_ILLEGAL_APP_ID presumably because CFE_SB has not been registered with event services. This might have gone unnoticed because there is no event outputted nor is the return code set to any variable.' (reported on Ubuntu 22.04.5, 'cFE v6.7' with a link to main cfe_evs.c#L185).",
+    "GitHub search_issues body of #1466 (open, 2021-04-30): '`CFE_ES_WaitForStartupSync` doesn't return status, so unique/local timeout responses can't be handled by the caller.' #1509 (open, 2021-05-13): 'no built in protection from possible race conditions with global table data if tables are shared/unshared/unregistered currently with other management functions ... To Reproduce: Via inspection'."
+   ],
+   "scope_checked": "Pinned-commit files read via a blobless git clone (git show). #2663 body via WebFetch; #1466 and #1509 bodies via search API. #2663 NOT reproduced; SB AppId initialization timing in the pinned code not traced.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the #73 pattern (a service API used inside another core app's init before the provider is registered) is still structurally present at the pinned commit, with a benign, silent symptom per open #2663. This is a current-version, reproducible-in-principle candidate distinct from the historical crash, and should be labelled 'reported, not yet reproduced'."
+  },
+  {
+   "id": "factcheck-c1",
+   "topic": "GSC-16917-1 Software Bus Network catalog entry",
+   "claim": "Verbatim catalog text: 'Core Flight System (cFS) Software Bus Network (SBN) Application, Version 1.0 GSC-16917-1. The SBN serves as a plug-in to the Core Flight Executive framework to transfer messages across process/processor interfaces. The technology has three primary functions: to establish and maintain a connection to each peer over available process/processor interfaces; to distribute and maintain a subscription message database for each peer; and to distribute messages to peers that have subscribed to message identifiers. Open Source'. Original claim (lines 336-337), that 'SBN description clearly shows the pub/sub structure managing a MID subscription database and distributing to subscribers': PARTIAL. The database is per peer and distribution is to peers, i.e. other cFS instances, processes or processors. It is the inter-node extension, not the local SB. Corrected wording: 'SBN (GSC-16917-1) extends cFE SB publish/subscribe to peer cFS instances across process/processor interfaces, maintaining a per-peer subscription database. Local SB semantics should be cited from cfe_sb.h/cfe_sb_priv.c.'",
+   "evidence": [
+    "NASA Software Catalog 2025-26 (https://ntts-prod.s3.amazonaws.com/t2p/prod/software/NASA_Software_Catalog_2025-26.pdf, Last-Modified 2025-07-07, sha256 71cf07751698370a880ae0cd914401b59f63d74e07f4aa644e1142d4f463ee76), PDF page 216 / printed page 207, section 'Vehicle Management (Space, Air, Ground)'; extracted text at catalog_2025-26.txt lines 8968-8972.",
+    "nasa/SBN README (main and master, HEAD bf058c45): 'The SBN application connects the cFE Software Bus (SB) to other buses, bridging the publish/subscribe messaging service to separate cFS instances in separate partitions, processes, processors, and/or networks.'",
+    "https://software.nasa.gov/software/GSC-16917-1 blocked (EGRESS_BLOCKED). The search snippet for that page matches the catalog wording."
+   ],
+   "scope_checked": "Full catalog entry text (pypdf extraction) and the SBN README. The software.nasa.gov page itself was not opened.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: the note should not use SBN as evidence of local SB routing. SBN belongs in the 'distributed/node-to-node extension' scope that the revision already deferred."
+  },
+  {
+   "id": "factcheck-d1",
+   "topic": "NASA/CR-20205010026 IV&V report",
+   "claim": "Not opened (NTRS blocked). Search snippets support: NASA/CR-20205010026, Dec 2020, J. W. Bradbury (Engility/TASC) for GSFC, approved under NASA IV&V SARP. Its goals include review of cFS V&V within high-value NASA programs, reusable V&V evidence, abstraction levels and trends, and 'completion of Klocwork static code analysis (SCA) as a gauge of likely code maturity and dependability including delivery of higher impact SCA issues to the cFS development team'. It references cFE 6.5.0. Not verified: whether design analysis or any startup or ordering issue is reported, and the revision's section and page claims (§2.1 static analysis p.19, §2.2 design analysis p.23). A search-engine summary attributed #71's startup-sync race to the Klocwork findings. That is unsupported: #71's own text attributes discovery to the GRC EVA team's Microblaze port. The original note does not cite this report.",
+   "evidence": [
+    "WebSearch snippets (3 queries) for 'NASA/CR-20205010026 December 2020 Open Source Core Flight System (cFS) Flight Software (FSW) Verification & Validation (V&V) Final Summary': goals '(a) the review and analysis of the V&V of NASA's open source core Flight System (cFS) within high-value NASA programs; (b) the identification of reusable program or project cFS V&V elements or assurance evidence; (c) identification of abstraction levels with potential to limit software assurance effort; and (d) identification of observed trends within the V&V approaches from project to project.'",
+    "Snippet: 'completion of Klocwork static code analysis (SCA) as a gauge of likely code maturity and dependability including delivery of higher impact SCA issues to the cFS development team'; 'Static code analysis results were observed to be among the most readily transferred verification and validation evidence. Projects contacted have confidence in the cFS code and perceive it to be both stable and mature.'",
+    "WebFetch/curl to ntrs.nasa.gov: EGRESS_BLOCKED / CONNECT 403."
+   ],
+   "scope_checked": "Search snippets only; the report PDF was not opened.",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "Inference: until the PDF is read, cite the report only as 'an IV&V/SARP review including Klocwork SCA of cFS (cFE 6.5.0 era)'. Do not claim it did or did not report startup or ordering issues. Treat its SCA as a possible baseline only after reading the tool settings and findings."
+  },
+  {
+   "id": "factcheck-e1",
+   "topic": "ClangIR official doc wording and local availability",
+   "claim": "Original claim (lines 536-537): CONFIRMED verbatim in substance. The ClangIR docs state that upstreaming from the incubator is still in progress, that ClangIR is not in a default clang build, and that it is MLIR-based, between the AST and LLVM IR. Locally, the provided clang (1053047a) lacks CIR support, and its checkout has no clang/docs/CIR directory (inference: the index page was added after 2026-02-25).",
+   "evidence": [
+    "https://github.com/llvm/llvm-project/blob/1e8550c234507ef5b70d508f18b98f9bb0ebc07b/clang/docs/CIR/index.md#L3-L11: 'The project of upstreaming ClangIR support from the incubator repository is still in progress, and ClangIR is not included in a default clang build. The documentation may be incomplete and out-of-date.' / 'ClangIR is a high-level representation in Clang that reflects aspects of the C/C++ languages and their extensions. It is implemented using MLIR and occupies a position between Clang's AST and LLVM IR.'",
+    "Local command: /home/user/work/llvm-project/build/bin/clang -fclangir -S -emit-cir t.c → 'error: clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON'.",
+    "/home/user/work/llvm-project/clang/CMakeLists.txt:185 'if(CLANG_ENABLE_CIR)' followed by FATAL_ERROR 'ClangIR is not yet supported in the standalone build.'; build/CMakeCache.txt has LLVM_ENABLE_PROJECTS=mlir;clang and no CLANG_ENABLE_CIR entry."
+   ],
+   "scope_checked": "Full CIR index.md at upstream main 1e8550c2 (23 lines); local clang CMakeLists and build cache; one compile attempt. The live clang.llvm.org page was blocked.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: a CIR frontend needs a separate CIR-enabled LLVM build, since the local toolchain is read-only. Budget the disk and time, or keep the AST/LLVM-IR routes as primary."
+  },
+  {
+   "id": "factcheck-e2",
+   "topic": "MLIR 'Translation from LLVM IR' wording and smoke test",
+   "claim": "Official wording: 'An experimental flow allows one to import a substantially limited subset of LLVM IR into MLIR, producing LLVM dialect operations.' (identical locally and at upstream main). The original note's prototype path C → LLVM IR → MLIR LLVM dialect (lines 541-553) omits this caveat; the revision's S16 summary is CONFIRMED. A one-file smoke test (cFS-shaped C: variadic event call, function-pointer dispatch table, memcpy into state, struct field reads) at -O0 -g imported without error. Field accesses become positional GEP indices, with field names only in debug-info attributes; source locations are kept as loc(); MID macros become plain integer constants.",
+   "evidence": [
+    "/home/user/work/llvm-project/mlir/docs/TargetLLVMIR.md:947-953 (commit 1053047a) and https://github.com/llvm/llvm-project/blob/1e8550c234507ef5b70d508f18b98f9bb0ebc07b/mlir/docs/TargetLLVMIR.md#L947-L953: '## Translation from LLVM IR' / 'An experimental flow allows one to import a substantially limited subset of LLVM IR into MLIR, producing LLVM dialect operations.' / 'mlir-translate -import-llvm filename.ll'.",
+    "Local run: clang -O0 -g -S -emit-llvm cfs_like.c; mlir-translate -import-llvm cfs_like.ll → exit 0, 138 lines. Output contains 'llvm.call @CFE_EVS_SendEvent(...) vararg(!llvm.func<i32 (i16, i16, ptr, ...)>)', indirect 'llvm.call %21(%22)', '\"llvm.intr.memcpy\"', and 'llvm.getelementptr inbounds|nuw %17[%2, 0] : ... !llvm.struct<\"struct.AttMsg_t\", (i32, array<4 x f64>)>'. With -mlir-print-debuginfo: 31 'cfs_like.c' locations; field names only in '#llvm.di_derived_type<tag = DW_TAG_member, name = \"Mid\" ...>'."
+   ],
+   "scope_checked": "Doc section read in full (both versions). The smoke test is ONE synthetic 20-line file at -O0 -g on clang/mlir 1053047a; no real cFS source was tested.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: the import route is feasible for simple code, but the semantics the analysis needs (field identity, MID names, macro-defined constants) must be recovered from debug info or the AST. That supports keeping an AST-side extraction for MIDs and fields and testing import on real cFS builds before committing to it."
+  },
+  {
+   "id": "factcheck-e3",
+   "topic": "MLIR DataFlow framework docs",
+   "claim": "Original claim (lines 449-450), that MLIR has a generic dataflow framework with a solver for fixed-point iteration and analysis-dependency management: CONFIRMED verbatim. The DataFlow headers contain no notion of threads, concurrency or interleaving; interprocedural propagation goes through CallOpInterface. So the revision's correction (cross-app/task semantics must be built by the researcher) holds. New issue: the official tutorial the revision cites as S14 (mlir/docs/Tutorials/DataFlowAnalysis.md) documents ForwardDataFlowAnalysis and LatticeElement. Neither class exists in the current headers, which use DataFlowSolver, AbstractSparseLattice/Lattice and Sparse/Dense Forward/Backward analyses. Cite the headers, not the tutorial, as the API reference.",
+   "evidence": [
+    "/home/user/work/llvm-project/mlir/include/mlir/Analysis/DataFlowFramework.h:9-12 (identical at upstream main 1e8550c2): 'This file defines a generic framework for writing data-flow analysis in MLIR. The framework consists of a solver, which runs the fixed-point iteration and manages analysis dependencies, and a data-flow analysis class used to implement specific analyses.'",
+    "Same file :305-322: 'The general data-flow analysis solver. This class is responsible for orchestrating child data-flow analyses, running the fixed-point iteration algorithm, managing analysis state and lattice anchor memory, and tracking dependencies between analyses, lattice anchor, and analysis states.' ... 'TODO: Optimize the internal implementation of the solver.'",
+    "grep -i 'concurren|thread|interleav|parallel|race' over mlir/include/mlir/Analysis/DataFlow/ and DataFlowFramework.h → no matches. DenseAnalysis.h:159-189 uses CallOpInterface for call transfer.",
+    "Tutorial at upstream main: 'ForwardDataFlowAnalysis' x7, 'LatticeElement' x17. grep 'class (ForwardDataFlowAnalysis|LatticeElement)' in upstream main SparseAnalysis.h, DenseAnalysis.h, DataFlowFramework.h → 0, and in local mlir/include and mlir/lib → none. SparseAnalysis.h (main) defines AbstractSparseLattice (:34), Lattice (:85), SparseForwardDataFlowAnalysis (:300), SparseBackwardDataFlowAnalysis (:522)."
+   ],
+   "scope_checked": "Header comments, class list and grep for concurrency terms in DataFlow headers (local 1053047a and main 1e8550c2); full tutorial grep. The doxygen page itself was blocked.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: the note should replace S14 (tutorial) with header permalinks at a pinned LLVM commit, and state that task, queue and message-order semantics are entirely researcher-built on top of a sequential, CFG/call-graph dataflow solver."
+  },
+  {
+   "id": "factcheck-x1",
+   "topic": "Original-note broad statements cross-check",
+   "claim": "Original line 165 ('BAT, in actual flight, repeatedly misidentified sky positions due to a known race condition'): PARTIAL. Corrected wording: 'Swift team Circulars (2017–2026) attribute several on-board misidentifications of known or active sources, and one mislocated image peak, which caused false triggers or spurious Notices, to a known race condition in BAT on-board software.' Original line 333 ('actual race/startup dependency bugs remain as public issues'): CONFIRMED (#71, #72, #73 closed historical; #2663, #1509, #1466 open). Original line 2432 (Swift as motivation for a cFS analyzer): must add the non-cFS qualifier (see factcheck-a6).",
+   "evidence": [
+    "See factcheck-a1..a6 and factcheck-b1..b5 evidence."
+   ],
+   "scope_checked": "Synthesis of the items above; no additional sources.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: these corrected wordings can be dropped into the rebuilt note's evidence table with the status labels shown."
+  }
+ ],
+ "gaps": [
+  "GCN Circulars 22706/32397/34691/43470/21077: gcn.nasa.gov, gcn.gsfc.nasa.gov and ADS were all blocked. Quotes are search-engine snippets, not byte-verified page text, and author lists for 22706 and 43470 were not obtained.",
+  "No public technical explanation of the Swift/BAT race or the '7 minute problem' was found. Swift team documents and BAT papers could not be opened (arxiv.org, swift.gsfc.nasa.gov, osti.gov blocked).",
+  "Swift heritage relies on snippets of arXiv:astro-ph/0408494 (RAD6000/VxWorks/C++, Triana-heritage C&DH Software Bus) and of NASA pages (cFE first used on LRO, 2009). No primary document was opened. The Swift spacecraft-bus (Spectrum Astro) flight software was not checked.",
+  "The cFE #73 (14) and #71 (25) Trac-migrated comments were unreadable: the HTML does not render them, api.github.com returns 403, and mcp issue_read is restricted to the user's repo. The revision's 2015-05-06 and 2015-06-16 dates and comment anchors remain unverified. Attaching nasa/cFE with API access (add_repo) could close this, but I did not change the session's repo configuration without the user's say.",
+  "The cFE 6.4.2 source is not in the GitHub history (it starts at the 6.5.0a import), so the exact first-fix version is inferred from milestone metadata and #105, not from code.",
+  "#2663's behaviour (silent CFE_EVS_APP_ILLEGAL_APP_ID at startup) was not reproduced. The SB AppId initialization timing at the pinned commit was not traced.",
+  "NASA/CR-20205010026 PDF was not opened (NTRS blocked). Static and design analysis scope, the page and section numbers cited by the revision, and any startup or ordering findings are unverified.",
+  "The software.nasa.gov GSC-16917-1 page was not opened. Its text came from the 2025-26 catalog PDF on an S3 host (ntts-prod), and the link from software.nasa.gov to that file was not verified.",
+  "The live clang.llvm.org and mlir.llvm.org pages were not opened. Doc text was verified from source files at llvm-project main 1e8550c2 (fetched 2026-10-01) and the local checkout 1053047a, so the rendered website could differ.",
+  "The import smoke test covers one synthetic C file only. No real cFS app was built or imported."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/manifest.tsv",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/cFE.git",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_es_start.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_evs_utils.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_evs_task.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_sb_task.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_time_task.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_es_objtab.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_v650a/cfe_platform_cfg.h",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_pinned/cfe_es_start.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_pinned/cfe_es_api.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_pinned/cfe_evs.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/src_pinned/cfe_sb_api.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/cfe-OSS-readme_v6.5.0a.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/NASA_Software_Catalog_2025-26.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/catalog_2025-26.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/SBN_README_main.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/llvm_docs/CIR_index.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/llvm_docs/TargetLLVMIR.md.main",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/llvm_docs/DataFlowFramework.h.main",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/llvm_docs/DataFlowAnalysis.md.main",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/llvm_docs/SparseAnalysis.h.main",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/import_test/cfs_like.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/import_test/cfs_like.ll",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/import_test/cfs_like.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/factcheck/import_test/cfs_like_dbg.mlir"
+ ]
+}

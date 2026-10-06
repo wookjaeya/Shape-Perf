@@ -1,0 +1,1308 @@
+{
+ "summary": {
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.opt.mlir": {
+   "defined_funcs": 6,
+   "api_calls_by_family": {
+    "CFE_ES_api": 13,
+    "CFE_EVS_api": 18,
+    "CFE_MSG_api": 2,
+    "CFE_PSP_api": 2,
+    "CFE_SB_api": 11,
+    "OS_api": 14
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 4,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 16,
+    "CFE_MSG_Init": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 6,
+    "CFE_SB_TransmitBuffer": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketBind": 2,
+    "OS_SocketOpen": 2,
+    "OS_SocketRecvFrom": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "OS_close": 1,
+    "OS_printf": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_SB_Subscribe#0: direct_const": 6,
+    "CFE_MSG_Init#1: direct_const": 2
+   },
+   "msgptr": {
+    "CFE_MSG_Init: CI_LAB_Global.HkTlm": 2
+   },
+   "global_store_fields": {
+    "CI_LAB_Global.AllowPassthrough": 2,
+    "CI_LAB_Global.<base:i8>": 2,
+    "CI_LAB_Global.HkTlm.Payload": 3,
+    "CI_LAB_Global.HkTlm.Payload.CommandErrorCounter": 3,
+    "CI_LAB_Global.HkTlm.Payload.IngestPackets": 5,
+    "CI_LAB_Global.HkTlm.Payload.IngestErrors": 5,
+    "CI_LAB_Global.NetBufPtr": 2,
+    "CI_LAB_Global.NetBufSize": 2
+   },
+   "global_store_value_kinds": {
+    "direct_const": 18,
+    "other": 6
+   },
+   "global_load_fields": 8,
+   "global_loads": 28,
+   "global_memops": [
+    "memset CI_LAB_Global. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:380",
+    "memset CI_LAB_Global. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:380"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 67,
+    "llvm.getelementptr:known": 37,
+    "llvm.load:known": 32,
+    "llvm.mlir.addressof:unknown": 3,
+    "llvm.mlir.addressof:known": 35,
+    "llvm.mlir.constant:unknown": 11,
+    "llvm.mlir.constant:known": 48,
+    "llvm.store:known": 25,
+    "other:unknown": 1,
+    "other:known": 172
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.opt.mlir": {
+   "defined_funcs": 4,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 2,
+    "CFE_SB_api": 2
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {
+    "CFE_SB_TransmitMsg: CI_LAB_Global.HkTlm": 1
+   },
+   "global_store_fields": {
+    "CI_LAB_Global.HkTlm.Payload": 1,
+    "CI_LAB_Global.HkTlm.Payload.SocketConnected": 1,
+    "CI_LAB_Global.Scheduled": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2,
+    "direct_const": 1
+   },
+   "global_load_fields": 2,
+   "global_loads": 2,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 6,
+    "llvm.getelementptr:known": 6,
+    "llvm.load:known": 2,
+    "llvm.mlir.addressof:known": 5,
+    "llvm.mlir.constant:known": 14,
+    "llvm.store:known": 3,
+    "other:known": 15
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.opt.mlir": {
+   "defined_funcs": 6,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 8,
+    "CFE_MSG_api": 20,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 8,
+    "CFE_MSG_GetFcnCode": 7,
+    "CFE_MSG_GetMsgId": 8,
+    "CFE_MSG_GetSize": 5,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "CI_LAB_Global.HkTlm.Payload.CommandErrorCounter": 8,
+    "CI_LAB_TaskPipe.CMD_MID.Value": 1,
+    "CI_LAB_TaskPipe.SEND_HK_MID.Value": 1,
+    "CI_LAB_TaskPipe.READ_UPLINK_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 8,
+    "direct_const": 3
+   },
+   "global_load_fields": 4,
+   "global_loads": 12,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 35,
+    "llvm.getelementptr:known": 20,
+    "llvm.load:known": 42,
+    "llvm.mlir.addressof:unknown": 5,
+    "llvm.mlir.addressof:known": 7,
+    "llvm.mlir.constant:unknown": 19,
+    "llvm.mlir.constant:known": 13,
+    "llvm.store:known": 23,
+    "other:unknown": 6,
+    "other:known": 201
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_passthru_decode.opt.mlir": {
+   "defined_funcs": 2,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 3,
+    "CFE_MSG_api": 1,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetSize": 1,
+    "CFE_SB_AllocateMessageBuffer": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 0,
+   "global_loads": 0,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 5,
+    "llvm.load:known": 2,
+    "llvm.mlir.addressof:known": 3,
+    "llvm.mlir.constant:known": 13,
+    "llvm.store:known": 6,
+    "other:known": 31
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.opt.mlir",
+   "n_defined_funcs": 6,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "CI_LAB_AppMain",
+    "CI_LAB_ReadUpLink",
+    "CI_LAB_ResetCounters_Internal",
+    "CI_LAB_TaskInit",
+    "CI_LAB_delete_callback"
+   ],
+   "calls": {
+    "CFE_ES_|api": 13,
+    "CFE_EVS_|api": 18,
+    "CFE_SB_|api": 11,
+    "OS_|api": 14,
+    "CFE_PSP_|api": 2,
+    "CFE_MSG_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 4,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_Subscribe": 6,
+    "CFE_EVS_SendEvent": 16,
+    "OS_SocketOpen": 2,
+    "OS_SocketAddrInit": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketBind": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "CFE_MSG_Init": 2,
+    "CFE_ES_RunLoop": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "OS_SocketRecvFrom": 2,
+    "CFE_SB_TransmitBuffer": 2,
+    "CFE_ES_ExitApp": 1,
+    "OS_printf": 1,
+    "OS_close": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:404"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:420"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:436"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2180
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:496"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:404"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:420"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:436"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2180
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:496"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:496"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:496"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "AllowPassthrough"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:381"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:481"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:677"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:678"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:679"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:680"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:584"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:589"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.zero"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:600"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:601"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "AllowPassthrough"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:381"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:481"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:677"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:678"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:679"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:680"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:584"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:589"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.zero"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:600"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:601"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:677"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:678"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:679"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:680"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:401"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:417"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:433"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:470"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:287"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:299"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "Scheduled"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:303"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:550"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:557"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:563"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:564"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:565"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:573"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:582"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:587"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:401"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:417"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:433"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:470"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:550"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:557"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:563"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:564"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:565"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:573"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:582"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:587"
+    },
+    {
+     "func": "CI_LAB_delete_callback",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:633"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "CI_LAB_AppMain",
+     "op": "memset",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:380"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "op": "memset",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_app.imp.mlir:380"
+    }
+   ]
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.opt.mlir",
+   "n_defined_funcs": 4,
+   "defined_funcs": [
+    "CI_LAB_NoopCmd",
+    "CI_LAB_ReadUplinkCmd",
+    "CI_LAB_ResetCountersCmd",
+    "CI_LAB_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_EVS_|api": 2,
+    "CFE_SB_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:162"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "CI_LAB_NoopCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:125"
+    },
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "SocketConnected"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.zext"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:160"
+    },
+    {
+     "func": "CI_LAB_ReadUplinkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "Scheduled"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:176"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_NoopCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:123"
+    },
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_cmds.imp.mlir:157"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.opt.mlir",
+   "n_defined_funcs": 6,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "CI_LAB_ProcessGroundCommand",
+    "CI_LAB_TaskPipe",
+    "CI_LAB_VerifyCmdLength"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 20,
+    "CFE_EVS_|api": 8,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 5,
+    "CFE_MSG_GetMsgId": 8,
+    "CFE_MSG_GetFcnCode": 7,
+    "CFE_EVS_SendEvent": 8,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "CI_LAB_VerifyCmdLength",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:223"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:223"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:223"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:314"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:359"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:365"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.READ_UPLINK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:371"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:223"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:223"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:314"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:409"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_VerifyCmdLength",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:221"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:221"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:221"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:312"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:351"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:379"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.READ_UPLINK_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:389"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:399"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:221"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:221"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:312"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_dispatch.imp.mlir:407"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/ci_lab_passthru_decode.opt.mlir",
+   "n_defined_funcs": 2,
+   "defined_funcs": [
+    "CI_LAB_DecodeInputMessage",
+    "CI_LAB_GetInputBuffer"
+   ],
+   "calls": {
+    "CFE_SB_|api": 1,
+    "CFE_EVS_|api": 3,
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_SB_AllocateMessageBuffer": 1,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [],
+   "global_loads": [],
+   "global_memops": []
+  }
+ ]
+}

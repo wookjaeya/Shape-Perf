@@ -1,0 +1,25 @@
+make: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[1]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[ 28%] Building include/CfsOps.h.inc...
+[ 28%] Building include/CfsOps.cpp.inc...
+[ 42%] Building include/CfsDialect.cpp.inc...
+[ 57%] Building include/CfsDialect.h.inc...
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[ 57%] Built target CfsIncGen
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[ 71%] Building CXX object CMakeFiles/cfs-smoke.dir/tools/cfs-smoke.cpp.o
+[ 85%] Building CXX object CMakeFiles/cfs-smoke.dir/lib/Cfs.cpp.o
+[100%] Linking CXX executable cfs-smoke
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+[100%] Built target cfs-smoke
+make[1]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+make: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/09_roadmap/oot_smoke/build'
+
+real	0m8.211s
+user	0m6.863s
+sys	0m1.006s

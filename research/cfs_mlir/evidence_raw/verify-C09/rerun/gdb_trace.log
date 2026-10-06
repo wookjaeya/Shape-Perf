@@ -1,0 +1,296 @@
+Breakpoint 1 at 0x32948: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/sb/fsw/src/cfe_sb_priv.c, line 316.
+Breakpoint 2 at 0x3297a: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/sb/fsw/src/cfe_sb_priv.c, line 322.
+Breakpoint 3 at 0x32981: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/sb/fsw/src/cfe_sb_priv.c, line 326.
+Breakpoint 4 at 0x2a1b3: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/evs/fsw/src/cfe_evs.c, line 185.
+Breakpoint 5 at 0x2a1fe: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/evs/fsw/src/cfe_evs.c, line 193.
+Breakpoint 6 at 0x2a2d0: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/evs/fsw/src/cfe_evs.c, line 209.
+Breakpoint 7 at 0x2d626: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/cfe/modules/evs/fsw/src/cfe_evs_utils.c, line 443.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+OS_BSP_Initialize():Maximum user msg queue depth = 10
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+OS_Posix_TaskAPI_Impl_Init():419:Could not setschedparam in main thread: Operation not permitted (1)
+[New Thread 0x7fb22a4b66c0 (LWP 9495)]
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+[New Thread 0x7fb22a4656c0 (LWP 9496)]
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FB22A080000, Size = 00080000 Status = 0
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-02:39:16.16213 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-02:39:16.16220 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-02:39:16.18337 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-02:39:16.18338 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-02:39:16.18338 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-02:39:16.18340 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-02:39:16.18350 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-02:39:16.18351 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-02:39:16.18352 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-02:39:16.18352 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-02:39:16.18381 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-02:39:16.18421 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+[New Thread 0x7fb22a45c6c0 (LWP 9511)]
+[Switching to Thread 0x7fb22a45c6c0 (LWP 9511)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_Generate EID=1
+EVS Port1 1980-012-14:03:20.05715 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=2
+EVS Port1 1980-012-14:03:20.05886 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 7188
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06152 66/1/CFE_ES 91: Version Info: Mission SampleMission, version (null)
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06289 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06433 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06559 66/1/CFE_ES 91: Version Info: Module ES, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06712 66/1/CFE_ES 91: Version Info: Module EVS, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06843 66/1/CFE_ES 91: Version Info: Module FS, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.06968 66/1/CFE_ES 91: Version Info: Module SB, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07084 66/1/CFE_ES 91: Version Info: Module TBL, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07215 66/1/CFE_ES 91: Version Info: Module TIME, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07336 66/1/CFE_ES 91: Version Info: Module OSAL, version git:dad0ee9
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07455 66/1/CFE_ES 91: Version Info: Module PSP, version git:53df1d5
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07582 66/1/CFE_ES 91: Version Info: Module MSG, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07701 66/1/CFE_ES 91: Version Info: Module SBR, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=91
+EVS Port1 1980-012-14:03:20.07815 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:546a002
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=92
+EVS Port1 1980-012-14:03:20.07948 66/1/CFE_ES 92: Build 202610010610 by root@vm, config sample
+GDB RTSE GRANTED bit=0 idx=1
+GDB EVS_SendEventWithAppID EID=14 type=2
+[New Thread 0x7fb22a4226c0 (LWP 9512)]
+[New Thread 0x7fb22a41c6c0 (LWP 9513)]
+[Switching to Thread 0x7fb22a41c6c0 (LWP 9513)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_Generate EID=1
+EVS Port1 1980-012-14:03:20.15760 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB RTSE GRANTED bit=0 idx=3
+GDB EVS_SendEventWithAppID EID=14 type=2
+[New Thread 0x7fb22a07f6c0 (LWP 9514)]
+1980-012-14:03:20.25490 CFE_SB_AppInit: Registered 4 events for filtering
+[Switching to Thread 0x7fb22a07f6c0 (LWP 9514)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_Generate EID=1
+EVS Port1 1980-012-14:03:20.25860 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB RTSE GRANTED bit=0 idx=4
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=14
+EVS Port1 1980-012-14:03:20.26034 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+GDB RTSE DENIED(bit-set) bit=0 idx=4
+[New Thread 0x7fb22a0786c0 (LWP 9515)]
+[Switching to Thread 0x7fb22a0786c0 (LWP 9515)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_Generate EID=1
+EVS Port1 1980-012-14:03:20.35931 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB RTSE GRANTED bit=0 idx=5
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=14
+EVS Port1 1980-012-14:03:20.36137 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+GDB RTSE DENIED(bit-set) bit=0 idx=5
+[New Thread 0x7fb22a0716c0 (LWP 9516)]
+[New Thread 0x7fb22a06a6c0 (LWP 9517)]
+[New Thread 0x7fb22a0646c0 (LWP 9518)]
+[Switching to Thread 0x7fb22a0716c0 (LWP 9516)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_Generate EID=1
+EVS Port1 1980-012-14:03:20.46365 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+GDB RTSE GRANTED bit=0 idx=6
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=14
+EVS Port1 1980-012-14:03:20.46582 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+GDB RTSE DENIED(bit-set) bit=0 idx=6
+1980-012-14:03:20.50652 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50654 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50656 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50666 CFE_ES_ParseFileEntry: Loading file: /cf/sbprobe.so, APP: SBPROBE
+[New Thread 0x7fb22a0576c0 (LWP 9519)]
+1980-012-14:03:20.57747 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+1980-012-14:03:20.57752 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+SBPROBE SCHED who=MAIN policy=OTHER prio=0 cpu=0
+[Switching to Thread 0x7fb22a0576c0 (LWP 9519)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB RTSE GRANTED bit=0 idx=9
+GDB EVS_SendEventWithAppID EID=14 type=2
+SBPROBE T1 never_subscribed rc=0x00000000 NoSubDelta=1 MsgSendErrDelta=0
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=48 type=1
+SBPROBE T1 subscribed_then_unsubscribed rc=0x00000000 NoSubDelta=0 MsgSendErrDelta=0
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=48 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+SBPROBE T2 seq_first=1 seq_after_3_unsubscribed_sends=5 diff=4
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB RTSE GRANTED bit=2 idx=9
+GDB EVS_SendEventWithAppID EID=17 type=3
+GDB RTSE GRANTED bit=2 idx=9
+GDB EVS_SendEventWithAppID EID=17 type=3
+GDB RTSE GRANTED bit=2 idx=9
+GDB EVS_SendEventWithAppID EID=17 type=3
+SBPROBE T3 msglim=2 depth=10 sent=5 rc=[0,0,0,0,0] received=2 MsgLimErrDelta=3 MsgSendErrDelta=3
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+SBPROBE T4 msglim=10 depth=3 sent=5 rc=[0,0,0,0,0] received=3 PipeOverflowDelta=2 MsgSendErrDelta=2
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+GDB RTSE GRANTED bit=3 idx=9
+GDB EVS_SendEventWithAppID EID=25 type=3
+SBPROBE T4b requested_depth=20 sent=20 received=10 PipeOverflowDelta=10
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+[New Thread 0x7fb22a04e6c0 (LWP 9520)]
+[New Thread 0x7fb22a0456c0 (LWP 9521)]
+[New Thread 0x7fb22a03c6c0 (LWP 9522)]
+SBPROBE SCHED who=ORD0 policy=OTHER prio=0 cpu=0
+SBPROBE SCHED who=ORD1 policy=OTHER prio=0 cpu=0
+SBPROBE SCHED who=ORD2 policy=OTHER prio=0 cpu=0
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(1,3,2) count=19
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(3,2,1) count=107
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(2,1,3) count=1
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(2,3,1) count=32
+SBPROBE T5 wake_rank(pipe0,pipe1,pipe2)=(3,1,2) count=41
+SBPROBE T5 trials=200 all_three_received_before_TransmitMsg_returned=57
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+[New Thread 0x7fb22a0336c0 (LWP 9523)]
+SBPROBE SCHED who=RELAY_HI policy=OTHER prio=0 cpu=0
+[Switching to Thread 0x7fb22a0716c0 (LWP 9516)]
+GDB EVS_Generate EID=21
+EVS Port1 1980-012-14:03:21.00001 66/1/CFE_TIME 21: Stop FLYWHEEL
+GDB RTSE GRANTED bit=0 idx=6
+GDB EVS_SendEventWithAppID EID=14 type=2
+GDB EVS_Generate EID=14
+EVS Port1 1980-012-14:03:21.00381 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+GDB RTSE DENIED(bit-set) bit=0 idx=6
+SBPROBE T6 relay_prio_higher_than_sender trials=500 relay_output_before_trigger=48 trigger_before_relay_output=452 other=0
+[Switching to Thread 0x7fb22a0576c0 (LWP 9519)]
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+GDB EVS_SendEventWithAppID EID=5 type=1
+GDB EVS_SendEventWithAppID EID=10 type=1
+[New Thread 0x7fb22a02a6c0 (LWP 9535)]
+SBPROBE SCHED who=RELAY_LO policy=OTHER prio=0 cpu=0
+SBPROBE T6 relay_prio_lower_than_sender trials=500 relay_output_before_trigger=27 trigger_before_relay_output=473 other=0
+SBPROBE DONE
+[Switching to Thread 0x7fb22a0716c0 (LWP 9516)]
+GDB EVS_Generate EID=21
+EVS Port1 1980-012-14:03:30.00003 66/1/CFE_TIME 21: Stop FLYWHEEL
+GDB RTSE GRANTED bit=0 idx=6
+GDB EVS_SendEventWithAppID EID=14 type=2
+[Switching to Thread 0x7fb22a0646c0 (LWP 9518)]
+GDB EVS_Generate EID=20
+EVS Port1 1980-012-14:03:30.99996 66/1/CFE_TIME 20: Start FLYWHEEL
+GDB RTSE GRANTED bit=0 idx=8
+GDB EVS_SendEventWithAppID EID=14 type=2

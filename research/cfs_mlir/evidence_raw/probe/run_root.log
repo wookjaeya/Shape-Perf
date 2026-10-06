@@ -1,0 +1,64 @@
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FC367780000, Size = 00080000 Status = 0
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-01:33:18.82768 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-01:33:18.82776 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-01:33:18.82808 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-01:33:18.82808 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-01:33:18.82808 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-01:33:18.82810 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-01:33:18.82820 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-01:33:18.82822 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-01:33:18.82822 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-01:33:18.82822 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-01:33:18.82849 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-01:33:18.82887 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)
+OS_QueueCreate_Impl():122:Your queue depth may be too large for the
+OS_QueueCreate_Impl():123:OS to handle. Please check the msg_max
+OS_QueueCreate_Impl():124:parameter located in /proc/sys/fs/mqueue/msg_max
+OS_QueueCreate_Impl():125:on your Linux file system and raise it if you
+OS_QueueCreate_Impl():126: need to or run as root
+1980-012-14:03:20.05029 CFE_ES_TaskInit: Cannot Create SB Pipe, RC = 0xCA000005
+1980-012-14:03:20.05031 CFE_ES_TaskMain: Application Init Failed,RC=0xCA000005
+OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)
+OS_QueueCreate_Impl():122:Your queue depth may be too large for the
+OS_QueueCreate_Impl():123:OS to handle. Please check the msg_max
+OS_QueueCreate_Impl():124:parameter located in /proc/sys/fs/mqueue/msg_max
+OS_QueueCreate_Impl():125:on your Linux file system and raise it if you
+OS_QueueCreate_Impl():126: need to or run as root
+1980-012-14:03:20.15045 CFE_EVS_TaskInit: Call to CFE_SB_CreatePipe Failed:RC=0xCA000005
+1980-012-14:03:20.15047 CFE_EVS_TaskMain: Application Init Failed,RC=0xCA000005
+1980-012-14:03:20.15047 CFE_ES_ExitApp: CORE Application CFE_EVS Had an Init Error.
+1980-012-14:03:20.15048 CFE_ES_ResetCFE: PROCESSOR RESET called from CFE_ES_ResetCFE (Commanded).
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+/bin/bash: line 1: 30685 Aborted                 timeout -s INT 20 ./core-cpu1
+
+real	0m11.157s
+user	0m0.033s
+sys	0m0.017s

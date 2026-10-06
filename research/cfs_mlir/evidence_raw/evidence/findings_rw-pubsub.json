@@ -1,0 +1,260 @@
+{
+ "summary": "Scope: static recovery of publish/subscribe architectures and ordering/timing analysis in ROS/ROS 2/DDS/AUTOSAR, and what is still missing for cFS. I read the full texts of ROSDiscover, ROSInfer and three HAROS papers, plus the HAROS/ROSDiscover code. For ROS/ROS 2, DDS and cFE/cFS I read docs and source pinned to commits. I counted ROBUST concurrency bugs myself from the dataset. Most academic hosts were blocked (arXiv, ACM, IEEE, Dagstuhl, MPI-SWS, omg.org, autosar.org, docs.ros.org, NTRS, university sites). For those papers I have only search-index snippets, artifact code, or a third-party thesis summary, and each finding says which.\n\nMain results:\n(1) Venue correction: ROSDiscover is ICSA'22 (DOI 10.1109/ICSA53651.2022.00019), not ICSE'22. It recovers only topology and types: ports, parameters, launch-file remaps. It checks structural rules (type mismatch, dangling connectors). It checks no ordering or timing.\n(2) ROSInfer (ICSE'24) already infers, from C++ ROS source, component state machines. Subscriber callbacks set state variables, and those variables guard periodic or reactive publishes. It then model-checks the system in TLA+ to find components that wait forever for an input nobody sends. This is close to the original note's 'message -> state field -> guarded use' idea. The authors say their models cannot be used to analyse race conditions or timing, and they name NASA F Prime as a generalization target.\n(3) HAROS extracts the ROS computation graph with path conditions, loop flags, queue sizes and latched flags. Its HPL language can state ordering and real-time properties, but those are checked at runtime or by property-based testing. Its Electrum model checking drops real-time and assumes every subscriber is fixed from the start and eventually gets every message. So first-message loss and staleness cannot be expressed there.\n(4) ROS and DDS handle first-message loss and staleness in the framework: ROS 1 latch, ROS 2/DDS TRANSIENT_LOCAL durability with a compatibility rule, LIFESPAN, DEADLINE, matched events, message_filters timestamp synchronizers, and rclc LET sampling. ROSpec checks declared QoS compatibility statically.\n(5) At the pinned cFE commit 546a0025, SB QoS is 'currently unused' and I found no durability or latching concept. A transmit with no subscribers succeeds, increments a counter and sends an event. Subscribe and destination lookup both run under the SB shared-data mutex, and delivery order is reverse subscription order. My inference: first-message loss in local SB is purely a question of whether subscribe finishes before the first transmit, and apps must handle it themselves.\n(6) cFS 'launch-file' equivalents are tables and commands: SCH_LAB schedule, TO_LAB subscription table plus ground-commanded subscriptions, and the HK copy table with its own subscriptions. The MID a transmit sends is bound earlier through CFE_MSG_Init, and dispatch is a single pipe plus MsgId/FcnCode branches. So ROS-style recovery does not carry over directly.\n(7) HK already has a configurable freshness policy: DataPresent flags, a missing-data counter, and by default incomplete combined packets are still sent.\n(8) Timing analyses (Casini ECRTS'19 as implemented by its authors' crate; Becker/Günzel cause-effect chains) take chain structure plus WCET, periods and supply/demand models as inputs. They recover nothing from source.\n(9) Empirical ROS data: 19 of 221 ROBUST bugs carry CONCURRENCY codes, mostly thread-level. My keyword scan found no bug describing loss of a message published before the subscriber connected. Garcia et al. ICSE'20 reportedly has 6 of 499 concurrency bugs (search snippet only).\n(10) Novelty caution: Ganesan/Lindvall et al. (SPLC'09) statically checked cFS architectural rules, reportedly including 'apps communicate only via SB', and did pub/sub architecture analysis of GMSEC (WCRE'10). Both are known only from snippets; they must be read before any novelty claim.",
+ "findings": [
+  {
+   "id": "rw-pubsub-01",
+   "topic": "ROSDiscover: what is recovered and checked (venue correction)",
+   "claim": "ROSDiscover was published at ICSA 2022, not ICSE 2022. From C++ source it recovers component models: topic ports (advertise/publish/subscribe), service ports (call/advertiseService) and parameters (param/getParam/setParam). It uses Clang ASTs plus symbolic function summaries. Launch files supply composition, remaps and params. It assumes a 'quasi-static' architecture, uses 15 handwritten models, and marks unknown values as top. It checks only structural first-order rules in Acme: connected ports with different message types, and dangling publishers/subscribers with similar names or types. It checks no ordering, startup or timing property. Results: 87.37% of API calls fully recovered; 9.09% under- and 6.82% over-approximation on 3 systems; 8 of 19 misconfiguration bugs detected; 8, 5 and 2 false positives on AutoRally, Husky and TurtleBot.",
+   "evidence": [
+    "Paper copy in the authors' artifact repo: https://github.com/cmu-rss-lab/rosdiscover-evaluation/blob/4648ad9d3c35b1c167130c3d592da2ab395b1ae9/paper.pdf (sha256 afd0c5b9...; local copy pdf/rosdiscover_paper_from_eval_repo.pdf, text in txt/rosdiscover_paper.txt)",
+    "txt/rosdiscover_paper.txt L529-533 (recognized API calls), L431-438 (quasi-static assumption), L585-601 (handwritten models, top), L668-683 (the 4 rules), L870-875, L1040-1061, L1116-1141 (results)",
+    "Venue: ROSInfer reference list, txt/rosinfer.txt L1866-1870: 'IEEE International Conference on Software Architecture (ICSA '22) ... 112-123. doi: 10.1109/ICSA53651.2022.00019'",
+    "txt/rosdiscover_paper.txt L1384-1393: the authors name NASA F' as an ecosystem the approach generalizes to"
+   ],
+   "scope_checked": "Full text of the paper.pdf copy in the evaluation repo; whether it is camera-ready or preprint is not stated. The IEEE page was not opened (blocked).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[Inference] Recovering cFS MID/pipe topology from source is the cFS analogue of ROSDiscover, and the authors themselves name a NASA flight framework (F') as a target. The note must not present topology recovery as its contribution. Any contribution has to lie in ordering, state and time, which ROSDiscover does not check."
+  },
+  {
+   "id": "rw-pubsub-02",
+   "topic": "ROSInfer: behavioral (state-machine) inference overlaps the note's 'message -> state -> guarded use' idea",
+   "claim": "ROSInfer (ICSE 2024, DOI 10.1145/3597503.3639206) infers from C++ ROS source a component state machine C=(S, s0, I, O, delta). The triggers it finds are: subscriber callbacks (subscribe/registerCallback/advertiseService); periodic triggers (Rate::sleep, createTimer, sleep/usleep, frequency by constant folding); and a component-started event. It finds state variables with a usage heuristic (the variable appears in control conditions of publishing code) and a scope heuristic (member or global variables). Transitions are assignments, often inside subscriber callbacks, and it also infers initial values. It generates PlusCal/TLA+ and checks LTL properties, for example 'expected outputs eventually happen'. This found 3 bugs that ROSDiscover missed (autoware-02/03/10), where a component waits for a required input that no node publishes. It does not model message contents ('To keep the model simple, we do not model the content of messages'). The authors state that static analysis cannot infer execution times, so the models cannot be used 'for ... analysis of race condition'. Numbers: 534 components; trigger-type recovery 87%; recall 93% periodic, 82% reactive, 71% state variables, 69% transitions; precision 100%, 91%, 76%, 88%. The authors suggest NASA FPrime as a target.",
+   "evidence": [
+    "PDF: https://raw.githubusercontent.com/clegoues/clegoues.github.io/master/assets/papers/Duerschmid2024ROSInfer.pdf (sha256 59bcb083...), text in txt/rosinfer.txt",
+    "txt/rosinfer.txt L303-332 (formalism; L318-319 'we do not model the content of messages'), L438-476 (trigger APIs), L486-521 (reactive/periodic patterns), L523-548 (state-variable heuristics), L597-603 (TLA+/LTL), L827-831, L1067-1069, L1182-1184 (results), L1247-1261 (bugs found), L1423-1428 (no execution times, no race analysis), L1434-1438 (FPrime)",
+    "Implementation inside ROSDiscover master: https://github.com/cmu-rss-lab/rosdiscover/blob/78301b86fca119cda9ad55500dcf800e56bb9504/src/rosdiscover/recover/states_analyzer.py#L30-L61 (state vars = variables in the inter-procedural condition of a publish that are assigned in another function; sub_state_var_assigns = such assignments inside subscriber callbacks) and .../recover/analyzer.py#L105-L134 (publish inside a subscriber callback; publish inside a while loop with Rate.sleep)"
+   ],
+   "scope_checked": "Full text of the author-hosted PDF; ROSDiscover master code at 78301b8 (analyzer.py, states_analyzer.py). The TLA+ generator code was not found in the default branches I cloned.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[Inference] The revision's §6.1 pattern (OnAttitudeMessage sets a valid flag; OnTrigger checks the flag) is structurally what ROSInfer already infers for ROS. So does the 'required input never arrives' liveness check. A cFS version must be positioned as an adaptation unless it adds what ROSInfer explicitly lacks: field-level payload-to-state provenance, the order between first publish and subscribe completion, staleness or epoch relations across several inputs, and receive status/timeout paths. ROSInfer and ROSDiscover also show that AST-level (Clang) recovery is the established route, which supports the revision's §9.3 AST/CFG alternative as a baseline."
+  },
+  {
+   "id": "rw-pubsub-03",
+   "topic": "HAROS: computation-graph extraction, queries, HPL properties, Electrum model checking",
+   "claim": "HAROS (IRC'19) extracts a ROS Computation Graph from launch files, CMake files and C++ ASTs. Each primitive call is recorded with name, message type, queue size, latched flag, source location, path conditions ('conditions') and whether it is under a loop ('repeats'). Users can supply extraction hints. The paper's example queries are structural: type mismatch, unbounded queues, queue size 1 ('can lead to message loss'), disconnected topics with similar names, global names, transitive publishing to the base. The paper names message_filters and tf2 as major extraction limitations. HPL adds message-level properties (absence, existence, precedence, response, prevention; global/after/until scopes; real-time bounds such as 'within 100 ms'). These are used for runtime monitors and property-based tests. In the IROS'20 Electrum model checking, 'the real-time features of HPL are not supported'. The template forces every outbox message to eventually reach all subscribers, and subscriptions are static sets.",
+   "evidence": [
+    "IRC'19 PDF from the author-site repo: https://github.com/git-afsantos/git-afsantos.github.io/blob/f7e268d0afbacf1c07c2efec8ef79f439229e642/files/2019-irc.pdf (DOI 10.1109/IRC.2019.00018); txt/haros_2019-irc.txt L716-726 (queries), L756-763 (queue size 1), L694-708 (message_filters/tf2 limitation), L932-934 ('timed ones' more naturally checked at runtime)",
+    "Code: https://github.com/git-afsantos/haros/blob/efe832c38bfb9682ca7575337a7decd46e59beb6/haros/extractor.py#L1355-L1378 (latched, conditions, repeats); .../haros/metamodel.py#L1401-L1422 (Topic.is_disconnected, types)",
+    "HPL: https://github.com/git-afsantos/hpl-specs/blob/9c2bcd5e69923137688aef2eb57b60a1fedef103/docs/lang.md#L21-L52",
+    "IROS'20 PDF: .../files/2020-iros.pdf (DOI 10.1109/IROS45743.2020.9341085), txt/haros_2020-iros.txt L186-200, L573-595; template https://github.com/git-afsantos/haros-plugin-electrum/blob/b3b3c111026e3ea8b20ab851efaa88a9774e7683/src/haros_plugin_electrum/templates/model.ele.jinja#L80-L96"
+   ],
+   "scope_checked": "Full texts of IRC'19, IROS'20 and RoSE'21 (author-hosted PDFs); HAROS extractor and metamodel code; HPL docs; Electrum template. The ENASE'22 HPL paper was not opened.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[Inference] HAROS records the latched flag but checks nothing with it. Its formal model assumes subscriptions exist from the start and delivery is reliable, so 'published before subscribed' and staleness cannot be expressed there. For cFS: (a) the HAROS queue-size and conditional-call checks map to MsgLim/pipe depth and conditional CFE_SB_Subscribe; (b) the subscribe-time to first-publish order is a real gap, but no claim of complete absence should be made without the ENASE'22 paper."
+  },
+  {
+   "id": "rw-pubsub-04",
+   "topic": "Framework-level fixes for first-message loss and stale data in ROS 1, ROS 2 and DDS",
+   "claim": "ROS 1: with latch=true, 'the last message published on this topic will be saved and sent to new subscribers when they connect'; getNumSubscribers()/isLatched() exist. ROS 2: TRANSIENT_LOCAL durability makes 'the publisher ... responsible for persisting samples for late-joining subscriptions'. A Volatile publisher with a Transient-local subscription is incompatible ('No communication'), so a 'latched' topic needs both sides to agree. LIFESPAN means expired (stale) messages 'are silently dropped'. DEADLINE gives missed-deadline events, and matched/incompatible-QoS events exist. DDS (Fast DDS docs): VOLATILE/TRANSIENT_LOCAL/TRANSIENT/PERSISTENT durability; DESTINATION_ORDER BY_RECEPTION_TIMESTAMP vs BY_SOURCE_TIMESTAMP; PRESENTATION coherent_access/ordered_access. Fast DDS marks DestinationOrder and Presentation as 'will be implemented in future releases'. Field evidence: ros1_bridge #130 (2018) reports that solitary non-latched messages are sometimes lost and that latching works around it. In ROBUST, tf2 static transforms are 'published once and the topic is latched, so late joiners also get the messages'.",
+   "evidence": [
+    "https://github.com/ros/ros_comm/blob/30483a9f218f1545eec16d3934bf3cb042e2cb5b/clients/roscpp/include/ros/node_handle.h#L236-L238; .../clients/roscpp/include/ros/publisher.h#L149-L157; .../clients/rospy/src/rospy/topics.py#L826-L829",
+    "https://github.com/ros2/ros2_documentation/blob/e2388aa72c17598a54fa228df6e9e9a44c5e7aec/source/ROS-Framework/interfaces/topics/About-Quality-of-Service-Settings.rst#L48-L61 (policies), #L81 (latching analogy), #L164-L191 (durability compatibility), #L284-L335 (QoS/matched events)",
+    "https://github.com/eProsima/Fast-DDS-docs/blob/b2af9caf0411a407a40d80622b1e6e43c9a41577/docs/fastdds/dds_layer/core/policy/standardQosPolicies.rst#L82-L125 (DestinationOrder, 'future releases' warning), #L196-L205 (durability kinds), #L875-L935 (Presentation)",
+    "ROBUST geometry2/a2f8eea.bug (repo @521fe75319c256995fae6f5a4b756f0bfa4bf65e)",
+    "https://github.com/ros2/ros1_bridge/issues/130 (WebFetch summary only: title, 2018-07-30, closed, reporter's workaround)"
+   ],
+   "scope_checked": "Pinned docs and headers listed. The OMG DDS spec was not opened (omg.org blocked), so DDS semantics come from one vendor's docs. For ros1_bridge #130 I saw only a WebFetch summary; the maintainers' root cause was not confirmed.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[Inference] In ROS and DDS, first-message loss and staleness are partly configuration problems: they can be fixed or detected through QoS and framework events. A cFS analysis has no such knob to check. It must reason about ordering and app-level recovery idioms instead. This contrast is a concrete, defensible way to state what is cFS-specific."
+  },
+  {
+   "id": "rw-pubsub-05",
+   "topic": "cFE SB at the pinned commit: no durability/latching, no-subscriber drop, synchronous routing, reverse-subscription delivery order",
+   "claim": "At cFE 546a0025, CFE_SB_Qos_t is documented as 'Currently an unused parameter in CFE_SB_SubscribeEx'; Priority and Reliability are 'for off-board routing, currently unused'. In CFE_SB_SubscribeFull, Quality is used only in the CFE_SB_SendSubscriptionReport call. Grepping modules/sb and modules/core_api for latch|durab|retain the last|last value|late.join found no SB durability concept (the one hit was in TIME). A transmit with no subscribers increments NoSubscribersCounter, records CFE_SB_SEND_NO_SUBS_EID and returns CFE_SUCCESS. Subscribe adds the destination while holding the SB SharedData mutex, and transmit looks up destinations while holding the same mutex. The header notes that new destinations go to the head of a linked list, so 'the message will first be sent to the last subscriber'.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/config/default_cfe_sb_extern_typedefs.h#L114-L125",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L936-L1110 (blob 39c0c4c4; lock L966, unlock L1077, Quality only at L1096)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1032-L1114 (FindDestinations under lock), #L1091-L1097 (no-subscriber path), #L132-L147 (OS_MutSemTake; on failure it only logs)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L236-L253 (blob cf1413c1, same as revision S09)"
+   ],
+   "scope_checked": "Shallow fetch of cFE at the pinned commit; grep of modules/sb and modules/core_api; read of the listed functions. OSAL queue semantics and SBN were not checked.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[Inference, not verified by execution] In local SB there is no discovery or connection delay like ROS 1/DDS matching. Once CFE_SB_Subscribe returns success, a later transmit finds the pipe. So the first-message hazard reduces to the order between subscribe completion and the first transmit on one cFE instance, and the framework offers no durability fix. Two further cFS-specific order semantics exist that no ROS tool models: delivery order across subscribers depends on subscription order, and failing to take the mutex only logs. Remote subscriptions via SBN subscription reports would bring back a ROS-like discovery delay; that was not checked."
+  },
+  {
+   "id": "rw-pubsub-06",
+   "topic": "cFS architecture configuration is table- and command-driven; publisher MID binding and dispatch differ from ROS",
+   "claim": "In the cFS bundle apps (pinned commits), the run-time pub/sub architecture is partly set by data, not by literal API arguments. SCH_LAB sends table-configured MessageIDs every PacketRate ticks; its default table is empty and mission-overridden. TO_LAB subscribes from a subscription table with per-MID BufLimit (MsgLim) and also from a ground 'add packet' command (to_lab_cmds.c L218). HK subscribes to InputMids taken from its copy table (hk_utils.c L322). A transmit's MID is not an argument of CFE_SB_TransmitMsg: it is bound earlier by CFE_MSG_Init on the buffer, as in sample_app.c L134 and the transmit at sample_app_cmds.c L61. Reactive dispatch uses one ReceiveBuffer loop on a single command pipe, MsgId_Equal branches, and a FcnCode switch. There is no per-topic callback registration.",
+   "evidence": [
+    "Census output: cfs_sb_callsite_census.txt (grep of fsw/src/*.c in sample_app@199476a3, HK@0dc16b7a, to_lab@d27c6014, sch_lab@607e2f90)",
+    "https://github.com/nasa/sch_lab/blob/607e2f90c5f828f3f3ae655a4debacf8b2cc4bbb/fsw/tables/sch_lab_table.c#L35-L50; .../fsw/src/sch_lab_app.c#L125-L131; .../config/default_sch_lab_tbldefs.h#L51-L54",
+    "https://github.com/nasa/to_lab/blob/d27c6014cb5d2979140500f635876ee87b81995b/fsw/tables/to_lab_sub.c#L34-L57; .../fsw/src/to_lab_cmds.c#L218; .../fsw/src/to_lab_app.c#L504",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L322",
+    "https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/fsw/src/sample_app.c#L77-L86; #L134; .../fsw/src/sample_app_cmds.c#L61; .../fsw/src/sample_app_dispatch.c#L86; #L132-L160"
+   ],
+   "scope_checked": "grep of the four apps' fsw/src and tables, plus reading the cited lines. Not a full census of cFS apps; tables loaded from files at runtime were not examined.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[Inference] A ROSDiscover/ROSInfer-style front end for cFS needs four things those tools do not have. (a) Parsing of table images (C initializers, possibly runtime-loaded .tbl files) as the 'launch file'. (b) Dataflow from CFE_MSG_Init/SetMsgId to TransmitMsg through the buffer object; in ROS, the topic is bound to the publisher object at advertise(). (c) Recovery of MsgId/FcnCode branch dispatch as the reactive trigger. (d) Treating command-driven subscriptions as dynamic architecture, which partly breaks ROSDiscover's quasi-static assumption. Periodic triggers in cFS are SCH messages derived from table data, so ROSInfer's sleep- and timer-based period detection does not apply. These four points are concrete, verifiable differences the note can use."
+  },
+  {
+   "id": "rw-pubsub-07",
+   "topic": "HK has a built-in app-level freshness/completeness policy",
+   "claim": "HK copies a byte range of each subscribed input into combined output packets and sets DataPresent per entry. When it sends a combined packet, it checks for entries not updated since the last send. If any is missing it increments MissingDataCtr and sends a DEBUG event. The compile-time option HK_DISCARD_INCOMPLETE_COMBO (default 0) decides whether the incomplete packet is still sent. Flags are reset to NOT_PRESENT after each send.",
+   "evidence": [
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L61-L83 (copy + DataPresent)",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L483-L504 (missing-data check, conditional send, reset)",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L737-L757 (HK_SetFlagsToNotPresent)",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/inc/hk_internal_cfg.h#L57-L69 (DEFAULT ... DISCARD_INCOMPLETE_COMBO 0)"
+   ],
+   "scope_checked": "HK source at the pinned commit (cited functions and config). HK requirements docs were not read.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[Inference] This goes beyond the revision's S22 (README only): in HK, combining non-fresh inputs is an explicit, configurable design choice, not a race. It is a good benchmark for the analyzer's guard/policy recognition, where the correct output is 'guarded or configured', not a warning. It also shows the revision's §6.3 caution is warranted."
+  },
+  {
+   "id": "rw-pubsub-08",
+   "topic": "ROS 2 executor and processing-chain response-time analysis (Casini et al. ECRTS 2019 and follow-ups)",
+   "claim": "The official ROS 2 docs (pinned) say the default executor processes ready messages 'in a round-robin fashion - but not in FIFO order'. They say this semantics 'was first described in a paper by Casini et al. at ECRTS 2019', and that the paper's timer prioritization 'was removed in Eloquent' (rclcpp PR 841). They also say rclc's executor 'implements ideas of the Logical Execution Time (LET) semantics'. The current rclcpp get_next_ready_executable (rolling a2501cc, from L814) checks ready timers, then subscriptions, services and clients within a wait-result snapshot. The authors' Rust crate implements Casini'19 Lemmas 1, 3, 4/5 and 8, plus Blass et al. RTSS'21. Its inputs are supply-bound functions (reservations), request-bound functions (arrival curves and WCET), interference sets and a given chain structure. Nothing is extracted from source.",
+   "evidence": [
+    "https://github.com/ros2/ros2_documentation/blob/e2388aa72c17598a54fa228df6e9e9a44c5e7aec/source/ROS-Framework/client-libraries/About-Executors/About-Executors.rst#L189-L203, #L209-L227, #L241",
+    "https://github.com/ros2/rclcpp/blob/a2501cc749d27b6d000f0f2bd8f08342cdb806fc/rclcpp/src/rclcpp/executor.cpp#L814",
+    "https://github.com/brandenburg/response-time-analysis-rs/blob/6530456a44416ef6144b175c413c5b022f14d104/src/ros2/ecrts19.rs (doc comments L6-L15, L34-L49, L84-L97, L130-L149); .../src/ros2/mod.rs",
+    "Casini paper bibliographic data from the docs above and the crate README; the abstract first sentence came from a search snippet"
+   ],
+   "scope_checked": "ROS 2 docs and rclcpp/rclc code at pinned commits; the authors' implementation crate. The Casini ECRTS'19, Blass RTSS'21, Tang RTSS'20 and Teper RTSS'22 full texts were NOT opened (Dagstuhl, MPI-SWS and IEEE blocked).",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "[Inference] These analyses verify end-to-end latency or response-time bounds. The chain topology and timing parameters are inputs, not recovered. A cFS static recovery of MID chains, SCH periods and pipe depths could at most supply the structural part of such an analysis. I did not reconcile the docs' statement that timer priority was removed with the rolling code's order of checks: executor semantics depend on the version, and the same caution applies to choosing a cFE/OSAL version. I found no published cFS counterpart of ROS 2 executor RTA, but I did not search for one."
+  },
+  {
+   "id": "rw-pubsub-09",
+   "topic": "AUTOSAR/automotive cause-effect chains: data age, reaction time, LET (Becker 2016/2017, Günzel 2021 and others)",
+   "claim": "The Dortmund E2E evaluation framework classifies each analysis by task model, communication model and metric. Becker 2016 (RTCSA) is integrated without restricted data propagation (periodic, implicit, MRDA). Becker 2017 (JSA, DOI 10.1016/j.sysarc.2017.09.004) covers periodic tasks with implicit or LET communication and MRDA. Hamann 2017 covers LET with MDA/MRT; Dürr 2019 covers sporadic tasks; Günzel 2021 and 2023 are also listed. The MSc thesis bundled with the framework summarizes Becker et al.: data-propagation trees built from read intervals [Rmin, Rmax] and data intervals [Dmin, Dmax] at different knowledge levels (no info, WCRTs known, exact schedule, LET). The analyses apply to 'periodic task sets using implicit communication and are restricted to local cause-effect chains'. It defines MRT, MRRT, MDA and MRDA. It notes that almost no analyses assume explicit communication, where reads and writes may happen at any time during a job.",
+   "evidence": [
+    "https://github.com/tu-dortmund-ls12-rt/E2EEvaluation/blob/18347b7b1e848033659ce8914ef45c40195b6d68/README.md (Analyses Overview table)",
+    "https://github.com/tu-dortmund-ls12-rt/E2EEvaluation/blob/18347b7b1e848033659ce8914ef45c40195b6d68/e2eAnalyses/Becker2017.py#L1-L15 (the docstring pairs the 2016 title with the 2017 DOI; the thesis bibliography separates them)",
+    "Thesis: .../doc/E2EEvaluation.pdf (Edmaier, TU Dortmund, Sept 2024, supervised by J.-J. Chen and M. Günzel); txt/e2e_thesis.txt L952-981 (implicit/LET/explicit), L1394-1428 (metric definitions), L1600-1684 (Becker summary), bibliography L5471-5480, L5568-5615",
+    "RTAS'21 artifact: https://github.com/tu-dortmund-ls12-rt/end-to-end @a460ed0f90522eab569a239b621f9989b161655d (exists; README not analyzed)"
+   ],
+   "scope_checked": "Artifact README and code docstrings; a third-party thesis summary (secondary). The Becker RTCSA'16 and JSA'17 papers and the Kirsch & Sokolova 2012 LET chapter were NOT opened. Günzel RTAS'21 is revision R07 and was not re-read.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "[Inference] Data-age and reaction-time bounds need periods, offsets, response times and a fixed communication semantics (implicit or LET). cFS SB is message-queue based with reads at ReceiveBuffer time, which matches none of the usual models. So the note should keep 'freshness' qualitative (ordering and update-before-use) unless it adds a timing model, consistent with revision §6.5. Recovered cFS chains plus SCH periods could become inputs to these analyses; that would be a separate step, not a result of the note's analyzer."
+  },
+  {
+   "id": "rw-pubsub-10",
+   "topic": "LET and timestamp synchronizers as framework-level answers to 'snapshot consistency'",
+   "claim": "rclc defines RCLC_SEMANTICS_LOGICAL_EXECUTION_TIME: 'At one sampling point t new data of all ready subscriptions are taken from DDS', and callbacks then use the data as of time t in the order they were added. ROS message_filters provides TimeSynchronizer and Synchronizer policies (ExactTime, ApproximateEpsilonTime, ApproximateTime) that deliver one callback with N messages matched by header timestamps. A ROBUST bug (geometry2/0af76d5) is a time-of-check-to-time-of-use race in tf2's message filter: transforms checked as available can be evicted from the buffer before the callback runs.",
+   "evidence": [
+    "https://github.com/ros2/rclc/blob/3064baadeabdaca6dabfae3f8351510bdbe53071/rclc/include/rclc/executor.h#L43-L59, #L773-L778",
+    "https://github.com/ros2/message_filters/blob/815ce9f9f388762ed79b0571e0157fc0234bd76b/doc/index.rst#L13-L17, #L166-L168, #L241-L266",
+    "ROBUST geometry2/0af76d5/0af76d5.bug (repo @521fe75319c256995fae6f5a4b756f0bfa4bf65e)",
+    "AUTOSAR TIMEX 'age'/'reaction' LatencyTimingConstraint: search-index snippet only (autosar.org blocked)"
+   ],
+   "scope_checked": "rclc header and message_filters docs at pinned commits; one ROBUST bug file. The AUTOSAR TPS TimingExtensions spec was not opened.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[Inference] The original note's Properties 3 and 4 (same-cycle consistency, explicit timestamp check) are what ROS ships as library mechanisms. In cFS they are hand-written app code (as in HK). The analyzer must therefore recognize hand-written guards, not library calls. HAROS also lists message_filters as an extraction limitation, so such idioms are hard even in ROS."
+  },
+  {
+   "id": "rw-pubsub-11",
+   "topic": "ROSpec: static checking of declared QoS compatibility",
+   "claim": "ROSpec, a DSL in which developers specify ROS component configurations, statically checks provider/consumer QoS rules. A Volatile provider with a TransientLocal consumer is flagged, as are BestEffort vs Reliable, Automatic vs ManualByTopic liveliness, and deadline/duration ordering. History, lifespan and depth are always accepted. An evaluation example reports 'QoSError: Mismatch in quality of service for reliability'.",
+   "evidence": [
+    "https://github.com/pcanelas/rospec/blob/e47d6eb0e72e0fb5e00c90b7d019dcb472c40fff/src/rospec/verification/utils.py#L131-L145",
+    "https://github.com/pcanelas/rospec/blob/e47d6eb0e72e0fb5e00c90b7d019dcb472c40fff/examples/evaluation/detectable-142456.rospec; examples/expected/expected-142456.txt",
+    "Paper venue: search snippet only (dl.acm.org/doi/10.1145/3763169), not opened"
+   ],
+   "scope_checked": "Code and examples at the pinned commit. Paper not opened.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "[Inference] Static checks of whether both sides agree on 'latching' exist for ROS 2, but they check declared QoS, not when subscriptions and publishes happen. The cFS counterpart cannot be a QoS check and has to be an ordering check. This narrows what the note can claim as cFS-specific."
+  },
+  {
+   "id": "rw-pubsub-12",
+   "topic": "Empirical ROS bug data (ROBUST): how often timing/ordering bugs appear",
+   "claim": "In the ROBUST dataset (221 .bug files), 19 bugs carry at least one CONCURRENCY:* fault code. Code occurrences: NO-SYNC 12, BAD-SYNC 4, SIGNALS 3, TIMING 1. Most are thread-level (locks, serial writes, shutdown and signals). The ordering-relevant ones are: 15b2e3c, a race in tf2 buffer-server startup ('autostart') fixed by starting the server manually; 0af76d5, the tf2 message-filter TOCTOU; and 753226d, a missing header timestamp (CONCURRENCY:TIMING). My keyword scan of titles and descriptions found no bug about losing a message published before the subscriber connected. Configuration codes such as CONFIG:TOPIC (2) and CONFIG:REMAPPING (4) also occur.",
+   "evidence": [
+    "Dataset: https://github.com/robust-rosin/robust/tree/521fe75319c256995fae6f5a4b756f0bfa4bf65e (221 *.bug files)",
+    "My tabulation: robust_concurrency_subset.csv (19 rows); code counts from a Python regex parse of fault-codes/failure-codes",
+    "geometry2/15b2e3c/15b2e3c.bug, geometry2/0af76d5/0af76d5.bug, mavros/753226d/753226d.bug",
+    "Paper: EMSE 29(3):57, 2024 (search snippet); the DOI 10.1007/s10664-024-10464-4 is from a search summary and NOT verified; arXiv 2404.03629 not opened"
+   ],
+   "scope_checked": "Whole dataset parsed for codes; keyword regex over titles and descriptions only (not issue threads). The paper text and its codebook definitions were not read.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "[Inference] In this ROS corpus, message-ordering and first-message bugs are rare or not separately coded. Public ROS bug corpora cannot supply base rates or many ground-truth cases for the note's fault classes. The note's evaluation (revision §12) should rely on reproduced historical cFS cases and labeled synthetic or variant cases, and should not cite ROS prevalence numbers."
+  },
+  {
+   "id": "rw-pubsub-13",
+   "topic": "Garcia et al. ICSE 2020 (autonomous-vehicle bugs) and newer ROS bug studies",
+   "claim": "Garcia et al., 'A Comprehensive Study of Autonomous Vehicle Bugs' (ICSE'20, DOI 10.1145/3377811.3380397), studied 499 bugs from 16,851 commits in Apollo and Autoware: 13 root causes, 20 symptoms, 18 components. The most frequent root causes are algorithm and configuration bugs. A search-index summary of Table 4 gives concurrency as 2 (Apollo) + 4 (Autoware) = 6 of 499. Chen et al. (arXiv 2507.10235, 2025) report 121 interaction bugs in 10 ROS projects, 68.60% intra-system, and note that ROSDiscover detects only the dangling-connector subset. ROSCallBaX (PACMSE/FSE 2025) statically checks callback composition and execution setup (executors and similar) against framework conventions.",
+   "evidence": [
+    "Search-index snippets for https://ics.uci.edu/~alfchen/pubs/josh_icse20.pdf and dl.acm.org/doi/10.1145/3377811.3380397 (not opened; host blocked)",
+    "Search snippets for arxiv.org/abs/2507.10235 (not opened)",
+    "Search snippets for dl.acm.org/doi/10.1145/3715748 and zenodo.org/records/13882807 (not opened)"
+   ],
+   "scope_checked": "Search-engine snippets only; no full text opened.",
+   "status": "unverified",
+   "importance": "background",
+   "implication": "[Inference] If confirmed, concurrency is a small share of AV bugs, while configuration and interaction bugs are common. This supports framing the note around configuration- and ordering-dependent inter-component faults rather than prevalence claims. These numbers must not appear in the note until the full texts are read."
+  },
+  {
+   "id": "rw-pubsub-14",
+   "topic": "Flight-software precedents for static pub/sub architecture analysis (novelty risk)",
+   "claim": "HAROS IRC'19 cites Ganesan, Lindvall, Ruley, Wiegand, Ly and Tsui, 'Architectural analysis of systems based on the publisher-subscriber style', WCRE 2010; this citation is verified in the paper text. Search snippets say that work was applied to NASA GMSEC and found high-priority bugs from behavioral differences between vendor implementations of the same API. Snippets also show Ganesan, Lindvall, Ackermann, McComas and Bartholomew, 'Verifying architectural design rules of the flight software product line' (SPLC 2009). It checked the NASA Core Flight Software implementation against design rules from the developer's guide, reportedly including that applications do not interact directly but via the Software Bus, using static analysis (SAVE). These are the same authors as the revision's R03.",
+   "evidence": [
+    "txt/haros_2019-irc.txt L1093-1095 (reference [12])",
+    "Search snippets: semanticscholar.org/paper/058ac667c1adba4f8910a8ee3a6c1cc796814702; ntrs.nasa.gov/citations/20090004613 ('Analyzing the Core Flight Software (CFS) with SAVE'); ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20100031707.pdf (WCRE'10)",
+    "Direct PDF attempts failed: alumni.soe.ucsc.edu (403), ntrs.nasa.gov (blocked)"
+   ],
+   "scope_checked": "Only the citation in HAROS IRC'19 was verified in full text; everything else is search-snippet level.",
+   "status": "unverified",
+   "importance": "central",
+   "implication": "[Inference] Static extraction and rule-checking of cFS inter-application (Software Bus) architecture has a 2009 precedent by the cFS-testing group (R03 authors). Together with ROSDiscover/ROSInfer naming NASA F', this means the note must read SPLC'09, WCRE'10 and the SAVE/CFS NTRS report before claiming anything about cFS topology recovery. The defensible differentiator is ordering, startup and state/time semantics, not topology."
+  },
+  {
+   "id": "rw-pubsub-15",
+   "topic": "Teper et al. RTSS 2022 'End-to-End Timing Analysis in ROS2' (artifact only)",
+   "claim": "The public artifact reproduces three kinds of results for ROS 2 cause-effect chains: observed latencies from real ROS 2 execution, lower bounds by simulation, and upper bounds by analysis. The Dortmund E2E framework lists the paper as 'Received', not integrated.",
+   "evidence": [
+    "https://github.com/HarunTeper/ros2-end-to-end/blob/59c8cbdc311bb9bd0e1fec9d8464876dd37e2f9b/README.md",
+    "https://github.com/tu-dortmund-ls12-rt/E2EEvaluation/blob/18347b7b1e848033659ce8914ef45c40195b6d68/README.md (Teper 2022 row)"
+   ],
+   "scope_checked": "Artifact READMEs only; paper not opened (IEEE blocked).",
+   "status": "partial",
+   "importance": "background",
+   "implication": "[Inference] ROS 2 data-age analyses exist and are compared against measured traces. For cFS, a comparable step would need the timing model discussed in finding 09; it should stay out of scope for the note's first prototype."
+  }
+ ],
+ "gaps": [
+  "Full texts NOT opened because hosts were blocked: Casini et al. ECRTS'19; Blass et al. RTSS'21; Tang et al. RTSS'20; Teper et al. RTSS'22; Becker et al. RTCSA'16 and JSA'17; Hamann ECRTS'17; Kirsch & Sokolova 2012 LET chapter; AUTOSAR TPS TimingExtensions; OMG DDS 1.4 spec; Garcia et al. ICSE'20; ROBUST EMSE'24 paper text (dataset only); Chen et al. arXiv 2507.10235; ROSCallBaX FSE'25; Canelas et al. ISSTA'24 (ROS misconfigurations); the ROSpec paper; HAROS ENASE'22 (HPL); Witte & Tichy RoSE'18.",
+  "Most important unread items, central for novelty: Ganesan et al. SPLC 2009 'Verifying architectural design rules of the flight software product line' (cFS); Ganesan et al. WCRE 2010 pub/sub architectural analysis (GMSEC); NTRS 20090004613 'Analyzing the CFS with SAVE'. I could not tell whether they recover MID/pipe relations or check ordering.",
+  "Could not locate ROSInfer's PlusCal/TLA+ generator in the default branches of cmu-rss-lab/rosdiscover or rosdiscover-evaluation, so I did not check whether its TLA+ model can represent messages published before subscription or lost messages.",
+  "I found no published static detector for ROS 'publish before subscriber connected / first-message loss' (search was not exhaustive). Absence is not established.",
+  "I found no work applying ROSDiscover/ROSInfer-style recovery to cFS or F' (search limited to GitHub and search snippets).",
+  "I did not reconcile the ROS 2 docs (timer prioritization removed in Eloquent, rclcpp PR 841) with the rolling rclcpp code that checks ready timers first in get_next_ready_executable. The executor-ordering details are therefore version-dependent and unverified beyond what each source says.",
+  "cFS inference not tested by execution: that local SB subscription takes effect synchronously once Subscribe returns, so there is no discovery delay. SBN and remote subscription timing were not examined.",
+  "The ros1_bridge #130 cause was seen only through a WebFetch summary; maintainers' root-cause statements were not confirmed.",
+  "The ROBUST DOI (10.1007/s10664-024-10464-4) and the Garcia Table 4 concurrency counts (2+4) come from search summaries and are unverified."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/sources_log.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/cfs_sb_callsite_census.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/robust_concurrency_subset.csv",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/pdf/rosdiscover_paper_from_eval_repo.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/pdf/rosinfer_clegoues.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/rosdiscover_paper.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/rosinfer.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/haros_2019-irc.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/haros_2020-iros.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/haros_2021-rose.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/haros_2016-iros.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/txt/e2e_thesis.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/qos.rst",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/executors.rst",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/executor.cpp",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/rclc_executor.h",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/nodehandle.h",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/rospy_topics.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/cfe_cfe_sb.h",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/src/cfe_cfe_sb_api.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-pubsub/repos/ (shallow clones pinned in sources_log.md: rosdiscover, rosdiscover-cxx-recover, haros, hpl-specs, haros-plugin-electrum, haros-case-studies, afsantos_site (papers), cFE@546a0025, nasa_sample_app, nasa_HK, nasa_to_lab, nasa_sch_lab, robust, rospec, rta-rs, E2EEvaluation, end-to-end, ros2-end-to-end, mf (message_filters), fastdds-docs, ros2_documentation)"
+ ]
+}

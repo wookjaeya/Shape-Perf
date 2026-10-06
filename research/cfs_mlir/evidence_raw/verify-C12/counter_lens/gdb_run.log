@@ -1,0 +1,93 @@
+Breakpoint 1 at 0x2a1d1: file /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c, line 188.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+[New Thread 0x7ffff7fba6c0 (LWP 16181)]
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+[New Thread 0x7ffff7e696c0 (LWP 16182)]
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FFFF7B80000, Size = 00080000 Status = 0
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-03:02:14.27941 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-03:02:14.27950 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-03:02:14.28663 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-03:02:14.28664 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-03:02:14.28664 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-03:02:14.28666 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-03:02:14.28685 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-03:02:14.28688 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-03:02:14.28690 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-03:02:14.28690 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-03:02:14.28728 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-03:02:14.28773 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+[New Thread 0x7ffff7e606c0 (LWP 16183)]
+OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)
+OS_QueueCreate_Impl():122:Your queue depth may be too large for the
+OS_QueueCreate_Impl():123:OS to handle. Please check the msg_max
+OS_QueueCreate_Impl():124:parameter located in /proc/sys/fs/mqueue/msg_max
+OS_QueueCreate_Impl():125:on your Linux file system and raise it if you
+OS_QueueCreate_Impl():126: need to or run as root
+[Switching to Thread 0x7ffff7e606c0 (LWP 16183)]
+BP188 EventID=4 AppID=0x0 ILLEGAL
+#0  CFE_EVS_SendEventWithAppID (EventID=4, EventType=3, AppID=0, Spec=0x5555555bafe0 "CreatePipeErr:OS_QueueCreate returned %ld,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x0000555555583e76 in CFE_SB_CreatePipe (PipeIdPtr=0x5555555e63c8 <CFE_ES_Global+57384>, Depth=12, PipeName=0x5555555b8d22 "ES_CMD_PIPE") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:260
+#2  0x000055555557af82 in CFE_ES_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:367
+#3  0x000055555557ab67 in CFE_ES_TaskMain () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:114
+  Id   Target Id                                     Frame 
+  1    Thread 0x7ffff7fac740 (LWP 16178) "core-cpu1" 0x00007ffff7cecadf in __GI___clock_nanosleep (clock_id=1, flags=1, req=0x7fffffffc7c0, rem=0x0) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+  2    Thread 0x7ffff7fba6c0 (LWP 16181) "core-cpu1" 0x00007ffff7c98d71 in __futex_abstimed_wait_common64 (private=<optimized out>, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0x555555704aa0 <OS_impl_console_table>) at ./nptl/futex-internal.c:57
+  3    Thread 0x7ffff7e696c0 (LWP 16182) "core-cpu1" 0x00007ffff7c45fc8 in __GI___sigtimedwait (set=set@entry=0x555555705c68 <OS_impl_timebase_table+264>, info=info@entry=0x7ffff7e68ce0, timeout=timeout@entry=0x0) at ../sysdeps/unix/sysv/linux/sigtimedwait.c:31
+* 4    Thread 0x7ffff7e606c0 (LWP 16183) "CFE_ES"    CFE_EVS_SendEventWithAppID (EventID=4, EventType=3, AppID=0, Spec=0x5555555bafe0 "CreatePipeErr:OS_QueueCreate returned %ld,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+1980-012-14:03:20.07110 CFE_ES_TaskInit: Cannot Create SB Pipe, RC = 0xCA000005
+1980-012-14:03:20.07112 CFE_ES_TaskMain: Application Init Failed,RC=0xCA000005
+[New Thread 0x7ffff7e266c0 (LWP 16184)]
+OS_QueueCreate_Impl():119:OS_QueueCreate Error. errno = 22 (Invalid argument)
+OS_QueueCreate_Impl():122:Your queue depth may be too large for the
+OS_QueueCreate_Impl():123:OS to handle. Please check the msg_max
+OS_QueueCreate_Impl():124:parameter located in /proc/sys/fs/mqueue/msg_max
+OS_QueueCreate_Impl():125:on your Linux file system and raise it if you
+OS_QueueCreate_Impl():126: need to or run as root
+[Switching to Thread 0x7ffff7e266c0 (LWP 16184)]
+BP188 EventID=4 AppID=0x0 ILLEGAL
+#0  CFE_EVS_SendEventWithAppID (EventID=4, EventType=3, AppID=0, Spec=0x5555555bafe0 "CreatePipeErr:OS_QueueCreate returned %ld,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x0000555555583e76 in CFE_SB_CreatePipe (PipeIdPtr=0x5555555e7388 <CFE_EVS_Global+3240>, Depth=32, PipeName=0x5555555ba067 "EVS_CMD_PIPE") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:260
+#2  0x000055555557f248 in CFE_EVS_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:289
+#3  0x000055555557f075 in CFE_EVS_TaskMain () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:213
+  Id   Target Id                                     Frame 
+  1    Thread 0x7ffff7fac740 (LWP 16178) "core-cpu1" 0x00007ffff7cecadf in __GI___clock_nanosleep (clock_id=1, flags=1, req=0x7fffffffc7c0, rem=0x0) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+  2    Thread 0x7ffff7fba6c0 (LWP 16181) "core-cpu1" 0x00007ffff7c98d71 in __futex_abstimed_wait_common64 (private=<optimized out>, cancel=true, abstime=0x0, op=393, expected=0, futex_word=0x555555704aa0 <OS_impl_console_table>) at ./nptl/futex-internal.c:57
+  3    Thread 0x7ffff7e696c0 (LWP 16182) "core-cpu1" 0x00007ffff7c45fc8 in __GI___sigtimedwait (set=set@entry=0x555555705c68 <OS_impl_timebase_table+264>, info=info@entry=0x7ffff7e68ce0, timeout=timeout@entry=0x0) at ../sysdeps/unix/sysv/linux/sigtimedwait.c:31
+  4    Thread 0x7ffff7e606c0 (LWP 16183) "CFE_ES"    0x00007ffff7cecadf in __GI___clock_nanosleep (clock_id=1, flags=1, req=0x7ffff7e5fd90, rem=0x0) at ../sysdeps/unix/sysv/linux/clock_nanosleep.c:78
+* 5    Thread 0x7ffff7e266c0 (LWP 16184) "CFE_EVS"   CFE_EVS_SendEventWithAppID (EventID=4, EventType=3, AppID=0, Spec=0x5555555bafe0 "CreatePipeErr:OS_QueueCreate returned %ld,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+1980-012-14:03:20.15469 CFE_EVS_TaskInit: Call to CFE_SB_CreatePipe Failed:RC=0xCA000005
+1980-012-14:03:20.15472 CFE_EVS_TaskMain: Application Init Failed,RC=0xCA000005
+1980-012-14:03:20.15472 CFE_ES_ExitApp: CORE Application CFE_EVS Had an Init Error.
+1980-012-14:03:20.15473 CFE_ES_ResetCFE: PROCESSOR RESET called from CFE_ES_ResetCFE (Commanded).
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+
+Thread 5 "CFE_EVS" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory

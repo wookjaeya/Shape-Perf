@@ -1,0 +1,14 @@
+set pagination off
+set confirm off
+handle SIGINT nostop noprint pass
+handle SIGSTOP nostop noprint pass
+handle SIGCONT nostop noprint pass
+set follow-exec-mode same
+set breakpoint pending on
+break cfe_evs.c:188
+commands
+silent
+printf "BP188 EventID=%u AppID=0x%lx\n", EventID, (unsigned long)AppID
+bt 9
+continue
+end

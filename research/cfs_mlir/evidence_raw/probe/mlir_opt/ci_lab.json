@@ -1,0 +1,1309 @@
+{
+ "summary": {
+  "mlir_opt/ci_lab/ci_lab_app.dbg.mlir": {
+   "defined_funcs": 6,
+   "api_calls_by_family": {
+    "CFE_ES_api": 13,
+    "CFE_EVS_api": 18,
+    "CFE_MSG_api": 2,
+    "CFE_PSP_api": 2,
+    "CFE_SB_api": 11,
+    "OS_api": 14
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 4,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 16,
+    "CFE_MSG_Init": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 6,
+    "CFE_SB_TransmitBuffer": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketBind": 2,
+    "OS_SocketOpen": 2,
+    "OS_SocketRecvFrom": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "OS_close": 1,
+    "OS_printf": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_SB_Subscribe#0: direct_const": 6,
+    "CFE_MSG_Init#1: direct_const": 2
+   },
+   "msgptr": {
+    "CFE_MSG_Init: CI_LAB_Global.HkTlm": 2
+   },
+   "global_store_fields": {
+    "CI_LAB_Global.AllowPassthrough": 2,
+    "CI_LAB_Global.<base:i8>": 2,
+    "CI_LAB_Global.HkTlm.Payload": 3,
+    "CI_LAB_Global.HkTlm.Payload.CommandErrorCounter": 3,
+    "CI_LAB_Global.HkTlm.Payload.IngestPackets": 5,
+    "CI_LAB_Global.HkTlm.Payload.IngestErrors": 5,
+    "CI_LAB_Global.NetBufPtr": 2,
+    "CI_LAB_Global.NetBufSize": 2
+   },
+   "global_store_value_kinds": {
+    "direct_const": 18,
+    "other": 6
+   },
+   "global_load_fields": 8,
+   "global_loads": 28,
+   "global_memops": [
+    "memset CI_LAB_Global. src=memset @ apps/ci_lab/fsw/src/ci_lab_app.c:109",
+    "memset CI_LAB_Global. src=memset @ apps/ci_lab/fsw/src/ci_lab_app.c:109"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 67,
+    "llvm.getelementptr:unknown": 19,
+    "llvm.getelementptr:known": 18,
+    "llvm.load:known": 32,
+    "llvm.mlir.addressof:unknown": 23,
+    "llvm.mlir.addressof:known": 15,
+    "llvm.mlir.constant:unknown": 41,
+    "llvm.mlir.constant:known": 18,
+    "llvm.store:known": 25,
+    "other:unknown": 12,
+    "other:known": 161
+   }
+  },
+  "mlir_opt/ci_lab/ci_lab_cmds.dbg.mlir": {
+   "defined_funcs": 4,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 2,
+    "CFE_SB_api": 2
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {
+    "CFE_SB_TransmitMsg: CI_LAB_Global.HkTlm": 1
+   },
+   "global_store_fields": {
+    "CI_LAB_Global.HkTlm.Payload": 1,
+    "CI_LAB_Global.HkTlm.Payload.SocketConnected": 1,
+    "CI_LAB_Global.Scheduled": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2,
+    "direct_const": 1
+   },
+   "global_load_fields": 2,
+   "global_loads": 2,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 6,
+    "llvm.getelementptr:unknown": 6,
+    "llvm.load:known": 2,
+    "llvm.mlir.addressof:unknown": 5,
+    "llvm.mlir.constant:unknown": 14,
+    "llvm.store:known": 3,
+    "other:known": 15
+   }
+  },
+  "mlir_opt/ci_lab/ci_lab_dispatch.dbg.mlir": {
+   "defined_funcs": 6,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 8,
+    "CFE_MSG_api": 20,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 8,
+    "CFE_MSG_GetFcnCode": 7,
+    "CFE_MSG_GetMsgId": 8,
+    "CFE_MSG_GetSize": 5,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "CI_LAB_Global.HkTlm.Payload.CommandErrorCounter": 8,
+    "CI_LAB_TaskPipe.CMD_MID.Value": 1,
+    "CI_LAB_TaskPipe.SEND_HK_MID.Value": 1,
+    "CI_LAB_TaskPipe.READ_UPLINK_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 8,
+    "direct_const": 3
+   },
+   "global_load_fields": 4,
+   "global_loads": 12,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 35,
+    "llvm.getelementptr:unknown": 3,
+    "llvm.getelementptr:known": 17,
+    "llvm.load:known": 42,
+    "llvm.mlir.addressof:unknown": 12,
+    "llvm.mlir.constant:unknown": 32,
+    "llvm.store:known": 23,
+    "other:unknown": 15,
+    "other:known": 192
+   }
+  },
+  "mlir_opt/ci_lab/ci_lab_passthru_decode.dbg.mlir": {
+   "defined_funcs": 2,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 3,
+    "CFE_MSG_api": 1,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetSize": 1,
+    "CFE_SB_AllocateMessageBuffer": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 0,
+   "global_loads": 0,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 5,
+    "llvm.load:known": 2,
+    "llvm.mlir.addressof:unknown": 3,
+    "llvm.mlir.constant:unknown": 13,
+    "llvm.store:known": 6,
+    "other:unknown": 4,
+    "other:known": 27
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "mlir_opt/ci_lab/ci_lab_app.dbg.mlir",
+   "n_defined_funcs": 6,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "CI_LAB_AppMain",
+    "CI_LAB_ReadUpLink",
+    "CI_LAB_ResetCounters_Internal",
+    "CI_LAB_TaskInit",
+    "CI_LAB_delete_callback"
+   ],
+   "calls": {
+    "CFE_ES_|api": 13,
+    "CFE_EVS_|api": 18,
+    "CFE_SB_|api": 11,
+    "OS_|api": 14,
+    "CFE_PSP_|api": 2,
+    "CFE_MSG_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 4,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_Subscribe": 6,
+    "CFE_EVS_SendEvent": 16,
+    "OS_SocketOpen": 2,
+    "OS_SocketAddrInit": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketBind": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "CFE_MSG_Init": 2,
+    "CFE_ES_RunLoop": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "OS_SocketRecvFrom": 2,
+    "CFE_SB_TransmitBuffer": 2,
+    "CFE_ES_ExitApp": 1,
+    "OS_printf": 1,
+    "OS_close": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:122"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:131"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:140"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2180
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:194"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:122"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:131"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:140"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2180
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:194"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "CI_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:194"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:194"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "AllowPassthrough"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:111"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:182"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:218"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:219"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:222"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:223"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:262"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:266"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.zero"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:274"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:275"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "AllowPassthrough"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:111"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:182"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:218"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:219"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:222"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:223"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:262"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:266"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.zero"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:274"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:275"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:218"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:219"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:222"
+    },
+    {
+     "func": "CI_LAB_ResetCounters_Internal",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:223"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:122"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:131"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:140"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:171"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:68"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:78"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "Scheduled"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:78"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:241"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:246"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:251"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:252"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:253"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:259"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:262"
+    },
+    {
+     "func": "CI_LAB_AppMain",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:266"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:122"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:131"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:140"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:171"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:241"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:246"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:251"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:252"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufSize"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:253"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "NetBufPtr"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:259"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestErrors"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:262"
+    },
+    {
+     "func": "CI_LAB_ReadUpLink",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "IngestPackets"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:266"
+    },
+    {
+     "func": "CI_LAB_delete_callback",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "SocketID"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:95"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "CI_LAB_AppMain",
+     "op": "memset",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:109"
+    },
+    {
+     "func": "CI_LAB_TaskInit",
+     "op": "memset",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/ci_lab/fsw/src/ci_lab_app.c:109"
+    }
+   ]
+  },
+  {
+   "file": "mlir_opt/ci_lab/ci_lab_cmds.dbg.mlir",
+   "n_defined_funcs": 4,
+   "defined_funcs": [
+    "CI_LAB_NoopCmd",
+    "CI_LAB_ReadUplinkCmd",
+    "CI_LAB_ResetCountersCmd",
+    "CI_LAB_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_EVS_|api": 2,
+    "CFE_SB_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "CI_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:80"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "CI_LAB_NoopCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:41"
+    },
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "SocketConnected"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.zext"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:78"
+    },
+    {
+     "func": "CI_LAB_ReadUplinkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "Scheduled"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:87"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_NoopCmd",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:41"
+    },
+    {
+     "func": "CI_LAB_SendHkCmd",
+     "sym": "CI_LAB_Global",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_cmds.c:78"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/ci_lab/ci_lab_dispatch.dbg.mlir",
+   "n_defined_funcs": 6,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "CI_LAB_ProcessGroundCommand",
+    "CI_LAB_TaskPipe",
+    "CI_LAB_VerifyCmdLength"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 20,
+    "CFE_EVS_|api": 8,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 5,
+    "CFE_MSG_GetMsgId": 8,
+    "CFE_MSG_GetFcnCode": 7,
+    "CFE_EVS_SendEvent": 8,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "CI_LAB_VerifyCmdLength",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:103"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6276
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:130"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6277
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:131"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.READ_UPLINK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6278
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:132"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:103"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:156"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "CI_LAB_VerifyCmdLength",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_ProcessGroundCommand",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:103"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:128"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:138"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.READ_UPLINK_MID",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:143"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:148"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:60"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:103"
+    },
+    {
+     "func": "CI_LAB_TaskPipe",
+     "sym": "CI_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/ci_lab/fsw/src/ci_lab_dispatch.c:156"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/ci_lab/ci_lab_passthru_decode.dbg.mlir",
+   "n_defined_funcs": 2,
+   "defined_funcs": [
+    "CI_LAB_DecodeInputMessage",
+    "CI_LAB_GetInputBuffer"
+   ],
+   "calls": {
+    "CFE_SB_|api": 1,
+    "CFE_EVS_|api": 3,
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_SB_AllocateMessageBuffer": 1,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [],
+   "global_loads": [],
+   "global_memops": []
+  }
+ ]
+}

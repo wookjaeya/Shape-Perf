@@ -1,0 +1,8 @@
+93c93
+< list(APPEND MISSION_GLOBAL_APPLIST sample_app sample_lib)
+---
+> #list(APPEND MISSION_GLOBAL_APPLIST sample_app sample_lib)
+109c109
+< SET(cpu1_APPLIST ci_lab to_lab sch_lab)
+---
+> SET(cpu1_APPLIST sbprobe)

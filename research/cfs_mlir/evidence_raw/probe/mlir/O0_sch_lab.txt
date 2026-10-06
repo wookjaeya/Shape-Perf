@@ -1,0 +1,56 @@
+======== mlir/sch_lab/sch_lab_app.dbg.mlir
+  defined_funcs: 4
+  api_calls_by_family:
+       16  CFE_ES_api
+        2  CFE_MSG_api
+        4  CFE_SB_api
+        1  CFE_SB_helper
+        5  CFE_TBL_api
+        9  OS_api
+  api_calls_by_callee:
+        1  CFE_ES_ExitApp
+        3  CFE_ES_PerfLogAdd
+        1  CFE_ES_RunLoop
+       11  CFE_ES_WriteToSysLog
+        1  CFE_MSG_Init
+        1  CFE_MSG_SetFcnCode
+        1  CFE_SB_CreatePipe
+        1  CFE_SB_ReceiveBuffer
+        1  CFE_SB_Subscribe
+        1  CFE_SB_TransmitMsg
+        1  CFE_TBL_GetAddress
+        1  CFE_TBL_Load
+        1  CFE_TBL_Register
+        2  CFE_TBL_ReleaseAddress
+        1  OS_CountSemCreate
+        1  OS_CountSemGive
+        1  OS_CountSemTake
+        1  OS_TimeBaseGetIdByName
+        1  OS_TimerAdd
+        1  OS_TimerSet
+        3  OS_printf
+  helper_calls_by_callee:
+        1  CFE_SB_ValueToMsgId
+  mid_origins:
+        1  CFE_MSG_Init#1: load_other
+        1  CFE_SB_Subscribe#0: alloca[1 store(s)]->ValueToMsgId(direct_const)
+  msgptr:
+        1  CFE_SB_TransmitMsg: other
+        1  CFE_MSG_Init: other
+  global_store_fields:
+  global_store_value_kinds:
+  global_load_fields: 4
+  global_loads: 9
+  global_memops:
+        memset SCH_LAB_Global. src=memset @ apps/sch_lab/fsw/src/sch_lab_app.c:166
+  loc_known_by_op:
+       39  llvm.call:known
+        7  llvm.getelementptr:unknown
+       39  llvm.getelementptr:known
+       97  llvm.load:known
+       28  llvm.mlir.addressof:unknown
+       32  llvm.mlir.constant:unknown
+        3  llvm.store:unknown
+       49  llvm.store:known
+       29  other:unknown
+      129  other:known

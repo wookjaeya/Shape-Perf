@@ -1,0 +1,167 @@
+======== mlir/ci_lab/ci_lab_app.dbg.mlir
+  defined_funcs: 6
+  api_calls_by_family:
+        9  CFE_ES_api
+        9  CFE_EVS_api
+        1  CFE_MSG_api
+        1  CFE_PSP_api
+        6  CFE_SB_api
+        4  CFE_SB_helper
+        8  OS_api
+  api_calls_by_callee:
+        1  CFE_ES_ExitApp
+        5  CFE_ES_PerfLogAdd
+        1  CFE_ES_RunLoop
+        2  CFE_ES_WriteToSysLog
+        1  CFE_EVS_Register
+        8  CFE_EVS_SendEvent
+        1  CFE_MSG_Init
+        1  CFE_PSP_GetProcessorId
+        1  CFE_SB_CreatePipe
+        1  CFE_SB_ReceiveBuffer
+        3  CFE_SB_Subscribe
+        1  CFE_SB_TransmitBuffer
+        1  OS_SocketAddrInit
+        1  OS_SocketAddrSetPort
+        1  OS_SocketBind
+        1  OS_SocketOpen
+        1  OS_SocketRecvFrom
+        1  OS_TaskInstallDeleteHandler
+        1  OS_close
+        1  OS_printf
+  helper_calls_by_callee:
+        4  CFE_SB_ValueToMsgId
+  mid_origins:
+        3  CFE_SB_Subscribe#0: alloca[1 store(s)]->ValueToMsgId(direct_const)
+        1  CFE_MSG_Init#1: alloca[1 store(s)]->ValueToMsgId(direct_const)
+  msgptr:
+        1  CFE_MSG_Init: CI_LAB_Global.HkTlm
+  global_store_fields:
+        1  CI_LAB_Global.AllowPassthrough
+        1  CI_LAB_Global.<base:i8>
+        2  CI_LAB_Global.HkTlm.Payload.IngestErrors
+        2  CI_LAB_Global.HkTlm.Payload.IngestPackets
+        1  CI_LAB_Global.NetBufPtr
+        1  CI_LAB_Global.NetBufSize
+        1  CI_LAB_Global.HkTlm.Payload
+        1  CI_LAB_Global.HkTlm.Payload.CommandErrorCounter
+  global_store_value_kinds:
+        7  direct_const
+        3  other
+  global_load_fields: 8
+  global_loads: 16
+  global_memops:
+        memset CI_LAB_Global. src=memset @ apps/ci_lab/fsw/src/ci_lab_app.c:109
+  loc_known_by_op:
+       45  llvm.call:known
+       21  llvm.getelementptr:unknown
+       12  llvm.getelementptr:known
+       49  llvm.load:known
+       22  llvm.mlir.addressof:unknown
+       55  llvm.mlir.constant:unknown
+        1  llvm.store:unknown
+       30  llvm.store:known
+       23  other:unknown
+       85  other:known
+======== mlir/ci_lab/ci_lab_cmds.dbg.mlir
+  defined_funcs: 4
+  api_calls_by_family:
+        2  CFE_EVS_api
+        2  CFE_SB_api
+  api_calls_by_callee:
+        2  CFE_EVS_SendEvent
+        1  CFE_SB_TimeStampMsg
+        1  CFE_SB_TransmitMsg
+  helper_calls_by_callee:
+  mid_origins:
+  msgptr:
+        1  CFE_SB_TransmitMsg: CI_LAB_Global.HkTlm
+  global_store_fields:
+        1  CI_LAB_Global.HkTlm.Payload
+        1  CI_LAB_Global.HkTlm.Payload.SocketConnected
+        1  CI_LAB_Global.Scheduled
+  global_store_value_kinds:
+        2  other
+        1  direct_const
+  global_load_fields: 2
+  global_loads: 2
+  global_memops:
+  loc_known_by_op:
+        6  llvm.call:known
+        6  llvm.getelementptr:unknown
+        2  llvm.load:known
+        5  llvm.mlir.addressof:unknown
+       20  llvm.mlir.constant:unknown
+        4  llvm.store:unknown
+        3  llvm.store:known
+        4  other:unknown
+       15  other:known
+======== mlir/ci_lab/ci_lab_dispatch.dbg.mlir
+  defined_funcs: 6
+  api_calls_by_family:
+        3  CFE_EVS_api
+        6  CFE_MSG_api
+        1  CFE_SB_api
+        9  CFE_SB_helper
+  api_calls_by_callee:
+        3  CFE_EVS_SendEvent
+        2  CFE_MSG_GetFcnCode
+        3  CFE_MSG_GetMsgId
+        1  CFE_MSG_GetSize
+        1  CFE_SB_IsValidMsgId
+  helper_calls_by_callee:
+        3  CFE_SB_MsgIdToValue
+        3  CFE_SB_MsgId_Equal
+        3  CFE_SB_ValueToMsgId
+  mid_origins:
+        3  CFE_SB_MsgId_Equal#0: alloca[0 store(s)]-> outparam_of:CFE_MSG_GetMsgId
+        3  CFE_SB_MsgId_Equal#1: global
+  msgptr:
+  global_store_fields:
+        3  CI_LAB_Global.HkTlm.Payload.CommandErrorCounter
+  global_store_value_kinds:
+        3  other
+  global_load_fields: 4
+  global_loads: 7
+  global_memops:
+        memcpy CI_LAB_TaskPipe.CMD_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/ci_lab/fsw/src/ci_lab_dispatch.c:130
+        memcpy CI_LAB_TaskPipe.SEND_HK_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/ci_lab/fsw/src/ci_lab_dispatch.c:131
+        memcpy CI_LAB_TaskPipe.READ_UPLINK_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/ci_lab/fsw/src/ci_lab_dispatch.c:132
+  loc_known_by_op:
+       26  llvm.call:known
+       12  llvm.getelementptr:unknown
+       14  llvm.getelementptr:known
+       39  llvm.load:known
+        9  llvm.mlir.addressof:unknown
+       37  llvm.mlir.constant:unknown
+        8  llvm.store:unknown
+       12  llvm.store:known
+       25  other:unknown
+       60  other:known
+======== mlir/ci_lab/ci_lab_passthru_decode.dbg.mlir
+  defined_funcs: 2
+  api_calls_by_family:
+        3  CFE_EVS_api
+        1  CFE_MSG_api
+        1  CFE_SB_api
+  api_calls_by_callee:
+        3  CFE_EVS_SendEvent
+        1  CFE_MSG_GetSize
+        1  CFE_SB_AllocateMessageBuffer
+  helper_calls_by_callee:
+  mid_origins:
+  msgptr:
+  global_store_fields:
+  global_store_value_kinds:
+  global_load_fields: 0
+  global_loads: 0
+  global_memops:
+  loc_known_by_op:
+        5  llvm.call:known
+       19  llvm.load:known
+        3  llvm.mlir.addressof:unknown
+       14  llvm.mlir.constant:unknown
+        5  llvm.store:unknown
+       15  llvm.store:known
+       14  other:unknown
+       26  other:known

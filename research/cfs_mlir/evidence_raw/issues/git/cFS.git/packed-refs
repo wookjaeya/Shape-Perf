@@ -1,0 +1,42 @@
+# pack-refs with: peeled fully-peeled sorted 
+ab07d9496dea3928b25a7480f1363251dc7153f2 refs/heads/bootes.dev
+5a9b075cd4c818ee8555f349a9f78ba5632d0384 refs/heads/dev
+6c84e08621d7c1b264f980600966d59ae7073db0 refs/heads/draco-integration
+c9694b67720570fa098b143d79a3f802190a5454 refs/heads/equuleus-rc1-correction
+0c4f5d81ab194b08ecfad31685e6ec149d8d0a94 refs/heads/eval-cert1
+4724c7d8513675cd200d065a3851cf481f2f4583 refs/heads/eval-cert2
+871a2d7513fd2b7b3db8fb767c0c377ebb66cecf refs/heads/eval-cert3
+ed26455b48105baa451d1be683b5854ce49964e7 refs/heads/eval-cert4
+2b333b2d06dfc064ba3f321fc5bcc03ca718b56a refs/heads/gh-pages
+0bdc37a230667cadfcd31226322b9469d288c72d refs/heads/ic-latest-main
+9af0ee666b020c1a05809345ab13cd7803ee49a8 refs/heads/integration-candidate
+d34d6ef663a3f9e60f1697e057f2e7e44874cccb refs/heads/jph-update-bundle
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3 refs/heads/main
+85457b2fae8e4b6a91d328779277e96f7bcdfb56 refs/heads/part-686-resolve-conflict
+ef8604519ff19b6373694bf8e2519a05b9eacbcb refs/heads/v7.0.1-integration
+2f487a70b2d24ba34fa958555000085f8d73ecd3 refs/tags/6.7.0-bv
+^df359c1bebeb9b0d312061d65c721e35141aafce
+da695db7daaf3ca417662b81c5b9ea48c67be78f refs/tags/6.7.19-eval
+1fe6e514a72f51103ab0cbe91ca91aae8770da4e refs/tags/6.7.3-bv
+d7bff9381669d9ecdb14f688ef3080924d4f51c9 refs/tags/bootes-rc1
+^3e14c1bc530c3839c44123b26a33f057646bad32
+211449fc86d056c857024223841830960c8f3ee8 refs/tags/bootes-rc1+dev83
+^c82cdf377d372a1855b16633e9cc44725dfc600a
+e522b044f6d69b42ab823338bbe375c114ad562b refs/tags/bootes-rc2
+4d681b3baf11582bdcfd25fcaf1603ca9ab4f0d0 refs/tags/caelum-rc2
+69572b0d82b262ea974c4095b96d8c29ac3a27c7 refs/tags/caelum-rc3
+ed26455b48105baa451d1be683b5854ce49964e7 refs/tags/caelum-rc4
+fcd8eb75d665c6354a8b1df9452e7e8ca7eb7035 refs/tags/draco-eval1
+963b3ab0be55ea679207aa140c3002d1a6c8ffea refs/tags/draco-rc1
+89d0bda572edc99b868a9f4ab8d214755d38602e refs/tags/draco-rc2
+987f852a36cc5d77e6ca13fb87c0f4882b28225d refs/tags/draco-rc3
+5b0cc7b1b0fa0a52d9be0e35798dc32e58ec6af3 refs/tags/draco-rc4
+43a2df073e4b431f3aff282003b3dcfd10dbcbc5 refs/tags/draco-rc5
+e7e199bac7b3d1593dd1d04cecdc94e61a194786 refs/tags/equuleus-rc1
+^b106faa6cfd348e4293dd8c3cba7b81b66e00486
+05d60929cc9bd9e789f4db24687d66b3058b32f2 refs/tags/v6.6.0a
+2f63455572c3849ffa1285a837e4841416b152de refs/tags/v6.7.0a
+^3684ce90fbd62b92d894e1c30e9eeef749ea02d0
+b4ec679b2fd9d825610515ceb186cbfa80c60cfc refs/tags/v7.0.0
+54923de58353747c3f0bb737bc402ecea2ed8ed4 refs/tags/v7.0.0-multitarget-demo
+088b2fa828db9ff7e00733f1908e0eeb59f66ce3 refs/tags/v7.0.1

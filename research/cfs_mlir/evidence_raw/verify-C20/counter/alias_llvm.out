@@ -1,0 +1,46 @@
+Testing : Testing : ""eprxotb_eg"et"
+
+g_state#0 <-> g_other#0: MayAlias
+g_state#0 <-> g_state.att#0: MustAlias
+g_other#0 <-> g_state.att#0: MayAlias
+g_state#0 <-> g_state.valid#0: MustAlias
+g_other#0 <-> g_state.valid#0: MayAlias
+g_state.att#0 <-> g_state.valid#0: MustAlias
+g_state#0 <-> alloca#0: NoAlias
+g_other#0 <-> alloca#0: NoAlias
+g_state.att#0 <-> alloca#0: NoAlias
+g_state.valid#0 <-> alloca#0: NoAlias
+g_state#0 <-> callres#0: MayAlias
+g_other#0 <-> callres#0: MayAlias
+g_state.att#0 <-> callres#0: MayAlias
+g_state.valid#0 <-> callres#0: MayAlias
+alloca#0 <-> callres#0: MayAlias
+g_state#0 <-> func.region0#0: MayAlias
+g_other#0 <-> func.region0#0: MayAlias
+g_state.att#0 <-> func.region0#0: MayAlias
+g_state.valid#0 <-> func.region0#0: MayAlias
+alloca#0 <-> func.region0#0: NoAlias
+callres#0 <-> func.region0#0: MayAlias
+g_state#0 <-> func.region0#1: MayAlias
+g_other#0 <-> func.region0#1: MayAlias
+g_state.att#0 <-> func.region0#1: MayAlias
+g_state.valid#0 <-> func.region0#1: MayAlias
+alloca#0 <-> func.region0#1: NoAlias
+callres#0 <-> func.region0#1: MayAlias
+func.region0#0 <-> func.region0#1: MayAlias
+module {
+  llvm.mlir.global external @g_state() {addr_space = 0 : i32} : !llvm.struct<"State_t", (f64, i32, i32)>
+  llvm.mlir.global external @g_other() {addr_space = 0 : i32} : !llvm.struct<"Other_t", (f64)>
+  llvm.func @ext_get() -> !llvm.ptr
+  llvm.func @probe(%arg0: !llvm.ptr, %arg1: !llvm.ptr) attributes {test.ptr = "func"} {
+    %0 = llvm.mlir.constant(1 : i32) : i32
+    %1 = llvm.mlir.addressof @g_state {test.ptr = "g_state"} : !llvm.ptr
+    %2 = llvm.mlir.addressof @g_other {test.ptr = "g_other"} : !llvm.ptr
+    %3 = llvm.getelementptr %1[0, 0] {test.ptr = "g_state.att"} : (!llvm.ptr) -> !llvm.ptr, !llvm.struct<"State_t", (f64, i32, i32)>
+    %4 = llvm.getelementptr %1[0, 1] {test.ptr = "g_state.valid"} : (!llvm.ptr) -> !llvm.ptr, !llvm.struct<"State_t", (f64, i32, i32)>
+    %5 = llvm.alloca %0 x f64 {test.ptr = "alloca"} : (i32) -> !llvm.ptr
+    %6 = llvm.call @ext_get() {test.ptr = "callres"} : () -> !llvm.ptr
+    llvm.return
+  }
+}
+

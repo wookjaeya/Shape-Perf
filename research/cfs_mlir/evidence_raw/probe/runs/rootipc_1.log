@@ -1,0 +1,230 @@
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FCC12777000, Size = 00080000 Status = 0
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-01:43:44.51913 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-01:43:44.51920 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-01:43:44.51948 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-01:43:44.51948 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-01:43:44.51948 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-01:43:44.51950 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-01:43:44.51962 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-01:43:44.51964 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-01:43:44.51964 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-01:43:44.51966 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-01:43:44.51995 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-01:43:44.52037 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+EVS Port1 1980-012-14:03:20.05242 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.05245 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 56147
+EVS Port1 1980-012-14:03:20.05247 66/1/CFE_ES 91: Version Info: Mission SampleMission, version git:5a9b075
+EVS Port1 1980-012-14:03:20.05249 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:546a002
+EVS Port1 1980-012-14:03:20.05249 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:546a002
+EVS Port1 1980-012-14:03:20.05250 66/1/CFE_ES 91: Version Info: Module ES, version git:546a002
+EVS Port1 1980-012-14:03:20.05250 66/1/CFE_ES 91: Version Info: Module EVS, version git:546a002
+EVS Port1 1980-012-14:03:20.05250 66/1/CFE_ES 91: Version Info: Module FS, version git:546a002
+EVS Port1 1980-012-14:03:20.05252 66/1/CFE_ES 91: Version Info: Module SB, version git:546a002
+EVS Port1 1980-012-14:03:20.05252 66/1/CFE_ES 91: Version Info: Module TBL, version git:546a002
+EVS Port1 1980-012-14:03:20.05253 66/1/CFE_ES 91: Version Info: Module TIME, version git:546a002
+EVS Port1 1980-012-14:03:20.05253 66/1/CFE_ES 91: Version Info: Module OSAL, version git:dad0ee9
+EVS Port1 1980-012-14:03:20.05253 66/1/CFE_ES 91: Version Info: Module PSP, version git:53df1d5
+EVS Port1 1980-012-14:03:20.05255 66/1/CFE_ES 91: Version Info: Module MSG, version git:546a002
+EVS Port1 1980-012-14:03:20.05256 66/1/CFE_ES 91: Version Info: Module SBR, version git:546a002
+EVS Port1 1980-012-14:03:20.05258 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:546a002
+EVS Port1 1980-012-14:03:20.05259 66/1/CFE_ES 92: Build 202610010647 by root@vm, config sample
+EVS Port1 1980-012-14:03:20.15052 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+1980-012-14:03:20.25068 CFE_SB_AppInit: Registered 4 events for filtering
+EVS Port1 1980-012-14:03:20.25074 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.25076 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+EVS Port1 1980-012-14:03:20.35101 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.35102 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+EVS Port1 1980-012-14:03:20.45164 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.45167 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+1980-012-14:03:20.50129 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50132 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50134 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50143 CFE_ES_ParseFileEntry: Loading shared library: /cf/cfe_assert.so
+1980-012-14:03:20.50163 [BEGIN] CFE FUNCTIONAL TEST
+1980-012-14:03:20.50165 [BEGIN] 01 CFE-STARTUP
+1980-012-14:03:20.50175 CFE_ES_ParseFileEntry: Loading shared library: /cf/sample_lib.so
+SAMPLE Lib Initialized.Sample Lib v7.0.0+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+1980-012-14:03:20.50192 CFE_ES_ParseFileEntry: Loading file: /cf/sch_lab.so, APP: SCH_LAB
+1980-012-14:03:20.50213 CFE_ES_ParseFileEntry: Loading file: /cf/ci_lab.so, APP: CI_LAB
+1980-012-14:03:20.50235 CFE_ES_ParseFileEntry: Loading file: /cf/to_lab.so, APP: TO_LAB
+1980-012-14:03:20.50254 CFE_ES_ParseFileEntry: Loading file: /cf/sample_app.so, APP: SAMPLE_APP
+1980-012-14:03:20.50269 CFE_ES_ParseFileEntry: Loading file: /cf/lc.so, APP: LC
+1980-012-14:03:20.50286 CFE_ES_ParseFileEntry: Loading file: /cf/cf.so, APP: CF
+1980-012-14:03:20.50306 CFE_ES_ParseFileEntry: Loading file: /cf/ds.so, APP: DS
+1980-012-14:03:20.50329 CFE_ES_ParseFileEntry: Loading file: /cf/fm.so, APP: FM
+1980-012-14:03:20.50348 CFE_ES_ParseFileEntry: Loading file: /cf/hk.so, APP: HK
+1980-012-14:03:20.50369 CFE_ES_ParseFileEntry: Loading file: /cf/hs.so, APP: HS
+1980-012-14:03:20.50392 CFE_ES_ParseFileEntry: Loading file: /cf/mm.so, APP: MM
+1980-012-14:03:20.50410 CFE_ES_ParseFileEntry: Loading file: /cf/sc.so, APP: SC
+1980-012-14:03:20.50431 CFE_ES_ParseFileEntry: Loading file: /cf/md.so, APP: MD
+1980-012-14:03:20.50447 CFE_ES_ParseFileEntry: Loading file: /cf/cs.so, APP: CS
+1980-012-14:03:20.50466 CFE_ES_ParseFileEntry: Loading file: /cf/sbn.so, APP: SBN
+SCH Lab Initialized.SCH Lab v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.55259 66/1/TO_LAB 1: TO Lab Initialized.TO Lab v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled, Awaiting enable command.
+EVS Port1 1980-012-14:03:20.55267 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender TO_LAB
+EVS Port1 1980-012-14:03:20.55290 66/1/SAMPLE_APP 1: Sample App Initialized.Sample App v7.0.0+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.55305 66/1/LC 56: WDT verify results: good = 0, bad = 0, unused = 176
+EVS Port1 1980-012-14:03:20.55323 66/1/LC 66: ADT verify results: good = 0, bad = 0, unused = 176
+EVS Port1 1980-012-14:03:20.55325 66/1/LC 23: LC use of Critical Data Store disabled, activity mask = 0x00991990
+EVS Port1 1980-012-14:03:20.55331 66/1/LC 2: LC Initialized. Version 7.0.1.255
+1980-012-14:03:20.55470 CI_LAB listening on UDP port: 1234
+EVS Port1 1980-012-14:03:20.55473 66/1/CI_LAB 3: CI Lab Initialized.CI Lab App v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.55632 66/1/DS 10: Destination file table verify results: good entries = 6, bad = 0, unused = 10
+EVS Port1 1980-012-14:03:20.55659 66/1/FM 80: Free Space Table verify results: good entries = 3, bad = 0, unused = 5
+EVS Port1 1980-012-14:03:20.55691 66/1/MM 1: MM Initialized. Version 7.0.1.255
+EVS Port1 1980-012-14:03:20.55744 66/1/SBN 2: SBN subscribed to command pipe SBN_CMD_MID 0x18FA
+EVS Port1 1980-012-14:03:20.55815 66/1/DS 12: Filter table verify results: good entries = 14, bad = 0, unused = 242
+EVS Port1 1980-012-14:03:20.55833 66/1/FM 1: Initialization complete: version 7.0.1.255
+EVS Port1 1980-012-14:03:20.55850 66/1/MD 52: MD Dwell Tbl verify results: good = 0, bad = 0, unused = 25
+EVS Port1 1980-012-14:03:20.55880 66/1/CF 20: CF Initialized. Version 7.0.1.255
+EVS Port1 1980-012-14:03:20.55923 66/1/CS 144: CS EEPROM Table verification results: good = 0, bad = 0, unused = 16
+EVS Port1 1980-012-14:03:20.55982 66/1/HS 54: ExeCount verify results: good = 5, bad = 0, unused = 27
+EVS Port1 1980-012-14:03:20.56004 66/1/MD 52: MD Dwell Tbl verify results: good = 0, bad = 0, unused = 25
+EVS Port1 1980-012-14:03:20.56021 66/1/CS 107: CS EEPROM Table: No valid entries in the table
+EVS Port1 1980-012-14:03:20.56065 66/1/HK 1: HK Initialized.  Version 7.0.1.255
+EVS Port1 1980-012-14:03:20.56079 66/1/HS 50: AppMon verify results: good = 0, bad = 0, unused = 32
+EVS Port1 1980-012-14:03:20.56132 66/1/MD 52: MD Dwell Tbl verify results: good = 0, bad = 0, unused = 25
+EVS Port1 1980-012-14:03:20.56159 66/1/CS 143: CS Memory Table verification results: good = 0, bad = 0, unused = 16
+EVS Port1 1980-012-14:03:20.56173 66/1/HS 52: EventMon verify results: good = 0, bad = 0, unused = 16
+EVS Port1 1980-012-14:03:20.56222 66/1/SC 21: RTS table files not loaded at initialization = 0 of 4
+EVS Port1 1980-012-14:03:20.56231 66/1/CS 107: CS Memory Table: No valid entries in the table
+EVS Port1 1980-012-14:03:20.56233 66/1/HS 56: MsgActs verify results: good = 2, bad = 0, unused = 6
+EVS Port1 1980-012-14:03:20.56240 66/1/MD 52: MD Dwell Tbl verify results: good = 0, bad = 0, unused = 25
+EVS Port1 1980-012-14:03:20.56289 66/1/MD 7: Dwell Tables Recovered: 0, Dwell Tables Initialized: 4
+EVS Port1 1980-012-14:03:20.56317 66/1/CS 139: CS Tables Table verification results: good = 1, bad = 0, unused = 23
+EVS Port1 1980-012-14:03:20.56332 66/1/MD 1: MD Initialized.  Version 7.0.1.255
+1980-012-14:03:20.56391 HS_SysMonInit(): System Monitor using PSP device ID 0110ff05
+open(/proc/schedstat): No such file or directory
+1980-012-14:03:20.56402 HS_SysMonInit(): Unable to start device 0110ff05
+EVS Port1 1980-012-14:03:20.56410 66/1/SC 9: SC Initialized. Version 7.0.1.255
+EVS Port1 1980-012-14:03:20.56422 66/1/HS 74: Error in system monitor initialization, RC=0xC8000005
+EVS Port1 1980-012-14:03:20.56439 66/1/CS 142: CS Apps Table verification results: good = 0, bad = 0, unused = 24
+EVS Port1 1980-012-14:03:20.56442 66/1/DS 1: Application initialized, version 7.0.1.255, data at 0x7fcc125f8480
+EVS Port1 1980-012-14:03:20.56446 66/1/CS 108: CS Apps Table: No valid entries in the table
+EVS Port1 1980-012-14:03:20.56449 66/1/CS 127: OS Text Segment disabled due to platform
+EVS Port1 1980-012-14:03:20.56451 66/1/CS 1: CS Initialized. Version 7.0.1.255
+1980-012-14:03:20.60498 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+1980-012-14:03:20.60500 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+EVS Port1 1980-012-14:03:20.60797 66/1/FM 72: Child Task initialization complete
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./core-cpu1: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/cfe_assert.so: undefined symbol: SBN_UDP_Ops
+EVS Port1 1980-012-14:03:20.60859 66/1/SBN 4: checking if module (UDP) already loaded
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/sample_lib.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/sch_lab.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/ci_lab.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/to_lab.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/sample_app.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/lc.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/cf.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/ds.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/fm.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/hk.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/hs.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/mm.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/sc.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/md.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/cs.so: undefined symbol: SBN_UDP_Ops
+OS_GenericSymbolLookup_Impl():114:SBN_UDP_Ops: ./cf/sbn.so: undefined symbol: SBN_UDP_Ops
+EVS Port1 1980-012-14:03:20.60874 66/1/SBN 4: symbol not yet loaded (SBN_UDP_Ops)
+EVS Port1 1980-012-14:03:20.60877 66/1/SBN 4: loading module (Name=UDP, File=/cf/sbn_udp.so)
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./core-cpu1: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/cfe_assert.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sample_lib.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sch_lab.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/ci_lab.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/to_lab.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sample_app.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/lc.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/cf.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/ds.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/fm.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/hk.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/hs.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/mm.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sc.so: undefined symbol: SBN_F_Remap
+EVS Port1 1980-012-14:03:20.60891 66/1/SBN 4: validating symbol load (SBN_UDP_Ops)
+EVS Port1 1980-012-14:03:20.60896 66/1/SBN 4: initializing protocol module
+SBN_UDP Lib Initialized.
+EVS Port1 1980-012-14:03:20.60897 66/1/SBN 4: protocol module initialized
+EVS Port1 1980-012-14:03:20.60899 66/1/SBN 4: checking if module (Remap) already loaded
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/md.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/cs.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sbn.so: undefined symbol: SBN_F_Remap
+OS_GenericSymbolLookup_Impl():114:SBN_F_Remap: ./cf/sbn_udp.so: undefined symbol: SBN_F_Remap
+EVS Port1 1980-012-14:03:20.60908 66/1/SBN 4: symbol not yet loaded (SBN_F_Remap)
+EVS Port1 1980-012-14:03:20.60911 66/1/SBN 4: loading module (Name=Remap, File=/cf/sbn_f_remap.so)
+EVS Port1 1980-012-14:03:20.60923 66/1/SBN 4: validating symbol load (SBN_F_Remap)
+EVS Port1 1980-012-14:03:20.60926 66/1/SBN 4: initializing filter module
+EVS Port1 1980-012-14:03:20.60939 66/1/SBN 4096: SBN_F_Remap Lib Initialized.
+EVS Port1 1980-012-14:03:20.60942 66/1/SBN 4: filter module initialized
+EVS Port1 1980-012-14:03:20.60945 66/1/SBN 4: configuring peer (SC=66, CPU=1)...
+EVS Port1 1980-012-14:03:20.60948 66/1/SBN 4: found new highest net id: 0
+EVS Port1 1980-012-14:03:20.60951 66/1/SBN 4: increasing net count to 1
+EVS Port1 1980-012-14:03:20.60954 66/1/SBN 4: peer is this processor: loading net 0
+EVS Port1 1980-012-14:03:20.60957 66/1/SBN 258: configuring net (NetData=0x7fcc123888b4, Address=127.0.0.1:3234)
+EVS Port1 1980-012-14:03:20.60961 66/1/SBN 258: addr host: '127.0.0.1'
+EVS Port1 1980-012-14:03:20.60969 66/1/SBN 258: addr port: '3234'
+EVS Port1 1980-012-14:03:20.60974 66/1/SBN 258: configured (NetData=0x7fcc123888b4)
+EVS Port1 1980-012-14:03:20.60977 66/1/SBN 4: configuring peer (SC=66, CPU=2)...
+EVS Port1 1980-012-14:03:20.60980 66/1/SBN 4: peer is other processor: loading peer onto net 0
+EVS Port1 1980-012-14:03:20.60983 66/1/SBN 258: configuring peer (SC=66, CPU=2, Address=127.0.0.1:3235)
+EVS Port1 1980-012-14:03:20.60986 66/1/SBN 258: addr host: '127.0.0.1'
+EVS Port1 1980-012-14:03:20.60990 66/1/SBN 258: addr port: '3235'
+EVS Port1 1980-012-14:03:20.60993 66/1/SBN 258: configured peer (SC=66, CPU=2, Address=127.0.0.1:3235)
+EVS Port1 1980-012-14:03:20.60998 66/1/SBN 4: configuring peer (SC=66, CPU=3)...
+EVS Port1 1980-012-14:03:20.61001 66/1/SBN 4: peer is other processor: loading peer onto net 0
+EVS Port1 1980-012-14:03:20.61004 66/1/SBN 258: configuring peer (SC=66, CPU=3, Address=127.0.0.1:3236)
+EVS Port1 1980-012-14:03:20.61007 66/1/SBN 258: addr host: '127.0.0.1'
+EVS Port1 1980-012-14:03:20.61012 66/1/CFE_EVS 44: Events squelched, AppName = SBN
+EVS Port1 1980-012-14:03:20.65298 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65299 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65301 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65301 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65303 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65303 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65304 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65306 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65307 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65309 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65312 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65316 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65325 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65328 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65332 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65333 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB
+EVS Port1 1980-012-14:03:20.65341 66/1/TO_LAB 19: L550 TO Lab subscribed to 37 messages from the table
+EVS Port1 1980-012-14:03:21.00009 66/1/CFE_TIME 21: Stop FLYWHEEL
+1980-012-14:03:24.04878 CFE_ES_RunExceptionScan: ExceptionID 0x1110000 in TaskID 0: Caught SIGINT
+1980-012-14:03:24.04881 CFE_ES_RunExceptionScan: Processor Reset count not reached (0/2)
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+
+CFE_PSP: Shutdown initiated - Exiting cFE
+CI delete callback -- Closing CI Network socket.
+TO delete callback -- Closing TO Network socket.

@@ -1,0 +1,1868 @@
+{
+ "summary": {
+  "mlir_opt/hk/hk_app.dbg.mlir": {
+   "defined_funcs": 5,
+   "api_calls_by_family": {
+    "CFE_ES_api": 13,
+    "CFE_EVS_api": 39,
+    "CFE_MSG_api": 2,
+    "CFE_SB_api": 9,
+    "CFE_TBL_api": 21
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_ES_PoolCreate": 2,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 5,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 37,
+    "CFE_MSG_Init": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 6,
+    "CFE_TBL_GetAddress": 6,
+    "CFE_TBL_Load": 3,
+    "CFE_TBL_Manage": 6,
+    "CFE_TBL_Register": 6
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 2,
+    "CFE_SB_Subscribe#0: direct_const": 6
+   },
+   "msgptr": {
+    "CFE_MSG_Init: HK_AppData.": 2
+   },
+   "global_store_fields": {
+    "HK_AppData.RunStatus": 5,
+    "HK_AppData.CommandCounter": 3,
+    "HK_AppData.CommandErrorCounter": 3,
+    "HK_AppData.CombinedPacketsSent": 3,
+    "HK_AppData.MissingDataCtr": 3
+   },
+   "global_store_value_kinds": {
+    "direct_const": 17
+   },
+   "global_load_fields": 6,
+   "global_loads": 29,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 89,
+    "llvm.getelementptr:unknown": 12,
+    "llvm.getelementptr:known": 20,
+    "llvm.load:known": 30,
+    "llvm.mlir.addressof:unknown": 39,
+    "llvm.mlir.addressof:known": 21,
+    "llvm.mlir.constant:unknown": 55,
+    "llvm.mlir.constant:known": 28,
+    "llvm.store:known": 18,
+    "other:unknown": 6,
+    "other:known": 215
+   }
+  },
+  "mlir_opt/hk/hk_cmds.dbg.mlir": {
+   "defined_funcs": 4,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 2,
+    "CFE_SB_api": 2
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 2,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {
+    "CFE_SB_TransmitMsg: HK_AppData.": 1
+   },
+   "global_store_fields": {
+    "HK_AppData.Payload.CommandCounter": 1,
+    "HK_AppData.Payload.CommandErrorCounter": 1,
+    "HK_AppData.Payload.MissingDataCtr": 1,
+    "HK_AppData.Payload.CombinedPacketsSent": 1,
+    "HK_AppData.Payload.MemPoolHandle": 1,
+    "HK_AppData.RunStatus": 1,
+    "HK_AppData.CommandCounter": 1
+   },
+   "global_store_value_kinds": {
+    "global": 5,
+    "direct_const": 1,
+    "other": 1
+   },
+   "global_load_fields": 5,
+   "global_loads": 6,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 7,
+    "llvm.getelementptr:unknown": 8,
+    "llvm.getelementptr:known": 8,
+    "llvm.load:known": 7,
+    "llvm.mlir.addressof:unknown": 4,
+    "llvm.mlir.constant:unknown": 14,
+    "llvm.store:known": 7,
+    "other:known": 16
+   }
+  },
+  "mlir_opt/hk/hk_dispatch.dbg.mlir": {
+   "defined_funcs": 11,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 14,
+    "CFE_MSG_api": 36,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 14,
+    "CFE_MSG_GetFcnCode": 9,
+    "CFE_MSG_GetMsgId": 15,
+    "CFE_MSG_GetSize": 12,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "HK_AppData.CommandErrorCounter": 8,
+    "HK_AppPipe.CMD_MID.Value": 1,
+    "HK_AppPipe.SEND_HK_MID.Value": 1,
+    "HK_AppPipe.SEND_COMBINED_PKT_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 8,
+    "direct_const": 3
+   },
+   "global_load_fields": 4,
+   "global_loads": 12,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 62,
+    "llvm.getelementptr:unknown": 2,
+    "llvm.getelementptr:known": 20,
+    "llvm.load:known": 64,
+    "llvm.mlir.addressof:unknown": 14,
+    "llvm.mlir.addressof:known": 4,
+    "llvm.mlir.constant:unknown": 57,
+    "llvm.mlir.constant:known": 24,
+    "llvm.store:known": 32,
+    "other:unknown": 19,
+    "other:known": 384
+   }
+  },
+  "mlir_opt/hk/hk_utils.dbg.mlir": {
+   "defined_funcs": 13,
+   "api_calls_by_family": {
+    "CFE_ES_api": 6,
+    "CFE_EVS_api": 35,
+    "CFE_MSG_api": 6,
+    "CFE_SB_api": 21,
+    "CFE_TBL_api": 14
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_GetPoolBuf": 3,
+    "CFE_ES_PutPoolBuf": 3,
+    "CFE_EVS_SendEvent": 35,
+    "CFE_MSG_GetMsgId": 2,
+    "CFE_MSG_GetSize": 1,
+    "CFE_MSG_Init": 3,
+    "CFE_SB_IsValidMsgId": 13,
+    "CFE_SB_Subscribe": 3,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_SB_Unsubscribe": 3,
+    "CFE_TBL_DumpToBuffer": 2,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_TBL_GetStatus": 4,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Update": 2,
+    "CFE_TBL_Validate": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: load_other": 3,
+    "CFE_SB_Subscribe#0: load_other": 3,
+    "CFE_SB_Unsubscribe#0: load_other": 3
+   },
+   "msgptr": {
+    "CFE_MSG_Init: alloca[1 store(s)]->other outparam_of:CFE_ES_GetPoolBuf": 3,
+    "CFE_SB_TransmitMsg: other": 1
+   },
+   "global_store_fields": {
+    "HK_AppData.MissingDataCtr": 1,
+    "HK_AppData.CombinedPacketsSent": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2
+   },
+   "global_load_fields": 8,
+   "global_loads": 50,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 86,
+    "llvm.getelementptr:unknown": 16,
+    "llvm.getelementptr:known": 208,
+    "llvm.load:known": 161,
+    "llvm.mlir.addressof:unknown": 37,
+    "llvm.mlir.addressof:known": 11,
+    "llvm.mlir.constant:unknown": 99,
+    "llvm.mlir.constant:known": 20,
+    "llvm.store:known": 31,
+    "other:unknown": 29,
+    "other:known": 964
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "mlir_opt/hk/hk_app.dbg.mlir",
+   "n_defined_funcs": 5,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "HK_AppInit",
+    "HK_AppMain",
+    "HK_ResetHkData",
+    "HK_TableInit"
+   ],
+   "calls": {
+    "CFE_ES_|api": 13,
+    "CFE_MSG_|api": 2,
+    "CFE_EVS_|api": 39,
+    "CFE_SB_|api": 9,
+    "CFE_TBL_|api": 21
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_MSG_Init": 2,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 5,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_EVS_SendEvent": 37,
+    "CFE_SB_Subscribe": 6,
+    "CFE_ES_PoolCreate": 2,
+    "CFE_TBL_Register": 6,
+    "CFE_TBL_Load": 3,
+    "CFE_TBL_Manage": 6,
+    "CFE_TBL_GetAddress": 6,
+    "CFE_ES_RunLoop": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_ES_ExitApp": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2203
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:139"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:163"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:175"
+    },
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:187"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2203
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:139"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:163"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:175"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:187"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "HK_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:139"
+    },
+    {
+     "func": "HK_AppInit",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:139"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:136"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:350"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:351"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:352"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:353"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:63"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:99"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:112"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:136"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:350"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:351"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:352"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:353"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:350"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:351"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:352"
+    },
+    {
+     "func": "HK_ResetHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/hk/fsw/src/hk_app.c:353"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:163"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:175"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:187"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:276"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:286"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:296"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:306"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:317"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:79"
+    },
+    {
+     "func": "HK_AppMain",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:124"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:163"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:175"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:187"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:276"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:286"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:296"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:306"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:317"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    },
+    {
+     "func": "HK_AppInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:276"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:286"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:296"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:306"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:317"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    },
+    {
+     "func": "HK_TableInit",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_app.c:327"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/hk/hk_cmds.dbg.mlir",
+   "n_defined_funcs": 4,
+   "defined_funcs": [
+    "HK_NoopCmd",
+    "HK_ResetCountersCmd",
+    "HK_SendCombinedPktCmd",
+    "HK_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_SB_|api": 2,
+    "CFE_EVS_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_EVS_SendEvent": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [
+    {
+     "func": "HK_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "HK_AppData",
+      "path": []
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:73"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CommandCounter"
+      ]
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:65"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CommandErrorCounter"
+      ]
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:66"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "MissingDataCtr"
+      ]
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:67"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "CombinedPacketsSent"
+      ]
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:68"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "Payload",
+      "MemPoolHandle"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "HK_AppData",
+      "path": [
+       "MemPoolHandle"
+      ]
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:69"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:78"
+    },
+    {
+     "func": "HK_NoopCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_cmds.c:99"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:65"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:66"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:67"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:68"
+    },
+    {
+     "func": "HK_SendHkCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:69"
+    },
+    {
+     "func": "HK_NoopCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_cmds.c:99"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/hk/hk_dispatch.dbg.mlir",
+   "n_defined_funcs": 11,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "HK_AppPipe",
+    "HK_AppProcessCmd",
+    "HK_NoopVerifyDispatch",
+    "HK_ResetCountersVerifyDispatch",
+    "HK_SendCombinedPktVerifyDispatch",
+    "HK_SendHkVerifyDispatch",
+    "HK_VerifyCmdLength",
+    "HK_VerifyMsgLength"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 36,
+    "CFE_EVS_|api": 14,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 12,
+    "CFE_MSG_GetMsgId": 15,
+    "CFE_MSG_GetFcnCode": 9,
+    "CFE_EVS_SendEvent": 14,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "HK_NoopVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_ResetCountersVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:193"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6298
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:214"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6299
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:215"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_COMBINED_PKT_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6300
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:216"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:193"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_NoopVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_ResetCountersVerifyDispatch",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppProcessCmd",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:193"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:212"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:221"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.SEND_COMBINED_PKT_MID",
+     "path": [],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:226"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:230"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:141"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:160"
+    },
+    {
+     "func": "HK_AppPipe",
+     "sym": "HK_AppData",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/hk/fsw/src/hk_dispatch.c:193"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/hk/hk_utils.dbg.mlir",
+   "n_defined_funcs": 13,
+   "defined_funcs": [
+    "CFE_ResourceId_ToInteger",
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "HK_CheckForMissingData",
+    "HK_CheckStatusOfCopyTable",
+    "HK_CheckStatusOfDumpTable",
+    "HK_CheckStatusOfTables",
+    "HK_ProcessIncomingHkData",
+    "HK_ProcessNewCopyTable",
+    "HK_SendCombinedHkPacket",
+    "HK_SetFlagsToNotPresent",
+    "HK_TearDownOldCopyTable",
+    "HK_ValidateHkCopyTable"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 6,
+    "CFE_EVS_|api": 35,
+    "CFE_SB_|api": 21,
+    "CFE_ES_|api": 6,
+    "CFE_TBL_|api": 14
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetMsgId": 2,
+    "CFE_MSG_GetSize": 1,
+    "CFE_EVS_SendEvent": 35,
+    "CFE_SB_IsValidMsgId": 13,
+    "CFE_ES_GetPoolBuf": 3,
+    "CFE_MSG_Init": 3,
+    "CFE_SB_Subscribe": 3,
+    "CFE_ES_PutPoolBuf": 3,
+    "CFE_SB_Unsubscribe": 3,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_TBL_GetStatus": 4,
+    "CFE_TBL_Validate": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Update": 2,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_TBL_DumpToBuffer": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "kind": "other",
+      "op": "llvm.inttoptr"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:499"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "alloca",
+      "n_stores": 1,
+      "stored": [
+       {
+        "kind": "other",
+        "op": "llvm.mlir.zero"
+       }
+      ],
+      "outparam_of": [
+       "CFE_ES_GetPoolBuf"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:305"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:485"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/hk/fsw/src/hk_utils.c:501"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "HK_ProcessIncomingHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:46"
+    },
+    {
+     "func": "HK_ProcessIncomingHkData",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:48"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:285"
+    },
+    {
+     "func": "HK_ProcessNewCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:402"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:426"
+    },
+    {
+     "func": "HK_TearDownOldCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:463"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:704"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:706"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "MissingDataCtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:485"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CombinedPacketsSent"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:501"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:740"
+    },
+    {
+     "func": "HK_SendCombinedHkPacket",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:742"
+    },
+    {
+     "func": "HK_CheckForMissingData",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:704"
+    },
+    {
+     "func": "HK_CheckForMissingData",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:706"
+    },
+    {
+     "func": "HK_SetFlagsToNotPresent",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:740"
+    },
+    {
+     "func": "HK_SetFlagsToNotPresent",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:742"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:551"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:556"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:574"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:574"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:402"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:426"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:577"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:584"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:589"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:594"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:594"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:285"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:660"
+    },
+    {
+     "func": "HK_CheckStatusOfTables",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:665"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:551"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:556"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:574"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:574"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:402"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:426"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:436"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:577"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:584"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:589"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CopyTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:594"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTablePtr"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:594"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "MemPoolHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:285"
+    },
+    {
+     "func": "HK_CheckStatusOfCopyTable",
+     "sym": "HK_AppData",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:322"
+    },
+    {
+     "func": "HK_CheckStatusOfDumpTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:660"
+    },
+    {
+     "func": "HK_CheckStatusOfDumpTable",
+     "sym": "HK_AppData",
+     "path": [
+      "RuntimeTableHandle"
+     ],
+     "loc": "apps/hk/fsw/src/hk_utils.c:665"
+    }
+   ],
+   "global_memops": []
+  }
+ ]
+}

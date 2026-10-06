@@ -1,0 +1,45 @@
+=== HS #148
+828855f971db4b6714367ed0a970f52dbeab2965 2026-07-28 Merge pull request #150 from jphickey/fix-148-table-access
+b7530d94e322032d80cfd714b2a29c2b423473cb 2026-07-28 Fix #148, Add table access protections
+=== CS #140
+=== SC #178
+=== SC #45
+=== LC #8
+=== LC #13
+=== CF #285
+07747463131050606cc58127b932a4c580d4a57f 2022-07-21 Merge pull request #286 from havencarlson/fix#285-goto
+22e28557c0f25c486764be33a6fce64f800e5c67 2022-07-21 Fix #285, flatten logic in CF_CFDP_InitEngine() to fix bug that skipped needed code
+=== CF #377
+433ed5c8c7c46457369ef8070c4963255f1d2ec0 2023-04-13 Merge pull request #379 from skliper/fix377_semtimeouterror
+c92fb8e546887e3cd171181cc644a07c7d48a541 2023-04-07 Fix #377, Remove error event on nominal semaphore timeout
+=== SBN #79
+=== osal #274
+6357c2d0e3cd93d6f115ff6a232632d96818deda 2019-10-22 Fix #274: Avoid possible deadlock of timer callback
+=== osal #642
+ccbbcac7da1736e5164bc4440c324541c2cb2cca 2021-01-11 Merge pull request #704 from jphickey/fix-642-645-702-703
+7ba42a63fe6a7972582036dfd432ec3bf5edf8b1 2020-12-21 Fix #642, make OS_TaskDelete synchronous
+=== osal #472
+=== FM #76
+f878c987ed58ba40eb2beb9de39d9b737f2f9c5a 2023-02-02 Merge pull request #77 from jphickey/fix-76-constness-correct
+dbb49a4d61d287ea439c5f1677e32451b0a7d5fc 2023-01-27 Fix #76, Update const-ness of inputs
+=== PSP #310
+b1fc09aa6c0f6cd2d7739441e2b3943d430f1697 2025-12-17 Merge pull request #463 from jphickey:fix-310-toctou-eeprom
+802f6f893d9d5e4f4d26a83a31f8245ced7f7cc6 2025-10-15 Fix #310, resolve TOCTOU race in EEPROM file creation
+=== to_lab #152
+232051db75c4198343da9b5c842b0225df20e5ff 2023-04-13 Merge pull request #153 from jphickey/fix-152-subs-table
+87e202a06fa8224cde1498cda55007779265f855 2023-04-12 Fix #152, adjust subscription table based on apps present
+=== sch_lab #138
+a8c7ad13d830ac2684edbcdfe1351520893e2564 2023-04-13 Merge pull request #139 from jphickey/fix-138-table
+5000323a20a8c0950b0fa08ad486eecb7e0e2b96 2023-04-12 Fix #138, adjust table based on apps present
+=== DS #146
+3f35b6de2c20b6228ec583f7355e18f7c09a6ab2 2026-06-02 Merge pull request #147 from myc-yang/146-filter-dest-file-table-getaddress-return-value-check
+c609e35d6a09d19b5bb016395cefe305ee2a5361 2026-06-01 Fix nasa#146, When managing the Filter and Dest file tables, the return value of CFE_TBL_GetAddress() after the tables have already been loaded will be checked
+=== sample_app #255
+=== HK #4
+=== to_lab #204
+=== to_lab #229
+c757665f93ba6a5e08d5340a99b465d93523a0c7 2026-06-15 Merge pull request #230 from myc-yang/229-ignored-return-value-cfe-sb-subscribe
+51cf370217c9011c22e774bf5120bffd9a39cb9e 2026-06-15 Fix nasa#229, Check return values for CFE_SB_Subscribe for TO_LAB_CMD_MID and TO_LAB_SEND_HK_MID in TO_LAB_init() in fsw/src/to_lab_app.c
+=== ci_lab #96
+7e4600999fb46d5baaa24d829f43ee7efb21dc6a 2023-11-09 Merge pull request #132 from thnkslprpt/fix-96-check-returns-from-init-cfe-calls
+5c3d8431a42569af5d018cf50b925e40072d4668 2022-11-08 Fix #96, Check returns from CFE calls during init

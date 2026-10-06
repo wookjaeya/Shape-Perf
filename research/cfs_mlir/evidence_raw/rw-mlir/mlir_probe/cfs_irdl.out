@@ -1,0 +1,7 @@
+$ mlir-opt cfs_use.mlir --irdl-file=cfs_irdl.mlir --test-side-effects
+cfs_use.mlir:2:10: remark: operation has no memory effects
+
+$ (verifier) wrong operand type:
+cfs_bad.mlir:3:3: error: op expects exactly 2 operands, but got 3
+  "cfs.sb_subscribe"(%mid, %mid, %pipe) : (i32, i32, i32) -> ()
+  ^

@@ -1,0 +1,75 @@
+make --no-print-directory -C "build" DESTDIR="/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build" mission-install
+[ 22%] Built target elf2cfetbl
+[ 22%] Built target cfe-build-env
+[ 22%] Built target cfe-module-version
+[ 22%] Built target mission-version
+[ 33%] Built target cfeconfig_platformdata_native_default_cpu1
+[ 77%] Built target cfeconfig_platformdata_tool
+[100%] Built target cfgtool-execute-native_default_cpu1
+[100%] Built target mission-prebuild
+[ 50%] Built target tblobj_cpu1_cfeTestAppTable.tbl04414a6bc5b878f0e633fe4ff5c0fc78f18df90e
+[100%] Built target generate_table_cpu1_cfeTestAppTable_cfe_test_tbl
+[100%] Built target cfetables
+[100%] Built target native_default_cpu1-cfetables
+[100%] Built target mission-cfetables
+Table build completed
+[100%] Built target tabletool-execute
+[  1%] Built target osal_generic-linux_impl
+[  2%] Built target osal_bsp
+[ 12%] Built target osal_posix_impl
+[ 22%] Built target osal
+[ 24%] Built target ut_assert
+[ 41%] Built target ut_osapi_stubs
+[ 44%] Built target config
+[ 49%] Built target es
+[ 51%] Built target evs
+[ 53%] Built target fs
+[ 55%] Built target sb
+[ 61%] Built target tbl
+[ 63%] Built target time
+[ 64%] Built target ram_notimpl
+[ 67%] Built target psp-pc-linux-impl
+[ 68%] Built target psp-pc-linux-shared
+[ 70%] Built target soft_timebase
+[ 70%] Built target timebase_posix_clock
+[ 71%] Built target eeprom_mmap_file
+[ 71%] Built target port_notimpl
+[ 71%] Built target iodriver
+[ 72%] Built target linux_sysmon
+[ 74%] Built target endian_api
+[ 74%] Built target psp-pc-linux
+[ 76%] Built target msg
+[ 77%] Built target sbr
+[ 79%] Built target resourceid
+[ 80%] Built target probe_hi
+[ 80%] Built target probe_lo
+[ 81%] Built target probe_slow
+[ 83%] Built target probe_own
+[ 83%] Built target probe_shr
+[ 84%] Built target ut_assert_pic
+[ 84%] Built target cfe_assert
+[ 96%] Built target cfe_testcase
+[100%] Built target core-cpu1
+Install the project...
+-- Install configuration: "debug"
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/cfe_es_startup.scr
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/probe_hi.so
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/probe_lo.so
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/probe_slow.so
+-- Installing: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/probe_own.so
+-- Installing: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/probe_shr.so
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/cfe_assert.so
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/cf/cfe_testcase.so
+-- Installing: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/cpu1/core-cpu1
+[100%] Built target native_default_cpu1-install
+[ 14%] Built target cfeconfig_platformdata_native_default_cpu1
+[ 71%] Built target cfeconfig_platformdata_tool
+[100%] Built target elf2cfetbl
+Install the project...
+-- Install configuration: "debug"
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/.
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/./cpu1
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/./cpu1/cf
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/./cpu1/cf/cfe_test_tbl.tbl
+-- Up-to-date: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/build/exe/host/elf2cfetbl
+Built target mission-install

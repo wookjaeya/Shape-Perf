@@ -1,0 +1,308 @@
+{
+ "summary": "Task rw-races: prior theory and tools for non-data-race ordering faults, mapped onto the original note's fault agenda (message ordering, F1 first-message loss, F2 use-before-init of message-derived state, F3 stale state, F4 multi-stream snapshot, F5 startup dependency).\n\nACCESS LIMITS (read first). The egress proxy refused (HTTP 403) almost every academic host: dl.acm.org, arxiv, dagstuhl, springer, ntrs, kth, uchicago, columbia, eth, github.io and others. The Scholar Gateway MCP returned \"Could not resolve user identity from CONNECT\". Only microsoft.com, GitHub/raw.githubusercontent.com and storage.googleapis.com were reachable.\n\nFULL TEXT READ:\n- Burrows & Leino, stale-value errors (MSR manuscript krml107).\n- TaxDC (from the authors' lab-site GitHub repo).\n- PCT, ASPLOS 2010 (MSR).\n- P language, MSR-TR-2012-116.\n\nPRIMARY CODE/DOCS AT PINNED COMMITS:\n- Erlang/OTP Dialyzer race module and release notes.\n- Goblint race/MHP code at HEAD, plus the v1.1.0 OSEK and ARINC 653 analyses.\n- EventRacer README and the FCatch project site.\n- ZeroMQ guide (\"slow joiner\") and ROS 2 QoS docs.\n\nABSTRACT OR SEARCH SUMMARY ONLY: Lu et al. 2008 (abstract from MSR page). Artho/Havelund/Biere 2003 and 2004, Flanagan & Qadeer, AVIO, Netzer & Miller, EventRacer/WebRacer/InitRacer, DroidRacer/CAFA/SIERRA/nAdroid, DCatch, Christakis & Sagonas 2010/2011, Schwarz et al. 2011/2014, Tulsyan et al. 2020 and Chopra et al. are known to me only from search summaries. Those findings are marked partial or unverified.\n\nMAIN CONCLUSIONS:\n1. The generic ordering-fault notion is already covered and must be cited. The note's formula RequiredHB AND NOT ProvenHB AND PotentialConcurrent is anticipated by TaxDC §8.4. TaxDC proposes detecting DC bugs by (1) obtaining order and atomicity timing specifications among messages and computation, and (2) detecting violations by static or dynamic analysis. Netzer & Miller's feasible vs apparent races (summary) back the revision's point that unproven HB is only a candidate.\n2. F1 first-message loss is a recognized hazard under other names:\n   - TaxDC \"message arrives unexpectedly early\" (m3274: an early kill message is incorrectly ignored) and the error symptom \"Global missing messages\".\n   - InitRacer's late-event-handler-registration (summary).\n   - P's \"unhandled event\" check with explicit deferred/ignored sets.\n   - ZeroMQ's \"slow joiner\" and ROS 2's transient-local durability for late joiners.\n3. F2 use-before-init is the classic order violation:\n   - Lu et al.: about one third of examined non-deadlock bugs.\n   - PCT Fig. 1(a): access before initialization is a depth-1 ordering bug.\n   - TaxDC h5780: a join request sent before a security-key message arrives makes initialization abort.\n   - Guard flags such as `attitude_valid` are ad hoc / value-dependent synchronization, already modeled by EventRacer (dynamic) and Schwarz et al. VMCAI 2014 (static; summary).\n4. F3 stale state has a direct static precedent: Burrows & Leino (full text). Their staleness is relative to critical-section boundaries, not physical age or the producer's publication count. Time-based freshness still needs R07-style data.\n5. F4 multi-variable consistency is well covered for shared memory: high-level data races / view consistency, atomicity types, AVIO, and TaxDC's atomicity violation. Inference: if cFS handlers run to completion on one app task, an epoch-mismatched pair (A_k, B_j) involves no interleaving inside a code block. Those definitions then do not apply directly. This category is the least covered by the checked definitions and needs an epoch/time-disparity specification.\n6. F5 startup dependency is covered as an order-violation class: Lu et al., TaxDC h5780 and its reboot-timing bugs, DroidRacer/SIERRA lifecycle models, Goblint's thread-creation MHP, DCatch's distributed while-loop sync rule, and Tulsyan's RTOS rules. What remains for cFS is domain modeling of ES startup semantics, not a new fault class.\n7. Prior art close to the note's own approach:\n   - Goblint v1.1.0 statically extracted ARINC 653 process/IPC actions (queuing/sampling ports, blackboards, events, semaphores) from C. Its header says it outputs to console, graphviz and Promela. It also had an OSEK priority-ceiling/ISR analysis.\n   - Android static tools (SIERRA, nAdroid) already recover framework lifecycle/event ordering for static ordering-violation detection.\n   Novelty therefore cannot rest on \"framework-semantics recovery for ordering faults\" in general. It can at most rest on cFS SB/ES/TBL-specific semantics, on message-derived state provenance, and on the F4 epoch property. Even those are hypotheses, not established results.",
+ "findings": [
+  {
+   "id": "rw-races-01",
+   "topic": "TaxDC fault definitions (distributed concurrency bugs)",
+   "claim": "TaxDC studies 104 DC bugs in Cassandra, HBase, Hadoop MapReduce and ZooKeeper. Its message timing conditions are: order violation = the bug manifests whenever a message comes earlier (later) than another event, i.e. a message or a local computation, but not when it comes later (earlier); 44%. Atomicity violation = the bug manifests whenever a message comes in the middle of a set of events; 20%. Fault/reboot timing bugs are 32%. Finding #1: 64% of bugs are triggered by untimely messages, and two thirds of those are order violations from message-message or message-computation races. Table 1 lists the error symptoms 'Global missing messages' and 'Global unexpected messages'.",
+   "evidence": [
+    "Local full text: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/txt/taxdc_asplos16.txt lines 304-346 (Table 1), 412-417 (event types), 466-501 (timing conditions), 742-747 (Finding #1)",
+    "PDF retrieved from authors' lab-site repo: https://raw.githubusercontent.com/ucare-uchicago/ucare-html/87a6a05aa681a3f4d8993e0b84f786c9b994babc/pdf/asplos16-TaxDC.pdf (sha256 9d81b28f7b4e0f1e7f060ef6e191137939438841c420028f3f60524e8b75b4d8)",
+    "DOI 10.1145/2872362.2872374"
+   ],
+   "scope_checked": "Full text PDF (14 pages). Read abstract, Table 1, §2.6, §3.1, §5.1-5.2, §6, §8.4 in full; other sections by keyword grep only.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "INFERENCE: The original note's 'Message/Event Ordering Race' and its message-before-computation cases are already an established, named class: TaxDC's order violation for messages. The note must cite TaxDC and use its vocabulary, not present a new fault family. TaxDC is an empirical study of four Java cloud systems. Its percentages are not evidence about flight software."
+  },
+  {
+   "id": "rw-races-02",
+   "topic": "Prior 'required order vs provided order' detection framework",
+   "claim": "TaxDC §8.4 proposes that detecting message-timing DC bugs should focus on (1) obtaining timing specifications, including order and atomicity specifications among messages and computation, and (2) detecting violations through dynamic or static analysis. It offers invariant templates such as 'message bc should arrive at C before message ac arrives' and 'message ab should never arrive in the middle of event e on node B'. It also suggests error-guided inference of timing specifications from explicit exceptions.",
+   "evidence": [
+    "txt/taxdc_asplos16.txt lines 1553-1611 (§8.4 Bug Detection Tools)",
+    "Original note §47 Race(E1,E2) = RequiredHB AND NOT ProvenHB AND PotentialConcurrent; §48 sources of RequiredHB (original note lines 1916-1993)"
+   ],
+   "scope_checked": "TaxDC §8.4 full text; original note §46-49",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "INFERENCE: The core formalization in the original note was proposed in essence by TaxDC (2016) as a research direction: obtain the required order spec, then check for violations. The note must cite it as precedent. Any contribution must lie in how RequiredHB is obtained for cFS (API semantics, app guards, contracts) and in the static checking over cFS C code, not in the formula itself."
+  },
+  {
+   "id": "rw-races-03",
+   "topic": "Concrete DC-bug analogs of first-message loss and startup dependency",
+   "claim": "TaxDC m3274: B sends task-init (bc_init) to node C; then A sends task-kill (ac_kill), which arrives before bc_init and is 'thus incorrectly ignored by C'. The fix retries the early message later. TaxDC h5780: B sends a cluster-join request before a security-key message from ZooKeeper arrives, causing the initialization to abort. Fix strategies include adding global/local synchronization, retrying a message later, ignoring it, or accepting it with an existing handler; 40% of fixes need no new computation logic.",
+   "evidence": [
+    "txt/taxdc_asplos16.txt lines 572-585 (m3274, h5780), 1257-1278 (fix handling), 1375-1382 (Finding #5), 341-346 (fix taxonomy)"
+   ],
+   "scope_checked": "TaxDC §3.1 and §5 full text",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "INFERENCE: These are documented real-system instances of the same patterns as the agenda's F1 (early message dropped by a not-yet-ready receiver) and F5 (initialization racing with a required prior message). They should be cited as cross-domain precedents. They also give concrete 'normal-case' recovery patterns (retry, defer, ignore) that a cFS analyzer must recognize as guards, to avoid flagging intended behavior."
+  },
+  {
+   "id": "rw-races-04",
+   "topic": "Order violations and multi-variable bugs (Lu et al. 2008)",
+   "claim": "Abstract: from 105 bugs in MySQL, Apache, Mozilla and OpenOffice: (1) around one third of examined non-deadlock bugs are caused by violation of programmers' order intentions; (2) around 34% of non-deadlock bugs involve multiple variables; (3) about 92% can be reliably triggered by enforcing orders among no more than 4 memory accesses; (4) about 73% of non-deadlock bugs were not fixed by simply adding or changing locks. PCT (MSR, ASPLOS 2010) restates that ordering bugs [Lu et al.] have depth 1. Its Fig. 1(a) example is an ordering bug that manifests 'whenever Thread 2 accesses t before the initialization by Thread 1'.",
+   "evidence": [
+    "Abstract on MSR publication page: https://www.microsoft.com/en-us/research/publication/learning-from-mistakes-a-comprehensive-study-on-real-world-concurrency-bug-characteristics/ (DOI 10.1145/1346281.1346323)",
+    "PCT full text: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/asplos277-pct.pdf; local txt/pct_asplos10.txt lines 103-121, 268-276 (sha256 abda19d5...)"
+   ],
+   "scope_checked": "Lu et al.: abstract only; full-text definitions and tables NOT read (dl.acm.org blocked). PCT: §2.3 and Fig. 1 caption, full text.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "INFERENCE: F2 (use before initialization) and F5 (consumer before provider initialized) are textbook order violations and must cite Lu et al. 2008. The exact definition wording and per-category counts must come from the full text before quoting. Do not quote 'the desired order ... is flipped' until verified; that wording could not be found in any checked source."
+  },
+  {
+   "id": "rw-races-05",
+   "topic": "Stale-value errors (Burrows & Leino)",
+   "claim": "Burrows & Leino address 'a kind of race condition that arises from reading a variable whose value is possibly out-of-date'. The error 'arises when a lock is held at the time a value is read from a shared variable, but not held at the time the value is later used', and can occur even when every shared access is lock-protected. Detection: ghost booleans stale_t and from_critical_t per local variable, assert NOT stale_t before each read, and set stale_t on entry to a critical section if t's last write was inside a critical section. It is implemented as a compile-time checker in ESC/Java and needs no annotations. The checker mostly ignores which lock is acquired. Results: about 617 kloc, 43 false alarms, 1 benign race, 4 bugs. The authors note the technique can also be used dynamically.",
+   "evidence": [
+    "Full text (author manuscript): https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/krml107.pdf; local txt/burrows_leino_stale.txt lines 9-16, 48-54, 126-135, 201-213, 249-287, 363-395, 506-591, 676-690",
+    "Published: Concurrency and Computation: Practice and Experience 16(12), 2004, DOI 10.1002/cpe.866 (Wiley; not opened)"
+   ],
+   "scope_checked": "Full text of MSR-hosted manuscript; not diffed against the Wiley published version",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "INFERENCE: The agenda's F3 'stale state' already has a precise static-analysis precedent; the note must cite it. Its staleness is relative to synchronization scopes, i.e. a snapshot crossing critical-section boundaries. It is not about physical age or about whether the producer has published a newer value. cFS state is copied from payloads into app globals, not locals. So the cFS notion needs a different abstraction (message epoch or receive event), and freshness in time still needs R07-type timing data (revision §6.5)."
+  },
+  {
+   "id": "rw-races-06",
+   "topic": "High-level data races and block-local atomicity (Artho, Havelund, Biere)",
+   "claim": "Per search-engine summaries: high-level data races concern accesses to sets of related fields that should be accessed atomically. A 'view' of an atomic block is the set of shared variables it accesses, and maximal views are those not contained in another view. Two threads are view-consistent if the views of one, intersected with the maximal views of the other, form a chain under set inclusion. The authors argue the classical data-race notion misses such inconsistencies. The ATVA 2004 follow-up abstract says a data-flow-based static technique in JNuke finds stale-value errors that low- and high-level data race algorithms do not find, with no annotations.",
+   "evidence": [
+    "Bibliographic: STVR 13(4):207-227, 2003; author PDF URL https://people.kth.se/~artho/papers/stvr03.pdf (BLOCKED, 403)",
+    "ATVA 2004, LNCS 3299: https://link.springer.com/chapter/10.1007/978-3-540-30476-0_16 (BLOCKED); author PDF https://people.kth.se/~artho/papers/bl-atomicity.pdf (BLOCKED)",
+    "WebSearch summaries obtained 2026-10-01 (queries on 'view consistency' and 'block-local atomicity')"
+   ],
+   "scope_checked": "Search-engine summaries only; no full text; implementation (dynamic vs static) of the 2003 paper not verified",
+   "status": "unverified",
+   "importance": "central",
+   "implication": "INFERENCE: F4 'multi-stream inconsistent snapshot' must cite HLDR / view consistency as the established multi-variable consistency notion. View consistency is defined over lock-protected blocks in shared memory. Before claiming it does or does not cover cFS message-derived state, the full text must be read; revision §14.6 already lists this as an open item."
+  },
+  {
+   "id": "rw-races-07",
+   "topic": "Atomicity violations (Flanagan & Qadeer; AVIO)",
+   "claim": "Per search summaries: Flanagan & Qadeer (PLDI 2003, pp. 338-349) give a static type and effect system in which a method is atomic if every execution is equivalent to one where it runs without interleaving. It uses Lipton reduction (right/left/both movers) on top of race-freedom (RCC/Java). AVIO (ASPLOS 2006) is dynamic: it learns access-interleaving invariants from correct runs and flags unserializable interleavings (4 of 8 cases); a hardware variant AVIO-H uses cache-coherence invalidation information.",
+   "evidence": [
+    "AVIO preprint URL https://people.cs.uchicago.edu/~shanlu/preprint/asplos062-lu.pdf (BLOCKED); DOI 10.1145/1168857.1168864",
+    "Types for atomicity MSR page https://www.microsoft.com/en-us/research/publication/types-for-atomicity/ (no PDF link found)",
+    "WebSearch summaries 2026-10-01"
+   ],
+   "scope_checked": "Search summaries only",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "INFERENCE: Atomicity definitions target interleaving inside a code region that should be atomic. Cite them as the reference notion for F4. They become directly applicable only if a cFS app has more than one task touching the same state, e.g. child tasks, or a handler reading state that another task updates field by field."
+  },
+  {
+   "id": "rw-races-08",
+   "topic": "Gap analysis: epoch-mismatched multi-stream inputs vs atomicity/HLDR",
+   "claim": "INFERENCE (not a sourced claim): assume a cFS app processes messages sequentially from its pipe in one main task, each handler runs to completion, and a consumer reads A (set by message k) and B (set by message j != k). Then no code block is interleaved. Under the checked definitions this is neither a TaxDC atomicity violation (no message arrives in the middle of a set of events), nor an AVIO unserializable interleaving, nor a stale-value error in the Burrows-Leino sense (no local snapshot crosses a critical section). The fault, if any, is a violated cross-input consistency or time-disparity requirement that must be specified separately.",
+   "evidence": [
+    "TaxDC atomicity-violation definition: txt/taxdc_asplos16.txt lines 486-490",
+    "Burrows-Leino definition: txt/burrows_leino_stale.txt lines 48-54",
+    "Revision note §6.3 and §6.4 (latest-value combinations may be intended; R07)",
+    "Revision note §4.2 / S21: sample_app main loop and dispatch (single app main task assumption must be checked per app)"
+   ],
+   "scope_checked": "Reasoning over the definitions read above; per-app task structure of real cFS apps (child tasks) NOT checked",
+   "status": "partial",
+   "importance": "central",
+   "implication": "This is the agenda category least covered by the prior definitions checked here. It is a plausible place for a genuine research question, provided the note: (a) cites HLDR/atomicity/stale-value work and explains why they don't apply under run-to-completion; (b) checks the time-disparity literature in real-time cause-effect chains, which was not searched here; (c) does not claim novelty until both are done."
+  },
+  {
+   "id": "rw-races-09",
+   "topic": "Message races and race feasibility (Netzer & Miller)",
+   "claim": "Per search summaries: Netzer & Miller (LOPLAS 1(1):74-88, 1992) distinguish general races (in programs intended to be deterministic) from data races (in nondeterministic programs with critical sections). They distinguish feasible races, the intuitive notion for debugging, from apparent races, the less accurate notion assumed by most dynamic detectors, and show that locating feasible races is NP-hard. Their message-passing work on optimal tracing and replay, and Netzer, Brennan & Damodaran-Kamal (SPDT 1996), is dynamic and trace-based: it detects racing receives and traces only racing messages.",
+   "evidence": [
+    "DOI 10.1145/130616.130623 (dl.acm.org BLOCKED)",
+    "Optimal tracing and replay: https://link.springer.com/article/10.1007/BF01901615 (BLOCKED)",
+    "WebSearch summaries 2026-10-01"
+   ],
+   "scope_checked": "Search summaries only",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "INFERENCE: The original note's NOT ProvenHB test yields at best 'apparent' race candidates in Netzer-Miller terms. That supports the revision's §1.3/§10.2 correction that unproven HB is not a race. Cite Netzer & Miller for the feasible/apparent distinction once the full text is checked. MPI message-race detection is dynamic and receive-centric; the original note already excludes MPI matching (orig. §25)."
+  },
+  {
+   "id": "rw-races-10",
+   "topic": "Static message-passing error detection in Erlang (Christakis & Sagonas)",
+   "claim": "Dialyzer contained a static race analysis authored by Maria Christakis (file created 21 Nov 2008). Its warning tags are whereis/register, whereis/unregister, ets lookup/insert and mnesia dirty read/write, all check-then-act patterns on shared name registries and tables. Warnings read '... might fail due to a possible race condition caused by its combination with ...'. Release notes: introduced in Dialyzer 2.1.0 via -Wrace_conditions, citing the paper; 'The race_conditions option has been removed' in Dialyzer 5.0 (OTP 25, OTP-17819). The PADL 2010 paper (search summary) describes the analysis as automatic, integrated in Dialyzer and finding previously unknown races. For PADL 2011 (message-passing errors), the categories 'orphan messages, unused receives' come only from a 2018 secondary description (Harrison).",
+   "evidence": [
+    "https://raw.githubusercontent.com/erlang/otp/OTP-24.3.4/lib/dialyzer/src/dialyzer_races.erl lines 15-20, 52-55, 298-301, 2318-2335; local code/dialyzer_races_OTP-24.3.4.erl (sha256 48e4cf50...)",
+    "https://raw.githubusercontent.com/erlang/otp/OTP-25.0/lib/dialyzer/doc/src/notes.xml lines 35, 70-73 (Dialyzer 5.0 removal), 2186, 2199-2204 (Dialyzer 2.1.0 introduction); local code/dialyzer_notes_OTP-25.0.xml",
+    "raw OTP-25.0 path for dialyzer_races.erl returns HTTP 404 (command run 2026-10-01)",
+    "PADL 2010/2011 papers BLOCKED (mariachris.github.io, kar.kent.ac.uk, springer)"
+   ],
+   "scope_checked": "Dialyzer source and release notes (primary code); papers by search summary only",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "INFERENCE: Static detection of message-passing and race errors integrated into a production checker has precedent and should be cited. Its race patterns are check-then-act on shared registries; they are neither publish/subscribe timing nor message-derived state. The option's removal in OTP 25 is a fact; its reason was not checked and must not be interpreted in the note."
+  },
+  {
+   "id": "rw-races-11",
+   "topic": "Event races in web applications (EventRacer, WebRacer, InitRacer)",
+   "claim": "EventRacer works on a trace (ER_actionlog) recorded by an instrumented WebKit browser, so its analysis is dynamic; it displays happens-before graphs (README). Per search summary, the OOPSLA 2013 paper introduces 'race coverage' to expose ad hoc synchronization and reduce false positives, plus chain decomposition to cut vector-clock cost. WebRacer (PLDI 2012) is described as the first dynamic race detector for web applications. InitRacer (OOPSLA 2017) targets three initialization-phase event race classes, all with a dynamic analysis: form-input-overwritten, late-event-handler-registration and access-before-definition.",
+   "evidence": [
+    "https://raw.githubusercontent.com/eth-sri/EventRacer/07ced1cc7e92e5f2e1f7284c06c52ae40873b5a3/README.md; local code/eventracer_README.md",
+    "EventRacer DOI 10.1145/2509136.2509538; PDF files.sri.inf.ethz.ch/website/papers/oopsla13-web.pdf (BLOCKED)",
+    "InitRacer: https://cs.au.dk/~amoeller/papers/initracer/paper.pdf (BLOCKED); DOI 10.1145/3133890",
+    "WebSearch summaries 2026-10-01"
+   ],
+   "scope_checked": "EventRacer README (primary); papers by search summary only",
+   "status": "partial",
+   "importance": "central",
+   "implication": "INFERENCE: InitRacer's late-event-handler-registration and access-before-definition are close web-domain analogs of F1 and F2, and must be cited. EventRacer's race coverage for ad hoc synchronization is precedent for treating validity flags (revision §6.1 attitude_valid) as synchronization. All three are dynamic, so a static cFS analysis differs in technique, not in fault definition."
+  },
+  {
+   "id": "rw-races-12",
+   "topic": "Android event-driven ordering faults (DroidRacer, CAFA, SIERRA, nAdroid)",
+   "claim": "Per search summaries:\n- DroidRacer (PLDI 2014): dynamic, on the Android emulator. Its happens-before relation is split into thread-local and inter-thread parts, and it models lifecycle callbacks and posts with 'enable' operations.\n- CAFA (PLDI 2014): dynamic. Its causality model accounts for event queues, and it checks races between high-level operations (use-after-free) rather than low-level accesses.\n- SIERRA (ASPLOS 2018): static. It uses 'concurrency actions', auto-generated code models ordering lifecycle and GUI events, action-sensitivity, and backward symbolic execution (Thresher-based) to refute false positives.\n- nAdroid (CGO 2018): static. 'Threadification' models callbacks as threads to find ordering violations between callbacks on one event loop; reported 88 harmful violations (at least 58 new) in 27 apps.",
+   "evidence": [
+    "DroidRacer DOI 10.1145/2594291.2594311; CAFA DOI 10.1145/2594291.2594330; SIERRA DOI 10.1145/3296957.3173173; nAdroid DOI 10.1145/3168829",
+    "nAdroid artifact repo exists: https://github.com/SBULeeLab/CGO18-nAdroid-Artifact @ db22a7d148b402f3b87243092bf5d8611c1bb6fc (file list only)",
+    "WebSearch summaries 2026-10-01; all paper PDFs BLOCKED"
+   ],
+   "scope_checked": "Search summaries only; nAdroid artifact file list",
+   "status": "unverified",
+   "importance": "central",
+   "implication": "INFERENCE: Static ordering-violation detection that recovers framework-imposed event and lifecycle order through generated framework models already exists for Android (SIERRA, nAdroid). The original note's key novelty sentence (orig. §53) cannot be stated generically. It must be narrowed to cFS-specific semantics (SB MID/pipe routing, ES startup states, TBL protocol) and compared with these Android analyses."
+  },
+  {
+   "id": "rw-races-13",
+   "topic": "Distributed HB models across messages/RPC/events (DCatch)",
+   "claim": "Per search summaries: DCatch (ASPLOS 2017) builds a happens-before model of message, task, event and program (MTEP) rules covering RPC/socket communication and push-based synchronization. It includes a rule for distributed while-loop (polling) synchronization and one for ZooKeeper-style notification, and notes that program order holds only within one event handler or RPC function. DCatch traces correct runs, finds concurrent conflicting memory accesses, prunes false positives with static analysis, and tries to trigger bugs. It reports 32 DCbugs, 20 truly harmful, in Cassandra, HBase, Hadoop MapReduce and ZooKeeper.",
+   "evidence": [
+    "Preprint https://people.cs.uchicago.edu/~shanlu/paper/asplos17-preprint.pdf (BLOCKED)",
+    "WebSearch summaries 2026-10-01 (two queries)"
+   ],
+   "scope_checked": "Search summaries only; rule names and exact definitions not verified",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "INFERENCE: The original note's HB_message / HB_sync / HB_lifecycle split (orig. §46) mirrors DCatch's rule families. In particular, a polling-loop rule is the closest precedent for modeling cFE ES WaitForSystemState-style waits (revision §5.2) as HB edges conditioned on loop exit. Note too that DCatch's detection target is still conflicting memory accesses."
+  },
+  {
+   "id": "rw-races-14",
+   "topic": "Time-of-fault bugs (FCatch)",
+   "claim": "The FCatch project site (authors' GitHub) defines time-of-fault (TOF) bugs as: trigger = a special timing of a fault, where faults are 'message loss or node crashes'; error = unexpected state left by the untimely fault; failure = the system cannot handle that state. Categories: crash-regular (a read on a non-crash node conflicts with a write from the crash node) and crash-recovery (a read on the recovery node). The tool predicts TOF bugs from correct runs by identifying conflicting operations and then fault-intolerant operations. Paper: ASPLOS 2018.",
+   "evidence": [
+    "https://raw.githubusercontent.com/haopeng-liu/FCatch/ab7ed6b50f803dfdbcd5a05fec0c7d73b1748973/index.md, model.md, tool.md; local code/fcatch_index.md, code/fcatch_model.md, code/fcatch_tool.md",
+    "Paper DOI 10.1145/3173162.3177161 (BLOCKED)"
+   ],
+   "scope_checked": "Project site pages (primary, authors' repo); paper not read",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "INFERENCE: FCatch treats message loss as an injected fault. F1 concerns loss caused by ordering (publish before subscribe), a different trigger with a similar error (missing state). The note should keep these separate. Restart and recovery semantics (revision §5.4) have precedent in FCatch and in TaxDC reboot-timing bugs."
+  },
+  {
+   "id": "rw-races-15",
+   "topic": "Goblint: static race analysis for C, thread-creation HB, and past OSEK/ARINC 653 analyses",
+   "claim": "Goblint HEAD (d0ee7d5b, 2026-09-30) has raceAnalysis.ml, whose data races are checked per memory location, including struct prefixes and type-based accesses. Its MHP domain tracks thread id, created threads and must-joined threads; definitely_not_started excludes parallelism with threads not yet created. A creationLockset analysis is also present. Tag v1.1.0 (a8a2e9c4) contained src/analyses/osek.ml, with OSEK resources, ceiling-priority computation, ISRs and DisableAllInterrupts as pseudo-resources. It also contained src/analyses/arinc.ml, headed 'Tracking of arinc processes and their actions. Output to console, graphviz and promela.' It handles APEX calls including CreateProcess, Create/Send/ReceiveQueuingMessage, Write/ReadSamplingMessage, Blackboards, Buffers, Events and Semaphores, with timeout variants. Neither file exists at the v1.0.0 or v2.0.0 paths (HTTP 404).",
+   "evidence": [
+    "https://raw.githubusercontent.com/goblint/analyzer/d0ee7d5b0e2b6c12f0d33a285973397ab29eb9fa/src/cdomains/mHP.ml lines 9-13, 52-60; .../src/analyses/raceAnalysis.ml lines 1-40; local code/goblint_mHP.ml, code/goblint_raceAnalysis.ml, code/goblint_creationLockset.ml",
+    "https://raw.githubusercontent.com/goblint/analyzer/v1.1.0/src/analyses/arinc.ml lines 1-25; .../osek.ml lines 69-124, 200-208; local code/goblint_v1.1.0_arinc.ml, code/goblint_v1.1.0_osek.ml",
+    "git ls-remote: refs/tags/v1.1.0 = a8a2e9c43213a48bdb42db1f9b1b45491ddf9128; curl HTTP 404 for osek.ml/arinc.ml at v1.0.0 and v2.0.0"
+   ],
+   "scope_checked": "Source file headers and grep of selected functions; no execution of Goblint; associated publications for the ARINC analysis not identified",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "INFERENCE: A static C analyzer that extracted avionics RTOS inter-process communication (ARINC 653 ports, blackboards, events) into Promela/graph models already existed in Goblint. The note must cite it, or at least its code, as prior art for 'recovering framework IPC semantics from flight/avionics C code'. Goblint's thread-creation MHP is a ready precedent for one cFS startup HB source: child-task creation after initialization. Goblint is also a natural static baseline for the shared-memory subset (revision §12.3 currently lists only TSan)."
+  },
+  {
+   "id": "rw-races-16",
+   "topic": "Static analysis of interrupt-driven and priority-scheduled embedded C (Schwarz/Seidl; Tulsyan; Chopra)",
+   "claim": "Per search summaries:\n- Schwarz, Seidl, Vojdani, Mueller-Olm, Lammich (POPL 2011, pp. 93-104): static analysis of interrupt-driven programs synchronized via the priority ceiling protocol (OSEK/AUTOSAR).\n- Schwarz, Seidl, Vojdani, Apinis (VMCAI 2014, LNCS 8318): analyzes hand-crafted synchronization through integer variables (value-dependent synchronization) in priority-scheduled programs, with a major precision improvement for race detection on automotive controllers.\n- Tulsyan, Pai, D'Souza (FSTTCS 2020): an 'occurs-in-between' relation, six rules, and a pre-analysis of dynamic priority ranges and task suspension; implemented for FreeRTOS with 73% precision.\n- Chopra, Pai, D'Souza: a static analysis for high-level races (indicators of atomicity violations) in RTOS kernels.",
+   "evidence": [
+    "POPL 2011 (DOI not retrieved); VMCAI 2014 https://link.springer.com/chapter/10.1007/978-3-642-54013-4_2 (BLOCKED)",
+    "Tulsyan DOI 10.4230/LIPIcs.FSTTCS.2020.57 (BLOCKED); revision note R06 records §3-5 checked by the researcher",
+    "Chopra et al. https://link.springer.com/chapter/10.1007/978-3-030-30942-8_21 (BLOCKED)",
+    "WebSearch summaries 2026-10-01; the Chopra summary mixed in Tulsyan details, which are not attributed"
+   ],
+   "scope_checked": "Search summaries only (plus revision R06 record for Tulsyan)",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "INFERENCE: Flag-based synchronization is a solved-in-principle static topic for shared-memory races (value-dependent synchronization). This covers startup flags and counters (cFE #71 semaphores, flags and counters, revision S02) and validity guards. The note should cite it rather than design flag handling from scratch. These works target data races, not message-derived state consistency."
+  },
+  {
+   "id": "rw-races-17",
+   "topic": "Explicit 'must handle / may defer / may drop' event specifications (P language)",
+   "claim": "In P (MSR-TR-2012-116), events sent to a machine are stored in a FIFO queue. Each state declares a deferred set and an ignored set: on receive, an ignored event is dequeued and dropped, while a deferred event stays queued. If an event e arrives in state n with no transition for e and it is neither deferred nor ignored, the verifier flags an 'unhandled event' violation. A liveness check prevents deferring events indefinitely. P programs are verified by model checking and compiled to C; P was used for the core of the Windows 8 USB device driver stack.",
+   "evidence": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-8.pdf; local txt/p_lang_tr8.txt lines 9-24 (abstract), 164-174 (deferred/ignored), 198-209 (unhandled events); sha256 277e70ad..."
+   ],
+   "scope_checked": "Abstract and §2 language-overview paragraphs, full text",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "INFERENCE: P is a precise precedent for the original note's contract/annotation idea (orig. §49) and for a RequiredHB source in F1: whether an early message must be handled, may be delayed, or may be dropped. cFS has no such declarations; SB silently delivers to whatever pipes are subscribed. One possible design is to ask app authors for P-style per-MID ignored/deferred intent. P checks models written in P, not existing C code."
+  },
+  {
+   "id": "rw-races-18",
+   "topic": "Practitioner documentation of first-message loss in pub/sub middleware",
+   "claim": "ZeroMQ Guide ch.1: with PUB-SUB 'the subscriber will always miss the first messages that the publisher sends'. This 'slow joiner' symptom 'hits enough people often enough'; the guide says the pipeline pattern (PUSH/PULL) shows the same syndrome. ROS 2 QoS docs: Durability 'Transient local' makes the publisher 'responsible for persisting samples for late-joining subscriptions', while 'Volatile' makes no attempt to persist. Transient local is similar to ROS 1 'latching'. Defaults are volatile. Services should use volatile because 'service servers that re-start may receive outdated requests'.",
+   "evidence": [
+    "https://raw.githubusercontent.com/booksbyus/zguide/6752d24b215997aa161e6896941bfd6010d4d3f5/chapter1.txt lines 215-224, 343; local code/zguide_chapter1.txt",
+    "https://raw.githubusercontent.com/ros2/ros2_documentation/e2388aa72c17598a54fa228df6e9e9a44c5e7aec/source/ROS-Framework/interfaces/topics/About-Quality-of-Service-Settings.rst lines 48-51, 81, 97, 103; local code/ros2_qos.rst"
+   ],
+   "scope_checked": "Quoted passages from docs at pinned commits",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "INFERENCE: F1 is a well-known middleware hazard with standard mitigations (durability/latching, readiness handshakes). The note must not present 'publish before subscribe' as newly identified. A defensible question is narrower: whether a static analysis of cFS C apps can decide, from SB API calls, app guards and startup sync, whether a required first message can be lost. Whether cFE SB offers any late-joiner mechanism was not checked in this task."
+  },
+  {
+   "id": "rw-races-19",
+   "topic": "Coverage verdict per agenda category",
+   "claim": "INFERENCE, based on findings 01-18.\n- Well covered, must cite: generic message/event ordering races (Netzer-Miller, Order Types, TaxDC, DCatch, EventRacer, Erlang); F1 first-message loss as a hazard (TaxDC early-message order violation and 'global missing messages', InitRacer, P unhandled events, ZeroMQ, ROS 2); F2 use-before-init (Lu et al. order violation, PCT, TaxDC h5780, InitRacer, CAFA/nAdroid); F5 startup dependency (Lu et al., TaxDC, lifecycle HB in DroidRacer/SIERRA, Goblint creation-MHP, value-dependent sync, DCatch polling rule); restart (TaxDC reboot timing, FCatch).\n- Partially covered: F3 stale state (Burrows-Leino and Artho 2004 cover sync-scope staleness; time-based freshness is in R07, not in the race literature).\n- Least covered by the checked definitions: F4 epoch-mismatched multi-stream inputs under run-to-completion handlers, where no atomicity, HLDR or stale-value definition applies directly.\n- Not assessed: F6 table lifecycle (typestate literature not searched).",
+   "evidence": [
+    "coverage_matrix.csv in work dir",
+    "Findings rw-races-01 through rw-races-18"
+   ],
+   "scope_checked": "Synthesis over the sources listed in sources_manifest.tsv; several inputs are search summaries (see each finding's status)",
+   "status": "partial",
+   "importance": "central",
+   "implication": "For the note:\n(1) Restate F1, F2 and F5 as instances of existing order-violation and event-race definitions, citing them.\n(2) Position any contribution as static detection over cFS C with cFS framework semantics, compared against Android static tools (SIERRA, nAdroid) and Goblint (including its ARINC precedent).\n(3) Treat F4 (and F3 freshness) as the open research question, but only after checking time-disparity literature and reading the HLDR/atomicity full texts.\n(4) Revise the novelty sentence (orig. §53); 'framework-level semantic dependency recovery for ordering faults' has precedents."
+  }
+ ],
+ "gaps": [
+  "Full texts NOT read because the egress proxy returned 403: Artho/Havelund/Biere STVR 2003 and ATVA 2004; Flanagan & Qadeer PLDI 2003; AVIO (ASPLOS 2006); Lu et al. ASPLOS 2008 (abstract only); Netzer & Miller (LOPLAS 1992, the tracing/replay paper) and Netzer, Brennan & Damodaran-Kamal (SPDT 1996); Bagherzadeh & Rajan AGERE 2017 (relies on revision R05); Christakis & Sagonas PADL 2010/2011; EventRacer, WebRacer, InitRacer; DroidRacer, CAFA, SIERRA, nAdroid; DCatch; FCatch paper (site only); Schwarz et al. POPL 2011 and VMCAI 2014; Vojdani et al. ASE 2016; Tulsyan et al. FSTTCS 2020 (relies on revision R06); Chopra et al. Blocked hosts: dl.acm.org, arxiv.org, drops.dagstuhl.de, link.springer.com, ntrs.nasa.gov, people.kth.se, people.cs.uchicago.edu, www.cs.columbia.edu, files.sri.inf.ethz.ch, cs.au.dk, *.github.io, kar.kent.ac.uk, web.njit.edu, spinroot.com, shemesh.larc.nasa.gov and others listed in sources_manifest.tsv.",
+  "Scholar Gateway MCP full-text search was unavailable: 'INVALID_QUERY: Could not resolve user identity from CONNECT'.",
+  "Exact wording of Lu et al.'s order-violation definition and per-category counts (e.g. how many order-violation bugs) are unverified. Only the MSR abstract and PCT's secondary restatement were read.",
+  "Not established whether Artho et al. 2003 used static or dynamic checking, or whether view consistency was ever applied to message-passing or event-driven state.",
+  "DCatch rule names and the exact polling-loop (pull-based) rule are known only from search summaries.",
+  "Christakis & Sagonas PADL 2011 error categories (orphan messages, unused receives) come only from a 2018 secondary description (Harrison).",
+  "Time-disparity / multi-input consistency literature from real-time cause-effect chains was not searched. It is required before claiming F4 is uncovered.",
+  "Data-centric atomic-set serializability (Vaziri/Tip/Dolby; Hammer et al. ICSE 2008, seen only in a search result) was not checked. It may cover F4-like multi-variable consistency specifications.",
+  "No search was done for static analysis of publish/subscribe systems (ROS: HAROS, ROSDiscover; DDS race case study). This is related-work category 4 of the original note and is still open.",
+  "The publication behind Goblint's v1.1.0 ARINC 653 analysis was not identified. Only the code was checked; de la Camara et al. (SPIN 2007) and Thompson (NFM 2010, ARINC-653 flight code with MCP) were found by search but not read.",
+  "Whether cFS apps generally process handlers to completion on a single main task (the premise of finding rw-races-08) was not checked beyond the revision's S21 sample_app record. Child tasks may invalidate it.",
+  "Whether cFE SB provides any late-joiner or retained-message mechanism (analogous to ROS 2 transient-local) was not checked.",
+  "F6 table lifecycle (typestate / API-protocol checkers) was outside this task and not searched."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/sources_manifest.tsv",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/coverage_matrix.csv",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/pdf/burrows_leino_stale.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/pdf/taxdc_asplos16.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/pdf/pct_asplos10.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/pdf/p_lang_tr8.pdf",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/txt/burrows_leino_stale.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/txt/taxdc_asplos16.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/txt/pct_asplos10.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/txt/p_lang_tr8.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/dialyzer_races_OTP-24.3.4.erl",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/dialyzer_OTP-24.3.4.erl",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/dialyzer_notes_OTP-25.0.xml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_raceAnalysis.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_mHP.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_creationLockset.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_index.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_v1.1.0_osek.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_v1.1.0_arinc.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/goblint_v1.1.0_arincDomain.ml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/eventracer_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/fcatch_index.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/fcatch_model.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/fcatch_tool.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/zguide_chapter1.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/code/ros2_qos.rst",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-races/pdf2txt.py"
+ ]
+}

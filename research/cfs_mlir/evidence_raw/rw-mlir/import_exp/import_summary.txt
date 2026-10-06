@@ -1,0 +1,5 @@
+files selected: 154
+clang ok: 154  import ok: 154
+files with import diagnostics: 0
+ops (with loc printed): 136155  with known file:line:col: 94824 (69.6%)
+direct+indirect calls: 8830  indirect calls: 73

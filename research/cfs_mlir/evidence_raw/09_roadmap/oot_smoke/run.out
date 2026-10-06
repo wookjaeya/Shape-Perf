@@ -1,0 +1,7 @@
+module {
+  %c6274_i32 = arith.constant 6274 : i32
+  %c1_i32 = arith.constant 1 : i32
+  %0 = cfs.sb.subscribe %c6274_i32, %c1_i32 : i32
+}
+
+rc=0

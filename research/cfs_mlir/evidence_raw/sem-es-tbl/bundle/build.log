@@ -1,0 +1,64 @@
+make --no-print-directory -C "build" mission-all
+[ 22%] Built target cfeconfig_platformdata_native_default_cpu1
+[ 33%] Built target elf2cfetbl
+[ 33%] Built target cfe-build-env
+[ 77%] Built target cfeconfig_platformdata_tool
+[100%] Built target cfgtool-execute-native_default_cpu1
+[100%] Built target cfe-module-version
+[100%] Built target mission-version
+[100%] Built target mission-prebuild
+[ 50%] Built target osal_generic-linux_impl
+[150%] Built target config
+[550%] Built target osal_posix_impl
+[600%] Built target tblobj_cpu1_cfeTestAppTable.tbl04414a6bc5b878f0e633fe4ff5c0fc78f18df90e
+[700%] Built target evs
+[750%] Built target fs
+[800%] Built target generate_table_cpu1_cfeTestAppTable_cfe_test_tbl
+[1000%] Built target es
+[1000%] Built target cfetables
+[1100%] Built target sb
+Built target tbl
+Built target time
+[100%] Built target native_default_cpu1-cfetables
+Built target ram_notimpl
+Built target psp-pc-linux-impl
+[100%] Built target mission-cfetables
+Built target psp-pc-linux-shared
+Built target soft_timebase
+Built target timebase_posix_clock
+Built target eeprom_mmap_file
+Built target port_notimpl
+Built target iodriver
+Table build completed
+Built target linux_sysmon
+[100%] Built target tabletool-execute
+Built target endian_api
+Built target msg
+Built target sbr
+Built target resourceid
+Built target probe_hi
+Built target probe_lo
+Built target probe_slow
+Building C object apps/probe_own/CMakeFiles/probe_own.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/apps/probe_common/probe_tbl.c.o
+Building C object apps/probe_shr/CMakeFiles/probe_shr.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/apps/probe_common/probe_tbl.c.o
+Built target ut_assert_pic
+Built target osal_bsp
+Built target cfe_testcase
+Built target psp-pc-linux
+Linking C shared module probe_own.so
+Linking C shared module probe_shr.so
+Built target cfe_assert
+Built target ut_assert
+Built target osal
+Built target probe_shr
+Built target probe_own
+Generating cfe_build_env_table.c
+Built target ut_osapi_stubs
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_build_env_table.c.o
+Linking C executable core-cpu1
+Built target core-cpu1
+[100%] Built target native_default_cpu1-all
+[ 28%] Built target elf2cfetbl
+[ 42%] Built target cfeconfig_platformdata_native_default_cpu1
+[100%] Built target cfeconfig_platformdata_tool
+Built target mission-all

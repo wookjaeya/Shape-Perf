@@ -1,0 +1,204 @@
+--- v641/cFE-6.4.1-OSS-release/cfe/fsw/cfe-core/src/es/cfe_es_start.c	2014-12-12 15:50:31.000000000 +0000
++++ v642/cFE-6.4.2-OSS-release/cfe/fsw/cfe-core/src/es/cfe_es_start.c	2015-06-29 17:04:20.000000000 +0000
+@@ -169,6 +169,11 @@
+    int32 ReturnCode;
+ 
+    /*
++   ** Indicate that the CFE is the earliest initialization state
++   */
++   CFE_ES_Global.SystemState = CFE_ES_SYSTEM_STATE_EARLY_INIT;
++
++   /*
+    ** Initialize the Reset variables. This call is required
+    ** Before most of the ES functions can be used including the 
+    ** ES System log.
+@@ -185,7 +190,7 @@
+    /*
+    ** Announce the startup
+    */
+-   CFE_ES_WriteToSysLog("ES Startup: CFE_ES_Main started\n");
++   CFE_ES_WriteToSysLog("ES Startup: CFE_ES_Main in EARLY_INIT state\n");
+ 
+    /*
+    ** Create and Mount the filesystems needed
+@@ -246,26 +251,10 @@
+    } /* end if */
+ 
+    /*
+-   ** Create the ES Startup Sync Semaphore
++   ** Indicate that the CFE core is now starting up / going multi-threaded
+    */
+-   ReturnCode = OS_BinSemCreate(&(CFE_ES_Global.StartupSyncSemaphore),"ES_SYNC_SEM", 0, 0 );
+-   if(ReturnCode != OS_SUCCESS)
+-   {
+-      CFE_ES_WriteToSysLog("ES Startup: Error: ES Startup Sync Semaphore could not be created. RC=0x%08X\n",
+-                            ReturnCode);
+-         
+-      /*
+-      ** Delay to allow the message to be read
+-      */
+-      OS_TaskDelay(CFE_ES_PANIC_DELAY);
+-      
+-      /* 
+-      ** cFE Cannot continue to start up. 
+-      */
+-      CFE_PSP_Panic(CFE_PSP_PANIC_STARTUP_SEM);
+-         
+-   } /* end if */
+-
++   CFE_ES_WriteToSysLog("ES Startup: CFE_ES_Main entering CORE_STARTUP state\n");
++   CFE_ES_Global.SystemState = CFE_ES_SYSTEM_STATE_CORE_STARTUP;
+ 
+    /*
+    ** Create the tasks, OS objects, and initialize hardware
+@@ -273,17 +262,11 @@
+    CFE_ES_CreateObjects();
+ 
+    /*
+-   ** Before the Applications are loaded, set up the state
+-   ** variables that allow the startup syncronization to work.
+-   ** This depends on a couple of things:
+-   **  1. The fact that the cFE applications all use the CFE_ES_RunLoop Call
+-   **  2. The StartupSyncSemaphore has been created ( see above )
+-   **  3. The App(s) that wish to wait calls CFE_ES_WaitForStartupSync
+-   */
+-   CFE_ES_Global.AppStartupCounter = 0;
+-   CFE_ES_Global.StartupFileComplete = FALSE;
+-   CFE_ES_Global.StartupSemaphoreReleased = FALSE;
+-   
++   ** Indicate that the CFE core is ready
++   */
++   CFE_ES_WriteToSysLog("ES Startup: CFE_ES_Main entering CORE_READY state\n");
++   CFE_ES_Global.SystemState = CFE_ES_SYSTEM_STATE_CORE_READY;
++
+    /*
+    ** Start the cFE Applications from the disk using the file
+    ** specified in the CFE_ES_NONVOL_STARTUP_FILE or CFE_ES_VOLATILE_STARTUP_FILE 
+@@ -292,27 +275,22 @@
+    CFE_ES_StartApplications(StartType, StartFilePath );
+ 
+    /*
+-   ** Indicate that the startup file is complete. This avoids
+-   ** certain race conditions.
+-   */
+-   CFE_ES_Global.StartupFileComplete = TRUE;
+-
+-   /*
+-   ** Check for "stuck" startup sync semaphore
+-   */
+-   CFE_ES_LockSharedData(__func__,__LINE__);
+-   if (( CFE_ES_Global.StartupSemaphoreReleased == FALSE) && ( CFE_ES_Global.AppStartupCounter <= 0 ))
++    * Wait for applications to be "running" before declaring as operational.
++    * However, if not everything starts up, that is not a fatal error, we will
++    * continue anyway since the core apps are OK and control/telemetry should function.
++    * The problem app could be deleted/restarted/etc by the ground station.
++    */
++   if (CFE_ES_ApplicationSyncDelay(CFE_ES_SYSTEM_STATE_UNDEFINED,
++           CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC) != CFE_SUCCESS)
+    {
+-      CFE_ES_Global.AppStartupCounter = 0;
+-      CFE_ES_Global.StartupSemaphoreReleased = TRUE;
+-      OS_BinSemFlush(CFE_ES_Global.StartupSyncSemaphore);  
++       CFE_ES_WriteToSysLog("ES Startup: Startup Sync failed - Applications may not have all started\n");
+    }
+-   CFE_ES_UnlockSharedData(__func__,__LINE__);
+ 
+    /*
+-   ** Startup is complete
++   ** Startup is fully complete
+    */
+-   CFE_ES_WriteToSysLog("ES Startup: CFE Core Startup Complete\n");
++   CFE_ES_WriteToSysLog("ES Startup: CFE_ES_Main entering OPERATIONAL state\n");
++   CFE_ES_Global.SystemState = CFE_ES_SYSTEM_STATE_OPERATIONAL;
+ }
+ 
+ /*
+@@ -865,8 +843,10 @@
+                CFE_ES_Global.AppTable[j].TaskInfo.NumOfChildTasks = 0;
+                
+                /*
+-               ** Since this is a Core app, the AppStateRecord does not need to be filled out.
++               ** Core apps still have the notion of an init/running state
+                */
++               CFE_ES_Global.AppTable[j].StateRecord.AppState = CFE_ES_APP_STATE_INITIALIZING;
++               ++CFE_ES_Global.AppStartedCount;
+                
+                
+                /*
+@@ -948,6 +928,26 @@
+                CFE_PSP_Panic(CFE_PSP_PANIC_CORE_APP);
+             
+             }
++
++            /*
++             * CFE_ES_ApplicationSyncDelay() will delay this thread until the
++             * newly-started thread calls CFE_ES_WaitForStartupSync()
++             */
++            if (CFE_ES_ApplicationSyncDelay(CFE_ES_SYSTEM_STATE_UNDEFINED, CFE_CORE_MAX_STARTUP_MSEC) != CFE_SUCCESS)
++            {
++                CFE_ES_WriteToSysLog("ES Startup: Core App %s did not complete initialization\n",
++                                      CFE_ES_ObjectTable[i].ObjectName);
++
++                /*
++                ** Delay to allow the message to be read
++                */
++                OS_TaskDelay(CFE_ES_PANIC_DELAY);
++
++                /*
++                ** cFE Cannot continue to start up.
++                */
++                CFE_PSP_Panic(CFE_PSP_PANIC_CORE_APP);
++            }
+             break;
+ 
+             case CFE_ES_FUNCTION_CALL: /*----------------------------------------------------------*/
+@@ -993,3 +993,49 @@
+ 
+     CFE_ES_WriteToSysLog("ES Startup: Finished ES CreateObject table entries.\n");
+ }
++
++/*
++** Function: CFE_ES_ApplicationSyncDelay
++**
++** Purpose:  Waits for all of the applications that CFE has started thus far to
++**           reach the "running" state, i.e. call CFE_ES_RunLoop or CFE_ES_WaitForStartupSync
++**
++**           It will also wait for the overall system state to be (at least) reach
++**           the desired state.  This may be "CFE_ES_SYSTEM_STATE_UNDEFINED" to match any.
++**
++*/
++int32 CFE_ES_ApplicationSyncDelay(uint32 MinimumSystemState, uint32 TimeOutMilliseconds)
++{
++    int32 Status;
++    uint32 WaitTime;
++    uint32 WaitRemaining;
++
++    Status = CFE_SUCCESS;
++    WaitRemaining = TimeOutMilliseconds;
++    while (CFE_ES_Global.SystemState < MinimumSystemState ||
++            (CFE_ES_Global.AppReadyCount != CFE_ES_Global.AppStartedCount &&
++                    CFE_ES_SYSTEM_STATE_UNDEFINED == MinimumSystemState))
++    {
++        /* TBD: Very Crude timing here, but not sure if it matters,
++         * as this is only done during startup, not real work */
++        if (WaitRemaining > CFE_ES_STARTUP_SYNC_POLL_MSEC)
++        {
++            WaitTime = CFE_ES_STARTUP_SYNC_POLL_MSEC;
++        }
++        else if (WaitRemaining > 0)
++        {
++            WaitTime = WaitRemaining;
++        }
++        else
++        {
++            Status = CFE_ES_OPERATION_TIMED_OUT;
++            break;
++        }
++
++        OS_TaskDelay(WaitTime);
++        WaitRemaining -= WaitTime;
++    }
++
++    return Status;
++}
++

@@ -1,0 +1,370 @@
+{
+ "summary": "I traced cFE ES startup and lifecycle, Table Services, EVS registration and TIME startup in the source at cFE 546a002515be5a1e3b66f9ae2c14f948d9cec76f. For the runs I picked OSAL 5befd8e9 and PSP 36c24cb9 by date: the last dev merges before the cFE commit. The blob SHAs of the five files the revision note cites (cfe_es.h, cfe_sb.h, cfe_tbl.h, cfe_es_api.c, cfe_sb_priv.c) match its S08–S12 records. I then built the pinned core natively (with elf2cfetbl f97ba870) and ran five small probe apps of my own. They tested startup order against priority, the sync APIs, Table Services semantics and app restart, under four scheduling setups: RT privileges or not, all 4 CPUs or pinned to one. All runs used uid 65534, because root in this container cannot create SB queues deeper than msg_max=10.\n\nMain results:\n(1) Core apps now start strictly one after another, ES→EVS→SB→TBL→TIME. All EarlyInit runs before any task exists, and each core app must reach RUNNING before the next is created. Task priority does not change this order. The cFE #73 core-startup race therefore cannot be reproduced at this commit.\n(2) OPERATIONAL is reached after two 1000 ms timeouts even when apps are not RUNNING, and WaitForSystemState still returns success. Calling it also marks the caller's own app state ready. WaitForStartupSync discards the status, and its header promise to round the timeout up to 1000 ms is not implemented.\n(3) On Linux, OSAL picks SCHED_RR; without privileges it falls back silently in permissive mode. Priority-ordered app startup appeared only with RT privileges and a single pinned CPU (5/5 runs). Otherwise the startup-script order appeared, and not always.\n(4) CFE_TBL_GetAddress on a table that was never loaded returns a NULL pointer, both in the code and at runtime. The header promises a valid zero-filled pointer, and the revision note §7.1 repeats that promise as confirmed fact, so it needs correcting.\n(5) Table locking is one flag per handle, not per pointer. A second GetAddress moves the protection to the new buffer, and the first pointer's contents then changed under the sharer.\n(6) A single-buffered update is deferred (CFE_TBL_INFO_TABLE_LOCKED) until the address is released and Manage is called again. A double-buffered update goes ahead while a sharer holds the old buffer, and the next load is refused (CFE_TBL_ERR_NO_BUFFER_AVAIL).\n(7) When a table owner is restarted while another app shares its table, the new instance's Register fails with CFE_TBL_ERR_DUPLICATE_NOT_OWNED until the sharer calls Unregister. Meanwhile the sharer gets CFE_TBL_ERR_UNREGISTERED. This is reproduced, and gives source and runtime support to the original note's \"cross-application stale handle\" idea.\n(8) Restart, reload and delete only record a request; ES does the work later from a background scan. Teardown releases EVS, SB (subscriptions and queued messages dropped), TBL and TIME resources before it deletes the app's tasks. The restarted app gets a new AppId; restart took about 1.6 s in these runs.\n\nOne concurrency candidate is from code reading only: the owner's CFE_TBL_Load releases the registry lock before it applies the update. All findings separate confirmed source, confirmed runtime and inference. I saved an evidence ledger (Korean, with permalinks), the probe sources, the run script and the raw and extracted logs.",
+ "findings": [
+  {
+   "id": "esTbl-01",
+   "topic": "ES startup sequence / system states",
+   "claim": "CFE_ES_Main is the only writer of CFE_ES_Global.SystemState, and it moves through the states in order: EARLY_INIT (L88) → CORE_STARTUP (L184) → CreateObjects (L189) → CORE_READY (L195) → StartApplications (L202). It then waits up to 1000 ms for every app to reach LATE_INIT (L211-214) → APPS_INIT (L217), and waits up to 1000 ms for RUNNING (L226-229) → OPERATIONAL (L235). On either timeout it writes a syslog line and continues. The waits poll the app table every 50 ms (CFE_ES_MainTaskSyncDelay L886-944). SystemState is declared volatile sig_atomic_t.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_start.c#L74-L236",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_start.c#L886-L944",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_global.h#L152",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/inc/cfe_es_internal_cfg.h#L860-L879 (poll 50 ms, script timeout 1000 ms)",
+    "local: runs/probe_results_summary.txt L66-69 (Startup Sync failed x2 then OPERATIONAL)"
+   ],
+   "scope_checked": "Read cfe_es_start.c in full (L1-944) and the state enum in default_cfe_es_extern_typedefs.h L184-307; observed the transitions in the syslog of 4 runs.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the only happens-before edge that state progression gives is ES main's assignment. Whether other apps are ready depends on timing, so an analyzer must model these as timeout-guarded and conditional, not as guarantees."
+  },
+  {
+   "id": "esTbl-02",
+   "topic": "core app startup serialization vs cFE #73",
+   "claim": "CFE_ES_CreateObjects first calls EarlyInit for every core module in CoreObjectTable order, before any task exists, and panics on error. It then creates one core task at a time and waits up to CFE_PLATFORM_CORE_MAX_STARTUP_MSEC=30000 for that app to reach RUNNING before creating the next, panicking on timeout. The module order comes from MISSION_CORE_MODULES (config, es, evs, fs, sb, tbl, time, ...), so the core tasks start in the order ES→EVS→SB→TBL→TIME. Each core app reaches RUNNING by calling WaitForSystemState(CORE_READY). Two further guards exist: EVS_SendEvent checks EVS_AppID, with a comment that it may be called before CFE_EVS_TaskInit, and every new task's entry first waits 50 ms and then polls until its task record has an AppId.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_start.c#L767-L876",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/cmake/mission_defaults.cmake#L21-L40",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_private/config/default_cfe_core_private_internal_cfg.h#L68",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs_utils.c#L607-L635",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L227-L309",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_task.c#L83 (same pattern: es_task.c L134, evs_task.c L229, tbl_task.c L74, time_task.c L88)",
+    "local: runs/probe_results_summary.txt L35-39, L209-213, L384-388 (core init events ES,EVS,SB,TBL,TIME about 100 ms apart in every config, including RR priorities where TIME=60 is highest)"
+   ],
+   "scope_checked": "Read CreateObjects, the objtab files of es/evs/sb/tbl/time/fs, target_objtab.h, the generator in cmake/target/CMakeLists.txt L55-99, every core TaskMain up to its WaitForSystemState call, EVS EarlyInit/TaskInit, and GetTaskFunction/TaskEntryPoint. Ran 4 configurations.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the core-app startup race recorded in cFE #73 is structurally prevented at this commit, so the current code cannot serve as a positive case for detecting it. Reproducing #73 needs the historical revision, which I did not obtain. The original note's description (TIME starting first because of priority) applies to historical code only."
+  },
+  {
+   "id": "esTbl-03",
+   "topic": "CFE_ES_WaitForSystemState / WaitForStartupSync semantics",
+   "claim": "WaitForSystemState first raises the caller's own AppState to match the requested system state, under the ES lock. For external apps: APPS_INIT→LATE_INIT, OPERATIONAL→RUNNING, SHUTDOWN→STOPPED; for core apps, CORE_READY or higher→RUNNING. It then polls SystemState without the lock, in steps of at most 50 ms, and returns CFE_ES_OPERATION_TIMED_OUT (0xc4000027) when the time runs out. There is no infinite-wait option, and a timeout of 0 returns immediately. WaitForStartupSync is a void wrapper for WaitForSystemState(OPERATIONAL) and discards its status. The header says the WaitForStartupSync timeout must be at least 1000 and that lower values are rounded up; the implementation does no rounding.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L514-L619",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_es.h#L390-L449 (rounding claim L440-L444; no infinite wait L405-L409)"
+   ],
+   "scope_checked": "Read cfe_es_api.c L514-619 in full and the header doc blocks L390-449.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: calling the sync API both declares the caller ready and waits. A call made in the middle of init marks the app RUNNING before init has finished. Because WaitForStartupSync returns nothing, app code cannot tell a timeout from success. A sync edge in the analyzer must model the self-state change and the timeout path, and must not trust the header's rounding claim."
+  },
+  {
+   "id": "esTbl-04",
+   "topic": "OPERATIONAL does not imply all apps RUNNING (runtime)",
+   "claim": "PROBE_SLOW made no ES sync call for 2.5 s. In all four configurations ES logged 'Startup Sync failed' twice and then entered OPERATIONAL. The other probes' WaitForSystemState(OPERATIONAL,5000) returned 0x00000000 after about 1.95–2.0 s while SLOW was not yet RUNNING. SLOW's own later call returned immediately (waited_us of 0–1).",
+   "evidence": [
+    "local: runs/probe_results_summary.txt L66-80 (R1), L240-254 (R2), L415-427 (R3)",
+    "local: bundle/apps/probe_common/probe_order.c (probe source; PROBE_PRE_DELAY_MS=2500 for SLOW in bundle/apps/probe_slow/CMakeLists.txt)"
+   ],
+   "scope_checked": "Ran 4 configurations, about 34 s each, natively at the pinned commits; read the console logs.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "A successful startup-sync return does not show that another app has subscribed or initialized. Any first-message or startup-dependency rule built on WaitForStartupSync needs an explicit assumption that all apps reach RUNNING within the ES timeouts (inference)."
+  },
+  {
+   "id": "esTbl-05",
+   "topic": "startup script parsing and app creation order",
+   "claim": "The startup script is read one character at a time: '!' or EOF ends parsing, ';' ends a line, ',' separates tokens, and non-printing characters are dropped. Too-long lines are skipped with a warning, and lines with fewer than 8 tokens are rejected. On a processor reset, /ram/cfe_es_startup.scr is tried before /cf. Entries are processed in file order. For CFE_APP, a priority above OS_MAX_TASK_PRIORITY is clipped, any exception action other than 0 means processor restart, and CFE_ES_AppCreate loads the module and creates the task without waiting for it. CFE_LIB entries run their init function synchronously in the ES main context. ParseFileEntry's return status is ignored by the caller.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_startupscript.c#L53-L422",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L401-L570",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L681-L684 (library init call)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/cmake/sample_defs/cpu1_cfe_es_startup.scr#L1-L33"
+   ],
+   "scope_checked": "Read cfe_es_startupscript.c in full, AppCreate, StartAppTask and the LoadLibrary init path.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: an ordering edge exists only between a library's init and the apps listed after it. Apps listed later in the script have no ordering guarantee relative to earlier ones beyond their creation order."
+  },
+  {
+   "id": "esTbl-06",
+   "topic": "OSAL POSIX task priorities on Linux",
+   "claim": "OS_Posix_TaskAPI_Impl_Init uses SCHED_FIFO only when its priority range is wider than OS_MAX_TASK_PRIORITY (255); otherwise it uses SCHED_RR, so on Linux, where the range is 1–99, it picks RR. The highest level is reserved for the root thread. If pthread_setschedparam fails for lack of privilege, EnableTaskPriorities stays false: tasks are created with default attributes (SCHED_OTHER) and their OSAL priority is overwritten to 255. In strict mode (no OSAL_CONFIG_DEBUG_PERMISSIVE_MODE, the OSAL default) init fails instead; cFE's native sample config sets permissive mode to TRUE. OS_PriorityRemap squeezes OSAL priorities 1–254 linearly into the remaining Linux levels, so distinct OSAL priorities can share one level. OSAL mutexes use PTHREAD_PRIO_INHERIT. Task creation sets no CPU affinity, and OSAL_CONFIG_MAX_CPUS defaults to 1.",
+   "evidence": [
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/os/posix/src/os-impl-tasks.c#L80-L111",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/os/posix/src/os-impl-tasks.c#L227-L457",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/os/posix/src/os-impl-tasks.c#L530-L632",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/default_config.cmake#L159-L181",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/cmake/sample_defs/native_osconfig.cmake#L22-L39",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/os/posix/src/os-impl-mutex.c#L82",
+    "local: runs/R1_rr_allcpu/console.log ('Selected policy 2 for RT tasks, root task = 99'); runs/R3_nocap_allcpu/console.log ('Could not setschedparam in main thread: Operation not permitted'); runs/*/threads.txt (CLS RR vs TS, rtprio values)"
+   ],
+   "scope_checked": "Read os-impl-tasks.c L70-640, os-impl-queues.c L40-140, bsp_start.c L45-96 and default_config.cmake around PERMISSIVE and MAX_CPUS. Grepped for affinity use in the shared task code. Checked policy and priority with ps -L in each run.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: Linux runs reproduce RTOS-like priority behaviour only with RT privilege, and in permissive builds without privilege the priorities silently disappear. Reproduction experiments must record privilege, CPU pinning, the permissive flag and msg_max (which truncates queue depth for non-root users)."
+  },
+  {
+   "id": "esTbl-07",
+   "topic": "empirical startup order vs priority",
+   "claim": "The startup script listed LO(200), HI(20), SLOW(100), OWN(90), SHR(95), and app-main entry order was measured with CLOCK_MONOTONIC. With RR priorities and all 4 CPUs: script order, 5/5 runs. With RR priorities and taskset -c 0: priority order HI, OWN, SHR, SLOW, LO, 5/5. Without privilege on all CPUs: script order 4/5, with HI last once. Without privilege on cpu0: script order 5/5, with one deviation (SHR before OWN) in a separate long run.",
+   "evidence": [
+    "local: runs/order_repeats.txt",
+    "local: runs/probe_results_summary.txt (R1–R4 sections)",
+    "local: run_probe.sh (exact setpriv/taskset commands); runs/<run>/cmd.txt"
+   ],
+   "scope_checked": "20 short runs plus 4 long runs on a 4-vCPU container; the order comes from the probes' first-statement monotonic timestamps.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Priority-driven ordering scenarios (the reasoning style of the original #73 lesson) reproduce on Linux only when pinned to one CPU with RT privilege. Results from multi-CPU or unprivileged runs must not be generalized to single-core flight RTOS behaviour, or the reverse. Five runs per configuration is too few for probability claims (inference)."
+  },
+  {
+   "id": "esTbl-08",
+   "topic": "RunLoop / ExitApp / app run status",
+   "claim": "CFE_ES_RunLoop increments the calling task's counter. It returns false at once if *RunStatus != APP_RUN. Otherwise it raises the app's AppState to RUNNING if lower, and returns false, copying the request into *RunStatus, when the control request is not APP_RUN. CFE_ES_ExitApp, for an external app, records ExitStatus only if no request is pending, sets AppState=STOPPED and then loops on OS_TaskDelay(500) until ES deletes it. For a core app, CORE_APP_INIT_ERROR triggers a processor reset. On init failure the ES task does not exit at once: it calls WaitForSystemState(CORE_READY), which marks it RUNNING, and only calls ExitApp afterwards.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L292-L506",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_task.c#L100-L200",
+    "local: runs/run1_default.log L47-58 (root run: ES init failure, EVS still created; EVS init error leads to processor reset)"
+   ],
+   "scope_checked": "Read RunLoop, ExitApp and the ES TaskMain loop, and checked the root-run log.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: the 'app ready' event is whichever comes first of WaitForSystemState, WaitForStartupSync or RunLoop. The analyzer must check whether that point lies after the subscriptions, and must not treat the code before RunLoop as complete initialization."
+  },
+  {
+   "id": "esTbl-09",
+   "topic": "child tasks",
+   "claim": "CFE_ES_CreateChildTask may only be called from the app's main task. The new task's record carries the parent AppId and starts through the same 50 ms entry handshake. CFE_ES_GetAppRecordByContext resolves through the task record's AppId, so ES, EVS, SB and TBL calls made from a child task act as the parent app, including RunLoop and WaitForSystemState, which change the parent's AppState. Main tasks cannot be deleted through DeleteChildTask or ExitChildTask. TIME creates two child tasks at priority 25 during init.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L1202-L1497",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_resource.c#L308-L338",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/time/fsw/src/cfe_time_task.c#L175-L199"
+   ],
+   "scope_checked": "Read the child-task APIs, GetAppRecordByContext and GetAppID in source. Not exercised at runtime.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference, not run: tasks of one app share TBL access descriptors (a single LockFlag), so one task's ReleaseAddress can leave another task's pointer unprotected. A child task calling RunLoop can mark the app RUNNING before the main task has finished init. The analysis unit has to be the task, while identity and ownership belong to the app."
+  },
+  {
+   "id": "esTbl-10",
+   "topic": "Restart/Reload/Delete control flow and timing",
+   "claim": "CFE_ES_RestartApp, ReloadApp and DeleteApp only set ControlReq (Restart and Reload first check the file with OS_stat). CFE_ES_LockUserAppRecord rejects core apps and any app whose AppState is not exactly RUNNING. The ES background scan moves a RUNNING app with a pending request to WAITING with a timer of KILL_TIMEOUT(5) x SCAN_RATE(1000 ms). Apps in WAITING or STOPPED are processed when the timer reaches 0. An app that has already set STOPPED through RunLoop/ExitApp still has a timer of 0 and is processed at the next scan. ProcessControlRequest runs CleanUpApp and then AppCreate, whatever cleanup returned, and the new app gets a new AppId. At runtime, OWN left RunLoop with RunStatus=5 0.49 s (R1) or 0.014 s (R2) after the request, and the new instance started about 1.58 s / 1.63 s after the request, with AppId 1114121→1114123.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_api.c#L165-L284",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L72-L113",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_appctrl.c#L318-L499",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_backgroundtask.c#L74-L193 (includes always-active 'for coverage purposes' jobs L95-L115 in production table)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/inc/cfe_es_internal_cfg.h#L198-L229",
+    "local: runs/probe_results_summary.txt L97-105 (R1), L271-279 (R2)"
+   ],
+   "scope_checked": "Read the app-control APIs, LockUserAppRecord, RunAppTableScan, ProcessControlRequest and the background task loop. Ran a restart in 4 configurations. Did not run the non-cooperating (kill timeout) path.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: restart timing is a race between the app's RunLoop period and the ES scan cadence; a cooperating app takes about 1.6 s here, and a non-cooperating one would go through the kill-timeout path, not measured. AppIds held by other apps go stale. Restart, reload and delete must be modelled as asynchronous request-then-teardown events, not as immediate effects."
+  },
+  {
+   "id": "esTbl-11",
+   "topic": "what app teardown releases, and in which order",
+   "claim": "CFE_ES_CleanUpApp first collects the app's tasks and pools and marks the records RESERVED; the OS tasks are still alive at this point. It then calls each core module's AppCleanupCb in CoreObjectTable order: EVS unregisters the app; SB, for each owned pipe, removes the pipe from every route (unsubscribes), releases the buffers still in its queue and deletes the queue, and releases zero-copy buffers; TBL drops dump requests for the app's tables and releases all of the app's access descriptors; TIME clears the synch callback. Only after that does it delete the tasks (children first, main last, together with their OSAL objects), then the pools, unload the module and free the records.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L732-L1240",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L87-L124",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L352-L460",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_internal.c#L584-L641",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs_task.c#L178-L198",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/time/fsw/src/cfe_time_utils.c#L1018-L1041"
+   ],
+   "scope_checked": "Read CleanUpApp and its helpers, plus the four module cleanup callbacks and SB DeletePipeFull.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference, not run: pipes, subscriptions and tables are released before the tasks are deleted, so a task that is not cooperating, or a child task, may run briefly against resources that are gone. Between cleanup and re-subscription, messages to the app reach zero subscribers and one-time messages are lost. Tables restart from NEVER_LOADED."
+  },
+  {
+   "id": "esTbl-12",
+   "topic": "CFE_TBL_ERR_NEVER_LOADED returns NULL pointer (header/implementation mismatch)",
+   "claim": "For a table that has never been loaded, CFE_TBL_GetAddress and GetAddresses return CFE_TBL_ERR_NEVER_LOADED (0xcc000005) with *TblPtr=NULL and do not set the lock; ReleaseAddress also returns NEVER_LOADED. For normal tables the active buffer is set only at the first load (only dump-only internal-buffer tables get one at registration). The header says that in this case the call still returns a valid pointer to all-zero content, which must be released. The revision note §7.1 states the header's version as confirmed fact.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L174-L220 (L192-L196)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_regrec.c#L354-L388",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_regrec.h#L465-L469",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L540-L544 (header claim; also L620-L624)",
+    "local: runs/probe_results_summary.txt L50-51, L220-221, L399-400 ('GetAddress(T) BEFORE load st=0xcc000005 ptr=(nil)', Release st=0xcc000005)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/cfe_testcase/src/tbl_content_access_test.c#L52-L53 (functional test checks only the code, not the pointer)",
+    "revision note: /root/.claude/uploads/e983f27d-f015-5a5d-b912-399245630e78/fc87c4b6-MLIR_Flight_Software_Race_Research_Note_202609302-2.md L317"
+   ],
+   "scope_checked": "Read the implementation path GetAddress → TxnStartFromHandle → TxnGetTableAddress → GetNextNotification and the registry setup. Ran this case in 4 configurations, plus after re-registration following restart.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "The revision note should be corrected to: 'the header says a zero-filled pointer is returned, but at commit 546a002 the implementation returns NULL'. An app that trusts the header and dereferences the pointer after NEVER_LOADED dereferences NULL, a concrete API-misuse pattern a static checker can target. More generally, header text is not a reliable source of semantics without checking the implementation (inference)."
+  },
+  {
+   "id": "esTbl-13",
+   "topic": "TBL lock is per handle, not per pointer",
+   "claim": "Each access descriptor (one per handle and AppId) holds a single (LockFlag, BufferIndex). GetAddress sets LockFlag=true and BufferIndex to the current active buffer, and ReleaseAddress only clears LockFlag. Calling GetAddress twice on the same handle without a release moves the protection to the second buffer. At runtime, with double-buffered D, SHR took pointer A at t+1s and pointer B at t+3s, OWN's Load(D,v3) at t+4s succeeded, and the never-released pointer A then read value 3 instead of 1. When the inactive buffer is checked for locks, every descriptor attached to the table is scanned.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L204-L216",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_api.c#L478-L509",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_regrec.c#L47-L59",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_regrec.c#L278-L317",
+    "local: runs/probe_results_summary.txt L81-92 (R1) and L255-266 (R2): 't+5s first D ptr=... val=3'"
+   ],
+   "scope_checked": "Read the TBL access-descriptor, registry and regrec code. Ran the scenario in R1–R4.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the original note's Acquire→Use→Release model does not hold per pointer. An analyzer must track lock state per handle and flag use of a pointer obtained before a re-acquire. Main and child tasks of one app share the handle (esTbl-09), so the same hazard spans tasks."
+  },
+  {
+   "id": "esTbl-14",
+   "topic": "when a table update is applied; single vs double buffering",
+   "claim": "CFE_TBL_UpdateInternal switches the active buffer directly when the load buffer is private: always for double-buffered tables, and for the first load of a single-buffered table. A later single-buffered load arrives through a shared global load buffer and must take the table's only buffer exclusively; if any descriptor's lock points at that buffer, the result is CFE_TBL_INFO_TABLE_LOCKED (0x4c000018, a warning) and the load stays pending. On success it copies or switches, sets Updated on every descriptor, updates the CDS for critical tables and discards the working buffer. At runtime, single-buffered T held by its owner: Load gave 0x4c000018 and the old value stayed; after release, GetStatus gave UPDATE_PENDING (0x4c000004) and Manage gave INFO_UPDATED (0x4c00000e) with the new value. Double-buffered: a load while a sharer held the old buffer succeeded and the held pointer kept the old content; the next load gave CFE_TBL_ERR_NO_BUFFER_AVAIL (0xcc00000f) and was not left pending (GetStatus=0); after release the retry succeeded.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_internal.c#L416-L576",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_loadbuff.c#L40-L44",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_loadbuff.c#L146-L189",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_loadbuff.c#L434-L470",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L535-L539",
+    "local: runs/probe_results_summary.txt L61-64 (single), L83-96 (double D/E)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/cfe_testcase/src/tbl_content_access_test.c#L90-L99 (cFE test expects INFO_TABLE_LOCKED and notes the extra Manage)"
+   ],
+   "scope_checked": "Read UpdateInternal, GetWorkingBuffer, PrepareNewLoadBuff, the load-buffer ID scheme, LoadFinish and Manage/GetStatus. Ran the single and double scenarios in R1–R4.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: 'updates cannot occur while addresses are held' (header; revision note §7.1) is exact only for the single-buffered Update path, where the update is deferred rather than blocked. For double-buffered tables the update proceeds, holders see stale but stable data, and the following load is refused. Table models must depend on the buffering option, and a deferred update needs another Manage call."
+  },
+  {
+   "id": "esTbl-15",
+   "topic": "owner Load applies immediately; registry lock released early (candidate race)",
+   "claim": "In CFE_TBL_Load (owner only), the registry mutex is taken in TxnStartFromHandle and released right away (comment: 'As all ops are confined to this registry entry alone, release the lock'). It then runs ValidateLoadRequest/GetWorkingBuffer, loads the data, calls the validation function in the caller's context, and LoadFinish calls UpdateInternal immediately, all without the lock. CFE_TBL_Update, by contrast, holds the lock across UpdateInternal, and GetAddress sets LockFlag under the lock. The TBL task's LoadCmd calls ValidateLoadRequest under the lock. A cFE unit-test comment acknowledges concurrent Share and Unregister as possible at runtime.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_api.c#L287-L348",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_api.c#L356-L431",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_load.c#L764-L952",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_task_cmds.c#L376-L464",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/ut-coverage/tbl_UT.c#L4058-L4062",
+    "grep of lock calls: modules/tbl/fsw/src/*.c (Lock/Unlock sites listed in ledger §8.4)"
+   ],
+   "scope_checked": "Read the lock sites across TBL sources. I did not attempt a concurrent stress test.",
+   "status": "unverified",
+   "importance": "supporting",
+   "implication": "Candidate, unverified: when an owner re-loads a single-buffered table, a sharer's GetAddress could slip between the exclusivity check and the memcpy and read partially copied data, and an owner Load could overlap a ground LoadCmd. This is a framework-level ordering candidate for the analyzer's TBL model, and also a caution against assuming every update path is mutually exclusive with GetAddress. It needs a stress or model-checking test before being called a defect."
+  },
+  {
+   "id": "esTbl-16",
+   "topic": "owner restart while a sharer holds the table",
+   "claim": "On app cleanup, every access descriptor of the dead app is released. A table it owned becomes un-owned (OwnerAppId=UNDEFINED) but stays 'used' while sharers remain attached. LocateRegRecByName matches used records regardless of owner, so the restarted owner's CFE_TBL_Register gets CFE_TBL_ERR_DUPLICATE_NOT_OWNED (0xcc00000d). At runtime the new OWN instance's Register(T/D/E) failed every 0.5 s with syslog '...owned by App(0)', while SHR's GetAddress returned CFE_TBL_ERR_UNREGISTERED (0xcc000009) with ptr NULL. After SHR called Unregister, the owner's next retry succeeded with fresh content (NEVER_LOADED, then Load v1), and SHR had to Share again. Between the restart request and cleanup, SHR still read the old table successfully.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_accdesc.c#L169-L193",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L136-L166",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L302-L365",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_regrec.c#L133-L157",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L277-L314 (Unregister doc: race warning L290-L294, owner-removed use case L286-L288)",
+    "local: runs/probe_results_summary.txt L97-178 (R1), L271-352 (R2)"
+   ],
+   "scope_checked": "Read TBL register, release and lookup code. Ran the restart scenario in all 4 configurations with the same result.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "This is a reproducible cross-app lifecycle ordering dependency: whether the owner's restart succeeds depends on when another app calls Unregister. It grounds the original note's 'cross-application stale handle' item in source and runtime, but the visible failure is the owner's re-registration rather than the sharer's stale reads. It is a good candidate for an analyzer rule (a sharer with no Unregister on its UNREGISTERED path) and for benchmark construction (inference). Whether public apps such as CS handle this was not checked."
+  },
+  {
+   "id": "esTbl-17",
+   "topic": "ground load/validate/activate path and notification by message",
+   "claim": "The TBL task's LoadCmd loads into the working buffer. ValidateCmd creates a validation request, which the owner's Manage executes in the owner's context when a validation function exists. ActivateCmd requires IsValid and sets ActivateReq. The owner's CFE_TBL_Manage loops over GetStatus (priority: validation, then update, then dump), calls Validate or Update, and returns INFO_UPDATED when an update succeeds. Validate and Update require owner context. CFE_TBL_NotifyByMessage is owner-only. The notification is a CFE_SB_TransmitMsg sent from the TBL task only when ValidateCmd creates a new request, when ActivateCmd succeeds, or on dump; a send failure only raises an event. The header contradicts itself on where the validation function runs: 'Table Management Service' context at L200-201, 'Application's context' at L214-215. The implementation runs it in the caller's context.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_task_cmds.c#L376-L649",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_loadbuff.c#L524-L558",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_api.c#L603-L812",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_internal.c#L744-L778",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L406-L430",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L200-L215",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_tbl.h#L754-L796"
+   ],
+   "scope_checked": "Read the command handlers and the API code. The ground-command path and notification were not exercised at runtime.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference, not run: the notification is a one-time signal. If the owner's Manage meets INFO_TABLE_LOCKED there is no re-notification, so an app driven only by notification messages can leave the update pending indefinitely, and the notification itself is subject to SB loss (no subscriber, pipe full). The analyzer should require Manage to be called on a periodic path, or model the retry explicitly."
+  },
+  {
+   "id": "esTbl-18",
+   "topic": "GetAddresses partial-success semantics and INFO codes",
+   "claim": "CFE_TBL_GetAddresses processes each handle independently, keeps going after failures (stopping only on CFE_ES_ERR_RESOURCEID_NOT_VALID) and returns only the first non-success status. Some tables can therefore end up locked with valid pointers while the overall status is an error, and others NULL. ReleaseAddresses releases every table and returns the first non-success status. INFO codes (0x4c...) are positive, so a check of status >= CFE_SUCCESS treats them as success. GetNextNotification puts NEVER_LOADED ahead of INFO_UPDATED, and INFO_UPDATED is reported once per descriptor because it is cleared on GetAddress. A newly shared table reports INFO_UPDATED on the first GetAddress if it was already loaded.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_api.c#L517-L595",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_transaction.c#L297-L315",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/tbl/fsw/src/cfe_tbl_registry.c#L373-L398",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_error.h#L913-L1080",
+    "local: runs/probe_results_summary.txt L81-82 (first GetAddress after Share = 0x4c00000e)"
+   ],
+   "scope_checked": "Read the source. GetAddresses itself was not run; the INFO_UPDATED-after-Share behaviour was observed.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: an analyzer that judges lock acquisition from the aggregate status of GetAddresses, or that defines success as == CFE_SUCCESS, will report false missing-release findings or miss real paths. Lock state must be modelled per handle."
+  },
+  {
+   "id": "esTbl-19",
+   "topic": "EVS registration requirements",
+   "claim": "CFE_EVS_Register clears (memset) the caller's EVS entry and sets binary filters; any other scheme returns CFE_EVS_UNKNOWN_FILTER. Calling it again wipes the earlier filters and counters. CFE_EVS_SendEvent from an app that has not registered returns CFE_EVS_APP_NOT_REGISTERED (0xc2000002), drops the event, and logs a 'not registered' event and syslog once per app. EVS's own init order is GetAppID, Register, CreatePipe, Subscribe, and finally recording EVS_AppID. EVS cleanup unregisters the app.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs.c#L42-L161",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs_utils.c#L71-L182",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/src/cfe_evs_task.c#L266-L322",
+    "local: runs/probe_results_summary.txt L42, L45, L78 ('SendEvent_before_Register st=0xc2000002' plus the EVS_NotRegistered syslog)"
+   ],
+   "scope_checked": "Read the source; observed the unregistered SendEvent in every run.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: sending events before registration loses them silently, which is not an ordering failure that corrupts state. It matters mostly as a lifecycle check for restart and child tasks; events in the window between restart and Register are lost."
+  },
+  {
+   "id": "esTbl-20",
+   "topic": "TIME services startup dependencies",
+   "claim": "CFE_TIME_EarlyInit calls CFE_TIME_InitData before any task exists. It clears the globals, restores the reset variables (previous time on a processor reset), and sets ClockSetState=NOT_SET, flywheel and PendingState=INVALID, so CFE_TIME_GetTime returns values from CORE_STARTUP on but the clock is not yet set. CFE_TIME_TaskInit then runs in this order: EVS_Register; create the tone and 1Hz semaphores; create two child tasks at priority 25 (above every core app); CreatePipe and subscribe to HK, tone, data, 1Hz and ground commands (Subscribe or SubscribeLocal depending on client/server; a server also subscribes to time requests); send the init event; select the tone; add a 1Hz callback on the PSP timebase 'cFS-Master', skipped silently if that timebase is missing. TIME is the last core app, so ES, EVS, SB and TBL have finished their task init before it starts.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/time/fsw/src/cfe_time_task.c#L49-L395",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/time/fsw/src/cfe_time_utils.c#L231-L315",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/time/fsw/inc/cfe_time_internal_cfg.h#L234-L240",
+    "local: runs/R1_rr_allcpu/console.log (syslog time jumps from 1980-001 to 1980-012 when TIME initializes on processor reset; TIME_TONE_TASK/TIME_ONEHZ_TASK rtprio 88 in threads.txt)"
+   ],
+   "scope_checked": "Read TIME EarlyInit, TaskInit and its helpers, and the first part of InitData (L231-351). Did not trace the tone/1Hz state machine or the clock-state transitions after startup.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: a timestamp read early is not evidence of a synchronized clock, so freshness analysis must treat clock-state checks as guards. Because TIME's syslog timestamps jump at init, they cannot be used to order startup events; the probes used CLOCK_MONOTONIC instead."
+  },
+  {
+   "id": "esTbl-21",
+   "topic": "reproduction environment caveats",
+   "claim": "In this container, root has CAP_SYS_NICE but not CAP_SYS_RESOURCE, and msg_max=10. OSAL truncates queue depth only for non-root users in permissive mode, so as root SB pipe creation failed with EINVAL, EVS init failed and cFE ended in a processor reset. All comparison runs therefore used uid 65534 through setpriv, adding ambient CAP_SYS_NICE where RT priorities were wanted, which also means pipes were truncated to depth 10. /dev/shm/osal:RAM already existed, owned by root with mode 700 and created before my runs, so the probes could not open the volatile startup script there and fell back to /cf. The kept R1 log is a processor-reset start; R2–R4 and the 20 repeats were power-on starts, with the same TBL and restart results.",
+   "evidence": [
+    "local: runs/run1_default.log (OS_QueueCreate EINVAL; 'CORE Application CFE_EVS Had an Init Error'; PROCESSOR reset)",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/bsp/generic-linux/src/bsp_start.c#L55-L78",
+    "https://github.com/nasa/osal/blob/5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0/src/os/posix/src/os-impl-queues.c#L50-L105",
+    "command: grep Cap /proc/self/status -> CapEff 000001fffeffffff (bit 24 CAP_SYS_RESOURCE clear); cat /proc/sys/fs/mqueue/msg_max -> 10",
+    "local: run_probe.sh; runs/*/cmd.txt; grep 'Starting the cFE with' runs/*/console.log"
+   ],
+   "scope_checked": "Checked container capabilities and sysctl, OSAL queue/BSP code and run logs. I removed all SysV shm segments my runs created; I did not touch /dev/shm/osal:RAM.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: any later runtime replay or validation in this environment must record these conditions; truncated pipe depth in particular changes queue-overflow behaviour. Results do not transfer automatically to flight RTOS builds."
+  }
+ ],
+ "gaps": [
+  "I did not obtain or analyse the historical cFE revision behind #73, nor the commit that introduced today's serialized core startup (EarlyInit phase plus per-core-app RUNNING wait), so the #73 bug and the current code are not mapped to each other at commit level.",
+  "The TBL candidate race in CFE_TBL_Load (registry lock released before UpdateInternal: owner re-load vs a sharer's GetAddress, and owner Load vs a ground LoadCmd) comes from code reading only. No concurrent stress or model-checking run was done.",
+  "Behaviour of child tasks — sharing TBL handles and lock flags with the main task, and changing the parent's AppState through RunLoop or WaitForSystemState — is inferred from source only and not exercised at runtime.",
+  "I did not measure the kill-timeout restart path for an app that never calls RunLoop or ExitApp, nor the ES background scan cadence. The production job table contains always-active coverage jobs, and their timing effect was inferred, not measured.",
+  "I did not run the ground table path (LoadCmd, ValidateCmd, ActivateCmd, NotifyByMessage, then Manage), so the 'deferred update with no re-notification' scenario is unverified.",
+  "The teardown-ordering hazard (resources released before tasks are deleted) was not exercised with a non-cooperating app or a running child task.",
+  "All runtime results come from Linux native: SCHED_RR with priority compression, 4 vCPUs, uid 65534, pipe depth cut to 10, OSAL permissive mode. Nothing here establishes RTEMS or VxWorks semantics, and the order statistics are 5 runs per configuration only.",
+  "I did not trace TIME clock-state transitions after startup (tone/1Hz state machine, when the clock becomes SET or VALID), nor the client vs server differences beyond the subscriptions.",
+  "I did not check how public apps (CS, HK, LC, sample_app) handle NEVER_LOADED, repeated GetAddress on one handle, owner restart, or UNREGISTERED."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/sem-es-tbl_evidence_ledger.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/probe_results_summary.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/order_repeats.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/R1_rr_allcpu/console.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/R2_rr_cpu0/console.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/R3_nocap_allcpu/console.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/R4_nocap_cpu0/console.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/run1_default.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/runs/R1_rr_allcpu/threads.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/run_probe.sh",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/apps/probe_common/probe_order.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/apps/probe_common/probe_tbl.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/sample_defs/targets.cmake",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/cFE (clone at 546a002515be5a1e3b66f9ae2c14f948d9cec76f)",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/osal (clone at 5befd8e9f6c62b44bb7ff4c15db8629c0e00efa0)",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/psp (clone at 36c24cb953b047ab5525240579aeb06adf5ac11f)",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/elf2cfetbl (clone at f97ba87035688f0cf82d22b762d42c3c7e4292a6)"
+ ]
+}

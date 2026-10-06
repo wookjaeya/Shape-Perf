@@ -1,0 +1,27 @@
+# cFS SB call-site census (grep -n -E 'CFE_SB_(Subscribe|SubscribeEx|SubscribeLocal|TransmitMsg|TransmitBuffer)\s*\(' fsw/src/*.c), plus CFE_MSG_Init/SetMsgId sites
+## nasa_sample_app @ 199476a34827ae84d50d66f97619227854cd971a
+nasa_sample_app/fsw/src/sample_app.c:158:        status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(SAMPLE_APP_SEND_HK_MID), SAMPLE_APP_Data.CommandPipe);
+nasa_sample_app/fsw/src/sample_app.c:173:        status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(SAMPLE_APP_CMD_MID), SAMPLE_APP_Data.CommandPipe);
+nasa_sample_app/fsw/src/sample_app_cmds.c:61:    CFE_SB_TransmitMsg(CFE_MSG_PTR(SAMPLE_APP_Data.HkTlm.TelemetryHeader), true);
+nasa_sample_app/fsw/src/sample_app.c:134:        CFE_MSG_Init(CFE_MSG_PTR(SAMPLE_APP_Data.HkTlm.TelemetryHeader),
+## nasa_HK @ 0dc16b7a7bab71747b9c063cf405ad59a65a40a5
+nasa_HK/fsw/src/hk_app.c:163:    Status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(HK_SEND_COMBINED_PKT_MID), HK_AppData.CmdPipe);
+nasa_HK/fsw/src/hk_app.c:175:    Status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(HK_SEND_HK_MID), HK_AppData.CmdPipe);
+nasa_HK/fsw/src/hk_app.c:187:    Status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(HK_CMD_MID), HK_AppData.CmdPipe);
+nasa_HK/fsw/src/hk_cmds.c:73:    CFE_SB_TransmitMsg(CFE_MSG_PTR(HK_AppData.HkPacket.TelemetryHeader), true);
+nasa_HK/fsw/src/hk_utils.c:322:            Result = CFE_SB_Subscribe(OuterCpyEntry->InputMid, HK_AppData.CmdPipe);
+nasa_HK/fsw/src/hk_utils.c:499:                    CFE_SB_TransmitMsg(&OutBuffer->Msg, true);
+nasa_HK/fsw/src/hk_app.c:139:    CFE_MSG_Init(CFE_MSG_PTR(HK_AppData.HkPacket.TelemetryHeader),
+nasa_HK/fsw/src/hk_utils.c:305:                    CFE_MSG_Init(&NewPacketAddr->Msg, MidOfThisPacket, SizeOfThisPacket);
+## nasa_to_lab @ d27c6014cb5d2979140500f635876ee87b81995b
+nasa_to_lab/fsw/src/to_lab_app.c:261:    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(MsgIdValue), TO_LAB_Global.Cmd_pipe);
+nasa_to_lab/fsw/src/to_lab_app.c:504:                CFE_SB_SubscribeEx(SubEntry->Stream, TO_LAB_Global.Tlm_pipe, SubEntry->Flags, SubEntry->BufLimit);
+nasa_to_lab/fsw/src/to_lab_cmds.c:147:    CFE_SB_TransmitMsg(CFE_MSG_PTR(TO_LAB_Global.DataTypesTlm.TelemetryHeader), true);
+nasa_to_lab/fsw/src/to_lab_cmds.c:161:    CFE_SB_TransmitMsg(CFE_MSG_PTR(TO_LAB_Global.HkTlm.TelemetryHeader), true);
+nasa_to_lab/fsw/src/to_lab_cmds.c:218:            status = CFE_SB_SubscribeEx(pCmd->Stream, TO_LAB_Global.Tlm_pipe, pCmd->Flags, pCmd->BufLimit);
+nasa_to_lab/fsw/src/to_lab_app.c:142:        CFE_MSG_Init(CFE_MSG_PTR(TO_LAB_Global.HkTlm.TelemetryHeader),
+nasa_to_lab/fsw/src/to_lab_cmds.c:112:    CFE_MSG_Init(CFE_MSG_PTR(TO_LAB_Global.DataTypesTlm.TelemetryHeader),
+## nasa_sch_lab @ 607e2f90c5f828f3f3ae655a4debacf8b2cc4bbb
+131:                        CFE_SB_TransmitMsg(CFE_MSG_PTR(LocalStateEntry->CommandHeader), true);
+296:    Status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(CFE_TIME_ONEHZ_CMD_MID), SCH_LAB_Global.CmdPipe);
+246:            CFE_MSG_Init(CFE_MSG_PTR(LocalStateEntry->CommandHeader),

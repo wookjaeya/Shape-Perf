@@ -1,0 +1,252 @@
+[
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 485,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 496,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 507,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Main",
+  "line": 513,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 562,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 20,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "RunStatus"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 587,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 602,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 24,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandPipe"
+ },
+ {
+  "fn": "SAMPLE_APP_Init",
+  "line": 624,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 662,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 663,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 19,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 664,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 665,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 18,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "HkTlm.Payload.CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_SendHkCmd",
+  "line": 677,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles.[%14]"
+ },
+ {
+  "fn": "SAMPLE_APP_NoopCmd",
+  "line": 699,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_NoopCmd",
+  "line": 701,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ResetCountersCmd",
+  "line": 714,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ResetCountersCmd",
+  "line": 715,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 732,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 734,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 735,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_ProcessCmd",
+  "line": 753,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": false,
+  "how": "gep-index",
+  "path": "TblHandles"
+ },
+ {
+  "fn": "SAMPLE_APP_DisplayParamCmd",
+  "line": 781,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_DisplayParamCmd",
+  "line": 783,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 0,
+  "bare_addressof": true,
+  "how": "tbaa-struct-path",
+  "path": "CommandCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_VerifyCmdLength",
+  "line": 837,
+  "op": "load",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ },
+ {
+  "fn": "SAMPLE_APP_VerifyCmdLength",
+  "line": 839,
+  "op": "store",
+  "global": "SAMPLE_APP_Data",
+  "tbaa_off": 1,
+  "bare_addressof": false,
+  "how": "tbaa-struct-path",
+  "path": "CommandErrorCounter"
+ }
+]

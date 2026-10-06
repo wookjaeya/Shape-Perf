@@ -1,0 +1,30 @@
+path	sha256	origin
+cfe-OSS-readme_v6.5.0a.txt	3d2c3c6c5cb4545f879ce851473fb5e2fae9c8575a34b73de6bb95a529e861f5	https://raw.githubusercontent.com/nasa/cFE/v6.5.0a/cfe-OSS-readme.txt
+src_v650a/cfe_es_api.c	3d3ba6b3e84ec1d8008127d0353941daa3cb1810ebadab5a3636acee1e4f70e7	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_es_objtab.c	a118422e2311733f8452e1192ca1b60673eeb7259c6281277f0e5a6a5ba05f34	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_es_start.c	f5d89f3f25774a49085abfd9a98d2fe5614e1ddf51f6b3f97991d715f324172f	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_evs_task.c	10d20aecb3fb7ec259e4b0abf01239c603797d8758184c508bc93f9ff920cfc5	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_evs_utils.c	45f89a3c83e0033f08ba99fe4a1d54190002361f12ad78b273cb0d41adca7d6f	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_platform_cfg.h	b10b372ee4c0387bc051e16f4d8fa29d37362412bbdf8d3ce4e338498410b102	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_sb_task.c	cd06560d640c125eee6aa745b3be9c69dacd4265fd423a871563fe6f3f45eec6	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_v650a/cfe_time_task.c	ea6ce6f636c28dbe6b112c157d8f6416dfeb848ed0ab04e008fc46effa0b0e6c	git show v6.5.0a (commit b2765d9f905aa11f0c3b419b62233597366a7db9) of https://github.com/nasa/cFE
+src_pinned/cfe_es_api.c	e1b3bcdb3fd884e2484d7246bfd818b6829ea54b24d83f3aaa983279b8b631cf	git show 546a002515be5a1e3b66f9ae2c14f948d9cec76f of https://github.com/nasa/cFE
+src_pinned/cfe_es_objtab.c	826c01bc9e189dfd7c18208945d4d166f32a390d2fba59b72f8372198ab56127	git show 546a002515be5a1e3b66f9ae2c14f948d9cec76f of https://github.com/nasa/cFE
+src_pinned/cfe_es_start.c	f13325bd0288a50e9df47821624be02b8d7f5f1b381de9fae4097ad13a27d6d3	git show 546a002515be5a1e3b66f9ae2c14f948d9cec76f of https://github.com/nasa/cFE
+src_pinned/cfe_evs.c	24a6c0a7b9b948739910b092d4180da7685f83381154e552497691cc4fe8d537	git show 546a002515be5a1e3b66f9ae2c14f948d9cec76f of https://github.com/nasa/cFE
+src_pinned/cfe_sb_api.c	afa7682eb4b7381fb2af8ea048eaababadbbb411bfb1cce8f7b916bc7b78ad26	git show 546a002515be5a1e3b66f9ae2c14f948d9cec76f of https://github.com/nasa/cFE
+NASA_Software_Catalog_2025-26.pdf	71cf07751698370a880ae0cd914401b59f63d74e07f4aa644e1142d4f463ee76	https://ntts-prod.s3.amazonaws.com/t2p/prod/software/NASA_Software_Catalog_2025-26.pdf (Last-Modified 2025-07-07)
+catalog_2025-26.txt	aed8f403bda3069fdff946a19de138f588f1cdc2b9b606b3be6502019444c929	pypdf text extraction of the catalog PDF
+SBN_README_main.md	15c94f84cae6d40a19c02780cca7fe4ed34ff4ddc3ebfd01e08005ed390552d0	https://raw.githubusercontent.com/nasa/SBN/{main,master}/README.md (SBN HEAD bf058c45bb378446a22e78627693c240ee56df1c)
+SBN_README_master.md	974e4489dfeba28301b16255777e3473b9a9c2e5550177395e5dd9dd9219176e	https://raw.githubusercontent.com/nasa/SBN/{main,master}/README.md (SBN HEAD bf058c45bb378446a22e78627693c240ee56df1c)
+cFS_README.md	6d068ffc83faca5aecd5409fc1049614310a9e5aeb247a972ad3ac5104f8f2d6	https://raw.githubusercontent.com/nasa/cFS/main/README.md
+llvm_docs/CIR_index.md	a9febfaed46ab2aeb5c8e49c76a0e09bec5b84576aad354175e4a0784a76b4a9	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+llvm_docs/DataFlowAnalysis.md.main	92e3e5b40c2d78a57d5ad853e9d6bb4d979935662a56bd480e1e66eb4299c2a5	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+llvm_docs/DataFlowFramework.h.main	c88ae6e60b35e962eb8446637560b1c8af947b9f09f4ea599f2a916892a0e718	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+llvm_docs/DenseAnalysis.h.main	3bb37c5d699418913d447e8f6a58158fb1bbcda1647e8434df0fa473a484164c	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+llvm_docs/SparseAnalysis.h.main	965d139ff2fa4b162f7285ed4835d5fbb5de835a041476e4e700dcf2ab2d49bc	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+llvm_docs/TargetLLVMIR.md.main	997c878e9ae00eb00bfdb0a2dfa9563a8e8e8cea54d1c3e595ae3125818eab39	raw.githubusercontent.com/llvm/llvm-project/1e8550c234507ef5b70d508f18b98f9bb0ebc07b (upstream main on 2026-10-01)
+import_test/cfs_like.c	7aeb9863aa027ac668e9e3bd537fda9697d5072cb8c34c2da517dbccff39414b	local: clang/mlir-translate @ llvm-project 1053047a
+import_test/cfs_like.ll	4cd3ce8e729d693ef58e4136a78cc475475b53b69afb6aea599f40916ec76467	local: clang/mlir-translate @ llvm-project 1053047a
+import_test/cfs_like.mlir	867e872440b832693073617ece4a7bcf7af8d237232cefc9f5076bdd4962f67c	local: clang/mlir-translate @ llvm-project 1053047a
+import_test/cfs_like_dbg.mlir	66a1ebf2647ec72d809eb32a295c1ae327968e203b19c3a83bb7d3c5fa72af8e	local: clang/mlir-translate @ llvm-project 1053047a

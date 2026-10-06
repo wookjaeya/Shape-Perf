@@ -1,0 +1,20 @@
+# sem-sb: pinned sources used (checked 2026-10-01)
+nasa/cFE         546a002515be5a1e3b66f9ae2c14f948d9cec76f  2026-09-25 14:23:07 -0400  (task pin; == cfe submodule of nasa/cFS dev HEAD)
+nasa/osal        dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1  2026-09-29 08:32:53 -0500  (osal submodule of nasa/cFS dev HEAD 5a9b075c)
+nasa/PSP         53df1d54c3d29fd23832c59df1104de07a043af2  2026-09-29 15:07:51 -0400  (psp submodule of nasa/cFS dev HEAD; used only for probe build)
+nasa/sample_app  199476a34827ae84d50d66f97619227854cd971a  2026-09-24 14:35:53 -0400  (apps/sample_app submodule of nasa/cFS dev HEAD)
+nasa/elf2cfetbl  f97ba87035688f0cf82d22b762d42c3c7e4292a6  (tools/elf2cfetbl submodule of nasa/cFS dev HEAD; build-only)
+nasa/cFS (bundle) dev  5a9b075cd4c818ee8555f349a9f78ba5632d0384 2026-09-30 11:53:12 -0400 (default branch; pins cfe=546a0025, osal=dad0ee99, psp=53df1d54)
+nasa/cFS (bundle) main 088b2fa828db9ff7e00733f1908e0eeb59f66ce3 2026-05-13 08:34:06 -0400 (pins cfe=c5fb2b4d, osal=d2d877a6, psp=c4b3b0b6) -- NOT the cFE pin of this note
+  osal main d2d877a6 vs dad0ee99: `git diff --stat` on os-impl-queues.c, osapi-queue.c, osapi-queue.h, posix os-impl-queues.h = empty (identical queue code)
+blob SHAs (git hash-object): cfe_sb.h cf1413c11976074f7d393586c3f52f9dc0f22ed1 ; cfe_sb_priv.c 1de11a199c3d2138f7a46e12c529f03268da69d1 (match revision note S09/S12)
+  osal posix os-impl-queues.c 562abebbade1988298aa81c12db1897058d36ce6 ; shared osapi-queue.c 2e5fe814278eb92ebe81271c5b4f161f04b24cc1 ; osapi-queue.h be8f6c95004c30f28b2456bb5363a3e9312abee1
+  osal rtems os-impl-queues.c df8c111c9698c753fcc0fd1ef917ef8498626c32 ; vxworks os-impl-queues.c 1b09b4b6125a141fbafdfc70cf518070e860d043
+external semantics refs:
+  torvalds/linux tag v6.12 ipc/mqueue.c (sha256 7fc3b7d258cb9aefae3290d35bc4579eebb0c6e521179643bef283f5409e96dd) -> ext/linux-v6.12-ipc-mqueue.c
+  mkerrisk/man-pages ae6b221882ce71ba82fcdbe02419a225111502f0 man3/mq_send.3 -> ext/mq_send.3
+  RTEMS/rtems-docs b1afc8fbf4ae7a6ab144bb655a600909aa2e2f98 c-user/message/{directives,operations}.md -> ext/rtems-docs
+  blocked: pubs.opengroup.org (POSIX), man7.org, docs.rtems.org (egress proxy)
+probe environment: Linux 6.18.44-fc-v50 container, 4 vCPU, gcc 13.3.0, cmake 3.28.3, SIMULATION=native BUILDTYPE=debug,
+  container root has CapEff 000001fffeffffff (CAP_SYS_RESOURCE bit 24 absent). /proc/sys/fs/mqueue/msg_max default 10
+  (temporarily set to 64 for root runs 1,2,3,5; restored to 10; PSP SysV shm segments 0x52004151-3 removed after runs).

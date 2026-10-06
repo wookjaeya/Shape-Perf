@@ -1,0 +1,276 @@
+{
+ "summary": "PROBE REPORT (could not be saved as probe/REPORT.md: the harness refused to let a subagent write report files, so the full report is here and in the findings). Base dir P=/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe. Final disk use is 375 MB; the peak was 616 MB before I deleted the cpu2 build outputs (~249 MB).\n\nENVIRONMENT\n- Linux 6.18.44, 4 vCPU, running as root, but CAP_SYS_RESOURCE is absent (CapEff 0x1fffeffffff).\n- Build toolchain: gcc 13.3.0, cmake 3.28.3.\n- Analysis toolchain: clang/MLIR 23.0.0git at llvm-project 1053047a, Release+assertions. CLANG_ENABLE_CIR is not set.\n- /proc/sys/fs/mqueue/msg_max = 10.\n\n(1) CLONE [confirmed]\n- Command: shallow clone with submodules. Took 20.65 s and 99 MB.\n- Bundle commit: 5a9b075cd4c8.\n- The cfe submodule is 546a002515be, the same commit the revision note pins (S25).\n- osal dad0ee99, psp 53df1d54, sample_app 199476a3, hk 0dc16b7a.\n- All submodule commits are in submodules.txt.\n\n(2) BUILD [confirmed]\n- The README at this bundle commit uses `make native_std.prep` and `make native_std.install`. Copying Makefile.sample is no longer the procedure, so I followed the README.\n- target-rules.mk:33 already passes CMAKE_EXPORT_COMPILE_COMMANDS=TRUE.\n- prep: 5.58 s.\n- install with -j4: 48.8 s real (user 2m11s), 0 warnings, 502 MB build tree.\n- cpu1 compile_commands.json: 1435 entries; 98 of them are non-unit-test app src entries.\n\n(3) RUN [confirmed]\n- Root, host IPC namespace: fails after about 11 s with exit 134. mq_open returns EINVAL, then CFE_ES/EVS cannot create SB pipes, which triggers a PROCESSOR RESET and abort. Cause: OSAL truncates queue depth only for non-root users (bsp_start.c:66), and root here cannot exceed msg_max=10 without CAP_SYS_RESOURCE.\n- Non-root (setpriv uid 65534): runs and reaches OPERATIONAL. Pipes are truncated to depth 10 and RT priority is not permitted.\n- Root in a private IPC namespace (`unshare --ipc`, msg_max set to 256 inside it): runs with RT scheduling. The host value of msg_max stayed at 10.\n- So root is not needed; plain root actually fails in this container.\n- 8 runs in total (2 × 20 s plus 6 × 6 s). Leftover SysV shm segments were removed with ipcrm.\n- Load order is fixed by the startup script: SCH_LAB, CI_LAB, TO_LAB, SAMPLE_APP, then LC, CF, DS, FM, HK, HS, MM, SC, MD, CS, SBN.\n- Init-completion order varied: the 6 short runs gave 6 different orders. CI_LAB is loaded 2nd but finishes init 5th–10th.\n- Every run shows 'No subscribers for MsgId 0x808' (CFE_EVS_LONG_EVENT_MSG_MID) from CFE_SB, CFE_TBL, CFE_TIME and TO_LAB.\n  - The count is always 4, which is the EVS FIRST_4_STOP filter cap (cfe_sb_internal_cfg.h:222-225). The true count is unknown.\n  - Cause: TO_LAB deliberately subscribes only after CFE_ES_WaitForStartupSync, to avoid MsgLimit errors (to_lab_app.c:69-73).\n- Every run also shows 16 drops of 0x80E (CFE_SB_ONESUB_TLM_MID) from TO_LAB on SBNSubPipe:\n  - non-root config: 'Pipe Overflow' (depth 32 truncated to 10);\n  - root-ipcns config: 'Msg Limit Err' (SBN MsgLim 16).\n  - 16 is also the EVS filter cap (FIRST_16_STOP), so the real number is at least 16.\n  - Whether this affects SBN functionally is unverified.\n\n(4) IR / MLIR [confirmed]\n- I re-ran the compile_commands entries with clang plus `-S -emit-llvm -O0 -g`.\n  - The first try failed 4/4: gcc-only `-Wno-stringop-*` flags combined with -Werror.\n  - Adding `-Wno-unknown-warning-option` fixed it: 17/17 TUs compiled (sample_app 4, hk 4, sch_lab 1, ci_lab 4, to_lab 4), 0.03–0.06 s per file.\n- `mlir-translate --import-llvm`: 17/17 succeeded with 0 diagnostics, 8–25 ms per file.\n- API call sites (SB api / SB helper / ES / TBL / EVS / MSG / OS_):\n\n| app | SB api | SB helper | ES | TBL | EVS | MSG | OS_ |\n|---|---|---|---|---|---|---|---|\n| sample_app | 7 | 9 | 12 | 6 | 13 | 6 | 0 |\n| hk | 19 | 31 | 12 | 14 | 38 | 13 | 0 |\n| sch_lab | 4 | 1 | 16 | 5 | 0 | 2 | 9 |\n| ci_lab | 10 | 13 | 9 | 0 | 17 | 8 | 8 |\n| to_lab | 18 | 23 | 10 | 6 | 32 | 5 | 8 |\n\n- MIDs at -O0: code-defined MIDs reach Subscribe/MSG_Init through `call CFE_SB_ValueToMsgId(i32 const)` → struct alloca → load. They are not constants at the call site, but one alloca hop recovers them.\n- After `-O1 -Xclang -disable-llvm-passes` plus `mlir-opt --inline --sroa --mem2reg --canonicalize --cse`, they become direct `llvm.mlir.constant` operands. Inlining duplicates call sites, so site counts are not comparable to -O0.\n- Table-driven and command-driven MIDs stay runtime loads: HK copy table, TO_LAB sub table and ground commands, SCH_LAB schedule table.\n- Dispatch compares the received MID (from the CFE_MSG_GetMsgId out-param) against lazily-initialised function statics (CMD_MID, SEND_HK_MID).\n- IR keeps only numeric MIDs; macro names are lost. The Clang AST keeps the literal spelling locations.\n- State updates: struct-typed GEPs on `llvm.mlir.addressof` of the app global are kept, and DI member order gives field names. 83 global-field store sites were found, all with source locations.\n  - Missed: offset-0 fields (accessed through the base address), API out-param writes, and pointer-local writes (sch_lab: 0 detected).\n- Locations: with `--mlir-print-debuginfo`, all 477 calls, 996 loads, 83 state stores and 79 MID/msg sites carry file:line. The only unknown locations are 95 parameter-spill stores and constants hoisted to the function entry.\n\n(5) ClangIR [confirmed]\n- `-fclangir -emit-cir` fails: 'clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON'.\n- `-fclangir -S -emit-llvm` returns rc=0, but its output is byte-identical to the normal path, so the flag is silently ignored.\n- There is no cir-opt binary.\n\n[Inference] The C→LLVM IR→MLIR route works on real cFS apps. Code-defined MIDs need a preprocessing pass to become constants, and field names need DI. The message graph cannot be closed from code alone: table sources and build config must be inputs. The default bundle already shows startup-ordering SB events that serve as normal-case and candidate cases, but console counts are capped by EVS filters.",
+ "findings": [
+  {
+   "id": "probe-01",
+   "topic": "source pinning",
+   "claim": "The cFS bundle at commit 5a9b075cd4c818ee8555f349a9f78ba5632d0384 (2026-09-30) uses cfe submodule 546a002515be5a1e3b66f9ae2c14f948d9cec76f. This is exactly the cFE commit the revision note pins as S25. osal is dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1 and psp is 53df1d54c3d29fd23832c59df1104de07a043af2. The shallow clone with submodules took 20.65 s and used 99 MB.",
+   "evidence": [
+    "P/clone.log (time output: real 0m20.652s; du 99M)",
+    "P/submodules.txt (git submodule status: ' 546a002515be5a1e3b66f9ae2c14f948d9cec76f cfe (heads/dev)')",
+    "git -C P/cFS log -1 → 5a9b075cd4c818ee8555f349a9f78ba5632d0384 2026-09-30T11:53:12-04:00 'Merge pull request #1144 from nasa/ic-latest-dev'",
+    "core-cpu1 console: 'Version Info: Module CORE_API, version git:546a002' (P/run_nobody.log)"
+   ],
+   "scope_checked": "Ran git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/nasa/cFS, then git submodule status and git log for each submodule.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) The S08–S12 API citations in the revision and this executable build use the same cFE source, so code-level claims can be checked against a running build. OSAL, PSP and app SHAs are now pinned as well, as the revision's §3.1 requires."
+  },
+  {
+   "id": "probe-02",
+   "topic": "native build",
+   "claim": "The current bundle README procedure works in the container with gcc 13.3: make native_std.prep took 5.58 s, and make -j4 native_std.install took 48.8 s real (2m11.7s user) with 0 compiler warnings. The build tree is 502 MB and includes unit-test runners and cpu2. compile_commands.json is exported automatically: the cpu1 DB has 1435 entries, 98 of them non-unit-test app fsw/src entries. Each app source appears twice, once as the app module build and once as the unit-test coverage build (-D_UNIT_TEST_ -pg -ftest-coverage). The task's procedure (copy cfe/cmake/Makefile.sample) is not what this README uses: the README has a top-level Makefile with <config>.<goal> targets.",
+   "evidence": [
+    "P/prep.log, P/install.log ('native_std.install successfully completed', real 0m48.791s, grep -c 'warning:' = 0)",
+    "https://github.com/nasa/cFS/blob/5a9b075cd4c818ee8555f349a9f78ba5632d0384/README.md (Build and Run Quick Start: make native_std.prep / native_std.install)",
+    "P/cFS/target-rules.mk:33 '$(ALL_TARGETS): PREP_OPTS += -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE'",
+    "P/cFS/target-configs.mk:52-56 (ENABLE_UNIT_TESTS=TRUE, SIMULATION=native, CFE_EDS_ENABLED=OFF, MISSIONCONFIG=sample, debug)",
+    "P/compile_commands.cpu1.json (1435 entries)"
+   ],
+   "scope_checked": "Read README lines 95-166, Makefile, goal-configs.mk, target-configs.mk and target-rules.mk; ran prep and install; counted entries with python json.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) A pinned, reproducible build with a JSON compilation database (S19) can be produced in about 1 minute. This is enough to drive Clang/LLVM/MLIR front ends on the real compile flags."
+  },
+  {
+   "id": "probe-03",
+   "topic": "execution environment / root",
+   "claim": "core-cpu1 does not need root. In this container, running it as root actually fails. As root, OSAL does not truncate queue depth, and without CAP_SYS_RESOURCE mq_open cannot exceed msg_max=10. The result is EINVAL, CFE_ES and CFE_EVS cannot create SB pipes (RC 0xCA000005), a PROCESSOR RESET follows, and the process aborts (exit 134 after about 11 s). As uid 65534, OSAL truncates every queue to depth 10 and RT priorities are refused, but cFE reaches OPERATIONAL. As root inside a private IPC namespace with msg_max set to 256, it runs with RT scheduling (policy 2). The host msg_max stayed 10.",
+   "evidence": [
+    "P/run_root.log ('OS_QueueCreate Error. errno = 22', 'CFE_ES_TaskInit: Cannot Create SB Pipe, RC = 0xCA000005', 'CFE_EVS_TaskMain: Application Init Failed', 'Aborted', exit=134)",
+    "P/run_nobody.log ('Maximum user msg queue depth = 10', 'Could not setschedparam in main thread: Operation not permitted', 'entering OPERATIONAL state')",
+    "P/run_root_ipcns.log ('inner msg_max=256', 'Selected policy 2 for RT tasks', OPERATIONAL)",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/bsp/generic-linux/src/bsp_start.c#L66-L75 (geteuid()!=0 → read msg_max)",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-queues.c#L59-L68 and #L102-L104 (TruncateQueueDepth)",
+    "P/cFS/sample_defs/native_osconfig.cmake:39 set(OSAL_CONFIG_DEBUG_PERMISSIVE_MODE TRUE)",
+    "grep CapEff /proc/self/status → 000001fffeffffff (no cap_sys_resource)"
+   ],
+   "scope_checked": "Ran three configurations: root with a 20 s timeout, setpriv uid 65534 with a 20 s timeout, and unshare --ipc with a 20 s timeout. Each run used SIGINT. I also re-ran the second and third configurations 3 times for 6 s each, and read the OSAL BSP and queue source.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) Queue depths and priorities depend on the execution configuration, and they change the observed SB behaviour (see probe-06). Any dynamic replay or reproduction must record uid, msg_max and the scheduling policy next to the results. Results from different configurations must not be pooled."
+  },
+  {
+   "id": "probe-04",
+   "topic": "startup order",
+   "claim": "The startup script fixes the app load order: SCH_LAB, CI_LAB, TO_LAB, SAMPLE_APP, then the priority-70 apps LC, CF, DS, FM, HK, HS, MM, SC, MD and CS, then SBN. The order in which apps finish initialization differs between runs: 6 short runs gave 6 distinct orders. CI_LAB is loaded second but completes initialization 5th to 10th. Example nobody_1: SCH_LAB,TO_LAB,SAMPLE_APP,LC,CF,FM,CI_LAB,MM,HK,DS,MD,SC,CS. Example rootipc_1: SCH_LAB,TO_LAB,SAMPLE_APP,LC,CI_LAB,MM,FM,CF,HK,MD,SC,DS,CS. The core services always initialize in the order ES, EVS, SB, TBL, TIME, followed by the CORE_READY, APPS_INIT and OPERATIONAL states.",
+   "evidence": [
+    "P/runs/nobody_{1,2,3}.log, P/runs/rootipc_{1,2,3}.log (grep of '…Initialized|initialized|Initialization complete' events)",
+    "P/run_root_ipcns.log 'CFE_ES_ParseFileEntry: Loading file … APP:' sequence",
+    "P/cFS/build-native_std/exe/cpu1/cf/cfe_es_startup.scr (generated by sample_defs/generate_startup.cmake)"
+   ],
+   "scope_checked": "8 runs in two execution configurations. Order is taken from the EVS init-completion events only. HS and SBN emit no such event, so they are excluded.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) In the current public bundle, load or creation order is not readiness order, and readiness order is nondeterministic. This gives the revision's §2.2 point (#73) a present-day observation that can be reproduced. An analyzer must not take the script order as a happens-before order. This is not evidence of a defect."
+  },
+  {
+   "id": "probe-05",
+   "topic": "publish-before-subscribe (tolerated)",
+   "claim": "Every run (8/8) logs 'No subscribers for MsgId 0x808' from CFE_SB, CFE_TBL, CFE_TIME and TO_LAB before OPERATIONAL. 0x808 is CFE_EVS_LONG_EVENT_MSG_MID. TO_LAB subscribes to this MID from its table, but deliberately does so only after CFE_ES_WaitForStartupSync, 'to avoid possibly seeing MsgLimit errors due to the apps sending many events at start up'. The reported count of 4 is the EVS filter cap (CFE_SB_SEND_NO_SUBS_EID → CFE_EVS_FIRST_4_STOP), so the true number of subscriber-less sends is unknown and at least 4.",
+   "evidence": [
+    "P/run_nobody.log, P/run_root_ipcns.log, P/runs/*.log (nosubs=4 in each)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/evs/fsw/inc/cfe_evs_topicids.h#L54 (LONG_EVENT_MSG_TOPICID 8); default_cfe_core_api_msgid_mapping.h:63-64 (TLM base 0x0800)",
+    "https://github.com/nasa/to_lab/blob/d27c6014cb5d2979140500f635876ee87b81995b/fsw/src/to_lab_app.c#L69-L73 (comment + CFE_ES_WaitForStartupSync + TO_LAB_UpdateSubscriptionsFromTable)",
+    "P/cFS/sample_defs/tables/to_lab_sub.c:73 ({CFE_SB_MSGID_WRAP_VALUE(CFE_EVS_LONG_EVENT_MSG_MID), {0, 0}, 16})",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/inc/cfe_sb_internal_cfg.h#L221-L243 (filters: NO_SUBS FIRST_4_STOP; MSGID_LIM_ERR and Q_FULL_ERR FIRST_16_STOP)"
+   ],
+   "scope_checked": "Console logs from 8 runs; the to_lab main source; the sample_defs table source; cFE topic-ID and SB filter configuration headers.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) This is a concrete, code-documented normal case in which first messages are lost by design. The revision's §4.4 and §11.4 ask for exactly such cases. A first-message checker must classify this pattern as intended or allowed, not as a race. The case can serve as a labelled negative in evaluation. Console counts are not true counts; SB housekeeping counters would be needed for those."
+  },
+  {
+   "id": "probe-06",
+   "topic": "startup burst and MsgLim/overflow drops",
+   "claim": "After OPERATIONAL, TO_LAB subscribes to 37 table messages. Each subscription produces an SB subscription report, CFE_SB_ONESUB_TLM_MID (0x80E), sent to SBN's SBNSubPipe. SBN subscribes to that MID with MsgLim 16 (SBN_MAX_ONESUB_PKTS_ON_PIPE) on a pipe of depth 32. Every run reports 16 drop events for sender TO_LAB on that pipe. In the non-root configuration (depth truncated to 10) they appear as 'Pipe Overflow'; in the root/IPC-namespace configuration they appear as 'Msg Limit Err', with 0 overflows. 16 is also the EVS filter cap, so at least 16 reports are dropped. SBN itself also waits on CFE_ES_WaitForStartupSync(10000).",
+   "evidence": [
+    "P/run_nobody.log and P/runs/nobody_*.log: 16 × 'CFE_SB 25: Pipe Overflow,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB'",
+    "P/run_root_ipcns.log and P/runs/rootipc_*.log: 16 × 'CFE_SB 17: Msg Limit Err,MsgId 0x80e,pipe SBNSubPipe,sender TO_LAB'; 'TO_LAB 19: L550 TO Lab subscribed to 37 messages from the table'",
+    "https://github.com/nasa/SBN/blob/bf058c45bb378446a22e78627693c240ee56df1c/fsw/src/sbn_app.c#L1463-L1489 (SetupSubPipe: depth SBN_SUB_PIPE_DEPTH; SubscribeLocal ONESUB with SBN_MAX_ONESUB_PKTS_ON_PIPE); sbn_app.c:1651 CFE_ES_WaitForStartupSync(10000)",
+    "P/cFS/apps/sbn/fsw/platform_inc/sbn_platform_cfg.h:67 (SBN_SUB_PIPE_DEPTH 32), :74 (SBN_MAX_ONESUB_PKTS_ON_PIPE 16)",
+    "P/cFS/cfe/modules/sb/fsw/inc/cfe_sb_topicids.h:60 (ONESUB_TLM_TOPICID 14); default_cfe_sb_msgids.h:41 (Default=0x080E)"
+   ],
+   "scope_checked": "8 runs across 2 configurations; SBN and TO_LAB source; SB configuration headers. I did not read SB housekeeping counters and did not check SBN's recovery logic.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) This is an observed instance, in the default bundle, of the revision's §4.2 point that per-destination delivery can fail through MsgLim or queue depth. It arises from startup ordering: TO_LAB's deliberate deferral, made to avoid MsgLim errors in its own pipe, moves the burst into SBN's pipe. The execution configuration changes which failure path is taken. Functional impact and recovery (for example ALLSUBS reports) are unverified, so this must not be reported as a defect. It is a candidate case for analysis and evaluation."
+  },
+  {
+   "id": "probe-07",
+   "topic": "clang on cFS compile DB",
+   "claim": "Running the gcc compile_commands entries unchanged under clang 23 fails 4/4 for sample_app. The gcc-only flags -Wno-stringop-overflow and -Wno-stringop-truncation combined with -Werror trigger an 'unknown warning option' error. Adding -Wno-unknown-warning-option fixes this. All 17 app TUs (sample_app 4, hk 4, sch_lab 1, ci_lab 4, to_lab 4) then compile to LLVM IR with -S -emit-llvm -O0 -g in 0.03–0.06 s each.",
+   "evidence": [
+    "P/ir/sample_app/commands_attempt1_fail.log (error: unknown warning option '-Wno-stringop-overflow' … [-Werror,-Wunknown-warning-option])",
+    "P/ir/<app>/commands.log (exact clang command per TU, rc=0, timings)",
+    "P/emit_ir.py"
+   ],
+   "scope_checked": "Non-unit-test entries of the cpu1 compile DB for 5 apps, about 4.2k C source lines in total.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) A Clang-based frontend (LLVM IR, AST or LibTooling) can reuse the real build flags with a trivial flag filter. No hand-written include paths are needed."
+  },
+  {
+   "id": "probe-08",
+   "topic": "LLVM IR → MLIR import",
+   "claim": "mlir-translate --import-llvm (LLVM 23.0.0git, 1053047a) imports all 17 cFS app .ll files with no errors and no diagnostics, taking 8–25 ms per file. For example, sample_app.ll has 645 lines and its MLIR has 420 lines, while hk_utils.ll has 2890 lines and its MLIR has 1905. mlir-opt --inline --sroa --mem2reg --canonicalize --cse also runs on all of them without errors (8 TUs timed at 0.02–0.07 s; 17/17 succeeded).",
+   "evidence": [
+    "P/mlir/import.log (17 lines, rc=0, errlines=0)",
+    "P/mlir/<app>/*.mlir, *.dbg.mlir",
+    "P/mlir_opt/<app>/*.raw.mlir, *.dbg.mlir"
+   ],
+   "scope_checked": "5 apps, 17 TUs, built in the native_std configuration. EDS and other targets were not tested.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) For these apps, the original note's C → LLVM IR → MLIR LLVM-dialect path is not blocked by the importer's experimental status (S16). The cost lies in recovering semantics, not in importing."
+  },
+  {
+   "id": "probe-09",
+   "topic": "API call counts",
+   "claim": "Static llvm.call sites at -O0, given as SB-api / SB-helper / ES / TBL / EVS / MSG / OS_: sample_app 7/9/12/6/13/6/0 (16 defined functions); hk 19/31/12/14/38/13/0 (33); sch_lab 4/1/16/5/0/2/9 (4); ci_lab 10/13/9/0/17/8/8 (18); to_lab 18/23/10/6/32/5/8 (30). The SB helpers are the static inline functions CFE_SB_ValueToMsgId, CFE_SB_MsgId_Equal and CFE_SB_MsgIdToValue, which are defined inside each module at -O0.",
+   "evidence": [
+    "P/mlir/O0_<app>.json and .txt (summary.api_calls_by_family / api_calls_by_callee)",
+    "P/analyze_mlir.py"
+   ],
+   "scope_checked": "Regex scan of the printed MLIR. These are call-site counts, not dynamic counts.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) The API surface per app is small, tens of sites, so an API-semantics table for SB, ES, TBL, EVS and MSG is tractable. The HK and TO_LAB EVS counts show that event calls dominate the surface."
+  },
+  {
+   "id": "probe-10",
+   "topic": "MID constant reachability",
+   "claim": "At -O0, every code-defined MID reaches CFE_SB_Subscribe and CFE_MSG_Init through the same chain: llvm.call @CFE_SB_ValueToMsgId(i32 <const>), a store into a CFE_SB_MsgId_t alloca, and a load of the struct coerced to i32. The MID is therefore not a constant operand at the call site, but a one-hop alloca trace recovers it. Examples are sample_app 6275 (0x1883 SEND_HK), 6274 (0x1882 CMD) and 2179 (0x883 HK_TLM). With -O1 -Xclang -disable-llvm-passes (no optnone or noinline) followed by mlir-opt --inline --sroa --mem2reg --canonicalize --cse, the same sites receive llvm.mlir.constant operands directly. Inlining duplicates sites (Init is inlined into Main). Code-defined sites recovered as constants (code-defined/total): sample_app 3/3, hk 4/7, sch_lab 1/2, ci_lab 4/4, to_lab 2/7 plus 1 parameter site that becomes constant after inlining. The remaining sites are runtime data: the HK copy table (hk_utils.c:322 Subscribe, :436 Unsubscribe, :305 MSG_Init with a pool buffer); the TO_LAB sub table (to_lab_app.c:504 SubscribeEx, :454 Unsubscribe); TO_LAB ground-command payloads (to_lab_cmds.c:218 SubscribeEx, :280 Unsubscribe); and the SCH_LAB schedule table (sch_lab_app.c:246-248 ConfigEntry->MessageID).",
+   "evidence": [
+    "P/ir/sample_app/sample_app.ll lines 143-149 ('%call16 = call i32 @CFE_SB_ValueToMsgId(i32 noundef 6275)' … '%call19 = call i32 @CFE_SB_Subscribe(i32 %7, i32 noundef %6)')",
+    "P/mlir/O0_<app>.json (mid_args origins: 'alloca[1 store(s)]->ValueToMsgId(direct_const)', 'load_other')",
+    "P/mlir_opt/sample_app.json, P/mlir_opt/hk.json (mid_origins: CFE_SB_Subscribe#0: direct_const)",
+    "P/mlir_opt/sample_app/sample_app.dbg.mlir lines 207-217, 360-371 (llvm.mlir.constant(6274|6275|2179 : i32))",
+    "https://github.com/nasa/HK/blob/0dc16b7a7bab71747b9c063cf405ad59a65a40a5/fsw/src/hk_utils.c#L322 (CFE_SB_Subscribe(OuterCpyEntry->InputMid, …))",
+    "P/cFS/apps/sch_lab/fsw/src/sch_lab_app.c:246-248"
+   ],
+   "scope_checked": "5 apps at -O0 and with the opt pipeline. Origins were traced intra-procedurally with a regex probe and spot-checked against the C source.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) A standard SSA cleanup in MLIR, or a simple alloca trace, is enough to recover code-defined MIDs. A large share of real subscriptions, however, comes from table files or command payloads. The message graph must therefore take the table sources (sample_defs/tables/*.c) and the build's MID mapping as inputs, or mark those edges as unknown. The original note's MVP of four SB functions would under-approximate HK and TO_LAB otherwise."
+  },
+  {
+   "id": "probe-11",
+   "topic": "dispatch MID comparisons",
+   "claim": "In sample_app, HK and ci_lab dispatch, the received MID comes from the out-parameter of CFE_MSG_GetMsgId: the alloca has no direct store and is written by an API call. It is compared through CFE_SB_MsgId_Equal against function-static caches, for example SAMPLE_APP_TaskPipe.CMD_MID and SEND_HK_MID. Those caches start as CFE_SB_MSGID_RESERVED and are filled lazily on the first call (sample_app_dispatch.c:134-144; hk_dispatch.c:214-216). At -O0 they are written by memcpy from a ValueToMsgId(const) temporary. After the opt pipeline they are plain constant stores to `…CMD_MID.Value`.",
+   "evidence": [
+    "P/cFS/apps/sample_app/fsw/src/sample_app_dispatch.c:134-158",
+    "P/mlir/O0_sample_app.json global_memops: 'memcpy SAMPLE_APP_TaskPipe.CMD_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ …sample_app_dispatch.c:142'",
+    "P/mlir/O0_hk.txt (memcpy HK_AppPipe.SEND_COMBINED_PKT_MID … hk_dispatch.c:216)",
+    "P/mlir_opt/sample_app.json (global_store_fields SAMPLE_APP_TaskPipe.CMD_MID.Value)"
+   ],
+   "scope_checked": "sample_app, hk and ci_lab dispatch TUs.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) Linking a received MID to its handler needs three things: out-parameter semantics for CFE_MSG_GetMsgId, a flow-insensitive scan of stores to static MID caches, and branch-condition tracking over MsgId_Equal or icmp. The probe does not do the last one."
+  },
+  {
+   "id": "probe-12",
+   "topic": "symbolic MID names",
+   "claim": "LLVM IR and MLIR keep only numeric MID values; macro names such as SAMPLE_APP_CMD_MID are gone. The Clang AST keeps the spelling locations of the integer literals that build the MID: for example 6144 at global_core_api_base_msgid_values.h:30:34 and 131 at sample_app_topicids.h:31:52. It also keeps field names such as MemberExpr .CommandPipe on SAMPLE_APP_Data.",
+   "evidence": [
+    "P/cir/ast_SAMPLE_APP_Init.txt lines 124-136 and 169-181",
+    "P/mlir_opt/sample_app/sample_app.dbg.mlir (llvm.mlir.constant(6274 : i32))"
+   ],
+   "scope_checked": "I ran clang -Xclang -ast-dump -ast-dump-filter=SAMPLE_APP_Init on sample_app.c with the compile DB flags.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) The note's symbolic `#cfs.mid<NAME>` attributes need either an AST or preprocessor side channel, or a value→name table generated from the configured headers. The LLVM-IR route alone yields numbers."
+  },
+  {
+   "id": "probe-13",
+   "topic": "state-update recognition",
+   "claim": "Stores to fields of an app's global data struct are recognizable after import. clang 23 at -O0 keeps struct-typed constant GEPs, for example `getelementptr inbounds nuw (%struct.SAMPLE_APP_Data_t, ptr @SAMPLE_APP_Data, i32 0, i32 3)`. These become llvm.mlir.addressof plus `llvm.getelementptr inbounds|nuw %1[%c0, 3]`. Field names can be added by joining the struct index with the DI member order, which requires merging DI across the app's TUs because the type is emitted only where it is used. Detected global-field store sites (stores / fully named / offset-0 ambiguous / loads): sample_app 11/7/4/17, hk 15/15/0/50, sch_lab 0/0/0/9, ci_lab 16/15/1/25, to_lab 41/40/0/41. Three patterns are missed: (1) the first field at offset 0, which is accessed through the base address with no GEP (sample_app CmdCounter); (2) writes through API out-parameters (CFE_SB_CreatePipe(&SAMPLE_APP_Data.CommandPipe,…), CFE_TBL_Register(&…TblHandles[0],…), OS_CountSemCreate(&SCH_LAB_Global.TimingSem,…)); (3) writes through pointer locals (sch_lab LocalStateEntry->Counter = 0 at sch_lab_app.c:130), which explains sch_lab's 0.",
+   "evidence": [
+    "P/ir/sample_app/sample_app.ll lines 47, 101-102, 121-122",
+    "P/mlir/sample_app/sample_app.mlir lines 241-263 (llvm.getelementptr inbounds|nuw %1[%5, 3] …)",
+    "P/mlir/O0_<app>.json global_stores (field paths e.g. SAMPLE_APP_Data.RunStatus, HK_AppData.MissingDataCtr, SAMPLE_APP_Data.<base:i8>)",
+    "P/cFS/apps/sch_lab/fsw/src/sch_lab_app.c:121-130, 166-184"
+   ],
+   "scope_checked": "Regex probe over the 5 apps' -O0 MLIR with debug info, cross-checked against the C source for sample_app and sch_lab. Control flow and aliasing are not modelled.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "(inference) The note's state-provenance step is feasible for direct global-field updates. A real implementation must also model API out-parameter writes as state definitions, handle offset-0 fields using type or DI information, and add at least local pointer and alias tracking. Otherwise apps such as sch_lab show no state updates at all."
+  },
+  {
+   "id": "probe-14",
+   "topic": "source locations",
+   "claim": "The default MLIR print shows no locations; only 4 'loc(' strings appear in sample_app.mlir. With --mlir-print-debuginfo, every relevant site in the 5 apps carries file:line: 477/477 llvm.call ops, 996/996 llvm.load ops, 83/83 global-state stores and 79/79 MID or message sites. Unknown locations occur only on 95 parameter-spill stores in entry blocks (all 95 store an %argN) and on materialized constants hoisted to the function entry (llvm.mlir.constant, addressof and constant GEPs). After inlining, sites carry callsite(... at ...) locations.",
+   "evidence": [
+    "P/mlir/<app>/*.dbg.mlir (e.g. '#loc12 = loc(\"apps/sample_app/fsw/src/sample_app.c\":69:5)', '#loc111 = loc(fused<#di_subprogram>[#loc12])')",
+    "P/mlir/O0_<app>.json loc_known_by_op; aggregation: llvm.call:known 477, llvm.load:known 996, llvm.store:unknown 95 (all %arg spills)",
+    "P/mlir_opt/sample_app/sample_app.dbg.mlir line 165 '#loc172 = loc(callsite(#loc1 at #loc160))'"
+   ],
+   "scope_checked": "Location resolution of the alias chains in the printed MLIR for 17 TUs.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) The source positions needed for the explanations in the revision's §10.5 survive the LLVM-IR route. A constant operand such as a MID value has no location of its own, so diagnostics must cite the location of the op that uses it."
+  },
+  {
+   "id": "probe-15",
+   "topic": "ClangIR",
+   "claim": "ClangIR cannot be used with the local toolchain. `clang -fclangir -emit-cir` fails with 'clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON'. `clang -fclangir -S -emit-llvm` returns rc=0, but its output is byte-identical to the normal codegen output (diff of 0 lines): the flag is silently ignored and does not mean CIR was used. No cir-opt binary is built, and CMakeCache has no CLANG_ENABLE_CIR setting.",
+   "evidence": [
+    "P/cir/emit_cir.log",
+    "P/cir/cir_llvm.log (empty), diff P/cir/sample_app.cir.ll P/ir/sample_app/sample_app.ll → 0 lines",
+    "grep CIR /home/user/work/llvm-project/build/CMakeCache.txt (only CLANG_TOOL_CIR_*_BUILD entries)"
+   ],
+   "scope_checked": "Tried on sample_app.c only, with the compile DB flags.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "(inference) Testing the note's long-term CIR route requires rebuilding clang with CLANG_ENABLE_CIR=ON. The cost was not measured. A successful exit code from -fclangir is not evidence that CIR was used."
+  },
+  {
+   "id": "probe-16",
+   "topic": "EDS configuration MID mapping",
+   "claim": "In the EDS configuration, the cFE MID mapping macros are defined as function calls: CFE_PLATFORM_CMD_TOPICID_TO_MIDV(topic) is CFE_SB_LocalCmdTopicIdToMsgId(topic) and the TLM variant is CFE_SB_LocalTlmTopicIdToMsgId(topic). In the default (non-EDS) configuration they are constant OR expressions.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/config/eds_cfe_core_api_msgid_mapping.h#L37 and #L46",
+    "P/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49-50, 63-64"
+   ],
+   "scope_checked": "Header text only. native_eds was not built, so how these appear in IR is not observed.",
+   "status": "partial",
+   "importance": "background",
+   "implication": "(inference) Whether MIDs are compile-time constants depends on the build configuration. An analyzer must model the topic-ID→MID functions or evaluate them per configuration, and the configuration must be pinned together with the source."
+  }
+ ],
+ "gaps": [
+  "REPORT.md was not written. The harness refused report files from this subagent ('Subagents should return findings as text'), so the full report is in the summary and findings instead.",
+  "The true counts of subscriber-less sends and dropped subscription reports are unknown. The console shows the EVS filter caps (4 and 16), not the real values. Getting them needs SB housekeeping telemetry counters (send an HK request through ci_lab, or use cfe_testcase) or changed EVS filters.",
+  "The functional impact on SBN of the dropped ONESUB reports, and any recovery (for example through ALLSUBS), was not checked.",
+  "I did not raise the host /proc/sys/fs/mqueue/msg_max, to avoid changing the system. The root run used a private IPC namespace instead, so neither tested configuration is the documented 'root with large msg_max' setup or a flight configuration.",
+  "Not built or run: native_eds (where the MID mapping is a function call), cpu2, or multi-node SBN.",
+  "analyze_mlir.py is a regex-based, intra-procedural probe. It does not model control flow, aliasing, out-parameter API writes or branch conditions, so its counts are detection counts and not recall. sch_lab state writes through pointer locals were not detected.",
+  "The opt pipeline was run on all 5 apps, but per-site constant counts after optimisation are not comparable to -O0 because inlining duplicates call sites. I did not de-duplicate them.",
+  "ClangIR could not be evaluated without rebuilding clang with CLANG_ENABLE_CIR=ON. The rebuild cost and CIR's coverage of cFS C code are unknown.",
+  "The init-order nondeterminism rests on 6 short runs plus 2 long runs on one 4-vCPU container. Its frequency or distribution under other schedulers or loads was not measured."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/clone.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/submodules.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/prep.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/install.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/compile_commands.cpu1.json",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/run_root.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/run_nobody.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/run_root_ipcns.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/runs/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/emit_ir.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/emit_ir_o1np.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/analyze_mlir.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/ir/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/ir_o1np/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/mlir/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/mlir/import.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/mlir_opt/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cir/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/run_nobody/cpu1/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/run_ipcns/cpu1/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/"
+ ]
+}

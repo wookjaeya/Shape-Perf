@@ -1,0 +1,34 @@
+# cmd: git grep name-clearing in TBL cleanup/unregister across tags (clone /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify_C11_counter/cFE)
+=== v6.7.0 (2105b93 2019-12-19 16:53:05 -0500)
+v6.7.0:fsw/cfe-core/src/tbl/cfe_tbl_api.c:648:            /* Remove Table Name */
+v6.7.0:fsw/cfe-core/src/tbl/cfe_tbl_api.c:649:            RegRecPtr->Name[0] = '\0';
+v6.7.0:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:305:    RegRecPtr->Name[0] = '\0';
+v6.7.0:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:1413:                /* Remove Table Name */
+v6.7.0:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:1414:                RegRecPtr->Name[0] = '\0';
+=== v6.8.0-rc2 (27cc7df 2020-10-13 19:13:06 -0400)
+v6.8.0-rc2:fsw/cfe-core/src/tbl/cfe_tbl_api.c:634:            /* Remove Table Name */
+v6.8.0-rc2:fsw/cfe-core/src/tbl/cfe_tbl_api.c:635:            RegRecPtr->Name[0] = '\0';
+v6.8.0-rc2:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:301:    RegRecPtr->Name[0] = '\0';
+v6.8.0-rc2:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:1422:                /* Remove Table Name */
+v6.8.0-rc2:fsw/cfe-core/src/tbl/cfe_tbl_internal.c:1423:                RegRecPtr->Name[0] = '\0';
+=== v7.0.0-rc1 (0850b19 2021-04-02 18:19:59 -0400)
+v7.0.0-rc1:modules/tbl/fsw/src/cfe_tbl_api.c:636:            /* Remove Table Name */
+v7.0.0-rc1:modules/tbl/fsw/src/cfe_tbl_api.c:637:            RegRecPtr->Name[0] = '\0';
+v7.0.0-rc1:modules/tbl/fsw/src/cfe_tbl_internal.c:1279:                /* Remove Table Name */
+v7.0.0-rc1:modules/tbl/fsw/src/cfe_tbl_internal.c:1280:                RegRecPtr->Name[0] = '\0';
+=== draco-rc5 (fa5031f 2023-08-24 15:53:30 -0400)
+draco-rc5:modules/tbl/fsw/src/cfe_tbl_api.c:636:            /* Remove Table Name */
+draco-rc5:modules/tbl/fsw/src/cfe_tbl_api.c:637:            RegRecPtr->Name[0] = '\0';
+draco-rc5:modules/tbl/fsw/src/cfe_tbl_internal.c:1266:                /* Remove Table Name */
+draco-rc5:modules/tbl/fsw/src/cfe_tbl_internal.c:1267:                RegRecPtr->Name[0] = '\0';
+=== fcbb1791d003fd60a1e08b5e8240f374fad77856 (fcbb179 2025-12-17 10:02:05 -0500)
+fcbb1791d003fd60a1e08b5e8240f374fad77856:modules/tbl/fsw/src/cfe_tbl_api.c:320:            /* Remove Table Name */
+fcbb1791d003fd60a1e08b5e8240f374fad77856:modules/tbl/fsw/src/cfe_tbl_api.c:321:            RegRecPtr->Name[0] = '\0';
+fcbb1791d003fd60a1e08b5e8240f374fad77856:modules/tbl/fsw/src/cfe_tbl_internal.c:1061:                /* Remove Table Name */
+fcbb1791d003fd60a1e08b5e8240f374fad77856:modules/tbl/fsw/src/cfe_tbl_internal.c:1062:                Txn.RegRecPtr->Name[0] = '\0';
+=== v7.0.0 (215e224 2026-01-22 17:31:43 -0500)
+=== v7.0.1 (c5fb2b4 2026-05-12 16:39:22 -0400)
+=== 546a002515be5a1e3b66f9ae2c14f948d9cec76f (546a002 2026-09-25 14:23:07 -0400)
+# cmd: git log -S'Remove Table Name' -- modules/tbl
+c1ab1b77f9e0760381a80ff68e2e3487f4fbcf07 2026-01-22 17:20:58 -0500 NASA Docket No. GSC-19,200-1, and identified as "cFS Draco"
+8840f729f3b7611760ca0779c796127a513efb05 2021-03-09 08:55:08 -0500 Fix #972, Reorganize CFE core into separate modules

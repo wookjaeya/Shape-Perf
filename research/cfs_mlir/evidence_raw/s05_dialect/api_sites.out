@@ -1,0 +1,24 @@
+CFE_Config_GetVersionString  raw  2  distinct  1  sample_app.c:205:9
+CFE_ES_ExitApp               raw  1  distinct  1  sample_app.c:103:5
+CFE_ES_PerfLogAdd            raw  4  distinct  4  sample_app.c:101:5 sample_app.c:53:5 sample_app.c:74:9 sample_app.c:82:9
+CFE_ES_RunLoop               raw  1  distinct  1  sample_app.c:69:12
+CFE_ES_WriteToSysLog         raw 24  distinct  6  sample_app.c:127:9 sample_app_cmds.c:126:9 sample_app_cmds.c:131:9 sample_app_cmds.c:138:13 sample_app_utils.c:68:9 sample_app_utils.c:73:9
+CFE_EVS_Register             raw  2  distinct  1  sample_app.c:124:14
+CFE_EVS_SendEvent            raw 41  distinct 12  sample_app.c:146:13 sample_app.c:161:13 sample_app.c:176:13 sample_app.c:195:13 sample_app.c:212:9 sample_app.c:90:13 sample_app_cmds.c:103:5 sample_a
+CFE_MSG_GetFcnCode           raw 16  distinct  2  sample_app_dispatch.c:54:9 sample_app_dispatch.c:81:5
+CFE_MSG_GetMsgId             raw 15  distinct  2  sample_app_dispatch.c:146:5 sample_app_dispatch.c:53:9
+CFE_MSG_GetSize              raw 13  distinct  1  sample_app_dispatch.c:46:5
+CFE_MSG_Init                 raw  2  distinct  1  sample_app.c:134:9
+CFE_SB_CreatePipe            raw  2  distinct  1  sample_app.c:141:18
+CFE_SB_IsValidMsgId          raw  2  distinct  1  sample_app_dispatch.c:140:10
+CFE_SB_ReceiveBuffer         raw  1  distinct  1  sample_app.c:77:18
+CFE_SB_Subscribe             raw  4  distinct  2  sample_app.c:158:18 sample_app.c:173:18
+CFE_SB_TimeStampMsg          raw  3  distinct  1  sample_app_cmds.c:60:5
+CFE_SB_TransmitMsg           raw  3  distinct  1  sample_app_cmds.c:61:5
+CFE_TBL_GetAddress           raw  4  distinct  1  sample_app_cmds.c:123:14
+CFE_TBL_GetInfo              raw  5  distinct  1  sample_app_utils.c:65:14
+CFE_TBL_Load                 raw  2  distinct  1  sample_app.c:202:22
+CFE_TBL_Manage               raw  3  distinct  1  sample_app_cmds.c:68:9
+CFE_TBL_Register             raw  2  distinct  1  sample_app.c:188:18
+CFE_TBL_ReleaseAddress       raw  4  distinct  1  sample_app_cmds.c:135:18
+total raw 156 distinct 45 no-loc 0

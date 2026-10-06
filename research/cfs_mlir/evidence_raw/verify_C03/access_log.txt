@@ -1,0 +1,7 @@
+verify_C03 access log (2026-10-01)
+BLOCKED (curl 403 CONNECT / WebFetch EGRESS_BLOCKED): alumni.soe.ucsc.edu (SPLC'09 author PDF), ntrs.nasa.gov (WCRE'10 PDF 20100031707, SAVE slides 20090004613, SPLC'10 PDF 20100031199),
+  www.semanticscholar.org, pdfs.semanticscholar.org, dblp.org, dblp.uni-trier.de, api.crossref.org, api.openalex.org, publica.fraunhofer.de,
+  slideshare.net, slideserve.com, academia.edu, researchgate.net, core.ac.uk, web.archive.org, scholar.archive.org, citeseerx, wwwbroy.in.tum.de, arxiv.org, 2016.issre.net
+Scholar Gateway: "INVALID_QUERY: Could not resolve user identity from CONNECT"
+=> No full text of ISSRE'16, SPLC'09, WCRE'10 opened. All content below is WebSearch-index snippet only.
+Local: ../rw-pubsub/txt/haros_2019-irc.txt L927-931 (cites [12] for "static analysis was shown to be useful in such systems"), L1093-1095 (bib entry; no GMSEC mention).

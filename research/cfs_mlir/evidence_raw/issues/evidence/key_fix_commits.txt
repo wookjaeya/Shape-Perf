@@ -1,0 +1,500 @@
+################ nasa/cFE commit 6932f1fe9180f4fd3f6756e4074b2c4b27a703cf
+URL: https://github.com/nasa/cFE/commit/6932f1fe9180f4fd3f6756e4074b2c4b27a703cf
+Parent(s): 307725172952e35953f7a2815d664602afcb4709 
+Author: Joseph Hickey
+AuthorDate: Fri Oct 16 12:05:36 2020 -0400
+CommitDate: Mon Oct 26 15:41:46 2020 -0400
+
+Fix #950, race condition in control request
+
+Because the process of handling a control request involves
+calling other subsystems, the ES lock needs to be released.
+However, this also means that the app record can change state
+for other reasons, such as the app self-exiting at the same
+time.
+
+To avoid this possibility, process in two phases:
+
+First assemble a list of tasks that have timed out
+and need to be cleaned up, while ES is locked.
+
+Next actually perform the cleanup, while ES is unlocked.
+In areas during cleanup that need to update the ES global,
+the lock is locally re-acquired and released.
+
+
+ fsw/cfe-core/src/es/cfe_es_apps.c    | 766 +++++++++++++++++++++--------------
+ fsw/cfe-core/src/es/cfe_es_apps.h    |   4 +-
+ fsw/cfe-core/src/inc/cfe_es_events.h |  14 +-
+ fsw/cfe-core/unit-test/es_UT.c       |  77 ++--
+ 4 files changed, 516 insertions(+), 345 deletions(-)
+################ nasa/cFE commit b17cd1e3394efe061bc58c76cf6424e96d1c2fc4
+URL: https://github.com/nasa/cFE/commit/b17cd1e3394efe061bc58c76cf6424e96d1c2fc4
+Parent(s): 6b5f77a67eff0e756346df49db14472a5144406d 
+Author: Joseph Hickey
+AuthorDate: Tue Jan 12 17:21:38 2021 -0500
+CommitDate: Fri Jan 15 16:30:13 2021 -0500
+
+Fix #1073, refactor SB API for proper global locks
+
+Significant refactor of many SB API calls to address inconsistencies
+with respect to locking and unlocking of global data structures.
+
+First this updates the definition of CFE_SB_PipeId_t to use the
+CFE_ES_ResourceID_t base type, and a new ID range.  Notably this
+prevents direct access to the CFE_SB.PipeTbl global, forcing
+code to go through the proper lookup routine, which should only
+be done while locked.
+
+All API implementations follow the same general pattern:
+
+- Initial checks/queries while unlocked
+- Lock SB global
+- Lookups and/or modifications to the pipe table/routing info
+- Unlock SB global
+- Invoke other subsystems (e.g. OSAL)
+- Re-lock SB global (if needed) do final update, and unlock again
+- Send all events
+
+All error counters should be updated at the end, while still locked.
+All event processing is deferred to the end of each function, after
+all other processing is done.
+
+
+ fsw/cfe-core/src/inc/cfe_sb.h                      |   36 +-
+ fsw/cfe-core/src/inc/cfe_sb_msg.h                  |    4 +-
+ .../src/inc/private/cfe_resourceid_internal.h      |    5 +
+ fsw/cfe-core/src/sb/cfe_sb_api.c                   | 1985 ++++++++++++--------
+ fsw/cfe-core/src/sb/cfe_sb_buf.c                   |   46 +-
+ fsw/cfe-core/src/sb/cfe_sb_init.c                  |   16 +-
+ fsw/cfe-core/src/sb/cfe_sb_priv.c                  |  187 +-
+ fsw/cfe-core/src/sb/cfe_sb_priv.h                  |  133 +-
+ fsw/cfe-core/src/sb/cfe_sb_task.c                  |  360 +++-
+ fsw/cfe-core/src/time/cfe_time_tone.c              |    2 +-
+ fsw/cfe-core/unit-test/sb_UT.c                     |  299 +--
+ fsw/cfe-core/unit-test/sb_UT.h                     |   17 -
+ fsw/cfe-core/ut-stubs/ut_sb_stubs.c                |    2 +-
+ 13 files changed, 1852 insertions(+), 1240 deletions(-)
+################ nasa/cFE commit af0f5366eac96c708113a199d0a1241a1cab7832
+URL: https://github.com/nasa/cFE/commit/af0f5366eac96c708113a199d0a1241a1cab7832
+Parent(s): c51ba037261b0822629f28f7f4f1421c5eda91ca 
+Author: Joseph Hickey
+AuthorDate: Wed Oct 21 09:25:20 2020 -0400
+CommitDate: Wed Oct 21 09:25:20 2020 -0400
+
+HOTFIX #924, Correct AppId during initial start
+
+Due to a merge the setting of this to its final value got moved.
+Need to use "Pending" value, not the one in the table record.
+
+
+ fsw/cfe-core/src/es/cfe_es_start.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+################ nasa/cFE commit 1b03958cb10b3c254460d38a0324bbb3a1dfb8e4
+URL: https://github.com/nasa/cFE/commit/1b03958cb10b3c254460d38a0324bbb3a1dfb8e4
+Parent(s): 60a5f6580d1e737f46efce0418aba5b8dac6df6a 
+Author: Jacob Hageman
+AuthorDate: Wed Apr 15 15:45:39 2020 -0400
+CommitDate: Wed Apr 15 16:37:48 2020 -0400
+
+Fix #591, Avoid deadlock in CFE_ES_CreatObjects
+
+Now uses CFE_ES_SysLogWrite_Unsync inside shared data lock
+
+
+ fsw/cfe-core/src/es/cfe_es_start.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+################ nasa/cFE commit 25ccc0ce10a70bae49aa50439394b4c8faaa02da
+URL: https://github.com/nasa/cFE/commit/25ccc0ce10a70bae49aa50439394b4c8faaa02da
+Parent(s): 56e1539493ec73223672523dd870a32989d1f9da 
+Author: Dan
+AuthorDate: Thu Aug 17 13:51:57 2023 -0400
+CommitDate: Thu Aug 17 13:51:57 2023 -0400
+
+Fix #2427, Race condition in TestCreateChild
+
+
+ modules/cfe_testcase/src/es_task_test.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+################ nasa/cFE commit b9fed681a8a90fe838c400618d2cbd27388f1323
+URL: https://github.com/nasa/cFE/commit/b9fed681a8a90fe838c400618d2cbd27388f1323
+Parent(s): 6d80b601365facce18cfa9669e9a20281e9a0c90 
+Author: Jacob Hageman
+AuthorDate: Thu Dec 3 15:22:04 2020 -0500
+CommitDate: Thu Dec 3 15:22:04 2020 -0500
+
+Fix 1034, Atomic type for SystemState
+
+
+ fsw/cfe-core/src/es/cfe_es_global.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+################ nasa/cFE commit 69b0940dd9249adc4d4d2e998a610a4354c63153
+URL: https://github.com/nasa/cFE/commit/69b0940dd9249adc4d4d2e998a610a4354c63153
+Parent(s): 176e3df03f54f7753cb34beb3e986202604d6cef 
+Author: Joseph Hickey
+AuthorDate: Tue Jun 1 13:15:18 2021 -0400
+CommitDate: Tue Jun 1 13:40:39 2021 -0400
+
+Fix #1544, add time get reference error bit
+
+Use one of the unused time state bits to indicate if an error has
+occurred where CFE_TIME_GetReference was not able to get a consistent
+copy of the reference state data.
+
+In a functional system this should never occur - there should be at
+most one retry, which only happens in the event there was a burst
+of updates (more than 4) concurrently with reading the structure.
+
+The previous implementation did not report or handle the condition
+at all, this at least sets a TLM status bit and returns a reference
+struct filled with all zeros.
+
+
+ modules/time/fsw/inc/cfe_time_msg.h   |  4 ++-
+ modules/time/fsw/src/cfe_time_api.c   |  8 +++++
+ modules/time/fsw/src/cfe_time_utils.c | 21 +++++++++++
+ modules/time/fsw/src/cfe_time_utils.h |  4 +--
+ modules/time/ut-coverage/time_UT.c    | 66 ++++++++++++++++++++++++++++++++++-
+ 5 files changed, 99 insertions(+), 4 deletions(-)
+################ nasa/cFE commit dd596c9618c2d425570295419ed55b7e61862783
+URL: https://github.com/nasa/cFE/commit/dd596c9618c2d425570295419ed55b7e61862783
+Parent(s): fc8c48ad09460ce0277ad2bfcd81d376634aa2c6 
+Author: Joseph Hickey
+AuthorDate: Wed Oct 15 10:06:20 2025 -0400
+CommitDate: Wed Oct 15 10:07:51 2025 -0400
+
+Fix #2523, add mutex around EVS counter increment
+
+Adds a mutex to protect the EVS counter increments, thus avoiding a
+potential race condition here.
+
+
+ modules/evs/fsw/src/cfe_evs_utils.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+################ nasa/cFE commit 4767cef979377bd850708943dd6a75069a8b0891
+URL: https://github.com/nasa/cFE/commit/4767cef979377bd850708943dd6a75069a8b0891
+Parent(s): b878cd84a802037d2b61b314e6fbd3afb6f88f51 
+Author: Joseph Hickey
+AuthorDate: Mon Nov 17 09:37:30 2025 -0500
+CommitDate: Mon Nov 17 09:48:15 2025 -0500
+
+Fix #2655, add counter locks
+
+Add lock around counter increment and set.
+
+NOTE: Generic counters are not widely used, so there is less concern
+about making this performant or ideal.
+
+
+ modules/es/fsw/src/cfe_es_api.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+################ nasa/cFE commit d4f62edfad2a29af6d8d9c4714ae52511e4bc058
+URL: https://github.com/nasa/cFE/commit/d4f62edfad2a29af6d8d9c4714ae52511e4bc058
+Parent(s): 8365a0c69b810e313afe0fe19cdc8987374621e3 
+Author: Joseph Hickey
+AuthorDate: Wed Apr 29 11:07:24 2020 -0400
+CommitDate: Wed May 6 07:27:42 2020 -0400
+
+Fix #411, rework exception handling in CFE
+
+Move exception handling to a PSP function.  In this approach
+the CFE only logs data after the event as a background job.
+
+Replaces the CFE_ES_ProcessCoreException with a simple notification
+that causes the ES background job to run, which in turn polls the
+PSP for logged exceptions and writes entries to the ES ER log.
+
+Both the PSP execption scan and the ER log file dump are converted
+to background jobs.
+
+
+ cmake/sample_defs/cpu1_platform_cfg.h              |   2 +-
+ cmake/target/inc/target_config.h                   |  13 +-
+ cmake/target/src/target_config.c                   |   5 +-
+ fsw/cfe-core/src/es/cfe_es_api.c                   | 136 +------
+ fsw/cfe-core/src/es/cfe_es_apps.h                  |  10 +
+ fsw/cfe-core/src/es/cfe_es_backgroundtask.c        |  12 +
+ fsw/cfe-core/src/es/cfe_es_erlog.c                 | 408 +++++++++++++++++----
+ fsw/cfe-core/src/es/cfe_es_log.h                   |  41 ++-
+ fsw/cfe-core/src/es/cfe_es_start.c                 |  42 +--
+ fsw/cfe-core/src/es/cfe_es_task.c                  |  94 +----
+ fsw/cfe-core/src/es/cfe_es_task.h                  |  26 ++
+ fsw/cfe-core/src/es/cfe_es_verify.h                |  10 -
+ fsw/cfe-core/src/inc/cfe_es.h                      |  17 +-
+ fsw/cfe-core/src/inc/cfe_es_events.h               |  28 +-
+ fsw/cfe-core/src/inc/cfe_evs_msg.h                 |   1 +
+ .../src/inc/private/cfe_es_erlog_typedef.h         |  47 ++-
+ .../src/inc/private/cfe_es_resetdata_typedef.h     |   2 +-
+ fsw/cfe-core/unit-test/es_UT.c                     | 354 +++++++-----------
+ 18 files changed, 674 insertions(+), 574 deletions(-)
+################ nasa/CF commit 833fdbb27a26f15f2429e79392e7eb73d61abdea
+URL: https://github.com/nasa/CF/commit/833fdbb27a26f15f2429e79392e7eb73d61abdea
+Parent(s): 281a94188cd7d885a5aed01ee041f3ece2b0486f 
+Author: Joseph Hickey
+AuthorDate: Thu Nov 17 16:37:36 2022 -0500
+CommitDate: Thu Nov 17 16:45:54 2022 -0500
+
+Fix #184, work around throttle sem creation race
+
+Adds a retry loop around OS_CountSemGetIdByName, because if this sem is
+created by another app there may be some delay until the other app gets
+to the point where it creates the sem.  This works around the race
+condition.
+
+A retry limit is also imposed so CF will not spin here forever.
+
+
+ fsw/platform_inc/cf_platform_cfg.h | 22 ++++++++++++++++++++++
+ fsw/src/cf_cfdp.c                  | 23 +++++++++++++++++++++--
+ unit-test/cf_cfdp_tests.c          | 20 +++++++++++++++++++-
+ 3 files changed, 62 insertions(+), 3 deletions(-)
+################ nasa/CF commit 22e28557c0f25c486764be33a6fce64f800e5c67
+URL: https://github.com/nasa/CF/commit/22e28557c0f25c486764be33a6fce64f800e5c67
+Parent(s): eba87dfc5e9e1769df72815cdca52508c0afad39 
+Author: havencarlson
+AuthorDate: Thu Jul 21 13:10:23 2022 -0400
+CommitDate: Thu Jul 21 13:48:07 2022 -0400
+
+Fix #285, flatten logic in CF_CFDP_InitEngine() to fix bug that skipped needed code
+
+
+ fsw/src/cf_cfdp.c         | 86 ++++++++++++++++++++++-------------------------
+ unit-test/cf_cfdp_tests.c |  1 +
+ 2 files changed, 42 insertions(+), 45 deletions(-)
+################ nasa/CF commit c92fb8e546887e3cd171181cc644a07c7d48a541
+URL: https://github.com/nasa/CF/commit/c92fb8e546887e3cd171181cc644a07c7d48a541
+Parent(s): 0b0c64352c842c3452905b7f717085273350aa0f 
+Author: Jacob Hageman
+AuthorDate: Fri Apr 7 13:22:43 2023 +0000
+CommitDate: Fri Apr 7 13:22:43 2023 +0000
+
+Fix #377, Remove error event on nominal semaphore timeout
+
+
+ fsw/src/cf_cfdp_sbintf.c         |  2 +-
+ unit-test/cf_cfdp_sbintf_tests.c | 10 +++++-----
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+################ nasa/to_lab commit d3d52da34fa195cacfd085e92d1615ea1f036d15
+URL: https://github.com/nasa/to_lab/commit/d3d52da34fa195cacfd085e92d1615ea1f036d15
+Parent(s): 9a551208a6820b249c1ffc9e23c7f1148580abd2 
+Author: Joseph Hickey
+AuthorDate: Tue Apr 21 13:13:58 2026 -0400
+CommitDate: Wed Apr 29 13:38:49 2026 +0000
+
+Fix cFS/cFS#676, startup msg limit errors
+
+Tweaks to runtime operations to avoid msg limit errors
+
+Add a delay to defer msg subscriptions until after operational state.
+This avoids the flurry of event activity that happens during startup
+which often triggers a msglimit error.
+
+Rather than blocking in an OS_Delay (which does nothing while blocked)
+the app should block in CFE_SB_ReceiveBuffer.  This way if a message
+arrives during this time, it will be forwarded more promptly.
+
+
+ fsw/inc/to_lab_internal_cfg.h | 26 +++++++++++++++++++-------
+ fsw/src/to_lab_app.c          | 16 +++++++++++-----
+ 2 files changed, 30 insertions(+), 12 deletions(-)
+################ nasa/to_lab commit 87e202a06fa8224cde1498cda55007779265f855
+URL: https://github.com/nasa/to_lab/commit/87e202a06fa8224cde1498cda55007779265f855
+Parent(s): 41516d4f567e96b1ef885c84ef74c88f2e3f912c 
+Author: Joseph Hickey
+AuthorDate: Wed Apr 12 14:49:07 2023 -0400
+CommitDate: Wed Apr 12 14:51:18 2023 -0400
+
+Fix #152, adjust subscription table based on apps present
+
+Create an inclusion preprocessor macro for each app referred to in the
+subscription table, and only include that line if the app is present in
+the current configuration.
+
+In particular, do not assume that sample_app will always be there.
+
+
+ CMakeLists.txt          | 17 ++++++++++-----
+ fsw/tables/to_lab_sub.c | 56 +++++++++++++++++++++++++++++++++++--------------
+ 2 files changed, 52 insertions(+), 21 deletions(-)
+################ nasa/to_lab commit 51cf370217c9011c22e774bf5120bffd9a39cb9e
+URL: https://github.com/nasa/to_lab/commit/51cf370217c9011c22e774bf5120bffd9a39cb9e
+Parent(s): f99581e990b9a9e14cb838d73659d022899dd658 
+Author: Michael Yang
+AuthorDate: Mon Jun 15 08:09:07 2026 -0400
+CommitDate: Mon Jun 15 08:09:07 2026 -0400
+
+Fix nasa#229, Check return values for CFE_SB_Subscribe for TO_LAB_CMD_MID and TO_LAB_SEND_HK_MID in TO_LAB_init() in fsw/src/to_lab_app.c
+
+
+ fsw/src/to_lab_app.c | 39 +++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 37 insertions(+), 2 deletions(-)
+################ nasa/sample_app commit 693d75f23a4ab0edc1350c05e18974ed0a043ac2
+URL: https://github.com/nasa/sample_app/commit/693d75f23a4ab0edc1350c05e18974ed0a043ac2
+Parent(s): 3491a247d7c6d26c82917baf9cf34e1b8b7445a8 
+Author: Joseph Hickey
+AuthorDate: Fri Dec 6 08:57:30 2019 -0500
+CommitDate: Mon Dec 30 11:47:18 2019 -0500
+
+Fix #28: Check return of CFE_TBL_GetAddress
+
+The code must not dereference the pointer unless the call
+returned CFE_SUCCESS, otherwise the pointer is not valid.
+
+
+ fsw/src/sample_app.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+################ nasa/sample_app commit 61f657d940670cd59311cf1506a5fa9e7b60f8d6
+URL: https://github.com/nasa/sample_app/commit/61f657d940670cd59311cf1506a5fa9e7b60f8d6
+Parent(s): b798efc39900574fa2b08c2588fa2c6e2254ec99 
+Author: Jacob Hageman
+AuthorDate: Wed Jan 6 15:58:23 2021 -0500
+CommitDate: Wed Jan 6 15:58:23 2021 -0500
+
+Fix #101, Correct CFE_TBL_GetAddress return code check
+
+
+ fsw/src/sample_app.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+################ nasa/sch_lab commit c6342bdec008719dbcf083ac7e284a6a36ee677a
+URL: https://github.com/nasa/sch_lab/commit/c6342bdec008719dbcf083ac7e284a6a36ee677a
+Parent(s): d0e21d20aee4c1b4cdf8de7cf3ea2bd7c41caffe 
+Author: Joseph Hickey
+AuthorDate: Thu Jan 9 10:15:28 2020 -0500
+CommitDate: Thu Jan 9 10:15:28 2020 -0500
+
+Fix #24: Accept CFE_SUCCESS from CFE_TBL_GetAddress()
+
+This is a valid return from this function.
+
+
+ fsw/src/sch_lab_app.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+################ nasa/HS commit b7530d94e322032d80cfd714b2a29c2b423473cb
+URL: https://github.com/nasa/HS/commit/b7530d94e322032d80cfd714b2a29c2b423473cb
+Parent(s): 0048f957f1638beb1cb2f40c49642aad8509cb73 
+Author: Joseph Hickey
+AuthorDate: Tue Jul 28 09:50:30 2026 -0400
+CommitDate: Tue Jul 28 09:50:30 2026 -0400
+
+Fix #148, Add table access protections
+
+Scrub use of all table pointers and add access routines to get an entry
+from the table instead of dereferencing the array directly.  This pattern
+allows easier verification that all access includes a NULL check.
+
+Also includes some refactoring to support this goal.  Notably this
+includes changing the bitmask used to track if an appmon entry is active
+or inactive.
+
+
+ config/default_hs_msg.h       |   6 -
+ config/default_hs_msgdefs.h   |  12 +
+ config/default_hs_msgstruct.h |   2 +-
+ config/default_hs_tblstruct.h |   5 +-
+ config/eds_hs_msgdefs.h       |  11 +
+ fsw/src/hs_app.c              |  13 +-
+ fsw/src/hs_app.h              |  90 ++++-
+ fsw/src/hs_cmds.c             | 104 +++---
+ fsw/src/hs_monitors.c         | 628 ++++++++++++++++-----------------
+ unit-test/hs_app_tests.c      |  64 ++--
+ unit-test/hs_cmds_tests.c     | 786 +++++++++++++++++++-----------------------
+ unit-test/hs_monitors_tests.c | 373 ++++++++++++--------
+ 12 files changed, 1116 insertions(+), 978 deletions(-)
+################ nasa/DS commit c609e35d6a09d19b5bb016395cefe305ee2a5361
+URL: https://github.com/nasa/DS/commit/c609e35d6a09d19b5bb016395cefe305ee2a5361
+Parent(s): 34d10062c8d36bd235ac3a6ed8e7830f712ee010 
+Author: Michael Yang
+AuthorDate: Mon Jun 1 12:55:13 2026 -0400
+CommitDate: Mon Jun 1 12:55:13 2026 -0400
+
+Fix nasa#146, When managing the Filter and Dest file tables, the return value of CFE_TBL_GetAddress() after the tables have already been loaded will be checked
+
+
+ fsw/inc/ds_eventids.h      |  12 ++++++
+ fsw/src/ds_table.c         | 101 ++++++++++++++++++++++++++++++++++-----------
+ unit-test/ds_table_tests.c |  17 ++++++++
+ 3 files changed, 107 insertions(+), 23 deletions(-)
+################ nasa/osal commit 7ba42a63fe6a7972582036dfd432ec3bf5edf8b1
+URL: https://github.com/nasa/osal/commit/7ba42a63fe6a7972582036dfd432ec3bf5edf8b1
+Parent(s): a7529cf845cc6eacf9492ca5ca2bc69c4db7aa22 
+Author: Joseph Hickey
+AuthorDate: Mon Dec 21 22:15:14 2020 -0500
+CommitDate: Tue Dec 22 10:57:40 2020 -0500
+
+Fix #642, make OS_TaskDelete synchronous
+
+In the POSIX implementation, OS_TaskDelete was implemented in a
+deferred manner - the API call was a request, and the actual
+deletion occured sometime thereafter.  This is a problem if the
+task is running code within a dynamically loaded module, and the
+intent is to delete the task so the module can be unloaded.  In
+this case the app needs to be certain that the task has actually
+been deleted before unloading can be done safely.
+
+To do this requires use of pthread_join() on POSIX which confirms
+that the task has exited.  However, this is a (potentially) blocking
+call, so to do this requires rework of the EXCLUSIVE lock mode
+such that the OSAL lock is _not_ held during the join operation.
+
+
+ src/os/posix/src/os-impl-tasks.c                   | 86 ++++++++++++++++++++--
+ src/os/rtems/src/os-impl-tasks.c                   | 14 ++++
+ src/os/shared/inc/os-shared-task.h                 | 10 +++
+ src/os/shared/src/osapi-task.c                     |  2 +
+ src/os/vxworks/src/os-impl-tasks.c                 | 14 ++++
+ .../ut-stubs/src/osapi-task-impl-stubs.c           |  1 +
+ 6 files changed, 120 insertions(+), 7 deletions(-)
+################ nasa/osal commit 6357c2d0e3cd93d6f115ff6a232632d96818deda
+URL: https://github.com/nasa/osal/commit/6357c2d0e3cd93d6f115ff6a232632d96818deda
+Parent(s): f1fcd8d42b946de5782da805e3e75c3695c48006 
+Author: Joseph Hickey
+AuthorDate: Tue Oct 22 23:20:06 2019 -0400
+CommitDate: Thu Oct 31 16:41:15 2019 -0400
+
+Fix #274: Avoid possible deadlock of timer callback
+
+If the tick_time from the wait routine was perpetually
+greater than the interval time, eventually the wait_time
+became such that it was always below zero.  Once this
+occurs, application callbacks would cease entirely.
+
+To avoid this, run the callback condition in a loop
+for periodic timers only (not for one-shot config).
+
+
+ src/os/shared/osapi-timebase.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+################ nasa/PSP commit 802f6f893d9d5e4f4d26a83a31f8245ced7f7cc6
+URL: https://github.com/nasa/PSP/commit/802f6f893d9d5e4f4d26a83a31f8245ced7f7cc6
+Parent(s): ae0c0a77e9a6e67eeab4110e346bb29b1cf64fad 
+Author: Joseph Hickey
+AuthorDate: Wed Oct 15 10:55:30 2025 -0400
+CommitDate: Wed Oct 15 12:21:37 2025 -0400
+
+Fix #310, resolve TOCTOU race in EEPROM file creation
+
+Do not "stat" the file before opening, simply open it with O_CREAT and
+then call ftruncate to make it the correct size.
+
+
+ .../eeprom_mmap_file/cfe_psp_eeprom_mmap_file.c    | 93 ++++++++--------------
+ .../coveragetest-eeprom_mmap_file.c                | 22 +----
+ unit-test-coverage/ut-stubs/inc/PCS_unistd.h       |  1 +
+ unit-test-coverage/ut-stubs/override_inc/unistd.h  |  1 +
+ unit-test-coverage/ut-stubs/src/PCS_unistd_stubs.c | 17 ++++
+ 5 files changed, 57 insertions(+), 77 deletions(-)
+################ nasa/SBN commit 01dc62be92f887cee14cc8ddd2193ec49362f8ba
+URL: https://github.com/nasa/SBN/commit/01dc62be92f887cee14cc8ddd2193ec49362f8ba
+Parent(s): f9e66097c989e8260e5729e280f1c27c3de5953d 
+Author: Danrae Pray
+AuthorDate: Tue Feb 28 17:43:20 2017 -0600
+CommitDate: Tue Feb 28 17:43:20 2017 -0600
+
+changed from per-task mutex to global mutex to fix race condition in send-tasks...
+
+
+ fsw/platform_inc/sbn_interfaces.h |  3 ++-
+ fsw/src/sbn_app.c                 | 10 ++++++++++
+ fsw/src/sbn_app.h                 |  8 ++++++++
+ fsw/src/sbn_netif.c               | 17 +++--------------
+ 4 files changed, 23 insertions(+), 15 deletions(-)

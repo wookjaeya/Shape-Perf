@@ -1,0 +1,12 @@
+set pagination off
+set confirm off
+handle SIGINT nostop noprint pass
+break cfe_evs.c:188
+commands
+silent
+printf "BP188 EventID=%u AppID=0x%lx ILLEGAL\n", EventID, (unsigned long)AppID
+bt 4
+info threads
+continue
+end
+run

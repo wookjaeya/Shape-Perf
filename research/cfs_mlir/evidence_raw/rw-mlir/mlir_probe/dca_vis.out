@@ -1,0 +1,10 @@
+SetState_internal:
+ region #0
+  ^bb0 = live
+op_preds: predecessors:
+  llvm.call @SetState(%arg0) : (i32) -> ()
+func_private:
+ region #0
+  ^bb0 = live
+op_preds: (all) predecessors:
+  func.call @priv_func(%arg0) : (i32) -> ()

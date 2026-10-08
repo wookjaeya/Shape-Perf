@@ -2,8 +2,11 @@
 """CORD analyzer: find observed and predicted order violations in a CORD trace.
 
 Ordering model (see tool/DESIGN.md §3): happens-before is program order plus
-  - TCREATE(token) -> TSTART(token)
-  - SIG(o) -> WAIT(o), matched FIFO per sync object
+  - TCREATE -> TSTART, paired by token `a` when it is nonzero, otherwise by key
+    (for example an OSAL task id or task name recorded at both ends)
+  - SIG(o) -> WAIT(o), matched FIFO per sync object; for keys starting with
+    "bsem:" (binary semaphores, where gives coalesce) a WAIT joins the latest
+    SIG before it instead
   - SETSTATE(v, x) -> WAITRET(v, x) (reads-from on designated state variables)
 Lock release -> acquire is not an ordering edge, unless --locks-hb is given
 (ablation).
@@ -54,8 +57,9 @@ def vc_join(a, b):
 def analyze(evs, locks_hb=False, key_prefix=None):
     vc = collections.defaultdict(dict)          # tid -> vector clock
     names = {}
-    tokens = {}                                 # TCREATE token -> VC snapshot
+    tokens = {}                                 # TCREATE token or key -> VC snapshot
     sigq = collections.defaultdict(collections.deque)
+    lastsig = {}
     states = collections.defaultdict(list)      # key -> [(seq, value, vc)]
     lastrel = {}
     edges = collections.Counter()
@@ -67,15 +71,23 @@ def analyze(evs, locks_hb=False, key_prefix=None):
         if k == "TASKNAME":
             names[t] = key
         elif k == "TCREATE":
-            tokens[e["a"]] = dict(v)
+            tokens[e["a"] or ("key", key)] = dict(v)
         elif k == "TSTART":
-            if e["a"] in tokens:
-                vc_join(v, tokens[e["a"]])
+            tok = e["a"] or ("key", key)
+            if tok in tokens:
+                vc_join(v, tokens.pop(tok))
                 edges["create"] += 1
         elif k == "SIG":
-            sigq[key].append(dict(v))
+            if key.startswith("bsem:"):
+                lastsig[key] = dict(v)
+            else:
+                sigq[key].append(dict(v))
         elif k == "WAIT":
-            if sigq[key]:
+            if key.startswith("bsem:"):
+                if key in lastsig:
+                    vc_join(v, lastsig[key])
+                    edges["signal"] += 1
+            elif sigq[key]:
                 vc_join(v, sigq[key].popleft())
                 edges["signal"] += 1
         elif k == "SETSTATE":

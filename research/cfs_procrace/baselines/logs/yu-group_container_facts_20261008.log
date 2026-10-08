@@ -47,3 +47,12 @@ ret -1 errno 38 Function not implemented
 exit_group(0)                           = ?
 +++ exited with 0 +++
 # ptrace: gdb batch run
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Inferior 1 (process 1377) exited normally]
+# simics / Wind River / Intel Simics installed?
+ls: cannot access '/opt/simics*': No such file or directory
+ls: cannot access '/usr/local/simics*': No such file or directory
+ls: cannot access '/opt/intel/simics*': No such file or directory
+# qemu present?
+# pin present?
+ls: cannot access '/opt/pin*': No such file or directory

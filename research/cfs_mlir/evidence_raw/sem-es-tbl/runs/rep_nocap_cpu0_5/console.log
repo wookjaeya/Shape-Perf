@@ -1,0 +1,136 @@
+OS_BSP_Initialize():Maximum user msg queue depth = 10
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+OS_Posix_TaskAPI_Impl_Init():419:Could not setschedparam in main thread: Operation not permitted (1)
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FCAA8D80000, Size = 00080000 Status = 0
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-01:20:06.23098 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-01:20:06.23104 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-01:20:06.23132 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-01:20:06.23133 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-01:20:06.23133 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-01:20:06.23134 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-01:20:06.23144 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-01:20:06.23145 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-01:20:06.23146 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-01:20:06.23146 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-01:20:06.23176 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-01:20:06.23214 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+EVS Port1 1980-012-14:03:20.05209 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.05213 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 56223
+EVS Port1 1980-012-14:03:20.05213 66/1/CFE_ES 91: Version Info: Mission SampleMission, version (null)
+EVS Port1 1980-012-14:03:20.05216 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05216 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05218 66/1/CFE_ES 91: Version Info: Module ES, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05218 66/1/CFE_ES 91: Version Info: Module EVS, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05220 66/1/CFE_ES 91: Version Info: Module FS, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05220 66/1/CFE_ES 91: Version Info: Module SB, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05221 66/1/CFE_ES 91: Version Info: Module TBL, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05221 66/1/CFE_ES 91: Version Info: Module TIME, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05223 66/1/CFE_ES 91: Version Info: Module OSAL, version git:v7.0.1-45-g5befd8e
+EVS Port1 1980-012-14:03:20.05223 66/1/CFE_ES 91: Version Info: Module PSP, version git:v7.0.1-26-g36c24cb
+EVS Port1 1980-012-14:03:20.05224 66/1/CFE_ES 91: Version Info: Module MSG, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05226 66/1/CFE_ES 91: Version Info: Module SBR, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05226 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05227 66/1/CFE_ES 92: Build 202610010630 by root@vm, config sample
+EVS Port1 1980-012-14:03:20.15052 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+1980-012-14:03:20.25077 CFE_SB_AppInit: Registered 4 events for filtering
+EVS Port1 1980-012-14:03:20.25085 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.25086 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+EVS Port1 1980-012-14:03:20.35111 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.35115 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+EVS Port1 1980-012-14:03:20.45153 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.45161 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+1980-012-14:03:20.50144 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50147 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50149 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50158 CFE_ES_ParseFileEntry: Loading file: /cf/probe_lo.so, APP: PROBE_LO
+1980-012-14:03:20.50184 CFE_ES_ParseFileEntry: Loading file: /cf/probe_hi.so, APP: PROBE_HI
+1980-012-14:03:20.50198 CFE_ES_ParseFileEntry: Loading file: /cf/probe_slow.so, APP: PROBE_SLOW
+1980-012-14:03:20.50215 CFE_ES_ParseFileEntry: Loading file: /cf/probe_own.so, APP: PROBE_OWN
+1980-012-14:03:20.50228 CFE_ES_ParseFileEntry: Loading file: /cf/probe_shr.so, APP: PROBE_SHR
+1980-012-14:03:20.55193 PROBE PROBE_LO ENTRY mono_us=4806784083 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55197 EVS_NotRegistered: App PROBE_LO not registered with Event Services. Unable to send event.
+1980-012-14:03:20.55197 PROBE PROBE_LO SendEvent_before_Register st=0xc2000002
+1980-012-14:03:20.55198 PROBE PROBE_LO EVS_Register st=0x00000000
+1980-012-14:03:20.55208 PROBE PROBE_HI ENTRY mono_us=4806784236 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55209 EVS_NotRegistered: App PROBE_HI not registered with Event Services. Unable to send event.
+1980-012-14:03:20.55209 PROBE PROBE_HI SendEvent_before_Register st=0xc2000002
+1980-012-14:03:20.55210 PROBE PROBE_HI EVS_Register st=0x00000000
+1980-012-14:03:20.55223 PROBE PROBE_SLOW ENTRY mono_us=4806784383 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55237 PROBE PROBE_OWN ENTRY appid=1114121 mono_us=4806784519
+1980-012-14:03:20.55238 PROBE PROBE_OWN Register(T,single) st=0x00000000 mono_us=4806784538
+1980-012-14:03:20.55239 PROBE PROBE_OWN GetAddress(T) BEFORE load st=0xcc000005 ptr=(nil)
+1980-012-14:03:20.55239 PROBE PROBE_OWN ReleaseAddress(T) BEFORE load st=0xcc000005
+1980-012-14:03:20.55240 PROBE PROBE_OWN Load(T,v1) st=0x00000000
+1980-012-14:03:20.55243 PROBE PROBE_SHR ENTRY mono_us=4806784580
+1980-012-14:03:20.55244 PROBE PROBE_OWN Register(D,double) st=0x00000000 mono_us=4806784590
+1980-012-14:03:20.55246 PROBE PROBE_OWN Load(D,v1) st=0x00000000
+1980-012-14:03:20.55246 PROBE PROBE_OWN Register(E,double) st=0x00000000
+1980-012-14:03:20.55247 PROBE PROBE_OWN Load(E,v1) st=0x00000000
+1980-012-14:03:20.55248 PROBE PROBE_OWN GetAddress(T) st=0x4c00000e val=1 (holding)
+1980-012-14:03:20.55248 CFE_TBL_GetInactiveBufferExclusive: Inactive Buff Locked for 'PROBE_OWN.T' by AppId=1114121
+1980-012-14:03:20.55249 CFE_TBL_UpdateInternal: Unable to update locked table Handle=1769473
+EVS Port1 1980-012-14:03:20.55249 66/1/CFE_TBL 95: PROBE_OWN: Failed to update 'PROBE_OWN.T' (Stat=1275068440)
+EVS Port1 1980-012-14:03:20.55250 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender PROBE_OWN
+1980-012-14:03:20.55252 PROBE PROBE_OWN Load(T,v2) while self holds lock st=0x4c000018 val_seen=1
+1980-012-14:03:20.55253 PROBE PROBE_OWN ReleaseAddress(T) st=0x00000000
+1980-012-14:03:20.55253 PROBE PROBE_OWN GetStatus(T) st=0x4c000004
+EVS Port1 1980-012-14:03:20.55253 66/1/CFE_TBL 37: PROBE_OWN Successfully Updated 'PROBE_OWN.T'
+1980-012-14:03:20.55254 PROBE PROBE_OWN Manage(T) st=0x4c00000e
+1980-012-14:03:20.55255 PROBE PROBE_OWN GetAddress(T) after manage st=0x4c00000e val=2
+1980-012-14:03:21.50412 CFE_ES_Main: Startup Sync failed - Applications may not have all initialized
+1980-012-14:03:21.50416 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+EVS Port1 1980-012-14:03:21.00003 66/1/CFE_TIME 21: Stop FLYWHEEL
+1980-012-14:03:21.55854 CFE_ES_Main: Startup Sync failed - Applications may not have all started
+1980-012-14:03:21.55858 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+1980-012-14:03:21.60868 PROBE PROBE_HI WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=2004521 mono_us=4808788777
+1980-012-14:03:21.60871 PROBE PROBE_OWN OPERATIONAL t0 mono_us=4808788816
+1980-012-14:03:21.60872 PROBE PROBE_LO WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=2004688 mono_us=4808788826
+1980-012-14:03:21.60873 PROBE PROBE_SHR OPERATIONAL t0 mono_us=4808788832
+1980-012-14:03:21.60876 PROBE PROBE_SHR Share(T) st=0x00000000
+1980-012-14:03:21.60877 PROBE PROBE_SHR Share(D) st=0x00000000
+1980-012-14:03:21.60878 PROBE PROBE_SHR Share(E) st=0x00000000
+1980-012-14:03:22.10440 PROBE PROBE_SLOW AFTER_PRE_DELAY mono_us=4809284475 policy=0 rtprio=0 cpu=0
+1980-012-14:03:22.10444 EVS_NotRegistered: App PROBE_SLOW not registered with Event Services. Unable to send event.
+1980-012-14:03:22.10445 PROBE PROBE_SLOW SendEvent_before_Register st=0xc2000002
+1980-012-14:03:22.10445 PROBE PROBE_SLOW EVS_Register st=0x00000000
+1980-012-14:03:22.10446 PROBE PROBE_SLOW WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=0 mono_us=4809284534
+1980-012-14:03:22.61526 PROBE PROBE_SHR t+1s GetAddress(D) st=0x4c00000e val=1 ptr=0x55fa577e8a10 (holding)
+1980-012-14:03:22.61530 PROBE PROBE_SHR t+1s GetAddress(E) st=0x4c00000e val=1 ptr=0x55fa577e8a70 (holding once)
+EVS Port1 1980-012-14:03:23.61930 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.D' from 'Addr 0x7FCAA8CFFE00'
+1980-012-14:03:23.61937 PROBE PROBE_OWN t+2s Load(D,v2) while SHR holds D st=0x00000000
+EVS Port1 1980-012-14:03:23.61938 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.E' from 'Addr 0x7FCAA8CFFE00'
+1980-012-14:03:23.61939 PROBE PROBE_OWN t+2s Load(E,v2) while SHR holds E (once) st=0x00000000
+1980-012-14:03:24.62489 PROBE PROBE_SHR t+3s held D ptr=0x55fa577e8a10 val=1 (owner loaded v2 at t+2s)
+1980-012-14:03:24.62494 PROBE PROBE_SHR t+3s second GetAddress(D) st=0x4c00000e ptr=0x55fa577e89e0 val=2
+1980-012-14:03:24.62495 PROBE PROBE_SHR t+3s held E ptr=0x55fa577e8a70 val=1 (owner loaded v2 at t+2s)
+1980-012-14:03:25.04676 CFE_ES_RunExceptionScan: ExceptionID 0x1110000 in TaskID 0: Caught SIGINT
+1980-012-14:03:25.04679 CFE_ES_RunExceptionScan: Processor Reset count not reached (0/2)
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+
+CFE_PSP: Shutdown initiated - Exiting cFE

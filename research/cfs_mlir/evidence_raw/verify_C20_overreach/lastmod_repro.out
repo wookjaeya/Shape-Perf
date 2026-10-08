@@ -1,0 +1,7 @@
+== 
+test_tag: read_valid_after_call:  operand #0   - <unknown> test_tag: read_att_after_call:  operand #0   - <unknown> test_tag: read_att_after_extcall:  operand #0   - <unknown> test_tag: read_att_in_Guidance:  operand #0   - <unknown> 
+== interprocedural=false
+test_tag: read_valid_after_call:  operand #0   - <unknown> test_tag: read_att_after_call:  operand #0   - <unknown> test_tag: read_att_after_extcall:  operand #0   - <unknown> test_tag: read_att_in_Guidance:  operand #0   - <unknown> 
+== assume-func-writes=true
+test_tag: read_valid_after_call:  operand #0   - <unknown> test_tag: read_att_after_call:  operand #0   - <unknown> test_tag: read_att_after_extcall:  operand #0   - <unknown> test_tag: read_att_in_Guidance:  operand #0   - <unknown> 
+test_tag: v1_read:  operand #0   - w1 test_tag: v2_read:  operand #0   - <unknown> test_tag: v3_read_valid:  operand #0   - <unknown> 

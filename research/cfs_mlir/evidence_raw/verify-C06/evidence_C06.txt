@@ -1,0 +1,26 @@
+== commit
+08b384b4335cce324fac74577adc7f08e61b7cce
+== grep startup sync in all templates (expect none)
+exit=1
+== active gating
+196:        copilot_step();
+235:    {{#msgDataActive}}
+237:    copilot_step();
+238:    {{/msgDataActive}}
+== varNames selection
+    let varNames = fromMaybe (defaultVarNames spec) vs
+        monitors = maybe (defaultMonitors spec) (map (\x -> (x, Nothing))) rs
+    (vars, ids, infos, datas) = foldr f ([], [], [], []) varNames
+
+    f n o@(oVars, oIds, oInfos, oDatas) =
+      case variableMap varDB n of
+        Nothing -> o
+        Just (vars, ids, infos, datas) ->
+          (vars : oVars, ids : oIds, infos : oInfos, datas : oDatas)
+== README example invocation
+$ ogma cfs --variable-db examples/cfs-variable-db.json --variable-file examples/cfs-variables --handlers-file examples/cfs-handlers
+== cfs-variables
+position
+== cfs-002 inactive input
+4:       , "active": true
+14:       , "active": false

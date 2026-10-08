@@ -1,0 +1,6 @@
+CFE_APP, probe_lo,   Probe_LO_Main,   PROBE_LO,   200, 16384, 0x0, 0;
+CFE_APP, probe_hi,   Probe_HI_Main,   PROBE_HI,    20, 16384, 0x0, 0;
+CFE_APP, probe_slow, Probe_SLOW_Main, PROBE_SLOW, 100, 16384, 0x0, 0;
+CFE_APP, probe_own,  Probe_OWN_Main,  PROBE_OWN,   90, 16384, 0x0, 0;
+CFE_APP, probe_shr,  Probe_SHR_Main,  PROBE_SHR,   95, 16384, 0x0, 0;
+!

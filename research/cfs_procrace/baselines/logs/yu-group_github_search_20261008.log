@@ -1,0 +1,35 @@
+# yu-group: GitHub searches (2026-10-08) via the session's GitHub MCP search tools (search API covers all public GitHub).
+# Note: repository *contents* outside this session's configured repo are not readable through the MCP/gh API here
+# ("Access denied: repository ... is not configured for this session"); public repos were read with plain `git clone`
+# through the session proxy instead (see yu-group_github_candidates_20261008.log).
+
+## search_repositories
+"SimRacer"                 -> 33 hits; all sim-racing (motorsport) projects; none by the authors, none about process races
+"SimExplorer"              -> 4 hits: vampirecat35/SIMExplorer (Java GSM SIM-card explorer; cloned and inspected, unrelated),
+                              sampieters/SimExplorer (Python, 2026), jetsib/uSIMExplorer (Java, 2026), sabarish007/scaleSIMExplorer (scale-SIM DSE) -> none related
+"SimEvo"                   -> 16 hits; evolution simulators / simevo org (chemical process apps) -> none related
+"ReDPro"                   -> 269 hits, top 30 inspected by name/description: RedProtect, redproxy, ... -> none related
+"process-level race"       -> 0 hits
+"race reproduction framework process" -> 0 hits
+"system-level concurrency" -> 78 hits; only related one: tarannumzaman/Scminer ("Diagnose System-Level Concurrency Bugs") = SCMiner (ASE 2019), not one of the five
+"simics race condition testing" -> 0 ; "SimTester embedded Simics" -> 0 ; "process race reproduce pintool system call interleaving" -> 0
+"process-level race in:readme" -> 880 hits of generic matches; first 30 unrelated
+"user:tarannumzaman"       -> 1 repo: tarannumzaman/Scminer
+"user:tingtingdotyu"       -> 1 repo: project_workspace (created 2026-07-11, empty-named; no evidence it is Tingting Yu of UC) -> not pursued
+
+## search_users
+"Tingting Yu"   -> 15 accounts; none identifiable as the UC/UKy author from profile metadata
+"tarannumzaman" -> 1 (tarannumzaman; the SCMiner preprint ref [23] gives https://github.com/Tarannum-Zaman/Scminer, which git ls-remote resolves to the same refs)
+"Srisa-an"      -> 0 ; "Rattanasuksun" -> 0
+
+## search_code
+"SimRacer Simics"                -> 5 hits, all dictionary/domain-list files
+"SimRacer process"               -> 399 hits; academic ones are only bibliography mirrors (bibtex/bibtex.github.io ISSTA-2013-YuSR.html, dblp.yaml, biber-dist)
+"\"process-level race\""         -> 111 hits; academic ones are paper-index JSON (tmylla/CCF-Rec-Paper-DB STVR.json, swkim101/cspapers.org)
+"\"homepages.uc.edu/~tyu\""      -> 10 hits; faculty-list CSV/JSON scrapes (third-party), no tool links
+"\"SimEvo\" \"multi-process\""   -> 14 hits; bibliography/index files only
+"\"Race Reproduction Framework\"" -> 10 hits; bibliography/index files only
+
+## Conclusion of GitHub search
+No public implementation, artifact, VM image, or Simics script for SimRacer, SIMEXPLORER, RRF, SimEvo, or ReDPro was found on GitHub.
+The only public code from this research group found is tarannumzaman/Scminer (SCMiner, a different tool).

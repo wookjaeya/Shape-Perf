@@ -1,0 +1,14 @@
+{"meta":1,"threads":3,"overflow_threads":0,"seq":13}
+{"seq":0,"t":375350936137,"tid":7580,"k":12,"key":"MAIN","a":0,"b":0,"file":"t.c","line":27,"func":"main"}
+{"seq":1,"t":375350936521,"tid":7580,"k":3,"key":"","a":1,"b":0,"file":"t.c","line":29,"func":"main"}
+{"seq":2,"t":375350979505,"tid":7580,"k":3,"key":"","a":2,"b":0,"file":"t.c","line":30,"func":"main"}
+{"seq":8,"t":375353087321,"tid":7580,"k":1,"key":"obj:SYNCED","a":0,"b":0,"file":"t.c","line":31,"func":"main"}
+{"seq":9,"t":375353087636,"tid":7580,"k":5,"key":"sem:go","a":0,"b":0,"file":"t.c","line":31,"func":"main"}
+{"seq":3,"t":375351025879,"tid":7582,"k":4,"key":"","a":2,"b":0,"file":"t.c","line":17,"func":"user"}
+{"seq":4,"t":375351025980,"tid":7582,"k":12,"key":"USER","a":0,"b":0,"file":"t.c","line":17,"func":"user"}
+{"seq":10,"t":375356056147,"tid":7582,"k":2,"key":"obj:THR","a":0,"b":0,"file":"t.c","line":19,"func":"user"}
+{"seq":11,"t":375356070068,"tid":7582,"k":6,"key":"sem:go","a":0,"b":0,"file":"t.c","line":22,"func":"user"}
+{"seq":12,"t":375356070256,"tid":7582,"k":2,"key":"obj:SYNCED","a":0,"b":0,"file":"t.c","line":23,"func":"user"}
+{"seq":5,"t":375351088633,"tid":7581,"k":4,"key":"","a":1,"b":0,"file":"t.c","line":10,"func":"provider"}
+{"seq":6,"t":375351088900,"tid":7581,"k":12,"key":"PROVIDER","a":0,"b":0,"file":"t.c","line":10,"func":"provider"}
+{"seq":7,"t":375352173189,"tid":7581,"k":1,"key":"obj:THR","a":0,"b":0,"file":"t.c","line":13,"func":"provider"}

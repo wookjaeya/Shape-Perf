@@ -1,0 +1,38 @@
+{
+  "created_unix": 1790668082.0337982,
+  "source": {
+    "git_head": "eefb40dba13bd8b1856216fbe329d38e01c55d68",
+    "dirty": false,
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked_files": [],
+    "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dependencies": {
+    "python": "3.11.15",
+    "n_packages": 24,
+    "packages_sha256": "5b9ecf3d8e4a2429c12b0f9a48b53dc0d3641435dbee4e7b7751663569cf4401",
+    "key": {
+      "numpy": "2.2.6",
+      "onnx": "1.23.0",
+      "onnxruntime": "1.23.2",
+      "protobuf": "6.33.5",
+      "scipy": "1.15.3"
+    }
+  },
+  "host": {
+    "kernel": "6.18.44-fc-v49",
+    "machine": "x86_64",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "n_cpus": 4,
+    "node": "vm",
+    "cfs_quota_us": "unavailable"
+  },
+  "compilers": [],
+  "extra": {
+    "role": "g2-subgraph-timing",
+    "seed": 12,
+    "cpu": 3,
+    "note": "development container: NOT a result"
+  },
+  "provenance_id": "16031b7969ab98af"
+}

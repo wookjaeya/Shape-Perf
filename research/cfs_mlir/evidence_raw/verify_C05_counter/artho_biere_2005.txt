@@ -1,0 +1,162 @@
+Electronic Notes in Theoretical Computer Science 131 (2005) 3–14	
+www.elsevier.com/locate/entcs
+
+
+Combined Static and Dynamic Analysis
+Cyrille Artho
+Computer Systems Institute, ETH Zu¨rich, Switzerland
+Armin Biere
+Institute for Formal Models and Veriﬁcation, Johannes Kepler University, Linz, Austria
+
+Abstract
+Static analysis is usually faster than dynamic analysis but less precise. Therefore it is often desirable to retain information from static analysis for run-time verification, or to compare the results of both techniques. However, this requires writing two programs, which may not act identically under the same conditions. It would be desirable to share the same generic algorithm by static and dynamic analysis. In JNuke, a framework for static and dynamic analysis of Java programs, this has been achieved. By keeping the architecture of static analysis similar to a virtual machine, the only key difference between abstract interpretation and execution remains the nature of program states. In dynamic analysis, concrete states are available, while in static analysis, sets of (abstract) states are considered. Our new analysis is generic because it can re-use the same algorithm in static analysis and dynamic analysis. This paper describes the architecture of such a generic analysis. To our knowledge, JNuke is the first tool that has achieved this integration, which enables static and dynamic analysis to interact in novel ways.
+Keywords: Static analysis, dynamic analysis, Java.
+
+Introduction
+Java is a popular object-oriented, multi-threaded programming language. Veri- fication of Java programs has become increasingly important. Two major ap- proaches have been established: Static analysis and dynamic analysis. Static analysis approximates the set of possible program states. It includes abstract interpretation [8], where a fix point over abstract states, which represent sets of concrete states, is calculated. Static analysis scales well for many proper- ties, as they may only require summary information of dependent methods or modules. “Classical” static analysis constructs a graph representation of the
+
+
+1571-0661 © 2005 Elsevier B.V. Open access under CC BY-NC-ND license.
+doi:10.1016/j.entcs.2005.01.018
+
+
+
+Report
+
+
+Test case(s)
+
+Run−time Verification	Confirmed?
+
+
+yes
+
+
+Counter− example
+
+
+no
+add to suppression list
+
+Figure 1. A new tool flow for fault detection using combined static and dynamic analysis.
+
+program and calculates the fix point of properties using that graph [8]. This is very different from dynamic analysis, which evaluates properties against an event trace originating from a concrete program execution. Using a graph- free analysis [15], static analysis is again close to dynamic execution. In this paper, a graph-free static analysis is extended to a generic analysis which is applicable to dynamic analysis as well.
+JNuke [4] is a fully self-contained framework for loading and analyzing Java class files. Originally JNuke was designed for dynamic analysis, encompassing explicit-state software model checking [18] and run-time verification [1].
+Static analysis can be very efficient for checking properties such as block- local atomicity [3]. In the initial version, static analysis in JNuke could not handle recursion and required algorithms to be targetted to a static envir- onment [3]. This paper describes the solution for recursion and furthermore allows sharing of algorithms in a static and dynamic environment.
+JNuke’s generic analysis framework allows the entire analysis logics to be written such that they are agnostic of whether the “environment” is a static or dynamic analysis. Both versions require only a simple wrapper that converts environment-specific data into a form that a generic algorithm can use. Fur- thermore, the fact that the algorithm itself is identical for static and dynamic analysis allows a novel kind of combined analysis for fault detection, as out- lined in Figure 1. A static analyzer looks for faults. Reports are then analyzed by a human, who writes test cases for each kind of fault reported. Run-time verification will then analyze the program using the dynamic version of the same algorithm, possibly confirming the fault as a failure or counterexample. If a failure is not confirmed, even after multiple iterations of creating test cases, given reports can be suppressed in future runs of the static analyzer. Of course this particular application gives up soundness but facilitates fault finding. Current approaches only offer a manual review of reports. The gen- eric algorithm is shared by both tools, which is our contribution and enables this tight integration of static and dynamic analysis.
+
+
+Section 2 introduces static analysis in JNuke. Generic analysis algorithms, applicable to both a static and dynamic context, are described in Section 3. Section 4 shows the viability of this approach based on experiments. Section 5 concludes.
+
+Static Analysis in JNuke
+In JNuke, static analysis works very much like dynamic execution, where the environment only implements non-deterministic control flow. It thus imple- ments a graph-free data flow analysis [15] where data locality is improved because an entire path of computation is followed as long as valid new suc- cessor states are discovered. Each Java method can be executed in this way. The abstract behavior of the program is modelled by the user. The environ- ment runs the analysis algorithm until an abortion criterion is met or the full abstract state space is exhausted.
+The iteration over the program state space is separated from the analysis logics. A generic control flow module controls symbolic execution of instruc- tions, while the analysis algorithm deals with the representation of (abstract) data and the semantics of the analysis. The control flow module implements a variant of priority queue iteration [12], executing a full path of computation as long as successor states have not been visited before, without storing the flow graph [15].
+The generic control flow module first chooses an instruction to be executed from a set of unvisited states. It then runs the specific analysis algorithm on that unvisited state. That algorithm updates its abstract state and verifies the properties of interest. After evaluation of the current instruction, the control flow module adds all valid successor states to the queue of states to visit, avoiding duplicates by keeping a set of seen states. When encountering a branch instruction such as switch, all possible successors are added to the state space. Furthermore, each possible exception target is also added to the states that have to be explored.
+Many Java bytecode instructions do not affect control flow. Therefore our algorithm does not store the current state if an immediate successor instruction is eligible. A state is only stored if it is target of a branch instruction. This reduces memory usage [15] but may visit a state twice: If an instruction ib is the target of a backward jump, such as in a while loop, it is only recognized as such when the branch instruction is visited, which usually occurs after ib has been visited before. However, this overhead is small since it only occurs during the first iteration.
+It is up to the specific analysis algorithm to model data values. Currently,
+
+
+only the block-local atomicity analysis for stale values [3] is implemented. This analysis tracks the state of each register (whether it is shared and therefore possibly stale) and includes a simple approximation of lock identities (pointer aliasing [20]). It does not require any further information about the state of variables, and thus chooses to execute every branch target. Due to the limited number of possible states for each register, the analysis converges very quickly.
+
+Generic Analysis Algorithms
+As described in the introduction, the goal was to use generic analysis al- gorithms. These algorithms should work equally in both a static environment (using abstract interpretation) and a dynamic environment (using run-time verification). The problem is that the environments are quite different: the VM offers a single fully detailed state. Abstract interpretation [8], on the other hand, deals with sets of states, each state containing imprecise inform- ation that represents several concrete states. The challenge was to reconcile the differences between these two worlds and factor out the common parts of the algorithm.
+A generic analysis represents a single program state or a set of program states at a single program location. It also embodies a number of event hand- lers that model the semantics of byte code operations. Both static analysis and run-time analysis trigger an intermediate layer that evaluates the events. The environment hides its actual nature (static or dynamic) from the generic algorithm and maintains a representation of the program state that is suitably detailed.
+Figure 2 shows the principle. Run-time verification is driven by a trace, a series of events e emitted by the run-time verification API. An event rep- resents method entry or exit, or execution of an instruction at location l. Conventional run-time analysis analyzes these events directly. The dynamic environment, on the other hand, uses the event information to maintain a context c of algorithm-specific data before relaying the event to the generic analysis. This context is used to maintain state information s that cannot be updated uniformly for the static and dynamic case. It is updated simil- arly by the static environment, which also receives events e, determining that successor states at l are to be computed. The key difference for the static environment is that its updates to c concern sets of states S. Sets of states are also stored in components used by the generic algorithm. Operation on states (such as comparisons) are performed through delegation to component members. Therefore the “true nature” of state components, whether they embody single concrete states or sets of abstract states, is transparent to the
+
+
+e
+
+
+
+
+
+
+e
+
+
+
+
+
+Figure 2. Running generic analysis algorithms in a static or dynamic environment.
+generic analysis. It can thus be used statically or dynamically.
+The abstract domain is chosen based on the features required by the gen- eric analysis to evaluate given properties. Both the domain and the properties are implemented as an observer algorithm in JNuke. Future algorithms may include an interpreter for logics such as LTL. Interpretation of events with respect to temporal properties would then be encoded in the generic ana- lysis while event generation would be implemented by the static and dynamic environment, respectively.
+
+Context data
+Context data c has to be applicable to static and dynamic analysis. The dynamic environment maintains a single (current) context c, while the static environment maintains one context per location, cl. In a static environment, certain data may not be defined precisely; for instance, in a field access, the static environment often cannot provide a pointer to the instance of which the field was accessed. There are two ways to deal with this problem: The generic analysis must not require such data, or the static layer must insert artificial values. The latter was used for modeling static lock sets, where the static layer uses symbolic IDs to distinguish locks, rather than their pointers. On each lock acquisition, the lock set in cl is updated with a new such lock ID. The generic analysis may only read locks or perform non-destructive, abstract tests, such as testing set intersections for emptiness. Due to polymorphism (in the implementation) of the actual set content, the generic analysis therefore never becomes aware of the true nature of the locks. The environment also maintains contextual information for each lock, such as the line number where it was acquired. Again, polymorphism allows lookup from locks to line numbers without revealing the content of the lock.
+In general, the environment must create suitable representations of state
+
+
+information used by the generic analysis. The generic analysis only operates on such data. The environment thus acts as a proxy [11] for the virtual machine, if present, or replaces that data with appropriate facsimiles in static analysis. These facsimiles have to be conceptually isomorphic with respect to concrete values obtained during run-time analysis. Distinct objects have to map to distinct representations. Of course, true isomorphism is only achieved if pointer analysis is absolutely accurate.
+The generic block-local atomicity algorithm [3] has the property that it is agnostic to certain concrete values (such as the values of integers) but needs precise information about others (locks). It thus provides a good example of a generic analysis algorithm, as other ones are expected to show similar differences. In the block-local atomicity algorithm, the static environment approximates the lock set, representing it with proxy objects; the dynamic environment simply queries the VM. The property check itself is completely independent of the environment, as it refers to “shadow data” which reflects the status of each register, i.e., whether their value is stale or not. In the static case, the semantics of sets of states are reflected by approximating the set of all possible values in the operations on registers.
+
+Interfacing run-time veriﬁcation
+Many run-time verification algorithms, such as Eraser [16], are context-sensitive and not thread-local. Such an algorithm receives events from all threads and methods. A run-time variant of such an algorithm therefore requires only a single instance of the analysis. In such cases, creating a static variant is less interesting since the dynamic algorithm, if used with a good test suite, creates excellent results [5].
+Conversely, analyzing a context-insensitive (method-local), thread-local property is more amenable to static analysis, but actually makes run-time analysis more difficult. This is counter-intuitive because such properties are conceptually simpler. However, in run-time verification, a new instance of the analysis has to be created on each method call and thread. Instances of ana- lysis algorithms then correspond to stack frames on the program stack. Each new analysis instance is completely independent of any others, except for a shared, global context (such as lock sets, which are kept throughout method calls) and return values of method calls. The dynamic environment maintains the shared context and relays return values of method calls to the analysis instance corresponding to the caller. Detailed knowledge of run-time verific- ation is not necessary for the remainder of this paper; more about run-time verification in JNuke is described in the extended version of this paper [2].
+
+Interfacing static analysis
+Static analysis calculates the set of all possible program states. Branches (test nodes) are treated non-derministically by considering all possible successors and copying (cloning) the current state for each outcome. Junction nodes denote points where control flow of several predecessor nodes merges [8]. In this paper, the operation that creates a new set of possible states at this node will be called merging.
+The key is that the generic algorithm is not aware that static analysis re- quires copying and merging operations. To achieve this, the capabilities of the generic analysis must be extended with the Mergeable interface. The ex- tended class inherits the algorithm and delegates cloning and merging states to the components of a state. By merging states, sets of states are generated. Computations of state components must therefore support set semantics for static analysis. What is important is that the analysis logics are unchanged: the generic algorithm is still unaware that cloning, merging, and set opera- tions happen “behind the scenes” and implements its property checking as if only a single state existed. In some cases, static analysis may converge slowly; convergence is improved by using a widening operator [8] which can be implemented by the merge operation.
+In dynamic analysis, only one program location l is active (per thread), corresponding to a single program state s. In static analysis, the sets of states Sl at all program locations l are of interest. Each set of states Sl is represented by an instance of the generic algorithm. The type of operation performed to model the semantics of each instruction remains the same for static and dynamic analysis.
+In our framework, the successor states of one set Sl are calculated in each iteration. The choice of l is implemented by a control flow module, as described in Section 2. This covers intra-method analysis, leaving open the problem of method calls. It is desirable that the entire statically reachable call graph is traversed so each reachable method in a program is analyzed. A recursion class solves this challenge. It expands a method call by starting a new instance of the control flow class. Figure 3 shows an overview of these connections. The recursion class starts with the main method and creates a new instance of the control flow class for each called method. The control flow class performs intra-method analysis and delegates method calls back to the recursion class, which also handles multi-threading by exploring the behavior of threads when encountering a thread start point, e.g. a run method. This way, the algorithm explores the behavior of all threads.
+This leaves open the problem of self-recursion or mutual recursion. It is not possible to model the effects of a recursive method that calls another
+
+
+
+Figure 3. Interfacing static analysis with a generic analysis algorithm.
+method higher up in its stack frame using this algorithm. This is because the precise effect of that method call depends on itself. 1 Therefore the static analysis class has to implement a summary method, which models method calls without requiring knowledge about the effects of a method. Such a summary method can conservatively assume the worst possible outcome or provide more precise information.
+The effect of each evaluated method call is stored as a summary. Context- sensitivity is modeled by evaluating each method call once for each possible context. If an analysis is context-insensitive, an empty context is assumed, having the effect that each method is only evaluated once.
+In principle, every analysis algorithm can be split up into a generic al- gorithm and its environment. Most data flow problems can be seen as set- theoretic or closure problems [14] and their nature will affect how the merge operation is implemented. Precision of the analysis will depend on the approx- imation of pointer aliasing [20]. If accurate information about data values is needed or when environment-specific optimizations are called for, the generic part of an algorithm may become rather small compared to the size of its (static or dynamic) environment. However, with the block-local atomicity al- gorithm, it has been our experience that the generic algorithm does indeed embody the entire logics and thus is not just a negligeable part of the whole. Notably, adapting a static algorithm for dynamic analysis is greatly facilitated with our approach.
+Experiments
+The block-local atomicity algorithm [3] has been implemented as a generic algorithm that can be used to compare the static and dynamic approach. It analyzes method-local data flow, checking for copies of shared data (stale values) that are used outside the critical section in which shared data was read [7]. This analysis only requires reference alias information about locks,
+
+1 A bounded expansion of recursion is possible, approximating the unbounded behavior.
+
+
+Table 1 Benchmark programs.
+
+Table 2 Benchmark results.
+
+making it a suitable candidate for both static and dynamic analysis. Table 1 summarizes the benchmark programs used to compare the static and dynamic version of the stale-value analysis [3].
+The static analysis module includes a suppression list to avoid a few com- mon cases of false positives. The list contains three methods which return thread-local information, corresponding to the hand-over protocol for return data [13].
+The experiments emphasize the aim of applying a tool to test suites of real-world programs without user-defined abstractions or annotations. All experiments were run on a Pentium 4 with a clock frequency of 2.8 GHz and 1 MB of level II cache. Table 2 shows the results of run-time verification and static analysis. In both cases, the number of reports, run time, and memory consumption are given. About 25 small programs used for testing, which were correctly verified, are omitted.
+
+
+Run times for dynamic analysis are still quite high, even though Java foundation methods have been omitted from being monitored. A very effect- ive optimization would therefore exclude any methods that can be statically proven to be safe.
+Given warnings are all false positives. 2 In Daisy, they were caused by read- only [ro] and thread-local [tl] values. For the ProdCons benchmark, the stale value comes from a synchronized buffer [buf] and is thread-local [13]. The two false alarms for the TSP benchmark are caused by thread-local exceptions [exc].
+The overall experience shows that the approach works as envisioned. Ex- periments clearly indicate that static analysis is a lot faster, while being less precise. The staggering difference in execution times for the two analysis is easily explained: for SOR, for instance, the dynamic version generates many thousands of objects, on which a series of mathematical operations is per- formed. In the static version, each method is only executed once, which by itself reduces complexity by many orders of magnitude. In summary, given experiments show that the framework is fully applicable to real-world pro- grams, analyzing them both statically or dynamically depending on whether one requires a fast analysis or high precision.
+
+Conclusion and Future Work
+Static and dynamic analysis algorithms can be abstracted to a generic version, which can be run in a static or dynamic environment. By using a graph-free analysis, static analysis remains close enough to program execution such that the algorithmic part can be re-used for dynamic analysis. The environment encapsulates the differences between these two scenarios, making evaluation of the generic algorithm completely transparent to its environment. This way, the entire analysis logics and data structures can be re-used, allowing for comparing the two technologies with respect to precision and efficiency. Experiments with JNuke have shown that the static variant of a stale-value detection algorithm is significantly faster but less precise than the dynamic version. This underlines the benefit of using static information in order to reduce the overhead of run-time analysis. The fact that both types of analysis share the algorithm also allows for combining them in a tool that applies run-time verification to test cases resulting from static analysis reports.
+Future work includes evaluation of our combined analysis for fault detec-
+
+2 A more precise pointer analysis could suppress such warnings. Run-time verification would never report false positives concerning thread-local data, such as in the five cases in Daisy and TSP, due to fully accurate pointer information.
+
+
+tion, and porting more algorithms to the generic framework. Furthermore, run-time verification in JNuke needs more commonly used classes and librar- ies, while static analysis in JNuke is still limited by the lack of a precise pointer analysis.
+
+References
+1st, 2nd, 3rd and 4th Workshops on Runtime Veriﬁcation (RV ’01 – RV ’04), volume 55(2), 70(4), 89(2), 24(2) of ENTCS. Elsevier Science, 2001 – 2004.
+C. Artho and A. Biere. Combined static and dynamic analysis. Technical Report 466, ETH Zu¨rich, Zu¨rich, Switzerland, 2005.
+C. Artho, A. Biere, and K. Havelund. Using block-local atomicity to detect stale-value concurrency errors. In Farn Wang, editor, Proc. ATVA ’04. Springer, 2004.
+C. Artho, V. Schuppan, A. Biere, P. Eugster, M. Baur, and B. Zweimu¨ller. JNuke: Efficient Dynamic Analysis for Java. In R. Alur and D. Peled, editors, Proc. CAV ’04, Boston, USA, 2004. Springer.
+G. Brat, D. Drusinsky, D. Giannakopoulou, A. Goldberg, K. Havelund, M. Lowry,
+C. Pasareanu, W. Visser, and R. Washington. Experimental evaluation of verification and validation tools on Martian rover software. Formal Methods in System Design, 25(2), 2004.
+J. Bull, L. Smith, M. Westhead, D. Henty, and R. Davey. A methodology for benchmarking Java Grande applications. In Proc. ACM Java Grande Conference, 1999.
+M. Burrows and R. Leino. Finding stale-value errors in concurrent programs. Technical Report SRC-TN-2002-004, Compaq SRC, Palo Alto, USA, 2002.
+P. Cousot and R. Cousot. Abstract interpretation: a unified lattice model for static analysis of programs by construction or approximation of fixpoints. In Proc. Symp. Principles of Programming Languages. ACM Press, 1977.
+P. Eugster. Java Virtual Machine with rollback procedure allowing systematic and exhaustive testing of multithreaded Java programs. Master’s thesis, ETH Zu¨rich, 2003.
+S. Freund and S. Qadeer. Checking concise specifications for multithreaded software. Journal of Object Technology, 3(6):81–101, 2004.
+E. Gamma, R. Helm, R. Johnson, and J. Vlissides. Design Patterns: Elements of Reusable Object-Oriented Software. Addison-Wesley Professional Computing Series. Addison-Wesley Publishing Company, New York, NY, 1995.
+S. Horwitz, A. Demers, and T. Teitebaum. An efficient general iterative algorithm for dataflow analysis. Acta Inf., 24(6):679–694, 1987.
+D. Lea. Concurrent Programming in Java, Second Edition. Addison-Wesley, 1999.
+T. Marlowe and B. Ryder. An efficient hybrid algorithm for incremental data flow analysis. In
+Proc. 17th ACM SIGPLAN-SIGACT, pages 184–196, San Francisco, USA, 1990. ACM Press.
+M. Mohnen. A graph-free approach to data-flow analysis. In Proc. 11th CC, pages 46–61. Springer, 2002.
+S. Savage, M. Burrows, G. Nelson, P. Sobalvarro, and T. Anderson. Eraser: A dynamic data race detector for multithreaded programs. ACM Trans. on Computer Systems, 15(4), 1997.
+J. Trono. A new exercise in concurrency. SIGCSE Bull., 26(3):8–10, 1994.
+W. Visser, K. Havelund, G. Brat, S. Park, and F. Lerda. Model checking programs. Automated Software Engineering Journal, 10(2), April 2003.
+
+
+C. von Praun and T. Gross. Object-race detection. In OOPSLA 2001, Tampa Bay, USA, 2001. ACM Press.
+J. Whaley and M. Rinard. Compositional pointer and escape analysis for Java programs. In
+Proc. OOPSLA ’99, pages 187–206, Denver, USA, 1999. ACM Press.

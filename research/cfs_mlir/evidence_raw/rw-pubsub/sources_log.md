@@ -1,0 +1,23 @@
+# rw-pubsub source log (what was opened, how, scope)
+- ROSDiscover paper: repo copy github.com/cmu-rss-lab/rosdiscover-evaluation @4648ad9d3c35b1c167130c3d592da2ab395b1ae9 paper.pdf (last commit touching file 2024-06-10). Full text extracted -> txt/rosdiscover_paper.txt. Venue ICSA'22 (DOI 10.1109/ICSA53651.2022.00019) from web-search snippet + ROSInfer ref list; IEEE page not opened (blocked).
+- ROSDiscover code: github.com/cmu-rss-lab/rosdiscover @78301b86fca119cda9ad55500dcf800e56bb9504 (2023-11-28): src/rosdiscover/recover/analyzer.py, states_analyzer.py
+- ROSInfer paper: raw.githubusercontent.com/clegoues/clegoues.github.io/master/assets/papers/Duerschmid2024ROSInfer.pdf sha256 59bcb083514edfb6dd2343e066b5645ae64632995237aa7c633a5376eb49df5e. Full text -> txt/rosinfer.txt. ICSE'24 DOI 10.1145/3597503.3639206 (printed on paper).
+- Blocked (curl+WebFetch): arxiv.org, dl.acm.org, ieeexplore, drops.dagstuhl.de, docs.ros.org, wiki.ros.org, omg.org, autosar.org, chris.timperley.info, clairelegoues.com, semanticscholar, researchgate, springer. Scholar Gateway MCP: identity error.
+ROBUST @ 521fe75319c256995fae6f5a4b756f0bfa4bf65e
+- HAROS papers (author site repo github.com/git-afsantos/git-afsantos.github.io @f7e268d0afbacf1c07c2efec8ef79f439229e642 files/2019-irc.pdf, 2020-iros.pdf, 2021-rose.pdf, 2016-iros.pdf) -> txt/haros_*.txt (full text extracted)
+- HAROS code github.com/git-afsantos/haros @efe832c38bfb9682ca7575337a7decd46e59beb6 (haros/extractor.py L1355-1378, haros/metamodel.py L1401-1422)
+- hpl-specs @9c2bcd5e69923137688aef2eb57b60a1fedef103 docs/lang.md L21-52; haros-plugin-electrum @b3b3c111026e3ea8b20ab851efaa88a9774e7683 templates/model.ele.jinja L80-96
+- ROS1 ros_comm @30483a9f218f1545eec16d3934bf3cb042e2cb5b roscpp node_handle.h L236-238, publisher.h L149-157, rospy topics.py L826-829
+- ros2_documentation @e2388aa72c17598a54fa228df6e9e9a44c5e7aec source/ROS-Framework/interfaces/topics/About-Quality-of-Service-Settings.rst (L48-61,81,164-191,284-335); source/ROS-Framework/client-libraries/About-Executors/About-Executors.rst (L189-203,209-227,241)
+- rclcpp @a2501cc749d27b6d000f0f2bd8f08342cdb806fc rclcpp/src/rclcpp/executor.cpp L814ff; rclc @3064baadeabdaca6dabfae3f8351510bdbe53071 rclc/include/rclc/executor.h L43-59, L773-778
+- message_filters @815ce9f9f388762ed79b0571e0157fc0234bd76b doc/index.rst L13-17,166-168,241-266
+- Fast-DDS-docs @b2af9caf0411a407a40d80622b1e6e43c9a41577 docs/fastdds/dds_layer/core/policy/standardQosPolicies.rst L82-125,157-215,535-541,875-935 (OMG DDS spec itself NOT opened: omg.org blocked)
+- rta-rs (Brandenburg) @6530456a44416ef6144b175c413c5b022f14d104 src/ros2/mod.rs, src/ros2/ecrts19.rs
+- E2EEvaluation @18347b7b1e848033659ce8914ef45c40195b6d68 README table; e2eAnalyses/Becker2017.py L1-15; doc/E2EEvaluation.pdf (Edmaier MSc thesis 2024) -> txt/e2e_thesis.txt
+- end-to-end (RTAS21 artifact) @a460ed0f90522eab569a239b621f9989b161655d; ros2-end-to-end (Teper RTSS22 artifact) @59c8cbdc311bb9bd0e1fec9d8464876dd37e2f9b README only
+- ROSpec @e47d6eb0e72e0fb5e00c90b7d019dcb472c40fff src/rospec/verification/utils.py L131-145; examples/evaluation/detectable-142456.rospec
+- cFE @546a002515be5a1e3b66f9ae2c14f948d9cec76f: cfe_sb.h (blob cf1413c1) L236-253; cfe_sb_api.c (blob 39c0c4c4) L936-1110 (lock 966/1077, Quality only L1096); cfe_sb_priv.c (blob 1de11a19) L132-147, L1032-1114, L1091-1097; modules/sb/config/default_cfe_sb_extern_typedefs.h L114-125
+- nasa/sample_app @199476a34827ae84d50d66f97619227854cd971a; nasa/HK @0dc16b7a7bab71747b9c063cf405ad59a65a40a5; nasa/to_lab @d27c6014cb5d2979140500f635876ee87b81995b; nasa/sch_lab @607e2f90c5f828f3f3ae655a4debacf8b2cc4bbb
+- Snippet-only (WebSearch index, not opened): Garcia et al. ICSE'20; ROBUST EMSE'24 bibliographic; interaction-bugs arXiv 2507.10235; ROSCallBaX FSE'25; Ganesan SPLC'09 (cFS design rules); Ganesan WCRE'10 (GMSEC pub/sub); AUTOSAR TPS TimingExtensions; Casini ECRTS'19 abstract; arXiv 2608.14532 (cFS trust)
+- WebFetch summary only: github.com/ros2/ros1_bridge/issues/130
+- ROSDiscover paper.pdf copied to pdf/rosdiscover_paper_from_eval_repo.pdf (eval repo clone removed to save disk)

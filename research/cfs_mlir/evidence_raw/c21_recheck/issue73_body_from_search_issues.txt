@@ -1,0 +1,22 @@
+Source: GitHub MCP search_issues (owner=nasa repo=cFE, query "Race conditions dependencies between CFE core apps", sort=created asc), retrieved 2026-10-01.
+number=73 title="Race conditions / dependencies between CFE core apps" labels=[bug] state_reason=completed user=skliper
+created_at=2019-09-30T17:50:27Z closed_at=2019-09-30T17:50:37Z comments=14 milestone="6.4.2" (milestone #4, closed 2019-09-30T20:08:06Z)
+Neighbors: #71 created 17:50:02 closed 17:50:19 comments 25 milestone 6.4.2; #72 created 17:50:20 closed 17:50:26 comments 9 milestone 6.4.2; #105 created 17:54:02 closed 17:54:05 milestone 6.4.2.
+BODY (verbatim):
+The "core" applications have significant dependencies between them that need to be more pro-actively satisfied.  There are some race conditions during the startup phase that can pose some serious problems if things are not executed in the right order.
+
+The summary of what happened is below, but here is a list of the basic problems:
+
+* Start up code should synchronize at least the "core" applications and ensure that each one has reached it's respective "RunLoop" before starting the next one, regardless of what the platform config sets the priority to (likely depends on #71).
+* EVS_IsFiltered should range check before doing the table lookups based on passed-in values
+* CFE SB and EVS (at least) populate different values into their own "AppID" global variable before initialization.  SB does nothing (0 by default, which is in fact a valid AppID for a different app) but EVS initializes this to 0xFFFFFFFFF, which has very ill-effects if actually used for something, and nothing really checks for this.
+
+For those interested, here are the details of the specific sequence of events discovered when debugging application startup on the Microblaze processor used by the EVA team at GRC:
+
+1. As dictated by the table within "cfe_es_objtab.c", the CFE core applications are started (Tasks Created) in the order of EVS, SB, ES, TIME, BL.  
+2. In the default/example platform configuration, these have respective priorities of 61(EVS), 64(SB), 68(ES), 60(TIME), and 70(TBL).
+3. TIME task will run it's TaskMain first even though it is 4th in the start sequence.  
+4. As part of this init sequence, it calls CFE_SB_CreatePipe() which in turn calls CFE_EVS_SendEventWithAppID() in several places (for errors as well as an unconditional "debug event" at the end).  The AppId supplied is "CFE_SB.AppId" which is uninitialized since SB has not executed yet.  In this case the value used is actually 0.
+5. In turn this eventually calls EVS_NotRegistered() (since CFE_EVS_TaskInit has not run) and then EVS_SendEvent() as part of that.  
+6. EVS_SendEvent() calls EVS_IsFiltered() with the contents of CFE_EVS_GlobalData.EVS_AppId, which is also uninitialized but set to "0xFFFFFFFF", not zero like CFE_SB.AppId.  
+7. This appID value is not range-checked by EVS_IsFiltered and ultimately segfaults and crashes CFE core.

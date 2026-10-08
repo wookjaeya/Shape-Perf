@@ -1,0 +1,229 @@
+CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The C compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/user/work/procrace/baselines/racepro/build-libscribe
+[ 16%] Building C object CMakeFiles/scribe.dir/src/context.c.o
+In file included from /home/user/work/procrace/baselines/racepro/libscribe-racepro/include/scribe.h:24,
+                 from /home/user/work/procrace/baselines/racepro/libscribe-racepro/src/context.c:38:
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:110: warning: "__NR_socket" redefined
+  110 | #define __NR_socket             (SCRIBE_SOCKETCALL_BASE + SYS_SOCKET)
+      | 
+In file included from /usr/include/x86_64-linux-gnu/asm/unistd.h:20,
+                 from /usr/include/x86_64-linux-gnu/sys/syscall.h:24,
+                 from /home/user/work/procrace/baselines/racepro/libscribe-racepro/src/context.c:32:
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:45: note: this is the location of the previous definition
+   45 | #define __NR_socket 41
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:111: warning: "__NR_bind" redefined
+  111 | #define __NR_bind               (SCRIBE_SOCKETCALL_BASE + SYS_BIND)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:53: note: this is the location of the previous definition
+   53 | #define __NR_bind 49
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:112: warning: "__NR_connect" redefined
+  112 | #define __NR_connect            (SCRIBE_SOCKETCALL_BASE + SYS_CONNECT)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:46: note: this is the location of the previous definition
+   46 | #define __NR_connect 42
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:113: warning: "__NR_listen" redefined
+  113 | #define __NR_listen             (SCRIBE_SOCKETCALL_BASE + SYS_LISTEN)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:54: note: this is the location of the previous definition
+   54 | #define __NR_listen 50
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:114: warning: "__NR_accept" redefined
+  114 | #define __NR_accept             (SCRIBE_SOCKETCALL_BASE + SYS_ACCEPT)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:47: note: this is the location of the previous definition
+   47 | #define __NR_accept 43
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:115: warning: "__NR_getsockname" redefined
+  115 | #define __NR_getsockname        (SCRIBE_SOCKETCALL_BASE + SYS_GETSOCKNAME)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:55: note: this is the location of the previous definition
+   55 | #define __NR_getsockname 51
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:116: warning: "__NR_getpeername" redefined
+  116 | #define __NR_getpeername        (SCRIBE_SOCKETCALL_BASE + SYS_GETPEERNAME)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:56: note: this is the location of the previous definition
+   56 | #define __NR_getpeername 52
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:117: warning: "__NR_socketpair" redefined
+  117 | #define __NR_socketpair         (SCRIBE_SOCKETCALL_BASE + SYS_SOCKETPAIR)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:57: note: this is the location of the previous definition
+   57 | #define __NR_socketpair 53
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:120: warning: "__NR_sendto" redefined
+  120 | #define __NR_sendto             (SCRIBE_SOCKETCALL_BASE + SYS_SENDTO)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:48: note: this is the location of the previous definition
+   48 | #define __NR_sendto 44
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:121: warning: "__NR_recvfrom" redefined
+  121 | #define __NR_recvfrom           (SCRIBE_SOCKETCALL_BASE + SYS_RECVFROM)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:49: note: this is the location of the previous definition
+   49 | #define __NR_recvfrom 45
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:122: warning: "__NR_shutdown" redefined
+  122 | #define __NR_shutdown           (SCRIBE_SOCKETCALL_BASE + SYS_SHUTDOWN)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:52: note: this is the location of the previous definition
+   52 | #define __NR_shutdown 48
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:123: warning: "__NR_setsockopt" redefined
+  123 | #define __NR_setsockopt         (SCRIBE_SOCKETCALL_BASE + SYS_SETSOCKOPT)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:58: note: this is the location of the previous definition
+   58 | #define __NR_setsockopt 54
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:124: warning: "__NR_getsockopt" redefined
+  124 | #define __NR_getsockopt         (SCRIBE_SOCKETCALL_BASE + SYS_GETSOCKOPT)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:59: note: this is the location of the previous definition
+   59 | #define __NR_getsockopt 55
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:125: warning: "__NR_sendmsg" redefined
+  125 | #define __NR_sendmsg            (SCRIBE_SOCKETCALL_BASE + SYS_SENDMSG)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:50: note: this is the location of the previous definition
+   50 | #define __NR_sendmsg 46
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:126: warning: "__NR_recvmsg" redefined
+  126 | #define __NR_recvmsg            (SCRIBE_SOCKETCALL_BASE + SYS_RECVMSG)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:51: note: this is the location of the previous definition
+   51 | #define __NR_recvmsg 47
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:127: warning: "__NR_accept4" redefined
+  127 | #define __NR_accept4            (SCRIBE_SOCKETCALL_BASE + SYS_ACCEPT4)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:292: note: this is the location of the previous definition
+  292 | #define __NR_accept4 288
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:130: warning: "__NR_futex_wait" redefined
+  130 | #define __NR_futex_wait         (SCRIBE_FUTEX_BASE + FUTEX_WAIT)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:370: note: this is the location of the previous definition
+  370 | #define __NR_futex_wait 455
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:131: warning: "__NR_futex_wake" redefined
+  131 | #define __NR_futex_wake         (SCRIBE_FUTEX_BASE + FUTEX_WAKE)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:369: note: this is the location of the previous definition
+  369 | #define __NR_futex_wake 454
+      | 
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/include/linux/scribe_api.h:133: warning: "__NR_futex_requeue" redefined
+  133 | #define __NR_futex_requeue      (SCRIBE_FUTEX_BASE + FUTEX_REQUEUE)
+      | 
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:371: note: this is the location of the previous definition
+  371 | #define __NR_futex_requeue 456
+      | 
+[ 33%] Building C object CMakeFiles/scribe.dir/src/debug.c.o
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c: In function 'get_regs_str':
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:400:24: error: 'struct pt_regs' has no member named 'xcs'; did you mean 'cs'?
+  400 |                  regs->xcs, regs->eip, regs->eflags,
+      |                        ^~~
+      |                        cs
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:400:35: error: 'struct pt_regs' has no member named 'eip'; did you mean 'rip'?
+  400 |                  regs->xcs, regs->eip, regs->eflags,
+      |                                   ^~~
+      |                                   rip
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:401:24: error: 'struct pt_regs' has no member named 'eax'; did you mean 'rax'?
+  401 |                  regs->eax, regs->ebx, regs->ecx, regs->edx,
+      |                        ^~~
+      |                        rax
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:401:35: error: 'struct pt_regs' has no member named 'ebx'; did you mean 'rbx'?
+  401 |                  regs->eax, regs->ebx, regs->ecx, regs->edx,
+      |                                   ^~~
+      |                                   rbx
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:401:46: error: 'struct pt_regs' has no member named 'ecx'; did you mean 'rcx'?
+  401 |                  regs->eax, regs->ebx, regs->ecx, regs->edx,
+      |                                              ^~~
+      |                                              rcx
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:401:57: error: 'struct pt_regs' has no member named 'edx'; did you mean 'rdx'?
+  401 |                  regs->eax, regs->ebx, regs->ecx, regs->edx,
+      |                                                         ^~~
+      |                                                         rdx
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:402:24: error: 'struct pt_regs' has no member named 'esi'; did you mean 'rsi'?
+  402 |                  regs->esi, regs->edi, regs->ebp, regs->esp,
+      |                        ^~~
+      |                        rsi
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:402:35: error: 'struct pt_regs' has no member named 'edi'; did you mean 'rdi'?
+  402 |                  regs->esi, regs->edi, regs->ebp, regs->esp,
+      |                                   ^~~
+      |                                   rdi
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:402:46: error: 'struct pt_regs' has no member named 'ebp'; did you mean 'rbp'?
+  402 |                  regs->esi, regs->edi, regs->ebp, regs->esp,
+      |                                              ^~~
+      |                                              rbp
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:402:57: error: 'struct pt_regs' has no member named 'esp'; did you mean 'rsp'?
+  402 |                  regs->esi, regs->edi, regs->ebp, regs->esp,
+      |                                                         ^~~
+      |                                                         rsp
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:22: error: 'struct pt_regs' has no member named 'xds'
+  403 |                  regs->xds, regs->xes, regs->xfs, regs->xgs, regs->xss);
+      |                      ^~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:33: error: 'struct pt_regs' has no member named 'xes'
+  403 |                  regs->xds, regs->xes, regs->xfs, regs->xgs, regs->xss);
+      |                                 ^~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:44: error: 'struct pt_regs' has no member named 'xfs'
+  403 |                  regs->xds, regs->xes, regs->xfs, regs->xgs, regs->xss);
+      |                                            ^~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:55: error: 'struct pt_regs' has no member named 'xgs'
+  403 |                  regs->xds, regs->xes, regs->xfs, regs->xgs, regs->xss);
+      |                                                       ^~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:403:68: error: 'struct pt_regs' has no member named 'xss'; did you mean 'ss'?
+  403 |                  regs->xds, regs->xes, regs->xfs, regs->xgs, regs->xss);
+      |                                                                    ^~~
+      |                                                                    ss
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c: In function 'scribe_get_event_str':
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:453:16: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  453 |                (void *)e->user_ptr, e->size);
+      |                ^
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:440:44: note: in definition of macro '__TYPE'
+  440 |                 snprintf(str, size, fmt, ##__VA_ARGS__);        \
+      |                                            ^~~~~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:458:16: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  458 |                (void *)e->user_ptr, e->h.size,
+      |                ^
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:440:44: note: in definition of macro '__TYPE'
+  440 |                 snprintf(str, size, fmt, ##__VA_ARGS__);        \
+      |                                            ^~~~~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:502:55: warning: taking address of packed member of 'struct scribe_event_regs' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  502 |                get_regs_str(buffer1, sizeof(buffer1), &e->regs));
+      |                                                       ^~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:440:44: note: in definition of macro '__TYPE'
+  440 |                 snprintf(str, size, fmt, ##__VA_ARGS__);        \
+      |                                            ^~~~~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:548:16: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  548 |                (void *)e->user_ptr);
+      |                ^
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:440:44: note: in definition of macro '__TYPE'
+  440 |                 snprintf(str, size, fmt, ##__VA_ARGS__);        \
+      |                                            ^~~~~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:569:55: warning: taking address of packed member of 'struct scribe_event_diverge_regs' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  569 |                get_regs_str(buffer1, sizeof(buffer1), &e->regs));
+      |                                                       ^~~~~~~~
+/home/user/work/procrace/baselines/racepro/libscribe-racepro/src/debug.c:440:44: note: in definition of macro '__TYPE'
+  440 |                 snprintf(str, size, fmt, ##__VA_ARGS__);        \
+      |                                            ^~~~~~~~~~~
+make[2]: *** [CMakeFiles/scribe.dir/build.make:90: CMakeFiles/scribe.dir/src/debug.c.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:85: CMakeFiles/scribe.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2

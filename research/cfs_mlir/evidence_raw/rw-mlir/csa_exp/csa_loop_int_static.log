@@ -1,0 +1,1 @@
+$ (same command) rx_loop_int_static.c   # g_state declared static

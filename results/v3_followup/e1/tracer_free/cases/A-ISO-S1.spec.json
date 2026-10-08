@@ -1,0 +1,23 @@
+{
+ "case_id": "A-ISO-S1",
+ "artifacts": {
+  "S1": {
+   "path": "/home/user/work/v3/g2/K/L0064/S1_full/model.so",
+   "tag": null
+  }
+ },
+ "steps": [
+  [
+   "load",
+   "S1"
+  ],
+  [
+   "call",
+   "S1"
+  ],
+  [
+   "call",
+   "S1"
+  ]
+ ]
+}

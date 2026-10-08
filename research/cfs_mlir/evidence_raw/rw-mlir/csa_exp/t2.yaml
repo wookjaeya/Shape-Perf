@@ -1,0 +1,6 @@
+Propagations:
+  - Name: CFE_SB_ReceiveBuffer
+    DstArgs: [0]
+Sinks:
+  - Name: Control
+    Args: [0]

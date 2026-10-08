@@ -1,0 +1,50 @@
+set startup-with-shell off
+set disable-randomization off
+set pagination off
+set confirm off
+set breakpoint pending on
+handle all nostop noprint pass
+handle SIGINT stop print nopass
+break cfe_sb_priv.c:316
+commands
+silent
+printf "GDB RTSE DENIED(index) bit=%d\n", Bit
+continue
+end
+break cfe_sb_priv.c:322
+commands
+silent
+printf "GDB RTSE DENIED(bit-set) bit=%d idx=%u\n", Bit, Indx
+continue
+end
+break cfe_sb_priv.c:326
+commands
+silent
+printf "GDB RTSE GRANTED bit=%d idx=%u\n", Bit, Indx
+continue
+end
+break cfe_evs.c:185
+commands
+silent
+printf "GDB EVS_SendEventWithAppID EID=%u type=%d\n", EventID, EventType
+continue
+end
+break cfe_evs.c:193
+commands
+silent
+printf "GDB EVS NotRegistered\n"
+continue
+end
+break cfe_evs.c:209
+commands
+silent
+printf "GDB EVS SQUELCHED\n"
+continue
+end
+break EVS_GenerateEventTelemetry
+commands
+silent
+printf "GDB EVS_Generate EID=%u\n", EventID
+continue
+end
+run

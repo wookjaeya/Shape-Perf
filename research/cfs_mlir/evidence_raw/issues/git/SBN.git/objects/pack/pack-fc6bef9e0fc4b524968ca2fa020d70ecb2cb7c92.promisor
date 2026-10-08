@@ -1,0 +1,15 @@
+bf058c45bb378446a22e78627693c240ee56df1c HEAD
+8c2d1a502ce792d30db2760acd7dead72c02a508 refs/heads/32_fix_connect
+f1432b84ece9d6622f7ead866fc071bb8e7be1d2 refs/heads/cfs-6_7
+bf058c45bb378446a22e78627693c240ee56df1c refs/heads/dev
+9462eef742bc7d67999770ae602809f431cb87ff refs/heads/development
+aa3678b129e0046941c769b42d771267319e2347 refs/heads/draco-integration
+f8a06f3dc0abdeffb8f581f81297647d07ee5a1d refs/heads/fix-98-partial-standardization
+3b7b37572d63c3f8e85b1f0fa95853c1b78dcf96 refs/heads/main
+61450e9783b67d49363f99f831a6499810b0041e refs/heads/master
+3944b49a848260da5c03dbc98e4249dd4845a451 refs/heads/v7.0.1-integration
+89404a7454afac20bfcf31c425ec7945d7259ebc refs/heads/v7.0.1-version-update
+9aab44ecdc93c26f0ebadb6d56107c3c2b49a31b refs/tags/1.0.0
+02f3193eb86b42b4e8d5e2bc75a36ba27435ecf0 refs/tags/1.18.0
+7c37a493ecfb0677cbc47407e20d7ef62c48bb2b refs/tags/v7.0.0
+3b7b37572d63c3f8e85b1f0fa95853c1b78dcf96 refs/tags/v7.0.1

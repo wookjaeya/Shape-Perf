@@ -1,0 +1,79 @@
+# cord_build_08_config_compare.txt -- build configuration of the CORD copy vs the ENV build (2026-10-08T07:02:08.633Z)
+# ENV: /home/user/work/procrace/cfs_ref/cFS/build-native_std   CORD: /home/user/work/procrace/cfs_cord/cFS/build-native_std   (paths normalised: cfs_ref/cFS and cfs_cord/cFS -> X; table-object dir hashes, which CMake derives from the source path, -> <hash>)
+## stamp.prep: differing lines after normalisation: 0
+## CMakeCache.txt: differing lines after normalisation: 0
+## native/default_cpu1/CMakeCache.txt: differing lines after normalisation: 0
+## native/default_cpu1/cpu1/CMakeFiles/core-cpu1.dir/link.txt: differing lines after normalisation: 0
+## native/default_cpu1/cpu1/CMakeFiles/core-cpu1.dir/flags.make: differing lines after normalisation: 0
+## compile commands (compile_commands.json, mission scope and cpu1 arch scope)
+   == compile_commands.json: ENV 14 commands, CORD 14; only in CORD: []; only in ENV: []
+     identical commands: 14
+   == native/default_cpu1/compile_commands.json: ENV 1417 commands, CORD 1418; only in CORD: ['X/cfe/cord/cord.c']; only in ENV: []
+     identical commands: 1344
+     7 commands differ only by: added=['-DCORD_ENABLE', '-IX/cfe/cord'] removed=[]
+       targets: ['CMakeFiles']
+     66 commands differ only by: added=['-IX/cfe/cord'] removed=[]
+       targets: ['CMakeFiles']
+     CORD-only command: /usr/bin/cc -DSIMULATION=native -D_CFE_CORE_ -D_LINUX_OS_ -D_POSIX_OS_ -D_XOPEN_SOURCE=600 -g -Wstrict-prototypes -Wwrite-strings -Wpointer-arith -Wno-format-overflow -Wno-format-truncation -Wno-stringop-overflow -Wno-stringop-truncation -std=c99 -pedantic -Wall -Werror -std=c11 -o CMakeFiles/es.dir/__/__/cord/cord.c.o -c X/cfe/cord/cord.c
+##   the 66 include-only commands by target: es 13, sb 6, evs 5 (the non-instrumented sources of the three modules);
+##   coverage-es-ALL-object 16, -testrunner 5; coverage-sb-ALL-object 9, -testrunner 3; coverage-evs-ALL-object 6, -testrunner 3.
+##   No coverage target received -DCORD_ENABLE (source-file properties are directory-scoped).
+## optimisation/debug flags: ENV and CORD both '-g', no -O option (C5); unchanged
+## recorder symbols in core-cpu1 (nm):
+   0000000000029f67 T cord_event
+   000000000002a7ff T cord_flush
+   000000000002ab0d t cord_init
+   000000000002a162 T cord_maybe_delay
+   000000000002a0ec T cord_new_token
+## recorder symbols in the ENV core-cpu1: 0 (expected 0)
+## sizes: ENV core-cpu1 1531256 B, CORD core-cpu1 1555256 B; sha256 ENV 0edb1ae28780160e..., CORD 1040d64e5a201581...
+## build identity: ENV BUILDDATE 202610080115, CORD BUILDDATE 202610080657; BUILDUSER/BUILDHOST equal (ubuntu/vm)
+## other staged files: exe/cpu1 tree (files other than core-cpu1 and the unit-test binaries) compared by sha256:
+   files ENV 182, CORD 178; differing:
+   < e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./cpu1/.cdskeyfile
+   < e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./cpu1/.reservedkeyfile
+   < e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./cpu1/.resetkeyfile
+   < 07854d2fef297a06ba81685e660c332de36d5d18d546927d30daad6d7fda1541  ./cpu1/EEPROM.DAT
+   < 6f1fdf0c390f86163cb3a205df320a8a70788d55eb3929481d215bba45f73d9b  ./cpu1/cf/cf.so
+   > 358d82f1f36551e6684ee1d63c1b7065447d836ebc8cb182abf34a8a17ab6aab  ./cpu1/cf/cf.so
+   < fd3a7ffc956fa5b885216fc937204ea617732e685f09530b00775646362f9f16  ./cpu1/cf/cfe_assert.so
+   > e332c5f5a4a5c026df8e65fd1925b43453b53c7629bf67a3515f98cebfdc304d  ./cpu1/cf/cfe_assert.so
+   < 82a123c562d033100e1c304e73b8bdfec53fd1213883156270a49df6c8953f21  ./cpu1/cf/cfe_testcase.so
+   < 447946cd5801d49f5d20457201a6e3014e507b9658161a7b1a4646a04458e8b3  ./cpu1/cf/ci_lab.so
+   < 0aa78d4aaffdb28ea8b90876acb3fe0720e4b77afe97e26d645dff727bfe03da  ./cpu1/cf/cs.so
+   > a877a62bb1316f31dc7c79d6efeea825fe99445e9fcfbfd18456d05d3613bc4b  ./cpu1/cf/cfe_testcase.so
+   > bfbe5edb344a60418b854cb8a1ba48c79aa661b8102da994483e4d0c4d931cd9  ./cpu1/cf/ci_lab.so
+   > 9eb14c3d59c55268574f647b11bdecb1ebcd7415cb4b0f554dfa371fb2ca91f7  ./cpu1/cf/cs.so
+   < e40f2f8721b46fcafafd3d290d407c5be1d13d2cde5999976607de07e23a0a1f  ./cpu1/cf/ds.so
+   > f9f197eee8ba1bfedf5fe70f8e62110c2a97e29aa675ed995257024b80d33167  ./cpu1/cf/ds.so
+   < e439f91297504140c3fd5d458b13ae820e2c15a3564b82f5906d6b25cb3e7730  ./cpu1/cf/fm.so
+   > 00e9327a0ad8a4da53516c7225681972f6dc5eed0822e709cfb61bcfbb8599bf  ./cpu1/cf/fm.so
+   < 16fd53a8278c752bd68ee7c0c05204a6241eaaa975e73b88e4616db41f16d6f5  ./cpu1/cf/hk.so
+   > 35cd606ab03ae684997e95e97726183b34c0ef06999618fe2a6d5c8d165cfbd1  ./cpu1/cf/hk.so
+   < 4c5b0a2f9f77883fe69474f81eb344ffd47a69421df02b56d9fb4027d6b4c071  ./cpu1/cf/hs.so
+   > 0d53cc179414e3260ac3e97b0cf665aa94940f3a5522d6ad944bb47e2b48d903  ./cpu1/cf/hs.so
+   < 46c5c3e0a3a3bb87ce969b690b3d69dd34250f241bb2d3033a2b43469b535175  ./cpu1/cf/lc.so
+   > 3b11311b0825b9192a3d297b863596d77259c7c7a6c3b341be759eebe044d3c2  ./cpu1/cf/lc.so
+   < 495d656582a35c5ab7dbdde5e8473456a9e63a43583b926b5dce44df47440ca2  ./cpu1/cf/md.so
+   > 56513844fc8485b66cf4f81526fe4137b1da9c1c64f5c0b6491861cefad43193  ./cpu1/cf/md.so
+   < c18068611107b98f81f095193c376ca972003f3a57f214f8a26e69e4af7bfd05  ./cpu1/cf/mm.so
+   < 1473e7ff5f17a905bbe29a82fccf1d8e94acd208956b81a381b71372047658c6  ./cpu1/cf/sample_app.so
+   > 1987b48057227fe729230995cc6726f3639c430ded2d27a01fecc5c7fd329c07  ./cpu1/cf/mm.so
+   > 4a88d93271162bff17cec9b88163bb303f1834a50ee7e010a546e4519d81d06a  ./cpu1/cf/sample_app.so
+   < 94a96bd079212b456776547ac62af6346577934559ccf91696cccf044472de98  ./cpu1/cf/sample_lib.so
+   < ce40c3c7bdd212d8b6be3ee1638a256be8e8b5e938239c09154982f304d17ab6  ./cpu1/cf/sbn.so
+   > 93d9472f64f4e6edf4fa4c44221bbf167796b3537a557f88e89d9bb56371aa59  ./cpu1/cf/sample_lib.so
+   > a4586521088aa6e5016a71c451079e456f1fbc1099c07a1b0d01e07242f3fa92  ./cpu1/cf/sbn.so
+   < c5c584d5090df6837ca5c0b3db90fe09c254a5acf56799bb5cdc2f97b5776613  ./cpu1/cf/sbn_f_remap.so
+   > 9ef7babaf2eaef7d3ea1cbbbc2bc5184876788ae27aaf9c38363b306037763c4  ./cpu1/cf/sbn_f_remap.so
+   < 61cd3b691f69a802e519171d4faf5df602d273590cf310ebf7cdfbb2cf5fc0d1  ./cpu1/cf/sbn_udp.so
+   < d38dafbd0138c97047aaf12c02623cae72b52181b70d4db37c4708487942ed5d  ./cpu1/cf/sc.so
+   > d40aebaf056d76c8b64db0c20a3bb74b2a82d7f24e5ca39fdadd311e662c5462  ./cpu1/cf/sbn_udp.so
+   > 59a4cdaee71287dd8ad26b083d055882881add8a4ad199a2deda80f46aeb5703  ./cpu1/cf/sc.so
+## interpretation of the staged-file differences (checked 2026-10-08T07:03Z):
+##   - .cdskeyfile/.reservedkeyfile/.resetkeyfile/EEPROM.DAT exist only in the ENV exe/cpu1 (created by ENV runs; the copy has not run yet).
+##   - every *.tbl file is byte-identical.
+##   - the 18 app/lib .so files that the startup script loads: .text, .rodata and .data sections byte-identical
+##     (objcopy --only-section); the whole files differ only through debug info (-g records the source paths).
+##   - cfe_assert.so / cfe_testcase.so (not in the startup script) differ in .text/.rodata: __FILE__ path strings.
+##   - host tools and *_UT unit-test binaries differ (paths in debug info / __FILE__); not used by the runs.

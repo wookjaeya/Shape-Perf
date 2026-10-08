@@ -1,0 +1,1 @@
+{"name": "X_SAME_L1b8b_C8b", "arts": {"S1b": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model.so", "tag": "bravo"}, "S8b": {"path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so", "tag": "bravo"}}, "steps": [["load", "S1b"], ["load", "S8b"], ["call", "S8b"], ["call", "S1b"]]}

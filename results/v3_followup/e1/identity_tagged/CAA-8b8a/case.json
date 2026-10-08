@@ -1,0 +1,262 @@
+{
+  "case_id": "CAA-8b8a",
+  "description": "co-loaded A/A-tag",
+  "steps": [
+    [
+      "load",
+      "S8b"
+    ],
+    [
+      "load",
+      "S8a"
+    ],
+    [
+      "call",
+      "S8a"
+    ],
+    [
+      "call",
+      "S8b"
+    ],
+    [
+      "call",
+      "S8a"
+    ],
+    [
+      "call",
+      "S8b"
+    ]
+  ],
+  "arms": {
+    "S8a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so",
+      "tag": "alpha",
+      "policy": "S8"
+    },
+    "S8b": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so",
+      "tag": "bravo",
+      "policy": "S8"
+    }
+  },
+  "symbols": [
+    "compute=main_graph_alpha",
+    "compute=main_graph_bravo",
+    "entry=run_main_graph_alpha",
+    "entry=run_main_graph_bravo",
+    "wrapper=_mlir_ciface_main_graph_alpha",
+    "wrapper=_mlir_ciface_main_graph_bravo"
+  ],
+  "runs": {
+    "gdb": {
+      "argv": [
+        "gdb",
+        "-batch",
+        "-nx",
+        "-x",
+        "/home/user/Shape-Perf/scripts/gdb_identity_trace.py",
+        "--args",
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_gdb.json"
+      ],
+      "returncode": 0
+    },
+    "ld_lazy": {
+      "argv": [
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_ld_lazy.json"
+      ],
+      "env": {},
+      "returncode": 0,
+      "stdout": "{\"pid\": 10096, \"n_calls\": 4, \"all_exact\": true}",
+      "stderr_tail": "",
+      "filter": "lines containing 'binding file' and one of the artifact paths"
+    },
+    "ld_bindnow": {
+      "argv": [
+        "/home/user/work/venv/bin/python",
+        "-m",
+        "shapeperf.identity",
+        "@/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/CAA-8b8a/spec_ld_bindnow.json"
+      ],
+      "env": {
+        "LD_BIND_NOW": "1"
+      },
+      "returncode": 0,
+      "stdout": "{\"pid\": 10097, \"n_calls\": 4, \"all_exact\": true}",
+      "stderr_tail": "",
+      "filter": "lines containing 'binding file' and one of the artifact paths"
+    }
+  },
+  "dir": "/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/CAA-8b8a",
+  "rows": [
+    {
+      "case_id": "CAA-8b8a",
+      "call_index": 0,
+      "requested_arm": "S8a",
+      "load_order": [
+        "S8b",
+        "S8a"
+      ],
+      "first_call_order": [
+        "S8a",
+        "S8b"
+      ],
+      "artifact_sha256": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "alpha",
+      "entry_symbol": "run_main_graph_alpha",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_tagged/CAA-8b8a",
+      "entry_dso_arm": "S8a",
+      "wrapper_dso_arm": "S8a",
+      "actual_compute_arm": "S8a",
+      "actual_compute_module_sha256": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723",
+      "actual_compute_symbol_or_offset": "main_graph_alpha+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7a2b158cd8c5b8f3f0d70a0704834ec46278316b501367a204d67afd9e597e9f",
+      "executed_bytes_match_arms": [
+        "S8a",
+        "S8b"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8a"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8a"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "CAA-8b8a",
+      "call_index": 1,
+      "requested_arm": "S8b",
+      "load_order": [
+        "S8b",
+        "S8a"
+      ],
+      "first_call_order": [
+        "S8a",
+        "S8b"
+      ],
+      "artifact_sha256": "a855c03007c270124f75abbf6ec2b9dcdd4b0c8f270a9c5d46eaa74793b5e3e0",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "bravo",
+      "entry_symbol": "run_main_graph_bravo",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_tagged/CAA-8b8a",
+      "entry_dso_arm": "S8b",
+      "wrapper_dso_arm": "S8b",
+      "actual_compute_arm": "S8b",
+      "actual_compute_module_sha256": "a855c03007c270124f75abbf6ec2b9dcdd4b0c8f270a9c5d46eaa74793b5e3e0",
+      "actual_compute_symbol_or_offset": "main_graph_bravo+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7a2b158cd8c5b8f3f0d70a0704834ec46278316b501367a204d67afd9e597e9f",
+      "executed_bytes_match_arms": [
+        "S8a",
+        "S8b"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8b"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8b"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "CAA-8b8a",
+      "call_index": 2,
+      "requested_arm": "S8a",
+      "load_order": [
+        "S8b",
+        "S8a"
+      ],
+      "first_call_order": [
+        "S8a",
+        "S8b"
+      ],
+      "artifact_sha256": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "alpha",
+      "entry_symbol": "run_main_graph_alpha",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_tagged/CAA-8b8a",
+      "entry_dso_arm": "S8a",
+      "wrapper_dso_arm": "S8a",
+      "actual_compute_arm": "S8a",
+      "actual_compute_module_sha256": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723",
+      "actual_compute_symbol_or_offset": "main_graph_alpha+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7a2b158cd8c5b8f3f0d70a0704834ec46278316b501367a204d67afd9e597e9f",
+      "executed_bytes_match_arms": [
+        "S8a",
+        "S8b"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8a"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8a"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    },
+    {
+      "case_id": "CAA-8b8a",
+      "call_index": 3,
+      "requested_arm": "S8b",
+      "load_order": [
+        "S8b",
+        "S8a"
+      ],
+      "first_call_order": [
+        "S8a",
+        "S8b"
+      ],
+      "artifact_sha256": "a855c03007c270124f75abbf6ec2b9dcdd4b0c8f270a9c5d46eaa74793b5e3e0",
+      "runtime_sha256": "2187aa58d0b1ab7f293a6a9a70501d86370f8bcdb9caab2d08521bf9f07eb15f",
+      "tag": "bravo",
+      "entry_symbol": "run_main_graph_bravo",
+      "output_check": "exact_permutation",
+      "binding_or_trace_evidence_path": "results/v3_followup/e1/identity_tagged/CAA-8b8a",
+      "entry_dso_arm": "S8b",
+      "wrapper_dso_arm": "S8b",
+      "actual_compute_arm": "S8b",
+      "actual_compute_module_sha256": "a855c03007c270124f75abbf6ec2b9dcdd4b0c8f270a9c5d46eaa74793b5e3e0",
+      "actual_compute_symbol_or_offset": "main_graph_bravo+0 (module-relative 0x23b0)",
+      "executed_compute_sha256": "7a2b158cd8c5b8f3f0d70a0704834ec46278316b501367a204d67afd9e597e9f",
+      "executed_bytes_match_arms": [
+        "S8a",
+        "S8b"
+      ],
+      "ld_debug": {
+        "lazy": {
+          "wrapper_reference_of_requested_bound_to": "S8b"
+        },
+        "bindnow": {
+          "wrapper_reference_of_requested_bound_to": "S8b"
+        }
+      },
+      "note": "some loaded artifacts have byte-identical compute functions; the mapping path decides",
+      "ld_debug_corroboration": "agrees",
+      "identity_verdict": "verified_own",
+      "reasons": []
+    }
+  ]
+}

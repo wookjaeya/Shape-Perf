@@ -1,0 +1,24 @@
+accesses rooted at a global with TBAA: 25
+  of which address = bare addressof (no GEP): 8
+  bare-addressof accesses with a DI member name: 8
+SAMPLE_APP_Data      CommandCounter                         load  tbaa-struct-path x4
+SAMPLE_APP_Data      CommandCounter                         store tbaa-struct-path x4
+SAMPLE_APP_Data      CommandErrorCounter                    load  tbaa-struct-path x2
+SAMPLE_APP_Data      CommandErrorCounter                    store tbaa-struct-path x2
+SAMPLE_APP_Data      CommandPipe                            load  tbaa-struct-path x3
+SAMPLE_APP_Data      HkTlm.Payload.CommandCounter           store tbaa-struct-path x1
+SAMPLE_APP_Data      HkTlm.Payload.CommandErrorCounter      store tbaa-struct-path x1
+SAMPLE_APP_Data      RunStatus                              load  tbaa-struct-path x1
+SAMPLE_APP_Data      RunStatus                              store tbaa-struct-path x3
+SAMPLE_APP_Data      TblHandles                             load  gep-index        x3
+SAMPLE_APP_Data      TblHandles.[%14]                       load  gep-index        x1
+
+bare-addressof sites:
+  SAMPLE_APP_SendHkCmd L664 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_NoopCmd L699 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_NoopCmd L701 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ResetCountersCmd L714 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessCmd L732 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessCmd L734 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_DisplayParamCmd L781 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_DisplayParamCmd L783 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)

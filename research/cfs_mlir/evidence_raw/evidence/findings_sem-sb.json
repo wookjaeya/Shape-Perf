@@ -1,0 +1,251 @@
+{
+ "summary": "I read the SB and OSAL queue code at pinned commits: cFE 546a0025 and OSAL dad0ee99. OSAL dad0ee99 is the osal submodule of the nasa/cFS default branch, dev, at 5a9b075c, and that branch also pins cFE 546a0025. The cFS main branch at 088b2fa8 pins a different cFE (c5fb2b4d) and OSAL d2d877a6. Its queue files are byte-identical to dad0ee99. I also built cFE with SIMULATION=native, using PSP 53df1d54, and ran my own probe app, sbprobe, in five configurations. The run logs are in probe_runs/.\n\nSource and probe runs agree on these points:\n- TransmitMsg copies the message into a shared-pool buffer. Under the SB mutex it bumps the per-route sequence counter and applies the MsgLim check while walking the destination list from the head, which is the last subscriber. It then releases the mutex and calls OS_QueuePut once per pipe without holding the lock.\n- With real priorities on one CPU, higher-priority receivers ran before TransmitMsg returned in 200/200 trials. They woke in reverse subscription order.\n- A relay task with higher priority than the sender produced a cross-pipe causality inversion in 500/500 trials: the observer pipe got the relay's output before the original message. With a lower-priority relay this happened 0/500 times. On 4 CPUs it happened 0/500 times, and the wake order of three receivers covered all 6 permutations. As non-root, where priorities are silently ignored, it happened 15/500 and 30/500 times.\n- TransmitMsg returns CFE_SUCCESS when MsgLim is exceeded or a pipe is full. Only HK counters and events, which are filtered after the first 4 or 16 by default, show the loss.\n- Routes are append-only. The no-subscribers counter and event fire only for a MID that has never been subscribed since boot. After a subscriber unsubscribes or is cleaned up, sends are dropped silently and the sequence counter keeps advancing.\n- On Linux, POSIX mq with constant priority 1 and a non-blocking put gives per-pipe FIFO (confirmed in the Linux v6.12 source and the mq_send man page). There is no global order across pipes.\n- The native sample config enables OSAL permissive mode. As non-root, a pipe depth of 20 was silently truncated to msg_max=10, so 10 messages overflowed.\n- The default origination action stamps telemetry with the time of transmit.\n- A MsgId is a struct around a uint32. Non-EDS MIDs are compile-time base|topic values. EDS MIDs come from runtime calls that depend on the PSP processor id.\n- An ES restart runs SB cleanup, which deletes the app's pipes and discards queued messages, before the tasks are deleted. The restarted app gets a new AppId.\n\nEach finding below labels the implication for static analysis as inference.",
+ "findings": [
+  {
+   "id": "sem-sb-01",
+   "topic": "TransmitMsg pipeline and locking",
+   "claim": "CFE_SB_TransmitMsg works in this order: (1) validate the MsgId and size from the header; (2) allocate a buffer from the shared SB pool and memcpy the whole message into it; (3) take the SB mutex to look up the route, increment the per-route sequence counter (only if the route exists and IsOrigination), walk the destination list from the head, apply MsgLim and do optimistic depth accounting, then release the mutex; (4) run CFE_MSG_OriginationAction; (5) call OS_QueuePut for each destination pipe without the SB mutex, taking the mutex again only to undo accounting on error; (6) drop the sender's reference. The same descriptor pointer is enqueued on every pipe, so fan-out is by reference.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L1538-L1597",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1032-L1131 (lock L1049, seq L1058-L1064, unlock L1114)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1173-L1231 (OS_QueuePut L1187-L1188 outside lock)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1265-L1297",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/shared/src/osapi-queue.c#L190-L219 (OS_LOCK_MODE_NONE L200)",
+    "Stale comment: cfe_sb_api.c#L1564-L1575 says no buffer is allocated without a route, but the buffer is allocated at L1557 before routing"
+   ],
+   "scope_checked": "Full text of cfe_sb_api.c (1636 lines), cfe_sb_priv.c (1778 lines), cfe_sb_buf.c, cfe_sb_priv.h structs, cfe_sbr_route_unsorted.c, cfe_sbr_map_hash.c, OSAL shared osapi-queue.c at the pinned commits",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: model one publish as several separate per-destination enqueue events that follow the call, not as one atomic broadcast. The sequence number is assigned under the lock, but the enqueue happens after unlock. With several senders of one MID, the queue order can therefore differ from the sequence-number order."
+  },
+  {
+   "id": "sem-sb-02",
+   "topic": "Receiver can run before TransmitMsg returns; cross-pipe order",
+   "claim": "The header documents that a higher-priority subscriber may run before TransmitMsg returns. The code allows it because no SB lock is held across the per-pipe puts. Measured on one CPU with OSAL priorities active (root, SCHED_RR): all 3 higher-priority receivers ran before TransmitMsg returned in 200/200 trials. They woke in reverse subscription order (last subscriber first) in 200/200. A relay that receives G and republishes H made the observer pipe dequeue H before G in 500/500 trials when the relay outranked the sender, and 0/500 when it did not. On 4 CPUs: 0/500 inversions, and the 3 receivers' wake order took all 6 permutations. Non-root (priorities ignored, SCHED_OTHER) on 1 CPU: 15/500 and 30/500 inversions.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L417-L422",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L361-L391 (head insertion), #L1067-L1089 (head-first walk)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L238-L244",
+    "Linux v6.12 ipc/mqueue.c L1157-L1171 (pipelined_send to waiting receiver, wake_up_q after unlock): local copy ext/linux-v6.12-ipc-mqueue.c",
+    "probe: probe_runs/sbprobe.c; logs probe_runs/run1_root_cpu0.log, run5_root_cpu0_repeat.log (T5 200/200, T6 500/500 vs 0/500), run2/run3_root_allcpu.log (6 permutations, 0/500), run4_nonroot_cpu0_msgmax10.log (15/500, 30/500)"
+   ],
+   "scope_checked": "Header notes plus the code paths above; 5 executions of my probe app on cFE 546a0025, OSAL dad0ee99, PSP 53df1d54, native build, Linux 6.18 container, 4 vCPU",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the arrival order of one message at different pipes, and the order between a message and its causal consequences on another pipe, depend on subscription order (a runtime fact), task priorities, CPU count and OSAL permissive mode. A static ordering analysis cannot assume that publish happens before every effect, or that subscribers are FIFO across pipes. Ordering claims must be parameterized by the deployment's scheduling model. Linux-sim test results are not evidence for RTOS behaviour."
+  },
+  {
+   "id": "sem-sb-03",
+   "topic": "No subscribers: counters, events, routes",
+   "claim": "A MID with no route (never subscribed since SB init) increments NoSubscribersCounter (uint8), raises a SEND_NO_SUBS INFORMATION event (EVS-filtered after the first 4 by default) and returns CFE_SUCCESS. The sequence counter is not touched and the origination action is skipped. Routes are never removed. Once a MID has been subscribed, later sends with zero destinations (after Unsubscribe or pipe deletion) produce no counter and no event, return CFE_SUCCESS, and still advance the sequence counter. Measured: NoSub delta 1 for a never-subscribed MID versus 0 for a subscribed-then-unsubscribed MID, and the sequence count went 1 to 5 across 3 sends with no destinations (all 5 runs).",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1091-L1097",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.h#L785-L788",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sbr/fsw/src/cfe_sbr_route_unsorted.c#L72-L114 and #L168-L177 (AddRoute only, no removal in the file)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/inc/cfe_sb_internal_cfg.h#L222-L243 (default filters)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/config/default_cfe_sb_msgdefs.h#L73 (uint8 counter)",
+    "probe_runs/SBPROBE_lines_all_runs.txt (T1, T2)"
+   ],
+   "scope_checked": "Full SBR route module and map_hash; SB transmit path; default platform config; 5 probe runs",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: a successful publish return and the absence of a NO_SUBS event say nothing about receiver readiness. For first-message or restart-window hazards, the analyzer has to reason about the subscribe and publish order itself, not runtime indicators. Sequence-number gaps at a receiver can come from sends that had no destinations as well as from drops."
+  },
+  {
+   "id": "sem-sb-04",
+   "topic": "MsgLim and pipe full",
+   "claim": "MsgLim is a per-(MsgId,pipe) limit on messages currently queued (BuffCount). It is checked at transmit time under the lock, and BuffCount is decremented at receive time. Pipe depth is the OS queue limit, and a full queue makes the non-blocking OS_QueuePut fail. Both cases are per-pipe failures: the message is dropped for that pipe only, counters and filtered ERROR events are raised, and TransmitMsg still returns CFE_SUCCESS. Duplicate Subscribe returns CFE_SUCCESS and does not change an existing MsgLim. Measured: MsgLim=2, 5 sends gave rc all 0, 2 received, MsgLimitErrorCounter +3. Depth 3, 5 sends gave rc all 0, 3 received, PipeOverflowErrorCounter +2.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L989-L1024",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1194-L1227",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1437-L1449",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L1019-L1040 (duplicate path)",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/cfe_testcase/src/sb_sendrecv_test.c#L103-L107 (cFE's own test: 'call still returns CFE_SUCCESS')",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/inc/cfe_sb_internal_cfg.h#L107 (default MsgLim 4)",
+    "probe_runs T3/T4 lines"
+   ],
+   "scope_checked": "SB source, cFE functional test file sb_sendrecv_test.c (grep plus lines 96-110), 5 probe runs",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: a burst of more than MsgLim (default 4) messages of one MID, or more than the effective depth, between two receives drops messages for that subscriber only, and the publisher cannot see it. The analysis should carry MsgLim and depth as model parameters per (MID, pipe)."
+  },
+  {
+   "id": "sem-sb-05",
+   "topic": "Per-pipe FIFO and queue platform semantics",
+   "claim": "On Linux, OSAL posix OS_QueuePut calls mq_timedsend with constant priority 1 and a zero absolute timeout, so it never blocks and returns OS_QUEUE_FULL when full. The flags argument is ignored; SB passes its timeout there. Linux mqueue appends same-priority messages at the tail and dequeues from the head, which gives per-pipe FIFO. The RTEMS impl uses rtems_message_queue_send, and RTEMS docs say it places the message at the rear. The VxWorks impl uses msgQSend(NO_WAIT, MSG_PRI_NORMAL) on a MSG_Q_FIFO queue; I did not check vendor docs for that. Each pipe has a single reader by design, because the previous buffer is released when the next receive starts.",
+   "evidence": [
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-queues.c#L285-L323",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/inc/osapi-queue.h#L117-L133 (flags reserved)",
+    "https://github.com/torvalds/linux/blob/v6.12/ipc/mqueue.c#L191-L231 and #L248-L288 (list_add_tail / list_first_entry)",
+    "https://github.com/mkerrisk/man-pages/blob/ae6b221882ce71ba82fcdbe02419a225111502f0/man3/mq_send.3#L71-L76",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/rtems/src/os-impl-queues.c#L98-L103 and #L253-L256; RTEMS/rtems-docs b1afc8fb c-user/message/directives.md L589, operations.md L57-L58",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/vxworks/src/os-impl-queues.c#L76 and #L186",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1372-L1389"
+   ],
+   "scope_checked": "OSAL posix/shared queue files in full; RTEMS and VxWorks put/create functions; Linux v6.12 mqueue.c insert/get/send sections; man-pages mq_send.3 text. Could not open POSIX spec (pubs.opengroup.org), man7.org or docs.rtems.org (proxy blocked)",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference: on Linux and RTEMS, model each pipe as a FIFO channel with a single consumer and drop-on-full. Puts from one sender task into one pipe keep program order. There is no ordering relation between different pipes. The VxWorks ordering assumption must stay a stated assumption until verified."
+  },
+  {
+   "id": "sem-sb-06",
+   "topic": "CreatePipe depth versus effective capacity",
+   "claim": "CreatePipe rejects depth 0 or depth greater than OS_QUEUE_MAX_DEPTH (default 50) and stores the requested depth in SB telemetry. With OSAL_CONFIG_DEBUG_PERMISSIVE_MODE, which the cFE native sample config enables, and a non-root euid, the POSIX impl silently truncates the queue to /proc/sys/fs/mqueue/msg_max (10 here). Measured: requested depth 20 gave 10 received and +10 PipeOverflowErrorCounter as non-root. As root without CAP_SYS_RESOURCE, no truncation applies, mq_open fails with EINVAL for depth over 10, and cFE core init aborts.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L126 and #L163 and #L191",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-queues.c#L59-L69 and #L97-L129",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/bsp/generic-linux/src/bsp_start.c#L66-L78",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/default_config.cmake#L159-L181 and #L391-L396",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/cmake/sample_defs/native_osconfig.cmake#L22-L39",
+    "probe_runs/run4_nonroot_cpu0_msgmax10.log (T4b), probe_runs/run0_root_msgmax10_failed.log (EINVAL, EVS CreatePipe failed)"
+   ],
+   "scope_checked": "Source above; local container: msg_max=10, CapEff 000001fffeffffff (bit 24 CAP_SYS_RESOURCE absent); 2 probe configurations",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: queue capacity, and therefore drop behaviour, must come from the deployment configuration (OSAL options, BSP, privileges), not from the CreatePipe literal. Native-sim experiments must record euid, msg_max and the permissive flag."
+  },
+  {
+   "id": "sem-sb-07",
+   "topic": "OSAL priorities in native/permissive mode",
+   "claim": "POSIX OSAL tries to use SCHED_FIFO or SCHED_RR. Here it picked RR, because FIFO's 1..99 range is not wider than 255 OSAL levels; OSAL prio 100 mapped to RR 60 and 50 to RR 79. If setschedparam fails (non-root) and permissive mode is on, all tasks silently run SCHED_OTHER with no error. In non-permissive mode, init fails instead.",
+   "evidence": [
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-tasks.c#L333-L446",
+    "probe_runs/run1_root_cpu0.log (SCHED lines policy=RR prio=60/79/41)",
+    "probe_runs/run4_nonroot_cpu0_msgmax10.log ('Could not setschedparam ... Operation not permitted', policy=OTHER)"
+   ],
+   "scope_checked": "os-impl-tasks.c lines 325-454; probe runs",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: a priority-aware ordering argument, such as the receiver preempting the sender, holds only when the deployment enforces priorities. The analysis has to state the scheduling assumption explicitly, and dynamic validation on a default non-root Linux sim tests a different schedule space."
+  },
+  {
+   "id": "sem-sb-08",
+   "topic": "ReceiveBuffer semantics and buffer lifetime",
+   "claim": "The timeout argument maps as follows: >0 ms becomes an absolute deadline, 0 is CFE_SB_POLL and -1 is CFE_SB_PEND_FOREVER; other negative values give BAD_ARGUMENT. OS results map to: empty → CFE_SB_NO_MESSAGE, timeout → CFE_SB_TIME_OUT, anything else → CFE_SB_PIPE_RD_ERR. On Linux the timed wait uses a CLOCK_REALTIME absolute time. Each receive on a pipe, with valid arguments, first drops the reference to the previous buffer, whatever the result of that receive. The returned pointer is read-only and shared with the other subscribers. Default CFE_MSG_VerificationAction accepts every message.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L1310-L1347",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L556-L578, #L1343-L1393, #L1476-L1606",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L440-L479",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb_api_typedefs.h#L45-L46",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-queues.c#L188-L277",
+    "https://github.com/nasa/osal/blob/dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1/src/os/posix/src/os-impl-common.c#L147-L149",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/msg/fsw/src/cfe_msg_integrity.c#L60-L76"
+   ],
+   "scope_checked": "Receive transaction code in full; OSAL posix QueueGet; header documentation",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: a state update is valid only if the payload is copied before the next receive on the same pipe. Keeping a pointer past that point is a lifetime bug, separate from ordering. The analysis should split success, NO_MESSAGE, TIME_OUT and error paths, because only the success path updates state."
+  },
+  {
+   "id": "sem-sb-09",
+   "topic": "Zero-copy API",
+   "claim": "AllocateMessageBuffer takes a zeroed buffer from the SB pool and tracks it as owned by the calling AppId. A successful TransmitBuffer transfers ownership to SB, and the app must not touch the buffer afterwards. If TransmitBuffer fails, the app still owns the buffer. ReleaseMessageBuffer is only for buffers that were never transmitted. TransmitBuffer uses the same Execute path as TransmitMsg, so ordering, MsgLim and no-subscriber behaviour are identical, including the per-route sequence update when IsOrigination is true.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L1404-L1530",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L530-L634",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L455-L522"
+   ],
+   "scope_checked": "Zero-copy API implementations and header docs",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: the same channel model applies to zero-copy sends. The only extra is an ownership and use-after-transmit rule that a separate lifetime check can enforce."
+  },
+  {
+   "id": "sem-sb-10",
+   "topic": "Origination action overwrites the timestamp",
+   "claim": "With IsOrigination=true and a route that exists, SB writes the per-route sequence count into its copy. The default CFE_MSG_OriginationAction then sets the telemetry time to CFE_TIME_GetTime() at transmit and generates the command checksum. Any timestamp the app set earlier, for example via CFE_SB_TimeStampMsg in sample_app, is overwritten in the SB copy.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/msg/fsw/src/cfe_msg_integrity.c#L30-L53",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1058-L1064 and #L1122-L1130",
+    "https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/fsw/src/sample_app_cmds.c#L60-L61"
+   ],
+   "scope_checked": "Default MSG integrity module (the file compiled per modules/msg/CMakeLists.txt L21) and the SB transmit path; mission overrides not checked",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: for the original note's freshness and data-age ideas, a header timestamp on IsOrigination=true telemetry is the transmit time, not the sampling time. Data-age reasoning needs payload-level time fields or source analysis, and mission MSG overrides may differ."
+  },
+  {
+   "id": "sem-sb-11",
+   "topic": "Message ID representation and mapping",
+   "claim": "CFE_SB_MsgId_t is struct { uint32 Value }. ValueToMsgId, MsgIdToValue and MsgId_Equal are static inline. A MID is valid if it is nonzero and at most 0x1FFF by default. In non-EDS builds, MIDs are compile-time integers: CMD = 0x1800|topic and TLM = 0x0800|topic, defined by default_*_msgid_values.h and *_msgids.h, with topic ids in *_topicids.h. In EDS builds the same macros become runtime calls that depend on CFE_PSP_GetProcessorId(). sample_app dispatches with if/else on CFE_SB_MsgId_Equal against lazily cached static MIDs, not a switch. Routing hashes the MID value into a map four times the route count with linear probing. Side observation: the non-EDS CFE_SB_CmdTopicIdToMsgId with InstanceNum==0 calls the global Tlm converter; I did not verify whether this is intended.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/config/default_cfe_sb_extern_typedefs.h#L89-L105",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/fsw/inc/cfe_sb.h#L876-L940",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/config/default_cfe_core_api_msgid_mapping.h#L49-L86",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/core_api/config/eds_cfe_core_api_msgid_mapping.h#L37-L66",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_msg_id_util.c#L108-L123 and #L200-L204",
+    "https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/config/default_sample_app_msgids.h#L29-L31",
+    "https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/fsw/inc/sample_app_topicids.h#L28-L33",
+    "https://github.com/nasa/sample_app/blob/199476a34827ae84d50d66f97619227854cd971a/fsw/src/sample_app_dispatch.c#L132-L167",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sbr/fsw/src/cfe_sbr_map_hash.c#L54-L175"
+   ],
+   "scope_checked": "MsgId typedefs, mapping headers (default and eds), msg_id_util (default and eds grep), sample_app config chain and dispatch at the cFS-dev-pinned sample_app commit",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the frontend must resolve MIDs by constant-folding through the struct wrapper and inline helpers, using the config headers the build actually selected (take them from compile_commands.json). It must recover dispatch from Equal-chains or a switch on MsgIdToValue. EDS builds need a processor-id parameter."
+  },
+  {
+   "id": "sem-sb-12",
+   "topic": "Pipe and subscription cleanup on app delete or restart",
+   "claim": "An ES control request (delete, restart or reload) runs CFE_ES_CleanUpApp. That function calls the core-module cleanup callbacks, including CFE_SB_CleanUpApp, before deleting tasks. Restart and reload then create a new app instance with a new AppId. CFE_SB_CleanUpApp deletes every pipe the app owns: it removes the pipe from all routes, discards queued messages and deletes the OS queue. It also releases the app's zero-copy buffers. Routes and their sequence counters persist, and the new instance must CreatePipe and Subscribe again.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_appctrl.c#L318-L379",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/es/fsw/src/cfe_es_apps.c#L855-L904 and #L1047-L1119",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_objtab.c#L36",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L87-L124",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_api.c#L352-L511"
+   ],
+   "scope_checked": "ES appctrl ProcessControlRequest and RunAppTableScan (lines 310-495), ES CleanUpApp and helpers (845-1119), SB cleanup and DeletePipeFull. Restart not exercised in probe",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: every app restart reopens a window like the first-message one. Publishers keep sending into a route with zero destinations, with no NO_SUBS signal, until the new instance subscribes again. Any queued backlog is lost. A lifecycle-aware analysis should model this as a reset of the subscriber's pipe state and the subscriber's own state."
+  },
+  {
+   "id": "sem-sb-13",
+   "topic": "Runtime routing changes and QoS",
+   "claim": "QoS (the Quality argument) has no effect on local delivery; it is only copied into subscription reports when reporting is enabled. Scope LOCAL or GLOBAL only controls reporting. SB ground commands can disable or enable a (MsgId, Pipe) destination at runtime, and FindDestinations then skips a disabled destination silently. CFE_SB_PIPEOPTS_IGNOREMINE suppresses delivery to the sender's own pipe.",
+   "evidence": [
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_task.c#L645-L674",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_task.c#L355-L392 and #L440-L468",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/fsw/src/cfe_sb_priv.c#L1067-L1089",
+    "https://github.com/nasa/cFE/blob/546a002515be5a1e3b66f9ae2c14f948d9cec76f/modules/sb/config/default_cfe_sb_extern_typedefs.h#L114-L125"
+   ],
+   "scope_checked": "grep of all SB sources for Quality, Scope and Active writers; the relevant functions read",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Inference: the static subscription graph over-approximates delivery. Ground route-disable commands and pipe options are runtime inputs that a source-only analysis cannot see; state them as assumptions."
+  }
+ ],
+ "gaps": [
+  "I could not open the POSIX spec (pubs.opengroup.org), man7.org or docs.rtems.org because the egress proxy blocks them. For Linux FIFO I used the kernel v6.12 source and the man-pages repo on GitHub; for RTEMS, the rtems-docs repo on GitHub. VxWorks queue ordering semantics are unverified; I only read the OSAL code.",
+  "The probe ran only on the native Linux sim, in one container with 4 vCPU on kernel 6.18. No RTOS or flight target was tested. Inversion and wake-order counts are schedule-dependent observations, not rates. 0/500 on multi-core does not mean impossible.",
+  "No probe of an app restart window or of ReceiveBuffer buffer lifetime; these rest on source reading only.",
+  "I did not check mission-specific overrides of CFE_MSG_OriginationAction, MsgId mapping or platform config. All defaults quoted are cFE default config values.",
+  "EDS build path: only the MID mapping headers and util function signatures were read. EDS dispatch and EdsLib internals were not analysed.",
+  "The CFE_SB_CmdTopicIdToMsgId(InstanceNum==0) → GlobalTlm observation is unconfirmed as a bug; no upstream issue search was done.",
+  "The OSAL main and dev queue code is identical, but I did not diff PSP or other OSAL files between the cFS main (088b2fa8) and dev (5a9b075c) bundles.",
+  "To get root runs working I temporarily raised /proc/sys/fs/mqueue/msg_max in the container from 10 to 64, then restored it to 10, and removed the PSP SysV shm segments 0x52004151-0x52004153 that my runs created. This touched container state outside the work directory."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/notes_sem_sb.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/commits.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/sbprobe.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/CMakeLists.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/SBPROBE_lines_all_runs.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run0_root_msgmax10_failed.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run1_root_cpu0.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run2_root_allcpu.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run3_root_allcpu.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run4_nonroot_cpu0_msgmax10.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/run5_root_cpu0_repeat.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/targets.cmake.diff",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/probe_runs/startup_scr.diff",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/ext/linux-v6.12-ipc-mqueue.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/ext/mq_send.3",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/ext/rtems-docs/c-user/message/directives.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/cFE",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/osal",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/sample_app",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission"
+ ]
+}

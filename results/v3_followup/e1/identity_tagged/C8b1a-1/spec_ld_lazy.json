@@ -1,0 +1,43 @@
+{
+  "arms": {
+    "S1a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so",
+      "tag": "alpha",
+      "policy": "S1"
+    },
+    "S8b": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so",
+      "tag": "bravo",
+      "policy": "S8"
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "S8b"
+    ],
+    [
+      "load",
+      "S1a"
+    ],
+    [
+      "call",
+      "S1a"
+    ],
+    [
+      "call",
+      "S8b"
+    ],
+    [
+      "call",
+      "S1a"
+    ],
+    [
+      "call",
+      "S8b"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/input.npy",
+  "expected_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/C8b1a-1/calls_ld_lazy.jsonl"
+}

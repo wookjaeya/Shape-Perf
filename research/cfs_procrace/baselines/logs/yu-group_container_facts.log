@@ -1,0 +1,59 @@
+# date: 2026-10-07T07:27:02Z
+# uname -a
+Linux vm 6.18.44-fc-v77 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+VERSION_ID="24.04"
+# nproc
+4
+# free disk on /home/user/work
+/dev/vda        252G   34G  4.0G  90% /
+# /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+# CapEff
+CapEff:	000001fffeffffff
+CAP_SYS_MODULE(16)= True CAP_SYS_BOOT(22)= True CAP_SYS_PTRACE(19)= True
+# CONFIG_MODULES / KVM / KEXEC
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+CONFIG_KVM=y
+# CONFIG_KPROBES is not set
+CONFIG_UPROBES=y
+# CONFIG_MODULES is not set
+# /dev/kvm
+ls: cannot access '/dev/kvm': No such file or directory
+# kexec_load probe via python ctypes (syscall 246 x86_64)
+kexec_load ret -1 errno Function not implemented
+# ptrace check: strace /bin/true
+/usr/bin/strace
+execve("/bin/true", ["/bin/true"], 0x7ffdc295b3b8 /* 150 vars */) = 0
++++ exited with 0 +++
+# gdb
+/usr/bin/gdb
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Inferior 1 (process 9150) exited normally]
+No current process: you must name one.
+# simics present?
+apache-maven-3.9.11
+claude-code
+containerd
+env-runner
+gradle
+gradle-8.14.3
+maven
+node20
+node21
+node22
+nvm
+pw-browsers
+rbenv
+rclone
+rclone-attach
+ruby-3.1.6
+ruby-3.2.6
+ruby-3.3.6
+# virtualization flags in cpuinfo
+no vmx/svm flag
+model name	: Intel(R) Xeon(R) Processor @ 2.10GHz
+hypervisor flag present

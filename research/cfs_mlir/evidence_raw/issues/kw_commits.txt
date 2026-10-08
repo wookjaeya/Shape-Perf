@@ -1,0 +1,478 @@
+CF|af71cfe146a9aa31660618c775d7adf50cd381a4|2026-08-27|Fix #508, Adds files initialized housekeeping counters
+CF|7debcb8d395a498cf3d94d792ebdffa267ffd1fc|2026-08-21|Fix #90, selectively clear data during InitEngine
+CF|e95cbf88d8363306ba232df9cd0c4618e3cf7b12|2026-06-16|Fix #502, Initialize Variable msg_size in cf_cfdp_sbintf.c
+CF|4219d7ff1558c3095555b986bb8bed0902fd0fe4|2026-04-17|Fix #49: Removed trailing space in comment. (pipeline error fix)
+CF|8338106141ac814572a316a3a9cd242cfa355dba|2026-04-16|Fix #49: Correct CMD/TLM definition of _TX and _RX Message IDs
+CF|26d5c7f35c6d0f12436ef1f3417e46fdf3fc61e5|2026-03-26|Fix #41, Adjust CF Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+CF|e2039fb3ad1ccf7e0b2d27e3342c21396a32c1e4|2024-03-06|Fix #436, apply name changes to EDS dispatcher
+CF|a18ec4ddcb0c79c53f520865af08b88998c6b41f|2023-12-13|Fix #422, initial add of EDS
+CF|157e04aa42b2b9a011d266f6bd88d53cc136b2dc|2023-09-29|Fix #265, Updates from review of variable name changes
+CF|e5fbf9efdd1d70d5b49d7e296142748a44ad9d61|2023-07-25|Fix #401, use valid size when calling CFE_MSG_Init
+CF|98b469488b490b77dab9450b1f69fe92e8bb2218|2023-07-11|Fix #393, revert merge of PR #341. This reverts commit 70eb257616acb4b5015171e5e29fa7b1ed4c0e3e, reversing changes made to cb2977cb5650d4f818eec3ed17627725a0ca9a74.
+CF|c92fb8e546887e3cd171181cc644a07c7d48a541|2023-04-07|Fix #377, Remove error event on nominal semaphore timeout
+CF|b66ac5ece76ad6258c301a5a6a362c6a5f8498c0|2022-12-05|Fix #348, Moves interface definition files to inc
+CF|833fdbb27a26f15f2429e79392e7eb73d61abdea|2022-11-17|Fix #184, work around throttle sem creation race
+CF|ae008652e6587f4046ef8cb1705e8268ee407d6d|2022-08-25|Fix #315, UT update to improve crc initialization check
+CF|ebf5e58ddad1d0e2641b17637ec145ea389f7f2e|2022-08-08|Fix #308, Revert requirements whitespace changes from #302
+CF|0040fb368738d1c848142574808553b40624953b|2022-08-02|Fix #299, Clarify event text for commands that initiate actions
+CF|1c584ead48bb53245231e9994825296705c97555|2022-07-22|Fix #290, multiplied num of transactions per channel by num of channels in Test_CF_CFDP_InitEngine()
+CF|22e28557c0f25c486764be33a6fce64f800e5c67|2022-07-21|Fix #285, flatten logic in CF_CFDP_InitEngine() to fix bug that skipped needed code
+CF|8855399ce045221befc994c2044224f07a7becf1|2022-07-13|Fix #131, Reset file psn and use OS_mv for out-of-order RX MD processing
+CF|79f0f74958c9f5f136c8ba491e637f79ec51167a|2022-06-07|Fix #173, Truncate files when created to avoid stale data
+CF|a555d95c143e5de32d317a121b6c1c3e9d267bf3|2022-06-07|Fix #217, Add mission rev and print in startup and noop events
+CF|624d91a2e4700f0cd83f9b4cac5623aab400bc73|2022-05-13|Fix #241, Resolve uninit var static analysis warnings in fsw
+CF|0df28fd88fa34251bbe69c2b09e4e4f68d0251ea|2022-04-07|Part #218, Resolve uninit and masked variable static analysis warnings
+CF|c4773cbcec00d0556b32245b6890ced57c65fc5b|2022-02-10|Fix #197, Resolve uninitialized variables in UT
+CF|8e543a925e69da2a5e74a8515e0962b8ad9fc2e4|2021-11-23|Fix #53, initialize local buffers
+CF|0ea121271f35b3bb4ce36ce2b6930286e5f52f6f|2021-12-02|Fix #55, resolve uninitialized pointer warning
+CF|738a1976762dc2e895972a9dd5e996cab5279bb7|2021-11-23|Fix #48, use proper CFE_SB_PipeID type
+CF|75321f43d7ea151965fe0deffcc88049a0f095b0|2021-11-23|Fix #47, init data passed as const input
+CF|82ba77679e89816250c1b9e618aeb86d594adf8d|2017-06-29|Initial commit
+CS|b276c99e347de309578a3a8fc7b595952e8f1fab|2026-08-26|Fix cFS#1081, initial modification of headers
+CS|e3cc712c025bbfbc03113116db8138edb8e3e9da|2022-11-29|Fix #55, Moves interface definition files to inc
+CS|b32cb443e99655da529910bf2e6453e7c304de27|2022-04-26|Fix #6, remove padding in table definitions
+CS|317db0acb9fe0d00221ee00d2c62469dd70b43d2|2022-04-25|Bulk update adds all internal 2.5.1-rc2 changes
+CS|0f34b32d49eafec36f498c04cac2d2e0bac0cae6|2022-04-25|Bulk update for 2.5.0 release, see VDD for change summary
+CS|d62e6684c65743e161a40b953c4e323e16f17ba0|2019-06-24|CS Version 2.4.1.  Minor changes for cFE 6.6 compatibility.
+CS|5e28642df8be78813a8562e377a40c0fc4033a4f|2017-06-29|Initial commit
+DS|41b2d2e67b9b347c383d2d258964519284f6370e|2026-06-09|Fix #148, DS App Changing null terminator manipulation in string to follow best practices of using strncpy.
+DS|5022bded185d87335d8049829ae66651f332d2a7|2026-06-03|Fix #150, Initialize Buffer in DS_FileCreateSequence
+DS|c609e35d6a09d19b5bb016395cefe305ee2a5361|2026-06-01|Fix nasa#146, When managing the Filter and Dest file tables, the return value of CFE_TBL_GetAddress() after the tables have already been loaded will be checked
+DS|da6c977a439d3c77329ffe68c6c4e2547a860454|2026-04-10|Fix #29, Adjust DS Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+DS|7d91157622c0d8735e066da6d2052c03461c9f8b|2023-03-04|Fix #85, Change EVS_Register failure from SendEvent to WriteToSysLog
+DS|baebec6ce850bede03bc0b0956f2d7fbc7f16dd6|2023-03-13|Fix #90, Rename SB Command Pipe to CmdPipe
+DS|2a32b6cea7988fc52d566f92020d2cf3aeead228|2022-12-06|Fix #71, Moves interface definition files to inc
+DS|154eb521e2e9152ae10d6b927b8a1c47f11fa830|2022-09-20|Fix #8, use CFE_FS_InitHeader() to initialize CFE header
+DS|01494b6de563884b9f7f4eff4ce6b75d5bca317c|2022-08-17|Fix #44, Standardize UT table initialization
+DS|7cc1c6e836c87cb7e8d53b82fb697cd968666ca5|2022-05-13|Fix #16, Resolve fsw uninit var static analysis warnings
+DS|34d4f86ec1aa8a6c577c6040f3716e4cce235a33|2022-04-26|Bulk update adds all internal 2.6.1-rc2 changes
+DS|68cb97b489442cf2430b241f254811947d3731c8|2022-04-26|Bulk update for 2.6.0 release, see VDD for change summary
+DS|6c0d59fb19a95df48c489f0f2a9377dcec0c6fe2|2017-06-29|Initial commit
+FM|b6b8ce2d174f34e5457e145e0154708c205022a5|2026-06-23|Fix #144, Initialize Variables in fm_cmd_utils.c
+FM|823b5f1396c002ec9270d2afcb0a4480ee117e01|2026-06-01|Fix nasa#139, Suppressed ignored return value warning for CFE_TBL_Load() in FM_TableInit()
+FM|ba1b8437f12ae4f1281ab4ec22c015cc8ff8fc9d|2026-04-03|Fix #30, Adjust FM Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+FM|eb8c99e7c6466039dddd315b75f2ac9e73a54093|2023-07-17|Fix #109, Uninitialized FileStats in FM_GetVolumeFreeSpace
+FM|9d5d77172668c5b44dfd1e1fc51c7cd971091f19|2023-03-05|Fix #87, Change EVS_Register failure from SendEvent to WriteToSysLog
+FM|88b70c0642c53fc3e75585dbf135ad96fc660a1d|2023-02-09|Fix #66, remove static from table definition
+FM|ee03d1795223c3aa6e8010a0932b1b072ad6e27a|2022-12-06|Fix #67, Moves interface definition files to inc
+FM|ed2f2461061719dc9f5b78ea821347221371fcaa|2022-11-06|Fix #62, Remove initializations causing Cppcheck errors
+FM|b4a8e4c9bcbef8e7f45da8d047c631b3bbdc20d4|2022-09-21|Fix #52, use CFE_FS_InitHeader() to initialize CFE header
+FM|6cdd00d9c5fcc7c8ba60c0a98adf3542c5f8a5d3|2022-08-16|Fix #14, initialize DirListData with zeros before using
+FM|952de35e9d8c2ddaa37719c9dc4db5cd8ce779c9|2022-08-01|Fix #43, Initialize FileMode on OS_stat failure
+FM|94538408f7ed3206a4eabe8b72387cfa9a57b1fc|2022-05-13|Fix #19, Resolve uninitialized variable static analysis warnings
+FM|47932d26036bead589b4c9cbd23958613760ffc4|2022-05-05|Bulk update adds all internal 2.6.1-rc2 changes
+FM|142eec97a0cb1b4cbf9a93ecc80465ee72927648|2022-05-05|Bulk update for 2.6.0 release candidate 1, see VDD for change summary
+FM|3605ec57882318a701763b949794b364b1ea25af|2017-06-29|Initial commit
+HK|e42e52eddcaea002a28c1cba8e12f02c0060ef7a|2026-03-26|Fix #22, Adjust HK Files to Work with an EDS Build and Default COSMOS Packet Definitions
+HK|cd0b0ecf39b18583ac53489d339c32855de55db2|2023-09-04|Fix #58, add memset for uninitialized local
+HK|f739a2e36653b505c0cf36483262ad170b417c6f|2023-01-16|Fix #38, correct uninitialized variable in UT
+HK|762cbeb95d18f7acf908260e59bd25aeb313031d|2022-12-06|Fix #32, Moves interface definition files to inc
+HK|cdb9075edc54bb48049e99f908f00ca89481fbe1|2022-11-07|Fix #28, Remove initializations causing Cppcheck failure
+HK|46cf218b01f790c4345109b96b1b7783f487c60b|2022-05-09|Bulk update adds all internal 2.5.1-rc2 changes
+HK|85a8b20daf5869ae35a0e6772ca9c452d9c0b7ff|2022-05-09|Bulk update for 2.5.0 release, see VDD for change summary
+HK|565e73024820960ab9c880a2db887e5b9591545c|2017-06-29|Initial commit
+HS|26063de6bc09c1500989ea5ab490ef7a507a8d32|2024-03-06|Fix #123, apply name changes to EDS dispatcher
+HS|61566011b3aa4d7cfece68ff77955bb87fe0a974|2024-01-17|Fix #113, use CFE_TBL_FILEDEF macro for table definitions
+HS|7603ef69729d488b7a8cb3e63ebd40cc4fa515fc|2023-04-20|Fix #96, use non-designated initializer for command header
+HS|1d33e2fd894293717fffecd0cef189f1b435c2ed|2022-12-06|Fix #54, Moves interface definition files to inc
+HS|45981522828ef1f7c9738f78c31d5fd53c7f3e28|2022-11-07|Fix #52, Remove initializations causing Cppcheck errors
+HS|04f588519ec9f1feb596d36a9689d875b53064f2|2022-05-24|Fix #23, Add UT verification of startup sync
+HS|367719b6b1b188fcb3b9d5a416e5a1ee7ba19176|2022-05-09|Fix #16 #10, Resolve reassignment before use style warnings
+HS|6f2ae71e19773e88abf5d17cafc036a91ac26b38|2022-05-09|Bulk update adds all internal 2.4.1-rc2 changes
+HS|f72c7b106064d1f4f9de6d72fc602e67667dcc05|2022-05-09|Bulk update for 2.4.0 release, see VDD for change summary
+HS|dbdd404a19799bea175c6d48f9f7440540bfa4cf|2017-06-29|Initial commit
+LC|b2a1b3f7e3aaa0c070a2fc066565c00766e7df2d|2026-05-11|Fix #123, add local variable init
+LC|6b78bdc18b54face06c1be633e6b9daf75a4de73|2023-08-16|Fix #95, add local isnan, isfinite macros
+LC|82fcd16ad69cf2f1552317ae4419f7cb8105722c|2023-01-30|Fix #36, Refactor LC_TableInit to remove multiple returns
+LC|6cd1c24df0e0b356c884428330e087474fdec256|2022-12-06|Fix #55, Moves interface definition files to inc
+LC|8f8075c8727989385cf480164e24c8b2442b060b|2022-05-13|Fix #24, Resolve fsw uninit var static analysis warnings
+LC|a2e1be1b8b037707347f4d0e33b47d81bb0c091f|2022-05-13|Fix #23, Resolve UT uninit var static analysis warnings
+LC|f320744bfa80eb1064f5bd4a3637e45c0560039f|2022-05-09|Bulk update adds all internal 2.2.1-rc2 changes
+LC|6d68cf8fe9e4ac66296da538cbbaf737e03156d9|2022-05-09|Bulk update for 2.2.0 release candidate 1, see VDD for change summary
+LC|9c09346ebba01ab300f5876894f27113e9b4a725|2017-06-29|Initial commit
+MD|86a0f34405d333d813833382049b1a3f1c800bd1|2026-08-18|Fix nasa#97, Replaced zero with NULL for MD_LoadTablePtr initialization in MD_ManageDwellTable() in md_app.c
+MD|5c638aeedd0383bd19d85f7e38575e92f9c505ee|2026-03-26|Fix #24, Adjust MD Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+MD|badb96f464f6ab5e1c9791b54f4285618853f278|2022-12-06|Fix #41, Moves interface definition files to inc
+MD|519e70938f96dc6c760c504fc18fd1cd7fec179f|2022-11-07|Fix #39, Remove initializations causing Cppcheck errors
+MD|da1f7830d96a7642d8fbb84ed63a68ed6e1d620a|2022-05-13|Fix #8, Resolve UT uninit var static analysis warnings
+MD|de1cd620decd61e32b801b780789cc4752a3fc53|2022-05-09|Bulk update adds all internal 2.4.1-rc2 changes
+MD|19526253a9230292eccf3b5178b4d36095334236|2022-05-09|Bulk update for 2.4.0 release, see VDD for change summary
+MD|6af10af789fa14a8c4395244644e8be6c1e20d0b|2017-06-29|Initial commit
+MM|b105feee83e5738d9729eb5ce70c3ca5df2bd823|2026-06-05|Fix #114, Initialize PSP_Status in mm_dump.c
+MM|155ea49df1a57d6f546ce29d8149fa1fcc54a252|2026-03-31|Fix #28, add initialization to stack variable
+MM|b309a32bfdb18111f6ffa55a89e51d439acd3cb1|2026-03-26|Fix #30, Adjust MM Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+MM|8bd024089667359b043afbf3bfcf9c82f034fd5d|2022-12-06|Fix #57, Moves interface definition files to inc
+MM|5a447ae15b232eaefc4b246477077bbb7df5df80|2022-11-07|Fix #54, Update initializations causing Cppcheck failure
+MM|91fd71c7f473ade6a7c7c01c3aa1ebade2effae5|2022-09-21|Fix #6, initialize return code to false
+MM|db554323c9097dd3bef35b6106d26a39735c81a0|2022-09-20|Fix #4, use CFE_FS_InitHeader() to initialize CFE header
+MM|7adc87ad144a89eec7832aa12a671fc56c94bd78|2022-05-13|Fix #17, Resolve UT uninit var static analysis warnings
+MM|46457a8052961893e97910258d099c2bf63dc8b4|2022-05-13|Fix #18, Resolve uninit var static analysis warnings
+MM|106a1812ff72c9597fef65e2e5d5da10d19d7640|2022-05-09|Bulk update adds all internal 2.5.1-rc2 changes
+MM|b03d1ad6a11dfd14ec0681e1d1db66ebedbdcb54|2022-05-09|Bulk update for 2.5.0 release, see VDD for change summary
+MM|fc72265d418e6462891460700cbc6ac7ac29d3aa|2017-06-29|Initial commit
+PSP|c9d8192a164595e5055edfd09ea553566da28923|2026-09-24|Fix #507, Make CFE_PSP_AsyncMask File Static
+PSP|6ecfa0598b61532b495cee6ccbb74bfa9861a04b|2026-06-01|Fix nasa#482, used return value of backtrace in OS_printf() statement
+PSP|802f6f893d9d5e4f4d26a83a31f8245ced7f7cc6|2025-10-15|Fix #310, resolve TOCTOU race in EEPROM file creation
+PSP|2336ddee131d8d1c40c65989bc317d7a7e2c2486|2024-09-12|Fix #435, correct init in PCS_malloc call
+PSP|116a58ecbc7a9d813ccc7320af66dbe0bc61694f|2022-09-28|Fix #183, Create Changelog File
+PSP|05af21e98d737826b12a654d94c1b61e57edcb38|2022-05-16|Fix #342, Resolve uninit var static analysis warning
+PSP|f2f944bd922cc6acd11894f7fab50fccdbb0f925|2022-05-10|Fix #340, Add cpu affinity example
+PSP|bf9b935ba6b7a28f223f02cac8c9ef20b444df10|2021-08-29|Fix #299, Sleep before exit when printing
+PSP|cecbb092b6ea44add928ba0b33e18fb40ca96d9b|2020-10-07|Fix #204, redefinition of macros in PPC vxworks unit test build
+SBN|ccb363d761c4995e6e813fc4e16a32213550b756|2026-08-19|Fix nasa#102, Replaced zero with NULL for MsgPtr initialization in WaitForWakeup() in sbn_app.c
+SBN|ee59c6a151a262048b83631f9e8567f5ac888953|2026-07-15|Fix #98, undo remnant of uncommited change to protocol types/names
+SBN|fa46b06889d999873594f71c1b156eb73ff7ce53|2026-06-24|Fix nasa#94, Initialize Variables in sbn_subs.c and sbn_app.c
+SBN|e2db02be8cc93a76bf7737a855fbc32d90b731d6|2026-04-07|Fix #69, Remove unused initial value for variable.
+SBN|d83bc5d39a6fba985c43e92df05058e2d6a4b7db|2026-04-07|Fix #69, Remove unused initial value for variable.
+SBN|5f31f07bba97ba970cb8be3516801d1875fd18b8|2026-04-07|Fix #69, Remove unused initial value for variable.
+SBN|ca5a912e48494997d8703d1e1d4050140f4b0fc3|2026-04-07|Fix #69, Remove unused initial value for variables.
+SBN|050e57df832141f0bac40e7ed02a9dc9cc3f09d1|2026-04-07|Fix #69, Remove unused initial value for variable.
+SBN|6fd2d694608212102b0b7e69d5d874592b1135c1|2026-04-07|Fix #69, Remove unused initial value for variables.
+SBN|206d7403d90891406d649ce069c362887b4d33ec|2026-04-07|Fix #69, Change argument name in function prototype to match implementation.
+SBN|a8190ec83edaab6477f93db7d80fa5dc55c9f07c|2026-04-07|Fix #69, Remove unused initial value for variable.
+SBN|261865fb8bcfaaee1348e3b94f86f3cca167dfdf|2026-04-07|Fix #69, Change argument name in function implementation to match prototype.
+SBN|3cb2df90bfc04923bc685602e76be022df547317|2026-04-07|Fix #69, Correct array index access before limits check.
+SBN|5ee8f94a9f6355a253abce9c1cd3534217fdb20c|2026-04-07|Fix #69, Fix issue with data structure not being initialized.
+SBN|8d805df3004036b60d3471c6ee83ed6e0af4c6c6|2026-04-07|Fix #69, Fix uninitialized variable in spacewire module.
+SBN|3b5e96fa2422751ae7ca76ad15bae2d58f1afe26|2026-04-07|Fix #69, Fix uninitialized variable in spacewire module.
+SBN|d9b60086c2570e0a2e0b6e49e7a7c705f39523b9|2026-03-19|Fix #121, Adjust serial module to change of buffer size type.
+SBN|ff2f6e47ee45561c7bae11eed3bee9408a1a01c1|2026-03-19|Fix #121, Adjust TCP module to change of buffer size type.
+SBN|f05e3955deb1143002a56185192960f6e7dfca32|2026-03-23|Fix #121, Adjust UDP module to change of buffer size type.
+SBN|f0699df2bd78c910551edf6bf84a19d83ac14ea1|2026-03-19|Fix #121, Change how sizes are represented in binary form.
+SBN|28346e1b6ccf8f0f96854d34bcaa1d15189d584b|2026-04-06|Fix #121, Explicitly cast down message sizes before sending messages out.
+SBN|ea3451a17b12381a8eaba784f9a6b2bc4e32ef59|2026-03-19|Fix #121, Change type of SBN message size.
+SBN|fade4c88cc44d72aa518cebb962c1fbe787e4a37|2026-03-23|Fix #135, Change type of variable to match return type of `write`.
+SBN|98126ccaadf577732166acd554b14ec6bb72a10d|2026-03-20|Fix #136, Change type of variable to match return type of OS_write.
+SBN|94cca10df88bad059c6410fd18e8cacb4d4903c7|2026-03-12|Fix #119, Move function prototypes together with existing block in header.
+SBN|b3ab487ab5253decce06992ae1e4850425fb3da9|2021-02-08|fixing net initialization, no-op print to debug
+SBN|9bd0d7a3507bd957ebbc1321f02ddd6ae50abebc|2021-02-08|adding Spacecraft ID to SBN peers and making tables reloadable
+SBN|989daa633911fc77cc26f7ec3e516115dd6d7dd2|2021-02-08|cmds: fixing time initialization
+SBN|7305e531ebdccf85cb5b6376f63b2e07d970a3d5|2020-09-11|fix for osal obj id changes
+SBN|80f540a739506ff0fab9550955a88a16b9e0e0b8|2020-08-21|100% coverage sbn_subs (did I say that before?)
+SBN|a4f7edbc84bb982bf7c9890e36acec37ec08764d|2020-08-17|if sub already in SBN.Subs, don't err out due to max subs
+SBN|b0414bf0d80f9d4b8aacefa0b8243c42fb6d4265|2020-07-27|better handling of startup
+SBN|1ef51f802e3f5c850d54ab73b342eb1a3a8328e0|2020-07-15|initial unit tests for SBN core (just AppMain so far!)
+SBN|330eba0b206d9778ad326a6436529e7575e4ff40|2020-06-26|use CFE_SB_PIPEOPTS_IGNOREMINE instead of GetLastSenderId()
+SBN|9ff53b246f213e5e633f4bd5ef408ef073125b73|2020-06-17|implemented remap subscription
+SBN|a9dcd29e5ab592c62b5a74b3acd754235ebaf6d2|2020-06-03|update version for table change
+SBN|e04672142c94182c5f90a023f611a52f54124e49|2020-04-20|updated version to reflect #17 change
+SBN|ffe605d336a7e95fe25b981b0cd04b60e58253af|2020-01-13|rearchitected TCP, incoming connections "unaffiliated" until the first message is received.
+SBN|9c32aea5283602c10a8288c21db0897824b8a8c0|2020-01-07|updated comment, changed "name"
+SBN|25c4912c8725779a5a2b3fcedf72f3bd94fb034a|2020-01-07|Initial wireshark dissector code for SBN
+SBN|817b862d9cb3a8faa22d533407ae4fd103f41508|2019-12-02|SBN_PeerInterface_t.PipeName not used, but Subs array is
+SBN|88246b78919befefd15c2e8ecddc0826c5f1df28|2018-02-13|clarified the "RESET" commands, simplified the command list a bit (changes to configurations should be performed via changes to the tables), and added a requirements document.
+SBN|ac554aaf40fddee83d7e88c6b3cbeecf99fa8378|2018-01-31|Now have a defined "init" interface for modules which receives the version numbers from SBN so that the module can verify it is running against the right version of SBN.
+SBN|f599e31fb9bcc6a65dabb9c83c1b54d5c7d59a2a|2018-01-23|changed line 536 of sbn_app.c from if(!D.Net.Configured) to if(!D.Net->Configured)
+SBN|46cf8060f8a49eaa1c06decb1b1c73e5a9bd571c|2018-01-03|removed static declaration from address struct in send message...could cause race conditions.
+SBN|0f2f2f23e54af5390b133ed9d19b6cfa8574045a|2017-11-25|use the configured pipe depth
+SBN|f9d210e9c5bf0630a78f7779d7f5957951b56282|2017-11-08|revert event struct to 6.5.0a's definition and moved MAKE_BIG_UINT32 to hdr. (whoops, danger of using dev branch of CFE)
+SBN|ae9a1f553700a60506fb49672fc4181b676fb25e|2017-10-27|Changing the logic of peer polling...now core SBN calls the protocol module poll function every cycle and it's up to the module to determine what to do when...
+SBN|9eb4c2fba6cccf68178d6dcb715111e029b96386|2017-10-24|change in the event struct
+SBN|9b885231bafb1185381f426332ea8abcaf6ffd04|2017-10-05|Need to make sure serial port is opened before sending... :)
+SBN|9731afbf8207522f490f86c1f2016488108e2c5c|2017-06-29|Initial commit
+SBN|6c6ef2465e27c640a3096e8a76882f81f536927e|2017-06-16|As SBN blocks on the SCH pipe, SBN should wake and process SCH messages immediately upon receipt. It's possible SBN will be busy when addl. SCH messages arrive, but it's ok if we drop them.
+SBN|fcdbe8668b41ff8e881f63593fa1531461575ed6|2017-05-10|DTN should not block when polling, only when using tasks.
+SBN|b0d002730c2a1514381b86bfb067031bdb20f3e5|2017-05-08|Added "Unload" methods to module interface, so that ES can stop/unload/reload SBN.
+SBN|c2fdf0ec1b3d897382b2c585f3cc0dfdd1f54903|2017-05-05|added version handshake as part of the subscription messages
+SBN|b5cb3d75157970570af11d5b48d6549e3e4d1af8|2017-05-04|Change the sub protocol to send all subs in one message.
+SBN|ff17058d1d8b8970d96719fe7a51e274850a713a|2017-03-13|brought in latest sbn code from babelfish, resolved merge conflicts, tested changes...
+SBN|01dc62be92f887cee14cc8ddd2193ec49362f8ba|2017-02-28|changed from per-task mutex to global mutex to fix race condition in send-tasks...
+SBN|351ebba869db5253299ff2d9279743cfdeef8e3f|2017-01-27|Changed spacecraft id in example peer data file to 0x42 to match cfe macro
+SBN|17fe0e5dfb98f6ab3013bdd6ee1e8d2e830065ed|2017-01-10|added "send task" option, where each peer gets a task that waits on the pipe and sends the message as soon as it is received from the pipe.
+SBN|1161c94c16b2eede9f7a5cdefc3d1264d3c4ba71|2016-08-26|Reduced to one command and one telemetry message id (wakeups can occur on the command MID/pipe... and all telemetry can be the same MID but with different telemetry headers, which have been already implemented.)
+SBN|5855016ea54abfdd2ffcfe206ba4e69fe1805a2d|2016-08-24|Minor fix, should loop on subscription messages on SubPipe until there are no more messages; prev. implementation returned upon successfully processing one message.
+SBN|126e0e0e98332ab8289b67558dfb855caee5e0e8|2016-08-24|moved SBN_DEBUG_MSGS to sbn_platform_cfg.h, included in initialized message
+SBN|d0bcb25b224112e56263b588c1cfc5f1ce4e1332|2016-08-05|support for OSAL networking, plus some minor design changes for UDP
+SBN|9a6843f151dfbc5951a0ca8ff476395fdeee9c8b|2016-08-03|Supports (conditionally) OSAL network layer. The OSAL network layer is still a work in progress, so this API may change.
+SBN|337471cf6364bda06f4e9b16c9325eaff6282c8d|2016-07-15|missed the subscription endian logic
+SBN|f565db7c57c37daf1728a33d8dad41756c948c22|2016-07-09|Fixes endian-ness when you have multiple nodes (SB re-uses the same message buffer for multiple pipes.)
+SBN|62f1aac535f57d00a884283f6b25ed2e6d67a4ea|2016-05-04|better error handling when dealing with pipes and subscriptions
+SBN|2ec1a881f93391292189e236fa72547f2370a260|2016-05-05|limits the number of times we check peer pipes so we don't starve other processing
+SBN|a28c15214c8e1ff50e328f650bf23c48da5d6ee5|2016-05-04|fixed a starvation bug wherein SBN was only processing one message per peer per "tick" (wakeup or timeout)
+SBN|ce1b3cac1db368bc23a3478edd7431fb901ebf70|2016-04-26|Needed to update the version # as the protocol and APIs are significantly changed (yeah the branch name in GIT is 1.1; we'll stick with that as the branch will disappear once we approve to merge into the development branch.)
+SBN|72577e32d6a7ef3497189e37ff2675b871501967|2016-03-30|removed sbn_lib library, fixed some subscription bugs and simplified code
+SBN|bfbc3730d54b770ec3b227b48a58d585ce60c79c|2016-02-05|Now using ProcessorId (and properly sending ProcessorId in network-byte order over the wire) for determining which peer sent me a message.
+SBN|0f973d9373abbe0d4373de38908987a0d212bae6|2016-02-03|ProcessorId is network-order over the wire...need to convert back on recv
+SBN|b3cc9400c1da00337fe6c986f0c6e9277a0a96fb|2016-01-28|corrected sub/unsub byte ordering; CFE_SB calls expect platform-order, we send/store network-order (big-endian). Also ensure debug messages show the correct byte order.
+SBN|1f6ff6cc12f886f37e85d4f93596781109e0d8d3|2016-01-25|fixed compiler warnings, changed from int * to void **, minor cleanup
+SBN|051c1d1e79532607d7a68fd3cb739daaf063b6bf|2016-01-25|sbn_sync not used
+SBN|14e6be60487ee00a736aae81b3d5b85a4fc5326d|2015-11-30|Changing over-the-wire SBN protocol to be "network" order bytes (big-endian).
+SBN|8c385ce17cbd11cf3d6311c6c4811ea36d417f0f|2015-12-30|SBN network traffic should have headers in network order
+SBN|c9fc63ce94307992973d32696e58e940db021f99|2015-12-30|initial checkin of code from JSC
+SC|99cec13adb57ddcda367633902644c854ab762ca|2026-06-05|Fix #162, change RTS IDs to correct pattern
+SC|234b715e43e83fb402c4010b4a256eed6ed8c6e5|2026-04-20|Fix #33, update bitmask definition in unit test
+SC|bb88193fda3f8269aa2c6a22143bb07a94d19de1|2026-03-31|Fix #28, change bitmask to uint8 and simplify macro
+SC|6d6e4ad14bba5e8f92138bf94a5d23d140440c99|2026-03-27|Fix #25, Adjust SC Files to Work with an EDS Build and Default COSMOS Packet Definition Files
+SC|a017a7bca456dc044d300cce5fa85ed0dc7f2e1f|2023-10-12|Fix #117, change local array refs to object pointer
+SC|37b2b2fbe9e17d4a03e3cd6bb3622d166950a947|2023-05-26|Fix #18, Make compiler-added padding in `SC_AtpControlBlock_t` explicit
+SC|6d23f30024740c7d1f35cc5b6b405cc94808b73d|2022-12-06|Fix #65, Moves interface definition files to inc
+SC|8f39e1bd880754fa4bd35bb6d77029a63823af14|2022-11-06|Fix #63, Remove initializations causing Cppcheck errors
+SC|d651f314783aa3b1f95175a6e3b045e8d7a2b07d|2022-10-24|Fix #16, Move Table Header definitions from sc_app.h to sc_tbldefs.h
+SC|6623362de1597b54ed0966d3d1eb852e2796ed8f|2022-08-24|Fix #8, reorder conditions in if statements to optimize code
+SC|31c0e4bf4bd1febb8a4ed089443ea9982d525622|2022-05-13|Fix #23, Resolve fsw uninit var static analysis warnings
+SC|a7227270e4146e7857d673ed2ab7dff173d43dfd|2022-05-06|Bulk update adds all internal 3.1.1-rc2 changes
+SC|ae2d615e7431d430950fd25ccc7e85587c03ad95|2022-05-06|Bulk update for 3.1.0 release candidate 1, see VDD for change summary
+SC|cc94ae1a1a15acafd66d8d35f656103c27cb56cb|2017-06-29|Initial commit
+SCH|10b171f4f76dcd39310e0d9fba4625a6105aec65|2017-06-29|Initial commit
+cFE|5c07b7fe19fd0acd857e900242940ac524a83e80|2026-09-11|Fix #2804, Clear events before running function under tests
+cFE|84109fe9dc2d5aa95dfb1ec610930a3d8da92204|2026-09-04|Fix #2803, Add function to move event issuing switch statement out of SubscribeFull
+cFE|f4fc92799f3183b4149a0809c5d85ae5d2863566|2026-08-31|Fix #2801, reduce file systems init complexity
+cFE|13ed88153b785d60b42cd9085751d93b06831e8e|2026-08-27|cFE#2317: balance parentheses/braces in CFE_MSG_CMD_HDR_INIT (priext)
+cFE|23ae3bd09921368f5ca33db176e272c621a5eb07|2026-06-22|Fix #2737, After discussion with Joe and Jose about similar instances where CodeSonar flagged certain functions for not having bounds checking regardless of bounds checking being done beforehand in the code, I'm adding a note in the code to ignore this in CodeSonar. I've also marked on our CodeSonar website to ignore these lines.
+cFE|96b78824a0a2a6476f17bc346f444e2d9ffab8f4|2026-06-03|Fix #2736, Initialize Variables Passed to Functions
+cFE|906536f44501a3380bee37e0cdfd39c98f82ec25|2026-06-02|Fix #2750, add in Task Affinity TA module to cFE
+cFE|7fa169983204d2d6687d619995baec1a3e693cdf|2026-06-01|Fix nasa#2742, Suppressed ignored return value warning of OS_QueueDelete() in CFE_SB_DeletePipeFull() in modules/sb/fsw/src/cfe_sb_api.c
+cFE|7110ed37ad94bb474e719a9facf2db2ed41f50e2|2026-05-19|Fix nasa#2731, Used CFE_SB_GetAppTaskName() function directly in calls to CFE_EVS_SendEventWithAppID() in CFE_SB_DeletePipeFull()
+cFE|e0ced588cd6f99aff6176c675f23a0ed96d4da95|2026-04-10|Fix #199, Fix #199, Adjust cFE Files to Work with an EDS Build and Default COSMOS Packet Definitions
+cFE|063cb3022abd7b8193280fad9552fb11f194b47b|2026-03-26|Fix #184, prevent startup script line buffer overflow
+cFE|48101c8f8af00d814c5643dc2b392c07599dd59d|2026-03-02|Fix nasa#2439, Updating tests to be in sync with latest codebase
+cFE|4767cef979377bd850708943dd6a75069a8b0891|2025-11-17|Fix #2655, add counter locks
+cFE|b0f38482fb25f4af191ba6bacabbcce4bfa1f46c|2025-10-24|Fix #2523, move truncation count into locked section
+cFE|dd596c9618c2d425570295419ed55b7e61862783|2025-10-15|Fix #2523, add mutex around EVS counter increment
+cFE|587e0b383c34a42c0b0ce41b57d82aec555f3885|2025-05-09|Fix #2651, initialize pipename buffer
+cFE|3091b2a0e600d8e648bb113b55b70a2202a844a8|2025-01-24|Fix #2625, add initialization of table indices
+cFE|66d44f56d2e4b8cda224e2b1e6bd5878b7869450|2024-08-01|Changing to uint32 cast
+cFE|1209acd9143223c8be4c983e817ae847d39433de|2024-04-01|HotFix #2539, uninitialized value warning fixes
+cFE|0604676c20e3be94e1d494d80afe7420e4c7c151|2024-03-28|Fix #2538, table transaction initial implementation
+cFE|777feec3ac9da50ccdabf4541ffb3cc88b752199|2024-02-02|Fix #2514, change CFE_MSG_Message from union to struct
+cFE|7d7a826f969ef9ccce4182d08d6dba615eaef9c7|2024-01-15|Fix #2495, Remove superfluous status assignment in `CFE_SB_CreatePipe`
+cFE|e56d5e0bbb94ffa8fc43fa6ad8541bf4c54f0f0d|2023-12-07|HotFix #2411, move perf enum definition
+cFE|cd0b2046f35af03ceb5a7a06363685b505570108|2023-11-14|HotFix #2464, update startup script entry points
+cFE|58551ac4cf5dda2abbf36916a3e9a874615b6c0e|2023-09-06|Fix #2436, Adds an empty string or null pointer check for pipe creation
+cFE|27e6b24f1e57e5e9d67f7fbbbeeecf1491a43e85|2023-09-06|Fix #2436, Adds an empty string or null pointer check for pipe creation
+cFE|25ccc0ce10a70bae49aa50439394b4c8faaa02da|2023-08-17|Fix #2427, Race condition in TestCreateChild
+cFE|2afb1342256a16eded511c765d5aa055f0cc975f|2023-07-17|Fix #2402, Uninitialized ExceptionTaskID in CFE_ES_RunExceptionScan
+cFE|5843440428738191fddc96b5c59a0b54cd08625d|2023-07-17|Fix #2334, Uninitialized PktTime in EVS_SendViaPorts
+cFE|44eac09ea0bfc75cf3d0a03fa8b5fbcd33d73b87|2022-10-11|Fix #2164, Remove Changelog in Doxygen Config
+cFE|95d201c08fb0564dc2a418044e9fa62e9ad0bcbf|2022-10-07|Added most recent build in order to resolve merge conflict
+cFE|bc887c1ff31c1a3c28556bbbcd17589d993a5e74|2022-09-30|Fix #782, Create CHANGELOG.md
+cFE|3a8ad1744e4053041c29e021fcc0125af5d7bd64|2022-09-29|Fix #2157, Update TO_LAB entry point in cfe_es_startup.scr
+cFE|84b42867275d9ce89a9a5b0b1609e662e669d52b|2022-08-18|Fix #2137, Squash uninit var static analysis warnings
+cFE|2c8ba837bbc61ee6955abc983a913e741abba789|2022-08-08|Fix #2131, Increase event burst credit to not squelch at startup in CI
+cFE|0286b6ec301219620adf553882c3f1bf194c0a5e|2022-06-14|Fix #2118, Endian macro mask before shift to avoid shift overflow warning
+cFE|f9112b4e714ac876a0af2d5869fd0e9027b59c39|2022-06-07|Fix #2114, Add macro for initializing command header
+cFE|558b5a419c62568207bcfdcd7e23ffe362c7c12b|2022-05-13|Fix #2101, Resolve fsw uninit var static analysis warnings
+cFE|847794c67e68c0bcb25d5239140ef2b7d7761915|2022-05-12|Fix #2100, Resolve UT uninit var static analysis warnings
+cFE|45c0ae6d8f8ca396f4fed3a9e887a660886310f1|2022-01-25|Fix #2036, Revert breaking change to CFE_ES_AppInfo_t structure
+cFE|3333827efd9fd04ffab3b4166057fb5f9891d354|2022-01-18|Fix #2028, Initialize BlockData in ES UT
+cFE|fbbd5a9180ccd5bbfc36e40a1ea530a1d30ddc8a|2022-01-18|Fix #2026, CFE_FS_ParseInputFileNameEx avoid uninit var
+cFE|8e24232c8674837195bddc4e65a65501480e8fd4|2021-09-29|Fix #1982, extended header definitions and test updates
+cFE|6a8da99fd98dc3922695a66df5af84c77ad701a7|2021-08-25|Fix #1843, Remove ClockFlagCheck helper method.
+cFE|b108e7ec288336a0ce845a1f1cd3856cb44561f2|2021-08-24|Fix #1825, test unsubscribe from single pipe
+cFE|914d9b32b2d8fac619e3e534db230e775b3026b2|2021-08-24|Fix #1843, Add Time Clock Test
+cFE|352a9e5ed6387cc1f899ff30694408dc3d7bf114|2021-08-17|Fix #1791, Add tests for TBL ReleaseAddresses
+cFE|6c52f003c375571fcb683e1aa3d0953aaa1d09d1|2021-08-17|Fix #1795, test boundary condition on GetAddresses
+cFE|81df083c0b53b212580a0dacd8a2ac3ce417f16c|2021-08-13|Fix #1794, Subscribe Message Limit Greater CFE_PLATFORM_SB_DEFAULT_MSG_LIMIT
+cFE|19374f5fbfc20eedc05d46bc3ad1402c96f1cf7c|2021-08-10|Fix #1680, add SB subscription functional test
+cFE|94360e72b8e1868e290044777271385b211041dc|2021-08-13|Fix #1786, Success Test for CFE_ES_RestartApp
+cFE|6887fbfd892b121b39e8fbd65237ef34fbddf271|2021-08-11|Fix #812 Start Perf Data before running tests
+cFE|10d3bde51013d9794613c519f8aa2ebd7d7a1d61|2021-08-09|Fix #1775, Add invalid ID Syslog entry for CFE_ES_DeleteApp and CFE_ES_ReloadApp
+cFE|8fd8ab7faab0609f94153573639ee5b0a415c4e9|2021-07-20|Fix #1693, correct function name in UT_BSP_Unlock
+cFE|8aa153b21e0ddb565edd52b0a8f4d12098dbbc7c|2021-07-14|Fix #1546, use cfe time clock state enum t in cmd/tlm and handling
+cFE|683b59413e22e554bf090ba3ead72be16677b939|2021-07-12|Fix #1635, Change CI to use Test Log.
+cFE|2bf59c2ee7f9685b7bc053c8da5fd8a64fd7b83b|2021-07-07|Fix #1651, Add SB Pipe Management Functional Tests.
+cFE|6868369aa4165dd446c5f52f4a7b7e380a295e20|2021-04-29|Fix #1184, Change type to resolve loop warning
+cFE|961b752bc90216743a95694dbf5d011fed4a4273|2021-05-26|Fix #1320 #1583, Order event ids and remove max
+cFE|df504c1b282aa4f9f1bf5289f70e2be18142ac8a|2021-06-14|Fix #1367, Adding delay to test timeout.
+cFE|b8d3f865a9afe8961dbc1825f0a52659aefe9fdb|2021-06-14|Fix #1367, Changing info test to force failure.
+cFE|b9953774749d065a5b99440ed89ee723e9f2783a|2021-06-02|Fix #1483, Change BUILDTYPE to debug
+cFE|445e9223af64edf3fa67ca159ed7431467dffa31|2021-06-01|Fix #1595, provide CFE assert lock/unlock
+cFE|ee6c43d4d7f0d06efe95bd59d2df92d5b9055a7e|2021-05-24|Fix #1569, Remove unused CFE_SB_NO_SUBSCRIBERS
+cFE|ee19f1897a9114772443d7dac4bfedaaca9de88d|2021-05-20|Fix #1485, Document CFE_ES_PoolCreateEx NumBlockSizes error handling
+cFE|7fa73a59d2887a579a6617f06ce65ae320ff62f0|2021-05-16|Partial #1474, changing return type from int32 to CFE_Status_t
+cFE|63d11eb692b756510f292ff370f5e21c8ad6cc0e|2021-05-05|Update #1343, Move priority to "native" config file
+cFE|edc4b2a183e76cab5d5eec819b9887b9da67eeb8|2021-04-20|Fix #1336, Function comment blocks in SBR module
+cFE|5d79991f700828be72a0b66d7ae65e9f9560101e|2021-04-20|Fix #1336, Function comment blocks in ResourceID module
+cFE|146d8c4c3afc03544f04df18ed1baf88b2aa64bb|2021-04-20|Fix #1336, Function comment blocks in MSG module
+cFE|5f9b92864e9a81cb28138d1ff9b24c453a2a6725|2021-04-22|Fix #1336, Function comment blocks in TIME module
+cFE|62716f23ee4588c971b62726df5f57a73d7ed24a|2021-04-20|Fix #1336, Function comment blocks in TBL module
+cFE|8010a9b7a865ee52ebb732712c77a55151462fa8|2021-04-23|Fix #1336, Function comment blocks in FS module
+cFE|a2f3aaada79cc8b0c357103891867d7b5a6fb8d6|2021-04-20|Fix #1336, Function comment blocks in EVS module
+cFE|a301f259f297b1f0ec057c87f127e72e06960c2a|2021-04-20|Fix #1336, Function comment blocks in SB module
+cFE|8d341bbfebb820ca92f5a40614a6987d6507586d|2021-04-20|Fix #1336, Function comment blocks in ES module
+cFE|85bfba24dd2cf73d88cfe318526d6a8cca7dc167|2021-04-16|Fix #1338, ignore status of call to CFE_ES_CDS_CachePreload
+cFE|469d970e62129d9fd0c58e85b542843cca2337de|2021-04-16|Fix #1330, better warning about malformed startup line
+cFE|0905f87e2cee23ee894a4e90d79abfbe2479b64e|2021-03-24|Fix #1261, Remove redundant checks in CFE_EVS_EarlyInit
+cFE|d71366ffee2bf6467b4151ba45f562a22c26bc76|2021-03-23|Fix #1252, Squash potentially uninitialized variable warnings
+cFE|360d0ca8b5ec4c05ee698709629ea30b43a8126b|2021-03-18|Fix #1187, Increment CreatePipeErrorCounter for all create pipe errors
+cFE|f1bcbe550792f0b1d56a55eb7fb575ccf80275dd|2021-03-17|Fix #1185, Squash possible uninitialized variable false alarms
+cFE|d5bd7ca978c7a69b6ca50f36ad5dff26f05fa33a|2021-03-17|Fix #1192, Initialize TotalMsgSize in CFE_SB_GetUserDataLength
+cFE|a00a788156e4d4b8d9f48d46802324210ff01e33|2021-03-10|Fix #1217, locally define BIG/LITTLE order macros
+cFE|2888450aa98dabe018ac456a3288dada5bb8a633|2021-02-08|Fix #979, add stack size and priority to task info
+cFE|80fca942fec8e96d7c9d203a93e8f9d8ca766710|2021-02-04|Fix #665, update pipe name documentation.
+cFE|f7be6e3788e5471863200b748e9fe9c6eab0742d|2021-02-01|Fix #1108, clean up ifdef blocks
+cFE|a97a268af5c9ed4bccb91c8afbc545a05c4c238b|2021-01-29|Fix #1141, PipeName unset with debug event
+cFE|cf198f6c48949464a01a37c28fce43cffc2c0407|2021-01-25|Fix #1036, Clear task data in EarlyInit and standardize name
+cFE|38113518c8a525185df99ccad711184e973c1ccf|2021-01-11|Fix #793, Clarify restart/reload app behavior
+cFE|bd051ffbfa6d3336b95a4e1549f0cdc15428e966|2021-01-21|Fix #996, Remove CFE_PLATFORM_SB_MAX_PIPE_DEPTH in favor of OS_QUEUE_MAX_DEPTH
+cFE|1a17cfc742fb0812527e4c4e7617343fcb2e189e|2021-01-21|Fix #997, Simplify UT_InitData SB setup
+cFE|1def3b562ee408f3ae295237fd8f6b3f92b9b2c9|2021-01-22|Fix #1071, Initialize Status in CFE_ES_WaitForSystemState
+cFE|4a86e23361b2b3870dbc8a13aea7f653ee9a749c|2021-01-22|Fix #986, Remove unnecessary CFE_MSG_Init in TBL
+cFE|79c4210d513dd4a4c2e59ea033db86b6d6bb5da7|2021-01-25|Fix #915, Check for file existence in CFE_ES_RestartApp
+cFE|137768d16f5e06a3d3119d3e5249cb812204ac81|2021-01-15|Fix #982, use separate pipe info data struct
+cFE|b17cd1e3394efe061bc58c76cf6424e96d1c2fc4|2021-01-12|Fix #1073, refactor SB API for proper global locks
+cFE|6b5f77a67eff0e756346df49db14472a5144406d|2021-01-12|Fix #985, globalize "resource ID" definitions
+cFE|ad743931bf676b1195082c11b6168fde14cf85d3|2021-01-07|Fix #1074, Refactor CFE_TIME_RegisterSynchCallback
+cFE|b53b3bc1bd5810f14d93bc8bdcb00110b44467ec|2021-01-05|fix #1062 - remove CFE_SB_TimeOut_t typedef
+cFE|298890387197438f12f63e2e6f07729131176904|2020-12-29|Fix #1049, replace OS_fsBlocksFree
+cFE|a83df5e5abec22908652720156eaf645b60ae8ef|2020-12-14|fix #1030 change test_MSG to UT_DisplayPkt
+cFE|231a0cbb177d5e9c4c0250924b27d367d8f6abad|2020-12-07|Fix #952, OSAL module flags to permit app reload
+cFE|6b453be2de988bac473ebb84315f6c058b63d7b5|2020-10-28|Fix #973, CFE_MSG_Init clear option removed
+cFE|d684a6cbb5213c2326bbc13335fc2517b389f2c3|2020-10-27|Fix #967, Update startup script names
+cFE|6932f1fe9180f4fd3f6756e4074b2c4b27a703cf|2020-10-16|Fix #950, race condition in control request
+cFE|e6296e6b0bf82a18f5b4484d9dd8f73ce122a300|2020-10-26|Fix #909, reorganize ES public API + msg definitions
+cFE|af0f5366eac96c708113a199d0a1241a1cab7832|2020-10-21|HOTFIX #924, Correct AppId during initial start
+cFE|8a4056fc59c8ead57609799a8121b85aa8f5906d|2020-09-10|Fix #873, Add test for SB subscribe/unsubscribe/unsubscribe
+cFE|be1a23a8b32b6ecd03053d6924bb152d08b0c61b|2020-09-04|fix #862 - unsub of a message ID that is already unsubbed should now work as expected
+cFE|58ed92ed500a20b7ba2209ce405f5dd2553342d2|2020-09-01|Fix #823, avoid infinite loop in CDS registry find
+cFE|b561ed8db3de36d0dcab51ff72aeb84d47c8e569|2020-05-27|Updated return comment for CFE_SB_DeletePipe to include user defined flag as a possible return type.
+cFE|91aacd899878e462beebf819498a70dc6e13ee0e|2020-05-21|Fix #704. Added stub for CFE_SB_DeletePipe in ut_sb_stubs.c
+cFE|2a0494e5b63b1f1286c752bb935eb0ec3b3ccdfa|2020-05-06|Issue #666, Change message definitions to ensure alignment
+cFE|8dad53604b40797945aafcf6e7ed570ed0d2983f|2020-05-07|Fix #684, order of CleanupTaskResources
+cFE|5e71fe2f494b9730dfb777a4d99e25b9919ff452|2020-05-06|Issue #666, Change message definitions to ensure alignment
+cFE|6ef8a02a358787a8ccf85a2ec61441d0512b922b|2020-04-29|Fix #623, Replace OS_FS_* return codes with common definitions (#624)
+cFE|f211a064bf24839f45e0ef25f1f4b8cae16c3bf6|2020-04-28|Fix #523, SB Subscription report control on separate MID
+cFE|1b03958cb10b3c254460d38a0324bbb3a1dfb8e4|2020-04-15|Fix #591, Avoid deadlock in CFE_ES_CreatObjects
+cFE|79e4bfbc2ec79fc996db2c5d71e74607b5a6b4f8|2020-04-13|Fixes #494, Updates CFE_SB_GetLastSenderID to check if message has been sent on pipe
+cFE|436bc4b4a03faf616fac6fd6dbc3624b9afecbd0|2020-04-01|Fix #581, Propagate the OSAL compile definitions to CFE build
+cFE|e72fd7632d1d1cd8fb5611841bc304e093fda8f1|2020-01-28|Fix #377, Order requirements by ID
+cFE|7d13f76f33e5b55845be7940d8c30b9b7d921ef1|2020-01-22|fix for #308 - improved create pipe error reporting with eid and unit test changes
+cFE|d1a1b354de1c584ed090339fa9831404ce1cc476|2019-12-16|Fix #429, Const string initialization
+cFE|bbdf20178f9ff78f5fb99f3c9f06499d2f42ff07|2019-10-11|Fix #373: Correct mutex around log file write
+cFE|b7e1307080151df7bceb1f581f932378a667dd7a|2019-10-09|Fix #298, fix inifinite loop
+cFE|8fe60c31eee5ce00853da9cd980aac96dc8978b8|2019-09-13|Fix #25: Ensure table file header definition is consistent
+cFE|26ffd61d0eef53eb34b2fbf320d34e41bffc1481|2017-06-29|Initial commit
+cFS|bc8d3c3a7dd18b84b8a4e5c6ae7f2896d9026c21|2026-04-07|Part cFS/Documents#11, updating submodule pointers to point to current synched codebase.
+cFS|525d198bb5ae54644b18e887c56a32a036b94bf0|2023-11-14|Update CFE to correct entry points in sample startup script
+cFS|bc8b3a9da3cc99abaf566a2074a471fd05e3bd5b|2022-08-25|Squash uninit var static analysis warnings *Combines:*
+cFS|201798bcb76e9842590feda528b95332f5c26eb2|2022-07-27|Fix #530, Default CI to bash to apply pipefail
+cFS|01e7f0a69247c828a9ddcadcb8b429852cf4109a|2020-08-11|Add versioning changes from ci_lab and tblCRCTool
+cFS|336aa5da81a2a8f9eff647080d589139a9114da4|2020-05-28|Updates to submodules for FastTracked changes and osal PR  #461
+cFS|ecd2d5db67c10a5d1816eb4f495cd172216f1a77|2020-05-19|Initial update to submodules for ic-20200513
+cFS|e53cc1d8270dc63b15728916ab80ee0449c11d71|2020-03-25|Update sample_app submodule to reflect change in integration-candidate
+cFS|cbe03be8381bc6a800af2f96488f4d8cb3a2a5a9|2020-03-18|Update cfe and psp submodule references to integration candidate. Update ci_lab submodule to reflect minor change in master.
+cFS|9fbc8754f99c98b19658cf99b8d5442dd26f1d18|2017-06-29|Initial commit
+ci_lab|c16d2f3c78e38de5232c937c07b245fd857efefb|2026-06-16|Fix #197, Initialize Variable msg_size in ci_lab_passthru_decode.c
+ci_lab|2c9e4f20bb56a00b11c1998ce81ff0aa3ba738a6|2024-03-06|Fix #176, apply name changes to EDS dispatcher
+ci_lab|d24fba8d082f5c8f4785b7dc9d3a99f8212018ae|2024-01-31|Fix #173, more complete definition of READ_UPLINK
+ci_lab|c823b5485074c85386cff95e14679c3c9dee76c2|2023-12-13|Fix #169, initial inclusion of EDS file
+ci_lab|0013d43d0c19276b206034aaede6a6fc71d952a0|2023-11-15|Fix #160, Configurable timeouts and loops
+ci_lab|5c3d8431a42569af5d018cf50b925e40072d4668|2022-11-08|Fix #96, Check returns from CFE calls during init
+ci_lab|e1604deecc4493153bf5703ab005fc492e3a3002|2022-10-07|Added most recent build in order to resolve merge conflict
+ci_lab|7c7f2bced2b6175108236301e0a6f0341b2219e9|2022-09-30|Fix #119, Create CHANGELOG.md
+osal|9a934155fc262a1dff8994331f62cce9584cb20f|2026-08-20|Fix nasa#1564, local_arg in OS_Console_Create_Impl() initialized to NULL instead of zero pointer
+osal|9d259cedb975aa6493c1b38296ef64199cc4076c|2026-08-21|Fix nasa#1568, task affinity support vxrtp
+osal|fc8eaf6e8be6ad972e648ff2c23054950cd9f980|2026-06-23|Fix #1556, Initialize Variables in osapi-clock.c
+osal|9e2de2d9a63e6c400c3eeade21f8e32ee61c18e9|2026-06-23|Fix #1547, Use statvfs f_frsize for reported block size
+osal|2afc615840321bd7b5b85edea126951e6b5257c0|2026-04-09|Fix #108, add_compile_definitions() adds an extra -D. add_definitions() does not add a -D. Getting rid of the extra -D in add_compile_definitions() fixes an Address Sanitizer error.
+osal|b16cb4bb449df9614c422d85894b55679e77b68b|2025-07-07|Fix #1445, add conditional around priority sem test
+osal|1cf3c3c3b8c715bdfcb73893be3044f96e6098d2|2025-03-21|Fix #1503, Change timer start time to improve accuracy
+osal|46c65e62e4ee01ba19ac2c6eeb3cf0b941d46a16|2023-12-28|Fix #1432 #1411, RTEMS semaphore return bugs and functional test update
+osal|fd199a82b54d0b2a63471db9e7c79fd261bcc306|2023-08-25|Fix #1406, Squash RTEMS countsem take timeout bug
+osal|954f05369141cbede692ccefbb160d96a5133014|2022-10-10|Fix #1304, locks for condvar objects on rtems/vxworks
+osal|d8c683ac74ff2412df1ca8a95a4e09b9ea4e1f45|2022-10-07|Added 2 most recent builds in order to resolve merge conflict
+osal|e02e4e94712db25a540c4cf01e559d85c957b980|2022-09-30|Fix #552, Create CHANGELOG.md
+osal|2ffe351b71eb4a6922e1122483725aeeedca0176|2022-05-18|Part #1253, Resolve UT uninit vars static analysis warnings
+osal|da79c7944cacaeabfed3aa6c8d44cad930c5067a|2022-05-12|Fix #1253, Resolve UT uninit vars static analysis warnings
+osal|49ca8bec9b49b9f12ecadc60c6e9e69599cb52ca|2022-02-10|Fix #1214, Resolve UT uninitialized variable warnings
+osal|bd4c65022e76280d380fde46aa82c5e4fe5fc09f|2020-08-19|Fix #1208, typesafe definition of osal_id_t
+osal|c8b9301c2e8d2474795c70615d6ae387b5a4a4f3|2021-06-25|Fix #1087, do not register RTOS timer for external sync
+osal|55cb7b28ebd8cdb7ef74d1e0e3bbea3855ab2be3|2021-06-25|Fix #1086, increase timeout in network-api-test
+osal|1e00b53bc1b250ae5a4edf68c4f58b73fac7d304|2021-06-03|Partial #1052, Mutex test cases
+osal|771ce48cd6798e86119c1a8207b48a5be0981800|2021-05-28|Fix #1061, add mutex lock around UtAssert globals
+osal|40b4a89cb419af7cf39eff53f3e95a7e62e27eee|2021-05-21|Fix #1017, resolve discrepancies between mutex API and unit tests
+osal|78e87f700f7a2dd0e4772359e624a2e8a4619f3a|2021-05-12|Fix #1009, add missing clock retcode tests
+osal|8a3e0ec2d961b9f82a2f76936b8ae97181133481|2021-05-19|Fix #1027, defer cancellation when BSP locked
+osal|076164e1628a08f5f4d7ca559e4538fd5900ad85|2021-05-19|Fix #991, Add count sem timeout test
+osal|1d6a6536b5dd78841bf962670d169a0194e85c43|2021-05-07|Fix #988, do not require nonblock mode
+osal|6951d971e89b5ac2c01ab006da53b9a0ed6bc57c|2021-05-07|Fix #989, add local mutex to BSP console
+osal|ccf9215f0ac65a2bba333759f75897923a0b770a|2021-04-12|Fix #957, move async console option
+osal|11a7d435f988c626de5e8e4b15a12fdc87a4a436|2021-04-02|Fix #871, allow OSAL re-initialization
+osal|5ba86d2ec097b7364ebb2d61e9e0d24043d29056|2021-03-30|Fix #844, switch to use CLOCK_REALTIME
+osal|7853845eb152efb8a7f51ea6f8819adbfae01bd1|2021-03-12|Fix #867, better error translation for ESPIPE errno
+osal|cdddcee5aef421261e466ebd3446af16d813328e|2021-03-11|Fix #875, Move copyblock size to define
+osal|5ea8bb2d544428eca415b1689a2d85314783c85c|2021-03-10|Fix #843, remove BIG/LITTLE bit order macros
+osal|d1c4e8ff8ade263c14089a821267ff764420abbf|2021-03-01|Fix #833, Initialize file descriptor in OS_OpenCreate
+osal|feff5b2d0b30e8f542b8401f3e8f9a504eb79e97|2021-02-12|Fix #779, Change local vars to not conflict with global vars.
+osal|69002757380d090e23780983974ea778f932e6b2|2021-02-11|Fix #803, Add check of semaphore to avoid unreachable code in posix OS_BinSemCreate_Impl
+osal|44e0afc3bb7ae7d014b2d8080444e309cf9abcb3|2021-02-10|Fix #790, Return status from OS_ConsoleAPI_Init
+osal|b9a76972b45d4344ed3cff008251d08ee293f978|2021-02-09|Fix #783, Initialize locals flagged in static analysis
+osal|8c7535c523aa140b3a5d43e674ba42c8345a16ad|2021-01-14|Fix #718, deprecate OS_fsBlocksFree and OS_fsBytesFree
+osal|7e34a2c2242d6e75a75d5479ea65ca2aeac5cea2|2020-12-30|Fix #429, update OS_time_t definition to 64-bit ticks
+osal|9074cf98260d987a8af166d40002cac3d3307dd7|2021-01-05|Fix #685, change file create to use read write
+osal|efd7f3553e58de33d487458871cc0f66da951e0d|2021-01-04|Fix #732 change uint32 to size_t
+osal|ae888d44f641fc5990691dcf60c0769395685978|2020-12-29|Fix #707 Resolve issues of auto tests in parallel build change sem flush to solve race condition change port numbers to be different from network test
+osal|b5863b717bcb958c967ccb6cbf39814500721b85|2020-06-04|Fix #471, order of operations for delete all
+osal|7ba42a63fe6a7972582036dfd432ec3bf5edf8b1|2020-12-21|Fix #642, make OS_TaskDelete synchronous
+osal|a7529cf845cc6eacf9492ca5ca2bc69c4db7aa22|2020-12-22|Fix #703, implement exclusive/reserved lock
+osal|29e1fd52db85c2c4a71bd2fed3cb9223f8d28791|2020-12-21|Fix #645, implement separate lock/unlock key
+osal|f9e9b284bf937d377ebb9611cdf6b858d0dddaf7|2020-12-15|Fix #688, Initial macro implementation and config options
+osal|8121f5ba860df7dac31f23e34a33878b83688834|2020-12-14|Fix #686, Use errno in clock_getres error reporting
+osal|a41f748e460eadd279370d69907d2c302efe798c|2020-12-09|Fix #673 #677, improve global lock on POSIX
+osal|292e0c16b07c1225bd9138a071b34a37d865214f|2020-12-07|Fix #670, clean up task definitions in core test
+osal|ba3bc0175bd4c4329a5ba4e1b41ffa6cae2a38bf|2020-12-01|Fix #664, change type of sync callback argument to osal_id_t
+osal|2899dfec30cf31aa3d2c49ec43eef3cc2fc55373|2020-10-29|Fix #635, add typedefs for osal stack and priority
+osal|a32392a1ce1bd66877727fe114a3428e4bdd43bc|2020-11-04|Update #641, revert change to OS_SymbolLookup()
+osal|2189b0ec2a92fc683e40f48f54a7cbb0f161b4c4|2020-10-23|Fix #623, add debug messages for mutex double locks
+osal|d5f90ddd2d96b3cc2874c04a90871f1d09b615eb|2020-09-04|Fix #593, change OCS_off_t to a signed type
+osal|a5a01833c791ce6a946aaa7ea49629319fd659a3|2020-08-25|Fix #537, Fail tests on startup and teardown failures
+osal|a871decbcc3e2295b4ef097addf9546e60066d60|2020-06-19|Fix #516, Use absolute timeout for timedlock calls
+osal|a64a43520f923e67d7c50611a66d4f519663b813|2020-06-09|Fix #493, race condition in idmap api test
+osal|f3f8b8a7f1d2572a8b37062f1983fe5cab40e2f1|2020-06-01|fix #380, Updated test to implement changes requested
+osal|7a644f8d8d2cd356a6a330f5fc53749b9c1e8297|2020-05-28|Fix #381, Updated functional tests to implement all changes requested on Github
+osal|4ef9c1803ff5b48a34828f9525b93d1a2ea7e2c7|2020-05-19|Fix #476, add global lock/unlock wrapper
+osal|eda62103058f9a8ac51ac0ac2f97cc0d75f85cdf|2020-05-19|Fix #474, Add timecb global mutex
+osal|084dd75e03a5b5c8726711a833cd8170dfd3f28b|2020-05-19|Fix #470, bin sem unlock after task delete
+osal|a227f3b9819070044ee0968d646d7e558d65c58a|2020-04-27|Fix #435, Changes for string ops warnings
+osal|a9c020550b56fa944f107e8303b4364ff0e2bc53|2020-05-04|Update #285, Change CI config to specify permissive mode
+osal|baeb635179d5f2897ccbf7f8294b85c6167cf0a9|2020-04-01|added parenthesis to avoid operator order problems
+osal|e8a1db737f54a31520b1e642731377316fea1ea2|2019-12-18|Fix #323: Avoid infinite sem-speed-test
+osal|6357c2d0e3cd93d6f115ff6a232632d96818deda|2019-10-22|Fix #274: Avoid possible deadlock of timer callback
+osal|2457d6f4b4501b8d9fa1288bcd5f4326f63ba1ef|2019-09-17|Fix #17: Update function description blocks across OSAL
+osal|689a3cc355e8d1570234f9281cccfcac64e03649|2019-09-17|Fix #17: Update function description blocks across OSAL
+osal|8d0dbec03faea88c47af555ed546c72e1cf3935f|2014-02-06|Merged OSAL 4.1 changes (developed outside of git repo)
+osal|6b5ff25a0822bd50423de6855bb2933a06b39ed1|2013-02-15|Initial commit of osal 4.0
+sample_app|0325fdad29a3a69e89f6efaf9b04da14d9871b50|2026-04-02|Fix #29, Reorders prototypes to match implementation
+sample_app|ceed7e7d524c01ca6cbdb8190453f519c199cd5f|2026-03-26|Fix #26, Adjust SAMPLE_APP to Work with an EDS Build and Default COSMOS Packet Definition Files
+sample_app|41018a883e41e6f411062f1d8861c80dc453a1cf|2024-03-06|Fix #228, apply name changes to EDS dispatcher
+sample_app|bd145c805b2eed7b2711e3334bb1d57b21b4a51e|2023-12-13|Fix #224, initial inclusion of EDS file
+sample_app|a71b471ef5c85466d845ff6c4ce6b8708bce86ea|2023-12-01|Fix #215, Convert syslog writes during initialization to events
+sample_app|d08ee4374fd0fe622ad2d70336cfcacbd8fd9ab4|2023-03-23|Fix #141, Zero out global data structure during initialization
+sample_app|de9e945ef4210771411c07a876a3e7d36773ef58|2023-03-06|Fix #197, Refactor SAMPLE_APP_Init/Process to remove multiple returns
+sample_app|6edee0618d6282b740e5a556781a700b93b41c74|2022-10-24|Fix #147, Add check for success of CFE_TBL_Load() during Initialization
+sample_app|319f506eb16dbd427173b04f95b5c6625f0ef408|2022-10-07|Added most recent build in order to resolve merge conflict
+sample_app|81bc2f4cb5adf7aa11ae913953c45a00c69b7ae1|2022-09-30|Fix #182, Create CHANGELOG.md
+sample_app|61f657d940670cd59311cf1506a5fa9e7b60f8d6|2021-01-06|Fix #101, Correct CFE_TBL_GetAddress return code check
+sample_app|dc18851082755f40720101c5a09bb7efe28438a0|2020-08-24|Fix #89, Remove CFE_SB_InitMsg use in coverage test
+sample_app|f2b905db86bc47b6a806c3b9282fd4b4c5197ff2|2020-06-16|HOTFIX: Rename items to reflect changes from PR#73
+sample_app|155a3e70596c59d09d334c63990dbdf930d588d8|2020-05-11|Fix #64, add CFE_SB_InitMsg() for housekeeping UT (HOTFIX)
+sample_app|24a5bdb2bfef36e64d8a06b5c9e8edadcea0e9bc|2020-03-26|Integration fix: change deprecated symbol in UT
+sample_app|693d75f23a4ab0edc1350c05e18974ed0a043ac2|2019-12-06|Fix #28: Check return of CFE_TBL_GetAddress
+sch_lab|3c9a56c86a179a6e9d58108513d0df78b86e1fd9|2023-12-13|Fix #159, initial inclusion of EDS file
+sch_lab|cb4cd0e955f252a7088d365e99215b6a456d3223|2022-10-07|Added most recent build in order to resolve merge conflict
+sch_lab|ef32d9b748e603b9aaf0593e68118afec63b7815|2022-09-30|Fix #122, Create CHANGELOG.md
+sch_lab|136df4e18568bf2c74919c007a71e0c44f038eef|2022-05-12|Fix #114, Resolve uninit var static analysis warnings
+sch_lab|4f820010439cfed1c5d33705228c33048e2a5a3c|2021-05-24|Fix #80, exit the main loop if init fails
+sch_lab|c6342bdec008719dbcf083ac7e284a6a36ee677a|2020-01-09|Fix #24: Accept CFE_SUCCESS from CFE_TBL_GetAddress()
+sch_lab|ce6b27882f0e3203130ceb22cff6b5d59bce7701|2019-10-23|Fix #18: Include definition of CFE_SB_MsgId_t
+to_lab|51cf370217c9011c22e774bf5120bffd9a39cb9e|2026-06-15|Fix nasa#229, Check return values for CFE_SB_Subscribe for TO_LAB_CMD_MID and TO_LAB_SEND_HK_MID in TO_LAB_init() in fsw/src/to_lab_app.c
+to_lab|fd9db4a25ab8575df89a35fe44383c20ab590685|2026-06-09|Fix nasa#231, to_lab app: Changing null terminator manipulation in string to follow best practices of using strncpy.
+to_lab|a2b2a0462c27023fe372dbf7c25f6c43b39b80b6|2026-06-05|Fix #234, Initialize SourceBufferSize in to_lab_passthru_encode.c
+to_lab|d3d52da34fa195cacfd085e92d1615ea1f036d15|2026-04-21|Fix cFS/cFS#676, startup msg limit errors
+to_lab|8464a68d267547b130bb8b5c2b3669235b0aa448|2026-04-15|Fix #45, TO Stops Subscribing after an Invalid MID in the TO Subscriptions Table
+to_lab|17e23dca49a27c775101f4b97f282ca93d9b17ba|2026-03-04|Fix #37, Clean up TBD comment in TO_LAB_UnsubscribeFromTlmPipe
+to_lab|04b0af9651169b885b7fdbcbadb1dee6a452a2eb|2026-02-26|Fix #35, Add unsubscribe count to show we are looking at the full table
+to_lab|e8f3dcf54bcd9b2b00a4dc94e17379e1a0b6b135|2023-12-11|Fix #179, Light initialization logic refactor + remove multiple returns
+to_lab|21bacbb33045269c21133c19a03b8672efec255c|2024-03-06|Fix #193, apply name changes to EDS dispatcher
+to_lab|d87f662f6b9df9104fe569db3f12645d03afe0b2|2024-01-17|Fix #187, Zero-out global data during init + set `RunStatus` to `APP_ERROR` if init fails
+to_lab|0706028d8ca88170b71255575b5f3b5629c59e04|2023-12-13|Fix #184, initial inclusion of EDS file
+to_lab|e8421f64c336de07a60cc92984e78d0ffc8fe497|2023-11-15|Fix #172, Add timeout and packet limit on sending telemetry
+to_lab|fce77cf01a645f04393f8c4413156b3c886f9805|2023-01-27|Fix #145, Refactor mutually exclusive logic in if, else if block
+to_lab|87e202a06fa8224cde1498cda55007779265f855|2023-04-12|Fix #152, adjust subscription table based on apps present
+to_lab|53caa1f6820af26efd1aa60de7e4a03abcc67446|2023-04-05|Fix #147, Add check for failure of `CFE_EVS_Register()` during initialization
+to_lab|3705985fbd58d5699e242a02539c68902142b7d5|2022-09-30|Fix #128, Create CHANGELOG.md
+to_lab|f0164b44a193834633ce1a8129bde724231e2630|2021-02-26|Fix #85, Remove numeric pipe ID from event printf
+to_lab|39e557f767b0b04f24c07338573cf8e42c2da76f|2020-12-14|Fix #71, Remove all only from telemetry pipe
+to_lab|ee44ea4cb9448764865a0310f12c7590b1722ac6|2020-07-23|Fix #50, Mark end of valid MsgId subscriptions
+to_lab|dcdd0af11f70209e6e0c2344f95e18d2b4254161|2020-06-26|fix #47 - correct return type for TO_LAB_init()
+to_lab|05bb649ff2af7aa57052f5f0766f7b88c3ae2d56|2020-04-27|Fix #34, Deprecate shell tlm subscription

@@ -1,0 +1,2104 @@
+[
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 274,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_appctrl.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 27,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_apps.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 146,
+  "indirect_calls": 3
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_backgroundtask.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 14,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_cds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 81,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_cds_mempool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 36,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_crc.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_erlog.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 31,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_generic_pool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 23,
+  "indirect_calls": 9
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_mempool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 90,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_perf.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_resource.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 36,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_start.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 122,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_startupscript.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 33,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_syslog.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 22,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 221,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 65,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 280,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_appctrl.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 33,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_apps.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 152,
+  "indirect_calls": 3
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_backgroundtask.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 20,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_cds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 87,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_cds_mempool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_crc.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_erlog.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 37,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_generic_pool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 29,
+  "indirect_calls": 9
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_mempool.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 96,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_perf.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 48,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_resource.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_start.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 128,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_startupscript.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 39,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_syslog.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 28,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 227,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/es/fsw/src/cfe_es_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/es/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 71,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 30,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_log.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 23,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 171,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 55,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 60,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 36,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_log.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 29,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 177,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 61,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/evs/fsw/src/cfe_evs_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/evs/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 66,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 232,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_buf.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 8,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_init.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 14,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_priv.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 214,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 156,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_util.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 10,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 44,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_msg_id_util.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 10,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 238,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_buf.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 14,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_init.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 20,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_priv.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 220,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 162,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_util.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 16,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 50,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/sb/fsw/src/cfe_sb_msg_id_util.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/sb/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 16,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 191,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_accdesc.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 22,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_load.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 132,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_loadbuff.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 61,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_registry.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 73,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_regrec.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 47,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dump.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 79,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dumpctl.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 7,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_handlelink.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 3,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_valresult.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 32,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_internal.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 157,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 43,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 38,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 167,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_passthru_codec.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 21,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 15,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 197,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_accdesc.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 28,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_load.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 138,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_loadbuff.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 67,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_registry.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 79,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_regrec.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 53,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dump.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 85,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dumpctl.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 13,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_handlelink.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 9,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_valresult.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 38,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_internal.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 163,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 49,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 44,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_task_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 173,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_passthru_codec.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 27,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/tbl/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 21,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 29,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 113,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_tone.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 51,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 64,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 61,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_api.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 35,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_task.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 119,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_tone.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 57,
+  "indirect_calls": 1
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 70,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_objtab.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "cfe/modules/time/fsw/src/cfe_time_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/time/ut-coverage",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 67,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ci_lab/fsw/src/ci_lab_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ci_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 45,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ci_lab/fsw/src/ci_lab_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ci_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ci_lab/fsw/src/ci_lab_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ci_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 26,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ci_lab/fsw/src/ci_lab_passthru_decode.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ci_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 5,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/to_lab/fsw/src/to_lab_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/to_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 73,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/to_lab/fsw/src/to_lab_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/to_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 34,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/to_lab/fsw/src/to_lab_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/to_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 19,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/to_lab/fsw/src/to_lab_passthru_encode.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/to_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 1,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sch_lab/fsw/src/sch_lab_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sch_lab",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 39,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sample_app/fsw/src/sample_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sample_app",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 27,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sample_app/fsw/src/sample_app_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sample_app",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 13,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sample_app/fsw/src/sample_app_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sample_app",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 3,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sample_app/fsw/src/sample_app_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sample_app",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 25,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 49,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cfdp.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 266,
+  "indirect_calls": 1
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cfdp_r.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 120,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cfdp_s.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 109,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cfdp_sbintf.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 29,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cfdp_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 12,
+  "indirect_calls": 3
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_chunk.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 18,
+  "indirect_calls": 3
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_clist.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 6,
+  "indirect_calls": 2
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_codec.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 1,
+  "clang_stderr_lines": 7,
+  "clang_err": [
+   "  239 | static inline void CF_Codec_Load_uint64(uint64 *pdst, const CF_CFDP_uint64_t *psrc)",
+   "      |                    ^~~~~~~~~~~~~~~~~~~~",
+   "2 errors generated."
+  ]
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_cmd.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 158,
+  "indirect_calls": 4
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_crc.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_timer.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 2,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 46,
+  "indirect_calls": 2
+ },
+ {
+  "file": "apps/cf/fsw/src/cf_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cf",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 18,
+  "indirect_calls": 1
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_app_monitor.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 35,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_event_monitor.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 43,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_exec_monitor.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 30,
+  "indirect_calls": 2
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_msg_action.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 18,
+  "indirect_calls": 1
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_sysmon.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 17,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 90,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hs/fsw/src/hs_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 59,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_dwell_tbl.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 34,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 3,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_dwell_pkt.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 11,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 44,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 64,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/md/fsw/src/md_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/md",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 32,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_mem32.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 16,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 24,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_dump.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 19,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_mem16.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 16,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 39,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_mem8.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 15,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_load.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 32,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 98,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/mm/fsw/src/mm_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/mm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 44,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 58,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_table_processing.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 1,
+  "clang_stderr_lines": 11,
+  "clang_err": [
+   "      |                 ^~",
+   "      |                 =",
+   "1 error generated."
+  ]
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 30,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 75,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_table_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 35,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_app_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 35,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_memory_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_init.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 24,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_eeprom_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 42,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_compute.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 65,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/cs/fsw/src/cs_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/cs",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 104,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_cmd_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 47,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 30,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 112,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_child.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 165,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_table_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 7,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 53,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/fm/fsw/src/fm_compression_none.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/fm",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 0,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_custom.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 5,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 84,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 26,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_watch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 53,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_action.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 16,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 21,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/lc/fsw/src/lc_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/lc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 55,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_rtsrq.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 75,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 5,
+  "indirect_calls": 1
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 73,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_atsrq.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 86,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_state.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 34,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_loads.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 89,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 73,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sc/fsw/src/sc_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sc",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 59,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ds/fsw/src/ds_table.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ds",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 88,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ds/fsw/src/ds_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ds",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 156,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ds/fsw/src/ds_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ds",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 27,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ds/fsw/src/ds_file.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ds",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 69,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/ds/fsw/src/ds_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/ds",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 76,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hk/fsw/src/hk_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hk",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 49,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hk/fsw/src/hk_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hk",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 7,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hk/fsw/src/hk_utils.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hk",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 70,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/hk/fsw/src/hk_dispatch.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/hk",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 35,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sbn/fsw/src/sbn_app.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 281,
+  "indirect_calls": 17
+ },
+ {
+  "file": "apps/sbn/fsw/src/sbn_cmds.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 111,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sbn/fsw/src/sbn_pack.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 17,
+  "indirect_calls": 0
+ },
+ {
+  "file": "apps/sbn/fsw/src/sbn_subs.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 106,
+  "indirect_calls": 2
+ },
+ {
+  "file": "apps/sbn_udp/fsw/src/sbn_udp_if.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn_udp",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 74,
+  "indirect_calls": 10
+ },
+ {
+  "file": "apps/sbn_f_remap/fsw/src/sbn_f_remap.c",
+  "dir": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/build-native_std/native/default_cpu1/apps/sbn_f_remap",
+  "clang_rc": 0,
+  "clang_stderr_lines": 0,
+  "import_rc": 0,
+  "import_stderr_lines": 0,
+  "calls": 63,
+  "indirect_calls": 1
+ }
+]

@@ -1,0 +1,240 @@
+OS_BSP_Initialize():Maximum user msg queue depth = 10
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+OS_Posix_TaskAPI_Impl_Init():419:Could not setschedparam in main thread: Operation not permitted (1)
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: EEPROM Range (2) created: Start Address = 7FC2F8180000, Size = 00080000 Status = 0
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-01:17:06.03127 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-01:17:06.03133 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-01:17:06.03159 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-01:17:06.03159 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-01:17:06.03160 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-01:17:06.03162 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-01:17:06.03171 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-01:17:06.03172 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-01:17:06.03172 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-01:17:06.03173 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-01:17:06.03205 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-01:17:06.03235 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+EVS Port1 1980-012-14:03:20.05229 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.05232 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 56223
+EVS Port1 1980-012-14:03:20.05233 66/1/CFE_ES 91: Version Info: Mission SampleMission, version (null)
+EVS Port1 1980-012-14:03:20.05235 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05236 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05238 66/1/CFE_ES 91: Version Info: Module ES, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05239 66/1/CFE_ES 91: Version Info: Module EVS, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05239 66/1/CFE_ES 91: Version Info: Module FS, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05241 66/1/CFE_ES 91: Version Info: Module SB, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05241 66/1/CFE_ES 91: Version Info: Module TBL, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05242 66/1/CFE_ES 91: Version Info: Module TIME, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05242 66/1/CFE_ES 91: Version Info: Module OSAL, version git:v7.0.1-45-g5befd8e
+EVS Port1 1980-012-14:03:20.05244 66/1/CFE_ES 91: Version Info: Module PSP, version git:v7.0.1-26-g36c24cb
+EVS Port1 1980-012-14:03:20.05244 66/1/CFE_ES 91: Version Info: Module MSG, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05245 66/1/CFE_ES 91: Version Info: Module SBR, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05245 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:v7.0.1-106-g546a002
+EVS Port1 1980-012-14:03:20.05247 66/1/CFE_ES 92: Build 202610010630 by root@vm, config sample
+EVS Port1 1980-012-14:03:20.15049 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+1980-012-14:03:20.25079 CFE_SB_AppInit: Registered 4 events for filtering
+EVS Port1 1980-012-14:03:20.25086 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.25088 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+EVS Port1 1980-012-14:03:20.35118 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.35121 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+EVS Port1 1980-012-14:03:20.45152 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.45156 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+1980-012-14:03:20.50145 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50149 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50151 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50160 CFE_ES_ParseFileEntry: Loading file: /cf/probe_lo.so, APP: PROBE_LO
+1980-012-14:03:20.50187 CFE_ES_ParseFileEntry: Loading file: /cf/probe_hi.so, APP: PROBE_HI
+1980-012-14:03:20.50203 CFE_ES_ParseFileEntry: Loading file: /cf/probe_slow.so, APP: PROBE_SLOW
+1980-012-14:03:20.50216 CFE_ES_ParseFileEntry: Loading file: /cf/probe_own.so, APP: PROBE_OWN
+1980-012-14:03:20.50228 CFE_ES_ParseFileEntry: Loading file: /cf/probe_shr.so, APP: PROBE_SHR
+1980-012-14:03:20.55198 PROBE PROBE_LO ENTRY mono_us=4626584352 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55203 EVS_NotRegistered: App PROBE_LO not registered with Event Services. Unable to send event.
+1980-012-14:03:20.55203 PROBE PROBE_LO SendEvent_before_Register st=0xc2000002
+1980-012-14:03:20.55205 PROBE PROBE_LO EVS_Register st=0x00000000
+1980-012-14:03:20.55212 PROBE PROBE_HI ENTRY mono_us=4626584486 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55213 EVS_NotRegistered: App PROBE_HI not registered with Event Services. Unable to send event.
+1980-012-14:03:20.55214 PROBE PROBE_HI SendEvent_before_Register st=0xc2000002
+1980-012-14:03:20.55215 PROBE PROBE_HI EVS_Register st=0x00000000
+1980-012-14:03:20.55225 PROBE PROBE_SLOW ENTRY mono_us=4626584624 policy=0 rtprio=0 cpu=0
+1980-012-14:03:20.55241 PROBE PROBE_SHR ENTRY mono_us=4626584776
+1980-012-14:03:20.55243 PROBE PROBE_OWN ENTRY appid=1114121 mono_us=4626584798
+1980-012-14:03:20.55248 PROBE PROBE_OWN Register(T,single) st=0x00000000 mono_us=4626584844
+1980-012-14:03:20.55248 PROBE PROBE_OWN GetAddress(T) BEFORE load st=0xcc000005 ptr=(nil)
+1980-012-14:03:20.55249 PROBE PROBE_OWN ReleaseAddress(T) BEFORE load st=0xcc000005
+1980-012-14:03:20.55250 PROBE PROBE_OWN Load(T,v1) st=0x00000000
+1980-012-14:03:20.55251 PROBE PROBE_OWN Register(D,double) st=0x00000000 mono_us=4626584883
+1980-012-14:03:20.55252 PROBE PROBE_OWN Load(D,v1) st=0x00000000
+1980-012-14:03:20.55253 PROBE PROBE_OWN Register(E,double) st=0x00000000
+1980-012-14:03:20.55254 PROBE PROBE_OWN Load(E,v1) st=0x00000000
+1980-012-14:03:20.55254 PROBE PROBE_OWN GetAddress(T) st=0x4c00000e val=1 (holding)
+1980-012-14:03:20.55255 CFE_TBL_GetInactiveBufferExclusive: Inactive Buff Locked for 'PROBE_OWN.T' by AppId=1114121
+1980-012-14:03:20.55256 CFE_TBL_UpdateInternal: Unable to update locked table Handle=1769473
+EVS Port1 1980-012-14:03:20.55258 66/1/CFE_TBL 95: PROBE_OWN: Failed to update 'PROBE_OWN.T' (Stat=1275068440)
+EVS Port1 1980-012-14:03:20.55262 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender PROBE_OWN
+1980-012-14:03:20.55266 PROBE PROBE_OWN Load(T,v2) while self holds lock st=0x4c000018 val_seen=1
+1980-012-14:03:20.55266 PROBE PROBE_OWN ReleaseAddress(T) st=0x00000000
+1980-012-14:03:20.55267 PROBE PROBE_OWN GetStatus(T) st=0x4c000004
+EVS Port1 1980-012-14:03:20.55267 66/1/CFE_TBL 37: PROBE_OWN Successfully Updated 'PROBE_OWN.T'
+1980-012-14:03:20.55269 PROBE PROBE_OWN Manage(T) st=0x4c00000e
+1980-012-14:03:20.55270 PROBE PROBE_OWN GetAddress(T) after manage st=0x4c00000e val=2
+1980-012-14:03:21.50423 CFE_ES_Main: Startup Sync failed - Applications may not have all initialized
+1980-012-14:03:21.50428 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+EVS Port1 1980-012-14:03:21.00001 66/1/CFE_TIME 21: Stop FLYWHEEL
+1980-012-14:03:21.55844 CFE_ES_Main: Startup Sync failed - Applications may not have all started
+1980-012-14:03:21.55848 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+1980-012-14:03:21.60863 PROBE PROBE_LO WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=2004673 mono_us=4628589090
+1980-012-14:03:21.60868 PROBE PROBE_HI WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=2004617 mono_us=4628589140
+1980-012-14:03:21.60869 PROBE PROBE_SHR OPERATIONAL t0 mono_us=4628589150
+1980-012-14:03:21.60870 PROBE PROBE_OWN OPERATIONAL t0 mono_us=4628589157
+1980-012-14:03:21.60872 PROBE PROBE_SHR Share(T) st=0x00000000
+1980-012-14:03:21.60874 PROBE PROBE_SHR Share(D) st=0x00000000
+1980-012-14:03:21.60875 PROBE PROBE_SHR Share(E) st=0x00000000
+1980-012-14:03:22.10421 PROBE PROBE_SLOW AFTER_PRE_DELAY mono_us=4629084722 policy=0 rtprio=0 cpu=0
+1980-012-14:03:22.10427 EVS_NotRegistered: App PROBE_SLOW not registered with Event Services. Unable to send event.
+1980-012-14:03:22.10427 PROBE PROBE_SLOW SendEvent_before_Register st=0xc2000002
+1980-012-14:03:22.10428 PROBE PROBE_SLOW EVS_Register st=0x00000000
+1980-012-14:03:22.10428 PROBE PROBE_SLOW WaitForSystemState(OPERATIONAL,5000) st=0x00000000 waited_us=1 mono_us=4629084797
+1980-012-14:03:22.61353 PROBE PROBE_SHR t+1s GetAddress(D) st=0x4c00000e val=1 ptr=0x558dcca48a10 (holding)
+1980-012-14:03:22.61357 PROBE PROBE_SHR t+1s GetAddress(E) st=0x4c00000e val=1 ptr=0x558dcca48a70 (holding once)
+EVS Port1 1980-012-14:03:23.61897 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.D' from 'Addr 0x7FC2F8139E00'
+1980-012-14:03:23.61904 PROBE PROBE_OWN t+2s Load(D,v2) while SHR holds D st=0x00000000
+EVS Port1 1980-012-14:03:23.61904 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.E' from 'Addr 0x7FC2F8139E00'
+1980-012-14:03:23.61906 PROBE PROBE_OWN t+2s Load(E,v2) while SHR holds E (once) st=0x00000000
+1980-012-14:03:24.62419 PROBE PROBE_SHR t+3s held D ptr=0x558dcca48a10 val=1 (owner loaded v2 at t+2s)
+1980-012-14:03:24.62424 PROBE PROBE_SHR t+3s second GetAddress(D) st=0x4c00000e ptr=0x558dcca489e0 val=2
+1980-012-14:03:24.62425 PROBE PROBE_SHR t+3s held E ptr=0x558dcca48a70 val=1 (owner loaded v2 at t+2s)
+EVS Port1 1980-012-14:03:25.60949 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.D' from 'Addr 0x7FC2F8139E10'
+1980-012-14:03:25.60956 PROBE PROBE_OWN t+4s Load(D,v3) while SHR still holds old D buffer st=0x00000000
+1980-012-14:03:25.60957 CFE_TBL_GetInactiveBufferExclusive: Inactive Buff Locked for 'PROBE_OWN.E' by AppId=1114122
+EVS Port1 1980-012-14:03:25.60957 66/1/CFE_TBL 60: Load,app=PROBE_OWN,tbl=PROBE_OWN.E:No working buffers available, stat=0xffffffffcc00000f
+1980-012-14:03:25.60959 PROBE PROBE_OWN t+4s Load(E,v3) while SHR holds first E buffer st=0xcc00000f
+1980-012-14:03:25.60959 PROBE PROBE_OWN t+4s GetStatus(E) st=0x00000000
+1980-012-14:03:26.61479 PROBE PROBE_SHR t+5s first D ptr=0x558dcca48a10 val=3 ; second D ptr=0x558dcca489e0 val=2 ; E ptr=0x558dcca48a70 val=1 (ow
+1980-012-14:03:26.61484 PROBE PROBE_SHR t+5s ReleaseAddress(E) st=0x4c00000e
+1980-012-14:03:26.61484 PROBE PROBE_SHR t+5s ReleaseAddress(D) st=0x4c00000e
+EVS Port1 1980-012-14:03:27.62113 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.D' from 'Addr 0x7FC2F8139E10'
+1980-012-14:03:27.62121 PROBE PROBE_OWN t+6s Load(D,v3) after SHR release st=0x00000000
+EVS Port1 1980-012-14:03:27.62123 66/1/CFE_TBL 35: Successfully loaded 'PROBE_OWN.E' from 'Addr 0x7FC2F8139E10'
+1980-012-14:03:27.62125 PROBE PROBE_OWN t+6s Load(E,v3) after SHR release st=0x00000000
+1980-012-14:03:29.61148 CFE_ES_RestartApp: Restart Application PROBE_OWN Initiated
+1980-012-14:03:29.61152 PROBE PROBE_SHR t+8s RestartApp(PROBE_OWN id=1114121) st=0x00000000 mono_us=4636591942
+1980-012-14:03:29.62166 PROBE PROBE_OWN leaving RunLoop RunStatus=5 mono_us=4636602088
+1980-012-14:03:29.62170 CFE_ES_ExitApp: Application PROBE_OWN called CFE_ES_ExitApp
+1980-012-14:03:30.11164 PROBE PROBE_SHR poll GetAddress(T) st=0x4c00000e ptr=0x558dcca489b0 mono_us=4637092059
+1980-012-14:03:30.61183 PROBE PROBE_SHR poll GetAddress(T) st=0x00000000 ptr=0x558dcca489b0 mono_us=4637592243
+1980-012-14:03:31.11192 PROBE PROBE_SHR poll GetAddress(T) st=0x00000000 ptr=0x558dcca489b0 mono_us=4638092430
+EVS Port1 1980-012-14:03:31.14434 66/1/CFE_ES 10: Restart Application PROBE_OWN Success, AppID=0x11000b.
+1980-012-14:03:31.19453 PROBE PROBE_OWN ENTRY appid=1114123 mono_us=4638175043
+1980-012-14:03:31.19458 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:31.19459 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:31.19461 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4638175118
+1980-012-14:03:31.19461 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:31.19461 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:31.19463 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4638175135
+1980-012-14:03:31.19463 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:31.19462 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:31.19464 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:31.19465 PROBE PROBE_OWN OPERATIONAL t0 mono_us=4638175156
+1980-012-14:03:31.61212 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:31.61216 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4638592675
+1980-012-14:03:31.69481 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:31.69483 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:31.69487 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4638675375
+1980-012-14:03:31.69487 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:31.69486 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:31.69488 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4638675393
+1980-012-14:03:31.69489 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:31.69488 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:31.69490 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:32.11236 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:32.11241 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4639092857
+1980-012-14:03:32.19507 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:32.19509 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:32.19513 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4639175578
+1980-012-14:03:32.19513 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:32.19512 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:32.19516 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4639175607
+1980-012-14:03:32.19516 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:32.19515 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:32.19517 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:32.61254 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:32.61258 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4639593030
+1980-012-14:03:32.69534 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:32.69535 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:32.69537 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4639675823
+1980-012-14:03:32.69538 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:32.69537 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:32.69538 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4639675833
+1980-012-14:03:32.69538 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:32.69538 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:32.69539 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:33.11265 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:33.11269 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4640093162
+1980-012-14:03:33.19547 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:33.19549 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:33.19552 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4640175999
+1980-012-14:03:33.19555 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:33.19555 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:33.19556 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4640176036
+1980-012-14:03:33.19556 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:33.19555 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:33.19557 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:33.61283 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:33.61288 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4640593352
+1980-012-14:03:33.69568 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.T' owned by App(0)
+EVS Port1 1980-012-14:03:33.69572 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'T', Status=0xCC00000D
+1980-012-14:03:33.69574 PROBE PROBE_OWN Register(T,single) st=0xcc00000d mono_us=4640676219
+1980-012-14:03:33.69575 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.D' owned by App(0)
+EVS Port1 1980-012-14:03:33.69575 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'D', Status=0xCC00000D
+1980-012-14:03:33.69576 PROBE PROBE_OWN Register(D,double) st=0xcc00000d mono_us=4640676237
+1980-012-14:03:33.69577 CFE_TBL_TxnCheckDuplicateRegistration: App(1114123) Registering Duplicate Table 'PROBE_OWN.E' owned by App(0)
+EVS Port1 1980-012-14:03:33.69577 66/1/CFE_TBL 90: PROBE_OWN Failed to Register table 'E', Status=0xCC00000D
+1980-012-14:03:33.69578 PROBE PROBE_OWN Register(E,double) st=0xcc00000d
+1980-012-14:03:34.11302 CFE_TBL_TxnGetTableAddress: App(1114122) attempt to access unowned Tbl Handle=1769476
+1980-012-14:03:34.11303 PROBE PROBE_SHR poll GetAddress(T) st=0xcc000009 ptr=(nil) mono_us=4641093459
+1980-012-14:03:34.11304 PROBE PROBE_SHR Unregister(T) st=0x00000000 mono_us=4641093467
+1980-012-14:03:34.11304 PROBE PROBE_SHR Unregister(D) st=0x00000000 mono_us=4641093469
+1980-012-14:03:34.11305 PROBE PROBE_SHR Unregister(E) st=0x00000000 mono_us=4641093472
+1980-012-14:03:34.19596 PROBE PROBE_OWN Register(T,single) st=0x00000000 mono_us=4641176382
+1980-012-14:03:34.19598 PROBE PROBE_OWN GetAddress(T) BEFORE load st=0xcc000005 ptr=(nil)
+1980-012-14:03:34.19598 PROBE PROBE_OWN ReleaseAddress(T) BEFORE load st=0xcc000005
+1980-012-14:03:34.19599 PROBE PROBE_OWN Load(T,v1) st=0x00000000
+1980-012-14:03:34.19599 PROBE PROBE_OWN Register(D,double) st=0x00000000 mono_us=4641176419
+1980-012-14:03:34.19600 PROBE PROBE_OWN Load(D,v1) st=0x00000000
+1980-012-14:03:34.19600 PROBE PROBE_OWN Register(E,double) st=0x00000000
+1980-012-14:03:34.19600 PROBE PROBE_OWN Load(E,v1) st=0x00000000
+1980-012-14:03:34.61317 PROBE PROBE_SHR re-Share(T) st=0x00000000 mono_us=4641593596
+1980-012-14:03:34.61321 PROBE PROBE_SHR GetAddress(T) after re-share st=0x4c00000e val=1
+EVS Port1 1980-012-14:03:43.00003 66/1/CFE_TIME 21: Stop FLYWHEEL
+EVS Port1 1980-012-14:03:43.99992 66/1/CFE_TIME 20: Start FLYWHEEL
+1980-012-14:03:52.00733 CFE_ES_RunExceptionScan: ExceptionID 0x1110000 in TaskID 0: Caught SIGINT
+1980-012-14:03:52.00738 CFE_ES_RunExceptionScan: Processor Reset count not reached (0/2)
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+
+CFE_PSP: Shutdown initiated - Exiting cFE

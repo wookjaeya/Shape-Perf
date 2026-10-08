@@ -1,0 +1,608 @@
+# Evidence extracts (rw-flight), produced 2026-10-01 from local clones listed in repo_pins.txt
+
+## E1 cFE static-analysis CI (cppcheck) — repos/cFE/.github/workflows/static-analysis.yml:45-52
+      - name: Run cppcheck
+        uses: nasa/cFS/actions/cppcheck@dev
+        id: run-cppcheck
+        with:
+          strict-dir-list: './cfe/modules/core_api/fsw ./cfe/modules/core_private/fsw ./cfe/modules/es/fsw ./cfe/modules/evs/fsw ./cfe/modules/fs/fsw ./cfe/modules/msg/fsw ./cfe/modules/resourceid/fsw ./cfe/modules/sb/fsw ./modules/cfe/sbr/fsw ./modules/cfe/tbl/fsw ./cfe/modules/time/fsw -UCFE_PLATFORM_TIME_CFG_CLIENT -DCFE_PLATFORM_TIME_CFG_SERVER'
+          compile-commands-json: ./build/compile_commands.json ./build/native/default_cpu1/compile_commands.json
+          module-path: cfe
+          cppcheck-xslt-path: 'nasa/cFS/raw/refs/heads/dev/.github/scripts'
+## E2 cFS CodeQL JPL/MISRA query set; JPL rule 14 checking-return-values excluded — repos/cFS/.github/codeql/jpl-misra.qls:1-25
+# Start with all the queries in the codeql/cpp-queries pack.
+- queries: .
+  from: codeql/cpp-queries
+# Restrict to only the queries with the following ID patterns.
+- include:
+    id:
+      # MISRA Rule 5-3-2
+      - cpp/jsf/av-rule-173
+      # MISRA Rule 5-14-1
+      - cpp/jsf/av-rule-165
+      # MISRA Rule 5-18-1
+      - cpp/jsf/av-rule-168
+      # MISRA 6-2-2
+      - cpp/jsf/av-rule-202
+      # JPL Rules
+      - /cpp/jpl-c/*/
+# Exclude queries with too many results
+- exclude:
+    id:
+      # JPL 14
+      - cpp/jpl-c/checking-return-values
+      # JPL 15
+      - cpp/jpl-c/checking-parameter-values
+      # JPL 17
+      - cpp/jpl-c/basic-int-types
+
+## E3 CodeSonar suppression comments in cFE source
+repos/cFE/modules/cfe_assert/src/cfe_assert_io.c:92:        /* SAD: Suppress Ignored Return Value warning from CodeSonar.  There is no alternative action to take if
+repos/cFE/modules/sb/fsw/src/cfe_sb_api.c:436:        /* SAD: Suppress Ignored Return Value warning from CodeSonar.  If OS_QueueDelete() returns an error, nothing the
+
+## E4 cFE SB EDS: Telemetry/Telecommand interfaces and per-app Application component — repos/cFE/modules/sb/eds/cfe_sb.xml
+
+        <!--
+        NOTE: The TC/TM interfaces are declared separately because many CFS applications do
+        not have a 1:1 relationship between telecommand and telemetry streams.  For instance, some
+        applications define a single command packet, but publish 3-4 different telemetry packets.
+
+        For instance, the software bus application itself listens for 2 different command streams but
+        publishes 4 different telemetry streams.  There is no direct relationship between these.
+         -->
+      <Interface name="Telemetry" level="functional" shortDescription="CFE software bus pipe publication interface">
+        <LongDescription>
+            Higher level interface to publish a message via the CFE software bus.  cFS applications may define their
+            own application-specific interface of this type to indicate the message(s) it will publish via
+            the software bus.  This is typically the various types of telemetry that the application generates.
+        </LongDescription>
+        <GenericTypeSet>
+          <GenericType name="TelemetryDataType" baseType="CFE_HDR/TelemetryHeader" />
+        </GenericTypeSet>
+        <ParameterSet>
+          <Parameter name="InstanceNumber" type="BASE_TYPES/uint16" shortDescription="Identifies a specific instance of this topic within the mission" />
+          <Parameter name="TopicId" type="BASE_TYPES/uint16" shortDescription="Abstract topic ID number shared by all instances" />
+        </ParameterSet>
+        <CommandSet>
+          <!--
+              NOTE: This datasheet serves both sides of the connection; the implementation of this interface
+              within the CFS code and any external code share this definition.  Therefore the terms "send" and
+              "receive" are not valid since it depends on which point of view.  The term "indication" makes more
+              sense as it can apply to either context.
+          -->
+          <Command name="indication" mode="async" shortDescription="Publishes a single datagram on the CFE software bus (SB)">
+            <Argument name="data" type="TelemetryDataType" mode="in" />
+...
+      <Component name="Application">
+        <RequiredInterfaceSet>
+          <Interface name="CMD" shortDescription="Software bus telecommand interface" type="CFE_SB/Telecommand">
+            <!-- This uses a common base type for all software bus application command messages -->
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="CommandBase" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="SUB_RPT_CTRL" shortDescription="Subscription reporting interface" type="CFE_SB/Telecommand">
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="SubReportBase" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="SEND_HK" shortDescription="Send telemetry command interface" type="CFE_SB/Telecommand">
+            <!-- This uses a bare spacepacket with no payload -->
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="SendHkCmd" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="HK_TLM" shortDescription="Software bus housekeeping telemetry interface" type="CFE_SB/Telemetry">
+            <!-- This publishes a message datagram of the CFE_SB/HousekeepingTlm datatype -->
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelemetryDataType" type="HousekeepingTlm" />
+
+## E5 EDS state-machine use in cFE EDS XML (count of files)
+0
+
+## E6 FPP generated topology setup order — repos/fpp/compiler/lib/src/main/scala/codegen/CppWriter/TopologyCppWriter/TopSetupTeardownFns.scala:40-55
+  private def getSetupFn = functionMember(
+    Some("Set up the topology"),
+    "setup",
+    params,
+    CppDoc.Type("void"),
+    List(
+      ("initComponents", "state"),
+      ("configComponents", "state"),
+      ("setBaseIds", ""),
+      ("connectComponents", ""),
+      ("regCommands", ""),
+      ("readParameters", ""),
+      ("loadParameters", ""),
+      ("startTasks", "state"),
+    ).flatMap(writeFnCall)
+  )
+
+## E7 FPP async input port queue-full behavior — repos/fpp/docs/spec/Specifiers/Port-Instance-Specifiers.adoc:145-166
+`priority` specifies a priority for the port instance.
+The type of _e_ must be <<Type-Checking_Type-Conversion,convertible to>>
+<<Types_Internal-Types_Integer,_Integer_>>.
+The priority applies to the component's message queue and may appear only for
+`async input` ports.
+The meaning of the priority value is operating system-dependent.
+
+. The optional _queue-full-behavior_ specifies the behavior when a
+message is received and the queue is full:
+
+.. `assert` means that an assertion fails, terminating FSW.
+
+.. `block` means that the sender is blocked until there is
+space on the queue for the message.
+
+.. `drop` means that the message is dropped.
+
+.. `hook` means that the message is passed to a user-supplied hook function.
+
++
+This specifier is valid only for `async input` ports.
+If no specifier appears, then the default behavior is `assert`.
+
+## E8 fpp-check -u unconnected ports — repos/fpp/docs/users-guide/Analyzing-and-Translating-Models.adoc:62-85
+*Checking for unconnected port instances:*
+It is often useful to check for port instances that appear
+in a topology but that have no connections.
+For example, the following is a useful procedure for adding component instances
+and connections to a topology:
+
+. Add the component instances.
+In general this will introduce new port instances,
+which will initially be unconnected.
+
+. Check for unconnected port instances.
+
+. Add some or all of the connections identified
+in step 2.
+
+. Rerun steps 2 and 3 until there are no more
+missing connections, or you are certain that the
+missing connections are valid for your design.
+
+To check for unconnected port instances (step 2 in the procedure above),
+run `fpp-check` with the option `-u` _file_, where _file_ is
+the name of an output file.
+`fpp-check` will write the names of all unconnected port instances
+to the file.
+
+## E9 Generated output-port invoke asserts connection — repos/fpp/compiler/tools/fpp-to-cpp/test/component/base/PassiveSerialComponentAc.ref.cpp:3146-3170
+  typedOut_out(
+      FwIndexType portNum,
+      U32 u32,
+      F32 f32,
+      bool b,
+      const Fw::StringBase& str1,
+      const E& e,
+      const A& a,
+      const S& s
+  ) const
+{
+  FW_ASSERT(
+    (0 <= portNum) && (portNum < this->getNum_typedOut_OutputPorts()),
+    static_cast<FwAssertArgType>(portNum)
+  );
+
+  FW_ASSERT(
+    this->m_typedOut_OutputPort[portNum].isConnected(),
+    static_cast<FwAssertArgType>(portNum)
+  );
+  this->m_typedOut_OutputPort[portNum].invoke(
+    u32,
+    f32,
+    b,
+    str1,
+
+## E10 Generated active component init creates queue — repos/fpp/compiler/tools/fpp-to-cpp/test/component/base/ActiveSerialComponentAc.ref.cpp:107-112,1158-1163
+void ActiveSerialComponentBase ::
+  init(
+      FwSizeType queueDepth,
+      FwSizeType msgSize,
+      FwEnumStoreType instance
+  )
+...
+  // Create the queue
+  Os::Queue::Status qStat = this->createQueue(queueDepth, this->m_msgSize);
+  FW_ASSERT(
+    Os::Queue::Status::OP_OK == qStat,
+    static_cast<FwAssertArgType>(qStat)
+  );
+
+## E11 F' framework-specific CodeQL queries (headers) — repos/fprime/.github/codeql/fprime-queries/
+-- FprimeCommandResponse.ql
+/**
+ * @name Command handler missing command response
+ * @description Every path through a command handler
+ *              (`*_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, ...)`) must
+ *              either call `cmdResponse_out` directly, or store both `opCode`
+ *              and `cmdSeq` into member variables that are later passed to a
+ *              `cmdResponse_out` call (the deferred command response pattern).
+ *              A handler with a path that does neither may leave the ground
+ *              system waiting forever for a command completion.
+ * @kind problem
+ * @id cpp/fprime/command-response
+ * @problem.severity warning
+ * @tags correctness
+ *       reliability
+-- FprimeInternalPortInvoke.ql
+/**
+ * @name Internal port handler called directly
+ * @description Internal port interactions must go through the auto-coded
+ *              internal-interface invoke function, which enqueues the message
+ *              on the component queue; calling the handler directly bypasses
+ *              the component's threading model.
+ * @kind problem
+ * @id cpp/fprime/internal-port-invoke
+ * @problem.severity warning
+ * @tags correctness
+ *       reliability
+ *       external/jpl
+ */
+
+-- FprimeNoBlockingInSchedIn.ql
+/**
+ * @name Blocking operation in rate-group handler
+ * @description Rate-group (schedIn) handlers run on the rate group's thread
+ *              and must complete quickly; blocking operations such as locks,
+ *              sleeps, or blocking I/O can overrun the cycle.
+ * @kind problem
+ * @id cpp/fprime/no-blocking-in-sched-handler
+ * @problem.severity warning
+ * @tags correctness
+ *       reliability
+ *       external/jpl
+ */
+
+import cpp
+-- FprimeNoFileAccessInCritical.ql
+/**
+ * @name Synchronous file access in critical region or rate-group handler
+ * @description Synchronous file I/O has unbounded latency and must not be
+ *              performed while holding a lock or inside a rate-group
+ *              (schedIn) handler.
+ * @kind problem
+ * @id cpp/fprime/no-file-access-in-critical
+ * @problem.severity warning
+ * @tags correctness
+ *       reliability
+ *       external/jpl
+ */
+
+import cpp
+
+## E12 fprime-topo-analysis README — repos/fprime-topo-analysis/README.md:1-30, 385-408, 545-560
+# F´ Topology Analysis
+
+A standalone static analyzer for F´ (F Prime) topologies. It depends on an
+fprime checkout only as an *input*, never as a host.
+
+
+Static analyses over an F´ topology, for concurrency defects that no single
+source of truth can see on its own.
+
+## Why the analysis is hybrid
+
+An F´ concurrency bug lives across two artifacts:
+
+| Question | Answered by |
+| --- | --- |
+| Which output port is wired to which input port? | the FPP topology (`fpp-to-json`) |
+| Does that input port lock a mutex, or queue a message? | the FPP topology |
+| Which output ports does *this handler* actually call? | the C++ implementation |
+
+Neither half is sufficient. A C++-only tool cannot resolve a port call, because
+`someOut_out()` dispatches through a port object wired at topology-init time —
+the far end exists only in the FPP model. An FPP-only tool has to assume every
+handler may call every output port, which is sound but reports chains the code
+never takes.
+
+So the topology supplies the inter-component edges, `libclang` supplies the
+intra-component ones, and the analyses run over the join.
+
+```
+                 ┌─ inter-component edges ─┐                            guarded_port_analyzer.py
+...
+### `checks.py` + `topology_checks.py` — the check registry
+
+Fifteen analyses over the same graph, each a policy returning uniform findings.
+`fprime-topology-checks --list-checks` names them. A check declares whether it
+needs C++ call-flow analysis and is skipped with a note rather than reporting
+on guesses.
+
+| Check | Finds |
+| --- | --- |
+| `priority-inversion-window` | Spread of task priorities contending one mutex |
+| `unconnected-port` | A reachable handler invokes an unconnected output port (asserts) |
+| `disconnected-instance` | A would-assert handler that no real thread reaches (floating/unused) |
+| `sync-cycle` | A cycle of sync ports — recursion bounded by a data condition, not deadlock |
+| `ping-coverage` | Unmonitored threads, and pings that prove nothing |
+| `data-race` | Members reached by two threads with an unsynchronized writer |
+| `buffer-ownership` | Cross-pool buffer returns and leak sinks |
+| `stack-depth` | Deepest synchronous chain per thread |
+| `rate-group-mutexes` | A rate-group member whose mutex another thread also takes |
+| `fatal-path` | A FATAL report that can be queued or dropped |
+| `queue-fanout` | Fan-out onto a queue; error only for a provable self-enqueue |
+| `cmd-tlm-paths` | Unwired command, time, event and telemetry ports |
+| `cpu-affinity` | Mutexes contended across pinned CPUs |
+| `dead-telemetry` | Declared channels never written and events never emitted |
+| `undocumented-interface` | Params, commands, telemetry and events with no FPP `@` doc annotation |
+...
+## What is deliberately not modeled
+
+* **User-written threads and callbacks.** Only F´ port calls are followed.
+* **Runtime guards.** A handler that calls a port only under a condition the
+  analysis cannot evaluate is treated as though it always does. This is why
+  `unconnected-port` reports such a conditional call as a warning rather than an
+  error: a data-condition guard — a flag only set when a feature is wired — is a
+  common and legitimate reason for a reachable path never to be taken. An
+  unconditional call (on every path) is the error tier; a handler no real thread
+  reaches is not this check's concern at all and surfaces as
+  `disconnected-instance`.
+* **Run-time port routing.** A dispatcher's port array reaches every component,
+  but one opcode routes to exactly one of them. Counts through a wide port array
+  are upper bounds, which is why `queue-fanout` excludes them from its error
+  tier.
+
+
+## E13 fprime-topo-analysis startup assumption — repos/fprime-topo-analysis/src/fprime_topology_analysis/checks.py:50-53
+# Command registration: a component hands its opcodes to the dispatcher through
+# a Fw.CmdReg port. This runs once at startup, single-threaded, before tasks
+# start, so writes it makes (the dispatch table) are not a runtime race.
+CMD_REG_TYPE = "Fw.CmdReg"
+
+## E14 Ogma cFS template — repos/ogma/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c:68-80,127-140,214-239
+    while (CFE_ES_RunLoop(&RunStatus) == true)
+    {
+        CFE_ES_PerfLogExit(COPILOT_CFS_PERF_ID);
+
+        /* Pend on receipt of command packet -- timeout set to 500 millisecs */
+        status = CFE_SB_ReceiveBuffer(&SBBufPtr, COPILOT_CommandPipe, 500);
+
+        CFE_ES_PerfLogEntry(COPILOT_CFS_PERF_ID);
+
+        if (status == CFE_SUCCESS)
+        {
+            COPILOT_ProcessCommandPacket();
+        }
+...
+    {{#msgIds}}
+    if (status == CFE_SUCCESS)
+    {
+        status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId({{.}}), COPILOT_CommandPipe);
+
+        if (status != CFE_SUCCESS)
+        {
+            CFE_EVS_SendEvent(COPILOT_CR_SUB_ERR_EID,
+                              CFE_EVS_EventType_ERROR,
+                              "Copilot App: Error subscribing to necessary messages, RC = 0x%08lX",
+                              (unsigned long)status);
+        }
+    }
+    {{/msgIds}}
+...
+{{#msgHandlers}}
+/**
+* Make received data available to Copilot and run monitors.
+*/
+void COPILOT_Process{{msgDataDesc}}(void)
+{
+    {{#msgDataFromType}}
+    {{msgDataFromType}}* msg;
+    msg = ({{.}}*) COPILOTMsgPtr;
+    {{/msgDataFromType}}
+    {{^msgDataFromType}}
+    {{msgDataVarType}}* msg;
+    msg = ({{msgDataVarType}}*) COPILOTMsgPtr;
+    {{/msgDataFromType}}
+    {{#msgDataFromField}}
+    {{msgDataVarName}} = msg->{{.}};
+    {{/msgDataFromField}}
+    {{^msgDataFromField}}
+    {{msgDataVarName}} = *msg;
+    {{/msgDataFromField}}
+
+    {{#msgDataActive}}
+    // Run all copilot monitors.
+    copilot_step();
+    {{/msgDataActive}}
+}
+WaitForStartupSync/WaitForSystemState occurrences in template: 0
+
+## E15 Ogma variable DB example — repos/ogma/ogma-cli/examples/cfs-variable-db.json
+{ "inputs":
+     [ { "name": "position"
+       , "type": "position_t"
+       , "active": true
+       , "connections":
+           [ { "scope": "cfs"
+             , "topic": "ICAROUS_POSITION_MID"
+             }
+           ]
+       }
+     , { "name": "velocity"
+       , "type": "velocity_t"
+       , "active": true
+       , "connections":
+           [ { "scope": "cfs"
+             , "topic": "ICAROUS_VELOCITY_MID"
+             }
+           ]
+       }
+     ]
+, "topics":
+     [ { "scope": "cfs"
+       , "topic": "ICAROUS_POSITION_MID"
+       , "type":  "position_t"
+       }
+     , { "scope": "cfs"
+       , "topic": "ICAROUS_VELOCITY_MID"
+       , "type":  "velocity_t"
+       }
+     ]
+, "types": []
+}
+
+## E16 IKOS checks & assumptions — repos/ikos/analyzer/README.md:237-257, 528-545
+### Checks
+
+The list of available checks are:
+
+* **buffer overflow analysis**, `-a=boa`: checks for buffer overflows and out-of-bound array accesses.
+* **division by zero analysis**, `-a=dbz`: checks for integer divisions by zero.
+* **null pointer analysis**, `-a=nullity`: checks for null pointer dereferences.
+* **assertion prover**, `-a=prover`: prove user-defined properties, using `__ikos_assert(condition)`.
+* **unaligned pointer analysis**, `-a=upa`: checks for unaligned pointer dereferences.
+* **uninitialized variable analysis**, `-a=uva`: checks for read of uninitialized variables.
+* **signed integer overflow analysis**, `-a=sio`: checks for signed integer overflows.
+* **unsigned integer overflow analysis**, `-a=uio`: checks for unsigned integer overflows.
+* **shift count analysis**, `-a=shc`: checks for invalid shifts, where the amount shifted is greater or equal to the bit-width of the left operand, or less than zero.
+* **pointer overflow analysis**, `-a=poa`: checks for pointer arithmetic overflows.
+* **pointer comparison analysis**, `-a=pcmp`: checks for pointer comparisons between pointers referring to different objects.
+* **soundness analysis**, `-a=sound`: checks for instructions that could make the analysis unsound, i.e miss bugs.
+* **function call analysis**, `-a=fca`: checks for function calls through function pointers of the wrong type.
+* **dead code analysis**, `-a=dca`: checks for unreachable statements.
+* **double free analysis**, `-a=dfa`: checks for double free, invalid free, use after free and use after return.
+* **debugger**, `-a=dbg`: prints debug information, using `__ikos_print_values("desc", x)` and `__ikos_print_invariant()`.
+* **memory watcher**, `-a=watch`: prints memory writes at a given memory location, using `__ikos_watch_mem(ptr, size)`.
+...
+--------------------
+
+This section describes the assumptions made by the analyzer about the code.
+
+First, the analyzed code is compiled with the **Clang** compiler using the host target. Thus, Clang is responsible for specifying the data model (size of types), the data layout (alignments), the endianness, the signedness of `char`, the semantic of floating points, etc. depending on the host target. The analyzer uses the generated LLVM bitcode from Clang. This means that you can get different results depending on your host target.
+
+During the analysis, the analyzer will make the following assumptions:
+* The program is single-threaded.
+* The program does not receive signals.
+* The program does not receive interrupts.
+* Extern functions (without implementation) do not update global variables.
+* Extern functions can write on their pointer parameters, but only with one level of indirection:
+```c
+extern void f(int** p); // Assume to write on *p but not **p
+```
+* Extern functions do not call user-defined functions (no callbacks).
+* Extern functions can throw exceptions.
+* Extern functions return well-initialized values.
+
+## E17 Space ROS IKOS integration — repos/spaceros-docs/source/Related-Projects/IKOS.rst:33-39
+How is IKOS used with Space ROS?
+--------------------------------
+
+The Space ROS Docker image incorporates the ``ikos`` command-line tool.
+In addition, there is a Python-based wrapper tool, ``ament_ikos``, that is used to integrate IKOS into the ament-based build and test system.
+Space ROS adds ikos to the common set of linters and analysis tools used by most of the Space ROS core by including it in its forked version of ``ament_lint_common``.
+Then, when building and executing tests for Space ROS, along with the other source code analysis tools, ``ament_ikos`` is invoked to analyze any test binaries.
+
+## E18 HK subscribes to MIDs from its copy table; table-update path re-subscribes — repos/HK/fsw/src/hk_utils.c
+        }
+
+        /* If HK needs to subscribe to this Input packet... */
+        if ((OuterRtEntry->InputMidSubscribed == HK_INPUTMID_NOT_SUBSCRIBED)
+            && CFE_SB_IsValidMsgId(OuterCpyEntry->InputMid))
+        {
+            Result = CFE_SB_Subscribe(OuterCpyEntry->InputMid, HK_AppData.CmdPipe);
+
+            if (Result == CFE_SUCCESS)
+...
+        HKStatus = HK_SUCCESS; /* This could just be a bad table, so no reason to abort the app */
+    }
+    else if (Status == CFE_TBL_INFO_UPDATE_PENDING)
+    {
+        /* Unsubscribe to input msgs and free out pkt buffers */
+        /* If the copy table pointer is bad, that's okay here because it will be re-allocated later.
+           If the runtime table pointer is bad, the process new copy table call later on will
+           flag the error.  So we can ignore the return status at this point.
+        */
+        HK_TearDownOldCopyTable(HK_AppData.CopyTablePtr, HK_AppData.RuntimeTablePtr);
+
+        /* release address must be called for update to take. */
+        Status = CFE_TBL_ReleaseAddress(HK_AppData.CopyTableHandle);
+
+        /* Releasing the address should only return CFE_SUCCESS at this point since we
+           already had an update-pending response earlier */
+        if (Status == CFE_SUCCESS)
+        {
+            /* Update the copy table */
+            Status = CFE_TBL_Update(HK_AppData.CopyTableHandle);
+
+            if (Status == CFE_SUCCESS)
+            {
+                /* Get address of the newly updated copy table. */
+                Status = CFE_TBL_GetAddress((void *)(&HK_AppData.CopyTablePtr), HK_AppData.CopyTableHandle);
+
+                /* Status should only be CFE_TBL_INFO_UPDATED because we updated it above */
+                if (Status == CFE_TBL_INFO_UPDATED)
+                {
+                    Status = HK_ProcessNewCopyTable(HK_AppData.CopyTablePtr, HK_AppData.RuntimeTablePtr);
+
+                    if (Status == CFE_SUCCESS)
+                    {
+                        HKStatus = HK_SUCCESS;
+
+-- repos/HK/fsw/tables/hk_cpy_tbl.c:36-46
+    /*         inputMid        inputOffset     outputMid    outputOffset  numBytes*/
+
+    /*   0 */ {
+               CFE_SB_MSGID_WRAP_VALUE(CFE_EVS_HK_TLM_MID),
+               12,                                                                     CFE_SB_MSGID_WRAP_VALUE(HK_COMBINED_PKT1_MID),
+               12,                                                                                                                                                           4,
+               },
+    /*   1 */
+    {
+               CFE_SB_MSGID_WRAP_VALUE(CFE_TIME_HK_TLM_MID),
+               12,                                                                                      CFE_SB_MSGID_WRAP_VALUE(HK_COMBINED_PKT1_MID),
+
+## E19 HK missing-data guard — repos/HK/fsw/src/hk_utils.c:483-500
+                if (HK_CheckForMissingData(ThisEntrysOutMid, &InputMidMissing) == HK_MISSING_DATA_DETECTED)
+                {
+                    HK_AppData.MissingDataCtr++;
+
+                    CFE_EVS_SendEvent(HK_OUTPKT_MISSING_DATA_EID,
+                                      CFE_EVS_EventType_DEBUG,
+                                      "Combined Packet 0x%08lX missing data from Input Pkt 0x%08lX",
+                                      (unsigned long)CFE_SB_MsgIdToValue(ThisEntrysOutMid),
+                                      (unsigned long)CFE_SB_MsgIdToValue(InputMidMissing));
+                }
+#if HK_DISCARD_INCOMPLETE_COMBO == 1
+                else /* This clause is only exclusive if discarding incomplete packets */
+#endif
+                {
+                    /* Send the combined housekeeping telemetry packet...        */
+                    CFE_SB_TimeStampMsg(&OutBuffer->Msg);
+                    CFE_SB_TransmitMsg(&OutBuffer->Msg, true);
+
+
+## E20 TO_LAB table-/command-driven subscriptions
+        SubEntry = &TO_LAB_Global.SubsTblPtr->Subs[TableIndex];
+        if (CFE_SB_IsValidMsgId(SubEntry->Stream))
+        {
+            SubscribeResult =
+                CFE_SB_SubscribeEx(SubEntry->Stream, TO_LAB_Global.Tlm_pipe, SubEntry->Flags, SubEntry->BufLimit);
+            if (SubscribeResult != CFE_SUCCESS)
+            {
+        else
+        {
+            status = CFE_SB_SubscribeEx(pCmd->Stream, TO_LAB_Global.Tlm_pipe, pCmd->Flags, pCmd->BufLimit);
+
+
+## E21 cFE history: race/deadlock fixes (git log on repos/cFE)
+dd596c96 2025-10-15 Fix #2523, add mutex around EVS counter increment
+b9066712 2024-04-18 Fix #2550, Use resource ID for dump control index
+1272f6d5 2024-04-18 Fix #2550, Use resource ID for validation index
+2329feea 2023-08-18 Merge pull request #2428 from dmknutsen:Issue_2427
+25ccc0ce 2023-08-17 Fix #2427, Race condition in TestCreateChild
+58abd38d 2021-02-02 Fix #978, store task parameters in task record
+6932f1fe 2020-10-16 Fix #950, race condition in control request
+7566f2f0 2020-04-28 Merge pull request #619 from skliper/fix591-writetosys-deadlock
+a4a48bd5 2020-04-21 Merge pull request #598 from jphickey/fix-295-apptable-scan
+1b03958c 2020-04-15 Fix #591, Avoid deadlock in CFE_ES_CreatObjects
+04f1fddb 2020-04-09 Merge pull request #595 from jphickey/fix-456-perflog-race
+bbdf2017 2019-10-11 Fix #373: Correct mutex around log file write
+
+## E22 fprime_cfs_reference README (raw devel @20a3e615): to_lab subscription table
+
+`ci_lab` and `to_lab` give the [cFS GroundSystem](https://github.com/nasa/cFS-GroundSystem)
+a direct path to the software bus; `to_lab` is subscribed to the F Prime packetized
+telemetry message (`0x0820`) in `fprime_cfs_reference_defs/tables/cpu1_to_lab_sub.c`.

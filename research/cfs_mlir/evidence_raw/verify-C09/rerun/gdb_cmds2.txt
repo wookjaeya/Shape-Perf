@@ -1,0 +1,12 @@
+set startup-with-shell off
+set pagination off
+set confirm off
+set breakpoint pending on
+handle all nostop noprint pass
+break cfe_evs_task.c:1479 if EventType >= 2
+commands
+silent
+printf "GDB GetTypeEnable type=%d callerAppIdx=%lu active=%d\n", EventType, (unsigned long)(AppDataPtr - CFE_EVS_Global.AppData), (int)AppDataPtr->EventTypesActive[Index]
+continue
+end
+run

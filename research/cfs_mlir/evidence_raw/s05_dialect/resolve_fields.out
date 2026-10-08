@@ -1,0 +1,49 @@
+accesses rooted at a global with TBAA: 93
+  of which address = bare addressof (no GEP): 31
+  bare-addressof accesses with a DI member name: 31
+SAMPLE_APP_Data      CommandCounter                         load  tbaa-struct-path x15
+SAMPLE_APP_Data      CommandCounter                         store tbaa-struct-path x16
+SAMPLE_APP_Data      CommandErrorCounter                    load  tbaa-struct-path x16
+SAMPLE_APP_Data      CommandErrorCounter                    store tbaa-struct-path x17
+SAMPLE_APP_Data      CommandPipe                            load  tbaa-struct-path x5
+SAMPLE_APP_Data      HkTlm.Payload.CommandCounter           store tbaa-struct-path x3
+SAMPLE_APP_Data      HkTlm.Payload.CommandErrorCounter      store tbaa-struct-path x3
+SAMPLE_APP_Data      RunStatus                              load  tbaa-struct-path x1
+SAMPLE_APP_Data      RunStatus                              store tbaa-struct-path x4
+SAMPLE_APP_Data      TblHandles                             load  gep-index        x10
+SAMPLE_APP_Data      TblHandles.[%147]                      load  gep-index        x1
+SAMPLE_APP_Data      TblHandles.[%14]                       load  gep-index        x1
+SAMPLE_APP_Data      TblHandles.[%69]                       load  gep-index        x1
+
+bare-addressof sites:
+  SAMPLE_APP_Main L741 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L826 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L828 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L876 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L926 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L928 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L1027 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_Main L1029 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_SendHkCmd L1223 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_NoopCmd L1258 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_NoopCmd L1260 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ResetCountersCmd L1273 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessCmd L1294 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessCmd L1296 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_DisplayParamCmd L1360 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_DisplayParamCmd L1362 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1532 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1534 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1582 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1633 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1635 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1734 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_ProcessGroundCommand L1736 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L1838 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L1923 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L1925 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L1973 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L2024 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L2026 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L2125 load SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)
+  SAMPLE_APP_TaskPipe L2127 store SAMPLE_APP_Data -> SAMPLE_APP_Data.CommandCounter (tbaa off 0)

@@ -1,0 +1,884 @@
+{
+  "pair": [
+    "S8a",
+    "S1b"
+  ],
+  "artifacts": {
+    "S8a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so",
+      "tag": "alpha",
+      "sha256": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723"
+    },
+    "S1b": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model.so",
+      "tag": "bravo",
+      "sha256": "227c7cd9a9cc3aa2ad8440369f23fc3c302ed11f82b5e4992b0763e601bee9d0"
+    }
+  },
+  "shared_exported": {
+    "functions": {
+      "OMInstrumentPoint": {
+        "same_code_modulo_addresses": true
+      },
+      "__extendhfsf2": {
+        "same_code_modulo_addresses": true
+      },
+      "__gnu_f2h_ieee": {
+        "same_code_modulo_addresses": true
+      },
+      "__gnu_h2f_ieee": {
+        "same_code_modulo_addresses": true
+      },
+      "__truncdfhf2": {
+        "same_code_modulo_addresses": true
+      },
+      "__truncsfhf2": {
+        "same_code_modulo_addresses": true
+      },
+      "getInstrumentFile": {
+        "same_code_modulo_addresses": true
+      },
+      "omCompilationInfo": {
+        "same_code_modulo_addresses": true
+      },
+      "omInputSignature": {
+        "same_code_modulo_addresses": true
+      },
+      "omInstrumentPrint": {
+        "same_code_modulo_addresses": true
+      },
+      "omOutputSignature": {
+        "same_code_modulo_addresses": true
+      },
+      "omQueryEntryPoints": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorCreate": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorCreateEmpty": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorCreateUntyped": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorCreateWithOwnership": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorDestroy": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetAllocatedPtr": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetBufferSize": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetDataPtr": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetDataType": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetNumElems": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetOwning": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetRank": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetShape": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorGetStrides": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListCreate": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListDestroy": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListDestroyShallow": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListGetOmtArray": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListGetOmtByIndex": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorListGetSize": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorPrint": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetDataPtr": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetDataType": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetOwning": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetShape": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetStrides": {
+        "same_code_modulo_addresses": true
+      },
+      "omTensorSetStridesWithPyArrayStrides": {
+        "same_code_modulo_addresses": true
+      },
+      "om_bf16_to_f32": {
+        "same_code_modulo_addresses": true
+      },
+      "om_f16_to_f32": {
+        "same_code_modulo_addresses": true
+      },
+      "om_f32_to_bf16": {
+        "same_code_modulo_addresses": true
+      },
+      "om_f32_to_f16": {
+        "same_code_modulo_addresses": true
+      },
+      "run_main_graph": {
+        "same_code_modulo_addresses": true
+      }
+    },
+    "objects": {
+      "OM_DATA_TYPE_NAME": {
+        "type": "OBJECT",
+        "size": 184
+      },
+      "OM_DATA_TYPE_SIZE": {
+        "type": "OBJECT",
+        "size": 92
+      },
+      "bufferIndex": {
+        "type": "OBJECT",
+        "size": 8
+      },
+      "startReportPrinted": {
+        "type": "OBJECT",
+        "size": 1
+      },
+      "timing_nest_level": {
+        "type": "OBJECT",
+        "size": 4
+      }
+    }
+  },
+  "compute_function": {
+    "S8a": "main_graph_alpha",
+    "S1b": "main_graph_bravo"
+  },
+  "calls_made_by_compute_function": {
+    "S8a": [
+      "malloc@plt"
+    ],
+    "S1b": [
+      "malloc@plt"
+    ]
+  },
+  "cross_library_bindings_observed": [
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-1",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "startReportPrinted",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "C1b8a-8",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "startReportPrinted",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-1",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "startReportPrinted",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "C8a1b-8",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "startReportPrinted",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "SEQ1b8a",
+      "from": "S8a",
+      "to": "S1b",
+      "symbol": "startReportPrinted",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_NAME",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "OM_DATA_TYPE_SIZE",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "bufferIndex",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorCreateUntyped",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetDataType",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetRank",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetShape",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorGetStrides",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListCreate",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetOmtArray",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorListGetSize",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataPtr",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "omTensorSetDataType",
+      "n": 1
+    },
+    {
+      "case": "SEQ8a1b",
+      "from": "S1b",
+      "to": "S8a",
+      "symbol": "startReportPrinted",
+      "n": 1
+    }
+  ],
+  "crossed_symbols": {
+    "OM_DATA_TYPE_NAME": {
+      "shared_function_same_code": null,
+      "is_object": true
+    },
+    "OM_DATA_TYPE_SIZE": {
+      "shared_function_same_code": null,
+      "is_object": true
+    },
+    "bufferIndex": {
+      "shared_function_same_code": null,
+      "is_object": true
+    },
+    "omTensorCreateUntyped": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorGetDataPtr": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorGetDataType": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorGetRank": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorGetShape": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorGetStrides": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorListCreate": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorListGetOmtArray": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorListGetSize": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorSetDataPtr": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "omTensorSetDataType": {
+      "shared_function_same_code": true,
+      "is_object": false
+    },
+    "startReportPrinted": {
+      "shared_function_same_code": null,
+      "is_object": true
+    }
+  },
+  "crossed_symbol_on_compute_path": [],
+  "crossed_symbol_with_different_code": []
+}

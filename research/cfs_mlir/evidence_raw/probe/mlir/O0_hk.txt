@@ -1,0 +1,190 @@
+======== mlir/hk/hk_app.dbg.mlir
+  defined_funcs: 5
+  api_calls_by_family:
+       10  CFE_ES_api
+       16  CFE_EVS_api
+        1  CFE_MSG_api
+        5  CFE_SB_api
+        4  CFE_SB_helper
+        7  CFE_TBL_api
+  api_calls_by_callee:
+        1  CFE_ES_ExitApp
+        4  CFE_ES_PerfLogAdd
+        1  CFE_ES_PoolCreate
+        1  CFE_ES_RunLoop
+        3  CFE_ES_WriteToSysLog
+        1  CFE_EVS_Register
+       15  CFE_EVS_SendEvent
+        1  CFE_MSG_Init
+        1  CFE_SB_CreatePipe
+        1  CFE_SB_ReceiveBuffer
+        3  CFE_SB_Subscribe
+        2  CFE_TBL_GetAddress
+        1  CFE_TBL_Load
+        2  CFE_TBL_Manage
+        2  CFE_TBL_Register
+  helper_calls_by_callee:
+        4  CFE_SB_ValueToMsgId
+  mid_origins:
+        1  CFE_MSG_Init#1: alloca[1 store(s)]->ValueToMsgId(direct_const)
+        3  CFE_SB_Subscribe#0: alloca[1 store(s)]->ValueToMsgId(direct_const)
+  msgptr:
+        1  CFE_MSG_Init: HK_AppData.
+  global_store_fields:
+        4  HK_AppData.RunStatus
+        1  HK_AppData.CommandCounter
+        1  HK_AppData.CommandErrorCounter
+        1  HK_AppData.CombinedPacketsSent
+        1  HK_AppData.MissingDataCtr
+  global_store_value_kinds:
+        8  direct_const
+  global_load_fields: 6
+  global_loads: 12
+  global_memops:
+  loc_known_by_op:
+       49  llvm.call:known
+       14  llvm.getelementptr:unknown
+       10  llvm.getelementptr:known
+       73  llvm.load:known
+       27  llvm.mlir.addressof:unknown
+       59  llvm.mlir.constant:unknown
+        1  llvm.store:unknown
+       52  llvm.store:known
+       17  other:unknown
+       83  other:known
+======== mlir/hk/hk_cmds.dbg.mlir
+  defined_funcs: 4
+  api_calls_by_family:
+        2  CFE_EVS_api
+        2  CFE_SB_api
+  api_calls_by_callee:
+        2  CFE_EVS_SendEvent
+        1  CFE_SB_TimeStampMsg
+        1  CFE_SB_TransmitMsg
+  helper_calls_by_callee:
+  mid_origins:
+  msgptr:
+        1  CFE_SB_TransmitMsg: HK_AppData.
+  global_store_fields:
+        1  HK_AppData.RunStatus
+        1  HK_AppData.CommandCounter
+  global_store_value_kinds:
+        1  direct_const
+        1  other
+  global_load_fields: 5
+  global_loads: 6
+  global_memops:
+  loc_known_by_op:
+        7  llvm.call:known
+        8  llvm.getelementptr:unknown
+        8  llvm.getelementptr:known
+       14  llvm.load:known
+        4  llvm.mlir.addressof:unknown
+       23  llvm.mlir.constant:unknown
+        4  llvm.store:unknown
+        9  llvm.store:known
+        6  other:unknown
+       18  other:known
+======== mlir/hk/hk_dispatch.dbg.mlir
+  defined_funcs: 11
+  api_calls_by_family:
+        3  CFE_EVS_api
+        8  CFE_MSG_api
+        1  CFE_SB_api
+        9  CFE_SB_helper
+  api_calls_by_callee:
+        3  CFE_EVS_SendEvent
+        2  CFE_MSG_GetFcnCode
+        4  CFE_MSG_GetMsgId
+        2  CFE_MSG_GetSize
+        1  CFE_SB_IsValidMsgId
+  helper_calls_by_callee:
+        3  CFE_SB_MsgIdToValue
+        3  CFE_SB_MsgId_Equal
+        3  CFE_SB_ValueToMsgId
+  mid_origins:
+        3  CFE_SB_MsgId_Equal#0: alloca[0 store(s)]-> outparam_of:CFE_MSG_GetMsgId
+        3  CFE_SB_MsgId_Equal#1: global
+  msgptr:
+  global_store_fields:
+        3  HK_AppData.CommandErrorCounter
+  global_store_value_kinds:
+        3  other
+  global_load_fields: 4
+  global_loads: 7
+  global_memops:
+        memcpy HK_AppPipe.CMD_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/hk/fsw/src/hk_dispatch.c:214
+        memcpy HK_AppPipe.SEND_HK_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/hk/fsw/src/hk_dispatch.c:215
+        memcpy HK_AppPipe.SEND_COMBINED_PKT_MID. src=alloca[1 store(s)]->ValueToMsgId(direct_const) @ apps/hk/fsw/src/hk_dispatch.c:216
+  loc_known_by_op:
+       35  llvm.call:known
+        6  llvm.getelementptr:unknown
+       14  llvm.getelementptr:known
+       55  llvm.load:known
+        9  llvm.mlir.addressof:unknown
+       54  llvm.mlir.constant:unknown
+       14  llvm.store:unknown
+       17  llvm.store:known
+       38  other:unknown
+       94  other:known
+======== mlir/hk/hk_utils.dbg.mlir
+  defined_funcs: 13
+  api_calls_by_family:
+        2  CFE_ES_api
+       17  CFE_EVS_api
+        4  CFE_MSG_api
+       11  CFE_SB_api
+       18  CFE_SB_helper
+        7  CFE_TBL_api
+  api_calls_by_callee:
+        1  CFE_ES_GetPoolBuf
+        1  CFE_ES_PutPoolBuf
+       17  CFE_EVS_SendEvent
+        2  CFE_MSG_GetMsgId
+        1  CFE_MSG_GetSize
+        1  CFE_MSG_Init
+        7  CFE_SB_IsValidMsgId
+        1  CFE_SB_Subscribe
+        1  CFE_SB_TimeStampMsg
+        1  CFE_SB_TransmitMsg
+        1  CFE_SB_Unsubscribe
+        1  CFE_TBL_DumpToBuffer
+        1  CFE_TBL_GetAddress
+        2  CFE_TBL_GetStatus
+        1  CFE_TBL_ReleaseAddress
+        1  CFE_TBL_Update
+        1  CFE_TBL_Validate
+  helper_calls_by_callee:
+        9  CFE_SB_MsgIdToValue
+        9  CFE_SB_MsgId_Equal
+  mid_origins:
+        2  CFE_SB_MsgId_Equal#0: alloca[0 store(s)]-> outparam_of:CFE_MSG_GetMsgId
+        3  CFE_SB_MsgId_Equal#1: load_other
+        7  CFE_SB_MsgId_Equal#0: load_other
+        3  CFE_SB_MsgId_Equal#1: alloca[0 store(s)]->memcpy<-unknown_ptr
+        1  CFE_MSG_Init#1: alloca[0 store(s)]->memcpy<-unknown_ptr
+        1  CFE_SB_Subscribe#0: load_other
+        1  CFE_SB_Unsubscribe#0: load_other
+        3  CFE_SB_MsgId_Equal#1: alloca[1 store(s)]->param
+  msgptr:
+        1  CFE_MSG_Init: alloca[1 store(s)]->other outparam_of:CFE_ES_GetPoolBuf
+        1  CFE_SB_TransmitMsg: alloca[2 store(s)]->other
+  global_store_fields:
+        1  HK_AppData.MissingDataCtr
+        1  HK_AppData.CombinedPacketsSent
+  global_store_value_kinds:
+        2  other
+  global_load_fields: 8
+  global_loads: 25
+  global_memops:
+  loc_known_by_op:
+       70  llvm.call:known
+       23  llvm.getelementptr:unknown
+      129  llvm.getelementptr:known
+      304  llvm.load:known
+       29  llvm.mlir.addressof:unknown
+      120  llvm.mlir.constant:unknown
+       14  llvm.store:unknown
+      154  llvm.store:known
+      103  other:unknown
+      398  other:known

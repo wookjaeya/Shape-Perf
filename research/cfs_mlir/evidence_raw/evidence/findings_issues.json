@@ -1,0 +1,245 @@
+{
+ "summary": "I mined public issues, PRs and commit history across 20 NASA cFS repositories: cFE, cFS, osal, PSP, sample_app, ci_lab, to_lab, sch_lab, HK, LC, SC, SCH, DS, FM, MD, MM, CS, HS, CF and SBN.\n\n**Access:** The GitHub API, the GitHub MCP tool and curl to github.com were all refused with 403 (repos not enabled for this session). WebFetch on github.com HTML worked, but it shows only issue bodies and metadata, and it paraphrases rather than quoting verbatim. Comments, including the migrated Trac comments, were not visible. Blobless git clones (11 MB) gave me the full commit history and source at any revision.\n\n**Volume examined:**\n- 37 issue-search pages, about 379 listing rows including duplicates.\n- 42 individual issue/PR pages.\n- 8,198 commit subjects, filtered by keyword to 478, of which 25 key commits were read in full.\n- Source files checked at several revisions: cFE 6.5.0a (commit 792f5e35), 6.6.0a (2661d19f), v6.7.0, v7.0.0, the pinned commit 546a002, sample_app dev 199476a and MD HEAD 65eb7b3.\n\n**Result:** 38 candidates recorded in candidates.json. About 26 fall in the agenda categories; the rest are lifecycle/shutdown items or excluded shared-memory races.\n\n**cFE #73 and #71:** I verified the bodies. Both were bulk-created on GitHub on 2019-09-30 with milestone 6.4.2. The original Trac dates could not be re-checked because comments were not readable. Neither has a fix commit on GitHub. The earliest public cFE source (6.5.0a) already contains the mitigations:\n- a wait after each core app starts;\n- an EVS_AppID range guard whose comment names the \"called before CFE_EVS_TaskInit\" case;\n- semaphore-free polling of the startup state.\n\nSo the original #73/#71 failures cannot be reproduced from public source.\n\n**Best reproducible cases** (code from before and after the fix is public, or the fault is still present):\n- cFE #198 (cross-app late-init race; 6.5.0a vs 6.6.0a).\n- CF #184 (cross-app startup race on a semaphore owned by another app; in-code comment states the race).\n- sample_app #101 (table address never released on the INFO_UPDATED path; introduced by the #28 fix).\n- HS #148 and MD #79 (table-derived state used before it is loaded; MD #79 confirmed in code at HEAD).\n- cFE #46 (multi-field TIME reference read; pre-fix, post-fix and current code all public).\n- cFE #950 (exit/cleanup race; recipe in the issue).\n- to_lab d3d52da (intentional late subscription, usable as a benign case).\n\n**Key finding on table semantics:** At commit 546a002 the cfe_tbl.h comment for CFE_TBL_ERR_NEVER_LOADED (lines 540-544) no longer matches the code. The header says a valid zero-content pointer is returned and must be released. The implementation (cfe_tbl_registry.c lines 192-196) returns NULL and sets no lock. In v6.7.0 the code still matched the header. Any API model has to be checked against the implementation of the pinned version, not the header alone.\n\n**Thin categories:** I found no public issue reporting a real functional failure caused by publishing before a subscriber was ready, and no cross-stream snapshot inconsistency between apps. Message-derived state cases are few: LC #8, cFE #2739 and cFE #1073.\n\n**Files saved** (all under /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/): candidates.json, search_log.tsv, evidence/key_fix_commits.txt, the extracted source in src650/, src546/ and a few single files, plus the raw commit lists.",
+ "findings": [
+  {
+   "id": "issues-F01",
+   "topic": "cFE #73 verified detail",
+   "claim": "cFE #73 ('Race conditions / dependencies between CFE core apps', closed, label bug, milestone 6.4.2, GitHub creation date 2019-09-30 by skliper during the bulk migration) describes a startup segfault on Microblaze. Core apps were created in the order EVS, SB, ES, TIME, TBL with priorities 61, 64, 68, 60, 70. TIME ran first and called CFE_SB_CreatePipe, which called CFE_EVS_SendEventWithAppID with an uninitialized CFE_SB.AppId (0). That led through EVS_NotRegistered and EVS_SendEvent to EVS_IsFiltered with EVS_AppId 0xFFFFFFFF, which had no range check. The body proposes three fixes: synchronize core apps to their RunLoop one at a time, range-check EVS_IsFiltered, and initialize AppId variables consistently. It references #71.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/73 (WebFetch of body and metadata; comments not rendered)",
+    "6.5.0a import commit 792f5e3594c10e21a3560479bb72ea0584eb8ead cfe/fsw/cfe-core/src/es/cfe_es_start.c:935-950: after each core app is created, CFE_ES_ApplicationSyncDelay waits until that app calls WaitForStartupSync/RunLoop, else CFE_PSP_Panic (local copy src650/cfe_es_start.c)",
+    "6.5.0a cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c:613-617: EVS_SendEvent checks EVS_AppID < CFE_ES_MAX_APPLICATIONS, with the comment 'which can happen if this is called by some other thread before CFE_EVS_TaskInit() runs'",
+    "Pinned 546a002 modules/es/fsw/src/cfe_es_start.c:861 CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, CFE_PLATFORM_CORE_MAX_STARTUP_MSEC) per core app; modules/evs/fsw/src/cfe_evs_utils.c:614-623 same guard via EVS_AppDataIsMatch",
+    "git log of cFE.git: no commit references #73; the earliest cFE source in public history is the 2017-06-29 6.5.0a import (commit 792f5e35)"
+   ],
+   "scope_checked": "Issue body and metadata via WebFetch (twice; no comments rendered). Source read with git show at 792f5e35 (6.5.0a) and 546a002. Commit-message grep over all of cFE.git.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] #73 cannot be reproduced from any public cFE revision, because pre-fix code is not on GitHub and SourceForge listings were unreachable. It can only be the basis of a clearly labelled derived example. The mitigations visible in the code (per-core-app serialization and a guard on the caller side) are what an analyzer must model, or it will raise false alarms on current cFE. The original Trac dates (2015 per the revision note) were NOT re-verified here."
+  },
+  {
+   "id": "issues-F02",
+   "topic": "cFE #71 verified detail and successor issues",
+   "claim": "cFE #71 ('CFE ES StartupSyncSemaphore subject to multiple race conditions', closed, milestone 6.4.2, GitHub date 2019-09-30) says startup sync used 'a binary semaphore, a boolean flag, and a counter' managed independently, so WaitForStartupSync could misbehave. It was seen by the EVA team at GRC on Xilinx Microblaze. In 6.5.0a there is no semaphore: sync is polling of SystemState, AppReadyCount and AppStartedCount. A later issue (#1034, found by an RV tool) made SystemState 'volatile sig_atomic_t' in commit b9fed68 (2020-12-03). The WaitForStartupSync API was added 2008-07-30 according to the in-file revision log.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/71",
+    "6.5.0a cfe_es_start.c:1009-1040 (CFE_ES_ApplicationSyncDelay polling loop) and cfe_es_api.c:651-694 (WaitForStartupSync marks the app RUNNING, increments AppReadyCount, then polls); grep for 'StartupSem' found nothing",
+    "6.5.0a cfe_es.h revision log lines 52-53: 'Revision 1.5 2008/07/30 ... Added CFE_ES_WaitForStartupSync API'",
+    "https://github.com/nasa/cFE/issues/1034 ; https://github.com/nasa/cFE/commit/b9fed681a8a90fe838c400618d2cbd27388f1323 (diff: uint32 SystemState -> volatile sig_atomic_t SystemState in cfe_es_global.h)"
+   ],
+   "scope_checked": "#71 and #1034 bodies via WebFetch; 6.5.0a source; full b9fed68 diff via git. #71 comments not visible.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] #71 is a fault in the framework's sync primitive itself, not an ordering fault between apps. It belongs in the same history as #73 and should not be counted separately (consistent with revision note §2.3). Pre-fix code is not public, so it cannot be replayed."
+  },
+  {
+   "id": "issues-F03",
+   "topic": "Best historical cross-app startup case: cFE #198",
+   "claim": "cFE #198 ('Additional CFE start up state for application sync', milestone 6.6.0) reports that in the EVA CWS project, apps using CFE_ES_WaitForStartupSync still received requests from other apps before finishing their late-phase (inter-app) initialization. The single OPERATIONAL state introduced in 6.4.2 could not express two-phase init. The fix (APPS_INIT system state, LATE_INIT app state, CFE_ES_WaitForSystemState) is absent in 6.5.0a and present in 6.6.0a.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/198",
+    "6.6.0a commit 2661d19f45dd325daf068e81a2967cbcc08ccab8 fsw/cfe-core/src/inc/cfe_es.h:136 (CFE_ES_SYSTEM_STATE_APPS_INIT), :158 (CFE_ES_APP_STATE_LATE_INIT), :645 (CFE_ES_WaitForSystemState); same grep on 6.5.0a cfe_es.h/cfe_es_api.c returns nothing",
+    "Pinned 546a002 cfe_es_start.c:211-228: waits for LATE_INIT, then APPS_INIT, then RUNNING"
+   ],
+   "scope_checked": "Issue body via WebFetch; grep of headers in both releases via git show.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] This is the only cross-application startup-ordering case found where both pre-fix (6.5.0a) and post-fix (6.6.0a) framework code are public. The EVA CWS apps are not public, so an evaluation needs a synthetic two-app pair built on 6.5.0a vs 6.6.0a, labelled as derived from #198."
+  },
+  {
+   "id": "issues-F04",
+   "topic": "Cross-app startup dependency in an app: CF #184",
+   "claim": "CF #184 (opened 2022-01-13, milestone v7.0.0) reports that CF binds during CF_CFDP_InitEngine to a throttle counting semaphore that another app (CI/TO or an I/O app) creates. ES starts all apps concurrently and nothing guarantees the creator runs first, so CF aborts. The issue also notes that a restart of the owning app can change the semaphore ID. The fix (commit 833fdbb, PR #342 merged 2022-12-01) retries OS_CountSemGetIdByName up to 25 times at 100 ms while it returns OS_ERR_NAME_NOT_FOUND. The patch adds the code comment 'There is a start up race condition because CFE starts all apps at the same time'.",
+   "evidence": [
+    "https://github.com/nasa/CF/issues/184",
+    "https://github.com/nasa/CF/pull/342",
+    "https://github.com/nasa/CF/commit/833fdbb27a26f15f2429e79392e7eb73d61abdea (full diff read: fsw/src/cf_cfdp.c InitEngine retry loop; fsw/platform_inc/cf_platform_cfg.h CF_STARTUP_SEM_MAX_RETRIES 25, CF_STARTUP_SEM_TASK_DELAY 100; new unit tests)",
+    "Local: evidence/key_fix_commits.txt"
+   ],
+   "scope_checked": "Issue and PR via WebFetch; full commit diff via git.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] A real, public dependency between apps on a resource created by another app (not an SB message) that can be replayed from the parent commit with a synthetic creator app. The fix only bounds the wait (2.5 s) and does not handle restart of the owning app, so it is a useful case for 'sync call or retry present but readiness not guaranteed'. Not executed here."
+  },
+  {
+   "id": "issues-F05",
+   "topic": "Startup sync API gives no readiness guarantee (open)",
+   "claim": "cFE #1466 (open since 2021-04-30) asks for CFE_ES_WaitForStartupSync to return the status of CFE_ES_WaitForSystemState. PR #2273 (opened 2023-03-30), which did this, was closed without merge on 2026-07-07 despite reviewer approval. At the pinned commit the wrapper is still void. ES's own startup waits treat timeouts as non-fatal and declare OPERATIONAL anyway.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/1466",
+    "https://github.com/nasa/cFE/pull/2273",
+    "546a002 modules/es/fsw/src/cfe_es_api.c:616-619 (void wrapper calling CFE_ES_WaitForSystemState(OPERATIONAL, ...))",
+    "546a002 modules/es/fsw/src/cfe_es_start.c:203-228 (comment: 'if not everything starts up, that is not a fatal error, we will continue anyway'; two MainTaskSyncDelay calls only log on timeout)"
+   ],
+   "scope_checked": "Issue and PR via WebFetch; pinned source.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Directly supports revision note §5.2 with an open upstream issue and an abandoned fix. [inference] An analyzer must treat 'WaitForStartupSync was called' as a timeout-bounded, status-less wait, and OPERATIONAL as not implying every app is ready."
+  },
+  {
+   "id": "issues-F06",
+   "topic": "Table API: header contract vs implementation drift",
+   "claim": "At pinned commit 546a002, the CFE_TBL_GetAddress header (cfe_tbl.h:540-544) says that on CFE_TBL_ERR_NEVER_LOADED the function 'will still return a valid table pointer to a table with all zero content', which must be released before the table can be loaded. The implementation instead sets *TblPtr = NULL and does not set the access descriptor's LockFlag (cfe_tbl_registry.c:192-196; LockFlag is set only on the loaded path, line 207). CFE_TBL_GetAddress also sets *TblPtr = NULL on entry (cfe_tbl_api.c:449-450). In v6.7.0 the implementation matched the header: GetAddressInternal set LockFlag=true (cfe_tbl_internal.c:571) before GetNextNotification returned NEVER_LOADED (lines 616-619). v7.0.0 already has the new behavior.",
+   "evidence": [
+    "546a002 modules/core_api/fsw/inc/cfe_tbl.h:536-544 (blob f3510424300c6ce3797f7b365b498ecacda90704, same blob as revision note S10)",
+    "546a002 modules/tbl/fsw/src/cfe_tbl_registry.c:192-196 and :207 (blob bb3a5dce82223b9dcc9cf874aced3393d4ecf65f)",
+    "546a002 modules/tbl/fsw/src/cfe_tbl_api.c:449-450",
+    "v6.7.0 (commit 2105b9324eca7dd58b4d6aea17628d10956dcfdb) fsw/cfe-core/src/tbl/cfe_tbl_internal.c:571 and :616-619 (local v670_cfe_tbl_internal.c)",
+    "v7.0.0 modules/tbl/fsw/src/cfe_tbl_registry.c:184/197 (same structure as 546a002)"
+   ],
+   "scope_checked": "Source read with git show at v6.7.0, v7.0.0 and 546a002; grep for LockFlag and NEVER_LOADED across all TBL .c files.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Revision note §7.1 states the NEVER_LOADED pointer and release obligation as confirmed fact from S10. That is true of the header only; the pinned implementation differs. An analyzer's TBL model (for missing release or use-after-release) must be built and checked per version against the implementation, not the docs. Two app-level claims depend on this: SC PR #170 ('stack garbage on failure') does not hold for cFE 546a002, and the lock premise in sample_app #255 is not borne out (see F07)."
+  },
+  {
+   "id": "issues-F07",
+   "topic": "Table-lifecycle evaluation cases",
+   "claim": "Confirmed table-lifecycle cases:\n- sample_app #101 (2020-10-30): the first GetAddress after a load returns CFE_TBL_INFO_UPDATED; the code treated that as failure and did not release the address ('resource leak'). The bug was introduced by the #28 fix 693d75f (2019-12-06, early return on != CFE_SUCCESS) and fixed by 61f657d (2021-01-06, '< CFE_SUCCESS').\n- sch_lab #24 (fix c6342bd): only INFO_UPDATED was accepted at init.\n- cFE #1750 (open): Load on a locked table returns INFO_TABLE_LOCKED but leaves LoadInProgress set; the existing functional test TestReleaseAddress demonstrates it.\n- cFE #1509 (open): races in shared-table GetInfo/Modified vs share/unshare/unregister, found by code inspection only.\n- DS #146: GetAddress status ignored (fix c609e35; issue body empty).\n- sample_app #255 (open): claims a missing ReleaseAddress before Manage. At sample_app dev 199476a, ProcessCmd releases on its success paths and SendHkCmd holds no address, so the premise is not confirmed.",
+   "evidence": [
+    "https://github.com/nasa/sample_app/issues/101 ; https://github.com/nasa/sample_app/issues/28 ; commits 693d75f23a4ab0edc1350c05e18974ed0a043ac2 and 61f657d940670cd59311cf1506a5fa9e7b60f8d6 (diffs read)",
+    "https://github.com/nasa/sch_lab/issues/24 ; commit c6342bdec008719dbcf083ac7e284a6a36ee677a",
+    "https://github.com/nasa/cFE/issues/1750 ; https://github.com/nasa/cFE/issues/1509",
+    "https://github.com/nasa/DS/issues/146 ; commit c609e35d6a09d19b5bb016395cefe305ee2a5361",
+    "https://github.com/nasa/sample_app/issues/255 ; sample_app dev 199476a fsw/src/sample_app_cmds.c:64-69 and :123-136"
+   ],
+   "scope_checked": "Issue pages via WebFetch; diffs via git; sample_app dev source. #1750 and #1509 were not checked against 546a002 code, and the functional test was not run.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] sample_app #28 to #101 is a clean, public, version-pinnable missing-release case on an info-status path. It needs to be paired with a v6.7/6.8-era cFE, where the leaked LockFlag would block updates. #1750 is the strongest open framework-level case and has a ready-made functional test. These cases are mostly single-app API-protocol faults, not inter-app races, so they should be labelled that way (revision note §7.2)."
+  },
+  {
+   "id": "issues-F08",
+   "topic": "Use-before-init of state derived from tables/messages",
+   "claim": "Two confirmed public cases of table-derived state used before initialization:\n- HS #148: HS_EnableAppMonCmd leads to HS_AppMonStatusRefresh dereferencing a NULL AMTablePtr when the table is registered but not loaded. Recipe: delete hs_amt.tbl and send the command; result is a segfault and processor reset. Fixed by b7530d9 (2026-07-28).\n- MD #79 (open): when tables are loaded from file rather than recovered from CDS, the loaded data is never copied into MD_AppData.MD_DwellTables[], so dwell processing uses zero delays. Confirmed at MD HEAD 65eb7b3: md_app.c:423-449 loads without MD_CopyUpdatedTbl, whereas the CDS path (347-366) and the update path (499-505) copy.\nMessage-derived cases are few: LC #8 (open, imported from GSFCCFS-1075: STALE-to-FALSE transition sets TtoFValue); cFE #2739 (unauthenticated TIME tone/data messages update MET/STCF/leap state via CFE_TIME_ToneDataCmd, ToneData, ToneVerify, ToneUpdate).",
+   "evidence": [
+    "https://github.com/nasa/HS/issues/148 ; https://github.com/nasa/HS/commit/b7530d94e322032d80cfd714b2a29c2b423473cb",
+    "https://github.com/nasa/MD/issues/79 ; https://github.com/nasa/MD/blob/65eb7b3b0aa8acd05076128a623cd696582b6d7c/fsw/src/md_app.c#L423-L449 (local md_app_HEAD.c)",
+    "https://github.com/nasa/LC/issues/8",
+    "https://github.com/nasa/cFE/issues/2739"
+   ],
+   "scope_checked": "Issue pages via WebFetch; HS commit message and stat; MD source at HEAD read. LC and TIME code for LC #8 and cFE #2739 not inspected.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "[inference] Public evidence for 'state used before its source arrived' is mostly table-sourced and deterministic (a missing file or a missed copy), not a timing race. The analyzer's state-origin tracking should treat table loads as state sources alongside SB payloads. MD #79 is a ready open case at HEAD."
+  },
+  {
+   "id": "issues-F09",
+   "topic": "First-message / subscription category: no failure report found",
+   "claim": "Within the searched scope I found no public issue reporting a functional failure caused by a message published before its subscriber was ready. Related evidence found:\n- to_lab commit d3d52da (2026-04-21, 'Fix cFS/cFS#676, startup msg limit errors') deliberately moves TO_LAB subscriptions after CFE_ES_WaitForStartupSync(10000 ms), so startup events are not forwarded and MsgLim errors are avoided.\n- cFE #926 (open): SB send succeeds even when delivery drops at a full queue or MsgLim; proposes 'critical' subscriptions. #918 (send status) was closed wontfix.\n- Pinned code: when there are no subscribers, cfe_sb_priv.c:1091-1097 increments NoSubscribersCounter, sends an event and returns CFE_SUCCESS.\n- The framework provides CFE_SB_SEND_PREV_SUBS_CC, which replays existing subscriptions for SBN (cfe_sb_fcncodes.h:432-462; cfe_sb_task.c:1162).\n- cFE #2131: event squelch triggered at startup by the burst of startup events.",
+   "evidence": [
+    "https://github.com/nasa/to_lab/commit/d3d52da34fa195cacfd085e92d1615ea1f036d15 (full diff read: to_lab_app.c, to_lab_internal_cfg.h DEFAULT_TO_LAB_PLATFORM_STARTUP_SYNC_TIMEOUT 10000)",
+    "https://github.com/nasa/cFS/issues/676 resolves to an unrelated format-check PR (Fix #662); a to_lab search for msglimit returned 0 hits",
+    "https://github.com/nasa/cFE/issues/926 ; https://github.com/nasa/cFE/issues/918 (title and state from search listing)",
+    "546a002 modules/sb/fsw/src/cfe_sb_priv.c:1091-1097; modules/sb/fsw/inc/cfe_sb_fcncodes.h:432-462; modules/sb/fsw/src/cfe_sb_task.c:1162",
+    "https://github.com/nasa/cFE/issues/2131"
+   ],
+   "scope_checked": "Searches: cFE 'subscribe before', 'no subscribers', startup queries; to_lab, ci_lab and SBN searches; commit-subject keyword scan ('subscri', 'first', 'pipe'). Pages and code as listed.",
+   "status": "partial",
+   "importance": "central",
+   "implication": "[inference] The first-message category has no public positive (fault) case. The public material instead shows intentional late subscription (benign) and silent-drop semantics. Positive cases for this category would have to be synthetic or fault-injected, and d3d52da should be a negative/benign control. 'No failure report found' is limited to the queries listed in search_log.tsv."
+  },
+  {
+   "id": "issues-F10",
+   "topic": "Multi-field snapshot of message-derived state: TIME reference",
+   "claim": "cFE #46 (milestone 6.6.0; 'SMP: CFE_TIME_GetReference() has insufficient protection against update while reading') and #1544 (fix 69b0940, 2021-06-01) cover the consistency of the multi-field TIME reference. TIME tone/data processing writes it; any app's time query reads it.\n- 6.5.0a (cfe_time_utils.c:712-736): seven AtTone*/clock fields are read between two reads of a non-volatile uint32 VersionCount (cfe_time_utils.h:233).\n- 6.6.0a: volatile Pending/CompleteVersionCounter (cfe_time_utils.h:212-213).\n- 546a002: ReferenceState[] ring, RetryCount=4, and an error bit added by #1544.\nNo public issue was found about cross-stream inconsistency between apps (e.g., HK combined packets); HK #4 (imported from GSFCCFS-991) only asks to count missing packets.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/46 ; https://github.com/nasa/cFE/issues/1544 ; https://github.com/nasa/cFE/commit/69b0940dd9249adc4d4d2e998a610a4354c63153",
+    "https://github.com/nasa/cFE/blob/792f5e3594c10e21a3560479bb72ea0584eb8ead/cfe/fsw/cfe-core/src/time/cfe_time_utils.c#L712-L736 (local time_utils_792f5e3.c)",
+    "6.6.0a 2661d19f fsw/cfe-core/src/time/cfe_time_utils.h:212-213; 546a002 modules/time/fsw/src/cfe_time_utils.c:538 onward (local src546/cfe_time_utils.c)",
+    "https://github.com/nasa/HK/issues/4"
+   ],
+   "scope_checked": "Issue pages via WebFetch; GetReference in three versions via git show.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[inference] The only public snapshot-consistency case is within a single framework service and is shared-memory in nature (a seqlock-like scheme), but it is a real 'state written from messages, read elsewhere' structure, with pre-fix, post-fix and current code public. The analyzer must model this versioned-read pattern to avoid false snapshot warnings on TIME consumers. The original note's attitude+position-style cross-stream case has no public cFS issue counterpart in this search."
+  },
+  {
+   "id": "issues-F11",
+   "topic": "Framework-level SB delivery race",
+   "claim": "cFE #1073 (2021-01-06): after hours of running natively, apps such as EVS, SB and TIME received MIDs they never subscribed to (EVS got 0x1810, CFE_TIME_TONE_CMD_MID; caught at cfe_evs_task.c:378). The fix b17cd1e (2021-01-12, PR #1092) refactored the SB API so the pipe table and routing are accessed only under the SB global lock.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/1073",
+    "https://github.com/nasa/cFE/commit/b17cd1e3394efe061bc58c76cf6424e96d1c2fc4 (message and stat read; 13 files, cfe_sb_api.c +1985/-1240 lines changed)"
+   ],
+   "scope_checked": "Issue via WebFetch; commit message and stat via git (diff not reviewed line by line).",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[inference] A real case where a framework race shows up as a message reaching the wrong app's handler (cross-app symptom, shared-memory root cause). It is mainly a contrast case: source-level message-graph analysis assumes routing is correct, while this failure is inside SB. Replay value is low (hours to manifest)."
+  },
+  {
+   "id": "issues-F12",
+   "topic": "Lifecycle (exit/stop/restart/shutdown) cluster",
+   "claim": "Confirmed lifecycle ordering issues:\n- cFE #950: app self-exit vs ES background cleanup gives a segfault, reliably reproduced with a modified sample_app. Fix 6932f1f does two-phase cleanup.\n- cFE #591: deadlock in CFE_ES_CreateObjects on FreeRTOS 10 / cFE 6.7.0 (Capella). Fix 1b03958.\n- cFE #2433 (open): a cancelled task holding the SB mutex inside mq_timedsend causes a shutdown hang.\n- cFE #2107 (open): stopping an app that holds a mutex fails cleanup with RC=-6.\n- cFE #701: SCH timer callback vs timebase lock deadlock on exit; fixed via osal#472.\n- osal #642: POSIX OS_TaskDelete was deferred; made synchronous in 7ba42a6.\n- cFE #1383 (open): endless restart of an app that fails init.\n- cFE #2140 (open): stopped app waits the full kill timeout.\n- SBN #79 (open): cleanup deletes pipe ID 0 after partial init.",
+   "evidence": [
+    "https://github.com/nasa/cFE/issues/950 ; https://github.com/nasa/cFE/commit/6932f1fe9180f4fd3f6756e4074b2c4b27a703cf",
+    "https://github.com/nasa/cFE/issues/591 ; https://github.com/nasa/cFE/commit/1b03958cb10b3c254460d38a0324bbb3a1dfb8e4",
+    "https://github.com/nasa/cFE/issues/2433 ; https://github.com/nasa/cFE/issues/2107 ; https://github.com/nasa/cFE/issues/701",
+    "https://github.com/nasa/osal/commit/7ba42a63fe6a7972582036dfd432ec3bf5edf8b1",
+    "https://github.com/nasa/cFE/issues/1383 ; https://github.com/nasa/cFE/issues/2140 ; https://github.com/nasa/SBN/issues/79"
+   ],
+   "scope_checked": "Issue pages via WebFetch; commit messages via git. Line numbers quoted inside issues refer to the reporters' versions and were not re-checked.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "[inference] The original note's lifecycle/restart interest has more public material than the message categories. #950 is the most replayable (parent commit plus the recipe in the issue). Most of these are lock/OS-level, so they test whether the analyzer models OSAL/ES semantics, not SB message flow."
+  },
+  {
+   "id": "issues-F13",
+   "topic": "Migration and dating caveats",
+   "claim": "Low-numbered cFE issues (#46, #71, #73, #198) all show a GitHub creation date of 2019-09-30 with an older milestone (6.4.2 or 6.6.0), so they are migrated records. Their original dates live only in comments, which WebFetch did not render. LC #8, LC #13 and HK #4 state they were imported from the internal tracker (GSFCCFS-1075, GSFCCFS-1119, GSFCCFS-991) and carry GitHub date 2022-04-22. The cFE git history before 2019 consists only of bulk imports (6.5.0a on 2017-06-29, 6.6.0a on 2019-05-03), and the in-file MKS revision logs stop in 2014.",
+   "evidence": [
+    "WebFetch of cFE #46/#71/#73/#198 metadata",
+    "https://github.com/nasa/LC/issues/8 ; https://github.com/nasa/LC/issues/13 ; https://github.com/nasa/HK/issues/4",
+    "git log of cFE.git before 2019-10-01 (commits 792f5e35 'Add 6.5.0a from Sourceforge release', 2661d19f 'Bulk add of cFE 6.6.0a')",
+    "src650/cfe_es_start.c:25-29 (revision log ends 2014-09-05)"
+   ],
+   "scope_checked": "Issue metadata via WebFetch; git log; 6.5.0a file headers.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "Evaluation records must keep the GitHub date, the original tracker ID and the version separate. The 2015 Trac dates cited for #73 in the revision note remain unverified by this task."
+  },
+  {
+   "id": "issues-F14",
+   "topic": "Search coverage",
+   "claim": "Reviewed:\n- 37 WebFetch issue-search pages (17 for cFE including one org-wide search; 20 for the other repos), about 379 listing rows including duplicates.\n- 42 individual issue/PR pages.\n- 8,198 commit subjects from 20 blobless clones, keyword-filtered to 478 subjects, of which 25 commits were read in full.\nResult: 38 candidates in candidates.json:\n- startup service dependency: 7 (C01-C05, C10, C30);\n- first-message/subscription: 3 (C06, C07, C31);\n- table lifecycle and use-before-init: 8 (C14-C21);\n- shared-table race: 1 (C13);\n- message-derived state: 2 (C22, C23);\n- snapshot: 2 (C11, C12);\n- framework SB race: 1 (C08);\n- lifecycle and other: 11;\n- excluded shared-memory or out of scope: 3.",
+   "evidence": [
+    "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/search_log.tsv",
+    "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/candidates.json",
+    "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/all_commit_subjects.txt (8198 lines); kw_commits.txt (478 lines)"
+   ],
+   "scope_checked": "Counts from my own logs. GitHub search pages listed only about 12 rows each, so recall per query is incomplete.",
+   "status": "confirmed",
+   "importance": "background",
+   "implication": "The candidate pool is large enough to build a mixed evaluation set (historical, open-at-HEAD, benign). It is not an exhaustive census, and no prevalence statistics should be derived from it."
+  }
+ ],
+ "gaps": [
+  "Could not read GitHub issue comments. The GitHub REST API, the GitHub MCP tool and curl to github.com returned 403 because the nasa repositories are not enabled for this session. WebFetch renders bodies but not comments. So the migrated Trac comments of cFE #73/#71 (original 2015 dates, fix discussion, 6.4.2 test record cited in the revision note) were not re-verified.",
+  "WebFetch returns a model's summary, not raw HTML, so issue bodies are paraphrased. Exact quotations are reliable only where I took them from git (commit messages, code comments).",
+  "Pre-6.5.0 cFE source (needed to replay #73/#71) is not in public GitHub history. SourceForge file listings and web.archive.org were unreachable (JS shell or proxy 403).",
+  "The original issue for to_lab commit d3d52da ('Fix cFS/cFS#676') was not found: nasa/cFS#676 is an unrelated PR.",
+  "Not checked against pinned 546a002 code: whether cFE #1509 (shared-table races) and #1750 (LoadInProgress) are still present. The functional test TestReleaseAddress was not run.",
+  "No candidate was built or executed: CF #184 parent, sample_app #101 pair, HS #148, MD #79 and cFE #950 replays are all untested. Reproducibility labels are judgments from code and issue text.",
+  "Pages not opened (titles/listings only): SC #178, CS #140 (NULL table-pointer issues), cFE #1493/#1495 (shared-table patterns), cFE #2655 body, CF #285 body, osal #642/#274 issue pages, cFE #918 body, PSP #310.",
+  "LC #8 and cFE #2739 code paths were not inspected, and HK source was not inspected for multi-stream timing assumptions.",
+  "Search recall is limited: each GitHub search page showed only about 12 rows and I did not page through every query. The org-wide search showed 10 of 85 results. Issues worded differently from my keywords may be missed.",
+  "The sch_lab pattern of holding a table address across the run loop was not checked."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/candidates.json",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/search_log.tsv",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/evidence/key_fix_commits.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/fix_commits_cFE.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/fix_commits_apps.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/all_commit_subjects.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/kw_commits.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/src650/ (cFE 6.5.0a ES/EVS/SB files from commit 792f5e35)",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/src546/ (cFE 546a002 ES/EVS/SB/TBL/TIME files)",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/v670_cfe_tbl_internal.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/time_utils_792f5e3.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/time_utils_2661d19.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/md_app_HEAD.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/build_candidates.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/issues/git/ (20 blobless bare clones, ~11 MB)"
+ ]
+}

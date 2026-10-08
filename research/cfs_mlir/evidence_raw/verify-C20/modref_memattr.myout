@@ -1,0 +1,5 @@
+Testing : <<NULL ATTRIBUTE>>
+att -> att#0: NoModRef
+call_readnone -> att#0: ModRef
+att -> call_readnone#0: NoModRef
+call_readnone -> call_readnone#0: ModRef

@@ -1,0 +1,9 @@
+{"seq":0,"t":0,"tid":1,"k":3,"key":"T2","a":0,"b":0,"file":"x.c","line":1,"func":"main"}
+{"seq":1,"t":1,"tid":2,"k":4,"key":"T2","a":0,"b":0,"file":"x.c","line":2,"func":"t2"}
+{"seq":2,"t":2,"tid":1,"k":1,"key":"obj:A","a":0,"b":0,"file":"x.c","line":3,"func":"main"}
+{"seq":3,"t":3,"tid":1,"k":5,"key":"bsem:S","a":0,"b":0,"file":"x.c","line":4,"func":"main"}
+{"seq":4,"t":4,"tid":1,"k":1,"key":"obj:B","a":0,"b":0,"file":"x.c","line":5,"func":"main"}
+{"seq":5,"t":5,"tid":1,"k":5,"key":"bsem:S","a":0,"b":0,"file":"x.c","line":6,"func":"main"}
+{"seq":6,"t":6,"tid":2,"k":6,"key":"bsem:S","a":0,"b":0,"file":"x.c","line":7,"func":"t2"}
+{"seq":7,"t":7,"tid":2,"k":2,"key":"obj:A","a":0,"b":0,"file":"x.c","line":8,"func":"t2"}
+{"seq":8,"t":8,"tid":2,"k":2,"key":"obj:B","a":0,"b":0,"file":"x.c","line":9,"func":"t2"}

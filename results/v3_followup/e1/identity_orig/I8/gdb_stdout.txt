@@ -1,0 +1,11 @@
+Breakpoint 1 (main_graph_model) pending.
+Breakpoint 2 (run_main_graph_model) pending.
+Breakpoint 3 (_mlir_ciface_main_graph_model) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+{"pid": 9707, "n_calls": 2, "all_exact": true}
+[Inferior 1 (process 9707) exited normally]
+Function "main_graph_model" not defined.
+Function "run_main_graph_model" not defined.
+Function "_mlir_ciface_main_graph_model" not defined.
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/user/work/v3/g2/K/L0064/S8_full/model.so"

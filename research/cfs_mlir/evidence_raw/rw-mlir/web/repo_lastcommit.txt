@@ -1,0 +1,10 @@
+secure-software-engineering/phasar 41d97dab7e7d629cef1c4bb8dd789034ccd77ab3 2026-09-30T11:27:59+02:00 | Update Docs (#864)
+SVF-tools/SVF 6a4bb08f11c121e6ea57fae6bc1a5b785a7cd663 2026-10-01T06:35:05+08:00 | Merge pull request #1902 from aleksisch/fix-contextdda-heap-cond
+github/codeql f1d3f1defc5ca73bcf1ed48031fb31c62fd91952 2026-09-30T20:27:46+02:00 | Merge pull request #22636 from GiangTran-FinX/tree-sitter-extractor/esc
+joernio/joern 98a815cbcd095200d6ef60714801e93d035615b6 2026-09-30T20:21:31+02:00 | [bazel] Bring in scalafix --diff-base fix (#6340)
+NASA-SW-VnV/ikos ac7f7c1738976cabc58c6a53413df6e458995c38 2025-04-23T23:54:45-07:00 | Merge branch 'bugfix/fneg'. Close #197.
+goblint/analyzer d0ee7d5b0e2b6c12f0d33a285973397ab29eb9fa 2026-09-30T14:33:52+03:00 | Merge pull request #2175 from goblint/arraydomain-indexdomain
+trailofbits/vast 60d605d07e68e674a03972208932f3555eb7ef8a 2026-02-13T00:58:27-05:00 | build(deps): bump the github-actions group across 1 directory with 3 up
+Jezurko/potato 68c1d5248b884dfbde96ac85d957b511f92b4c5e 2026-03-25T11:54:49+01:00 | treewide: Update for upstream llvm changes to RegionSuccessor.
+trailofbits/macroni 3ee356a156ccc7399ff0b209b905f3621f0e4286 2024-07-02T09:40:18-04:00 | Rename generate_module() to mk_mod_and_mctx()
+llvm/Polygeist 77c04bb2a7a2406ca9480bcc9e729b07d2c8d077 2024-07-31T19:43:12-04:00 | Implement builtin functions __builtin_ctz{s,,l,ll} (#424)

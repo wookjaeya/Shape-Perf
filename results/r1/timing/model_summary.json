@@ -1,0 +1,51 @@
+{
+  "design": {
+    "cmd": "model",
+    "blocks": 5,
+    "warmup": 2,
+    "iterations": 5,
+    "out": "/home/user/Shape-Perf/results/r1/timing",
+    "cpu": 3,
+    "seed": 20260930,
+    "arms": [
+      "orig",
+      "r1a",
+      "r1b",
+      "r1c"
+    ],
+    "length": 256
+  },
+  "effects_vs_orig": {
+    "r1a": {
+      "n_blocks": 5,
+      "relative_effect_pct": -17.352417764444695,
+      "ci95_pct": [
+        -20.99106189604842,
+        -13.546201058975527
+      ],
+      "orig_mean_us": 986028.1345200001,
+      "arm_mean_us": 815089.97196
+    },
+    "r1b": {
+      "n_blocks": 5,
+      "relative_effect_pct": -27.435363564973592,
+      "ci95_pct": [
+        -30.800909416775745,
+        -23.90613205220224
+      ],
+      "orig_mean_us": 986028.1345200001,
+      "arm_mean_us": 715586.3905600001
+    },
+    "r1c": {
+      "n_blocks": 5,
+      "relative_effect_pct": -9.888799604878203,
+      "ci95_pct": [
+        -12.170288173857577,
+        -7.548046466060695
+      ],
+      "orig_mean_us": 986028.1345200001,
+      "arm_mean_us": 888526.2568400002
+    }
+  },
+  "note": "development container: NOT a result"
+}

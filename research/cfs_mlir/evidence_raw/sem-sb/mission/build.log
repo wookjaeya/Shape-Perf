@@ -1,0 +1,108 @@
+make --no-print-directory -C "build" mission-all
+[ 22%] Built target elf2cfetbl
+[ 33%] Built target cfeconfig_platformdata_native_default_cpu1
+[ 33%] Built target cfe-build-env
+[ 77%] Built target cfeconfig_platformdata_tool
+[100%] Built target cfgtool-execute-native_default_cpu1
+[100%] Built target cfe-module-version
+[100%] Built target mission-version
+[100%] Built target mission-prebuild
+[100%] Built target osal_generic-linux_impl
+[200%] Built target tblobj_cpu1_cfeTestAppTable.tbl373841326f8cea13ce79018e59202824f6b892a9
+[500%] Built target config
+[1300%] Built target osal_posix_impl
+[1300%] Built target generate_table_cpu1_cfeTestAppTable_cfe_test_tbl
+[1500%] Built target evs
+[1600%] Built target fs
+[2100%] Built target es
+[2100%] Built target cfetables
+[100%] Built target native_default_cpu1-cfetables
+Built target sb
+Built target time
+Built target tbl
+Built target ram_notimpl
+[100%] Built target mission-cfetables
+Built target psp-pc-linux-impl
+Built target psp-pc-linux-shared
+Built target soft_timebase
+Built target timebase_posix_clock
+Built target eeprom_mmap_file
+Built target port_notimpl
+Built target iodriver
+Built target linux_sysmon
+Built target endian_api
+Built target msg
+Built target sbr
+Built target resourceid
+Building C object apps/sbprobe/CMakeFiles/sbprobe.dir/fsw/src/sbprobe.c.o
+Table build completed
+Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utassert.c.o
+[100%] Built target tabletool-execute
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/cfe_test.c.o
+Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utlist.c.o
+Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utstubs.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/cfe_test_table.c.o
+Linking C shared module sbprobe.so
+Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/uttest.c.o
+Built target sbprobe
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_application_control_test.c.o
+Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/uttools.c.o
+Built target osal_bsp
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_error_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_behavior_test.c.o
+Built target ut_assert_pic
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_info_test.c.o
+Built target psp-pc-linux
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_task_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_cds_test.c.o
+Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_io.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_counter_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_misc_test.c.o
+Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_init.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_mempool_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_perf_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_resource_id_test.c.o
+Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_runner.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/evs_filters_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/evs_send_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/fs_header_test.c.o
+Linking C shared module cfe_assert.so
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/fs_util_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/message_id_test.c.o
+Built target cfe_assert
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/msg_api_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/resource_id_misc_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_performance_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_pipe_mang_test.c.o
+Built target ut_assert
+Built target osal
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_sendrecv_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_subscription_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_content_access_test.c.o
+Built target ut_osapi_stubs
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_content_mang_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_information_test.c.o
+Generating cfe_module_version_table.c
+Generating cfe_build_env_table.c
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_registration_test.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_arithmetic_test.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-sb/mission/build/src/cfe_mission_strings.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_current_test.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_module_version_table.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_conversion_test.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_build_env_table.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_psp_module_list.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_static_symbol_list.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/cfe_static_module_list.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_external_test.c.o
+Building C object cpu1/CMakeFiles/core-cpu1.dir/src/target_config.c.o
+Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_misc_test.c.o
+Linking C executable core-cpu1
+Linking C shared module cfe_testcase.so
+Built target cfe_testcase
+Built target core-cpu1
+[100%] Built target native_default_cpu1-all
+[ 42%] Built target cfeconfig_platformdata_native_default_cpu1
+[ 42%] Built target elf2cfetbl
+[100%] Built target cfeconfig_platformdata_tool
+Built target mission-all

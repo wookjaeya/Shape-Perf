@@ -1,0 +1,897 @@
+{
+ "summary": {
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.opt.mlir": {
+   "defined_funcs": 3,
+   "api_calls_by_family": {
+    "CFE_ES_api": 8,
+    "CFE_EVS_api": 13,
+    "CFE_MSG_api": 2,
+    "CFE_SB_api": 7,
+    "CFE_TBL_api": 4
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 2,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 11,
+    "CFE_MSG_Init": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 4,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_Register": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 2,
+    "CFE_SB_Subscribe#0: direct_const": 4
+   },
+   "msgptr": {
+    "CFE_MSG_Init: SAMPLE_APP_Data.HkTlm": 2
+   },
+   "global_store_fields": {
+    "SAMPLE_APP_Data.RunStatus": 4
+   },
+   "global_store_value_kinds": {
+    "direct_const": 4
+   },
+   "global_load_fields": 3,
+   "global_loads": 8,
+   "global_memops": [
+    "memset SAMPLE_APP_Data. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:316",
+    "memset SAMPLE_APP_Data. src=memset @ /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:316"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 37,
+    "llvm.getelementptr:known": 10,
+    "llvm.load:known": 9,
+    "llvm.mlir.addressof:unknown": 1,
+    "llvm.mlir.addressof:known": 30,
+    "llvm.mlir.constant:unknown": 4,
+    "llvm.mlir.constant:known": 38,
+    "llvm.store:known": 4,
+    "other:known": 102
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.opt.mlir": {
+   "defined_funcs": 5,
+   "api_calls_by_family": {
+    "CFE_ES_api": 3,
+    "CFE_EVS_api": 3,
+    "CFE_SB_api": 2,
+    "CFE_TBL_api": 3
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_WriteToSysLog": 3,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_TBL_GetAddress": 1,
+    "CFE_TBL_Manage": 1,
+    "CFE_TBL_ReleaseAddress": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {
+    "CFE_SB_TransmitMsg: SAMPLE_APP_Data.HkTlm": 1
+   },
+   "global_store_fields": {
+    "SAMPLE_APP_Data.HkTlm.Payload.CommandErrorCounter": 1,
+    "SAMPLE_APP_Data.HkTlm.Payload": 1,
+    "SAMPLE_APP_Data.<base:i8>": 4,
+    "SAMPLE_APP_Data.CommandErrorCounter": 1
+   },
+   "global_store_value_kinds": {
+    "global": 2,
+    "other": 3,
+    "direct_const": 2
+   },
+   "global_load_fields": 4,
+   "global_loads": 8,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 13,
+    "llvm.getelementptr:known": 15,
+    "llvm.load:known": 13,
+    "llvm.mlir.addressof:known": 13,
+    "llvm.mlir.constant:known": 18,
+    "llvm.store:known": 7,
+    "other:known": 186
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.opt.mlir": {
+   "defined_funcs": 6,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 12,
+    "CFE_MSG_api": 30,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 12,
+    "CFE_MSG_GetFcnCode": 11,
+    "CFE_MSG_GetMsgId": 10,
+    "CFE_MSG_GetSize": 9,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "SAMPLE_APP_Data.CommandErrorCounter": 9,
+    "SAMPLE_APP_TaskPipe.CMD_MID.Value": 1,
+    "SAMPLE_APP_TaskPipe.SEND_HK_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 9,
+    "direct_const": 2
+   },
+   "global_load_fields": 3,
+   "global_loads": 12,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 52,
+    "llvm.getelementptr:known": 21,
+    "llvm.load:known": 55,
+    "llvm.mlir.addressof:unknown": 5,
+    "llvm.mlir.addressof:known": 6,
+    "llvm.mlir.constant:unknown": 20,
+    "llvm.mlir.constant:known": 13,
+    "llvm.store:known": 31,
+    "other:unknown": 10,
+    "other:known": 295
+   }
+  },
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_utils.opt.mlir": {
+   "defined_funcs": 2,
+   "api_calls_by_family": {
+    "CFE_ES_api": 2,
+    "CFE_TBL_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_WriteToSysLog": 2,
+    "CFE_TBL_GetInfo": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 0,
+   "global_loads": 0,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 3,
+    "llvm.getelementptr:known": 2,
+    "llvm.load:known": 2,
+    "llvm.mlir.addressof:known": 2,
+    "llvm.mlir.constant:known": 5,
+    "other:known": 21
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.opt.mlir",
+   "n_defined_funcs": 3,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "SAMPLE_APP_Init",
+    "SAMPLE_APP_Main"
+   ],
+   "calls": {
+    "CFE_ES_|api": 8,
+    "CFE_EVS_|api": 13,
+    "CFE_MSG_|api": 2,
+    "CFE_SB_|api": 7,
+    "CFE_TBL_|api": 4
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 4,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 2,
+    "CFE_MSG_Init": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_EVS_SendEvent": 11,
+    "CFE_SB_Subscribe": 4,
+    "CFE_TBL_Register": 2,
+    "CFE_TBL_Load": 2,
+    "CFE_ES_RunLoop": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_ES_ExitApp": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "SAMPLE_APP_Main",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2179
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:334"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6275
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:358"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6274
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:381"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2179
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:334"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6275
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:358"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6274
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:381"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "SAMPLE_APP_Main",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "SAMPLE_APP_Data",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:334"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "SAMPLE_APP_Data",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:334"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:317"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:227"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 3
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:251"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "RunStatus"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:317"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:355"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:378"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "TblHandles"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:409"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:238"
+    },
+    {
+     "func": "SAMPLE_APP_Main",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "RunStatus"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:257"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:355"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandPipe"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:378"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "TblHandles"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:409"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "SAMPLE_APP_Main",
+     "op": "memset",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:316"
+    },
+    {
+     "func": "SAMPLE_APP_Init",
+     "op": "memset",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "src": "memset",
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app.imp.mlir:316"
+    }
+   ]
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.opt.mlir",
+   "n_defined_funcs": 5,
+   "defined_funcs": [
+    "SAMPLE_APP_DisplayParamCmd",
+    "SAMPLE_APP_NoopCmd",
+    "SAMPLE_APP_ProcessCmd",
+    "SAMPLE_APP_ResetCountersCmd",
+    "SAMPLE_APP_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_SB_|api": 2,
+    "CFE_TBL_|api": 3,
+    "CFE_EVS_|api": 3,
+    "CFE_ES_|api": 3
+   },
+   "calls_by_callee": {
+    "CFE_SB_TimeStampMsg": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_TBL_Manage": 1,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_TBL_GetAddress": 1,
+    "CFE_ES_WriteToSysLog": 3,
+    "CFE_TBL_ReleaseAddress": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "SAMPLE_APP_Data",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:212"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "SAMPLE_APP_Data",
+      "path": [
+       "CommandErrorCounter"
+      ]
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:208"
+    },
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "global",
+      "sym": "SAMPLE_APP_Data",
+      "path": []
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:210"
+    },
+    {
+     "func": "SAMPLE_APP_NoopCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:252"
+    },
+    {
+     "func": "SAMPLE_APP_ResetCountersCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:269"
+    },
+    {
+     "func": "SAMPLE_APP_ResetCountersCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:270"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:299"
+    },
+    {
+     "func": "SAMPLE_APP_DisplayParamCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "<base:i8>"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:369"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:207"
+    },
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_SendHkCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "TblHandles",
+      "[dyn]"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:223"
+    },
+    {
+     "func": "SAMPLE_APP_NoopCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:250"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:297"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "TblHandles"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:300"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "TblHandles"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:325"
+    },
+    {
+     "func": "SAMPLE_APP_DisplayParamCmd",
+     "sym": "SAMPLE_APP_Data",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_cmds.imp.mlir:367"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.opt.mlir",
+   "n_defined_funcs": 6,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "SAMPLE_APP_ProcessGroundCommand",
+    "SAMPLE_APP_TaskPipe",
+    "SAMPLE_APP_VerifyCmdLength"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 30,
+    "CFE_EVS_|api": 12,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 9,
+    "CFE_MSG_GetMsgId": 10,
+    "CFE_MSG_GetFcnCode": 11,
+    "CFE_EVS_SendEvent": 12,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "SAMPLE_APP_VerifyCmdLength",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_TaskPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6274
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:341"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_TaskPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6275
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:347"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:211"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "SAMPLE_APP_VerifyCmdLength",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_ProcessGroundCommand",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:333"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_TaskPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:355"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:365"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    },
+    {
+     "func": "SAMPLE_APP_TaskPipe",
+     "sym": "SAMPLE_APP_Data",
+     "path": [
+      "CommandErrorCounter"
+     ],
+     "loc": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_dispatch.imp.mlir:209"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C18/sample_app_utils.opt.mlir",
+   "n_defined_funcs": 2,
+   "defined_funcs": [
+    "SAMPLE_APP_GetCrc",
+    "SAMPLE_APP_TblValidationFunc"
+   ],
+   "calls": {
+    "CFE_TBL_|api": 1,
+    "CFE_ES_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_TBL_GetInfo": 1,
+    "CFE_ES_WriteToSysLog": 2
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [],
+   "global_loads": [],
+   "global_memops": []
+  }
+ ]
+}

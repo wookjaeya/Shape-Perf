@@ -1,0 +1,1117 @@
+{
+ "05_sec.md": [
+  {
+   "part": "05_sec.md",
+   "location": "§5.7.4 첫 문단 (line 378)",
+   "problem": "§5.7.4가 §7.8을 인용하면서 정정 전 probe 값(sample_app 이름 결정 7개, 모호 4개)을 쓴다. §7.8의 정정된 표는 sample_app store 11개를 이름 결정 6개, offset 0 모호 5개(최상위 4 + 중첩 1)로 센다. 정정 단락은 원래 값 7이 `…HkTlm.Payload`까지만 이름을 붙인 중첩 첫 field store를 포함했다고 적는다. 정확한 인용문: \"§7.8에서는 sample_app store 11개 중 7개에 이름이 붙고 4개가 offset 0으로 모호했다.\"",
+   "fix": "해당 문장을 다음으로 바꾼다: \"§7.8에서는 sample_app 전역 field store 11개 중 6개가 끝 field까지 이름이 붙었다. 5개(최상위 `CommandCounter` 4개, 중첩 첫 field `HkTlm.Payload.CommandCounter` 1개)는 offset 0이라 모호했다.\"",
+   "evidence": [
+    "07_sec.md §7.8 table row: '| sample_app | **[실측]** 11 | 6 | 5 (4 + 1) | 0 | 17 |' and correction paragraph: '원래 보고는 이름 결정을 7, 15, 0, 15, 40으로 셌다 … 중첩 첫 field store 12개'",
+    "$N/probe/mlir/O0_sample_app.json summary.global_store_fields: sample_app.c {RunStatus: 3}; sample_app_cmds.c {HkTlm.Payload.CommandErrorCounter: 1, HkTlm.Payload: 1, <base:i8>: 4, CommandErrorCounter: 1}; sample_app_dispatch.c {CommandErrorCounter: 1} → 이름 결정 6, 모호 5 (base 4 + 중첩 HkTlm.Payload 1)",
+    "07_sec.md §7.14: 'offset 0 쓰기 17개' = 5+0+0+3+9 (정정 값을 쓴다)"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "05_sec.md",
+   "location": "§5.7.1 표, '가용성' 행, `-O1 -Xclang -disable-llvm-passes` + MLIR pipeline 열 (line 312)",
+   "problem": "§5.7.1은 -O1 + pipeline 경로가 sample_app 4개 TU에서만 작동한다고 적는다. §7.12는 같은 경로가 앱 5개 17 TU에서 작동했다고 적고(전체 inline), §7.13.1은 '-O1 경로는 앱 5개 17 TU에서만, noinline 설정은 sample_app 4 TU에서만 쟀다'고 적는다. §7.7.3의 앱별 회수 결과(5개 앱)도 이 경로의 출력이다. 두 절이 측정 범위에 대해 서로 다르게 말한다. 정확한 인용문: \"| **[실측]** sample_app 4개 TU에서 작동 |\"",
+   "fix": "셀을 다음으로 바꾼다: \"| **[실측]** 앱 5개 17 TU에서 TU별로 작동한다 (§7.7.2, §7.12). 앱 단위 `llvm-link`와 `noinline` 설정은 sample_app 4 TU에서만 쟀다 (§5.7.2) |\"",
+   "evidence": [
+    "$N/probe/ir_o1np/ has 5 app dirs with 17 .ll files; commands.log 'rc=0' counts: ci_lab 4, hk 4, sample_app 4, sch_lab 1, to_lab 4",
+    "$N/probe/mlir_opt/*/*.dbg.mlir: 17 files (pipeline outputs); mlir_opt/<app>.json give mid_origins 'direct_const' per app",
+    "07_sec.md §7.12 row 2: '**[실측]** 앱 5개 17 TU에서 작동(전체 inline). `noinline`은 sample_app만 (§7.13.1)'",
+    "07_sec.md §7.13.1: '이 입력의 `-O1` 경로는 앱 5개 17 TU에서만, `noinline` 설정은 sample_app 4 TU에서만 쟀다'"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "05_sec.md",
+   "location": "§5.11 두 번째 항목 (line 596)",
+   "problem": "'실측 대상은 sample_app 하나다'라는 말이 너무 넓다. §5.7.3은 -O1 pipeline의 MID 상수 회수를 5개 앱에 대해 §7.7.3에서 가져오고, 그 측정은 앱 5개 17 TU에서 했다. sample_app에만 한정된 것은 TBAA, noinline, 앱 단위 연결, IRDL 측정이다. 정확한 인용문: \"- **[실측]** 실측 대상은 sample_app 하나다. TBAA·`noinline` 결과를 hk, to_lab, sch_lab, ci_lab과 mission 전체에 적용하는 것은 **[미확인]**이다.\"",
+   "fix": "다음으로 바꾼다: \"- **[실측]** 이 절의 TBAA·`noinline`·앱 단위 연결·IRDL 실측 대상은 sample_app 하나다. `-O1` pipeline의 TU별 MID 상수 회수는 앱 5개 17 TU에서 쟀다 (§7.7.3). TBAA·`noinline` 결과를 hk, to_lab, sch_lab, ci_lab과 mission 전체에 적용하는 것은 **[미확인]**이다.\"",
+   "evidence": [
+    "07_sec.md §7.7.3 table: sample_app 3/3, hk 4/7, sch_lab 1/2, ci_lab 4/4, to_lab 3/7 (after -O1 pipeline, §7.7.2)",
+    "07_sec.md §7.13.1 [미확인] scope sentence",
+    "$N/probe/mlir_opt/{sample_app,hk,sch_lab,ci_lab,to_lab}.json"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "05_sec.md",
+   "location": "§5.5.7 표 아래 첫 문단 (line 259)",
+   "problem": "§5.5.7은 조건 없이 MustAlias를 단언한다. §7.11 item 1과 검증 C20 (scope 표)는 이 결과를 두 GEP가 같은 base SSA 값을 쓸 때로 한정한다. 이 조건은 설계에 중요하다. 함수마다 따로 있는 `addressof`는 base 값이 다르다. 그래서 §5가 그리는 것보다 upstream 결과가 상황에 더 크게 좌우된다. 정확한 인용문: \"**[확인된 사실]** upstream `LocalAliasAnalysis`는 한 struct의 서로 다른 field를 MustAlias로 본다 (검증 C20 (a)).\"",
+   "fix": "다음으로 바꾼다: \"**[확인된 사실]** upstream `LocalAliasAnalysis`는 두 GEP가 같은 base SSA 값을 쓸 때 한 struct의 서로 다른 field를 MustAlias로 본다 (검증 C20 (a), §7.11).\"",
+   "evidence": [
+    "07_sec.md §7.11 item 1: '한 struct의 서로 다른 field 두 개는 두 GEP가 같은 base SSA 값을 쓸 때 MustAlias다'",
+    "verified_claims.json C20 vote 'scope' corrected_claim: 'It returns MustAlias for two different fields of one struct when both GEPs share a base SSA value, because GEP implements ViewLikeOpInterface'",
+    "verified_claims.json C20 vote 'counter' (e): '-test-last-modified … identifies memory by SSA underlying value: each function has its own addressof'"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "05_sec.md",
+   "location": "§5.3 '소스 위치' 목록 첫 항목 (line 71)",
+   "problem": "설계는 직접 호출이 DI에서 온 `FileLineColLoc`를 그대로 가진다고 말한다. 측정된 import 출력은 직접 호출에 `FusedLoc`을 붙인다. 이 `FusedLoc`은 DI scope metadata(`#di_subprogram`/`#di_lexical_block`)와 `FileLineColLoc`를 감싼다. §5.7.3의 발췌(`#loc160 = loc(fused<#di_subprogram17>[#loc3])`)와 검증 C17('fused with a DI scope')도 같다. `FileLineColLoc`에 직접 맞추는 pass는 이 위치를 놓친다. 정확한 인용문: \"- 직접 호출: DI에서 온 `FileLineColLoc`를 그대로 쓴다.\"",
+   "fix": "다음으로 바꾼다: \"- 직접 호출: import가 붙인 `FusedLoc<#di_subprogram|#di_lexical_block>[FileLineColLoc]`를 그대로 쓴다. file:line:col은 안쪽 `FileLineColLoc`에서 읽는다 (§7.9).\"",
+   "evidence": [
+    "$N/s05_dialect/linked_noinl.opt.mlir L573 '%45 = llvm.call @CFE_SB_CreatePipe(…) loc(#loc290)' and L1369 '#loc290 = loc(fused<#di_lexical_block5>[#loc41])'",
+    "$N/probe/mlir_opt/sample_app/sample_app.dbg.mlir L161 '#loc160 = loc(fused<#di_subprogram17>[#loc3])'",
+    "verified_claims.json C17 vote 'recheck': 'every one of the 8830 llvm.call and 26378 llvm.load ops carries a file:line:col location (fused with a DI scope)'"
+   ],
+   "from": "pair:05-07"
+  }
+ ],
+ "07_sec.md": [
+  {
+   "part": "07_sec.md",
+   "location": "§7.6 첫 문단 끝 (line 178), 표 바로 앞",
+   "problem": "§7.6의 sample_app 행은 helper가 아닌 API 호출을 7+12+6+13+6+0 = 44개로 더한다. §5.7.2와 §5.8 P0은 sample_app의 `llvm.call @CFE_*`·`@OS_*` site를 45개로 적는다. 차이는 `CFE_Config_GetVersionString` 1개다. probe의 접두어 목록에 `CFE_Config_`와 `CFE_ResourceId_`가 없어서 이 호출들이 소리 없이 빠졌다. 그런데 §7.6은 뺀 접두어로 `CFE_PSP_`만 적는다. 정확한 인용문: \"`CFE_PSP_` 호출(ci_lab, to_lab 각 1개)은 표에서 뺐다 (`analyze_mlir.py` L15, L263-L267).\"",
+   "fix": "해당 문장 뒤에 덧붙인다: \"probe의 접두어 목록(L15)에 없는 `CFE_Config_`(sample_app 1, sch_lab 1, ci_lab 1, to_lab 2)와 `CFE_ResourceId_`(hk 1) 호출도 세지 않았다. 그래서 sample_app의 helper 아닌 API 합 44는 §5.7.2의 45보다 1 작다. 45에는 `CFE_Config_GetVersionString`(`sample_app.c:205`)이 들어 있다.\"",
+   "evidence": [
+    "$N/probe/analyze_mlir.py L15: FAMILIES = ['CFE_SB_', 'CFE_ES_', 'CFE_TBL_', 'CFE_EVS_', 'CFE_MSG_', 'CFE_TIME_', 'CFE_FS_', 'CFE_PSP_', 'OS_'] (no CFE_Config_, CFE_ResourceId_)",
+    "grep of $N/probe/mlir/<app>/*.dbg.mlir: sample_app 1×CFE_Config_, hk 1×CFE_ResourceId_, sch_lab 1×CFE_Config_, ci_lab 1×CFE_Config_ + 1×CFE_PSP_, to_lab 2×CFE_Config_ + 1×CFE_PSP_",
+    "$N/s05_dialect/api_sites.out: 'CFE_Config_GetVersionString raw 2 distinct 1 sample_app.c:205:9' … 'total raw 156 distinct 45'",
+    "Recomputed O0_sample_app.json totals: ES 12, EVS 13, MSG 6, SB api 7, TBL 6 → 44"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "07_sec.md",
+   "location": "§7.8 '이름을 못 붙이거나 놓친 패턴' 표 (lines 269-275)와 [해석] 문단 (line 279)",
+   "problem": "§7.8은 놓친 쓰기 패턴을 세 가지로 적는다. 앱 전역 전체에 대한 `memset`이 빠졌다. -O0 probe는 이것을 store가 아닌 별도 memop으로 기록했고, 83개 store site에도 세지 않았다. §5.7.4는 `memset`(sample_app.c L117)을 '잡지 못한 것'으로 적고, §5.5.7은 이를 위해 `via = memset`을 설계한다. 두 절이 측정된 놓친 쓰기 집합에 대해 서로 다르다. 정확한 인용문: \"**[실측] 이름을 못 붙이거나 놓친 패턴은 세 가지다.**\"",
+   "fix": "제목을 \"**[실측] 이름을 못 붙이거나 놓친 패턴은 네 가지다.**\"로 바꾼다. 표에 다음 행을 더한다: \"| 구간 쓰기(`memset`) | `memset(&SAMPLE_APP_Data, 0, sizeof(SAMPLE_APP_Data))` (sample_app.c L117). sch_lab_app.c L166, ci_lab_app.c L109, to_lab_app.c L123도 같다 | `llvm.intr.memset` 하나다. store가 아니어서 위 83개에 들지 않는다. probe는 `global_memops`로 따로 기록한다 |\". [해석] 문단의 \"세 가지를 더 해야 한다\"는 \"네 가지를 더 해야 한다\"로 바꾸고, \"`memset`을 겹치는 field별 쓰기로 나누고(§5.5.7)\"를 목록에 더한다.",
+   "evidence": [
+    "$N/probe/mlir/O0_<app>.json summary.global_memops: 'memset SAMPLE_APP_Data. … sample_app.c:117', 'memset SCH_LAB_Global. … sch_lab_app.c:166', 'memset CI_LAB_Global. … ci_lab_app.c:109', 'memset TO_LAB_Global. … to_lab_app.c:123'",
+    "$N/probe/cFS/apps/sample_app/fsw/src/sample_app.c L117: 'memset(&SAMPLE_APP_Data, 0, sizeof(SAMPLE_APP_Data));'",
+    "05_sec.md §5.7.4: '**[실측] 잡지 못한 것.** `memset`(sample_app.c L117, TBAA tag 없음)과 …'",
+    "05_sec.md §5.5.7: '`memset`처럼 구간 전체를 쓰는 연산은 `via = memset`인 `state.update`를 …'"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "07_sec.md",
+   "location": "§7.0 결과 요약 표, '상태 저장을 인식하는가?' 행 (line 19)",
+   "problem": "§7.0은 offset 0 field 쓰기에 이름을 붙일 수 없다고 범위 제한 없이 적는다. 이 결과는 -O0 probe에만 해당한다. §5.7.4는 -O1 TBAA struct-path tag로 sample_app의 base 주소 접근 31개를 모두 `CommandCounter`로 풀었다고 측정했다. §5.7.1은 이를 'sample_app 31/31 해결'로 적는다. 요약도 놓친 패턴으로 `memset`을 빠뜨린다. 정확한 인용문: \"| 상태 저장을 인식하는가? | **[실측]** 앱 전역 struct field의 직접 store는 인식된다. offset 0 field 쓰기는 잡지만 이름을 못 붙인다. API out-parameter와 지역 포인터를 통한 쓰기는 놓친다. | §7.8 |\"",
+   "fix": "다음으로 바꾼다: \"| 상태 저장을 인식하는가? | **[실측]** `-O0` probe에서 앱 전역 struct field의 직접 store는 인식된다. offset 0 field 쓰기는 잡지만 이름을 못 붙인다. sample_app에서는 `-O1` TBAA struct-path tag로 base 주소 접근 31개가 모두 `CommandCounter`로 풀렸다 (§5.7.4). API out-parameter, `memset`, 지역 포인터를 통한 쓰기는 놓친다. | §7.8, §5.7.4 |\"",
+   "evidence": [
+    "05_sec.md §5.7.4 table: '그중 GEP 없이 base 주소로 접근한 것 | 31. 31개 모두 tag offset 0으로 `CommandCounter`가 되었다'",
+    "05_sec.md §5.7.1 offset 0 field row: '**[실측]** sample_app 31/31 해결'",
+    "$N/s05_dialect/resolve_fields.out (base-address accesses resolved '(tbaa off 0)' → SAMPLE_APP_Data.CommandCounter)",
+    "$N/probe/mlir/O0_sample_app.json global_memops (memset @ sample_app.c:117)"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "07_sec.md",
+   "location": "§7.14 표, '상태 저장 인식' 행 (line 466)",
+   "problem": "§7.14는 '타입 기반 field 해석'을 아직 해 보지 않은 다음 단계로 적고, `memset`을 빠뜨린다. §5.7.4는 이미 TBAA 기반 해석을 측정했다(sample_app만, 31/31). 또 strict aliasing 조건(`-fno-strict-aliasing`이면 tag 0개)도 적었다. 남은 공백은 다른 앱에 적용하는 일이다. 정확한 인용문: \"| 상태 저장 인식 | **[실측]** offset 0 쓰기 17개는 이름 없음, out-parameter·지역 포인터 쓰기는 놓침 | API out-parameter 모델, 타입 기반 field 해석, points-to |\"",
+   "fix": "다음으로 바꾼다: \"| 상태 저장 인식 | **[실측]** `-O0`에서 offset 0 쓰기 17개는 이름이 없고, out-parameter·`memset`·지역 포인터 쓰기는 놓친다. `-O1` TBAA 해석은 sample_app에서만 쟀다 (31/31, §5.7.4) | API out-parameter 모델(§5.1 D2), TBAA 해석을 다른 앱에 적용, points-to |\"",
+   "evidence": [
+    "05_sec.md §5.7.4 TBAA table and '**[실측] TBAA의 조건.** … `-fno-strict-aliasing`을 더하면 0개다'",
+    "05_sec.md §5.11: 'TBAA·`noinline` 결과를 hk, to_lab, sch_lab, ci_lab과 mission 전체에 적용하는 것은 **[미확인]**이다'",
+    "05_sec.md §5.1 D2 (out-parameter 명시화)"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "07_sec.md",
+   "location": "§7.5.1 세 번째 [실측] 문단 (line 135)",
+   "problem": "§7.5.1에서 이 문장은 -O0 단계 서술(`-S -emit-llvm -O0 -g`, 그 뒤 import) 사이에 있어서, 17-TU pipeline 실행이 -O0 IR에 대한 것으로 읽힌다. 인용된 디렉터리 `$N/probe/mlir_opt/`에는 실제로 `-O1 -Xclang -disable-llvm-passes` IR(`$N/probe/ir_o1np/`)에 pipeline을 돌린 결과가 있다. -O0 IR에 pipeline을 돌린 기록은 sample_app뿐이다. 그래서 §5.7.1과 §7.12에서 TU 범위에 대한 혼동이 생긴다. 정확한 인용문: \"**[실측]** `mlir-opt --inline --sroa --mem2reg --canonicalize --cse`도 17개 모두 오류 없이 끝났다 (`$N/probe/mlir_opt/`).\"",
+   "fix": "다음으로 바꾼다: \"**[실측]** `mlir-opt --inline --sroa --mem2reg --canonicalize --cse`도 17개 모두 오류 없이 끝났다. 이 pipeline의 입력은 위 `-O0` IR이 아니라 `-O1 -Xclang -disable-llvm-passes -g`로 다시 만든 17개 IR이다 (`$N/probe/ir_o1np/`, 출력 `$N/probe/mlir_opt/`, §7.7.2). `-O0` IR에 pipeline을 돌린 기록은 sample_app뿐이다 (§7.7.1).\"",
+   "evidence": [
+    "grep -c 'optimize_none|no_inline': $N/probe/mlir_opt/sample_app/sample_app.raw.mlir = 0, $N/probe/mlir/sample_app/sample_app.mlir (-O0) = 3",
+    "$N/probe/ir_o1np/*/commands.log: 17 entries with '-O1 -Xclang -disable-llvm-passes' and rc=0; $N/probe/mlir_opt/*/*.dbg.mlir = 17 files",
+    "-O0 pipeline outputs exist only as $N/verify_C18_counter/o0.opt.mlir and $N/verify-C18/o0_sample_app.opt.mlir (sample_app)",
+    "evidence/findings_probe.json probe-08 evidence: 'P/mlir_opt/<app>/*.raw.mlir, *.dbg.mlir'"
+   ],
+   "from": "pair:05-07"
+  },
+  {
+   "part": "07_sec.md",
+   "location": "§7.7.3, 앱별 표 뒤, '**[확인된 사실] to_lab 정정.**' 단락 앞 (line 239/240)",
+   "problem": "앞부분 요약(00_front.md)은 '구독 site 47곳 중 8곳은 table·명령·설정에서 MID를 받고'에 대해 §7을 인용한다. §9의 GO-2 기준도 '47곳 분류'를 쓴다. 그런데 §7은 이 수를 어디에도 적지 않는다. §7.7.3은 lab 앱 5개의 MID 인자 site 23개만 다룬다. 그래서 §7.7.3의 23-site 표와 bundle 전체 47-site 수의 관계가 이 절에 없다.",
+   "fix": "표 뒤에 다음 단락을 넣는다: \"**[실측] 범위를 bundle 전체로 넓힌 수.** 위 표는 lab 앱 5개의 MID 인자 site 23개다. bundle 전체 `apps/*/fsw/src`의 `CFE_SB_Subscribe*` 호출은 47곳이다. 그중 8곳(CF 1, DS 2, HK 1, LC 1, SBN 1, TO_LAB 2)은 table·명령·설정 구조체에서 MID를 얻는다 (`$N/C16-verify/subscribe_sites.txt`, 검증 C16, §3.7). 이 47곳은 소스 grep 집계다. IR에서 상수 회수는 시험하지 않았다.\"",
+   "evidence": [
+    "$N/C16-verify/subscribe_sites.txt: 47 lines; data/command-driven: cf_cfdp.c:1288, ds_table.c:938, ds_cmds.c:1327, hk_utils.c:322, lc_watch.c:225, sbn_subs.c:425, to_lab_app.c:504, to_lab_cmds.c:218",
+    "00_front.md line 14: '그러나 구독 site 47곳 중 8곳은 table·명령·설정에서 MID를 받고, MID 이름은 IR에서 사라진다 (§7)'",
+    "03_sec.md line 149 (§3.7) and 09_sec.md lines 357-358 / 584 (GO-2 '47곳 분류') use the same count"
+   ],
+   "from": "pair:05-07"
+  }
+ ],
+ "06_sec.md": [
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-MSG 행, 조건 ② (\"명령 기반·unknown 발행자가 없다\")",
+   "problem": "`Pub(m)`의 완전성을 앱 코드의 transmit site와 table 발행만으로 판정한다. 그런데 §3에는 cFE가 앱 대신 SB 발행을 하는 경로가 셋 기록되어 있다. (a) EVS long event(0x808)는 `SendEvent`를 부른 task가 `TransmitMsg`로 보낸다(SB-13, §3.7의 sender CFE_SB/CFE_TBL/CFE_TIME/TO_LAB). (b) global `Subscribe`는 subscription reporting이 켜지면 호출 task에서 report(0x80E)를 보낸다(SB-2, SB-7). (c) TBL-8 알림은 TBL task가 보낸다. 이 발행자들이 빠지면 `Pub(m)`이 '완전'으로 판정된다. 그러면 0x808을 구독하는 TO_LAB·DS나 NotifyByMessage MID를 받는 owner에 대해 G0에 틀린 HB-MSG 간선이 들어간다. HB-FIFO 조건 ③도 같은 `Pub` 정의를 쓴다. 또 `Pub(m)=∅`이면 join 간선이 공허하게 참이 되어, 모든 사건이 `first hdl`보다 앞서게 된다.",
+   "fix": "\"명령 기반·unknown 발행자가 없다.\" 바로 뒤에 다음 문장을 넣는다. \"`Pub(m)`에는 cFE가 앱 대신 내는 발행도 넣는다. (a) `cfs.evs.send_event` site는 EVS long event MID(기본 0x808)의 발행자다. 호출 task가 `TransmitMsg`로 보낸다(§3 SB-13, §3.7). (b) global 범위 `cfs.sb.subscribe` site는 subscription reporting이 켜진 build에서 report MID(번들 0x80E)의 발행자다(§3 SB-2, SB-7). (c) `CFE_TBL_NotifyByMessage`에 넘긴 MID는 TBL task가 발행한다(§3 TBL-8). 이 MID를 상수로 풀지 못하면 조건 ②는 성립하지 않는다. cFE core task가 직접 내는 발행이 있는 MID도 마찬가지다. `Pub(m)=∅`이면 간선을 넣지 않는다.\" 6.10 'MID가 table·명령에서 온다' 행의 완화 열에도 '프레임워크 대리 발행(EVS event, subscription report, TBL 알림)도 `Pub(m)`에 넣는다'를 덧붙인다.",
+   "evidence": [
+    "03_sec.md SB-13: `CFE_EVS_LONG_EVENT_MSG_MID` = 0x808; §3.7: 'No subscribers for MsgId 0x808 … sender CFE_SB, CFE_TBL, CFE_TIME, TO_LAB'",
+    "03_sec.md SB-7: 'TO_LAB의 subscription report(MID 0x80E)가 SBN의 SBNSubPipe에서 drop되었다'",
+    "03_sec.md TBL-8: '알림은 세 경우에 TBL task가 TransmitMsg로 한 번씩 보낸다'",
+    "cFE 546a0025 cfe_sb_api.c L1094–L1097: `if (Status == CFE_SUCCESS && Scope == CFE_SB_MSG_GLOBAL) CFE_SB_SendSubscriptionReport(...)` → cfe_sb_task.c L652–L663 `CFE_SB_TransmitMsg(...)`, 호출자 문맥 ($N/verify_C11_counter/cFE)",
+    "cfe_tbl_internal.c L761: `CFE_SB_TransmitMsg(CFE_MSG_PTR(CFE_TBL_Global.NotifyMsg.CommandHeader), true)`",
+    "05_sec.md L250: EVS는 `CFE_SB_TransmitMsg(…, true)`로 보낸다 (cfe_evs_utils.c L498, L513)"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-SYS2 행, 조건 열 (\"`B`가 startup script 앱이다\")과 BUILD_HB L162",
+   "problem": "§3.3은 ready(B)를 'B의 모든 task 가운데 다음 호출에 처음 도달하는 지점(child 호출도 B의 것, ES-8)'으로 정의한다. 또 child가 이 호출에 도달할 수 있고 main 경로와 순서를 정할 수 없으면 'Subscribe가 ready(B)보다 앞선다'는 결론을 내지 않는다고 쓴다. §6의 `ready`·`readyMark`는 task마다 만들어지는데, HB-SYS2와 BUILD_HB는 어느 task의 ready인지 정하지 않는다. child task가 `RunLoop`를 먼저 부르면 AppState는 child 쪽에서 RUNNING이 된다(ES-7, ES-8). 이때 `NoStartupTimeout(B)`가 성립해도, 사슬 `sub(main) →PO ready(main) → sys(OPERATIONAL)`는 실제 보장이 아니다.",
+   "fix": "조건 셀을 다음으로 바꾼다. \"`B`가 startup script 앱이다. `ready(B,RUNNING)`은 §3.3의 ready(B)와 같다. 즉 B의 모든 task(main과 child) 가운데 처음 도달하는 ready 사건이다(child 호출도 B의 것, §3 ES-8, M8). child task의 ready 사건과 main의 ready 사건 사이에 HB 순서가 없으면 이 간선을 넣지 않는다.\" BUILD_HB L162는 `for B in script_apps where first_ready(B) is unique: addA(GA, first_ready(B)→sys(OPERATIONAL), ...)`로 고친다.",
+   "evidence": [
+    "03_sec.md L82–L87: 'ready(B) := B의 모든 task 가운데 … 처음 도달하는 지점 (child 호출도 B의 것, ES-8) … child가 이 호출에 도달할 수 있고 main 경로와 순서를 정할 수 없으면 'Subscribe가 ready(B)보다 앞선다'는 결론을 내지 않는다.'",
+    "03_sec.md ES-8: 'child의 RunLoop·WaitForSystemState가 부모의 AppState를 바꿀 수 있다'",
+    "06_sec.md 6.3.4: '`readyMark : {NO, YES}` | 이 task가 AppState를 올렸는가'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-FIFO 행 조건 열 ('④ OSAL POSIX 또는 RTEMS다.'), §6.1.1 'reader는 하나다 (A1. …)', BUILD_HB L158",
+   "problem": "§3 A1은 pipe FIFO 가정에 'OSAL POSIX/RTEMS'와 '한 pipe를 한 task만 읽는다'를 함께 조건으로 둔다. 또 같은 PipeId를 둘 이상 task가 receive하면 A1을 끄고 경고한다. §6.1.1은 이를 조건이 아니라 사실처럼 '`reader는 하나다`'로 쓴다. HB-FIFO도 backend 조건 ④만 확인한다. 두 task가 같은 pipe를 읽으면 다른 task가 m1 instance를 가져갈 수 있다. 그러면 `first hdl(U,m1)`이 `first hdl(U,m2)`보다 늦을 수 있는데, 그래도 간선이 들어간다.",
+   "fix": "HB-FIFO 조건에 \"⑥ pipe `p`에서 `cfs.sb.receive`를 부르는 task가 `U` 하나다(§3 A1 조건)\"를 더한다. §6.1.1의 \"reader는 하나다 (A1. OSAL POSIX·RTEMS 조건. VxWorks는 **[미확인]**)\"는 다음으로 바꾼다. \"reader가 하나일 때만 FIFO를 가정한다. 같은 pipe를 둘 이상 task가 receive하면 A1을 끄고 경고한다 (§3 A1, SB-9. OSAL POSIX·RTEMS 조건. VxWorks는 **[미확인]**)\". BUILD_HB L158의 조건에는 `and receivers(p) == {U}`를 더한다.",
+   "evidence": [
+    "03_sec.md A1 조건: '한 pipe를 한 task만 읽는다. [설계 제안] 같은 PipeId로 ReceiveBuffer를 부르는 task가 둘 이상이면 A1을 끄고 경고한다.'",
+    "03_sec.md SB-9: 'pipe 공유를 막는 검사는 없다. 다른 task가 같은 pipe에서 receive하면 앞 task가 쓰던 buffer가 놓인다'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.1.2 `ready(b,s)` 행 속성 열 ('`run_loop`은 RUNNING')과 §6.4.2 `cfs.es.run_loop(rs)` 행 ('처음 도달에서 `ready(b, RUNNING)`')",
+   "problem": "§3 ES-7과 §3.3 ready(B) 정의를 보면, `RunLoop`이 AppState를 RUNNING으로 올리는 것은 `*RunStatus == APP_RUN`일 때뿐이다. 그 밖의 값이면 AppState를 바꾸지 않고 바로 false를 반환한다. §6은 run_loop에 처음 도달하면 조건 없이 `ready(b,RUNNING)`과 `readyMark := YES`를 만든다. 흔한 패턴이 init 실패 때 `RunStatus = APP_ERROR`로 두고 run loop에 들어가는 것인데, 이 경우 존재하지 않는 ready 사건이 HB-SYS2 사슬에 쓰인다.",
+   "fix": "6.1.2 속성 셀의 \"`run_loop`은 RUNNING\"을 다음으로 바꾼다. \"`run_loop`은 `rs`가 NULL이거나 `*rs == APP_RUN`인 경로에서만 RUNNING이다(§3 ES-7). 그 밖의 값이거나 `*rs`를 상수로 풀지 못하면 `ready`를 만들지 않는다.\" 6.4.2의 \"처음 도달에서 `ready(b, RUNNING)`\"은 다음으로 바꾼다. \"`rs`가 NULL이거나 `*rs == APP_RUN`으로 풀리는 첫 도달에서 `ready(b, RUNNING)`(§3 ES-7). 그렇지 않으면 사건 없음.\" 같은 행의 Aux 열 `readyMark := YES`에도 같은 조건을 붙인다.",
+   "evidence": [
+    "03_sec.md ES-7: '`RunLoop`은 `*RunStatus`가 `APP_RUN`이 아니면 AppState를 바꾸지 않고 바로 false를 반환한다(L453–L456)'",
+    "03_sec.md L84: 'RunLoop 진입(단 *RunStatus == APP_RUN일 때만, ES-7)'",
+    "cFE 546a0025 cfe_es_api.c L453–L456: `if (RunStatus != NULL && *RunStatus != CFE_ES_RunStatus_APP_RUN) { return false; }` — lock과 AppState 상승(L469–L472)보다 앞에 있다"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-SYS2 행 가정 열",
+   "problem": "같은 이름의 가정 `NoStartupTimeout(B)`를 두 절이 다르게 정의한다. §3.3 R-sync-2는 'ES가 OPERATIONAL을 쓰기 전 RUNNING 대기의 마지막 검사(ES lock 아래)에서 B.AppState ≥ RUNNING이었다'로 정의한다. §6은 'LATE_INIT 대기와 RUNNING 대기 각각의 제한 안에 해당 상태에 도달한다'는 시간 기준 연언으로 정의한다. `ready(B,RUNNING) → sys(OPERATIONAL)`에는 RUNNING 대기 조건만 필요하다. 두 번째 간선 `ready(B,LATE_INIT) → sys(APPS_INIT)`은 다른 대기(L211–L214)에 기대므로 다른 가정이다. 또 MainTaskSyncDelay는 벽시계가 아니라 누적 delay로 기한을 센다. 그래서 '제한 안에 도달'과 '마지막 검사에서 성립'은 같은 조건이 아니다.",
+   "fix": "가정 셀을 다음으로 바꾼다. \"`NoStartupTimeout(B)` (§3.3 R-sync-2의 정의): ES가 OPERATIONAL을 쓰기 전 RUNNING 대기(`CFE_ES_MainTaskSyncDelay(RUNNING, CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC)`, 기본 1000 ms, soft)의 마지막 검사(ES lock 아래)에서 `B.AppState ≥ RUNNING`이었다. 두 번째 간선 `ready(B,LATE_INIT) → sys(APPS_INIT)`은 같은 조건을 LATE_INIT 대기(cfe_es_start.c L211–L214)의 마지막 검사에 적용한 별도 가정 `NoStartupTimeout_LI(B)`로 기록한다. BUILD_HB는 아직 이 간선을 만들지 않는다.\" 근거 열 앞에는 'R-sync-2 (§3.3)'를 더한다.",
+   "evidence": [
+    "03_sec.md L93–L96: 'NoStartupTimeout(B) := ES가 OPERATIONAL을 쓰기 전 RUNNING 대기의 마지막 검사(ES lock 아래)에서 B.AppState >= RUNNING이었다'",
+    "cFE 546a0025 cfe_es_start.c L211–L235: 두 번의 별도 `CFE_ES_MainTaskSyncDelay` 호출; L886–L944: 검사는 lock 아래에서 하고 `WaitRemaining`은 delay를 빼 가며 줄인다",
+    "06_sec.md BUILD_HB L162는 OPERATIONAL 간선만 더한다"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.4.2 `cfs.sb.subscribe` 행 Aux 열 ('성공 분기에서 `subs ∪= {(m,p,msglim)}`')",
+   "problem": "§3 SB-2를 보면 같은 (MID, pipe)를 다시 구독해도 `CFE_SUCCESS`를 반환하지만 기존 MsgLim은 바꾸지 않는다. 전이는 새 삼중쌍을 더하므로 `subs`에 `(m,p,4)`와 `(m,p,k)`가 함께 생긴다. 그러면 6.7.2 모델의 `MsgLim(m,p)` 계수기(M4)가 틀린 한계를 쓸 수 있다. 예: 상수 구독 뒤 TO_LAB AddPacket의 `SubscribeEx`.",
+   "fix": "Aux 셀을 다음으로 바꾼다. \"성공 분기에서 `(m,p,·)`가 `subs`에 없으면 `subs ∪= {(m,p,msglim)}`. 이미 있으면 기존 msglim을 유지한다. 재구독은 `CFE_SUCCESS`를 반환하지만 MsgLim을 바꾸지 않는다(§3 SB-2).\" 6.1.2 `sub` 행의 MsgLim 속성도 '처음 성공한 구독의 값'으로 정한다.",
+   "evidence": [
+    "03_sec.md SB-2: '같은 (MID, pipe)를 다시 구독하면 CFE_SUCCESS를 반환하고 기존 MsgLim을 바꾸지 않는다(L1019–L1040)'",
+    "cFE 546a0025 cfe_sb_api.c L1019–L1040: duplicate destination → `PendingEventID = CFE_SB_DUP_SUBSCRIP_EID; break;`, Status는 SUCCESS로 남고 새 dest를 더하지 않는다",
+    "03_sec.md M4: '`msglim(MID, pipe)`(Subscribe 기본 4, SubscribeEx 지정값)'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.4.2 `cfs.es.restart_app(app)` 행과 §6.1.2 `rst.req` 행 ('`CFE_ES_RestartApp` 호출 / ES background의')",
+   "problem": "§3 ES-9을 보면 API는 검사한 뒤에만 `ControlReq`를 기록하고, core 앱과 RUNNING이 아닌 앱은 거부한다. 그런데 §6은 호출만 있으면 조건 없이 `rst.req`를 만든다. 이는 AP3('상태를 바꾸는 사건은 성공 경로에만')와도 어긋난다. 거부된 요청에서 HB-RST가 `rst.req → rst.clean → rst.create` 간선을 만든다.",
+   "fix": "6.4.2 행의 사건 셀을 \"status == `CFE_SUCCESS` 분기에 `rst.req(app)`. status를 검사하지 않으면 `unchecked` (AP3)\"로 바꾼다. 6.1.2의 \"`CFE_ES_RestartApp` 호출\"은 \"`CFE_ES_RestartApp`의 성공 반환\"으로 바꾼다.",
+   "evidence": [
+    "03_sec.md ES-9: 'API는 검사 후 `ControlReq`만 기록한다. core 앱과 RUNNING이 아닌 앱은 거부한다.'",
+    "cFE 546a0025 cfe_es_api.c L165–L200: `CFE_ES_ERR_RESOURCEID_NOT_VALID` 또는 `CFE_ES_FILE_IO_ERR`를 반환할 때는 `ControlReq`를 쓰지 않는다",
+    "06_sec.md AP3"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.8 FP8 행 기제 열",
+   "problem": "'§3.9의 A1–A11을 `G0`의 규칙으로 쓴다'는 문장이 §3.9와 §6.2의 실제 사용과 맞지 않는다. §3.9 서두는 각 가정을 명시한 조건 아래에서만 쓰고, 조건을 벗어나면 끄고 'unknown'으로 두라고 한다. A1은 HB-FIFO를 거쳐 `G_A`(가정 `NoDrop`)에만 들어간다. A3은 [해석]이다(실행으로 검증하지 않음). A2·A7–A11은 HB 규칙이 아니라 사건 모델과 전이에서 쓴다. A9(TIME 기준값)를 G0 규칙의 예로 든 것도 틀렸다. 그대로 두면 AP1('G0에는 가정이 없는 규칙만')과 충돌한다.",
+   "fix": "기제 셀을 다음으로 바꾼다. \"§3.9의 A1–A11을 각 조건이 성립할 때만 쓴다. Σ와 무관하고 남는 가정이 없는 것은 `G0` 규칙이 된다(A4→HB-CORE, A5→HB-LIB, A6→HB-SYS1). 이름 붙은 가정이 남는 것은 `G_A`에 둔다(A1·A3→HB-FIFO와 `NoDrop`). A2, A7–A11은 사건 모델과 전이(6.1.2, 6.3.4, 6.4.2)에서 쓰고 HB 간선을 만들지 않는다. 조건을 벗어나면 그 가정을 끄고 `UNKNOWN`으로 둔다 (§3.9 서두, AP4).\"",
+   "evidence": [
+    "03_sec.md §3.9 서두: '아래는 고정 commit과 명시한 조건 아래에서만 가정한다. 조건을 벗어나면 가정을 끄고 결과를 ‘unknown’으로 남긴다.'",
+    "03_sec.md A3: '**[해석]**(실행으로 검증하지 않음)'",
+    "06_sec.md AP1과 HB-FIFO 가정 열 `NoDrop(p,m1)` (G_A에만)"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-CORE 행 조건 열 ('기본 `MISSION_CORE_MODULES`')",
+   "problem": "§3.6은 'core service 직렬화'를 버전에 따라 바뀌는 의미로 적는다. 공개 배포본 cFE 6.4.1에는 core 앱별 sync가 없고 6.4.2에서 처음 들어갔다(검증 C21의 정정 문구). AP6은 버전 의존 규칙에 버전 조건을 붙이라고 한다. 그런데 HB-CORE에는 버전 조건이 없다. HB-RST, HB-TREG, HB-ATX는 버전 조건을 갖는다.",
+   "fix": "조건 셀을 다음으로 바꾼다. \"기본 `MISSION_CORE_MODULES`. core 앱별 sync가 있는 버전(공개 배포본 기준 cFE ≥ 6.4.2, §3.6). 6.4.2와 546a0025 사이의 sync 구현 차이는 확인하지 않았다. 그래서 고정 commit이 아닌 버전에서는 이 간선을 버전 가정과 함께 `G_A`에 둔다 (AP6).\"",
+   "evidence": [
+    "03_sec.md §3.6 'core service 직렬화' 행: '공개 SourceForge 배포본 cFE 6.4.1(2014-12-12)에는 per-core-app sync와 `EVS_AppID` 검사가 없고, 6.4.2(2015-07-13)에 처음 들어갔다.'",
+    "evidence/verified_claims.json C21 (refuted). 정정 문구: 수정은 공개본으로는 cFE 6.4.2에서 처음 나왔다(CFE_ES_ApplicationSyncDelay + panic)",
+    "06_sec.md AP6: '버전 의존 규칙에는 버전 조건을 붙인다.'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.3.4 `tblPtr` 행 내용 열 ('`state ∈ {PROTECTED, UNPROTECTED, RELEASED, NULL}`')",
+   "problem": "§3 M8(필수 모델 사실)은 'TBL LockFlag는 같은 handle을 쓰는 task들이 공유한다'라고 쓴다. 근거는 ES-8, TBL-2, TBL-3이다. §6의 `tblPtr` 전이는 task마다 따로 도는 dense 분석 안에서만 PROTECTED/UNPROTECTED를 바꾼다. 그래서 같은 앱의 다른 task가 같은 `h`로 `GetAddress`(BufferIndex 이동)나 `ReleaseAddress`(LockFlag 해제)를 부르는 경우를 보지 못한다. 그 결과 M8의 TBL 부분이 §6 어디에도 모델링되지 않는다.",
+   "fix": "내용 셀 끝에 다음을 더한다. \"handle `h`를 같은 앱의 둘 이상 task가 `cfs.tbl.get_address`·`release_address`에 쓰면, 그 `h`로 얻은 포인터는 `PROTECTED`가 아니라 `UNPROTECTED`로 둔다(§3 M8: descriptor와 LockFlag는 task 사이에 공유된다. TBL-2, ES-8). ES-8은 코드만 읽은 [해석]이므로 이 처리는 경고를 줄이는 방향으로 쓰지 않는다. 진단에는 그 handle을 쓰는 task 목록을 적는다.\"",
+   "evidence": [
+    "03_sec.md M8: 'child task의 ES·SB·TBL 호출은 부모 앱의 것으로 기록한다. TBL LockFlag는 같은 handle을 쓰는 task들이 공유한다.'",
+    "03_sec.md ES-8: 'child와 main은 TBL access descriptor(따라서 LockFlag)를 공유한다' ([해석], 실행하지 않음)",
+    "03_sec.md TBL-2: 'GetAddress 성공은 기존 잠금을 확인하지 않고 LockFlag=true, BufferIndex=현재 active buffer … 로 덮는다. ReleaseAddress는 LockFlag=false만 쓴다.'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.4.2 `cfs.tbl.get_address(h)` 행 Aux 열 끝 ('NEVER_LOADED·UNREGISTERED 분기: `tblPtr[ptr] := NULL` | §3 TBL-1, TBL-2 |')",
+   "problem": "§3 M11(필수 모델 사실)은 '`GetAddresses`의 집계 상태로 handle별 잠금을 판단하지 않는다'라고 쓴다. TBL-9에 따르면 `GetAddresses`는 handle마다 따로 처리하고 첫 non-success만 반환하므로, 일부 table은 잠기고 일부는 NULL일 수 있다. 그런데 §6(그리고 §5)에는 `CFE_TBL_GetAddresses`·`ReleaseAddresses`의 전이가 없다. 그래서 M11의 이 부분이 모델링되지 않는다.",
+   "fix": "Aux 셀 끝에 다음을 더한다. \"`CFE_TBL_GetAddresses`·`ReleaseAddresses`(복수)는 lifting하지 않는다. 6.5.2의 `ExternalCallee` hook에서 API 모델로 처리한다. 집계 status가 `CFE_SUCCESS`이면 모든 포인터를 `PROTECTED`로 둔다. 그 밖에는 포인터마다 `PROTECTED`와 `NULL`의 합류로 둔다. 집계 status로 handle별 잠금을 판단하지 않는다(§3 M11, TBL-9).\" 근거 열에는 'TBL-9, M11'을 더한다.",
+   "evidence": [
+    "03_sec.md M11: '`GetAddresses`의 집계 상태로 handle별 잠금을 판단하지 않는다.'",
+    "03_sec.md TBL-9: '`GetAddresses`는 handle마다 따로 처리하고 실패 뒤에도 계속하며 첫 non-success만 반환한다. 일부 table은 잠기고 일부는 NULL일 수 있다.'",
+    "grep 'GetAddresses\\|get_addresses' parts/*.md → 03_sec.md에만 있고 05·06에는 없음"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.6 R-F8 행 생성 조건 열 ('`tunreg(s,t) ≺ treg(owner,t,SUCCESS)` | sharer `s`가 `t`를 `share`했다. cFE ≥ v7.0.0.')",
+   "problem": "§3 M3은 '재시작 창의 발행은 사라진다'라고 쓰고, M9는 '이 창에서 구독자의 pipe·queue·state가 초기화된다. 다른 앱의 AppId 보관 … 은 새 인스턴스와 연결되지 않는다'라고 쓴다. 둘 다 반드시 모델링할 사실이다. §6은 HB-RST와 `rst.*` 사건으로 사건열만 모델링한다. R-F8은 TBL 재등록만 다룬다. 재시작 창의 SB 쪽(재구독 전 발행 유실, 옛 AppId 사용)은 어떤 `Req`도 만들지 않는다. 6.1.3의 once/first 한정자로는 'rst.req 뒤 첫 발행'을 표현할 수 없기 때문이다. 그런데 이 공백이 어디에도 적혀 있지 않다.",
+   "fix": "생성 조건 셀의 \"cFE ≥ v7.0.0.\" 뒤에 다음을 넣는다. \"재시작 창의 SB 쪽(§3 M3·M9: 재구독 전 발행 유실, 다른 앱이 보관한 옛 AppId)은 이 규칙이 만들지 않는다. 'rst.req 뒤 첫 발행'은 6.1.3의 once/first로 표현되지 않기 때문이다. 이 부분은 결과를 내지 않는 범위로 진단과 평가 보고에 적는다.\" 6.10 표 끝에는 같은 내용의 위험 행을 더한다.",
+   "evidence": [
+    "03_sec.md M3: '구독 완료 전의 발행과 재시작 창의 발행은 사라진다.'",
+    "03_sec.md M9: '이 창에서 구독자의 pipe·queue·state가 초기화된다. 다른 앱의 AppId 보관과 table 공유는 새 인스턴스와 연결되지 않는다.'",
+    "06_sec.md 6.1.3: task 사이 순서는 `once`·`first` 사건 사이에만 만든다. R-F8의 Req는 TBL 쪽뿐이다"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.4.3 의사 코드 `case TblGetAddress` 첫 줄 ('for q, e in s.aux.tblPtr.items(): if e.h == h and e.state == PROTECTED: e.state = UNPROTECTED  # TBL-2')",
+   "problem": "이 강등은 status 분기 전에 무조건 일어난다. 그런데 §3 M10과 TBL-1을 보면 NEVER_LOADED에서는 desc가 바뀌지 않고(LockFlag도 BufferIndex도 그대로), UNREGISTERED 경로도 desc를 건드리지 않는다. 6.4.2 표도 강등을 SUCCESS·INFO_UPDATED 분기에만 둔다. 결과적으로 owner 재시작 뒤 sharer가 UNREGISTERED를 받으면, 아직 LockFlag가 서 있는 옛 포인터가 거짓 F6 후보가 된다(TBL-7 시나리오).",
+   "fix": "그 줄을 지우고 성공 분기 람다 안으로 옮긴다. `s.pending_edge[st in {SUCCESS, INFO_UPDATED}] = lambda x: (demote_protected(x, h), x.aux.tblPtr.put(ptr, (h, tbl_of(h), PROTECTED)))`. 여기서 `demote_protected`는 같은 `h`의 PROTECTED 포인터를 UNPROTECTED로 바꾼다(TBL-2). NEVER_LOADED·UNREGISTERED 분기는 기존 포인터를 바꾸지 않는다(M10).",
+   "evidence": [
+    "03_sec.md M10: 't.active == ⊥ → (NEVER_LOADED, ptr=NULL), desc 불변'",
+    "03_sec.md TBL-1: 'LockFlag를 세우지 않는다(L192–L196). LockFlag는 load된 경로에서만 세운다(L207).'",
+    "cFE 546a0025 cfe_tbl_registry.c L182–L196: UNREGISTERED·NEVER_LOADED 분기는 `*TblPtr = NULL`만 쓰고 AccDescPtr는 건드리지 않는다",
+    "06_sec.md 6.4.2 get_address 행: 강등은 'SUCCESS·INFO_UPDATED 분기'에 있다"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-SYS1 행 근거 열 ('그래서 `MemOrder`에 기대지 않는다')",
+   "problem": "§3.3 끝의 [미확인]은 'SystemState는 lock 없이 읽힌다. 다중 코어에서 B의 앞선 쓰기가 A에게 보이는 메모리 순서는 확인하지 않았다'이다. §3.10도 이를 미확인 목록에 둔다. 여기서 B의 앞선 쓰기에는 B의 Subscribe도 들어간다. §6은 [해석]만으로 lock 아래의 쓰기에는 `MemOrder`가 필요 없다고 결론짓고 HB-SYS1을 `G0`에 둔다. 그러면서 §3의 미확인 항목과 연결하지 않는다.",
+   "fix": "\"그래서 `MemOrder`에 기대지 않는다.\"를 다음으로 바꾼다. \"그래서 이 쓰기들에는 `MemOrder`가 필요 없다고 본다. 이 판단은 실행이나 메모리 모델로 확인하지 않았다. §3.3 끝과 §3.10은 다중 코어에서 B의 앞선 쓰기가 A에게 보이는 순서를 **[미확인]**으로 둔다.\" 6.10의 MemOrder 항목에도 'lock 아래 쓰기에 대한 위 [해석] 포함'을 덧붙인다.",
+   "evidence": [
+    "03_sec.md L103: '**[미확인]** `SystemState`는 lock 없이 읽힌다. 다중 코어에서 B의 앞선 쓰기가 A에게 보이는 메모리 순서는 확인하지 않았다.'",
+    "03_sec.md §3.10: '다중 코어에서 `SystemState` 읽기의 메모리 순서.'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.4.2 `CFE_TIME_GetTime` 행 Prov·Mem 열",
+   "problem": "이 행은 '여러 field가 같은 version에서 온다'를 조건 없이 쓴다. §3 A9는 이를 '처음 4번의 읽기 안에 일관된 복사본을 얻은 경우'로 제한한다. EVT-5에 따르면 실패하면 구조를 0으로 채우고 NOT_SET 값이 나온다. EVT-4와 M13에 따르면 시작 직후 시계는 NOT_SET이다.",
+   "fix": "셀을 다음으로 바꾼다. \"결과 출처 `Time(cfe)`. 여러 field가 같은 version에서 온다는 것은 A9의 조건(처음 4번 읽기 안에 일관된 복사본)에서만 성립한다. 실패하면 0으로 채운 기준값이 쓰인다(§3 EVT-5). 시작 직후에는 `ClockSetState=NOT_SET`일 수 있다(§3 EVT-4, M13).\"",
+   "evidence": [
+    "03_sec.md A9 조건: '처음 4번의 읽기(최초 1회와 재시도 3회) 안에 일관된 복사본을 얻은 경우'",
+    "03_sec.md EVT-5: '처음 4번 안에 일관된 복사본을 얻지 못하면 구조를 0으로 채우고 `GetReferenceFail`을 세운다'",
+    "03_sec.md M13: '시작 직후 시계는 NOT_SET이다.'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.7.2 모델 요소 표 pipe 행 ('`depth_eff = min(요청, 배치 상한)`')",
+   "problem": "'배치 상한'은 §3에 정의되지 않은 말이다. §3 M4는 `depth_eff`를 정확히 정의한다. permissive mode이고 euid≠0이면 min(요청 depth, msg_max)이고, 그 밖에는 요청 depth다. root에서는 줄이지 않는다(OS-2).",
+   "fix": "\"`depth_eff = min(요청, 배치 상한)`\"을 다음으로 바꾼다. \"`depth_eff`는 §3 M4의 정의를 따른다. permissive mode이고 euid≠0이면 min(요청 depth, `msg_max`)이고, 그 밖에는 요청 depth다(요청은 `OS_QUEUE_MAX_DEPTH` 50 이하, §3 SB-1)\"",
+   "evidence": [
+    "03_sec.md M4: '`depth_eff`는 permissive mode이고 euid≠0이면 min(요청 depth, msg_max), 그 밖에는 요청 depth다(OS-2).'",
+    "03_sec.md OS-2: 'permissive mode이고 euid가 0이 아니면 … queue 깊이를 그 값으로 조용히 줄인다. root는 줄이지 않는다.'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "06_sec.md",
+   "location": "§6.2 HB-SYS2 행 근거 열 ('probe 앱 하나를 2.5 s 늦게 시작시킨')과 §6.7.3 순서 강제 행 ('앱 시작 지연만으로 순서를 강제할 수 있었다')",
+   "problem": "측정 조건을 §3 ES-4와 다르게 쓴다. probe는 앱을 늦게 시작시키지 않았다. PROBE_SLOW는 제때 시작했고, 진입 뒤 2.5 s 동안 ES sync API를 부르지 않았다.",
+   "fix": "HB-SYS2 근거의 \"probe 앱 하나를 2.5 s 늦게 시작시킨 24/24 실행에서\"를 \"probe 앱 하나(PROBE_SLOW)가 진입 후 2.5 s 동안 ES API를 부르지 않게 한 24/24 실행에서\"로 바꾼다. 6.7.3의 \"앱 시작 지연만으로 순서를 강제할 수 있었다\"는 \"앱 진입 뒤 ES 호출을 늦추는 것만으로 OPERATIONAL이 그 앱의 ready보다 먼저 오게 할 수 있었다(24/24)\"로 바꾼다.",
+   "evidence": [
+    "03_sec.md ES-4: 'PROBE_SLOW가 ES 호출 전에 2.5 s를 기다리게 했다. 24/24 실행에서 ‘Startup Sync failed’가 두 번 찍히고 OPERATIONAL에 들어갔다.'",
+    "$N/sem-es-tbl/sem-es-tbl_evidence_ledger.md L103: 'PROBE_SLOW는 진입 후 2.5 s 동안 ES sync API를 부르지 않는다.'"
+   ],
+   "from": "pair:03-06"
+  }
+ ],
+ "03_sec.md": [
+  {
+   "part": "03_sec.md",
+   "location": "§3.8 M1 의사 코드 L175 ('drop(d, QFULL)')와 M4 본문 L186 ('`depth_eff`개이면 QFULL drop이다')",
+   "problem": "같은 drop 원인의 이름이 다르다. §3은 `QFULL`을 쓰고, §6.1.2의 why 집합 {NO_ROUTE, ZERO_DEST, MSGLIM, PIPE_FULL, INACTIVE}, HB-FIFO의 `NoDrop`('MSGLIM·PIPE_FULL·INACTIVE'), §1.1의 사건 어휘는 `PIPE_FULL`을 쓴다.",
+   "fix": "L175의 `drop(d, QFULL)`을 `drop(d, PIPE_FULL)`로 바꾼다. L186의 \"`depth_eff`개이면 QFULL drop이다\"는 \"`depth_eff`개이면 PIPE_FULL drop이다\"로 바꾼다. EVT-2의 'Q_FULL event'는 EID 이름이므로 그대로 둔다.",
+   "evidence": [
+    "06_sec.md L78: 'why ∈ {NO_ROUTE, ZERO_DEST, MSGLIM, PIPE_FULL, INACTIVE}'",
+    "06_sec.md L116 HB-FIFO: '`NoDrop(p,m1)`: 그 instance가 MSGLIM·PIPE_FULL·INACTIVE로 버려지지 않는다'",
+    "01_sec.md L40: '`OS_QueuePut`과 `PIPE_FULL` drop은 mutex를 푼 뒤 목적지마다 일어난다'"
+   ],
+   "from": "pair:03-06"
+  },
+  {
+   "part": "03_sec.md",
+   "location": "§3.8 M2 마지막 문장",
+   "problem": "M2는 필수 consumer 요구를 '`required(MID → App)` 계약'으로 받는다고 쓴다. 그런데 이 계약 이름은 다른 어느 part에도 없다. §6.6의 계약 문법과 R-F1c는 같은 요구를 `must_receive_first(b, m)`로 받는다.",
+   "fix": "\"‘필수 consumer’ 요구는 `required(MID → App)` 계약으로 받아 M3의 HB 검사에 넘긴다.\"를 다음으로 바꾼다. \"‘필수 consumer’ 요구는 계약 `must_receive_first(b, m)`(§6.6 R-F1c)으로 받아 M3의 HB 검사에 넘긴다.\"",
+   "evidence": [
+    "06_sec.md L439 R-F1c: '`sub(b,m,p) ≺ first tx(a,m)` | 계약 `must_receive_first(b, m)`'",
+    "06_sec.md L457 계약 문법: 'must_receive_first   ATTITUDE_INIT_MID'",
+    "grep 'required(' parts/*.md → 03_sec.md L182에만 있음"
+   ],
+   "from": "pair:03-06"
+  }
+ ],
+ "09_sec.md": [
+  {
+   "part": "09_sec.md",
+   "location": "§9.5.2 주별 작업 표, W11 행 작업 열",
+   "problem": "SYN-ORD-01의 정의가 §8.3.3과 다르다. §8.3.3은 CONTROL이 두 메시지를 '한 pipe로' 받고, correct가 `NAV_STATE.Epoch == SENSOR_ATT.Seq` 검사라고 정의한다. §9는 관찰자가 '다른 pipe에서' 받고, correct가 payload 전달이라고 쓴다. 또 §9.5.2는 '같은 구조의 probe가 이미 있다'며 T6를 L2 근거로 든다. 그런데 T6에서는 관찰자 pipe 하나가 trigger(MID_G)와 relay 출력(MID_H)을 모두 구독한다. 따라서 '다른 pipe' 구조는 근거로 든 probe와도 맞지 않는다.",
+   "fix": "다음 문장을 바꾼다. 원문: \"이 절이 제안하는 F7 사례 SYN-ORD-01을 더한다. relay 앱이 원 메시지를 받은 handler 안에서 결과 메시지를 보내고, 관찰자 앱이 두 메시지를 다른 pipe에서 받는다. 변형은 R-F7i 조건 ②로 나눈다. faulty에서는 관찰자의 결과 메시지 handler가 원 메시지 handler가 쓴 field를 읽는다. correct에서는 relay가 그 값을 결과 메시지 payload에 실어 보내고, 관찰자는 그 값만 읽는다.\" 바꿀 문장: \"§8.3.3의 F7 사례 SYN-ORD-01을 더한다. relay `NAV`는 `SENSOR_ATT` handler 안에서 `NAV_STATE`를 보낸다(R-F7i 조건 ①). 관찰자 `CONTROL`은 두 메시지를 한 pipe에서 받는다. 이는 T6 probe와 같은 구조다. T6에서는 관찰자 pipe 하나가 trigger와 relay 출력을 모두 구독했다(`$N/sem-sb/probe_runs/sbprobe.c` L313–L319). faulty에서는 `CONTROL`의 `NAV_STATE` handler가 직전 `SENSOR_ATT` handler가 쓴 값과 짝짓는다(R-F7i 조건 ②, 도착 순서 가정). correct에서는 `NAV_STATE.Epoch == SENSOR_ATT.Seq`인 쌍만 짝짓는다(§8.3.3). correct에서도 조건 ②의 field 읽기는 남는다. 그래서 후보가 없으려면 이 guard를 인식해야 한다.\" 종료 기준 (c)는 그대로 둔다.",
+   "evidence": [
+    "08_sec.md L95: SYN-ORD-01 \"`CONTROL`이 한 pipe로 `SENSOR_ATT`와 `NAV_STATE`를 받고 ... correct: `NAV_STATE.Epoch == SENSOR_ATT.Seq`인 쌍만 짝짓는다\"",
+    "09_sec.md L480: \"관찰자 앱이 두 메시지를 다른 pipe에서 받는다 ... correct에서는 relay가 그 값을 결과 메시지 payload에 실어 보내고\"",
+    "09_sec.md L485: \"같은 구조의 probe가 이미 있다. 관찰자 pipe가 먼저 구독하고 relay pipe가 나중에 구독했다\"",
+    "$N/sem-sb/probe_runs/sbprobe.c L313–L319: CFE_SB_CreatePipe(&p,...\"SBP_OBS_HI\"); Subscribe(MID_G, p); Subscribe(MID_H, p) — 관찰자는 pipe 하나로 두 MID를 받는다. InversionTest는 같은 obsPipe에서 두 번 ReceiveBuffer한다",
+    "06_sec.md L447: R-F7i 조건 ①(m1 handler 안에서 m2 발행)과 ②(c의 m2 handler가 m1 handler가 쓴 field를 읽음)"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.3.3 MVP driver 의사코드의 마지막 주석 줄",
+   "problem": "§9는 `GUARANTEED_UNDER(A′)`를 '후보'로 세지 않는다. 그런데 §8.3.2와 §8.8.1은 `conditional` 사례가 '가정을 명시한 조건부 경고'를 내야 하고, 경고가 없으면 FN이라고 정한다. 이 대응 규칙이 없으면 W10이 기대하는 결과(SYN-F1-01 conditional = `GUARANTEED_UNDER(NoStartupTimeout)`)가 §8.8.1 채점에서 FN이 된다. CF #184 수정판과 SYN-F5-01 conditional 1·2도 같다.",
+   "fix": "원문 \"  # GUARANTEED와 GUARANTEED_UNDER(A′)는 판정 기록으로만 센다 (W9·W10 기대표의 GUARANTEED).\" 바로 뒤에 다음 두 줄을 더한다. \"  # §8.8.1 채점에서는 GUARANTEED_UNDER(A′)를 §8.3.2의 '가정을 명시한 조건부 경고'로 센다. expected.verdict = conditional이고 A′가 expected.assumption의 가정을 담으면 TP다.\" / \"  # no_warn 사례와, contract ID를 인용하지 않은 allowed 사례에서는 FP다(§8.8.1 FP 규칙). GUARANTEED는 경고로 세지 않는다.\"",
+   "evidence": [
+    "08_sec.md L75: `conditional` 기대 판정 \"가정을 명시한 조건부 경고\"",
+    "08_sec.md L295: \"`conditional` 사례 | 경고가 YAML `expected.assumption`의 가정을 인용하면 TP ... 경고가 없으면 FN\"",
+    "09_sec.md L309–L310: \"'후보'로 세는 것은 verdict ∈ {UNPROVEN, VIOLATED_ALWAYS}인 Candidate뿐이다. GUARANTEED와 GUARANTEED_UNDER(A′)는 판정 기록으로만 센다\"",
+    "09_sec.md L439–L441: SYN-F1-01, SYN-F5-01, CF #184 수정판의 conditional 기대 판정"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.3.6의 '[설계 제안] SB 모델 적합성.' 문단, §9.3.2 W8 행, §9.8 단계 1·3 행의 '모델 적합성' 열, §9.5.2 W11 종료 기준",
+   "problem": "세 가지가 §8.3.4와 맞지 않는다. (1) §8.3.4는 적합성 표를 'benchmark보다 먼저 실행'하라고 한다. 그런데 §9는 W7에서 SYN-F2 기대 판정(GO-4 기준 2)을 먼저 내고, SB 적합성은 W8에 돌린다. (2) §8.3.4는 실패한 행이 있으면 그 의미를 쓰는 범주의 benchmark를 보류하라고 한다. §9는 결과를 L0으로만 낮춘다. (3) '수신 순서' 줄은 HB-FIFO로 확인하게 되어 있다. 그러나 HB-FIFO는 단계 3(W11)에서야 켠다(§9.5.1, §9.8). 단계 1의 HB 규칙은 HB-PO·MSG·CORE·LIB뿐이다. 따라서 W8에는 이 줄을 확인할 수 없다.",
+   "fix": "원문 \"뒤 두 줄은 규칙으로 확인한다. 수신 순서에서는 HB-FIFO를 같은 pipe·같은 sender에만 적용한다. 발행 중 선점에서는 `tx.e → hdl` 간선을 만들지 않는다. 이 시험은 GO-4 기준이 아니다. 하나라도 틀리면 그 의미에 기대는 판정은 L0으로만 보고한다.\" 바꿀 문장: \"발행 중 선점 줄은 W8에 규칙으로 확인한다. 이때 `tx.e → hdl` 간선을 만들지 않아야 한다. 수신 순서 줄은 HB-FIFO를 켜는 W11에 확인한다. HB-FIFO는 같은 pipe·같은 sender에만 적용한다(§9.5.1). 이 시험은 GO-4 기준이 아니다. 그러나 W8 첫날, GO-4 판정보다 먼저 돌린다(§8.3.4: benchmark보다 먼저). 틀린 줄이 있으면 §8.3.4대로 그 의미를 쓰는 범주의 benchmark 판정을 보류한다(예: MsgLim → F1·F4). 해당 후보는 L0으로만 보고한다(§8.1 L1 조건).\" 함께 고칠 곳: W8 행의 \"SB 모델 적합성 시험(§8.3.4의 SB 다섯 줄)을 돌린다.\"는 \"SB 모델 적합성 시험(§8.3.4의 SB 네 줄. 수신 순서 줄은 W11)을 GO-4 판정 전에 돌린다.\"로 바꾼다. §9.8 단계 1 행의 \"SB 다섯 줄\"은 \"SB 네 줄\"로 바꾼다. 단계 3 행의 \"— (relay 역전은 기존 probe를 L2 근거로 씀, §9.5.2)\"는 \"SB 수신 순서 줄(HB-FIFO). relay 역전은 기존 probe를 L2 근거로 씀(§9.5.2)\"로 바꾼다. W11 종료 기준의 \"faulty는 R-F7i 후보, correct는 후보 없음이다.\" 뒤에는 \"(d) §8.3.4 '수신 순서' 줄의 결론을 HB-FIFO가 낸다.\"를 더한다.",
+   "evidence": [
+    "08_sec.md L118: \"실패한 행이 있으면 그 의미를 쓰는 범주의 benchmark를 보류한다(예: MsgLim → F1·F4) ... 이 표를 benchmark보다 먼저 실행한다\"",
+    "08_sec.md L110: '수신 순서' 행(같은 pipe FIFO, pipe 사이 순서 없음)",
+    "09_sec.md L227: 단계 1 HB 규칙은 \"HB-PO, HB-MSG, HB-CORE, HB-LIB만\"",
+    "09_sec.md L469, L575: HB-FIFO는 단계 3(W11–W12)에서 켠다",
+    "09_sec.md L247, L404, L409: W7 기대 판정이 GO-4 기준 2이고, SB 적합성은 W8에 돈다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.7.1 W15 표, '수정하지 않은 bundle 전체 실행' 행",
+   "problem": "(1) §8.4.3은 L2가 아닌 경고를 세 분류('설계상 허용', '불가능', '판단 불가')로 나눈다. §9는 이를 '§8.4.3의 다섯 분류'라고 부른다. (2) §8.5가 계획한 두 사례가 §9 어디에도 일정에 없다. 하나는 cFE #2663(F5 현재 사례, core ES·EVS 사이)이고, 다른 하나는 cFE #46·#1544(versioned read의 guard 인식 정상 사례)다. #46은 선택 기준선 B7·B8 비교에만 나오고, #2663·#1544는 09에 없다. 두 사례는 core code를 분석해야 하는데, §9.3.1은 MVP에서 core를 분석 대상에서 뺀다.",
+   "fix": "원문 \"경고를 §8.4.3의 다섯 분류로 나눈다.\" 바꿀 문장: \"경고마다 증거 수준(L0/L1/L2)을 붙인다. L2가 아닌 경고는 §8.4.3의 세 분류('설계상 허용', '불가능', '판단 불가')로 나눈다. `0x808`은 '설계상 허용'으로, SBN `0x80E` 손실은 '판단 불가'로 시작한다(§8.4.3). 이 실행에는 cFE core module(ES·EVS·TIME)도 넣는다. 그래서 §8.5의 cFE #2663(F5 현재 사례)과 cFE #46·#1544(guard 인식의 정상 사례, versioned read)를 판정한다. core를 넣지 못하면 두 사례를 '미실시'로 적는다.\"",
+   "evidence": [
+    "08_sec.md L155: \"L2가 아닌 경고는 셋 중 하나로 분류한다. '설계상 허용' ..., '불가능' ..., '판단 불가'\"",
+    "09_sec.md L543: \"경고를 §8.4.3의 다섯 분류로 나눈다\"",
+    "08_sec.md L174: cFE #2663 \"F5 현재 사례(core service 사이, §2)\"; L177: cFE #46·#1544 \"guard 인식의 정상 사례(versioned read)\"",
+    "grep: '2663'과 '1544'는 09_sec.md에 없다. '#46'은 L547의 선택 기준선 B7·B8에만 나온다",
+    "09_sec.md L236: \"cFE core module은 분석 대상이 아니라 §3의 모델로만 쓴다\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.4.3 GO-5 측정 목록의 '위치 일치' 항목과 판정 표의 GO 조건",
+   "problem": "GO-5는 일치를 함수 단위로 판정한다. 후보의 `req (e1, e2)` 중 하나가 수정 commit이 바꾼 함수 안에 있으면 일치로 센다. 이 기준은 §8에 없다. §8은 TP를 동결 정답의 `dedup_key`(상태 field | consumer 위치 | producer MID·API) 일치로 정의한다(§8.1, §8.8.1). §9.3.3의 Candidate도 같은 `dedup_key` 규칙을 쓴다. 그래서 GO-5는 §8 지표를 쓰지 않는다.",
+   "fix": "측정 원문 \"- 위치 일치. 후보의 `req (e1, e2)` 중 하나가 공개 수정 commit이 바꾼 함수 안에 있으면 일치로 센다(CF #184는 833fdbb). #198 파생은 파생 예제에서 동결한 위치와 비교한다.\" 바꿀 문장: \"- 정답 일치. §8.8.1의 TP 규칙으로 센다. 후보의 `dedup_key`가 W9 초에 동결한 정답 기록(§8.6)의 `dedup_key`와 같아야 한다. 보조 지표로는 `req (e1, e2)` 중 하나가 공개 수정 commit이 바꾼 함수 안에 있는지를 따로 적는다(CF #184는 833fdbb, #198 파생은 파생 예제에서 동결한 위치).\" GO 조건 원문 \"분석기가 그 사례를 같은 위치의 L0·L1 후보로 냈다.\" 바꿀 문장: \"분석기가 그 사례에서 §8.8.1 기준으로 TP인 L0·L1 후보를 냈다(동결 정답과 `dedup_key` 일치).\"",
+   "evidence": [
+    "08_sec.md L11: \"경고와의 대응은 ... `dedup_key`로 판정한다(§8.8.1)\"",
+    "08_sec.md L291: TP는 \"정답 `warn` 사례의 `dedup_key`와 일치하는 경고가 1개 이상 있음\"",
+    "09_sec.md L326: \"dedup_key는 §8.6과 같은 규칙\"",
+    "09_sec.md L452, L456: 함수 단위 '위치 일치'와 \"같은 위치의 L0·L1 후보\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.7.1 W15 표, 'ablation' 행",
+   "problem": "§8.10.2는 I1–I7을 정의한다. §9 표기도 'ablation AB1–AB10·I1–I7'이라고 쓴다. 그러나 W15는 I1–I5와 I7만 둔다. I6(MID 이름 복원: AST side channel 대 정수만)은 GO-2 PIVOT-A와 GO-3 PIVOT-1에서 언급만 될 뿐, 어느 주에도 일정이 없다. §8.10.1은 결과를 판정이 바뀐 사례 목록으로 보고하라고 하는데, 이 형식도 W15에 없다.",
+   "fix": "원문 \"| ablation | 도메인 AB1–AB10을 flag로 끈다. 구현 기반 I1–I5를 바꾼다. I7(ClangIR)은 CIR을 켠 build가 있을 때만 한다. |\" 바꿀 문장: \"| ablation | 도메인 AB1–AB10을 flag로 끈다. 결과는 비율이 아니라 판정이 바뀐 사례 목록으로 적는다(§8.10.1). 구현 기반 I1–I6을 바꾼다. I6은 GO-2 PIVOT-A나 GO-3 PIVOT-1에서 만든 AST sidecar가 있을 때 한다. 없으면 '미실시'로 적는다. I7(ClangIR)은 CIR을 켠 build가 있을 때만 한다. |\"",
+   "evidence": [
+    "08_sec.md L425: I6 \"MID 이름 복원: AST side channel 사용 vs 정수만 사용\"",
+    "08_sec.md L384: \"결과는 비율이 아니라 판정이 바뀐 사례 목록으로 보고한다\"",
+    "09_sec.md L26: \"ablation AB1–AB10·I1–I7\"",
+    "09_sec.md L548: \"구현 기반 I1–I5를 바꾼다. I7(ClangIR)은 ...\"",
+    "09_sec.md L363, L391: I6은 PIVOT 경로에서만 언급된다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.7.1 W15 표, '선택 기준선' 행",
+   "problem": "§8.9의 기준선 B5(cFS model-based testing [R03])는 §9 어디에도 없다. grep에서 'B5'는 'AB5'로만 나온다. §8.9가 정한 행동, 즉 '저자에게 요청. 얻지 못하면 제외하고 그 사실을 적음'에도 일정이 없다. §9.12는 R03 본문만 문헌으로 요청하고, Spec Explorer 모델·harness 요청은 다루지 않는다.",
+   "fix": "원문 \"| 선택 기준선 | B3(CSA custom checker), B6(Ogma), B7(TSan), B8(Goblint) | 시간이 남을 때만. B7·B8은 cFE #950, #46 같은 공유 메모리 대조 사례에만 쓴다. |\" 바꿀 문장: \"| 선택 기준선 | B3(CSA custom checker), B5(R03 model-based testing), B6(Ogma), B7(TSan), B8(Goblint) | 시간이 남을 때만. B5는 W2에 §9.12의 문헌 요청과 함께 R03 저자에게 Spec Explorer 모델·harness를 요청한다. 얻으면 §8.3.4의 SB 적합성 결과와 대조한다. 얻지 못하면 제외 사실을 GO-8 주장–근거표에 적는다(§8.9). B7·B8은 cFE #950, #46 같은 공유 메모리 대조 사례에만 쓴다. |\"",
+   "evidence": [
+    "08_sec.md L371: B5 \"원 모델·harness로 SB 의미 적합성 시험(§8.3.4)과 대조 ... 저자에게 요청. 얻지 못하면 제외하고 그 사실을 적음\"",
+    "grep 'B5' in 09_sec.md: L623의 'AB1–AB5'만 나온다",
+    "09_sec.md L635: §9.12는 \"R03(ISSRE 2016) 본문\"만 요청한다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.7.1, '이 예산이 W15에 들어가지 않으면 ... (§8.11 기준선 공정성).' 문단 뒤",
+   "problem": "§8의 두 평가 항목에 W15 일정이 없다. (1) §8.10.2의 구현 기반 엔진 비교: §8은 같은 규칙 집합(F1–F8)을 E-dialect·E-llvm·E-ql 세 엔진에 구현해 모든 사례의 판정을 비교하라고 한다. §9는 E-llvm을 W8에 단계 1 범위로만(2일) 만들고, E-ql은 GO-8에서 이름만 든다. G3-d는 단계 2 ES op 추가의 LOC를 E-llvm과 비교하는데, E-llvm에 ES op를 더하는 작업도 일정에 없다. (2) §8.8.2의 분석 비용: 단계별 wall time·peak RSS를 앱별과 mission 전체로 5회씩 재서 중앙값을 내야 한다. §9에는 W6 (d)의 MVP 범위 기록만 있다.",
+   "fix": "원문 \"이 예산이 W15에 들어가지 않으면 B2 query를 F2 하나로 줄이고, 줄인 사실을 GO-8 주장–근거표에 적는다 (§8.11 기준선 공정성).\" 뒤에 다음 문단을 더한다. \"**[설계 제안]** W15에는 두 측정을 더한다. (1) 구현 기반 엔진 비교(§8.10.2). E-dialect·E-llvm·E-ql의 사례별 판정을 비교한다. E-llvm은 W8에 만든 단계 1 규칙에 W9에 ES op 묶음을 더한 범위다(G3-d 비교에도 필요하다). E-ql은 B2의 F1·F2·F6 query 범위다. 따라서 비교 범위를 그 교집합으로 적는다. (2) 분석 비용(§8.8.2). frontend·lifting·solver·보고서 단계별로 wall time과 peak RSS를 잰다(`/usr/bin/time -v`). 앱별(5개)과 mission 전체(154개 파일)로 나누어 각 5회씩 재고 중앙값을 적는다.\"",
+   "evidence": [
+    "08_sec.md L401, L409: \"같은 규칙 집합(F1–F8 검사 ...)을 세 엔진에 구현한다\" / \"세 엔진이 모든 사례에서 같은 판정을 내면\"",
+    "09_sec.md L376, L395: E-llvm은 시간 제한 2일로 W8에 만들고, E-ql은 \"W15의 E-ql ... GO-8에서\"",
+    "09_sec.md L386: G3-d는 \"단계 2의 ES op 묶음을 더할 때 바뀐 파일 수와 LOC\"",
+    "08_sec.md L305: 분석 비용 측정 방법(단계별, 앱별·mission, 5회 중앙값)",
+    "09_sec.md L269: W6 (d)는 MVP 앱 범위만 다룬다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.7.2 W16 산출물 표, '층별 결과표' 행",
+   "problem": "W16의 최종 결과표에는 §8.8이 요구하는 보고 항목 대부분이 빠져 있다. 빠진 것은 다음과 같다. exact(Clopper–Pearson) 구간, `P_L1`·`P_L2`, '범주 불일치'·'가정 누락' 수, 분석 실패 수와 두 가지 recall, 이견으로 정답 집합에서 뺀 사례 수(§8.6), 분석 비용(§8.8.2), 의미 coverage(§8.8.3), 수작업 모델링 부담(§8.8.4), 진단 설명 완결성(§8.8.5), ablation 사례 목록(§8.10.1), 'MLIR이 제공한 것/연구자가 만든 것' 표(§8.10.2).",
+   "fix": "원문 \"| 층별 결과표 | 합성·주입·역사·수정하지 않은 bundle을 나눈다. 범주별 TP/FP/FN, unknown 수, Σ, cFE 버전을 싣는다. |\" 바꿀 문장: \"| 층별 결과표 | 범주 × 층 칸마다 다음을 싣는다. TP/FP/FN의 원래 개수, precision·recall과 그 exact(Clopper–Pearson) 구간, `P_L1`·`P_L2`, '범주 불일치'·'가정 누락' 수, 분석 실패 수와 두 recall(실패를 FN으로 센 값, 뺀 값), 이견으로 정답 집합에서 뺀 사례 수, unknown 수, Σ, cFE 버전(§8.6, §8.8.1). 수정하지 않은 bundle 층은 recall 없이 §8.4.3의 분류 분포만 싣는다. |\" 그 아래에 행을 하나 더한다. \"| 지표표 | 분석 비용(§8.8.2), 의미 coverage(§8.8.3), 수작업 모델링 부담(§8.8.4, 기준선 구현 포함), 진단 설명 완결성(§8.8.5), ablation별로 판정이 바뀐 사례 목록(§8.10.1), 'MLIR이 제공한 것'과 '연구자가 만든 것'의 구분표(§8.10.2) |\"",
+   "evidence": [
+    "08_sec.md L291–L301: TP/FP/FN 규칙, 범주 불일치, 가정 누락, 분석 실패의 두 recall, Clopper–Pearson, P_L1/P_L2",
+    "08_sec.md L233: \"뺀 수는 범주별 보고\"",
+    "08_sec.md L305, L319, L333–L341, L349: §8.8.2–§8.8.5 지표",
+    "08_sec.md L384, L428: ablation 보고 형식과 MLIR/연구자 구분표",
+    "09_sec.md L565: 현재 층별 결과표 항목"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.4.2 W10 사례 표, INJ-TO-1 행의 'L2 시도 방법' 열",
+   "problem": "§8.7.1은 pipe depth나 MsgLim이 결과를 바꾸는 사례(F1·F4 burst, INJ-TO-1)에는 `unshare --ipc` 방식만 쓰라고 한다. depth가 잘리지 않기 때문이다. §9는 INJ-TO-1에 '수정하지 않은 bundle과 같은 실행 구성'을 쓴다고 한다. 그런데 수정하지 않은 bundle은 uid 65534(depth가 10으로 잘림) 구성으로도 실행했다. 실측에서도 같은 SBN 손실이 uid 65534에서는 overflow로, root+ipcns에서는 MsgLim으로 나타났다.",
+   "fix": "원문 \"| F1 계열 MsgLim 손실 후보. 현재판은 benign | 수정하지 않은 bundle과 같은 실행 구성 |\" 바꿀 문장: \"| F1 계열 MsgLim 손실 후보. 현재판은 benign | root + `unshare --ipc`, namespace 안 `msg_max`=256 구성만 쓴다(§8.7.1: MsgLim·depth가 결과를 바꾸는 사례). 구독 순서와 `env.json`을 함께 기록한다 |\"",
+   "evidence": [
+    "08_sec.md L255: \"pipe depth나 MsgLim이 결과를 바꾸는 사례(F1·F4 burst, INJ-TO-1)는 depth가 잘리지 않는 `unshare --ipc` 방식만 쓴다\" / \"같은 SBN 손실이 uid 65534에서는 overflow, root+ipcns에서는 MsgLim으로 나타났다\"",
+    "08_sec.md L248–L249: uid 65534는 depth를 10으로 자르고, root+ipcns는 msg_max 256",
+    "09_sec.md L443: INJ-TO-1 \"수정하지 않은 bundle과 같은 실행 구성\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.4.2 W10 사례 표, INJ-TO-1 행 뒤(cFE #73 행 앞). §9.1 W10 행",
+   "problem": "§8.4.2의 주입 INJ-SCH-1(sch_lab `SCH_OneHzPktsRcvd > 0` 조건 제거, F5 후보)은 §9 어디에도 일정이 없다. grep 'SCH-1' 결과는 09_sec.md에 없다. §8.4.2는 이 주입을 정답 집합에 넣지 않고 §8.4.3 분류로만 판정한다고 정했다. 그래도 실행 시점은 필요하다. sch_lab은 MVP 앱이고 startup 의미는 단계 2에서 켜지므로, 자연스러운 시점은 W10이다.",
+   "fix": "원문 행 \"| cFE #73 | **[확인된 사실]** 수정 전 6.4.1(2014-12-12)...\" 앞에 다음 행을 넣는다. \"| INJ-SCH-1 | **[설계 제안]** sch_lab `SCH_LAB_AppMain`에서 `SCH_OneHzPktsRcvd > 0` 조건을 제거한다(§8.4.2). **[미확인]** 결과가 결함인지 사전에 알 수 없다. | 정답 집합에 넣지 않는다. 경고가 나오면 §8.4.3의 세 분류로만 판정한다. | L2 시도 없음. 수정하지 않은 bundle과 같은 harness에서 분석만 한다 |\" §9.1 W10 행의 주 산출물 \"SYN-F1-01, SYN-F5-01, CF #184, cFE #198 파생, INJ-TO-1\"에도 \"INJ-SCH-1(분류만)\"을 더한다.",
+   "evidence": [
+    "08_sec.md L147: INJ-SCH-1 \"F5 후보 ... 정답 집합에 넣지 않는다. 경고가 나오면 §8.4.3의 분류로만 판정한다\"",
+    "grep 'SCH-1' in 09_sec.md: 결과 없음",
+    "09_sec.md L233: sch_lab은 MVP 포함 앱이다. L107: W10 사례 목록"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.6.2 W13 행 작업 열",
+   "problem": "§8.3.1은 네 번째 합성 앱 `GAINTBL`을 정의한다. GAIN table의 owner이고 단일·이중 buffer 두 빌드가 있으며 PacketRate는 10이다. SYN-F6-* 와 SYN-F8-01에 이 앱이 필요하다. 그러나 §9에서 GAINTBL을 만드는 작업은 어느 주에도 없다. W7은 SENSOR·NAV·CONTROL만 넣는다. GAINTBL은 §9.13 대응표에 'GAINTBL(W13)'로만 나온다.",
+   "fix": "원문 \"| W13 | 위 범위를 구현한다. bundle의 OSAL·PSP 고정값으로 §8.3.4의 TBL·재시작 네 줄을 다시 실행한다.\" 바꿀 문장: \"| W13 | 위 범위를 구현한다. §8.3.1의 `GAINTBL`을 bundle `apps/`에 넣는다. 단일·이중 buffer 두 빌드를 만들고, SCH_LAB 테이블에 `GAINTBL_WAKEUP_MID`(PacketRate 10)를 더한다. bundle의 OSAL·PSP 고정값으로 §8.3.4의 TBL·재시작 네 줄을 다시 실행한다.\"",
+   "evidence": [
+    "08_sec.md L60, L62: GAINTBL 행과 \"PacketRate는 ... `GAINTBL` 10\"",
+    "08_sec.md L94, L96: SYN-F6-03(이중 buffer, owner의 연속 load)과 SYN-F8-01(`CFE_ES_RestartApp(GAINTBL)`)",
+    "09_sec.md L246: W7은 \"SENSOR·NAV·CONTROL을 bundle `apps/`에 넣는다\"",
+    "09_sec.md L668: \"§8.3.1의 SENSOR·NAV·CONTROL과 GAINTBL(W13)\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.6.2 W14 행",
+   "problem": "§8.5는 'TBL owner 재시작'을 F8 현재 사례로 계획한다. 이 사례는 현재 bundle에서 `DUPLICATE_NOT_OWNED`로 재현되었다. 그러나 W14의 사례 목록과 §9.8의 '역사 4건'에는 이 사례가 없다. W13은 이 동작을 적합성 시험으로만 다시 실행하고, 분석기 판정 대상으로는 두지 않는다.",
+   "fix": "원문 \"| W14 | 사례를 분석한다: SYN-F6-01·02·03, SYN-F8-01·02, INJ-SA-1·2, INJ-HK-1. 역사 사례도 다룬다: sample_app #28→#101, HS #148, MD #79, cFE #1750. | GO-7 |\" 바꿀 문장: \"| W14 | 사례를 분석한다: SYN-F6-01·02·03, SYN-F8-01·02, INJ-SA-1·2, INJ-HK-1. 현재 사례 'TBL owner 재시작'(§8.5, F8)도 판정한다. 이 사례는 W13 적합성 probe(`$N/sem-es-tbl/bundle/apps/probe_common/`)를 W13 초에 사례 기록으로 동결해 쓴다. 역사 사례도 다룬다: sample_app #28→#101, HS #148, MD #79, cFE #1750. | GO-7 |\"",
+   "evidence": [
+    "08_sec.md L175: \"TBL owner 재시작 | [실측] §8.3.4의 `DUPLICATE_NOT_OWNED` 재현 | 현재 bundle | F8 현재 사례\"",
+    "09_sec.md L520, L576: W14 목록과 \"역사 4건\"",
+    "09_sec.md L519: W13은 적합성 시험만 한다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.12 독립 동결 일정 표",
+   "problem": "§8.6은 '기록은 분석기를 실행하기 전에 동결한다'고 한다. §9.0.3 원칙 3도 같다. 그런데 SYN-F4-02(함정 사례)는 W6 기준 (b)와 단계 1 사례 목록에서 처음 쓰인다. 반면 동결 일정은 SYN-F4-02를 W11 초의 'SYN-F3/F4'에 둔다. 따라서 분석기가 동결 전의 정답으로 실행된다.",
+   "fix": "원문 행 \"| W7 초 | 합성 앱 계약, SYN-F2-* 정답 |\" 앞에 \"| W6 초 | SYN-F4-02 정답(함정 사례, `no_warn`. W6 기준 (b)에서 처음 쓴다) |\"를 넣는다. 원문 \"| W11 초 | SYN-F3/F4, SYN-ORD-01, INJ-HK-2, INJ-LC-* 정답과 harness table |\"의 \"SYN-F3/F4\"는 \"SYN-F3-01, SYN-F4-01\"로 바꾼다.",
+   "evidence": [
+    "08_sec.md L185: \"기록은 분석기를 실행하기 전에 동결한다\"",
+    "09_sec.md L89: 원칙 3 \"정답과 계약은 분석기 실행 전에 동결한다\"",
+    "09_sec.md L267, L573: W6 (b)와 단계 1이 SYN-F4-02를 쓴다",
+    "09_sec.md L650: W11 초에 \"SYN-F3/F4\"를 동결한다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.5.2 W12 행 작업 열",
+   "problem": "§8.4.1은 harness 완료 기준을 정한다. 그 기준을 만족하기 전에는 INJ-HK·INJ-LC를 실행하지 않는다. §9는 harness table을 W11 초에 동결하고 W12에 쓰지만, 완료 기준을 확인하는 단계가 없다. W14의 INJ-HK-1도 같은 HK copy table harness에 기대는데, 마찬가지다.",
+   "fix": "원문 \"| W12 | 공개 앱 주입 INJ-HK-2, INJ-LC-1, INJ-LC-2를 분석한다. W11 초에 동결한 harness table 세 가지(SCH 항목 추가, LC WDT·ADT 정의, HK copy table 입력 선택)를 입력으로 쓴다.\" 뒤에 다음 문장을 더한다. \"먼저 §8.4.1의 harness 완료 기준을 확인한다. 주입 없는 원본 실행에서 HK `CombinedPacketsSent`와 LC `APSampleCount`·`MonitoredMsgCount`가 증가해야 하고, LC `WPsInUse`·`ActiveAPs`가 0보다 커야 한다. 기준에 못 미치면 INJ-HK·INJ-LC(W14의 INJ-HK-1 포함)를 실행하지 않고, GO-6 측정 (a)에 '미실시'로 적는다.\"",
+   "evidence": [
+    "08_sec.md L133: \"harness 완료 기준: 주입 없는 원본 실행에서 HK의 `CombinedPacketsSent`와 LC의 `APSampleCount`·`MonitoredMsgCount`가 증가하고, LC의 `WPsInUse`·`ActiveAPs`가 0보다 크다. 그 전에는 INJ-HK·INJ-LC를 실행하지 않는다\"",
+    "09_sec.md L481, L483, L650: harness table을 동결하고 쓰지만 완료 확인은 없다",
+    "08_sec.md L143: INJ-HK-1도 HK copy table load 경로를 쓴다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.0.1 고정 입력과 인력 표, '인력' 행",
+   "problem": "§8이 요구하는 역할 분리가 §9의 인력 계획에 빠져 있다. §8.1은 L1을 '분석기 작성자가 아닌 label 담당자'가 witness를 확인해야 준다고 한다. §8.11은 결함 주입과 label을 다른 사람이 맡으라고 한다. §8.6은 `labeler`와 `reviewer` 두 사람의 판정을 요구하고, 둘이 다르면 그 사례를 정답 집합에서 뺀다. 그러나 §9는 작성자 B가 '정답·계약을 동결한다'고만 쓴다. 주입 diff 작성자, L1 확인자, `labeler`·`reviewer`가 누구인지 정하지 않았다.",
+   "fix": "원문 \"| 인력 | 연구자 1명이 구현·평가를 맡는다. 독립 작성자 1명(이하 작성자 B)이 정답·계약을 동결한다(주당 약 1일). |\" 바꿀 문장: \"| 인력 | 연구자 1명이 분석기 구현과 실행을 맡는다. 독립 작성자 1명(이하 작성자 B)은 결함 주입 diff(INJ-*)와 합성 사례의 변형 diff, 계약, 정답 label을 쓰고 동결한다(§8.6의 `labeler`). L1 판정의 witness 확인(§8.1)도 B가 한다. B의 부담은 주당 약 1일이고, W10·W12·W14에는 더 걸릴 수 있다. §8.6의 `reviewer`는 분석기 작성자가 아닌 두 번째 사람이 맡는다. 두 번째 사람이 없으면 `reviewer: none`으로 적고, 이중 판정 제외 규칙을 적용하지 못했음을 결과에 적는다. |\"",
+   "evidence": [
+    "08_sec.md L20: L1은 \"분석기 작성자가 아닌 label 담당자가 witness를 source에서 확인\"할 때만 준다",
+    "08_sec.md L232–L233: `labeler: A, reviewer: B` / \"두 판정이 다르면 동결하지 않고 정답 집합에서 뺀다\"",
+    "08_sec.md L434: \"결함 주입과 label을 다른 사람이 맡는다\"",
+    "09_sec.md L43: 현재 인력 행"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.2.1 W1 작업 표, '실행 환경 기록' 행",
+   "problem": "`env.json`의 항목은 '§8.7.1의 항목'을 근거로 든다. 그런데 §8.7.1이 요구하는 cFE commit이 빠져 있다. 반복 횟수를 어디에 둘지도 정해져 있지 않다.",
+   "fix": "원문 \"OSAL permissive 여부, OSAL·PSP·LLVM SHA다. | `env.json` | §8.7.1의 항목 |\" 바꿀 문장: \"OSAL permissive 여부, cFE·OSAL·PSP·LLVM SHA다. 반복 횟수는 사례별 정답 기록(§8.6 `trials`)에 둔다. | `env.json` | §8.7.1의 항목 |\"",
+   "evidence": [
+    "08_sec.md L255: \"기록 항목은 cFE·OSAL·PSP commit, uid, CapEff, `msg_max`, IPC namespace, scheduling policy, CPU affinity, OSAL permissive 여부, kernel, 반복 횟수다\"",
+    "09_sec.md L126: env.json 항목에 cFE SHA가 없다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "09_sec.md",
+   "location": "§9.11 12주 축소안 표의 W12 행과 그 뒤 [해석] 문단",
+   "problem": "축소안의 단계 5(W12)는 기준선과 ablation만 줄여서 남긴다. §8.4.3 층(수정하지 않은 bundle 전체 실행)을 하는지 빼는지는 말하지 않는다. 16주안에서는 W15가 이 층을 맡는다. 축소안에서 빠지는 평가 층이 명시되지 않는다.",
+   "fix": "원문 \"| W12 | 단계 5. B0·B1·B2와 ablation AB1–AB5, I1–I3만 한다. GO-8을 닫는다. |\" 바꿀 문장: \"| W12 | 단계 5. B0·B1·B2와 ablation AB1–AB5, I1–I3만 한다. §8.4.3의 수정하지 않은 bundle 전체 실행은 뺀다. GO-8을 닫는다. |\" 이어지는 원문 \"**[해석]** 축소안에서는 F3, F7, F8의 결과가 없다.\" 뒤에는 \"수정하지 않은 bundle 층(§8.4.3)의 분류 분포도 없다.\"를 더한다.",
+   "evidence": [
+    "09_sec.md L623, L625: 축소안 W12와 [해석]",
+    "09_sec.md L543: 16주안에서는 W15가 이 층을 맡는다",
+    "08_sec.md L153–L157: §8.4.3 층 정의"
+   ],
+   "from": "pair:08-09"
+  }
+ ],
+ "08_sec.md": [
+  {
+   "part": "08_sec.md",
+   "location": "§8.3.3 범주별 쌍 표, SYN-F1-01 행의 `benign` / `conditional` 열 (그리고 SYN-F5-01 행의 conditional 1)",
+   "problem": "SYN-F1-01의 conditional 변형이 §9의 기대 판정을 낼 수 없다. 이 변형에서 `NAV`는 `CFE_ES_WaitForStartupSync` 반환 뒤에 발행한다. 그런데 §6.2와 §9 W9 기준 (a)에 따르면 `WaitForStartupSync`는 status를 버린다. 그래서 `waitok`이 생기지 않고 사슬이 끊겨 후보가 된다. 반면 §9 W10 표는 이 변형의 기대 판정을 `GUARANTEED_UNDER(NoStartupTimeout)`으로 둔다. SYN-F5-01 conditional 1에도 같은 문제가 있다. `CONTROL`이 status를 검사한다는 조건이 없으면 `waitok(CONTROL, APPS_INIT)`이 생기지 않는다.",
+   "fix": "SYN-F1-01 원문: \"`conditional`: `CONTROL`은 구독 뒤 `CFE_ES_WaitForStartupSync`를 호출하고, `NAV`는 그 호출이 반환된 뒤 발행. 가정: ES timeout(1000 ms) 안에 `CONTROL`이 RUNNING 도달(§8.3.4)\" 바꿀 문장: \"`conditional`: `CONTROL`은 구독 뒤 `CFE_ES_WaitForStartupSync`를 호출한다(ready(CONTROL, RUNNING)). `NAV`는 `CFE_ES_WaitForSystemState(CFE_ES_SystemState_OPERATIONAL, t)`의 반환 status를 검사하고, `CFE_SUCCESS` 분기에서만 발행한다. 가정: ES timeout(1000 ms) 안에 `CONTROL`이 RUNNING에 도달한다(`NoStartupTimeout(CONTROL)`, §8.3.4). `NAV`가 `WaitForStartupSync`를 쓰면 `waitok`이 없어 사슬이 끊긴다(§6.2). 그런 코드는 이 변형으로 쓰지 않는다\". SYN-F5-01 원문: \"`conditional` 1: `NAV`가 자원 생성 후 `WaitForSystemState(APPS_INIT)`, `CONTROL`도 같은 상태를 기다린 뒤 bind.\" 바꿀 문장: \"`conditional` 1: `NAV`는 자원을 만든 뒤 `WaitForSystemState(APPS_INIT)`를 호출한다. `CONTROL`도 같은 상태를 기다리고, 반환 status가 `CFE_SUCCESS`인 분기에서만 bind한다.\"",
+   "evidence": [
+    "06_sec.md L176: \"`a`가 `WaitForStartupSync`를 쓰면 `waitok`이 없으므로 사슬이 끊긴다 (§3 ES-6)\"",
+    "06_sec.md L84, L117: waitok/HB-SYS1은 `cfs.es.wait_system_state`의 status == SUCCESS 분기에서만 생기고, `wait_startup_sync`는 제외된다",
+    "09_sec.md L424: \"`waitok`은 status를 검사한 `WaitForSystemState`의 성공 분기에서만 생긴다\"",
+    "09_sec.md L434 W9 (a): \"`WaitForStartupSync`를 쓰면 사슬이 끊겨 후보가 된다\"",
+    "09_sec.md L439: SYN-F1-01 \"conditional: `GUARANTEED_UNDER(NoStartupTimeout)`\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.3.4 cFS 의미 모델 적합성 시험 표, '구독 해제 후 송신' 행의 '모델이 내야 할 결론' 열",
+   "problem": "§8.3.4는 sequence counter가 조건 없이 증가한다고 쓴다. 검증 C09의 세 투표는 모두 '`IsOrigination=true`일 때만' 증가한다고 보정했다. §9 W8 문단도 이 열을 기대 결론으로 쓰면서 `IsOrigination=true` 조건을 붙인다. 두 절의 모델 결론이 서로 다르다.",
+   "fix": "원문 \"| 구독 해제 후 송신 | 이벤트·counter 없이 성공, sequence counter는 증가 |\" 바꿀 문장: \"| 구독 해제 후 송신 | 이벤트·counter 없이 성공. `IsOrigination=true`로 보낼 때만 route sequence counter가 증가(검증 C09) |\"",
+   "evidence": [
+    "evidence/verified_claims.json C09 votes recheck/scope/counter (b): \"When IsOrigination=true it also still advances the per-route sequence counter\" / \"For sends with IsOrigination=true it still advances\" / \"When IsOrigination is true they still advance\"",
+    "09_sec.md L409: \"구독 해제 뒤 송신은 counter·event 없이 `CFE_SUCCESS`를 돌려주고, `IsOrigination=true`일 때만 route sequence가 증가한다 (검증 C09)\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.4.3 첫 문장",
+   "problem": "§8.4.3은 수정하지 않은 bundle 전체를 '주입 전에' 분석한다고 한다. 그러나 §9는 이 실행을 W15에 둔다. 이는 주입 실험(W10 INJ-TO-1, W12 INJ-HK-2·INJ-LC-*, W14 INJ-SA-*·INJ-HK-1)이 모두 끝난 뒤다. SBN·CF도 W15 전에는 분석 범위 밖이다. §8.4.3이 첫 시험 대상으로 드는 SBN `0x80E` 손실도 W15에야 다룰 수 있다.",
+   "fix": "원문 \"**[설계 제안]** 주입 전에 수정하지 않은 bundle 전체를 분석한다.\" 바꿀 문장: \"**[설계 제안]** 모든 단계의 규칙을 켠 뒤(§9 W15) 수정하지 않은 bundle 전체를 분석한다. SBN·CF도 포함한다. 주입 사례마다의 정상 대조는 같은 harness에서 원본 함수로 따로 둔다(§8.4.2).\"",
+   "evidence": [
+    "08_sec.md L155: \"주입 전에 수정하지 않은 bundle 전체를 분석한다\"",
+    "09_sec.md L107, L112, L481, L520, L543: 주입은 W10·W12·W14, 전체 bundle 실행은 W15",
+    "09_sec.md L234: MVP에서 \"제외: SBN과 CF\"",
+    "08_sec.md L137, L159: 주입마다 원본 함수가 정상 대조군이고, SBN `0x80E`가 첫 시험 대상이다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.8.3 의미 coverage 표, 'provenance 간선' 행 뒤",
+   "problem": "GO-6의 STOP 조건은 측정 (b)를 쓴다. (b)는 K=16에서 `nonrel` 형태인 `ProvRecord`의 비율이고, 분모는 서로 다른 `read_loc` 수다. §9.9는 이를 '`NonRel` 과반'이라고 부른다. W6 기준 (c)는 K ∈ {2,4,8,16}의 `lostAt` 수를 쓴다. 두 지표 모두 §8에 정의가 없다. 따라서 관문 GO-6이 §8에 없는 지표를 쓴다.",
+   "fix": "원문 행 \"| provenance 간선 | 복원한 (MID → field → 사용 위치) 경로 / 수작업 정답 | 아직 없음 |\" 뒤에 두 행을 더한다. \"| 상관 보존 실패 | K=16에서 `nonrel` 형태인 `ProvRecord` 수 / 서로 다른 `read_loc`(소비 위치) 수. MVP 공개 앱 5개 기준(§9 GO-6 측정 (b)) | 아직 없음 |\" / \"| 사영 위치 | K ∈ {2, 4, 8, 16}에서 `Disj`가 `NonRel`로 사영된 위치(`lostAt`) 수. 단위가 위 행과 다르다(§9 W6 기준 (c)) | 아직 없음 |\"",
+   "evidence": [
+    "09_sec.md L492: \"(b) K=16에서 MVP 공개 앱 5개의 `ProvRecord` 중 `nonrel` 형태인 것의 비율. 분모는 서로 다른 `read_loc`\"",
+    "09_sec.md L501, L588: STOP \"측정 (b)의 비율이 0.5를 넘는다\" / \"`NonRel` 과반\"",
+    "09_sec.md L268: W6 (c) `lostAt` 표",
+    "08_sec.md L319–L327: §8.8.3 표에 이 지표들이 없다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.10.2 구현 기반 ablation: 도입 문장, 엔진 표, 공학 지표 목록",
+   "problem": "GO-3은 E-ast 엔진과 G3-b 지표('SB·MSG 호출이 만든 `Unknown` 출처 수')로 MLIR 유지를 판정한다. GO 조건은 '사실상 G3-b가 가른다'고 쓴다. 그런데 §8.10.2의 엔진 표에는 E-dialect·E-llvm·E-ql만 있다. MLIR 기여를 주장할 수 있는 공학 지표 목록에도 `Unknown` 출처 수가 없다. 따라서 관문 GO-3의 핵심 지표가 §8에 정의되어 있지 않다.",
+   "fix": "(1) 원문 \"**[설계 제안]** 같은 규칙 집합(F1–F8 검사와 같은 SB·ES·TBL 모델)을 세 엔진에 구현한다.\" 뒤에 다음 문장을 더한다. \"추출 단계만 비교하는 E-ast를 따로 둔다(§9.3.5).\" (2) 원문 행 \"| E-ql | CodeQL(B2와 같은 구현) | 사용 안 함 |\" 뒤에 다음 행을 더한다. \"| E-ast | Clang LibTooling·Clang CFG. 23개 site, dispatch case, field 쓰기 위치만 추출. 같은 API 의미표. 함수 사이 출처 분석 없음(시간 제한 3일, §9.3.5) | 사용 안 함 |\" (3) 공학 지표 목록의 \"- 분석 시간.\" 뒤에 다음 항목을 더한다. \"- 출처 정밀도: §44 예와 SYN-F2-01/02에서 SB·MSG 호출이 만든 `Unknown` 출처 수(§9 GO-3의 G3-b).\"",
+   "evidence": [
+    "09_sec.md L371, L377: \"§8.10.2의 E-dialect, E-llvm에 시간 제한을 둔 E-ast를 더한다\" / \"E-ast (이 절에서 추가)\"",
+    "09_sec.md L384, L390: G3-b `Unknown` 출처 수. GO 조건은 \"사실상 G3-b(`Unknown` 출처 수)가 가른다\"",
+    "08_sec.md L401–L414: 세 엔진 표와 공학 지표 목록(LOC, 바꾼 파일 수·LOC, 진단 위치, 분석 시간)"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.6 YAML 스키마, `label:` 줄",
+   "problem": "§8.6의 이름 'A', 'B'가 §9의 '작성자 B'와 맞지 않는다. §8.6에서 B는 reviewer이고 labeler A는 누구인지 정해져 있지 않다. A가 연구자라면 §8.1(L1은 분석기 작성자가 아닌 label 담당자)과 §8.11(label을 다른 사람이) 규칙을 어긴다.",
+   "fix": "원문 \"label: {status: fault, labeler: A, reviewer: B, frozen_at: null, disagreement: null}\" 바꿀 문장: \"label: {status: fault, labeler: B, reviewer: C, frozen_at: null, disagreement: null}\" 바로 아래 주석 줄 \"# 두 판정이 다르면 동결하지 않고 정답 집합에서 뺀다(뺀 수는 범주별 보고)\" 뒤에 다음 주석을 더한다. \"# B = §9.0.1의 작성자 B(분석기 작성자가 아님). C = 두 번째 독립 검토자. C가 없으면 reviewer: none으로 적는다\"",
+   "evidence": [
+    "08_sec.md L232: \"labeler: A, reviewer: B\"",
+    "09_sec.md L43, L642: \"독립 작성자 1명(이하 작성자 B)이 정답·계약을 동결한다\" / \"작성자 B는 다음 시점에 정답과 계약을 동결한다\"",
+    "08_sec.md L20, L434: label 담당자는 분석기 작성자가 아니어야 한다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.6 YAML 스키마, `expected:` 블록의 `rule:` 줄",
+   "problem": "§8.6 예의 규칙 ID `FS-F2`는 노트 어디에도 정의되어 있지 않다. grep 'FS-F' 결과는 이 줄 하나다. §6.6과 §9.3.3은 Req 규칙을 `R-F2`로 부른다. §9.3.3의 `Candidate.rule`도 `R-F*`다. 정답 기록과 분석기 출력의 rule 필드 이름이 서로 다르다.",
+   "fix": "원문 \"  rule: FS-F2\" 바꿀 문장: \"  rule: R-F2                  # §6.6의 Req 규칙 ID. §9.3.3 Candidate.rule과 같다\"",
+   "evidence": [
+    "08_sec.md L221: \"rule: FS-F2\"",
+    "06_sec.md L441: \"| R-F2 | F2 | `w(b,f,Msg(m)) ≺ r(b,f,u)` ...\"",
+    "09_sec.md L322: \"Candidate { id, category : F1..F8, rule : R-F*, ...\"",
+    "grep 'FS-F[0-9]' 전체 parts: 08_sec.md L221에만 나온다"
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.5 역사적 결함 표, 'TBL owner 재시작' 행",
+   "problem": "§8.5는 'v7.0.0 이전 버전은' 정리할 때 table 이름을 지웠다고 일반화한다. 검증 C15의 근거는 확인한 버전만 든다. 그 버전은 v6.7.0, v6.8.0-rc2, v7.0.0-rc1, draco-rc5이고, 이 동작은 c1ab1b7(v7.0.0)에서 사라졌다. §9.6.1도 범위를 'v6.7.0부터 draco-rc5까지'로 쓴다. 두 절의 버전 범위가 다르고, §8은 v6.7.0보다 앞선 버전까지 넓힌다.",
+   "fix": "원문 \"한 검증자의 source 확인에 따르면 v7.0.0 이전 버전은 정리 시 table 이름을 지웠다(검증 C15, 실행 확인 안 함).\" 바꿀 문장: \"한 검증자의 source 확인에 따르면 v6.7.0, v6.8.0-rc2, v7.0.0-rc1, draco-rc5는 정리할 때 table 이름을 지웠다. 이 동작은 v7.0.0 commit c1ab1b7에서 사라졌다(검증 C15, 실행 확인 안 함; §9.6.1). v6.7.0보다 앞선 버전은 확인하지 않았다.\"",
+   "evidence": [
+    "evidence/verified_claims.json C15 counter vote: \"CFE_TBL_CleanUpApp and Unregister cleared the table name ... in v6.7.0 ..., v6.8.0-rc2, v7.0.0-rc1, draco-rc5 ... removal in c1ab1b77f9e0 ... (tags v7.0.0 and v7.0.1). Inference from source, not run\"",
+    "09_sec.md L513: \"v6.7.0부터 draco-rc5까지는 cleanup 때 table 이름을 지웠다 (§1.2 F8, 검증 C15)\"",
+    "08_sec.md L175: \"v7.0.0 이전 버전은 정리 시 table 이름을 지웠다\""
+   ],
+   "from": "pair:08-09"
+  },
+  {
+   "part": "08_sec.md",
+   "location": "§8.8.3 의미 coverage 표, 'MID 해석' 행",
+   "problem": "GO-2는 MID 회수를 판정할 때 §7.13.4의 23개 site 정답(`truth/extract_23.json`)과 다섯 분류(const, param, table, state, cmd_payload)를 쓴다. 그러나 §8.8.3의 'MID 해석' 지표는 세 분류(code 상수, table·명령 데이터, 미해석)이고 그 정답 집합을 가리키지 않는다. 그래서 관문 GO-2와 §8 지표를 잇는 대응이 없다. 특히 state(`to_lab_app.c:454`)가 어느 분류에 들어가는지 정해져 있지 않다.",
+   "fix": "원문 \"| MID 해석 | MID 인자 위치를 세 종류로 나눈 비율: code 상수로 해석, table·명령 데이터에서 해석, 미해석 |\" 바꿀 문장: \"| MID 해석 | MID 인자 위치를 세 종류로 나눈 비율: code 상수로 해석, table·명령·상태 데이터에서 해석, 미해석. MVP 공개 앱 5개의 정답은 §7.13.4의 23개 site(`truth/extract_23.json`)다. 그 다섯 분류를 이렇게 묶는다: const·param은 code 상수, table·cmd_payload·state는 데이터. §9 GO-2는 이 정답에 대한 miss·wrong 수를 쓴다 |\"",
+   "evidence": [
+    "08_sec.md L324: 현재 MID 해석 행(세 분류)",
+    "09_sec.md L165: `truth/extract_23.json`의 `mid` 분류 \"const 값 집합, param, table, state, cmd_payload\"",
+    "09_sec.md L349–L350, L362: GO-2 측정과 GO 조건(miss = wrong = ∅)",
+    "07_sec.md §7.13.4: 23개 site 표(`to_lab_app.c:454` state)"
+   ],
+   "from": "pair:08-09"
+  }
+ ],
+ "01_sec.md": [
+  {
+   "part": "01_sec.md",
+   "location": "§1.7 '할 수 있는 주장' 표, MLIR import 행의 '조건' 열",
+   "problem": "정정 문구가 아니라 기각된 C17의 틀린 변형이 쓰였다. 인용: \"gcc compile_commands를 clang에 그대로 쓰면 2개 파일이 `-Werror`로 실패한다 (검증 C17 정정).\" 그대로 쓰면 gcc 전용 `-Wno-stringop-*` flag 때문에 `-Werror` 아래에서 모든 해당 파일이 실패한다. 2개 파일 실패는 `-Wno-unknown-warning-option`을 더한 뒤의 결과다. §1.6 RQ6과 §10.3 C17 행은 맞게 쓰고 있어 서로 어긋난다.",
+   "fix": "인용 문장을 다음으로 바꾼다: \"README의 gcc compile_commands를 clang에 그대로 쓰면 gcc 전용 `-Wno-stringop-*` flag가 `-Werror` 아래에서 오류가 된다. `-Wno-unknown-warning-option`을 더해도 2개 파일(`cf_codec.c`, `cs_table_processing.c`)이 `-Werror`로 실패하고, `-Wno-error`까지 더하면 154/154다 (검증 C17 정정 문구, §10.3).\"",
+   "evidence": [
+    "verified_claims.json C17 recheck vote corrected_claim: 'Re-running these entries with clang 23 ... fails under -Werror on the gcc-only -Wno-stringop-* flags. Adding -Wno-unknown-warning-option fixes that, but it is not enough: 2 of the 154 selected files still fail ... so -Wno-error is also needed.'",
+    "probe/ir/sample_app/commands_attempt1_fail.log (cited in the C17 vote): 'unknown warning option -Wno-stringop-overflow ... [-Werror,-Wunknown-warning-option]'",
+    "10_sec.md §10.3 C17 행: 'README의 gcc DB에 `-Wno-unknown-warning-option`만 더하면 154개 중 2개(`cf_codec.c`, `cs_table_processing.c`)가 `-Werror`로 실패한다'",
+    "01_sec.md §1.6 RQ6 현재 근거: 'README의 gcc 설정에 `-Wno-unknown-warning-option`만 더하면 2개 파일 ... 실패한다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.6 RQ1 '정답 자료' 항목",
+   "problem": "수치가 CS11과 원 log와 맞지 않는다. 인용: \"**[실측]** 실행마다 SBN의 SBNSubPipe(MsgLim 16)에서 TO_LAB 구독 보고(0x80E)의 drop event가 16개 기록되었다(root는 Msg Limit Err, 비root는 Pipe Overflow). 16은 EVS filter 상한이라 실제 유실은 16건 이상이다 (`$N/probe/run_nobody.log`, `run_root_ipcns.log`).\" CS11은 8회 실행 중 `runs/nobody_1.log`에서 0x80E overflow가 11줄뿐이라고 쓴다. 같은 event ID의 나머지 5줄은 DS_CMD_PIPE의 0x808 overflow다. 따라서 '실행마다 16개'와 '16건 이상'은 그 실행에서 틀린다.",
+   "fix": "다음으로 바꾼다: \"**[실측]** 기본 bundle 8회 실행에서 SBN의 SBNSubPipe(MsgLim 16)가 TO_LAB 구독 보고(0x80E)를 버린 event는 7회에서 16개, `runs/nobody_1.log`에서 11개였다(root는 Msg Limit Err, 비root는 Pipe Overflow). nobody_1에서 같은 event ID의 나머지 5개는 OPERATIONAL 이전 `DS_CMD_PIPE`의 `0x808` overflow였다. 16은 event ID별 EVS filter 상한이므로 실제 유실은 보이는 수 이상이고 정확한 수는 알 수 없다 (CS11; `$N/probe/run_nobody.log`, `run_root_ipcns.log`, `$N/probe/runs/*.log`).\"",
+   "evidence": [
+    "0x80e drop 수: nobody_1=11, nobody_2=16, nobody_3=16, run_nobody=16 (Pipe Overflow); rootipc_1-3=16, run_root_ipcns=16 (Msg Limit Err)",
+    "grep 'Pipe Overflow' $N/probe/runs/nobody_1.log | grep -v 0x80e → 5 lines 'MsgId 0x808,pipe DS_CMD_PIPE' (log L121-125, OPERATIONAL at L142)",
+    "10_sec.md CS11: 'uid 65534 4회는 `Pipe Overflow`(3회 16줄, `runs/nobody_1.log` 11줄) ... 같은 overflow event 16줄 중 5줄이 OPERATIONAL 이전 `DS_CMD_PIPE`의 `0x808` overflow였다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.3 첫 문단",
+   "problem": "§1.3의 Σ 성분 목록에 실행 플랫폼이 없다. 인용: \"나머지 행(우선순위 적용, CPU 수·affinity, 실효 pipe 깊이, 지상 명령)이 Σ다.\" 그러나 §1.4 RTEMS·VxWorks 행은 'Σ에 플랫폼을 기록하고 일반화하지 않는다'라고 쓰고, §10.5 Q5도 OSAL·RTOS를 Σ로 다룬다.",
+   "fix": "다음으로 바꾼다: \"나머지 행(우선순위 적용, CPU 수·affinity, 실효 pipe 깊이, 지상 명령)과 실행 플랫폼(OSAL·RTOS 종류, 1.4절)이 Σ다.\"",
+   "evidence": [
+    "01_sec.md §1.4 RTEMS·VxWorks 행: 'Σ에 플랫폼을 기록하고 일반화하지 않는다'",
+    "10_sec.md Q5: 'Σ(OSAL·RTOS, ...)'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.6 RQ6 '반박 기준' 항목 끝",
+   "problem": "RQ6이 §10.5 Q1과 §9.7.2 GO-8에 어긋난다. 인용: \"CodeQL과의 후보 집합 비교는 RQ5의 B2로 한다.\" 이 문장은 B2 결과가 RQ6과 무관하다는 뜻으로 읽힌다. 그러나 Q1의 결정은 'B2가 같은 후보 집합을 내면 N3·RQ6는 검증할 가설로 남긴다(GO-8 조건 2)'이고, GO-8 조건 2는 RQ6에도 B2 반박 규칙을 적용한다.",
+   "fix": "다음으로 바꾼다: \"CodeQL과의 후보 집합 비교(B2)는 RQ5와 함께 한다. GO-8 조건 2(§9.7.2)에 따라 B2 후보의 `dedup_key` 집합이 E-dialect와 같으면 RQ6도 '검증할 가설'로 남긴다 (§10.5 Q1).\"",
+   "evidence": [
+    "10_sec.md Q1 결정: 'B2가 같은 후보 집합을 내면 N3·RQ6는 '검증할 가설'로 남긴다(GO-8 조건 2)'",
+    "09_sec.md §9.7.2 GO-8 조건 2: 'N3·RQ5·RQ6에서는 B2(같은 SB 모델) 후보의 `dedup_key` 집합이 E-dialect 후보의 `dedup_key` 집합과 같으면 반박 조건이 성립한 것으로 본다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.6 '가설의 재진술' 표, H2′ 행",
+   "problem": "H2′의 정상 대조 집합이 CD6, §9.2.2와 다르다. 인용: \"정상 대조(TO_LAB 지연 구독, HK 결합 정책, Ogma passive 입력, 직렬화된 core startup)에서는 후보가 0이다\" CD6과 §9.2.2 `truth/normal.yaml`은 대조 다섯 가지에 직렬화된 core 시작을 더한다. H2′에는 'core 초기화 중 `0x808` 미구독 발행'과 'SCH_LAB 1 Hz guard'가 빠져 있다. 그래서 H2′의 기각 조건이 평가 설계보다 좁다.",
+   "fix": "다음으로 바꾼다: \"정상 대조(§9.2.2 `truth/normal.yaml`의 다섯 가지인 TO_LAB 지연 구독, HK 결합 정책, core 초기화 중 `0x808` 미구독 발행, SCH_LAB 1 Hz guard, Ogma passive 입력과 직렬화된 core startup; §10.2 CD6)에서는 후보가 0이다\".",
+   "evidence": [
+    "10_sec.md CD6: '대상은 §9.2.2 `truth/normal.yaml`의 다섯 가지(TO_LAB 지연 구독, HK 불완전 결합 packet, core 초기화 중 `0x808` 미구독 발행, SCH_LAB 1 Hz guard, Ogma passive 입력)와 직렬화된 core 시작(CM9)이다'",
+    "09_sec.md L166-175: normal.yaml 정상 대조 표의 다섯 행"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.7 '할 수 있는 주장' 표, 마지막 행(부재 진술)의 '조건' 열",
+   "problem": "이 제한 목록은 §10.2 CP12와 §10.5 Q2가 같은 부재 진술의 막힌 출처로 드는 목록보다 좁다. 인용: \"'egress 차단으로 Ganesan 2016 [R03], Valente 2025 [R04], IV&V 보고서 원문을 읽지 못했고, ROSInfer [R15]의 TLA+ 생성 코드는 찾지 못했다'는 제한을 함께 쓴다\" 여기에 SPLC 2009 [R16], WCRE 2010 [R17], ROSInfer 2025 학위논문이 빠져 있다. CP12는 이 진술을 결론의 근거로 쓰지 않는다고 하는데, §1.7은 그 경계를 밝히지 않는다.",
+   "fix": "다음으로 바꾼다: \"'egress 차단으로 Ganesan 2016 [R03], SPLC 2009 [R16], WCRE 2010 [R17], Valente 2025 [R04], IV&V 보고서(S07) 원문을 읽지 못했고, ROSInfer [R15]의 TLA+ 생성 코드와 2025 학위논문은 찾지 못했다'는 제한을 함께 쓴다. 신규성의 근거로 쓰지 않는다 (§10.2 CP12, §10.5 Q2)\".",
+   "evidence": [
+    "10_sec.md CP12: '핵심 본문(R03, R16, R17, R04, S07 IV&V 보고서, ROSInfer 후속)을 egress 차단으로 읽지 못했다 ... 결론의 근거로 쓰지 않는다'",
+    "10_sec.md Q2: '(R03 ISSRE 2016, R16 SPLC 2009, R17 WCRE 2010, R04 Valente 2025, ROSInfer TLA+ 생성기와 2025 학위논문, S07 IV&V §2.1–2.2)'",
+    "00_front.md 결론 상자: '읽지 못한 선행 본문(R03, R16, R17, R04 등)이 같은 일을 했는지(Q2)'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.1, 이벤트 어휘 앞의 [해석] 문단",
+   "problem": "기여 후보의 수와 형식이 §10.2 CD8, §4.7.4와 다르다. §1.1의 인용: \"**[해석]** 따라서 위 정의 자체는 기여가 아니다. 기여 후보는 두 가지다. cFS에서 `Req`와 `G`를 얻는 방법, 그리고 그 판정을 cFS C 소스에서 정적으로 하는 방법이다 (1.7절).\" CD8과 §4.7.4는 기여 후보를 네 요소의 결합으로 정한다: 시간에 따라 바뀌는 구독 집합, field 단위 출처, cFE 의미에서 얻은 `Req`·`G`로 한 순서 판정, 설계된 허용의 구별. 또 Q2가 닫히기 전까지 잠정적이라고 쓴다.",
+   "fix": "다음으로 바꾼다: \"**[해석]** 따라서 위 정의 자체는 기여가 아니다. 기여 후보는 §4.7.4의 네 요소 결합이다(§10.2 CD8). 그 중심은 cFS에서 `Req`와 `G`를 얻는 방법과, 그 판정을 cFS C 소스에서 정적으로 하는 방법이다 (1.7절). 이 신규성 문장은 §10.5 Q2가 닫히기 전까지 잠정적이다.\"",
+   "evidence": [
+    "10_sec.md CD8: '신규성 문장을 §4.7.4의 네 요소 결합으로 좁힌다. (1) 시간에 따라 바뀌는 구독 집합, (2) field 단위 출처, (3) cFE 의미에서 얻는 `Req`·`G`로 한 순서 판정, (4) 설계된 허용 정책의 구별 ... 4.7.3의 본문을 읽기 전까지 잠정적이다'",
+    "04_sec.md §4.7.4: '본 연구의 기여 후보는 ... cFS C 소스에 대해 다음 네 가지를 하나의 정적 분석으로 결합하는 것이다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.8 본문",
+   "problem": "§1.8은 이 절과 관련된 보정을 모두 §10.4에 모았다고 하지만 목록이 불완전하다. 인용: \"이 절과 관련된 원노트·수정본의 보정(원노트 §4.1·§4.2·§21·§27·§41·§53, 수정본 §2.1·§2.2·§7.1)은 §10.4의 O1, O4, O17, O22, O24, O27, RV1, RV2, RV5에 모았다.\" 나열한 원본 절 안에서도 O2·O3(원노트 §4.1), O5·O6(§4.2), RV4(수정본 §7.1)가 빠졌다. §1이 직접 다루는 보정도 빠졌다: O13(§1.1, 원노트 §47 식에 조건 4가 없음), O14(F1, TO_LAB), O15(Σ 우선순위), O16(F4), O19·O20(F6), O21(F8), O26(§1.4 물리 시간), RV3(F1 경로 없음과 목적지 0), RV6(F4 HK), RV10(§1.7 #73).",
+   "fix": "다음으로 바꾼다: \"이 절과 관련된 원노트·수정본의 보정(원노트 §4.1·§4.2·§13·§15–§17·§21·§23–§24·§27·§31·§35·§41·§47–§49·§53, 수정본 §2.1·§2.2·§4.2·§5.3·§6.3·§7.1)은 §10.4의 O1–O6, O13–O17, O19–O22, O24, O26, O27, RV1–RV6, RV10에 모았다.\"",
+   "evidence": [
+    "10_sec.md §10.4.1: O2 '§4.1 L187-205', O3 '§4.1 L183', O5 '§4.2 L280', O6 '§4.2 L262-268', O13 '§13, §47', O14 '§15, §31', O15 '§16', O16 '§17', O19 '§23, §35', O20 '§24-C', O21 '§24-D', O26 '§48–49'",
+    "10_sec.md §10.4.2: RV3 '§4.2 L185', RV4 '§7.1 L315', RV6 '§6.3 L286', RV10 '§5.3, §11.3'",
+    "01_sec.md §1.1 '원노트 §47 ... 조건 4는 빠져 있다'; §1.4 물리 시간 행; §1.7 '#73' 행 '(수정본 §5.3)'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.7 '할 수 없는 주장' 표, '프레임워크 의미를 복원해 순서 결함을 찾는 방법이 새롭다' 행",
+   "problem": "Goblint 문구가 C08 정정 문구, CP7과 완전히 맞지 않는다. 인용: \"Goblint v1.1.0의 `arinc.ml`은 ARINC 653 process·동기화 동작을 graphviz·Promela 모델로 내보냈지만 sampling·queuing port 호출은 `Nop`으로 처리했다\" 정정 문구(C08 refuted)에서는 port와 buffer 호출이 모두 `todo()` → `Nop`이다. 모델에 들어가는 것은 process 수명, semaphore, event, blackboard, timed wait다.",
+   "fix": "다음으로 바꾼다: \"Goblint v1.1.0의 `arinc.ml`은 ARINC 653의 process 수명·semaphore·event·blackboard·timed wait를 graphviz·Promela 모델로 내보냈지만 sampling·queuing port와 buffer 호출은 `todo()` → `Nop`으로 처리했다\".",
+   "evidence": [
+    "10_sec.md §10.3 C08 정정 문구: 'port·buffer 호출은 `todo()` → `Nop`이다. 모델에 들어가는 것은 process 수명, semaphore, event, blackboard, timed wait다'",
+    "10_sec.md CP7: 'process·semaphore·event·blackboard를 graphviz·Promela 모델로 내보냈다. sampling·queuing port와 buffer 호출은 `Nop`이다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "01_sec.md",
+   "location": "§1.7 '할 수 없는 주장' 표, Ogma 행",
+   "problem": "contested C06의 이견 설명이 §10.3 C06 행보다 좁다. 인용: \"기각한 1표는 이 결합이 배포된 예제 실행으로 보이지 않은 추론이라고 보았다\" §10.3에서는 scope 검증자가 원 문장의 과장된 세 부분을 이유로 기각했다: DB의 모든 MID 구독, 무조건 `copilot_step()` 호출, 예제 DB만으로 latest-value 결합을 단정한 것. 다른 둘은 같은 사항을 보정으로 처리했다.",
+   "fix": "다음으로 바꾼다: \"기각한 1표(scope)는 원 문장의 세 부분이 코드보다 넓다고 보았다. DB의 모든 MID 구독, 무조건 `copilot_step()` 호출, 그리고 배포된 예제 실행 없이 예제 DB만으로 latest-value 결합을 단정한 것이다. 다른 둘은 같은 사항을 보정으로 처리했다 (§10.3 C06 행)\".",
+   "evidence": [
+    "verified_claims.json C06 scope vote (refuted=true): '(1) \"subscribes to the MIDs listed in a variable database\" is too broad ... (2) \"copies ... and then calls copilot_step()\" is stated as unconditional ... (3) \"The monitors therefore evaluate latest values from separately updated messages\" does not follow from the example'",
+    "10_sec.md §10.3 C06: '검증자 하나(scope)는 원 문장의 세 부분이 코드보다 넓다며 기각했다 ... 다른 둘은 같은 사항을 보정으로 처리했다'"
+   ],
+   "from": "pair:01-10"
+  }
+ ],
+ "10_sec.md": [
+  {
+   "part": "10_sec.md",
+   "location": "§10.5 Q1 행, '막는 주장' 열과 '답에 따른 결정' 열",
+   "problem": "RQ5의 근거 상태가 §10 어디에도 없다. 10_sec.md에서 'RQ5'를 grep하면 0건이다. 다른 RQ와 가설은 모두 Q행에 연결되어 있다(RQ1·H1′→Q7, RQ2·H3′→Q6, RQ3→Q8, RQ4·H2′·H3′→Q3, RQ6→Q1, H2′의 F1→Q9). 그런데 RQ5의 반박 기준('같은 모델을 넣은 기준선이 같은 집합을 찾는다')이 바로 Q1의 질문이다. §9.7.2 GO-8 조건 2도 B2 반박 규칙에 'N3·RQ5·RQ6'를 명시한다.",
+   "fix": "Q1의 '막는 주장' 칸에서 \"원노트 §42–43의 MLIR 정당성, RQ6, N3, CD8 (2)–(3)\"를 \"원노트 §42–43의 MLIR 정당성, RQ5, RQ6, N3, CD8 (2)–(3)\"로 바꾼다. '결정' 칸에서 \"B2가 같은 후보 집합을 내면 N3·RQ6는 '검증할 가설'로 남긴다(GO-8 조건 2).\"를 \"B2가 같은 후보 집합을 내면 N3·RQ5·RQ6는 '검증할 가설'로 남긴다(GO-8 조건 2).\"로 바꾼다. Q1의 '현재 근거'(CL8: CodeQL은 순서와 무관, CSA taint 소실)는 이미 §1.6 RQ5의 현재 근거와 같다.",
+   "evidence": [
+    "grep 'RQ5' parts/10_sec.md → 0건; 01_sec.md L248-255에 RQ5 정의",
+    "09_sec.md §9.7.2 GO-8 조건 2: 'N3·RQ5·RQ6에서는 B2(같은 SB 모델) 후보의 `dedup_key` 집합이 E-dialect 후보의 `dedup_key` 집합과 같으면 반박 조건이 성립한 것으로 본다'",
+    "01_sec.md RQ5 반박 기준: '같은 모델을 넣은 기준선이 같은 집합을 찾는다.'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.1 CM10 '지위와 근거' 열",
+   "problem": "gdb 실행 횟수가 §1.2 F5와 다르고, 로컬 증거와도 다르다. CM10의 인용: \"**[실측]** 검증 중 gdb 실행 1회에서 `cfe_evs.c:188`(`Status = CFE_EVS_APP_ILLEGAL_APP_ID;`)의 breakpoint가 24번 걸렸다.\" §1.2 F5는 '실행당 24번 관측했다 (2회; gdb_attach.log, gdb_attach2.log)'라고 쓴다. §2.2.4와 §8도 2회로 쓴다. 실제로 두 log는 서로 다른 process(16421, 16535)이고, 각각 BP188 hit가 24개다.",
+   "fix": "다음으로 바꾼다: \"**[실측]** 검증 중 gdb 실행 2회에서 각각 `cfe_evs.c:188`(`Status = CFE_EVS_APP_ILLEGAL_APP_ID;`)의 breakpoint가 24번 걸렸다.\" grep 근거도 바꾼다: \"(`grep -c \"^BP188\" $N/verify-C12/counter_lens/gdb_attach.log` → 24, `gdb_attach2.log` → 24)\".",
+   "evidence": [
+    "grep -c '^BP188' $N/verify-C12/counter_lens/gdb_attach.log → 24; gdb_attach2.log → 24",
+    "gdb_attach.log: '[Inferior 1 (process 16421) exited normally]'; gdb_attach2.log: '[Inferior 1 (process 16535) exited normally]'",
+    "01_sec.md §1.2 F5: '검증 중 gdb로 이 경로를 실행당 24번 관측했다 (2회; ...gdb_attach.log, gdb_attach2.log; §2.2.4)'",
+    "02_sec.md §2.2.4: '두 번 실행했고, 매번 AppID=0으로 24번 멈추었다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.3 검증 C12 행, '노트가 쓰는 문장' 열",
+   "problem": "CM10과 같은 횟수 오류가 있다. 인용: \"#2663의 `ILLEGAL_APP_ID`는 검증 중 gdb 실행 1회에서 24번 관측했다\". §1.2 F5와 로컬 log는 2회 실행에서 각각 24번이다.",
+   "fix": "다음으로 바꾼다: \"#2663의 `ILLEGAL_APP_ID`는 검증 중 gdb 실행 2회에서 각각 24번 관측했다(`gdb_attach.log`, `gdb_attach2.log`)\".",
+   "evidence": [
+    "$N/verify-C12/counter_lens/gdb_attach.log and gdb_attach2.log: 각각 BP188 24개, 서로 다른 PID",
+    "01_sec.md §1.2 F5 '(2회; ...)'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.7 CP8 '주장' 열",
+   "problem": "§1.2 F4, §1.7, 증거와 어긋난다. CP8의 인용: \"Ogma가 생성하는 cFS monitor 앱은 받은 값을 전역에 복사하고 active 입력에서만 `copilot_step()`을 부른다.\" template에서는 REEVAL 명령도 새 데이터 없이 `copilot_step()`을 부른다. §1.2 F4('active 입력이 도착할 때와, 새 데이터 없이 REEVAL 명령이 올 때만')와 §1.7('active 입력이나 REEVAL 명령에서만')은 REEVAL 경로를 포함한다.",
+   "fix": "다음으로 바꾼다: \"Ogma가 생성하는 cFS monitor 앱은 받은 값을 전역에 복사하고, active 입력이 도착할 때와 새 데이터 없이 REEVAL 명령(`COPILOT_CFS_REEVAL_CMD_MID`)이 올 때만 `copilot_step()`을 부른다.\"",
+   "evidence": [
+    "$N/verify-C06/ogma/ogma-core/templates/cfs/copilot/fsw/src/copilot_cfs.c (HEAD 08b384b4) L194-196: 'if (CFE_SB_MsgId_Equal(MsgId, COPILOT_CFS_REEVAL_CMD_MID_s)) { copilot_step();'",
+    "verified_claims.json C06: recheck, counter, scope 세 표 모두 'A REEVAL command calls copilot_step() without updating any data'",
+    "09_sec.md §9.2.2 normal.yaml: '평가(`copilot_step()`)는 active 입력(`STATE_MID`)이나 `COPILOT_CFS_REEVAL_CMD_MID` 명령이 올 때만 일어난다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.3 검증 C06 행, '노트가 쓰는 문장' 열",
+   "problem": "이 행이 contested C06에 대해 노트가 쓰는 정본 문장인데, REEVAL 경로가 빠져 있다. 인용: \"`copilot_step()`은 active 입력에서만 불린다.\" 같은 행이 'REEVAL MID'를 구독한다고 쓰고, §1.2 F4와 §1.7은 REEVAL을 호출 경로로 든다.",
+   "fix": "다음으로 바꾼다: \"`copilot_step()`은 active 입력이 도착할 때와 새 데이터 없이 REEVAL 명령이 올 때만 불린다.\"",
+   "evidence": [
+    "copilot_cfs.c L194-196 @08b384b4 (local clone $N/verify-C06/ogma)",
+    "verified_claims.json C06 scope vote: '(2) ... copilot_step() ... depends on each input's \"active\" flag ... A REEVAL command also steps the monitors with no new data.'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.5 Q5 '질문' 열",
+   "problem": "Σ 정의가 §1.3과 어긋난다. 인용: \"판정이 Σ(OSAL·RTOS, CPU 수, 권한, cFE 버전)에 얼마나 의존하는가?\" §1.3은 'cFE·앱 버전 ... 은 1.1의 System 튜플의 성분이다. 나머지 행(우선순위 적용, CPU 수·affinity, 실효 pipe 깊이, 지상 명령)이 Σ다'라고 쓴다. 즉 cFE 버전은 Σ가 아니다. 노트의 다른 곳은 둘을 나눈다(CD5 'Σ와 cFE 버전을 매개변수로 둔다', §9 '결과마다 cFE 버전, Σ(§1.3)', N6 'cFE 버전과 Σ').",
+   "fix": "다음으로 바꾼다: \"판정이 Σ(§1.3: 우선순위 적용 여부·권한, CPU 수·affinity, 실효 pipe 깊이, 지상 명령, 실행 플랫폼 OSAL·RTOS)와 System 튜플의 cFE 버전에 얼마나 의존하는가?\"",
+   "evidence": [
+    "01_sec.md §1.3: 'cFE·앱 버전, MID 매핑, table 이미지, startup script 행은 1.1의 System 튜플의 성분이다. 나머지 행(...)이 Σ다.'",
+    "10_sec.md CD5: 'HB는 cFE 의미에서 얻고 Σ와 cFE 버전을 매개변수로 둔다'",
+    "09_sec.md L91: '결과마다 cFE 버전, Σ(§1.3), 증거 수준을 붙인다'; 04_sec.md N6: 'cFE 버전과 Σ를 매개변수로 둔 판정'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.5 Q8 '현재 근거' 열",
+   "problem": "Q8은 RQ3(F1·F2·F5·F7·F8의 순서 판정)과 평가 층 (c)를 막는 질문이다. 그런데 순서 결함 범위 밖이라고 §1이 정한 쌍 두 개가 아무 표시 없이 들어 있다. 인용: \"**[확인된 사실]** 후보 쌍이 공개되어 있다: #73 파생(6.4.1/6.4.2), #198(6.5.0a/6.6.0a), CF #184, sample_app #101, #950(CM8, CM11).\" §1.4는 cFE #950을 공유 메모리 data race로 제외하고 Goblint·TSan 기준선 비교에만 쓴다. §1.2 F6과 §1.5는 sample_app #101을 단일 앱 API 오용으로 분류하고 순서 결함으로 세지 않는다. §1.6 RQ3의 정답 자료는 #198, CF #184, #73 파생만 든다.",
+   "fix": "다음으로 바꾼다: \"**[확인된 사실]** 후보 쌍이 공개되어 있다. RQ3 대상은 #73 파생(6.4.1/6.4.2), #198(6.5.0a/6.6.0a), CF #184다(§1.6 RQ3). sample_app #101은 단일 앱 API 오용(F6, L3 lint)이라 순서 결함 집계에서 빼고 typestate 판정에만 쓴다. #950은 §1.4의 공유 메모리 race 제외 대상이라 B7·B8 비교용 대조로만 쓴다(CM8, CM11, §8.5).\"",
+   "evidence": [
+    "01_sec.md §1.4: '공유 메모리 data race. 예: cFE #950 [S68](exit·cleanup race) ... Goblint·ThreadSanitizer [S20]를 기준선으로 겹치는 범위만 비교한다'",
+    "01_sec.md §1.2 F6: 위반의 두 사건이 같은 앱 안에 있으면 'API 프로토콜 오용'으로 센다; §1.5: 단일 앱 API 오용(sample_app #101)에는 'race'를 쓰지 않는다",
+    "08_sec.md L170 '단일 앱 API 오용이므로 앱 간 race로 세지 않음'; L173 cFE #950 'lock 수준 문제라 TSan·Goblint 비교용'; 09_sec.md L547 'B7·B8은 cFE #950, #46 같은 공유 메모리 대조 사례에만 쓴다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.3 CT1 '지위와 근거' 열 (같은 문구가 §10.4.2 RV5 '보정된 서술'에도 있음)",
+   "problem": "CT1은 \"v6.7.0은 header와 맞았다 ([cfe_tbl_internal.c L571, L616-L619 @2105b932]...\"라고 쓰고, RV5는 \"... v6.7.0은 header와 맞았다.\"라고 쓴다. 둘 다 조건 없이 단정한다. §1.2 F6은 'v6.7.0의 구현은 내부 buffer를 쓰는 table에 한해 header와 일치했다'로 범위를 한정한다. C13 검증 하나가 이 한정을 지적했다. 사용자 정의 주소 table은 v6.7.0에서도 load 전 포인터가 NULL이었다.",
+   "fix": "CT1에서 \"v6.7.0은 header와 맞았다\"를 \"v6.7.0은 내부 buffer를 쓰는 table에 한해 header와 맞았다(사용자 정의 주소 table은 load 전 NULL)\"로 바꾸고, 뒤의 링크는 그대로 둔다. RV5에서 \"v6.7.0은 header와 맞았다.\"를 \"v6.7.0은 내부 buffer를 쓰는 table에 한해 header와 맞았다.\"로 바꾼다.",
+   "evidence": [
+    "verified_claims.json C13 vote: '\"In v6.7.0 the implementation matched the header\" holds only for internal-buffer tables. Those buffers were zeroed at registration. For user-defined-address tables in v6.7.0, the returned pointer would be NULL'; also 'v6.7.0 matched the header for tables with internal buffers, but not for user-defined-address tables, whose buffer pointer was NULL until loaded (api.c L278)'",
+    "01_sec.md §1.2 F6: 'v6.7.0의 구현은 내부 buffer를 쓰는 table에 한해 header와 일치했다 (§3.4 TBL-1, §3.6)'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.7 CP12 '지위와 근거' 열",
+   "problem": "같은 부재 진술의 지위 표기가 §1.7과 다르다. §1.7은 이 진술을 '할 수 있는 주장'에 두고 **[해석]**('검색 범위에 한정된 부재 진술이다')을 붙인다. CP12는 \"**[미확인]** 부재 판단이다. 핵심 본문(R03, R16, R17, R04, S07 IV&V 보고서, ROSInfer 후속)을 egress 차단으로 읽지 못했다 (`$N/rw-flight/access_log.txt`). 결론의 근거로 쓰지 않는다\"라고 쓴다. 「근거 표기」에서 [미확인]은 결론에 쓸 수 없다. 그래서 같은 문장에 서로 다른 사용 규칙이 붙는다.",
+   "fix": "다음으로 바꾼다: \"**[해석]** 검색 범위에 한정된 부재 판단이다(§1.7과 같은 지위). **[미확인]** 핵심 본문(R03, R16, R17, R04, S07 IV&V 보고서, ROSInfer TLA+ 생성기와 2025 학위논문)을 egress 차단으로 읽지 못했다 (`$N/rw-flight/access_log.txt`). 신규성·결론의 근거로 쓰지 않는다\".",
+   "evidence": [
+    "01_sec.md §1.7 마지막 할 수 있는 주장 행: '**[해석]** 검색 범위에 한정된 부재 진술이다'",
+    "00_front.md 근거 표기: [해석] '판단임을 밝혀 쓴다'; [미확인] '결론의 근거로 쓰지 않는다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.8 CD2 '주장' 열",
+   "problem": "F7의 이름이 다르다. 인용: \"원노트 F1–F6에 메시지 간 순서(F7)와 재시작 창(F8)을 더한다\" §1.2 표와 소제목, 00_front ID 규칙은 F7을 '메시지 간 도착 순서'로 부른다.",
+   "fix": "다음으로 바꾼다: \"원노트 F1–F6에 메시지 간 도착 순서(F7)와 재시작 창(F8)을 더한다\".",
+   "evidence": [
+    "01_sec.md §1.2 표: 'F7 | 메시지 간 도착 순서'; 소제목 '#### F7 — 메시지 간 도착 순서'",
+    "00_front.md ID 규칙: 'F7은 메시지 간 도착 순서, F8은 재시작 창이다'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.5 Q4 '질문' 열",
+   "problem": "F4의 이름과 정의가 다르다. 인용: \"F4(epoch가 다른 입력 조합)는 기존 정의로 이미 다뤄지는가?\" §1.2는 F4를 '다중 stream snapshot 불일치'로 부르고, 계약의 관계로 정의한다(같은 메시지 instance 또는 같은 β 주기). 'epoch'는 §1 F4 정의의 용어가 아니다.",
+   "fix": "다음으로 바꾼다: \"F4(다중 stream snapshot 불일치: 같은 메시지 instance나 같은 β 주기를 요구하는 입력 조합)는 기존 정의로 이미 다뤄지는가?\"",
+   "evidence": [
+    "01_sec.md §1.2 표: 'F4 | 다중 stream snapshot 불일치 | ... `requires_same_instance(F′)` ... `requires_same_cycle(F′, β)`'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.3 검증 C17 행 '노트가 쓰는 문장' 열 (CX2 '지위와 근거'에도 같은 문구가 있음)",
+   "problem": "성공한 import 조건이 §1.7과 C17 투표보다 덜 구체적이다. 10.3 C17의 인용: \"기록된 154/154 import는 clang으로 configure한 별도 build tree에서 `-Werror`를 빼고 `-Wno-everything`, `-Xclang -disable-O0-optnone`을 더한 결과다.\" CX2도 '`-Werror`를 빼고'라고 쓴다. §1.7은 '`-Werror`·`-Wno-stringop-*` 제거'라고 쓴다. import script는 실제로 두 종류의 flag를 모두 뺐다.",
+   "fix": "10.3 C17 행과 CX2에서 \"`-Werror`를 빼고\"를 \"`-Werror*`·`-Wno-stringop*` flag를 빼고\"로 바꾼다.",
+   "evidence": [
+    "verified_claims.json C17 recheck vote: 'a separate CMake tree configured with clang (build-ana, ENABLE_UNIT_TESTS=FALSE), with -Werror* and -Wno-stringop* removed and -Wno-everything -Xclang -disable-O0-optnone added'; 'rw-mlir/import_exp/run_import.py ... drops args starting with -Werror or -Wno-stringop'",
+    "01_sec.md §1.7: '`-Werror`·`-Wno-stringop-*` 제거, `-Wno-everything`·`-Xclang -disable-O0-optnone` 추가'"
+   ],
+   "from": "pair:01-10"
+  },
+  {
+   "part": "10_sec.md",
+   "location": "§10.2.3 CE1 '지위와 근거' 열의 근거 행 번호",
+   "problem": "R3 설정의 행 범위가 §1.2 F5와 다르다. 인용: \"L66-80, L240-254, L415-427, L590-604\" §1.2 F5는 L415-429를 쓴다. 다른 세 설정과 같은 범위는 L415-429다. 이 범위는 PROBE_SLOW의 늦은 `WaitForSystemState`(L428-429)까지 포함하고, R1의 L66-80이 L78-80으로 같은 내용을 포함하는 것과 맞는다.",
+   "fix": "\"L415-427\"을 \"L415-429\"로 바꿔 \"L66-80, L240-254, L415-429, L590-604\"로 쓴다.",
+   "evidence": [
+    "$N/sem-es-tbl/runs/probe_results_summary.txt L415 '106:... Startup Sync failed', L428-429 'PROBE_SLOW EVS_Register' / 'PROBE_SLOW WaitForSystemState(OPERATIONAL,5000) ... waited_us=0'",
+    "01_sec.md §1.2 F5: '(`$N/sem-es-tbl/runs/probe_results_summary.txt` L66-80, L240-254, L415-429, L590-604 ...)'"
+   ],
+   "from": "pair:01-10"
+  }
+ ],
+ "04_sec.md": [
+  {
+   "part": "04_sec.md",
+   "location": "§4.8 반론표 #9, '답변' 열 (line 344)",
+   "problem": "The answer to \"실제 결함은 없고 합성 예제뿐이다\" overstates what §2 says about these cases. (a) It lists the owner-restart `DUPLICATE_NOT_OWNED` as a real public defect, but §2.6 calls these observations \"결함 판정이 아니다\". §2.4.3 F8 calls it a current-version \"후보\", and §2.7.2 gives it `conditional`. (b) It presents cFE #198 as a public case without saying the defective EVA CWS app code is private. §2.4.2 and §2.7.1 say it needs two synthetic apps (a 파생 예제, as §8.5 and §9 call it). (c) It says only F1 lacks public positive cases, but §2.7.3 says F1, F4 and F7 have none and F8 has only that one observation.",
+   "fix": "Replace \"공개 사례가 있다: cFE #198(6.5.0a/6.6.0a), CF #184(수정 833fdbb), owner 재시작 시 `DUPLICATE_NOT_OWNED`(**[실측]**), 조용한 잔여 사례 #2663, #73 파생 예제(6.4.1/6.4.2 소스).\" with \"공개 기록에서 온 사례가 있다: CF #184(수정 833fdbb와 parent 공개), cFE #198 파생 예제(6.5.0a/6.6.0a 위 합성 앱 2개; EVA CWS 앱은 비공개, 2.4.2절), 조용한 잔여 사례 #2663, #73 파생 예제(6.4.1/6.4.2 소스). owner 재시작 시 `DUPLICATE_NOT_OWNED`는 **[실측]** 관측이고 결함 판정 전의 현재 버전 후보다(2.6절, 2.4.3절).\" Then replace \"F1의 공개 양성 사례는 찾지 못해 합성으로 만든다\" with \"F1·F4·F7의 공개 양성 사례는 찾지 못했고 F8은 현재 버전 관측 하나뿐이다. 이 범주는 합성·주입으로 만든다 (2.7.3절)\".",
+   "evidence": [
+    "02_sec.md §2.6 intro: \"아래는 두 고정 build의 관측이며, 결함 판정이 아니다.\" Row 4: \"버전에 따라 다른 후보다.\"",
+    "02_sec.md §2.4.3 F8 row: \"현재 버전 후보는 2.6절의 소유 앱 재시작 관측(DUPLICATE_NOT_OWNED) 하나다.\" §2.7.2: \"소유 앱 재시작 시 DUPLICATE_NOT_OWNED ... 나머지는 conditional\"",
+    "02_sec.md §2.4.2 #198 row: \"EVA CWS 앱은 비공개라 합성 앱 2개가 필요하다.\" §2.7.1: \"#198(공개 issue; 해당 앱 코드는 비공개)\"",
+    "08_sec.md §8.5 table: \"cFE #198 ... EVA CWS 앱은 비공개다 | 두 cFE 버전 위의 2앱 파생 예제 | F5 파생 예제\"",
+    "02_sec.md §2.7.3: \"F1·F4·F7은 공개 cFS 양성 사례가 없다. F8은 현재 버전 관측 하나뿐이다.\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "04_sec.md",
+   "location": "§4.2.1 'ROS 결함 연구' 셋째 bullet (line 101)",
+   "problem": "This sentence is about F1, but it says the evaluation should rely on cFS historical cases. §2 found no public cFS positive case for F1. It assigns F1 to synthetic and injected layers only. So the F1 evaluation basis rests on cases that §2 says do not exist.",
+   "fix": "Replace \"이 연구의 평가는 cFS의 역사적 사례와 label을 단 합성·변형 사례에 기대야 한다 (1.6절 RQ3).\" with \"cFS에서도 2.4.3절의 검색 범위 안에서는 F1의 공개 양성 사례를 찾지 못했다. 따라서 F1 평가는 label을 단 합성·주입 사례에 기대야 한다. cFS의 역사적 수정 전후 쌍은 F5 등 다른 범주에만 있다 (2.7.2절, 1.6절 RQ3).\"",
+   "evidence": [
+    "02_sec.md §2.4.3 F1 row: \"[미확인] 검색 범위(2.4.1절, 재현율 불완전) 안에서는 발행이 구독보다 먼저여서 기능 실패가 났다는 공개 보고를 찾지 못했다. ... 양성 사례는 합성하거나 주입해야 한다.\"",
+    "02_sec.md §2.7.2: \"| F1, F4, F7 | synthetic, injected | warn | 공개 양성 사례가 없는 범주다.\"",
+    "01_sec.md §1.2 F1: \"[해석] F1의 양성 사례는 합성·주입으로 만들어야 한다.\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "04_sec.md",
+   "location": "§4.8 반론표 #9, '필요한 실험·자료' 열 (line 344)",
+   "problem": "The column says that for every fix pair the fixed version should become `GUARANTEED` or `GUARANTEED_UNDER`. For H-73-derived, §2.2.5 records that the SB AppId early use is still there in 6.4.2 and expects warn after the fix. Applied per pair, the criterion would count the correct result for H-73-derived as a failure.",
+   "fix": "After \"수정 후 판은 `GUARANTEED` 또는 `GUARANTEED_UNDER`가 되는지 본다\", insert \"(해당 수정이 다룬 `Req`에 한한다. H-73-derived의 SB AppId 선사용 `Req`는 6.4.2에서도 남으므로 수정 후에도 `CANDIDATE` 이상이 기대값이다, 2.2.5절)\".",
+   "evidence": [
+    "02_sec.md §2.2.5 H-73-derived expected_post: \"EVS TaskInit의 CreatePipe(cfe_evs_task.c:410)는 SB task 생성 전이므로 CFE_SB.AppId=0 사용이 남는다 -> C-2663과 같은 진단(warn)\"",
+    "02_sec.md §2.2.3 row 3: \"[확인된 사실] 바뀌지 않았다. ... SB AppId는 여전히 SB TaskInit에서만 설정된다.\"",
+    "verified_claims C21 counter vote: \"SB's AppId initialization never changed, and issue #2663 (2025) shows the SB/EVS ordering mismatch persists\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "04_sec.md",
+   "location": "§4.8 반론표 #11, '답변' 열 (line 346)",
+   "problem": "\"BAT flight software는 RAD6000·VxWorks 위의 C++다\" generalizes from the Image Processor's RAD6000 software to all of BAT's flight software. The C22 scope verifier flagged exactly this. §2.1.5 keeps the narrower wording: the RAD6000 in the Image Processor runs C++ on VxWorks, and a separate ADSP21020 DSP does image production and processing.",
+   "fix": "Replace \"BAT flight software는 RAD6000·VxWorks 위의 C++다(snippet).\" with \"2004년 발사 전 논문의 snippet에 따르면 BAT Image Processor의 RAD6000 software는 VxWorks 위의 C++이고, 이미지 생성·처리는 별도 ADSP21020 DSP가 맡는다(2.1.5절).\"",
+   "evidence": [
+    "verified_claims C22 scope vote: \"'BAT flight software is C++ on VxWorks on a RAD6000' generalizes from the RAD6000's software, while a separate 21020 DSP handles imaging, and the description is a 2004 pre-launch one.\"",
+    "02_sec.md §2.1.5: \"Image Processor의 RAD6000에서 VxWorks 위의 C++ 코드가 실행된다. 별도의 ADSP21020 DSP가 이미지 생성과 처리를 맡는다.\"",
+    "02_sec.md §2.1.4: \"결함이 RAD6000 쪽 C++ 코드에 있는가, DSP 쪽에 있는가 | [미확인]\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "04_sec.md",
+   "location": "§4.1.2 표, Havelund·Lowry·Penix 행의 '겹침' 열 (line 71)",
+   "problem": "The overlap column calls the DS1 case \"비행 SW의 순서 결함\", which ties it to this study's ordering-fault categories. §2.1.7 classifies the same case as a thread/lock defect, not an inter-app pub/sub ordering fault. It also says the case is not used as evidence for this study's fault categories, and supports only the general claim that ordering faults matter in flight.",
+   "fix": "Change the 겹침 cell \"비행 SW의 순서 결함\" to \"비행 SW 동시성 결함의 선례(thread·lock 수준. 앱 간 pub/sub 순서 결함이 아니며 이 연구 범주의 근거로 쓰지 않는다, 2.1.7절)\".",
+   "evidence": [
+    "02_sec.md §2.1.7: \"[해석] 이 사례는 thread와 lock 수준의 결함이다. 앱 사이 pub/sub 순서 결함이 아니다. ... 이 연구가 다루는 결함 범주의 근거로는 쓰지 않는다.\"",
+    "04_sec.md same row, gap column: \"thread·lock 문제이고 모델이 수작업이다\""
+   ],
+   "from": "pair:02-04"
+  }
+ ],
+ "02_sec.md": [
+  {
+   "part": "02_sec.md",
+   "location": "§2.7.2 평가 데이터 구성 표, 첫 행의 `expected.verdict` 열 (line 423)",
+   "problem": "§2.7.2 gives every historical pair (H-73-derived, #198, CF #184) the verdict \"수정 후 no_warn\". This conflicts in three places. §2.4.2's own CF #184 row says the fix only bounds the wait to 2.5 s and ignores owner restart. §8.5 and §9.4.2 set CF #184's fixed version to `conditional` and #198's 6.6.0a version to \"가정 아래 보장\". §4.8 #9 expects post-fix versions to be `GUARANTEED` or `GUARANTEED_UNDER`, and `GUARANTEED_UNDER` corresponds to conditional.",
+   "fix": "Replace \"수정 전 warn, 수정 후 no_warn(H-73-derived의 SB AppId 선사용은 warn)\" with \"수정 전 warn. 수정 후: H-73-derived의 crash 경로는 no_warn(panic으로 끝나는 core 동기화는 가정 없는 간선, §6 HB-CORE와 같음). #198(6.6.0a의 `WaitForSystemState`, soft limit)과 CF #184(25회×100 ms 제한 재시도)는 conditional(§8.5, §9.4.2). H-73-derived의 SB AppId 선사용은 수정 후에도 warn\". Note for the §8 owner: §8.5 also names \"#73의 sync delay+panic\" as conditional. That conflicts with this record and with HB-CORE, and it should be settled there.",
+   "evidence": [
+    "02_sec.md §2.4.2 CF #184 row: \"수정은 대기 시간을 2.5 s로 제한할 뿐이고 소유 앱의 재시작은 다루지 않는다.\"",
+    "08_sec.md §8.5: \"수정이 timeout·제한 재시도에 기대면 `conditional`이다(#73의 sync delay+panic, CF #184).\" Table: \"CF #184 ... 수정판은 `conditional`\"",
+    "09_sec.md §9.4.2: \"CF #184 ... 수정판: conditional\"; \"cFE #198 파생 ... 6.6.0a에서 `WaitForSystemState(APPS_INIT)`를 쓴 판: 가정 아래 보장\"",
+    "04_sec.md §4.8 #9: \"수정 후 판은 `GUARANTEED` 또는 `GUARANTEED_UNDER`가 되는지 본다\"",
+    "06_sec.md HB-CORE row: the assumption column is \"—\", so the rule is in G0."
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "02_sec.md",
+   "location": "§2.4.3 표, F2 행 (line 346)",
+   "problem": "#73 is filed as a public positive case for F2. §2.2.2 itself maps #73 to the original note's §16 `A.ServiceReady → B.UseService` structure, which is F5 in §1.2. §1.2 defines F2 as use of message-derived state and lists #73 under F5. The same table already lists #73 in the F5 row. §4.3.4 likewise treats F2 as 첫 갱신 전 사용 of message-derived state, not service initialization.",
+   "fix": "In the F2 row, change \"#73(서비스 초기화 전 사용, 역사적). HS #148, MD #79(table 유래, timing과 무관)\" to \"HS #148, MD #79(table 유래, timing과 무관). #73은 서비스 초기화 전 사용이라 F5에서 센다\". Keep the F5 row as it is.",
+   "evidence": [
+    "02_sec.md §2.2.2: \"[해석] 원노트 §16의 `A.ServiceReady → B.UseService` 구조에 그대로 맞는 사례다.\"",
+    "01_sec.md §1.2 table: \"F5 | 시작 시 서비스·자원 의존 | ... | §16, §34, F5\". The F5 bullet: \"[확인된 사실] cFE #73 [S01]. ... 역사적 core startup 결함이다.\"",
+    "01_sec.md §1.2 F2 lists only HS #148 and MD #79 as public cases.",
+    "04_sec.md §4.3.4: \"F2 첫 갱신 전 사용 | ... | payload field → 앱 전역 field의 출처\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "02_sec.md",
+   "location": "§2.4.3 제목과 표 첫 열 (lines 341-352)",
+   "problem": "The table is titled \"원노트 결함 범주\" and labels its rows with the original note's names: F1 구독 전 발행, F2 초기화 전 사용, F3 오래된 상태, F4 여러 stream의 snapshot 불일치, F5 startup 서비스 의존, F6 table lifecycle 오용. It also includes F7 and F8, which the original note does not define (원노트 §38 has only F1–F6). §4 and §1.2 use the names this note defines: 첫 메시지 유실, 첫 갱신 전 사용, 경계를 넘은 사용, 다중 stream snapshot, 시작 의존, Table 수명. As written, the same IDs carry two different name sets.",
+   "fix": "Change the heading \"#### 2.4.3 원노트 결함 범주별 공개 근거\" to \"#### 2.4.3 결함 범주(§1.2)별 공개 근거\". Change the column header \"원노트 범주\" to \"범주 (§1.2)\". Rename the rows to the §1.2 names: \"F1 첫 메시지 유실\", \"F2 메시지 유래 state의 첫 갱신 전 사용\", \"F3 갱신 경계를 넘은 state 사용\", \"F4 다중 stream snapshot 불일치\", \"F5 시작 시 서비스·자원 의존\", \"F6 Table 수명 프로토콜 위반\". Leave F7 and F8 as they are, and change no IDs.",
+   "evidence": [
+    "Original note 4ccc8aa8 §38 'Fault Category' defines only F1 Publish before subscriber ready … F6 Table lifecycle misuse (grep: lines 1548-1598). It has no F7 or F8.",
+    "01_sec.md §1.2: \"원노트 §38의 F1–F6을 유지하고, 두 범주를 덧붙인다.\" The table names F1 첫 메시지 유실 … F8 재시작 창.",
+    "04_sec.md line 10: \"결함 범주 F1–F8과 실행 가정 Σ는 1.2–1.3절\". §4.3.4 uses \"F1 첫 메시지 유실\", \"F2 첫 갱신 전 사용\", \"F3 경계를 넘은 사용\", \"F5 시작 의존\", \"F6 Table 수명\"."
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "02_sec.md",
+   "location": "§2.1.6 원노트 서술의 보정 표, 셋째 행 보정 열 (line 98)",
+   "problem": "\"BAT는 C++/VxWorks/RAD6000 시스템이다\" makes the same overgeneralization the C22 scope vote flagged. It also contradicts §2.1.5 and §2.1.4 in the same section, which say a separate DSP does the imaging and leave open whether the race is on the RAD6000 side or the DSP side.",
+   "fix": "Replace \"**[해석]** BAT는 C++/VxWorks/RAD6000 시스템이다.\" with \"**[해석]** snippet 기준으로 BAT Image Processor의 RAD6000 software는 VxWorks 위의 C++이고 이미지 처리는 별도 DSP가 맡는다(2.1.5절).\"",
+   "evidence": [
+    "verified_claims C22 scope vote (3): the RAD6000-only description generalizes, \"while a separate 21020 DSP handles imaging\"",
+    "02_sec.md §2.1.5 bullets on RAD6000 C++/VxWorks and the separate ADSP21020 DSP; §2.1.4 row \"RAD6000 쪽 C++ 코드에 있는가, DSP 쪽에 있는가 | [미확인]\""
+   ],
+   "from": "pair:02-04"
+  },
+  {
+   "part": "02_sec.md",
+   "location": "§2.2.5 마지막 [설계 제안] 문단 (line 193)과 §2.0 표 cFE #73 행 마지막 열 (line 19)",
+   "problem": "§2 calls the #73-derived record a \"파생 사례\" and, in §2.0, a \"파생 benchmark 후보\". §4.8 (#9, #12), §1.6, §1.7, §8.5, §9 and §10 all use the term \"파생 예제\" for the same thing, so one concept has three names.",
+   "fix": "In line 193, change \"#73은 다음과 같은 \\\"파생 사례\\\" 기록으로\" to \"#73은 다음과 같은 \\\"파생 예제\\\" 기록으로\". In the §2.0 table, change \"파생 benchmark 후보\" to \"파생 예제 후보\". Keep the case_id H-73-derived unchanged.",
+   "evidence": [
+    "04_sec.md §4.8 #9: \"#73 파생 예제(6.4.1/6.4.2 소스)\"; #12: \"파생 예제만 만들 수 있고, 결과는 '파생 예제'로 보고한다\"",
+    "08_sec.md §8.5: \"그렇지 않으면 \\\"파생 예제\\\"로 따로 표시한다\"; 01_sec.md line 234: \"#73 파생 예제\"; 10_sec.md CR4: \"'#73 파생 예제'로만 보고한다\""
+   ],
+   "from": "pair:02-04"
+  }
+ ]
+}

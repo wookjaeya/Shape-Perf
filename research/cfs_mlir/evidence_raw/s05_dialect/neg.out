@@ -1,0 +1,7 @@
+== neg1
+neg1.mlir:3:15: error: expected base type 'cfs.pipe' but got 'builtin.integer'
+== neg2
+neg2.mlir:4:9: error: expected base type 'cfs.msgid' but got 'cfs.pipe'
+== neg3
+== neg_sig
+neg_sig.mlir:1:11: error: custom op 'llvm.func' failed to construct function type: expected LLVM type for function arguments

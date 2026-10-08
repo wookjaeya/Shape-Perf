@@ -1,0 +1,299 @@
+Dumping SAMPLE_APP_Init:
+FunctionDecl 0x55f1ed9203b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.h:87:1, col:34> col:14 used SAMPLE_APP_Init 'CFE_Status_t (void)'
+
+Dumping SAMPLE_APP_Init:
+FunctionDecl 0x55f1ed92ebe0 prev 0x55f1ed9203b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:111:1, line:219:1> line:111:14 used SAMPLE_APP_Init 'CFE_Status_t (void)'
+`-CompoundStmt 0x55f1ed933c40 <line:112:1, line:219:1>
+  |-DeclStmt 0x55f1ed92ed20 <line:113:5, col:24>
+  | `-VarDecl 0x55f1ed92ecb8 <col:5, col:18> col:18 used status 'CFE_Status_t':'int'
+  |-DeclStmt 0x55f1ed92ee38 <line:114:5, col:67>
+  | `-VarDecl 0x55f1ed92edd0 <col:5, col:66> col:18 used VersionString 'char[256]'
+  |-CallExpr 0x55f1ed92f008 <line:117:5, col:56> 'void *'
+  | |-ImplicitCastExpr 0x55f1ed92eff0 <col:5> 'void *(*)(void *, int, __size_t)' <FunctionToPointerDecay>
+  | | `-DeclRefExpr 0x55f1ed92ee50 <col:5> 'void *(void *, int, __size_t)' Function 0x55f1ed75d0b8 'memset' 'void *(void *, int, __size_t)'
+  | |-ImplicitCastExpr 0x55f1ed92f048 <col:12, col:13> 'void *' <BitCast>
+  | | `-UnaryOperator 0x55f1ed92eef0 <col:12, col:13> 'SAMPLE_APP_Data_t *' prefix '&' cannot overflow
+  | |   `-DeclRefExpr 0x55f1ed92ee70 <col:13> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  | |-IntegerLiteral 0x55f1ed92ef08 <col:30> 'int' 0
+  | `-UnaryExprOrTypeTraitExpr 0x55f1ed92ef68 <col:33, col:55> '__size_t':'unsigned long' sizeof
+  |   `-ParenExpr 0x55f1ed92ef48 <col:39, col:55> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue
+  |     `-DeclRefExpr 0x55f1ed92ef28 <col:40> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' non_odr_use_unevaluated
+  |-BinaryOperator 0x55f1ed92f0e8 <line:119:5, col:33> 'uint32':'unsigned int' '='
+  | |-MemberExpr 0x55f1ed92f080 <col:5, col:21> 'uint32':'unsigned int' lvalue .RunStatus 0x55f1ed91fe50
+  | | `-DeclRefExpr 0x55f1ed92f060 <col:5> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  | `-ImplicitCastExpr 0x55f1ed92f0d0 <col:33> 'uint32':'unsigned int' <IntegralCast>
+  |   `-DeclRefExpr 0x55f1ed92f0b0 <col:33> 'int' EnumConstant 0x55f1ed7f2b78 'CFE_ES_RunStatus_APP_RUN' 'int'
+  |-BinaryOperator 0x55f1ed92f310 <line:124:5, col:66> 'CFE_Status_t':'int' '='
+  | |-DeclRefExpr 0x55f1ed92f108 <col:5> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | `-CallExpr 0x55f1ed92f288 <col:14, col:66> 'CFE_Status_t':'int'
+  |   |-ImplicitCastExpr 0x55f1ed92f270 <col:14> 'CFE_Status_t (*)(const void *, uint16, CFE_EVS_EventFilter_Enum_t)' <FunctionToPointerDecay>
+  |   | `-DeclRefExpr 0x55f1ed92f128 <col:14> 'CFE_Status_t (const void *, uint16, CFE_EVS_EventFilter_Enum_t)' Function 0x55f1ed8206d8 'CFE_EVS_Register' 'CFE_Status_t (const void *, uint16, CFE_EVS_EventFilter_Enum_t)'
+  |   |-ImplicitCastExpr 0x55f1ed92f2c8 </home/user/work/llvm-project/build/lib/clang/23/include/__stddef_null.h:26:14, col:23> 'const void *' <NullToPointer>
+  |   | `-ParenExpr 0x55f1ed92f1a8 <col:14, col:23> 'void *'
+  |   |   `-CStyleCastExpr 0x55f1ed92f180 <col:15, col:22> 'void *' <NullToPointer>
+  |   |     `-IntegerLiteral 0x55f1ed92f148 <col:22> 'int' 0
+  |   |-ImplicitCastExpr 0x55f1ed92f2e0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:124:37> 'uint16':'unsigned short' <IntegralCast>
+  |   | `-IntegerLiteral 0x55f1ed92f1c8 <col:37> 'int' 0
+  |   `-ImplicitCastExpr 0x55f1ed92f2f8 <col:40> 'CFE_EVS_EventFilter_Enum_t':'unsigned short' <IntegralCast>
+  |     `-DeclRefExpr 0x55f1ed92f1e8 <col:40> 'int' EnumConstant 0x55f1ed814808 'CFE_EVS_EventFilter_BINARY' 'int'
+  |-IfStmt 0x55f1ed931ca0 <line:125:5, line:151:5> has_else
+  | |-BinaryOperator 0x55f1ed92f400 <line:125:9, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '!='
+  | | |-ImplicitCastExpr 0x55f1ed92f3e8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:125:9> 'CFE_Status_t':'int' <LValueToRValue>
+  | | | `-DeclRefExpr 0x55f1ed92f330 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | | `-ParenExpr 0x55f1ed92f3c8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  | |   `-CStyleCastExpr 0x55f1ed92f3a0 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  | |     `-IntegerLiteral 0x55f1ed92f368 <col:36> 'int' 0
+  | |-CompoundStmt 0x55f1ed92f638 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:126:5, line:128:5>
+  | | `-CallExpr 0x55f1ed92f5e8 <line:127:9, col:107> 'CFE_Status_t':'int'
+  | |   |-ImplicitCastExpr 0x55f1ed92f5d0 <col:9> 'CFE_Status_t (*)(const char *, ...)' <FunctionToPointerDecay>
+  | |   | `-DeclRefExpr 0x55f1ed92f420 <col:9> 'CFE_Status_t (const char *, ...)' Function 0x55f1ed72e1b0 'CFE_ES_WriteToSysLog' 'CFE_Status_t (const char *, ...)'
+  | |   |-ImplicitCastExpr 0x55f1ed92f620 <col:30> 'const char *' <ArrayToPointerDecay>
+  | |   | `-StringLiteral 0x55f1ed92f4a0 <col:30> 'const char[52]' lvalue "Sample App: Error Registering Events, RC = 0x%08lX\n"
+  | |   `-CStyleCastExpr 0x55f1ed92f540 <col:86, col:101> 'unsigned long' <IntegralCast>
+  | |     `-ImplicitCastExpr 0x55f1ed92f528 <col:101> 'CFE_Status_t':'int' <LValueToRValue> part_of_explicit_cast
+  | |       `-DeclRefExpr 0x55f1ed92f4f0 <col:101> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | `-CompoundStmt 0x55f1ed931c78 <line:130:5, line:151:5>
+  |   |-CallExpr 0x55f1ed92fa28 <line:134:9, line:136:51> 'CFE_Status_t':'int'
+  |   | |-ImplicitCastExpr 0x55f1ed92fa10 <line:134:9> 'CFE_Status_t (*)(CFE_MSG_Message_t *, CFE_SB_MsgId_t, CFE_MSG_Size_t)' <FunctionToPointerDecay>
+  |   | | `-DeclRefExpr 0x55f1ed92f650 <col:9> 'CFE_Status_t (CFE_MSG_Message_t *, CFE_SB_MsgId_t, CFE_MSG_Size_t)' Function 0x55f1ed8b0bb0 'CFE_MSG_Init' 'CFE_Status_t (CFE_MSG_Message_t *, CFE_SB_MsgId_t, CFE_MSG_Size_t)'
+  |   | |-ParenExpr 0x55f1ed92f778 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/msg/option_inc/default_cfe_msg_hdr_pri.h:52:27, col:41> 'CFE_MSG_Message_t *'
+  |   | | `-UnaryOperator 0x55f1ed92f760 <col:28, col:40> 'CFE_MSG_Message_t *' prefix '&' cannot overflow
+  |   | |   `-ParenExpr 0x55f1ed92f740 <col:29, col:40> 'CFE_MSG_Message_t':'struct CFE_MSG_Message' lvalue
+  |   | |     `-MemberExpr 0x55f1ed92f710 <col:30, col:37> 'CFE_MSG_Message_t':'struct CFE_MSG_Message' lvalue .Msg 0x55f1ed87d880
+  |   | |       `-ParenExpr 0x55f1ed92f6f0 <col:30, col:35> 'CFE_MSG_TelemetryHeader_t':'struct CFE_MSG_TelemetryHeader' lvalue
+  |   | |         `-MemberExpr 0x55f1ed92f6c0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:134:34, col:56> 'CFE_MSG_TelemetryHeader_t':'struct CFE_MSG_TelemetryHeader' lvalue .TelemetryHeader 0x55f1ed91f958
+  |   | |           `-MemberExpr 0x55f1ed92f690 <col:34, col:50> 'SAMPLE_APP_HkTlm_t':'struct SAMPLE_APP_HkTlm_t' lvalue .HkTlm 0x55f1ed91fde8
+  |   | |             `-DeclRefExpr 0x55f1ed92f670 <col:34> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   | |-CallExpr 0x55f1ed92f8d8 <line:135:22, col:63> 'CFE_SB_MsgId_t':'struct CFE_SB_MsgId_t'
+  |   | | |-ImplicitCastExpr 0x55f1ed92f8c0 <col:22> 'CFE_SB_MsgId_t (*)(CFE_SB_MsgId_Atom_t)' <FunctionToPointerDecay>
+  |   | | | `-DeclRefExpr 0x55f1ed92f798 <col:22> 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)' Function 0x55f1ed88f698 'CFE_SB_ValueToMsgId' 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)'
+  |   | | `-ImplicitCastExpr 0x55f1ed92f908 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:63:49, col:89> 'CFE_SB_MsgId_Atom_t':'unsigned int' <IntegralCast>
+  |   | |   `-ParenExpr 0x55f1ed92f838 <col:49, col:89> 'int'
+  |   | |     `-BinaryOperator 0x55f1ed92f818 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:31:34, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:63:88> 'int' '|'
+  |   | |       |-IntegerLiteral 0x55f1ed92f7b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:31:34> 'int' 2048
+  |   | |       `-ParenExpr 0x55f1ed92f7f8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:63:82, col:88> 'int'
+  |   | |         `-IntegerLiteral 0x55f1ed92f7d8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_topicids.h:33:52> 'int' 131
+  |   | `-UnaryExprOrTypeTraitExpr 0x55f1ed92f990 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:136:22, col:50> '__size_t':'unsigned long' sizeof
+  |   |   `-ParenExpr 0x55f1ed92f970 <col:28, col:50> 'SAMPLE_APP_HkTlm_t':'struct SAMPLE_APP_HkTlm_t' lvalue
+  |   |     `-MemberExpr 0x55f1ed92f940 <col:29, col:45> 'SAMPLE_APP_HkTlm_t':'struct SAMPLE_APP_HkTlm_t' lvalue .HkTlm 0x55f1ed91fde8 non_odr_use_unevaluated
+  |   |       `-DeclRefExpr 0x55f1ed92f920 <col:29> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' non_odr_use_unevaluated
+  |   |-BinaryOperator 0x55f1ed92fc78 <line:141:9, line:143:65> 'CFE_Status_t':'int' '='
+  |   | |-DeclRefExpr 0x55f1ed92fa68 <line:141:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | `-CallExpr 0x55f1ed92fc08 <col:18, line:143:65> 'CFE_Status_t':'int'
+  |   |   |-ImplicitCastExpr 0x55f1ed92fbf0 <line:141:18> 'CFE_Status_t (*)(CFE_SB_PipeId_t *, uint16, const char *)' <FunctionToPointerDecay>
+  |   |   | `-DeclRefExpr 0x55f1ed92fa88 <col:18> 'CFE_Status_t (CFE_SB_PipeId_t *, uint16, const char *)' Function 0x55f1ed8878c8 'CFE_SB_CreatePipe' 'CFE_Status_t (CFE_SB_PipeId_t *, uint16, const char *)'
+  |   |   |-UnaryOperator 0x55f1ed92faf8 <col:36, col:53> 'CFE_SB_PipeId_t *' prefix '&' cannot overflow
+  |   |   | `-MemberExpr 0x55f1ed92fac8 <col:37, col:53> 'CFE_SB_PipeId_t':'unsigned int' lvalue .CommandPipe 0x55f1ed91feb8
+  |   |   |   `-DeclRefExpr 0x55f1ed92faa8 <col:37> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   |   |-ImplicitCastExpr 0x55f1ed92fc48 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_internal_cfg.h:42:48> 'uint16':'unsigned short' <IntegralCast>
+  |   |   | `-IntegerLiteral 0x55f1ed92fb10 <col:48> 'int' 32
+  |   |   `-ImplicitCastExpr 0x55f1ed92fc60 <line:45:47> 'const char *' <ArrayToPointerDecay>
+  |   |     `-StringLiteral 0x55f1ed92fb60 <col:47> 'const char[20]' lvalue "SAMPLE_APP_CMD_PIPE"
+  |   `-IfStmt 0x55f1ed931c58 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:144:9, line:150:9>
+  |     |-BinaryOperator 0x55f1ed9319f0 <line:144:13, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '!='
+  |     | |-ImplicitCastExpr 0x55f1ed9319d8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:144:13> 'CFE_Status_t':'int' <LValueToRValue>
+  |     | | `-DeclRefExpr 0x55f1ed92fc98 <col:13> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |     | `-ParenExpr 0x55f1ed9319b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  |     |   `-CStyleCastExpr 0x55f1ed931990 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  |     |     `-IntegerLiteral 0x55f1ed931958 <col:36> 'int' 0
+  |     `-CompoundStmt 0x55f1ed931c40 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:145:9, line:150:9>
+  |       `-CallExpr 0x55f1ed931bb0 <line:146:13, line:149:52> 'CFE_Status_t':'int'
+  |         |-ImplicitCastExpr 0x55f1ed931b98 <line:146:13> 'CFE_Status_t (*)(uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' <FunctionToPointerDecay>
+  |         | `-DeclRefExpr 0x55f1ed931a10 <col:13> 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' Function 0x55f1ed820b10 'CFE_EVS_SendEvent' 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)'
+  |         |-ImplicitCastExpr 0x55f1ed931bf8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_eventids.h:37:38> 'uint16':'unsigned short' <IntegralCast>
+  |         | `-IntegerLiteral 0x55f1ed931a30 <col:38> 'int' 9
+  |         |-ImplicitCastExpr 0x55f1ed931c10 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:147:31> 'CFE_EVS_EventType_Enum_t':'unsigned short' <IntegralCast>
+  |         | `-DeclRefExpr 0x55f1ed931a50 <col:31> 'int' EnumConstant 0x55f1ed8144f8 'CFE_EVS_EventType_ERROR' 'int'
+  |         |-ImplicitCastExpr 0x55f1ed931c28 <line:148:31> 'const char *' <ArrayToPointerDecay>
+  |         | `-StringLiteral 0x55f1ed931ad0 <col:31> 'const char[57]' lvalue "Sample App: Error creating SB Command Pipe, RC = 0x%08lX"
+  |         `-CStyleCastExpr 0x55f1ed931b70 <line:149:31, col:46> 'unsigned long' <IntegralCast>
+  |           `-ImplicitCastExpr 0x55f1ed931b58 <col:46> 'CFE_Status_t':'int' <LValueToRValue> part_of_explicit_cast
+  |             `-DeclRefExpr 0x55f1ed931b20 <col:46> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |-IfStmt 0x55f1ed9323e0 <line:153:5, line:166:5>
+  | |-BinaryOperator 0x55f1ed931da0 <line:153:9, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '=='
+  | | |-ImplicitCastExpr 0x55f1ed931d88 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:153:9> 'CFE_Status_t':'int' <LValueToRValue>
+  | | | `-DeclRefExpr 0x55f1ed931cd0 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | | `-ParenExpr 0x55f1ed931d68 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  | |   `-CStyleCastExpr 0x55f1ed931d40 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  | |     `-IntegerLiteral 0x55f1ed931d08 <col:36> 'int' 0
+  | `-CompoundStmt 0x55f1ed9323c0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:154:5, line:166:5>
+  |   |-BinaryOperator 0x55f1ed932038 <line:158:9, col:107> 'CFE_Status_t':'int' '='
+  |   | |-DeclRefExpr 0x55f1ed931dc0 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | `-CallExpr 0x55f1ed931fe8 <col:18, col:107> 'CFE_Status_t':'int'
+  |   |   |-ImplicitCastExpr 0x55f1ed931fd0 <col:18> 'CFE_Status_t (*)(CFE_SB_MsgId_t, CFE_SB_PipeId_t)' <FunctionToPointerDecay>
+  |   |   | `-DeclRefExpr 0x55f1ed931de0 <col:18> 'CFE_Status_t (CFE_SB_MsgId_t, CFE_SB_PipeId_t)' Function 0x55f1ed889fb8 'CFE_SB_Subscribe' 'CFE_Status_t (CFE_SB_MsgId_t, CFE_SB_PipeId_t)'
+  |   |   |-CallExpr 0x55f1ed931ed8 <col:35, col:77> 'CFE_SB_MsgId_t':'struct CFE_SB_MsgId_t'
+  |   |   | |-ImplicitCastExpr 0x55f1ed931ec0 <col:35> 'CFE_SB_MsgId_t (*)(CFE_SB_MsgId_Atom_t)' <FunctionToPointerDecay>
+  |   |   | | `-DeclRefExpr 0x55f1ed931e00 <col:35> 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)' Function 0x55f1ed88f698 'CFE_SB_ValueToMsgId' 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)'
+  |   |   | `-ImplicitCastExpr 0x55f1ed931f08 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:49, col:89> 'CFE_SB_MsgId_Atom_t':'unsigned int' <IntegralCast>
+  |   |   |   `-ParenExpr 0x55f1ed931ea0 <col:49, col:89> 'int'
+  |   |   |     `-BinaryOperator 0x55f1ed931e80 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:30:34, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:88> 'int' '|'
+  |   |   |       |-IntegerLiteral 0x55f1ed931e20 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:30:34> 'int' 6144
+  |   |   |       `-ParenExpr 0x55f1ed931e60 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:82, col:88> 'int'
+  |   |   |         `-IntegerLiteral 0x55f1ed931e40 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_topicids.h:31:52> 'int' 131
+  |   |   `-ImplicitCastExpr 0x55f1ed932020 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:158:80, col:96> 'CFE_SB_PipeId_t':'unsigned int' <LValueToRValue>
+  |   |     `-MemberExpr 0x55f1ed931f40 <col:80, col:96> 'CFE_SB_PipeId_t':'unsigned int' lvalue .CommandPipe 0x55f1ed91feb8
+  |   |       `-DeclRefExpr 0x55f1ed931f20 <col:80> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   `-IfStmt 0x55f1ed9323a0 <line:159:9, line:165:9>
+  |     |-BinaryOperator 0x55f1ed932128 <line:159:13, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '!='
+  |     | |-ImplicitCastExpr 0x55f1ed932110 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:159:13> 'CFE_Status_t':'int' <LValueToRValue>
+  |     | | `-DeclRefExpr 0x55f1ed932058 <col:13> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |     | `-ParenExpr 0x55f1ed9320f0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  |     |   `-CStyleCastExpr 0x55f1ed9320c8 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  |     |     `-IntegerLiteral 0x55f1ed932090 <col:36> 'int' 0
+  |     `-CompoundStmt 0x55f1ed932388 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:160:9, line:165:9>
+  |       `-CallExpr 0x55f1ed9322f8 <line:161:13, line:164:52> 'CFE_Status_t':'int'
+  |         |-ImplicitCastExpr 0x55f1ed9322e0 <line:161:13> 'CFE_Status_t (*)(uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' <FunctionToPointerDecay>
+  |         | `-DeclRefExpr 0x55f1ed932148 <col:13> 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' Function 0x55f1ed820b10 'CFE_EVS_SendEvent' 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)'
+  |         |-ImplicitCastExpr 0x55f1ed932340 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_eventids.h:38:38> 'uint16':'unsigned short' <IntegralCast>
+  |         | `-IntegerLiteral 0x55f1ed932168 <col:38> 'int' 10
+  |         |-ImplicitCastExpr 0x55f1ed932358 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:162:31> 'CFE_EVS_EventType_Enum_t':'unsigned short' <IntegralCast>
+  |         | `-DeclRefExpr 0x55f1ed932188 <col:31> 'int' EnumConstant 0x55f1ed8144f8 'CFE_EVS_EventType_ERROR' 'int'
+  |         |-ImplicitCastExpr 0x55f1ed932370 <line:163:31> 'const char *' <ArrayToPointerDecay>
+  |         | `-StringLiteral 0x55f1ed932210 <col:31> 'const char[58]' lvalue "Sample App: Error Subscribing to HK request, RC = 0x%08lX"
+  |         `-CStyleCastExpr 0x55f1ed9322b8 <line:164:31, col:46> 'unsigned long' <IntegralCast>
+  |           `-ImplicitCastExpr 0x55f1ed9322a0 <col:46> 'CFE_Status_t':'int' <LValueToRValue> part_of_explicit_cast
+  |             `-DeclRefExpr 0x55f1ed932268 <col:46> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |-IfStmt 0x55f1ed932a78 <line:168:5, line:181:5>
+  | |-BinaryOperator 0x55f1ed9324d0 <line:168:9, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '=='
+  | | |-ImplicitCastExpr 0x55f1ed9324b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:168:9> 'CFE_Status_t':'int' <LValueToRValue>
+  | | | `-DeclRefExpr 0x55f1ed932400 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | | `-ParenExpr 0x55f1ed932498 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  | |   `-CStyleCastExpr 0x55f1ed932470 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  | |     `-IntegerLiteral 0x55f1ed932438 <col:36> 'int' 0
+  | `-CompoundStmt 0x55f1ed932a58 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:169:5, line:181:5>
+  |   |-BinaryOperator 0x55f1ed932708 <line:173:9, col:103> 'CFE_Status_t':'int' '='
+  |   | |-DeclRefExpr 0x55f1ed9324f0 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | `-CallExpr 0x55f1ed9326b8 <col:18, col:103> 'CFE_Status_t':'int'
+  |   |   |-ImplicitCastExpr 0x55f1ed9326a0 <col:18> 'CFE_Status_t (*)(CFE_SB_MsgId_t, CFE_SB_PipeId_t)' <FunctionToPointerDecay>
+  |   |   | `-DeclRefExpr 0x55f1ed932510 <col:18> 'CFE_Status_t (CFE_SB_MsgId_t, CFE_SB_PipeId_t)' Function 0x55f1ed889fb8 'CFE_SB_Subscribe' 'CFE_Status_t (CFE_SB_MsgId_t, CFE_SB_PipeId_t)'
+  |   |   |-CallExpr 0x55f1ed932608 <col:35, col:73> 'CFE_SB_MsgId_t':'struct CFE_SB_MsgId_t'
+  |   |   | |-ImplicitCastExpr 0x55f1ed9325f0 <col:35> 'CFE_SB_MsgId_t (*)(CFE_SB_MsgId_Atom_t)' <FunctionToPointerDecay>
+  |   |   | | `-DeclRefExpr 0x55f1ed932530 <col:35> 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)' Function 0x55f1ed88f698 'CFE_SB_ValueToMsgId' 'CFE_SB_MsgId_t (CFE_SB_MsgId_Atom_t)'
+  |   |   | `-ImplicitCastExpr 0x55f1ed932638 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:49, col:89> 'CFE_SB_MsgId_Atom_t':'unsigned int' <IntegralCast>
+  |   |   |   `-ParenExpr 0x55f1ed9325d0 <col:49, col:89> 'int'
+  |   |   |     `-BinaryOperator 0x55f1ed9325b0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:30:34, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:88> 'int' '|'
+  |   |   |       |-IntegerLiteral 0x55f1ed932550 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/sample_defs/inc/global_core_api_base_msgid_values.h:30:34> 'int' 6144
+  |   |   |       `-ParenExpr 0x55f1ed932590 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/config/default_cfe_core_api_msgid_mapping.h:49:82, col:88> 'int'
+  |   |   |         `-IntegerLiteral 0x55f1ed932570 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_topicids.h:29:52> 'int' 130
+  |   |   `-ImplicitCastExpr 0x55f1ed9326f0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:173:76, col:92> 'CFE_SB_PipeId_t':'unsigned int' <LValueToRValue>
+  |   |     `-MemberExpr 0x55f1ed932670 <col:76, col:92> 'CFE_SB_PipeId_t':'unsigned int' lvalue .CommandPipe 0x55f1ed91feb8
+  |   |       `-DeclRefExpr 0x55f1ed932650 <col:76> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   `-IfStmt 0x55f1ed932a38 <line:174:9, line:180:9>
+  |     |-BinaryOperator 0x55f1ed9327f8 <line:174:13, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '!='
+  |     | |-ImplicitCastExpr 0x55f1ed9327e0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:174:13> 'CFE_Status_t':'int' <LValueToRValue>
+  |     | | `-DeclRefExpr 0x55f1ed932728 <col:13> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |     | `-ParenExpr 0x55f1ed9327c0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  |     |   `-CStyleCastExpr 0x55f1ed932798 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  |     |     `-IntegerLiteral 0x55f1ed932760 <col:36> 'int' 0
+  |     `-CompoundStmt 0x55f1ed932a20 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:175:9, line:180:9>
+  |       `-CallExpr 0x55f1ed932990 <line:176:13, line:179:52> 'CFE_Status_t':'int'
+  |         |-ImplicitCastExpr 0x55f1ed932978 <line:176:13> 'CFE_Status_t (*)(uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' <FunctionToPointerDecay>
+  |         | `-DeclRefExpr 0x55f1ed932818 <col:13> 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' Function 0x55f1ed820b10 'CFE_EVS_SendEvent' 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)'
+  |         |-ImplicitCastExpr 0x55f1ed9329d8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_eventids.h:39:38> 'uint16':'unsigned short' <IntegralCast>
+  |         | `-IntegerLiteral 0x55f1ed932838 <col:38> 'int' 11
+  |         |-ImplicitCastExpr 0x55f1ed9329f0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:177:31> 'CFE_EVS_EventType_Enum_t':'unsigned short' <IntegralCast>
+  |         | `-DeclRefExpr 0x55f1ed932858 <col:31> 'int' EnumConstant 0x55f1ed8144f8 'CFE_EVS_EventType_ERROR' 'int'
+  |         |-ImplicitCastExpr 0x55f1ed932a08 <line:178:31> 'const char *' <ArrayToPointerDecay>
+  |         | `-StringLiteral 0x55f1ed9328b0 <col:31> 'const char[56]' lvalue "Sample App: Error Subscribing to Commands, RC = 0x%08lX"
+  |         `-CStyleCastExpr 0x55f1ed932950 <line:179:31, col:46> 'unsigned long' <IntegralCast>
+  |           `-ImplicitCastExpr 0x55f1ed932938 <col:46> 'CFE_Status_t':'int' <LValueToRValue> part_of_explicit_cast
+  |             `-DeclRefExpr 0x55f1ed932900 <col:46> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |-IfStmt 0x55f1ed933bd8 <line:183:5, line:216:5>
+  | |-BinaryOperator 0x55f1ed932b68 <line:183:9, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '=='
+  | | |-ImplicitCastExpr 0x55f1ed932b50 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:183:9> 'CFE_Status_t':'int' <LValueToRValue>
+  | | | `-DeclRefExpr 0x55f1ed932a98 <col:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  | | `-ParenExpr 0x55f1ed932b30 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  | |   `-CStyleCastExpr 0x55f1ed932b08 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  | |     `-IntegerLiteral 0x55f1ed932ad0 <col:36> 'int' 0
+  | `-CompoundStmt 0x55f1ed933ba8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:184:5, line:216:5>
+  |   |-BinaryOperator 0x55f1ed932fb8 <line:188:9, line:192:63> 'CFE_Status_t':'int' '='
+  |   | |-DeclRefExpr 0x55f1ed932b88 <line:188:9> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | `-CallExpr 0x55f1ed932ee8 <col:18, line:192:63> 'CFE_Status_t':'int'
+  |   |   |-ImplicitCastExpr 0x55f1ed932ed0 <line:188:18> 'CFE_Status_t (*)(CFE_TBL_Handle_t *, const char *, size_t, uint16, CFE_TBL_CallbackFuncPtr_t)' <FunctionToPointerDecay>
+  |   |   | `-DeclRefExpr 0x55f1ed932ba8 <col:18> 'CFE_Status_t (CFE_TBL_Handle_t *, const char *, size_t, uint16, CFE_TBL_CallbackFuncPtr_t)' Function 0x55f1ed8aabd8 'CFE_TBL_Register' 'CFE_Status_t (CFE_TBL_Handle_t *, const char *, size_t, uint16, CFE_TBL_CallbackFuncPtr_t)'
+  |   |   |-UnaryOperator 0x55f1ed932c70 <col:35, col:64> 'CFE_TBL_Handle_t *' prefix '&' cannot overflow
+  |   |   | `-ArraySubscriptExpr 0x55f1ed932c50 <col:36, col:64> 'CFE_TBL_Handle_t':'short' lvalue
+  |   |   |   |-ImplicitCastExpr 0x55f1ed932c38 <col:36, col:52> 'CFE_TBL_Handle_t *' <ArrayToPointerDecay>
+  |   |   |   | `-MemberExpr 0x55f1ed932be8 <col:36, col:52> 'CFE_TBL_Handle_t[1]' lvalue .TblHandles 0x55f1ed91ffd8
+  |   |   |   |   `-DeclRefExpr 0x55f1ed932bc8 <col:36> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   |   |   `-IntegerLiteral 0x55f1ed932c18 <col:63> 'int' 0
+  |   |   |-ImplicitCastExpr 0x55f1ed932f38 <line:189:35> 'const char *' <ArrayToPointerDecay>
+  |   |   | `-StringLiteral 0x55f1ed932cf0 <col:35> 'const char[13]' lvalue "ExampleTable"
+  |   |   |-UnaryExprOrTypeTraitExpr 0x55f1ed932d70 <line:190:35, col:67> '__size_t':'unsigned long' sizeof 'SAMPLE_APP_ExampleTable_t':'struct SAMPLE_APP_ExampleTable_t'
+  |   |   |-ImplicitCastExpr 0x55f1ed932f50 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_tbl_api_typedefs.h:67:29, col:77> 'uint16':'unsigned short' <IntegralCast>
+  |   |   | `-ParenExpr 0x55f1ed932e30 <col:29, col:77> 'int'
+  |   |   |   `-BinaryOperator 0x55f1ed932e10 <line:50:33, line:54:39> 'int' '|'
+  |   |   |     |-ParenExpr 0x55f1ed932db0 <line:50:33, col:40> 'int'
+  |   |   |     | `-IntegerLiteral 0x55f1ed932d90 <col:34> 'int' 0
+  |   |   |     `-ParenExpr 0x55f1ed932df0 <line:54:32, col:39> 'int'
+  |   |   |       `-IntegerLiteral 0x55f1ed932dd0 <col:33> 'int' 0
+  |   |   `-ImplicitCastExpr 0x55f1ed932fa0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:192:35> 'CFE_Status_t (*)(void *)' <FunctionToPointerDecay>
+  |   |     `-DeclRefExpr 0x55f1ed932e50 <col:35> 'CFE_Status_t (void *)' Function 0x55f1ed9237a8 'SAMPLE_APP_TblValidationFunc' 'CFE_Status_t (void *)'
+  |   |-IfStmt 0x55f1ed933600 <line:193:9, line:203:9> has_else
+  |   | |-BinaryOperator 0x55f1ed933108 <line:193:13, /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:37> 'int' '!='
+  |   | | |-ImplicitCastExpr 0x55f1ed9330f0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:193:13> 'CFE_Status_t':'int' <LValueToRValue>
+  |   | | | `-DeclRefExpr 0x55f1ed933038 <col:13> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | | `-ParenExpr 0x55f1ed9330d0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/cfe/modules/core_api/fsw/inc/cfe_error.h:147:21, col:37> 'CFE_Status_t':'int'
+  |   | |   `-CStyleCastExpr 0x55f1ed9330a8 <col:22, col:36> 'CFE_Status_t':'int' <NoOp>
+  |   | |     `-IntegerLiteral 0x55f1ed933070 <col:36> 'int' 0
+  |   | |-CompoundStmt 0x55f1ed933300 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:194:9, line:199:9>
+  |   | | `-CallExpr 0x55f1ed933270 <line:195:13, line:198:52> 'CFE_Status_t':'int'
+  |   | |   |-ImplicitCastExpr 0x55f1ed933258 <line:195:13> 'CFE_Status_t (*)(uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' <FunctionToPointerDecay>
+  |   | |   | `-DeclRefExpr 0x55f1ed933128 <col:13> 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' Function 0x55f1ed820b10 'CFE_EVS_SendEvent' 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)'
+  |   | |   |-ImplicitCastExpr 0x55f1ed9332b8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_eventids.h:40:38> 'uint16':'unsigned short' <IntegralCast>
+  |   | |   | `-IntegerLiteral 0x55f1ed933148 <col:38> 'int' 12
+  |   | |   |-ImplicitCastExpr 0x55f1ed9332d0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:196:31> 'CFE_EVS_EventType_Enum_t':'unsigned short' <IntegralCast>
+  |   | |   | `-DeclRefExpr 0x55f1ed933168 <col:31> 'int' EnumConstant 0x55f1ed8144f8 'CFE_EVS_EventType_ERROR' 'int'
+  |   | |   |-ImplicitCastExpr 0x55f1ed9332e8 <line:197:31> 'const char *' <ArrayToPointerDecay>
+  |   | |   | `-StringLiteral 0x55f1ed933188 <col:31> 'const char[58]' lvalue "Sample App: Error Registering Example Table, RC = 0x%08lX"
+  |   | |   `-CStyleCastExpr 0x55f1ed933230 <line:198:31, col:46> 'unsigned long' <IntegralCast>
+  |   | |     `-ImplicitCastExpr 0x55f1ed933218 <col:46> 'CFE_Status_t':'int' <LValueToRValue> part_of_explicit_cast
+  |   | |       `-DeclRefExpr 0x55f1ed9331e0 <col:46> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   | `-CompoundStmt 0x55f1ed9335e8 <line:201:9, line:203:9>
+  |   |   `-BinaryOperator 0x55f1ed9335c8 <line:202:13, col:114> 'CFE_Status_t':'int' '='
+  |   |     |-DeclRefExpr 0x55f1ed933318 <col:13> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+  |   |     `-CallExpr 0x55f1ed933528 <col:22, col:114> 'CFE_Status_t':'int'
+  |   |       |-ImplicitCastExpr 0x55f1ed933510 <col:22> 'CFE_Status_t (*)(CFE_TBL_Handle_t, CFE_TBL_SrcEnum_t, const void *)' <FunctionToPointerDecay>
+  |   |       | `-DeclRefExpr 0x55f1ed933338 <col:22> 'CFE_Status_t (CFE_TBL_Handle_t, CFE_TBL_SrcEnum_t, const void *)' Function 0x55f1ed8ab4a8 'CFE_TBL_Load' 'CFE_Status_t (CFE_TBL_Handle_t, CFE_TBL_SrcEnum_t, const void *)'
+  |   |       |-ImplicitCastExpr 0x55f1ed933568 <col:35, col:63> 'CFE_TBL_Handle_t':'short' <LValueToRValue>
+  |   |       | `-ArraySubscriptExpr 0x55f1ed9333e0 <col:35, col:63> 'CFE_TBL_Handle_t':'short' lvalue
+  |   |       |   |-ImplicitCastExpr 0x55f1ed9333c8 <col:35, col:51> 'CFE_TBL_Handle_t *' <ArrayToPointerDecay>
+  |   |       |   | `-MemberExpr 0x55f1ed933378 <col:35, col:51> 'CFE_TBL_Handle_t[1]' lvalue .TblHandles 0x55f1ed91ffd8
+  |   |       |   |   `-DeclRefExpr 0x55f1ed933358 <col:35> 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t' lvalue Var 0x55f1ed924698 'SAMPLE_APP_Data' 'SAMPLE_APP_Data_t':'struct SAMPLE_APP_Data_t'
+  |   |       |   `-IntegerLiteral 0x55f1ed9333a8 <col:62> 'int' 0
+  |   |       |-ImplicitCastExpr 0x55f1ed933580 <col:66> 'CFE_TBL_SrcEnum_t':'enum CFE_TBL_SrcEnum' <IntegralCast>
+  |   |       | `-DeclRefExpr 0x55f1ed933400 <col:66> 'int' EnumConstant 0x55f1ed895680 'CFE_TBL_SRC_FILE' 'int'
+  |   |       `-ImplicitCastExpr 0x55f1ed9335b0 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_internal_cfg.h:57:48> 'const void *' <BitCast>
+  |   |         `-ImplicitCastExpr 0x55f1ed933598 <col:48> 'const char *' <ArrayToPointerDecay>
+  |   |           `-StringLiteral 0x55f1ed933480 <col:48> 'const char[23]' lvalue "/cf/sample_app_tbl.tbl"
+  |   |-CallExpr 0x55f1ed9338c8 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:205:9, line:210:61> 'void'
+  |   | |-ImplicitCastExpr 0x55f1ed9338b0 <line:205:9> 'void (*)(char *, size_t, const char *, const char *, const char *, const char *)' <FunctionToPointerDecay>
+  |   | | `-DeclRefExpr 0x55f1ed933630 <col:9> 'void (char *, size_t, const char *, const char *, const char *, const char *)' Function 0x55f1ed6cbce0 'CFE_Config_GetVersionString' 'void (char *, size_t, const char *, const char *, const char *, const char *)'
+  |   | |-ImplicitCastExpr 0x55f1ed933920 <col:37> 'char *' <ArrayToPointerDecay>
+  |   | | `-DeclRefExpr 0x55f1ed933650 <col:37> 'char[256]' lvalue Var 0x55f1ed92edd0 'VersionString' 'char[256]'
+  |   | |-ImplicitCastExpr 0x55f1ed933950 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app_version.h:73:44> 'size_t':'unsigned long' <IntegralCast>
+  |   | | `-IntegerLiteral 0x55f1ed933670 <col:44> 'int' 256
+  |   | |-ImplicitCastExpr 0x55f1ed933968 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:207:37> 'const char *' <ArrayToPointerDecay>
+  |   | | `-StringLiteral 0x55f1ed9336c0 <col:37> 'const char[11]' lvalue "Sample App"
+  |   | |-ImplicitCastExpr 0x55f1ed933980 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app_version.h:32:5, <scratch space>:34:1> 'const char *' <ArrayToPointerDecay>
+  |   | | `-StringLiteral 0x55f1ed933720 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app_version.h:32:5, <scratch space>:34:1> 'const char[12]' lvalue "v7.0.0+dev1"
+  |   | |-ImplicitCastExpr 0x55f1ed933998 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app_version.h:34:36> 'const char *' <ArrayToPointerDecay>
+  |   | | `-StringLiteral 0x55f1ed9337b0 <col:36> 'const char[6]' lvalue "Draco"
+  |   | `-ImplicitCastExpr 0x55f1ed9339b0 <line:46:34> 'const char *' <ArrayToPointerDecay>
+  |   |   `-StringLiteral 0x55f1ed933830 <col:34> 'const char[7]' lvalue "v7.0.1"
+  |   `-CallExpr 0x55f1ed933b00 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:212:9, line:215:40> 'CFE_Status_t':'int'
+  |     |-ImplicitCastExpr 0x55f1ed933ae8 <line:212:9> 'CFE_Status_t (*)(uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' <FunctionToPointerDecay>
+  |     | `-DeclRefExpr 0x55f1ed9339c8 <col:9> 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)' Function 0x55f1ed820b10 'CFE_EVS_SendEvent' 'CFE_Status_t (uint16, CFE_EVS_EventType_Enum_t, const char *, ...)'
+  |     |-ImplicitCastExpr 0x55f1ed933b48 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/inc/sample_app_eventids.h:29:38> 'uint16':'unsigned short' <IntegralCast>
+  |     | `-IntegerLiteral 0x55f1ed9339e8 <col:38> 'int' 1
+  |     |-ImplicitCastExpr 0x55f1ed933b60 </tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/probe/cFS/apps/sample_app/fsw/src/sample_app.c:213:27> 'CFE_EVS_EventType_Enum_t':'unsigned short' <IntegralCast>
+  |     | `-DeclRefExpr 0x55f1ed933a08 <col:27> 'int' EnumConstant 0x55f1ed814438 'CFE_EVS_EventType_INFORMATION' 'int'
+  |     |-ImplicitCastExpr 0x55f1ed933b78 <line:214:27> 'const char *' <ArrayToPointerDecay>
+  |     | `-StringLiteral 0x55f1ed933a90 <col:27> 'const char[26]' lvalue "Sample App Initialized.%s"
+  |     `-ImplicitCastExpr 0x55f1ed933b90 <line:215:27> 'char *' <ArrayToPointerDecay>
+  |       `-DeclRefExpr 0x55f1ed933ac8 <col:27> 'char[256]' lvalue Var 0x55f1ed92edd0 'VersionString' 'char[256]'
+  `-ReturnStmt 0x55f1ed933c30 <line:218:5, col:12>
+    `-ImplicitCastExpr 0x55f1ed933c18 <col:12> 'CFE_Status_t':'int' <LValueToRValue>
+      `-DeclRefExpr 0x55f1ed933bf8 <col:12> 'CFE_Status_t':'int' lvalue Var 0x55f1ed92ecb8 'status' 'CFE_Status_t':'int'
+

@@ -1,0 +1,17 @@
+ci_lab/ci_lab_app rc=0 t=.016040301s errlines=0 ll_lines=944 mlir_lines=632
+ci_lab/ci_lab_cmds rc=0 t=.010558043s errlines=0 ll_lines=226 mlir_lines=153
+ci_lab/ci_lab_dispatch rc=0 t=.012164532s errlines=0 ll_lines=610 mlir_lines=394
+ci_lab/ci_lab_passthru_decode rc=0 t=.010674846s errlines=0 ll_lines=305 mlir_lines=191
+hk/hk_app rc=0 t=.013790770s errlines=0 ll_lines=1032 mlir_lines=705
+hk/hk_cmds rc=0 t=.010607737s errlines=0 ll_lines=347 mlir_lines=225
+hk/hk_dispatch rc=0 t=.011275505s errlines=0 ll_lines=814 mlir_lines=518
+hk/hk_utils rc=0 t=.025123145s errlines=0 ll_lines=2890 mlir_lines=1905
+sample_app/sample_app rc=0 t=.014044574s errlines=0 ll_lines=645 mlir_lines=420
+sample_app/sample_app_cmds rc=0 t=.010780229s errlines=0 ll_lines=498 mlir_lines=340
+sample_app/sample_app_dispatch rc=0 t=.011187471s errlines=0 ll_lines=623 mlir_lines=360
+sample_app/sample_app_utils rc=0 t=.009116529s errlines=0 ll_lines=214 mlir_lines=137
+sch_lab/sch_lab_app rc=0 t=.013823879s errlines=0 ll_lines=1261 mlir_lines=793
+to_lab/to_lab_app rc=0 t=.017902616s errlines=0 ll_lines=1880 mlir_lines=1284
+to_lab/to_lab_cmds rc=0 t=.016002652s errlines=0 ll_lines=1163 mlir_lines=892
+to_lab/to_lab_dispatch rc=0 t=.010770789s errlines=0 ll_lines=527 mlir_lines=287
+to_lab/to_lab_passthru_encode rc=0 t=.008462022s errlines=0 ll_lines=136 mlir_lines=85

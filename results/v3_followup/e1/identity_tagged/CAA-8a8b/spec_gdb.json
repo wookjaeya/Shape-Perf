@@ -1,0 +1,43 @@
+{
+  "arms": {
+    "S8a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so",
+      "tag": "alpha",
+      "policy": "S8"
+    },
+    "S8b": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so",
+      "tag": "bravo",
+      "policy": "S8"
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "S8a"
+    ],
+    [
+      "load",
+      "S8b"
+    ],
+    [
+      "call",
+      "S8b"
+    ],
+    [
+      "call",
+      "S8a"
+    ],
+    [
+      "call",
+      "S8b"
+    ],
+    [
+      "call",
+      "S8a"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/input.npy",
+  "expected_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/CAA-8a8b/calls_gdb.jsonl"
+}

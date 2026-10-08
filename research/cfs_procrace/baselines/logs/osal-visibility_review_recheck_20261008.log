@@ -1,0 +1,290 @@
+2026-10-08T02:27:37Z
+
+## F1: grep -cE 'Test_Sem|Task_[0-9]' per trace; second number = matches that are not write(1,
+run1_exact 0 0
+run2_annotated 13 0
+rep03_annotated 13 0
+rep04_annotated 13 0
+rep05_annotated 13 0
+rep06_annotated 13 0
+rep07_annotated 13 0
+rep08_annotated 13 0
+rep09_annotated 13 0
+rep10_annotated 13 0
+rep11_annotated 13 0
+rep12_annotated 13 0
+
+## F1: run1_exact.strace L200-216 (default -s 32 truncates the UtAssert buffers)
+L1+199	22284 write(1, "01.012 count-sem-test.c:102 - OS"..., 111) = 111
+L2+199	22284 write(1, "\n", 1)                 = 1
+L3+199	22284 write(1, "[ PASS]", 7)            = 7
+L4+199	22284 write(1, " ", 1)                  = 1
+L5+199	22284 write(1, "01.013 count-sem-test.c:105 - OS"..., 99) = 99
+L6+199	22284 write(1, "\n", 1)                 = 1
+L7+199	22284 write(1, "[ PASS]", 7)            = 7
+L8+199	22284 write(1, " ", 1)                  = 1
+L9+199	22284 write(1, "01.014 count-sem-test.c:106 - OS"..., 110) = 110
+L10+199	22284 write(1, "\n", 1)                 = 1
+L11+199	22284 write(1, "[ PASS]", 7)            = 7
+L12+199	22284 write(1, " ", 1)                  = 1
+L13+199	22284 write(1, "01.015 count-sem-test.c:109 - OS"..., 107) = 107
+L14+199	22284 write(1, "\n", 1)                 = 1
+L15+199	22284 write(1, "[ PASS]", 7)            = 7
+L16+199	22284 write(1, " ", 1)                  = 1
+L17+199	22284 write(1, "01.016 count-sem-test.c:117 - OS"..., 92) = 92
+
+## F1: scripts/strace_countsem.sh
+2:# Run OSAL's own functional test src/tests/count-sem-test (built by README L24-30) under strace.
+4:# Usage: strace_countsem.sh <build_osal_test dir> <outdir> <run-label> <mode: exact|annotated>
+10:    # The command given in the task: strace -f -e trace=all  (-o only redirects strace's own output to a file)
+11:    echo "+ (cwd $PWD) strace -f -e trace=all -o $OUT/${LABEL}.strace ./count-sem-test"
+12:    strace -f -e trace=all -o "$OUT/${LABEL}.strace" ./count-sem-test > "$OUT/${LABEL}.stdout" 2>&1
+17:    # -s 65535 full strings (so no name can hide behind the default 32-byte truncation),
+19:    echo "+ (cwd $PWD) strace -f -e trace=all -tt -T -s 65535 -k -o $OUT/${LABEL}.strace ./count-sem-test"
+20:    strace -f -e trace=all -tt -T -s 65535 -k -o "$OUT/${LABEL}.strace" ./count-sem-test > "$OUT/${LABEL}.stdout" 2>&1
+
+## F2: mqueue sysctls, mode, mount, access(W_OK) root vs ubuntu
+msg_max=10 queues_max=256
+-rw-r--r-- 1 root root 0 Oct  8 01:07 /proc/sys/fs/mqueue/msg_max
+-rw-r--r-- 1 root root 0 Oct  8 01:07 /proc/sys/fs/mqueue/queues_max
+proc on /proc type proc (rw,relatime)
+root W_OK: True
+ubuntu W_OK: False
+(nothing was written to the sysctl)
+
+## F2: standalone-build.yml L27-30
+L1+26	    runs-on: ubuntu-22.04
+L2+26	    container:
+L3+26	      image: ghcr.io/core-flight-system/cfsbuildenv-linux:latest
+L4+26	      options: --sysctl fs.mqueue.queues_max=512 --sysctl fs.mqueue.msg_max=512
+
+## F2: os-impl-queues.c L122-126
+            OS_DEBUG("Your queue depth may be too large for the\n");
+            OS_DEBUG("OS to handle. Please check the msg_max\n");
+            OS_DEBUG("parameter located in /proc/sys/fs/mqueue/msg_max\n");
+            OS_DEBUG("on your Linux file system and raise it if you\n");
+            OS_DEBUG(" need to or run as root\n");
+
+## F2: bsp_start.c L66-78
+    if (geteuid() != 0)
+    {
+        fp = fopen("/proc/sys/fs/mqueue/msg_max", "r");
+        if (fp)
+        {
+            if (fgets(buffer, sizeof(buffer), fp) != NULL)
+            {
+                OS_BSP_Global.MaxQueueDepth = OSAL_BLOCKCOUNT_C(strtoul(buffer, NULL, 10));
+                BSP_DEBUG("Maximum user msg queue depth = %u\n", (unsigned int)OS_BSP_Global.MaxQueueDepth);
+            }
+            fclose(fp);
+        }
+    }
+
+## F2: ENV.md L18, L32 (excerpt)
+- **Open decisions for the PI** (§8): bundle branch (A2); queue-depth mode, README `msg_max` 10 versus the bundle CI's 64 (E5); stop method and reset policy (E7, E11); the failed unit tests (C12); where C1's semaphore conditions come from (D7).
+- `runs/run01_root_plain.log` shows that the attempt ran as root with RT scheduling ("Selected policy 2 for RT tasks", L7, no `EPERM`) and failed with `OS_QueueCreate Error. errno = 22 (Invalid argument)` (L41, L49). **Corrected cause:** OSAL reads `msg_max` only when `geteuid() != 0` (`osal/src/bsp/generic-linux/src/bsp_start.c` L66-78), so as root it truncates nothing, permissive mode or not. `m
+
+## F3: README L16, L24
+OSAL library build pc-linux example (from the base osal directory):
+OSAL permissive build with tests example (see also [CI](https://github.com/nasa/osal/blob/master/.travis.yml))
+
+## F3: git ls-remote nasa/osal: count of refs/heads/master
+0
+dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1	refs/heads/dev
+d2d877a69cff47452bcca274b309147d48e6c16f	refs/heads/main
+
+## F3: raw .travis.yml on master (HTTP status)
+404
+github.com blob URL through the agent proxy: 403 (proxy refusal; not used as evidence)
+
+## F3: commit that deleted .travis.yml
+72da4f28bc925d13f36d38e0016029a96b0770d7 2021-02-03 Fix #771, Add workflow timeout and format check
+
+## F4: birth times
+/home/user/work/procrace/baselines/syspro birth=2026-10-07 07:19:19.070009515 +0000
+/home/user/work/procrace/baselines/racepro birth=2026-10-07 07:19:19.070009515 +0000
+/home/user/work/procrace/baselines/syspro/inputs birth=2026-10-08 01:36:01.252927207 +0000
+/home/user/work/procrace/baselines/syspro/primitives.c birth=2026-10-08 01:37:01.000930759 +0000
+/home/user/work/procrace/baselines/syspro/syscall_name_probe.py birth=2026-10-08 01:36:16.288928101 +0000
+/home/user/Shape-Perf/research/cfs_procrace/baselines/syspro.md:143:| `/home/user/work/procrace/baselines/syspro/` (created 2026-10-07 07:19) | **Empty directory.** No SysPro step was taken. | n/a | Nothing to reuse. Today's inputs and probes now liv
+/home/user/Shape-Perf/research/cfs_procrace/baselines/racepro.md:202:| `/home/user/work/procrace/baselines/syspro/` | Empty directory | Out of scope for this report (separate SysPro task) | — |
+
+## F5: racepro.md §5.1 shared memory and FUTEX resource; §5.2 memory not a candidate
+44:| Scribe kernel | `columbia/linux-2.6-racepro` @ `b29e9afb4dae248e83aeb58482fb60013017576f` | Record/replay inside Linux 2.6.35. Provides `/dev/scribe`, resource ordering, page-ownership memory tracking, and go-live. |
+116:- **Shared kernel resources.** Scribe serializes them and records the access order as "resource lock" events with a per-resource serial (`scribe.md` L89-92). Resource types are listed in `include/linux/scribe_resource.h` L221-229: `INODE`, `FILE`, `FILES_S
+121:- **Shared memory.** Scribe uses a page-ownership protocol (`scribe/memory.c` L27-39, L58-77, L118). A task takes ownership of a page, and each ownership carries a serial. The `mm_struct` reference count "is used to determine if a task is operating in sing
+136:     - excludes `SCRIBE_RES_TYPE_FUTEX` (L194, L282);
+143:- **Shared memory is not a candidate source.** No RacePro module references Scribe memory events (`grep EventMem|mem_owned|mem_public` → 0 matches). Memory interleavings are recorded for replay, but they never become race candidates or HB edges.
+165:| C1 (CF#184) | BP creates a named count semaphore. CF looks it up by name (`apps/cf/fsw/src/cf_cfdp.c:1282` `OS_CountSemGetIdByName`). | Creation calls `sem_init(&impl->id, 0, …)`, an unnamed, process-private semaphore (`os-impl-countsem.c:85`), so no n
+171:**Analytical conclusion (to be labelled "analysis", not "detection result"):** none of the five dependencies matches any of RacePro's race classes as implemented. RacePro would at most build candidates on incidental kernel resources, such as stdout writes 
+
+## F6: C1.yaml L35-37, L91-96
+  - id: OSAL-caelum
+    what: "OSAL v6.0.0-rc4 (pinned by cFS caelum-rc4)"
+    url: "https://github.com/nasa/osal/tree/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3"
+  osal_level:
+    revision: 42af0f73c952b4e4c7fbc06c97d354a1430f4ac3
+    create: "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-countsem.c#L89-L116"
+    name_set: "OS_OBJECT_INIT at osapi-countsem.c L106 (active_id is OS_OBJECT_ID_RESERVED at this point)"
+    usable_by_name: "OS_ObjectIdTransactionFinish sets record->active_id = final_id: https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L1089-L1135"
+    hypothesis_reserved_window: "inference: lookup between L106 and finalize may return OS_ERR_INCORRECT_OBJ_STATE (osapi-idmap.c L414-L416; os-shared-idmap.h L294-L298); not covered by fix's NAME_NOT_FOUND-only retry; u
+
+## F6: C1 cFS gitlink
+01e8416
+160000 commit dad0ee99c121f2ecc11f8c0798c1e836e41d8ab1	osal
+
+## F6: osapi-idmap.c@42af0f7 L414-417
+    if (!OS_ObjectIdIsValid(expected_id))
+    {
+        return OS_ERR_INCORRECT_OBJ_STATE;
+    }
+
+## F6: @42af0f7 FindNextMatch defined-check, GetBySearch, FindByName
+        if (OS_ObjectIdDefined(record->active_id) && MatchFunc(arg, token, record))
+int32 OS_ObjectIdGetBySearch(OS_lock_mode_t lock_mode, osal_objtype_t idtype, OS_ObjectMatchFunc_t MatchFunc, void *arg,
+                             OS_object_token_t *token)
+{
+    int32 return_code;
+
+    OS_ObjectIdTransactionInit(lock_mode, idtype, token);
+
+    return_code = OS_ObjectIdFindNextMatch(MatchFunc, arg, token);
+
+    if (return_code == OS_SUCCESS)
+    {
+        /*
+         * The "ConvertToken" routine will return with the global lock
+         * in a state appropriate for returning to the caller, as indicated
+         * by the "lock_mode" parameter.
+         */
+        return_code = OS_ObjectIdConvertToken(token);
+    }
+    else
+    {
+        OS_ObjectIdTransactionCancel(token);
+    }
+
+    return return_code;
+} /* end OS_ObjectIdGetBySearch */
+int32 OS_ObjectIdFindByName(osal_objtype_t idtype, const char *name, osal_id_t *object_id)
+{
+    int32             return_code;
+    OS_object_token_t token;
+
+    /*
+     * As this is an internal-only function, calling it with NULL is allowed.
+     * This is required by the file/dir/socket API since these DO allow multiple
+     * instances of the same name.
+     */
+    ARGCHECK(name, OS_ERR_NAME_NOT_FOUND);
+    LENGTHCHECK(name, OS_MAX_API_NAME, OS_ERR_NAME_TOO_LONG);
+
+    return_code = OS_ObjectIdGetByName(OS_LOCK_MODE_GLOBAL, idtype, name, &token);
+    if (return_code == OS_SUCCESS)
+    {
+        *object_id = token.obj_id;
+
+        OS_ObjectIdRelease(&token);
+    }
+
+    return return_code;
+
+} /* end OS_ObjectIdFindByName */
+
+/*----------------------------------------------------------------
+
+## F7: d2d877a osapi-idmap.c L838, L859, L1059, L1072-1075, L513-516
+L838: int32 OS_ObjectIdFinalizeNew(int32 operation_status, OS_object_token_t *token, osal_id_t *outid)
+L859:     OS_ObjectIdTransactionFinish(token, &final_id);
+L1059: void OS_ObjectIdTransactionFinish(OS_object_token_t *token, const osal_id_t *final_id)
+L1072:     if (token->lock_mode == OS_LOCK_MODE_EXCLUSIVE || token->lock_mode == OS_LOCK_MODE_REFCOUNT)
+L1073:     {
+L1074:         OS_Lock_Global(token);
+L1075:     }
+L513:             if (token->lock_mode == OS_LOCK_MODE_REFCOUNT || token->lock_mode == OS_LOCK_MODE_EXCLUSIVE)
+L514:             {
+L515:                 OS_Unlock_Global(token);
+L516:             }
+
+## F7: stale comments
+osapi-countsem.c L93:     /* Note - the common ObjectIdAllocate routine will lock the object type and leave it locked. */
+osapi-task.c L186:     /* Note - the common ObjectIdAllocate routine will lock the object type and leave it locked. */
+
+## F8: 'trace=all' in project .md/.yaml other than osal-visibility.md
+(none)
+
+## F8: 'strace' in roadmap
+(none)
+
+## F8: 'strace' in tool/DESIGN.md
+97:  4. a syscall-level model in the style of RacePro: what `strace -f` shows about the
+
+## F8: CONDITIONS_POLICY.md accepted references
+## 레퍼런스로 인정하는 것
+
+1. 사례의 원 보고: issue 본문과 댓글. migration된 이슈는 원 Trac 기록도 포함한다.
+2. 수정 commit, 그리고 명시된 revision의 소스 코드.
+3. 고정 commit의 공식 문서: README, docs, cmake sample 설정, CF 등 앱 자체 문서.
+4. 도구의 공식 문서: README, 논문의 artifact 절.
+
+## F9: kernel config, cpu flags, kvm
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+CONFIG_KVM=y
+CONFIG_KVM_PVM=y
+# CONFIG_MODULES is not set
+vmx|svm lines: 0; hypervisor-flag lines: 4
+ls: cannot access '/dev/kvm': No such file or directory
+/sys/class/misc: autofs cpu_dma_latency fuse hw_random loop-control tun userfaultfd vga_arbiter vsock 
+uname -r: 6.18.44-fc-v80; hostname: vm; ipc ns: ipc:[4026531839]
+46:## finit_module(-1) and kexec_load probes via ctypes
+48:kexec_load ret -1 errno 38 Function not implemented
+
+## F10: file times and run03
+/home/user/Shape-Perf/research/cfs_procrace/baselines/osal-visibility.md mod=2026-10-08 01:59:02.350181573 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/ENV.md mod=2026-10-08 02:20:02.433084207 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/run03_audit_operational.log mod=2026-10-08 02:11:34.719487910 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/run04_po_operational_sigint.log mod=2026-10-08 02:09:49.069047747 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/run05_pr_operational_esrestart.log mod=2026-10-08 02:10:06.565079654 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/run06_po_operational_esrestart.log mod=2026-10-08 02:10:27.597050037 +0000
+/home/user/Shape-Perf/research/cfs_procrace/env/logs/run07_po_fixed30s_esrestart.log mod=2026-10-08 02:11:04.757100674 +0000
+CFE_PSP: Starting the cFE with a PROCESSOR reset.
+1980-012-14:03:47.56293 CFE_ES_RunExceptionScan: Maximum Processor Reset count reached (2)
+CFE_PSP: Exiting cFE with POWERON Reset status.
+
+## F10: ENV.md L189 and L213 (excerpt)
+The reset-type sequence shows both stop paths (E7, E11): run01 PO → run02 PR → run03 PR, which hit the maximum of two processor resets and exited with POWERON; run04 PO (clean IPC) → SIGINT → run05 PR → ES restart → run06 PO → ES restart → run07 PO → ES restart. No SysV segment is left now.
+Ordering experiments need a fixed reset type (E7) and stop method (E11).
+
+## F11a: count-sem-test.c Task_0 creations; run1 lookup markers
+161:        OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(100), 0),
+179:        OS_TaskCreate(&task_id[0], "Task_0", Test_CountSem_Task0, NULL, TASK_STACK_SIZE, OSAL_PRIORITY_C(200), 0),
+328:22286 write(1, "01.038 count-sem-test.c:35 - OS_"..., 94) = 94
+399:22287 write(1, "01.044 count-sem-test.c:35 - OS_"..., 94) = 94
+430:22288 write(1, "01.046 count-sem-test.c:49 - OS_"..., 94 <unfinished ...>
+459:22289 write(1, "01.048 count-sem-test.c:63 - OS_"..., 94) = 94
+
+## F11b: core_exact.strace mq_open names
+mq_open: 69; mq_unlink: 69; distinct names: 64; names not of form <pid>.q <n>: 0
+      4 mq_open("25212.q 0"
+      2 mq_open("25212.q 3"
+      2 mq_open("25212.q 2"
+      1 mq_open("25212.q 9"
+
+## F11c: README L16-31
+L1+15	OSAL library build pc-linux example (from the base osal directory):
+L2+15	```
+L3+15	mkdir build_osal
+L4+15	cd build_osal
+L5+15	cmake -DOSAL_SYSTEM_BSPTYPE=generic-linux ..
+L6+15	make
+L7+15	```
+L8+15	
+L9+15	OSAL permissive build with tests example (see also [CI](https://github.com/nasa/osal/blob/master/.travis.yml))
+L10+15	```
+L11+15	mkdir build_osal_test
+L12+15	cd build_osal_test
+L13+15	cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..
+L14+15	make
+L15+15	make test
+L16+15	```

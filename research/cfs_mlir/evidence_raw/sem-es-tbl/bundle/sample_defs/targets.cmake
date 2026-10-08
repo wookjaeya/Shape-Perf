@@ -1,0 +1,7 @@
+SET(MISSION_NAME "SampleMission")
+SET(SPACECRAFT_ID 0x42)
+SET(FT_INSTALL_SUBDIR "host/functional-test")
+SET(MISSION_CPUNAMES cpu1)
+SET(cpu1_PROCESSORID 1)
+SET(cpu1_APPLIST probe_hi probe_lo probe_slow probe_own probe_shr)
+SET(cpu1_FILELIST cfe_es_startup.scr)

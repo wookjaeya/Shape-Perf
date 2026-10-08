@@ -1,0 +1,30 @@
+att -> att#0: NoModRef
+local_alloca -> att#0: NoModRef
+call_readnone_attr -> att#0: ModRef
+call_plain -> att#0: ModRef
+func -> att#0: ModRef
+att -> local_alloca#0: NoModRef
+local_alloca -> local_alloca#0: NoModRef
+call_readnone_attr -> local_alloca#0: ModRef
+call_plain -> local_alloca#0: ModRef
+func -> local_alloca#0: ModRef
+att -> func.region0#0: NoModRef
+local_alloca -> func.region0#0: NoModRef
+call_readnone_attr -> func.region0#0: ModRef
+call_plain -> func.region0#0: ModRef
+func -> func.region0#0: ModRef
+module {
+  llvm.mlir.global external @g_state() {addr_space = 0 : i32} : !llvm.struct<"State_t", (f64, i32, i32)>
+  llvm.func @CFE_ES_PerfLogAdd(i32, i32) attributes {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none, errnoMem = none, targetMem0 = none, targetMem1 = none>}
+  llvm.func @probe(%arg0: f64) attributes {test.ptr = "func"} {
+    %0 = llvm.mlir.constant(0 : i32) : i32
+    %1 = llvm.mlir.constant(1 : i32) : i32
+    %2 = llvm.mlir.addressof @g_state : !llvm.ptr
+    %3 = llvm.getelementptr %2[0, 0] {test.ptr = "att"} : (!llvm.ptr) -> !llvm.ptr, !llvm.struct<"State_t", (f64, i32, i32)>
+    %4 = llvm.alloca %1 x f64 {test.ptr = "local_alloca"} : (i32) -> !llvm.ptr
+    llvm.call @CFE_ES_PerfLogAdd(%0, %1) {memory_effects = #llvm.memory_effects<other = none, argMem = none, inaccessibleMem = none, errnoMem = none, targetMem0 = none, targetMem1 = none>, test.ptr = "call_readnone_attr"} : (i32, i32) -> ()
+    llvm.call @CFE_ES_PerfLogAdd(%0, %1) {test.ptr = "call_plain"} : (i32, i32) -> ()
+    llvm.return
+  }
+}
+

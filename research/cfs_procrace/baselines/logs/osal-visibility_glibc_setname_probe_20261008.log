@@ -1,0 +1,9 @@
+# Agent probe of glibc behaviour (NOT an OSAL/cFS test): which syscall does pthread_setname_np(pthread_self(), name) issue on this host? 2026-10-08T01:49:20Z
+# Purpose: cFS pc-linux PSP (psp c4b3b0b) cfe_psp_start.c L170-201 calls pthread_setname_np(pthread_self(), taskname) on OS_EVENT_TASK_STARTUP.
+# glibc: ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39
+$ runuser -u ubuntu -- strace -f -e trace=prctl -s 64 python3 -I -c "import ctypes,ctypes.util; l=ctypes.CDLL(ctypes.util.find_library(\"c\")); l.pthread_self.restype=ctypes.c_ulong; print(l.pthread_setname_np(ctypes.c_ulong(l.pthread_self()), b\"CF_PROBE_NAME\"))"
+[pid 23561] +++ exited with 0 +++   (python helper child; output tail -5)
+--- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=23561, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+prctl(PR_SET_NAME, "CF_PROBE_NAME")     = 0
+0
++++ exited with 0 +++

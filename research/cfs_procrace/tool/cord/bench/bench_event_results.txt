@@ -1,0 +1,31 @@
+# Tool microbenchmark (not a research condition). gcc 13.3.0 -std=c11 -g -O0 (the cFS build has no -O), 4 vCPU, 2026-10-08T07:24Z
+sizeof(struct cord_ev)=120 bytes; per-thread buffer=65536 events -> 7.5 MB reserved per recording thread
+  start VmSize:	    2708 kB
+  start VmRSS:	    1724 kB
+  after 25 threads x 30 events VmSize:	  620808 kB
+  after 25 threads x 30 events VmRSS:	    2056 kB
+1 thread : 108 ns/event
+2 threads concurrently: 155 ns/event (wall per event per thread)
+4 threads concurrently: 248 ns/event (wall per event per thread)
+  end VmSize:	  674596 kB
+  end VmRSS:	   51284 kB
+sizeof(struct cord_ev)=120 bytes; per-thread buffer=65536 events -> 7.5 MB reserved per recording thread
+  start VmSize:	    2708 kB
+  start VmRSS:	    1728 kB
+  after 25 threads x 30 events VmSize:	  489736 kB
+  after 25 threads x 30 events VmRSS:	    2052 kB
+1 thread : 110 ns/event
+2 threads concurrently: 149 ns/event (wall per event per thread)
+4 threads concurrently: 291 ns/event (wall per event per thread)
+  end VmSize:	  543524 kB
+  end VmRSS:	   51276 kB
+sizeof(struct cord_ev)=120 bytes; per-thread buffer=65536 events -> 7.5 MB reserved per recording thread
+  start VmSize:	    2708 kB
+  start VmRSS:	    1724 kB
+  after 25 threads x 30 events VmSize:	  489736 kB
+  after 25 threads x 30 events VmRSS:	    2048 kB
+1 thread : 122 ns/event
+2 threads concurrently: 161 ns/event (wall per event per thread)
+4 threads concurrently: 269 ns/event (wall per event per thread)
+  end VmSize:	  543524 kB
+  end VmRSS:	   51272 kB

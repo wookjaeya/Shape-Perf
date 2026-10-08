@@ -1,0 +1,65 @@
+# SysPro repo probe 2026-10-08T01:29:18Z
+## git ls-remote https://github.com/tarannumzaman/ReproSys
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+exit=128
+## git ls-remote https://github.com/Tarannum-Zaman/ReproSys
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+exit=128
+## git ls-remote https://github.com/tarannumzaman/reprosys
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+exit=128
+## git ls-remote https://github.com/tarannumzaman/SysPro
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+exit=128
+## git ls-remote https://github.com/Tarannum-Zaman/SysPro
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+exit=128
+## curl -sSI https://github.com/tarannumzaman/ReproSys
+403 https://github.com/tarannumzaman/ReproSys redirect=
+## curl https://github.com/tarannumzaman/ReproSys/tree/main
+403
+## curl https://github.com/tarannumzaman
+403 redirect=
+## gh api repos/tarannumzaman/ReproSys
+{"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:"push" to attach the repository with credentials. (HTTP 403)
+exit=0
+## gh api users/tarannumzaman
+{"message":"This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...).","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...). (HTTP 403)
+## gh api users/Tarannum-Zaman/repos
+{"message":"This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...).","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...). (HTTP 403)
+## gh api search/repositories?q=ReproSys
+{"message":"This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...).","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: This GitHub API path is not available: sessions are bound to their configured repositories. Use repository-scoped endpoints (repos/{owner}/{repo}/...). (HTTP 403)
+## archival services 2026-10-08T01:31:14Z
+## curl https://archive.softwareheritage.org/api/1/origin/https://github.com/tarannumzaman/ReproSys/get/
+curl: (56) CONNECT tunnel failed, response 403
+000
+## curl https://web.archive.org/web/2026/https://github.com/tarannumzaman/ReproSys
+curl: (56) CONNECT tunnel failed, response 403
+000
+## curl https://archive.org/wayback/available?url=github.com/tarannumzaman/ReproSys
+curl: (56) CONNECT tunnel failed, response 403
+000
+## curl https://codeload.github.com/tarannumzaman/ReproSys/zip/refs/heads/main
+403
+## curl https://raw.githubusercontent.com/tarannumzaman/ReproSys/main/README.md
+404
+## curl https://api.github.com/repos/tarannumzaman/ReproSys
+403
+## raw.githubusercontent.com control and variants 2026-10-08T01:31:24Z
+## curl https://raw.githubusercontent.com/tarannumzaman/Scminer/master/README.md
+404 14
+## curl https://raw.githubusercontent.com/tarannumzaman/ReproSys/master/README.md
+404 14
+## curl https://raw.githubusercontent.com/tarannumzaman/ReproSys/HEAD/README.md
+404 14
+## curl https://raw.githubusercontent.com/tarannumzaman/ReproSys/refs/heads/main/README.md
+404 14
+## Control: git ls-remote https://github.com/tarannumzaman/Scminer
+255933c62394e0d4fc0a9063975d36aca1cb15a9	HEAD
+fb6b6e3364bd820c70bb5cd00dfb9d947277a700	refs/heads/apache
+## MCP github search_repositories 'user:tarannumzaman' -> total_count 1: tarannumzaman/Scminer only (public index); 'ReproSys' -> only filipeive/reprosys (Blade/PHP, unrelated); 'SysPro concurrency bug reports' -> 0; code search '"ReproSys" "tarannumzaman"' -> 0
+## MCP github get_file_contents tarannumzaman/ReproSys -> 'not configured for this session'
+## add_repo tarannumzaman/ReproSys (read) -> 'was not found on github.com, or this session's GitHub credential doesn't have access to it ... you don't have access to tarannumzaman/reprosys'
+## raw host positive control with an existing file (Scminer has no README.md, so the README.md control above was not valid)
+## curl https://raw.githubusercontent.com/tarannumzaman/Scminer/master/.Rhistory
+200 19001

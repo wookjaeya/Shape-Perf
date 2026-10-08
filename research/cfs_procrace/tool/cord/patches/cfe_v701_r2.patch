@@ -1,0 +1,1026 @@
+CORD instrumentation for case R2 (cFE #2663) on cFS v7.0.1 (bundle 088b2fa8, cFE c5fb2b4d)
+==========================================================================================
+Date: 2026-10-08. Applies with `patch -p1` in the cFS bundle root. "a/" = the ENV source tree
+(/home/user/work/procrace/cfs_ref/cFS without .git and build-native_std); "b/" = the instrumented copy
+(/home/user/work/procrace/cfs_cord/cFS). The copy equalled the ENV source before patching
+(env/logs/cord_build_00_copy_manifest.txt). This diff is the complete difference between the two trees
+(`diff -ruN --exclude=.git --exclude=build-native_std`): 14 files, 2 of them new.
+Event model: tool/DESIGN.md; recorder: tool/cord/cord.{c,h} (copied verbatim to cfe/cord/, same sha256:
+cord.c f1f6780d..., cord.h 290499e3...). Without -DCORD_ENABLE every added statement compiles to nothing.
+
+Build integration (cfe/modules/{es,sb,evs}/CMakeLists.txt)
+  - cord.c is added to the `es` static library only (target_sources), compiled with the target's own flags
+    plus "-std=c11" (cord.c uses C11 _Atomic; with the build's -std=c99 -pedantic -Werror it does not compile).
+  - CORD_ENABLE is set as a source-file property on exactly the 7 instrumented .c files. Source-file
+    properties are directory-scoped, so the coverage-test targets in ut-coverage/ (which reuse es_SOURCES etc.
+    and copy the module target's include directories and compile definitions) build the same sources WITHOUT
+    CORD_ENABLE and without cord.c. A target-level define would have propagated to them and broken their link.
+  - include dir cfe/cord added (PRIVATE) to es, sb, evs. No optimisation/debug/warning flag is changed.
+
+Sites (line numbers: original "a" -> patched "b")
+  Publication (SB task, CFE_SB_AppInit)
+    PUB  "sb.appid"   cfe_sb_task.c L138 -> b L139, right after CFE_ES_GetAppID(&CFE_SB_Global.AppId); a = stored AppId
+    PUB  "sb.evsreg"  cfe_sb_task.c after the CFE_EVS_Register status check L155-160 -> b L162 (only on success)
+  Uses: every SB call that passes CFE_SB_Global.AppId to CFE_EVS_SendEventWithAppID (39 call sites).
+    The argument is replaced mechanically by CFE_SB_CORD_APPID() (helper in cfe_sb_module_all.h), which records
+    USE "sb.appid" and USE "sb.evsreg" (a = AppId value read) at the call site and returns the same value.
+    cfe_sb_api.c (34; line numbers unchanged):
+      CFE_SB_CreatePipe       L228 L239 L247 L255 L262 L277(PIPE_ADDED)
+      CFE_SB_DeletePipeFull   L474 L482 L504
+      CFE_SB_SetPipeOpts      L582 L590 L607
+      CFE_SB_GetPipeOpts      L678 L685 L698
+      CFE_SB_GetPipeName      L753 L761
+      CFE_SB_GetPipeIdByName  L864 L872 L885
+      CFE_SB_SubscribeFull    L1108 L1118 L1128 L1138 L1146 L1157 L1168 L1185(SUBSCRIPTION_RCVD) L1201
+      CFE_SB_UnsubscribeFull  L1345 L1355 L1365 L1375 L1392
+    cfe_sb_priv.c (1): L786 CFE_SB_MessageTxn_ReportSingleEvent (SEND_NO_SUBS and the other transmit/receive events)
+    cfe_sb_task.c (4): L673 -> b L675 CFE_SB_SendSubscriptionReport; L744, L755, L765 -> b L746, L757, L767
+      CFE_SB_BackgroundFileEventHandler (runs in the ES background task; only after SB file-write commands)
+    Not touched: cfe_sb_task.c L138 `&CFE_SB_Global.AppId` (the publication itself).
+  Outcome (EVS, CFE_EVS_SendEventWithAppID)
+    NOTE "evs.illegal_appid"   cfe_evs.c L188 -> b L190 (a = AppID passed)
+    NOTE "evs.not_registered"  cfe_evs.c L193 -> b L196 (a = AppID passed)
+  Happens-before events for the ES startup serialization (S1: cfe_es_start.c L810 CFE_ES_StartAppTask, L835 sync)
+    TCREATE "task:<TaskName>"  cfe_es_apps.c CFE_ES_StartAppTask, before OS_TaskCreate (a L664 -> b L678); a = 0, so
+                               the analyzer pairs it with TSTART by key. Covers core apps, external apps and child tasks.
+    TSTART "task:<TaskName>" + TASKNAME "<TaskName>"  cfe_es_apps.c CFE_ES_TaskEntryPoint (ES's task entry wrapper),
+                               after CFE_ES_GetTaskFunction succeeded, inside the existing ES lock section, before
+                               the real entry function (a L631-633 -> b L641-642). The name is read from the task
+                               record that CFE_ES_GetTaskFunction has just confirmed (written by the parent before
+                               the record was marked used), so key and parent key cannot disagree.
+    SETSTATE "es.appstate:<AppName>" (a = new state), right after each AppState write found in cFE:
+      cfe_es_api.c L399 -> b L400  CFE_ES_ExitApp           STOPPED
+      cfe_es_api.c L471 -> b L473  CFE_ES_RunLoop           RUNNING
+      cfe_es_api.c L573 -> b L576  CFE_ES_WaitForSystemState RequiredAppState (core app waiting for >= CORE_READY: RUNNING)
+      cfe_es_apps.c L1144 -> b L1165 CFE_ES_RunAppTableScan WAITING
+      Not instrumented: implicit writes of 0 (UNDEFINED) by memset of a whole app record (record creation/cleanup,
+      cfe_es_start.c L823 on a failed core-app start); no wait in cFE returns on value 0.
+    WAITRET "es.appstate:<AppName>" (a = state waited for, b = state read)
+      cfe_es_start.c CFE_ES_MainTaskSyncDelay, inside the lock of the check that succeeded, one event per used app
+      record (a L882-887 -> b L888-903). Callers: L210 (LATE_INIT), L225 (RUNNING), L835 (RUNNING, core apps).
+      CFE_ES_WaitForSystemState (cfe_es_api.c L518-600) is NOT given a WAITRET: it waits on
+      CFE_ES_Global.SystemState, not on app records, so "app records it confirmed" does not exist; the
+      system-state edge (ES main's SystemState write -> return of WaitForSystemState) is therefore not modeled.
+  Helpers: cfe_es_module_all.h (CFE_ES_CORD_APPSTATE), cfe_sb_module_all.h (CFE_SB_CORD_APPID); both include cord.h.
+  Not added: CORD_PUB_PRE (witness delay hook), LOCK/UNLOCK, SIG/WAIT. CORD_DELAY is not used.
+
+diff -ruN a/cfe/cord/cord.c b/cfe/cord/cord.c
+--- a/cfe/cord/cord.c	1970-01-01 00:00:00.000000000 +0000
++++ b/cfe/cord/cord.c	2026-10-08 06:55:15.966401248 +0000
+@@ -0,0 +1,274 @@
++/*
++ * CORD event recorder.
++ *
++ * - One buffer per thread, allocated on first use and registered in a fixed
++ *   table with an atomic index (no lock).
++ * - A global atomic counter gives each event a sequence number, so the
++ *   analyzer sees the observed total order.
++ * - Output: JSON lines in $CORD_OUT (default cord_trace.jsonl), written at
++ *   exit, on SIGSEGV/SIGBUS/SIGABRT/SIGTERM/SIGINT, and optionally once after
++ *   $CORD_DUMP_AFTER_MS milliseconds by a helper thread.
++ * - Witness hook: $CORD_DELAY="<pattern>@<usec>[;...]". <pattern> is a
++ *   resource key or "file:line" (file basename). Each matching
++ *   cord_maybe_delay() call sleeps for <usec> microseconds.
++ *
++ * The recorder calls only libc and the kernel, never OSAL or cFE.
++ */
++#define _GNU_SOURCE
++#include "cord.h"
++
++#include <pthread.h>
++#include <signal.h>
++#include <stdatomic.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/syscall.h>
++#include <time.h>
++#include <unistd.h>
++
++#define CORD_MAX_THREADS 512
++#define CORD_KEYLEN 64
++#define CORD_MAX_DELAYS 16
++
++struct cord_ev {
++    uint64_t seq;
++    uint64_t t_ns;
++    int kind;
++    int line;
++    long a, b;
++    const char *file;
++    const char *func;
++    char key[CORD_KEYLEN];
++};
++
++struct cord_buf {
++    int tid;
++    unsigned long pthread;
++    size_t cap;
++    _Atomic size_t n;
++    _Atomic size_t dropped;
++    struct cord_ev *ev;
++};
++
++static struct cord_buf *g_bufs[CORD_MAX_THREADS];
++static _Atomic int g_nbufs;
++static _Atomic int g_overflow_threads;
++static _Atomic uint64_t g_seq;
++static _Atomic long g_token;
++static _Atomic int g_dumped;
++static __thread struct cord_buf *t_buf;
++
++struct cord_delay {
++    char pat[128];
++    long usec;
++};
++static struct cord_delay g_delays[CORD_MAX_DELAYS];
++static int g_ndelays;
++
++static uint64_t now_ns(void)
++{
++    struct timespec ts;
++    clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
++}
++
++static struct cord_buf *get_buf(void)
++{
++    if (t_buf)
++        return t_buf;
++    size_t cap = 1u << 16;
++    const char *s = getenv("CORD_BUF");
++    if (s && atol(s) > 0)
++        cap = (size_t)atol(s);
++    struct cord_buf *b = calloc(1, sizeof(*b));
++    if (!b)
++        return NULL;
++    b->ev = calloc(cap, sizeof(struct cord_ev));
++    if (!b->ev) {
++        free(b);
++        return NULL;
++    }
++    b->cap = cap;
++    b->tid = (int)syscall(SYS_gettid);
++    b->pthread = (unsigned long)pthread_self();
++    int i = atomic_fetch_add(&g_nbufs, 1);
++    if (i >= CORD_MAX_THREADS) {
++        atomic_fetch_add(&g_overflow_threads, 1);
++        free(b->ev);
++        free(b);
++        return NULL;
++    }
++    g_bufs[i] = b;
++    t_buf = b;
++    return b;
++}
++
++void cord_event(int kind, const char *key, long a, long b,
++                const char *file, int line, const char *func)
++{
++    struct cord_buf *buf = get_buf();
++    if (!buf)
++        return;
++    size_t i = atomic_load_explicit(&buf->n, memory_order_relaxed);
++    if (i >= buf->cap) {
++        atomic_fetch_add(&buf->dropped, 1);
++        return;
++    }
++    struct cord_ev *e = &buf->ev[i];
++    e->seq = atomic_fetch_add(&g_seq, 1);
++    e->t_ns = now_ns();
++    e->kind = kind;
++    e->a = a;
++    e->b = b;
++    e->file = file;
++    e->line = line;
++    e->func = func;
++    if (key) {
++        strncpy(e->key, key, CORD_KEYLEN - 1);
++        e->key[CORD_KEYLEN - 1] = 0;
++    } else {
++        e->key[0] = 0;
++    }
++    atomic_store_explicit(&buf->n, i + 1, memory_order_release);
++}
++
++long cord_new_token(void)
++{
++    return atomic_fetch_add(&g_token, 1) + 1;
++}
++
++static const char *base(const char *p)
++{
++    const char *s = p ? strrchr(p, '/') : NULL;
++    return s ? s + 1 : (p ? p : "");
++}
++
++void cord_maybe_delay(const char *key, const char *file, int line)
++{
++    if (g_ndelays == 0)
++        return;
++    char site[160];
++    snprintf(site, sizeof site, "%s:%d", base(file), line);
++    for (int i = 0; i < g_ndelays; i++) {
++        if ((key && strcmp(g_delays[i].pat, key) == 0) || strcmp(g_delays[i].pat, site) == 0) {
++            cord_event(CORD_K_NOTE, "cord.delay", g_delays[i].usec, 0, file, line, "cord_maybe_delay");
++            usleep((useconds_t)g_delays[i].usec);
++            return;
++        }
++    }
++}
++
++static void json_str(FILE *f, const char *s)
++{
++    fputc('"', f);
++    for (; s && *s; s++) {
++        unsigned char c = (unsigned char)*s;
++        if (c == '"' || c == '\\')
++            fprintf(f, "\\%c", c);
++        else if (c < 0x20)
++            fprintf(f, "\\u%04x", c);
++        else
++            fputc(c, f);
++    }
++    fputc('"', f);
++}
++
++static void dump(const char *suffix)
++{
++    const char *out = getenv("CORD_OUT");
++    char path[512];
++    snprintf(path, sizeof path, "%s%s", out ? out : "cord_trace.jsonl", suffix);
++    FILE *f = fopen(path, "w");
++    if (!f)
++        return;
++    int nb = atomic_load(&g_nbufs);
++    if (nb > CORD_MAX_THREADS)
++        nb = CORD_MAX_THREADS;
++    fprintf(f, "{\"meta\":1,\"threads\":%d,\"overflow_threads\":%d,\"seq\":%llu}\n", nb,
++            atomic_load(&g_overflow_threads), (unsigned long long)atomic_load(&g_seq));
++    for (int i = 0; i < nb; i++) {
++        struct cord_buf *b = g_bufs[i];
++        if (!b)
++            continue;
++        size_t n = atomic_load_explicit(&b->n, memory_order_acquire);
++        if (atomic_load(&b->dropped))
++            fprintf(f, "{\"meta\":2,\"tid\":%d,\"dropped\":%zu}\n", b->tid, atomic_load(&b->dropped));
++        for (size_t j = 0; j < n; j++) {
++            struct cord_ev *e = &b->ev[j];
++            fprintf(f, "{\"seq\":%llu,\"t\":%llu,\"tid\":%d,\"k\":%d,\"key\":",
++                    (unsigned long long)e->seq, (unsigned long long)e->t_ns, b->tid, e->kind);
++            json_str(f, e->key);
++            fprintf(f, ",\"a\":%ld,\"b\":%ld,\"file\":", e->a, e->b);
++            json_str(f, base(e->file));
++            fprintf(f, ",\"line\":%d,\"func\":", e->line);
++            json_str(f, e->func);
++            fputs("}\n", f);
++        }
++    }
++    fclose(f);
++}
++
++void cord_flush(void)
++{
++    if (atomic_exchange(&g_dumped, 1))
++        return;
++    dump("");
++}
++
++static void on_signal(int sig)
++{
++    cord_event(CORD_K_NOTE, "cord.signal", sig, 0, __FILE__, __LINE__, __func__);
++    cord_flush();
++    signal(sig, SIG_DFL);
++    raise(sig);
++}
++
++static void *dumper(void *arg)
++{
++    long ms = (long)arg;
++    usleep((useconds_t)(ms * 1000));
++    cord_event(CORD_K_NOTE, "cord.timed_dump", ms, 0, __FILE__, __LINE__, __func__);
++    cord_flush();
++    return NULL;
++}
++
++static void parse_delays(void)
++{
++    const char *s = getenv("CORD_DELAY");
++    if (!s || !*s)
++        return;
++    char tmp[1024];
++    strncpy(tmp, s, sizeof tmp - 1);
++    tmp[sizeof tmp - 1] = 0;
++    char *save = NULL;
++    for (char *tok = strtok_r(tmp, ";", &save); tok && g_ndelays < CORD_MAX_DELAYS;
++         tok = strtok_r(NULL, ";", &save)) {
++        char *at = strrchr(tok, '@');
++        if (!at)
++            continue;
++        *at = 0;
++        strncpy(g_delays[g_ndelays].pat, tok, sizeof g_delays[0].pat - 1);
++        g_delays[g_ndelays].usec = atol(at + 1);
++        g_ndelays++;
++    }
++}
++
++__attribute__((constructor)) static void cord_init(void)
++{
++    parse_delays();
++    atexit(cord_flush);
++    int sigs[] = {SIGSEGV, SIGBUS, SIGABRT, SIGTERM, SIGINT, SIGFPE};
++    for (size_t i = 0; i < sizeof sigs / sizeof sigs[0]; i++)
++        signal(sigs[i], on_signal);
++    const char *d = getenv("CORD_DUMP_AFTER_MS");
++    if (d && atol(d) > 0) {
++        pthread_t th;
++        pthread_attr_t at;
++        pthread_attr_init(&at);
++        pthread_attr_setdetachstate(&at, PTHREAD_CREATE_DETACHED);
++        pthread_create(&th, &at, dumper, (void *)atol(d));
++        pthread_attr_destroy(&at);
++    }
++}
+diff -ruN a/cfe/cord/cord.h b/cfe/cord/cord.h
+--- a/cfe/cord/cord.h	1970-01-01 00:00:00.000000000 +0000
++++ b/cfe/cord/cord.h	2026-10-08 06:55:15.966454473 +0000
+@@ -0,0 +1,76 @@
++/*
++ * CORD event recorder: public interface.
++ *
++ * Events go to per-thread buffers. The buffers are written as JSON lines to
++ * $CORD_OUT at process exit or on a fatal signal. The recorder never calls
++ * into OSAL or cFE, so it works before any framework service is ready.
++ *
++ * Build the instrumented code with -DCORD_ENABLE. Without it every macro
++ * expands to nothing.
++ */
++#ifndef CORD_H
++#define CORD_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++enum cord_kind {
++    CORD_K_PUB = 1,      /* resource becomes usable (recorded after the commit) */
++    CORD_K_USE,          /* a task depends on the resource; a = status */
++    CORD_K_TCREATE,      /* parent, before the create call; a = token */
++    CORD_K_TSTART,       /* child, at its entry; a = token */
++    CORD_K_SIG,          /* post/give/put on a sync object */
++    CORD_K_WAIT,         /* successful take/get on a sync object */
++    CORD_K_SETSTATE,     /* write of a designated state variable; a = value */
++    CORD_K_WAITRET,      /* end of a wait on a state variable; a = value read */
++    CORD_K_LOCK,
++    CORD_K_UNLOCK,
++    CORD_K_NOTE,         /* free-form marker (outcome, status) */
++    CORD_K_TASKNAME      /* names the current task; key = name */
++};
++
++void cord_event(int kind, const char *key, long a, long b,
++                const char *file, int line, const char *func);
++
++/* Witness hook: sleeps if $CORD_DELAY names this key or site. */
++void cord_maybe_delay(const char *key, const char *file, int line);
++
++/* Unique token for a task creation (TCREATE/TSTART pairing). */
++long cord_new_token(void);
++
++void cord_flush(void);
++
++#ifdef __cplusplus
++}
++#endif
++
++#ifdef CORD_ENABLE
++#define CORD_EV(k, key, a, b) cord_event((k), (key), (long)(a), (long)(b), __FILE__, __LINE__, __func__)
++#define CORD_PUB_PRE(key)     cord_maybe_delay((key), __FILE__, __LINE__)
++#define CORD_PUB(key)         CORD_EV(CORD_K_PUB, (key), 0, 0)
++#define CORD_USE(key, status) CORD_EV(CORD_K_USE, (key), (status), 0)
++#define CORD_SIG(key)         CORD_EV(CORD_K_SIG, (key), 0, 0)
++#define CORD_WAIT(key)        CORD_EV(CORD_K_WAIT, (key), 0, 0)
++#define CORD_SETSTATE(key, v) CORD_EV(CORD_K_SETSTATE, (key), (v), 0)
++#define CORD_WAITRET(key, v)  CORD_EV(CORD_K_WAITRET, (key), (v), 0)
++#define CORD_LOCK(key)        CORD_EV(CORD_K_LOCK, (key), 0, 0)
++#define CORD_UNLOCK(key)      CORD_EV(CORD_K_UNLOCK, (key), 0, 0)
++#define CORD_NOTE(key, a)     CORD_EV(CORD_K_NOTE, (key), (a), 0)
++#define CORD_TASKNAME(name)   CORD_EV(CORD_K_TASKNAME, (name), 0, 0)
++#else
++#define CORD_EV(k, key, a, b) ((void)0)
++#define CORD_PUB_PRE(key)     ((void)0)
++#define CORD_PUB(key)         ((void)0)
++#define CORD_USE(key, status) ((void)0)
++#define CORD_SIG(key)         ((void)0)
++#define CORD_WAIT(key)        ((void)0)
++#define CORD_SETSTATE(key, v) ((void)0)
++#define CORD_WAITRET(key, v)  ((void)0)
++#define CORD_LOCK(key)        ((void)0)
++#define CORD_UNLOCK(key)      ((void)0)
++#define CORD_NOTE(key, a)     ((void)0)
++#define CORD_TASKNAME(name)   ((void)0)
++#endif
++
++#endif /* CORD_H */
+diff -ruN a/cfe/modules/es/CMakeLists.txt b/cfe/modules/es/CMakeLists.txt
+--- a/cfe/modules/es/CMakeLists.txt	2026-10-08 01:13:11.759291047 +0000
++++ b/cfe/modules/es/CMakeLists.txt	2026-10-08 06:55:15.980958962 +0000
+@@ -35,6 +35,17 @@
+ 
+ add_library(es STATIC ${es_SOURCES})
+ 
++# CORD instrumentation (research copy, case R2; tool/cord/patches/cfe_v701_r2.patch).
++# The recorder is linked into core-cpu1 through this module only. Source-file properties are
++# directory-scoped, so the coverage-test targets (ut-coverage/, which reuse es_SOURCES and copy the
++# target's include directories and compile definitions) compile the same sources without CORD_ENABLE.
++# cord.c needs C11 (_Atomic); every other flag is the target's own.
++target_sources(es PRIVATE ${CFE_SOURCE_DIR}/cord/cord.c)
++set_source_files_properties(${CFE_SOURCE_DIR}/cord/cord.c PROPERTIES COMPILE_OPTIONS "-std=c11")
++set_source_files_properties(fsw/src/cfe_es_api.c fsw/src/cfe_es_apps.c fsw/src/cfe_es_start.c
++                            PROPERTIES COMPILE_DEFINITIONS CORD_ENABLE)
++target_include_directories(es PRIVATE ${CFE_SOURCE_DIR}/cord)
++
+ target_include_directories(es PUBLIC fsw/inc)
+ target_link_libraries(es PRIVATE core_private)
+ 
+diff -ruN a/cfe/modules/es/fsw/src/cfe_es_api.c b/cfe/modules/es/fsw/src/cfe_es_api.c
+--- a/cfe/modules/es/fsw/src/cfe_es_api.c	2026-10-08 01:13:11.763340386 +0000
++++ b/cfe/modules/es/fsw/src/cfe_es_api.c	2026-10-08 06:55:01.556664487 +0000
+@@ -397,6 +397,7 @@
+                                       CFE_ES_AppRecordGetName(AppRecPtr));
+ 
+             AppRecPtr->AppState = CFE_ES_AppState_STOPPED;
++            CFE_ES_CORD_APPSTATE(CORD_K_SETSTATE, AppRecPtr, AppRecPtr->AppState, 0); /* CORD R2 */
+ 
+             /*
+             ** Unlock the ES Shared data before suspending the app
+@@ -469,6 +470,7 @@
+         if (AppRecPtr->AppState < CFE_ES_AppState_RUNNING)
+         {
+             AppRecPtr->AppState = CFE_ES_AppState_RUNNING;
++            CFE_ES_CORD_APPSTATE(CORD_K_SETSTATE, AppRecPtr, AppRecPtr->AppState, 0); /* CORD R2 */
+         }
+ 
+         /*
+@@ -571,6 +573,7 @@
+         if (AppRecPtr->AppState < RequiredAppState)
+         {
+             AppRecPtr->AppState = RequiredAppState;
++            CFE_ES_CORD_APPSTATE(CORD_K_SETSTATE, AppRecPtr, AppRecPtr->AppState, 0); /* CORD R2 */
+         }
+     }
+     CFE_ES_UnlockSharedData(__func__, __LINE__);
+diff -ruN a/cfe/modules/es/fsw/src/cfe_es_apps.c b/cfe/modules/es/fsw/src/cfe_es_apps.c
+--- a/cfe/modules/es/fsw/src/cfe_es_apps.c	2026-10-08 01:13:11.764491122 +0000
++++ b/cfe/modules/es/fsw/src/cfe_es_apps.c	2026-10-08 06:55:01.557503930 +0000
+@@ -630,6 +630,18 @@
+          * call into CFE_PSP_SetDefaultExceptionEnvironment).
+          */
+         CFE_ES_LockSharedData(__func__, __LINE__);
++#ifdef CORD_ENABLE
++        {
++            /* CORD R2: TSTART + TASKNAME, named from the task record that CFE_ES_GetTaskFunction has
++             * just confirmed under the ES lock (so the name is the one the parent recorded) */
++            CFE_ES_TaskRecord_t *CordTaskRecPtr = CFE_ES_GetTaskRecordByContext();
++            const char          *CordName       = (CordTaskRecPtr != NULL) ? CordTaskRecPtr->TaskName : "?";
++            char                 CordKey[64];
++            snprintf(CordKey, sizeof(CordKey), "task:%s", CordName);
++            CORD_EV(CORD_K_TSTART, CordKey, 0, 0);
++            CORD_TASKNAME(CordName);
++        }
++#endif
+         CFE_PSP_SetDefaultExceptionEnvironment();
+         CFE_ES_UnlockSharedData(__func__, __LINE__);
+ 
+@@ -658,6 +670,14 @@
+     int32                OsStatus;
+     int32                ReturnCode;
+ 
++#ifdef CORD_ENABLE
++    {
++        /* CORD R2: TCREATE, paired with the child's TSTART by key (token a = 0) */
++        char CordKey[64];
++        snprintf(CordKey, sizeof(CordKey), "task:%s", TaskName);
++        CORD_EV(CORD_K_TCREATE, CordKey, 0, 0);
++    }
++#endif
+     /*
+      * Create the primary task for the newly loaded task
+      */
+@@ -1142,6 +1162,7 @@
+                 /* this happens after a command arrives to restart/reload/delete an app */
+                 /* switch to WAITING state, and set the timer for transition */
+                 AppPtr->AppState                = CFE_ES_AppState_WAITING;
++                CFE_ES_CORD_APPSTATE(CORD_K_SETSTATE, AppPtr, AppPtr->AppState, 0); /* CORD R2 */
+                 AppPtr->ControlReq.AppTimerMsec = CFE_PLATFORM_ES_APP_KILL_TIMEOUT * CFE_PLATFORM_ES_APP_SCAN_RATE;
+             }
+         }
+diff -ruN a/cfe/modules/es/fsw/src/cfe_es_module_all.h b/cfe/modules/es/fsw/src/cfe_es_module_all.h
+--- a/cfe/modules/es/fsw/src/cfe_es_module_all.h	2026-10-08 01:13:11.764845801 +0000
++++ b/cfe/modules/es/fsw/src/cfe_es_module_all.h	2026-10-08 06:55:01.555787786 +0000
+@@ -54,4 +54,23 @@
+ #include "cfe_es_resource.h"
+ #include "cfe_es_log.h"
+ 
++/*
++ * CORD instrumentation (research copy, case R2 / cFE #2663; tool/cord/patches/cfe_v701_r2.patch).
++ * CFE_ES_CORD_APPSTATE records a SETSTATE or WAITRET event on key "es.appstate:<AppName>" of the
++ * given app record (a, b as in cord.h). Without CORD_ENABLE it expands to nothing.
++ */
++#include "cord.h"
++#ifdef CORD_ENABLE
++#include <stdio.h>
++#define CFE_ES_CORD_APPSTATE(Kind, AppRecPtr, A, B)                                                 \
++    do                                                                                             \
++    {                                                                                              \
++        char CordKey_[64];                                                                         \
++        snprintf(CordKey_, sizeof(CordKey_), "es.appstate:%s", (AppRecPtr)->AppName);              \
++        cord_event((Kind), CordKey_, (long)(A), (long)(B), __FILE__, __LINE__, __func__);          \
++    } while (0)
++#else
++#define CFE_ES_CORD_APPSTATE(Kind, AppRecPtr, A, B) ((void)0)
++#endif
++
+ #endif /* CFE_ES_MODULE_ALL_H */
+diff -ruN a/cfe/modules/es/fsw/src/cfe_es_start.c b/cfe/modules/es/fsw/src/cfe_es_start.c
+--- a/cfe/modules/es/fsw/src/cfe_es_start.c	2026-10-08 01:13:11.764845801 +0000
++++ b/cfe/modules/es/fsw/src/cfe_es_start.c	2026-10-08 06:55:01.558054332 +0000
+@@ -885,6 +885,22 @@
+             }
+             ++AppRecPtr;
+         }
++#ifdef CORD_ENABLE
++        if (AppNotReadyCounter == 0)
++        {
++            /* CORD R2: WAITRET for every app record this successful check confirmed
++             * (a = state waited for, b = state read), recorded under the same lock */
++            AppRecPtr = CFE_ES_Global.AppTable;
++            for (i = 0; i < CFE_PLATFORM_ES_MAX_APPLICATIONS; i++)
++            {
++                if (CFE_ES_AppRecordIsUsed(AppRecPtr))
++                {
++                    CFE_ES_CORD_APPSTATE(CORD_K_WAITRET, AppRecPtr, AppStateId, AppRecPtr->AppState);
++                }
++                ++AppRecPtr;
++            }
++        }
++#endif
+         CFE_ES_UnlockSharedData(__func__, __LINE__);
+ 
+         if (AppNotReadyCounter == 0)
+diff -ruN a/cfe/modules/evs/CMakeLists.txt b/cfe/modules/evs/CMakeLists.txt
+--- a/cfe/modules/evs/CMakeLists.txt	2026-10-08 01:13:11.772845801 +0000
++++ b/cfe/modules/evs/CMakeLists.txt	2026-10-08 06:55:15.987976984 +0000
+@@ -25,6 +25,10 @@
+ 
+ add_library(evs STATIC ${evs_SOURCES})
+ 
++# CORD instrumentation (research copy, case R2; see modules/es/CMakeLists.txt)
++set_source_files_properties(fsw/src/cfe_evs.c PROPERTIES COMPILE_DEFINITIONS CORD_ENABLE)
++target_include_directories(evs PRIVATE ${CFE_SOURCE_DIR}/cord)
++
+ target_include_directories(evs PUBLIC fsw/inc)
+ target_link_libraries(evs PRIVATE core_private)
+ 
+diff -ruN a/cfe/modules/evs/fsw/src/cfe_evs.c b/cfe/modules/evs/fsw/src/cfe_evs.c
+--- a/cfe/modules/evs/fsw/src/cfe_evs.c	2026-10-08 01:13:11.776879774 +0000
++++ b/cfe/modules/evs/fsw/src/cfe_evs.c	2026-10-08 06:54:41.618538041 +0000
+@@ -32,6 +32,7 @@
+ 
+ #include <stdarg.h>
+ #include <string.h>
++#include "cord.h" /* CORD instrumentation (research copy, case R2) */
+ 
+ /*----------------------------------------------------------------
+  *
+@@ -186,11 +187,13 @@
+     if (AppDataPtr == NULL)
+     {
+         Status = CFE_EVS_APP_ILLEGAL_APP_ID;
++        CORD_NOTE("evs.illegal_appid", CFE_RESOURCEID_TO_ULONG(AppID)); /* CORD R2: outcome */
+     }
+     else if (!EVS_AppDataIsMatch(AppDataPtr, AppID))
+     {
+         /* Handler for events from apps not registered with EVS */
+         Status = EVS_NotRegistered(AppDataPtr, AppID);
++        CORD_NOTE("evs.not_registered", CFE_RESOURCEID_TO_ULONG(AppID)); /* CORD R2: outcome */
+     }
+     else if (EVS_IsFiltered(AppDataPtr, EventID, EventType) == false)
+     {
+diff -ruN a/cfe/modules/sb/CMakeLists.txt b/cfe/modules/sb/CMakeLists.txt
+--- a/cfe/modules/sb/CMakeLists.txt	2026-10-08 01:13:11.788388850 +0000
++++ b/cfe/modules/sb/CMakeLists.txt	2026-10-08 06:55:15.981304939 +0000
+@@ -33,6 +33,11 @@
+ 
+ add_library(sb STATIC ${sb_SOURCES})
+ 
++# CORD instrumentation (research copy, case R2; see modules/es/CMakeLists.txt)
++set_source_files_properties(fsw/src/cfe_sb_api.c fsw/src/cfe_sb_priv.c fsw/src/cfe_sb_task.c
++                            PROPERTIES COMPILE_DEFINITIONS CORD_ENABLE)
++target_include_directories(sb PRIVATE ${CFE_SOURCE_DIR}/cord)
++
+ target_include_directories(sb PUBLIC fsw/inc)
+ target_link_libraries(sb PRIVATE core_private)
+ 
+diff -ruN a/cfe/modules/sb/fsw/src/cfe_sb_api.c b/cfe/modules/sb/fsw/src/cfe_sb_api.c
+--- a/cfe/modules/sb/fsw/src/cfe_sb_api.c	2026-10-08 01:13:11.790663389 +0000
++++ b/cfe/modules/sb/fsw/src/cfe_sb_api.c	2026-10-08 06:54:14.565987806 +0000
+@@ -225,7 +225,7 @@
+         case CFE_SB_CR_PIPE_BAD_ARG_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_CR_PIPE_BAD_ARG_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "CreatePipeErr:Bad Input Arg:app=%s,ptr=0x%lx,depth=%d,maxdepth=%d",
+                                        CFE_SB_GetAppTskName(TskId, FullName),
+                                        (unsigned long)PipeIdPtr,
+@@ -236,7 +236,7 @@
+         case CFE_SB_MAX_PIPES_MET_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_MAX_PIPES_MET_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "CreatePipeErr:Max Pipes(%d)In Use.app %s",
+                                        CFE_PLATFORM_SB_MAX_PIPES,
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+@@ -244,7 +244,7 @@
+         case CFE_SB_CR_PIPE_NAME_TAKEN_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_CR_PIPE_NAME_TAKEN_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "CreatePipeErr:OS_QueueCreate failed, name taken (app=%s, name=%s)",
+                                        CFE_SB_GetAppTskName(TskId, FullName),
+                                        PipeName);
+@@ -252,14 +252,14 @@
+         case CFE_SB_CR_PIPE_NO_FREE_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_CR_PIPE_NO_FREE_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "CreatePipeErr:OS_QueueCreate failed, no free id's (app=%s)",
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+             break;
+         case CFE_SB_CR_PIPE_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_CR_PIPE_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "CreatePipeErr:OS_QueueCreate returned %ld,app %s",
+                                        (long)OsStatus,
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+@@ -274,7 +274,7 @@
+         /* send debug event */
+         CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_ADDED_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Pipe Created:name %s,id %d,app %s",
+                                    PipeName,
+                                    (int)CFE_ResourceId_ToInteger(PendingPipeId),
+@@ -471,7 +471,7 @@
+         case CFE_SB_DEL_PIPE_ERR1_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_DEL_PIPE_ERR1_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Delete Error:Bad Argument,PipedId %ld,Requestor %s",
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+                                        FullName);
+@@ -479,7 +479,7 @@
+         case CFE_SB_DEL_PIPE_ERR2_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_DEL_PIPE_ERR2_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Delete Error:Caller(%s) is not the owner of pipe %ld",
+                                        FullName,
+                                        CFE_RESOURCEID_TO_ULONG(PipeId));
+@@ -501,7 +501,7 @@
+ 
+         CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_DELETED_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Pipe Deleted:id %d,owner %s",
+                                    (int)CFE_RESOURCEID_TO_ULONG(PipeId),
+                                    FullName);
+@@ -579,7 +579,7 @@
+         case CFE_SB_SETPIPEOPTS_ID_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SETPIPEOPTS_ID_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Opts Error:Bad Argument,PipedId %lu,Requestor %s",
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+@@ -587,7 +587,7 @@
+         case CFE_SB_SETPIPEOPTS_OWNER_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SETPIPEOPTS_OWNER_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Opts Set Error: Caller(%s) is not the owner of pipe %lu",
+                                        CFE_SB_GetAppTskName(TskId, FullName),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId));
+@@ -604,7 +604,7 @@
+ 
+         CFE_EVS_SendEventWithAppID(CFE_SB_SETPIPEOPTS_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Pipe opts set:id %lu,owner %s, opts=0x%02x",
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+                                    FullName,
+@@ -675,14 +675,14 @@
+         case CFE_SB_GETPIPEOPTS_PTR_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEOPTS_PTR_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Opts Error:Bad Argument,Requestor %s",
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+             break;
+         case CFE_SB_GETPIPEOPTS_ID_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEOPTS_ID_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Opts Error:Bad Argument,PipeId %lu,Requestor %s",
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+@@ -695,7 +695,7 @@
+     {
+         CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEOPTS_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Pipe opts get:id %lu, opts=0x%02x",
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+                                    (unsigned int)*OptsPtr);
+@@ -750,7 +750,7 @@
+         case CFE_SB_GETPIPENAME_NULL_PTR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPENAME_NULL_PTR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Name Error:NullPtr,Requestor %s",
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+             break;
+@@ -758,7 +758,7 @@
+         case CFE_SB_GETPIPENAME_ID_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPENAME_ID_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe Id Error:Bad Argument,Id=%lu,Requestor %s",
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+@@ -861,7 +861,7 @@
+         case CFE_SB_GETPIPEIDBYNAME_NULL_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEIDBYNAME_NULL_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe ID By Name Error:Bad Argument,Requestor %s",
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+             break;
+@@ -869,7 +869,7 @@
+         case CFE_SB_GETPIPEIDBYNAME_NAME_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEIDBYNAME_NAME_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Pipe ID By Name Error:Bad Argument,Requestor %s",
+                                        CFE_SB_GetAppTskName(TskId, FullName));
+             break;
+@@ -882,7 +882,7 @@
+     {
+         CFE_EVS_SendEventWithAppID(CFE_SB_GETPIPEIDBYNAME_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "PipeIdByName name=%s id=%lu",
+                                    PipeName,
+                                    CFE_RESOURCEID_TO_ULONG(*PipeIdPtr));
+@@ -1105,7 +1105,7 @@
+         case CFE_SB_DUP_SUBSCRIP_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_DUP_SUBSCRIP_EID,
+                                        CFE_EVS_EventType_INFORMATION,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Duplicate Subscription,MsgId 0x%x on %s pipe,app %s",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        PipeName,
+@@ -1115,7 +1115,7 @@
+         case CFE_SB_SUB_INV_CALLER_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SUB_INV_CALLER_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Caller(%s) is not the owner of pipe %lu,Msg=0x%x",
+                                        CFE_SB_GetAppTskName(TskId, FullName),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1125,7 +1125,7 @@
+         case CFE_SB_SUB_INV_PIPE_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SUB_INV_PIPE_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Invalid Pipe Id,Msg=0x%x,PipeId=%lu,App %s",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1135,7 +1135,7 @@
+         case CFE_SB_DEST_BLK_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_DEST_BLK_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Request for Destination Blk failed for Msg 0x%x",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId));
+             break;
+@@ -1143,7 +1143,7 @@
+         case CFE_SB_MAX_DESTS_MET_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_MAX_DESTS_MET_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Max Dests(%d)In Use For Msg 0x%x,pipe %s,app %s",
+                                        CFE_PLATFORM_SB_MAX_DEST_PER_PKT,
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+@@ -1154,7 +1154,7 @@
+         case CFE_SB_MAX_MSGS_MET_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_MAX_MSGS_MET_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Max Msgs(%d)In Use,MsgId 0x%x,pipe %s,app %s",
+                                        CFE_PLATFORM_SB_MAX_MSG_IDS,
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+@@ -1165,7 +1165,7 @@
+         case CFE_SB_SUB_ARG_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SUB_ARG_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Subscribe Err:Bad Arg,MsgId 0x%x,PipeId %lu,app %s,scope %d",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1182,7 +1182,7 @@
+     {
+         CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RCVD_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s",
+                                    (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1198,7 +1198,7 @@
+     {
+         CFE_EVS_SendEventWithAppID(CFE_SB_HASHCOLLISION_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Msg hash collision: MsgId = 0x%x, collisions = %u",
+                                    (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                    (unsigned int)Collisions);
+@@ -1342,7 +1342,7 @@
+             CFE_SB_GetPipeName(PipeName, sizeof(PipeName), PipeId);
+             CFE_EVS_SendEventWithAppID(CFE_SB_UNSUB_NO_SUBS_EID,
+                                        CFE_EVS_EventType_INFORMATION,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Unsubscribe Err:No subs for Msg 0x%x on %s,app %s",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        PipeName,
+@@ -1352,7 +1352,7 @@
+         case CFE_SB_UNSUB_INV_PIPE_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_UNSUB_INV_PIPE_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Unsubscribe Err:Invalid Pipe Id Msg=0x%x,Pipe=%lu,app=%s",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1362,7 +1362,7 @@
+         case CFE_SB_UNSUB_INV_CALLER_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_UNSUB_INV_CALLER_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Unsubscribe Err:Caller(%s) is not the owner of pipe %lu,Msg=0x%x",
+                                        CFE_SB_GetAppTskName(TskId, FullName),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1372,7 +1372,7 @@
+         case CFE_SB_UNSUB_ARG_ERR_EID:
+             CFE_EVS_SendEventWithAppID(CFE_SB_UNSUB_ARG_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Unsubscribe Err:Bad Arg,MsgId 0x%x,PipeId %lu,app %s,scope %d",
+                                        (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                        CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -1389,7 +1389,7 @@
+     {
+         CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_REMOVED_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Subscription Removed:Msg 0x%x on pipe %lu,app %s",
+                                    (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+diff -ruN a/cfe/modules/sb/fsw/src/cfe_sb_module_all.h b/cfe/modules/sb/fsw/src/cfe_sb_module_all.h
+--- a/cfe/modules/sb/fsw/src/cfe_sb_module_all.h	2026-10-08 01:13:11.792049701 +0000
++++ b/cfe/modules/sb/fsw/src/cfe_sb_module_all.h	2026-10-08 06:54:33.881006938 +0000
+@@ -47,4 +47,24 @@
+ #include "cfe_sbr.h"
+ #include "cfe_core_resourceid_basevalues.h"
+ 
++/*
++ * CORD instrumentation (research copy, case R2 / cFE #2663; tool/cord/patches/cfe_v701_r2.patch).
++ * Every SB call site that passes SB's own AppId to CFE_EVS_SendEventWithAppID reads it through
++ * CFE_SB_CORD_APPID(). With CORD_ENABLE it records USE("sb.appid") and USE("sb.evsreg") at the call
++ * site (a = the AppId value read) and returns the value; without CORD_ENABLE it is CFE_SB_Global.AppId.
++ */
++#include "cord.h"
++#ifdef CORD_ENABLE
++static inline CFE_ES_AppId_t CFE_SB_CordAppIdUse(const char *File, int Line, const char *Func)
++{
++    CFE_ES_AppId_t AppId = CFE_SB_Global.AppId;
++    cord_event(CORD_K_USE, "sb.appid", (long)CFE_RESOURCEID_TO_ULONG(AppId), 0, File, Line, Func);
++    cord_event(CORD_K_USE, "sb.evsreg", (long)CFE_RESOURCEID_TO_ULONG(AppId), 0, File, Line, Func);
++    return AppId;
++}
++#define CFE_SB_CORD_APPID() CFE_SB_CordAppIdUse(__FILE__, __LINE__, __func__)
++#else
++#define CFE_SB_CORD_APPID() (CFE_SB_Global.AppId)
++#endif
++
+ #endif /* CFE_SB_MODULE_ALL_H */
+diff -ruN a/cfe/modules/sb/fsw/src/cfe_sb_priv.c b/cfe/modules/sb/fsw/src/cfe_sb_priv.c
+--- a/cfe/modules/sb/fsw/src/cfe_sb_priv.c	2026-10-08 01:13:11.792049701 +0000
++++ b/cfe/modules/sb/fsw/src/cfe_sb_priv.c	2026-10-08 06:54:14.569835739 +0000
+@@ -783,7 +783,7 @@
+ 
+     if (EventType > 0 && CFE_SB_RequestToSendEvent(TskId, ReqBit) == CFE_SB_GRANTED)
+     {
+-        CFE_EVS_SendEventWithAppID(EventId, EventType, CFE_SB_Global.AppId, "%s", Message);
++        CFE_EVS_SendEventWithAppID(EventId, EventType, CFE_SB_CORD_APPID(), "%s", Message);
+ 
+         /* clear the bit so the task may send this event again */
+         CFE_SB_FinishSendEvent(TskId, ReqBit);
+diff -ruN a/cfe/modules/sb/fsw/src/cfe_sb_task.c b/cfe/modules/sb/fsw/src/cfe_sb_task.c
+--- a/cfe/modules/sb/fsw/src/cfe_sb_task.c	2026-10-08 01:13:11.792049701 +0000
++++ b/cfe/modules/sb/fsw/src/cfe_sb_task.c	2026-10-08 06:54:20.989324380 +0000
+@@ -136,6 +136,7 @@
+ 
+     /* Get the assigned Application ID for the SB Task */
+     CFE_ES_GetAppID(&CFE_SB_Global.AppId);
++    CORD_EV(CORD_K_PUB, "sb.appid", CFE_RESOURCEID_TO_ULONG(CFE_SB_Global.AppId), 0); /* CORD R2: publication 1 */
+ 
+     /* Process the platform cfg file events to be filtered */
+     int32 CurrEvent, CurrMask;
+@@ -158,6 +159,7 @@
+         CFE_ES_WriteToSysLog("%s: Call to CFE_EVS_Register Failed:RC=0x%08X\n", __func__, (unsigned int)Status);
+         return Status;
+     }
++    CORD_PUB("sb.evsreg"); /* CORD R2: publication 2 (SB registered with EVS) */
+ 
+     CFE_ES_WriteToSysLog("%s: Registered %d events for filtering\n", __func__, (int)CfgFileEventsToFilter);
+ 
+@@ -670,7 +672,7 @@
+         Status = CFE_SB_TransmitMsg(CFE_MSG_PTR(SubRptMsg.TelemetryHeader), true);
+         CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RPT_EID,
+                                    CFE_EVS_EventType_DEBUG,
+-                                   CFE_SB_Global.AppId,
++                                   CFE_SB_CORD_APPID(),
+                                    "Sending Subscription Report Msg=0x%x,Pipe=%lu,Stat=0x%x",
+                                    (unsigned int)CFE_SB_MsgIdToValue(MsgId),
+                                    CFE_RESOURCEID_TO_ULONG(PipeId),
+@@ -741,7 +743,7 @@
+         case CFE_FS_FileWriteEvent_COMPLETE:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SND_RTG_EID,
+                                        CFE_EVS_EventType_DEBUG,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "%s written:Size=%d,Entries=%d",
+                                        BgFilePtr->FileWrite.FileName,
+                                        (int)Position,
+@@ -752,7 +754,7 @@
+         case CFE_FS_FileWriteEvent_RECORD_WRITE_ERROR:
+             CFE_EVS_SendEventWithAppID(CFE_SB_FILEWRITE_ERR_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "File write,byte cnt err,file %s,request=%d,actual=%d",
+                                        BgFilePtr->FileWrite.FileName,
+                                        (int)BlockSize,
+@@ -762,7 +764,7 @@
+         case CFE_FS_FileWriteEvent_CREATE_ERROR:
+             CFE_EVS_SendEventWithAppID(CFE_SB_SND_RTG_ERR1_EID,
+                                        CFE_EVS_EventType_ERROR,
+-                                       CFE_SB_Global.AppId,
++                                       CFE_SB_CORD_APPID(),
+                                        "Error creating file %s, stat=0x%x",
+                                        BgFilePtr->FileWrite.FileName,
+                                        (int)Status);

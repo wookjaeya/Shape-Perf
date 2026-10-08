@@ -1,0 +1,1 @@
+cmd: timeout -s INT 7  setpriv --reuid=65534 --regid=65534 --clear-groups --inh-caps=-all -- ./core-cpu1

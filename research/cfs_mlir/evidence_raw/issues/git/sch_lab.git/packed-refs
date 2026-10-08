@@ -1,0 +1,17 @@
+# pack-refs with: peeled fully-peeled sorted 
+450075fb1414c3104b7efad18d9fcd596d1d38bf refs/heads/2.4.x
+607e2f90c5f828f3f3ae655a4debacf8b2cc4bbb refs/heads/dev
+46044f9d0f58fe939ea1d182a854060e8d2e9e1d refs/heads/draco-integration
+e2f1493c4357009ae0f5131dda57742b6b06195a refs/heads/integration-candidate
+bc848cd8a6c0407023b959191e8aa39a01928444 refs/heads/main
+e59cc1b80d51127523ca25fb27e30b6e736173dc refs/heads/v7.0.1-integration
+1c82c40386993e21234824382b0622deb98076ae refs/heads/v7.0.1-version-update
+82645f50eb9d458b7ea181f2fb70cb11aef31a3c refs/tags/draco-rc5
+82645f50eb9d458b7ea181f2fb70cb11aef31a3c refs/tags/equuleus-rc1
+acdff2182c17ae1be9e977007e00e51ad3dbe52b refs/tags/v2.2.0a
+56109c1a4956d79cab1573d873fe855dca93cd22 refs/tags/v2.3.0
+450075fb1414c3104b7efad18d9fcd596d1d38bf refs/tags/v2.4.0-rc1
+19bf84cd49be797c6db0afdded452f3b798c3f40 refs/tags/v2.5.0-rc3
+81240416fcc9a6601fa361602088b9f0fe1497ce refs/tags/v2.5.0-rc4
+c8396121e5ca6c76f7a1aba70b054e12af407cde refs/tags/v7.0.0
+bc848cd8a6c0407023b959191e8aa39a01928444 refs/tags/v7.0.1

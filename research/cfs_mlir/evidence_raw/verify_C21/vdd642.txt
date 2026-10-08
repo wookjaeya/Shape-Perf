@@ -1,0 +1,640 @@
+
+
+
+
+
+
+Flight Software Branch
+
+FSW Version Description Document
+
+core Flight Executive (cFE)
+Build: 6.4.2
+June 29, 2015
+
+
+
+
+Signatures
+Submitted by:
+
+
+______________________________________________________
+Susanne Strege/ 582Date
+CFS Flight Software Product Development Lead
+
+
+
+
+Approved by:
+
+
+______________________________________________________
+David McComas/582Date
+Flight Software Branch/Head
+
+
+
+1.0FSW Version Description
+1.1purpose and summary
+The purpose of this build is to fix a series of startup race conditions that were found in cFE build 6.4.1.  This build also includes two fixes in the unit test suite.  
+There were no API changes or additions to this build.  Therefore the transition from cFE 6.4.1 to 6.4.2 should require minor effort.  cFE Build 6.4.2  implements the 5 Trac Tickets listed in Attachment 1.
+Unit testing has been completed and baselined on cFE build 6.4.2 using the cFE test suite.  Results are included in the release package in the “Results” directories included under:
+/fsw/cfe-core/unit-test/  
+Regression testing was performed on both cFE 6.4.0 and this fix/revision build.  Results are included in the release package under:
+/test-and-ground/test-review-packages/Results
+There are some outstanding issues being investigated.  Resolutions to these issues may require a new release. The project CCB and community inputs will determine which FSW DCRs/Trac Tickets to include in the next release.
+1.2new/Changed functionality in this VERSION
+Table 1.2-1 identifies new FSW functionality that has been implemented and is integrated into this FSW version. Requirement references are included where applicable.   
+Table 1.2-1 – New Functionality in this Version
+No.
+FSB DCR /Trac # (or N/A )
+Requirements
+High Level Description of Functionality  
+N/A
+None
+N/A
+N/A
+ 
+Table 1.2-2 identifies changes to FSW functionality from previously delivered FSW versions and the DCRs/Trac Tickets associated with these changes. 
+
+
+
+
+
+Table 1.2-2 – Changes to Previously Delivered Functionality
+No.
+FSB DCR # (or N/A )
+Requirements
+High Level Description of Functionality  
+1
+Trac #40
+N/A
+The CFE_ES_WaitForStartupSync() API has been modified to use a simpler polling loop (with delay) rather than a semaphore. This may cause some extra scheduling delays as the waiting tasks will be performing a delay rather than pending on a semaphore, but it will be reliable. Any such delays will be confined to start up, and typically less than 50ms (the delay time).
+The core applications were updated to make a call to the CFE_ES_WaitForStartupSync API during initialization. This forces each core application to reach its respective main loop before the next core application will be started regardless of the platform’s priority settings.
+2
+Trac #41
+N/A
+When starting an application, cFE ES had called the CFE_ES_UnlockSharedData function before making a call to OS_TaskCreate, then called CFE_ES_LockSharedData again to perform several more updates to the global table after the task ID is obtained.  
+This unlock-relock opens up an opportunity for the child thread to read the shared table data before it is fully populated. This can cause many problems. One specific issue is the call to CFE_ES_GetAppID (which many tasks call very early in their init procedures) will fail, which can have a serious snowball effect.
+The unlock-relock code has been removed and updated to be the same as other areas where tasks are spawned.
+3
+
+Trac #42
+N/A
+The EVS_SendEvent function was modified to confirm the global "EVS_AppID" value is within range before calling EVS_IsFiltered. Otherwise do nothing.
+The CFE_EVS_TaskInit function was modified to set the EVS_AppID value last.  This will assure that all other initialization is done before the AppID is valid.
+1.3MISSING Planned FEATURES AND KNOWN PROBLEMS
+Table 1.3-1 identifies the functions and known discrepancies that are absent from cFE Build 6.4.2. Any workarounds that may apply are identified.
+Information on currently open DCRs is available at http://tlserver3.gsfc.nasa.gov:7001/index.html and https://babelfish.arc.nasa.gov/trac/cfs_cfe/report/1.  Note that these are restricted websites that requires a server account.  Additional DCRs/Trac Tickets may have been submitted after preparation of this VDD.  A cFE DCR and/or Trac Ticket report containing a listing of open DCRs/Trac Tickets is available on request for customers who do not have access to the above servers.  Please contact Susanne Strege, susie.strege@nasa.gov.  Table 1.3-1 below only contains a listing of the open DCRs on the MKS tlserver3 server.  Open trac tickets are not listed.
+Table 1.3-1 – Functions absent from this Release
+No.
+FSB DCR # 
+Description
+Reason for Absence 
+Affected Requirement or Component
+Workaround
+Planned Delivery
+1
+7641
+cFE Executive Services User's Guide has holes
+Lower priority than other 6.4 issues    
+N/A
+None
+Not Determined
+2
+8310
+ES:  add the ability to ignore comment lines (per ARC wish list).
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+3
+9821
+cFE Table Validation Request Queue becomes full
+Lower priority than other 6.4 issues    
+ES
+None
+Not Determined
+4
+12298
+Update ES performance functions to communicate w/logic analyzer (MMS request)
+It is unknown if a generic solution exists for the cFE.  More research is needed.
+ES
+None
+Not Determined
+5
+14483
+ES:  Invalid memory handle when restarting an application (ARC)
+Looks like a Table Manager problem, in the table cleanup for an application.  Insufficient time to complete analysis for 6.4
+SB
+None
+Not Determined
+6
+18593
+CFE_ES_ProcessCoreException and CFE_ES_ResetCFE are not ISR safe
+May require a re-write of these functions to make them ISR safe.  Insufficient time to complete analysis for 6.4
+SB
+None
+Not Determined
+7
+19117
+cFE Time subsystem has calls to OS functions that do not exist ( OS_GetLocalMET and OS_SetLocalMET )
+Requires PSP changes in addition to the TIME subsystem function call changes.  Insufficient time to complete updates for 6.4  
+TIME
+None
+Not Determined
+8
+19589
+TBL: Table Services does not restore LastFileLoaded for critical tables from CDS (MMS Request)
+Implementation is dependent on customer needs.  Community input is needed.
+TBL
+None
+Not Determined
+9
+21087
+cFE Application Developers Guide is Outdated
+Lower priority than other 6.4 issues    
+N/A
+None
+Not Determined
+10
+21293
+cFE: Executive Services always creates tasks with floating point enabled
+Implementation is dependent on customer needs.  Community input is needed.    
+ES
+None
+Not Determined
+11
+21554
+cFE ES: Add a mechanism to serialize the initialization of the cFE Core apps
+OSAL 4.1 updates may have fixed this issue.  Further analysis is needed.
+ES
+None
+Not Determined
+12
+21558
+cFE Core SB: Prevent message looping in applications such as SBN
+This has been fixed in the SBN prototype code.
+SB
+None
+Not Determined
+13
+21594
+ES - Add Ability to Recreate the RAM Disk via Command
+Nice to have feature.  RAM disk can be recreated via shell commanding.  Not many applications require use of the RAM disk (only CF).
+ES
+None
+Not Determined
+14
+21771
+ES - RegisteredTasks Counter Does Not Decrement When Child Tasks are Exited
+Needs test time, code seems to be correct - But also NumChildTasks for each app is not decremented.  Insufficient time to complete analysis for 6.4  
+ES
+None
+Not Determined
+15
+21934
+Table Services CRC Tool Displays Output in Hexadecimal Only
+Easy to implement however there is not a high need for fix.
+N/A
+None
+Not Determined
+16
+22063
+Add support to allow SBN to pass sender information across the network
+Analysis is needed to determine the best solution.  Insufficient time to complete analysis for 6.4  
+SB
+None
+Not Determined
+17
+22080
+EVS - Add Configuration To Output Events Upon Command Message vs. Function Call (MMS Request)
+May change the design of EVS.  Analysis is needed to determine the best solution for the cFE.  Insufficient time to complete analysis for 6.4    
+EVS
+None
+Not Determined
+18
+22081
+SB - Add Last Pipe ID and Message ID to Routine Telemetry for Diagnosing Message Limit Error and Buffer Overrun Errors
+Needs more discussion.  What problem are we trying to solve?  Event filtering may solve this issue.  Implementation is dependent on customer needs.  Community input is needed.
+SB
+None
+Not Determined
+19
+22150
+TIME Services Complexity Requires Extra User Guide Documentation
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+20
+22242
+TABLE load may not work if file read is fragmented ( affects PikeOS )
+Analysis is needed to determine if the solution requires a cFE change or OSAL.  Insufficient time to complete analysis for 6.4
+TBL
+None
+Not Determined
+21
+22313
+CFE ES: Check exception handling code for potential exception conditions and ISR safety
+Insufficient time to complete analysis for 6.4
+ES
+None
+Not Determined
+22
+22622
+TBL - Update Table Services to Send Messages to Notify Applications of Pending Table Updates
+Update will require an additional message ID for each application using a table.  Implementation is costly.  Implementation is dependent on customer needs.  Community input is needed.  
+TBL
+None
+Not Determined
+23
+22629
+Consider adding option for 8 bit subseconds field in the telemetry secondary header
+Implementation is dependent on customer needs.  Community input is needed.
+cFE
+None
+Not Determined
+24
+22684
+Update CFE_ES_SYSTEM_LOG_SIZE verify to allow larger sys log files
+Lower priority than other 6.4 issues
+ES
+None
+Not Determined
+25
+22685
+Why is CFE_SB_MAX_MSG_IDS limited to 1024 in the verify header file?
+Lower priority than other 6.4 issues
+SB
+None
+Not Determined
+26
+22686
+Why does the CFE_SB_DEFAULT_MSG_LIMIT have a lower limit of 4 in the verify.h?
+Lower priority than other 6.4 issues
+SB
+None
+Not Determined
+27
+22703
+TBL - Modified Table Notification Issue
+Insufficient time to complete for 6.4
+TBL
+None
+Not Determined
+28
+22741
+Consider adding EVS command to send event with text specified in command parameter
+Implementation is dependent on customer needs.  Community input is needed.
+EVS
+None
+Not Determined
+29
+22742
+SB - Sequence Count Reset Issue (APL found)
+Analysis is needed to determine if this is an issue that should be fixed in the Software Bus or worked around as was done by the RBSP FSW team.  Insufficient time to complete analysis for 6.4
+SB
+Create a library routine that will manage the sequence counters so that when the message is sent on the software bus, the packet is complete. Replace the calls to CFE_SB_MsgSend with CFE_SB_ZeroCopySend, which is the API that does not increment and update the sequence counter.
+
+30
+22767
+Update String Functions to Use "strn" Version (ARC wish list)
+Lower priority than other 6.4 issues
+cFE
+None
+
+31
+22768
+cFE ES: Do not create syslog entries for each ER log entry
+Lower priority than other 6.4 issues
+ES
+None
+
+32
+22780
+cFE ES : Fix ES AppCreate Command parameter validation
+Lower priority than other 6.4 issues
+ES
+None
+
+33
+22789
+Edit SB Unit test to cover zero copy functions
+Lower priority than other 6.4 issues
+N/A
+None
+
+34
+22791
+The SB unit test driver needs to be changed to increase the coverage of the SB source code
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+35
+22792
+The EVS unit test driver needs to be changed to increase the coverage of the EVS source code
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+36
+22793
+The TBL unit test driver needs to be changed to increase the coverage of the TBL source code
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+37
+22807
+ES unit test crashes on Ubuntu 14.04
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+38
+22812
+Remove “cpu” directories from fsw/platform_inc
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+39
+22813
+cFE does not allow FSW to meet double floating point alignment requirements on PPC440x5 Book E architecture
+Insufficient time to complete analysis for 6.4
+N/A
+None
+Not Determined
+40
+22830
+SB – Update to verify HK command packet length
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+41
+22831
+EVS – Update to verify HK command packet length
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+42
+22832
+ES – Update to verify HK command packet length
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+43
+22833
+TIME – Update to verify HK command packet length
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+44
+22838
+MMS-IVV-013 (OBS-1238) - Static Code Analysis: Possible Buffer Underrun in cfe_fs_decompress.c 
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+45
+22843
+SB - Allow the Endianness of the Command Secondary Header to be Configurable
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+46
+22846
+Elf2CfeTbl tool can be different for different processors and the tool can require recompilation when osconfig.h changes
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+47
+22932
+CCSDS header file macro CCSDS_INC_SEQ generates a compiler warning when referenced
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+48
+22934
+SB - Duplicate Pipe Creation Causes Failure to Delete Pipe
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+49
+22950
+SB - The CFE_SB_MAX_DEST_PER_PKT Configuration Parameter Purpose is Not Clearly Documented
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+50
+23031
+TBL - Dump table registry data command hogs CPU if too many tables
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+51
+23032
+Put ES Perf Child Task Priority in global cfe_platform (or mission) config.
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+52
+23035
+ES - Exit Application Error
+Lower priority than other 6.4 issues
+N/A
+None
+Not Determined
+1.4Development Tool Versions Associated with this FSW Version
+Table 1.4-1 identifies the versions of development tools used to generate this FSW version:
+Note that since the cFE uses the Operating System Abstraction Layer (OSAL), multiple operating systems are supported.  Build Testing of cFE Build 6.4.2 has been done on a PPC/mcp750 using the RTOS and compiler specified in Table 1.4-1 below.  In addition, cFE Build 6.4.2 has been integrated with the following hardware/software platforms:
+
+Tested Platforms
+PPC/mcp750 running VxWorks 6.4  
+
+Supported Platforms
+PPC/RAD750 running VxWorks 6.4
+Coldfire/MMS flight board running RTEMS 4.10
+Coldfire/MCF5235 running RTEMS 4.10
+SPARC/LEON3 running RTEMS 4.10
+X86/PC running Linux
+
+
+Table 1.4-1 – Development Tool Versions Associated with this FSW Version
+Tool Type.
+Tool Name
+Version Used
+RTOS
+VxWorks 
+6.4
+Compiler
+GNU (ccppc)
+3.3.2
+CFS PSP
+CFS Platform Support Package
+1.2.0.0
+OSAL
+Operating System Abstraction Layer
+4.1.1
+Ground System
+ASIST
+20.2
+2.0Delivered products
+Table 2-1 identifies the locations of FSW products relevant to this FSW Build. The version or date of the Build and where the product can be located are provided.  Changes from a previous VDD are identified.  
+Table 2-1 – Delivered Products and their Locations
+
+Software Element
+Changed with this Version?
+New Version or Date
+
+Location
+Executable for this build
+Yes
+6.4.2
+N/A.  Executables are not delivered for the cFE
+Installation Procedures &amp; Special Instructions 
+No
+N/A
+See Deployment Guide .Tlserver3.gsfc.nasa.gov (in MKS CM system)
+Source Code of this FSW Build 
+Yes
+6.4.2
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+FSW Build Plan
+No
+N/A
+None
+Annotated S/W Detailed Design Docs
+No
+N/A
+cFE Application Developer’s Guide
+Ground System T&amp;C Database
+Yes
+6.4.2
+Tlserver3.gsfc.nasa.gov (in MKS CM system under test-and-ground/asist)
+Ground System Scripts developed by FSB
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system under test-and-ground/asist)
+Simulator and Test Data Generator Software  
+N/A
+N/A
+None
+Executable - Ground Tools associated with FSW (tools to build stored command loads, etc.)
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+Source Code - Ground Tools associated with FSW (tools to build stored command loads, etc.)
+Yes
+N/A
+$WORK
+Perl scripts to generate ground database and build verification procedures  from templates
+Unit Test Procedures
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+Unit Test Data
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+Unit Test Results
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+FSW Make Files
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+Linker &amp; Compiler Configuration Files
+No
+N/A
+Tlserver3.gsfc.nasa.gov (in MKS CM system)
+
+3.0INSTALLATION PROCEDURES
+Table 3-1 identifies the nominal FSW Installation Procedure(s) for this FSW Build onto the intended target system (including the commercial applications used and the configuration settings).  The procedure version identifier, the date of the procedure and where it can be located are also provided.  
+Table 3-1 FSW Installation Procedure(s)
+Destination
+(Target System)
+Filename
+Version and Date
+Location
+Procedure is generic for each CPU
+CFS Deployment Guide
+3.0
+tlserver.gsfc.nasa.gov cfe-project docs/cFE Deployment Guide
+
+4.0Configuration summary and version identification
+cFE Build 6.4.2 can be found on tlserver3.gsfc.nasa.gov and is provided as open source on sourceforge.net:
+
+ http://sourceforge.net/projects/coreflightexec/
+
+Telemetry is available to indicate cFE Build 6.4.2 and is documented in the following source file: /fsw/cfe/core/src/inc/cfe_version.h.
+
+Acronyms
+
+API………………………………………...…………………………………………….Application Program Interface
+cFECore Flight Executive
+C&amp;DHCommand and Data Handling
+cFS…………………………………………………………………………………………Core Flight Software System
+CMConfiguration Management
+CPMCFS Performance Monitor
+COTSCommercial Off-The-Shelf
+DCRDiscrepancy/Change Request
+ESExecutive Services
+ETUEngineering Test Unit
+FSBFlight Software Branch
+FSWFlight Software
+I&amp;TIntegration &amp; Test
+MMS Magnetospheric Multiscale Mission
+OSAL……………………………………………………………………….……Operating System Abstraction Layer
+RTOSReal-Time Operating System
+TBL……………………………………………………………………………………………………………..……Table
+T&amp;CTelemetry and Command
+URLUniversal Resource Locator
+UTF…………………………………………………………………………………………….….Unit Test Framework
+VDDVersion Description Document
+ATTACHMENT 1 – 6.4.2 DCRs/Trac Tickets
+Ticket
+Summary
+Type
+Milestone
+Component
+#40
+CFE ES "StartupSyncSemaphore" subject to multiple race conditions
+defect
+6.4.2
+es
+#41
+Race condition within CFE_ES_AppCreate
+defect
+6.4.2
+es
+#42
+Race conditions / dependencies between CFE core apps
+defect
+6.4.2
+other
+#51
+Buffer overrun in stub implementation of CFE_TIME_Print
+defect
+6.4.2
+time
+#59
+Unit Test Stub Function UT_GetActualCmdCodeField Not Restored with CCSDS Secondary Header (GSFC DCR 23036)
+defect
+6.4.2
+other

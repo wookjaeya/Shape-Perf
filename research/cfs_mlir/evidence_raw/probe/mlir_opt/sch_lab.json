@@ -1,0 +1,320 @@
+{
+ "summary": {
+  "mlir_opt/sch_lab/sch_lab_app.dbg.mlir": {
+   "defined_funcs": 4,
+   "api_calls_by_family": {
+    "CFE_ES_api": 26,
+    "CFE_MSG_api": 4,
+    "CFE_SB_api": 6,
+    "CFE_TBL_api": 10,
+    "OS_api": 16
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 3,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WriteToSysLog": 21,
+    "CFE_MSG_Init": 2,
+    "CFE_MSG_SetFcnCode": 2,
+    "CFE_SB_CreatePipe": 2,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_Subscribe": 2,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_TBL_ReleaseAddress": 4,
+    "OS_CountSemCreate": 2,
+    "OS_CountSemGive": 1,
+    "OS_CountSemTake": 1,
+    "OS_TimeBaseGetIdByName": 2,
+    "OS_TimerAdd": 2,
+    "OS_TimerSet": 2,
+    "OS_printf": 6
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: load_other": 2,
+    "CFE_SB_Subscribe#0: direct_const": 2
+   },
+   "msgptr": {
+    "CFE_MSG_Init: other": 2,
+    "CFE_SB_TransmitMsg: other": 1
+   },
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 4,
+   "global_loads": 15,
+   "global_memops": [
+    "memset SCH_LAB_Global. src=memset @ apps/sch_lab/fsw/src/sch_lab_app.c:166",
+    "memset SCH_LAB_Global. src=memset @ apps/sch_lab/fsw/src/sch_lab_app.c:166"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 64,
+    "llvm.getelementptr:unknown": 5,
+    "llvm.getelementptr:known": 47,
+    "llvm.load:known": 44,
+    "llvm.mlir.addressof:unknown": 28,
+    "llvm.mlir.addressof:known": 24,
+    "llvm.mlir.constant:unknown": 21,
+    "llvm.mlir.constant:known": 10,
+    "llvm.store:known": 12,
+    "other:unknown": 9,
+    "other:known": 215
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "mlir_opt/sch_lab/sch_lab_app.dbg.mlir",
+   "n_defined_funcs": 4,
+   "defined_funcs": [
+    "CFE_SB_ValueToMsgId",
+    "SCH_LAB_AppInit",
+    "SCH_LAB_AppMain",
+    "SCH_LAB_LocalTimerCallback"
+   ],
+   "calls": {
+    "CFE_ES_|api": 26,
+    "OS_|api": 16,
+    "CFE_TBL_|api": 10,
+    "CFE_MSG_|api": 4,
+    "CFE_SB_|api": 6
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 3,
+    "OS_CountSemCreate": 2,
+    "CFE_ES_WriteToSysLog": 21,
+    "OS_TimeBaseGetIdByName": 2,
+    "OS_TimerAdd": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_ReleaseAddress": 4,
+    "CFE_TBL_GetAddress": 2,
+    "CFE_MSG_Init": 2,
+    "CFE_MSG_SetFcnCode": 2,
+    "CFE_SB_CreatePipe": 2,
+    "OS_printf": 6,
+    "CFE_SB_Subscribe": 2,
+    "OS_TimerSet": 2,
+    "CFE_ES_RunLoop": 1,
+    "OS_CountSemTake": 1,
+    "CFE_SB_ReceiveBuffer": 1,
+    "CFE_SB_TransmitMsg": 1,
+    "CFE_ES_ExitApp": 1,
+    "OS_CountSemGive": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "SCH_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:246"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6161
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:296"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:246"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6161
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:296"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "SCH_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "other",
+      "op": "llvm.getelementptr"
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:246"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "kind": "other",
+      "op": "llvm.getelementptr"
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:131"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "kind": "other",
+      "op": "llvm.getelementptr"
+     },
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:246"
+    }
+   ],
+   "global_stores": [],
+   "global_loads": [
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:211"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:215"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:224"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:283"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:296"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TimerId"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:303"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TimingSem"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:98"
+    },
+    {
+     "func": "SCH_LAB_AppMain",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:102"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:211"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:215"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:224"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TblHandle"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:283"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "CmdPipe"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:296"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TimerId"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:303"
+    },
+    {
+     "func": "SCH_LAB_LocalTimerCallback",
+     "sym": "SCH_LAB_Global",
+     "path": [
+      "TimingSem"
+     ],
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:145"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "SCH_LAB_AppMain",
+     "op": "memset",
+     "sym": "SCH_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:166"
+    },
+    {
+     "func": "SCH_LAB_AppInit",
+     "op": "memset",
+     "sym": "SCH_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/sch_lab/fsw/src/sch_lab_app.c:166"
+    }
+   ]
+  }
+ ]
+}

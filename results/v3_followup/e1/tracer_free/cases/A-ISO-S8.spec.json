@@ -1,0 +1,23 @@
+{
+ "case_id": "A-ISO-S8",
+ "artifacts": {
+  "S8": {
+   "path": "/home/user/work/v3/g2/K/L0064/S8_full/model.so",
+   "tag": null
+  }
+ },
+ "steps": [
+  [
+   "load",
+   "S8"
+  ],
+  [
+   "call",
+   "S8"
+  ],
+  [
+   "call",
+   "S8"
+  ]
+ ]
+}

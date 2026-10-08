@@ -1,0 +1,275 @@
+{
+  "source_cell": "/home/user/work/v3/g2/K/L0064",
+  "source_build": {
+    "kind": "K",
+    "length": 64,
+    "u": 8,
+    "input_sha256": "39cf8b687e4db4a94fcc5a464239a8bf71fb047c20b121ae4847593fae13361b",
+    "unrolled_loops": {
+      "S8": 1,
+      "S1": 0
+    },
+    "predicted_unrolled_loops": {
+      "S8": 1,
+      "S1": 0
+    },
+    "ir_identical": false,
+    "predicted_ir_identical": false,
+    "normalized_diff": {
+      "hunks": 1,
+      "changed_lines": 23
+    },
+    "so_hash": {
+      "S8": "6e8faed173de27b9408e284921aaa8af0cce0c1114955a11809b9ec86d0906cf",
+      "S1": "01328b45a4da92c28805e4b3e4582dd96ba8046cd50100fb87e37d8497e61497"
+    },
+    "so_identical": false,
+    "compile_ok": true,
+    "provenance_id": "2f3da961b190f5f6",
+    "prediction_holds": true
+  },
+  "files": {
+    "model.onnx": "e0b1404e26aa8a1f3238312d148a79ffbe8cfec430800f1a0d771e881ab9698d",
+    "input.npy": "2993eb7af23301d784cfa2bd9b8d411a77c44b534432415201c28893dc414a95",
+    "expected.npy": "36431537e53cfd31be09d3a544e72b3227e1a8911b217574d3fe83073fef8562"
+  },
+  "provenance_id": "2b0d6a5522e9edc3",
+  "builds": [
+    {
+      "arm": "S8",
+      "tag": "alpha",
+      "probe": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S8",
+        "mode": "probe",
+        "tag": "alpha",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/orig/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=alpha",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_probe/model",
+          "--EmitMLIR",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "orig",
+        "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+        "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+        "compiler_bin_bytes": 153922704
+      },
+      "full": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S8",
+        "mode": "full",
+        "tag": "alpha",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/orig/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=alpha",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "orig",
+        "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+        "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+        "compiler_bin_bytes": 153922704,
+        "artifact_hash": "c18036e339bb0fee4c360d8f8a96d9d657d2215c8d9c347011fc7b81f5f8f723",
+        "artifact_bytes": 42008
+      },
+      "lowering_equal_to_untagged_after_tag_normalization": true,
+      "normalized_diff_vs_untagged": {
+        "hunks": 0,
+        "changed_lines": 0
+      }
+    },
+    {
+      "arm": "S1",
+      "tag": "bravo",
+      "probe": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S1",
+        "mode": "probe",
+        "tag": "bravo",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=bravo",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_probe/model",
+          "--EmitMLIR",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "cap1",
+        "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+        "compiler_bin_bytes": 153922704
+      },
+      "full": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S1",
+        "mode": "full",
+        "tag": "bravo",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=bravo",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_bravo_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "cap1",
+        "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+        "compiler_bin_bytes": 153922704,
+        "artifact_hash": "227c7cd9a9cc3aa2ad8440369f23fc3c302ed11f82b5e4992b0763e601bee9d0",
+        "artifact_bytes": 46104
+      },
+      "lowering_equal_to_untagged_after_tag_normalization": true,
+      "normalized_diff_vs_untagged": {
+        "hunks": 0,
+        "changed_lines": 0
+      }
+    },
+    {
+      "arm": "S8",
+      "tag": "bravo",
+      "probe": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S8",
+        "mode": "probe",
+        "tag": "bravo",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/orig/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=bravo",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_probe/model",
+          "--EmitMLIR",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "orig",
+        "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+        "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+        "compiler_bin_bytes": 153922704
+      },
+      "full": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S8",
+        "mode": "full",
+        "tag": "bravo",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/orig/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=bravo",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "orig",
+        "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+        "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+        "compiler_bin_bytes": 153922704,
+        "artifact_hash": "a855c03007c270124f75abbf6ec2b9dcdd4b0c8f270a9c5d46eaa74793b5e3e0",
+        "artifact_bytes": 42008
+      },
+      "lowering_equal_to_untagged_after_tag_normalization": true,
+      "normalized_diff_vs_untagged": {
+        "hunks": 0,
+        "changed_lines": 0
+      }
+    },
+    {
+      "arm": "S1",
+      "tag": "alpha",
+      "probe": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S1",
+        "mode": "probe",
+        "tag": "alpha",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=alpha",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_probe/model",
+          "--EmitMLIR",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "cap1",
+        "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+        "compiler_bin_bytes": 153922704
+      },
+      "full": {
+        "kind": "K",
+        "length": 64,
+        "arm": "S1",
+        "mode": "full",
+        "tag": "alpha",
+        "returncode": 0,
+        "command": [
+          "/home/user/work/variants/cap1/bin/onnx-mlir",
+          "-O3",
+          "--march=x86-64",
+          "--mcpu=emeraldrapids",
+          "--tag=alpha",
+          "-o",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model",
+          "--EmitLib",
+          "/home/user/work/v3_followup/e1/K_L0064_tagged/model.onnx"
+        ],
+        "stderr_tail": "",
+        "compiler_variant": "cap1",
+        "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+        "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+        "compiler_bin_bytes": 153922704,
+        "artifact_hash": "4045744f2c1ddf482f2b62e49dad3a1331b90de4cac4d476453848e2a8c7d330",
+        "artifact_bytes": 46104
+      },
+      "lowering_equal_to_untagged_after_tag_normalization": true,
+      "normalized_diff_vs_untagged": {
+        "hunks": 0,
+        "changed_lines": 0
+      }
+    }
+  ]
+}

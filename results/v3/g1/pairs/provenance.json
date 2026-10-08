@@ -1,0 +1,57 @@
+{
+  "created_unix": 1790663942.6855357,
+  "source": {
+    "git_head": "1d781b6fb0a3a5d4ebe03f5140ffdecf1260207a",
+    "dirty": false,
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked_files": [],
+    "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dependencies": {
+    "python": "3.11.15",
+    "n_packages": 24,
+    "packages_sha256": "5b9ecf3d8e4a2429c12b0f9a48b53dc0d3641435dbee4e7b7751663569cf4401",
+    "key": {
+      "numpy": "2.2.6",
+      "onnx": "1.23.0",
+      "onnxruntime": "1.23.2",
+      "protobuf": "6.33.5",
+      "scipy": "1.15.3"
+    }
+  },
+  "host": {
+    "kernel": "6.18.44-fc-v49",
+    "machine": "x86_64",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "n_cpus": 4,
+    "node": "vm",
+    "cfs_quota_us": "unavailable"
+  },
+  "compilers": [
+    {
+      "compiler_variant": "orig",
+      "compiler_bin": "/home/user/work/variants/orig/bin/onnx-mlir",
+      "compiler_bin_sha256": "e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0",
+      "compiler_bin_bytes": 153922704,
+      "version": "onnx-mlir version 0.5.1, onnx version 1.21.0 (https://github.com/onnx/onnx-mlir 1e017c9fcd7ae7218731ae799f13a957e0cbc80b)\nLLVM version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)\nOptimized build with assertions.\nDefault target: x86_64-unknown-linux-gnu\nHost CPU: emeraldrapids"
+    },
+    {
+      "compiler_variant": "cap1",
+      "compiler_bin": "/home/user/work/variants/cap1/bin/onnx-mlir",
+      "compiler_bin_sha256": "fcea1caa6a858832dbbcb2f7951337c495b29be06b178676cd78c8c70ce49396",
+      "compiler_bin_bytes": 153922704,
+      "version": "onnx-mlir version 0.5.1, onnx version 1.21.0 (https://github.com/onnx/onnx-mlir 1e017c9fcd7ae7218731ae799f13a957e0cbc80b)\nLLVM version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)\nOptimized build with assertions.\nDefault target: x86_64-unknown-linux-gnu\nHost CPU: emeraldrapids"
+    }
+  ],
+  "extra": {
+    "role": "g1-pair-build",
+    "lengths": [
+      149,
+      150,
+      156,
+      160,
+      256
+    ]
+  },
+  "provenance_id": "efe05ca1411a3e35"
+}

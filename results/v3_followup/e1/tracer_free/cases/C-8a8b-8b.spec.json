@@ -1,0 +1,39 @@
+{
+ "case_id": "C-8a8b-8b",
+ "artifacts": {
+  "S8a": {
+   "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so",
+   "tag": "alpha"
+  },
+  "S8b": {
+   "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_bravo_full/model.so",
+   "tag": "bravo"
+  }
+ },
+ "steps": [
+  [
+   "load",
+   "S8a"
+  ],
+  [
+   "load",
+   "S8b"
+  ],
+  [
+   "call",
+   "S8b"
+  ],
+  [
+   "call",
+   "S8a"
+  ],
+  [
+   "call",
+   "S8b"
+  ],
+  [
+   "call",
+   "S8a"
+  ]
+ ]
+}

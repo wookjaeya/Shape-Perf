@@ -1,0 +1,9 @@
+test_tag: v1_read:
+ operand #0
+  - w1
+test_tag: v2_read:
+ operand #0
+  - <unknown>
+test_tag: v3_read_valid:
+ operand #0
+  - <unknown>

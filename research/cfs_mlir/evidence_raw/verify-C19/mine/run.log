@@ -1,0 +1,20 @@
+$ clang -fclangir -emit-cir t.c -o t.cir
+error: clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON
+exit=1
+$ clang -fclangir -S -emit-llvm t.c -o t.cir.ll
+exit=0
+$ clang -S -emit-llvm t.c -o t.ll
+exit=0
+$ diff t.cir.ll t.ll
+diff exit=0
+cmp exit=0
+$ clang -fclangir -S -emit-llvm -Wall -### t.c
+23:"-fclangir"
+$ clang -fclangir -c t.c (any warning?)
+exit=0
+$ clang -fclangir -S -emit-llvm -O2 t.c
+cmp O2 exit=0
+$ ls cir-opt cir-translate
+ls: cannot access '/home/user/work/llvm-project/build/bin/cir-opt': No such file or directory
+ls: cannot access '/home/user/work/llvm-project/build/bin/cir-translate': No such file or directory
+ls: cannot access '/home/user/work/llvm-project/build/bin/cir-lsp-server': No such file or directory

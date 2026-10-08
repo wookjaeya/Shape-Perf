@@ -1,0 +1,315 @@
+# Analysis of count-sem-test syscall traces, 2026-10-08T01:51:26Z
+# Inputs: /home/user/work/procrace/baselines/osal-visibility/traces/run1_exact.strace (exact command), /home/user/work/procrace/baselines/osal-visibility/traces/run2_annotated.strace and rep03..rep12 (annotated: -tt -T -s 65535 -k), all in /home/user/work/procrace/baselines/osal-visibility/traces
+# Helpers (agent-written, read-only on traces): /home/user/work/procrace/baselines/osal-visibility/scripts/analyze_strace.py, /home/user/work/procrace/baselines/osal-visibility/scripts/show_futex_pi.py, /home/user/work/procrace/baselines/osal-visibility/scripts/summarize.py
+# Markers: UtAssert prints one report line per assertion right after the call returns (count-sem-test.c);
+#   so syscalls between the report write for line N-1 and the report write for line N belong to the call on line N (plus UtAssert's own bookkeeping).
+
+## A. run1_exact: window around OS_CountSemCreate (count-sem-test.c:105 'Test_Sem', :106 NAME_TAKEN, :109 'Test_Sem_Nonzero'), trace lines 200..216
+22284 write(1, "01.012 count-sem-test.c:102 - OS"..., 111) = 111
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.013 count-sem-test.c:105 - OS"..., 99) = 99
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.014 count-sem-test.c:106 - OS"..., 110) = 110
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.015 count-sem-test.c:109 - OS"..., 107) = 107
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.016 count-sem-test.c:117 - OS"..., 92) = 92
+# => between the report for :102 and the report for :117 the only syscalls are write(1,...) issued by UtAssert reporting. OS_CountSemCreate x3 issued no syscall.
+
+## B. run1_exact: window around task creation and the by-name lookups in child tasks (count-sem-test.c:160..189; lookups at :35, :49, :63), trace lines 299..465
+22284 write(1, "01.036 count-sem-test.c:151 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b8e000
+22284 mprotect(0x7fc844b8f000, 20480, PROT_READ|PROT_WRITE) = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b93990, parent_tid=0x7fc844b93990, exit_signal=0, stack=0x7fc844b8e000, stack_size=0x4f80, tls=0x7fc844b936c0} => {parent_tid=[22286]}, 88) = 22286
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22286 rseq(0x7fc844b93fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 <... rt_sigprocmask resumed>NULL, 8) = 0
+22286 <... rseq resumed>)               = 0
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22286 set_robust_list(0x7fc844b939a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 7
+22286 <... set_robust_list resumed>)    = 0
+22284 write(1, " ", 1 <unfinished ...>
+22286 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 write(1, "01.037 count-sem-test.c:160 - OS"..., 157 <unfinished ...>
+22286 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 <... write resumed>)              = 157
+22284 write(1, "\n", 1 <unfinished ...>
+22286 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22286 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=580136619},  <unfinished ...>
+22286 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22286 write(1, "[ PASS]", 7)            = 7
+22286 write(1, " ", 1)                  = 1
+22286 write(1, "01.038 count-sem-test.c:35 - OS_"..., 94) = 94
+22286 write(1, "\n", 1)                 = 1
+22286 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 rt_sigaction(SIGRTMIN, {sa_handler=0x7fc84489a920, sa_mask=[], sa_flags=SA_RESTORER|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fc844845330}, NULL, 8) = 0
+22284 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=50627, ...}) = 0
+22284 mmap(NULL, 50627, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fc844b81000
+22284 close(3)                          = 0
+22284 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+22284 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"..., 832) = 832
+22284 fstat(3, {st_mode=S_IFREG|0644, st_size=183024, ...}) = 0
+22284 mmap(NULL, 185256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fc844b53000
+22284 mmap(0x7fc844b57000, 147456, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4000) = 0x7fc844b57000
+22284 mmap(0x7fc844b7b000, 16384, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7fc844b7b000
+22284 mmap(0x7fc844b7f000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2b000) = 0x7fc844b7f000
+22284 close(3)                          = 0
+22284 mprotect(0x7fc844b7f000, 4096, PROT_READ) = 0
+22284 munmap(0x7fc844b81000, 50627)     = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 getpid()                          = 22284
+22284 tgkill(22284, 22286, SIGRTMIN)    = 0
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22284 futex(0x7fc844b93990, FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME, 22286, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22286 <... futex resumed>)              = ? ERESTARTSYS (To be restarted if SA_RESTART is set)
+22286 --- SIGRTMIN {si_signo=SIGRTMIN, si_code=SI_TKILL, si_pid=22284, si_uid=1000} ---
+22286 getpid()                          = 22284
+22286 futex(0x7fc844b80230, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+22286 rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+22286 exit(0)                           = ?
+22286 +++ exited with 0 +++
+22284 <... futex resumed>)              = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.039 count-sem-test.c:164 - OS"..., 77) = 77
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.040 count-sem-test.c:165 - ta"..., 58) = 58
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.041 count-sem-test.c:169 - OS"..., 92) = 92
+22284 write(1, "\n", 1)                 = 1
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.042 count-sem-test.c:170 - se"..., 57) = 57
+22284 write(1, "\n", 1)                 = 1
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b93990, parent_tid=0x7fc844b93990, exit_signal=0, stack=0x7fc844b8e000, stack_size=0x4f80, tls=0x7fc844b936c0} => {parent_tid=[22287]}, 88) = 22287
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22287 rseq(0x7fc844b93fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7)            = 7
+22287 <... rseq resumed>)               = 0
+22284 write(1, " ", 1 <unfinished ...>
+22287 set_robust_list(0x7fc844b939a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 1
+22287 <... set_robust_list resumed>)    = 0
+22284 write(1, "01.043 count-sem-test.c:178 - OS"..., 157 <unfinished ...>
+22287 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 157
+22287 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=633673383},  <unfinished ...>
+22287 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22287 write(1, "[ PASS]", 7)            = 7
+22287 write(1, " ", 1)                  = 1
+22287 write(1, "01.044 count-sem-test.c:35 - OS_"..., 94) = 94
+22287 write(1, "\n", 1)                 = 1
+22287 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b88000
+22284 mprotect(0x7fc844b89000, 20480, PROT_READ|PROT_WRITE) = 0
+22284 rt_sigprocmask(SIG_BLOCK, ~[], ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b8d990, parent_tid=0x7fc844b8d990, exit_signal=0, stack=0x7fc844b88000, stack_size=0x4f80, tls=0x7fc844b8d6c0} => {parent_tid=[22288]}, 88) = 22288
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], NULL, 8) = 0
+22288 rseq(0x7fc844b8dfe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1 <unfinished ...>
+22288 <... rseq resumed>)               = 0
+22284 <... write resumed>)              = 1
+22284 write(1, "01.045 count-sem-test.c:182 - OS"..., 157 <unfinished ...>
+22288 set_robust_list(0x7fc844b8d9a0, 24 <unfinished ...>
+22284 <... write resumed>)              = 157
+22288 <... set_robust_list resumed>)    = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22288 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 <... write resumed>)              = 1
+22288 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 mmap(NULL, 24576, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fc844b82000
+22288 write(1, "[ PASS]", 7 <unfinished ...>
+22284 mprotect(0x7fc844b83000, 20480, PROT_READ|PROT_WRITE <unfinished ...>
+22288 <... write resumed>)              = 7
+22284 <... mprotect resumed>)           = 0
+22288 write(1, " ", 1 <unfinished ...>
+22284 rt_sigprocmask(SIG_BLOCK, ~[],  <unfinished ...>
+22288 <... write resumed>)              = 1
+22284 <... rt_sigprocmask resumed>~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1], 8) = 0
+22288 write(1, "01.046 count-sem-test.c:49 - OS_"..., 94 <unfinished ...>
+22284 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7fc844b87990, parent_tid=0x7fc844b87990, exit_signal=0, stack=0x7fc844b82000, stack_size=0x4f80, tls=0x7fc844b876c0} <unfinished ...>
+22288 <... write resumed>)              = 94
+22288 write(1, "\n", 1 <unfinished ...>
+22284 <... clone3 resumed> => {parent_tid=[22289]}, 88) = 22289
+22288 <... write resumed>)              = 1
+22284 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22288 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... rt_sigprocmask resumed>NULL, 8) = 0
+22289 rseq(0x7fc844b87fe0, 0x20, 0, 0x53053053 <unfinished ...>
+22284 write(1, "[ PASS]", 7 <unfinished ...>
+22289 <... rseq resumed>)               = 0
+22284 <... write resumed>)              = 7
+22289 set_robust_list(0x7fc844b879a0, 24 <unfinished ...>
+22284 write(1, " ", 1 <unfinished ...>
+22289 <... set_robust_list resumed>)    = 0
+22284 <... write resumed>)              = 1
+22289 rt_sigprocmask(SIG_SETMASK, ~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1],  <unfinished ...>
+22284 write(1, "01.047 count-sem-test.c:185 - OS"..., 157) = 157
+22289 <... rt_sigprocmask resumed>NULL, 8) = 0
+22284 write(1, "\n", 1 <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_LOCK_PI_PRIVATE, NULL <unfinished ...>
+22284 <... write resumed>)              = 1
+22284 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 <... futex resumed>)              = 0
+22284 clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, {tv_sec=2471, tv_nsec=685640776},  <unfinished ...>
+22289 futex(0x561bf3da0e08, FUTEX_UNLOCK_PI_PRIVATE) = 0
+22289 write(1, "[ PASS]", 7)            = 7
+22289 write(1, " ", 1)                  = 1
+22289 write(1, "01.048 count-sem-test.c:63 - OS_"..., 94) = 94
+22289 write(1, "\n", 1)                 = 1
+22289 futex(0x561bf3d9f0c0, FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME, 0, {tv_sec=1791423992, tv_nsec=190334989}, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+22284 <... clock_nanosleep resumed>NULL) = 0
+22284 write(1, "[ PASS]", 7)            = 7
+22284 write(1, " ", 1)                  = 1
+22284 write(1, "01.049 count-sem-test.c:189 - ta"..., 94) = 94
+# => per child: clone3 (parent, from OS_TaskCreate) / rseq, set_robust_list, rt_sigprocmask (glibc thread start) / futex PI lock+unlock on 0x...e08 (UT_BSP_Lock of the UtAssert report, see D) / write of the PASS line for the lookup / futex WAIT on the semaphore word (OS_CountSemTake/TimedWait blocking).
+# => no syscall attributable to OS_CountSemGetIdByName itself (confirmed with stacks in C).
+
+## C. per-trace summary over the 11 annotated traces (stack-attributed)
+| trace | syscalls | name-bearing syscalls (issuer) | under OS_CountSemCreate: total / via OS_printf | under OS_CountSemGetIdByName: total / via OS_printf | under idmap lock impl | under OS_TaskPrepare |
+|---|---|---|---|---|---|---|
+| run2_annotated.strace | 610 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep03_annotated.strace | 601 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep04_annotated.strace | 609 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep05_annotated.strace | 604 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep06_annotated.strace | 610 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep07_annotated.strace | 606 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep08_annotated.strace | 605 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep09_annotated.strace | 604 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep10_annotated.strace | 610 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep11_annotated.strace | 610 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+| rep12_annotated.strace | 606 | 13 (OS_BSP_ConsoleOutput_Impl<-UtAssert_DoReport x13) | 1 / 1 | 1 / 1 | 0 | 0 |
+# 'via OS_printf' = the FUTEX_WAKE of the OSAL console task caused by the BUGCHECK message printed for the NULL-argument checks
+#   (count-sem-test.c:93-97; osapi-countsem.c L90-91, L209-210); the successful create/lookup calls issued 0 syscalls in every trace.
+
+## D. attribution of every PI-futex syscall in run2_annotated (grouped: address, op, innermost two frames of the test binary)
+   39 x futex(0x55de862e3e08, FUTEX_UNLOCK_PI_PRIVATE)  stack: OS_BSP_Unlock_Impl <- UT_BSP_Unlock
+   22 x futex(0x55de862e3e08, FUTEX_LOCK_PI_PRIVATE)  stack: OS_BSP_Lock_Impl <- UT_BSP_Lock
+    6 x futex(0x55de862e3e08, FUTEX_LOCK_PI_PRIVATE)  stack: OS_BSP_Lock_Impl <- OS_ConsoleOutput_Impl
+    6 x futex(0x55de862e3e08, FUTEX_UNLOCK_PI_PRIVATE)  stack: OS_BSP_Unlock_Impl <- OS_ConsoleOutput_Impl
+    1 x futex(0x7ffe76de3cd4, FUTEX_UNLOCK_PI_PRIVATE)  stack: OS_BSP_Initialize <- main
+# => every PI futex at 0x...e08 is OS_BSP_Lock_Impl/OS_BSP_Unlock_Impl (BSP console lock taken by UtAssert reporting and by the OSAL console task);
+#    none comes from OSAL idmap locking (OS_Lock_Global_Impl) or from OS_CountSemCreate/OS_CountSemGetIdByName. The single 0x7ffe... EPERM call is in OS_BSP_Initialize (startup).
+
+## E. full stack-attributed report for run2_annotated
+# trace: /home/user/work/procrace/baselines/osal-visibility/traces/run2_annotated.strace
+# syscall records parsed: 617
+
+## (1) syscalls whose argument text contains an OSAL object name used by the test
+    13 x write  stack: OS_BSP_ConsoleOutput_Impl <- UT_BSP_DoText <- UtAssert_DoReport <- UtAssertEx
+
+## (2) syscalls whose user stack contains a given OSAL function (any depth)
+### OS_CountSemCreate: 1 syscalls
+     1 x futex(FUTEX_WAKE_PRIVATE ...)  stack: OS_ConsoleWakeup_Impl <- OS_ConsoleWrite <- OS_printf <- OS_CountSemCreate
+### OS_CountSemGetIdByName: 1 syscalls
+     1 x futex(FUTEX_WAKE_PRIVATE ...)  stack: OS_ConsoleWakeup_Impl <- OS_ConsoleWrite <- OS_printf <- OS_CountSemGetIdByName
+### OS_ObjectIdAllocateNew: 0 syscalls
+### OS_ObjectIdFindByName: 0 syscalls
+### OS_ObjectIdFinalizeNew: 0 syscalls
+### OS_TaskCreate: 18 syscalls
+     4 x rt_sigprocmask(~[] ...)  stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+     4 x clone3(child_tid=ADDR ...)  stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+     4 x rt_sigprocmask(~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1] ...)  stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+     3 x mmap(24576 ...)  stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+     3 x mprotect(20480 ...)  stack: OS_Posix_InternalTaskCreate_Impl <- OS_TaskCreate_Impl <- OS_TaskCreate
+### OS_TaskPrepare: 0 syscalls
+### OS_CountSemTake: 10 syscalls
+     7 x futex(FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME ...)  stack: OS_CountSemTake_Impl <- OS_CountSemTake
+     1 x --- SIGRTMIN {si_sig(si_code=SI_TKILL ...)  stack: OS_CountSemTake_Impl <- OS_CountSemTake
+     1 x getpid( ...)  stack: OS_CountSemTake_Impl <- OS_CountSemTake
+     1 x futex(FUTEX_WAKE_PRIVATE ...)  stack: OS_CountSemTake_Impl <- OS_CountSemTake
+### OS_CountSemTimedWait: 6 syscalls
+     6 x futex(FUTEX_WAIT_BITSET_PRIVATE|FUTEX_CLOCK_REALTIME ...)  stack: OS_CountSemTimedWait_Impl <- OS_CountSemTimedWait
+### OS_CountSemGive: 9 syscalls
+     9 x futex(FUTEX_WAKE_PRIVATE ...)  stack: OS_CountSemGive_Impl <- OS_CountSemGive
+### OS_TaskDelete: 20 syscalls
+     2 x fstat({st_mode=S_IFREG|0644 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     2 x close( ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x rt_sigaction({sa_handler=ADDR ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x openat("/etc/ld.so.cache" ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mmap(50627 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x openat("/lib/x86_64-linux-gnu/libgcc_s.so.1" ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x read("<ELF header bytes elided>")  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mmap(185256 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mmap(147456 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mmap(16384 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mmap(8192 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x mprotect(4096 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x munmap(50627) = 0 <0.000062> ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x rt_sigprocmask(~[] ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x getpid( ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x tgkill(22315 ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x rt_sigprocmask(~[INT ILL ABRT BUS FPE KILL SEGV STOP RTMIN RT_1] ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+     1 x futex(FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME ...)  stack: OS_TaskDelete_Impl <- OS_TaskDelete
+### OS_TaskDelay: 17 syscalls
+    17 x clock_nanosleep(TIMER_ABSTIME ...)  stack: OS_TaskDelay_Impl <- OS_TaskDelay
+### OS_CountSemGetInfo: 1 syscalls
+     1 x futex(FUTEX_WAKE_PRIVATE ...)  stack: OS_ConsoleWakeup_Impl <- OS_ConsoleWrite <- OS_printf <- OS_CountSemGetInfo
+### OS_CountSemDelete: 0 syscalls
+### OS_Lock_Global_Impl: 0 syscalls
+### OS_Unlock_Global_Impl: 0 syscalls
+### OS_WaitForStateChange_Impl: 0 syscalls
+### OS_NotifyEvent: 0 syscalls
+### OS_TaskRegister_Impl: 0 syscalls
+### OS_CountSemCreate_Impl: 0 syscalls
+### OS_ObjectIdGetById: 0 syscalls
+### OS_ObjectIdConvertToken: 0 syscalls
+
+## (3) syscall-name histogram per thread (pid)
+  pid 22313 {'write': 311, 'futex': 49, 'mmap': 17, 'clock_nanosleep': 17, 'rt_sigprocmask': 14, 'mprotect': 8, 'openat': 5, 'fstat': 5, 'close': 5, 'clone3': 5, 'brk': 3, 'read': 3, 'rt_sigaction': 3, 'pread64': 2, 'munmap': 2, 'geteuid': 2, 'sched_get_priority_max': 2, 'sched_get_priority_min': 2, 'getpid': 2, 'execve': 1, 'access': 1, 'arch_prctl': 1, 'set_tid_address': 1, 'set_robust_list': 1, 'rseq': 1, 'prlimit64': 1, 'ioctl': 1, 'getrandom': 1, 'sched_getparam': 1, 'sched_getscheduler': 1, 'sched_setscheduler': 1, 'getegid': 1, 'tgkill': 1, 'kill': 1, 'exit_group': 1, '+++ exited with 0 ++': 1}
+  pid 22314 {'futex': 16, 'write': 5, 'rseq': 1, 'set_robust_list': 1, 'rt_sigprocmask': 1, '+++ exited with 0 ++': 1}
+  pid 22315 {'futex': 4, 'write': 4, 'rt_sigprocmask': 2, 'rseq': 1, 'set_robust_list': 1, '--- SIGRTMIN {si_sig': 1, 'getpid': 1, 'exit': 1, '+++ exited with 0 ++': 1}
+  pid 22316 {'write': 16, 'futex': 11, 'rt_sigprocmask': 2, 'rseq': 1, 'set_robust_list': 1, 'exit': 1, '+++ exited with 0 ++': 1}
+  pid 22317 {'write': 16, 'futex': 12, 'rt_sigprocmask': 2, 'rseq': 1, 'set_robust_list': 1, 'exit': 1, '+++ exited with 0 ++': 1}
+  pid 22318 {'write': 16, 'futex': 13, 'rt_sigprocmask': 2, 'rseq': 1, 'set_robust_list': 1, 'exit': 1, '+++ exited with 0 ++': 1}
+
+## F. futex address -> object mapping for run2_annotated (static PIE symbols via 'nm -S -n count-sem-test'; load base inferred from the stack-attributed BSP lock)
+$ grep -o "futex(0x[0-9a-f]*, FUTEX_[A-Z_]*" run2_annotated.strace | sort | uniq -c
+      4 futex(0x55de862e1f20, FUTEX_WAIT_BITSET_PRIVATE
+      3 futex(0x55de862e1f20, FUTEX_WAKE_PRIVATE
+     13 futex(0x55de862e20c0, FUTEX_WAIT_BITSET_PRIVATE
+      9 futex(0x55de862e20c0, FUTEX_WAKE_PRIVATE
+     28 futex(0x55de862e3e08, FUTEX_LOCK_PI_PRIVATE
+     45 futex(0x55de862e3e08, FUTEX_UNLOCK_PI_PRIVATE
+      1 futex(0x7fa7993e9230, FUTEX_WAKE_PRIVATE
+      1 futex(0x7fa7993fc990, FUTEX_WAIT_BITSET
+      1 futex(0x7ffe76de3cd4, FUTEX_UNLOCK_PI_PRIVATE
+# load base = 0x55de862e3e08 - (OS_BSP_GenericLinuxGlobal 0x2fe00 + 8, AccessMutex) = 0x55de862b4000 (page aligned)
+000000000002df20 0000000000000020 B OS_impl_console_table
+000000000002e0a0 0000000000000280 B OS_impl_count_sem_table
+000000000002fe00 0000000000000038 B OS_BSP_GenericLinuxGlobal
+# 0x55de862e3e08 = OS_BSP_GenericLinuxGlobal+8   (BSP AccessMutex, PI; UtAssert + console output)
+# 0x55de862e20c0 = OS_impl_count_sem_table+32  (slot 1 = sem_t of 'Test_Sem'; FUTEX_WAIT from blocking OS_CountSemTake/TimedWait, FUTEX_WAKE from OS_CountSemGive)
+# 0x55de862e1f20 = OS_impl_console_table+0     (console data_sem; OS_printf wakeup of the console task)
+# => at syscall level the counting semaphore is visible only as an anonymous futex word address (an OSAL table slot), and only when a Take blocks or a Give wakes a waiter.
+#    Nothing in any syscall links this address to the name 'Test_Sem'; the name->slot binding lives only in OS_common_table/OS_count_sem_table (process memory).

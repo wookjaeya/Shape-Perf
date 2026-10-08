@@ -1,0 +1,41 @@
+README analyzer/README.md @ ac7f7c17 (HEAD master per git ls-remote 2026-10-01; commit date 2025-04-23)
+L244: * **assertion prover**, `-a=prover`: prove user-defined properties, using `__ikos_assert(condition)`.
+L247: * **signed integer overflow analysis**, `-a=sio`: checks for signed integer overflows.
+L253: * **function call analysis**, `-a=fca`: checks for function calls through function pointers of the wrong type.
+L254: * **dead code analysis**, `-a=dca`: checks for unreachable statements.
+L341: IKOS analyses each entry point independently, as if they were running in different processes.
+L535: * The program is single-threaded.
+L538: * Extern functions (without implementation) do not update global variables.
+L586: Model library functions to reduce warnings
+L590: 
+L591: The analyzer will produce a warning for each call to an unknown function. You can use `ikos-report --analyses-filter=sound output.db` to list these warnings, or filter the "ignored call side effect" in ikos-view.
+L593: You can model library functions to improve the precision of the analysis and reduce the number of warnings. To model a library function, simply write a small implementation for it and link it in your program. This is usually called a "stub".
+L598: 
+L599: char* fgets(char* restrict str, int size, FILE* restrict stream) {
+L600:     __ikos_assert(size >= 0);
+L601:     __ikos_forget_mem(stream, sizeof(FILE));
+L602:     __ikos_abstract_mem(str, size);
+L603:     return __ikos_nondet_int() ? str : NULL;
+
+checker headers:
+assert_prover.hpp
+buffer_overflow.hpp
+checker.hpp
+dead_code.hpp
+debug.hpp
+division_by_zero.hpp
+double_free.hpp
+function_call.hpp
+int_overflow_base.hpp
+kind.hpp
+memory_watch.hpp
+name.hpp
+null_dereference.hpp
+pointer_alignment.hpp
+pointer_compare.hpp
+pointer_overflow.hpp
+shift_count.hpp
+signed_int_overflow.hpp
+soundness.hpp
+uninitialized_variable.hpp
+unsigned_int_overflow.hpp

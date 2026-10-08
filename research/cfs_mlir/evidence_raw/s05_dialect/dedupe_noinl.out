@@ -1,0 +1,12 @@
+4 ('CommandCounter', 'load', 'tbaa-struct-path') ['sample_app_cmds.c:122:35', 'sample_app_cmds.c:157:35', 'sample_app_cmds.c:55:73', 'sample_app_cmds.c:81:35']
+4 ('CommandCounter', 'store', 'tbaa-struct-path') ['sample_app_cmds.c:100:41', 'sample_app_cmds.c:122:35', 'sample_app_cmds.c:157:35', 'sample_app_cmds.c:81:35']
+2 ('CommandErrorCounter', 'load', 'tbaa-struct-path') ['sample_app_cmds.c:54:73', 'sample_app_dispatch.c:66:44']
+2 ('CommandErrorCounter', 'store', 'tbaa-struct-path') ['sample_app_cmds.c:101:41', 'sample_app_dispatch.c:66:44']
+3 ('CommandPipe', 'load', 'tbaa-struct-path') ['sample_app.c:158:96', 'sample_app.c:173:92', 'sample_app.c:77:66']
+1 ('HkTlm.Payload.CommandCounter', 'store', 'tbaa-struct-path') ['sample_app_cmds.c:55:55']
+1 ('HkTlm.Payload.CommandErrorCounter', 'store', 'tbaa-struct-path') ['sample_app_cmds.c:54:55']
+1 ('RunStatus', 'load', 'tbaa-struct-path') ['sample_app.c:103:36']
+3 ('RunStatus', 'store', 'tbaa-struct-path') ['sample_app.c:119:31', 'sample_app.c:63:35', 'sample_app.c:94:39']
+3 ('TblHandles', 'load', 'gep-index') ['sample_app.c:202:35', 'sample_app_cmds.c:123:43', 'sample_app_cmds.c:135:41']
+1 ('TblHandles.[%14]', 'load', 'gep-index') ['sample_app_cmds.c:68:24']
+distinct source sites: 25  ops without a resolvable file:line:col: 0

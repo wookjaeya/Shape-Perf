@@ -1,0 +1,20 @@
+== build r1a 05:35:10
+[6/8] Building CXX object src/Conversion/ONNXToKrnl/CMakeFiles/OMONNXToKrnl.dir/Math/Elementwise.cpp.o
+[7/8] Linking CXX static library Release/lib/libOMONNXToKrnl.a
+[8/8] Linking CXX executable Release/bin/onnx-mlir
+a78f5b9479684f9d20b67b47f389fac8cae54725de4c8d826be0be0c33f07032  /home/user/work/variants/r1a/bin/onnx-mlir
+== build r1b 05:36:50
+[4/6] Building CXX object src/Conversion/ONNXToKrnl/CMakeFiles/OMONNXToKrnl.dir/Math/Elementwise.cpp.o
+[5/6] Linking CXX static library Release/lib/libOMONNXToKrnl.a
+[6/6] Linking CXX executable Release/bin/onnx-mlir
+366f403574915db56745e8bd865b1b4845ad71b956daf16ded8b572b53bafff2  /home/user/work/variants/r1b/bin/onnx-mlir
+== build r1c 05:37:40
+[4/6] Building CXX object src/Conversion/KrnlToLLVM/CMakeFiles/OMKrnlToLLVM.dir/ConvertKrnlToLLVM.cpp.o
+[5/6] Linking CXX static library Release/lib/libOMKrnlToLLVM.a
+[6/6] Linking CXX executable Release/bin/onnx-mlir
+bc26be316929b1b51b3b017265b7b6e20317e6a8668e2affd1cf8f6184f7deb5  /home/user/work/variants/r1c/bin/onnx-mlir
+== revert 05:38:08
+[5/6] Linking CXX static library Release/lib/libOMONNXToKrnl.a
+[6/6] Linking CXX executable Release/bin/onnx-mlir
+e34bcd6a3b455e2b620c15eb8f1f89f17fda310790b352a037cc38ab75c47af0  build/Release/bin/onnx-mlir
+== done 05:38:56

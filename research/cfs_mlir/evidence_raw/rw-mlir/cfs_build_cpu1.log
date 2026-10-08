@@ -1,0 +1,666 @@
+make: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[1]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: *** No rule to make target '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/src/cfeconfig_platformdata_native_default_cpu1.c', needed by 'src/cfe_platformcfg_tables.c'.
+make[2]: *** No rule to make target '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/src/cfeconfig_platformdata_native_default_cpu1.list', needed by 'src/cfe_platformcfg_tables.c'.
+make[2]: Target 'config/CMakeFiles/config.dir/depend' not remade because of errors.
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[1]: *** [CMakeFiles/Makefile2:1696: config/CMakeFiles/config.dir/all] Error 2
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  0%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-binsem.c.o
+[  0%] Building C object osal/generic-linux_impl/CMakeFiles/osal_generic-linux_impl.dir/src/bsp_start.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  0%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o
+[  0%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs.c.o
+[  0%] Building C object osal/generic-linux_impl/CMakeFiles/osal_generic-linux_impl.dir/src/bsp_console.c.o
+[  0%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-common.c.o
+[  1%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_log.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  1%] Built target osal_generic-linux_impl
+[  1%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-console.c.o
+[  1%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_appctrl.c.o
+[  1%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_task.c.o
+[  1%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o
+[  2%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-condvar.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  2%] Building C object fs/CMakeFiles/fs.dir/fsw/src/cfe_fs_api.c.o
+[  2%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-countsem.c.o
+[  4%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_backgroundtask.c.o
+[  4%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_utils.c.o
+[  4%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-dirs.c.o
+[  4%] Building C object fs/CMakeFiles/fs.dir/fsw/src/cfe_fs_priv.c.o
+[  4%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_cds.c.o
+[  4%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-errors.c.o
+[  4%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_objtab.c.o
+[  4%] Building C object fs/CMakeFiles/fs.dir/fsw/src/cfe_fs_objtab.c.o
+[  4%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-files.c.o
+[  4%] Building C object evs/CMakeFiles/evs.dir/fsw/src/cfe_evs_dispatch.c.o
+[  5%] Linking C static library libfs.a
+[  5%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_cds_mempool.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  5%] Built target fs
+[  5%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_crc.c.o
+[  5%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-filesys.c.o
+[  5%] Linking C static library libevs.a
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[  5%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_erlog.c.o
+[  5%] Built target evs
+[  7%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-heap.c.o
+[  7%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_api.c.o
+[  7%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_generic_pool.c.o
+[  7%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-idmap.c.o
+[  7%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-mutex.c.o
+[  8%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_mempool.c.o
+[  8%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_buf.c.o
+[ 10%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_init.c.o
+[ 10%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-queues.c.o
+[ 10%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_priv.c.o
+[ 10%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_objtab.c.o
+[ 10%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_perf.c.o
+[ 10%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-tasks.c.o
+[ 10%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-timebase.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 10%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_resource.c.o
+[ 10%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_api.c.o
+[ 11%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-gettime.c.o
+[ 11%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o
+[ 11%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-gettime-monotonic.c.o
+[ 11%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_start.c.o
+[ 11%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-console-bsp.c.o
+[ 13%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_accdesc.c.o
+[ 13%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_util.c.o
+[ 13%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-bsd-select.c.o
+[ 13%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_load.c.o
+[ 13%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_objtab.c.o
+[ 13%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_startupscript.c.o
+[ 13%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-io.c.o
+[ 13%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_dispatch.c.o
+[ 13%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-files.c.o
+[ 14%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_syslog.c.o
+[ 14%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_loadbuff.c.o
+[ 15%] Building C object sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_msg_id_util.c.o
+[ 17%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-file-allocate.c.o
+[ 17%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-dirs.c.o
+[ 17%] Linking C static library libsb.a
+[ 17%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_registry.c.o
+[ 17%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_task.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 17%] Built target sb
+[ 17%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-no-shell.c.o
+[ 17%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_regrec.c.o
+[ 17%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-loader.c.o
+[ 17%] Building C object es/CMakeFiles/es.dir/fsw/src/cfe_es_dispatch.c.o
+[ 17%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-dl-loader.c.o
+[ 17%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_dump.c.o
+[ 18%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_dumpctl.c.o
+[ 18%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-dl-symtab.c.o
+[ 18%] Linking C static library libes.a
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 18%] Built target es
+[ 20%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-bsd-sockets.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 20%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_handlelink.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 20%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-network-gethostname.c.o
+[ 20%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_api.c.o
+[ 20%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_task.c.o
+[ 20%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_valresult.c.o
+[ 20%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-posix-network-gethostid.c.o
+[ 20%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-bsd-sockets-dns.c.o
+[ 20%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_tone.c.o
+[ 20%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_internal.c.o
+[ 20%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/src/os-impl-rwlock.c.o
+[ 21%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_utils.c.o
+[ 21%] Building C object osal/posix_impl/CMakeFiles/osal_posix_impl.dir/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/osal/src/os/portable/os-impl-pthread-affinity-np.c.o
+[ 21%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_objtab.c.o
+[ 21%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_transaction.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 21%] Building C object time/CMakeFiles/time.dir/fsw/src/cfe_time_dispatch.c.o
+[ 21%] Building C object psp/ram_notimpl-pc-linux-impl/CMakeFiles/ram_notimpl.dir/cfe_psp_ram_notimpl.c.o
+[ 21%] Built target osal_posix_impl
+[ 21%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 21%] Linking C static library libram_notimpl.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 21%] Linking C static library libtime.a
+[ 21%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_exception.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 23%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_task_cmds.c.o
+[ 23%] Built target ram_notimpl
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 23%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_memory.c.o
+[ 23%] Built target time
+[ 24%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_ssr.c.o
+[ 24%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_objtab.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 24%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_passthru_codec.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 24%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_start.c.o
+[ 24%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_support.c.o
+[ 24%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_error.c.o
+[ 24%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_exceptionstorage.c.o
+[ 24%] Building C object tbl/CMakeFiles/tbl.dir/fsw/src/cfe_tbl_dispatch.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 24%] Building C object psp/pc-linux-impl/CMakeFiles/psp-pc-linux-impl.dir/src/cfe_psp_watchdog.c.o
+[ 24%] Building C object psp/soft_timebase-pc-linux-impl/CMakeFiles/soft_timebase.dir/cfe_psp_soft_timebase.c.o
+[ 26%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_memrange.c.o
+[ 26%] Linking C static library libtbl.a
+[ 26%] Linking C static library libsoft_timebase.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Built target psp-pc-linux-impl
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_memutils.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_module.c.o
+[ 26%] Built target tbl
+[ 26%] Built target soft_timebase
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Building C object psp/pc-linux-shared/CMakeFiles/psp-pc-linux-shared.dir/src/cfe_psp_version.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Building C object psp/timebase_posix_clock-pc-linux-impl/CMakeFiles/timebase_posix_clock.dir/cfe_psp_timebase_posix_clock.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 26%] Building C object psp/eeprom_mmap_file-pc-linux-impl/CMakeFiles/eeprom_mmap_file.dir/cfe_psp_eeprom_mmap_file.c.o
+[ 26%] Built target psp-pc-linux-shared
+[ 27%] Building C object psp/port_notimpl-pc-linux-impl/CMakeFiles/port_notimpl.dir/cfe_psp_port_notimpl.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 27%] Building C object psp/iodriver-pc-linux-impl/CMakeFiles/iodriver.dir/src/iodriver.c.o
+[ 28%] Linking C static library libtimebase_posix_clock.a
+[ 28%] Linking C static library libeeprom_mmap_file.a
+[ 28%] Linking C static library libport_notimpl.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 28%] Linking C static library libiodriver.a
+[ 28%] Built target timebase_posix_clock
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 28%] Built target eeprom_mmap_file
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 28%] Built target port_notimpl
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 28%] Building C object psp/linux_sysmon-pc-linux-impl/CMakeFiles/linux_sysmon.dir/linux_sysmon.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 30%] Building C object psp/endian_api-pc-linux-impl/CMakeFiles/endian_api.dir/cfe_psp_endian_common.c.o
+[ 30%] Built target iodriver
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 30%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_ccsdspri.c.o
+[ 31%] Building C object sbr/CMakeFiles/sbr.dir/fsw/src/cfe_sbr_map_hash.c.o
+[ 31%] Building C object psp/endian_api-pc-linux-impl/CMakeFiles/endian_api.dir/cfe_psp_endian_wrappers.c.o
+[ 31%] Linking C static library liblinux_sysmon.a
+[ 31%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_init.c.o
+[ 31%] Building C object sbr/CMakeFiles/sbr.dir/fsw/src/cfe_sbr_route_unsorted.c.o
+[ 31%] Linking C static library libendian_api.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 31%] Built target linux_sysmon
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 31%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_integrity.c.o
+[ 31%] Built target endian_api
+[ 31%] Building C object sbr/CMakeFiles/sbr.dir/fsw/src/cfe_sbr_objtab.c.o
+[ 31%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_msgid_shared.c.o
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_sechdr_checksum.c.o
+[ 33%] Linking C static library libsbr.a
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_sechdr_fc.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_sechdr_time.c.o
+[ 33%] Built target sbr
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_objtab.c.o
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_initdefaulthdr_pri.c.o
+[ 33%] Building C object msg/CMakeFiles/msg.dir/fsw/src/cfe_msg_msgid_v1.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 34%] Building C object resourceid/CMakeFiles/resourceid.dir/fsw/src/cfe_resourceid_api.c.o
+[ 34%] Building C object apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_app.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 34%] Building C object apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_app.c.o
+[ 36%] Linking C static library libmsg.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 36%] Building C object resourceid/CMakeFiles/resourceid.dir/fsw/src/cfe_resourceid_objtab.c.o
+[ 36%] Built target msg
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_cmds.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object apps/sch_lab/CMakeFiles/sch_lab.dir/fsw/src/sch_lab_app.c.o
+[ 37%] Building C object apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_cmds.c.o
+[ 37%] Linking C static library libresourceid.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target resourceid
+[ 37%] Building C object apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_dispatch.c.o
+[ 37%] Building C object apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_dispatch.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Linking C shared module sch_lab.so
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utassert.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target sch_lab
+[ 37%] Building C object apps/ci_lab/CMakeFiles/ci_lab.dir/fsw/src/ci_lab_passthru_decode.c.o
+[ 37%] Building C object apps/to_lab/CMakeFiles/to_lab.dir/fsw/src/to_lab_passthru_encode.c.o
+[ 37%] Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utlist.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/utstubs.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/cfe_test.c.o
+[ 37%] Linking C shared module to_lab.so
+[ 37%] Linking C shared module ci_lab.so
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target to_lab
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target ci_lab
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/cfe_test_table.c.o
+[ 37%] Building C object apps/sample_app/CMakeFiles/sample_app.dir/fsw/src/sample_app.c.o
+[ 37%] Building C object apps/sample_lib/CMakeFiles/sample_lib.dir/fsw/src/sample_lib.c.o
+[ 37%] Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/uttest.c.o
+[ 37%] Linking C shared module sample_lib.so
+[ 37%] Building C object apps/sample_app/CMakeFiles/sample_app.dir/fsw/src/sample_app_cmds.c.o
+[ 37%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_application_control_test.c.o
+[ 37%] Building C object osal/ut_assert/CMakeFiles/ut_assert_pic.dir/src/uttools.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target sample_lib
+[ 37%] Building C object apps/sample_app/CMakeFiles/sample_app.dir/fsw/src/sample_app_utils.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 37%] Built target ut_assert_pic
+[ 37%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_behavior_test.c.o
+[ 37%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_app.c.o
+[ 37%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp.c.o
+[ 39%] Building C object apps/sample_app/CMakeFiles/sample_app.dir/fsw/src/sample_app_dispatch.c.o
+[ 39%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_error_test.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 39%] Linking C shared module sample_app.so
+[ 40%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_app_monitor.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 42%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_info_test.c.o
+[ 42%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_r.c.o
+[ 42%] Built target sample_app
+[ 42%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_s.c.o
+[ 42%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_event_monitor.c.o
+[ 42%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_task_test.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 42%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_exec_monitor.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 42%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_dwell_tbl.c.o
+[ 42%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_sbintf.c.o
+[ 42%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_cds_test.c.o
+[ 42%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_msg_action.c.o
+[ 42%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_utils.c.o
+[ 42%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp_dispatch.c.o
+[ 42%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_dwell_pkt.c.o
+[ 42%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_sysmon.c.o
+[ 42%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_counter_test.c.o
+[ 43%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_chunk.c.o
+[ 43%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_app.c.o
+[ 44%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_cmds.c.o
+[ 44%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_clist.c.o
+[ 44%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_misc_test.c.o
+[ 44%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_app.c.o
+[ 46%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_cmds.c.o
+[ 46%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_codec.c.o
+[ 46%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_mempool_test.c.o
+[ 46%] Building C object apps/md/CMakeFiles/md.dir/fsw/src/md_dispatch.c.o
+[ 46%] Building C object apps/hs/CMakeFiles/hs.dir/fsw/src/hs_dispatch.c.o
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/apps/cf/fsw/src/cf_codec.c:169:20: error: unused function 'CF_Codec_Store_uint64' [-Werror,-Wunused-function]
+  169 | static inline void CF_Codec_Store_uint64(CF_CFDP_uint64_t *pdst, uint64 val)
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/apps/cf/fsw/src/cf_codec.c:239:20: error: unused function 'CF_Codec_Load_uint64' [-Werror,-Wunused-function]
+  239 | static inline void CF_Codec_Load_uint64(uint64 *pdst, const CF_CFDP_uint64_t *psrc)
+      |                    ^~~~~~~~~~~~~~~~~~~~
+2 errors generated.
+make[2]: *** [apps/cf/CMakeFiles/cf.dir/build.make:188: apps/cf/CMakeFiles/cf.dir/fsw/src/cf_codec.c.o] Error 1
+[ 46%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cmd.c.o
+[ 47%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_perf_test.c.o
+[ 47%] Linking C shared module md.so
+[ 47%] Linking C shared module hs.so
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 47%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/es_resource_id_test.c.o
+[ 47%] Built target md
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 47%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_mem32.c.o
+[ 47%] Built target hs
+[ 47%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/evs_filters_test.c.o
+[ 47%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_crc.c.o
+[ 47%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_app.c.o
+[ 49%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_dump.c.o
+[ 49%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_timer.c.o
+[ 49%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/evs_send_test.c.o
+[ 49%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_mem16.c.o
+[ 49%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/fs_header_test.c.o
+[ 50%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_utils.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 50%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_cmds.c.o
+[ 50%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_utils.c.o
+[ 50%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/fs_util_test.c.o
+[ 50%] Building C object apps/cf/CMakeFiles/cf.dir/fsw/src/cf_dispatch.c.o
+[ 50%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_table_processing.c.o
+[ 50%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_mem8.c.o
+[ 52%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/message_id_test.c.o
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/apps/cs/fsw/src/cs_table_processing.c:932:17: error: equality comparison with extraneous parentheses [-Werror,-Wparentheses-equality]
+  932 |     if ((Result == CFE_TBL_INFO_UPDATED))
+      |          ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/apps/cs/fsw/src/cs_table_processing.c:932:17: note: remove extraneous parentheses around the comparison to silence this warning
+  932 |     if ((Result == CFE_TBL_INFO_UPDATED))
+      |         ~       ^                      ~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/apps/cs/fsw/src/cs_table_processing.c:932:17: note: use '=' to turn this equality comparison into an assignment
+  932 |     if ((Result == CFE_TBL_INFO_UPDATED))
+      |                 ^~
+      |                 =
+make[2]: Target 'apps/cf/CMakeFiles/cf.dir/build' not remade because of errors.
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[1]: *** [CMakeFiles/Makefile2:2798: apps/cf/CMakeFiles/cf.dir/all] Error 2
+1 error generated.
+make[2]: *** [apps/cs/CMakeFiles/cs.dir/build.make:90: apps/cs/CMakeFiles/cs.dir/fsw/src/cs_table_processing.c.o] Error 1
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 53%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_app.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 53%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_cmd_utils.c.o
+[ 53%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_load.c.o
+[ 53%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/msg_api_test.c.o
+[ 53%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_utils.c.o
+[ 53%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_cmds.c.o
+[ 53%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_app.c.o
+[ 53%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/resource_id_misc_test.c.o
+[ 53%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_cmds.c.o
+[ 53%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_table_cmds.c.o
+[ 55%] Building C object apps/mm/CMakeFiles/mm.dir/fsw/src/mm_dispatch.c.o
+[ 55%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_performance_test.c.o
+[ 55%] Linking C shared module mm.so
+[ 55%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_app_cmds.c.o
+[ 55%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_child.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 55%] Built target mm
+[ 55%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_pipe_mang_test.c.o
+[ 55%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_memory_cmds.c.o
+[ 55%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_table_utils.c.o
+[ 55%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_sendrecv_test.c.o
+[ 56%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/sb_subscription_test.c.o
+[ 56%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_init.c.o
+[ 57%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_dispatch.c.o
+[ 59%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_eeprom_cmds.c.o
+[ 59%] Building C object apps/fm/CMakeFiles/fm.dir/fsw/src/fm_compression_none.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 59%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_content_access_test.c.o
+[ 59%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_custom.c.o
+[ 59%] Linking C shared module fm.so
+[ 59%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_compute.c.o
+[ 60%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_app.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 60%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_content_mang_test.c.o
+[ 60%] Built target fm
+[ 60%] Building C object apps/cs/CMakeFiles/cs.dir/fsw/src/cs_dispatch.c.o
+[ 60%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_cmds.c.o
+[ 60%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_information_test.c.o
+make[2]: Target 'apps/cs/CMakeFiles/cs.dir/build' not remade because of errors.
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[1]: *** [CMakeFiles/Makefile2:3214: apps/cs/CMakeFiles/cs.dir/all] Error 2
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 60%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_watch.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 60%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_rtsrq.c.o
+[ 60%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_utils.c.o
+[ 60%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/tbl_registration_test.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 62%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_app.c.o
+[ 62%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_action.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 62%] Building C object apps/ds/CMakeFiles/ds.dir/fsw/src/ds_table.c.o
+[ 62%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_arithmetic_test.c.o
+[ 62%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_utils.c.o
+[ 62%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_atsrq.c.o
+[ 63%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_current_test.c.o
+[ 63%] Building C object apps/ds/CMakeFiles/ds.dir/fsw/src/ds_cmds.c.o
+[ 63%] Building C object apps/lc/CMakeFiles/lc.dir/fsw/src/lc_dispatch.c.o
+[ 63%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_state.c.o
+[ 63%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_conversion_test.c.o
+[ 65%] Building C object apps/ds/CMakeFiles/ds.dir/fsw/src/ds_app.c.o
+[ 66%] Linking C shared module lc.so
+[ 66%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_loads.c.o
+[ 66%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_external_test.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 66%] Built target lc
+[ 66%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_cmds.c.o
+[ 66%] Building C object apps/ds/CMakeFiles/ds.dir/fsw/src/ds_file.c.o
+[ 66%] Building C object apps/cfe_testcase/CMakeFiles/cfe_testcase.dir/src/time_misc_test.c.o
+[ 66%] Building C object apps/ds/CMakeFiles/ds.dir/fsw/src/ds_dispatch.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 66%] Building C object apps/sc/CMakeFiles/sc.dir/fsw/src/sc_dispatch.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 66%] Building C object apps/hk/CMakeFiles/hk.dir/fsw/src/hk_app.c.o
+[ 66%] Linking C shared module cfe_testcase.so
+[ 66%] Linking C shared module ds.so
+[ 68%] Linking C shared module sc.so
+[ 68%] Building C object apps/hk/CMakeFiles/hk.dir/fsw/src/hk_cmds.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Built target ds
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Built target cfe_testcase
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Built target sc
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Building C object apps/sbn/CMakeFiles/sbn.dir/fsw/src/sbn_app.c.o
+[ 68%] Building C object apps/sbn_udp/CMakeFiles/sbn_udp.dir/fsw/src/sbn_udp_if.c.o
+[ 68%] Building C object apps/sbn/CMakeFiles/sbn.dir/fsw/src/sbn_cmds.c.o
+[ 68%] Building C object apps/hk/CMakeFiles/hk.dir/fsw/src/hk_utils.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Linking C shared module sbn_udp.so
+[ 68%] Building C object apps/hk/CMakeFiles/hk.dir/fsw/src/hk_dispatch.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Building C object apps/sbn_f_remap/CMakeFiles/sbn_f_remap.dir/fsw/src/sbn_f_remap.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 68%] Building C object apps/sbn/CMakeFiles/sbn.dir/fsw/src/sbn_pack.c.o
+[ 68%] Built target sbn_udp
+[ 69%] Building C object apps/sbn/CMakeFiles/sbn.dir/fsw/src/sbn_subs.c.o
+[ 69%] Linking C shared module hk.so
+[ 69%] Linking C shared module sbn_f_remap.so
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Built target hk
+[ 69%] Building C object osal/CMakeFiles/osal_bsp.dir/src/bsp/shared/src/osapi-bsp.c.o
+[ 69%] Building C object osal/CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_app_run.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Built target sbn_f_remap
+[ 69%] Linking C shared module sbn.so
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Building C object osal/CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_app_startup.c.o
+[ 69%] Building C object psp/CMakeFiles/psp-pc-linux.dir/pc-linux_module_list.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_io.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Built target sbn
+[ 69%] Building C object osal/CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_symtab.c.o
+[ 69%] Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_init.c.o
+[ 69%] Linking C static library libpsp-pc-linux.a
+[ 69%] Building C object osal/CMakeFiles/osal_bsp.dir/src/bsp/shared/src/bsp_default_resourcecfg.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 69%] Built target psp-pc-linux
+[ 69%] Building C object apps/cfe_assert/CMakeFiles/cfe_assert.dir/src/cfe_assert_runner.c.o
+[ 71%] Linking C static library libosal_bsp.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 71%] Built target osal_bsp
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 72%] Linking C shared module cfe_assert.so
+[ 72%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/utlist.c.o
+[ 73%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/utassert.c.o
+[ 73%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-binsem.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 73%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-clock.c.o
+[ 73%] Built target cfe_assert
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-common.c.o
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-condvar.c.o
+[ 75%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/utstubs.c.o
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-dir.c.o
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-errors.c.o
+[ 75%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-file.c.o
+[ 76%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-filesys.c.o
+[ 76%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-heap.c.o
+[ 76%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/uttest.c.o
+[ 76%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/uttools.c.o
+[ 76%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-idmap.c.o
+[ 76%] Building C object osal/ut_assert/CMakeFiles/ut_assert.dir/src/utbsp.c.o
+[ 76%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-module.c.o
+[ 76%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-mutex.c.o
+[ 78%] Linking C static library libut_assert.a
+[ 78%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-network.c.o
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-printf.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 79%] Built target ut_assert
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task-affinity.c.o
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-queue.c.o
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-rwlock.c.o
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-select.c.o
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 79%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-shell.c.o
+[ 81%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-sockets.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make[2]: Entering directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 81%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o
+[ 82%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/utstub-helpers.c.o
+[ 82%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-timebase.c.o
+[ 82%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-binsem-stubs.c.o
+[ 82%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-time.c.o
+[ 82%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-version.c.o
+[ 82%] Building C object osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-debug.c.o
+[ 82%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-clock-stubs.c.o
+[ 82%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-binsem-handlers.c.o
+[ 84%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-clock-handlers.c.o
+[ 84%] Linking C static library libosal.a
+[ 84%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-common-stubs.c.o
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-common-handlers.c.o
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 85%] Built target osal
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-condvar-stubs.c.o
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-countsem-stubs.c.o
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-countsem-handlers.c.o
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-dir-stubs.c.o
+[ 85%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-dir-handlers.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-error-stubs.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-error-handlers.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-file-stubs.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-file-handlers.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-filesys-stubs.c.o
+[ 86%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-filesys-handlers.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-heap-stubs.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-heap-handlers.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-idmap-stubs.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-idmap-handlers.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-module-stubs.c.o
+[ 88%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-module-handlers.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-mutex-stubs.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-mutex-handlers.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-network-stubs.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-network-handlers.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-printf-stubs.c.o
+[ 89%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-printf-handlers.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-queue-stubs.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-queue-handlers.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-rwlock-stubs.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-rwlock-handlers.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-select-stubs.c.o
+[ 91%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-shell-stubs.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-sockets-stubs.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-sockets-handlers.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-stubs.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-handlers.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-affinity-stubs.c.o
+[ 92%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-task-affinity-handlers.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timer-stubs.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timer-handlers.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timebase-stubs.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-timebase-handlers.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-version-stubs.c.o
+[ 94%] Building C object osal/ut-stubs/CMakeFiles/ut_osapi_stubs.dir/osapi-version-handlers.c.o
+[ 95%] Linking C static library libut_osapi_stubs.a
+make[2]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+[ 95%] Built target ut_osapi_stubs
+make[1]: Target 'all' not remade because of errors.
+make[1]: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'
+make: *** [Makefile:146: all] Error 2
+make: Target 'default_target' not remade because of errors.
+make: Leaving directory '/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/build-ana/native/default_cpu1'

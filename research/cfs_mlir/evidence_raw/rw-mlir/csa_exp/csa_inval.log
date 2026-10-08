@@ -1,0 +1,3 @@
+$ clang --analyze (GenericTaint, taint.yaml) inval.c
+inval.c:7:93: warning: Untrusted data is passed to a user-defined sink [optin.taint.GenericTaint]
+1 warning generated.

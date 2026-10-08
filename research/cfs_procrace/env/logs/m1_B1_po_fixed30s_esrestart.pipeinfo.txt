@@ -1,0 +1,29 @@
+# /home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_B1_po_fixed30s_esrestart.pipeinfo.dat: 1624 bytes, header {'ContentType': '0x63464531', 'SubType': 20, 'Length': 64, 'SpacecraftID': 66, 'ProcessorID': 1, 'ApplicationID': 1114113, 'TimeSeconds': 1001028, 'TimeSubSeconds': 2259409636, 'Description': 'SB Pipe Information'}
+# entries=26 trailing_bytes=0
+PipeName             AppName        Max   Cur  Peak SndErr Opts
+ES_CMD_PIPE          CFE_ES          12     0     1      0    0
+EVS_CMD_PIPE         CFE_EVS         32     0     1      0    0
+SB_CMD_PIPE          CFE_SB          32     0     1      0    0
+TBL_CMD_PIPE         CFE_TBL         12     0     1      0    0
+TIME_CMD_PIPE        CFE_TIME        12     0     2      0    0
+SCH_LAB_CMD_PIPE     SCH_LAB          8     0     1      0    0
+CI_LAB_CMD_PIPE      CI_LAB          32     0     1      0    0
+TO_LAB_CMD_PIPE      TO_LAB           8     0     1      0    0
+TO_LAB_TLM_PIPE      TO_LAB          50     0    11      0    0
+SAMPLE_APP_CMD_PIPE  SAMPLE_APP      32     0     1      0    0
+LC_CMD_PIPE          LC              12     0     1      0    0
+DS_CMD_PIPE          DS              45     0    12      0    0
+CF_CMD_PIPE          CF              32     0     2      0    0
+CF_CHAN_0            CF              16     0     0      0    0
+CF_CHAN_1            CF              16     0     0      0    0
+HK_CMD_PIPE          HK              40     0     2      0    0
+HS_CMD_PIPE          HS              12     0     1      0    0
+HS_EVENT_PIPE        HS              32     0     0      0    0
+HS_WAKEUP_PIPE       HS               1     0     0      0    0
+MM_CMD_PIPE          MM              12     0     1      0    0
+SC_CMD_PIPE          SC              12     0     1      0    0
+MD_CMD_PIPE          MD              50     0     1      0    0
+CS_CMD_PIPE          CS              12     0     1      0    0
+SBNCmdPipe           SBN             20     0     2      0    0
+FM_CMD_PIPE          FM              10     0     1      0    0
+SBNSubPipe           SBN             32     0    11      0    0

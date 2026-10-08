@@ -1,0 +1,224 @@
+ninja: Entering directory `build'
+[1/31] Building Analysis.h.inc...
+[2/31] Building Conversions.h.inc...
+[3/31] Building Potato.cpp.inc...
+[4/31] Building Potato.h.inc...
+[5/31] Building PotatoDialect.cpp.inc...
+[6/31] Building PotatoDialect.h.inc...
+[7/31] Building PotatoTypes.h.inc...
+[8/31] Building PotatoTypes.cpp.inc...
+[9/31] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/steensgaard.cpp.o
+[10/31] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/utils.cpp.o
+[11/31] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o
+FAILED: lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o -MF lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o.d -o lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/andersen.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch, branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/andersen.cpp:7:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+3 errors generated.
+[12/31] Building CXX object lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o
+FAILED: lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o -MF lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o.d -o lib/analysis/CMakeFiles/obj.MLIRPotatoAnalysis.dir/pt.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch, branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/pt.cpp:1:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+3 errors generated.
+[13/31] Building CXX object lib/passes/analysis/CMakeFiles/obj.MLIRPotatoPasses.dir/aabench.cpp.o
+FAILED: lib/passes/analysis/CMakeFiles/obj.MLIRPotatoPasses.dir/aabench.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/passes/analysis/CMakeFiles/obj.MLIRPotatoPasses.dir/aabench.cpp.o -MF lib/passes/analysis/CMakeFiles/obj.MLIRPotatoPasses.dir/aabench.cpp.o.d -o lib/passes/analysis/CMakeFiles/obj.MLIRPotatoPasses.dir/aabench.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/passes/analysis/aabench.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/passes/analysis/aabench.cpp:1:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch, branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/passes/analysis/aabench.cpp:1:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/passes/analysis/aabench.cpp:1:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:484:17: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  484 |                 {branch, branch->getResults()}, result_lattices
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:254:20: note: in instantiation of member function 'potato::analysis::pt_analysis<potato::analysis::aa_analysis, potato::analysis::aa_lattice>::visit_operation' requested here
+  254 |         if (failed(visit_operation(op)))
+      |                    ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:243:16: note: in instantiation of member function 'potato::analysis::pt_analysis<potato::analysis::aa_analysis, potato::analysis::aa_lattice>::initialize_recursively' requested here
+  243 |         return initialize_recursively(root);
+      |                ^
+/home/user/work/llvm-project/mlir/include/mlir/Analysis/DataFlowFramework.h:714:34: note: in instantiation of member function 'potato::analysis::pt_analysis<potato::analysis::aa_analysis, potato::analysis::aa_lattice>::initialize' requested here
+  714 |   childAnalyses.emplace_back(new AnalysisT(*this, std::forward<Args>(args)...));
+      |                                  ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/passes/analysis/aabench.cpp:27:20: note: in instantiation of function template specialization 'mlir::DataFlowSolver::load<potato::analysis::aa_analysis>' requested here
+   27 |             solver.load< analysis::aa_analysis >();
+      |                    ^
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:580:31: note: passing argument to parameter 'successor' here
+  580 |         mlir::RegionSuccessor successor,
+      |                               ^
+4 errors generated.
+[14/31] Building CXX object lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o
+FAILED: lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o 
+/home/user/work/llvm-project/build/bin/clang++ -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_USE_CXX11_ABI=1 -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/user/work/llvm-project/llvm/include -I/home/user/work/llvm-project/build/include -I/home/user/work/llvm-project/mlir/include -I/home/user/work/llvm-project/build/tools/mlir/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include -I/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/build/include -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -Xclang -fno-pch-timestamp -O3 -DNDEBUG -std=c++20   -D_DEBUG -D_GLIBCXX_ASSERTIONS -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE -D_GLIBCXX_USE_CXX11_ABI=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -UNDEBUG -fno-exceptions -funwind-tables -MD -MT lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o -MF lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o.d -o lib/analysis/trad/CMakeFiles/obj.MLIRPotatoLLVMAnalysis.dir/llvm_aa.cpp.o -c /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:9:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:432:37: error: no member named 'getSuccessorInputs' in 'mlir::RegionSuccessor'
+  432 |             first_index + successor.getSuccessorInputs().size())
+      |                           ~~~~~~~~~ ^
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:613:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  613 |                         mlir::RegionSuccessor(branch, branch->getResults().slice(first_idx, inputs.size())),
+      |                         ^                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/lib/analysis/trad/llvm_aa.cpp:8:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/trad/llvm_aa.hpp:9:
+In file included from /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/andersen.hpp:10:
+/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato/include/potato/analysis/pt.hpp:623:25: error: no matching constructor for initialization of 'mlir::RegionSuccessor'
+  623 |                         mlir::RegionSuccessor(
+      |                         ^
+  624 |                             region,
+      |                             ~~~~~~~
+  625 |                             region->getArguments().slice(first_idx, inputs.size())
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:202:3: note: candidate constructor not viable: requires single argument 'region', but 2 arguments were provided
+  202 |   RegionSuccessor(Region *region) : successor(region) {
+      |   ^               ~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:199:7: note: candidate constructor (the implicit move constructor) not viable: requires 1 argument, but 2 were provided
+  199 | class RegionSuccessor {
+      |       ^~~~~~~~~~~~~~~
+/home/user/work/llvm-project/mlir/include/mlir/Interfaces/ControlFlowInterfaces.h:228:3: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  228 |   RegionSuccessor() : successor(nullptr) {}
+      |   ^
+3 errors generated.
+ninja: build stopped: subcommand failed.

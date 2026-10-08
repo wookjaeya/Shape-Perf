@@ -1,0 +1,35 @@
+{
+  "arms": {
+    "S1a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S1_alpha_full/model.so",
+      "tag": "alpha",
+      "policy": "S1"
+    },
+    "S8a": {
+      "path": "/home/user/work/v3_followup/e1/K_L0064_tagged/S8_alpha_full/model.so",
+      "tag": "alpha",
+      "policy": "S8"
+    }
+  },
+  "steps": [
+    [
+      "load",
+      "S1a"
+    ],
+    [
+      "load",
+      "S8a"
+    ],
+    [
+      "call",
+      "S8a"
+    ],
+    [
+      "call",
+      "S1a"
+    ]
+  ],
+  "input_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/input.npy",
+  "expected_npy": "/home/user/work/v3_followup/e1/K_L0064_tagged/expected.npy",
+  "call_log": "/home/user/Shape-Perf/results/v3_followup/e1/identity_tagged/SAMETAG-1a8a-8/calls_ld_bindnow.jsonl"
+}

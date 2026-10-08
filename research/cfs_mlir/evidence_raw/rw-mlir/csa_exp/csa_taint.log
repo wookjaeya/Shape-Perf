@@ -1,0 +1,1 @@
+$ clang --analyze -Xclang -analyzer-checker=optin.taint.GenericTaint -Xclang -analyzer-config -Xclang optin.taint.TaintPropagation:Config=taint.yaml rx_loop.c

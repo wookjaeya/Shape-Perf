@@ -1,0 +1,46 @@
+=== #73
+=== #71
+=== #198
+=== #950
+6932f1fe9180f4fd3f6756e4074b2c4b27a703cf 2020-10-16 Fix #950, race condition in control request
+=== #591
+7566f2f0b1b04042963465b434a68a82041cb6ab 2020-04-28 Merge pull request #619 from skliper/fix591-writetosys-deadlock
+1b03958cb10b3c254460d38a0324bbb3a1dfb8e4 2020-04-15 Fix #591, Avoid deadlock in CFE_ES_CreatObjects
+=== #1073
+95ec2da1705f3db440cfe23c0744d8ccba2dd7d4 2021-01-24 Merge pull request #1092 from jphickey/fix-1073-sb-locking
+b17cd1e3394efe061bc58c76cf6424e96d1c2fc4 2021-01-12 Fix #1073, refactor SB API for proper global locks
+=== #1034
+=== #926
+=== #1466
+=== #1509
+=== #1750
+=== #46
+=== #411
+733eb94aaa29a644d54ead15932c37d281605eaa 2020-05-08 Merge pull request #653 from jphickey/fix-411-exceptions
+87b87c8c1146fdc612d08dff745b9917b8ce1771 2020-05-06 Update #411, documentation updates
+d4f62edfad2a29af6d8d9c4714ae52511e4bc058 2020-04-29 Fix #411, rework exception handling in CFE
+=== #701
+=== #2107
+=== #2433
+=== #2523
+032a19ef9535117a90ff229dbe77bad96a22672d 2025-11-14 Merge pull request #2667 from jphickey:fix-2523-evs-counter
+b0f38482fb25f4af191ba6bacabbcce4bfa1f46c 2025-10-24 Fix #2523, move truncation count into locked section
+dd596c9618c2d425570295419ed55b7e61862783 2025-10-15 Fix #2523, add mutex around EVS counter increment
+=== #2655
+92261217fc2d8e29b75cc5deaa9d5b849e6b51ee 2025-12-17 Merge pull request #2670 from jphickey:fix-2655-counter-lock
+4767cef979377bd850708943dd6a75069a8b0891 2025-11-17 Fix #2655, add counter locks
+=== #2427
+2329feea5456eb0dc51c4be375fa06c68bbbf614 2023-08-18 Merge pull request #2428 from dmknutsen:Issue_2427
+25ccc0ce10a70bae49aa50439394b4c8faaa02da 2023-08-17 Fix #2427, Race condition in TestCreateChild
+=== #923
+948fa07b7559c11e57b60d7bdb8974ac26b84435 2020-10-01 Merge pull request #925 from jphickey/fix-923-appid-lookups
+a4ffe5b522ee7afc69e1658941e50a21665040c9 2020-09-30 Fix #923, Perform appid lookup early
+=== #924
+af0f5366eac96c708113a199d0a1241a1cab7832 2020-10-21 HOTFIX #924, Correct AppId during initial start
+787f3a829bbd3a45b7349bb74a97167d7a8ec9a9 2020-10-13 Fix #924, do not recycle ID values
+=== #2739
+=== #1383
+=== #2140
+=== #1892
+=== #1493
+=== #1495

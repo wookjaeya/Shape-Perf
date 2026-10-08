@@ -1,0 +1,155 @@
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 1 (cfe_evs.c:188) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x00007f06c464553b in __GI_kill () at ../sysdeps/unix/syscall-template.S:120
+warning: 120	../sysdeps/unix/syscall-template.S: No such file or directory
+process 16421 is executing new program: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/verify-C12/counter_lens/run/core-cpu1
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7f25d1ab36c0 (LWP 16453)]
+[New Thread 0x7f25d1a626c0 (LWP 16454)]
+[New Thread 0x7f25d1a596c0 (LWP 16455)]
+[Switching to Thread 0x7f25d1a596c0 (LWP 16455)]
+BP188 EventID=5 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=5, EventType=1, AppID=0, Spec=0x55d9e065d018 "Pipe Created:name %s,id %d,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0625ed7 in CFE_SB_CreatePipe (PipeIdPtr=0x55d9e06883c8 <CFE_ES_Global+57384>, Depth=12, PipeName=0x55d9e065ad22 "ES_CMD_PIPE") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:275
+#2  0x000055d9e061cf82 in CFE_ES_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:367
+#3  0x000055d9e061cb67 in CFE_ES_TaskMain () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:114
+BP188 EventID=10 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=10, EventType=1, AppID=0, Spec=0x55d9e065d2b0 "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0626ebc in CFE_SB_SubscribeFull (MsgId=..., PipeId=1441793, Quality=..., MsgLim=4, Scope=0 '\000') at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1085
+#2  0x000055d9e0626b65 in CFE_SB_Subscribe (MsgId=..., PipeId=1441793) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:924
+#3  0x000055d9e061cfdb in CFE_ES_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:377
+BP188 EventID=10 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=10, EventType=1, AppID=0, Spec=0x55d9e065d2b0 "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0626ebc in CFE_SB_SubscribeFull (MsgId=..., PipeId=1441793, Quality=..., MsgLim=4, Scope=0 '\000') at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1085
+#2  0x000055d9e0626b65 in CFE_SB_Subscribe (MsgId=..., PipeId=1441793) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:924
+#3  0x000055d9e061d034 in CFE_ES_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/es/fsw/src/cfe_es_task.c:387
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58920, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58920) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58af0, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58910, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58910) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58ae0, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a588c0, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a588c0) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a90, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a58850, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a58850) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58a20, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a588e0, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a588e0) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a58ab0, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+[New Thread 0x7f25d1a1f6c0 (LWP 16456)]
+[New Thread 0x7f25d1a196c0 (LWP 16457)]
+[Switching to Thread 0x7f25d1a196c0 (LWP 16457)]
+BP188 EventID=5 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=5, EventType=1, AppID=0, Spec=0x55d9e065d018 "Pipe Created:name %s,id %d,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0625ed7 in CFE_SB_CreatePipe (PipeIdPtr=0x55d9e0689388 <CFE_EVS_Global+3240>, Depth=32, PipeName=0x55d9e065c067 "EVS_CMD_PIPE") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:275
+#2  0x000055d9e0621248 in CFE_EVS_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:289
+#3  0x000055d9e0621075 in CFE_EVS_TaskMain () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:213
+BP188 EventID=10 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=10, EventType=1, AppID=0, Spec=0x55d9e065d2b0 "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0626ebc in CFE_SB_SubscribeFull (MsgId=..., PipeId=1441794, Quality=..., MsgLim=4, Scope=0 '\000') at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1085
+#2  0x000055d9e0626b65 in CFE_SB_Subscribe (MsgId=..., PipeId=1441794) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:924
+#3  0x000055d9e06212a1 in CFE_EVS_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:297
+BP188 EventID=10 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=10, EventType=1, AppID=0, Spec=0x55d9e065d2b0 "Subscription Rcvd:MsgId 0x%x on PipeId %lu,app %s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e0626ebc in CFE_SB_SubscribeFull (MsgId=..., PipeId=1441794, Quality=..., MsgLim=4, Scope=0 '\000') at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1085
+#2  0x000055d9e0626b65 in CFE_SB_Subscribe (MsgId=..., PipeId=1441794) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:924
+#3  0x000055d9e06212fa in CFE_EVS_TaskInit () at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs_task.c:304
+BP188 EventID=14 AppID=0x0
+#0  CFE_EVS_SendEventWithAppID (EventID=14, EventType=2, AppID=0, Spec=0x55d9e065d99c "%s") at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/evs/fsw/src/cfe_evs.c:188
+#1  0x000055d9e062957c in CFE_SB_MessageTxn_ReportSingleEvent (TxnPtr=0x7f25d1a18940, ContextPtr=0x0, EventId=14) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:786
+#2  0x000055d9e06295f5 in CFE_SB_MessageTxn_ReportEvents (TxnPtr=0x7f25d1a18940) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:812
+#3  0x000055d9e0627b02 in CFE_SB_TransmitMsg (MsgPtr=0x7f25d1a18b10, IsOrigination=true) at /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/sem-es-tbl/bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:1594
+[New Thread 0x7f25d16ff6c0 (LWP 16458)]
+[New Thread 0x7f25d16f86c0 (LWP 16459)]
+[New Thread 0x7f25d16f16c0 (LWP 16460)]
+[New Thread 0x7f25d16ea6c0 (LWP 16461)]
+[New Thread 0x7f25d16e46c0 (LWP 16462)]
+[Thread 0x7f25d1a596c0 (LWP 16455) exited]
+[Thread 0x7f25d1a626c0 (LWP 16454) exited]
+[Thread 0x7f25d1a1f6c0 (LWP 16456) exited]
+[Thread 0x7f25d1a196c0 (LWP 16457) exited]
+[Thread 0x7f25d16ff6c0 (LWP 16458) exited]
+[Thread 0x7f25d16f86c0 (LWP 16459) exited]
+[Thread 0x7f25d16f16c0 (LWP 16460) exited]
+[Thread 0x7f25d16ea6c0 (LWP 16461) exited]
+[Thread 0x7f25d16e46c0 (LWP 16462) exited]
+[Thread 0x7f25d1aa5740 (LWP 16421) exited]
+[Thread 0x7f25d1ab36c0 (LWP 16453) exited]
+[New process 16421]
+[Inferior 1 (process 16421) exited normally]
+The program is not being run.

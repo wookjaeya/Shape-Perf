@@ -1,0 +1,15 @@
+op kind: known / unknown
+llvm.load                      26378       0
+llvm.mlir.constant                 0   17150
+llvm.getelementptr             12492    2723
+llvm.store                     11274    3445
+llvm.call                       8830       0
+llvm.alloca                        1    8085
+llvm.br                         6125    1633
+llvm.intr.dbg.declare           7171       0
+llvm.cond_br                    5016       0
+llvm.icmp                       4198       0
+llvm.mlir.addressof                0    3789
+llvm.zext                       3179      28
+llvm.return                     2557       0
+llvm.mlir.global                2514       0

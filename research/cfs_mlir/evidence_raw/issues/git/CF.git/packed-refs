@@ -1,0 +1,23 @@
+# pack-refs with: peeled fully-peeled sorted 
+a9c36d63522babae4ec6e14c57df7315c927c58f refs/heads/dev
+deb508e2d3966848099658b42c544c923457587c refs/heads/draco-integration
+af71cfe146a9aa31660618c775d7adf50cd381a4 refs/heads/fix-508-tx-complete-hk-counters
+81e8da2b67eb8c156b885ac3d49b7375d027b287 refs/heads/gh-pages
+2b29ba665cff30f56cf1b8f63063a1e388e49b73 refs/heads/integration-candidate
+15a871e66cad7ec75e1be78989a93075ff142055 refs/heads/main
+8a635119b29dcfbd59d9c00ec0ca11e7bb25816a refs/heads/rc-2.2.2
+d74a996deb280b6ebd1cfa15eaa07d87f0767abe refs/heads/v7.0.1-integration
+ed935d2ee3c3dad611923f47292effd1b45ecdd2 refs/heads/v7.0.1-version-update
+ea5515cd4d50a25451d4dde9a330313a8d4a2767 refs/tags/2.2.1
+5fa809fecbce63f7a11dc6f995f7bfd5a991b50f refs/tags/draco-eval1
+d0b3e25566b7cb8221d8a3f90017fe52ee0f43d4 refs/tags/draco-rc1
+bff67f871cc88fbd7f2399a029aacd088112978c refs/tags/draco-rc2
+27769791341a26dc77ee6f8f9ac36a192c4c10e9 refs/tags/draco-rc3
+19c18b9dbdb0093e9bea78322de777e8f282acfb refs/tags/draco-rc4
+5df892e8161b423de0fe70a87b9481842558429d refs/tags/draco-rc5
+5df892e8161b423de0fe70a87b9481842558429d refs/tags/equuleus-rc1
+bc6139dc1a4a202e6c98c00e600edb8fe9e30fe9 refs/tags/v3.0.0
+^2ca7f978aea855ba4d6adc6e5370cbb2178129a5
+2a292d041a3644844517cc10344abbf0c4ecccc2 refs/tags/v3.0.1-rc1
+92baf07dc04d92cb388d899119df060126f708a0 refs/tags/v7.0.0
+15a871e66cad7ec75e1be78989a93075ff142055 refs/tags/v7.0.1

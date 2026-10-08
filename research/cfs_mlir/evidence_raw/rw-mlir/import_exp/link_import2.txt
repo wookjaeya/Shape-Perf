@@ -1,0 +1,16 @@
+$ mlir-translate --import-llvm mission.bc -o mission.mlir
+
+real	0m1.186s
+user	0m1.179s
+sys	0m0.096s
+rc=0
+-rw-r--r-- 1 root root 20246233 Oct  1 05:57 mission.mlir
+1700
+1700
+$ mlir-opt mission.mlir -test-print-callgraph (unknown-callee edges)
+
+real	0m2.625s
+user	0m1.578s
+sys	0m0.757s
+562
+6177

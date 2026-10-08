@@ -1,0 +1,40 @@
+# tool	repo	query	rows_listed	notes
+WebFetch	nasa/cFE	race (page1)	12	first page only shows 12
+WebFetch	nasa/cFE	race (page2)	12	includes #950,#1035
+WebFetch	nasa/cFE	startup race OR startup order	12	#1509,#1073,#952
+WebFetch	nasa/cFE	WaitForStartupSync	9	#73,#71,#198,#1466,PR#2273
+WebFetch	nasa/cFE	deadlock	12	#2433,#2127,#2107,#701,#591,#411,#373
+WebFetch	nasa/cFE	subscribe before	10	#926,#46,#1892
+WebFetch	nasa/cFE	table race OR table sharing OR GetAddress	12	#1750,#2538
+WebFetch	nasa/cFE	"no subscribers"	11	#926,#918,#1569
+WebFetch	nasa/cFE	restart app OR reload app	12	#2140,#1383,#2107
+WebFetch	nasa/cFE	"table sharing"	4	#1509,#1493,#1495
+WebFetch	nasa/cFE	"invalid message ID" intermittently	1	#1073
+WebFetch	nasa/cFE	stale OR uninitialized	11	mostly static-analysis cleanups
+WebFetch	nasa/cFE	tone data order OR "time at tone"	11	#1587,#1544
+WebFetch	nasa/cFE	tone	12	#2739
+WebFetch	nasa/cFE	"Erroneous Time Behavior" OR "GetReference error handling"	2	#1587,#1544
+WebFetch	nasa/cFE	"provides send status"	1	#918
+WebFetch	org:nasa	"race condition" is:issue (global search)	10	85 total; mostly non-cFS repos
+WebFetch	nasa/CF	race OR startup OR semaphore OR deadlock OR sync	12	#184,PR#342,#377,#285
+WebFetch	nasa/to_lab	subscribe OR startup OR race OR limit	12	#204,#229,#172
+WebFetch	nasa/to_lab	msglimit OR "msg limit" OR "message limit"	0	no issue for d3d52da
+WebFetch	nasa/HS	startup OR race OR sync OR stale OR restart	8	#148,#23
+WebFetch	nasa/LC	stale OR race OR startup OR order OR uninitialized	9	#8,#13,PR#115
+WebFetch	nasa/HK	stale OR missing OR race OR startup OR table OR uninitialized	12	#4,#60
+WebFetch	nasa/CS	table OR race OR startup OR miscompare OR update	12	#140
+WebFetch	nasa/SC	race OR startup OR table OR order OR time	12	PR#170,#178,PR#150(#45)
+WebFetch	nasa/DS	GetAddress OR table OR race OR startup OR stale	13	#146,#169
+WebFetch	nasa/SBN	race OR startup OR subscription OR sync OR order OR deadlock	12	#79,#92
+WebFetch	nasa/sample_app	GetAddress OR startup OR race OR subscribe OR table	12	#255
+WebFetch	nasa/sch_lab	GetAddress OR startup OR race OR sync OR timer OR table	12	#138
+WebFetch	nasa/cFS	race OR startup OR "msg limit" OR sync OR order	12	#1036
+WebFetch	nasa/osal	race OR deadlock OR "task delete" OR startup	12	robust-mutex PR for cFE#2433
+WebFetch	nasa/FM	race OR child OR startup OR sync OR semaphore	12	#76
+WebFetch	nasa/ci_lab	race OR startup OR subscribe OR order OR socket	12	#96
+WebFetch	nasa/MM	race OR startup OR table OR order OR stale	11	none relevant
+WebFetch	nasa/PSP	race OR startup OR restart OR reset OR sync	12	#310
+WebFetch	nasa/SCH	(open issues list, no query)	12	none relevant
+WebFetch	nasa/MD	race OR startup OR table OR stale OR order	12	#79
+git	20 repos (blobless bare clones)	all commit subjects	8198	all_commit_subjects.txt
+git	20 repos	keyword filter (race|startup|sync|order|subscri|stale|uninit|deadlock|restart|reload|timeout|getaddress|releaseaddress|lock|init|before|ready|hang|semaphore|mutex|priority|pipe)	478	kw_commits.txt

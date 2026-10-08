@@ -1,0 +1,17 @@
+$ clang -fclangir -emit-cir t1.c -o t1.cir
+error: clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON
+exit=1
+
+$ clang -cc1 -triple x86_64-unknown-linux-gnu -fclangir -emit-cir t1.c -o t1b.cir
+error: clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON
+exit=1
+
+$ grep CLANG_ENABLE_CIR build/tools/clang/include/clang/Config/config.h
+86:#define CLANG_ENABLE_CIR 0
+
+$ clang --version
+clang version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /home/user/work/llvm-project/build/bin
+Build config: +assertions

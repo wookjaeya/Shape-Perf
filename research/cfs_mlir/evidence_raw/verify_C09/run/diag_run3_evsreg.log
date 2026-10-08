@@ -1,0 +1,97 @@
+CFE_PSP: Default Reset SubType = 1
+CFE_PSP: Default CPU ID = 1
+CFE_PSP: Default Spacecraft ID = 66
+CFE_PSP: Default CPU Name: cpu1
+OS_Posix_GetSchedulerParams():208:Policy 1: available, min-max: 1-99
+OS_Posix_GetSchedulerParams():208:Policy 2: available, min-max: 1-99
+OS_Posix_TaskAPI_Impl_Init():401:Selected policy 2 for RT tasks, root task = 99
+CFE_PSP: initializing module 'soft_timebase' with ID 0110ff00
+CFE_PSP: Instantiated software timebase 'cFS-Master' running at 10000 usec
+CFE_PSP: initializing module 'timebase_posix_clock' with ID 0110ff01
+CFE_PSP: Using POSIX monotonic clock as CFE timebase
+CFE_PSP: initializing module 'eeprom_mmap_file' with ID 0110ff02
+CFE_PSP: Using MMAP simulated EEPROM implementation
+CFE_PSP: initializing module 'port_notimpl' with ID 0110ff03
+CFE_PSP: I/O Port access not implemented
+CFE_PSP: initializing module 'iodriver' with ID 0110ff04
+CFE_PSP: initializing module 'linux_sysmon' with ID 0110ff05
+CFE_PSP: initializing module 'endian_api' with ID 0110ff06
+CFE_PSP: Host CPU Endian=LITTLE
+CFE_PSP: initializing module 'ram_notimpl' with ID 0110ff07
+CFE_PSP: Physical RAM access not implemented
+CFE_PSP: EEPROM Range (2) created: Start Address = 7F3A3D480000, Size = 00080000 Status = 0
+CFE_PSP: Starting the cFE with a POWER ON reset.
+CFE_PSP: Clearing out CFE CDS Shared memory segment.
+CFE_PSP: Clearing out CFE Reset Shared memory segment.
+CFE_PSP: Clearing out CFE User Reserved Shared memory segment.
+1980-001-02:37:20.78922 CFE_ES_SetupResetVariables: POWER ON RESET due to Power Cycle (Power Cycle).
+1980-001-02:37:20.78933 CFE_ES_Main: CFE_ES_Main in EARLY_INIT state
+Number of addresses returned by backtrace = 1
+CFE_PSP: CFE_PSP_AttachExceptions called
+1980-001-02:37:20.78970 CFE_ES_Main: CFE_ES_Main entering CORE_STARTUP state
+1980-001-02:37:20.78970 CFE_ES_CreateObjects: Starting Object Creation calls.
+1980-001-02:37:20.78970 CFE_ES_CreateObjects: Calling EarlyInit for CFE_CONFIG
+1980-001-02:37:20.78972 CFE_ES_CreateObjects: Calling EarlyInit for CFE_ES
+1980-001-02:37:20.78988 CFE_ES_CreateObjects: Calling EarlyInit for CFE_EVS
+1980-001-02:37:20.78989 CFE_EVS_EarlyInit: Event Log cleared following power-on reset
+1980-001-02:37:20.78990 CFE_ES_CreateObjects: Calling EarlyInit for CFE_FS
+1980-001-02:37:20.78991 CFE_ES_CreateObjects: Calling EarlyInit for CFE_SB
+1980-001-02:37:20.79022 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TBL
+1980-001-02:37:20.79068 CFE_ES_CreateObjects: Calling EarlyInit for CFE_TIME
+EVS Port1 1980-012-14:03:20.05249 66/1/CFE_ES 1: cFE ES Initialized: CFE_ES v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.05252 66/1/CFE_ES 2: cFS Versions: cfe v7.0.1+dev1, osal v7.0.1+dev1, psp v7.0.1+dev1. cFE chksm 33302
+EVS Port1 1980-012-14:03:20.05252 66/1/CFE_ES 91: Version Info: Mission SampleMission, version (null)
+EVS Port1 1980-012-14:03:20.05256 66/1/CFE_ES 91: Version Info: Module CORE_API, version git:546a002
+EVS Port1 1980-012-14:03:20.05258 66/1/CFE_ES 91: Version Info: Module CONFIG, version git:546a002
+EVS Port1 1980-012-14:03:20.05259 66/1/CFE_ES 91: Version Info: Module ES, version git:546a002
+EVS Port1 1980-012-14:03:20.05261 66/1/CFE_ES 91: Version Info: Module EVS, version git:546a002
+EVS Port1 1980-012-14:03:20.05262 66/1/CFE_ES 91: Version Info: Module FS, version git:546a002
+EVS Port1 1980-012-14:03:20.05264 66/1/CFE_ES 91: Version Info: Module SB, version git:546a002
+EVS Port1 1980-012-14:03:20.05264 66/1/CFE_ES 91: Version Info: Module TBL, version git:546a002
+EVS Port1 1980-012-14:03:20.05265 66/1/CFE_ES 91: Version Info: Module TIME, version git:546a002
+EVS Port1 1980-012-14:03:20.05267 66/1/CFE_ES 91: Version Info: Module OSAL, version git:dad0ee9
+EVS Port1 1980-012-14:03:20.05268 66/1/CFE_ES 91: Version Info: Module PSP, version git:53df1d5
+EVS Port1 1980-012-14:03:20.05270 66/1/CFE_ES 91: Version Info: Module MSG, version git:546a002
+EVS Port1 1980-012-14:03:20.05271 66/1/CFE_ES 91: Version Info: Module SBR, version git:546a002
+EVS Port1 1980-012-14:03:20.05273 66/1/CFE_ES 91: Version Info: Module RESOURCEID, version git:546a002
+EVS Port1 1980-012-14:03:20.05274 66/1/CFE_ES 92: Build 202610010610 by root@vm, config sample
+EVS Port1 1980-012-14:03:20.15066 66/1/CFE_EVS 1: cFE EVS Initialized: CFE_EVS v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+1980-012-14:03:20.25090 CFE_SB_AppInit: Registered 4 events for filtering
+EVS Port1 1980-012-14:03:20.25097 66/1/CFE_SB 1: cFE SB Initialized: CFE_SB v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.25099 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_SB
+EVS Port1 1980-012-14:03:20.35119 66/1/CFE_TBL 1: cFE TBL Initialized: CFE_TBL v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.35121 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TBL
+EVS Port1 1980-012-14:03:20.45162 66/1/CFE_TIME 1: cFE TIME Initialized: CFE_TIME v7.0.1+dev1 (Draco) DEV BUILD, based on v7.0.1, EDS disabled
+EVS Port1 1980-012-14:03:20.45166 66/1/CFE_SB 14: No subscribers for MsgId 0x808,sender CFE_TIME
+1980-012-14:03:20.50146 CFE_ES_CreateObjects: Finished ES CreateObject table entries.
+1980-012-14:03:20.50149 CFE_ES_Main: CFE_ES_Main entering CORE_READY state
+1980-012-14:03:20.50151 CFE_ES_OpenStartupScript: Opened ES App Startup file: /cf/cfe_es_startup.scr
+1980-012-14:03:20.50162 CFE_ES_ParseFileEntry: Loading file: /cf/sbprobe.so, APP: SBPROBE
+1980-012-14:03:20.60200 CFE_ES_Main: CFE_ES_Main entering APPS_INIT state
+1980-012-14:03:20.60203 CFE_ES_Main: CFE_ES_Main entering OPERATIONAL state
+SBDIAG EVS_Register rc=0x00000000
+SBDIAG task GetTaskID=0x00000000 ToIndex=0x00000000 idx=9
+SBDIAG StopRecurseFlags[idx]=0x00000000
+SBDIAG SB filter[0] EventID=14 Mask=0xfffc Count=3 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[1] EventID=7 Mask=0xfffc Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[2] EventID=17 Mask=0xfff0 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[3] EventID=25 Mask=0xfff0 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[4] EventID=65535 Mask=0x0000 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[5] EventID=65535 Mask=0x0000 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[6] EventID=65535 Mask=0x0000 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+SBDIAG SB filter[7] EventID=65535 Mask=0x0000 Count=0 ActiveFlag=1 SquelchTokens=31000 SquelchedCount=0
+EVS Port1 1980-012-14:03:20.60238 66/1/CFE_SB 14: No subscribers for MsgId 0x911,sender SBPROBE
+SBDIAG T1a never_subscribed_first rc=0x00000000 NoSubDelta=2 MsgSendErrDelta=0 MsgLimDelta=0 EVS_MsgSendDelta=1 EVS_SB_AppSentDelta=1 (SB_AppSent before=4 after=5)
+SBDIAG after T1a StopRecurseFlags[idx]=0x00000000
+SBDIAG T0 direct_EVS_SendEventWithAppID_SB rc=0x00000000 NoSubDelta=0 MsgSendErrDelta=0 MsgLimDelta=0 EVS_MsgSendDelta=0 EVS_SB_AppSentDelta=0 (SB_AppSent before=5 after=5SBDIAG T1b never_subscribed_second rc=0x00000000 NoSubDelta=1 MsgSendErrDelta=0 MsgLimDelta=0 EVS_MsgSendDelta=0 EVS_SB_AppSentDelta=0 (SB_AppSent before=5 after=5)
+EVS Port1 1980-012-14:03:20.60310 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x914,pipe SBD_T3,sender SBPROBE
+EVS Port1 1980-012-14:03:20.60313 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x914,pipe SBD_T3,sender SBPROBE
+EVS Port1 1980-012-14:03:20.60313 66/1/CFE_SB 17: Msg Limit Err,MsgId 0x914,pipe SBD_T3,sender SBPROBE
+SBDIAG T3 msglim2_5sends rc=0x00000000 NoSubDelta=3 MsgSendErrDelta=3 MsgLimDelta=3 EVS_MsgSendDelta=3 EVS_SB_AppSentDelta=3 (SB_AppSent before=5 after=8)
+SBDIAG DONE
+EVS Port1 1980-012-14:03:21.00004 66/1/CFE_TIME 21: Stop FLYWHEEL
+1980-012-14:03:43.03859 CFE_ES_RunExceptionScan: ExceptionID 0x1110000 in TaskID 0: Caught Signal 15
+1980-012-14:03:43.03862 CFE_ES_RunExceptionScan: Processor Reset count not reached (0/2)
+CFE_PSP: Exiting cFE with PROCESSOR Reset status.
+
+CFE_PSP: Shutdown initiated - Exiting cFE

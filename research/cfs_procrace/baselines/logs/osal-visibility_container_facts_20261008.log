@@ -1,0 +1,50 @@
+# osal-visibility container facts, 2026-10-08T01:38:24Z
+$ uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+$ cat /etc/os-release | head -4
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.4 LTS (Noble Numbat)"
+$ nproc
+4
+$ df -h / /home/user
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   35G  2.6G  94% /
+/dev/vda        252G   35G  2.6G  94% /
+$ id
+uid=0(root) gid=0(root) groups=0(root)
+$ grep Cap /proc/self/status
+CapInh:	0000000000000000
+CapPrm:	000001fffeffffff
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+CapAmb:	0000000000000000
+$ capsh --decode (CapEff)
+0x000001fffeffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read,cap_perfmon,cap_bpf,cap_checkpoint_restore
+$ ls -l /proc/modules; head -3 /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+head: cannot open '/proc/modules' for reading: No such file or directory
+$ cat /proc/sys/kernel/yama/ptrace_scope
+cat: /proc/sys/kernel/yama/ptrace_scope: No such file or directory
+$ which strace gdb cmake gcc g++ make git
+/usr/bin/strace
+/usr/bin/gdb
+/usr/bin/cmake
+/usr/bin/gcc
+/usr/bin/g++
+/usr/bin/make
+/usr/bin/git
+$ versions
+strace -- version 6.8
+cmake version 3.28.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+GNU Make 4.3
+git version 2.43.0
+$ cat /proc/sys/kernel/sched_rt_runtime_us
+950000
+$ ulimit -r -q
+0
+819200
+$ cat /proc/sys/fs/mqueue/msg_max
+10

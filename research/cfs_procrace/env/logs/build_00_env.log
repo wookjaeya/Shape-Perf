@@ -1,0 +1,17 @@
+# build_cfs.sh environment record, 2026-10-08T01:10:43.893Z
+## invoking user: uid=0(root) gid=0(root) groups=0(root)
+## build user: ubuntu (uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev))
+## uname: Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+## os-release:
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.4 LTS (Noble Numbat)"
+## README L89 prerequisites (Make, CMake, GCC, Git):
+make: /usr/bin/make :: GNU Make 4.3
+cmake: /usr/bin/cmake :: cmake version 3.28.3
+gcc: /usr/bin/gcc :: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+git: /usr/bin/git :: git version 2.43.0
+## nproc: 4
+## df:
+/dev/vda        252G   34G  3.9G  90% /

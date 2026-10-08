@@ -1,0 +1,95 @@
+# yu-group: primary sources actually opened (2026-10-08). Read-only; nothing from these repos was executed.
+# Text extraction: pdftotext (poppler-utils 24.02.0-1ubuntu9.9, installed via apt; see yu-group_apt_poppler.log)
+
+## S1. DESCRY (Yu, Zaman, Wang, ESEC/FSE 2017) -- author-hosted PDF
+# origin: git clone --depth 1 --filter=blob:none --no-checkout https://github.com/chaowang-vt/chaowang-vt.github.io
+#         (repo HEAD f3544731050f7f435640f53c1c938c0dea5135dd, 2026-03-10); git checkout HEAD -- pubDOC/YuZW17.pdf
+#         = the file served at https://chaowang-vt.github.io/pubDOC/YuZW17.pdf (the URL [P5] in the roadmap; the https URL itself is egress-blocked here)
+# sha256: f9d7b57bbb0c1269f9143b4ec69286e90348a58fadd071f76f11022e06dfbf60
+# pdfinfo: Title: DESCRY: Reproducing System-Level Concurrency Failures ;Pages: 11;
+# command: pdftotext -layout YuZW17.pdf /home/user/work/procrace/baselines/yu-group/text/YuZW17_DESCRY.txt ; pdftotext YuZW17.pdf /home/user/work/procrace/baselines/yu-group/text/YuZW17_DESCRY_raw.txt
+# Quoted passages (page numbers from pdftotext -f/-l per page):
+### p2 (Sec.1):
+DESCRY has been implemented as a software tool using the
+LLVM compiler front-end [1], the KLEE symbolic virtual machine [5],
+and the Simics Virtual Platform [8, 38] for deterministic replay.
+### p3 (Sec.2.1):
+421-file, device) without proper synchronization [21]. Such resources
+422-are often accessed through system calls. Thus, handling systemlevel concurrency fault requires the modeling of read/write effects
+423-and synchronization operations involving system calls. For example, the lstat system call on file f reads the metadata of f . The
+424-clone system call creates a new process inode under the /proc
+425:directory (write). Synchronization operations control process interactions through kernel process scheduler. Common process-level
+426-synchronization primitives include fork, wait, exit, pipe, and
+427-signal.
+428-The second column of Figure 4 shows an example interleaving
+### p7 (Sec.7):
+We have implemented DESCRY in a software tool built upon a
+number of open-source platforms. Specifically, our static program
+analysis for mapping log messages to program statements was implemented in LLVM [1], our log-guided symbolic execution was
+implemented using KLEE [5], and our interleaving schedule generator was implemented using the Simics Virtual Platform [8].
+### p8 (Sec.7.2):
+this problem in KLEE would have allowed DESCRY to handle these
+two failures without any modification.
+DESCRY is the only tool that can automatically reproduce the
+22 known failures. Existing tools, such as RacePro [21] and SimRacer [29, 38], may appear to be similar but cannot really solve
+the same problem, due to the following limitations. First, they require the user to provide concrete data inputs, which cannot be
+satisfied in practice. Second, their search for erroneous interleaving
+schedules is not guided by logs. Since prior work has shown that
+SimRacer outperformed RacePro (due to limitations of RacePro such
+as replay divergence [38]), in this study, we compare DESCRY only
+to SimRacer. SimRacer does not have the capability of generating
+new data inputs, so we had to feed random inputs to SimRacer. As
+shown in Table 3, SimRacer reproduced only eight out of the 22
+failures reproduced by DESCRY.
+### p8 (Sec.7.2, DESCRY_AS):
+### p9 (Sec.7.2):
+1614-top of the vertical axis, it means the corresponding method failed
+1615-to reproduce the failure in the two-hour time limit. Among the
+1616-eight failures successfully reproduced by SimRacer, SimRacer was
+1617:3 times faster than DESCRY on average. Unfortunately, there are 14
+1618-other failures that SimRacer could not reproduce but DESCRY could.
+1619-Compared to DESCRY, the method DESCRYD F S was 2.1 to 11 times
+1620-slower on the individual benchmarks both can handle (and 7.8 times
+### refs:
+[29] Supat Rattanasuksun, Tingting Yu, Witawas Srisa-An, and Gregg Rothermel. Rrf:
+A race reproduction framework for use in debugging process-level races. pages
+162–172, 2016.
+[38] Tingting Yu, Witawas Srisa-an, and Gregg Rothermel. SimRacer: An automated
+framework to support testing for process-level races. In International
+Symposium on Software Testing and Analysis, pages 167–177, 2013.
+
+## S2. SCMiner preprint (Zaman, Han, Yu; IEEE PDFeXpress 2019-09-13) -- not one of the five tools; checked for statements about them
+# origin: git clone --depth 1 https://github.com/tarannumzaman/Scminer (HEAD 255933c62394e0d4fc0a9063975d36aca1cb15a9, 2022-09-27), file Scminer_preprint.pdf
+# sha256: 854f86c14bcffe8c446d9e8b84f347ace3697145dbc31a094e8dec4b37172099
+# command: pdftotext -layout Scminer_preprint.pdf /home/user/work/procrace/baselines/yu-group/text/Scminer_preprint.txt
+### p11 (related work), verbatim (two-column layout, left column):
+638:   Process-level concurrency failures. RacePro [11] leverages       
+639-the vector-clocks algorithm to detect a process-level race if       
+640-it happens during test execution. It tracks the accesses of         
+641-                                                                    
+642-shared kernel resources via system calls and records exe-           
+### ref [45] (benchmark source pointer used for 'other research [18], [45]'):
+686:[22] M. Naik, A. Aiken, and J. Whaley, “Effective static race detection [45] 2016, http://cs.uky.edu/ tyu/research/descry.
+
+## Addenda (lines missed by the first grep; line numbers refer to /home/user/work/procrace/baselines/yu-group/text/*.txt)
+### DESCRY p3 (Sec.2.1), YuZW17_DESCRY_raw.txt:
+schedule is either a shared resource access (“R" denotes read and
+“W" denotes write) or a synchronization operation. Details of shared
+resource and event modeling can be found in prior work [21, 38].
+### DESCRY p8 (Sec.7.2), YuZW17_DESCRY_raw.txt:
+generation algorithm. The third option is DESCRYAS , which uses
+the logging points to guide symbolic execution, but does not use
+our new schedule generation algorithm. Instead, DESCRYAS relies
+on active testing techniques [31, 38]. This controlled experiment allows us to evaluate the performance of our new schedule generation
+### SCMiner p11 (Sec. related work), Scminer_preprint.txt left column lines 638-648:
+   Process-level concurrency failures. RacePro [11] leverages           
+the vector-clocks algorithm to detect a process-level race if         [8
+it happens during test execution. It tracks the accesses of             
+                                                                        
+shared kernel resources via system calls and records exe-             [9
+cutions of multiple processes. SimRacer [18] and RacePro                
+[11] aim to detect process-level concurrency faults by testing          
+                                                                        
+for different interleavings of system calls. Descry [17] can         [10
+reproduce system-level concurrency failures by combining                
+static and dynamic analysis techniques to generate test inputs.         

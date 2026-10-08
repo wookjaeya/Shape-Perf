@@ -1,0 +1,2204 @@
+{
+ "summary": {
+  "mlir_opt/to_lab/to_lab_app.dbg.mlir": {
+   "defined_funcs": 13,
+   "api_calls_by_family": {
+    "CFE_ES_api": 16,
+    "CFE_EVS_api": 45,
+    "CFE_MSG_api": 2,
+    "CFE_PSP_api": 2,
+    "CFE_SB_api": 32,
+    "CFE_TBL_api": 12,
+    "OS_api": 13
+   },
+   "api_calls_by_callee": {
+    "CFE_ES_ExitApp": 1,
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_ES_RunLoop": 1,
+    "CFE_ES_WaitForStartupSync": 1,
+    "CFE_ES_WriteToSysLog": 6,
+    "CFE_EVS_Register": 2,
+    "CFE_EVS_SendEvent": 43,
+    "CFE_MSG_Init": 2,
+    "CFE_PSP_GetProcessorId": 2,
+    "CFE_SB_CreatePipe": 4,
+    "CFE_SB_IsValidMsgId": 10,
+    "CFE_SB_ReceiveBuffer": 4,
+    "CFE_SB_Subscribe": 5,
+    "CFE_SB_SubscribeEx": 4,
+    "CFE_SB_Unsubscribe": 5,
+    "CFE_TBL_GetAddress": 4,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_Manage": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "OS_SocketAddrFromString": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketOpen": 1,
+    "OS_SocketSendTo": 2,
+    "OS_TaskInstallDeleteHandler": 2,
+    "OS_close": 1,
+    "OS_printf": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 2,
+    "CFE_SB_Subscribe#0: direct_const": 4,
+    "CFE_SB_Unsubscribe#0: global": 5,
+    "CFE_SB_SubscribeEx#0: load_other": 4,
+    "CFE_SB_Subscribe#0: param": 1
+   },
+   "msgptr": {
+    "CFE_MSG_Init: TO_LAB_Global.HkTlm": 2
+   },
+   "global_store_fields": {
+    "TO_LAB_Global.AllowPassthru": 2,
+    "TO_LAB_Global.downlink_on": 2,
+    "TO_LAB_Global.SubsTblPtr": 2,
+    "TO_LAB_Global.ActiveSubs.[dyn].Value": 5,
+    "TO_LAB_Global.ActiveSubCount": 9,
+    "TO_LAB_Global.suppress_sendto": 2
+   },
+   "global_store_value_kinds": {
+    "direct_const": 16,
+    "alloca[0 store(s)]-> outparam_of:CFE_TBL_GetAddress": 2,
+    "unknown": 4
+   },
+   "global_load_fields": 8,
+   "global_loads": 55,
+   "global_memops": [
+    "memset TO_LAB_Global. src=memset @ apps/to_lab/fsw/src/to_lab_app.c:123",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ apps/to_lab/fsw/src/to_lab_app.c:516",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ apps/to_lab/fsw/src/to_lab_app.c:516",
+    "memset TO_LAB_Global. src=memset @ apps/to_lab/fsw/src/to_lab_app.c:123",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ apps/to_lab/fsw/src/to_lab_app.c:516",
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ apps/to_lab/fsw/src/to_lab_app.c:516"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 128,
+    "llvm.getelementptr:unknown": 18,
+    "llvm.getelementptr:known": 69,
+    "llvm.load:known": 97,
+    "llvm.mlir.addressof:unknown": 54,
+    "llvm.mlir.addressof:known": 18,
+    "llvm.mlir.constant:unknown": 130,
+    "llvm.mlir.constant:known": 19,
+    "llvm.store:known": 24,
+    "other:unknown": 19,
+    "other:known": 610
+   }
+  },
+  "mlir_opt/to_lab/to_lab_cmds.dbg.mlir": {
+   "defined_funcs": 11,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 12,
+    "CFE_MSG_api": 1,
+    "CFE_SB_api": 7
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 12,
+    "CFE_MSG_Init": 1,
+    "CFE_SB_MessageStringGet": 1,
+    "CFE_SB_SubscribeEx": 1,
+    "CFE_SB_TimeStampMsg": 2,
+    "CFE_SB_TransmitMsg": 2,
+    "CFE_SB_Unsubscribe": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {
+    "CFE_MSG_Init#1: direct_const": 1,
+    "CFE_SB_SubscribeEx#0: load_other": 1,
+    "CFE_SB_Unsubscribe#0: load_other": 1
+   },
+   "msgptr": {
+    "CFE_MSG_Init: TO_LAB_Global.DataTypesTlm": 1,
+    "CFE_SB_TransmitMsg: TO_LAB_Global.DataTypesTlm": 1,
+    "CFE_SB_TransmitMsg: TO_LAB_Global.HkTlm": 1
+   },
+   "global_store_fields": {
+    "TO_LAB_Global.suppress_sendto": 1,
+    "TO_LAB_Global.downlink_on": 1,
+    "TO_LAB_Global.HkTlm.Payload": 8,
+    "TO_LAB_Global.HkTlm.Payload.CommandErrorCounter": 6,
+    "TO_LAB_Global.DataTypesTlm.Payload": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.bl1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.bl2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b3": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.b4": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.w1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.w2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.dw1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.dw2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.f1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.f2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.df1": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.df2": 1,
+    "TO_LAB_Global.DataTypesTlm.Payload.str.[dyn]": 1,
+    "TO_LAB_Global.ActiveSubCount": 2,
+    "TO_LAB_Global.ActiveSubs.[dyn].Value": 1
+   },
+   "global_store_value_kinds": {
+    "direct_const": 16,
+    "other": 18,
+    "load_other": 1
+   },
+   "global_load_fields": 6,
+   "global_loads": 21,
+   "global_memops": [
+    "memcpy TO_LAB_Global.ActiveSubs.[dyn] src=unknown_ptr @ apps/to_lab/fsw/src/to_lab_cmds.c:232"
+   ],
+   "loc_known_by_op": {
+    "llvm.call:known": 23,
+    "llvm.getelementptr:unknown": 42,
+    "llvm.getelementptr:known": 33,
+    "llvm.load:known": 40,
+    "llvm.mlir.addressof:unknown": 26,
+    "llvm.mlir.constant:unknown": 78,
+    "llvm.store:known": 35,
+    "other:unknown": 8,
+    "other:known": 120
+   }
+  },
+  "mlir_opt/to_lab/to_lab_dispatch.dbg.mlir": {
+   "defined_funcs": 5,
+   "api_calls_by_family": {
+    "CFE_EVS_api": 3,
+    "CFE_MSG_api": 3,
+    "CFE_SB_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_EVS_SendEvent": 3,
+    "CFE_MSG_GetFcnCode": 2,
+    "CFE_MSG_GetMsgId": 1,
+    "CFE_SB_IsValidMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {
+    "TO_LAB_Global.HkTlm.Payload.CommandErrorCounter": 2,
+    "TO_LAB_TaskPipe.CMD_MID.Value": 1,
+    "TO_LAB_TaskPipe.SEND_HK_MID.Value": 1
+   },
+   "global_store_value_kinds": {
+    "other": 2,
+    "direct_const": 2
+   },
+   "global_load_fields": 3,
+   "global_loads": 5,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 22,
+    "llvm.getelementptr:unknown": 3,
+    "llvm.getelementptr:known": 6,
+    "llvm.load:known": 12,
+    "llvm.mlir.addressof:unknown": 7,
+    "llvm.mlir.constant:unknown": 18,
+    "llvm.store:known": 6,
+    "other:unknown": 130,
+    "other:known": 207
+   }
+  },
+  "mlir_opt/to_lab/to_lab_passthru_encode.dbg.mlir": {
+   "defined_funcs": 1,
+   "api_calls_by_family": {
+    "CFE_MSG_api": 1
+   },
+   "api_calls_by_callee": {
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_origins": {},
+   "msgptr": {},
+   "global_store_fields": {},
+   "global_store_value_kinds": {},
+   "global_load_fields": 0,
+   "global_loads": 0,
+   "global_memops": [],
+   "loc_known_by_op": {
+    "llvm.call:known": 1,
+    "llvm.load:known": 1,
+    "llvm.mlir.constant:unknown": 2,
+    "llvm.store:known": 3,
+    "other:unknown": 1,
+    "other:known": 7
+   }
+  }
+ },
+ "detail": [
+  {
+   "file": "mlir_opt/to_lab/to_lab_app.dbg.mlir",
+   "n_defined_funcs": 13,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_AppMain",
+    "TO_LAB_CmdSubscribe",
+    "TO_LAB_ManageTables",
+    "TO_LAB_UnsubscribeFromTlmPipe",
+    "TO_LAB_UpdateSubscriptionsFromTable",
+    "TO_LAB_ValidateSubTable",
+    "TO_LAB_delete_callback",
+    "TO_LAB_forward_telemetry",
+    "TO_LAB_init",
+    "TO_LAB_openTLM",
+    "TO_LAB_process_commands"
+   ],
+   "calls": {
+    "CFE_ES_|api": 16,
+    "CFE_EVS_|api": 45,
+    "CFE_MSG_|api": 2,
+    "CFE_TBL_|api": 12,
+    "CFE_SB_|api": 32,
+    "OS_|api": 13,
+    "CFE_PSP_|api": 2
+   },
+   "calls_by_callee": {
+    "CFE_ES_PerfLogAdd": 7,
+    "CFE_EVS_Register": 2,
+    "CFE_ES_WriteToSysLog": 6,
+    "CFE_MSG_Init": 2,
+    "CFE_TBL_Register": 2,
+    "CFE_EVS_SendEvent": 43,
+    "CFE_TBL_Load": 2,
+    "CFE_TBL_GetAddress": 4,
+    "CFE_SB_CreatePipe": 4,
+    "CFE_SB_Subscribe": 5,
+    "OS_TaskInstallDeleteHandler": 2,
+    "CFE_ES_WaitForStartupSync": 1,
+    "CFE_SB_IsValidMsgId": 10,
+    "CFE_SB_Unsubscribe": 5,
+    "CFE_SB_SubscribeEx": 4,
+    "CFE_ES_RunLoop": 1,
+    "CFE_PSP_GetProcessorId": 2,
+    "OS_SocketAddrInit": 2,
+    "OS_SocketAddrSetPort": 2,
+    "OS_SocketAddrFromString": 2,
+    "CFE_SB_ReceiveBuffer": 4,
+    "OS_SocketSendTo": 2,
+    "CFE_TBL_ReleaseAddress": 2,
+    "CFE_TBL_Manage": 2,
+    "CFE_ES_ExitApp": 1,
+    "OS_printf": 1,
+    "OS_close": 1,
+    "OS_SocketOpen": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2176
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:142"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2176
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:142"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_CmdSubscribe",
+     "callee": "CFE_SB_Subscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "param",
+      "arg": "%arg0"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "global",
+      "sym": "TO_LAB_Global",
+      "path": [
+       "ActiveSubs",
+       "[dyn]",
+       "Value"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "TO_LAB_AppMain",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:142"
+    },
+    {
+     "func": "TO_LAB_init",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:142"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "AllowPassthru"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:125"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:126"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "value": {
+      "kind": "alloca",
+      "n_stores": 0,
+      "stored": [],
+      "outparam_of": [
+       "CFE_TBL_GetAddress"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:192"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:466"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:475"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:545"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:378"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:466"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:475"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:545"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "AllowPassthru"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:125"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:126"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "value": {
+      "kind": "alloca",
+      "n_stores": 0,
+      "stored": [],
+      "outparam_of": [
+       "CFE_TBL_GetAddress"
+      ],
+      "memcpy_from": []
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:192"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:466"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:475"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:545"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:378"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:466"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:475"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "unknown"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:545"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:466"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:475"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:164"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:178"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:452"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:461"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:500"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:344"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:346"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:350"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:365"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:289"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:568"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:569"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:574"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:452"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:461"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:500"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:164"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:178"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_init",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:452"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:461"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:500"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:344"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:346"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:350"
+    },
+    {
+     "func": "TO_LAB_forward_telemetry",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:365"
+    },
+    {
+     "func": "TO_LAB_process_commands",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:289"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:568"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:569"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblHandle"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:574"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:452"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:461"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "SubsTblPtr"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:500"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:504"
+    },
+    {
+     "func": "TO_LAB_delete_callback",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:105"
+    },
+    {
+     "func": "TO_LAB_delete_callback",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "TLMsockid"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:107"
+    },
+    {
+     "func": "TO_LAB_CmdSubscribe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "Cmd_pipe"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:261"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:452"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:454"
+    },
+    {
+     "func": "TO_LAB_UnsubscribeFromTlmPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:461"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memset",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:123"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:516"
+    },
+    {
+     "func": "TO_LAB_AppMain",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:516"
+    },
+    {
+     "func": "TO_LAB_init",
+     "op": "memset",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "src": "memset",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:123"
+    },
+    {
+     "func": "TO_LAB_UpdateSubscriptionsFromTable",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:516"
+    },
+    {
+     "func": "TO_LAB_ManageTables",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "apps/to_lab/fsw/src/to_lab_app.c:516"
+    }
+   ]
+  },
+  {
+   "file": "mlir_opt/to_lab/to_lab_cmds.dbg.mlir",
+   "n_defined_funcs": 11,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_AddPacketCmd",
+    "TO_LAB_EnableOutputCmd",
+    "TO_LAB_NoopCmd",
+    "TO_LAB_RemoveAllCmd",
+    "TO_LAB_RemovePacketCmd",
+    "TO_LAB_ResetCountersCmd",
+    "TO_LAB_SendDataTypesCmd",
+    "TO_LAB_SendHkCmd"
+   ],
+   "calls": {
+    "CFE_SB_|api": 7,
+    "CFE_EVS_|api": 12,
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_SB_MessageStringGet": 1,
+    "CFE_EVS_SendEvent": 12,
+    "CFE_MSG_Init": 1,
+    "CFE_SB_TimeStampMsg": 2,
+    "CFE_SB_TransmitMsg": 2,
+    "CFE_SB_SubscribeEx": 1,
+    "CFE_SB_Unsubscribe": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_MSG_Init",
+     "arg": 1,
+     "origin": {
+      "kind": "const",
+      "value": 2177
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:112"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "callee": "CFE_SB_SubscribeEx",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:218"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "callee": "CFE_SB_Unsubscribe",
+     "arg": 0,
+     "origin": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:280"
+    }
+   ],
+   "msgptr_args": [
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_MSG_Init",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "DataTypesTlm"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:112"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "DataTypesTlm"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:147"
+    },
+    {
+     "func": "TO_LAB_SendHkCmd",
+     "callee": "CFE_SB_TransmitMsg",
+     "msg": {
+      "sym": "TO_LAB_Global",
+      "path": [
+       "HkTlm"
+      ]
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:161"
+    }
+   ],
+   "global_stores": [
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "suppress_sendto"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:48"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:57"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:60"
+    },
+    {
+     "func": "TO_LAB_NoopCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:82"
+    },
+    {
+     "func": "TO_LAB_ResetCountersCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:93"
+    },
+    {
+     "func": "TO_LAB_ResetCountersCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:94"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 26985
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:119"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "bl1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:129"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "bl2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 1
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:130"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 16
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:131"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 127
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:132"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b3"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 127
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:133"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "b4"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 69
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:134"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "w1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 9320
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:135"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "w2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 32767
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:136"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "dw1"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 305419896
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:137"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "dw2"
+     ],
+     "value": {
+      "kind": "const",
+      "value": -2023406815
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:138"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "f1"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(9.001000e+01"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:139"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "f2"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(4.500000e-06"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:140"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "df1"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(9.990000e+01"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:141"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "df2"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.mlir.constant(4.444000e-01"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:142"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "DataTypesTlm",
+      "Payload",
+      "str",
+      "[dyn]"
+     ],
+     "value": {
+      "kind": "load_other"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:145"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:149"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:184"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:194"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:214"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:228"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:233"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:242"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:276"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:289"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 0
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:294"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:295"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:302"
+    },
+    {
+     "func": "TO_LAB_RemoveAllCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:325"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "downlink_on"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:54"
+    },
+    {
+     "func": "TO_LAB_EnableOutputCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:60"
+    },
+    {
+     "func": "TO_LAB_NoopCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:82"
+    },
+    {
+     "func": "TO_LAB_SendDataTypesCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:149"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:176"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:184"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:194"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:201"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:214"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:218"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:228"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:232"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:233"
+    },
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:242"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]",
+      "Value"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:263"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:276"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:280"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:289"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubCount"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:295"
+    },
+    {
+     "func": "TO_LAB_RemovePacketCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:302"
+    },
+    {
+     "func": "TO_LAB_RemoveAllCmd",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:325"
+    }
+   ],
+   "global_memops": [
+    {
+     "func": "TO_LAB_AddPacketCmd",
+     "op": "memcpy",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "ActiveSubs",
+      "[dyn]"
+     ],
+     "src": "unknown_ptr",
+     "loc": "apps/to_lab/fsw/src/to_lab_cmds.c:232"
+    }
+   ]
+  },
+  {
+   "file": "mlir_opt/to_lab/to_lab_dispatch.dbg.mlir",
+   "n_defined_funcs": 5,
+   "defined_funcs": [
+    "CFE_SB_MsgIdToValue",
+    "CFE_SB_MsgId_Equal",
+    "CFE_SB_ValueToMsgId",
+    "TO_LAB_ProcessGroundCommand",
+    "TO_LAB_TaskPipe"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 3,
+    "CFE_EVS_|api": 3,
+    "CFE_SB_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetFcnCode": 2,
+    "CFE_EVS_SendEvent": 3,
+    "CFE_SB_IsValidMsgId": 1,
+    "CFE_MSG_GetMsgId": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [
+    {
+     "func": "TO_LAB_ProcessGroundCommand",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:80"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6272
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:95"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.SEND_HK_MID",
+     "path": [
+      "Value"
+     ],
+     "value": {
+      "kind": "const",
+      "value": 6273
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:96"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "value": {
+      "kind": "other",
+      "op": "llvm.add"
+     },
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:80"
+    }
+   ],
+   "global_loads": [
+    {
+     "func": "TO_LAB_ProcessGroundCommand",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:80"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:93"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.SEND_HK_MID",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:102"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_TaskPipe.CMD_MID",
+     "path": [],
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:107"
+    },
+    {
+     "func": "TO_LAB_TaskPipe",
+     "sym": "TO_LAB_Global",
+     "path": [
+      "HkTlm",
+      "Payload",
+      "CommandErrorCounter"
+     ],
+     "loc": "apps/to_lab/fsw/src/to_lab_dispatch.c:80"
+    }
+   ],
+   "global_memops": []
+  },
+  {
+   "file": "mlir_opt/to_lab/to_lab_passthru_encode.dbg.mlir",
+   "n_defined_funcs": 1,
+   "defined_funcs": [
+    "TO_LAB_EncodeOutputMessage"
+   ],
+   "calls": {
+    "CFE_MSG_|api": 1
+   },
+   "calls_by_callee": {
+    "CFE_MSG_GetSize": 1
+   },
+   "helper_calls_by_callee": {},
+   "mid_args": [],
+   "msgptr_args": [],
+   "global_stores": [],
+   "global_loads": [],
+   "global_memops": []
+  }
+ ]
+}

@@ -1,0 +1,359 @@
+{
+ "summary": "Task rw-mlir: compiler-IR infrastructure for MLIR-based analysis of cross-app ordering faults in cFS, plus the alternatives a reviewer will raise. Everything was checked against primary sources (llvm-project main ccac700c of 2026-10-01 in a sparse checkout, tool repos at pinned HEAD SHAs) and local experiments. Work directory: W=/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir.\n\nMain results:\n(1) ClangIR cannot be tested locally. The local clang 23 (1053047a) returns \"clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON\". On main, CIR is still opt-in and its docs say it is not in default builds. The incubator closed on 2026-02-20, and its lifetime checker was not upstreamed. Main does now carry a basic offset-based CIR alias analysis.\n(2) The C -> LLVM IR -> MLIR path works on real cFS code. I built the cFS bundle at 5a9b075c (its cFE is the revision note's pinned 546a0025). All 154 cFE-core and app C files imported with zero diagnostics, and the whole linked mission (cFE core plus 20 apps, OSAL/PSP not included) imports in about 1.2 s. Every call and load keeps file:line:col. MID macro names are lost (they become integers), and field names survive only in debug-info metadata.\n(3) Upstream MLIR supplies the solver, not the analysis. In my probes on the LLVM dialect, the only upstream alias analysis said two distinct globals MayAlias and two different fields of one struct MustAlias. Any external llvm.call came back ModRef for every location. Indirect calls go to an unknown callee. Imported C functions, even `static` ones, count as having unknown callers. The toy dense analysis returned <unknown> for the original note's §44 example.\n(4) No tool, MLIR included, can recover SB publish/subscribe edges from code alone. The SB transport ends in OS_QueuePut/OS_QueueGet, which are bodiless OSAL declarations, so every option needs an explicit model of the CFE_SB API.\n(5) Clang Static Analyzer experiment: a taint source on CFE_SB_ReceiveBuffer works for int payloads. It loses the taint for double payloads, and across any opaque call such as the next ReceiveBuffer, even when the global is `static`. So handler-to-handler flow inside a cFS run loop is not reported without custom API modelling.\n(6) The alternatives were judged on four axes from their docs and source: (a) pub/sub graph recovery, (b) payload-to-state provenance, (c) cross-app ordering/HB, (d) source-located diagnostics. PhASAR, SVF, CodeQL, Joern, CSA, Frama-C, IKOS and Goblint can all do (b) and (d) to some degree. None provides (a) or (c) without user-written models. Goblint, SVF-MTA and RacerF reason about pthread/lock-based shared memory, not message-order happens-before.\n\nConclusion (inference): a custom dialect is justified only as a typed, verifiable container for the cFS API model (SB/ES/TBL operations with effects on non-addressable resources) and for task/app structure, plus reuse of MLIR's solver. Its costs are: writing the alias and memory model, closed-world call resolution and function-pointer handling, recovering MID and field names, and absorbing MLIR API churn. That churn is real: PoTATo failed to build against the local MLIR from Feb 2026. A CodeQL or Phasar/SVF baseline that uses the same SB model is the comparison a reviewer will demand.",
+ "findings": [
+  {
+   "id": "rw-mlir-01",
+   "topic": "ClangIR local test",
+   "claim": "The local toolchain cannot emit ClangIR. Both `clang -fclangir -emit-cir t1.c` and `clang -cc1 -fclangir -emit-cir` fail with 'error: clang IR support not available, rebuild clang with -DCLANG_ENABLE_CIR=ON' (exit 1). The driver still lists -fclangir, -emit-cir and -clangir-* options in --help.",
+   "evidence": [
+    "W/cir_test/clangir_local_test.log (commands and exact output)",
+    "/home/user/work/llvm-project/build/tools/clang/include/clang/Config/config.h:86 '#define CLANG_ENABLE_CIR 0'",
+    "/home/user/work/llvm-project/build/CMakeCache.txt: LLVM_ENABLE_PROJECTS=mlir;clang, no CLANG_ENABLE_CIR entry",
+    "clang --version: 23.0.0git 1053047a4be7d1fece3adaf5e7597f838058c947"
+   ],
+   "scope_checked": "Ran clang with -fclangir -emit-cir on W/cir_test/t1.c, a cFS-shaped C file; grepped the generated config.h and CMakeCache. I did not rebuild clang with CIR: the build dir is read-only and a rebuild was not attempted.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: CIR on cFS C code is untested in this environment. A separate clang+MLIR build with -DCLANG_ENABLE_CIR=ON is a prerequisite before CIR can be the frontend, and its C coverage must be measured on cFS itself."
+  },
+  {
+   "id": "rw-mlir-02",
+   "topic": "ClangIR upstream status 2026",
+   "claim": "On llvm-project main ccac700c (2026-10-01), ClangIR is still opt-in.\n- clang/docs/CIR/index.md says 'upstreaming ... still in progress, and ClangIR is not included in a default clang build'.\n- llvm/CMakeLists.txt pulls in MLIR only `if (CLANG_ENABLE_CIR AND ...)`, and there is no option() defaulting it ON.\n- The incubator llvm/clangir closed with HEAD 63412d47 '[CIR] Incubator is now closed' (2026-02-20); its README says development is now upstream.\n- C coverage indicators on main: 183 C files in clang/test/CIR/CodeGen and 783 errorNYI call sites in clang/lib/CIR/CodeGen. Examples are 'indirect goto with active cleanup' and NYI under -ftrivial-auto-var-init.\n- An RFC/PR #221291 'Enable ClangIR Build By Default' (Sept 2026) is known to me only from search snippets. Per those snippets it would build CIR by default but still require -fclangir to use it.",
+   "evidence": [
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/clang/docs/CIR/index.md#L3-L7",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/llvm/CMakeLists.txt#L222-L227 (local copy W/web/llvm_CMakeLists_main.txt)",
+    "git ls-remote https://github.com/llvm/clangir HEAD -> 63412d47b3d573ba2d7d55920541269930d4a303; W/web/incubator_README.md",
+    "W/llvm-main sparse checkout: `git ls-tree -r HEAD clang/test/CIR/CodeGen | grep '\\.c$' | wc -l` = 183; `grep -c errorNYI clang/lib/CIR/CodeGen/*.cpp` total 783",
+    "Search snippet only: https://github.com/llvm/llvm-project/pull/221291 and https://discourse.llvm.org/t/rfc-enable-clangir-build-by-default/91730 (both blocked; not opened)"
+   ],
+   "scope_checked": "Read the CIR docs index, clang/CMakeLists.txt and llvm/CMakeLists.txt at main ccac700c, and the incubator README. Counted tests and NYI sites by grep; this is a rough indicator, not a coverage measurement. clang.llvm.org, llvm.github.io and discourse.llvm.org are blocked, so the 2026 progress reports and PR #221291's merge state were not opened.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the original note's 'CIR long-term' path is plausible but would rest on an opt-in, still-NYI frontend. Pin an llvm-project SHA and report the fraction of cFS TUs that CIR compiles before adopting it."
+  },
+  {
+   "id": "rw-mlir-03",
+   "topic": "Existing CIR-based analyses",
+   "claim": "The CIR lifetime checker (LifetimeCheck.cpp, 2344 lines; clang-tidy/cir/Lifetime.cpp) exists only in the closed incubator. It is a hand-written walker over structured CIR ops (IfOp, SwitchOp, LoopOpInterface, ScopeOp) with pset remarks and does not use MLIR's DataFlowSolver (0 occurrences). Main has no lifetime pass in CIR Passes.td and no clang-tidy/cir directory.\n\nMain does add a CIR alias analysis (CIRBasicAliasAnalysis):\n- offset-based, walking cir.get_member layout offsets;\n- NoAlias only for distinct cir.alloca;\n- 'TODO: Extend to cover global addresses, function arguments with noalias, and heap allocations';\n- cir.call (CIR_CallOpBase) does not declare MemoryEffectOpInterface, so getModRef returns ModAndRef for calls.\n\nCIR keeps member names (`cir.get_member %0[1] {name = \"i\"}`) and structured cir.if/switch/scope/while/for. Separately, upstream Clang's new LifetimeSafety analysis is built on the Clang CFG/AST, not CIR.",
+   "evidence": [
+    "W/web/incubator_LifetimeCheck.cpp (raw.githubusercontent.com/llvm/clangir/63412d47.../clang/lib/CIR/Dialect/Transforms/LifetimeCheck.cpp)",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/clang/include/clang/CIR/Dialect/Passes.td (passes: canonicalize, simplify, hoist-allocas, flatten-cfg, goto-solver, cxxabi/target/eh lowering, lowering-prepare, idiom-recognizer, lib-opt, call-conv-lowering)",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/clang/lib/CIR/Dialect/Analysis/CIRBasicAliasAnalysis.cpp#L163 and #L238-L245",
+    "W/web/CIROps_main.td:4624-4628 (CIR_CallOpBase interfaces), 4001+ (GetMemberOp with StrAttr:$name)",
+    "/home/user/work/llvm-project/clang/lib/Analysis/LifetimeSafety/LifetimeSafety.cpp:26 includes clang/Analysis/CFG.h"
+   ],
+   "scope_checked": "Grepped the incubator LifetimeCheck.cpp. Listed the main tree. Read CIRBasicAliasAnalysis.cpp lines 1-384 in full, the CIR alias tests' headers, and the CIROps.td CallOpBase and GetMemberOp definitions.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: there is no maintained upstream CIR analysis to reuse for cFS beyond basic alias analysis. CIR is better than the LLVM dialect for field names and structured control flow, but global and call effects still need the researcher's own modelling."
+  },
+  {
+   "id": "rw-mlir-04",
+   "topic": "LLVM IR import on real cFS",
+   "claim": "C -> LLVM IR (clang -O0 -g) -> `mlir-translate --import-llvm` succeeded on all 154 C files in the cFS cpu1 compile DB (cFE es/sb/tbl/evs/time plus 20 apps), with 0 import warnings or errors. llvm-link of all 154 modules took 1.3 s, and importing the linked mission.bc took 1.19 s, giving a 20 MB MLIR module. That module has 2389 defined llvm.func, 184 external declarations (OSAL/PSP/libc) and 73 indirect llvm.call sites; -test-print-callgraph reports 6177 call edges, 562 of them to <Unknown-Callee-Node>. The 73 indirect calls are concentrated in sbn_app.c (17), sbn_udp_if.c (10), cfe_es_generic_pool.c (9) and cf. Debug locations: 69.6% of printed ops carry file:line:col. Every llvm.call (8830), llvm.load and llvm.cond_br has one. The unknown locations are llvm.mlir.constant (17150, all), llvm.mlir.addressof (3789, all), llvm.alloca (8085) and prologue stores/GEPs/br.",
+   "evidence": [
+    "W/import_exp/run_import.py, W/import_exp/import_results.json, W/import_exp/import_summary.txt",
+    "W/import_exp/loc_by_op.py and W/import_exp/loc_by_op.txt",
+    "W/import_exp/link_import.py, W/import_exp/link_import.txt, W/import_exp/link_import2.txt, W/import_exp/mission.mlir",
+    "cFS bundle https://github.com/nasa/cFS/commit/5a9b075cd4c818ee8555f349a9f78ba5632d0384, cfe submodule 546a002515be5a1e3b66f9ae2c14f948d9cec76f (W/cfs_clone.log)",
+    "Build: cmake -DSIMULATION=native -DMISSIONCONFIG=sample -DENABLE_UNIT_TESTS=FALSE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON with local clang (W/cfs_prep.log, W/cfs_build_cpu1.log)",
+    "Docs: https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/docs/TargetLLVMIR.md#L947-L950 'experimental flow ... substantially limited subset'; failure catalogue W/web/import-failure_main.ll (TBAA/loop metadata/debug-record warnings)"
+   ],
+   "scope_checked": "Native Linux cpu1 sample config at -O0 -g with -Werror dropped. In the normal clang build, cf and cs fail on -Werror warnings only. OSAL and PSP were not imported. The location counts come from a regex over printed IR, so they are approximate. Higher -O levels and cross-compiled RTEMS/VxWorks configurations were not tested.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the original note's initial prototype path (C -> LLVM IR -> MLIR LLVM dialect) is technically viable and cheap at cFS scale. The 'experimental subset' risk did not show up on this code. The costs lie in semantics, not import."
+  },
+  {
+   "id": "rw-mlir-05",
+   "topic": "Information lost before MLIR (LLVM path)",
+   "claim": "MID macros reach MLIR only as integers. SAMPLE_APP_CMD_MID (default_sample_app_msgids.h:29) becomes `llvm.mlir.constant(6274 : i32)` with loc(#loc1)=unknown, passed to an external `llvm.call @CFE_SB_ValueToMsgId`, then `CFE_SB_Subscribe`. Dispatch becomes `llvm.switch` on i32. Struct fields appear only as GEP indices (`llvm.getelementptr %gs[0, 1] ... !llvm.struct<\"struct.State_t\", (f64, i32, i32)>`). Member names survive only in imported debug metadata, e.g. `#llvm.di_derived_type<tag = DW_TAG_member, name = \"att\" ...>`.",
+   "evidence": [
+    "W/import_exp/out/apps__sample_app__fsw__src__sample_app.c.mlir lines 246/258/261 (constants 2179/6275/6274) and 299-351 (ValueToMsgId, CreatePipe, Subscribe)",
+    "W/cfs-bundle/apps/sample_app/config/default_sample_app_msgids.h:29-30 (sample_app 199476a34827ae84d50d66f97619227854cd971a)",
+    "W/cir_test/t1.llvm.dbg.mlir lines 14-40 (DW_TAG_member names) and t1.llvm.mlir (GEP field indices)"
+   ],
+   "scope_checked": "Inspected the imported sample_app and toy t1.c MLIR with --mlir-print-debuginfo.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the analyzer must (i) constant-propagate MIDs through CFE_SB_ValueToMsgId (an external or identity call), (ii) map GEP indices to DI member names to report 'state field' provenance, and (iii) rebuild macro names from a separate preprocessor or AST pass (Clang LibTooling, or VAST/Macroni). CIR and VAST keep field names but not macros."
+  },
+  {
+   "id": "rw-mlir-06",
+   "topic": "MLIR DataFlow framework capabilities",
+   "claim": "Upstream MLIR (main ccac700c) provides sparse forward/backward and dense forward/backward analyses on a DataFlowSolver.\n- The solver is interprocedural by default (`bool interprocedural = true`).\n- DeadCodeAnalysis plus SparseConstantPropagation must be loaded for user analyses to run: Utils.h loadBaselineAnalyses, described as an 'interim fix'.\n- Interprocedural flow is context-insensitive: a callee's entry joins all known call sites via PredecessorState.\n- Public symbol callables are marked as having unknown predecessors (DeadCodeAnalysis.cpp:192).\n- A call to a callable without a region is 'external'. The dense default goes to visitCallControlFlowTransfer(ExternalCallee) -> setToEntryState (DenseAnalysis.h:171), overridable per analysis. The sparse default is visitExternalCall -> setAllToEntryStates (SparseAnalysis.h:321).\n- Calls whose return sites are not all known also go to the entry state (DenseAnalysis.cpp:117, SparseAnalysis.cpp:251).\n- Non-symbol (indirect) callables are a TODO (DeadCodeAnalysis.cpp:432).\n- The official tutorial is stale: it documents a `ForwardDataFlowAnalysis` class that does not exist in the code.",
+   "evidence": [
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlowFramework.h#L300",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlow/Utils.h#L23-L32",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/lib/Analysis/DataFlow/DeadCodeAnalysis.cpp#L192 and #L421-L447",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/include/mlir/Analysis/DataFlow/DenseAnalysis.h#L163-L173",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/lib/Analysis/DataFlow/DenseAnalysis.cpp#L92-L148",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/lib/Analysis/DataFlow/SparseAnalysis.cpp#L231-L256",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/docs/Tutorials/DataFlowAnalysis.md#L182-L245 vs `grep -rn 'class ForwardDataFlowAnalysis' mlir/include mlir/lib` = empty"
+   ],
+   "scope_checked": "Read the headers and implementations in full for call handling, on both the local tree (1053047a) and main. Diffed local vs main: DenseAnalysis.h is identical; the .cpp files have refactor-level diffs (RegionSuccessor API).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: the solver gives fixpoint and worklist machinery plus a call-graph-aware CFG walk. Every cFS-specific element must be written by the researcher: the lattice, the memory model, external-call transfer functions for CFE_*/OS_* and inter-task semantics. This supports the revision note's §9.2 correction."
+  },
+  {
+   "id": "rw-mlir-07",
+   "topic": "Imported C functions have unknown callers in MLIR",
+   "claim": "Experiment: in `-test-dead-code-analysis`, `llvm.func internal @SetState` (C static) prints 'op_preds: predecessors: llvm.call @SetState' without '(all)', i.e. not all predecessors are known. A `func.func private @priv_func` prints '(all) predecessors'. llvm.func has `linkage` but no MLIR `sym_visibility` (generic print), so every imported C function is MLIR-public. Its entry state therefore joins with the pessimistic entry state in interprocedural dense and sparse analyses.",
+   "evidence": [
+    "W/mlir_probe/dca_vis.mlir and W/mlir_probe/dca_vis.out (command: mlir-opt dca_vis.mlir -test-dead-code-analysis)",
+    "W/mlir_probe/vis.mlir generic print showing linkage=internal and no sym_visibility",
+    "/home/user/work/llvm-project/mlir/lib/Analysis/DataFlow/DeadCodeAnalysis.cpp:80-83 ('(all)' printed iff allPredecessorsKnown)"
+   ],
+   "scope_checked": "Local mlir-opt (1053047a) test pass on a 3-function module. The same DCA logic is present on main (line 192).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: to get call-site-to-callee precision on imported cFS code, the pipeline needs a closed-world step (e.g. mark non-entry functions private) or must lift into a custom function op with private visibility. Otherwise handler -> SetState -> global flows lose entry information."
+  },
+  {
+   "id": "rw-mlir-08",
+   "topic": "Alias analysis for the MLIR LLVM dialect",
+   "claim": "Experiment with upstream LocalAliasAnalysis, the only built-in alias analysis implementation:\n- distinct globals @g_state vs @g_other (via llvm.mlir.addressof): MayAlias;\n- &g_state.att vs &g_state.valid: MustAlias, because GEP implements ViewLikeOpInterface and is unwrapped to its base, so the analysis is field-insensitive;\n- alloca vs global: NoAlias;\n- call result or argument vs anything: MayAlias.\nModRef experiment: a store to .att is 'Mod' for the .valid location, and an external `llvm.call @CFE_ES_PerfLogAdd` is 'ModRef' for every location. llvm.call declares CallOpInterface but not MemoryEffectsOpInterface, unchanged on main. Main adds one relevant change: effects on non-addressable resources are NoAlias in getModRef.",
+   "evidence": [
+    "W/mlir_probe/alias_llvm.mlir and alias_llvm.out (mlir-opt --pass-pipeline='builtin.module(llvm.func(test-alias-analysis))')",
+    "W/mlir_probe/modref_llvm.mlir and modref_llvm.out (test-alias-analysis-modref)",
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/lib/Analysis/AliasAnalysis/LocalAliasAnalysis.cpp#L100-L106, #L496-L501, #L526-L536",
+    "W/web/LLVMOps_main.td:819-823 (LLVM_CallOp interfaces), :294-298 (GEP ViewLikeOpInterface); W/web/LLVMDialect_main.cpp: getEffects only for LoadOp/StoreOp/InlineAsmOp"
+   ],
+   "scope_checked": "Ran the local test passes. Read LocalAliasAnalysis.cpp in full on local and main, and the main LLVMOps.td/LLVMDialect.cpp for CallOp effects. No TBAA-based MLIR alias analysis exists upstream (only LocalAliasAnalysis.cpp under lib/Analysis/AliasAnalysis).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: payload-to-state-field provenance on the LLVM dialect needs a researcher-built field-sensitive, global-aware memory model. Upstream AA conflates fields and cannot separate globals, and every unmodelled call clobbers everything. This is the main pointer/alias cost of the MLIR route."
+  },
+  {
+   "id": "rw-mlir-09",
+   "topic": "Upstream dense analysis on the original note's §44 example",
+   "claim": "The upstream test dense analysis (-test-last-modified) on LLVM dialect gives a reaching store only when the store and load use the same SSA pointer (v1_read -> w1). It returns <unknown> when the same global is reached through a second llvm.mlir.addressof (v2), for a different field of the same base (v3), and for all reads in the HandleAttitude -> SetState -> global.att -> Guidance example. This holds in all three modes: default, interprocedural=false and assume-func-writes=true.",
+   "evidence": [
+    "W/mlir_probe/lastmod_llvm.mlir and lastmod_llvm.out",
+    "W/mlir_probe/lastmod_llvm_iso.mlir and lastmod_llvm_iso.out",
+    "/home/user/work/llvm-project/mlir/test/lib/Analysis/DataFlow/TestDenseDataFlowAnalysis.h:188-218 (UnderlyingValueAnalysis keys on SSA values only)"
+   ],
+   "scope_checked": "This is a test analysis, not a production one. It shows what upstream provides out of the box, not a limit of what MLIR can express.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: the original note's minimum 'MLIR-specific contribution' (§44 interprocedural receive -> field -> consumer) is not available upstream. It is exactly the part to be built, and the effort should be stated in the note."
+  },
+  {
+   "id": "rw-mlir-10",
+   "topic": "Indirect calls and the call graph",
+   "claim": "For C dispatch through a const function-pointer table (`Table[i](m)` with Table = {H1, H2}), the MLIR CallGraph gives Dispatch a single edge to <Unknown-Callee-Node> and no edges to H1 or H2.",
+   "evidence": [
+    "W/cir_test/t2.c, W/cir_test/t2.mlir, W/cir_test/t2.callgraph.out (mlir-opt t2.mlir -test-print-callgraph)"
+   ],
+   "scope_checked": "Local test pass on a 7-line C file.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: where cFS uses function pointers (73 sites in the mission, mostly SBN/CF/ES pool; app command dispatch in sample_app is switch-based), MLIR needs a points-to pass (PoTATo or own) or an external SVF result to resolve callees."
+  },
+  {
+   "id": "rw-mlir-11",
+   "topic": "Side-effect interfaces, resources and IRDL prototyping",
+   "claim": "MemoryEffects support:\n- Effects (Allocate/Free/Read/Write) apply to Resources arranged in a hierarchy, with isSubresourceOf/isDisjointFrom and isAddressable.\n- Non-addressable resources do not alias pointer memory.\n- The docs state the mechanism is 'deliberately *not* intended for fine-grained regions ... or offset-based disambiguation'.\n\nIRDL can declare a toy `cfs` dialect at runtime (`mlir-opt --irdl-file`) with structural verification; a wrong operand count gives 'op expects exactly 2 operands, but got 3'. The IRDL-defined ops implement no MemoryEffectOpInterface: --test-side-effects, which walks only ops with that interface, reports nothing for them.",
+   "evidence": [
+    "https://github.com/llvm/llvm-project/blob/ccac700c68e92a7eabcb2f745789978213f16f2d/mlir/docs/Rationale/SideEffectsAndSpeculation.md#L78-L121",
+    "W/mlir_probe/cfs_irdl.mlir, cfs_use.mlir, cfs_irdl.out",
+    "/home/user/work/llvm-project/mlir/test/lib/IR/TestSideEffects.cpp:28-39"
+   ],
+   "scope_checked": "Read the doc section and ran the local IRDL experiment.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: a cfs dialect can model SB pipes, MID queues and table buffers as non-addressable resources with explicit Read/Write effects, so they do not clobber C memory. That needs ODS/C++; IRDL alone gives only structure. This is the concrete technical benefit a dialect adds over plain llvm.call."
+  },
+  {
+   "id": "rw-mlir-12",
+   "topic": "SB transport is opaque to whole-program code analysis",
+   "claim": "In cFE 546a0025, SB delivery ends in OSAL queue calls: cfe_sb_priv.c:1188 OS_QueuePut, and cfe_sb_api.c:428 and cfe_sb_priv.c:1485 OS_QueueGet. In the linked mission module these are bodiless declarations (mission.mlir lines 57018 and 61947). Publisher-to-subscriber flow therefore passes through external functions plus the routing table, and no direct call or def-use path links TransmitMsg to the receiver's handler.",
+   "evidence": [
+    "W/cfs-bundle/cfe/modules/sb/fsw/src/cfe_sb_priv.c:1188 and :1485; W/cfs-bundle/cfe/modules/sb/fsw/src/cfe_sb_api.c:428 (cFE 546a002515be5a1e3b66f9ae2c14f948d9cec76f)",
+    "W/import_exp/mission.mlir:57018 (llvm.func @OS_QueueGet declaration), :61947 (@OS_QueuePut declaration)"
+   ],
+   "scope_checked": "Grepped the SB sources and the imported mission module. OSAL was deliberately not linked; linking the POSIX OSAL would expose mq_* or pthread calls instead, which was not tested.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: for criterion (a), pub/sub graph recovery, every tool needs an explicit model of CFE_SB_Subscribe/TransmitMsg/ReceiveBuffer keyed by MID value. This is the shared baseline cost and not a differentiator of MLIR."
+  },
+  {
+   "id": "rw-mlir-13",
+   "topic": "Clang Static Analyzer as an alternative (experiment)",
+   "claim": "Experiment with a YAML taint config (Propagations: CFE_SB_ReceiveBuffer DstArgs [0]; Sinks: Control Args [0]) and optin.taint.GenericTaint, local clang 1053047a:\n- int payload: reported both directly (Control(buf->att)) and via a global within one function path;\n- the same code with a double payload: no report;\n- cross-handler run loop (handler 1 stores to the global, handler 2 reads it on a later iteration): no report, whether the global is static or not;\n- isolated cause: any opaque call between store and read (Opaque(), or a second CFE_SB_ReceiveBuffer) drops the taint even for a `static` global; only the no-intervening-call case reports (inval.c:7).\ncFS apps keep state in non-static globals, e.g. hk_app.c:42 `HK_AppData_t HK_AppData;`. CSA also supports CTU analysis and YAML taint configuration (docs).",
+   "evidence": [
+    "W/csa_exp/csa_all.log (all commands and outputs), W/csa_exp/rx_direct.c, rx_direct_int.c, rx_loop.c, rx_loop_int.c, rx_loop_int_static.c, inval.c, taint.yaml",
+    "/home/user/work/llvm-project/clang/docs/analyzer/user-docs/TaintAnalysisConfiguration.rst:30-110; CrossTranslationUnit.rst",
+    "/home/user/work/llvm-project/clang/lib/StaticAnalyzer/Core/SValBuilder.cpp:73 '// FIXME: Handle floats.' (offered as a likely, unproven cause of the double-payload miss)",
+    "W/cfs-bundle/apps/hk/fsw/src/hk_app.c:42 (hk 0dc16b7a5929368592f8e55009c5b60a9eb3e97206) and similar for cf/cs/ds/fm/hs/lc/md/mm/sc"
+   ],
+   "scope_checked": "Probe programs only, not cFS app code. Default analyzer budget. Did not write a custom checker or evalCall model, and did not test CTU.",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: CSA covers (b) and (d) within one path, and only with a custom checker that models CFE_SB_* with evalCall so that globals are not invalidated. Floating-point state (attitude etc.) is a practical weakness. CSA has no notion of cross-task or cross-app interleaving, so (a) and (c) are out of its model."
+  },
+  {
+   "id": "rw-mlir-14",
+   "topic": "CodeQL as an alternative",
+   "claim": "CodeQL C/C++ global data flow links a global's final value in one function to its uses in any function through `jumpStep` over GlobalLikeVariable SSA uses and defs. This is flow-insensitive across functions: handler A's write reaches handler B's read regardless of order. Library behaviour can be added through data-extension models (sourceModel/sinkModel/summaryModel), which the docs mark 'Beta ... subject to change'. Custom edges can be added with isAdditionalFlowStep. An ISSTA 2025 experience report applied CodeQL to 258 embedded projects (709 true defects, 34% false positives; snippet-level).",
+   "evidence": [
+    "W/web/codeql_DataFlowPrivate.qll:93-120 (github/codeql f1d3f1defc5ca73bcf1ed48031fb31c62fd91952, cpp/ql/lib/semmle/code/cpp/ir/dataflow/internal/DataFlowPrivate.qll)",
+    "W/web/codeql_customizing-library-models-for-cpp.rst:8-60 and docs/codeql/reusables/beta-note-customizing-library-models.rst",
+    "W/web/codeql_analyzing-data-flow-in-cpp.rst:163-198 (global data flow, isAdditionalFlowStep)",
+    "QL paper DOI 10.4230/LIPIcs.ECOOP.2016.2 (search snippet)",
+    "Shen et al., PACMSE ISSTA 2025, DOI 10.1145/3728923 (search snippet; full text not opened)"
+   ],
+   "scope_checked": "Read the repo docs and the jumpStep source. Did not install or run the CodeQL CLI (size and licence not checked here).",
+   "status": "confirmed",
+   "importance": "central",
+   "implication": "Inference: CodeQL can express (a), pub/sub edges, as an isAdditionalFlowStep from TransmitMsg to ReceiveBuffer sharing a constant MID, plus (b) and (d) with a moderate query-writing cost. It has no happens-before or interleaving model, so (c) would be ad hoc. This makes it the strongest 'why not just CodeQL' baseline: the comparison should use the same SB model."
+  },
+  {
+   "id": "rw-mlir-15",
+   "topic": "PhASAR, SVF, Joern",
+   "claim": "PhASAR (HEAD 41d97dab, 2026-09-30):\n- LLVM 16 to 22.1;\n- IFDS/IDE/WPDS solvers, call graphs (CHA/RTA/VTA/alias-based), alias sets with optional SVF integration, a taint configuration, and a user-supplied entry-point list;\n- the README mentions no concurrency support.\n\nSVF (HEAD 6a4bb08f, 2026-10-01):\n- LLVM up to 22;\n- field- and flow-sensitive points-to, memory SSA, demand-driven analysis, abstract execution, and MTA (multithreaded value-flow, MHP, lock analysis, MSli slicing);\n- thread APIs are a hard-coded table in ThreadAPI.cpp (pthread_create -> TD_FORK, pthread_mutex_lock and sem_wait -> TD_ACQUIRE).\n\nJoern (HEAD 98a815cb, 2026-09-30):\n- the c2cpg frontend is Eclipse-CDT based, accepts compile_commands.json, and emits problem nodes for unparsed code;\n- builds code property graphs queried in a Scala DSL.",
+   "evidence": [
+    "W/web/secure-software-engineering_phasar_README.md (raw at 41d97dab7e7d629cef1c4bb8dd789034ccd77ab3); PhASAR TACAS 2019 DOI 10.1007/978-3-030-17465-1_22 (snippet)",
+    "W/web/SVF-tools_SVF_README.md; W/web/svf_ThreadAPI.cpp:108-117 (SVF 6a4bb08f11c121e6ea57fae6bc1a5b785a7cd663); SVF CC'16 DOI 10.1145/2892208.2892235 (README link)",
+    "W/web/joernio_joern_README.md; W/web/joern_joern-cli_frontends_c2cpg_README.md:5,63-90 (joern 98a815cbcd095200d6ef60714801e93d035615b6); CPG paper DOI 10.1109/SP.2014.44 (snippet)",
+    "W/web/repo_lastcommit.txt"
+   ],
+   "scope_checked": "README and selected source files at pinned SHAs. None of the three tools was built or run.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference, (a)-(d):\n- PhASAR: (a) only with a user model; (b) yes, via IFDS taint with summaries for CFE_*; (c) no HB model; (d) LLVM debug-location based.\n- SVF: (a) only with a model; (b) yes, strongest pointer/value-flow (resolves function pointers); (c) MTA is lock/fork-join MHP for pthread, not message order; (d) via LLVM debug info.\n- Joern: (a) via graph queries on MID constants; (b) approximate dataflow; (c) none; (d) yes.\nOne could feed SVF points-to results into an MLIR pipeline instead of rebuilding them."
+  },
+  {
+   "id": "rw-mlir-16",
+   "topic": "Frama-C, IKOS, Goblint",
+   "claim": "Frama-C:\n- The official repo and site (git.frama-c.com, frama-c.com) are blocked here. The GitHub snapshot repo is frozen at 2020-10-21.\n- opam has frama-c 33.0 'Arsenic' (LGPL-2.1). Its description lists Eva (abstract interpretation), WP, Slicing, Aoraï (automata-based properties) and E-ACSL, with no concurrency plugin listed.\n- RacerF (ECOOP 2025, Frama-C plugin, pthread data races, heuristic) is known from snippets.\n\nIKOS (HEAD ac7f7c17, 2025-04-23):\n- needs LLVM/Clang 14; checks include boa, dbz, nullity and uva (uninitialized reads);\n- its 'multi-threading' means parallel analysis jobs (`--jobs`);\n- 'IKOS analyses each entry point independently, as if they were running in different processes.'\n\nGoblint (HEAD d0ee7d5b, 2026-09-30):\n- thread-modular abstract interpretation for C with race analysis and pthread semantics hard-coded in libraryFunctions.ml;\n- an `ana.thread.wrappers` option for pthread_create wrappers;\n- its OSEK and ARINC653 support 'has been removed from recent Goblint versions, please use Release 1.1.1'.",
+   "evidence": [
+    "W/web/framac_README.md (Frama-C/Frama-C-snapshot 639a3647, 2020-10-21); W/web/framac_33_opam (https://raw.githubusercontent.com/ocaml/opam-repository/master/packages/frama-c/frama-c.33.0/opam); Frama-C FAoC 2015 DOI 10.1007/s00165-014-0326-7 (snippet); RacerF arXiv 2502.04905 / LIPIcs.ECOOP.2025.37 (snippet only)",
+    "W/web/NASA-SW-VnV_ikos_README.md:9-18,177; W/web/ikos_analyzer_README.md:241-246, 'Entry points' and 'Multi-threading' sections (ikos ac7f7c1738976cabc58c6a53413df6e458995c38); IKOS SEFM 2014 DOI 10.1007/978-3-319-10431-7_20 (snippet)",
+    "W/web/goblint_analyzer_README.md; W/web/goblint_libraryFunctions.ml:487-523; W/web/goblint_options.schema.json (ana.thread.wrappers); https://raw.githubusercontent.com/goblint/analyzer/d0ee7d5b0e2b6c12f0d33a285973397ab29eb9fa/tests/regression/17-arinc/README.md; Goblint ASE 2016 DOI 10.1145/2970276.2970337 (snippet)"
+   ],
+   "scope_checked": "READMEs, the option schema, the library function table and the opam metadata. None of the tools was run. Frama-C's current docs and a possible Mthread plugin could not be checked (site blocked).",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference:\n- Frama-C/Eva and IKOS: whole-program abstract interpretation from given entry points; (b) yes; uninitialized/value questions yes; (c) no message HB model; (a) only via stubs/ACSL specifications of CFE_*; (d) yes. Aoraï could check intra-app call-order properties (e.g. Subscribe before Receive).\n- Goblint: the closest to (c), but for lock-based shared memory only. Modelling OS_TaskCreate is possible via the wrappers option, but SB message HB is not modelled."
+  },
+  {
+   "id": "rw-mlir-17",
+   "topic": "Polygeist",
+   "claim": "llvm/Polygeist main was last committed on 2024-07-31 (77c04bb2) and pins its own llvm-project submodule (26eb4285b5). Its README requires building that LLVM/MLIR/Clang. The project targets raising C to affine/polyhedral MLIR (PACT 2021; DOI 10.1109/PACT52795.2021.00011 per a search snippet; publisher page not opened).",
+   "evidence": [
+    "git fetch of llvm/Polygeist HEAD: W/web/repo_lastcommit.txt; `git ls-tree HEAD llvm-project` -> 26eb4285b56edd8c897642078d91f16ff0fd3472",
+    "W/web/polygeist_README.md (raw at 77c04bb2a7a2406ca9480bcc9e729b07d2c8d077), build and citation sections"
+   ],
+   "scope_checked": "README and commit metadata only. Not built.",
+   "status": "partial",
+   "importance": "background",
+   "implication": "Inference: Polygeist is unsuitable as a maintained 2026 frontend for cFS control/state code. Its strength (loops and arrays to affine) is irrelevant to SB ordering."
+  },
+  {
+   "id": "rw-mlir-18",
+   "topic": "MLIR-based C analysis ecosystem and precedents",
+   "claim": "VAST:\n- trailofbits/vast, HEAD 60d605d0, 2026-02-13, LLVM 19; an MLIR 'tower of IRs' frontend for C/C++ program analysis;\n- the hl dialect keeps field names (`hl.member` with MemberVarSymbolRefAttr), typedefs and indirect calls;\n- `vast-detect-parsers` lifts C into a domain 'parser dialect' guided by YAML function models, an architectural precedent for a cfs lifting with API models.\n\nMacroni (last commit 2024-07-02) adds macro expansions to VAST and needs a PASTA-specific clang.\n\nPoTATo:\n- Jezurko/potato, last commit 2026-03-25: dialect-based points-to (Andersen/Steensgaard) on the MLIR DataFlow framework, with `--llvm-ir-to-potato`; the README says it is tested with LLVM 19 and was shown as a EuroLLVM 2024 poster;\n- my builds of commits 80d157c and 20e7d8f against the local LLVM 1053047a failed with RegionSuccessor/DataFlow API errors.\n\nSYCL-MLIR (Tiotto et al., CGO 2024): a domain dialect modelling SYCL runtime semantics for host/device analysis. Its source contains sycl::AliasAnalysis subclassing LocalAliasAnalysis with domain rules.",
+   "evidence": [
+    "W/web/trailofbits_vast_README.md; W/web/vast_build.md:6; W/web/vast_HighLevelOps.td:340-352,404; W/web/vast_vast-detect-parsers.md; W/web/vast_related.md (lists Macroni, PoTATo, Miller 'VAST MLIR Abstract Interpreter')",
+    "W/web/trailofbits_macroni_README.md; W/web/Jezurko_potato_README.md",
+    "W/potato_build.log, W/potato_build2.log (errors: 'no member named getSuccessorInputs in mlir::RegionSuccessor', AbstractDenseLattice static_assert)",
+    "https://github.com/intel/llvm/blob/baecca12faa2593beace1b040b4e5185ee296579/mlir-sycl/include/mlir/Dialect/SYCL/Analysis/AliasAnalysis.h (W/web/syclmlir_AliasAnalysis.h); paper arXiv 2312.13170 / DOI 10.1109/CGO57630.2024.10444866 (snippet; arxiv blocked)"
+   ],
+   "scope_checked": "Repo READMEs, docs and selected .td/.h files at pinned SHAs, plus a local PoTATo build attempt. The VAST blog, the VAST docs site and the SYCL-MLIR paper text were blocked.",
+   "status": "confirmed",
+   "importance": "supporting",
+   "implication": "Inference: domain-dialect lifting with function models has precedents (VAST parser dialect, SYCL-MLIR), so the novelty must not rest on 'using a dialect'. Reusable MLIR points-to exists (PoTATo) but lags or forks LLVM versions. MLIR analysis-API churn between Feb and Oct 2026 is a real maintenance cost."
+  },
+  {
+   "id": "rw-mlir-19",
+   "topic": "MLIR verification and analysis papers 2021-2026",
+   "claim": "The MLIR formal work found concerns the semantics of MLIR dialects and the soundness of transfer functions, not analysis of C application code:\n- Fehr et al., 'First-Class Verification Dialects for MLIR', PLDI 2025, DOI 10.1145/3729309: SMT-based semantics dialects, translation validation, proving dataflow transfer-function soundness;\n- Peng et al., 'Nice to Meet You: Synthesizing Practical MLIR Abstract Transformers', POPL 2026, DOI 10.1145/3776722: synthesized, verified KnownBits/ConstantRange transformers for LLVM/arith ops.\nNo peer-reviewed paper was found that uses MLIR to analyse message ordering or state provenance in embedded or flight C code.",
+   "evidence": [
+    "Search snippets: https://dl.acm.org/doi/10.1145/3729309, https://doi.org/10.1145/3776722 (full texts on users.cs.utah.edu, arxiv and dl.acm blocked)",
+    "Search queries run: 'MLIR static analysis C programs paper 2024 2025 abstract interpretation dialect'; 'MLIR-based data race detection OR taint analysis ...'; 'ClangIR CIR based static analysis research paper 2025 2026'"
+   ],
+   "scope_checked": "Abstract-level from search snippets only. The search was not systematic, and blocked venues limit recall.",
+   "status": "partial",
+   "importance": "supporting",
+   "implication": "Inference: these works could back the soundness argument for a cfs dialect's transfer functions. Not finding prior MLIR work on cFS ordering is a search result, not a novelty proof (consistent with the revision note's §8.5)."
+  },
+  {
+   "id": "rw-mlir-20",
+   "topic": "Conclusion: what a custom cfs dialect adds and costs",
+   "claim": "What a cfs dialect adds over an off-the-shelf tool with an SB model:\n1. cFS API calls become typed ops whose operands (MID, pipe, buffer, status, timeout) and verifiers make missing return checks or unknown MIDs explicit.\n2. Effects go on non-addressable resources (pipe/MID queue, table buffer, ES state), so modelled calls stop clobbering all C memory. Upstream llvm.call is ModRef-all (rw-mlir-08) and main's LocalAliasAnalysis treats non-addressable effects as NoAlias.\n3. App/task/run-loop structure becomes regions, so inter-task reasoning is separate from intra-task dataflow.\n4. Reuse of the DataFlowSolver (sparse/dense, DCA, interprocedural walk).\n5. Location-carrying diagnostics: FileLineColLoc is preserved on calls and loads (rw-mlir-04).\n\nWhat it costs (all researcher-built):\n- a field-sensitive, global-aware memory model and alias analysis: upstream is field-insensitive and globals MayAlias (rw-mlir-08/09);\n- a closed-world visibility fix (rw-mlir-07) and indirect-call resolution (rw-mlir-10);\n- MID constant recovery and field-name and macro mapping (rw-mlir-05);\n- an SB model, which every tool needs anyway (rw-mlir-12);\n- a cross-task HB/interleaving layer, which MLIR does not provide (rw-mlir-06);\n- tracking an unstable MLIR analysis API (rw-mlir-18);\n- a frontend decision: the LLVM path works now; CIR is opt-in and untested here (rw-mlir-01/02).",
+   "evidence": [
+    "Synthesis of rw-mlir-04 through rw-mlir-18 (each with its own evidence)"
+   ],
+   "scope_checked": "Synthesis; no implementation of the dialect was attempted beyond the IRDL structural toy (rw-mlir-11).",
+   "status": "partial",
+   "importance": "central",
+   "implication": "Inference for the research design:\n- The comparison a reviewer will ask for is 'same SB model in CodeQL (isAdditionalFlowStep) or PhASAR/SVF (IFDS + points-to)' versus 'cfs dialect + MLIR solver', on the same cFS apps.\n- MLIR's claimed benefit must be shown on (c), ordering and HB across apps with typed effects, and on the cost of extension, not on (a) or (b) alone.\n- Keep the LLVM-dialect frontend for the MVP with DI-based field mapping, and treat CIR or VAST as an ablation once a CIR-enabled build is pinned."
+  }
+ ],
+ "gaps": [
+  "ClangIR could not be run on any C code here. The local clang has CLANG_ENABLE_CIR=0, the build dir is read-only, Compiler Explorer is blocked, and no CIR-enabled clang was built. CIR's real coverage of cFS sources is unknown.",
+  "The merge state of PR #221291 ('Enable ClangIR Build By Default') and the 2026 ClangIR progress reports were seen only as search snippets (discourse.llvm.org and github.com web pages blocked). main@ccac700c's CMake shows no default-ON option.",
+  "No alternative tool was executed except the Clang Static Analyzer. CodeQL, PhASAR, SVF, Joern, Frama-C, IKOS and Goblint were judged from READMEs, docs and source at pinned SHAs, so their behaviour on cFS is unmeasured. The PoTATo build failed against the local LLVM (API mismatch), and VAST was not built (needs LLVM 19).",
+  "Paper full texts were not opened: Polygeist PACT'21, SYCL-MLIR CGO'24, Fehr PLDI'25, Peng POPL'26, RacerF ECOOP'25, the CodeQL embedded ISSTA'25 report, PhASAR TACAS'19 and the CPG S&P'14 paper. arxiv.org, dl.acm.org, drops.dagstuhl.de, utah.edu and zenodo are blocked; DOIs and claims are from search-index snippets only.",
+  "Frama-C's current documentation and any concurrency plugin (e.g. Mthread) could not be verified because frama-c.com and git.frama-c.com are blocked. Only the opam 33.0 metadata and the 2020 GitHub snapshot were read.",
+  "The import experiment covered only the native Linux cpu1 config at -O0 with -Werror dropped. OSAL/PSP, optimized builds, cross-compiled RTEMS/VxWorks targets and EDS-enabled builds were not tested. Location coverage was computed with a regex over printed IR (approximate).",
+  "The double-payload CSA miss is attributed to limited floating-point symbolic modelling only as a likely cause (SValBuilder FIXME). The analyzer's internals for this case were not traced.",
+  "The literature search for MLIR-based analysis of C or embedded message-ordering code was not systematic and was limited by blocked venues. Absence of prior work is not established."
+ ],
+ "artifacts": [
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cir_test/clangir_local_test.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cir_test/t1.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cir_test/t1.llvm.dbg.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cir_test/t2.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cir_test/t2.callgraph.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/alias_llvm.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/alias_llvm.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/modref_llvm.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/modref_llvm.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/lastmod_llvm.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/lastmod_llvm.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/lastmod_llvm_iso.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/lastmod_llvm_iso.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/dca_vis.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/dca_vis.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/cfs_irdl.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/cfs_use.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/mlir_probe/cfs_irdl.out",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/run_import.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/import_results.json",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/import_summary.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/loc_by_op.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/loc_by_op.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/link_import.py",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/link_import.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/link_import2.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/mission.mlir",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/import_exp/out/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/csa_all.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/taint.yaml",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/rx_loop.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/inval.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/rx_direct.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/csa_exp/rx_direct_int.c",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/repo_heads.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/repo_lastcommit.txt",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/codeql_DataFlowPrivate.qll",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/incubator_LifetimeCheck.cpp",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/CIROps_main.td",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/LLVMOps_main.td",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/import-failure_main.ll",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/syclmlir_AliasAnalysis.h",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/goblint_options.schema.json",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/framac_33_opam",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/web/ikos_analyzer_README.md",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/llvm-main/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs-bundle/",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs_clone.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/cfs_build_cpu1.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato_build.log",
+  "/tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/cfs_note/rw-mlir/potato_build2.log"
+ ]
+}

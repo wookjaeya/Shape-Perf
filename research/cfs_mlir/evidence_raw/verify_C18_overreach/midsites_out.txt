@@ -1,0 +1,28 @@
+== sample_app
+  CFE_MSG_Init             sample_app.c:134             ['const 2179']  in ['SAMPLE_APP_Init', 'SAMPLE_APP_Main']
+  CFE_SB_Subscribe         sample_app.c:158             ['const 6275']  in ['SAMPLE_APP_Init', 'SAMPLE_APP_Main']
+  CFE_SB_Subscribe         sample_app.c:173             ['const 6274']  in ['SAMPLE_APP_Init', 'SAMPLE_APP_Main']
+== hk
+  CFE_MSG_Init             hk_app.c:139                 ['const 2203']  in ['HK_AppInit', 'HK_AppMain']
+  CFE_SB_Subscribe         hk_app.c:163                 ['const 6300']  in ['HK_AppInit', 'HK_AppMain']
+  CFE_SB_Subscribe         hk_app.c:175                 ['const 6299']  in ['HK_AppInit', 'HK_AppMain']
+  CFE_SB_Subscribe         hk_app.c:187                 ['const 6298']  in ['HK_AppInit', 'HK_AppMain']
+  CFE_MSG_Init             hk_utils.c:305               ['llvm.load %150', 'llvm.load %155', 'llvm.load %47']  in ['HK_CheckStatusOfCopyTable', 'HK_CheckStatusOfTables', 'HK_ProcessNewCopyTable']
+  CFE_SB_Subscribe         hk_utils.c:322               ['llvm.load %198 {alignment = 4', 'llvm.load %203 {alignment = 4', 'llvm.load %95 {alignment = 4']  in ['HK_CheckStatusOfCopyTable', 'HK_CheckStatusOfTables', 'HK_ProcessNewCopyTable']
+  CFE_SB_Unsubscribe       hk_utils.c:436               ['llvm.load %100 {alignment = 4', 'llvm.load %58 {alignment = 4', 'llvm.load %95 {alignment = 4']  in ['HK_CheckStatusOfCopyTable', 'HK_CheckStatusOfTables', 'HK_TearDownOldCopyTable']
+== sch_lab
+  CFE_MSG_Init             sch_lab_app.c:246            ['llvm.load %100 {alignment = 4', 'llvm.load %94 {alignment = 4']  in ['SCH_LAB_AppInit', 'SCH_LAB_AppMain']
+  CFE_SB_Subscribe         sch_lab_app.c:296            ['const 6161']  in ['SCH_LAB_AppInit', 'SCH_LAB_AppMain']
+== ci_lab
+  CFE_SB_Subscribe         ci_lab_app.c:122             ['const 6276']  in ['CI_LAB_AppMain', 'CI_LAB_TaskInit']
+  CFE_SB_Subscribe         ci_lab_app.c:131             ['const 6277']  in ['CI_LAB_AppMain', 'CI_LAB_TaskInit']
+  CFE_SB_Subscribe         ci_lab_app.c:140             ['const 6278']  in ['CI_LAB_AppMain', 'CI_LAB_TaskInit']
+  CFE_MSG_Init             ci_lab_app.c:194             ['const 2180']  in ['CI_LAB_AppMain', 'CI_LAB_TaskInit']
+== to_lab
+  CFE_MSG_Init             to_lab_app.c:142             ['const 2176']  in ['TO_LAB_AppMain', 'TO_LAB_init']
+  CFE_SB_Subscribe         to_lab_app.c:261             ['ARG/param', 'const 6272', 'const 6273']  in ['TO_LAB_AppMain', 'TO_LAB_CmdSubscribe', 'TO_LAB_init']
+  CFE_SB_Unsubscribe       to_lab_app.c:454             ['llvm.load %149 {alignment = 4', 'llvm.load %17 {alignment = 4', 'llvm.load %269 {alignment = 4', 'llvm.load %32 {alignment = 4', 'llvm.load %44 {alignment = 4']  in ['TO_LAB_AppMain', 'TO_LAB_ManageTables', 'TO_LAB_UnsubscribeFromTlmPipe', 'TO_LAB_UpdateSubscriptionsFromTable']
+  CFE_SB_SubscribeEx       to_lab_app.c:504             ['llvm.load %174 {alignment = 4', 'llvm.load %294 {alignment = 4', 'llvm.load %57 {alignment = 4', 'llvm.load %69 {alignment = 4']  in ['TO_LAB_AppMain', 'TO_LAB_ManageTables', 'TO_LAB_UpdateSubscriptionsFromTable']
+  CFE_MSG_Init             to_lab_cmds.c:112            ['const 2177']  in ['TO_LAB_SendDataTypesCmd']
+  CFE_SB_SubscribeEx       to_lab_cmds.c:218            ['llvm.load %71 {alignment = 4']  in ['TO_LAB_AddPacketCmd']
+  CFE_SB_Unsubscribe       to_lab_cmds.c:280            ['llvm.load %45 {alignment = 4']  in ['TO_LAB_RemovePacketCmd']

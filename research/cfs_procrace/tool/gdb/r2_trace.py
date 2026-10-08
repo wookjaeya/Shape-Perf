@@ -15,6 +15,10 @@ import time
 import gdb
 
 OUT = open(os.environ.get("R2_TRACE_OUT", "r2_trace.jsonl"), "w", buffering=1)
+# Keep the inferior's environment equal to a run without gdb (ENV E12): drop the
+# variable that only this script reads, and the LINES/COLUMNS that gdb adds.
+for _v in ("R2_TRACE_OUT", "LINES", "COLUMNS"):
+    gdb.execute("unset environment %s" % _v)
 SEQ = [0]
 
 

@@ -60,14 +60,20 @@
 # .meta records both times. With RUN_CFS_HOOK unset or empty, v3 behaves exactly as v2 and writes the same .meta
 # lines (only the version string differs).
 #
+# Optional launch wrapper (v4; CONDITIONS.md H-8): if RUN_CFS_WRAP is set, its words are placed between the
+# user switch and ./core-cpu1, e.g. RUN_CFS_WRAP="gdb -batch -nx -x <script> -ex run --args" (case R2 uses the
+# reporter's method, a gdb breakpoint). PID is then the wrapper's; the core-cpu1 child PID is recorded in the .meta.
+# RUN_CFS_WRAP is removed from the environment before launch. With RUN_CFS_WRAP unset or empty, v4 behaves exactly
+# as v3.
+#
 # Script history: v1 (2026-10-08T01:29Z) produced logs/run01_*, run02_* and the audit's run03; it polled the log
 # every 50 ms and had SIGINT as its only stop. v2 (after the audit): STOP argument, event-based detection,
-# isolation check, process credentials/limits/environment in the .meta; produced run04-run07. v3 (this file,
-# 2026-10-08, measurement M1): optional RUN_CFS_HOOK only.
+# isolation check, process credentials/limits/environment in the .meta; produced run04-run07. v3 (2026-10-08,
+# measurement M1): optional RUN_CFS_HOOK only. v4 (this file, 2026-10-08, case R2): optional RUN_CFS_WRAP only.
 
 set -euo pipefail
 
-SCRIPT_VERSION="v3"
+SCRIPT_VERSION="v4"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib_record.sh
 . "${SCRIPT_DIR}/lib_record.sh"
@@ -78,7 +84,7 @@ CFE_DIR="${CFS_DIR}/cfe"
 OPER_LINE="CFE_ES_Main entering OPERATIONAL state"      # README L114
 
 if [ $# -lt 2 ]; then
-    sed -n '2,67p' "$0" >&2
+    sed -n '2,73p' "$0" >&2
     exit 2
 fi
 DURATION="$1"
@@ -87,6 +93,10 @@ LOG_FILE="${3:-${SCRIPT_DIR}/logs/run_$(date -u +%Y%m%dT%H%M%SZ).log}"
 HOOK="${RUN_CFS_HOOK:-}"
 export -n RUN_CFS_HOOK 2>/dev/null || true       # never part of core-cpu1's environment
 if [ -n "${HOOK}" ] && [ ! -x "${HOOK}" ]; then echo "ERROR: RUN_CFS_HOOK=${HOOK} is not executable" >&2; exit 2; fi
+WRAP_STR="${RUN_CFS_WRAP:-}"
+export -n RUN_CFS_WRAP 2>/dev/null || true       # never part of core-cpu1's environment
+WRAP=()
+[ -z "${WRAP_STR}" ] || read -r -a WRAP <<< "${WRAP_STR}"
 mkdir -p "$(dirname "${LOG_FILE}")"
 LOG_FILE="$(cd "$(dirname "${LOG_FILE}")" && pwd)/$(basename "${LOG_FILE}")"   # absolute: the script cd's to EXE_DIR
 META="${LOG_FILE}.meta"
@@ -183,7 +193,7 @@ cd "${EXE_DIR}"
 : > "${LOG_FILE}"
 FIFO="${PRIV}/console.fifo"; mkfifo "${FIFO}"
 T0_US="$(now_us)"
-setsid "${LAUNCH[@]}" ./core-cpu1 < /dev/null > "${LOG_FILE}" 2>&1 &
+setsid "${LAUNCH[@]}" "${WRAP[@]}" ./core-cpu1 < /dev/null > "${LOG_FILE}" 2>&1 &
 PID=$!
 tail -n +1 --pid="${PID}" -f -- "${LOG_FILE}" > "${FIFO}" 2>/dev/null &
 TAILPID=$!
@@ -197,6 +207,7 @@ capture_static() {   # raw copies first (fast); they are processed after the run
     cat "/proc/${PID}/cgroup"  > "${PRIV}/cgroup"  2>/dev/null || true
     tr '\0' ' ' < "/proc/${PID}/cmdline" > "${PRIV}/cmdline" 2>/dev/null || true
     readlink "/proc/${PID}/exe" "/proc/${PID}/cwd" "/proc/${PID}/fd/0" "/proc/${PID}/fd/1" "/proc/${PID}/fd/2" > "${PRIV}/links" 2>/dev/null || true
+    [ ${#WRAP[@]} -eq 0 ] || pgrep -a -P "${PID}" > "${PRIV}/children" 2>/dev/null || true
     T_CAP_END_US="$(now_us)"
 }
 HOOK_LOG=""
@@ -291,6 +302,7 @@ leftover="$(pgrep -g "${PID}" 2>/dev/null | tr '\n' ' ' || true)"
 # ---------------------------------------------------------------- record
 {
     echo "pid=${PID} pgid=${PID} (setsid)"
+    if [ ${#WRAP[@]} -gt 0 ]; then echo "wrapper=${WRAP_STR} (pid is the wrapper's)"; echo "wrapper_children_at_first_console_line:"; sed 's/^/  /' "${PRIV}/children" 2>/dev/null || true; fi
     echo "stop_reason=${stop_reason}"
     echo "first_console_line_read_ms=$( [ -n "${FIRST_US}" ] && rel_ms "${FIRST_US}" || echo none)"
     echo "operational_line_read_ms=$( [ -n "${OPER_US}" ] && rel_ms "${OPER_US}" || echo not_seen)"

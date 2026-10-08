@@ -1,0 +1,309 @@
+# C3 evidence record. Companion to C3.md (same directory). Record date: 2026-10-08.
+# Policy: /home/user/Shape-Perf/research/cfs_procrace/CONDITIONS_POLICY.md
+# Statuses: from-reference | unspecified_by_reference. "inference:" marks our reasoning.
+# Tarball pins: "641:<path>:L<n>" = cFE-6.4.1-OSS-release/<path> (sha256 ec26e33b...e98f);
+#               "642:<path>:L<n>" = cFE-6.4.2-OSS-release/<path> (sha256 c64ed2aa...a53a4f).
+# Local evidence root: /home/user/work/procrace/src/C3/
+case_id: C3
+
+sources:
+  - id: issue
+    url: https://github.com/nasa/cFE/issues/73
+    what: "Issue #73 'Race conditions / dependencies between CFE core apps'; skliper; opened and closed Sep 30, 2019 (Trac migration); label bug; milestone 6.4.2; 14 comments not rendered logged-out."
+    retrieval: "Logged-out web page via WebFetch, fragment quotes <=125 chars. gh api / REST / curl HTML: 403. GitHub MCP: repo not configured. Earlier dumps /home/user/work/procrace/issues/cFE_73*.json contain only the 403 text and were not reused."
+  - id: issue_comment_probes
+    url: https://github.com/nasa/cFE/issues?q=is%3Aissue%20in%3Acomments%20%22trac%20issue%2042%22
+    what: "GitHub issue search over comment text (in:comments, strict quoted phrases). Establishes: 14 comments; 'trac issue 42'; 'Created by jphickey on 2015-05'; Trac comments by jphickey, glimes, sstrege, acudmore 'on 2015-05'; terms vxworks, mcp750, commit present; RTEMS, linux, microblaze, 6.4.1, priority absent."
+    log: /home/user/work/procrace/src/C3/retrieval/github_comment_search_probes_20261008.tsv
+  - id: milestone_list
+    url: https://github.com/nasa/cFE/issues?q=is%3Aissue+milestone%3A6.4.2+sort%3Acreated-asc
+    what: "11 issues in milestone 6.4.2, all by skliper, all 'closed on Sep 30, 2019' (#34 #67 #71 #72 #73 #81 #82 #90 #102 #105 #106)."
+  - id: vdd_642
+    url: "642:cfe/docs/cFE 6.4.2.0 Version Description Document.pdf"
+    sha256: 6f2d0c3db98391eea974472b6de775fe6655b50084ea2bffe3fc50cc873616a2
+    text: /home/user/work/procrace/src/C3/text/VDD_6.4.2.0.txt
+    what: "cFE 6.4.2 VDD, dated JUNE 29, 2015. Sec 1.1: races 'found in cFE build 6.4.1'. Table 1.2-2 rows Trac #40 (core apps call CFE_ES_WaitForStartupSync; 'forces each core application to reach its respective main loop before the next core application will be started regardless of the platform's priority settings') and Trac #42 (EVS_SendEvent range check; EVS_AppID set last). Attachment 1: #40 #41 #42 #51 #59. Sec 1.4: tested PPC/mcp750 VxWorks 6.4, OSAL 4.1.1. Table 1.3-1: open MKS DCR 21554 'Add a mechanism to serialize the initialization of the cFE Core apps'."
+  - id: src_641
+    url: https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.1/cFE-6.4.1-OSS-release.tar.gz/download
+    sha256: ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f
+    bytes: 39586940
+    sf_date: "2014-12-12 17:58:23 UTC"
+    local: /home/user/work/procrace/src/C3/sf/x641/cFE-6.4.1-OSS-release
+  - id: src_642
+    url: https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.2-OSS-release.tar.gz/download
+    sha256: c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f
+    bytes: 36411531
+    sf_date: "2015-07-13 19:22:59 UTC"
+    local: /home/user/work/procrace/src/C3/sf/x642/cFE-6.4.2-OSS-release
+  - id: git_650a
+    url: https://github.com/nasa/cFE/tree/b2765d9f905aa11f0c3b419b62233597366a7db9
+    what: "Tag v6.5.0a; earliest public git revision (import commit 792f5e3594c10e21a3560479bb72ea0584eb8ead, 2017-06-29). Already contains the fix."
+  - id: current_src
+    url: https://github.com/nasa/cFE/tree/f22e538cafe56cf44b15996b67bd1e90850a30cf
+    what: "dev (remote default branch), 2026-10-05."
+  - id: related_71
+    url: https://github.com/nasa/cFE/issues/71
+    what: "Trac #40 'CFE ES \"StartupSyncSemaphore\" subject to multiple race conditions'; EVA team at GRC, Xilinx Microblaze. #73 says item 1 'likely depends on' it."
+  - id: related_2663
+    url: https://github.com/nasa/cFE/issues/2663
+    what: "R2. 'Unregistered AppId error with CFE_EVS_SendEventWithAppID() during cFE task startup'; myc-yang; Aug 6, 2025; open; ES/EVS init -> CFE_EVS_APP_ILLEGAL_APP_ID; names cFE v6.7."
+
+issue_body_verbatim:
+  note: "Fragments as returned by WebFetch; '+' joins consecutive fragments. Formatting not guaranteed."
+  paragraph: "The \"core\" applications have significant dependencies between them that need to be more pro-actively satisfied. There are some race conditions during the startup phase that can pose some serious problems if things are not executed in the right order."
+  list1:
+    - "Start up code should synchronize at least the \"core\" applications + and ensure that each one has reached it's respective \"RunLoop\" before starting the next one, + regardless of what the platform config sets the priority to + (likely depends on [CFE ES \"StartupSyncSemaphore\" subject to multiple race conditions #71]"
+    - "EVS_IsFiltered should range check before doing the table lookups based on passed-in values"
+    - "CFE SB and EVS (at least) populate different values into their own \"AppID\" global variable before initialization. + SB does nothing (0 by default, which is in fact a valid AppID for a different app) but + EVS initializes this to 0xFFFFFFFFF, which has very ill-effects if actually used for something + and nothing really checks for this."
+  lead_in: "For those interested, here are the details of the specific sequence of events discovered when debugging application startup on the Microblaze processor used by the EVA team at GRC:"
+  list2:
+    - "As dictated by the table within \"cfe_es_objtab.c\", the CFE core applications are started (Tasks Created) in the order of EVS, SB, ES, TIME, BL."
+    - "In the default/example platform configuration, these have respective priorities of 61(EVS), 64(SB), 68(ES), 60(TIME), and 70(TBL)."
+    - "TIME task will run it's TaskMain first even though it is 4th in the start sequence."
+    - "As part of this init sequence, it calls CFE_SB_CreatePipe() which in turn calls CFE_EVS_SendEventWithAppID() in several places (for errors as well as an unconditional \"debug event\" at the end). The AppId supplied is \"CFE_SB.AppId\" which is uninitialized since SB has not executed yet. In this case the value used is actually 0."
+    - "In turn this eventually calls EVS_NotRegistered() (since CFE_EVS_TaskInit has not run) and then EVS_SendEvent() as part of that."
+    - "EVS_SendEvent() calls EVS_IsFiltered() with the contents of CFE_EVS_GlobalData.EVS_AppID, which is also uninitialized but set to \"0xFFFFFFFF\", not zero like CFE_SB.AppId."
+    - "This appID value is not range-checked by EVS_IsFiltered and ultimately segfaults and crashes CFE core."
+  typos_noted: ["'0xFFFFFFFFF' (9 F) in list1 item 3 vs '0xFFFFFFFF' in list2 item 6 and code", "'BL' in list2 item 1 = TBL (item 2)"]
+
+trac:
+  ticket: 42
+  mapping_evidence:
+    - "6.4.2 VDD Attachment 1 row '#42 Race conditions / dependencies between CFE core apps' (identical title)"
+    - "#73 comment contains phrase 'trac issue 42' (search probe; only #73 matches)"
+    - "offset GitHub# = Trac# + 31 for all five 6.4.2 tickets (#40->#71, #41->#72, #42->#73, #51->#82, #59->#90)"
+  created: {by: jphickey, date: "2015-05 (day not recoverable)", reference: issue_comment_probes, status: from-reference}
+  commenters_2015_05: [jphickey, glimes, sstrege, acudmore]
+  other_dated_text: "'on 2015-06' present in comments; author/context unknown"
+  closed: {value: null, status: unspecified_by_reference, note: "in hidden comments; babelfish Trac unreachable"}
+
+revisions:
+  buggy:
+    version: "6.4.1"
+    artifact: src_641
+    in_git: false
+    reference: "6.4.2 VDD sec 1.1 'found in cFE build 6.4.1'"
+  fixed:
+    version: "6.4.2"
+    artifact: src_642
+    in_git: false
+    first_git_revision_with_fix: b2765d9f905aa11f0c3b419b62233597366a7db9  # v6.5.0a
+    reference: "milestone 6.4.2; VDD Attachment 1 and Table 1.2-2"
+  current_checked:
+    commit: f22e538cafe56cf44b15996b67bd1e90850a30cf
+    branch: dev
+    date: "2026-10-05"
+
+platform:
+  original:
+    processor: {value: "Xilinx Microblaze (EVA team at GRC)", reference: "#73 body lead-in; #71", status: from-reference}
+    os_rtos: {value: null, status: unspecified_by_reference}
+    psp_bsp: {value: null, status: unspecified_by_reference, note: "no Microblaze PSP in 641:psp/fsw/"}
+    osal_version: {value: null, status: unspecified_by_reference}
+    compiler: {value: null, status: unspecified_by_reference}
+    word_size: {value: null, status: unspecified_by_reference}
+  nasa_642_test_platform:
+    value: "PPC/mcp750, VxWorks 6.4, GNU ccppc 3.3.2, PSP 1.2.0.0, OSAL 4.1.1"
+    reference: "6.4.2 VDD sec 1.4, Table 1.4-1"
+    status: from-reference
+    note: "not the EVA platform; #73 comments mention 'vxworks' and 'mcp750' (probe only, context unknown)"
+
+resource:
+  items:
+    - id: R-SB
+      name: CFE_SB.AppId
+      initial_value: {value: 0, reference: "641:cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:L105 (file-scope object, no initializer); #73 list2 item 4", status: from-reference}
+    - id: R-EVSID
+      name: CFE_EVS_GlobalData.EVS_AppID
+      initial_value: {value: "0xFFFFFFFF (CFE_EVS_UNDEF_APPID)", reference: "641:.../evs/cfe_evs_task.c:L190; 641:.../evs/cfe_evs_task.h:L105; #73 list2 item 6", status: from-reference}
+    - id: R-EVSREG
+      name: "CFE_EVS_GlobalData.AppData[i].RegisterFlag (and filters)"
+      initial_value: {value: "all zero (FALSE)", reference: "641:.../evs/cfe_evs_task.c:L188 (CFE_PSP_MemSet in CFE_EVS_EarlyInit)", status: from-reference}
+    - id: R-ES
+      name: "ES TaskTable/AppTable entry (TaskId->AppId) for each core task"
+      note: "protected by the ES shared-data lock (existing_sync); listed for completeness"
+  appid0_owner: "inference: CFE_EVS (AppTable cleared every start 641:.../es/cfe_es_start.c:L200-L207; first-free slot L825-L827; CFE_EVS first core task 641:.../es/cfe_es_objtab.c:L120)"
+
+publish_site:
+  R-SB:
+    task: CFE_SB (SB main task)
+    buggy: "641:cfe/fsw/cfe-core/src/sb/cfe_sb_task.c:L198 CFE_ES_GetAppID(&CFE_SB.AppId) in CFE_SB_AppInit (L184), called from CFE_SB_TaskMain L127; SB EVS registration L257"
+    permalink_650a: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/sb/cfe_sb_task.c#L206
+    current: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_task.c#L128
+  R-EVSID:
+    task: CFE_EVS (EVS main task)
+    buggy: "641:cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:L385 EVS_GetAppID(&CFE_EVS_GlobalData.EVS_AppID) - FIRST step of CFE_EVS_TaskInit (L372), before self-registration L393 and CreatePipe L401"
+    fixed: "642:.../evs/cfe_evs_task.c:L436 (assigned LAST)"
+    permalink_650a_fixed: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_task.c#L420
+    current: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_task.c#L312
+  R-EVSREG:
+    task: CFE_EVS (for EVS's own record)
+    buggy: "641:.../evs/cfe_evs_task.c:L393 CFE_EVS_Register(NULL, 0, CFE_EVS_BINARY_FILTER); RegisterFlag set in 641:.../evs/cfe_evs.c:L127 onwards"
+  R-ES:
+    task: "ES main thread (CFE_ES_Main/CFE_ES_CreateObjects)"
+    buggy: "641:.../es/cfe_es_start.c:L838 lock, L875 OS_TaskCreate, L919 TaskTable[..].AppId = j, L933 unlock"
+
+use_site:
+  executing_task: CFE_TIME (main task); all calls synchronous in TIME's context
+  chain:
+    - {site: "CFE_TIME_TaskMain -> CFE_TIME_TaskInit", buggy: "641:.../time/cfe_time_task.c:L187, L193, L241", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/time/cfe_time_task.c#L236"}
+    - {site: "CFE_SB_CreatePipe(&CFE_TIME_TaskData.CmdPipe, ...)", buggy: "641:.../time/cfe_time_task.c:L308", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/time/cfe_time_task.c#L305"}
+    - {site: "CFE_EVS_SendEventWithAppID(..., CFE_SB.AppId, ...) - reads R-SB", buggy: "641:.../sb/cfe_sb_api.c:L195, L207, L217 (errors), L264 (unconditional debug event, after unlock L261)", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/sb/cfe_sb_api.c#L266"}
+    - {site: "CFE_EVS_SendEventWithAppID: AppID<MAX ok; AppData[0].RegisterFlag==FALSE -> EVS_NotRegistered - reads R-EVSREG", buggy: "641:.../evs/cfe_evs.c:L277, L285, L289, L292", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs.c#L276"}
+    - {site: "EVS_NotRegistered -> EVS_SendEvent(CFE_EVS_ERR_UNREGISTERED_EVS_APP, ...)", buggy: "641:.../evs/cfe_evs_utils.c:L194, L199, L211", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L206"}
+    - {site: "EVS_SendEvent -> EVS_IsFiltered(CFE_EVS_GlobalData.EVS_AppID, ...) - reads R-EVSID; no range check", buggy: "641:.../evs/cfe_evs_utils.c:L608, L616"}
+    - {site: "EVS_IsFiltered: AppDataPtr = &CFE_EVS_GlobalData.AppData[AppID] (AppID=0xFFFFFFFF), reads flags/filters, may write FilterPtr->Count++", buggy: "641:.../evs/cfe_evs_utils.c:L235, L243-L244, L299, L313", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L239"}
+  first_event_call: "inference: on a successful CreatePipe the first EVS call is the debug event at 641:.../sb/cfe_sb_api.c:L264 ('unconditional \"debug event\" at the end', #73)"
+
+existing_sync:
+  - name: object-table creation order EVS, SB, ES, TIME, TBL
+    reference: "641:.../es/cfe_es_objtab.c:L120-L129; #73 list2 item 1"
+    orders: "OS_TaskCreate calls only (not execution)"
+    covers_c3_resources: false
+  - name: task priorities EVS 61, SB 64, ES 68, TIME 60, TBL 70 (lower number = higher priority)
+    reference: "641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1115, L1138, L1161, L1188, L1217; semantics L1185-L1186; #73 list2 items 2-3"
+    orders: "TIME runs before EVS/SB once all exist - causes the violation"
+    covers_c3_resources: false
+  - name: priority of the thread running CFE_ES_Main
+    reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L353-L366 (SCHED_FIFO max 'so ES Main completes'); 641:psp/fsw/mcp750-vxworks6.4/src/cfe_psp_start.c:L181 (no change); Microblaze PSP unknown"
+    status: "Microblaze: unspecified_by_reference"
+    covers_c3_resources: false
+  - name: ES shared-data lock across OS_TaskCreate + TaskTable fill; CFE_ES_RegisterApp/CFE_ES_GetAppID take the same lock
+    reference: "641:.../es/cfe_es_start.c:L838-L933; 641:.../es/cfe_es_api.c:L767-L771, L846-L851"
+    covers_c3_resources: "R-ES only"
+  - name: early-init function calls before task creation (EVS/SB/TIME/TBL/FS EarlyInit)
+    reference: "641:.../es/cfe_es_objtab.c:L92-L106"
+    effect: "SB pipe table/mutex and EVS globals exist before TIME runs (CreatePipe works); also set the bad initial AppId values"
+    covers_c3_resources: false
+  - name: SB shared-data mutex in CFE_SB_CreatePipe
+    reference: "641:.../sb/cfe_sb_api.c:L182 lock; released before event calls (L261 before L264)"
+    covers_c3_resources: false
+  - name: 6.4.1 startup sync (binary semaphore + counter + flag; CFE_ES_WaitForStartupSync / CFE_ES_RunLoop)
+    reference: "641:.../es/cfe_es_start.c:L248-L310; 641:.../es/cfe_es_api.c:L540, L676"
+    covers_c3_resources: false
+    note: "only startup-script apps; no core task source calls WaitForStartupSync or RunLoop in 6.4.1; ES does not wait between core-task creations"
+
+required_order:
+  statement: "Before TIME (or any task) executes CFE_SB_CreatePipe and its event calls with CFE_SB.AppId: (a) SB has published CFE_SB.AppId and registered with EVS (CFE_SB_AppInit), and (b) EVS has completed CFE_EVS_TaskInit (EVS_AppID valid, EVS registered). Sufficient form stated by the issue: each core app reaches its main loop before the next core app starts, regardless of priority."
+  provenance:
+    - "#73 list1 item 1 (requirement) and list2 items 3-7 (failing order)"
+    - "6.4.2 VDD Table 1.2-2 row Trac #40 ('forces each core application to reach its respective main loop before the next core application will be started regardless of the platform's priority settings')"
+    - "6.4.2 VDD Table 1.2-2 row Trac #42 ('set the EVS_AppID value last. This will assure that all other initialization is done before the AppID is valid')"
+  inference: "Crash requires both (a) and (b) violated. (b) violated alone is impossible on this path: if SB registered, U3 takes EVS_IsFiltered(SB id). If only (a) violated (EVS initialized, SB not), the event is attributed to AppId 0 = EVS: misattribution, no crash."
+
+fix:
+  commit:
+    value: null
+    note: "No public commit. Fix visible only as 6.4.1->6.4.2 tarball diff; 6.4.2 VDD gives no commit IDs. First public git revision containing it: b2765d9f905aa11f0c3b419b62233597366a7db9 (v6.5.0a; import 792f5e3594c10e21a3560479bb72ea0584eb8ead)."
+  kind: [order_guarantee, guard, publish_last]
+  components:
+    - id: F1
+      trac: 42
+      kind: guard
+      change: "EVS_SendEvent: if (EVS_AppID < CFE_ES_MAX_APPLICATIONS && EVS_IsFiltered(...) == FALSE)"
+      pin_642: "642:cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c:L615-L621"
+      permalink_650a: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L611-L617
+    - id: F2
+      trac: 42
+      kind: publish_last
+      change: "CFE_EVS_TaskInit reads AppID into a local; assigns CFE_EVS_GlobalData.EVS_AppID at the end"
+      pin_642: "642:cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:L394, L435-L436"
+      permalink_650a: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_task.c#L420
+    - id: F3
+      trac: 40
+      kind: order_guarantee
+      change: "ES main thread waits after each core OS_TaskCreate (CFE_ES_ApplicationSyncDelay, 50 ms polling, CFE_CORE_MAX_STARTUP_MSEC=30000, CFE_PSP_Panic on timeout); every core TaskMain calls CFE_ES_WaitForStartupSync(CFE_CORE_MAX_STARTUP_MSEC) after TaskInit"
+      pin_642: "642:.../es/cfe_es_start.c:L848-L855, L932-L950, L1007-L1040; 642:.../es/cfe_es_api.c:L652-L693; TIME 642:.../time/cfe_time_task.c:L209; 642:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1702, L1726, L1744"
+      permalink_650a:
+        - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L938
+        - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L1009
+        - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L651
+        - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/time/cfe_time_task.c#L196
+  guarantees:
+    - "F3: core TaskInit k+1 starts only after core task k finished TaskInit and called WaitForStartupSync (table order EVS->SB->ES->TIME->TBL, independent of priority); TIME's CreatePipe runs after SB and EVS init. Fail-stop: panic on 30 s timeout. (inference from code + VDD row #40)"
+    - "F1: EVS_SendEvent never indexes AppData with an out-of-range EVS_AppID; such events are dropped ('Otherwise do nothing', VDD)."
+    - "F2: valid EVS_AppID implies EVS init complete (VDD row #42)."
+  not_guaranteed:
+    - "inference: tasks created before SB still read CFE_SB.AppId before SB publishes it - EVS in 6.4.2 (attributed to AppId 0 = EVS, no crash); ES and EVS in current code -> CFE_EVS_APP_ILLEGAL_APP_ID (R2, #2663)."
+    - "F1 drops EVS's own events emitted before EVS_AppID is set (silent loss, not an error)."
+
+present_in_current:
+  value: "fix present; original crash path absent; residual SB-AppId-before-publication path present (R2)"
+  checked_commit: f22e538cafe56cf44b15996b67bd1e90850a30cf
+  evidence:
+    F1: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_utils.c#L607-L635
+    F1_helper: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_utils.c#L48-L60
+    F1_sendwithappid: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs.c#L185-L194
+    F2: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_task.c#L266-L312
+    F3_main: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_start.c#L801-L873
+    F3_poll: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_start.c#L886
+    F3_time_wait: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/time/fsw/src/cfe_time_task.c#L72-L88
+    F3_core_running: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_api.c#L545-L573
+    creation_order: "https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/mission_defaults.cmake#L26-L40 (es, evs, fs, sb, tbl, time, ...; TIME now last)"
+    priorities: "example_platform_cfg.h ES 68 #L100, EVS 61 #L872, SB 64 #L1269, TBL 70 #L1300, TIME 60 #L1742 (unchanged)"
+    sb_appid_publish: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_task.c#L128
+    sb_global_zeroed: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_init.c#L50
+    residual_es_createpipe: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_task.c#L367
+    residual_evs_createpipe: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_task.c#L289
+
+reproduction:
+  kind: public_code_derived
+  original: unavailable
+  rationale: "Buggy code path is public (6.4.1 tarball) but the Microblaze OS/PSP/OSAL/toolchain/config used by EVA are not stated; the 14 Trac comments are unread."
+  conditions:
+    - {name: cfe_version_buggy, value: "6.4.1", reference: "6.4.2 VDD sec 1.1", status: from-reference}
+    - {name: cfe_version_fixed, value: "6.4.2", reference: "milestone 6.4.2; VDD Attachment 1, Table 1.2-2", status: from-reference}
+    - {name: buggy_artifact, value: "cFE-6.4.1-OSS-release.tar.gz sha256 ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f", reference: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.1/cFE-6.4.1-OSS-release.tar.gz/download", status: from-reference}
+    - {name: fixed_artifact, value: "cFE-6.4.2-OSS-release.tar.gz sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f", reference: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.2-OSS-release.tar.gz/download", status: from-reference}
+    - {name: version_eva_ran, value: null, reference: "#73 names no version", status: unspecified_by_reference}
+    - {name: processor, value: "Xilinx Microblaze", reference: "#73 lead-in; #71", status: from-reference}
+    - {name: os_psp_osal_compiler_on_microblaze, value: null, reference: "#73, #71 silent; comments unread", status: unspecified_by_reference}
+    - {name: core_task_creation_order, value: "EVS, SB, ES, TIME, TBL", reference: "#73 list2 item 1; 641:cfe/fsw/cfe-core/src/es/cfe_es_objtab.c:L120-L129", status: from-reference}
+    - {name: core_task_priorities_default, value: "EVS 61, SB 64, ES 68, TIME 60, TBL 70", reference: "#73 list2 item 2; 641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1115/L1138/L1161/L1188/L1217", status: from-reference}
+    - {name: eva_used_default_priorities, value: null, reference: "#73 list2 item 2 says 'In the default/example platform configuration'", status: unspecified_by_reference}
+    - {name: priority_semantics, value: "lower number = higher priority", reference: "641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1185-L1186", status: from-reference}
+    - {name: creator_thread_priority_microblaze, value: null, reference: "not stated", status: unspecified_by_reference}
+    - {name: creator_thread_priority_pc_linux_psp, value: "SCHED_FIFO max during CFE_ES_Main", reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L353-L366", status: from-reference}
+    - {name: observed_execution_order, value: "TIME TaskMain first; CFE_SB_CreatePipe before SB and EVS init", reference: "#73 list2 items 3-5", status: from-reference}
+    - {name: cpu_count_preemption_model, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: sb_appid_before_init, value: 0, reference: "#73 list2 item 4; 641:.../sb/cfe_sb_task.c:L105, L198", status: from-reference}
+    - {name: evs_appid_before_init, value: "0xFFFFFFFF", reference: "#73 list2 item 6; 641:.../evs/cfe_evs_task.c:L190; cfe_evs_task.h:L105", status: from-reference}
+    - {name: cfe_es_max_applications, value: "32 (6.4.1 cpu1 sample)", reference: "641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L570", status: from-reference}
+    - {name: cfe_es_max_applications_eva, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: failing_call_chain, value: "CFE_SB_CreatePipe -> CFE_EVS_SendEventWithAppID -> EVS_NotRegistered -> EVS_SendEvent -> EVS_IsFiltered", reference: "#73 list2 items 4-7; use_site pins", status: from-reference}
+    - {name: observed_outcome, value: "segfaults and crashes CFE core", reference: "#73 list2 item 7", status: from-reference}
+    - {name: fault_details_logs, value: null, reference: "none published", status: unspecified_by_reference}
+    - {name: reset_type, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: failure_frequency, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: startup_script_contents, value: null, reference: "core tasks are created before the script runs (641:.../es/cfe_es_start.c:L273 vs L292)", status: unspecified_by_reference}
+    - {name: fix_sync_constants, value: "CFE_ES_STARTUP_SYNC_POLL_MSEC 50; CFE_CORE_MAX_STARTUP_MSEC 30000; CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC 30000", reference: "642:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1702, L1726, L1744", status: from-reference}
+    - {name: osal_version_nasa_build, value: "4.1.1", reference: "641:osal/readme.txt; 6.4.2 VDD Table 1.4-1", status: from-reference}
+
+assumptions_needed:
+  - "A1 (deviation): x86-64 Linux host + 6.4.1 pc-linux PSP + POSIX OSAL in place of Microblaze; scheduling, memory layout and fault behaviour differ."
+  - "A2: OSAL 4.1.1 source (sourceforge.net/projects/osal or github.com/nasa/osal per 641:osal/readme.txt) - not yet fetched; exact tag/hash to be recorded."
+  - "A3 (D3): order control - either priority-driven (SCHED_FIFO main thread + RT priorities; container privilege unverified) or event-based hold of CFE_SB_AppInit and CFE_EVS_TaskInit until TIME's first CFE_EVS_SendEventWithAppID from CFE_SB_CreatePipe is observed; no fixed delays."
+  - "A4 (D4): outcome criterion - out-of-range AppID (0xFFFFFFFF) reaching EVS_IsFiltered as primary observable; crash secondary (64-bit vs 32-bit OOB behaviour differs; inference)."
+  - "A5: 6.4.1 platform_inc/cpu1/cfe_platform_cfg.h unchanged (issue cites 'default/example' values)."
+  - "A6: power-on reset."
+  - "A7: fixed-side control = 6.4.2 tarball (minimal diff) rather than v6.5.0a (many unrelated changes)."
+  - "A8: ablations 'order guarantee only' (F3) and 'guard only' (F1) are constructed subsets of the 6.4.1->6.4.2 diff, not historical revisions."
+  - "A9: recorder must not depend on EVS, SB or TIME (roadmap sec 6.3 item 5)."
+
+open_questions:
+  - "Content of the 14 migrated comments: exact Trac created/comment/closed dates, 'vxworks'/'mcp750' context, which 'commit', author of 'on 2015-06' text (needs D1 or a reachable Trac/Wayback copy)."
+  - "OS, PSP, OSAL version, toolchain, word size of the EVA Microblaze system."
+  - "cFE build EVA ran when the crash occurred (VDD's 'found in 6.4.1' covers the series; #73 is silent)."
+  - "Did the crash reproduce on NASA's mcp750/VxWorks test platform?"
+  - "Trac/MKS commit IDs for Trac #40 and #42."
+  - "Relation of MKS DCR 21554 ('serialize the initialization of the cFE Core apps', open in the 6.4.2 VDD) to Trac #42."
+  - "Exact segfault site on Microblaze: first OOB read in EVS_IsFiltered or later effect of the write at 641:.../evs/cfe_evs_utils.c:L313."
+  - "Include the residual SB-AppId-before-publication path (EVS in 6.4.2; ES and EVS in current = R2) in C3's package? (D5)"
+  - "Not verified: whether cFE 6.4.0 has the same core-task code (only 6.4.1 and 6.4.2 inspected)."
+
+decisions_requested:
+  - {id: D1, question: "Grant authenticated GitHub API access to nasa/cFE (add_repo access:push) to read #73's 14 comments?", options: ["yes", "no - keep month-level dates and probes"], expected_gain: high}
+  - {id: D2, question: "Buggy-side code for derived experiment?", options: ["6.4.1 tarball (+ OSAL 4.1.1)", "v6.5.0a with 6.4.2 fix hunks reverted (constructed; deviation)", "both"]}
+  - {id: D3, question: "How to produce TIME-before-SB/EVS order?", options: ["priority-driven per pc-linux PSP (needs RT privileges)", "event-based hold per CONDITIONS_POLICY", "both"]}
+  - {id: D4, question: "Primary outcome criterion?", options: ["OOB AppID reaching EVS_IsFiltered (crash secondary)", "require crash"]}
+  - {id: D5, question: "Scope of residual SB-AppId-before-publication path?", options: ["C3 sub-scenario", "R2 only"]}

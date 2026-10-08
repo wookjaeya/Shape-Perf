@@ -1,0 +1,81 @@
+# 2026-10-08T01:09:44Z clone candidate public repos found by GitHub repository search (read-only inspection, nothing executed)
+## git clone --depth 1 https://github.com/tarannumzaman/Scminer /home/user/work/procrace/baselines/yu-group/sources/tarannumzaman_Scminer
+exit=0
+HEAD 255933c62394e0d4fc0a9063975d36aca1cb15a9 Tue Sep 27 13:51:33 2022 -0400 Tarannum Shaila Zaman
+19M	/home/user/work/procrace/baselines/yu-group/sources/tarannumzaman_Scminer
+createPCA matrix.zip
+Scminer_preprint.pdf
+count.zip
+creatematrixrow.zip
+candidategeneration.zip
+LocroCon_Filter.zip
+Auditlog.zip
+.Rhistory
+## git clone --depth 1 https://github.com/vampirecat35/SIMExplorer /home/user/work/procrace/baselines/yu-group/sources/vampirecat35_SIMExplorer
+exit=0
+HEAD e20af6266124901d1bb5e15bf226f3919bde23e1 Thu Nov 21 20:13:29 2019 +0000 gustavovrr
+832K	/home/user/work/procrace/baselines/yu-group/sources/vampirecat35_SIMExplorer
+SIMExplorer/src/simexplorer/SIMExplorer.java
+SIMExplorer/src/simexplorer/DialogSobre.java
+SIMExplorer/src/simexplorer/DialogEditar.form
+SIMExplorer/src/simexplorer/DialogNumReg.form
+SIMExplorer/src/simexplorer/DialogCHV.form
+SIMExplorer/src/simexplorer/DialogNumReg.java
+SIMExplorer/src/simexplorer/reportgenerator/SMSCollection.java
+SIMExplorer/src/simexplorer/reportgenerator/ADNCollection.java
+SIMExplorer/src/simexplorer/reportgenerator/LNDCollection.java
+SIMExplorer/src/simexplorer/reportgenerator/ReportGenerator.java
+SIMExplorer/src/simexplorer/reportgenerator/MSISDNCollection.java
+SIMExplorer/src/simexplorer/files/AccessConditions.java
+SIMExplorer/src/simexplorer/files/FileMap.java
+SIMExplorer/src/simexplorer/files/TypeOfFile.java
+SIMExplorer/src/simexplorer/files/IncreaseCommandAllowed.java
+SIMExplorer/src/simexplorer/files/EF.java
+SIMExplorer/src/simexplorer/files/DF.java
+SIMExplorer/src/simexplorer/files/AccessConditionsMap.java
+SIMExplorer/src/simexplorer/files/File.java
+SIMExplorer/src/simexplorer/simcardcloner/SIMCardClonerListener.java
+SIMExplorer/src/simexplorer/simcardcloner/SIMCardCloner.java
+SIMExplorer/src/simexplorer/simcardcloner/SIMCardType.java
+SIMExplorer/src/simexplorer/DialogEnviarAPDU.java
+SIMExplorer/src/simexplorer/DialogEditar.java
+SIMExplorer/src/simexplorer/DialogCHV.java
+SIMExplorer/src/simexplorer/decoders/DecodeSMS.java
+SIMExplorer/src/simexplorer/decoders/DecodeEF8f0d.java
+SIMExplorer/src/simexplorer/decoders/DecodeLOCI.java
+SIMExplorer/src/simexplorer/decoders/DecodeSPN.java
+SIMExplorer/src/simexplorer/decoders/DecodeEFFactory.java
+SIMExplorer/src/simexplorer/decoders/SIMFileNotFoundException.java
+SIMExplorer/src/simexplorer/decoders/DecodeICCID.java
+SIMExplorer/src/simexplorer/decoders/DecodeIMSI.java
+SIMExplorer/src/simexplorer/decoders/DecodeEF.java
+SIMExplorer/src/simexplorer/decoders/DecodeADN.java
+SIMExplorer/src/simexplorer/DialogEnviarAPDU.form
+SIMExplorer/src/simexplorer/SIMExplorer.form
+SIMExplorer/src/simexplorer/DialogCopia.java
+SIMExplorer/src/simexplorer/DialogSobre.form
+SIMExplorer/src/simexplorer/apdusender/APDUSender.java
+SIMExplorer/src/simexplorer/DialogCopia.form
+SIMExplorer/nbproject/build-impl.xml
+SIMExplorer/nbproject/project.xml
+SIMExplorer/nbproject/genfiles.properties
+SIMExplorer/nbproject/project.properties
+SIMExplorer/build.xml
+SIMExplorer/manifest.mf
+SIMExplorer/com/googlecode/attention/sms/pdu/manifest.file
+SIMExplorer/com/googlecode/attention/sms/pdu/pduelements.properties
+SIMExplorer/com/googlecode/attention/sms/pdu/spec.txt
+# 2026-10-08T01:09:57Z removed vampirecat35_SIMExplorer clone: Java NetBeans GSM SIM-card file explorer (src/simexplorer/decoders/DecodeIMSI.java, simcardcloner/), unrelated to Yu et al. SIMEXPLORER
+## 2026-10-08T01:11:23Z git clone --depth 1 --filter=blob:none --no-checkout https://github.com/chaowang-vt/chaowang-vt.github.io /home/user/work/procrace/baselines/yu-group/sources/chaowang-vt.github.io
+exit=0
+HEAD f3544731050f7f435640f53c1c938c0dea5135dd Tue Mar 10 14:46:15 2026 -0700
+pubDOC/YuCBG08FSE.pdf
+pubDOC/YuHW20_TSE_ConTesa.pdf
+pubDOC/YuZW17.pdf
+## git checkout HEAD -- pubDOC/YuZW17.pdf
+exit=0
+f9d7b57bbb0c1269f9143b4ec69286e90348a58fadd071f76f11022e06dfbf60  /home/user/work/procrace/baselines/yu-group/sources/chaowang-vt.github.io/pubDOC/YuZW17.pdf
+## 2026-10-08 git ls-remote probes (from yu-group_source_fetch_20261008.log)
+# https://github.com/tarannumzaman/ReproSys (the SysPro code/data link [P6-a]) -> "could not read Username for 'https://github.com': terminal prompts disabled"
+#   i.e. not publicly readable at this time (private, renamed or deleted). Relevant to the SysPro task, not to the five yu-group tools.
+# https://github.com/Tarannum-Zaman/Scminer -> same refs as tarannumzaman/Scminer (account rename redirect)

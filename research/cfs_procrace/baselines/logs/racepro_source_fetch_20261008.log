@@ -1,0 +1,58 @@
+# date: 2026-10-08T01:10:52Z
+# single reachability check per URL (no retries), via session proxy
+curl: (56) CONNECT tunnel failed, response 403
+000 https://www.cs.columbia.edu/~orenl/papers/sosp2011-racepro.pdf
+curl: (56) CONNECT tunnel failed, response 403
+000 https://dl.acm.org/doi/10.1145/2043556.2043590
+curl: (56) CONNECT tunnel failed, response 403
+000 https://viennot.biz/scribe-slides/
+403 https://github.com/columbia/racepro
+# git ls-remote HEADs (read access through git proxy)
+columbia/racepro 681f94e39bf5049e24fd2641099001f5246a7b6d
+columbia/racepro-bundle 72e9c55dc5c05354dff31820d2ba57b2917b806c
+columbia/libscribe-racepro 011b64426dbd7d3f9185a8d2b61b0c476ec5164c
+columbia/py-scribe-racepro 56d6187eafd7ec2d650099c7d7afd6130d4c5bff
+columbia/linux-2.6-racepro b29e9afb4dae248e83aeb58482fb60013017576f
+nviennot/linux-2.6-scribe d02032383ef128645331500621c833e6ed88f6d9
+nviennot/libscribe b6dbd60ae5359721d062931717bf81d6b98bc7e4
+nviennot/py-scribe d03f3f1feee69852491d73eecc889cc6f157afa1
+# proxy recent failures (status endpoint):
+2026-10-08T01:08:18.540Z connect_rejected sites.google.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:18.791Z connect_rejected www.researchgate.net:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:19.063Z connect_rejected scholar.google.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:19.258Z connect_rejected acmse.net:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:19.516Z connect_rejected ischool.syracuse.edu:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:19.648Z connect_rejected arxiv.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:19.909Z connect_rejected export.arxiv.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:20.175Z connect_rejected core.ac.uk:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:20.304Z connect_rejected www.semanticscholar.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:20.499Z connect_rejected citeseerx.ist.psu.edu:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:20.603Z connect_rejected software.intel.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:20.852Z connect_rejected www.intel.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:21.126Z connect_rejected www.windriver.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:08:41.145Z connect_rejected archive.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:09:28.987Z connect_rejected pages.github.com:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:09:29.439Z connect_rejected tarannumzaman.github.io:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:09:30.022Z connect_rejected chaowang-vt.github.io:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:10:53.375Z connect_rejected www.cs.columbia.edu:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:10:53.940Z connect_rejected dl.acm.org:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-08T01:10:54.524Z connect_rejected viennot.biz:443 gateway answered 403 to CONNECT (policy denial or upstream failure)
+# 2026-10-08T01:11:45Z alternate official hosts found via WebSearch (single attempt each)
+curl: (56) CONNECT tunnel failed, response 403
+000 https://www.sigops.org/s/conferences/sosp/2011/current/2011-Cascais/25-laadan-online.pdf ->  bytes
+curl: (56) CONNECT tunnel failed, response 403
+000 https://systems.cs.columbia.edu/projects/racepro ->  bytes
+curl: (56) CONNECT tunnel failed, response 403
+000 https://www.sigops.org/s/conferences/sosp/2011/current/2011-Cascais/25-laadan-slides.pdf ->  bytes
+# --- annotation appended 2026-10-08T02:10:35Z (review pass; the lines above are unchanged; no host was re-fetched) ---
+# DOI mismatch: the ACM URL tried above is https://dl.acm.org/doi/10.1145/2043556.2043590.
+#   roadmap_input_20261007.md L637 ([P1]) and racepro.md give DOI 10.1145/2043556.2043589.
+#   The tried URL therefore does not match the roadmap DOI. The proxy refused CONNECT to dl.acm.org
+#   at host level (403), so the outcome for ...2043589 would be the same. Not retried:
+#   /root/.ccr/README.md L18-19 "do not retry organization policy denials (403/407)".
+# Not recorded in this log: the WebFetch attempts (result EGRESS_BLOCKED; per racepro.md section 1 they
+#   covered the cs.columbia.edu/~junfeng/... and webstaging.cs.columbia.edu/... mirrors, which this log
+#   does not show) and the Scholar Gateway full-text search (result ACCESS_DENIED). These were tool responses in the 01:10-01:21 session and were
+#   not logged. Their exact URLs, error strings and times cannot be recovered now; the proxy
+#   recentRelayFailures buffer no longer lists any of these hosts (count 0 at 2026-10-08T02:10:35Z).
+#   racepro.md cites them as "tool response, not logged".

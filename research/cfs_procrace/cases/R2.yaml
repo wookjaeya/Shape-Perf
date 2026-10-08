@@ -1,0 +1,307 @@
+# R2 evidence record. Companion to R2.md (same directory). Record date: 2026-10-08.
+# Policy: /home/user/Shape-Perf/research/cfs_procrace/CONDITIONS_POLICY.md
+# Statuses: from-reference | unspecified_by_reference. "inference:" marks our reasoning.
+# Revision shorthands: B = fc8c48ad09460ce0277ad2bfcd81d376634aa2c6 (nasa/cFE main on 2025-08-06),
+#                      M = 12cb84fc3ef22e584d94dba571e0c4f9a59397cb (main HEAD), D = f22e538cafe56cf44b15996b67bd1e90850a30cf (dev HEAD).
+# Local evidence root: /home/user/work/procrace/src/R2/
+case_id: R2
+
+sources:
+  - id: issue
+    url: https://github.com/nasa/cFE/issues/2663
+    what: "'Unregistered AppId error with CFE_EVS_SendEventWithAppID() during cFE task startup'; myc-yang (Michael Yang - NASA/GSFC); opened Aug 6, 2025 (#issue-3297793618); open; label bug; 2 comments (not rendered logged-out); last updated 2026-09-08."
+    retrieval: "Logged-out page via WebFetch (fragment quotes). gh api / REST / curl github.com: HTTP 403 'GitHub access to this repository is not enabled for this session'. Earlier dumps /home/user/work/procrace/issues/cFE_2663*.json contain only that 403 text and were not reused."
+  - id: r2_analysis_comment
+    url: https://github.com/nasa/cFE/issues/2663#issuecomment-5588955819
+    what: "Follow-up analysis cited by the roadmap as [R2-analysis]. Text NOT retrieved (not rendered logged-out; API denied)."
+    established_by_probes:
+      commenters_on_issue: [dzbaker, philphauler]
+      terms_present_in_comments: [AppInit, CFE_SB_AppInit, EarlyInit, CFE_SB_EarlyInit, AppId, "CFE_SB_Global.AppId", EVS_GetAppDataByID, undefined, before, deterministic, fix, vacuous, "2820", "ES and EVS"]
+      terms_absent: [race, "not a race", order, sequence, timing, priority, always, objtab, CORE_MODULES_LIST, CFE_ES_CreateObjects, TaskInit, CFE_ES_TaskInit, CFE_EVS_TaskInit, CFE_ES_GetAppID, CFE_ES_APPID_UNDEFINED, CFE_ES_AppID_ToIndex, CFE_EVS_Register, CFE_SB_CreatePipe, EVS_GetCurrentContext, memset, uninitialized, registered, zero, "actual cause"]
+    author_and_date: "inference: philphauler, 2026-09-08 (PR #2820 closing comment issuecomment-5588956244 of Sep 8, 2026 says 'see my note on #2663 with the actual cause'; IDs adjacent; issue last updated 2026-09-08)"
+    log: /home/user/work/procrace/src/R2/retrieval/github_search_probes_20261008.tsv
+  - id: pr_2820
+    url: https://github.com/nasa/cFE/pull/2820
+    what: "'fix(evs): allow SendEventWithAppID for caller own AppId during startup'; philphauler; base nasa:dev, head philphauler:fix-2663-evs-illegal-appid; opened 2026-08-29; closed NOT merged 2026-09-08 ('Closing this one: the fix is vacuous (see my note on #2663 with the actual cause).'). Review by sylvesterkaczmarek 2026-09-02; dzbaker comment 2026-08-31."
+    commits: [66b61e306a91ea56ed347a3afe1cad9d92c9d24a, be80f01fe1f959a5db3ef978fd4791caf03851d7, 5bc6a792a0d671717e9ccff86dd67efe4ca45f3a]
+    base_of_commits: 13ed88153b785d60b42cd9085751d93b06831e8e
+    local: "git branch pr2820 in /home/user/work/procrace/src/R2/cFE (fetched refs/pull/2820/head)"
+  - id: cfe_repo
+    url: https://github.com/nasa/cFE
+    local: /home/user/work/procrace/src/R2/cFE
+    note: "full-history clone 2026-10-08; remote HEAD = dev"
+  - id: cfs_bundle
+    url: https://github.com/nasa/cFS/tree/9c786d2536821aae608560e0d75835e3637b499d
+    what: "Bundle main/dev on 2025-08-06 (commit date 2025-07-16). Submodules: cfe 18651ef6c380864368931728c00abf591eaae598 (tree identical to B), osal 3bcb1377a4ed0cd558ffb4754154c811fbc452b9, psp 9173cba35f346c4420c0cc36c298979eba1c9dd2."
+    readme: https://github.com/nasa/cFS/blob/9c786d2536821aae608560e0d75835e3637b499d/README.md#L127-L153
+    local_readme: /home/user/work/procrace/src/R2/text/cFS_README_at_9c786d25.md
+  - id: osal
+    url: https://github.com/nasa/osal/blob/3bcb1377a4ed0cd558ffb4754154c811fbc452b9/src/os/inc/osapi-idmap.h#L32-L52
+    what: "OS_OBJECT_INDEX_MASK 0xFFFF, OS_OBJECT_TYPE_SHIFT 16, OS_OBJECT_TYPE_USER 0x10 (used to show AppId 0 is not a valid ES AppId)"
+  - id: api_doc
+    url: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/core_api/fsw/inc/cfe_evs.h#L168-L172
+    what: "CFE_EVS_SendEventWithAppID note: 'The Application ID must correspond to a registered application or core service.' (same text L169 in M and D)"
+
+issue_body_verbatim:
+  note: "Fragments as returned by WebFetch (model-mediated); verify before quoting in the paper."
+  describe_the_bug:
+    - "When the ES and the EVS tasks initializes, they make various CFE_SB API calls"
+    - "(i.e. `CFE_SB_CreatePipe()` and `CFE_SB_Subscribe()`)"
+    - "which in turn call `CFE_EVS_SendEventWithAppID()` passing in the AppId for the CFE_SB."
+    - "`CFE_EVS_SendEventWithAppID()` then returns a `CFE_EVS_APP_ILLEGAL_APP_ID`"
+    - "presumably because CFE_SB has not been registered with event services."
+    - "This might have gone unnoticed because there is no event outputted"
+    - "nor is the return code set to any variable."
+  to_reproduce:
+    - "make SIMULATION=native prep"
+    - "make"
+    - "make install"
+    - "Place a breakpoint here - https://github.com/nasa/cFE/blob/main/modules/evs/fsw/src/cfe_evs.c#L185"
+    - "Run the gdb and see it stopped at the breakpoint."
+  system_observed_on: ["OS: Ubuntu 22.04.5 LTS", "cFE v6.7"]
+  reporter_info: "Michael Yang - NASA/GSFC"
+  gdb_observation: "Only 'stopped at the breakpoint'. No gdb output, backtrace, thread names, hit count or status value given."
+
+timeline:
+  - {date: "2019-12-19", event: "tag v6.7.0 (2105b932); 'Last official release' named in B's cfe_version.h"}
+  - {date: "2020-09-02", event: "2efe70b7 Fix #797 introduces EVS_GetAppDataByID"}
+  - {date: "2020-09-22", event: "96d82c53 Fix #894 resource ID type (AppId 0 no longer a valid index)"}
+  - {date: "2021-09-22", event: "tag v7.0.0-rc4: R2 path already present (checked)"}
+  - {date: "2025-05-29", event: "B fc8c48ad becomes main (next main commit 2025-11-14)"}
+  - {date: "2025-07-16", event: "cFS bundle 9c786d25 pins cfe 18651ef6 (tree = B)"}
+  - {date: "2025-08-06", event: "#2663 opened by myc-yang"}
+  - {date: "2026-01-22", event: "tag v7.0.0 (215e2243)"}
+  - {date: "2026-04-07", event: "b9bec567 Fix #197 dynamic object table: core init order = MISSION_CORE_MODULES (config, es, evs, fs, sb, tbl, time); authored 2026-03-26"}
+  - {date: "2026-04-02", event: "58d4b372 clang-format: main/cfe_evs.c#L185 no longer the ILLEGAL_APP_ID line (now L188)"}
+  - {date: "2026-05-12", event: "tag v7.0.1 (c5fb2b4d)"}
+  - {date: "2026-08-29", event: "PR #2820 opened"}
+  - {date: "2026-09-08", event: "PR #2820 closed unmerged as 'vacuous'; #2663 last updated; inferred date of issuecomment-5588955819"}
+  - {date: "unknown", event: "dzbaker comment on #2663"}
+  - {date: "2026-10-08", event: "M and D checked 01:50 UTC"}
+
+revisions:
+  buggy:
+    commit: fc8c48ad09460ce0277ad2bfcd81d376634aa2c6
+    date: "2025-05-29"
+    tree: 6bbcad2cae878a216105407ad8b587a614a8f3e8
+    equivalent: "nasa/cFS 9c786d25 submodule cfe 18651ef6 (identical tree)"
+    status: unspecified_by_reference
+    basis: "inference: main/dev/integration-candidate all resolved to B on 2025-08-06 (first-parent history); B's cfe_version.h reports 6.7.0 development (CFE_LAST_OFFICIAL v6.7.0, CFE_SRC_VERSION equuleus-rc1+dev247); B cfe_evs.c L185 is the ILLEGAL_APP_ID assignment the issue links. The issue itself names only 'cFE v6.7' and the moving branch 'main'. User decision D1."
+    not_the_tag_v6_7_0: "inference from code: tag v6.7.0 has fsw/cfe-core layout and integer AppIDs (AppId 0 valid; ILLEGAL only if >= MAX_APPLICATIONS), so the reported path cannot arise there."
+  fixed: null
+  fixed_note: "No fix. Issue open; no commit on any nasa/cFE branch mentions 2663 (git log --remotes=origin --grep=2663, 2026-10-08); only the unmerged PR #2820 fork commits 66b61e30 and 5bc6a792 do."
+  current_checked:
+    checked_at: "2026-10-08T01:50Z"
+    main: {commit: 12cb84fc3ef22e584d94dba571e0c4f9a59397cb, date: "2026-06-25", subject: "Merge pull request #2700 from nasa/fix-2695-time-ext-met-coverage"}
+    dev: {commit: f22e538cafe56cf44b15996b67bd1e90850a30cf, date: "2026-10-05", subject: "Merge pull request #2864 from jphickey/fix-2862-tblevent", note: "remote default branch"}
+
+platform:
+  stated:
+    os: {value: "Ubuntu 22.04.5 LTS", reference: issue body, status: from-reference}
+    cfe_version_text: {value: "cFE v6.7", reference: issue body, status: from-reference}
+    build: {value: "make SIMULATION=native prep; make; make install (native/pc-linux simulation)", reference: issue body, status: from-reference}
+    debugger: {value: gdb, reference: issue body, status: from-reference}
+  not_stated: [cfe_commit, osal_commit, psp_commit, bundle_commit, compiler_version, gdb_version, privileges_root_or_user, OMIT_DEPRECATED, ENABLE_UNIT_TESTS, cpu_count_affinity, platform_config_changes, startup_script]
+
+resource:
+  name: CFE_SB_Global.AppId
+  description: "ES AppId of the SB core app; used as event source ID by every SB API path that emits an event (in the caller's task)."
+  definition: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_task.c#L40
+  pre_publication_value:
+    value: "0 == CFE_ES_APPID_UNDEFINED (memset in CFE_SB_EarlyInit, run as object-table function entry before any core task)"
+    refs:
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_init.c#L55-L61
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_objtab.c#L75-L77
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/core_api/fsw/inc/cfe_es_api_typedefs.h#L220
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/core_api/fsw/inc/cfe_resourceid_api_typedefs.h#L65
+  why_invalid: "inference from code+constants: CFE_ResourceId_ToIndex computes Serial = 0 - CFE_ES_APPID_BASE; BASE = MARK | (0x11 << 16) = 0x00110000 (SIMPLE) or 0x02110000 (STRICT); Serial wraps to 0xFFEF0000 / 0xFDEF0000 > 0xFFFF -> NOT_VALID -> EVS_GetAppDataByID returns NULL -> CFE_EVS_APP_ILLEGAL_APP_ID. Independent of OMIT_DEPRECATED."
+  why_invalid_refs:
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/evs/fsw/src/cfe_evs_utils.c#L48-L63
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_api.c#L2024-L2028
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/resourceid/fsw/src/cfe_resourceid_api.c#L79-L97
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/resourceid/fsw/inc/cfe_core_resourceid_basevalues.h#L62-L89
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/resourceid/fsw/inc/cfe_resourceid_basevalue.h#L64-L73
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/resourceid/option_inc/cfe_resourceid_simple.h#L54
+    - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/resourceid/option_inc/cfe_resourceid_strict.h#L75
+    - https://github.com/nasa/osal/blob/3bcb1377a4ed0cd558ffb4754154c811fbc452b9/src/os/inc/osapi-idmap.h#L32-L52
+
+publish_site:
+  buggy:
+    - site: "CFE_SB_AppInit: CFE_ES_GetAppID(&CFE_SB_Global.AppId); (first statement; return ignored)"
+      task: CFE_SB (CFE_SB_TaskMain -> CFE_SB_AppInit)
+      permalink: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_task.c#L118-L126
+    - site: "CFE_SB_AppInit: CFE_EVS_Register(CFE_SB_Global.EventFilters, ...) (SB registered with EVS; governs NotRegistered branch, not ILLEGAL_APP_ID)"
+      permalink: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_task.c#L193
+    - site: "SB becomes RUNNING (protocol-level availability to tasks created after SB)"
+      permalink: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_task.c#L81
+  current:
+    main: https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/sb/fsw/src/cfe_sb_task.c#L138
+    dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_task.c#L128
+  usable_by_other_tasks: "In memory immediately after the store (no lock/barrier). By protocol only for tasks created after SB reaches RUNNING; tasks created before SB get no guarantee (inference from S1)."
+
+use_site:
+  observation_point:
+    site: "CFE_EVS_SendEventWithAppID: AppDataPtr = EVS_GetAppDataByID(AppID); if NULL -> Status = CFE_EVS_APP_ILLEGAL_APP_ID (reporter's breakpoint L185 at B)"
+    buggy: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/evs/fsw/src/cfe_evs.c#L169-L191
+    main: https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/evs/fsw/src/cfe_evs.c#L185-L189
+    dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs.c#L185-L189
+  reads_of_resource_in_sb_api:
+    - site: "CFE_SB_CreatePipe success debug event CFE_SB_PIPE_ADDED_EID with CFE_SB_Global.AppId (return discarded); error events L222-L255"
+      buggy: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_api.c#L257-L262
+      dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_api.c#L275-L277
+    - site: "CFE_SB_SubscribeFull success debug event CFE_SB_SUBSCRIPTION_RCVD_EID (return discarded); error/info events L1079-L1131"
+      buggy: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_api.c#L1133-L1140
+      dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_api.c#L1085-L1087
+  callers:
+    - id: U1
+      task: CFE_EVS
+      site: "CFE_EVS_TaskInit: CFE_SB_CreatePipe L277, CFE_SB_Subscribe L285, L292"
+      buggy: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/evs/fsw/src/cfe_evs_task.c#L254-L306
+      dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_task.c#L289-L304
+      precedes_publication: {B: true, M: true, D: true}
+    - id: U2
+      task: CFE_ES
+      site: "CFE_ES_TaskInit: CFE_SB_CreatePipe L331, CFE_SB_Subscribe L341, L351"
+      buggy: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_task.c#L273-L357
+      dev: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_task.c#L367-L387
+      precedes_publication: {B: false, M: true, D: true}
+      note: "inference: at B, ES is created after SB is RUNNING, so U2 should not hit; conflicts with the issue prose 'ES and the EVS tasks' (open question Q1)."
+  expected_hits_inference: {B: "3 (all in CFE_EVS)", M_D: "6 (ES 3, EVS 3)"}
+  consequence: "Return discarded; affected success events are DEBUG and default type mask 0xE has Debug OFF (default_cfe_evs_internal_cfg.h L156-L168), so in the default config the visible difference is the discarded status; ERROR events from these SB calls during ES/EVS init would also be lost (inference)."
+
+existing_sync:
+  - id: S1
+    kind: startup_sync_order_guarantee
+    what: "CFE_ES_CreateObjects starts one core task, finalizes its app record, then CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, CFE_PLATFORM_CORE_MAX_STARTUP_MSEC*1000); panic on timeout."
+    reference:
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_start.c#L707-L871
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_start.c#L881-L939
+    effect_on_r2: "inference: guarantees init completes in creation order -> tasks created before SB finish init before SB exists; enforces the wrong order deterministically."
+  - id: S2
+    kind: startup_sync
+    what: "Core app AppState raised to RUNNING inside CFE_ES_WaitForSystemState(CORE_READY), called after *_TaskInit (EVS L217, SB L81, ES L110 at B)."
+    reference: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_api.c#L559-L653
+  - id: S3
+    kind: creation_order
+    what: "B: static object table EVS, SB, ES, TIME, TBL. M/D: MISSION_CORE_MODULES config, es, evs, fs, sb, tbl, time ('the order of this list is the order in which they will be initialized')."
+    reference:
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_objtab.c#L97-L128
+      - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/mission_defaults.cmake#L26-L40
+      - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/target/CMakeLists.txt#L55-L71
+  - id: S4
+    kind: priorities
+    what: "EVS 61, SB 64, ES 68, TIME 60, TBL 70 (sample config)."
+    reference: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/cmake/sample_defs/example_platform_cfg.h#L886
+    effect_on_r2: "inference: irrelevant to the core init order under S1."
+  - id: S5
+    kind: early_init
+    what: "CFE_SB_EarlyInit zeroes SB globals before any task; readers see UNDEFINED, not garbage."
+    reference: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_init.c#L55-L61
+  - id: S6
+    kind: guard
+    what: "EVS_GetAppDataByID validity check -> ILLEGAL_APP_ID (error code instead of crash; ignored by SB API)."
+    reference: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/evs/fsw/src/cfe_evs.c#L182-L186
+  - id: S7
+    kind: delay_handshake
+    what: "New task: OS_TaskDelay(CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC=50) then wait for its task record; does not wait for app-record finalization (RESERVED -> ID) done by creator after CFE_ES_StartAppTask returns."
+    reference:
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_apps.c#L496-L542
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_start.c#L752-L780
+      - https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_resource.c#L308-L335
+    effect_on_r2: "inference: if creator is held >50 ms in that window, SB's CFE_ES_GetAppID fails and SB AppId stays UNDEFINED for the run (timing-dependent variant; unreported; decision D5)."
+  - id: locks
+    kind: none_for_resource
+    what: "ES/SB shared-data locks protect tables; no lock orders the store of CFE_SB_Global.AppId against SB-API reads (reads occur after SB unlock)."
+    reference: https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/sb/fsw/src/cfe_sb_api.c#L220-L223
+
+required_order:
+  statement: "CFE_SB_AppInit must store a valid SB AppId (cfe_sb_task.c L126 at B), and for generated rather than unregistered-handled events also register SB with EVS (L193), before any task executes an SB API path that emits an event with CFE_SB_Global.AppId. For R2 this means EVS init (U1) and, at M/D, ES init (U2) would have to run after SB AppInit; S1+S3 make them run before (inference)."
+  provenance:
+    - {kind: api_doc, ref: "https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/core_api/fsw/inc/cfe_evs.h#L168-L172", text: "The Application ID must correspond to a registered application or core service."}
+    - {kind: code, ref: "cfe_evs.c L182-L191 and resource ID conversion (resource.why_invalid_refs)", text: "undefined ID -> NULL -> ILLEGAL_APP_ID; valid-but-unregistered -> EVS_NotRegistered"}
+    - {kind: issue, ref: "https://github.com/nasa/cFE/issues/2663", text: "presumably because CFE_SB has not been registered with event services. (reporter hypothesis; inference: code points to AppId publication, not registration, as what selects ILLEGAL_APP_ID)"}
+    - {kind: comment_not_retrieved, ref: "https://github.com/nasa/cFE/issues/2663#issuecomment-5588955819", text: "content unknown; probes only"}
+  classification_inference: "roadmap 7.3 row 'startup procedure always forces the unready use' -> deterministic initialization-dependency defect in the default configuration; code-only, not executed; pending Q1 and D5."
+
+fix:
+  commit: null
+  kind: none
+  guarantees: "none (issue open)"
+  proposed:
+    pr: https://github.com/nasa/cFE/pull/2820
+    head: 5bc6a792a0d671717e9ccff86dd67efe4ca45f3a
+    state: "closed, not merged (2026-09-08)"
+    kind: guard
+    description: "Use-site fallback in CFE_EVS_SendEventWithAppID: if lookup fails and caller's own AppId equals AppID, use caller's EVS record."
+    permalink: https://github.com/nasa/cFE/blob/5bc6a792a0d671717e9ccff86dd67efe4ca45f3a/modules/evs/fsw/src/cfe_evs.c#L185-L195
+    guarantees: "none for R2 (author: 'the fix is vacuous'; inference: passed AppID is SB's UNDEFINED, caller's ID is valid and different, so the branch never fires; when equal and valid, the first lookup would not fail)."
+
+present_in_current:
+  value: true
+  checked_at: "2026-10-08T01:50Z"
+  main: 12cb84fc3ef22e584d94dba571e0c4f9a59397cb
+  dev: f22e538cafe56cf44b15996b67bd1e90850a30cf
+  unchanged_elements: ["EarlyInit zeroing (cfe_sb_init.c L50)", "publication in CFE_SB_AppInit (main L138, dev L128)", "SB API events with CFE_SB_Global.AppId", "EVS_GetAppDataByID check -> ILLEGAL_APP_ID (L185-L189)", "ES/EVS TaskInit SB calls", "S1 startup serialization", "API note cfe_evs.h L169"]
+  changed_elements:
+    - "Core order now config, es, evs, fs, sb, tbl, time (b9bec567, 2026-04-07): ES also precedes SB."
+    - "Line shift (58d4b372): issue link main#L185 now points at the EVS_GetAppDataByID call; ILLEGAL_APP_ID assignment at L188."
+    - "dev: SB subscribe error events moved to CFE_SB_IssueSubscribeEvents (#2803); still SB AppId."
+    - "S1 timeout argument lost '* 1000' (now CFE_PLATFORM_CORE_MAX_STARTUP_MSEC)."
+
+reproduction:
+  kind: public_code_derived
+  kind_note: "Native public code, but revision/toolchain/run options are not pinned by the report; B is an inference (D1)."
+  conditions:
+    - {name: os, value: "Ubuntu 22.04.5 LTS", reference: "issue body (System observed on)", status: from-reference}
+    - {name: cfe_version_text, value: "cFE v6.7", reference: "issue body", status: from-reference}
+    - {name: cfe_commit, value: null, candidate_note: "B fc8c48ad (main on 2025-08-06; version macros 6.7.0-dev)", reference: "issue body links blob/main; R2.md section 3", status: unspecified_by_reference}
+    - {name: osal_psp_commits, value: null, candidate_note: "bundle 9c786d25 pins osal 3bcb1377, psp 9173cba3", reference: "nasa/cFS 9c786d25 tree", status: unspecified_by_reference}
+    - {name: bundle_setup, value: null, candidate_note: "README: cp cfe/cmake/Makefile.sample Makefile; cp -r cfe/cmake/sample_defs sample_defs", reference: "https://github.com/nasa/cFS/blob/9c786d2536821aae608560e0d75835e3637b499d/README.md#L127-L149", status: unspecified_by_reference}
+    - {name: build_commands, value: "make SIMULATION=native prep; make; make install", reference: "issue body", status: from-reference}
+    - {name: BUILDTYPE, value: debug, reference: "issue command sets none + https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/cmake/Makefile.sample#L63-L65", status: from-reference}
+    - {name: ARCH_and_O, value: "native/default_cpu1, build", reference: "same Makefile.sample defaults", status: from-reference}
+    - {name: OMIT_DEPRECATED, value: null, note: "outcome independent (R2.md section 4)", reference: "https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/cmake/sample_defs/global_build_options.cmake#L19-L27", status: unspecified_by_reference}
+    - {name: ENABLE_UNIT_TESTS, value: null, reference: null, status: unspecified_by_reference}
+    - {name: platform_config, value: null, candidate_note: "B sample defaults: priorities EVS61/SB64/ES68/TIME60/TBL70, STARTUP_SYNC_POLL_MSEC 50, CORE_MAX_STARTUP_MSEC 30000, EVS_DEFAULT_TYPE_FLAG 0xE", reference: "https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/cmake/sample_defs/example_platform_cfg.h", status: unspecified_by_reference}
+    - {name: core_task_creation_order, value: "B: EVS,SB,ES,TIME,TBL; M/D: config,es,evs,fs,sb,tbl,time", reference: "existing_sync S3", status: from-reference}
+    - {name: compiler_and_gdb_versions, value: null, reference: null, status: unspecified_by_reference}
+    - {name: privileges, value: null, candidate_note: "README quick-start: 'as a normal user (best effort message queue depth and task priorities)'", reference: "cFS README L141", status: unspecified_by_reference}
+    - {name: cpu_count_affinity, value: null, reference: null, status: unspecified_by_reference}
+    - {name: startup_script_apps, value: null, note: "apps start after CORE_READY, cannot reach U1/U2 (inference)", reference: "https://github.com/nasa/cFE/blob/fc8c48ad09460ce0277ad2bfcd81d376634aa2c6/modules/es/fsw/src/cfe_es_start.c#L186-L199", status: unspecified_by_reference}
+    - {name: run_under_gdb, value: "gdb", reference: "issue body", status: from-reference}
+    - {name: run_directory_binary, value: null, candidate_note: "README: cd build/exe/cpu1/; ./core-cpu1", reference: "cFS README L148-L149", status: unspecified_by_reference}
+    - {name: breakpoint_location, value: "modules/evs/fsw/src/cfe_evs.c#L185 on main (= ILLEGAL_APP_ID assignment at B; different statement on current main)", reference: "issue body", status: from-reference}
+    - {name: breakpoint_revision, value: null, reference: "issue links moving branch main", status: unspecified_by_reference}
+    - {name: gdb_mode_threads_hitcount, value: null, reference: null, status: unspecified_by_reference}
+    - {name: observation_criterion, value: "execution stops at the breakpoint; no event output; return code not stored", reference: "issue body", status: from-reference}
+    - {name: tasks_reaching_path, value: "ES and EVS (prose, no trace)", reference: "issue body", status: from-reference}
+    - {name: runs_repeatability, value: null, reference: null, status: unspecified_by_reference}
+
+assumptions_needed:
+  - "A1: cFE = B (or bundle 9c786d25 with cfe 18651ef6, osal 3bcb1377, psp 9173cba3) represents the reporter's 'cFE v6.7' on main (needs D1)."
+  - "A2: bundle README setup with unmodified sample_defs (default object table and platform config)."
+  - "A3: OMIT_DEPRECATED and ENABLE_UNIT_TESTS unset (README 'debug, permissive mode'); outcome expected independent of OMIT_DEPRECATED."
+  - "A4: Ubuntu 22.04 distribution GCC/gdb; versions unknown; container differences recorded as deviation."
+  - "A5: normal user per README quick-start, host CPU count; expected not to change R2 order under S1 (inference) but changes RT priority use/timing."
+  - "A6: outcome recorded at U0 by a recorder independent of EVS/SB/TIME/ES GetAppID (roadmap 6.3 rule 5): task identity, AppID passed, status returned; gdb all-stop as in the issue does not change S1 order (inference)."
+  - "A7: no startup timeout (CFE_ES_MainTaskSyncDelay succeeds)."
+  - "A8: current-code arm uses M or D with default MISSION_CORE_MODULES order (D4)."
+  - "A9 (only for D5 variant): event-based hold of the ES startup thread after CFE_ES_StartAppTask returns and before app-record finalization until SB's CFE_ES_GetAppID is observed; role-derived, not part of R2 original-case results."
+  - "A10: any publish-first control (e.g. sb before es/evs in MISSION_CORE_MODULES) is a constructed configuration variant; must not be presented as evidence that the original configuration races (roadmap 6.4)."
+
+open_questions:
+  - "Q1: At B, ES is created after SB is RUNNING (S1+S3), so ES's SB calls should not hit ILLEGAL_APP_ID; why does the report say 'the ES and the EVS tasks'? (misattribution via CFE_ES_TaskEntryPoint frame, local modification/other branch, or the S7 window)"
+  - "Q2: Content, author and date of issuecomment-5588955819 and of dzbaker's comment (D3)."
+  - "Q3: Do executions show exactly 3 hits in CFE_EVS at B and 6 (ES 3, EVS 3) at M/D on every boot (deterministic), or any variation (race signal)?"
+  - "Q4: Reporter's exact environment: commits, privileges, OMIT_DEPRECATED, compiler/gdb versions."
+  - "Q5: Intended semantics for SB events emitted for callers before SB is ready (attribute to SB via early AppId assignment, drop, queue, or syslog)? No reference decides."
+  - "Q6: Does any reference require es and evs before sb in MISSION_CORE_MODULES, beyond 'the order of this list is the order in which they will be initialized'?"
+  - "Q7: Should R2 and C3's residual 'SB AppId before publication' path be counted as one pattern (roadmap 9.3)?"
+  - "Q8: Exact timestamps of the two comments (date 2026-09-08 for issuecomment-5588955819 is an inference)."
+
+decisions_requested:
+  - "D1: buggy revision = B (a) / unspecified, current code only (b) / both (c)."
+  - "D2: settle race vs deterministic by native runs at B and D/M with an EVS/SB-independent recorder (a) / keep 'unconfirmed (code-only: deterministic)' (b)."
+  - "D3: obtain hidden comments: user pastes text (a) / authenticated API with push-scope add_repo (b) / probes only (c)."
+  - "D4: current revision of record: dev D (a) / main M (b) / both (c)."
+  - "D5: include the S7 interleaving-dependent SB-AppId variant as a separate role-derived sub-scenario (a) / exclude (b)."

@@ -1,0 +1,248 @@
+# C5 evidence record (machine-readable). Companion: C5.md. Record date: 2026-10-08.
+# Status vocabulary per CONDITIONS_POLICY.md: from-reference | unspecified_by_reference (no deviation used here).
+# Tarball notation: "SF-<ver>:<path>#Lx-Ly" = file cFE-<ver>-OSS-release/<path> inside the SourceForge tarball listed under sources (sha256 given).
+case_id: C5
+
+decisions_needed:
+  - id: D1
+    question: "How to obtain the 9 comments of nasa/cFE#72 (incl. 536673810 [C5-fix], 536673820 [C5-context])"
+    options: ["attach nasa/cFE to the session (add_repo) for authenticated REST", "user pastes the comment text", "proceed without; C5-fix/C5-context stay unverified"]
+  - id: D2
+    question: "Buggy-side revision for derived experiments"
+    options: ["cFE 6.4.1 tarball (sha256 ec26e33b...)", "cFE 6.4.0 tarball (sha256 6f1ce989...), AppCreate byte-identical"]
+    fixed_side: "cFE 6.4.2 tarball (sha256 c64ed2aa...)"
+    osal: "readme: '4.1.1 or higher'; example names osal-4.1.1 (git tag osal-4.1.1 = 2f1fdb0c)"
+  - id: D3
+    question: "Approve a 64-bit modern-Linux build of 6.4.x as a recorded deviation? (readme target: 32-bit x86 CentOS 6.x; MCP750 vxWorks 6.4)"
+  - id: D4
+    question: "Pursue the possible residual window in current main/dev (inference, see present_in_current) as a separate derived research candidate, or keep out of scope? (No upstream report filed.)"
+
+sources:
+  - id: C5
+    what: "nasa/cFE issue #72 body + metadata"
+    url: "https://github.com/nasa/cFE/issues/72"
+    metadata: {author: skliper, created_at: "2019-09-30T17:50:20Z", closed_at: "2019-09-30T17:50:26Z", state_reason: completed, labels: [bug], milestone: "6.4.2 (#4, created 2019-09-30T17:45:35Z)", comments: 9}
+    retrieved: "verbatim body via GitHub MCP search_issues; local copy /home/user/work/procrace/src/C5/retrieved_20261008/cFE_72_body.md"
+  - id: C5-fix
+    url: "https://github.com/nasa/cFE/issues/72#issuecomment-536673810"
+    retrieved: "NOT RETRIEVED: github.com/api.github.com 403 from egress proxy; GitHub MCP issue_read not configured for nasa/cFE; WebFetch shows 'No activity'; web.archive.org unreachable"
+  - id: C5-context
+    url: "https://github.com/nasa/cFE/issues/72#issuecomment-536673820"
+    retrieved: "NOT RETRIEVED (same as C5-fix)"
+  - id: invalid-earlier-dumps
+    what: "/home/user/work/procrace/issues/cFE_72.json, cFE_72_comments.json, i72.html are HTTP 403 error bodies, not issue data; not reused"
+  - id: SF-6.3.2
+    url: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.3.2/cFE-6.3.2-OSS-release.tar.gz/download"
+    sha256: aeef774819f9fc4237ef76bbe709c3ce15007a8be4cf152bab5b5c7cbb6d26fd
+    gzip_mtime: "2014-04-03 12:52:30"
+  - id: SF-6.4.0
+    url: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.0/cFE-6.4.0-OSS-release.tar.gz/download"
+    sha256: 6f1ce989dc0fbce771e04aefdabffd57620cf3f52166274f605ae233ab3ccc54
+    gzip_mtime: "2014-10-15 11:51:47"
+  - id: SF-6.4.1
+    url: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.1/cFE-6.4.1-OSS-release.tar.gz/download"
+    sha256: ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f
+    gzip_mtime: "2014-12-12 17:09:26"
+  - id: SF-6.4.2
+    url: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.2-OSS-release.tar.gz/download"
+    sha256: c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f
+    gzip_mtime: "2015-07-13 19:19:10"
+  - id: MKS-rev-1.26
+    what: "cfe_es_apps.c $Log: 'Revision 1.26 2014/09/05 ... acudmore / Changed CFE_ES_AppCreate and CFE_ES_LoadLibrary to remove big shared data lock. Locking shared data at several points now to give other apps a chance to run.'"
+    url: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L25-L26"
+    also_in: ["SF-6.4.0", "SF-6.4.1", "SF-6.4.2 (still last entry)"]
+  - id: cFE-v6.5.0a
+    url: "https://github.com/nasa/cFE/tree/b2765d9f905aa11f0c3b419b62233597366a7db9"
+  - id: cFE-0749d692
+    what: "Fix #173, refactor app and lib loading procedure (2020-10-16, Joseph Hickey): OS_TaskCreate outside lock + entry wrapper waits for full registration"
+    url: "https://github.com/nasa/cFE/commit/0749d692c0c402ed2f1f22913966225fe6345680"
+  - id: cFE-58abd38d
+    what: "Fix #978, store task parameters in task record (2021-02-02, Joseph Hickey): wait checks task record only"
+    url: "https://github.com/nasa/cFE/commit/58abd38d04390cbe123d89b57819af013464d57f"
+  - id: OSAL-4.1.1
+    url: "https://github.com/nasa/osal/tree/2f1fdb0c89523ba865dda65bbf599671a7a79fa3"
+  - id: related-279
+    what: "nasa/cFE#279 'Race Condition in CFE_AppCreate() function' - different race (entry reuse during app-scan unload); WebFetch summary only"
+    url: "https://github.com/nasa/cFE/issues/279"
+  - id: related-73
+    what: "nasa/cFE#73 (= case C3), same milestone 6.4.2, created 7 s after #72; GRC EVA Microblaze context. Not linked to #72 by any reference."
+    url: "https://github.com/nasa/cFE/issues/73"
+
+revisions:
+  pre_bug: {release: "6.3.2", ref: "SF-6.3.2:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L429-L638", note: "single lock across OS_TaskCreate (L584) and registration"}
+  bug_introduced: {change: "MKS rev 1.26, 2014-09-05, acudmore", ref: MKS-rev-1.26}
+  buggy:
+    - {release: "6.4.0", ref: "SF-6.4.0:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L571-L673", note: "AppCreate byte-identical to 6.4.1"}
+    - {release: "6.4.1", ref: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L571-L673"}
+  buggy_git_revision: null   # none: earliest git content is 6.5.0a (fixed)
+  fixed: {release: "6.4.2", ref: "SF-6.4.2:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L571-L669", public_commit: null}
+  fixed_first_git: {tag: v6.5.0a, sha: b2765d9f905aa11f0c3b419b62233597366a7db9, permalink: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L629-L737"}
+  later_redesign:
+    - {sha: 0749d692c0c402ed2f1f22913966225fe6345680, date: "2020-10-16", note: "OS_TaskCreate outside lock; CFE_ES_GetAppEntryPoint waits for GetAppRecordByContext()!=NULL", permalink: "https://github.com/nasa/cFE/blob/0749d692c0c402ed2f1f22913966225fe6345680/fsw/cfe-core/src/es/cfe_es_apps.c#L434-L574"}
+    - {sha: 58abd38d04390cbe123d89b57819af013464d57f, date: "2021-02-02", note: "CFE_ES_GetTaskFunction waits for task record only", permalink: "https://github.com/nasa/cFE/blob/58abd38d04390cbe123d89b57819af013464d57f/fsw/cfe-core/src/es/cfe_es_apps.c#L477-L526"}
+  current_checked:
+    - {ref: "origin/main (v7.0.1-2-g12cb84fc)", sha: 12cb84fc3ef22e584d94dba571e0c4f9a59397cb, date: "2026-06-25"}
+    - {ref: "origin/dev (v7.0.1-108-gf22e538c)", sha: f22e538cafe56cf44b15996b67bd1e90850a30cf, date: "2026-10-05"}
+
+platform:
+  original_observation:
+    cfe_version: {value: null, status: unspecified_by_reference, reference: "https://github.com/nasa/cFE/issues/72 (body names none)"}
+    osal_version: {value: null, status: unspecified_by_reference}
+    os_target: {value: null, status: unspecified_by_reference}
+    cpu_count: {value: null, status: unspecified_by_reference}
+  release_documentation_6_4_1:
+    osal_required: {value: "4.1.1 or higher", status: from-reference, reference: "SF-6.4.1:cfe-OSS-readme.txt 'Software Required'"}
+    runtime_targets: {value: ["32 bit x86 Linux (CentOS 6.x)", "Motorola MCP750 PowerPC vxWorks 6.4"], status: from-reference, reference: "SF-6.4.1:cfe-OSS-readme.txt 'Runtime Targets Supported'"}
+    build_env: {value: "CentOS/RHEL 6.x x86 32-bit; compiled on CentOS 6.5-x86, CentOS-7.0-x64, Ubuntu 12.04 LTS x86, Ubuntu 14.04 LTS x64", status: from-reference, reference: "SF-6.4.1:cfe-OSS-readme.txt 'Build Environment Supported'"}
+
+resource:
+  name: "CFE_ES_Global.TaskTable[TaskId] (RecordUsed, AppId, TaskId, TaskName): the OS-task -> cFE-AppID link"
+  index: "TaskId = OSAL task ID returned by OS_TaskCreate (array index in OSAL 4.1.1); readers use OS_TaskGetId()"
+  sharers: ["creating ES context (CFE_ES_Main startup thread for startup-script apps; CFE_ES task for Start App cmd / restart / reload)", "new app main task"]
+  secondary_fields_in_window:
+    - "AppTable[i].TaskInfo.MainTaskId written by OSAL inside OS_TaskCreate while ES lock is released (OSAL posix L690) [inference: unsynchronized]"
+    - "AppStartupCounter++ at SF-6.4.1 cfe_es_apps.c L670 (after task creation); decremented by CFE_ES_RunLoop L593"
+
+publish_site:
+  buggy_6_4_1:
+    writes: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L649-L655 (RecordUsed L649, AppId L651, TaskId L652, TaskName L653-L655)"
+    usable_by_other_tasks_at: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L673 (CFE_ES_UnlockSharedData)"
+    window: "unlock L610 -> OS_TaskCreate L614 -> relock L637; new task runnable from OSAL pthread_create (osapi.c L645) onward"
+    osal_create_permalink: "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L480-L707"
+  fixed_6_4_2: "SF-6.4.2:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L644-L669 (lock held since L571, OS_TaskCreate L619)"
+  fixed_v6_5_0a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L713-L737"
+  current_main:
+    task_record: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_apps.c#L672-L722"
+    app_record_finalize: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_apps.c#L861-L897"
+
+use_site:
+  - fn: CFE_ES_GetAppID
+    buggy: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L846-L871"
+    behaviour: "returns CFE_ES_ERR_APPID (L848) unless TaskTable[OS_TaskGetId()].RecordUsed == TRUE (L861)"
+    v6_5_0a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L784-L810"
+    current_main: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_api.c#L738-L766"
+  - fn: CFE_ES_GetAppIDInternal (via RunLoop L551, WaitForStartupSync L700, ExitApp L445, CreateChildTask L1081, ExitChildTask L1345)
+    buggy: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L1873-L1893"
+    behaviour: "RunLoop on failure: syslog 'Cannot get AppID for the caller', returns FALSE (L653-L661)"
+  - fn: "EVS_GetAppID <- CFE_EVS_Register"
+    buggy: ["SF-6.4.1:cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L122-L140", "SF-6.4.1:cfe/fsw/cfe-core/src/evs/cfe_evs.c#L95-L107"]
+    behaviour: "propagates failure; app not registered with EVS"
+  - fn: CFE_SB_CreatePipe
+    buggy: "SF-6.4.1:cfe/fsw/cfe-core/src/sb/cfe_sb_api.c#L171-L240"
+    behaviour: "ignores GetAppID status (L224); AppId stays 0xFFFFFFFF (L173) and is stored in PipeTbl (L237)"
+  - fn: "sample app init (typical early caller)"
+    buggy: "SF-6.4.1:apps/sample_app/fsw/src/sample_app.c#L77-L97"
+    behaviour: "RegisterApp L82 -> EVS_Register L87 -> SB_CreatePipe L95; statuses unchecked"
+
+existing_sync:
+  - mechanism: "ES shared-data mutex"
+    effect: "protects each read/write section individually; released at L610 and re-taken at L637 around OS_TaskCreate, so it does not order registration before the new task's first read"
+    reference: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L571-L673; SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L851-L867"
+  - mechanism: "mutex protocol PTHREAD_PRIO_INHERIT (OSAL posix)"
+    reference: "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L3158-L3161"
+  - mechanism: "creation order"
+    effect: "task created (L614) before registration (L637-L673): opposite of the required order"
+    reference: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L610-L673"
+  - mechanism: "OSAL OS_task_table_mut"
+    effect: "protects OSAL table only; not held across pthread_create"
+    reference: "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L519-L704"
+  - mechanism: "OS_TaskRegister / OS_TaskGetId (thread-specific key)"
+    effect: "identity lookup only; OS_TaskGetId returns 0 if OS_TaskRegister never succeeded"
+    reference: "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L906-L972"
+  - mechanism: "priorities"
+    effect: "per-app priority from startup script/command; Linux priorities and SCHED_FIFO only when root; main thread SCHED_FIFO 50 when root"
+    reference: ["SF-6.4.1:build/cpu1/exe/cfe_es_startup.scr#L1-L5 (SAMPLE_APP 50, CI_LAB_APP 60, TO_LAB_APP 70, SCH_LAB_APP 80)", "SF-6.4.1:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h#L1161 (CFE_ES_START_TASK_PRIORITY 68)", "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L435-L453", "https://github.com/nasa/osal/blob/2f1fdb0c89523ba865dda65bbf599671a7a79fa3/src/os/posix/osapi.c#L587-L640"]
+  - mechanism: "startup sync (CFE_ES_WaitForStartupSync, 6.4.1)"
+    effect: "orders apps against all-startup-apps-running; does not order a task's first GetAppID against its own registration; its counter is itself incremented inside the window (L670)"
+    reference: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L676-L756"
+  - mechanism: "issue's 'safe' paths (checked)"
+    effect: "CFE_ES_CreateObjects lock L838 -> OS_TaskCreate L875 -> registration L910-L919 -> unlock L933; CFE_ES_CreateChildTask lock L1076 -> OS_TaskCreate L1108 -> registration L1116-L1118 -> unlock L1145"
+    reference: ["SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_start.c#L838-L933", "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L1076-L1145"]
+  - inference: "In 6.4.1 nothing orders registration before the new task's first lock-protected read; outcome depends on who takes the ES mutex first after OS_TaskCreate."
+
+required_order:
+  statement: "For the main task T created by CFE_ES_AppCreate, ES's registration of T in TaskTable[TaskId] (RecordUsed=TRUE, AppId=i; 6.4.1 L649-L651, released at L673) must complete before T's first CFE_ES_GetAppID/GetAppIDInternal (or any API using them). Violation = GetAppID returns failure (CFE_ES_ERR_APPID) / RunLoop returns FALSE for a task ES is about to register; T merely running early is not the violation."
+  provenance:
+    - {kind: issue_text, reference: "https://github.com/nasa/cFE/issues/72", quote: "This unlock-relock opens up an opportunity for the child thread to read the shared table data before it is fully populated. ... CFE_ES_GetAppID() (which many tasks call very early in their init procedures) will fail"}
+    - {kind: api_semantics, reference: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L846-L871"}
+    - {kind: fix, reference: "SF-6.4.1 -> SF-6.4.2 diff of cfe_es_apps.c (lock held L571-L669 across OS_TaskCreate)"}
+    - {kind: maintainer_comment_later, reference: "https://github.com/nasa/cFE/blob/0749d692c0c402ed2f1f22913966225fe6345680/fsw/cfe-core/src/es/cfe_es_apps.c#L500-L506", quote: "there is a potential race condition if the real task code starts and calls e.g. CFE_ES_RegisterApp() or any other function that depends on having an AppID context, before its fully registered in the global app table."}
+    - {kind: typical_caller, reference: "SF-6.4.1:apps/sample_app/fsw/src/sample_app.c#L77-L97"}
+
+fix:
+  commit: null   # no public commit; visible only as SF-6.4.1 -> SF-6.4.2 source difference; $Log not updated; issue links none; [C5-fix] unread
+  version: "6.4.2 (tarball 2015-07-13; cfe_es_apps.c mtime 2015-06-29); matches GitHub milestone '6.4.2'"
+  diff_summary:
+    - "removed CFE_ES_UnlockSharedData before OS_TaskCreate (6.4.1 L610)"
+    - "removed CFE_ES_LockSharedData on failure path (6.4.1 L628) and before registration (6.4.1 L637)"
+    - "moved startup counter increment before task creation as ++AppStartedCount (6.4.2 L607); removed AppStartupCounter++ (6.4.1 L670)"
+  kind: order_guarantee   # by lock-scope extension (one critical section covers OS_TaskCreate + TaskTable registration)
+  guarantees: "Every ES-mutex-protected read by the new task happens after the registration is complete (task created while creator holds the mutex; reader blocks until L669). Not covered: readers that skip the lock (e.g. CFE_ES_IncrementTaskCounter, SF-6.4.1 cfe_es_api.c L1203-L1209). Module load/symbol lookup stay outside the lock (rev 1.26 retained there). [inference from code]"
+  unverified_context: "[C5-context] reportedly: big lock caused watchdog-servicing deadline problems during runtime app load (comment not retrieved)"
+
+present_in_current:
+  checked: ["12cb84fc3ef22e584d94dba571e0c4f9a59397cb (origin/main)", "f22e538cafe56cf44b15996b67bd1e90850a30cf (origin/dev)"]
+  original_pattern_present: false
+  current_mechanism:
+    kind: guard   # wait-until-published with timeout, not lock scope
+    detail: "OS_TaskCreate runs outside the ES lock with entry CFE_ES_TaskEntryPoint; CFE_ES_GetTaskFunction polls (OS_TaskDelay(CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC), lock, check task record AppId defined && EntryFunc != NULL) until CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC; on timeout the real entry is never called"
+    permalinks:
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_apps.c#L559-L641"
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_apps.c#L649-L725"
+      - "https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_apps.c#L227-L393"
+    sample_constants:
+      - {name: CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC, value: 50, reference: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/cmake/sample_defs/example_platform_cfg.h#L838"}
+      - {name: CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC, value: 1000, reference: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/cmake/sample_defs/example_platform_cfg.h#L856"}
+  possible_residual_window:
+    status: inference_not_verified
+    description: "Task record is published under lock in CFE_ES_StartAppTask (main L672-L722), but the App record stays RESERVED until a second critical section in CFE_ES_AppCreate (main L861 -> CFE_ES_AppRecordSetUsed L869 -> unlock L897). CFE_ES_GetAppID needs GetAppRecordByContext, which needs AppRecordIsMatch (resource.c L308-L341, resource.h L253-L256). Since 58abd38d the entry wait checks only the task record (before: GetAppRecordByContext at 0749d692). If the poll succeeds between L722 and L861, the app entry can run while CFE_ES_GetAppID returns CFE_ES_ERR_RESOURCEID_NOT_VALID."
+    permalinks:
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_apps.c#L757-L897"
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_api.c#L738-L766"
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_resource.c#L308-L341"
+      - "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/modules/es/fsw/src/cfe_es_resource.h#L253-L256"
+    decision: D4
+
+reproduction:
+  kind: public_code_derived   # buggy code public (6.4.0/6.4.1 tarballs); no original platform/config/log/steps; comments unread
+  conditions:
+    - {name: cfe_buggy_revision, value: "6.4.1 (or 6.4.0, identical AppCreate)", reference: "SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L610-L673 (sha256 ec26e33b...)", status: from-reference}
+    - {name: cfe_fixed_revision_control, value: "6.4.2", reference: "SF-6.4.2:cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L571-L669; milestone 6.4.2", status: from-reference}
+    - {name: cfe_version_of_original_observation, value: null, reference: "https://github.com/nasa/cFE/issues/72", status: unspecified_by_reference}
+    - {name: osal_version_requirement, value: "4.1.1 or higher", reference: "SF-6.4.1:cfe-OSS-readme.txt 'Software Required'", status: from-reference}
+    - {name: osal_version_of_original_observation, value: null, reference: null, status: unspecified_by_reference}
+    - {name: supported_targets, value: ["32-bit x86 Linux (CentOS 6.x)", "MCP750 vxWorks 6.4"], reference: "SF-6.4.1:cfe-OSS-readme.txt 'Runtime Targets Supported'", status: from-reference}
+    - {name: target_of_original_observation, value: null, reference: null, status: unspecified_by_reference}
+    - {name: build_procedure, value: ". ./setvars.sh; cd build/cpu1; make config; make; run exe/core-linux.bin (increase msg_max or run as root)", reference: "SF-6.4.1:cfe-OSS-readme.txt 'Quick start'", status: from-reference}
+    - {name: app_creation_path, value: null, reference: "issue: 'When starting an application'; candidates F8 (startup script / Start App cmd / restart / reload)", status: unspecified_by_reference}
+    - {name: victim_app_and_first_call, value: null, reference: "issue: 'many tasks call very early in their init procedures' (no app named); sample_app pattern SF-6.4.1:apps/sample_app/fsw/src/sample_app.c#L77-L97 is not the reporter's app", status: unspecified_by_reference}
+    - {name: creator_and_new_task_priorities, value: null, reference: "issue none; sample values in existing_sync", status: unspecified_by_reference}
+    - {name: root_sched_fifo, value: null, reference: "OSAL applies priorities only as root", status: unspecified_by_reference}
+    - {name: cpu_count, value: null, reference: null, status: unspecified_by_reference}
+    - {name: failure_manifestation, value: "CFE_ES_GetAppID fails (CFE_ES_ERR_APPID)", reference: "issue body; SF-6.4.1:cfe/fsw/cfe-core/src/es/cfe_es_api.c#L846-L871", status: from-reference}
+    - {name: downstream_snowball_effects, value: null, reference: "issue: 'serious snowball effect' (unspecified)", status: unspecified_by_reference}
+    - {name: failure_log_or_frequency, value: null, reference: null, status: unspecified_by_reference}
+    - {name: runtime_load_watchdog_context, value: null, reference: "https://github.com/nasa/cFE/issues/72#issuecomment-536673820 (not retrieved)", status: unspecified_by_reference}
+    - {name: timing_control, value: null, reference: "CONDITIONS_POLICY.md: event-based control, no arbitrary delay constant", status: unspecified_by_reference}
+    - {name: current_code_poll_and_timeout, value: "50 ms / 1000 ms (sample config)", reference: "https://github.com/nasa/cFE/blob/12cb84fc3ef22e584d94dba571e0c4f9a59397cb/cmake/sample_defs/example_platform_cfg.h#L838-L856", status: from-reference}
+
+assumptions_needed:
+  - {id: A1, assumption: "buggy side = 6.4.1 (or 6.4.0) tarball; fixed side = 6.4.2 tarball", decision: D2}
+  - {id: A2, assumption: "OSAL = osal-4.1.1 (2f1fdb0c); readme gives only a lower bound and uses 4.1.1 in its example", decision: D2}
+  - {id: A3, assumption: "host = this container; a 64-bit modern Linux build would be a recorded deviation from the 32-bit CentOS 6.x target", decision: D3}
+  - {id: A4, assumption: "victim app = 6.4.1 sample_app, or a role app whose first action is CFE_ES_GetAppID (label role-derived)"}
+  - {id: A5, assumption: "creation path = startup script or Start App command (issue does not say)"}
+  - {id: A6, assumption: "event-based scheduling control: hold creator after OS_TaskCreate returns and before relock (6.4.1 L637) until the new task's GetAppID is observed; equivalent placement for the fixed control; no fixed sleep"}
+  - {id: A7, assumption: "oracle: new task's GetAppID != CFE_SUCCESS while its TaskTable entry is not RecordUsed, plus downstream effects; early execution alone is not a failure"}
+  - {id: A8, assumption: "OS_TaskGetId returns the new task's ID inside the window (depends on pthread_create writing OS_task_table[i].id before the new thread's OS_TaskRegister lookup; not fixed by any reference)"}
+  - {id: A9, assumption: "(only if D4 = pursue) current-code probe holds creator between StartAppTask unlock (main L722) and AppCreate relock (L861); labeled as derived probe, not a reproduction of #72", decision: D4}
+
+open_questions:
+  - "Content of the 9 comments of #72, esp. [C5-fix] 536673810 and [C5-context] 536673820 (fix revision? Trac ticket? reporter? platform?) - D1"
+  - "Original Trac ticket number/reporter/date (babelfish Trac unreachable; web.archive.org unreachable)"
+  - "Was the original observation tied to a specific mission/platform (cf. #73 GRC EVA Microblaze, same batch)? No reference links them"
+  - "Which internal GSFC change implemented the 6.4.2 fix? Only the release diff is public"
+  - "Is the residual window in current main/dev reachable, and has it been reported? (inference; searches not exhaustive) - D4"
+  - "OSAL 4.1.1 posix: can the new thread run OS_TaskRegister before pthread_create stores its ID (symptom would be wrong AppID via TaskTable[0] rather than failure)? vxWorks/RTEMS semantics not checked"
+  - "6.4.2a/b/c and 6.5.0 tarballs not inspected (expected fixed)"
+  - "Does roadmap §7.2 [C5-context] paraphrase (watchdog servicing deadline during runtime load) match the comment text?"

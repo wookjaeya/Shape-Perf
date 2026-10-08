@@ -1,0 +1,75 @@
+# SysPro paper fetch attempts 2026-10-08T01:29:52Z
+## curl https://arxiv.org/html/2601.09616v1
+curl: (56) CONNECT tunnel failed, response 403
+000 https://arxiv.org/html/2601.09616v1
+## curl https://arxiv.org/abs/2601.09616v1
+curl: (56) CONNECT tunnel failed, response 403
+000 https://arxiv.org/abs/2601.09616v1
+## curl https://arxiv.org/pdf/2601.09616v1
+curl: (56) CONNECT tunnel failed, response 403
+000 https://arxiv.org/pdf/2601.09616v1
+## curl https://export.arxiv.org/abs/2601.09616v1
+curl: (56) CONNECT tunnel failed, response 403
+000 https://export.arxiv.org/abs/2601.09616v1
+## curl https://doi.org/10.1016/j.jss.2026.112785
+curl: (56) CONNECT tunnel failed, response 403
+000 https://doi.org/10.1016/j.jss.2026.112785
+## curl https://api.crossref.org/works/10.1016/j.jss.2026.112785
+curl: (56) CONNECT tunnel failed, response 403
+000 https://api.crossref.org/works/10.1016/j.jss.2026.112785
+## curl https://www.sciencedirect.com/science/article/pii/S0164121226000000
+curl: (56) CONNECT tunnel failed, response 403
+000 https://www.sciencedirect.com/science/article/pii/S0164121226000000
+# NOTE: the sciencedirect PII URL above was a guessed placeholder, not a reference; its result carries no information about the article. Disregard it.
+## second round (leads from WebSearch 'SysPro: Reproducing System-Level Concurrency Bugs from Bug Reports PIN system call') 2026-10-08T01:30:49Z
+## curl https://web3.arxiv.org/pdf/2601.09616
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://web3.arxiv.org/abs/2601.09616v1
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://www.emergentmind.com/topics/syspro
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://api.emergentmind.com/topics/syspro
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://uknowledge.uky.edu/cs_etds/119
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://par.nsf.gov/servlets/purl/10075449
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## curl https://conf.researchr.org/details/ase-2026/ase-2026-journal-first/43/SysPro-Reproducing-System-Level-Concurrency-Bugs-from-Bug-Reports
+curl: (56) CONNECT tunnel failed, response 403
+000  0
+## third round (leads from WebSearch extended 'arxiv 2601.09616 SysPro Intel PIN version sleep injection system call dictionary implementation') 2026-10-08T01:32:15Z
+## curl https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5035178
+curl: (56) CONNECT tunnel failed, response 403
+000
+## curl https://www.sciencedirect.com/science/article/abs/pii/S0164121226000191
+curl: (56) CONNECT tunnel failed, response 403
+000
+## curl https://www.sciencedirect.com/science/article/pii/S0164121226000191
+curl: (56) CONNECT tunnel failed, response 403
+000
+2026-10-08T01:29:53.552Z connect_rejected doi.org:443
+2026-10-08T01:29:53.795Z connect_rejected api.crossref.org:443
+2026-10-08T01:29:54.059Z connect_rejected www.sciencedirect.com:443
+2026-10-08T01:30:49.463Z connect_rejected web3.arxiv.org:443
+2026-10-08T01:30:49.760Z connect_rejected web3.arxiv.org:443
+2026-10-08T01:30:50.001Z connect_rejected www.emergentmind.com:443
+2026-10-08T01:30:50.043Z connect_rejected api.emergentmind.com:443
+2026-10-08T01:30:50.188Z connect_rejected uknowledge.uky.edu:443
+2026-10-08T01:30:50.342Z connect_rejected par.nsf.gov:443
+2026-10-08T01:30:50.630Z connect_rejected conf.researchr.org:443
+2026-10-08T01:31:15.057Z connect_rejected archive.softwareheritage.org:443
+2026-10-08T01:31:15.321Z connect_rejected web.archive.org:443
+2026-10-08T01:31:15.610Z connect_rejected archive.org:443
+2026-10-08T01:32:15.483Z connect_rejected papers.ssrn.com:443
+2026-10-08T01:32:15.754Z connect_rejected www.sciencedirect.com:443
+2026-10-08T01:32:15.998Z connect_rejected www.sciencedirect.com:443
+2026-10-08T01:33:59.357Z connect_rejected www.intel.com:443
+2026-10-08T01:33:59.608Z connect_rejected software.intel.com:443
+2026-10-08T01:33:59.879Z connect_rejected www.srcml.org:443
+2026-10-08T01:34:00.221Z connect_rejected www.philippe-fournier-viger.com:443

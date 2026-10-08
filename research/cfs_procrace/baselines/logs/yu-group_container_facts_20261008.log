@@ -56,3 +56,15 @@ ls: cannot access '/opt/intel/simics*': No such file or directory
 # qemu present?
 # pin present?
 ls: cannot access '/opt/pin*': No such file or directory
+# re-check 2026-10-08T02:11:02Z (disk changed; module-loading facts and tool absence re-confirmed)
+## df -h /home/user/work
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   35G  2.4G  94% /
+## zgrep CONFIG_MODULES /proc/config.gz
+# CONFIG_MODULES is not set
+## ls /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+## finit_module(313) probe
+-1 Function not implemented
+## which simics qemu-system-x86_64 pin
+exit=1

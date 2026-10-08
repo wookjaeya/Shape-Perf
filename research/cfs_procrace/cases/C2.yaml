@@ -1,0 +1,324 @@
+# C2 evidence record. Companion to C2.md (same directory). Record date: 2026-10-08.
+# Policy: /home/user/Shape-Perf/research/cfs_procrace/CONDITIONS_POLICY.md
+# Statuses: from-reference | unspecified_by_reference. "inference:" marks our reasoning.
+case_id: C2
+
+sources:
+  - id: issue
+    url: https://github.com/nasa/cFE/issues/198
+    what: "Issue #198 'Additional CFE start up state for application sync'; skliper; opened Sep 30, 2019; label enhancement; milestone 6.6.0; closed; no comments; Development: 'No branches or pull requests'."
+    retrieval: "Logged-out web page via WebFetch, sentence-level quotes. REST/gh api/curl HTML blocked by proxy (403). GitHub MCP not configured for nasa/cFE."
+  - id: issue_closed_date
+    url: https://github.com/nasa/cFE/issues?page=2&q=is%3Aissue+milestone%3A6.6.0+sort%3Acreated-asc
+    what: "Milestone 6.6.0 issue list: '#198 ... was closed on Sep 30, 2019'."
+  - id: vdd_660
+    url: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L184-L191
+    what: "cFE 6.6.0 VDD, New Functionality: 'Trac #167 es Additional CFE start up state for application sync; 465a958: Add additional sync state for apps; b227d57: Remove stale comment in CFE_ES_ExitApp'."
+  - id: trac_167
+    url: https://babelfish.arc.nasa.gov/trac/cfs_cfe/ticket/167
+    what: "Original Trac ticket (inferred origin of #198). UNREACHABLE: getaddrinfo ENOTFOUND; web.archive.org blocked by proxy (403 Host not in allowlist)."
+  - id: buggy_src_650a
+    url: https://github.com/nasa/cFE/tree/b2765d9f905aa11f0c3b419b62233597366a7db9
+    what: "Tag v6.5.0a; cfe/ tree identical to import commit 792f5e3594c10e21a3560479bb72ea0584eb8ead."
+  - id: buggy_src_642
+    url: https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.2-OSS-release.tar.gz/download
+    what: "cFE 6.4.2 OSS tarball (version named by the issue). sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f; local copy /home/user/work/procrace/src/C2/sf_642/."
+  - id: fixed_src_660a
+    url: https://github.com/nasa/cFE/tree/8811c92094512975e14fd545df355705141560b2
+    what: "Tag v6.6.0a (2019-06-27). ES files identical to bulk import 2661d19f45dd325daf068e81a2967cbcc08ccab8 (2019-05-03), the earliest public commit containing CFE_ES_WaitForSystemState."
+  - id: current_src
+    url: https://github.com/nasa/cFE/tree/f22e538cafe56cf44b15996b67bd1e90850a30cf
+    what: "dev (remote default branch), v7.0.1-108, 2026-10-05."
+  - id: related_1466
+    url: https://github.com/nasa/cFE/issues/1466
+    what: "Open: 'CFE_ES_WaitForStartupSync doesn't return status, so unique/local timeout responses can't be handled by the caller.'"
+  - id: related_1467
+    url: https://github.com/nasa/cFE/issues/1467
+    what: "Open: 'Timeouts aren't reported when using CFE_ES_WaitForSystemState.'"
+  - id: related_77
+    url: https://github.com/nasa/cFE/issues/77
+    what: "Context only: 'Application Startup Race Conditions (GSFC DCR 22819)' - ES priority vs started app; different mechanism."
+  - id: related_114
+    url: https://github.com/nasa/cFE/issues/114
+    what: "Context: Trac #83 'Default Configuration Setting for CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC is Too Big'; VDD: 'cee20c9: Changed default from 30 to 1' (sample 30000 -> 1000 ms)."
+
+issue_body_verbatim:
+  - "Although the cFE 6.4.2 release improved synchronization during start up,"
+  - "it only implements a single state (`OPERATIONAL`) which is supposed to indicate when everything is ready."
+  - "However, this may not be sufficient for all applications."
+  - "Specifically, some applications have an \"early\" init in which its local data structures are all set to an initial state,"
+  - "followed by a \"late\" init that may require some communications with other applications or libraries."
+  - "An application would need to also complete this \"late\" initialization in order to be considered completely up and running."
+  - "Currently the start up sync only handles the early init; late init, if required, is generally done"
+  - "while in the \"operational\" state but this also a race condition in that requests can be made to an application"
+  - "that has not been fully initialized."
+  - "This race condition was observed in the EVA CWS project where one app needed to wait for other apps to be fully loaded"
+  - "before completing its initialization, so it was using `CFE_ES_WaitForStartupSync()` before doing its late-phase init."
+  - "But other applications (also using the same sync call) were calling other functions before the late-phase init had completed."
+  - "The solution is to add another CFE startup state for this late-phase init."
+
+revisions:
+  buggy:
+    value: "cFE 6.4.2 (SourceForge tarball) and v6.5.0a b2765d9f905aa11f0c3b419b62233597366a7db9 - identical single-OPERATIONAL startup sync"
+    status: from-reference
+    note: "The cFE version actually used by EVA CWS is unspecified_by_reference; the issue names 6.4.2 only as the release that improved startup sync."
+  fixed:
+    value: "v6.6.0a 8811c92094512975e14fd545df355705141560b2 (first public commit with the change: 2661d19f45dd325daf068e81a2967cbcc08ccab8); Trac commits 465a958, b227d57 not public"
+    status: from-reference
+    note: "inference: linkage #198 == Trac #167 (identical title in VDD; constant GitHub=Trac+31 offset over 10 title-matched pairs). Pending user decision D1."
+  current_checked:
+    value: f22e538cafe56cf44b15996b67bd1e90850a30cf
+    branch: dev (origin/HEAD)
+    date: "2026-10-05"
+    describe: v7.0.1-108-gf22e538c
+
+platform:
+  original:
+    value: null
+    status: unspecified_by_reference
+    note: "Issue gives no OS, CPU, board, OSAL/PSP, SMP, or build configuration for EVA CWS."
+  vdd_660_tested_platforms:
+    note: "6.6.0 VDD 'Tested Platforms' lists cFE 6.6.0 test platforms (e.g., x86-64 Ubuntu 16.04 pc-linux; RTEMS 4.11.2 pc-rtems; ARMv7/PowerPC Yocto pc-linux). Not the EVA CWS platform."
+    reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L503-L530
+
+resource:
+  statement: "Readiness of the providing app P after its late-phase init ('completely up and running'); content of P's late init is private."
+  reference: https://github.com/nasa/cFE/issues/198
+  status: from-reference
+  unspecified: ["what P's late init sets up", "duration", "observable readiness indicator inside P"]
+
+publish_site:
+  in_private_app:
+    value: "completion point of P's late-phase init"
+    status: unspecified_by_reference
+  in_cfe_buggy:
+    statement: "No cFE publication exists for late-init completion. cFE only publishes app RUNNING (by WaitForStartupSync or first RunLoop) and system OPERATIONAL. Because P calls WaitForStartupSync before late init, RUNNING/OPERATIONAL are published before the resource is ready (inference)."
+    permalinks:
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L667-L673
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L576-L587
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L281-L291
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.h#L90-L95
+  in_cfe_fixed:
+    statement: "P's transition to CFE_ES_AppState_RUNNING (first RunLoop or WaitForSystemState(OPERATIONAL)); ES sets OPERATIONAL only after all apps are RUNNING (or soft timeout)."
+    permalinks:
+      - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L520
+      - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_start.c#L217-L233
+      - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L260-L297
+
+use_site:
+  in_private_app:
+    value: "R's calls to 'other functions' after returning from CFE_ES_WaitForStartupSync"
+    reference: https://github.com/nasa/cFE/issues/198
+    status: from-reference
+    unspecified: ["function names", "mechanism (SB message, library call, shared memory, ...)", "whether the target is P"]
+  in_cfe_release_point_buggy:
+    - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L1017-L1019
+    - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L692
+  in_cfe_release_point_fixed:
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L649
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L686-L689
+
+existing_sync:
+  - name: startup sync (CFE_ES_WaitForStartupSync -> ApplicationSyncDelay -> OPERATIONAL)
+    orders: "each startup app's sync call (or first RunLoop) before release of any external app waiting for OPERATIONAL"
+    passed_by: "both P and R (issue sentences 6b, 7)"
+    gap: "does not order P's late init (after its sync call) before R's requests"
+    references:
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L642-L694
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L1009-L1042
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/inc/cfe_es.h#L655-L680
+  - name: ES shared-data mutex
+    orders: "atomic AppTable state/counter updates only"
+    references:
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L665-L689
+  - name: soft timeouts
+    orders: "none; ES enters OPERATIONAL after CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC regardless; each app's wait ends at its own timeout"
+    references:
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L276-L291
+  - name: creation order
+    orders: "apps created sequentially in startup-script order, no readiness wait between creations"
+    references:
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L676-L688
+    eva_cws_value: unspecified_by_reference
+  - name: task priorities
+    eva_cws_value: unspecified_by_reference
+  - name: app-level handshake / retry / NOT_READY handling
+    eva_cws_value: unspecified_by_reference
+
+required_order:
+  statement: "P's late-phase initialization completes before other applications make requests to P (an app is 'completely up and running' only after its late init)."
+  provenance:
+    - kind: original_report
+      reference: https://github.com/nasa/cFE/issues/198
+      quote: "An application would need to also complete this \"late\" initialization in order to be considered completely up and running."
+    - kind: original_report
+      reference: https://github.com/nasa/cFE/issues/198
+      quote: "this also a race condition in that requests can be made to an application that has not been fully initialized."
+    - kind: api_semantics_in_fix
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L178-L297
+      quote: "OPERATIONAL: normal operation mode; all apps are RUNNING / RUNNING: All initialization is complete. Second sync point."
+  secondary: "P's late init requires other apps 'fully loaded' first (issue sentence 6a) - P's reason for syncing before late init."
+
+fix:
+  commit:
+    trac: ["465a958 (Add additional sync state for apps)", "b227d57 (Remove stale comment in CFE_ES_ExitApp)"]
+    trac_public: false
+    first_public_commit: 2661d19f45dd325daf068e81a2967cbcc08ccab8
+    release_tag: v6.6.0a (8811c92094512975e14fd545df355705141560b2)
+    linkage_to_issue: "inference (D1): #198 == Trac #167"
+  kind: order_guarantee
+  kind_detail: "new startup barrier phase (APPS_INIT) with per-app LATE_INIT/RUNNING states and CFE_ES_WaitForSystemState(); opt-in; bounded by soft timeouts; not a retry or use-site guard"
+  changes:
+    - "CFE_ES_SystemState_APPS_INIT=4 added ('startup apps have all completed their early init, but not necessarily operational yet'); OPERATIONAL=5"
+    - "CFE_ES_AppState_{EARLY_INIT,LATE_INIT,RUNNING,WAITING,STOPPED}; counters AppStartedCount/AppReadyCount removed"
+    - "int32 CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds): APPS_INIT->caller LATE_INIT, OPERATIONAL->caller RUNNING; returns CFE_ES_OPERATION_TIMED_OUT on timeout"
+    - "void CFE_ES_WaitForStartupSync() = WaitForSystemState(OPERATIONAL) wrapper, status discarded"
+    - "ES main: StartApplications -> MainTaskSyncDelay(LATE_INIT) -> APPS_INIT -> MainTaskSyncDelay(RUNNING) -> OPERATIONAL; each wait soft (log and continue)"
+  references:
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L584-L689
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_start.c#L198-L233
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_start.c#L949-L1005
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es.h#L616-L677
+    - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L178-L310
+  guarantees:
+    - "G1 (inference from code): if P calls WaitForSystemState(APPS_INIT) after early init, does late init, then becomes RUNNING, ES does not set OPERATIONAL before P is RUNNING, so R waiting on OPERATIONAL is released after P's late init - unless the ES phase-2 soft timeout (CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC; sample 1000 ms) or R's own timeout expires."
+    - "G2 (inference from code): when APPS_INIT is entered, all started apps are >= LATE_INIT (early init done), same timeout caveat."
+  not_guaranteed:
+    - "ordering among late-init phases of two apps both waiting for APPS_INIT"
+    - "requests from apps that never wait on OPERATIONAL"
+    - "apps started after startup"
+    - "notification of timeout to the caller of WaitForStartupSync (void); #1466/#1467 open"
+    - "apps keeping the 6.4.2 pattern (WaitForStartupSync before late init) still declare RUNNING early - fix requires P to opt in (inference from cfe_es_api.c#L632-L637 at 8811c920)"
+
+present_in_current:
+  value: true
+  checked_commit: f22e538cafe56cf44b15996b67bd1e90850a30cf
+  evidence:
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_api.c#L514-L619
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_start.c#L195-L235
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_start.c#L886-L944
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/config/default_cfe_es_extern_typedefs.h#L179-L300
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/core_api/fsw/inc/cfe_es.h#L390-L449
+    - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/docs/cFE_FunctionalRequirements.csv#L146-L147
+  notes:
+    - "Same two-phase design; WaitForStartupSync still void; no syslog on WaitForSystemState timeout."
+    - "No in-tree app demonstrates APPS_INIT -> late init -> RUNNING; functional test es_behavior_test.c L71-L77 only checks each state returns CFE_SUCCESS."
+
+reproduction:
+  kind: role_derived
+  original: unavailable
+  rationale: "EVA CWS apps private; no cFE version, platform, logs, or function names in the issue; Trac #167 unreachable."
+  conditions:
+    - name: application_suite
+      value: "EVA CWS (private; code unavailable)"
+      reference: https://github.com/nasa/cFE/issues/198
+      status: from-reference
+    - name: roles
+      value: "P: early init -> CFE_ES_WaitForStartupSync() -> late-phase init; R (>=1): CFE_ES_WaitForStartupSync() -> calls 'other functions'"
+      reference: https://github.com/nasa/cFE/issues/198
+      status: from-reference
+    - name: app_names_count_order_priorities
+      value: null
+      reference: null
+      status: unspecified_by_reference
+    - name: late_init_content_and_duration
+      value: "'may require some communications with other applications or libraries'; specifics unknown"
+      reference: https://github.com/nasa/cFE/issues/198
+      status: unspecified_by_reference
+    - name: request_function_and_mechanism
+      value: null
+      reference: https://github.com/nasa/cFE/issues/198
+      status: unspecified_by_reference
+    - name: oracle_early_call
+      value: "R calls other functions before P's late-phase init completed"
+      reference: https://github.com/nasa/cFE/issues/198
+      status: from-reference
+    - name: failure_symptom_beyond_early_call
+      value: null
+      reference: null
+      status: unspecified_by_reference
+    - name: cfe_version_used_by_eva_cws
+      value: null
+      reference: https://github.com/nasa/cFE/issues/198
+      status: unspecified_by_reference
+    - name: cfe_code_single_operational_barrier
+      value: "6.4.2 tarball (sha256 c64ed2aa...) or v6.5.0a b2765d9f"
+      reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L642-L694
+      status: from-reference
+    - name: cfe_code_fixed
+      value: "v6.6.0a 8811c920 (or current f22e538c)"
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L184-L191
+      status: from-reference
+    - name: osal_psp_os_cpu_smp_board
+      value: null
+      reference: null
+      status: unspecified_by_reference
+    - name: sync_timeout_argument_P_R
+      value: null
+      reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/inc/cfe_es.h#L655-L680
+      status: unspecified_by_reference
+      note: "doc: 'must be at least 1000'"
+    - name: CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC (EVA CWS)
+      value: null
+      reference: null
+      status: unspecified_by_reference
+    - name: CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC (cFE sample config, buggy side)
+      value: 30000
+      reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/sample_defs/cpu1_platform_cfg.h#L1854
+      status: from-reference
+    - name: CFE_ES_STARTUP_SYNC_POLL_MSEC (cFE sample config, buggy side)
+      value: 50
+      reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/sample_defs/cpu1_platform_cfg.h#L1812
+      status: from-reference
+    - name: CFE_CORE_MAX_STARTUP_MSEC (cFE sample config, buggy side)
+      value: 30000
+      reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/sample_defs/cpu1_platform_cfg.h#L1836
+      status: from-reference
+    - name: CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC (cFE sample config, fixed side)
+      value: 1000
+      reference: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/sample_defs/example_platform_cfg.h#L856
+      status: from-reference
+      note: "same value at v6.6.0a cmake/sample_defs/cpu1_platform_cfg.h L1893 (Trac #83: 'Changed default from 30 to 1')"
+    - name: apps_started_from_startup_script
+      value: "likely (inference only)"
+      reference: https://github.com/nasa/cFE/issues/198
+      status: unspecified_by_reference
+    - name: reset_type
+      value: null
+      reference: null
+      status: unspecified_by_reference
+    - name: observation_frequency_determinism
+      value: null
+      reference: null
+      status: unspecified_by_reference
+
+assumptions_needed:
+  - "ASSUMPTION A1 (user decision D2): buggy-side revision 6.4.2 tarball vs v6.5.0a; fixed side v6.6.0a vs current dev f22e538c."
+  - "ASSUMPTION A2: role-based apps P (provider) and >=1 R (requester); count, names, startup-script order, priorities recorded as assumptions."
+  - "ASSUMPTION A3 (user decision D4): request mechanism R->P and P's observable readiness indicator (e.g., flag set at end of late init); must not be presented as original."
+  - "ASSUMPTION A4: oracle = R's request entry observed before P's late-init-complete event; any crash/assertion added is a derived result."
+  - "ASSUMPTION A5: event-based timing control (hold P's late-init completion until R's request entry is observed), no fixed delays; only reference constants are sample-config timeouts."
+  - "ASSUMPTION A6: native Linux (pc-linux PSP) with OSAL paired to chosen cFE revision - a deviation from the unknown original platform."
+  - "ASSUMPTION A7: timeout arguments P and R pass to the sync API (doc minimum 1000 ms)."
+  - "ASSUMPTION A8: fixed-side variants - P uses WaitForSystemState(APPS_INIT); P keeps 6.4.2 pattern on 6.6.0a code; ES phase-2 timeout expires first; R uses NOT_READY handling/retry."
+  - "ASSUMPTION A9: whether P's late init sends requests to R (issue: 'may require some communications with other applications')."
+
+open_questions:
+  - "Original Trac #167 content (reporter, dates, discussion, EVA CWS details) - babelfish unreachable, Wayback blocked."
+  - "Explicit record mapping GitHub #198 to Trac #167? Only title identity + constant +31 offset (D1)."
+  - "Exact content of Trac commits 465a958 and b227d57 (not in public history; only squashed 6.5.0a->6.6.0a diff observable)."
+  - "EVA CWS cFE version, OSAL/PSP, platform, apps, and functions involved."
+  - "Did EVA CWS adopt WaitForSystemState(APPS_INIT) afterwards?"
+  - "GitHub timeline/closing event of #198 (REST blocked; web view shows no linked PR/commit) (D3)."
+  - "Not verified: that cFE 6.4.1 lacked the SystemState sync (issue says 6.4.2 introduced it; only 6.4.2 and 6.5.0a inspected)."
+  - "Whether to track fix residual gaps (silent soft timeouts; #1466, #1467, #1326) as separate derived scenarios."
+
+decisions_requested:
+  - id: D1
+    question: "Accept #198 == Trac #167 (fixed in 6.6.0 by 465a958/b227d57, folded into 2661d19f) as the fix provenance, labelled inference?"
+  - id: D2
+    question: "Buggy-side public revision for a derived experiment: cFE 6.4.2 tarball or v6.5.0a (b2765d9f)?"
+  - id: D3
+    question: "Grant authenticated GitHub API access to nasa/cFE (add_repo with credentials) to fetch #198's REST timeline?"
+  - id: D4
+    question: "Approve a specific R->P request mechanism as an assumption, or keep the derived experiment mechanism-agnostic?"

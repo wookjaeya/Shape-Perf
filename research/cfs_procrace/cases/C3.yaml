@@ -4,17 +4,23 @@
 # Tarball pins: "641:<path>:L<n>" = cFE-6.4.1-OSS-release/<path> (sha256 ec26e33b...e98f);
 #               "642:<path>:L<n>" = cFE-6.4.2-OSS-release/<path> (sha256 c64ed2aa...a53a4f).
 # Local evidence root: /home/user/work/procrace/src/C3/
+# Review evidence: /home/user/work/procrace/src/C3-recheck/ and /home/user/work/procrace/src/C3-provenance/ (revised 2026-10-08 after two reviews).
 case_id: C3
 
 sources:
   - id: issue
     url: https://github.com/nasa/cFE/issues/73
-    what: "Issue #73 'Race conditions / dependencies between CFE core apps'; skliper; opened and closed Sep 30, 2019 (Trac migration); label bug; milestone 6.4.2; 14 comments not rendered logged-out."
+    what: "Issue #73 'Race conditions / dependencies between CFE core apps'; GitHub author skliper (Trac migration); original Trac reporter jphickey (Trac header comment); opened Sep 30, 2019; closed Sep 30, 2019 (closer not visible logged-out); label bug; milestone 6.4.2; 14 comments, not present in the HTML returned to WebFetch (logged out)."
     retrieval: "Logged-out web page via WebFetch, fragment quotes <=125 chars. gh api / REST / curl HTML: 403. GitHub MCP: repo not configured. Earlier dumps /home/user/work/procrace/issues/cFE_73*.json contain only the 403 text and were not reused."
   - id: issue_comment_probes
     url: https://github.com/nasa/cFE/issues?q=is%3Aissue%20in%3Acomments%20%22trac%20issue%2042%22
     what: "GitHub issue search over comment text (in:comments, strict quoted phrases). Establishes: 14 comments; 'trac issue 42'; 'Created by jphickey on 2015-05'; Trac comments by jphickey, glimes, sstrege, acudmore 'on 2015-05'; terms vxworks, mcp750, commit present; RTEMS, linux, microblaze, 6.4.1, priority absent."
     log: /home/user/work/procrace/src/C3/retrieval/github_comment_search_probes_20261008.tsv
+  - id: issue_comment_snippets
+    url: "https://github.com/search?q=repo%3Anasa%2FcFE+%22trac+issue+42%22&type=issues (and further queries, see log)"
+    what: "Logged-out GitHub global search (WebFetch): one text-match snippet per query, from comment text; WebFetch quotes ~120-125 chars verbatim and paraphrases the rest. Recovered author, timestamp and opening text of 10 of the 14 #73 comments (Trac header; jphickey 2015-05-07, -08, -11; sstrege 05-15; acudmore 05-18; glimes 05-19, 05-22; wmoleski 06-16; sstrege 2016-08-11) and #71's jphickey 2015-05-08 comment. 4 comments not identified. HTTP 429 after several queries; curl to github.com/search: proxy 403."
+    log: /home/user/work/procrace/src/C3-provenance/retrieval/github_global_search_snippets_20261008.tsv
+    rerun_by_reviser_2026_10_08: "H, #1, #1a, #1b, #1d, #2, #3, #3a, #7, #8 (mcp750 and 'on 2015-06' queries), #9, #71 2633a3d (see C3.md sec 1.2.1)"
   - id: milestone_list
     url: https://github.com/nasa/cFE/issues?q=is%3Aissue+milestone%3A6.4.2+sort%3Acreated-asc
     what: "11 issues in milestone 6.4.2, all by skliper, all 'closed on Sep 30, 2019' (#34 #67 #71 #72 #73 #81 #82 #90 #102 #105 #106)."
@@ -22,7 +28,7 @@ sources:
     url: "642:cfe/docs/cFE 6.4.2.0 Version Description Document.pdf"
     sha256: 6f2d0c3db98391eea974472b6de775fe6655b50084ea2bffe3fc50cc873616a2
     text: /home/user/work/procrace/src/C3/text/VDD_6.4.2.0.txt
-    what: "cFE 6.4.2 VDD, dated JUNE 29, 2015. Sec 1.1: races 'found in cFE build 6.4.1'. Table 1.2-2 rows Trac #40 (core apps call CFE_ES_WaitForStartupSync; 'forces each core application to reach its respective main loop before the next core application will be started regardless of the platform's priority settings') and Trac #42 (EVS_SendEvent range check; EVS_AppID set last). Attachment 1: #40 #41 #42 #51 #59. Sec 1.4: tested PPC/mcp750 VxWorks 6.4, OSAL 4.1.1. Table 1.3-1: open MKS DCR 21554 'Add a mechanism to serialize the initialization of the cFE Core apps'."
+    what: "cFE 6.4.2 VDD, dated JUNE 29, 2015. Sec 1.1: races 'found in cFE build 6.4.1'. Table 1.2-2 rows Trac #40 (core apps call CFE_ES_WaitForStartupSync; 'forces each core application to reach its respective main loop before the next core application will be started regardless of the platform's priority settings') and Trac #42 (EVS_SendEvent range check; EVS_AppID set last). Attachment 1: Trac #40 #41 #42 #51 #59 (columns Ticket, Summary, Type, Milestone, Component; no GitHub numbers anywhere in the VDD). Sec 1.4: tested PPC/mcp750 VxWorks 6.4, OSAL 4.1.1. Table 1.3-1: open MKS DCR 21554 'Add a mechanism to serialize the initialization of the cFE Core apps'."
   - id: src_641
     url: https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.1/cFE-6.4.1-OSS-release.tar.gz/download
     sha256: ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f
@@ -35,9 +41,25 @@ sources:
     bytes: 36411531
     sf_date: "2015-07-13 19:22:59 UTC"
     local: /home/user/work/procrace/src/C3/sf/x642/cFE-6.4.2-OSS-release
+  - id: vdd_640
+    url: "641:cfe/docs/Version Description Document.doc (identical copy in the 6.4.2 tarball)"
+    sha256: 13f779f6848d3d10f1e1d6b31e12ca9ed2904de80ec512a40f7e1cf66c98484b
+    text: /home/user/work/procrace/src/C3-provenance/text/VDD_6.4.0_in_641tarball.strings.txt
+    what: "cFE 6.4.0 VDD ('Build: 6.4.0', 'September 30, 2014'), the only VDD in the 6.4.1 tarball (no 6.4.1 VDD there). Table 1.3-1 lists open DCR 21554 'cFE ES: Add a mechanism to serialize the initialization of the cFE Core apps' / 'OSAL 4.1 updates may have fixed this issue.  Further analysis is needed.' Table 1.4-1: VxWorks 6.4, GNU (ccppc) 3.3.2, PSP 1.2.0.0, OSAL 4.1.1. The .pdf is a scan (KONICA MINOLTA bizhub 363, 2014-09-30)."
+  - id: vdd_641
+    url: "642:cfe/docs/cFE 6.4.1.0 Version Description Document.doc"
+    sha256: 6b62ae73a91d519512fd10253d4ed4c4373be4b9502f478aaa761e8f666a526b
+    pdf_sha256: 3b13f9ec51be58ac7e06409f847535db3d04e779d707098b796daef1aa9f6533
+    text: /home/user/work/procrace/src/C3-recheck/vdd641b/s3.txt
+    what: "cFE 6.4.1 VDD ('Build: 6.4.1', 'December 10, 2014'), shipped only in the 6.4.2 tarball. Table 1.3-1 lists open DCR 21554 (same text) and DCR 22819 'ES application startup race condition when startup task is at a low priority'. Table 1.4-1: VxWorks 6.4, GNU (ccppc) 3.3.2, PSP 1.2.0.0, OSAL 4.1.1. Sec 1.4: build testing on PPC/mcp750; also tested on an X86/PC running Linux. The .pdf is a scan; local text/VDD_6.4.1.0.txt is empty (19 form feeds)."
+  - id: osal_411
+    url: https://github.com/nasa/osal/tree/2f1fdb0c89523ba865dda65bbf599671a7a79fa3
+    tag: "osal-4.1.1 (tag object a2b87e39c8f65659f3807b7495b25a31740f690b -> 2f1fdb0c89523ba865dda65bbf599671a7a79fa3, 2014-04-22)"
+    local: /home/user/work/procrace/src/C3-provenance/osal-4.1.1
+    what: "OSAL 4.1.1 POSIX: OS_API_Init sets main thread SCHED_FIFO 50 only as root (src/os/posix/osapi.c:L431-L452); OS_TaskCreate sets EXPLICIT_SCHED, SCHED_FIFO and OS_PriorityRemap'd priority only if geteuid()==0 (L516, L587-L632); OS_PriorityRemap L3948-L4029; MAX_PRIORITY 255 (L146). Identity with SourceForge osal-4.1.1-release.tar.gz unverified."
   - id: git_650a
     url: https://github.com/nasa/cFE/tree/b2765d9f905aa11f0c3b419b62233597366a7db9
-    what: "Tag v6.5.0a; earliest public git revision (import commit 792f5e3594c10e21a3560479bb72ea0584eb8ead, 2017-06-29). Already contains the fix."
+    what: "Tag v6.5.0a (tag object 40e7d511) peels to b2765d9f 'Update attributes. Update latest app versions.' (2017-07-07 14:37:34 -0400). It is NOT the first git revision with the fix: that is the import commit 792f5e3594c10e21a3560479bb72ea0584eb8ead 'Add 6.5.0a from Sourceforge release.' (2017-06-29 15:51:14 -0400), which already contains F1-F3. git diff --stat 792f5e35 b2765d9f -- cfe is empty, so every v6.5.0a permalink shows the import's cfe/ code."
   - id: current_src
     url: https://github.com/nasa/cFE/tree/f22e538cafe56cf44b15996b67bd1e90850a30cf
     what: "dev (remote default branch), 2026-10-05."
@@ -46,7 +68,7 @@ sources:
     what: "Trac #40 'CFE ES \"StartupSyncSemaphore\" subject to multiple race conditions'; EVA team at GRC, Xilinx Microblaze. #73 says item 1 'likely depends on' it."
   - id: related_2663
     url: https://github.com/nasa/cFE/issues/2663
-    what: "R2. 'Unregistered AppId error with CFE_EVS_SendEventWithAppID() during cFE task startup'; myc-yang; Aug 6, 2025; open; ES/EVS init -> CFE_EVS_APP_ILLEGAL_APP_ID; names cFE v6.7."
+    what: "R2. 'Unregistered AppId error with CFE_EVS_SendEventWithAppID() during cFE task startup'; myc-yang; Aug 6, 2025; open; body 'When the ES and the EVS tasks initializes' -> CFE_EVS_APP_ILLEGAL_APP_ID; names cFE v6.7. At dev/main on its report date (fc8c48ad, 2025-05-29; R2's revision B, an inference in R2.md) the object table is EVS, SB, ES, TIME, TBL, so code predicts EVS only (R2.md sec 0 item 3). Link to C3's residual path: inference, version-dependent."
 
 issue_body_verbatim:
   note: "Fragments as returned by WebFetch; '+' joins consecutive fragments. Formatting not guaranteed."
@@ -69,25 +91,43 @@ issue_body_verbatim:
 trac:
   ticket: 42
   mapping_evidence:
-    - "6.4.2 VDD Attachment 1 row '#42 Race conditions / dependencies between CFE core apps' (identical title)"
-    - "#73 comment contains phrase 'trac issue 42' (search probe; only #73 matches)"
-    - "offset GitHub# = Trac# + 31 for all five 6.4.2 tickets (#40->#71, #41->#72, #42->#73, #51->#82, #59->#90)"
-  created: {by: jphickey, date: "2015-05 (day not recoverable)", reference: issue_comment_probes, status: from-reference}
-  commenters_2015_05: [jphickey, glimes, sstrege, acudmore]
-  other_dated_text: "'on 2015-06' present in comments; author/context unknown"
-  closed: {value: null, status: unspecified_by_reference, note: "in hidden comments; babelfish Trac unreachable"}
+    - "direct: #73 Trac header comment 'Imported from trac issue 42. Created by jphickey on 2015-05-06T17:04:36, last modified: 2016-08-11T15:39:40' (issue_comment_snippets); probe 'trac issue 42' matches #73 only"
+    - "6.4.2 VDD Attachment 1 row Trac '#42 Race conditions / dependencies between CFE core apps' (identical title; the VDD has no GitHub numbers)"
+    - "inference (our mapping, not VDD content): offset GitHub# = Trac# + 31 for all five 6.4.2 tickets (#40->#71, #41->#72, #42->#73, #51->#82, #59->#90), by identical titles"
+  created: {by: jphickey, date: "2015-05-06T17:04:36", timezone: unspecified_by_reference, reference: "issue_comment_snippets (Trac header)", status: from-reference}
+  last_modified: {value: "2016-08-11T15:39:40", reference: "Trac header", status: from-reference}
+  original_reporter_note: "GitHub author skliper is the 2019 migrator; Trac reporter is jphickey. inference: the #73 body is jphickey's Trac description."
+  comments_recovered:  # verbatim fragments as returned by WebFetch; [para] = WebFetch paraphrase, not a quote
+    - {author: jphickey, at: "2015-05-07 10:41:17", text: "Working on a fix for this. There are two possible approaches to solving this", more: "fragments 1a-1d in C3.md sec 1.2.1 (EarlyInit option; 'always present and always get the same AppIDs'; 'reach the run loop before starting the next task. This would only need to be done for the core tasks')"}
+    - {author: jphickey, at: "2015-05-08 13:39:51", text: "DEPENDENCY NOTE: Trac #71 implements the first part of this fix,", para: "makes core apps start in a coordinated order", inference: "'#71' is the migration's rewrite of Trac #40"}
+    - {author: jphickey, at: "2015-05-11 09:54:07", text: "Pushed commit [changeset:0c00114] for remainder of this fix", para: "two small extra EVS changes, first in EVS_SendEvent"}
+    - {author: "unknown (inference: comment of 2015-05-11)", text: "that once the AppID is valid that all other initialization is also done. / Associated branch name is trac-42-rangecheck-evs-appid"}
+    - {author: sstrege, at: "2015-05-15 16:47:47", text: "Approve", check: log_only}
+    - {author: acudmore, at: "2015-05-18", text: "Approve", check: log_only}
+    - {author: glimes, at: "2015-05-19 13:47:46", text: "approve", check: log_only}
+    - {author: glimes, at: "2015-05-22 10:51:16", text: "Commit [changeset:e08eada] has this fix, backported to master."}
+    - {author: wmoleski, at: "2015-06-16 13:37:12", text: "cFE 6.4.2.0 was tested using an MCP750 running vxworks 6.4. All build", para: "build verification tests normally run for a release all passed"}
+    - {author: sstrege, at: "2016-08-11 15:39:18", text: "Merged to development on Wed May 20 09:39:24 2015 -0400"}
+  comments_not_recovered: "4 of 14; full text of all"
+  commenters: [jphickey, sstrege, acudmore, glimes, wmoleski]
+  comment_span: "2015-05-07 to 2016-08-11"
+  other_dated_text: "'on 2015-06' = wmoleski comment of 2015-06-16 (global search for the same phrase returns it); it reports a test of the FIXED 6.4.2.0 build on MCP750/VxWorks 6.4"
+  merged_to_development: {value: "2015-05-20 09:39:24 -0400", reference: "sstrege Trac comment 2016-08-11 15:39:18", status: from-reference}
+  closed: {value: "2016-08-11", status: inference, note: "no status-change text recovered; Trac last modified 2016-08-11T15:39:40, 22 s after the last recovered comment"}
 
 revisions:
   buggy:
     version: "6.4.1"
     artifact: src_641
     in_git: false
-    reference: "6.4.2 VDD sec 1.1 'found in cFE build 6.4.1'"
+    reference: "6.4.2 VDD sec 1.1 'a series of startup race conditions that were found in cFE build 6.4.1'"
+    status: "from-reference (VDD sec 1.1) + inference (#42 in the 'series'; the sentence lists no tickets and Attachment 1 also has unit-test tickets #51, #59)"
   fixed:
     version: "6.4.2"
     artifact: src_642
     in_git: false
-    first_git_revision_with_fix: b2765d9f905aa11f0c3b419b62233597366a7db9  # v6.5.0a
+    first_git_revision_with_fix: 792f5e3594c10e21a3560479bb72ea0584eb8ead  # import 'Add 6.5.0a from Sourceforge release.', 2017-06-29 15:51:14 -0400
+    tag_v6_5_0a: b2765d9f905aa11f0c3b419b62233597366a7db9  # tag object 40e7d511; 2017-07-07 14:37:34 -0400; cfe/ identical to 792f5e35
     reference: "milestone 6.4.2; VDD Attachment 1 and Table 1.2-2"
   current_checked:
     commit: f22e538cafe56cf44b15996b67bd1e90850a30cf
@@ -106,7 +146,16 @@ platform:
     value: "PPC/mcp750, VxWorks 6.4, GNU ccppc 3.3.2, PSP 1.2.0.0, OSAL 4.1.1"
     reference: "6.4.2 VDD sec 1.4, Table 1.4-1"
     status: from-reference
-    note: "not the EVA platform; #73 comments mention 'vxworks' and 'mcp750' (probe only, context unknown)"
+    note: "not the EVA platform. The 'vxworks'/'mcp750' matches in #73's comments come from wmoleski's 2015-06-16 test of the fixed 6.4.2.0 build ('cFE 6.4.2.0 was tested using an MCP750 running vxworks 6.4.'). Whether the crash reproduced on mcp750: unspecified_by_reference."
+  nasa_641_test_platform:
+    value: "PPC/mcp750, VxWorks 6.4, GNU ccppc 3.3.2, PSP 1.2.0.0, OSAL 4.1.1; also tested on X86/PC Linux (little endian)"
+    reference: "6.4.1 VDD sec 1.4, Table 1.4-1 (vdd_641)"
+    status: from-reference
+  derived_pc_linux:
+    value: "32-bit x86 Linux (CentOS 6.x); ARCH_OPTS -m32; LDFLAGS -m32 -Wl,-export-dynamic; DEBUG_OPTS -g -O0; OS posix; PSP pc-linux; platform config cpu1"
+    reference: "641:cfe-OSS-readme.txt:L83-L89, L98-L100, L152-L153; 641:psp/fsw/pc-linux/make/compiler-opts.mak:L33; 641:psp/fsw/pc-linux/make/link-rules.mak:L21; 641:build/cpu1/cfe/debug-opts.mak:L4; 641:build/cpu1/cfe/cfe-config.mak:L27, L32; 641:build/cpu1/Makefile:L63; 641:build/cfs.mak:L42-L43"
+    status: "from-reference for the derived platform; deviation from Microblaze"
+    note: "a build that follows these is a 32-bit process even on a 64-bit host; a 64-bit build is a separate deviation"
 
 resource:
   items:
@@ -122,7 +171,7 @@ resource:
     - id: R-ES
       name: "ES TaskTable/AppTable entry (TaskId->AppId) for each core task"
       note: "protected by the ES shared-data lock (existing_sync); listed for completeness"
-  appid0_owner: "inference: CFE_EVS (AppTable cleared every start 641:.../es/cfe_es_start.c:L200-L207; first-free slot L825-L827; CFE_EVS first core task 641:.../es/cfe_es_objtab.c:L120)"
+  appid0_owner: "inference: CFE_EVS (AppTable cleared every start 641:.../es/cfe_es_start.c:L200-L207; first-free slot L825-L827; CFE_EVS first core task 641:.../es/cfe_es_objtab.c:L120). jphickey 2015-05-07 Trac comment: core apps 'are always present and always get the same AppIDs' (supports determinism; does not say which app gets 0)."
 
 publish_site:
   R-SB:
@@ -132,7 +181,7 @@ publish_site:
     current: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_task.c#L128
   R-EVSID:
     task: CFE_EVS (EVS main task)
-    buggy: "641:cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:L385 EVS_GetAppID(&CFE_EVS_GlobalData.EVS_AppID) - FIRST step of CFE_EVS_TaskInit (L372), before self-registration L393 and CreatePipe L401"
+    buggy: "641:cfe/fsw/cfe-core/src/evs/cfe_evs_task.c:L385 EVS_GetAppID(&CFE_EVS_GlobalData.EVS_AppID) - second step of CFE_EVS_TaskInit (L372), right after CFE_ES_RegisterApp (L377), and before CFE_EVS_Register (L393) and CFE_SB_CreatePipe (L401)"
     fixed: "642:.../evs/cfe_evs_task.c:L436 (assigned LAST)"
     permalink_650a_fixed: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_task.c#L420
     current: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_task.c#L312
@@ -153,7 +202,7 @@ use_site:
     - {site: "EVS_NotRegistered -> EVS_SendEvent(CFE_EVS_ERR_UNREGISTERED_EVS_APP, ...)", buggy: "641:.../evs/cfe_evs_utils.c:L194, L199, L211", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L206"}
     - {site: "EVS_SendEvent -> EVS_IsFiltered(CFE_EVS_GlobalData.EVS_AppID, ...) - reads R-EVSID; no range check", buggy: "641:.../evs/cfe_evs_utils.c:L608, L616"}
     - {site: "EVS_IsFiltered: AppDataPtr = &CFE_EVS_GlobalData.AppData[AppID] (AppID=0xFFFFFFFF), reads flags/filters, may write FilterPtr->Count++", buggy: "641:.../evs/cfe_evs_utils.c:L235, L243-L244, L299, L313", permalink_650a: "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c#L239"}
-  first_event_call: "inference: on a successful CreatePipe the first EVS call is the debug event at 641:.../sb/cfe_sb_api.c:L264 ('unconditional \"debug event\" at the end', #73)"
+  first_event_call: "inference: on a successful CreatePipe the first event-send call is the debug event at 641:.../sb/cfe_sb_api.c:L264 ('unconditional \"debug event\" at the end', #73). TIME's first EVS API call is earlier: CFE_EVS_Register(NULL, 0, 0) at 641:.../time/cfe_time_task.c:L252 (sends no event)."
 
 existing_sync:
   - name: object-table creation order EVS, SB, ES, TIME, TBL
@@ -165,8 +214,14 @@ existing_sync:
     orders: "TIME runs before EVS/SB once all exist - causes the violation"
     covers_c3_resources: false
   - name: priority of the thread running CFE_ES_Main
-    reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L353-L366 (SCHED_FIFO max 'so ES Main completes'); 641:psp/fsw/mcp750-vxworks6.4/src/cfe_psp_start.c:L181 (no change); Microblaze PSP unknown"
+    reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L353-L366 (SCHED_FIFO max 'so ES Main completes'; preceded by OS_API_Init at L299); 641:psp/fsw/mcp750-vxworks6.4/src/cfe_psp_start.c:L181 (no change); Microblaze PSP unknown"
     status: "Microblaze: unspecified_by_reference"
+    covers_c3_resources: false
+    note: "inference: on SMP Linux a newly created EVS thread can run on another CPU before TIME is even created, whatever the creator's priority; no reference states a CPU count"
+  - name: OSAL 4.1.1 POSIX task scheduling
+    reference: "osal_411 src/os/posix/osapi.c:L431-L452 (OS_API_Init: main thread SCHED_FIFO 50 only as root), L516 + L587-L632 (OS_TaskCreate: EXPLICIT_SCHED, SCHED_FIFO, remapped priority only if geteuid()==0), L3948-L4029 (OS_PriorityRemap); 641:cfe-OSS-readme.txt:L176-L177 'Root/sudo is also required to enable the linux real time scheduler for more accurate priorty control.'"
+    status: from-reference
+    remap_inference: "assuming Linux SCHED_FIFO 1..99 (3 OSAL priorities per bin): TIME 60->66, EVS 61->65, SB 64->64, ES 68->63, TBL 70->62, TIME tone/1Hz 25->77; distinct, same order"
     covers_c3_resources: false
   - name: ES shared-data lock across OS_TaskCreate + TaskTable fill; CFE_ES_RegisterApp/CFE_ES_GetAppID take the same lock
     reference: "641:.../es/cfe_es_start.c:L838-L933; 641:.../es/cfe_es_api.c:L767-L771, L846-L851"
@@ -184,17 +239,27 @@ existing_sync:
     note: "only startup-script apps; no core task source calls WaitForStartupSync or RunLoop in 6.4.1; ES does not wait between core-task creations"
 
 required_order:
-  statement: "Before TIME (or any task) executes CFE_SB_CreatePipe and its event calls with CFE_SB.AppId: (a) SB has published CFE_SB.AppId and registered with EVS (CFE_SB_AppInit), and (b) EVS has completed CFE_EVS_TaskInit (EVS_AppID valid, EVS registered). Sufficient form stated by the issue: each core app reaches its main loop before the next core app starts, regardless of priority."
+  statement: "From-reference (issue, VDD): each core app reaches its main loop before the next core app starts, regardless of priority (sufficient condition). Fine-grained form, inference from code at the 641 pins (neither the issue nor the VDD states it): before TIME (or any task) executes CFE_SB_CreatePipe and its event calls with CFE_SB.AppId, (a) SB has published CFE_SB.AppId (641 sb_task.c:L198) and registered with EVS (L257), and (b) EVS has completed CFE_EVS_TaskInit (EVS_AppID valid at 641 evs_task.c:L385, EVS registered at L393)."
   provenance:
     - "#73 list1 item 1 (requirement) and list2 items 3-7 (failing order)"
     - "6.4.2 VDD Table 1.2-2 row Trac #40 ('forces each core application to reach its respective main loop before the next core application will be started regardless of the platform's priority settings')"
     - "6.4.2 VDD Table 1.2-2 row Trac #42 ('set the EVS_AppID value last. This will assure that all other initialization is done before the AppID is valid')"
-  inference: "Crash requires both (a) and (b) violated. (b) violated alone is impossible on this path: if SB registered, U3 takes EVS_IsFiltered(SB id). If only (a) violated (EVS initialized, SB not), the event is attributed to AppId 0 = EVS: misattribution, no crash."
+    - "jphickey Trac comment 2015-05-07 10:41:17 ('There are two possible approaches to solving this'; option 2: startup sync so each core task reaches 'the run loop before starting the next task. This would only need to be done for the core tasks')"
+    - "jphickey Trac comment 2015-05-08 13:39:51 ('DEPENDENCY NOTE: Trac #71 implements the first part of this fix,')"
+    - "Trac comment (branch trac-42-rangecheck-evs-appid): 'that once the AppID is valid that all other initialization is also done.'"
+  inference: "Crash condition: TIME's CFE_SB_CreatePipe event call happens while EVS has not reached 641 evs_task.c:L385 (EVS_AppID == 0xFFFFFFFF) AND AppData[CFE_SB.AppId].RegisterFlag is FALSE, i.e. SB has not reached 641 sb_task.c:L257 (whether or not L198 has run). (b) violated alone (EVS before L385, SB past L257) is possible but cannot crash on this path: U3 takes EVS_IsFiltered(SB id). (a) violated alone (EVS past L385) cannot crash: if SB is before L198 the event carries AppId 0 = EVS (misattributed; the DEBUG event is then dropped, by CFE_EVS_DEFAULT_TYPE_FLAG 0xE 'Debug = OFF' at 641 cpu1 cfg L1424 if EVS is past L393, or by ActiveFlag FALSE if EVS is between L385 and L393); if SB is between L198 and L257, EVS_NotRegistered(SB id) emits one ERROR event 'App %s not registered with Event Services. Unable to send event.' plus a syslog line (641 evs_utils.c:L199-L215)."
 
 fix:
   commit:
     value: null
-    note: "No public commit. Fix visible only as 6.4.1->6.4.2 tarball diff; 6.4.2 VDD gives no commit IDs. First public git revision containing it: b2765d9f905aa11f0c3b419b62233597366a7db9 (v6.5.0a; import 792f5e3594c10e21a3560479bb72ea0584eb8ead)."
+    note: "No public git object. Fix code visible only as 6.4.1->6.4.2 tarball diff; 6.4.2 VDD gives no commit IDs. First git revision containing it: import 792f5e3594c10e21a3560479bb72ea0584eb8ead (2017-06-29); tag v6.5.0a peels to b2765d9f905aa11f0c3b419b62233597366a7db9 (2017-07-07), cfe/ identical."
+    trac_commits:  # from-reference (Trac comments via issue_comment_snippets); none is an object in public nasa/cFE (git cat-file -> 'Not a valid object name')
+      - {id: 2633a3d, ticket: "Trac #40 (GitHub #71)", by: jphickey, at: "2015-05-08 13:33:11", text: "Pushed commit [changeset:2633a3d] for review / This modifies the CFE_ES_WaitForStartupSync() to use a simpler polling loop (with delay) rather than a"}
+      - {id: 0c00114, ticket: "Trac #42 (#73)", by: jphickey, at: "2015-05-11 09:54:07", text: "Pushed commit [changeset:0c00114] for remainder of this fix"}
+      - {id: e08eada, ticket: "Trac #42 (#73)", by: glimes, at: "2015-05-22 10:51:16", text: "Commit [changeset:e08eada] has this fix, backported to master."}
+    branch: {value: trac-42-rangecheck-evs-appid, status: from-reference}
+    merged_to_development: {value: "2015-05-20 09:39:24 -0400", by_comment: "sstrege 2016-08-11 15:39:18", status: from-reference}
+    inference: "'first part of this fix' = 2633a3d (F3, Trac #40); 'remainder' 0c00114 = F1 + F2."
   kind: [order_guarantee, guard, publish_last]
   components:
     - id: F1
@@ -211,6 +276,7 @@ fix:
       permalink_650a: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/evs/cfe_evs_task.c#L420
     - id: F3
       trac: 40
+      provenance_42: "jphickey #73 Trac comment 2015-05-08 13:39:51 'DEPENDENCY NOTE: Trac #71 implements the first part of this fix,' (inference: '#71' = migration rewrite of Trac #40)"
       kind: order_guarantee
       change: "ES main thread waits after each core OS_TaskCreate (CFE_ES_ApplicationSyncDelay, 50 ms polling, CFE_CORE_MAX_STARTUP_MSEC=30000, CFE_PSP_Panic on timeout); every core TaskMain calls CFE_ES_WaitForStartupSync(CFE_CORE_MAX_STARTUP_MSEC) after TaskInit"
       pin_642: "642:.../es/cfe_es_start.c:L848-L855, L932-L950, L1007-L1040; 642:.../es/cfe_es_api.c:L652-L693; TIME 642:.../time/cfe_time_task.c:L209; 642:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1702, L1726, L1744"
@@ -224,11 +290,11 @@ fix:
     - "F1: EVS_SendEvent never indexes AppData with an out-of-range EVS_AppID; such events are dropped ('Otherwise do nothing', VDD)."
     - "F2: valid EVS_AppID implies EVS init complete (VDD row #42)."
   not_guaranteed:
-    - "inference: tasks created before SB still read CFE_SB.AppId before SB publishes it - EVS in 6.4.2 (attributed to AppId 0 = EVS, no crash); ES and EVS in current code -> CFE_EVS_APP_ILLEGAL_APP_ID (R2, #2663)."
+    - "inference: tasks created before SB still read CFE_SB.AppId before SB publishes it. Version-dependent: EVS only in 6.4.2 (642 objtab L120-L129; EVS Register L402 -> CreatePipe L410 -> EVS_AppID published L436; attributed to AppId 0 = EVS, no crash) and still EVS only at dev/main on #2663's report date, fc8c48ad (2025-05-29, R2's revision B (inference in R2.md); table EVS, SB, ES, TIME, TBL); ES and EVS since b9bec567 (committed 2026-04-07) -> CFE_EVS_APP_ILLEGAL_APP_ID. #2663's body says 'When the ES and the EVS tasks initializes'; the link to R2/#2663 is an inference (R2.md sec 0 item 3)."
     - "F1 drops EVS's own events emitted before EVS_AppID is set (silent loss, not an error)."
 
 present_in_current:
-  value: "fix present; original crash path absent; residual SB-AppId-before-publication path present (R2)"
+  value: "fix present; original crash path absent; residual SB-AppId-before-publication path present for ES and EVS (since b9bec567; link to R2 is inference, version-dependent)"
   checked_commit: f22e538cafe56cf44b15996b67bd1e90850a30cf
   evidence:
     F1: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs_utils.c#L607-L635
@@ -239,7 +305,8 @@ present_in_current:
     F3_poll: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_start.c#L886
     F3_time_wait: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/time/fsw/src/cfe_time_task.c#L72-L88
     F3_core_running: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/es/fsw/src/cfe_es_api.c#L545-L573
-    creation_order: "https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/mission_defaults.cmake#L26-L40 (es, evs, fs, sb, tbl, time, ...; TIME now last)"
+    creation_order: "https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/mission_defaults.cmake#L26-L40 (config, es, evs, fs, sb, tbl, time, osal, psp, msg, sbr, resourceid; config and fs have no task, so task order ES, EVS, SB, TBL, TIME; TIME now last). Since b9bec567 (committed 2026-04-07); at fc8c48ad the static table was EVS, SB, ES, TIME, TBL."
+    F1_null_spec_check: "https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/evs/fsw/src/cfe_evs.c#L180-L183 (CFE_EVS_SendEventWithAppID checks Spec == NULL before EVS_GetAppDataByID at L185)"
     priorities: "example_platform_cfg.h ES 68 #L100, EVS 61 #L872, SB 64 #L1269, TBL 70 #L1300, TIME 60 #L1742 (unchanged)"
     sb_appid_publish: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_task.c#L128
     sb_global_zeroed: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/sb/fsw/src/cfe_sb_init.c#L50
@@ -249,15 +316,15 @@ present_in_current:
 reproduction:
   kind: public_code_derived
   original: unavailable
-  rationale: "Buggy code path is public (6.4.1 tarball) but the Microblaze OS/PSP/OSAL/toolchain/config used by EVA are not stated; the 14 Trac comments are unread."
+  rationale: "Buggy code path is public (6.4.1 tarball) but the Microblaze OS/PSP/OSAL/toolchain/config used by EVA are not stated; 10 of the 14 Trac comments are partly recovered (snippets) and do not state them; 4 are unread."
   conditions:
-    - {name: cfe_version_buggy, value: "6.4.1", reference: "6.4.2 VDD sec 1.1", status: from-reference}
+    - {name: cfe_version_buggy, value: "6.4.1", reference: "6.4.2 VDD sec 1.1 'a series of startup race conditions that were found in cFE build 6.4.1'", status: "from-reference (VDD sec 1.1) + inference (#42 in series)"}
     - {name: cfe_version_fixed, value: "6.4.2", reference: "milestone 6.4.2; VDD Attachment 1, Table 1.2-2", status: from-reference}
     - {name: buggy_artifact, value: "cFE-6.4.1-OSS-release.tar.gz sha256 ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f", reference: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.1/cFE-6.4.1-OSS-release.tar.gz/download", status: from-reference}
     - {name: fixed_artifact, value: "cFE-6.4.2-OSS-release.tar.gz sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f", reference: "https://sourceforge.net/projects/coreflightexec/files/cFE-6.4.2-OSS-release.tar.gz/download", status: from-reference}
     - {name: version_eva_ran, value: null, reference: "#73 names no version", status: unspecified_by_reference}
     - {name: processor, value: "Xilinx Microblaze", reference: "#73 lead-in; #71", status: from-reference}
-    - {name: os_psp_osal_compiler_on_microblaze, value: null, reference: "#73, #71 silent; comments unread", status: unspecified_by_reference}
+    - {name: os_psp_osal_compiler_on_microblaze, value: null, reference: "#73, #71 and the 10 recovered comments silent; 4 comments unread", status: unspecified_by_reference}
     - {name: core_task_creation_order, value: "EVS, SB, ES, TIME, TBL", reference: "#73 list2 item 1; 641:cfe/fsw/cfe-core/src/es/cfe_es_objtab.c:L120-L129", status: from-reference}
     - {name: core_task_priorities_default, value: "EVS 61, SB 64, ES 68, TIME 60, TBL 70", reference: "#73 list2 item 2; 641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1115/L1138/L1161/L1188/L1217", status: from-reference}
     - {name: eva_used_default_priorities, value: null, reference: "#73 list2 item 2 says 'In the default/example platform configuration'", status: unspecified_by_reference}
@@ -265,7 +332,7 @@ reproduction:
     - {name: creator_thread_priority_microblaze, value: null, reference: "not stated", status: unspecified_by_reference}
     - {name: creator_thread_priority_pc_linux_psp, value: "SCHED_FIFO max during CFE_ES_Main", reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L353-L366", status: from-reference}
     - {name: observed_execution_order, value: "TIME TaskMain first; CFE_SB_CreatePipe before SB and EVS init", reference: "#73 list2 items 3-5", status: from-reference}
-    - {name: cpu_count_preemption_model, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: cpu_count_preemption_model, value: null, reference: "-", status: unspecified_by_reference, note: "D3(a) priority-driven order would need a single CPU or equivalent (inference); assumption A10"}
     - {name: sb_appid_before_init, value: 0, reference: "#73 list2 item 4; 641:.../sb/cfe_sb_task.c:L105, L198", status: from-reference}
     - {name: evs_appid_before_init, value: "0xFFFFFFFF", reference: "#73 list2 item 6; 641:.../evs/cfe_evs_task.c:L190; cfe_evs_task.h:L105", status: from-reference}
     - {name: cfe_es_max_applications, value: "32 (6.4.1 cpu1 sample)", reference: "641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L570", status: from-reference}
@@ -273,37 +340,46 @@ reproduction:
     - {name: failing_call_chain, value: "CFE_SB_CreatePipe -> CFE_EVS_SendEventWithAppID -> EVS_NotRegistered -> EVS_SendEvent -> EVS_IsFiltered", reference: "#73 list2 items 4-7; use_site pins", status: from-reference}
     - {name: observed_outcome, value: "segfaults and crashes CFE core", reference: "#73 list2 item 7", status: from-reference}
     - {name: fault_details_logs, value: null, reference: "none published", status: unspecified_by_reference}
-    - {name: reset_type, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: reset_type_eva, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: reset_type_derived_pc_linux, value: "power-on (PO)", reference: "641:psp/fsw/pc-linux/src/cfe_psp_start.c:L555-L559 (default ResetType 'PO'), L244-L252 (PO -> CFE_ES_POWERON_RESET); 641:cfe-OSS-readme.txt:L163 './core-linux.bin' (no args)", status: from-reference}
     - {name: failure_frequency, value: null, reference: "-", status: unspecified_by_reference}
-    - {name: startup_script_contents, value: null, reference: "core tasks are created before the script runs (641:.../es/cfe_es_start.c:L273 vs L292)", status: unspecified_by_reference}
+    - {name: startup_script_contents_eva, value: null, reference: "core tasks are created before the script runs (641:.../es/cfe_es_start.c:L273 vs L292)", status: unspecified_by_reference}
+    - {name: startup_script_contents_derived_pc_linux, value: "641:build/cpu1/exe/cfe_es_startup.scr", reference: "641:build/cpu1/exe/cfe_es_startup.scr", status: from-reference}
     - {name: fix_sync_constants, value: "CFE_ES_STARTUP_SYNC_POLL_MSEC 50; CFE_CORE_MAX_STARTUP_MSEC 30000; CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC 30000", reference: "642:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1702, L1726, L1744", status: from-reference}
-    - {name: osal_version_nasa_build, value: "4.1.1", reference: "641:osal/readme.txt; 6.4.2 VDD Table 1.4-1", status: from-reference}
+    - {name: osal_version_required_641, value: ">= 4.1.1", reference: "641:cfe-OSS-readme.txt:L74-L78 'Operating System Abstraction Layer 4.1.1 or higher'", status: from-reference}
+    - {name: osal_version_tested_example, value: "4.1.1", reference: "641:cfe-OSS-readme.txt:L139-L142 (osal-4.1.1-release.tar.gz); vdd_640 Table 1.4-1; vdd_641 Table 1.4-1; 6.4.2 VDD Table 1.4-1", status: from-reference, note: "supported but not uniquely determined (requirement is '4.1.1 or higher'). 641:osal/readme.txt only says 'The current version as of October 2014 is 4.1.1' and does not name the OSAL used to build 6.4.1. Fetched source: osal_411 (git tag; identity with SourceForge tarball unverified)."}
+    - {name: time_child_task_priorities, value: "CFE_TIME_TONE_TASK_PRIORITY 25, CFE_TIME_1HZ_TASK_PRIORITY 25 (cpu1 sample)", reference: "641:cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h:L1189-L1190; created in CFE_TIME_TaskInit at 641:.../time/cfe_time_task.c:L280, L294, between L252 CFE_EVS_Register and L308 CFE_SB_CreatePipe", status: from-reference}
+    - {name: time_child_task_priorities_eva, value: null, reference: "-", status: unspecified_by_reference}
+    - {name: word_size_build_flags_derived, value: "32-bit x86 Linux (CentOS 6.x); ARCH_OPTS -m32; LDFLAGS -m32 -Wl,-export-dynamic; DEBUG_OPTS -g -O0; OS posix; PSP pc-linux", reference: "641:cfe-OSS-readme.txt:L83-L89, L98-L100; 641:psp/fsw/pc-linux/make/compiler-opts.mak:L33; 641:psp/fsw/pc-linux/make/link-rules.mak:L21; 641:build/cpu1/cfe/debug-opts.mak:L4; 641:build/cpu1/cfe/cfe-config.mak:L27, L32", status: "from-reference for the derived platform (deviation from Microblaze)"}
+    - {name: platform_config_derived, value: cpu1, reference: "641:build/cpu1/Makefile:L63 'export CFE_CORE_PLATFORM_INC_SRC:=cpu1'; 641:build/cfs.mak:L42-L43; 641:cfe-OSS-readme.txt:L152-L153 '( Note: cpu1 is configured for the pc-linux target )'", status: from-reference}
+    - {name: rt_scheduling_privilege_derived, value: root, reference: "osal_411 src/os/posix/osapi.c:L431-L452, L587-L632; 641:cfe-OSS-readme.txt:L168-L177", status: from-reference, note: "container support unverified"}
 
 assumptions_needed:
-  - "A1 (deviation): x86-64 Linux host + 6.4.1 pc-linux PSP + POSIX OSAL in place of Microblaze; scheduling, memory layout and fault behaviour differ."
-  - "A2: OSAL 4.1.1 source (sourceforge.net/projects/osal or github.com/nasa/osal per 641:osal/readme.txt) - not yet fetched; exact tag/hash to be recorded."
-  - "A3 (D3): order control - either priority-driven (SCHED_FIFO main thread + RT priorities; container privilege unverified) or event-based hold of CFE_SB_AppInit and CFE_EVS_TaskInit until TIME's first CFE_EVS_SendEventWithAppID from CFE_SB_CreatePipe is observed; no fixed delays."
-  - "A4 (D4): outcome criterion - out-of-range AppID (0xFFFFFFFF) reaching EVS_IsFiltered as primary observable; crash secondary (64-bit vs 32-bit OOB behaviour differs; inference)."
-  - "A5: 6.4.1 platform_inc/cpu1/cfe_platform_cfg.h unchanged (issue cites 'default/example' values)."
-  - "A6: power-on reset."
-  - "A7: fixed-side control = 6.4.2 tarball (minimal diff) rather than v6.5.0a (many unrelated changes)."
+  - "A1 (deviation from Microblaze): derived platform = 32-bit x86 Linux (CentOS 6.x) + 6.4.1 pc-linux PSP + POSIX OSAL, built -m32 with -g -O0 (from-reference for the derived platform, see reproduction.conditions word_size_build_flags_derived); scheduling, memory layout and fault behaviour differ from Microblaze. Host distribution/version available in the container not yet checked. A 64-bit build is a separate deviation that must be justified."
+  - "A2: OSAL source FETCHED: nasa/osal tag osal-4.1.1 -> 2f1fdb0c89523ba865dda65bbf599671a7a79fa3 (/home/user/work/procrace/src/C3-provenance/osal-4.1.1). References: 641:osal/readme.txt names 'sourceforge.net/projects/osal or github.com/nasa.osal' (sic); 641:cfe-OSS-readme.txt:L77-L78 names 'github.com/nasa/osal'. Identity with SourceForge osal-4.1.1-release.tar.gz unverified. Requirement is >= 4.1.1; 4.1.1 is the tested/example version, not uniquely determined."
+  - "A3 (D3): order control - either priority-driven (pc-linux PSP SCHED_FIFO max main thread; OSAL 4.1.1 applies SCHED_FIFO and remapped priorities only as root (from-reference); needs A10; container root/RT support unverified) or event-based hold of CFE_SB_AppInit and CFE_EVS_TaskInit until TIME's first CFE_EVS_SendEventWithAppID from CFE_SB_CreatePipe is observed; no fixed delays."
+  - "A4 (input to D4): under the reference-following -m32 build, AppData[0xFFFFFFFF] wraps to AppData[-1], the memory just before CFE_EVS_GlobalData (AppData is its first member) (inference); whether that faults is unspecified_by_reference. In a 64-bit build (deviation) it lands ~4G x sizeof(EVS_AppData_t) past the array. The choice of primary observable is decision D4, not made here."
+  - "A5: platform configuration. Derived pc-linux: cpu1, from-reference (reproduction.conditions platform_config_derived) - not an assumption. EVA: unspecified_by_reference; that EVA used the 'default/example' values the issue cites remains an assumption (eva_used_default_priorities)."
+  - "A6: reset type. Derived pc-linux: power-on, from-reference (reset_type_derived_pc_linux). EVA: unspecified_by_reference."
+  - "A7: fixed-side control - options (6.4.2 tarball vs v6.5.0a) listed under D2; no choice made here."
   - "A8: ablations 'order guarantee only' (F3) and 'guard only' (F1) are constructed subsets of the 6.4.1->6.4.2 diff, not historical revisions."
   - "A9: recorder must not depend on EVS, SB or TIME (roadmap sec 6.3 item 5)."
+  - "A10 (needed for D3(a)): single CPU or equivalent restriction (e.g. affinity). inference: on SMP Linux a newly created EVS thread can run on another CPU before TIME is even created. No reference states a CPU count."
 
 open_questions:
-  - "Content of the 14 migrated comments: exact Trac created/comment/closed dates, 'vxworks'/'mcp750' context, which 'commit', author of 'on 2015-06' text (needs D1 or a reachable Trac/Wayback copy)."
+  - "Content of the 14 migrated comments: PARTLY ANSWERED (trac.comments_recovered: creation date, 10 comment headers and opening text, commit IDs, merge date, mcp750/vxworks context, author of 'on 2015-06' = wmoleski). Open: full text, 4 unidentified comments, close/resolution record (needs D1 or a reachable Trac/Wayback copy)."
   - "OS, PSP, OSAL version, toolchain, word size of the EVA Microblaze system."
-  - "cFE build EVA ran when the crash occurred (VDD's 'found in 6.4.1' covers the series; #73 is silent)."
-  - "Did the crash reproduce on NASA's mcp750/VxWorks test platform?"
-  - "Trac/MKS commit IDs for Trac #40 and #42."
-  - "Relation of MKS DCR 21554 ('serialize the initialization of the cFE Core apps', open in the 6.4.2 VDD) to Trac #42."
+  - "cFE build EVA ran when the crash occurred (VDD's 'found in 6.4.1' covers the series; #73 and the recovered comments are silent)."
+  - "Did the crash reproduce on NASA's mcp750/VxWorks test platform? PARTLY ANSWERED: the mcp750/VxWorks mention is wmoleski's 2015-06-16 verification of the fixed 6.4.2.0 build; whether the crash reproduced there remains unspecified_by_reference."
+  - "Trac commit IDs for Trac #40 and #42: PARTLY ANSWERED (2633a3d; 0c00114, e08eada; branch trac-42-rangecheck-evs-appid). Not public git objects; diffs unavailable."
+  - "Relation of MKS DCR 21554 ('serialize the initialization of the cFE Core apps') to Trac #42. Known: open in the 6.4.0 VDD (2014-09-30), the 6.4.1 VDD (2014-12-10) and the 6.4.2 VDD; exact opening date not given."
   - "Exact segfault site on Microblaze: first OOB read in EVS_IsFiltered or later effect of the write at 641:.../evs/cfe_evs_utils.c:L313."
-  - "Include the residual SB-AppId-before-publication path (EVS in 6.4.2; ES and EVS in current = R2) in C3's package? (D5)"
-  - "Not verified: whether cFE 6.4.0 has the same core-task code (only 6.4.1 and 6.4.2 inspected)."
+  - "Include the residual SB-AppId-before-publication path (EVS in 6.4.2 and at fc8c48ad; ES and EVS since b9bec567; link to R2 is inference) in C3's package? (D5)"
+  - "Not verified: whether cFE 6.4.0 has the same core-task code (only 6.4.1 and 6.4.2 source inspected; the 6.4.0 VDD is in the 6.4.1 tarball but is not code)."
 
 decisions_requested:
-  - {id: D1, question: "Grant authenticated GitHub API access to nasa/cFE (add_repo access:push) to read #73's 14 comments?", options: ["yes", "no - keep month-level dates and probes"], expected_gain: high}
-  - {id: D2, question: "Buggy-side code for derived experiment?", options: ["6.4.1 tarball (+ OSAL 4.1.1)", "v6.5.0a with 6.4.2 fix hunks reverted (constructed; deviation)", "both"]}
-  - {id: D3, question: "How to produce TIME-before-SB/EVS order?", options: ["priority-driven per pc-linux PSP (needs RT privileges)", "event-based hold per CONDITIONS_POLICY", "both"]}
-  - {id: D4, question: "Primary outcome criterion?", options: ["OOB AppID reaching EVS_IsFiltered (crash secondary)", "require crash"]}
-  - {id: D5, question: "Scope of residual SB-AppId-before-publication path?", options: ["C3 sub-scenario", "R2 only"]}
+  - {id: D1, question: "Grant authenticated GitHub API access to nasa/cFE (add_repo access:push) to read the full text of #73's 14 comments?", options: ["yes", "no - keep snippet-level text from logged-out global search (10 of 14 comments partly recovered) and probes"], expected_gain: moderate, note: "REST still 403 and MCP 'not configured' (2026-10-08). Credential-free global search gives author, timestamp and ~120 chars per comment, one snippet per query, HTTP 429 after several queries; 4 comments not identified."}
+  - {id: D2, question: "Buggy-side and fixed-side code for derived experiment?", options: ["6.4.1 tarball (+ OSAL >= 4.1.1; 4.1.1 fetched)", "v6.5.0a with 6.4.2 fix hunks reverted (constructed; deviation)", "both"], options_fixed: ["6.4.2 tarball (minimal diff)", "v6.5.0a (import 792f5e35 / tag target b2765d9f; many unrelated changes)", "both"]}
+  - {id: D3, question: "How to produce TIME-before-SB/EVS order?", options: ["priority-driven per pc-linux PSP (needs root for OSAL 4.1.1 RT scheduling and a single CPU or equivalent - A10)", "event-based hold per CONDITIONS_POLICY", "both"]}
+  - {id: D4, question: "Primary outcome criterion?", options: ["OOB AppID reaching EVS_IsFiltered (crash secondary)", "require crash"], note: "reference-following build is -m32; OOB index wraps to AppData[-1] (inference); fault unspecified"}
+  - {id: D5, question: "Scope of residual SB-AppId-before-publication path?", options: ["C3 sub-scenario", "R2 only"], note: "version-dependent: EVS only in 6.4.2 and at dev/main on #2663's report date (fc8c48ad); ES and EVS since b9bec567 (2026-04-07); C3-R2 link is inference"}

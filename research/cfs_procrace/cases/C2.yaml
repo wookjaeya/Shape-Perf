@@ -1,6 +1,7 @@
 # C2 evidence record. Companion to C2.md (same directory). Record date: 2026-10-08.
 # Policy: /home/user/Shape-Perf/research/cfs_procrace/CONDITIONS_POLICY.md
-# Statuses: from-reference | unspecified_by_reference. "inference:" marks our reasoning.
+# Statuses: from-reference | unspecified_by_reference. "inference:" marks our reasoning; compound statuses name which part is from-reference and which is inference.
+# Revised 2026-10-08 after source recheck (see C2.md §0 "Revision 2026-10-08").
 case_id: C2
 
 sources:
@@ -28,16 +29,35 @@ sources:
     what: "Tag v6.6.0a (2019-06-27). ES files identical to bulk import 2661d19f45dd325daf068e81a2967cbcc08ccab8 (2019-05-03), the earliest public commit containing CFE_ES_WaitForSystemState."
   - id: current_src
     url: https://github.com/nasa/cFE/tree/f22e538cafe56cf44b15996b67bd1e90850a30cf
-    what: "dev (remote default branch), v7.0.1-108, 2026-10-05."
+    what: "dev (remote default branch), git describe --tags = v7.0.1-108-gf22e538c (v7.0.1 is a lightweight tag; plain git describe gives v6.8.0-rc1+dev393-1433-gf22e538c), 2026-10-05."
+  - id: vdd_650
+    url: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/docs/cFE%206.5.0%20Version%20Description%20Document.pdf
+    what: "cFE 6.5.0 VDD, cover 'BUILD: 6.5.0 / JUNE 7, 2016'. Table 1.3-1 row 70 '#168 cFE cES1515.1 Requirement Failure' (es, new, cfe_next); #165-#167 not listed; row 12 '#46 Application Startup Race Conditions (GSFC DCR 22819)' (new). The text above the table says 'Open trac tickets are not listed', although the table column is 'Trac Ticket #'. Table 1.4-1: 'CFS PSP 1.3.0.0', 'OSAL 4.2.0'. Table 1.5-1 row 2: x86-64, Ubuntu 14.04.4 LTS, pc-linux, 'Built via CMake', 'posix-ng' OSAL."
+    retrieval: "git show b2765d9f:'cfe/docs/cFE 6.5.0 Version Description Document.pdf' | pdftotext -layout"
+  - id: vdd_642
+    url: "local: /home/user/work/procrace/src/C2/sf_642/x/cFE-6.4.2-OSS-release/cfe/docs/cFE 6.4.2.0 Version Description Document.pdf (inside the 6.4.2 tarball, sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f)"
+    what: "cFE 6.4.2 VDD, cover 'BUILD: 6.4.2 / JUNE 29, 2015'. §1.1 'The purpose of this build is to fix a series of startup race conditions that were found in cFE build 6.4.1.' Table 1.2-2 item 1 (Trac #40): 'The CFE_ES_WaitForStartupSync() API has been modified to use a simpler polling loop (with delay) rather than a semaphore.' Attachment 1: #40, #41, #42 (milestone 6.4.2). §1.4: Tested 'PPC/mcp750 running VxWorks 6.4'; Supported includes 'X86/PC running Linux'. Table 1.4-1: 'CFS PSP 1.2.0.0', 'OSAL 4.1.1'."
   - id: related_1466
     url: https://github.com/nasa/cFE/issues/1466
-    what: "Open: 'CFE_ES_WaitForStartupSync doesn't return status, so unique/local timeout responses can't be handled by the caller.'"
+    what: "Open (Apr 30, 2021; enhancement; Development 'No branches or pull requests'): 'CFE_ES_WaitForStartupSync doesn't return status, so unique/local timeout responses can't be handled by the caller.'"
   - id: related_1467
     url: https://github.com/nasa/cFE/issues/1467
-    what: "Open: 'Timeouts aren't reported when using CFE_ES_WaitForSystemState.'"
+    what: "Open (Apr 30, 2021; labels CFS-42, enhancement; Development 'No branches or pull requests'): 'Timeouts aren't reported when using CFE_ES_WaitForSystemState.' Proposed: 'Syslog from within the API.'"
+  - id: related_1326
+    url: https://github.com/nasa/cFE/issues/1326
+    what: "Open (skliper, Apr 13, 2021; labels CFS-40, enhancement): 'Synchronization mechanism would be better (more responsive, etc) vs delays.' Names OS_TaskDelay polling in CFE_ES_WaitForSystemState (cfe_es_api.c line 627 at e80aae9) and CFE_ES_GetTaskFunction (cfe_es_apps.c line 505 at e80aae9). WebFetch 2026-10-08."
+  - id: related_prs_2273_2286
+    url: [https://github.com/nasa/cFE/pull/2273, https://github.com/nasa/cFE/pull/2286]
+    what: "#2273 'Fix #1466, Add status return to CFE_ES_WaitForStartupSync()' (opened Mar 30, 2023) and #2286 'Fix #1467, Add syslog write for CFE_ES_WaitForSystemState() timeout' (opened Apr 9, 2023), both by thnkslprpt, shown Closed (thnkslprpt closed them Jul 7, 2026); merge state not shown. Not merged per code at f22e538c (inference): wrapper still void (cfe_es_api.c#L616-L619), no syslog on timeout (#L597-L601)."
   - id: related_77
     url: https://github.com/nasa/cFE/issues/77
-    what: "Context only: 'Application Startup Race Conditions (GSFC DCR 22819)' - ES priority vs started app; different mechanism."
+    what: "Context only (= Trac #46 by title): 'Application Startup Race Conditions (GSFC DCR 22819)'. Full body: 'Applications will fail to start when they are started via the ES Start Application command (CFE_ES_START_APP_CC) and the ES application has a lower priority than the application being started by the command.' 'This issue will also occur if the OS startup code is a lower priority than the applications that are being started in the startup script.' Mechanism: relative priority (same startup-script path), not late init."
+  - id: related_199
+    url: https://github.com/nasa/cFE/issues/199
+    what: "'cFE cES1515.1 Requirement Failure', skliper, opened Sep 30, 2019, closed, milestone Bootes. Title identical to Trac #168 in the 6.5.0 VDD (offset +31, adjacent to #198/#167)."
+  - id: related_71_72_73
+    url: [https://github.com/nasa/cFE/issues/71, https://github.com/nasa/cFE/issues/72, https://github.com/nasa/cFE/issues/73]
+    what: "Milestone 6.4.2; titles identical to Trac #40, #41, #42 in the 6.4.2 VDD Attachment 1. #71 body: 'The \"Startup Sync\" mechanisms are based on a binary semaphore, a boolean flag, and a counter.' #72/#73 are cases C5/C3 (cross-case link)."
   - id: related_114
     url: https://github.com/nasa/cFE/issues/114
     what: "Context: Trac #83 'Default Configuration Setting for CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC is Too Big'; VDD: 'cee20c9: Changed default from 30 to 1' (sample 30000 -> 1000 ms)."
@@ -59,18 +79,18 @@ issue_body_verbatim:
 
 revisions:
   buggy:
-    value: "cFE 6.4.2 (SourceForge tarball) and v6.5.0a b2765d9f905aa11f0c3b419b62233597366a7db9 - identical single-OPERATIONAL startup sync"
-    status: from-reference
-    note: "The cFE version actually used by EVA CWS is unspecified_by_reference; the issue names 6.4.2 only as the release that improved startup sync."
+    value: "cFE 6.4.2 (SourceForge tarball) and v6.5.0a b2765d9f905aa11f0c3b419b62233597366a7db9 - single-OPERATIONAL startup sync; sync functions (WaitForStartupSync, RunLoop INITIALIZING->RUNNING, ApplicationSyncDelay, ES main sequence, AppCreate counters/state) logically identical"
+    status: "6.4.2 = from-reference (issue sentences 1a-1b + source); v6.5.0a = inference (sync-logic equivalence by code comparison)"
+    note: "The cFE version actually used by EVA CWS is unspecified_by_reference; the issue names 6.4.2 only as the release that improved startup sync. Startup path is not identical: v6.5.0a CMake builds define _ENHANCED_BUILD_ (cfe/cmake/global_functions.cmake#L75-L79) and create static-module apps before script apps (cfe_es_apps.c#L168-L194); the 6.4.2 tarball has no CMake files and no such code."
   fixed:
     value: "v6.6.0a 8811c92094512975e14fd545df355705141560b2 (first public commit with the change: 2661d19f45dd325daf068e81a2967cbcc08ccab8); Trac commits 465a958, b227d57 not public"
-    status: from-reference
-    note: "inference: linkage #198 == Trac #167 (identical title in VDD; constant GitHub=Trac+31 offset over 10 title-matched pairs). Pending user decision D1."
+    status: "from-reference (6.6.0 VDD Trac #167 row + code at 8811c920); linkage to #198 = inference pending D1"
+    note: "inference: linkage #198 == Trac #167 (identical title in VDD; constant GitHub=Trac+31 offset over 20 title pairs from the 6.6.0, 6.5.0 and 6.4.2 VDDs, incl. adjacent #199 == Trac #168). The VDD cites Trac #167, not GitHub #198; the #198 page shows no linked commit or PR. Pending user decision D1."
   current_checked:
     value: f22e538cafe56cf44b15996b67bd1e90850a30cf
     branch: dev (origin/HEAD)
     date: "2026-10-05"
-    describe: v7.0.1-108-gf22e538c
+    describe: "v7.0.1-108-gf22e538c (git describe --tags; v7.0.1 is a lightweight tag; plain git describe gives v6.8.0-rc1+dev393-1433-gf22e538c)"
 
 platform:
   original:
@@ -78,14 +98,30 @@ platform:
     status: unspecified_by_reference
     note: "Issue gives no OS, CPU, board, OSAL/PSP, SMP, or build configuration for EVA CWS."
   vdd_660_tested_platforms:
-    note: "6.6.0 VDD 'Tested Platforms' lists cFE 6.6.0 test platforms (e.g., x86-64 Ubuntu 16.04 pc-linux; RTEMS 4.11.2 pc-rtems; ARMv7/PowerPC Yocto pc-linux). Not the EVA CWS platform."
-    reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L503-L530
+    note: "6.6.0 VDD 'Tested Platforms' lists cFE 6.6.0 test platforms: build testing 'on a PPC/mcp750' (L506-L507); functional rows x86-64 Ubuntu 16.04 pc-linux (L516), i686 RTEMS 4.11.2 pc-rtems (L520), Beaglebone Black ARMv7 Yocto pc-linux (L524), Virtual G4 PowerPC 7400 Yocto pc-linux (L528), Virtual Malta MIPS 64 (64-bit) Yocto Poky 2.4, Linux 4.12.12, pc-linux (L532-L534). Not the EVA CWS platform."
+    reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L503-L535
+  per_revision_pairing:
+    status: from-reference
+    note: "Applies to a derived experiment's chosen public revision, not to EVA CWS (which stays unspecified_by_reference)."
+    cfe_642:
+      value: "OSAL 4.1.1, PSP 1.2.0.0; tested PPC/mcp750 VxWorks 6.4; supported includes 'X86/PC running Linux'; classic make build; tarball has no osal/ or psp/"
+      reference: "6.4.2 VDD Table 1.4-1 and §1.4 (source vdd_642)"
+    cfe_650a:
+      value: "OSAL gitlink 7139592f04e47f7522b07b1ef9f84a21393df88a (nasa/osal git describe --tags: osal-4.2.1a-1-g7139592, 2017-07-07) + in-tree PSP 1.3.0.0; 6.5.0 VDD names OSAL 4.2.0 / PSP 1.3.0.0 and lists x86-64 Ubuntu 14.04.4 pc-linux 'Built via CMake' as tested. Git OSAL and VDD OSAL differ."
+      reference: ["git ls-tree b2765d9f osal", "https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/psp/fsw/pc-linux/inc/psp_version.h#L26-L29", "6.5.0 VDD Tables 1.4-1, 1.5-1 (source vdd_650)"]
+    cfe_660:
+      value: "'latest release of the OSAL, Version 4.2.1'; 'backward compatibility is not supported with versions of the OSAL library older than 4.2.0 and versions of the PSP library older than 1.3.0'; Ubuntu 16.04 pc-linux tested"
+      reference: ["https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L139-L153", "https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L503-L535"]
 
 resource:
-  statement: "Readiness of the providing app P after its late-phase init ('completely up and running'); content of P's late init is private."
-  reference: https://github.com/nasa/cFE/issues/198
-  status: from-reference
-  unspecified: ["what P's late init sets up", "duration", "observable readiness indicator inside P"]
+  statement: "Readiness of the late-init app P after its late-phase init ('completely up and running'); content of P's late init is private."
+  reference: "https://github.com/nasa/cFE/issues/198 (sentence 4, generic; sentences 6a-6b for P)"
+  status: "from-reference (generic readiness, sentence 4) + inference (P is the request target)"
+  inferences:
+    - "(a) R's 'other functions' calls (sentence 7) targeted P - not stated by the issue."
+    - "(b) P acts as a service provider - not stated by the issue."
+  note: "The provider/service wording comes from roadmap §2.1, which is not a reference under CONDITIONS_POLICY.md and is not used as provenance."
+  unspecified: ["what P's late init sets up", "duration", "observable readiness indicator inside P", "whether R's calls targeted P"]
 
 publish_site:
   in_private_app:
@@ -99,17 +135,22 @@ publish_site:
       - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L281-L291
       - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.h#L90-L95
   in_cfe_fixed:
-    statement: "P's transition to CFE_ES_AppState_RUNNING (first RunLoop or WaitForSystemState(OPERATIONAL)); ES sets OPERATIONAL only after all apps are RUNNING (or soft timeout)."
+    statement: "Inference, conditional on P adopting CFE_ES_WaitForSystemState(CFE_ES_SystemState_APPS_INIT) before late init: P's late-init completion is published as P's transition to CFE_ES_AppState_RUNNING (first RunLoop or WaitForSystemState(OPERATIONAL)); ES sets OPERATIONAL only after all apps are RUNNING or after the phase-2 soft timeout (cfe_es_start.c#L223-L227). Otherwise RUNNING is still published at P's WaitForStartupSync call, before late init (cfe_es_api.c#L622-L637, #L686-L689)."
     permalinks:
       - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L520
       - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_start.c#L217-L233
+      - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L622-L637
+      - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/es/cfe_es_api.c#L686-L689
       - https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L260-L297
 
 use_site:
   in_private_app:
-    value: "R's calls to 'other functions' after returning from CFE_ES_WaitForStartupSync"
-    reference: https://github.com/nasa/cFE/issues/198
+    value: "R's calls to 'other functions'; R used the same sync call (CFE_ES_WaitForStartupSync)"
+    reference: "https://github.com/nasa/cFE/issues/198 (sentence 7)"
     status: from-reference
+    inferences:
+      - "R called the functions after its WaitForStartupSync returned (status: inference)"
+      - "R was released via OPERATIONAL, not by its own or ES's soft timeout (status: inference; the buggy-side wait also ends on timeout, cfe_es_start.c#L1016-L1035 at b2765d9f)"
     unspecified: ["function names", "mechanism (SB message, library call, shared memory, ...)", "whether the target is P"]
   in_cfe_release_point_buggy:
     - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L1017-L1019
@@ -121,7 +162,8 @@ use_site:
 existing_sync:
   - name: startup sync (CFE_ES_WaitForStartupSync -> ApplicationSyncDelay -> OPERATIONAL)
     orders: "each startup app's sync call (or first RunLoop) before release of any external app waiting for OPERATIONAL"
-    passed_by: "both P and R (issue sentences 6b, 7)"
+    used_by: "both P and R (issue sentences 6b, 7; from-reference)"
+    passed_by: "inference: that R's calls came after its sync call returned, and via OPERATIONAL rather than a timeout, is not stated by the issue"
     gap: "does not order P's late init (after its sync call) before R's requests"
     references:
       - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L642-L694
@@ -136,27 +178,47 @@ existing_sync:
     references:
       - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_start.c#L276-L291
   - name: creation order
-    orders: "apps created sequentially in startup-script order, no readiness wait between creations"
+    orders: "apps created sequentially in startup-script order, no readiness wait between creations; in v6.5.0a CMake builds (_ENHANCED_BUILD_) static-module apps (if configured) are created before script apps"
     references:
       - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L676-L688
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_apps.c#L168-L194
+      - https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/global_functions.cmake#L75-L79
     eva_cws_value: unspecified_by_reference
   - name: task priorities
+    orders: "startup-script start behaviour depends on relative priority (#77 = Trac #46: 'This issue will also occur if the OS startup code is a lower priority than the applications that are being started in the startup script.')"
+    references:
+      - https://github.com/nasa/cFE/issues/77
+      - "6.5.0 VDD Table 1.3-1 row 12 (Trac #46, new) - source vdd_650"
     eva_cws_value: unspecified_by_reference
   - name: app-level handshake / retry / NOT_READY handling
     eva_cws_value: unspecified_by_reference
 
 required_order:
-  statement: "P's late-phase initialization completes before other applications make requests to P (an app is 'completely up and running' only after its late init)."
+  statement: "From-reference, in the issue's terms: the late-init app's late-phase init should complete before the other applications' 'other functions' calls (sentence 7). An app is 'completely up and running' only after late init (sentence 4), and requests to a not-fully-initialized app are 'a race condition' (5b-5c)."
+  status: from-reference
+  inferences:
+    - "(a) R's calls targeted P (then: P's late-phase init completes before R's requests to P)"
+    - "(b) P acts as a service provider"
   provenance:
     - kind: original_report
       reference: https://github.com/nasa/cFE/issues/198
+      locator: "sentence 4"
       quote: "An application would need to also complete this \"late\" initialization in order to be considered completely up and running."
     - kind: original_report
       reference: https://github.com/nasa/cFE/issues/198
+      locator: "sentences 5b-5c"
       quote: "this also a race condition in that requests can be made to an application that has not been fully initialized."
+    - kind: original_report
+      reference: https://github.com/nasa/cFE/issues/198
+      locator: "sentence 7"
+      quote: "But other applications (also using the same sync call) were calling other functions before the late-phase init had completed."
     - kind: api_semantics_in_fix
-      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L178-L297
-      quote: "OPERATIONAL: normal operation mode; all apps are RUNNING / RUNNING: All initialization is complete. Second sync point."
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L206-L209
+      quote: "OPERATIONAL: normal operation mode; all apps are RUNNING"
+    - kind: api_semantics_in_fix
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/fsw/cfe-core/src/inc/cfe_es_extern_typedefs.h#L278-L281
+      quote: "RUNNING: All initialization is complete.  Second sync point."
+  not_provenance: "roadmap §2.1 provider/service wording (not a reference under CONDITIONS_POLICY.md)"
   secondary: "P's late init requires other apps 'fully loaded' first (issue sentence 6a) - P's reason for syncing before late init."
 
 fix:
@@ -170,7 +232,7 @@ fix:
   kind_detail: "new startup barrier phase (APPS_INIT) with per-app LATE_INIT/RUNNING states and CFE_ES_WaitForSystemState(); opt-in; bounded by soft timeouts; not a retry or use-site guard"
   changes:
     - "CFE_ES_SystemState_APPS_INIT=4 added ('startup apps have all completed their early init, but not necessarily operational yet'); OPERATIONAL=5"
-    - "CFE_ES_AppState_{EARLY_INIT,LATE_INIT,RUNNING,WAITING,STOPPED}; counters AppStartedCount/AppReadyCount removed"
+    - "New app states EARLY_INIT (replacing INITIALIZING) and LATE_INIT (plus UNDEFINED); RUNNING, WAITING and STOPPED already existed as #defines (RUNNING 1, STOPPED 2, WAITING 3, INITIALIZING 4 at b2765d9f cfe_es_apps.h#L106-L109; 6.4.2 cfe_es_apps.h:107-110) and were kept and renumbered in the ordered enum CFE_ES_AppState (UNDEFINED 0, EARLY_INIT 1, LATE_INIT 2, RUNNING 3, WAITING 4, STOPPED 5) for relational comparison; new apps start in EARLY_INIT (8811c920 cfe_es_apps.c L628); counters AppStartedCount/AppReadyCount removed"
     - "int32 CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds): APPS_INIT->caller LATE_INIT, OPERATIONAL->caller RUNNING; returns CFE_ES_OPERATION_TIMED_OUT on timeout"
     - "void CFE_ES_WaitForStartupSync() = WaitForSystemState(OPERATIONAL) wrapper, status discarded"
     - "ES main: StartApplications -> MainTaskSyncDelay(LATE_INIT) -> APPS_INIT -> MainTaskSyncDelay(RUNNING) -> OPERATIONAL; each wait soft (log and continue)"
@@ -187,7 +249,7 @@ fix:
     - "ordering among late-init phases of two apps both waiting for APPS_INIT"
     - "requests from apps that never wait on OPERATIONAL"
     - "apps started after startup"
-    - "notification of timeout to the caller of WaitForStartupSync (void); #1466/#1467 open"
+    - "notification of timeout to the caller of WaitForStartupSync (void); no syslog inside WaitForSystemState; when ES's phase-2 soft timeout expires ES only syslogs and sets OPERATIONAL, so R waiting on OPERATIONAL gets CFE_SUCCESS (cfe_es_start.c#L223-L233); #1466/#1467 open. Callers of WaitForSystemState do get CFE_ES_OPERATION_TIMED_OUT for their own timeout (cfe_es_api.c#L663, #L671; cfe_es.h#L637-L640)."
     - "apps keeping the 6.4.2 pattern (WaitForStartupSync before late init) still declare RUNNING early - fix requires P to opt in (inference from cfe_es_api.c#L632-L637 at 8811c920)"
 
 present_in_current:
@@ -202,7 +264,8 @@ present_in_current:
     - https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/docs/cFE_FunctionalRequirements.csv#L146-L147
   notes:
     - "Same two-phase design; WaitForStartupSync still void; no syslog on WaitForSystemState timeout."
-    - "No in-tree app demonstrates APPS_INIT -> late init -> RUNNING; functional test es_behavior_test.c L71-L77 only checks each state returns CFE_SUCCESS."
+    - "No in-tree app demonstrates APPS_INIT -> late init -> RUNNING (non-test git grep SystemState_APPS_INIT: default_cfe_es_extern_typedefs.h:204, cfe_es_api.c:560, cfe_es_start.c:217 only). es_behavior_test.c L71-L76 assert CFE_SUCCESS for each WaitForSystemState level incl. APPS_INIT, L77 calls WaitForStartupSync (void), L82 asserts total elapsed < 8 s (TimeExpected = {8,0}, L66); the test runs after startup, so it does not exercise the barrier ordering (https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/modules/cfe_testcase/src/es_behavior_test.c#L66-L82)."
+    - "WaitForSystemState returns CFE_ES_OPERATION_TIMED_OUT (cfe_es_api.c#L599, #L607; cfe_es.h#L411-L413). Its current doc (cfe_es.h#L405-L409) no longer states the 1000 ms minimum; the WaitForStartupSync doc still does (#L440-L444)."
 
 reproduction:
   kind: role_derived
@@ -211,27 +274,30 @@ reproduction:
   conditions:
     - name: application_suite
       value: "EVA CWS (private; code unavailable)"
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 6a)"
       status: from-reference
     - name: roles
-      value: "P: early init -> CFE_ES_WaitForStartupSync() -> late-phase init; R (>=1): CFE_ES_WaitForStartupSync() -> calls 'other functions'"
-      reference: https://github.com/nasa/cFE/issues/198
+      value: "P ('one app'): CFE_ES_WaitForStartupSync() before its late-phase init (6a-6b). R: 'other applications' (plural in the issue; count unspecified_by_reference), 'also using the same sync call', 'calling other functions before the late-phase init had completed' (7)."
+      reference: "https://github.com/nasa/cFE/issues/198 (sentences 6a, 6b, 7; generic description 3a, 5a)"
       status: from-reference
+      inferences:
+        - "P had an early init before the sync (from the generic sentences 3a/5a, not the EVA CWS-specific 6a-6b)"
+        - "R's calls came after its sync call returned"
     - name: app_names_count_order_priorities
       value: null
       reference: null
       status: unspecified_by_reference
     - name: late_init_content_and_duration
       value: "'may require some communications with other applications or libraries'; specifics unknown"
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 3b)"
       status: unspecified_by_reference
     - name: request_function_and_mechanism
       value: null
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 7, no detail)"
       status: unspecified_by_reference
     - name: oracle_early_call
       value: "R calls other functions before P's late-phase init completed"
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 7)"
       status: from-reference
     - name: failure_symptom_beyond_early_call
       value: null
@@ -239,25 +305,31 @@ reproduction:
       status: unspecified_by_reference
     - name: cfe_version_used_by_eva_cws
       value: null
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 1a names 6.4.2 only as the sync-improving release)"
       status: unspecified_by_reference
     - name: cfe_code_single_operational_barrier
       value: "6.4.2 tarball (sha256 c64ed2aa...) or v6.5.0a b2765d9f"
       reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/es/cfe_es_api.c#L642-L694
-      status: from-reference
+      status: "6.4.2 = from-reference (issue 1a-1b + source); v6.5.0a = inference (sync-logic equivalence by code comparison)"
+      note: "Build-system difference: 6.4.2 classic make only; v6.5.0a CMake defines _ENHANCED_BUILD_ and creates static-module apps before script apps (cfe_es_apps.c#L168-L194). Choice is D2 (pending)."
     - name: cfe_code_fixed
-      value: "v6.6.0a 8811c920 (or current f22e538c)"
+      value: "v6.6.0a 8811c920"
       reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/docs/cFE_6_6_0_version_description.md#L184-L191
-      status: from-reference
-    - name: osal_psp_os_cpu_smp_board
+      status: "from-reference (6.6.0 VDD Trac #167 row + code at 8811c920); linkage to #198 = inference pending D1"
+      note: "Whether a derived experiment uses v6.6.0a or current dev f22e538c is assumption A1; f22e538c is recorded only under present_in_current."
+    - name: osal_psp_os_cpu_smp_board (EVA CWS)
       value: null
       reference: null
       status: unspecified_by_reference
+    - name: osal_psp_pairing_per_revision (derived experiment)
+      value: "6.4.2: OSAL 4.1.1 / PSP 1.2.0.0 ('X86/PC running Linux' supported). v6.5.0a: OSAL gitlink 7139592f (osal-4.2.1a-1-g7139592) + in-tree PSP 1.3.0.0; VDD OSAL 4.2.0 / PSP 1.3.0.0; x86-64 Ubuntu 14.04 pc-linux 'Built via CMake' tested. 6.6.0: OSAL 4.2.1, no compatibility below OSAL 4.2.0 / PSP 1.3.0; Ubuntu 16.04 pc-linux tested."
+      reference: "platform.per_revision_pairing"
+      status: from-reference
     - name: sync_timeout_argument_P_R
       value: null
       reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/fsw/cfe-core/src/inc/cfe_es.h#L655-L680
       status: unspecified_by_reference
-      note: "doc: 'must be at least 1000'"
+      note: "Doc (cfe_es.h#L670-L674): 'This parameter must be at least 1000. Lower values will be rounded up.' Doc-only constraint; the code does not enforce or round: TimeOutMilliseconds is passed unchanged (b2765d9f cfe_es_api.c#L692 -> cfe_es_start.c#L1016 'WaitRemaining = TimeOutMilliseconds;'; 8811c920 cfe_es_api.c#L648; f22e538c cfe_es_api.c#L584). Current WaitForSystemState doc (f22e538c cfe_es.h#L405-L409) no longer states the 1000 ms minimum. The value stays unspecified_by_reference for EVA CWS."
     - name: CFE_ES_STARTUP_SCRIPT_TIMEOUT_MSEC (EVA CWS)
       value: null
       reference: null
@@ -266,6 +338,7 @@ reproduction:
       value: 30000
       reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/sample_defs/cpu1_platform_cfg.h#L1854
       status: from-reference
+      note: "v6.5.0a carries the same buggy-side values (this and the two below) in two files: cfe/cmake/sample_defs/cpu1_platform_cfg.h and cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h, both at L1812/L1836/L1854. 6.4.2 tarball: cfe/fsw/platform_inc/cpu1/cfe_platform_cfg.h L1702/L1726/L1744."
     - name: CFE_ES_STARTUP_SYNC_POLL_MSEC (cFE sample config, buggy side)
       value: 50
       reference: https://github.com/nasa/cFE/blob/b2765d9f905aa11f0c3b419b62233597366a7db9/cfe/cmake/sample_defs/cpu1_platform_cfg.h#L1812
@@ -279,9 +352,19 @@ reproduction:
       reference: https://github.com/nasa/cFE/blob/f22e538cafe56cf44b15996b67bd1e90850a30cf/cmake/sample_defs/example_platform_cfg.h#L856
       status: from-reference
       note: "same value at v6.6.0a cmake/sample_defs/cpu1_platform_cfg.h L1893 (Trac #83: 'Changed default from 30 to 1')"
+    - name: CFE_PLATFORM_ES_STARTUP_SYNC_POLL_MSEC (cFE sample config, fixed side)
+      value: 50
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/cmake/sample_defs/cpu1_platform_cfg.h#L1851
+      status: from-reference
+      note: "current f22e538c example_platform_cfg.h#L838 also 50"
+    - name: CFE_PLATFORM_CORE_MAX_STARTUP_MSEC (cFE sample config, fixed side)
+      value: 30000
+      reference: https://github.com/nasa/cFE/blob/8811c92094512975e14fd545df355705141560b2/cmake/sample_defs/cpu1_platform_cfg.h#L1875
+      status: from-reference
+      note: "current f22e538c default_cfe_core_private_internal_cfg.h#L68 also 30000"
     - name: apps_started_from_startup_script
       value: "likely (inference only)"
-      reference: https://github.com/nasa/cFE/issues/198
+      reference: "https://github.com/nasa/cFE/issues/198 (sentence 5a); cfe_es.h#L666-L668 (b2765d9f) startup-file restriction"
       status: unspecified_by_reference
     - name: reset_type
       value: null
@@ -294,30 +377,32 @@ reproduction:
 
 assumptions_needed:
   - "ASSUMPTION A1 (user decision D2): buggy-side revision 6.4.2 tarball vs v6.5.0a; fixed side v6.6.0a vs current dev f22e538c."
-  - "ASSUMPTION A2: role-based apps P (provider) and >=1 R (requester); count, names, startup-script order, priorities recorded as assumptions."
-  - "ASSUMPTION A3 (user decision D4): request mechanism R->P and P's observable readiness indicator (e.g., flag set at end of late init); must not be presented as original."
+  - "ASSUMPTION A2: role-based apps P (late-init app) and >=1 R ('other applications'); count, names, startup-script order, priorities recorded as assumptions. Treating P as a provider that R calls is itself an assumption (required_order.inferences (a)/(b))."
+  - "ASSUMPTION A3 (user decision D4): request mechanism R->P and P's observable readiness indicator (e.g., flag set at end of late init); that R's calls target P at all is an assumption; must not be presented as original."
   - "ASSUMPTION A4: oracle = R's request entry observed before P's late-init-complete event; any crash/assertion added is a derived result."
   - "ASSUMPTION A5: event-based timing control (hold P's late-init completion until R's request entry is observed), no fixed delays; only reference constants are sample-config timeouts."
-  - "ASSUMPTION A6: native Linux (pc-linux PSP) with OSAL paired to chosen cFE revision - a deviation from the unknown original platform."
-  - "ASSUMPTION A7: timeout arguments P and R pass to the sync API (doc minimum 1000 ms)."
+  - "ASSUMPTION A6: native Linux (pc-linux PSP). For EVA CWS this is an assumption (original platform unknown, no reference value to deviate from), not a deviation. pc-linux is reference-tested for 6.5.0 and 6.6.0 and listed as supported ('X86/PC running Linux') for 6.4.2. OSAL/PSP must follow the per-revision reference pairing (platform.per_revision_pairing), not a free pairing; only a departure from that pairing would be a deviation."
+  - "ASSUMPTION A7: timeout arguments P and R pass to the sync API. Doc says 'at least 1000 ... rounded up', but this is doc-only: the code passes TimeOutMilliseconds unchanged (see sync_timeout_argument_P_R note), so a value below 1000 is used as given."
   - "ASSUMPTION A8: fixed-side variants - P uses WaitForSystemState(APPS_INIT); P keeps 6.4.2 pattern on 6.6.0a code; ES phase-2 timeout expires first; R uses NOT_READY handling/retry."
   - "ASSUMPTION A9: whether P's late init sends requests to R (issue: 'may require some communications with other applications')."
 
 open_questions:
   - "Original Trac #167 content (reporter, dates, discussion, EVA CWS details) - babelfish unreachable, Wayback blocked."
-  - "Explicit record mapping GitHub #198 to Trac #167? Only title identity + constant +31 offset (D1)."
+  - "Explicit record mapping GitHub #198 to Trac #167? Only title identity + constant +31 offset over 20 pairs from three VDDs, incl. adjacent #199 == Trac #168 (D1)."
   - "Exact content of Trac commits 465a958 and b227d57 (not in public history; only squashed 6.5.0a->6.6.0a diff observable)."
   - "EVA CWS cFE version, OSAL/PSP, platform, apps, and functions involved."
   - "Did EVA CWS adopt WaitForSystemState(APPS_INIT) afterwards?"
   - "GitHub timeline/closing event of #198 (REST blocked; web view shows no linked PR/commit) (D3)."
-  - "Not verified: that cFE 6.4.1 lacked the SystemState sync (issue says 6.4.2 introduced it; only 6.4.2 and 6.5.0a inspected)."
+  - "Partly answered: exact 6.4.1 code not inspected; 6.4.1 used a binary-semaphore startup sync per Trac #40 (6.4.2 VDD Table 1.2-2) / GitHub #71, replaced in 6.4.2 by a polling loop."
   - "Whether to track fix residual gaps (silent soft timeouts; #1466, #1467, #1326) as separate derived scenarios."
 
 decisions_requested:
   - id: D1
     question: "Accept #198 == Trac #167 (fixed in 6.6.0 by 465a958/b227d57, folded into 2661d19f) as the fix provenance, labelled inference?"
+    evidence: "Identical title in the 6.6.0 VDD; GitHub = Trac + 31 over 10 pairs from the 6.6.0 VDD plus (added 2026-10-08) #199/#168 (adjacent), #77/#46, #174/#143, #187/#156, #195/#164 (6.5.0 VDD Table 1.3-1) and #71/#40, #72/#41, #73/#42 (6.4.2 VDD Attachment 1); #171/#140 and #175/#144 near-identical ('EDS:'/'SMP:' prefixes). No explicit cross-reference. Evidence strengthened 2026-10-08; still inference."
   - id: D2
     question: "Buggy-side public revision for a derived experiment: cFE 6.4.2 tarball or v6.5.0a (b2765d9f)?"
+    options_detail: "(a) 6.4.2: issue-named; classic make build only; tarball has no osal/ or psp/; VDD OSAL 4.1.1 / PSP 1.2.0.0. (b) v6.5.0a: sync functions logically identical to 6.4.2 (inference by code comparison); CMake build defines _ENHANCED_BUILD_ (static-module apps created before script apps); OSAL gitlink 7139592f + in-tree PSP 1.3.0.0; VDD OSAL 4.2.0 / PSP 1.3.0.0."
   - id: D3
     question: "Grant authenticated GitHub API access to nasa/cFE (add_repo with credentials) to fetch #198's REST timeline?"
   - id: D4

@@ -10,7 +10,7 @@ sources:
   - id: C1-BP
     what: "comment on #184 cited by roadmap as BP-CF integration"
     url: "https://github.com/nasa/CF/issues/184#issuecomment-1202543669"
-    retrieved: "NOT RETRIEVED: api.github.com 403 (egress policy); GitHub MCP limited to wookjaeya/shape-perf; WebFetch renders no comments; web.archive.org blocked"
+    retrieved: "NOT RETRIEVED (re-tested 2026-10-08): gh api -> HTTP 403 from the session's GitHub proxy, scoped per repository, naming the remedy add_repo with access:'push' (credentialed attach; needs user consent, may be refused; not attempted); GraphQL not served by the proxy; GitHub MCP issue_read refuses nasa/CF (allowed: wookjaeya/shape-perf); WebFetch renders no comments; archive mirrors CONNECT 403 per 2026-10-08 audit. Not a general egress denial."
   - id: C1-178
     what: "nasa/CF issue #178 (default table sem names -> empty)"
     url: "https://github.com/nasa/CF/issues/178"
@@ -28,8 +28,17 @@ sources:
   - id: C1-docs-current
     url: "https://github.com/nasa/CF/blob/35f408d3e088e613bf5197490947ea57cdc5a060/docs/dox_src/cfs_cf.dox#L372-L392"
   - id: BP-CI
-    what: "nasa/bp b051eb0 build/run workflow; PR workflow pins jphickey/cf@fix-184-throttle-sem-race ('needs to run with a patch to CF')"
-    url: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-pullreq.yml"
+    what: "nasa/bp b051eb0 build/run workflow (authored 2022-11-15 11:17:40 -0500, committed 2022-11-18 10:30:29 -0500, merged to nasa/bp main 2022-11-30 by e871ad9 / PR #26); PR workflow pins jphickey/cf@fix-184-throttle-sem-race ('needs to run with a patch to CF'; no failure named, no run log)"
+    url: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-pullreq.yml#L6-L14"
+  - id: BP-CI-dispatch
+    what: "same commit: manual-dispatch workflow defaults to unpatched nasa/cf main (counter-evidence to 'needed the race fix')"
+    url: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-dispatch.yml#L22-L29"
+  - id: BP-0b7422e
+    what: "nasa/bp 0b7422e (2022-08-04, jphickey): first public BP default sem names BP0_tsem/BP1_tsem; 'This should work in conjunction with the CF app and two instance of CFS'; PR nasa/bp#2 merged into development 2022-08-17 (WebFetch summary)"
+    url: "https://github.com/nasa/bp/commit/0b7422e8ddfec6d6310b7bb791d0e06db190814f"
+  - id: C1-PR-timeline
+    what: "PR #342 timeline (WebFetch 2026-10-08): force-push c2671e83d60ab1e584d33c3694dd75c114f8615d -> 833fdbb27a26f15f2429e79392e7eb73d61abdea Nov 17 2022 21:46 (#event-7838087462); branch deleted Apr 17 2023 (#event-9026865323)"
+    url: "https://github.com/nasa/CF/pull/342"
   - id: BP-provider
     url: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_flow.c#L121-L144"
   - id: OSAL-caelum
@@ -43,9 +52,11 @@ sources:
 
 revisions:
   buggy: 2a024d8efd9f44f54b7a59f7face24f255536236        # linked in issue body (L1014-L1015)
-  buggy_immediate_parent_of_fix: 281a94188cd7d885a5aed01ee041f3ece2b0486f
+  buggy_immediate_parent_of_fix: 281a94188cd7d885a5aed01ee041f3ece2b0486f   # git parent of 833fdbb (fix base)
+  main_before_fix_merge: {sha: 32a8b0354b0bf6b4036d289c7ee193addfbff374, note: "first parent of 2ffbecc; differs from 281a941 only in README.md (43fab71), code identical"}
+  pr342_initial_head: {sha: c2671e83d60ab1e584d33c3694dd75c114f8615d, parent: 281a94188cd7d885a5aed01ee041f3ece2b0486f, dates: "authored and committed 2022-11-17 16:37:36 -0500", note: "same message and same 3 files as 833fdbb; git diff c2671e8 833fdbb is whitespace-only in fsw/src/cf_cfdp.c; same constants; force-pushed to 833fdbb 2022-11-17 21:46 UTC; fetched by SHA from https://github.com/jphickey/cf on 2026-10-08"}
   last_tag_without_fix: "draco-rc3 (27769791341a26dc77ee6f8f9ac36a192c4c10e9)"
-  fixed: 833fdbb27a26f15f2429e79392e7eb73d61abdea
+  fixed: 833fdbb27a26f15f2429e79392e7eb73d61abdea   # authored 2022-11-17 16:37:36 -0500, committed 16:45:54 -0500
   fixed_merge: 2ffbeccc3e75fc69cd4a10652e7cc6abc2e4c90e
   first_tag_with_fix: "draco-rc4 (19c18b9dbdb0093e9bea78322de777e8f282acfb)"
   current_checked:
@@ -56,14 +67,30 @@ platform:
   original_observation:
     os: {value: "Ubuntu 21.10", status: from-reference, reference: "https://github.com/nasa/CF/issues/184"}
     cfe_osal_psp: {value: null, status: unspecified_by_reference}
-    cfs_release_required_by_CF_README: {value: "cFS Caelum (no tag/commit)", status: from-reference, reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/README.md#L36-L39"}
+    cfs_release_required_by_CF_README: {value: "cFS Caelum (no tag/commit)", status: from-reference, reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/README.md#L36-L39", note: "applies to 2a024d8 only: absent at 2ca7f97 (v3.0.0), added by 2a292d0 (2021-11-19, v3.0.1-rc1), replaced by f183509 (2022-03-22) with 'cFS Framework (cFE, OSAL, PSP)'; 281a941 README L23-L25 names no release (unspecified_by_reference)"}
   fix_testing:
     os: {value: "Ubuntu 22.04", status: from-reference, reference: "https://github.com/nasa/CF/pull/342"}
   public_bp_integration_ci:
     runner: {value: "ubuntu-22.04", status: from-reference, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L51"}
-    build: {value: "-DSIMULATION=native -DCMAKE_BUILD_TYPE=Release -DMISSIONCONFIG=bpxfer; cFE sample_defs copied", status: from-reference, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L115-L127"}
-    component_refs: {value: "cFS main, bplib main, CF jphickey/cf@fix-184-throttle-sem-race (PR) or nasa/cf@main (dispatch), tinycbor v0.6.0", status: from-reference}
+    build: {value: "cmake -DCMAKE_BUILD_TYPE=Release -DSIMULATION=native -DCMAKE_INSTALL_PREFIX=/exe -DMISSIONCONFIG=bpxfer -DMISSION_DEFS=$PWD/bpxfer_defs -B build -S cfs-bundle/cfe; make DESTDIR=<workspace> -j2 mission-install", status: from-reference, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L126-L131"}
+    config_copies:
+      status: from-reference
+      reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L115-L124"
+      steps:
+        - "L118 cfe sample_defs/sample_perfids.h -> bpxfer_defs/cfe_perfids.h"
+        - "L119 cpu1_msgids.h -> cfe_msgids.h"
+        - "L120 cpu1_platform_cfg.h -> default_platform_cfg.h"
+        - "L121 sample_defs/*{osconfig,custom,options}.cmake"
+        - "L122 BP .github/buildconfig/*.{cmake,scr} (targets.cmake, extra_install.cmake, cfe_es_startup.scr)"
+        - "L123 BP .github/buildconfig/{tx,rx,tables}"
+        - "L124 bpxfer_mission_cfg.h = sample_mission_cfg.h + bp_msgids_extra.h"
+    targets_cmake: {value: "MISSION_NAME BpTestWorkflow; SPACECRAFT_ID 0xb9; MISSION_CPUNAMES tx rx; MISSION_GLOBAL_APPLIST cf bp bplib ci_lab to_lab sch_lab; GLOBAL_PSP_MODULELIST iodriver unsock_intf; tx_PROCESSORID 1, rx_PROCESSORID 2; PLATFORM default", status: from-reference, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/targets.cmake#L8-L25"}
+    psp_patch: {value: "in psp/: git fetch https://github.com/jphickey/PSP.git techdev-iodriver:techdev-iodriver; git merge --no-edit techdev-iodriver", status: from-reference, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/actions/setup-cfs/action.yml#L26-L31", sha_status: unspecified_by_reference, note: "mutable branch; 7c29c50033ecf602bd534b6bade632d7eabda1b6 on 2026-10-08 (git ls-remote), 2022 SHA unknown"}
+    tinycbor_install: {value: "staging copied into / (sudo cp -rv -t /); /usr/local/lib/libtinycbor.so installed per target as tinycbor.so", status: from-reference, reference: "build-run-bp-common.yml L111; https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/extra_install.cmake#L11-L18"}
+    bundle_cache: {value: "key = md5(setup-cfs/action.yml)@$(date +%G-%V) (ISO year-week); setup skipped on cache hit", status: from-reference, reference: "build-run-bp-common.yml L73-L100 @b051eb0"}
+    component_refs: {value: "cFS main, bplib main, CF jphickey/cf@fix-184-throttle-sem-race (PR) or nasa/cf@main (dispatch), tinycbor v0.6.0, PSP + jphickey/PSP@techdev-iodriver", status: from-reference}
     component_shas: {value: null, status: unspecified_by_reference, note: "mutable refs; run logs not retrieved"}
+    component_shas_inference: "inference only, not chosen: CI runs of b051eb0 fall in [2022-11-18T15:30:29Z (commit), 2022-11-30T20:19:21Z (merge e871ad9)]; cFS main first-parent = 1df262a (cFE 6cccb3f, OSAL f34759d, PSP a260e9c) at start, 1b0b338 (cFE fef4a0d, OSAL b44f4ce, PSP a260e9c) at end; 30102b5 (cFE 6cccb3f, OSAL e98bb23) only via a week-2022-46 cache built before 2022-11-17T21:23:45Z (no such run on record); CF main 281a941 throughout; PR CF branch head 833fdbb from 2022-11-17 21:46Z (c2671e8 before, whitespace-only diff). Earlier candidate 'cFS main@2022-11-15 = 30102b5' (author-date anchor) withdrawn."
   cfs_bundle_pins_CF: "no nasa/cFS commit pins apps/cf before c63d544 (2026-01-23)"
 
 resource:
@@ -79,13 +106,21 @@ resource:
     buggy: "'provided by the Telemetry Output (TO) application or an equivalent application ... must match the name of the semaphore created by TO' (cf_guide.md L48-L57 @2a024d8)"
     current: "'the receiving app must create a counting semaphore during initialization, using the name defined in the CF table ... must give the semaphore each time it is ready to receive a PDU' (cfs_cf.dox L372-L392 @35f408d)"
   cf_creates_it: "no (issue #178: 'CF does not actually create the throttling semaphores')"
-  to_lab_creates_it: "no (nasa/to_lab full history: no OS_CountSemCreate)"
+  to_lab_creates_it: "no (nasa/to_lab full history, 283 commits, HEAD d27c601: no OS_CountSemCreate)"
+  ci_lab_creates_it: "no (nasa/ci_lab full history, 244 commits, HEAD edb8ddf: git log --all -S OS_CountSemCreate finds nothing)"
 
 publish_site:
   app_level_public_provider:
     function: "nasa/bp initialize_throttling -> OS_CountSemGetIdByName then OS_CountSemCreate(&Sem, Name, Max, 0)"
     permalink: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_flow.c#L121-L144"
     call_chain: "BP_AppMain (bp_app.c L812) -> AppInit (L203) -> BP_FlowInit (bp_flow.c L524) -> initialize_throttling; before first CFE_ES_RunLoop (bp_app.c L818)"
+    init_sequence_b051eb0:
+      reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_app.c#L109-L205 ; https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_flow.c#L519-L524"
+      steps: ["memset BP_GlobalData + Throttles=BP_Throttles (L146-L147)", "CFE_EVS_Register (L152)", "CFE_ES_GetAppID (L157)", "CFE_ES_GetAppName (L162)", "CFE_SB_CreatePipe (L167)", "3x CFE_SB_Subscribe (L172-L184)", "2x CFE_MSG_Init (L187-L190)", "BP_StorageService_Init (L193)", "BP_SetupLibrary (L196): bplib_init (L112), bplib_route_alloc_table(10, 16<<20) (L119)", "BP_FlowInit (L203): first statement initialize_throttling() (bp_flow.c L524)"]
+      note: "BP_IOInit defined (bp_io.c L204) but not called at b051eb0"
+    init_sequence_ce59162: "BP_StorageService_Init (bp_app.c L170), BP_IOInit (L173), BP_FlowInit (L178) -> bplib_init (bp_flow.c L683) then initialize_throttling (L689)"
+    init_sequence_0b7422e: "bplib_init in AppInit (bp_app.c L113), BP_FlowInit (L205) -> initialize_throttling first (bp_flow.c L526)"
+    sem_count: {value: 2, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/platform_inc/bp_platform_cfg.h#L29", note: "included by bp_cfg.h L25; fallback '#define BP_NUM_SEM_THROTTLES 0' at bp_cfg.h L191-L192"}
     initial_count: {value: "BP_APP_READ_LIMIT default 10", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_cfg.h#L86-L87"}
   app_level_original_provider: {value: null, status: unspecified_by_reference, note: "issue: 'CI/TO or some other dedicated I/O app'"}
   osal_level:
@@ -93,14 +128,29 @@ publish_site:
     create: "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-countsem.c#L89-L116"
     name_set: "OS_OBJECT_INIT at osapi-countsem.c L106 (active_id is OS_OBJECT_ID_RESERVED at this point)"
     usable_by_name: "OS_ObjectIdTransactionFinish sets record->active_id = final_id: https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L1089-L1135"
-    hypothesis_reserved_window: "inference: lookup between L106 and finalize may return OS_ERR_INCORRECT_OBJ_STATE (osapi-idmap.c L414-L416; os-shared-idmap.h L294-L298); not covered by fix's NAME_NOT_FOUND-only retry; unverified"
+    hypothesis_reserved_window:
+      status: "inference from code reading; unverified (not runtime-tested)"
+      i_status_code: "lookup between OS_OBJECT_INIT (osapi-countsem.c L106) and finalize matches the RESERVED record (FindNextMatch L583, OS_ObjectIdDefined '!= 0' osapi-idmap.h L141-L144) and returns OS_ERR_INCORRECT_OBJ_STATE (ConvertToken L414-L416; IsValid os-shared-idmap.h L294-L298; type 0xFFFF via OS_OBJECT_TYPE_SHIFT 16 osapi-idmap.h L35 >= OS_OBJECT_TYPE_USER 0x10 L53); not in OS_CountSemGetIdByName @retval list (osapi-countsem.h L158-L162); not covered by the fix's NAME_NOT_FOUND-only retry, so CF init ends even with the fix"
+      ii_lock_held: "FindByName uses OS_LOCK_MODE_GLOBAL (osapi-idmap.c L1013); GetBySearch (L943-L967) takes the count-sem global table lock in TransactionInit (L337-L340); ConvertToken returns at L414-L416 before its unlock block (L507-L540); GetBySearch cancels only when FindNextMatch fails (L961-L964); FindByName releases only on success (L1014-L1019); table mutex PTHREAD_MUTEX_NORMAL (posix os-impl-idmap.c L224); creator's FinalizeNew -> TransactionFinish re-locks at L1104 and would block -> provider hangs in OS_CountSemCreate, later count-sem operations hang. ConvertToken header comment L397-L398 ('Upon failure, the global table lock is always released') does not match this path."
+      same_structure_at: "42af0f7 (L414/L583/L963; posix L224); e98bb23, f34759d, b44f4ce (L395/L561/L930; posix L222); 24c8641 v7.0.0 (L400/L566/L935, GetBySearch L915-L939; posix L222); osapi-countsem.c steps L94/L100/L103/L106 in the last four"
+      oracle_implication: "an experiment must observe provider/table hang, not only a CF status (A7, D4)"
+      permalinks:
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L943-L967"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L401-L417"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L507-L540"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L302-L344"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/shared/src/osapi-idmap.c#L1101-L1105"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/posix/src/os-impl-idmap.c#L220-L230"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/inc/osapi-idmap.h#L35"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/inc/osapi-idmap.h#L53"
+        - "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/inc/osapi-countsem.h#L158-L162"
 
 use_site:
   - role: bind (primary)
     function: CF_CFDP_InitEngine -> OS_CountSemGetIdByName
     permalink: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_cfdp.c#L1012-L1023"
     caller: "CF_AppMain (cf_app.c L445) -> CF_Init (L359)"
-    on_failure: "event CF_EID_ERR_INIT_SEM; goto err_out; engine not enabled; CF_Init fails; run_status=APP_ERROR (cf_app.c L445-L449); CFE_ES_RunLoop returns false; CFE_ES_ExitApp (L481)"
+    on_failure: "event CF_EID_ERR_INIT_SEM; goto err_out; engine not enabled; CF_Init returns status (cf_app.c L359-L375, err_out at L374-L375); run_status=APP_ERROR (cf_app.c L445-L449); CFE_ES_ExitApp (L481). At cFE 98f78e8 only (assumed pairing A1): CFE_ES_RunLoop returns false at cfe_es_api.c L520-L523, before the RUNNING update at L536-L539, so CF never reaches RUNNING"
   - role: re-bind on command
     function: CF_CmdEnableEngine -> CF_CFDP_InitEngine
     permalink: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_cmd.c#L1059-L1080"
@@ -114,7 +164,7 @@ existing_sync:
     reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_app.c#L212-L482"
     orders_create_before_lookup: false
   - name: provider startup sync (public BP)
-    value: "none in fsw at ce59162 and b051eb0"
+    value: "none in fsw at ce59162, 0b7422e and b051eb0"
     reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_app.c#L804-L818"
     orders_create_before_lookup: false
   - name: ES app creation order
@@ -122,11 +172,12 @@ existing_sync:
     reference: "https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/modules/es/fsw/src/cfe_es_apps.c#L75-L263"
     orders_create_before_lookup: "no (inference): orders task start, not progress; issue: CF-first only 'increases the chance'"
   - name: ES global startup states
-    value: "ES waits LATE_INIT then RUNNING before OPERATIONAL; only callers of WaitForSystemState/WaitForStartupSync block; timeout CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC=1000 in sample cfg"
-    reference: "https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/modules/es/fsw/src/cfe_es_start.c#L203-L236"
-    orders_create_before_lookup: "no for CF (CF does not wait); would if CF called WaitForStartupSync before InitEngine and provider creates before first RunLoop within timeout (inference; issue's suggestion, not implemented)"
+    value: "facts at cFE 98f78e8 (pairing assumed, A1): ES makes two sequential waits after StartApplications, all apps LATE_INIT (cfe_es_start.c L212) then all apps RUNNING (L227), each bounded by CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC=1000 (sample cfg); on timeout it logs 'Startup Sync failed' and enters OPERATIONAL anyway (L235-L236). Only callers of WaitForSystemState/WaitForStartupSync block. CFE_ES_WaitForStartupSync(T) = CFE_ES_WaitForSystemState(OPERATIONAL, T) (cfe_es_api.c L688-L691); 'SYSTEM_STATE_OPERATIONAL requires that all apps are RUNNING' (L612); caller's own state raised to RUNNING (L641-L644); polls every STARTUP_SYNC_POLL_MSEC until state or caller timeout (L654-L675)"
+    reference: "https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/modules/es/fsw/src/cfe_es_start.c#L203-L236 ; https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/modules/es/fsw/src/cfe_es_api.c#L595-L691"
+    orders_create_before_lookup: "no for CF (CF does not wait); would if CF called WaitForStartupSync before InitEngine and provider creates before its first RunLoop, once ES reaches OPERATIONAL (all apps RUNNING or both ES timeouts expire) (inference; issue's suggestion, not implemented)"
+    caller_timeout_argument: {value: null, status: unspecified_by_reference, note: "issue says only 'Adding a call to CFE_ES_WaitForStartupSync() before starting the engine might help too'"}
   - name: task priorities
-    value: "startup-script field 5; OSAL 0 = highest; POSIX RT priorities only with permission, else permissive fallback; cFE sample native config sets OSAL_CONFIG_DEBUG_PERMISSIVE_MODE TRUE; public BP CI: CF 65, BP 55"
+    value: "startup-script field 5; OSAL 0 = highest; POSIX RT priorities only with permission, else permissive fallback; cFE sample native config sets OSAL_CONFIG_DEBUG_PERMISSIVE_MODE TRUE (native_osconfig.cmake L26-L39 @98f78e8 for the 2a024d8+caelum-rc4 path, assumed A1; BP path copies it from the bundle cFE at run time, common.yml L121: L39 @6cccb3f and @fef4a0d, inference); public BP CI: CF 65, BP 55"
     reference: "https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/posix/src/os-impl-tasks.c#L296-L419"
     orders_create_before_lookup: "no guarantee (inference)"
   - name: OSAL object table locking
@@ -139,12 +190,13 @@ existing_sync:
     orders_create_before_lookup: "no; tolerance window only"
 
 required_order:
-  statement: "For each CF channel i with non-empty sem_name, the provider's OS_CountSemCreate(sem_name) must be complete (OSAL record finalized) before CF's OS_CountSemGetIdByName(sem_name) in CF_CFDP_InitEngine (single attempt at 2a024d8 L1014-L1015). Otherwise CF_EID_ERR_INIT_SEM, engine not enabled, CF exits with APP_ERROR. After 833fdbb: creation must complete before the last of up to 25 lookups spaced by OS_TaskDelay(100)."
+  statement: "Reference level: for each CF channel i with non-empty sem_name, the provider's creation of the counting semaphore sem_name (OS_CountSemCreate) must have returned before CF's OS_CountSemGetIdByName(sem_name) in CF_CFDP_InitEngine (single attempt at 2a024d8 L1014-L1015). Otherwise CF_EID_ERR_INIT_SEM, engine not enabled, CF exits with APP_ERROR. After 833fdbb: creation must complete before the last of up to 25 lookups spaced by OS_TaskDelay(100)."
+  statement_refinement_inference: "from OSAL code reading (C1.md section 4), not a reference: visibility by name with OS_SUCCESS requires OS_ObjectIdTransactionFinish to set active_id to its final value; a lookup in the RESERVED window is a separate hypothesized case"
   provenance:
     - "issue #184: 'the CF app expects that semaphore to be created _before_ it starts' / 'if that fails, CF aborts'"
     - "issue #178: 'it expects the semaphore to be created before CF starts'"
     - "CF docs @2a024d8 cf_guide.md L48-L57: 'must match the name of the semaphore created by TO' / 'If a semaphore is expected and not found, the application will terminate during initialization'"
-    - "code @2a024d8: cf_cfdp.c L1012-L1023, cf_app.c L359-L363, L445-L449, L453, L481"
+    - "code @2a024d8: cf_cfdp.c L1012-L1023, cf_app.c L359-L375, L445-L449, L453, L481"
     - "fix comment @833fdbb cf_cfdp.c L993-L999: 'if this sem is instantiated by another app, it may not be created yet'"
   not_used_as_provenance: "current docs cfs_cf.dox L372-L392 (claims 'not-in-use' fallback and 'CF has code to ensure...'), contradicted by code"
 
@@ -165,32 +217,42 @@ fix:
     - "provider creation later than the retry window"
     - "provider restart / sem ID change (issue's secondary problem)"
     - "transient non-NAME_NOT_FOUND statuses (hypothesized OS_ERR_INCORRECT_OBJ_STATE window)"
+    - "in that window the count-sem table lock may stay held so the provider blocks in OS_CountSemCreate (code reading, unverified); a CF-side retry cannot address it"
 
 present_in_current:
   value: true
-  detail: "retry pattern unchanged; still no startup sync; still no provider in CF; default names empty"
+  detail: "retry pattern unchanged; still no startup sync; still no provider in CF; default names empty; failure event renamed CF_INIT_SEM_ERR_EID (cf_eventids.h L136) with text 'CF: failed to get sem id for name %s, error=%ld' (cf_cfdp.c L1321-L1329 @35f408d)"
   checked:
     - {sha: 35f408d3e088e613bf5197490947ea57cdc5a060, permalink: "https://github.com/nasa/CF/blob/35f408d3e088e613bf5197490947ea57cdc5a060/fsw/src/cf_cfdp.c#L1299-L1330", constants: "https://github.com/nasa/CF/blob/35f408d3e088e613bf5197490947ea57cdc5a060/fsw/inc/cf_internal_cfg.h#L163-L185"}
     - {sha: 15a871e66cad7ec75e1be78989a93075ff142055, location: "fsw/src/cf_cfdp.c L1280-L1290"}
 
 reproduction:
   kind: public_code_derived
-  kind_rationale: "original reporter setup (provider, names, core versions) not in any reference; public nasa/bp b051eb0 integration needed the fix but uses mutable component refs and no failing log was retrieved"
+  kind_rationale: "original reporter setup (provider, names, core versions) not in any reference. Public nasa/bp b051eb0 integration: its PR CI was configured to use the CF fix branch (inference that it needed the race fix; the workflow comment names no failure, no failing run without it is on record, and the dispatch workflow in the same commit defaults to unpatched nasa/cf main). It uses mutable component refs (incl. a merged PSP patch branch) and no run log was retrieved"
   conditions:
-    - {name: cf_buggy_revision, value: "2a024d8efd9f44f54b7a59f7face24f255536236 (reported); last pre-fix code 281a94188cd7d885a5aed01ee041f3ece2b0486f", reference: "https://github.com/nasa/CF/issues/184", status: from-reference}
+    - {name: cf_buggy_revision, value: "2a024d8efd9f44f54b7a59f7face24f255536236 (reported); fix base 281a94188cd7d885a5aed01ee041f3ece2b0486f (parent of 833fdbb); main before merge 32a8b03 differs only in README.md (code identical)", reference: "https://github.com/nasa/CF/issues/184 ; git log --first-parent 2ffbecc", status: from-reference}
     - {name: cf_fixed_revision, value: 833fdbb27a26f15f2429e79392e7eb73d61abdea, reference: "https://github.com/nasa/CF/commit/833fdbb27a26f15f2429e79392e7eb73d61abdea", status: from-reference}
     - {name: host_os_original, value: "Ubuntu 21.10", reference: "https://github.com/nasa/CF/issues/184", status: from-reference}
     - {name: host_os_fix_test_and_bp_ci, value: "Ubuntu 22.04 / ubuntu-22.04 runner", reference: "https://github.com/nasa/CF/pull/342 ; build-run-bp-common.yml L51,L146 @b051eb0", status: from-reference}
     - {name: cfe_osal_psp_original, value: null, reference: null, status: unspecified_by_reference}
-    - {name: cfs_release_required_by_cf_readme, value: "cFS Caelum (exact tag unspecified)", reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/README.md#L36-L39", status: from-reference}
+    - {name: cfs_release_required_by_cf_readme, value: "cFS Caelum (exact tag unspecified); applies to 2a024d8 only (text present 2a292d0..f183509); for 281a941 the README names no release", reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/README.md#L36-L39 ; https://github.com/nasa/CF/blob/281a94188cd7d885a5aed01ee041f3ece2b0486f/README.md#L23-L25", status: from-reference}
     - {name: bp_ci_component_refs, value: "cFS main, bplib main, CF jphickey/cf@fix-184-throttle-sem-race | nasa/cf@main, tinycbor v0.6.0", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L6-L37", status: from-reference}
-    - {name: bp_ci_component_shas, value: null, reference: "mutable refs; no run log retrieved", status: unspecified_by_reference}
-    - {name: build_config_bp_ci, value: "-DSIMULATION=native -DCMAKE_BUILD_TYPE=Release -DMISSIONCONFIG=bpxfer; cFE sample_defs", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L115-L127", status: from-reference}
+    - {name: bp_ci_component_shas, value: null, reference: "mutable refs; no run log retrieved", status: unspecified_by_reference, note: "inference only: cFS 1df262a..1b0b338 over [2022-11-18, 2022-11-30]; CF 833fdbb on the PR branch; see platform.public_bp_integration_ci.component_shas_inference"}
+    - {name: build_config_bp_ci, value: "cmake -DCMAKE_BUILD_TYPE=Release -DSIMULATION=native -DCMAKE_INSTALL_PREFIX=/exe -DMISSIONCONFIG=bpxfer -DMISSION_DEFS=$PWD/bpxfer_defs -B build -S cfs-bundle/cfe; copies: L118-L121 cFE sample_defs (perfids, msgids, platform_cfg -> default_platform_cfg.h, *{osconfig,custom,options}.cmake), L122-L123 BP .github/buildconfig (*.{cmake,scr}, {tx,rx,tables}), L124 bpxfer_mission_cfg.h = sample_mission_cfg.h + bp_msgids_extra.h", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L115-L127", status: from-reference}
+    - {name: bp_ci_build_definitions, value: "targets.cmake and extra_install.cmake from BP .github/buildconfig @b051eb0 (not cFE sample_defs)", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/targets.cmake", status: from-reference}
+    - {name: bp_ci_psp_patch, value: "git fetch https://github.com/jphickey/PSP.git techdev-iodriver:techdev-iodriver; git merge --no-edit techdev-iodriver (in psp/)", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/actions/setup-cfs/action.yml#L26-L31", status: from-reference, note: "ref from-reference; 2022 SHA unspecified_by_reference; branch mutable (7c29c50 on 2026-10-08)"}
+    - {name: bp_ci_psp_modules, value: "iodriver unsock_intf", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/targets.cmake#L17", status: from-reference}
+    - {name: bp_ci_cpu_targets, value: "tx (PROCESSORID 1), rx (PROCESSORID 2), PLATFORM default; MISSION_NAME BpTestWorkflow; SPACECRAFT_ID 0xb9", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/targets.cmake#L8-L25", status: from-reference}
+    - {name: bp_ci_app_list, value: "cf bp bplib ci_lab to_lab sch_lab", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/targets.cmake#L16", status: from-reference}
+    - {name: bp_ci_tinycbor_install, value: "staging copied into / ; /usr/local/lib/libtinycbor.so installed per target as tinycbor.so", reference: "build-run-bp-common.yml L111 ; https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/extra_install.cmake#L11-L18", status: from-reference}
+    - {name: bp_ci_cf_tables, value: "tx/rx same sem names BP0_tsem (L40), BP1_tsem (L54); differ only in local entity id at L27 (tx 1, rx 2); per-channel timer layout; FILEDEF CF.config_table (L59)", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/rx/tables/cf_def_config.c#L27", status: from-reference}
+    - {name: cf_startup_entry_2a024d8, value: null, reference: "CF repo at 2a024d8 has no startup script", status: unspecified_by_reference, note: "constraint (inference): default table CFE_TBL_FILEDEF(CF_config_table, CF_APP.config_table, ...) (fsw/tables/cf_def_config.c L61 @2a024d8) with CF_CONFIG_TABLE_NAME 'config_table' (cf_platform_cfg.h L262) means the default table file loads only if the app is named CF_APP; 281a941 and BP CI use CF.config_table / app name CF (L84 @281a941)"}
+    - {name: cf_table_format, value: "2a024d8: ack/nak/inactivity timers global after channels (cf_def_config.c L53-L55; fsw/platform_inc/cf_tbldefs.h L82-L86); 281a941: per channel (cf_def_config.c L37-L38, L66-L67; fsw/src/cf_tbldefs.h L60-L62); BP CI tables match 281a941 only", reference: "cited files at 2a024d8, 281a941, b051eb0", status: from-reference, note: "using BP CI tables with 2a024d8 would be a deviation"}
     - {name: build_config_original, value: null, reference: null, status: unspecified_by_reference}
     - {name: provider_app_original, value: "unidentified ('CI/TO or some other dedicated I/O app')", reference: "https://github.com/nasa/CF/issues/184", status: unspecified_by_reference}
     - {name: provider_app_public, value: "nasa/bp BP_AppMain", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/cfe_es_startup.scr#L7", status: from-reference}
     - {name: provider_create_call_public, value: "OS_CountSemCreate(&Sem, Name, BP_APP_READ_LIMIT=10 default, 0) after failed GetIdByName", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_flow.c#L121-L144", status: from-reference}
-    - {name: provider_create_point_public, value: "in AppInit -> BP_FlowInit, before first CFE_ES_RunLoop", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_app.c#L203", status: from-reference}
+    - {name: provider_create_point_public, value: "in AppInit -> BP_FlowInit (first statement initialize_throttling), after EVS/ES/SB setup, BP_StorageService_Init and BP_SetupLibrary (bplib_init); before first CFE_ES_RunLoop", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/src/bp_app.c#L109-L205", status: from-reference}
     - {name: sem_names_original, value: null, reference: null, status: unspecified_by_reference}
     - {name: sem_names_public, value: ["BP0_tsem", "BP1_tsem"], reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/custom/bp_semcfg.c#L43-L49", status: from-reference}
     - {name: cf_default_table_at_buggy, value: ["", ""], reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/tables/cf_def_config.c#L42-L51", status: from-reference}
@@ -199,38 +261,39 @@ reproduction:
     - {name: startup_order_public, value: "cf (line 6) before bp (line 7)", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/cfe_es_startup.scr#L6-L7", status: from-reference}
     - {name: priorities_public, value: {CF: 65, BP: 55, convention: "OSAL 0 = highest"}, reference: "cfe_es_startup.scr L6-L7 @b051eb0; https://github.com/nasa/osal/blob/42af0f73c952b4e4c7fbc06c97d354a1430f4ac3/src/os/posix/src/os-impl-tasks.c#L80-L86", status: from-reference}
     - {name: priorities_original, value: null, reference: null, status: unspecified_by_reference}
-    - {name: rt_priority_enforcement, value: null, reference: "native_osconfig.cmake L26-L39 (PERMISSIVE TRUE); common.yml L168-L174 (no privilege change); effect not stated", status: unspecified_by_reference}
+    - {name: rt_priority_enforcement, value: null, reference: "native_osconfig.cmake L26-L39 @98f78e8 (2a024d8+caelum-rc4 path, assumed A1) / L39 @6cccb3f and @fef4a0d (BP path, inference; copied at common.yml L121) (PERMISSIVE TRUE); common.yml L168-L174 (no privilege change); effect not stated", status: unspecified_by_reference}
     - {name: cpu_count_affinity, value: null, reference: null, status: unspecified_by_reference}
     - {name: provider_artificial_delay, value: "suggested in issue; amount and mechanism not given", reference: "https://github.com/nasa/CF/issues/184", status: unspecified_by_reference}
-    - {name: channels_with_sem_public, value: 2, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/tx/tables/cf_def_config.c#L40-L54", status: from-reference}
-    - {name: es_startup_sync_params_sample, value: {STARTUP_SCRIPT_TIMEOUT_MSEC: 1000, STARTUP_SYNC_POLL_MSEC: 50}, reference: "https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/cmake/sample_defs/cpu1_platform_cfg.h#L1667-L1709", status: from-reference, note: "file value; whether original used it is unspecified"}
+    - {name: channels_with_sem_public, value: 2, reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/buildconfig/tx/tables/cf_def_config.c#L40-L54 ; provider https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/fsw/platform_inc/bp_platform_cfg.h#L29 (included by bp_cfg.h L25; fallback 0 at bp_cfg.h L191-L192)", status: from-reference}
+    - {name: es_startup_sync_params_sample, value: {STARTUP_SCRIPT_TIMEOUT_MSEC: 1000, STARTUP_SYNC_POLL_MSEC: 50}, reference: "2a024d8+caelum-rc4 path (assumed A1): https://github.com/nasa/cFE/blob/98f78e8604c19415fd1e199eae94196a781539b8/cmake/sample_defs/cpu1_platform_cfg.h#L1667-L1709 ; BP path (inference, copied from bundle cFE at common.yml L120): https://github.com/nasa/cFE/blob/6cccb3f5d10664b5b10aeb9cfcda871ba2d99b32/cmake/sample_defs/cpu1_platform_cfg.h#L1689-L1731 (same lines/values @fef4a0d)", status: from-reference, note: "file value; whether original used it is unspecified"}
     - {name: retry_constants_fixed, value: {max_retries: 25, delay_ms: 100}, reference: "https://github.com/nasa/CF/blob/833fdbb27a26f15f2429e79392e7eb73d61abdea/fsw/platform_inc/cf_platform_cfg.h#L329-L349", status: from-reference}
-    - {name: failure_oracle, value: "CF_EID_ERR_INIT_SEM 'CF: failed to get sem id for name %s, error=...'; engine.enabled stays 0; CF exits APP_ERROR", reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_cfdp.c#L1016-L1021", status: from-reference}
+    - {name: failure_oracle, value: "CF_EID_ERR_INIT_SEM 'CF: failed to get sem id for name %s, error=...' (CF_INIT_SEM_ERR_EID at dev 35f408d, cf_cfdp.c L1321-L1329); engine.enabled stays 0; CF exits APP_ERROR", reference: "https://github.com/nasa/CF/blob/2a024d8efd9f44f54b7a59f7face24f255536236/fsw/src/cf_cfdp.c#L1016-L1021", status: from-reference}
     - {name: observed_output_original, value: null, reference: "issue has no log; comments unreadable", status: unspecified_by_reference}
     - {name: run_count_or_frequency, value: "'not readily reproducible'", reference: "https://github.com/nasa/CF/issues/184", status: unspecified_by_reference}
     - {name: run_procedure_public_ci, value: "start core-tx/core-rx; sleep 5; grep OPERATIONAL; enable flows; class-1 transfer; sleep 30; md5 check", reference: "https://github.com/nasa/bp/blob/b051eb0d12bfe76c0230215c2ff851cfaa553ce4/.github/workflows/build-run-bp-common.yml#L157-L212", status: from-reference}
 
 assumptions_needed:
-  - "A1 core pairing: cFE/OSAL/PSP revisions to run with CF 2a024d8 (or 281a941); candidates caelum-rc4 (README 'cFS Caelum') or cFS main@2022-11-15 (30102b5, inference from commit dates); buildability unverified"
-  - "A2 provider identity: public nasa/bp (b051eb0, or ce59162 with names set) or role-derived app calling OS_CountSemCreate(name, n, 0) during init; link [C1-BP] -> this BP code unverified"
-  - "A3 sem_name values and number of channels (at 2a024d8 requires changing CF default table from empty)"
+  - "A1 core pairing, two separate candidate sets (none binding): for CF 2a024d8, cFS caelum-rc4 (cFE 98f78e8, OSAL 42af0f7, PSP 1bd7bd9; README 'cFS Caelum' present at 2a024d8 only); for CF 281a941/833fdbb (BP path; README names no release), inference from BP CI window [2022-11-18, 2022-11-30]: cFS 1df262a (cFE 6cccb3f, OSAL f34759d, PSP a260e9c) or 1b0b338 (cFE fef4a0d, OSAL b44f4ce, PSP a260e9c); 30102b5 only via weekly cache; all BP-path candidates also need the mutable jphickey/PSP@techdev-iodriver merge. Earlier candidate 'cFS main@2022-11-15 (30102b5)' was anchored on b051eb0's author date and is withdrawn. Buildability unverified"
+  - "A2 provider identity: public nasa/bp (0b7422e = first with BP0_tsem/BP1_tsem, b051eb0, or ce59162 with names set; init sequences differ) or role-derived app calling OS_CountSemCreate(name, n, 0) during init; link [C1-BP] -> this BP code unverified"
+  - "A3 sem_name values and number of channels (at 2a024d8 requires changing CF default table from empty; BP CI tables do not fit 2a024d8 layout/FILEDEF name)"
   - "A4 startup-script order, priorities, RT-priority enforcement (root/CAP_SYS_NICE vs permissive fallback), CPU count/affinity"
   - "A5 provider delay/hold mechanism: event-based (hold creation until CF lookup observed / retries exhausted), not a fixed sleep; no reference value"
   - "A6 fixed-version boundary cases (inside vs after retry window) defined by observed retry iterations, not wall-clock"
-  - "A7 RESERVED-window probe requires pausing inside OSAL create (derived extension)"
-  - "A8 oracle: CF_EID_ERR_INIT_SEM + CF exit = failure; delayed successful bind = normal retry"
+  - "A7 RESERVED-window probe requires pausing inside OSAL create (derived extension); oracle must include provider/table hang (count-sem table lock may stay held), not only CF status; hang bound unspecified_by_reference"
+  - "A8 oracle: CF_EID_ERR_INIT_SEM (CF_INIT_SEM_ERR_EID at current dev) + CF exit = failure; delayed successful bind = normal retry"
   - "A9 secondary problem (provider restart/ID change): trigger and timing unspecified"
+  - "A10 if a derived control adds CFE_ES_WaitForStartupSync to CF (issue suggestion), its TimeOutMilliseconds argument has no reference value"
 
 open_questions:
-  - "Content/author/date of the 5 comments on #184, incl. issuecomment-1202543669 ([C1-BP]); not retrievable in this session"
-  - "Did nasa/bp CI fail without the CF patch; Actions logs from 2022-11 not retrieved (may be expired)"
-  - "Content of c2671e8 (PR #342 head before force-push to 833fdbb; WebFetch summary)"
-  - "Can OS_CountSemGetIdByName return OS_ERR_INCORRECT_OBJ_STATE during concurrent create (OSAL v6.0.0-rc4/v7.0.0 code reading)? needs controlled test"
+  - "Content/author/date of the 5 comments on #184, incl. issuecomment-1202543669 ([C1-BP]); not retrievable in this session (per-repo proxy block; credentialed attach via add_repo access:'push' needs user consent and may be refused)"
+  - "Did nasa/bp CI fail without the CF patch; Actions logs from 2022-11 not retrieved (may be expired); 'needed the race fix' is inference"
+  - "CLOSED 2026-10-08: c2671e8 (PR #342 initial head) fetched from jphickey/cf; whitespace-only diff to 833fdbb; PR head for minutes on 2022-11-17; neither commit existed on 2022-11-15; earlier premise 'BP CI would have used it on 2022-11-15' withdrawn (b051eb0 committed 2022-11-18). Remaining unknown: any earlier unpublished BP branch state running CI against an earlier fix-184 branch state"
+  - "Can OS_CountSemGetIdByName return OS_ERR_INCORRECT_OBJ_STATE during concurrent create, and does that path leave the count-sem table lock held so the provider blocks in OS_CountSemCreate (code reading of OSAL 42af0f7, e98bb23, f34759d, b44f4ce, 24c8641; same structure)? needs controlled test with hang oracle"
   - "Reporter's cFE/OSAL versions, provider and sem names (Ubuntu 21.10)"
   - "ES handling after CF APP_ERROR exit (cleanup, syslog) on chosen core revision"
   - "Current docs (cfs_cf.dox L372-L392) contradict code (fallback to not-in-use; 'CF has code to ensure...')"
   - "Is the secondary problem (stale sem ID after provider restart; use site cf_cfdp_sbintf.c L87-L104 @35f408d) in scope for C1"
-  - "DECISION D1: verify [C1-BP] (user pastes text / attach nasa/CF with credentials) or mark unverified and cite nasa/bp b051eb0 + PR #342 instead"
-  - "DECISION D2: reproduction basis = nasa/bp b051eb0 integration config vs role-derived provider on CF 2a024d8 (both public_code_derived)"
-  - "DECISION D3: record core pairing (A1) as explicit assumption; choose candidate"
-  - "DECISION D4: include OSAL RESERVED-window hypothesis as a separate derived control in C1 package"
+  - "DECISION D1 (open, updated 2026-10-08): verify [C1-BP] via (a) user consent to credentialed add_repo nasa/CF access:'push' (may be refused) or user pastes the 5 comments; or (b) mark unverified and cite PR #342 + nasa/bp 0b7422e/b051eb0 instead. (b) supports the BP-CF integration and the PR CI pinning the fix branch, NOT 'BP를 먼저 시작해도' (public BP CI starts cf line 6 before bp line 7), so the roadmap section 2 C1 row must also drop/qualify that phrase and change '실제 semaphore 이름 ... 미공개' to 'names in [C1-BP] unknown; public BP defaults BP0_tsem/BP1_tsem' (roadmap wording is a user decision)"
+  - "DECISION D2 (open, refined 2026-10-08): reproduction basis = public nasa/bp integration (b051eb0 or 0b7422e; implies CF ~281a941/833fdbb by table layout and app name CF, not 2a024d8; needs mutable PSP patch jphickey/PSP@techdev-iodriver) vs role-derived provider on CF 2a024d8 (startup entry unspecified, CF_APP name constraint). Both public_code_derived"
+  - "DECISION D3 (open, updated 2026-10-08: candidate list changed): record core pairing (A1) as explicit assumption; candidates for CF 2a024d8: caelum-rc4 (README-derived); for BP path (CF 281a941/833fdbb): cFS 1df262a or 1b0b338 (window endpoints, cFE/OSAL differ), 30102b5 only via weekly cache (inference). Withdrawn: cFS main@2022-11-15 = 30102b5 (author-date anchor)"
+  - "DECISION D4 (open, updated 2026-10-08): include OSAL RESERVED-window hypothesis as a separate derived control; its oracle must observe provider/table hang (count-sem table lock may stay held), not only CF status; hang bound has no reference value"

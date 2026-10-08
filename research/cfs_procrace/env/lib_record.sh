@@ -21,6 +21,7 @@ rec_env_value_allowed() {
         GCC_*|COMPILER_PATH|LIBRARY_PATH|CPATH|C_INCLUDE_PATH|SOURCE_DATE_EPOCH|DEPENDENCIES_OUTPUT|SUNPRO_DEPENDENCIES) return 0 ;;
         GIT_SSL_CAINFO|SSL_CERT_FILE|CURL_CA_BUNDLE|HTTPS_PROXY|https_proxy|HTTP_PROXY|http_proxy|NO_PROXY|no_proxy) return 0 ;;
         CFS_NORMAL_USER|CFS_DIR) return 0 ;;
+        CORD_*) return 0 ;;   # CORD recorder settings (instrumented build only; CONDITIONS.md H-9)
     esac
     return 1
 }

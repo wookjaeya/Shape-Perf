@@ -21,6 +21,14 @@
 #   build_cfs.sh runtest [PARENT_DIR] [LOG_DIR]   README L106 on an existing build (logs build_08_*)
 #   build_cfs.sh record  [PARENT_DIR] [LOG_DIR]   record the effective settings of an existing build and
 #                                                 re-run the source checks (log build_07_record_existing.log)
+#   build_cfs.sh existing PARENT_DIR [LOG_DIR] [LOG_PREFIX]   (v4) README L104-105 (prep, install) on an existing
+#                                                 source tree that is NOT a git clone and has no build yet, e.g. the
+#                                                 CORD-instrumented copy (CONDITIONS.md H-9); same user, environment
+#                                                 checks, make goals and logging as "build", then the "record" output.
+#                                                 No clone and no pinned-state check: the caller proves the source
+#                                                 (manifest + patch). PARENT_DIR is required. Logs: <LOG_PREFIX>00_env,
+#                                                 00_steps, 04_prep, 05_install, 06_outputs, 07_record (default prefix
+#                                                 cord_build_). Refuses a tree that contains .git (e.g. the ENV clone).
 #     PARENT_DIR  directory that contains the clone "cFS"   (default /home/user/work/procrace/cfs_ref)
 #     LOG_DIR     where logs are written                    (default <this script dir>/logs)
 #
@@ -43,10 +51,12 @@
 #   v3  2026-10-08 (audit) subcommands; extended environment refusal list and environment record;
 #                          nested-submodule check by gitlinks (mode 160000); README L106 runtest step;
 #                          "record" step for an existing build.
+#   v4  2026-10-08 (CORD R2) "existing" step for a non-git copy (log prefix parameter; the record step skips the
+#                          git checks when the tree has no .git). build/runtest/record behave as in v3.
 
 set -euo pipefail
 
-SCRIPT_VERSION="v3"
+SCRIPT_VERSION="v4"
 BUNDLE_URL="https://github.com/nasa/cFS.git"                       # README L91
 BUNDLE_COMMIT="088b2fa828db9ff7e00733f1908e0eeb59f66ce3"           # origin/main HEAD on 2026-10-08, tag v7.0.1 (CONDITIONS.md A2)
 CONFIG="native_std"                                                 # README L104-106
@@ -87,15 +97,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STEP="${1:-}"
 case "${STEP}" in
     build|runtest|record) shift ;;
-    *) sed -n '2,45p' "$0" >&2; echo "ERROR: first argument must be build, runtest or record" >&2; exit 2 ;;
+    existing) shift; [ -n "${1:-}" ] || { echo "ERROR: existing needs an explicit PARENT_DIR" >&2; exit 2; } ;;
+    *) sed -n '2,55p' "$0" >&2; echo "ERROR: first argument must be build, runtest, record or existing" >&2; exit 2 ;;
 esac
 PARENT_DIR="${1:-/home/user/work/procrace/cfs_ref}"
 LOG_DIR="${2:-${SCRIPT_DIR}/logs}"
+if [ "${STEP}" = existing ]; then LOG_PREFIX="${3:-cord_build_}"; else LOG_PREFIX="build_"; fi
 CFS_DIR="${PARENT_DIR}/cFS"
 mkdir -p "${LOG_DIR}"
 
 ts() { date -u +%Y-%m-%dT%H:%M:%S.%3NZ; }
-say() { echo "[$(ts)] [build_cfs.sh ${SCRIPT_VERSION} ${STEP}] $*" | tee -a "${LOG_DIR}/build_00_steps.log"; }
+say() { echo "[$(ts)] [build_cfs.sh ${SCRIPT_VERSION} ${STEP}] $*" | tee -a "${LOG_DIR}/${LOG_PREFIX}00_steps.log"; }
 g() { git -c safe.directory='*' "$@"; }   # read-only git as root on the ubuntu-owned clone (ENV.md §7)
 
 # ---------------------------------------------------------------- user selection (README L102)
@@ -267,6 +279,32 @@ make_step() {  # name, make goal
     return ${rc}
 }
 
+# ================================================================= step: existing (README L104-105 on a non-git copy)
+do_existing() {
+    for t in make cmake gcc; do
+        command -v "$t" >/dev/null 2>&1 || { echo "ERROR: README L89 prerequisite '$t' is missing" >&2; exit 3; }
+    done
+    check_env
+    [ -d "${CFS_DIR}" ] || { echo "ERROR: ${CFS_DIR} does not exist" >&2; exit 5; }
+    [ ! -e "${CFS_DIR}/.git" ] || { echo "ERROR: ${CFS_DIR} is a git clone; use build/record for it" >&2; exit 5; }
+    [ ! -e "${CFS_DIR}/build-${CONFIG}" ] || { echo "ERROR: ${CFS_DIR}/build-${CONFIG} exists; this step builds a fresh tree only" >&2; exit 5; }
+    test -f "${CFS_DIR}/Makefile" && test -d "${CFS_DIR}/sample_defs" || { echo "ERROR: README L96 layout not found" >&2; exit 7; }
+    local notmine
+    notmine="$(find "${PARENT_DIR}" ! -user "${BUILD_USER}" | head -5)"
+    [ -z "${notmine}" ] || { echo "ERROR: files not owned by the build user ${BUILD_USER} (CONDITIONS.md D-1): ${notmine}" >&2; exit 5; }
+    env_record "${LOG_DIR}/${LOG_PREFIX}00_env.log"
+    say "existing tree ${CFS_DIR} (not a git clone; source identity from the caller's manifest/patch); README L96 layout present; nothing copied"
+    make_step "${LOG_PREFIX}04_prep"    "${CONFIG}.prep"       # README L104
+    make_step "${LOG_PREFIX}05_install" "${CONFIG}.install"    # README L105
+    ( cd "${CFS_DIR}/build-${CONFIG}/exe"
+      echo "## exe tree"; find . -maxdepth 2 | sort
+      echo "## cpu1/cf/cfe_es_startup.scr (generated by sample_defs/generate_startup.cmake)"; cat cpu1/cf/cfe_es_startup.scr
+      echo "## sizes"; du -sh "${CFS_DIR}" "${CFS_DIR}/build-${CONFIG}" "${CFS_DIR}/build-${CONFIG}/exe"
+    ) > "${LOG_DIR}/${LOG_PREFIX}06_outputs.log" 2>&1
+    do_record "${LOG_DIR}/${LOG_PREFIX}07_record.log"
+    say "done; executable: ${CFS_DIR}/build-${CONFIG}/exe/cpu1/core-cpu1 (README L111-112)"
+}
+
 # ================================================================= step: runtest (README L106)
 do_runtest() {
     command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required by target-rules.mk L68-84 (runtest)" >&2; exit 3; }
@@ -298,16 +336,24 @@ do_runtest() {
 
 # ================================================================= step: record (existing build)
 do_record() {
-    local out="${LOG_DIR}/build_07_record_existing.log" b="${CFS_DIR}/build-${CONFIG}"
+    local out="${1:-${LOG_DIR}/build_07_record_existing.log}" b="${CFS_DIR}/build-${CONFIG}"
     [ -d "${b}" ] || { echo "ERROR: no build tree at ${b}" >&2; exit 3; }
     env_record "${out}.env.tmp"
     {
-        echo "# build_cfs.sh ${SCRIPT_VERSION} record: effective settings of the existing build, $(ts)"
-        echo "# The environment of the original build invocation (script v1, 2026-10-08T01:10Z) was not recorded."
+        echo "# build_cfs.sh ${SCRIPT_VERSION} ${STEP}: effective settings of the existing build, $(ts)"
+        if [ "${STEP}" = existing ]; then
+            echo "# The environment of this build invocation is in ${LOG_PREFIX}00_env.log."
+        else
+            echo "# The environment of the original build invocation (script v1, 2026-10-08T01:10Z) was not recorded."
+        fi
         echo "# The values below are read from the build artifacts, which hold what the build actually used."
         echo
-        echo "## pinned state and source checks (same checks as the build step)"
-        pinned_state_record
+        if [ -e "${CFS_DIR}/.git" ]; then
+            echo "## pinned state and source checks (same checks as the build step)"
+            pinned_state_record
+        else
+            echo "## ${CFS_DIR} is not a git clone: no pinned-state check here (the source is identified by the caller's manifest and patch)"
+        fi
         echo
         echo "## ${CONFIG} PREP_OPTS actually passed to cmake (target-rules.mk L50 writes them to stamp.prep)"
         cat "${b}/stamp.prep"
@@ -355,4 +401,5 @@ case "${STEP}" in
     build)   do_build ;;
     runtest) do_runtest ;;
     record)  do_record ;;
+    existing) do_existing ;;
 esac

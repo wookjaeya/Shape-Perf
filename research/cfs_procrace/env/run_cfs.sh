@@ -37,7 +37,11 @@
 #     LOG_FILE  console log path (default <this script dir>/logs/run_<UTC timestamp>.log). A companion
 #           <LOG_FILE>.meta holds the run record.
 #   Environment:
-#     CFS_DIR          clone location (default /home/user/work/procrace/cfs_ref/cFS)
+#     CFS_DIR          clone location (default /home/user/work/procrace/cfs_ref/cFS, the ENV tree). v5: may name a
+#                      tree that is not a git clone, such as the CORD-instrumented copy /home/user/work/procrace/cfs_cord/cFS
+#                      (CONDITIONS.md H-9); the .meta then records cfs_dir and "bundle=not a git clone" instead of a
+#                      commit, and the source identity is the caller's (manifest + patch). Everything else (user, cwd
+#                      inside CFS_DIR, command, stop, isolation, records) is the same for any CFS_DIR.
 #     CFS_NORMAL_USER  required when started as root: the existing non-root account to run as (README L102).
 #                      core-cpu1 (and cmd_send) are exec'ed with setpriv: uid, gid and supplementary groups of that
 #                      account only; no capability, rlimit, scheduler or environment change (CONDITIONS.md E1, E12).
@@ -69,11 +73,14 @@
 # Script history: v1 (2026-10-08T01:29Z) produced logs/run01_*, run02_* and the audit's run03; it polled the log
 # every 50 ms and had SIGINT as its only stop. v2 (after the audit): STOP argument, event-based detection,
 # isolation check, process credentials/limits/environment in the .meta; produced run04-run07. v3 (2026-10-08,
-# measurement M1): optional RUN_CFS_HOOK only. v4 (this file, 2026-10-08, case R2): optional RUN_CFS_WRAP only.
+# measurement M1): optional RUN_CFS_HOOK only. v4 (2026-10-08, case R2): optional RUN_CFS_WRAP only. v5 (this file,
+# 2026-10-08, CORD R2): records cfs_dir, and "bundle=" no longer resolves git upward from a CFS_DIR that has no .git
+# (it says "not a git clone"). For the default CFS_DIR (the ENV clone) v5 writes the same .meta lines as v4 plus the
+# one cfs_dir= line.
 
 set -euo pipefail
 
-SCRIPT_VERSION="v4"
+SCRIPT_VERSION="v5"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib_record.sh
 . "${SCRIPT_DIR}/lib_record.sh"
@@ -84,7 +91,7 @@ CFE_DIR="${CFS_DIR}/cfe"
 OPER_LINE="CFE_ES_Main entering OPERATIONAL state"      # README L114
 
 if [ $# -lt 2 ]; then
-    sed -n '2,73p' "$0" >&2
+    sed -n '2,79p' "$0" >&2
     exit 2
 fi
 DURATION="$1"
@@ -168,7 +175,12 @@ trap cleanup EXIT
     echo "command=./core-cpu1"
     echo "launcher=setsid ${LAUNCH[*]}"
     echo "run_user=${RUN_USER} ($(id "${RUN_USER}"))"
-    echo "bundle=$(git -c safe.directory='*' -C "${CFS_DIR}" rev-parse HEAD 2>/dev/null || echo unknown)"
+    echo "cfs_dir=${CFS_DIR}"
+    if [ -e "${CFS_DIR}/.git" ]; then
+        echo "bundle=$(git -c safe.directory='*' -C "${CFS_DIR}" rev-parse HEAD 2>/dev/null || echo unknown)"
+    else
+        echo "bundle=not a git clone (CFS_DIR override, CONDITIONS.md H-9; source identity from the caller)"
+    fi
     echo "core-cpu1 sha256=$(sha256sum "${EXE_DIR}/core-cpu1" | cut -d' ' -f1) mtime=$(date -u -r "${EXE_DIR}/core-cpu1" +%Y-%m-%dT%H:%M:%SZ)"
     echo "uname=$(uname -a)"
     echo "nproc=$(nproc)"

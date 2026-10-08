@@ -1,0 +1,49 @@
+# date: 2026-10-08T01:07:55Z
+# uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+VERSION_ID="24.04"
+# nproc
+4
+# free disk (df -h /home/user/work)
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   34G  3.9G  90% /
+# memory
+               total        used        free      shared  buff/cache   available
+Mem:           16094         557       15443          13         313       15536
+Swap:              0           0           0
+# /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+# CapEff and selected bits
+CapEff:	000001fffeffffff
+CAP_SYS_MODULE 16 True
+CAP_SYS_PTRACE 19 True
+CAP_SYS_BOOT 22 True
+CAP_SYS_ADMIN 21 True
+# kernel config (selected)
+CONFIG_SYSVIPC=y
+CONFIG_POSIX_MQUEUE=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_PERF_EVENTS=y
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+CONFIG_KVM=y
+# CONFIG_KPROBES is not set
+CONFIG_UPROBES=y
+# CONFIG_MODULES is not set
+CONFIG_FTRACE=y
+CONFIG_UPROBE_EVENTS=y
+# /dev/kvm
+ls: cannot access '/dev/kvm': No such file or directory
+# cpu virtualization flags (vmx/svm)
+none
+hypervisor
+# finit_module probe (syscall 313)
+ret -1 errno 38 Function not implemented
+# kexec_load probe (syscall 246)
+ret -1 errno 38 Function not implemented
+# ptrace: strace /bin/true
+exit_group(0)                           = ?
++++ exited with 0 +++
+# ptrace: gdb batch run

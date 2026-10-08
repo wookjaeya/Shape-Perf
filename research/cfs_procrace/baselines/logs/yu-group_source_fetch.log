@@ -1,0 +1,12 @@
+## GET https://homepages.uc.edu/~tyu/  (2026-10-07T07:27:16Z)
+curl: (56) CONNECT tunnel failed, response 403
+http=000 size=0 final=https://homepages.uc.edu/~tyu/
+## GET https://homepages.uc.edu/~tyu/links/research.html  (2026-10-07T07:27:16Z)
+curl: (56) CONNECT tunnel failed, response 403
+http=000 size=0 final=https://homepages.uc.edu/~tyu/links/research.html
+## GET https://homepages.uc.edu/~tyu/links/software.html  (2026-10-07T07:27:16Z)
+curl: (56) CONNECT tunnel failed, response 403
+http=000 size=0 final=https://homepages.uc.edu/~tyu/links/software.html
+## GET https://homepages.uc.edu/~tyu/links/tools.html  (2026-10-07T07:27:16Z)
+curl: (56) CONNECT tunnel failed, response 403
+http=000 size=0 final=https://homepages.uc.edu/~tyu/links/tools.html

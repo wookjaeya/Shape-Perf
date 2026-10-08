@@ -1,0 +1,16 @@
+# uname -r: 6.18.44-fc-v77
+# ls -la /dev/scribe:
+ls: cannot access '/dev/scribe': No such file or directory
+# grep -c scribe /proc/kallsyms:
+26
+# /proc/modules present?
+ls: cannot access '/proc/modules': No such file or directory
+# capsh / CAP_SYS_MODULE:
+CapInh:	0000000000000000
+CapPrm:	000001fffeffffff
+CapEff:	000001fffeffffff
+CapBnd:	000001fffeffffff
+CapAmb:	0000000000000000
+# LD_LIBRARY_PATH=. ./record -- /bin/true
+./record: can't record: Bad file descriptor
+exit=255

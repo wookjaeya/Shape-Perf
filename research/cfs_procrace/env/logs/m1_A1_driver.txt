@@ -1,0 +1,5 @@
+measure_baseline.sh m1_A1: variant=A window=30s (CFE_PLATFORM_CORE_MAX_STARTUP_MSEC=30000) stop=ci-es-restart-poweron grace=5000ms
+mq_probe sha256=368ceee2184df9a7ecc64be53db32cebf2514f50e518ebf3bac165319b92b3cf layout=m1_layout.json
+tools sha256: mq_probe.c=0658efa654f59c5f cfs_layout.py=d6866a645dc807b7 cfs_snapshot.py=36645735e771ed68 sb_pipeinfo_parse.py=ce278d0f98aa6fc7 inotify_wait.py=13055c90febcc629 m1_hook.sh=4235bfce32c21f63 persist_snapshot.sh=9fe5314f31fa79a2 
+run_cfs.sh sha256=6df4283c0986cc02883b64361c0260c21eb25763a870e8c74cbce5bd6f52ba77
+run_cfs.sh exit=0

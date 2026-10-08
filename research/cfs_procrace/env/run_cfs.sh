@@ -49,13 +49,25 @@
 # Harness-only aspects (not cFS settings; CONDITIONS.md H-*): setsid (H-1), stdin /dev/null and console to a
 # regular file (H-2), event-based detection of the README L114 line with tail -f (H-3), GRACE bound (E11).
 #
+# Optional measurement hook (v3; CONDITIONS.md H-7, BASELINE_MEASURE.md): if RUN_CFS_HOOK names an executable,
+# it is called synchronously as  <hook> <point> <pid> <log_file> <ms since launch>  at two points:
+#   S1  fixed MODE only: right after the README L114 line is read (after the existing thread capture);
+#   S2  every MODE: when the wait ends (duration elapsed / README L114 line in operational mode), immediately before
+#       the stop action. Not called if core-cpu1 exited by itself.
+# Hook output goes to <LOG_FILE>.hook, never to the console log. RUN_CFS_HOOK is removed from the environment
+# before core-cpu1 is launched (export -n), so the process environment is the same as without the hook. While a
+# hook runs, the wait loop does not run; in fixed mode the stop therefore comes after the S2 hook returns, and the
+# .meta records both times. With RUN_CFS_HOOK unset or empty, v3 behaves exactly as v2 and writes the same .meta
+# lines (only the version string differs).
+#
 # Script history: v1 (2026-10-08T01:29Z) produced logs/run01_*, run02_* and the audit's run03; it polled the log
-# every 50 ms and had SIGINT as its only stop. v2 (this file, after the audit): STOP argument, event-based
-# detection, isolation check, process credentials/limits/environment in the .meta.
+# every 50 ms and had SIGINT as its only stop. v2 (after the audit): STOP argument, event-based detection,
+# isolation check, process credentials/limits/environment in the .meta; produced run04-run07. v3 (this file,
+# 2026-10-08, measurement M1): optional RUN_CFS_HOOK only.
 
 set -euo pipefail
 
-SCRIPT_VERSION="v2"
+SCRIPT_VERSION="v3"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib_record.sh
 . "${SCRIPT_DIR}/lib_record.sh"
@@ -66,12 +78,15 @@ CFE_DIR="${CFS_DIR}/cfe"
 OPER_LINE="CFE_ES_Main entering OPERATIONAL state"      # README L114
 
 if [ $# -lt 2 ]; then
-    sed -n '2,54p' "$0" >&2
+    sed -n '2,67p' "$0" >&2
     exit 2
 fi
 DURATION="$1"
 STOP="$2"
 LOG_FILE="${3:-${SCRIPT_DIR}/logs/run_$(date -u +%Y%m%dT%H%M%SZ).log}"
+HOOK="${RUN_CFS_HOOK:-}"
+export -n RUN_CFS_HOOK 2>/dev/null || true       # never part of core-cpu1's environment
+if [ -n "${HOOK}" ] && [ ! -x "${HOOK}" ]; then echo "ERROR: RUN_CFS_HOOK=${HOOK} is not executable" >&2; exit 2; fi
 mkdir -p "$(dirname "${LOG_FILE}")"
 LOG_FILE="$(cd "$(dirname "${LOG_FILE}")" && pwd)/$(basename "${LOG_FILE}")"   # absolute: the script cd's to EXE_DIR
 META="${LOG_FILE}.meta"
@@ -184,6 +199,15 @@ capture_static() {   # raw copies first (fast); they are processed after the run
     readlink "/proc/${PID}/exe" "/proc/${PID}/cwd" "/proc/${PID}/fd/0" "/proc/${PID}/fd/1" "/proc/${PID}/fd/2" > "${PRIV}/links" 2>/dev/null || true
     T_CAP_END_US="$(now_us)"
 }
+HOOK_LOG=""
+run_hook() {   # $1 = S1 | S2; synchronous; output to <LOG_FILE>.hook
+    [ -n "${HOOK}" ] || return 0
+    local t0 t1 r=0
+    t0="$(now_us)"
+    "${HOOK}" "$1" "${PID}" "${LOG_FILE}" "$(rel_ms "${t0}")" >> "${LOG_FILE}.hook" 2>&1 < /dev/null || r=$?
+    t1="$(now_us)"
+    HOOK_LOG="${HOOK_LOG:+${HOOK_LOG},}$1@$(rel_ms "${t0}")-$(rel_ms "${t1}")ms(rc=${r})"
+}
 capture_threads() {
     ps -L -o tid,cls,rtprio,ni,pri,psr,comm -p "${PID}" > "${PRIV}/threads" 2>&1 || true
     T_THR_US="$(now_us)"
@@ -207,6 +231,7 @@ while :; do
             OPER_US="$(now_us)"
             if [ "${MODE}" = operational ]; then stop_reason="operational_seen"; break; fi
             capture_threads
+            run_hook S1
         fi
     elif [ "${rc}" -gt 128 ]; then
         continue            # read timed out; the deadline test at the top of the loop decides
@@ -236,6 +261,7 @@ signal_group() {
 CMD_SEND_RC="n/a"
 TAIL_FDS=""
 if [ "${stop_reason}" != "exited_by_itself" ]; then
+    run_hook S2
     T_STOP_US="$(now_us)"
     case "${STOP}" in
         console-sigint)
@@ -269,6 +295,7 @@ leftover="$(pgrep -g "${PID}" 2>/dev/null | tr '\n' ' ' || true)"
     echo "first_console_line_read_ms=$( [ -n "${FIRST_US}" ] && rel_ms "${FIRST_US}" || echo none)"
     echo "operational_line_read_ms=$( [ -n "${OPER_US}" ] && rel_ms "${OPER_US}" || echo not_seen)"
     echo "stop_initiated_ms=$( [ -n "${T_STOP_US}" ] && rel_ms "${T_STOP_US}" || echo none)"
+    if [ -n "${HOOK}" ]; then echo "hook=${HOOK}"; echo "hook_calls=${HOOK_LOG:-none} (output in $(basename "${LOG_FILE}").hook)"; fi
     echo "stop_actions=${STOP_LOG:-none}"
     echo "cmd_send_exit=${CMD_SEND_RC}"
     if [ -s "${PRIV}/cmd_send.out" ]; then echo "cmd_send_output:"; sed 's/^/  /' "${PRIV}/cmd_send.out"; fi

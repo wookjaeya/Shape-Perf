@@ -1,0 +1,38 @@
+# availability.md: read-only container consistency re-check (no install, no build, no tool run)
+# Purpose: confirm the container facts that racepro.md, yu-group.md, descry.md, syspro.md and osal-visibility.md rely on are unchanged.
+# Taken: 2026-10-08T02:30:46Z
+$ uname -a
+Linux vm 6.18.44-fc-v80 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+$ grep PRETTY /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+$ nproc
+4
+$ df -h /home/user/work
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   35G  2.2G  95% /
+$ ls /proc/modules
+ls: cannot access '/proc/modules': No such file or directory
+$ grep CapEff /proc/self/status
+CapEff:	000001fffeffffff
+$ zgrep CONFIG_{MODULES,KEXEC,KEXEC_FILE} /proc/config.gz
+# CONFIG_KEXEC is not set
+# CONFIG_KEXEC_FILE is not set
+# CONFIG_MODULES is not set
+$ ls /dev/kvm
+ls: cannot access '/dev/kvm': No such file or directory
+$ grep -c -E 'vmx|svm' /proc/cpuinfo
+0
+$ python3 -I ctypes: syscall(313 finit_module, fd(/dev/null), "", 0); syscall(246 kexec_load, 0, 0, NULL, 0)
+finit_module -1 Function not implemented
+kexec_load -1 Function not implemented
+$ strace -f -o /dev/null /bin/true; echo rc
+rc=0
+$ gdb -q -batch -ex run /bin/true | tail -1
+[Inferior 1 (process 21924) exited normally]
+$ du -sh /home/user/work/procrace/baselines/*
+2.6M	/home/user/work/procrace/baselines/descry
+69M	/home/user/work/procrace/baselines/osal-visibility
+201M	/home/user/work/procrace/baselines/racepro
+36K	/home/user/work/procrace/baselines/syspro
+22M	/home/user/work/procrace/baselines/yu-group
+# Result: agrees with the per-tool reports. Free disk on / is lower than the ~4 GB the task text expected (see df above).

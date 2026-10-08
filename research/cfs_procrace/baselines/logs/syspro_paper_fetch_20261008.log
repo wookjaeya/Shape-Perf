@@ -73,3 +73,18 @@ curl: (56) CONNECT tunnel failed, response 403
 2026-10-08T01:33:59.608Z connect_rejected software.intel.com:443
 2026-10-08T01:33:59.879Z connect_rejected www.srcml.org:443
 2026-10-08T01:34:00.221Z connect_rejected www.philippe-fournier-viger.com:443
+
+## ADDENDUM 2026-10-08T02:26:08Z (review re-check): further paper/artifact index hosts, one curl attempt each
+## 3. Reachability, one attempt per host (curl -sS -o /dev/null -w '%{http_code}' --max-time 20)
+https://www.intel.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://software.intel.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://zenodo.org/api/records -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://figshare.com/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.figshare.com/v2/articles -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://www.semanticscholar.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.semanticscholar.org/graph/v1/paper/arXiv:2601.09616 -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://api.openalex.org/works -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://export.arxiv.org/api/query -> curl: (56) CONNECT tunnel failed, response 403 000 
+https://scholar.archive.org/ -> curl: (56) CONNECT tunnel failed, response 403 000 
+
+# Source: syspro_review_recheck_20261008.log section 3

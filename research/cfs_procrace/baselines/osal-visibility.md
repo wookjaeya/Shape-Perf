@@ -2,25 +2,28 @@
 
 Date: 2026-10-08 (UTC). Policy: `../CONDITIONS_POLICY.md`. Logs: `logs/osal-visibility_*.log`. Work directory: `/home/user/work/procrace/baselines/osal-visibility/` (69 MB).
 
-**What kind of result this is.** This is a probe, not a baseline-tool result. It checks what any syscall-level observer (strace/ptrace, or a kernel recorder that models syscall effects) can see when OSAL and cFE create, register or look up named objects. No process-race tool was run here. Nothing below says that any tool "fails to detect" anything.
+Revised 2026-10-08 after review. Changes: the name-bearing count is now scoped to the `-s 65535` runs; R5 (mqueue sysctls, CI link) and R11 (trace command) are re-sourced; the observer scope now excludes memory-page recorders; D1, D4 and H-OSAL-1 citations are corrected; container facts now include kexec and VM; the syspro provenance is fixed; counts are made precise. Evidence for the revision: `logs/osal-visibility_review_recheck_20261008.log`.
+
+**What kind of result this is.** This is a probe, not a baseline-tool result. It checks what a syscall-level observer can see when OSAL and cFE create, register or look up named objects. Here "syscall-level observer" means an observer whose events are syscalls or syscall effects on kernel objects: strace, ptrace or seccomp; RacePro's race-candidate model (`racepro.md` §5.2); DESCRY's relations. A recorder that also logs memory page ownership (Scribe, `racepro.md` §5.1) may record anonymous, page-granular accesses to the in-memory tables described below. That was not measured here. No process-race tool was run here. Nothing below says that any tool "fails to detect" anything.
 
 ## 0. Decisions needed from the PI
 
 | # | Question | Why it needs you | Options |
 |---|---|---|---|
-| D1 | Should the reference cFS build (`core-cpu1`, ENV) be run once under `strace -f`? It would confirm three things at the cFS level: (a) the PSP's per-task `prctl(PR_SET_NAME, <task name>)` (§6.4); (b) that CF's `OS_CountSemGetIdByName` and the ES record writes issue no syscalls; (c) that each SB pipe shows up as an `mq_open("<pid>.<pipe name>")`. | Each extra cFS run changes the PSP reset state. run02 ended at "Processor Reset count not reached (1/2)". The reset-type policy for repeated runs is still open (ENV E7). Today (b) and (c) rest on OSAL tests plus source reading, and (a) rests on source reading plus a glibc probe. | (i) Run it after E7 is decided, using ENV's documented run procedure. (ii) Do not run it; keep the source-level statements and mark them as such. |
-| D2 | Can this probe count as the "event observation" evidence for syscall-based baselines (RacePro's kernel-object model, DESCRY and SysPro's syscall orders) in the §4.7 diagnosis table? | This is evidence about the observation model, not a tool run. It may be cited only as "not observable at syscall level", never as a tool missing a case. | Accept with that label, or require each tool's own run first. |
+| D1 | Should the reference cFS build (`core-cpu1`, ENV) be run once under `strace -f`? It would confirm three things at the cFS level: (a) the PSP's per-task `prctl(PR_SET_NAME, <task name>)` (§6.4); (b) that CF's `OS_CountSemGetIdByName` and the ES record writes issue no syscalls; (c) that each SB pipe shows up as an `mq_open("<pid>.<pipe name>")`. | Each extra cFS run changes the PSP reset state. Since this report was first written (01:59), ENV has run run03-run07 (02:09-02:11). The reset-type sequence is now run01 PO → run02 PR → run03 PR, which hit "Maximum Processor Reset count reached (2)" and exited with POWERON → run04 PO → SIGINT → run05 PR → ES restart → run06 PO → ES restart → run07 PO → ES restart (`env/ENV.md` L189; `env/logs/run03_audit_operational.log` L229-230). ENV says ordering experiments need a fixed reset type (E7) and stop method (E11) (`env/ENV.md` L213). Both are still open (L18). Today (b) and (c) rest on OSAL tests plus source reading, and (a) rests on source reading plus a glibc probe. | (i) Run it after E7 is decided, using ENV's documented run procedure. (ii) Do not run it; keep the source-level statements and mark them as such. |
+| D2 | Can this probe count as the "event observation" evidence for syscall-based baselines (RacePro's kernel-object model, DESCRY and SysPro's syscall orders) in the §4.7 diagnosis table? | This is evidence about the observation model, not a tool run. It may be cited only as "not observable at syscall level", never as a tool missing a case. For RacePro it covers the race-candidate model (`racepro.md` §5.2), not Scribe's recording. Scribe also logs memory page ownership between threads (`racepro.md` §5.1), and this probe did not measure that. | Accept with that label, or require each tool's own run first. |
 | D3 | Should hypothesis **H-OSAL-1** (§6.5) be pursued? Source reading suggests that a by-name lookup that hits an object still being created gets `OS_ERR_INCORRECT_OBJ_STATE`, and that the count-semaphore table lock is then never released, so the creator blocks for good. This bears directly on C1. | It was not executed. Checking it needs a controlled interleaving. No OSAL test exercises it, so the policy's "own test only if none exists" clause applies. | (i) Check it with gdb breakpoints on OSAL's own `count-sem-test` (no new code). (ii) Write a minimal test against the documented API. (iii) Defer, and record it only in the C1 notes. |
-| D4 | Branch. These results are for OSAL `d2d877a` (cFS `main` / `v7.0.1`). The local C1 sources use OSAL `dad0ee9` (`dev`). | This is tied to the open ENV A2 (main vs dev). On the inspected paths, `dev` changes only a refactor in `OS_ObjectIdFindNextFree` and adds a core-count read at init. `dev` was not executed. | Keep main, or re-run the probe on dev. |
+| D4 | Revision. These results are for OSAL `d2d877a` (cFS `main` / `v7.0.1`). The local C1 cFS checkout (`src/C1/cFS`, `01e8416`) has the OSAL gitlink `dad0ee9` (`dev`). The C1 case's own OSAL is a third revision: `42af0f73` (v6.0.0-rc4, pinned by cFS caelum-rc4; `cases/C1.yaml` L35-37, L91-96). The H-OSAL-1 hypothesis in C1.yaml L96 is stated at that revision. | This is tied to the open ENV A2 (main vs dev). On the inspected paths, `dev` changes only a refactor in `OS_ObjectIdFindNextFree` and adds a core-count read at init. Neither `dev` nor `42af0f73` was executed. Read-only `git show` at `42af0f73` confirms the same no-unlock path for H-OSAL-1 (§6.5). | Keep main, re-run the probe on dev, or re-run it on `42af0f73`. |
+| D5 | CI mqueue sysctls (R5): `fs.mqueue.msg_max=512`, `queues_max=512` in OSAL's CI, against 10 and 256 here. | Root here appears able to raise them (R5), but that changes shared container state and the README build does not require it. This is the same open question as ENV E5 (`env/ENV.md` L18: README `msg_max` 10 vs the bundle CI's 64). | Decide together with E5. Until then: not applied. |
 
 ## 1. Summary and verdict
 
-- **Verdict: `probe_result`.** OSAL was built exactly as its README says (L24-30). Its own functional test `src/tests/count-sem-test` passed 81/81 under the exact command `strace -f -e trace=all`. It passed again in 11 stack-annotated strace runs.
+- **Verdict: `probe_result`.** OSAL was built exactly as its README says (L24-30). Its own functional test `src/tests/count-sem-test` passed 81/81 under `strace -f -e trace=all`, the base command given by the orchestrating task (R11; not a policy reference). It passed again in 11 stack-annotated strace runs.
 - **Count semaphore create and lookup issued no syscalls at all**, not even the expected futex or clock calls:
   - `OS_CountSemCreate(&id, "Test_Sem", 0, 0)` (count-sem-test.c:105), the duplicate create at :106, and the create at :109.
-  - `OS_CountSemGetIdByName(&id, "Test_Sem")` in three other OSAL tasks (:35, :49, :63).
-  - The result held in all 12 traces.
-- **The name never appears in a syscall made by OSAL.** In every run, the only syscalls whose arguments contain `Test_Sem` or `Task_N` are 13 `write(1, …)` calls. They come from the test harness's own assertion report (`UtAssert_DoReport` → `OS_BSP_ConsoleOutput_Impl`).
+  - `OS_CountSemGetIdByName(&id, "Test_Sem")`: four lookups in three task functions (:35, :49, :63). `Task_0` is started twice (count-sem-test.c L160-162 and L178-180), so :35 runs twice (`run1_exact.strace` L328 and L399).
+  - The result held in all 12 traces. run1 supports it through line-number markers, which survive strace's default string truncation (§6.2).
+- **The name never appears in a syscall made by OSAL.** In each of the 11 runs with `-s 65535`, exactly 13 syscalls carry an object name (`Test_Sem` or `Task_N`). All 13 are `write(1, …)` from the test harness's own assertion report (`UtAssert_DoReport` → `OS_BSP_ConsoleOutput_Impl`). In run1 (base command, default `-s 32`) the write buffers are truncated at 32 bytes, so 0 matches appear. run1 supports only the window analysis by line-number markers, not any claim about names in long arguments.
 - **Where the name and the registry live.** The name→object binding is only in process memory: `OS_common_table[].name_entry` and `OS_count_sem_table[].obj_name`. The semaphore itself is an unnamed, process-private `sem_t` (`sem_init(…, 0, …)`). At syscall level it appears only as a futex word address (an OSAL table slot), and only when a Take blocks or a Give wakes a waiter.
 - **Contrast in OSAL's own `osal-core-test`:**
   - OSAL **queues** are named kernel objects. Each `OS_QueueCreate` issues `mq_open("<pid>.<name>")` and then `mq_unlink`. cFE SB pipes are OSAL queues (`cfe_sb_api.c` L163).
@@ -73,9 +76,10 @@ The `gh api` calls for the gitlink were refused with "GitHub access … not enab
 
 - Project files:
   - Policy, roadmap §2-§4 and §13.
-  - `env/ENV.md`, plus the run01 log, line 42 only.
-  - `cases/C1.yaml` (grep).
-  - `baselines/racepro.md` §7.
+  - `env/ENV.md`, plus the run01 log, line 42 only. In the revision: `env/ENV.md` L18, L32, L189, L213 and `env/logs/run03_audit_operational.log` L26, L229-230.
+  - `cases/C1.yaml` (grep; in the revision, L35-37 and L91-96).
+  - `baselines/racepro.md` §7. In the revision: §5.1-§5.2, `syspro.md` §7 and `descry.md` (grep for relations).
+  - In the revision: `tool/DESIGN.md` (grep for `strace`), and OSAL `42af0f73:src/os/shared/src/osapi-idmap.c` via read-only `git show` in `src/C1/osal`.
 - Earlier-attempt logs: listed in §10.
 - SysPro task files: `logs/syspro_syscall_surface_probe_20261008.log` and `work/.../syspro/primitives.c`, to check for overlap.
 
@@ -83,7 +87,7 @@ The `gh api` calls for the gitlink were refused with "GitHub access … not enab
 
 - The OSAL API guide PDF (`cFS/gh-pages/osal-apiguide.pdf`, README L10/L35). The build steps came from README and the Configuration Guide.
 - The CI container image `ghcr.io/core-flight-system/cfsbuildenv-linux:latest`: it was not pulled.
-- `.travis.yml`, which README L24 points to on `master`. It does not exist at this commit, so it could not be opened.
+- `.travis.yml`, which README L24 links as `blob/master/.travis.yml`. The link is dead. nasa/osal has no `master` branch (`git ls-remote`: `main`, `dev` and others, no `refs/heads/master`), and the raw URL `raw.githubusercontent.com/nasa/osal/master/.travis.yml` returns 404. (The github.com page itself returned 403 from the agent proxy, so it is not used as evidence.) `.travis.yml` was deleted from OSAL in `72da4f28` (2021-02-03, "Fix #771, Add workflow timeout and format check"). See R5 for how the GitHub workflow is used instead.
 - glibc sources. The `pthread_setname_np` → `prctl` behaviour was checked empirically instead (§5).
 - `src/unit-tests/oscore-test/ut_oscore_countsem_test.c`: grep only. It was not used as the strace target.
 - `src/examples/tasking-example`.
@@ -94,15 +98,15 @@ The `gh api` calls for the gitlink were refused with "GitHub access … not enab
 |---|---|---|---|
 | R1 | Use the OSAL commit pinned by the cFS main bundle | Task text; cFS `.gitmodules` L4-6; gitlink | **Yes**, `d2d877a` (§2) |
 | R2 | CMake ≥ 3.5 | Config Guide L205-206: "OSAL requires at least version 3.5 of the cmake tool." | **Yes**, cmake 3.28.3 |
-| R3 | Standalone build with tests, run from the base osal directory | README L16 "(from the base osal directory)" and L24-30: `mkdir build_osal_test` / `cd build_osal_test` / `cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..` / `make` / `make test` | **Yes, verbatim** (`from-reference`). Serial `make`, because README uses no `-j`. |
+| R3 | Standalone build with tests, run from the base osal directory | README L24-30: `mkdir build_osal_test` / `cd build_osal_test` / `cmake -DENABLE_UNIT_TESTS=true -DOSAL_SYSTEM_BSPTYPE=generic-linux -DOSAL_CONFIG_DEBUG_PERMISSIVE_MODE=TRUE ..` / `make` / `make test`. README L16 "(from the base osal directory)" heads the first example, the library build at L16-22, not this one. For the test build at L24-30 the base directory is implied by `cmake … ..` run inside `build_osal_test`. | **Yes, verbatim** (`from-reference`). Serial `make`, because README uses no `-j`. |
 | R4 | Alternative documented standalone build | Config Guide L245-246: "preferably outside the OSAL source tree". L253-262 add `-DCMAKE_BUILD_TYPE=debug`. | **Not used.** The README form was followed, as the task names README first. The only effective difference is `-g`: the README build has empty `C_FLAGS` (`flags.make`), so both are `-O0`. The two documents do not say which one governs (`unspecified_by_reference`). |
-| R5 | CI environment that README L24 points to ("see also CI") | README L24 links `master/.travis.yml`, which is absent at this commit. The current CI is `.github/workflows/standalone-build.yml` L27-71: `ubuntu-22.04`, container `cfsbuildenv-linux:latest`, `--sysctl fs.mqueue.msg_max=512 queues_max=512`, `-DCMAKE_BUILD_TYPE=Debug -DOSAL_OMIT_DEPRECATED=FALSE -DOSAL_VALIDATE_API=FALSE -DOSAL_INSTALL_LIBRARIES=FALSE`, `make -j2`, `ctest -j4` | **Not met, not substituted.** Here `msg_max` is 10 and was not raised (`CAP_SYS_RESOURCE` is absent, so mqueue depths above `msg_max` are not possible anyway). No CI image was used. Effect: queue depth is truncated to 10 under permissive mode (`default_config.cmake` L173-175). There is no effect on count semaphores, and `queue-test` passed. |
+| R5 | CI environment that README L24 points to ("see also CI") | README L24 links `blob/master/.travis.yml`. nasa/osal has no `master` branch and the raw URL returns 404. `.travis.yml` was deleted in `72da4f28` (2021-02-03, "Fix #771, Add workflow timeout and format check") (§3). The GitHub workflow `.github/workflows/standalone-build.yml` is used as the successor CI **by inference from that commit**, not because README points to it. Its L27-71: `ubuntu-22.04`, container `cfsbuildenv-linux:latest`, L30 `--sysctl fs.mqueue.queues_max=512 --sysctl fs.mqueue.msg_max=512`, `-DCMAKE_BUILD_TYPE=Debug -DOSAL_OMIT_DEPRECATED=FALSE -DOSAL_VALIDATE_API=FALSE -DOSAL_INSTALL_LIBRARIES=FALSE`, `make -j2`, `ctest -j4` | **Not met and not attempted.** Here `msg_max` = 10 and `queues_max` = 256, against 512 and 512 in the CI. Raising the sysctls as root appears possible: `/proc` is mounted `rw`, `msg_max` is a root-owned `0644` file, and `access(W_OK)` returns True for root and False for `ubuntu`. OSAL's own error text tells users to "check the msg_max parameter located in /proc/sys/fs/mqueue/msg_max … and raise it if you need to or run as root" (`os-impl-queues.c` L122-126). Raising it would change shared container state, and the README build does not require it. Whether to apply the CI value is a PI decision (D5), the same open question as ENV E5 (`env/ENV.md` L18: `msg_max` 10 vs the bundle CI's 64). (`CAP_SYS_RESOURCE`, which is absent here, governs only a per-call `mq_open` bypass of `msg_max`; `env/ENV.md` L32.) No CI image was used. Effect: the generic-linux BSP reads `msg_max` only when `geteuid() != 0` (`bsp_start.c` L66-78), so the runs as uid 1000 truncate queue depth to 10 under permissive mode (`default_config.cmake` L173-175). There is no effect on count semaphores, and `queue-test` passed. |
 | R6 | Linux needs NPTL and POSIX mqueue | Config Guide L653-655: "must have support for native POSIX threads (NPTL) and POSIX message queues (mqueue)." | **Yes**: glibc 2.39 NPTL; `CONFIG_POSIX_MQUEUE=y` (`container_kernel_caps.log`); `mq_open` works (core trace) |
 | R7 | Tested platforms | Config Guide L645-647: "Ubuntu LTS versions (up through 20.04 …)" | **Outside the tested range** (Ubuntu 24.04.4, kernel 6.18). This is informational, not a stated requirement. |
 | R8 | Permissive mode is for a normal user | Config Guide L170: "For debugging as a normal/non-root user …". `default_config.cmake` L169-177. | **Yes.** Build and runs were done as `ubuntu` (uid 1000), with `RLIMIT_RTPRIO` = 0. As documented, priorities are not enforced; the test printed "Task Priorities not in effect, skipping sem priority test" (count-sem-test.c:207). The run user is `unspecified_by_reference` in README. The normal user was chosen because of L170 and to match the ENV cFS runs (bundle README L102). |
 | R9 | Run the tests | README L30 `make test`; Config Guide L735-746 | **Done.** 84/85 passed (173 s). `network-api-test` failed only at `OS_SocketOpen(…INET6…)` (network-api-test.c:148-149): the container has no IPv6 (`EAFNOSUPPORT`, no `/proc/net/if_inet6`). This is a container limitation, not worked around, and unrelated to semaphores. |
 | R10 | Run a single test in place in the build tree | Config Guide L722-733; ctest's `add_test(count-sem-test "count-sem-test")` working directory | **Yes.** Run from `build_osal_test/tests`. |
-| R11 | Trace command | Task text: `strace -f -e trace=all` | **Yes** (run1, verbatim, `-o file` only). The annotated runs add output-format options only: `-tt -T -s 65535 -k`. |
+| R11 | Trace command (**probe-design condition, not a policy reference**) | The base command `strace -f -e trace=all` comes from the orchestrating task text. No project reference holds it: the roadmap has no `strace`, and no project `.md` or `.yaml` other than this report has `trace=all`. The project design note `tool/DESIGN.md` L97 names a baseline "what `strace -f` shows" but gives no flags, and it is not one of the references the policy accepts (`CONDITIONS_POLICY.md` L5-10). | run1 used the base command (plus `-o file`). The annotated runs add `-tt -T -s 65535 -k`. These are `unspecified_by_reference` agent choices. They are not output-format only: `-k` unwinds the user stack at every stop and perturbs scheduling (§9). The header comment in `scripts/strace_countsem.sh` ("extra output-format options only") was written before this review. It is left unchanged as run provenance, and this row supersedes it. |
 | R12 | ptrace allowed in the container | (container fact) | **Yes**: strace 6.8 works, there is no Yama, and `CAP_SYS_PTRACE` is present |
 
 **Container facts** (`logs/osal-visibility_container_facts_20261008.log`):
@@ -111,8 +115,11 @@ The `gh api` calls for the gitlink were refused with "GitHub access … not enab
 - Root with CapEff `0x1fffeffffff`:
   - `CAP_SYS_MODULE` is in the set, but `/proc/modules` is absent. `container_kernel_caps.log` shows `# CONFIG_MODULES is not set` and `finit_module` → ENOSYS.
   - `CAP_SYS_RESOURCE` is absent.
-- No `/proc/sys/kernel/yama`. `fs.mqueue.msg_max` = 10.
-- Booting another kernel was not attempted. `/dev/kvm` is absent (`racepro_emulation_feasibility.log`).
+- No `/proc/sys/kernel/yama`. `fs.mqueue.msg_max` = 10, `fs.mqueue.queues_max` = 256.
+- Booting another kernel is not available. Neither kexec nor a hardware-assisted nested VM is available (read-only checks, `logs/osal-visibility_review_recheck_20261008.log` F9):
+  - `/proc/config.gz`: `# CONFIG_KEXEC is not set`, `# CONFIG_KEXEC_FILE is not set`. `kexec_load` returns ENOSYS (`logs/descry_container_facts_20261008.log` L48).
+  - No `vmx`/`svm` CPU flags; the `hypervisor` flag is set. `/dev/kvm` is absent (also `racepro_emulation_feasibility.log`), and no `kvm` misc device is registered in `/sys/class/misc`, although the kernel is built with `CONFIG_KVM=y` and `CONFIG_KVM_PVM=y`.
+  - The kernel is a guest kernel `6.18.44-fc-v80` with hostname `vm`. The `fc` suffix suggests Firecracker (inference). The process is in the init IPC namespace (`ipc:[4026531839]`).
 - glibc is `2.39-0ubuntu8.9`. That version comes from the earlier non-reference `apt-get install gcc-multilib` (8.7 → 8.9, see §10). OSAL documents no glibc version (`unspecified_by_reference`).
 
 ## 5. What was run
@@ -126,7 +133,7 @@ Scripts are in `/home/user/work/procrace/baselines/osal-visibility/scripts/`. Th
 | build | `make` | exit 0, 26.8 s, 0 warnings, 0 errors | `osal-visibility_build_make_20261008.log` |
 | test (1st) | `make test` | **Failed before running any test.** The agent had listed the tests with `ctest -N` as root, which created a root-owned `Testing/`. That directory was removed and the step re-run. | `osal-visibility_build_maketest_FAILED_root_owned_Testing_dir_20261008.log` |
 | test | `make test` | 84/85 passed. Only `network-api-test` failed (IPv6). `count-sem-test` passed in 1.23 s. | `osal-visibility_build_maketest_20261008.log`, `osal-visibility_ctest_LastTest_20261008.log` |
-| probe, exact | (cwd `build_osal_test/tests`) `strace -f -e trace=all -o run1_exact.strace ./count-sem-test` | exit 0, 81/81 PASS | `osal-visibility_strace_run1_exact_20261008.log` (full trace and stdout) |
+| probe, exact | (cwd `build_osal_test/tests`) `strace -f -e trace=all -o run1_exact.strace ./count-sem-test` | exit 0, 81/81 PASS. strace's default `-s 32` truncates the UtAssert write buffers, so this trace is used only for the line-number marker windows (§6.2). | `osal-visibility_strace_run1_exact_20261008.log` (full trace and stdout) |
 | probe, annotated ×11 | `strace -f -e trace=all -tt -T -s 65535 -k -o <label>.strace ./count-sem-test` (run2, rep03…rep12) | all exit 0, 81/81 PASS | `osal-visibility_strace_analysis_20261008.log`; traces in `work/…/traces/` |
 | contrast | `strace -f -e trace=all -o core_exact.strace ./osal-core-test`, plus the same annotated form | exit 0, 624/624 PASS (both) | `osal-visibility_strace_osal-core-test_20261008.log` |
 | glibc check | `strace -f -e trace=prctl -s 64 python3 -I -c '<ctypes call of pthread_setname_np(pthread_self(), b"CF_PROBE_NAME")>'` | `prctl(PR_SET_NAME, "CF_PROBE_NAME") = 0` | `osal-visibility_glibc_setname_probe_20261008.log` |
@@ -183,9 +190,9 @@ Scripts are in `/home/user/work/procrace/baselines/osal-visibility/scripts/`. Th
 Test structure:
 
 - The main task creates "Test_Sem" (L105), checks that a duplicate is rejected (L106), and creates "Test_Sem_Nonzero" (L109).
-- It then starts OSAL tasks `Task_0`, `Task_1` and `Task_2` (L160-186). Each looks the semaphore up by name (L35, L49, L63) and then blocks on Take or TimedWait.
+- It then starts OSAL tasks `Task_0`, `Task_1` and `Task_2` (L160-186). `Task_0` is started twice: once alone (L160-162, then deleted) and once with the other two (L178-180). Each task looks the semaphore up by name (L35, L49, L63) and then blocks on Take or TimedWait. That makes four lookups in three task functions (`run1_exact.strace` L328 and L399 for :35, L430 for :49, L459 for :63).
 
-UtAssert prints one report line right after each call returns, and these `write`s serve as markers.
+UtAssert prints one report line right after each call returns, and these `write`s serve as markers. The marker prefix (`01.0nn count-sem-test.c:NNN`) fits inside strace's default 32-byte string limit, so the windows can be read from run1 even though its write buffers are truncated.
 
 - **Create window** (`run1_exact.strace` lines 200-216, reproduced in analysis log §A; same in all annotated runs): between the report for :102 and the report for :117 there are only `write(1, "[ PASS]"…)`, `write(1, " ")`, `write(1, "01.01x count-sem-test.c:10x - …")` and `write(1, "\n")`. Three `OS_CountSemCreate` calls issued **zero** syscalls.
 - **Lookup windows** (`run1_exact.strace` lines 299-465, analysis log §B). For each child task the sequence is:
@@ -212,7 +219,7 @@ UtAssert prints one report line right after each call returns, and these `write`
 | `OS_CountSemTake` / `OS_CountSemTimedWait` / `OS_CountSemGive` | futex WAIT/WAKE on `0x…0c0`, only when blocking or waking |
 | `OS_TaskDelay` | `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, …)` |
 
-**Name-bearing syscalls:** exactly 13 per run, all `write(1, …)` from `OS_BSP_ConsoleOutput_Impl` ← `UT_BSP_DoText` ← `UtAssert_DoReport`. The harness prints the source expression, and that is the only place the name appears.
+**Name-bearing syscalls** (`grep -cE 'Test_Sem|Task_[0-9]'`): in each of the 11 runs with `-s 65535`, exactly 13 syscalls carry an object name. All 13 are `write(1, …)` from `OS_BSP_ConsoleOutput_Impl` ← `UT_BSP_DoText` ← `UtAssert_DoReport`. The harness prints the source expression, and that is the only place the name appears. In run1 (base command, default `-s 32`) the write buffers are truncated (for example `write(1, "01.013 count-sem-test.c:105 - OS"..., 99)`, L204), so 0 matches appear. run1 therefore supports only the window analysis above, not any claim about names in long arguments.
 
 **Futex address → object** (static symbols from `nm -S -n`; load base from the stack-attributed BSP lock; analysis log §F):
 
@@ -227,7 +234,7 @@ So the semaphore's only syscall-level identity is an anonymous address. Nothing 
 ### 6.3 Contrast: osal-core-test (OSAL's own test; log `osal-visibility_strace_osal-core-test_20261008.log`)
 
 - **Queues are visible by name:**
-  - There are 69 `mq_open("25212.q 0", O_RDWR|O_CREAT, 0666, {…mq_maxmsg=10…})` calls, each followed by `mq_unlink`, all with stack `OS_QueueCreate_Impl` ← `OS_QueueCreate`.
+  - There are 69 `mq_open("<pid>.q <n>", O_RDWR|O_CREAT, 0666, {…mq_maxmsg=10…})` calls, each followed by `mq_unlink`, all with stack `OS_QueueCreate_Impl` ← `OS_QueueCreate`. In `core_exact.strace` the pid is 25212 and there are 64 distinct names (`q 0` ×4, `q 2` and `q 3` ×2 each, the rest once).
   - `mq_maxmsg` = 10 is the permissive truncation (R5).
 - **Lookups by name issued no syscalls:** `OS_QueueGetIdByName` (L411-414) and `OS_TaskGetIdByName` (L304-315) both had 0.
 - **Bin and mutex semaphores:** `OS_BinSemCreate` and `OS_MutSemCreate` had 0 syscalls each.
@@ -280,9 +287,9 @@ So the semaphore's only syscall-level identity is an anonymous address. Nothing 
 
 **The window.** A count semaphore is RESERVED and already named during this stretch:
 
-1. `OS_ObjectIdAllocateNew` → `OS_ObjectIdConvertToken` (EXCLUSIVE) sets `active_id = RESERVED` and releases the type lock (`osapi-idmap.c` L437-438, L515).
+1. `OS_ObjectIdAllocateNew` → `OS_ObjectIdConvertToken` (EXCLUSIVE) sets `active_id = RESERVED` and releases the type lock (`osapi-idmap.c` L437-438; unlock at L513-516). The comments at `osapi-countsem.c` L93 and `osapi-task.c` L186 ("the common ObjectIdAllocate routine will lock the object type and leave it locked") are stale. They are not a counter-reference: the code unlocks.
 2. The creator sets `name_entry` without holding the lock (`osapi-countsem.c` L100; `os-shared-idmap.h` L110), then calls `sem_init`.
-3. `OS_ObjectIdFinalizeNew` takes the lock again (L1074).
+3. `OS_ObjectIdFinalizeNew` (L859) → `OS_ObjectIdTransactionFinish` → `OS_Lock_Global` (L1074) takes the lock again.
 
 Between steps 2 and 3 the record is RESERVED and carries its name.
 
@@ -296,14 +303,22 @@ Between steps 2 and 3 the record is RESERVED and carries its name.
 **Consequence, read from the source:**
 
 - The looking-up task (C1: CF) gets `OS_ERR_INCORRECT_OBJ_STATE`. CF's retry fix (`833fdbb`) retries only on `OS_ERR_NAME_NOT_FOUND` (`cases/C1.yaml` L160).
-- The count-semaphore table mutex stays locked. The creator (C1: BP) would then block forever in `OS_ObjectIdFinalizeNew` (L1074).
+- The count-semaphore table mutex stays locked. The creator (C1: BP) would then block forever in `OS_ObjectIdFinalizeNew` (L859) → `OS_ObjectIdTransactionFinish` → `OS_Lock_Global` (L1074).
 - At syscall level this would show only as a `FUTEX_LOCK_PI` that never returns, on an anonymous address.
+
+**At the C1 case's own OSAL revision.** The line numbers above are for `d2d877a`. The C1 case's own OSAL is `42af0f73` (v6.0.0-rc4; `cases/C1.yaml` L35-37, L91-96). The probe was not run there. Read-only `git show` at `42af0f73` confirms the same no-unlock path:
+
+- `osapi-idmap.c@42af0f7` L414-417: `if (!OS_ObjectIdIsValid(expected_id)) { return OS_ERR_INCORRECT_OBJ_STATE; }`.
+- `OS_ObjectIdFindNextMatch` matches any defined `active_id` (L583).
+- `OS_ObjectIdGetBySearch` (L943-967) has no cancel when ConvertToken fails, and `OS_ObjectIdFindByName` (L1000-1025) releases only on success. Both are identical in structure to `d2d877a`.
 
 **Caveats.** The window holds no syscalls at all (§6.2), so it is very short. This extends the `C1.yaml` L96 hypothesis (which predicted only the error code). It is unverified and must not be cited as a result until it is checked.
 
 ## 7. Observation model
 
-**A syscall-level observer** (strace/ptrace, seccomp, or a kernel recorder that models syscall effects on kernel objects) **watching a native cFS process sees:**
+**Scope.** The lists below apply to observers whose events are syscalls or syscall effects on kernel objects: strace, ptrace or seccomp; RacePro's race-candidate model (`racepro.md` §5.2); DESCRY's relations. A recorder that also logs memory page ownership (Scribe, `racepro.md` §5.1: page-ownership events between threads, plus `FUTEX` resource events) may record anonymous, page-granular accesses to `OS_common_table` and the ES tables. That was not measured here. Such events would carry a page, not a name or a record field.
+
+**A syscall-level observer in this sense, watching a native cFS process, sees:**
 
 - Thread creation: `clone3`, with no name.
 - Kernel thread names: `prctl(PR_SET_NAME)` from the pc-linux PSP. This is source-level; D1 would confirm it in cFS.
@@ -357,7 +372,7 @@ These items are RacePro-related, not OSAL. The assessment agrees with `racepro.m
 | `container_kernel_caps.log` | Factual record | Used for `CONFIG_MODULES` unset, `CONFIG_POSIX_MQUEUE=y`, and `finit_module` ENOSYS |
 | `racepro_emulation_feasibility.log` | Exploratory. The "Ubuntu 10.10" choice is not from a reference. | `/dev/kvm` is absent |
 | `/home/user/work/procrace/baselines/racepro/` (sources and the two build directories above) | Sources: fetched only. Builds: as above. | Not used |
-| `/home/user/work/procrace/baselines/syspro/` (`primitives.c`, `syscall_name_probe.py`, created 2026-10-08 by the SysPro task, not 2026-10-07) | It is a self-labelled container probe of raw POSIX primitives ("NOT SysPro and NOT cFS"), not a documented procedure. | Consistent with this probe: `sem_init` and an uncontended mutex issue no syscalls, `pthread_create` issues `clone3`, and `mq_open` carries the name. This probe supersedes it with OSAL's own tests. |
+| `/home/user/work/procrace/baselines/syspro/` | The earlier attempt created it empty (birth 2026-10-07 07:19:19, the same instant as `racepro/`; `syspro.md` §7, `racepro.md` §7). It left nothing to assess there. `inputs/`, `syscall_name_probe.py` and `primitives.c` were added by the SysPro task on 2026-10-08 at 01:36-01:37. `primitives.c` is a self-labelled container probe of raw POSIX primitives ("NOT SysPro and NOT cFS"), not a documented procedure. | Consistent with this probe: `sem_init` and an uncontended mutex issue no syscalls, `pthread_create` issues `clone3`, and `mq_open` carries the name. This probe supersedes it with OSAL's own tests. |
 
 ## 11. Files
 
@@ -378,6 +393,7 @@ These items are RacePro-related, not OSAL. The assessment agrees with `racepro.m
 - `osal-visibility_strace_osal-core-test_20261008.log`
 - `osal-visibility_glibc_setname_probe_20261008.log`
 - `osal-visibility_source_citations_20261008.log`
+- `osal-visibility_review_recheck_20261008.log` (read-only recheck behind the 2026-10-08 revision)
 
 **Work directory** (`/home/user/work/procrace/baselines/osal-visibility/`):
 

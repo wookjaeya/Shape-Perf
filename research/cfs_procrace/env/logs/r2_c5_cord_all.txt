@@ -1,0 +1,320 @@
+events=653 tasks=25 edges={'create': 24, 'state': 55} meta=[{'meta': 1, 'threads': 25, 'overflow_threads': 0, 'seq': 653}]
+[observed_violation] x17 sb.appid keys=['sb.appid'] status={0: 17} gap_ms=198.51245
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[observed_violation] x17 sb.evsreg keys=['sb.evsreg'] status={0: 17} gap_ms=198.513857
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[observed_violation] x2 sb.appid keys=['sb.appid'] status={0: 2} gap_ms=200.779501
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[observed_violation] x2 sb.evsreg keys=['sb.evsreg'] status={0: 2} gap_ms=200.780885
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[observed_violation] x2 sb.appid keys=['sb.appid'] status={0: 2} gap_ms=100.393435
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[observed_violation] x2 sb.evsreg keys=['sb.evsreg'] status={0: 2} gap_ms=100.394808
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[observed_violation] x1 sb.appid keys=['sb.appid'] status={0: 1} gap_ms=200.785907
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_api.c:277 CFE_SB_CreatePipe
+[observed_violation] x1 sb.evsreg keys=['sb.evsreg'] status={0: 1} gap_ms=200.787175
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_ES cfe_sb_api.c:277 CFE_SB_CreatePipe
+[observed_violation] x1 sb.appid keys=['sb.appid'] status={0: 1} gap_ms=100.402119
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[observed_violation] x1 sb.evsreg keys=['sb.evsreg'] status={0: 1} gap_ms=100.403374
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[observed_violation] x1 sb.appid keys=['sb.appid'] status={0: 1} gap_ms=100.346679
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[observed_violation] x1 sb.evsreg keys=['sb.evsreg'] status={0: 1} gap_ms=100.34792
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_EVS cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x39 sb.appid keys=['sb.appid'] status={1114115: 39} gap_ms=302.012122
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x39 sb.evsreg keys=['sb.evsreg'] status={1114115: 39} gap_ms=302.010745
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x37 sb.appid keys=['sb.appid'] status={1114115: 37} gap_ms=402.337346
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_task.c:675 CFE_SB_SendSubscriptionReport
+[ordered] x37 sb.evsreg keys=['sb.evsreg'] status={1114115: 37} gap_ms=402.336336
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_task.c:675 CFE_SB_SendSubscriptionReport
+[ordered] x35 sb.appid keys=['sb.appid'] status={1114115: 35} gap_ms=302.049457
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x35 sb.evsreg keys=['sb.evsreg'] status={1114115: 35} gap_ms=302.048175
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x16 sb.appid keys=['sb.appid'] status={1114115: 16} gap_ms=302.579596
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: DS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x16 sb.evsreg keys=['sb.evsreg'] status={1114115: 16} gap_ms=302.578236
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: DS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x8 sb.appid keys=['sb.appid'] status={1114115: 8} gap_ms=303.022929
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x8 sb.evsreg keys=['sb.evsreg'] status={1114115: 8} gap_ms=303.021572
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x6 sb.appid keys=['sb.appid'] status={1114115: 6} gap_ms=200.671058
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x6 sb.evsreg keys=['sb.evsreg'] status={1114115: 6} gap_ms=200.669678
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x5 sb.appid keys=['sb.appid'] status={1114115: 5} gap_ms=302.546829
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CF cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x5 sb.evsreg keys=['sb.evsreg'] status={1114115: 5} gap_ms=302.545457
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CF cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x4 sb.appid keys=['sb.appid'] status={1114115: 4} gap_ms=302.443527
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: LC cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x4 sb.evsreg keys=['sb.evsreg'] status={1114115: 4} gap_ms=302.442225
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: LC cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=301.713492
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CI_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=301.712132
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CI_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=302.288875
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: LC cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=302.287495
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: LC cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=302.503145
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CF cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=302.501797
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CF cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=303.092922
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: HS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=303.091563
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: HS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=303.10949
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: HS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=303.108111
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: HS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=303.547771
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=303.54641
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=303.751572
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: MD cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=303.750225
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: MD cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=303.960337
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=303.958968
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CS cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=305.120867
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SBN cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=305.119538
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SBN cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=100.327033
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=100.325654
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=302.009081
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=302.007768
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: TO_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=302.283935
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=302.282583
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=302.654587
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: DS cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=302.653213
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: DS cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=302.773354
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: FM cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=302.771974
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: FM cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=303.406296
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: MM cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=303.404944
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: MM cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x2 sb.appid keys=['sb.appid'] status={1114115: 2} gap_ms=305.117247
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SBN cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x2 sb.evsreg keys=['sb.evsreg'] status={1114115: 2} gap_ms=305.115943
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SBN cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=100.321456
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=100.320196
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=100.364261
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=100.362999
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TBL cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=200.665022
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=200.663809
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=200.716501
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=200.715186
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_TIME cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=301.603726
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SCH_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=301.602461
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SCH_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=301.608096
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SCH_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=301.606737
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SCH_LAB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=301.707467
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CI_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=301.706191
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CI_LAB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.276073
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.274805
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.277198
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: LC cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.275875
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: LC cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.40295
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.401699
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SAMPLE_APP cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.567819
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: DS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.566467
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: DS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.680119
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CF cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.678829
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CF cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=302.769696
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: FM cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=302.768325
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: FM cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.020709
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.019375
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.023447
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:1201 CFE_SB_SubscribeFull
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.022066
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: HK cfe_sb_api.c:1201 CFE_SB_SubscribeFull
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.40333
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: MM cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.401959
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: MM cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.544757
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.543413
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.55206
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:1201 CFE_SB_SubscribeFull
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.550666
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: SC cfe_sb_api.c:1201 CFE_SB_SubscribeFull
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.746604
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: MD cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.745268
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: MD cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=303.957556
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[ordered] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=303.95621
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CS cfe_sb_api.c:277 CFE_SB_CreatePipe
+[same_task] x3 sb.appid keys=['sb.appid'] status={1114115: 3} gap_ms=0.06557
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[same_task] x3 sb.evsreg keys=['sb.evsreg'] status={1114115: 3} gap_ms=0.064193
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_api.c:1185 CFE_SB_SubscribeFull
+[same_task] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=0.060394
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[same_task] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=0.059108
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_api.c:277 CFE_SB_CreatePipe
+[same_task] x1 sb.appid keys=['sb.appid'] status={1114115: 1} gap_ms=0.085067
+    pub: CFE_SB cfe_sb_task.c:139 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+[same_task] x1 sb.evsreg keys=['sb.evsreg'] status={1114115: 1} gap_ms=0.08379
+    pub: CFE_SB cfe_sb_task.c:162 CFE_SB_AppInit
+    use: CFE_SB cfe_sb_priv.c:786 CFE_SB_MessageTxn_ReportSingleEvent
+groups: {'observed_violation': 12, 'ordered': 88, 'same_task': 6}

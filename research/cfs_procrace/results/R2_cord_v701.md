@@ -145,15 +145,34 @@ The CORD runs fall inside the ENV range. Any overhead is below the run-to-run sp
 | recorded but not judged | no: every `sb.*` USE has a verdict (no `no_publication_in_run`) |
 | order violation detected | **yes**: 11 observed violations per run (ES 7, EVS 4), all rejected by EVS; 0 predicted; 217–220 ordered, each with an HB chain |
 
-## 7. Open decision (copy without `.git`)
+## 7. Copy without `.git`: corrected (runs r2_c4–r2_c6)
 
-The copy is not equal to ENV in one build input: the generated version table. Options, for the PI:
+**Cause.** Runs r2_c1–r2_c3 used a copy that had no `.git`, because the lead's instructions said to leave it out. Without `.git`, cFE's git-based version script leaves every module version NULL. ES then sends 4 init events instead of 17, so those runs showed 11 violating uses instead of 24.
 
-- **(a)** Copy the `.git` metadata too (about 265 MB; disk after this build: 1.1 GB free). `git describe --dirty` would then report `-dirty` for repositories with patched files, so the strings would still differ from ENV, but all 14 "Version Info" events would be sent.
-- **(b)** Supply `sample_defs/generate_module_version.cmake` (a hook documented in `cfe/cmake/mission_build.cmake` L130-138) that writes ENV's exact values (`build-native_std/src/cfe_module_version_table.c` of ENV). It reproduces the ENV table, but adds a file to `sample_defs`, which ENV A5 uses as shipped.
-- **(c)** Keep the copy as is, and report R2 counts as "build without version metadata" (this document).
+**Correction (lead's decision, 2026-10-08).** The ENV build is the reference, so this restores equality with it. No new condition was chosen. Option (b) was used:
+- `tool/cord/patches/version_table/generate_module_version.cmake` was installed as `sample_defs/generate_module_version.cmake` in the copy. cFE uses that file instead of its git script when it exists ("If this script exists in the mission defs directory (user-supplied) then use that", `cfe/cmake/mission_build.cmake` L130-137).
+- The script installs the ENV build's generated table `env_module_version_table.c` byte for byte. Its sha256 is `4615470b…`.
+- The copy's earlier build tree was removed; it was our own build output, and its `core-cpu1` sha256 `1040d64e…` is kept in `env/logs/cord_build_v1_core_sha256_before_removal.txt`. The copy was then rebuilt fresh with the same steps (`env/logs/cord_build_v2_*`: prep and install, exit 0, 0 warnings).
+- The generated `cfe_module_version_table.c` of the new build has sha256 `4615470b…`, **identical to ENV**. The new `core-cpu1` has sha256 `7d618152…`.
+- The only remaining difference from ENV's inputs is these two added `sample_defs` files. Their content reproduces ENV's generated file exactly.
 
-Nothing was changed on the PI's behalf.
+**Results of r2_c4–r2_c6** (operational mode, CI ES-restart stop, no debugger, 3 runs):
+
+| Measure | r2_c4 | r2_c5 | r2_c6 |
+|---|---|---|---|
+| "Version Info" lines on the console | 14 | 14 | 14 (ENV: 14) |
+| `sb.appid` uses | 258 | 240 | 254 |
+| observed violations (AppId 0 → `evs.illegal_appid`) | **24** (ES 20, EVS 4) | **24** (ES 20, EVS 4) | **24** (ES 20, EVS 4) |
+| uses between the two publications | 0 | 0 | 0 |
+| predicted violations | 0 | 0 | 0 |
+| ordered | 229 | 211 | 225 |
+| same task (SB) | 5 | 5 | 5 |
+| last violating use → publication | 100.5 ms | 100.3 ms | 100.3 ms |
+| OPERATIONAL line read | 1635 ms | 1629 ms | 1634 ms (ENV 1613–1636) |
+
+- **The violating set equals the gdb result** (`R2_gdb_v701.md`): 24 per boot, 20 from ES and 4 from EVS, in 3 of 3 runs on each side.
+- Every ordered use is explained by the chain SETSTATE(`es.appstate:CFE_SB`=RUNNING) → WAITRET (ES main) → TCREATE → TSTART of the using task.
+- **Without a debugger the result is the same as under gdb**, and OPERATIONAL timing stays within the ENV range at this resolution.
 
 ## 8. Claims
 

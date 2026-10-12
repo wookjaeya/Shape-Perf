@@ -11,6 +11,7 @@
 | R05 | `05_lit_systematic_static.md` | 체계적 테스트·DPOR·BMC/SMT·정적 분석·MLIR 성숙도·임베디드/비행 SW 검증 문헌, 주장 템플릿, 평가 관행 |
 | R06 | `06_critique_v01.md` | 설계안 v0.1 비판, 요구사항 목록, 개방성 확보 방안, 해서는 안 되는 주장 |
 | R07 | `07_env_feasibility.md` | 이 머신에서의 구현 가능성: LLVM 23(MLIR·Clang), compile_commands, uprobe/eBPF 관측 비용, ld --wrap 범위 |
+| R08 | `08_terminology.md` | 용어 검토: '계약(contract)'의 타당성, AI(FSE 2014) 정독, 대안 용어, 52편 용어 비교, 권고(readiness specification)와 근거 등급. 하위 조사는 `terminology/T1–T4` |
 
 문헌 인용에는 검증 상태가 표시되어 있다(V-doc, V-abs, P, UNVERIFIED). 원문 PDF는 접속 정책 때문에 열지 못했다. UNVERIFIED 항목은 논문에 그대로 인용하지 않는다.
 

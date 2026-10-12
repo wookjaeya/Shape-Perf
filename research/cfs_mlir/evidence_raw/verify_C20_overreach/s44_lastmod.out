@@ -1,8 +1,0 @@
-== 
-test_tag: read_att_in_Guidance:
- operand #0
-  - <unknown>
-== assume-func-writes=true
-test_tag: read_att_in_Guidance:
- operand #0
-  - <unknown>

@@ -9,7 +9,7 @@ flowchart TD
         KZC["kz<br/>core-only CLI: proofcheck, observe, trace,<br/>conform, predict, explore, hold, gate,<br/>loop, report, dump"]
     end
 
-    subgraph SRC["입력 (read-only)"]
+    subgraph SRC["inputs (read-only)"]
         TREE[("pinned cFS tree (read-only)<br/>cFS 088b2fa8, cFE c5fb2b4d,<br/>OSAL d2d877a6, PSP c4b3b0b6")]
         BUILD[("build-native_std<br/>compile DB, link.txt, generated files, .tbl,<br/>gcc core-cpu1 + app .so with DWARF")]
         REC[("research records<br/>policy, case ledger, results, baseline measure")]
@@ -29,7 +29,7 @@ flowchart TD
 
     STORE[("KZ artifact store<br/>typed KZ containers")]
 
-    subgraph GATED["PI-gated (설치·승인 전)"]
+    subgraph GATED["PI-gated (not yet installed or approved)"]
         Z3["Z3 (P-Z3)"]
         LBPF["libbpf (P-LIBBPF)"]
         NID["llvm-18-dev + Nidhugg (P-NIDHUGG)"]

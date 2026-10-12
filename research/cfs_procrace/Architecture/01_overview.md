@@ -9,11 +9,11 @@
 - [0. 읽는 법](#0-읽는-법)
 - [1. 문제](#1-문제): process-level의 뜻, 준비 계약, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 다섯 설계 사례
 - [2. 기존 탐지 기법의 한계](#2-기존-탐지-기법의-한계): 순서가 잘못 정해진 사용, lock으로 보호된 순서 위반, soft barrier
-- [3. Kairos의 핵심 아이디어](#3-kairos의-핵심-아이디어): 한 장 그림(D0), 하나의 모형과 세 해석, 증명 동반 판정, 미수정 바이너리 관측
+- [3. Kairos의 핵심 아이디어](#3-kairos의-핵심-아이디어): 한 장 그림(그림 D0), 하나의 모형과 세 해석, 증명 동반 판정, 미수정 바이너리 관측
 - [4. 판정 체계](#4-판정-체계): (σ, M) 칸, class, 근거 축, "경보 없음 ≠ 안전"
 - [5. 기여 가설과 하지 않는 주장](#5-기여-가설과-하지-않는-주장)
 - [6. 다음에 읽을 곳](#6-다음에-읽을-곳)
-- [부록 A. 용어](#부록-a-용어)
+- [부록 A. 처음 읽을 때 필요한 용어](#부록-a-처음-읽을-때-필요한-용어)
 
 ---
 
@@ -29,9 +29,23 @@
 | [D] | 설계 결정. spec §11의 ADR이 기록한다 |
 | [U] | 미확인 |
 
-**문헌**은 [R04]·[R05]·[R06]이 확인한 만큼만 인용하고 그 상태 표지를 붙인다. V-doc은 원문을 직접 읽은 것, V-abs는 서지와 초록 수준의 주장을 확인한 것, V-me는 해당 보고서 작성자가 검색으로 서지·초록 수준을 확인한 것, P는 일부만 확인한 것, UNVERIFIED는 확인하지 않아 결론에 쓰지 않는 것이다([R04 §0.2]; [R05]).
+**문헌**은 [R04]·[R05]·[R06]이 확인한 만큼만 인용하고 그 상태 표지를 붙인다. V-doc은 원문을 직접 읽은 것, V-abs는 서지와 초록 수준의 주장을 확인한 것, V-me는 해당 보고서 작성자가 검색으로 서지·초록 수준을 확인한 것, P는 일부만 확인한 것, UNVERIFIED는 확인하지 않아 결론에 쓰지 않는 것이다([R04 §0.2]; [R05 §0.2]; V-me는 [R06 §9]).
 
-**인용 형식.** "(spec §4.4)"는 SPEC_FINAL.md의 절이다. "[R03 §4]"는 `background/`의 보고서, "[LED]"는 `cases/ledger.md`, "[R2g]"와 "[R2c]"는 `results/`의 R2 기록(gdb, CORD), "[BM]"은 `env/BASELINE_MEASURE.md`다. 코드 위치 `path:line`은 고정된 cFS tree(cFS `088b2fa8`) 기준이다(spec 머리말).
+**인용 형식.** 이 폴더의 모든 문서가 같은 형식을 쓴다(spec 머리말).
+
+| 표기 | 가리키는 것 |
+|---|---|
+| (spec §4.4), (spec App. A.1) | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)의 절과 부록 |
+| [R01]–[R07], 예: [R03 §4] | [background/](background/README.md)의 배경 조사 보고서와 그 절. "[R07] L340"처럼 L이 붙으면 그 보고서의 줄 번호다 |
+| [LED], [R2g], [R2c], [BM], [POL] | 연구 기록: `cases/ledger.md`, `results/R2_gdb_v701.md`(gdb), `results/R2_cord_v701.md`(CORD), `env/BASELINE_MEASURE.md`, `CONDITIONS_POLICY.md`(모두 `research/cfs_procrace/` 아래) |
+| [A], [B], [C], 예: [B §4.4] | 세 설계안 [history/proposal_A-static-model.md](history/proposal_A-static-model.md)(CAIRN), [history/proposal_B-dynamic-predictive.md](history/proposal_B-dynamic-predictive.md)(Sextant), [history/proposal_C-hybrid-layered.md](history/proposal_C-hybrid-layered.md)(Kairos)와 그 절 |
+| [J1]–[J3], 예: [J1 §6], [J2-9], [J1 X8] | 세 설계안을 각각 형식(J1), cFS(J2), 방법(J3) 관점에서 심사한 문서([history/judgment_J1-formal.md](history/judgment_J1-formal.md) 등)와 그 절·항목 번호. "[J1 X8]"의 X8은 심사 J1 안의 항목 번호이고, 검토 X1–X3과 관계없다 |
+| [X1]–[X3], 예: [X1-C1], [X2-14 (d)] | 세 적대적 검토(X1 형식적 건전성, X2 cFS 충실도, X3 실현 가능성·평가, [history/](history/))와 그 issue 번호. C는 critical, M은 major, m은 minor다. 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md) |
+| [X3, here] | 검토 X3이 이 머신에서 직접 잰 값 [M] |
+| v0.1, 예: v0.1 §7.3 | 사용자가 2026-10-08에 쓴 설계안 v0.1과 그 절. [R06]이 비판한 대상이고, 이 폴더에는 없다([background/06_critique_v01.md](background/06_critique_v01.md) 머리말에 파일 이름이 있다) |
+| `path:line` | 고정된 cFS tree(cFS `088b2fa8`) 기준의 코드 위치. "`:835`"처럼 경로가 없으면 바로 앞에 적은 파일이다 |
+
+**이름이 겹치는 기호.** 같은 기호가 여러 뜻으로 쓰인다. 예를 들어 "PI 결정 D4"(native σ_R1 실현 여부)와 "그림 D4"(연구 워크플로우 그림), "보장 G5"(spec §6.3)와 "gap G5"([R04 §5]), "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum)이 다르다. 이 폴더의 문서는 언제나 앞에 종류를 붙인다. 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
 
 **연구 조건 정책.** 모든 경계·예산·매개변수는 세 부류 중 하나다. reference(코드 상수나 고정 문서)에서 온 값은 `from-reference`, 자원이 유한해서 사람이 고른 값은 `deviation`(이유·효과·필요성을 기록), reference가 정하지 않았고 값도 고르지 않은 것은 `unspecified_by_reference`다(spec 머리말; `CONDITIONS_POLICY.md`).
 
@@ -74,6 +88,8 @@ Kairos가 판정하는 단위는 **readiness contract**(준비 계약)의 instan
 
 이 문서에서 "준비·순서 위반"은 VIOLATING 발생을 말한다. Allowed가 정해지지 않은 계약에서는 NOT_READY_UNJUDGED 발생을 말하고, 결과 label이 어느 뜻인지 밝힌다(spec §1.6).
 
+**계약 이름.** K-로 시작하는 이름은 계약 template family다. `K-<family>.<변형>` 꼴로 쓴다. 예를 들어 K-ID는 "넘긴 identity 값이 유효하고 등록되어 있다", K-ROUTE는 "송신 시점에 route가 있다", K-SELF.es는 "호출자 자신의 ES App·task record가 LIVE다"이다. 전체 목록과 [R03 §4]의 계약 종류 RC1–RC15와의 대응은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-계약-라이브러리와-15개-계약-종류)에 있다.
+
 ### 1.3 네 가지 구체 예
 
 | 예 | 준비되어야 할 것 | 먼저 일어날 수 있는 것 | 결과 | 상태 |
@@ -105,7 +121,7 @@ Kairos가 판정하는 단위는 **readiness contract**(준비 계약)의 instan
 
 - **자원.** route `sb.route(MsgId, pipe)`다. SB에서 구독(subscribe)은 동기화 edge가 아니라 **상태**다. 송신할 때 SB는 자기 lock 아래에서 route를 찾고 목적지 목록을 snapshot한다. 늦게 구독한 pipe는 이미 보낸 메시지를 받지 못한다 [F] (spec §3.9 "Subscribe-before-send", 규칙 R8).
 - **결과.** route가 없으면 SB는 `NoSubscribersCounter`를 올리고 `SEND_NO_SUBS` 이벤트를 낸 뒤, 송신자에게 `CFE_SUCCESS`를 돌려준다 [F] (spec §3.9).
-- **관측.** 기본 bundle에서 부팅마다 `NoSubscribersCounter`가 15–26이었다 [M] ([BM §0]; spec §8.1 RQ5). R2의 ES 사용 중 17건도 이 경로에서 나온 `SEND_NO_SUBS` 이벤트다. 아직 아무도 구독하지 않은 EVS event packet(MsgId 0x808)을 보낼 때 생긴다([R2g §2]; spec §1.6, App. A.1 step 13).
+- **관측.** 기본 bundle에서 부팅마다 `NoSubscribersCounter`가 15–26이었다 [M] ([BM §0]; spec §8.1 RQ5). R2의 ES 사용 중 17건은 `SEND_NO_SUBS` 이벤트의 사용이다 [M] ([R2g §2]). 이것이 아직 아무도 구독하지 않은 EVS event packet(MsgId 0x808)을 보낼 때 이 경로에서 생긴다는 귀속은 기록의 추론이다 [I] ([R2g §2]는 이 귀속을 event ID와 뒤의 콘솔 줄 "No subscribers for MsgId 0x808"에서 끌어낸 추론으로 적는다; spec §1.6, App. A.1 step 13).
 - **계약.** K-ROUTE다(spec §3.15 RC5). 대부분의 문서는 전달을 요구하지 않는다. 그래서 Allowed는 `unspecified_by_reference`이고, 결과 label은 **LOSS-UNDER-ORDER**, harm은 `unspecified_by_reference`가 된다. TO_LAB처럼 문서가 늦은 구독을 밝힌 경우는 `defer_by_design`이다(spec §1.6, §3.9).
 
 #### OSAL RESERVED 구간: 이름은 보이는데 object는 아직 준비되지 않았다
@@ -118,7 +134,7 @@ Kairos가 판정하는 단위는 **readiness contract**(준비 계약)의 instan
   5. 다시 lock을 잡고 최종 ID를 기록해 발행한다(`osapi-idmap.c:1092`).
 
   3과 5 사이(RES_CN)에서는 이름이 보이지만 object는 LIVE가 아니고, lock도 잡혀 있지 않다.
-- **이름으로 찾을 때.** 이 구간에서 by-name lookup은 즉시 `OS_ERR_INCORRECT_OBJ_STATE`로 실패한다. header는 실패 시 lock을 항상 푼다고 적지만(`osapi-idmap.c:384–385`), 이 경로는 unlock 전에 return한다(`:401–404`) [F] (spec §3.2). spec은 이 문서화된 불변식에서 계약 K-LOCKBAL을 끌어낸다. lock이 남으면 생성자가 발행 단계에서 막힐 수 있다(OSAL F1, spec App. A.4 step 4) [I].
+- **이름으로 찾을 때.** 이 구간에서 by-name lookup은 즉시 `OS_ERR_INCORRECT_OBJ_STATE`로 실패한다. header는 실패 시 lock을 항상 푼다고 적지만(`osapi-idmap.c:384–385`), 이 경로는 unlock 전에 return한다(`:401–404`) [F] (spec §3.2). spec은 이 문서화된 불변식에서 계약 K-LOCKBAL을 끌어낸다. lock이 남으면 생성자가 발행 단계에서 막힐 수 있다(OSAL F1, spec App. A.4 step 4) [I]. OSAL F1·F7은 [R01]이 코드 읽기로 낸 OSAL 결함 후보 번호이고, 실행으로 확인한 적은 없다.
 - **ID로 찾을 때.** by-ID lookup은 RESERVED record를 만나면 대기한다. broadcast나 timeout으로 깨어나 다시 시도하고, 정해진 횟수 뒤에는 `OS_ERR_OBJECT_IN_USE`로 실패한다(`osapi-idmap.c:475–480`) [F] (spec §3.2). 새 task의 자기 확인(handshake)이 이렇게 실패하면, 생성자는 `OS_SUCCESS`를 받았는데 task entry는 실행되지 않는다(OSAL F7, 계약 K-SPAWN.osal, harm `task_never_runs`). OSAL timebase callback thread도 같은 handshake를 하므로 1 Hz 체인이 시작되지 않을 수 있다(spec §3.3) [I].
 - **모형 수준.** 이 구간은 OSAL을 POSIX 구현 수준까지 펼치는 모형 M_impl에서만 보인다. API 계약 수준 모형 M_api에서는 생성이 원자적이다(spec §1.4; §4.3 아래).
 - **상태.** 이 경로들은 코드 읽기에서 나온 후보다. 확인 실행 전에는 버그라고 주장하지 않는다(spec §6.4 항목 23).
@@ -167,21 +183,21 @@ Kairos가 판정하는 단위는 **readiness contract**(준비 계약)의 instan
 **(3) 임시방편 soft barrier(ad hoc soft barriers).**
 - 앱이 쓰는 시작 barrier(script 단계)는 opt-in이고, 시간이 초과되면 log만 남기고 통과한다. core 직렬화의 대기는 예외로, timeout되면 panic한다(spec §3.14). `CFE_ES_WaitForStartupSync`는 void를 반환하므로 호출자는 대기가 성공했는지 알 수 없다(`cfe_es_api.c:616–619`; spec §1.11, §3.6).
 - 그래서 barrier가 주는 순서는 "제때 성공했을 때만" 성립하는 조건부 순서다.
-- **선행 연구.** EventRacer(OOPSLA 2013 [V-abs])와 Tian et al.(ISSTA 2008 [V-abs])은 ad hoc 동기화를 인식한다. 그러나 timeout에 따라 성립 여부가 갈리는 edge는 모형화하지 않는다([R04 §5 G3]).
+- **선행 연구.** EventRacer(OOPSLA 2013 [V-abs])와 Tian et al.(ISSTA 2008 [V-abs])은 ad hoc 동기화를 인식한다. 그러나 timeout에 따라 성립 여부가 갈리는 edge는 모형화하지 않는다([R04 §5]의 gap G3). gap G1–G8은 [R04 §5]가 "조사한 기법이 모형화하지 않는데 cFS가 요구하는 것"으로 정리한 공백 목록의 번호이고, [R04]는 이 목록을 추론으로 표시한다. spec §6.3의 보장 G1–G10과는 다른 번호 체계다([10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)).
 - **Kairos의 답.** 조건부 O-edge, guard가 붙은 S-edge, σ_U와 σ_U∞의 분리, timeout-dependent refinement(class를 더 나눈 하위 판정, §4.5)를 쓴다(spec §1.8, §1.9, §1.11). S-edge는 두 끝이 모두 있는 모든 실행에서 성립하는 구조적 순서이고, O-edge는 관측한 실행에서만 성립하는 동기화 순서다(§3.1).
-- **새로움은 미확인.** 이 형식화(G3)가 새로운지는 문헌 확인이 끝나지 않았다(open literature check)([R04 §8 item 5]; spec §1.11).
+- **새로움은 미확인.** 이 형식화(gap G3)가 새로운지는 문헌 확인이 끝나지 않았다(open literature check)([R04 §8 항목 5]; spec §1.11).
 
 ### 2.3 그 밖의 cFS 특성
 
-spec §1.11 표의 나머지 행이다. G5–G8은 [R04 §5]가 정리한 공백 목록의 번호이고, [R04]는 이 목록을 추론으로 표시한다.
+spec §1.11 표의 나머지 행이다. 괄호 안의 gap 번호는 §2.2 (3)에서 설명한 [R04 §5]의 공백 목록 번호다.
 
 | cFS 현상 | 선행 연구가 하는 것 | Kairos가 더하는 것 (새 메커니즘 주장 없음) |
 |---|---|---|
 | 구독 전 송신: 성공을 반환하는 조용한 손실 | InitRacer(OOPSLA 2017 [V-abs])의 "late event handler registration" | 그 분류의 cFS instance. registry를 key로 삼고, 전달을 요구하는 reference가 없으면 LOSS-UNDER-ORDER |
-| 용량 손실: queue가 차면 조용히 버린다. 부팅당 4–49건 [M] ([BM §0]) | event·분산 HB 모형은 전달을 가정한다([R04 §5 G5]) | 용량(queue depth, MsgLim)을 typestate로 두고, 가능한 순서가 결과를 바꾸는지 예측·탐색. G5는 용량에 대해서만 실제로 열린 문제다 |
-| 실행 task ≠ 소유 앱 ≠ 서비스 ≠ 찍힌 AppId (G6) | thread identity. CAFA/DroidRacer는 thread와 event를 나누고, DCatch는 RPC pool을 추상화한다 | identity 필드 네 개, on-behalf frame(다른 앱을 대신해 실행되는 코드의 identity 표시), capture point(§3.1)(spec §1.2, §1.4) |
-| 구성이 도달 여부와 용량을 정함 (G7) | 구성을 주어진 것으로 받는다 | basis B와 구성 closure, `inactive`, provider 축 |
-| 우선순위 순서는 RT target에서만 성립 (G8) | edge도 없고 판정도 없다 | σ_R1[P_sched]를 schedule 제약으로 두고, σ마다 판정 |
+| 용량 손실: queue가 차면 조용히 버린다. 부팅당 4–49건 [M] ([BM §0]) (gap G5) | event·분산 HB 모형은 전달을 가정한다([R04 §5]) | 용량(queue depth, MsgLim)을 typestate로 두고, 가능한 순서가 결과를 바꾸는지 예측·탐색. gap G5는 용량에 대해서만 실제로 열린 문제다 |
+| 실행 task ≠ 소유 앱 ≠ 서비스 ≠ 찍힌 AppId (gap G6) | thread identity. CAFA/DroidRacer는 thread와 event를 나누고, DCatch는 RPC pool을 추상화한다 | identity 필드 네 개, on-behalf frame(다른 앱을 대신해 실행되는 코드의 identity 표시), capture point(§3.1)(spec §1.2, §1.4) |
+| 구성이 도달 여부와 용량을 정함 (gap G7) | 구성을 주어진 것으로 받는다 | basis B와 구성 closure, `inactive`, provider 축 |
+| 우선순위 순서는 RT target에서만 성립 (gap G8) | edge도 없고 판정도 없다 | σ_R1[P_sched]를 schedule 제약으로 두고, σ마다 판정 |
 
 ### 2.4 빌려 오는 것
 
@@ -199,7 +215,7 @@ Kairos는 어떤 메커니즘도 새롭다고 주장하지 않는다(spec §1.11
 | 확인과 triage(보고를 결과별로 분류·선별) | CTrigger, RaceFuzzer, RacePro, Portend, DataCollider [V-abs] |
 | soundiness(가정 목록을 명시하고 그 아래에서만 건전성을 주장하는 태도; spec §6.1의 "soundiness manifest") | Livshits et al. CACM 2015 [V-abs] |
 
-**DPOR**(dynamic partial-order reduction)은 서로 영향을 주지 않는 연산의 순서만 다른 interleaving을 반복해서 탐색하지 않도록 줄이는 체계적 탐색 기법이다. interleaving은 여러 thread의 사건이 끼어드는 순서 하나를 말한다.
+**DPOR**(dynamic partial-order reduction)은 의존하는(dependent) transition이 뒤바뀔 수 있는 곳에만 backtracking 지점(다른 순서를 시도하려고 되돌아갈 지점)을 두어, 독립 연산의 순서만 다른 interleaving의 탐색을 줄이는 체계적 탐색 기법이다([R05 §2.2]; DPOR POPL 2005 [V-abs; 보장 문구 UNVERIFIED]). interleaving은 여러 thread의 사건이 끼어드는 순서 하나를 말한다. Kairos의 source-DPOR은 class(독립 연산의 순서만 다른 실행들의 동치류)당 실행 하나를 주장하지 않는다(spec §6.4 항목 9).
 
 ---
 
@@ -207,34 +223,34 @@ Kairos는 어떤 메커니즘도 새롭다고 주장하지 않는다(spec §1.11
 
 spec §0.2는 설계의 형식적 핵심을 여덟 요점으로 적는다. 이 절은 그중 세 축을 다룬다. 하나의 모형을 세 방식으로 해석하는 것(§3.2), 증명 동반 판정(§3.3), 수정하지 않은 바이너리의 관측(§3.4)이다. 그리고 이 셋을 묶는 상호 검사와 feedback(§3.5)을 설명한다.
 
-### 3.0 한 장 그림 (D0)
+### 3.0 한 장 그림 (그림 D0)
 
-렌더링: [diagrams/D0_big_picture.svg](diagrams/D0_big_picture.svg)
+**그림 D0. 한 장으로 보는 Kairos** (렌더링: [diagrams/D0_big_picture.svg](diagrams/D0_big_picture.svg); spec §0.1–0.2, §2.1, §2.4, §4.14)
 
 ```mermaid
 flowchart TD
     %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
     %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
 
-    B[("L0 입력: basis B<br/>build, config, Init, Env, Input")]
-    PHI[("L0 입력: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
+    B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
+    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
 
     CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
 
-    ABS["L3 abstract 해석<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
-    OPR["L3 operational 해석<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
 
-    OBS["L4 kz observe (F0)<br/>uprobe + eBPF, plan.kz 기반"]
-    BIN["cFS process core-cpu1<br/>수정하지 않은 gcc 바이너리"]
+    OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
 
-    CON["L3 concrete 해석<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
 
     HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
 
-    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>경보 없음 ≠ 안전")]
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>no alarm ≠ safe")]
     REP["L5 kz report / kz loop<br/>fixed point + run set"]
-    FIX["Φ 수정 (human review)<br/>→ new Φ hash, new loop"]
+    FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
     B --> CLO
     PHI -->|"bindings, patterns"| CLO
@@ -277,7 +293,7 @@ flowchart TD
 
 ### 3.1 하나의 typed event model과 framework profile Φ_cFS
 
-**KEM(Kairos Event Model)**은 모든 구성요소가 공유하는 타입 있는 사건 형식 하나다(spec §0.2 item 1, §1.5). 사건 하나에는 다음이 들어 있다.
+**KEM(Kairos Event Model)**은 모든 구성요소가 공유하는 타입 있는 사건 형식 하나다(spec §0.2 항목 1, §1.5). 사건 하나에는 다음이 들어 있다.
 
 - 실행 주체(actor)와 actor별 순번
 - 연산과 인자
@@ -289,7 +305,7 @@ flowchart TD
 
 정적 template도 같은 타입을 쓰고, 필드만 기호적이다. 그래서 정적 층, trace 층, 모형 층이 같은 검사기를 쓴다(spec §1.5).
 
-**Φ_cFS**는 cFS에 대한 지식을 코드가 아닌 데이터로 적은 profile이다. 작은 선언형 DSL(영역 전용 언어)로 쓴다(spec §0.2 item 1; §2.1 principle 2). Φ에 담기는 것은 다음과 같다.
+**Φ_cFS**는 cFS에 대한 지식을 코드가 아닌 데이터로 적은 profile이다. 작은 선언형 DSL(영역 전용 언어)로 쓴다(spec §0.2 항목 1; §2.1 원칙 2). Φ에 담기는 것은 다음과 같다.
 
 | Φ 항목 | 뜻 | cFS 예 |
 |---|---|---|
@@ -309,7 +325,7 @@ flowchart TD
   - C_σ: σ_R1의 우선순위 제약이다. HB edge가 결코 아니다.
 - **looper**는 메시지를 받아 handler를 부르는 loop를 도는 actor다. looper에서는 handler 하나 안에서만 program order를 HB로 인정하고, handler 사이에는 HB edge를 두지 않는다(CAFA [V-abs], DCatch [P]; spec §1.9).
 
-engine은 framework에 중립적이다. engine 코드에 사례 식별자(예: `CFE_SB_Global`, `C1`)를 쓰지 못하도록 lint(코드 규칙 자동 검사)가 막는다(spec §2.1 principle 2, §7.2).
+engine은 framework에 중립적이다. engine 코드에 사례 식별자(예: `CFE_SB_Global`, `C1`)를 쓰지 못하도록 lint(코드 규칙 자동 검사)가 막는다(spec §2.1 원칙 2, §7.2).
 
 ### 3.2 같은 Φ를 세 방식으로 해석한다
 
@@ -323,13 +339,13 @@ engine은 framework에 중립적이다. engine 코드에 사례 식별자(예: `
 
 S0–S10은 spec §9.3의 구현 단계 이름이다.
 
-세 해석은 모두 `libkz-core` 안의 evaluator 하나로 Φ predicate를 평가한다(spec §0.2 item 2; §2.1 principle 1). 그래서 세 층의 답이 다르면 "해석 차이"로 묻히지 않고, §3.5의 obligation 실패로 드러난다.
+세 해석은 모두 `libkz-core` 안의 evaluator 하나로 Φ predicate를 평가한다(spec §0.2 항목 2; §2.1 원칙 1). 그래서 세 층의 답이 다르면 "해석 차이"로 묻히지 않고, §3.5의 obligation 실패로 드러난다.
 
-view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 실행에 대한 주장이다. loop를 h에서 자른 view로는 이런 주장을 할 수 없다. 그래서 이 판정들은 certificate view에서만 내고, exploration view에서 나온 결과에는 h를 경계 b에 적는다. 독립 검사기는 잘린 영역을 쓰는 certificate 단계를 거부한다(spec §0.6 item 1, §4.3). 그림은 [diagrams/D10_skeleton_views.svg](diagrams/D10_skeleton_views.svg)에 있다.
+view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 실행에 대한 주장이다. loop를 h에서 자른 view로는 이런 주장을 할 수 없다. 그래서 이 판정들은 certificate view에서만 내고, exploration view에서 나온 결과에는 h를 경계 b에 적는다. 독립 검사기는 잘린 영역을 쓰는 certificate 단계를 거부한다(spec §0.6 항목 1, §4.3). 그림은 [diagrams/D10_skeleton_views.svg](diagrams/D10_skeleton_views.svg)에 있다.
 
 ### 3.3 증명 동반 판정 (proof-carrying verdicts)
 
-**정적 순서는 must-analysis다**(spec §0.2 item 3, §4.4). 모든 실행에서 반드시 성립하는 순서만 결론으로 낸다는 뜻이다.
+**정적 순서는 must-analysis다**(spec §0.2 항목 3, §4.4). 모든 실행에서 반드시 성립하는 순서만 결론으로 낸다는 뜻이다.
 
 - **MustBefore(MB)**: `a ∈ MB(n)`은 "모든 실행에서 n이 일어날 때마다 그 전에 a가 일어났다"는 뜻이다. 최대 고정점(greatest fixpoint)으로 계산한다. 즉 시작 actor의 entry 같은 기저 노드는 빈 집합에서, 나머지 노드는 가장 큰 집합에서 시작해, 규칙이 더 줄일 수 없을 때까지 줄인다.
 - 규칙은 넷이다.
@@ -341,7 +357,7 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 
 **PWB(precedes-whenever-both-occur)**는 "둘 다 일어나는 실행에서는 항상 a가 b보다 먼저"라는 관계다. 이것을 쓰려면 **once(τ)**를 분석으로 증명해야 한다. once(τ)는 actor τ가 한 실행에서 많아야 하나 존재한다는 사실이다(spec §1.2, §1.9, §4.5).
 
-**certificate**는 fixed-order나 protected 판정을 다시 확인할 수 있게 적은 증명 기록이다(spec §2.1 principle 3, §4.5). 다음이 들어간다.
+**certificate**는 fixed-order나 protected 판정을 다시 확인할 수 있게 적은 증명 기록이다(spec §2.1 원칙 3, §4.5). 다음이 들어간다.
 
 - 사용한 규칙 instance
 - writer 항목과 각 항목의 전이·key 상태
@@ -351,7 +367,7 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 
 **독립 검사기 `kz proofcheck`**는 producer와 코드를 공유하지 않고, Clang도 link하지 않는다. certificate의 각 단계를 스스로 다시 유도한다. 일부러 망가뜨린 certificate(mutant)는 모두 거부해야 한다(certificate-mutation test). 분석 자체는 프로그램을 바꾼 program mutant로 시험한다(spec §2.2, §4.5, §8.5).
 
-**검증하지 못한 가정은 숨기지 않는다.** `DECLARED_TRUSTED` 항목은 certificate마다 모두 나열한다(spec §6.3 G10).
+**검증하지 못한 가정은 숨기지 않는다.** `DECLARED_TRUSTED` 항목은 certificate마다 모두 나열한다(spec §6.3 보장 G10).
 
 **R2 certificate의 골자.** 기대 동작이며, 실행한 것은 없다 [I] (spec App. A.1).
 
@@ -361,30 +377,30 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 4. 따라서 모든 실행에서 `m` → `o` → SB 생성 → `x` 순서가 성립하고, 사용은 항상 `x`보다 먼저다. 값 조건은 모든 사용에서 거짓이므로 `fixed-order`다.
 5. 실패 시의 early return은 영향이 없다. 이 증명은 사용 지점이 다른 지점을 지배(dominate)할 것을 요구하지 않는다(step 7).
 6. 신뢰 항목도 나열한다. ES 쪽은 `CleanUpApp` 관계 guard 하나다. EVS 쪽은 할당 신선도 가정 A-FRESH, 소유 가정 A-OWNER, 같은 guard다(step 9).
-7. 출처 회계: "generic contract K-ID + framework rule R19". 사례를 아는 상태에서 쓴 framework 규칙에 기댄다는 것을 판정에 밝힌다(spec §7.2; step 10).
+7. 출처 회계: "generic 계약 K-ID + framework 규칙 R19". 사례를 아는 상태에서 쓴 framework 규칙에 기댄다는 것을 판정에 밝힌다(spec §7.2; step 10).
 
 그림은 [diagrams/D8_r2_certificate_overview.svg](diagrams/D8_r2_certificate_overview.svg)에 있다.
 
 ### 3.4 수정하지 않은 바이너리를 관측한다
 
 - **실행 바이너리.** cFS 빌드 그대로의 gcc 바이너리(gcc 13.3.0, `-O0 -g`)를 실행한다. Clang/LLVM은 분석에만 쓰고, 분석 사실은 DWARF와 기계어 수준에서 gcc 바이너리에 묶는다(spec §2.6, §3.17).
-- **충실도 분류**(fidelity class, [R07 §7]; spec §5.1). 기본은 F0이다(spec §2.1 principle 4).
+- **충실도 분류**(fidelity class, [R07 §7]; spec §5.1). 기본은 F0이다(spec §2.1 원칙 4).
   - F0: 바이너리와 실행 조건을 바꾸지 않고, timing만 흔들린다.
   - F1: 같은 source와 compiler에서 link나 code-generation 옵션만 바꾼다.
   - F2: source를 고친다.
   - F3: 다른 compiler를 쓴다.
 - **관측: `kz observe`, F0.**
   - **uprobe**는 실행 파일을 고치지 않고 사용자 프로그램의 명령 주소에 커널이 거는 탐침이다. **eBPF**는 그 탐침에서 커널 안에서 실행되는, 검증된 작은 프로그램이다.
-  - 새 패키지 설치 없이 perf-PMU uprobe와 자체 raw `bpf()` loader로 구현한다(spec §2.1 principle 7, §5.1).
+  - 새 패키지 설치 없이 perf-PMU uprobe(kernel perf 하위 시스템의 PMU 인터페이스로 거는 uprobe; tracefs에 전역 event를 만들지 않는다)와 자체 raw `bpf()` loader로 구현한다(spec §2.1 원칙 7, §5.1).
   - entry+4 위치의 uprobe 비용은 hit당 0.57 µs다 [M] ([R07 §4.7]). BPF 본체의 비용은 아직 측정하지 않았다(spec §5.1).
 - **확인: `kz hold`, F0.**
   - ptrace(다른 process를 멈추고 조사·제어하는 Linux system call)와 x86 debug register(지정한 주소를 실행하면 trap을 내는 CPU 레지스터)의 실행 breakpoint로 한 thread만 멈춘다. 코드 text는 고치지 않는다.
-  - #DB trap은 약 34 µs다 [M] ([R07 §4.7]). 전용 holder의 비용은 아직 측정하지 않았다(spec §4.13, §5.1).
+  - #DB trap(x86 debug exception: debug register에 건 주소를 실행할 때 CPU가 내는 예외)은 약 34 µs다 [M] ([R07 §4.7]). 전용 holder의 비용은 아직 측정하지 않았다(spec §4.13, §5.1).
 - **PI 결정이 필요한 것.**
-  - F1 `--wrap` gate(linker가 API 호출을 감싼 함수로 돌리게 하는 방식)와 PCT(깊이 d인 버그를 실행마다 하한이 있는 확률로 찾는 무작위 schedule 시험 기법 [V-abs; 메커니즘 P], spec §6.3 G7)는 PI 결정 D3 이후에만 쓴다(spec §4.13; `spec/PI_DECISIONS.md` D3).
+  - F1 `--wrap` gate(linker가 API 호출을 감싼 함수로 돌리게 하는 방식)와 PCT(깊이 d인 버그를 실행마다 하한이 있는 확률로 찾는 무작위 schedule 시험 기법 [V-abs; 메커니즘 P], spec §6.3 보장 G7)는 PI 결정 D3 이후에만 쓴다(spec §4.13; `spec/PI_DECISIONS.md` PI 결정 D3).
   - root 쪽 관측 hook에는 PI 결정 D1이 필요하다(spec §5.1).
 - **timestamp는 HB를 만들지 않는다.** 증거로만 쓴다(spec §1.5, §5.8).
-- **관측은 지지 증거일 뿐이다.** 관측만으로 보편 class(protected, fixed-order)를 만들지 않는다(spec §4.12 item 2).
+- **관측은 지지 증거일 뿐이다.** 관측만으로 보편 class(protected, fixed-order)를 만들지 않는다(spec §4.12 항목 2).
 
 관측 파이프라인 그림은 [diagrams/D7_observation_pipeline.svg](diagrams/D7_observation_pipeline.svg)에 있다.
 
@@ -397,11 +413,11 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 - O4: 프로그램 자신의 결과 코드가 계산한 상태와 맞는가.
 - O7: 정적으로 찾은 writer가 Φ가 선언한 효과와 같은가.
 
-**모순이 나오면** 관련 규칙이나 모형을 중지한다. `unknown(model_fault)`와 model-fault 기록을 남기고, 그 Φ 버전의 loop를 끝낸다. 모순을 조용히 해결하지 않는다(spec §0.2 item 7, §6.3 G9).
+**모순이 나오면** 관련 규칙이나 모형을 중지한다. `unknown(model_fault)`와 model-fault 기록을 남기고, 그 Φ 버전의 loop를 끝낸다. 모순을 조용히 해결하지 않는다(spec §0.2 항목 7, §6.3 보장 G9).
 
 예외가 하나 있다. M_api에서만 성립하는 certificate가 실제 바이너리와 모순되면, 이것은 model fault가 아니라 portability-hazard의 증거다(spec §1.4).
 
-**feedback**은 네 경로가 있다(spec §2.4, §4.14; D0의 점선).
+**feedback**은 네 경로가 있다(spec §2.4, §4.14; 그림 D0의 점선).
 
 - F1: 관측에서 배운 key와 target을 정적 closure로 되돌린다.
 - F2: model gap을 정적 closure로 되돌린다.
@@ -410,7 +426,7 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 
 이름이 겹치는 것에 주의한다. feedback F1–F4는 충실도 분류 F0–F3(§3.4), 동결 F1·F2(§5.2), OSAL 결함 번호 F1·F7(§1.3)과 이름만 같다.
 
-**`kz loop`**는 판정 상태가 더 바뀌지 않는 고정점에서 멈추고, 그 결과를 run 집합과 함께 보고한다. 분석 예산은 wall clock이 아니라 결정적인 work unit(전개한 상태 수, 탐색 노드 수 등)으로 센다. 그래서 저장된 산출물에서 다시 돌리면 판정 저장소가 byte 단위로 같아야 한다(spec §2.1 principle 8, §6.3 G8).
+**`kz loop`**는 판정 상태가 더 바뀌지 않는 고정점에서 멈추고, 그 결과를 run 집합과 함께 보고한다. 분석 예산은 wall clock이 아니라 결정적인 work unit(전개한 상태 수, 탐색 노드 수 등)으로 센다. 그래서 저장된 산출물에서 다시 돌리면 판정 저장소가 byte 단위로 같아야 한다(spec §2.1 원칙 8, §6.3 보장 G8).
 
 ---
 
@@ -446,7 +462,7 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 1. σ_U에서 증명한 보편 class는 같은 M, 같은 경계 b에서 σ_U의 부분집합인 σ′에도 성립한다.
 2. σ_E로는 두 경우에만 옮긴다. M_impl에서 증명한 경우, 또는 M_api에서 증명했는데 그 instance의 관련 범위(cone)에 M_impl-relevant 연산이 없거나 M_impl 결과가 같은 경우다. 그 밖에는 σ_E 칸이 `unknown(model_level)`이다.
 3. 어느 σ′에서 찾은 witness는 같은 M의 σ_U에서도 witness다. witness는 판정을 뒷받침하는 구체적 실행 하나다.
-4. 빈도나 class는 σ_E로 옮겨 가지 않는다. σ_E class에는 자연 실행의 witness가 필요하다.
+4. σ_U 예측이나 모형 witness에서 σ_E 빈도나 class를 만들지 않고, 실행 횟수(나쁜 실행을 보지 못했다는 사실)에서 σ_E class를 만들지 않는다. σ_E 빈도 `n of N`은 pool key가 같은 실행끼리만 합치고 `σ_E(plan P)`로 표시한다. σ_E의 보편 class(protected, tolerated, fixed-order)는 규칙 2로만 얻고, `schedule-dependent(σ_E)`는 양쪽(나쁜 쪽과 좋은 쪽)의 자연 실행 witness로만 얻는다(spec §1.10, §4.12 항목 4, §6.4 항목 3·10).
 
 ### 4.5 class (spec §1.10, §1.8)
 
@@ -498,8 +514,8 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 - 판정 기록에는 "safe" 필드가 없다(spec §1.10).
 - 경보가 없다는 것은 근거가 없다는 뜻이고, 그런 칸은 `unknown(reason)`이 된다. σ_E class를 나쁜 실행이 없다는 사실에서 유도하는 일은 없다(spec §0.1).
 - σ_E class는 자연 실행의 witness로만 정한다. `schedule-dependent(σ_E)`에는 자연 실행에서 나온 나쁜 witness(또는 stall)와 좋은 witness가 둘 다 필요하다. hold나 gate가 개입한 실행이면 `σ_E(held)`다. σ_E의 protected·fixed-order는 실행에서 유도하지 않고, 전이 규칙 2로만 얻는다(spec §1.10).
-- 나쁜 실행을 관측하지 못하면 기록 문구는 정확히 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"이다. "timing-protected"라고 쓰지 않는다(spec §1.10; §6.4 항목 3).
-- 예측이 반대 순서를 찾지 못한 것("not predictable")은 protected가 아니다(spec §4.9 item 9; §6.3 G4). prefilter(예측 전에 후보를 고르는 SHB, WCP, SyncP 같은 빠른 검사)가 아무것도 내지 않았다는 것은 아무 뜻도 없다(spec §4.9 item 6).
+- 나쁜 실행을 관측하지 못하면 기록 문구는 정확히 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"이다. pool key는 빈도를 합칠 때 같아야 하는 (B hash, plan hash, cold/warm 층)이다(spec §4.12 항목 4). "timing-protected"라고 쓰지 않는다(spec §1.10; §6.4 항목 3).
+- 예측이 반대 순서를 찾지 못한 것("not predictable")은 protected가 아니다(spec §4.9 항목 9; §6.3 보장 G4). prefilter(예측 전에 후보를 고르는 SHB, WCP, SyncP 같은 빠른 검사)가 아무것도 내지 않았다는 것은 아무 뜻도 없다(spec §4.9 항목 6).
 - 경계 b를 넘어선 탐색, obligation이 실패한 모형에서도 안전을 말하지 않는다(spec §6.4 항목 2).
 
 ### 4.8 예: 기대 판정 (모두 [I], 실행 전)
@@ -510,9 +526,9 @@ view가 둘인 이유는 이렇다. protected, fixed-order, inactive는 모든 �
 | C1, 기본 B | `inactive(B)`: 기본 table의 이름이 비어 있어 조회 경로가 접힌다 | App. A.4 step 1 |
 | C1, 파생 B′, M_api | σ_U에서 `schedule-dependent`, σ_U∞에서는 좋은 실행만 남아 `timeout-dependent` | App. A.4 step 3 |
 | C1, 파생 B′, M_impl | RESERVED 구간의 by-name 조회가 `INCORRECT_OBJ_STATE`를 내고 lock이 남는다. implementation-defect candidate(F1)다. M_api 결과는 σ_E로 옮기지 않는다 | App. A.4 step 4 |
-| core task의 App-record 구간(K-SELF.es) | 정적 certificate가 없어 열린 후보다. lock을 뒤집는 예측으로 간다. 두 M 모두 σ_U에서 `schedule-dependent`이고 σ_U∞에서도 그렇다. σ_R1[`P_sched^posix`]에서는 한 CPU에서 이 구간이 열리지 않는다. σ_E는 "no σ_E bad witness in n of N runs; σ_E class unknown"으로 예상한다 | App. A.2; spec §7.3 |
+| core task의 App-record 구간(K-SELF.es) | 정적 certificate가 없어 열린 후보다. lock을 뒤집는 예측으로 간다. 두 M 모두 σ_U에서 `schedule-dependent`이고 σ_U∞에서도 그렇다. σ_R1[`P_sched^posix`]에서는 한 CPU에서 이 구간이 열리지 않는다 [I]. `P_sched^posix`는 RT 스케줄링이 허용될 때의 OSAL POSIX scheduling profile이다([04 §7.2](04_formal_model.md#72-네-의미론)). σ_E는 "no σ_E bad witness in n of N runs; σ_E class unknown"으로 예상한다 | App. A.2; spec §7.3 |
 | timebase 이름 조회(TIME, SCH_LAB) | 종료 구간 밖에서 `protected`. 코드가 순서를 정한 곳에서 race를 지어내지 않는지 보는 calibration이다 | App. A.7 |
-| `SBNSubPipe` 시작 폭주(K-MODE, K-CAP, K-CAP.msglim) | 두 결과가 자연 실행에서 다시 관측되면 `schedule-dependent(σ_E)`, LOSS-UNDER-ORDER | App. A.5 |
+| `SBNSubPipe`(SBN 앱이 구독 보고를 받는 pipe, 실효 용량 10) 시작 폭주(K-MODE: SB 전역 mode 변경, K-CAP: queue 용량, K-CAP.msglim: 구독별 MsgLim) | 두 결과가 자연 실행에서 다시 관측되면 `schedule-dependent(σ_E)`, LOSS-UNDER-ORDER | App. A.5 |
 
 ---
 
@@ -525,11 +541,11 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 1. σ와 M을 밝힌 must-order certificate다. 관측된 "HB상 순서가 정해진 계약 위반"을 보편 class인 fixed-order로 끌어올린다.
 2. 문서화된 Allowed 결과와 conjunct별 LP.
 3. 위 둘을 lock을 뒤집는 예측, hold 확인, recall을 측정하는 평가와 결합한 것.
-4. 이 전체를 cFS 의미론 G1–G8을 중심으로 조직한 것.
+4. 이 전체를 cFS 의미론, 곧 [R04 §5]의 gap G1–G8을 중심으로 조직한 것.
 
-개별 메커니즘에는 모두 선행 연구가 있다. 새로움은 조합에 대해서만 주장한다. G3(timeout 조건부 barrier edge) 형식화가 새로운지는 문헌 확인 전이다(spec §6.4 항목 18).
+개별 메커니즘에는 모두 선행 연구가 있다. 새로움은 조합에 대해서만 주장한다. gap G3(timeout 조건부 barrier edge) 형식화가 새로운지는 문헌 확인 전이다(spec §6.4 항목 18).
 
-**평가는 놓친 것을 잰다**(spec §0.2 item 8, §8.5).
+**평가는 놓친 것을 잰다**(spec §0.2 항목 8, §8.5).
 - recall 프로토콜은 history에서 유래한 program mutant와 수정 전후 쌍에 대해 층별로 detected / unknown / missed를 보고한다. 정확 이항 구간(exact binomial interval)을 붙이고, F2 동결 전에 고정한다.
 - mutant의 문서화된 동작과 모순되는 certificate는 soundness 실패로 센다.
 - recall 수치는 합성(synthetic) 측정이며, 실제 순서 버그 일반에 대한 recall이 아니다(spec §6.4 항목 25).
@@ -561,7 +577,7 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
   - 첫 평가 실행은 사례별 항목 없이(template-only) 한다.
   - 동결 F1(첫 평가 전)과 F2(held-out을 열기 전)를 둔다.
   - 사례를 아는 상태에서 쓴 framework 규칙을 판정마다 밝힌다.
-- **개발 사례는 블라인드가 아니다.** 저자들은 R2와 App-record 구간을 이미 안다. 블라인드는 held-out 출처(설계 중 열어 보지 않은 평가 출처: 다른 cFS revision, 다른 구성, 동결 전 고정한 질의로 찾은 issue, recall mutant, 설계에 쓰지 않은 코드 주석)에 대해서만 주장한다(spec §7.2, §7.5).
+- **개발 사례는 맹검가 아니다.** 저자들은 R2와 App-record 구간을 이미 안다. 맹검는 held-out 출처(설계 중 열어 보지 않은 평가 출처: 다른 cFS revision, 다른 구성, 동결 전 고정한 질의로 찾은 issue, recall mutant, 설계에 쓰지 않은 코드 주석)에 대해서만 주장한다(spec §7.2, §7.5).
 - **다섯 사례 밖의 후보**도 일반 template에서 나온다(spec §7.3). core-task App-record 구간, OSAL lock 누수(F1), 조용한 task 소실(F7), timebase handshake, SB pipe 이름 가시성, TIME callback, `SBNSubPipe` 폭주, SCH_LAB 깨우기 대 늦은 구독자 등이다. 증거가 나오기 전까지는 모두 후보다.
 
 ### 5.3 일반화 가설: 진술하되 주장하지 않는다 (spec §7.6)
@@ -588,46 +604,47 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 | 범위 | 측정된 이득(G-MLIR) 없이 "MLIR이 탐지나 정밀도를 높인다". H-F를 넘는 F Prime 등에 대한 주장. Linux `SCHED_OTHER` permissive mode에서 얻은 비행 대표 timing이나 overhead. profile이 없는 RTEMS/VxWorks의 RT 판정. ad hoc 동기화 위치의 memory model 정확성(가정 A4) | 15, 17, 19, 20 |
 | 결과 해석 | EVS가 거부한 이벤트 요청을 "잃어버린 packet"으로 부름. 확인 실행 전에 OSAL F1, F7, timebase handshake 소실, 두 App-record 구간을 버그로 부름. 실제 순서 버그 일반에 대한 recall 수치 | 22, 23, 25 |
 
-전체 가정 목록(soundiness manifest)은 spec §6.1, 보장 문구 G1–G10은 spec §6.3에 있다. 모든 보장은 B, Φ, M, σ, 경계 b, skeleton view, 가정 A에 상대적이다. "sound"라는 말을 한정어 없이 쓰지 않는다(spec §6 머리말).
+전체 가정 목록(soundiness manifest)은 spec §6.1, 보장 G1–G10의 문구는 spec §6.3에 있다. 모든 보장은 B, Φ, M, σ, 경계 b, skeleton view, 가정 A에 상대적이다. "sound"라는 말을 한정어 없이 쓰지 않는다(spec §6 머리말).
 
 ---
 
 ## 6. 다음에 읽을 곳
 
-아래 02–08 문서는 Architecture 문서 계획([diagrams/README.md](diagrams/README.md)의 "포함 문서" 열)에 있는 문서다.
+처음 읽는다면 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 순서를 권한다. 문제와 구조(01–03)를 먼저 보고, 형식 모형과 cFS 대응(04–05), 관측·확인과 평가(06–07), 구현 단계와 선행 연구(08–09)를 본 뒤, 설계 결정·PI 결정·용어집(10)으로 끝난다. 알고 싶은 것이 분명하면 아래 표에서 바로 고른다. 폴더의 입구는 [README.md](README.md)다.
 
-| 알고 싶은 것 | 문서 | spec |
+| 문서 | 내용 | spec |
 |---|---|---|
-| 구성요소, 계층, 데이터 흐름 | [02_architecture.md](02_architecture.md) (D1, D2) | §2 |
-| instance 하나의 분석 순서, 연구 단계, 판정 상태 기계 | [03_workflow.md](03_workflow.md) (D3, D4, D6, D7) | §4, §9 |
-| 형식 모형: 의미론, MB, certificate, 보장 | [04_formal_model.md](04_formal_model.md) (D10) | §1, §4.3–4.5, §6 |
-| cFS 계층과 Φ_cFS의 대응, R2 certificate, 종료 범위 | [05_cfs_mapping.md](05_cfs_mapping.md) (D5, D8, D9) | §3, App. A |
-| 관측과 확인 | [06_observation_confirmation.md](06_observation_confirmation.md) (D7) | §4.13, §5 |
-| 단계, 출구 조건, PI 결정 | [08_roadmap.md](08_roadmap.md) (D4) | §9, §10, [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) |
-| 검토 쟁점 57개의 처리 | [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md) | §0.6 |
-| 그림 목록과 범례 | [diagrams/README.md](diagrams/README.md) | §12 |
+| [README.md](README.md) | 폴더 입구: 읽는 순서, 문서별 한 줄 요약 | — |
+| **01_overview.md (이 문서)** | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
+| [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O9(그림 D1, D2) | §2 |
+| [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
+| [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
+| [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
+| [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 38개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
+| [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
+| [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
+| [history/](history/) | 설계 이력: 설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], SPEC v1 | — |
+
+용어는 [10_decisions_adr.md §3 용어집](10_decisions_adr.md#3-용어집), 이름이 겹치는 기호(그림 D4와 PI 결정 D4, 보장 G5와 gap G5 등)는 [§0.2 이름 충돌 주의](10_decisions_adr.md#02-이름-충돌-주의)에서 찾는다.
 
 ---
 
-## 부록 A. 용어
+## 부록 A. 처음 읽을 때 필요한 용어
 
-자세한 정의는 spec §13에 있다.
+이 문서를 읽는 데 꼭 필요한 말만 남겼다. 전체 용어집은 [10_decisions_adr.md §3](10_decisions_adr.md#3-용어집)이고, 그 원문은 spec §13이다.
 
 | 용어 | 이 문서에서의 뜻 |
 |---|---|
-| actor / actor instance | 실행 흐름 하나(OSAL task, raw thread, 외부 입력 근원) / (static actor, generation) |
+| actor | 실행 흐름 하나(OSAL task, raw thread, 외부 입력 근원) |
 | basis B / B′ | 스케줄을 뺀, 실행을 정하는 모든 것 / 구성이나 입력을 바꾼 새 basis. "새 버그"의 근거가 아니다 |
-| census | 모든 계약을 모든 문맥 위치에 instance로 만들고 class나 `unknown(reason)`을 주는 작업 |
 | certificate | fixed-order나 protected 판정의 검사 가능한 증명 기록. `kz proofcheck`가 다시 확인한다 |
-| certificate view `Sk^cert` / exploration view `Sk^h` | loop를 "0회 이상 반복"으로 닫은 skeleton / h번까지 펼치고 나머지에 잘림을 표시한 skeleton |
-| cone | 한 후보와 관련된 actor와 object를 닫은 집합 |
-| capture point | 호출자가 넘길 값을 미리 읽은 load 지점. 값 조건의 LP다 |
-| `DECLARED_TRUSTED` | 분석이 검증하지 못하고 믿은 항목. 쓰는 certificate마다 나열한다 |
-| LP | linearization point. 연산의 효과가 한순간에 일어났다고 보는 지점. 조건(conjunct)마다 둔다 |
-| LOSS-UNDER-ORDER | 전달을 요구하는 reference가 없는 route·용량 계약의 결과 label |
-| MustBefore(MB) | 모든 실행에서 반드시 먼저 일어나는 사건의 정적 집합(최대 고정점) |
-| once(τ) | actor τ가 한 실행에 많아야 하나 존재한다는, 분석으로 증명한 사실 |
-| PWB | precedes-whenever-both-occur. 둘 다 일어나면 항상 a가 먼저다 |
-| S / O / C_σ | 두 끝이 모두 있는 모든 실행에서 성립하는 구조적 순서 / 관측한 실행에서만 성립하는 순서 / σ_R1의 우선순위 제약(HB가 아님) |
+| K-* | 계약 template family의 이름(예: K-ID, K-ROUTE). 목록은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-계약-라이브러리와-15개-계약-종류) |
+| LP / capture point | linearization point. 연산의 효과가 한순간에 일어났다고 보는 지점이고, 조건(conjunct)마다 둔다 / 호출자가 넘길 값을 미리 읽은 load 지점. 값 조건의 LP다 |
+| MustBefore(MB) / PWB | 모든 실행에서 반드시 먼저 일어나는 사건의 정적 집합(최대 고정점) / 둘 다 일어나면 항상 a가 먼저라는 관계 |
+| S / O / C_σ (HB stratum) | 두 끝이 모두 있는 모든 실행에서 성립하는 구조적 순서 / 관측한 실행에서만 성립하는 순서 / σ_R1의 우선순위 제약(HB가 아님) |
 | witness | 판정을 뒷받침하는 구체적 실행 하나 |
-| work unit | 분석 예산을 세는 결정적 단위(상태 수, 탐색 노드 수 등). wall clock이 아니다 |

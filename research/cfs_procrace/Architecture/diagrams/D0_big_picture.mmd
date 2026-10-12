@@ -2,25 +2,25 @@ flowchart TD
     %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
     %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
 
-    B[("L0 입력: basis B<br/>build, config, Init, Env, Input")]
-    PHI[("L0 입력: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
+    B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
+    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
 
     CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
 
-    ABS["L3 abstract 해석<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
-    OPR["L3 operational 해석<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
 
-    OBS["L4 kz observe (F0)<br/>uprobe + eBPF, plan.kz 기반"]
-    BIN["cFS process core-cpu1<br/>수정하지 않은 gcc 바이너리"]
+    OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
 
-    CON["L3 concrete 해석<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
 
     HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
 
-    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>경보 없음 ≠ 안전")]
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>no alarm ≠ safe")]
     REP["L5 kz report / kz loop<br/>fixed point + run set"]
-    FIX["Φ 수정 (human review)<br/>→ new Φ hash, new loop"]
+    FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
     B --> CLO
     PHI -->|"bindings, patterns"| CLO

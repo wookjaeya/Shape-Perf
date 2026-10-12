@@ -4,11 +4,11 @@ flowchart TD
     %%         D2_components_dynamic_detail.mmd (observation, concrete/operational interpreters, confirmation, loop).
     %% Dashed border = conditional or PI-gated component. Dashed edge = feedback path.
 
-    IN[("L0 입력<br/>basis B (build tree, config, Env, Init, Input)<br/>profile.kzp (Φ text, 사람이 작성)")]
+    IN[("L0 input<br/>basis B (build tree, config, Env, Init, Input)<br/>profile.kzp (Φ text, human-authored)")]
 
-    L1["L1 kz-static: basis, extract, link, skel<br/>설정으로 닫힌 프로그램 → 사실과 skeleton"]
+    L1["L1 kz-static: basis, extract, link, skel<br/>configuration-closed program → facts and skeletons"]
     MR["L1 kz-static modref<br/>(S3b, conditional)"]
-    CORE["L2 libkz-core (shared)<br/>KEM types, Φ parser, one evaluator,<br/>vector clocks, verdict lattice, KZ container I/O<br/>모든 구성요소가 link (BPF 제외)"]
+    CORE["L2 libkz-core (shared)<br/>KEM types, Φ parser, one evaluator,<br/>vector clocks, verdict lattice, KZ container I/O<br/>linked by every component (except BPF)"]
 
     STAT["L3 abstract: kz-static static + plan<br/>census, MustBefore, certificates, probe plan"]
     PCK["L5 kz proofcheck<br/>independent checker (no shared code)"]
@@ -37,7 +37,7 @@ flowchart TD
 
     CNF -.->|"F3 confirmation runs"| TRC
     TRC -.->|"F1 keys, targets, opened script / F2 model gaps"| L1
-    TRC -.->|"F4 obligation failures"| PHIFIX["Φ 수정 (human review)"]
+    TRC -.->|"F4 obligation failures"| PHIFIX["Φ revision (human review)"]
 
     IN -->|"profile.kzp → profile.kz (parser)"| CORE
 

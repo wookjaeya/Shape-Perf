@@ -8,16 +8,16 @@
 ## 목차
 
 0. [읽기 전에](#0-읽기-전에): 표기, 이 문서의 자리, 필요한 용어
-1. [한 장으로 보기: 관측 파이프라인 (D7)](#1-한-장으로-보기-관측-파이프라인-d7)
+1. [한 장으로 보기: 관측 파이프라인 (그림 D7)](#1-한-장으로-보기-관측-파이프라인-그림-d7)
 2. [메커니즘과 fidelity class](#2-메커니즘과-fidelity-class-spec-51) (spec §5.1)
 3. [probe 배치와 반환값 capture](#3-probe-배치와-반환값-capture-spec-52-47) (spec §5.2, §4.7)
 4. [eBPF data path](#4-ebpf-data-path-spec-53-54) (spec §5.3, §5.4)
 5. [사건 기록과 trace container](#5-사건-기록과-trace-container-spec-55) (spec §5.5)
 6. [손실 계산](#6-손실-계산-spec-56) (spec §5.6)
-7. [GetAppID 없이 정체성 bootstrap](#7-getappid-없이-정체성-bootstrap-spec-57) (spec §5.7)
+7. [GetAppID 없이 identity bootstrap](#7-getappid-없이-identity-bootstrap-spec-57) (spec §5.7)
 8. [causal token과 timestamp](#8-causal-token과-timestamp-spec-58) (spec §5.8)
 9. [관측과 제어의 안전 규칙](#9-관측과-제어의-안전-규칙-spec-59) (spec §5.9)
-10. [비용 모델과 측정 의무](#10-비용-모델과-측정-의무-spec-510-86) (spec §5.10, §8.6)
+10. [비용 모형과 측정 의무](#10-비용-모형과-측정-의무-spec-510-86) (spec §5.10, §8.6)
 11. [미시험 항목과 대안](#11-미시험-항목과-대안-spec-511-93) (spec §5.11, §9.3)
 12. [확인 실행](#12-확인-실행-spec-413) (spec §4.13): `kz hold`(F0), `kz gate`(F1), normalization boot, perturbation 비율
 13. [CONDITIONS_POLICY와의 관계](#13-conditions_policy와의-관계)
@@ -40,7 +40,9 @@
 | [D] | 설계 결정. spec §11의 ADR이 기록한다 |
 | [U] | 미확인 |
 
-인용 형식은 01, 03과 같다. "(spec §5.3)"은 SPEC_FINAL.md의 절, "[R07 §4.7]"은 `background/`의 보고서, [BM]은 `env/BASELINE_MEASURE.md`, [R2g]·[R2c]는 `results/`의 R2 기록(gdb, 퇴역한 CORD recorder), [POL] Ln은 `CONDITIONS_POLICY.md`의 n번째 줄이다. D1, D3, P-TRACEFS 같은 이름은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)의 PI 결정이다. 코드 위치 `path:line`은 고정된 cFS tree(cFS `088b2fa8`) 기준이다.
+인용 형식은 01, 03과 같다. "(spec §5.3)"은 SPEC_FINAL.md의 절, "[R07 §4.7]"은 `background/`의 보고서, [BM]은 `env/BASELINE_MEASURE.md`, [R2g]·[R2c]는 `results/`의 R2 기록(gdb, 퇴역한 CORD recorder), [POL] Ln은 `CONDITIONS_POLICY.md`의 n번째 줄이다. PI 결정 D1, D3, P-TRACEFS 같은 이름은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)의 PI 결정이다. 코드 위치 `path:line`은 고정된 cFS tree(cFS `088b2fa8`) 기준이다.
+
+**인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
 
 ### 0.2 이 문서의 자리
 
@@ -50,14 +52,14 @@
 
 관측이 무엇을 볼지는 관측기가 정하지 않는다. `kz-static plan`이 정적 분석 결과에서 probe plan(`plan.kz`)을 만든다(spec §4.7). plan은 두 부분이다.
 
-- **필수 동기화 skeleton**: 모든 actor의 S·O 규칙 anchor(anchor는 규칙이 가리키는 소스 지점을 gcc 바이너리의 명령에 묶은 것이다. 대상은 OSAL task, mutex, semaphore, queue, timer, module 연산; ES lock wrapper, wait, `RunLoop`, `ExitApp`, app/task 생성; SB create, subscribe, route_lookup, put, receive; shutdown store). 이것을 다 남기는 것은 관련 없어 보이는 제3자 thread의 동기화를 관측에서 잘라 내는 slicing 오류를 피하기 위해서다(spec §4.7 item 1; v0.1 §7.3).
-- **후보 의무**: 아직 판정이 열린(open) instance가 요구하는 것. 각 conjunct의 LP 구간과 capture 지점, 계약 사용 지점의 결과값, Allowed(계약이 문서로 허용하는 not-ready 동작)를 정하는 guard 결과, API 경계가 없는 준비 field의 쓰기 감시, identity frame에 필요한 user stack, 예측 후보의 A-COMM 검사(예측 witness가 trace에 없는 공유 읽기에 기대지 않는지 보는 검사)가 지목한 writer(spec §4.7 item 2).
+- **필수 동기화 skeleton**: 모든 actor의 S·O 규칙 anchor(anchor는 규칙이 가리키는 소스 지점을 gcc 바이너리의 명령에 묶은 것이다. 대상은 OSAL task, mutex, semaphore, queue, timer, module 연산; ES lock wrapper, wait, `RunLoop`, `ExitApp`, app/task 생성; SB create, subscribe, route_lookup, put, receive; shutdown store). 이것을 다 남기는 것은 관련 없어 보이는 제3자 thread의 동기화를 관측에서 잘라 내는 slicing 오류를 피하기 위해서다(spec §4.7 항목 1; v0.1 §7.3).
+- **후보 의무**: 아직 판정이 열린(open) instance가 요구하는 것. 각 conjunct의 LP 구간과 capture 지점, 계약 사용 지점의 결과값, Allowed(계약이 문서로 허용하는 not-ready 동작)를 정하는 guard 결과, API 경계가 없는 준비 field의 쓰기 감시, identity frame에 필요한 user stack, 예측 후보의 A-COMM 검사(예측 witness가 trace에 없는 공유 읽기에 기대지 않는지 보는 검사)가 지목한 writer(spec §4.7 항목 2).
 
-그래서 recorder는 "좁고, 모형이 이끈다"(spec §9.3). 관측 결과는 `kz trace`(정체성 결합, HB, LP 구간, routing; spec §4.8)와 `kz conform`(O1/O2; spec §4.11)으로 가고, feedback loop가 새 key와 모형 빈틈을 plan에 되돌린다(spec §4.14). 확인 실행은 판정 기록의 `realized` 근거와 naturalness label을 만든다(spec §1.10).
+그래서 recorder는 "좁고, 모형이 이끈다"(spec §9.3). 관측 결과는 `kz trace`(identity 결합, HB, LP 구간, routing; spec §4.8)와 `kz conform`(O1/O2; spec §4.11)으로 가고, feedback loop가 새 key와 모형 빈틈을 plan에 되돌린다(spec §4.14). 확인 실행은 판정 기록의 `realized` 근거와 naturalness label을 만든다(spec §1.10).
 
 ### 0.3 필요한 용어
 
-이 문서를 읽는 데 필요한 만큼만 적는다. 전체 용어집은 spec §13이다.
+이 문서를 읽는 데 필요한 만큼만 적는다. 전체 용어집은 [10_decisions_adr.md §3](10_decisions_adr.md#3-용어집)이다(원문 spec §13).
 
 | 용어 | 쉬운 설명 | spec |
 |---|---|---|
@@ -68,20 +70,22 @@
 | eBPF | kernel이 검증기(verifier)로 안전성을 확인한 뒤 kernel 안에서 실행하는 작은 프로그램. 여기서는 uprobe가 걸릴 때마다 인자와 순서 token을 기록한다 | §5.3 |
 | attach cookie | probe를 BPF 프로그램에 연결할 때 그 연결에 달아 두는 값. 프로그램이 `bpf_get_attach_cookie`로 읽는다. Kairos는 site id를 cookie로 쓴다 | §5.3 |
 | trap 비용 등급 | uprobe가 걸린 자리의 원래 명령을 kernel이 흉내 낼(에뮬레이션) 수 있으면 싸고, 그렇지 못하면 한 명령을 실제로 실행하는 single-step 경로(debug exception, #DB)를 거쳐 비싸다(원인 설명은 [R07]의 추론). 이 VM에서 0.57 µs 대 31.7 µs다 [M] | §5.1; [R07 §4.7] |
-| debug register, HW watchpoint | x86 CPU의 debug register(DR0–DR3, thread마다 네 개)에 주소를 넣으면 그 주소에 쓰기나 실행이 일어날 때 예외가 난다. 쓰기 감시가 watchpoint, 실행 감시가 HW 실행 breakpoint다 | §4.7 item 3, §5.1 |
+| debug register, HW watchpoint | x86 CPU의 debug register(DR0–DR3, thread마다 네 개)에 주소를 넣으면 그 주소에 쓰기나 실행이 일어날 때 예외가 난다. 쓰기 감시가 watchpoint, 실행 감시가 HW 실행 breakpoint다 | §4.7 항목 3, §5.1 |
 | ptrace | 한 프로세스(여기서는 root의 holder)가 다른 프로세스의 thread를 멈추고 register를 읽고 쓰게 하는 Linux system call | §4.13 |
 | `ld --wrap` | link할 때 `foo` 호출을 `__wrap_foo`로 돌리는 GNU ld 옵션. 바이너리를 다시 link해야 하므로 F1이다 | §5.1; [R07 §4.2] |
 | `tseq`, `objseq` | `tseq`는 thread별 일련번호로, 같은 thread 안의 순서와 손실을 알려 준다. `objseq`는 object(예: mutex)별 일련번호로, 같은 object를 둘러싼 thread 사이의 순서를 알려 준다. 둘 다 kernel 쪽에서 매긴다 | §5.3 |
 | happens-before (HB), vector clock | HB는 한 실행 안에서 동기화(lock, message, thread 생성 등)로 정해지는 "먼저 일어남"의 부분 순서다. vector clock은 thread마다 카운터 벡터를 들고 다니며 HB를 계산하는 자료 구조다(Lamport 1978; Fidge 1988; Mattern 1989 [V-abs]) | §1.9 |
 | linearization point (LP), capture point | LP는 연산의 효과가 "이 명령에서 한순간에 일어났다"고 보는 지점이다. Kairos는 요구 조건의 conjunct(∧로 묶인 조건 하나)마다 LP를 둔다. capture point는 호출자가 넘길 값을 미리 읽어 둔 load 지점이고, 값 conjunct의 LP가 된다 | §1.4 |
 | witness | 판정을 뒷받침하는 구체적인 실행 하나(나쁜 실행, 좋은 실행, stall) | §1.10 |
-| pool key, stratum | 여러 실행의 빈도를 합칠 때 같아야 하는 열쇠(B hash, plan hash, stratum). stratum은 VM 재부팅 뒤 첫 실행(cold)과 나머지(warm)의 구분이다 | §1.7, §4.12 item 4 |
+| pool key, cold/warm 층(stratum) | 여러 실행의 빈도를 합칠 때 같아야 하는 열쇠(B hash, plan hash, cold/warm 층). cold/warm 층(spec의 stratum)은 VM 재부팅 뒤 첫 실행(cold)과 나머지(warm)의 구분이다. HB edge의 stratum S/O/C_σ와 다른 뜻이다 | §1.7, §4.12 항목 4 |
 
 ---
 
-## 1. 한 장으로 보기: 관측 파이프라인 (D7)
+## 1. 한 장으로 보기: 관측 파이프라인 (그림 D7)
 
 그림 D7은 관측과 hold가 수정하지 않은 gcc 바이너리 주위에서 어떻게 맞물리는지 보인다(spec §12 D7). 그림의 비용 값 중 [M]은 spec이 인용한 기존 측정([R07 §4.7])이고, Kairos가 실행한 것은 없다. 점선 테두리는 선택 사항(tracefs; P-TRACEFS는 쓰지 말 것을 권고)이다. loader에서 perf-sample backend와 tracefs로 이어진 점선은 loader의 기본 경로 대신 쓸 수 있는 대안 backend를 뜻한다(spec §12 D7에서 "|"로 나열한 것).
+
+**그림 D7. 관측 파이프라인** (렌더링: [diagrams/D7_observation_pipeline.svg](diagrams/D7_observation_pipeline.svg); spec §12 D7; §5.1–5.7, §4.13)
 
 ```mermaid
 flowchart TD
@@ -150,9 +154,7 @@ flowchart TD
     class THR bin
 ```
 
-렌더링: [diagrams/D7_observation_pipeline.svg](diagrams/D7_observation_pipeline.svg)
-
-흐름의 요약은 [03_workflow.md §5](03_workflow.md#5-관측-파이프라인-개요-d7)에 있다. 이 문서는 그림의 각 노드를 아래 절에서 자세히 다룬다.
+분석 워크플로우 안에서 관측이 놓이는 자리는 [03_workflow.md §5](03_workflow.md#5-관측-파이프라인-개요-그림-d7)에 있다. 이 문서는 그림의 각 노드를 아래 절에서 자세히 다룬다.
 
 | 그림의 노드 | 하는 일 | 이 문서 |
 |---|---|---|
@@ -167,7 +169,7 @@ flowchart TD
 | `run-*.kzt` | trace container(SITES, RAW_EVENTS, STRINGS, STACKS, LOSS, RUNMETA, PERTURBATION) | §5 |
 | `kz hold` | live stream을 보고 thread를 멈추고 푼다(ptrace, DR0–DR3, clone 시 attach) | §12 |
 | normalization-boot driver | 비정상 종료 뒤 관측하지 않는 정리 boot를 하고, 그 boot를 pool에서 뺀다 | §12.9 |
-| `kz trace` | 해독, 손실 검사, 정체성 결합, HB | §5.3, §6, §7, §8 |
+| `kz trace` | 해독, 손실 검사, identity 결합, HB | §5.3, §6, §7, §8 |
 
 그림에는 F1 `kz gate`가 없다. gate는 PI 결정 D3 뒤에만 쓰는 경로다(§12.5).
 
@@ -182,7 +184,7 @@ flowchart TD
 | 등급 | 무엇이 바뀌나 | Kairos에서의 쓰임 |
 |---|---|---|
 | **F0** | 아무것도 바뀌지 않는다. 바이너리와 실행 조건이 그대로이고 timing만 흔들린다 | 본 관측과 기본 확인(`kz hold`) |
-| **F1** | 같은 소스와 컴파일러. link 옵션이나 code generation 옵션이 바뀐다 | `kz gate`, D3 승인 뒤에만(deviation) |
+| **F1** | 같은 소스와 컴파일러. link 옵션이나 code generation 옵션이 바뀐다 | `kz gate`, PI 결정 D3 승인 뒤에만(deviation) |
 | **F2** | 같은 컴파일러. 계측 지점의 소스를 고쳐 쓴다 | 계획 없음 |
 | **F3** | 다른 컴파일러(clang)로 실행 바이너리를 만든다 | 하지 않음 |
 
@@ -198,7 +200,7 @@ flowchart TD
 | HW write watchpoint (perf breakpoint PMU, task별) | F0 | API 경계가 없는 준비 field의 store | ≈34 µs/hit [M]. gate와 debug register 네 개를 나눠 쓴다(§3.5) | 부팅당 몇 번만 쓰이는 field에만 쓴다. 선언한 실험 밖에서는 쓰기 감시만 한다 |
 | ptrace + debug register 실행 breakpoint | F0 | 확인 hold(`kz hold`) | #DB trap ≈34 µs [M]; gdb breakpoint ≈203 µs [M]; 전용 holder는 **측정 전** | Yama(ptrace 제한 모듈) 없음. root가 uid 1000 프로세스에 붙을 수 있다 |
 | sched/syscall tracepoint | F0 | clone 교차 확인; RacePro식 기준선의 관측 모형(spec §8.3) | 측정 전 | 이 kernel에 있다 |
-| `ld --wrap` gate | F1 + deviation | PCT와 여러 지점 스케줄, **D3 승인 시에만**; perturbation 실험군 W | handoff 1.1 µs(같은 CPU) / 10.5 µs(다른 CPU) [M] | 앱을 다시 link한다. 같은 TU 안의 호출을 놓친다 |
+| `ld --wrap` gate | F1 + deviation | PCT와 여러 지점 스케줄, **PI 결정 D3 승인 시에만**; perturbation 실험군 W | handoff 1.1 µs(같은 CPU) / 10.5 µs(다른 CPU) [M] | 앱을 다시 link한다. 같은 TU 안의 호출을 놓친다 |
 | 소스 probe | F2 | 계획 없음 | — | API 호출 지점의 12.4%가 macro 전개 안에 있다([R07 §4.6]) |
 | Clang으로 빌드한 실행 | F3 | 하지 않음 | — | — |
 | `LD_PRELOAD` / `LD_AUDIT` | — | **기각**: PIE 실행 파일 안에서 정의된 symbol을 가로챌 수 없고, `run_cfs.sh:154–158`이 거부한다 | — | [R07 §4.3] |
@@ -215,7 +217,7 @@ flowchart TD
 
 **gdb는 기준 기록일 뿐이다.** R2의 per-use 기록은 gdb로 만들었다([R2g]). Kairos는 자기 recorder로 그 집합을 다시 관측해야 하고, 그것이 S1의 출구 조건이다(§11.2).
 
-**관측기는 root다.** observer는 README 방식의 `ubuntu` 프로세스 옆에서 root로 돈다. uprobe PMU에는 `CAP_PERFMON`이나 `CAP_SYS_ADMIN`이 필요하다는 것이 [R07]의 추론이다(PI_DECISIONS D1, [R07] L355). 이를 위해 `env/run_cfs.sh`에 root 쪽 hook을 새로 두어야 하고, 이것이 PI 결정 D1이다(spec §5.1; [R07 §9 item 1]). 자세한 것은 §13.
+**관측기는 root다.** observer는 README 방식의 `ubuntu` 프로세스 옆에서 root로 돈다. uprobe PMU에는 `CAP_PERFMON`이나 `CAP_SYS_ADMIN`이 필요하다는 것이 [R07]의 추론이다(PI_DECISIONS D1, [R07] L355). 이를 위해 `env/run_cfs.sh`에 root 쪽 hook을 새로 두어야 하고, 이것이 PI 결정 D1이다(spec §5.1; [R07 §9 항목 1]). 자세한 것은 §13.
 
 ---
 
@@ -256,9 +258,9 @@ lock과 queue에는 반환 probe를 걸지 않는다([B §5.5]; [J3-M4]).
 
 ### 3.4 내부 지점과 capture 지점
 
-**내부 지점**은 API 경계에 있지 않은 publication store다(예: App record를 최종 상태로 만드는 store). 순서대로 다음을 쓴다(spec §5.2).
+**내부 지점**은 API 경계에 있지 않은 발행 store다(예: App record를 최종 상태로 만드는 store). 순서대로 다음을 쓴다(spec §5.2).
 
-1. `static inline` helper의 out-of-line local copy에 entry probe. 같은 이름의 copy가 여러 개 있으므로 DWARF(바이너리에 들어 있는 debug 정보)의 compile unit으로 구분한다. `-O0`에서는 copy가 실제로 있다: `core-cpu1`에 `CFE_ES_AppRecordSetUsed` local copy 두 개, `CFE_ES_AppRecordIsMatch` copy 네 개 [M] [X3, here]. 예를 들어 core app의 publication은 `cfe_es_start.c`의 compile unit에 있는 `CFE_ES_AppRecordSetUsed` copy에 묶는다(spec §3.17).
+1. `static inline` helper의 out-of-line local copy에 entry probe. 같은 이름의 copy가 여러 개 있으므로 DWARF(바이너리에 들어 있는 debug 정보)의 compile unit으로 구분한다. `-O0`에서는 copy가 실제로 있다: `core-cpu1`에 `CFE_ES_AppRecordSetUsed` local copy 두 개, `CFE_ES_AppRecordIsMatch` copy 네 개 [M] [X3, here]. 예를 들어 core app의 발행은 `cfe_es_start.c`의 compile unit에 있는 `CFE_ES_AppRecordSetUsed` copy에 묶는다(spec §3.17).
 2. 그것이 없으면 write watchpoint.
 3. 그것도 안 되면 가장 가까운 싼 등급의 명령.
 
@@ -266,15 +268,15 @@ lock과 queue에는 반환 probe를 걸지 않는다([B §5.5]; [J3-M4]).
 
 ### 3.5 site validator와 debug register 공동 할당
 
-**site validator.** 계획된 모든 주소를 LLVM MC(LLVM의 기계어 해독 계층)로 disassemble하고 calibration 표(§10.5)에서 비용을 찾는다. 비싼 지점은 보고하고, 조용히 받아들이지 않는다(spec §5.2).
+**site validator.** 계획된 모든 주소를 LLVM MC(LLVM의 기계어 해독 계층)로 disassemble하고 보정표(§10.5)에서 비용을 찾는다. 비싼 지점은 보고하고, 조용히 받아들이지 않는다(spec §5.2).
 
-**debug register 공동 할당** [D](spec §4.7 item 3; [X3-m1]). HW watchpoint와 ptrace gate는 thread마다 같은 debug register 네 개를 나눠 쓴다 [I: kernel의 hw_breakpoint 계층을 통해]. 그래서 `plan`과 `kz hold`는 할당기 하나를 함께 쓴다.
+**debug register 공동 할당** [D](spec §4.7 항목 3; [X3-m1]). HW watchpoint와 ptrace gate는 thread마다 같은 debug register 네 개를 나눠 쓴다 [I: kernel의 hw_breakpoint 계층을 통해]. 그래서 `plan`과 `kz hold`는 할당기 하나를 함께 쓴다.
 
 - watchpoint와 gate를 합쳐 thread당 4개 이하.
 - **task별 event만** 쓴다. CPU별 breakpoint는 그 CPU의 모든 thread에서 slot을 하나씩 차지하기 때문이다.
 - **쓰기 전용 watchpoint**만 쓴다. 읽기·쓰기 watchpoint는 읽을 때마다 ≈34 µs로 걸린다. 예를 들어 `AppTable`에 걸면 `GetAppID`마다 걸린다([R07] L339). 이것은 선언한 실험에서만 쓴다.
 
-**지점 선택**은 의무를 지점으로 덮는 greedy weighted set cover(의무 전체를 비용이 적은 지점들로 덮도록 하나씩 고르는 근사 방법)다. 최적성은 주장하지 않는다. plan의 hash는 모든 trace에 들어간다(spec §4.7 item 5).
+**지점 선택**은 의무를 지점으로 덮는 greedy weighted set cover(의무 전체를 비용이 적은 지점들로 덮도록 하나씩 고르는 근사 방법)다. 최적성은 주장하지 않는다. plan의 hash는 모든 trace에 들어간다(spec §4.7 항목 5).
 
 ### 3.6 앱 `.so`는 실행 전에 inode로 등록한다
 
@@ -386,10 +388,10 @@ record 형식은 `kz_schema.h`의 X-macro field 목록 하나에서 C struct, du
 | `SITES` | plan에서 복사한 site 목록과 binary build-id, inode, offset |
 | `RAW_EVENTS`, `STRINGS`, `STACKS` | 위의 raw record와 그 부속 |
 | `LOSS` | 손실 표(§6) |
-| `RUNMETA` | B hash, plan hash, S0 hash, stratum, kernel version, backend, hold 목록, observer CPU 시간과 배치, harness version |
+| `RUNMETA` | B hash, plan hash, Init snapshot S0의 hash, cold/warm 층(stratum), kernel version, backend, hold 목록, observer CPU 시간과 배치, harness version |
 | `PERTURBATION` | 실행별 교란 기록(§12.8) |
 
-RUNMETA의 B hash, plan hash, stratum이 **pool key**다. σ_E 빈도는 pool key가 같은 실행끼리만 합치고 `σ_E(plan P)`라고 표시한다(spec §4.12 item 4, §8.7). 즉, 관측 계획이 다른 실행은 같은 표본으로 보지 않는다.
+RUNMETA의 B hash, plan hash, cold/warm 층이 **pool key**다. σ_E 빈도는 pool key가 같은 실행끼리만 합치고 `σ_E(plan P)`라고 표시한다(spec §4.12 항목 4, §8.7). 즉, 관측 계획이 다른 실행은 같은 표본으로 보지 않는다.
 
 ### 5.3 해독된 사건
 
@@ -409,11 +411,11 @@ RUNMETA의 B hash, plan hash, stratum이 **pool key**다. σ_E 빈도는 pool ke
 
 이것은 가정 **A6**(계획한 지점의 관측 완전성, 손실은 계산함)의 실행 방식이다(spec §6.1).
 
-**왜 중요한가: SB subscribe-before-send의 예** [I, 규칙 적용]. SB는 route_lookup 시점에 route가 있는지만 본다. 구독이 늦으면 transmit은 성공 코드를 돌려주면서 조용히 사라진다(spec §3.9 "Subscribe-before-send"). 이런 계약을 판정하려면 subscribe와 route_lookup 사이의 사건이 필요하다. 그 구간에 손실이 있으면 "subscribe가 없었다"고 읽지 않고 `unknown(loss)`로 둔다. 손실을 부재로 읽으면 일어나지 않았을 수도 있는 순서를 근거로 판정하게 된다.
+**왜 중요한가: SB 구독 전 송신의 예** [I, 규칙 적용]. SB는 route_lookup 시점에 route가 있는지만 본다. 구독이 늦으면 transmit은 성공 코드를 돌려주면서 조용히 사라진다(spec §3.9 "Subscribe-before-send"). 이런 계약을 판정하려면 subscribe와 route_lookup 사이의 사건이 필요하다. 그 구간에 손실이 있으면 "subscribe가 없었다"고 읽지 않고 `unknown(loss)`로 둔다. 손실을 부재로 읽으면 일어나지 않았을 수도 있는 순서를 근거로 판정하게 된다.
 
 ---
 
-## 7. GetAppID 없이 정체성 bootstrap (spec §5.7)
+## 7. GetAppID 없이 identity bootstrap (spec §5.7)
 
 ### 7.1 왜 프로세스 안에서 조회하지 않나
 
@@ -433,7 +435,7 @@ identity는 네 필드로 나누고 합치지 않는다(spec §1.2).
 | `svc(e)` | 활성 frame의 stack: API frame(SB, EVS, TBL, …)과, 다른 actor를 대신해 도는 코드의 on-behalf frame | TIME synch callback은 등록한 app을 위해 TIME task에서 돈다([R02 §5.3]) |
 | `stamp(e)` | 코드가 명시적으로 넘기거나 저장하는 identity 값 | `CFE_EVS_SendEventWithAppID`의 `AppID` 인자 |
 
-R2에서는 ES task(`exec`)가 SB 코드(`svc`의 SB API frame)를 실행하면서 SB의 아직 publish되지 않은 AppId(`stamp`)를 찍는다([R2g §2]; spec §1.2 표). 넷을 합쳐 "thread = app"으로 보면 이 사실이 보이지 않는다.
+R2에서는 ES task(`exec`)가 SB 코드(`svc`의 SB API frame)를 실행하면서 SB가 아직 발행하지 않은 AppId(`stamp`)를 찍는다([R2g §2]; spec §1.2 표). 넷을 합쳐 "thread = app"으로 보면 이 사실이 보이지 않는다.
 
 ### 7.3 여덟 단계 bootstrap
 
@@ -442,7 +444,7 @@ R2에서는 ES task(`exec`)가 SB 코드(`svc`의 SB API frame)를 실행하면�
 | 1 | 모든 record | kernel tid |
 | 2 | 생성자 쪽: `OS_TaskCreate` entry(이름, entry pointer, 우선순위)와 out-parameter | 새 task의 이름·entry ↔ OSAL id |
 | 3 | 자식 쪽: `OS_TaskEntryPoint(osal_id)`(export됨, `osapi-task.c:124`). `.symtab` 대비책은 `OS_PthreadTaskEntry`(`os-impl-tasks.c:131`, [J3 §2.4]) | `OS_TaskPrepare` 전에 tid ↔ OSAL id |
-| 4 | ES 쪽: `CFE_ES_StartAppTask` 인자(`ParentAppId`), task record publication, App record publication(AST로 묶은 지점, spec §3.17) | task ↔ app. 가정 A-OWNER, A-FRESH도 여기서 검사한다(O9) |
+| 4 | ES 쪽: `CFE_ES_StartAppTask` 인자(`ParentAppId`), task record 발행, App record 발행(AST로 묶은 지점, spec §3.17) | task ↔ app. 가정 A-OWNER, A-FRESH도 여기서 검사한다(O9) |
 | 5 | timebase thread: `OS_TimeBase_CallbackThread(timebase_id)`(`osapi-timebase.c:365`) | timebase thread. callback은 `OS_TimerAdd` 기록으로 등록자에게 돌린다 |
 | 6 | 생성 지점 | OSAL task record가 없는 raw thread. PSP가 붙인 kernel thread 이름(15자, `cfe_psp_start.c:197–201`)은 독립된 두 번째 확인이다 |
 | 7 | OSAL과 cFE의 serial | generation. 실행 사이에서는 `(type, name, creator, creation ordinal)`로 대응시킨다 |
@@ -470,7 +472,7 @@ thread 사이의 HB edge는 **양 끝을 맞춘(matched) 동기화**에서만 �
 | mutex | `objseq`(`OS_MutSemGive` entry에서 매긴 object별 token) |
 | queue | descriptor + FIFO 순서 |
 | SB | descriptor + pipe |
-| registry(이름·ID 조회) | 결과가 함의하는 reads-from: 성공한 조회는 같은 generation의 publication을 읽었다 |
+| registry(이름·ID 조회) | 결과가 함의하는 reads-from: 성공한 조회는 같은 generation의 발행을 읽었다 |
 | poll | 기록된 탈출 상태(조건으로 빠져나왔는가, timeout인가). poll은 성공 반환일 때만 edge가 된다 |
 | task 생성 | OSAL id |
 | semaphore | 보수적 결합(conservative join) |
@@ -483,9 +485,9 @@ protocol key로 부족한 곳에서는 timestamp 창을 **맞춤의 근거**로 
 
 ### 8.3 cFS에서 이것이 뜻하는 것
 
-- **C1(OSAL 이름 조회)**: CF의 `OS_CountSemGetIdByName` 성공은 provider의 publication을 읽었다는 결과-함의 reads-from으로 순서가 정해진다. 두 사건의 timestamp로 순서를 정하지 않는다(spec §3.2 "Outcome-implied reads-from"; [A §5.6]).
-- **SB subscribe-before-send**: subscribe(`CFE_SB_SubscribeFull`)와 route_lookup은 둘 다 SB lock 아래에서 일어난다(spec §1.3, §1.4). 그래서 둘의 순서는 lock 사건, 즉 O-edge(관측한 실행에서만 성립하고 예측에서 뒤집을 수 있는 동기화 순서, spec §1.9)에서 나온다. trace는 이 경우를 "O-ordered"로 보내고, 반대 순서가 가능한지는 예측이 판단한다(spec §4.8 step 5).
-- **R2**: 24개 위반 사용은 모두 core 직렬화 때문에 publication보다 **HB상 앞서** 있다([R2g §2]; spec §1.11). 그 순서는 시각이 아니라 구조적(S) edge, 특히 framework 규칙 R19(core 직렬화 poll)에서 나온다(spec App. A.1).
+- **C1(OSAL 이름 조회)**: CF의 `OS_CountSemGetIdByName` 성공은 provider의 발행을 읽었다는 결과-함의 reads-from으로 순서가 정해진다. 두 사건의 timestamp로 순서를 정하지 않는다(spec §3.2 "Outcome-implied reads-from"; [A §5.6]).
+- **SB 구독 전 송신**: spec은 구독을 순서 edge가 아니라 **상태**로 본다. 규칙 R8은 "route_lookup 시점에 route가 있는가"만 판정하고, 송신은 목적지를 snapshot하며, 늦게 구독한 pipe에는 전달하지 않는다(spec §3.9, §3.16). 그래서 timestamp로 구독과 송신의 순서를 정하지 않는다. SCH_LAB의 깨우기 송신 대 늦은 구독자 같은 K-ROUTE 후보는 spec이 예측과 구독자 hold로 다룬다고 적는다(spec §7.3). 이 문서가 적용한 규칙 [I]: 구독(`CFE_SB_SubscribeFull`)과 route_lookup은 둘 다 SB lock 아래에서 일어나므로, 둘의 순서가 SB lock 같은 O-edge(관측한 실행에서만 성립하고 예측에서 뒤집을 수 있는 동기화 순서, spec §1.9)로만 정해지는 instance라면 trace는 그것을 "O-ordered"로 예측에 넘긴다(spec §4.8 step 5의 routing 규칙). 모든 K-ROUTE 사용이 그런 것은 아니다.
+- **R2**: 24개 위반 사용은 모두 core 직렬화 때문에 발행보다 **HB상 앞서** 있다([R2g §2]; spec §1.11). 그 순서는 시각이 아니라 구조적(S) edge, 특히 framework 규칙 R19(core 직렬화 poll)에서 나온다(spec App. A.1).
 
 ---
 
@@ -503,7 +505,7 @@ eBPF는 kernel 문맥에서 돈다. OSAL API를 부르지 않고, 사용자 lock
 2. token을 EXCLUSIVE로 바꾸면서 slot을 **RESERVED**로 표시하고 type lock을 **놓는다**.
 3. `OS_OBJECT_INIT`이 이름을 보이게 한다.
 4. 구현 호출(`pthread_create`, `mq_open` 등)을 한다.
-5. `FinalizeNew`가 다시 lock을 잡고 publish한다.
+5. `FinalizeNew`가 다시 lock을 잡고 발행한다.
 
 2–5 사이가 **RESERVED 구간**이다. 이 구간의 record를 ID로 조회하는 thread는 제한된 횟수만큼 기다린다. 시도 k마다 type unlock의 broadcast나 시간 초과(`k² × 10 ms`)로 깨어나고, 5번째 시도는 `OS_ERR_OBJECT_IN_USE`로 실패한다(`osapi-idmap.c:475–480`; spec §3.2). 자기 record를 ID로 조회하는 handshake에서 이 시도가 다 소모되면 생기는 것이 F7이다: 자식 task의 `OS_TaskPrepare`가 실패해, 생성자는 `OS_SUCCESS`를 받았는데도 entry가 끝내 실행되지 않는다(spec §3.3 K-SPAWN.osal). 이름으로 조회하는 thread는 기다리지 않고 곧바로 `OS_ERR_INCORRECT_OBJ_STATE`로 실패하는데, 이때 unlock 처리 전에 돌아오는 경로가 F1 lock 누수다(`osapi-idmap.c:401–404`; 계약 K-LOCKBAL; spec §3.2).
 
@@ -522,11 +524,11 @@ hold는 §12(spec §4.13)의 규칙을 따른다: 빈 program lockset, timebase 
 
 ---
 
-## 10. 비용 모델과 측정 의무 (spec §5.10, §8.6)
+## 10. 비용 모형과 측정 의무 (spec §5.10, §8.6)
 
 ### 10.1 비용 식
 
-thread `i`의 추가 비용은 `ΔC_i = Σ_j n_ij · c_j`다(v0.1 §11.2). `n_ij`는 thread `i`가 지점 `j`를 지난 횟수, `c_j`는 그 지점의 명령 등급 단가다. 확인 실행에는 `Σ_holds (c_hold + hold 지속 시간)`을 더한다(spec §5.10). plan은 이 값을 thread별로 기록한다(spec §4.7 item 4).
+thread `i`의 추가 비용은 `ΔC_i = Σ_j n_ij · c_j`다(v0.1 §11.2). `n_ij`는 thread `i`가 지점 `j`를 지난 횟수, `c_j`는 그 지점의 명령 등급 단가다. 확인 실행에는 `Σ_holds (c_hold + hold 지속 시간)`을 더한다(spec §5.10). plan은 이 값을 thread별로 기록한다(spec §4.7 항목 4).
 
 ### 10.2 따로 보고하는 비용 여섯 가지
 
@@ -557,7 +559,7 @@ thread `i`의 추가 비용은 `ΔC_i = Σ_j n_ij · c_j`다(v0.1 §11.2). `n_ij
 
 이 숫자는 "probe를 어디에 거느냐가 한 자릿수 이상 차이를 만든다"는 것을 보일 뿐이다. 626–632개는 Kairos가 아닌 퇴역 recorder의 관측이고, 그 인용 방식은 PI 결정 D12가 정한다(권고: 이전 관측으로만 인용하고 S1/S2에서 다시 관측).
 
-### 10.5 calibration 표 (S1)
+### 10.5 보정표(calibration table) (S1)
 
 S1은 이 VM에서 micro-benchmark로 명령 등급마다 비용을 잰다. 방법은 [R07 §4.7]의 방법이다(spec §5.10).
 
@@ -569,23 +571,9 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 
 ### 10.6 perturbation 실험군 (spec §8.6)
 
-관측이 실행을 얼마나 바꾸는지는 실험군을 나누어 잰다.
+관측이 실행을 얼마나 바꾸는지는 실험군을 나누어 잰다. 실험군 A(수정 없는 바이너리, observer 없음, `-fc-v114`에서 다시 측정), B(빈 BPF 프로그램을 단 uprobe), C′(최소 R2 plan), C(전체 plan), D(C + hold, hold plan별로 같은 plan hash의 C와 비교), W(F1 `--wrap` build, PI 결정 D3 승인 시에만)가 각각 기준, trap 비용, 좁은 plan의 비용, 기록 비용, 제어 효과, code layout 효과를 가른다. 측정량은 계측 없이도 보이는 것(A를 B, C′, C와 비교)과 recorder만 보는 것(C′, C, D 비교)으로 나누고, cold와 warm 층은 합치지 않는다. σ_E 빈도는 `σ_E(plan P)`로 표시한다.
 
-| 실험군 | 구성 | 분리하는 것 |
-|---|---|---|
-| A | 수정 없는 바이너리, observer 없음, **`-fc-v114`에서 다시 측정** | 기준 |
-| B | uprobe를 등록하고 빈 BPF 프로그램만 붙임 | trap 비용 |
-| C′ | 최소 R2 plan(R2 지점과 identity bootstrap만) | 좁은 plan의 비용 |
-| C | 전체 plan | 기록 비용 |
-| D | C + hold. **hold plan별로** 같은 plan hash의 C 실행과 비교 | 제어 효과 |
-| W | F1 `--wrap` build, gate 끔(D3 승인 시에만) | 변형 build의 code layout 효과 |
-
-측정량은 "무엇이 그것을 볼 수 있는가"로 나눈다.
-
-- **계측 없이도 보이는 것**(A를 B, C′, C와 비교): console의 cFE 시각으로 CORE_READY → OPERATIONAL, 15개 "Loading file … APP:" 줄의 구간(warm에서 2.2–3.3 ms), 앱별 init offset, OPERATIONAL 줄의 wall time, 정지 시 읽는 SB counter(`PipeOverflowErrorCounter`, `NoSubscribersCounter`, `MsgLimitErrorCounter`, `InternalErrorCounter`), 어느 pipe가 넘쳤는지.
-- **recorder만 보는 것**(C′, C, D 비교): R2의 per-use 집합(task, SB 함수, EID), site별 hit, drop, observer CPU 시간과 배치.
-
-평균이 아니라 분포를 비교한다. σ_E 빈도는 `σ_E(plan P)`로 표시하고, 관측하지 않은 실행과의 동등성은 **실제로 잰 계측 없는 주변 분포(marginal)에 대해서만** 말한다. cold와 warm은 따로 두고 합치지 않으며([BM]: OPERATIONAL까지 2570 ms 대 1613–1633 ms, load 구간 849 ms 대 2.2–3.3 ms), 실험군은 block이 아니라 섞어서 실행한다. 섞는 순서는 이유와 함께 **가정**으로 기록한다(spec §8.6 controls).
+실험군 표, 측정량의 목록, 통제(교차 실행, cold/warm 분리)는 평가 계획 쪽 [07_evaluation.md §7](07_evaluation.md#7-오버헤드와-perturbation-실험-spec-86)에 한 곳으로 모았다.
 
 ---
 
@@ -595,7 +583,7 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 
 | 항목 | 상태 | 대안 |
 |---|---|---|
-| 앱 `.so`에 대한 inode 등록 uprobe(`dlopen` 전) | `.so`에서는 시험 전([R07 §9 item 6]). 주 바이너리에서는 동작 | 설계상 대안이 필요 없다. startup thread hold는 쓰더라도 pool에서 뺀다 |
+| 앱 `.so`에 대한 inode 등록 uprobe(`dlopen` 전) | `.so`에서는 시험 전([R07 §9 항목 6]). 주 바이너리에서는 동작 | 설계상 대안이 필요 없다. startup thread hold는 쓰더라도 pool에서 뺀다 |
 | attach cookie(`BPF_LINK_CREATE` / `uprobe_multi`) | kernel symbol만 있음. 기능 시험 전 | perf-sample backend(사건의 perf fd로 site를 안다) |
 | ring buffer, task storage, `bpf_get_stack` | 시험 전 | register와 user stack을 담은 perf-sample record |
 | 반환값 capture R-a…R-e | 측정 전 | calibration이 지점마다 정한다. 지연 읽기는 정적으로 유효한 곳에서만 |
@@ -612,7 +600,7 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 - 어긋나면 조사하고 보고한다. **결과에 맞추어 조정하지 않는다.** 쓴 backend를 기록한다.
 - 손실은 0이거나 계산되어 있어야 한다.
 - R-a…R-e, BPF 본체, cookie, perf-sample 비용을 잰다. 앱 `.so`의 inode 등록을 시험한다.
-- 실험군 A를 `-fc-v114`에서 stratum별로 다시 재고, A, B, C′을 계측 없이 보이는 측정량으로 비교한다. S1의 N은 S1에서 deviation으로 정한다(D14).
+- 실험군 A를 `-fc-v114`에서 cold/warm 층별로 다시 재고, A, B, C′을 계측 없이 보이는 측정량으로 비교한다. S1의 N은 S1에서 deviation으로 정한다(PI 결정 D14).
 
 **S6(F0 확인)** 의 출구 조건은 App-record 구간 probe를 사건 해제, reference watchdog, attach 전략, 기록된 perturbation 비율과 함께 실행하고, 결과를 realized, refuted, inconclusive 중 하나로 `derived` 표시와 함께 내는 것이다. holder 비용, clone 시 attach 비용, ptrace × uprobe 상호작용도 이때 잰다(spec §9.3 S6; PI 결정 D16).
 
@@ -630,7 +618,7 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 | protected | conformance 외에 없다 |
 | schedule-dependent / timeout-dependent | 나쁜 witness를 directed 확인한다. 자연 실행이 나쁜 순서만 보이면 좋은 witness도 확인한다 |
 | unknown(model_gap, writer_incomplete, conformance) | 예측 witness를 근거 삼아 시도한다. 근거는 쌓이지만 class는 모형을 고칠 때까지 unknown이다 |
-| unknown(budget) | D3가 승인되면 F1 PCT 실행, 아니면 unknown으로 남는다 |
+| unknown(budget) | PI 결정 D3가 승인되면 F1 PCT 실행, 아니면 unknown으로 남는다 |
 | LOSS-UNDER-ORDER | SB counter와 put 결과로 관측한다 |
 
 `LOSS-UNDER-ORDER`는 route·용량 계약에서 전달을 요구하는 reference가 없을 때 손실에 붙이는 label이고, conformance는 관측한 trace가 모형과 맞는지 보는 검사(actor별 O1/O2, 전역 O8)다(spec §1.10, §2.5).
@@ -677,7 +665,7 @@ watchdog이 터지면 결과는 `inconclusive(await-timeout)`이다. hold 중 �
 - 측정된 단가: #DB trap ≈34 µs, gdb breakpoint ≈203 µs [M]([R07 §4.7]).
 - holder의 stop/resume 비용과, uprobe 및 signal(timebase의 real-time signal, `SIGUSR1`)과의 상호작용은 **측정 전**이고 S6의 출구 항목이다.
 
-**F1 `kz gate`**(D3 뒤에만).
+**F1 `kz gate`**(PI 결정 D3 뒤에만).
 
 - 동기화 skeleton API에 대한 손으로 쓴 `__wrap_*` gate를 C99 파일 하나에 두고 cFS flag로 build한다.
 - controller가 witness 스케줄이나 PCT를 강제한다. PCT(probabilistic concurrency testing)는 무작위 우선순위로 스케줄을 고르는 방법이다. 버그의 깊이 d는 그것을 드러내는 데 필요한 최소 순서 제약 수다([R05 §2.1]). PCT는 실행마다 깊이 d의 버그를 적어도 `1/(n·k^(d−1))`의 확률로 찾는다([V-abs; mechanism P]). [R05 §2.1]에 따르면 n은 thread 수, k는 step 수다. Kairos는 n과 k를 실행마다 재고, gate 지점에 상대적으로 말한다. d는 1부터 PI가 정한 실행 예산 안에서 늘린다(deviation).
@@ -697,7 +685,7 @@ deadlock과 lock 누수(K-LOCKBAL)의 oracle은 **wait-for 사실**이다. timeo
 | `refuted` | 순서는 일어났는데 결과가 좋았다. 모형이나 요약이 틀렸으므로 model-fault 기록을 쓴다 |
 | `inconclusive` | 결정하지 못했다(예: watchdog) |
 
-hold나 gate로 얻은 realized witness는 σ_E class를 만들지 않는다. 그런 칸은 `σ_E(held)`다. σ_E class는 양쪽 모두 자연 witness가 있어야 한다(spec §1.10, §4.12 item 4). spec은 확인에 대해 이만큼을 보장한다(G6): `realized` 판정은 선언한 제어 아래 B의 gcc 바이너리에서 재현되었고, 계약 oracle을 확인 trace에서 평가했으며, naturalness label과 perturbation 비율을 단다. realized 보고는 recorder의 oracle에 상대적으로 false alarm을 포함하지 않는다(spec §6.3 G6).
+hold나 gate로 얻은 realized witness는 σ_E class를 만들지 않는다. 그런 칸은 `σ_E(held)`다. σ_E class는 양쪽 모두 자연 witness가 있어야 한다(spec §1.10, §4.12 항목 4). spec은 확인에 대해 이만큼을 보장한다(G6): `realized` 판정은 선언한 제어 아래 B의 gcc 바이너리에서 재현되었고, 계약 oracle을 확인 trace에서 평가했으며, naturalness label과 perturbation 비율을 단다. realized 보고는 recorder의 oracle에 상대적으로 false alarm을 포함하지 않는다(spec §6.3 보장 G6).
 
 ### 12.8 perturbation 기록과 비율
 
@@ -706,7 +694,7 @@ hold나 gate로 얻은 realized witness는 σ_E class를 만들지 않는다. �
 - hold(횟수, 지점, 지속 시간);
 - 비용 등급별 probe hit 수;
 - observer CPU 시간과 배치;
-- §10.6의 계측 없이 보이는 측정량;
+- 계측 없이 보이는 측정량([07 §7.3](07_evaluation.md#73-측정은-무엇이-볼-수-있느냐로-나눈다));
 - witness마다 **perturbation 비율**.
 
 perturbation 비율은 다음과 같다.
@@ -724,7 +712,7 @@ perturbation ratio =
 - 약 100 ms의 core 직렬화 간격([R2g §2]);
 - SCH_LAB의 첫 tick이 init 뒤 적어도 1 s.
 
-비율은 **문턱값 없이** 보고한다(spec §4.13, §4.12 item 8). "비율이 작으니 자연스럽다"는 판정을 도구가 내리지 않는다는 뜻이다.
+비율은 **문턱값 없이** 보고한다(spec §4.13, §4.12 항목 8). "비율이 작으니 자연스럽다"는 판정을 도구가 내리지 않는다는 뜻이다.
 
 ### 12.9 normalization boot [D]
 
@@ -733,11 +721,11 @@ perturbation ratio =
 **처리.** 그런 실행 뒤에는 매번(spec §4.13):
 
 1. **관측하지 않는 normalization boot**를 한 번 한다. 이미 E11(a)로 쓰고 있는 CI의 POWERON restart(`.github/workflows/build-run-app-reusable.yml` L209–214; [BM] L29)로 끝내며, 이것이 segment를 지운다(`cfe_psp_support.c:62–69`). 손으로 지우지 않는다([R2g]의 "not cleaned (policy)" 관행 유지).
-2. 그 뒤의 유지 상태 snapshot이 기준 S0와 같아야 한다. 비교는 내용 hash로 하고 mtime은 보지 않는다.
+2. 그 뒤의 유지 상태 snapshot이 기준 Init snapshot S0와 같아야 한다. 비교는 내용 hash로 하고 mtime은 보지 않는다.
 3. normalization boot는 어떤 pool에도 넣지 않는다.
-4. cold 실행(VM 재부팅 뒤 첫 실행)은 따로 stratum을 이루고, warm 실행과 합치지 않는다.
+4. cold 실행(VM 재부팅 뒤 첫 실행)은 따로 cold/warm 층(stratum)을 이루고, warm 실행과 합치지 않는다.
 
-정지 방법과 normalization 방법은 PI 결정 D17이 정한다. 권고는 둘 다 CI ES POWERON restart 명령(from-reference 후보)이다. 이 정지도 teardown(shutdown 요청 뒤 객체를 지우는 단계)이므로, 그 뒤의 사용은 K-TEARDOWN(shutdown 요청 뒤의 사용을 모은 계약 family) instance로 따로 보고한다(spec §3.5; [05_cfs_mapping.md](05_cfs_mapping.md)의 D9).
+정지 방법과 normalization 방법은 PI 결정 D17이 정한다. 권고는 둘 다 CI ES POWERON restart 명령(from-reference 후보)이다. 이 정지도 teardown(shutdown 요청 뒤 객체를 지우는 단계)이므로, 그 뒤의 사용은 K-TEARDOWN(shutdown 요청 뒤의 사용을 모은 계약 family) instance로 따로 보고한다(spec §3.5; [05_cfs_mapping.md](05_cfs_mapping.md)의 그림 D9).
 
 ### 12.10 cFS 예: core task App-record 구간 확인 [I]
 
@@ -745,7 +733,7 @@ spec App. A.2 step 5의 계획을 위 규칙에 대입한다. 실행한 적은 �
 
 | 요소 | 값 | 규칙 |
 |---|---|---|
-| 확인 대상 | core task(예: EVS)가 `cfe_es_start.c:818`의 App record publication 전에 `GetAppID`를 부르는 순서 | §12.1 schedule-dependent |
+| 확인 대상 | core task(예: EVS)가 `cfe_es_start.c:818`의 App record 발행 전에 `GetAppID`를 부르는 순서 | §12.1 schedule-dependent |
 | 멈출 thread와 지점 | startup thread. `CFE_ES_StartAppTask`가 돌아온 뒤(`cfe_es_start.c:810–814`), `:816`의 `CFE_ES_LockSharedData` 전 | §12.2 조건 1: 그 지점의 lock 집합은 비어 있다 |
 | 해제 | 자식의 `GetAppID`가 돌아오면 | §12.4 사건 기반 |
 | watchdog | EVS 구간은 10000 ms: 이미 만든 core task들은 `CFE_PLATFORM_CORE_MAX_STARTUP_MSEC` = 30000 ms를 기다리지만, 예측한 continuation에 restart 요청이 있으면 `CFE_PSP_RESTART_DELAY` = 10000 ms가 더 작다 | §12.4 최소 reference timeout |
@@ -772,13 +760,13 @@ spec App. A.2 step 5의 계획을 위 규칙에 대입한다. 실행한 적은 �
 | [POL] 원칙 | 관측·확인에서의 적용 | 근거 |
 |---|---|---|
 | 조건은 reference에서 온다(L3, L15). 기준 실행은 gcc 13.3.0 바이너리, 기록된 flag, README 방식이다 | **기준 바이너리를 수정하지 않는다.** 본 관측과 기본 확인은 F0: 바이너리, build, 환경, 실행 사용자를 바꾸지 않고 timing만 흔든다. `LD_PRELOAD`는 쓰지 않는다(`run_cfs.sh:154–158`이 거부). 소스 probe(F2)와 다른 컴파일러(F3)는 쓰지 않는다 | spec §5.1, §2.6; [R07 §4.7, §7] |
-| 조건마다 값·reference·상태를 기록한다(L14–17) | **root 쪽 관측·hold hook은 PI 결정 D1이다.** 질문: root 프로세스가 README 방식의 `ubuntu` 프로세스에 perf-PMU uprobe, eBPF, task별 watchpoint, ptrace hold를 붙여도 되는가. `env/run_cfs.sh`의 `RUN_CFS_WRAP`/`RUN_CFS_HOOK` 옆에 hook 하나가 필요하다. 선택지: (a) 승인(F0), (b) 거부(그러면 F1 `--wrap`이나 F2 소스 probe만 남는다). 권고: (a). 결정 전에는 S1과 trace를 쓰는 모든 것(S2, S3a의 reach와 O1/O2, S4–S6, RQ5, RQ7)이 막힌다. 결정하지 않으면 Kairos 관측 실행은 없다 | spec §5.1; PI_DECISIONS D1; [R07 §9 item 1] |
-| reference와 다르면 deviation으로만(L16, L18–21) | F1 `--wrap` gate는 link 옵션을 바꾸므로 deviation이고 D3 승인 뒤에만 쓴다. 그 code layout 효과는 실험군 W가 잰다 | spec §5.1, §4.13, §8.6; D3 |
+| 조건마다 값·reference·상태를 기록한다(L14–17) | **root 쪽 관측·hold hook은 PI 결정 D1이다.** `env/run_cfs.sh`의 `RUN_CFS_WRAP`/`RUN_CFS_HOOK` 옆에 hook 하나가 필요하다. 권고는 승인(F0)이고, 결정하지 않으면 Kairos 관측 실행은 없다. 질문, 선택지, 막히는 것은 [10_decisions_adr.md §2.4](10_decisions_adr.md#24-1순위-s1을-열기-위해-지금-필요한-결정)에 있다 | spec §5.1; PI_DECISIONS D1; [R07 §9 항목 1] |
+| reference와 다르면 deviation으로만(L16, L18–21) | F1 `--wrap` gate는 link 옵션을 바꾸므로 deviation이고 PI 결정 D3 승인 뒤에만 쓴다. 그 code layout 효과는 실험군 W가 잰다 | spec §5.1, §4.13, §8.6; PI 결정 D3 |
 | 우회책을 조용히 쓰지 않는다(L18–21) | tracefs dynamic event는 host 상태를 바꾸므로 쓰면 RUNMETA에 기록한다. 권고는 쓰지 않는 것(P-TRACEFS). libbpf 설치는 기록된 package 결정이고 기본은 설치하지 않음(P-LIBBPF). startup thread hold 대비책은 쓰더라도 pool에서 뺀다 | spec §5.2, §5.4; P-TRACEFS, P-LIBBPF |
 | 도구 매개변수는 사건 기반이거나 reference 상수(L22) | hold 해제는 사건 기반. watchdog은 platform 상수(`CFE_PSP_RESTART_DELAY` 등)를 Φ와 B에서 읽는다. 고정 sleep은 기각한다 | spec §4.13; ADR-020 |
-| 자원 때문에 고른 값은 deviation(L16; spec 머리말) | 실행 횟수 N(D14; S1의 N은 S1에서 결정), PCT 깊이 d를 늘리는 실행 예산 | spec §4.13, §8.7; D14 |
-| 정지 방법도 reference에서 | CI ES POWERON restart 명령(from-reference 후보)으로 정지하고 normalization boot도 그것으로 한다(D17). 결정 전에는 실행을 하나씩 하고 S0를 기록하되 pool하지 않는다 | spec §3.5, §4.13; D17 |
-| 기록된 조건과 현재 환경의 차이도 기록한다(L14) | kernel이 `-fc-v80`에서 `-fc-v114`로 바뀌었으므로 실험군 A를 다시 잰다(D11, 필수) | spec §5.10; D11 |
+| 자원 때문에 고른 값은 deviation(L16; spec 머리말) | 실행 횟수 N(PI 결정 D14; S1의 N은 S1에서 결정), PCT 깊이 d를 늘리는 실행 예산 | spec §4.13, §8.7; PI 결정 D14 |
+| 정지 방법도 reference에서 | CI ES POWERON restart 명령(from-reference 후보)으로 정지하고 normalization boot도 그것으로 한다(PI 결정 D17). 결정 전에는 실행을 하나씩 하고 Init snapshot S0를 기록하되 pool하지 않는다 | spec §3.5, §4.13; PI 결정 D17 |
+| 기록된 조건과 현재 환경의 차이도 기록한다(L14) | kernel이 `-fc-v80`에서 `-fc-v114`로 바뀌었으므로 실험군 A를 다시 잰다(PI 결정 D11, 필수) | spec §5.10; PI 결정 D11 |
 | 외부 참고 도구 | valgrind helgrind/DRD는 gdb처럼 `RUN_CFS_WRAP`로 실행하는 표시된 참고점이다. 감싼 실행 명령은 deviation이다(P-VALGRIND) | spec §5.1, §8.3; P-VALGRIND |
 | 단위 시험의 값은 연구 조건이 아니다(L23) | Kairos 자신의 단위 시험 값은 연구 조건이 아니다 | spec 머리말 |
 
@@ -789,27 +777,40 @@ spec App. A.2 step 5의 계획을 위 규칙에 대입한다. 실행한 적은 �
 ## 14. 이 문서가 주장하지 않는 것
 
 - **구현과 측정.** Kairos는 아직 만들어지지도, 실행되지도 않았다. 이 문서의 [M] 값은 모두 spec이 인용한 기존 측정이다. **S1 전에는 overhead 수치를 주장하지 않는다**(spec §5.2). §10.4의 숫자는 산술이지 예측이 아니다.
-- **"안전".** 경보 없음은 안전의 근거가 아니다(spec §6.4 item 2). 관측에서 나쁜 실행이 없었다는 것은 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"으로만 쓰고 "timing-protected"라 하지 않는다(item 3). 손실은 사건 없음이 아니다(§6).
-- **확인 실행에서 σ_E class.** hold, gate, timeout-exercised 실행은 σ_E class를 만들지 않고 `σ_E(held)`만 만든다(item 10). 파생 확인은 `derived`로 표시하고 원 사례 결과와 섞지 않는다.
-- **확인 전의 버그 주장.** OSAL F1(lock 누수), F7(조용한 task 소실), timebase handshake 소실, 두 App-record 구간은 확인 실행 전에는 버그가 아니다(item 23).
-- **R2 수치.** Kairos 자신의 recorder가 per-use 집합을 재현하기 전에는 어떤 R2 수치도 Kairos의 결과가 아니다. "24"는 ENV의 version 표가 있는 basis에서만 맞다(item 21).
-- **비행 환경 대표성.** Linux `SCHED_OTHER`, permissive 모드에서 잰 timing과 overhead는 비행 환경을 대표하지 않는다(item 17).
-- **도구의 새로움.** PCT, delay injection 같은 기존 기법의 새로움을 주장하지 않는다(item 18). 관측 수단인 uprobe, eBPF, ptrace도 기존 Linux 기능이다.
+- **"안전".** 경보 없음은 안전의 근거가 아니다(spec §6.4 항목 2). 관측에서 나쁜 실행이 없었다는 것은 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"으로만 쓰고 "timing-protected"라 하지 않는다(항목 3). 손실은 사건 없음이 아니다(§6).
+- **확인 실행에서 σ_E class.** hold, gate, timeout-exercised 실행은 σ_E class를 만들지 않고 `σ_E(held)`만 만든다(항목 10). 파생 확인은 `derived`로 표시하고 원 사례 결과와 섞지 않는다.
+- **확인 전의 버그 주장.** OSAL F1(lock 누수), F7(조용한 task 소실), timebase handshake 소실, 두 App-record 구간은 확인 실행 전에는 버그가 아니다(항목 23).
+- **R2 수치.** Kairos 자신의 recorder가 per-use 집합을 재현하기 전에는 어떤 R2 수치도 Kairos의 결과가 아니다. "24"는 ENV의 version 표가 있는 basis에서만 맞다(항목 21).
+- **비행 환경 대표성.** Linux `SCHED_OTHER`, permissive 모드에서 잰 timing과 overhead는 비행 환경을 대표하지 않는다(항목 17).
+- **도구의 새로움.** PCT, delay injection 같은 기존 기법의 새로움을 주장하지 않는다(항목 18). 관측 수단인 uprobe, eBPF, ptrace도 기존 Linux 기능이다.
 
 ---
 
 ## 15. 관련 문서
 
-| 문서 | 내용 |
-|---|---|
-| [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문. 이 문서는 주로 §5, §4.13, §4.7, §8.6을 풀어 쓴 것이다 |
-| [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | D1, D3, D11, D14, D16, D17, P-LIBBPF, P-TRACEFS, P-VALGRIND |
-| [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md) | 이 문서와 관련된 검토 쟁점: X3-M1(cookie, inode 등록), X3-M2(perturbation 비율), X3-M3(normalization boot), X3-m1(debug register 할당), X3-m2(perf-sample backend), X3-m3(R-e, 지연 읽기), X3-m4(hold 대비책 제거), X3-m8(S1 출구 조건) |
-| [01_overview.md](01_overview.md) | 문제, 판정 체계, 한 화면 개요(D0) |
-| [02_architecture.md](02_architecture.md) | 계층과 구성요소, 산출물 형식, 기술 결정 |
-| [03_workflow.md](03_workflow.md) | instance 분석 순서(D3), 확인 단계의 요약(§1.6), 관측 파이프라인 개요(§5, D7), perturbation 실험군(§4.9) |
-| [04_formal_model.md](04_formal_model.md) | 의미론, MustBefore, certificate, 보장 |
-| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ의 대응(D5), R2 certificate(D8), 종료 범위(D9) |
-| [08_roadmap.md](08_roadmap.md) | 단계 S0–S10과 출구 조건 |
-| [background/07_env_feasibility.md](background/07_env_feasibility.md) | [R07] 환경 타당성 보고서. 이 문서의 측정값 대부분의 출처(§4.7, §7) |
-| [diagrams/README.md](diagrams/README.md) | 그림 범례, 목록, 다시 렌더링하는 법 |
+이 폴더의 모든 문서는 아래 같은 문서 지도를 쓴다. 용어는 [10_decisions_adr.md §3 용어집](10_decisions_adr.md#3-용어집), 이름이 겹치는 기호는 [§0.2 이름 충돌 주의](10_decisions_adr.md#02-이름-충돌-주의), PI 결정 목록은 [§2](10_decisions_adr.md#2-pi가-내려야-할-결정)에 있다.
+
+| 문서 | 내용 | spec |
+|---|---|---|
+| [README.md](README.md) | 폴더 입구: 읽는 순서, 문서별 한 줄 요약 | — |
+| [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
+| [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O9(그림 D1, D2) | §2 |
+| [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| **06_observation_confirmation.md (이 문서)** | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
+| [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
+| [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
+| [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 38개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
+| [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
+| [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
+| [history/](history/) | 설계 이력: 설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], SPEC v1 | — |
+
+**이 문서와 특히 관련된 곳.**
+
+- spec: 주로 §5, §4.13, §4.7, §8.6을 풀어 쓴 것이다. perturbation 실험군의 평가 쪽 쓰임은 [07_evaluation.md §7](07_evaluation.md#7-오버헤드와-perturbation-실험-spec-86)에 있다.
+- PI 결정: D1, D3, D11, D14, D16, D17, P-LIBBPF, P-TRACEFS, P-VALGRIND([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)).
+- 검토 쟁점: X3-M1(cookie, inode 등록), X3-M2(perturbation 비율), X3-M3(normalization boot), X3-m1(debug register 할당), X3-m2(perf-sample backend), X3-m3(R-e, 지연 읽기), X3-m4(hold 대비책 제거), X3-m8(S1 출구 조건)([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)).
+- 배경: [background/07_env_feasibility.md](background/07_env_feasibility.md)([R07] §4.7, §7). 이 문서의 측정값 대부분의 출처다.

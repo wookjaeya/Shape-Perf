@@ -7,14 +7,14 @@
 ## 목차
 
 - [0. 읽기 전에](#0-읽기-전에): 표기, Φ_cFS가 담는 것, 필요한 용어
-- [1. 한 장으로 보기 (D5)](#1-한-장으로-보기-d5): cFS 계층과 Φ_cFS 항목의 대응
+- [1. 한 장으로 보기 (그림 D5)](#1-한-장으로-보기-그림-d5): cFS 계층과 Φ_cFS 항목의 대응
 - [2. 계층별 대응](#2-계층별-대응): actor, OSAL, task 생성과 App-record 구간, PSP, ES, 앱 적재, 재시작, SB, EVS, TBL, CDS, TIME, ad hoc 동기화 (spec §3.1–3.14)
 - [3. 계약 라이브러리와 15개 계약 종류](#3-계약-라이브러리와-15개-계약-종류) (spec §3.15)
 - [4. HB 규칙 목록](#4-hb-규칙-목록) (spec §3.16)
 - [5. site binding과 version guard](#5-site-binding과-version-guard) (spec §3.17)
 - [6. 다섯 사례의 자리와 그 밖의 후보](#6-다섯-사례의-자리와-그-밖의-후보) (spec §7.3)
-- [7. R2 certificate 예 (D8)](#7-r2-certificate-예-d8) (spec App. A.1)
-- [8. 종료 범위 (D9)](#8-종료-범위-d9) (spec §3.5, §1.6, §4.5, App. A.7)
+- [7. R2 certificate 예 (그림 D8)](#7-r2-certificate-예-그림-d8) (spec App. A.1)
+- [8. 종료 범위 (그림 D9)](#8-종료-범위-그림-d9) (spec §3.5, §1.6, §4.5, App. A.7)
 - [9. 이 문서가 주장하지 않는 것](#9-이-문서가-주장하지-않는-것)
 - [10. 관련 문서](#10-관련-문서)
 
@@ -39,9 +39,11 @@
 - 문헌은 [R04]·[R05]·[R06]이 확인한 상태 표지(V-doc, V-abs, V-me, P, UNVERIFIED)와 함께만 인용한다.
 - **경보 없음 ≠ 안전.** 이 문서의 어떤 표도 "안전"을 뜻하지 않는다. 근거가 없는 칸은 `unknown(reason)`이 된다(spec §0.1, §1.10).
 
+**인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
+
 ### 0.2 Φ_cFS가 담는 것
 
-Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작은 선언형 언어로 쓴 데이터인 **framework profile Φ**에 넣는다(spec §0.2 item 1; ADR-003). Φ_cFS는 v7.0.1용 Φ다. cFS의 메커니즘 하나는 다음 네 종류의 Φ 항목이 된다(spec §3 머리말).
+Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작은 선언형 언어로 쓴 데이터인 **framework profile Φ**에 넣는다(spec §0.2 항목 1; ADR-003). Φ_cFS는 v7.0.1용 Φ다. cFS의 메커니즘 하나는 다음 네 종류의 Φ 항목이 된다(spec §3 머리말).
 
 | Φ 항목 | 뜻 | cFS 예 |
 |---|---|---|
@@ -58,7 +60,7 @@ Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작�
 
 ### 0.3 필요한 용어
 
-자세한 정의는 [04_formal_model.md](04_formal_model.md)와 spec §13에 있다.
+자세한 정의는 [04_formal_model.md](04_formal_model.md)와 용어집 [10_decisions_adr.md §3](10_decisions_adr.md#3-용어집)에 있다(원문 spec §13).
 
 | 용어 | 이 문서에서의 뜻 |
 |---|---|
@@ -82,11 +84,11 @@ Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작�
 
 ---
 
-## 1. 한 장으로 보기 (D5)
+## 1. 한 장으로 보기 (그림 D5)
 
-D5는 두 장이다. 개요는 cFS 계층마다 Φ_cFS의 어떤 kind·규칙·계약이 생기는지 보이고, 상세는 대표 코드 위치가 어떤 Φ 항목이 되는지 보인다(spec §12 D5).
+그림 D5는 두 장이다. 개요는 cFS 계층마다 Φ_cFS의 어떤 kind·규칙·계약이 생기는지 보이고, 상세는 대표 코드 위치가 어떤 Φ 항목이 되는지 보인다(spec §12 D5).
 
-**D5 개요** — 렌더링: [diagrams/D5_cfs_mapping_overview.svg](diagrams/D5_cfs_mapping_overview.svg)
+**그림 D5 개요. cFS 계층과 Φ_cFS 항목의 대응** (렌더링: [diagrams/D5_cfs_mapping_overview.svg](diagrams/D5_cfs_mapping_overview.svg); spec §12 D5; §1.3, §3.1–3.16)
 
 ```mermaid
 flowchart LR
@@ -135,7 +137,7 @@ flowchart LR
     class KPSP,KOSAL,KES,KEVS,KSB,KTBL,KTIME,KFS,KAPP,KX phi
 ```
 
-**D5 상세** — 렌더링: [diagrams/D5_cfs_mapping_detail.svg](diagrams/D5_cfs_mapping_detail.svg)
+**그림 D5 상세. 코드 위치와 Φ 항목** (렌더링: [diagrams/D5_cfs_mapping_detail.svg](diagrams/D5_cfs_mapping_detail.svg); spec §12 D5; §3.2–3.9)
 
 ```mermaid
 flowchart LR
@@ -219,7 +221,7 @@ flowchart LR
 |---|---|
 | ES startup thread (PSP main) | `CFE_PSP_MAIN_FUNCTION`. `CFE_ES_Main`이 돌아오면 `OS_Application_Run`을 돈다(`cfe_psp_start.c:452–508`). 정의상 once |
 | core main task (ES, EVS, SB, TBL, TIME) | 생성 파일 `cfe_static_module_list.c`. `CFE_ES_CreateObjects`의 table loop(횟수 상수)를 정확히 펼쳐 반복마다 spawn 노드 하나를 둔다 |
-| 앱 main task (15개) | **B가 고른** startup script. entry symbol을 module `.so` 안의 정의로 푼다(`dlsym`의 정적 대응, [R05 §2.5 item 1]). 관측한 `OS_ModuleSymbolLookup`으로 확인한다 |
+| 앱 main task (15개) | **B가 고른** startup script. entry symbol을 module `.so` 안의 정의로 푼다(`dlsym`의 정적 대응, [R05 §2.5 항목 1]). 관측한 `OS_ModuleSymbolLookup`으로 확인한다 |
 | child task | 상수 함수 인자를 가진 `CFE_ES_CreateChildTask` 호출. 예: TIME의 tone·local task(`cfe_time_task.c:160, 173`), `ES_BG_TASK`(`cfe_es_backgroundtask.c:214`), FM의 자식(`fm_child.c:86`). owner는 만든 앱이다 |
 | timebase `cFS-Master` | PSP `soft_timebase` module(`cfe_psp_soft_timebase.c:53`). 관측은 `OS_TimeBase_CallbackThread`(`osapi-timebase.c:365`) |
 | 자기 조회 handshake를 하는 OSAL 내부 thread | 자기 object에 `OS_ObjectIdGetById`를 부르는 OSAL 내부 thread entry를 pattern으로 찾는 일반 규칙([X2-03]) |
@@ -283,11 +285,19 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 | `CFE_ES_CreateChildTask` (`:1262`) | 오류 코드, 자식 없음(harm `task_never_runs`) | 호출자마다 |
 | `CFE_ES_ExitChildTask` (`:1459`) | 오류 경로(record 해제 안 됨) | `unspecified_by_reference` |
 
-**결과 사슬.** 사슬은 한 갈래가 아니라 **모든 갈래**를 기록한다(spec §1.6). 실행 전이므로 모두 코드에서 추론한 것이다 [I] ([X2-02]).
-- **core 구간 안의 EVS.** `GetAppID` 실패 → `CFE_ES_ExitApp(CORE_APP_INIT_ERROR)`. (a) 구간이 아직 열려 있으면 `ExitApp`은 no-op이다. 그 뒤 raise 때 구간이 닫혔으면 EVS task가 결국 종료하고 시스템은 EVS 없이 돈다(`service_task_absent`). 아직 열려 있으면 raise를 건너뛰어 30000 ms 뒤 core sync가 panic한다(`panic`). (b) 첫 `ExitApp` 전에 구간이 닫혔으면 `CFE_ES_ResetCFE(PROCESSOR)` → `CFE_PSP_Restart`다. EVS task가 10000 ms 뒤 `abort()`하고, 정상 종료는 없다(8.1). 30 s panic보다 먼저다(`process_abort`).
-- **script 앱이 자기 구간 안.** `RunLoop` false → loop 이탈 → `ExitApp` no-op → task return. record가 `AppState ≤ RUNNING`인 채 남는데 scan은 `> RUNNING`만 처리한다(`cfe_es_apps.c:1112–1146`). 두 soft barrier가 각각 timeout된다(`app_zombie`). 구간이 먼저 닫히면 STOPPED로 정리된다(`app_error_exit`).
-- **core task(ES, SB, TBL, TIME)의 raise가 구간 안.** raise를 건너뛰어, 다시 raise하지 않으면 30 s 뒤 panic이다.
-- **SB·TBL의 `GetAppID`가 구간 안**(`cfe_sb_task.c:138`, `cfe_tbl_task.c:196`, 둘 다 상태 무시). identity 셀이 그 실행 내내 `UNDEFINED`가 되고, 이후 모든 SB/TBL `SendEventWithAppID` 사용이 shape ABSENT로 bad다. 이 뿌리 하나에 사슬로 묶는다. EventRacer식 race coverage(OOPSLA 2013 [V-abs])에 따라 뿌리를 보고하고, 종속 사용(기존 기록에서 부팅마다 순서가 정해진 211–229개 [M], [R2c §7])은 붙여 둔다. race coverage는 어떤 짝을 뒤집으려면 ad hoc 동기화 짝을 먼저 뒤집어야 할 때 그 동기화 짝을 뿌리로 보고하는 방식이다(spec §4.8 step 7).
+**결과 사슬.** 사슬은 한 갈래가 아니라 **모든 갈래**를 기록한다(spec §1.6). 실행 전이므로 모두 코드에서 추론한 것이다 [I] (spec §3.3; [X2-02]). 아래 표는 갈래마다 조건, 결과, harm을 한 줄씩 적는다.
+
+| 상황 | 조건 | 결과 | harm |
+|---|---|---|---|
+| core 구간 안의 EVS: `GetAppID` 실패 → `CFE_ES_ExitApp(CORE_APP_INIT_ERROR)` | (a1) `ExitApp` 때 구간이 열려 있고(no-op), raise 때는 닫힘 | raise는 일어난다. loop 조건이 거짓이라 `ExitApp(RUNTIME_ERROR)` → `OS_TaskExit`. 시스템이 EVS task 없이 돈다 | `service_task_absent` |
+| 〃 | (a2) `ExitApp` 때도, raise 때도 구간이 열려 있음 | raise를 건너뛴다. core sync가 `CFE_PLATFORM_CORE_MAX_STARTUP_MSEC` = 30000 ms를 기다린 뒤 `CFE_PSP_Panic` | `panic` |
+| 〃 | (b) 첫 `ExitApp` 전에 구간이 닫힘 | `CFE_ES_ResetCFE(PROCESSOR)` → `CFE_PSP_Restart`. 요청자인 EVS task가 `CFE_PSP_RESTART_DELAY` = 10000 ms 뒤 `abort()`. 정상 종료는 없다(§8.1). 30 s panic보다 먼저다 | `process_abort` |
+| script 앱이 자기 구간 안: `RunLoop`이 false | `ExitApp` 때 구간이 열려 있음 | loop 이탈 → `ExitApp` no-op → task return. record가 `AppState ≤ RUNNING`인 채 남는데 scan은 `> RUNNING`만 처리한다(`cfe_es_apps.c:1112–1146`). 두 soft barrier가 각각 timeout된다 | `app_zombie` |
+| 〃 | `ExitApp` 전에 구간이 닫힘 | STOPPED로 정리된다 | `app_error_exit` |
+| core task(ES, SB, TBL, TIME)의 raise가 구간 안 | 다시 raise하지 않음 | raise를 건너뛰어 30 s 뒤 panic | `panic` |
+| SB·TBL의 `GetAppID`가 구간 안(`cfe_sb_task.c:138`, `cfe_tbl_task.c:196`, 둘 다 상태 무시) | — | identity 셀이 그 실행 내내 `UNDEFINED`가 되고, 이후 모든 SB/TBL `SendEventWithAppID` 사용이 shape ABSENT로 bad다. 이 뿌리 하나에 사슬로 묶는다 | 사용마다 |
+
+마지막 행의 보고 방식은 EventRacer식 race coverage(OOPSLA 2013 [V-abs])를 따른다. 어떤 짝을 뒤집으려면 ad hoc 동기화 짝을 먼저 뒤집어야 할 때 그 동기화 짝을 뿌리로 보고하고, 종속 사용(기존 기록에서 부팅마다 순서가 정해진 211–229개 [M], [R2c §7])은 붙여 둔다(spec §4.8 step 7).
 
 **삭제와 종료 (P-TASK-JOIN / R17, S).** `OS_TaskDelete`는 취소한 뒤 join한다(`os-impl-tasks.c:693–723`). 지연 취소(deferred cancellation)는 피해 task가 취소 지점에서 program lock을 잡고 있으면 그 lock을 남긴다([R01 §2.4]). 그래서 ES lock 아래에서 삭제하는 `CFE_ES_DeleteChildTask`(`cfe_es_api.c:1348, 1383`)에 **K-LOCK.cancel**을 둔다.
 
@@ -313,8 +323,8 @@ probe는 기본적으로 함수 entry+4에 둔다. **uprobe**는 실행 파일�
 - **시작 순서(PSP main thread의 program order, S)** [F] ([R01 §5.1]): `OS_API_Init` → event handler 등록 → reserved memory → `OS_FileSysAddFixedMap` → `CFE_PSP_ModuleInit`(`cFS-Master` 생성·시작) → `sleep(1)` → reset 종류 결정(`cfe_psp_start.c:411–434`) → `CFE_PSP_InitProcessorReservedMemory` → `CFE_ES_Main` → `OS_Application_Run`. 그래서 `cFS-Master`는 어떤 cFE task보다 먼저 LIVE다.
 - **task 시작 hook.** `OS_EVENT_TASK_STARTUP`에서 PSP는 `OS_GetResourceName`을 부르고(task table lock을 쓰므로 F7의 시도를 소비할 수 있다), `CFE_*` task를 CPU 0에 고정한다(`cfe_psp_start.c:174, 184–189`). 고정은 아직 측정할 Env 사실이다.
 - **panic은 종료 연산이다.** `CFE_PSP_Panic` → `abort()`(`cfe_psp_support.c:116–121`). ES는 먼저 `CFE_ES_PANIC_DELAY` = 500 ms를 기다리고, 그동안 다른 thread는 계속 돈다([J1 §1 check 1]). 규칙 T-TERM(종료 연산 뒤에는 후속 edge가 없다)은 panic하는 thread의 종료 갈래만 잘라 낸다.
-- **재시작과 종료**는 세 효과로 모형화한다. 8절에서 D9와 함께 설명한다.
-- **유지 상태 (scope = persistent).** boot record, CDS, reset area, user-reserved shm, `/dev/shm/osal:RAM`, `EEPROM.DAT`다([R01 §5.3]). 실행마다 snapshot(S0)을 찍고 내용만으로 정규화한다(spec §1.7).
+- **재시작과 종료**는 세 효과로 모형화한다. 8절에서 그림 D9와 함께 설명한다.
+- **유지 상태 (scope = persistent).** boot record, CDS, reset area, user-reserved shm, `/dev/shm/osal:RAM`, `EEPROM.DAT`다([R01 §5.3]). 실행마다 Init snapshot S0(구현 단계 S0와 다른 뜻)를 찍고 내용만으로 정규화한다(spec §1.7).
 - **비동기 PSP 경로**(경쟁을 인정한 exception ring, `cfe_psp_exception.c:72–86` → `SIGUSR1` → ES)는 첫 범위 밖이다. 다만 kind와 edge를 Φ에 넣어 두어 "순서 없음"으로 조용히 처리되지 않게 한다.
 
 ### 2.6 ES: phase, soft barrier, core 직렬화 (spec §3.6)
@@ -337,7 +347,7 @@ probe는 기본적으로 함수 entry+4에 둔다. **uprobe**는 실행 파일�
 Pred_code = ∀ r ∈ AppTable: ¬(IsUsed(r) ∧ r.AppState < AppStateId)     (:835에서 AppStateId = RUNNING)
 ```
 
-falsifier `f`에 대해 관측하는 conjunct는 `ρ(f)`에서의 instance `C = ¬(IsUsed(ρ(f)) ∧ ρ(f).AppState < RUNNING)`다. Φ는 규칙 이름, stratum, 종료 탈출만 이 loop에 묶는다. predicate는 Φ 작성자가 쓰지 않는다. **C의 writer 집합**(raise, `ExitApp`의 STOPPED store, scan의 WAITING store, `CleanUpApp`의 record 해제, startup thread의 un-use store `:823`·`cfe_es_apps.c:893`, EarlyInit memset `:82`)과 각 처리는 7절과 D8 상세에 있다. 하나만 미리 적는다. script `AppCreate` 실패 경로의 `cfe_es_apps.c:893`은 script phase 관측으로 가는 경로가 **있어서** 그 writer 집합에 남는다. script phase barrier가 O-edge인 이유가 하나 더 생긴다.
+falsifier `f`에 대해 관측하는 conjunct는 `ρ(f)`에서의 instance `C = ¬(IsUsed(ρ(f)) ∧ ρ(f).AppState < RUNNING)`다. Φ는 규칙 이름, stratum, 종료 탈출만 이 loop에 묶는다. predicate는 Φ 작성자가 쓰지 않는다. **C의 writer 집합**(raise, `ExitApp`의 STOPPED store, scan의 WAITING store, `CleanUpApp`의 record 해제, startup thread의 un-use store `:823`·`cfe_es_apps.c:893`, EarlyInit memset `:82`)과 각 처리는 7절과 그림 D8 상세에 있다. 하나만 미리 적는다. script `AppCreate` 실패 경로의 `cfe_es_apps.c:893`은 script phase 관측으로 가는 경로가 **있어서** 그 writer 집합에 남는다. script phase barrier가 O-edge인 이유가 하나 더 생긴다.
 
 **`CFE_ES_WaitForSystemState(s, T)`는 두 효과다** ([R02 §1.7]).
 1. ES lock 아래의 raise(`cfe_es_api.c:573`). 수준은 호출자 종류와 요청 상태로 정한다(`:536–563`). core 앱은 `s ≥ CORE_READY`이면 RUNNING, 외부 앱은 EARLY_INIT, LATE_INIT(APPS_INIT), RUNNING(OPERATIONAL), STOPPED(SHUTDOWN)다.
@@ -365,7 +375,7 @@ falsifier `f`에 대해 관측하는 conjunct는 `ρ(f)`에서의 instance `C = 
 ### 2.8 재시작, 재적재, 삭제 (spec §3.8)
 
 - **R15 CTRL-REQ (O).** ES lock 아래에서 쓴 요청 → 앱의 `RunLoop`이 읽음 → `ExitApp` → scan이 STOPPED를 봄. 앱 동작 없이 scan timer로 오는 kill 경로(RUNNING + 요청 → kill timer 5 × 1000 ms의 WAITING, `cfe_es_apps.c:1139–1146`)에는 edge가 없다.
-- **`CFE_ES_CleanUpApp`**(`:1407–1640`): record를 RESERVED로 표시 → core module의 `Cleanup` hook을 **생성된 core object table 순서로**, ES lock 없이 실행(`:1525–1545`. 순서는 하드코딩이 아니라 B에서 온다) → task 삭제(자식 먼저) → pool 삭제 → module unload → record 해제. **앱의 task는 module cleanup이 끝난 뒤까지 계속 돈다.** 이 구간이 K-LIFE 구간이다([X2-14](d)).
+- **`CFE_ES_CleanUpApp`**(`:1407–1640`): record를 RESERVED로 표시 → core module의 `Cleanup` hook을 **생성된 core object table 순서로**, ES lock 없이 실행(`:1525–1545`. 순서는 하드코딩이 아니라 B에서 온다) → task 삭제(자식 먼저) → pool 삭제 → module unload → record 해제. **앱의 task는 module cleanup이 끝난 뒤까지 계속 돈다.** 이 구간이 K-LIFE 구간이다([X2-14 (d)]).
 - **계약.** `K-LIFE`(퇴역 뒤 사용: 삭제된 pipe에 `ReceiveBuffer`, RESERVED task record로 `GetAppID`, module unload 뒤의 TIME synch callback, K-LIFE 구간 안의 사용), `K-GEN`(동료가 이전 generation의 ID나 주소를 들고 있음: CF의 semaphore ID, MD가 풀어 둔 주소, SBN module symbol; [R03 §4 RC15]), generation을 건너는 `K-PERSIST`(2.12).
 - **시나리오 family.** `B_restart(app, request)`는 B.Input에 한 앱에 대한 문서화된 제어 요청 **하나**를 넣고 사건(OPERATIONAL 관측)으로 촉발한다. 경로를 지나는 최소 경우다. 더 긴 요청 순서는 `unspecified_by_reference`이고 길이를 고르지 않는다. `B_stop`은 정지 명령과 그것이 일으키는 teardown이다(8절).
 
@@ -381,7 +391,7 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 | R7 SB-DELIVER (O) | pipe p에 descriptor d를 넣은 put → p에서 d를 꺼낸 `ReceiveBuffer`. pipe마다 FIFO. drop된 메시지에는 edge가 없다 |
 | 메시지 key ([X2-09]) | `CFE_SB_TransmitMsg`에는 MsgId 인자가 없다. Φ는 메시지 buffer의 추상 위치 `msg.hdr.MsgId`와 MSG module 함수의 encode/decode 요약을 두고, AST 수준 값 분석이 init 지점의 상수를 송신 지점까지 옮긴다. table에 저장된 명령 packet(SC, HS, LC, SCH_LAB schedule)은 DWARF layout으로 해독한다. census는 key가 concrete, symbolic, ⊤(모름)인 비율을 보고한다 |
 | 구독 전 송신 | `sb.route(m,p)`. **R8은 edge가 아니라 상태다.** route_lookup 때 route가 있거나 없다. 목적지는 snapshot되고 늦게 합류한 pipe에는 전달되지 않는다 |
-| 메시지 provenance ([X1-M7](a)) | pipe p마다 `Prov(p) = (Routes_B(p) ∩ Tx_B) ∪ Input_B(p)`를 handler 도달성에 대한 최소 고정점으로 계산한다. `Prov(p)` 밖의 dispatch 갈래는 두 skeleton view 모두에서 접어 버린다(spec §4.3) |
+| 메시지 provenance ([X1-M7 (a)]) | pipe p마다 `Prov(p) = (Routes_B(p) ∩ Tx_B) ∪ Input_B(p)`를 handler 도달성에 대한 최소 고정점으로 계산한다. `Prov(p)` 밖의 dispatch 갈래는 두 skeleton view 모두에서 접어 버린다(spec §4.3) |
 | looper 규칙 | handler 안의 program order만 두고, **handler 사이에는 HB edge가 없다.** 예측에서 FIFO 제약으로만 남는다(CAFA PLDI 2014 [V-abs]; DCatch ASPLOS 2017 [P]) |
 | buffer 수명 | 같은 pipe의 다음 `ReceiveBuffer`나 pipe 삭제까지 유효하다(`cfe_sb.h:449–464`) → `K-LIFE.sb-buffer` |
 | 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** 호출자에게 ES task record가 없거나 task별 재귀 bit가 서 있으면 문서화된 drop(`documented_drop`)이다(`cfe_sb_priv.c:305–328, 773–790`) |
@@ -390,11 +400,11 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 
 **Allowed와 oracle.** route와 용량 계약의 Allowed는 소비자의 문서가 전달을 요구하지 않는 한 `unspecified_by_reference`다. TO_LAB의 문서화된 지연(`to_lab_app.c:64–66`)은 `defer_by_design`이다. bad 실행에는 결과 label **LOSS-UNDER-ORDER**와 harm `unspecified_by_reference`가 붙는다. oracle은 정지 때 memory에서 읽는 네 counter(`NoSubscribersCounter`, `PipeOverflowErrorCounter`, `MsgLimitErrorCounter`, `InternalErrorCounter`)와 trace의 put별 결과다. `PeakQueueDepth`는 put 성공 전에 세므로 실제 `mq` 용량을 넘을 수 있어, **SB가 계산한 깊이**라는 label을 단다([J2-12]).
 
-**예: SB 구독 전 송신.** ES는 init 중에, 아직 아무도 구독하지 않은 EVS event packet(MsgId 0x808)을 보낸다. route가 없으니 SB는 `SEND_NO_SUBS` event를 내고 송신자에게는 성공을 돌려준다. 사례 R2의 ES 사용 20개 중 17개가 이 경로의 `SEND_NO_SUBS` event다 [M] ([R2g §2]; spec App. A.1 step 13). 기본 bundle에서 `NoSubscribersCounter`는 부팅마다 15–26이었다 [M] ([BM §0]; spec §8.1 RQ5).
+**예: SB 구독 전 송신.** route가 없으면 SB는 `SEND_NO_SUBS` event를 내고 송신자에게는 성공을 돌려준다 [F] (spec §3.9). 사례 R2의 ES 사용 20개 중 17개가 `SEND_NO_SUBS` event의 사용이다 [M] ([R2g §2]). 이 17건이 ES가 init 중에, 아직 아무도 구독하지 않은 EVS event packet(MsgId 0x808)을 보낼 때 이 경로에서 생긴다는 귀속은 기록의 추론이다 [I] ([R2g §2]는 이 귀속을 event ID와 뒤의 콘솔 줄 "No subscribers for MsgId 0x808"에서 끌어낸 추론으로 적는다; spec App. A.1 step 13). 기본 bundle에서 `NoSubscribersCounter`는 부팅마다 15–26이었다 [M] ([BM §0]; spec §8.1 RQ5).
 
 ### 2.10 Event Services (spec §3.10)
 
-- `CFE_EVS_Register`는 먼저 **slot을 memset**하고(`cfe_evs.c:56`), 마지막에 lock 없이 REG를 발행한다(LP `:106`). "slot마다 writer 하나"는 재시작이 없을 때만 맞다. `B_restart`에서는 이 memset이 이전 generation 등록의 disabler(조건을 다시 거짓으로 만드는 사건)다([X2-14](b)).
+- `CFE_EVS_Register`는 먼저 **slot을 memset**하고(`cfe_evs.c:56`), 마지막에 lock 없이 REG를 발행한다(LP `:106`). "slot마다 writer 하나"는 재시작이 없을 때만 맞다. `B_restart`에서는 이 memset이 이전 generation 등록의 disabler(조건을 다시 거짓으로 만드는 사건)다([X2-14 (b)]).
 - `CFE_EVS_SendEvent`는 호출자의 AppId를 스스로 푼다(K-SELF.es 사용). `CFE_EVS_SendEventWithAppID`는 넘겨받은 AppId를 믿고, 조건이 둘이다(spec §1.4; [R02 §3.2]).
 
 | conjunct | LP | 실패 결과 코드 |
@@ -427,7 +437,7 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 - `CFE_TIME_TaskInit`은 EVS 등록, semaphore와 자식 둘 생성(TIME의 App-record 구간 안, 2.3), 구독, `cFS-Master`에 1 Hz OSAL timer 추가를 한다([R02 §5.1]).
 - **1 Hz pipeline**은 실제 edge의 사슬이다: timer callback(timebase thread) → `OS_BinSemGive(LocalSemaphore)` → `Local1HzTask` → SB → TIME main → `Tone1HzISR` → `Tone1HzTask` → SB → TIME main. 그 안의 instance는 protected로 분류되어야 한다. 이것은 calibration, 즉 코드가 순서를 정한 곳에서 도구가 race를 지어내지 않는지 보는 검사다.
 - `ReferenceState[4]`와 `LastVersionCounter`는 `volatile`만 쓰는 seqlock 비슷한 단일 writer buffer다(`cfe_time_utils.c:538–656`). seqlock은 reader가 version counter를 앞뒤로 읽어 일관된 사본을 얻었는지 확인하는 기법이다. R14(O, assumed). 추측성 reader load는 보고하지 않는다(Boehm, MSPC 2012, [R02 §10]이 인용한 대로).
-- **synch callback** ([X2-14](c)). `time.synchcb`의 key는 **앱 index이고 generation이 없다.** 등록은 lock 없는 check-then-set이고(`cfe_time_api.c:628–640`), 정리는 module unload 전에 index로 지운다(`cfe_time_utils.c:1026–1034`) → `K-LIFE.callback`과 `K-ATOM.synchcb`(`B_restart`에서 한 index에 등록 둘) 후보다. callback은 등록한 앱을 대신해 TIME 문맥에서 돈다(on-behalf frame).
+- **synch callback** ([X2-14 (c)]). `time.synchcb`의 key는 **앱 index이고 generation이 없다.** 등록은 lock 없는 check-then-set이고(`cfe_time_api.c:628–640`), 정리는 module unload 전에 index로 지운다(`cfe_time_utils.c:1026–1034`) → `K-LIFE.callback`과 `K-ATOM.synchcb`(`B_restart`에서 한 index에 등록 둘) 후보다. callback은 등록한 앱을 대신해 TIME 문맥에서 돈다(on-behalf frame).
 - **FS 백그라운드 요청**은 FS mutex를 통한 생산자–소비자 edge(R16)이고, 요청자의 callback은 `ES_BG_TASK`에서 돈다([R02 §6.1]).
 
 ### 2.14 ad hoc 동기화와 memory model 가정 (spec §3.14)
@@ -439,7 +449,9 @@ ad hoc 동기화는 lock·semaphore 같은 정식 기본 연산 없이 flag poll
 | `WaitForSystemState`의 `volatile` `SystemState` polling, `MainTaskSyncDelay`와 `GetTaskFunction`의 ES lock 아래 polling | 코드에서 뽑은 predicate의 await. 조건 탈출에 edge. `SystemState`는 `assumed`(A4). `MainTaskSyncDelay`는 core phase에서 S·obs-fatal, script phase에서 O·obs-soft |
 | CF semaphore 재시도(`cf_cfdp.c:1270–1301`) | 지연 간격·횟수 제한 재시도. 유효 경계까지 정확히 펼친다. σ_U∞에서 끈질기다. 결과는 FOUND, 다른 코드 → break, 소진의 셋 |
 | OSAL by-ID RESERVED 대기(M_impl) | broadcast 또는 timeout으로 깨는 시도(2.2) |
-| SB `SubscriptionReporting` 읽기, TBL 결과 flag, TIME seqlock | 가시성 가정 edge(`assumed`, A4) |
+| SB unlock 뒤의 `SubscriptionReporting` 읽기(`cfe_sb_task.c:659`) | `sb.mode.subreport`의 **use**이고 `assumed`(A4) 표시가 붙는다. edge가 아니다([X2-05] 반영) |
+| TBL `ValidationResults.State` / `DumpCtrl.State` 결과 flag | O-edge, 가시성 가정(A4) |
+| TIME seqlock | 규칙 R14, 가시성 가정(A4) |
 | FS `IsPending` 사전 검사 | 무해한 사전 검사, edge 없음(실제 edge는 FS mutex) |
 | ES `AppTimerMsec` 감소 | 시간 기반 전이. σ_U에서 비결정 |
 | SCH_LAB 첫 tick이 init 뒤 ≥ 1 s | 첫 1 Hz packet의 메시지 edge만 있다. 여유([M] 13번 부팅에서 0.12–0.9 s, [R03 §6.3])는 σ_E 증거일 뿐 edge가 아니다 |
@@ -558,11 +570,11 @@ fn("CFE_ES_CreateObjects").call("CFE_ES_AppRecordSetUsed", arg[1] != CFE_RESOURC
 | **C1** (CF #184): CF가 다른 앱이 만들 counting semaphore를 이름으로 찾는다 | RC1. `K-REG.osal`(spec §2.3 발췌의 `K-REG.osal-countsem-lookup`, Allowed `retry_until_ready`, 경계는 유효 `CF_STARTUP_SEM_MAX_RETRIES`). M_impl에서 `K-LOCKBAL`. phase 쪽은 K-PHASE(6.2) | P-CNT, RF, M_impl의 by-name token | 기본 B: 조회가 비어 있지 않은 `sem_name` 검사 뒤에 있는데 기본 항목이 둘 다 비어 있다(`cf_cfdp.c:1270`; `cf_def_config.c:60, 78`). B′: 공개 코드에서 파생(nasa/bp, [LED §1a]) | 기본 B: `inactive(B)`(증명은 `Sk^cert`의 접힌 경로 조건). B′, M_api: σ_U에서 schedule-dependent, σ_U∞에서 refinement timeout-dependent. M_impl: by-name 조회가 `INCORRECT_OBJ_STATE`로 끝나고 lock이 남아 구현 결함 후보(F1) | App. A.4 |
 | **C2** (cFE #198): late init이 끝나기 전에 다른 앱이 진행했다 | RC7. K-PHASE(소비자 쪽, 수준별) | R5/R6, script phase barrier(O, obs-soft), 2단계 barrier의 version guard `cfe >= 6.6.0` | 역할 파생(role-derived): 구성한 앱 쌍, synthetic control. 원 시스템은 비공개다 | spec은 기대 판정을 따로 적지 않는다. RQ2가 어떤 판정 기록이 나오는지 묻는다 | §3.6, §8.1 RQ2, §8.2 |
 | **C3** (cFE #73): 6.4.1에서 우선순위 때문에 TIME이 먼저 실행되어 core 시작 중 crash | R2와 같은 자원 가족(SB AppId)이라 독립 사례로 세지 않는다(spec §8.2; [LED §3.1]). spec §2.3 발췌에서 `K-ID.send-with-appid`의 작성 기록은 `inspected { R2, C3 }`다 | σ_R1[P_sched], R19의 version guard `cfe >= 6.4.2` | 6.4.1 tarball, 공유 파생 6.4.x 플랫폼(PI 결정 D13) | H-V 시험: σ_R1에서 fixed-order, σ_U에서 schedule-dependent | §7.6, §8.2 |
-| **C5** (cFE #72): 6.4.0/6.4.1의 `AppCreate`가 lock을 푼 채 task를 만들고 나중에 등록했다 | RC6. K-SELF.es, K-SPAWN(App record). v7.0.1의 두 App-record 구간이 C5 모양의 잔여 후보다 [I] | ES task-record handshake, App-record 구간(O-ordered, 2.3) | v7.0.1: 기본 부팅에서 예측, 확인은 derived(PI 결정 D16). 6.4.1: D13 | 6.4.1: schedule-dependent(H-V). v7.0.1의 두 구간: σ_U와 σ_U∞에서 schedule-dependent(6.2) | §3.3, §7.3, §7.6, §8.1 RQ2, App. A.2–A.3 |
+| **C5** (cFE #72): 6.4.0/6.4.1의 `AppCreate`가 lock을 푼 채 task를 만들고 나중에 등록했다 | RC6. K-SELF.es, K-SPAWN(App record). v7.0.1의 두 App-record 구간이 C5 모양의 잔여 후보다 [I] | ES task-record handshake, App-record 구간(O-ordered, 2.3) | v7.0.1: 기본 부팅에서 예측, 확인은 derived(PI 결정 D16). 6.4.1: PI 결정 D13 | 6.4.1: schedule-dependent(H-V). v7.0.1의 두 구간: σ_U와 σ_U∞에서 schedule-dependent(6.2) | §3.3, §7.3, §7.6, §8.1 RQ2, App. A.2–A.3 |
 
 - 다섯 사례는 개발용이다. 일반성, C3·C5의 v7.0.1 재현, R2가 race라는 것은 주장하지 않는다(9절).
 - 엔진 코드에는 사례 식별자나 사례 전용 symbol(예: `CFE_SB_Global`, `sem_name`, `C1`)을 두지 않는다. `profiles/`와 `tests/` 밖에서는 lint가 막는다(spec §7.2).
-- 저자들이 R2와 App-record 구간을 이미 알기 때문에 개발 사례에서의 template-only 실행은 blind가 아니다. 거기서 순환성을 막는 것은 header 출처와 코드에서 뽑은 predicate다. blind는 held-out 출처와 recall mutant에만 주장한다(spec §7.2).
+- 저자들이 R2와 App-record 구간을 이미 알기 때문에 개발 사례에서의 template-only 실행은 맹검(blind)이 아니다. 거기서 순환성을 막는 것은 header 출처와 코드에서 뽑은 predicate다. blind는 held-out 출처와 recall mutant에만 주장한다(spec §7.2).
 
 ### 6.2 그 밖의 후보 (spec §7.3)
 
@@ -572,7 +584,7 @@ spec §7.3의 규칙: 모든 줄은 사례 지식이 아니라 census가 적용�
 
 | 후보 | template | 출처 | 근거 상태 | 기대 첫 판정 [I] | 증거 경로 |
 |---|---|---|---|---|---|
-| **core-task App-record 구간** (EVS, ES, SB, TBL, TIME과 TaskInit 자식, `cfe_es_start.c:818` 전) | K-SELF.es(7 호출자), K-SPAWN.app-record | 2.3; [J1 §1.1]; [LED §3.4] | 코드 해석, 미실행 | O-ordered(ES lock) → 예측/explorer. σ_U(M_api, M_impl)와 σ_U∞에서 schedule-dependent(50 ms 양보만이 둘을 가른다). σ_R1[`P_sched^posix`]: 한 CPU에서는 protected(startup thread가 task보다 우선순위가 높다). σ_E: 자연 bad witness는 기대하지 않는다 → "n of N 실행에서 σ_E bad witness 없음, σ_E class 모름" | 기본 부팅에서 lock 뒤집기 예측. `:810` 반환과 `:818` 사이의 derived F0 hold(D16) |
+| **core-task App-record 구간** (EVS, ES, SB, TBL, TIME과 TaskInit 자식, `cfe_es_start.c:818` 전) | K-SELF.es(7 호출자), K-SPAWN.app-record | 2.3; [J1 §1.1]; [LED §3.4] | 코드 해석, 미실행 | O-ordered(ES lock) → 예측/explorer. σ_U(M_api, M_impl)와 σ_U∞에서 schedule-dependent(50 ms 양보만이 둘을 가른다). σ_R1[`P_sched^posix`]: 한 CPU에서는 protected(startup thread가 task보다 우선순위가 높다). σ_E: 자연 bad witness는 기대하지 않는다 → "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"(N번 중 n번 실행에서 σ_E bad witness 없음, σ_E class 모름) | 기본 부팅에서 lock 뒤집기 예측. `:810` 반환과 `:818` 사이의 derived F0 hold(PI 결정 D16) |
 | **SB/TBL identity가 발행되지 않음** (위 구간의 결과) | K-ID, shape ABSENT. 사슬 뿌리는 구간 instance | spec §0.5; `cfe_sb_task.c:138`, `cfe_tbl_task.c:196` | 코드 해석, 미실행 | 발행 뒤의 SB-AppId 사용(부팅마다 순서가 정해진 211–229개 [M], [R2c §7])과 TBL identity 사용: protected certificate 없음. schedule-dependent(σ_U), ABSENT, 사슬 | 위와 같음. K-ID oracle(이후 모든 SB event의 `ILLEGAL_APP_ID`) |
 | script 앱 App-record 구간. `GetAppIDByName`의 `0xFFFFFFFF` 성공. `RunLoop` false → zombie | K-SELF.es, K-REG.es | 2.3; [R02 §1.6] | 코드 해석, 미실행 | O-ordered → 예측. schedule-dependent(σ_U, σ_U∞). harm은 갈래마다 | App. A.3 |
 | RESERVED record를 by-name 조회하면 type lock이 남는다 (OSAL F1) | K-LOCKBAL(M_impl) + K-REG.osal | `osapi-idmap.c:384–385` 대 `:401–404`; [R01 §1.8] | **코드 해석, 미실행** | 도달 가능하면 M_impl의 구현 결함 후보. 생성이 더 일찍 certified된 짝은 protected | explorer 교착 검사. 선언 실험 hold + wait-for oracle(App. A.4) |
@@ -584,7 +596,7 @@ spec §7.3의 규칙: 모든 줄은 사례 지식이 아니라 census가 적용�
 | TBL owner 적재 대 지상 적재의 claim | K-ATOM.tbl-load | `cfe_tbl_api.c:305–309`; [R02 §4.4] | **코드 해석, 미실행** ([R02]가 "발견이 아니라 후보"로 기록) | 기본 B에서 `inactive`(메시지 provenance) | 입력 variant B′ |
 | module unload 뒤의 TIME synch callback. 한 index에 등록 둘 | K-LIFE.callback, K-ATOM.synchcb | `cfe_time_api.c:628–640`; `cfe_time_utils.c:1026–1034`; [R02 §5.3] | **코드 해석, 미실행** | open. 재시작 family | `B_restart` |
 | OPERATIONAL 뒤 burst: SB의 구독 재전송(SBN 명령이 촉발) 대 TO_LAB의 구독 37개 | K-MODE + K-CAP + K-CAP.msglim | 2.9; [R03 §5.2]; `SBNSubPipe`가 M1 실행 6번 중 5번 넘쳤다 [M] ([BM §3.3]) | 넘침은 측정 [M](M1 harness). burst 귀속은 [R03 §5.2]의 추론이고 census가 확인한다 | 두 자연 결과가 다시 관측되면 schedule-dependent(σ_E). LOSS-UNDER-ORDER | 통제 없는 실행의 σ_E witness. App. A.5 |
-| SCH_LAB wakeup 대 늦은 구독자 | K-ROUTE | 첫 송신이 init 뒤 ≥ 1 s. 여유 0.12–0.9 s [M] ([R03 §6.3]) | 여유는 측정 [M]. 위반은 관측된 적 없다 | schedule-dependent(σ_U), LOSS-UNDER-ORDER. 지금까지 "n of N 실행에서 σ_E bad witness 없음" | 예측. 구독자 hold |
+| SCH_LAB wakeup 대 늦은 구독자 | K-ROUTE | 첫 송신이 init 뒤 ≥ 1 s. 여유 0.12–0.9 s [M] ([R03 §6.3]) | 여유는 측정 [M]. 위반은 관측된 적 없다 | schedule-dependent(σ_U), LOSS-UNDER-ORDER. 지금까지 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown" | 예측. 구독자 hold |
 | K-PHASE: CF의 재시도 구간 대 soft startup barrier | K-PHASE + K-REG.osal | [R03 §2.6]; `cfe_es_start.c:210–228` | 코드 해석, 미실행 | C1 파생 B′에서 timeout-dependent(soft barrier timeout이나 재시도 소진이 있어야 위반) | σ_U 대 σ_U∞ explorer |
 | HS AppMon이 "이름 없음"을 "진행 없음"으로 센다 / HS XCT task 이름 조회 | K-REG.es / `K-REG.osal<task>` + K-LOCKBAL | `hs_monitors.c:69–160`; `hs_cmds.c:148`; [R03 §2.10] | 코드 해석, 미실행 | 기본 table에서 `inactive`(AppMon은 모두 `NOACT`, table 해독으로 확인) | table variant B′ |
 | MD/MM의 앱 symbol 조회 | K-REG.loader, 전역 scope | `md_utils.c:214`; `mm_cmds.c:143`; `mm_utils.c:525` | 코드 해석, 미실행 | 앱 symbol(LOCAL)은 provider `none`. Allowed에 따라 tolerated 또는 fixed-order | census, table variant |
@@ -596,7 +608,7 @@ spec §7.3의 규칙: 모든 줄은 사례 지식이 아니라 census가 적용�
 
 ---
 
-## 7. R2 certificate 예 (D8)
+## 7. R2 certificate 예 (그림 D8)
 
 이 절은 spec App. A.1을 cFS 쪽에서 읽는다. 모두 **기대 동작**이고 실행한 것은 없다 [I]. 코드 위치는 [F]다. 형식 개념으로 한 단계씩 따라가는 설명은 [04_formal_model.md §10](04_formal_model.md#10-r2로-읽는-once-mustbefore-pwb-certificate)에 있다.
 
@@ -618,9 +630,9 @@ spec §7.3의 규칙: 모든 줄은 사례 지식이 아니라 census가 적용�
 | writer 제외 규칙 | OWN-NOPATH(관측과 같은 once actor 안에 있고 관측으로 가는 경로가 없는 writer), PWB-before-falsifier, PWB-after-observation, KEY-SEP(다른 record를 쓰는 것이 증명된 writer) |
 | certificate | 위 증명을 적은 기록이다. LLVM을 링크하지 않고 생산자와 코드를 공유하지 않는 독립 검사기 `kz proofcheck`가 다시 확인한다 |
 
-### 7.2 그림: certificate의 두 절반 (D8 개요)
+### 7.2 certificate의 두 절반 (그림 D8 개요)
 
-렌더링: [diagrams/D8_r2_certificate_overview.svg](diagrams/D8_r2_certificate_overview.svg)
+**그림 D8 개요. R2 certificate의 두 절반** (렌더링: [diagrams/D8_r2_certificate_overview.svg](diagrams/D8_r2_certificate_overview.svg); spec §12 D8; App. A.1; §4.4, §4.5)
 
 ```mermaid
 flowchart TD
@@ -717,18 +729,18 @@ flowchart TD
 | 4. 관측 `o_ES` | ES 반복의 `MainTaskSyncDelay` 성공 탈출(`cfe_es_start.c:835`). 관측 conjunct는 predicate를 `ρ_ES`(falsifier `f_ES` = `:803`이 할당한 record)에 적용한 것이다. `f_ES` 전에는 task가 없고, 그 전에 올 수 있는 `AppState` writer는 `:82`의 zeroing memset뿐이라 새 record 가정이 필요 없다 → `m_ES ∈ MB(o_ES)`, `raise_ES ∈ MB(o_ES)` |
 | 5. 관측 `o_EVS` | EVS 반복의 `:803`이 `f_EVS`, record는 `ρ_EVS`다. `f_EVS` 직후 `AppState(ρ_EVS) = 0`이려면 **A-FRESH**(`ρ_EVS`는 `ρ_ES`와 다르고 전에 쓰인 적 없다)와 **A-OWNER**(ES main과 `ES_BG_TASK`의 `AppState` writer는 `ρ_ES`를 겨눈다)가 필요하다 → `m_EVS ∈ MB(o_EVS)` |
 | 6. MB 사슬 | `m_ES`(`CFE_ES_TaskInit` 호출의 반환, `cfe_es_task.c:114`) → T-PO → raise → T-OBS → `o_ES` → startup thread의 T-PO(panic 갈래는 T-TERM으로 잘림, `:823` 실패 갈래는 panic으로만 감) → SB 반복의 spawn → T-SPAWN(spawn site 하나, `once(SB main)`) → SB entry → T-PO → `x`. 그래서 `m_ES ∈ MB(x)`다. EVS 쪽도 `m_EVS`(`cfe_evs_task.c:213`)가 `o_EVS`를 거쳐 같다. 생성된 core 순서에서 EVS 반복이 SB 반복보다 앞이다([R02 §1.3]) |
-| 7. frontier와 once | `once(ES main)`, `once(EVS main)`: 펼친 core loop에 spawn 노드가 각각 하나이고, once인 startup thread 위에 있다. `TaskInit`은 message loop 전에 한 번 불리므로 `m_ES ∉ Anc(c)`다 → FRONTIER로 `PWB(c, x)`. **early return은 상관없다.** `CFE_ES_TaskInit`이 실패로 일찍 돌아와도 `CFE_ES_TaskMain`은 L134에서 raise한다. 증명은 사용이 raise를 지배할 것을 요구하지 않는다([J2-1]) |
+| 7. frontier와 once | `once(ES main)`, `once(EVS main)`: 펼친 core loop에 spawn 노드가 각각 하나이고, once인 startup thread 위에 있다. `TaskInit`은 message loop 전에 한 번 불리므로 `m_ES ∉ Anc(c)`다 → FRONTIER로 `PWB(c, x)`. **early return은 상관없다.** `CFE_ES_TaskInit`이 실패로 일찍 돌아와도 `CFE_ES_TaskMain`은 `cfe_es_task.c:134`에서 raise한다. 증명은 사용이 raise를 지배할 것을 요구하지 않는다([J2-1]) |
 | 8. badness | `Allowed = none`이다. header가 대안으로 드는 system log는 다른 API다. harm `event_lost_silently` |
 | 9. 판정 | `fixed-order(σ_U, M_api)`와 `fixed-order(σ_U, M_impl)`. certificate에 task 생성(M_impl 관련 연산)이 있으므로 M_impl certificate는 M_impl skeleton에서 따로 계산한다. σ_U∞·σ_R1 칸은 전이 규칙 1(같은 M, b = ∞)로, σ_E 칸은 M_impl에서 전이 규칙 2로 "도달하는 곳에서" 성립한다. S1이 발생을 다시 관측하면 `reach = proved`가 된다. shape는 SB가 나중에 발행하면 WRONG-WAY, SB 자신의 구간에 걸리면 ABSENT다(둘 다 bad) |
 | 10. 출처 회계 | "generic 계약 K-ID + framework 규칙 R19". R19는 `:835`의 loop, stratum, 종료 탈출을 묶는다. predicate는 코드에서 뽑고 `kz proofcheck`가 다시 유도한다 |
 
 용어: **MUST_KEY**는 writer가 instance와 확실히 같은 key(같은 상수, 같은 symbolic 값, 같은 할당 기록)를 쓴다는 key status다. **COMPUTED**는 분석이 직접 확인한 transition status이고, **DECLARED_TRUSTED**는 Φ가 선언했지만 분석이 확인하지 못한 항목이다(spec §4.2 steps 7–8).
 
-### 7.4 writer 목록과 신뢰 항목 (D8 상세)
+### 7.4 writer 목록과 신뢰 항목 (그림 D8 상세)
 
-D8 상세는 spec §12가 요구한 "writer 목록 상자"다. V의 writer, `W_o(o_ES)`, `W_o(o_EVS)`의 각 항목과 certificate가 기대는 신뢰 항목을 모두 보인다. 빨간 상자가 `DECLARED_TRUSTED` 항목이다.
+그림 D8 상세는 spec §12가 요구한 "writer 목록 상자"다. V의 writer, `W_o(o_ES)`, `W_o(o_EVS)`의 각 항목과 certificate가 기대는 신뢰 항목을 모두 보인다. 빨간 상자가 `DECLARED_TRUSTED` 항목이다.
 
-렌더링: [diagrams/D8_r2_certificate_writers.svg](diagrams/D8_r2_certificate_writers.svg)
+**그림 D8 상세. R2 certificate의 writer 목록과 신뢰 항목** (렌더링: [diagrams/D8_r2_certificate_writers.svg](diagrams/D8_r2_certificate_writers.svg); spec App. A.1 steps 3–5, 9)
 
 ```mermaid
 flowchart TD
@@ -791,26 +803,24 @@ flowchart TD
 ```
 
 - **신뢰 항목.** ES 절반은 `CleanUpApp`의 관계 guard 하나, EVS 절반은 A-FRESH, A-OWNER, `CleanUpApp`의 관계 guard다. 모두 certificate에 나열되고(보장 G10), 관측(O9, O3/O4)으로 반박될 수 있다(spec App. A.1 step 9; §6.3).
-- **EVS 쪽에서 눈여겨볼 두 항목** (step 5).
-  - ES main의 raise는 ONCE-PWB로 빠진다. `once(raise_ES)`이고 `raise_ES ∈ MB(o_ES) ⊆ MB(f_EVS)`이므로 `PWB(raise_ES, f_EVS)`다. ES의 raise는 EVS record가 예약되기 전에 이미 끝난다.
-  - ES main의 `ExitApp` STOPPED store는 A-OWNER 아래에서 빠진다. 그 owner record는 `Type = CORE`인 `ρ_ES`이고, store의 guard는 `Type != CORE`다. 이 store는 `m_EVS`가 지배하지도 않고 PWB로 순서가 정해지지도 않는다. CORE_READY 대기가 timeout된 뒤의 이른 `ExitApp`이 σ_U에서 도달 가능하기 때문이다. 그래서 `DECLARED_TRUSTED`(A-OWNER)다.
+- **EVS 쪽 writer 처리** (step 5). ES main의 raise가 ONCE-PWB로 빠지는 이유, `ExitApp` STOPPED store가 A-OWNER 아래에서만 빠지는 이유, `f_EVS` 직후의 사실에 A-FRESH와 A-OWNER가 필요한 이유는 [04_formal_model.md §10.2](04_formal_model.md#102-mustbefore-사슬)가 형식 규칙으로 설명한다.
 
 ### 7.5 그 밖에 이 예가 보여 주는 것
 
-- **checker 시험 (S3a 출구, step 11).** 다음 변형은 모두 `kz proofcheck`가 거부해야 한다: `m_ES`를 `c` 앞의 노드로 바꿈, `once(ES main)` 사실 삭제, EVS certificate에서 `raise_ES`의 ONCE-PWB 사실 삭제, OWN-NOPATH 증명 없이 `:823`을 `W_o(o_ES)`에 다시 넣음, RESERVED도 used로 센다는 것을 잊은 predicate로 바꿈, `derives` 연결 삭제, certificate 단계를 `TRUNC` 구역으로 옮김.
+- **checker 시험 (S3a 출구, step 11).** 일곱 가지 certificate 변형을 `kz proofcheck`가 모두 거부해야 한다. 목록은 [04_formal_model.md §10.5](04_formal_model.md#105-certificate와-독립-검사기)에 있다.
 - **기대하는 사용 집합 (step 12).** basis 민감도와 S1 관문의 검사이지 새 증거가 아니다. ENV의 version table이 있는 basis에서 부팅마다 ES 20개(`SEND_NO_SUBS` 17 + `SUBSCRIPTION_RCVD` 2 + `PIPE_ADDED` 1)와 EVS 4개, 합계 24개다([R2g §2]; [R2c §7]). version table이 NULL인 basis에서는 11개(ES 7, EVS 4)다([R2c §4.2]).
-- **사슬 (step 13).** `SEND_NO_SUBS` 사용 17개는 ES event packet(MsgId 0x808)에 대한 K-ROUTE instance에 묶인다. 이 packet들은 어떤 구독보다 먼저 송신된다([R2g §2]). LOSS-UNDER-ORDER, harm 미지정이다.
+- **사슬 (step 13).** `SEND_NO_SUBS` 사용 17개는 ES event packet(MsgId 0x808)에 대한 K-ROUTE instance에 묶인다. 이 packet들이 어떤 구독보다 먼저 송신된다는 귀속은 [R2g §2]의 추론이다 [I]. LOSS-UNDER-ORDER, harm 미지정이다.
 - **주장하지 않는 것 (step 14).** R2가 race라는 것, S1 전에 어떤 개수든 Kairos의 결과라는 것, 반복 실행에서 결정성을 끌어내는 것, certificate가 framework 규칙 없이 나온다는 것.
 
 ---
 
-## 8. 종료 범위 (D9)
+## 8. 종료 범위 (그림 D9)
 
 (spec §3.5, §1.6, §4.5, App. A.7)
 
-pc-linux에서 종료는 모든 OSAL object를 지우는 `OS_DeleteAllObjects`로 끝난다. 이 연산은 모든 `osal.obj` 자원의 disabler다(App. A.7). Kairos는 모든 계약에 "종료 요청 전"이라는 **범위(scope)**를 붙이고, 범위 밖의 사용은 별도 family로 따로 분류·보고한다(spec §1.6, §3.5). D9가 pc-linux의 실제 종료 모형과 그 범위를 보인다. 이 그림에서만 점선 화살표는 spec 표기 "⇢"(SCOPE로 제외되는 disabler 관계)이고, 점선 테두리는 다음 실행이다.
+pc-linux에서 종료는 모든 OSAL object를 지우는 `OS_DeleteAllObjects`로 끝난다. 이 연산은 모든 `osal.obj` 자원의 disabler다(App. A.7). Kairos는 모든 계약에 "종료 요청 전"이라는 **범위(scope)**를 붙이고, 범위 밖의 사용은 별도 family로 따로 분류·보고한다(spec §1.6, §3.5). 그림 D9가 pc-linux의 실제 종료 모형과 그 범위를 보인다. 이 그림에서만 점선 화살표는 spec 표기 "⇢"(SCOPE로 제외되는 disabler 관계)이고, 점선 테두리는 다음 실행이다.
 
-렌더링: [diagrams/D9_teardown_scoping.svg](diagrams/D9_teardown_scoping.svg)
+**그림 D9. 종료 범위** (렌더링: [diagrams/D9_teardown_scoping.svg](diagrams/D9_teardown_scoping.svg); spec §12 D9; §3.5, §1.6, §4.5, §4.13)
 
 ```mermaid
 flowchart TD
@@ -911,7 +921,7 @@ kind는 `es.shutdown`이고 상태는 RUN → SHUTDOWN_REQ → TEARDOWN이다(sp
 
 spec §6.4 중 이 문서와 관련된 항목이다.
 
-- 경보가 없다는 것에서 "안전"이나 "위반 없음"을 끌어내지 않는다(항목 2). 실행에서 bad가 없었다는 것에서 σ_E class를 끌어내지 않는다. 쓸 수 있는 말은 "n of N 실행에서 σ_E bad witness 없음(pool key), σ_E class 모름"뿐이다(항목 3).
+- 경보가 없다는 것에서 "안전"이나 "위반 없음"을 끌어내지 않는다(항목 2). 실행에서 bad가 없었다는 것에서 σ_E class를 끌어내지 않는다. 쓸 수 있는 말은 정확히 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"뿐이다(N번 중 n번 실행에서 σ_E bad witness 없음, σ_E class 모름; 항목 3).
 - 반복 실패 실행에서 "fixed-order"나 "결정적"을 끌어내지 않는다(항목 4).
 - R2가 race라고 하지 않는다. R2 certificate가 generic template만으로 나온다고 하지 않는다. generic 계약 K-ID와 framework 규칙 R19를 함께 쓴다(항목 12).
 - C3·C5를 v7.0.1에서 재현했다고 하지 않는다(항목 13). 기존 도구가 C1–R2에서 실패한다고 하지 않는다(항목 14).
@@ -928,14 +938,28 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 
 ## 10. 관련 문서
 
-| 문서 | 내용 |
-|---|---|
-| [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 다섯 사례, 판정 체계 |
-| [02_architecture.md](02_architecture.md) | 계층, 구성요소, 산출물, Φ 언어(D1, D2) |
-| [03_workflow.md](03_workflow.md) | instance 분석 순서, feedback loop, 판정 상태 기계, 연구 단계(D3, D4, D6, D7) |
-| [04_formal_model.md](04_formal_model.md) | actor·자원·계약·의미론, MustBefore·PWB·certificate, R2 certificate의 형식적 따라가기(D10) |
-| [06_observation_confirmation.md](06_observation_confirmation.md) | 관측과 확인(D7) |
-| [diagrams/README.md](diagrams/README.md) | 그림 목록, 범례, 다시 렌더링하는 법 |
-| [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문. 이 문서는 §3, §7.3, App. A.1, A.7을 주로 따른다 |
-| [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md) | 검토 쟁점([X1]–[X3])의 처리. 이 문서에 나온 [X2-01]–[X2-14] 등의 출처 |
-| [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | PI 결정(D9, D12, D13, D16, D17, D18 등) |
+이 폴더의 모든 문서는 아래 같은 문서 지도를 쓴다. 용어는 [10_decisions_adr.md §3 용어집](10_decisions_adr.md#3-용어집), 이름이 겹치는 기호는 [§0.2 이름 충돌 주의](10_decisions_adr.md#02-이름-충돌-주의), PI 결정 목록은 [§2](10_decisions_adr.md#2-pi가-내려야-할-결정)에 있다.
+
+| 문서 | 내용 | spec |
+|---|---|---|
+| [README.md](README.md) | 폴더 입구: 읽는 순서, 문서별 한 줄 요약 | — |
+| [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
+| [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O9(그림 D1, D2) | §2 |
+| [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| **05_cfs_mapping.md (이 문서)** | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
+| [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
+| [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
+| [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 38개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
+| [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
+| [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
+| [history/](history/) | 설계 이력: 설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], SPEC v1 | — |
+
+**이 문서와 특히 관련된 곳.**
+
+- spec: 주로 §3, §7.3, App. A.1, A.7을 따른다. R2 certificate의 형식 유도(MustBefore 사슬, FRONTIER, 검사기)는 [04_formal_model.md §10](04_formal_model.md#10-r2로-읽는-once-mustbefore-pwb-certificate)에 있다.
+- PI 결정: D9, D12, D13, D16, D17, D18 등([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)).
+- 검토 쟁점: 이 문서에 나온 [X2-01]–[X2-14] 등의 출처([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)).

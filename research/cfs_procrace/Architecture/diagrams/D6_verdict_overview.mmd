@@ -1,0 +1,59 @@
+stateDiagram-v2
+    %% D6 overview - verdict state machine for one (σ, M) cell. Source: spec §12 D6; §1.10, §4.12, §4.14.
+    %% Parallel evidence/axis regions: D6_verdict_axes.mmd.
+
+    state "candidate (census instance)" as candidate
+    state "open" as open
+    state "inactive" as inactive
+    state "unknown(budget)" as unkBudget
+    state "unknown(model_fault)" as unkFault
+    state "unknown(model_gap)" as unkGap
+    state "unknown(other reason)" as unkOther
+    state "model-fault record written (rule or model suspended)" as mfr
+
+    state "universal and witnessed classes" as classes {
+        state "protected[cert]" as protCert
+        state "protected[model b]" as protModel
+        state "tolerated" as tolerated
+        state "fixed-order[cert]" as fixCert
+        state "fixed-order[model b]" as fixModel
+        state "schedule-dependent" as schedDep
+        state "refinement (timeout-dependent or timeout-masked-liveness)" as refine
+        protCert --> tolerated : allowed not-ready witness
+        protModel --> tolerated : allowed not-ready witness
+        schedDep --> refine : derived from per-σ cells
+    }
+
+    [*] --> candidate
+    candidate --> inactive : static, per M (Sk^cert)
+    candidate --> fixCert : static certificate, per M
+    candidate --> protCert : static certificate, per M
+    candidate --> open : no certificate
+    open --> schedDep : bad or stall witness + good witness
+    open --> fixModel : explorer within b
+    open --> protModel : explorer within b
+    open --> unkBudget : work-unit cap exhausted
+    open --> unkGap : O1 / O2 / O6 failure
+    open --> unkOther : other reason recorded
+    open --> mfr : evidence refuted
+    classes --> mfr : O3 / O4 / O9 contradiction
+    mfr --> unkFault : loop ends for this Φ version
+    unkFault --> candidate : new Φ hash, new loop
+    unkGap --> candidate : new Φ hash or model fix, new loop
+
+    note right of candidate
+        Invariant: no state named safe or timing-protected.
+        No transition from no alarm to a universal class.
+        σ_E universal states only via transfer rule 2.
+    end note
+
+    note left of fixCert
+        M_api-only certificate + contradicting observation
+        gives portability-hazard-evidence; no state change at M_api.
+    end note
+
+    note right of unkOther
+        reasons: not_reached, model_gap, bound, budget,
+        key_unresolved, loss, unmodelled, writer_incomplete,
+        horizon, conformance, model_fault, model_level
+    end note

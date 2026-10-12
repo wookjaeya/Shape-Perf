@@ -1,0 +1,58 @@
+flowchart TD
+    %% D4 overview - research workflow: stages, freezes, PI decisions. Source: spec §12 D4; §9.3, §7.2, §10.1.
+    %% Detail: D4_research_evaluation.mmd (freezes, held-out, recall, triage, ablations, baselines, statistics).
+    %% Dashed border = conditional or PI-gated stage. Dashed edge = PI decision gating a stage.
+
+    PHI["Φ authoring<br/>provenance, authoring records,<br/>refinement accounting"]
+
+    subgraph MVC["thin MVC = S0 + S1 + S2 + S3a (never cut)"]
+        S0["S0 formats + formal core<br/>kz_schema.h, Φ grammar + semantics,<br/>one evaluator, golden harness"]
+        S1["S1 F0 observer<br/>gate: R2 per-use set re-observed<br/>by Kairos's own recorder"]
+        S2["S2 trace HB + dynamic contracts<br/>gate: every R2 use classified"]
+        S3A["S3a static closure, S3a writers,<br/>two views, census, certificates,<br/>kz proofcheck<br/>gate: R2 FIXED_ORDER accepted"]
+    end
+
+    S3B["S3b points-to (conditional:<br/>only if O7 shows blocking DISABLED)"]
+    S4["S4 feedback loop, O1-O7 + O9,<br/>byte-exact replay"]
+    S5["S5 prediction + O8"]
+    S6["S6 F0 confirmation (kz hold)"]
+    S7["S7 explorer: exh then dpor<br/>kill criterion"]
+    S8["S8 G-MLIR gate (optional)"]
+    S9["S9 freeze F1, then F2;<br/>evaluation (D4 evaluation detail)"]
+    S10["S10 PI-gated arms:<br/>--wrap gates + PCT, native σ_R1, 6.4.x basis"]
+    CLAIMS[("claims table<br/>what each cut can claim")]
+
+    PHI --> S0
+    S0 --> S1 --> S2 --> S3A --> S4 --> S5 --> S6 --> S7 --> S8
+    S3A -.-> S3B
+    S3A -->|"F1 after S3a, before the first evaluation run"| S9
+    S8 --> S9
+    S9 --> CLAIMS
+    S9 -.-> S10
+
+    D1["D1 root-side hook"]
+    D14["D14 N (deviation)"]
+    D15["D15 work-unit caps"]
+    D16["D16 App-record probes"]
+    PRT["P-RECALL, P-TRIAGE"]
+    D3X["D3, D4, D13"]
+    D6["D6 MLIR gate"]
+
+    D1 -.-> S1
+    D14 -.-> S1
+    D14 -.-> S9
+    D15 -.-> S5
+    D15 -.-> S7
+    D16 -.-> S6
+    PRT -.-> S9
+    D3X -.-> S10
+    D6 -.-> S8
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    class PHI,S0,S1,S2,S3A,S4,S5,S6,S7,S9 comp
+    class S3B,S8,S10 gated
+    class D1,D14,D15,D16,PRT,D3X,D6 dec
+    class CLAIMS art

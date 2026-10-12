@@ -1,0 +1,66 @@
+stateDiagram-v2
+    %% D6 detail - parallel regions of one verdict record (orthogonal axes). Source: spec §12 D6; §1.10, §4.12, §4.13.
+    %% Each region evolves independently of the class state machine in D6_verdict_overview.mmd.
+
+    state "verdict record axes (parallel regions)" as axes {
+        state "evidence realization" as realization {
+            state "none" as rNone
+            state "predicted-modelled (A-COMM failed)" as rPM
+            state "predicted-extrapolated (summary-guided)" as rPE
+            state "model(b) (explorer)" as rModel
+            state "predicted (trace-sound under A-COMM)" as rPred
+            state "realized (order and outcome on the gcc binary)" as rReal
+            [*] --> rNone
+            rNone --> rPM
+            rNone --> rPE
+            rNone --> rModel
+            rNone --> rPred
+            rPM --> rReal : confirmation
+            rPE --> rReal : confirmation
+            rModel --> rReal : confirmation
+            rPred --> rReal : confirmation
+        }
+        --
+        state "naturalness (realized only)" as naturalness {
+            state "natural (no hold, no gate)" as nNat
+            state "held-F0" as nHeld
+            state "gated-F1" as nGated
+            state "timeout-exercised" as nTO
+            [*] --> nNat
+            [*] --> nHeld
+            [*] --> nGated
+            [*] --> nTO
+        }
+        --
+        state "provider" as provider {
+            state "present" as pPresent
+            state "none" as pNone
+            state "env-absent" as pEnv
+            state "unknown" as pUnk
+            [*] --> pPresent
+            [*] --> pNone
+            [*] --> pEnv
+            [*] --> pUnk
+        }
+        --
+        state "reach" as reach {
+            state "assumed (reads: if reached)" as reAssumed
+            state "proved (run id or confirmed model path)" as reProved
+            [*] --> reAssumed
+            reAssumed --> reProved
+        }
+        --
+        state "scope" as scope {
+            state "in-scope (before SHUTDOWN_REQ)" as sIn
+            state "teardown (K-TEARDOWN)" as sTd
+            [*] --> sIn
+            [*] --> sTd
+        }
+    }
+
+    note right of axes
+        certificate(id) is also a realization value (§1.10).
+        Weaker per axis: model(b) ≈ predicted-modelled ≈ predicted-extrapolated
+        below predicted below realized; timeout-exercised below gated-F1 ≈ held-F0
+        below natural. Flag derived marks a constructed schedule.
+    end note

@@ -1,0 +1,54 @@
+flowchart TD
+    %% D2 detail (1/2) - kz-static pipeline and the independent checker. Source: spec §12 D2; §2.2-2.4, §4.1-4.7.
+    %% Rectangle = component, cylinder = KZ artifact. Dashed border = conditional (S3b).
+
+    INB[("build tree, link.txt, generated files,<br/>startup scripts, .tbl, Env/Init snapshots, argv")]
+    PROF[("profile.kzp (text) → profile.kz<br/>Φ: kinds, ops, per-conjunct LPs, bindings,<br/>rules, contracts (human-authored)")]
+
+    BAS["kz-static basis<br/>script selection, reset type,<br/>content-only Init hash"]
+    BK[("basis.kz")]
+    EXT["kz-static extract<br/>Clang AST facts, derives,<br/>S3a writer extraction, loop-exit trees"]
+    LNK["kz-static link<br/>IR call graph, DWARF/MC binder,<br/>anchor audit"]
+    MOD["kz-static modref<br/>(S3b, conditional)"]
+    FK[("facts.kz<br/>incl. derives, writers,<br/>loop-exit trees")]
+    AK[("anchors.kz<br/>site → gcc address, cost class")]
+    SKL["kz-static skel<br/>two views, once facts,<br/>message provenance, await predicates"]
+    SK[("skel.kz<br/>cert view, exploration view,<br/>once, provenance")]
+    STA["kz-static static<br/>MustBefore per M, census,<br/>certificates, open candidates"]
+    CEN[("census.kz")]
+    PCK["kz proofcheck<br/>(in kz; no LLVM, no code shared<br/>with static)"]
+    PLN["kz-static plan<br/>probe sites, joint debug-register allocator"]
+    PK[("plan.kz")]
+
+    INB --> BAS --> BK
+    BK --> EXT
+    BK --> LNK
+    BK --> SKL
+    EXT --> FK
+    LNK --> AK
+    LNK -.->|"closed IR"| MOD
+    PROF -.-> MOD
+    MOD -.->|"points-to writer sets"| FK
+    FK --> SKL
+    AK --> SKL
+    PROF --> SKL
+    SKL --> SK
+    SK --> STA
+    FK --> STA
+    PROF --> STA
+    STA -->|"O7: writer sites vs Φ effects"| CEN
+    CEN -->|"certificates"| PCK
+    PCK -->|"accept / reject (CC)"| CEN
+    CEN --> PLN
+    AK --> PLN
+    PLN --> PK
+    PK --> NEXT["→ kz observe<br/>(D2 dynamic detail)"]
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class BAS,EXT,LNK,SKL,STA,PCK,PLN comp
+    class INB,PROF,BK,FK,AK,SK,CEN,PK art
+    class MOD gated
+    class NEXT ref

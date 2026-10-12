@@ -1,0 +1,57 @@
+flowchart TD
+    %% D8 detail - writer entries of the R2 certificate with transition and key status, and every trusted entry.
+    %% Source: spec App. A.1 steps 3-5, 9; §4.2, §4.4. Expected behaviour; nothing here was run.
+    %% Each column is one list (the thin links only stack the entries). Red = DECLARED_TRUSTED entry.
+
+    subgraph TR["trusted entries listed in the certificates (step 9)"]
+        direction TB
+        T1["ES half:<br/>CleanUpApp relational guard"]
+        T2["EVS half: A-FRESH, A-OWNER,<br/>CleanUpApp relational guard"]
+        T3["all refutable by O9 and O3 / O4"]
+        T1 --- T2 --- T3
+    end
+
+    subgraph WEV["W_o(o_EVS), conjunct at ρ_EVS (step 5)"]
+        direction TB
+        F1["raise_EVS cfe_es_api.c:573<br/>via cfe_evs_task.c:229<br/>kept; m_EVS ∈ MB · COMPUTED"]
+        F2["ExitApp stores<br/>cfe_evs_task.c:220, :257<br/>kept; after m_EVS · COMPUTED"]
+        F3["raise_ES cfe_es_task.c:134<br/>ONCE-PWB: PWB(raise_ES, f_EVS)<br/>COMPUTED"]
+        F4["ES ExitApp STOPPED<br/>cfe_es_api.c:399<br/>excluded: Type != CORE on ρ_ES;<br/>KEY-SEP · DECLARED_TRUSTED (A-OWNER)"]
+        F5["scan WAITING cfe_es_apps.c:1144<br/>neutral · COMPUTED"]
+        F6["CleanUpApp record free<br/>excluded (relational guard)<br/>DECLARED_TRUSTED"]
+        F7["failure clears :823<br/>(ES and EVS iterations)<br/>OWN-NOPATH · COMPUTED"]
+        F8["EarlyInit memset :82<br/>ONCE-PWB · COMPUTED"]
+        F9["writers in SB, TBL, TIME,<br/>script apps<br/>FRONTIER · COMPUTED"]
+        F1 --- F2 --- F3 --- F4 --- F5 --- F6 --- F7 --- F8 --- F9
+    end
+
+    subgraph WES["W_o(o_ES), conjunct at ρ_ES (step 4)"]
+        direction TB
+        E1["raise_ES cfe_es_api.c:573<br/>via cfe_es_task.c:134<br/>kept; m_ES ∈ MB · COMPUTED"]
+        E2["ExitApp STOPPED cfe_es_api.c:399<br/>via cfe_es_task.c:200<br/>after raise_ES and m_ES (T-PO)"]
+        E3["RunLoop raise cfe_es_api.c:471<br/>absent (call graph) · COMPUTED"]
+        E4["scan WAITING cfe_es_apps.c:1144<br/>neutral (same-record guard)<br/>COMPUTED"]
+        E5["CleanUpApp record free<br/>cfe_es_apps.c:1407-1640<br/>excluded (relational guard)<br/>DECLARED_TRUSTED"]
+        E6["failure clear cfe_es_start.c:823<br/>OWN-NOPATH · COMPUTED"]
+        E7["EarlyInit memset cfe_es_start.c:82<br/>ONCE-PWB(w, f_ES) · COMPUTED"]
+        E8["later startup-thread writers<br/>(:823 later iterations, apps.c:893,<br/>script reservations)<br/>OWN-NOPATH · COMPUTED"]
+        E9["writers in EVS, SB, TBL, TIME,<br/>script apps, children<br/>FRONTIER: PWB(o_ES, w) · COMPUTED"]
+        E10["cFS-Master, console<br/>no writers (S3a) · COMPUTED"]
+        E1 --- E2 --- E3 --- E4 --- E5 --- E6 --- E7 --- E8 --- E9 --- E10
+    end
+
+    subgraph WV["writers of V = valid(CFE_SB_Global.AppId) (A.1 step 3)"]
+        direction TB
+        V1["x: GetAppID success store<br/>cfe_sb_task.c:138<br/>W · COMPUTED · MUST_KEY"]
+        V2["failure-branch store of UNDEFINED<br/>cfe_es_api.c:758-760<br/>neutral"]
+        V3["EarlyInit memset of CFE_SB_Global<br/>cfe_sb_init.c:50<br/>writes 0 · neutral"]
+        V4["A-TYPE check: no untyped write,<br/>no escaping address;<br/>else DISABLED, certificate withheld"]
+        V1 --- V2 --- V3 --- V4
+    end
+
+    classDef ok fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef trust fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef chk fill:#fffbe6,stroke:#a07a00,color:#111
+    class V1,V2,V3,E1,E2,E3,E4,E6,E7,E8,E9,E10,F1,F2,F3,F5,F7,F8,F9 ok
+    class E5,F4,F6,T1,T2,T3 trust
+    class V4 chk

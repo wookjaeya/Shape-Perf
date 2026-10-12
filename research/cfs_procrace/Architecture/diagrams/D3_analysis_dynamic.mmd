@@ -1,0 +1,65 @@
+flowchart TD
+    %% D3 detail (2/2) - from an open candidate to the per-cell verdict. Source: spec §12 D3; §4.8-4.13, §1.8, §1.10.
+    %% Diamond = decision. Rounded = terminal class or label. Dashed border = gated (S7 explorer, F1 gate). Dashed edge = loop path.
+
+    OPEN["open candidate<br/>(from D3 static detail)"]
+    OBS["observation<br/>kz observe → run-*.kzt → kz trace"]
+    RT{"routing<br/>per conjunct LP vs deciding lifecycle LP"}
+    CONF(["conforming: READY / TOLERATED<br/>supporting evidence only"])
+    CERTQ["ask static for a FIXED_ORDER certificate<br/>(VC_R order as prefilter)"]
+    PRD{"prediction (kz predict)<br/>lock reversal; A-COMM label"}
+    EXP{"explorer (exh or dpor)<br/>σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view, h in b"}
+    CNF{"confirmation (kz hold F0 / kz gate F1)<br/>naturalness, perturbation ratio"}
+    CMB["combine per (σ, M) cell (§4.12)<br/>weaker evidence kept per axis"]
+    TRN{"transfer to σ_E<br/>(M_impl, or M_api with no<br/>M_impl-relevant op, or agreement)"}
+
+    SD(["schedule-dependent<br/>refinements timeout-dependent,<br/>timeout-masked-liveness (per σ)"])
+    FOB(["fixed-order / protected within b<br/>model(b) evidence"])
+    UB(["unknown(budget)"])
+    UML(["σ_E cell: unknown(model_level)<br/>M_api result = portability claim"])
+    SDE(["schedule-dependent(σ_E)<br/>natural witnesses on both sides"])
+    SEH(["σ_E(held)<br/>realized but held or gated"])
+    SEU(["σ_E cell = transferred universal class<br/>(protected / tolerated / fixed-order)"])
+    OBL["obligation failure<br/>O1-O9 or CC"]
+    UMF(["unknown(model_gap / model_fault / conformance)<br/>model-fault record; suspension ends the loop"])
+    PHE(["portability-hazard-evidence<br/>(M_api-only certificate contradicted<br/>by the binary; no state change)"])
+
+    OPEN --> OBS --> RT
+    RT -->|"conforming"| CONF
+    RT -->|"wrong-way (S-ordered)"| CERTQ
+    RT -->|"O-ordered (lock, message, soft poll)"| PRD
+    RT -->|"unordered"| PRD
+    PRD -->|"witness: predicted / predicted-modelled<br/>/ predicted-extrapolated"| CNF
+    PRD -->|"no witness within work-unit cap"| EXP
+    PRD -->|"no witness, explorer frozen"| UB
+    EXP -->|"Q_bad yes, Q_good yes"| SD
+    EXP -->|"one query yes"| FOB
+    EXP -->|"cap exhausted"| UB
+    EXP -->|"witness"| CNF
+    CNF -->|"realized (natural / held-F0 / gated-F1 /<br/>timeout-exercised)"| CMB
+    CNF -->|"refuted: model-fault record"| OBL
+    CNF -->|"inconclusive"| CMB
+    CONF --> CMB
+    SD --> CMB
+    FOB --> CMB
+    CMB --> TRN
+    TRN -->|"rule 2 holds"| SEU
+    TRN -->|"rule 2 fails"| UML
+    TRN -->|"natural bad + natural good"| SDE
+    TRN -->|"held / gated witnesses only"| SEH
+    OBS -->|"O3 / O4 / O9 contradiction"| OBL
+    OBL --> UMF
+    OBS -->|"M_api-only certificate contradicted"| PHE
+    UMF -.->|"loop end; Φ fix → new loop"| OPEN
+
+    classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    class RT,PRD,CNF,TRN dec
+    class EXP gated
+    class CONF,SD,FOB,SDE,SEH,SEU term
+    class PHE unk
+    class UB,UML,UMF,OBL unk
+    class OPEN,OBS,CERTQ,CMB comp

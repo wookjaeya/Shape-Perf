@@ -1,0 +1,48 @@
+flowchart TD
+    %% D3 detail (1/2) - static census decisions for one instance, per model level M. Source: spec §12 D3; §4.2, §4.5, §4.6.
+    %% Diamond = decision. Rounded = terminal class (per M, σ_U, b = ∞ on Sk^cert).
+
+    TM{"template matched<br/>(certificate view Sk^cert)"}
+    RCH{"reachable under B<br/>+ message provenance?"}
+    KEY{"key resolved?<br/>concrete / symbolic / ⊤"}
+    WS{"writer sets complete?<br/>(A-TYPE, O7)"}
+    PRV["provider axis: none / env-absent / present<br/>none = INIT_FALSE and empty complete writer set"]
+    FO{"FIXED_ORDER certificate?<br/>once, frontier / once-PWB, derives,<br/>badness, reach"}
+    PR{"PROTECTED certificate?<br/>MUST_KEY must-writer, SCOPE,<br/>PWB for disablers"}
+    PC{"kz proofcheck<br/>independent re-validation"}
+
+    INA(["inactive(B)<br/>proof: folded path condition + provenance sets"])
+    FIX(["fixed-order(σ_U, M)<br/>reach proved or assumed"])
+    PRO(["protected(σ_U, M) / tolerated"])
+    UWI(["unknown(writer_incomplete)"])
+    OPEN["open: probe obligations<br/>reason ∈ unordered, O-ordered-only,<br/>conditional-observation, key_unresolved,<br/>writer_incomplete, horizon, unmodelled"]
+    DYN["→ observation (D3 dynamic detail)"]
+
+    TM --> RCH
+    RCH -->|"no Sk^cert path"| INA
+    RCH -->|"yes"| KEY
+    KEY -->|"⊤"| OPEN
+    KEY -->|"concrete or symbolic"| WS
+    WS -->|"DISABLED entry"| UWI
+    UWI --> OPEN
+    WS -->|"complete"| PRV
+    PRV -->|"provider none: classified by badness,<br/>not a separate terminal"| FO
+    FO -->|"yes"| PC
+    FO -->|"no"| PR
+    PR -->|"yes"| PC
+    PR -->|"no"| OPEN
+    PC -->|"accept (fixed-order cert)"| FIX
+    PC -->|"accept (protected cert)"| PRO
+    PC -->|"reject"| OPEN
+    OPEN --> DYN
+
+    classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class TM,RCH,KEY,WS,FO,PR,PC dec
+    class INA,FIX,PRO term
+    class UWI unk
+    class PRV,OPEN comp
+    class DYN ref

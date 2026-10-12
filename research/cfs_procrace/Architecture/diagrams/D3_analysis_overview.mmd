@@ -1,0 +1,51 @@
+flowchart TD
+    %% D3 overview - analysis workflow per contract instance and (σ, M) cell. Source: spec §12 D3; §4.6, §4.8-4.13.
+    %% Detail: D3_analysis_static.mmd (census decisions) and D3_analysis_dynamic.mmd (observation to σ_E transfer).
+    %% Dashed border = gated stage. Dashed edge = feedback / loop path.
+
+    INST["contract instance i = (κ, context-qualified template, key)<br/>계약 인스턴스 (census)"]
+    STAT{"1 static census on Sk^cert<br/>reachable? key? writer sets?<br/>certificate? (kz proofcheck)"}
+    T1(["inactive / fixed-order / protected<br/>certificate evidence, per M"])
+    OPEN["open candidate<br/>reason + probe obligations"]
+    OBS["2 observation on the unmodified binary<br/>+ routing of each use"]
+    PRD["3 prediction<br/>lock reversal, A-COMM label"]
+    EXP["4 explorer (S7, gated)<br/>two queries per σ, h in b"]
+    CNF["5 confirmation<br/>kz hold F0 / kz gate F1"]
+    CMB["6 combine per (σ, M) cell (§4.12)"]
+    TRN["7 transfer to σ_E<br/>(M_impl or M agreement)"]
+    REC[("verdict record<br/>class or unknown(reason);<br/>axes provider, reach, scope")]
+    OBL["obligation failure (O1-O9, CC)"]
+    UNK(["unknown(model_gap / model_fault /<br/>conformance); suspension ends the loop"])
+
+    INST --> STAT
+    STAT -->|"decided"| T1
+    STAT -->|"no certificate"| OPEN
+    T1 --> CMB
+    OPEN --> OBS
+    OBS -->|"wrong-way: ask for certificate"| STAT
+    OBS -->|"O-ordered / unordered"| PRD
+    PRD -->|"no witness within cap"| EXP
+    PRD -->|"witness"| CNF
+    EXP -->|"witness"| CNF
+    EXP --> CMB
+    PRD --> CMB
+    CNF --> CMB
+    OBS -->|"conforming: supporting evidence"| CMB
+    CMB --> TRN --> REC
+    OBS --> OBL
+    CNF --> OBL
+    OBL --> UNK
+    UNK -.->|"Φ fix → new Φ hash → new loop"| INST
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    class INST,OPEN,OBS,PRD,CNF,CMB,TRN comp
+    class STAT dec
+    class T1 term
+    class OBL,UNK unk
+    class EXP gated
+    class REC art

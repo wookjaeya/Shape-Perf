@@ -1,6 +1,6 @@
 # T2: Where "contract" comes from, and whether it fits Kairos's "readiness contract"
 
-Scope: the PI asked whether "contract" (계약) is a valid term for Kairos's κ (SPEC_FINAL §1.6). This note traces how "contract" is used in software engineering and verification, compares each use with κ, and recommends wording. It reflects the spec as read on 2026-10-12 (§1.6, §1.10, §1.11, §2.3 examples, §3.15, §7.1–7.2). The spec was not edited.
+Scope: the PI asked whether "contract" (계약) is a valid term for Kairos's κ (SPEC_FINAL §1.6). This note traces how "contract" is used in software engineering and verification, compares each use with κ, and recommends wording. It reflects the spec as read on 2026-10-12 (§1.6, §1.10, §1.11, §2.3 examples, §3.15, §7.1–7.2). The spec was not edited. **Errata of 2026-10-15 are in §11** (marked "erratum En").
 
 ---
 
@@ -9,14 +9,14 @@ Scope: the PI asked whether "contract" (계약) is a valid term for Kairos's κ 
 1. **Only part of κ is a contract in the established sense.**
    - "Contract" (Meyer's Design by Contract and everything after it) means a **specified** agreement. It has two parties: a client obligated to establish the precondition, and a supplier obligated to establish the postcondition. It assigns **blame**: a precondition violation is a client bug, a postcondition violation is a supplier bug.
    - κ is something else: an **analysis record**. It bundles a typestate precondition with these extra parts:
-     - the supplier's documented error results;
+     - the supplier's documented error results (a separate, framework-level judgement since spec revision 1.1: erratum E1);
      - the *client's* continuation policy, which is often taken from the client's own code;
      - a harm label;
      - provenance;
      - a scope condition.
 2. **Parts of κ that are contracts in the strict sense.**
    - `Req` when it comes from a cFE `\par Assumptions` block. Example: `cfe_evs.h` says *"The Application ID must correspond to a registered application or core service."* That is a natural-language precondition, and the obligation falls on the client.
-   - Allowed entries that restate documented supplier behaviour: `\retval` codes, `documented_drop`, the documented `fallback` to `CFE_ES_WriteToSysLog`. These read like JML `exceptional_behavior` cases or Code Contracts `EnsuresOnThrow` clauses.
+   - Allowed entries that restate documented supplier behaviour: `\retval` codes, `documented_drop`, the documented `fallback` to `CFE_ES_WriteToSysLog`. These read like JML `exceptional_behavior` cases or Code Contracts `EnsuresOnThrow` clauses (erratum E1).
    - `scope`, the "no shutdown before the use" condition. This works like an assume-guarantee **assumption**, or a **rely** condition, that keeps readiness stable.
 3. **Parts of κ that are not contracts.**
    - Allowed entries taken from the code under analysis (`retry_until_ready` with a bound read from CF's loop, `defer_by_design` from an app comment). These are client tolerance policies or inferred specifications. Calling them "contractual" invites a circularity objection.
@@ -24,9 +24,9 @@ Scope: the PI asked whether "contract" (계약) is a valid term for Kairos's κ 
    - The **cross-thread order** itself. Every documented cFS precondition we use is a *state* predicate at the call. The rule "the provider's transition must happen-before the use" is not written in any contract. Kairos derives it with HB and must-before analysis. SCOOP (wait conditions), rely-guarantee, and A/G contracts can express such things, but Kairos uses none of their semantics.
    - Instances whose Allowed is `unspecified_by_reference`, such as K-ROUTE subscribe-before-first-send. **No reference states the requirement**, so calling them contracts is a misnomer.
 4. **Applied to the cases:**
-   - **R2 (cFE #2663)** is a textbook contract violation. A documented precondition is violated by the client (SB code calling EVS with SB's not-yet-published AppId) in every boot.
-   - **C1 (CF #184)** is *not* a violation of OSAL's contract. `OS_CountSemGetIdByName` documents `OS_ERR_NAME_NOT_FOUND` as a normal result. The readiness need is CF's own, code-admitted assumption about a peer app. It is closer to an unmet A/G *environment assumption* than to a DbC precondition.
-   - **SB subscribe-before-first-send loss:** SB's documented contract is fulfilled ("transmitted to all subscribers", `CFE_SUCCESS`). No contract is violated.
+   - **R2 (cFE #2663)** is a textbook contract violation (superseded: erratum E2). A documented precondition is violated by the client (SB code calling EVS with SB's not-yet-published AppId) in every boot.
+   - **C1 (CF #184)** is *not* a violation of OSAL's contract. `OS_CountSemGetIdByName` documents `OS_ERR_NAME_NOT_FOUND` as a normal result (an `@retval`, neither normal nor an error: erratum E3). The readiness need is CF's own, code-admitted assumption about a peer app. It is closer to an unmet A/G *environment assumption* than to a DbC precondition.
+   - **SB subscribe-before-first-send loss:** SB's documented contract is fulfilled ("transmitted to all subscribers", `CFE_SUCCESS`). No contract is violated (outside R2's window only: erratum E4).
 5. **The AI paper (FSE 2014) is a useful contrast, not a competitor for the word.**
    - AI uses "invariant" in the "likely invariant" sense: something **learned from correct runs**.
    - R2's wrong order occurs in *every* run. So any run-learned invariant would absorb it as normal ([I], same argument the spec already makes for DefUse).
@@ -49,7 +49,7 @@ Scope: the PI asked whether "contract" (계약) is a valid term for Kairos's κ 
 | `U`, `sel` | use pattern, resource key | the call site (client) |
 | `Req` | conjunction of lifecycle/value predicates on the resource at the use's LP (typestate) | the resource state at the client's call; established by **another actor** (provider) |
 | `Oracle` | the framework's own validity predicate, e.g. `EVS_GetAppDataByID` + `EVS_AppDataIsMatch` | the **supplier's** defensive check |
-| `Allowed` | finite vocabulary: `none`, `documented_drop`, `returned_and_tested`, `retry_until_ready(codes,bound)`, `fallback`, `defer_by_design`, `exit`, `unspecified_by_reference` | mix: some entries are the supplier's documented results, some are the client's continuation |
+| `Allowed` | finite vocabulary: `none`, `documented_drop`, `returned_and_tested`, `retry_until_ready(codes,bound)`, `fallback`, `defer_by_design`, `exit`, `unspecified_by_reference` | mix: some entries are the supplier's documented results, some are the client's continuation (resolved in spec revision 1.1: erratum E1) |
 | `harm` | `event_lost_silently`, `app_zombie`, … | the analyst's consequence class |
 | `prov` | kind ∈ {`api_doc`, `code_admission`, `code_pattern`, `issue`, `researcher`}, `path:line`, hash | metadata |
 | `scope` | "no SHUTDOWN_REQ LP precedes the use" | an assumption on the environment |
@@ -285,13 +285,13 @@ These are often more exact names for parts of κ.
   - *Temporal / cross-thread:* **yes**. It is purely about cross-thread order of memory accesses.
   - *Specified or inferred:* **inferred from runs judged correct.**
 - **Why it matters for the term** [I]:
-  1. AI chose "invariant" because the property is *empirical*: whatever held in all correct runs.
+  1. AI chose "invariant" because the property is *empirical*: whatever held in all correct runs (a motive the paper does not state: erratum E5).
   2. R2's wrong order appears in every boot (24 uses per boot, 3/3 with gdb). Its harm, an event lost silently, does not change outputs that a tester would judge. So R2 runs would be "correct runs", and the EarlyInit predecessor would enter `BSet`. AI would never fire. The spec makes the same argument for DefUse (§1.11).
-  3. Any term for κ must therefore signal **"external reference, not learned from runs"**. "Contract" signals that well. "Invariant" would signal the opposite, and it also collides with DbC class invariants.
+  3. Any term for κ must therefore signal **"external reference, not learned from runs"**. "Contract" signals that well. "Invariant" would signal the opposite, and it also collides with DbC class invariants (overstated: erratum E5).
   4. AI's stall mechanism is a run-time wait-until-ordered. It is conceptually akin to SCOOP's wait conditions and to CF's retry loop. All three "tolerate" a not-ready state by waiting. Kairos's `retry_until_ready` / `TOLERATED` is the classification side of the same idea.
 - **Related "intention" wording.** Lu, Park, Seo, Zhou, "Learning from Mistakes: A Comprehensive Study on Real World Concurrency Bug Characteristics", ASPLOS 2008. [V for bibliographic data]
   - Abstract (snippet): about one third of non-deadlock bugs are "caused by violation to programmers' order intentions". [P for wording]
-  - The concurrency-bug community therefore speaks of *intentions* and *invariants*, not contracts.
+  - The concurrency-bug community therefore speaks of *intentions* and *invariants*, not contracts (not a census of the word: erratum E6).
 
 ### 3.16 cFS and flight-software use
 - **No published work applying DbC, ACSL or A/G "contracts" to cFS was found** (one extended search; a negative result, not proof of absence).
@@ -356,7 +356,7 @@ These are often more exact names for parts of κ.
 | Case | DbC reading | A/G or rely reading | κ today | Is "contract violation" accurate? |
 |---|---|---|---|---|
 | **R2** (cFE #2663; 24 uses per boot, observed 3/3) | Client (SB code running in ES/EVS task contexts) passes `CFE_SB_Global.AppId` before SB's task publishes it. This violates the documented precondition "must correspond to a registered application". The supplier's defensive check returns `CFE_EVS_APP_ILLEGAL_APP_ID`. The doc names the fallback (`CFE_ES_WriteToSysLog`) that the client did not use. | The provider (SB task) guarantees publication only *after* the uses. HB/must-before shows every execution is bad (`fixed-order`). | `K-ID.send-with-appid`, `api_doc`, `allowed none` | **Yes.** A textbook precondition violation, client's fault, in every execution. "Contract" is fully justified here, and the AI contrast (§3.15) shows why a reference outside the runs is needed. |
-| **C1** (CF #184; 25 × delay retry around `OS_CountSemGetIdByName`) | OSAL's contract is total: `OS_ERR_NAME_NOT_FOUND` is a documented normal result, with no precondition that the name exists. **No OSAL contract is violated**, even when the retries run out. | CF *assumes* (its own comment says "assume this is what is going on") that some peer app creates the semaphore within its retry budget. No component *guarantees* that. This is an A/G compatibility gap, tolerated by a hand-written bounded wait. | `K-REG.osal-countsem-lookup`, `api_doc` (retvals) + `code_admission`, `retry_until_ready` | **No.** The requirement is a client-admitted environment assumption with a code-derived tolerance. "Readiness assumption" or "inferred requirement" is accurate; "contract" overstates who promised what. |
+| **C1** (CF #184; 25 × delay retry around `OS_CountSemGetIdByName`) | OSAL's contract is total: `OS_ERR_NAME_NOT_FOUND` is a documented normal result (an `@retval`: erratum E3), with no precondition that the name exists. **No OSAL contract is violated**, even when the retries run out. | CF *assumes* (its own comment says "assume this is what is going on") that some peer app creates the semaphore within its retry budget. No component *guarantees* that. This is an A/G compatibility gap, tolerated by a hand-written bounded wait. | `K-REG.osal-countsem-lookup`, `api_doc` (retvals) + `code_admission`, `retry_until_ready` | **No.** The requirement is a client-admitted environment assumption with a code-derived tolerance. "Readiness assumption" or "inferred requirement" is accurate; "contract" overstates who promised what. |
 | **SB subscribe-before-first-send** (silent loss) | `CFE_SB_TransmitMsg` fulfils its documented contract: it delivers to "all subscribers" (here none) and returns `CFE_SUCCESS`. No documented assumption requires a subscriber. | An end-to-end delivery expectation with no stated owner. | K-ROUTE; `unspecified_by_reference` → LOSS-UNDER-ORDER | **No.** There is no contract to violate. The spec already labels it correctly (LOSS-UNDER-ORDER); the umbrella word "contract" contradicts that label. |
 
 ---
@@ -408,7 +408,7 @@ These are often more exact names for parts of κ.
 | readiness rule | SDV precedent | collides with HB rules R1–R19 |
 | readiness obligation | DbC flavour | collides with "proof obligation" and "candidate obligations" (§4) |
 | readiness protocol | typestate/protocol precedent | suggests call-sequence protocols on one object (Beckman et al.) |
-| readiness invariant | matches the AI paper | wrong: AI/Daikon "invariant" means learned; DbC "invariant" means a class invariant |
+| readiness invariant | matches the AI paper | wrong: AI/Daikon "invariant" means learned (overstated; the reason is that κ is a specification object: erratum E5); DbC "invariant" means a class invariant |
 
 ### 9.2 Recommendation
 1. **Umbrella:** call κ a **readiness specification**, with "contract" kept only in the tier name (point 3).
@@ -497,3 +497,16 @@ These are often more exact names for parts of κ.
 | 44 | Korean rendering 계약에 의한 설계 for DbC | UNVERIFIED | no Korean source found |
 | L1 | cFE v7.0.1: `cfe_evs.h` (SendEventWithAppID assumption and retvals), `cfe_evs.c:185–188`, `cfe_sb.h` (TransmitMsg, ReceiveBuffer notes), `cfe_es.h` (WaitForSystemState assumption), `cfe_config_handlers.c:63`, `tbl_ut_helpers.c:358–359` | local, read | text |
 | L2 | OSAL `osapi-countsem.h:160`; CF `cf_cfdp.c:1272–1290` | local, read | text |
+
+---
+
+## 11. Errata (2026-10-15)
+
+These errata apply the external review EXT-20261012 §6.2–§6.4 (`../../history/review_EXT_20261012.md`) as `../../spec/SPEC_FINAL.md` revision 1.1 answers it (spec §0.7 item 4, §1.6 "Three judgements", §10.1 QT-2–QT-5, ADR-043). The text above is kept as written on 2026-10-12; the markers "erratum En" point here. The synthesis `../08_terminology.md` (revision 3) carries the same corrections. The word "contract" stays in every document while the renaming (T1) is pending.
+
+- **E1. Supplier results and caller acceptance** [D in the spec]. §0 items 1–2 and §1's `Allowed` row count the supplier's documented error results, `\retval` codes and supplier drops as parts of κ or as Allowed entries. Spec revision 1.1 separates them (§1.6 "Three judgements", §1.10, ADR-043). What the supplier documents and returns is the framework-level judgement (`fw_doc` per instance, `fw_conf` per cell); it never makes an occurrence TOLERATED. An Allowed entry decides statuses only at the caller level, when a caller-side text supports it or, under the default of PI item QT-4, a fixed rule (reported as rule-backed). `documented_drop` now names a drop of the using code's own request documented on the caller side; a supplier's documented drop of a caller's request is framework-level information (spec §1.6, Allowed table). For R2 the caller-level Allowed is `none`, and the header's mention of `CFE_ES_WriteToSysLog` names a different API, not an accepted outcome of the use (spec App. A.1 step 8). The mix noted in §1 is thus resolved by the side of each provenance record (`supplier`, `caller`, `rule`) and the field `appreq` (spec §1.6).
+- **E2. R2 is not a textbook contract violation** [F]. §0 item 4 was superseded by `../08_terminology.md` §2.3 ("Partly"): EVS also documents the not-ready results as return codes (`cfe_evs.h:198–199`). In spec revision 1.1, R2 violates a caller-side obligation (`appreq` = `cfe_evs.h:169–172`), while EVS's documented error return is the framework-level result `documented-result` (spec App. A.1 step 8).
+- **E3. `OS_ERR_NAME_NOT_FOUND`** [F]. §0 item 4 and §6's C1 row: OSAL documents it as an `@retval` "if the name was not found in the table" (`osapi-countsem.h:160`). The header calls it neither normal nor an error.
+- **E4. The SB loss** [M], [I]. §0 item 4's "SB's documented contract is fulfilled" holds outside R2's window. Inside it, the `SEND_NO_SUBS` events that cSB4305.5 requires are rejected by EVS [M], and the window's counter increments are cleared later by SB's own initialization [I] (spec App. A.1 step 13a). cSB4305.5 is framework-level (`documented-not-error`); the caller level is LOSS-UNDER-ORDER unless a consumer or mission reference decides (spec §3.9; PI item QT-2, which re-asks STATUS decision T2).
+- **E5. "Invariant"** [F: AI p. 331; I]. §3.15 item 1 ("AI chose 'invariant' because the property is empirical") attributes a motive the paper does not state: AI defines program invariants in the specified sense and calls the learned objects "likely invariants" (p. 331; T1 §7 item 1), and Daikon's own definition is the specified one too (T3 §2.1, snippet). §3.15 item 3 and §9.1's "readiness invariant" row overstate in the same way. An invariant can be written, proved or inferred. The reason not to call κ an invariant is that κ is a specification object, not a single predicate (spec §1.6); the learned reading next to AI and DefUse is a secondary, reader-side risk [I].
+- **E6. "Not contracts"** [U]. §3.15's "speaks of intentions and invariants, not contracts" describes the Lu-line works cited there; it is not a census of the word. GPredict's Introduction calls the Java Iterator usage rule "a more generic contract" (known from the external review's reading and a search snippet; PDF not opened; P-PAPERS); see T4 erratum E2.

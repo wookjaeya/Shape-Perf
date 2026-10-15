@@ -1,27 +1,49 @@
 flowchart TD
-    %% D3 detail (2/2) - from an open candidate to the per-cell verdict. Source: spec §12 D3; §4.8-4.13, §1.8, §1.10.
-    %% Diamond = decision. Rounded = terminal class or label. Dashed border = gated (S7 explorer, F1 gate). Dashed edge = loop path.
+    %% D3 detail (2/2) - from an open or progress candidate to the per-cell record. Source: spec §12 D3 (rev 1.1); §1.8, §1.10, §4.8-4.14.
+    %% Diamond = decision. Rounded = terminal value. Dashed border = gated (S7 explorer). Dashed edge = loop path. Red = unknown, contested or obligation failure.
+    %% Three separate outputs per (σ, M) cell and bound: safety record → class, reach, progress. A stall never leads into a class.
 
     OPEN["open candidate<br/>(from D3 static detail)"]
+    PCD["progress candidate<br/>(certified instance, from D3 static detail)"]
     OBS["observation<br/>kz observe → run-*.kzt → kz trace"]
     RT{"routing<br/>per conjunct LP vs deciding lifecycle LP"}
     CONF(["conforming: READY / TOLERATED<br/>supporting evidence only"])
     CERTQ["ask static for a FIXED_ORDER certificate<br/>(VC_R order as prefilter)"]
-    PRD{"prediction (kz predict)<br/>lock reversal; A-COMM label"}
-    EXP{"explorer (exh or dpor)<br/>σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view, h in b"}
+    PRD{"prediction (kz predict)<br/>lock reversal; A-COMM label;<br/>horizon completion"}
+    PNR(["predicted not-ready evidence<br/>PENDING occurrence, no class"])
+    EXP{"explorer (exh or dpor)<br/>σ_U, σ_U∞, σ_R1[P_sched]; exploration view, h in b<br/>Q_reach, Q_bad, Q_ok, Q_stall"}
     CNF{"confirmation (kz hold F0 / kz gate F1)<br/>naturalness, perturbation ratio"}
-    CMB["combine per (σ, M) cell (§4.12)<br/>weaker evidence kept per axis"]
-    TRN{"transfer to σ_E<br/>(M_impl, or M_api with no<br/>M_impl-relevant op, or agreement)"}
+    CMB["combine per (σ, M) cell and bound (§4.12)<br/>safety record: ¬Bad_i, ¬OK_i, ¬NR_i with routes,<br/>witnesses with ordinals; weaker evidence kept per axis;<br/>axes provider and scope"]
+    TRN{"transfer (§1.8)<br/>safety statements only"}
 
-    SD(["schedule-dependent<br/>refinements timeout-dependent,<br/>timeout-masked-liveness (per σ)"])
-    FOB(["fixed-order / protected within b<br/>model(b) evidence"])
-    UB(["unknown(budget)"])
+    subgraph SAF["class, derived from the safety record"]
+        FO(["fixed-order<br/>¬OK_i with a decision route"])
+        PR(["protected: ¬Bad_i<br/>tolerated from exh only"])
+        NFS(["no-final-status<br/>¬Bad_i and ¬OK_i"])
+        SD(["schedule-dependent<br/>bad and good witness at one ordinal"])
+        REF(["refinement timeout-dependent<br/>from σ_U and σ_U∞ cells, exh only"])
+        OSP(["ordinal-split<br/>witnesses at different ordinals"])
+        NDR(["unknown(no_decision_route)<br/>¬OK_i shown"])
+        UB(["unknown(budget / bound / other reason)"])
+    end
+
+    REACH(["reach: proved / assumed (if reached) /<br/>model(b) / unreached(b) / contested"])
+
+    subgraph PRG["progress, per cell and bound"]
+        PSW(["stall-witness: clauses pre-use / in-use / horizon,<br/>kind, qualifiers, wait-for root; model(b) or realized"])
+        PNS(["no-stall-within(b)<br/>(a statement about the model only)"])
+        PUN(["unknown(not_checked / bound / budget /<br/>unmodelled / teardown_scope / …)"])
+        TML(["timeout-masked-liveness<br/>(per instance, σ_U cell)"])
+        ROOT(["progress-chain root reported (flag tml-root);<br/>dependents attached"])
+    end
+
+    SEU(["σ_E cell: the transferred safety statement<br/>for every real run of B"])
     UML(["σ_E cell: unknown(model_level)<br/>M_api result = portability claim"])
-    SDE(["schedule-dependent(σ_E)<br/>natural witnesses on both sides"])
+    SDE(["σ_E: schedule-dependent (two natural runs,<br/>same ordinal) or ordinal-split"])
     SEH(["σ_E(held)<br/>realized but held or gated"])
-    SEU(["σ_E cell = transferred universal class<br/>(protected / tolerated / fixed-order)"])
-    OBL["obligation failure<br/>O1-O9 or CC"]
-    UMF(["unknown(model_gap / model_fault / conformance)<br/>model-fault record; suspension ends the loop"])
+    OBL["obligation failure<br/>O1-O5, O8, O9"]
+    UMF(["unknown(model_gap / model_fault / conformance)<br/>model-fault record; a suspension ends the loop"])
+    CTD(["contested bound (O6(b), O10)<br/>rendered unknown(model_fault); no suspension"])
     PHE(["portability-hazard-evidence<br/>(M_api-only certificate contradicted<br/>by the binary; no state change)"])
 
     OPEN --> OBS --> RT
@@ -29,28 +51,48 @@ flowchart TD
     RT -->|"wrong-way (S-ordered)"| CERTQ
     RT -->|"O-ordered (lock, message, soft poll)"| PRD
     RT -->|"unordered"| PRD
-    PRD -->|"witness: predicted / predicted-modelled<br/>/ predicted-extrapolated"| CNF
+    PRD -->|"witness: predicted / predicted-modelled /<br/>predicted-extrapolated"| CMB
+    PRD -->|"witness → hold plan"| CNF
+    PRD -->|"PENDING, horizon not completed"| PNR
     PRD -->|"no witness within work-unit cap"| EXP
     PRD -->|"no witness, explorer frozen"| UB
-    EXP -->|"Q_bad yes, Q_good yes"| SD
-    EXP -->|"one query yes"| FOB
-    EXP -->|"cap exhausted"| UB
-    EXP -->|"witness"| CNF
-    CNF -->|"realized (natural / held-F0 / gated-F1 /<br/>timeout-exercised)"| CMB
-    CNF -->|"refuted: model-fault record"| OBL
+    PCD -.->|"if the explorer is available"| EXP
+    PCD -->|"explorer frozen or cut"| PUN
+    EXP -->|"Q_bad, Q_ok per ordinal:<br/>statements within b, witnesses"| CMB
+    EXP -->|"Q_reach"| REACH
+    EXP -->|"Q_stall yes (exh only)"| PSW
+    EXP -->|"Q_stall no, no undecided test"| PNS
+    EXP -->|"deadness test undecided, cap"| PUN
+    EXP -->|"witness → hold plan"| CNF
+    EXP -->|"O10: exh witness against a<br/>certified or transferred statement"| CTD
+    CNF -->|"realized (natural / held-F0 /<br/>gated-F1 / timeout-exercised)"| CMB
     CNF -->|"inconclusive"| CMB
+    CNF -->|"realized hang, wait-for fact<br/>(deadlock-cycle, leaked-lock)"| PSW
+    CNF -->|"refuted: witness withdrawn (O6)"| CTD
+    OBS -->|"observed occurrence"| REACH
     CONF --> CMB
-    SD --> CMB
-    FOB --> CMB
+    CMB -->|"¬OK_i deciding"| FO
+    CMB -->|"¬Bad_i only"| PR
+    CMB -->|"both statements"| NFS
+    CMB -->|"bad + good, same ordinal"| SD
+    CMB -->|"bad + good, other ordinals"| OSP
+    CMB -->|"¬OK_i, REJECT after the decision"| NDR
+    CMB -->|"nothing established"| UB
+    SD --> REF
+    OSP -->|"same-ordinal pair found"| SD
     CMB --> TRN
-    TRN -->|"rule 2 holds"| SEU
+    TRN -->|"rule 1(a): statement into the receiving cell,<br/>combined with its own statements"| CMB
+    TRN -->|"rule 2 holds: b = ∞,<br/>M_impl or M agreement"| SEU
     TRN -->|"rule 2 fails"| UML
-    TRN -->|"natural bad + natural good"| SDE
-    TRN -->|"held / gated witnesses only"| SEH
-    OBS -->|"O3 / O4 / O9 contradiction"| OBL
+    CMB -->|"natural bad and good witnesses"| SDE
+    CMB -->|"held / gated witnesses only"| SEH
+    PSW -->|"hang state under σ_U∞, not under σ_U (exh)"| TML
+    PSW -->|"progress chain"| ROOT
+    TML --> ROOT
+    OBS -->|"O1-O5, O8, O9 failure"| OBL
     OBL --> UMF
     OBS -->|"M_api-only certificate contradicted"| PHE
-    UMF -.->|"loop end; Φ fix → new loop"| OPEN
+    UMF -.->|"suspension: loop end; Φ fix → new Φ hash, new loop"| OPEN
 
     classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
     classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
@@ -59,7 +101,6 @@ flowchart TD
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     class RT,PRD,CNF,TRN dec
     class EXP gated
-    class CONF,SD,FOB,SDE,SEH,SEU term
-    class PHE unk
-    class UB,UML,UMF,OBL unk
-    class OPEN,OBS,CERTQ,CMB comp
+    class CONF,PNR,FO,PR,NFS,SD,REF,OSP,REACH,PSW,PNS,TML,ROOT,SEU,SDE,SEH term
+    class UB,NDR,PUN,UML,UMF,OBL,CTD,PHE unk
+    class OPEN,PCD,OBS,CERTQ,CMB comp

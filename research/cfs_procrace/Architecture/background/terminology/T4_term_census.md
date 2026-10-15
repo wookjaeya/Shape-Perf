@@ -2,7 +2,7 @@
 
 **Scope.** The PI asked whether "contract" (계약) is the right word for Kairos's κ ("readiness contract", `spec/SPEC_FINAL.md` §1.6, §1.10, §3.15, §7.2). This note does not argue the lineage of "contract"; T2 (`T2_contract_lineage.md`) does that. This note asks a narrower, empirical question. **In the papers and systems a reviewer will compare us with, what words name (a) the required order or readiness condition and (b) its violation? Is that requirement learned, specified or built in?** It ends with the vocabulary a PLDI/ICSE/FSE/ASPLOS reviewer would expect for our problem.
 
-**Date and inputs.** 2026-10-12. Read:
+**Date and inputs.** 2026-10-12. This note is a dated input; the **errata of 2026-10-15 are in §10** and are marked "erratum En" where they apply. Read:
 - the AI paper PDF, all 11 pages (as images, plus `pdftotext`);
 - SPEC_FINAL §1.6, §1.10, §1.11, §3.15, §7.2;
 - background `04_lit_dynamic.md` [R04] and `05_lit_systematic_static.md` [R05];
@@ -22,7 +22,7 @@ Nothing in the repository was edited.
 
 ## 0. Bottom line
 
-1. **No race, order-violation or initialization-race work in this census calls the required order a "contract".** The census has 52 entries. The required order is named in five ways (§4.1):
+1. **No race, order-violation or initialization-race work in this census calls the required order a "contract".** (Recorded at abstract level only: errata E1–E3, §10.) The census has 52 entries. The required order is named in five ways (§4.1):
    - **as an intention**: "programmers' order intentions", "desired order", "assumed order", "the programmer intends …";
    - **as a learned invariant**: AVIO, DefUse, PSet, CCI, AI;
    - **as a built-in model** of what the platform guarantees: happens-before in WebRacer, EventRacer, DroidRacer, CAFA, SIERRA, DCatch, NodeRacer;
@@ -49,7 +49,7 @@ Nothing in the repository was edited.
 6. **Reviewer expectation and recommendation (§6).**
    - **Bug class.** Anchor it in **"order violation"** (Lu et al. 2008) and **"initialization race"** (InitRacer). Name our violation a **"readiness violation"** (short form: use-before-ready), defined as a use whose **readiness precondition** (a framework typestate precondition) is false, with a not-ready outcome that is not allowed.
    - **Object.** Call κ a **readiness specification**, as T2 recommends.
-   - **Avoid unqualified words.** "Invariant" means learned in this literature. "Contract" means DbC in this literature (T2). "Tolerated" means run-time bug avoidance in the AI / Atom-Aid / ConAir line.
+   - **Avoid unqualified words.** "Invariant" means learned in this literature (overstated: erratum E4, §10). "Contract" means DbC in this literature (T2). "Tolerated" means run-time bug avoidance in the AI / Atom-Aid / ConAir line.
    - **Cite systemd for the separation.** systemd states explicitly that ordering dependencies are "independent of and orthogonal to the requirement dependencies". That is a citable precedent for separating *what state must hold* (Req) from *what order establishes it* (HB/must-before).
 7. **Premise corrections found while verifying:**
    - Unicorn is **ICST 2012**, not ICSE.
@@ -198,7 +198,7 @@ Legend for **Kind** (how the requirement enters the tool):
 
 | # | Work (status) | Requirement term | Violation term | Kind | Where |
 |---|---|---|---|---|---|
-| 52 | GPredict, Huang, Luo, Roşu, ICSE 2015, pp. 847–857 (V) | user-written **"concurrency properties"** ("high-level properties"); spec language adapted from MOP (P) | **"property violations"** predicted under the causal model | **S** | Summary of abstract (FSL page). R04 L553: "user-written generic properties, Java, no notion of a legal error outcome" |
+| 52 | GPredict, Huang, Luo, Roşu, ICSE 2015, pp. 847–857 (V) | user-written **"concurrency properties"** ("high-level properties"); spec language adapted from MOP (P) | **"property violations"** predicted under the causal model | **S** | Summary of abstract (FSL page). R04 L553: "user-written generic properties, Java, no notion of a legal error outcome". See errata E2 and E7 (§10) |
 
 ---
 
@@ -213,7 +213,7 @@ Legend for **Kind** (how the requirement enters the tool):
   - Its prose speaks of "programmers' intentions about the correct order", "the order assumed by developers" and "the programmer intends … but this intention is not guaranteed" (text, pp. 331, 334, 335).
   - Its checkable object is a *learned* invariant.
   - Its violation is an "Anticipating Invariant Violation".
-- **Takeaway for terms [I].** In this line, the word for the checked requirement is **"invariant"**, and it means **learned from correct runs**.
+- **Takeaway for terms [I].** In this line, the word for the checked requirement is **"invariant"**, and it means **learned from correct runs** (overstated as a definition: erratum E4, §10).
   - Kairos's κ is not learned (T1, T2).
   - So "invariant" is the one word Kairos must not use for κ.
   - "Intention" is the informal word reviewers use for what an order violation violates. Kairos's provenance field is, in effect, a record of **where the intention is written down**.
@@ -237,7 +237,7 @@ Legend for **Kind** (how the requirement enters the tool):
   - a **filter** expressing **intents** (LOOM);
   - a **property** (GPredict: user-written "concurrency properties", with violations predicted by SMT).
 - **The violation is a "protocol violation"** (Lifestate; Mishra et al.).
-- **None uses "contract".**
+- **None uses "contract"** as the recorded requirement term (errata E1–E2, §10).
 - **Lifestate is the closest in shape to κ** [I]: framework lifecycle × typestate × trace checking. T2 §3.13 already flags it as the closest prior work in shape.
 
 ### 3.4 Systems platforms: "readiness", "dependency", "satisfied", "defer"
@@ -282,7 +282,7 @@ Legend for **Kind** (how the requirement enters the tool):
 | Specification | "typestate", "protocol", "lifestate specification", "repair policy", "execution filter", "order relationships", "concurrency properties" | Strom & Yemini; Mishra et al.; Lifestate; EventRaceCommander; LOOM; CFix; GPredict |
 | Platform declaration | "ordering dependency", "requirement dependency", "readiness notification", "readiness probe", "readiness gate", "condition: service_healthy", "satisfied", "supplier/consumer", "lifecycle state ≥ X" | systemd, Kubernetes, Compose, OSGi DS, Linux, AndroidX |
 
-**"Contract" appears in none of the 52 entries** as the name of the order or readiness requirement. T2 found "contract" for concurrency only as SCOOP preconditions-as-waits and as atomicity usage protocols (ICST 2017), not for readiness.
+**"Contract" appears in none of the 52 entries** as the name of the order or readiness requirement (recorded at abstract level: errata E1–E2, §10). T2 found "contract" for concurrency only as SCOOP preconditions-as-waits and as atomicity usage protocols (ICST 2017), not for readiness.
 
 ### 4.2 Three ways to name the violation
 
@@ -325,10 +325,10 @@ Notes:
 
 ### 4.5 What the absence of "contract" implies
 
-- **It is not wrong, but it is non-standard here.** In this literature the requirement is an intention, a learned invariant, an HB model or a specification. A reviewer from this community will read "contract" in its DbC sense (pre/post with blame; T2 §3.2).
+- **It is not wrong, but it is non-standard here** (withdrawn in this form: erratum E3, §10). In this literature the requirement is an intention, a learned invariant, an HB model or a specification. A reviewer from this community will read "contract" in its DbC sense (pre/post with blame; T2 §3.2).
   - That sense fits R2: a documented precondition violated by the caller.
-  - It does not fit C1, where OSAL documents not-found as a normal result.
-  - It does not fit the SB loss, where SB's documented behaviour is met. T2 §0 item 4 makes the same point.
+  - It does not fit C1, where OSAL documents not-found as a normal result (as an `@retval`, neither normal nor an error: erratum E6).
+  - It does not fit the SB loss, where SB's documented behaviour is met (outside R2's window only: erratum E6). T2 §0 item 4 makes the same point.
 - **What "contract" does get right [I].** It signals that the requirement comes from **outside the runs**, which the learned-invariant line lacks. T1's analysis of AI makes this the decisive property for R2.
 - **"Specification" carries the same signal** with less baggage. Lifestate and typestate use it, and it is the word specification-mining papers set against "learned".
 
@@ -339,7 +339,7 @@ Notes:
 | `retry_until_ready(codes, bound)` | Linux `-EPROBE_DEFER` / deferred probe list ("try to call it again later"); WASABI "retry" (and "retry bugs" when it is wrong) | V-doc; V |
 | `defer_by_design(src)` | Kubernetes readiness gates and init containers; Compose `condition: service_healthy`; systemd `Type=notify` (start follow-up units only after `READY=1`) | V-doc |
 | `documented_drop(src)` and LOSS-UNDER-ORDER | ZeroMQ "slow joiner" (loss accepted unless synchronized: "assume that the published data stream is infinite"); ROS 2 "volatile" durability for "late-joining" subscriptions | V-doc |
-| `returned_and_tested(codes)` | API directives / documented error results (Monperrus); OSGi "unsatisfied → deactivated" | V; V-doc |
+| `returned_and_tested(codes)` | API directives / documented error results (Monperrus); OSGi "unsatisfied → deactivated" (a documented result is framework-level, not an acceptance: erratum E5) | V; V-doc |
 | repair or avoidance at run time (not part of κ) | AI "tolerating" by stalling; EventRaceCommander "postponing or discarding selected events"; TaxDC fixes "ignoring/neutralizing the untimely message" | V (text); V; P |
 
 **Collision.** In the AI / Atom-Aid / ConAir line, **"tolerating concurrency bugs"** means a *run-time system that avoids the bug* (AI text p.330: "tolerating concurrency bugs during production runs").
@@ -351,9 +351,9 @@ Notes:
 
 | Kairos term (spec) | Nearest census term(s) | Risk | Note [I] |
 |---|---|---|---|
-| readiness contract κ | lifestate specification; typestate; API directive; readiness probe/condition | **medium** | No race paper uses "contract"; DbC connotation (T2) |
+| readiness contract κ | lifestate specification; typestate; API directive; readiness probe/condition | **medium** | No row records "contract" as the requirement term, at abstract level (errata E1–E3); DbC connotation (T2) |
 | `Req` (required lifecycle state at the use) | typestate; `Lifecycle.State.isAtLeast`; OSGi "satisfied"; Kubernetes `Ready` | low | "Readiness precondition" is accurate (T2 §9.2) |
-| `Allowed` | documented error results; deferred probe; durability QoS; repair policy | low | Split into supplier-documented vs client tolerance (T2) |
+| `Allowed` | documented error results; deferred probe; durability QoS; repair policy | low | Split into supplier-documented vs client tolerance (T2); spec revision 1.1 makes the supplier side a separate judgement (erratum E5) |
 | `TOLERATED` | AI's "tolerating" (different meaning) | **medium** | §4.6 |
 | `VIOLATING` / "violation" | order violation; protocol violation; invariant violation | low | Say "readiness violation" |
 | `NOT_READY_UNJUDGED`, LOSS-UNDER-ORDER | "slow joiner"; "late-joining"; late-event-handler-registration | low | Cite ZeroMQ/ROS 2 for "loss by design unless durability is requested" |
@@ -393,7 +393,7 @@ Notes:
   - **access-before-definition** over a named-object registry (InitRacer's term, lifted);
   - **initialization race** when the order varies;
   - the tolerance is a **retry** (WASABI's object of study) and in kernel terms a **deferred probe** ("resources that are not yet available").
-  - A first-lookup failure inside the retry bound is an **allowed not-ready outcome**, not a violation. That is why Kairos needs `Allowed`. Neither the HB race detectors nor GPredict's user-written properties have it (R04 L553: GPredict has "no notion of a legal error outcome").
+  - A first-lookup failure inside the retry bound is an **allowed not-ready outcome**, not a violation. That is why Kairos needs `Allowed`. Neither the HB race detectors nor GPredict's user-written properties have it (R04 L553: GPredict has "no notion of a legal error outcome"; an abstract-level inference: erratum E7).
 - **Suggested phrasing [S]:** "a schedule-dependent readiness condition whose not-ready outcome is handled by a bounded retry; it becomes a violation only if the retry bound can be exhausted".
 
 ### 5.3 SB subscribe-before-first-send: silent loss
@@ -438,13 +438,13 @@ This is consistent with T2 §9.2, which this census supports.
 | order that establishes `Req` | **ordering** (happens-before / must-before), stated as orthogonal to the precondition | 순서 관계 | systemd "orthogonal" (V-doc); HB literature (R04) |
 | violation | **readiness violation**; informal short form **use-before-ready** | 준비 위반 (준비 전 사용) | — |
 | shapes | wrong-way / unordered / absent / stale (keep, define once) | — | race (HB detectors); use-free (CAFA, P) |
-| acceptable not-ready results | **allowed not-ready outcomes**, split into *documented outcomes* (supplier) and *client handling* (retry, defer) | 허용된 미준비 결과 | `-EPROBE_DEFER` (V-doc); WASABI (V); ZeroMQ/ROS 2 (V-doc) |
+| acceptable not-ready results | **allowed not-ready outcomes**, split into *documented outcomes* (supplier) and *client handling* (retry, defer); see erratum E5 | 허용된 미준비 결과 | `-EPROBE_DEFER` (V-doc); WASABI (V); ZeroMQ/ROS 2 (V-doc) |
 | SB loss | **late-joiner loss** (unjudged unless a reference requires delivery) | 늦은 구독 손실 | InitRacer; ZeroMQ; ROS 2 |
 | documentation source | **API contract** / **API directive**, used *only* for documentation-backed entries | API 계약 / API 지시문 | T2 §9.2; Monperrus |
 | learned comparators | **likely / learned invariants** (AI, DefUse, AVIO, PSet) | 학습된 불변식 | AI (V); DefUse (V) |
 
 **Words to avoid or qualify:**
-- "invariant" for κ (it means learned);
+- "invariant" for κ (κ is a specification object, not a predicate; "it means learned" is overstated: erratum E4);
 - unqualified "contract" for κ (DbC; T2);
 - unqualified "tolerated" in prose (AI's sense);
 - "readiness" without "resource" or "lifecycle" on first use (I/O sense);
@@ -452,11 +452,11 @@ This is consistent with T2 §9.2, which this census supports.
 
 ### 6.3 Paste-ready definition paragraph [S]
 
-> We call a *readiness violation* a use of a framework resource (a registry name, an application identity, a message route, a table) while the resource has not reached the lifecycle state that the use requires, with an outcome the framework does not document as acceptable. Readiness violations are order violations in the sense of Lu et al. [ASPLOS 2008]: the desired order between the provider's state transition and the use is flipped. They generalize the initialization races of InitRacer [OOPSLA 2017] (access-before-definition, late event-handler registration) from web pages to tasks of a flight-software framework. We state the requirement as a *readiness specification*: a typestate precondition [Strom and Yemini 1986] on the resource at the use, the not-ready outcomes that the framework's documentation allows, and the provenance of each part. As in systemd, where ordering dependencies are "independent of and orthogonal to" requirement dependencies, the specification fixes what must hold at the use, not the order that makes it hold; Kairos derives that order from happens-before and must-before analysis. Unlike learned order invariants (AVIO, DefUse, PSet, AI), readiness specifications are not inferred from runs. This matters because some violations, such as cFE #2663, occur in every run and would be learned as normal.
+> We call a *readiness violation* a use of a framework resource (a registry name, an application identity, a message route, a table) while the resource has not reached the lifecycle state that the use requires, with an outcome the framework does not document as acceptable. Readiness violations are order violations in the sense of Lu et al. [ASPLOS 2008]: the desired order between the provider's state transition and the use is flipped. They generalize the initialization races of InitRacer [OOPSLA 2017] (access-before-definition, late event-handler registration) from web pages to tasks of a flight-software framework. We state the requirement as a *readiness specification*: a typestate precondition [Strom and Yemini 1986] on the resource at the use, the not-ready outcomes that the framework's documentation allows, and the provenance of each part. As in systemd, where ordering dependencies are "independent of and orthogonal to" requirement dependencies, the specification fixes what must hold at the use, not the order that makes it hold; Kairos derives that order from happens-before and must-before analysis. Unlike learned order invariants (AVIO, DefUse, PSet, AI), readiness specifications are not inferred from runs. This matters because some violations, such as cFE #2663, occur in every run and would be learned as normal. *[Erratum E5, §10: read "an outcome the framework does not document as acceptable" and "the not-ready outcomes that the framework's documentation allows" as caller-side acceptance; the framework's own documented result is reported separately.]*
 
 ### 6.4 Related-work sentence that uses census vocabulary [S]
 
-> Order-violation detectors either learn the intended order from correct runs (access-interleaving invariants, definition-use invariants, predecessor sets, Anticipating Invariants) or treat unordered conflicting operations under a framework happens-before model as candidates (EventRacer, DroidRacer, CAFA, SIERRA, DCatch), or check user-written properties on predicted traces (GPredict). The first absorbs violations that recur in every run. The second cannot report a use that is ordered, but ordered the wrong way. None of them has a notion of a documented not-ready outcome, such as a bounded retry (cf. the Linux kernel's deferred probing) or a by-design loss to a late-joining subscriber (cf. ZeroMQ's "slow joiner", ROS 2 volatile durability).
+> Order-violation detectors either learn the intended order from correct runs (access-interleaving invariants, definition-use invariants, predecessor sets, Anticipating Invariants) or treat unordered conflicting operations under a framework happens-before model as candidates (EventRacer, DroidRacer, CAFA, SIERRA, DCatch), or check user-written properties on predicted traces (GPredict). The first absorbs violations that recur in every run. The second cannot report a use that is ordered, but ordered the wrong way. None of them has a notion of a documented not-ready outcome (errata E5 and E7, §10), such as a bounded retry (cf. the Linux kernel's deferred probing) or a by-design loss to a late-joining subscriber (cf. ZeroMQ's "slow joiner", ROS 2 volatile durability).
 
 ---
 
@@ -466,7 +466,7 @@ This is consistent with T2 §9.2, which this census supports.
   - 52 entries across multithreaded, event-driven, Android, distributed, sequential-init, systems, API-doc and predictive-property work.
   - Each entry has a status tag and records whether the wording was seen in text or only in a summary.
 - **Finding:**
-  - No race, order-violation or initialization-race work names its requirement a "contract".
+  - No race, order-violation or initialization-race work names its requirement a "contract" (at abstract level, in this census: errata E1–E3, §10).
   - The requirement is an intention (Lu 2008), a learned invariant (AVIO, DefUse, PSet, AI), a built-in HB model (event and distributed detectors), or a specification (typestate, Lifestate, repair policies).
   - "Readiness" is standard in systems and operations (Kubernetes, systemd, ZeroMQ) but not in bug-detection papers. It collides with I/O readiness.
 - **Recommendation** (consistent with T2):
@@ -557,3 +557,17 @@ Bibliographic status reflects this session's searches. Where R04/R05 or T1/T2 al
 2. **Higher-order / behavioural "contracts" in PL** (for PLDI reviewers) were not searched here. T2 covers DbC, JML, A/G, SCOOP and session-type-like behavioural contracts.
 3. **Aerospace partitioned-OS vocabulary** (ARINC 653 initialization vs normal mode) was not checked. It may be the most natural vocabulary for flight-software reviewers.
 4. **The negative result on "readiness"** in bug-detection venues rests on one extended web search. A DBLP title search for "readiness" would strengthen or refute it.
+
+---
+
+## 10. Errata (2026-10-15)
+
+These errata apply the external review EXT-20261012 §6.2–§6.4 (`../../history/review_EXT_20261012.md`) as `../../spec/SPEC_FINAL.md` revision 1.1 answers it (spec §0.7 item 4, §1.6 "Three judgements", §10.1 QT-2–QT-5, ADR-043). The text above is kept as written on 2026-10-12; the markers "erratum En" point here. The synthesis `../08_terminology.md` (revision 3) carries the same corrections. The word "contract" stays in every document while the renaming (T1) is pending.
+
+- **E1. What the census counted** [F: this note]. The 52 rows are 37 distinct research papers (AI is rows 10 and 12) and 14 platform, language or guideline documentation rows (rows 29 and 36–48). The "Requirement term" column records one name per row: the name the work gives the required order or readiness requirement. For the papers other than AI, that name comes from a search summary of the abstract or from AI's description of the work (§1); no paper body was searched for "contract" or any other word. Seven rows record no requirement term (rows 3, 4, 5, 6, 21, 35, 43). So §0 item 1, §3.3 ("None uses 'contract'"), §4.1's last paragraph, §4.7's first row and §7's "Finding" hold only in this scope: no row records "contract" as the requirement's name at abstract level. They do not show that the works do not use the word.
+- **E2. GPredict** [U]. GPredict (row 52) calls the Java Iterator usage rule "a more generic contract" in its Introduction. This is known from the external review's reading of the printed first page (EXT-20261012 §6.3) and from a web-search snippet; the PDF was not opened, so the wording is unverified (PI decision P-PAPERS). Row 52 records only "concurrency properties". The phrase shows that a predictive-analysis paper in this census uses "contract" in its prose for an API usage rule. In which sense it does so is not classified until the paper is read.
+- **E3. Consequence for "contract"** [I]. §4.5's "non-standard here" is withdrawn in that form. Term frequency alone is no reason to exclude "contract" (EXT-20261012 §6.3). The recommendation of §6.2 does not rest on the census (`../08_terminology.md` §2.4, §5.2), and the decision is the PI's (T1).
+- **E4. "Invariant"** [F: AI p. 331; I]. §0 item 6 ("'Invariant' means learned in this literature"), §3.1's takeaway ("it means learned from correct runs") and §6.2 ("it means learned") overstate. An invariant is a predicate that should hold at given points; it can be written, proved or inferred, and learning is not part of its definition. AI itself separates "program invariants", predicates "that should always be true at certain points of the execution", from the "likely invariants" learned from testing runs (p. 331; T1 §7 item 1). In the learned-invariant line (AVIO, DefUse, PSet, AI) the checked object is a learned invariant. The reason not to call κ an invariant is that κ is a specification object, not a single predicate: it bundles the required state (`Req` with its `Oracle`), the not-ready outcomes that its references accept (Allowed, each with a reference horizon), what the use must achieve (`appreq`), the harm, the provenance of each part and the scope (spec §1.6). Confusion with learned-invariant tools is a secondary, reader-side point [I].
+- **E5. Supplier results and caller acceptance** [D in the spec]. §4.6, §4.7, §6.2, the paste-ready definition of §6.3 ("an outcome the framework does not document as acceptable"; "the not-ready outcomes that the framework's documentation allows") and §6.4 ("a notion of a documented not-ready outcome") merge two judgements that spec revision 1.1 keeps apart (§1.6 "Three judgements", §1.10). What the supplier documents and returns is the framework-level judgement (`fw_doc` per instance, `fw_conf` per cell); it never makes an occurrence TOLERATED. Which not-ready outcomes are accepted is the caller-level judgement, made from references of the caller, the consumer or the mission (`appreq` and the caller-level Allowed). The observed consequence is recorded apart. Read §6.3 as "… with an outcome that no caller-, consumer- or mission-side reference accepts; the framework's own documented result is reported separately".
+- **E6. Facts** [F]. §4.5: OSAL documents `OS_ERR_NAME_NOT_FOUND` as an `@retval` "if the name was not found in the table" (`osapi-countsem.h:160`), without calling it normal or an error. §4.5's "SB's documented behaviour is met" holds outside R2's window only: inside it the `SEND_NO_SUBS` events that cSB4305.5 requires are rejected by EVS (spec App. A.1 step 13a). §0 item 5 and §5.3: LOSS-UNDER-ORDER with `unspecified_by_reference` is the caller-level label; cSB4305.5's "not considered an error" is reported beside it as the framework-level result `documented-not-error`, not as an allowed drop (spec §3.9; PI item QT-2, which re-asks STATUS decision T2).
+- **E7. GPredict and "legal error outcomes"** [I], [U]. §5.2 and §6.4 rest on R04 L553 ("no notion of a legal error outcome"), which is an abstract-level inference of R04 §5. GPredict's property formalism (adapted from MOP, P) is unverified (P-PAPERS), and spec §8.3 infers that finite-horizon Allowed entries can be encoded in a GPredict-style property. Nothing here says what GPredict can or cannot express (spec §6.4 item 37).

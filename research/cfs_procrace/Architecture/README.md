@@ -2,7 +2,7 @@
 
 NASA cFS v7.0.1에서 앱·서비스 task 사이의 준비(readiness)·순서 위반을 판정하는 설계 Kairos(도구 접두어 `kz`)를 한국어로 풀어 쓴 문서 모음이다. 이 파일은 길잡이일 뿐이고, 설계 내용은 담지 않는다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(영문)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(영문) rev 1.1. rev 1.1은 외부 검토 EXT-20261012([history/review_EXT_20261012.md](history/review_EXT_20261012.md))에 답한 판이다(요약 spec §0.7, 검토 항목별 처리 spec §0.8, 결정 ADR-039–ADR-044). 01–10은 이 rev 1.1을 풀어 쓴다. 그림마다 rev 1.1을 반영했는지는 [diagrams/README.md](diagrams/README.md)에 적는다.
 
 ## 읽는 순서
 
@@ -13,15 +13,15 @@ NASA cFS v7.0.1에서 앱·서비스 task 사이의 준비(readiness)·순서 �
 | 순서 | 문서 | 한 줄 요약 | 읽는 시간 | 그림 |
 |---|---|---|---|---|
 | 1 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장 | 15–25분 | D0 |
-| 2 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름 12단계, obligation O1–O9 | 적지 않음 | D1, D2 |
+| 2 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름 12단계, obligation O1–O10과 CC | 적지 않음 | D1, D2 |
 | 3 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요 | 15–25분 | D3, D4 개요, D6, D7 |
-| 4 | [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장 | 적지 않음 | D10 |
-| 5 | [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위 | 적지 않음 | D5, D8, D9 |
+| 4 | [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 세 판단(framework 수준·caller 수준·관측된 결과), 의미론 σ와 모형 수준 M, 유한 실행 위의 safety와 따로 두는 progress, prefix containment, MustBefore·PWB·certificate의 형식 유도와 신뢰 장부(trust ledger), 보장 | 적지 않음 | D10 |
+| 5 | [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, 다섯 사례의 자리와 사례별 기대 판정, R2 certificate와 신뢰 장부, SB 손실의 세 판단, 종료 범위 | 적지 않음 | D5, D8, D9 |
 | 6 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형 | 15–25분 | D7 |
-| 7 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계 | 15–25분 | D4 상세 |
-| 8 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험 | 15–25분 | D4 개요 |
+| 7 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 사례별 대상과 대조, 관측 단위 U1–U6, 비교의 세 종류와 세 결과(탐지·분류·근거), 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계 | 15–25분 | D4 상세 |
+| 8 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 단계별 공수 추정([I], rung에는 없음), 첫 목표인 검증 사다리 V0–V4(첫 rung은 V1: ENV basis에서 R2의 K-ID 사슬 끝까지), 다섯 사례(R2, C1, C2, C3, C5)의 경로와 대조, 범위를 줄이는 순서, 위험 | 15–25분 | D4 개요 |
 | 9 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8 | 15–25분 | D0 |
-| 10 | [10_decisions_adr.md](10_decisions_adr.md) | 설계 결정 기록(ADR) 38개, PI 결정 목록, 이름 충돌 주의, 한국어 용어집 | 15–25분 | D4 개요 |
+| 10 | [10_decisions_adr.md](10_decisions_adr.md) | 설계 결정 기록(ADR) 44개(ADR-001–ADR-044; 039–044는 rev 1.1에서 더함), PI 결정 목록, 이름 충돌 주의, 한국어 용어집 | 15–25분 | D4 개요 |
 
 ## 자주 찾는 곳
 
@@ -30,6 +30,7 @@ NASA cFS v7.0.1에서 앱·서비스 task 사이의 준비(readiness)·순서 �
 | 한국어 용어집 | [10_decisions_adr.md §3](10_decisions_adr.md#3-용어집) (원문 spec §13) |
 | 이름 충돌 주의(그림 D4와 PI 결정 D4, 보장 G5와 gap G5, 단계 S0와 Init snapshot S0 등) | [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의) |
 | 설계 결정 기록(ADR) | [10_decisions_adr.md §1](10_decisions_adr.md#1-설계-결정-기록adr) (원문 spec §11) |
+| rev 1.1에서 바뀐 것(외부 검토 EXT-20261012) | 요약 spec §0.7, 검토 항목별 처리 spec §0.8, ADR-039–ADR-044([10_decisions_adr.md §1.1](10_decisions_adr.md#11-adr을-읽는-법)), 검토 원문 [history/review_EXT_20261012.md](history/review_EXT_20261012.md) |
 | PI가 내려야 할 결정 목록 | [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정) (원문 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)) |
 | 근거 표기([F], [M], [I], [D], [U])와 인용 형식 | [01_overview.md §0](01_overview.md#0-읽는-법) |
 | 그림 목록, 범례, 다시 렌더링하는 법 | [diagrams/README.md](diagrams/README.md) |
@@ -39,9 +40,9 @@ NASA cFS v7.0.1에서 앱·서비스 task 사이의 준비(readiness)·순서 �
 | 경로 | 내용 |
 |---|---|
 | `01_*.md`–`10_*.md` | 한국어 설명 문서. spec에 없는 설계 요소·수치·인용은 더하지 않는다 |
-| [spec/](spec/) | 규범 원문 [SPEC_FINAL.md](spec/SPEC_FINAL.md), 검토 쟁점 57개의 처리 [ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문 [PI_DECISIONS.md](spec/PI_DECISIONS.md) |
+| [spec/](spec/) | 규범 원문 [SPEC_FINAL.md](spec/SPEC_FINAL.md) rev 1.1(외부 검토 EXT-20261012에 답한 판: 요약 §0.7, 검토 항목별 처리 §0.8, ADR-039–ADR-044), 검토 [X1]–[X3]의 쟁점 57개의 처리 [ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)(EXT-20261012 항목은 다루지 않는다. 그 처리 기록은 spec §0.8뿐이다), PI 결정 원문 [PI_DECISIONS.md](spec/PI_DECISIONS.md) |
 | [diagrams/](diagrams/README.md) | 그림 D0–D10의 Mermaid 원본(`.mmd`)과 렌더링(`.svg`) |
 | [background/](background/README.md) | 배경 조사 보고서 [R01]–[R07] (영문) |
-| [history/](history/) | 설계 이력: 설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], SPEC v1(영문) |
+| [history/](history/) | 설계 이력: 설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], SPEC v1(영문), 외부 검토 EXT-20261012 [review_EXT_20261012.md](history/review_EXT_20261012.md)(한국어, commit `b4ac55f` 대상; spec rev 1.1이 답했다) |
 
-어떤 문서도 "경보가 없으면 안전하다"고 말하지 않는다. 판정 기록에는 "safe" 칸이 없고, 근거가 없는 칸은 `unknown(reason)`이 된다(spec §0.1, §1.10).
+어떤 문서도 "경보가 없으면 안전하다"고 말하지 않는다. 판정 기록에는 "safe" 칸이 없고, 어떤 progress 값도 "live"나 "deadlock-free"를 뜻하지 않으며, 근거가 없는 칸은 `unknown(reason)`이 된다(spec §0.1, §1.10).

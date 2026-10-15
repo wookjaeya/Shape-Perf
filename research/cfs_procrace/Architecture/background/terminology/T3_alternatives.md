@@ -4,7 +4,7 @@
 - T1 (`T1_ai_paper.md`) analyses the AI paper (FSE 2014).
 - T2 (`T2_contract_lineage.md`) traces where "contract" comes from.
 
-This note, T3, surveys the **alternative terms**. For each term it gives the established meaning with verified citations, then judges how well the term fits κ and what it collides with in cFS. The spec and the background files were only read, never edited, and nothing was committed.
+This note, T3, surveys the **alternative terms**. **Errata of 2026-10-15 are in §8** (marked "erratum En"). For each term it gives the established meaning with verified citations, then judges how well the term fits κ and what it collides with in cFS. The spec and the background files were only read, never edited, and nothing was committed.
 
 **Method and limits.**
 - Every citation below was checked with WebSearch during this session.
@@ -76,7 +76,7 @@ This note, T3, surveys the **alternative terms**. For each term it gives the est
    - Use this as an **explanatory mapping, not as the name**. It loses the STALE and capacity predicates and the tolerated outcomes.
 7. **"Precondition" is accurate only for API-documented instances.**
    - R2 fits: cFE writes *"The Application ID must correspond to a registered application or core service."* [F:code `cfe_evs.h:168–172`].
-   - C1 does not fit: OSAL documents `OS_ERR_NAME_NOT_FOUND` as a normal result [F:code `osapi-countsem.h:160`]. The need is CF's own expectation.
+   - C1 does not fit: OSAL documents `OS_ERR_NAME_NOT_FOUND` as a normal result [F:code `osapi-countsem.h:160`] (an `@retval`, neither normal nor an error: erratum E1). The need is CF's own expectation.
    - The SB loss does not fit: Transmit is defined as delivery "to all subscribers", which is vacuously true with none [F:code `cfe_sb.h:400–403`].
    - Use "readiness precondition" for the `Req` of `api_doc`-tier instances only.
 8. **Reject these as the umbrella:**
@@ -197,7 +197,7 @@ On learning in general [seen, p.339]:
 | *Code-mined, not run-learned:* **MUVI**: Lu, Park et al., SOSP 2007, pp. 103–116 **[V venue and pages; full author list P]** | **multi-variable access correlations** inferred from code [abs] | source code | variable correlations | majority logic, as in Engler's beliefs (§2.4) |
 
 **Lesson for naming** [I].
-- In this community, "invariant", "predicate" and "constraint" all mean *what held in the training runs*. The ground truth behind them is called the programmer's **intention**:
+- In this community, "invariant", "predicate" and "constraint" all mean *what held in the training runs* (true of the learned tools above only: erratum E2). The ground truth behind them is called the programmer's **intention**:
   - AI p.331 [seen];
   - Lu et al. 2008's "order intentions" (ASPLOS 2008 **[V]**; wording **P**, see §2.9).
 - Shan Lu co-authored AVIO, DefUse, CCI, AI and the 2008 study. Reviewers from this line will read "readiness invariant" as learned.
@@ -510,15 +510,15 @@ Also, name the non-typestate kinds by what they are, inside the same catalogue:
 - **Change:** "Typestate contracts | Strom & Yemini 1986" → "Typestate | Strom & Yemini, TSE 12(1), 1986 [V]" (T2 also found this).
 - **Draft sentence:**
 
-  > *Unlike likely invariants learned from runs judged correct (Daikon; AVIO; DefUse; PSet; AI), a readiness specification is derived from references (API documentation, code admissions, issues) and is never trained on executions. A wrong order that occurs in every run, as in cFE #2663, therefore remains a violation. Its core is a typestate requirement (Strom and Yemini) on a framework resource that another task establishes. This is the multithreaded setting of predictive typestate checking (Joshi and Sen) and the framework-lifecycle setting of Lifestate (Meier et al.). Unlike both, a readiness specification also lists the not-ready outcomes that the framework or the client documents as acceptable, each with a reference horizon.*
+  > *Unlike likely invariants learned from runs judged correct (Daikon; AVIO; DefUse; PSet; AI), a readiness specification is derived from references (API documentation, code admissions, issues) and is never trained on executions. A wrong order that occurs in every run, as in cFE #2663, therefore remains a violation. Its core is a typestate requirement (Strom and Yemini) on a framework resource that another task establishes. This is the multithreaded setting of predictive typestate checking (Joshi and Sen) and the framework-lifecycle setting of Lifestate (Meier et al.). Unlike both, a readiness specification also lists the not-ready outcomes that the framework or the client documents as acceptable, each with a reference horizon.* [Erratum E3, §8.]
 
 ### 5.5 Proposed STATUS entry (for the parent to merge; Korean, matching `STATUS_20261012.md`)
 
 > - **T3 '계약' 대안 용어 조사** 완료 (`scratchpad/arch/terms/T3_alternatives.md`).
->   - **결론 1. invariant 계열은 쓰면 안 된다.** Daikon, AVIO, DefUse, PSet, CCI, AI, Bugaboo, Recon의 invariant는 모두 "정상 실행에서 학습한 것"이다. 그래서 R2처럼 매 부팅 같은 잘못된 순서가 나면 그것을 정상으로 배운다.
+>   - **결론 1. invariant 계열은 쓰면 안 된다.** Daikon, AVIO, DefUse, PSet, CCI, AI, Bugaboo, Recon의 invariant는 모두 "정상 실행에서 학습한 것"이다 [정정 E4, §8: 지나친 일반화다]. 그래서 R2처럼 매 부팅 같은 잘못된 순서가 나면 그것을 정상으로 배운다.
 >   - **결론 2. 단어 하나로 '참조에서 명시했고 학습하지 않았다'는 뜻을 담을 수 없다.** specification, typestate, precondition, protocol, rule은 모두 명시형과 마이닝형이 함께 있다. 그래서 어떤 이름을 쓰든 "참조 근거(reference-derived)"라는 수식어와 provenance tier를 붙여야 한다.
 >   - **결론 3. 가장 정확한 기성 용어는 Req에 대한 typestate다.** 동시성 typestate(Joshi & Sen ASE 2008)와 프레임워크 생명주기 typestate(Lifestate ECOOP 2019)가 있다. 두 논문 모두 §1.11에 없으므로 추가해야 한다.
->   - **결론 4. 전체 이름으로는 '준비 명세(readiness specification)'가 가장 무난하다.** '계약'은 R2처럼 API 문서가 근거인 경우에만 맞다. C1은 CF 자신의 기대이고, SB 손실은 근거 문서가 없다.
+>   - **결론 4. 전체 이름으로는 '준비 명세(readiness specification)'가 가장 무난하다.** '계약'은 R2처럼 API 문서가 근거인 경우에만 맞다. C1은 CF 자신의 기대이고, SB 손실은 근거 문서가 없다 [정정 E5, §8].
 >   - **피해야 할 용어.** protocol은 CFDP/SBN과 충돌한다. requirement는 cFE 기능 요구사항(cES…)과 `Req`와 충돌한다. dependency는 PDG 의미와 겹친다. rule은 HB 규칙과 충돌한다.
 >   - **PI 결정 필요.** (가) '준비 명세 + 요구 타입상태 + 허용된 미준비 결과'로 이름을 바꾸거나, (나) '준비 계약'을 유지하되 정의 문단을 두고 tier별로 보고한다.
 
@@ -597,3 +597,15 @@ T2 verified, and this note relies on its verification without repeating it: SDV 
 4. **Joshi & Sen ASE 2008 and Lifestate:** read the full texts before claiming a difference from Kairos's prediction layer. Both are close prior art (§2.3).
 5. **Korean terms:** check the Korean renderings against a terminology source (for example, the KIISE glossary) before using them in a Korean paper or report.
 6. The FSW collision counts are whole-word greps over `cfe`, `osal`, `psp` and `apps` C sources, with unit tests excluded. They are indicators, not a lexical study.
+
+---
+
+## 8. Errata (2026-10-15)
+
+These errata apply the external review EXT-20261012 §6.2–§6.4 (`../../history/review_EXT_20261012.md`) as `../../spec/SPEC_FINAL.md` revision 1.1 answers it (spec §0.7 item 4, §1.6 "Three judgements", §10.1 QT-2–QT-5, ADR-043). The text above is kept as written on 2026-10-12; the markers "erratum En" point here. The synthesis `../08_terminology.md` (revision 3) carries the same corrections. The word "contract" stays in every document while the renaming (T1) is pending.
+
+- **E1. `OS_ERR_NAME_NOT_FOUND`** [F]. §0: OSAL documents it as an `@retval` "if the name was not found in the table" (`osapi-countsem.h:160`). The header calls it neither normal nor an error.
+- **E2. "What held in the training runs"** [F: §2.1, §2.2; I]. §2.2's "Lesson for naming" holds only for the learned tools in that table. Daikon's own definition (§2.1, snippet) is the specified sense, classical invariants are specified or proved (§2.1), Recon uses runs that include buggy ones, and MUVI is mined from code (§2.2 table). An invariant can be written, proved or inferred. The reason not to call κ an invariant is that κ is a specification object, not a single predicate (spec §1.6). That readers from the learned-invariant line may read "readiness invariant" as learned stays as a secondary, reader-side risk [I].
+- **E3. The paste-ready text of §5.4** [F], [D in the spec]. "Unlike likely invariants learned from runs judged correct (Daikon; AVIO; DefUse; PSet; AI)" is inaccurate for Daikon, which infers likely invariants from whatever executions it observes and does not judge runs correct (`../08_terminology.md` §4.1). "The not-ready outcomes that the framework or the client documents as acceptable" merges the supplier's documented result with the caller's acceptance, which spec revision 1.1 keeps apart (§1.6 "Three judgements"). Read: "Unlike likely invariants inferred from observed runs (Daikon) or learned from runs judged correct (AVIO; DefUse; PSet; AI), …" and "… the not-ready outcomes that the caller's, consumer's or mission's references accept, each with a reference horizon; the framework's documented results are reported separately". The synthesis carries the corrected sentence (`../08_terminology.md` §5.7(d)).
+- **E4. §5.5 결론 1 (Korean draft)** [F]. "Daikon, AVIO, DefUse, PSet, CCI, AI, Bugaboo, Recon의 invariant는 모두 '정상 실행에서 학습한 것'" is inaccurate: CCI and Recon also use failing runs, and Daikon does not judge runs correct. The conclusion "κ를 invariant라 부르지 않는다" stands, for the specification-object reason of E2.
+- **E5. §5.5 결론 4 (Korean draft)** [F]. "SB 손실은 근거 문서가 없다": a supplier-side reference exists (cSB4305.5; framework level, `documented-not-error`). What is missing is a caller-, consumer- or mission-side reference that decides the caller level (spec §3.9; PI item QT-2).

@@ -1,5 +1,5 @@
 flowchart TD
-    %% D2 overview - components by layer and the main artifact flow. Source: spec §12 D2; §2.1-2.4.
+    %% D2 overview - components by layer and the main artifact flow. Source: spec §12 D2 (rev 1.1); §2.1-2.4, §4.5.1.
     %% Detail: D2_components_static_detail.mmd (L1 + abstract interpreter) and
     %%         D2_components_dynamic_detail.mmd (observation, concrete/operational interpreters, confirmation, loop).
     %% Dashed border = conditional or PI-gated component. Dashed edge = feedback path.
@@ -11,7 +11,7 @@ flowchart TD
     CORE["L2 libkz-core (shared)<br/>KEM types, Φ parser, one evaluator,<br/>vector clocks, verdict lattice, KZ container I/O<br/>linked by every component (except BPF)"]
 
     STAT["L3 abstract: kz-static static + plan<br/>census, MustBefore, certificates, probe plan"]
-    PCK["L5 kz proofcheck<br/>independent checker (no shared code)"]
+    PCK["L5 kz proofcheck<br/>re-validates inference steps relative to its trusted base<br/>(facts, skeleton, closure lists, Φ, libkz-core, runs);<br/>shares no analysis code with static, links libkz-core"]
 
     OBS["L4 kz observe (F0)"]
     TRC["L3 concrete: kz trace, kz conform, kz predict"]
@@ -25,7 +25,8 @@ flowchart TD
     L1 -.-> MR
     MR -.->|"writer sets"| STAT
     STAT -->|"certificates"| PCK
-    PCK -->|"accept / reject (CC)"| STAT
+    L1 -->|"trusted: facts.kz, skel.kz, anchors.kz"| PCK
+    PCK -->|"accept / reject (CC), trust ledgers"| STAT
     STAT -->|"plan.kz"| OBS
     OBS -->|"run-*.kzt"| TRC
     STAT -->|"census.kz"| EXP

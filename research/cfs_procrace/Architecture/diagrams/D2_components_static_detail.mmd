@@ -1,5 +1,5 @@
 flowchart TD
-    %% D2 detail (1/2) - kz-static pipeline and the independent checker. Source: spec §12 D2; §2.2-2.4, §4.1-4.7.
+    %% D2 detail (1/2) - kz-static pipeline and the checker (independent inference relative to its trusted base). Source: spec §12 D2 (rev 1.1); §2.2-2.4, §4.1-4.7, §4.5.1.
     %% Rectangle = component, cylinder = KZ artifact. Dashed border = conditional (S3b).
 
     INB[("build tree, link.txt, generated files,<br/>startup scripts, .tbl, Env/Init snapshots, argv")]
@@ -16,7 +16,8 @@ flowchart TD
     SK[("skel.kz<br/>cert view, exploration view,<br/>once, provenance")]
     STA["kz-static static<br/>MustBefore per M, census,<br/>certificates, open candidates"]
     CEN[("census.kz")]
-    PCK["kz proofcheck<br/>(in kz; no LLVM, no code shared<br/>with static)"]
+    PCK["kz proofcheck<br/>(in kz; no LLVM; no analysis code shared<br/>with static; links libkz-core: T5 steps marked)<br/>re-validates inference steps, writes trust ledgers"]
+    RUNS[("trusted input: run-*.kzt, hb-*.kz,<br/>prefix probes named by the reach step<br/>(D2 dynamic detail)")]
     PLN["kz-static plan<br/>probe sites, joint debug-register allocator"]
     PK[("plan.kz")]
 
@@ -38,7 +39,12 @@ flowchart TD
     PROF --> STA
     STA -->|"O7: writer sites vs Φ effects"| CEN
     CEN -->|"certificates"| PCK
-    PCK -->|"accept / reject (CC)"| CEN
+    PCK -->|"accept / reject (CC), trust ledgers"| CEN
+    FK -->|"trusted"| PCK
+    SK -->|"trusted"| PCK
+    AK -->|"trusted"| PCK
+    PROF -->|"trusted"| PCK
+    RUNS --> PCK
     CEN --> PLN
     AK --> PLN
     PLN --> PK
@@ -51,4 +57,4 @@ flowchart TD
     class BAS,EXT,LNK,SKL,STA,PCK,PLN comp
     class INB,PROF,BK,FK,AK,SK,CEN,PK art
     class MOD gated
-    class NEXT ref
+    class NEXT,RUNS ref

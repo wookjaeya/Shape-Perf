@@ -1,59 +1,84 @@
 stateDiagram-v2
-    %% D6 overview - verdict state machine for one (σ, M) cell. Source: spec §12 D6; §1.10, §4.12, §4.14.
-    %% Parallel evidence/axis regions: D6_verdict_axes.mmd.
+    direction LR
+    %% D6 overview - class region of the verdict state machine for one (σ, M) cell and bound. Source: spec §12 D6 (rev 1.1); §1.10, §4.12, §4.14.
+    %% The class is a safety classification, a function of the safety record (¬Bad_i, ¬OK_i, ¬NR_i, witnesses with ordinals).
+    %% Parallel regions (evidence, naturalness, provider, reach, scope, progress, trust ledger): D6_verdict_axes.mmd.
 
     state "candidate (census instance)" as candidate
     state "open" as open
-    state "inactive" as inactive
+    state "inactive (static: no Sk^cert path under B)" as inactive
+    state "unknown(no_decision_route), certified ¬OK_i shown" as unkNDR
     state "unknown(budget)" as unkBudget
-    state "unknown(model_fault)" as unkFault
     state "unknown(model_gap)" as unkGap
     state "unknown(other reason)" as unkOther
-    state "model-fault record written (rule or model suspended)" as mfr
+    state "unknown(model_fault): rule suspended, loop ends" as unkFault
+    state "contested (rendered unknown(model_fault))" as contested
+    state "model-fault record" as mfr
 
-    state "universal and witnessed classes" as classes {
-        state "protected[cert]" as protCert
-        state "protected[model b]" as protModel
-        state "tolerated" as tolerated
-        state "fixed-order[cert]" as fixCert
-        state "fixed-order[model b]" as fixModel
-        state "schedule-dependent" as schedDep
-        state "refinement (timeout-dependent or timeout-masked-liveness)" as refine
-        protCert --> tolerated : allowed not-ready witness
-        protModel --> tolerated : allowed not-ready witness
-        schedDep --> refine : derived from per-σ cells
+    state "classes derived from the safety record (per cell and bound)" as classes {
+        state "protected[cert]: ¬NR_i, b = ∞, every reached occurrence READY" as protCert
+        state "fixed-order[cert]: ¬OK_i with decision route, b = ∞" as fixCert
+        state "protected[model b]: ¬Bad_i within b" as protModel
+        state "tolerated[model b]" as tolModel
+        state "fixed-order[model b]: ¬OK_i and a bad witness within b" as fixModel
+        state "no-final-status: ¬Bad_i and ¬OK_i" as nfs
+        state "ordinal-split: bad and good at different ordinals" as ordSplit
+        state "schedule-dependent: bad and good at the same ordinal" as schedDep
+        state "refinement timeout-dependent" as refine
+        protCert --> nfs : ¬OK_i established (exh or transfer)
+        fixCert --> nfs : ¬Bad_i established (exh or transfer)
+        ordSplit --> schedDep : same-ordinal pair found
+        schedDep --> refine : derived from per-σ cells (exh only)
     }
 
     [*] --> candidate
-    candidate --> inactive : static, per M (Sk^cert)
-    candidate --> fixCert : static certificate, per M
-    candidate --> protCert : static certificate, per M
+    candidate --> inactive : static, per M
+    candidate --> fixCert : FIXED_ORDER certificate, REJECT at the decision
+    candidate --> unkNDR : FIXED_ORDER certificate, REJECT after the decision
+    candidate --> protCert : PROTECTED certificate, per M
     candidate --> open : no certificate
-    open --> schedDep : bad or stall witness + good witness
-    open --> fixModel : explorer within b
-    open --> protModel : explorer within b
+    unkNDR --> fixCert : later bad witness in the cell
+    unkNDR --> nfs : ¬Bad_i established
+    open --> schedDep : bad and good witness at the same ordinal
+    open --> ordSplit : bad and good witnesses at different ordinals
+    open --> fixModel : exh (Q_bad yes, Q_ok no)
+    open --> protModel : exh (Q_bad no, Q_ok yes)
+    open --> tolModel : exh (no, yes) with a TOLERATED occurrence
+    open --> nfs : exh (Q_bad no, Q_ok no)
     open --> unkBudget : work-unit cap exhausted
-    open --> unkGap : O1 / O2 / O6 failure
+    open --> unkGap : O1 / O2 / O6(a) failure
     open --> unkOther : other reason recorded
     open --> mfr : evidence refuted
-    classes --> mfr : O3 / O4 / O9 contradiction
-    mfr --> unkFault : loop ends for this Φ version
+    classes --> unkFault : O3 / O4 / O9 against a certified statement
+    classes --> contested : O6(b) or O10 within the bound
     unkFault --> candidate : new Φ hash, new loop
-    unkGap --> candidate : new Φ hash or model fix, new loop
+    unkGap --> candidate : new Φ hash, new loop
 
     note right of candidate
-        Invariant: no state named safe or timing-protected.
-        No transition from no alarm to a universal class.
-        σ_E universal states only via transfer rule 2.
+        Invariants.
+        No state is named safe, timing-protected, live or deadlock-free.
+        No transition goes from no alarm to a universal class or to no-stall-within(b).
+        σ_E universal (safety) states arise only via transfer rule 2 with b = ∞.
+        A stall witness never moves this region.
+        Every non-suspending transition moves up within its bound.
     end note
 
-    note left of fixCert
-        M_api-only certificate + contradicting observation
-        gives portability-hazard-evidence; no state change at M_api.
+    note left of candidate
+        A certificate gives one safety statement; progress stays unknown(not_checked) unless exh runs.
+        There is no protected[cert] to tolerated transition.
+        A universal class is rendered with its reach and progress, e.g. protected: every reached occurrence READY (certificate, b = ∞), reach proved, progress not checked.
+    end note
+
+    note right of contested
+        O6(b): a realized witness within b against an exh-only statement.
+        O10: an exh witness within b against a certified or certificate-transferred statement. Only the explored bound becomes contested; the b = ∞ record keeps its state with a persistent contested mark; directed check.
+        No loop end unless the witness is realized.
+    end note
+
+    note left of unkFault
+        An M_api-only certificate contradicted by an observation gives portability-hazard-evidence; no state change at M_api.
     end note
 
     note right of unkOther
-        reasons: not_reached, model_gap, bound, budget,
-        key_unresolved, loss, unmodelled, writer_incomplete,
-        horizon, conformance, model_fault, model_level
+        Other reasons: not_reached, bound, key_unresolved, loss, unmodelled, writer_incomplete, horizon, conformance, model_level.
     end note

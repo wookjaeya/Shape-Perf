@@ -3,6 +3,7 @@
 - Date: 2026-10-12. Scope: every issue raised by the adversarial reviews [X1] (`review_X1-soundness.md`), [X2] (`review_X2-cfs-fidelity.md`) and [X3] (`review_X3-feasibility-eval.md`) against `SPEC_v1.md`.
 - Result: **57 issues; 57 resolved in `SPEC_FINAL.md`; none rejected.** Counts: X1 2 critical / 12 major / 9 minor; X2 1 critical / 9 major / 4 minor; X3 1 critical / 11 major / 8 minor.
 - "Where" names sections of `SPEC_FINAL.md`. "Deviation from the reviewer's fix" is stated where the resolution differs from what the reviewer proposed, with the reason.
+- **Addendum (2026-10-15).** The external review EXT-20261012 (`../history/review_EXT_20261012.md`), answered by `SPEC_FINAL.md` revision 1.1, is summarized in the last section, [EXT-20261012](#ext-20261012--external-review-of-commit-b4ac55f). Its item-by-item log is `REVIEW_RESPONSE_20261012.md`; the normative disposition table is SPEC §0.8.
 - One reviewer statement was found inaccurate while resolving X3-m5 (apps are loaded with LOCAL symbols, not `RTLD_GLOBAL`); the correction is recorded in SPEC FINAL §0.5 and below.
 
 ## X1 — formal soundness and claims
@@ -76,3 +77,27 @@
 | X3-m6 | minor | X-macro field lists expanded into struct, dump printer and offset asserts; explicit reserved fields; `sizeof` equals the sum of fields; writers zero records; typed references `(artifact sha256, section, index)`; per-section schema versions | §2.3, ADR-004 |
 | X3-m7 | minor | Two binaries: `kz-static` (with `libkz-llvm`) and a core-only `kz` (which also hosts `kz proofcheck`) | §2.1, §2.2, §9.1 |
 | X3-m8 | minor | S1 gates on agreement of the per-use set (task, SB function, EID) with [R2g §2] and with the expectation computed from B (24 or 11); mismatches investigated and reported, never tuned; backend recorded | §9.3 S1, App. A.1 step 12 |
+
+## EXT-20261012 — external review of commit `b4ac55f`
+
+- Date: 2026-10-15. Review: `../history/review_EXT_20261012.md` (2026-10-12). Answered by `SPEC_FINAL.md` revision 1.1: summary §0.7, normative disposition table §0.8, ADR-039 to ADR-044, decisions §10.1 and `PI_DECISIONS.md`.
+- **Full log: [`REVIEW_RESPONSE_20261012.md`](REVIEW_RESPONSE_20261012.md)**: the review's point, our verification verdict with evidence, what changed (file and section) and what is deferred, per item; case coverage; design choices the PI may revisit; process notes; and the problems still open after the final check.
+- Result: no item rejected. Each item listed below was checked before any edit, by six independent verification passes and, for §2.2, by an independent recount of the raw traces. The §7 pass returned "partial"; the others returned "accept", and the §4.2 and §4.3 passes found the problem wider than the review stated. Nothing was built or run for this revision beyond what the cited records measured.
+
+| Review item | Verdict | Main change | Where (SPEC unless named) | Deferred to |
+|---|---|---|---|---|
+| §2.2 R2 raw-trace recount | accept | every number confirmed by an independent recount; units of observation separated | `../../results/R2_gdb_v701.md` §6, §7; §8.2 (U1–U6), §8.7 | — |
+| §2.3 stale CORD summary | accept | [R2c §8] rewritten: groups G, C-init, C-restored, never pooled | `../../results/R2_cord_v701.md` §8 | D12 |
+| §4.1 (P0) protected vs its certificate | accept | safety statements; a separate per-cell progress result | §0.7 item 1, §1.6, §1.8, §1.10, L-PR, L-FO, G2, G11, ADR-039, LP-DL | D20; V0-P |
+| §4.2 (P0) maximal-execution containment | accept (wider) | Pref and Max separated; prefix containment; existence, witnesses and progress per σ | §0.7 item 2, §1.8, L-CONT, L-REF, L-DEAD, ADR-040, LP-TW, O10 | V0-P |
+| §4.3 checker's independence | accept (wider) | named trusted base; four-part trust ledger | §0.7 item 3, §4.5, §4.5.1, G10, ADR-041, App. A.1 step 9a | — |
+| §5.1 (P1) comparison vs ablation | accept | comparison kinds K1–K3 kept apart; same-information comparators | §8.3, §8.4, §8.5, ADR-042 | P-PAPERS, P-ABL-ALLOWED |
+| §5.2 (P1) alarm yes/no alone | accept | detection, classification and evidence reported separately | §8.3, §8.5, ADR-042 | P-CLASSGT |
+| §5.3 (P1) ground truth vs blindness | accept | blindness only from an exposure and freeze record | §7.2, §7.5 item 5, §8.5, ADR-042 | D8/P-RECALL |
+| §5.4 (P1) units and independence | accept | units U1–U6; unit and independence assumption per statistic | §8.2, §8.7 | P-STATS |
+| §6.1–§6.3 terminology | accept (§6.3 re-scoped) | invariant rationale, census scope and the name's limits restated; "contract" kept | `../background/08_terminology.md` rev 3, notes 33, 34, 36; `../../STATUS_20261012.md` §1A errata E1, E2 | T1 |
+| §6.4 failure handling vs application obligation | accept | three judgements: framework level, caller level, observed consequence | §0.7 item 4, §1.6, §1.10, §3.9, ADR-043 | QT-2, QT-3, QT-4, QT-5, QT-9 |
+| §7 scope and order | partial | validation ladder V0–V4 with V1 = R2's K-ID chain; per-case paths and controls; no summed estimate | §0.7 item 7, §9.3, §9.4, ADR-044 | P-LADDER, P-R2CTRL, D22, P-C1HOLD, P-C2, D13, P-F1GATE |
+| §9 claims allowed now | accept | none of the ruled-out claims is made | §9.3 claims table and cut list | T1 (term row) |
+
+Thirteen open problems remain after the final consistency check (nine blocking, four minor), among them ADR-044's "v7.0.1 B′" wording against D22 (none chosen), the VP-D3/VP-D4 gates and needs in the Korean and decision mirrors, transfer rule 2's `¬NR_i` wording and the omission of L-CONT (c) from the trust ledger. They are listed with fixes in `REVIEW_RESPONSE_20261012.md` §5.

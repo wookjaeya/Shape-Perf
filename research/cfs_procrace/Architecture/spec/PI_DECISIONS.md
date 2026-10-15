@@ -36,7 +36,7 @@
 | P-RGIT (new) | `58abd38d^`/`58abd38d` as a basis on the A.3 residual line | none until decided | VP-D5 | VP-D5 |
 | D15 | Work-unit caps (prediction, exploration, O8, skeleton construction) as deviations | set before S5/S7, in work units only | S5, S7 kill criterion; the only model progress route; the closed cone (D21) | S5, S7 |
 | D21 (candidate) | The cone on which the S7 kill criterion is assessed | closed cone, caps unchanged | S7 kill criterion; every model progress result | S7 |
-| P-D18GATES (new) | (a) LP-CASE-C1 for the S5 gate's "C1-derived trace" until D22 lands; (b) the S7 review with or without D22 | none until decided | the S5 gate; the S7 kill criterion | S5, S7 |
+| P-D18GATES (new) | (a) LP-CASE-C1 for the S5 gate's "C1-derived trace" until D22 lands; (b) the S7 review with or without D22, and whether it includes, or waits for, every case-track cone that exists at review time (C2's role-derived pair under P-C2; C3 and C5 on the 6.4.x pair under D13); a decision taken without the cones of C2, C3 and C5 is reported with that fact (SPEC §4.10 item 9) | none until decided | the S5 gate; the S7 kill criterion | S5, S7 |
 | D16 | Derived App-record probes on both creation paths (not C1's holds, see P-C1HOLD) | pursue, labelled derived | S6 | S6 |
 | D3 | F1 `--wrap` gates, PCT, group W | defer until S6 shows whether F0 holds suffice | S10 PCT arm; G7; group W | after S6 |
 | P-PAPERS | Access to primary papers (JACM DPOR; framework-HB rule tables; mover reduction; FG05 guarantee; G3 search; GPredict §II.B property formalism; Joshi & Sen ASE 2008 and Lifestate ECOOP 2019) | approve | G5 for `dpor`; L3 citation; comparator golden tests; G3 novelty wording; the GPredict characterization of SPEC §1.11 and its same-information encoding (§8.3); the framework-typestate difference claimed in §1.11 | S7 / S9 (V4a) |
@@ -68,7 +68,7 @@ The decisions each rung and case track needs, as the "Needs" column of SPEC §9.
 | V2 R2's control basis B′ (parallel with V3) | that the fixed-order verdict is withdrawn where the publication order is corrected | P-R2CTRL; D18 for options (c3) and (d); D1, D17, D14 for runs |
 | V3 C1 on its B′ (parallel with V2) | C1's own phenomenon | D22 (with D18's C1 part), C1 D2–D4, P-C1HOLD, D15, D21, P-D18GATES (a) |
 | VP-D3 C3 and C5 on the 6.4.x pair | C3's and C5's own phenomena; H-V | D13 (a)–(c), Q16, D15, D4 |
-| VP-D4 C2 role-derived | C2's own phenomenon, as a synthetic control | P-C2, D15 |
+| VP-D4 C2 role-derived | C2's own phenomenon, as a synthetic control | P-C2, D15; D13 for a 6.4.2 row |
 | VP-D5 the A.3 line | a PROTECTED certificate that appears on `58abd38d^` and is withheld on `58abd38d` | P-RGIT |
 | V4a comparison | the three outcomes per tool and labelled unit (§8.3) | P-STATS, P-CLASSGT, P-PAPERS (golden tests), P-VALGRIND, P-F1GATE |
 | V4b held-out and pre/post-fix pairs | §7.5 sources (a)–(e); recall (§8.5) | D8/P-RECALL, P-TRIAGE, P-STATS, D14, P-CLASSGT |
@@ -325,11 +325,11 @@ Nothing must be installed for the thin MVC (S0 + S1 + S2 + S3a) or for S4–S6: 
 - **Sub-items** (SPEC §10.1).
   - Q16: the Φ_6.4.x outcome map and binding, and the 6.4.1 references for the Allowed entries of C3 and C5.
   - (a) Does an analysis-only parse of a reconstructed compile DB count as "code-reading evidence only"?
-  - (b) The compile-DB inputs: OSAL artifact and placement, host, gcc version, include set, each listed with its reference status (SPEC §10.2).
+  - (b) The compile-DB inputs: OSAL artifact and placement, host, gcc version, include set, each listed with its reference status (SPEC §10.2); and C3's derived basis recorded as a `deviation` from the Microblaze platform its issue reports ([LED §1b]), carried into C3's RQ2 and H-V reporting (SPEC §10.1).
   - (c) Placement of the basis before F1, or C3 and C5 recorded as post-freeze by design (SPEC §8.2). The 6.4.x basis is the S10 arm (case track VP-D3) and is placed before F1 only if (c) so decides (§9.3). Cutting S10 removes C3's and C5's tool-level evidence and C2's 6.4.2 row, unless (c) has placed the basis before F1 (§9.3 cut list).
 - **References.** [LED] X3; [R06 §4 T5]; SPEC §7.6, §8.2, §9.3 (S10 row, VP-D3 row, per-case rows of C3 and C5, cut list), §10.2.
 - **Recommendation.** Raise now; no option recommended.
-- **Blocked until decided.** VP-D3 (C3's and C5's first tool-level evidence); RQ2 for C3 and C5; H-V; P-F1GATE.
+- **Blocked until decided.** VP-D3 (C3's and C5's first tool-level evidence); RQ2 for C3 and C5; H-V; P-F1GATE. Also C2's 6.4.2 row (VP-D4), which needs D13 (SPEC §8.2 C2 row, §9.3 VP-D4 row and cut list); SPEC §10.1's D13 row does not list it.
 
 ## D8 / P-RECALL — Held-out sources and the recall protocol
 
@@ -459,13 +459,13 @@ Nothing must be installed for the thin MVC (S0 + S1 + S2 + S3a) or for S4–S6: 
 - **Recommendation.** Proposal; no date or threshold.
 - **Blocked until decided.** F1.
 
-## P-D18GATES (new) — Gates that depend on C1's B′
+## P-D18GATES (new) — Gates that depend on C1's B′ and on the case-track cones
 
-- **Question.** (a) Does litmus LP-CASE-C1 satisfy the S5 gate's "C1-derived trace" until D22 lands? (b) Does the S7 review wait for D22, or is the kill criterion reported on the reduced cone set (both App-record windows A.2 and A.3, and `SBNSubPipe`, none of them a design case's instance), with that set named?
-- **Facts.** Two of the five development cones of the S7 kill criterion, the C1-derived lookup and the K-PHASE CF instance, exist only in C1's derived basis (SPEC §4.10 item 9). The S5 gate's C1 item needs D22, or P-D18GATES (a) (§9.3 S5 row). The litmus programs of App. A.8 are evidence about the definitions, not about the cases.
-- **References.** SPEC §4.10 item 9, §7.3, §9.3 (S5, S7 and V3 rows), §10.2 (risk "The S5 gate and the S7 kill criterion depend on C1's B′"), App. A.8.
+- **Question.** (a) Does litmus LP-CASE-C1 satisfy the S5 gate's "C1-derived trace" until D22 lands? (b) Does the S7 review wait for D22, or is the kill criterion reported on the reduced cone set (both App-record windows A.2 and A.3, and `SBNSubPipe`, none of them a design case's instance), with that set named? And does the review include, or wait for, every case-track cone that exists at review time (C2's role-derived pair under P-C2; C3's and C5's instances on the 6.4.x pair under D13)? A keep-or-freeze decision taken without the cones of C2, C3 and C5 is reported with that fact (SPEC §4.10 item 9, §10.1).
+- **Facts.** Two of the five development cones of the S7 kill criterion, the C1-derived lookup and the K-PHASE CF instance, exist only in C1's derived basis (SPEC §4.10 item 9). The S5 gate's C1 item needs D22, or P-D18GATES (a) (§9.3 S5 row). The litmus programs of App. A.8 are evidence about the definitions, not about the cases. The case-track cones of C2 (VP-D4, under P-C2) and of C3 and C5 (VP-D3, under D13) need those decisions (§9.3 VP-D3 and VP-D4 rows); without them, and without D22, the S7 review rests only on the reduced set, whose cones contain no design case's instance. A keep-or-freeze decision taken without the cones of C2, C3 and C5 is reported with that fact (§4.10 item 9; §10.2 risk "Validation concentrated on one case").
+- **References.** SPEC §4.10 item 9, §7.3, §9.3 (S5, S7, V3, VP-D3 and VP-D4 rows), §10.1 (P-D18GATES, P-C2 and D13 rows), §10.2 (risks "The S5 gate and the S7 kill criterion depend on C1's B′" and "Validation concentrated on one case"), App. A.8.
 - **Recommendation.** None until decided.
-- **Blocked until decided.** The S5 gate; the S7 kill criterion.
+- **Blocked until decided.** The S5 gate; the S7 kill criterion, including whether its keep-or-freeze decision covers the case-track cones of C2, C3 and C5 or is reported without them (SPEC §4.10 item 9).
 
 ## P-CLASSGT (new) — Class statements of references
 

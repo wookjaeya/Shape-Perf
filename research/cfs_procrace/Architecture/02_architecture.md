@@ -416,6 +416,7 @@ record layout은 `include/kz/schema/kz_schema.h` 한 파일에 **X-macro field �
 
 같은 schema에서 몇 가지를 더 볼 수 있다(spec §2.3).
 - certificate step record의 `view` field는 `VIEW_CERT`여야 한다. 다른 값이면 `kz proofcheck`가 거부한다. exploration view(horizon h로 자른 skeleton)의 node를 certificate에 쓰지 못하게 하는 장치다([X1-C1] 반영).
+- certificate마다 `CERTIFICATES` section의 record(`KZ_CERT_FIELDS`)가 하나씩 있다. instance, 종류(`FIXED_ORDER|PROTECTED|INACTIVE`), M 수준(`M_API|M_IMPL`), flag(`DECIDES|CONTESTED`), `contested_phi`, trust ledger 참조, `contested_by`(O10의 `exh` witness) 참조를 담는다. `CONTESTED` flag와 `contested_phi`가 O10의 지속되는 contested 표시이고, 같은 Φ hash의 이후 census는 이 표시를 이 record에서 읽어 유지한다(spec §2.3, §2.5 O10, §4.6, §4.12, §4.14).
 - 판정 cell의 `cls` field 값은 `INACTIVE|PROTECTED|FIXED|NO_FINAL|SCHED_DEP|ORDINAL_SPLIT|CONTESTED|UNKNOWN`뿐이다. "safe"에 해당하는 값이 형식 자체에 없다. `unknown_reason`에는 `NO_DECISION_ROUTE`와 `HORIZON`이 있다(spec §1.10).
 - 판정 cell은 class와 따로 `reach`(`PROVED|ASSUMED|MODEL_B|UNREACHED_B|CONTESTED`), `progress`(`P_UNKNOWN|P_STALL_WITNESS|P_NO_STALL_B|P_CONTESTED`)와 그 이유·harm·종류·flag(`TIMEOUT_MASKED_LIVENESS`, `TML_ROOT` 등), 세 진술의 경로 `safety_routes`(`¬Bad`, `¬OK`, `¬NR` 각각 `NONE|CERT|MODEL|TRANSFERRED`), framework 수준 `fw_conf`, trust ledger 참조를 가진다. "live"나 "deadlock-free"에 해당하는 값도 없다.
 - 경계마다 `BOUNDS` section의 record(`KZ_BOUND_FIELDS`)가 하나씩 있다. 그 경계의 class, reach, progress, 경로, 서수가 붙은 나쁜·좋은·stall witness의 범위를 담는다. 판정 record(`KZ_VERDICT_FIELDS`)에는 결과 label과 framework 수준 `fw_doc`이 따로 있다.

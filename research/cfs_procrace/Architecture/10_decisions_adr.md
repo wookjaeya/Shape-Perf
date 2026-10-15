@@ -661,7 +661,7 @@ spec §13의 용어 93개를 spec의 순서(영문 알파벳 순)대로 옮겼�
 | **Certificate** | 검사할 수 있는 증명 객체다. 규칙 instance, status가 붙은 writer 항목, once 사실, derives 사실, 추출한 predicate, frontier, reach를 담는다. **safety 진술** 하나를 증명한다: `¬OK_i`(REJECT가 발생의 결정에 있으면 fixed-order) 또는 `¬NR_i`(도달한 발생 가운데 not ready로 정해진 것이 없다, protected). `kz proofcheck`가 신뢰 기반에 상대적으로 추론 단계를 다시 확인하고, `libkz-core`를 부르는 단계를 표시한다. trust ledger가 그것을 기록한다. progress는 주장하지 않는다 | §4.5, §4.5.1, App. A.1(R2) |
 | **Certificate view `Sk^cert` / exploration view `Sk^h`** | 무한 loop를 모두 star-closure("0회 이상 반복")로 닫은 skeleton / loop를 h번까지 펼치고 잘린 곳에 표시를 한 skeleton | §4.3. 그림 D10 |
 | **Cell** | 판정 기록에서 (σ, M) 하나에 해당하는 부분이다 | §1.10 |
-| **Chain** | 위반 사슬 `i₁ ⇝ i₂`다. 발생 사이의 연결이고, 모든 분기를 기록한다. 예: R2의 `SEND_NO_SUBS` 사용 17개는 K-ROUTE instance와 이어진다 / progress 사슬 `i₁ ⇝_p i₂`는 i₂의 stall을 i₁의 not-ready 결과 탓으로 돌린다 | §1.6, §1.8 |
+| **Chain** | 위반 사슬 `i₁ ⇝ i₂`다. 발생 사이의 연결이고, 모든 분기를 기록한다. 예: R2에서 ES 문맥의 `SEND_NO_SUBS` 사용 17개는 ES event packet의 K-ROUTE instance와 이어진다(spec App. A.1 step 13) / progress 사슬 `i₁ ⇝_p i₂`는 i₂의 stall을 i₁의 not-ready 결과 탓으로 돌린다 | §1.6, §1.8 |
 | **Comparison kinds (K1, K2, K3)** | K1: 공개된 그대로 돌린 원 도구다. `NOT_RUN`은 결코 false negative가 아니다 / K2: 같은 property 정보나 그 기법 자신의 정보를 받은 선행 기법의 재구현이다 / K3: 요소 하나를 뺀 Kairos ablation이다. K3은 선행 기법이 무엇을 표현할 수 있는지에 대해 아무것도 말하지 않는다 | §8.3, §8.4 |
 | **Cone** | 한 후보와 관련된 actor와 object를 닫은 집합이다 | §4.9, §4.10 |
 | **C_σ** | σ_R1의 스케줄 제약(한 CPU의 고정 우선순위, affinity)이다. happens-before가 아니고, 관측한 실행 앞부분과 섞지 않는다 | §1.9 |

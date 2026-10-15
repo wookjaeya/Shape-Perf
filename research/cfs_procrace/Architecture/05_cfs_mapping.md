@@ -404,7 +404,7 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 | 메시지 provenance ([X1-M7 (a)]) | pipe p마다 `Prov(p) = (Routes_B(p) ∩ Tx_B) ∪ Input_B(p)`를 handler 도달성에 대한 최소 고정점으로 계산한다. `Prov(p)` 밖의 dispatch 갈래는 두 skeleton view 모두에서 접어 버린다(spec §4.3) |
 | looper 규칙 | handler 안의 program order만 두고, **handler 사이에는 HB edge가 없다.** 예측에서 FIFO 제약으로만 남는다(CAFA PLDI 2014 [V-abs]; DCatch ASPLOS 2017 [P]) |
 | buffer 수명 | 같은 pipe의 다음 `ReceiveBuffer`나 pipe 삭제까지 유효하다(`cfe_sb.h:449–464`) → `K-LIFE.sb-buffer` |
-| 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** 문서화된 drop(`documented_drop`, 사용하는 코드는 SB 자신의 event 코드)이 둘 있다. 호출자에게 ES task record가 없는 경우(`cfe_sb_priv.c:315–318`; 주석이 없어 규칙 `rule`)와 task별 재귀 bit가 서 있는 경우(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; 호출자 쪽 `caller`, `code_admission`)다. SB가 버린 event를 보내라는 cSB 요구(cSB4305.3–.5)는 SB의 event site에서 호출자 쪽 글이다. 그것을 그 site의 `appreq`로 기록할지는 열려 있다(PI). 기록하면 spec §1.6의 우선순위 규칙이 적용된다: 재귀 guard의 허용은 그것과 충돌하고(우선순위가 정해질 때까지 충돌을 적은 NOT_READY_UNJUDGED), task record 없음 drop은 그것에 밀린다(VIOLATING). 기록하지 않으면 두 drop 모두 TOLERATED다 |
+| 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** **문서화된 drop**(`documented_drop`, 사용하는 코드는 SB 자신의 event 코드)은 하나다. 호출자의 task별 재귀 bit가 서 있는 경우다(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; 호출자 쪽 `caller`, `code_admission`). **문서화되지 않은 drop**: 호출자에게 ES task record가 없으면 SB의 event 코드는 자기 `CFE_ES_GetTaskID` 호출의 status를 무시하고(`cfe_sb_priv.c:773`, K-SELF.es instance, spec §3.3), 이어 `CFE_ES_TaskID_ToIndex`가 실패해 event가 버려진다(`cfe_sb_priv.c:315–318, 784`). 이 drop을 문서화한 주석이 없고 이를 받아들이는 Kairos 규칙도 없으므로 Allowed 항목이 아니다. 그래서 그 K-SELF.es instance의 호출자 수준 Allowed는 `unspecified_by_reference`이고(NOT_READY_UNJUDGED; harm `unspecified_by_reference`; 결과는 effect lost silently, 곧 event가 버려진다), SB의 `appreq`가 기록되면 `none`(VIOLATING)이다(spec §1.6 `appreq` step (1)). SB가 버린 event를 보내라는 cSB 요구(cSB4305.3–.5)는 SB의 event site에서 호출자 쪽 글이다. 그것을 그 site의 `appreq`로 기록할지는 열려 있다(PI). 기록하면 spec §1.6의 우선순위 규칙이 적용되어, 재귀 guard의 허용은 그것과 충돌한다(우선순위가 정해질 때까지 충돌을 적은 NOT_READY_UNJUDGED). 기록하지 않으면 재귀 guard drop은 TOLERATED다(spec §3.9; [X2-14 (a)]) |
 | 구독 보고 mode ([X2-05]) | SBN은 `ENABLE_SUB_REPORTING`과 `SEND_PREV_SUBS` 명령을 **보낼 뿐이다**(`sbn_subs.c:43–60`). mode 변경(LP `cfe_sb_task.c:1224–1227`)과 재전송 송신 loop(`:1169`)는 **SB 자신의 main task**가 한다. 구독자 task는 SB unlock 뒤 lock 없이 flag를 읽는다(`:659`, `assumed`). K-MODE는 SB 명령 pipe 위의 R7로 이어지고, 그 pipe에도 K-CAP과 K-CAP.msglim instance가 있다 |
 | 용량, 두 수준 | `sb.queue(p)`의 `cap_B(p)` → **K-CAP**. `cap_B(p) = min(요청 깊이, msg_max)`는 euid ≠ 0일 때만 맞다(spec §1.3; [M] `msg_max` 10, 26개 pipe 중 22개가 잘림, [BM §3.1]). `sb.msglim(m,p)`의 한도는 각 `Subscribe` 지점의 `MsgLim` 인자를 상수 평가한다(기본 4) → **K-CAP.msglim**. 1단계 상한은 certificate view의 MB 순서 위에서 put과 get의 maximum-weight closure로 구한다(표준 알고리즘 사실, 인용은 미확인). star-closed loop 안의 put은 무게가 무한이므로 protected certificate가 없다 |
 
@@ -858,22 +858,61 @@ flowchart TD
 
 ### 7.4 writer 목록과 신뢰 항목 (그림 D8 상세)
 
-그림 D8 상세는 spec §12가 요구한 "writer 목록 상자"다. V의 writer, `W_o(o_ES)`, `W_o(o_EVS)`의 각 항목과 certificate가 기대는 신뢰 항목을 모두 보인다. 빨간 상자가 `DECLARED_TRUSTED` 항목이다.
+그림 D8 상세는 spec §12 D8이 요구한 두 상자를 보인다. 하나는 "writer 목록 상자"로, V의 writer, `W_o(o_ES)`, `W_o(o_EVS)`의 각 항목을 transition·key status와 함께 보인다. 다른 하나는 신뢰 장부 상자로, App. A.1 step 9a의 네 부분((i) `kz proofcheck`가 다시 확인한 단계, (ii) 추출된 사실, (iii) 믿은 항목, (iv) 반박할 수 있지만 증명되지 않은 항목)을 보인다. 장부는 절반마다, M마다 하나이고 (σ_U, M_api)와 (σ_U, M_impl), b = ∞ 칸의 것이며, 다른 칸의 장부는 이것에서 유도한다(spec §4.5.1). 빨간 상자가 `DECLARED_TRUSTED` 항목이다.
 
-**그림 D8 상세. R2 certificate의 writer 목록과 신뢰 항목** (렌더링: [diagrams/D8_r2_certificate_writers.svg](diagrams/D8_r2_certificate_writers.svg); spec App. A.1 steps 3–5, 9)
+**그림 D8 상세. R2 certificate의 writer 목록과 신뢰 항목** (렌더링: [diagrams/D8_r2_certificate_writers.svg](diagrams/D8_r2_certificate_writers.svg); spec §12 D8; App. A.1 steps 3–5, 9, 9a; §4.2, §4.4, §4.5.1)
 
 ```mermaid
 flowchart TD
-    %% D8 detail - writer entries of the R2 certificate with transition and key status, and every trusted entry.
-    %% Source: spec App. A.1 steps 3-5, 9; §4.2, §4.4. Expected behaviour; nothing here was run.
+    %% D8 detail - writer entries of the R2 certificate with transition and key status, and the four-part trust ledger.
+    %% Source: spec §12 D8 (rev 1.1); App. A.1 steps 3-5, 9, 9a; §4.2, §4.4, §4.5.1. Expected behaviour; nothing here was run.
     %% Each column is one list (the thin links only stack the entries). Red = DECLARED_TRUSTED entry.
+    %% The ledger parts are declared (iv) to (i) so that Mermaid places them (i) to (iv) from left to right.
 
-    subgraph TR["trusted entries listed in the certificates (step 9)"]
+    subgraph TL["trust ledger, four parts (A.1 step 9a): one per half and per M, for (σ_U, M_api) and (σ_U, M_impl), b = ∞; the other cells' ledgers are derived (§4.5.1)"]
         direction TB
-        T1["ES half:<br/>CleanUpApp relational guard"]
-        T2["EVS half: A-FRESH, A-OWNER,<br/>CleanUpApp relational guard"]
-        T3["all refutable by O9 and O3 / O4"]
-        T1 --- T2 --- T3
+        subgraph TL4["(iv) refutable, not proved (not run until S1 / S2)"]
+            direction TB
+            F1R["A-FRESH, A-OWNER: O9"]
+            F2R["CleanUpApp guard:<br/>O3 / O4, only on runs<br/>in which CleanUpApp<br/>runs inside the window"]
+            F3R["A-SKEL: O1 / O2,<br/>O8 from S5;<br/>closure: O5;<br/>once and MB facts: O3"]
+            F4R["Φ effects, LPs, derives,<br/>Pred_code: O4(a) / (b);<br/>writer completeness:<br/>O7 (model build)"]
+            F5R["exercised-path limit:<br/>default boots cannot refute<br/>the :823 → panic branch,<br/>the early returns<br/>(cfe_es_task.c:340/371/381/393)<br/>or the timed-out-wait<br/>ExitApp path"]
+            F6R["passing an obligation<br/>is never proof; reach is<br/>the one item that an<br/>observation proves"]
+            F1R --- F2R --- F3R --- F4R --- F5R --- F6R
+        end
+        subgraph TL3["(iii) trusted entries"]
+            direction TB
+            P1["Φ: K-ID.send-with-appid<br/>(Req; capture-point and<br/>slot-check LPs; outcome<br/>map; Allowed none; harm)"]
+            P2["Φ: T-DERIVE;<br/>CFE_ES_GetAppID effects;<br/>R19 binding (predicate<br/>re-derived, not trusted);<br/>T-TERM declarations;<br/>AppState / IsUsed bindings;<br/>Φ_L-1 (M_impl)"]
+            P3["DECLARED_TRUSTED<br/>(counted by trusted:#60;n#62;):<br/>CleanUpApp relational<br/>guard (both halves);<br/>A-FRESH, A-OWNER<br/>(EVS half), incl. the<br/>ExitApp STOPPED exclusion"]
+            P4["assumptions: A1, A3, A4,<br/>A9, A-SKEL, A-WS,<br/>A-TYPE, A-EXTRACT,<br/>A-CORE; A2, A6 (reach);<br/>A7-impl, A7-api, A10<br/>(M_impl)"]
+            P5["lemma obligations:<br/>L-MB, L-ONCE, L-PWB,<br/>L-DERIVE, L-FO, L1;<br/>L-MAPI-CONE<br/>(M_api reach by a run);<br/>derived cells: L-STATUS,<br/>L-MON, L-CONT, L-TRANS;<br/>L-REACH-CONE<br/>(σ_U∞ reach by a run)"]
+            P6["tool base: libkz-core,<br/>checker tool hash"]
+            P1 --- P2 --- P3 --- P4 --- P5 --- P6
+        end
+        subgraph TL2["(ii) extracted facts, recorded by hash"]
+            direction TB
+            X1["facts.kz, skel.kz,<br/>anchors.kz, closure;<br/>for reach: run and<br/>prefix-probe records"]
+            X2["39 SB sites of<br/>SendEventWithAppID<br/>and their contexts"]
+            X3["copy-chain AST facts;<br/>INIT image<br/>cfe_sb_task.c:40"]
+            X4["S3a writer sections<br/>with their statuses<br/>(the lists in this figure)"]
+            X5["A-TYPE listings;<br/>Type = CORE<br/>(cfe_es_start.c:795);<br/>PendingAppId flow (:814)"]
+            X6[":835 exit trees,<br/>mod set, lock region"]
+            X7["core-table order;<br/>call-graph rows;<br/>Sk^cert graph;<br/>spawn lists"]
+            X1 --- X2 --- X3 --- X4 --- X5 --- X6 --- X7
+        end
+        subgraph TL1["(i) re-validated by kz proofcheck (own unless via T5)"]
+            direction TB
+            R1["view: every step<br/>on Sk^cert"]
+            R2["ONCE: PSP main;<br/>ES, EVS, SB main;<br/>raise_ES;<br/>cfe_es_start.c:82"]
+            R3["T-PO (dominator routine);<br/>T-TERM; T-SPAWN<br/>(spawn lists equal<br/>the closure's lists)"]
+            R4["T-OBS at o_ES, o_EVS:<br/>falsifier :803 (via T5);<br/>Pred_code re-derived<br/>from the :835 exit trees;<br/>R19 binding (via T5);<br/>L1 preconditions;<br/>Pred_code ⇒ C;<br/>W_o recomputed<br/>with its exclusions"]
+            R5["FRONTIER; DERIVES;<br/>INIT_FALSE(V) (via T5);<br/>badness: Allowed none"]
+            R6["statuses consistent;<br/>DECLARED_TRUSTED<br/>list complete"]
+            R7["reach per cell,<br/>after S1"]
+            R1 --- R2 --- R3 --- R4 --- R5 --- R6 --- R7
+        end
     end
 
     subgraph WEV["W_o(o_EVS), conjunct at ρ_EVS (step 5)"]
@@ -918,11 +957,12 @@ flowchart TD
     classDef trust fill:#fdeceb,stroke:#b23b3b,color:#111
     classDef chk fill:#fffbe6,stroke:#a07a00,color:#111
     class V1,V2,V3,E1,E2,E3,E4,E6,E7,E8,E9,E10,F1,F2,F3,F5,F7,F8,F9 ok
-    class E5,F4,F6,T1,T2,T3 trust
+    class R1,R2,R3,R4,R5,R6,R7,X1,X2,X3,X4,X5,X6,X7,P1,P2,P4,P5,P6,F1R,F2R,F3R,F4R,F5R,F6R ok
+    class E5,F4,F6,P3 trust
     class V4 chk
 ```
 
-- **`DECLARED_TRUSTED` 항목.** ES 절반은 `CleanUpApp`의 관계 guard 하나, EVS 절반은 A-FRESH, A-OWNER, `CleanUpApp`의 관계 guard다. 모두 certificate에 나열되고(보장 G10), 관측(O9, O3/O4)으로 반박될 수 있으며, 관측으로 증명되지는 않는다. sub-label `trusted:<n>`이 이것을 센다(spec App. A.1 step 9). 그림 D8 상세의 빨간 상자는 이 항목만 보인다. certificate가 믿는 것은 이보다 넓고, 그 전체는 아래 신뢰 장부가 적는다.
+- **`DECLARED_TRUSTED` 항목.** ES 절반은 `CleanUpApp`의 관계 guard 하나, EVS 절반은 A-FRESH, A-OWNER, `CleanUpApp`의 관계 guard다. 모두 certificate에 나열되고(보장 G10), 관측(O9, O3/O4)으로 반박될 수 있으며, 관측으로 증명되지는 않는다. sub-label `trusted:<n>`이 이것을 센다(spec App. A.1 step 9). 그림 D8 상세의 빨간 상자는 이 항목만 보인다. certificate가 믿는 것은 이보다 넓고, 그 전체는 그림의 신뢰 장부 상자와 아래 신뢰 장부 표가 적는다.
 
 **R2의 신뢰 장부** [D] (spec App. A.1 step 9a, §4.5.1; EXT-20261012 §4.3; ADR-041). 내용은 기대 [I]이고 실행한 것은 없다. 장부는 절반마다, M마다 하나씩이고, 칸은 (σ_U, M_api)와 (σ_U, M_impl), b = ∞다. 다른 칸(σ_U∞, σ_R1, σ_E)의 장부는 이것에서 유도한다. 형식 쪽의 같은 장부는 [04_formal_model.md §10.7](04_formal_model.md#107-신뢰-장부trust-ledger)에 있다. 아래 표는 cFS 쪽에서 무엇이 어느 부분에 드는지를 보인다.
 
@@ -935,7 +975,7 @@ flowchart TD
 
 - obligation 통과는 결코 증명으로 기록하지 않는다. 관측이 증명하는 유일한 항목은 reach다(spec §4.5.1).
 - `kz report`는 이 장부를 판정과 함께 출력하고, 네 부분의 크기를 label `ledger:<i>/<ii>/<iii>/<iv>`로 보인다. S3a gate와 rung V1의 S3a-R2 하위 관문은 이 장부를 요구한다(spec §9.3).
-- 그림 D8 상세에는 아직 이 네 부분 장부 상자가 없다(spec §12 D8은 그것을 요구한다). 이 절의 Mermaid 원본은 `diagrams/`의 원본과 같은 사본이므로, 그림을 고칠 때 함께 고친다.
+- 그림 D8 상세의 신뢰 장부 상자는 이 표의 네 부분을 줄여 보인다(spec §12 D8). 이 절의 Mermaid 원본은 `diagrams/D8_r2_certificate_writers.mmd`와 같은 사본이므로, 그림을 고칠 때 함께 고친다.
 - **EVS 쪽 writer 처리** (step 5). ES main의 raise가 ONCE-PWB로 빠지는 이유, `ExitApp` STOPPED store가 A-OWNER 아래에서만 빠지는 이유, `f_EVS` 직후의 사실에 A-FRESH와 A-OWNER가 필요한 이유는 [04_formal_model.md §10.2](04_formal_model.md#102-mustbefore-사슬)가 형식 규칙으로 설명한다.
 
 ### 7.5 그 밖에 이 예가 보여 주는 것
@@ -1006,8 +1046,8 @@ flowchart TD
     end
 
     OBJ["every osal.obj#60;T#62; resource<br/>(e.g. timebase cFS-Master)"]
-    INS(["in-scope uses: before SHUTDOWN_REQ<br/>contracts apply; certificates stated<br/>outside teardown"])
-    KTD(["uses after SR: K-TEARDOWN family<br/>(K-LIFE during deletion), reported apart"])
+    INS(["in-scope uses (default scope):<br/>decided before SHUTDOWN_REQ;<br/>certificates stated outside teardown"])
+    KTD(["K-TEARDOWN uses: occurrences decided<br/>after SHUTDOWN_REQ (K-LIFE during deletion);<br/>same statuses, reported apart"])
     NOTE["SIGUSR1 is blocked process-wide: while the startup thread<br/>is inside CFE_ES_Main, a restart request causes no teardown,<br/>only the requester's abort after 10 s"]
 
     subgraph NEXT["next run: B.Init"]
@@ -1019,8 +1059,8 @@ flowchart TD
 
     Q4 -->|"T-OBS: SR ∈ MB(OS_DeleteAllObjects)"| M4
     M6 -.->|"disabler of every osal.obj (SCOPE-excluded)"| OBJ
-    Q4 -->|"uses after this LP"| KTD
-    INS -->|"scope conjunct: no SHUTDOWN_REQ LP before the use"| Q4
+    Q4 -->|"occurrences decided after this LP"| KTD
+    INS -->|"scope conjunct: no SHUTDOWN_REQ LP<br/>before the occurrence's decision event"| Q4
     Q2 -->|"POWERON: segments deleted"| N1
     Q7 -->|"any other exit"| N2
     NOTE --- M2

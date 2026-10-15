@@ -271,7 +271,7 @@ flowchart TD
 
     HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
 
-    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>no alarm ≠ safe")]
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress<br/>no alarm ≠ safe")]
     REP["L5 kz report / kz loop<br/>fixed point + run set"]
     FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
@@ -537,7 +537,7 @@ class는 **안전성**(safety)에 대한 분류다. 영구 대기와 deadlock은
 | `schedule-dependent` | **같은 발생 서수**에 나쁜 witness와 좋은 witness가 있다(서로 다른 두 유한 실행) | 같은 칸·경계의 두 witness. stall witness는 그중 하나가 될 수 없다 |
 | ↳ `timeout-dependent` | σ_U에서 schedule-dependent이고, σ_U∞에서 `¬Bad_i`가 서고, σ_U∞에서 사용에 도달한다. 곧 σ_U의 나쁜 유한 실행은 모두 시간 기반 전이를 거친다 | σ_U와 σ_U∞ 칸에서 유도하고 자기 경계와 함께 적는다. `exh`가 필요하다 |
 | `ordinal-split` | 나쁜 witness와 좋은 witness가 있지만 같은 서수의 짝은 없다 | 서수가 붙은 witness. 어느 한 발생이 스케줄에 따라 달라진다고 말하지 **않는다** |
-| `unknown(reason)` | 아무것도 서지 않았거나, `¬OK_i`만 있고 결정 경로가 없다(`no_decision_route`; 진술은 그대로 보인다) | reason ∈ {`not_reached`, `model_gap`, `bound`, `budget`, `key_unresolved`, `loss`, `unmodelled`, `writer_incomplete`, `horizon`, `no_decision_route`, `conformance`, `model_fault`(`contested` 경계 포함), `model_level`} |
+| `unknown(reason)` | 아무것도 서지 않았거나, `¬OK_i`만 있고 결정 경로가 없거나(`no_decision_route`; 진술은 그대로 보인다), 진술 없이 한쪽 witness만 있다. 곧 `¬OK_i` 없는 나쁜 witness이거나 `¬Bad_i` 없는 좋은 witness다(`one_sided`; witness는 그대로 보인다) | reason ∈ {`not_reached`, `model_gap`, `bound`, `budget`, `key_unresolved`, `loss`, `unmodelled`, `writer_incomplete`, `horizon`(horizon monitor가 OPEN인 채 trace가 끝남), `horizon_static`(trace 없는 census의 정적 경우: FIXED_ORDER 항목 5가 horizon 안의 연장 중 일부만 허용되지 않음을 찾아 class가 열린 채 남음; spec §4.5, §4.6), `no_decision_route`, `one_sided`, `unordered`, `O-ordered-only`, `conditional-observation`(census의 열린 경로, 어느 경로도 결정하지 않은 동안; spec §4.6), `conformance`, `model_fault`(`contested` 경계 포함), `model_level`}. census의 `open`은 class가 아니며 `unknown(<열린 경로 reason>)`으로 보인다(spec §12 D6) |
 
 좋은 쪽 flag `timeout-rescued`는 σ_U에서 좋은 witness가 있고 σ_U∞에서 `¬OK_i`가 설 때, 곧 좋은 발생이 모두 어떤 대기가 포기한 덕분일 때 붙는다. protected, schedule-dependent, ordinal-split에 붙을 수 있다(spec §1.8, §1.10). **explorer 없이는 refinement가 성립하지 않는다.** certificate는 σ_U의 진술만, 예측은 witness만 주기 때문이다(spec §1.8).
 
@@ -575,7 +575,7 @@ class는 **안전성**(safety)에 대한 분류다. 영구 대기와 deadlock은
   - ABSENT: 어떤 연장도 p*를 가질 수 없다. 정적으로(provider `none`, 또는 once 노드를 p* 없이 이미 지남) 또는 경계 b 안의 `exh`로 보인다. 그냥 끝난 run에서 추론하지 않는다.
   - NOT-OBSERVED: p*가 실행에도 기록된 연장에도 없고, ABSENT는 보이지 않았다.
   - STALE: 조건이 한때 참이었다가 사용 전에 다시 거짓이 되었다.
-- 결과 label(호출자 수준): `violation`(Allowed가 정해짐), `LOSS-UNDER-ORDER`(route·용량, Allowed 미정), `not-ready-unjudged`(그 밖의 계약, Allowed 미정). class가 fixed-order, schedule-dependent, ordinal-split인 칸만 이 label을 보인다. `liveness`는 진행 결과의 label이다.
+- 결과 label(호출자 수준): `violation`(Allowed가 정해짐), `LOSS-UNDER-ORDER`(호출자 수준 Allowed가 미정이고 must-deliver `appreq`가 없는 route·용량 계약), `not-ready-unjudged`(그 밖의 계약, Allowed 미정; 그리고 must-deliver `appreq`와 `caller` 항목이 충돌해 Allowed가 미정인 route·용량 계약, spec §1.6 `appreq` 단계 (3)). class가 fixed-order, schedule-dependent, ordinal-split인 칸만 이 label을 보인다. `liveness`는 진행 결과의 label이다.
 - framework 수준: `fw_doc`(instance마다: `documented-not-error`, `documented-result`, `undocumented`), `fw_conf`(칸마다: `as-documented`, `deviates`, `unknown`). 결과 label과 합치지 않는다.
 - 관측된 결과 `consequence`(관측 횟수와 함께), harm(호출자 수준), 위반 사슬과 progress chain, trust ledger 참조, B·Φ·tool hash.
 
@@ -629,7 +629,7 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 
 **첫 목표와 최소 핵심.** 첫 목표는 thin MVC(S0+S1+S2+S3a) 전체가 아니라 검증 사다리(validation ladder)의 rung V1이다. ENV basis에서 R2의 K-ID 사슬을 끝까지 통과시키는 것이고, 단계 출구 조건 가운데 R2 사슬에 필요한 항목만 떼어 낸 하위 관문 S0-R2, S3a-R2, S1-R2, S2-R2를 쓴다. thin MVC의 나머지 출구 조건은 rung V1b다 [D] (spec §9.3; ADR-044). thin MVC까지 오면 다음을 주장할 수 있다고 spec은 계획한다 [I] (spec §9.3 Claims).
 - census
-- R2의 fixed-order 안전성 진술. 독립 검사기가 명시한 trusted base(추출 사실, skeleton, Φ)에 상대적으로 추론 단계를 다시 검증한 것이다
+- R2의 fixed-order 안전성 진술((σ_U, M_api)와 (σ_U, M_impl)). V0-P 뒤에는 certified fixed-order로, 독립 검사기가 명시한 trusted base(추출 사실, skeleton, Φ)에 상대적으로 추론 단계를 다시 검증한 것이다. V0-P 전에는 "accepted by `kz proofcheck`, conditional on the unwritten lemma obligations"라고만 쓴다. V0-P는 V1 결과를 certificate로 적기 전에 그 문구의 lemma obligation을 쓰고 검토하는 항목이다(spec §9.3 사다리 표)
 - 구성 closure와 메시지 출처에서 나온 inactive·provider 판정
 - 정적 층과 trace 층의 recall
 

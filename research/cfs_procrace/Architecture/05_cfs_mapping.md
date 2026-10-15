@@ -1,19 +1,19 @@
-# 05 cFS 대응: Φ_cFS 프로파일, 계약 coverage, R2 certificate, 종료 범위
+# 05 cFS 대응: Φ_cFS 프로파일, 준비 상태 명세 coverage, R2 certificate, 종료 범위
 
-이 문서는 Kairos의 cFS 프로파일 Φ_cFS가 cFS v7.0.1의 실제 구조(PSP, OSAL, cFE의 ES·EVS·SB·TBL·TIME·FS·CDS, 앱)를 어떤 resource kind·HB 규칙·계약으로 옮기는지 설명한다. R03이 찾은 15개 계약 종류의 coverage, 다섯 설계 사례와 그 밖의 후보가 들어가는 자리와 사례별 기대 판정, R2 certificate의 모양과 신뢰 장부, SB 손실의 세 판단, 종료(teardown) 범위도 다룬다. spec에 없는 설계 요소·수치·인용은 더하지 않으며, 세부는 spec의 해당 절로 넘긴다.
+이 문서는 Kairos의 cFS 프로파일 Φ_cFS가 cFS v7.0.1의 실제 구조(PSP, OSAL, cFE의 ES·EVS·SB·TBL·TIME·FS·CDS, 앱)를 어떤 resource kind·HB 규칙·준비 상태 명세로 옮기는지 설명한다. R03이 찾은 15개 범주(spec의 준비 범주 RC1–RC15)의 coverage, 다섯 설계 사례와 그 밖의 후보가 들어가는 자리와 사례별 기대 판정, R2 certificate의 모양과 신뢰 장부, SB 손실의 세 판단, 종료(teardown) 범위도 다룬다. spec에 없는 설계 요소·수치·인용은 더하지 않으며, 세부는 spec의 해당 절로 넘긴다. 기준은 spec 개정 1.2다. 개정 1.1은 외부 검토 EXT-20261012에 답한 것이고(spec §0.7, ADR-039–ADR-044), 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md))을 반영하고 형식 정정 둘(σ_E 진술, 신뢰 장부)과 증명 상태를 더했다(spec §0.9–§0.11, ADR-045–ADR-052). 이 문서에서 바뀐 곳은 §0.4에 모았다.
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
 
 ## 목차
 
-- [0. 읽기 전에](#0-읽기-전에): 표기, Φ_cFS가 담는 것, 필요한 용어
+- [0. 읽기 전에](#0-읽기-전에): 표기, Φ_cFS가 담는 것, 필요한 용어, 개정 1.2에서 바뀐 곳
 - [1. 한 장으로 보기 (그림 D5)](#1-한-장으로-보기-그림-d5): cFS 계층과 Φ_cFS 항목의 대응
 - [2. 계층별 대응](#2-계층별-대응): actor, OSAL, task 생성과 App-record 구간, PSP, ES, 앱 적재, 재시작, SB, EVS, TBL, CDS, TIME, ad hoc 동기화 (spec §3.1–3.14)
-- [3. 계약 라이브러리와 15개 계약 종류](#3-계약-라이브러리와-15개-계약-종류) (spec §3.15)
+- [3. 준비 상태 명세 catalogue와 15개 준비 범주](#3-준비-상태-명세-catalogue와-15개-준비-범주) (spec §3.15)
 - [4. HB 규칙 목록](#4-hb-규칙-목록) (spec §3.16)
 - [5. site binding과 version guard](#5-site-binding과-version-guard) (spec §3.17)
-- [6. 다섯 사례의 자리와 그 밖의 후보](#6-다섯-사례의-자리와-그-밖의-후보): 사례별 기대 판정, R2의 음성 대조 E-post/E-TBL, C1의 결과 (spec §7.3, §8.2, §9.3, App. A.4)
-- [7. R2 certificate 예 (그림 D8)](#7-r2-certificate-예-그림-d8): 신뢰 장부와 사슬의 세 판단 포함 (spec App. A.1)
+- [6. 다섯 사례의 자리와 그 밖의 후보](#6-다섯-사례의-자리와-그-밖의-후보): 사례별 기대 판정과 대조, R2의 음성 대조 E-post/E-TBL, C1의 결과 (spec §7.3, §8.2, §9.3, App. A.4)
+- [7. R2 certificate 예 (그림 D8)](#7-r2-certificate-예-그림-d8): 신뢰 장부와 증명 상태, 사슬의 세 판단 포함 (spec App. A.1)
 - [8. 종료 범위 (그림 D9)](#8-종료-범위-그림-d9) (spec §3.5, §1.6, §4.5, App. A.7)
 - [9. 이 문서가 주장하지 않는 것](#9-이-문서가-주장하지-않는-것)
 - [10. 관련 문서](#10-관련-문서)
@@ -36,7 +36,7 @@
 | **코드 해석, 미실행** | 배경 보고서([R01], [R02] 등)나 검토·ledger가 코드를 읽고 낸 결함 후보다. 실행으로 확인한 적이 없고, 확인 실행 전에는 버그라고 부르지 않는다(spec §6.4 항목 23) |
 
 - 코드 위치 `path:line`은 고정된 cFS tree(cFS `088b2fa8`; cFE `c5fb2b4d`, OSAL `d2d877a6`, PSP `c4b3b0b6`) 기준이다(spec 머리말). 파일 이름 없이 적은 줄 번호(예: `:818`)는 바로 앞에 적은 파일의 줄이다.
-- "(spec §3.3)"은 SPEC_FINAL.md의 절이다. [R01]–[R07]은 `background/`의 보고서, [LED]는 `cases/ledger.md`, [R2g]·[R2c]는 `results/`의 R2 기록(gdb, CORD), [BM]은 `env/BASELINE_MEASURE.md`다. [A]·[B]·[C]는 `history/`의 설계 제안, [X1]–[X3]·[J1]–[J3]은 같은 곳의 검토·심사다.
+- "(spec §3.3)"은 SPEC_FINAL.md의 절이다. [R01]–[R07]은 `background/`의 보고서, [LED]는 `cases/ledger.md`, [R2g]는 `results/R2_gdb_v701.md`의 R2 gdb 기록(`env/logs/r2_g1..3_*`), [BM]은 `env/BASELINE_MEASURE.md`다. [A]·[B]·[C]는 `history/`의 설계 제안, [X1]–[X3]·[J1]–[J3]은 같은 곳의 검토·심사다. 퇴역한 recorder CORD의 결과는 현재 문서의 근거가 아니어서 인용하지 않는다(PI 결정 D12, spec §0.11).
 - 문헌은 [R04]·[R05]·[R06]이 확인한 상태 표지(V-doc, V-abs, V-me, P, UNVERIFIED)와 함께만 인용한다.
 - **경보 없음 ≠ 안전.** 이 문서의 어떤 표도 "안전"을 뜻하지 않는다. 근거가 없는 칸은 `unknown(reason)`이 된다(spec §0.1, §1.10).
 
@@ -51,12 +51,12 @@ Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작�
 | resource kind와 lifecycle automaton | 자원 종류마다 생애주기 상태 기계를 둔다. 이 방식을 **typestate**라 한다. 객체의 현재 상태가 어떤 연산을 허용하는지 정한다는 개념이다(Strom & Yemini 1986 [V-me]; spec §1.3) | `sb.route(m,p)`: NONE ↔ ROUTED |
 | operation | API 하나의 binding(코드의 어느 지점인가), 효과, 결과 코드의 뜻, 조건마다의 LP | `CFE_SB_TransmitMsg`: route_lookup LP 하나와 목적지마다 put LP 하나(spec §1.4) |
 | HB 규칙 | "e₁이 e₂보다 먼저"를 정하는 추론 규칙이다. stratum과 robustness tag를 가진다 | R19 CORE-SERIAL (S, obs-fatal) |
-| 계약 (readiness contract) | 사용 지점이 요구하는 자원 상태, 판정 oracle, 호출자 쪽 근거가 받아들이는 not-ready 결과(Allowed), 이 사용이 이루어야 할 것의 근거(`appreq`), 해(harm), 출처(provenance)를 묶는다. 출처마다 `supplier`·`caller`·`rule` 가운데 어느 쪽인지 적는다(spec §1.6) | K-ID: `CFE_EVS_SendEventWithAppID`에 넘긴 AppId가 유효하고 EVS에 등록돼 있어야 한다 |
+| 준비 상태 명세 (readiness specification) | 사용 지점이 요구하는 자원 상태(준비 사전조건 `Req`, readiness precondition), 판정 oracle, 호출자 쪽 근거가 받아들이는 not-ready 결과(Allowed), 이 사용이 이루어야 할 것의 근거(`appreq`), 해(harm), 출처(provenance)를 묶는다. 출처마다 `supplier`·`caller`·`rule` 가운데 어느 쪽인지 적는다(spec §1.6). 이름은 PI 결정 T1 = (a)로 정했다(spec 부록 C) | K-ID: `CFE_EVS_SendEventWithAppID`에 넘긴 AppId가 유효하고 EVS에 등록돼 있어야 한다 |
 
 **규칙 이름의 출처.** R1–R19는 [R02 §8.1]의 규칙 번호이고, P-*는 [R01 §3, §6.1]의 OSAL 기본 연산 규칙이다(spec §3 머리말). **규칙 R2(task 생성 → 자식의 첫 사건)는 사례 R2(cFE #2663)와 다르다.** 이 문서는 규칙을 항상 "규칙 R2" 또는 "P-TASK / R2"로 적는다.
 
 **두 원칙**이 §3 전체에 걸린다(spec §3 머리말, §1.4).
-- 위반의 shape(0.3)를 정하는 edge는 API 수준 edge뿐이다.
+- bad 사용의 shape(0.3)를 정하는 edge는 API 수준 edge뿐이다.
 - OSAL 내부 lock은 M_impl에서 interleaving을 제약할 뿐이다. 어느 수준에서도 shape용 HB edge를 만들지 않는다.
 
 ### 0.3 필요한 용어
@@ -77,21 +77,41 @@ Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작�
 | Allowed / harm | 호출자 수준에서 받아들이는 not-ready 결과(유한 어휘: `none`, `documented_drop`, `returned_and_tested`, `retry_until_ready`, `fallback`, `defer_by_design`, `exit`, `unspecified_by_reference`)와, 허용되지 않을 때의 효과 분류다. 공급자의 문서화된 결과는 framework 수준 판단(`fw_doc`, `fw_conf`)으로 따로 적는다(spec §1.6, §1.10) |
 | 세 판단 | not-ready 사용을 세 번 따로 판단한다. framework 수준(공급자가 문서화한 결과와 실제 동작, `fw_doc`·`fw_conf`), 호출자 수준(`appreq`와 호출자 수준 Allowed. 상태, class, 결과 label, harm은 이것만 정한다), 관측된 결과(consequence와 관측 횟수)다. framework 수준 판단은 발생을 TOLERATED로 만들지 않는다(spec §1.6 "Three judgements"; ADR-043) |
 | safety와 progress | class는 유한 실행 위의 safety 진술 `¬Bad_i`, `¬OK_i`, `¬NR_i`에서 나온다. 영원한 대기와 deadlock은 class가 아니라 칸마다의 **progress 결과**다: `stall-witness`, `no-stall-within(b)`, `unknown(reason)`, 기본값 `unknown(not_checked)`(spec §0.7 item 1, §1.8, §1.10) |
-| 신뢰 장부 (trust ledger) | certificate와 판정 칸마다 붙는 네 부분 기록이다. (i) `kz proofcheck`가 다시 확인한 추론 단계, (ii) 추출된 사실, (iii) 믿은 항목, (iv) 반박할 수 있지만 증명되지 않은 항목(spec §4.5.1). 7.4가 R2의 장부를 보인다 |
+| 신뢰 장부 (trust ledger) | certificate와 판정 칸마다 붙는 네 부분 기록이다. (i) `kz proofcheck`가 다시 확인한 추론 단계, (ii) 추출된 사실, (iii) 믿은 항목(쓴 lemma의 증명 상태 포함), (iv) 반박할 수 있지만 증명되지 않은 항목(spec §4.5.1). 7.4가 R2의 장부를 보인다 |
+| 준비 상태 위반 | 범위 안 발생이 준비 사전조건을 만족하지 못하고 호출자 수준 Allowed가 그 결과를 받아들이지 않을 때(`VIOLATING`)다. 상태를 만들 provider가 있는 곳에서는 순서 위반의 하위 부류다. 호출자 수준 Allowed가 `unspecified_by_reference`인 발생은 `NOT_READY_UNJUDGED`이고 위반이라 부르지 않는다(spec §1.6) |
+| 근거 등급 (source tier) | 준비 상태 명세 뒤에 어떤 종류의 근거가 있는지다: `contract-backed`, `requirement-derived`, `admitted`, `issue-derived`, `code-derived`, `researcher`, `unreferenced`. 보고할 때 `prov` 기록에서 유도하고 저장 field는 없다(spec §1.6) |
+| 증명 상태 (proof status) | lemma와 보장마다 `proved`, `depends-on-stated-assumption`, `unproved` 가운데 하나다. 의무로만 적힌 lemma를 "증명됨"으로 출력하지 않는다(spec §6.2, PS1–PS4) |
 | shape | bad 사용의 모양이다. WRONG-WAY(공급이 사용 뒤에 오고 사용이 HB상 앞), UNORDERED(HB상 순서 없음), ABSENT(witness의 어떤 연장에도 공급이 올 수 없음), NOT-OBSERVED(실행과 기록된 연장에 공급이 없지만 ABSENT는 보이지 못함), STALE(한때 참이었다가 무효화됨)(spec §1.10) |
 | provider 축 | `present`, `none`(초기에 거짓이고 writer가 하나도 없음), `env-absent`(환경 능력이 없어 공급이 막힘), `unknown`(spec §1.10) |
-| census | 모든 계약을 모든 문맥 위치(context-qualified site)에 instance로 만들고, 각각에 class나 `unknown(reason)`을 주는 정적 작업이다(spec §4.6) |
+| census | 모든 준비 상태 명세를 모든 문맥 위치(context-qualified site)에 instance로 만들고, 각각에 class나 `unknown(reason)`을 주는 정적 작업이다(spec §4.6) |
 | skeleton, certificate view `Sk^cert` | skeleton은 actor의 제어 흐름 그래프를 관련 사건만 남겨 투영한 것이다. certificate view는 상한이 없는 loop를 "0회 이상 반복"(star-closed)으로 닫은 skeleton이다. 보편 판정과 `inactive`는 이 view에서만 나온다(spec §4.3) |
 | looper | `ReceiveBuffer`로 메시지를 받아 handler로 나눠 주는 loop를 도는 actor다(spec §1.9) |
 | 예측 / explorer | 예측은 관측한 trace에서 다른 순서가 가능한지 찾는 단계다(spec §4.9). explorer는 후보 하나의 작은 모형 위에서 실행을 체계적으로 탐색하는 단계이며, 늦은 단계 S7의 조건부(gated) 구성요소다(spec §4.10) |
-| hold, F0, derived | hold는 확인 실행에서 한 thread를 지정한 지점에 붙잡아 두는 방법이다. F0는 바이너리와 실행 조건을 바꾸지 않고 timing만 교란하는 수준이다. 구성한 스케줄로 얻은 확인에는 `derived` 표시를 단다(spec §1.10, §4.13, §5.1) |
+| hold, F0, derived | hold는 확인 실행에서 한 thread를 지정한 지점에 붙잡아 두는 방법이다. F0는 기준 바이너리를 같은 cFS 사용자와 같은 명령으로 실행하고, 별도의 root 프로세스가 그 프로세스에 hook을 거는 수준이다. "시간만 바뀐다"고 쓰지 않고, 관측 영향은 점검한다(PI 결정 D1; spec §5.1, §8.6). 구성한 스케줄로 얻은 확인에는 `derived` 표시를 단다(spec §1.10, §4.13, §5.1) |
 | `n of N`, pool key | 자연 실행 N번 중 n번에서 관측했다는 기록과, 같은 조건이라 한데 모아 센 실행 묶음의 식별자다(spec §1.10, §2.3) |
+
+### 0.4 개정 1.2에서 바뀐 곳
+
+spec 개정 1.2가 이 문서의 범위에 준 변경이다. 모두 [D]다. PI 결정은 연구 계획, 범위, 용어에 대한 결정이고 사실이나 실행 결과가 아니다. 이 개정에서도 빌드·설치·실행은 없었고 Kairos의 결과는 없다. 정정 전후의 문장과 손으로 계산한 최소 예제는 [../plan/formal_corrections.md](../plan/formal_corrections.md), R2 첫 결과의 증명 상태표는 [../plan/proof_status_R2.md](../plan/proof_status_R2.md)에 있다.
+
+| 바뀐 것 | 이 문서 | spec |
+|---|---|---|
+| R2 표현: 거부된 이벤트 요청은 "이벤트 요청 거부"다. harm `event_lost_silently`를 `event_request_rejected`로 바꿨다. 시스템 호출이 있었다거나 없었다는 주장은 debugger 로그가 아니라 코드 분석이나 시스템 호출 관측에 기댄다 | §2.9, §7.1, §7.3, §9 | §0.9 항목 4, §6.4 항목 47, A.1 step 8·13a |
+| 신뢰 장부에 L-CONT (c)와 L-STATUS를 넣었다. reach나 witness가 실행에 기대는 모든 칸, certificate 자신의 칸도 포함한다. 그 실행 쪽 전제는 O1, O2, O4, O5가 반박한다 | §7.4, §7.6 | §4.5.1, A.1 step 9a, §0.9 항목 2, ADR-045 |
+| 증명 상태 `proved` / `depends-on-stated-assumption` / `unproved`를 lemma와 보장마다 둔다. 의무로만 적힌 lemma를 "증명됨"으로 출력하지 않는다(PS1–PS4). R2 첫 결과의 모든 certificate 칸은 "lemma status: unproved"를 출력한다 | §0.3, §7.1, §7.3, §7.4, §7.6 | §6.2, §6.4 항목 45·46, §0.9 항목 3, ADR-045 |
+| σ_E 진술을 L-FO·L-PR이 증명하는 꼴로 정정했다. 판정된 범위 안 발생에 대한 진술이고 `NOT_EVALUATED` 조기 반환을 허용한다 | §7.3, §7.6, §8.3 | §1.8 전이 규칙 2, A.1 step 9, A.7, §0.9 항목 1, §6.4 항목 44 |
+| caller 수준 판단: 규칙만으로는 받아들이지 않고(QT-4), 정상 연속은 인용한 노드이며(Q15), 충돌은 판정을 보류하고(QT-5), K-SPAWN.osal·K-LOCKBAL은 구현 결함 계열이다(QT-9). EVS의 `GetAppID` 발생, TIME의 `CreateChildTask` 호출, C1의 수정 전 발생은 NOT_READY_UNJUDGED다 | §2.2, §2.3, §2.9, §3, §6.2, §6.4 | §1.6, §3.3, §3.15, A.2, A.4, §6.4 항목 53, ADR-043(개정), ADR-048 |
+| C1 기준 구성 D22: 공개 BP 기반, 후보 쌍 CF `281a941` → `833fdbb`. 공개 값과 원 보고자 환경을 구분한다. 재시도 상수는 선택한 소스에서 읽는다 | §6.1, §6.3, §6.4 | §0.9 항목 5, A.4 step 2·3·6, §9.3, ADR-044, ADR-050 |
+| 사례별 대조와 기준: P-R2CTRL(c2 먼저), P-C1HOLD(생성 직전 보류. RESERVED 구간 실험은 후속 항목), P-C2·Q22, D13·Q16, P-RGIT, P-CLASSGT | §6.1, §6.3, §6.4, §7.5 | §8.2, §9.3, A.1 step 15, A.4 step 5, ADR-050 |
+| D17 (a): POWERON 재시작은 shm segment를 지우지만 모든 유지 파일, file cache, 공유 file system을 초기화하지 않는다 | §8.1, §8.2 | §3.5, §4.13, §6.4 항목 49, ADR-049 |
+| 용어 T1 = (a): 준비 상태 명세, 준비 사전조건, 준비 상태 위반, 근거 등급, `allowed-not-ready`, 준비 범주 | 문서 전체, §3 | §0.11, 부록 C, ADR-052 |
+| CORD 인용 정리(D12): R2의 실행 근거는 gdb 기록뿐이다. 11개 구성, 범위 211–229, 사용 집합의 CORD 대조를 지웠다 | §0.1, §2.3, §6.2, §7.1, §7.3, §7.5 | §0.11, 머리말 |
 
 ---
 
 ## 1. 한 장으로 보기 (그림 D5)
 
-그림 D5는 두 장이다. 개요는 cFS 계층마다 Φ_cFS의 어떤 kind·규칙·계약이 생기는지 보이고, 상세는 대표 코드 위치가 어떤 Φ 항목이 되는지 보인다(spec §12 D5).
+그림 D5는 두 장이다. 개요는 cFS 계층마다 Φ_cFS의 어떤 kind·규칙·준비 상태 명세가 생기는지 보이고, 상세는 대표 코드 위치가 어떤 Φ 항목이 되는지 보인다(spec §12 D5).
 
 **그림 D5 개요. cFS 계층과 Φ_cFS 항목의 대응** (렌더링: [diagrams/D5_cfs_mapping_overview.svg](diagrams/D5_cfs_mapping_overview.svg); spec §12 D5; §1.3, §3.1–3.16)
 
@@ -197,7 +217,7 @@ flowchart LR
 
 같은 내용을 표로 줄이면 다음과 같다. 각 줄의 세부는 2절의 해당 소절에 있다.
 
-| cFS 계층 | 주요 kind | HB 규칙 | 주요 계약 | 이 문서 / spec |
+| cFS 계층 | 주요 kind | HB 규칙 | 주요 준비 상태 명세 | 이 문서 / spec |
 |---|---|---|---|---|
 | PSP | `es.shutdown`, 유지(persistent) 자원, 종료 연산 Panic·Restart | SR | K-TEARDOWN | 2.5, 8 / §3.5 |
 | OSAL | `osal.obj<T>`, `loader.sym`, queue 용량 `cap_B` | P-TASK, P-TASK-JOIN, P-MUT, P-BIN, P-CNT, P-Q, P-TB, P-MOD | K-REG.osal, K-SPAWN.osal, K-LOCKBAL, K-REG.unique, K-LIFE.osal | 2.2–2.4 / §3.2–3.4 |
@@ -246,15 +266,15 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 - **M_api**: 생성은 한 번의 전이 ABSENT → LIVE이고, 이름 조회는 FOUND 또는 `NAME_NOT_FOUND`다.
 - **M_impl** ([R01 §1.5–1.8]): type lock 아래 ALLOC → `ConvertToken(EXCLUSIVE)`가 RESERVED를 표시하고 lock을 **푼다** → `OS_OBJECT_INIT`이 이름을 보이게 한다 → 구현 호출(`pthread_create`, `mq_open` 등) → `FinalizeNew`가 다시 잠그고 발행한다. 이 사이에 조회 token이 RESERVED record를 만나면 token 종류에 따라 갈린다 [F].
 
-| token | RESERVED record를 만났을 때 | Φ 계약 |
+| token | RESERVED record를 만났을 때 | Φ 준비 상태 명세 |
 |---|---|---|
-| by-name, search | `OS_ERR_INCORRECT_OBJ_STATE`로 즉시 실패하는데, unlock 로직 **전에** return한다(`osapi-idmap.c:401–404`). header는 "실패하면 OS_LOCK_MODE_NONE이 아닌 모든 lock mode에서 전역 table lock을 항상 푼다"고 적는다(`:384–385`) | **K-LOCKBAL**: API는 type lock을 푼 채 돌아와야 한다. 문서화된 불변식에서 끌어낸 계약이다 |
+| by-name, search | `OS_ERR_INCORRECT_OBJ_STATE`로 즉시 실패하는데, unlock 로직 **전에** return한다(`osapi-idmap.c:401–404`). header는 "실패하면 OS_LOCK_MODE_NONE이 아닌 모든 lock mode에서 전역 table lock을 항상 푼다"고 적는다(`:384–385`) | **K-LOCKBAL**: API는 type lock을 푼 채 돌아와야 한다. 문서화된 불변식에서 끌어낸 공급자 쪽 postcondition이다(문서화된 API 의미, API 계약). QT-9에 따라 구현 결함 계열이다 |
 | by-ID (`OS_ObjectIdGetById`) | 제한된 대기에 들어간다. 시도 k는 type unlock의 broadcast(모든 type unlock이 broadcast한다, `os-impl-idmap.c:106–129`) 또는 timeout k² × 10 ms로 깬다(`posix/src/os-impl-idmap.c:138–170`). 다섯 번째 시도는 `OS_ERR_OBJECT_IN_USE`로 실패한다(`osapi-idmap.c:475–480`) | **K-SPAWN.osal**(2.3) |
 
 - timeout으로 깨는 것은 **timeout 전이**다. σ_U에서는 언제든 가능하고 σ_U∞에서는 없다. broadcast로 깨는 것은 모든 σ에 남는다. [I] σ_U에서 timeout 네 번은 실제 시간(σ_E 기준)으로 10 + 40 + 90 + 160 = 300 ms이므로, task 소실(F7)에는 그 정도의 생성자 지연이면 충분하다.
-- **관측**: 각 `OS_*Create`·`OS_*GetIdByName`·`OS_*Delete`의 entry와, 발행 구간을 잡는 `OS_ObjectIdFinalizeNew` entry. 반환값은 계약 사용 지점, 결과가 edge를 정하는 지점, 칸별 reach를 위한 prefix 지점(spec §4.7 item 6)에서만 잡는다(spec §5.2).
+- **관측**: 각 `OS_*Create`·`OS_*GetIdByName`·`OS_*Delete`의 entry와, 발행 구간을 잡는 `OS_ObjectIdFinalizeNew` entry. 반환값은 준비 상태 명세 사용 지점(readiness use site), 결과가 edge를 정하는 지점, 칸별 reach를 위한 prefix 지점(spec §4.7 item 6)에서만 잡는다(spec §5.2).
 - **규칙 RF (O)**: 성공한 조회는 같은 generation의 발행을 읽은 것이다. timestamp로 순서를 정하지 않는다([A §5.6]).
-- **계약**: `K-REG.osal-lookup`(Req LIVE. Allowed는 재시도 loop가 있으면 그 경계의 `retry_until_ready`(CF는 호출자 쪽 `code_admission`), 없으면 `returned_and_tested`(규칙 `rule`: 기본 정상 연속, rule-backed로 따로 보고). framework 수준은 `@retval` 목록(`osapi-countsem.h:157–160`)의 `documented-result`다; spec §3.15 RC1), `K-LOCKBAL`(M_impl, by-name/search), `K-REG.unique`(동시 생성의 중복 이름, [R01] F2), `K-LIFE.osal`(삭제와 동시인 NONE-mode 사용, [R01] F4). rwlock과 condvar는 test 밖 호출자가 없어 모형에 넣지 않는다.
+- **준비 상태 명세**: `K-REG.osal-lookup`(준비 사전조건 LIVE. 호출자 수준 Allowed는 `caller` 기록이 받아들이는 곳에서만 정한다. 재시도 loop가 있고 호출자 쪽 기록이 있으면 그 경계의 `retry_until_ready`(CF는 호출자 쪽 `code_admission`), 그 밖에는 `unspecified_by_reference`다. `returned_and_tested`는 reference가 호출자의 처리와 정상 연속을 인용한 곳에서만 쓴다. 추출한 `cont_candidate`, error 반환, exit는 사실로 보고한다(QT-4, Q15). framework 수준은 `@retval` 목록(`osapi-countsem.h:157–160`)의 `documented-result`다; spec §3.2, §3.15 RC1), `K-LOCKBAL`(M_impl, by-name/search), `K-REG.unique`(동시 생성의 중복 이름, [R01] F2), `K-LIFE.osal`(삭제와 동시인 NONE-mode 사용, [R01] F4). rwlock과 condvar는 test 밖 호출자가 없어 모형에 넣지 않는다.
 - [R01]의 F1(lock 누수), F2, F4, F7은 **코드 해석으로 낸 후보이고 실행하지 않았다**([R01 §1.8, §2.2]).
 
 ### 2.3 task 생성, ES handshake, App-record 구간, K-SELF.es (spec §3.3)
@@ -262,10 +282,10 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 **규칙 P-TASK / R2 (S, unconditional).** 생성자가 `OS_TaskCreate` 호출 전에 한 사건은 모두 자식의 첫 사건보다 먼저다([R01 §2.2]).
 
 **K-SPAWN.osal (M_impl).** 아직 RESERVED인 자기 record에 by-ID 자기 조회 handshake를 하는 thread는 모두 instance다([X2-03]).
-- 자식 task의 `OS_TaskPrepare`: 2.2의 대기 시도가 소진되면, 생성자는 `OS_SUCCESS`를 받았는데 entry는 실행되지 않는다. harm `task_never_runs`([R01]의 F7).
+- 자식 task의 `OS_TaskPrepare`: 2.2의 대기 시도가 소진되면, 생성자는 `OS_SUCCESS`를 받았는데 entry는 실행되지 않는다. 결과는 task 소실([R01]의 F7)이다. harm은 `unspecified_by_reference`이고, `task_never_runs`는 reference에서 온 `appreq`가 기록된 곳에서만이다(spec §3.3).
 - timebase callback thread(`osapi-timebase.c:383–390`): 실패하면 조용히 `return`한다. `cFS-Master`가 callback을 하나도 보내지 않아 1 Hz 사슬이 시작되지 않는다(TIME tone 없음, SCH_LAB wakeup 없음). 이 결과는 progress 축에서 `Local1HzTask`의 사용과 SCH_LAB loop의 `idle` pre-use stall로 나타나고, progress 사슬로 이 발생에 붙는다 [I] (2.13; spec §3.13, §7.3).
 - closure가 pattern으로 찾는 그 밖의 OSAL 내부 thread(2.1).
-- **harm의 판단 수준** (spec §1.6 harm). `task_never_runs`는 self 조회가 실패한 VIOLATING 발생의 safety 결과다. 다만 K-SPAWN.osal과 K-LOCKBAL의 `none`은 공급자 쪽 글에만 기댄다. 그래서 `appreq`가 기록되거나 PI가 구현 결함 family로 옮기기 전까지(PI 항목 QT-9) 그 발생은 NOT_READY_UNJUDGED이고 harm은 `unspecified_by_reference`이며, 효과는 consequence로 남는다.
+- **harm의 판단 수준** (spec §1.6 harm; QT-9, 2026-10-15 [D]). K-SPAWN.osal과 K-LOCKBAL의 `none`은 공급자 쪽 글에만 기댄다. 그래서 그 발생은 NOT_READY_UNJUDGED이고 harm은 `unspecified_by_reference`이며, 효과(task 소실, lock 누수)는 consequence로 남는다. PI는 이 둘을 구현 결함 계열(implementation-defect family)로 정했다. 호출자 요구 위반으로 만들려고 연구자가 작성한 `appreq`를 더하지 않고, 순서 위반과 이어지는 부분만 자기 근거로 보고한다. `task_never_runs`는 self 조회가 실패한 VIOLATING 발생의 harm일 수 있지만, 그러려면 reference에서 온 `appreq`가 있어야 한다.
 
 **ES task-record handshake (O, 조건부. guard된 부분은 S).** `CFE_ES_StartAppTask`는 ES lock을 잡기 **전에** task를 만들고(`cfe_es_apps.c:664–672`) task record는 그 **뒤에** 채운다(`:694–703`). 자식은 `CFE_ES_GetTaskFunction`에서 50 ms 지연과 lock 아래 확인을 되풀이하며, 예산은 `CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC` = 1000 ms, 즉 최대 21번이다(`:559–596`). 시간이 다 되면 entry는 불리지 않는다 [F].
 
@@ -273,13 +293,13 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 
 | 경로 | 예약 → task 시작 → 발행 | 구간 안에서 생기는 일 |
 |---|---|---|
-| script 앱 | `cfe_es_apps.c:821` → `:848–854` → `:869`(ES lock 아래, `:861–869`) | 50 ms 간격 poll이 이미 성공했을 수 있다([R02 §1.6]). 동료 앱의 `CFE_ES_GetAppIDByName`은 `CFE_SUCCESS`와 함께 `0xFFFFFFFF`를 돌려준다(`cfe_es_api.c:637–656`). 계약 oracle(`CFE_ES_AppRecordIsMatch`)이 이 성공을 not-ready로 판정한다 |
+| script 앱 | `cfe_es_apps.c:821` → `:848–854` → `:869`(ES lock 아래, `:861–869`) | 50 ms 간격 poll이 이미 성공했을 수 있다([R02 §1.6]). 동료 앱의 `CFE_ES_GetAppIDByName`은 `CFE_SUCCESS`와 함께 `0xFFFFFFFF`를 돌려준다(`cfe_es_api.c:637–656`). 준비 상태 명세의 oracle(`CFE_ES_AppRecordIsMatch`)이 이 성공을 not-ready로 판정한다 |
 | core 앱 | `cfe_es_start.c:803` → `:810` → `:818` | core task의 `*_TaskInit`이 `:818` 전에 `GetAppID`를 부를 수 있다. EVS는 첫 동작으로 부른다(`cfe_evs_task.c:273`) |
 
 - **child task도 피하지 못한다.** 부모의 구간 안에서 만든 자식(TIME, `ES_BG_TASK`, FM)은 아직 최종이 아닌 같은 App record로 풀린다([X2-02]).
 - **두 구간 모두 O-ordered다.** 사용의 LP와 발행이 모두 ES lock 아래에 있으므로 trace는 둘을 lock edge로 순서 짓는다. 반대 순서가 가능한지는 lock을 뒤집는 예측(spec §4.9)이나 explorer(§4.10)가 정한다. 이전 제안의 "순서 없음" 분류는 spec §0.5가 정정했다.
 
-**K-SELF.es [D].** generic 계약 `es.self(exec) = LIVE`를 `GetAppRecordByContext`/`GetTaskRecordByContext`의 **모든** 호출자에 instance로 만든다. 호출자마다 문서화된 not-ready 동작이 다르다(줄은 `cfe_es_api.c`).
+**K-SELF.es [D].** generic 준비 상태 명세 `es.self(exec) = LIVE`를 `GetAppRecordByContext`/`GetTaskRecordByContext`의 **모든** 호출자에 instance로 만든다. 호출자마다 문서화된 not-ready 동작이 다르다(줄은 `cfe_es_api.c`).
 
 | 호출자 (위치) | not-ready일 때의 결과 | Allowed |
 |---|---|---|
@@ -288,12 +308,14 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 | `CFE_ES_WaitForSystemState` (`:533`) | raise를 건너뛰고 대기는 계속 | `unspecified_by_reference` |
 | `CFE_ES_GetAppID` (`:750`) | `CFE_ES_ERR_RESOURCEID_NOT_VALID`, 출력 `UNDEFINED` | 호출자마다(상태를 검사하거나 무시) |
 | `CFE_ES_GetTaskID` (`:785`) | 오류 코드 | 호출자마다 |
-| `CFE_ES_CreateChildTask` (`:1262`) | 오류 코드, 자식 없음(harm `task_never_runs`) | 호출자마다 |
+| `CFE_ES_CreateChildTask` (`:1262`) | 오류 코드, 자식 없음(task 소실). 호출자 수준 Allowed가 정해진 호출자에서만 harm `task_never_runs`다 | 호출자마다 |
 | `CFE_ES_ExitChildTask` (`:1459`) | 오류 경로(record 해제 안 됨) | `unspecified_by_reference` |
 
-**결과 사슬.** 사슬은 한 갈래가 아니라 **모든 갈래**를 기록한다(spec §1.6). 실행 전이므로 모두 코드에서 추론한 것이다 [I] (spec §3.3; [X2-02]). 아래 표는 갈래마다 조건, 결과, harm을 한 줄씩 적는다.
+Allowed가 `unspecified_by_reference`인 행은 harm도 `unspecified_by_reference`다(spec §1.6). 그 사슬의 효과는 관측된 consequence이고, 기록된 `appreq`가 harm을 줄 때만 harm이 된다(spec §3.3).
 
-| 상황 | 조건 | 결과 | harm |
+**결과 사슬.** 사슬은 한 갈래가 아니라 **모든 갈래**를 기록한다(spec §1.6). 실행 전이므로 모두 코드에서 추론한 것이다 [I] (spec §3.3; [X2-02]). 갈래는 뿌리 발생의 관측된 consequence로 기록하고, 뿌리의 호출자 수준 Allowed가 정해진 곳에서만 갈래가 harm 이름을 가진다. EVS 사슬의 뿌리는 EVS의 `GetAppID` 발생이다. 그 `returned_and_tested` 항목이 연속을 인용하지 않으므로 엄격한 대안(QT-4, Q15)에서 이 발생은 NOT_READY_UNJUDGED이고, 아래 갈래는 그 발생의 consequence이며 harm은 `unspecified_by_reference`다. 갈래에 쓴 이름(`service_task_absent`, `panic`, `process_abort`)은 관측될 consequence의 이름이고, 기록된 `appreq`가 harm을 줄 때 harm이 된다(spec §3.3, App. A.2 step 3). 아래 표는 갈래마다 조건, 결과, 그 이름을 한 줄씩 적는다.
+
+| 상황 | 조건 | 결과 | consequence의 이름 |
 |---|---|---|---|
 | core 구간 안의 EVS: `GetAppID` 실패 → `CFE_ES_ExitApp(CORE_APP_INIT_ERROR)` | (a1) `ExitApp` 때 구간이 열려 있고(no-op), raise 때는 닫힘 | raise는 일어난다. loop 조건이 거짓이라 `ExitApp(RUNTIME_ERROR)` → `OS_TaskExit`. 시스템이 EVS task 없이 돈다 | `service_task_absent` |
 | 〃 | (a2) `ExitApp` 때도, raise 때도 구간이 열려 있음 | raise를 건너뛴다. core sync가 `CFE_PLATFORM_CORE_MAX_STARTUP_MSEC` = 30000 ms를 기다린 뒤 `CFE_PSP_Panic` | `panic` |
@@ -303,10 +325,10 @@ OSAL object의 kind는 `osal.obj<T>`이고, 상태는 FREE → ALLOC → RES_C(�
 | core task(ES, SB, TBL, TIME)의 raise가 구간 안 | 다시 raise하지 않음 | raise를 건너뛰어 30 s 뒤 panic | `panic` |
 | SB·TBL의 `GetAppID`가 구간 안(`cfe_sb_task.c:138`, `cfe_tbl_task.c:196`, 둘 다 상태 무시) | — | identity 셀이 그 실행 내내 `UNDEFINED`가 되고, 이후 모든 SB/TBL `SendEventWithAppID` 사용이 shape ABSENT로 bad다. 이 뿌리 하나에 사슬로 묶는다 | 사용마다 |
 
-마지막 행의 보고 방식은 EventRacer식 race coverage(OOPSLA 2013 [V-abs])를 따른다. 어떤 짝을 뒤집으려면 ad hoc 동기화 짝을 먼저 뒤집어야 할 때 그 동기화 짝을 뿌리로 보고하고, 종속 사용(기존 기록에서 부팅마다 순서가 정해진 211–229개 [M], [R2c §7])은 붙여 둔다(spec §4.8 step 7).
+마지막 행의 보고 방식은 EventRacer식 race coverage(OOPSLA 2013 [V-abs])를 따른다. 어떤 짝을 뒤집으려면 ad hoc 동기화 짝을 먼저 뒤집어야 할 때 그 동기화 짝을 뿌리로 보고하고, 종속 사용(발행과 SB 등록 뒤의 SB 호출자 사용. gdb 기록에서 부팅마다 199 / 205 / 205개였다 [M], [R2g §2])은 붙여 둔다(spec §4.8 step 7).
 
-- EVS의 `GetAppID`(`cfe_evs_task.c:273`)는 status를 검사하지만, not-ready 갈래는 `CFE_EVS_TaskInit`에서 `Status`를 돌려준다(`:274–278`). 검사의 모든 post-dominator가 status를 돌려주는 함수 반환이므로 기본 정상 연속이 없다(spec §1.6). 그래서 이 발생은 TOLERATED가 아니라 VIOLATING이다 [I] (spec App. A.2 step 3).
-- 표의 panic과 abort는 그 발생의 safety 결과(harm)다. progress 결과가 아니고, 어떤 horizon도 정하지 않는다(spec §1.6, App. A.2 step 3).
+- EVS의 `GetAppID`(`cfe_evs_task.c:273`)는 status를 검사하지만, not-ready 갈래는 `CFE_EVS_TaskInit`에서 `Status`를 돌려준다(`:274–278`). 검사의 모든 post-dominator가 status를 돌려주는 함수 반환이므로 추출한 후보 연속 `cont_candidate`는 none이다(spec §1.6). 이어서 `CFE_EVS_TaskMain`이 `CFE_ES_ExitApp(CORE_APP_INIT_ERROR)`를 부른다(`:215–220`). 이것들은 코드 사실이어서 그 발생의 consequence로 기록한다. EVS의 처리에 연속을 인용한 reference가 없으므로 이 발생은 TOLERATED도 VIOLATING도 아닌 NOT_READY_UNJUDGED다 [I] (엄격한 대안 QT-4, Q15; spec App. A.2 step 3).
+- 표의 panic과 abort는 그 발생의 관측된 consequence다. 뿌리 발생의 호출자 수준 Allowed가 정해지지 않았으므로 harm이 아니다. progress 결과가 아니고, 어떤 horizon도 정하지 않는다(spec §1.6, §3.3, App. A.2 step 3).
 
 **삭제와 종료 (P-TASK-JOIN / R17, S).** `OS_TaskDelete`는 취소한 뒤 join한다(`os-impl-tasks.c:693–723`). 지연 취소(deferred cancellation)는 피해 task가 취소 지점에서 program lock을 잡고 있으면 그 lock을 남긴다([R01 §2.4]). 그래서 ES lock 아래에서 삭제하는 `CFE_ES_DeleteChildTask`(`cfe_es_api.c:1348, 1383`)에 **K-LOCK.cancel**을 둔다.
 
@@ -404,11 +426,11 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 | 메시지 provenance ([X1-M7 (a)]) | pipe p마다 `Prov(p) = (Routes_B(p) ∩ Tx_B) ∪ Input_B(p)`를 handler 도달성에 대한 최소 고정점으로 계산한다. `Prov(p)` 밖의 dispatch 갈래는 두 skeleton view 모두에서 접어 버린다(spec §4.3) |
 | looper 규칙 | handler 안의 program order만 두고, **handler 사이에는 HB edge가 없다.** 예측에서 FIFO 제약으로만 남는다(CAFA PLDI 2014 [V-abs]; DCatch ASPLOS 2017 [P]) |
 | buffer 수명 | 같은 pipe의 다음 `ReceiveBuffer`나 pipe 삭제까지 유효하다(`cfe_sb.h:449–464`) → `K-LIFE.sb-buffer` |
-| 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** **문서화된 drop**(`documented_drop`, 사용하는 코드는 SB 자신의 event 코드)은 하나다. 호출자의 task별 재귀 bit가 서 있는 경우다(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; 호출자 쪽 `caller`, `code_admission`). **문서화되지 않은 drop**: 호출자에게 ES task record가 없으면 SB의 event 코드는 자기 `CFE_ES_GetTaskID` 호출의 status를 무시하고(`cfe_sb_priv.c:773`, K-SELF.es instance, spec §3.3), 이어 `CFE_ES_TaskID_ToIndex`가 실패해 event가 버려진다(`cfe_sb_priv.c:315–318, 784`). 이 drop을 문서화한 주석이 없고 이를 받아들이는 Kairos 규칙도 없으므로 Allowed 항목이 아니다. 그래서 그 K-SELF.es instance의 호출자 수준 Allowed는 `unspecified_by_reference`이고(NOT_READY_UNJUDGED; harm `unspecified_by_reference`; 결과는 effect lost silently, 곧 event가 버려진다), SB의 `appreq`가 기록되면 `none`(VIOLATING)이다(spec §1.6 `appreq` step (1)). SB가 버린 event를 보내라는 cSB 요구(cSB4305.3–.5)는 SB의 event site에서 호출자 쪽 글이다. 그것을 그 site의 `appreq`로 기록할지는 열려 있다(PI). 기록하면 spec §1.6의 우선순위 규칙이 적용되어, 재귀 guard의 허용은 그것과 충돌한다(우선순위가 정해질 때까지 충돌을 적은 NOT_READY_UNJUDGED). 기록하지 않으면 재귀 guard drop은 TOLERATED다(spec §3.9; [X2-14 (a)]) |
+| 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** **문서화된 drop**(`documented_drop`, 사용하는 코드는 SB 자신의 event 코드)은 하나다. 호출자의 task별 재귀 bit가 서 있는 경우다(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; 호출자 쪽 `caller`, `code_admission`). **문서화되지 않은 drop**: 호출자에게 ES task record가 없으면 SB의 event 코드는 자기 `CFE_ES_GetTaskID` 호출의 status를 무시하고(`cfe_sb_priv.c:773`, K-SELF.es instance, spec §3.3), 이어 `CFE_ES_TaskID_ToIndex`가 실패해 event가 버려진다(`cfe_sb_priv.c:315–318, 784`). 이 drop을 문서화한 주석이 없고 이를 받아들이는 Kairos 규칙도 없으므로 Allowed 항목이 아니다. 그래서 그 K-SELF.es instance의 호출자 수준 Allowed는 `unspecified_by_reference`이고(NOT_READY_UNJUDGED; harm `unspecified_by_reference`; 결과는 effect lost silently, 곧 event가 버려진다), SB의 `appreq`가 기록되면 `none`(VIOLATING)이다(spec §1.6 `appreq` step (1)). SB가 버린 event를 보내라는 cSB 요구(cSB4305.3–.5)는 SB의 event site에서 호출자 쪽 글이다. 그것을 그 site의 `appreq`로 기록할지는 열려 있다(PI). 기록하면 spec §1.6이 충돌로 적고 판정을 보류하므로(QT-5), 재귀 guard의 허용은 그것과 충돌한다(충돌을 적은 NOT_READY_UNJUDGED, 우선순위를 정하지 않는다). 기록하지 않으면 재귀 guard drop은 TOLERATED다(spec §3.9; [X2-14 (a)]) |
 | 구독 보고 mode ([X2-05]) | SBN은 `ENABLE_SUB_REPORTING`과 `SEND_PREV_SUBS` 명령을 **보낼 뿐이다**(`sbn_subs.c:43–60`). mode 변경(LP `cfe_sb_task.c:1224–1227`)과 재전송 송신 loop(`:1169`)는 **SB 자신의 main task**가 한다. 구독자 task는 SB unlock 뒤 lock 없이 flag를 읽는다(`:659`, `assumed`). K-MODE는 SB 명령 pipe 위의 R7로 이어지고, 그 pipe에도 K-CAP과 K-CAP.msglim instance가 있다 |
 | 용량, 두 수준 | `sb.queue(p)`의 `cap_B(p)` → **K-CAP**. `cap_B(p) = min(요청 깊이, msg_max)`는 euid ≠ 0일 때만 맞다(spec §1.3; [M] `msg_max` 10, 26개 pipe 중 22개가 잘림, [BM §3.1]). `sb.msglim(m,p)`의 한도는 각 `Subscribe` 지점의 `MsgLim` 인자를 상수 평가한다(기본 4) → **K-CAP.msglim**. 1단계 상한은 certificate view의 MB 순서 위에서 put과 get의 maximum-weight closure로 구한다(표준 알고리즘 사실, 인용은 미확인). star-closed loop 안의 put은 무게가 무한이므로 protected certificate가 없다 |
 
-**Allowed와 세 판단** [D] (spec §1.6 "Three judgements", §3.9; ADR-043). route와 용량 계약의 손실은 세 판단으로 따로 기록하고, 어느 규칙도 셋을 합치지 않는다(spec §4.12 item 6).
+**Allowed와 세 판단** [D] (spec §1.6 "Three judgements", §3.9; ADR-043). route와 용량 준비 상태 명세의 손실은 세 판단으로 따로 기록하고, 어느 규칙도 셋을 합치지 않는다(spec §4.12 item 6).
 
 | 판단 | 무구독 손실 (구독 전 송신, K-ROUTE) | 용량 손실 (queue full, MsgLim; K-CAP, K-CAP.msglim) |
 |---|---|---|
@@ -417,7 +439,8 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 | 관측된 결과 (consequence) | "message lost"(route 없음)와 counter 증가량 | "message lost"(queue full 또는 MsgLim 도달)와 counter 증가량 |
 
 - SB 쪽 reference는 framework 수준이다. 어느 것도 route·용량 발생을 TOLERATED로 만들거나 `appreq`를 채우지 않는다. 그래서 무구독 손실은 `documented_drop`이 아니다. `documented_drop`은 사용하는 코드가 자기 요청을 버리는 경우이고, 공급자가 호출자의 요청을 문서대로 버리는 것은 op의 outcome map에 있는 framework 수준 정보다(spec §1.6 Allowed 표).
-- 전달을 요구하는 `appreq`(예: 임무 요구)가 소비자의 호출자 쪽 항목(예: TO_LAB의 연기)과 충돌하면 spec §1.6의 우선순위 규칙으로 다룬다. 우선순위가 정해질 때까지 그 발생은 충돌을 적은 NOT_READY_UNJUDGED이고, 결코 조용히 TOLERATED가 되지 않는다.
+- 프레임워크가 어떤 반환 결과를 문서화해 허용한다고 해서 호출자의 요구 충족까지 인정되지 않는다(QT-3). 구독자 없는 송신에 대한 SB 규정(cSB4305.5)과 R2의 `ILLEGAL_APP_ID`(EVS API가 유효하지 않은 AppId에 돌려주는 오류, `cfe_evs.h:169–172`)는 서로 다른 API에 대한 다른 진술이고, 어느 쪽도 다른 쪽의 근거가 아니다(QT-2; spec §1.6).
+- 전달을 요구하는 `appreq`(예: 임무 요구)가 소비자의 호출자 쪽 항목(예: TO_LAB의 연기)과 충돌하면 충돌을 적고 판정을 보류한다(QT-5, 2026-10-15). 문서의 버전·대상·적용 범위를 먼저 확인하고, 충돌이 풀리지 않으면 우선순위를 만들지 않는다. 그 발생은 충돌을 적은 NOT_READY_UNJUDGED이고, 결코 조용히 TOLERATED가 되지 않는다.
 - `documented-not-error` 결과도 호출자 수준에서 LOSS-UNDER-ORDER나 `violation`을 지닐 수 있다(spec §1.10). 손실은 판정의 consequence로 counter 증가량과 함께 남는다.
 - **oracle** ([J2-12]; [X2-06]). 정지 때 memory에서 읽는 네 counter(`NoSubscribersCounter`, `PipeOverflowErrorCounter`, `MsgLimitErrorCounter`, `InternalErrorCounter`; [BM §2.3]의 방법)와 trace의 put별 결과다. `PeakQueueDepth`는 put 성공 전에 세므로 실제 `mq` 용량을 넘을 수 있어, **SB가 계산한 깊이**라는 label을 단다. 실제 깊이는 put/get 결과로 다시 만든다.
 
@@ -438,7 +461,7 @@ R2 구간에서 이 손실의 세 판단은 다음과 같다 [I] (spec App. A.1 
 | 값 조건 `valid(arg.AppID)` | capture point(호출자가 AppId를 읽은 load, 예: `cfe_sb_api.c:226–228`) | `ILLEGAL_APP_ID` |
 | 등록 조건 `state(evs.reg(arg.AppID)) = REG` | slot 검사(`cfe_evs.c:185–194`) | `NOT_REGISTERED` |
 
-- EVS 자신의 identity는 마지막에 발행하고(`cfe_evs_task.c:311–312`) 사용 지점에서 guard한다(`cfe_evs_utils.c:613–623`). guard된 이른 사용은 `documented_drop`이다. 호출자 쪽 근거다: guard와 그 주석(`cfe_evs_utils.c:613–615`)은 사용자인 EVS 자신의 event 코드에 속한다. 그 발생은 결정에서 TOLERATED다. refinement `tolerated`는 certificate 경로가 없으므로 `exh`에서만 나온다(spec §1.10, §3.10).
+- EVS 자신의 identity는 마지막에 발행하고(`cfe_evs_task.c:311–312`) 사용 지점에서 guard한다(`cfe_evs_utils.c:613–623`). guard된 이른 사용은 `documented_drop`이다. 호출자 쪽 근거다: guard와 그 주석(`cfe_evs_utils.c:613–615`)은 사용자인 EVS 자신의 event 코드에 속한다. 그 발생은 결정에서 TOLERATED다. refinement `allowed-not-ready`는 certificate 경로가 없으므로 `exh`에서만 나온다(spec §1.10, §3.10).
 - lock 없는 filter counter와 `EVS_NotRegistered` 갱신은 class **M**(memory 수준 data race)이다. 순서 위반으로 세지 않는다(spec §1.1).
 
 ### 2.11 Table Services (spec §3.11)

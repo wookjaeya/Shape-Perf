@@ -1,0 +1,325 @@
+# extraction summary
+extract
+  translation units          168
+  functions                  1591 (bodies read 1409, in system headers skipped 54)
+  call sites                 5948
+  indirect calls             54 (resolved 47, unresolved 7)
+  spawn calls                4 (entry resolved 4)
+  loops                      257 (table walks resolved 3, failed 0)
+  out-pointer summaries      store-only 1, escaping 0, unsummarized 0
+  untyped write sites        99 in the program, 0 of them count for a target
+  location CFE_ES_AppRecord_t.AppId   writers 5 (direct 2, data function 3, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location CFE_ES_AppRecord_t.AppState   writers 7 (direct 4, data function 3, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location CFE_ES_AppRecord_t.Type   writers 5 (direct 2, data function 3, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location CFE_PSP_IdleTaskState_t.ShutdownReq   writers 2 (direct 1, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location CFE_SB_Global_t.AppId   writers 3 (direct 0, data function 1, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location EVS_AppData_t.AppID   writers 4 (direct 2, data function 2, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  hand-entered inputs        16 (built-in data-function table 12, command line 4)
+
+# the identity field of the SB task
+[init] 1
+  CFE_SB_Global_t.AppId in CFE_SB_Global zero-initialized value=0 defined at cfe/modules/sb/fsw/src/cfe_sb_task.c:40:17
+[writers] 3
+  CFE_SB_Global_t.AppId memset at cfe/modules/sb/fsw/src/cfe_sb_init.c:50:5 in CFE_SB_EarlyInit value=const 0 [fill 0] key=&CFE_SB_Global {early-init,init-tree,covers-more-than-the-field} COMPUTED
+  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:754 value=symbolic [CFE_ES_AppRecordGetID(AppRecPtr)] key=*CFE_ES_GetAppID argument 0 guard=(ne local:AppRecPtr 0) {} COMPUTED
+  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:759 value=const 0 [CFE_ES_APPID_UNDEFINED] key=*CFE_ES_GetAppID argument 0 guard=(not (ne local:AppRecPtr 0)) {} COMPUTED
+[locs] 6
+  CFE_SB_Global_t.AppId writer-set-complete writers=3 (direct 0, data-fn 1, out-pointer 2) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=7
+[outcalls] 1
+  site 2436 cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 CFE_ES_GetAppID arg 0 = &CFE_SB_Global_t.AppId store-only stores=2
+
+# loops that walk a table or wait
+  loop 8 site 135 cfe/modules/es/fsw/src/cfe_es_api.c:410:13 in CFE_ES_ExitApp depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 136
+      exit 0
+      mod [(call-result OS_TaskDelay)]
+  loop 9 site 148 cfe/modules/es/fsw/src/cfe_es_api.c:585:5 in CFE_ES_WaitForSystemState depth=1 poll trip=unknown exits=1 calls=1
+      delay-call site 149
+      exit (or (not (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0)) (and (and (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0) (not (gt local:WaitRemaining 50))) (not (gt local:WaitRemaining 0))))
+      mod [local:Status, local:WaitRemaining, local:WaitTime, (call-result OS_TaskDelay)]
+      budget [local:WaitRemaining, param:TimeOutMilliseconds#1, local:WaitTime, (store local:WaitTime 50), (store local:WaitTime local:WaitRemaining)]
+  loop 13 site 418 cfe/modules/es/fsw/src/cfe_es_apps.c:573:5 in CFE_ES_GetTaskFunction depth=1 poll trip=unknown exits=1 calls=5
+      delay-call site 419
+      lock one-lock-region site 420
+      exit (or (eq local:ReturnCode 0) (le local:Timeout 0))
+      mod [local:EntryFunc, local:ReturnCode, local:TaskRecPtr, local:Timeout, (call-result CFE_ES_GetTaskRecordByContext), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_UnlockSharedData), (call-result CFE_ResourceId_IsDefined), (call-result OS_TaskDelay)]
+      budget [local:Timeout, 1000, 50]
+  loop 18 site 529 cfe/modules/es/fsw/src/cfe_es_apps.c:1526:5 in CFE_ES_CleanUpApp depth=1 table-walk trip=exact(10) exits=1 calls=3 table=GLOBAL_CONFIGDATA.CoreObjectTable
+      exit (eq local:Entry 0)
+      mod [local:CleanupStatus, local:Entry, local:ReturnCode, local:i, (call-result <indirect>), (call-result CFE_ES_WriteToSysLog), (call-result CFE_ResourceId_ToInteger)]
+  loop 42 site 1109 cfe/modules/es/fsw/src/cfe_es_start.c:752:5 in CFE_ES_CreateObjects depth=1 table-walk trip=exact(10) exits=1 calls=5 table=GLOBAL_CONFIGDATA.CoreObjectTable
+      delay-call site 1113
+      exit (eq local:Entry 0)
+      mod [local:Entry, local:ReturnCode, local:i, (call-result <indirect>), (call-result CFE_ES_WriteToSysLog), (call-result CFE_PSP_Panic), (call-result OS_TaskDelay)]
+  loop 43 site 1115 cfe/modules/es/fsw/src/cfe_es_start.c:776:5 in CFE_ES_CreateObjects depth=1 table-walk trip=exact(10) exits=1 calls=16 table=GLOBAL_CONFIGDATA.CoreObjectTable
+      delay-call site 1134
+      lock none site 1116
+      exit (eq local:Entry 0)
+      mod [field:CFE_ES_AppRecord_t.AppName, field:CFE_ES_AppRecord_t.Type, field:CFE_ES_AppStartParams_t.ExceptionAction, field:CFE_ES_ControlReq_t.AppControlRequest, field:CFE_ES_ControlReq_t.AppTimerMsec, field:CFE_ES_Global_t.LastAppId, field:CFE_ES_Global_t.RegisteredCoreApps, field:CFE_ES_TaskStartParams_t.Priority, field:CFE_ES_TaskStartParams_t.StackSize, local:AppRecPtr, local:Entry, local:PendingAppId, local:ReturnCode, local:i, (call-result CFE_ES_AppRecordSetUsed), (call-result CFE_ES_LocateAppRecordByID), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_MainTaskSyncDelay), (call-result CFE_ES_StartAppTask), (call-result CFE_ES_UnlockSharedData), (call-result CFE_ES_WriteToSysLog), (call-result CFE_PSP_Panic), (call-result CFE_ResourceId_FindNext), (call-result OS_TaskDelay), (call-result memset), (call-result strncpy)]
+  loop 44 site 1137 cfe/modules/es/fsw/src/cfe_es_start.c:871:5 in CFE_ES_MainTaskSyncDelay@cfe/modules/es/fsw/src/cfe_es_start.c:860 depth=1 poll trip=unknown exits=2 calls=5
+      delay-call site 1142
+      lock one-lock-region site 1138
+      exit (or (eq local:AppNotReadyCounter 0) (and (not (gt local:WaitRemaining 50)) (not (gt local:WaitRemaining 0))))
+      mod [local:AppNotReadyCounter, local:AppRecPtr, local:Status, local:WaitRemaining, local:WaitTime, local:i, (call-result CFE_ES_AppRecordIsUsed), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_UnlockSharedData), (call-result OS_TaskDelay)]
+      budget [local:WaitRemaining, param:TimeOutMilliseconds#1, local:WaitTime, (store local:WaitTime 50), (store local:WaitTime local:WaitRemaining)]
+  loop 194 site 4921 osal/src/os/shared/src/osapi-common.c:367:5 in OS_DeleteAllObjects depth=1 poll trip=unknown exits=1 calls=5
+      delay-call site 4926
+      exit (or (eq local:ObjectCount 0) (gt local:TryCount 4))
+      mod [local:ObjectCount, local:TryCount, (call-result OS_ForEachObject), (call-result OS_ForEachObjectOfType), (call-result OS_TaskDelay)]
+  loop 246 site 5965 psp/fsw/modules/linux_sysmon/linux_sysmon.c:341:17 in linux_sysmon_Start@psp/fsw/modules/linux_sysmon/linux_sysmon.c:304 depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 5966
+      exit (not (and (eq field:linux_sysmon_cpuload_state_t.num_cpus 0) (lt local:DelayCount 100000000)))
+      mod [local:DelayCount, (call-result OS_TaskDelay)]
+
+# the images of the tables the loops walk
+[image] 72
+  CFE_CONFIG_ModuleEntry.Cleanup null
+  CFE_CONFIG_ModuleEntry.EarlyInit function CFE_Config_Init
+  CFE_CONFIG_ModuleEntry.Name string "CFE_CONFIG"
+  CFE_CONFIG_ModuleEntry.Priority int 0
+  CFE_CONFIG_ModuleEntry.StackSize int 0
+  CFE_CONFIG_ModuleEntry.TaskMain null
+  CFE_CORE_MODULE_OBJTAB[0] address CFE_CONFIG_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[10] null
+  CFE_CORE_MODULE_OBJTAB[1] address CFE_ES_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[2] address CFE_EVS_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[3] address CFE_FS_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[4] address CFE_SB_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[5] address CFE_TBL_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[6] address CFE_TIME_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[7] address CFE_MSG_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[8] address CFE_SBR_ModuleEntry
+  CFE_CORE_MODULE_OBJTAB[9] address CFE_RESOURCEID_ModuleEntry
+  CFE_ES_ModuleEntry.Cleanup null
+  CFE_ES_ModuleEntry.EarlyInit function CFE_ES_CDS_EarlyInit
+  CFE_ES_ModuleEntry.Name string "CFE_ES"
+  CFE_ES_ModuleEntry.Priority int 68
+  CFE_ES_ModuleEntry.StackSize int 8192
+  CFE_ES_ModuleEntry.TaskMain function CFE_ES_TaskMain
+  CFE_EVS_ModuleEntry.Cleanup function CFE_EVS_CleanUpApp
+  CFE_EVS_ModuleEntry.EarlyInit function CFE_EVS_EarlyInit
+  CFE_EVS_ModuleEntry.Name string "CFE_EVS"
+  CFE_EVS_ModuleEntry.Priority int 61
+  CFE_EVS_ModuleEntry.StackSize int 8192
+  CFE_EVS_ModuleEntry.TaskMain function CFE_EVS_TaskMain
+  CFE_FS_ModuleEntry.Cleanup null
+  CFE_FS_ModuleEntry.EarlyInit function CFE_FS_EarlyInit
+  CFE_FS_ModuleEntry.Name string "CFE_FS"
+  CFE_FS_ModuleEntry.Priority int 0
+  CFE_FS_ModuleEntry.StackSize int 0
+  CFE_FS_ModuleEntry.TaskMain null
+  CFE_MSG_ModuleEntry.Cleanup null
+  CFE_MSG_ModuleEntry.EarlyInit null
+  CFE_MSG_ModuleEntry.Name string "CFE_MSG"
+  CFE_MSG_ModuleEntry.Priority int 0
+  CFE_MSG_ModuleEntry.StackSize int 0
+  CFE_MSG_ModuleEntry.TaskMain null
+  CFE_RESOURCEID_ModuleEntry.Cleanup null
+  CFE_RESOURCEID_ModuleEntry.EarlyInit null
+  CFE_RESOURCEID_ModuleEntry.Name string "CFE_RESOURCEID"
+  CFE_RESOURCEID_ModuleEntry.Priority int 0
+  CFE_RESOURCEID_ModuleEntry.StackSize int 0
+  CFE_RESOURCEID_ModuleEntry.TaskMain null
+  CFE_SBR_ModuleEntry.Cleanup null
+  CFE_SBR_ModuleEntry.EarlyInit null
+  CFE_SBR_ModuleEntry.Name string "CFE_SBR"
+  CFE_SBR_ModuleEntry.Priority int 0
+  CFE_SBR_ModuleEntry.StackSize int 0
+  CFE_SBR_ModuleEntry.TaskMain null
+  CFE_SB_ModuleEntry.Cleanup function CFE_SB_CleanUpApp
+  CFE_SB_ModuleEntry.EarlyInit function CFE_SB_EarlyInit
+  CFE_SB_ModuleEntry.Name string "CFE_SB"
+  CFE_SB_ModuleEntry.Priority int 64
+  CFE_SB_ModuleEntry.StackSize int 8192
+  CFE_SB_ModuleEntry.TaskMain function CFE_SB_TaskMain
+  CFE_TBL_ModuleEntry.Cleanup function CFE_TBL_CleanUpApp
+  CFE_TBL_ModuleEntry.EarlyInit function CFE_TBL_EarlyInit
+  CFE_TBL_ModuleEntry.Name string "CFE_TBL"
+  CFE_TBL_ModuleEntry.Priority int 70
+  CFE_TBL_ModuleEntry.StackSize int 8192
+  CFE_TBL_ModuleEntry.TaskMain function CFE_TBL_TaskMain
+  CFE_TIME_ModuleEntry.Cleanup function CFE_TIME_CleanUpApp
+  CFE_TIME_ModuleEntry.EarlyInit function CFE_TIME_EarlyInit
+  CFE_TIME_ModuleEntry.Name string "CFE_TIME"
+  CFE_TIME_ModuleEntry.Priority int 60
+  CFE_TIME_ModuleEntry.StackSize int 8192
+  CFE_TIME_ModuleEntry.TaskMain function CFE_TIME_TaskMain
+  GLOBAL_CONFIGDATA.CoreObjectTable address CFE_CORE_MODULE_OBJTAB
+
+# indirect call and spawn targets
+[targets] 147
+  site 15 cfe/modules/config/fsw/src/cfe_config_get.c:184:13 in CFE_Config_IterateAll indirect-call -> CFE_ES_ModSrcVerCallback via P:CFE_Config_IterateAll#1 of 1
+  site 296 cfe/modules/es/fsw/src/cfe_es_api.c:1554:21 in CFE_ES_CalculateCRC indirect-call -> CFE_ES_ComputeCRC_Algo_16_ARC via CFE_ES_ComputeCRC_Params_t.Algorithm of 2
+  site 296 cfe/modules/es/fsw/src/cfe_es_api.c:1554:21 in CFE_ES_CalculateCRC indirect-call -> CFE_ES_ComputeCRC_Algo_NONE via CFE_ES_ComputeCRC_Params_t.Algorithm of 2
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_ES_BackgroundTask via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_ES_TaskMain via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_EVS_TaskMain via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_SB_TaskMain via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_TBL_TaskMain via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_TIME_Local1HzTask via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_TIME_TaskMain via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 in CFE_ES_TaskEntryPoint indirect-call -> CFE_TIME_Tone1HzTask via L:CFE_ES_TaskEntryPoint/RealEntryFunc of 8
+  site 429 cfe/modules/es/fsw/src/cfe_es_apps.c:664:16 in CFE_ES_StartAppTask spawn-entry -> CFE_ES_TaskEntryPoint via F:CFE_ES_TaskEntryPoint of 1
+  site 481 cfe/modules/es/fsw/src/cfe_es_apps.c:1016:22 in CFE_ES_LoadLibrary indirect-call -> UNRESOLVED(no-function-flows-to-it) via L:CFE_ES_LoadLibrary/FunctionPointer of 0
+  site 530 cfe/modules/es/fsw/src/cfe_es_apps.c:1535:26 in CFE_ES_CleanUpApp indirect-call -> CFE_EVS_CleanUpApp via Target_ObjectTable_t.Cleanup of 4
+  site 530 cfe/modules/es/fsw/src/cfe_es_apps.c:1535:26 in CFE_ES_CleanUpApp indirect-call -> CFE_SB_CleanUpApp via Target_ObjectTable_t.Cleanup of 4
+  site 530 cfe/modules/es/fsw/src/cfe_es_apps.c:1535:26 in CFE_ES_CleanUpApp indirect-call -> CFE_TBL_CleanUpApp via Target_ObjectTable_t.Cleanup of 4
+  site 530 cfe/modules/es/fsw/src/cfe_es_apps.c:1535:26 in CFE_ES_CleanUpApp indirect-call -> CFE_TIME_CleanUpApp via Target_ObjectTable_t.Cleanup of 4
+  site 581 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:164:44 in CFE_ES_BackgroundTask indirect-call -> CFE_ES_ActiveJob via CFE_ES_BackgroundJobEntry_t.RunFunc of 5
+  site 581 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:164:44 in CFE_ES_BackgroundTask indirect-call -> CFE_ES_RunAppTableScan via CFE_ES_BackgroundJobEntry_t.RunFunc of 5
+  site 581 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:164:44 in CFE_ES_BackgroundTask indirect-call -> CFE_ES_RunExceptionScan via CFE_ES_BackgroundJobEntry_t.RunFunc of 5
+  site 581 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:164:44 in CFE_ES_BackgroundTask indirect-call -> CFE_ES_RunPerfLogDump via CFE_ES_BackgroundJobEntry_t.RunFunc of 5
+  site 581 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:164:44 in CFE_ES_BackgroundTask indirect-call -> CFE_FS_RunBackgroundFileDump via CFE_ES_BackgroundJobEntry_t.RunFunc of 5
+  site 586 cfe/modules/es/fsw/src/cfe_es_backgroundtask.c:214:14 in CFE_ES_BackgroundInit spawn-entry -> CFE_ES_BackgroundTask via F:CFE_ES_BackgroundTask of 1
+  site 812 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:122:19 in CFE_ES_GenPoolRecyclePoolBlock indirect-call -> CFE_ES_CDS_PoolRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 812 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:122:19 in CFE_ES_GenPoolRecyclePoolBlock indirect-call -> CFE_ES_MemPoolDirectRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 813 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:142:22 in CFE_ES_GenPoolRecyclePoolBlock indirect-call -> CFE_ES_CDS_PoolCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 813 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:142:22 in CFE_ES_GenPoolRecyclePoolBlock indirect-call -> CFE_ES_MemPoolDirectCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 815 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:207:14 in CFE_ES_GenPoolCreatePoolBlock indirect-call -> CFE_ES_CDS_PoolRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 815 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:207:14 in CFE_ES_GenPoolCreatePoolBlock indirect-call -> CFE_ES_MemPoolDirectRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 816 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:215:18 in CFE_ES_GenPoolCreatePoolBlock indirect-call -> CFE_ES_CDS_PoolCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 816 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:215:18 in CFE_ES_GenPoolCreatePoolBlock indirect-call -> CFE_ES_MemPoolDirectCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 828 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:422:14 in CFE_ES_GenPoolGetBlockSize indirect-call -> CFE_ES_CDS_PoolRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 828 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:422:14 in CFE_ES_GenPoolGetBlockSize indirect-call -> CFE_ES_MemPoolDirectRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 830 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:465:14 in CFE_ES_GenPoolPutBlock indirect-call -> CFE_ES_CDS_PoolRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 830 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:465:14 in CFE_ES_GenPoolPutBlock indirect-call -> CFE_ES_MemPoolDirectRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 832 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:484:22 in CFE_ES_GenPoolPutBlock indirect-call -> CFE_ES_CDS_PoolCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 832 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:484:22 in CFE_ES_GenPoolPutBlock indirect-call -> CFE_ES_MemPoolDirectCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 834 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:536:22 in CFE_ES_GenPoolRebuild indirect-call -> CFE_ES_CDS_PoolRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 834 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:536:22 in CFE_ES_GenPoolRebuild indirect-call -> CFE_ES_MemPoolDirectRetrieve via CFE_ES_GenPoolRecord_t.Retrieve of 2
+  site 838 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:595:38 in CFE_ES_GenPoolRebuild indirect-call -> CFE_ES_CDS_PoolCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 838 cfe/modules/es/fsw/src/cfe_es_generic_pool.c:595:38 in CFE_ES_GenPoolRebuild indirect-call -> CFE_ES_MemPoolDirectCommit via CFE_ES_GenPoolRecord_t.Commit of 2
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_Config_Init via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_ES_CDS_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_EVS_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_FS_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_SB_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_TBL_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1111 cfe/modules/es/fsw/src/cfe_es_start.c:762:26 in CFE_ES_CreateObjects indirect-call -> CFE_TIME_EarlyInit via Target_ObjectTable_t.EarlyInit of 7
+  site 1824 cfe/modules/fs/fsw/src/cfe_fs_api.c:741:13 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_ES_BackgroundERLogFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1824 cfe/modules/fs/fsw/src/cfe_fs_api.c:741:13 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_BackgroundFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1824 cfe/modules/fs/fsw/src/cfe_fs_api.c:741:13 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_TBL_DumpRegistryEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1828 cfe/modules/fs/fsw/src/cfe_fs_api.c:753:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_ES_BackgroundERLogFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1828 cfe/modules/fs/fsw/src/cfe_fs_api.c:753:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_BackgroundFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1828 cfe/modules/fs/fsw/src/cfe_fs_api.c:753:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_TBL_DumpRegistryEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1831 cfe/modules/fs/fsw/src/cfe_fs_api.c:774:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_ES_BackgroundERLogFileDataGetter via CFE_FS_FileWriteMetaData_t.GetData of 5
+  site 1831 cfe/modules/fs/fsw/src/cfe_fs_api.c:774:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_WriteMsgMapInfoDataGetter via CFE_FS_FileWriteMetaData_t.GetData of 5
+  site 1831 cfe/modules/fs/fsw/src/cfe_fs_api.c:774:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_WritePipeInfoDataGetter via CFE_FS_FileWriteMetaData_t.GetData of 5
+  site 1831 cfe/modules/fs/fsw/src/cfe_fs_api.c:774:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_WriteRouteInfoDataGetter via CFE_FS_FileWriteMetaData_t.GetData of 5
+  site 1831 cfe/modules/fs/fsw/src/cfe_fs_api.c:774:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_TBL_DumpRegistryGetter via CFE_FS_FileWriteMetaData_t.GetData of 5
+  site 1834 cfe/modules/fs/fsw/src/cfe_fs_api.c:798:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_ES_BackgroundERLogFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1834 cfe/modules/fs/fsw/src/cfe_fs_api.c:798:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_BackgroundFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1834 cfe/modules/fs/fsw/src/cfe_fs_api.c:798:17 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_TBL_DumpRegistryEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1836 cfe/modules/fs/fsw/src/cfe_fs_api.c:822:9 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_ES_BackgroundERLogFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1836 cfe/modules/fs/fsw/src/cfe_fs_api.c:822:9 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_SB_BackgroundFileEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1836 cfe/modules/fs/fsw/src/cfe_fs_api.c:822:9 in CFE_FS_RunBackgroundFileDump indirect-call -> CFE_TBL_DumpRegistryEventHandler via CFE_FS_FileWriteMetaData_t.OnEvent of 3
+  site 1911 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:165:23 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ResourceId_DefaultIncrementSerial@cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:67 via P:CFE_ResourceId_FindNextEx#1 of 2
+  site 1911 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:165:23 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_LoadBuffIncrementSerial via P:CFE_ResourceId_FindNextEx#1 of 2
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ES_CheckAppIdSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ES_CheckCDSHandleSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ES_CheckCounterIdSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ES_CheckLibIdSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_ES_CheckMemPoolSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_SB_CheckPipeDescSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_CheckAccessDescriptorSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_CheckDumpCtrlSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_CheckLoadBuffSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_CheckRegistrySlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 1913 cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c:171:18 in CFE_ResourceId_FindNextEx indirect-call -> CFE_TBL_CheckValidationResultSlotUsed via P:CFE_ResourceId_FindNextEx#3 of 11
+  site 2375 cfe/modules/sb/fsw/src/cfe_sb_priv.c:1244:31 in CFE_SB_MessageTxn_ProcessPipes indirect-call -> CFE_SB_ReceiveTxn_PipeHandler via P:CFE_SB_MessageTxn_ProcessPipes#0 of 2
+  site 2375 cfe/modules/sb/fsw/src/cfe_sb_priv.c:1244:31 in CFE_SB_MessageTxn_ProcessPipes indirect-call -> CFE_SB_TransmitTxn_PipeHandler via P:CFE_SB_MessageTxn_ProcessPipes#0 of 2
+  site 2632 cfe/modules/sbr/fsw/src/cfe_sbr_route_unsorted.c:224:9 in CFE_SBR_ForEachRouteId indirect-call -> CFE_SB_CollectMsgMapInfo via P:CFE_SBR_ForEachRouteId#0 of 4
+  site 2632 cfe/modules/sbr/fsw/src/cfe_sbr_route_unsorted.c:224:9 in CFE_SBR_ForEachRouteId indirect-call -> CFE_SB_CollectRouteInfo via P:CFE_SBR_ForEachRouteId#0 of 4
+  site 2632 cfe/modules/sbr/fsw/src/cfe_sbr_route_unsorted.c:224:9 in CFE_SBR_ForEachRouteId indirect-call -> CFE_SB_RemovePipeFromRoute via P:CFE_SBR_ForEachRouteId#0 of 4
+  site 2632 cfe/modules/sbr/fsw/src/cfe_sbr_route_unsorted.c:224:9 in CFE_SBR_ForEachRouteId indirect-call -> CFE_SB_SendRouteSub via P:CFE_SBR_ForEachRouteId#0 of 4
+  site 2758 cfe/modules/tbl/fsw/src/cfe_tbl_api.c:663:41 in CFE_TBL_Validate indirect-call -> UNRESOLVED(no-function-flows-to-it) via L:CFE_TBL_Validate/ValidationFunc of 0
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_AbortLoadCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_ActivateCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_DeleteCDSCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_DumpCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_DumpRegistryCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_LoadCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_NoopCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_ResetCountersCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_SendHkCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_SendRegistryCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 2845 cfe/modules/tbl/fsw/src/cfe_tbl_dispatch.c:164:25 in CFE_TBL_TaskPipe indirect-call -> CFE_TBL_ValidateCmd via CFE_TBL_CmdHandlerTblRec_t.MsgProcFuncPtr of 11
+  site 3090 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1203:9 in CFE_TBL_ForeachAccessDescriptor indirect-call -> CFE_TBL_CheckInactiveBufferHelper@cfe/modules/tbl/fsw/src/cfe_tbl_regrec.c:47 via P:CFE_TBL_ForeachAccessDescriptor#1 of 5
+  site 3090 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1203:9 in CFE_TBL_ForeachAccessDescriptor indirect-call -> CFE_TBL_CountAccessDescHelper via P:CFE_TBL_ForeachAccessDescriptor#1 of 5
+  site 3090 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1203:9 in CFE_TBL_ForeachAccessDescriptor indirect-call -> CFE_TBL_FindAccessDescHelper@cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:249 via P:CFE_TBL_ForeachAccessDescriptor#1 of 5
+  site 3090 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1203:9 in CFE_TBL_ForeachAccessDescriptor indirect-call -> CFE_TBL_NotifyOtherAppHelper@cfe/modules/tbl/fsw/src/cfe_tbl_api.c:948 via P:CFE_TBL_ForeachAccessDescriptor#1 of 5
+  site 3090 cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:1203:9 in CFE_TBL_ForeachAccessDescriptor indirect-call -> CFE_TBL_SetUpdatedHelper@cfe/modules/tbl/fsw/src/cfe_tbl_internal.c:566 via P:CFE_TBL_ForeachAccessDescriptor#1 of 5
+  site 3206 cfe/modules/tbl/fsw/src/cfe_tbl_load.c:855:22 in CFE_TBL_ValidateLoadInProgress indirect-call -> UNRESOLVED(no-function-flows-to-it) via L:CFE_TBL_ValidateLoadInProgress/ValidationFunc of 0
+  site 3661 cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:377:13 in CFE_TBL_TxnProcessEvents indirect-call -> CFE_TBL_SendActivationEventHelper via P:CFE_TBL_TxnProcessEvents#1 of 5
+  site 3661 cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:377:13 in CFE_TBL_TxnProcessEvents indirect-call -> CFE_TBL_SendDumpEventHelper via P:CFE_TBL_TxnProcessEvents#1 of 5
+  site 3661 cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:377:13 in CFE_TBL_TxnProcessEvents indirect-call -> CFE_TBL_SendLoadBasicEventHelper via P:CFE_TBL_TxnProcessEvents#1 of 5
+  site 3661 cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:377:13 in CFE_TBL_TxnProcessEvents indirect-call -> CFE_TBL_SendLoadFileEventHelper via P:CFE_TBL_TxnProcessEvents#1 of 5
+  site 3661 cfe/modules/tbl/fsw/src/cfe_tbl_transaction.c:377:13 in CFE_TBL_TxnProcessEvents indirect-call -> CFE_TBL_SendValidationEventHelper via P:CFE_TBL_TxnProcessEvents#1 of 5
+  site 3821 cfe/modules/time/fsw/src/cfe_time_task.c:160:14 in CFE_TIME_TaskInit spawn-entry -> CFE_TIME_Tone1HzTask via F:CFE_TIME_Tone1HzTask of 1
+  site 3823 cfe/modules/time/fsw/src/cfe_time_task.c:173:14 in CFE_TIME_TaskInit spawn-entry -> CFE_TIME_Local1HzTask via F:CFE_TIME_Local1HzTask of 1
+  site 3964 cfe/modules/time/fsw/src/cfe_time_tone.c:1329:17 in CFE_TIME_NotifyTimeSynchApps indirect-call -> UNRESOLVED(no-function-flows-to-it) via L:CFE_TIME_NotifyTimeSynchApps/Func of 0
+  site 4367 osal/src/os/posix/src/os-impl-binsem.c:383:5 in OS_GenericBinSemTake_Impl@osal/src/os/posix/src/os-impl-binsem.c:362 indirect-call -> OS_Posix_BinSemReleaseMutex via L:OS_GenericBinSemTake_Impl@osal/src/os/posix/src/os-impl-binsem.c:362/__cancel_routine of 1
+  site 4376 osal/src/os/posix/src/os-impl-binsem.c:435:5 in OS_GenericBinSemTake_Impl@osal/src/os/posix/src/os-impl-binsem.c:362 indirect-call -> OS_Posix_BinSemReleaseMutex via L:OS_GenericBinSemTake_Impl@osal/src/os/posix/src/os-impl-binsem.c:362/__cancel_routine of 1
+  site 4426 osal/src/os/posix/src/os-impl-condvar.c:245:5 in OS_CondVarWait_Impl indirect-call -> OS_Posix_CondVarReleaseMutex@osal/src/os/posix/src/os-impl-condvar.c:42 via L:OS_CondVarWait_Impl/__cancel_routine of 1
+  site 4433 osal/src/os/posix/src/os-impl-condvar.c:247:5 in OS_CondVarWait_Impl indirect-call -> OS_Posix_CondVarReleaseMutex@osal/src/os/posix/src/os-impl-condvar.c:42 via L:OS_CondVarWait_Impl/__cancel_routine of 1
+  site 4440 osal/src/os/posix/src/os-impl-condvar.c:274:5 in OS_CondVarTimedWait_Impl indirect-call -> OS_Posix_CondVarReleaseMutex@osal/src/os/posix/src/os-impl-condvar.c:42 via L:OS_CondVarTimedWait_Impl/__cancel_routine of 1
+  site 4447 osal/src/os/posix/src/os-impl-condvar.c:276:5 in OS_CondVarTimedWait_Impl indirect-call -> OS_Posix_CondVarReleaseMutex@osal/src/os/posix/src/os-impl-condvar.c:42 via L:OS_CondVarTimedWait_Impl/__cancel_routine of 1
+  site 4514 osal/src/os/posix/src/os-impl-idmap.c:149:5 in OS_WaitForStateChange_Impl indirect-call -> OS_Posix_ReleaseTableMutex via L:OS_WaitForStateChange_Impl/__cancel_routine of 1
+  site 4522 osal/src/os/posix/src/os-impl-idmap.c:171:5 in OS_WaitForStateChange_Impl indirect-call -> OS_Posix_ReleaseTableMutex via L:OS_WaitForStateChange_Impl/__cancel_routine of 1
+  site 4879 osal/src/os/shared/src/osapi-common.c:81:18 in OS_NotifyEvent indirect-call -> CFE_PSP_OS_EventHandler via OS_SharedGlobalVars_t.EventHandler of 1
+  site 5252 osal/src/os/shared/src/osapi-idmap.c:245:5 in OS_ForEachDoCallback indirect-call -> CFE_ES_CleanupObjectCallback via OS_creator_filter_t.user_callback of 2
+  site 5252 osal/src/os/shared/src/osapi-idmap.c:245:5 in OS_ForEachDoCallback indirect-call -> OS_CleanUpObject via OS_creator_filter_t.user_callback of 2
+  site 5275 osal/src/os/shared/src/osapi-idmap.c:567:54 in OS_ObjectIdFindNextMatch indirect-call -> OS_FileSys_FindVirtMountPoint via P:OS_ObjectIdFindNextMatch#0 of 3
+  site 5275 osal/src/os/shared/src/osapi-idmap.c:567:54 in OS_ObjectIdFindNextMatch indirect-call -> OS_ObjectNameMatch via P:OS_ObjectIdFindNextMatch#0 of 3
+  site 5275 osal/src/os/shared/src/osapi-idmap.c:567:54 in OS_ObjectIdFindNextMatch indirect-call -> OS_TaskIdMatchSystemData_Impl via P:OS_ObjectIdFindNextMatch#0 of 3
+  site 5328 osal/src/os/shared/src/osapi-idmap.c:1298:36 in OS_ObjectIdIteratorGetNext indirect-call -> OS_FileSysFilterFree via OS_object_iter_t.match of 3
+  site 5328 osal/src/os/shared/src/osapi-idmap.c:1298:36 in OS_ObjectIdIteratorGetNext indirect-call -> OS_ForEachFilterCreator via OS_object_iter_t.match of 3
+  site 5328 osal/src/os/shared/src/osapi-idmap.c:1298:36 in OS_ObjectIdIteratorGetNext indirect-call -> OS_ObjectFilterActive via OS_object_iter_t.match of 3
+  site 5331 osal/src/os/shared/src/osapi-idmap.c:1330:14 in OS_ObjectIdIteratorProcessEntry indirect-call -> OS_FileIteratorClose via P:OS_ObjectIdIteratorProcessEntry#1 of 2
+  site 5331 osal/src/os/shared/src/osapi-idmap.c:1330:14 in OS_ObjectIdIteratorProcessEntry indirect-call -> OS_ForEachDoCallback via P:OS_ObjectIdIteratorProcessEntry#1 of 2
+  site 5684 osal/src/os/shared/src/osapi-task.c:132:13 in OS_TaskEntryPoint indirect-call -> CFE_ES_TaskEntryPoint via L:OS_TaskEntryPoint/task_entry of 1
+  site 5703 osal/src/os/shared/src/osapi-task.c:246:9 in OS_TaskDelete indirect-call -> UNRESOLVED(no-function-flows-to-it) via L:OS_TaskDelete/delete_hook of 0
+  site 5766 osal/src/os/shared/src/osapi-time.c:227:5 in OS_Timer_NoArgCallback@osal/src/os/shared/src/osapi-time.c:218 indirect-call -> UNRESOLVED(no-function-flows-to-it) via OS_Timer_ArgWrapper_t.timer_callback_func of 0
+  site 5878 osal/src/os/shared/src/osapi-timebase.c:406:21 in OS_TimeBase_CallbackThread indirect-call -> OS_TimeBase_SigWaitImpl@osal/src/os/posix/src/os-impl-timebase.c:134 via L:OS_TimeBase_CallbackThread/syncfunc of 1
+  site 5888 osal/src/os/shared/src/osapi-timebase.c:491:25 in OS_TimeBase_CallbackThread indirect-call -> CFE_TIME_Local1HzTimerCallback via OS_timecb_internal_record_t.callback_ptr of 2
+  site 5888 osal/src/os/shared/src/osapi-timebase.c:491:25 in OS_TimeBase_CallbackThread indirect-call -> OS_Timer_NoArgCallback@osal/src/os/shared/src/osapi-time.c:218 via OS_timecb_internal_record_t.callback_ptr of 2
+  site 5921 psp/fsw/modules/iodriver/src/iodriver.c:109:17 in CFE_PSP_IODriver_Command indirect-call -> UNRESOLVED(no-function-flows-to-it) via CFE_PSP_IODriver_API_t.DeviceMutex of 0
+  site 5924 psp/fsw/modules/iodriver/src/iodriver.c:119:18 in CFE_PSP_IODriver_Command indirect-call -> linux_sysmon_DevCmd@psp/fsw/modules/linux_sysmon/linux_sysmon.c:576 via CFE_PSP_IODriver_API_t.DeviceCommand of 1
+  site 6145 psp/fsw/pc-linux/src/cfe_psp_start.c:449:5 in OS_Application_Startup indirect-call -> CFE_ES_Main via Target_CfeConfigData.SystemMain of 1
+  site 6154 psp/fsw/pc-linux/src/cfe_psp_start.c:497:13 in OS_Application_Run indirect-call -> CFE_ES_ProcessAsyncEvent via Target_CfeConfigData.SystemNotify of 1
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> eeprom_mmap_file_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> endian_api_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> iodriver_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> linux_sysmon_Init@psp/fsw/modules/linux_sysmon/linux_sysmon.c:113 via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> port_notimpl_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> ram_notimpl_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> soft_timebase_Init via CFE_PSP_ModuleApi_t.Init of 8
+  site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> timebase_posix_clock_Init via CFE_PSP_ModuleApi_t.Init of 8
+
+# derives rows of the event calls: 59, of them derived from CFE_SB_Global_t.AppId: 39
+
+# reachability of the event calls (counts per root), spawn edges not followed
+reach-report 1
+location: CFE_SB_Global_t.AppId  callee: CFE_EVS_SendEventWithAppID
+sink call sites (an argument derives from the location): 39
+indirect call sites without a resolved target (they add no edge): 7
+spawn entries followed: no
+root CFE_ES_Main (1 function): 0 of 39 sink sites in reachable functions
+root CFE_ES_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+root CFE_EVS_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+root CFE_SB_TaskMain (1 function): 22 of 39 sink sites in reachable functions
+root CFE_TBL_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+root CFE_TIME_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+
+# reachability of the event calls (counts per root), spawn edges followed
+reach-report 1
+location: CFE_SB_Global_t.AppId  callee: CFE_EVS_SendEventWithAppID
+sink call sites (an argument derives from the location): 39
+indirect call sites without a resolved target (they add no edge): 7
+spawn entries followed: yes
+root CFE_ES_Main (1 function): 25 of 39 sink sites in reachable functions
+root CFE_ES_TaskMain (1 function): 25 of 39 sink sites in reachable functions
+root CFE_EVS_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+root CFE_SB_TaskMain (1 function): 22 of 39 sink sites in reachable functions
+root CFE_TBL_TaskMain (1 function): 19 of 39 sink sites in reachable functions
+root CFE_TIME_TaskMain (1 function): 25 of 39 sink sites in reachable functions

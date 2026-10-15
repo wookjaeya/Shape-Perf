@@ -1,0 +1,73 @@
+# startup_ok -- a synthetic start-up of two core applications and a correct event request.
+#
+# Unit-test values only: nothing here is a recorded run and no value is a research condition.
+# The table size, the slots and the identifiers are made up; the identifiers lie in the identifier
+# space of the profile (base 0x110000).
+#
+# What the trace exercises:
+#   - the clearing of the identity cell and of the record table (effects of two operations);
+#   - R1 program order on three actors;
+#   - R2-P-TASK: the creating call precedes the first event of the task, also when the task starts
+#     before the creating call has returned;
+#   - R18: the phase point precedes the tasks the main actor creates afterwards;
+#   - R19: the main actor polls until the used records are RUNNING; the poll exit is ordered after
+#     the writes of the two tasks;
+#   - the publication of the identity through the out parameter, and a request that carries it
+#     (status READY, the outcome agrees, the captured value agrees with the replayed cell).
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+owner T_EVS 1
+owner T_SB 2
+
+T0 CFE_ES_Main call
+T0 CFE_ES_Main.reset_records pt
+T0 CFE_ES_Main.reset_states pt
+T0 CFE_ES_CreateObjects call
+T0 CFE_SB_EarlyInit call
+T0 CFE_SB_EarlyInit.clear_global pt
+T0 CFE_SB_EarlyInit ret
+T0 core_phase2_begin pt
+
+# the first core application: slot 1
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=1
+T0 CFE_ES_CreateObjects.type_core pt lp.slot=1
+T0 OS_TaskCreate call
+T_EVS OS_TaskEntryPoint call arg.task_id=11
+T0 OS_TaskCreate ret out.task_id=11 result=0
+T0 CFE_ES_CreateObjects.publish_core pt lp.slot=1 lp.pending_id=0x110001
+T_EVS CFE_EVS_Register call
+T_EVS CFE_EVS_Register.clear_slot pt
+T_EVS CFE_EVS_Register.register pt
+T_EVS CFE_EVS_Register ret result=0
+T_EVS CFE_ES_RunLoop call arg.RunStatus=1
+T_EVS CFE_ES_RunLoop.raise_running pt
+T_EVS CFE_ES_RunLoop ret result=1
+T0 core_sync_call pt
+T0 CFE_ES_MainTaskSyncDelay call arg.AppStateId=3 arg.TimeOutMilliseconds=30000
+T0 CFE_ES_MainTaskSyncDelay ret result=0
+
+# the second core application: slot 2, whose task publishes its identity and sends an event
+T0 CFE_ES_CreateObjects.reserve_core pt lp.slot=2
+T0 CFE_ES_CreateObjects.type_core pt lp.slot=2
+T0 OS_TaskCreate call
+T0 OS_TaskCreate ret out.task_id=12 result=0
+T_SB OS_TaskEntryPoint call arg.task_id=12
+T0 CFE_ES_CreateObjects.publish_core pt lp.slot=2 lp.pending_id=0x110002
+T_SB CFE_EVS_Register call
+T_SB CFE_EVS_Register.clear_slot pt
+T_SB CFE_EVS_Register.register pt
+T_SB CFE_EVS_Register ret result=0
+T_SB CFE_ES_GetAppID call
+T_SB CFE_ES_GetAppID.self_live pt
+T_SB CFE_ES_GetAppID.store_ok pt out.AppIdPtr=@CFE_SB_Global.AppId value=0x110002
+T_SB CFE_ES_GetAppID ret result=0
+T_SB CFE_EVS_SendEventWithAppID.id_valid pt arg.AppID=0x110002 cell=@CFE_SB_Global.AppId value=0x110002
+T_SB CFE_EVS_SendEventWithAppID call arg.AppID=0x110002
+T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+T_SB CFE_EVS_SendEventWithAppID ret result=0
+T_SB CFE_ES_RunLoop call arg.RunStatus=1
+T_SB CFE_ES_RunLoop.raise_running pt
+T_SB CFE_ES_RunLoop ret result=1
+T0 core_sync_call pt
+T0 CFE_ES_MainTaskSyncDelay call arg.AppStateId=3 arg.TimeOutMilliseconds=30000
+T0 CFE_ES_MainTaskSyncDelay ret result=0
+T0 CFE_ES_CreateObjects ret result=0

@@ -1,0 +1,41 @@
+# trace poll_timeout.trace, predicate supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 12
+terminated yes at #11 T0 CFE_PSP_Panic.terminal pt
+shutdown_request no
+
+event table
+  #0 T0 CFE_ES_CreateObjects call
+  #1 T0 core_phase2_begin pt
+  #2 T0 CFE_ES_CreateObjects.reserve_core pt
+  #3 T0 OS_TaskCreate call
+  #4 T_SB OS_TaskEntryPoint call
+  #5 T0 OS_TaskCreate ret
+  #6 T0 CFE_ES_CreateObjects.publish_core pt
+  #7 T0 core_sync_call pt
+  #8 T0 CFE_ES_MainTaskSyncDelay call
+  #9 T0 CFE_ES_MainTaskSyncDelay ret
+  #10 T0 CFE_PSP_Panic call
+  #11 T0 CFE_PSP_Panic.terminal pt
+
+edges 12
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R18 S unconditional #1 -> #4
+edge R2-P-TASK S unconditional #3 -> #4
+edge R1 S unconditional #3 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #8 -> #9
+edge R1 S unconditional #9 -> #10
+edge R1 S unconditional #10 -> #11
+
+occurrences 0
+
+findings 0
+
+final state
+  es.app[2] = LIVE id 0x110002
+  loc CFE_SB_Global.AppId = 0

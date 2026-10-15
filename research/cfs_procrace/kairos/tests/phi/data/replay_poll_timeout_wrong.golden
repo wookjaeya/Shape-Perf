@@ -1,0 +1,29 @@
+# trace poll_timeout_wrong.trace, predicate supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 6
+terminated no
+shutdown_request no
+
+event table
+  #0 T0 CFE_ES_CreateObjects call
+  #1 T0 core_sync_call pt
+  #2 T0 CFE_ES_MainTaskSyncDelay call
+  #3 T0 CFE_ES_MainTaskSyncDelay ret
+  #4 T0 CFE_ES_CreateObjects.reserve_core pt
+  #5 T0 OS_TaskCreate call
+
+edges 5
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+
+occurrences 0
+
+findings 1
+finding #5: rule R19: the poll CFE_ES_MainTaskSyncDelay (#3) did not reach its exit outcome, and the next call of the actor is OS_TaskCreate, not the terminal operation CFE_PSP_Panic
+
+final state
+  es.app[1] = RESERVED id 0xffffffff
+  loc CFE_SB_Global.AppId = 0

@@ -1,0 +1,59 @@
+extract
+  translation units          1
+  functions                  9 (bodies read 8, in system headers skipped 0)
+  call sites                 5
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                4 (entry resolved 3)
+  loops                      0 (table walks resolved 0, failed 0)
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  hand-entered inputs        12 (built-in data-function table 12, command line 0)
+facts-view 1
+[files] 1
+  0 spawn.c 05115402b999 809
+[functions] 9
+  fn 0 fx_spawn spawn.c:5 params=3 {}
+  fn 1 start_direct spawn.c:11-14 params=0 {defined}
+  fn 2 start_from_table spawn.c:30-33 params=0 {defined}
+  fn 3 start_indirect spawn.c:21-21 params=0 {defined}
+  fn 4 start_unknown spawn.c:35-38 params=1 {defined}
+  fn 5 start_with spawn.c:16-19 params=1 {defined,static}
+  fn 6 worker_a spawn.c:7-7 params=0 {defined,static,address-taken}
+  fn 7 worker_b spawn.c:8-8 params=0 {defined,static,address-taken}
+  fn 8 worker_c spawn.c:9-9 params=0 {defined,static}
+[calls] 5
+  site 0 spawn.c:13:3 start_direct -> fx_spawn direct {spawn-op}
+      arg 0:addr-of-object t
+      arg 1:string "a"
+      arg 2:function worker_a fn=worker_a@spawn.c:7
+  site 1 spawn.c:18:3 start_with@spawn.c:16 -> fx_spawn direct {spawn-op}
+      arg 0:addr-of-object t
+      arg 1:string "via"
+      arg 2:top ~f
+  site 2 spawn.c:21:29 start_indirect -> start_with direct {intra-tu}
+      arg 0:function worker_b fn=worker_b@spawn.c:8
+  site 3 spawn.c:32:3 start_from_table -> fx_spawn direct {spawn-op}
+      arg 0:addr-of-object t
+      arg 1:symbolic Desc.name
+      arg 2:symbolic Desc.entry
+  site 4 spawn.c:37:3 start_unknown -> fx_spawn direct {spawn-op}
+      arg 0:addr-of-object t
+      arg 1:string "unknown"
+      arg 2:top ~f
+[derives] 0
+[loops] 0
+[init] 0
+[consts] 0
+[writers] 0
+[atype] 0
+[locs] 1
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
+[targets] 4
+  site 0 spawn.c:13:3 in start_direct spawn-entry -> worker_a@spawn.c:7 via F:worker_a@spawn.c:7 of 1
+  site 1 spawn.c:18:3 in start_with@spawn.c:16 spawn-entry -> worker_b@spawn.c:8 via P:start_with@spawn.c:16#0 of 1
+  site 3 spawn.c:32:3 in start_from_table spawn-entry -> worker_c@spawn.c:9 via Desc.entry of 1
+  site 4 spawn.c:37:3 in start_unknown spawn-entry -> UNRESOLVED(no-function-flows-to-it) via P:start_unknown#0 of 0
+[image] 0
+[terminals] 0
+[outcalls] 0

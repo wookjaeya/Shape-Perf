@@ -1,0 +1,109 @@
+extract
+  translation units          1
+  functions                  14 (bodies read 11, in system headers skipped 0)
+  call sites                 7
+  indirect calls             2 (resolved 2, unresolved 0)
+  spawn calls                1 (entry resolved 1)
+  loops                      8 (table walks resolved 2, failed 0)
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location Gate.state   writers 2 (direct 2, data function 0, out-pointer 0, initial values 2), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  hand-entered inputs        14 (built-in data-function table 12, command line 2)
+facts-view 1
+[files] 1
+  0 loops.c 2647a528f679 2598
+[functions] 14
+  fn 0 a_init loops.c:64-67 params=0 {defined,static}
+  fn 1 b_init loops.c:68-71 params=0 {defined,static}
+  fn 2 b_task loops.c:72-72 params=0 {defined,static}
+  fn 3 c_task loops.c:73-73 params=0 {defined,static}
+  fn 4 counted loops.c:36-39 params=0 {defined}
+  fn 5 fx_abort loops.c:15 params=0 {}
+  fn 6 fx_delay loops.c:14 params=1 {}
+  fn 7 fx_spawn loops.c:62 params=3 {}
+  fn 8 init_all loops.c:81-89 params=0 {defined}
+  fn 9 init_flat loops.c:105-108 params=0 {defined}
+  fn 10 poll_budget loops.c:25-33 params=1 {defined}
+  fn 11 poll_flag loops.c:18-22 params=0 {defined}
+  fn 12 spawn_all loops.c:91-101 params=0 {defined}
+  fn 13 wait_all loops.c:42-47 params=0 {defined}
+[calls] 7
+  site 1 loops.c:20:5 poll_flag -> fx_delay direct {in-loop,delay-op} loop=0 depth=1
+      arg 0:const 5 5
+  site 3 loops.c:29:5 poll_budget -> fx_delay direct {in-loop,delay-op} loop=1 depth=1
+      arg 0:const 10 10
+  site 4 loops.c:32:3 poll_budget -> fx_abort direct {terminal-op}
+  site 8 loops.c:45:35 wait_all -> fx_delay direct {in-loop,delay-op} loop=4 depth=2
+      arg 0:const 1 1
+  site 12 loops.c:87:29 init_all -> <indirect> indirect {in-loop} loop=5 depth=1
+  site 14 loops.c:99:5 spawn_all -> fx_spawn direct {in-loop,spawn-op} loop=6 depth=1
+      arg 0:addr-of-object tid
+      arg 1:symbolic Mod.name
+      arg 2:symbolic Mod.task
+  site 16 loops.c:107:42 init_flat -> <indirect> indirect {in-loop} loop=7 depth=1
+[derives] 0
+[loops] 8
+  loop 0 site 0 loops.c:19:3 in poll_flag depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 1
+      exit (not (ne global:g_flag 1))
+      mod [(call-result fx_delay)]
+  loop 1 site 2 loops.c:27:3 in poll_budget depth=1 poll trip=unknown exits=1 calls=1
+      delay-call site 3
+      exit (or (not (gt local:left 0)) (and (gt local:left 0) (eq field:Gate.state 2)))
+      mod [local:left, (call-result fx_delay)]
+      budget [local:left, param:timeout#0, 10]
+  loop 2 site 5 loops.c:38:3 in counted depth=1 constant-trip trip=exact(4) exits=0 calls=0
+  loop 3 site 6 loops.c:44:3 in wait_all depth=1 count-bounded trip=exact(3) exits=0 calls=2
+      delay-call site 8
+      exit (not (lt local:i 3))
+      mod [local:i, (call-result fx_delay)]
+  loop 4 site 7 loops.c:45:5 in wait_all depth=2 poll trip=unknown exits=0 calls=1
+      delay-call site 8
+      exit (not (ne field:Gate.state 2))
+      mod [(call-result fx_delay)]
+  loop 5 site 11 loops.c:84:3 in init_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
+      exit (eq local:e 0)
+      mod [local:e, local:i, (call-result <indirect>)]
+  loop 6 site 13 loops.c:95:3 in spawn_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
+      exit (eq local:e 0)
+      mod [local:e, local:i, (call-result fx_spawn)]
+  loop 7 site 15 loops.c:107:3 in init_flat depth=1 other trip=unknown exits=0 calls=1
+[init] 2
+  Gate.state in g_gate zero-initialized value=0 defined at loops.c:9:6
+  Gate.state in g_gates zero-initialized value=0 defined at loops.c:12:6
+[consts] 2
+  4 = 4 at loops.c:38
+  3 = 3 at loops.c:44
+[writers] 2
+  Gate.state assign at loops.c:65:3 in a_init value=const 1 [1] key=g_gate {early-init,init-tree} COMPUTED
+  Gate.state assign at loops.c:69:3 in b_init value=const 2 [2] key=g_gate {early-init,init-tree} COMPUTED
+[atype] 0
+[locs] 2
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
+  Gate.state writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=2 unresolved-indirect=0
+[targets] 6
+  site 12 loops.c:87:29 in init_all indirect-call -> a_init@loops.c:64 via Mod.init of 2
+  site 12 loops.c:87:29 in init_all indirect-call -> b_init@loops.c:68 via Mod.init of 2
+  site 14 loops.c:99:5 in spawn_all spawn-entry -> b_task@loops.c:72 via Mod.task of 2
+  site 14 loops.c:99:5 in spawn_all spawn-entry -> c_task@loops.c:73 via Mod.task of 2
+  site 16 loops.c:107:42 in init_flat indirect-call -> a_init@loops.c:64 via Mod.init of 2
+  site 16 loops.c:107:42 in init_flat indirect-call -> b_init@loops.c:68 via Mod.init of 2
+[image] 14
+  g_cfg.list address mod_list@loops.c:78
+  mod_a@loops.c:75.init function a_init
+  mod_a@loops.c:75.name string "a"
+  mod_a@loops.c:75.task null
+  mod_b@loops.c:76.init function b_init
+  mod_b@loops.c:76.name string "b"
+  mod_b@loops.c:76.task function b_task
+  mod_c@loops.c:77.init null
+  mod_c@loops.c:77.name string "c"
+  mod_c@loops.c:77.task function c_task
+  mod_list@loops.c:78[0] address mod_a@loops.c:75
+  mod_list@loops.c:78[1] address mod_b@loops.c:76
+  mod_list@loops.c:78[2] address mod_c@loops.c:77
+  mod_list@loops.c:78[3] null
+[terminals] 1
+  site 4 fx_abort at loops.c:32:3 in poll_budget depth=0 {process-terminal,unguarded} guard=-
+[outcalls] 0

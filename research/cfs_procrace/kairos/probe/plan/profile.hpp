@@ -1,0 +1,76 @@
+// profile.hpp -- the observation part of a profile (.kzp, "kzp-observe 1"): which sites to probe,
+// where each is found by name, and what its four raw values mean.  Framework knowledge enters
+// the observer only through such a file, with the provenance of every entry.
+//
+// Grammar (line oriented; '#' starts a comment outside quotes; tokens are separated by white
+// space; a quoted token "..." may contain white space, \" and \\):
+//
+//   kzp-observe 1                                  first statement
+//   binary <name>                                  the file name of the traced binary (a check, not a path)
+//   prov <id> tier=<tier> kind=<kind> [side=<side>] file="<path>" lines=<from>-<to> cite="<text>" [authored="<text>"]
+//             [root=<name>] [sha256=<64 hex digits>]
+//   site <label> <entry|ret|point> <target> [decoder=<name>] [prov=<id>] [s0=<slot> .. s3=<slot>]
+//
+//   target:  func=<symbol> [in=<file suffix>]                 for entry and ret
+//            at=<file suffix>:<line> after-call=<symbol>      for point
+//   slot:    <src>:<width>:<role>      src = a register name | stack+<byte offset> | ip
+//            width = u8 | u16 | u32 | u64
+//   decoder: generic (default) | spawn-create | spawn-return | thread-entry
+//
+// Tiers and kinds are the names of the schema (contract-backed, admitted, code-derived,
+// issue-derived, researcher, unreferenced; api_doc, requirement, code_admission, code_pattern,
+// issue, researcher).  A site without prov= has tier `unreferenced`; the reports count tiers.
+// `sha256` is the hash of the cited lines (each with its newline), the value that
+// `sed -n 'A,Bp' file | sha256sum` prints: the anchor tool recomputes it from the source root and
+// refuses a basis whose cited text differs from the declaration.  `root` names which source root
+// the file is relative to (the default root is --source-root; others are --root name=dir).
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "kz/core/sha256.hpp"
+#include "kz/core/status.hpp"
+#include "kz/schema/kz_schema.h"
+#include "kz/trace/decode_sites.hpp"
+
+namespace kz::plan {
+
+struct ProvDecl {
+  std::string id;
+  uint8_t tier = KZ_TIER_UNREFERENCED;
+  uint8_t kind = KZ_PROV_KIND_NONE;
+  uint8_t side = KZ_PROV_SIDE_NA;
+  std::string file, cite, authored;
+  uint32_t line_from = 0, line_to = 0;
+  std::string root;          // which source root `file` is relative to ("" = the default root)
+  bool has_sha256 = false;   // the profile declares the hash of the cited lines
+  Digest sha256 = {};
+  uint32_t source_line = 0;  // line of the declaration in the profile
+};
+
+struct ProfileSite {
+  std::string label;
+  uint16_t kind = 0;              // KZ_SITE_KIND_*
+  std::string func, in_suffix;    // entry, ret
+  std::string at_file;            // point
+  uint32_t at_line = 0;
+  std::string after_call;
+  uint16_t decoder = KZ_DECODER_GENERIC;
+  int prov = -1;                  // index into Profile::provs, or -1
+  std::vector<kz::trace::SlotSpec> slots;
+  uint32_t source_line = 0;
+};
+
+struct Profile {
+  std::string binary_name;
+  std::vector<ProvDecl> provs;
+  std::vector<ProfileSite> sites;
+  Digest sha256 = {};             // of the profile text as read
+};
+
+Status parse_profile(std::string_view text, Profile* out);
+
+}  // namespace kz::plan

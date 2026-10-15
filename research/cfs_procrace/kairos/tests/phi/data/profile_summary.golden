@@ -1,0 +1,37 @@
+profile "cfs-v7.0.1"
+revision "cFS 088b2fa8 / cFE c5fb2b4d / OSAL d2d877a6 / PSP c4b3b0b6"
+hash c62892dde8236faa2d8e0ea2c81ab5909183e8c3da3ec743d20887e1b2ee183c
+
+provenance records: 85
+entries with provenance (best tier): 78
+  contract-backed: 2
+  admitted: 0
+  code-derived: 73
+  issue-derived: 0
+  researcher: 3
+  unreferenced: 0
+hand-entered (best tier researcher or unreferenced): 3
+  hb R1
+  kind cell
+  op abort
+entries citing at least one researcher record: 12
+  effect CFE_ES_CleanUpApp.free_record
+  effect CFE_ES_GetAppID.store_fail
+  hb R1
+  hb R18
+  hb R19
+  kind cell
+  kind es.self
+  kind evs.reg
+  op abort
+  site core_phase2_begin
+  trusted A-FRESH
+  trusted A-OWNER
+declared-trusted: 3
+  effect CFE_ES_CleanUpApp.free_record
+  trusted A-FRESH
+  trusted A-OWNER
+assumptions: 0
+
+readiness specifications
+  K-ID.send-with-appid: caller-level Allowed none (Allowed none, and appreq is specified by a caller-side record: no not-ready outcome is acceptable)

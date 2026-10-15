@@ -1,0 +1,64 @@
+# trace shutdown_scope.trace, predicate supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 17
+terminated yes at #14 T0 abort call
+shutdown_request yes at #8 T0 CFE_PSP_Restart.request_shutdown pt
+
+event table
+  #0 T0 CFE_ES_CreateObjects.reserve_core pt
+  #1 T0 CFE_ES_CreateObjects.publish_core pt
+  #2 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #3 T_SB CFE_EVS_SendEventWithAppID call
+  #4 T_SB CFE_EVS_SendEventWithAppID ret
+  #5 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #6 T_SB CFE_EVS_SendEventWithAppID call
+  #7 T0 CFE_PSP_Restart call
+  #8 T0 CFE_PSP_Restart.request_shutdown pt
+  #9 T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+  #10 T_SB CFE_EVS_SendEventWithAppID ret
+  #11 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #12 T_SB CFE_EVS_SendEventWithAppID call
+  #13 T_SB CFE_EVS_SendEventWithAppID ret
+  #14 T0 abort call
+  #15 T0 CFE_PSP_Restart ret
+  #16 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+
+edges 13
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #1 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #6 -> #9
+edge R1 S unconditional #9 -> #10
+edge R1 S unconditional #10 -> #11
+edge R1 S unconditional #11 -> #12
+edge R1 S unconditional #12 -> #13
+edge R1 S unconditional #8 -> #14
+
+occurrences 3
+occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0] call #3 return #4
+  status VIOLATING decided at call #3 scope default
+  conjunct id_valid capture #2 fails
+  conjunct slot_registered not_passed
+  result 0xc2000003 outcome agrees
+occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #6 return #10
+  status VIOLATING decided at point #9 scope teardown
+  conjunct id_valid capture #5 holds
+  conjunct slot_registered point #9 fails
+  result 0xc2000002 outcome agrees
+occurrence K-ID.send-with-appid actor T_SB ordinal 2 key [0] call #12 return #13
+  status VIOLATING decided at call #12 scope teardown
+  conjunct id_valid capture #11 fails
+  conjunct slot_registered not_passed
+  result 0xc2000003 outcome agrees
+
+findings 1
+finding #14: 2 event(s) follow the process-terminal step and are not replayed (a real run has none)
+
+final state
+  es.app[2] = LIVE id 0x110002
+  es.shutdown[] = SHUTDOWN_REQ
+  loc CFE_SB_Global.AppId = 0

@@ -1,0 +1,27 @@
+default: unknown(not_reached); reach assumed; progress unknown(not_checked)
+protected-by-certificate: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: proved (not checked against a ledger)
+protected-within-bound: protected - no reached occurrence violates (model) [b=12]; reach model(b=12); progress unknown(not_checked)
+fixed-order-with-decision-route: fixed-order - no reached occurrence READY (cert; decision route) [b=inf]; reach assumed; progress unknown(not_checked); lemma status: unproved
+fixed-order-without-decision-route: fixed-order - no reached occurrence READY (cert; no decision route) [b=inf]; reach assumed; progress unknown(not_checked); lemma status: unproved
+protected-with-a-stall-witness: protected - no reached occurrence violates (cert) [b=?]; reach assumed; progress stall-witness(S={pre-use}; kind=other; qualifiers={}; harm=none; realization=model(b=?); wait-for root: in witness self/WITNESSES#1); lemma status: unproved
+contested: unknown(model_fault); reach assumed; progress unknown(not_checked)
+protected-without-a-bound: protected - every reached occurrence READY (cert) [b=?]; reach proved; progress unknown(not_checked); lemma status: proved (not checked against a ledger)
+bounded-reach-and-progress: unknown(not_reached) [b=12]; reach unreached(b=12); progress no-stall-within(b=7)
+bounded-reach-and-progress-without-bounds: unknown(not_reached); reach unreached(b=?); progress no-stall-within(b=?)
+unknown-no-decision-route: unknown(no_decision_route) - retains not-OK (cert); reach assumed; progress unknown(not_checked); lemma status: unproved
+unknown-one-sided: unknown(one_sided) - retains bad witness self/WITNESSES#1; reach assumed; progress unknown(not_checked)
+schedule-dependent: schedule-dependent - bad witness self/WITNESSES#1; good witness self/WITNESSES#1; reach assumed; progress unknown(not_checked)
+stall-witness-in-full: unknown(not_reached); reach assumed; progress stall-witness(S={pre-use,in-use}; kind=deadlock-cycle; qualifiers={idle,terminal-pending}; harm=terminal_pending(abort); realization=model(b=12); wait-for root: in witness self/WITNESSES#1) relative to the closed cone
+lemmas-only-listed: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: unproved (lemmas:0/0/2; not proved: #1, #3)
+lemmas-only-listed acceptance: accepted by kz proofcheck, relative to its trusted base; lemma status: unproved (lemmas:0/0/2; not proved: #1, #3)
+lemmas-only-listed labels: ledger:0/0/2/0 trusted:0 lemmas:0/0/2
+lemmas-mixed: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: depends-on-stated-assumption (lemmas:1/1/0; not proved: #2)
+lemmas-mixed acceptance: accepted by kz proofcheck, relative to its trusted base; lemma status: depends-on-stated-assumption (lemmas:1/1/0; not proved: #2)
+lemmas-mixed labels: ledger:0/0/2/0 trusted:0 lemmas:1/1/0
+lemmas-all-proved: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: proved (lemmas:1/0/0)
+lemmas-all-proved acceptance: accepted by kz proofcheck, relative to its trusted base; lemma status: proved (lemmas:1/0/0)
+lemmas-all-proved labels: ledger:0/0/1/0 trusted:0 lemmas:1/0/0
+proved-but-the-ledger-says-unproved: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: INCONSISTENT (the record says proved, its ledger says unproved; lemmas:0/0/2; not proved: #1, #3)
+proved-but-the-ledger-says-unproved acceptance: accepted by kz proofcheck, relative to its trusted base; lemma status: INCONSISTENT (the record says proved, its ledger says unproved; lemmas:0/0/2; not proved: #1, #3)
+proved-without-a-ledger: protected - every reached occurrence READY (cert) [b=inf]; reach proved; progress unknown(not_checked); lemma status: proved (not checked against a ledger)
+proved-without-a-ledger acceptance: accepted by kz proofcheck, relative to its trusted base; lemma status: proved (not checked against a ledger)

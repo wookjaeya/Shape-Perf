@@ -1,24 +1,24 @@
-# 04 형식 모형: actor, 자원, 계약, 의미론, 순서 관계, 보장
+# 04 형식 모형: actor, 자원, 준비 상태 명세, 의미론, 순서 관계, 보장
 
-이 문서는 Kairos가 판정의 근거로 삼는 형식 모형을 설명한다. 실행의 주체(actor)와 대상(자원), 준비 계약과 instance, 실행 집합을 정하는 기준 B·의미론 σ·모형 수준 M, 그 위에서 계산하는 순서 관계, 판정 기록, 그리고 보장과 가정을 다룬다. spec §1.2–1.10, §4.2–4.5(§4.5.1 신뢰 장부 포함)의 핵심, §6, App. A.8의 litmus 프로그램을 spec을 읽지 않은 연구자가 따라올 수 있게 풀어 쓴다. 기준은 spec 개정 1.1이다. 이 개정은 외부 검토 EXT-20261012에 답한 것이다(spec §0.7, ADR-039–ADR-044).
+이 문서는 Kairos가 판정의 근거로 삼는 형식 모형을 설명한다. 실행의 주체(actor)와 대상(자원), 준비 상태 명세와 instance, 실행 집합을 정하는 기준 B·의미론 σ·모형 수준 M, 그 위에서 계산하는 순서 관계, 판정 기록, 그리고 보장과 가정을 다룬다. spec §1.2–1.10, §4.2–4.5(§4.5.1 신뢰 장부 포함)의 핵심, §6, App. A.8의 litmus 프로그램을 spec을 읽지 않은 연구자가 따라올 수 있게 풀어 쓴다. 기준은 spec 개정 1.2다. 개정 1.1은 외부 검토 EXT-20261012에 답한 것이고(spec §0.7, ADR-039–ADR-044), 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md))을 반영하고 형식 정정 둘(σ_E 진술, 신뢰 장부)과 증명 상태를 더했다(spec §0.9–§0.11, ADR-045–ADR-052). 이 문서에서 바뀐 곳은 §0.4에 모았다.
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
 
 ## 목차
 
-- [0. 읽기 전에](#0-읽기-전에): 표기, 예로 쓰는 사례, 모형의 뼈대
+- [0. 읽기 전에](#0-읽기-전에): 표기, 예로 쓰는 사례, 모형의 뼈대, 개정 1.2에서 바뀐 곳
 - [1. Actor, instance, once(τ), 네 가지 identity](#1-actor-instance-onceτ-네-가지-identity) (spec §1.2): 실행 사이의 actor instance 이름 포함
 - [2. 자원: kind, lifecycle automaton, generation, key](#2-자원-kind-lifecycle-automaton-generation-key) (spec §1.3)
 - [3. 연산, effect, LP, capture point, 모형 수준 M](#3-연산-effect-lp-capture-point-모형-수준-m) (spec §1.4)
 - [4. Event, template, trace](#4-event-template-trace) (spec §1.5)
-- [5. 준비 계약](#5-준비-계약) (spec §1.6): 계약의 요소, Allowed와 horizon monitor, 발생과 status(`NOT_EVALUATED`, `PENDING` 포함), 위반 사슬과 progress 사슬, 세 판단
+- [5. 준비 상태 명세](#5-준비-상태-명세) (spec §1.6): 준비 상태 명세의 요소, Allowed와 horizon monitor, 발생과 status(`NOT_EVALUATED`, `PENDING` 포함), 준비 상태 위반 사슬과 progress 사슬, 세 판단, 이름과 근거 등급
 - [6. 분석 기준 B](#6-분석-기준-b) (spec §1.7)
-- [7. 스케줄·시간 의미 σ와 containment](#7-스케줄시간-의미-σ와-containment) (spec §1.8): 유한 실행과 maximal 실행, 시간 기반 전이, 죽은 actor와 stall, refinement, prefix containment와 전이 규칙
+- [7. 스케줄·시간 의미 σ와 containment](#7-스케줄시간-의미-σ와-containment) (spec §1.8): 유한 실행과 maximal 실행, 시간 기반 전이, 죽은 actor와 stall, refinement, prefix containment와 전이 규칙(σ_E 진술의 정정 포함)
 - [8. Skeleton의 두 view](#8-skeleton의-두-view) (spec §4.3, 그림 D10)
 - [9. 순서 관계: strata, MustBefore, PWB, HB](#9-순서-관계-strata-mustbefore-pwb-hb) (spec §1.9, §4.2, §4.4, §4.5)
-- [10. R2로 읽는 once, MustBefore, PWB, certificate](#10-r2로-읽는-once-mustbefore-pwb-certificate) (spec §4.5, §4.5.1, App. A.1, A.7): 검사기의 신뢰 기반, 신뢰 장부
-- [11. 판정 기록](#11-판정-기록) (spec §1.10): safety 기록과 class, reach·progress 축, shape, 세 판단의 필드
-- [12. 보장과 가정](#12-보장과-가정) (spec §6, App. A.8): 가정, lemma, 보장 G1–G11, 하지 않는 주장, litmus 프로그램
+- [10. R2로 읽는 once, MustBefore, PWB, certificate](#10-r2로-읽는-once-mustbefore-pwb-certificate) (spec §4.5, §4.5.1, App. A.1, A.7): 검사기의 신뢰 기반, 신뢰 장부, 증명 상태
+- [11. 판정 기록](#11-판정-기록) (spec §1.10): safety 기록과 class, reach·progress 축, shape, 세 판단의 필드, 증명 상태 필드
+- [12. 보장과 가정](#12-보장과-가정) (spec §6, App. A.8): 가정, lemma와 증명 상태, 보장 G1–G11, 하지 않는 주장, litmus 프로그램
 - [13. 관련 문서](#13-관련-문서)
 
 ---
@@ -32,7 +32,7 @@
 | 표기 | 뜻 |
 |---|---|
 | [F] | 코드·기록·보고서 인용이 있는 사실 |
-| [M] | 측정값. 이 문서의 [M]은 모두 spec이 인용한 **기존** 측정이다([BM], [R07], [R2g], [R2c]) |
+| [M] | 측정값. 이 문서의 [M]은 모두 spec이 인용한 **기존** 측정이다([BM], [R07], [R2g]) |
 | [I] | 추론 또는 설계상 추론. 실행해서 확인하지 않았다 |
 | [D] | 설계 결정. spec §11의 ADR이 기록한다 |
 | [U] | 미확인 |
@@ -47,9 +47,9 @@
 
 | 사례 | 한 줄 요약 | 이 문서에서 보여 주는 것 |
 |---|---|---|
-| **R2** | cFE core가 시작하는 동안 ES와 EVS task가 SB 코드를 실행한다. 그 코드는 `CFE_EVS_SendEventWithAppID`에 SB의 AppId(`CFE_SB_Global.AppId`)를 넘긴다. 이 값은 SB task가 `cfe_sb_task.c:138`에서 쓰기 전까지 0(UNDEFINED)이다. 기존 기록에서 매 boot의 위반 사용 24개(ENV의 version table이 있는 basis)는 모두 HB상 발행보다 **앞서도록 순서가 정해져** 있었다([R2g §2]; [R2c §7]; spec §1.11) | 네 가지 identity, capture point, once, MustBefore, PWB, certificate, 신뢰 장부 |
-| **C1** | CF가 table에 적힌 이름으로 OSAL counting semaphore를 조회한다. 그것을 만드는 provider 앱과의 순서를 정하는 장치가 없다. default B에서는 이름이 비어 있어 이 경로가 실행되지 않는다([LED]; spec App. A.4) | `inactive`, 지연 retry, 시간 기반 전이와 σ_U∞, timeout-dependent, 좌초(stranded), `leaked-lock` stall, M_impl |
-| **SB 구독 전 송신** | 구독(route)이 생기기 전에 보낸 message는 success를 돌려받으면서 조용히 사라진다(spec §1.11) | 세 판단(framework 수준 `documented-not-error`와 caller 수준 LOSS-UNDER-ORDER), Allowed가 정해지지 않은 계약, 위반 사슬 |
+| **R2** | cFE core가 시작하는 동안 ES와 EVS task가 SB 코드를 실행한다. 그 코드는 `CFE_EVS_SendEventWithAppID`에 SB의 AppId(`CFE_SB_Global.AppId`)를 넘긴다. 이 값은 SB task가 `cfe_sb_task.c:138`에서 쓰기 전까지 0(UNDEFINED)이다. 기존 gdb 기록에서 매 boot의 준비 상태 위반 사용 24개(원인 하나, 정적 site 3곳, ENV basis, [R2g §6])는 모두 core serialization으로 HB상 발행보다 **앞서도록 순서가 정해져** 있었다([R2g §2]; spec §1.11, §6.4 항목 21) | 네 가지 identity, capture point, once, MustBefore, PWB, certificate, 신뢰 장부 |
+| **C1** | CF가 table에 적힌 이름으로 OSAL counting semaphore를 조회한다. 그것을 만드는 provider 앱과의 순서를 정하는 장치가 없다. default B에서는 이름이 비어 있어 이 경로가 실행되지 않는다([LED]; spec App. A.4). 이름이 비어 있지 않은 파생 설정 B′는 D22가 정했다: 공개 BP 기반, 후보 쌍 CF `281a941` → `833fdbb` [D]. 아직 만들지 않았고 버전 호환성도 확인하지 않았다 [U] (spec App. A.4 step 2) | `inactive`, 지연 retry, 시간 기반 전이와 σ_U∞, timeout-dependent, 좌초(stranded), `leaked-lock` stall, M_impl |
+| **SB 구독 전 송신** | 구독(route)이 생기기 전에 보낸 message는 success를 돌려받으면서 조용히 사라진다(spec §1.11) | 세 판단(framework 수준 `documented-not-error`와 caller 수준 LOSS-UNDER-ORDER), Allowed가 정해지지 않은 준비 상태 명세, 준비 상태 위반 사슬 |
 | **OSAL RESERVED 구간** | OSAL object 생성 도중, 이름은 이미 보이지만 최종 ID는 아직 쓰이지 않은 구간이다(spec §1.3, §3.2) | lifecycle 상태 RES_CN, M_api와 M_impl의 차이 |
 
 ### 0.3 모형의 뼈대
@@ -62,13 +62,28 @@
 | 자원 | framework가 관리하는 대상. kind마다 lifecycle 상태 기계가 있다 | §2 |
 | 연산과 effect | actor가 부르는 API. 자원 상태를 바꾸거나(lifecycle) 자원을 쓴다(use). 효과마다 일어나는 지점(LP)이 있다 | §3 |
 | event, trace | LP에서 일어난 효과 하나 / actor별 program order를 지키는 event 열 | §4 |
-| 준비 계약 | "이 사용 지점에서 이 자원은 이 상태여야 한다"와 caller 수준에서 허용되는 not-ready 행동. 사용의 발생마다 status를 정한다 | §5 |
+| 준비 상태 명세 | "이 사용 지점에서 이 자원은 이 상태여야 한다"(준비 사전조건 `Req`)와 caller 수준에서 허용되는 not-ready 행동. 사용의 발생마다 status를 정한다 | §5 |
 | B, σ, M | 유한 실행 집합 `Pref(B,σ,M)`과 도달 가능한 상태를 정한다 | §6, §7 |
 | skeleton view | 정적 분석이 실행 집합을 근사하는 actor별 자동자 | §8 |
 | 순서 관계 | MustBefore, PWB, trace의 HB | §9, §10 |
-| 신뢰 장부 | certificate와 판정 칸이 무엇을 다시 확인했고 무엇을 믿었는지 적은 네 부분 기록 | §10.7 |
-| 판정 기록 | instance마다 (σ, M) 칸·경계별 safety 기록과 class, reach, progress, 근거 축 | §11 |
-| 보장 | 위 모두와 가정 A에 상대적인 safety 진술과 progress 진술. `no-stall-within(b)`는 b 안의 모형에 대해서만 말한다 | §12 |
+| 신뢰 장부 | certificate와 판정 칸이 무엇을 다시 확인했고 무엇을 믿었는지 적은 네 부분 기록. 믿은 lemma의 증명 상태를 함께 적는다 | §10.7 |
+| 판정 기록 | instance마다 (σ, M) 칸·경계별 safety 기록과 class, reach, progress, 근거 축, 증명 상태 | §11 |
+| 보장 | 위 모두와 가정 A에 상대적인 safety 진술과 progress 진술. `no-stall-within(b)`는 b 안의 모형에 대해서만 말한다. 모든 lemma와 보장은 증명 상태(`proved`, `depends-on-stated-assumption`, `unproved`)를 지닌다 | §12 |
+
+### 0.4 개정 1.2에서 바뀐 곳
+
+spec 개정 1.2가 이 문서의 범위에 준 변경이다. 모두 [D]다. PI 결정은 연구 계획, 범위, 용어에 대한 결정이고 사실이나 실행 결과가 아니다. 정의와 문장의 정정은 정의를 바꾼 것이다. 이 개정에서도 빌드·설치·실행은 없었고 Kairos의 결과는 없다. 정정 전후의 문장과 손으로 계산한 최소 예제는 [../plan/formal_corrections.md](../plan/formal_corrections.md), R2 첫 결과의 증명 상태표는 [../plan/proof_status_R2.md](../plan/proof_status_R2.md)에 있다.
+
+| 바뀐 것 | 이 문서 | spec |
+|---|---|---|
+| σ_E 진술을 L-FO·L-PR이 증명하는 꼴로 정정: 판정된 범위 안 발생에 대한 진술이고 `NOT_EVALUATED` 조기 반환을 허용한다 | §7.5 전이 규칙 2, §10.4, §10.6, §11.1, §11.4, §12.3 L-TRANS, §12.4 G2, §12.6 LP-EARLY | §1.8, §1.10, §6.2, §6.3, A.1 step 9, A.7, A.8, §0.9 항목 1, ADR-045 |
+| 신뢰 장부에 L-CONT (c)와 L-STATUS를 넣음: reach나 witness가 실행에 기대는 모든 칸, certificate 자신의 칸 포함. 그 실행 쪽 전제는 O1, O2, O4, O5가 반박한다 | §10.7 | §4.5.1, A.1 step 9a, §0.9 항목 2, ADR-045 |
+| 증명 상태 `proved` / `depends-on-stated-assumption` / `unproved`를 lemma와 보장마다 두고, 의무로만 적힌 lemma를 "증명됨"으로 출력하지 않음(PS1–PS4) | §10.5, §10.7, §11.2, §11.5, §12.3, §12.4, §12.5 | §6.2, §6.3, §2.3, §6.4 항목 45·46, §0.9 항목 3, ADR-045 |
+| caller 수준 판단: 규칙만으로는 받아들이지 않음(QT-4), 정상 연속은 인용한 노드(Q15), 충돌은 판정 보류(QT-5), K-SPAWN.osal·K-LOCKBAL은 구현 결함 계열(QT-9) | §5.2, §5.3, §5.8, §7.4, §12.6 LP-ALLOW | §1.6, §6.4 항목 53, ADR-043(개정), ADR-048 |
+| C1 기준 구성 D22: 공개 BP 기반, 후보 쌍 CF `281a941` → `833fdbb` | §0.2, §3.5, §7.4 | §0.9 항목 5, A.4 step 2·3·6, ADR-044 |
+| R2 표현: harm `event_request_rejected`, "이벤트 요청 거부" | §5.1, §5.3, §5.7 | §0.9 항목 4, §6.4 항목 47, A.1 step 8·13a |
+| 용어 T1 = (a): 준비 상태 명세, 준비 사전조건, 준비 상태 위반, 근거 등급, `allowed-not-ready` | 문서 전체, §5.9 | §0.11, §1.6, 부록 C, ADR-052 |
+| CORD 인용 정리(D12): R2의 실행 근거는 gdb 기록뿐 | §0.1, §0.2, §5.7, §6, §10.7 | §0.11, 머리말 |
 
 ---
 
@@ -157,7 +172,7 @@ kind `k`마다 lifecycle automaton `A_k = (Q_k, q0_k, Σ_k, δ_k)`, 즉 상태 �
 
 ### 2.3 `cell(loc)`: 일반 kind
 
-`cell(loc)`은 값이 자원 identity인 공유 위치를 다루는 **일반** kind다(spec §1.3). R2의 `CFE_SB_Global.AppId`는 `cell(CFE_SB_Global.AppId)`다. `svc.identity(SB)` 같은 이름은 표시일 뿐 Φ 항목이 아니다. 그래서 R2에는 SB 전용 kind도 계약도 필요 없다(spec App. A.1 step 1).
+`cell(loc)`은 값이 자원 identity인 공유 위치를 다루는 **일반** kind다(spec §1.3). R2의 `CFE_SB_Global.AppId`는 `cell(CFE_SB_Global.AppId)`다. `svc.identity(SB)` 같은 이름은 표시일 뿐 Φ 항목이 아니다. 그래서 R2에는 SB 전용 kind도 준비 상태 명세도 필요 없다(spec App. A.1 step 1).
 
 ### 2.4 할당 기록 `ρ(n)`
 
@@ -172,7 +187,7 @@ kind `k`마다 lifecycle automaton `A_k = (Q_k, q0_k, Σ_k, δ_k)`, 즉 상태 �
 
 ### 3.1 연산과 effect
 
-연산 `op ∈ Φ.ops`는 binding(symbol 또는 AST pattern, 줄 번호가 아님), 역할이 붙은 인자(name, id, out-id, AppId, stamp, buffer, msg), 결과 code → `{ready, not_ready(q), error}`의 outcome map, 그리고 effect 목록을 가진다(spec §1.4). effect는 `lifecycle(r, a) when guard`(상태를 바꿈), `use(r)`(계약의 대상), `sync(obj, role)`(acq, rel, give, take, put, get, create, start, join, observe, timeout 등), `env(input)`, `mark(handler_begin | handler_end)`다.
+연산 `op ∈ Φ.ops`는 binding(symbol 또는 AST pattern, 줄 번호가 아님), 역할이 붙은 인자(name, id, out-id, AppId, stamp, buffer, msg), 결과 code → `{ready, not_ready(q), error}`의 outcome map, 그리고 effect 목록을 가진다(spec §1.4). effect는 `lifecycle(r, a) when guard`(상태를 바꿈), `use(r)`(준비 상태 명세의 대상), `sync(obj, role)`(acq, rel, give, take, put, get, create, start, join, observe, timeout 등), `env(input)`, `mark(handler_begin | handler_end)`다.
 
 outcome map의 not-ready code마다 **문서화된 결과**를 붙인다. supplier 쪽 reference가 그 code에 대해 문서화한 부수 효과(counter, event, drop)와, 그 문서의 `prov`(side `supplier`, §5.8)다. 예: route가 없는 `CFE_SB_TransmitMsg`는 `NoSubscribersCounter++`, `SEND_NO_SUBS` event, `CFE_SUCCESS`다(`cfe_sb_priv.c:1082–1087`, cSB4305.5). 이것은 framework 수준 판단의 근거이고, 발생의 status를 정하지 않는다(§5.8).
 
@@ -180,7 +195,7 @@ outcome map의 not-ready code마다 **문서화된 결과**를 붙인다. suppli
 
 **linearization point(LP)**는 시간이 걸리는 연산의 효과가 한순간에 원자적으로 일어났다고 볼 수 있는 한 지점이다. Kairos는 이것을 코드의 구체적 명령 위치로 정한다.
 
-**요구 조건의 conjunct마다 LP를 따로 둔다** [D] (spec §1.4; [X1-M1] 수정). conjunct는 `P_1 ∧ … ∧ P_n`에서 ∧로 묶인 각 조건이다.
+**준비 사전조건(`Req`)의 conjunct마다 LP를 따로 둔다** [D] (spec §1.4; [X1-M1] 수정). conjunct는 `P_1 ∧ … ∧ P_n`에서 ∧로 묶인 각 조건이다.
 
 - lifecycle effect의 LP는 API 안에서 그 효과가 실제로 일어나는 명령 수준 event다.
 - use의 conjunct는 프로그램이 그 상태를 **읽는** 지점을 LP로 선언한다.
@@ -223,14 +238,14 @@ OSAL을 어디까지 펼쳐 모형화하는지가 두 수준으로 나뉜다 [D]
 
 - OSAL 내부 lock은 M_impl에서만 interleaving을 제약하고, 어느 수준에서도 shape용 HB edge를 만들지 않는다.
 - **M_impl-relevant 연산**은 두 수준이 다르게 모형화하는 연산이다: idmap 생성·조회·삭제·token 변환, task 생성·준비·삭제, binsem, queue 생성·put·get. cone(한 후보와 관련된 actor와 object를 닫은 집합, spec §4.10)이나 certificate에 이런 연산이 있으면 그것도 M_impl-relevant다.
-- **두 수준이 다르면 그대로 보고한다.** M_impl에서 protected인데 M_api에서 위반 가능하면 **portability hazard**다. M_impl에서만 위반 가능하면 고정 판 OSAL POSIX의 **implementation-defect candidate**다. M_api 전용 certificate를 실제 바이너리 관측이 반박하면 **portability-hazard-evidence**이고, model fault가 아니다.
+- **두 수준이 다르면 그대로 보고한다.** M_impl에서 protected인데 M_api에서 준비 상태 위반이 가능하면 **portability hazard**다. M_impl에서만 가능하면 고정 판 OSAL POSIX의 **implementation-defect candidate**다. M_api 전용 certificate를 실제 바이너리 관측이 반박하면 **portability-hazard-evidence**이고, model fault가 아니다.
 
-**예** ([I], spec App. A.4 step 4). C1의 파생 설정 B′에서 by-name 조회가 RESERVED 구간에 닿는 경우다(D22가 정하기 전까지 B′는 없다).
+**예** ([I], spec App. A.4 step 4). C1의 파생 설정 B′에서 by-name 조회가 RESERVED 구간에 닿는 경우다. B′는 D22가 정했다: 공개 BP 기반, 후보 쌍 CF `281a941` → `833fdbb` [D]. 아직 만들지 않았고 버전 호환성도 확인하지 않았다 [U] (§7.4).
 
-- M_impl에서 조회는 기다리지 않고 `OS_ERR_INCORRECT_OBJ_STATE`를 바로 받는다(`osapi-idmap.c:401–404`). 이 code는 CF의 `retry_until_ready` code 밖이므로 monitor는 결정에서 REJECT를 주고, 발생은 `VIOLATING`이다(safety). 시간 기반 전이가 필요 없으므로 M_impl에서는 `Bad_i(σ_U∞)`이고 timeout-dependent가 아니다.
+- M_impl에서 조회는 기다리지 않고 `OS_ERR_INCORRECT_OBJ_STATE`를 바로 받는다(`osapi-idmap.c:401–404`). 이 code는 CF의 `retry_until_ready` code 밖이므로 monitor는 결정에서 REJECT를 주고, 발생은 `VIOLATING`이다(safety). 이 항목이 status를 정하는 것은 `caller` record(CF의 인정 `cf_cfdp.c:1272–1278`, `code_admission` [I])가 있을 때뿐이다(§5.8, §7.4). 시간 기반 전이가 필요 없으므로 M_impl에서는 `Bad_i(σ_U∞)`이고 timeout-dependent가 아니다.
 - K-LOCKBAL에 따라 countsem table lock이 잡힌 채 남는다. CF 자신의 instance에는 이 누수로 인한 stall이 없다. CF는 lock을 쥐고 있을 뿐 기다리지 않는다.
 - 죽음 판정(§7.3)은 CF의 VIOLATING 시도에 사슬로 붙은 딸린 결과를 찾는다. wait-for root는 countsem type lock 하나다. `FinalizeNew`에서 죽은 provider, 같은 type lock을 잡는 뒤 연산에서 LP 전에 막힌 actor(생성, 삭제, by-name 조회, GetInfo, 모든 type의 lock을 GLOBAL mode로 잡는 객체 순회 `OS_ForEachObject*`; `OS_LOCK_MODE_NONE`을 쓰는 `OS_CountSemGive`, `Take`, `TimedWait`은 아니다. 예: SCH_LAB의 `OS_CountSemCreate`, `sch_lab_app.c:167`), CF를 정리하다 `CFE_ES_CleanupTaskResources`에서 죽은 `ES_BG_TASK`(그 뒤 어떤 앱도 정리·재시작·재적재되지 않는다)다. 모두 confirmable `leaked-lock` stall witness이고 harm은 `hang_or_deadlock`이다(litmus LP-LEAK, LP-CASE-C1).
-- 결과는 **implementation-defect candidate**(F1)다. cone이 M_impl-relevant이고 두 수준이 다르므로 M_api 결과는 σ_E로 옮기지 않는다. 위반이 M_impl에만 있으므로 label은 `portability-hazard`가 아니다.
+- 결과는 **implementation-defect candidate**(F1)다. cone이 M_impl-relevant이고 두 수준이 다르므로 M_api 결과는 σ_E로 옮기지 않는다. 준비 상태 위반이 M_impl에만 있으므로 label은 `portability-hazard`가 아니다.
 
 ---
 
@@ -251,22 +266,26 @@ OSAL을 어디까지 펼쳐 모형화하는지가 두 수준으로 나뉜다 [D]
 
 ---
 
-## 5. 준비 계약
+<a id="5-준비-계약"></a>
 
-### 5.1 계약의 요소
+## 5. 준비 상태 명세
 
-계약은 `κ = ⟨id, U, sel, Req, Oracle, Allowed, appreq, harm, prov, authored, guard, scope⟩`다(spec §1.6). 이름 결정 T1이 정해질 때까지 "계약"이라는 말을 그대로 쓴다.
+<a id="51-계약의-요소"></a>
+
+### 5.1 준비 상태 명세의 요소
+
+**준비 상태 명세**(readiness specification)는 `κ = ⟨id, U, sel, Req, Oracle, Allowed, appreq, harm, prov, authored, guard, scope⟩`다(spec §1.6). 이름은 PI 결정 T1 = (a)로 정했다(2026-10-15 [D]; §5.9, spec 부록 C). 한국어로는 늘 준비 상태 명세를 온전히 쓰고 '명세'만 따로 쓰지 않는다.
 
 | 요소 | 뜻 | 예 |
 |---|---|---|
 | `U` | 사용 pattern: 연산과 site 조건 | `CFE_EVS_SendEventWithAppID` 호출 |
 | `sel` | event 필드에서 key를 고르는 selector | `evs.reg(arg.AppID)`, `osal.countsem(arg.name)` |
-| `Req` | conjunct `P_1 ∧ … ∧ P_n`. 각각 core expression 언어로 쓰고 자기 LP를 가진다 | `valid(arg.AppID) ∧ state(evs.reg(arg.AppID)) = REG` |
+| `Req`(준비 사전조건, readiness precondition) | 필요한 lifecycle 또는 값 조건의 conjunct `P_1 ∧ … ∧ P_n`. 각각 core expression 언어로 쓰고 자기 LP를 가진다. 키로 고른 자원에 대한 요구이고 누가 그것을 약속했다고는 말하지 않는다 | `valid(arg.AppID) ∧ state(evs.reg(arg.AppID)) = REG` |
 | `Oracle` | conjunct마다 **framework 유효성 predicate**. Kairos는 실행하지 않는다. 정적으로는 그 읽기 집합이 conjunct의 **지원 위치**(support location)를 정하고, 동적으로는 프로그램의 결과 code가 conjunct의 관측된 모습이다(O4) | `CFE_ES_AppRecordIsMatch(CFE_ES_LocateAppRecordByID(a), a)` |
 | `Allowed` | caller 수준에서 받아들이는 not-ready 결과와 그 horizon(§5.2). 어떤 항목이 status를 정하는지는 §5.8에 있다 | `none`, `retry_until_ready(…)` |
 | `appreq` | 이 사용이 호출하는 앱이나 mission을 위해 이뤄야 할 것을 말하는 reference, 또는 `unspecified_by_reference`(기본). supplier 쪽 글이나 규칙에서 가져오지 않는다(§5.8) | K-ID: `cfe_evs.h:169–172` |
-| `harm` | 결과가 허용되지 않을 때의 효과 종류(§5.3) | `event_lost_silently` |
-| `prov` | 출처 record `(kind, side, path:line 또는 요구 ID, 인용 문장의 sha256)`. kind ∈ {`api_doc`, `requirement`, `code_admission`, `code_pattern`, `issue`, `researcher`}, side ∈ {`supplier`, `caller`, `rule`}(§5.8). `requirement`는 cFS 기능 요구(`cfe/docs/cFE_FunctionalRequirements.csv`, 앱의 `*_FunctionalRequirements.csv`)다 [D, 제안; PI 항목 QT-2(STATUS 결정 T2 재질문) 미결, spec §10.1] | `cfe_evs.h:168–172` |
+| `harm` | 결과가 허용되지 않을 때의 효과 종류(§5.3) | `event_request_rejected` |
+| `prov` | 출처 record `(kind, side, path:line 또는 요구 ID, 인용 문장의 sha256)`. kind ∈ {`api_doc`, `requirement`, `code_admission`, `code_pattern`, `issue`, `researcher`}, side ∈ {`supplier`, `caller`, `rule`}(§5.8). `requirement`는 cFS 기능 요구(`cfe/docs/cFE_FunctionalRequirements.csv`, 앱의 `*_FunctionalRequirements.csv`)다 [D, 2026-10-15 결정: QT-2 승인, spec §10.1] | `cfe_evs.h:168–172` |
 | `authored` | 작성 시각, 작성자, 작성자가 그 API에 대해 미리 본 설계 사례(C1, C2, C3, C5, R2) | — |
 | `guard` | profile을 판끼리 재사용하기 위한 version guard | `cfe ≥ 6.6.0` |
 | `scope` | 암묵적 scope conjunct "결정 event 전에 종료 요청이 없다"(§5.4) | — |
@@ -279,31 +298,33 @@ OSAL을 어디까지 펼쳐 모형화하는지가 두 수준으로 나뉜다 [D]
 |---|---|---|
 | `none` | 어떤 not-ready 결과도 허용하지 않는다 | 사용 자체 |
 | `documented_drop(src)` | 사용하는 코드가 자기 요청을 설계상 버린다. 사용을 가진 모듈의 **caller 쪽** 글이 이것을 밝힌다. 예: EVS의 own-ID guard(`cfe_evs_utils.c:613–623`, 주석은 사용하는 코드인 EVS의 것, `caller`); SB의 task별 event 재귀 guard(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; `caller`). 뒤의 것은 사용자가 SB의 event 코드다. caller 쪽 글이 밝히지 않는 drop은 `documented_drop` 항목이 아니고, 어떤 Kairos 규칙도 그것을 받아들이지 않는다. 그래서 호출자에게 ES task record가 없을 때 SB가 event를 버리는 것(`cfe_sb_priv.c:315–318`)에는 항목이 없다. 이것은 SB의 event 코드가 status를 무시하는 `CFE_ES_GetTaskID` 호출(`cfe_sb_priv.c:773`)의 K-SELF.es instance에서 일어나는 문서화되지 않은 drop이다. 그 caller 수준 Allowed는 `unspecified_by_reference`(NOT_READY_UNJUDGED, harm `unspecified_by_reference`, consequence는 event가 버려져 효과가 조용히 사라짐)이고, SB의 `appreq`가 기록되면 `none`(VIOLATING)이다(§5.8 `appreq` 단계 1; spec §3.9). supplier가 호출자의 요청을 문서대로 버리는 것(SB의 구독자 없음 drop, cSB4305.5)은 op의 outcome map에 있는 framework 수준 정보이고(§3.1), 이 항목이 아니다 | 사용 자체 |
-| `returned_and_tested(codes)` | 문서화된 code를 돌려주고, 호출자가 그 code로 분기해 **정상 연속**(normal continuation, 아래)에 이른다. **error exit**(`CFE_ES_ExitApp`, `CFE_ES_ExitChildTask`, `OS_TaskExit`, `CFE_ES_ResetCFE`, `CFE_PSP_Restart`, terminal 연산)나 그 전의 실패 status 반환은 정상 연속이 아니다. 정상 연속에서 REJECT event가 함께 일어나면 REJECT가 이긴다 | 정상 연속까지(ACCEPT), 또는 REJECT event까지: error exit, 문서화된 전파가 없는 error 반환, 같은 actor의 같은 자원에 대한 다음 연산, actor 종료. trace가 먼저 끝나면 `unknown(horizon)` |
+| `returned_and_tested(codes)` | 문서화된 code를 돌려주고, 호출자가 그 code로 분기해 **정상 연속**(normal continuation)에 이른다. 정상 연속은 항목이 인용과 함께 **이름을 적은 노드**다(엄격한 대안 Q15, 2026-10-15 결정 [D]). 인용을 적지 않은 항목은 `unspecified_by_reference`다(아래 '정상 연속'). **error exit**(`CFE_ES_ExitApp`, `CFE_ES_ExitChildTask`, `OS_TaskExit`, `CFE_ES_ResetCFE`, `CFE_PSP_Restart`, terminal 연산)나 그 전의 실패 status 반환은 정상 연속이 아니다. 정상 연속에서 REJECT event가 함께 일어나면 REJECT가 이긴다 | 정상 연속까지(ACCEPT), 또는 REJECT event까지: error exit, 문서화된 전파가 없는 error 반환, 같은 actor의 같은 자원에 대한 다음 연산, actor 종료. trace가 먼저 끝나면 `unknown(horizon)` |
 | `retry_until_ready(codes, bound)` | 호출자가 재시도한다 | build에서 상수 평가한 loop bound(예: CF의 실효 `CF_STARTUP_SEM_MAX_RETRIES`) |
 | `fallback(op′)` | 호출자가 문서화된 대안을 쓴다 | actor의 다음 연산 |
 | `defer_by_design(src)` | reference가 연기를 문서화했다(TO_LAB은 `CFE_ES_WaitForStartupSync` 뒤에 구독한다, `to_lab_app.c:64–68`) | 연기하는 actor가 실행하는 문서화된 연기 지점. 그 actor는 사용이 결정될 때 아직 없을 수 있다 |
 | `exit(code, src)` | 문서화된 종료 | actor 종료 |
 | `unspecified_by_reference` | reference가 허용 여부를 말하지 않는다 | — |
 
-**정상 연속** [D] (spec §1.6; EXT-20261012 §4.1).
-- 항목은 reference가 문서화한 정상 연속 노드를 인용과 함께 적을 수 있다.
-- 적지 않으면 **기본 정상 연속**을 쓴다. 함수 f 안의 test 노드 n(돌려받은 status에 대한 분기)을 보자. f의 certificate view CFG를 loop 반복마다 비순환으로 만든다. 정확히 펼친 loop는 펼친 대로 두고, n을 담은 그 밖의 loop는 back edge를 loop 출구로 돌린다. 이 그래프에서 n의 가장 가까운 post-dominator c 가운데, c가 f의 return도 exit도 아니고, c에서 돌려받은 status도 n과 c 사이 not-ready 갈래에서 쓴 변수도 live가 아닌 것이 기본 정상 연속이다. f의 반환 값도 사용으로 센다.
-- 그런 c가 없으면 기본 정상 연속이 없다. 그 발생은 REJECT만 될 수 있다. 예: C1의 수정 전 판(§7.4).
-- **문서화된 전파.** reference(`api_doc`나 `code_admission`)가 API가 not-ready status를 자기 호출자에게 돌려준다고 적으면, 항목이 그렇게 말할 수 있다(예: `CFE_EVS_Register`의 `cfe_evs.h:98`). 그러면 API 안의 test 노드와 합류는 무시한다. API가 status를 돌려주는 것은 REJECT가 아니다. 의무는 호출자 쪽에서 API가 돌아온 지점부터 같은 규칙으로 시작한다. 코드만 읽고 알아낸 전파는 이런 항목을 만들지 않는다.
-- 기본값을 쓸지, 모든 항목이 정상 연속을 reference에서 인용해야 하는지는 설계 항목 Q15다(spec §10.1).
+**정상 연속** [D] (spec §1.6; EXT-20261012 §4.1; 엄격한 대안 Q15, 2026-10-15 결정).
+- 정상 연속은 reference가 문서화한 노드를 항목이 인용과 함께 적은 것이다. 인용은 `prov` record이고 kind는 `api_doc`, `requirement`, `code_admission`, `issue` 중 하나, side는 `caller`다.
+- **인용을 적지 않은 항목은 `unspecified_by_reference`다.** monitor가 없고, 그 not-ready 발생은 NOT_READY_UNJUDGED이며, ACCEPT도 REJECT도 끌어내지 않는다. 코드가 보여 주는 것은 판단과 따로 사실로 추출해 보고한다.
+- **후보 연속 `cont_candidate(n)`**은 판단이 아니라 사실이다. 함수 f 안의 test 노드 n(돌려받은 status에 대한 분기)을 보자. f의 certificate view CFG를 loop 반복마다 비순환으로 만든다. 정확히 펼친 loop는 펼친 대로 두고, n을 담은 그 밖의 loop는 back edge를 loop 출구로 돌린다. 이 그래프에서 n의 가장 가까운 post-dominator c 가운데, c가 f의 return도 exit도 아니고, c에서 돌려받은 status도 n과 c 사이 not-ready 갈래에서 쓴 변수도 live가 아닌 것이 `cont_candidate(n)`이다. f의 반환 값도 사용으로 센다. 그런 c가 없으면 `none`이다. 예: C1의 수정 전 판(§7.4).
+- 발생은 n에서 시작하는 경로에서 code 사실 넷도 기록한다: error exit에 이르는지, non-success status를 반환하는지, 같은 자원에 대한 다음 연산이 있는지, actor가 종료하는지. 이 사실들은 발생의 `consequence`에 속한다(§11.5).
+- `cont_candidate(n)`을 허용된 회복으로 읽는 것은 판단이고, 판단에는 reference가 필요하다. reference가 없으면 판단하지 않는다.
+- **문서화된 전파.** reference(`api_doc`이나 `code_admission`)가 API가 not-ready status를 자기 호출자에게 돌려준다고 적으면, 항목이 그렇게 말할 수 있다(예: `CFE_EVS_Register`의 `cfe_evs.h:98`). 그러면 API 안의 test 노드와 합류는 무시한다. API가 status를 돌려주는 것은 REJECT가 아니다. 의무는 호출자 쪽에서 API가 돌아온 지점부터 같은 규칙으로 시작한다. 코드만 읽고 알아낸 전파는 이런 항목을 만들지 않는다.
 
 **horizon monitor** [D] (spec §1.6; EXT-20261012 §4.1–4.2). `none`과 `unspecified_by_reference` 밖의 항목은 유한 실행 ρ(§7.1) 위의 monitor μ로 읽는다. 항목은 **감시 actor**(monitored actor), ACCEPT event, REJECT event를 정한다.
 
 | 항목 | 감시 actor | ACCEPT | REJECT |
 |---|---|---|---|
 | `documented_drop` | 사용 actor | 결정에서 결과가 문서화된 drop이다 | 결정에서 그 밖의 결과다 |
-| `returned_and_tested` | 사용 actor | `codes` 안의 not-ready 결과 뒤, test 노드를 지나 정상 연속에 이른다 | 결과가 `codes` 밖이다. 또는 ACCEPT 전에 error exit, test를 담은 함수의 실패 status 반환, 같은 자원에 대한 다음 연산, actor 종료에 이른다 |
+| `returned_and_tested` | 사용 actor | `codes` 안의 not-ready 결과 뒤, test 노드를 지나 항목이 인용한 정상 연속에 이른다 | 결과가 `codes` 밖이다. 또는 ACCEPT 전에 error exit, test를 담은 함수의 실패 status 반환, 같은 자원에 대한 다음 연산, actor 종료에 이른다 |
 | `retry_until_ready` | 사용 actor | 같은 loop instance의 뒤 시도가 `READY`다(`NOT_EVALUATED` 시도는 아니다) | loop가 소진 경로로 간다. 또는 시도 결과가 `codes` 밖이다 |
 | `fallback` | 사용 actor | 다음 연산이 `op′`다 | 다음 연산이 다른 것이다. 또는 process 종료 단계가 아닌 방식으로 먼저 끝난다 |
 | `defer_by_design` | 연기 지점을 실행하는 actor(TO_LAB은 그 main task). 결정 때 아직 없을 수 있다 | 연기 지점을 실행한다 | process 종료 단계가 아닌 방식으로 먼저 끝난다 |
 | `exit` | 사용 actor | `code`로 문서화된 종료에 이른다 | process 종료 단계가 아닌 다른 종료다 |
 
+- **인용한 정상 연속이 없는 `returned_and_tested` 항목**은 monitor가 없다. 그 발생은 NOT_READY_UNJUDGED다(위 '정상 연속').
 - **경로 검사.** 감시 actor의 제어 노드에서 ACCEPT event로도 process 종료 단계(§7.3)로도 가는 `Sk^cert` 경로가 없으면 μ는 곧바로 REJECT를 준다. 아직 없는 actor면 가장 가까운 기존 spawn 사슬 조상에서 시작해 spawn edge를 따라 찾는다.
 - **process 종료 단계에서와 그 뒤에는** μ가 ACCEPT도 REJECT도 내지 않는다. process가 끝날 때 PENDING인 발생은 PENDING으로 남는다. 실제 실행에는 그런 단계 뒤의 event가 없다.
 - **teardown은 기본 scope 발생을 결정하지 않는다** [D] (scope가 "종료 요청 전"이기 때문이다, §5.4). 기본 scope 발생에 대해 μ는 TEARDOWN LP(`OS_DeleteAllObjects`, spec §3.5)에서와 그 뒤에 ACCEPT도 REJECT도 내지 않는다. 그 삭제는 감시 actor를 그 actor 자신의 event 없이 끝낸다. 그래서 teardown이 시작될 때 PENDING인 기본 scope 발생은 PENDING으로 남고, 그 실행은 `unknown(horizon)`을 준다. SHUTDOWN_REQ LP 뒤의 상태가 그 발생의 progress에서 빠지는 것(§7.3)과 같은 이유다. SHUTDOWN_REQ LP와 TEARDOWN LP 사이에 일어난 감시 actor의 event는 여전히 그 발생을 결정한다.
@@ -311,27 +332,27 @@ OSAL을 어디까지 펼쳐 모형화하는지가 두 수준으로 나뉜다 [D]
 - 끝나지 않는 horizon은 progress 문제다(§7.3). μ가 OPEN인 채 trace가 끝나면 `unknown(horizon)`이다.
 - 정적 검사는 `Sk^cert` 경로 위에서, trace 검사는 trace 위에서, explorer는 탐색한 prefix 위에서 μ를 계산한다.
 
-`unspecified_by_reference`이면 harm도 `unspecified_by_reference`다. must-deliver `appreq`가 없는 route·용량 계약에는 결과 label **LOSS-UNDER-ORDER**도 붙는다. 둘 다 관측된 효과를 지우지 않는다. 판정은 그 효과를 `consequence`로 기록한다(§11.5).
+`unspecified_by_reference`이면 harm도 `unspecified_by_reference`다. must-deliver `appreq`가 없는 route·용량 준비 상태 명세에는 결과 label **LOSS-UNDER-ORDER**도 붙는다. 둘 다 관측된 효과를 지우지 않는다. 판정은 그 효과를 `consequence`로 기록한다(§11.5).
 
 **SB 구독 전 송신**(K-ROUTE)은 세 판단으로 나눠 보고한다(§5.8; spec §1.11, §3.9, App. A.1 step 13a).
 - framework 수준: cSB4305.5가 문서화한 결과이고, framework는 그것을 error로 보지 않는다(`documented-not-error`).
 - caller 수준: TO_LAB처럼 소비자가 연기를 문서화한 곳에서는 `defer_by_design`이다. 소비자나 mission reference가 말하지 않는 곳에서는 `unspecified_by_reference`와 LOSS-UNDER-ORDER다(spec §3.15 RC5).
-- 이 손실은 `documented_drop`이 아니다. Kairos는 이 손실을 "위반"이라고 단정하지 않는다. reference가 caller 수준 판단 근거를 주지 않는다는 사실을 label로 남긴다.
+- 이 손실은 `documented_drop`이 아니다. Kairos는 이 손실을 준비 상태 위반이라고 단정하지 않는다. reference가 caller 수준 판단 근거를 주지 않는다는 사실을 label로 남긴다.
 
 ### 5.3 harm
 
-어휘는 `event_lost_silently`, `status_ignored`, `wrong_identity_stamped`, `app_error_exit`, `app_zombie`(record를 영원히 쓰고 정리하지 않음), `service_task_absent`(core task가 끝났는데 시스템은 계속 돎), `processor_reset_requested`, `process_abort`(pc-linux에서 reset 요청은 `CFE_PSP_RESTART_DELAY` 뒤 abort한다), `panic`(core 동기화 실패), `task_never_runs`, `hang_or_deadlock`, `terminal_pending(panic | abort)`, `message_lost`, `unspecified_by_reference`다(spec §1.6).
+어휘는 `event_request_rejected`(EVS가 패킷을 만들기 전에 요청을 거절하고 호출자는 status를 버림), `status_ignored`, `wrong_identity_stamped`, `app_error_exit`, `app_zombie`(record를 영원히 쓰고 정리하지 않음), `service_task_absent`(core task가 끝났는데 시스템은 계속 돎), `processor_reset_requested`, `process_abort`(pc-linux에서 reset 요청은 `CFE_PSP_RESTART_DELAY` 뒤 abort한다), `panic`(core 동기화 실패), `task_never_runs`, `hang_or_deadlock`, `terminal_pending(panic | abort)`, `message_lost`, `unspecified_by_reference`다(spec §1.6).
 
 `task_never_runs`와 `hang_or_deadlock` 두 값은 두 가지로 쓰이고, 기록은 둘을 나눈다 [D] (EXT-20261012 §4.1).
-- **VIOLATING 발생의 harm.** caller 수준 Allowed가 지정된 곳에서 Allowed 분석이 정한다. 예: TIME의 `CFE_ES_CreateChildTask` 호출(`cfe_time_task.c:160, 173`; spec §3.3, App. A.2 item 4)의 K-SELF.es에서는, 기본 정상 연속을 쓰는 `returned_and_tested` 항목(`rule` record이고 QT-4 기본값 아래에서 status를 정한다, §5.8)이 돌려받은 error를 REJECT하고, 그 뒤 자식 task는 결코 돌지 않는다 [I]. 위반한 instance의 safety 결과다.
+- **VIOLATING 발생의 harm.** caller 수준 Allowed가 지정된 곳, 곧 `caller` record를 가진 항목이나 지정된 `appreq`가 발생을 정하는 곳에서 Allowed 분석이 정한다. 엄격한 대안(QT-4, Q15) 아래에서 TIME의 `CFE_ES_CreateChildTask` 호출(`cfe_time_task.c:160, 173`; spec §3.3, App. A.2 item 4)의 K-SELF.es는 그런 곳이 아니다. 그 `returned_and_tested` 항목은 연속을 인용하지 않으므로 발생은 NOT_READY_UNJUDGED이고 harm은 `unspecified_by_reference`다. 돌려받은 error가 호출자에게 돌아가고 그 뒤 자식 task가 결코 돌지 않는다는 code 사실 [I]은 그 발생의 consequence로 기록한다. 이런 harm을 가진 VIOLATING 발생에는 `caller` record나 지정된 `appreq`가 필요하다(litmus LP-ALLOW).
 - **progress 결과의 harm**(§7.3). 사용으로 가는 길에서, 사용 안에서, 또는 사용의 horizon을 열어 둔 채 죽은 actor다. 기다리는 instance의 progress 결과다.
 - `terminal_pending(panic | abort)`는 progress harm으로만 쓴다. 기다리는 actor는 죽었지만, stop 입력이 일으키지 않는 process 끝이 모든 상태에서 도달 가능하다. 그래서 process는 멈춰 있지 않고 panic(`panic`)이나, 다른 abort·재시작 요청·`main`의 반환(`abort`)으로 끝난다. 두 값은 spec §3.3의 `panic`과 `process_abort` 구분을 지킨다.
 
-caller 수준 규칙(§5.8: `Allowed = none`에는 지정된 `appreq`가 필요하다) 아래에서, `none`이 supplier 쪽 글에만 기대는 K-SPAWN.osal과 K-LOCKBAL은 NOT_READY_UNJUDGED다. harm은 `unspecified_by_reference`이고, 효과는 consequence로 기록한다. `appreq`가 기록되거나 PI가 이들을 implementation-defect family로 옮길 때까지 그렇다(PI 항목 QT-9).
+caller 수준 규칙(§5.8: `Allowed = none`에는 지정된 `appreq`가 필요하다) 아래에서, `none`이 supplier 쪽 글에만 기대는 K-SPAWN.osal과 K-LOCKBAL은 NOT_READY_UNJUDGED다. harm은 `unspecified_by_reference`이고, 효과는 consequence로 기록한다. PI는 2026-10-15에 이들을 구현 결함 계열(implementation-defect family)로 정했다(QT-9). 이들을 준비 상태 위반(호출자 요구 위반)으로 만들려고 연구자가 작성한 `appreq`를 더하지 않고, 순서 위반과 이어지는 부분만 자기 근거로 보고한다.
 
 ### 5.4 scope: 종료 요청 전까지
 
-모든 계약에는 암묵적 scope conjunct **"발생의 결정 event보다 앞선 `es.shutdown`의 SHUTDOWN_REQ LP가 없다"**가 붙는다 [D] (spec §1.6; [X1-M6], [X2-04] 수정, EXT-20261012 §4.1이 다시 씀).
+모든 준비 상태 명세에는 암묵적 scope conjunct **"발생의 결정 event보다 앞선 `es.shutdown`의 SHUTDOWN_REQ LP가 없다"**가 붙는다 [D] (spec §1.6; [X1-M6], [X2-04] 수정, EXT-20261012 §4.1이 다시 씀).
 - 발생의 준비 여부가 결정될 때(§5.5) 함께 정한다. 결정 뒤의 conjunct LP는 상관없다. conjunct가 하나면 "사용의 LP보다 앞선"과 같다.
 - scope는 instance의 일부다: `i = (κ, t, key, scope)`, `scope ∈ {default, teardown}`.
 - 기본 scope 밖 발생은 별도 family **K-TEARDOWN**(기본 scope의 여집합)의 instance다. 같은 status로 분류하고 따로 보고한다. 그 progress는 `unknown(teardown_scope)`다(§7.3).
@@ -366,37 +387,41 @@ i에 속하고 ρ에서 결정된 발생의 status는 다음 여섯 중 하나�
 - `READY`, `TOLERATED`, `VIOLATING`, `NOT_READY_UNJUDGED`, `NOT_EVALUATED`는 최종이다. ρ의 모든 연장에서 그대로다(L-STATUS, §12.3).
 - `PENDING`은 연장에서 `TOLERATED`나 `VIOLATING`이 될 수도 있고, 모든 연장에서 `PENDING`으로 남을 수도 있다. **`PENDING` 발생은 결코 `TOLERATED`로 세지 않는다.**
 
-유한 실행이 `i`에 대해 **bad**라는 것은 범위 안 `VIOLATING` 발생을 담거나, Allowed가 `unspecified_by_reference`일 때 범위 안 `NOT_READY_UNJUDGED` 발생을 담는다는 뜻이다. bad 유한 실행의 모든 연장은 bad다. 유한 실행이 `i`의 **good witness**라는 것은 범위 안 `READY`나 `TOLERATED` 발생을 담는다는 뜻이다. witness는 그 발생의 ordinal을 기록한다. 어느 뜻의 bad인지는 결과 label이 말한다. 사용 전, 사용 안, horizon 안의 영원한 대기는 결코 위반이 아니다. 그것은 **progress** 결과다(§7.3).
+유한 실행이 `i`에 대해 **bad**라는 것은 범위 안 `VIOLATING` 발생을 담거나, Allowed가 `unspecified_by_reference`일 때 범위 안 `NOT_READY_UNJUDGED` 발생을 담는다는 뜻이다. bad 유한 실행의 모든 연장은 bad다. 유한 실행이 `i`의 **good witness**라는 것은 범위 안 `READY`나 `TOLERATED` 발생을 담는다는 뜻이다. witness는 그 발생의 ordinal을 기록한다. 어느 뜻의 bad인지는 결과 label이 말한다. 사용 전, 사용 안, horizon 안의 영원한 대기는 결코 준비 상태 위반이 아니다. 그것은 **progress** 결과다(§7.3).
 
-### 5.6 위반 사슬
+<a id="56-위반-사슬"></a>
 
-`i₁ ⇝ i₂`는 `u₂`의 발생이 `u₁`의 not-ready 결과 **때문에만** 존재할 때다(제어나 데이터 의존. trace에서는 frame 포함 관계와 Φ `emits` 주석). 사슬은 결과의 갈래를 **모두** 기록한다([X2-02] 수정). 예: R2의 identity 사용 24개 중 17개는 ES 문맥의 `SEND_NO_SUBS` event의 사용이다 [M] ([R2g §2]). 이 17건이 어떤 구독보다 먼저 송신된 ES의 EVS event packet(MsgId 0x808)에서 나왔다는 귀속은 기록의 추론이다 [I] ([R2g §2]는 이 귀속을 event ID와 뒤의 콘솔 줄 "No subscribers for MsgId 0x808"에서 끌어낸 추론으로 적는다. spec §1.6도 사용 17개는 [F], 귀속은 [I]로 적는다). 사슬의 뿌리는 route가 없는 송신(K-ROUTE instance)이고, 그 송신 안에서 나온 `SEND_NO_SUBS` 사용(R2의 K-ID instance)이 사슬로 이어진다(K-ROUTE ⇝ K-ID; spec §4.8 step 8, App. A.1 step 13).
+### 5.6 준비 상태 위반 사슬
+
+`i₁ ⇝ i₂`(준비 상태 위반 사슬)는 `u₂`의 발생이 `u₁`의 not-ready 결과 **때문에만** 존재할 때다(제어나 데이터 의존. trace에서는 frame 포함 관계와 Φ `emits` 주석). 사슬은 결과의 갈래를 **모두** 기록한다([X2-02] 수정). 예: R2의 identity 사용 24개 중 17개는 ES 문맥의 `SEND_NO_SUBS` event의 사용이다 [M] ([R2g §2]). 이 17건이 어떤 구독보다 먼저 송신된 ES의 EVS event packet(MsgId 0x808)에서 나왔다는 귀속은 기록의 추론이다 [I] ([R2g §2]는 이 귀속을 event ID와 뒤의 콘솔 줄 "No subscribers for MsgId 0x808"에서 끌어낸 추론으로 적는다. spec §1.6도 사용 17개는 [F], 귀속은 [I]로 적는다). 사슬의 뿌리는 route가 없는 송신(K-ROUTE instance)이고, 그 송신 안에서 나온 `SEND_NO_SUBS` 사용(R2의 K-ID instance)이 사슬로 이어진다(K-ROUTE ⇝ K-ID; spec §4.8 step 8, App. A.1 step 13).
 
 **K-ROUTE 쪽의 발생** ([I], spec App. A.1 step 13). ES의 version-event packet을 보내는 K-ROUTE template은 boot마다 ordinal이 여럿이므로 ordinal마다 분류한다.
 - 소비자 TO_LAB의 telemetry pipe는 연기가 문서화되어 있다(`defer_by_design`). 감시 actor는 TO_LAB의 main task이고, ES가 송신할 때는 아직 없다. 그래서 각 발생은 송신에서 PENDING이고, TO_LAB이 구독하면 TOLERATED다. TO_LAB이 먼저 끝나거나 더는 구독할 수 없게 되면 같은 ordinal에서 VIOLATING이다. 예: TO_LAB 자신의 App-record 구간이 `TO_LAB_init`의 `CFE_EVS_Register`를 실패하게 하는 경우(`to_lab_app.c:134`, spec App. A.3). 그래서 이 K-ROUTE instance는 schedule-dependent이고, 그 구간의 발생에 사슬로 붙는다.
 - 연기 문서가 없는 소비자의 K-ROUTE instance는 Allowed가 `unspecified_by_reference`이고 label은 LOSS-UNDER-ORDER다. route가 없는 이른 발생과 route가 있는 뒤 발생은 같은 ordinal 쌍을 보이지 않는 한 `ordinal-split`만 준다(§11.1).
 - panic은 이 발생들 중 어느 것도 결정하지 않는다(§5.2).
 
-**progress 사슬** [D] (spec §1.6, §1.8; EXT-20261012 §4.1). 위반 사슬은 발생을 잇는다. 그런데 stall 상태(§7.3)에는 기다리는 사용의 발생이 없다. 그래서 둘째 사슬이 progress 결과를 잇는다. `i₁ ⇝_p i₂`는 `i₂`의 어떤 stall 상태에 wait-for root r이 있어 다음 중 하나가 성립할 때다.
+**progress 사슬** [D] (spec §1.6, §1.8; EXT-20261012 §4.1). 준비 상태 위반 사슬은 발생을 잇는다. 그런데 stall 상태(§7.3)에는 기다리는 사용의 발생이 없다. 그래서 둘째 사슬이 progress 결과를 잇는다. `i₁ ⇝_p i₂`는 `i₂`의 어떤 stall 상태에 wait-for root r이 있어 다음 중 하나가 성립할 때다.
 - (P1) r의 actor가 `u₁`의 열린 발생 안에 있거나, `u₁`의 `PENDING` 발생의 감시 actor다.
 - (P2) r의 대기를 아직 채울 수 있는 모든 event(그 predicate의 지원 위치에 쓰기; 그 object의 release, give, put, send; 그 actor의 spawn)를 certificate view에서 `u₁` 호출의 READY 결과가 지배하고, 그 유한 실행에 그 경로 위에서 not ready로 결정된 `u₁` 발생이 있다. 예: core App-record 구간 안에서 건너뛴 K-SELF.es raise.
 - (P3) r의 object가 not ready로 결정된 `u₁` 발생에서 잡은 lock이다(K-LOCKBAL). 또는 r이 `u₁` 발생의 not-ready 갈래에서 끝난 actor를 기다린다(K-SPAWN).
 
 - 조건은 모두 stall 상태, 그 유한 실행, certificate view에서 읽으므로 결정 가능하다.
-- 뿌리 instance를 보고하고, 딸린 progress 결과는 거기에 붙인다. 위반 사슬과 같은 방식이다(spec App. A.2 item 4).
+- 뿌리 instance를 보고하고, 딸린 progress 결과는 거기에 붙인다. 준비 상태 위반 사슬과 같은 방식이다(spec App. A.2 item 4).
 - wait-for root가 not-ready 결과와 무관한 stall(predicate 대기의 순환, 그냥 결코 주지 않는 provider)은 사슬 뿌리가 없다. wait-for root 집합으로만 묶는다. 사슬에 없는 instance가 timeout-masked-liveness를 가지면 스스로 `tml-root`를 진다(§7.4).
-- progress 사슬은 칸마다(`kz_verdict_cell.progress_chain`) 위반 사슬과 따로 저장한다.
+- progress 사슬은 칸마다(`kz_verdict_cell.progress_chain`) 준비 상태 위반 사슬과 따로 저장한다.
 
-### 5.7 R2의 계약
+<a id="57-r2의-계약"></a>
+
+### 5.7 R2의 준비 상태 명세
 
 (spec App. A.1 steps 1–2, 8)
 
-- 계약은 generic `K-ID.send-with-appid`(출처 `cfe_evs.h:168–172`)이고, 모든 문맥별 `CFE_EVS_SendEventWithAppID` site에 instance를 만든다. SB site 39개는 `CFE_SB_Global.AppId`를 `stamp`로 넘긴다([R2c §2]).
-- `Req = valid(arg.AppID) ∧ state(evs.reg(arg.AppID)) = REG`. value conjunct `V`는 capture point `c`에서 `cell(CFE_SB_Global.AppId)` 위로 평가한다. registry conjunct는 여기서 역할이 없다. EVS가 index 유효성을 먼저 검사하고(`cfe_evs.c:185–189`) `V`가 이미 실패하기 때문이다.
+- 준비 상태 명세는 generic `K-ID.send-with-appid`(출처 `cfe_evs.h:168–172`, 근거 등급 `contract-backed`)이고, 모든 문맥별 `CFE_EVS_SendEventWithAppID` site에 instance를 만든다. SB site 39개는 `CFE_SB_Global.AppId`를 `stamp`로 넘긴다([R2g §6]).
+- 준비 사전조건 `Req = valid(arg.AppID) ∧ state(evs.reg(arg.AppID)) = REG`. value conjunct `V`는 capture point `c`에서 `cell(CFE_SB_Global.AppId)` 위로 평가한다. registry conjunct는 여기서 역할이 없다. EVS가 index 유효성을 먼저 검사하고(`cfe_evs.c:185–189`) `V`가 이미 실패하기 때문이다.
 - 세 판단(§5.8)으로 나누면 다음과 같다.
-  - caller 수준: `appreq` = `cfe_evs.h:169–172`(caller 쪽), `Allowed = none`(header가 대안으로 든 system log는 다른 API다), harm `event_lost_silently`.
-  - framework 수준: `CFE_EVS_APP_ILLEGAL_APP_ID`는 `\retval`로 문서화되어 있고(`cfe_evs.h:199`), error severity이며(`cfe_error.h:115–119, 267`), counter도 event도 없다(`cfe_evs.c:186–189`). 그래서 `fw_doc` = {`documented-result`}다. `fw_conf`는 실행이 뒷받침하는 칸에서 `as-documented`이고(위반 사용마다 그 결과가 뒤따른다, [R2g §7]), M_api에서는 `unknown`이다.
-  - 관측된 결과: SB 호출자는 모두 `ILLEGAL_APP_ID`를 버린다. consequence는 "status ignored and effect lost silently"다.
+  - caller 수준: `appreq` = `cfe_evs.h:169–172`(caller 쪽), `Allowed = none`(header가 대안으로 든 system log는 다른 API다), harm `event_request_rejected`.
+  - framework 수준: `CFE_EVS_APP_ILLEGAL_APP_ID`는 `\retval`로 문서화되어 있고(`cfe_evs.h:199`), error severity이며(`cfe_error.h:115–119, 267`), counter도 event도 없다(`cfe_evs.c:186–189`). 그래서 `fw_doc` = {`documented-result`}다. `fw_conf`는 실행이 뒷받침하는 칸에서 `as-documented`이고(준비 상태 위반 사용마다 그 결과가 뒤따른다, [R2g §7]), M_api에서는 `unknown`이다.
+  - 관측된 결과: SB 호출자는 모두 `ILLEGAL_APP_ID`를 버린다. consequence는 "status ignored"와 "event rejected"다. EVS는 요청을 패킷을 만들기 전에 거절하므로(`cfe_evs.c:185–189`) 잃어버린 패킷이 없다. 표현은 "이벤트 요청 거부"이고 "이벤트 손실"이나 "패킷 손실"이 아니다(spec §6.4 항목 22, 47).
 
 ### 5.8 세 판단: framework 수준, caller 수준, 관측된 결과
 
@@ -410,20 +435,20 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 
 **출처 record의 side.** 모든 `prov` record에 `side ∈ {supplier, caller, rule}`를 붙인다. 작성자가 (record, κ) 쌍마다 판단해 기록한다.
 - `supplier`: 자원이 준비되지 않았을 때 supplier가 돌려주거나 하는 것, 또는 framework가 그 결과를 error로 보는지를 말한다. 예: `\retval`·`@retval` 줄; EVS나 SB를 부르는 앱의 사용에 대한 cEVS3103.1과 cSB4305.3–.5; 문서화된 전파(`cfe_evs.h:98`); barrier의 문서화된 timeout; supplier 자기 코드 위의 `code_pattern` record(spec §2.3의 K-SELF.es 출처).
-- `caller`: 사용하는 코드가 무엇을 이뤄야 하는지, 또는 not-ready 결과를 어떻게 다루고 그것이 받아들일 만하다는 것을 말하는 글이다. 사용하는 코드는 호출자이고, route·용량 계약이면 소비자, 또는 그것을 대신해 도는 앱이나 mission이다. 예: `cfe_evs.h:169–172`; CF의 인정 `cf_cfdp.c:1272–1278`; TO_LAB의 연기 `to_lab_app.c:64–68`; 사용을 가진 모듈의 guard 주석; 앱이나 mission의 요구.
-- `rule`: 글이 없다. Kairos의 고정 규칙과 그것을 적용한 코드를 가리키고, 받아들인다는 말은 하지 않는다. 예: `returned_and_tested`의 기본 정상 연속; spec §7.1 source 4의 loop 유도 계약. 주석이 밝히지 않는 사용 코드의 drop에는 `rule` record가 없다. Kairos의 어떤 고정 규칙도 drop을 받아들인 것으로 읽지 않는다(§5.2 `documented_drop` 행).
+- `caller`: 사용하는 코드가 무엇을 이뤄야 하는지, 또는 not-ready 결과를 어떻게 다루고 그것이 받아들일 만하다는 것을 말하는 글이다. 사용하는 코드는 호출자이고, route·용량 준비 상태 명세이면 소비자, 또는 그것을 대신해 도는 앱이나 mission이다. 예: `cfe_evs.h:169–172`; CF의 인정 `cf_cfdp.c:1272–1278`; TO_LAB의 연기 `to_lab_app.c:64–68`; 사용을 가진 모듈의 guard 주석; 앱이나 mission의 요구.
+- `rule`: 글이 없다. Kairos의 고정 규칙과 그것을 적용한 코드를 가리키고, 받아들인다는 말은 하지 않는다. 예: `returned_and_tested`를 위한 `cont_candidate`의 추출; spec §7.1 source 4의 loop 인식. **`rule` record는 status를 정하지 않는다**(아래 caller 수준 Allowed). 주석이 밝히지 않는 사용 코드의 drop에는 `rule` record가 없다. Kairos의 어떤 고정 규칙도 drop을 받아들인 것으로 읽지 않는다(§5.2 `documented_drop` 행).
 - side는 (record, κ) 쌍에 속한다. cSB4305.5는 K-ROUTE(사용자는 송신하는 앱)에는 `supplier`이고, SB의 `SEND_NO_SUBS` event site의 K-ID instance(사용자는 SB 자신의 event 코드)에는 `caller`다.
 
-**caller 수준 Allowed.**
-- `caller` record가 하나라도 있는 Allowed 항목은 horizon monitor로 읽는다. `rule` record만 있고 `caller` record가 없는 항목(`rule`-only)도 기본값으로 그렇게 읽는다(PI 항목 QT-4).
-- record가 모두 `supplier`인 항목은 status를 정하지 않고 framework 수준 정보로 남는다.
-- 이 기본값 아래에서는 `rule`-only 항목의 status를 caller reference가 아니라 **규칙이** 정한다. 그 ACCEPT는 rule-backed TOLERATED로 보고하고 caller-backed와 따로 센다(tier `code-derived`). 문서화된 반환 code만으로 호출자의 의무가 풀리지 않는다. 엄격한 대안에서는 `rule`-only 항목이 `unspecified_by_reference`다.
+**caller 수준 Allowed** [D] (spec §1.6; EXT-20261012 §6.4; 엄격한 대안 QT-4, 2026-10-15 결정).
+- Allowed 항목은 `caller` record가 하나라도 있을 때에만 horizon monitor로 읽는다.
+- record가 모두 `supplier`인 항목, 모두 `rule`인 항목, 둘이 섞인 항목은 status를 정하지 않는다. caller 수준에서 그 항목은 `unspecified_by_reference`이고 not-ready 발생은 NOT_READY_UNJUDGED다. supplier-only 항목은 framework 수준 정보로 남는다.
+- **규칙만으로는 어떤 발생도 받아들여지지 않는다.** 원출처 근거가 없는 항목은 미판정으로 남는다. 이전 기본값이 만들던 label(규칙이 받아들인 TOLERATED, 규칙의 REJECT에 기댄 VIOLATING)이 없어질 뿐, 관측은 지우지 않는다. 모든 not-ready 발생의 `consequence`는 code 사실(상태 변화, 돌려받은 code, error 반환과 exit, 추출한 `cont_candidate`)과 관측 count를 계속 지니고(§11.5), framework 수준 결과는 `fw_doc`과 `fw_conf`로 남는다.
 - 이 문서의 status, class, 결과 label에서 "Allowed"는 caller 수준 Allowed를 뜻한다.
 
 **`appreq`와 caller 수준 Allowed를 정하는 순서** [D] (spec §1.6).
 1. `caller`나 `rule` 항목이 없으면, `appreq`가 지정되어 있을 때 `none`이고 아니면 `unspecified_by_reference`다. `Allowed = none`에는 지정된 `appreq`가 필요하다.
-2. 지정된 `appreq`가 `rule`-only 항목이 포기하는 효과를 요구하면 `appreq`가 이긴다. 그 항목은 caller 수준에서 빠진다.
-3. 지정된 `appreq`가 배제하는 결과를 받아들이는 `caller` 항목, 또는 양립할 수 없는 연속을 받아들이는 `caller` 항목 둘은 두 reference와 함께 **충돌**로 기록한다. PI가 우선순위를 정할 때까지(PI 항목 QT-5) 충돌하는 항목은 caller 수준 Allowed를 `unspecified_by_reference`로 만든다. 그 발생은 충돌을 적은 NOT_READY_UNJUDGED이고 결코 TOLERATED가 아니다. 결과 label은 `not-ready-unjudged`다. 충돌에 must-deliver `appreq`가 끼어도 LOSS-UNDER-ORDER가 아니다.
+2. `rule`-only 항목과 `supplier`-only 항목은 caller 수준에 들지 않는다(QT-4).
+3. 지정된 `appreq`가 배제하는 결과를 받아들이는 `caller` 항목, 또는 양립할 수 없는 연속을 받아들이는 `caller` 항목 둘은 두 reference와 함께 **충돌**로 기록한다. **충돌을 밝히고 판정은 보류한다**(QT-5, 2026-10-15 결정). 두 문서의 버전, 대상, 적용 범위를 먼저 확인하고, 그것으로 충돌이 풀리지 않는 동안 우선순위를 만들지 않는다. 충돌하는 항목은 caller 수준 Allowed를 `unspecified_by_reference`로 만든다. 그 발생은 충돌을 적은 NOT_READY_UNJUDGED이고 결코 TOLERATED가 아니다. 결과 label은 `not-ready-unjudged`다. 충돌에 must-deliver `appreq`가 끼어도 LOSS-UNDER-ORDER가 아니다.
 4. 그 밖에는 항목이 정한다.
 
 항목과 `appreq`가 충돌하는지, `appreq`가 규칙이 포기하는 것을 요구하는지는 작성자의 판단이고, 두 reference와 함께 기록한다. F1 뒤에 `appreq`나 기록된 충돌을 바꾸면 `oracle refinement`다(spec §7.2).
@@ -433,7 +458,33 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 - SB 구독 전 송신(ES의 event packet 17건): `fw_doc` = {`documented-not-error`}(cSB4305.5의 근거 문장). 이 구간의 칸과 실행에서 `fw_conf` = `deviates`다. cSB4305.5의 shall 문장이 요구하는 `SEND_NO_SUBS` event를 EVS가 `ILLEGAL_APP_ID`로 거절하기 때문이다([M] ES 문맥에서 17개, [R2g §2]). caller 수준은 TO_LAB의 `defer_by_design`이거나, 소비자 reference가 말하지 않는 곳에서 LOSS-UNDER-ORDER다. 관측: "message lost"와 "event rejected". 이 구간에서 손실은 구간 뒤에 남는 흔적을 남기지 않는다 [I].
 - `documented-not-error` 결과도 caller 수준에서 LOSS-UNDER-ORDER나 `violation`을 지닐 수 있다.
 
-이 설계의 바탕인 PI 항목(STATUS 결정 T2 재질문 QT-2, 이 최소 설계의 채택 QT-3, QT-4)은 열려 있다. PI가 다르게 정하면 ADR-043을 고친다(spec §0.7 item 4, §10.1).
+이 설계의 바탕인 PI 항목은 2026-10-15에 결정되었다 [D] (spec §0.10, ADR-043 개정, ADR-048). QT-2와 QT-3은 승인이다: 근거 종류 `requirement`를 더하고, 구독자 없는 송신에 대한 SB 규정과 R2의 유효하지 않은 AppId 오류를 섞지 않으며, 프레임워크 문서·실제 API 동작, 호출자 요구, 관측된 결과의 세 층을 분리한다. QT-4와 Q15는 엄격한 대안, QT-5는 충돌을 밝히고 판정 보류, QT-9는 구현 결함 계열로 분리다.
+
+### 5.9 이름과 근거 등급
+
+(spec §1.6 "Naming and source tiers"; spec 부록 C; ADR-052; `background/08_terminology.md` §5.1–§5.5)
+
+**이름** [D] (PI 결정 T1 = (a), 2026-10-15).
+- 판정 대상 κ는 **준비 상태 명세**(readiness specification)다. 논문의 첫 사용에서는 "근거 기록 준비 상태 명세"(provenance-tracked readiness specification)로 쓴다. 한국어로는 준비 상태 명세를 온전히 쓰고 '명세'만 따로 쓰지 않는다. 영어로도 bare word "specification"을 κ에 쓰지 않는다. 이 문서 이름이기 때문이다.
+- `Req`는 κ의 **준비 사전조건**(readiness precondition)이다. 키로 고른 자원에 대한 lifecycle 또는 값 요구이고, 누가 그것을 약속했다고는 말하지 않는다.
+- 범위 안 발생이 준비 사전조건을 만족하지 못하고 caller 수준 Allowed가 그 결과를 받아들이지 않으면(`VIOLATING`) **준비 상태 위반**(readiness violation)이다. 상태를 만들 provider가 있는 곳에서 이것은 순서 위반(order violation)의 하위 부류다. "계약 위반"이라 부르지 않는다. caller 수준 Allowed가 `unspecified_by_reference`인 발생은 `NOT_READY_UNJUDGED`(route·용량 준비 상태 명세는 LOSS-UNDER-ORDER)이고 위반이라 부르지 않는다.
+- **계약**(contract)이라는 말은 문서화된 API 의미에만 쓴다. M_api의 OSAL API 계약(§3.5)과 아래 근거 등급 `contract-backed`다. Kairos가 쓰는 어떤 대상도 계약이라 부르지 않는다.
+- class refinement였던 `tolerated`는 `allowed-not-ready`(허용된 미준비 결과)다. 산문에서는 "허용된 미준비 결과"라고 쓰고 "Kairos가 tolerate한다"고 쓰지 않는다. 발생의 status 값 `TOLERATED`는 이번 개정에서 이름을 바꾸지 않았다.
+- 식별자의 이름은 한 번에 정했고 목록은 spec 부록 C에 있다. 바뀐 것은 이름뿐이다. 정의, lemma, 보장, 한계값, 숫자는 바뀌지 않았다 [I] (ADR-052). 한국어 표현(준비 상태 명세, 준비 사전조건, 준비 상태 위반, 근거 등급 등)은 한국어 용어 출처로 확인하지 않았다 [U] (`background/08_terminology.md` §5.1).
+
+**근거 등급**(source tier). 어떤 종류의 근거가 instance 뒤에 서 있는지 말한다. κ와 caller 수준 Allowed의 `prov` record에서 보고할 때 계산한다. 추가로 작성하지 않으며, §2.3의 record에 필드를 더하지 않는다. `kz report`가 판정이 가리키는 Φ 항목에서 읽는다. 섞인 항목은 아래에 적은 순서에서 가장 약한 등급을 받는다. 등급은 `background/08_terminology.md` §5.4에서 가져왔고, `code-derived`와 `unreferenced`의 정의는 QT-4 엄격한 대안에 맞춘 것이다 [I].
+
+| 등급 | 뜻 |
+|---|---|
+| `contract-backed` | caller 수준 부분이 호출자에 대한 문서화된 API 의무에 기댄다(`api_doc`, side `caller`. 글이 의무를 말하는지는 작성자의 판단이고 기록한다). supplier가 error 반환도 문서화했는지는 상관없다. 예: R2의 K-ID(`cfe_evs.h:169–172`) |
+| `requirement-derived` | caller 수준의 어떤 부분이 cFS 기능 요구(kind `requirement`, QT-2)에 기대고, 더 약한 것에는 기대지 않는다 |
+| `admitted` | 어떤 부분이 `code_admission`에 기댄다. 예: CF의 주석 `cf_cfdp.c:1272–1278` |
+| `issue-derived` | 어떤 부분이 `issue`에 기댄다 |
+| `code-derived` | 명세가 프로그램 본문에서 고정 규칙으로 만들어졌고(side `rule`인 `code_pattern` record: spec §7.1 source 4의 loop 인식, `cont_candidate`의 추출) caller 수준 부분을 대변하는 `caller` record도 지정된 `appreq`도 없다. `rule` record는 status를 정하지 않으므로(QT-4) caller 수준 Allowed는 `unspecified_by_reference`이고 발생은 NOT_READY_UNJUDGED다 |
+| `researcher` | caller 수준의 어떤 부분이 `researcher` record에 기댄다 |
+| `unreferenced` | caller 수준 부분을 대변하는 record가 없다. 곧 caller 수준 Allowed가 `unspecified_by_reference`이고 명세를 만든 `rule` record도 없다 |
+
+"reference에서 온 것"(reference-derived)이라는 말은 앞의 네 등급에만 쓴다. `researcher` 항목은 reference가 아니고, `code_pattern` 항목은 분석하는 프로그램에서 규칙이 만든 것이다. 등급의 순서는 `background/08_terminology.md` §5.4를 따른다. 그 순서가 옳은지는 08에서 열려 있고(08 §7 Q4) 여기서 정하지 않았다. **보고 규칙**: census 개수, 판정, 확장 평가의 recall은 근거 등급별로 보고한다. caller 수준 Allowed가 지정된 모든 bad 발생은 등급과 함께 준비 상태 위반으로 보고한다. "계약 위반"은 쓰지 않는다.
 
 ---
 
@@ -443,7 +494,7 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 
 | 항목 | 내용과 cFS 예 |
 |---|---|
-| **Build** | commit, gcc 13.3.0과 flag, `link.txt` archive 의미, 생성 파일 hash. `cfe_static_module_list.c`가 core 순서를 정한다. 생성 module version table이 없으면 R2의 위반 수가 24에서 11로 바뀐다([R2c §4.2, §7]) |
+| **Build** | commit, gcc 13.3.0과 flag, `link.txt` archive 의미, 생성 파일 hash. `cfe_static_module_list.c`가 core 순서를 정하고, 생성 module version table도 hash로 기록한다. R2의 boot당 개수가 그 table에 기대는지는 table 없는 basis에서 Kairos 자신의 기록기가 확인할 구성 문제다 [I]. gdb로 본 24개 중 13개는 설정된 module을 훑는 version event callback에서 나온다([M], [R2g §6]). 그 훑기가 table의 내용을 따른다는 것은 코드 읽기 [I]이고, table 없는 basis를 다룬 gdb 기록은 없다 |
 | **Config** | startup script 선택 규칙(PROCESSOR reset이면 휘발성 `/ram/cfe_es_startup.scr` 먼저, POWERON이면 생성 script, `cfe_es_apps.c:130–168`), `.tbl`과 소스 초기값의 byte 대조, platform 상수, PSP module 목록 |
 | **Init** | 실행 전 유지 상태(boot record, CDS·reset area SysV segment, `/dev/shm/osal:RAM`, `EEPROM.DAT`, 해독한 CDS와 critical table image). 실행마다 Init snapshot S0를 뜬다(구현 단계 S0와 다른 뜻). hash는 내용만 본다(`EEPROM.DAT` mtime은 boot마다 바뀜, [BM]) |
 | **Env** | kernel, 4 vCPU, 스케줄링([M] 27개 thread 모두 `SCHED_OTHER`, [BM §0]), affinity, euid(queue 잘림을 정함), CWD, 실효 queue 깊이, platform 기능(`/proc/schedstat` 없음), cold/warm 층([M] OPERATIONAL까지 2570 ms 대 1613–1633 ms, [BM]) |
@@ -451,7 +502,7 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 
 **INIT** [D] (spec §1.7; [X1-m1], [X2-12] 수정)은 **프로그램 진입 상태**다. process scope 위치는 정적 초기값 image, persistent scope 위치는 해독한 S0다. EarlyInit의 store(예: `memset(&CFE_SB_Global, 0, …)` `cfe_sb_init.c:50`)는 INIT이 아니라 평범한 writer 항목이다. R2에서 `CFE_SB_Global`은 0으로 초기화되는 전역이므로(`cfe_sb_task.c:40`) INIT에서 `AppId = 0 = UNDEFINED`이고, value conjunct `V`는 INIT에서 거짓이다(`INIT_FALSE(V)`).
 
-**실행 열과 generation.** 실행 사이 계약(K-PERSIST)에서는 실행 *n*의 끝 상태가 `B_{n+1}.Init`이 된다. 한 실행 안의 재시작·재적재는 generation을 만든다(`B_restart`). `CFE_PSP_Restart(POWERON)`로 끝나지 않은 실행 뒤에는 관측하지 않는 normalization boot를 한 번 해서 Init을 정규 S0로 되돌린다(spec §1.7, §4.13).
+**실행 열과 generation.** 실행 사이 준비 상태 명세(K-PERSIST)에서는 실행 *n*의 끝 상태가 `B_{n+1}.Init`이 된다. 한 실행 안의 재시작·재적재는 generation을 만든다(`B_restart`). `CFE_PSP_Restart(POWERON)`로 끝나지 않은 실행 뒤에는 관측하지 않는 normalization boot를 한 번 해서 Init을 정규 S0로 되돌린다(spec §1.7, §4.13).
 
 **구성 변형은 새 basis B′이고, 결코 "새 버그"가 아니다**([R06 §5.4]). 모든 판정은 B의 hash를 지닌다.
 
@@ -493,7 +544,7 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
    - 시도 자신의 전이는 TB가 아니다. 그래서 TB를 지워도 lock을 쥔 채 남는 actor는 없다.
 3. Φ가 시간 기반이라고 선언한 모든 전이. Φ는 대기를 포기하거나 다른 actor에 작용하는 모든 countdown·시계 비교를, 짝이 되는 "아직 만료 안 됨" 결과와 함께 선언해야 한다.
    - 선언된 것: **강제 kill**, 즉 ES kill timer의 `expire-waiting`(`AppTimerMsec`, spec §3.8, §3.14). main task가 STOPPED 저장(`cfe_es_api.c:399`)에 이르지 않은 앱에 대한 만료다. `expire-stopped`(자발적 `CFE_ES_ExitApp` 뒤 timer 0의 만료 포함)는 앱 정리의 박자만 맞추므로 TB가 아니고, `not-yet-expired`도 결코 TB가 아니다.
-   - 아직 선언되지 않은 것: HS의 application monitor(`hs_monitors.c:107–160`; 기본 `NOACT` table에서는 inactive)와 TIME의 flywheel 진입(`cfe_time_tone.c:1172–1186`). Φ가 선언하기 전까지 σ_U∞는 이들을 남긴다. 활성 HS application monitor 항목이 있는 basis의 instance, 또는 계약이 TIME의 시계 상태를 읽는 instance의 σ_U∞ 결과에는 sub-label `tb-undeclared`를 붙인다.
+   - 아직 선언되지 않은 것: HS의 application monitor(`hs_monitors.c:107–160`; 기본 `NOACT` table에서는 inactive)와 TIME의 flywheel 진입(`cfe_time_tone.c:1172–1186`). Φ가 선언하기 전까지 σ_U∞는 이들을 남긴다. 활성 HS application monitor 항목이 있는 basis의 instance, 또는 준비 상태 명세가 TIME의 시계 상태를 읽는 instance의 σ_U∞ 결과에는 sub-label `tb-undeclared`를 붙인다.
 
 같은 제어 노드에 공유 상태에 따라 허락되는 비-TB 전이(timed wait의 성공 결과, 전이 하나인 마지막 시도의 성공 결과)가 있으면 그 TB 전이는 **짝이 있다**(paired). 없으면 **짝이 없다**(unpaired).
 
@@ -506,7 +557,7 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 | **σ_R1[P_sched]** | 한 CPU의 고정 우선순위 선점. 인용한 scheduling profile `P_sched`(정책, 우선순위 대응, root thread 우선순위, priority inheritance)로 매개변수화한다. 지연은 막고(block) 상수 평가한 지연 인자로 이산 시간에 깨우며, 막는 지점 사이 계산은 시간 0이다(가정 A-ZT). timeout은 σ_U처럼 허락된다. §7.1의 별도 전이 체계이고, 투영하면 σ_U에 들어간다(§7.5) | 우선순위가 순서를 정하는 플랫폼(예: 6.4.1의 C3). 기본은 모형으로만 |
 | **σ_E** | 기록된 Env에서 실제 바이너리의 실행. 모형화하지 않고 관측·확인 실행으로 표본만 얻는다 | 실제 witness와 빈도 |
 
-`P_sched^posix` [F]: RT 스케줄링이 허용될 때(root/RT 권한) OSAL POSIX는 Linux에서 `SCHED_RR`를 고르고, `CFE_ES_Main`을 돌리는 root thread가 가장 높은 우선순위를 받으며, OSAL 우선순위는 `OS_PriorityRemap`이 여러 개를 하나로 압축하고, mutex는 `PTHREAD_PRIO_INHERIT`다(`os-impl-tasks.c:78–106, 348–365, 391–409`; `os-impl-mutex.c:82`; spec §1.8; PI 결정 D4). 기록된 ENV는 이 조건 밖이다. 27개 thread가 모두 `SCHED_OTHER`라 우선순위가 아무 효과가 없다 [M] ([BM §0]; §6의 Env 행). 그래서 이 profile은 σ_R1 모형과, PI 결정 D4가 여는 native arm에만 쓴다. RTEMS·VxWorks profile은 backend 소스가 basis에 들어오기 전까지 `unspecified_by_reference`이고 σ_R1 판정을 내지 않는다(PI 결정 D13). [I] `P_sched^posix`에서는 startup thread가 실행 가능한 동안 core App-record 구간이 한 CPU에서 열릴 수 없다.
+`P_sched^posix` [F]: RT 스케줄링이 허용될 때(root/RT 권한) OSAL POSIX는 Linux에서 `SCHED_RR`를 고르고, `CFE_ES_Main`을 돌리는 root thread가 가장 높은 우선순위를 받으며, OSAL 우선순위는 `OS_PriorityRemap`이 여러 개를 하나로 압축하고, mutex는 `PTHREAD_PRIO_INHERIT`다(`os-impl-tasks.c:78–106, 348–365, 391–409`; `os-impl-mutex.c:82`; spec §1.8; PI 결정 D4). 기록된 ENV는 이 조건 밖이다. 27개 thread가 모두 `SCHED_OTHER`라 우선순위가 아무 효과가 없다 [M] ([BM §0]; §6의 Env 행). 그래서 이 profile은 σ_R1 모형과, 나중의 별도 구성인 native arm에만 쓴다. PI 결정 D4(2026-10-15): 첫 해석은 모델 기반 단일 코어이고, 실제 우선순위 실행은 필요성을 확인한 뒤 별도 구성·조건으로 검증하며, 모형 결과를 실제 실시간 실행 결과로 표기하지 않는다. RTEMS·VxWorks profile은 backend 소스가 basis에 들어오기 전까지 `unspecified_by_reference`이고 σ_R1 판정을 내지 않는다(PI 결정 D13). [I] `P_sched^posix`에서는 startup thread가 실행 가능한 동안 core App-record 구간이 한 CPU에서 열릴 수 없다.
 
 ### 7.3 실행의 결과: good, bad, stall
 
@@ -579,22 +630,23 @@ refinement는 σ마다 따로 계산한 결과에서 끌어내고, 자기 경계
 | refinement | 조건 | 뜻 |
 |---|---|---|
 | **timeout-dependent** (σ_U의 schedule-dependent를 세분) | `class(σ_U) = schedule-dependent`, `¬Bad_i(σ_U∞)`가 확립됨, σ_U∞에서 사용에 도달함(reach `model(b)`나 `proved`) | L-CONT에 따라 앞의 두 조건은 "σ_U의 모든 bad 유한 실행이 시간 기반 전이를 담는다"와 같다. σ_U∞ reach가 없으면 붙이지 않는다. 그때는 `timeout-rescued`와 σ_U∞ reach가, 사용이 시간 기반 전이를 거쳐서만 도달됨을 보인다 |
-| (없음) | `Bad_i(σ_U∞)`가 성립 | 위반은 순서 논리 안에 있다 |
+| (없음) | `Bad_i(σ_U∞)`가 성립 | 준비 상태 위반은 순서 논리 안에 있다 |
 | **timeout-rescued** (good 쪽 flag) | `OK_i(σ_U)`와 `¬OK_i(σ_U∞)`가 확립됨 | σ_U의 모든 good witness가 시간 기반 전이를 담는다. 어떤 대기가 포기했기 때문에만 good이다. protected, schedule-dependent, ordinal-split(σ_U에서 good witness를 가진 모든 class)에 붙을 수 있다 |
-| **timeout-masked-liveness** (σ_U 칸의 progress refinement, **instance마다**) | σ_U∞에서 도달 가능한 어떤 곱 상태가 i에 대해 σ_U∞에서는 **hang 상태**이고 σ_U에서는 아니다 | σ_U에서 그 상태를 벗어나는 길은 모두 시간 기반 전이를 지난다. 그 전이가 영원한 대기를 위반, panic, 다른 연속으로 바꾼다 |
+| **timeout-masked-liveness** (σ_U 칸의 progress refinement, **instance마다**) | σ_U∞에서 도달 가능한 어떤 곱 상태가 i에 대해 σ_U∞에서는 **hang 상태**이고 σ_U에서는 아니다 | σ_U에서 그 상태를 벗어나는 길은 모두 시간 기반 전이를 지난다. 그 전이가 영원한 대기를 준비 상태 위반, panic, 다른 연속으로 바꾼다 |
 | **tml-root** | `i₁`로 들어오는 progress 사슬이 없고, `i₁ ⇝_p* i₂`인 어떤 `i₂`(`i₂ = i₁` 포함)가 timeout-masked-liveness를 가진다 | TML 구성원을 가진 progress 사슬의 뿌리, 또는 사슬 없는 TML instance 자신을 표시한다. 보고서는 `tml-root` instance와 사슬 구성원 수를 보인다. 구성원은 자기 칸에 timeout-masked-liveness와 flag `CHAINED`를 지니고 하나씩 보고하지 않는다. 뿌리 자신의 σ_U∞ progress는 `no-stall-within(b)`일 수 있다 |
 
 - **explorer 없이는 어떤 refinement도 확립되지 않는다.** `timeout-dependent`와 `timeout-rescued`는 σ_U∞의 보편 진술이 필요하다. certificate는 σ_U만, 예측은 witness만 준다. 예측은 `Bad_i(σ_U∞)`나 `OK_i(σ_U∞)`를 보여 refinement를 배제할 수만 있다. 뒤의 둘은 progress 결과다.
 - **tml-root의 예** ([I], spec §1.8, App. A.2 step 3). core App-record 구간 안에서 raise를 건너뛰면 `MainTaskSyncDelay`가 만족될 수 없다(spec §3.3). σ_U∞에서 `CFE_ES_MainTaskSyncDelay`(`cfe_es_start.c:860–918`)에 L1을 적용하면 startup thread는 `cfe_es_start.c:835`에서 죽고, 이미 만든 core task는 `CORE_READY` poll에서 죽는다. σ_U에서는 startup thread가 panic한다. 그 뒤의 instance들은 timeout-masked-liveness를 지니고 그 구간의 K-SELF.es instance에 사슬로 붙는다. 그 K-SELF.es instance가 `tml-root`를 진다.
 - **v1과의 대응** [I]. v1의 timeout-dependent는 첫 timeout 직전 상태에서 σ_U∞로 이어 가면 good만 나온다는 조건이었다. 새 refinement는 그 "bad 아님" 부분을 지키고, "stall 없음" 부분은 progress refinement가 된다. v1의 timeout-masked-liveness instance 중 v1 stall 상태가 σ_U∞의 hang 상태인 것은 새 refinement를 가진다. v1은 사용 actor가 idle 대기에 있는 상태도 셌지만 새 refinement는 뺀다. 반대 방향은 성립하지 않는다. 새 refinement는 그 instance의 bad σ_U 실행이 지나지 않는 hang 상태도 다루고, progress 사슬이 그것을 뿌리에 붙인다.
 
-**C1로 본 뜻** ([I], spec App. A.4 step 3, 파생 B′, M_api. D22가 정하기 전까지 B′는 없다).
+**C1로 본 뜻** ([I], spec App. A.4 step 3, 파생 B′, M_api. B′는 D22가 정했다: 공개 BP 기반, 후보 쌍 CF `281a941` → `833fdbb` [D]. §3.5의 예).
+- **항목.** CF의 `retry_until_ready` 항목이 status를 정하는 것은 `caller` record가 있을 때뿐이다. 그 record는 CF의 인정(`cf_cfdp.c:1272–1278`, kind `code_admission`, side `caller`; spec §7.1 source 8, RC1)이다 [I]. 인식한 loop만으로는(`code_pattern`, side `rule`) 항목이 `unspecified_by_reference`이고 모든 not-ready 시도가 NOT_READY_UNJUDGED다. 아래 class는 `caller` record가 있는 경우다(QT-4 엄격한 대안, spec App. A.4 step 3).
 - **σ_U.** CF의 retry를 모두 provider의 생성보다 앞에 둔 실행이 있다. 지연은 양보일 뿐이기 때문이다. 그래서 `schedule-dependent(σ_U)`다.
 - **σ_U∞, M_api.** loop는 지연 retry이고, 마지막 시도의 실패 결과는 시간 기반 전이라 지워진다. M_api에서 시도는 전이 하나(조회)이므로, 마지막 시도는 조회가 성공할 수 있을 때만 허락된다. provider가 아직 돌 수 있는 동안 σ_U∞의 어떤 유한 실행도 bad가 아니다. not-ready 시도의 monitor(`retry_until_ready`)는 뒤 시도가 READY일 때 ACCEPT하거나 OPEN으로 남을 뿐이다. REJECT event인 소진이 시간 기반이기 때문이다. 그래서 `¬Bad_i(σ_U∞)`이고, `exh`가 b 안에서 정한다. σ_U∞에서 사용에 도달하므로 **timeout-dependent**다. explorer 없이는 확립되지 않는다.
-- **수정 전 판**(CF 2a024d8, 시도 한 번, 파생 basis). Allowed 항목은 `returned_and_tested`다. test(`cf_cfdp.c:1016` @2a024d8)는 정확히 펼친 channel loop 안에 있다. not-ready 갈래는 `CF_EID_ERR_INIT_SEM`을 올리고 `err_out: return ret;`로 간다. 성공 갈래도 거기에 닿고 `ret`을 돌려준다(`:1018–1021, 1052–1053` @2a024d8). 그래서 기본 정상 연속이 없고(§5.2), error 반환이 REJECT이며, CF는 `APP_ERROR`로 끝난다([LED §1a]). 시간 기반 전이 없이 VIOLATING이므로 σ_U∞에서도 schedule-dependent다. 즉 C1의 수정([LED §1b])은 순서 논리의 위반을 timing 여유에 대한 의존으로 바꾸었다. 모든 항목이 정상 연속을 인용해야 한다는 엄격한 읽기(Q15)에서는 항목이 `unspecified_by_reference`이고 발생은 NOT_READY_UNJUDGED이며, class는 같다.
+- **수정 전 판**(CF `281a941`, 선택한 쌍의 수정 직전 판, 조회 한 번: `cf_cfdp.c` L993–L1001, `cases/C1.md`. 아래 구조는 보고자의 `2a024d8`에서 읽은 것이다. 공개 BP table과 섞지 않으며 anchor audit이 `281a941`에서 다시 읽는다 [U]). 처리는 연속을 인용하지 않은 status test다. test(`cf_cfdp.c:1016` @2a024d8)는 정확히 펼친 channel loop 안에 있다. not-ready 갈래는 `CF_EID_ERR_INIT_SEM`을 올리고 `err_out: return ret;`로 간다. 성공 갈래도 거기에 닿고 `ret`을 돌려준다(`:1018–1021, 1052–1053` @2a024d8). 그래서 추출된 `cont_candidate`는 none이다(§5.2). error가 반환되고 CF는 `APP_ERROR`로 끝난다([LED §1a]). 이것들은 code 사실이고 그 발생의 consequence로 기록한다. 이 처리가 받아들여진다고 말하거나 연속을 인용하는 reference는 여기에 없다 [I]. 그래서 엄격한 대안(Q15와 QT-4, 2026-10-15 결정)에서 항목은 `unspecified_by_reference`이고 발생은 시간 기반 전이 없이 NOT_READY_UNJUDGED다. 나중에 수정 전 처리에 대한 `caller` record가 나오면 label이 바뀌고 class는 바뀌지 않는다. NOT_READY_UNJUDGED 발생은 bad이기 때문이다(§5.5). σ_U∞에서도 schedule-dependent다. C1의 수정([LED §1b])은 순서 논리의 준비 상태 위반을 timing 여유에 대한 의존으로 바꾸었다.
 - **provider가 결코 돌지 않으면.** 이 경우를 쓰는 cFS basis는 없다(reference가 없다). litmus L-PATIENT variant 2(spec App. A.8)가 결과를 보인다. certificate의 REJECT인 소진이 결정 뒤에 있으므로, b = ∞에서 class는 `unknown(no_decision_route)`이고 모든 σ에서 `¬OK_i`가 보인다. b 안에서 `exh`는 σ_U에서 fixed-order(소진하는 실행이 bad witness), σ_U∞에서 `no-final-status`를 준다. σ_U∞에서 retry하는 actor는 마지막 시도의 호출 노드에서 죽는다(`stall-witness({pre-use, horizon})`, hang). σ_U는 소진으로만 벗어나므로 **timeout-masked-liveness**다.
 - **M_impl.** 조회는 여러 전이다(§3.5). 시간 기반 전이는 마지막 반복에서 `NAME_NOT_FOUND`를 가지고 지나는 `cf_cfdp.c:1285` 갈래다. 실패한 마지막 조회 뒤 CF는 type lock을 풀고 **좌초**한다. CF와 그것이 허락할 수 있는 actor(startup thread의 script barrier)의 progress는 `unknown(unmodelled)`다. RESERVED 구간에 닿는 경로는 따로 있다(§3.5의 예, `leaked-lock`).
-- 이른 조회 한 번(`retry_until_ready`)은 `tolerated`이고, `exh`에서만 나온다.
+- 이른 조회 한 번(`retry_until_ready`)은 `allowed-not-ready`이고, `exh`에서만 나온다.
 
 **timeout-exercised** (spec §1.8). 확인 실행에서 시간 기반 전이(주기적이 아닌 timed wait의 timeout, 지연 retry의 실패한 마지막 시도, 강제 kill)가 instance의 닫힌 cone에 속한 actor에서 일어난 경우다. hold 동안, 또는 hold 뒤 witness의 결정 event 전에 일어났으면 naturalness `timeout-exercised`를 붙이고 자연 σ_E로 세지 않는다. 반환 status만 보지 않고 prefix probe(spec §4.7 item 6 (c))로 정한다. hold가 provider를 붙잡아 소진된 retry(C1, App. A.4 step 5)는 timeout status가 아니라 `NAME_NOT_FOUND`를 보고, OSAL 내부 timed wake는 결코 반환되지 않기 때문이다. 주기적 대기의 timeout은 세지 않는다.
 
@@ -617,8 +669,13 @@ refinement는 σ마다 따로 계산한 결과에서 끌어내고, 자기 경계
 
 1. 규칙 1은 두 부분이다.
    - **(a) safety는 진술별로 아래로 옮긴다.** σ_U, 수준 M, 경계 b에서 확립한 진술 `¬Bad_i`, `¬OK_i`, `¬NR_i`(§11.1)는 같은 진술로 σ_U∞(같은 M, 같은 b)에서 성립한다. σ_R1[P_sched](같은 M)에서는 b = ∞일 때, 또는 b가 유한하면 σ_R1 모형의 cone이 같은 h에서 σ_U 모형의 cone을 담을 때(L-CONE-R1) 성립한다. 받은 진술에는 flag `SAFETY_TRANSFERRED`를 붙인다. 옮긴 `¬OK_i`가 결정적인지(decision route가 있는지)는 받는 σ에서 다시 계산한다(§11.1). 받는 칸의 class는 그 기록에서 나오므로, 옮긴 진술과 그 자리에서 확립한 진술은 순서와 상관없이 합쳐진다.
-   - **(b) 존재는 σ마다 따로.** reach, witness(그래서 `tolerated`, `schedule-dependent`, `ordinal-split`), progress 결과는 아래로 옮기지 않는다. 예외는 L-DEAD (c), (d)의 stall 상태(deadlock 순환, 누수된 lock)뿐이다. 각각 자기 σ에서 계산하고, 계산하지 않았으면 칸은 `reach = assumed`, `progress = unknown(not_checked)`다. σ′의 어떤 유한 실행도 b 안에서 사용에 닿지 않는다는 것을 `exh`가 보이면 그 칸의 reach는 `unreached(b)`이고, 옮긴 보편 class는 "… 도달한다면; b 안에서는 도달하지 않음"으로 읽는다. v1의 label `inactive_σ′`는 없앴다. `inactive`는 정적 class뿐이다.
-2. **σ_E로는** b = ∞인 safety 진술만 옮긴다. M_impl에서는 옮긴다. M_api에서는 (i) instance의 cone과 certificate에 M_impl-relevant 연산이 없거나(prefix 위의 L-MLEVEL, sub-label `mlevel-lemma`), (ii) M_impl 결과가 있고 같을 때만 옮긴다. 그러면 σ_E 칸은 B의 어떤 실제 실행에서도 범위 안 발생이 `VIOLATING`·`NOT_READY_UNJUDGED`가 아니다(`¬Bad_i`), `READY`·`TOLERATED`가 아니다(`¬OK_i`), `READY` 밖이 아니다(`¬NR_i`)라고 말한다. 그 밖에는 σ_E 칸이 `unknown(model_level)`이고, M_api 결과는 이식성 주장으로 보고한다.
+   - **(b) 존재는 σ마다 따로.** reach, witness(그래서 `allowed-not-ready`, `schedule-dependent`, `ordinal-split`), progress 결과는 아래로 옮기지 않는다. 예외는 L-DEAD (c), (d)의 stall 상태(deadlock 순환, 누수된 lock)뿐이다. 각각 자기 σ에서 계산하고, 계산하지 않았으면 칸은 `reach = assumed`, `progress = unknown(not_checked)`다. σ′의 어떤 유한 실행도 b 안에서 사용에 닿지 않는다는 것을 `exh`가 보이면 그 칸의 reach는 `unreached(b)`이고, 옮긴 보편 class는 "… 도달한다면; b 안에서는 도달하지 않음"으로 읽는다. v1의 label `inactive_σ′`는 없앴다. `inactive`는 정적 class뿐이다.
+2. **σ_E로는** b = ∞인 safety 진술만 옮긴다. M_impl에서는 옮긴다. M_api에서는 (i) instance의 cone과 certificate에 M_impl-relevant 연산이 없거나(prefix 위의 L-MLEVEL, sub-label `mlevel-lemma`), (ii) M_impl 결과가 있고 같을 때만 옮긴다. 그러면 σ_E 칸은 B의 모든 유한 실제 실행의 **판정된(decided)** 범위 안 발생에 대해, 거기서 확립된 safety 진술(§11.1)을 certificate lemma가 증명하는 꼴(L-FO, L-PR, §12.3) 그대로 말한다.
+   - `¬Bad_i`: `VIOLATING`이나 `NOT_READY_UNJUDGED`인 것이 없다.
+   - `¬OK_i`: `READY`나 `TOLERATED`인 것이 없다.
+   - `¬NR_i`: 준비 안 됨으로 판정된 것(`TOLERATED`, `PENDING`, `VIOLATING`, `NOT_READY_UNJUDGED`)이 없다. 곧 판정된 것은 모두 `READY`나 `NOT_EVALUATED`다.
+
+   실행이 끝났을 때 아직 열려 있는 발생은 status가 없고 세 진술 밖이다. `NOT_EVALUATED` 발생(호출이 어느 conjunct LP보다 먼저 반환했고 거짓으로 판명된 conjunct가 없는 경우. 예: 인자 검사에서의 조기 반환)은 준비 상태도 준비 안 됨도 아니다. 세 진술이 모두 허용하므로, 그런 발생을 가진 실제 실행은 이 칸의 반례가 아니다. 이 칸은 실제 실행의 모든 범위 안 발생이 `READY`라고, 어떤 발생에 도달한다고, 진행성에 대해 무엇이라고도 말하지 않는다. 그 밖에는 σ_E 칸이 `unknown(model_level)`이고, M_api 결과는 이식성 주장으로 보고한다. (2026-10-15 정정: 이전 문안은 `¬NR_i`를 "`READY` 밖이 아니다"라고 써서 `NOT_EVALUATED`까지 배제했고, 그것은 L-PR이 증명하는 것보다 강했다. spec §0.9 항목 1, ADR-045. 정정 전후의 문장은 [../plan/formal_corrections.md](../plan/formal_corrections.md) §1.)
 3. **witness는 위로 옮긴다.** 다음은 범위 안의 최종 status(`READY`, `TOLERATED`, `VIOLATING`, `NOT_READY_UNJUDGED`) 발생을 담으면 같은 M의 σ_U에서 good이나 bad witness이고, 발생 ordinal을 지닌다.
    - σ′(σ_U∞, 또는 π를 거친 σ_R1)의 유한 실행.
    - M_impl에서의 실제 실행. M_api에서는 L-MLEVEL 아래이거나, instance의 닫힌 cone의 모든 actor prefix가 M_api 적합성 검사를 통과한 실제 실행(L-MAPI-CONE, §12.3; spec §4.7 item 6).
@@ -637,7 +694,7 @@ refinement는 σ마다 따로 계산한 결과에서 끌어내고, 자기 경계
 
 view는 둘이다 [D] (spec §4.3; [X1-C1] 수정).
 
-- **Certificate view `Sk^cert`.** reference bound까지 정확히 펼치지 않는 loop는 모두 **star-closed**다. star-closure는 loop를 "0번 이상 몇 번이든 반복"으로 닫는 것으로, loop head, back edge, 명시적 반복/탈출 선택으로 표현한다. message loop의 dispatch는 message provenance(§8.3)로 접는다. horizon도 잘림도 없다. `inactive`, provider `none`, MustBefore, once, PWB, frontier 규칙, K-CAP bound(용량 계약의 backlog 상한)는 **이 view에서만** 계산한다.
+- **Certificate view `Sk^cert`.** reference bound까지 정확히 펼치지 않는 loop는 모두 **star-closed**다. star-closure는 loop를 "0번 이상 몇 번이든 반복"으로 닫는 것으로, loop head, back edge, 명시적 반복/탈출 선택으로 표현한다. message loop의 dispatch는 message provenance(§8.3)로 접는다. horizon도 잘림도 없다. `inactive`, provider `none`, MustBefore, once, PWB, frontier 규칙, K-CAP bound(용량 준비 상태 명세의 backlog 상한)는 **이 view에서만** 계산한다.
 - **Exploration view `Sk^h`.** star-closed loop를 h번까지 펼치고, 그 너머는 `TRUNC`로 표시한다. explorer와 O8만 쓰고, 여기서 나온 판정은 b에 h를 지닌다. `kz proofcheck`는 `Sk^h` 노드나 `TRUNC` 영역을 가리키는 certificate 단계를 거부한다.
 
 **왜 둘인가.** 이전 판(v1)은 loop를 h에서 잘랐다. h 너머 반복에서만 닿는 writer가 있으면 잘린 그래프의 "경로 없음"이나 "writer 없음"은 실제 실행에 대해 거짓이 된다. MustBefore 증명의 T-PO 단계가 바로 여기서 깨졌다([X1-C1]; spec §6.2 L-MB). 그래서 보편 주장은 어떤 반복 횟수도 포함하는 view에서만 하고, 잘린 view는 유한 탐색에만 쓴다.
@@ -852,7 +909,7 @@ spec App. A.1의 R2 certificate를 위의 개념으로 따라간다. 모두 **�
 - writer: `V`를 참으로 만들 수 있는 것은 SB task의 writer `x`(`cfe_sb_task.c:138`, `GetAppID`의 성공 갈래 out-pointer store, `COMPUTED`, `MUST_KEY`)뿐이다. 실패 갈래의 `UNDEFINED` store와 EarlyInit memset은 중립이다. A-TYPE 검사가 타입 없는 쓰기나 탈출 주소를 찾으면 writer 집합이 `DISABLED`이고 certificate는 보류된다(spec App. A.1 step 3).
 - 목표: **모든 유한 실행에서 모든 `c`가 모든 `x`보다 먼저**, 즉 `PWB(c, x)`다. 그러면 `V`는 도달한 모든 발생의 capture point에서 거짓이다. 그래서 모든 발생은 호출에서 결정되고, `Allowed = none`이므로 `VIOLATING`이다. 이것이 결정적인 safety 진술 `¬OK_i`, 즉 class `fixed-order`다(§11.1).
 
-data-race 검출기는 여기서 할 말이 없다. 기존 기록에서 위반 사용은 HB상 발행보다 **앞서도록** 순서가 정해져 있었다. 순서 없는 두 접근을 찾는 기법은 이것을 보고하지 않는다(spec §1.11). Kairos는 "순서는 있는데 방향이 틀렸다"를 모든 실행에 대해 증명하려 한다.
+data-race 검출기는 여기서 할 말이 없다. 기존 gdb 기록에서 준비 상태 위반 사용은 HB상 발행보다 **앞서도록** 순서가 정해져 있었다. 순서 없는 두 접근을 찾는 기법은 이것을 보고하지 않는다(spec §1.11). Kairos는 "순서는 있는데 방향이 틀렸다"를 모든 실행에 대해 증명하려 한다.
 
 ### 10.2 MustBefore 사슬
 
@@ -910,22 +967,24 @@ ES 쪽 사슬(spec App. A.1 steps 4, 6):
   - (σ_U, M_api): cone에 task 생성이 있어 L-MLEVEL을 쓸 수 없다. 발생까지 닫힌 cone의 모든 actor prefix가 M_api 적합성 검사(`OS_ERR_INCORRECT_OBJ_STATE` 없음, 잃은 task 없음, 누수된 type lock 없음)를 통과할 때만 `proved`다(L-MAPI-CONE; spec §4.7 item 6). 아니면 `assumed`다.
   - σ_U∞(두 M): 더하여 닫힌 cone actor들의 prefix 전이에 시간 기반 전이가 없어야 한다(L-REACH-CONE). soft barrier·poll timeout, 소진된 지연 retry, M_impl에서 OSAL 내부 timed wake가 없어야 한다. ES, EVS, SB 자식의 `OS_TaskPrepare` self 조회가 그런 wake를 탈 수 있고(spec §3.3), prefix probe만 그것을 보인다. 아니면 `assumed`다.
   - σ_R1: `assumed`.
-- **σ_E.** M_impl에서 전이 규칙 2로 얻는다: 어떤 실제 실행에서도 범위 안 발생이 `READY`가 아니다. S1이 발생을 다시 관측하면 reach가 `proved`다.
+- **σ_E.** M_impl에서 전이 규칙 2로 얻는다: 모든 유한 실제 실행에서 판정된 범위 안 발생 중 `READY`나 `TOLERATED`인 것이 없다(`¬OK_i`, 결정적). `NOT_EVALUATED` 발생은 허용된다. S1이 판정되고 평가된 발생을 다시 관측하면 reach가 `proved`다(L-CONT (c)를 거쳐서. 신뢰 장부 (iii)부, §10.7).
 - **progress.** 모든 칸에서 `unknown(not_checked)`다. certificate는 progress를 주장하지 않는다. explorer를 돌리면, M_api σ_U∞에서 이 instance의 stall 상태는 `CFE_ES_MainTaskSyncDelay`(`cfe_es_start.c:860–918`)에 L1을 적용할 때 건너뛴 core raise 뒤에서만 예상되고, App. A.2 뿌리(`tml-root`)에 사슬로 붙는다. M_impl에서는 F7로 잃은 core task 뒤에서도 생긴다(`OS_TaskEntryPoint`가 실패한 `OS_TaskPrepare` 뒤 `OS_TaskExit`을 부른다, `osapi-task.c:128–137`). 그때는 그 task의 K-SPAWN.osal 발생에 사슬로 붙는다. 이것들은 R2의 발견이 아니고, 기본 B에 상대적이다 [I].
 - **근거.** realization은 `certificate`이고, 여기에 pool key를 가진 `realized/natural` 관측 `n of N`이 더해진다.
 - **shape.** SB가 witness나 그 기록된 실행에서 나중에 발행하는 곳에서 WRONG-WAY다. SB 자신의 구간에 걸린 곳에서는 ABSENT다. `cfe_sb_task.c:138`의 SB `GetAppID`는 once 노드이고 그 실패 갈래를 이미 지났으므로, witness의 어떤 연장에도 성공 store가 없다(§11.2). 둘 다 bad다.
 - **신뢰 항목.** certificate마다 네 부분의 신뢰 장부를 지닌다(§10.7, 보장 G10). 그 (iii)부의 `DECLARED_TRUSTED` 항목은 ES 쪽이 `CleanUpApp` 관계 guard, EVS 쪽이 A-FRESH, A-OWNER, `CleanUpApp` guard다. rendered label `trusted:<n>`(sub-label이 아니다, §11.5)이 이것, 즉 (iii)부에서 종류가 `DECLARED_TRUSTED`인 항목을 센다. 모두 O9와 O3/O4로 반박할 수 있고, 그것들로 증명되지는 않는다. writer 목록과 그림 D8 상세는 [05_cfs_mapping.md §7.4](05_cfs_mapping.md#74-writer-목록과-신뢰-항목-그림-d8-상세)에 있다.
-- **출처 회계.** "generic 계약 K-ID + framework 규칙 R19". R19는 `:835`의 loop, 그 stratum, terminal 탈출을 묶는다. predicate는 코드에서 뽑고, `kz proofcheck`가 추출기의 직렬화된 `:835` exit tree에서 다시 유도한다(신뢰 장부 (ii)부). R19는 사례를 아는 상태에서 쓴 framework 규칙이고, 판정은 이것을 밝힌다(spec §7.2).
-- **하지 않는 주장**(step 14): R2가 race라는 것; S1 전의 개수를 Kairos 결과로 내는 것; 반복 실행에서 결정성을 끌어내는 것; certificate가 framework 규칙을 쓰지 않는다는 것; 모든 실행에서 사용에 도달한다는 것(reach는 별도 축); 어떤 progress 진술; 검사기가 추출된 사실이나 skeleton을 검증했다는 것. 기대하는 사용 집합(step 12)과 사슬(step 13)은 [05_cfs_mapping.md §7.5](05_cfs_mapping.md#75-그-밖에-이-예가-보여-주는-것)에 있다. 사슬의 세 판단(step 13a)은 §5.8, 교정 순서 대조군의 기대 기록(step 15)은 spec App. A.1에 있다.
+- **증명 상태.** 이 certificate 칸들이 출력하는 상태는 쓰는 lemma 중 가장 약한 것이다(§12.3, PS3). R2의 certificate는 L-MB, L-ONCE, L-PWB, L-FO, L1, L-STATUS가 `unproved`이므로 모든 칸이 "lemma status: unproved"를 출력한다(spec App. A.1 step 9a). 그래서 첫 R2 결과는 "`kz proofcheck`가 신뢰 기반과 이 lemma들에 상대적으로 받아들였다"로 쓰고, V0-P가 lemma를 올리기 전에는 "증명됨"이나 "검증됨"이라 쓰지 않는다(PS2, ADR-045). 상태표는 [../plan/proof_status_R2.md](../plan/proof_status_R2.md)에 있다.
+- **출처 회계.** "generic 준비 상태 명세 K-ID + framework 규칙 R19". R19는 `:835`의 loop, 그 stratum, terminal 탈출을 묶는다. predicate는 코드에서 뽑고, `kz proofcheck`가 추출기의 직렬화된 `:835` exit tree에서 다시 유도한다(신뢰 장부 (ii)부). R19는 사례를 아는 상태에서 쓴 framework 규칙이고, 판정은 이것을 밝힌다(spec §7.2).
+- **하지 않는 주장**(step 14): R2가 race라는 것; S1 전의 개수를 Kairos 결과로 내는 것; 반복 실행에서 결정성을 끌어내는 것; certificate가 framework 규칙을 쓰지 않는다는 것; 모든 실행에서 사용에 도달한다는 것(reach는 별도 축); 어떤 progress 진술; 검사기가 추출된 사실이나 skeleton을 검증했다는 것; lemma의 증명 상태가 `proved`가 아닌데 "증명됨"이나 "검증됨"이라 쓰는 것(spec §6.4 항목 45). 기대하는 사용 집합(step 12)과 사슬(step 13)은 [05_cfs_mapping.md §7.5](05_cfs_mapping.md#75-그-밖에-이-예가-보여-주는-것)에 있다. 사슬의 세 판단(step 13a)은 §5.8, 교정 순서 대조군의 기대 기록(step 15)은 spec App. A.1에 있다.
 
 ### 10.5 Certificate와 독립 검사기
 
-**certificate**는 판정의 safety 진술 하나(§11.1)를 다른 프로그램이 한 단계씩 다시 확인할 수 있게 적은 증명 기록이다. FIXED_ORDER certificate는 INIT_FALSE 증명, (value conjunct이면) `derives` 사실, transition·key status가 붙은 `W_j`, 사용한 once 사실, frontier 노드와 no-path 증명(또는 ONCE-PWB 사실), writer마다 MB 유도(T-OBS의 writer 제외 포함), badness 증명, reach를 담는다(spec §4.5). badness 증명은 기대는 REJECT event와, 그것이 발생의 결정 event에 있는지를 기록한다(§10.6).
+**certificate**는 판정의 safety 진술 하나(§11.1)를 다른 프로그램이 한 단계씩 다시 확인할 수 있게 적은 증명 기록이다. FIXED_ORDER certificate는 INIT_FALSE 증명, (value conjunct이면) `derives` 사실, transition·key status가 붙은 `W_j`, 사용한 once 사실, frontier 노드와 no-path 증명(또는 ONCE-PWB 사실), writer마다 MB 유도(T-OBS의 writer 제외 포함), badness 증명, reach를 담는다(spec §4.5). badness 증명은 기대는 REJECT event와, 그것이 발생의 결정 event에 있는지를 기록한다(§10.6). certificate는 증명 상태도 지닌다(`KZ_CERT.proof_status`, spec §4.5). 자기 칸의 장부 (iii)부 `LEMMA` 항목 중 가장 약한 상태이고, `kz proofcheck`가 certificate를 받아들일 때 쓴다. 받아들였다고 올라가지는 않는다.
 
 **`kz proofcheck`: 신뢰 기반에 상대적인 독립 추론** [D] (spec §4.5; EXT-20261012 §4.3; ADR-041).
 - producer(`kz-static static`)와 분석 코드를 공유하지 않고 LLVM도 link하지 않는 별도 module이다.
 - 독립성은 **추론**의 독립이지 **사실**의 독립이 아니다. 공유 `libkz-core`(T5)의 evaluator나 rule engine을 부르는 단계에서는 이 독립성도 성립하지 않는다. T5의 container I/O와 Φ parser로 입력을 읽는 것만으로는 단계가 자기 것(own)으로 남는다.
 - evaluator나 rule engine을 부르는 단계는 신뢰 장부에 "via T5"로 표시한다.
+- "`kz proofcheck`가 받아들였다"는 신뢰 기반에 상대적으로 추론 단계를 다시 확인했다는 뜻이다. 늘 certificate의 증명 상태(§12.3, PS3)와 함께 보고하고 "증명됨"이라 쓰지 않는다.
 
 **신뢰 기반** (모든 certificate의 신뢰 장부에 기록한다)
 
@@ -934,7 +993,7 @@ ES 쪽 사슬(spec App. A.1 steps 4, 6):
 | T1 | `facts.kz`: AST 사실, `derives` 복사 사슬, writer 절(W, W^must, D와 transition·key status, 전이 filter 분류), ALLOCS, A-TYPE 목록, mod set·lock 영역을 가진 직렬화된 loop-exit 식, INIT image, 상수 평가 | A-EXTRACT |
 | T2 | `skel.kz`와 `anchors.kz`: `skel`이 `link`의 IR call graph에서 만든 `Sk^cert` 그래프(inline·문맥 구분, 정확한 펼침, star-closure, poll loop 인식, message provenance, `TRUNC` 표시). 검사기의 지배·도달·once routine은 이 그래프 위에서 돌고, 검사기는 그래프를 다시 만들지 않는다 | A-SKEL |
 | T3 | closure의 spawn site 목록 | A3 |
-| T4 | Φ: 규칙, effect, binding, LP, T-TERM 선언, 계약과 Allowed 항목 | A1 |
+| T4 | Φ: 규칙, effect, binding, LP, T-TERM 선언, 준비 상태 명세와 Allowed 항목 | A1 |
 | T5 | producer와 공유하는 `libkz-core`: Φ parser, core-expression evaluator, rule engine, container I/O. 모든 단계가 입력을 container I/O와 Φ parser로 읽는다 | A-CORE |
 | T6 | reach 단계가 가리키는 실행, `hb-*.kz`, prefix probe 산출물 | A2, A6 |
 
@@ -974,7 +1033,7 @@ ES 쪽 사슬(spec App. A.1 steps 4, 6):
 - **PROTECTED가 증명하는 것**(L-PR). `TS(B,σ_U,M)`의 모든 유한 실행에서, 범위 안 발생의 모든 conjunct는 그 LP가 발생의 결정 이전에 있을 때 성립한다. 그래서 결정된 범위 안 발생은 모두 `READY`나 `NOT_EVALUATED`다. 이것이 진술 `¬NR_i`이고, `¬Bad_i`를 함의한다.
   - 증명하지 않는 것: 사용에 도달하지 않는 실행(deadlock, 영원한 대기, 잃은 provider나 spawn), reach, horizon.
   - 판정의 progress 값은 `exh`가 정하지 않으면 `unknown(not_checked)`다.
-  - certificate가 READY를 증명하므로 refinement `tolerated`를 결코 뒷받침하지 않는다. `tolerated`는 `exh`에서만 나온다. certificate에 맞서 결정된 not-ready 발생(TOLERATED, PENDING 포함)이 나오면, 실행에서 나왔으면 모순이고 `exh`에서 나왔으면 O10 불일치다(§11.1).
+  - certificate가 READY를 증명하므로 refinement `allowed-not-ready`를 결코 뒷받침하지 않는다. `allowed-not-ready`는 `exh`에서만 나온다. certificate에 맞서 결정된 not-ready 발생(TOLERATED, PENDING 포함)이 나오면, 실행에서 나왔으면 모순이고 `exh`에서 나왔으면 O10 불일치다(§11.1).
 - **FIXED_ORDER의 badness(item 5)와 decision route.** horizon 안의 모든 `Sk^cert` 연속에서 사용의 not-ready 결과가 Allowed 밖이어야 한다. 즉 항목의 monitor가 결코 ACCEPT하지 않는다.
   - 제어 event인 ACCEPT(정상 연속, fallback 연산, 연기 지점, 문서화된 종료)는 §5.2의 경로 검사로 막는다.
   - 같은 instance의 READY 발생이 필요한 ACCEPT(`retry_until_ready`)는 certificate 자신의 INIT_FALSE와 frontier(또는 once-PWB) 사실로 막는다. 그 사실은 `ℓ_j`의 모든 발생을 덮는다.
@@ -982,7 +1041,7 @@ ES 쪽 사슬(spec App. A.1 steps 4, 6):
   - 일부 연속만 허용되지 않으면 certificate는 "fixed not-ready"(shape WRONG-WAY나 ABSENT)만 확립하고 class는 열려 있다.
 - **FIXED_ORDER가 증명하는 것**(L-FO). `TS(B,σ_U,M)`의 모든 유한 실행에서, LP `ℓ_j`가 결정 이전에 있는 범위 안 발생은 `ℓ_j`에서 `P_j`가 거짓이다. 그 밖의 결정된 발생은 다른 거짓 conjunct로 먼저 결정되었거나, 호출이 `ℓ_j`를 지나지 않고 돌아와 `NOT_EVALUATED`다. 그래서 도달한 범위 안 발생은 어느 것도 READY가 아니고, item 5에 따라 어떤 연속도 TOLERATED로 만들지 않는다. 이것이 `¬OK_i`다. 사용 도달, 모든 실행이 결정에 이른다는 것, 사용에 닿지 않는 실행에 대해서는 증명하지 않는다.
 - **예: timebase 조회** ([I], spec App. A.7). `cFS-Master`의 발행 LP `x*`는 PSP main thread에서 `CFE_ES_Main` 전에 일어나므로, T-PO와 T-SPAWN으로 모든 cFE task entry의 MB에 든다. disabler `OS_DeleteAllObjects`는 SCOPE로 제외된다. census가 찾는 `OS_TimeBaseDelete` site는 기본 B에서 없을 것으로 보고, 찾으면 PWB로 순서가 정해져야 하며 아니면 certificate를 보류한다.
-  - 그래서 TIME과 SCH_LAB의 조회(`cfe_time_task.c:311`, `sch_lab_app.c:176`)는 teardown 밖에서 safety 진술로 `protected(σ_U, M_api)`다. 조회가 돌 때 record가 이미 LIVE이므로 `protected(σ_U, M_impl)`이기도 하다(`¬NR_i`: 도달한 모든 조회가 READY). σ_U∞와 σ_R1 칸은 전이 규칙 1(a)로, σ_E 칸은 M_impl에서 규칙 2로 얻는다.
+  - 그래서 TIME과 SCH_LAB의 조회(`cfe_time_task.c:311`, `sch_lab_app.c:176`)는 teardown 밖에서 safety 진술로 `protected(σ_U, M_api)`다. 조회가 돌 때 record가 이미 LIVE이므로 `protected(σ_U, M_impl)`이기도 하다(`¬NR_i`: 판정된 범위 안 조회 발생은 모두 `READY`나 `NOT_EVALUATED`이므로 도달한 조회는 모두 `READY`). σ_U∞와 σ_R1 칸은 전이 규칙 1(a)로, σ_E 칸은 M_impl에서 규칙 2로 얻는다.
   - progress는 주장하지 않는다. certificate가 낸 모든 칸에서 `unknown(not_checked)`다. explorer를 M_api에서 돌리면 σ_U∞ stall 상태는 건너뛴 core raise 뒤에서만 닿는다. 그때 startup thread는 `cfe_es_start.c:835`에서 죽고 TIME과 SCH_LAB의 spawn은 앞에 남는다(`CFE_ES_MainTaskSyncDelay`에 L1 적용; L1을 끄면 `unknown(unmodelled)`). 이 stall은 App. A.2 뿌리(`tml-root`)에 사슬로 붙는다. M_impl에서는 F7로 잃은 core task 뒤에서도 닿고, 그 task의 K-SPAWN.osal 발생에 붙는다.
   - 이 진술은 기본 B에 상대적이다. C1의 B′ M_impl에서는 SCH_LAB의 조회가 누수된 countsem type lock 뒤에도 있다(`sch_lab_app.c:167`의 `OS_CountSemCreate`; `leaked-lock`, CF의 VIOLATING 시도에 사슬, §3.5).
   - timebase handshake 손실은 이 조회에 영향이 없다. 두 조회는 TaskInit과 AppInit에서 `OS_TimerAdd` 전에 돌고 callback을 기다리지 않는다.
@@ -993,27 +1052,42 @@ ES 쪽 사슬(spec App. A.1 steps 4, 6):
 
 ### 10.7 신뢰 장부(trust ledger)
 
-모든 certificate와 모든 판정 칸은 네 부분으로 된 **신뢰 장부**를 지닌다 [D] (spec §4.5.1; EXT-20261012 §4.3; ADR-041). record는 `KZ_TRUST_LEDGER`, 항목은 `KZ_TRUST`다(spec §2.3).
+모든 certificate와 모든 판정 칸은 네 부분으로 된 **신뢰 장부**를 지닌다 [D] (spec §4.5.1; EXT-20261012 §4.3; ADR-041, ADR-045). record는 `KZ_TRUST_LEDGER`, 항목은 `KZ_TRUST`다(spec §2.3).
 
 | 부분 | 담는 것 |
 |---|---|
 | (i) 다시 확인한 추론 단계 | `kz proofcheck`가 받아들인 certificate 단계. 단계 번호와 한 확인(§10.5)을 적는다. status는 `ACCEPTED`(자기 routine) 또는 `ACCEPTED_VIA_T5`(공유 evaluator나 rule engine도 부름)다. "다시 확인했다"는 (ii)와 (iii)에 상대적으로 옳다는 뜻이다 |
 | (ii) 추출된 사실 | (i)의 단계가 읽은 모든 `facts.kz`, `skel.kz`, `anchors.kz`, closure, 실행, prefix probe record. typed 참조로 나열하고, 산출물 hash가 장부를 정확한 추출에 묶는다 |
-| (iii) 믿은 항목 | 쓴 Φ 항목(규칙, effect, binding, LP, T-TERM 선언, 계약과 Allowed 항목); `DECLARED_TRUSTED` 항목; §12.2의 가정(id로; 실행으로 reach를 증명하면 A2와 A6); 증명이 아직 스케치인 lemma 의무; 도구 기반(`libkz-core`와 검사기 tool hash) |
+| (iii) 믿은 항목 | 쓴 Φ 항목(규칙, effect, binding, LP, T-TERM 선언, 준비 상태 명세와 Allowed 항목); `DECLARED_TRUSTED` 항목; §12.2의 가정(id로; 실행으로 reach를 증명하면 A2와 A6); 쓴 lemma(종류 `LEMMA`)와 각각의 **증명 상태**(§12.3 표에서 복사한다. 의무로만 적힌 lemma는 `unproved`다); 도구 기반(`libkz-core`와 검사기 tool hash) |
 | (iv) 반박할 수 있지만 증명되지 않음 | (ii)나 (iii)의 항목 중 obligation이 반박할 수 있는 것마다: obligation(O1–O10; O7은 모형 build 때, O10은 `exh` 기록이 certificate를 만날 때), 상태(`not run`, `not refuted on the exercised paths of runs R`, `refuted`), 실행된 경로의 한계 |
 
-- (iii)부의 lemma 의무: L-MB, L-ONCE, L-PWB, L-DERIVE, L-FO나 L-PR, L1. SCOPE 제외를 쓰면 L-SCOPE. M_api reach나 M_api witness가 실행에 기대면 L-MAPI-CONE. certificate 자기 칸이 아닌 칸에는 L-STATUS, L-MON, L-CONT, L-TRANS를 넣고, 규칙 2(i)를 쓰면 L-MLEVEL, 실행으로 σ_U∞ reach를 증명하면 L-REACH-CONE, bounded σ_R1 전이면 L-CONE-R1을 넣는다.
-- **obligation 통과는 결코 증명으로 기록하지 않는다.** 관측이 증명하는 유일한 항목은 reach다.
-- **칸별 장부.** certificate의 장부는 자기 칸(σ_U, M, b = ∞)의 장부다. 다른 칸의 장부는 그것에서 유도한다. 전이로 얻은 칸은 전이 lemma와, 그것이 기대는 가정(A7-impl, A7-api, A3, A4, A9, A-SKEL)과 그 obligation을 더한다. reach를 실행으로 증명한 칸은 실행과 prefix probe record, A2, A6, 칸별 reach 검사를 더한다. σ_U∞ 칸이면 cone actor의 TB 없음과 L-REACH-CONE, M_api 칸이면 cone actor의 M_api 적합성과 L-MAPI-CONE이다.
-- **certificate 없는 판정.** (i)부가 비어 있다. (iii)부는 그 경로 자신의 기반을 적는다. `exh`면 보장 G5, L-DPOR, L-MON, cone 규칙, 쓰는 reduction이다. 예측이면 L-PRED와 A-COMM이다. 실현된 witness면 recorder와 oracle이다. (iv)부는 O1, O2, O6, O8을 나열하고, `exh` 기록이 certificate나 전이된 진술을 만나면 O10도 나열한다.
-- `kz report`는 certificate 기반 판정마다 장부를 출력하고, 네 부분의 크기를 label `ledger:<i>/<ii>/<iii>/<iv>`로 보인다. 이 label은 sub-label이 아니고 bitset에 넣지 않는다.
+- (iii)부의 lemma(종류 `LEMMA`)는 증명 상태를 지닌다(§12.3). 부분을 가진 lemma(L-CONT, L-TRANS, L-DEAD)는 항목과 상태가 부분마다 하나다.
+  - certificate 자신의 칸에는 늘 L-MB, L-ONCE, L-PWB, L-DERIVE, L-FO나 L-PR, L1, L-STATUS(status의 최종성. badness 항목과 실행에서 읽은 모든 status가 기댄다)를 넣는다. SCOPE 제외를 쓰면 L-SCOPE를 더한다.
+  - **reach나 witness가 실제 실행에 기대는 곳마다, certificate 자신의 칸도 포함해서 L-CONT (c)**(실행의 LP 단위 사영은 (σ_U, M_impl)의 유한 실행이다)를 A2, A6과 함께 넣는다. M_api에서는 L-MLEVEL(cone에 M_impl-relevant 연산이 없음)이나 L-MAPI-CONE(적합성 검사)을 더한다. L-MAPI-CONE도 실행의 사영에서 출발한다.
+  - certificate 자신의 칸이 아닌 칸에는 L-MON, 칸의 σ가 요구하는 L-CONT (a), (b), (b′), L-TRANS를 넣는다. 규칙 2(i)를 쓰면 L-MLEVEL, 실행으로 σ_U∞ reach를 증명하면 L-REACH-CONE, bounded σ_R1 전이면 L-CONE-R1을 더한다.
+- **L-CONT (c), L-MAPI-CONE, L-REACH-CONE의 실행 쪽 전제는 (iv)부에서 반박할 수 있다.** certificate view 자동자가 받아들이지 않는 actor 열을 가진 실행(O1, O2), 계산한 상태와 결과가 어긋나는 실행(O4), closure 밖의 actor나 key를 가진 실행(O5)은 그 모의가 주장하는 것을 반박한다. 그렇지 않으면 항목은 "실행된 경로 R에서 반박되지 않음"을 적는다.
+- **obligation 통과는 결코 증명으로 기록하지 않는다.** 관측이 증명하는 유일한 항목은 reach이고, 그것도 L-CONT (c)와 그 칸이 쓰는 다른 lemma를 거쳐서만이다. 그 lemma들의 증명 상태가 장부에 reach 옆에 보인다.
+- **증명 상태** [D] (PI 결정 D20; spec §4.5.1). (iii)부의 `LEMMA` 항목은 `KZ_TRUST.proof`를 지닌다. 검사기(`exh` 경로면 탐색기)를 build할 때 §12.3 표에서 복사한다. certificate와 판정 칸의 증명 상태는 그 진술이 쓰는 `LEMMA` 항목 중 가장 약한 것이고(PS3), 그런 항목이 없으면 `NA`다. `kz report`는 그것을 certificate 기반 진술 옆에 출력한다.
+- **칸별 장부.** certificate의 장부는 자기 칸(σ_U, M, b = ∞)의 장부다. 다른 칸의 장부는 그것에서 유도한다.
+  - 전이로 얻은 칸은 전이 lemma와, 그것이 기대는 가정(A7-impl, A7-api, A3, A4, A9, A-SKEL)과 그 obligation을 더한다.
+  - reach를 실행으로 증명한 칸은, certificate 자신의 칸도 마찬가지로, 실행과 prefix probe record, A2, A6, L-CONT (c), L-STATUS, 칸별 reach 검사를 더한다. σ_U∞ 칸이면 cone actor의 TB 없음과 L-REACH-CONE, M_api 칸이면 cone actor의 M_api 적합성과 L-MAPI-CONE(같은 실행 사영에서 출발)이다.
+  - certificate(자기 것이든 전이된 것이든)와 `exh` 결과(progress 후보, litmus LP-DL)를 함께 가진 칸은 `exh` 경로의 기반(보장 G5, L-DPOR, L-DEAD, L-MON, cone 규칙, 쓰는 reduction과 L1–L3)을 (iii)부에, O6과 O10을 (iv)부에 더한다.
+  - 항목마다 지탱하는 경계가 적혀 있다(`KZ_TRUST.bound`: b = ∞ 또는 탐색한 h). 그래서 b = ∞ 진술을 뒷받침하는 항목과 bounded 기록·progress 값을 뒷받침하는 항목이 구분된다.
+- **certificate 없는 판정.** (i)부가 비어 있다. (iii)부는 그 경로 자신의 기반을 적는다. `exh`면 보장 G5, L-DPOR, L-DEAD, L-MON, cone 규칙, 쓰는 reduction이다. 예측이면 L-PRED와 A-COMM이다. 실현된 witness면 recorder와 oracle이다. (iv)부는 O1, O2, O6, O8을 나열하고, `exh` 기록이 certificate나 전이된 진술을 만나면 O10도 나열한다.
+- `kz report`는 certificate 기반 판정마다 장부를 출력한다. 네 부분의 크기를 label `ledger:<i>/<ii>/<iii>/<iv>`로, (iii)부 `LEMMA` 항목의 증명 상태별 개수를 label `lemmas:<p>/<d>/<u>`로 보인다. 두 label은 sub-label이 아니고 bitset에 넣지 않는다(§11.5).
 
 **R2의 장부** ([I], spec App. A.1 step 9a; 실행한 것은 없다). 절반마다, M마다 certificate 장부가 하나씩 있다. 칸은 (σ_U, M_api)와 (σ_U, M_impl), b = ∞다. 다른 칸의 장부는 이것에서 유도한다.
 - **(i)** view; ONCE(once(PSP main)은 정의상; once(ES main), once(EVS main), once(SB main)은 각자 펼친 core loop 안 once startup thread 위, star-closed 영역 밖에 생성 노드가 하나뿐이라 배타성이 자명함; once(`raise_ES`), once(`cfe_es_start.c:82`)); T-PO(검사기의 지배 routine으로 `m_ES ∈ MB(raise_ES)`, `m_EVS ∈ MB(raise_EVS)`, 남긴 `ExitApp` store, `o_ES`(또는 `o_EVS`)에서 `spawn_SB`까지 panic 갈래를 자른 startup thread 사슬, SB entry → `x`, FRONTIER 제외마다의 경로); T-TERM(`CFE_PSP_Panic`과 `abort`의 pc-linux 선언); T-SPAWN(SB main과 FRONTIER로 제외한 writer의 actor마다 spawn 목록이 closure 목록과 같음); T-OBS(`:803`의 falsifier 조건 via T5; form (b) `Pred_code` 재유도 own; R19의 binding·stratum·terminal 탈출 via T5 [I]; L1 전제; `Pred_code ⇒ C`; `W_o`와 그 제외); FRONTIER(모든 capture point `c`에 대해 `m_ES →* c` 경로 없음); DERIVES; INIT_FALSE(V) via T5; badness(`Allowed = none`이므로 모든 not-ready 발생이 결정에서 VIOLATING); status; reach(S1 뒤, (σ_U, M_api) 칸은 cone actor의 M_api 적합성 포함).
-- **(ii)** SB `SendEventWithAppID` site 39개와 그 문맥([R2c §2]); 복사 사슬 AST 사실; INIT image(`CFE_SB_Global`은 0으로 초기화, `cfe_sb_task.c:40`); `(CFE_SB_Global_t, AppId)`와 `AppState`/`IsUsed`의 S3a writer 절과 분류; A-TYPE 목록; record tag `Type = CORE`(`cfe_es_start.c:795`)와 `PendingAppId` 흐름(`:814`); 직렬화된 `:835` exit tree와 mod set·lock 영역; 생성된 core table 순서; call graph 기반 행; `Sk^cert` 그래프; spawn 목록. 모두 hash로 기록한다.
-- **(iii)** Φ(K-ID의 Req, capture point·slot 검사 LP, outcome map `cfe_evs.c:185–189`, `Allowed none`, harm; T-DERIVE; `CFE_ES_GetAppID`의 effect; R19; T-TERM 선언; `AppState`/`IsUsed` binding; M_impl certificate에는 Φ_L-1). `DECLARED_TRUSTED`(`CleanUpApp` 관계 guard는 두 절반 모두; EVS 절반의 A-FRESH, A-OWNER와 `ExitApp` STOPPED 제외). 가정 A1, A3, A4, A9, A-SKEL, A-WS, A-TYPE, A-EXTRACT, A-CORE, reach에 A2와 A6, M_impl certificate에 A7-impl, A7-api, A10. lemma 의무 L-MB, L-ONCE, L-PWB, L-DERIVE, L-FO, L1. SCOPE 제외는 예상되지 않는다 [I]. (σ_U, M_api) 칸의 reach가 실행에 기대면 L-MAPI-CONE. 유도된 칸(σ_U∞, σ_R1, σ_E)에는 L-STATUS, L-MON, L-CONT, L-TRANS, 실행으로 reach를 증명한 σ_U∞ 칸에는 L-REACH-CONE. cone이 M_impl-relevant이므로 L-MLEVEL은 쓰지 않고, σ_E 칸은 M_impl에서 온다. 도구 기반.
-- **(iv)** S1/S2 전까지 모두 `not run`이다. A-FRESH와 A-OWNER는 O9; `CleanUpApp` guard는 O3/O4(구간 안에서 `CleanUpApp`이 도는 실행에서만; 기본 boot에는 그런 실행이 없을 것으로 본다 [I]); A-SKEL은 O1/O2와 S5부터 O8; closure는 O5; once·MB 사실은 O3; Φ effect, LP, `derives`, `Pred_code`는 O4(a)/(b)(`x` 전에 성공하는 SB-AppId 사용이 하나라도 있으면 certificate가 반박된다); writer 완전성은 O7과 program mutant; A-CORE는 evaluator agreement property test와 golden test. 실행된 경로의 한계 [I]: 기본 boot는 성공 경로만 지난다. 그래서 `:823` → panic 갈래, `cfe_es_task.c:340/371/381/393`의 early return, timeout된 대기 뒤의 `ExitApp` 경로는 기본 boot의 obligation으로 반박할 수 없다.
-- S3a gate는 R2 장부를 요구한다(ADR-041).
+- **(ii)** SB `SendEventWithAppID` site 39개와 그 문맥([R2g §6]); 복사 사슬 AST 사실; INIT image(`CFE_SB_Global`은 0으로 초기화, `cfe_sb_task.c:40`); `(CFE_SB_Global_t, AppId)`와 `AppState`/`IsUsed`의 S3a writer 절과 분류; A-TYPE 목록; record tag `Type = CORE`(`cfe_es_start.c:795`)와 `PendingAppId` 흐름(`:814`); 직렬화된 `:835` exit tree와 mod set·lock 영역; 생성된 core table 순서; call graph 기반 행; `Sk^cert` 그래프; spawn 목록. 모두 hash로 기록한다.
+- **(iii)** Φ(K-ID의 준비 사전조건 `Req`, capture point·slot 검사 LP, outcome map `cfe_evs.c:185–189`, `Allowed none`, harm; T-DERIVE; `CFE_ES_GetAppID`의 effect; R19; T-TERM 선언; `AppState`/`IsUsed` binding; M_impl certificate에는 Φ_L-1). `DECLARED_TRUSTED`(`CleanUpApp` 관계 guard는 두 절반 모두; EVS 절반의 A-FRESH, A-OWNER와 `ExitApp` STOPPED 제외). 가정 A1, A3, A4, A9, A-SKEL, A-WS, A-TYPE, A-EXTRACT, A-CORE, reach에 A2와 A6, M_impl certificate에 A7-impl, A7-api, A10. 도구 기반.
+  - **lemma**(각각 증명 상태가 붙는다. 이 중 가장 약한 것이 certificate 칸마다 출력되는 상태다):
+    - certificate 자신의 칸 (σ_U, M_api), (σ_U, M_impl): L-MB(`unproved`), L-ONCE(`unproved`), L-PWB(`unproved`), L-DERIVE(`depends-on-stated-assumption`), L-FO(`unproved`), L1(`unproved`), L-STATUS(`unproved`). L-SCOPE(`unproved`)는 `W_j`에서 SCOPE 제외를 쓸 때만이고 예상되지 않는다 [I].
+    - 그 칸들의 **reach 항목**: (σ_U, M_impl)은 S1이 실행으로 reach를 `proved`로 만드므로 L-CONT (c)(`depends-on-stated-assumption`). (σ_U, M_api)는 실행이 L-MAPI-CONE(`unproved`)을 거쳐서만 reach를 증명하고, 그것이 실행의 LP 단위 사영에서 출발하므로 L-CONT (c)도 함께 적는다. L-MLEVEL은 cone이 M_impl-relevant이므로 쓰지 않는다.
+    - 유도된 칸(σ_U∞, σ_R1, σ_E): L-MON(`unproved`), L-CONT (a)(`proved`)와 칸의 σ가 요구하는 (b), (b′)(`unproved`), L-TRANS(`unproved`). M_impl에서 오는 σ_E 칸에는 L-CONT (c). 실행으로 reach를 증명한 σ_U∞ 칸에는 L-REACH-CONE(`unproved`).
+    - 이 상태에서 R2의 모든 certificate 칸은 "lemma status: unproved"를 출력한다.
+- **(iv)** S1/S2 전까지 모두 `not run`이다. A-FRESH와 A-OWNER는 O9; `CleanUpApp` guard는 O3/O4(구간 안에서 `CleanUpApp`이 도는 실행에서만; 기본 boot에는 그런 실행이 없을 것으로 본다 [I]); A-SKEL은 O1/O2와 S5부터 O8; closure는 O5; once·MB 사실은 O3; Φ effect, LP, `derives`, `Pred_code`는 O4(a)/(b)(`x` 전에 성공하는 SB-AppId 사용이 하나라도 있으면 certificate가 반박된다); writer 완전성은 O7(model build 때). L-CONT (c), L-MAPI-CONE과 유도된 σ_U∞ 칸의 L-REACH-CONE은 실행 쪽 전제로 반박한다: O1, O2(certificate view 자동자가 받아들이지 않는 actor 열), O4(계산한 상태와 어긋나는 결과), O5(closure 밖 actor나 key), 실행 R에서. 실행된 경로의 한계 [I]: 기본 boot는 성공 경로만 지난다. 그래서 `:823` → panic 갈래, `cfe_es_task.c:340/371/381/393`의 early return, timeout된 대기 뒤의 `ExitApp` 경로는 기본 boot의 obligation으로 반박할 수 없다. reach는 관측이 확립하는 유일한 항목이고, L-CONT (c)와 그 칸이 쓰는 다른 lemma를 거칠 때뿐이다.
+- **장부 밖의 시험**(obligation이 아니므로 (iv)부 항목이 아니다, spec §4.5.1): A-CORE는 evaluator agreement property test와 golden test로, writer 완전성은 program mutant(spec §8.5)로도 시험한다. 그 결과는 반박 상태가 아니라 검사기와 recall 지표와 함께 보고한다.
+- S3a gate는 R2 장부를 요구한다(ADR-041, ADR-045).
 
 ---
 
@@ -1031,7 +1105,7 @@ instance `i`, B, σ, M, 경계 b를 고정한다(spec §1.10). status(§5.5)는 
 | `Reach_i` | 어떤 유한 실행이 준비 여부가 결정되고 평가된(`NOT_EVALUATED`가 아닌) 범위 안 발생을 담는다 |
 
 **safety 기록** [D] (EXT-20261012 §4.1; ADR-039). 칸마다, 경계마다 기록은 다음을 가진다.
-- 확립된 진술 `¬Bad_i`, `¬OK_i`, `¬NR_i`("도달한 범위 안 발생 중 not ready로 결정된 것이 없다")와 각각의 경로(certificate, `exh`, 전이). `¬NR_i`는 PROTECTED certificate나 그 전이에서만 오고, `¬Bad_i`를 함의한다.
+- 확립된 진술 `¬Bad_i`, `¬OK_i`, `¬NR_i`("범위 안 발생 중 not ready로 결정된 것이 없다". 곧 판정된 것은 모두 `READY`나 `NOT_EVALUATED`)와 각각의 경로(certificate, `exh`, 전이). `¬NR_i`는 PROTECTED certificate나 그 전이에서만 오고, `¬Bad_i`를 함의한다.
 - `¬OK_i`의 **decision route**. `¬OK_i`가 **결정적**(deciding)이라는 것은 그 칸·경계에 bad witness가 있거나, 진술이 FIXED_ORDER certificate(또는 그 전이)에서 왔고 그 badness 항목이 모든 not-ready 발생을 결정 event에서 정한다는 뜻이다(`Allowed = none`; `unspecified_by_reference`; 항목의 code 밖 결과). 그런 certificate는 모든 σ에서 결정적이다. REJECT event가 결정 뒤에 있는 certificate(retry 소진, error exit·error 반환, 다음 연산, 종료)는 어느 σ에서도 혼자 결정하지 못한다. REJECT로 가는 길이 시간 없는 대기, σ_U∞가 지우는 전이, σ_R1의 굶주림으로 막힐 수 있기 때문이다.
 - bad·good witness와 그 ordinal.
 
@@ -1040,14 +1114,14 @@ instance `i`, B, σ, M, 경계 b를 고정한다(spec §1.10). status(§5.5)는 
 | class (safety 축) | 기록 | 증명 의무 |
 |---|---|---|
 | `inactive(B)` | 어떤 실행도 사용에 도달하지 않는다 | 정적: B 상수와 message provenance 아래 **certificate view**에서 template에 닿을 수 없다(경로 조건이 증명). **관측되지 않은 사용은 inactive가 아니라 `unknown(not_reached)`다** |
-| `protected(B,σ,M,b)` | `¬Bad_i` 확립, `¬OK_i`는 아님. 도달한 범위 안 발생은 모두 `READY`, `TOLERATED`, `PENDING`이고, 결코 `VIOLATING`이나 `NOT_READY_UNJUDGED`가 아니다. `¬NR_i`가 있으면 모두 `READY`다 | certificate(b = ∞; L-PR이 `¬NR_i`를 증명), b 안에서 `Q_bad = no`인 `exh`, 또는 전이(규칙 1(a)) |
-| ↳ refinement `tolerated` | protected이고, 어떤 유한 실행에 `TOLERATED` 발생이 있다 | b 안의 `exh`만. PROTECTED certificate는 `¬NR_i`를 증명하므로 결코 뒷받침하지 않는다 |
+| `protected(B,σ,M,b)` | `¬Bad_i` 확립, `¬OK_i`는 아님. 도달한 범위 안 발생은 모두 `READY`, `TOLERATED`, `PENDING`이고, 결코 `VIOLATING`이나 `NOT_READY_UNJUDGED`가 아니다. `¬NR_i`가 있으면 모두 `READY`다(도달한 발생은 판정되었고 `NOT_EVALUATED`가 아니다. 위 `Reach_i`. `NOT_EVALUATED` 발생은 어느 진술도 세지 않으므로 `¬NR_i`는 "모든 발생이 `READY`"가 아니다) | certificate(b = ∞; L-PR이 `¬NR_i`를 증명), b 안에서 `Q_bad = no`인 `exh`, 또는 전이(규칙 1(a)) |
+| ↳ refinement `allowed-not-ready` | protected이고, 어떤 유한 실행에 `TOLERATED` 발생이 있다 | b 안의 `exh`만. PROTECTED certificate는 `¬NR_i`를 증명하므로 결코 뒷받침하지 않는다 |
 | `fixed-order(B,σ,M,b)` | `¬OK_i` 확립 **이고 결정적**, `¬Bad_i`는 아님. 도달한 범위 안 발생 중 `READY`나 `TOLERATED`가 없고, bad witness가 있거나 not-ready 발생이 결정에서 bad로 정해진다 | certificate(L-FO와 badness 항목), b 안에서 `Q_ok = no`이고 bad witness가 있는 `exh`, 또는 받는 σ에 decision route가 있는 전이. **k번 중 k번 실패한 실행으로는 결코 내지 않는다**([R06 S9]). 모든 실행이 결정에 이른다는 것은 주장하지 않는다 |
 | `no-final-status(B,σ,M,b)` | `¬Bad_i`와 `¬OK_i`가 모두 확립. 도달한 범위 안 발생이 모두 `PENDING`(이나 `NOT_EVALUATED`)이거나, 도달한 것이 없다 | 두 진술. 각자 어느 경로로든 된다(예: 전이된 `¬OK_i`와 `exh`의 `¬Bad_i`) |
 | `schedule-dependent(B,σ,M,b)` | **같은 ordinal에서** bad witness와 good witness. 서로 다른 두 유한 실행이다 | 같은 칸·경계의 두 witness. 축마다 더 약한 근거를 기록한다. stall witness는 결코 둘 중 하나가 아니다 |
 | ↳ refinement | `timeout-dependent` (§7.4) | σ_U와 σ_U∞ 칸에서 끌어내고 자기 경계를 가진다. `exh`가 필요하다 |
 | `ordinal-split(B,σ,M,b)` | bad와 good witness가 있지만, 같은 ordinal의 쌍은 확립되지 않았다 | witness와 그 ordinal. 어떤 발생 하나가 스케줄에 의존한다고 말하지 **않는다** |
-| `unknown(reason)` | 확립된 것이 없다. 또는 decision route 없는 `¬OK_i`만 있다(이유 `no_decision_route`; 진술은 그래도 보인다) | `not_reached`, `model_gap`, `bound`, `budget`, `key_unresolved`, `loss`, `unmodelled`, `writer_incomplete`, `horizon`(horizon monitor가 OPEN인 채 trace가 끝남), `no_decision_route`, `conformance`, `model_fault`(`contested` 경계 포함), `model_level` |
+| `unknown(reason)` | 확립된 것이 없다. 또는 decision route 없는 `¬OK_i`만 있다(이유 `no_decision_route`; 진술은 그래도 보인다). 또는 진술 없이 한쪽 witness만 있다. 곧 `¬OK_i` 없는 bad witness이거나 `¬Bad_i` 없는 good witness다(이유 `one_sided`; witness는 그대로 보인다) | `not_reached`, `model_gap`, `bound`, `budget`, `key_unresolved`, `loss`, `unmodelled`, `writer_incomplete`, `horizon`(horizon monitor가 OPEN인 채 trace가 끝남), `horizon_static`(trace 없는 census의 정적 경우: FIXED_ORDER 항목 5가 horizon 안의 연장 중 일부만 허용되지 않음을 찾아 class가 열린 채 남음; spec §4.5, §4.6), `no_decision_route`, `one_sided`, `unordered`, `O-ordered-only`, `conditional-observation`(census의 열린 경로, 어느 경로도 결정하지 않은 동안; spec §4.6), `conformance`, `model_fault`(`contested` 경계 포함), `model_level` |
 
 good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal-split(σ_U에서 good witness를 가진 모든 class)에 붙을 수 있다.
 
@@ -1055,7 +1129,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 - **보편 진술의 범위.** `¬Bad_i`와 `¬OK_i`는 도달한 발생을 두고 말한다. 그래서 도달한 발생이 없으면 공허하게 성립하고, 도달한 발생이 모두 `PENDING`이면 둘 다 성립한다. 서로 배타적이지 않다. 둘 다 확립된 경우가 `no-final-status`다.
 - 어느 진술도 사용에 닿지 않는 실행에 대해 말하지 않는다. 사용 전의 영원한 대기는 progress 결과가 다룬다(§7.3). 사용의 actor instance가 발생 없이 끝나거나 process가 panic하는 실행은 어느 축도 다루지 않는다. 그 기록은 그리로 이끈 not-ready 뿌리 발생이 있으면 그 safety 결과와, 그 사슬에서 관측된 결과(`consequence`: 잃은 task, panic, process abort), 그리고 그 뿌리의 caller 수준 Allowed가 주는 harm(K-SPAWN.osal과 K-SELF.es raise의 기본값 아래에서는 `unspecified_by_reference`, §5.3; spec §1.6, §3.3)뿐이다. 자발적 timeout 뒤의 σ_U panic에는 그런 뿌리가 없다(spec §1.10, §6.4 item 34).
 - **존재**는 칸의 **reach** 축에 기록하고 class에 넣지 않는다. `reach = assumed`면 보편 class를 "… 도달한다면"으로 읽는다. `reach = unreached(b)`면 "… 도달한다면; b 안에서는 도달하지 않음"으로 읽는다.
-- **경계마다.** 기록, class, reach, progress는 경계마다 둔다. b = ∞는 certificate, 그것에서 옮긴 것, 실행, 확인된 모형 경로의 경계다. `exh`는 끝낸 h마다 경계를 가진다. b = ∞의 진술은 모든 b에서 성립하고, b 안의 witness는 더 큰 모든 경계에서 성립한다. (칸, 경계)마다 class를 하나 계산한다. 보고서는 b = ∞의 class와, 정보를 더하는 bounded class를 함께 보인다. 그래서 두 경로가 다른 경계에서 다른 class를 줄 수 있다(예: certificate의 b = ∞ protected와, 아무것도 도달하지 않은 `exh`의 b 안 `no-final-status`, spec §4.12 item 2).
+- **경계마다.** 기록, class, reach, progress는 경계마다 둔다. b = ∞는 certificate, 그것에서 옮긴 것, 실행, 확인된 모형 경로의 경계다. `exh`는 끝낸 h마다 경계를 가진다. b = ∞의 진술은 모든 b에서 성립하고, b 안의 witness는 더 큰 모든 경계에서 성립한다. (칸, 경계)마다 class를 하나 계산한다. 보고서는 b = ∞의 class와, 정보를 더하는 bounded class를 함께 보인다. 그래서 두 경로가 다른 경계에서 다른 class를 줄 수 있다(예: certificate의 b = ∞ protected와, 아무것도 도달하지 않은 `exh`의 b 안 `no-final-status`, spec §4.12 item 2). b = ∞ 기록에는 확인되지 않은 탐색기 witness가 들어가지 않는다. 모형 witness는 실행이 그 경로를 확인할 때만(실현된 witness나 확인된 모형 경로로) 들어간다. 그래서 `exh`의 bad witness가 certificate의 `¬OK_i`를 b = ∞에서 결정적으로 만드는 일은 없다(L-PATIENT variant 2와 3, LP-EARLY, spec App. A.8).
 - **모순과 불일치** (spec §4.12 item 5). 같은 경계에서 셋을 나눈다.
   1. certificate나 그 전이에서 온 진술에 맞서는 실현된 witness는 **모순**이다: `¬Bad_i`에 맞서는 bad witness, `¬OK_i`에 맞서는 good witness, `¬NR_i`에 맞서는 관측된 결정된 not-ready 발생. 규칙을 정지시킨다(spec §4.14).
   2. 그런 진술에 맞서는 `exh` witness, 또는 한 σ의 `exh` 결과가 다른 σ에서 옮긴 `exh` 진술과 맞서는 것은 obligation **O10**(모형–certificate 일치)으로 간다. 탐색한 경계가 `contested`가 된다. certificate 자신의 b = ∞ 기록은 그대로이고, 그 Φ 판에 대한 지속적인 contested 표시를 받는다. 방향을 정한 확인이 뒤따른다. (i) L1–L3를 끄고 다시 탐색한다. witness가 사라지면 그 reduction이 원인이고, 그 instance에서 끈다. (ii) 아니면 `kz proofcheck`를 다시 돌린다. 거부하면 certificate를 거둔다. (iii) 아니면 탐색한 경계는 `contested`로 남고(`unknown(model_fault)`로 보임), witness의 확인 실행을 계획한다. 다른 경계는 낮추지 않는다. witness가 실현되지 않는 한 Φ 규칙을 정지시키지 않는다.
@@ -1068,7 +1142,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 
 - **provider** ∈ {`present`, `none`, `env-absent`, `unknown`}. `none`은 conjunct가 INIT_FALSE이고 완전한 writer 집합이 비었을 때다. `env-absent`는 writer가 B.Env가 거짓으로 기록한 `env` predicate에 묶인 Φ effect뿐이고 O4 결과가 일치할 때다.
   - provider `none`인 사용도 결과로 분류한다. 도달한 발생이 `READY`나 `TOLERATED`일 수 없고 decision route가 있으면 fixed-order다.
-  - 그래서 유일한 REJECT가 결정 뒤의 소진인 retry는, certificate만으로는 모든 σ에서 b = ∞의 `unknown(no_decision_route)`이다(`¬OK_i`는 보인다). `exh`로는 b 안에서 σ_U fixed-order(소진하는 실행이 bad witness)이고, 소진이 시간 기반이면 σ_U∞ `no-final-status`다. `tolerated`를 가진 protected는 `exh`로만 얻는다. 허용된 not-ready 결과를 확립하는 certificate는 없고, FIXED_ORDER item 5는 그런 instance를 열어 둔다(spec §4.5).
+  - 그래서 유일한 REJECT가 결정 뒤의 소진인 retry는, certificate만으로는 모든 σ에서 b = ∞의 `unknown(no_decision_route)`이다(`¬OK_i`는 보인다). `exh`로는 b 안에서 σ_U fixed-order(소진하는 실행이 bad witness)이고, 소진이 시간 기반이면 σ_U∞ `no-final-status`다. `allowed-not-ready`를 가진 protected는 `exh`로만 얻는다. 허용된 not-ready 결과를 확립하는 certificate는 없고, FIXED_ORDER item 5는 그런 instance를 열어 둔다(spec §4.5).
   - 예: HS의 `linux_sysmon`은 provider `env-absent`, class `fixed-order`, 결과 label `not-ready-unjudged`이고, 순서 문제가 아니므로 따로 보고한다(spec App. A.6).
 - **reach**, 칸 (σ, M)마다, 경계마다 [D] (spec §1.10; EXT-20261012 §4.2). b = ∞에서는 `proved(run id | 확인된 모형 경로)`나 `assumed`다. 유한 b에서는 `model(b)`(`exh`가 b 안에서 결정된 범위 안 발생을 찾음, 확인 안 됨)나 `unreached(b)`(`exh`가 찾지 못함)다. `proved`는 **그 σ, 그 M의** 유한 실행으로서 B 위에서 실현되고 결정된 범위 안 발생을 담은 것이 필요하다.
 
@@ -1087,7 +1161,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
   - stall witness는 kind(`deadlock-cycle`, `leaked-lock`, `other`), qualifier(`idle`, `terminal-pending`, choice support를 가진 `choice-dependent`), wait-for root 집합, `confirmable` flag, 실현 방식(`model(b)` | `realized`), harm(`hang_or_deadlock` | `task_never_runs` | `terminal_pending(panic | abort)`), progress 사슬, 결과 label `liveness`를 지닌다.
   - 기본값은 `unknown(not_checked)`다. K-TEARDOWN instance는 `unknown(teardown_scope)`다. 근거가 반박한 경계는 `contested`가 되고 `unknown(model_fault)`로 보인다.
   - progress 결과는 class를 바꾸지 않고, class는 progress 값을 함의하지 않는다. `protected`와 stall witness가 함께 있는 것은 일관된 기록이지 모순이 아니다(litmus LP-DL, §12.6).
-  - **보이기 규칙.** 보편 class는 언제나 그 칸의 reach·progress 값과 그 경계와 함께 보인다. stall witness는 kind, qualifier, wait-for root와 함께 보인다. 예: "protected — 도달한 모든 발생 READY (certificate, b = ∞); reach proved; progress not checked". `terminal-pending`은 닫힌 cone에 상대적이라고 보인다.
+  - **보이기 규칙.** 보편 class는 언제나 그 칸의 reach·progress 값과 그 경계와 함께 보인다. stall witness는 kind, qualifier, wait-for root와 함께 보인다. certificate나 그것에서 옮긴 진술에 기댄 진술은 lemma 상태도 함께 보인다(§12.3, PS3). 예: "protected — 판정된 모든 발생이 READY 또는 NOT_EVALUATED (certificate, b = ∞); reach proved; progress not checked; lemma status: unproved". `terminal-pending`은 닫힌 cone에 상대적이라고 보인다.
   - **세는 규칙.** stall witness는 `realized`이거나, confirmable이고 choice-dependent가 아닌 모형 witness일 때만 detection이나 Reported로 센다(spec §8.5). 센 witness는 wait-for root 집합으로 묶는다. 묶음마다 칸에서 한 번만 세고, 그것이 막는 instance를 붙인다. 그 밖의 모형 stall witness는 progress 후보로 나열한다.
 - **shape** ([A §1.7]). bad 유한 witness ρ와 그 발생 `u`, 그리고 실패한 conjunct를 참으로 만들 첫 전이 `p*`의 관계다. looper 규칙(handler 사이 edge 없음)과 API 수준 edge만 쓴다. witness가 유한 실행이므로 shape는 ρ와 그 **기록된 연장** 위에서 정의한다. 기록된 연장은 ρ를 담은 실행의 나머지, 또는 ρ가 속한 explorer 경로다 [D] (EXT-20261012 §4.2).
 
@@ -1111,7 +1185,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 ### 11.4 σ_E class와 "경보 없음 ≠ 안전"
 
 - **schedule-dependent.** `schedule-dependent(σ_E)`에는 **같은 발생 ordinal에서** 자연 bad witness와 자연 good witness가 필요하다. 그 ordinal의 발생이 최종 status를 가진 서로 다른 두 실현 실행이고, 각자 pool key를 가진다. ordinal이 다른 bad·good 발생은 `ordinal-split(σ_E)`이고, 실행 하나에서도 나올 수 있다. 실현됐지만 hold·gate가 개입했으면 `σ_E(held)`다.
-- **보편 class.** σ_E의 protected, fixed-order, no-final-status는 실행에서 결코 유도하지 않는다. 전이 규칙 2(b = ∞)로만 얻고, 모든 실제 실행에 대한 safety 진술을 말한다.
+- **보편 class.** σ_E의 protected, fixed-order, no-final-status는 실행에서 결코 유도하지 않는다. 전이 규칙 2(b = ∞)로만 얻고, 모든 유한 실제 실행의 판정된 범위 안 발생에 대해 certificate가 증명하는 것과 같은 safety 진술(`¬Bad_i`, `¬OK_i`, `¬NR_i`)을 말한다. `NOT_EVALUATED` 조기 반환은 세 진술이 모두 허용하고, `¬NR_i`는 "모든 발생이 `READY`"가 아니다.
 - **횟수.** 관측 횟수는 정확히 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"으로 쓴다. 결코 "timing-protected"라고 쓰지 않는다.
 - **progress.** σ_E progress는 영속성을 스스로 보이는 wait-for 사실(spec §4.13)이 있을 때만 `stall-witness(realized)`다. `deadlock-cycle`이거나, holder가 끝났거나 같은 lock을 잡으려다 스스로 막힌 `leaked-lock`(K-LOCKBAL)이어야 한다. 그 밖에는 `unknown(not_checked)`이고, 결코 `no-stall-within(b)`가 아니다.
 
@@ -1119,7 +1193,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 
 (spec §1.10; §5.8의 세 판단)
 
-- **결과 label**(caller 수준, safety 결과): `violation`(Allowed 지정) / `LOSS-UNDER-ORDER`(route·용량 계약 중 caller 수준 Allowed가 미지정이고 must-deliver `appreq`가 없는 것) / `not-ready-unjudged`(그 밖 계약 중 Allowed가 미지정인 것, 그리고 must-deliver `appreq`가 `caller` 항목과 충돌해 Allowed가 미지정인 route·용량 계약, §5.8 `appreq` 단계 3). 어떤 칸의 class도 not-ready 결과를 보이지 않는 동안은 `NONE`이다.
+- **결과 label**(caller 수준, safety 결과): `violation`(Allowed 지정. 준비 상태 위반) / `LOSS-UNDER-ORDER`(route·용량 준비 상태 명세 중 caller 수준 Allowed가 미지정이고 must-deliver `appreq`가 없는 것) / `not-ready-unjudged`(그 밖 준비 상태 명세 중 Allowed가 미지정인 것, 그리고 must-deliver `appreq`가 `caller` 항목과 충돌해 Allowed가 미지정인 route·용량 준비 상태 명세, §5.8 `appreq` 단계 3). 어떤 칸의 class도 not-ready 결과를 보이지 않는 동안은 `NONE`이다.
   - label은 Allowed에 따른 뜻을 말하므로 판정마다 한 필드다. 칸은 class가 fixed-order, schedule-dependent, ordinal-split일 때만 label을 보인다.
   - `fixed-order`는 decision route가 있을 때만 label을 지닌다. App. A.6은 `not-ready-unjudged`의 fixed-order다. decision route 없는 `¬OK_i`는 `unknown(no_decision_route)`이고 label을 보이지 않는다.
   - label `liveness`는 progress 결과에 속한다.
@@ -1128,16 +1202,17 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
   - `fw_conf`, **(σ, M) 칸마다** ∈ {`as-documented`, `deviates`, `unknown`}: 칸의 근거에서 결과 code(O4(a))와 문서화된 부수 효과(spec §3.9의 counter, trace의 event 시도와 그 결과)가 문서대로 일어났는가. M_api는 API 계약 적합을 가정하므로 M_api 칸은 `unknown`이다. `as-documented`와 `deviates`는 M_impl 칸과 실행에서 온다. 실행마다의 적합성은 conformance 기록(spec §4.11)에 있다. 어긋남은 거기에 적고, 아무것도 정지시키지 않는다.
   - `documented-not-error` 결과도 caller 수준에서 LOSS-UNDER-ORDER나 `violation`을 지닐 수 있다. `violation`이 `as-documented`로 일어난 `documented-result` 위에 설 수도 있다(R2).
 - **consequence**(관측된 결과). Allowed와 상관없이 모든 not-ready 발생에 대해, trace나 모형 연속에서 기록한다. run oracle이 주는 관측 count(counter 변화, event 시도와 그 결과)를 칸의 `runs` 참조로 함께 남긴다. 어휘: crash나 정의되지 않은 행동; deadlock(VIOLATING 발생의 결과로서. instance 자신의 영원한 대기는 progress 결과다); process abort; panic; app error exit; app zombie; core service task 없음; status 무시와 조용한 효과 손실; event 뒤 계속; 늦었지만 회복; message 손실(route 없음, queue 가득, MsgLim 도달); event 거절(EVS가 거절한 event 시도, 예: `ILLEGAL_APP_ID`).
-- **sub-label**: `portability-hazard`, `implementation-defect-candidate`, `portability-hazard-evidence`(§3.5); `assumed-visibility`(spec §3.14); `A-ZT`(σ_R1 지연 의미); `tb-undeclared`(§7.1). sub-label은 bitset(`sublabels`, spec §2.3)이다. 다음 두 **rendered label**은 sub-label이 아니고 bitset에 넣지 않는다(§10.7).
+- **sub-label**: `portability-hazard`, `implementation-defect-candidate`, `portability-hazard-evidence`(§3.5); `assumed-visibility`(spec §3.14); `A-ZT`(σ_R1 지연 의미); `tb-undeclared`(§7.1). sub-label은 bitset(`sublabels`, spec §2.3)이다. 다음 세 **rendered label**은 sub-label이 아니고 bitset에 넣지 않는다(§10.7).
   - `trusted:<n>`(연속성을 위해 둔다): certificate 신뢰 장부의 (iii)부에서 종류가 `DECLARED_TRUSTED`(`KZ_TRUST.kind`, spec §2.3)인 항목 수다.
   - `ledger:<i>/<ii>/<iii>/<iv>`: 장부 네 부분의 크기다. `TRUST_LEDGERS` record의 `n_rechecked`, `n_extracted`, `n_trusted`, `n_refutable`에서 읽는다.
   - `n_trusted`는 (iii)부 전체의 크기다. 그래서 `ledger:`의 세 번째 값은 `trusted:<n>`의 n과 다를 수 있다. (iii)부에는 `DECLARED_TRUSTED` 항목 말고도 Φ 항목, 가정, lemma 의무, 도구 기반이 들어간다.
+  - `lemmas:<p>/<d>/<u>`: 신뢰 장부 (iii)부의 `LEMMA` 항목 가운데 증명 상태가 `proved`, `depends-on-stated-assumption`, `unproved`인 것의 개수다(§12.3). 장부의 `KZ_TRUST` 항목에서 센다.
 - **판정 기록**(`kz_verdict`와 (σ, M)별 `kz_verdict_cell`, spec §2.3)에는 다음이 들어간다.
   - instance id; provider와 scope.
-  - 칸마다: class와 refinement, 그 근거인 safety 기록(진술 `¬Bad_i`, decision route를 가진 `¬OK_i`, `¬NR_i`와 각 경로, ordinal을 가진 witness); 경계 참조(`BOUNDS` 절의 항목, 경계마다 하나: 경계와 정책 상태(exploration view면 h 포함), 경계별 class(`contested` 포함), reach와 progress 값, safety 경로와 decision route, refinement, progress flag, 이유와 harm, ordinal을 가진 bad·good·stall witness, 그 경계의 progress 사슬); reach; `fw_conf`; realization과 naturalness 집합, pool key를 가진 `n of N`; progress 결과(값, stall 절 집합, kind, qualifier, wait-for root 집합, 이유, harm, 실현 방식, 경계, stall witness, progress 사슬, flag `timeout-masked-liveness`와 `tml-root`); 신뢰 장부 참조.
-  - shape; caller 수준의 결과 label과 harm; framework 수준의 `fw_doc`; 관측된 consequence와 관측 count 참조; 위반 사슬; unknown 이유.
+  - 칸마다: class와 refinement, 그 근거인 safety 기록(진술 `¬Bad_i`, decision route를 가진 `¬OK_i`, `¬NR_i`와 각 경로, ordinal을 가진 witness); 경계 참조(`BOUNDS` 절의 항목, 경계마다 하나: 경계와 정책 상태(exploration view면 h 포함), 경계별 class(`contested` 포함), reach와 progress 값, safety 경로와 decision route, refinement, progress flag, 이유와 harm, ordinal을 가진 bad·good·stall witness, 그 경계의 progress 사슬); reach; `fw_conf`; realization과 naturalness 집합, pool key를 가진 `n of N`; progress 결과(값, stall 절 집합, kind, qualifier, wait-for root 집합, 이유, harm, 실현 방식, 경계, stall witness, progress 사슬, flag `timeout-masked-liveness`와 `tml-root`); 신뢰 장부 참조; 증명 상태(`proof_status`): 칸의 진술이 쓰는, 칸의 장부 (iii)부 `LEMMA` 항목 중 가장 약한 상태이고 그런 항목이 없으면 `NA`(§12.3).
+  - shape; caller 수준의 결과 label과 harm; framework 수준의 `fw_doc`; 관측된 consequence와 관측 count 참조; 준비 상태 위반 사슬; unknown 이유.
   - B, Φ, tool hash.
-  - certificate(O10이 이 Φ 판에 contested 표시를 했으면 그 표시 포함), witness, 실행에 대한 typed 참조.
+  - certificate(O10이 이 Φ 판에 contested 표시를 했으면 그 표시 포함. certificate record `KZ_CERT_FIELDS`가 certificate 자신의 `proof_status`도 지닌다), witness, 실행에 대한 typed 참조.
 - **"safe" 필드는 결코 없고, "live"나 "deadlock-free"를 뜻하는 필드도 없다**(spec §1.10; 그림 [D6](diagrams/D6_verdict_overview.svg)의 불변식).
 
 ---
@@ -1157,7 +1232,7 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 | A1 | 규칙 타당성: Φ의 규칙, effect, binding이 고정 판에 대해 옳다 | 틀린 edge·effect / 인용, O3·O4·O7이 반박, certificate가 쓴 규칙 나열 |
 | A2 | binding 정확성: Clang site와 AST pattern이 gcc 바이너리 명령에 대응한다 | 틀린 probe / anchor audit, DWARF compile unit binding |
 | A3 | closure: actor는 B가 고른 startup script, 생성된 object table, `CreateChildTask` site, OSAL timebase/timer와 내부 thread, PSP thread, 환경 입력에서만 온다. 남은 간접 호출은 `unknown_effect` | actor 누락 / closure boot(O5); `unknown_effect` → T-SPAWN ∅, writer 집합 `DISABLED` |
-| A4 | 메모리 모형: `-O0` x86-64 TSO에서 event 단위 순차 일관성. ad hoc flag 동기화는 assumed-visibility edge | weak memory 효과 누락 / `assumed` tag와 sub-label |
+| A4 | 메모리 모형: `-O0` x86-64 TSO에서 event 단위 순차 일관성. ad hoc flag 동기화는 assumed-visibility edge | weak memory 효과 누락 / `assumed` tag와, 이 가정을 쓰는 모든 결과의 sub-label `assumed-visibility`. D10(2026-10-15 결정): 그 범위 밖의 보장은 하지 않고, 가정이 성립하는지 불분명한 곳은 `unknown` |
 | A5 | shape에는 API 수준 edge만. OSAL 내부 lock은 M_impl에서만 interleaving 제약 | ablation 11 |
 | A6 | 계획한 site의 관측 완전성, 손실 회계 포함 | event 누락 / `tseq` 틈, `unknown(loss)` |
 | A7-impl | Φ_L-1 의미가 M_impl 경로에서 kernel, libc, OSAL POSIX를 LP 단위로 과대 근사한다(`mq`의 같은 우선순위 FIFO는 UNVERIFIED) | prefix containment 실패 / 실제 OSAL litmus suite, O4 |
@@ -1182,31 +1257,44 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 
 ### 12.3 Lemma
 
-수준 M의 모형은 actor별 certificate view skeleton 자동자와 수준 M의 Φ 의미를 합친 것이고, §7.1의 전이 체계 `TS(B,σ,M)`로 본다. 아래 safety lemma는 모두 유한 실행 `Pref(B,σ_U,M)` 위에서 말한다. 증명은 유한 실행 안의 위치에 대한 귀납이라 maximal성도 공정성도 쓰지 않는다. spec §6.2는 lemma와 **증명 스케치**만 준다.
+수준 M의 모형은 actor별 certificate view skeleton 자동자와 수준 M의 Φ 의미를 합친 것이고, §7.1의 전이 체계 `TS(B,σ,M)`로 본다. 아래 safety lemma는 모두 유한 실행 `Pref(B,σ_U,M)` 위에서 말한다. 증명은 유한 실행 안의 위치에 대한 귀납이라 maximal성도 공정성도 쓰지 않는다. spec §6.2는 lemma와 **증명 스케치**를 준다. 스케치가 완전한 증명인 것은 아래 표에서 `proved`로 표시한 것뿐이다.
 
-| lemma | 진술 (쉬운 말) | 상태 |
+**증명 상태** [D] (PI 결정 D20의 추가 완료 조건, 2026-10-15; spec §6.2가 한 곳에서 정의한다). spec §6.2와 §6.3의 모든 lemma와 보장은 세 값 중 하나를 지닌다. 강한 쪽부터 적는다.
+- `proved`(증명 완료): spec이 완전한 증명을 담는다. §1의 정의와, 그 자신이 `proved`인 lemma만 쓴다. §6.1의 가정도, 추출된 사실도, 쓰이지 않은 단계도 없다.
+- `depends-on-stated-assumption`(명시한 가정에 의존): 논증이 §6.1이 id로 적은 가정(`A-…` 항목이나 `T-JACM`) 아래에서 그 진술에 대해 완전하다. 쓰는 다른 lemma는 `proved`이거나 `depends-on-stated-assumption`이고, 표의 행이 가정을 적는다. 진술은 그 가정에 상대적으로만 성립한다. 가정은 관측으로 반박할 수 있고(신뢰 장부 (iv)부) 관측으로 증명되지 않는다.
+- `unproved`(미증명): 그 밖의 모든 것. 스케치에 주장만 있는 단계가 있거나, lemma가 의무, [I], "쓸 것"으로 표시되었거나, `unproved` lemma를 쓴다.
+
+여러 lemma를 쓰는 진술의 상태는 그중 가장 약한 것이다(**weakest link**). 구현에 대한 요구인 보장(G9, G10, G8의 재현 부분)은 정리가 아니다. 증명이 없으므로 `unproved`이고 표의 행이 말하는 시험으로 확인한다. 부분을 가진 lemma(L-CONT, L-TRANS, L-DEAD)는 부분마다 상태가 하나다.
+- **(PS1)** 상태는 spec 텍스트의 속성이다. 쓴 증명을 더하고 표를 같은 변경에서 고치는 편집만 상태를 올린다. 도구 실행, 통과한 시험, 통과한 obligation(O1–O10), 장부의 항목은 결코 올리지 않고, 틈을 찾는 검토는 내린다. 표의 상태는 이 개정의 작성자 분류이고 독립 검토는 아직 기록되지 않았다 [I]. V0-P(spec §9.3)가 검토를 기록하는 곳이다.
+- **(PS2)** 신뢰 장부나 spec §9.3이 의무로만 적은 lemma는 `unproved`다. 판정, 보고서, 장부 출력, README, 논문 문장은 lemma의 상태가 `proved`가 아니면 그 lemma를 "증명됨"이라, 그 lemma에 기댄 진술을 "검증됨"이나 "인증됨"이라 쓰지 않는다.
+- **(PS3)** 모든 certificate, certificate 기반 판정 칸, 신뢰 장부는 자기 진술의 증명 상태를 지닌다. 쓴 (iii)부 `LEMMA` 항목 중 가장 약한 것이다(`KZ_CERT.proof_status`, `KZ_VERDICT_CELL.proof_status`, `KZ_TRUST.proof`, spec §2.3). 보고서는 그것을 safety 진술 옆에 출력하고 `proved`가 아닌 lemma를 이름으로 적는다. 예: "fixed-order — ¬OK_i, deciding (certificate, b = ∞); lemma status: unproved (L-MB, L-ONCE, L-PWB, L-FO, L1)". "`kz proofcheck`가 받아들였다"에는 늘 "신뢰 기반에 상대적으로"와 이 상태가 따른다.
+- **(PS4)** `proved`는 lemma의 상태이고 판정의 상태가 아니다. lemma가 모두 `proved`인 certificate도 추출된 사실, skeleton, closure 목록, Φ, `libkz-core`, 장부의 가정에 상대적이다. 상태가 모델에 대한 진술을 바이너리에 대한 진술로 바꾸지는 않는다.
+
+아래 표의 마지막 열이 이 개정의 분류다. R2 첫 결과의 증명 상태표는 [../plan/proof_status_R2.md](../plan/proof_status_R2.md)에 있다.
+
+| lemma | 진술 (쉬운 말) | 증명 상태 (이 개정의 분류) |
 |---|---|---|
-| **L-MB** | 모든 유한 실행 ρ, 노드 `n`, ρ 안 `n`의 발생 `n_k`, `a ∈ MB(n)`에 대해, ρ에서 `n_k` 앞에 `a`의 발생이 있다. 발생에 조건을 건 진술이라 `n`이 일어나지 않는 유한 실행에 대해서는 말하지 않는다. 그래서 MB 사실로 만든 어떤 certificate도 progress를 확립할 수 없다. 귀납의 경우: 기저(∅), T-PO(`Sk^cert`에서는 실제 선행이 모두 skeleton 선행, A-SKEL), T-SPAWN(A3), T-OBS(L1, A-WS, 네 제거 규칙). lock은 기여하지 않는다 | 스케치 |
-| **L-ONCE** | `once(a)`, `a ∈ MB(b)`이면 유한 실행 위에서 `PWB(a, b)` | 스케치 |
-| **L-PWB** | FRONTIER 조건이면, `a`와 `b`의 발생을 담은 모든 유한 실행에서 `a`의 모든 발생이 `b`의 모든 발생보다 앞선다. once가 전제다 | 스케치 |
-| **L-SCOPE** | `SHUTDOWN_REQ ∈ MB(d)`이고 `d`의 발생이 사용 발생 `u_k`의 결정 event(특히 그 호출이나 결정 이전의 conjunct LP)보다 앞서면 `u_k`는 범위 밖이다. 결정 뒤의 conjunct LP는 scope에 영향이 없다. 첫 conjunct LP에서 정하는 scope는 두 conjunct LP 사이의 `d`에서 틀리고, 모든 conjunct LP 위에서 정하는 scope는 short-circuit하지 않는 코드에서 틀린다(litmus LP-SCOPE2). SCOPE를 쓰는 곳마다 신뢰 장부 (iii)부에 나열한다 | 스케치 (EXT-20261012 §4.1이 다시 씀) |
-| **L-DERIVE** | `derives(arg, loc, c)`이면 API가 검사하는 값은 `c`에서의 `loc` 값과 같다 | 스케치 |
-| **L-FO** | FIXED_ORDER certificate가 있으면, 모든 유한 실행에서 결정된 범위 안 발생 `u_k`는 `ℓ_{j,k}`가 결정 이전에 있을 때 거기서 `P_j`가 거짓이다. 아니면 다른 거짓 conjunct로 먼저 결정되었거나 `NOT_EVALUATED`다. badness 조건과 함께 어떤 연장도 `u_k`를 TOLERATED로 만들지 않는다. 즉 `¬OK_i(σ_U,M,∞)`. 결정에 있는 REJECT event가 decision route다. 사용의 지배는 필요 없다. 어떤 발생이 도달한다는 것, 모든 실행이 PENDING 대신 결정에 이른다는 것은 주장하지 않는다 | 스케치 |
-| **L-PR** | PROTECTED certificate가 있으면, 모든 유한 실행에서 범위 안 발생의 conjunct `P_j`는 그 LP가 결정 이전에 있을 때 성립한다. 그래서 결정된 범위 안 발생은 모두 `READY`나 `NOT_EVALUATED`(`¬NR_i`)이고 `¬Bad_i`가 성립한다. 사용에 닿지 않는 유한 실행, stall 상태, reach, maximal 실행에 대해서는 주장하지 않는다 | 스케치 |
-| **L-CONT** | prefix containment(§7.5). (a) `Pref(σ_U∞,M)`은 시간 기반 전이 없는 `Pref(σ_U,M)`과 같다. (b) `π(Pref(σ_R1,M)) ⊆ Pref(σ_U,M)`. (b′) **L-CONE-R1**: bounded σ_R1 모형의 cone이 같은 h에서 σ_U 모형의 cone을 담으면, (b)의 지운 단계와 σ_U cone 밖 actor의 전이를 지운 σ_R1 실행은 σ_U 모형의 유한 실행이다. (c) B의 유한 실제 실행의 LP 단위 투영은 `Pref(σ_U,M_impl)`에 든다. 끝 상태에 대해서는 말하지 않는다. (d) 주장하지 않음: `Max(σ_U∞) ⊆ Max(σ_U)`는 거짓이다(LP-TW); 실제 실행은 (σ_U, M_impl)에서 maximal이 아니다; σ_R1 maximal containment는 증명하지 않고 쓰지 않는다. (e) σ_E 대 M_api는 주장하지 않는다. 따름정리: 시간 기반 전이가 없는 σ_U 유한 실행은 σ_U∞ 유한 실행이고, σ_U 실행의 첫 시간 기반 전이 직전 상태는 σ_U∞에서 도달 가능하다 | 스케치. (b)는 [I], (b′)는 [I] 의무 |
-| **L-REACH-CONE** | 닫힌 cone C의 actor들의 전이에 시간 기반 전이가 없는 σ_U 유한 실행이 있으면, C의 actor로 투영이 같은 σ_U∞ 유한 실행이 있다. 실행 기반 σ_U∞ reach가 쓴다 | [I], 의무 |
-| **L-MAPI-CONE** | 실제 실행에서 C의 actor들의 OSAL 호출이 모두 M_api가 허락하는 결과를 받았고 C의 actor에 M_impl 전용 행동이 없었으면, C의 actor로 투영이 같은 `Pref(σ_U,M_api)` 실행이 있다. 실행 기반 M_api reach와 M_api 실행 witness가 쓴다 | [I], 의무 |
-| **L-STATUS** | 범위 안 발생의 status와 scope는 ρ의 effect event에만 달려 있다. 그래서 (a) π 아래 불변이고, σ′로 읽든 σ_U로 읽든 같다. (b) `READY`, `TOLERATED`, `VIOLATING`, `NOT_READY_UNJUDGED`와 결정된 발생의 scope는 모든 연장에서 최종이다. (c) bad 유한 실행의 모든 연장은 bad다 | 스케치 |
-| **L-MON** | instance monitor는 결정적이고 전이를 막지 않는다. (a) 곱 실행은 `Pref(B,σ,M)`에 정확히 투영되고, ρ 뒤의 monitor 상태는 ρ의 함수다. (b) actor는 곱 상태에서 죽은 것과 밑 상태에서 죽은 것이 같다. (c) 곱 상태와 전이로 결정된 발생의 status와 scope는 그 둘의 함수다. 그래서 `Bad_i(o)`, `OK_i(o)`, `NR_i`는 곱 그래프 edge의 성질이고, stall 판정은 곱 상태의 함수다 | 스케치 |
-| **L-TRANS** | (1a) σ_U의 `¬Bad_i`, `¬OK_i`, `¬NR_i`는 σ_U∞(같은 M, b)와 σ_R1(b = ∞, 또는 유한 b에서 L-CONE-R1 아래)에서 같은 진술로 성립한다. (2) b = ∞, M_impl이면 L-CONT (c)로 σ_E 진술이 된다. M_api는 L-MLEVEL이나 같은 M_impl 결과가 필요하다. (3) σ′의 witness, M_impl 실제 실행, L-MLEVEL이나 prefix 적합성 검사를 거친 M_api 실제 실행은 같은 M의 σ_U witness다. (부정) 존재 주장인 `Reach_i`, `OK_i`, `Bad_i`, witness, `tolerated`, stall 상태는 아래로 옮기지 않는다. 전이를 지우면 도달하는 유한 실행이 사라지고 actor가 죽을 수 있다(LP-TW). stall 상태는 위로도 옮기지 않는다. 전이를 더하면 죽은 actor가 살아날 수 있다. 예외는 L-DEAD (c), (d)뿐이다. 빈도는 σ_E 위의 측도라 σ_U가 정하지 않는다 | 스케치 |
-| **L-MLEVEL** | cone과 certificate에 M_impl-relevant 연산이 없으면 `Pref(B,σ,M_api)`와 `Pref(B,σ,M_impl)`의 cone 투영이 같다. 전이 규칙 2(i), M_api의 규칙 3, M_api reach, 보장 G2의 M_api 갈래가 이 prefix 꼴을 쓴다 | **[I], 논문에서 증명할 의무.** 그 전까지 전이 규칙 2(i)에 sub-label `mlevel-lemma` |
-| **L-REF** | 같은 M, b에서 timeout-dependent는 `class(σ_U) = schedule-dependent ∧ ¬Bad_i(σ_U∞) ∧ Reach_i(σ_U∞)`; timeout-rescued는 `OK_i(σ_U) ∧ ¬OK_i(σ_U∞)`; timeout-masked-liveness는 σ_U∞에서 도달 가능한 어떤 곱 상태가 σ_U∞에서 hang 상태이고 σ_U에서는 아니라는 것; `tml-root`는 §7.4. 각각 σ별 질문(spec §4.10 item 7), progress 사슬, 공유 곱 상태 공간 위의 죽음·도달성 판정의 Boolean 조합이다. 그래서 σ별 결과가 있으면 잘 정의되고 `exh`가 b 안에서 정한다. maximal 실행, 공정성, quiescence를 쓰지 않는다. 정해지지 않은 죽음 판정은 TML에 `unknown(bound)`나 `unknown(unmodelled)`를 준다. 마지막 시도가 M에서 전이 하나인 경우 v1의 틈이 닫힌다. 여러 전이인 경우는 잘못 정하지 않고 정하지 않은 채 둔다. explorer 없이는 어느 것도 확립되지 않는다 | 스케치 |
-| **L-DPOR** | `exh`는 b 안에서 도달 가능한 모든 **곱 상태**(모형 상태와 monitor 상태)를 방문하고 거기서 허락된 모든 edge를 본다. `Q_reach`, `Q_bad`, `Q_ok`(ordinal별 포함)는 결정하는 edge의 성질이라 b 안에서 정확히 정해진다. `Q_stall`도 censored·좌초 actor와 그 closure의 판정을 빼면 정확하다. 모형 상태만의 visited set으로는 모자란다. `dpor`는 JACM 2017 정리가 이 전이 체계 class에 성립하고, 쓰는 monitor 성질이 확장된 의존(SHUTDOWN_REQ LP 대 instance의 호출·conjunct LP; 발생의 결정 event 대 사용 actor가 아닌 감시 actor와 그 spawn 사슬의 전이; 기본 scope 발생에 대해 TEARDOWN LP 대 감시 actor의 전이, spec §4.10 item 3) 아래 불변일 때, bad·good이 있는 동치류를 모두 대표한다. `dpor`는 stall 상태에 대해 주장하지 않는다 | `exh`: 외부 정리 불필요. `dpor`: **unverified**(T-JACM 상태 P, PI 결정 P-PAPERS). 확장된 의존 아래 불변성은 의무 [I]. "동치류마다 실행 하나"는 주장하지 않는다 |
-| **L-DEAD** | (a) 유한 전이 체계에서 i에 대한 actor의 죽음은, i에서 제외된 상태를 sink로 한 도달 가능 곱 그래프 위의 역방향 도달성 하나로 정한다. `terminal-pending`(stop 입력 없는 그래프에서 process 끝의 `AG EF`)도 하나로 정한다. 그래서 stall 상태는 결정 가능하다. bounded 모형에서 좌초하거나 잠재적으로 허락되는 actor의 판정은 정해지지 않는다. (b) 죽음은 전이 체계에 상대적이다. 전이를 더하면 죽은 actor가 살아날 수 있고, 빼면 죽을 수 있다(LP-TW). (c) **예외, deadlock 순환**: 죽은 actor들이 holder만 풀 수 있는 object(mutex, OSAL type lock)를 timeout 없이 잡으려고 다음 actor를 기다리는 순환을 이루고, witness actor가 순환에 속하거나 그런 대기의 사슬로 순환 구성원을 기다리면, 어느 σ의 어떤 전이도 그 object를 풀지 못한다. 그 유한 실행이 허락되는 모든 σ에서 stall 상태이고, qualifier만 σ마다 다시 계산한다. (d) **예외, 누수된 lock**: witness actor가 holder만 푸는 비재귀 object를 timeout 없이 기다리고, 그 holder가 object를 잡은 API에서 돌아왔으며, 끝났거나 먼저 다시 잡지 않고 풀 `Sk^cert` 경로가 없으면(K-LOCKBAL), 어느 σ에서도 풀리지 않는다 | [D] (EXT-20261012 §4.1), 스케치 |
-| **L1** | 전제(body가 counter·예산 밖의 관련 위치를 바꾸지 않음; test 읽기가 한 lock의 한 critical section 안이거나 원자적 읽기 하나)를 만족하는 poll loop의 조건 탈출은 test의 원자적 읽기 지점의 `await(Pred_code)` 성공에, 예산 탈출은 timeout 전이에 대응한다. σ_U∞에서는 요약의 timeout과 요약하지 않은 loop의 예산 탈출이 모두 시간 기반 전이로 지워진다. 그래서 요약은 loop의 관련 event 위의 σ_U∞ 유한 실행을 바꾸지 않는다(관련 상태를 바꾸지 않는 실패 test 읽기는 stuttering) [I]. **죽음은 바꾼다.** 요약한 poller는 `Pred_code`가 결코 참이 될 수 없는 상태에서 죽고, 요약하지 않은 것은 거기서 좌초한다. 그래서 의무에는, 요약이 stall을 지어내지 않고 정해지지 않은 판정을 정해진 것으로 바꾼다는 것이 들어간다. `CFE_ES_MainTaskSyncDelay`(`cfe_es_start.c:860–918`)는 두 M에서 전제를 만족한다(읽기가 모두 ES lock critical section 하나 안, `:878–888`). L1을 끄면 그것에 기대는 progress 결과는 `unknown(unmodelled)`다 | 스케치. `kz proofcheck`는 추출기가 낸 직렬화된 exit tree에서 predicate를 다시 유도한다. 그 tree는 추출된 사실이다(신뢰 장부 (ii)부). 전체 증명은 F1 전 |
-| **L2, L3** | **L2**: lock ℓ의 critical section은 (i) ℓ이 cone object가 아니고 다른 cone actor가 ℓ을 잡지 않으며, (ii) body가 cone 위치·object를 건드리지 않고 막는 연산이 없을 때 없앨 수 있다. 자기 acquire·release는 ℓ을 건드리는 것으로 센다. 그러면 σ_U에서 cone의 도달 상태와 결과도, cone의 stall 상태도 바뀌지 않는다 [I]. (ii)만으로는 모자란다. LP-DL에서 τ_B의 안쪽 `m1` section은 body가 비어 있는데, 그것을 없애면 lock 순서 순환과 deadlock이 사라진다. 조건 (i)이 그 section을 남긴다. **L3**: 조건(오른쪽 mover acquire, 왼쪽 mover release, 보호된 접근은 양쪽 mover, non-mover 많아야 하나, 모든 경로에서 release, 중첩 blocking acquire 없음)을 만족하는 critical section의 원자 블록 축약. stall 상태를 보존하는지는 L3 의무의 일부다 | 증명 전까지 **가정**. instance마다 끌 수 있고 ablation. 축약 정리 인용은 open literature check |
-| **L-PRED** | `predicted` witness는 A-COMM을 통과한 Pred(π)의 linearization이고 A4, A7, Φ primitive 의미 아래 실현 가능하다(maximal causal models RV 2012; RVPredict PLDI 2014 [V-abs]). `predicted-extrapolated` witness는 외삽한 loop에 대해 A-SKEL에 상대적이다. `Sk^cert`에서 **horizon completion**으로 완성한 witness도 그렇다. **예측된 not-ready 근거**(예측 prefix의 `PENDING` 발생)는 witness가 아니고 어떤 class도 뒷받침하지 않는다 | 스케치 |
-| **L-LOOP** | (B, Φ, tool)을 고정하면 feedback loop는 끝난다 | 스케치 |
+| **L-MB** | 모든 유한 실행 ρ, 노드 `n`, ρ 안 `n`의 발생 `n_k`, `a ∈ MB(n)`에 대해, ρ에서 `n_k` 앞에 `a`의 발생이 있다. 발생에 조건을 건 진술이라 `n`이 일어나지 않는 유한 실행에 대해서는 말하지 않는다. 그래서 MB 사실로 만든 어떤 certificate도 progress를 확립할 수 없다. 귀납의 경우: 기저(∅), T-PO(`Sk^cert`에서는 실제 선행이 모두 skeleton 선행, A-SKEL), T-SPAWN(A3), T-OBS(L1, A-WS, 네 제거 규칙). lock은 기여하지 않는다 | `unproved`. 스케치만 있다. T-OBS 경우가 쓰는 PWB 사실이 같은 MB에서 도출되는데 그 공동 귀납("앞선 발생에서의 귀납 가정으로 정당화")이 주장만 되고 쓰이지 않았다. L1이 `unproved`이고 falsifier의 지배 사실은 추출된 사실이다. 공동 귀납과 L1을 쓰면 오를 수 있다 |
+| **L-ONCE** | `once(a)`, `a ∈ MB(b)`이면 유한 실행 위에서 `PWB(a, b)` | `unproved`. L-MB를 쓴다 |
+| **L-PWB** | FRONTIER 조건이면, `a`와 `b`의 발생을 담은 모든 유한 실행에서 `a`의 모든 발생이 `b`의 모든 발생보다 앞선다. once가 전제다 | `unproved`. L-MB를 쓰고, 경로 논증 `m →* a`는 A-SKEL에서 주장만 한다 |
+| **L-SCOPE** | `SHUTDOWN_REQ ∈ MB(d)`이고 `d`의 발생이 사용 발생 `u_k`의 결정 event(특히 그 호출이나 결정 이전의 conjunct LP)보다 앞서면 `u_k`는 범위 밖이다. 결정 뒤의 conjunct LP는 scope에 영향이 없다. 첫 conjunct LP에서 정하는 scope는 두 conjunct LP 사이의 `d`에서 틀리고, 모든 conjunct LP 위에서 정하는 scope는 short-circuit하지 않는 코드에서 틀린다(litmus LP-SCOPE2). SCOPE를 쓰는 곳마다 신뢰 장부 (iii)부에 나열한다 | `unproved`. L-MB를 쓴다 (EXT-20261012 §4.1이 다시 씀) |
+| **L-DERIVE** | `derives(arg, loc, c)`이면 API가 검사하는 값은 `c`에서의 `loc` 값과 같다 | `depends-on-stated-assumption`: A-EXTRACT, A-TYPE, A2. 추출된 복사 사슬에 대해 논증은 완전하다. 사슬이 gcc 바이너리에 충실하다는 것은 가정이다 |
+| **L-FO** | FIXED_ORDER certificate가 있으면, 모든 유한 실행에서 결정된 범위 안 발생 `u_k`는 `ℓ_{j,k}`가 결정 이전에 있을 때 거기서 `P_j`가 거짓이다. 아니면 다른 거짓 conjunct로 먼저 결정되었거나 `NOT_EVALUATED`다. badness 조건과 함께 어떤 연장도 `u_k`를 TOLERATED로 만들지 않는다. 즉 `¬OK_i(σ_U,M,∞)`. 결정에 있는 REJECT event가 decision route다. 사용의 지배는 필요 없다. 어떤 발생이 도달한다는 것, 모든 실행이 PENDING 대신 결정에 이른다는 것은 주장하지 않는다 | `unproved`. `unproved` lemma(L-PWB, L-ONCE, L-SCOPE, L-STATUS)를 쓴다 |
+| **L-PR** | PROTECTED certificate가 있으면, 모든 유한 실행에서 범위 안 발생의 conjunct `P_j`는 그 LP가 결정 이전에 있을 때 성립한다. 그래서 결정된 범위 안 발생은 모두 `READY`나 `NOT_EVALUATED`(`¬NR_i`)이고 `¬Bad_i`가 성립한다. 사용에 닿지 않는 유한 실행, stall 상태, reach, maximal 실행에 대해서는 주장하지 않는다 | `unproved`. `unproved` lemma(L-MB, L-PWB, L-ONCE, L-SCOPE)를 쓴다 |
+| **L-CONT** | prefix containment(§7.5). (a) `Pref(σ_U∞,M)`은 시간 기반 전이 없는 `Pref(σ_U,M)`과 같다. (b) `π(Pref(σ_R1,M)) ⊆ Pref(σ_U,M)`. (b′) **L-CONE-R1**: bounded σ_R1 모형의 cone이 같은 h에서 σ_U 모형의 cone을 담으면, (b)의 지운 단계와 σ_U cone 밖 actor의 전이를 지운 σ_R1 실행은 σ_U 모형의 유한 실행이다. (c) B의 유한 실제 실행의 LP 단위 투영은 `Pref(σ_U,M_impl)`에 든다. 끝 상태에 대해서는 말하지 않는다. (d) 주장하지 않음: `Max(σ_U∞) ⊆ Max(σ_U)`는 거짓이다(LP-TW); 실제 실행은 (σ_U, M_impl)에서 maximal이 아니다; σ_R1 maximal containment는 증명하지 않고 쓰지 않는다. (e) σ_E 대 M_api는 주장하지 않는다. 따름정리: 시간 기반 전이가 없는 σ_U 유한 실행은 σ_U∞ 유한 실행이고, σ_U 실행의 첫 시간 기반 전이 직전 상태는 σ_U∞에서 도달 가능하다 | 부분마다 하나다. (a) `proved`: 스케치가 완전한 증명이다(같은 상태와 후속 함수, `en_σU∞`는 `en_σU`에서 TB를 뺀 것, 길이에 대한 귀납). (b) `unproved` [I]: σ_R1의 단계 종류별 경우 분석이 쓰이지 않았다. (b′) `unproved` [I] 의무. (c) `depends-on-stated-assumption`: A7-impl, A7-api, A-SKEL, A3, A4, A9. 단계 모의가 "길이에 대한 귀납"이라고만 있고 쓰이지 않았다. 무게는 가정에 있고 실행의 끝 상태에 대해서는 말하지 않는다. V0-P가 틈을 찾으면 `unproved`로 내려간다. (d), (e)는 주장하지 않는 진술이라 상태가 없다. 따름정리는 `proved`(L-CONT (a)에서) |
+| **L-REACH-CONE** | 닫힌 cone C의 actor들의 전이에 시간 기반 전이가 없는 σ_U 유한 실행이 있으면, C의 actor로 투영이 같은 σ_U∞ 유한 실행이 있다. 실행 기반 σ_U∞ reach가 쓴다 | `unproved` [I] 의무 |
+| **L-MAPI-CONE** | 실제 실행에서 C의 actor들의 OSAL 호출이 모두 M_api가 허락하는 결과를 받았고 C의 actor에 M_impl 전용 행동이 없었으면, C의 actor로 투영이 같은 `Pref(σ_U,M_api)` 실행이 있다. 실행 기반 M_api reach와 M_api 실행 witness가 쓴다 | `unproved` [I] 의무 |
+| **L-STATUS** | 범위 안 발생의 status와 scope는 ρ의 effect event에만 달려 있다. 그래서 (a) π 아래 불변이고, σ′로 읽든 σ_U로 읽든 같다. (b) `READY`, `TOLERATED`, `VIOLATING`, `NOT_READY_UNJUDGED`와 결정된 발생의 scope는 모든 연장에서 최종이다. (c) bad 유한 실행의 모든 연장은 bad다 | `unproved`. 정의에 가깝지만, 여섯 horizon monitor가 하나씩 최종적이고 ρ의 event만 읽는다는 확인을 쓰지 않았다. 그 확인을 쓰면 `proved`가 된다 |
+| **L-MON** | instance monitor는 결정적이고 전이를 막지 않는다. (a) 곱 실행은 `Pref(B,σ,M)`에 정확히 투영되고, ρ 뒤의 monitor 상태는 ρ의 함수다. (b) actor는 곱 상태에서 죽은 것과 밑 상태에서 죽은 것이 같다. (c) 곱 상태와 전이로 결정된 발생의 status와 scope는 그 둘의 함수다. 그래서 `Bad_i(o)`, `OK_i(o)`, `NR_i`는 곱 그래프 edge의 성질이고, stall 판정은 곱 상태의 함수다 | `unproved`. 열거한 monitor 상태가 모든 horizon 종류에 충분하다는 것(절 (c))이 주장만 되고 열거되지 않았다 |
+| **L-TRANS** | (1a) σ_U의 `¬Bad_i`, `¬OK_i`, `¬NR_i`는 σ_U∞(같은 M, b)와 σ_R1(b = ∞, 또는 유한 b에서 L-CONE-R1 아래)에서 같은 진술로 성립한다. (2) b = ∞, M_impl이면 L-CONT (c)로 σ_E 진술이 된다. M_api는 L-MLEVEL이나 같은 M_impl 결과가 필요하다. (3) σ′의 witness, M_impl 실제 실행, L-MLEVEL이나 prefix 적합성 검사를 거친 M_api 실제 실행은 같은 M의 σ_U witness다. (부정) 존재 주장인 `Reach_i`, `OK_i`, `Bad_i`, witness, `allowed-not-ready`, stall 상태는 아래로 옮기지 않는다. 전이를 지우면 도달하는 유한 실행이 사라지고 actor가 죽을 수 있다(LP-TW). stall 상태는 위로도 옮기지 않는다. 전이를 더하면 죽은 actor가 살아날 수 있다. 예외는 L-DEAD (c), (d)뿐이다. 빈도는 σ_E 위의 측도라 σ_U가 정하지 않는다 | `unproved`. `unproved` lemma를 쓴다. (1a)의 σ_U∞는 L-CONT (a)(`proved`)와 L-STATUS(`unproved`)에 기댄다 |
+| **L-MLEVEL** | cone과 certificate에 M_impl-relevant 연산이 없으면 `Pref(B,σ,M_api)`와 `Pref(B,σ,M_impl)`의 cone 투영이 같다. 전이 규칙 2(i), M_api의 규칙 3, M_api reach, 보장 G2의 M_api 갈래가 이 prefix 꼴을 쓴다 | `unproved` — **[I], 논문에서 증명할 의무.** 그 전까지 전이 규칙 2(i)에 sub-label `mlevel-lemma` |
+| **L-REF** | 같은 M, b에서 timeout-dependent는 `class(σ_U) = schedule-dependent ∧ ¬Bad_i(σ_U∞) ∧ Reach_i(σ_U∞)`; timeout-rescued는 `OK_i(σ_U) ∧ ¬OK_i(σ_U∞)`; timeout-masked-liveness는 σ_U∞에서 도달 가능한 어떤 곱 상태가 σ_U∞에서 hang 상태이고 σ_U에서는 아니라는 것; `tml-root`는 §7.4. 각각 σ별 질문(spec §4.10 item 7), progress 사슬, 공유 곱 상태 공간 위의 죽음·도달성 판정의 Boolean 조합이다. 그래서 σ별 결과가 있으면 잘 정의되고 `exh`가 b 안에서 정한다. maximal 실행, 공정성, quiescence를 쓰지 않는다. 정해지지 않은 죽음 판정은 TML에 `unknown(bound)`나 `unknown(unmodelled)`를 준다. 마지막 시도가 M에서 전이 하나인 경우 v1의 틈이 닫힌다. 여러 전이인 경우는 잘못 정하지 않고 정하지 않은 채 둔다. explorer 없이는 어느 것도 확립되지 않는다 | `unproved`. progress 사슬의 결정 가능성과 v1 틈이 닫힌다는 것이 주장만 되었다 |
+| **L-DPOR** | `exh`는 b 안에서 도달 가능한 모든 **곱 상태**(모형 상태와 monitor 상태)를 방문하고 거기서 허락된 모든 edge를 본다. `Q_reach`, `Q_bad`, `Q_ok`(ordinal별 포함)는 결정하는 edge의 성질이라 b 안에서 정확히 정해진다. `Q_stall`도 censored·좌초 actor와 그 closure의 판정을 빼면 정확하다. 모형 상태만의 visited set으로는 모자란다. `dpor`는 JACM 2017 정리가 이 전이 체계 class에 성립하고, 쓰는 monitor 성질이 확장된 의존(SHUTDOWN_REQ LP 대 instance의 호출·conjunct LP; 발생의 결정 event 대 사용 actor가 아닌 감시 actor와 그 spawn 사슬의 전이; 기본 scope 발생에 대해 TEARDOWN LP 대 감시 actor의 전이, spec §4.10 item 3) 아래 불변일 때, bad·good이 있는 동치류를 모두 대표한다. `dpor`는 stall 상태에 대해 주장하지 않는다 | `exh`: `unproved`. 유한 도달성은 표준이지만 censoring과 좌초 예외를 증명하지 않았다. 외부 정리는 필요 없다. `dpor`: `unproved`이고 **unverified**다(T-JACM 상태 P, PI 결정 P-PAPERS). 확장된 의존 아래 불변성은 의무 [I]. "동치류마다 실행 하나"는 주장하지 않는다 |
+| **L-DEAD** | (a) 유한 전이 체계에서 i에 대한 actor의 죽음은, i에서 제외된 상태를 sink로 한 도달 가능 곱 그래프 위의 역방향 도달성 하나로 정한다. `terminal-pending`(stop 입력 없는 그래프에서 process 끝의 `AG EF`)도 하나로 정한다. 그래서 stall 상태는 결정 가능하다. bounded 모형에서 좌초하거나 잠재적으로 허락되는 actor의 판정은 정해지지 않는다. (b) 죽음은 전이 체계에 상대적이다. 전이를 더하면 죽은 actor가 살아날 수 있고, 빼면 죽을 수 있다(LP-TW). (c) **예외, deadlock 순환**: 죽은 actor들이 holder만 풀 수 있는 object(mutex, OSAL type lock)를 timeout 없이 잡으려고 다음 actor를 기다리는 순환을 이루고, witness actor가 순환에 속하거나 그런 대기의 사슬로 순환 구성원을 기다리면, 어느 σ의 어떤 전이도 그 object를 풀지 못한다. 그 유한 실행이 허락되는 모든 σ에서 stall 상태이고, qualifier만 σ마다 다시 계산한다. (d) **예외, 누수된 lock**: witness actor가 holder만 푸는 비재귀 object를 timeout 없이 기다리고, 그 holder가 object를 잡은 API에서 돌아왔으며, 끝났거나 먼저 다시 잡지 않고 풀 `Sk^cert` 경로가 없으면(K-LOCKBAL), 어느 σ에서도 풀리지 않는다 | [D] (EXT-20261012 §4.1). 부분마다 하나다. (a) `unproved`: L-MON을 쓴다. (b) `proved`: 예제 LP-TW (a)가 명시적으로 보인다. W는 σ_U에서 죽지 않고(timeout이 허락된다) σ_U∞에서 죽는다(giver가 없다). (c), (d) `depends-on-stated-assumption`: A1, A7-impl(객체가 Φ가 선언한 대로 holder 해제형이고, 그 유한 실행이 σ에서 허락된다) |
+| **L1** | 전제(body가 counter·예산 밖의 관련 위치를 바꾸지 않음; test 읽기가 한 lock의 한 critical section 안이거나 원자적 읽기 하나)를 만족하는 poll loop의 조건 탈출은 test의 원자적 읽기 지점의 `await(Pred_code)` 성공에, 예산 탈출은 timeout 전이에 대응한다. σ_U∞에서는 요약의 timeout과 요약하지 않은 loop의 예산 탈출이 모두 시간 기반 전이로 지워진다. 그래서 요약은 loop의 관련 event 위의 σ_U∞ 유한 실행을 바꾸지 않는다(관련 상태를 바꾸지 않는 실패 test 읽기는 stuttering) [I]. **죽음은 바꾼다.** 요약한 poller는 `Pred_code`가 결코 참이 될 수 없는 상태에서 죽고, 요약하지 않은 것은 거기서 좌초한다. 그래서 의무에는, 요약이 stall을 지어내지 않고 정해지지 않은 판정을 정해진 것으로 바꾼다는 것이 들어간다. `CFE_ES_MainTaskSyncDelay`(`cfe_es_start.c:860–918`)는 두 M에서 전제를 만족한다(읽기가 모두 ES lock critical section 하나 안, `:878–888`). L1을 끄면 그것에 기대는 progress 결과는 `unknown(unmodelled)`다 | `unproved`. 전체 증명은 F1 전에 쓰도록 적혀 있다. 의무에는 요약한 poller가 요약하지 않은 poller가 좌초하는 바로 그 상태에서 죽는다는 것이 들어간다. `kz proofcheck`는 추출기가 낸 직렬화된 exit tree에서 predicate를 다시 유도한다. 그 tree는 추출된 사실이다(신뢰 장부 (ii)부) |
+| **L2, L3** | **L2**: lock ℓ의 critical section은 (i) ℓ이 cone object가 아니고 다른 cone actor가 ℓ을 잡지 않으며, (ii) body가 cone 위치·object를 건드리지 않고 막는 연산이 없을 때 없앨 수 있다. 자기 acquire·release는 ℓ을 건드리는 것으로 센다. 그러면 σ_U에서 cone의 도달 상태와 결과도, cone의 stall 상태도 바뀌지 않는다 [I]. (ii)만으로는 모자란다. LP-DL에서 τ_B의 안쪽 `m1` section은 body가 비어 있는데, 그것을 없애면 lock 순서 순환과 deadlock이 사라진다. 조건 (i)이 그 section을 남긴다. **L3**: 조건(오른쪽 mover acquire, 왼쪽 mover release, 보호된 접근은 양쪽 mover, non-mover 많아야 하나, 모든 경로에서 release, 중첩 blocking acquire 없음)을 만족하는 critical section의 원자 블록 축약. stall 상태를 보존하는지는 L3 의무의 일부다 | `unproved`. 증명은 F1 전에 쓰고 그 전까지 **가정**이다. instance마다 끌 수 있고 ablation한다. 축약 정리 인용은 open literature check다. 둘이 stall 상태를 보존하는지도 의무에 들어간다 |
+| **L-PRED** | `predicted` witness는 A-COMM을 통과한 Pred(π)의 linearization이고 A4, A7, Φ primitive 의미 아래 실현 가능하다(maximal causal models RV 2012; RVPredict PLDI 2014 [V-abs]). `predicted-extrapolated` witness는 외삽한 loop에 대해 A-SKEL에 상대적이다. `Sk^cert`에서 **horizon completion**으로 완성한 witness도 그렇다. **예측된 not-ready 근거**(예측 prefix의 `PENDING` 발생)는 witness가 아니고 어떤 class도 뒷받침하지 않는다 | `unproved`. 인용한 결과를 이 event 모형에 맞추는 것이 쓰이지 않았다 |
+| **L-LOOP** | (B, Φ, tool)을 고정하면 feedback loop는 끝난다 | `unproved`. 유한 lattice와 모든 비종단 반복의 엄격한 상승은 §4.14에서 주장만 한다 |
 
 `mover`는 다른 actor의 전이와 순서를 바꿔도 결과가 같은 전이다(오른쪽 mover는 뒤로, 왼쪽 mover는 앞으로 옮길 수 있다). **DPOR**(dynamic partial-order reduction)은 의존하는(dependent) transition이 뒤바뀔 수 있는 곳에만 backtracking 지점(다른 순서를 시도하려고 되돌아갈 지점)을 두어, 독립 연산의 순서만 다른 interleaving의 탐색을 줄이는 체계적 탐색 기법이다([R05 §2.2]; DPOR POPL 2005 [V-abs; 보장 문구 UNVERIFIED]; source/optimal DPOR POPL 2014 [V-abs]; JACM 확장 P). Kairos의 source-DPOR은 class(독립 연산의 순서만 다른 실행들의 동치류)당 실행 하나를 주장하지 않는다(spec §6.4 항목 9).
 
@@ -1214,33 +1302,36 @@ good 쪽 flag `timeout-rescued`(§7.4)는 protected, schedule-dependent, ordinal
 
 (spec §6.3)
 
+각 보장은 증명 상태를 지닌다(§12.3). 인용한 lemma 중 가장 약한 것이다. 상태가 `proved`가 아닌 보장은 lemma가 성립하면 명시한 가정에 상대적으로 무엇이 성립하는지를 말한 것이고, 증명된 정리가 아니다.
+
 | ID | 보장 |
 |---|---|
-| **보장 G1** census 과대 근사 | `Sk^cert`에서 도달 가능한 모든 계약 사용은 분석한 (σ, M)마다 class나 `unknown(reason)`을 가진 instance가 된다. `inactive`는 `Sk^cert`에서만 낸다. closure 밖 instance는 세어서 나열한다 |
-| **보장 G2** certificate 판정(M별, safety만) | realization `certificate`인 수준 M의 판정은 A 아래 `TS(B,σ_U,M)`의 모든 유한 실행에 대해 safety 진술을 말한다(L-FO / L-PR). fixed-order는 `¬OK_i`를 말한다. 이 진술은 certificate의 REJECT가 발생의 결정에 있을 때만 혼자 결정적이고, 아니면 칸은 bad witness가 생길 때까지 `unknown(no_decision_route)`를 보인다. protected는 `¬NR_i`(도달한 발생 중 not ready로 결정된 것이 없음, 그래서 `¬Bad_i`)를 말한다.<br>• **다른 σ**: L-CONT와 L-TRANS로 같은 M, b의 σ_U∞·σ_R1 유한 실행에서 같은 진술이 성립한다. 옮긴 `¬OK_i`가 decision route를 지키는지는 σ마다 정한다.<br>• **σ_E**: M = M_impl이거나, M = M_api이고 cone에 M_impl-relevant 연산이 없거나(L-MLEVEL) M_impl 판정이 같을 때만 B의 모든 유한 실제 실행에 대해 성립한다. 그 밖에는 OSAL API 계약에 대한 주장이다.<br>• **말하지 않는 것**: reach 축을 통하지 않은 reach, progress(영원한 대기, deadlock, 잃은 provider나 spawn, 닫히지 않는 horizon), maximal 실행.<br>• **검사**: 모든 certificate는 `kz proofcheck`를 통과했고, view(`Sk^cert`)와 M을 밝히며, 신뢰 장부(§10.7)를 지닌다. `kz_verdict`는 M별 결과를 저장한다 |
-| **보장 G3** 관측된 위반 | 기록된 trace에서 HB로 순서가 정해진 lifecycle LP로 계산한 어떤 conjunct LP의 상태가 Req 밖이고, 프로그램의 결과 code가 일치하며(A2, A6, O4), **그리고** 그 발생의 trace 안 status가 `VIOLATING`(horizon monitor가 trace에서 REJECT, 또는 `Allowed = none`)이거나 Allowed 미지정이면 `NOT_READY_UNJUDGED`일 때만 보고한다. `PENDING`, `TOLERATED`, `NOT_EVALUATED` 발생은 관측된 위반이 아니다. monitor가 OPEN인 채 trace가 끝나면 `unknown(horizon)`이다. 계약이 "옳은" 요구라는 주장은 하지 않고 출처를 보인다 |
-| **보장 G4** 예측 건전성 | `predicted` witness는 Pred(π)에 있고 A-COMM을 통과했다(L-PRED). `predicted-modelled`와 `predicted-extrapolated` witness(horizon completion으로 완성한 것 포함)는 모형 근거다. 예측된 not-ready 근거(예측 prefix의 `PENDING`)는 witness도 class도 아니다. 예측은 maximal하지 않다. **"예측 불가"는 결코 "protected"가 아니다** |
-| **보장 G5** 경계 안 모형 분류 | 닫힌 모형(spec §4.10 item 1의 닫힌 cone과 쓰는 reduction), σ, M, b 안에서 `exh`는 곱 상태와 그 결정 edge 위에서 safety 기록(그래서 `no-final-status`와 `ordinal-split`을 포함한 class), reach 값, refinement를 정확히 정한다. progress 결과도 정확히 정한다. 다만 censored actor나 그 closure의 죽음 판정은 `unknown(bound)`, 좌초 actor나 그 closure의 판정은 `unknown(unmodelled)`다(L-DPOR, L-DEAD, L-MON). safety 쪽 censoring이 보류한 진술은 `unknown(bound)`다. `dpor` class는 T-JACM이 성립하고 쓰는 monitor 성질이 확장된 의존(spec §4.10 item 3) 아래 불변일 때 성립하며, 그때까지 unverified로 표시한다. `dpor`는 progress 결과를 내지 않는다. 충실도 근거는 O1, O2, O6, O8이고, certificate와의 불일치는 O10으로 간다 |
-| **보장 G6** 확인 | `realized` 판정은 B의 gcc 바이너리에서 선언한 제어 아래 재현되었고, 계약 oracle 평가, naturalness label, perturbation ratio를 가진다. 실현 보고에는 recorder oracle에 상대적인 거짓 경보가 없다. σ_E `schedule-dependent`에는 서로 다른 두 실행에서 **같은 발생 ordinal**의 자연 bad·good witness가 필요하다. ordinal이 다르면 `ordinal-split(σ_E)`다 |
-| **보장 G7** PCT | PI 결정 D3로 F1 gate가 승인될 때만: F1 실행 하나가 깊이 d의 bug를 gate된 스케줄 지점에 대해 확률 `1/(n·k^(d−1))` 이상으로 찾는다. PCT는 스케줄을 무작위로 골라 깊이가 정해진 bug를 확률적으로 찾는 시험 기법이다(ASPLOS 2010 [V-abs; mechanism P]) |
-| **보장 G8** loop 종료와 재현성 | (B, Φ, tool)이 고정되면 loop는 끝나고, 저장된 산출물에서 다시 돌리면 판정 저장소가 byte 단위로 재현된다(예산이 결정적 work unit이므로) |
-| **보장 G9** 불일치 표면화 | 층 사이 모순(O1–O10, CC)은 모두 보고하고 관련 규칙·모형을 정지·강등한다. 정지는 그 Φ 판의 loop를 끝낸다. 조용히 해소하지 않는다 |
-| **보장 G10** 신뢰 사실의 투명성 | 모든 certificate와 모든 판정 칸은 신뢰 장부(§10.7)를 지닌다. 장부는 (i) `kz proofcheck`가 다시 확인한 추론 단계, (ii) 그 단계가 읽은 추출된 사실과 `facts.kz`·`skel.kz`·`anchors.kz`의 hash, (iii) 기대는 Φ 항목, `DECLARED_TRUSTED` 항목(A-FRESH, A-OWNER, 관계 guard), 가정, lemma 의무, (iv) (ii)·(iii)의 항목을 반박할 수 있는 obligation과 그 상태, 실행된 경로의 한계를 나열한다. census는 T-OBS가 꺼진 conjunct 수를 보고한다 |
-| **보장 G11** progress, 경계 안·모형 상대 | [D] (EXT-20261012 §4.1)<br>• `no-stall-within(b)`는 `exh`만 낸다. 닫힌 cone 모형, σ, M, b 안에서 i의 stall 상태(§7.3)에 닿지 않는다는 뜻이다. 닫힌 cone 규칙, 쓰는 reduction, censoring 규칙, §7.3의 제외, A에 상대적이다.<br>• `stall-witness`는 stall 상태로 끝나는 모형의 유한 실행(`model(b)`, kind·qualifier·choice support 포함)이거나, wait-for 사실을 가진 실현 실행이다(spec §4.13).<br>• `terminal-pending`은 닫힌 cone에 상대적이다. cone 밖 actor의 process 끝이 cone의 hang 상태를 process 전체에서 terminal-pending으로 만들 수 있다.<br>• **어느 값도 바이너리에 대한 진술이 아니다.** 죽음은 과대 근사로도 과소 근사로도 보존되지 않는다(L-DEAD (b)). 모형 stall witness는 확인 전까지 후보다. idle도 terminal-pending도 아닌 `deadlock-cycle`과 `leaked-lock` witness만 wait-for oracle로 확인할 수 있다. semaphore·queue·message·predicate 위의 witness, idle·terminal-pending·choice-dependent witness는 결코 hang으로 세지 않는다(spec §8.5).<br>• **모형화하지 않는 것**: VIOLATING 발생 뒤의 정의되지 않은 행동(예: C3의 검사 없는 `AppData` index)은 전이가 아니라 harm이다. 모형은 process를 계속 돌리므로, 그런 발생 뒤의 progress 결과는 그 연속에 상대적이다 [I]. K-TEARDOWN instance는 progress 결과를 받지 않는다(`unknown(teardown_scope)`). 사용 actor instance가 발생 없이 끝나거나 panic으로 끝나는 실행은 safety 축도 progress 축도 다루지 않는다(spec §6.4 item 34). Φ가 시간 기반으로 선언하지 않은 포기에 기대는 σ_U∞ 결과는 `tb-undeclared`를 지닌다. L1의 poll 요약에 기대는 결과는 L1에 상대적이다.<br>• **배제된 경로**: certificate, 예측, wait-for 사실 없는 관측, σ 사이 전이에서 progress 결과를 끌어내지 않는다. 예외는 L-DEAD (c), (d)다 |
+| **보장 G1** census 과대 근사 | [증명 상태 `depends-on-stated-assumption`: A1, A3, A-SKEL, A-WS, A-EXTRACT] `Sk^cert`에서 도달 가능한 모든 준비 상태 명세 사용은 분석한 (σ, M)마다 class나 `unknown(reason)`을 가진 instance가 된다. `inactive`는 `Sk^cert`에서만 낸다. closure 밖 instance는 세어서 나열한다 |
+| **보장 G2** certificate 판정(M별, safety만) | [증명 상태 `unproved`: L-FO, L-PR, L-CONT, L-TRANS, L-MLEVEL] realization `certificate`인 수준 M의 판정은 A 아래 `TS(B,σ_U,M)`의 모든 유한 실행에 대해 safety 진술을 말한다(L-FO / L-PR). fixed-order는 `¬OK_i`를 말한다. 이 진술은 certificate의 REJECT가 발생의 결정에 있을 때만 혼자 결정적이고, 아니면 칸은 bad witness가 생길 때까지 `unknown(no_decision_route)`를 보인다. protected는 `¬NR_i`(도달한 발생 중 not ready로 결정된 것이 없음, 그래서 `¬Bad_i`)를 말한다.<br>• **다른 σ**: L-CONT와 L-TRANS로 같은 M, b의 σ_U∞·σ_R1 유한 실행에서 같은 진술이 성립한다. 옮긴 `¬OK_i`가 decision route를 지키는지는 σ마다 정한다.<br>• **σ_E**: M = M_impl이거나, M = M_api이고 cone에 M_impl-relevant 연산이 없거나(L-MLEVEL) M_impl 판정이 같을 때만 B의 모든 유한 실제 실행에 대해 성립한다. 성립하는 것은 L-FO나 L-PR이 증명하는 꼴 그대로, 그 실행의 판정된 범위 안 발생에 대한 진술이다(전이 규칙 2). `¬NR_i`는 `NOT_EVALUATED` 발생을 허용하고 모든 발생이 `READY`라고 말하지 않는다. 그 밖에는 OSAL API 계약에 대한 주장이다.<br>• **말하지 않는 것**: reach 축을 통하지 않은 reach, progress(영원한 대기, deadlock, 잃은 provider나 spawn, 닫히지 않는 horizon), maximal 실행.<br>• **검사**: 모든 certificate는 `kz proofcheck`를 통과했고, view(`Sk^cert`)와 M을 밝히며, 신뢰 장부(§10.7)를 지닌다. `kz_verdict`는 M별 결과를 저장한다 |
+| **보장 G3** 관측된 준비 상태 위반 | [증명 상태 `depends-on-stated-assumption`: A1, A2, A6, O4] 기록된 trace에서 HB로 순서가 정해진 lifecycle LP로 계산한 어떤 conjunct LP의 상태가 준비 사전조건 `Req` 밖이고, 프로그램의 결과 code가 일치하며(A2, A6, O4), **그리고** 그 발생의 trace 안 status가 `VIOLATING`(horizon monitor가 trace에서 REJECT, 또는 `Allowed = none`)이거나 Allowed 미지정이면 `NOT_READY_UNJUDGED`일 때만 보고한다. `PENDING`, `TOLERATED`, `NOT_EVALUATED` 발생은 관측된 준비 상태 위반이 아니다. monitor가 OPEN인 채 trace가 끝나면 `unknown(horizon)`이다. 준비 상태 명세가 "옳은" 요구라는 주장은 하지 않고 출처와 근거 등급을 보인다 |
+| **보장 G4** 예측 건전성 | [증명 상태 `unproved`: L-PRED] `predicted` witness는 Pred(π)에 있고 A-COMM을 통과했다(L-PRED). `predicted-modelled`와 `predicted-extrapolated` witness(horizon completion으로 완성한 것 포함)는 모형 근거다. 예측된 not-ready 근거(예측 prefix의 `PENDING`)는 witness도 class도 아니다. 예측은 maximal하지 않다. **"예측 불가"는 결코 "protected"가 아니다** |
+| **보장 G5** 경계 안 모형 분류 | [증명 상태 `unproved`: L-DPOR, L-DEAD (a), L-MON. `dpor`는 T-JACM에도 기댄다] 닫힌 모형(spec §4.10 item 1의 닫힌 cone과 쓰는 reduction), σ, M, b 안에서 `exh`는 곱 상태와 그 결정 edge 위에서 safety 기록(그래서 `no-final-status`와 `ordinal-split`을 포함한 class), reach 값, refinement를 정확히 정한다. progress 결과도 정확히 정한다. 다만 censored actor나 그 closure의 죽음 판정은 `unknown(bound)`, 좌초 actor나 그 closure의 판정은 `unknown(unmodelled)`다(L-DPOR, L-DEAD, L-MON). safety 쪽 censoring이 보류한 진술은 `unknown(bound)`다. `dpor` class는 T-JACM이 성립하고 쓰는 monitor 성질이 확장된 의존(spec §4.10 item 3) 아래 불변일 때 성립하며, 그때까지 unverified로 표시한다. `dpor`는 progress 결과를 내지 않는다. 충실도 근거는 O1, O2, O6, O8이고, certificate와의 불일치는 O10으로 간다 |
+| **보장 G6** 확인 | [증명 상태 `depends-on-stated-assumption`: A2, A6, 기록기의 oracle] `realized` 판정은 B의 gcc 바이너리에서 선언한 제어 아래 재현되었고, 준비 상태 oracle 평가, naturalness label, perturbation ratio를 가진다. 실현 보고에는 recorder oracle에 상대적인 거짓 경보가 없다. σ_E `schedule-dependent`에는 서로 다른 두 실행에서 **같은 발생 ordinal**의 자연 bad·good witness가 필요하다. ordinal이 다르면 `ordinal-split(σ_E)`다 |
+| **보장 G7** PCT | [증명 상태 `unproved`] PI 결정 D3로 F1 gate가 승인될 때만: F1 실행 하나가 깊이 d의 bug를 gate된 스케줄 지점에 대해 확률 `1/(n·k^(d−1))` 이상으로 찾는다. PCT는 스케줄을 무작위로 골라 깊이가 정해진 bug를 확률적으로 찾는 시험 기법이다(ASPLOS 2010 [V-abs; mechanism P]) |
+| **보장 G8** loop 종료와 재현성 | [증명 상태 `unproved`: L-LOOP. 재현은 시험으로 확인하는 요구다] (B, Φ, tool)이 고정되면 loop는 끝나고, 저장된 산출물에서 다시 돌리면 판정 저장소가 byte 단위로 재현된다(예산이 결정적 work unit이므로) |
+| **보장 G9** 불일치 표면화 | [증명 상태 `unproved`. 구현에 대한 요구다] 층 사이 모순(O1–O10, CC)은 모두 보고하고 관련 규칙·모형을 정지·강등한다. 정지는 그 Φ 판의 loop를 끝낸다. 조용히 해소하지 않는다 |
+| **보장 G10** 신뢰 사실의 투명성 | [증명 상태 `unproved`. 구현에 대한 요구다] 모든 certificate와 모든 판정 칸은 신뢰 장부(§10.7)를 지닌다. 장부는 (i) `kz proofcheck`가 다시 확인한 추론 단계, (ii) 그 단계가 읽은 추출된 사실과 `facts.kz`·`skel.kz`·`anchors.kz`의 hash, (iii) 기대는 Φ 항목, `DECLARED_TRUSTED` 항목(A-FRESH, A-OWNER, 관계 guard), 가정, lemma 의무, (iv) (ii)·(iii)의 항목을 반박할 수 있는 obligation과 그 상태, 실행된 경로의 한계, (v) (iii)의 lemma 항목마다의 증명 상태(§12.3)와 certificate 기반 진술마다의 가장 약한 상태를 나열한다. census는 T-OBS가 꺼진 conjunct 수를 보고한다 |
+| **보장 G11** progress, 경계 안·모형 상대 | [증명 상태 `unproved`: L-DEAD (a), L-MON, L-DPOR] [D] (EXT-20261012 §4.1)<br>• `no-stall-within(b)`는 `exh`만 낸다. 닫힌 cone 모형, σ, M, b 안에서 i의 stall 상태(§7.3)에 닿지 않는다는 뜻이다. 닫힌 cone 규칙, 쓰는 reduction, censoring 규칙, §7.3의 제외, A에 상대적이다.<br>• `stall-witness`는 stall 상태로 끝나는 모형의 유한 실행(`model(b)`, kind·qualifier·choice support 포함)이거나, wait-for 사실을 가진 실현 실행이다(spec §4.13).<br>• `terminal-pending`은 닫힌 cone에 상대적이다. cone 밖 actor의 process 끝이 cone의 hang 상태를 process 전체에서 terminal-pending으로 만들 수 있다.<br>• **어느 값도 바이너리에 대한 진술이 아니다.** 죽음은 과대 근사로도 과소 근사로도 보존되지 않는다(L-DEAD (b)). 모형 stall witness는 확인 전까지 후보다. idle도 terminal-pending도 아닌 `deadlock-cycle`과 `leaked-lock` witness만 wait-for oracle로 확인할 수 있다. semaphore·queue·message·predicate 위의 witness, idle·terminal-pending·choice-dependent witness는 결코 hang으로 세지 않는다(spec §8.5).<br>• **모형화하지 않는 것**: VIOLATING 발생 뒤의 정의되지 않은 행동(예: C3의 검사 없는 `AppData` index)은 전이가 아니라 harm이다. 모형은 process를 계속 돌리므로, 그런 발생 뒤의 progress 결과는 그 연속에 상대적이다 [I]. K-TEARDOWN instance는 progress 결과를 받지 않는다(`unknown(teardown_scope)`). 사용 actor instance가 발생 없이 끝나거나 panic으로 끝나는 실행은 safety 축도 progress 축도 다루지 않는다(spec §6.4 item 34). Φ가 시간 기반으로 선언하지 않은 포기에 기대는 σ_U∞ 결과는 `tb-undeclared`를 지닌다. L1의 poll 요약에 기대는 결과는 L1에 상대적이다.<br>• **배제된 경로**: certificate, 예측, wait-for 사실 없는 관측, σ 사이 전이에서 progress 결과를 끌어내지 않는다. 예외는 L-DEAD (c), (d)다 |
 
 ### 12.5 하지 않는 주장
 
-spec §6.4의 43개 항목 중 이 문서와 직접 이어지는 것을 묶는다. 괄호 안은 §6.4의 항목 번호다.
+spec §6.4의 57개 항목 중 이 문서와 직접 이어지는 것을 묶는다. 괄호 안은 §6.4의 항목 번호다.
 
-- **안전과 완전성.** 단서 없이 "sound", "complete", "모든 race를 찾는다", "거짓 경보 없음"이라고 하지 않는다 (1). **경보가 없다는 것에서 "safe"나 "위반 없음"을 끌어내지 않는다.** 경계 너머, 예측·prefilter의 침묵, obligation이 실패한 모형에서도 마찬가지다 (2). 나쁜 실행이 없었다는 것에서 "timing-protected"나 어떤 σ_E class도 끌어내지 않는다 (3).
+- **안전과 완전성.** 단서 없이 "sound", "complete", "모든 race를 찾는다", "거짓 경보 없음"이라고 하지 않는다 (1). **경보가 없다는 것에서 "safe"나 "준비 상태 위반 없음"을 끌어내지 않는다.** 경계 너머, 예측·prefilter의 침묵, obligation이 실패한 모형에서도 마찬가지다 (2). 나쁜 실행이 없었다는 것에서 "timing-protected"나 어떤 σ_E class도 끌어내지 않는다 (3).
 - **progress.** certificate에서 progress, 종료, deadlock 없음, 도달성을 주장하지 않는다. certificate로 얻은 protected나 fixed-order는 사용에 닿지 않는 실행, 사용 전·안·뒤의 영원한 대기·deadlock·잃은 provider나 spawn, Allowed horizon이 닫히는지에 대해 아무것도 말하지 않는다 (26). "no stall", "deadlock-free", "live"는 b 안 `exh` 밖에서 말하지 않고, 거기서도 닫힌 cone 모형에 대해서만 말한다. livelock, starvation, divergence에 대해서는 아무것도 말하지 않는다. progress 개념은 죽음뿐이다 (29). K-TEARDOWN instance의 progress 진술 (32). kind `other`이거나 idle, terminal-pending, choice-dependent인 모형 stall witness가 바이너리의 hang이라는 것, explorer 없이 refinement가 있다는 것 (33). 사용 actor나 그 spawn 사슬의 actor가 발생 없이 끝나거나 panic으로 끝나는 실행에 대한 어떤 것 (34). fixed-order instance의 모든 실행이 결정에 이른다는 것, 닫힌 cone에서 계산한 terminal-pending이 process 전체에서 성립한다는 것 (35). σ_U∞에 Φ가 선언하지 않은 포기(HS의 application monitor, TIME의 flywheel 진입)가 없다는 것, process 종료 단계 뒤에 결정된 발생에 대한 어떤 것, L1을 끈 상태에서 L1 요약에 기댄 결과가 성립한다는 것 (36).
-- **의미론과 전이.** maximal 실행의 containment. `Max(σ_U∞) ⊆ Max(σ_U)`는 거짓이고(LP-TW), 실제 실행은 maximal 실행이 아니며, σ_R1 maximal containment는 쓰지 않는다 (27). σ 사이에서 reach, witness(그래서 `tolerated`, `schedule-dependent`, `ordinal-split`), stall witness(L-DEAD (c), (d)를 빼고), progress 결과를 옮긴다는 것. 전이로 얻은 σ_E progress 진술, σ_E로 옮긴 유한 경계(b ≠ ∞) 진술, σ_R1 모형이 cone을 담지 않는 σ_U 모형에서 옮긴 유한 경계 σ_R1 진술도 주장하지 않는다 (28). `ordinal-split` instance가 스케줄에 의존한다는 것. 스케줄 의존은 같은 ordinal의 두 witness를 가진 `schedule-dependent`에서만 주장한다 (30).
+- **의미론과 전이.** maximal 실행의 containment. `Max(σ_U∞) ⊆ Max(σ_U)`는 거짓이고(LP-TW), 실제 실행은 maximal 실행이 아니며, σ_R1 maximal containment는 쓰지 않는다 (27). σ 사이에서 reach, witness(그래서 `allowed-not-ready`, `schedule-dependent`, `ordinal-split`), stall witness(L-DEAD (c), (d)를 빼고), progress 결과를 옮긴다는 것. 전이로 얻은 σ_E progress 진술, σ_E로 옮긴 유한 경계(b ≠ ∞) 진술, σ_R1 모형이 cone을 담지 않는 σ_U 모형에서 옮긴 유한 경계 σ_R1 진술도 주장하지 않는다 (28). `ordinal-split` instance가 스케줄에 의존한다는 것. 스케줄 의존은 같은 ordinal의 두 witness를 가진 `schedule-dependent`에서만 주장한다 (30). 전이로 얻은 σ_E 칸이 실제 실행의 모든 범위 안 발생이 `READY`라고 말한다는 것. 그 칸은 판정된 발생에 대해 `¬Bad_i`, `¬OK_i`, `¬NR_i`를 말하고 `NOT_EVALUATED` 조기 반환을 허용한다 (44).
 - **판정의 근거.** 반복된 실패 실행에서 fixed-order나 결정성을 끌어내지 않는다 (4). VC_R 사슬만으로 fixed-order를 내지 않는다 (5). h-cut view에서 b에 h 없이 보편 판정을 내지 않는다 (6). cone이 M_impl-relevant인 M_api 전용 판정의 σ_E 타당성을 주장하지 않는다 (7). A-COMM에 실패한 witness를 trace-sound라 하지 않는다 (8). T-JACM 미검증 동안 `dpor`의 정확성을, 그리고 "동치류마다 실행 하나"를 주장하지 않는다 (9). σ_U 예측·모형 witness에서 σ_E 빈도·class를, hold·gate 실행에서 σ_E class를 끌어내지 않는다 (10, 11).
-- **검사기.** `kz proofcheck`가 추출된 사실, skeleton, closure 목록, Φ, `libkz-core`를 믿으면서 그것에 상대적으로 추론 단계를 다시 확인했다는 것보다 강한 뜻의 "독립 검증"을 주장하지 않는다. "via T5"로 표시한 단계는 공유 evaluator나 rule engine도 썼다 (31).
-- **R2와 사례.** "R2는 race다"라고 하지 않는다. 근거와 증명 모양으로 보아 fixed-order 의존성 오류이고, certificate는 generic K-ID **와** framework 규칙 R19를 쓴다 (12). Kairos recorder가 재현하기 전에는 R2의 개수를 Kairos 결과로 내지 않는다 (21). 다섯 설계 사례에서 일반성을, 파생·mutant·구성 변경 시험에서 "새 버그"를 주장하지 않는다 (16). 확인 실행 전에는 OSAL F1, F7, App-record 구간을 bug라 하지 않는다 (23). class label 없이 class 정확도를 말하지 않는다. R2에는 reference class 진술이 없고, C1, C2, C3, C5의 "race" 진술을 칸별 class로 옮기는 방법은 PI 결정 P-CLASSGT 전까지 없다 (41). v7.0.1 기본 구성에서 C1, C2, C3, C5를 "재현"했다고 하지 않는다 (42). 한 설계 사례의 결과를 다른 사례의 근거로 쓰거나, 다섯 사례를 독립 표본으로 세지 않는다. 예: C1의 기본 B `inactive(B)` 증명은 v7.0.1 대응물에 대한 generic 층 결과이지 C1에 대한 결과가 아니다 (43).
-- **기법의 새로움.** HB/vector clock, DPOR, PCT, lockset, 예측 분석, key 충돌 lock 반전(RVPredict/GPredict), 늦은 등록 손실(InitRacer), 예측된 use-before-init(ExceptioNULL), framework typestate(predictive typestate checking, Joshi & Sen; Lifestate)를 기법으로서 새롭다고 하지 않는다. 새로움은 cFS 의미를 둘러싼 조합에만 주장한다 (18). ad hoc 동기화의 메모리 모형 정확성은 A4로 가정할 뿐이다 (20). 명세 기반·GPredict 꼴 기법이 Allowed 결과, 유한 retry, 유한 horizon을 표현하지 못한다고 하지 않는다 (37). detection(경보 유무)만으로 certificate와 예측이 더하는 것을 말하지 않는다 (38).
+- **검사기.** `kz proofcheck`가 추출된 사실, skeleton, closure 목록, Φ, `libkz-core`를 믿으면서 그것에 상대적으로 추론 단계를 다시 확인했다는 것보다 강한 뜻의 "독립 검증"을 주장하지 않는다. "via T5"로 표시한 단계는 공유 evaluator나 rule engine도 썼다 (31). lemma의 증명 상태가 `proved`가 아닌데 판정, 보고서, 장부 출력, 논문 문장에서 그 lemma를 "증명됨"이라, 그 lemma에 기댄 진술을 "검증됨"이나 "인증됨"이라 쓰지 않는다. `proved`를 바이너리에 대한 진술로 읽지 않는다 (45). `reach = proved`가 관측만으로 확립된다고 하지 않는다. 그것은 L-CONT (c)와, 그 칸이 필요로 하는 L-MLEVEL, L-MAPI-CONE, L-REACH-CONE에 기대며 그 증명 상태가 칸의 장부에 보인다 (46).
+- **R2와 사례.** "R2는 race다"라고 하지 않는다. 근거와 증명 모양으로 보아 fixed-order 의존성 오류이고, certificate는 generic K-ID **와** framework 규칙 R19를 쓴다 (12). Kairos recorder가 재현하기 전에는 R2의 개수를 Kairos 결과로 내지 않는다 (21). 다섯 설계 사례에서 일반성을, 파생·mutant·구성 변경 시험에서 "새 버그"를 주장하지 않는다 (16). 확인 실행 전에는 OSAL F1, F7, App-record 구간을 bug라 하지 않는다 (23). class label 없이 class 정확도를 말하지 않는다. R2에는 reference class 진술이 없다. C1, C2, C3, C5의 "race" 진술을 칸별 class로 옮기는 방법은 어떤 reference도 정하지 않고, PI는 2026-10-15에 이 단어를 도구 class로 자동 변환하지 않기로 했다(P-CLASSGT). class label은 명시한 모형, 구성, 실제 근거에서만 나오고, 원문과의 일치·불일치는 정확도가 아니라 그대로 보고한다 (41). v7.0.1 기본 구성에서 C1, C2, C3, C5를 "재현"했다고 하지 않는다 (42). 한 설계 사례의 결과를 다른 사례의 근거로 쓰거나, 다섯 사례를 독립 표본으로 세지 않는다. 예: C1의 기본 B `inactive(B)` 증명은 v7.0.1 대응물에 대한 generic 층 결과이지 C1에 대한 결과가 아니다 (43).
+- **표현과 판정 근거.** R2의 거부된 이벤트 요청을 "이벤트 손실"이나 "패킷 손실"이라 하지 않는다. EVS는 패킷을 만들기 전에 요청을 거절하므로(`cfe_evs.c:185–189`) 정확한 표현은 "이벤트 요청 거부"다 (22, 47). 시스템 호출이 일어났다거나 일어나지 않았다는 주장을 debugger 로그만으로 하지 않는다. 코드 분석(그렇게 밝힌다, [I])이나 정해진 조건의 시스템 호출 관측이 필요하다 (47). `rule` record만으로, 또는 추출한 후보 연속만으로 받아들임, TOLERATED status, harm을 만들지 않는다. 어떤 reference도 정하지 않은 우선순위를 충돌하는 reference 사이에 두지 않는다. K-SPAWN.osal이나 K-LOCKBAL을 준비 상태 위반(호출자 요구 위반)으로 만드는 연구자 작성 요구를 더하지 않는다 (53; QT-4, Q15, QT-5, QT-9).
+- **기법의 새로움.** HB/vector clock, DPOR, PCT, lockset, 예측 분석, key 충돌 lock 반전(RVPredict/GPredict), 늦은 등록 손실(InitRacer), 예측된 use-before-init(ExceptioNULL), framework typestate(predictive typestate checking, Joshi & Sen; Lifestate)를 기법으로서 새롭다고 하지 않는다. 새로움은 cFS 의미를 둘러싼 조합에만 주장한다 (18). ad hoc 동기화의 메모리 모형 정확성은 A4로 가정할 뿐이다 (20). 명세 기반·GPredict 꼴 기법이 Allowed 결과, 유한 retry, 유한 horizon을 표현하지 못한다고 하지 않는다. 개정 1.2부터 그런 기법의 재구현은 평가에 들어 있지 않다 (37). detection(경보 유무)만으로 certificate와 예측이 더하는 것을 말하지 않는다 (38).
 
-나머지 항목(평가 쪽 39, 40 등)은 spec §6.4 원문을 본다.
+나머지 항목(평가 쪽 39, 40, 48–52, 54–57 등)은 spec §6.4 원문을 본다.
 
 ### 12.6 정의를 시험하는 litmus 프로그램
 
@@ -1275,8 +1366,8 @@ EXT-20261012가 더한 litmus 프로그램은 실제 OSAL 위에서 gcc로 빌�
 |---|---|
 | LP-LEAK | M_impl에서 RESERVED 구간의 by-name 조회가 결정에서 VIOLATING이 되고, 뒤 조회가 in-use stall(`leaked-lock`, confirmable, 첫 조회에서 오는 progress 사슬)이 되는 것; 두 conjunct use의 in-use stall(kind `other`, confirmable 아님); M_api/M_impl 갈림 |
 | LP-SCOPE2 | 결정 event에서 정하는 scope, L-SCOPE, L-STATUS (b), 확장된 의존을 쓴 `dpor` 대 `exh` |
-| LP-EARLY | 호출이 LP 전에 돌아오는 `NOT_EVALUATED`, 그런 호출을 가진 L-FO, O4(b), O10. retry 변형은 b 안 fixed-order, b = ∞ `unknown(no_decision_route)` |
-| LP-ALLOW | Allowed 종류마다; 기본 정상 연속, status의 liveness, REJECT 우선, error exit, 문서화된 전파; process 종료 단계 뒤에 판정 없음; 아직 spawn되지 않은 감시 actor와 닫힌 cone; side(`caller`, `supplier`, `rule`)와 `appreq` 충돌; 모든 변형에서 `consequence` 기록; `tolerated`는 `exh`에서만 |
+| LP-EARLY | 호출이 LP 전에 돌아오는 `NOT_EVALUATED`, 그런 호출을 가진 L-FO, O4(b), O10. retry 변형은 b 안 fixed-order, b = ∞ `unknown(no_decision_route)`. **PROTECTED 변형 (c)**(2026-10-15에 더함): 같은 API인데 registry가 INIT에서 **참**이고 writer도 disabler도 없어 PROTECTED certificate (a)가 있다. `p != NULL`인 발생은 `READY`, `p == NULL`인 발생은 `NOT_EVALUATED`다. σ_U에서 `¬NR_i`가 성립하고(L-PR), 전이 규칙 2로 M_impl의 모든 실제 실행에서도 성립한다. `lk`가 `ERR_ARG`를 돌려주는 실행도 마찬가지이고, 그 실행은 O4(b)의 실패도 σ_E 칸의 반례도 아니다(2026-10-15 전 규칙 2의 문안 "`READY` 밖이 아니다"는 그 실행에 모순되었을 것이다). reach는 `p != NULL`인 호출을 담은 실행으로만 `proved`이고, 관측한 호출이 모두 `p == NULL`이면 `assumed`다 |
+| LP-ALLOW | Allowed 종류마다. 변형 (b)는 연속을 `caller` record가 인용한 경우(b-cited)와 인용하지 않은 경우(b-uncited, Q15 엄격한 대안)로 두 번 돈다. b-uncited에서는 모든 (b) 변형이 NOT_READY_UNJUDGED이고 `cont_candidate`, error exit, non-success 반환, 다음 연산의 사실이 consequence에 들어간다. 그 밖에: `rule` record만으로는 받아들이지 않음(b1r, QT-4); supplier-only 항목은 status를 정하지 않음(a2); `appreq` 충돌은 충돌을 밝히고 판정 보류(a3, d5: NOT_READY_UNJUDGED, QT-5); status의 liveness, REJECT 우선, error exit, 문서화된 전파; process 종료 단계 뒤에 판정 없음; 아직 spawn되지 않은 감시 actor와 닫힌 cone; 실제 code 모양 (b6)–(b9), (d3), (d4); 모든 변형에서 `consequence` 기록; `allowed-not-ready`는 `exh`에서만 |
 | LP-RESTART | kill timer의 결과 label(`expire-stopped`는 TB가 아니고 `expire-waiting`은 TB), σ_U∞의 K-LIFE와 generation |
 | L-PATIENT (다시 씀) | 지연 retry의 세 variant: σ_U∞에서 M마다 결정 전이의 시간 기반 전이, horizon monitor, 결정에 있는 REJECT만의 decision route, 경계별 safety 기록, 죽음, stall 절 집합, 좌초, refinement |
 
@@ -1285,12 +1376,12 @@ EXT-20261012가 더한 litmus 프로그램은 실제 OSAL 위에서 gcc로 빌�
 | litmus | 프로그램 모양 | 기대 결과 (요약) | 확인하는 것 |
 |---|---|---|---|
 | **LP-CASE-C1** | provider P가 countsem "S"를 만든다. L은 "S"를 by-name으로 retry 조회한다(`if (ret != OS_ERR_NAME_NOT_FOUND) break; OS_TaskDelay(d);`, litmus bound). 실패하면 (r) 다른 호출 위치의 두 번째 조회로 re-bind하거나, (x) `stopped`를 저장하고 `OS_TaskDelay`에서 돈다. 구경꾼 B는 countsem "T"를 만든 뒤 조회한다. (x)에서는 청소자 Cl이 `stopped`를 기다렸다가 `OS_ForEachObject`를 부른다 | (σ_U, M_impl): key "S"의 ordinal (L, 1)에서 schedule-dependent. L 자신의 instance에는 stall 상태가 없다. `exh`의 딸린 결과는 wait-for root 하나(countsem type lock)를 가진다: P는 `FinalizeNew`에서 죽고, B는 생성에서 죽으며(조회가 앞에 있음), (x)의 Cl은 객체 순회에서, (r)의 L은 re-bind에서(별도 re-bind instance의 in-use stall) 죽는다. 모두 `leaked-lock`, confirmable, 한 번만 세고, L의 VIOLATING 시도에 사슬로 붙는다. (σ_U∞, M_impl)에서 P가 L의 마지막 조회 뒤에야 만들면 L이 좌초하고, L closure의 판정은 `unknown(unmodelled)`다. B와 P의 판정은 정해진다(L을 기다리지 않는다). (M_api)에서 P가 결코 돌지 않으면 L이 죽고 `stall-witness({pre-use, horizon})`, σ_U에 timeout-masked-liveness | M별 시간 기반 전이; 좌초와 그 closure; 다시 들어가는 leaker와 순회하는 청소자가 있는 leaked-lock; 호출 문맥별 instance; wait-for root 집합으로 묶기; `OS_CountSem*`과 순회의 lock mode |
-| **LP-CASE-C2** | barrier actor Bt가 soft litmus timeout으로 P의 `declared`나 `stopped` flag를 poll한 뒤 `phase = OP`를 둔다(STOPPED가 RUNNING 위인 `AppState < AppStateId`의 대응물). R은 `phase = OP`를 기다렸다가 `svc(P)`를 부른다(`Req = late = DONE`, `Allowed unspecified_by_reference`). 변형: (buggy) P가 늦은 init 전에 선언한다; (fixed) 늦은 init 뒤에 선언한다; (fixed, fail) 늦은 init이 실패할 수 있고, 그러면 P는 `stopped`를 두고 끝난다; (fixed, cycle) P의 늦은 init이 R이 `svc` 반환 뒤에야 보내는 message를 기다린다 | (buggy) σ_U·σ_U∞ 모두 schedule-dependent, refinement 없음. (fixed) σ_U schedule-dependent(bad 실행에 Bt의 timeout이 필요), σ_U∞ `¬Bad_i`이고 도달 → timeout-dependent. (fixed, fail) `stopped`를 거친 TB 없는 bad 실행 → `Bad_i(σ_U∞)`, refinement 없음. (fixed, cycle) σ_U는 b 안 fixed-order; σ_U∞는 `unreached(b)`, b 안 `no-final-status`. R은 호출 전에 죽는다(pre-use stall, kind `other`, wait-for root는 끝 강연결 성분인 순환 {P, R, Bt}, 사슬 뿌리 없음, 세지 않음). R의 instance에 timeout-masked-liveness와 `tml-root` | 뿌리 없는 progress 결과; predicate 대기 순환의 wait-for root; 사슬 없는 instance의 `tml-root`; timeout-dependent의 reach 조건; 실패한 provider가 barrier를 통과하는 것; soft timeout이 hang을 fixed-order 위반으로 바꾸는 것 |
-| **LP-CASE-C3** | registry `reg[]`. cell `X`(처음 0, actor E의 slot)와 cell `Y`(처음 범위 밖). E는 `Y := 0` 후 `reg[0]`을 둔다. S는 `X := 1` 후 `reg[1]`을 둔다. T는 `send(X)`(범위와 `reg[X]` 검사)를 부르고, 미등록이면 `Y`를 읽는 `notreg()`를 부른다(guard 있음, 정의되지 않은 행동 없음). instance는 (1) `send(X)`(`valid(X) ∧ reg[X]`)와 (2) `notreg()`의 `Y` 읽기(`valid(Y)`)이고, 둘 다 `Allowed none` | (1)은 T의 호출이 그것이 지닌 identity의 등록보다 앞설 때만 not ready다. E 등록 뒤 `X = 0`이면 READY인데, 이것은 K-ID가 표현하지 못하는 잘못된 귀속이다(적합성 gap으로 기록). (2)는 (1)의 not-ready 갈래에서만 생기고(사슬 (1) ⇝ (2)), E가 `Y`를 저장하지 않았으면 bad다. 둘 다 유일한 ordinal에서 schedule-dependent이고, σ_U∞에서도 그렇다 | 두 identity cell; value·registry conjunct; 위반 사슬; C3의 K-ID 적합성 gap |
+| **LP-CASE-C2** | barrier actor Bt가 soft litmus timeout으로 P의 `declared`나 `stopped` flag를 poll한 뒤 `phase = OP`를 둔다(STOPPED가 RUNNING 위인 `AppState < AppStateId`의 대응물). R은 `phase = OP`를 기다렸다가 `svc(P)`를 부른다(`Req = late = DONE`, `Allowed unspecified_by_reference`). 변형: (buggy) P가 늦은 init 전에 선언한다; (fixed) 늦은 init 뒤에 선언한다; (fixed, fail) 늦은 init이 실패할 수 있고, 그러면 P는 `stopped`를 두고 끝난다; (fixed, cycle) P의 늦은 init이 R이 `svc` 반환 뒤에야 보내는 message를 기다린다 | (buggy) σ_U·σ_U∞ 모두 schedule-dependent, refinement 없음. (fixed) σ_U schedule-dependent(bad 실행에 Bt의 timeout이 필요), σ_U∞ `¬Bad_i`이고 도달 → timeout-dependent. (fixed, fail) `stopped`를 거친 TB 없는 bad 실행 → `Bad_i(σ_U∞)`, refinement 없음. (fixed, cycle) σ_U는 b 안 fixed-order; σ_U∞는 `unreached(b)`, b 안 `no-final-status`. R은 호출 전에 죽는다(pre-use stall, kind `other`, wait-for root는 끝 강연결 성분인 순환 {P, R, Bt}, 사슬 뿌리 없음, 세지 않음). R의 instance에 timeout-masked-liveness와 `tml-root` | 뿌리 없는 progress 결과; predicate 대기 순환의 wait-for root; 사슬 없는 instance의 `tml-root`; timeout-dependent의 reach 조건; 실패한 provider가 barrier를 통과하는 것; soft timeout이 hang을 fixed-order 준비 상태 위반으로 바꾸는 것 |
+| **LP-CASE-C3** | registry `reg[]`. cell `X`(처음 0, actor E의 slot)와 cell `Y`(처음 범위 밖). E는 `Y := 0` 후 `reg[0]`을 둔다. S는 `X := 1` 후 `reg[1]`을 둔다. T는 `send(X)`(범위와 `reg[X]` 검사)를 부르고, 미등록이면 `Y`를 읽는 `notreg()`를 부른다(guard 있음, 정의되지 않은 행동 없음). instance는 (1) `send(X)`(`valid(X) ∧ reg[X]`)와 (2) `notreg()`의 `Y` 읽기(`valid(Y)`)이고, 둘 다 `Allowed none` | (1)은 T의 호출이 그것이 지닌 identity의 등록보다 앞설 때만 not ready다. E 등록 뒤 `X = 0`이면 READY인데, 이것은 K-ID가 표현하지 못하는 잘못된 귀속이다(적합성 gap으로 기록). (2)는 (1)의 not-ready 갈래에서만 생기고(사슬 (1) ⇝ (2)), E가 `Y`를 저장하지 않았으면 bad다. 둘 다 유일한 ordinal에서 schedule-dependent이고, σ_U∞에서도 그렇다 | 두 identity cell; value·registry conjunct; 준비 상태 위반 사슬; C3의 K-ID 적합성 gap |
 | **LP-CASE-C5** | 등록자 G가 `cnt := 1`을 두고, task A를 만들고, mutex `m` 아래 `tab[A] = USED`를 쓴다(A가 그 전에 돌 수 있다). `cnt`를 둔 뒤 W를 spawn한다. A는 `reg_evs()`(`CFE_EVS_Register`처럼 안에서 status를 test하고 문서화된 전파로 돌려준다. A는 무시한다), `mkpipe()`(status 무시), `runloop()`(실패하면 false, `Allowed unspecified_by_reference`; 성공하면 `cnt`를 한 번 줄임)에서 `tab[self]`를 읽는다. W는 soft litmus timeout으로 `cnt == 0`을 poll한 뒤 `ops()`(`Req = cnt = 0`, `Allowed unspecified_by_reference`)를 부른다. 변형 (early-W): `cnt`를 두기 전에 W를 spawn한다 | A의 세 사용: ordinal 1에서 schedule-dependent(`runloop`는 ordinal이 여럿이지만 구간에 들 수 있는 것은 첫째뿐). W의 instance: σ_U에서 (W, 1)의 schedule-dependent(`runloop`가 실패하면 W가 timeout). σ_U∞에서 그 갈래의 W는 poll에서 죽고, A의 `runloop` 발생에 사슬로 붙은 hang이다 → W의 instance에 timeout-masked-liveness와 timeout-dependent, A의 `runloop` instance에 `tml-root`. (early-W): `cnt`를 두기 전에 W가 통과할 수 있어 TB 없는 bad 실행이 생긴다 → `Bad_i(σ_U∞)`, timeout-dependent 아님. TML은 그대로 | 안에서 test한 뒤 전파되고 무시되는 status; 무시된 status; NOT_READY_UNJUDGED; 구간에 첫 ordinal만 드는 ordinal; not-ready 뿌리를 가진 progress 사슬; timeout-dependent를 주장하기 전에 배제해야 할 counter race |
 
 **완료 조건** (spec App. A.8).
-- **EXT-20261012 §4.1.** LP-DL은 사용 전에 deadlock이 있는데 사용의 준비는 증명된다. 어떤 경로도 조건 없는 protected를 내지 않는다. 모든 칸이 reach 값과 progress 값(`unknown(not_checked)`나 stall witness)을 지니고, 보장 G2와 spec §6.4 item 26이 certificate는 progress를 주장하지 않는다고 말한다. looper 변형과 L2의 lock 조건 덕분에 `exh`는 이 경우 결코 `no-stall-within(b)`를 내지 않는다.
+- **EXT-20261012 §4.1.** LP-DL은 사용 전에 deadlock이 있는데 사용의 준비는 증명된다. 어떤 경로도 조건 없는 protected를 내지 않는다. 모든 칸이 reach 값과 progress 값(`unknown(not_checked)`나 stall witness)을 지니고 certificate에 기댄 곳은 lemma 상태도 지니며, 보장 G2와 spec §6.4 item 26이 certificate는 progress를 주장하지 않는다고 말한다. looper 변형과 L2의 lock 조건 덕분에 `exh`는 이 경우 결코 `no-stall-within(b)`를 내지 않는다.
 - **EXT-20261012 §4.2.** LP-TW는 timeout이 있으면 진행하고 없으면 멈춘다. σ_U∞ 유한 실행은 σ_U 유한 실행이지만, σ_U∞-maximal 실행은 σ_U-maximal이 아니다. 전이 규칙은 safety 진술만 아래로 옮기고 reach와 progress는 σ마다 다시 계산한다. class는 합친 기록에서 경계마다 계산하므로, σ_U와 σ_U∞ 칸은 어떤 평가 순서에서도 서로 모순되지 않는다.
 - **그 밖.** LP-SCOPE2, LP-EARLY, LP-ALLOW(실제 코드 모양 (b6)–(b9), (d3), (d4) 포함), LP-RESTART, L-PATIENT variant 3, LP-CASE-C1/C2/C3/C5는 Allowed 종류마다, 설계 사례마다 메커니즘과 코드 모양을 v7.0.1 OSAL 위에서 확인 가능하게 한다. 정의에 대한 근거이지 사례에 대한 근거가 아니다.
 
@@ -1306,13 +1397,13 @@ EXT-20261012가 더한 litmus 프로그램은 실제 OSAL 위에서 gcc로 빌�
 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O10(그림 D1, D2) | §2 |
 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
-| **04_formal_model.md (이 문서)** | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
-| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| **04_formal_model.md (이 문서)** | 형식 모형: actor·자원·준비 상태 명세, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장과 증명 상태(그림 D10) | §1, §4.2–4.5.1, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 준비 상태 명세 template K-*와 RC1–RC15(준비 범주), R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| [10_decisions_adr.md](10_decisions_adr.md) | ADR 44개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 목록, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -1320,5 +1411,6 @@ EXT-20261012가 더한 litmus 프로그램은 실제 OSAL 위에서 gcc로 빌�
 
 **이 문서와 특히 관련된 곳.**
 
-- spec: 주로 §1, §4.2–4.5.1, §6, App. A.1, A.7, A.8을 풀어 쓴 것이다. 외부 검토에 답한 개정은 spec §0.7과 ADR-039–ADR-044에 있다. R2 certificate에 쓰는 cFS 사실과 그림 D8은 [05_cfs_mapping.md §7](05_cfs_mapping.md#7-r2-certificate-예-그림-d8)에 있다.
-- 검토 쟁점과 PI 결정: [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md).
+- spec: 주로 §1, §4.2–4.5.1, §6, App. A.1, A.7, A.8을 풀어 쓴 것이다. 외부 검토에 답한 개정은 spec §0.7과 ADR-039–ADR-044에 있다. 개정 1.2의 형식 정정과 증명 상태는 spec §0.9와 ADR-045에, 2026-10-15 결정의 반영은 §0.10과 ADR-046–ADR-051에, 용어 이름 변경과 CORD 인용 정리는 §0.11, 부록 C, ADR-052에 있다. R2 certificate에 쓰는 cFS 사실과 그림 D8은 [05_cfs_mapping.md §7](05_cfs_mapping.md#7-r2-certificate-예-그림-d8)에 있다.
+- 검토 쟁점과 PI 결정: [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md), 2026-10-15 결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md).
+- 개정 1.2의 형식 정정과 R2 증명 상태: [../plan/formal_corrections.md](../plan/formal_corrections.md), [../plan/proof_status_R2.md](../plan/proof_status_R2.md).

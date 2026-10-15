@@ -1,0 +1,65 @@
+# sites.kzp -- the probe plan of the perf-sample observer for profile cfs-v7.0.1 (sub-gate S1-R2,
+# Architecture/spec/SPEC_FINAL.md section 9.3).
+#
+# This file is DATA for `kz anchor` and `kz observe`.  The observer contains no knowledge of the
+# framework; everything it knows about the framework is here, each entry with the lines it was read
+# from.  The format is the observer's own ("kzp-observe 1", probe/plan/profile.hpp); it is not the
+# profile language of the readiness specification (the phi files next to this directory), and it
+# does not replace it: the same facts are stated there for the checker, here for the probes.
+#
+# Source roots: `kz anchor ... --source-root <the pinned bundle>`.  The paths below are relative to
+# the bundle's root, as in ../01_prov.kzp, and the sha256 values are those of the cited lines (each
+# followed by LF), the value of  sed -n 'A,Bp' FILE | sha256sum.  `kz anchor` recomputes them and
+# refuses to build a basis when the text differs.
+#
+# What each site yields (the four raw slots a0..a3 of an event; kz_raw.h):
+#   entry sites   argument registers of the System V x86-64 call at the probed address, which is the
+#                 instruction after `endbr64`: the arguments are intact and the word at the top of the
+#                 stack is the return address (a3).
+#   return sites  the return value (rax) and the instruction pointer, which is the return address.
+# The probes sit at function entry (+4): the same address for the entry and the return site.
+#
+# Nothing here selects a condition of the experiment.  Which sites exist is the plan; the number of
+# runs, the stop method and the user are the caller's (docs/observer.md).
+kzp-observe 1
+binary core-cpu1
+
+# ---- cited text ---------------------------------------------------------------------------------
+
+# The event-send API: what the arguments mean (caller side) and the signature.
+prov evs_h_appid_note tier=contract-backed kind=api_doc side=caller file="cfe/modules/core_api/fsw/inc/cfe_evs.h" lines=168-172 cite="the AppId passed to the send function must be a registered application or core service" sha256=acb3967b445672203af748f7bc65f2f3a91187ef107a607b1645420e1570f1ed
+prov evs_h_proto tier=contract-backed kind=api_doc side=supplier file="cfe/modules/core_api/fsw/inc/cfe_evs.h" lines=205-209 cite="prototype: (uint16 EventID, enum EventType, AppId AppID, const char *Spec, ...) returns a status" sha256=a8ed318d106c639ac3a7300a63e73d45912fe97ea2a6a4907cc0485b50630ebd
+prov evs_c_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=169-214 cite="the definition: looks the AppId up and returns CFE_EVS_APP_ILLEGAL_APP_ID / CFE_EVS_APP_NOT_REGISTERED / CFE_EVS_APP_SQUELCHED or CFE_SUCCESS" sha256=422b8b94579a037d29e42f7a463aa06fb81617654aa755543912b1704a7bdb40
+
+# The SB task stores its own application id.
+prov sb_task_138 tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_task.c" lines=138-138 cite="CFE_ES_GetAppID(&CFE_SB_Global.AppId): the store of the SB task's id; the status of the call is ignored" sha256=71651783668ec441e89a38086dd8ae4fd8e27ceee108596a421c2f6d7675773b
+
+# The main task's wait for the started applications.
+prov es_sync_call tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=833-835 cite="the core application start waits with CFE_ES_MainTaskSyncDelay(CFE_ES_AppState_RUNNING, ...)" sha256=5fa85fe9c94982e9a761ce74878418437eb441a3ed8409e72eb90c723317386b
+prov es_sync_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=860-918 cite="the definition: (uint32 AppStateId, uint32 TimeOutMilliseconds) polls the application table and returns a status" sha256=f60f77b3ca1d27093d055e021fda88f108fb902d18b908fe152d282ac706cf12
+
+# Task creation and the first function a new task runs.
+prov os_create_sig tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=164-170 cite="OS_TaskCreate(task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags)" sha256=087fd9452b5371ea83d7c093a05b31b7ed91f248a2c91ce262a788e253097756
+prov os_entry_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=124-138 cite="OS_TaskEntryPoint(task_id) runs first in the new task, then calls the task's entry function" sha256=d5a27a7b41d28db45fac53fa108761c7b9073e78162ca354a58b49e9f975d2cb
+
+# The membership of these sites in sub-gate S1-R2.  The SPEC is under revision: the line is cited
+# but not hashed (the root `spec` is not given to `kz anchor`).
+prov spec_s1r2 tier=researcher kind=researcher file="Architecture/spec/SPEC_FINAL.md" lines=2818-2818 root=spec cite="S1-R2: probes at the send function's entry and return, at the SB task's id store, at the main task's sync-delay exits and at the core task spawns" authored="Kairos K2, from SPEC_FINAL 9.3 as read on 2026-10-15"
+
+# ---- sites --------------------------------------------------------------------------------------
+
+# The event-send function: which event, of which type, for which application id (a2); the status it returns.
+site evs.send.entry entry func=CFE_EVS_SendEventWithAppID prov=evs_h_proto s0=rdi:u16:event_id s1=rsi:u32:event_type s2=rdx:u32:app_id s3=stack+0:u64:return_address
+site evs.send.ret   ret   func=CFE_EVS_SendEventWithAppID prov=evs_c_def   s0=rax:u32:status s3=ip:u64:return_address
+
+# The line after the call that stores the SB task's id.
+site sb.appid.store point at=cfe_sb_task.c:138 after-call=CFE_ES_GetAppID prov=sb_task_138 s0=rax:u32:status
+
+# The main task's wait for the applications to reach a state.
+site es.sync.entry entry func=CFE_ES_MainTaskSyncDelay prov=es_sync_def s0=rdi:u32:app_state s1=rsi:u32:timeout_msec s3=stack+0:u64:return_address
+site es.sync.ret   ret   func=CFE_ES_MainTaskSyncDelay prov=es_sync_def s0=rax:u32:status s3=ip:u64:return_address
+
+# Task creation (creator side) and the first function of the new task (child side): the identity join.
+site osal.task_create.entry entry func=OS_TaskCreate decoder=spawn-create prov=os_create_sig s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r9:u32:priority s3=stack+0:u64:return_address
+site osal.task_create.ret   ret   func=OS_TaskCreate decoder=spawn-return prov=os_create_sig s0=rax:u32:status s3=ip:u64:return_address
+site osal.task_entry        entry func=OS_TaskEntryPoint decoder=thread-entry prov=os_entry_def s0=rdi:u32:task_id s3=stack+0:u64:return_address

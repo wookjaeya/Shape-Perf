@@ -1,0 +1,77 @@
+# trace kid_ordinals.trace, predicate supplied, cfe version 7.0.1
+replay profile "cfs-v7.0.1"
+events 21
+terminated no
+shutdown_request no
+
+event table
+  #0 T0 CFE_ES_CreateObjects.reserve_core pt
+  #1 T0 CFE_ES_CreateObjects.publish_core pt
+  #2 T_SB CFE_EVS_Register call
+  #3 T_SB CFE_EVS_Register.clear_slot pt
+  #4 T_SB CFE_EVS_Register.register pt
+  #5 T_SB CFE_EVS_Register ret
+  #6 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #7 T_SB CFE_EVS_SendEventWithAppID call
+  #8 T_SB CFE_EVS_SendEventWithAppID ret
+  #9 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+  #10 T_SB CFE_EVS_SendEventWithAppID call
+  #11 T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+  #12 T_SB CFE_EVS_SendEventWithAppID ret
+  #13 T_TIME CFE_EVS_SendEventWithAppID.id_valid pt
+  #14 T_TIME CFE_EVS_SendEventWithAppID call
+  #15 T_TIME CFE_EVS_SendEventWithAppID.slot_registered pt
+  #16 T_TIME CFE_EVS_SendEventWithAppID ret
+  #17 T_SB CFE_EVS_SendEventWithAppID call
+  #18 T_SB CFE_EVS_SendEventWithAppID.slot_registered pt
+  #19 T_SB CFE_EVS_SendEventWithAppID ret
+  #20 T_SB CFE_EVS_SendEventWithAppID.id_valid pt
+
+edges 18
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #8 -> #9
+edge R1 S unconditional #9 -> #10
+edge R1 S unconditional #10 -> #11
+edge R1 S unconditional #11 -> #12
+edge R1 S unconditional #13 -> #14
+edge R1 S unconditional #14 -> #15
+edge R1 S unconditional #15 -> #16
+edge R1 S unconditional #12 -> #17
+edge R1 S unconditional #17 -> #18
+edge R1 S unconditional #18 -> #19
+edge R1 S unconditional #19 -> #20
+
+occurrences 4
+occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #7 return #8
+  status NOT_EVALUATED decided at return #7 scope default
+  conjunct id_valid capture #6 holds
+  conjunct slot_registered not_passed
+  result 0xc2000008 outcome not_checked
+occurrence K-ID.send-with-appid actor T_SB ordinal 2 key [0x110002] call #10 return #12
+  status READY decided at point #11 scope default
+  conjunct id_valid capture #9 holds
+  conjunct slot_registered point #11 holds
+  result 0 outcome agrees
+occurrence K-ID.send-with-appid actor T_TIME ordinal 1 key [0x110002] call #14 return #16
+  status READY decided at point #15 scope default
+  conjunct id_valid capture #13 holds
+  conjunct slot_registered point #15 holds
+  result 0 outcome agrees
+occurrence K-ID.send-with-appid actor T_SB ordinal 3 key [0x110002] call #17 return #19
+  status READY decided at point #18 scope default
+  conjunct id_valid call #17 holds
+  conjunct slot_registered point #18 holds
+  result 0 outcome agrees
+
+findings 0
+
+final state
+  es.app[2] = LIVE id 0x110002
+  evs.reg[0x110002] = REG
+  loc CFE_SB_Global.AppId = 0

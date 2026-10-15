@@ -1,0 +1,21 @@
+# 50_trusted.kzp -- the declared-trusted entries of the V1 subset.
+#
+# They are assumptions the certificate of the R2 path lists in part (iii) of its trust ledger.
+# They are refutable by observation (obligations O3, O4, O9) and never proved by it.  The third
+# declared-trusted entry, the guard of the CleanUpApp record free, is the effect `free_record` of
+# CFE_ES_CleanUpApp in 20_ops.kzp.
+phi 1;
+
+trusted A-FRESH {
+  class declared_trusted;
+  statement "Distinct reservation nodes of the core creation loop allocate distinct App records, and a record allocated there was never used earlier in the run";
+  refutable_by O9;
+  prov r_a_fresh, es_start_reserve, es_start_taskmain_loop;
+}
+
+trusted A-OWNER {
+  class declared_trusted;
+  statement "The App record that CFE_ES_GetAppRecordByContext returns for a task created by StartAppTask with ParentAppId is the record whose PendingAppId flowed to ParentAppId";
+  refutable_by O9;
+  prov r_a_owner, es_start_starttask, es_apps_taskrecord_fill, es_ctx_lookup;
+}

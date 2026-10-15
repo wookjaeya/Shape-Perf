@@ -1,0 +1,46 @@
+# Case identifiers.  Engine code (include/ and lib/) must not contain any of them: knowledge
+# about a case or about the framework is data in profiles/<profile>/*.kzp or in a basis
+# record, with provenance.  profiles/ and tests/ may use them.
+#
+#   word <phrase>   the phrase as consecutive name components, without regard to case.  Source
+#                   text is cut into components at '_', at a lower-case to upper-case step
+#                   (GetApp), at the end of an acronym (HTTPServer) and between a digit and a
+#                   capitalised word (R2Cert); a phrase is cut the same way, so "word GetAppID"
+#                   is the components get, app, id.  Hence "word R2" finds R2, check_R2, r2_x,
+#                   R2Cert, kzR2Rule and "r2" in a path or a string, and not R2D2, C10 or CRC32.
+#   regex <pattern> an ECMAScript regular expression, searched in each line as written
+#
+# The scan covers file names, code, comments and strings.  A harmless lower-case variable named
+# c1 or r2 in the engine is also found: rename it.
+#
+# The five design cases, by their identifiers:
+word R2
+word C1
+word C2
+word C3
+word C5
+# Their upstream issue numbers (as a word, and in the #<n> form):
+word 2663
+regex #(72|73|184|198|2663)\b
+# Reference revisions that only exist because of a case:
+regex \b(b9bec567|58abd38d|833fdbb|281a941|2a024d8|15a871e)\b
+# Symbols and names that belong to a case or to one framework:
+word CFE_SB_Global
+word ILLEGAL_APP_ID
+word BP0_tsem
+word BP1_tsem
+word sem_name
+word SBNSubPipe
+regex \bCFE_[A-Za-z0-9_]+
+regex \bOS_[A-Za-z][A-Za-z0-9_]*
+# The framework and its modules, whatever the spelling (CFE_*, cfe_sb_task.c, EVS_x, osal_x ...):
+word cfe
+word evs
+word osal
+word psp
+word cfs
+word c_fs
+# Names of the pinned bundle that carry the case's meaning:
+word MainTaskSyncDelay
+word GetAppID
+word AppId

@@ -1,0 +1,1558 @@
+kz-layout abi=1
+record kz_byte size=1 fields=1
+  b offset=0 size=1 count=1 kind=u8
+record kz_ref size=40 fields=3
+  artifact_sha256 offset=0 size=1 count=32 kind=u8
+  section offset=32 size=4 count=1 kind=u32
+  index offset=36 size=4 count=1 kind=u32
+record kz_str size=8 fields=2
+  off offset=0 size=4 count=1 kind=u32
+  len offset=4 size=4 count=1 kind=u32
+record kz_header size=160 fields=15
+  magic offset=0 size=1 count=8 kind=u8
+  abi_version offset=8 size=4 count=1 kind=u32
+  artifact_kind offset=12 size=4 count=1 kind=u32
+  flags offset=16 size=4 count=1 kind=u32
+  header_size offset=20 size=4 count=1 kind=u32
+  n_parents offset=24 size=4 count=1 kind=u32
+  n_sections offset=28 size=4 count=1 kind=u32
+  parents_off offset=32 size=8 count=1 kind=u64
+  sections_off offset=40 size=8 count=1 kind=u64
+  total_size offset=48 size=8 count=1 kind=u64
+  basis_sha256 offset=56 size=1 count=32 kind=u8
+  profile_sha256 offset=88 size=1 count=32 kind=u8
+  tool_sha256 offset=120 size=1 count=32 kind=u8
+  header_crc offset=152 size=4 count=1 kind=u32
+  rsv0 offset=156 size=4 count=1 kind=u32
+record kz_parent size=40 fields=3
+  sha256 offset=0 size=1 count=32 kind=u8
+  kind offset=32 size=4 count=1 kind=u32
+  role offset=36 size=4 count=1 kind=u32
+record kz_section_entry size=48 fields=9
+  type offset=0 size=4 count=1 kind=u32
+  schema_version offset=4 size=4 count=1 kind=u32
+  record_size offset=8 size=4 count=1 kind=u32
+  rsv0 offset=12 size=4 count=1 kind=u32
+  count offset=16 size=8 count=1 kind=u64
+  offset offset=24 size=8 count=1 kind=u64
+  size offset=32 size=8 count=1 kind=u64
+  crc32 offset=40 size=4 count=1 kind=u32
+  rsv1 offset=44 size=4 count=1 kind=u32
+record kz_prov size=68 fields=10
+  tier offset=0 size=1 count=1 kind=u8
+  kind offset=1 size=1 count=1 kind=u8
+  side offset=2 size=1 count=1 kind=u8
+  rsv0 offset=3 size=1 count=1 kind=u8
+  line_from offset=4 size=4 count=1 kind=u32
+  line_to offset=8 size=4 count=1 kind=u32
+  file offset=12 size=8 count=1 kind=str
+  cite offset=20 size=8 count=1 kind=str
+  authored offset=28 size=8 count=1 kind=str
+  text_sha256 offset=36 size=1 count=32 kind=u8
+record kz_deviation size=48 fields=9
+  subject offset=0 size=8 count=1 kind=str
+  reference_value offset=8 size=8 count=1 kind=str
+  used_value offset=16 size=8 count=1 kind=str
+  reason offset=24 size=8 count=1 kind=str
+  effect offset=32 size=8 count=1 kind=str
+  avoidable offset=40 size=1 count=1 kind=u8
+  rsv0 offset=41 size=1 count=1 kind=u8
+  rsv1 offset=42 size=2 count=1 kind=u16
+  prov offset=44 size=4 count=1 kind=u32
+record kz_basis_item size=28 fields=7
+  name offset=0 size=8 count=1 kind=str
+  value offset=8 size=8 count=1 kind=str
+  policy offset=16 size=1 count=1 kind=u8
+  rsv0 offset=17 size=1 count=1 kind=u8
+  rsv1 offset=18 size=2 count=1 kind=u16
+  prov offset=20 size=4 count=1 kind=u32
+  deviation offset=24 size=4 count=1 kind=u32
+record kz_file_hash size=56 fields=5
+  path offset=0 size=8 count=1 kind=str
+  sha256 offset=8 size=1 count=32 kind=u8
+  size offset=40 size=8 count=1 kind=u64
+  prov offset=48 size=4 count=1 kind=u32
+  rsv0 offset=52 size=4 count=1 kind=u32
+record kz_witness size=112 fields=13
+  kind offset=0 size=1 count=1 kind=u8
+  status offset=1 size=1 count=1 kind=u8
+  naturalness offset=2 size=1 count=1 kind=u8
+  flags offset=3 size=1 count=1 kind=u8
+  realization offset=4 size=2 count=1 kind=u16
+  rsv0 offset=6 size=2 count=1 kind=u16
+  ordinal_k offset=8 size=4 count=1 kind=u32
+  rsv1 offset=12 size=4 count=1 kind=u32
+  actor offset=16 size=8 count=1 kind=str
+  run offset=24 size=40 count=1 kind=ref
+  events offset=64 size=40 count=1 kind=ref
+  n_events offset=104 size=4 count=1 kind=u32
+  rsv2 offset=108 size=4 count=1 kind=u32
+record kz_bound size=192 fields=21
+  h offset=0 size=4 count=1 kind=u32
+  policy offset=4 size=1 count=1 kind=u8
+  cls offset=5 size=1 count=1 kind=u8
+  reach offset=6 size=1 count=1 kind=u8
+  progress offset=7 size=1 count=1 kind=u8
+  progress_kind offset=8 size=1 count=1 kind=u8
+  safety_routes offset=9 size=1 count=1 kind=u8
+  flags offset=10 size=1 count=1 kind=u8
+  unknown_reason offset=11 size=1 count=1 kind=u8
+  progress_reason offset=12 size=1 count=1 kind=u8
+  progress_harm offset=13 size=1 count=1 kind=u8
+  refinements offset=14 size=2 count=1 kind=u16
+  progress_flags offset=16 size=2 count=1 kind=u16
+  rsv0 offset=18 size=2 count=1 kind=u16
+  n_bad offset=20 size=4 count=1 kind=u32
+  n_good offset=24 size=4 count=1 kind=u32
+  n_stall offset=28 size=4 count=1 kind=u32
+  witness_bad offset=32 size=40 count=1 kind=ref
+  witness_good offset=72 size=40 count=1 kind=ref
+  witness_stall offset=112 size=40 count=1 kind=ref
+  progress_chain offset=152 size=40 count=1 kind=ref
+record kz_verdict size=112 fields=15
+  instance offset=0 size=8 count=1 kind=u64
+  provider offset=8 size=1 count=1 kind=u8
+  rsv1 offset=9 size=1 count=1 kind=u8
+  scope offset=10 size=1 count=1 kind=u8
+  outcome_label offset=11 size=1 count=1 kind=u8
+  shape offset=12 size=1 count=1 kind=u8
+  consequence offset=13 size=1 count=1 kind=u8
+  harm offset=14 size=1 count=1 kind=u8
+  fw_doc offset=15 size=1 count=1 kind=u8
+  sublabels offset=16 size=4 count=1 kind=u32
+  ncells offset=20 size=4 count=1 kind=u32
+  first_cell offset=24 size=4 count=1 kind=u32
+  rsv2 offset=28 size=4 count=1 kind=u32
+  chain offset=32 size=40 count=1 kind=ref
+  provenance offset=72 size=40 count=1 kind=ref
+record kz_verdict_cell size=472 fields=32
+  sigma offset=0 size=1 count=1 kind=u8
+  mlevel offset=1 size=1 count=1 kind=u8
+  cls offset=2 size=1 count=1 kind=u8
+  unknown_reason offset=3 size=1 count=1 kind=u8
+  refinements offset=4 size=2 count=1 kind=u16
+  realization offset=6 size=2 count=1 kind=u16
+  naturalness offset=8 size=1 count=1 kind=u8
+  flags offset=9 size=1 count=1 kind=u8
+  reach offset=10 size=1 count=1 kind=u8
+  progress offset=11 size=1 count=1 kind=u8
+  progress_reason offset=12 size=1 count=1 kind=u8
+  progress_harm offset=13 size=1 count=1 kind=u8
+  progress_realization offset=14 size=1 count=1 kind=u8
+  safety_routes offset=15 size=1 count=1 kind=u8
+  progress_flags offset=16 size=2 count=1 kind=u16
+  progress_kind offset=18 size=1 count=1 kind=u8
+  fw_conf offset=19 size=1 count=1 kind=u8
+  proof_status offset=20 size=1 count=1 kind=u8
+  rsv2 offset=21 size=1 count=3 kind=u8
+  observed_n offset=24 size=4 count=1 kind=u32
+  observed_N offset=28 size=4 count=1 kind=u32
+  bounds offset=32 size=40 count=1 kind=ref
+  refinement_bounds offset=72 size=40 count=1 kind=ref
+  progress_bounds offset=112 size=40 count=1 kind=ref
+  pool_key offset=152 size=40 count=1 kind=ref
+  certificate offset=192 size=40 count=1 kind=ref
+  trust offset=232 size=40 count=1 kind=ref
+  witness_bad offset=272 size=40 count=1 kind=ref
+  witness_good offset=312 size=40 count=1 kind=ref
+  witness_stall offset=352 size=40 count=1 kind=ref
+  progress_chain offset=392 size=40 count=1 kind=ref
+  runs offset=432 size=40 count=1 kind=ref
+record kz_raw_ev size=64 fields=8
+  t_ns offset=0 size=8 count=1 kind=u64
+  tid offset=8 size=4 count=1 kind=u32
+  tseq offset=12 size=4 count=1 kind=u32
+  site offset=16 size=4 count=1 kind=u32
+  phase offset=20 size=2 count=1 kind=u16
+  flags offset=22 size=2 count=1 kind=u16
+  objseq offset=24 size=8 count=1 kind=u64
+  a offset=32 size=8 count=4 kind=u64
+record kz_site size=96 fields=15
+  site offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=2 count=1 kind=u16
+  insn_class offset=6 size=2 count=1 kind=u16
+  decoder offset=8 size=2 count=1 kind=u16
+  phases offset=10 size=2 count=1 kind=u16
+  line offset=12 size=4 count=1 kind=u32
+  file_offset offset=16 size=8 count=1 kind=u64
+  inode offset=24 size=8 count=1 kind=u64
+  device offset=32 size=8 count=1 kind=u64
+  build_id offset=40 size=1 count=20 kind=u8
+  symbol offset=60 size=8 count=1 kind=str
+  path offset=68 size=8 count=1 kind=str
+  label offset=76 size=8 count=1 kind=str
+  source offset=84 size=8 count=1 kind=str
+  rsv0 offset=92 size=4 count=1 kind=u32
+record kz_site_slot size=20 fields=7
+  site offset=0 size=4 count=1 kind=u32
+  slot offset=4 size=1 count=1 kind=u8
+  src offset=5 size=1 count=1 kind=u8
+  width offset=6 size=1 count=1 kind=u8
+  rsv0 offset=7 size=1 count=1 kind=u8
+  index offset=8 size=4 count=1 kind=u32
+  role offset=12 size=8 count=1 kind=str
+record kz_stack_frame size=24 fields=5
+  tid offset=0 size=4 count=1 kind=u32
+  tseq offset=4 size=4 count=1 kind=u32
+  index offset=8 size=4 count=1 kind=u32
+  flags offset=12 size=4 count=1 kind=u32
+  ip offset=16 size=8 count=1 kind=u64
+record kz_loss size=40 fields=10
+  source offset=0 size=1 count=1 kind=u8
+  rsv0 offset=1 size=1 count=1 kind=u8
+  cpu offset=2 size=2 count=1 kind=u16
+  site offset=4 size=4 count=1 kind=u32
+  tid offset=8 size=4 count=1 kind=u32
+  tseq_first offset=12 size=4 count=1 kind=u32
+  tseq_last offset=16 size=4 count=1 kind=u32
+  rsv1 offset=20 size=4 count=1 kind=u32
+  count offset=24 size=8 count=1 kind=u64
+  t_ns offset=32 size=8 count=1 kind=u64
+record kz_runmeta size=152 fields=14
+  basis_sha256 offset=0 size=1 count=32 kind=u8
+  plan_sha256 offset=32 size=1 count=32 kind=u8
+  s0_sha256 offset=64 size=1 count=32 kind=u8
+  run_ordinal offset=96 size=4 count=1 kind=u32
+  stratum offset=100 size=4 count=1 kind=u32
+  backend offset=104 size=1 count=1 kind=u8
+  fidelity offset=105 size=1 count=1 kind=u8
+  flags offset=106 size=2 count=1 kind=u16
+  n_holds offset=108 size=4 count=1 kind=u32
+  kernel offset=112 size=8 count=1 kind=str
+  harness offset=120 size=8 count=1 kind=str
+  placement offset=128 size=8 count=1 kind=str
+  observer_cpu_ns offset=136 size=8 count=1 kind=u64
+  boot_ns offset=144 size=8 count=1 kind=u64
+record kz_perturbation size=32 fields=8
+  kind offset=0 size=1 count=1 kind=u8
+  rsv0 offset=1 size=1 count=1 kind=u8
+  rsv1 offset=2 size=2 count=1 kind=u16
+  cost_class offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  rsv2 offset=12 size=4 count=1 kind=u32
+  count offset=16 size=8 count=1 kind=u64
+  ns offset=24 size=8 count=1 kind=u64
+record kz_side_ev size=40 fields=10
+  t_ns offset=0 size=8 count=1 kind=u64
+  pid offset=8 size=4 count=1 kind=u32
+  tid offset=12 size=4 count=1 kind=u32
+  ppid offset=16 size=4 count=1 kind=u32
+  ptid offset=20 size=4 count=1 kind=u32
+  kind offset=24 size=1 count=1 kind=u8
+  rsv0 offset=25 size=1 count=1 kind=u8
+  cpu offset=26 size=2 count=1 kind=u16
+  flags offset=28 size=4 count=1 kind=u32
+  comm offset=32 size=8 count=1 kind=str
+record kz_map_ev size=88 fields=15
+  t_ns offset=0 size=8 count=1 kind=u64
+  addr offset=8 size=8 count=1 kind=u64
+  len offset=16 size=8 count=1 kind=u64
+  pgoff offset=24 size=8 count=1 kind=u64
+  ino offset=32 size=8 count=1 kind=u64
+  bias offset=40 size=8 count=1 kind=u64
+  pid offset=48 size=4 count=1 kind=u32
+  tid offset=52 size=4 count=1 kind=u32
+  dev_major offset=56 size=4 count=1 kind=u32
+  dev_minor offset=60 size=4 count=1 kind=u32
+  prot offset=64 size=4 count=1 kind=u32
+  flags offset=68 size=4 count=1 kind=u32
+  bias_known offset=72 size=4 count=1 kind=u32
+  rsv0 offset=76 size=4 count=1 kind=u32
+  path offset=80 size=8 count=1 kind=str
+record kz_thread size=88 fields=16
+  pid offset=0 size=4 count=1 kind=u32
+  tid offset=4 size=4 count=1 kind=u32
+  generation offset=8 size=4 count=1 kind=u32
+  ptid offset=12 size=4 count=1 kind=u32
+  announced_id offset=16 size=4 count=1 kind=u32
+  flags offset=20 size=4 count=1 kind=u32
+  creator_event offset=24 size=4 count=1 kind=u32
+  first_event offset=28 size=4 count=1 kind=u32
+  t_fork offset=32 size=8 count=1 kind=u64
+  t_exit offset=40 size=8 count=1 kind=u64
+  t_name offset=48 size=8 count=1 kind=u64
+  entry_fn offset=56 size=8 count=1 kind=u64
+  priority offset=64 size=4 count=1 kind=u32
+  n_events offset=68 size=4 count=1 kind=u32
+  name offset=72 size=8 count=1 kind=str
+  entry_symbol offset=80 size=8 count=1 kind=str
+record kz_symbol size=40 fields=8
+  vaddr offset=0 size=8 count=1 kind=u64
+  size offset=8 size=8 count=1 kind=u64
+  file_offset offset=16 size=8 count=1 kind=u64
+  name offset=24 size=8 count=1 kind=str
+  bind offset=32 size=1 count=1 kind=u8
+  rsv0 offset=33 size=1 count=1 kind=u8
+  rsv1 offset=34 size=2 count=1 kind=u16
+  rsv2 offset=36 size=4 count=1 kind=u32
+record kz_target size=80 fields=14
+  id offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=2 count=1 kind=u16
+  insn_class offset=6 size=2 count=1 kind=u16
+  vaddr offset=8 size=8 count=1 kind=u64
+  file_offset offset=16 size=8 count=1 kind=u64
+  func_vaddr offset=24 size=8 count=1 kind=u64
+  delta offset=32 size=4 count=1 kind=u32
+  line offset=36 size=4 count=1 kind=u32
+  col offset=40 size=4 count=1 kind=u32
+  prov offset=44 size=4 count=1 kind=u32
+  insn offset=48 size=1 count=8 kind=u8
+  func offset=56 size=8 count=1 kind=str
+  file offset=64 size=8 count=1 kind=str
+  label offset=72 size=8 count=1 kind=str
+record kz_fact_func size=48 fields=10
+  fn offset=0 size=4 count=1 kind=u32
+  tu offset=4 size=4 count=1 kind=u32
+  name offset=8 size=8 count=1 kind=str
+  file offset=16 size=8 count=1 kind=str
+  line offset=24 size=4 count=1 kind=u32
+  col offset=28 size=4 count=1 kind=u32
+  end_line offset=32 size=4 count=1 kind=u32
+  fh offset=36 size=4 count=1 kind=u32
+  flags offset=40 size=4 count=1 kind=u32
+  nparams offset=44 size=4 count=1 kind=u32
+record kz_fact_call size=76 fields=19
+  site offset=0 size=4 count=1 kind=u32
+  tu offset=4 size=4 count=1 kind=u32
+  file offset=8 size=8 count=1 kind=str
+  caller offset=16 size=8 count=1 kind=str
+  callee offset=24 size=8 count=1 kind=str
+  line offset=32 size=4 count=1 kind=u32
+  col offset=36 size=4 count=1 kind=u32
+  first_arg offset=40 size=4 count=1 kind=u32
+  nargs offset=44 size=4 count=1 kind=u32
+  flags offset=48 size=4 count=1 kind=u32
+  loop_depth offset=52 size=2 count=1 kind=u16
+  rsv0 offset=54 size=2 count=1 kind=u16
+  caller_fn offset=56 size=4 count=1 kind=u32
+  callee_fn offset=60 size=4 count=1 kind=u32
+  fh offset=64 size=4 count=1 kind=u32
+  loop offset=68 size=4 count=1 kind=u32
+  kind offset=72 size=1 count=1 kind=u8
+  rsv1 offset=73 size=1 count=1 kind=u8
+  rsv2 offset=74 size=2 count=1 kind=u16
+record kz_fact_arg size=56 fields=12
+  site offset=0 size=4 count=1 kind=u32
+  index offset=4 size=4 count=1 kind=u32
+  kind offset=8 size=1 count=1 kind=u8
+  role offset=9 size=1 count=1 kind=u8
+  rsv0 offset=10 size=2 count=1 kind=u16
+  rsv1 offset=12 size=4 count=1 kind=u32
+  value offset=16 size=8 count=1 kind=i64
+  symbol offset=24 size=8 count=1 kind=str
+  loc_type offset=32 size=8 count=1 kind=str
+  loc_field offset=40 size=8 count=1 kind=str
+  fn offset=48 size=4 count=1 kind=u32
+  rsv2 offset=52 size=4 count=1 kind=u32
+record kz_fact_derives size=68 fields=15
+  site offset=0 size=4 count=1 kind=u32
+  arg_index offset=4 size=4 count=1 kind=u32
+  loc_type offset=8 size=8 count=1 kind=str
+  loc_field offset=16 size=8 count=1 kind=str
+  chain_root offset=24 size=4 count=1 kind=u32
+  rsv0 offset=28 size=4 count=1 kind=u32
+  file offset=32 size=8 count=1 kind=str
+  line offset=40 size=4 count=1 kind=u32
+  col offset=44 size=4 count=1 kind=u32
+  fh offset=48 size=4 count=1 kind=u32
+  hops offset=52 size=4 count=1 kind=u32
+  callee offset=56 size=8 count=1 kind=str
+  status offset=64 size=1 count=1 kind=u8
+  reason offset=65 size=1 count=1 kind=u8
+  rsv1 offset=66 size=2 count=1 kind=u16
+record kz_fact_expr size=32 fields=7
+  op offset=0 size=2 count=1 kind=u16
+  flags offset=2 size=2 count=1 kind=u16
+  a offset=4 size=4 count=1 kind=u32
+  b offset=8 size=4 count=1 kind=u32
+  rsv0 offset=12 size=4 count=1 kind=u32
+  value offset=16 size=8 count=1 kind=i64
+  name offset=24 size=8 count=1 kind=str
+record kz_fact_loop size=96 fields=24
+  site offset=0 size=4 count=1 kind=u32
+  line offset=4 size=4 count=1 kind=u32
+  file offset=8 size=8 count=1 kind=str
+  func offset=16 size=8 count=1 kind=str
+  delay_site offset=24 size=4 count=1 kind=u32
+  exit_root offset=28 size=4 count=1 kind=u32
+  modset_root offset=32 size=4 count=1 kind=u32
+  budget_root offset=36 size=4 count=1 kind=u32
+  lock_site offset=40 size=4 count=1 kind=u32
+  lock_kind offset=44 size=1 count=1 kind=u8
+  rsv0 offset=45 size=1 count=1 kind=u8
+  rsv1 offset=46 size=2 count=1 kind=u16
+  loop offset=48 size=4 count=1 kind=u32
+  fn offset=52 size=4 count=1 kind=u32
+  col offset=56 size=4 count=1 kind=u32
+  fh offset=60 size=4 count=1 kind=u32
+  depth offset=64 size=2 count=1 kind=u16
+  kind offset=66 size=1 count=1 kind=u8
+  trip_status offset=67 size=1 count=1 kind=u8
+  n_exits offset=68 size=4 count=1 kind=u32
+  n_calls offset=72 size=4 count=1 kind=u32
+  rsv2 offset=76 size=4 count=1 kind=u32
+  trip offset=80 size=8 count=1 kind=i64
+  table offset=88 size=8 count=1 kind=str
+record kz_fact_init size=64 fields=13
+  loc_type offset=0 size=8 count=1 kind=str
+  loc_field offset=8 size=8 count=1 kind=str
+  value offset=16 size=8 count=1 kind=i64
+  source offset=24 size=1 count=1 kind=u8
+  rsv0 offset=25 size=1 count=1 kind=u8
+  rsv1 offset=26 size=2 count=1 kind=u16
+  prov offset=28 size=4 count=1 kind=u32
+  object offset=32 size=8 count=1 kind=str
+  file offset=40 size=8 count=1 kind=str
+  line offset=48 size=4 count=1 kind=u32
+  col offset=52 size=4 count=1 kind=u32
+  fh offset=56 size=4 count=1 kind=u32
+  rsv2 offset=60 size=4 count=1 kind=u32
+record kz_fact_const size=56 fields=12
+  name offset=0 size=8 count=1 kind=str
+  file offset=8 size=8 count=1 kind=str
+  value offset=16 size=8 count=1 kind=i64
+  line offset=24 size=4 count=1 kind=u32
+  tu offset=28 size=4 count=1 kind=u32
+  prov offset=32 size=4 count=1 kind=u32
+  rsv0 offset=36 size=4 count=1 kind=u32
+  text offset=40 size=8 count=1 kind=str
+  fh offset=48 size=4 count=1 kind=u32
+  kind offset=52 size=1 count=1 kind=u8
+  rsv1 offset=53 size=1 count=1 kind=u8
+  rsv2 offset=54 size=2 count=1 kind=u16
+record kz_fact_atype size=56 fields=12
+  kind offset=0 size=1 count=1 kind=u8
+  rsv0 offset=1 size=1 count=1 kind=u8
+  rsv1 offset=2 size=2 count=1 kind=u16
+  site offset=4 size=4 count=1 kind=u32
+  loc_type offset=8 size=8 count=1 kind=str
+  loc_field offset=16 size=8 count=1 kind=str
+  file offset=24 size=8 count=1 kind=str
+  line offset=32 size=4 count=1 kind=u32
+  col offset=36 size=4 count=1 kind=u32
+  fh offset=40 size=4 count=1 kind=u32
+  fn offset=44 size=4 count=1 kind=u32
+  detail offset=48 size=8 count=1 kind=str
+record kz_fact_writer size=112 fields=25
+  loc_type offset=0 size=8 count=1 kind=str
+  loc_field offset=8 size=8 count=1 kind=str
+  file offset=16 size=8 count=1 kind=str
+  func offset=24 size=8 count=1 kind=str
+  line offset=32 size=4 count=1 kind=u32
+  col offset=36 size=4 count=1 kind=u32
+  site offset=40 size=4 count=1 kind=u32
+  kind offset=44 size=1 count=1 kind=u8
+  value_kind offset=45 size=1 count=1 kind=u8
+  tstatus offset=46 size=1 count=1 kind=u8
+  kstatus offset=47 size=1 count=1 kind=u8
+  wd offset=48 size=1 count=1 kind=u8
+  rsv0 offset=49 size=1 count=1 kind=u8
+  rsv1 offset=50 size=2 count=1 kind=u16
+  guard_root offset=52 size=4 count=1 kind=u32
+  key offset=56 size=8 count=1 kind=str
+  value offset=64 size=8 count=1 kind=i64
+  value_text offset=72 size=8 count=1 kind=str
+  via_file offset=80 size=8 count=1 kind=str
+  fh offset=88 size=4 count=1 kind=u32
+  fn offset=92 size=4 count=1 kind=u32
+  via_line offset=96 size=4 count=1 kind=u32
+  via_fn offset=100 size=4 count=1 kind=u32
+  flags offset=104 size=4 count=1 kind=u32
+  rsv2 offset=108 size=4 count=1 kind=u32
+record kz_fact_alloc size=56 fields=9
+  site offset=0 size=4 count=1 kind=u32
+  node offset=4 size=4 count=1 kind=u32
+  file offset=8 size=8 count=1 kind=str
+  func offset=16 size=8 count=1 kind=str
+  line offset=24 size=4 count=1 kind=u32
+  record_type offset=28 size=8 count=1 kind=str
+  tag_field offset=36 size=8 count=1 kind=str
+  rsv0 offset=44 size=4 count=1 kind=u32
+  tag_value offset=48 size=8 count=1 kind=i64
+record kz_anchor size=64 fields=11
+  site offset=0 size=4 count=1 kind=u32
+  audit offset=4 size=1 count=1 kind=u8
+  rsv0 offset=5 size=1 count=1 kind=u8
+  insn_class offset=6 size=2 count=1 kind=u16
+  file_offset offset=8 size=8 count=1 kind=u64
+  build_id offset=16 size=1 count=20 kind=u8
+  function offset=36 size=8 count=1 kind=str
+  binary offset=44 size=8 count=1 kind=str
+  line offset=52 size=4 count=1 kind=u32
+  col offset=56 size=4 count=1 kind=u32
+  rsv1 offset=60 size=4 count=1 kind=u32
+record kz_actor size=24 fields=7
+  actor offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=1 count=1 kind=u8
+  once offset=5 size=1 count=1 kind=u8
+  rsv0 offset=6 size=2 count=1 kind=u16
+  entry_node offset=8 size=4 count=1 kind=u32
+  generation offset=12 size=4 count=1 kind=u32
+  name offset=16 size=8 count=1 kind=str
+record kz_closure_spawn size=16 fields=6
+  actor offset=0 size=4 count=1 kind=u32
+  spawn_site offset=4 size=4 count=1 kind=u32
+  creator offset=8 size=4 count=1 kind=u32
+  resolution offset=12 size=1 count=1 kind=u8
+  rsv0 offset=13 size=1 count=1 kind=u8
+  rsv1 offset=14 size=2 count=1 kind=u16
+record kz_skel_node size=28 fields=10
+  actor offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=1 count=1 kind=u8
+  view offset=5 size=1 count=1 kind=u8
+  flags offset=6 size=2 count=1 kind=u16
+  site offset=8 size=4 count=1 kind=u32
+  context offset=12 size=4 count=1 kind=u32
+  profile_entry offset=16 size=4 count=1 kind=u32
+  conjunct offset=20 size=2 count=1 kind=u16
+  rsv0 offset=22 size=2 count=1 kind=u16
+  region offset=24 size=4 count=1 kind=u32
+record kz_skel_edge size=16 fields=6
+  from offset=0 size=4 count=1 kind=u32
+  to offset=4 size=4 count=1 kind=u32
+  kind offset=8 size=1 count=1 kind=u8
+  rsv0 offset=9 size=1 count=1 kind=u8
+  rsv1 offset=10 size=2 count=1 kind=u16
+  label offset=12 size=4 count=1 kind=u32
+record kz_skel_once size=48 fields=5
+  subject_kind offset=0 size=1 count=1 kind=u8
+  rule offset=1 size=1 count=1 kind=u8
+  rsv0 offset=2 size=2 count=1 kind=u16
+  subject offset=4 size=4 count=1 kind=u32
+  derivation offset=8 size=40 count=1 kind=ref
+record kz_fact_target size=24 fields=7
+  site offset=0 size=4 count=1 kind=u32
+  fn offset=4 size=4 count=1 kind=u32
+  kind offset=8 size=1 count=1 kind=u8
+  reason offset=9 size=1 count=1 kind=u8
+  rsv0 offset=10 size=2 count=1 kind=u16
+  n offset=12 size=4 count=1 kind=u32
+  via offset=16 size=8 count=1 kind=str
+record kz_fact_image size=56 fields=11
+  object offset=0 size=8 count=1 kind=str
+  path offset=8 size=8 count=1 kind=str
+  value offset=16 size=8 count=1 kind=i64
+  text offset=24 size=8 count=1 kind=str
+  fn offset=32 size=4 count=1 kind=u32
+  kind offset=36 size=1 count=1 kind=u8
+  rsv0 offset=37 size=1 count=1 kind=u8
+  rsv1 offset=38 size=2 count=1 kind=u16
+  file offset=40 size=8 count=1 kind=str
+  line offset=48 size=4 count=1 kind=u32
+  fh offset=52 size=4 count=1 kind=u32
+record kz_fact_loc size=60 fields=15
+  loc_type offset=0 size=8 count=1 kind=str
+  loc_field offset=8 size=8 count=1 kind=str
+  n_writers offset=16 size=4 count=1 kind=u32
+  n_direct offset=20 size=4 count=1 kind=u32
+  n_data_fn offset=24 size=4 count=1 kind=u32
+  n_outptr offset=28 size=4 count=1 kind=u32
+  n_untyped offset=32 size=4 count=1 kind=u32
+  n_escape offset=36 size=4 count=1 kind=u32
+  n_cast offset=40 size=4 count=1 kind=u32
+  n_union offset=44 size=4 count=1 kind=u32
+  n_init offset=48 size=4 count=1 kind=u32
+  n_unresolved_indirect offset=52 size=4 count=1 kind=u32
+  status offset=56 size=1 count=1 kind=u8
+  rsv0 offset=57 size=1 count=1 kind=u8
+  rsv1 offset=58 size=2 count=1 kind=u16
+record kz_fact_terminal size=48 fields=10
+  site offset=0 size=4 count=1 kind=u32
+  fn offset=4 size=4 count=1 kind=u32
+  guard_root offset=8 size=4 count=1 kind=u32
+  depth offset=12 size=4 count=1 kind=u32
+  op offset=16 size=8 count=1 kind=str
+  file offset=24 size=8 count=1 kind=str
+  line offset=32 size=4 count=1 kind=u32
+  col offset=36 size=4 count=1 kind=u32
+  fh offset=40 size=4 count=1 kind=u32
+  flags offset=44 size=4 count=1 kind=u32
+record kz_fact_outcall size=64 fields=14
+  site offset=0 size=4 count=1 kind=u32
+  arg_index offset=4 size=4 count=1 kind=u32
+  callee_fn offset=8 size=4 count=1 kind=u32
+  n_stores offset=12 size=4 count=1 kind=u32
+  loc_type offset=16 size=8 count=1 kind=str
+  loc_field offset=24 size=8 count=1 kind=str
+  callee offset=32 size=8 count=1 kind=str
+  file offset=40 size=8 count=1 kind=str
+  line offset=48 size=4 count=1 kind=u32
+  col offset=52 size=4 count=1 kind=u32
+  fh offset=56 size=4 count=1 kind=u32
+  summary offset=60 size=1 count=1 kind=u8
+  rsv0 offset=61 size=1 count=1 kind=u8
+  rsv1 offset=62 size=2 count=1 kind=u16
+record kz_tu size=72 fields=7
+  tu offset=0 size=4 count=1 kind=u32
+  fh offset=4 size=4 count=1 kind=u32
+  source offset=8 size=8 count=1 kind=str
+  object offset=16 size=8 count=1 kind=str
+  flags offset=24 size=8 count=1 kind=str
+  member offset=32 size=8 count=1 kind=str
+  command_sha256 offset=40 size=1 count=32 kind=u8
+record kz_cert_step size=36 fields=11
+  rule offset=0 size=4 count=1 kind=u32
+  from_node offset=4 size=4 count=1 kind=u32
+  to_node offset=8 size=4 count=1 kind=u32
+  site_from offset=12 size=4 count=1 kind=u32
+  site_to offset=16 size=4 count=1 kind=u32
+  profile_entry offset=20 size=4 count=1 kind=u32
+  tstatus offset=24 size=2 count=1 kind=u16
+  kstatus offset=26 size=2 count=1 kind=u16
+  view offset=28 size=4 count=1 kind=u32
+  flags offset=32 size=2 count=1 kind=u16
+  rsv0 offset=34 size=2 count=1 kind=u16
+record kz_cert size=136 fields=11
+  instance offset=0 size=8 count=1 kind=u64
+  kind offset=8 size=1 count=1 kind=u8
+  mlevel offset=9 size=1 count=1 kind=u8
+  flags offset=10 size=1 count=1 kind=u8
+  proof_status offset=11 size=1 count=1 kind=u8
+  nsteps offset=12 size=4 count=1 kind=u32
+  first_step offset=16 size=4 count=1 kind=u32
+  rsv1 offset=20 size=4 count=1 kind=u32
+  contested_profile offset=24 size=1 count=32 kind=u8
+  trust offset=56 size=40 count=1 kind=ref
+  contested_by offset=96 size=40 count=1 kind=ref
+record kz_trust size=60 fields=9
+  part offset=0 size=1 count=1 kind=u8
+  kind offset=1 size=1 count=1 kind=u8
+  status offset=2 size=1 count=1 kind=u8
+  proof offset=3 size=1 count=1 kind=u8
+  ident offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  refutes offset=12 size=4 count=1 kind=u32
+  bound offset=16 size=4 count=1 kind=u32
+  source offset=20 size=40 count=1 kind=ref
+record kz_trust_ledger size=224 fields=11
+  n_rechecked offset=0 size=4 count=1 kind=u32
+  n_extracted offset=4 size=4 count=1 kind=u32
+  n_trusted offset=8 size=4 count=1 kind=u32
+  n_refutable offset=12 size=4 count=1 kind=u32
+  first offset=16 size=4 count=1 kind=u32
+  count offset=20 size=4 count=1 kind=u32
+  facts offset=24 size=40 count=1 kind=ref
+  skel offset=64 size=40 count=1 kind=ref
+  anchors offset=104 size=40 count=1 kind=ref
+  profile offset=144 size=40 count=1 kind=ref
+  checker offset=184 size=40 count=1 kind=ref
+record kz_obligation size=64 fields=8
+  obligation offset=0 size=4 count=1 kind=u32
+  status offset=4 size=1 count=1 kind=u8
+  rsv0 offset=5 size=1 count=1 kind=u8
+  rsv1 offset=6 size=2 count=1 kind=u16
+  first_run offset=8 size=4 count=1 kind=u32
+  n_runs offset=12 size=4 count=1 kind=u32
+  exercised_limit offset=16 size=8 count=1 kind=str
+  witness offset=24 size=40 count=1 kind=ref
+enum KZ_ARTIFACT
+  0x0 NONE "none"
+  0x1 BASIS "basis"
+  0x2 PROFILE "profile"
+  0x3 FACTS "facts"
+  0x4 ANCHORS "anchors"
+  0x5 SKEL "skel"
+  0x6 CENSUS "census"
+  0x7 PLAN "plan"
+  0x8 RUN "run"
+  0x9 HB "hb"
+  0xa WITNESS "witness"
+  0xb HOLDPLAN "holdplan"
+  0xc VERDICTS "verdicts"
+  0xd LOOP "loop"
+  0xe TEST "unit-test"
+enum KZ_POLICY
+  0x0 UNSET "unset"
+  0x1 FROM_REFERENCE "from-reference"
+  0x2 DEVIATION "deviation"
+  0x3 UNSPECIFIED "unspecified_by_reference"
+  0x4 UNIT_TEST "unit-test-value"
+  0x5 DECLARED "declared-assumption"
+enum KZ_AVOIDABLE
+  0x0 UNKNOWN "unknown"
+  0x1 YES "yes"
+  0x2 NO "no"
+enum KZ_TIER
+  0x0 UNREFERENCED "unreferenced"
+  0x1 DOC_BACKED "contract-backed"
+  0x2 ADMITTED "admitted"
+  0x3 CODE_DERIVED "code-derived"
+  0x4 ISSUE_DERIVED "issue-derived"
+  0x5 RESEARCHER "researcher"
+enum KZ_PROV_KIND
+  0x0 NONE "none"
+  0x1 API_DOC "api_doc"
+  0x2 REQUIREMENT "requirement"
+  0x3 CODE_ADMISSION "code_admission"
+  0x4 CODE_PATTERN "code_pattern"
+  0x5 ISSUE "issue"
+  0x6 RESEARCHER "researcher"
+enum KZ_PROV_SIDE
+  0x0 NA "n/a"
+  0x1 SUPPLIER "supplier"
+  0x2 CALLER "caller"
+  0x3 RULE "rule"
+enum KZ_SIGMA
+  0x0 NONE "unset"
+  0x1 U "sigma_U"
+  0x2 U_INF "sigma_Uinf"
+  0x3 R1 "sigma_R1"
+  0x4 E "sigma_E"
+enum KZ_MLEVEL
+  0x0 NONE "unset"
+  0x1 API "M_api"
+  0x2 IMPL "M_impl"
+enum KZ_CLS
+  0x0 UNKNOWN "unknown"
+  0x1 INACTIVE "inactive"
+  0x2 PROTECTED "protected"
+  0x3 FIXED "fixed-order"
+  0x4 NO_FINAL "no-final-status"
+  0x5 SCHED_DEP "schedule-dependent"
+  0x6 ORDINAL_SPLIT "ordinal-split"
+  0x7 CONTESTED "contested"
+enum KZ_UNKNOWN_REASON
+  0x0 NONE "none"
+  0x1 NOT_REACHED "not_reached"
+  0x2 MODEL_GAP "model_gap"
+  0x3 BOUND "bound"
+  0x4 BUDGET "budget"
+  0x5 KEY_UNRESOLVED "key_unresolved"
+  0x6 LOSS "loss"
+  0x7 UNMODELLED "unmodelled"
+  0x8 WRITER_INCOMPLETE "writer_incomplete"
+  0x9 HORIZON "horizon"
+  0xa HORIZON_STATIC "horizon_static"
+  0xb NO_DECISION_ROUTE "no_decision_route"
+  0xc ONE_SIDED "one_sided"
+  0xd UNORDERED "unordered"
+  0xe O_ORDERED_ONLY "O-ordered-only"
+  0xf CONDITIONAL_OBSERVATION "conditional-observation"
+  0x10 CONFORMANCE "conformance"
+  0x11 MODEL_FAULT "model_fault"
+  0x12 MODEL_LEVEL "model_level"
+enum KZ_REACH
+  0x0 ASSUMED "assumed"
+  0x1 PROVED "proved"
+  0x2 MODEL_B "model(b)"
+  0x3 UNREACHED_B "unreached(b)"
+  0x4 CONTESTED "contested"
+enum KZ_PROGRESS
+  0x0 UNKNOWN "unknown"
+  0x1 STALL_WITNESS "stall-witness"
+  0x2 NO_STALL_B "no-stall-within(b)"
+  0x3 CONTESTED "contested"
+enum KZ_PROGRESS_REASON
+  0x0 NOT_CHECKED "not_checked"
+  0x1 BOUND "bound"
+  0x2 BUDGET "budget"
+  0x3 UNMODELLED "unmodelled"
+  0x4 TEARDOWN_SCOPE "teardown_scope"
+  0x5 MODEL_GAP "model_gap"
+  0x6 MODEL_FAULT "model_fault"
+enum KZ_PROGRESS_HARM
+  0x0 NONE "none"
+  0x1 HANG_OR_DEADLOCK "hang_or_deadlock"
+  0x2 TASK_NEVER_RUNS "task_never_runs"
+  0x3 TERMINAL_PENDING_PANIC "terminal_pending(panic)"
+  0x4 TERMINAL_PENDING_ABORT "terminal_pending(abort)"
+enum KZ_PROGRESS_REALIZATION
+  0x0 NONE "none"
+  0x1 MODEL "model(b)"
+  0x2 REALIZED "realized"
+flags KZ_PROGRESS_KIND
+  0x1 PRE_USE "pre-use"
+  0x2 IN_USE "in-use"
+  0x4 HORIZON "horizon"
+flags KZ_PROGRESS_FLAG
+  0x1 DEADLOCK_CYCLE "deadlock-cycle"
+  0x2 LEAKED_LOCK "leaked-lock"
+  0x4 IDLE "idle"
+  0x8 TERMINAL_PENDING "terminal-pending"
+  0x10 CHOICE_DEPENDENT "choice-dependent"
+  0x20 CONFIRMABLE "confirmable"
+  0x40 CHAINED "chained"
+  0x80 TIMEOUT_MASKED_LIVENESS "timeout-masked-liveness"
+  0x100 TML_ROOT "tml-root"
+enum KZ_ROUTE
+  0x0 NONE "none"
+  0x1 CERT "cert"
+  0x2 MODEL "model"
+  0x3 TRANSFERRED "transferred"
+flags KZ_REFINEMENT
+  0x1 TOLERATED "tolerated"
+  0x2 TIMEOUT_DEP "timeout-dependent"
+  0x4 TIMEOUT_RESCUED "timeout-rescued"
+flags KZ_REALIZATION
+  0x1 CERT "certificate"
+  0x2 MODEL "model(b)"
+  0x4 PREDICTED "predicted"
+  0x8 PRED_MODELLED "predicted-modelled"
+  0x10 PRED_EXTRAP "predicted-extrapolated"
+  0x20 REALIZED "realized"
+flags KZ_NATURALNESS
+  0x1 NATURAL "natural"
+  0x2 HELD_F0 "held-F0"
+  0x4 GATED_F1 "gated-F1"
+  0x8 TIMEOUT_EXERCISED "timeout-exercised"
+flags KZ_CELL_FLAG
+  0x1 DERIVED "derived"
+  0x2 SIGMA_E_HELD "sigma_E(held)"
+  0x4 SAFETY_TRANSFERRED "safety-transferred"
+  0x8 DECIDES "decides"
+enum KZ_FW_CONF
+  0x0 UNKNOWN "unknown"
+  0x1 AS_DOCUMENTED "as-documented"
+  0x2 DEVIATES "deviates"
+flags KZ_FW_DOC
+  0x1 DOC_NOT_ERROR "documented-not-error"
+  0x2 DOC_RESULT "documented-result"
+  0x4 UNDOCUMENTED "undocumented"
+enum KZ_PROVIDER
+  0x0 UNKNOWN "unknown"
+  0x1 PRESENT "present"
+  0x2 NONE "none"
+  0x3 ENV_ABSENT "env-absent"
+enum KZ_SCOPE
+  0x0 IN_SCOPE "in-scope"
+  0x1 TEARDOWN "teardown"
+enum KZ_OUTCOME_LABEL
+  0x0 NONE "none"
+  0x1 VIOLATION "violation"
+  0x2 LOSS_UNDER_ORDER "LOSS-UNDER-ORDER"
+  0x3 NOT_READY_UNJUDGED "not-ready-unjudged"
+enum KZ_SHAPE
+  0x0 NONE "none"
+  0x1 WRONG_WAY "WRONG-WAY"
+  0x2 UNORDERED "UNORDERED"
+  0x3 ABSENT "ABSENT"
+  0x4 NOT_OBSERVED "NOT-OBSERVED"
+  0x5 STALE "STALE"
+enum KZ_CONSEQUENCE
+  0x0 NOT_OBSERVED "not-observed"
+  0x1 CRASH_OR_UB "crash-or-ub"
+  0x2 DEADLOCK "deadlock"
+  0x3 PROCESS_ABORT "process-abort"
+  0x4 PANIC "panic"
+  0x5 TASK_LOST "task-lost"
+  0x6 APP_ERROR_EXIT "app-error-exit"
+  0x7 APP_ZOMBIE "app-zombie"
+  0x8 CORE_SERVICE_TASK_ABSENT "core-service-task-absent"
+  0x9 STATUS_IGNORED_EFFECT_LOST "status-ignored-effect-lost"
+  0xa EVENT_THEN_CONTINUE "event-then-continue"
+  0xb DELAYED_BUT_RECOVERED "delayed-but-recovered"
+  0xc MESSAGE_LOST "message-lost"
+  0xd EVENT_REJECTED "event-rejected"
+enum KZ_HARM
+  0x0 UNSPECIFIED "unspecified_by_reference"
+  0x1 EVENT_REQUEST_REJECTED "event_request_rejected"
+  0x2 STATUS_IGNORED "status_ignored"
+  0x3 WRONG_IDENTITY_STAMPED "wrong_identity_stamped"
+  0x4 APP_ERROR_EXIT "app_error_exit"
+  0x5 APP_ZOMBIE "app_zombie"
+  0x6 SERVICE_TASK_ABSENT "service_task_absent"
+  0x7 PROCESSOR_RESET_REQUESTED "processor_reset_requested"
+  0x8 PROCESS_ABORT "process_abort"
+  0x9 PANIC "panic"
+  0xa TASK_NEVER_RUNS "task_never_runs"
+  0xb HANG_OR_DEADLOCK "hang_or_deadlock"
+  0xc TERMINAL_PENDING_PANIC "terminal_pending(panic)"
+  0xd TERMINAL_PENDING_ABORT "terminal_pending(abort)"
+  0xe MESSAGE_LOST "message_lost"
+flags KZ_SUBLABEL
+  0x1 PORTABILITY_HAZARD "portability-hazard"
+  0x2 IMPL_DEFECT_CANDIDATE "implementation-defect-candidate"
+  0x4 PORTABILITY_HAZARD_EVIDENCE "portability-hazard-evidence"
+  0x8 ASSUMED_VISIBILITY "assumed-visibility"
+  0x10 A_ZT "A-ZT"
+  0x20 TB_UNDECLARED "tb-undeclared"
+enum KZ_WITNESS_KIND
+  0x0 NONE "none"
+  0x1 BAD "bad"
+  0x2 GOOD "good"
+  0x3 STALL "stall"
+enum KZ_OCC
+  0x0 NOT_EVALUATED "NOT_EVALUATED"
+  0x1 READY "READY"
+  0x2 TOLERATED "TOLERATED"
+  0x3 VIOLATING "VIOLATING"
+  0x4 PENDING "PENDING"
+  0x5 NOT_READY_UNJUDGED "NOT_READY_UNJUDGED"
+enum KZ_PHASE
+  0x0 NONE "none"
+  0x1 ENTRY "ENTRY"
+  0x2 POINT "POINT"
+  0x3 RET "RET"
+  0x4 WATCH "WATCH"
+  0x5 GATE "GATE"
+  0x6 MARK "MARK"
+flags KZ_RAW_FLAG
+  0x1 STR_FOLLOWS "STR_FOLLOWS"
+  0x2 STACK_FOLLOWS "STACK_FOLLOWS"
+  0x4 TRUNC "TRUNC"
+  0x8 OBJSEQ_VALID "OBJSEQ_VALID"
+enum KZ_SITE_KIND
+  0x0 NONE "none"
+  0x1 ENTRY_PROBE "entry-probe"
+  0x2 POINT_PROBE "point-probe"
+  0x3 RET_PROBE "ret-probe"
+  0x4 WATCHPOINT "watchpoint"
+  0x5 GATE "gate"
+enum KZ_INSN_CLASS
+  0x0 UNKNOWN "unknown"
+  0x1 EMULATED "emulated"
+  0x2 TRAP "trap"
+flags KZ_SITE_PHASE
+  0x1 ENTRY "ENTRY"
+  0x2 POINT "POINT"
+  0x4 RET "RET"
+  0x8 WATCH "WATCH"
+  0x10 GATE "GATE"
+enum KZ_DECODER
+  0x0 NONE "none"
+  0x1 GENERIC "generic"
+  0x2 SPAWN_CREATE "spawn-create"
+  0x3 SPAWN_RETURN "spawn-return"
+  0x4 THREAD_ENTRY "thread-entry"
+enum KZ_SLOT_SRC
+  0x0 NONE "none"
+  0x1 REG "reg"
+  0x2 STACK "stack"
+  0x3 IP "ip"
+enum KZ_LOSS_SOURCE
+  0x0 NONE "none"
+  0x1 RING_RESERVE_FAIL "ring-reserve-fail"
+  0x2 PERF_RECORD_LOST "perf-record-lost"
+  0x3 TSEQ_GAP "tseq-gap"
+  0x4 PERF_THROTTLE "perf-throttle"
+enum KZ_BACKEND
+  0x0 NONE "none"
+  0x1 PERF_SAMPLE "perf-sample"
+  0x2 BPF_RAW "bpf-raw"
+  0x3 TRACEFS "tracefs"
+  0x4 GDB "gdb"
+enum KZ_FIDELITY
+  0x0 NONE "none"
+  0x1 F0 "F0"
+  0x2 F1 "F1"
+  0x3 F2 "F2"
+  0x4 F3 "F3"
+enum KZ_STRATUM
+  0x0 NONE "none"
+  0x1 WARM "warm"
+  0x2 COLD "cold"
+flags KZ_RUN_FLAG
+  0x1 NORMALIZATION_BOOT "normalization-boot"
+  0x2 HOLDS_USED "holds-used"
+  0x4 ABNORMAL_EXIT "abnormal-exit"
+  0x8 LOSS_PRESENT "loss-present"
+enum KZ_PERTURBATION_KIND
+  0x0 NONE "none"
+  0x1 PROBE_HITS "probe-hits"
+  0x2 HOLD "hold"
+  0x3 OBSERVER_CPU "observer-cpu"
+  0x4 BOOT_TIME "boot-time"
+enum KZ_SIDE_KIND
+  0x0 NONE "none"
+  0x1 FORK "FORK"
+  0x2 EXIT "EXIT"
+  0x3 COMM "COMM"
+flags KZ_SIDE_FLAG
+  0x1 COMM_EXEC "comm-exec"
+flags KZ_THREAD_FLAG
+  0x1 FORK_SEEN "fork-seen"
+  0x2 COMM_SEEN "comm-seen"
+  0x4 ENTRY_SEEN "entry-seen"
+  0x8 SPAWN_MATCHED "spawn-matched"
+  0x10 SPAWN_AMBIGUOUS "spawn-ambiguous"
+  0x20 NAME_INHERITED "name-inherited"
+  0x40 NAME_AFTER_FIRST_EVENT "name-after-first-event"
+  0x80 TID_REUSED "tid-reused"
+  0x100 EXIT_SEEN "exit-seen"
+  0x200 ENTRY_UNMATCHED "entry-unmatched"
+enum KZ_SYMBOL_BIND
+  0x0 LOCAL "local"
+  0x1 GLOBAL "global"
+  0x2 WEAK "weak"
+enum KZ_TARGET_KIND
+  0x0 NONE "none"
+  0x1 FUNC_ENTRY "func-entry"
+  0x2 AFTER_CALL "after-call"
+enum KZ_ARG_KIND
+  0x0 NONE "none"
+  0x1 CONST "const"
+  0x2 SYMBOLIC "symbolic"
+  0x3 TOP "top"
+  0x4 FUNC "function"
+  0x5 STRING "string"
+  0x6 ADDR_FIELD "addr-of-field"
+  0x7 ADDR_OBJECT "addr-of-object"
+enum KZ_ARG_ROLE
+  0x0 NONE "none"
+  0x1 STAMP "stamp"
+  0x2 KEY "key"
+  0x3 ID "id"
+flags KZ_CALL_FLAG
+  0x1 IN_MACRO "in-macro"
+  0x2 INTRA_TU "intra-tu"
+  0x4 RESULT_USED "result-used"
+  0x8 RESULT_TESTED "result-tested"
+  0x10 IN_LOOP "in-loop"
+  0x20 TERMINAL_OP "terminal-op"
+  0x40 SPAWN_OP "spawn-op"
+  0x80 DELAY_OP "delay-op"
+  0x100 DATA_FN "data-fn"
+  0x200 LOCK_OP "lock-op"
+  0x400 UNLOCK_OP "unlock-op"
+enum KZ_CALL_KIND
+  0x0 NONE "none"
+  0x1 DIRECT "direct"
+  0x2 INDIRECT "indirect"
+  0x3 BUILTIN "builtin"
+flags KZ_FUNC_FLAG
+  0x1 DEFINED "defined"
+  0x2 STATIC "static"
+  0x4 ADDRESS_TAKEN "address-taken"
+  0x8 VARIADIC "variadic"
+  0x10 BUILTIN "builtin"
+  0x20 INLINE "inline"
+enum KZ_DERIVES_STATUS
+  0x0 NOT_DERIVED "not-derived"
+  0x1 DERIVED "derived"
+  0x2 CONSTANT "constant"
+enum KZ_DERIVES_REASON
+  0x0 NONE "none"
+  0x1 MULTI_DEF "multiple-definitions"
+  0x2 NOT_COPY "not-a-copy"
+  0x3 ADDRESS_TAKEN "address-taken"
+  0x4 FROM_PARAM "from-parameter"
+  0x5 FROM_CALL "from-call-result"
+  0x6 MULTI_LOC "several-locations"
+  0x7 NO_DEF "no-definition"
+  0x8 NOT_SHARED "not-a-shared-location"
+enum KZ_EXPR_OP
+  0x0 NONE "none"
+  0x1 CONST "const"
+  0x2 LOAD "load"
+  0x3 AND "and"
+  0x4 OR "or"
+  0x5 NOT "not"
+  0x6 EQ "eq"
+  0x7 NE "ne"
+  0x8 LT "lt"
+  0x9 LE "le"
+  0xa ADD "add"
+  0xb SUB "sub"
+  0xc CALL_RESULT "call-result"
+  0xd COPY "copy"
+  0xe SEQ "seq"
+  0xf LOCSET "locset"
+  0x10 GT "gt"
+  0x11 GE "ge"
+  0x12 MUL "mul"
+  0x13 DIV "div"
+  0x14 MOD "mod"
+  0x15 BITAND "bitand"
+  0x16 BITOR "bitor"
+  0x17 BITXOR "bitxor"
+  0x18 SHL "shl"
+  0x19 SHR "shr"
+  0x1a NEG "neg"
+  0x1b BITNOT "bitnot"
+  0x1c COND "cond"
+  0x1d TOP "top"
+  0x1e ADDR "addr"
+  0x1f INDEX "index"
+  0x20 DEREF "deref"
+  0x21 STORE "store"
+enum KZ_EXPR_REF
+  0x0 NONE "none"
+  0x1 FIELD "field"
+  0x2 GLOBAL "global"
+  0x3 LOCAL "local"
+  0x4 PARAM "param"
+  0x5 STRING "string"
+  0x6 FUNC "function"
+enum KZ_LOCK_KIND
+  0x0 NONE "none"
+  0x1 ONE_REGION "one-lock-region"
+  0x2 ATOMIC_READ "atomic-read"
+enum KZ_LOOP_KIND
+  0x0 OTHER "other"
+  0x1 CONST_TRIP "constant-trip"
+  0x2 COUNT_BOUNDED "count-bounded"
+  0x3 POLL "poll"
+  0x4 TABLE_WALK "table-walk"
+  0x5 MESSAGE "message-loop"
+enum KZ_TRIP_STATUS
+  0x0 UNKNOWN "unknown"
+  0x1 EXACT "exact"
+  0x2 UPPER_BOUND "upper-bound"
+  0x3 NONCONSTANT "non-constant-bound"
+enum KZ_INIT_SOURCE
+  0x0 NONE "none"
+  0x1 STATIC_INIT "static-initializer"
+  0x2 ZERO "zero-initialized"
+  0x3 DECODED_S0 "decoded-S0"
+  0x4 NONCONST "static-initializer-non-constant"
+enum KZ_CONST_KIND
+  0x0 NONE "none"
+  0x1 INT "int"
+  0x2 STRING "string"
+enum KZ_ATYPE_KIND
+  0x0 NONE "none"
+  0x1 UNTYPED_WRITE "untyped-write"
+  0x2 ADDRESS_ESCAPE "address-escape"
+  0x3 CAST "cast"
+  0x4 UNION "union"
+enum KZ_WRITER_KIND
+  0x0 NONE "none"
+  0x1 ASSIGN "assign"
+  0x2 MEMSET "memset"
+  0x3 MEMCPY "memcpy"
+  0x4 OUTPTR "out-pointer"
+  0x5 EXTERNAL "external"
+  0x6 UNKNOWN_EFFECT "unknown_effect"
+  0x7 INCDEC "inc-dec"
+  0x8 AGGREGATE "aggregate-assign"
+flags KZ_WD
+  0x1 W "W"
+  0x2 W_MUST "W_must"
+  0x4 D "D"
+flags KZ_WRITER_FLAG
+  0x1 EARLY_INIT "early-init"
+  0x2 INIT_TREE "init-tree"
+  0x4 BASE_LOCAL "base-local"
+  0x8 IN_LOOP "in-loop"
+  0x10 COVERS_MORE "covers-more-than-the-field"
+  0x20 IN_MACRO "in-macro"
+enum KZ_CALL_TARGET_KIND
+  0x0 NONE "none"
+  0x1 INDIRECT "indirect-call"
+  0x2 SPAWN_ENTRY "spawn-entry"
+enum KZ_CALL_TARGET_REASON
+  0x0 RESOLVED "resolved"
+  0x1 NO_FLOW "no-function-flows-to-it"
+  0x2 UNKNOWN_SOURCE "unknown-source"
+  0x3 CAST_FROM_DATA "cast-from-data"
+enum KZ_IMAGE_KIND
+  0x0 NONE "none"
+  0x1 INT "int"
+  0x2 STRING "string"
+  0x3 ADDR "address"
+  0x4 FUNC "function"
+  0x5 NULLPTR "null"
+  0x6 NONCONST "non-constant"
+  0x7 ZERO_FILL "zero-fill"
+enum KZ_LOC_STATUS
+  0x0 UNCHECKED "unchecked"
+  0x1 COMPLETE "writer-set-complete"
+  0x2 DISABLED "DISABLED"
+flags KZ_TERMINAL_FLAG
+  0x1 PROCESS_TERMINAL "process-terminal"
+  0x2 IN_LOOP "in-loop"
+  0x4 UNGUARDED "unguarded"
+enum KZ_OUTPTR_SUMMARY
+  0x0 NONE "none"
+  0x1 STORE_ONLY "store-only"
+  0x2 ESCAPES "escapes"
+  0x3 UNSUMMARIZED "unsummarized"
+  0x4 DATA_FN "data-function"
+enum KZ_ANCHOR_AUDIT
+  0x0 UNAUDITED "unaudited"
+  0x1 OK "ok"
+  0x2 MISMATCH "mismatch"
+  0x3 AMBIGUOUS "ambiguous"
+  0x4 MISSING "missing"
+enum KZ_ACTOR_KIND
+  0x0 NONE "none"
+  0x1 STATIC_ENTRY "static-entry"
+  0x2 SPAWNED "spawned"
+  0x3 CALLBACK "callback"
+  0x4 ENV_ROOT "env-root"
+  0x5 ASYNC "async"
+enum KZ_SPAWN_RES
+  0x0 NONE "none"
+  0x1 RESOLVED "resolved"
+  0x2 UNKNOWN_EFFECT "unknown_effect"
+enum KZ_NODE_KIND
+  0x0 NONE "none"
+  0x1 ENTRY "entry"
+  0x2 EFFECT "effect"
+  0x3 LOAD "load"
+  0x4 STORE "store"
+  0x5 SPAWN "spawn"
+  0x6 TERMINAL "terminal"
+  0x7 HANDLER_MARK "handler-mark"
+  0x8 LOOP_HEAD "loop-head"
+  0x9 CHOICE "choice"
+  0xa EXIT "exit"
+  0xb CAPTURE "capture"
+  0xc AWAIT "await"
+flags KZ_NODE_FLAG
+  0x1 STAR_CLOSED "star-closed"
+  0x2 TRUNC "TRUNC"
+  0x4 ONCE "once"
+  0x8 UNKNOWN_EFFECT "unknown_effect"
+enum KZ_EDGE_KIND
+  0x0 NONE "none"
+  0x1 PO "po"
+  0x2 SPAWN "spawn"
+  0x3 BACK "back"
+  0x4 OUTCOME "outcome"
+  0x5 CHOICE "choice"
+enum KZ_ONCE_SUBJECT
+  0x0 NONE "none"
+  0x1 ACTOR "actor"
+  0x2 NODE "node"
+enum KZ_ONCE_RULE
+  0x0 NONE "none"
+  0x1 ACTOR_ONCE "actor-once"
+  0x2 NODE_OUTSIDE_STAR "node-outside-star-closed-region"
+enum KZ_RULE
+  0x0 NONE "none"
+  0x1 T_PO "T_PO"
+  0x2 T_SPAWN "T_SPAWN"
+  0x3 T_OBS "T_OBS"
+  0x4 T_TERM "T_TERM"
+  0x5 FRONTIER "FRONTIER"
+  0x6 ONCE "ONCE"
+  0x7 ONCE_PWB "ONCE_PWB"
+  0x8 OWN_NOPATH "OWN_NOPATH"
+  0x9 KEY_SEP "KEY_SEP"
+  0xa SCOPE "SCOPE"
+  0xb WRITER "WRITER"
+  0xc INIT_FALSE "INIT_FALSE"
+  0xd INIT_TRUE "INIT_TRUE"
+  0xe DERIVES "DERIVES"
+  0xf PRED_EXTRACT "PRED_EXTRACT"
+  0x10 BADNESS "BADNESS"
+  0x11 STATUS_CONSIST "STATUS_CONSIST"
+  0x12 REACH "REACH"
+  0x13 VIEW "VIEW"
+enum KZ_TSTATUS
+  0x0 NA "n/a"
+  0x1 COMPUTED "COMPUTED"
+  0x2 DECLARED_VERIFIED "DECLARED_VERIFIED"
+  0x3 DECLARED_TRUSTED "DECLARED_TRUSTED"
+  0x4 ASSUMED_VIS "ASSUMED_VIS"
+  0x5 DISABLED "DISABLED"
+enum KZ_KSTATUS
+  0x0 NA "NA"
+  0x1 MUST_KEY "MUST_KEY"
+  0x2 MAY_KEY "MAY_KEY"
+  0x3 NO_KEY "NO_KEY"
+enum KZ_VIEW
+  0x0 NONE "none"
+  0x1 CERT "VIEW_CERT"
+  0x2 EXPL "VIEW_EXPL"
+flags KZ_STEP_FLAG
+  0x1 AT_DECISION "at-decision"
+  0x2 AFTER_DECISION "after-decision"
+  0x4 REJECT_EVENT "reject-event"
+enum KZ_CERT_KIND
+  0x0 NONE "none"
+  0x1 FIXED_ORDER "FIXED_ORDER"
+  0x2 PROTECTED "PROTECTED"
+  0x3 INACTIVE "INACTIVE"
+flags KZ_CERT_FLAG
+  0x1 DECIDES "decides"
+  0x2 CONTESTED "contested"
+enum KZ_TRUST_PART
+  0x0 NONE "none"
+  0x1 RECHECKED "i-rechecked"
+  0x2 EXTRACTED "ii-extracted"
+  0x3 TRUSTED "iii-trusted"
+  0x4 REFUTABLE "iv-refutable"
+enum KZ_TRUST_KIND
+  0x0 NONE "none"
+  0x1 CERT_STEP "CERT_STEP"
+  0x2 FACT "FACT"
+  0x3 SKEL "SKEL"
+  0x4 CLOSURE "CLOSURE"
+  0x5 ANCHOR "ANCHOR"
+  0x6 RUN "RUN"
+  0x7 PROBE "PROBE"
+  0x8 PROFILE_ENTRY "PROFILE_ENTRY"
+  0x9 DECLARED_TRUSTED "DECLARED_TRUSTED"
+  0xa ASSUMPTION "ASSUMPTION"
+  0xb LEMMA "LEMMA"
+  0xc TOOL_BASE "TOOL_BASE"
+  0xd OBLIGATION "OBLIGATION"
+enum KZ_TRUST_STATUS
+  0x0 NA "n/a"
+  0x1 ACCEPTED "ACCEPTED"
+  0x2 ACCEPTED_VIA_T5 "ACCEPTED_VIA_T5"
+  0x3 NOT_RUN "NOT_RUN"
+  0x4 NOT_REFUTED_ON_EXERCISED "NOT_REFUTED_ON_EXERCISED"
+  0x5 REFUTED "REFUTED"
+enum KZ_PROOF
+  0x0 NA "n/a"
+  0x1 UNPROVED "unproved"
+  0x2 DEPENDS "depends-on-stated-assumption"
+  0x3 PROVED "proved"
+enum KZ_OBL
+  0x0 NONE "none"
+  0x1 O1 "O1"
+  0x2 O2 "O2"
+  0x3 O3 "O3"
+  0x4 O4 "O4"
+  0x5 O5 "O5"
+  0x6 O6 "O6"
+  0x7 O7 "O7"
+  0x8 O8 "O8"
+  0x9 O9 "O9"
+  0xa O10 "O10"
+  0xb CC "CC"
+section STRINGS type=1 record=kz_byte version=1
+section BASIS type=2 record=kz_basis_item version=1
+section FILE_HASHES type=3 record=kz_file_hash version=1
+section PROVENANCE type=4 record=kz_prov version=1
+section DEVIATIONS type=5 record=kz_deviation version=1
+section REF_LISTS type=6 record=kz_ref version=1
+section FACTS type=10 record=kz_fact_call version=2
+section FACT_ARGS type=11 record=kz_fact_arg version=2
+section DERIVES type=12 record=kz_fact_derives version=2
+section FACT_EXPRS type=13 record=kz_fact_expr version=2
+section FACT_LOOPS type=14 record=kz_fact_loop version=2
+section FACT_INIT type=15 record=kz_fact_init version=2
+section FACT_CONSTS type=16 record=kz_fact_const version=2
+section FACT_ATYPE type=17 record=kz_fact_atype version=2
+section WRITERS type=18 record=kz_fact_writer version=2
+section ALLOCS type=19 record=kz_fact_alloc version=1
+section FUNCS type=20 record=kz_fact_func version=1
+section ANCHORS type=21 record=kz_anchor version=1
+section SKEL_CERT type=23 record=kz_skel_node version=1
+section SKEL_CERT_EDGES type=24 record=kz_skel_edge version=1
+section ONCE type=26 record=kz_skel_once version=1
+section ACTORS type=28 record=kz_actor version=1
+section CLOSURE_SPAWNS type=29 record=kz_closure_spawn version=1
+section CALL_TARGETS type=31 record=kz_fact_target version=1
+section STATIC_IMAGE type=32 record=kz_fact_image version=1
+section FACT_LOCS type=33 record=kz_fact_loc version=1
+section TERMINALS type=34 record=kz_fact_terminal version=1
+section OUTCALLS type=35 record=kz_fact_outcall version=1
+section TUS type=36 record=kz_tu version=1
+section SITES type=40 record=kz_site version=2
+section RAW_EVENTS type=41 record=kz_raw_ev version=1
+section STACKS type=43 record=kz_stack_frame version=1
+section LOSS type=44 record=kz_loss version=2
+section RUNMETA type=45 record=kz_runmeta version=1
+section PERTURBATION type=46 record=kz_perturbation version=1
+section SITE_SLOTS type=50 record=kz_site_slot version=1
+section SIDE_EVENTS type=51 record=kz_side_ev version=1
+section THREADS type=52 record=kz_thread version=1
+section MAPS type=53 record=kz_map_ev version=1
+section SYMBOLS type=54 record=kz_symbol version=1
+section TARGETS type=55 record=kz_target version=1
+section CERTIFICATES type=60 record=kz_cert version=1
+section CERT_STEPS type=61 record=kz_cert_step version=1
+section TRUST_LEDGERS type=62 record=kz_trust_ledger version=1
+section TRUST type=63 record=kz_trust version=1
+section OBLIGATIONS type=64 record=kz_obligation version=1
+section WITNESSES type=80 record=kz_witness version=1
+section VERDICTS type=81 record=kz_verdict version=1
+section VERDICT_CELLS type=82 record=kz_verdict_cell version=1
+section BOUNDS type=83 record=kz_bound version=1
+format kz_header.artifact_kind enum KZ_ARTIFACT
+format kz_header.header_crc hex 0
+format kz_parent.kind enum KZ_ARTIFACT
+format kz_section_entry.crc32 hex 0
+format kz_prov.tier enum KZ_TIER
+format kz_prov.kind enum KZ_PROV_KIND
+format kz_prov.side enum KZ_PROV_SIDE
+format kz_deviation.avoidable enum KZ_AVOIDABLE
+format kz_deviation.prov idx 0
+format kz_basis_item.policy enum KZ_POLICY
+format kz_basis_item.prov idx 0
+format kz_basis_item.deviation idx 0
+format kz_file_hash.prov idx 0
+format kz_witness.kind enum KZ_WITNESS_KIND
+format kz_witness.status enum KZ_OCC
+format kz_witness.naturalness flags KZ_NATURALNESS
+format kz_witness.realization flags KZ_REALIZATION
+format kz_bound.h bound 0
+format kz_bound.policy enum KZ_POLICY
+format kz_bound.cls enum KZ_CLS
+format kz_bound.reach enum KZ_REACH
+format kz_bound.progress enum KZ_PROGRESS
+format kz_bound.progress_kind flags KZ_PROGRESS_KIND
+format kz_bound.safety_routes routes 0
+format kz_bound.flags flags KZ_CELL_FLAG
+format kz_bound.unknown_reason enum KZ_UNKNOWN_REASON
+format kz_bound.progress_reason enum KZ_PROGRESS_REASON
+format kz_bound.progress_harm enum KZ_PROGRESS_HARM
+format kz_bound.refinements flags KZ_REFINEMENT
+format kz_bound.progress_flags flags KZ_PROGRESS_FLAG
+format kz_verdict.instance hex 0
+format kz_verdict.provider enum KZ_PROVIDER
+format kz_verdict.scope enum KZ_SCOPE
+format kz_verdict.outcome_label enum KZ_OUTCOME_LABEL
+format kz_verdict.shape enum KZ_SHAPE
+format kz_verdict.consequence enum KZ_CONSEQUENCE
+format kz_verdict.harm enum KZ_HARM
+format kz_verdict.fw_doc flags KZ_FW_DOC
+format kz_verdict.sublabels flags KZ_SUBLABEL
+format kz_verdict_cell.sigma enum KZ_SIGMA
+format kz_verdict_cell.mlevel enum KZ_MLEVEL
+format kz_verdict_cell.cls enum KZ_CLS
+format kz_verdict_cell.unknown_reason enum KZ_UNKNOWN_REASON
+format kz_verdict_cell.refinements flags KZ_REFINEMENT
+format kz_verdict_cell.realization flags KZ_REALIZATION
+format kz_verdict_cell.naturalness flags KZ_NATURALNESS
+format kz_verdict_cell.flags flags KZ_CELL_FLAG
+format kz_verdict_cell.reach enum KZ_REACH
+format kz_verdict_cell.progress enum KZ_PROGRESS
+format kz_verdict_cell.progress_reason enum KZ_PROGRESS_REASON
+format kz_verdict_cell.progress_harm enum KZ_PROGRESS_HARM
+format kz_verdict_cell.progress_realization enum KZ_PROGRESS_REALIZATION
+format kz_verdict_cell.safety_routes routes 0
+format kz_verdict_cell.progress_flags flags KZ_PROGRESS_FLAG
+format kz_verdict_cell.progress_kind flags KZ_PROGRESS_KIND
+format kz_verdict_cell.fw_conf enum KZ_FW_CONF
+format kz_verdict_cell.proof_status enum KZ_PROOF
+format kz_raw_ev.phase enum KZ_PHASE
+format kz_raw_ev.flags flags KZ_RAW_FLAG
+format kz_raw_ev.objseq hex 0
+format kz_raw_ev.a hex 0
+format kz_site.kind enum KZ_SITE_KIND
+format kz_site.insn_class enum KZ_INSN_CLASS
+format kz_site.decoder enum KZ_DECODER
+format kz_site.phases flags KZ_SITE_PHASE
+format kz_site.file_offset hex 0
+format kz_site_slot.src enum KZ_SLOT_SRC
+format kz_stack_frame.ip hex 0
+format kz_loss.source enum KZ_LOSS_SOURCE
+format kz_loss.site idx 0
+format kz_runmeta.stratum enum KZ_STRATUM
+format kz_runmeta.backend enum KZ_BACKEND
+format kz_runmeta.fidelity enum KZ_FIDELITY
+format kz_runmeta.flags flags KZ_RUN_FLAG
+format kz_perturbation.kind enum KZ_PERTURBATION_KIND
+format kz_perturbation.cost_class enum KZ_INSN_CLASS
+format kz_perturbation.site idx 0
+format kz_side_ev.kind enum KZ_SIDE_KIND
+format kz_side_ev.flags flags KZ_SIDE_FLAG
+format kz_map_ev.addr hex 0
+format kz_map_ev.pgoff hex 0
+format kz_map_ev.bias hex 0
+format kz_thread.ptid idx 0
+format kz_thread.announced_id idx 0
+format kz_thread.flags flags KZ_THREAD_FLAG
+format kz_thread.creator_event idx 0
+format kz_thread.first_event idx 0
+format kz_thread.entry_fn hex 0
+format kz_symbol.vaddr hex 0
+format kz_symbol.file_offset hex 0
+format kz_symbol.bind enum KZ_SYMBOL_BIND
+format kz_target.kind enum KZ_TARGET_KIND
+format kz_target.insn_class enum KZ_INSN_CLASS
+format kz_target.vaddr hex 0
+format kz_target.file_offset hex 0
+format kz_target.func_vaddr hex 0
+format kz_target.prov idx 0
+format kz_fact_func.tu idx 0
+format kz_fact_func.fh idx 0
+format kz_fact_func.flags flags KZ_FUNC_FLAG
+format kz_fact_call.tu idx 0
+format kz_fact_call.flags flags KZ_CALL_FLAG
+format kz_fact_call.caller_fn idx 0
+format kz_fact_call.callee_fn idx 0
+format kz_fact_call.fh idx 0
+format kz_fact_call.loop idx 0
+format kz_fact_call.kind enum KZ_CALL_KIND
+format kz_fact_arg.kind enum KZ_ARG_KIND
+format kz_fact_arg.role enum KZ_ARG_ROLE
+format kz_fact_arg.fn idx 0
+format kz_fact_derives.chain_root idx 0
+format kz_fact_derives.fh idx 0
+format kz_fact_derives.status enum KZ_DERIVES_STATUS
+format kz_fact_derives.reason enum KZ_DERIVES_REASON
+format kz_fact_expr.op enum KZ_EXPR_OP
+format kz_fact_expr.flags enum KZ_EXPR_REF
+format kz_fact_expr.a idx 0
+format kz_fact_expr.b idx 0
+format kz_fact_loop.delay_site idx 0
+format kz_fact_loop.exit_root idx 0
+format kz_fact_loop.modset_root idx 0
+format kz_fact_loop.budget_root idx 0
+format kz_fact_loop.lock_site idx 0
+format kz_fact_loop.lock_kind enum KZ_LOCK_KIND
+format kz_fact_loop.fn idx 0
+format kz_fact_loop.fh idx 0
+format kz_fact_loop.kind enum KZ_LOOP_KIND
+format kz_fact_loop.trip_status enum KZ_TRIP_STATUS
+format kz_fact_init.source enum KZ_INIT_SOURCE
+format kz_fact_init.prov idx 0
+format kz_fact_init.fh idx 0
+format kz_fact_const.tu idx 0
+format kz_fact_const.prov idx 0
+format kz_fact_const.fh idx 0
+format kz_fact_const.kind enum KZ_CONST_KIND
+format kz_fact_atype.kind enum KZ_ATYPE_KIND
+format kz_fact_atype.fh idx 0
+format kz_fact_atype.fn idx 0
+format kz_fact_writer.kind enum KZ_WRITER_KIND
+format kz_fact_writer.value_kind enum KZ_ARG_KIND
+format kz_fact_writer.tstatus enum KZ_TSTATUS
+format kz_fact_writer.kstatus enum KZ_KSTATUS
+format kz_fact_writer.wd flags KZ_WD
+format kz_fact_writer.guard_root idx 0
+format kz_fact_writer.fh idx 0
+format kz_fact_writer.fn idx 0
+format kz_fact_writer.via_fn idx 0
+format kz_fact_writer.flags flags KZ_WRITER_FLAG
+format kz_anchor.audit enum KZ_ANCHOR_AUDIT
+format kz_anchor.insn_class enum KZ_INSN_CLASS
+format kz_anchor.file_offset hex 0
+format kz_actor.kind enum KZ_ACTOR_KIND
+format kz_closure_spawn.creator idx 0
+format kz_closure_spawn.resolution enum KZ_SPAWN_RES
+format kz_skel_node.kind enum KZ_NODE_KIND
+format kz_skel_node.view enum KZ_VIEW
+format kz_skel_node.flags flags KZ_NODE_FLAG
+format kz_skel_node.site idx 0
+format kz_skel_node.profile_entry idx 0
+format kz_skel_node.region idx 0
+format kz_skel_edge.kind enum KZ_EDGE_KIND
+format kz_skel_edge.label idx 0
+format kz_skel_once.subject_kind enum KZ_ONCE_SUBJECT
+format kz_skel_once.rule enum KZ_ONCE_RULE
+format kz_fact_target.fn idx 0
+format kz_fact_target.kind enum KZ_CALL_TARGET_KIND
+format kz_fact_target.reason enum KZ_CALL_TARGET_REASON
+format kz_fact_image.fn idx 0
+format kz_fact_image.kind enum KZ_IMAGE_KIND
+format kz_fact_image.fh idx 0
+format kz_fact_loc.status enum KZ_LOC_STATUS
+format kz_fact_terminal.fn idx 0
+format kz_fact_terminal.guard_root idx 0
+format kz_fact_terminal.fh idx 0
+format kz_fact_terminal.flags flags KZ_TERMINAL_FLAG
+format kz_fact_outcall.callee_fn idx 0
+format kz_fact_outcall.fh idx 0
+format kz_fact_outcall.summary enum KZ_OUTPTR_SUMMARY
+format kz_tu.fh idx 0
+format kz_cert_step.rule enum KZ_RULE
+format kz_cert_step.profile_entry idx 0
+format kz_cert_step.site_from idx 0
+format kz_cert_step.site_to idx 0
+format kz_cert_step.tstatus enum KZ_TSTATUS
+format kz_cert_step.kstatus enum KZ_KSTATUS
+format kz_cert_step.view enum KZ_VIEW
+format kz_cert_step.flags flags KZ_STEP_FLAG
+format kz_cert.instance hex 0
+format kz_cert.kind enum KZ_CERT_KIND
+format kz_cert.mlevel enum KZ_MLEVEL
+format kz_cert.flags flags KZ_CERT_FLAG
+format kz_cert.proof_status enum KZ_PROOF
+format kz_trust.part enum KZ_TRUST_PART
+format kz_trust.kind enum KZ_TRUST_KIND
+format kz_trust.status enum KZ_TRUST_STATUS
+format kz_trust.proof enum KZ_PROOF
+format kz_trust.site idx 0
+format kz_trust.refutes idx 0
+format kz_trust.bound bound 0
+format kz_obligation.obligation enum KZ_OBL
+format kz_obligation.status enum KZ_TRUST_STATUS
+fingerprint=a244133c5918d6272133a83ca41536b52dc9894112db6d279a9ad5830eb5c90f

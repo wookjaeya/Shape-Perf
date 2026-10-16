@@ -172,7 +172,9 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 1. `cfe_sb_init.c:50:5` `CFE_SB_EarlyInit` 의 `memset(&CFE_SB_Global, 0, …)`: 값 0, `early-init`, record 통째.
 2. `cfe_sb_task.c:138:5` `CFE_SB_AppInit` 의 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)` out 포인터 저장 둘: `cfe_es_api.c:754`(guard `AppIdPtr != NULL ∧ AppRecPtr != NULL`, 유효 ID), `:759`(guard `AppIdPtr != NULL ∧ AppRecPtr == NULL`, `CFE_ES_APPID_UNDEFINED`).
 
-INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped 0, escape 0, cast 0, union 0)이라 writer 집합 상태는 `writer-set-complete` 이고 DISABLED 가 아니다. 다른 추출 대상 5개(App 레코드의 AppId·AppState·Type, PSP ShutdownReq, EVS AppID)도 모두 complete.
+INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped 0, escape 0, cast 0, union 0, unknown-effect 0)이라 writer 집합 상태는 `writer-set-complete` 이고 DISABLED 가 아니다. 다른 추출 대상 5개(App 레코드의 AppId·AppState·Type, PSP ShutdownReq, EVS AppID)도 모두 complete. 이 "complete" 는 §4.1 의 검사가 찾는 것이 없다는 뜻이고, §8 의 가정 위에서만 완전성이다.
+
+2026-10-16 검토 반영 뒤 다시 확인한 것 [M]: 대상 형에 닿는 포인터가 본문 없는 함수·미해결 간접 호출·가변 인자 위치로 가는 곳 **0**(요약의 "unknown-effect passes"; `AppRecPtr` 같은 포인터 인자도 이 검사에 든다), 대상 형을 const view 로 바꾸는 cast **0**, memset 계열의 크기 검사로 늘어난 writer **0**, inline assembly **0**(번들의 cfe·osal·psp 에 `asm` 없음). table walk 의 image 확인: `GLOBAL_CONFIGDATA` 는 `typedef const struct {...} Target_ConfigData`(`cfe/cmake/target/inc/target_config.h:159`) 라서 const 이고, `CFE_CORE_MODULE_OBJTAB` 와 원소 객체(`CFE_ES_ModuleEntry` 등)도 const 정의라 **선언된 가정 0 개**로 펼친다. (검토 지적은 정의 줄 `target_config.c:245` 만 보고 non-const 로 읽었으나 const 는 typedef 에 있다. 확인 자체는 구현했고 fixture `init_live` 가 const 아닌 경로를 시험한다.)
 
 **derives 와 gdb 기록의 대조(정적 호출 지점 수준)**: `CFE_EVS_SendEventWithAppID` 의 AppID 인자 59 행 중 39 행이 `CFE_SB_Global_t.AppId` 에서 copy 없이(hops 0) 온다. 파일별 `cfe_sb_api.c` 34, `cfe_sb_priv.c` 1, `cfe_sb_task.c` 4. `results/R2_gdb_v701.md` §6 이 소스를 다시 세어 적은 "SB AppId 를 넘기는 정적 SB 호출 지점 39(34/1/4)"와 **같다**. gdb 실행에서 공개 전에 실행된 위반 지점 셋(`cfe_sb_api.c` L277, L1185, `cfe_sb_priv.c` L786, 인자의 줄)은 모두 이 39 안에 있다. gdb 의 24 는 한 번 부팅의 **동적 발생 수**이고 3 개 정적 지점에서 나온다. 정적 지점 수와 비교할 수 없으며 이 추출은 어느 쪽 수도 주장하지 않는다. 나머지 20 행 중 19 는 TBL 의 identity 필드 `CFE_TBL_Global_t.TableTaskAppId` 에서 온다(E-TBL 쪽).
 
@@ -189,10 +191,10 @@ INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped
 
 | 시험 | 확인하는 것 |
 |---|---|
-| `static_fixture_compile_*` | 고정 도구 C 파일이 빌드 컴파일러로 `-std=c99 -pedantic -Wall -Wextra -Werror` 통과 |
-| `static_golden_{writers,outptr,derives,loops,spawn,atype}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
+| `static_fixture_compile_*` | 고정 도구 C 파일이 빌드 컴파일러로 `-std=c99 -pedantic -Wall -Wextra -Werror` 통과(`clobber.c` 는 일부러 객체 끝을 넘어 쓰므로 컴파일 검사에서 뺀다) |
+| `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
 | `static_golden_core_cpu1` | 고정 번들의 core-cpu1: basis 항목, 요약, SB identity 필드의 INIT·writer·A-TYPE·out 포인터, 함수별 쓰기, poll·walk 루프의 규칙, table walk 순서, spawn 매개변수, image, 간접 대상, derives 39 의 목록·파일별 수·gdb 기록 지점 대조, 도달성. 번들이 없으면 건너뜀(77) |
-| `test_static_unroll` | 부분 평가, 반복 펼치기(taken/skipped/residual, 인자·callee 값, spawn 표시), task-main 매개변수(DIRECT/VIA_ENTRY), 루프 규칙(각 실패 이유와 A-TYPE 상태에 따른 untyped write 처리) |
+| `test_static_unroll` | 부분 평가, 반복 펼치기(taken/skipped/residual, 인자·callee 값, spawn 표시), task-main 매개변수(DIRECT/VIA_ENTRY), 루프 규칙(각 실패 이유와 A-TYPE 상태에 따른 untyped write 처리), table walk image 확인(const 고리, 형 있는 쓰기, 객체 주소, 원소 필드), finalize 의 unknown-effect 결정(본문 없음, 가변 위치, 미해결 간접 호출, 해결된 간접 호출, 데이터 함수) |
 | `test_static_{expr,flow,recipe,gitrev,link,cli}` | 식 pool, 흐름 그래프·table walk, recipe 문법, commit 읽기, link set, CLI(basis→extract 합성 프로그램) |
 
 고정 도구가 덮는 경우: 필드 writer(대입, 증감, 통째, memset, guard), A-TYPE 으로 DISABLED 되는 대상(cast, escape, union, untyped), out 포인터(중첩, 두 번 저장, escape), derives chain, 루프 탈출식(poll, 예산, counted, 중첩, table walk), counter-zero 술어와 cursor(`sync_delay`), 루프 조건이 counter 를 읽어 거부되는 경우, 본문이 시험 필드를 써서 L1 (i) 실패, 시험 필드가 추출 대상이 아니라 L1 (i) 미결정(`poll_untargeted`), 조건·예산이 섞인 탈출, `sig_atomic_t` 원자 읽기, spawn 지점(직접, 매개변수, 표, 미해결)과 trampoline 을 통한 task-main.
@@ -201,10 +203,18 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 
 ## 8. 한계와 남은 일
 
+**writer 집합 완전성(`writer-set-complete`)이 기대는 가정** [D]. 상태 `writer-set-complete` 는 §4.1 의 검사(형 있는 writer 수집, A-TYPE 의 cast·escape·union·untyped·unknown-effect)가 아무것도 찾지 못했다는 뜻이고, 다음 가정 위에서만 writer 집합이 완전하다. 증명된 성질이 아니다.
+- G1. 본문 없는 코드(시스템 라이브러리, 시스템 헤더의 함수)는 프로그램의 전역을 **이름으로** 쓰지 않는다: 받은 포인터를 통해서만 쓴다(unknown-effect 는 이 경로만 본다). 실행 중 적재되는 앱(.so)이 cFE 전역을 이름으로 쓰는 경우는 닫힌 프로그램(core-cpu1) 밖이다.
+- G2. 상수가 아닌 크기의 데이터 함수 쓰기는 둘러싼 객체 안에 머문다(벗어나면 C 에서 정의되지 않은 동작). `T *` 목적지에 상수가 아닌 크기는 `T` 배열 안에 머문다.
+- G3. 데이터 함수 요약(C 라이브러리 12 개: 목적지 인자만 쓴다, `%n` 없음)은 사람이 넣은 표다(`spec.cpp`, BASIS 에 `researcher` 로 기록). Φ 데이터로 옮기는 일은 K1 에 남은 일이다(아래).
+- G4. 포인터 도달은 형으로 따진다(필드 기반): `void*`·`char*` 필드는 아무 형에도 닿지 않는다(그 형으로의 변환이 cast hit 이기 때문).
+
+그 밖:
 - **증명하지 않은 것**: await 규칙은 L1 의 **전제**를 추출된 사실 위에서 확인한 것이고 L1 자체는 증명하지 않았다. 인증서에 쓰려면 lemma 의 증명 상태(`unproved` 등)를 붙여야 한다(K4b, PS3).
-- 관련 위치 집합은 술어가 직접 읽는 필드와 추출 대상이다. 술어가 부르는 함수가 읽는 비대상 필드는 빠진다(보수적이지 않을 수 있는 지점: 그런 필드가 생기면 추출 대상으로 올려야 한다). `MainTaskSyncDelay` 의 `CFE_ES_AppRecordIsUsed` 는 `AppId` 를 읽고 이 필드는 추출 대상이다.
-- 호출 그래프의 미해결 간접 호출 7 개는 간선을 더하지 않는다. 그런 호출에 닿는 루프는 `mod-incomplete` 로 결정하지 않는다.
+- L1 (i) 의 관련 위치 집합은 술어가 직접 읽는 필드와 추출 대상이다. 술어가 부르는 함수가 읽는 비대상 필드는 빠진다(보수적이지 않을 수 있는 지점: 그런 필드가 생기면 추출 대상으로 올려야 한다). `MainTaskSyncDelay` 의 `CFE_ES_AppRecordIsUsed` 는 `AppId` 를 읽고 이 필드는 추출 대상이다. L1 (ii) 쪽은 호출 결과가 있으면 atomic-read 를 거부하고 one-lock-region 은 호출이 잠금 구간 안일 때만 인정한다(§5.2). 호출이 잠금 구간 안이라는 것은 같은 함수 본문 안의 lock/unlock 호출 순서로만 판단한다(callee 안에서 잠금을 푸는 경우는 보지 않는다).
+- 호출 그래프의 미해결 간접 호출 7 개는 간선을 더하지 않는다. 그런 호출에 닿는 루프는 `mod-incomplete` 로 결정하지 않는다. writer 집합에 대해서는 정보용이다(§4.1).
 - task-main 매개변수와 간접 대상은 field 기반 may-flow 다(인스턴스 대응 없음).
+- table walk 의 image 확인은 형 있는 쓰기만 본다. const 아닌 고리를 포인터·cast·본문 없는 코드로 바꾸는 쓰기는 배제하지 않으며, 그래서 그 경우는 선언된 가정으로 센다(core-cpu1 은 0 개).
 - 하지 않은 SPEC 단계: §4.1 5(문서 주석), §4.1 6 의 app-unit probe와 `-fcallgraph-info` 대조, `.tbl` 바이트 대조, §4.2 6–8(transition filtering, Φ 대응, key·allocation), §3.17 anchor audit, message provenance(§4.3).
-- 프로필 문법에 지연·잠금 연산 선언이 없다(K1 에 요청할 항목). 그때까지 명령줄 입력이며 사람이 넣은 입력으로 센다.
+- 프로필 문법에 지연·잠금 연산과 **데이터 함수 요약**을 선언하는 수단이 없다(K1 에 요청할 항목). 그때까지 지연·잠금은 명령줄 입력, 데이터 함수 표는 엔진의 내장 표이며 둘 다 사람이 넣은 입력으로 센다.
 - core golden 은 지금 프로필의 대상·역할·종료·spawn 선언에 의존한다. 프로필이 바뀌면 다시 만들고 diff 를 검토해야 한다.

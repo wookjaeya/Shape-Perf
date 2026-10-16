@@ -2,7 +2,7 @@
 
 cFS 애플리케이션·task 수준의 준비 상태(readiness)와 순서 위반을 판정하는 도구. 설계는 `../Architecture/spec/SPEC_FINAL.md`, 구현 계획은 `../plan/ROADMAP_20261015.md`, PI 결정은 `../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md` 에 있다.
 
-이 트리의 현재 단계는 **M2(R2 사례의 최소 전체 경로)의 토대(K0)**이다: 레코드 형식, KZ 컨테이너 입출력, 해시, 정규 dump, 판정·신뢰 원장 레코드, 시험, lint. 근거 검사기와 판정 엔진은 **아직 없다**(아래 상태 표). 관측기(perf-sample 백엔드, K2)는 있다(`docs/observer.md`). 정적 추출층(`kz-static basis`/`extract`, K4a)은 있다(`docs/static_facts.md`). 이 트리의 시험 값은 단위 시험 값이며 연구 조건이나 실험 결과가 아니다.
+이 트리의 현재 단계는 **M2(R2 사례의 최소 전체 경로)의 토대(K0)**이다: 레코드 형식, KZ 컨테이너 입출력, 해시, 정규 dump, 판정·신뢰 원장 레코드, 시험, lint. 근거 검사기와 판정 엔진은 **아직 없다**(아래 상태 표). 관측기(perf-sample 백엔드, K2)는 있다(`docs/observer.md`). 정적 추출층(`kz-static basis`/`extract`, K4a)은 있다(`docs/static_facts.md`; writer 집합의 `writer-set-complete` 는 그 문서 §8 의 가정 위에서만 완전성이다). 이 트리의 시험 값은 단위 시험 값이며 연구 조건이나 실험 결과가 아니다.
 
 표기: **[M]** 이번 구현에서 실행해 확인, **[D]** 설계 결정, **[I]** 계획·미확인.
 
@@ -33,9 +33,9 @@ kairos/
   profiles/cfs-v7.0.1/observe/  (K2) 관측용 프로브 계획
   docs/observer.md           관측기 사용법과 설계 세부
   docs/observer_smoke_run.md 실제 cFS 에 한 번 붙인 기록(조건, deviation, 개수; S1-R2 기능 확인 1/3, 미완)
-  lib/llvm/                  (K4a) Clang 으로 읽는 정적 추출층: basis, 사실(writer, A-TYPE, INIT, derives, 루프와 인증 뷰 규칙, table walk 펼치기, spawn)
+  lib/llvm/                  (K4a) Clang 으로 읽는 정적 추출층: basis, 사실(writer, A-TYPE 과 unknown-effect, INIT, derives, 루프와 인증 뷰 규칙, table walk 펼치기와 image 확인, spawn)
   tools/kz-static/           (K4a) CLI `kz-static`: basis, extract, show, reach (-DKZ_BUILD_LLVM_TOOLS=ON 일 때만)
-  tests/static/              (K4a) 고정 C 프로그램의 golden, core-cpu1 golden, 단위 시험
+  tests/static/              (K4a) 고정 C 프로그램의 golden(7 개, `clobber.c` 는 읽기만), core-cpu1 golden, 단위 시험
   profiles/cfs-v7.0.1/basis/ (K4a) basis recipe(core-cpu1.kzb): link 명령, 생성 파일, 표, 시작 스크립트 규칙
   docs/static_facts.md       (K4a) 정적 추출층의 사용법, 사실의 뜻, core-cpu1 결과, 한계
 ```
@@ -183,7 +183,7 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 | 재생 엔진: 효과, HB 간선 4개 템플릿, readiness 발생의 상태, 결과 코드 검사 | `lib/core/eval_trace.cpp` | 구현, **합성 trace** 로 시험 통과 [M]. 실제 trace 에는 아직 쓰지 않았다. Allowed 항목의 horizon monitor, vector clock, 탐색기는 **미구현** (항목이 판정하는 발생은 `PENDING` 으로 남는다) |
 | `tools/kz-phi` | `tools/kz-phi/` | 구현, 시험 통과 [M] |
 | `profiles/cfs-v7.0.1/*.kzp` | `profiles/` | 판정용 Φ 프로필의 **V1 부분집합**(K-ID.send-with-appid, cell 과 INIT 사실, GetAppID 의 out 포인터 효과, App 레코드의 AppState, HB R1·R2-P-TASK·R18·R19, T-TERM 선언)은 구현. 인용 98개를 고정된 번들에서 다시 읽어 본문 해시를 대조했고 source 4개의 개정 고정이 체크아웃된 커밋과 같음을 확인했다 [M]. 출처 기록 109개, 항목 91개 중 손으로 넣은 것(가장 강한 tier researcher) 3개, `researcher` 기록을 하나라도 인용하는 항목 12개, `declared_trusted` 3개, 호출자 수준 인용: appreq 1개(contract-backed, side caller), 손으로 넣은 인용 0개(`kz-phi stats`). 프로필 해시 `bc8a3401e6b53b23642e258363dd27eabd7187eea2790f463a45171ae5ec90a4`. 나머지 프레임워크(C1·C2·C3·C5 의 지식)는 **미작성**. 관측용 프로브 계획 `profiles/cfs-v7.0.1/observe/sites.kzp` 는 있다(K2; 형식 `kzp-observe 1`, 인용 해시 검증됨 [M]) |
-| basis, extract (LLVM) | `lib/llvm/`, `tools/kz-static/` | 구현(K4a), 시험 통과 [M] (`docs/static_facts.md`): core-cpu1 의 basis 와 facts. app-unit link probe, anchor audit, transition filtering·key 상태, 문서 주석 후보는 **미구현**. skel 은 K4b |
+| basis, extract (LLVM) | `lib/llvm/`, `tools/kz-static/` | 구현(K4a), 시험 통과 [M] (`docs/static_facts.md`): core-cpu1 의 basis 와 facts. 2026-10-16 검토 반영: unknown-effect(본문 없는 callee·미해결 간접 호출·가변 위치·inline asm), 데이터 함수의 크기 검사, record 형 대상의 부분 쓰기, const view cast, 지역 변수 id, table walk image 확인(선언된 가정), L1 (ii) 의 호출 결과 제한, derives 의 cast. writer 집합 완전성은 문서 §8 의 가정 G1–G4 위에서만 성립. C 라이브러리 데이터 함수 표는 아직 엔진 안(Φ 문법 대기). app-unit link probe, anchor audit, transition filtering·key 상태, 문서 주석 후보는 **미구현**. skel 은 K4b |
 | MustBefore, certificate, census, plan | `lib/static/` | **미구현** |
 | 근거 검사기 `kz proofcheck` | `lib/proofcheck/` | **미구현** |
 | 관측기 perf-sample 백엔드(F0), 앵커 해석, loader | `probe/` | 구현(K2), 시험 통과 [M]. 실제 cFS 에 한 번 붙여 보았다(`docs/observer_smoke_run.md`). **S1-R2 기능 확인은 미완(N=1/3)**: 남은 두 실행은 cFS 를 돌릴 수 있는 단계가 고친 스크립트(`observe_cfs_smoke.sh <tag> <kz> <ordinal>`)로 한다. s1r2_p1 을 쓴 도구의 원본은 되찾을 수 없다(같은 문서 §8). BPF 백엔드, 프로브 비용 측정, 앱 `.so` inode 등록, 생성 함수 출력 인자와 알린 id 의 대조는 **미구현**(V1b/S1) |

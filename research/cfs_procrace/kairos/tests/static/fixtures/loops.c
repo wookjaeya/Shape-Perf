@@ -234,3 +234,82 @@ void poll_untargeted(void) {
     fx_delay(1);
   }
 }
+
+/* ---- locals are told apart by their declaration, not by their name -------------------------------- */
+
+/* The counter shape of sync_delay, after an unrelated block-scoped local of the same name: the
+ * counter is still recognised (form (b)), whatever the order of the declarations in memory. */
+int sync_decoy(int want) {
+  int i;
+  const Rec *r;
+  {
+    int pending = 7;
+    (void)pending;
+  }
+  int pending;
+  while (1) {
+    pending = 0;
+    fx_lock();
+    r = g_recs;
+    for (i = 0; i < 4; i++) {
+      if (r->state < want) ++pending;
+      ++r;
+    }
+    fx_unlock();
+    if (pending == 0) break;
+    fx_delay(1);
+  }
+  return 0;
+}
+
+/* The exit tests the outer `pending`, which the loop never changes; the inner `pending` counts.
+ * The outer one is not a counter: no recognised predicate. */
+void sync_shadow(int want) {
+  int i;
+  const Rec *r;
+  int pending = 1;
+  while (1) {
+    fx_lock();
+    {
+      int pending = 0;
+      r = g_recs;
+      for (i = 0; i < 4; i++) {
+        if (r->state < want) ++pending;
+        ++r;
+      }
+      (void)pending;
+    }
+    fx_unlock();
+    if (pending == 0) break;
+    fx_delay(1);
+  }
+}
+
+/* One atomic read, and a call result that the test also reads: the callee's reads are not that
+ * atomic read, so L1 (ii) does not hold. */
+void wait_phase_used(int want) {
+  while (g_sys.phase < want && !rec_used(&g_recs[0])) fx_delay(5);
+}
+
+/* ---- a table walk through a configuration that is not const ------------------------------------ */
+
+/* The configuration is changed at run time: its static image is not the value the walk reads,
+ * so the walk is not unrolled.  (The walks over g_cfg above read a configuration that is not
+ * const either, but nothing writes it: they are unrolled under a declared assumption.) */
+typedef struct {
+  const Mod *const *list;
+} LiveCfg;
+static const Mod *const alt_list[] = {&mod_c, 0};
+LiveCfg g_live = {mod_list};
+
+void switch_live(void) { g_live.list = alt_list; }
+
+void init_live(void) {
+  unsigned long i;
+  const Mod *e;
+  for (i = 0;; i++) {
+    e = g_live.list[i];
+    if (e == 0) break;
+    if (e->init != 0) (void)e->init();
+  }
+}

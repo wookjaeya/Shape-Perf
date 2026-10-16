@@ -65,21 +65,23 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
   os << "  call sites                 " << m.calls.size() << "\n";
   os << "  indirect calls             " << R.indirect_total << " (resolved " << R.indirect_resolved << ", unresolved " << R.indirect_unresolved << ")\n";
   os << "  spawn calls                " << R.spawn_total << " (entry resolved " << R.spawn_resolved << ")\n";
-  os << "  loops                      " << m.loops.size() << " (table walks resolved " << R.walks_resolved << ", failed " << R.walks_failed << ")\n";
+  os << "  loops                      " << m.loops.size() << " (table walks resolved " << R.walks_resolved << ", failed " << R.walks_failed << ", under a declared assumption " << R.walks_assumed << ")\n";
   os << "  certificate-view rules     unroll " << R.loops_unroll << ", await " << R.loops_await << ", star-closed " << R.loops_star << "\n";
   os << "  spawn parameters           " << m.spawn_params.size() << ", unrolled iteration rows " << m.iters.size() << "\n";
   os << "  out-pointer summaries      store-only " << R.outptr_store_only << ", escaping " << R.outptr_escapes << ", unsummarized " << R.outptr_unsummarized << "\n";
   os << "  untyped write sites        " << R.atype_untyped_sites_total << " in the program, " << R.atype_untyped_sites_relevant << " of them count for a target\n";
+  os << "  unknown-effect passes      " << R.reach_passes_unknown << " (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)\n";
   const kz::EnumDesc* status = kz::find_enum("KZ_LOC_STATUS");
   for (const kzs::LocFact& l : m.locs) {
     const char* st = status != nullptr ? kz::enum_display(*status, l.status) : nullptr;
     os << "  location " << l.loc_type << "." << l.loc_field << "   writers " << l.n_writers << " (direct " << l.n_direct << ", data function " << l.n_data_fn << ", out-pointer " << l.n_outptr
-       << ", initial values " << l.n_init << "), A-TYPE hits: untyped " << l.n_untyped << ", escape " << l.n_escape << ", cast " << l.n_cast << ", union " << l.n_union << "  -> "
+       << ", initial values " << l.n_init << "), A-TYPE hits: untyped " << l.n_untyped << ", escape " << l.n_escape << ", cast " << l.n_cast << ", union " << l.n_union << ", unknown effect " << l.n_unknown << "  -> "
        << (st != nullptr ? st : "?") << "\n";
   }
   size_t builtin = 0, cli = 0;
   for (const kzs::DeclaredItem& d : spec.declared) (d.origin == kCommandLine ? cli : builtin)++;
   os << "  hand-entered inputs        " << spec.declared.size() << " (built-in data-function table " << builtin << ", command line " << cli << ")\n";
+  os << "  declared assumptions       " << m.assumptions.size() << " (static images of table-walk links that are not const)\n";
   return os.str();
 }
 

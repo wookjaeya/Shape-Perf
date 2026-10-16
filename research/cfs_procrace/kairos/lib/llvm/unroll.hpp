@@ -52,6 +52,20 @@ struct ProgramGraph {
 };
 
 void find_spawn_params(Model* m, const ProgramGraph& g);
+
+// Unrolling reads the path of a table walk, the table and its element objects from their
+// static-initializer images.  That is their value when the walk runs if they are const.  For
+// every link that is not const (the object is not const and neither is the field), a typed write
+// of the field or of the object anywhere in the program (FUNC_WRITES: assignments, record writes,
+// the address taken) means the image may be stale: `written` says where, and the walk is not
+// unrolled.  Without such a write the link is listed in `assumed`: the image is taken as the
+// value under a declared assumption (writes through pointers, casts and code without a body are
+// not excluded by this check).
+struct WalkTrust {
+  std::vector<std::string> assumed;
+  std::string written;
+};
+WalkTrust check_walk_links(const Model& m, const Model::WalkSpec& walk, const std::vector<ImageFact>& entries);
 void unroll_table_walks(Model* m, const std::map<std::string, std::vector<ImageFact>>& entries);
 void decide_loop_rules(Model* m, const ExtractSpec& spec, const ProgramGraph& g);
 

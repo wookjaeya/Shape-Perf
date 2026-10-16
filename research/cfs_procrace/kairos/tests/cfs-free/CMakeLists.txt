@@ -56,4 +56,32 @@ endforeach()
 # root and exits 77 (reported as skipped, never as passed) where the kernel refuses; each
 # observation spends about 0.1 s per probe event on removing the probes, so it takes tens of seconds.
 set_tests_properties(test_probe_golden PROPERTIES LABELS "unit;golden")
+# test_probe_anchor_compilers exits 77 when addr2line or the other compiler's build is missing: the
+# cross-check did not run, so the test is reported as skipped, not as passed.
+set_tests_properties(test_probe_anchor_compilers PROPERTIES SKIP_RETURN_CODE 77)
 set_tests_properties(test_probe_observe PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 900)
+
+# The anchor cross-check step of probe/scripts/observe_cfs_smoke.sh (--xcheck), on the target program:
+# every site of target.kzp is found by addr2line and in objdump's disassembly at the address kz anchor
+# resolved, and the output is the same twice (it holds no time).  Exits 77 (skipped) without binutils.
+add_test(NAME probe_anchor_xcheck_script
+  COMMAND bash -c [=[
+    set -eu
+    kz=$1; prog=$2; profile=$3; root=$4; script=$5; d=$6
+    "$kz" anchor "$prog" "$profile" -o "$d/xcheck_basis.kz" --source-root "$root" > /dev/null
+    rc=0; bash "$script" --xcheck "$kz" "$d/xcheck_basis.kz" "$profile" "$d/xcheck_1.txt" || rc=$?
+    [ "$rc" -eq 0 ] || exit "$rc"
+    bash "$script" --xcheck "$kz" "$d/xcheck_basis.kz" "$profile" "$d/xcheck_2.txt"
+    cmp -s "$d/xcheck_1.txt" "$d/xcheck_2.txt" || { echo "the cross-check output differs between two runs"; exit 1; }
+    n_sites=$(grep -c '^site ' "$profile")
+    [ "$(grep -c '^== site ' "$d/xcheck_1.txt")" -eq "$n_sites" ] || { echo "not every site has a block"; exit 1; }
+    [ "$(grep -c '^>' "$d/xcheck_1.txt")" -eq "$n_sites" ] || { echo "a probed address is not an instruction boundary of objdump"; exit 1; }
+    ! grep -q 'address not found' "$d/xcheck_1.txt" || exit 1
+    grep -q '^tp_send$' "$d/xcheck_1.txt" || { echo "addr2line did not name tp_send"; exit 1; }
+    grep -q 'target_prog.c:' "$d/xcheck_1.txt" || { echo "addr2line gave no line of target_prog.c"; exit 1; }
+    grep -A3 'publish.after_get' "$d/xcheck_1.txt" | grep -q '^tp_publish$' || { echo "the after-call site is not in tp_publish"; exit 1; }
+    echo "xcheck: $n_sites sites cross-checked"
+  ]=] _ $<TARGET_FILE:kz> $<TARGET_FILE:target_prog> ${CMAKE_CURRENT_SOURCE_DIR}/target/target.kzp ${CMAKE_SOURCE_DIR}
+      ${CMAKE_SOURCE_DIR}/probe/scripts/observe_cfs_smoke.sh ${CMAKE_CURRENT_BINARY_DIR}
+  VERBATIM)
+set_tests_properties(probe_anchor_xcheck_script PROPERTIES LABELS "unit" SKIP_RETURN_CODE 77)

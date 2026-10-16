@@ -184,6 +184,8 @@ void test_run() {
   in.placement = "unit-test placement";
   in.observer_cpu_ns = 123456;
   in.boot_ns = 654321;
+  in.proc_reads = 9;
+  in.proc_ns = 31000;
 
   // Events: the main thread (tid 100) enters f and returns; thread 101 enters f once more.
   auto ev = [](uint64_t t, uint32_t tid, uint32_t tseq, uint32_t site, uint16_t phase, uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3) {
@@ -243,7 +245,8 @@ void test_run() {
   task.rec = main_thread.rec;
   task.rec.tid = 101; task.rec.ptid = 100; task.rec.announced_id = 0x100; task.rec.creator_event = 0; task.rec.first_event = 3;
   task.rec.t_fork = 900; task.rec.t_exit = 2000; task.rec.t_name = 950; task.rec.entry_fn = 0x7000000010c0; task.rec.priority = 11; task.rec.n_events = 1;
-  task.rec.flags = KZ_THREAD_FLAG_FORK_SEEN | KZ_THREAD_FLAG_COMM_SEEN | KZ_THREAD_FLAG_ENTRY_SEEN | KZ_THREAD_FLAG_SPAWN_MATCHED | KZ_THREAD_FLAG_EXIT_SEEN;
+  task.rec.flags = KZ_THREAD_FLAG_FORK_SEEN | KZ_THREAD_FLAG_COMM_SEEN | KZ_THREAD_FLAG_ENTRY_SEEN | KZ_THREAD_FLAG_SPAWN_MATCHED | KZ_THREAD_FLAG_EXIT_SEEN |
+                   KZ_THREAD_FLAG_MATCH_BY_TIME | KZ_THREAD_FLAG_ID_UNVERIFIED;
   task.name = "TASK_A";
   task.entry_symbol = "g";
   in.threads = {main_thread, task};
@@ -312,6 +315,34 @@ void test_run() {
   std::vector<kz_runmeta> dm;
   KZ_CHECK_OK(dc.read_section(KZ_SEC_RUNMETA, &dm));
   if (dm.size() == 1) KZ_CHECK((dm[0].flags & KZ_RUN_FLAG_LOSS_PRESENT) != 0);
+
+  // Perturbation accounting: the return site (same file offset as the entry site) is charged the
+  // return trampoline, not a second trap; the /proc reads of the observer are a row of their own.
+  kz::Container rc;
+  KZ_CHECK_OK(kz::Container::parse(bytes, &rc));
+  std::vector<kz_perturbation> pert;
+  KZ_CHECK_OK(rc.read_section(KZ_SEC_PERTURBATION, &pert));
+  KZ_CHECK_EQ(pert.size(), size_t(6));
+  if (pert.size() == 6) {
+    KZ_CHECK_EQ(pert[0].cost_class, uint32_t(f.sites[0].insn_class));
+    KZ_CHECK_EQ(pert[1].site, 1u);
+    KZ_CHECK_EQ(pert[1].cost_class, uint32_t(KZ_INSN_CLASS_RET_TRAMPOLINE));
+    KZ_CHECK_EQ(pert[5].kind, uint8_t(KZ_PERTURBATION_KIND_PROC_CAPTURE));
+    KZ_CHECK_EQ(pert[5].count, uint64_t(9));
+    KZ_CHECK_EQ(pert[5].ns, uint64_t(31000));
+  }
+  using kz::probe::TrapAccount;
+  const std::vector<TrapAccount> acc = kz::probe::trap_accounts(f.sites);
+  KZ_CHECK(acc == std::vector<TrapAccount>({TrapAccount::CountedHere, TrapAccount::InOtherRow, TrapAccount::CountedHere}));
+  KZ_CHECK(kz::probe::trap_account_text(f.sites, 1).find("counted in the row of site 0") != std::string::npos);
+  KZ_CHECK(kz::probe::trap_account_text(f.sites, 1).find("return trampolines") != std::string::npos);
+  // A return site alone at its address: the trap there is counted in no row, and the record says so.
+  std::vector<kz::trace::SiteSpec> alone = {f.sites[1], f.sites[2]};
+  KZ_CHECK(kz::probe::trap_accounts(alone) == std::vector<TrapAccount>({TrapAccount::Uncounted, TrapAccount::CountedHere}));
+  KZ_CHECK(kz::probe::trap_account_text(alone, 0).find("uncounted") == 0);
+  // The order of the sites does not move the count to the return site.
+  std::vector<kz::trace::SiteSpec> ret_first = {f.sites[1], f.sites[0]};
+  KZ_CHECK(kz::probe::trap_accounts(ret_first) == std::vector<TrapAccount>({TrapAccount::InOtherRow, TrapAccount::CountedHere}));
 }
 
 }  // namespace

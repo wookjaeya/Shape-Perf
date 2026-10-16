@@ -1,9 +1,13 @@
 // The whole-program rules of the certificate view (lib/llvm/unroll.cpp), on synthetic models:
 // partial evaluation against an element image, the unrolled iterations of a table walk, the
-// task-main parameters of spawning functions, and the rule of each loop (unroll, await, star).
+// task-main parameters of spawning functions, the rule of each loop (unroll, await, star), the
+// check that a walk's static image may be its run-time value (const links, typed writes), and the
+// unknown-effect decision of finalize for pointers that reach a target.
+#include <map>
 #include <string>
 #include <vector>
 
+#include "finalize.hpp"
 #include "support/kz_test.hpp"
 #include "unroll.hpp"
 
@@ -307,6 +311,138 @@ int main() {
     decide_loop_rules(&m, spec, g);
     KZ_CHECK_EQ(m.loops[0].cert, uint8_t(KZ_LOOP_CERT_STAR));
     KZ_CHECK(m.loops[0].cert_note.find("is DISABLED") != std::string::npos);
+  }
+  // ---- may the static image of a table walk be stale? ----------------------------------------------------
+  {
+    Model m;
+    m.object_images["cfg"] = {img("cfg", ".list", KZ_IMAGE_KIND_ADDR, "list")};
+    m.object_images["list"] = {img("list", "[0]", KZ_IMAGE_KIND_ADDR, "mod_a"), img("list", "[1]", KZ_IMAGE_KIND_NULLPTR)};
+    m.object_const = {{"cfg", false}, {"list", true}, {"mod_a", true}};
+    Model::WalkSpec w;
+    w.loop_key = "L";
+    w.root_object = "cfg";
+    w.fields = {"list"};
+    w.field_owner = {"Cfg"};
+    w.field_const = {false};
+    w.elem_type = "Mod";
+    const std::vector<ImageFact> entries = {img("list", "[0]", KZ_IMAGE_KIND_ADDR, "mod_a")};
+    // the configuration is not const and nothing writes it: the link is assumed, nothing else
+    WalkTrust t = check_walk_links(m, w, entries);
+    KZ_CHECK(t.written.empty());
+    KZ_CHECK_EQ(t.assumed.size(), size_t(1));
+    if (!t.assumed.empty()) KZ_CHECK_EQ(t.assumed[0], std::string("cfg.list"));
+    // a const object, or a const field, needs no assumption
+    w.root_const = true;
+    KZ_CHECK(check_walk_links(m, w, entries).assumed.empty());
+    w.root_const = false;
+    w.field_const = {true};
+    KZ_CHECK(check_walk_links(m, w, entries).assumed.empty());
+    w.field_const = {false};
+    // a typed write of the field anywhere: the image may be stale
+    WriteEvent we;
+    we.func_key = "swap";
+    we.kind = KZ_FWRITE_KIND_FIELD;
+    we.type = "Cfg";
+    we.field = "list";
+    we.pos = at(9);
+    m.write_events = {we};
+    t = check_walk_links(m, w, entries);
+    KZ_CHECK(t.written.find("Cfg.list is written at t.c:9:1 (swap)") != std::string::npos);
+    // a write of the whole record, or the address of the object taken, as well
+    we.field = "*";
+    m.write_events = {we};
+    KZ_CHECK(!check_walk_links(m, w, entries).written.empty());
+    we.kind = KZ_FWRITE_KIND_OUTARG;
+    we.type = "<global>";
+    we.field = "cfg";
+    m.write_events = {we};
+    KZ_CHECK(check_walk_links(m, w, entries).written.find("cfg is written") != std::string::npos);
+    // an untyped write is not a typed write: it stays under the assumption
+    we.kind = KZ_FWRITE_KIND_UNTYPED;
+    we.type.clear();
+    we.field.clear();
+    m.write_events = {we};
+    KZ_CHECK(check_walk_links(m, w, entries).written.empty());
+    // a table and elements that are not const are assumed too; a write of an element's field is a write
+    m.write_events.clear();
+    m.object_const["list"] = false;
+    m.object_const["mod_a"] = false;
+    w.field_const = {true};
+    t = check_walk_links(m, w, entries);
+    KZ_CHECK_EQ(t.assumed.size(), size_t(2));
+    if (t.assumed.size() == 2) {
+      KZ_CHECK_EQ(t.assumed[0], std::string("list[]"));
+      KZ_CHECK_EQ(t.assumed[1], std::string("mod_a"));
+    }
+    we.kind = KZ_FWRITE_KIND_FIELD;
+    we.type = "Mod";
+    we.field = "init";
+    m.write_events = {we};
+    KZ_CHECK(check_walk_links(m, w, entries).written.find("the element mod_a") != std::string::npos);
+    // an object that is not in the table of objects counts as not const
+    m.object_const.clear();
+    m.write_events.clear();
+    w.field_const = {false};
+    KZ_CHECK_EQ(check_walk_links(m, w, entries).assumed.size(), size_t(3));
+  }
+
+  // ---- code whose effect is unknown: the whole-program decision of finalize -----------------------------
+  {
+    Model m;
+    ExtractSpec spec;
+    for (const char* ty : {"A", "B", "C", "D", "E"}) spec.fields.push_back(TargetField{FieldRef{ty, "id"}, "test"});
+    auto fn = [&](const std::string& k, uint32_t np, bool body) {
+      FuncFact f;
+      f.key = f.name = k;
+      f.nparams = np;
+      m.funcs[k] = f;
+      if (body) m.summaries[k].params.resize(np);
+    };
+    fn("f", 0, true);
+    fn("ext", 1, false);  // no body
+    fn("logv", 1, true);  // variadic, with a body
+    fn("cb", 1, true);    // the target of a resolved indirect call
+    fn("memset", 3, false);
+    CallFact c1 = call(10, "f", "ext"), c2 = call(11, "f", "logv"), c3 = call(12, "f", ""), c4 = call(13, "f", ""), c5 = call(14, "f", "memset");
+    m.calls = {c1, c2, c3, c4, c5};
+    m.indirect_calls = {IndirectCall{key_of(c3), "G:hook"}, IndirectCall{key_of(c4), "G:tab"}};
+    m.flow = {{"F:cb", "G:tab"}};
+    spec.data_fns["memset"] = DataFn{};
+    auto pass = [&](const CallFact& c, uint32_t arg, const std::string& type, bool variadic) {
+      Model::ReachPass rp;
+      rp.call_key = key_of(c);
+      rp.func_key = "f";
+      rp.pos = c.pos;
+      rp.arg_index = arg;
+      rp.callee_key = c.callee_key;
+      rp.callee_name = c.callee_name;
+      rp.variadic_position = variadic;
+      rp.types = {type};
+      rp.text = "&g";
+      return rp;
+    };
+    m.reach_passes = {pass(c1, 0, "A", false), pass(c2, 1, "B", true), pass(c3, 0, "C", false), pass(c4, 0, "D", false), pass(c5, 0, "E", false)};
+    finalize(&m, spec);
+    std::map<std::string, const LocFact*> loc;
+    for (const LocFact& l : m.locs) loc[l.loc_type] = &l;
+    KZ_CHECK_EQ(m.locs.size(), size_t(5));
+    if (m.locs.size() == 5) {
+      KZ_CHECK_EQ(loc["A"]->status, uint8_t(KZ_LOC_STATUS_DISABLED));  // no body
+      KZ_CHECK_EQ(loc["A"]->n_unknown, uint32_t(1));
+      KZ_CHECK_EQ(loc["B"]->status, uint8_t(KZ_LOC_STATUS_DISABLED));  // variadic position
+      KZ_CHECK_EQ(loc["C"]->status, uint8_t(KZ_LOC_STATUS_DISABLED));  // an indirect call with no known target
+      KZ_CHECK_EQ(loc["D"]->status, uint8_t(KZ_LOC_STATUS_COMPLETE));  // resolved to a function with a body
+      KZ_CHECK_EQ(loc["E"]->status, uint8_t(KZ_LOC_STATUS_COMPLETE));  // a data function: its summary
+      KZ_CHECK_EQ(loc["D"]->n_unresolved_indirect, uint32_t(1));       // informational only
+    }
+    KZ_CHECK_EQ(m.resolved.reach_passes_unknown, uint32_t(3));
+    size_t unknown = 0;
+    for (const ATypeFact& a : m.atypes)
+      if (a.kind == KZ_ATYPE_KIND_UNKNOWN_EFFECT) {
+        ++unknown;
+        KZ_CHECK(a.detail.find("a pointer that reaches the type (argument") == 0);
+      }
+    KZ_CHECK_EQ(unknown, size_t(3));
   }
   return kztest::finish("test_static_unroll");
 }

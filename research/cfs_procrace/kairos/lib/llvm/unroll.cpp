@@ -190,6 +190,99 @@ void find_spawn_params(Model* mp, const ProgramGraph& g) {
                        m.spawn_params.end());
 }
 
+// ---- may the static image of a table walk be stale? ----------------------------------------------------
+
+namespace {
+
+std::string object_name(const std::string& key) { return key.substr(0, key.find('@')); }
+
+bool writes_object_kind(uint8_t kind) { return kind == KZ_FWRITE_KIND_FIELD || kind == KZ_FWRITE_KIND_RECORD || kind == KZ_FWRITE_KIND_OUTARG; }
+
+std::string where_of(const WriteEvent& w) { return w.pos.str() + " (" + w.func_key + ")"; }
+
+}  // namespace
+
+WalkTrust check_walk_links(const Model& m, const Model::WalkSpec& walk, const std::vector<ImageFact>& entries) {
+  WalkTrust r;
+  auto is_const = [&](const std::string& key) {
+    auto it = m.object_const.find(key);
+    return it != m.object_const.end() && it->second;
+  };
+  // the first typed write of field `field` of `type` ("" = any field), or of the global `object`
+  auto field_write = [&](const std::string& type, const std::string& field) -> const WriteEvent* {
+    for (const WriteEvent& w : m.write_events)
+      if (writes_object_kind(w.kind) && w.type == type && (field.empty() || w.field == field || w.field == "*")) return &w;
+    return nullptr;
+  };
+  auto object_write = [&](const std::string& key) -> const WriteEvent* {
+    const std::string name = object_name(key);
+    for (const WriteEvent& w : m.write_events)
+      if (writes_object_kind(w.kind) && w.type == "<global>" && w.field == name) return &w;
+    return nullptr;
+  };
+  auto find_image = [&](const std::string& obj) -> const std::vector<ImageFact>* {
+    auto it = m.object_images.find(obj);
+    return it == m.object_images.end() ? nullptr : &it->second;
+  };
+  std::string cur = walk.root_object, prefix, text = object_name(cur);
+  bool cur_const = walk.root_const || is_const(cur);
+  for (size_t i = 0; i < walk.fields.size(); ++i) {
+    const std::string& f = walk.fields[i];
+    text += "." + f;
+    const bool field_const = i < walk.field_const.size() && walk.field_const[i];
+    if (!cur_const && !field_const) {
+      const std::string owner = i < walk.field_owner.size() ? walk.field_owner[i] : std::string();
+      if (const WriteEvent* w = field_write(owner, f)) {
+        r.written = "the link " + text + " is not const and " + owner + "." + f + " is written at " + where_of(*w);
+        return r;
+      }
+      if (const WriteEvent* w = object_write(cur)) {
+        r.written = "the link " + text + " is not const and " + object_name(cur) + " is written at " + where_of(*w);
+        return r;
+      }
+      r.assumed.push_back(text);
+    }
+    const std::vector<ImageFact>* img = find_image(cur);
+    const ImageFact* e = nullptr;
+    if (img != nullptr)
+      for (const ImageFact& x : *img)
+        if (x.path == prefix + "." + f) e = &x;
+    if (e != nullptr && e->kind == KZ_IMAGE_KIND_ADDR) {
+      cur = e->text;
+      cur_const = is_const(cur);
+      prefix.clear();
+      text = object_name(cur);
+    } else {
+      prefix += "." + f;
+      cur_const = cur_const || field_const;
+    }
+  }
+  // the table itself: its entries are read from its image
+  if (!cur_const) {
+    if (const WriteEvent* w = object_write(cur)) {
+      r.written = "the table " + text + " is not const and " + object_name(cur) + " is written at " + where_of(*w);
+      return r;
+    }
+    r.assumed.push_back(text + "[]");
+  }
+  // the element objects: their fields are read from their images
+  std::set<std::string> seen;
+  for (const ImageFact& e : entries) {
+    if (e.kind != KZ_IMAGE_KIND_ADDR || e.text.find('+') != std::string::npos || !seen.insert(e.text).second) continue;
+    if (is_const(e.text)) continue;
+    if (const WriteEvent* w = walk.elem_type.empty() ? nullptr : field_write(walk.elem_type, "")) {
+      r.written = "the element " + object_name(e.text) + " is not const and " + walk.elem_type + "." + w->field + " is written at " + where_of(*w);
+      return r;
+    }
+    if (const WriteEvent* w = object_write(e.text)) {
+      r.written = "the element " + object_name(e.text) + " is not const and is written at " + where_of(*w);
+      return r;
+    }
+    r.assumed.push_back(object_name(e.text));
+  }
+  return r;
+}
+
 // ---- unrolled iterations of table walks --------------------------------------------------------------
 
 namespace {
@@ -397,6 +490,7 @@ void decide_loop_rules(Model* mp, const ExtractSpec& spec, const ProgramGraph& g
         if (l.trip_status == KZ_TRIP_STATUS_EXACT) {
           l.cert = KZ_LOOP_CERT_UNROLL;
           l.cert_note = "unrolled: " + trip + " iterations, one per element of " + l.table + " in its static-initializer image";
+          if (!l.image_assumed.empty()) l.cert_note += "; declared assumption: the images of " + l.image_assumed + " (not const) are their values at run time";
         } else {
           l.cert = KZ_LOOP_CERT_STAR;
           l.cert_note = "star-closed: the table walk was not resolved" + (l.trip_note.empty() ? std::string() : " (" + l.trip_note + ")");

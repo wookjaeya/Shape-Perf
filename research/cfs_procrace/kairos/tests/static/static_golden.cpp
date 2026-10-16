@@ -47,7 +47,11 @@ const std::vector<Case>& cases() {
       {"derives", "derives.c", {}, kFactSections},
       {"loops", "loops.c", {"--target", "Gate.state", "--target", "Rec.state", "--target", "Sys.ready", "--target", "Sys.phase", "--delay-op", "fx_delay", "--lock-op", "fx_lock", "--unlock-op", "fx_unlock"}, kFactSections},
       {"spawn", "spawn.c", {}, kFactSections},
-      {"atype", "atype.c", {"--target", "Plain.id", "--target", "Cast.id", "--target", "Esc.id", "--target", "Mix.id", "--target", "Inner.id", "--target", "Safe.id"}, kFactSections},
+      {"atype", "atype.c", {"--target", "Plain.id", "--target", "Cast.id", "--target", "Esc.id", "--target", "Mix.id", "--target", "Inner.id", "--target", "Safe.id",
+                            "--target", "Ext.id", "--target", "Ind.id", "--target", "Var.id", "--target", "Asm.id", "--target", "Span.id", "--target", "Sub.id",
+                            "--target", "Outp.id", "--target", "Laund.id"},
+       kFactSections},
+      {"clobber", "clobber.c", {"--target", "Any.id", "--target", "Far.id"}, kFactSections},
   };
   return all;
 }

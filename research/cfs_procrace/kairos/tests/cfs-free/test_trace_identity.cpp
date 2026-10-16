@@ -22,11 +22,21 @@ std::vector<SiteSpec> sites() {
     v[i].phases = KZ_SITE_PHASE_ENTRY;
     v[i].decoder = KZ_DECODER_GENERIC;
   }
+  auto slot = [](uint8_t n, uint8_t src, uint32_t index, uint8_t width, const char* role) {
+    SlotSpec sl;
+    sl.slot = n; sl.src = src; sl.index = index; sl.width = width; sl.role = role;
+    return sl;
+  };
+  // The slots the decoders read (kz_raw.h, KZ_DECODER); check_site refuses a spawn site without them.
   v[kSiteCreate].decoder = KZ_DECODER_SPAWN_CREATE;
+  v[kSiteCreate].slots = {slot(0, KZ_SLOT_SRC_REG, KZ_REG_RSI, 8, "name_ptr"), slot(1, KZ_SLOT_SRC_REG, KZ_REG_RDX, 8, "entry_fn"),
+                          slot(2, KZ_SLOT_SRC_REG, KZ_REG_R9, 4, "priority"), slot(3, KZ_SLOT_SRC_STACK, 0, 8, "return_address")};
   v[kSiteReturn].kind = KZ_SITE_KIND_RET_PROBE;
   v[kSiteReturn].phases = KZ_SITE_PHASE_RET;
   v[kSiteReturn].decoder = KZ_DECODER_SPAWN_RETURN;
+  v[kSiteReturn].slots = {slot(0, KZ_SLOT_SRC_REG, KZ_REG_RAX, 4, "status"), slot(3, KZ_SLOT_SRC_IP, 0, 8, "return_address")};
   v[kSiteEntry].decoder = KZ_DECODER_THREAD_ENTRY;
+  v[kSiteEntry].slots = {slot(0, KZ_SLOT_SRC_REG, KZ_REG_RDI, 4, "task_id")};
   return v;
 }
 
@@ -43,6 +53,11 @@ struct Trace {
     e.a[0] = a0; e.a[1] = a1; e.a[2] = a2; e.a[3] = a3;
     events.push_back(e);
     return static_cast<uint32_t>(events.size() - 1);
+  }
+  // The last event had a slot the kernel did not copy: TRUNC, and that slot 0 (apply_slots).
+  void truncate_last(int slot) {
+    events.back().flags |= KZ_RAW_FLAG_TRUNC;
+    events.back().a[slot] = 0;
   }
   uint32_t create(uint32_t tid, uint64_t t, uint64_t entry_fn, uint64_t prio, uint64_t retaddr) { return raw(tid, t, kSiteCreate, 0x1234, entry_fn, prio, retaddr); }
   uint32_t create_ret(uint32_t tid, uint64_t t, uint64_t status, uint64_t retaddr) { return raw(tid, t, kSiteReturn, status, 0, 0, retaddr); }
@@ -98,6 +113,8 @@ void test_normal_spawns() {
   KZ_CHECK_EQ(st.creates_without_fork, uint64_t(0));
   KZ_CHECK_EQ(st.creates_without_return, uint64_t(0));
   KZ_CHECK_EQ(st.entries_unmatched, uint64_t(0));
+  KZ_CHECK_EQ(st.matched_by_time, uint64_t(2));
+  KZ_CHECK_EQ(st.ids_unverified, uint64_t(2));
   const ThreadRecord* a = find(v, 11);
   const ThreadRecord* b = find(v, 12);
   const ThreadRecord* m = find(v, 10);
@@ -113,7 +130,10 @@ void test_normal_spawns() {
   KZ_CHECK_EQ(a->rec.n_events, 1u);
   KZ_CHECK_EQ(a->rec.t_fork, uint64_t(105));
   KZ_CHECK_EQ(a->rec.t_name, uint64_t(111));
+  // The creator link rests on FORK-time containment only (MATCH_BY_TIME), and nothing on the creator
+  // side was compared with the announced id (ID_UNVERIFIED).
   const uint32_t all = KZ_THREAD_FLAG_FORK_SEEN | KZ_THREAD_FLAG_COMM_SEEN | KZ_THREAD_FLAG_ENTRY_SEEN | KZ_THREAD_FLAG_SPAWN_MATCHED |
+                       KZ_THREAD_FLAG_MATCH_BY_TIME | KZ_THREAD_FLAG_ID_UNVERIFIED |
                        KZ_THREAD_FLAG_NAME_AFTER_FIRST_EVENT;  // the child's first event (its entry) precedes its rename
   KZ_CHECK_EQ(a->rec.flags, all);
   KZ_CHECK_EQ(b->name, std::string("CHILD_B"));
@@ -126,6 +146,8 @@ void test_normal_spawns() {
   KZ_CHECK_EQ(m->rec.creator_event, KZ_NONE32);
   KZ_CHECK_EQ(m->rec.announced_id, KZ_NONE32);
   KZ_CHECK(!has(*m, KZ_THREAD_FLAG_SPAWN_MATCHED));
+  KZ_CHECK(!has(*m, KZ_THREAD_FLAG_MATCH_BY_TIME));
+  KZ_CHECK(!has(*m, KZ_THREAD_FLAG_ID_UNVERIFIED));
   KZ_CHECK_EQ(m->rec.n_events, 4u);
   KZ_CHECK_EQ(m->rec.first_event, c1);
   // ordered by (pid, tid, generation)
@@ -181,6 +203,7 @@ void test_ambiguity_is_reported_not_guessed() {
     const ThreadRecord* t = find(v, tid);
     KZ_CHECK(t != nullptr);
     KZ_CHECK(has(*t, KZ_THREAD_FLAG_SPAWN_AMBIGUOUS));
+    KZ_CHECK(has(*t, KZ_THREAD_FLAG_MATCH_BY_TIME));  // the candidates too were found by time containment
     KZ_CHECK(!has(*t, KZ_THREAD_FLAG_SPAWN_MATCHED));
     KZ_CHECK_EQ(t->rec.creator_event, KZ_NONE32);
     KZ_CHECK_EQ(t->rec.entry_fn, uint64_t(0));
@@ -360,6 +383,80 @@ void test_required_inputs() {
   KZ_CHECK_ERR(join_identities(in, &out, nullptr), kz::Err::Invalid);
 }
 
+void test_sites_must_declare_decoder_slots() {
+  // A spawn site whose slots do not say what the decoder reads would be read as zeros: refused.
+  for (int which = 0; which < 4; ++which) {
+    Trace tr;
+    tr.create(10, 100, 0x4000, 1, 0x900);
+    tr.create_ret(10, 120, 0, 0x900);
+    switch (which) {
+      case 0: tr.sites[kSiteCreate].slots[1].role = "something_else"; break;   // entry_fn not at slot 1
+      case 1: tr.sites[kSiteCreate].slots.pop_back(); break;                   // no return address
+      case 2: tr.sites[kSiteReturn].slots.pop_back(); break;                   // the return has no key
+      case 3: tr.sites[kSiteEntry].slots.clear(); break;                       // no announced id
+    }
+    JoinInput in;
+    in.events = &tr.events; in.sites = &tr.sites; in.side = &tr.side;
+    std::vector<ThreadRecord> out;
+    KZ_CHECK_ERR(join_identities(in, &out, nullptr), kz::Err::Invalid);
+  }
+}
+
+void test_truncated_slots_are_not_keys() {
+  // A create whose return address was not copied (TRUNC, slot 0): it opens no interval, so a return
+  // with return address 0 cannot close it, and the fork in it is not assigned to it.
+  {
+    Trace tr;
+    tr.create(10, 100, 0x4000, 1, 0);
+    tr.truncate_last(3);
+    tr.fork(10, 11, 10, 105);
+    tr.create_ret(10, 120, 0, 0);
+    JoinStats st;
+    auto v = tr.join(&st);
+    KZ_CHECK_EQ(st.creates_unreadable, uint64_t(1));
+    KZ_CHECK_EQ(st.returns_without_create, uint64_t(1));
+    KZ_CHECK_EQ(st.spawn_matched, uint64_t(0));
+    KZ_CHECK(!has(*find(v, 11), KZ_THREAD_FLAG_SPAWN_MATCHED));
+    KZ_CHECK_EQ(find(v, 11)->rec.entry_fn, uint64_t(0));
+  }
+  // Without the TRUNC flag the same values would match: the flag, not the value, decides.
+  {
+    Trace tr;
+    tr.create(10, 100, 0x4000, 1, 0);
+    tr.fork(10, 11, 10, 105);
+    tr.create_ret(10, 120, 0, 0);
+    JoinStats st;
+    auto v = tr.join(&st);
+    KZ_CHECK_EQ(st.spawn_matched, uint64_t(1));
+  }
+  // A return whose key is unreadable leaves the call open: its fork is ambiguous, not matched.
+  {
+    Trace tr;
+    tr.create(10, 100, 0x4000, 1, 0x900);
+    tr.fork(10, 11, 10, 105);
+    tr.create_ret(10, 120, 0, 0);
+    tr.truncate_last(3);
+    JoinStats st;
+    auto v = tr.join(&st);
+    KZ_CHECK_EQ(st.returns_unreadable, uint64_t(1));
+    KZ_CHECK_EQ(st.creates_without_return, uint64_t(1));
+    KZ_CHECK(has(*find(v, 11), KZ_THREAD_FLAG_SPAWN_AMBIGUOUS));
+  }
+  // An entry whose id was not copied announces nothing.
+  {
+    Trace tr;
+    tr.fork(10, 11, 10, 100);
+    tr.entry(11, 110, 0);
+    tr.truncate_last(0);
+    JoinStats st;
+    auto v = tr.join(&st);
+    KZ_CHECK_EQ(st.entries_unreadable, uint64_t(1));
+    KZ_CHECK_EQ(find(v, 11)->rec.announced_id, KZ_NONE32);
+    KZ_CHECK(!has(*find(v, 11), KZ_THREAD_FLAG_ENTRY_SEEN));
+    KZ_CHECK(!has(*find(v, 11), KZ_THREAD_FLAG_ID_UNVERIFIED));
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -374,5 +471,7 @@ int main() {
   test_entry_announcements();
   test_input_order_does_not_matter();
   test_required_inputs();
+  test_sites_must_declare_decoder_slots();
+  test_truncated_slots_are_not_keys();
   return kztest::finish("test_trace_identity");
 }

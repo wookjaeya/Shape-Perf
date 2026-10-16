@@ -182,6 +182,7 @@ struct LoopCtx {
   uint32_t shared_loads = 0, shared_loads_locked = 0;
   bool volatile_load = false;
   uint32_t lock_calls = 0;
+  std::set<std::string> callees_locked, callees_unlocked;  // callee names called inside / outside a lock region
   // A counted for-loop: i = c0; i <op> bound; i += step.
   bool counted = false;
   const VarDecl* induction = nullptr;
@@ -234,11 +235,48 @@ class FnWalker {
     for (unsigned i = 0; i < fd_->getNumParams(); ++i) summary_.params[i].is_pointer = fd_->getParamDecl(i)->getType()->isPointerType();
     LocalPre pre(&locals_, &tested_);
     pre.TraverseStmt(const_cast<Stmt*>(fd_->getBody()));
+    assign_local_ids();
     visit(fd_->getBody());
     m_.summaries[fkey_] = summary_;
   }
 
  private:
+  // ---- local variables: one identity per declaration ----
+  // Expression trees name a local by a string.  A name that two locals of the function share
+  // (shadowing, reuse in sibling blocks) is made unique with the position of the declaration,
+  // "n@line:col"; a name used once stays as written.  The id depends only on the declarations,
+  // never on pointer values, and every lookup from a tree back to a declaration goes through
+  // local_by_id_.
+  void assign_local_ids() {
+    std::map<std::string, uint32_t> uses;
+    // the declarations in source order (the raw encoding of a location is its offset in the
+    // unit, the same in every parse of the same input), not in pointer order
+    std::vector<const VarDecl*> decls;
+    for (const auto& kv : locals_) {
+      decls.push_back(kv.first);
+      ++uses[kv.first->getNameAsString()];
+    }
+    std::sort(decls.begin(), decls.end(), [](const VarDecl* a, const VarDecl* b) {
+      return a->getLocation().getRawEncoding() < b->getLocation().getRawEncoding();
+    });
+    for (const VarDecl* vd : decls) {
+      std::string id = vd->getNameAsString();
+      if (uses[id] > 1) {
+        const Pos p = tu_.pos_of(vd->getLocation());
+        id += "@" + std::to_string(p.line) + ":" + std::to_string(p.col);
+      }
+      // two declarations at one position (one macro expansion): number them in source order
+      const std::string base = id;
+      for (uint32_t k = 2; local_by_id_.count(id) != 0; ++k) id = base + "#" + std::to_string(k);
+      local_id_[vd] = id;
+      local_by_id_[id] = vd;
+    }
+  }
+  std::string lid(const VarDecl* vd) const {
+    auto it = local_id_.find(vd);
+    return it != local_id_.end() ? it->second : vd->getNameAsString();
+  }
+
   // ---- small helpers ----
   ExprPool& pool() { return m_.exprs; }
 
@@ -287,7 +325,7 @@ class FnWalker {
       if (elem_var_ != nullptr && dre->getDecl() == elem_var_) return pool().load(KZ_EXPR_REF_ELEM, "");
       if (const auto* pv = dyn_cast<ParmVarDecl>(dre->getDecl())) return pool().load(KZ_EXPR_REF_PARAM, pv->getNameAsString(), pv->getFunctionScopeIndex());
       if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl()))
-        return pool().load(vd->hasGlobalStorage() ? KZ_EXPR_REF_GLOBAL : KZ_EXPR_REF_LOCAL, vd->getNameAsString());
+        return vd->hasGlobalStorage() ? pool().load(KZ_EXPR_REF_GLOBAL, vd->getNameAsString()) : pool().load(KZ_EXPR_REF_LOCAL, lid(vd));
       if (const auto* fn = dyn_cast<FunctionDecl>(dre->getDecl())) return pool().load(KZ_EXPR_REF_FUNC, fn->getNameAsString());
       return pool().top("declref");
     }
@@ -502,6 +540,8 @@ class FnWalker {
       case Stmt::InitListExprClass: return visit_initlist(cast<InitListExpr>(s));
       case Stmt::UnaryExprOrTypeTraitExprClass: return;  // sizeof and alignof do not evaluate their operand
       case Stmt::CompoundStmtClass: return visit_compound(cast<CompoundStmt>(s));
+      case Stmt::GCCAsmStmtClass:
+      case Stmt::MSAsmStmtClass: return visit_asm(cast<AsmStmt>(s));
       default: break;
     }
     for (const Stmt* c : s->children()) visit(c);
@@ -671,6 +711,34 @@ class FnWalker {
       lf.budget = build_budget(lc);
     }
     if (lf.kind == KZ_LOOP_KIND_POLL || lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED) extract_predicate(lc, &lf);
+    restrict_lock_kind(lc, &lf);
+  }
+
+  // L1 (ii) sees the loads of the loop body.  A call result in the test reads what the callee
+  // reads, which the load count does not see: an atomic read is then not the whole test, and one
+  // lock region covers the test only if every such call is made inside the region (and nowhere
+  // outside it in the loop).  An indirect call result is never covered.
+  void restrict_lock_kind(const LoopCtx* lc, LoopFact* lf) {
+    if (lf->lock_kind == KZ_LOCK_KIND_NONE) return;
+    std::set<std::string> called;
+    collect_call_results(lf->pred, &called);
+    collect_call_results(lf->cond, &called);
+    if (called.empty()) return;
+    if (lf->lock_kind == KZ_LOCK_KIND_ATOMIC_READ) {
+      lf->lock_kind = KZ_LOCK_KIND_NONE;
+      return;
+    }
+    for (const std::string& f : called)
+      if (f == "<indirect>" || lc->callees_locked.count(f) == 0 || lc->callees_unlocked.count(f) != 0) {
+        lf->lock_kind = KZ_LOCK_KIND_NONE;
+        return;
+      }
+  }
+  static void collect_call_results(ExprRef e, std::set<std::string>* out) {
+    if (e == nullptr) return;
+    if (e->op == KZ_EXPR_OP_CALL_RESULT) out->insert(e->name);
+    collect_call_results(e->a, out);
+    collect_call_results(e->b, out);
   }
 
   // ---- SPEC 4.3: the condition exits of a poll loop and the predicate they test -------------
@@ -682,7 +750,7 @@ class FnWalker {
   // (b) rewritten as a `forall` over the constant-trip loop that counts; it is a direct test
   // (form (a)) when it reads no local variable at all.
   void extract_predicate(LoopCtx* lc, LoopFact* lf) {
-    const std::string budget = lc->budget_var != nullptr ? lc->budget_var->getNameAsString() : std::string();
+    const std::string budget = lc->budget_var != nullptr ? lid(lc->budget_var) : std::string();
     std::vector<ExprRef> cond_terms;
     std::vector<size_t> cond_index;  // the exit each condition term comes from
     bool any_exit = false;
@@ -806,11 +874,11 @@ class FnWalker {
     collect_free_locals(e->b, out);
   }
 
-  const VarDecl* local_by_name(const LoopCtx* lc, const std::string& name) {
+  // The declaration a LOCAL load of an expression tree names (its id, see assign_local_ids).
+  const VarDecl* local_by_name(const LoopCtx* lc, const std::string& id) {
     (void)lc;
-    for (const auto& kv : locals_)
-      if (kv.first->getNameAsString() == name) return kv.first;
-    return nullptr;
+    auto it = local_by_id_.find(id);
+    return it != local_by_id_.end() ? it->second : nullptr;
   }
 
   // `cnt == 0` (and its spellings) replaced by `forall`.  Any other use of the counter stays and
@@ -893,7 +961,7 @@ class FnWalker {
     collect_locals(phi, &names);
     std::vector<ExprRef> cursors;
     for (const std::string& n : names) {
-      if (info.induction != nullptr && n == info.induction->getNameAsString()) continue;
+      if (info.induction != nullptr && n == lid(info.induction)) continue;
       const VarDecl* p = local_by_name(lc, n);
       ExprRef cur = p != nullptr ? cursor_of(lc, L2, info, p) : nullptr;
       if (cur == nullptr) {
@@ -902,7 +970,7 @@ class FnWalker {
       }
       cursors.push_back(cur);
     }
-    const std::string iv = info.induction != nullptr ? info.induction->getNameAsString() : std::string("i");
+    const std::string iv = info.induction != nullptr ? lid(info.induction) : std::string("i");
     *inner_out = L2;
     return pool().make(KZ_EXPR_OP_FORALL, 0, inner.trip, iv, pool().unary(KZ_EXPR_OP_NOT, phi), pool().list(KZ_EXPR_OP_SEQ, cursors));
   }
@@ -931,7 +999,7 @@ class FnWalker {
     int64_t len = 0;
     const Expr* base = set->rhs->IgnoreParenImpCasts();
     if (const auto* cat = ctx_.getAsConstantArrayType(base->getType())) len = static_cast<int64_t>(cat->getSize().getZExtValue());
-    return pool().make(KZ_EXPR_OP_CURSOR, 0, len, p->getNameAsString(), to_expr(base), nullptr);
+    return pool().make(KZ_EXPR_OP_CURSOR, 0, len, lid(p), to_expr(base), nullptr);
   }
 
   ExprRef build_budget(LoopCtx* lc) {
@@ -940,7 +1008,7 @@ class FnWalker {
       if (lc->other_mods.count(v) != 0) continue;
       // the variable must be tested by an exit condition
       bool tested = false;
-      for (ExprRef x : lc->exits) tested |= expr_mentions_local(x, v->getNameAsString());
+      for (ExprRef x : lc->exits) tested |= expr_mentions_local(x, lid(v));
       if (!tested) continue;
       lc->budget_var = v;
       const LocalInfo& li = locals_[v];
@@ -952,7 +1020,7 @@ class FnWalker {
         init = d.rhs;
       }
       std::vector<ExprRef> parts;
-      parts.push_back(pool().load(KZ_EXPR_REF_LOCAL, v->getNameAsString()));
+      parts.push_back(pool().load(KZ_EXPR_REF_LOCAL, lid(v)));
       parts.push_back(outside == 1 && init != nullptr ? to_expr(init) : pool().top("no single initial value"));
       const Expr* step = kv.second;
       parts.push_back(step != nullptr ? to_expr(step) : pool().constant(1));
@@ -961,7 +1029,7 @@ class FnWalker {
         if (const auto* dre = dyn_cast<DeclRefExpr>(step->IgnoreParenImpCasts())) {
           if (const auto* sv = dyn_cast<VarDecl>(dre->getDecl())) {
             for (const DefInfo& d : locals_[sv].defs)
-              if (in_range(d.loc, lc->range) && d.rhs != nullptr) parts.push_back(pool().binary(KZ_EXPR_OP_STORE, pool().load(KZ_EXPR_REF_LOCAL, sv->getNameAsString()), to_expr(d.rhs)));
+              if (in_range(d.loc, lc->range) && d.rhs != nullptr) parts.push_back(pool().binary(KZ_EXPR_OP_STORE, pool().load(KZ_EXPR_REF_LOCAL, lid(sv)), to_expr(d.rhs)));
           }
         }
       }
@@ -1019,12 +1087,16 @@ class FnWalker {
           if (idx == nullptr || idx->getDecl() != iv) continue;
         }
         // the base: a global object, possibly through fields
-        std::vector<std::string> fields;
+        std::vector<std::string> fields, owners;
+        std::vector<bool> consts;
         const Expr* b = as->getBase()->IgnoreParenImpCasts();
         const VarDecl* root = nullptr;
         for (;;) {
           if (const auto* me = dyn_cast<MemberExpr>(b)) {
+            const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
             fields.insert(fields.begin(), me->getMemberDecl()->getNameAsString());
+            owners.insert(owners.begin(), fl != nullptr ? field_type_name(fl) : std::string());
+            consts.insert(consts.begin(), fl != nullptr && fl->getType().isConstQualified());
             b = me->getBase()->IgnoreParenImpCasts();
             continue;
           }
@@ -1037,6 +1109,12 @@ class FnWalker {
         w.root_object = tu_.object_key(root);
         w.fields = fields;
         w.text = tu_.source_text(as->getBase()->getSourceRange());
+        w.field_owner = owners;
+        w.field_const = consts;
+        w.root_const = root->getType().isConstant(ctx_);
+        QualType et = tested_var->getType().getCanonicalType();
+        if (et->isPointerType()) et = et->getPointeeType();
+        if (const RecordDecl* erd = tu_.record_of(et)) w.elem_type = tu_.record_name(erd);
         lc->walk = w;
         lc->walk_found = true;
         lc->walk_var = tested_var;
@@ -1062,6 +1140,8 @@ class FnWalker {
       outer->shared_loads_locked += lc->shared_loads_locked;
       outer->volatile_load |= lc->volatile_load;
       outer->lock_calls += lc->lock_calls;
+      outer->callees_locked.insert(lc->callees_locked.begin(), lc->callees_locked.end());
+      outer->callees_unlocked.insert(lc->callees_unlocked.begin(), lc->callees_unlocked.end());
       if (outer->delay_call.empty()) outer->delay_call = lc->delay_call;
       if (outer->lock_call.empty()) outer->lock_call = lc->lock_call;
     }
@@ -1391,15 +1471,39 @@ class FnWalker {
       r.reason = KZ_DERIVES_REASON_NOT_COPY;
       return r;
     }
-    const Expr* s = e->IgnoreParenCasts();
     int64_t c = 0;
-    if (!isa<CallExpr>(s) && tu_.eval_int(s, &c)) {
+    if (!isa<CallExpr>(e->IgnoreParenCasts()) && tu_.eval_int(e, &c)) {  // the value after the conversions
       r.status = KZ_DERIVES_STATUS_CONSTANT;
       r.chain = pool().constant(c);
       return r;
     }
+    // A copy keeps the value: parentheses, lvalue-to-rvalue and no-op conversions, and integer
+    // conversions that cannot lose information (to a type at least as wide).  A narrowing
+    // conversion, a conversion to bool and every other cast is not a copy.
+    const Expr* s = e;
+    for (;;) {
+      s = s->IgnoreParens();
+      const auto* ce = dyn_cast<CastExpr>(s);
+      if (ce == nullptr) break;
+      const CastKind k = ce->getCastKind();
+      if (k == CK_LValueToRValue || k == CK_NoOp) {
+        s = ce->getSubExpr();
+        continue;
+      }
+      if (k == CK_IntegralCast) {
+        const QualType from = ce->getSubExpr()->getType(), to = ce->getType();
+        if (!from->isIntegerType() || !to->isIntegerType() || ctx_.getIntWidth(to) < ctx_.getIntWidth(from)) {
+          r.reason = KZ_DERIVES_REASON_NOT_COPY;
+          return r;
+        }
+        s = ce->getSubExpr();
+        continue;
+      }
+      r.reason = KZ_DERIVES_REASON_NOT_COPY;
+      return r;
+    }
     const Expr* lv = s;
-    while (const auto* as = dyn_cast<ArraySubscriptExpr>(lv)) lv = as->getBase()->IgnoreParenImpCasts();
+    while (const auto* as = dyn_cast<ArraySubscriptExpr>(lv)) lv = as->getBase()->IgnoreParens()->IgnoreImpCasts();
     if (const auto* me = dyn_cast<MemberExpr>(lv)) {
       if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) {
         r.status = KZ_DERIVES_STATUS_DERIVED;
@@ -1410,20 +1514,23 @@ class FnWalker {
         return r;
       }
     }
+    // a global object, or an element of a global array (the array is the location)
+    if (const auto* gre = dyn_cast<DeclRefExpr>(lv)) {
+      if (const auto* gvd = dyn_cast<VarDecl>(gre->getDecl()); gvd != nullptr && gvd->hasGlobalStorage()) {
+        r.status = KZ_DERIVES_STATUS_DERIVED;
+        r.loc_type = "<global>";
+        r.loc_field = gvd->getNameAsString();
+        r.capture = tu_.pos_of(gre->getLocation());
+        r.chain = pool().load(KZ_EXPR_REF_GLOBAL, gvd->getNameAsString());
+        return r;
+      }
+    }
     if (const auto* dre = dyn_cast<DeclRefExpr>(s)) {
       if (isa<ParmVarDecl>(dre->getDecl())) {
         r.reason = KZ_DERIVES_REASON_FROM_PARAM;
         return r;
       }
       if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl())) {
-        if (vd->hasGlobalStorage()) {
-          r.status = KZ_DERIVES_STATUS_DERIVED;
-          r.loc_type = "<global>";
-          r.loc_field = vd->getNameAsString();
-          r.capture = tu_.pos_of(dre->getLocation());
-          r.chain = pool().load(KZ_EXPR_REF_GLOBAL, vd->getNameAsString());
-          return r;
-        }
         auto it = locals_.find(vd);
         if (it == locals_.end() || it->second.defs.empty()) {
           r.reason = KZ_DERIVES_REASON_NO_DEF;
@@ -1445,7 +1552,7 @@ class FnWalker {
         DeriveResult inner = derive(d.rhs, depth + 1);
         if (inner.status == KZ_DERIVES_STATUS_NOT_DERIVED) return inner;
         inner.hops += 1;
-        inner.chain = pool().make(KZ_EXPR_OP_COPY, 0, 0, vd->getNameAsString(), inner.chain, nullptr);
+        inner.chain = pool().make(KZ_EXPR_OP_COPY, 0, 0, lid(vd), inner.chain, nullptr);
         return inner;
       }
     }
@@ -1523,6 +1630,7 @@ class FnWalker {
     for (auto& lc : loops_) {
       ++lc->n_calls;
       lc->callees.insert(name.empty() ? "<indirect>" : name);
+      (lock_depth_ > 0 ? lc->callees_locked : lc->callees_unlocked).insert(name.empty() ? "<indirect>" : name);
       if (is_delay && lc->delay_call.empty()) lc->delay_call = ckey;
       if (is_lock) {
         if (lc->lock_call.empty()) lc->lock_call = ckey;
@@ -1644,6 +1752,30 @@ class FnWalker {
         m_.outcalls.push_back(oc);
       }
     }
+    // pointers that reach a target, for the unknown-effect check of finalize (SPEC 4.2 steps 2-3):
+    // the destination and the source of a data function are its summary, not an unknown effect
+    for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
+      if (is_data) continue;  // the summary of a data function says what it writes (its destination)
+      std::set<size_t> reached = targets_reached(ce->getArg(i)->IgnoreParenImpCasts()->getType());
+      const std::set<size_t> r2 = targets_reached(ce->getArg(i)->IgnoreParenCasts()->getType());
+      reached.insert(r2.begin(), r2.end());
+      if (reached.empty()) continue;
+      Model::ReachPass rp;
+      rp.call_key = ckey;
+      rp.func_key = fkey_;
+      rp.tu = cf.tu;
+      rp.pos = cf.pos;
+      rp.ordinal = cf.ordinal;
+      rp.arg_index = i;
+      rp.callee_key = cf.callee_key;
+      rp.callee_name = name;
+      rp.variadic_position = callee != nullptr && i >= callee->getNumParams();
+      std::set<std::string> types;
+      for (size_t t : reached) types.insert(spec_.fields[t].field.type);
+      rp.types.assign(types.begin(), types.end());
+      rp.text = tu_.source_text(ce->getArg(i)->getSourceRange(), 60);
+      m_.reach_passes.push_back(rp);
+    }
     m_.calls.push_back(cf);
 
     // the callee expression of an indirect call is itself evaluated; arguments are visited
@@ -1653,12 +1785,179 @@ class FnWalker {
 
   bool type_name_matches(const std::string& display, const std::string& spec_type) { return display == spec_type; }
 
+  // The targets whose owner type a pointer of type `t` reaches: the records it points at (through
+  // any number of pointer levels), the records they hold by value, and, transitively, the records
+  // their pointer fields point at.  A value that is not a pointer (or an array) reaches nothing:
+  // the callee gets a copy.  void and char pointees reach nothing typed (the conversion to them
+  // is a cast hit of its own).
+  std::set<size_t> targets_reached(QualType t) {
+    std::set<size_t> out;
+    if (t.isNull()) return out;
+    t = t.getCanonicalType();
+    if (const ArrayType* at = ctx_.getAsArrayType(t)) t = at->getElementType().getCanonicalType();
+    else if (t->isPointerType()) t = t->getPointeeType().getCanonicalType();
+    else return out;
+    const RecordDecl* start = pointee_record(t);
+    if (start == nullptr) return out;
+    auto cit = reach_cache_.find(start);
+    if (cit != reach_cache_.end()) return cit->second;
+    std::set<const RecordDecl*> seen;
+    std::vector<const RecordDecl*> work{start};
+    while (!work.empty()) {
+      const RecordDecl* rd = work.back();
+      work.pop_back();
+      if (rd == nullptr || !seen.insert(rd).second) continue;
+      for (size_t i = 0; i < spec_.fields.size(); ++i)
+        if (tu_.is_owner_record(rd, i)) out.insert(i);
+      const RecordDecl* def = rd->getDefinition();
+      if (def == nullptr) continue;
+      for (const FieldDecl* fd : def->fields()) work.push_back(pointee_record(fd->getType()));
+    }
+    reach_cache_[start] = out;
+    return out;
+  }
+  // The record a type is or points at, through arrays and any number of pointer levels (not
+  // through function pointers); null for anything else.
+  const RecordDecl* pointee_record(QualType t) {
+    t = t.getCanonicalType();
+    for (int guard = 0; guard < 16; ++guard) {
+      if (const ArrayType* at = ctx_.getAsArrayType(t)) {
+        t = at->getElementType().getCanonicalType();
+        continue;
+      }
+      if (t->isPointerType() && !t->isFunctionPointerType()) {
+        t = t->getPointeeType().getCanonicalType();
+        continue;
+      }
+      break;
+    }
+    return tu_.record_of(t);
+  }
+
+  // Inline assembly (SPEC 4.2 step 3: unknown effect).  An operand that is, holds or reaches a
+  // target, and every target when the statement clobbers memory (the assembly may then store
+  // to any object, by name or through any address).
+  void visit_asm(const AsmStmt* s) {
+    std::set<size_t> hit;
+    bool memory = false;
+    for (unsigned i = 0; i < s->getNumClobbers(); ++i)
+      if (s->getClobber(i) == "memory") memory = true;
+    auto operand = [&](const Expr* e) {
+      if (e == nullptr) return;
+      const Expr* x = e->IgnoreParenImpCasts();
+      for (size_t t : targets_reached(x->getType())) hit.insert(t);
+      for (size_t t : tu_.owners_contained_in(x->getType())) hit.insert(t);
+      std::set<size_t> on_chain;
+      chain_targets(x, &on_chain);
+      hit.insert(on_chain.begin(), on_chain.end());
+      if (const auto* me = dyn_cast<MemberExpr>(x->IgnoreParens()))
+        if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl()))
+          for (size_t t : tu_.targets_of_field(fl)) hit.insert(t);
+    };
+    for (unsigned i = 0; i < s->getNumOutputs(); ++i) operand(s->getOutputExpr(i));
+    for (unsigned i = 0; i < s->getNumInputs(); ++i) operand(s->getInputExpr(i));
+    for (size_t t = 0; t < spec_.fields.size(); ++t) {
+      if (!memory && hit.count(t) == 0) continue;
+      add_atype(KZ_ATYPE_KIND_UNKNOWN_EFFECT, t, s, memory ? "inline assembly that clobbers memory" : "inline assembly with an operand that reaches the type");
+    }
+    for (const Stmt* c : s->children()) visit(c);
+  }
+
   std::string fp_callee_node(const Expr* callee_expr) {
     std::vector<std::string> src = fp_sources(callee_expr);
     // fp_sources of a callee expression: the node(s) that carry the function value
     if (src.empty()) return "?:null";
     if (src.size() == 1) return src.front();
     return "?:several";
+  }
+
+  // The size of a type in bytes, or -1 when it has none (incomplete, void, a function).
+  int64_t type_size(QualType t) {
+    if (t.isNull() || t->isIncompleteType() || t->isFunctionType() || t->isVoidType() || t->isDependentType()) return -1;
+    return static_cast<int64_t>(ctx_.getTypeSizeInChars(t).getQuantity());
+  }
+  // The parameter of a data function that bounds the write: the first size_t parameter other
+  // than the destination and the source; -1 when there is none (strcpy, sprintf: unbounded).
+  int size_param(const FunctionDecl* callee, const DataFn& d) {
+    const QualType st = ctx_.getSizeType().getCanonicalType();
+    for (unsigned i = 0; i < callee->getNumParams(); ++i) {
+      if (static_cast<int>(i) == d.dest || static_cast<int>(i) == d.src) continue;
+      if (callee->getParamDecl(i)->getType().getCanonicalType() == st) return static_cast<int>(i);
+    }
+    return -1;
+  }
+  // The target fields whose storage holds the lvalue `lv` as a proper part: the members on the
+  // chain of `.` accesses and subscripts above it, up to and including the first `->` access.
+  void chain_targets(const Expr* lv, std::set<size_t>* out) {
+    const Expr* e = lv->IgnoreParens();
+    bool first = true;
+    for (;;) {
+      if (const auto* me = dyn_cast<MemberExpr>(e)) {
+        if (!first)
+          if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl()))
+            for (size_t t : tu_.targets_of_field(fl)) out->insert(t);
+        if (me->isArrow()) return;
+        e = me->getBase()->IgnoreParens();
+      } else if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+        e = as->getBase()->IgnoreParenImpCasts();
+      } else {
+        return;
+      }
+      first = false;
+    }
+  }
+  // The object a write starting at `lv` stays inside when it stays inside any object: the
+  // outermost lvalue through `.` members and subscripts of arrays; through `->` (or `*p`) the
+  // record the pointer points at.  `offset` is where `lv` starts in it (-1 when an index is not
+  // constant); `fields` are the target fields on the way (they contain `lv`).
+  struct Enclosing {
+    QualType type;
+    int64_t offset = 0;
+    std::string text;
+    std::set<size_t> fields;
+  };
+  Enclosing enclosing_object(const Expr* lv) {
+    Enclosing r;
+    const Expr* e = lv->IgnoreParens();
+    for (;;) {
+      if (const auto* me = dyn_cast<MemberExpr>(e)) {
+        const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
+        if (fl == nullptr) break;
+        if (r.offset >= 0) r.offset += static_cast<int64_t>(ctx_.getFieldOffset(fl) / ctx_.getCharWidth());
+        for (size_t t : tu_.targets_of_field(fl)) r.fields.insert(t);
+        if (me->isArrow()) {
+          r.type = me->getBase()->getType()->getPointeeType();
+          r.text = "the record " + tu_.source_text(me->getBase()->getSourceRange(), 40) + " points at";
+          return r;
+        }
+        e = me->getBase()->IgnoreParens();
+        continue;
+      }
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+        const Expr* base = as->getBase()->IgnoreParenImpCasts();
+        if (!base->getType()->isArrayType()) {  // a subscript of a pointer: the pointee array is not known
+          r.type = e->getType();
+          r.offset = 0;
+          r.text = "an element of " + tu_.source_text(base->getSourceRange(), 40);
+          return r;
+        }
+        int64_t idx = 0;
+        const int64_t es = type_size(e->getType());
+        if (r.offset >= 0 && es >= 0 && tu_.eval_int(as->getIdx(), &idx)) r.offset += idx * es;
+        else r.offset = -1;
+        e = base->IgnoreParens();
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_Deref) {
+        r.type = e->getType();
+        r.text = "the object " + tu_.source_text(uo->getSubExpr()->getSourceRange(), 40) + " points at";
+        return r;
+      }
+      break;
+    }
+    r.type = e->getType();
+    r.text = tu_.source_text(e->getSourceRange(), 40);
+    return r;
   }
 
   // memset/memcpy family: a typed write of every field of the destination's pointee type.
@@ -1715,6 +2014,63 @@ class FnWalker {
     } else if (core->getType()->isArrayType()) {
       for (size_t t : tu_.owners_contained_in(core->getType())) contained.insert(t);
     }
+    // The destination as an lvalue (when it is one) and the type of the region it starts.
+    const Expr* region_lv = nullptr;
+    QualType region_t;
+    bool via_pointer = false;
+    if (const auto* uo = dyn_cast<UnaryOperator>(core); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
+      region_lv = uo->getSubExpr()->IgnoreParens();
+      region_t = region_lv->getType();
+    } else if (isa<MemberExpr>(core) || (isa<DeclRefExpr>(core) && core->getType()->isArrayType()) || isa<ArraySubscriptExpr>(core)) {
+      region_lv = core;
+      region_t = core->getType();
+    } else if (core->getType()->isPointerType()) {
+      region_t = core->getType()->getPointeeType();
+      via_pointer = true;
+    }
+    // A store into a part of a target field (`&x.f.g`, `&x.f[2]`): a partial write of the field.
+    std::set<size_t> partial;
+    if (region_lv != nullptr) chain_targets(region_lv, &partial);
+    for (size_t t : exact) partial.erase(t);
+    // The extent of the write.  "Every field of the destination's type" (SPEC 4.2 step 2) is the
+    // whole write only when the size argument is at most the size of that type.  Otherwise the
+    // write is taken to cover the enclosing object (the outermost lvalue reached through `.`
+    // members and subscripts, or the record an `->` access points into); a constant size that
+    // goes past the end of that object, or a size that is not a whole number of elements of a
+    // pointer's type, writes memory the types do not name: an unknown-effect hit for every target.
+    std::string extent_note;
+    if (!untyped && !region_t.isNull()) {
+      const int size_arg = size_param(callee, d);
+      int64_t n = 0;
+      const bool n_known = size_arg >= 0 && static_cast<unsigned>(size_arg) < ce->getNumArgs() && tu_.eval_int(ce->getArg(size_arg), &n);
+      const int64_t rsize = type_size(region_t);
+      const bool inside = n_known && rsize >= 0 && n <= rsize;
+      if (!inside && via_pointer) {
+        if (n_known && rsize > 0 && n % rsize != 0) {
+          for (size_t t = 0; t < spec_.fields.size(); ++t)
+            add_atype(KZ_ATYPE_KIND_UNKNOWN_EFFECT, t, ce, callee->getNameAsString() + " writes " + std::to_string(n) + " bytes through a pointer to a type of " + std::to_string(rsize) + " bytes: " + key);
+        } else if (!n_known) {
+          extent_note = "; size not constant: taken to stay inside an array of the pointee type";
+        }
+      } else if (!inside && region_lv != nullptr) {
+        const Enclosing enc = enclosing_object(region_lv);
+        if (!enc.type.isNull()) {
+          for (size_t t : tu_.owners_contained_in(enc.type)) contained.insert(t);
+          for (size_t t : enc.fields) partial.insert(t);
+          note_record_write(enc.type, ce);
+          const int64_t osize = type_size(enc.type);
+          if (n_known && enc.offset >= 0 && osize >= 0 && enc.offset + n > osize) {
+            for (size_t t = 0; t < spec_.fields.size(); ++t)
+              add_atype(KZ_ATYPE_KIND_UNKNOWN_EFFECT, t, ce, callee->getNameAsString() + " writes past the end of " + enc.text + ": " + key);
+          } else {
+            extent_note = n_known ? "; the size goes beyond the destination: covers " + enc.text
+                                  : "; size not constant: taken to stay inside " + enc.text;
+          }
+        }
+        for (size_t t : exact) partial.erase(t);
+      }
+    }
+    if (!extent_note.empty()) vi.text += extent_note;
     // FUNC_WRITES: the region the destination denotes (a pointer to another scalar type writes
     // the object whose address was taken elsewhere: that use is an OUTARG row of its own)
     if (untyped) {
@@ -1744,6 +2100,13 @@ class FnWalker {
     }
     for (size_t t : exact)
       if (contained.count(t) == 0) add_writer(t, ce, d.writer_kind, vi, key, 0u);
+    for (size_t t : partial)
+      if (contained.count(t) == 0 && exact.count(t) == 0) {
+        ValueInfo pv;
+        pv.kind = KZ_ARG_KIND_TOP;
+        pv.text = vi.text;
+        add_writer(t, ce, d.writer_kind, pv, key, KZ_WRITER_FLAG_PARTIAL);
+      }
     if (untyped) {
       Model::UntypedWrite u;
       u.pos = tu_.pos_of(ce->getBeginLoc());
@@ -1757,6 +2120,18 @@ class FnWalker {
   }
 
   // ---- assignments and increments ----
+  // `a[i]`, `a[i][j]`: the array variable, when the subscripts are of an array (not a pointer).
+  static const DeclRefExpr* subscript_root(const Expr* lv) {
+    const Expr* e = lv->IgnoreParenImpCasts();
+    bool any = false;
+    while (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+      const Expr* base = as->getBase()->IgnoreParenImpCasts();
+      if (!base->getType()->isArrayType()) return nullptr;
+      e = base->IgnoreParens();
+      any = true;
+    }
+    return any ? dyn_cast<DeclRefExpr>(e) : nullptr;
+  }
   void note_mod(const Expr* lv) {
     if (loops_.empty()) return;
     lv = lv->IgnoreParenImpCasts();
@@ -1764,7 +2139,7 @@ class FnWalker {
     const VarDecl* var = nullptr;
     if (const auto* dre = dyn_cast<DeclRefExpr>(lv)) {
       if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl())) {
-        name = std::string(vd->hasGlobalStorage() ? "global:" : "local:") + vd->getNameAsString();
+        name = vd->hasGlobalStorage() ? "global:" + vd->getNameAsString() : "local:" + lid(vd);
         var = vd;
       }
     } else if (const auto* me = dyn_cast<MemberExpr>(lv)) {
@@ -1818,6 +2193,8 @@ class FnWalker {
           else note_local_event(lvd, LocalEvent::Other, nullptr, bo->getOperatorLoc());
         }
         note_global_write(ldre, bo);
+      } else if (const DeclRefExpr* adre = subscript_root(lhs)) {
+        note_global_write(adre, bo);  // an element of a global array
       }
       // loop bookkeeping: decrements are budget candidates; everything else modifies the variable
       if (!loops_.empty()) {
@@ -1825,7 +2202,7 @@ class FnWalker {
         const VarDecl* vd = dre != nullptr ? dyn_cast<VarDecl>(dre->getDecl()) : nullptr;
         if (vd != nullptr && k == BO_SubAssign) {
           for (auto& lc : loops_) add_decrement(lc.get(), vd, bo->getRHS());
-          for (auto& lc : loops_) lc->mod_names.insert(std::string("local:") + vd->getNameAsString());
+          for (auto& lc : loops_) lc->mod_names.insert(vd->hasGlobalStorage() ? "global:" + vd->getNameAsString() : "local:" + lid(vd));
         } else {
           note_mod(lhs);
         }
@@ -1898,13 +2275,15 @@ class FnWalker {
         if (const auto* svd = dyn_cast<VarDecl>(sdre->getDecl()))
           note_local_event(svd, uo->isIncrementOp() ? LocalEvent::Inc1 : LocalEvent::Other, nullptr, uo->getOperatorLoc());
         note_global_write(sdre, uo);
+      } else if (const DeclRefExpr* adre = subscript_root(sub)) {
+        note_global_write(adre, uo);  // an element of a global array
       }
       if (!loops_.empty()) {
         const auto* dre = dyn_cast<DeclRefExpr>(sub->IgnoreParenImpCasts());
         const VarDecl* vd = dre != nullptr ? dyn_cast<VarDecl>(dre->getDecl()) : nullptr;
         if (vd != nullptr && uo->isDecrementOp()) {
           for (auto& lc : loops_) add_decrement(lc.get(), vd, nullptr);
-          for (auto& lc : loops_) lc->mod_names.insert(std::string("local:") + vd->getNameAsString());
+          for (auto& lc : loops_) lc->mod_names.insert(vd->hasGlobalStorage() ? "global:" + vd->getNameAsString() : "local:" + lid(vd));
         } else {
           note_mod(sub);
         }
@@ -1924,7 +2303,11 @@ class FnWalker {
     const Stmt* stmt = nullptr;  // the assignment, the increment or the & expression
     const Expr* rhs = nullptr;
     bool compound = false;
+    bool partial = false;  // the use is of a part of the lvalue (a member of it, an element of it)
   };
+  // How the lvalue `me` is used: climbs over parentheses, `.` member accesses and subscripts of
+  // which it is the base (a store to `x.f.g` or `x.f[i]` writes part of `x.f`), and stops at an
+  // assignment, an increment or an `&`.  An `->` access through it reads it.
   LvalueUse classify_lvalue_use(const Expr* me) {
     LvalueUse u;
     const Stmt* cur = me;
@@ -1937,6 +2320,15 @@ class FnWalker {
       }
       if (const auto* as = dyn_cast<ArraySubscriptExpr>(p)) {
         if (as->getBase()->IgnoreParenImpCasts() == cur || as->getBase() == cur) {
+          u.partial = true;
+          cur = p;
+          continue;
+        }
+        return u;
+      }
+      if (const auto* pm = dyn_cast<MemberExpr>(p)) {
+        if (!pm->isArrow() && (pm->getBase() == cur || pm->getBase()->IgnoreParens() == cur)) {
+          u.partial = true;
           cur = p;
           continue;
         }
@@ -1993,38 +2385,50 @@ class FnWalker {
       const std::string key = tu_.source_text(me->getBase()->getSourceRange(), 60);
       if (use.kind == LvalueUse::Assign || use.kind == LvalueUse::IncDec) {
         note_write(KZ_FWRITE_KIND_FIELD, field_type_name(fl), fl->getNameAsString(), use.stmt);
-        if (use.kind == LvalueUse::Assign && (fl->getType()->isRecordType() || fl->getType()->isArrayType())) note_record_write(fl->getType(), use.stmt);
+        if (use.kind == LvalueUse::Assign && !use.partial && (fl->getType()->isRecordType() || fl->getType()->isArrayType())) note_record_write(fl->getType(), use.stmt);
       } else if (use.kind == LvalueUse::AddrOf) {
         note_write(KZ_FWRITE_KIND_OUTARG, field_type_name(fl), fl->getNameAsString(), use.stmt);
       }
+      // a store to a part of the field (a member or an element of it) changes the field: a writer
+      // whose value is not the value stored
+      const uint32_t part_flags = use.partial ? static_cast<uint32_t>(KZ_WRITER_FLAG_PARTIAL) : 0u;
       for (size_t t : tgts) {
         switch (use.kind) {
           case LvalueUse::Assign: {
-            ValueInfo v = use.compound ? ValueInfo() : tu_.classify_value(use.rhs);
-            if (use.compound) v.text = tu_.source_text(use.stmt->getSourceRange(), 60);
-            add_writer(t, use.stmt, KZ_WRITER_KIND_ASSIGN, v, key, base_flags);
+            ValueInfo v = (use.compound || use.partial) ? ValueInfo() : tu_.classify_value(use.rhs);
+            if (use.compound || use.partial) v.text = tu_.source_text(use.stmt->getSourceRange(), 60);
+            add_writer(t, use.stmt, KZ_WRITER_KIND_ASSIGN, v, key, base_flags | part_flags);
             break;
           }
           case LvalueUse::IncDec: {
             ValueInfo v;
             v.text = tu_.source_text(use.stmt->getSourceRange(), 60);
-            add_writer(t, use.stmt, KZ_WRITER_KIND_INCDEC, v, key, base_flags);
+            add_writer(t, use.stmt, KZ_WRITER_KIND_INCDEC, v, key, base_flags | part_flags);
             break;
           }
           case LvalueUse::AddrOf: {
-            // a call argument is an out-pointer call (recorded in visit_call); anything else escapes
+            // The address of the field as a call argument is an out-pointer call (recorded in
+            // visit_call).  The address of a part of it is one only as the destination of a data
+            // function (handle_data_call writes the field) or its source (a read).  Anything else
+            // escapes.
             const Stmt* top = chain_top(use.stmt);
             const Stmt* p = parent_stmt(top);
             const auto* call = p != nullptr ? dyn_cast<CallExpr>(p) : nullptr;
-            bool is_arg = false;
+            int arg_at = -1;
             if (call != nullptr)
-              for (const Expr* a : call->arguments())
-                if (a == top || a->IgnoreParenImpCasts() == use.stmt) is_arg = true;
-            if (!is_arg) {
+              for (unsigned i = 0; i < call->getNumArgs(); ++i)
+                if (call->getArg(i) == top || call->getArg(i)->IgnoreParenImpCasts() == use.stmt) arg_at = static_cast<int>(i);
+            bool covered = arg_at >= 0 && !use.partial;
+            if (arg_at >= 0 && use.partial && is_data_call(call->getDirectCallee())) {
+              const DataFn& d = spec_.data_fns.at(call->getDirectCallee()->getNameAsString());
+              covered = arg_at == d.dest || arg_at == d.src;
+            }
+            if (!covered) {
               std::string how = "other use";
               if (p != nullptr) how = std::string("used by ") + p->getStmtClassName();
               if (const VarDecl* vd = parent_var(top)) how = "initializer of " + vd->getNameAsString();
-              add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, use.stmt, "the address of the field: " + how);
+              if (arg_at >= 0) how = "passed to " + callee_text(call);
+              add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, use.stmt, std::string(use.partial ? "the address of a part of the field: " : "the address of the field: ") + how);
             }
             break;
           }
@@ -2113,10 +2517,12 @@ class FnWalker {
         const bool s_has = !sp.isNull() && tu_.type_contains_target(sp, t);
         const bool d_has = !dp.isNull() && tu_.type_contains_target(dp, t);
         if (s_has && !d_has) {
-          if (!dp.isNull() && dp.isConstQualified()) continue;  // a read-only view
+          // A const view is not exempt: C lets a later cast drop the const again (to `char *`, say),
+          // and that cast no longer mentions the type.
           add_atype(KZ_ATYPE_KIND_CAST, t, ce,
                     k == CK_PointerToIntegral ? "a pointer to the type is converted to an integer"
-                                              : "a pointer to the type is converted to a pointer to another type");
+                    : (!dp.isNull() && dp.isConstQualified()) ? "a pointer to the type is converted to a const pointer to another type"
+                                                              : "a pointer to the type is converted to a pointer to another type");
         } else if (d_has && !s_has) {
           add_atype(KZ_ATYPE_KIND_CAST, t, ce,
                     k == CK_IntegralToPointer ? "an integer is converted to a pointer to the type"
@@ -2142,6 +2548,28 @@ class FnWalker {
     if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl())) {
       if (vd->hasGlobalStorage() && !loops_.empty() && is_rvalue_load(dre)) note_shared_load(dre->getType());
     }
+  }
+
+  // `p->f` or `(*p).f` for a pointer parameter p: a store to the member (or to a part of it) is a
+  // store to the pointee, whose value is not the value stored; the member's address escapes; a
+  // read is nothing.  (A field that is itself an extraction target also gets its writer from
+  // visit_member; this is the summary the call sites instantiate when they pass the address of
+  // a record-typed target.)
+  template <typename Escape>
+  void pointee_member_use(ParamSummary& ps, const MemberExpr* me, const DeclRefExpr* dre, Escape& escape) {
+    const LvalueUse use = classify_lvalue_use(me);
+    if (use.kind == LvalueUse::Assign || use.kind == LvalueUse::IncDec) {
+      OutStore st;
+      st.pos = tu_.pos_of(use.stmt->getBeginLoc());
+      tu_.next_key(st.pos, fkey_ + "#o", &st.ordinal);
+      st.value_kind = KZ_ARG_KIND_TOP;
+      st.value_text = "store to a member of the pointee: " + tu_.source_text(use.stmt->getSourceRange(), 60);
+      st.guard = guard_from(0);
+      ps.stores.push_back(st);
+      return;
+    }
+    if (use.kind == LvalueUse::AddrOf) escape("the address of a member of the pointee is taken");
+    (void)dre;
   }
 
   // A use of a pointer parameter, for the out-pointer summary of the function (SPEC 4.2 step 2).
@@ -2199,13 +2627,22 @@ class FnWalker {
             return;
           }
         }
+        // `(*p).f`: a use of a member of the pointee
+        if (const auto* gm = dyn_cast_or_null<MemberExpr>(gp); gm != nullptr && !gm->isArrow()) {
+          pointee_member_use(ps, gm, dre, escape);
+          return;
+        }
         return;  // a read through the pointer
       }
       escape(std::string("used by a unary operator"));
       return;
     }
     if (const auto* me = dyn_cast<MemberExpr>(p)) {
-      if (me->isArrow()) return;  // a typed field access: the field facts cover it
+      // `p->f`: a use of a member of the pointee
+      if (me->isArrow()) {
+        pointee_member_use(ps, me, dre, escape);
+        return;
+      }
       escape("member access");
       return;
     }
@@ -2224,6 +2661,8 @@ class FnWalker {
           return;
         }
       }
+      // `p[i].f`: a use of a member of an element of the pointee
+      if (const auto* gm = dyn_cast_or_null<MemberExpr>(gp); gm != nullptr && !gm->isArrow()) pointee_member_use(ps, gm, dre, escape);
       return;
     }
     if (const auto* bo = dyn_cast<BinaryOperator>(p)) {
@@ -2326,6 +2765,9 @@ class FnWalker {
   const VarDecl* elem_var_ = nullptr;  // set while an expression is built in element form
   std::vector<LocalEvent> local_events_;
   std::map<size_t, InnerInfo> inner_ctx_;  // Model::loops index -> what the finished loop left
+  std::map<const VarDecl*, std::string> local_id_;  // lookup only, never iterated to choose
+  std::map<std::string, const VarDecl*> local_by_id_;
+  std::map<const RecordDecl*, std::set<size_t>> reach_cache_;  // lookup only
 };
 
 // ---- static initializers: function values stored in tables -------------------------------------------
@@ -2394,8 +2836,16 @@ bool read_function_body(TuReader& tu, const FunctionDecl* fd) {
 }
 
 void collect_global_fp_flows(TuReader& tu, const VarDecl* vd) {
-  if (!vd->hasInit()) return;
   const std::string object = tu.object_key(vd);
+  // whether the object is const (the table-walk check of finalize): the definition with an
+  // initializer decides; a tentative definition only fills a gap
+  {
+    const bool is_const = vd->getType().isConstant(tu.ctx());
+    std::map<std::string, bool>& oc = tu.model().object_const;
+    if (vd->hasInit()) oc[object] = is_const;
+    else oc.emplace(object, is_const);
+  }
+  if (!vd->hasInit()) return;
   if (is_fp_type(vd->getType())) {
     const Expr* s = vd->getInit()->IgnoreParenCasts();
     if (const auto* dre = dyn_cast<DeclRefExpr>(s))

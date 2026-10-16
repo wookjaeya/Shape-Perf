@@ -389,7 +389,7 @@ class View {
       if (!want_loc(l.loc_type, l.loc_field)) continue;
       os << "  " << str(l.loc_type) << "." << str(l.loc_field) << " " << enum_text("KZ_LOC_STATUS", l.status) << " writers=" << l.n_writers << " (direct " << l.n_direct
          << ", data-fn " << l.n_data_fn << ", out-pointer " << l.n_outptr << ") atype: untyped=" << l.n_untyped << " escape=" << l.n_escape << " cast=" << l.n_cast
-         << " union=" << l.n_union << " init=" << l.n_init << " unresolved-indirect=" << l.n_unresolved_indirect << "\n";
+         << " union=" << l.n_union << " unknown-effect=" << l.n_unknown_effect << " init=" << l.n_init << " unresolved-indirect=" << l.n_unresolved_indirect << "\n";
     }
   }
   void targets(std::ostream& os) {

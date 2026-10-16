@@ -410,6 +410,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     r.n_escape = l.n_escape;
     r.n_cast = l.n_cast;
     r.n_union = l.n_union;
+    r.n_unknown_effect = l.n_unknown;
     r.n_init = l.n_init;
     r.n_unresolved_indirect = l.n_unresolved_indirect;
     r.status = l.status;
@@ -564,6 +565,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("target." + t.field.type + "." + t.field.field, t.origin, from_profile ? KZ_POLICY_FROM_REFERENCE : KZ_POLICY_DECLARED, from_profile ? KZ_NONE32 : prov_for(t.origin));
   }
   for (const DeclaredItem& d : spec.declared) item(d.name, d.value, KZ_POLICY_DECLARED, prov_for(d.origin));
+  // the assumptions the extraction itself declared (counted in the report)
+  for (const Model::Assumption& a : m.assumptions)
+    item(a.name, a.value, KZ_POLICY_DECLARED, prov_for("kz-static extract: declared assumption of the table-walk unrolling (SPEC 4.3), not checked"));
   auto num = [](uint64_t v) { return std::to_string(v); };
   item("count.translation_units", num(m.main_files.size()), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.functions", num(R.func_keys.size()), KZ_POLICY_UNSET, KZ_NONE32);
@@ -579,6 +583,8 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   item("count.sites", num(R.n_sites), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.untyped_write_sites_all", num(R.atype_untyped_sites_total), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.untyped_write_sites_counted", num(R.atype_untyped_sites_relevant), KZ_POLICY_UNSET, KZ_NONE32);
+  item("count.unknown_effect_pointer_passes", num(R.reach_passes_unknown), KZ_POLICY_UNSET, KZ_NONE32);
+  item("count.declared_assumptions", num(m.assumptions.size()), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.key_collisions", num(R.key_collisions), KZ_POLICY_UNSET, KZ_NONE32);
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
 

@@ -43,3 +43,14 @@ void constant(void) { fx_consume(5); }
 void other_field(void) { fx_consume(g_cell.aux); }
 
 void via_pointer(const Cell *c) { fx_consume(c->id); }
+
+/* a conversion that cannot lose information (to a type at least as wide) keeps the copy */
+short g_small;
+void widened(void) { fx_consume(g_small); }
+
+/* a narrowing conversion is not a copy: two identities may give the same value */
+void narrowed(void) { fx_consume((unsigned char)g_cell.id); }
+
+/* an element of a global array: the array is the location */
+int g_ids[4];
+void from_array(int i) { fx_consume(g_ids[i]); }

@@ -1,5 +1,5 @@
 kz-dump 1
-container abi=1 kind=run size=2832
+container abi=1 kind=run size=2864
 basis_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
 profile_sha256=1b92e0e511b97a41704a8c80a7b45b55f670f320189a080f416a7d2450e8c5e8
 tool_sha256=6270daf2ba43960aa8613e2de3454804a903b33cea853e35fc8fa3ccde1f881c
@@ -29,12 +29,13 @@ section LOSS type=44 version=2 record=kz_loss record_size=40 count=2 crc32=0xb40
   LOSS[1] source=perf-throttle cpu=1 site=none tid=4294967295 tseq_first=0 tseq_last=0 count=400 t_ns=1400
 section RUNMETA type=45 version=1 record=kz_runmeta record_size=152 count=1 crc32=0x704877bf
   RUNMETA[0] basis_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945 plan_sha256=d6ce29bde8b5db0b2a0fbe6b00782ce761e44165dcbe62983a973fbb6ebecbcb s0_sha256=0000000000000000000000000000000000000000000000000000000000000000 run_ordinal=3 stratum=cold backend=perf-sample fidelity=F0 flags={loss-present} n_holds=0 kernel="Linux 0.0.0-unit-test" harness="unit-test harness" placement="unit-test placement" observer_cpu_ns=123456 boot_ns=654321
-section PERTURBATION type=46 version=1 record=kz_perturbation record_size=32 count=5 crc32=0x3149b1cd
+section PERTURBATION type=46 version=1 record=kz_perturbation record_size=32 count=6 crc32=0xde3dfef4
   PERTURBATION[0] kind=probe-hits cost_class=emulated site=0 count=2 ns=0
-  PERTURBATION[1] kind=probe-hits cost_class=emulated site=1 count=1 ns=0
+  PERTURBATION[1] kind=probe-hits cost_class=ret-trampoline site=1 count=1 ns=0
   PERTURBATION[2] kind=probe-hits cost_class=unknown site=2 count=1 ns=0
   PERTURBATION[3] kind=observer-cpu cost_class=unknown site=none count=0 ns=123456
   PERTURBATION[4] kind=boot-time cost_class=unknown site=none count=0 ns=654321
+  PERTURBATION[5] kind=proc-capture cost_class=unknown site=none count=9 ns=31000
 section SITE_SLOTS type=50 version=1 record=kz_site_slot record_size=20 count=6 crc32=0x49446ca6
   SITE_SLOTS[0] site=0 slot=0 src=reg width=4 index=5 role="first"
   SITE_SLOTS[1] site=0 slot=1 src=reg width=2 index=4 role="second"
@@ -48,10 +49,10 @@ section SIDE_EVENTS type=51 version=1 record=kz_side_ev record_size=40 count=5 c
   SIDE_EVENTS[2] t_ns=900 pid=100 tid=101 ppid=50 ptid=100 kind=FORK cpu=0 flags={} comm=""
   SIDE_EVENTS[3] t_ns=950 pid=100 tid=101 ppid=50 ptid=100 kind=COMM cpu=0 flags={} comm="TASK_A"
   SIDE_EVENTS[4] t_ns=2000 pid=100 tid=101 ppid=50 ptid=100 kind=EXIT cpu=0 flags={} comm=""
-section THREADS type=52 version=1 record=kz_thread record_size=88 count=2 crc32=0xf29ddcca
+section THREADS type=52 version=1 record=kz_thread record_size=88 count=2 crc32=0x1b20702f
   THREADS[0] pid=100 tid=100 generation=0 ptid=50 announced_id=none flags={fork-seen,comm-seen} creator_event=none first_event=0 t_fork=500 t_exit=0 t_name=600 entry_fn=0x0 priority=0 n_events=3 name="synthetic.bin" entry_symbol=""
-  THREADS[1] pid=100 tid=101 generation=0 ptid=100 announced_id=256 flags={fork-seen,comm-seen,entry-seen,spawn-matched,exit-seen} creator_event=0 first_event=3 t_fork=900 t_exit=2000 t_name=950 entry_fn=0x7000000010c0 priority=11 n_events=1 name="TASK_A" entry_symbol="g"
+  THREADS[1] pid=100 tid=101 generation=0 ptid=100 announced_id=256 flags={fork-seen,comm-seen,entry-seen,spawn-matched,exit-seen,match-by-time,id-unverified} creator_event=0 first_event=3 t_fork=900 t_exit=2000 t_name=950 entry_fn=0x7000000010c0 priority=11 n_events=1 name="TASK_A" entry_symbol="g"
 section MAPS type=53 version=1 record=kz_map_ev record_size=88 count=1 crc32=0xc127dd69
   MAPS[0] t_ns=550 addr=0x700000000000 len=12288 pgoff=0x0 ino=4242 bias=0x700000000000 pid=100 tid=100 dev_major=254 dev_minor=0 prot=5 flags=2 bias_known=1 path="/synthetic/synthetic.bin"
-artifact_sha256=0c7d25d7724a7d069ad2befbdfc18d1d9af1bd831dff05e87acf3bef6b35c2fc
-artifact_sha256 0c7d25d7724a7d069ad2befbdfc18d1d9af1bd831dff05e87acf3bef6b35c2fc
+artifact_sha256=d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7
+artifact_sha256 d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7

@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <map>
@@ -312,6 +313,40 @@ void test_basic(const std::string& basis_path, kz::plan::LoadedBasis& basis, con
   KZ_CHECK_EQ(w2->n_events, 5u);
   KZ_CHECK_EQ(main_thread->n_events, 9u);
   KZ_CHECK(o.rec("identity.spawn_matched") == "2" && o.rec("identity.spawn_ambiguous") == "0");
+  // The creator link rests on FORK-time containment only, and nothing on the creator side was
+  // compared with the announced ids: the records say so.
+  const uint32_t honest = KZ_THREAD_FLAG_MATCH_BY_TIME | KZ_THREAD_FLAG_ID_UNVERIFIED;
+  KZ_CHECK_EQ(w1->flags & honest, honest);
+  KZ_CHECK_EQ(w2->flags & honest, honest);
+  KZ_CHECK_EQ(main_thread->flags & honest, 0u);
+  KZ_CHECK(o.rec("identity.matched_by_time").compare(0, 2, "2 ") == 0);
+  KZ_CHECK(o.rec("identity.ids_unverified").compare(0, 2, "2 ") == 0);
+  KZ_CHECK_EQ(o.rec("match.events_with_unreadable_key"), std::string("0"));
+
+  // The observer's own /proc reads while the command ran are counted, and are a PERTURBATION row.
+  KZ_CHECK(o.rec("observer.proc_capture.mode").compare(0, 5, "full:") == 0);
+  const long proc_reads = std::strtol(o.rec("observer.proc_capture.reads").c_str(), nullptr, 10);
+  // At least: the process (1 attempt; 7 reads if it was still there), its thread list (1), and one
+  // attempt for each of the three threads (2 reads each if it was still there).  This short program
+  // may be gone before the drain thread looks: then the attempts alone are counted.
+  KZ_CHECK(proc_reads >= 1 + 1 + 3);
+  KZ_CHECK(contains(o.rec("observer.proc_capture.window"), "after the command started"));
+  std::vector<kz_perturbation> pert;
+  KZ_CHECK_OK(o.container.read_section(KZ_SEC_PERTURBATION, &pert));
+  bool proc_row = false;
+  for (const kz_perturbation& p : pert) {
+    if (p.kind == KZ_PERTURBATION_KIND_PROC_CAPTURE) {
+      proc_row = true;
+      KZ_CHECK_EQ(p.count, static_cast<uint64_t>(proc_reads));
+      KZ_CHECK(p.ns > 0);
+    }
+    // the return site shares the entry's breakpoint: its own cost is the return trampoline
+    if (p.kind == KZ_PERTURBATION_KIND_PROBE_HITS && p.site == 1) KZ_CHECK_EQ(p.cost_class, uint32_t(KZ_INSN_CLASS_RET_TRAMPOLINE));
+    if (p.kind == KZ_PERTURBATION_KIND_PROBE_HITS && p.site == 0) KZ_CHECK_EQ(p.cost_class, uint32_t(KZ_INSN_CLASS_EMULATED));
+  }
+  KZ_CHECK(proc_row);
+  KZ_CHECK(o.rec("perturbation.site0.trap").compare(0, 12, "counted-here") == 0);
+  KZ_CHECK(contains(o.rec("perturbation.site1.trap"), "counted in the row of site 0 (send.entry)"));
 
   // Events of each thread, in program order: site and the first three arguments.
   const std::vector<kz_raw_ev> e1 = o.of_tid(w1->tid), e2 = o.of_tid(w2->tid), em = o.of_tid(main_thread->tid);
@@ -560,6 +595,7 @@ void test_exit_codes_and_check(const std::string& basis_path) {
   KZ_CHECK_EQ(run_command({g_kz, "observe"}).code, 1);
   KZ_CHECK_EQ(run_command({g_kz, "observe", basis_path, g_profile, "-o", g_dir + "/u.kzt"}).code, 1);  // no command after --
   KZ_CHECK_EQ(run_command({g_kz, "observe", basis_path, g_profile, "-o", g_dir + "/u.kzt", "--stratum", "tepid", "--", "/bin/true"}).code, 1);
+  KZ_CHECK_EQ(run_command({g_kz, "observe", basis_path, g_profile, "-o", g_dir + "/u.kzt", "--proc-capture", "environ", "--", "/bin/true"}).code, 1);
 }
 
 }  // namespace

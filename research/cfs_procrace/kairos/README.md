@@ -32,7 +32,7 @@ kairos/
   tests/cfs-free/            (K2) 프레임워크 없이 도는 관측기 시험 + 목적 제작 C 프로그램 + golden
   profiles/cfs-v7.0.1/observe/  (K2) 관측용 프로브 계획
   docs/observer.md           관측기 사용법과 설계 세부
-  docs/observer_smoke_run.md 실제 cFS 에 한 번 붙인 기록(조건, deviation, 개수)
+  docs/observer_smoke_run.md 실제 cFS 에 한 번 붙인 기록(조건, deviation, 개수; S1-R2 기능 확인 1/3, 미완)
   lib/llvm/                  (K4a) Clang 으로 읽는 정적 추출층: basis, 사실(writer, A-TYPE, INIT, derives, 루프와 인증 뷰 규칙, table walk 펼치기, spawn)
   tools/kz-static/           (K4a) CLI `kz-static`: basis, extract, show, reach (-DKZ_BUILD_LLVM_TOOLS=ON 일 때만)
   tests/static/              (K4a) 고정 C 프로그램의 golden, core-cpu1 golden, 단위 시험
@@ -100,7 +100,8 @@ ctest 의 시험 이름과 라벨 (K0 토대의 32개 [M]; 관측기 시험은 �
 | 라벨 | 시험 | 확인하는 것 |
 |---|---|---|
 | unit | `test_trace_decode_{perf,real,sites,merge}`, `test_trace_identity`, `test_trace_symbols` | 합성 ring 바이트와 커널이 실제로 쓴 바이트의 해석, 슬롯 적용, 병합·손실, 정체성 결합, 기호 조회 |
-| unit | `test_probe_{elf_dwarf,anchor_compilers,profile,basis,record}` | ELF/DWARF 읽기와 앵커 해석(gcc·clang, DWARF 4·5 교차 확인), 프로필 문법, basis, 조건 기록 |
+| unit | `test_probe_{elf_dwarf,anchor_compilers,profile,basis,record}` | ELF/DWARF 읽기와 앵커 해석(gcc·clang, DWARF 4·5 교차 확인; `addr2line` 이나 다른 컴파일러가 없으면 77 = 건너뜀), 프로필 문법(디코더 슬롯·짝 열쇠 검사 포함), basis, 조건 기록과 `/proc` 읽기 수 |
+| unit | `probe_anchor_xcheck_script` | `probe/scripts/observe_cfs_smoke.sh --xcheck`(실행 뒤 앵커를 `addr2line`·`objdump` 로 교차 확인하는 단계)를 목적 제작 프로그램에서 확인 |
 | unit, golden | `test_probe_golden` | basis 와 실행 컨테이너의 정규 dump(`tests/cfs-free/golden/`) |
 | unit, integration | `test_probe_observe` | 목적 제작 C 프로그램에 실제 uprobe 를 붙인 통합 시험. root 가 아니면 77 로 끝나 건너뜀으로 보고된다. 약 20 초 |
 
@@ -170,7 +171,7 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 |---|---|---|
 | 스키마 `kz_schema.h` (컨테이너, 출처, deviation, witness, bound, verdict, verdict cell) | `include/kz/schema/` | 구현, 시험 통과 [M] |
 | `kz_raw.h` (관측 레코드) | `include/kz/schema/` | 구현(K2 소유). 초기 정의에서 SITES·LOSS 가 v2 가 되고 SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS, SYMBOLS, TARGETS 가 더해졌다(`docs/schema.md` §9) [M] |
-| `kz_facts.h` (사실·skeleton 레코드) | `include/kz/schema/` | 추출 레코드는 구현(K4a 소유, revision 3: 루프의 인증 뷰 규칙, 섹션 37–39) [M]. skeleton 레코드(23–29)는 초기 정의이고 K4b 가 쓴다 |
+| `kz_facts.h` (사실·skeleton 레코드) | `include/kz/schema/` | 추출 레코드는 구현(K4a 소유, revision 4: A-TYPE `unknown-effect`, FACT_LOCS v2, writer `partial-write`, 루프 `static-image-assumed`; revision 3: 루프의 인증 뷰 규칙, 섹션 37–39) [M]. skeleton 레코드(23–29)는 초기 정의이고 K4b 가 쓴다 |
 | `kz_cert.h` (certificate, 신뢰 원장) | `include/kz/schema/` | **초기 정의**(K4b 소유). 생성기·검사기는 없음 |
 | KZ 컨테이너 입출력, SHA-256, CRC-32, 정규 dump, 레지스트리 | `lib/core/` | 구현, 시험 통과 [M] |
 | 판정 셀·원장·증명 상태 보조 (기본값, 불변식, 서술) | `lib/core/verdict.cpp` | 구현, 시험 통과 [M]. 판정 격자(lattice)는 **미구현** |
@@ -185,8 +186,8 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 | basis, extract (LLVM) | `lib/llvm/`, `tools/kz-static/` | 구현(K4a), 시험 통과 [M] (`docs/static_facts.md`): core-cpu1 의 basis 와 facts. app-unit link probe, anchor audit, transition filtering·key 상태, 문서 주석 후보는 **미구현**. skel 은 K4b |
 | MustBefore, certificate, census, plan | `lib/static/` | **미구현** |
 | 근거 검사기 `kz proofcheck` | `lib/proofcheck/` | **미구현** |
-| 관측기 perf-sample 백엔드(F0), 앵커 해석, loader | `probe/` | 구현(K2), 시험 통과 [M]. 실제 cFS 에 한 번 붙여 보았다(`docs/observer_smoke_run.md`). BPF 백엔드, 프로브 비용 측정, 앱 `.so` inode 등록은 **미구현**(V1b/S1) |
-| trace 해석: 병합, 손실, 정체성 결합, 호출 짝짓기 | `lib/trace/` | 구현(K2), 시험 통과 [M]. HB 간선과 사건 판정은 **미구현** |
+| 관측기 perf-sample 백엔드(F0), 앵커 해석, loader | `probe/` | 구현(K2), 시험 통과 [M]. 실제 cFS 에 한 번 붙여 보았다(`docs/observer_smoke_run.md`). **S1-R2 기능 확인은 미완(N=1/3)**: 남은 두 실행은 cFS 를 돌릴 수 있는 단계가 고친 스크립트(`observe_cfs_smoke.sh <tag> <kz> <ordinal>`)로 한다. s1r2_p1 을 쓴 도구의 원본은 되찾을 수 없다(같은 문서 §8). BPF 백엔드, 프로브 비용 측정, 앱 `.so` inode 등록, 생성 함수 출력 인자와 알린 id 의 대조는 **미구현**(V1b/S1) |
+| trace 해석: 병합, 손실, 정체성 결합, 호출 짝짓기 | `lib/trace/` | 구현(K2), 시험 통과 [M]. 정체성 결합의 생성자 연결은 FORK 시각 포함 하나에 기댄다(A-CLK-PO; `match-by-time`), 알린 id 는 검증되지 않음(`id-unverified`). HB 간선과 사건 판정은 **미구현** |
 | CLI `kz anchor`, `kz observe`, `kz hits` | `tools/kz/` | 구현(K2), 시험 통과 [M]. `kz-static` 은 K4a 행 참조. 사용법: `docs/observer.md` |
 | conform, predict, explore, confirm, baselines, gate | `lib/*`, `gate/` | **미구현** (R2 경로 밖) |
 | 스키마의 EVENTS, EDGES, INSTANCES, TEMPLATES 등 | — | id 만 예약, 레코드 **미정의** (`docs/schema.md` §3) |

@@ -117,6 +117,27 @@ void test_proc_of_self() {
   ProcessCapture none;
   KZ_CHECK_ERR(capture_process(0x7ffffff0u, &none), kz::Err::Io);
   KZ_CHECK(list_threads(0x7ffffff0u).empty());
+
+  // Every read of /proc is counted (it is an action of the observer on the target: PERTURBATION
+  // proc-capture).  Mode full reads status, cmdline, the exe and cwd links, environ, cgroup and
+  // limits; mode status reads the status file only and copies nothing of the target's memory.
+  KZ_CHECK_EQ(pc.reads, 7u);
+  KZ_CHECK(pc.mode == ProcCaptureMode::Full);
+  KZ_CHECK_EQ(tc.reads, 2u);
+  KZ_CHECK_EQ(gone.reads, 1u);  // the attempt is counted too
+  ProcessCapture brief;
+  KZ_CHECK_OK(capture_process(pid, &brief, ProcCaptureMode::Status));
+  KZ_CHECK(brief.ok);
+  KZ_CHECK_EQ(brief.reads, 1u);
+  KZ_CHECK_EQ(brief.uid, pc.uid);
+  KZ_CHECK(brief.cmdline.empty());
+  KZ_CHECK(brief.env_names.empty());
+  KZ_CHECK(brief.limits.empty());
+  ProcCaptureMode m = ProcCaptureMode::Full;
+  KZ_CHECK(parse_proc_capture_mode("status", &m) && m == ProcCaptureMode::Status);
+  KZ_CHECK(parse_proc_capture_mode("full", &m) && m == ProcCaptureMode::Full);
+  KZ_CHECK(!parse_proc_capture_mode("environ", &m));
+  KZ_CHECK_EQ(std::string(proc_capture_mode_name(ProcCaptureMode::Status)), std::string("status"));
 }
 
 void test_cpu_list() {

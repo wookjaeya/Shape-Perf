@@ -1,6 +1,7 @@
 // run_container.cpp -- see run_container.hpp.
 #include "run_container.hpp"
 
+#include <cstdio>
 #include <cstring>
 
 #include "basis.hpp"
@@ -24,8 +25,8 @@ bool build_id_from_hex(const std::string& hex, uint8_t out[20]) {
   return true;
 }
 
-std::vector<uint8_t> trap_accounts(const std::vector<kz::trace::SiteSpec>& sites) {
-  std::vector<uint8_t> out(sites.size(), KZ_TRAP_ACCOUNT_UNCOUNTED);
+std::vector<TrapAccount> trap_accounts(const std::vector<kz::trace::SiteSpec>& sites) {
+  std::vector<TrapAccount> out(sites.size(), TrapAccount::Uncounted);
   for (size_t i = 0; i < sites.size(); ++i) {
     // The row that counts the trap at a file offset: the first ENTRY or POINT site there.
     size_t own = sites.size();
@@ -34,10 +35,31 @@ std::vector<uint8_t> trap_accounts(const std::vector<kz::trace::SiteSpec>& sites
         own = j;
         break;
       }
-    if (own == i) out[i] = KZ_TRAP_ACCOUNT_COUNTED_HERE;
-    else if (own < sites.size()) out[i] = KZ_TRAP_ACCOUNT_IN_OTHER_ROW;
+    if (own == i) out[i] = TrapAccount::CountedHere;
+    else if (own < sites.size()) out[i] = TrapAccount::InOtherRow;
   }
   return out;
+}
+
+std::string trap_account_text(const std::vector<kz::trace::SiteSpec>& sites, size_t i) {
+  const std::vector<TrapAccount> acc = trap_accounts(sites);
+  const kz::trace::SiteSpec& s = sites[i];
+  char off[32];
+  std::snprintf(off, sizeof off, "0x%llx", static_cast<unsigned long long>(s.file_offset));
+  const std::string own_cost = s.kind == KZ_SITE_KIND_RET_PROBE ? "this row counts return trampolines" : "this row counts the trap at its address";
+  switch (acc[i]) {
+    case TrapAccount::CountedHere:
+      return std::string("counted-here: the trap at file offset ") + off + " is counted in this row";
+    case TrapAccount::InOtherRow:
+      for (size_t j = 0; j < sites.size(); ++j)
+        if (sites[j].file_offset == s.file_offset && acc[j] == TrapAccount::CountedHere)
+          return std::string("in-other-row: the trap at file offset ") + off + " is counted in the row of site " + std::to_string(sites[j].site) + " (" + sites[j].label + ")" +
+                 (s.kind == KZ_SITE_KIND_RET_PROBE ? "; this row counts return trampolines" : "; this row repeats the same trap");
+      break;
+    case TrapAccount::Uncounted:
+      break;
+  }
+  return std::string("uncounted: no entry or point site is at file offset ") + off + ", so the trap there is counted in no row; " + own_cost;
 }
 
 Status write_run_container(const RunInputs& in, Bytes* out) {
@@ -108,16 +130,14 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
 
   // Perturbation accounting (SPEC 4.13): hits per site, observer CPU, process lifetime, /proc reads.
   std::vector<kz_perturbation> pert;
-  const std::vector<uint8_t> account = trap_accounts(in.sites);
   for (size_t i = 0; i < in.sites.size(); ++i) {
     kz_perturbation p;
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_PROBE_HITS;
     // A return site's own cost is the return trampoline; its entry trap is counted by the first
-    // ENTRY or POINT site at the same file offset, if there is one (trap_account).
+    // ENTRY or POINT site at the same file offset, if there is one (kz_raw.h; trap_accounts).
     p.cost_class = in.sites[i].kind == KZ_SITE_KIND_RET_PROBE ? static_cast<uint32_t>(KZ_INSN_CLASS_RET_TRAMPOLINE) : in.sites[i].insn_class;
     p.site = in.sites[i].site;
-    p.trap_account = account[i];
     p.count = i < in.decoded.stats.site_hits.size() ? in.decoded.stats.site_hits[i] : 0;
     pert.push_back(p);
   }

@@ -12,8 +12,8 @@ binary prog   # trailing comment
 prov p1 tier=code-derived kind=code_pattern file="src/a.c" lines=10-12 cite="the \"quoted\" cite" authored="me" sha256=0000000000000000000000000000000000000000000000000000000000000001
 prov p2 tier=researcher kind=researcher file="doc.md" lines=3-3 cite="why" root=repo
 prov p3 tier=unreferenced
-site f.entry entry func=fn in=src/a.c prov=p1 s0=rdi:u16:id s1=rsi:u32:arg s2=r9:u64:wide s3=stack+8:u64:ra
-site f.ret ret func=fn decoder=spawn-return s0=rax:u32:status s3=ip:u64:ra
+site f.entry entry func=fn in=src/a.c prov=p1 s0=rdi:u16:id s1=rsi:u32:arg s2=r9:u64:wide s3=stack+8:u64:return_address
+site f.ret ret func=fn decoder=spawn-return s0=rax:u32:status s3=ip:u64:return_address
 site g.point point at=src/b.c:42 after-call=callee prov=p2 s0=rax:u8:b
 )";
 
@@ -108,6 +108,29 @@ void test_errors() {
   KZ_CHECK(bad(h + "prov p tier=unreferenced\nprov p tier=unreferenced\nsite a entry func=f\n"));  // id twice
   KZ_CHECK(bad(h + "prov p tier=unreferenced sha256=zz\nsite a entry func=f\n"));
   KZ_CHECK(bad(h + "binary a\nbinary b\nsite a entry func=f\n"));
+  // The decoders of the identity join read fixed slots, and an entry/return pair is matched on slot 3:
+  // a profile that does not declare them is refused (never decoded as zeros).
+  const std::string ra = " s3=stack+0:u64:return_address";
+  const std::string create_ok = "site c entry func=mk decoder=spawn-create s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r9:u32:priority" + ra + "\n";
+  KZ_CHECK_OK(parse((h + create_ok).c_str()));
+  KZ_CHECK(bad(h + "site c entry func=mk decoder=spawn-create s0=rsi:u64:name_ptr s2=r9:u32:priority" + ra + "\n"));            // no entry_fn
+  KZ_CHECK(bad(h + "site c entry func=mk decoder=spawn-create s1=r9:u32:priority s2=rdx:u64:entry_fn" + ra + "\n"));             // roles swapped
+  KZ_CHECK(bad(h + "site c entry func=mk decoder=spawn-create s1=rdx:u64:entry_fn s2=r9:u64:priority" + ra + "\n"));            // priority wider than kept
+  KZ_CHECK(bad(h + "site c entry func=mk decoder=spawn-create s1=rdx:u64:entry_fn s2=r9:u32:priority\n"));                       // no return address
+  KZ_CHECK(bad(h + "site c entry func=mk decoder=spawn-create s1=rdx:u64:entry_fn s2=r9:u32:priority s3=stack+0:u64:ra\n"));     // wrong role at 3
+  KZ_CHECK(bad(h + "site c ret func=mk decoder=spawn-create s1=rdx:u64:entry_fn s2=r9:u32:priority s3=ip:u64:return_address\n"));  // not an entry
+  KZ_CHECK_OK(parse((h + "site r ret func=mk decoder=spawn-return s0=rax:u32:status s3=ip:u64:return_address\n").c_str()));
+  KZ_CHECK(bad(h + "site r ret func=mk decoder=spawn-return s0=rax:u32:status\n"));
+  KZ_CHECK(bad(h + "site r entry func=mk decoder=spawn-return s3=stack+0:u64:return_address\n"));
+  KZ_CHECK_OK(parse((h + "site t entry func=te decoder=thread-entry s0=rdi:u32:task_id\n").c_str()));
+  KZ_CHECK(bad(h + "site t entry func=te decoder=thread-entry s1=rdi:u32:task_id\n"));                                           // slot 0 missing
+  KZ_CHECK(bad(h + "site t entry func=te decoder=thread-entry s0=rdi:u64:task_id\n"));                                           // wider than the id kept
+  // generic entry/return pairs of one function: both need the key, a lone entry or return does not
+  KZ_CHECK_OK(parse((h + "site e entry func=f s0=rdi:u32:x" + ra + "\nsite r ret func=f s0=rax:u32:status s3=ip:u64:return_address\n").c_str()));
+  KZ_CHECK(bad(h + "site e entry func=f s0=rdi:u32:x\nsite r ret func=f s0=rax:u32:status s3=ip:u64:return_address\n"));
+  KZ_CHECK(bad(h + "site e entry func=f s0=rdi:u32:x" + ra + "\nsite r ret func=f s0=rax:u32:status\n"));
+  KZ_CHECK(bad(h + "site e entry func=f s0=rdi:u32:x s3=stack+0:u32:return_address\nsite r ret func=f s3=ip:u64:return_address\n"));  // key not 8 bytes
+  KZ_CHECK_OK(parse((h + "site e entry func=f s0=rdi:u32:x\nsite r ret func=g s0=rax:u32:status\n").c_str()));
   // an error names its line
   const kz::Status s = parse((h + "\n\nsite a entry func=f nonsense=1\n").c_str());
   KZ_CHECK(s.message.find("line 4") != std::string::npos);

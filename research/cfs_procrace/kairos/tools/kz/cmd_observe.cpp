@@ -482,6 +482,7 @@ int run(int argc, char** argv) {
     add("decode.traced_pids", pids);
   }
   for (size_t i = 0; i < sites.size(); ++i) add("hits.site" + num(i) + "." + sites[i].label, num(decoded.stats.site_hits[i]));
+  for (size_t i = 0; i < sites.size(); ++i) add("perturbation.site" + num(i) + ".trap", kz::probe::trap_account_text(sites, i));
   add("match.call_pairs", num(mstats.pairs));
   add("match.entries_without_return", num(mstats.entries_without_return));
   add("match.returns_without_entry", num(mstats.returns_without_entry));

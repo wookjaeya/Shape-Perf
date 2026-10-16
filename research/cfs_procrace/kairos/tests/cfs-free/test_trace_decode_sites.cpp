@@ -1,5 +1,8 @@
 // Unit tests of the site descriptors: what a site asks of the kernel, and how a sample's
 // slots become the four raw values.
+#include <cstring>
+
+#include "kz/trace/decode_match.hpp"
 #include "kz/trace/decode_sites.hpp"
 #include "support/kz_test.hpp"
 #include "support/perf_synth.hpp"
@@ -75,6 +78,129 @@ void test_check_site_rejects() {
   { SiteSpec t = s; t.slots.resize(5, t.slots[0]); KZ_CHECK(bad(t)); }
 }
 
+// The decoders of the identity join read fixed positions (kz_raw.h, KZ_DECODER): check_site says
+// which, and refuses a site that does not declare them.
+void test_check_site_decoders() {
+  auto bad = [](const SiteSpec& s) { return check_site(s).code == kz::Err::Invalid; };
+  SiteSpec c = entry_site();
+  c.decoder = KZ_DECODER_SPAWN_CREATE;
+  c.slots = {{0, KZ_SLOT_SRC_REG, 8, KZ_REG_RSI, "name_ptr"}, {1, KZ_SLOT_SRC_REG, 8, KZ_REG_RDX, "entry_fn"},
+             {2, KZ_SLOT_SRC_REG, 4, KZ_REG_R9, "priority"}, {3, KZ_SLOT_SRC_STACK, 8, 0, "return_address"}};
+  KZ_CHECK_OK(check_site(c));
+  { SiteSpec t = c; t.slots.erase(t.slots.begin()); KZ_CHECK_OK(check_site(t)); }   // the name pointer is not read
+  { SiteSpec t = c; t.slots.erase(t.slots.begin() + 1); KZ_CHECK(bad(t)); }         // entry_fn missing
+  { SiteSpec t = c; t.slots[1].role = "fn"; KZ_CHECK(bad(t)); }                     // another role at slot 1
+  { SiteSpec t = c; t.slots[2].width = 8; KZ_CHECK(bad(t)); }                       // priority kept in 32 bits
+  { SiteSpec t = c; t.slots[3].role = "ra"; KZ_CHECK(bad(t)); }
+  { SiteSpec t = c; t.slots.pop_back(); KZ_CHECK(bad(t)); }
+  { SiteSpec t = c; t.kind = KZ_SITE_KIND_RET_PROBE; t.phases = KZ_SITE_PHASE_RET; KZ_CHECK(bad(t)); }
+  SiteSpec r;
+  r.kind = KZ_SITE_KIND_RET_PROBE;
+  r.phases = KZ_SITE_PHASE_RET;
+  r.decoder = KZ_DECODER_SPAWN_RETURN;
+  r.slots = {{0, KZ_SLOT_SRC_REG, 4, KZ_REG_RAX, "status"}, {3, KZ_SLOT_SRC_IP, 8, 0, "return_address"}};
+  KZ_CHECK_OK(check_site(r));
+  { SiteSpec t = r; t.slots.pop_back(); KZ_CHECK(bad(t)); }
+  { SiteSpec t = r; t.kind = KZ_SITE_KIND_ENTRY_PROBE; t.phases = KZ_SITE_PHASE_ENTRY; KZ_CHECK(bad(t)); }
+  SiteSpec e = entry_site();
+  e.decoder = KZ_DECODER_THREAD_ENTRY;
+  e.slots = {{0, KZ_SLOT_SRC_REG, 4, KZ_REG_RDI, "task_id"}};
+  KZ_CHECK_OK(check_site(e));
+  { SiteSpec t = e; t.slots[0].width = 8; KZ_CHECK(bad(t)); }                       // the id is kept in 32 bits
+  { SiteSpec t = e; t.slots[0].slot = 1; KZ_CHECK(bad(t)); }
+  // a generic site reads by role: no position is required
+  { SiteSpec t = entry_site(); t.slots = {{2, KZ_SLOT_SRC_REG, 4, KZ_REG_RDI, "anything"}}; KZ_CHECK_OK(check_site(t)); }
+}
+
+SiteSpec pair_site(uint32_t id, uint16_t kind, const char* symbol) {
+  SiteSpec s;
+  s.site = id;
+  s.kind = kind;
+  s.phases = kind == KZ_SITE_KIND_ENTRY_PROBE ? KZ_SITE_PHASE_ENTRY : KZ_SITE_PHASE_RET;
+  s.decoder = KZ_DECODER_GENERIC;
+  s.label = std::string(symbol) + (kind == KZ_SITE_KIND_ENTRY_PROBE ? ".entry" : ".ret");
+  s.symbol = symbol;
+  if (kind == KZ_SITE_KIND_ENTRY_PROBE)
+    s.slots = {{0, KZ_SLOT_SRC_REG, 4, KZ_REG_RDI, "x"}, {3, KZ_SLOT_SRC_STACK, 8, 0, "return_address"}};
+  else
+    s.slots = {{0, KZ_SLOT_SRC_REG, 4, KZ_REG_RAX, "status"}, {3, KZ_SLOT_SRC_IP, 8, 0, "return_address"}};
+  return s;
+}
+
+void test_check_plan_pairs() {
+  std::vector<SiteSpec> plan = {pair_site(0, KZ_SITE_KIND_ENTRY_PROBE, "f"), pair_site(1, KZ_SITE_KIND_RET_PROBE, "f")};
+  KZ_CHECK_OK(check_plan(plan));
+  KZ_CHECK(has_return_address_key(plan[0]) && has_return_address_key(plan[1]));
+  { auto t = plan; t[1].slots.pop_back(); KZ_CHECK_ERR(check_plan(t), kz::Err::Invalid); }               // the return has no key
+  { auto t = plan; t[0].slots[1].role = "caller"; KZ_CHECK_ERR(check_plan(t), kz::Err::Invalid); }       // the entry's slot 3 is something else
+  { auto t = plan; t[0].slots[1].width = 4; KZ_CHECK_ERR(check_plan(t), kz::Err::Invalid); }             // a 4-byte key
+  { auto t = plan; t[1].slots.pop_back(); t[1].symbol = "g"; KZ_CHECK_OK(check_plan(t)); }               // not a pair: no key needed
+  { auto t = plan; t[0].kind = 77; KZ_CHECK_ERR(check_plan(t), kz::Err::Invalid); }                       // every site is checked
+}
+
+kz_raw_ev ev(uint32_t tid, uint32_t site, uint64_t a3, uint16_t flags = 0) {
+  kz_raw_ev e;
+  std::memset(&e, 0, sizeof e);
+  e.tid = tid;
+  e.site = site;
+  e.a[3] = a3;
+  e.flags = flags;
+  return e;
+}
+
+void test_match_calls() {
+  const std::vector<SiteSpec> plan = {pair_site(0, KZ_SITE_KIND_ENTRY_PROBE, "f"), pair_site(1, KZ_SITE_KIND_RET_PROBE, "f")};
+  // Nested calls on one thread pair by return address, innermost first; another thread is separate.
+  {
+    const std::vector<kz_raw_ev> evs = {ev(1, 0, 0x100), ev(1, 0, 0x200), ev(2, 0, 0x100), ev(1, 1, 0x200), ev(2, 1, 0x100), ev(1, 1, 0x100)};
+    MatchStats st;
+    const std::vector<CallPair> p = match_calls(evs, plan, &st);
+    KZ_CHECK_EQ(st.sites_paired, uint64_t(1));
+    KZ_CHECK_EQ(st.pairs, uint64_t(3));
+    KZ_CHECK_EQ(st.entries_without_return, uint64_t(0));
+    KZ_CHECK_EQ(st.returns_without_entry, uint64_t(0));
+    KZ_CHECK_EQ(p.size(), size_t(3));
+    KZ_CHECK_EQ(p[0].return_event, 5u);
+    KZ_CHECK_EQ(p[1].return_event, 3u);
+    KZ_CHECK_EQ(p[2].return_event, 4u);
+  }
+  // An event whose slot was not copied (TRUNC: the value there is 0) is never matched on that 0: an
+  // entry and a return that would both read 0 stay apart, and are counted separately.
+  {
+    const std::vector<kz_raw_ev> evs = {ev(1, 0, 0, KZ_RAW_FLAG_TRUNC), ev(1, 1, 0)};
+    MatchStats st;
+    const std::vector<CallPair> p = match_calls(evs, plan, &st);
+    KZ_CHECK_EQ(st.pairs, uint64_t(0));
+    KZ_CHECK_EQ(st.events_with_unreadable_key, uint64_t(1));
+    KZ_CHECK_EQ(st.entries_without_return, uint64_t(0));
+    KZ_CHECK_EQ(st.returns_without_entry, uint64_t(1));
+    KZ_CHECK_EQ(p.size(), size_t(2));
+    KZ_CHECK(p[0].unreadable_key);
+    KZ_CHECK_EQ(p[0].return_event, KZ_NONE32);
+  }
+  {
+    const std::vector<kz_raw_ev> evs = {ev(1, 0, 0x100), ev(1, 1, 0, KZ_RAW_FLAG_TRUNC)};
+    MatchStats st;
+    const std::vector<CallPair> p = match_calls(evs, plan, &st);
+    KZ_CHECK_EQ(st.pairs, uint64_t(0));
+    KZ_CHECK_EQ(st.events_with_unreadable_key, uint64_t(1));
+    KZ_CHECK_EQ(st.entries_without_return, uint64_t(1));
+    KZ_CHECK(p[1].unreadable_key);
+  }
+  // Sites of one symbol without the key are not paired at all (and the sites without slots, as a
+  // reader that forgot them would pass, pair nothing).
+  {
+    std::vector<SiteSpec> nokey = plan;
+    nokey[1].slots.pop_back();
+    MatchStats st;
+    const std::vector<CallPair> p = match_calls({ev(1, 0, 0x100), ev(1, 1, 0x100)}, nokey, &st);
+    KZ_CHECK_EQ(st.sites_paired, uint64_t(0));
+    KZ_CHECK_EQ(st.sites_without_key, uint64_t(1));
+    KZ_CHECK_EQ(st.pairs, uint64_t(0));
+    KZ_CHECK(p.empty());
+  }
+}
+
 void test_apply() {
   const SiteSpec s = entry_site();
   PerfRecord rec;
@@ -133,6 +259,9 @@ int main() {
   test_register_numbers();
   test_needs();
   test_check_site_rejects();
+  test_check_site_decoders();
+  test_check_plan_pairs();
+  test_match_calls();
   test_apply();
   return kztest::finish("test_trace_decode_sites");
 }

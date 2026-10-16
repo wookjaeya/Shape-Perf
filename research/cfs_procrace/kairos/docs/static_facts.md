@@ -87,9 +87,9 @@ artifact 종류 FACTS. 모든 사실은 (file, line, col) 과 `fh`(같은 컨테
 | LOOP_ITERS (37) | `kz_fact_iter` | table walk 의 펼친 반복(§5.3) |
 | FACT_INIT (15) | `kz_fact_init` | INIT: 프로그램 진입 상태(정적 초기값, 0 초기화) |
 | FACT_CONSTS (16) | `kz_fact_const` | 상수 경계 |
-| FACT_ATYPE (17) | `kz_fact_atype` | A-TYPE 목록(untyped write, address escape, cast, union) |
+| FACT_ATYPE (17) | `kz_fact_atype` | A-TYPE 목록(untyped write, address escape, cast, union, unknown-effect) |
 | WRITERS (18) | `kz_fact_writer` | 대상 필드의 writer. `tstatus` = `n/a`(아래) |
-| FACT_LOCS (33) | `kz_fact_loc` | 대상마다 O7 행: writer 수, A-TYPE 수, 상태 `writer-set-complete` / `DISABLED` |
+| FACT_LOCS (33) | `kz_fact_loc` | 대상마다 O7 행: writer 수, A-TYPE 수(종류별, unknown-effect 포함), 상태 `writer-set-complete` / `DISABLED` |
 | CALL_TARGETS (31) | `kz_fact_target` | 간접 호출과 spawn 의 대상(함수 포인터 흐름 그래프) |
 | SPAWN_PARAMS (38) | `kz_fact_spawn_param` | spawn 하는 함수의 task-main 매개변수(§5.4) |
 | STATIC_IMAGE (32) | `kz_fact_image` | walk 가 읽는 표의 초기값 |
@@ -98,19 +98,26 @@ artifact 종류 FACTS. 모든 사실은 (file, line, col) 과 `fh`(같은 컨테
 | FUNC_WRITES (39) | `kz_fact_fwrite` | 함수 본문이 직접 쓰는 필드(첫 지점). 루프 body 의 전이적 mod set 을 컨테이너에서 다시 계산할 수 있게 둔다 |
 | BASIS, FILE_HASHES, PROVENANCE | — | 추출 매개변수, 수, 손으로 넣은 입력(계층 `researcher`) |
 
-schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, 새 섹션 37–39 는 1. 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
+schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
 
 ### 4.1 writer, A-TYPE, INIT (SPEC §4.2)
 
 - 추상 위치는 (struct 형, field) 이고 base 객체와 무관하다 [D]. writer: `MemberExpr` 대입·복합 대입·증감, struct 통째 대입(그 형이 담은 모든 대상), 데이터 함수(memset 계열: 목적지 형이 담은 모든 대상, 상수 0 채움은 값 0 으로 기록), out 포인터(매개변수 저장 요약을 호출 지점에서 실체화; 저장마다 guard 와 값).
 - **guard** 는 그 문장이 실행될 때 성립해야 하는 조건의 논리곱이다. `if (c) <탈출>;`(else 없음, `break`/`continue`/`return`/`goto` 로 끝남) 뒤의 문장에는 `¬c` 가 붙는다 [D]. 라벨과 `case` 는 합류점이라 거기서 떨어뜨린다. 각 조건은 **자기 위치에서 쓰인 그대로**이며, 한 상태 위의 술어로 읽으면 안 된다(사이에 지역 변수가 바뀔 수 있다).
-- **A-TYPE**: cast(대상 형을 담은 형의 포인터와 다른 형 사이의 변환; 읽기 전용 view 와 데이터 함수 인자는 제외), 대상 필드 주소의 escape(호출 인자 외의 사용, 또는 저장만 하지 않는 callee), union 멤버 쓰기, untyped write(`void*`/`char*` 를 통한 저장, 데이터 함수). untyped write 는 대상 형에 cast·escape·union 노출이 있을 때만 그 대상에 센다: 노출이 없으면 untyped 포인터가 그 형의 객체를 가리킬 방법이 없다 [D]. 하나라도 걸리면 그 대상은 `DISABLED`.
+- **A-TYPE**: cast(대상 형을 담은 형의 포인터와 다른 형 사이의 변환; 데이터 함수의 목적지·원본 인자는 제외. **const view 도 제외하지 않는다**: C 는 뒤에서 const 를 떼는 cast(`(char *)v`)를 허용하고 그 cast 는 대상 형을 언급하지 않는다), 대상 필드 주소의 escape(호출 인자 외의 사용, 저장만 하지 않는 callee, 필드의 **일부**(`&x.f.g`) 주소를 데이터 함수의 목적지·원본 밖으로 넘김), union 멤버 쓰기, untyped write(`void*`/`char*` 를 통한 저장, 데이터 함수), **unknown-effect**(아래). untyped write 는 대상 형에 cast·escape·union·unknown-effect 노출이 있을 때만 그 대상에 센다: 노출이 없으면 untyped 포인터가 그 형의 객체를 가리킬 방법이 없다 [D]. 하나라도 걸리면 그 대상은 `DISABLED`.
+- **unknown-effect** (SPEC §4.2 2 단계 마지막 항목, 3 단계) [D]: 대상의 소유 형에 **닿는** 포인터(그 형을 가리키거나, 값으로 담은 record 를 가리키거나, record 의 포인터 필드를 따라 전이적으로 닿는 포인터; 포인터 단계 수 무관)가 (1) 닫힌 프로그램에 본문이 없는 함수, (2) 대상을 모두 알지 못하는 간접 호출(미해결이거나 해결된 대상 중 본문이 없는 것), (3) 가변 인자 위치(`va_arg` 읽기는 따라가지 않음)로 넘어가면 그 형의 모든 대상에 hit 를 기록한다. inline assembly 는 피연산자가 대상 형에 닿거나 대상 필드이면 그 대상에, `"memory"` clobber 가 있으면 **모든** 대상에 hit 다. 데이터 함수(memset 계열)는 요약이 쓰는 곳(목적지)을 정하므로 제외한다. 본문이 있는 callee 는 그 본문의 field 사실이 덮으므로(writer 수집은 닫힌 프로그램의 모든 본문을 읽는다) hit 가 아니다. 그래서 `unresolved-indirect` 수는 정보용이고 그 자체로 상태를 정하지 않는다: 미해결 호출은 대상에 닿는 포인터나 대상 필드의 주소를 받을 때만 hit 가 된다.
+- **데이터 함수의 범위** [D]: "목적지 형의 모든 필드를 쓴다"는 크기 인자가 그 형의 크기 이하일 때만 쓰기 전체다. 크기 인자(목적지·원본이 아닌 첫 `size_t` 매개변수)를 상수로 평가해 목적지 영역 크기와 비교하고, 넘거나 상수가 아니거나 크기 매개변수가 없으면(`strcpy`, `sprintf`) 둘러싼 객체(`.` 멤버와 배열 첨자를 거슬러 올라간 가장 바깥 lvalue, `->`·`*p` 이면 그 포인터가 가리키는 record)가 담은 모든 대상의 writer(`covers-more-than-the-field`)로 기록한다. 상수 크기가 둘러싼 객체의 끝을 넘으면 형이 이름 붙이지 않은 메모리를 쓰므로 모든 대상에 unknown-effect hit 다. 목적지가 `T *` 포인터이면 크기가 `T` 의 배수일 때 `T` 배열로 본다(같은 위치들).
+- **record·배열 형 대상** [D]: 대상 필드의 일부에 대한 저장(`x.f.g = v`, `x.f[i] = v`, 증감)은 그 필드의 writer 이고 `partial-write` 표시, 값은 top 이다. out 포인터 매개변수 `p` 에 대해 `(*p).g`, `p->g`, `p[i].g` 저장은 pointee 에 대한 저장으로 요약에 들어가고, 그 멤버의 주소를 잡으면 escape 다. 데이터 함수의 목적지가 대상 필드의 일부이면 그 대상의 `partial-write` writer 다.
 - writer 의 `tstatus` 는 **`n/a`** 다 [D]. SPEC §4.2 의 COMPUTED 는 6–7 단계(conjunct 에 대한 transition filtering 과 Φ 대응)를 거친 항목이고, 추출기는 2–3 단계만 했다. 이전 판(revision 2)은 모든 writer 를 COMPUTED 로 썼는데 과장이라 고쳤다.
 - INIT: 전역 객체의 정적 초기값 또는 0 초기화. EarlyInit 저장은 INIT 이 아니라 보통 writer(`early-init` 표시)다(SPEC §1.7).
 
 ### 4.2 derives
 
-역할(stamp / key / id)이 있는 인자마다 한 행: 공유 위치(struct field 또는 전역)를 읽은 값이 산술 없이 지역 변수 복사만 거쳐 인자에 오는지. 지역 변수는 정의가 하나이고 주소가 잡히지 않아야 한다. 실패하면 이유(정의 여러 개, 복사 아님, 매개변수에서 옴, 호출 결과 등)를 쓴다.
+역할(stamp / key / id)이 있는 인자마다 한 행: 공유 위치(struct field, 전역, 전역 배열의 원소 — 이때 위치는 배열)를 읽은 값이 산술 없이 지역 변수 복사만 거쳐 인자에 오는지. 지역 변수는 정의가 하나이고 주소가 잡히지 않아야 한다. 복사로 보는 변환은 괄호, lvalue→rvalue, no-op, 그리고 정보를 잃지 않는 정수 변환(폭이 같거나 넓어짐)뿐이다. 좁히는 정수 변환(`(uint16)x`), bool 변환과 그 밖의 cast 는 `not-a-copy` 다 [D]. 실패하면 이유(정의 여러 개, 복사 아님, 매개변수에서 옴, 호출 결과 등)를 쓴다.
+
+### 4.3 식 트리의 지역 변수
+
+식 트리는 지역 변수를 이름 문자열로 적는다. 한 함수 안에서 같은 이름의 지역 변수가 둘 이상이면(가림, 형제 블록의 재사용) 선언 위치를 붙인 `이름@줄:열` 로 구별하고, 한 번만 쓰인 이름은 그대로 둔다. 술어 추출(counter, cursor, 예산)은 트리의 이름을 이 id 표로 선언에 되돌린다. id 는 선언에만 의존하고 포인터 값에 의존하지 않는다(이전 판은 포인터 순서의 map 에서 첫 이름 일치를 골라, 가림이 있으면 결과가 할당 순서에 따라 달라질 수 있었다).
 
 ## 5. 루프와 인증 뷰 규칙(SPEC §4.3)
 
@@ -118,7 +125,7 @@ schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, 새 섹션 37–39 는 1. 바뀐
 
 | 종류 | 판정 |
 |---|---|
-| table-walk | `V = Table[i]; if (V == NULL) break;` 꼴. 경로(전역 객체와 필드)를 static image 위에서 따라가 NULL 원소까지 센다 |
+| table-walk | `V = Table[i]; if (V == NULL) break;` 꼴. 경로(전역 객체와 필드)를 static image 위에서 따라가 NULL 원소까지 센다. image 가 실행 시 값인지 확인한다(§5.3) |
 | constant-trip | `for (i = c0; i <op> bound; i += step)`, bound 는 상수, 본문이 i 를 바꾸지 않음 |
 | count-bounded | constant-trip 이면서 **자기 본문에** 지연 연산 호출이 있음(delay-paced) |
 | poll | 횟수를 모르고 자기 본문에 지연 연산 호출이 있음 |
@@ -135,10 +142,13 @@ schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, 새 섹션 37–39 는 1. 바뀐
 세부:
 - **조건 탈출과 예산 탈출**: 탈출을 결정한 조건(탈출 지점의 가장 안쪽 guard 또는 부정된 루프 조건)을 선언항으로 나누고(`not (and a b)` 는 `¬a ∨ ¬b`), 예산 변수(감소되고 탈출식이 검사하는 지역 변수)를 언급하는 선언항은 예산 탈출, 나머지는 조건 탈출이다. 조건 탈출에서 예산만 검사하는 논리곱 항은 뺀다. 상수 거짓 탈출(`while (1)`)은 버린다.
 - **술어 형태**: (a) 지역 변수를 읽지 않는 직접 시험, (b) counter-zero: 본문 첫 수준의 무조건 `cnt = 0`, 바로 안쪽의 정확한 횟수 N 의 constant-trip 루프(탈출 없음) 안에서만 `++cnt`, 그 밖의 정의 없음, 그리고 `cnt` 를 검사하는 탈출이 모두 안쪽 루프 **뒤**에 있고 루프 조건은 `cnt` 를 읽지 않음 → `cnt == 0` 을 `forall i N (not φ) cursors` 로 바꾼다. φ 가 읽는 지역 변수는 안쪽 루프의 유도 변수나 **cursor**(안쪽 루프 전에 한 번 `p = base`, 안쪽 루프 본문 첫 수준에서 매 반복 `++p`)여야 한다. cursor 의 `base` 가 크기를 아는 배열이면 길이를 함께 쓴다. (c) (a)와 (b)의 조합.
-- **L1 (ii)**: 본문의 공유 읽기(필드·전역의 lvalue→rvalue 변환; `x.f` 의 base 나 배열 decay 는 읽기가 아님)가 모두 잠금 구간 안이고 잠금 호출이 하나이면 one-lock-region. 공유 읽기가 하나이고 잠금 밖이며 `_Atomic` 이거나 C 의 `sig_atomic_t` 로 쓰인 `volatile` 이면 atomic-read. 잠금 연산은 명령줄 입력이다.
+- **L1 (ii)**: 본문의 공유 읽기(필드·전역의 lvalue→rvalue 변환; `x.f` 의 base 나 배열 decay 는 읽기가 아님)가 모두 잠금 구간 안이고 잠금 호출이 하나이면 one-lock-region. 공유 읽기가 하나이고 잠금 밖이며 `_Atomic` 이거나 C 의 `sig_atomic_t` 로 쓰인 `volatile` 이면 atomic-read. 잠금 연산은 명령줄 입력이다. 술어(또는 조건)에 호출 결과(`call-result`)가 있으면 callee 가 읽는 것은 위 수에 보이지 않으므로 [D]: atomic-read 는 성립하지 않고, one-lock-region 은 그 호출이 모두 그 루프 안에서 잠금 구간 안에서만 이루어질 때만 성립한다(간접 호출 결과는 성립하지 않음). callee 본문 안의 읽기를 세지는 않는다: 잠금 구간 안의 호출이면 그 읽기도 구간 안이다.
 - **L1 (i)**: 관련 위치 = 술어가 직접 읽는 필드·전역(크기를 아는 배열 cursor 의 base 는 제외) ∪ 모든 추출 대상. 본문 쓰기(FUNC_WRITES 행 중 그 루프 안의 것)와 본문 호출에서 도달하는 함수(직접 호출, 해결된 간접 호출)의 쓰기를 모은다. `T.*`(record 통째 쓰기)는 `T` 의 모든 필드에 걸린다. 확실한 쓰기가 있으면 "L1 (i) fails" 다. 쓰기를 찾지 못했어도 다음이면 `mod-incomplete`(결정하지 않음): 해결되지 않은 간접 호출에 닿음, 관련 위치가 **추출 대상이 아님**(A-TYPE 목록이 없어 포인터·cast·untyped view 를 통한 쓰기를 배제할 수 없다), 관련 대상이 `DISABLED`. 그래서 await 는 술어가 읽는 위치가 모두 writer 집합이 complete 인 추출 대상일 때만 나온다 [D]. 술어가 호출하는 함수(예: `IsUsed`)가 읽는 필드는 그 필드가 추출 대상일 때만 관련 위치에 든다 [D].
 
 ### 5.3 table walk 펼치기
+
+**image 가 실행 시 값인가** [D]. 펼치기는 경로의 필드, 표, 원소 객체를 static-initializer image 에서 읽는다. const 객체나 const 필드는 바뀔 수 없다(바꾸면 C 에서 정의되지 않은 동작). const 가 아닌 고리(link)마다 FUNC_WRITES 에서 그 필드(`T.f` 또는 `T.*`)나 그 객체(이름으로 대입, 주소 잡기)에 대한 **형 있는 쓰기**를 찾는다. 하나라도 있으면 image 가 낡았을 수 있으므로 walk 를 해결하지 않는다(trip 미상, star-closed, 이유에 쓰기 위치). 없으면 그 고리를 **선언된 가정**으로 펼친다: 루프에 `static-image-assumed` 표시, 규칙 설명에 고리 목록, facts 의 BASIS 에 `assume.static_image[<루프>]` 항목(정책 `declared-assumption`, 출처 계층 `researcher`), 요약에 "declared assumptions" 로 센다. 이 확인은 포인터·cast·본문 없는 코드를 통한 쓰기는 배제하지 않는다(그래서 가정이다).
+
 
 resolved table walk 의 반복마다 원소 객체의 static image 로 루프 본문 호출의 guard 를 **부분 평가**한다(원소 필드 값 대입, 상수 비교, 알려진 non-NULL 포인터 대 0, 함수끼리 이름 비교, 논리 연결자). 결과: `taken`, `skipped`, 또는 원소에 의존하지 않는 나머지 조건만 남은 `residual`. 원소 필드를 읽는 인자는 그 반복의 값(함수, 정수, 문자열, 주소)으로, 원소 필드를 통한 간접 호출은 그 반복의 callee 로 기록한다. `order` view 는 이것으로 table walk 가 정하는 순서를 보여 준다.
 

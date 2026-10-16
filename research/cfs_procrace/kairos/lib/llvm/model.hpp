@@ -146,6 +146,7 @@ struct LoopFact {
   std::string table;       // TABLE_WALK: the table as an access path ("Type.field" or a global name)
   std::string table_root;  // TABLE_WALK: the global object that holds it (resolved in finalize)
   std::string trip_note;   // TABLE_WALK that could not be resolved: why
+  std::string image_assumed;  // TABLE_WALK unrolled through links that are not const: which (declared assumption)
   // SPEC 4.3, certificate view: what the reader found, and what finalize decides from it.
   bool delay_direct = false;   // the delay call is in this loop's own body, not in an inner loop
   ExprRef cond = nullptr;      // the condition exits (not the budget exits)
@@ -291,7 +292,7 @@ struct ImageFact {
 struct LocFact {
   std::string loc_type, loc_field;
   uint32_t n_writers = 0, n_direct = 0, n_data_fn = 0, n_outptr = 0;
-  uint32_t n_untyped = 0, n_escape = 0, n_cast = 0, n_union = 0, n_init = 0, n_unresolved_indirect = 0;
+  uint32_t n_untyped = 0, n_escape = 0, n_cast = 0, n_union = 0, n_unknown = 0, n_init = 0, n_unresolved_indirect = 0;
   uint8_t status = KZ_LOC_STATUS_UNCHECKED;
 };
 
@@ -379,6 +380,13 @@ struct Model {
     std::string root_object;           // the global object the path starts at
     std::vector<std::string> fields;   // field names from the root to the array
     std::string text;
+    // For the check that the image is the value at run time (SPEC 4.3 unrolling): per field, the
+    // record type that declares it and whether the field itself is const; whether the root
+    // object is const; the record type of the elements.
+    std::vector<std::string> field_owner;
+    std::vector<bool> field_const;
+    bool root_const = false;
+    std::string elem_type;
   };
   std::vector<WalkSpec> walks;
   // Untyped write sites (all of them, before the exposure filter).
@@ -388,6 +396,29 @@ struct Model {
     std::string func_key, tu, call_key, detail;
   };
   std::vector<UntypedWrite> untyped_writes;
+  // A pointer that reaches the owner type of a target (directly, inside records, or through
+  // pointer fields) passed as a call argument.  finalize() decides whether the callee is code
+  // whose effect is unknown (no body, unresolved indirect call, variadic position): then every
+  // such target gets an A-TYPE unknown-effect hit.
+  struct ReachPass {
+    std::string call_key, func_key, tu;
+    Pos pos;
+    uint32_t ordinal = 0;
+    uint32_t arg_index = 0;
+    std::string callee_key, callee_name;  // empty for an indirect call
+    bool variadic_position = false;
+    std::vector<std::string> types;  // the owner types of the targets the pointer reaches (sorted)
+    std::string text;                // the argument as written
+  };
+  std::vector<ReachPass> reach_passes;
+  // Whether each global object is const (from its definition), for the table-walk check.
+  std::map<std::string, bool> object_const;
+  // Declared assumptions the extraction made (BASIS items with policy declared, provenance tier
+  // researcher), counted in the report.
+  struct Assumption {
+    std::string name, value;
+  };
+  std::vector<Assumption> assumptions;
   // Calls whose callee expression is a known data function (memset family) with a typed writer:
   // already turned into writers; counted here for the report.
   uint32_t data_fn_calls = 0;
@@ -408,8 +439,9 @@ struct Model {
     uint32_t key_collisions = 0;
     uint32_t indirect_total = 0, indirect_resolved = 0, indirect_unresolved = 0;
     uint32_t spawn_total = 0, spawn_resolved = 0;
-    uint32_t walks_resolved = 0, walks_failed = 0;
+    uint32_t walks_resolved = 0, walks_failed = 0, walks_assumed = 0;
     uint32_t outptr_store_only = 0, outptr_escapes = 0, outptr_unsummarized = 0, outptr_data_fn = 0;
+    uint32_t reach_passes_unknown = 0;  // pointer arguments that reach a target and go to code of unknown effect
     uint32_t atype_untyped_sites_total = 0, atype_untyped_sites_relevant = 0;
     uint32_t flow_nodes = 0, flow_edges = 0;
     uint32_t loops_unroll = 0, loops_await = 0, loops_star = 0;

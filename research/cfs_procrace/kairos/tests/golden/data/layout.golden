@@ -545,7 +545,7 @@ record kz_fact_image size=56 fields=11
   file offset=40 size=8 count=1 kind=str
   line offset=48 size=4 count=1 kind=u32
   fh offset=52 size=4 count=1 kind=u32
-record kz_fact_loc size=60 fields=15
+record kz_fact_loc size=64 fields=16
   loc_type offset=0 size=8 count=1 kind=str
   loc_field offset=8 size=8 count=1 kind=str
   n_writers offset=16 size=4 count=1 kind=u32
@@ -556,11 +556,12 @@ record kz_fact_loc size=60 fields=15
   n_escape offset=36 size=4 count=1 kind=u32
   n_cast offset=40 size=4 count=1 kind=u32
   n_union offset=44 size=4 count=1 kind=u32
-  n_init offset=48 size=4 count=1 kind=u32
-  n_unresolved_indirect offset=52 size=4 count=1 kind=u32
-  status offset=56 size=1 count=1 kind=u8
-  rsv0 offset=57 size=1 count=1 kind=u8
-  rsv1 offset=58 size=2 count=1 kind=u16
+  n_unknown_effect offset=48 size=4 count=1 kind=u32
+  n_init offset=52 size=4 count=1 kind=u32
+  n_unresolved_indirect offset=56 size=4 count=1 kind=u32
+  status offset=60 size=1 count=1 kind=u8
+  rsv0 offset=61 size=1 count=1 kind=u8
+  rsv1 offset=62 size=2 count=1 kind=u16
 record kz_fact_terminal size=48 fields=10
   site offset=0 size=4 count=1 kind=u32
   fn offset=4 size=4 count=1 kind=u32
@@ -946,6 +947,7 @@ enum KZ_INSN_CLASS
   0x0 UNKNOWN "unknown"
   0x1 EMULATED "emulated"
   0x2 TRAP "trap"
+  0x3 RET_TRAMPOLINE "ret-trampoline"
 flags KZ_SITE_PHASE
   0x1 ENTRY "ENTRY"
   0x2 POINT "POINT"
@@ -996,6 +998,7 @@ enum KZ_PERTURBATION_KIND
   0x2 HOLD "hold"
   0x3 OBSERVER_CPU "observer-cpu"
   0x4 BOOT_TIME "boot-time"
+  0x5 PROC_CAPTURE "proc-capture"
 enum KZ_SIDE_KIND
   0x0 NONE "none"
   0x1 FORK "FORK"
@@ -1014,6 +1017,8 @@ flags KZ_THREAD_FLAG
   0x80 TID_REUSED "tid-reused"
   0x100 EXIT_SEEN "exit-seen"
   0x200 ENTRY_UNMATCHED "entry-unmatched"
+  0x400 MATCH_BY_TIME "match-by-time"
+  0x800 ID_UNVERIFIED "id-unverified"
 enum KZ_SYMBOL_BIND
   0x0 LOCAL "local"
   0x1 GLOBAL "global"
@@ -1146,6 +1151,7 @@ flags KZ_LOOP_FLAG
   0x2 L1_MOD "L1-i"
   0x4 L1_READ "L1-ii"
   0x8 MOD_INCOMPLETE "mod-incomplete"
+  0x10 IMAGE_ASSUMED "static-image-assumed"
 enum KZ_ITER_KIND
   0x0 NONE "none"
   0x1 ELEMENT "element"
@@ -1192,6 +1198,7 @@ enum KZ_ATYPE_KIND
   0x2 ADDRESS_ESCAPE "address-escape"
   0x3 CAST "cast"
   0x4 UNION "union"
+  0x5 UNKNOWN_EFFECT "unknown-effect"
 enum KZ_WRITER_KIND
   0x0 NONE "none"
   0x1 ASSIGN "assign"
@@ -1213,6 +1220,7 @@ flags KZ_WRITER_FLAG
   0x8 IN_LOOP "in-loop"
   0x10 COVERS_MORE "covers-more-than-the-field"
   0x20 IN_MACRO "in-macro"
+  0x40 PARTIAL "partial-write"
 enum KZ_CALL_TARGET_KIND
   0x0 NONE "none"
   0x1 INDIRECT "indirect-call"
@@ -1404,7 +1412,7 @@ section FACT_EXPRS type=13 record=kz_fact_expr version=3
 section FACT_LOOPS type=14 record=kz_fact_loop version=3
 section FACT_INIT type=15 record=kz_fact_init version=2
 section FACT_CONSTS type=16 record=kz_fact_const version=2
-section FACT_ATYPE type=17 record=kz_fact_atype version=2
+section FACT_ATYPE type=17 record=kz_fact_atype version=3
 section WRITERS type=18 record=kz_fact_writer version=2
 section ALLOCS type=19 record=kz_fact_alloc version=1
 section FUNCS type=20 record=kz_fact_func version=1
@@ -1416,7 +1424,7 @@ section ACTORS type=28 record=kz_actor version=1
 section CLOSURE_SPAWNS type=29 record=kz_closure_spawn version=1
 section CALL_TARGETS type=31 record=kz_fact_target version=1
 section STATIC_IMAGE type=32 record=kz_fact_image version=1
-section FACT_LOCS type=33 record=kz_fact_loc version=1
+section FACT_LOCS type=33 record=kz_fact_loc version=2
 section TERMINALS type=34 record=kz_fact_terminal version=1
 section OUTCALLS type=35 record=kz_fact_outcall version=1
 section TUS type=36 record=kz_tu version=1
@@ -1668,4 +1676,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=d564a43a5474c1c7cfd138b4caa03262e20e7d42f8dd3454ea24fad014607a2e
+fingerprint=bbb82e8246896d8c938269aff1ba5cc8d0816d3e61cb2b3c0b4e1ca3bee164eb

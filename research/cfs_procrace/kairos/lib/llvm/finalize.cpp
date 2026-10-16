@@ -368,7 +368,26 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     std::vector<ImageFact> elems, entries;
     int64_t trip = 0;
     std::string why;
-    if (resolve_table_walk(m, w, &elems, &trip, &why, &entries)) {
+    WalkTrust trust;
+    const bool resolved = resolve_table_walk(m, w, &elems, &trip, &why, &entries);
+    if (resolved) trust = check_walk_links(m, w, entries);
+    if (resolved && !trust.written.empty()) {
+      lf.trip_status = KZ_TRIP_STATUS_UNKNOWN;
+      lf.trip_note = "the static image may not be the value at run time: " + trust.written;
+      ++R.walks_failed;
+    } else if (resolved) {
+      if (!trust.assumed.empty()) {
+        std::string links;
+        for (const std::string& a : trust.assumed) links += (links.empty() ? "" : ", ") + a;
+        lf.image_assumed = links;
+        lf.lflags |= KZ_LOOP_FLAG_IMAGE_ASSUMED;
+        ++R.walks_assumed;
+        m.assumptions.push_back(Model::Assumption{
+            "assume.static_image[" + lf.key + "]",
+            "the walk over " + lf.table + " reads links that are not const (" + links +
+                "); their static-initializer images are taken as their values when the walk runs. No typed write of them was found; "
+                "writes through pointers, casts and code without a body are not excluded."});
+      }
       lf.trip = trip;
       lf.trip_status = KZ_TRIP_STATUS_EXACT;
       walk_entries[w.loop_key] = entries;
@@ -478,10 +497,58 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     }
   }
 
+  // ---- pointers that reach a target and go to code whose effect is unknown (SPEC 4.2 steps 2-3)
+  // The writer collection reads every body of the closed program, so a callee with a body is
+  // covered by its own facts, whether it is called directly or through a resolved pointer.  What
+  // is not covered: a callee without a body, an indirect call whose targets are not all known,
+  // and a variadic position (the callee's va_arg reads are not followed).  A pointer that reaches
+  // the owner type of a target and goes there may be used to write any target of that type.
+  for (const Model::ReachPass& rp : m.reach_passes) {
+    std::string why;
+    auto no_body = [&](const std::string& fk) { return m.summaries.count(fk) == 0; };
+    auto nparams_of = [&](const std::string& fk) -> uint32_t {
+      auto it = m.funcs.find(fk);
+      return it == m.funcs.end() ? 0u : it->second.nparams;
+    };
+    if (rp.callee_key.empty()) {
+      auto it = indirect_targets.find(rp.call_key);
+      if (unresolved_calls.count(rp.call_key) != 0 || it == indirect_targets.end() || it->second.empty()) {
+        why = "an indirect call whose targets are not all known";
+      } else {
+        for (const std::string& f : it->second) {
+          if (no_body(f)) why = "an indirect call that may reach " + f + ", which has no body in the closed program";
+          else if (rp.arg_index >= nparams_of(f)) why = "an indirect call that may reach " + f + ", in a variadic position";
+          if (!why.empty()) break;
+        }
+      }
+    } else if (spec.data_fns.count(rp.callee_name) != 0) {
+      continue;  // a data function: its summary says what it writes
+    } else if (rp.variadic_position) {
+      why = rp.callee_name + ", in a variadic position (its va_arg reads are not followed)";
+    } else if (no_body(rp.callee_key)) {
+      why = rp.callee_name + ", which has no body in the closed program";
+    }
+    if (why.empty()) continue;
+    ++R.reach_passes_unknown;
+    for (const std::string& type : rp.types) {
+      ATypeFact a;
+      a.kind = KZ_ATYPE_KIND_UNKNOWN_EFFECT;
+      a.type_name = type;
+      a.pos = rp.pos;
+      a.ordinal = rp.ordinal;
+      a.func_key = rp.func_key;
+      a.tu = rp.tu;
+      a.call_key = rp.call_key;
+      a.detail = "a pointer that reaches the type (argument " + std::to_string(rp.arg_index) + ": " + rp.text + ") is passed to " + why;
+      m.atypes.push_back(a);
+    }
+  }
+
   // ---- A-TYPE listing
   std::set<std::string> exposed_types;
   for (const ATypeFact& a : m.atypes)
-    if (a.kind == KZ_ATYPE_KIND_CAST || a.kind == KZ_ATYPE_KIND_UNION || a.kind == KZ_ATYPE_KIND_ADDRESS_ESCAPE) exposed_types.insert(a.type_name);
+    if (a.kind == KZ_ATYPE_KIND_CAST || a.kind == KZ_ATYPE_KIND_UNION || a.kind == KZ_ATYPE_KIND_ADDRESS_ESCAPE || a.kind == KZ_ATYPE_KIND_UNKNOWN_EFFECT)
+      exposed_types.insert(a.type_name);
   R.atype_untyped_sites_total = static_cast<uint32_t>(m.untyped_writes.size());
   if (!exposed_types.empty()) {
     R.atype_untyped_sites_relevant = static_cast<uint32_t>(m.untyped_writes.size());
@@ -556,11 +623,16 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       else if (a.kind == KZ_ATYPE_KIND_ADDRESS_ESCAPE) ++l.n_escape;
       else if (a.kind == KZ_ATYPE_KIND_CAST) ++l.n_cast;
       else if (a.kind == KZ_ATYPE_KIND_UNION) ++l.n_union;
+      else if (a.kind == KZ_ATYPE_KIND_UNKNOWN_EFFECT) ++l.n_unknown;
     }
     for (const InitFact& i : m.inits)
       if (i.loc_type == l.loc_type && i.loc_field == l.loc_field) ++l.n_init;
+    // Informational: an unresolved indirect call decides nothing by itself.  Its possible targets
+    // with a body are read like every other body; what it may do beyond them is an unknown-effect
+    // hit when it receives a pointer that reaches the type (above), or an address-escape hit when
+    // it receives the address of the field.
     l.n_unresolved_indirect = R.indirect_unresolved;
-    l.status = (l.n_untyped + l.n_escape + l.n_cast + l.n_union) > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
+    l.status = (l.n_untyped + l.n_escape + l.n_cast + l.n_union + l.n_unknown) > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
     m.locs.push_back(l);
   }
 

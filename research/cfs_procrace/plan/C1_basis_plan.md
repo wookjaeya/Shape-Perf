@@ -1,11 +1,12 @@
 # C1 기준 구성 계획 — D22(공개 BP 기반)와 P-C1HOLD
 
-- 작성일: 2026-10-15. 개정 2: 2026-10-16(§15).
+- 작성일: 2026-10-15. 개정 2: 2026-10-16(§15). 개정 3: 2026-10-16(검토 11건, §16).
 - 성격: **원출처 소스의 재확인 기록 + 실행 계획**. 이 문서를 쓰는 동안 cFS·cFE·OSAL·PSP·CF·BP를 빌드하거나 실행하지 않았고, 설치도 하지 않았다. 아래의 모든 "빌드 계획"과 "보류 설계"는 계획이며 수행된 결과가 아니다.
 - 입력 결정: [PI_DECISIONS_RESOLVED_20261015.md](../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md) §3.2(D22), §3.3(P-C1HOLD), §2(T1·QT-3·D1·D14), §4(D15·D19). 이 문서는 그 결정을 **결정으로** 적용한다. 결정문의 표현을 사실로 인용하지 않는다.
 - 개정: 2026-10-15 검토 11건을 반영했다(처리 결과는 §14). 검토 반영으로 바뀐 판단은 D22의 적용 순서(§8.0), bplib 고정 커밋과 단위 시험 플래그(§4.3, DV-13), readiness precondition의 정의(§1.2), 해제 규칙 R-c의 삭제(§9.2), 섭동 비율의 비교 간격(§9.5)이다.
 - 개정 2(2026-10-16): 명세 인용 기준을 커밋된 rev 1.2(`6be8935`)로 옮기고, 그 판의 App. A.4 step 3(QT-4·Q15 엄격 대안: `caller` 기록이 있어야 TOLERATED)과 §4.13 "Attach strategy"를 §9에 반영했다. 소스를 다시 읽어 BP `AppInit`의 조기 반환 경로(생성 호출 전에 provider가 스스로 실패하는 경우, §5.4, §9.1 P-E)와 OSAL 내부의 이름 공개·id 확정 사건(§9.1 P-2a~P-2c)을 더했고, CI 후보 OSAL에서 확정이 반환보다 앞선다는 점을 확인했다(§1.2). 변경 목록은 §15.
-- 입력 계획: [ROADMAP_20261015.md](ROADMAP_20261015.md) §3(정정 목록), §8(C1), §12(산출물). 로드맵의 `[제안]`·`[분석]` 항목은 제안·분석으로만 다룬다.
+- 개정 3(2026-10-16): 검토 11건을 반영했다(§16). 바뀐 판단은 *readiness violation*을 VIOLATING 시도에만 쓰는 것(§9.3), `833fdbb`의 `caller` 기록 다시 묶기를 C1 출력 전의 선행 조건으로 둔 것(§9.3), 해제 규칙 R-d를 CF 종료로 줄인 것(§9.2, Q-10), 앞 채널 실패로 조회가 없는 키의 결과 "도달하지 않음"(§9.2, §9.3), BP 자신의 조회 호출 지점을 별개 인스턴스로 둔 것(§9.3, Q-11), 로드맵 `[제안]`과 결정의 출처 구분(§1.3 등)이다.
+- 입력 계획: [ROADMAP_20261015.md](ROADMAP_20261015.md) §3(정정 목록), §8(C1), §12(산출물). 로드맵 §1.1에 따라 작업 지시·완료 기준·순서는 모두 `[제안]`이다. 이 문서는 로드맵의 `[제안]`·`[분석]` 항목을 제안·분석으로만 다루며, 그것을 근거로 "이미 정해졌다"고 쓰지 않는다. 결정의 출처는 결정문과 명세의 [D]뿐이다.
 - 규칙: [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md) — 값은 레퍼런스에서 가져오고, 레퍼런스가 정하지 않는 값은 `unspecified_by_reference`로 둔다. 이 문서에는 임의로 고른 N·임계값·대기 상한·일정 수치가 없다.
 - 이 문서가 건드리지 않는 것: `kairos/`와 소스 코드, 동결된 이력 문서, `env/`의 기존 기록, `/home/user/work/procrace/cfs_ref`(읽기만 했다).
 
@@ -15,9 +16,9 @@
 2. **BP CI가 가리키는 참조는 대부분 움직이는 참조이다**(§4). cFS `main`, bplib `main`, CF `main` 또는 삭제된 브랜치, 합쳐 넣는 PSP 브랜치, 러너 이미지, `actions/*@v3`. 이 중 일부는 오늘 값을 읽어 **BP 고정 커밋과 맞지 않음을 확인했다**: bplib `main`의 오늘 값(`c5fb835`)에는 BP가 쓰는 bplib 식별자 30개 중 26개가 없다. 따라서 "워크플로를 그대로 다시 돌린다"는 재현이 아니다. 또 bplib `main`은 창의 끝(2022-11-30 20:14:16Z)에 `e7524239`로 옮겨 갔고, 이 커밋의 메시지는 CFS 빌드에서 bplib의 `ut-functional`이 "링크되지 않는다"는 빌드 오류를 고친다고 적는다(§4.3). ENV의 `-DENABLE_UNIT_TESTS=TRUE`는 `d4c6db9`의 CMake 분기에서 바로 그 `ut-functional`을 추가하게 만든다 [F, 소스 읽기]. 그 빌드가 실패하리라는 것은 커밋 메시지에 근거한 추론이며 [I] 빌드로 확인하지 않았다.
 3. **BP 워크플로 두 개가 D22의 수정 전후 쌍을 그대로 정의한다**(§4.1): 수동 실행 워크플로는 `nasa/cf` `main`(2022-12-01 19:35Z까지 `281a941`), PR 워크플로는 `jphickey/cf@fix-184-throttle-sem-race`(`833fdbb`로 추정)를 쓴다. 이것은 워크플로 파일의 사실([F])과 시점별 해석([I])이며, 어느 쪽이 실제로 실패했는지의 로그는 없다.
 4. **CF `281a941`과 `833fdbb`는 BP 표 형식과 필드 순서까지 일치한다**(§5). 두 버전의 차이는 3개 파일(재시도 루프, 상수 2개, 단위 시험)이고 `cf_app.c`·`cf_tbldefs.h`·`cf_def_config.c`는 바이트 단위로 같다. 반면 원 보고자의 `2a024d8`은 표 구조(타이머 위치, 헤더 위치, 필드 순서)가 달라 BP 표와 섞을 수 없다. 재시도 상수는 `833fdbb`와 v7.0.1 모두 소스에서 25회·100 ms를 읽었고 `281a941`에는 재시도가 없다.
-5. **D22의 적용 순서는 "공개 통합 구성의 버전 호환성 확인이 먼저"이다**(결정문 §3.2). 이 문서의 정적 대조(§5.3)는 공개 통합 스택(CI 후보)에서 **이름 수준**으로 맞는다는 것만 보였고 조립·기동은 하지 않았다. 따라서 ENV 번들(v7.0.1)로 옮기는 계획(§8.3의 B0–B8)은 **둘째 단계**이다: 첫째 단계 P-REC(공개 통합 구성의 조립·기동, §8.5)가 그대로 구성되지 않는다고 기록된 뒤에만, 또는 PI가 이 순서에 대한 예외를 승인한 뒤에만 시작한다(§12 Q-5). 그 전에는 ENV 이식을 D22의 기준 구성이라고 부르지 않는다. 이식을 하게 되면 CF는 `CFS_APP_PATH` 앞순위로 교체할 수 있지만, BP는 (a) 메시지 ID 기준 매크로 2개, (b) PSP `iodriver`의 이름·구조체 필드 변경(8개 이름은 대소문자 변경 수준, `Location_t` 필드는 다름), (c) ENV PSP에 없는 `unsock_intf` 모듈, (d) BP CI가 복사하는 cFE 샘플 설정 파일 이름 변경을 만나며, ENV의 단위 시험 플래그 `-DENABLE_UNIT_TESTS=TRUE`는 고정 bplib `d4c6db9`에서 bplib 자신의 커밋 메시지가 말하는 빌드 오류 경로를 여는 것으로 읽힌다(§4.3, DV-13, [I]). 모든 차이를 이탈 대장(§8.4)에 적었다. 로드맵 §8.1은 "다른 버전에서 구성하면 공개 코드 기반 파생 실험이라고 표시한다"고 정하므로, 이식이 시작되면 그 표시를 붙인다.
-6. **P-C1HOLD는 사건 기반으로 설계했고 대기 상한 값은 정하지 않았다**(§9). 보류 지점은 provider의 `OS_CountSemCreate(name)` 진입 직전, 해제는 CF의 재시도 종료(C-4) 또는 최종 초기화 결과(C-6) 사건이다. A1–A5는 관측 사건 열로 대응시켰다. A2는 자연 실행에서만 얻는 것으로 둔다(결정 범위 밖의 "제어된 A2"는 Q-9로 올렸다). 중단 조건·감시 한도는 파일럿 값으로 남겼다. 개정 2에서 시도 분류를 명세 rev 1.2에 맞췄다: TOLERATED는 CF의 시작 경쟁 인정 주석이라는 `caller` 기록이 있을 때만 나오며, 그 주석은 `833fdbb`의 `cf_cfdp.c` L993–L999에 있으나 명세는 v7.0.1의 줄만 인용한다(§9.3, §9.6). 또 provider가 생성 호출 전에 스스로 실패하는 경로(`bplib_init` 등, §5.4)를 P-E로 관측해 A3와 섞지 않는다.
-7. 여전히 `unspecified_by_reference`인 조건은 §10에 모았다. 가장 큰 것은 provider 구현 방식(§8.2의 PI 결정 필요 항목), D22 순서의 첫 단계 처리(Q-5), bplib 고정 커밋과 단위 시험 플래그의 조합(Q-4), 원 보고자·BP CI 당시의 전체 버전 조합이다.
+5. **D22의 적용 순서는 "공개 통합 구성의 버전 호환성 확인이 먼저"이다**(결정문 §3.2). 이 문서의 정적 대조(§5.3)는 공개 통합 스택(CI 후보)에서 **이름 수준**으로 맞는다는 것만 보였고 조립·기동은 하지 않았다. 따라서 ENV 번들(v7.0.1)로 옮기는 계획(§8.3의 B0–B8)은 **둘째 단계**이다: 첫째 단계 P-REC(공개 통합 구성의 조립·기동, §8.5)가 그대로 구성되지 않는다고 기록된 뒤에만, 또는 PI가 이 순서에 대한 예외를 승인한 뒤에만 시작한다(§12 Q-5). 그 전에는 ENV 이식을 D22의 기준 구성이라고 부르지 않는다. 이식을 하게 되면 CF는 `CFS_APP_PATH` 앞순위로 교체할 수 있지만, BP는 (a) 메시지 ID 기준 매크로 2개, (b) PSP `iodriver`의 이름·구조체 필드 변경(8개 이름은 대소문자 변경 수준, `Location_t` 필드는 다름), (c) ENV PSP에 없는 `unsock_intf` 모듈, (d) BP CI가 복사하는 cFE 샘플 설정 파일 이름 변경을 만나며, ENV의 단위 시험 플래그 `-DENABLE_UNIT_TESTS=TRUE`는 고정 bplib `d4c6db9`에서 bplib 자신의 커밋 메시지가 말하는 빌드 오류 경로를 여는 것으로 읽힌다(§4.3, DV-13, [I]). 모든 차이를 이탈 대장(§8.4)에 적었다. 결정문 §3.2의 적용 순서("그대로 구성할 수 없으면 다른 버전으로 옮긴 차이를 기록한다")와 명세 App. A.4 step 2("the move to other versions … is a derived basis, and every difference from the public values is recorded as a `deviation`")에 따라 [D], 이식이 시작되면 그 구성을 공개 코드 기반 파생 구성으로 표시한다. 로드맵 §8.1도 같은 표시를 `[제안]`한다.
+6. **P-C1HOLD는 사건 기반으로 설계했고 대기 상한 값은 정하지 않았다**(§9). 보류 지점은 provider의 `OS_CountSemCreate(name)` 진입 직전, 해제는 CF의 재시도 종료(C-4) 또는 최종 초기화 결과(C-6) 사건이다. A1–A5는 관측 사건 열로 대응시켰다. A2는 자연 실행에서만 얻는 것으로 둔다(결정 범위 밖의 "제어된 A2"는 Q-9로 올렸다). 중단 조건·감시 한도는 파일럿 값으로 남겼다. 개정 2에서 시도 분류를 명세 rev 1.2에 맞췄다: TOLERATED는 CF의 시작 경쟁 인정 주석이라는 `caller` 기록이 있을 때만 나오며, 그 주석은 `833fdbb`의 `cf_cfdp.c` L993–L999에 있으나 명세는 v7.0.1의 줄만 인용한다(§9.3, §9.6). 개정 3에서 그 기록을 `833fdbb`에 다시 묶는 anchor audit 항목을 **C1의 첫 출력 전 선행 조건**으로 두었다(그래야 A2의 앞선 시도가 좋은 쪽이다). *readiness violation*은 VIOLATING 시도에만 쓴다(명세 §0, §0.11 item 2). 해제 사건은 결정된 두 사건과 그것을 함의하는 CF 종료(C-7)만 쓰고, "다른 쪽이 막힘"에서의 해제는 Q-10으로 올렸다. 또 provider가 생성 호출 전에 스스로 실패하는 경로(`bplib_init` 등, §5.4)를 P-E로 관측해 A3와 섞지 않는다.
+7. 여전히 `unspecified_by_reference`인 조건은 §10에 모았다. 가장 큰 것은 provider 구현 방식(§8.2의 PI 결정 필요 항목), D22 순서의 첫 단계 처리(Q-5), bplib 고정 커밋과 단위 시험 플래그의 조합(Q-4), 원 보고자·BP CI 당시의 전체 버전 조합이다. C1 기대 결과표를 동결하기 전에 필요한 것은 G-REBIND(§9.3, C1B-U21)와 BP 호출 지점의 기대 상태(Q-11, C1B-U23)이다. 해제 규칙에서 "다른 쪽이 막힘"을 쓸지는 Q-10이다.
 
 ## 1. 범위·표기·용어
 
@@ -35,10 +36,10 @@
 
 ### 1.2 용어(T1 = (a))
 
-- 판정 대상의 이름은 **readiness specification(준비 상태 명세)**, 선행 조건은 **readiness precondition**, 위반은 **readiness violation**이다.
+- 판정 대상의 이름은 **readiness specification(준비 상태 명세)**, 선행 조건은 **readiness precondition**, 위반은 **readiness violation**이다. *readiness violation*은 **VIOLATING 시도**, 곧 caller 수준 Allowed가 거부한 범위 안의 시도에만 쓴다 [D: SPEC_FINAL @`6be8935` §0 "An in-scope occurrence rejected by the caller-level Allowed is a readiness violation", §0.11 item 2 "a `VIOLATING` occurrence is a readiness violation"]. NOT_READY_UNJUDGED 시도는 나쁜 쪽이지만(명세 §1.6의 bad 정의) Allowed가 거부한 것이 아니므로 readiness violation이라고 부르지 않는다. 그 결과 라벨은 `not-ready-unjudged`이다(명세 §1.10 "Outcome label").
 - **원출처의 말**[F]: 이슈 #184 본문 "the CF app expects that semaphore to be created _before_ it starts"; CF 문서(`2a024d8`의 `docs/cf_guide.md` L48–L57) "If a semaphore is expected and not found, the application will terminate during initialization". 저장소 기록 [cases/C1.md](../cases/C1.md) F1·F4가 인용한다. 두 출처 모두 "provider의 생성 호출이 반환했는가"를 말하지 않는다.
 - **C1의 readiness precondition**(연구자의 형식화, 원출처의 인용이 아니다) [I/D]: *CF의 `OS_CountSemGetIdByName(sem_name)`이 효력을 갖는 시점(조회의 선형화 시점, 객체 표 훑기)에, 이름 `sem_name`의 counting semaphore가 존재할 것 — 곧 그 id가 확정되어 이름으로 보일 것.* 이것은 명세 §2.3의 `K-REG.osal-countsem-lookup` 블록의 `requires state(osal.obj<countsem>(arg.name)) = LIVE`와 같은 대상이다 [D: SPEC_FINAL rev 1.2 @`6be8935` §2.3의 `readiness K-REG.osal-countsem-lookup` 블록. rev 1.1 @`2499ad4`에서는 같은 블록의 키워드가 `contract`였다]. 판정은 **객체 존재**에 대한 것이며 `OS_CountSemCreate`의 **반환 시점**에 대한 것이 아니다: ENV OSAL에서 id 확정(`OS_ObjectIdFinalizeNew` 안의 `OS_ObjectIdTransactionFinish`, `osapi-idmap.c` L859)은 `OS_CountSemCreate`가 반환하기 전에 일어나므로(`osapi-countsem.c`: `OS_ObjectIdFinalizeNew` 호출 L106, 반환 L109), 조회가 생성 호출의 반환보다 먼저 시작해도 확정 뒤에 표를 훑으면 성공한다 [F, ENV OSAL 읽기]. CI 후보 OSAL `b44f4ce`·`f34759d`도 같은 구조이다: `osapi-countsem.c`의 `OS_ObjectIdAllocateNew` L94, `OS_OBJECT_INIT` L100, `OS_CountSemCreate_Impl` L103, `OS_ObjectIdFinalizeNew` L106, `osapi-idmap.c`의 `OS_ObjectIdTransactionFinish(token, &final_id)` L849, 그리고 `OS_ObjectIdConvertToken` 함수 본문은 ENV와 글자 단위로 같다 [F/M, 2026-10-16 `grep`·`diff`]. 저장소 기록 `cases/C1.md` §7이 쓰는 "생성이 반환한 뒤"는 이 형식화보다 강한 서술이며, 반환은 존재의 충분조건이지 필요조건이 아니다 [I]. 확정 전 RESERVED 구간에서의 조회는 별개의 가설 사례이다(A5, `cases/C1.md` §7 Refinement).
-- 이 정의 아래에서 **판정 열은 반환 코드에서 채우지 않는다**(QT-3). 어떤 조회 시도가 precondition을 만족했는지는 id 확정 사건과 그 조회의 선형화 시점의 순서로 정하고, 확정 사건을 직접 관측하지 못하면 "`OS_SUCCESS`와 같은 id가 반환됐다"를 *결과에서 함의되는 reads-from*으로만 쓴다(명세 App. A.4 step 2의 "outcome-implied reads-from") [D]. 시도 하나의 분류는 명세 App. A.4 step 3·6의 어휘를 따른다: READY, TOLERATED, VIOLATING, NOT_READY_UNJUDGED(§9.3). rev 1.2의 QT-4 엄격 대안에 따라 TOLERATED는 `caller` 기록(CF 자신의 시작 경쟁 인정 주석, `code_admission`)이 있는 판에서만 나온다(명세 §2.3 "Caller-level Allowed", App. A.4 step 3) [D].
+- 이 정의 아래에서 **판정 열은 반환 코드에서 채우지 않는다**(QT-3). 어떤 조회 시도가 precondition을 만족했는지는 id 확정 사건과 그 조회의 선형화 시점의 순서로 정하고, 확정 사건을 직접 관측하지 못하면 "`OS_SUCCESS`와 같은 id가 반환됐다"를 *결과에서 함의되는 reads-from*으로만 쓴다(명세 App. A.4 step 2의 "outcome-implied reads-from") [D]. 시도 하나의 분류는 명세 App. A.4 step 3·6의 어휘를 따른다: READY, TOLERATED, VIOLATING, NOT_READY_UNJUDGED(§9.3). rev 1.2의 QT-4 엄격 대안에 따라 TOLERATED는 `caller` 기록(CF 자신의 시작 경쟁 인정 주석, `code_admission`)이 있는 판에서만 나온다(명세 §1.6 "Caller-level Allowed", App. A.4 step 3; 기록 자체는 §2.3의 블록) [D].
 - "API contract"라는 말은 **문서화된 API 의미**에만 쓴다. 예: OSAL의 `OS_CountSemGetIdByName`은 이름이 없으면 `OS_ERR_NAME_NOT_FOUND`를 반환한다고 문서에 적혀 있다(ENV OSAL `osapi-countsem.h` L157–L160 [F]).
 - QT-3에 따라 세 층을 섞지 않는다: (1) 프레임워크 문서·실제 API 동작(OSAL 반환값), (2) 호출자 요구(CF의 readiness precondition), (3) 관측 결과. 이 문서의 A1–A5 대응표(§9.3)는 세 층을 열로 분리한다.
 
@@ -48,13 +49,15 @@
 
 | 항목 | 남은 곳 | PI 질문인가 |
 |---|---|---|
-| 원 보고자 환경의 재현 | 로드맵 §8.1이 "원 보고자의 provider·전체 실행 환경과 같다는 주장은 하지 않는다"고 정했다. 값은 C1B-U01·U03·U04에 `unspecified_by_reference`로 남는다 | 아니오(재현을 시도하자는 제안이 없다) |
+| 원 보고자 환경의 재현 | 결정문 §3.2가 공개 구성의 값과 원 보고자 환경의 값을 구분하고, "원 보고자가 사용한 provider와 해당 공개 BP 구성의 동일성"을 확정되지 않은 조건으로 남겼다 [D]. 명세 App. A.4 step 2도 BP 값을 "not as values of the original reporter's environment"로 적는다 [D]. 로드맵 §8.1의 "같다는 주장은 하지 않는다"는 `[제안]`이며 같은 방향이다. 값은 C1B-U01·U03·U04에 `unspecified_by_reference`로 남는다 | 아니오(재현을 시도하자는 결정이나 제안이 없다) |
 | provider 구현 방식(B-1~B-4) | §8.2, §12 Q-2 | 예 |
 | D22 순서의 첫 단계(P-REC 또는 대체) | §8.0, §8.5, §12 Q-5 | 예 |
 | bplib 고정 커밋과 단위 시험 플래그 | §4.3, DV-13, §12 Q-4 | 예 |
 | 실행 횟수 N | D14: S1에서 목적별로 정하고 본실험 전에 동결한다. §9.4 PV-4, C1B-U07 | 아니오(결정문이 시점과 방법을 이미 정했다) |
 | 보류 감시 한도·중단 조건 | P-C1HOLD: 파일럿 값. §9.4 PV-1~PV-3, C1B-U06 | 아니오(같음) |
-| A4를 사례 결과로 셀지 | 로드맵 §8.3과 결정문 §3.3이 "단위 예제로 검증하고 실제 사례 결과로 세지 않음"으로 이미 정했다. §9.3 A4 행, C1B-U12 | 아니오 |
+| A4를 사례 결과로 셀지 | 명세 SPEC_FINAL @`6be8935` App. A.4 step 6 [D]: "**no referenced basis exists** … A4 is shown by litmus L-PATIENT variant 2 and LP-CASE-C1 (App. A.8) with the provider never running, or recorded as 'not realized: no referenced configuration'; only on a provider-less basis that the PI sets as a recorded deviation is it realized". 로드맵 §8.3의 A4 행("단위 예제로 검증하고 실제 사례 결과로 세지 않음")은 `[제안]`이다. 결정문 §3.3은 A4를 다루지 않는다. §9.3 A4 행, C1B-U12 | 아니오(실현하려면 PI가 provider 없는 구성을 이탈로 정해야 하며, 이 문서는 그것을 요청하지 않는다) |
+| BP 자신의 조회 호출 지점(P-1)의 분류 | §9.3 "BP 호출 지점의 인스턴스", Q-11 | 예(anchor audit가 정하지 못하면) |
+| "다른 쪽이 막힘"에서의 해제 | §9.2 R-d, Q-10 | 예 |
 | "제어된 A2"(R-c) | 결정 범위 밖의 제안이다. §9.2.1, §12 Q-9 | 예 |
 
 ## 2. 점검에 쓴 소스 사본
@@ -397,7 +400,7 @@ ES의 앱 생성은 줄 순서이며 앱 사이에 대기가 없다: `CFE_ES_Sta
 | P0 | 공개 통합 구성의 버전 호환성 확인. 수행 방식(P-REC 조립·기동, 또는 PI가 승인한 대체)은 Q-5 | §8.5 | 정적 이름 대조(§5.3)만 했다. 조립은 하지 않았다. 대체의 승인은 없다 |
 | B0–B8 | ENV 번들(v7.0.1) 위의 이식 빌드 | §8.3 | **P0 결과가 "그대로 구성되지 않음"으로 기록된 뒤에만** 시작한다. 또는 PI가 이 순서에 대한 예외를 승인한 뒤에(Q-5) |
 
-두 갈래 중 어느 쪽이든 ENV 이식은 **D22의 기준 구성이 아니다**. P0이 성공하면 P0의 구성이 공개 통합 기준이고 ENV 이식은 그와 비교하는 파생이다. P0이 실패하면(실패 지점·요구·레퍼런스 기록) ENV 이식이 "다른 버전으로 옮긴" 구성이며 로드맵 §8.1에 따라 공개 코드 기반 파생 실험으로 표시한다. PI가 예외를 승인하는 경우는 승인 사실과 그 이유를 이탈 대장에 한 줄로 더한다(DV-00).
+두 갈래 중 어느 쪽이든 ENV 이식은 **D22의 기준 구성이 아니다**. P0이 성공하면 P0의 구성이 공개 통합 기준이고 ENV 이식은 그와 비교하는 파생이다. P0이 실패하면(실패 지점·요구·레퍼런스 기록) ENV 이식이 "다른 버전으로 옮긴" 구성이며, 결정문 §3.2의 적용 순서와 명세 App. A.4 step 2("is a derived basis") [D]에 따라 공개 코드 기반 파생 구성으로 표시한다(로드맵 §8.1의 `[제안]`과 같은 표시). PI가 예외를 승인하는 경우는 승인 사실과 그 이유를 이탈 대장에 한 줄로 더한다(DV-00).
 
 §8.3의 단계표는 B0 앞에 P0 행을 둔다.
 
@@ -418,7 +421,7 @@ ES의 앱 생성은 줄 순서이며 앱 사이에 대기가 없다: `CFE_ES_Sta
 
 서브모듈 전체 목록(25개)은 ENV의 CONDITIONS.md가 기록한다. 위 값은 `cfs_ref/cFS`에서 `git submodule status`로 다시 읽은 것이다(읽기 전용).
 
-호스트(이번 점검에서 읽음) [M]: Ubuntu 24.04.4, gcc 13.3.0, cmake 3.28.3, CPU 4개, `pkg-config tinycbor` 없음, 사용자는 root(`id -u`=0). ENV 빌드는 일반 사용자(`ubuntu`)로 수행했고 root의 우선순위·큐 동작 차이는 ENV.md D-4가 기록한다.
+호스트(이번 점검에서 읽음) [M]: Ubuntu 24.04.4, gcc 13.3.0, cmake 3.28.3, CPU 4개, `pkg-config tinycbor` 없음, 사용자는 root(`id -u`=0). ENV 빌드는 일반 사용자(`ubuntu`)로 수행했고 root의 우선순위·큐 동작 차이는 [env/CONDITIONS.md](../env/CONDITIONS.md)의 D-4 행(L123)이 기록한다(ENV.md는 L16·L296에서 그 행을 가리킨다).
 
 ### 8.2 바뀌는 구성요소
 
@@ -452,10 +455,10 @@ C1의 A1–A3(§9)는 초기화 시점의 생성·조회 관계만 필요로 하
 | **P0** | **D22 순서의 첫 단계**(§8.0, §8.5). Q-5에 따라 P-REC(공개 통합 구성의 조립·기동) 또는 PI가 승인한 대체를 수행한다. 아래 B0–B8은 P0의 결과가 "그대로 구성되지 않음"으로 기록되었거나 PI가 예외를 승인한 뒤에 시작한다 | P-REC의 조립·기동 기록 또는 실패 지점(요구와 레퍼런스). 대체이면 PI 승인의 출처 |
 | B0 | 호스트·환경변수·도구 버전 기록. `build_cfs.sh`의 거부 목록(`REFUSED_VARS`, L142–L146)을 파생 빌드에 적용했을 때 **걸리는 변수를 명시한다**: 파생 빌드는 `CFS_APP_PATH`를 설정하므로(DV-16) 이 점검에 걸린다. `ENABLE_UNIT_TESTS`·`MISSIONCONFIG`·`SIMULATION`은 ENV와 같이 환경변수가 아닌 `-D` 옵션으로만 준다. 나머지 거부 변수는 설정하지 않는다. `cfs_ref` 트리 해시를 작업 전·후에 기록해 변경 없음을 확인 | 호스트 기록, 거부 목록 중 설정한 변수와 설정한 방식(환경변수 또는 동등한 캐시 항목), `cfs_ref` 전후 해시 |
 | B1 | 새 작업 공간에 번들 `088b2fa`를 클론하고 서브모듈을 ENV와 같은 SHA로 맞춘다 | `git submodule status` 전체와 ENV 목록과의 `diff`가 비어 있음 |
-| B2 | `CFS_APP_PATH` 디렉터리 두 개(`pre`, `post`)를 만든다. 각각 `cf`(`281a941`/`833fdbb`), `bp`(`b051eb0`+필요 시 이식 패치), `bplib`(Q-4가 정하는 커밋. 결정 전 기본은 `d4c6db9`). 두 디렉터리의 차이는 `cf`뿐이어야 한다 | `diff -r`로 `pre`와 `post`의 차이가 §7.2의 3개 파일 패치와 같음 |
+| B2 | `CFS_APP_PATH` 디렉터리 두 개(`pre`, `post`)를 만든다. 각각 `cf`(`281a941`/`833fdbb`), `bp`(`b051eb0`+필요 시 이식 패치), `bplib`(커밋은 `unspecified_by_reference`: 후보 `d4c6db9`·`e7524239` 중 Q-4가 정한다. **Q-4 전에는 B2를 시작하지 않는다**). 두 디렉터리의 차이는 `cf`뿐이어야 한다 | `diff -r`로 `pre`와 `post`의 차이가 §7.2의 3개 파일 패치와 같음 |
 | B3 | tinycbor `v0.6.0`을 사용자 영역에 빌드·설치(일반 사용자 권한, `/` 미사용) | 설치 파일 해시, `pkg-config` 출력 |
 | B4 | 파생 `MISSION_DEFS` 작성: `sample_defs` 복사본을 바탕으로 §8.4의 DV 항목을 적용한 파일만 덮어쓴다. **원본 `sample_defs`는 수정하지 않는다** | 덮어쓴 파일 목록과 각 파일의 `diff` |
-| B5 | `cmake` 구성을 두 번 수행(`pre`, `post`). ENV와 같은 플래그를 유지하되 차이는 DV로 기록한다. **단위 시험 플래그의 기본은 "끔"이다**: `-DENABLE_UNIT_TESTS=TRUE`를 주지 않는다. 근거는 BP CI의 cmake 호출이 이 변수를 지정하지 않는다는 사실(`build-run-bp-common.yml` L127)과, ENV 플래그와 고정 bplib `d4c6db9`의 조합이 빌드 실패로 기대된다는 추론(§4.3)이다. 이것은 ENV 기준에서의 **기록된 이탈**이다(DV-13). Q-4에서 PI가 "켬 + `e7524239`" 등을 고르면 그에 따른다 | 두 구성의 `CMakeCache.txt` `diff` — 차이가 `CFS_APP_PATH` 하나여야 함. `ENABLE_UNIT_TESTS`의 값과 bplib 커밋을 기록 |
+| B5 | `cmake` 구성을 두 번 수행(`pre`, `post`). ENV와 같은 플래그를 유지하되 차이는 DV로 기록한다. **단위 시험 플래그의 기본은 "끔"이다**: `-DENABLE_UNIT_TESTS=TRUE`를 주지 않는다. 근거는 BP CI의 cmake 호출이 이 변수를 지정하지 않는다는 사실(`build-run-bp-common.yml` L127)과, ENV 플래그와 고정 bplib `d4c6db9`의 조합이 빌드 실패로 기대된다는 추론(§4.3)이다. 이것은 ENV 기준에서의 **기록된 이탈**이다(DV-13). Q-4에서 PI가 "켬 + `e7524239`" 등을 고르면 그에 따른다 | 두 구성의 `CMakeCache.txt`를 **정규화해** 비교한다: 각 캐시에서 자기 빌드 디렉터리의 절대 경로를 `<BUILD>`로, 자기 `CFS_APP_PATH` 디렉터리의 절대 경로를 `<APPS>`로 바꾼 뒤 `diff`가 비어야 한다. 정규화 전에는 경로 항목이 달라지는 것이 정상이다: 빌드 디렉터리를 값으로 갖는 항목(ENV 캐시에서 주석 줄을 빼고 18개: 예 `CMAKE_CACHEFILE_DIR` L488, `MISSION_BINARY_DIR` L310, `CFE_BINARY_DIR` L27, `OSAL_BINARY_DIR` L331, `*_DOCS_BINARY_DIR`, `CMAKE_FIND_PACKAGE_REDIRECTS_DIR` L123), `CFS_APP_PATH` 자체, 앱 소스 경로를 값으로 갖는 항목(ENV 캐시의 예 `CF_DOCS_SOURCE_DIR` L60) [M: ENV `build-native_std/CMakeCache.txt`를 `grep`, 2026-10-16]. 파생 빌드에 어떤 항목이 생길지는 구성 전에는 모른다 [U]. 정규화 뒤 남는 차이는 모두 설명하고 기록한다. `ENABLE_UNIT_TESTS`의 값과 bplib 커밋을 기록 |
 | B6 | 설치 후 산출물 해시: `core-*`, `cf.so`, `bp.so`, `bplib.so`, 표 파일(`cf_def_config.tbl` 등), 시작 스크립트 | 해시표. `pre`/`post`에서 `cf.so`와 `cf_def_config.tbl`(같아야 함) 외의 차이 설명 |
 | B7 | 관측 없이 기본 기동: ES POWERON 재시작으로 종료하는 ENV의 절차로 "OPERATIONAL" 도달과 CF·BP의 초기화 이벤트(CF 20 또는 30, BP 14 또는 15)를 콘솔 기록에서 확인. **BP의 이벤트 15는 두 가지 문구를 가진다**("Found semaphore: %s", "Created semaphore: %s"; `bp_flow.c` L129–L130, L135). 생성의 증거는 이벤트 ID가 아니라 문구와 P-3(§9.1)으로 가른다. **BP의 표준 오류도 함께 남긴다**: `bplib_init failed`·`bplib_route_alloc_table failed`(P-E, §5.4)가 있으면 provider는 생성 호출 전에 끝났으며 그 기동은 C1 조건 확인이 아니라 구성 오류로 기록한다 | 콘솔 기록 원본. 이 단계는 *조건 확인*이며 빈도·확률 자료가 아니다 |
 | B8 | 음성 대조: ENV(`cfs_ref`)의 기존 빌드는 이름이 `""`이므로 경로 비활성 대조로 *그대로 인용*(재빌드하지 않음) | 기존 기록 경로 |
@@ -486,7 +489,7 @@ C1의 A1–A3(§9)는 초기화 시점의 생성·조회 관계만 필요로 하
 | DV-15 | 실행 사용자·스케줄링 | 일반 사용자, 우선순위 미적용 | 알 수 없음(§3.6) | ENV 고정 | root 실행·실시간 적용은 별도 조건으로만 |
 | DV-16 | **`CFS_APP_PATH`를 설정**(CF 교체와 BP·bplib 추가의 수단) | 설정하지 않음. CONDITIONS C4: `CFS_APP_PATH` 빈 값(`CMakeCache.txt` L42 `CFS_APP_PATH:STRING=`). `build_cfs.sh`는 이 환경변수가 설정돼 있으면 중단한다(`REFUSED_VARS` L142–L146, `check_env()` L147부터) | BP CI가 `CFS_APP_PATH: ${{ github.workspace }}/src`로 설정(`build-run-bp-common.yml` L45–L46) | 번들의 `apps/cf`보다 앞서 CF를 찾고 BP·bplib을 더하는 방법이 이 변수의 검색 순서이다(ENV cFE `mission_build.cmake` L380–L384, L397–L407). 대안(번들 서브모듈의 CF를 직접 바꾸기, 번들 트리에 앱 디렉터리 추가)은 번들 자체를 수정해 "서브모듈 SHA가 ENV와 같다"는 B1의 기록을 깨뜨린다 [I] | 이 변수는 CMake 캐시에 저장돼(`mission_build.cmake` L380–L382, `CACHE STRING`) 이후 재구성에도 남는다. 소스 선택 외에 컴파일 옵션을 바꾸지 않는다 [I, 소스 읽기]. ENV의 환경 점검(`check_env`)이 그대로는 이 빌드를 거부하므로 B0에서 어떤 거부 변수를 어떤 방식으로 설정하는지 기록한다 |
 
-DV-03, DV-11, DV-13은 레퍼런스가 결정하지 않으므로 값을 고르지 않았다(DV-13의 "끔"은 BP CI의 호출이라는 레퍼런스에서 가져온 값이며, ENV 플래그와의 충돌은 DV-13에 기록했다). 기본안이 필요하면 §12에 PI 결정으로 올린다.
+DV-03, DV-11, DV-13은 레퍼런스가 결정하지 않으므로 값을 고르지 않았다. DV-13의 "끔"은 BP CI의 호출이라는 레퍼런스에서 가져온 값이며, ENV 플래그와의 충돌은 DV-13에 기록했다. bplib 커밋은 고르지 않았다: `unspecified_by_reference`이며 Q-4가 정할 때까지 B2를 시작하지 않는다. 기본안이 필요하면 §12에 PI 결정으로 올린다.
 
 ### 8.5 P0 — P-REC: 공개 통합 구성을 그대로 재구성 (B0 앞의 첫 단계)
 
@@ -548,21 +551,23 @@ D22의 적용 순서("공개 통합 구성의 버전 호환성을 먼저 확인"
 
 **ES·시스템 쪽(부수 기록)**: ES의 `LATE_INIT`·`RUNNING` 대기와 시간 초과 로그(ENV `cfe_es_start.c` L210–L228), `OPERATIONAL` 진입 줄, 앱 상태. TO_LAB은 `CFE_ES_WaitForStartupSync(TO_LAB_STARTUP_SYNC_TIMEOUT)`(ENV `to_lab_app.c` L67)로 구독을 미루므로, BP를 보류하면 ES가 `OPERATIONAL`에 도달하는 시각이 늦어져 TO_LAB의 구독 시점이 달라진다 [I]. 이는 C1 변수가 아니라 **보류의 부수 효과**로 기록한다.
 
-로드맵 §8.2가 요구하는 세 시점과의 대응: "생성 시작" = P-2, "이름 공개" = P-2a, "객체 사용 가능" = P-2c [I: 대응은 이 문서의 해석]. P-2a~P-2c는 OSAL 공유 계층 안의 사건이므로 관측 방식(심볼 진입, 호출 지점 주소, 또는 P-3과 C-2에서 결과로 함의되는 순서만 사용)은 빌드 후 정한다 [U]. 이 셋을 직접 관측하지 못하면 §1.2에 따라 "같은 id의 `OS_SUCCESS`"를 결과로 함의되는 reads-from으로만 쓴다.
+로드맵 §8.2가 `[제안]`하는 세 시점과의 대응(명세 App. A.4 step 5의 "The normal path records the creation and lookup events directly"와 결정문 §3.3의 같은 문장 [D]이 이 기록의 결정된 근거이다): "생성 시작" = P-2, "이름 공개" = P-2a, "객체 사용 가능" = P-2c [I: 대응은 이 문서의 해석]. P-2a~P-2c는 OSAL 공유 계층 안의 사건이므로 관측 방식(심볼 진입, 호출 지점 주소, 또는 P-3과 C-2에서 결과로 함의되는 순서만 사용)은 빌드 후 정한다 [U]. 이 셋을 직접 관측하지 못하면 §1.2에 따라 "같은 id의 `OS_SUCCESS`"를 결과로 함의되는 reads-from으로만 쓴다.
 
-생성 세대 식별: P-3의 `osal_id_t`와 C-2의 반환 ID를 비교해 같은 객체인지 기록한다. 이름이 같아도 삭제·재생성된 객체를 같은 세대로 가정하지 않는다(로드맵 §8.2).
+생성 세대 식별: P-3의 `osal_id_t`와 C-2의 반환 ID를 비교해 같은 객체인지 기록한다. 이름이 같아도 삭제·재생성된 객체를 같은 세대로 가정하지 않는다(로드맵 §8.2의 `[제안]`; 명세 §1.6의 상태 정의는 "same generation"의 수명 사건만 센다 [D]).
 
 ### 9.2 보류·해제 규칙(키마다)
 
 - **키**는 semaphore 이름이다(`BP0_tsem`, `BP1_tsem`). A1–A5는 키별로 판정한다. 채널 0의 조회가 성공해도 채널 1은 다른 키이다.
+- **앞 채널의 실패는 뒤 채널의 조회를 없앤다** [F]. CF의 채널 루프(`cf_cfdp.c` L967)는 조회가 최종 실패하면 이벤트 30을 낸 뒤 `break`로 **루프 전체를 빠져나간다**(`281a941` L1000, `833fdbb` L1019; `833fdbb`의 L1008 `break`는 재시도 루프만 빠져나간다). 같은 채널의 파이프 생성·구독 실패도 `break`이다(L977, L988). 따라서 채널 0(`BP0_tsem`)이 A3로 끝나면 CF는 `BP1_tsem`에 대해 `OS_CountSemGetIdByName`을 **한 번도 부르지 않는다**(C-1 없음). provider 쪽도 같은 방향이다: BP는 한 스레드에서 이름 0, 이름 1 순서로 조회·생성한다(`bp_flow.c` L124–L142). 그래서 G(`BP0_tsem`)에서 보류하면 `BP1_tsem`의 생성도 함께 막힌다.
+- 이런 키의 결과는 **"도달하지 않음(앞 채널 실패, C-1 없음)"**으로 기록하고 A1–A4 어느 것으로도 세지 않는다. 명세의 말로는 그 실행에 그 키 인스턴스의 발생이 없으므로 좋은 증거도 나쁜 증거도 아니다 [I: 명세 §1.6의 instance·witness 정의에서]. 보류 실행 하나는 **한 키만** 시험한다: G(`BP0_tsem`) 보류 실행에서 `BP1_tsem`은 시험되지 않는다. `BP1_tsem`의 A3는 G(`BP1_tsem`)에서 보류하는 **별도 실행**(이름 0은 보류 없이 만들어짐)으로만 얻는다. 그 실행에서도 CF의 채널 0이 자연 순서로 실패하면 `BP1_tsem`은 다시 "도달하지 않음"이며, 그 실행은 `BP1_tsem`의 근거가 아니다.
 - **보류 지점 G(name)**: provider 스레드가 `OS_CountSemCreate`(P-2)를 `sem_name == name`으로 호출하기 **직전**. 이 지점은 provider가 OSAL 객체 표를 건드리기 전이므로 RESERVED 구간 *밖*이다(§9.3 A5와 구분). 구현에서 이 지점은 API 심볼 진입 + 인수 조건 또는 BP의 호출 지점 주소 중 하나로 잡을 수 있다. 심볼 진입 방식은 다른 호출자(예: SCH_LAB의 `OS_CountSemCreate`)의 호출도 걸리므로 인수 조건이 필요하다 [I]. P-1이 성공한 이름에서는 P-2가 일어나지 않으므로(§9.1) G(name)에 도달하지 않는다. 그 경우는 보류가 걸리지 않은 실행으로 기록한다.
 - **연결 방식**: provider(BP)의 주 스레드는 관측이 시작된 뒤에 ES가 만들므로, 보류 장치는 그 스레드를 만드는 쪽(ES 시작 스레드)에 clone 시 자동 연결해야 하고, 새 스레드는 생성 때 한 번 멈춘다. 이 정지는 앱 시작 창 안의 측정되지 않은 섭동이며, 이를 쓴 실행은 그 사실을 기록한다(SPEC_FINAL @`6be8935` §4.13 "Attach strategy", App. A.4 step 5) [D]. 정지 비용은 S6이 측정한다(명세). 이 문서는 값을 정하지 않는다.
 - **보류 가능성 조건**(SPEC_FINAL @`6be8935` §4.13 "Gate placement"의 항목 1·2·3·4: 보류 대상의 프로그램 잠금 집합이 비어 있을 것, 타임베이스 콜백·binsem 내부 구간·시그널 핸들러 밖일 것, RESERVED 구간 밖일 것(후속 OSAL 결함 후보 실험은 예외), 디버그 레지스터 할당이 가능할 것) [D: 명세의 규칙]. 이 지점이 그 조건을 만족하는지는 빌드 후 확인한다 [U].
 - **보류의 범위**: P-C1HOLD는 보류를 **실패 경로의 확인**에 한정한다(결정문 §3.3: "정상 경로는 생성·조회 사건을 직접 기록한다. 실패 경로 확인 시 provider를 생성 직전에 보류하고, CF의 재시도 종료 또는 최종 초기화 결과라는 사건을 기준으로 해제한다") [D]. 정상 경로(A1, A2)는 생성·조회 사건을 직접 기록하며 보류하지 않는다.
 - **해제 사건**(사건 기반, 값 없음). 결정된 해제 사건은 "CF의 재시도 종료 또는 최종 초기화 결과"이다.
-  - **R-a: C-4(재시도 종료)가 관측될 때.** 이것이 보류를 푸는 주된 규칙이다. C-4는 C-5(실패 이벤트)와 C-6(최종 초기화 결과)보다 앞서므로, **R-a는 C-5·C-6 이전에 provider를 푼다**. 따라서 보류로 만든 실행에서 provider의 생성 호출 진입(P-2)은 C-4 이후이며 C-6 이후가 아니다.
+  - **R-a: C-4(재시도 종료)가 관측될 때.** 이것이 보류를 푸는 주된 규칙이다. C-4는 C-5(실패 이벤트)와 C-6(최종 초기화 결과)보다 앞서므로, **R-a는 C-5·C-6 이전에 provider를 푼다**. 따라서 보류로 만든 실행에서 P-2는 C-4 이후이다. **P-2와 C-5·C-6 사이의 순서는 관측해 기록하며 가정하지 않는다**: `833fdbb`에서는 마지막 실패한 조회 뒤에도 `OS_TaskDelay`가 한 번 더 불리고(L1011) 이벤트 전송이 이어지며, 풀린 provider 스레드가 먼저 스케줄된다는 근거는 없다.
   - **R-b: C-6(최종 초기화 결과)이 관측될 때.** C-4를 사건 열에서 식별하지 못한 경우의 대비이다(둘 중 먼저 오는 사건에서 푼다).
-  - **R-d: 다른 쪽이 종료했거나 막힌 경우**(SPEC_FINAL §4.13 "Release"의 "when the other party is blocked or has exited") [D]. CF 종료는 C-7로 관측.
+  - **R-d: CF가 종료한 경우(C-7)에만.** `CF_AppMain`은 `CF_Init`이 반환한 **뒤에** `CFE_ES_RunLoop`을 거쳐 `CFE_ES_ExitApp`에 이른다(`cf_app.c` L330–L338, L366; `281a941`·`833fdbb` 같음 [M: `diff`]). 그러므로 시작 구간의 C-7은 CF의 최종 초기화 결과(`CF_Init`의 반환)가 이미 나왔음을 함의한다 [F]. `CF_Init`이 `CF_CFDP_InitEngine`(C-0) 전에 실패한 경우에도 그렇다(그때는 C-6이 없고 모든 키가 "도달하지 않음"이다). 그래서 R-d는 결정된 해제 사건(최종 초기화 결과)을 C-6으로 식별하지 못했을 때 알아보는 수단이며, 새 해제 사건이 아니다. 명세 §4.13 "Release"의 일반 규칙("when the other party is blocked or has exited") [D] 중 **"막힌 경우"는 쓰지 않는다**: 결정문 §3.3이 C1에 정한 해제 사건은 재시도 종료와 최종 초기화 결과 둘뿐이며, CF가 막혔다는 것은 그 어느 쪽도 아니다. 이것은 §9.2.1이 R-c를 쓰지 않는 이유와 같다. CF가 C-4 전에 막히면 감시 한도(PV-1)에 따라 `inconclusive(await-timeout)`이다. "막힘"에서의 해제를 C1에 쓸지는 PI 질문으로 올렸다(§12 Q-10).
 - 기다리는 사건이 오지 않을 때의 처리(감시 한도)는 값을 정하지 않고 §9.4에 둔다. 한도에 도달하면 결과는 `inconclusive(await-timeout)`이며 "교착"으로 부르지 않는다.
 - 구현 틀: 명세의 F0 `kz hold`(§4.13 "Mechanisms": `PTRACE_SEIZE`+실행 중단점 레지스터, 해당 스레드만 정지, 나중에 생성되는 스레드는 생성 시 자동 연결) [D: 명세의 설계]. 구현은 이 문서의 범위가 아니다.
 
@@ -578,25 +583,29 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 
 ### 9.3 A1–A5와 관측 사건의 대응
 
-로드맵 §8.3의 다섯 구간. 판정의 세 층(QT-3)을 열로 분리했다: **관측 사건 열**(층 3), **OSAL 반환**(층 1: 문서화된 API 의미), **readiness precondition과 시도 분류**(층 2: 호출자 요구, §1.2의 정의).
+로드맵 §8.3의 다섯 구간(그 표는 `[제안]`이다. 구간의 결정된 분류는 명세 App. A.4 step 6 "Outcome partition" [D]이다). 판정의 세 층(QT-3)을 열로 분리했다: **관측 사건 열**(층 3), **OSAL 반환**(층 1: 문서화된 API 의미), **readiness precondition과 시도 분류**(층 2: 호출자 요구, §1.2의 정의).
 
-층 2의 열은 OSAL 반환값을 베껴 채우지 않는다. 정의(§1.2)는 *조회의 선형화 시점에 객체가 존재하는가*이며, 시도의 분류는 SPEC_FINAL @`6be8935` App. A.4 step 3·6의 어휘를 따른다 [D]: **READY**(요구 충족), **TOLERATED**(요구 미충족이나 `caller` 기록이 있는 허용 항목 `retry_until_ready`가 받아들이는 시도; READY와 TOLERATED는 모두 좋은 쪽), **VIOLATING**(요구 미충족이고 허용 항목의 감시가 REJECT하는 시도), **NOT_READY_UNJUDGED**(요구 미충족인데 `caller` 기록이 없어 허용 여부를 판정하지 않는 시도; 명세 §0.1의 `Bad_i` 정의에서 VIOLATING과 함께 나쁜 쪽). *readiness violation*은 최종 실패로 끝난 나쁜 쪽 시도(A3·A4)에만 쓴다. A2의 앞선 실패 시도는 violation이 아니다.
+층 2의 열은 OSAL 반환값을 베껴 채우지 않는다. 정의(§1.2)는 *조회의 선형화 시점에 객체가 존재하는가*이며, 시도의 분류는 SPEC_FINAL @`6be8935` App. A.4 step 3·6의 어휘를 따른다 [D]: **READY**(요구 충족), **TOLERATED**(요구 미충족이나 `caller` 기록이 있는 허용 항목 `retry_until_ready`가 받아들이는 시도; READY와 TOLERATED는 모두 좋은 쪽), **VIOLATING**(요구 미충족이고 허용 항목의 감시가 REJECT하는 시도), **NOT_READY_UNJUDGED**(요구 미충족인데 `caller` 기록이 없어 허용 여부를 판정하지 않는 시도; 명세 §1.6의 bad 정의에서 "where Allowed is `unspecified_by_reference`" VIOLATING과 함께 나쁜 쪽). *readiness violation*은 **VIOLATING 시도에만** 쓴다(명세 §0, §0.11 item 2; §1.2). 나쁜 쪽은 두 가지로 적는다: **VIOLATING → readiness violation**, **NOT_READY_UNJUDGED → 나쁜 쪽, 판정되지 않음, readiness violation 아님**(결과 라벨 `not-ready-unjudged`). TOLERATED인 A2의 앞선 시도는 좋은 쪽이며 violation이 아니다.
 
-**`caller` 기록의 판별 [F/D].** rev 1.2의 QT-4 엄격 대안에서 TOLERATED는 `caller` 기록이 있을 때만 나온다(명세 §2.3 "Caller-level Allowed"). 명세 §2.3의 블록은 그 기록으로 CF 자신의 주석 "There is a start up race condition because CFE starts all apps at the same time …"(`code_admission`, side `caller`)을 ENV CF `15a871e`의 `cf_cfdp.c` L1272–L1278에서 인용한다. 같은 주석은 `833fdbb`의 `cf_cfdp.c` L993–L999에 있고(첫 문장 L994 [F, `grep`]), `281a941`·`2a024d8`에는 없다(재시도 루프 자체가 없다). 따라서 `833fdbb`에서 A2의 앞선 시도가 TOLERATED가 되려면 이 줄을 `833fdbb` 기준으로 다시 묶는 기록(명세의 anchor audit)이 필요하다 [D/U]. 다시 묶기 전에는 그 시도를 NOT_READY_UNJUDGED로 둔다.
+**`caller` 기록의 판별 [F/D].** rev 1.2의 QT-4 엄격 대안에서 TOLERATED는 `caller` 기록이 있을 때만 나온다(명세 §1.6 "Caller-level Allowed"). 명세 §2.3의 블록은 그 기록으로 CF 자신의 주석 "There is a start up race condition because CFE starts all apps at the same time …"(`code_admission`, side `caller`)을 ENV CF `15a871e`의 `cf_cfdp.c` L1272–L1278에서 인용한다. 같은 주석은 `833fdbb`의 `cf_cfdp.c` L993–L999에 있고(첫 문장 L994 [F, `grep`]), `281a941`·`2a024d8`에는 없다(재시도 루프 자체가 없다). 따라서 `833fdbb`에서 A2의 앞선 시도가 TOLERATED가 되려면 이 줄을 `833fdbb` 기준으로 다시 묶는 기록(명세의 anchor audit; App. A.4 step 6 "the line and the name are rebound per basis by the anchor audit")이 필요하다 [D/U].
+
+**선행 조건 G-REBIND(이 문서의 선택).** 다시 묶기 전에는 그 시도가 NOT_READY_UNJUDGED이고, 명세 §1.6에 따라 그런 시도를 가진 실행은 **나쁜 실행**이다. 그러면 자연 A2 실행은 순번 (CF, 1 … m−1)에서 나쁜 증거가 되어, 자연 A1 실행(같은 순번 (CF, 1)에서 좋은 증거)과 함께 명세 step 6의 같은 순번 조건을 이미 채운다. 이 상태로는 기대 결과표가 "A2 = 좋은 쪽"이라는 이 절의 서술과 맞지 않는다. 그래서 이 문서는 다음을 **선행 조건**으로 둔다: **anchor audit가 `833fdbb`의 `cf_cfdp.c` L993–L999를 K-REG.osal-countsem-lookup의 `code_admission caller` 기록으로 다시 묶은 기록이 있기 전에는 `833fdbb` 빌드의 C1 출력(S1·S2의 자연 상태 집계, 보류 실행의 판정)을 하나도 내지 않는다.** 이것은 결정문 §3.7(P-F1GATE)의 "기대 결과표는 해당 사례의 첫 출력 전에 동결한다"[D]를 지키기 위한 순서이다. 아래 표와 해석 규칙은 G-REBIND가 충족된 상태의 기대 결과이다. anchor audit가 다시 묶기를 **거부하면**(예: 그 줄이 같은 기록이 아니라고 판정하면), 첫 출력 전에 기대 결과표를 다음과 같이 다시 쓰고 동결한다: `833fdbb`의 A2 실행은 순번 1 … m−1에 NOT_READY_UNJUDGED(나쁜 쪽, readiness violation 아님) 시도를 가진 나쁜 실행으로 좋음·나쁨 짝짓기에 들어가며, A2를 "수정이 회복시킨 실행"이라고 부르지 않는다. 그 변경은 이 문서의 개정으로 기록한다. `281a941`에는 다시 묶을 주석이 없으므로 G-REBIND는 `833fdbb`에만 해당한다.
 
 | 구간 | 로드맵 정의 | 관측 사건 열(키별, 층 3) | OSAL 반환(층 1) | 시도 분류와 readiness precondition(층 2) | 필요한 보류 | `281a941` | `833fdbb` |
 |---|---|---|---|---|---|---|---|
 | **A1** 첫 조회 성공 | 첫 조회에서 성공 | C-1(k=1) → C-2(k=1)=`OS_SUCCESS`, 반환 ID = P-3의 ID(같은 생성 세대) → (모든 키) 이벤트 20. P-3과 C-1의 선후는 기록하되 판정에 쓰지 않는다 | `OS_SUCCESS` | (CF, 1) **READY**. 조회의 선형화 시점에 객체가 확정돼 있었다. 확정 사건을 직접 관측하지 못하면 이 사실은 "같은 id의 `OS_SUCCESS`"에서 결과로 함의된다(§1.2). 조회가 생성 호출의 반환보다 먼저 시작했어도 확정 뒤에 표를 훑었다면 READY이다 | 없음(자연). 자연 순서가 이 구간이 되는지는 관측으로만 안다 | ✓ | ✓ |
-| **A2** 먼저 실패, 재시도 성공 | 처음은 실패, 이후 재시도로 성공 | C-2(k=1)=`OS_ERR_NAME_NOT_FOUND` → C-3 → … → C-2(k=m, 2≤m≤R)=`OS_SUCCESS`, 반환 ID = P-3의 ID; 이벤트 20 | 처음 `OS_ERR_NAME_NOT_FOUND`, 이후 `OS_SUCCESS` | (CF, 1 … m−1) **미충족이나 TOLERATED**(`833fdbb` 기준으로 다시 묶은 `caller` 기록이 있을 때. 없으면 NOT_READY_UNJUDGED, 위 판별), (CF, m) **READY**. 끝에서는 요구가 충족되고 최종 실패가 없으므로 **readiness violation이 아니다** | **없음(자연 실행에서만)**. "제어된 A2"는 결정 범위 밖이다(§9.2.1, Q-9) | **해당 없음**(조회 1회) | ✓ (`R`=25, 소스에서 읽음) |
-| **A3** provider가 늦어 재시도까지 종료 | provider가 늦게 생성되어 재시도까지 종료 | **A3는 C-2 열로 정의한다**: C-2가 `R`번 모두 `OS_ERR_NAME_NOT_FOUND`(`281a941`은 `R`=1). 이어서 C-5(이벤트 30, `error`=`OS_ERR_NAME_NOT_FOUND`), C-6 오류, C-7 `APP_ERROR`. P-2/P-3의 위치: **보류 실행에서는 R-a가 C-4에서 풀므로 P-2는 C-4 이후**이다. 자연 실행에서는 P-2와 마지막 C-2의 선후를 관측으로 기록하며 가정하지 않는다 | `OS_ERR_NAME_NOT_FOUND` | `833fdbb`: (CF, 1 … R) 모두 **VIOLATING**(소진으로 REJECT; `caller` 기록이 없으면 NOT_READY_UNJUDGED). `281a941`: (CF, 1)은 명세 step 6에서 **VIOLATING**(오류 반환), step 3에서 **NOT_READY_UNJUDGED**(수정 전 처리를 인정하는 `caller` 기록이 없음) — 두 단계의 표기가 다르며 이 문서는 고르지 않는다(§9.6). 어느 쪽이든 나쁜 쪽이고 최종 실패 = **readiness violation** | 보류 가능: G(name)에서 정지하고 R-a(C-4) 또는 R-b(C-6)로 해제 → *controlled*. 자연 발생은 관측 가능성 확인 | ✓ (`R`=1) | ✓ (`R`=25) |
-| **A4** 해당 이름의 provider 없음 | 원출처 구성에 provider가 없으면 단위 예제로 검증하고 실제 사례 결과로 세지 않음 | C-열은 A3와 같고 P-2가 관측 창 전체에서 없음 | `OS_ERR_NAME_NOT_FOUND` | A3와 같다(VIOLATING, readiness violation) | 보류 아님. *공개 BP 기반에는 이 구성이 없다*(BP는 두 이름을 모두 만든다) | 단위 예제 / PI가 provider 없는 파생을 이탈로 정하는 경우만 | 같음 |
+| **A2** 먼저 실패, 재시도 성공 | 처음은 실패, 이후 재시도로 성공 | C-2(k=1)=`OS_ERR_NAME_NOT_FOUND` → C-3 → … → C-2(k=m, 2≤m≤R)=`OS_SUCCESS`, 반환 ID = P-3의 ID; 이벤트 20 | 처음 `OS_ERR_NAME_NOT_FOUND`, 이후 `OS_SUCCESS` | (CF, 1 … m−1) **미충족이나 TOLERATED**(G-REBIND 충족 상태. 충족 전에는 출력하지 않는다; 다시 묶기가 거부되면 NOT_READY_UNJUDGED = 나쁜 쪽, 위 G-REBIND 문단), (CF, m) **READY**. 모든 시도가 좋은 쪽이므로 **좋은 실행**이며 readiness violation이 없다 | **없음(자연 실행에서만)**. "제어된 A2"는 결정 범위 밖이다(§9.2.1, Q-9) | **해당 없음**(조회 1회) | ✓ (`R`=25, 소스에서 읽음) |
+| **A3** provider가 늦어 재시도까지 종료 | provider가 늦게 생성되어 재시도까지 종료 | **A3는 C-2 열로 정의한다**: C-2가 `R`번 모두 `OS_ERR_NAME_NOT_FOUND`(`281a941`은 `R`=1). 이어서 C-5(이벤트 30, `error`=`OS_ERR_NAME_NOT_FOUND`), C-6 오류, C-7 `APP_ERROR`. P-2/P-3의 위치: **보류 실행에서는 R-a가 C-4에서 풀므로 P-2는 C-4 이후**이다. 자연 실행에서는 P-2와 마지막 C-2의 선후를 관측으로 기록하며 가정하지 않는다 | `OS_ERR_NAME_NOT_FOUND` | 나쁜 쪽(VIOLATING → readiness violation; NOT_READY_UNJUDGED → 나쁜 쪽, 판정되지 않음, readiness violation 아님). `833fdbb`: (CF, 1 … R) 모두 **VIOLATING**(소진으로 REJECT, G-REBIND 충족 상태) = **readiness violation**. `281a941`: (CF, 1)의 라벨은 명세 안에서 갈린다 — step 3은 **NOT_READY_UNJUDGED**(수정 전 처리를 인정하는 `caller` 기록이 없음; 이 읽기에서는 readiness violation이 **아니다**), step 6은 **VIOLATING**("by the error return (step 3)"; 이 읽기에서만 readiness violation). 두 읽기 모두 나쁜 쪽이므로 좋음·나쁨 짝짓기는 같다. 이 문서는 라벨을 고르지 않고 보고한다(§9.6) | 보류 가능: G(name)에서 정지하고 R-a(C-4) 또는 R-b(C-6)로 해제 → *controlled*. 자연 발생은 관측 가능성 확인 | ✓ (`R`=1) | ✓ (`R`=25) |
+| **A4** 해당 이름의 provider 없음 | 원출처 구성에 provider가 없으면 단위 예제로 검증하고 실제 사례 결과로 세지 않음 | C-열은 A3와 같고 P-2가 관측 창 전체에서 없음 | `OS_ERR_NAME_NOT_FOUND` | A3와 같다: 나쁜 쪽(VIOLATING → readiness violation; NOT_READY_UNJUDGED → 나쁜 쪽, 판정되지 않음, readiness violation 아님). 버전별 라벨은 A3 행과 같다 | 보류 아님. *공개 BP 기반에는 이 구성이 없다*(BP는 두 이름을 모두 만든다). 명세 App. A.4 step 6 [D]: "no referenced basis exists" | litmus L-PATIENT variant 2·LP-CASE-C1(명세 App. A.8)로 보이거나 "not realized: no referenced configuration"으로 기록(명세 step 6 [D]). PI가 provider 없는 구성을 기록된 이탈로 정하는 경우에만 실현 | 같음 |
 | **A5** 객체 생성 중간 상태에서 조회 | OSAL 생성 중간 상태 | C-2=`OS_ERR_INCORRECT_OBJ_STATE`(가설) + 이후 provider·표 정지 관측(wchan/futex) | 문서화된 반환값에 없다(ENV `osapi-countsem.h` L157–L160 [F]) | 이 문서가 분류하지 않는다. 명세 step 6은 VIOLATING으로 둔다 [D]. 확정 전 RESERVED 구간은 별개의 가설 사례이다(§1.2) | provider를 OSAL 내부(생성 진입 이후, 확정 전)에서 정지 | **후속 과제**(P-C1HOLD): 원 C1 시작 조건·다섯 사례 성과 수에 넣지 않는다 | 같음 |
+| **도달하지 않음**(A1–A5 아님) | — (이 문서가 더한 기록 범주) | 그 키에 C-1이 없다. 앞 채널의 조회가 최종 실패했거나(이벤트 30 뒤 `break`) 앞 채널의 파이프·구독이 실패했다(§9.2) | 호출 없음 | 발생이 없으므로 분류 없음. 그 키에 대해 좋은 증거도 나쁜 증거도 아니다 [I] | 해당 키의 시험은 그 키에서 보류하는 별도 실행(§9.2) | ✓ (채널 0이 A3이면 채널 1) | ✓ (같음) |
 
 해석 규칙:
 
+- **BP 호출 지점의 인스턴스(P-1)** [F/D/U]. BP도 생성 전에 같은 연산 `OS_CountSemGetIdByName`을 부른다(`bp_flow.c` L126). 명세 §2.3의 `readiness K-REG.osal-countsem-lookup`은 `use op OS_CountSemGetIdByName`으로 열쇠가 잡히므로 이 호출도 같은 readiness specification의 사례이다. 명세 §1.6의 인스턴스는 `i = (κ, t, key, scope)`이고 `t`는 문맥이 붙은 호출 템플릿이므로, BP의 호출 지점은 CF의 것과 **별개의 인스턴스**이다(키가 `BP0_tsem`으로 같아도). 첫 기동(객체 없음)에서 BP의 조회는 `OS_ERR_NAME_NOT_FOUND`를 반환할 것으로 기대한다(§3.3, §9.1 P-1) [I]. 그 시도의 층 2 분류는 **커밋된 명세가 정하지 않는다** [U]: (a) `caller` 기록의 쪽(side)은 "(record, κ) 쌍"에 대해 정해지므로(명세 §1.6 "Side of a provenance record") CF의 인정 주석이 이 κ의 Allowed 항목 전체를 감시기로 만든다고 읽으면, 재시도가 없는 BP 지점에서 `retry_until_ready`의 감시기가 거부해 VIOLATING이 될 수 있다 [I]; (b) 그 기록이 CF의 호출 템플릿에만 해당한다고 읽으면 BP 지점의 Allowed는 `unspecified_by_reference`이고 NOT_READY_UNJUDGED이다 [I]; (c) BP의 "조회 후 없으면 생성"을 준비 요구가 있는 사용이 아니라고 보는 제외 규칙은 명세에서 찾지 못했다 [U]. (a)·(b) 모두 **모든 정상 첫 기동에서 나쁜 실행**을 만든다. 이 문서의 처리: BP 지점은 **별개 인스턴스로 따로 기록하고**(층 1·층 3: 반환값, P-1→P-2 순서), CF의 A1–A4 집계와 같은 순번 짝짓기에 넣지 않는다(템플릿이 달라 명세상으로도 같은 인스턴스가 아니다). 층 2의 기대 상태는 C1 기대 결과표 동결 전에 anchor audit 또는 PI가 정한다(§10 C1B-U23, §12 Q-11). 정해지기 전에는 BP 지점의 분류를 출력하지 않는다.
 - **provider 자체 실패와 A3의 구분**: C-열이 A3와 같아도 P-E(§9.1)가 관측되고 P-0·P-2가 없으면 그 실행은 A3도 A4도 아니며 `provider-init-failed`로 따로 기록한다(§5.4). 이 실행은 순서 근거로 쓰지 않는다 [I: 이 문서의 기록 규칙. 명세에 같은 이름의 라벨은 없다].
-- A1·A2는 *좋은* 쪽(READY, TOLERATED), A3·A4는 *나쁜* 쪽(VIOLATING 또는 NOT_READY_UNJUDGED) 증거이다. 같은 바이너리·구성·의미에서 **같은 키·같은 발생 순번**의 좋은 증거와 나쁜 증거가 모두 있을 때만 실행 순서 의존을 주장한다(로드맵 §8.5; 명세 step 6 "schedule dependence needs a good and a bad witness at the same ordinal in one build, configuration and semantics"). 한 빌드에서 A1과 A3를 모두 얻는 경우는 `833fdbb`·`281a941` 각각 *따로* 센다. 두 빌드의 결과를 섞어 같은 순번으로 세지 않는다.
-- `281a941`에서 A1이 나오면 그 키는 *수정 전 코드가 성공한 실행*이다. `833fdbb`에서 A2가 나오면 *수정이 회복시킨 실행*이다. A3는 두 버전에서 모두 오류이다. 수정 후에 A3가 나온다는 것은 재시도가 모든 순서 오류를 제거하지는 않는다는 관측이다(로드맵 §8.5는 "제거한다고 주장하지 않는다"를 요구한다). 보류로 만든 A3라면 그 가능성을 보일 뿐 자연 발생 빈도의 증거가 아니다.
+- 좋은 쪽·나쁜 쪽은 **실행이 아니라 시도(순번)마다** 정한다(명세 §1.6: 실행은 나쁜 시도를 하나라도 가지면 나쁜 실행이고, READY·TOLERATED 시도를 가지면 그 순번의 좋은 증거이다). G-REBIND가 충족된 상태에서: A1은 (CF, 1) READY로 좋은 증거, A2는 (CF, 1 … m−1) TOLERATED와 (CF, m) READY로 모든 순번에서 좋은 증거, A3·A4는 (CF, 1 … R) 나쁜 증거(VIOLATING, 또는 `281a941`의 step 3 읽기에서 NOT_READY_UNJUDGED)이다. "도달하지 않음"은 어느 쪽도 아니다. G-REBIND가 거부된 경우의 다른 분류는 위 G-REBIND 문단을 따른다. 같은 바이너리·구성·의미에서 **같은 키·같은 발생 순번**의 좋은 증거와 나쁜 증거가 모두 있을 때만 실행 순서 의존을 주장한다(명세 App. A.4 step 6 "schedule dependence needs a good and a bad witness at the same ordinal in one build, configuration and semantics" [D]; 로드맵 §8.5의 같은 완료 기준은 `[제안]`). 한 빌드에서 A1과 A3를 모두 얻는 경우는 `833fdbb`·`281a941` 각각 *따로* 센다. 두 빌드의 결과를 섞어 같은 순번으로 세지 않는다.
+- `281a941`에서 A1이 나오면 그 키는 *수정 전 코드가 성공한 실행*이다. `833fdbb`에서 A2가 나오면 *수정이 회복시킨 실행*이다. A3는 두 버전에서 모두 오류이다. 수정 후에 A3가 나온다는 것은 재시도가 모든 순서 오류를 제거하지는 않는다는 관측이다(로드맵 §8.5는 "제거한다고 주장하지 않는다"를 완료 기준으로 `[제안]`한다. 이 문서는 그 제안을 따른다). 보류로 만든 A3라면 그 가능성을 보일 뿐 자연 발생 빈도의 증거가 아니다.
 - 보류로 만든 A3(controlled)는 자연 실행의 빈도 정보를 주지 않는다. 라벨: `held-F0`(보류 사용), 보류 중에 시간 기반 전이(마지막 재시도 실패 등)가 일어난 경우 `timeout-exercised`(SPEC_FINAL @`6be8935` §1.8의 "Confirmation runs in which a time-based transition …"와 §1.10의 naturalness 축, §4.13 "Labels") [D: 명세의 라벨 규칙].
 - A5는 명세 App. A.4 step 5의 RESERVED 구간 실험과 같은 것이다(rev 1.1 @`2499ad4`에서는 "declared experiment", rev 1.2 @`6be8935`에서는 "follow-up OSAL-defect-candidate item"이다). 이 문서는 A5의 보류 지점·감시 한도를 정하지 않는다(P-C1HOLD가 후속으로 분리).
 - C-5의 이벤트 30 존재만으로 A3를 확정하지 않는다: C-2의 반환 값 열과 시도 횟수로 *재시도 종료 사유*를 구분해 기록한다(`exhausted` 또는 `other_status`).
@@ -625,8 +634,8 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 ### 9.6 명세와 어긋나는 점(고치지 않고 보고)
 
 - **감시 한도 문구(해소됨).** rev 1.1 @`2499ad4`의 §4.13 "Watchdog"과 App. A.4 step 5는 CF에 대해 "effective retry bound × effective delay"를 들었고, 결정문 §3.3은 이 곱을 벽시계 상한으로 쓰지 말라고 결정했다. 커밋된 rev 1.2 @`6be8935`의 §4.13 "Watchdog"은 "The retry count times the delay is not by itself taken as a safe wall-clock waiting limit"로, App. A.4 step 5는 "Their product is not taken as a safe wall-clock waiting limit"로 바뀌어 결정문과 일치한다 [M: 2026-10-16 `grep`]. 더 이상 어긋남이 아니다. Q-6은 철회 상태로 둔다.
-- **`281a941`의 단일 조회 실패 시도의 표기(보고만 한다).** rev 1.2 App. A.4 step 3의 "At the pre-fix revision"은 QT-4·Q15 엄격 대안 아래에서 이 시도를 **NOT_READY_UNJUDGED**(수정 전 처리를 인정하는 `caller` 기록 없음)로 두고, 같은 부록의 step 6 "Outcome partition"은 "at CF `281a941`, (CF, 1) VIOLATING by the error return (step 3)"이라고 쓴다. 두 표기는 모두 `Bad_i`(나쁜 쪽)이므로 class는 같지만 라벨이 다르다. 이 문서는 §9.3에 둘을 함께 적고 고르지 않는다. 정정은 명세 담당 단계의 몫이다.
-- **`caller` 기록의 판(版) 묶기.** 명세 §2.3의 `K-REG.osal-countsem-lookup` 블록은 `code_admission caller "apps/cf/fsw/src/cf_cfdp.c:1272-1278"`(ENV CF `15a871e`)를 인용한다. D22의 수정 후 판 `833fdbb`에서 같은 주석은 L993–L999이다(§9.3). 이 줄을 `833fdbb`에 묶는 기록이 없으면 그 판의 A2 앞선 시도는 TOLERATED가 아니라 NOT_READY_UNJUDGED가 된다. App. A.4 step 6은 "the line and the name are rebound per basis by the anchor audit"라고 적으므로 anchor audit의 항목으로 넘긴다 [D/U].
+- **`281a941`의 단일 조회 실패 시도의 표기(보고만 한다).** rev 1.2 App. A.4 step 3의 "At the pre-fix revision"은 QT-4·Q15 엄격 대안 아래에서 이 시도를 **NOT_READY_UNJUDGED**(수정 전 처리를 인정하는 `caller` 기록 없음)로 두고, 같은 부록의 step 6 "Outcome partition"은 "at CF `281a941`, (CF, 1) VIOLATING by the error return (step 3)"이라고 쓴다. 두 표기는 모두 `Bad_i`(나쁜 쪽)이므로 class는 같지만 라벨이 다르고, T1에 따라 **readiness violation이라는 말은 step 6의 읽기(VIOLATING)에서만 맞는다**. step 3의 읽기(NOT_READY_UNJUDGED)에서는 결과 라벨이 `not-ready-unjudged`이며 readiness violation이 아니다(명세 §0, §0.11 item 2, §1.10 "Outcome label"). 이 문서는 §9.3에 둘을 함께 적고 고르지 않는다. 정정은 명세 담당 단계의 몫이다.
+- **`caller` 기록의 판(版) 묶기.** 명세 §2.3의 `K-REG.osal-countsem-lookup` 블록은 `code_admission caller "apps/cf/fsw/src/cf_cfdp.c:1272-1278"`(ENV CF `15a871e`)를 인용한다. D22의 수정 후 판 `833fdbb`에서 같은 주석은 L993–L999이다(§9.3). 이 줄을 `833fdbb`에 묶는 기록이 없으면 그 판의 A2 앞선 시도는 TOLERATED가 아니라 NOT_READY_UNJUDGED가 된다. App. A.4 step 6은 "the line and the name are rebound per basis by the anchor audit"라고 적으므로 anchor audit의 항목으로 넘긴다 [D/U]. 개정 3부터 이 다시 묶기는 `833fdbb` 빌드의 C1 첫 출력 전 선행 조건(G-REBIND, §9.3)이다.
 - **수정 전 구조의 재독해.** 명세 App. A.4 step 3은 수정 전 구조를 `2a024d8`에서 읽고 `281a941`에서의 재독해를 anchor audit 몫으로 남겼다([U]). 이번 점검이 그 재독해를 제공한다: `281a941`의 실패 경로는 `goto err_out`이 아니라 `break`+`ret` 반환이며(§5.1) 오류 상태가 반환된다는 점은 같다 [I]. 명세 문장의 줄 번호(`:1018–1021, 1052–1053` @`2a024d8`)는 `281a941`에서 L995–L1001, L1029–L1034로 바뀐다. 다만 명세가 쓴 "`err_out: return ret;`는 성공 분기도 도달하는 지점"이라는 구조는 `281a941`에서는 `if (ret == CFE_SUCCESS) { enabled = 1; } return ret;`(L1029–L1034)로 바뀌어 있으므로, 정상 연속 경로의 서술은 anchor audit에서 다시 읽어야 한다 [U].
 
 ## 10. `unspecified_by_reference`로 남는 조건 (검증 항목 8)
@@ -646,7 +655,7 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 | C1B-U09 | provider 구현 방식(B-1~B-4) | 레퍼런스에 없음 | Q-2 |
 | C1B-U10 | 인스턴스 수(1 또는 2) | C1 레퍼런스는 인스턴스 수를 정하지 않음 | DV-11, Q-3 |
 | C1B-U11 | 빌드 형식(`Release` 대 `debug`)이 결과에 주는 영향 | ENV 고정과 공개 구성이 다름 | DV-09 |
-| C1B-U12 | A4를 실현하는 기준 | 공개 BP는 두 이름 모두 생성. provider 없는 구성은 레퍼런스가 없다 | 결정문 §3.3·로드맵 §8.3의 처리를 따름: 단위 예제 또는 PI가 정하는 이탈 |
+| C1B-U12 | A4를 실현하는 기준 | 공개 BP는 두 이름 모두 생성. provider 없는 구성은 레퍼런스가 없다 | 명세 App. A.4 step 6 [D]를 따름: litmus L-PATIENT variant 2·LP-CASE-C1로 보이거나 "not realized: no referenced configuration"으로 기록. PI가 provider 없는 구성을 기록된 이탈로 정할 때만 실현(로드맵 §8.3의 A4 행은 같은 방향의 `[제안]`) |
 | C1B-U13 | `techdev-iodriver`의 CI 당시 팁 | 강제 푸시 여부를 알 수 없음 | `bd4a2ea` 후보 [I] |
 | C1B-U14 | ENV TO_LAB·CI_LAB·SCH_LAB와 BP CI 시기 앱(`9e2ad8c` 등)의 동작 차이 | 후자의 소스를 이번에 읽지 않았다 | [U] |
 | C1B-U15 | BP `MsgId` 기본값(`RESERVED`)이 데이터 경로 throttle에 주는 영향 | C1 초기화 순서 범위 밖 | §3.3 [U] |
@@ -655,7 +664,8 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 | C1B-U18 | 섭동 비율(명세 §4.13)의 분모로 쓸 C1의 코드상 분리 간격 | 명세의 예는 다른 창의 값이고 C1의 보호 간격은 레퍼런스에 없다. 공통 시작 지연 50 ms는 두 앱의 호출 사이 간격이 아니다 | 값을 고르지 않음. §9.4 PV-8에서 파일럿 측정 후 PI·명세가 정함 |
 | C1B-U19 | bplib 고정 커밋(`d4c6db9` 또는 `e7524239`)과 `ENABLE_UNIT_TESTS`의 조합 | BP CI 창의 마지막 5분 안에 bplib `main`이 옮겨 갔고, 어느 쪽을 실행이 썼는지 기록이 없다. ENV 플래그(켬)와 `d4c6db9`의 조합은 빌드 실패가 기대되나 확인하지 않았다 | §4.3, DV-13, Q-4. B5 기본은 "끔"(BP CI의 호출을 따름) |
 | C1B-U20 | 공개 통합 구성이 조립·기동되는지(D22 순서의 첫 단계 P0의 결과) | 이름 수준 정적 대조만 했고 조립하지 않았다 | §8.0, §8.5, Q-5. 이 결과 없이 ENV 이식 구성을 D22 기준 구성이라고 부르지 않음 |
-| C1B-U21 | `833fdbb`에서 CF 인정 주석(L993–L999)을 `caller` 기록으로 묶는지 | 명세 §2.3은 `15a871e`의 L1272–L1278만 인용한다. 묶기는 anchor audit의 일이다 | §9.3·§9.6. 묶기 전에는 `833fdbb`의 A2 앞선 시도를 NOT_READY_UNJUDGED로 둔다 |
+| C1B-U21 | `833fdbb`에서 CF 인정 주석(L993–L999)을 `caller` 기록으로 묶는지 | 명세 §2.3은 `15a871e`의 L1272–L1278만 인용한다. 묶기는 anchor audit의 일이다 | §9.3·§9.6. 묶기 전에는 `833fdbb`의 A2 앞선 시도가 NOT_READY_UNJUDGED(나쁜 쪽)이므로, 묶기를 `833fdbb` 빌드의 C1 첫 출력 전 선행 조건(G-REBIND)으로 둔다. 거부되면 첫 출력 전에 기대 결과표를 다시 쓴다(§9.3) |
+| C1B-U23 | BP 자신의 조회 호출 지점(`bp_flow.c` L126, P-1)의 층 2 분류 | 커밋된 명세는 CF의 `caller` 기록이 이 κ의 다른 호출 템플릿에도 해당하는지, 또는 "조회 후 없으면 생성"을 제외하는지 정하지 않는다 | §9.3 "BP 호출 지점의 인스턴스". 별개 인스턴스로 따로 기록하고 CF의 A1–A4 집계에 넣지 않는다. 기대 상태는 anchor audit 또는 PI가 정한다(Q-11) |
 | C1B-U22 | OSAL 내부 사건 P-2a~P-2c(이름 공개, 구현 호출, id 확정)를 관측할 수 있는지와 그 방식 | 빌드 산출물의 심볼·인라인 여부를 아직 보지 않았다 | §9.1. 관측하지 못하면 결과로 함의되는 reads-from만 쓴다(§1.2) |
 
 ## 11. 접근 상태와 기존 문서와의 불일치
@@ -687,14 +697,16 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 | Q-1 | ENV 위 파생 구성의 앱 집합과 시작 스크립트 | (a) BP의 6개 모듈(앱 5개 + `bplib` 라이브러리; ENV 앱 11개와 ENV 라이브러리 2개가 빠진다, DV-03)만 + BP 스크립트 / (b) ENV 15개 앱 + BP·bplib 추가 / (c) 기타 | 정하지 않음. 레퍼런스가 정하지 않는다(C1B-U08). (a)는 공개 기준에, (b)는 ENV 기준에 가깝다 |
 | Q-2 | provider 구현 방식 | B-1(전부 이식) / B-2(초기화 경로만) / B-3(공개 스택 별도 재구성) / B-4(역할 기반) | 정하지 않음. 결정문 §3.2는 공개 BP 기반이므로 B-4는 기본안이 아니다. B-1·B-2의 비용은 §8.2 |
 | Q-3 | 인스턴스 수 | 1(`cpu1`) / 2(`tx`,`rx`) | 정하지 않음. 초기화 관찰에는 1개로 시작 가능하다고 보지만 [I] 레퍼런스 선택이 아님 |
-| Q-4 | bplib 고정 커밋과 단위 시험 플래그 `ENABLE_UNIT_TESTS`(§4.3, DV-13) | (a) **끔 + `d4c6db9`**(BP CI의 호출을 따름, ENV 플래그에서 이탈) / (b) **켬 + `e7524239`**(ENV 플래그 유지, bplib 커밋이 `d4c6db9`와 다름) / (c) 켬 + `d4c6db9` — bplib 자신의 커밋 메시지에 따라 빌드 실패가 기대되므로 선택지로 올리지 않고, 시험 빌드에서 확인될 때에만 기록 | 정하지 않음. B5의 **임시 기본**은 (a)이다: BP CI의 호출이라는 레퍼런스에서 가져온 값이며 ENV 기준에서의 기록된 이탈이다. PI가 (b)를 고르면 B2·B5를 따라 바꾼다 |
+| Q-4 | bplib 고정 커밋과 단위 시험 플래그 `ENABLE_UNIT_TESTS`(§4.3, DV-13) | (a) **끔 + `d4c6db9`**(BP CI의 호출을 따름, ENV 플래그에서 이탈) / (b) **켬 + `e7524239`**(ENV 플래그 유지, bplib 커밋이 `d4c6db9`와 다름) / (c) 켬 + `d4c6db9` — bplib 자신의 커밋 메시지에 따라 빌드 실패가 기대되므로 선택지로 올리지 않고, 시험 빌드에서 확인될 때에만 기록 | 정하지 않음. B5의 단위 시험 플래그는 "끔"으로 적었다: BP CI의 호출이라는 레퍼런스에서 가져온 값이며 ENV 기준에서의 기록된 이탈이다(DV-13). **bplib 커밋에는 기본값을 두지 않는다**: `unspecified_by_reference`이며 Q-4 전에는 B2를 시작하지 않는다. PI가 (b)를 고르면 B5의 플래그도 따라 바꾼다 |
 | Q-5 | **D22의 적용 순서의 첫 단계**(공개 통합 구성의 버전 호환성 확인)를 어떻게 할지(§8.0, §8.5) | (a) P-REC를 B0 앞에서 수행하고 결과(조립 성공/실패 지점)에 따라 분기 / (b) 이미 한 이름 수준 정적 대조(§5.3)로 갈음 — 이는 D22 순서의 "확인"을 실행 없이 진행하는 **예외**이므로 PI의 승인과 이유를 DV-00에 기록 / (c) ENV 이식을 PI가 직접 선택 — 같은 성격의 예외 | 정하지 않음. 이 문서는 (a)를 D22 순서의 문자 그대로의 적용으로 읽고 B0을 P0 뒤에 둔다. 정적 대조가 호환성 확인을 갈음한다고 주장하지 않는다. 승인이 없는 동안 ENV 이식을 "D22 기준 구성" 또는 "공개 코드 기반 기준"이라고 부르지 않는다 |
-| Q-6 | (철회) 명세 §4.13의 감시 한도 문구 정정 | — | PI 질문이 아니다. 작업 트리의 명세는 이미 고쳐져 있고, 커밋된 명세에 문구가 남아 있는지는 Spec-C 단계가 확인한다(§9.6). ID는 유지한다 |
+| Q-6 | (철회) 명세 §4.13의 감시 한도 문구 정정 | — | PI 질문이 아니다. 커밋된 명세 rev 1.2 @`6be8935`의 §4.13 "Watchdog"과 App. A.4 step 5에서 문구가 이미 결정문 §3.3에 맞게 고쳐져 해소됐다(§9.6) [M]. ID는 유지한다 |
 | Q-7 | `bd4a2ea`가 창에서의 PSP 브랜치 팁이라는 [I]를 어떻게 다룰지 | 후보로만 사용 | 후보로만 사용 |
 | Q-8 | #184 댓글 접근 | `add_repo`(동의 필요) / 사용자가 댓글을 붙여 줌 | 시도하지 않음 |
 | Q-9 | "제어된 A2"(첫 `NAME_NOT_FOUND`에서 provider를 푸는 규칙 R-c)를 P-C1HOLD의 범위 확장으로 받아들일지(§9.2.1) | 받아들임(해제 규칙·표시·감시 한도를 새로 정함) / 받아들이지 않음(A2는 자연 실행에서만) | 정하지 않음. 결정문 §3.3의 해제 사건은 재시도 종료와 최종 초기화 결과뿐이므로 이 문서는 "받아들이지 않음"을 기본으로 쓴다. R-c는 A2를 보장하지도 않는다 |
+| Q-10 | 명세 §4.13 "Release"의 일반 규칙 중 "다른 쪽이 막힌 경우"의 해제를 C1의 P-C1HOLD에 쓸지(§9.2 R-d) | 씀(무엇을 "막힘"으로 볼지, 그 판정 사건과 표시를 새로 정함) / 쓰지 않음(해제는 C-4·C-6과 C-6을 함의하는 C-7뿐, 막힘은 감시 한도로 `inconclusive(await-timeout)`) | 정하지 않음. Q-9와 같은 이유로 이 문서는 "쓰지 않음"을 기본으로 쓴다: CF가 막혔다는 것은 결정된 두 해제 사건의 어느 쪽도 아니다 |
+| Q-11 | BP 자신의 조회 호출 지점(P-1, `bp_flow.c` L126)의 층 2 기대 상태(§9.3, C1B-U23) | (a) CF의 `caller` 기록이 κ 전체에 적용 → VIOLATING 가능 / (b) 호출 템플릿별 → NOT_READY_UNJUDGED / (c) "조회 후 없으면 생성"을 범위 밖으로 두는 규칙을 명세에 더함(이유 기록) | 정하지 않음. anchor audit가 먼저 판단하고, 명세가 정하지 못하면 PI 결정이다. 정해지기 전에는 BP 지점의 분류를 출력하지 않으며 CF의 집계와 섞지 않는다. C1 기대 결과표 동결 전에 필요하다 |
 
-다음 단계(순서만, 일정 없음): ① 위 Q 항목 결정(Q-5가 먼저 — 그 결과가 ②–③의 시작 조건이다) → ② **P0: D22 순서의 첫 단계**(Q-5에 따른 P-REC 수행 또는 PI가 승인한 대체; 결과와 실패 지점의 기록) → ③ P0이 "그대로 구성되지 않음"으로 기록되었거나 PI가 예외를 승인한 경우에만 B0–B2 준비(소스 배치, 작업 공간 분리) → ④ B3–B6 빌드·산출물 해시 → ⑤ B7 기본 기동 확인 → ⑥ 관측기 사건(§9.1)의 심볼·`uprobe` 가능성 확인 → ⑦ 파일럿으로 PV-1~PV-8 측정·동결 → ⑧ A1–A3 실행. P0이 성공하면 ③–⑤는 그 구성(공개 통합 기준)에서 이어지고, ENV 이식은 비교용 파생 구성으로 PI가 필요를 정한다.
+다음 단계(순서만, 일정 없음): ① 위 Q 항목 결정(Q-5가 먼저 — 그 결과가 ②–③의 시작 조건이다) → ② **P0: D22 순서의 첫 단계**(Q-5에 따른 P-REC 수행 또는 PI가 승인한 대체; 결과와 실패 지점의 기록) → ③ P0이 "그대로 구성되지 않음"으로 기록되었거나 PI가 예외를 승인한 경우에만 B0–B2 준비(소스 배치, 작업 공간 분리) → ④ B3–B6 빌드·산출물 해시 → ⑤ B7 기본 기동 확인 → ⑥ 관측기 사건(§9.1)의 심볼·`uprobe` 가능성 확인 → ⑦ 파일럿으로 PV-1~PV-8 측정·동결 → ⑦′ C1 기대 결과표 동결(결정문 §3.7 [D]). 그 전에 G-REBIND(`833fdbb`의 `caller` 기록 다시 묶기, §9.3)와 Q-11(BP 호출 지점의 기대 상태)이 정해져 있어야 한다 → ⑧ A1–A3 실행. ③의 B2는 Q-4(bplib 커밋)가 정해진 뒤에 시작한다. P0이 성공하면 ③–⑤는 그 구성(공개 통합 기준)에서 이어지고, ENV 이식은 비교용 파생 구성으로 PI가 필요를 정한다.
 
 ## 13. 이 문서의 검증을 다시 하는 방법
 
@@ -841,7 +853,7 @@ for s in missing:
 - **#4**: 리뷰의 두 선택지 중 "A2는 자연 실행에서만"을 택하고, R-c는 지우는 대신 결정 범위 밖의 제안으로 §9.2.1에 이유와 함께 남기고 Q-9로 올렸다.
 - **#7**: "커밋 시점에 다시 확인하고 해소됐으면 삭제"는 이 문서의 작성자가 커밋 시점을 알 수 없다. 그래서 §9.6은 조건부 문장("커밋된 명세에 문구가 남아 있을 때에만 어긋남")으로 바꾸고 Q-6은 PI 질문이 아니므로 철회 표시했다(ID는 유지).
 - **#9**: 리뷰는 "L128–L131"로 적었으나 파일에서 확인한 값은 조회 호출 L126–L127, 이벤트 L129–L130, `else if` L131이다. 파일의 값을 썼다.
-- **#10**: 없는 Q를 더하지 않고 문장을 고쳤다. 원 보고자 환경의 재현은 로드맵 §8.1이 이미 "같다는 주장을 하지 않는다"로 정했고, A4는 로드맵 §8.3과 결정문 §3.3이 이미 정했다.
+- **#10**: 없는 Q를 더하지 않고 문장을 고쳤다. 원 보고자 환경의 재현은 로드맵 §8.1이 이미 "같다는 주장을 하지 않는다"로 정했고, A4는 로드맵 §8.3과 결정문 §3.3이 이미 정했다. *(개정 3의 정정: 이 출처 표시는 틀렸다. 로드맵 §8.1·§8.3은 `[제안]`이고 결정문 §3.3은 A4를 다루지 않는다. 결정된 근거는 결정문 §3.2와 명세 App. A.4 step 2·6이다. §1.3과 §16 #3을 보라.)*
 - **#11**: 저장소에 새 파일을 만들지 않았다(이 작업은 이 문서 한 파일만 소유한다). 대신 스크립트 전문, 사본 목록, 행마다의 정규식을 §13에 넣었다. 정규식은 처음 점검 때 따로 적어 두지 않았으므로 같은 숫자를 내는 형태를 다시 구성했다고 §13.3에 밝혔다.
 
 ## 15. 개정 2의 변경 (2026-10-16)
@@ -860,3 +872,33 @@ for s in missing:
 | 8 | §11.1 | #184 댓글 접근을 다시 시도했다. 여전히 HTTP 403이다 | [M] |
 
 바뀌지 않은 판단: D22의 적용 순서(P0 먼저, Q-5), B5의 단위 시험 플래그 기본 "끔"(Q-4), A2는 자연 실행에서만(Q-9), 모든 파일럿 값 미정(§9.4).
+
+## 16. 개정 3: 검토 11건의 처리 (2026-10-16)
+
+각 지적을 원출처로 먼저 확인한 뒤 고쳤다. 명세는 커밋된 `6be8935`의 `SPEC_FINAL.md`를 `git show`로 읽었다. 빌드·실행·설치는 하지 않았다.
+
+| # | 심각도 | 지적 | 판정 | 확인 | 고친 곳 |
+|---:|---|---|---|---|---|
+| 1 | major | NOT_READY_UNJUDGED 시도에 "readiness violation"을 씀 | 수용 | 명세 §0("An in-scope occurrence rejected by the caller-level Allowed is a readiness violation"), §0.11 item 2("a `VIOLATING` occurrence is a readiness violation"), §1.6의 bad 정의, §1.10 "Outcome label"(`violation` / `not-ready-unjudged`) | §1.2, §9.3(정의 문단, A3·A4 행), §9.6 |
+| 2 | major | 기본 분류대로라면 A2 실행이 나쁜 실행인데 좋은 쪽으로만 다룸 | 수용(선택 1) | 명세 §1.6 "A finite execution is bad … where Allowed is `unspecified_by_reference`, a `NOT_READY_UNJUDGED` one"; App. A.4 step 6의 다시 묶기 문장; 결정문 §3.7의 "기대 결과표는 첫 출력 전에 동결" | §9.3 G-REBIND 문단, A2 행, 해석 규칙, §9.6, C1B-U21, 다음 단계 ⑦′, §0 6·7항 |
+| 3 | major | 로드맵 `[제안]`과 없는 결정(§3.3의 A4)을 정해진 결정처럼 인용 | 수용 | 로드맵 §1.1("작업 지시, 산출물 이름, 완료 기준, 순서 … 모두 [제안]"), §8.1의 `[제안]` 목록, 결정문 §3.3 전문(A4 언급 없음), 명세 App. A.4 step 2·6 | 머리말 "입력 계획", §0 5항, §1.3의 두 행, §8.0, §9.1, §9.3 머리와 해석 규칙, C1B-U12, §14 #10에 정정 표시 |
+| 4 | minor | R-d("막힌 경우")가 결정된 해제 사건 밖 | 수용 | 명세 §4.13 "Release"; 결정문 §3.3의 두 해제 사건; CF의 `CFE_ES_ExitApp`은 `CF_Init` 반환 뒤에만 불림(`cf_app.c` L330–L338, L366) | §9.2 R-d, §12 Q-10, §1.3 |
+| 5 | minor | R-a 뒤 P-2가 C-6보다 앞선다는 근거 없는 서술 | 수용 | `833fdbb` `cf_cfdp.c` L1011(마지막 실패 뒤의 `OS_TaskDelay`), L1016–L1018(이벤트) | §9.2 R-a |
+| 6 | minor | 앞 채널 실패 뒤의 키에 결과가 없음 | 수용 | `281a941` L1000, `833fdbb` L1019의 `break`가 채널 루프(L967)를 빠져나감; L977·L988도 같음; BP의 이름 순서 생성 `bp_flow.c` L124–L142 [F] | §9.2, §9.3 표의 "도달하지 않음" 행과 해석 규칙 |
+| 7 | minor | BP 자신의 조회(P-1)가 같은 readiness specification의 사례인데 분류가 없음 | 수용(일부 다름, 아래) | 명세 §2.3 `use op OS_CountSemGetIdByName`; §1.6의 인스턴스 `(κ, t, key, scope)`와 "Side of a provenance record"의 "(record, κ)" 규칙; `bp_flow.c` L126 | §9.3 "BP 호출 지점의 인스턴스", C1B-U23, Q-11, §1.3 |
+| 8 | minor | Q-6 행이 낡음 | 수용 | `6be8935`의 §4.13 "Watchdog"("The retry count times the delay is not by itself taken as a safe wall-clock waiting limit")와 App. A.4 step 5("Their product is not taken …") [M] | §12 Q-6 |
+| 9 | minor | 두 빌드 트리의 `CMakeCache.txt` 차이가 `CFS_APP_PATH` 하나일 수 없음 | 수용 | ENV `build-native_std/CMakeCache.txt`에 빌드 디렉터리 경로를 값으로 갖는 항목 18개(주석 제외), 앱 소스 경로 항목(`CF_DOCS_SOURCE_DIR` L60) [M: `grep`] | B5 |
+| 10 | minor | B2가 bplib 기본 커밋을 레퍼런스 없이 고름 | 수용 | §4.3에서 `d4c6db9`는 추론된 후보 [I]; CONDITIONS_POLICY | B2, §8.4 뒤 문단, Q-4, 다음 단계 |
+| 11 | minor | D-4의 파일이 틀림 | 수용 | D-4 행은 `env/CONDITIONS.md` L123. `env/ENV.md`는 L16·L296에서 가리킬 뿐 | §8.1 |
+
+검토 밖에서 함께 고친 것: 이 문서가 "Caller-level Allowed"를 명세 §2.3으로 인용했으나 그 문단은 §1.6에 있다(`6be8935`에서 §1.6은 L363–L449, 문단은 L403). §1.2와 §9.3의 인용을 §1.6으로 고쳤다. §15 #3의 같은 인용은 개정 기록이므로 그대로 둔다.
+
+### Rejected findings
+
+**통째로 기각한 지적은 없다.** 다음은 검토가 제안한 고침과 **다르게** 처리한 부분이다.
+
+- **#2**: 두 선택지 중 선택 1(다시 묶기를 C1 출력 전 선행 조건으로)을 택했다. 다만 이 문서는 anchor audit의 결과를 미리 정할 수 없으므로, 다시 묶기가 **거부되는** 경우에 선택 2의 분류로 기대 결과표를 첫 출력 전에 다시 쓴다는 규칙을 함께 적었다. 선행 조건은 `833fdbb`에만 걸린다(`281a941`에는 다시 묶을 주석이 없다).
+- **#4**: 검토의 두 선택지를 함께 썼다: R-d를 CF 종료(C-7)로 줄였고, "막힌 경우"는 Q-10으로 올렸다. C-7을 남긴 근거는 C-7이 C-6을 함의한다는 소스 사실이다.
+- **#7**: 검토는 엄격 대안 아래에서 BP 지점에 NOT_READY_UNJUDGED가 생긴다고 적었다. 커밋된 명세를 읽으면 그것은 두 읽기 중 하나이다. `caller` 기록의 쪽이 "(record, κ)" 쌍에 대해 정해지므로, CF의 기록이 κ의 Allowed 항목 전체를 감시기로 만든다고 읽으면 재시도가 없는 BP 지점은 VIOLATING이 될 수도 있다 [I]. 이 문서는 어느 쪽인지 정하지 않고 Q-11과 C1B-U23으로 올렸다. 두 읽기 모두 정상 첫 기동마다 나쁜 실행을 만든다는 점은 검토와 같다.
+- **#9**: 정규화 비교(빌드 디렉터리와 `CFS_APP_PATH` 디렉터리를 자리표시로 바꿈)를 완료 조건으로 삼았다. 정규화 전에 달라지는 항목은 ENV 캐시에서 확인한 범주로만 적었다. 파생 빌드의 정확한 항목 목록은 구성 전에는 모르므로 [U]로 두었다.
+- **#10**: bplib 기본값을 지우는 것에 더해, Q-4가 정해지기 전에는 B2를 시작하지 않는다고 적었다. 값을 고르지 않은 채 B2를 진행할 수 없기 때문이다.

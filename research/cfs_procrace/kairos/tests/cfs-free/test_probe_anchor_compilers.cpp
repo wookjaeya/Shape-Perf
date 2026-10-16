@@ -38,6 +38,10 @@ std::vector<std::string> source_lines(const std::string& path) {
   return v;
 }
 
+// A part of the test that could not run (a tool or a binary missing).  The test then exits 77, which
+// ctest reports as skipped (SKIP_RETURN_CODE), never as passed, unless a check failed.
+int g_skipped_parts = 0;
+
 bool have_addr2line() { return system("command -v addr2line >/dev/null 2>&1") == 0; }
 
 // addr -> "file:line" from addr2line for a batch of addresses.
@@ -74,6 +78,7 @@ std::map<uint64_t, std::pair<std::string, unsigned>> addr2line(const std::string
 void check_binary(const std::string& bin, const std::string& source, const char* what) {
   if (!exists(bin)) {
     std::printf("%s: %s not built, skipped\n", what, bin.c_str());
+    ++g_skipped_parts;
     return;
   }
   kz::Bytes bytes;
@@ -115,6 +120,7 @@ void check_binary(const std::string& bin, const std::string& source, const char*
     KZ_CHECK_EQ(compared, static_cast<int>(addrs.size()));
   } else {
     std::printf("%s: addr2line not found, the cross-check is skipped\n", what);
+    ++g_skipped_parts;
   }
 
   // Resolve the sites the test profile uses and check them against the instructions and the source.
@@ -165,5 +171,10 @@ int main(int argc, char** argv) {
   check_binary(argv[1], argv[5], "default compiler, DWARF 5");
   check_binary(argv[2], argv[5], "DWARF 4");
   check_binary(argv[3], argv[5], "other compiler");
-  return kztest::finish("test_probe_anchor_compilers");
+  const int rc = kztest::finish("test_probe_anchor_compilers");
+  if (rc == 0 && g_skipped_parts != 0) {
+    std::printf("test_probe_anchor_compilers: %d part(s) skipped: reported as skipped, not passed\n", g_skipped_parts);
+    return 77;
+  }
+  return rc;
 }

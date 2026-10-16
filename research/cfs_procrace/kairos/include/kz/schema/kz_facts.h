@@ -16,7 +16,12 @@
  * 38 (SPAWN_PARAMS: parameters that carry the function a spawned task runs) and 39 (FUNC_WRITES:
  * the fields each function writes) are new.  Writers no longer claim the transition status
  * COMPUTED: the extractor did steps 2-3 of SPEC 4.2 only, so tstatus is n/a until the census
- * classifies the entry.
+ * classifies the entry.  Revision 4: FACT_ATYPE has the kind `unknown-effect` (SPEC 4.2 steps
+ * 2-3: a pointer that reaches a target goes to code without a body, to an unresolved indirect
+ * call, to a variadic position, or to inline assembly; version 3); FACT_LOCS counts those hits
+ * in n_unknown_effect (version 2); writers have the flag `partial-write` (a store to a part of a
+ * record- or array-typed target); loops have the flag `static-image-assumed` (a table walk read
+ * through a link that is not const, unrolled under a declared assumption).
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -77,7 +82,7 @@ enum kz_facts_section_id {
   S(FACT_LOOPS, 14, kz_fact_loop, 3)           \
   S(FACT_INIT, 15, kz_fact_init, 2)            \
   S(FACT_CONSTS, 16, kz_fact_const, 2)         \
-  S(FACT_ATYPE, 17, kz_fact_atype, 2)          \
+  S(FACT_ATYPE, 17, kz_fact_atype, 3)          \
   S(WRITERS, 18, kz_fact_writer, 2)            \
   S(ALLOCS, 19, kz_fact_alloc, 1)              \
   S(FUNCS, 20, kz_fact_func, 1)                \
@@ -89,7 +94,7 @@ enum kz_facts_section_id {
   S(CLOSURE_SPAWNS, 29, kz_closure_spawn, 1)   \
   S(CALL_TARGETS, 31, kz_fact_target, 1)       \
   S(STATIC_IMAGE, 32, kz_fact_image, 1)        \
-  S(FACT_LOCS, 33, kz_fact_loc, 1)             \
+  S(FACT_LOCS, 33, kz_fact_loc, 2)             \
   S(TERMINALS, 34, kz_fact_terminal, 1)        \
   S(OUTCALLS, 35, kz_fact_outcall, 1)          \
   S(TUS, 36, kz_tu, 1)                         \
@@ -436,8 +441,9 @@ enum kz_facts_section_id {
   X(T, uint32_t, n_escape, )   /* A-TYPE: address escapes */                         \
   X(T, uint32_t, n_cast, )     /* A-TYPE: casts to or from an untyped view */        \
   X(T, uint32_t, n_union, )    /* A-TYPE: union members */                           \
+  X(T, uint32_t, n_unknown_effect, ) /* A-TYPE: code whose effect is unknown may write it */ \
   X(T, uint32_t, n_init, )     /* objects in the INIT image */                       \
-  X(T, uint32_t, n_unresolved_indirect, ) /* whole program, reported per location */  \
+  X(T, uint32_t, n_unresolved_indirect, ) /* whole program; informational (an unresolved call counts only through unknown-effect hits) */ \
   X(T, uint8_t, status, )      /* KZ_LOC_STATUS */                                   \
   X(T, uint8_t, rsv0, )                                                              \
   X(T, uint16_t, rsv1, )
@@ -674,10 +680,14 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 /* L1-i: the body writes none of the relevant locations (the fields the predicate reads and the
  * extraction targets), through its callees included; L1-ii: the test reads happen in one
  * critical section of one lock, or are one atomic read; MOD_INCOMPLETE: the transitive write set
- * could not be closed (an unresolved indirect call or an untyped write is reachable). */
+ * could not be closed (an unresolved indirect call or an untyped write is reachable);
+ * IMAGE_ASSUMED: a table walk whose path, table or elements are not const was unrolled under the
+ * declared assumption that their static-initializer image is their value when the walk runs (no
+ * typed write of them was found; the assumption is a BASIS item with policy declared). */
 #define KZ_ENUM_LOOP_FLAGS(ITEM, P) /* set */                                        \
   ITEM(P, DELAY_DIRECT, 0x1, "delay-in-body") ITEM(P, L1_MOD, 0x2, "L1-i")           \
-  ITEM(P, L1_READ, 0x4, "L1-ii") ITEM(P, MOD_INCOMPLETE, 0x8, "mod-incomplete")
+  ITEM(P, L1_READ, 0x4, "L1-ii") ITEM(P, MOD_INCOMPLETE, 0x8, "mod-incomplete")  \
+  ITEM(P, IMAGE_ASSUMED, 0x10, "static-image-assumed")
 
 #define KZ_ENUM_ITER_KIND(ITEM, P)                                                   \
   ITEM(P, NONE, 0, "none") ITEM(P, ELEMENT, 1, "element") ITEM(P, CALL, 2, "call")   \
@@ -711,7 +721,7 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 #define KZ_ENUM_ATYPE_KIND(ITEM, P)                                                  \
   ITEM(P, NONE, 0, "none") ITEM(P, UNTYPED_WRITE, 1, "untyped-write")                \
   ITEM(P, ADDRESS_ESCAPE, 2, "address-escape") ITEM(P, CAST, 3, "cast")              \
-  ITEM(P, UNION, 4, "union")
+  ITEM(P, UNION, 4, "union") ITEM(P, UNKNOWN_EFFECT, 5, "unknown-effect")
 
 #define KZ_ENUM_WRITER_KIND(ITEM, P)                                                 \
   ITEM(P, NONE, 0, "none") ITEM(P, ASSIGN, 1, "assign") ITEM(P, MEMSET, 2, "memset") \
@@ -726,7 +736,7 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, EARLY_INIT, 0x1, "early-init") ITEM(P, INIT_TREE, 0x2, "init-tree")        \
   ITEM(P, BASE_LOCAL, 0x4, "base-local") ITEM(P, IN_LOOP, 0x8, "in-loop")            \
   ITEM(P, COVERS_MORE, 0x10, "covers-more-than-the-field")                           \
-  ITEM(P, IN_MACRO, 0x20, "in-macro")
+  ITEM(P, IN_MACRO, 0x20, "in-macro") ITEM(P, PARTIAL, 0x40, "partial-write")
 
 #define KZ_ENUM_CALL_TARGET_KIND(ITEM, P)                                                 \
   ITEM(P, NONE, 0, "none") ITEM(P, INDIRECT, 1, "indirect-call")                     \

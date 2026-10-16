@@ -1,0 +1,76 @@
+flowchart LR
+    %% D10 - two skeleton views of one actor. Source: spec §12 D10; §4.3, §4.5, §4.10, App. A.8 (litmus L-H2).
+    %% Sk^cert: every unbounded loop star-closed (no horizon). Sk^h: loops unrolled to h, the rest marked TRUNC.
+
+    subgraph CFG["actor CFG (one static actor, C code)"]
+        A0["init prefix"]
+        A1["message loop:<br/>ReceiveBuffer + dispatch"]
+        H1["handler H1"]
+        H2["handler H2<br/>(writer only reachable in<br/>handler iteration 2: L-H2)"]
+        AX["exit"]
+        A0 --> A1
+        A1 --> H1
+        A1 --> H2
+        H1 --> A1
+        H2 --> A1
+        A1 --> AX
+    end
+
+    subgraph CERT["Sk^cert: certificate view"]
+        C0["init prefix"]
+        CH["loop head"]
+        CC{"iterate / exit choice"}
+        CD["dispatch folded by Prov(p)"]
+        CH1["H1"]
+        CH2["H2"]
+        CX["exit"]
+        C0 --> CH --> CC
+        CC -->|"iterate"| CD
+        CC -->|"exit"| CX
+        CD --> CH1
+        CD --> CH2
+        CH1 -->|"back edge"| CH
+        CH2 -->|"back edge"| CH
+    end
+
+    subgraph EXP1["Sk^h with h = 1"]
+        E10["init prefix"]
+        E11["iteration 1: H1 or H2"]
+        E1T(["TRUNC"])
+        E10 --> E11 --> E1T
+    end
+
+    subgraph EXP2["Sk^h with h = 2"]
+        E20["init prefix"]
+        E21["iteration 1: H1 or H2"]
+        E22["iteration 2: H1 or H2"]
+        E2T(["TRUNC"])
+        E20 --> E21 --> E22 --> E2T
+    end
+
+    STA["MustBefore, certificates, inactive,<br/>provider none, once, PWB, K-CAP bound<br/>(Sk^cert only)"]
+    EXPL["kz explore and O8<br/>(Sk^h; h recorded in b)"]
+    PCK{"kz proofcheck<br/>view check"}
+    REJ(["reject"])
+    LIT["litmus L-H2 (App. A.8): provider present, not inactive,<br/>no certificate either way; h = 1: writer not reached<br/>(unknown(bound) on the good side); h = 2: schedule-dependent"]
+
+    CFG --> CERT
+    CFG --> EXP1
+    CFG --> EXP2
+    CERT -->|"kz-static static"| STA
+    EXP1 --> EXPL
+    EXP2 --> EXPL
+    STA -->|"certificates"| PCK
+    PCK -->|"a step names an Sk^h node or a TRUNC region"| REJ
+    EXPL --- LIT
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef trunc fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef use fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef note fill:#ffffff,stroke:#999,color:#555
+    class A0,A1,H1,H2,AX,C0,CH,CD,CH1,CH2,CX,E10,E11,E20,E21,E22 comp
+    class E1T,E2T,REJ trunc
+    class CC,PCK dec
+    class STA,EXPL use
+    class LIT note

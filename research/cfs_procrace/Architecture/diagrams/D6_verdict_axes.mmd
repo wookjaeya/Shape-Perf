@@ -1,0 +1,107 @@
+stateDiagram-v2
+    %% D6 detail - parallel regions of one verdict cell, per (σ, M) and bound. Source: spec §12 D6 (rev 1.1); §1.8, §1.10, §4.5.1, §4.12-4.14.
+    %% Each region evolves independently of the class region in D6_verdict_overview.mmd. A stall witness never moves the class region.
+
+    state "verdict cell: parallel regions (per (σ, M) and bound)" as axes {
+        state "evidence realization" as realization {
+            state "none" as rNone
+            state "predicted-modelled (A-COMM failed)" as rPM
+            state "predicted-extrapolated (summary-guided)" as rPE
+            state "model(b) (explorer)" as rModel
+            state "predicted (trace-sound under A-COMM)" as rPred
+            state "realized (order and outcome on the gcc binary)" as rReal
+            [*] --> rNone
+            rNone --> rPM
+            rNone --> rPE
+            rNone --> rModel
+            rNone --> rPred
+            rPM --> rReal : confirmation
+            rPE --> rReal : confirmation
+            rModel --> rReal : confirmation
+            rPred --> rReal : confirmation
+        }
+        --
+        state "naturalness (realized only)" as naturalness {
+            direction LR
+            state "natural (no hold, no gate)" as nNat
+            state "held-F0" as nHeld
+            state "gated-F1" as nGated
+            state "timeout-exercised (time-based transition of a cone actor)" as nTO
+            [*] --> nNat
+            [*] --> nHeld
+            [*] --> nGated
+            [*] --> nTO
+        }
+        --
+        state "provider" as provider {
+            direction LR
+            state "present" as pPresent
+            state "none" as pNone
+            state "env-absent" as pEnv
+            state "unknown" as pUnk
+            [*] --> pPresent
+            [*] --> pNone
+            [*] --> pEnv
+            [*] --> pUnk
+        }
+        --
+        state "reach (existence, never part of a class)" as reach {
+            state "assumed: a universal class reads if reached" as reAssumed
+            state "proved (b = ∞): run id or confirmed model path" as reProved
+            state "model(b): exh found a decided in-scope occurrence" as reModel
+            state "unreached(b): reads if reached, not reached within b" as reUnreached
+            state "contested (bounded b)" as reContested
+            [*] --> reAssumed
+            reAssumed --> reProved : finite execution of that σ at that M
+            reAssumed --> reModel : exh, Q_reach yes
+            reAssumed --> reUnreached : exh, Q_reach no
+            reUnreached --> reContested : reach proof within b (O6)
+        }
+        --
+        state "scope" as scope {
+            direction LR
+            state "in-scope (decided before SHUTDOWN_REQ)" as sIn
+            state "teardown (K-TEARDOWN)" as sTd
+            [*] --> sIn
+            [*] --> sTd
+        }
+        --
+        state "progress (safety and progress are separate)" as progress {
+            state "unknown(not_checked)" as gNC
+            state "unknown(teardown_scope) (K-TEARDOWN)" as gTD
+            state "unknown(bound / budget / unmodelled / model_gap)" as gUnk
+            state "stall-witness[model b]" as gSWM
+            state "stall-witness[realized]" as gSWR
+            state "no-stall-within(b) (a statement about the model only)" as gNS
+            state "contested (rendered unknown(model_fault))" as gCont
+            [*] --> gNC
+            [*] --> gTD
+            gNC --> gUnk : exh, a deadness test undecided or cap exhausted
+            gNC --> gSWM : exh, Q_stall yes
+            gNC --> gNS : exh, Q_stall no
+            gNC --> gSWR : σ_E wait-for fact that shows permanence
+            gSWM --> gSWR : wait-for oracle, confirmable kinds only
+            gSWM --> gCont : O6, prefix realized, a witnessing actor proceeds
+            gNS --> gCont : realized stall within b (O6)
+        }
+        --
+        state "trust ledger (certificate-based states): four parts, all present" as ledger {
+            direction LR
+            state "(i) re-validated inference steps, ACCEPTED or ACCEPTED_VIA_T5, correct relative to (ii) and (iii)" as l1
+            state "(ii) extracted facts: typed references with artifact hashes" as l2
+            state "(iii) trusted entries: Φ entries, DECLARED_TRUSTED, assumptions, lemma sketches, tool base" as l3
+            state "(iv) refutable, not proved: entries of (ii) or (iii) with obligation, status, exercised-path limit" as l4
+        }
+    }
+
+    note right of axes
+        certificate(id) is also a realization value (§1.10).
+        Weaker per axis: model(b) ≈ predicted-modelled ≈ predicted-extrapolated, below predicted, below realized; timeout-exercised below gated-F1 ≈ held-F0, below natural. Flag derived marks a constructed schedule.
+        Transfer: safety statements go down, good and bad witnesses go up; reach and progress are computed per σ, except that deadlock-cycle and leaked-lock stall states hold in every σ where their finite execution is admissible (L-DEAD (c), (d)).
+    end note
+
+    note left of axes
+        Progress record: the set of stall clauses (pre-use, in-use, horizon), kind (deadlock-cycle, leaked-lock, other), qualifiers (idle, terminal-pending, choice-dependent), wait-for root set, harm and progress chain; flags timeout-masked-liveness (per instance) and tml-root.
+        No transition goes from a certificate into the progress region. No progress value means live or deadlock-free.
+        Trust ledger: derived per cell (transfer lemmas added); part (i) is empty for a verdict without a certificate; passing an obligation is never recorded as proof.
+    end note

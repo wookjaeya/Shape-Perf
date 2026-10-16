@@ -1,0 +1,76 @@
+flowchart TD
+    %% D8 overview - the R2 FIXED_ORDER certificate (ES and EVS halves), expected behaviour; nothing was run.
+    %% Source: spec §12 D8; App. A.1; §4.4, §4.5. Writer lists: D8_r2_certificate_writers.mmd.
+    %% Edge labels name the rule. "--x" = excluded / no path (the rule named on the edge proves it).
+
+    INIT["INIT: CFE_SB_Global is zero-initialized<br/>(cfe_sb_task.c:40)"]
+    V0(["AppId = 0 = UNDEFINED<br/>INIT_FALSE(V)"])
+
+    subgraph ST["startup thread (PSP main, once): unrolled core loop"]
+        FES["f_ES: SetUsed(RESERVED) cfe_es_start.c:803<br/>ES iteration, allocates ρ_ES"]
+        CLES["failure clear memset :823<br/>(ES iteration)"]
+        OES["o_ES: MainTaskSyncDelay success :835<br/>Pred_code extracted (form b)"]
+        FEVS["f_EVS: :803, EVS iteration<br/>allocates ρ_EVS"]
+        CLEVS["failure clear memset :823<br/>(EVS iteration)"]
+        OEVS["o_EVS: MainTaskSyncDelay success :835"]
+        SPSB["SB spawn :810 (SB iteration)"]
+        PAN(["CFE_PSP_Panic branches<br/>terminal: cut by T-TERM"])
+    end
+
+    subgraph ESM["ES main task (once)"]
+        CES["c_ES: load of CFE_SB_Global.AppId<br/>in SB event sites inlined in CFE_ES_TaskInit<br/>(+ EVS slot check: no role, V already fails)"]
+        MES["m_ES: return of the CFE_ES_TaskInit call<br/>cfe_es_task.c:114"]
+        RES["raise_ES: cfe_es_task.c:134<br/>→ cfe_es_api.c:573"]
+    end
+
+    subgraph EVM["EVS main task (once)"]
+        CEV["c_EVS: load of CFE_SB_Global.AppId<br/>in SB event sites inlined in CFE_EVS_TaskInit"]
+        MEV["m_EVS: cfe_evs_task.c:213"]
+        REV["raise_EVS: cfe_evs_task.c:229"]
+    end
+
+    subgraph SBM["SB main task"]
+        SBE["SB entry"]
+        WX["writer x: success store of<br/>CFE_ES_GetAppID(#38;CFE_SB_Global.AppId)<br/>cfe_sb_task.c:138 (W, COMPUTED, MUST_KEY)"]
+    end
+
+    DER["derives(c, CFE_SB_Global.AppId)<br/>T-DERIVE: V evaluated at c"]
+    RESULT(["m_ES ∈ MB(x), m_EVS ∈ MB(x), m ∉ Anc(c)<br/>⇒ PWB(c, x) by FRONTIER<br/>⇒ fixed-order(σ_U, M_api and M_impl)"])
+
+    INIT --> V0
+    FES -->|"falsifier dominates o"| OES
+    CLES --> PAN
+    CLES --x|"OWN-NOPATH"| OES
+    OES -->|"failure"| PAN
+    OES -->|"T-PO"| FEVS
+    FEVS -->|"falsifier dominates o"| OEVS
+    CLEVS --> PAN
+    CLEVS --x|"OWN-NOPATH"| OEVS
+    OEVS -->|"T-PO (panic cut by T-TERM)"| SPSB
+    SPSB -->|"T-SPAWN (single spawn site)"| SBE
+    SBE -->|"T-PO"| WX
+
+    CES --x|"no path c →* m: FRONTIER"| MES
+    MES -->|"T-PO"| RES
+    RES -->|"T-OBS"| OES
+    CEV --x|"no path: FRONTIER"| MEV
+    MEV -->|"T-PO"| REV
+    REV -->|"T-OBS"| OEVS
+    RES --x|"excluded from W_o(o_EVS): ONCE-PWB"| OEVS
+
+    CES --- DER
+    CEV --- DER
+    DER --- WX
+    V0 --- DER
+    WX --> RESULT
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef obs fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef term fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef res fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef cap fill:#e9e4f5,stroke:#5b3f99,color:#111
+    class FES,FEVS,CLES,CLEVS,SPSB,MES,RES,MEV,REV,SBE,INIT comp
+    class OES,OEVS obs
+    class PAN term
+    class RESULT,V0 res
+    class CES,CEV,WX,DER cap

@@ -1,0 +1,58 @@
+kz-dump 1
+container abi=1 kind=run size=2864
+basis_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
+profile_sha256=1b92e0e511b97a41704a8c80a7b45b55f670f320189a080f416a7d2450e8c5e8
+tool_sha256=6270daf2ba43960aa8613e2de3454804a903b33cea853e35fc8fa3ccde1f881c
+parents=1
+  parent[0] kind=basis role=0 sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
+sections=13
+section STRINGS type=1 version=1 record=kz_byte record_size=1 count=294 crc32=0x330fcc4f
+section BASIS type=2 version=1 record=kz_basis_item record_size=28 count=3 crc32=0xe6352aa9
+  BASIS[0] name="observer.backend" value="perf-sample (unit-test value)" policy=unset prov=none deviation=none
+  BASIS[1] name="cfs.user" value="unit-test-user" policy=from-reference prov=none deviation=none
+  BASIS[2] name="run.count" value="1" policy=deviation prov=none deviation=0
+section FILE_HASHES type=3 version=1 record=kz_file_hash record_size=56 count=1 crc32=0x8a093737
+  FILE_HASHES[0] path="/synthetic/synthetic.bin" sha256=da76ef727d5e1b225bc88cbf4716f48be52560b4b9b249af893e97e2f31ee1ea size=4848 prov=none
+section DEVIATIONS type=5 version=1 record=kz_deviation record_size=48 count=1 crc32=0xbbeba3ff
+  DEVIATIONS[0] subject="run.count" reference_value="3" used_value="1" reason="unit-test reason" effect="unit-test effect" avoidable=no prov=none
+section SITES type=40 version=2 record=kz_site record_size=96 count=3 crc32=0x29f390d8
+  SITES[0] site=0 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=10 file_offset=0x1004 inode=4242 device=65024 build_id=0102030405060708090a0b0c0d0e0f1011121314 symbol="f" path="/synthetic/synthetic.bin" label="f.entry" source=""
+  SITES[1] site=1 kind=ret-probe insn_class=emulated decoder=generic phases={RET} line=10 file_offset=0x1004 inode=4242 device=65024 build_id=0102030405060708090a0b0c0d0e0f1011121314 symbol="f" path="/synthetic/synthetic.bin" label="f.ret" source=""
+  SITES[2] site=2 kind=point-probe insn_class=unknown decoder=generic phases={POINT} line=11 file_offset=0x100d inode=4242 device=65024 build_id=0102030405060708090a0b0c0d0e0f1011121314 symbol="f" path="/synthetic/synthetic.bin" label="f.after" source="/w/x.c"
+section RAW_EVENTS type=41 version=1 record=kz_raw_ev record_size=64 count=4 crc32=0x7668caea
+  RAW_EVENTS[0] t_ns=1000 tid=100 tseq=0 site=0 phase=ENTRY flags={} objseq=0x0 a=[0x7,0x8,0x0,0x7000000010a0]
+  RAW_EVENTS[1] t_ns=1100 tid=100 tseq=1 site=2 phase=POINT flags={} objseq=0x0 a=[0x0,0x0,0x0,0x0]
+  RAW_EVENTS[2] t_ns=1200 tid=100 tseq=2 site=1 phase=RET flags={} objseq=0x0 a=[0xc2000005,0x0,0x0,0x7000000010a0]
+  RAW_EVENTS[3] t_ns=1300 tid=101 tseq=0 site=0 phase=ENTRY flags={TRUNC} objseq=0x0 a=[0x9,0x2,0x0,0x7000000010c0]
+section LOSS type=44 version=2 record=kz_loss record_size=40 count=2 crc32=0xb402f036
+  LOSS[0] source=perf-record-lost cpu=2 site=0 tid=101 tseq_first=0 tseq_last=0 count=17 t_ns=1250
+  LOSS[1] source=perf-throttle cpu=1 site=none tid=4294967295 tseq_first=0 tseq_last=0 count=400 t_ns=1400
+section RUNMETA type=45 version=1 record=kz_runmeta record_size=152 count=1 crc32=0x704877bf
+  RUNMETA[0] basis_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945 plan_sha256=d6ce29bde8b5db0b2a0fbe6b00782ce761e44165dcbe62983a973fbb6ebecbcb s0_sha256=0000000000000000000000000000000000000000000000000000000000000000 run_ordinal=3 stratum=cold backend=perf-sample fidelity=F0 flags={loss-present} n_holds=0 kernel="Linux 0.0.0-unit-test" harness="unit-test harness" placement="unit-test placement" observer_cpu_ns=123456 boot_ns=654321
+section PERTURBATION type=46 version=1 record=kz_perturbation record_size=32 count=6 crc32=0xde3dfef4
+  PERTURBATION[0] kind=probe-hits cost_class=emulated site=0 count=2 ns=0
+  PERTURBATION[1] kind=probe-hits cost_class=ret-trampoline site=1 count=1 ns=0
+  PERTURBATION[2] kind=probe-hits cost_class=unknown site=2 count=1 ns=0
+  PERTURBATION[3] kind=observer-cpu cost_class=unknown site=none count=0 ns=123456
+  PERTURBATION[4] kind=boot-time cost_class=unknown site=none count=0 ns=654321
+  PERTURBATION[5] kind=proc-capture cost_class=unknown site=none count=9 ns=31000
+section SITE_SLOTS type=50 version=1 record=kz_site_slot record_size=20 count=6 crc32=0x49446ca6
+  SITE_SLOTS[0] site=0 slot=0 src=reg width=4 index=5 role="first"
+  SITE_SLOTS[1] site=0 slot=1 src=reg width=2 index=4 role="second"
+  SITE_SLOTS[2] site=0 slot=3 src=stack width=8 index=0 role="return_address"
+  SITE_SLOTS[3] site=1 slot=0 src=reg width=4 index=0 role="status"
+  SITE_SLOTS[4] site=1 slot=3 src=ip width=8 index=0 role="return_address"
+  SITE_SLOTS[5] site=2 slot=0 src=reg width=4 index=0 role="status"
+section SIDE_EVENTS type=51 version=1 record=kz_side_ev record_size=40 count=5 crc32=0xdb734f53
+  SIDE_EVENTS[0] t_ns=500 pid=100 tid=100 ppid=50 ptid=50 kind=FORK cpu=0 flags={} comm=""
+  SIDE_EVENTS[1] t_ns=600 pid=100 tid=100 ppid=50 ptid=50 kind=COMM cpu=0 flags={comm-exec} comm="synthetic.bin"
+  SIDE_EVENTS[2] t_ns=900 pid=100 tid=101 ppid=50 ptid=100 kind=FORK cpu=0 flags={} comm=""
+  SIDE_EVENTS[3] t_ns=950 pid=100 tid=101 ppid=50 ptid=100 kind=COMM cpu=0 flags={} comm="TASK_A"
+  SIDE_EVENTS[4] t_ns=2000 pid=100 tid=101 ppid=50 ptid=100 kind=EXIT cpu=0 flags={} comm=""
+section THREADS type=52 version=1 record=kz_thread record_size=88 count=2 crc32=0x1b20702f
+  THREADS[0] pid=100 tid=100 generation=0 ptid=50 announced_id=none flags={fork-seen,comm-seen} creator_event=none first_event=0 t_fork=500 t_exit=0 t_name=600 entry_fn=0x0 priority=0 n_events=3 name="synthetic.bin" entry_symbol=""
+  THREADS[1] pid=100 tid=101 generation=0 ptid=100 announced_id=256 flags={fork-seen,comm-seen,entry-seen,spawn-matched,exit-seen,match-by-time,id-unverified} creator_event=0 first_event=3 t_fork=900 t_exit=2000 t_name=950 entry_fn=0x7000000010c0 priority=11 n_events=1 name="TASK_A" entry_symbol="g"
+section MAPS type=53 version=1 record=kz_map_ev record_size=88 count=1 crc32=0xc127dd69
+  MAPS[0] t_ns=550 addr=0x700000000000 len=12288 pgoff=0x0 ino=4242 bias=0x700000000000 pid=100 tid=100 dev_major=254 dev_minor=0 prot=5 flags=2 bias_known=1 path="/synthetic/synthetic.bin"
+artifact_sha256=d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7
+artifact_sha256 d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7

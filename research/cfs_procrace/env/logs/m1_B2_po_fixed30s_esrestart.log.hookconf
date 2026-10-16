@@ -1,0 +1,7 @@
+VARIANT=B
+TOOLS=/home/user/Shape-Perf/research/cfs_procrace/env/tools
+LAYOUT=/home/user/Shape-Perf/research/cfs_procrace/env/logs/m1_layout.json
+PROBE=/home/user/Shape-Perf/research/cfs_procrace/env/tools/bin/mq_probe
+HOST_DIR=/home/user/work/procrace/cfs_ref/cFS/build-native_std/exe/host
+RUN_USER=ubuntu
+GRACE_MSEC=5000

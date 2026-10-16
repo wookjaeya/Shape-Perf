@@ -1,0 +1,54 @@
+flowchart TD
+    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
+    %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
+
+    B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
+    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
+
+    CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
+    CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
+
+    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+
+    OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
+
+    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+
+    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
+
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress<br/>no alarm ≠ safe")]
+    REP["L5 kz report / kz loop<br/>fixed point + run set"]
+    FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
+
+    B --> CLO
+    PHI -->|"bindings, patterns"| CLO
+    PHI --> CORE
+    CLO --> ABS
+    CORE --> ABS
+    CORE --> OPR
+    CORE --> CON
+    ABS -->|"open candidates → probe plan"| OBS
+    OBS ---|"observe"| BIN
+    OBS -->|"run-*.kzt traces"| CON
+    CON -->|"witness → hold plan"| HOLD
+    OPR -->|"witness → hold plan"| HOLD
+    HOLD ---|"hold"| BIN
+    ABS -->|"certificates, inactive"| VER
+    CON -->|"observed / predicted evidence"| VER
+    OPR -->|"model(b) evidence"| VER
+    VER --> REP
+
+    HOLD -.->|"F3 confirmation runs"| CON
+    CON -.->|"F1 keys, targets; F2 model gaps"| CLO
+    CON -.->|"F4 obligation failures"| FIX
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
+    class CLO,CORE,ABS,CON,OBS,HOLD,REP,FIX comp
+    class B,PHI,VER art
+    class OPR gated
+    class BIN bin

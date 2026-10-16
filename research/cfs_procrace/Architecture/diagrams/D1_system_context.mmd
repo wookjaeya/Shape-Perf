@@ -1,0 +1,72 @@
+flowchart TD
+    %% D1 - System context. Source: spec §12 D1; §2.2, §2.6, §5.1, §1.7, §10.1.
+    %% Dashed border + dashed edge = PI-gated node (not installed / not approved).
+
+    PI(["PI / Researcher"])
+
+    subgraph KZ["Kairos (root session)"]
+        KZS["kz-static<br/>LLVM CLI: basis, extract, link,<br/>modref, skel, static, plan"]
+        KZC["kz<br/>core-only CLI: proofcheck, observe, trace,<br/>conform, predict, explore, hold, gate,<br/>loop, report, dump"]
+    end
+
+    subgraph SRC["inputs (read-only)"]
+        TREE[("pinned cFS tree (read-only)<br/>cFS 088b2fa8, cFE c5fb2b4d,<br/>OSAL d2d877a6, PSP c4b3b0b6")]
+        BUILD[("build-native_std<br/>compile DB, link.txt, generated files, .tbl,<br/>gcc core-cpu1 + app .so with DWARF")]
+        REC[("research records<br/>policy, case ledger, results, baseline measure")]
+    end
+
+    subgraph TOOLS["toolchain (installed)"]
+        LLVM["LLVM 23 build 1053047a<br/>Clang/LLVM libraries"]
+        CL18["system clang-18<br/>BPF backend"]
+    end
+
+    subgraph HOST["Linux host (4 vCPU)"]
+        KER["Linux kernel 6.18.44-fc-v114<br/>perf uprobe PMU with attach cookies, bpf(),<br/>perf breakpoint PMU, ptrace, tracepoints"]
+        HAR["run harness env/run_cfs.sh<br/>root-side hook (decision D1),<br/>RUN_CFS_WRAP (gdb, valgrind)"]
+        CFS["cFS process core-cpu1<br/>README mode, user ubuntu, 27 threads"]
+        PST[("persistent state<br/>/dev/shm/osal:RAM, EEPROM.DAT,<br/>SysV segments, key files")]
+    end
+
+    STORE[("KZ artifact store<br/>typed KZ containers")]
+
+    subgraph GATED["PI-gated (not yet installed or approved)"]
+        Z3["Z3 (P-Z3)"]
+        LBPF["libbpf (P-LIBBPF)"]
+        NID["llvm-18-dev + Nidhugg (P-NIDHUGG)"]
+        WRAP["F1 --wrap variant (D3)"]
+        MLIR["MLIR (D6)"]
+        TSAN["TSan variant (P-TSAN)"]
+    end
+
+    PI -->|"Φ edits, decisions, freezes F1/F2"| KZC
+    TREE -->|"sources"| KZS
+    BUILD -->|"compile DB, link, tables, binaries + DWARF"| KZS
+    LLVM -->|"libraries"| KZS
+    CL18 -->|"BPF object"| KZC
+    REC -->|"reference values, policy"| KZC
+    HAR -->|"launch as ubuntu, stop method (D17),<br/>normalization boots"| CFS
+    KZC -->|"perf_event_open (uprobes by inode, breakpoints),<br/>bpf(), ptrace"| KER
+    KER -->|"traps, holds"| CFS
+    KER -->|"ring buffers / perf samples"| KZC
+    CFS <-->|"read at boot / written at stop"| PST
+    KZC -->|"S0 snapshot (read-only)"| PST
+    KZS -->|"basis, facts, skel, census, plan"| STORE
+    KZC --> STORE
+    STORE -->|"reports"| PI
+
+    Z3 -.-> KZC
+    LBPF -.-> KZC
+    NID -.-> KZC
+    WRAP -.-> KZC
+    MLIR -.-> KZS
+    TSAN -.-> KZC
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
+    class KZS,KZC,LLVM,CL18,KER,HAR comp
+    class TREE,BUILD,REC,PST,STORE art
+    class Z3,LBPF,NID,WRAP,MLIR,TSAN gated
+    class CFS bin
+    style GATED stroke-dasharray:5 5

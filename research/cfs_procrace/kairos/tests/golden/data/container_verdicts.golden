@@ -1,0 +1,44 @@
+kz-dump 1
+container abi=1 kind=verdicts size=3400
+basis_sha256=7220aaba79daeb87adc748a0136a7f509f6831f7ecdb7e048d39e53d8138079b
+profile_sha256=bbe16d93cbd718e54d5ebc3948f76224b983dfa8496c471eb69558e60b8ef6e5
+tool_sha256=2cbe633db216021c4d50a539314d4976889624a10d6bb7c27c984b0aec183a1d
+parents=2
+  parent[0] kind=facts role=0 sha256=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4
+  parent[1] kind=run role=0 sha256=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b
+sections=12
+section STRINGS type=1 version=1 record=kz_byte record_size=1 count=56 crc32=0xbc8a1c02
+section PROVENANCE type=4 version=1 record=kz_prov record_size=68 count=1 crc32=0x97aca8
+  PROVENANCE[0] tier=code-derived kind=code_pattern side=rule line_from=38 line_to=40 file="example/src/producer.c" cite="" authored="" text_sha256=0000000000000000000000000000000000000000000000000000000000000000
+section REF_LISTS type=6 version=1 record=kz_ref record_size=40 count=2 crc32=0x9e82c75e
+  REF_LISTS[0] artifact_sha256=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b section=45 index=0
+  REF_LISTS[1] artifact_sha256=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4 section=10 index=0
+section CERTIFICATES type=60 version=1 record=kz_cert record_size=136 count=1 crc32=0xb3151d68
+  CERTIFICATES[0] instance=0x1234 kind=FIXED_ORDER mlevel=M_api flags={decides} proof_status=unproved nsteps=3 first_step=0 contested_profile=0000000000000000000000000000000000000000000000000000000000000000 trust=self/TRUST_LEDGERS#0 contested_by=-
+section CERT_STEPS type=61 version=1 record=kz_cert_step record_size=36 count=3 crc32=0xbfb06c9b
+  CERT_STEPS[0] rule=VIEW from_node=0 to_node=3 site_from=none site_to=none profile_entry=none tstatus=n/a kstatus=NA view=VIEW_CERT flags={}
+  CERT_STEPS[1] rule=WRITER from_node=2 to_node=1 site_from=10 site_to=9 profile_entry=5 tstatus=COMPUTED kstatus=MUST_KEY view=VIEW_CERT flags={}
+  CERT_STEPS[2] rule=BADNESS from_node=0 to_node=0 site_from=11 site_to=none profile_entry=6 tstatus=n/a kstatus=NA view=VIEW_CERT flags={at-decision,reject-event}
+section TRUST_LEDGERS type=62 version=1 record=kz_trust_ledger record_size=224 count=1 crc32=0x270f8aec
+  TRUST_LEDGERS[0] n_rechecked=2 n_extracted=1 n_trusted=4 n_refutable=1 first=0 count=8 facts=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4/FACTS#0 skel=- anchors=- profile=- checker=self/PROVENANCE#0
+section TRUST type=63 version=1 record=kz_trust record_size=60 count=8 crc32=0x554372a2
+  TRUST[0] part=i-rechecked kind=CERT_STEP status=ACCEPTED proof=n/a ident=0 site=none refutes=none bound=inf source=self/CERT_STEPS#0
+  TRUST[1] part=i-rechecked kind=CERT_STEP status=ACCEPTED_VIA_T5 proof=n/a ident=1 site=none refutes=none bound=inf source=self/CERT_STEPS#1
+  TRUST[2] part=ii-extracted kind=FACT status=n/a proof=n/a ident=0 site=none refutes=none bound=inf source=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4/WRITERS#0
+  TRUST[3] part=iii-trusted kind=DECLARED_TRUSTED status=n/a proof=n/a ident=7 site=none refutes=none bound=inf source=82909c480b46ffde51faedd60c0d298125ec8e4751728b1f4004d8ba476aaac4/WRITERS#1
+  TRUST[4] part=iii-trusted kind=ASSUMPTION status=n/a proof=n/a ident=3 site=none refutes=none bound=inf source=-
+  TRUST[5] part=iii-trusted kind=LEMMA status=n/a proof=unproved ident=1 site=none refutes=none bound=inf source=-
+  TRUST[6] part=iii-trusted kind=LEMMA status=n/a proof=depends-on-stated-assumption ident=2 site=none refutes=none bound=inf source=-
+  TRUST[7] part=iv-refutable kind=OBLIGATION status=NOT_RUN proof=n/a ident=4 site=none refutes=3 bound=inf source=self/OBLIGATIONS#0
+section OBLIGATIONS type=64 version=1 record=kz_obligation record_size=64 count=1 crc32=0xc012a099
+  OBLIGATIONS[0] obligation=O4 status=NOT_RUN first_run=0 n_runs=0 exercised_limit="not run" witness=-
+section WITNESSES type=80 version=1 record=kz_witness record_size=112 count=1 crc32=0x14496f63
+  WITNESSES[0] kind=bad status=VIOLATING naturalness={natural} flags=0 realization={realized} ordinal_k=1 actor="example_producer_main#1" run=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b/RUNMETA#0 events=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b/RAW_EVENTS#0 n_events=2
+section VERDICTS type=81 version=1 record=kz_verdict record_size=112 count=1 crc32=0x55e40099
+  VERDICTS[0] instance=0x1234 provider=present scope=in-scope outcome_label=violation shape=WRONG-WAY consequence=event-rejected harm=event_request_rejected fw_doc={documented-result} sublabels={} ncells=2 first_cell=0 chain=- provenance=self/PROVENANCE#0
+section VERDICT_CELLS type=82 version=1 record=kz_verdict_cell record_size=472 count=2 crc32=0xd8cbbd2b
+  VERDICT_CELLS[0] sigma=sigma_U mlevel=M_api cls=fixed-order unknown_reason=none refinements={} realization={certificate} naturalness={} flags={decides} reach=proved progress=unknown progress_reason=not_checked progress_harm=none progress_realization=none safety_routes=not_bad=none,not_ok=cert,not_nr=none progress_flags={} progress_kind={} fw_conf=unknown proof_status=unproved observed_n=1 observed_N=1 bounds=self/BOUNDS#0 refinement_bounds=- progress_bounds=- pool_key=- certificate=self/CERTIFICATES#0 trust=self/TRUST_LEDGERS#0 witness_bad=- witness_good=- witness_stall=- progress_chain=- runs=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b/RUNMETA#0
+  VERDICT_CELLS[1] sigma=sigma_U mlevel=M_impl cls=unknown unknown_reason=not_reached refinements={} realization={} naturalness={} flags={} reach=assumed progress=unknown progress_reason=not_checked progress_harm=none progress_realization=none safety_routes=not_bad=none,not_ok=none,not_nr=none progress_flags={} progress_kind={} fw_conf=as-documented proof_status=n/a observed_n=0 observed_N=0 bounds=- refinement_bounds=- progress_bounds=- pool_key=- certificate=- trust=- witness_bad=- witness_good=- witness_stall=- progress_chain=- runs=-
+section BOUNDS type=83 version=1 record=kz_bound record_size=192 count=1 crc32=0x2cc1fe6d
+  BOUNDS[0] h=inf policy=unit-test-value cls=fixed-order reach=proved progress=unknown progress_kind={} safety_routes=not_bad=none,not_ok=cert,not_nr=none flags={decides} unknown_reason=none progress_reason=not_checked progress_harm=none refinements={} progress_flags={} n_bad=1 n_good=0 n_stall=0 witness_bad=self/WITNESSES#0 witness_good=- witness_stall=- progress_chain=-
+artifact_sha256=01f1990cb70f0f9f33ef473316c391cf03d647fc9c4655051743fee82ed118dc

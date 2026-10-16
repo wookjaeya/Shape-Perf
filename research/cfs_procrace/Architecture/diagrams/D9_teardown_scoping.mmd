@@ -1,0 +1,61 @@
+flowchart TD
+    %% D9 - teardown scoping on pc-linux. Source: spec §12 D9; §3.5, §1.6 (scope), §4.5 (SCOPE), §4.13, App. A.7.
+    %% Lines are in psp/fsw/pc-linux/src. In this diagram the dashed edge is the spec's "⇢" (disabler relation,
+    %% SCOPE-excluded from in-scope certificates); the dashed border marks the next run.
+
+    subgraph REQ["requester actor (any caller, e.g. via CFE_ES_ResetCFE)"]
+        direction TB
+        Q1["CFE_ES_ResetCFE → CFE_PSP_Restart"]
+        Q2["if POWERON: delete shm segments<br/>cfe_psp_support.c:62-69"]
+        Q3["write boot record NextResetType<br/>:78-79"]
+        Q4["ShutdownReq = true  :87<br/>= SHUTDOWN_REQ LP"]
+        Q5["pthread_kill SIGUSR1 to PSP main  :88"]
+        Q6["OS_TaskDelay(CFE_PSP_RESTART_DELAY)<br/>= 10000 ms  :99"]
+        Q7(["abort()  :107<br/>terminal for the requester (T-TERM)"])
+        Q1 --> Q2 --> Q3 --> Q4 --> Q5 --> Q6 --> Q7
+    end
+
+    subgraph MAIN["PSP main thread (once)"]
+        direction TB
+        M1["CFE_ES_Main"]
+        M2["return from CFE_ES_Main"]
+        M3["OS_Application_Run: sigwait loop<br/>cfe_psp_start.c:484-499"]
+        M4["observe ShutdownReq"]
+        M5["OS_TaskDelay(100)"]
+        M6["OS_DeleteAllObjects  cfe_psp_start.c:505-507<br/>= TEARDOWN LP"]
+        M1 --> M2 --> M3 --> M4 --> M5 --> M6
+    end
+
+    OBJ["every osal.obj#60;T#62; resource<br/>(e.g. timebase cFS-Master)"]
+    INS(["in-scope uses (default scope):<br/>decided before SHUTDOWN_REQ;<br/>certificates stated outside teardown"])
+    KTD(["K-TEARDOWN uses: occurrences decided<br/>after SHUTDOWN_REQ (K-LIFE during deletion);<br/>same statuses, reported apart"])
+    NOTE["SIGUSR1 is blocked process-wide: while the startup thread<br/>is inside CFE_ES_Main, a restart request causes no teardown,<br/>only the requester's abort after 10 s"]
+
+    subgraph NEXT["next run: B.Init"]
+        N1(["POWERON restart → clean Init"])
+        N2(["other exits (abort, PROCESSOR restart, harness kill)<br/>→ segments and boot record left → PROCESSOR reset"])
+        N3["normalization boot (unobserved, excluded);<br/>Init checked against canonical S0"]
+        N2 --> N3
+    end
+
+    Q4 -->|"T-OBS: SR ∈ MB(OS_DeleteAllObjects)"| M4
+    M6 -.->|"disabler of every osal.obj (SCOPE-excluded)"| OBJ
+    Q4 -->|"occurrences decided after this LP"| KTD
+    INS -->|"scope conjunct: no SHUTDOWN_REQ LP<br/>before the occurrence's decision event"| Q4
+    Q2 -->|"POWERON: segments deleted"| N1
+    Q7 -->|"any other exit"| N2
+    NOTE --- M2
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef key fill:#fffbe6,stroke:#a07a00,color:#111
+    classDef term fill:#fdeceb,stroke:#b23b3b,color:#111
+    classDef ok fill:#eaf6ea,stroke:#2e7d32,color:#111
+    classDef note fill:#ffffff,stroke:#999,color:#555
+    classDef next fill:#f4f4f4,stroke:#777,color:#111
+    class Q1,Q2,Q3,Q5,Q6,M1,M2,M3,M5,OBJ comp
+    class Q4,M4,M6 key
+    class Q7,KTD term
+    class INS ok
+    class NOTE note
+    class N1,N2,N3 next
+    style NEXT stroke-dasharray:5 5

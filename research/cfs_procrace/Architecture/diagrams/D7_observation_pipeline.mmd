@@ -1,0 +1,64 @@
+flowchart TD
+    %% D7 - observation and hold pipeline on the unmodified gcc binary. Source: spec §12 D7; §5.1-5.7, §4.13.
+    %% Costs marked [M] are measured values quoted by the spec ([R07 §4.7]); nothing here was run by Kairos.
+    %% Dashed border = optional (tracefs; P-TRACEFS recommends no).
+
+    PLAN[("plan.kz<br/>sites, cookies, decoders, cost classes,<br/>debug-register allocation")]
+    HOOK["harness root hook<br/>env/run_cfs.sh (decision D1)"]
+
+    LOAD["kz loader (root, user space)<br/>raw bpf() / perf_event_open, glibc elf.h"]
+    PSB["perf-sample backend<br/>(zero-install bring-up)"]
+    DRN["kz drainer (user space)<br/>CPU time and placement recorded"]
+    HOLD["kz hold<br/>ptrace, DR0-DR3, attach at clone"]
+    NBD["normalization-boot driver"]
+    TFS["optional tracefs instance"]
+
+    subgraph KERN["Linux kernel 6.18.44-fc-v114"]
+        UPR["uprobe registrations by (inode, offset)<br/>core-cpu1 and app .so, before launch"]
+        WP["per-task write watchpoints"]
+        BPF["BPF programs<br/>entry, point, return, watch"]
+        DESC["site-descriptor array<br/>indexed by attach cookie"]
+        SEQ["per-thread tseq<br/>per-object objseq"]
+        BUF["per-CPU ring buffers / perf buffers"]
+        DROP["drop counters / PERF_RECORD_LOST"]
+    end
+
+    THR(["cFS threads<br/>process core-cpu1, unmodified gcc binary"])
+
+    RUN[("run-*.kzt<br/>SITES, RAW_EVENTS, STRINGS, STACKS,<br/>LOSS, RUNMETA, PERTURBATION")]
+    TRC["kz trace"]
+    NB["normalization boot<br/>unobserved, excluded from pools"]
+
+    HOOK -->|"start before launch"| LOAD
+    PLAN -->|"register by inode, load descriptors"| LOAD
+    LOAD --> UPR
+    LOAD --> WP
+    LOAD -.- PSB
+    LOAD -.- TFS
+    THR -->|"hits probe"| UPR
+    THR -->|"writes watched field"| WP
+    UPR -->|"trap: 0.57 µs at entry+4 [M];<br/>31.7 µs class otherwise [M]"| BPF
+    WP -->|"≈34 µs per hit [M]"| BPF
+    BPF -->|"cookie → descriptor"| DESC
+    BPF --> SEQ
+    BPF -->|"record"| BUF
+    BUF -->|"reservation failure"| DROP
+    BUF --> DRN
+    DROP --> DRN
+    DRN --> RUN
+    DRN -->|"live stream (release on event)"| HOLD
+    HOLD -->|"stop / continue"| THR
+    THR -->|"abnormal exit"| NBD
+    NBD --> NB
+    RUN --> TRC
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef kern fill:#f3eee6,stroke:#7a5c2e,color:#111
+    classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
+    class LOAD,PSB,DRN,HOLD,NBD,TRC,HOOK,NB comp
+    class PLAN,RUN art
+    class TFS gated
+    class UPR,WP,BPF,DESC,SEQ,BUF,DROP kern
+    class THR bin

@@ -1,0 +1,33 @@
+# CONTAINER PROBE, NOT SysPro and NOT cFS: which OSAL-POSIX primitives used at the case anchors reach the kernel. 2026-10-08T01:37:00Z
+# Source: /tmp/claude-0/-home-user-Shape-Perf/e983f27d-f015-5a5d-b912-399245630e78/scratchpad/primitives.c (copied to /home/user/work/procrace/baselines/syspro/primitives.c). Build: gcc -O0 -pthread (gcc 13.3, glibc 2.39). getpid() calls are markers.
+# Command: strace -f -e trace=getpid,futex,clone,clone3,mq_open,mq_unlink,close,mmap,mprotect,rt_sigprocmask,set_robust_list,rseq,munmap,madvise,exit ./primitives
+getpid()                                = 12591
+getpid()                                = 12591
+getpid()                                = 12591
+getpid()                                = 12591
+rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7f51eb7ff000
+mprotect(0x7f51eb800000, 8388608, PROT_READ|PROT_WRITE) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f51ebfff990, parent_tid=0x7f51ebfff990, exit_signal=0, stack=0x7f51eb7ff000, stack_size=0x7fff80, tls=0x7f51ebfff6c0}strace: Process 12592 attached
+ => {parent_tid=[12592]}, 88) = 12592
+[pid 12592] rseq(0x7f51ebffffe0, 0x20, 0, 0x53053053 <unfinished ...>
+[pid 12591] rt_sigprocmask(SIG_SETMASK, [],  <unfinished ...>
+[pid 12592] <... rseq resumed>)         = 0
+[pid 12591] <... rt_sigprocmask resumed>NULL, 8) = 0
+[pid 12592] set_robust_list(0x7f51ebfff9a0, 24 <unfinished ...>
+[pid 12591] futex(0x7f51ebfff990, FUTEX_WAIT_BITSET|FUTEX_CLOCK_REALTIME, 12592, NULL, FUTEX_BITSET_MATCH_ANY <unfinished ...>
+[pid 12592] <... set_robust_list resumed>) = 0
+[pid 12592] rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+[pid 12592] rt_sigprocmask(SIG_BLOCK, ~[RT_1], NULL, 8) = 0
+[pid 12592] madvise(0x7f51eb7ff000, 8368128, MADV_DONTNEED) = 0
+[pid 12592] exit(0)                     = ?
+[pid 12592] +++ exited with 0 +++
+<... futex resumed>)                    = 0
+getpid()                                = 12591
+mq_open("syspro_probe_q", O_RDWR|O_CREAT, 0600, {mq_flags=0, mq_maxmsg=4, mq_msgsize=8, mq_curmsgs=0}) = 3
+close(3)                                = 0
+mq_unlink("syspro_probe_q")             = 0
+getpid()                                = 12591
++++ exited with 0 +++
+exit=0

@@ -274,7 +274,13 @@ struct EffectDecl {
                           // Sync: role; Env: input; SetTag: tag name
   std::string tag_value;  // SetTag
   std::string sync_object;  // Sync
+  // The guard of the effect.  `when` (filter false): the code reaches the linearization point only
+  // when the guard holds, so a point event whose guard is false in the replay is a finding (a
+  // refutation for a declared_trusted effect, a trace/profile disagreement otherwise).  `filter`
+  // (filter true): the point is shared by branches and the effect applies only where the guard
+  // holds; a false guard is not a finding.  A declared_trusted effect cannot filter.
   ExprPtr when;
+  bool filter = false;
   LpSpec lp;
   std::string status;  // "" | declared_trusted | declared_verified
   std::vector<std::string> refutable_by;

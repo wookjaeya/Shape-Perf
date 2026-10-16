@@ -1,10 +1,11 @@
-# C2·C3·C5 사례 설정 — 첫 분석·실행 경로 (2026-10-15)
+# C2·C3·C5 사례 설정 — 첫 분석·실행 경로 (2026-10-15, 2026-10-16 보완)
 
 - 대상: C2 (nasa/cFE #198), C3 (nasa/cFE #73), C5 (nasa/cFE #72). 보조 쌍: cFE `58abd38d^`/`58abd38d` (P-RGIT).
 - 위치와 역할: `plan/case_setup_C2_C3_C5.md`. [ROADMAP_20261015.md](ROADMAP_20261015.md) §12 작업 5의 산출물이며, §9.1(C2)·§9.2(C3)·§9.3(C5)의 `[제안]` 작업을 "첫 분석 또는 실행 경로"로 구체화한다. 조건표·기대 결과표는 병행 문서 `plan/case_basis_register.md`가 다룬다. 이 문서는 그 문서의 ID를 인용하지 않는다.
-- 읽은 입력: [PI_DECISIONS_RESOLVED_20261015.md](../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md) §2·§3.3–§3.6·§4, [ROADMAP_20261015.md](ROADMAP_20261015.md) §3·§6.1·§9·§12·§13, `Architecture/spec/SPEC_FINAL.md` rev 1.1 (§7.6, §8.2, §9.3, §10.1, 부록 A.3·A.8), `Architecture/spec/PI_DECISIONS.md` (D13, D14, D15, P-C1HOLD, P-C2, P-RGIT), [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md), `cases/ledger.md`, `cases/C2.md`·`C3.md`·`C5.md`, `env/ENV.md`, `env/CONDITIONS.md`, `env/logs/f_root_capability_probe.log`.
+- 읽은 입력: [PI_DECISIONS_RESOLVED_20261015.md](../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md) §2·§3.3–§3.6·§4, [ROADMAP_20261015.md](ROADMAP_20261015.md) §3·§6.1·§9·§12·§13, `Architecture/spec/SPEC_FINAL.md` rev 1.1 (§7.6, §8.2, §9.3, §10.1, 부록 A.3·A.8; 2026-10-16에 rev 1.2에서 재확인, 부록 D.1), `Architecture/spec/PI_DECISIONS.md` (D13, D14, D15, P-C1HOLD, P-C2, P-RGIT), [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md), `cases/ledger.md`, `cases/C2.md`·`C3.md`·`C5.md`, `env/ENV.md`, `env/CONDITIONS.md`, `env/logs/f_root_capability_probe.log`.
 - 성격: **읽기, 파일 가져오기, 해시 계산, 압축 해제, 정적 ELF 점검, 구문 분석 전용 프로브**만 수행했다(§0.3). cFS·cFE·OSAL·PSP·CF를 빌드·링크·실행하지 않았고, 패키지를 설치하지 않았고, 파일을 삭제하지 않았고, git add/commit/push를 하지 않았다. 내려받은 외부 바이너리(CentOS RPM의 실행 파일)는 실행하지 못했다(§3.3.1). `kairos/`와 소스 코드를 건드리지 않았다. N·임계값·예산·노력 수치를 새로 정하지 않았다. PI 결정은 결정[D]으로만 적었고 사실로 옮기지 않았다.
 - 검토 반영: 검토 지적 11건을 원본과 대조해 반영했다. 항목별 처리는 부록 C이다. ID 표기: `D13`·`D14`·`P-C2`·`Q22`처럼 사례 접두사가 없는 ID는 PI 결정(`Architecture/spec/PI_DECISIONS.md`)이고(모호하면 `PI-D1`처럼 접두사를 붙인다), 사례 기록(`cases/C*.md`)의 결정·가정 ID는 `C2-D4`·`C3-D3(a)`처럼 항상 사례 접두사를 붙이며, `ledger X3`은 `cases/ledger.md` §5의 항목이다.
+- 2026-10-16 보완(부록 D): (1) SPEC이 rev 1.2로 바뀌어(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함) 이 문서가 인용한 SPEC 문구를 rev 1.2에서 다시 찾아 줄 번호를 붙였다. 인용한 문구는 모두 rev 1.2에 남아 있다(부록 D.1). (2) 6.4.1·6.4.2·OSAL 4.1.1 tarball을 다시 내려받아 같은 sha256을 확인했다. (3) 컴파일 DB를 **6.4.2와 앱 번역 단위(5개)까지** 넓혀 같은 구문 분석·민감도 프로브를 돌렸다(§3.2, §3.3, 부록 D.2). (4) C3·C5의 관측 사건과 식별 방법을 §4.3으로 추가했다(ROADMAP §9.2·§9.3의 `[제안]` 항목 대응). (5) 이슈 페이지를 다시 읽으려 했으나 막혔다(§2.1). 이번에도 cFS를 빌드·실행하지 않았고 설치·삭제·git 조작을 하지 않았다.
 - 용어: T1 = (a)에 따라 판정 대상은 **준비 상태 명세(readiness specification)**, 전제는 **준비 상태 전제(readiness precondition)**, 위반은 **준비 상태 위반(readiness violation)** 이다. "API contract"는 문서화된 API 의미(헤더의 `\retcode` 등)를 말할 때만 쓴다. 원출처의 "race"는 도구 class로 자동 변환하지 않는다(P-CLASSGT).
 
 ## 0. 읽는 법
@@ -41,6 +42,7 @@
 | 컴파일 DB 재구성 | make 조각(`*.mak`, `Makefile`)을 **읽고** 파이썬으로 53개 번역 단위의 명령행을 생성. `make config`의 파일 복사 5건은 파일 복사로만 흉내 냈다 | 패키지 설치, 시스템 설정 변경 |
 | 구문 분석 프로브 | clang 18·gcc 13의 `-fsyntax-only`·`-E`·`-M`, clang의 `-ast-dump`·`-fdump-record-layouts-simple` | 앱(sample_app 등)·단위 시험·링크 단계의 분석 |
 | 문헌상 host의 헤더로 같은 프로브 | CentOS 6.5 i686 RPM 3개를 가져와 **압축 해제만**(설치 아님) | 그 host의 gcc·실행 환경 재현 |
+| (2026-10-16) tarball 재수신·해시, 6.4.2·앱 번역 단위까지 컴파일 DB 재구성과 구문 분석 프로브, 구조체 크기 재측정, Q16 앵커 재확인 | 같은 방법. make는 실행하지 않았고 `make config`의 앱 헤더 복사 3종(`public_inc`·`mission_inc`·`platform_inc`)도 파일 복사로만 흉내 냈다 | 앱 링크, `elf2cfetbl`, 단위 시험 |
 | 문헌상 host 사용자 영역의 조립 가능성 점검(§3.3.1) | 같은 vault에서 gcc·binutils·glibc 등 RPM 16개를 더 가져와 새 디렉터리에 페이로드만 풀고, `readelf`로 의존 라이브러리를 정적으로 점검. `command -v`·`docker info`·레지스트리 HEAD 요청 | 풀어낸 바이너리의 **실행**(세션 권한 정책이 거부했고 우회하지 않았다), docker 데몬 기동, 이미지 pull, qemu 설치 |
 
 재현 명령은 부록 A에 있다. 스크래치 경로는 인용하지 않는다.
@@ -51,11 +53,12 @@
 |---|---|---|---|
 | **C2 단일/두 단계 동기화 코드 읽기** | 6.4.2·v6.5.0a의 `WaitForStartupSync`·`ApplicationSyncDelay`·`ES_Main` 말미가 공백 무시 비교로 동일[M]. v6.6.0a·v7.0.1은 `APPS_INIT`·`LATE_INIT`·`WaitForSystemState`·2단계 `MainTaskSyncDelay`[F] (§2.2) | 6.4.1의 세마포어 기반 동기화(Trac #40 이전)는 이 절에서 다루지 않음. C2는 6.4.2를 단일 단계 기준으로 삼는다 | 읽기 |
 | **C2 역할·2×2** | P(late init 제공)·R(의존 호출)의 정의를 보고 사실과 재구성 선택으로 분리. 4셀 중 3셀 실행 가능, 1셀(단일 단계×새 provider)은 심볼 부재로 제외[M]. 따라서 PI 결정문·SPEC이 서술한 교차 2×2는 그대로는 실현되지 않는다 (§2.3–§2.4) | 3셀 + B 제외로 충분한지 PI 확인(§7 항목 1), 요청 방식(C2-D4), 앱 수·우선순위·timeout 인자, 단일 단계 쪽 개정(6.4.2 대 v6.5.0a), 6.5.0a·6.6.0a configure 결정 — 모두 P-C2 | 읽기(역할·설계) / 빌드·실행(셀 실행) |
-| **C3·C5 분석 기반 아티팩트** | 6.4.1·6.4.2·OSAL 4.1.1 tarball을 원 배포처(SourceForge)에서 지금 가져올 수 있음. sha256이 ledger·C3·C5 기록과 일치[M] (§3.1) | 6.4.1·6.4.2의 git 이력은 없음(기록) | 읽기 |
-| **컴파일 DB·파싱 (D13 (a)/(b)(i))** | 53개 번역 단위의 컴파일 명령 재구성. 컨테이너의 32비트 헤더로 clang 18 기본 설정은 51/53 통과, 오류 2건(§3.3), `-Wno-error=incompatible-function-pointer-types`를 주면 53/53, 0 오류 [M]. 이 옵션은 레퍼런스에 없는 우회책이며 `deviation`으로 기록했다(§3.3) | 구문 분석이 통과했다는 사실은 빌드·실행 가능성의 근거가 아님. 앱·단위 시험 번역 단위는 미포함 | 파싱 |
-| **헤더·환경 민감도 (deviation)** | 구조체 크기 7종·OS/기본 타입 크기 7종은 컨테이너 헤더(glibc 2.39)와 CentOS 6.5 헤더(glibc 2.12)에서 동일. 전처리한 프로젝트 토큰열은 53개 중 51개 동일, 2개는 `sched_priority` 멤버 이름 별칭만 다름[M] (§3.3) | 민감성 판정과 (ii) 전환 여부는 PI. 이름에 의존하는 바인딩은 보류 대상 후보. 문헌상 host의 gcc·전체 sysroot를 실행해 본 시험은 없음[U] (§3.3.1) | 파싱 / (ii) 확대: 헤더 추출 범위에서는 설치 없음[I], 전체 sysroot·gcc는 미시험[U] |
+| **C3·C5 분석 기반 아티팩트** | 6.4.1·6.4.2·OSAL 4.1.1 tarball을 원 배포처(SourceForge)에서 지금 가져올 수 있음. sha256이 ledger·C3·C5 기록과 일치[M] (§3.1). 2026-10-16 재수신에서도 HTTP 200, 같은 sha256[M] | 6.4.1·6.4.2의 git 이력은 없음(기록) | 읽기 |
+| **컴파일 DB·파싱 (D13 (a)/(b)(i))** | 2026-10-15: 6.4.1 코어·OSAL·PSP 53개 번역 단위. 2026-10-16: 6.4.1과 6.4.2 각각 58개(53 + 앱 5: `sample_lib`·`sample_app`·`ci_lab`·`to_lab`·`sch_lab`). 컨테이너의 32비트 헤더로 clang 18 기본 설정은 두 판 모두 56/58 통과, 오류 2건(같은 두 줄, §3.3), `-Wno-error=incompatible-function-pointer-types`를 주면 58/58, 0 오류. gcc 13은 플래그 없이 58/58 [M]. 이 옵션은 레퍼런스에 없는 우회책이며 `deviation`으로 기록했다(§3.3) | 구문 분석이 통과했다는 사실은 빌드·실행 가능성의 근거가 아님. 단위 시험·링크 단계는 미포함 | 파싱 |
+| **헤더·환경 민감도 (deviation)** | 구조체 크기 7종·OS/기본 타입 크기 7종은 컨테이너 헤더(glibc 2.39)와 CentOS 6.5 헤더(glibc 2.12)에서 동일(6.4.1·6.4.2 모두). 전처리한 프로젝트 토큰열은 판마다 58개 중 56개 동일, 2개는 `sched_priority` 멤버 이름 별칭만 다름. clang 대 gcc는 58/58 동일[M] (§3.3) | 민감성 판정과 (ii) 전환 여부는 PI. 이름에 의존하는 바인딩은 보류 대상 후보. 문헌상 host의 gcc·전체 sysroot를 실행해 본 시험은 없음[U] (§3.3.1) | 파싱 / (ii) 확대: 헤더 추출 범위에서는 설치 없음[I], 전체 sysroot·gcc는 미시험[U] |
 | **원 사례 플랫폼 대비** | 이 문서의 파생 기반(6.4.1 `pc-linux`, 32비트 x86)은 6.4.1 readme가 지원 런타임으로 적은 플랫폼이다. C3의 보고 플랫폼 Microblaze에 대해서는 `deviation`, C5(#72)의 플랫폼은 `unspecified_by_reference` (§3.3.2) | Microblaze의 OS·PSP·OSAL·툴체인(레퍼런스에 없음). RQ2·H-V 보고에 `deviation`을 이월(PI D13 (b)) | 읽기 |
-| **Q16 표 골격** | C3 13행, C5 12행. 6.4.1·6.4.2 파일:줄을 tarball에서 읽어 채움[F] (§4) | Φ_6.4.x의 Allowed 항목(6.4.1 레퍼런스 인용)은 `unspecified_by_reference` 유지. 기계 검증용 golden 시험 미작성 | 읽기 |
+| **Q16 표 골격** | C3 13행, C5 12행. 6.4.1·6.4.2 파일:줄을 tarball에서 읽어 채움[F] (§4). 2026-10-16 재수신 tarball에서 부록 A.5 앵커가 같은 줄을 돌려줌[M] | Φ_6.4.x의 Allowed 항목(6.4.1 레퍼런스 인용)은 `unspecified_by_reference` 유지. 기계 검증용 golden 시험 미작성 | 읽기 |
+| **C3·C5 관측 사건** | 사건 목록, 식별 방법(새 task를 `GetAppID`가 아니라 OS thread와 생성 관계로 식별), 판정 단위와 파생 결과(충돌)의 분리, 6.4.2 diff에 Trac #40·#41·#42가 섞였다는 표시 (§4.3) | 관측 도구·보류 지점·순서 제어 방식은 PI(C3-D3, `ledger.md` X3). 실행은 6.4.x 실행 기반 이후 | 읽기(설계) / 실행 |
 | **P-RGIT 보조 쌍** | `58abd38d^` = `6b9c267e`, 각 쪽에서 §5.2가 인용하는 ES 소스 3파일(`cfe_es_api.c`·`cfe_es_apps.c`·`cfe_es_resource.c`)을 가져와 읽음(변경 파일 10개의 목록은 두 커밋의 변경 파일 목록에서 확인), 대기 함수 변경점(앱 레코드 → 태스크 레코드) 확인. 공개 번들 `a41549cb`가 `58abd38d^`와 OSAL·PSP 쌍을 이룸[M] (§5) | 입력 대응 비용 확인 뒤 수행(PI). 쌍의 모든 조건은 `unspecified_by_reference` | 읽기 / 수행 시 빌드·실행 |
 | **6.4.x 실행 (분석 전용과 별도)** | 32비트 런타임은 있음. root의 `CAP_SYS_RESOURCE` 부재와 `msg_max` 10이 큐 깊이 10 초과 큐 생성에 걸릴 가능성(§3.5) | 이 조건에서 6.4.1이 기동하는지는 미시험[U] | 실행·플랫폼(권한) |
 
@@ -65,7 +68,7 @@
 
 ### 2.1 공개 보고가 고정하는 것과 열어 둔 것
 
-이슈 #198 본문은 8개 문장이다. 사례 기록은 이를 WebFetch의 125자 이하 조각으로 보존한다(기록). 줄 바꿈·서식은 보장되지 않는다. 댓글은 없다(기록). 이 문서에서는 이슈 페이지를 다시 읽지 못했다(GitHub REST·API는 이 세션에서 403, §3.1).
+이슈 #198 본문은 8개 문장이다. 사례 기록은 이를 WebFetch의 125자 이하 조각으로 보존한다(기록). 줄 바꿈·서식은 보장되지 않는다. 댓글은 없다(기록). 이 문서에서는 이슈 페이지를 다시 읽지 못했다(GitHub REST·API는 이 세션에서 403, §3.1). 2026-10-16에 다시 시도했다[M]: `https://github.com/nasa/cFE/issues/198`·`/73`·`/72`와 `api.github.com/repos/nasa/cFE/issues/198`이 모두 HTTP 403("GitHub access to this repository is not enabled for this session")이고, GitHub MCP 도구도 "repository nasa/cfe is not configured for this session"으로 거부했다. 저장소 접근 추가는 사용자 승인이 필요한 조작이라 하지 않았다. raw.githubusercontent.com과 `git ls-remote`(github.com)는 된다.
 
 | 항목 | 보고가 고정하는 것 [F](기록) | 보고가 열어 둔 것 [U] |
 |---|---|---|
@@ -192,7 +195,7 @@
 
 ### 3.1 아티팩트의 출처와 해시
 
-원 배포처는 SourceForge이다. 가져오기는 `https://sourceforge.net/projects/…/download`가 `master.dl.sourceforge.net`로 리다이렉트되었다[M]. 2026-10-15에 세 파일 모두 HTTP 200이었다.
+원 배포처는 SourceForge이다. 가져오기는 `https://sourceforge.net/projects/…/download`가 `master.dl.sourceforge.net`로 리다이렉트되었다[M]. 2026-10-15에 세 파일 모두 HTTP 200이었다. 2026-10-16에 같은 URL에서 다시 받아도 HTTP 200, 같은 바이트 수, 아래와 같은 sha256이었다[M].
 
 | 아티팩트 | 출처 URL | 바이트 | sha256 (계산) | gzip 헤더 시각(UTC) | 기록과의 일치 |
 |---|---|---:|---|---|---|
@@ -212,14 +215,16 @@
 | SourceForge 릴리스 파일 | 성공 |
 | `raw.githubusercontent.com` 고정 SHA 파일 | 성공 |
 | `git fetch --filter=blob:none <SHA>` (github.com/nasa/cFS) | 성공 |
+| `git ls-remote https://github.com/nasa/cFE` (2026-10-16) | 성공. `v6.5.0a`는 주석 태그 객체 `40e7d511…`이고 가리키는 커밋이 `b2765d9f…`, `v6.6.0a` = `8811c920…`, `v7.0.1` = `c5fb2b4d…` (부록 B와 같음) |
 | `web.archive.org`, `babelfish.arc.nasa.gov` | HTTP 000(연결 거부). 사례 기록과 같음 |
 | `gh api repos/nasa/cFS…`·nasa/cFE REST | 403 "not enabled for this session" |
+| `github.com/nasa/cFE/issues/N` HTML, GitHub MCP `issue_read` (2026-10-16) | 403 / "not configured for this session" (§2.1) |
 
 비용: 읽기.
 
 ### 3.2 컴파일 DB·include 입력
 
-6.4.1 트리에는 컴파일 DB가 없다. 빌드는 `build/cpu1/Makefile` → `build/cfs.mak` → `build/cpu1/cfe/<서브시스템>/Makefile` → `cfe/fsw/cfe-core/src/make/make-rules.mak`의 규칙이다. 컴파일 명령은 `$(COMPILER) $(LOCAL_COPTS) $(INCLUDE_PATH) $(COPTS) $(DEBUG_OPTS) -DOS_DEBUG_LEVEL=$(DEBUG_LEVEL) -c`이다(`make-rules.mak`). 아래는 Makefile을 **읽어서** 재구성한 입력이며 각 값은 CONDITIONS_POLICY 형식이다.
+6.4.1·6.4.2 트리에는 컴파일 DB가 없다. 빌드는 `build/cpu1/Makefile` → `build/cfs.mak` → `build/cpu1/cfe/<서브시스템>/Makefile` → `cfe/fsw/cfe-core/src/make/make-rules.mak`의 규칙이다. 컴파일 명령은 `$(COMPILER) $(LOCAL_COPTS) $(INCLUDE_PATH) $(COPTS) $(DEBUG_OPTS) -DOS_DEBUG_LEVEL=$(DEBUG_LEVEL) -c`이다(`make-rules.mak`). 아래는 Makefile을 **읽어서** 재구성한 입력이며 각 값은 CONDITIONS_POLICY 형식이다.
 
 **상태 열의 `from-reference`가 뜻하는 범위**: 6.4.1 배포 파일이 지원 런타임 대상으로 적은 `pc-linux` 플랫폼(32비트 x86 Linux)에서 읽은 값이라는 뜻이다(readme L100 "1. 32 bit x86 Linux ( CentOS 6.x )", `cfe-config.mak` L27·L32). **C3·C5 사례의 원 플랫폼 조건이라는 뜻이 아니다**(ROADMAP §6.1은 `from-reference`가 해당 원출처의 조건이라는 뜻이며 공개 BP 구성의 값이 원 보고자 구성에서도 쓰였다는 뜻이 아니라고 적는다. 같은 주의를 6.4.1 `pc-linux` 값에 적용한다[I]). C3의 보고 플랫폼은 Microblaze이고 C5(#72)의 플랫폼은 불명이다. 원 플랫폼 대비 상태는 §3.3.2에 따로 적는다.
 
@@ -233,7 +238,10 @@
 | 아키텍처·디버그 | `-m32 -Wall -Wstrict-prototypes -g -O0 -DOS_DEBUG_LEVEL=3` | `compiler-opts.mak` L33; `build/cpu1/cfe/debug-opts.mak` | from-reference (6.4.1 readme 기준 플랫폼 `pc-linux`; 사례의 원 조건 아님) |
 | `LOCAL_COPTS` | 비어 있음(`EXCLUDE_CFE_TBL`을 정의하지 않음) | `build/cpu1/cfe/es/Makefile` | from-reference(기본; 6.4.1 readme 기준 플랫폼, 사례의 원 조건 아님) |
 | 번역 단위 | 53개: ES 11, SB 7, EVS 4, TBL 4, TIME 4, FS 3(= 33), OSAL posix 6(`osapi.c` 등), PSP pc-linux 14(`pc-linux/src` 9 + `psp/fsw/shared` 5) | 각 `cfe_<s>.mak`, `osal.mak`, `psp.mak` | from-reference (6.4.1 readme 기준 플랫폼 `pc-linux`; 사례의 원 조건 아님) |
-| 미포함 | 앱(`sample_app` 등 `THE_APPS`), 단위 시험, 링크 단계, `elf2cfetbl` | `build/cpu1/Makefile` L42–L43 | 다음 단계. C5의 victim 후보 `sample_app.c`는 앱 Makefile(`apps/<app>/fsw/for_build`)에서 별도로 재구성해야 한다 |
+| 앱 번역 단위 (2026-10-16 추가) | 5개: `THE_APPS := sample_lib sample_app`, `THE_APPS += ci_lab to_lab sch_lab`의 각 앱 `OBJS`(앱마다 1개). include: `-I$(OSAL_SRC)/inc -I$(CFE_CORE_SRC)/inc -I$(CFE_PSP_SRC)/inc -I$(CFE_PSP_SRC)/pc-linux/inc -I$(CFS_APP_SRC)/inc -I<앱>/fsw/src -I<mission_inc> -I../cfe/inc -I../inc`. `../cfe/inc`(= `build/cpu1/cfe/inc`)는 출하 트리에 없는 디렉터리라 아무것도 주지 않는다[M]. 컴파일 줄은 `app-rules.mak` L21(코어와 같은 형식), `LOCAL_COPTS`는 다섯 앱 모두 비어 있다(각 `for_build/Makefile` L36) | `build/cpu1/Makefile` L42–L43; `apps/<app>/fsw/for_build/Makefile`; `cfe-core/src/make/app-rules.mak` L21 | from-reference (같은 단서). C5의 victim 후보 `sample_app.c`가 여기 들어간다 |
+| 앱 헤더 복사 (2026-10-16 추가) | `make config`의 `cfs_copy_app_public_incs`·`cfs_copy_app_mission_incs`·`cfs_copy_app_platform_incs`(`build/cfs.mak` L58·L75·L93)를 파일 복사로 흉내 냄. 코어 복사 5건과 합쳐 15건 | `build/cfs.mak` L36–L146 (`cfs_prebuild`) | from-reference(단계) |
+| 6.4.2 | `build/` 트리 전체, `psp/fsw/pc-linux`, `psp/fsw/shared`가 6.4.1과 바이트 단위로 같다(`diff -rq` 출력 없음[M]). 6.4.2에 `psp/fsw/beaglebone-linux`가 추가되었으나 pc-linux 빌드에 쓰이지 않는다. 6.4.2 `cfe/fsw/platform_inc/cpu1/`에는 `cfe_platform_cfg.h~`가 함께 들어 있으나 `cfe_platform_cfg.h`와 sha256이 같고(`82eeac232452…`[M]) 복사 규칙의 `*.h`에 걸리지 않는다. 따라서 6.4.2의 컴파일 명령은 경로만 바뀐 같은 58개이다 | 6.4.2 readme: OSAL "4.1.1 or higher"(L76), 지원 런타임 "32 bit x86 Linux ( CentOS 6.x )"(L100) | from-reference (6.4.2 readme 기준 플랫폼 `pc-linux`; 사례의 원 조건 아님) |
+| 미포함 | 단위 시험, 링크 단계, `elf2cfetbl` | `build/cpu1/Makefile` | 다음 단계 |
 
 비용: 파싱(설치 없음).
 
@@ -243,7 +251,7 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 
 | 항목 | 레퍼런스(6.4.1 readme) | 이 컨테이너 [M] | 상태 |
 |---|---|---|---|
-| 빌드 host | "built on CentOS/RHEL 6.x x86 (32 bit)", "compiled on CentOS 6.5-x86, CentOS-7.0-x64, Ubuntu 12.04 LTS x86, Ubuntu 14.04 LTS x64"(L83·L88–L89). 64비트 host에서는 "build and run as a 32 bit application"(L86–L87) | Ubuntu 24.04.4 LTS, x86_64, 커널 6.18.44, 4 CPU | **deviation**. 이유: 이 컨테이너는 readme가 나열한 host 중 어느 것도 아니다. 영향: 아래 표. **그렇게 할 수밖에 없다는 근거는 시험하지 않았다[U]**: 목록 host의 재구성(VM·컨테이너 이미지·사용자 영역 조립)을 시도한 시험이 없다. §3.3.1의 프로브는 사용자 영역 파일이 vault에서 모두 가져와지고 정적 의존이 닫힌다는 것까지만 보였고, 실행은 하지 못했다 |
+| 빌드 host | "built on CentOS/RHEL 6.x x86 (32 bit)", "compiled on CentOS 6.5-x86, CentOS-7.0-x64, Ubuntu 12.04 LTS x86, Ubuntu 14.04 LTS x64"(L83·L88–L89). 64비트 host에서는 "build and run as a 32 bit application"(L86–L87). 6.4.2 readme도 같은 줄(L83–L91)에 같은 문구이고, 빠른 시작에 "cFS has been built and run on Ubuntu 13.10 x64 and CentOS 6.5 i386"(L129)을 더한다[F, 2026-10-16 재수신 tarball] | Ubuntu 24.04.4 LTS, x86_64, 커널 6.18.44, 4 CPU | **deviation**. 이유: 이 컨테이너는 readme가 나열한 host 중 어느 것도 아니다. 영향: 아래 표. **그렇게 할 수밖에 없다는 근거는 시험하지 않았다[U]**: 목록 host의 재구성(VM·컨테이너 이미지·사용자 영역 조립)을 시도한 시험이 없다. §3.3.1의 프로브는 사용자 영역 파일이 vault에서 모두 가져와지고 정적 의존이 닫힌다는 것까지만 보였고, 실행은 하지 못했다 |
 | 컴파일러 | readme는 gcc 버전을 쓰지 않는다. "On Ubuntu 14.04, the cFE unit tests do not work due to differences in the GCC compiler"(L90–L91) — 컴파일러 차이가 알려져 있다는 뜻 | clang 18.1.3, gcc 13.3.0 | deviation. 목록 host의 gcc 버전은 `unspecified_by_reference`. CentOS 6.5 GA 패키지 세트의 gcc는 `gcc-4.4.7-4.el6`이다(vault 색인; RPM 안 `cc1`의 버전 문자열 `4.4.7 20120313 (Red Hat 4.4.7-4)`[M]). 목록 host가 그 gcc를 썼다는 것은 가정[I] |
 | 진단 옵션 `-Wno-error=incompatible-function-pointer-types` (프로브에서만 사용) | 레퍼런스에 없다. 6.4.1 make 트리(`*.mak`·`Makefile`·`*.sh`)에 `-std=`·`-Wno-error`·`-Werror`가 없고, pc-linux 경고 옵션은 `-Wall -Wstrict-prototypes`뿐이다(`compiler-opts.mak` L13)[M: grep] | clang 18 기본 설정에서 번역 단위 2개(`osapi.c:647`, `cfe_psp_start.c:270`)가 오류로 막힘. 이 플래그로 진단을 경고로 내리면 53/53 통과(§3.3 ⑤) | **deviation**(우회책). 이유: clang 16 이후 이 진단이 기본 오류이다. 영향: 오류가 경고가 되어 두 번역 단위가 구문 분석을 통과하며 소스는 바꾸지 않는다. 불가피성은 없다: 컨테이너 gcc 13은 이 플래그 없이 53/53 통과(22 경고). 목록 host의 gcc에서 이 두 호출이 오류였는지는 시험하지 않았다[U] |
 | 언어 표준 `-std=gnu89` (프로브에서만 사용) | 레퍼런스에 없다(readme·make 트리가 `-std`를 정하지 않음; 위 grep) | 지정해도 결과가 같다(53/53, 0 오류, 20 경고) | `unspecified_by_reference`. 기본 표준과 비교하려는 프로브 선택이며 레퍼런스에서 읽은 값이 아니다. 근거 [U→부분 확인]: 당초 "gcc 4.x의 기본이 gnu89"라는 배경 지식[U]이었고, 이번에 `gcc-4.4.7-4.el6` RPM의 man 페이지(`gcc.1.gz`)에서 "gnu89 … This is the default for C code"를 읽었다[F: RPM 내용 읽기만]. 목록 host가 그 gcc였는지는 [I] |
@@ -260,6 +268,22 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 | **③ 정수·포인터 크기** | `-m32`에서 `__SIZEOF_LONG__`·포인터·`size_t` = 4. `int32` = `long int`(4), `uint32` = `unsigned long int`(4), `cpuaddr` = `unsigned long int`(4)(`common_types.h` L135·L139·L142). `sizeof` 14종(`EVS_AppData_t` 70, `CFE_EVS_GlobalData_t` 2540, `CFE_ES_AppRecord_t` 168, `CFE_ES_TaskRecord_t` 36, `CFE_ES_Global_t` 34812, `cfe_sb_t` 549076, `CFE_SB_PipeD_t` 68, `pthread_t` 4, `pthread_mutex_t` 24, `time_t` 4, `uint32` 4, `cpuaddr` 4, `void*` 4, `int32` 4)이 컨테이너 헤더·CentOS 6.5 헤더(clang)·컨테이너 gcc 13에서 모두 같다(gcc는 `_Static_assert` 14건 통과, 음성 대조 1건 실패 확인). **`-m32`를 빼면 53개 번역 단위가 모두 실패**한다(오류 106건, 첫 오류 `common_types.h:256 CompileTimeAssert(sizeof(uint32)==4)`) | 크기 수준에서는 헤더에 민감하지 않다. 대신 `-m32`는 **필수**이다: `_ix86_`가 `-D`로 정의되어 `uint32 = unsigned long`이 고정되므로 64비트 대상은 성립하지 않는다. 포인터↔`uint32` 변환이 곳곳에 있다(예: `cfe_esmempool.c` L196·L203, `osapi.c` L968 `OS_TaskGetId`의 `memcpy(&task_id_int,&task_id,sizeof(uint32))`) |
 | **④ 매크로가 선택한 소스 경로** | 닫힘 113개 파일 중 환경·컴파일러 매크로를 거는 조건문이 있는 파일은 6개(50줄): `common_types.h` L114(`__GNUC__`)·L126(`_ix86_`‖`__i386__`)·L144(`_ix64_`‖`__x86_64__`)·L162(PPC), `EXCLUDE_CFE_TBL`(`cfe_es_apps.c` L130·L1199, `cfe_es_objtab.c` L57·L67·L100·L128), `SOFTWARE_LITTLE_BIT_ORDER`(`cfe_psp_eeprom.c`), `OS_DEBUG_PRINTF`(OSAL posix; `osconfig.h`에 정의 없음). 전처리 후 프로젝트 파일 토큰열(공백 제거)은 **clang 18 대 gcc 13에서 53/53 동일**(각 1,669,604자). **컨테이너 헤더 대 CentOS 6.5 헤더에서는 51/53 동일**, 다른 2개(`osapi.c`, `cfe_psp_start.c`)는 `sched_priority` 대 `__sched_priority`뿐. clang은 `__GNUC__ 4`(minor 2)를, gcc 13은 `13`을 정의한다 | 닫힘 안에서 `__GNUC__`는 `defined` 형태로만 쓰여 컴파일러 차이가 경로를 바꾸지 않는다. 경로 선택은 `-D`(`_ix86_` 등)와 `-m32`(`__i386__`)가 정하고, `EXCLUDE_CFE_TBL`·`OS_DEBUG_PRINTF`는 정의되지 않은 쪽이 기본이다. 헤더 차이는 **멤버 이름 별칭**에서만 나타난다: CentOS 6.5의 glibc 2.12는 구조체 멤버를 `__sched_priority`로 두고(`bits/sched.h` L76) `sched_priority`를 매크로 별칭으로 정의한다(`sched.h` L45, 전처리 결과가 `__sched_priority`). 컨테이너의 glibc 2.39는 멤버가 `sched_priority`이고(`bits/types/struct_sched_param.h` L25) `/usr/include/sched.h` L47–L48에 항등 매크로(`sched_priority`)와 역방향 별칭(`__sched_priority` → `sched_priority`)이 있다 |
 | **⑤ 구조체·반환값 해석** | 반환 코드 상수는 매크로라 동일(`CFE_ES_ERR_APPID` 0xc4000001, `CFE_EVS_APP_NOT_REGISTERED` 0xc2000002, `CFE_EVS_APP_ILLEGAL_APP_ID` 0xc2000003; 오류 심각도 마스크 `0xc0000000`, `cfe_error.h` L132–L136). clang 18 기본 설정에서 **오류 2건**: `osapi.c:647` `pthread_create`에 `osal_task_entry`(`void(*)(void)`)를 전달, `cfe_psp_start.c:270` 시그널 핸들러. 둘 다 `-Wincompatible-function-pointer-types`가 clang 16 이후 기본 오류라서 생긴다. 이 플래그를 경고로 내리면 53/53 통과, 0 오류, 20 경고. `-std=gnu89`를 줘도 같은 결과. 컨테이너 gcc 13은 53/53, 22 경고 | `osapi.c:647`은 `OS_TaskCreate`가 새 task를 `pthread_create`로 시작하는 바로 그 호출이다(C5 Q16 행). 오류가 있는 번역 단위를 버리는 분석기라면 이 호출을 잃는다. `-std=gnu89`는 레퍼런스에서 읽은 값이 아니라 프로브 선택이다(§3.3의 해당 행; 당초 근거는 "gcc 4.x의 기본 표준"이라는 배경 지식[U]) |
+
+**2026-10-16 확장 — 6.4.2와 앱 번역 단위** [M] (같은 방법; 컴파일 DB는 판마다 58개, 부록 D.2):
+
+| 프로브 | 6.4.1 (58) | 6.4.2 (58) |
+|---|---|---|
+| clang 18 기본 | 56/58, 오류 2 (`osapi.c:647:34`, `cfe_psp_start.c:270:19`; 앱 5개는 통과) | 같음 |
+| clang 18 + `-Wno-error=incompatible-function-pointer-types` | 58/58, 0 오류 | 같음 |
+| 위 + `-std=gnu89` | 58/58, 0 오류 | 같음 |
+| gcc 13 (플래그 없음) | 58/58, 0 오류 | 같음 |
+| clang 18 + 우회 플래그, CentOS 6.5 헤더(`-nostdinc`) | 58/58, 0 오류 | 같음 |
+| `-m32` 제거 | 0/58 (`common_types.h:256`·`:260` 크기 단정 실패) | 같음 |
+| 전처리 프로젝트 토큰열: 컨테이너 헤더 대 CentOS 6.5 헤더 | 56/58 동일. 다른 2개(`osapi.c`, `cfe_psp_start.c`)는 `__` 접두(= `__sched_priority`)만 다름 | 같음 |
+| 전처리 프로젝트 토큰열: clang 대 gcc | 58/58 동일 | 같음 |
+| `sizeof` 14종(③의 목록) | 컨테이너·CentOS 헤더에서 같은 값: `EVS_AppData_t` 70, `CFE_EVS_GlobalData_t` 2540, `CFE_ES_AppRecord_t` 168, `CFE_ES_TaskRecord_t` 36, `CFE_ES_Global_t` 34812, `cfe_sb_t` 549076, `CFE_SB_PipeD_t` 68, 나머지 7종 ③과 같음 | 6.4.1과 같은 값 |
+
+경고 수는 세는 방법(진단 줄의 `warning:` 수)에 따라 달라 결과 판정에 쓰지 않는다. 해석[I]: 6.4.2 쪽과 앱 번역 단위를 넣어도 (b)(i)의 민감 후보는 늘지 않았다. 영향 후보는 여전히 `sched_priority` 멤버 이름 바인딩과 clang 기본 설정의 두 오류이다. C5의 victim 후보 `sample_app.c`는 두 판 모두 오류 없이 파싱되고 헤더 세트에 따른 토큰 차이가 없다.
 
 **판정에 쓸 수 있는 요약**[I]:
 
@@ -303,7 +327,7 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 ### 3.4 분석 전용 산출물의 한계
 
 - 파싱 통과는 **구문 수준**의 사실이다. 링크·실행·`elf2cfetbl`·앱을 포함한 빌드 가능성의 근거가 아니다.
-- 이 프로브는 6.4.1만 돌렸다. 6.4.2 번역 단위도 같은 방식으로 재구성할 수 있으나 이 문서에서는 하지 않았다(차이는 `cfe_es_*`, `cfe_evs_*`, `cfe_sb_task.c`, `cfe_tbl_task.c`, `cfe_time_task.c`, `cfe_platform_cfg.h`, `cfe_error.h`, `cfe_version.h`; C3 §3 기록).
+- 2026-10-15의 프로브는 6.4.1만 돌렸다. 2026-10-16에 6.4.2와 앱 번역 단위까지 같은 방식으로 돌렸다(§3.3 확장 표). 두 판의 소스 차이는 `cfe_es_*`, `cfe_evs_*`, `cfe_sb_task.c`, `cfe_tbl_task.c`, `cfe_time_task.c`, `cfe_platform_cfg.h`, `cfe_error.h`, `cfe_version.h`이다(C3 §3 기록). 빌드 조각은 같다(§3.2).
 - 입력·대응 실패는 탐지 기법의 실패로 세지 않는다[D]. 위 오류 2건과 `sched_priority` 차이는 입력·대응 문제로 분류한다.
 
 ### 3.5 실행 측면 — 분석 전용과 별도 산출물
@@ -367,6 +391,44 @@ Q16의 범위[D]: Φ_6.4.x의 outcome map·binding과, C3·C5의 Allowed 항목�
 
 **Allowed 후보 레퍼런스(6.4.1)**: `CFE_ES_GetAppID`의 문서(위)는 `CFE_ES_ERR_APPID`를 반환 코드로 열거하나, 그것이 "등록 전의 task"의 정상 경로라는 문구는 없다. C5 (a)의 "문서화된 전파"를 Φ_6.4.x가 작성하려면 호출자 쪽 인용이 필요하다(SPEC §8.2·부록의 C5 항목). → `unspecified_by_reference`.
 
+### 4.3 C3·C5의 관측 사건과 판정 분리 (2026-10-16 추가)
+
+ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정과 파생 결과의 분리)에 대응하는 **설계**이다. 실행하지 않았다. 줄 번호는 6.4.1 기준이고 6.4.2 대응은 §4.1·§4.2의 표에 있다. 사건 이름은 이 문서의 작업 이름이며 SPEC의 용어가 아니다. 관측 도구(gdb 중단점, 프로브 등)와 보류 지점의 선택은 PI 몫이다(C3-D3, `ledger.md` X3). gdb를 쓰면 관측 영향 점검(PI-D1) 대상이다.
+
+**C3** (준비 상태 전제는 §4.1):
+
+| 사건 | 위치 (6.4.1) | 기록할 값 | 비용 |
+|---|---|---|---|
+| E3-SBPUB | `sb/cfe_sb_task.c` L198 `CFE_ES_GetAppID(&CFE_SB.AppId)` 반환 | `CFE_SB.AppId` 값과 반환값(무시되는 값) | 실행 |
+| E3-SBREG | 같은 파일 L257 `CFE_EVS_Register` 반환 | SB의 `RegisterFlag` | 실행 |
+| E3-EVSPUB | `evs/cfe_evs_task.c` L385 (6.4.2는 L436 전역 대입) | `EVS_AppID` 값 | 실행 |
+| E3-USE | TIME 문맥의 `CFE_SB_CreatePipe`(`time/cfe_time_task.c` L308) 안에서 `sb/cfe_sb_api.c` L264 이벤트 송신 진입 | 호출 thread, `CFE_SB.AppId`·`EVS_AppID`의 그 시점 값, `RegisterFlag` | 실행 |
+| E3-IDX | `evs/cfe_evs_utils.c` L244 (`EVS_IsFiltered`의 인덱스 계산) | `AppID` 인자. 0xFFFFFFFF이면 범위 밖 인덱스 사용(판정 단위 후보, `C3.md` C3-D4 (a)) | 실행 |
+| E3-FAULT | 프로세스의 신호(SIGSEGV 등)·비정상 종료 | 신호와 위치. **파생 결과**로만 기록. fault가 없어도 E3-IDX는 남는다(`C3.md` A4: fault 여부는 `unspecified_by_reference`) | 실행 |
+| E3-SCHED | 각 코어 task의 실제 정책·우선순위와 CPU 집합 | `geteuid()==0`일 때만 OSAL이 SCHED_FIFO·재매핑을 건다(`osapi.c` L435·L587). 실제 적용값은 실행 중 기록(U-RT). CPU 수·고정 여부는 `unspecified_by_reference`(§3.5) | 실행 |
+
+- 해석 규칙[I]: ROADMAP §9.2 완료 기준대로 "잘못된 상태 사용"(E3-USE·E3-IDX)과 "실제 crash"(E3-FAULT)를 나누어 보고한다. 6.4.2에서 crash가 사라진 것만으로 순서 의존이 없어졌다고 쓰지 않는다: 6.4.2는 F3(Trac #40, 순서 보장)·F1·F2(Trac #42, 사용 지점 가드와 게시 순서)를 한 diff에 담고(`ledger.md` §3.3 L214–L216, L225), C5의 Trac #41도 같은 diff에 있다. 판 전체 비교의 결과에는 "여러 수정이 섞였다"를 표시한다. 하나만 떼는 것은 구성한 부분 diff이며 `deviation`이다(같은 곳).
+- 현재 판(v7.0.1)의 R2 기록은 C3의 실행 근거로 세지 않는다(ROADMAP §9.2, SPEC rev 1.2 L2828 "Not independent C3 evidence").
+
+**C5** (준비 상태 전제는 §4.2):
+
+| 사건 | 위치 (6.4.1 / OSAL 4.1.1) | 기록할 값 | 비용 |
+|---|---|---|---|
+| E5-UNLOCK | `es/cfe_es_apps.c` L610 생성자의 락 해제 | 생성자 thread, 앱 슬롯 `i` | 실행 |
+| E5-CREATE | L614 `OS_TaskCreate` 진입, OSAL `osapi.c` L645 `pthread_create` | 생성자 thread와 이 호출의 순번 | 실행 |
+| E5-START | 새 thread의 첫 실행. OSAL은 ES가 넘긴 진입 주소(`(void*)StartAddr`, `cfe_es_apps.c` L616)를 `pthread_create`의 시작 함수로 그대로 넘긴다(`osapi.c` L645–L648) | 새 thread의 OS thread ID와, 그것을 만든 E5-CREATE. **`pthread_create`가 반환하기 전에 새 thread가 실행될 수 있다**는 것을 전제로 한다(ROADMAP §9.3 항목 2) | 실행 |
+| E5-REG | 새 thread의 `CFE_ES_RegisterApp` → `OS_TaskRegister`(`cfe_es_api.c` L776) 반환 | 반환값 | 실행 |
+| E5-USE | 새 thread의 첫 `CFE_ES_GetAppID`(L846): 락 획득 L851, `OS_TaskGetId` 결과, 검사 L861, 반환값 | `TaskId`, `RecordUsed`, 반환값(`CFE_SUCCESS`/`CFE_ES_ERR_APPID`) | 실행 |
+| E5-RELOCK·PUB | 생성자의 재획득 L637, `RecordUsed = TRUE` L649, `AppId = i` L651, 해제 L673 | 게시 시점 | 실행 |
+| E5-CONSUME | 실패한 `GetAppID`의 소비: `EVS_GetAppID`(`evs/cfe_evs_utils.c` L127)를 거친 등록 건너뜀, `CFE_SB_CreatePipe`의 반환 무시(`sb/cfe_sb_api.c` L224), `RunLoop` 실패 로그(`cfe_es_api.c` L658) | 각 경로의 결과. **파생 결과**로 기록 | 실행 |
+
+- **식별 방법**[I] (ROADMAP §9.3 항목 3): 관측기는 새 thread를 그 thread 자신의 `GetAppID`로 식별하지 않는다. 그 호출이 바로 판정 대상이고 등록 전에는 실패하기 때문이다. 대신 (1) OS thread ID(Linux에서는 LWP ID)와 (2) 그 thread를 만든 E5-CREATE(생성자 thread, 호출 순번, 앱 슬롯 `i`, 앱 이름 인자)를 임시 식별로 쓰고, (3) E5-RELOCK·PUB에서 `TaskTable[TaskId].AppId = i`가 기록된 뒤 앱 정보와 연결한다. `TaskId`는 OSAL 표 인덱스이며 `OS_TaskGetId`가 `thread_key`의 값에서 하위 16비트로 계산한다(`osapi.c` L959–L972). 이 연결 방식은 설계 제안이며 아직 어떤 도구로도 시험하지 않았다.
+- **판정 단위**[I]: 위반은 "E5-USE가 E5-RELOCK·PUB보다 먼저 일어나고 그 결과가 `CFE_ES_ERR_APPID`"인 것이다(§4.2 준비 상태 전제). E5-START가 E5-CREATE의 반환보다 먼저인 것만으로는 위반이 아니다(ROADMAP §9.3 완료 기준). `CFE_ES_GetAppID`가 락을 잡으므로(L851) 생성자가 L637–L673을 쥐고 있는 동안의 호출은 기다렸다가 성공한다[I, 코드 읽기]. 따라서 창은 L610(해제)부터 L637(재획득)까지이다. 6.4.2는 이 구간의 해제·재획득이 없다(§4.2 Q16-C5-02).
+- **원 보고에 없는 결과를 기대하지 않는다**: 사례 기록이 보존한 #72 인용은 `GetAppID` 실패를 서술하고(`C5.md` §7 출처 1, 기록), `C5.md` 전체에 crash라는 낱말이 없다(grep 0건[M]; 이슈 원문과 댓글 9개는 이 세션에서 다시 읽지 못함). crash는 기대 결과에 넣지 않는다(ROADMAP §9.3 항목 5).
+- 현재 판의 App-record 잔여 후보(SPEC 부록 A.3)와 `58abd38d^`/`58abd38d` 쌍(§5)은 #72와 별도 결과로 관리한다.
+
+비용: 이 절의 설계는 읽기. 사건 기록은 6.4.x 실행 기반(§3.5)이 생긴 뒤의 실행이며, 권한·`msg_max`·CPU 고정 조건이 붙는다.
+
 **시험 가능성**: 위 각 행은 (파일, 정규식 앵커) 쌍으로 기계 검증할 수 있다(부록 A.5가 앵커 정규식을 가진다). 행 하나가 6.4.1과 6.4.2에서 모두 한 줄에 맞으면 버전 대응이 성립한 것이다. 대응 실패는 기법의 실패가 아니라 입력·대응 실패로 센다[D].
 
 비용: 읽기. 기계 검증은 읽기+스크립트(설치 없음).
@@ -421,7 +483,9 @@ Q16의 범위[D]: Φ_6.4.x의 outcome map·binding과, C3·C5의 Allowed 항목�
 | C2 셀 A (6.4.2) | ● | ● | ● | ● | | | D13과 같은 6.4.x 플랫폼. 큐 깊이 조건(§3.5) |
 | C2 셀 B | 제외(심볼 부재) | | | | | | |
 | C3·C5 tarball 확보·해시(§3.1) | ● | | | | | | 완료 |
-| 컴파일 DB 재구성·53 TU 파싱(§3.2–§3.3) | ● | ● | | | | | 완료. 앱·6.4.2 TU는 미포함 |
+| 컴파일 DB 재구성·파싱(§3.2–§3.3) | ● | ● | | | | | 완료: 6.4.1·6.4.2 각 58 TU(코어 33·OSAL 6·PSP 14·앱 5). 단위 시험·링크는 미포함 |
+| C3·C5 관측 사건 설계(§4.3) | ● | | | | | | 설계 완료. 기록은 6.4.x 실행 이후 |
+| C3·C5 사건 기록 | | | ● | ● | | (●) | §3.5의 권한·`msg_max`·CPU 고정 조건 |
 | 헤더 민감도 (ii) CentOS 6.5 헤더 | ● | ● | | | | | 압축 해제만, 설치 아님. 헤더 3종만 완료. 전체 sysroot·gcc 4.4.7의 실행은 미시험[U] |
 | 목록 host 자체 재현(CentOS 6.5-x86 등) | | | | (●) | (●) | (●) | 시험하지 않음[U] (§3.3.1). 사용자 영역 파일은 가져와지고 정적 의존이 닫혔으나 실행·이미지·VM은 미시험이다. 필요한 비용 분류도 확정하지 않았다 |
 | Microblaze (C3 원 플랫폼) | | | | | | ● | OS·PSP·OSAL·툴체인이 레퍼런스에 없음. C3의 파생 기반은 `deviation`, C5(#72)의 플랫폼은 `unspecified_by_reference`(§3.3.2) |
@@ -445,12 +509,15 @@ Q16의 범위[D]: Φ_6.4.x의 outcome map·binding과, C3·C5의 Allowed 항목�
 5. **P-RGIT 수행 시점**: 입력 대응 비용(§5.3)을 본 뒤.
 6. **목록 host 재구성 시험의 허용 여부**: 데몬 기동·이미지 pull·내려받은 외부 바이너리 실행을 허용할지(§3.3.1). 허용되기 전까지 §3.3 빌드 host 행의 불가피성은 [U]로 남는다.
 7. **C2 보류 감시 한도**: C1의 P-C1HOLD와 같은 원칙(중단 조건·감시 한도를 본실험 전에 기록)을 C2에 적용할지(§2.6).
+8. **C3·C5 관측 방식**: §4.3 사건을 어떤 도구로 기록할지(gdb 중단점은 관측 영향 점검 PI-D1 대상), C3의 순서 제어(우선순위 대 사건 기반 보류, C3-D3), C3의 주 판정 단위(C3-D4 (a)/(b); 사례 전반은 `ledger.md` X7). 6.4.2 diff에 섞인 Trac #40·#41·#42를 떼어 보는 부분 diff는 `deviation`이며 계획에 없다(SPEC rev 1.2 L2829의 C5 행: PI가 D13에 추가할 때만).
+9. **이슈 원문 접근(ledger X1)**: nasa/cFE 이슈 페이지와 API가 이 세션에서 403이다(§2.1). 원문·댓글을 다시 읽으려면 사용자가 이 저장소의 GitHub 접근을 세션에 추가해야 한다.
 
 **이 문서가 확인하지 못한 것**
 
 - 이슈 #198·#72·#73의 페이지와 댓글(C3 14개 중 4개 미식별, C5 9개, C2는 댓글 없음)은 이 세션에서 읽지 못했다(GitHub 403, ledger X1). 보고 서술은 사례 기록의 인용에 근거한다.
 - 6.4.2 VDD, 6.4.1 VDD의 본문은 다시 읽지 않았다(기록). 6.6.0 VDD의 Trac #167 행만 재확인했다.
-- 6.4.1·6.4.2 번역 단위 중 앱·단위 시험·링크는 파싱하지 않았다. 6.4.2 번역 단위의 컴파일 DB는 재구성하지 않았다.
+- 6.4.1·6.4.2 번역 단위 중 단위 시험·링크는 파싱하지 않았다(앱 5개와 6.4.2 번역 단위는 2026-10-16에 파싱함, §3.3).
+- §4.3의 식별 방법(OS thread ID + 생성 관계 → 나중의 `AppId` 연결)은 어떤 관측 도구로도 시험하지 않은 설계이다.
 - 목록 host의 gcc 버전·기본 C 표준은 레퍼런스가 정하지 않는다. CentOS 6.5 GA의 `gcc-4.4.7-4.el6` RPM man 페이지에서 `gnu89`가 C의 기본이라는 문구를 읽었으나(§3.3), 목록 host가 그 gcc였는지는 [I]이다.
 - 풀어낸 CentOS 6.5 사용자 영역(gcc 4.4.7 포함)의 **실행** 시험, 컨테이너 데몬·이미지 경로, QEMU·VM 경로(§3.3.1).
 - C3의 순서 제어(우선순위 대 사건 기반 보류), 주 oracle(C3-D4; 사례 전반은 ledger X7), C3와 R2를 한 패턴으로 세는지(ledger X4), 현재 R2 기록을 C3 증거로 세지 않는다는 원칙은 이 문서가 건드리지 않았다.
@@ -607,7 +674,7 @@ zcat <풀어낸 트리>/usr/share/man/man1/gcc.1.gz | grep -n -B1 -A2 'gnu89'   
 
 ## 부록 B. 이 문서가 인용하는 고정 출처
 
-- nasa/cFE: 태그 `v6.5.0a` → `b2765d9f905aa11f0c3b419b62233597366a7db9`, 태그 `v6.6.0a` → `8811c92094512975e14fd545df355705141560b2`, 태그 `v7.0.1` → `c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd`(`git ls-remote`로 확인[M]). 쌍 `6b9c267e6ac539ae17fb79a94467928f44559844` / `58abd38d04390cbe123d89b57819af013464d57f`.
+- nasa/cFE: 태그 `v6.5.0a` → `b2765d9f905aa11f0c3b419b62233597366a7db9`(주석 태그 객체 `40e7d511575937789b0b5afd356ace8fff0680d8`가 가리키는 커밋, 2026-10-16 `git ls-remote`), 태그 `v6.6.0a` → `8811c92094512975e14fd545df355705141560b2`, 태그 `v7.0.1` → `c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd`(`git ls-remote`로 확인[M]). 쌍 `6b9c267e6ac539ae17fb79a94467928f44559844` / `58abd38d04390cbe123d89b57819af013464d57f`.
 - nasa/cFS 번들: `a41549cb201b8d53b9e5aea81b1e7bb660e6cb8b`(cfe `6b9c267e`, osal `ff4f5231`, psp `a1a7e7a3`), `8d0f9dc3ce9ce83ebd90da5a489094f5b497ed94`(cfe `672b2dc4`), 태그 `v6.6.0a` `05d60929cc9bd9e789f4db24687d66b3058b32f2`(cfe `99038d54`, osal `75beb864`, psp `8f420020`).
 - nasa/osal: 태그 `v6.0.0-rc1` `ff4f52312297a3cdf3ddc0cf5ead95f27954630b`, 7139592f = `osal-4.2.1a-1-g7139592`.
 - SourceForge 릴리스 파일: §3.1.
@@ -639,3 +706,48 @@ zcat <풀어낸 트리>/usr/share/man/man1/gcc.1.gz | grep -n -B1 -A2 'gnu89'   
 
 - 지적 1의 "실행 가능한 프로브" 해법 중 풀어낸 sysroot의 실행 시험은 수행하지 못했다. 이유: 이 세션의 권한 정책(자동 모드 분류기)이 내려받은 외부 바이너리의 실행을 거부했다. 지적이 허용한 다른 해법(미시험을 [U]로 표시, §3.5 인용 삭제, "불가"를 "시험하지 않음"으로 변경)을 적용했다. 거부된 실행을 다른 도구로 우회하지 않았다.
 
+
+## 부록 D. 2026-10-16 보완 기록
+
+이번 보완도 읽기, 파일 가져오기, 해시 계산, 압축 해제, 구문 분석 전용 프로브만 했다. cFS를 빌드·실행하지 않았고 설치·삭제·git 조작을 하지 않았다. 스크래치 경로는 인용하지 않는다.
+
+### D.1 SPEC rev 1.2에서 다시 찾은 인용
+
+SPEC이 rev 1.2(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함)로 바뀌었으므로 이 문서가 인용한 문구를 현재 파일에서 다시 찾았다[M: grep]. 절 번호는 바뀌지 않았다.
+
+| 이 문서의 인용 | rev 1.2의 위치 |
+|---|---|
+| C2 행 "a **2 × 2**, not a pair", "the old against the new role-derived provider on the ENV cFE" (§2.4) | §9.3 표 C2 행, L2827 |
+| C2 기반 "the 6.4.2 tarball, or v6.5.0a", 4셀을 독립 결함으로 세지 않음, Q22 (§2.4) | §8.2 표 C2 행, L2505. VP-D4 L2803. §10.1 P-C2·Q22 행 L2898 |
+| H-V "Allowed `unspecified_by_reference` until Φ_6.4.x cites 6.4.1 references" (§4.1) | §7.6 L2470 |
+| VP-D5, P-RGIT "not a substitute … not blind" (§5) | §9.3 L2804, C5 행 L2829 |
+| LP-CASE-C2 (buggy)/(fixed)/(fixed, fail) (§2.4) | 부록 A.8 L3618 |
+| 부록 A.3 확인 4(생성자 보류 위치) (§5.3) | L3542–L3550 |
+| C3 행 "Not independent C3 evidence"(§4.3) | §9.3 L2828 |
+| 부분 diff는 PI가 D13에 추가할 때만(§7 항목 8) | §9.3 C5 행 L2829 |
+
+rev 1.2는 T1 이름 변경(Spec-C)을 적용했다(SPEC §0.11, 부록 C). 이 문서는 처음부터 새 이름을 쓴다.
+
+### D.2 6.4.2·앱 번역 단위로 넓힌 컴파일 DB와 프로브
+
+부록 A.2 스크립트와의 차이는 다음뿐이다(모두 make 조각을 **읽어서** 만든다):
+
+```python
+# 1) 판 선택: A = <WORK>/x64<v>/cFE-6.4.<v>-OSS-release  (v = 1, 2). 생성 헤더 디렉터리도 판마다 따로 둔다.
+# 2) make 변수 읽기: 주석(# 이후)을 지우고, '=' 뒤 같은 줄만 읽는다(빈 'LOCAL_COPTS =' 다음 줄의 주석을 값으로 읽는 오류를 막음).
+def var(t,name):
+    t=re.sub(r"#.*","",t.replace("\\\n"," ")); m=re.search(r"^\s*"+name+r"[ \t]*=[ \t]*(.*)$",t,re.M)
+    return m.group(1).split() if m else []
+# 3) THE_APPS (build/cpu1/Makefile L42-L43)의 앱마다: fsw/public_inc·platform_inc/*.h -> cpu1 inc, fsw/mission_inc/*.h -> mission_inc
+# 4) 앱 번역 단위: apps/<app>/fsw/for_build/Makefile의 OBJS, LOCAL_COPTS, INCLUDE_PATH(본문 §3.2 표의 순서), 같은 COPTS
+```
+
+결과는 §3.3의 확장 표이다. 실행한 명령의 형식은 부록 A.3과 같고(`-c <src>`를 `-fsyntax-only <src>`로 바꿈), CentOS 6.5 헤더는 부록 A.1의 RPM 3개를 압축 해제한 것이다. 구조체 크기는 `cfe.h`·`cfe_evs_task.h`·`cfe_es_global.h`·`cfe_sb_priv.h`·`<pthread.h>`·`<time.h>`를 포함하고 `char s_T[sizeof(T)]`를 선언한 탐침 파일 하나를 EVS 번역 단위의 include 집합(+ `sb` 디렉터리)으로 `-ast-dump`해 읽었다.
+
+Q16 앵커(부록 A.5)는 재수신 tarball에서 §4의 줄 번호를 그대로 돌려주었다[M]: 예) 6.4.1 `cfe_sb_task.c` L198 / 6.4.2 L206, 6.4.1 `cfe_evs_task.c` L385 / 6.4.2 L436, `cfe_evs_utils.c` L244(두 판), 6.4.2 가드 L620, 6.4.2 `cfe_es_start.c` L936, `cfe_es_apps.c`의 `OS_TaskCreate` L614 / L619, `cfe_es_api.c` 검사 L861 / L800, OSAL `pthread_create` L645·`*task_id` L690·`geteuid() == 0` L587.
+
+### D.3 이번에 하지 못한 것
+
+- 이슈 #198·#73·#72 원문(§2.1): 403. 저장소 접근 추가는 사용자 승인 사항이라 요청하지 않았다.
+- 목록 host의 gcc 4.4.7 실행, 컨테이너 이미지·VM 경로(§3.3.1): 이번에도 시험하지 않았다.
+- 6.4.x 실행과 §4.3 사건 기록: 실행 기반이 없다(§3.5).

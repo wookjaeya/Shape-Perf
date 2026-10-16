@@ -1,6 +1,7 @@
 # SIMEXPLORER (STVR 2017) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 08:44–09:10, 경로 시도와 읽기 시각).
+- 재검토: 2026-10-16 (UTC 00:10–00:30). 막힌 경로를 다시 시도했고(§1.1 경로 26–29), 인용문과 쪽 번호를 저장한 수락본 텍스트와 다시 대조했다. 고친 것은 §1.3 항목 10–12에 적었다. 요약하면 세 가지다. 근거를 찾지 못한 라이선스 문구를 지웠다. 논문이 단일 process 안의 multithreaded 응용을 기존 thread-level 기법의 영역으로 두는 서술을 더했다(§2.1, §4.2, §5.3). R2 수치의 근거를 gdb 원시 기록으로 바꿨다(§3.2, §3.5).
 - 대상: T. Yu, W. Srisa-an, G. Rothermel, *An automated framework to support testing for process-level race conditions* (도구 이름 SIMEXPLORER), Software Testing, Verification and Reliability 27(4–5), e1634, 2017. DOI 10.1002/stvr.1634. 저자 CV는 같은 논문을 "SIMEXPLORER: An Automated Framework to Support Testing for System-Level Race Conditions"로 적는다. 학위논문 Yu 2014, *SimExplorer: A Testing Framework to Detect Elusive Software Faults*(UNL)가 같은 이름의 틀을 다룬다.
 - 범위: 로드맵 §10 (M6)의 SIMEXPLORER 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. SIMEXPLORER를 실행하지 않았다(실행할 구현을 찾지 못했다). 어느 사례에 대해서도 "탐지하지 못한다"는 결과를 담지 않는다.
@@ -38,7 +39,7 @@
 
 ## 0. 한눈에 보기
 
-1. **SIMEXPLORER 논문의 저자 수락본 전문을 읽었다** `[전문]`. CPS-VO 아카이브가 올린 26쪽 PDF다(그 페이지에 "Creative Commons 2.5" 표기, sha256 `af805231…3e08`). Wiley 판본과 학위논문 PDF는 Cloudflare 도전 페이지(HTTP 403)에서 멈췄고 우회하지 않았다. 학위논문은 초록만 읽었다 `[초록]`. 같은 프레임워크의 앞선 서술인 Sim-O/C 논문(ITJ 2013)은 전문을 읽었다 `[2차]` (§1).
+1. **SIMEXPLORER 논문의 저자 수락본 전문을 읽었다** `[전문]`. CPS-VO 아카이브의 레코드에 첨부된 26쪽 PDF `Yu_SimExplorer_JA.pdf`다(sha256 `af805231…3e08`). 레코드 페이지는 "Read-only archive of site from September 29, 2023"이라고 적는다. 그 페이지 텍스트에서 라이선스 표기는 찾지 못했다(§1.3 항목 10). Wiley 판본과 학위논문 PDF는 Cloudflare 도전 페이지(HTTP 403)에서 멈췄고 우회하지 않았다. 학위논문은 초록만 읽었다 `[초록]`. 같은 프레임워크의 앞선 서술인 Sim-O/C 논문(ITJ 2013)은 전문을 읽었다 `[2차]` (§1).
 2. **SIMEXPLORER는 SimRacer(ISSTA'13)의 "revised and expanded version"이다** (STVR p.2 각주 †, §7.1 p.24) `[전문]`. 저자는 인터럽트, 중첩 handler, signal 31종, 구현 절, 객체 프로그램 24개가 STVR에서 새로 더해졌다고 적는다. 로드맵 §10.1과 `availability.md`가 두 도구를 별개 행으로 둔 것은 같은 계보의 두 판본을 나눈 것이다(§4.3 P-S5).
 3. **역할은 탐지(testing-based detection)다.** Phase 1이 한 번의 실행 trace에서 잠재 race 쌍을 계산하고, Phase 2가 쌍의 접근 순서를 실제 실행에서 뒤집어 real race를 확인한다. 실패 보고를 입력으로 받는 재현 도구도, 버전 쌍을 쓰는 회귀 도구도 아니다 (STVR p.7, p.10–11).
 4. **관측 범위는 syscall에 한정되지 않는다.** shared resource(SR)에 shared memory와 hardware component가 들어 있고(STVR p.8), 메모리 접근은 Simics 메모리 중단점으로 잡는다(p.14). 따라서 이전 기록(`yu-group.md` §4, §7.2, `availability.md` §3)의 "추론한 syscall 모델 아래에서 shared-resource 사건이 아니다"라는 조건부 서술은 전문으로 유지되지 않는다. 다만 **cFS 내부 상태(OSAL 레지스트리, ES 테이블, SB AppId)를 SR로 지정하는 방법과 입도는 서술이 없다.** 지정 인터페이스가 있다는 한 문장뿐이다(p.8).
@@ -84,6 +85,10 @@
 | 23 | arXiv API `all:SimExplorer`, NSF PAR 검색 `SimExplorer`와 `"process-level race"`와 DOI, Internet Archive `advancedsearch`(`SimExplorer`) | 각각 0건, 0건, 무관한 소프트웨어 이름 2건(`SimExplorer 2.1.1`, `Simplorer`). `scholar.archive.org`는 "Rate limit reached" 페이지(재시도 한 번도 같았다) | 사본·구현 없음 |
 | 24 | Software Heritage 원본 검색 API, dblp, BASE, `core.ac.uk`(웹 403, API 500), ResearchGate(403), Europe PMC(403), `web.archive.org`·`api.fatcat.wiki`(연결 실패), Unpaywall(이메일 파라미터를 요구해서 보내지 않았다. 개인 이메일을 관련 없는 서비스에 보내지 않기 위해서다) | 모두 내용을 얻지 못했다. Software Heritage, dblp, BASE는 "Making sure you're not a bot!"(Anubis) 확인 페이지였고 우회하지 않았다 | `[미도달]` |
 | 25 | Intel Simics 공개 릴리스 페이지 `intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html` | 200. 오늘의 벤더 문서(§4.1) | 컨텍스트 |
+| 26 | (2026-10-16 00:13Z 재시도, 기본 curl, 25초 timeout) Wiley `doi/am-pdf/…`, `doi/pdf/…`, UNL 학위논문 PDF `viewcontent.cgi?article=1093&context=computerscidiss` | 모두 403, 제목 "Just a moment..."(Cloudflare 도전). 우회하지 않았다 | 출판본·학위논문 본문 `[미도달]` 그대로 |
+| 27 | (같은 시각) UNL 레코드 `computerscidiss/77/`, OpenAlex DOI 조회, CPS-VO 레코드(기본 curl) | UNL 200, OpenAlex 200(변화 없음). CPS-VO는 기본 curl에 다시 245 B "Request Rejected" | 경로 3, 6, 13과 같다 |
+| 28 | Scholar Gateway 의미 검색(연결된 학술 검색 도구) | `ACCESS_DENIED: Access denied` | `[미도달]` |
+| 29 | GitHub 저장소 검색 `simexplorer race`, 코드 검색 `"SimExplorer" Simics`(GitHub MCP) | 저장소 0건. 코드 2건이고 둘 다 다른 주제의 문헌 메모 파일이다(`PetarKirov/sparkles`의 `docs/research/…/raducu-2022.md`, `ssiMher/academic_impact_analysis`의 `文献信息.md`). 구현이 아니다 | 구현 없음 |
 
 2026-10-08 기록(`availability.md` A1, `yu-group.md` D1)은 이 호스트들을 세션의 egress 정책이 막았다고 적었다. 오늘 `digitalcommons.unl.edu`, `scholars.uky.edu`, `homepages.uc.edu`, `par.nsf.gov`, `intel.com`은 열리고, Wiley와 UNL PDF는 원 서버의 Cloudflare 도전으로 막힌다. 호스트별 상태가 날짜에 따라 다르므로 두 기록을 합쳐 읽지 않는다.
 
@@ -114,6 +119,9 @@
 | 7 | 제목 표기 | 수락본 제목은 "An automated framework to support testing for process-level race conditions", 저자 CV는 "SIMEXPLORER: … System-Level Race Conditions". 같은 DOI다. 문헌 인용 시 DOI로 맞춘다 |
 | 8 | 저자 CV의 Sim-O/C 연도 | CV는 ITJ 2014, 오늘 연 Intel PDF는 17권 2호 2013(PDF 생성일 2013-11-28)이다. 연도 표기가 다르다 |
 | 9 | 논문의 RacePro 평가(§2.3–2.4, p.6–7) | SIMEXPLORER 저자들이 RacePro의 한계와 replay divergence를 서술한다(RacePro를 baseline으로 쓰지 않았다, p.7, p.17). 경쟁 도구 저자의 서술이다. 이 문서는 그 내용을 RacePro에 대한 사실로 옮기지 않는다. RacePro 쪽 근거는 `plan/methods/RacePro.md`다 |
+| 10 | (2026-10-16 정정) §0 항목 1의 라이선스 문구 | 2026-10-15판은 CPS-VO 페이지에 "Creative Commons 2.5" 표기가 있다고 적었다. 저장한 레코드 페이지 텍스트를 다시 확인했으나 그 문구도, 다른 라이선스 표기도 없었다(페이지 끝은 "© 2023. CPS-VO"). 근거 없는 문장이라 지웠다. 이 PDF의 재배포 조건은 정해지지 않았다 `[U]`. 이 문서는 PDF를 저장소에 넣지 않았고 쪽 번호와 짧은 인용만 쓴다 |
+| 11 | (2026-10-16 추가) 논문이 밝힌 대상 범위 | 서론은 기존 기법 대부분이 "multithreaded applications within single processes"에 맞춰져 있고 process-level race에는 맞춰지지 않았다고 적는다(p.1). §2.2는 thread-level 기법을 process-level race에 바로 쓸 수 없는 이유를 든다(p.4–5). 2026-10-15판은 이 서술을 쓰지 않았다. §2.1, §4.2(P-S2), §5.3에 더했다 |
+| 12 | (2026-10-16 정정) R2 수치의 근거 | 2026-10-15판은 R2의 "24회"를 `ledger.md`와 로드맵으로 인용했다. R2의 실행 증거는 gdb 원시 기록(`env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md`)이므로 그쪽으로 바꿨다(§3.2, §3.5 R2 Q6). 값은 같다 |
 
 ---
 
@@ -124,7 +132,7 @@
 | 항목 | 내용 | 근거·등급 |
 |---|---|---|
 | 역할 | **탐지(detection).** "testing for process-level race conditions". 잠재 race를 계산하고 실행으로 확인하는 단계를 포함하지만, 보고된 실패를 재현하는 도구가 아니고 회귀 분석 도구도 아니다 | STVR p.1, p.7 `[전문]` |
-| 실행 단위 | 사건 원천 4종: ① 일반 user process(`fork`, `execv`) ② software signal과 handler ③ hardware interrupt와 ISR ④ kernel thread. 관측은 "process under test(PuT)"가 시작한 연산만 대상이다. Linux에서 thread는 PID를 가진 lightweight process라 "just like a process" 추적할 수 있다고 한 줄 적는다(replay 맥락) | STVR p.7, p.13, p.14 `[전문]` |
+| 실행 단위 | 사건 원천 4종: ① 일반 user process(`fork`, `execv`) ② software signal과 handler ③ hardware interrupt와 ISR ④ kernel thread. 관측은 "process under test(PuT)"가 시작한 연산만 대상이다. Linux에서 thread는 PID를 가진 lightweight process라 "just like a process" 추적할 수 있다고 한 줄 적는다(replay 맥락). 대상 범위에 대해 서론은 기존 기법 대부분이 "multithreaded applications within single processes"에 맞춰져 있다고 적고(p.1), §2.2는 thread-level 기법을 process-level race에 바로 쓸 수 없는 이유(공유 메모리 load/store와 lock/unlock 같은 thread 동기화를 전제함, system-wide 자원을 다루지 못함)를 든다(p.4–5). 한 process 안의 thread 사이 race를 범위에서 뺀다는 문장은 찾지 못했다 | STVR p.1, p.4–5, p.7, p.13, p.14 `[전문]` |
 | 관측하는 것 | **SR 접근**: shared memory, file descriptor, file inode, file data, process data(`/proc`, PID), hardware component(예: register). 각 접근을 read 또는 write로 분류한다. 메모리는 이전 연구의 관측 지원을 쓰고(SimRacer [16], SimTester [33]), 하드웨어는 Simics 기능을 쓰고, system call은 read/write 효과를 모델링한다. 추적하는 syscall은 23개다(예시 `open`, `read`, `write`, `lstat`, `clone`, `wait`, `execve`, `exit`). 전체 목록은 본문에 없다. **동기화 사건**: `fork`, `wait`, `exit`, `pipe`; signal 등록·활성·비활성(`sigaction`, `signal`, `sigprocmask` 등); interrupt 활성 비트 | STVR p.8 `[전문]` |
 | 관측 구현 | Simics Python API의 콜백. 공유 자원 연산에 메모리 중단점을 건다. PuT의 함수 진입 때 frame pointer를 call stack에 쌓고, 접근 시점의 frame pointer와 비교해 PuT 밖 접근을 거른다. 소스·계측 없이 binary level로 동작한다 | STVR p.2, p.14 `[전문]`; ITJ p.183, p.185–186 `[2차]` |
 | 메모리 SR 지정 | 메모리 중단점을 거는 주소를 어떻게 정하는지 STVR 본문에 서술이 없다. 시험 입력 생성을 위해 SR을 정적으로 식별했다는 문장이 있다(p.16). 선행 SimTester는 전역 변수 주소를 symbol table에서 얻고, 지역 포인터 등은 계측한 ISR이 주소를 출력하게 해서 얻었다 | STVR p.14, p.16 `[전문]`; VEE'12 p.55 `[2차]` |
@@ -209,7 +217,7 @@ Sim-O/C와 SIMEXPLORER가 같은 프레임워크의 앞뒤 이름이라는 판�
 | C2 cFE#198 | 앱 P의 late init 완료와 다른 앱 R의 의존 호출. P·R은 비공개(EVA CWS)이고 통신 방식·초기화 내용이 공개되지 않았다. 공개된 것은 단일 단계 시작 동기화(`WaitForStartupSync`)와 6.6.0a의 두 단계 방식(`APPS_INIT`/`LATE_INIT`, `CFE_ES_WaitForSystemState`) | `ledger.md` §1a–§1b; 로드맵 §9.1 |
 | C3 cFE#73 | SB task의 `CFE_SB.AppId`, EVS task의 `EVS_AppID`와 등록 플래그가 설정되기 전에 TIME task가 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID`(AppId=0)를 호출하고, `EVS_IsFiltered(0xFFFFFFFF)`가 범위 검사 없이 접근한다. 우선순위가 순서를 만든다(TIME 60, EVS 61, SB 64). 원 플랫폼은 Microblaze. 오류 지점은 사례 기록에서 미확인 | `ledger.md` §1a, §2 |
 | C5 cFE#72 | `CFE_ES_AppCreate`가 `OS_TaskCreate` 전에 ES lock을 풀고 뒤에 다시 잡아 `TaskTable` 항목을 채운다. 그 사이 새 task의 `CFE_ES_GetAppID`가 `CFE_ES_ERR_APPID`를 반환할 수 있다. 6.4.2 수정은 task 생성과 등록을 한 lock 범위에 둔다 | `ledger.md` §1a, §1b |
-| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로(`CreatePipe`/`Subscribe`/이벤트 전송)를 실행하고, `EVS_GetAppDataByID`가 NULL을 돌려 `ILLEGAL_APP_ID`가 된다. 상태는 폐기된다. 코어 시작 직렬화(S1)가 ES·EVS를 SB보다 먼저 실행시킨다. 서술은 "이벤트 요청 거부"다. gdb 3회 모두 설정 전 사용 24회 = 거부 24회 | `ledger.md` §1a; 로드맵 §2.2 |
+| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로(`CreatePipe`/`Subscribe`/이벤트 전송)를 실행하고, `EVS_GetAppDataByID`가 NULL을 돌려 `ILLEGAL_APP_ID`가 된다. 상태는 폐기된다. 코어 시작 직렬화(S1)가 ES·EVS를 SB보다 먼저 실행시킨다. 서술은 "이벤트 요청 거부"다. gdb 기록 3회(`env/logs/r2_g1..3_*`) 모두 실행당 설정 전 사용 24회(ES 20, EVS 4; `CreatePipe` 2, `SubscribeFull` 4, `ReportSingleEvent` 18), 모두 AppId 0, 모두 `cfe_evs.c` L188(v7.0.1)에서 `ILLEGAL_APP_ID`. 한 원인의 반복이며 독립 결함 24개가 아니고, 3회 일치는 고정 순서의 증명이 아니다 | `ledger.md` §1a; `results/R2_gdb_v701.md` §2, §6–7 `[기록]`(측정 기록); 로드맵 §2.2 |
 | 공통 | native cFS는 **한 Linux process**이고 OSAL task는 `pthread_create` thread다(osal `os-impl-tasks.c:568`). 이 호스트의 glibc에서 `pthread_create`는 `clone3`로 보인다. OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 **syscall 0건**이었다. 이 probe는 syscall 관측자가 본 것이고 SIMEXPLORER의 결과가 아니다 | `availability.md` §3, §4.2 `[기록]` |
 
 ### 3.3 도구 수준의 답 (사례와 무관)
@@ -299,7 +307,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | 3 | 분석 | 설정(쓰기)→사용(읽기) 쌍의 형태다. R2의 순서는 코어 시작 직렬화가 ES·EVS를 SB보다 먼저 실행시켜 정해진다(기록). 이 직렬화는 상태 polling이라 syscall 의미에서 추론한 HB(p.9)에 들지 않는다. 설계의 race 정의가 "순서를 바꿀 수 있는 접근"이므로(p.3, p.10–11) 바꿀 수 없는 위반을 뜻하는 출력 항목은 어휘에 따로 없다 | p.3, p.9, p.11 |
 | 4 | 답 | 도구 수준 답과 같다. R2의 요구 순서("SB AppId 저장이 SB API 경로의 이벤트 요청보다 먼저")를 넣을 입력은 서술에 없다 | p.3, p.16–18 |
 | 5 | 분석 | 직렬화를 HB로 인식하지 못하면 Phase 1이 쌍으로 계산할 수 있고 Phase 2는 순서를 뒤집어 보며 불가능하면 race로 세지 않는다(p.11). 이는 순서가 고정됐는지를 실행으로 시험하는 방식이며 고정된 이유를 설명하는 방식이 아니다. 실행하지 않았다 | p.10–11 |
-| 6 | 분석 | 사례 현상은 "이벤트 요청 거부 24회"이고 실패 메시지도 프로세스 실패도 없다(기록: `cfe_evs.c:185-188`, 상태 폐기). 출력은 race 쌍과 출력 기반 oracle 차이이고, race가 확인돼도 출력에 영향이 없으면 fault로 세지 않는다고 적는다 | p.19; `availability.md` §1 `[기록]` |
+| 6 | 분석 | 사례 현상은 실행당 "이벤트 요청 거부 24회"이고, 호출자가 반환 상태를 버려 출력도 카운터 변화도 없다(기록: `cfe_evs.c` L188, v7.0.1). 출력은 race 쌍과 출력 기반 oracle 차이이고, race가 확인돼도 출력에 영향이 없으면 fault로 세지 않는다고 적는다 | p.19; `results/R2_gdb_v701.md` §2 `[기록]` |
 
 ### 3.6 이 절이 말하지 않는 것
 
@@ -321,7 +329,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | guest OS | 단일 코어 x86 Linux 2.6.15와 3.5.0(p.18), Fedora Core 2.6.15와 Ubuntu 12.04(p.15) | 논문 서술. 정책상 "레퍼런스"인지는 PI 판단(§4.3 P-S1) | 기준 cFS `core-cpu1`은 x86-64 ELF이고 kernel ≥ 3.2.0을 요구한다(`availability.md` §0 A4 `[기록]`). 2.6.15 guest는 맞지 않고, 3.5.0은 숫자상 충족하나 32/64-bit와 userland는 서술이 없다 |
 | Controller(dummy device, guest의 driver 프로그램) | STVR p.14; ITJ p.188 | 구성 상세 서술 없음 | 만들려면 연구 쪽 신규 코드. 레퍼런스가 정하지 않는 입력이다 |
 | 입력(짝 process·handler, test input, oracle, SR·syscall 지정) | STVR p.8, p.16–17 | cFS용은 연구 쪽 신규 입력(`unspecified_by_reference`) | 미정 |
-| 하드웨어·host | STVR에 서술 없음 | `unspecified_by_reference` | 이 컨테이너: [M] 4 vCPU, x86_64, `/dev/kvm` 없음, vmx/svm 플래그 0, 여유 디스크 약 16 GB, kernel `6.18.44-fc-v114` |
+| 하드웨어·host | STVR에 서술 없음 | `unspecified_by_reference` | 이 컨테이너: [M] 2026-10-15: 4 vCPU, x86_64, `/dev/kvm` 없음, vmx/svm 플래그 0, 여유 디스크 약 16 GB, kernel `6.18.44-fc-v114`. [M] 2026-10-16 00:13Z 재확인: `which simics` 결과 없음, `/dev/kvm` 없음, vmx/svm 0, 4 vCPU, **여유 디스크 2.3 GB**, kernel `6.18.44-fc-v139`. 컨테이너 상태는 날짜마다 다르다. 벤더 문서의 설치 크기(약 10 GB)는 오늘의 여유 공간보다 크다 |
 | 문서화된 예제 | 서술 없음(저장소 README 없음) | — | `DOCUMENTED-SETUP-RUN` 불가 |
 
 ### 4.2 결과 상태 (로드맵 §10.4)
@@ -336,7 +344,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | C5 | `NOT_RUN` | 위와 같다 |
 | R2 | `NOT_RUN` | 위와 같다 |
 
-- `INAPPLICABLE`을 붙이지 않는다. 논문은 범위를 process, signal, interrupt 사이의 race로 적고(p.2–3, p.7), thread를 PID로 추적할 수 있다고 적으며(p.13), SR에 shared memory가 있다(p.8). 한 process 안의 task 사이 쌍이 "명시된 입력·대상 범위"에서 제외되는지는 읽은 자료로 정해지지 않는다. 이것은 PI 판단이다(§4.3 P-S2).
+- `INAPPLICABLE`을 붙이지 않는다. 논문은 범위를 process, signal, interrupt 사이의 race로 적고(p.2–3, p.7), thread를 PID로 추적할 수 있다고 적으며(p.13), SR에 shared memory가 있다(p.8). 반대 방향의 서술도 있다. 논문은 단일 process 안의 multithreaded 응용을 기존 thread-level 기법이 다뤄 온 영역으로 두고 자신을 process-level 쪽에 둔다(p.1, p.4–5). 그러나 한 process 안의 thread 사이 race를 범위에서 뺀다고 명시한 문장은 찾지 못했다. 한 process 안의 task 사이 쌍이 "명시된 입력·대상 범위"에서 제외되는지는 읽은 자료로 정해지지 않는다. 이것은 PI 판단이다(§4.3 P-S2).
 - `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP`, `REPORTED`는 도구를 실행한 뒤에만 쓸 수 있다. 이 문서는 어느 것도 예측하지 않는다. 사건 기록의 기준이 부족한 경우를 `ANALYSIS_GAP`으로 서둘러 분류하지 않는다(로드맵 §10.4).
 - §3의 내용은 라벨 `ANALYSIS`(observation-model analysis, not run)이고 `[전문]` 등급이다. 원 도구 결과가 아니다. 원 도구를 실행할 수 없으므로 `ORIGINAL-RUN`과 `DOCUMENTED-SETUP-RUN`은 불가능하다. 논문의 Phase 1–2 알고리즘(Figure 10, 12, 13)이 서술돼 있어 `REIMPLEMENTATION`은 원리상 서술할 수 있으나 Observer·Controller가 Simics에 의존하고(p.14) 충실성을 확인할 구현이 없다. 별도 라벨과 PI 승인이 필요하다(§4.3 P-S4).
 
@@ -345,7 +353,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | # | 항목 | 선택지 | 기본값 |
 |---|---|---|---|
 | P-S1 | 논문 §5의 환경 서술(Simics 위 x86 Linux 2.6.15·3.5.0 단일 코어, Fedora Core 2.6.15, Ubuntu 12.04)을 `CONDITIONS_POLICY`의 레퍼런스(`from-reference`)로 볼 것인가. 정책 목록은 "도구의 공식 문서: README, 논문의 artifact 절"이고 §5는 실험 서술이다 | 예 / 아니오 | 판단 전까지 `unspecified_by_reference` 유지, 논문 서술로 병기 |
-| P-S2 | 한 process 안의 task(thread) 사이 쌍을 SIMEXPLORER의 명시된 대상 범위 밖(`INAPPLICABLE`)으로 볼 것인가 | 예 / 아니오 | 아니오(`NOT_RUN` 유지). 논문이 thread를 PID로 추적한다고 적고 SR에 shared memory가 있으며, PI의 Process-Level 정의가 앱·task 단위라서 |
+| P-S2 | 한 process 안의 task(thread) 사이 쌍을 SIMEXPLORER의 명시된 대상 범위 밖(`INAPPLICABLE`)으로 볼 것인가 | 예 / 아니오 | 아니오(`NOT_RUN` 유지). 논문이 thread를 PID로 추적한다고 적고 SR에 shared memory가 있으며, PI의 Process-Level 정의가 앱·task 단위라서. 판단 자료로 반대 방향 서술(단일 process 안의 multithreaded 응용을 thread-level 기법의 영역으로 둠, p.1, p.4–5)도 함께 올린다 |
 | P-S3 | 저자에게 객체 프로그램과 도구의 제공을 요청할 것인가(`availability.md` A2). 논문은 객체 프로그램을 first author에게 요청하라고 적고 도구 코드 제공 여부는 적지 않는다 | 요청 / 요청하지 않음 | 요청하지 않음(아무도 연락하지 않았다). 연락 주체는 PI가 정한다 |
 | P-S4 | 논문 기술로 `REIMPLEMENTATION`을 만들 것인가(`availability.md` A9) | 만든다 / 만들지 않는다 | 만들지 않는다. 만든다면 원 도구 결과와 분리한 라벨을 쓰고, 충실성(Simics 의존 부분, 23개 syscall 목록, 메모리 SR 지정)이 정해지지 않은 부분을 기록한다 |
 | P-S5 | 로드맵 §10.1과 `availability.md`가 SimRacer와 SIMEXPLORER를 별개 행으로 둔 것을 같은 계보의 두 판본으로 정리할 것인가(STVR p.2 †, p.24) | 정리 / 유지 | 이 문서는 다른 문서를 바꾸지 않았다. 결정은 PI와 오케스트레이터가 한다 |
@@ -390,7 +398,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 
 ### 5.3 비교 논문에서 먼저 밝혀야 할 정의 차이
 
-[F] SIMEXPLORER의 race는 "두 system event(process, signal, hardware interrupt)가 같은 shared resource를 의도한 순서와 다른 순서로 접근할 수 있는 것"이고 일반 data race의 필요조건으로 둔다(p.2–3). [D] 이 연구의 Process-Level은 cFS 애플리케이션·task 단위의 운용상 정의이며 OS process로 한정하지 않는다(로드맵 §1.2). native cFS에서 대상은 한 process 안의 thread다. 비교 서술은 이 차이를 처음에 밝히고, 이 차이로 생기는 결과를 도구의 결함처럼 쓰지 않는다.
+[F] SIMEXPLORER의 race는 "두 system event(process, signal, hardware interrupt)가 같은 shared resource를 의도한 순서와 다른 순서로 접근할 수 있는 것"이고 일반 data race의 필요조건으로 둔다(p.2–3). 논문은 단일 process 안의 multithreaded 응용을 기존 thread-level 기법이 다뤄 온 영역으로 두고(p.1), thread-level 기법을 process-level race에 바로 쓸 수 없는 이유를 든다(p.4–5). [D] 이 연구의 Process-Level은 cFS 애플리케이션·task 단위의 운용상 정의이며 OS process로 한정하지 않는다(로드맵 §1.2). native cFS에서 대상은 한 process 안의 thread다. 비교 서술은 이 차이를 처음에 밝히고, 이 차이로 생기는 결과를 도구의 결함처럼 쓰지 않는다.
 
 [I] Kairos가 판정하는 대상은 readiness specification이고, SIMEXPLORER의 보고 단위는 "순서를 바꿀 수 있는 접근 쌍"과 oracle 출력 차이다. 두 도구의 출력은 같은 점수로 합치지 않는다(로드맵 §1.4).
 
@@ -424,4 +432,5 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 - 서지·참고문헌: `https://api.crossref.org/works/10.1002/stvr.1634`, `https://api.openalex.org/works/doi:10.1002/stvr.1634`, `https://scholars.uky.edu/en/publications/an-automated-framework-to-support-testing-for-process-level-race-/`.
 - 저자 페이지: `https://homepages.uc.edu/~tyu/links/research.html`, `…/links/projects.html`, `…/CV/tyu_cv.pdf`.
 - Simics 벤더 문서(컨텍스트): `https://www.intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html`.
+- R2 실행 증거(gdb 원시 기록): `env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md`.
 - 저장소 기록: `baselines/availability.md`, `baselines/yu-group.md`, `cases/ledger.md`, `plan/ROADMAP_20261015.md`(§1.2, §2.2, §9, §10), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`, `plan/methods/SimRacer.md`, `plan/methods/RacePro.md`.

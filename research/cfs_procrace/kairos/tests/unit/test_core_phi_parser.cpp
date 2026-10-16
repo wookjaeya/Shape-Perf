@@ -138,6 +138,8 @@ int main() {
       {"phi 1;\nsite s = fn(\"f\").call(\"x\") macro maybe;", 2, 34, "expected yes, no or any after 'macro', found 'maybe'"},
       {"phi 1;\nsite s = fn(\"f\").store(Type);", 2, 28, "expected Type.field in store(...)"},
       {"phi 1;\nop f() { frob; }", 2, 10, "unknown item 'frob' in operation"},
+      {"phi 1;\nop f() { effect e: use k() when true filter false lp at fn(\"f\").call(\"g\"); }", 2, 38, "linearization point of the effect"},
+      {"phi 1;\nop f() { effect e: use k() filter lp at fn(\"f\").call(\"g\"); }", 2, 38, "found identifier 'at'"},  // `filter` needs an expression
       {"phi 1;\nop f() { conjunct c: true; }", 2, 26, "expected 'lp' to give the linearization point of the conjunct"},
       {"phi 1;\nop f() { conjunct c: true lp somewhere; }", 2, 30, "expected 'capture', 'at <pattern>' or 'site <name>' after 'lp'"},
       {"phi 1;\nop f() { effect e: frob x lp capture; }", 2, 20, "unknown effect 'frob'"},

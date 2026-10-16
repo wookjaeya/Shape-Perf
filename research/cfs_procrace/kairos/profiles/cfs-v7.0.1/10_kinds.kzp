@@ -21,8 +21,9 @@ scope {
   prov psp_restart_req, psp_teardown;
 }
 
-# ES App record: free -> reserved -> live.  The state follows the AppId stored in the record:
-# undefined = free, reserved marker = reserved, an ID = live.  The `ids` block is the rule that
+# ES App record: free -> reserved -> live, and back through reserved when an application is cleaned
+# up (CFE_ES_CleanUpApp retires the record to RESERVED first and frees it at the end).  The state
+# follows the AppId stored in the record: undefined = free, reserved marker = reserved, an ID = live.  The `ids` block is the rule that
 # valid(x) evaluates: x is a valid index into the table iff (x - base) mod 2^32 <= serial_max, which
 # is CFE_ResourceId_ToIndex reached through CFE_ES_AppID_ToIndex (resid_toindex_fn,
 # es_appid_toindex_fn); the constants are those of the build (05_consts.kzp).
@@ -41,8 +42,9 @@ kind es.app(rec: Int) {
   transition FREE -> RESERVED on reserve;
   transition RESERVED -> LIVE on publish;
   transition RESERVED -> FREE on clear;
-  transition LIVE -> FREE on free;
-  prov es_record_helpers, es_start_reserve, es_start_publish, es_start_clear, es_apps_cleanup_free, es_apptype_enum, es_start_type_core, es_apprecord_struct, es_appid_toindex_fn, resid_toindex_fn;
+  transition LIVE -> RESERVED on retire;
+  transition RESERVED -> FREE on free;
+  prov es_record_helpers, es_start_reserve, es_start_publish, es_start_clear, es_apps_cleanup_retire, es_apps_cleanup_free, es_apptype_enum, es_start_type_core, es_apprecord_struct, es_appid_toindex_fn, resid_toindex_fn;
 }
 
 # The AppState field of the App record.  The ordinals are those of the cFS enumeration

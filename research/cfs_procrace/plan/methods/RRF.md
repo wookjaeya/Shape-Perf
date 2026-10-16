@@ -1,6 +1,7 @@
 # RRF (ISSRE 2016) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 08:51–09:06, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:15–00:40). `plan/process_race_method_matrix.md` §5.1의 후속 항목 중 RRF에 걸린 것(A5 원문 경로 재시도, A6 내부 oracle 논문, A10 쪽 번호 인용의 둘째 취득 경로)을 다시 시도했다(§1.1 경로 21–29). 저장한 RRF 추출 텍스트와 인용 위치를 다시 대조했다. R2 수치의 근거를 gdb 원시 기록으로 바꿨고, R2 사건표에 task 생성 행(⓪)을 넣고 ③ 칸을 Fig. 2의 기록 형식으로 보강했다(§3.5). 바뀐 것은 §1.3 항목 7–12에 적었다. 이번에도 RRF를 실행하지 않았다.
 - 대상: S. Rattanasuksun, T. Yu, W. Srisa-an, G. Rothermel, *RRF: A Race Reproduction Framework for Use in Debugging Process-Level Races*, ISSRE 2016, pp. 162–172. DOI 10.1109/ISSRE.2016.35.
 - 범위: 로드맵 §10 (M6)의 RRF 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. RRF를 실행하지 않았다(실행할 구현이 없다). 어느 사례에 대해서도 "재현하지 못한다" 또는 "탐지하지 못한다"는 결과를 담지 않는다.
@@ -29,7 +30,7 @@
 | `[기록]` | 저장소의 이전 보고서에 있는 값. 이번에 재검증하지 않았다 |
 | `[미도달]` | 열지 못했다 |
 
-쪽 번호 표기: **RRF p.N**은 CPS-VO 아카이브가 올린 PDF(11쪽)의 PDF 쪽이다. ISSRE 인쇄 쪽(162–172)은 11쪽이라 쪽 수는 같지만, 이 PDF가 IEEE 출판본과 같은 판본인지는 확인하지 못했다(IEEE 사본에 접근 불가, §1.1 경로 3). **SysPro p.N, DESCRY p.N**은 각 PDF의 쪽이다.
+쪽 번호 표기: **RRF p.N**은 CPS-VO 아카이브가 올린 PDF(11쪽)의 PDF 쪽이다. ISSRE 인쇄 쪽(162–172)은 11쪽이라 쪽 수는 같지만, 이 PDF가 IEEE 출판본과 같은 판본인지는 확인하지 못했다(IEEE 사본에 접근 불가, §1.1 경로 3, 24). **RRF 쪽 번호 인용은 단일 취득 경로이며 독립 재확인이 없다.** 2026-10-16에 둘째 경로를 다시 찾았으나 얻지 못했다(§1.1 경로 21–29, §1.3 항목 7). **SysPro p.N, DESCRY p.N**은 각 PDF의 쪽이다.
 
 ---
 
@@ -43,6 +44,7 @@
 6. **다섯 사례의 의존성 쌍은, RRF 이벤트 로그에 들어온다면 이 설계의 "같은 자원, 두 process, 두 순서" 모양과 맞는다 (분석, 미실행).** C1·C3·C5·R2의 공개와 사용은 cFE/OSAL 메모리 상태의 쓰기와 읽기이고, OSAL 자체 시험에서 C1의 생성·조회는 syscall 0건이었다(`availability.md` §4.2 `[기록]`). RRF의 후보 쌍은 syscall·resource lock 기록에서 나온다(p.3–5). 이 경로가 사례의 사건을 포함하는지는 자료로 정해지지 않는다. 한 process 안의 task 쌍을 PuD 쌍으로 줄 수 있는지도 서술이 없다.
 7. **실행은 불가능하고 오늘 적용되는 상태는 다섯 사례 모두 `NOT_RUN`이다.** RRF 구현을 찾지 못했고, 논문의 관측 도구 Scribe는 패치된 Linux 커널이 필요한데 이 컨테이너는 다른 커널을 띄울 수 없다(`availability.md` §1.1 `[기록]`; 오늘 설정 파일로 재확인 `[M]`). C2는 앱 소스가 비공개라 별도 사유가 더해진다. `INAPPLICABLE`은 PI 판단이다(§4.3).
 8. **Kairos 가설은 근거가 있는 만큼만 올렸다(§5).** 근거가 지지하는 것은 "cFS 내부 사건이 후보 생성 입력에 들어오는가"(H-RRF-1)와 "시간 기반 sleep 대신 사건 기반 제어"(H-RRF-4, 차이일 뿐 결핍이 아님)이다. 반사실 순서가 스케줄로 만들어지지 않는 경우의 설명(H-RRF-5)은 R2의 순서 성격이 미결이라 부분 근거다. 쌍 열거, 실행 확인, 확장 가능한 oracle 저장소는 RRF에 이미 있으므로 차별점으로 쓰지 않는다(§5.1).
+9. **2026-10-16 보완.** (a) 내부 oracle 논문(RRF의 [36], ISSRE 2013)은 초록만 읽었다 `[초록]`. UNL 기관 저장소의 PDF와 IEEE 사본이 도전 페이지에 막혔다(§1.1 경로 25–26). H-RRF-3의 조건은 그대로 남는다. (b) 저자 학위논문 PDF는 다시 막혔다. (c) RRF PDF의 둘째 취득 경로는 찾지 못했다. 같은 호스트의 파일 URL은 기본 `curl`에도 WAF 거부(245 B)를 돌려줬다(경로 22). (d) 논문 p.1은 process-level race를 "multiple processes access operating system resources"로 정의하고 thread 수준 탐지기는 이런 race를 다루지 못할 수 있다고 적는다. 2026-10-15판은 p.10만 썼다(§1.3 항목 8). (e) R2 수치를 gdb 원시 기록으로 바꿨고, 그 기록은 거부 경로에서 "no syscall was made"라고 적는다(§3.5 R2).
 
 ---
 
@@ -50,7 +52,7 @@
 
 ### 1.1 시도한 경로와 결과
 
-시각은 2026-10-15 UTC 08:51–09:06다. 접속 실패는 원인을 기록한 것까지만 썼고, TLS 검증을 끄거나 프록시·도전 페이지를 우회하려고 하지 않았다.
+시각은 경로 1–20이 2026-10-15 UTC 08:51–09:06, 경로 21–29가 2026-10-16 UTC 00:15–00:25다. 접속 실패는 원인을 기록한 것까지만 썼고, TLS 검증을 끄거나 프록시·도전 페이지를 우회하려고 하지 않았다.
 
 | # | 경로 | 결과 | 등급·비고 |
 |---|---|---|---|
@@ -74,14 +76,25 @@
 | 18 | Unpaywall API | **쓰지 않았다.** API가 이메일 주소를 요청 변수로 요구하고, 사용자의 주소를 이 용도의 외부 서비스에 보내지 않는다 | — |
 | 19 | 2차 문헌: SysPro `arxiv.org/pdf/2601.09616v1`(47쪽, sha256 `8fe5daa4…e726`), DESCRY `chaowang-vt.github.io/pubDOC/YuZW17.pdf`(11쪽, sha256 `f9d7b57b…bf60`), SimEvo `par.nsf.gov/servlets/purl/10089644`(12쪽, sha256 `143f7351…31be6`) | 세 PDF 모두 200. 텍스트를 추출해 `RRF`, `Rattanasuksun`, `Race Reproduction`을 검색했다. SysPro와 DESCRY에 언급이 있다(§2.4). SimEvo에는 없다 | `[2차]` |
 | 20 | RRF 논문이 인용한 Scribe 이슈 [31] `columbia/linux-2.6-racepro#3`, [32] `columbia/racepro#6` | `gh api`가 403(이 세션에 해당 저장소 접근 없음). 논문의 서술만 읽었다(p.9) | `[미도달]`. 부차적 |
+| 21 | (2026-10-16 00:17Z, 기본 `curl`, 30–40초 timeout) 저자 새 홈 `tingting-yu.scholar.uconn.edu`와 `/publications/`, `/research/` | 세 쪽 모두 200(10-15에는 연결 끊김). Publications 쪽 본문은 Google Scholar 프로필 링크뿐이고 Research 쪽은 주제 목록뿐이다. PDF·코드·다운로드 링크 없음 | 구현 없음 |
+| 22 | CPS-VO 레코드 `node/30361`와 파일 URL `file/30362/download/194493`(기본 `curl`) | 둘 다 HTTP 200에 본문 245 B "Request Rejected"(WAF). 10-15에는 파일 URL을 `curl`로 직접 시도하지 않았다(경로 2). 클라이언트 문자열을 바꾸거나 다른 도구로 재요청하지 않았다 | 같은 호스트이므로 둘째 경로가 아니다 |
+| 23 | 저자 CV `homepages.uc.edu/~tyu/CV/tyu_cv.pdf`(UC 홈의 projects 쪽이 링크) | 200, PDF. sha256 `61225fc2…36c5`. 학회 논문 C[14]가 RRF(저자 표기 "Rattanasuksan"), C[6]이 내부 oracle 논문(ISSRE 2013, pp. 11–20)이다. 둘 다 서지뿐이고 아티팩트·코드 링크가 없다 | 서지. 구현 없음 |
+| 24 | IEEE Xplore `document/7774517`(RRF), Semantic Scholar Graph API(RRF) | IEEE: HTTP 202, 본문 0 B(경로 3과 같은 도전). S2: `openAccessPdf.status: CLOSED` | 둘째 경로 없음 |
+| 25 | 내부 oracle 논문 [36]: Crossref 서지 검색, Semantic Scholar, IEEE `document/6698900` | Crossref: DOI `10.1109/ISSRE.2013.6698900`, 쪽 11–20, 링크는 IEEE 한 곳. S2: `CLOSED`. IEEE: 202 도전 | 서지 |
+| 26 | 내부 oracle 논문 [36]: UNL 기관 저장소 레코드 `digitalcommons.unl.edu/cseconfwork/255`와 PDF `viewcontent.cgi?article=1276&context=cseconfwork`, WebSearch 1회 | 레코드 200(초록만). PDF는 `curl` 403 `cf-mitigated: challenge`, WebFetch 403. 우회하지 않았다. WebSearch는 이 레코드와 UKy 학자 페이지(초록·서지)만 냈다 | **`[초록]`**. 본문 `[미도달]` |
+| 27 | 저자 학위논문 PDF `viewcontent.cgi?article=1182&context=computerscidiss`, 레코드 `computerscidiss/160`, WebSearch 1회 | PDF 403 `cf-mitigated: challenge`(경로 11과 같다). 레코드 200. WebSearch는 같은 레코드(UNL 구성원 한정 다운로드 안내)와 CPS-VO 레코드만 냈다 | 본문 `[미도달]` 그대로 |
+| 28 | OpenAlex 검색, Scholar Gateway `semanticSearch` | OpenAlex: HTTP 429(무키 일일 한도 소진 응답). Scholar Gateway: `ACCESS_DENIED: Access denied` | `[미도달]` |
+| 29 | GitHub(MCP) 저장소 검색 `process-level race reproduction sleep injection scribe`, 코드 검색 `"Rattanasuksun" race` | 저장소 0건. 코드 7건이며 모두 서지 데이터 파일이거나 무관한 파일이다(예: `morningD/lang.csconf`의 학회 소속 데이터) | 구현 없음 |
 
-**읽은 출처의 요약.** 본문 전체를 읽은 것은 RRF 논문(경로 2) 한 편이다. SysPro와 DESCRY는 RRF를 서술한 문장만 읽었다. 저자 학위논문은 PDF가 도전 페이지에 막혔고, 이 문서는 학위논문 본문의 어떤 내용도 쓰지 않는다.
+**읽은 출처의 요약.** 본문 전체를 읽은 것은 RRF 논문(경로 2) 한 편이다. SysPro와 DESCRY는 RRF를 서술한 문장만 읽었다. 저자 학위논문은 PDF가 도전 페이지에 막혔고, 이 문서는 학위논문 본문의 어떤 내용도 쓰지 않는다. 2026-10-16에 내부 oracle 논문(RRF [36])의 초록을 더 읽었다. 그 본문과 RRF의 둘째 사본은 얻지 못했다.
 
 ### 1.2 이 문서가 쓰는 출처별 등급
 
 | 출처 | 등급 | 이 문서에서의 쓰임 |
 |---|---|---|
-| RRF (ISSRE'16) CPS-VO 사본 | **`[전문]`** | 도구 설명 전체(§2), 여섯 질문의 도구 수준 답(§3.3), 실행 요구(§4) |
+| RRF (ISSRE'16) CPS-VO 사본 | **`[전문]`**. 단일 취득 경로, 독립 재확인 안 됨 | 도구 설명 전체(§2), 여섯 질문의 도구 수준 답(§3.3), 실행 요구(§4) |
+| 내부 oracle 논문(Yu, Srisa-an, Rothermel, ISSRE 2013, RRF의 [36]) | `[초록]`. 본문 `[미도달]` | 초록은 internal oracle을 "monitoring aspects of internal program and system states"로 탐지하는 oracle이라고 적는다. 어떤 상태를 어떤 입력으로 보는지는 초록에 없다. H-RRF-3의 조건을 가르지 못한다 |
+| 저자 CV(UC 홈) | 서지 | RRF와 [36]의 서지 확인. 아티팩트 링크 없음 |
 | RRF 서지·초록 | `[초록]` | 출판 정보 확인 |
 | RRF 출판본(IEEE) | `[미도달]` | 판본 동일성 미확인 |
 | Rattanasuksun 학위논문(UNL 2018) | 초록 `[초록]`. 본문 `[미도달]` | 존재 확인뿐. 구현 상세가 있을 수 있으나 읽지 못했다 |
@@ -101,6 +114,12 @@
 | 4 | `availability.md` §3 "C2 has no source" | 일치한다. RRF는 PuD의 소스 접근을 가정하고 소스에 `sleep`을 넣는다(p.5) |
 | 5 | `yu-group.md` §3.1 "DESCRY cites RRF only alongside SimRacer" | 일치한다. DESCRY p.8의 "SimRacer [29, 38]"에서 [29]가 RRF다. DESCRY는 RRF를 서술하지 않는다(§2.4) |
 | 6 | 로드맵 §10.1 RRF "우선 확인할 자료: 입력으로 필요한 위치·사건·실패 조건과 실행 제어" | 전문으로 답할 수 있다. 입력은 §2.1, 실행 제어는 소스 수준 `sleep` 주입이다 |
+| 7 | (2026-10-16) 쪽 번호 인용의 취득 경로 | `process_race_method_matrix.md` §1.1이 RRF 쪽 번호 인용을 "단일 취득 경로, 독립 재확인 안 됨"으로 표시했다. 이 문서도 같은 표시를 단다(머리말 쪽 번호 표기). 둘째 경로(IEEE, Semantic Scholar, OpenAlex, Scholar Gateway, 저자 홈 두 곳, CV, GitHub)는 얻지 못했다(§1.1 경로 21–29). 오늘 이 문서는 PDF를 다시 받지 않았고, 10-15에 저장한 같은 사본(sha256 `e8c26e2f…`)의 추출 텍스트에서 인용 위치를 다시 찾았다. 인용 문구는 모두 적은 쪽에서 찾았다. 다만 "reasonable to assume the availability of source code"는 p.5에 있고 p.3에는 없다(§2.3 행 2의 근거를 고쳤다) |
+| 8 | (2026-10-16 추가) 논문이 밝힌 대상 범위 | p.1은 process-level race를 "multiple processes access operating system resources without proper synchronization"인 경우로 정의하고, 특정 언어용이거나 "operating at the thread level"인 탐지기는 이런 race를 탐지·재현하지 못할 수 있다고 적는다. p.10은 thread 수준 기법이 "multi-threaded applications within single processes"에 맞춰져 있다고 적는다. 2026-10-15판은 p.10만 썼다. 한 process 안의 thread 사이 race를 범위에서 뺀다고 명시한 문장은 찾지 못했다. §2.1, §4.3 항목 1에 더했다 |
+| 9 | (2026-10-16 정정) R2 수치의 근거 | 2026-10-15판은 R2의 "24회"를 `ledger.md`와 로드맵으로 인용했다. R2의 실행 증거인 gdb 원시 기록(`env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md` §2, §7)으로 바꿨다. 값은 같다. R2 Q6의 `availability.md` §1 인용(`cfe_evs.c:185-188`)도 같은 기록의 v7.0.1 L188로 바꿨다 |
+| 10 | (2026-10-16 보강) R2 ③과 C3 TIME `CreatePipe` 칸 | Fig. 2(p.4)의 기록 형식을 근거로 더했다. syscall마다 경로 문자열 인자가 `data: input string`으로 남고, `files_struct` 자원 잠금은 `desc = none`이며, 예시에서 `llseek`·`close`는 관련 없는 syscall로 분류된다. `mq_open`이 Scribe에서 어떤 기록을 남기는지는 RacePro.md §2.5 K1–K3(RacePro 저장소 커널의 코드 읽기, `[기록]`)을 인용했다. RRF가 쓴 Scribe 판본이 그 커널과 같은지는 확인이 없다. 라벨은 "불명" 그대로다 |
+| 11 | (2026-10-16 추가) R2 사건표의 ⓪ task 생성 행 | `process_race_method_matrix.md` §7 항목 7이 RacePro.md에 대해 지적한 공백과 같은 행이다. RRF판에도 넣었다 |
+| 12 | (2026-10-16) 가설 번호 | H-RRF-2는 결번이다. 이름·ID·세대 항목(로드맵 §10.5 둘째 행)을 §5.3에서 가설로 올리지 않았기 때문이다. 번호를 다시 매기지 않는다(다른 문서가 H-RRF-1·3·4·5로 인용한다) |
 
 ---
 
@@ -112,7 +131,7 @@
 |---|---|---|
 | **역할** | 재현(reproduction). 사용자가 보고한 process-level race를 재현해 디버깅을 돕는다. "race detection system이 아니라 race reproduction system"이다. 부수적으로 같은 자원에 대해 다른 oracle을 적용해 다른 유형의 fault도 센다(Table V: UPDATEDB–UPDATEDB 204건, LOCATE–UPDATEDB 120건) | p.1, p.3, p.9–10 |
 | **race 정의** | "(1) 두 process가 공유 자원에 접근하고 (2) 원래 순서와 다른 순서로 접근할 수 있는 것." 기존 정의보다 넓고 **order violation을 포함한다**("desired order … reversed", 공통 lock의 보호 여부와 무관). order violation은 race의 필요조건이지 충분조건이 아니라고 적는다 | p.2 |
-| **실행 단위** | OS process. "two or more programs undergoing debugging (PuDs)". 평가 대상은 C 프로그램과 shell script 7쌍이다(Table I). 설정 파일에 두 process의 번호와 소스 위치를 둔다. 같은 process 안의 thread를 단위로 다루는 서술은 없다. thread 수준 기법은 "단일 process 안의 multi-threaded 응용"에 맞춘 것이라고 대비해 서술한다 | p.1, p.3, p.6–7, p.10 |
+| **실행 단위** | OS process. "two or more programs undergoing debugging (PuDs)". 평가 대상은 C 프로그램과 shell script 7쌍이다(Table I). 설정 파일에 두 process의 번호와 소스 위치를 둔다. 같은 process 안의 thread를 단위로 다루는 서술은 없다. process-level race를 "multiple processes access operating system resources"인 경우로 정의하고(p.1), thread 수준 기법은 "단일 process 안의 multi-threaded 응용"에 맞춘 것이라고 대비해 서술한다(p.1, p.10). thread 사이 race를 범위에서 뺀다는 명시 문장은 찾지 못했다 | p.1, p.3, p.6–7, p.10 |
 | **관측하는 것** | system-level event(system call, signal). 구현은 Scribe다. Scribe 출력 예(Fig. 2)에 system call과 인자, `resource lock` 기록(`type = inode/files_struct/file`, `access = read/write`, `id`, `serial`, `desc`)이 있다. DTrace(Solaris), inotify가 같은 역할의 다른 도구로 거명된다. 사용자 공간 메모리 접근, 함수 반환값, futex·mutex·semaphore 사건을 쓴다는 서술은 없다 | p.2–4 |
 | **자원 식별** | (1) 엔지니어가 bug report를 분석해 관측할 자원을 지정한다("must specify resources"). (2) 설정 파일의 "shared resource name"과 두 process 번호로 로그를 거른다. 먼저 대상이 아닌 process의 syscall을 빼고, 다음으로 공유 자원을 쓰는 syscall만 남긴다. (3) symbolic link가 있으면 Scribe가 실제 파일 이름과 symbolic 이름을 함께 보고하므로 같은 자원으로 걸러낸다. (4) 두 process의 syscall을 "같은 공유 자원에 접근하면" 짝짓는다. 예시 자원은 파일 경로(`/usr/local/var/locatedb`)다. 객체 ID·세대(generation)·등록 정보를 잇는 서술은 없다 | p.3–5, p.7–8 |
 | **모델링하는 순서·의존** | 두 process의 syscall 쌍이 같은 자원에 접근하는 **pair-wise access**다. 두 순서 `(σi, σj)`와 `(σj, σi)`를 모두 만들고, 쌍마다 네 패턴(Pi가 먼저, Pj가 먼저, Pi는 syscall 앞·Pj는 뒤, 그 반대)으로 `sleep`을 넣는다. RRF 자신의 happens-before 그래프나 lock·동기화 모델 서술은 없다(RacePro 쪽 모델은 RacePro 문서). syscall을 자원에 대한 read/write로 보는 "system-level event modeling"은 RacePro와 같은 방식으로 서술한다 | p.1, p.2, p.5–6 |
@@ -138,7 +157,7 @@
 | # | 서술 | 근거 | cFS와의 관계 (분석, 미실행) |
 |---|---|---|---|
 | 1 | 풀려는 문제를 "system call이 다른 system call을 부르는 implicit 접근을 엔지니어가 놓치기 쉬운 것"으로 둔다. 동기는 커널 서비스 안의 사건이 보이지 않는다는 점이다 | p.1–2 | 사례의 의존성은 이 문제와 반대 위치에 있다. 접근이 syscall로 나타나지 않고 사용자 공간 메모리의 쓰기·읽기다(`availability.md` §4.2 `[기록]`) |
-| 2 | 단위는 process 쌍이고 소스 접근을 가정한다("reasonable to assume the availability of source code") | p.3, p.5 | native cFS는 한 process이고 OSAL task는 thread다(`availability.md` §3 `[기록]`). cFE/OSAL/CF/BP 소스는 공개이나 C2의 앱은 비공개다 |
+| 2 | 단위는 process 쌍이고(p.3) 소스 접근을 가정한다("reasonable to assume the availability of source code", p.5) | p.3, p.5 | native cFS는 한 process이고 OSAL task는 thread다(`availability.md` §3 `[기록]`). cFE/OSAL/CF/BP 소스는 공개이나 C2의 앱은 비공개다 |
 | 3 | 평가 대상을 oracle이 있는 file·socket 자원으로 좁힌다. "oracle이 있는 유형만 탐지한다" | p.6 | cFS 사례에 대응하는 oracle이 논문에 없다. 저장소는 확장 가능하다고 적는다(p.2, p.6) |
 | 4 | `sleep` 기반 제어는 비결정성이 남는다("a system call is a large block of execution steps"). 시간은 사례별로 시험 실행으로 정했다 | p.5–6 | 시간 값은 cFS에서 `unspecified_by_reference`다. 조건 원칙은 사건 기반 제어를 우선한다(`CONDITIONS_POLICY.md`) |
 | 5 | RacePro가 2012년 이후 유지되지 않고 replay divergence가 있어 baseline으로 쓸 수 없었다. Scribe의 이슈 두 건(저장소 이슈 #3, #6)을 인용한다 | p.2, p.9 | Scribe를 쓰는 RRF의 실행 가능성에 직접 관련된다(§4) |
@@ -190,7 +209,7 @@
 | C2 cFE#198 | 앱 P의 late init 완료와 다른 앱 R의 의존 호출. P·R은 비공개(EVA CWS)이고 통신 방식·초기화 내용이 공개되지 않았다. 공개된 것은 단일 상태 시작 동기화(`WaitForStartupSync`)와 6.6.0a의 두 단계 방식(`APPS_INIT`, `LATE_INIT`, `CFE_ES_WaitForSystemState`)이다 | `ledger.md` §1a, §1b, §2; 로드맵 §9.1 `[기록]` |
 | C3 cFE#73 | SB task의 `CFE_SB.AppId`와 EVS task의 `EVS_AppID`·등록 플래그가 설정되기 전에 TIME task가 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID`(AppId=0)를 부르고 `EVS_IsFiltered(0xFFFFFFFF)`가 범위 검사 없이 접근한다. 우선순위(TIME 60, EVS 61, SB 64)가 순서를 만든다. 원 플랫폼은 Microblaze이고 오류 지점은 미확인 | `ledger.md` §1a, §2 `[기록]` |
 | C5 cFE#72 | `CFE_ES_AppCreate`가 ES lock을 `OS_TaskCreate` 앞에서 풀고 뒤에서 다시 잡아 `TaskTable`을 채운다. 그 사이 새 task의 `CFE_ES_GetAppID`가 `CFE_ES_ERR_APPID`를 반환할 수 있다. 위반은 "등록 전 조회"이고 일찍 실행된 것만으로는 위반이 아니다. 수정(6.4.2)은 lock 범위 확장이다 | `ledger.md` §1a, §1b `[기록]` |
-| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로(`CreatePipe`, `Subscribe`, 이벤트 전송)를 실행해 `EVS_GetAppDataByID`가 NULL을 돌려주고 `ILLEGAL_APP_ID`가 된다. 상태는 폐기된다. 서술은 "이벤트 요청 거부"이고 gdb 3회 모두 설정 전 사용 24회다. core 시작 직렬화(S1)가 EVS·ES 초기화를 SB보다 앞세운다. race인지 결정적 순서인지는 실행 확인이 필요한 미결 항목이다 | `ledger.md` §1a, §2; 로드맵 §2.2 `[기록]`. 실행 증거는 gdb 원시 기록(`env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md`) |
+| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로(`CreatePipe`, `Subscribe`, 이벤트 전송)를 실행해 `EVS_GetAppDataByID`가 NULL을 돌려주고 `ILLEGAL_APP_ID`가 된다. 상태는 폐기된다. 서술은 "이벤트 요청 거부"다. gdb 기록 3회(`env/logs/r2_g1..3_*`) 모두 실행당 설정 전 사용 24회(ES 20, EVS 4; `CreatePipe` 2, `SubscribeFull` 4, `ReportSingleEvent` 18), 모두 AppId 0, 모두 `cfe_evs.c` L188(v7.0.1)에서 `ILLEGAL_APP_ID`이다. 기록은 호출자가 이 상태를 버려 "Nothing was printed, no counter changed, and no syscall was made"라고 적는다. 한 원인의 반복이며 독립 결함 24개가 아니다. core 시작 직렬화(S1)가 EVS·ES 초기화를 SB보다 앞세운다. race인지 결정적 순서인지는 실행 확인이 필요한 미결 항목이고, 3회 일치는 결정성의 증명이 아니다 | `ledger.md` §1a, §2 `[기록]`; `results/R2_gdb_v701.md` §2, §3, §7 `[기록]`(측정 기록) |
 | 공통 | native cFS는 한 Linux process이고 OSAL task는 `pthread_create` thread다. OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 **syscall 0건**이었다. SB pipe는 `mq_open("<pid>.<name>")`을 부른다 | `availability.md` §3, §4.2 `[기록]`. OSAL 시험의 probe이며 RRF의 결과가 아니다 |
 
 ### 3.3 도구 수준의 답 (사례와 무관)
@@ -273,21 +292,22 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | 아래 사건 대응표의 네 사건 중 AppId 설정과 값 읽기는 전역 메모리 쓰기와 읽기다. `CreatePipe`의 `mq_open`만 syscall이다. 오류 반환은 반환값이다. 이 중 어느 것이 RRF의 관련 이벤트 로그에 들어와 후보가 되는지는 서술에서 정해지지 않는다 | p.3–4; 아래 표 |
+| 1 | 분석 | 아래 사건 대응표의 사건 중 AppId 설정과 값 읽기는 전역 메모리 쓰기와 읽기다. `CreatePipe`의 `mq_open`과 ⓪의 task 생성만 syscall이다. 오류 반환은 반환값이고, gdb 기록은 거부 경로에서 syscall이 없었다고 적는다. 이 중 어느 것이 RRF의 관련 이벤트 로그에 들어와 후보가 되는지는 서술에서 정해지지 않는다 | p.3–4; 아래 표; `results/R2_gdb_v701.md` §2 `[기록]` |
 | 2 | 분석 | `CFE_SB_Global.AppId` 하나의 메모리 위치다. EVS가 이 값을 이벤트 원천 ID로 받아 자기 테이블을 찾는 값 전달을 RRF가 추적한다는 서술은 없다 | p.4–5 |
 | 3 | 분석 | 설정(쓰기)과 사용(읽기)이 메모리라 syscall 쌍으로 표현되지 않는다. 이 순서를 정하는 core 시작 직렬화(S1)는 RRF의 모델에 없다 | p.5–6 |
 | 4 | 답 | 도구 수준 답과 같다. R2의 요구 순서("SB AppId 저장이 SB API 경로의 이벤트 요청보다 먼저")를 넣을 입력은 없다 | p.3, p.7 |
 | 5 | 분석 | RRF는 쌍마다 두 순서를 `sleep`으로 시도한다(p.5). R2의 순서는 시작 직렬화(S1)가 EVS·ES 초기화를 SB보다 앞세우므로, 한 task에 `sleep`을 넣어 SB 설정이 먼저인 순서를 만들 수 있는지는 자료로 정해지지 않는다 [I]. 순서가 스케줄로 뒤집히는지가 사례 기록상 미결이라(race인지 결정적 순서인지, `ledger.md` §2 R2) 이 칸이 답하는 범위는 "설계상 두 순서를 시도한다. 시도해도 한 순서만 나오는 경우의 처리는 서술에 없다"까지다. 순서가 고정된 이유를 담는 출력 항목은 서술에 없다 | p.5–6; `ledger.md` §2 `[기록]` |
-| 6 | 분석 | 사례 현상은 "이벤트 요청 24회 거부"이고 프로세스 실패가 없다(상태 폐기). 반환값은 출력 항목이 아니고 실패 메시지도 출력하지 않는다(`availability.md` §1의 `cfe_evs.c:185-188` 서술). 출력 기반 oracle에는 차이가 나타나지 않을 수 있다. 내부 oracle은 TOCTOU·atomicity·race 유형이다(p.6). "24"는 이 도구의 출력 수량이 아니다 | p.3, p.6; 로드맵 §2.2 `[기록]` |
+| 6 | 분석 | 사례 현상은 실행당 "이벤트 요청 24회 거부"이고 프로세스 실패가 없다(상태 폐기). 반환값은 출력 항목이 아니고, 기록상 호출자가 반환 상태를 버려 출력도 카운터 변화도 없다(`cfe_evs.c` L188, v7.0.1). 출력 기반 oracle에는 차이가 나타나지 않을 수 있다. 내부 oracle은 TOCTOU·atomicity·race 유형이다(p.6). RRF는 race가 실행마다 나타나는지 여부를 쌍·순서별 실행 수로 센다(Table II, p.8). R2처럼 기록상 3회 모두 나타난 현상에서 "targeted / incidental / new" 분류가 무엇이 될지는 서술로 정해지지 않는다. "24"는 이 도구의 출력 수량이 아니다 | p.3, p.6, p.8; `results/R2_gdb_v701.md` §2, §7 `[기록]` |
 
 **R2 사건 대응표** (로드맵 §10.3 방식의 RRF판). 참조 revision은 사례 기록의 B/M/D(`fc8c48ad`/`12cb84fc`/`f22e538c`)이며 v7.0.1 코드와 다를 수 있다.
 
 | R2 사건 | 커널에서 보이는 흔적 | RRF의 기록·입력(설계) | 후보 규칙 | 라벨 |
 |---|---|---|---|---|
+| ⓪ core task 생성 (2026-10-16 추가): ES가 core task를 `OS_TaskCreate`로 차례로 만들고 각 task가 RUNNING이 될 때까지 기다린다(S1, `cfe_es_start.c` L810, L835, v7.0.1; `results/R2_gdb_v701.md` §6 `[기록]`) | `OS_TaskCreate` → `pthread_create` → `clone` 계열 syscall(C5 보충표와 같은 근거, cFS에서 측정하지 않음). RUNNING 대기는 메모리 폴링과 지연이다 | `clone`은 RacePro의 추적 syscall 예다(p.2). 경로 문자열 인자가 없으므로 Fig. 2 방식의 자원 이름 거르기(p.4)에서 관련 이벤트가 되는 경로는 서술에 없다 | 시작 직렬화 같은 순서 근거를 모델링한다는 서술은 없다. 서술된 순서 조작은 쌍의 순서를 `sleep`으로 바꾸는 것이다(p.5) | 분석 |
 | ① SB AppId 설정: `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, 반환값 무시 (B `cfe_sb_task.c` L126, M L138, D L128) | syscall 없음(소스 수준) | 서술 없음 | 같은 자원의 syscall 쌍(p.5)이 아니다 | 분석 |
 | ② 값 읽기: EVS(B) 또는 ES·EVS(M, D) task가 같은 전역을 읽음 | syscall 없음 | 서술 없음 | 위와 같다 | 분석 |
-| ③ 이벤트 요청: `CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`(OSAL 시험 69회, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준) | `mq_open`이 "관련 이벤트"가 되는 조건은 엔지니어가 정한 자원 이름과 일치할 때다(p.4, p.7). 어떤 이름을 줄지는 서술이 없다 | — | **불명** |
-| ④ 오류 반환: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기 (B `cfe_evs.c` L182-L186) | 반환값 | 기록 대상이 아니다 | — | 분석 |
+| ③ 이벤트 요청: `CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`(OSAL 시험 69회, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준). RacePro 저장소의 Scribe 커널 코드 읽기에 따르면 `mq_open`은 fd 할당·설치에서 `files_struct` 쓰기를 남기고 큐 이름·큐 객체에는 자원 잠금이 없다(RacePro.md §2.5 K1–K3 `[기록]`, 실행 확인 없음) | `mq_open`이 "관련 이벤트"가 되는 조건은 엔지니어가 정한 자원 이름과 일치할 때다(p.4, p.7). Fig. 2에서 syscall의 경로 문자열 인자는 `data: input string`으로 남고, `files_struct` 잠금은 `desc = none`이며, 예시는 `llseek`·`close`(`files_struct` 잠금이 붙은 syscall)를 관련 없는 것으로 분류한다(p.4). 그러므로 큐 이름을 자원 이름으로 주면 `mq_open`의 이름 인자로 거를 수 있는 형식이라는 분석이 나온다 [I]. 그렇게 걸러진 쌍은 SB pipe 이름에 대한 것이고 AppId 설정·사용이 아니다 [I]. RRF가 쓴 Scribe 판본이 RacePro 저장소의 커널과 같은지, 엔지니어가 어떤 이름을 줄지는 서술이 없다 | — | **불명** |
+| ④ 오류 반환: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기 (B `cfe_evs.c` L182-L186; v7.0.1 L188) | 반환값. gdb 기록은 이 경로에서 syscall이 없었다고 적는다(`results/R2_gdb_v701.md` §2 `[기록]`) | 기록 대상이 아니다 | — | 분석 |
 
 #### C1·C3·C5 보충 사건 대응표
 
@@ -297,7 +317,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | C1 조회: `OS_CountSemGetIdByName` | 0 syscalls (probe) | 서술 없음 | 분석 |
 | C1 수정 후 재시도 대기: `OS_TaskDelay(100)` × 25 | sleep 계열 syscall(추정) | 이벤트 로그에 syscall로는 나타날 수 있다. 그 syscall을 "같은 자원"과 연결하는 경로는 서술이 없다 | 불명 |
 | C3 SB `AppId` 저장, EVS `EVS_AppID`·등록 | syscall 없음 | 서술 없음 | 분석 |
-| C3 TIME의 `CreatePipe` | `mq_open`(probe에서 부분 가시) | 자원 이름 지정 여부에 달렸다(p.4, p.7) | 불명 |
+| C3 TIME의 `CreatePipe` | 현재 OSAL에서는 `mq_open`(probe에서 부분 가시). C3의 원 판본(OSAL 4.1.1 시대)의 queue 구현이 `mq_open`을 쓰는지는 이 문서에서 확인하지 않았다 | 자원 이름 지정 여부에 달렸다(p.4, p.7). `mq_open`이라면 R2 ③과 같은 분석이다 | 불명 |
 | C5 `OS_TaskCreate` | `pthread_create`. 에이전트가 쓴 작은 C 프로그램에서 `clone3`로 관측(`availability.md` §4 끝, 기록. OSAL·cFS 측정은 아니다) | `clone`은 RacePro의 추적 syscall 예(p.2). RRF가 이 이벤트를 어떻게 쓰는지는 서술이 없다 | 분석 |
 | C5 ES 레코드 쓰기·`GetAppID` 조회 | 0 syscalls(OSAL 시험의 task 레지스트리 대기는 futex 대기만 보임) | 서술 없음 | 분석 |
 
@@ -318,9 +338,9 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | # | 요구 | 근거 | 오늘 상태 |
 |---|---|---|---|
 | R1 | RRF 구현(스크립트·도구·mPuD 생성기·oracle 저장소) | 논문은 구현 위치를 적지 않는다(전문 검색). §1.1 경로 1, 10, 13–15, 17 | **없음.** GitHub 저장소·코드·사용자 검색, Software Heritage, Zenodo, Internet Archive, 저자 홈, CPS-VO 레코드 어디에서도 구현·VM 이미지·스크립트를 찾지 못했다. 찾지 못했다는 것은 "접근한 출처에서 찾지 못함"이다. 존재하지 않는다는 확인이 아니다. 저자 학위논문 PDF는 열지 못해 구현 설명 유무를 모른다. **이것이 차단 요인이다** |
-| R2 | 이벤트 보고 도구 Scribe(Linux 커널 패치) | 논문 p.3 "Linux 지원과 낮은 overhead 때문에". 판본은 적지 않았다 | **없음.** RacePro 쪽 기록은 Scribe가 i386 Linux 2.6.35에 내장하는 패치이고 설치에 커널 교체가 필요하다고 한다(`availability.md` §1, §2.1 `[기록]`). 오늘 읽기 전용 확인 `[M]`: 커널 `6.18.44-fc-v114`, `# CONFIG_KEXEC is not set`, `# CONFIG_KEXEC_FILE is not set`, `# CONFIG_MODULES is not set`, `/proc/modules`와 `/dev/kvm` 없음, vmx/svm 플래그 0줄. 이 컨테이너는 다른 커널을 띄울 수 없다. 오늘은 syscall을 직접 불러 보는 확인(kexec_load, finit_module)을 포함한 명령이 권한 정책에 의해 거부되어 그 확인은 다시 시도하지 않았다. 10-08의 ENOSYS 기록을 쓴다 `[기록]`. **RRF가 쓴 Scribe 판본이 RacePro 저장소의 판본과 같다는 확인은 없다** |
+| R2 | 이벤트 보고 도구 Scribe(Linux 커널 패치) | 논문 p.3 "Linux 지원과 낮은 overhead 때문에". 판본은 적지 않았다 | **없음.** RacePro 쪽 기록은 Scribe가 i386 Linux 2.6.35에 내장하는 패치이고 설치에 커널 교체가 필요하다고 한다(`availability.md` §1, §2.1 `[기록]`). 2026-10-16T00:19Z 읽기 전용 재확인 `[M]`: 커널 `6.18.44-fc-v139`(2026-10-15에는 `fc-v114`), 아래 항목은 두 시각 모두 같다. 2026-10-16의 `/` 여유 공간은 1.9 GB였다. `# CONFIG_KEXEC is not set`, `# CONFIG_KEXEC_FILE is not set`, `# CONFIG_MODULES is not set`, `/proc/modules`와 `/dev/kvm` 없음, vmx/svm 플래그 0줄. 이 컨테이너는 다른 커널을 띄울 수 없다. 오늘은 syscall을 직접 불러 보는 확인(kexec_load, finit_module)을 포함한 명령이 권한 정책에 의해 거부되어 그 확인은 다시 시도하지 않았다. 10-08의 ENOSYS 기록을 쓴다 `[기록]`. **RRF가 쓴 Scribe 판본이 RacePro 저장소의 판본과 같다는 확인은 없다** |
 | R3 | 정적 분석 도구 | 논문 p.1, p.5 "existing static program analysis tools"(이름 없음) | **불명.** 도구를 고를 수 없다(`unspecified_by_reference`) |
-| R4 | 내부 oracle 저장소(TOCTOU, atomicity violation, race) | p.6. 구현은 저자의 이전 논문 [36](ISSRE 2013)을 인용한다 | 없음. [36]은 읽지 않았다 |
+| R4 | 내부 oracle 저장소(TOCTOU, atomicity violation, race) | p.6. 구현은 저자의 이전 논문 [36](ISSRE 2013)을 인용한다 | 없음. [36]은 초록만 읽었다(2026-10-16, §1.1 경로 25–26). 초록은 oracle이 내부 프로그램·시스템 상태를 본다고만 적고 입력 형식은 적지 않는다 |
 | R5 | PuD 소스와 `#ifdef` 빌드 | p.5–6 | cFE·OSAL·CF·BP 소스는 공개다(`ledger.md` `[기록]`). C2의 앱 소스는 비공개다. cFS 앱은 `dlopen`되는 공유 라이브러리이고(`yu-group.md` §7.1 `[기록]`) 논문은 프로그램 쌍을 각각 컴파일한다고만 서술한다. 둘의 정합은 서술이 없다 |
 | R6 | `sleep` 시간 `ST`와 반복 수 `r` | p.5–6, p.8: 논문의 사례에서 1초와 10회 | **cFS 조건으로는 `unspecified_by_reference`.** 논문의 값은 논문 사례의 값이다. 조건 원칙은 레퍼런스에 있는 상수나 사건 기반 제어를 쓰라고 한다 |
 | R7 | bug report(증상 포함) | p.4 | 다섯 사례의 이슈 본문은 있다. 댓글은 읽지 않았다(`availability.md` A6) |
@@ -340,7 +360,7 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 
 ### 4.3 PI 판단이 필요한 항목 (결정 후보. 여기서 정하지 않았다)
 
-1. **`INAPPLICABLE`로 볼지.** 논문은 대상을 "두 process가 OS 자원에 접근하는 race"로 정의하고(p.1–2) thread 수준 기법을 다른 범주로 서술한다(p.10). 사례의 의존성은 한 process 안의 task 사이 메모리 상태다. 이것을 "원 기법의 명시된 입력·대상 범위 밖"으로 보면 `INAPPLICABLE`이고 이유와 원문 위치(p.1–2, p.6, p.10)를 보고한다. 보지 않으면 `NOT_RUN`이다. 로드맵 §1.2의 운용 정의("task 단위, OS process로 한정하지 않음")와 맞물려서 PI가 정할 일이다.
+1. **`INAPPLICABLE`로 볼지.** 논문은 대상을 "두 process가 OS 자원에 접근하는 race"로 정의하고(p.1–2) thread 수준 기법을 다른 범주로 서술한다(p.1, p.10). p.1은 "operating at the thread level"인 탐지기가 process-level race를 다루지 못할 수 있다고 적는다. 거꾸로 한 process 안의 thread 사이 race를 범위에서 뺀다고 명시한 문장은 찾지 못했다(2026-10-16 재확인). 사례의 의존성은 한 process 안의 task 사이 메모리 상태다. 이것을 "원 기법의 명시된 입력·대상 범위 밖"으로 보면 `INAPPLICABLE`이고 이유와 원문 위치(p.1–2, p.6, p.10)를 보고한다. 보지 않으면 `NOT_RUN`이다. 로드맵 §1.2의 운용 정의("task 단위, OS process로 한정하지 않음")와 맞물려서 PI가 정할 일이다.
 2. **재구현(`REIMPLEMENTATION`)을 할지.** 논문이 서술한 부분은 Algorithm 1, 쌍 열거, 네 패턴, 로그 거르기이고, 서술하지 않은 부분은 정적 분석 도구, 이벤트→소스 대응 구현, oracle 구현, Scribe 판본, `ST` 결정 세부다. 서술하지 않은 부분은 각각 `deviation` 또는 `unspecified_by_reference` 선택이 된다. 학위논문 본문을 읽은 뒤 결정하는 편이 맞다(§6). 원 도구 결과와 분리해서만 보고한다(로드맵 §10.4).
 3. **저자에게 요청할지.** 아무에게도 연락하지 않았다(`availability.md` A2와 같은 상태).
 4. **학위논문 PDF를 `research/cfs_procrace/paper/`에 두는 것.** P-PAPERS는 사용자의 PDF 제공을 착수의 필수 조건으로 만들지 않는다. 다만 이 PDF만 도전 페이지에 막혀 있고 구현 서술이 있을 수 있다.
@@ -372,9 +392,9 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 | ID | 가설 | 근거 | 근거 수준 | 확인할 것 | §10.5 행 |
 |---|---|---|---|---|---|
 | **H-RRF-1** | cFS 내부 상태의 공개·사용 사건(OSAL 이름 테이블 등록·조회, AppId 저장, 레지스트리 등록)이 RRF의 후보 생성 입력에 들어오지 않을 수 있다. Kairos는 내부 API·상태 변화·값 전달을 관측해 소스와 연결해야 한다 | RRF의 관련 이벤트는 syscall·resource lock 기록을 엔지니어가 정한 자원으로 거른 것이다(p.3–4, p.7–8). OSAL 자체 시험에서 C1의 생성·조회는 syscall 0건이었고(`availability.md` §4.2 `[기록]`), C3·C5·R2는 소스 수준 서술이다. 논문은 이 문제를 "syscall 안의 implicit 접근이 안 보임"이라고 반대편에서 정의한다(p.1–2) | 설계 분석 + OSAL probe. RRF를 실행하지 않았고 구현 상세(학위논문)를 읽지 못했다. 부분 근거 | RRF의 Component A를 다섯 사례에 적용해 사건이 기록되는지 확인하는 것은 `NOT_RUN`이다. 학위논문 본문이 syscall 외의 관측을 서술하는지 확인 | 관측 입력 부족: R2·C3·C5, 그리고 C1 |
-| **H-RRF-3** | 사례의 판정 대상은 readiness precondition(준비 상태 전제)의 충족 여부와 그 결과(반환값·재시도·최종 초기화 결과)다. RRF의 oracle은 TOCTOU·atomicity·race 유형이다. Kairos는 readiness specification에 대한 판정과 반환·회복의 추적을 제공한다 | p.6의 oracle 유형, 평가가 file·socket에 한정됨, 출력이 race 분류(p.3, p.6). 사례 현상은 C1의 재시도 회복 vs 최종 실패, C5의 반환값 `CFE_ES_ERR_APPID`, R2의 "이벤트 요청 거부(출력 없음)" | **조건부.** oracle 저장소가 확장 가능하다고 논문이 적는다(p.2, p.6). 사용자가 작성한 oracle이 이 판정을 할 수 있다면 이것만으로는 Kairos 고유의 부족이 아니다. 그 oracle이 필요로 하는 사건이 H-RRF-1의 사건이므로 두 가설은 묶인다 | RRF 저장소의 oracle 인터페이스가 어떤 입력을 받는지(학위논문). 입력이 syscall 로그뿐이면 H-RRF-1과 같은 부족이다 | 오류 반환·회복 구분: C1. 시작 상태 vs 앱 고유 상태: C2 |
+| **H-RRF-3** | 사례의 판정 대상은 readiness precondition(준비 상태 전제)의 충족 여부와 그 결과(반환값·재시도·최종 초기화 결과)다. RRF의 oracle은 TOCTOU·atomicity·race 유형이다. Kairos는 readiness specification에 대한 판정과 반환·회복의 추적을 제공한다 | p.6의 oracle 유형, 평가가 file·socket에 한정됨, 출력이 race 분류(p.3, p.6). 사례 현상은 C1의 재시도 회복 vs 최종 실패, C5의 반환값 `CFE_ES_ERR_APPID`, R2의 "이벤트 요청 거부(출력 없음)" | **조건부.** oracle 저장소가 확장 가능하다고 논문이 적는다(p.2, p.6). 사용자가 작성한 oracle이 이 판정을 할 수 있다면 이것만으로는 Kairos 고유의 부족이 아니다. 그 oracle이 필요로 하는 사건이 H-RRF-1의 사건이므로 두 가설은 묶인다 | RRF 저장소의 oracle 인터페이스가 어떤 입력을 받는지(학위논문, 내부 oracle 논문 [36] 본문). [36]은 2026-10-16에 초록만 읽었고 입력 형식은 초록에 없다. 입력이 syscall 로그뿐이면 H-RRF-1과 같은 부족이다 | 오류 반환·회복 구분: C1. 시작 상태 vs 앱 고유 상태: C2 |
 | **H-RRF-4** | 순서를 정해 두고 기다리는 제어가 필요한 사례(C1 재시도 종료, C2 late init 완료)에서 시간 기반 `sleep`은 대기 길이를 사례마다 정해야 한다. Kairos의 사건 기준 보류(P-C1HOLD)는 대기 길이를 정하지 않는다 | RRF의 제어는 `sleep`이고 길이를 시험 실행으로 정한다(p.5–6). 논문이 비결정성이 남는다고 적는다(p.6). 조건 원칙은 사건 기반 제어를 우선한다 | **차이일 뿐 RRF의 결핍으로 쓰지 않는다.** RRF의 목적은 재현이고 시간 기반이 그 목적에 맞는지는 별개다. P-C1HOLD는 [D] 결정이다 | 해당 없음(설계 차이의 기록) | 관측되지 않은 순서: C1·C3·C5 (제어 방식의 차이) |
-| **H-RRF-5** | R2처럼 순서가 시작 직렬화로 고정된 것으로 보이는 경우, 반대 순서가 만들어지지 않는 이유와 가정을 결과에 설명해야 한다. RRF의 출력에는 그런 항목이 없다 | RRF는 쌍마다 두 순서를 `sleep`으로 시도한다(p.5). 출력은 race 분류와 이벤트 쌍 위치다(p.3, p.6). R2의 S1은 EVS·ES 초기화를 SB보다 앞세운다(`ledger.md` §1a `[기록]`) | **부분 근거.** R2가 schedule 의존인지 결정적 순서인지가 사례 기록상 미결이다(로드맵 §7.3). 반대 순서가 실제로 불가능한지는 gdb 3회 기록만으로 확정되지 않는다. RRF가 이 경우를 어떻게 보고하는지는 서술에 없다 | R2 원시 기록과 소스로 반대 순서가 가능한지(별도 작업). 가능하면 이 가설은 약해진다 | 순서가 고정된 이유 설명: R2 |
+| **H-RRF-5** | R2처럼 순서가 시작 직렬화로 고정된 것으로 보이는 경우, 반대 순서가 만들어지지 않는 이유와 가정을 결과에 설명해야 한다. RRF의 출력에는 그런 항목이 없다 | RRF는 쌍마다 두 순서를 `sleep`으로 시도한다(p.5). 출력은 race 분류와 이벤트 쌍 위치다(p.3, p.6). R2의 S1은 EVS·ES 초기화를 SB보다 앞세운다(`ledger.md` §1a `[기록]`) | **부분 근거.** R2가 schedule 의존인지 결정적 순서인지가 사례 기록상 미결이다(로드맵 §7.3). 반대 순서가 실제로 불가능한지는 gdb 3회 기록만으로 확정되지 않는다(`results/R2_gdb_v701.md` §3: "not a proof of determinism"). RRF가 이 경우를 어떻게 보고하는지는 서술에 없다 | R2 원시 기록과 소스로 반대 순서가 가능한지(별도 작업). 가능하면 이 가설은 약해진다 | 순서가 고정된 이유 설명: R2 |
 
 ### 5.3 근거가 부족해 가설로 올리지 않는 것
 
@@ -390,16 +410,18 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 
 ## 6. 확인하지 못한 것과 다음에 할 일
 
-1. **저자 학위논문 본문**(UNL 2018, 공개 레코드에 1.4 MB PDF가 있다고 표기)은 Cloudflare 도전 페이지에 막혀 있다. RRF의 구현 상세(정적 분석 도구, Scribe 판본, 커널, oracle 인터페이스)가 있을 수 있다. 읽기 전에는 H-RRF-1·H-RRF-3의 근거가 부분 근거에 머문다. 해결 경로는 PDF를 `research/cfs_procrace/paper/`에 두는 것이거나 접근 가능한 다른 경로다(P-PAPERS는 이를 필수 조건으로 만들지 않는다).
+1. **저자 학위논문 본문**(UNL 2018, 공개 레코드에 1.4 MB PDF가 있다고 표기)은 Cloudflare 도전 페이지에 막혀 있다(2026-10-16 재시도에서도 같음, §1.1 경로 27). RRF의 구현 상세(정적 분석 도구, Scribe 판본, 커널, oracle 인터페이스)가 있을 수 있다. 읽기 전에는 H-RRF-1·H-RRF-3의 근거가 부분 근거에 머문다. 해결 경로는 PDF를 `research/cfs_procrace/paper/`에 두는 것이거나 접근 가능한 다른 경로다(P-PAPERS는 이를 필수 조건으로 만들지 않는다).
 2. **IEEE 출판본**과 CPS-VO 사본(저자 수정본으로 보인다)의 동일성은 확인하지 못했다. 쪽 인용은 CPS-VO 사본 기준이다. 출판본과 쪽이 다를 수 있다.
 3. **구현·아티팩트 없음.** 저자에게 요청하지 않았다(`availability.md` A2).
 4. **논문의 내부 불일치.** 결과 서술은 "stress testing(STA)은 7쌍 중 6쌍에서 재현하지 못했다"고 하고 Table II도 UPDATEDB–UPDATEDB 한 쌍에서만 STA가 race를 냈다(p.8). 반면 p.8의 Discussion은 "첫 두 쌍에서 둘 다 재현했다"고 하고(Table II의 MV–RM 칸은 STA 0이다), 결론은 "STA는 둘만 재현했다"고 쓴다(p.10). 이 문서는 STA 수치를 쓰지 않는다. RRF 쪽 수치(7쌍 모두 재현)는 일관된다.
 5. **Scribe 이슈 [31], [32]**(`columbia/linux-2.6-racepro#3`, `columbia/racepro#6`)는 접근 권한이 없어 읽지 못했다(논문 p.9의 서술만 읽었다).
-6. **내부 oracle 논문**(Yu et al., ISSRE 2013, 논문의 [36])은 읽지 않았다. RRF의 oracle 입력 형식을 거기서 확인할 수 있을 가능성이 있다.
+6. **내부 oracle 논문**(Yu et al., ISSRE 2013, 논문의 [36], DOI 10.1109/ISSRE.2013.6698900)은 2026-10-16에 초록만 읽었다. UNL 기관 저장소 PDF는 Cloudflare 도전(403), IEEE는 AWS WAF 도전(202), Semantic Scholar는 `CLOSED`였다(§1.1 경로 25–26). RRF의 oracle 입력 형식은 아직 확인하지 못했다(`process_race_method_matrix.md` §5.1 A6 미해결).
 7. **사례 이슈 댓글**을 읽지 않았다(`availability.md` A6). 사례 입력(bug report의 증상 서술 수준)은 이슈 본문 기준이다.
 8. **전제 2**(task 쌍을 PuD 쌍으로 줄 수 있는지)는 서술이 없다. 원 도구로 답할 수 없고, 답은 구현이나 저자 설명에 있을 것이다.
 9. 이 문서가 달라지게 하는 기존 문서의 칸: `baselines/availability.md` §1·§3 RRF 열, `baselines/yu-group.md` §3.2·§4·§5 R7·§7.2. 갱신은 이 작업의 범위 밖이다(§1.3).
 10. 이 문서를 `process_race_method_matrix.md`(로드맵 §12 작업 6)에 넣을 때는 §3.4의 라벨과 §4.2의 상태를 따로 옮긴다. 관측 가능성, 표현 가능성, 재현 성공을 한 칸으로 합치지 않는다.
+11. **쪽 번호 인용의 둘째 취득 경로**(`process_race_method_matrix.md` §5.1 A10)는 2026-10-16에도 얻지 못했다. IEEE(202 도전), Semantic Scholar(`CLOSED`), OpenAlex(429), Scholar Gateway(`ACCESS_DENIED`), 저자 홈 두 곳과 CV(서지뿐)다. CPS-VO 사본을 WAF 거부 뒤 다른 도구로 받은 취득 방식을 허용 범위로 볼지는 PI 확인 사항이다(matrix §5.4 항목 16). 확인 전까지 "단일 취득 경로, 독립 재확인 안 됨" 표시를 유지한다.
+12. 이 보완(2026-10-16)으로 §3.4의 5 × 6 라벨은 바뀌지 않았다. R2 ③은 "불명" 그대로이고, ⓪ 행은 새로 넣은 "분석"이다. `process_race_method_matrix.md` §6.8의 RRF 행에 ⓪ 열은 없다. 반영 여부는 그 문서 담당이 정한다.
 
 ---
 
@@ -411,5 +433,8 @@ C2의 **공개 부분**(역할 재구성에 쓸 수 있는 알려진 조건):
 - SysPro(`[2차]`): *SysPro: Reproducing System-level Concurrency Bugs from Bug Reports*, arXiv 2601.09616v1. sha256 `8fe5daa4c7c3794715632e4379d9160a9852b723dc4a649317ef6bae0a75e726`. RRF 서술은 p.2, p.23, p.31, p.35.
 - DESCRY(`[2차]`): T. Yu, T. S. Zaman, C. Wang, ESEC/FSE 2017. `https://chaowang-vt.github.io/pubDOC/YuZW17.pdf`. sha256 `f9d7b57bbb0c1269f9143b4ec69286e90348a58fadd071f76f11022e06dfbf60`. RRF 인용은 p.8, p.11.
 - SimEvo(RRF 언급 없음 확인): `https://par.nsf.gov/servlets/purl/10089644`. sha256 `143f7351489367d9301b97ac2317e3f1f263ac159ee737ffcff14bb0adc31be6`.
-- 저자 페이지: `https://homepages.uc.edu/~tyu/`, `https://homepages.uc.edu/~tyu/links/research.html`.
+- 내부 oracle 논문(`[초록]`, 2026-10-16): T. Yu, W. Srisa-an, G. Rothermel, *An Empirical Comparison of the Fault-Detection Capabilities of Internal Oracles*, ISSRE 2013, pp. 11–20. DOI 10.1109/ISSRE.2013.6698900. 레코드 `https://digitalcommons.unl.edu/cseconfwork/255/`. 본문 `[미도달]`.
+- 저자 페이지: `https://homepages.uc.edu/~tyu/`, `https://homepages.uc.edu/~tyu/links/research.html`, `https://tingting-yu.scholar.uconn.edu/`(`/publications/`, `/research/`, 2026-10-16). 저자 CV `https://homepages.uc.edu/~tyu/CV/tyu_cv.pdf`(2026-10-16, sha256 `61225fc211abcb40e6ddcf8b8779fcccb66c61946424e0c139e47ad76ac836c5`).
+- R2 실행 증거(gdb 원시 기록): `env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md`(§2, §3, §6, §7).
+- RacePro 쪽 Scribe 커널 코드 읽기(`[기록]`, R2 ③): `plan/methods/RacePro.md` §2.5 K1–K3.
 - 저장소 기록: `baselines/availability.md`(§1, §1.1, §3, §4.2, §5.1, A2, A6), `baselines/yu-group.md`(§3, §4, §5, §7), `cases/ledger.md`(§1a, §1b, §2), `plan/ROADMAP_20261015.md`(§1.2, §2.2, §3, §9, §10), `plan/methods/RacePro.md`, `plan/methods/SimRacer.md`(같은 형식), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`.

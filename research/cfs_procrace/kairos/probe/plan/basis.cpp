@@ -266,9 +266,13 @@ Status make_plan(const Profile& profile, const LoadedBasis& basis, std::vector<k
     spec.symbol = basis.target_funcs[i];
     spec.source = ps.kind == KZ_SITE_KIND_POINT_PROBE ? basis.target_files[i] : std::string();
     spec.slots = ps.slots;
-    Status st = kz::trace::check_site(spec);
-    if (!st.ok()) return st;
     sites->push_back(std::move(spec));
+  }
+  // Every site, and the slot-3 key of every entry/return pair (kz::trace::check_plan).
+  Status st = kz::trace::check_plan(*sites);
+  if (!st.ok()) {
+    sites->clear();
+    return st;
   }
   return Status::success();
 }

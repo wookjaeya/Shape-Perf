@@ -5,6 +5,8 @@ extract
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
   loops                      0 (table walks resolved 0, failed 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
   location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
@@ -60,6 +62,8 @@ facts-view 1
   site 9 arg 0 of fx_consume: derived from Cell.aux read at derives.c:43:44 hops=0 chain=field:Cell.aux
   site 10 arg 0 of fx_consume: derived from Cell.id read at derives.c:45:49 hops=0 chain=field:Cell.id
 [loops] 0
+[iters] 0
+[order] 0
 [init] 1
   Cell.id in g_cell zero-initialized value=0 defined at derives.c:9:6
 [consts] 0
@@ -68,6 +72,8 @@ facts-view 1
 [locs] 1
   Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
 [targets] 0
+[spawnparams] 0
 [image] 0
 [terminals] 0
 [outcalls] 0
+[fwrites] 0

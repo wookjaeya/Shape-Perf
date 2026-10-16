@@ -8,7 +8,10 @@
 // at the end of the trace, or the return event was lost) and a return with no entry.
 //
 // Which sites form a pair is data: the same `symbol` in the site table, one ENTRY site and one
-// RET site, both carrying the return address in slot 3 (the convention of kz_raw.h).
+// RET site, both declaring slot 3 with role "return_address" (8 bytes; kz_raw.h, check_plan).  A
+// pair whose sites do not declare it is not matched (sites_without_key).  An event with TRUNC set
+// is never matched on its slot value (an unreadable slot is 0): it is returned alone with
+// `unreadable_key` and counted in events_with_unreadable_key, not in the two failure counts.
 #pragma once
 
 #include <cstdint>
@@ -21,6 +24,7 @@ namespace kz::trace {
 struct CallPair {
   uint32_t entry_event = KZ_NONE32;  // index into the events
   uint32_t return_event = KZ_NONE32; // KZ_NONE32 when the return was not seen
+  bool unreadable_key = false;       // the one event of this record had TRUNC set: it was not matched
 };
 
 struct MatchStats {
@@ -28,6 +32,8 @@ struct MatchStats {
   uint64_t entries_without_return = 0;
   uint64_t returns_without_entry = 0;
   uint64_t sites_paired = 0;         // (entry site, return site) pairs found in the site table
+  uint64_t sites_without_key = 0;    // pairs of the same symbol not matched: slot 3 is not a return_address
+  uint64_t events_with_unreadable_key = 0;  // events of paired sites with TRUNC set, left unmatched
 };
 
 // Pairs the events of every (entry site, return site) of the same symbol.  `events` are in the

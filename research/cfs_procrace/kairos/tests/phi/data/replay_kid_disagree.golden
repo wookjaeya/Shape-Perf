@@ -98,6 +98,8 @@ finding #24: return of 'no_such_op', which is not an operation of the profile
 finding #25: return of CFE_ES_RunLoop without an open call of the actor T_SB
 finding #28: effect CFE_ES_GetAppID.store_ok: 'no.such.location' is not a location of the profile
 
+guard failures 0
+
 final state
   es.app[2] = LIVE id 0x110002
   evs.reg[0x110002] = REG

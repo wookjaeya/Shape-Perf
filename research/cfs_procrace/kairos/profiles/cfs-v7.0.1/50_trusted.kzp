@@ -2,8 +2,8 @@
 #
 # They are assumptions the certificate of the R2 path lists in part (iii) of its trust ledger.
 # They are refutable by observation (obligations O3, O4, O9) and never proved by it.  The third
-# declared-trusted entry, the guard of the CleanUpApp record free, is the effect `free_record` of
-# CFE_ES_CleanUpApp in 20_ops.kzp.
+# declared-trusted entry, the guard of the CleanUpApp cleanup, is the effect `retire` of
+# CFE_ES_CleanUpApp in 20_ops.kzp (the first step of the cleanup, LIVE -> RESERVED).
 phi 1;
 
 trusted A-FRESH {

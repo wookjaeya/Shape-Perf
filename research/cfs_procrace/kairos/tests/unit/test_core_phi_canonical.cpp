@@ -141,6 +141,14 @@ int main() {
     KZ_CHECK_EQ(h3, h1);
   }
 
+  {  // the guard modes print as written and the canonical text is a fixed point
+    KZ_CHECK(base.find("effect store_bad: store *IdPtr := UNDEF filter state(self(exec)) != PRESENT lp at") != std::string::npos);
+    KZ_CHECK(base.find("effect store_ok: store *IdPtr := id(owner(exec)) when state(self(exec)) = PRESENT lp at") != std::string::npos);
+    std::string h;
+    KZ_CHECK_EQ(canon_of({SourceText{"canon.kzp", base}}, &h), base);
+    KZ_CHECK_EQ(h, base_hash);
+  }
+
   {  // the order of a citation list, and a repeated citation, do not matter
     std::vector<SourceText> f = kzmini::files();
     f[2].text = replace_once(f[2].text, "prov doc_call, doc_sup, code_a;", "prov code_a, doc_sup, doc_call, code_a;");
@@ -170,6 +178,7 @@ int main() {
       {2, "guard main >= \"2.0.1\";", "guard main >= \"2.0.2\";"},           // a version guard
       {2, "refutable_by O9;", "refutable_by O8;"},                           // a refutation
       {2, "conjunct who_valid: valid(arg.Who) lp capture;", "conjunct who_valid: valid(arg.Who) lp capture prov doc_sup;"},  // a citation of a conjunct
+      {2, "store *IdPtr := UNDEF filter state", "store *IdPtr := UNDEF when state"},  // a filtering guard made an asserted one
   };
   std::vector<std::string> seen{base_hash};
   for (const Edit& e : edits) {

@@ -234,18 +234,25 @@ Status parse_profile(std::string_view text, Profile* out) {
   }
   if (!header) return Status::error(Err::Invalid, "profile: empty (no 'kzp-observe 1' header)");
   if (out->sites.empty()) return Status::error(Err::Invalid, "profile: no site is declared");
-  // The slots of every site must be valid for the perf-sample backend.
+  // The slots of every site must be valid for the perf-sample backend, and the decoders and the
+  // entry/return pairs (same func=) must find their keys (kz::trace::check_plan).  The function
+  // name stands for the symbol here; `kz anchor` resolves it, and make_plan checks again.
+  std::vector<kz::trace::SiteSpec> specs;
   for (const ProfileSite& s : out->sites) {
     kz::trace::SiteSpec spec;
-    spec.site = 0;
+    spec.site = static_cast<uint32_t>(specs.size());
     spec.label = s.label;
     spec.kind = s.kind;
     spec.phases = s.kind == KZ_SITE_KIND_ENTRY_PROBE ? KZ_SITE_PHASE_ENTRY : s.kind == KZ_SITE_KIND_RET_PROBE ? KZ_SITE_PHASE_RET : KZ_SITE_PHASE_POINT;
     spec.decoder = s.decoder;
+    spec.symbol = s.func;
     spec.slots = s.slots;
     Status st = kz::trace::check_site(spec);
     if (!st.ok()) return Status::error(Err::Invalid, "profile line " + std::to_string(s.source_line) + ": " + st.message);
+    specs.push_back(std::move(spec));
   }
+  Status st = kz::trace::check_plan(specs);
+  if (!st.ok()) return Status::error(Err::Invalid, "profile: " + st.message);
   return Status::success();
 }
 

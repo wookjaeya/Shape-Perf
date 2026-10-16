@@ -133,6 +133,7 @@ struct LoopFact {
   Pos pos;
   std::string tu;
   std::string func_key, func_name;
+  std::string parent_key;  // the enclosing loop, or empty
   uint16_t depth = 0;
   uint8_t kind = KZ_LOOP_KIND_OTHER;
   uint8_t trip_status = KZ_TRIP_STATUS_UNKNOWN;
@@ -145,6 +146,58 @@ struct LoopFact {
   std::string table;       // TABLE_WALK: the table as an access path ("Type.field" or a global name)
   std::string table_root;  // TABLE_WALK: the global object that holds it (resolved in finalize)
   std::string trip_note;   // TABLE_WALK that could not be resolved: why
+  // SPEC 4.3, certificate view: what the reader found, and what finalize decides from it.
+  bool delay_direct = false;   // the delay call is in this loop's own body, not in an inner loop
+  ExprRef cond = nullptr;      // the condition exits (not the budget exits)
+  ExprRef pred = nullptr;      // the predicate extracted from them
+  uint8_t pred_form = KZ_PRED_FORM_NONE;
+  std::string pred_note;       // why no predicate, or how it was rewritten
+  uint8_t cert = KZ_LOOP_CERT_UNDECIDED;
+  uint8_t lflags = 0;
+  std::string cert_note;
+};
+
+// A call inside a table walk, in the form that finalize evaluates per iteration: its guards
+// inside the loop and its arguments, with the fields of the walked element as ELEM loads.
+struct WalkUse {
+  std::string loop_key, call_key;
+  ExprRef guard = nullptr;        // the guards from the loop body down to the call (element form)
+  std::string callee_field;       // an indirect call through a field of the element: the field
+  std::vector<std::pair<uint32_t, ExprRef>> args;  // (index, element-form expression) of the arguments that read the element
+};
+
+// A write of a field by a function's own body (FUNC_WRITES).
+struct WriteEvent {
+  std::string func_key;
+  uint8_t kind = KZ_FWRITE_KIND_NONE;
+  std::string type, field;  // field "*" for a whole record; both empty for an untyped write
+  Pos pos;
+  std::string loop_key;     // the innermost loop around the write, or empty
+};
+
+struct IterFact {
+  std::string loop_key;
+  uint32_t iter = 0;
+  uint8_t kind = KZ_ITER_KIND_NONE;
+  std::string call_key;   // CALL, ARG, CALLEE
+  uint32_t arg_index = kNone;
+  uint8_t status = KZ_ITER_STATUS_UNKNOWN;
+  ExprRef guard = nullptr;
+  uint8_t value_kind = KZ_IMAGE_KIND_NONE;
+  int64_t value = 0;
+  std::string text, fn_key;
+  uint8_t spawn = KZ_ITER_SPAWN_NONE;
+  Pos pos;  // where the value is written (the element's initializer)
+};
+
+struct SpawnParamFact {
+  std::string func_key;
+  uint32_t param = 0;
+  std::string spawn_call_key;
+  std::string entry_key;     // VIA_ENTRY
+  std::string call_key;      // VIA_ENTRY: the indirect call
+  uint8_t kind = KZ_SPAWN_PARAM_KIND_NONE;
+  std::string via;
 };
 
 struct InitFact {
@@ -301,12 +354,17 @@ struct Model {
   std::vector<TargetFact> targets;
   std::vector<ImageFact> images;
   std::vector<LocFact> locs;
+  std::vector<WalkUse> walk_uses;
+  std::vector<WriteEvent> write_events;
+  std::vector<IterFact> iters;              // filled by finalize
+  std::vector<SpawnParamFact> spawn_params;  // filled by finalize
 
   std::map<std::string, FuncSummary> summaries;  // function key -> out-pointer summary
   std::vector<FlowEdge> flow;
   std::vector<IndirectCall> indirect_calls;
   std::vector<std::string> spawn_calls;           // call keys of spawn-operation calls
   std::map<std::string, std::vector<std::string>> spawn_entry_nodes;  // call key -> fp-flow nodes of the entry argument
+  std::map<std::string, uint32_t> spawn_entry_arg;                     // call key -> index of the entry argument
   std::set<std::string> processed_functions;      // keys whose bodies were read
   std::vector<std::string> files;                 // every file a fact refers to (sorted by serialize)
   std::vector<std::string> main_files;            // the translation units read, in order
@@ -354,6 +412,7 @@ struct Model {
     uint32_t outptr_store_only = 0, outptr_escapes = 0, outptr_unsummarized = 0, outptr_data_fn = 0;
     uint32_t atype_untyped_sites_total = 0, atype_untyped_sites_relevant = 0;
     uint32_t flow_nodes = 0, flow_edges = 0;
+    uint32_t loops_unroll = 0, loops_await = 0, loops_star = 0;
   } resolved;
 };
 

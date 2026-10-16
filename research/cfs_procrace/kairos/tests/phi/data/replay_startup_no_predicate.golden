@@ -117,6 +117,8 @@ occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #39 ret
 findings 1
 finding #23: rule R19: the awaited predicate comes from the code and none was supplied, so no observation edge is derived
 
+guard failures 0
+
 final state
   es.app[0] = FREE
   es.app[1] = LIVE id 0x110001

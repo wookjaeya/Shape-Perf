@@ -32,7 +32,7 @@ prov r_lp_store_via_unlock {
   tier researcher;
   kind researcher;
   authored "2026-10-15, K1 (Claude Sonnet 5.5); cases inspected: R2";
-  note "The failure-branch store of CFE_ES_GetAppID (cfe_es_api.c:759) is a store through an out parameter, for which the pattern language has no pattern. Its linearization point is bound to the CFE_ES_UnlockSharedData call that follows it in the same critical section (cfe_es_api.c:763), which is later than the store. The extractor's writer entry names the store itself.";
+  note "The failure-branch store of CFE_ES_GetAppID (cfe_es_api.c:759) is a store through an out parameter, for which the pattern language has no pattern. Its linearization point is bound to the CFE_ES_UnlockSharedData call that follows it in the same critical section (cfe_es_api.c:763), which is later than the store. Both branches reach that call, so the guard of the effect is a filter (`filter`), not an assertion: a false guard there is the success branch, not a disagreement. The extractor's writer entry names the store itself.";
 }
 
 prov r_evs_reg_key_by_id {
@@ -74,7 +74,7 @@ prov r_cleanup_guard {
   tier researcher;
   kind researcher;
   authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 3.6 and A.1 steps 4-5; cases inspected: R2";
-  note "CFE_ES_CleanUpApp frees a record only for an external app whose AppState is above RUNNING. The caller of CleanUpApp (the background scan, cfe_es_apps.c:1112-1114) establishes this by a relational test on one record that the abstract domain cannot exclude, so the guard is declared, not computed.";
+  note "CFE_ES_CleanUpApp retires (LIVE -> RESERVED, cfe_es_apps.c:1498) and later frees a record only for an external app whose AppState is above RUNNING. The caller of CleanUpApp (the background scan, cfe_es_apps.c:1112-1114) establishes this by a relational test on one record that the abstract domain cannot exclude, so the guard of the retire step is declared, not computed. A point event of the retire step whose guard is false in the replay is reported as a refutation (O3, O4).";
 }
 
 prov r_libc_abort {

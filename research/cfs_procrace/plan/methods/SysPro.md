@@ -1,6 +1,7 @@
 # SysPro (arXiv 2601.09616v1 / JSS 2026) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 09:30–09:50, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:34–01:10). `plan/process_race_method_matrix.md`가 남긴 후속 항목 중 SysPro에 걸린 것을 처리했다. (1) 원문·구현 경로를 다시 시도했다(그 문서 §5.1 A5. 이 문서 §1.1 경로 18–30). arXiv v1은 다시 받아 해시가 같았고 주요 인용을 쪽별로 다시 대조했다. 새로 확인한 것은 학술지판의 서지 사실(OpenAlex, NSF PAR: 본문은 2027-06-01까지 공개되지 않음), 저자 홈페이지·CV에 SysPro 항목과 구현 링크가 없다는 것, NSF 과제 RepSON의 공개 초록이다. ReproSys는 오늘도 열리지 않았다. (2) "syscall 없음" 류 문장마다 `[M-probe 기록]`과 `[I 소스]`를 나눠 붙이고 사례 revision과의 불일치를 적었다(그 문서 §0.1). `clone3` 근거가 OSAL 시험이 아니라 에이전트가 쓴 작은 C 프로그램과 소스 읽기라는 점을 바로잡았다(§1.3 항목 17). (3) R2 사건 대응표(⓪ task 생성 행 포함)를 넣었다(그 문서 §5.1 A4, §7 항목 7. 이 문서 §3.5 끝). (4) p.14의 "scheduling 제어" 문장이 SimRacer [13]을 인용한다는 점을 적었다(§1.3 항목 15). 바뀐 것은 §1.3 항목 14–18에 모았다. 이번에도 SysPro를 실행하지 않았다.
 - 대상: T. S. Zaman 외, *SysPro: Reproducing System-level Concurrency Bugs from Bug Reports*. arXiv:2601.09616v1 (2026-01-14, 코멘트 "Accepted in JSS"). 학술지판은 Journal of Systems and Software vol. 236, 논문 번호 112785, 2026-06, DOI 10.1016/j.jss.2026.112785.
 - 범위: 로드맵(`plan/ROADMAP_20261015.md`) §10 (M6)의 SysPro 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다.
 - 이 문서의 성격: **분석 문서**다. SysPro를 실행하지 않았다(구현을 구하지 못했다). 어느 사례에 대해서도 "재현하지 못한다" 또는 "탐지하지 못한다"는 결과를 담지 않는다. 아래 "분석" 셀은 읽은 설계 서술에서 도출한 것이며 실행 결과가 아니다.
@@ -15,7 +16,9 @@
 | 태그 | 뜻 | 이 문서에서의 쓰임 |
 |---|---|---|
 | [F] | 인용이 있는 사실 | 원출처(논문 쪽·절) 또는 저장소 기록(문서·절). 저장소 기록은 "기록"이라고 표시하며 이번에 재검증하지 않았다 |
-| [M] | 측정 | 오늘(2026-10-15) 이 컨테이너에서 읽기 전용으로 확인한 값 |
+| [M] | 측정 | 2026-10-15 또는 2026-10-16(날짜를 적은 곳)에 이 컨테이너에서 읽기 전용으로 확인한 값 |
+| [M-probe 기록] | probe 측정의 저장소 기록 | OSAL 자체 시험(`count-sem-test`, `osal-core-test`)을 `strace`로 본 기록(`baselines/availability.md` §4.2). 조건: OSAL `d2d877a`(v7.0.1), 경합 없는 실행, cFS 실행 아님, 도구 실행 아님, 사례 revision 아님. 이번에 다시 측정하지 않았다 |
+| [I 소스] | 소스 수준 추론 | 코드를 읽고 도출했다. 실행하지 않았다. 읽은 소스는 별도 표시가 없으면 번들(cFE `c5fb2b4d`, PSP `c4b3b0b6`, OSAL `d2d877a`)이다 |
 | [I] | 추론·분석 | 설계 서술에서 도출한 해석. 도구를 실행하지 않았다 |
 | [D] | 결정 | PI 결정 |
 | [U] | 미확인 | 자료가 없거나 읽지 못함 |
@@ -30,12 +33,20 @@
 | `[기록]` | 저장소의 이전 보고서에 있는 값. 이번에 재검증하지 않았다 |
 | `[미도달]` | 열지 못했다 |
 
+**syscall 흔적 문장의 표기 규칙 (2026-10-16 추가. `process_race_method_matrix.md` §0.1과 같다).** "syscall로 보이지 않는다", "0건", "syscall이 아니다" 류의 문장에는 `[M-probe 기록]` 또는 `[I 소스]`를 붙인다.
+- `[M-probe 기록]`은 세 가지에만 쓴다. (1) 이름 있는 count semaphore의 생성·조회(C1에 해당하는 `OS_CountSemCreate`, `OS_CountSemGetIdByName`)가 `count-sem-test`에서 syscall 0건이었다. (2) `osal-core-test`에서 `OS_QueueCreate`가 `mq_open("<pid>.<name>")`을 69회 냈고 `OS_QueueGetIdByName`·`OS_TaskGetIdByName`은 0건이었다. (3) 같은 시험에서 새 task가 아직 RESERVED인 자기 레코드를 만나 기다린 1회가 task table lock·condvar 주소의 futex 대기로만 보였다(`availability.md` §4.2 항목 5). 지지하는 문장은 "OSAL `d2d877a`의 자체 시험에서 그 호출들이 경합 없이 그렇게 보였다"까지다. 경합이 있으면 lock 주소의 `FUTEX_LOCK_PI`와 condvar 대기가 보일 수 있다(`availability.md` §4.5).
+- **revision 불일치.** 사례의 OSAL은 C1이 `42af0f73`, C3·C5가 OSAL 4.1.1 시대(원 관측자의 OSAL은 `unspecified_by_reference`)이고, R2의 사례 revision은 B `fc8c48ad`, M `12cb84fc`, D `f22e538c`다. probe는 이 revision들에서 실행되지 않았고 cFS에서 strace를 돌린 기록은 없다(`process_race_method_matrix.md` §0.1 `[기록]`).
+- `pthread_create` → `clone3`와 `sem_init`·무경합 mutex의 syscall 부재는 **에이전트가 쓴 작은 C 프로그램**(`baselines/syspro.md` §1 "Syscall-surface probe", `availability.md` §4.5 끝)의 기록이다. 도구도 OSAL도 cFS도 아니다. `OS_TaskCreate` → `pthread_create` 연결은 `[I 소스]`다.
+- 그 밖의 "syscall 없음"(R2·C3·C5의 AppId 저장, 등록 쓰기, 조회, 반환값)은 `[I 소스]`다. C3·C5의 역사 판본 소스는 읽지 않았다.
+- **gdb 기록은 syscall 근거가 아니다.** R2의 `env/logs/r2_g1..3_*`는 breakpoint 기록이다. R2의 "syscall 없음"은 소스 읽기(`cases/mapping_v701.md` §1.2)이며 gdb 기록으로 뒷받침하지 않는다.
+- 어느 표기도 "SysPro가 사례를 재현하지 못한다"를 뒷받침하지 않는다.
+
 ---
 
 ## 0. 한눈에 보기
 
 1. **SysPro 논문(arXiv v1) 전문을 읽었다** `[전문]`. 2026-10-08 기록(`baselines/syspro.md`)은 arXiv가 막혀 논문을 못 열었다고 적었으나, 오늘은 PDF, HTML, TeX 원본이 모두 열린다(§1.1 경로 1–3). 그 기록의 "secondary-source derived" 항목 일부가 이제 논문 쪽으로 확정되거나 정정된다(§1.3).
-2. **구현(ReproSys)은 오늘도 열지 못했다.** 논문의 Data availability(p.38)가 가리키는 `github.com/tarannumzaman/ReproSys/tree/main`은 익명 `git ls-remote`가 인증을 요구하고, raw 파일은 404이며, GitHub 검색과 Software Heritage에도 없다(§1.1 경로 6–12). 학술지판의 data-availability 문장은 읽지 못했다.
+2. **구현(ReproSys)은 오늘도 열지 못했다.** 논문의 Data availability(p.38)가 가리키는 `github.com/tarannumzaman/ReproSys/tree/main`은 익명 `git ls-remote`가 인증을 요구하고, raw 파일은 404이며, GitHub 검색과 Software Heritage에도 없다(§1.1 경로 6–12). 학술지판의 data-availability 문장은 읽지 못했다. 2026-10-16 재시도에서도 같다: `add_repo`(읽기 권한)가 "not found 또는 접근 권한 없음"을 돌려주었고, 저자 홈페이지(`tarannumzaman.github.io`)의 publications·portfolio·CV(2025-03 작성 PDF)에는 SysPro 항목도 구현 링크도 없다. NSF PAR 레코드(10682187)는 학술지판 본문을 2027-06-01에 공개한다고 적는다(§1.1 경로 18–30).
 3. **역할은 재현(reproduction)이다.** 입력은 bug report(subject, body), 대상 응용의 C 소스, system call manual이고, 출력은 buggy 후보 system call 위치의 순위 목록과 재현에 성공했을 때의 interleaving schedule이다(p.3, p.14). 탐지 도구가 아니다. 탐지 표에 점수로 합치지 않는다.
 4. **실행 단위는 OS process이고 제어 단위는 system call 호출 지점이다.** 논문은 inter-process(system-level) bug를 대상으로 하고 intra-process(thread-level) fault는 구분한다(p.2–3). 문제 정의는 "bug report, 버그를 일으키는 process 집합, 보고서에 나온 응용 process의 소스"다(p.4–5). 한 process 안의 thread를 어떻게 다루는지는 서술이 없다.
 5. **SysPro는 실행 중 사건을 수집하지 않는다고 읽힌다.** 논문이 서술하는 실행 단계는 PIN으로 선택한 system call 호출 지점에 sleep을 넣고 실행해 보고된 실패가 재현되는지 보는 것이다(p.20–21, p.24). trace, 메모리 접근, lock, happens-before 관계를 기록한다는 서술이 없다(§2.1, 키워드 검색). `baselines/syspro.md` §5 항목 4의 "system call entry와 exit 사건을 관측한다"는 서술은 논문에서 확인되지 않는다(§1.3).
@@ -73,16 +84,40 @@
 | 16 | 저자 개인·소속 페이지, 사례 이슈 댓글 | 저자 페이지(`tingting-yu.scholar.uconn.edu`)는 200이나 SysPro 항목은 확인하지 못했다(동적 목록 여부 미확인). 사례 이슈 댓글은 `nasa/CF`, `nasa/cFE`를 세션이 막아 읽지 못했다(`add_repo`는 자격을 붙이는 조치라 호출하지 않았다) | `[미도달]` |
 | 17 | 호스트 도달성(HEAD만, 내려받지 않음): `intel.com`(PIN 페이지), `srcml.org`, `philippe-fournier-viger.com/spmf/`, `pypi.org/project/gensim/3.8.3/`, `pypi.org/project/nltk/`, `manpages.ubuntu.com/…/focal/…/syscalls.2.html`, `filippo.io/linux-syscall-table/` | 모두 200 `[M]`. 2026-10-08 기록(`syspro.md` §1, S2·S4·S6)은 PIN·srcML·SPMF 호스트가 막혔다고 적었다. 오늘은 열린다 | 도달성만 확인했다. 설치하지 않았다(§4.1) |
 
+**2026-10-16 재시도 (UTC 00:34–01:00).** 경로 18–30. 내려받은 파일은 각각 새 빈 디렉터리에 두었다. 쿠키·자격·도전 페이지 우회는 쓰지 않았다.
+
+| # | 경로 | 결과 | 등급·비고 |
+|---|---|---|---|
+| 18 | arXiv PDF 재취득 `arxiv.org/pdf/2601.09616v1` | 200, 1,345,590 B, sha256 `8fe5daa4…e726`로 경로 1과 같다 `[M]`. p.3, p.14, p.20, p.24, p.38의 인용을 쪽별 추출로 다시 대조했고 이 문서의 인용과 맞았다. `…/abs/2601.09616v2`는 여전히 404, 서지 페이지의 제출 이력은 v1 하나다 | `[전문]` 판본 동일 |
+| 19 | ScienceDirect `pii/S0164121226000191` | `curl` 403, 832,805 B 도전 페이지(경로 5와 같다) | `[미도달]` |
+| 20 | OpenAlex `api.openalex.org/works/doi:10.1016/j.jss.2026.112785` | 200 `[M]`. 발행일 2026-01-22, vol. 236, 112785. 저자와 소속: Tarannum Shaila Zaman(University of Maryland, Baltimore County), Chadni Islam(Queensland University of Technology), Jiangfan Shi(Zhejiang University), Zihan Shi, Fiona Xian, Tingting Yu(University of Connecticut). `open_access.is_oa=false`, `oa_status=closed`, `any_repository_has_fulltext=false`. 위치는 DOI 랜딩 페이지 하나이고 초록 필드가 없다 | 서지 `[M]`. 경로 12의 429는 오늘 해소됐다 |
+| 21 | Semantic Scholar API `paper/arXiv:2601.09616` | 429(요청 한도). 재시도하지 않았다 | `[미도달]` |
+| 22 | Unpaywall API | 422. 요청에 실제 이메일 주소를 요구한다. 사용자의 이메일을 외부 서비스에 보내지 않는다는 규칙에 따라 더 시도하지 않았다 | `[미도달]` |
+| 23 | NSF PAR 레코드 `par.nsf.gov/biblio/10682187` | 200 `[M]`. 제목, 저자 6명(경로 20과 같다), JSS 236 (C), 112785, 발행 2026-06-01, Award ID 2348277·2518445. "This content will become publicly available on June 1, 2027". 본문 파일 링크는 없다 | 서지 `[M]`. 학술지판 본문 `[미도달]`(엠바고) |
+| 24 | NSF 과제 API `api.nsf.gov/services/v1/awards/2518445.json` | 200 `[M]`. 과제명 "CRII: SHF: An Automated and User-centered Framework for Reproducing System-level Concurrency Bugs by Analyzing Bug Reports", 수행기관 UMBC, 2025-01-01–2027-05-31. 성과 목록에 SysPro(JSS, PAR 10682187), LLPut(2025), Gender Dynamics(2025), SECite(2026)가 있다. 초록은 계획 중인 프레임워크 "RepSON"을 서술한다 | `[2차]`(과제 초록). SysPro 논문의 서술이 아니다. §1.3 항목 16 |
+| 25 | 저자 홈페이지 `tarannumzaman.github.io`와 `/publications/`, `/portfolio/`, `/riselab/`, `/cv/` | 모두 200 `[M]`. 현 소속은 UMBC Information Systems다. publications 목록은 SCMiner(ASE 2019), DESCRY(FSE 2017) 등을 싣고 SysPro는 싣지 않는다. portfolio의 "Research Project 2: Automatically Reproduce System-Level Concurrency Bugs from Bug Reports"는 문제 서술뿐이고 링크가 없다. GitHub 링크는 `github.com/https://github.com/tarannumzaman`으로 깨져 있다 | `[2차]`(저자 자기 서술). 구현 링크 없음 |
+| 26 | 저자 CV `raw.githubusercontent.com/tarannumzaman/tarannumzaman.github.io/master/files/CV_zaman.pdf` | 200, 8쪽, 생성일 2025-03-24 `[M]`. "Automatically Reproducing System-Level Concurrency Bugs from Bug Reports" 과제 서술과 NSF CRII RepSON(CCF-2518445) 항목, 2019년 발표 "Reproducing System-level Concurrency Failures from Bug Reports"가 있다. `SysPro`, `ReproSys` 문자열은 0건 | `[2차]`. SysPro 출판 전의 CV다 |
+| 27 | 구현: `git ls-remote https://github.com/tarannumzaman/ReproSys`와 `…/SysPro` | 둘 다 "could not read Username"(인증 요구). 대조로 `tarannumzaman/Scminer`와 `tarannumzaman/tarannumzaman.github.io`는 익명으로 읽힌다(HEAD `255933c6…`, `807b39f2…`) `[M]`. `raw.githubusercontent.com/…/ReproSys/main/README.md` 404, `github.com/tarannumzaman/ReproSys` 페이지와 사용자 페이지는 프록시 403 | `[미도달]` |
+| 28 | 세션 도구 `add_repo`(owner `tarannumzaman`, repo `ReproSys`, 읽기) | "was not found on github.com, or this session's GitHub credential doesn't have access to it". 없는 저장소와 비공개 저장소를 이 응답으로 구분할 수 없다 | `[미도달]` |
+| 29 | GitHub 저장소 검색(MCP) `SysPro bug report system call concurrency reproduce`, Software Heritage origin `…/tarannumzaman/ReproSys` | 검색 0건. Software Heritage 404("Origin … not found") `[M]` | 구현 없음 |
+| 30 | 학술 검색 커넥터(Scholar Gateway), WebSearch 1회 | 커넥터는 "ACCESS_DENIED". WebSearch 결과는 arXiv HTML·서지, emergentmind(제3자 요약, 열지 않음), UKnowledge의 학위논문 레코드(`uknowledge.uky.edu/cs_etds/119`), SUNY Poly의 NSF 과제 보도 등이며 구현 링크는 없다 | 새 1차 출처 없음 |
+
+사례 이슈 댓글(경로 16)은 오늘도 읽지 못했다. GitHub MCP의 `issue_read`(`nasa/cFE` #2663 댓글)는 "repository … is not configured for this session"을 돌려주었고, 그 응답은 사용자가 요청하지 않은 저장소를 추가하지 말라고 안내한다. `github.com/nasa/cFE/issues/2663` 페이지는 프록시 403이다 `[M]`. 저장소를 추가하지 않았다(§4.3 항목 3).
+
 ### 1.2 이 문서가 쓰는 출처별 등급
 
 | 출처 | 등급 | 이 문서에서의 쓰임 |
 |---|---|---|
 | SysPro arXiv v1 PDF·HTML·TeX | **`[전문]`** | 도구 설명 전체(§2), 도구 수준의 답(§3.3), 실행 요구(§4.1) |
-| SysPro 학술지판(JSS 236, 112785) | 서지 `[M]`. 본문 **`[미도달]`** | 존재와 서지 확인, 저자 목록 차이(§1.3) |
+| SysPro 학술지판(JSS 236, 112785) | 서지 `[M]`(Crossref, OpenAlex, NSF PAR). 본문 **`[미도달]`**(출판사 403, PAR 엠바고 2027-06-01) | 존재와 서지 확인, 저자 목록 차이(§1.3) |
+| NSF 과제 2518445 공개 초록(RepSON) | `[2차]` | SysPro와 같은 연구 계열의 계획 서술. SysPro의 서술로 쓰지 않는다(§1.3 항목 16) |
+| 저자 홈페이지·CV | `[2차]`(저자 자기 서술) | 구현 링크가 없다는 사실과 연구 계열 확인만 |
 | ReproSys 저장소 | **`[미도달]`** | 위치와 접근 불가 사실만 |
 | Intel PIN 소개 페이지 | `[2차]`(WebFetch 요약) | PIN의 대상 ISA 확인(§4.1) |
 | 사례 쪽 사실(`cases/ledger.md` §1a·§1b·§2, `cases/C*.md` §1, `baselines/syspro.md` §1·§6) | `[기록]`. 이슈 본문은 오늘 보존본을 다시 읽었다 | §3.2 |
-| OSAL visibility probe(`baselines/availability.md` §4.2) | `[기록]` | 사건이 syscall로 보이는지의 근거. **SysPro의 결과가 아니고 어느 도구의 결과도 아니다.** OSAL 자체 시험을 syscall 관측자로 본 probe다 |
+| OSAL visibility probe(`baselines/availability.md` §4.2) | `[M-probe 기록]` | 사건이 syscall로 보이는지의 근거. **SysPro의 결과가 아니고 어느 도구의 결과도 아니다.** OSAL `d2d877a`의 자체 시험을 경합 없이 syscall 관측자로 본 probe이며 사례 revision이 아니다 |
+| 에이전트 C 프로그램 probe(`baselines/syspro.md` §1 "Syscall-surface probe", 같은 파일의 review re-check) | `[기록]` | `pthread_create` → `clone3`, `mq_open` → `mq_open`, `sem_init`·무경합 mutex의 syscall 부재, PSP가 쓰는 glibc 호출의 syscall 대응. glibc 동작 확인이며 OSAL·cFS·도구가 아니다 |
+| 소스 읽기(`baselines/syspro.md` §6, `availability.md` §4.3, `cases/mapping_v701.md` §1.2) | `[I 소스]` | AppId 저장·등록 쓰기·조회·반환값의 syscall 부재, 시작 syscall의 위치. 번들 revision 기준 |
 | 컨테이너 사실(`baselines/availability.md` §1.1) | `[기록]`, 일부 오늘 재확인 `[M]` | §4.1 |
 
 ### 1.3 이전 기록과 달라지거나 확정된 것
@@ -103,6 +138,11 @@
 | 11 | 저자 목록 | arXiv v1은 Zaman, Yan, Wang, Islam, Shi, Yu이고, Crossref의 JSS 서지는 Zaman, Islam, Shi, Shi, Xian, Yu다(경로 1, 5a). 학술지판이 v1과 같은 내용인지 모른다 |
 | 12 | 논문 내부의 불일치(해소하지 않고 기록) | (a) 직접 언급되지 않는 비율이 p.10 §2.5.1은 38%, p.15는 61%이고 Table 2(p.9)의 직접 언급 합계는 38.5%다. (b) 효과가 p.24는 24건 중 23건 재현인데, p.29는 "SysPro succeeded in 18 benchmarks, whereas SysPro man failed in all 19 cases"라고 쓴다. 이 문서는 어느 평가 수치도 쓰지 않고 설계 서술만 쓴다 |
 | 13 | `availability.md` §0 A1(b), `syspro.md` D4 "PIN·srcML·SPMF 호스트가 egress에서 막혀 있다" | 오늘은 HEAD 요청이 200이다(경로 17). 도달 가능해졌지만 PIN, srcML, SPMF의 사용 판본은 여전히 논문에 없다. 이 작업 규칙에 따라 설치하지 않았다 |
+| 14 | (2026-10-16) 학술지판 저자 목록 | OpenAlex와 NSF PAR가 Crossref와 같은 여섯 명을 적는다: Zaman, Chadni Islam, Jiangfan Shi, Zihan Shi, Fiona Xian, Yu(경로 20, 23). arXiv v1(Zaman, Yan, Wang, Islam, Shi, Yu)과 다르다. 저자 목록이 바뀐 이유와 본문 차이는 여전히 모른다. 학술지판 본문은 출판사 403이고 PAR 사본은 2027-06-01 공개 예정이다 |
+| 15 | (2026-10-16) "순서 제어"의 실체 | p.14는 "it permutes process interleavings by controlling scheduling [13]"이라고 쓰는데 [13]은 SimRacer(ISSTA 2013, 참고문헌 p.40)다. SysPro 자신의 실행 제어로 서술된 것은 p.20의 sleep 삽입("by inserting a sleep function between each relevant system call pair")뿐이다. SimRacer의 scheduling 제어를 SysPro가 쓰는지는 서술이 없다. 이 문서는 SysPro의 실행 제어를 sleep 삽입으로만 적는다 `[전문]` |
+| 16 | (2026-10-16) NSF 과제 초록의 RepSON | 과제 초록(경로 24)은 계획 중인 RepSON이 "run the program, collect the system call trace to identify potential buggy interleaving, and instrument the code to run it again"한다고 쓴다. 이것은 **과제 계획**이며 SysPro 논문의 서술이 아니다. SysPro 논문에는 trace 수집 서술이 없다(§1.3 항목 8, 키워드 `trace`는 예시 표 Table 1(p.6)과 다른 도구 인용에만 나온다). RepSON과 SysPro가 같은 도구인지, ReproSys가 RepSON과 관계가 있는지는 읽은 자료로 정해지지 않는다. 이 문서는 RepSON의 계획을 SysPro의 기능으로 쓰지 않는다 |
+| 17 | (2026-10-16) `clone3`의 근거 | 이전 판 §3.2 "공통" 행은 "`OS_TaskCreate`는 `clone3`로 보인다"를 OSAL probe와 같은 `[기록]`으로 묶었다. `clone3`는 OSAL 자체 시험의 관측이 아니라 에이전트가 쓴 작은 C 프로그램의 `pthread_create` → `clone3` 관측이고(`availability.md` §4.5 끝), `OS_TaskCreate` → `pthread_create`는 소스 읽기다. 해당 칸을 `[기록: 에이전트 C 프로그램]` + `[I 소스]`로 바로잡았다(§3.2, §3.5 C5) |
+| 18 | (2026-10-16) R2 사건 대응표 | `process_race_method_matrix.md` §6.8은 SysPro 칸을 보충표에서 옮겼고 §7 항목 7은 RacePro.md에 task 생성 행이 없다고 지적했다. 이 문서에 ⓪–④ R2 사건 대응표를 넣었다(§3.5 끝) |
 
 ---
 
@@ -189,7 +229,7 @@ SysPro의 입력은 보고서다. 아래 표는 각 보고서 **본문**에 무�
 | C3 cFE#73 | SB task의 `CFE_SB.AppId`와 EVS task의 `EVS_AppID`·등록 플래그가 설정되기 전에 TIME task가 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID`(AppId=0)를 부르고 `EVS_IsFiltered(0xFFFFFFFF)`가 범위 검사 없이 접근해 segfault로 core가 죽는다. 우선순위(TIME 60, EVS 61, SB 64)가 순서를 만든다. 원 플랫폼은 Microblaze다 | 파일 `cfe_es_objtab.c`. 함수 `CFE_SB_CreatePipe()`, `CFE_EVS_SendEventWithAppID()`, `EVS_NotRegistered()`, `EVS_SendEvent()`, `EVS_IsFiltered()`. 변수 `CFE_SB.AppId`, `CFE_EVS_GlobalData.EVS_AppId`. 우선순위 숫자 | 없음. 발생 과정을 순서대로 설명하는 서술은 있다 | `cases/ledger.md` §1a·§1b, `cases/C3.md` §1.1 `[기록]` |
 | C5 cFE#72 | `CFE_ES_AppCreate`가 ES lock을 `OS_TaskCreate` 앞에서 풀고 뒤에서 다시 잡아 `TaskTable`을 채운다. 그 사이 새 task의 `CFE_ES_GetAppID`가 `CFE_ES_ERR_APPID`를 반환할 수 있다. readiness violation은 "등록 전 조회"이고 일찍 실행된 것만으로는 위반이 아니다. 수정(6.4.2)은 lock 범위 확장이다 | 함수 `CFE_ES_UnlockSharedData()`, `OS_TaskCreate()`, `CFE_ES_LockSharedData()`, `CFE_ES_GetAppID()`, `CFE_ES_CreateObjects`, `CFE_ES_CreateChildTask`. `clone`, `fork`, `pthread_create`는 없다 | 없음 | `cases/ledger.md` §1a·§1b, `cases/C5.md` §1 `[기록]` |
 | R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로(`CreatePipe`, `Subscribe`, 이벤트 송신)를 실행해 `EVS_GetAppDataByID`가 NULL을 돌려주고 `ILLEGAL_APP_ID`가 된다. 서술은 "이벤트 요청 거부"다. gdb 3회 모두 설정 전 사용 24회다(로드맵 §2.2 `[재검산]`). core 시작 직렬화(S1)가 EVS·ES를 SB보다 앞세운다. 고정 순서인지 스케줄 의존인지는 미결이다 | 함수 `CFE_SB_CreatePipe()`, `CFE_SB_Subscribe()`, `CFE_EVS_SendEventWithAppID()`. 상수 `CFE_EVS_APP_ILLEGAL_APP_ID`. 코드 링크 `cfe_evs.c#L185` | 단계 목록: `make SIMULATION=native prep`, `make`, `make install`, `cfe_evs.c`의 185번째 줄에 breakpoint, gdb로 실행. 본문은 "there is no event outputted nor is the return code set to any variable"이라고 쓴다 | `cases/ledger.md` §1a·§2, `cases/R2.md` §1.2 `[기록]`. 실행 증거는 gdb 원시 기록(`env/logs/r2_g1..3_*`, `results/R2_gdb_v701.md`) |
-| 공통 | native cFS는 한 Linux process이고 OSAL task는 `pthread_create` thread다. OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 syscall 0건이었다. SB pipe는 `mq_open("<pid>.<name>")`을 부른다. `OS_TaskCreate`는 `clone3`로 보인다 | — | — | `availability.md` §3, §4.2 `[기록]`. OSAL 시험의 probe이며 SysPro의 결과가 아니다 |
+| 공통 | native cFS는 한 Linux process이고 OSAL task는 `pthread_create` thread다 `[I 소스]`. OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 syscall 0건이었다 `[M-probe 기록: OSAL d2d877a, 경합 없음. C1의 OSAL 42af0f73 아님]`. `OS_QueueCreate`는 `mq_open("<pid>.<name>")`을 냈다 `[M-probe 기록]`. SB pipe가 OSAL queue라는 연결(`CreatePipe` → `OS_QueueCreate`)은 `[I 소스]`다. `pthread_create`는 `clone3`로 보였다 `[기록: 에이전트 C 프로그램, OSAL·cFS 아님]`. `OS_TaskCreate` → `pthread_create`는 `[I 소스]`다 | — | — | `availability.md` §3, §4.2, §4.5. probe이며 SysPro의 결과가 아니다. 어느 것도 사례 revision에서 관측한 것이 아니다 |
 
 보고서 본문의 literal syscall 이름 대리 probe(`syspro.md` §6, `[기록]`): C1 `bind`, `exit`, `sync`, `time`, C2 `sync`, C3 `time`, C5 `read`, R2 없음. 모두 영어 단어이거나 cFE API 이름의 일부이고 syscall 호출이 아니다. **이 probe는 SysPro의 1단계가 아니다.** 목록과 토큰화 방식은 에이전트의 선택이었고(`unspecified_by_reference`), 논문이 서술한 1단계(이름 직접 일치, 이어서 man 페이지 NAME 절 TF-IDF)와 다르다. 오늘 다시 돌리지 않았다. SysPro의 1단계 출력은 **불명**이다.
 
@@ -224,9 +264,9 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | SysPro는 사건을 수집하지 않는다(§3.3 Q1). 사례에서 필요한 사건은 provider의 이름 등록(`OS_CountSemCreate`가 반환한 시점)과 CF의 `OS_CountSemGetIdByName` 조회와 그 반환값이다. OSAL 자체 시험에서 생성 3회와 조회 4회가 syscall 0건이었다. SysPro가 제어하는 위치는 system call의 소스 호출 지점이므로(p.17–20) 이 두 사건은 직접 계측 지점이 되지 않는다. 보고서가 주는 사람용 방법("provider의 시작을 지연")과 닮은 지연을 provider 초기화 중 어느 syscall 앞뒤에 둘 수 있는지, SysPro의 1단계가 그 위치를 고르는지는 불명이다 | p.17–20; `availability.md` §4.2, `syspro.md` §6 `[기록]` |
+| 1 | 분석 | SysPro는 사건을 수집하지 않는다(§3.3 Q1). 사례에서 필요한 사건은 provider의 이름 등록(`OS_CountSemCreate`가 반환한 시점)과 CF의 `OS_CountSemGetIdByName` 조회와 그 반환값이다. OSAL 자체 시험에서 생성 3회와 조회 4회가 syscall 0건이었다 `[M-probe 기록: OSAL d2d877a, 경합 없음]`. C1의 OSAL `42af0f73`에서는 실행하지 않았고, 경합이 있으면 lock 주소의 futex가 보일 수 있다. SysPro가 제어하는 위치는 system call의 소스 호출 지점이므로(p.17–20) 이 두 사건은 직접 계측 지점이 되지 않는다. 보고서가 주는 사람용 방법("provider의 시작을 지연")과 닮은 지연을 provider 초기화 중 어느 syscall 앞뒤에 둘 수 있는지, SysPro의 1단계가 그 위치를 고르는지는 불명이다 | p.17–20; `availability.md` §4.2, `syspro.md` §6 `[기록]` |
 | 2 | 분석 | 이름 `BP0_tsem` → OSAL object ID → 이름 테이블 slot → 객체를 같은 자원으로 잇는 장치가 서술에 없다. 객체가 삭제·재생성될 때 같은 세대로 보지 않는 장치도 서술이 없다 | p.3, p.14 |
-| 3 | 분석 | "생성 → 사용"은 system call 쌍의 순서로 표현될 수 있는 모양이다. 그러나 이 사례의 두 사건은 syscall이 아니다. OSAL 레코드가 예약 중인지, 공개 완료인지, CF가 재시도 중인지 최종 실패인지 구분하는 개념은 서술에 없다(`retry` 0건) | p.6, p.11 |
+| 3 | 분석 | "생성 → 사용"은 system call 쌍의 순서로 표현될 수 있는 모양이다. 그러나 이 사례의 두 사건은 OSAL 자체 시험에서 syscall을 내지 않았다 `[M-probe 기록: OSAL d2d877a, 경합 없음]`. OSAL 레코드가 예약 중인지, 공개 완료인지, CF가 재시도 중인지 최종 실패인지 구분하는 개념은 서술에 없다(`retry` 0건) | p.6, p.11 |
 | 4 | 답 | 도구 수준 답과 같다. 필요한 순서("생성이 조회보다 먼저")와 허용 오류("재시도는 `OS_ERR_NAME_NOT_FOUND`일 때만")를 넣을 입력이 없다. (참고, 분석: 보고서 본문의 함수 이름 `CF_CFDP_InitEngine()` 같은 단어는 질의 텍스트에 들어가므로 파일 순위에 영향을 줄 수 있다. p.16) | p.5, p.14–19 |
 | 5 | 분석 | SysPro의 제어는 "후보 위치에 sleep을 넣는다"다. C1의 나쁜 순서(provider의 생성보다 CF의 조회가 먼저)는 provider 쪽 지연으로 만들 수 있는 종류의 순서다(보고서 본문도 같은 방법을 적는다). 이것은 SysPro가 그 위치를 계측 대상으로 고를 수 있는가와는 별개이고, 그 점은 불명이다. 확인은 실제 재실행에서 한다(p.24). PI 결정 P-C1HOLD(생성 직전 보류, 사건 기반 해제)에 해당하는 서술은 없다. SysPro의 sleep은 길이가 서술되지 않고, "sleep"이라는 서술이라 시간 기반으로 읽힌다. 사건 기반 해제의 서술은 없다 | p.19–21, p.24; 보고서 본문 `[기록]`; P-C1HOLD [D] |
 | 6 | 분석 | 출력은 후보 위치 순위와 재현 성공 시 schedule이다(p.3, p.14). C1의 현상은 CF의 초기화 실패 이벤트와 `APP_ERROR` 종료다 `[기록]`. 재현의 판정 방법을 논문이 쓰지 않으므로(p.24) 이 현상과의 대응은 불명이다. 수정 후 재시도로 회복한 경로가 재현으로 세어지는지도 서술이 없다 | p.3, p.14, p.24; `ledger.md` §1b `[기록]` |
@@ -246,7 +286,7 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 SB·EVS의 AppId 저장과 EVS 등록 플래그 설정(메모리 쓰기), TIME의 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID(AppId=0)`와 `EVS_IsFiltered`의 범위 검사 없는 접근(메모리 읽기)이다. pipe 생성의 `mq_open`은 syscall로 보이지만 의존 상태가 아니다 `[기록]`. 보고서의 함수·변수 이름(`EVS_IsFiltered`, `CFE_SB.AppId` 등)은 파일 순위의 질의에 쓰일 수 있다(p.12–13, p.16). 그 순위가 어느 파일을 위로 올리는지, 그 파일에서 syscall 이름이 계측 지점이 되는지는 불명이다. AppId를 저장(publish)하기 전에 SB thread가 거치는 시작 syscall(`prctl`, `sched_setaffinity`, `clock_nanosleep`, `rt_sigaction`)이 있다는 소스 분석이 있으나 이것이 SysPro의 선택과 같은지는 불명이다 | p.12–13, p.16–20; `availability.md` §3, `syspro.md` §6 `[기록]` |
+| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 SB·EVS의 AppId 저장과 EVS 등록 플래그 설정(메모리 쓰기), TIME의 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID(AppId=0)`와 `EVS_IsFiltered`의 범위 검사 없는 접근(메모리 읽기)이다 `[I 소스]`. pipe 생성은 `mq_open`을 낼 것으로 읽히지만(`OS_QueueCreate`의 `mq_open`은 `[M-probe 기록]`, TIME의 `CreatePipe`와의 연결은 `[I 소스]`, C3의 OSAL 4.1.1 시대에서는 확인하지 않음) 의존 상태가 아니다. 보고서의 함수·변수 이름(`EVS_IsFiltered`, `CFE_SB.AppId` 등)은 파일 순위의 질의에 쓰일 수 있다(p.12–13, p.16). 그 순위가 어느 파일을 위로 올리는지, 그 파일에서 syscall 이름이 계측 지점이 되는지는 불명이다. AppId를 저장(publish)하기 전에 SB thread가 거치는 시작 syscall(`prctl`, `sched_setaffinity`, `clock_nanosleep`, `rt_sigaction`)이 있다는 소스 분석이 있으나(`[I 소스]` 번들 revision, glibc 대응은 에이전트 C 프로그램 `[기록]`. C3의 역사 판본은 읽지 않음) 이것이 SysPro의 선택과 같은지는 불명이다 | p.12–13, p.16–20; `availability.md` §3, `syspro.md` §6 `[기록]` |
 | 2 | 분석 | SB AppId, EVS 자신의 AppId, EVS 등록 플래그가 서로 다른 필드다(`ledger.md` §1a). SysPro의 서술에 필드 단위의 식별이 없다 | p.3, p.14 |
 | 3 | 분석 | SB·EVS 초기화 완료(publish) 뒤에야 TIME의 이벤트 요청이 유효하다는 관계를 표현할 장치가 서술에 없다. 순서는 task 우선순위가 만든다(`[기록]`). SysPro의 순서 모델은 system call 쌍이다 | p.6, p.17–19; `ledger.md` §1a |
 | 4 | 답 | 도구 수준 답과 같다 | p.5, p.14–19 |
@@ -257,32 +297,44 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 `OS_TaskCreate`(`clone3` syscall로 보임), ES lock 해제와 재획득 사이의 `TaskTable` 등록 쓰기(메모리), 새 task의 `CFE_ES_GetAppID` 읽기(메모리, lock 아래)다. 이 중 syscall로 보이는 것은 `clone3`뿐이다 `[기록]`. 보고서 본문은 `clone`, `fork`, `pthread_create`를 이름 붙이지 않는다. SysPro의 keyword 검색은 Linux system call 이름의 소스 호출 지점을 찾는다(p.18–19). thread 생성의 취급은 서술이 없다(전제 2) | p.18–19; `availability.md` §3, §4.2, `syspro.md` §6 `[기록]` |
+| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 `OS_TaskCreate`(`pthread_create`를 거쳐 `clone3`로 보일 것으로 읽힘: `OS_TaskCreate` → `pthread_create`는 `[I 소스]`, `pthread_create` → `clone3`는 `[기록: 에이전트 C 프로그램]`), ES lock 해제와 재획득 사이의 `TaskTable` 등록 쓰기(메모리 `[I 소스]`), 새 task의 `CFE_ES_GetAppID` 읽기(메모리와 `pthread_getspecific`, lock 아래 `[I 소스]`)다. 이 중 syscall로 읽히는 것은 `clone3`뿐이다. 쓰는 task와 조회하는 task가 ES lock에서 겹치면 lock 주소의 futex가 보일 수 있다(`availability.md` §4.3, §4.5). 레지스트리 대기가 lock·condvar 주소의 futex로만 보인 것은 OSAL task table의 관측이다 `[M-probe 기록]`. ES lock의 관측이 아니며 6.4.x 시대 소스는 읽지 않았다. 보고서 본문은 `clone`, `fork`, `pthread_create`를 이름 붙이지 않는다. SysPro의 keyword 검색은 Linux system call 이름의 소스 호출 지점을 찾는다(p.18–19). thread 생성의 취급은 서술이 없다(전제 2) | p.18–19; `availability.md` §3, §4.2, `syspro.md` §6 `[기록]` |
 | 2 | 분석 | OS task ID ↔ ES AppId ↔ `TaskTable` slot의 대응과 "등록 전" 상태를 식별하는 장치가 서술에 없다 | p.3, p.14 |
 | 3 | 분석 | 생성(`clone3`) → 등록(메모리 쓰기) → 조회(메모리 읽기)에서 생성 한 조각만 syscall이다. readiness violation은 "등록 전 조회"이고 일찍 실행된 것만으로는 위반이 아니다 `[기록]`. 이를 표현하려면 등록 사건과 조회의 반환 결과가 필요한데 SysPro의 순서 모델은 system call 쌍이다 | p.6, p.17–19; `ledger.md` §1a |
 | 4 | 답 | 도구 수준 답과 같다 | p.5, p.14–19 |
-| 5 | 분석 | 참조 OSAL에서는 `clone3` 직후의 지연이 child를 막고, 약 300 ms를 넘으면 child가 `OS_ERR_OBJECT_IN_USE`로 시작하지 못한다는 소스 분석이 있다 `[기록]`(`syspro.md` §6, 분석, 미실행). 사례가 필요로 하는 과거 OSAL·cFE 판본에서의 사정은 검토하지 않았다. 따라서 SysPro식 호출 앞·뒤 지연이 이 창에 닿는지는 불명이다. 탐색과 실제 재실행 확인은 §3.3 Q5와 같다 | p.19–21, p.26–27; `syspro.md` §6 `[기록]` |
+| 5 | 분석 | 참조 OSAL(`d2d877a`)에서는 `clone3` 직후의 지연이 child를 막고, 약 300 ms(OSAL 소스의 10, 40, 90, 160 ms 대기 네 번의 합)를 넘으면 child가 `OS_ERR_OBJECT_IN_USE`로 시작하지 못한다는 소스 분석이 있다 `[I 소스]`(`syspro.md` §6, 분석, 미실행). 이 수는 OSAL 소스의 상수에서 온 것이며 이 문서가 정한 조건이 아니다. 사례가 필요로 하는 과거 OSAL·cFE 판본에서의 사정은 검토하지 않았다. 따라서 SysPro식 호출 앞·뒤 지연이 이 창에 닿는지는 불명이다. 탐색과 실제 재실행 확인은 §3.3 Q5와 같다 | p.19–21, p.26–27; `syspro.md` §6 `[기록]` |
 | 6 | 분석 | 사례의 현상은 새 task의 첫 조회 실패(`CFE_ES_ERR_APPID`)이고 이후 영향은 앱에 달려 있다 `[기록]`. 재현의 판정 방법이 서술에 없다(p.24). 대응은 불명이다 | p.3, p.14, p.24; `ledger.md` §1a `[기록]` |
 
 #### R2 — cFE#2663 (SB AppId 설정 vs ES/EVS의 이벤트 요청)
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`의 저장(메모리 쓰기), ES/EVS task의 SB API 경로 호출, `EVS_GetAppDataByID`의 NULL과 `ILLEGAL_APP_ID` 반환이다. pipe 생성의 `mq_open`은 보이지만 AppId 저장과 반환값은 보이지 않는다 `[기록]`. 보고서 본문은 test case 비슷한 단계(빌드 명령, breakpoint, gdb 실행)를 적는다. SysPro의 정규식이 이를 command, options, input data로 읽는지는 불명이다. 읽지 못하면 사람이 TSL로 만드는 경로가 남는다(p.19–20) | p.19–20; `availability.md` §3, `ledger.md` §2 `[기록]` |
+| 1 | 분석 | SysPro는 사건을 수집하지 않는다. 사례의 사건은 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`의 저장(메모리 쓰기), ES/EVS task의 SB API 경로 호출, `EVS_GetAppDataByID`의 NULL과 `ILLEGAL_APP_ID` 반환이다. pipe 생성은 `mq_open`을 낼 것으로 읽히고(`OS_QueueCreate`의 `mq_open`은 `[M-probe 기록]`, `CreatePipe`와의 연결은 `[I 소스]`) AppId 저장과 반환값은 syscall이 아닌 것으로 읽힌다 `[I 소스]`(`cases/mapping_v701.md` §1.2). gdb 기록은 breakpoint 기록이라 이 판단의 근거가 아니다. 보고서 본문은 test case 비슷한 단계(빌드 명령, breakpoint, gdb 실행)를 적는다. SysPro의 정규식이 이를 command, options, input data로 읽는지는 불명이다. 읽지 못하면 사람이 TSL로 만드는 경로가 남는다(p.19–20) | p.19–20; `availability.md` §3, `ledger.md` §2 `[기록]` |
 | 2 | 분석 | `CFE_SB_Global.AppId`(SB 자신의 이벤트 원천 ID)와 EVS 등록 정보를 서로 다른 상태로 구분해야 한다. SysPro의 서술에 식별이 없다 | p.3, p.14 |
-| 3 | 분석 | SB가 AppId를 저장한 뒤에야 SB API 경로의 이벤트 요청이 유효하다는 관계를 표현할 장치가 서술에 없다. 저장은 syscall이 아니다 | p.6, p.17–19 |
+| 3 | 분석 | SB가 AppId를 저장한 뒤에야 SB API 경로의 이벤트 요청이 유효하다는 관계를 표현할 장치가 서술에 없다. 저장은 syscall이 아닌 메모리 쓰기로 읽힌다 `[I 소스]` | p.6, p.17–19 |
 | 4 | 답 | 도구 수준 답과 같다 | p.5, p.14–19 |
 | 5 | 분석 | R2의 순서가 core 시작 직렬화(S1)가 만든 고정 순서인지 스케줄 의존인지는 미결이다 `[기록]`. 고정 순서라면 기본 실행에서 나쁜 순서가 이미 나오므로 지연 삽입이 새 순서를 만드는 역할이 없다. SysPro의 서술은 "나쁜 순서가 기본 실행에서 이미 나오는 경우"를 따로 다루지 않는다. 스케줄 의존이라면 SB 쪽(AppId 저장 전) 지연이 나쁜 순서를 늘리는 방향이다 `[기록]`. 어느 쪽인지 정해지기 전에는 불명이다 | p.19–21; `ledger.md` §2, 로드맵 §2.2 `[기록]` |
 | 6 | 분석 | 사례의 현상은 이벤트 요청이 `ILLEGAL_APP_ID`로 거부되고 아무것도 출력하지 않으며 반환값이 쓰이지 않는 것이다(보고서 본문). SysPro의 출력은 후보 위치 순위와 재현 성공 시 schedule이다. 재현의 판정 방법이 서술에 없고(p.24) 이 현상에는 crash, 출력, 종료 상태가 없다. 대응은 불명이다 | p.3, p.14, p.24; R2 보고서 본문, `cfe_evs.c:185-188` `[기록]` |
 
 #### 보충: C1·C3·C5·R2의 의존 사건과 SysPro의 제어 단위 (분석, 미실행)
 
-| 사례 | 의존 사건(공개·사용) | syscall로 보이는가 (`[기록]`, OSAL 시험과 소스 읽기) | SysPro의 서술된 제어 단위(syscall 호출 지점)와의 대응 |
+| 사례 | 의존 사건(공개·사용) | syscall로 보이는가 (근거 표기는 §0 앞의 규칙) | SysPro의 서술된 제어 단위(syscall 호출 지점)와의 대응 |
 |---|---|---|---|
-| C1 | 이름 등록(`OS_CountSemCreate`), 이름 조회(`OS_CountSemGetIdByName`) | 0건(OSAL 자체 시험) | 직접 대응하는 호출 지점이 없다. 인접한 syscall 지점의 선택은 불명 |
-| C3 | SB·EVS AppId 저장, 등록 플래그, TIME의 이벤트 요청과 범위 검사 없는 접근 | 의존 상태는 보이지 않음. pipe `mq_open`만 보임 | 직접 대응하는 호출 지점이 없다. `mq_open`은 의존 상태가 아니다 |
-| C5 | `clone3`, `TaskTable` 등록 쓰기, `GetAppID` 조회 | `clone3`만 보임 | `clone3`는 호출 지점이 될 수 있으나 두 접근(등록, 조회)이 아니다. 판본 의존 |
-| R2 | AppId 저장, SB API 경로의 이벤트 요청과 반환 | 의존 상태는 보이지 않음. pipe `mq_open`만 보임 | 직접 대응하는 호출 지점이 없다 |
+| C1 | 이름 등록(`OS_CountSemCreate`), 이름 조회(`OS_CountSemGetIdByName`) | 0건 `[M-probe 기록: OSAL d2d877a, 경합 없음]`. C1의 OSAL `42af0f73`에서는 실행하지 않음 | 직접 대응하는 호출 지점이 없다. 인접한 syscall 지점의 선택은 불명 |
+| C3 | SB·EVS AppId 저장, 등록 플래그, TIME의 이벤트 요청과 범위 검사 없는 접근 | 의존 상태는 메모리 `[I 소스]`. pipe의 `mq_open`만 보일 것으로 읽힘(`[M-probe 기록]` + 연결 `[I 소스]`). 역사 판본 미확인 | 직접 대응하는 호출 지점이 없다. `mq_open`은 의존 상태가 아니다 |
+| C5 | `clone3`, `TaskTable` 등록 쓰기, `GetAppID` 조회 | `clone3`만 보일 것으로 읽힘(`[기록: 에이전트 C 프로그램]` + `[I 소스]`). 등록·조회는 메모리 `[I 소스]`. lock 경합 시 futex 가능 | `clone3`는 호출 지점이 될 수 있으나 두 접근(등록, 조회)이 아니다. 판본 의존 |
+| R2 | AppId 저장, SB API 경로의 이벤트 요청과 반환 | 의존 상태는 메모리 `[I 소스]`. pipe의 `mq_open`만 보일 것으로 읽힘. gdb 기록은 근거가 아님 | 직접 대응하는 호출 지점이 없다 |
+
+**R2 사건 대응표 (SysPro판, 2026-10-16 추가. 분석, 미실행).** 로드맵 §10.3 방식의 표를 SysPro의 서술된 단위에 맞췄다. 사례 쪽 사실은 저장소 기록이다(`cases/R2.md`, `cases/mapping_v701.md`, `results/R2_gdb_v701.md`). 참조 revision은 사례 기록의 B/M/D(`fc8c48ad`/`12cb84fc`/`f22e538c`)이며 gdb 실행은 v7.0.1(cFE `c5fb2b4d`)이다. gdb 3회 모두 설정 전 사용 24회가 거부 24회와 대응했다(`CreatePipe` 2, `SubscribeFull` 4, `ReportSingleEvent` 18). 24는 한 원인의 동적 발생이며 독립 결함 24개가 아니다(`results/R2_gdb_v701.md` §2, §6 `[기록]`). SysPro는 사건을 기록하지 않으므로(§3.3 Q1) "SysPro 입력" 칸은 **보고서 텍스트·소스 위치로서** 들어오는 경로와 **sleep 계측 지점**으로서 쓰일 수 있는지를 나눠 적는다.
+
+| # | R2 사건 | 커널에서 보이는 흔적 | 보고서·소스 단계(1단계)에서의 경로 | 계측 단계(2단계)에서의 경로 | 라벨 |
+|---|---|---|---|---|---|
+| ⓪ | **core task 생성과 시작 직렬화(S1)**: ES가 core task를 `OS_TaskCreate`로 차례로 만들고 각 task가 RUNNING이 될 때까지 기다린다(v7.0.1 `cfe_es_start.c` L810, L835, `results/R2_gdb_v701.md` §6 `[기록]`) | `OS_TaskCreate` → `pthread_create` → `clone3` 계열로 읽힘(`[I 소스]` + `[기록: 에이전트 C 프로그램]`). RUNNING 대기는 메모리 폴링과 지연 `[I 소스]`. cFS에서 측정하지 않음 | 보고서 본문은 task 생성과 시작 순서를 이름 붙이지 않는다 `[기록]`. 1단계가 이 위치를 고르는지는 불명 | `clone3`가 syscall 호출 지점이 될 수 있는지는 소스 단계의 keyword 검색(p.18–19)이 libc 경유 호출을 찾는지에 달렸고 서술이 없다. 시작 직렬화 같은 순서 근거를 모델링한다는 서술은 없다(키워드 `startup` 0건) | 분석 |
+| ① | **AppId 설정**: `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, 반환값 무시 | syscall 없음 `[I 소스]`(B `cfe_sb_task.c` L126, M L138, D L128) | 보고서 본문은 이 줄을 이름 붙이지 않는다. 함수 이름 `CFE_ES_GetAppID`는 본문에 없고 SB 함수 이름은 있다 `[기록]`. 파일 순위 질의에 쓰일 수 있다(p.16) | 직접 대응하는 syscall 호출 지점이 없다. 인접 syscall(SB thread의 시작 syscall, `[I 소스]`)을 고르는지는 불명 | 분석 |
+| ② | **값 전달**: EVS(B) 또는 ES·EVS(M, D) task가 같은 전역을 읽음 | syscall 없음 `[I 소스]` | 위와 같음 | 직접 대응하는 호출 지점이 없다 | 분석 |
+| ③ | **이벤트 요청**: `CFE_SB_CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `OS_QueueCreate`의 `mq_open`(`[M-probe 기록: OSAL d2d877a]`), `CreatePipe` → `OS_QueueCreate` 연결은 `[I 소스]`. `Subscribe`와 이벤트 전송 자체는 syscall이 아님 `[I 소스]` | 본문이 `CFE_SB_CreatePipe()`, `CFE_SB_Subscribe()`, `CFE_EVS_SendEventWithAppID()`를 이름 붙인다 `[기록]`. 파일 순위 질의에 쓰일 수 있다(p.16). 이 이름들은 Linux syscall 이름이 아니다 | `mq_open`은 Linux syscall 이름 목록에 있으므로 소스 keyword 검색의 대상이 될 수 있다는 것이 설계 서술에서 나오는 해석이다 [I]. 다만 cFE 소스에서 `mq_open`은 OSAL 구현 파일에 있고 SB API 파일에 있지 않다 `[I 소스]`. 1단계가 그 파일을 올리는지, 그 위치의 sleep이 ①보다 ③을 늦추는 방향(나쁜 순서를 줄이는 방향)인지는 실행하지 않아 불명이다 | 불명 |
+| ④ | **오류 반환**: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기. 출력 없음 | 반환값. syscall 없음 `[I 소스]`(B `cfe_evs.c` L182-186, M·D L185-189) | 본문이 `CFE_EVS_APP_ILLEGAL_APP_ID`와 "no event outputted nor … return code set"을 적는다 `[기록]` | 재현 성공의 판정 방법이 서술에 없다(p.24). 이 반환값을 재현 판정에 쓰는 경로는 서술에 없다 | 분석 |
+
+이 표의 "경로가 없다"는 읽은 설계 서술 안의 일이며 SysPro가 R2를 재현하지 못한다는 뜻이 아니다. R2의 순서가 고정인지 스케줄 의존인지는 사례 기록상 미결이다(§3.5 R2 Q5). gdb 3회의 같은 결과는 결정성의 증명이 아니다(`results/R2_gdb_v701.md`).
 
 ### 3.6 이 절이 말하지 않는 것
 
@@ -304,7 +356,7 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 
 | # | 요구 | 레퍼런스 | 상태 | 충족? |
 |---|---|---|---|---|
-| Y1 | SysPro 구현: `github.com/tarannumzaman/ReproSys/tree/main` | p.38 | 위치는 from-reference. 학술지판의 data-availability 문장은 읽지 못했다 | **아니오.** 열리지 않는다(§1.1 경로 6–10). 주 장애 |
+| Y1 | SysPro 구현: `github.com/tarannumzaman/ReproSys/tree/main` | p.38 | 위치는 from-reference. 학술지판의 data-availability 문장은 읽지 못했다 | **아니오.** 열리지 않는다(§1.1 경로 6–10, 2026-10-16 경로 27–29). 주 장애 |
 | Y2 | Intel PIN | p.3–4, p.20–21, 참고문헌 [16] | 도구는 from-reference. **판본은 `unspecified_by_reference`**(본문과 TeX 원본에 판본이 없다) | **아니오.** 설치하지 않았다(`pin` 없음 `[M]`). 호스트 도달성은 있다(HEAD 200 `[M]`). Intel 페이지 요약은 대상 ISA를 IA-32와 x86-64라고 한다 `[2차]`. 이 호스트에서 PIN의 어느 판본이 어느 커널에서 도는지는 확인하지 않았다 |
 | Y3 | srcML(C 소스 → XML, XPath 질의) | p.16, p.21, [17] | 도구는 from-reference. 판본 `unspecified_by_reference` | **아니오.** `srcml` 없음 `[M]`. 호스트 200 `[M]` |
 | Y4 | NLTK(불용어, stemming, tokenization), Gensim(TF-IDF, 유사도 행렬) | p.16, p.21, [18], [19] | 도구는 from-reference. 참고문헌 항목이 "Nltk 3.5 documentation"(p.40)과 "gensim 3.8.3"(p.41)을 적는다. 본문이 사용 판본이라고 쓰지는 않는다. Python 판본은 서술이 없다 | **아니오.** `nltk`, `gensim` 없음(`ModuleNotFoundError` `[M]`). PyPI 도달성 있다. 판본을 어떻게 읽을지는 §4.3 항목 5 |
@@ -317,7 +369,7 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 | Y11 | 매개변수: KeySystemCalls n=10(p.15–16), 파일 n=10(p.19), apriori level 2와 min support 100%(p.18), 평가의 top-N=20(p.23), 효과 100회(p.24), 무작위 비교 120분(p.29) | 해당 쪽 | 논문의 값. **도구 설정으로 요구한다고 서술된 것은 n=10, apriori 매개변수까지다.** 나머지는 평가 기준이다 | cFS 조건으로 가져오지 않는다 |
 | Y12 | sleep의 길이 | p.20–21 | **서술이 없다**(`unspecified_by_reference`) | 값을 고르지 않는다 |
 | Y13 | 재현 성공의 판정 방법(oracle) | p.24 | **서술이 없다**(`unspecified_by_reference`) | 값을 고르지 않는다 |
-| Y14 | 평가 호스트: Core i5-2400 3.10 GHz, 16 GB, Ubuntu 20.04 | p.21 | from-reference(실험 서술이며 설치 요구로 서술하지 않음) | 다르다: Ubuntu 24.04.4 LTS, 4 vCPU, 커널 `6.18.44-fc-v114`, 여유 디스크 16 GB `[M]`. 이 호스트를 쓰면 `deviation`이다 |
+| Y14 | 평가 호스트: Core i5-2400 3.10 GHz, 16 GB, Ubuntu 20.04 | p.21 | from-reference(실험 서술이며 설치 요구로 서술하지 않음) | 다르다: Ubuntu 24.04.4 LTS, 4 vCPU, 커널 `6.18.44-fc-v114`, 여유 디스크 16 GB(2026-10-15 `[M]`). 2026-10-16 재측정: 커널 `6.18.44-fc-v139`, 4 vCPU, 루트 여유 1.3 GB(사용 97%), `pin`·`srcml`·`nltk`·`gensim` 없음, `java`·`strace`·`gdb` 있음, `/dev/kvm` 없음, vmx 0 `[M]`. 커널 빌드 번호는 날마다 바뀐다. 이 호스트를 쓰면 `deviation`이다 |
 | Y15 | LLM·외부 API | — | 서술된 방법에 없다 | 해당 없음 |
 
 기준 환경 사실(`availability.md` §1.1 `[기록]`, 오늘 재확인 `[M]`): ptrace가 되는 `strace`와 `gdb`가 있다. `/dev/kvm` 없음, vmx 플래그 0. 이 호스트가 PIN을 실행할 수 있는지는 PIN의 판본이 정해지지 않아 확인할 수 없다. 2026-10-08 기록이 적은 "PIN은 kernel module이나 reboot이 필요 없다"는 가정은 레퍼런스가 아니다(`syspro.md` S12).
@@ -343,9 +395,9 @@ Q4가 다섯 사례 모두 "답"인 것은 도구 수준의 답이 사례와 무
 | # | 항목 | 선택지와 근거 |
 |---|---|---|
 | 1 | `NOT_RUN`과 `INAPPLICABLE`의 구분 | (a) 다섯 사례를 `NOT_RUN`으로 둔다(구현 미확보가 실제 장애이므로 현 상태). (b) C1·C3·C5·R2를 `INAPPLICABLE`로 올린다. 근거 후보는 SysPro의 범위 서술(p.2–3: inter-process, thread-level은 구분)과 문제 정의(p.4–5: process 집합)다. 반대 근거는 thread 처리가 서술되지 않았다는 점과 로드맵 §1.2의 Process-Level 운용 정의다. (c) C2만 입력 미충족(소스 비공개, Y8)으로 별도 처리한다. 이 문서는 (a)를 적용했다 |
-| 2 | 구현(ReproSys) 접근 | (a) 저자에게 연락한다. 논문 p.1의 교신저자는 T. Yu이고 첫 저자는 T. S. Zaman이다. 학술지판 저자 목록은 다르다(§1.3 항목 11). 연락하지 않았다. 누구의 이름으로 연락할지가 결정 사항이다(`availability.md` A2와 같다). (b) 이미 접근 권한이 있으면 사용자 계정으로 세션에 붙인다. (c) 현 상태를 유지하고 SysPro를 문헌·설계 분석 행으로 둔다 |
-| 3 | 사례 이슈 댓글의 취급 | 정책은 댓글을 원 보고의 일부로 본다(`CONDITIONS_POLICY.md` 7행). SysPro 논문은 subject, body(summary, description)만 입력으로 서술한다(p.16, p.31). 댓글을 SysPro의 입력에 넣을지는 결정 사항이다. 넣는다면 `nasa/CF`, `nasa/cFE` 접근(`add_repo`는 자격을 붙이는 조치라 동의가 필요하다)이나 사용자가 댓글을 직접 주는 방법이 필요하다. 이 조치는 다른 baseline 문서의 입력 조건과 공통이다 |
-| 4 | 학술지판(JSS) 본문 | 출판사 페이지가 403이고 Crossref 초록이 비어 있다. arXiv v1과 내용이 같은지, data-availability 문장이 같은지 모른다. 기관 접근이나 사용자가 PDF를 주는 방법이 있다. P-PAPERS [D]는 사용자 PDF 제공을 착수의 필수 조건으로 만들지 않는다고 정했다. 이 문서는 arXiv v1로 작성했다 |
+| 2 | 구현(ReproSys) 접근 | (a) 저자에게 연락한다. 논문 p.1의 교신저자는 T. Yu이고 첫 저자는 T. S. Zaman이다. 학술지판 저자 목록은 다르다(§1.3 항목 11, 14). 첫 저자의 현 소속은 UMBC다(경로 20, 25). 연락하지 않았다. 누구의 이름으로 연락할지가 결정 사항이다(`availability.md` A2와 같다). (b) 이미 접근 권한이 있으면 사용자 계정으로 세션에 붙인다. 이 세션의 `add_repo`(읽기)는 2026-10-16에 "not found 또는 접근 권한 없음"을 돌려주었다(경로 28). (c) 현 상태를 유지하고 SysPro를 문헌·설계 분석 행으로 둔다 |
+| 3 | 사례 이슈 댓글의 취급 | 정책은 댓글을 원 보고의 일부로 본다(`CONDITIONS_POLICY.md` 7행). SysPro 논문은 subject, body(summary, description)만 입력으로 서술한다(p.16, p.31). 댓글을 SysPro의 입력에 넣을지는 결정 사항이다. 넣는다면 `nasa/CF`, `nasa/cFE` 접근(GitHub MCP는 2026-10-16에 이 저장소들이 세션에 구성되지 않았다고 답하고 사용자가 요청하지 않은 저장소를 추가하지 말라고 안내한다. 추가는 사용자의 요청이 필요하다)이나 사용자가 댓글을 직접 주는 방법이 필요하다. 이 조치는 다른 baseline 문서의 입력 조건과 공통이다 |
+| 4 | 학술지판(JSS) 본문 | 출판사 페이지가 403이고 Crossref·OpenAlex 초록이 비어 있다. NSF PAR 사본은 2027-06-01에 공개된다(경로 23). arXiv v1과 내용이 같은지, data-availability 문장이 같은지 모른다. 기관 접근이나 사용자가 PDF를 주는 방법이 있다. P-PAPERS [D]는 사용자 PDF 제공을 착수의 필수 조건으로 만들지 않는다고 정했다. 이 문서는 arXiv v1로 작성했다 |
 | 5 | 도구 판본의 확정 | PIN, srcML, SPMF는 판본이 없다. NLTK 3.5와 gensim 3.8.3은 참고문헌 항목에만 있다. 참고문헌 항목을 사용 판본으로 읽어 `from-reference`로 둘지, `unspecified_by_reference`로 둘지는 결정 사항이다. 설치와 판본 선택은 이 작업의 범위가 아니다 |
 | 6 | 재구현(`REIMPLEMENTATION`)과 확장(`EXTENSION`) | 논문에 서술된 부분: man 페이지 NAME 절 기반 syscall 선택(p.15), 12조합 구조화 IR 파일 순위(p.16–17), apriori 쌍 순위(p.17–18), 쌍 위치 탐색(p.18–19), 정규식·TSL test case(p.19–20), PIN sleep 삽입(p.20–21). 서술되지 않은 부분: sleep 길이, 실패 판정 방법, 다른 process를 함께 실행하는 방법, man 페이지 묶음, PIN 판본. cFS용 앞단(Linux syscall 이름 대신 cFE/OSAL API)을 붙이면 원 도구가 아니라 `EXTENSION`이다. 결정과 구현은 하지 않았다 |
 
@@ -393,16 +445,17 @@ Kairos의 "실제 실행에서 확인", "관련 작업으로 범위를 좁힌 �
 
 | # | 항목 | 이유와 다음 조치 |
 |---|---|---|
-| 1 | ReproSys 구현 | 익명 접근 불가, 보존본 없음. 다음 조치는 저자 문의(§4.3 항목 2) 또는 사용자 접근 |
-| 2 | 학술지판(JSS) 본문과 data-availability 문장 | 출판사 403. arXiv v1과 같은지, 저자 목록이 다른 이유가 내용 변경인지 모른다(§4.3 항목 4) |
+| 1 | ReproSys 구현 | 익명 접근 불가, 보존본 없음, `add_repo` 거절, 저자 홈페이지·CV에 링크 없음(2026-10-16). 다음 조치는 저자 문의(§4.3 항목 2) 또는 사용자 접근 |
+| 2 | 학술지판(JSS) 본문과 data-availability 문장 | 출판사 403, NSF PAR 엠바고(2027-06-01). arXiv v1과 같은지, 저자 목록이 다른 이유가 내용 변경인지 모른다(§4.3 항목 4) |
 | 3 | sleep 길이, 실패 판정 방법, 다른 process를 함께 실행하는 방법 | 논문에 서술이 없다. 구현에 있을 수 있다. 값을 고르지 않는다(Y12, Y13) |
 | 4 | PIN, srcML, SPMF의 사용 판본, man 페이지 묶음 | 논문에 없다. 참고문헌의 NLTK 3.5, gensim 3.8.3의 해석은 PI 판단(§4.3 항목 5) |
 | 5 | SysPro 1단계(보고서 → KeySystemCalls → 파일 순위 → 쌍)가 다섯 보고서에서 내놓는 것 | 실행하지 않았다. 구현이 없으면 알 수 없다. 논문에 서술된 방법의 재구현은 가능하나 `REIMPLEMENTATION`이며 PI 결정이 먼저다(§4.3 항목 6) |
-| 6 | 사례 이슈 댓글 | 프록시가 `nasa/CF`, `nasa/cFE`를 막는다. SysPro의 입력이 댓글을 포함하는지도 정해지지 않았다(§4.3 항목 3) |
+| 6 | 사례 이슈 댓글 | 프록시가 `github.com/nasa/…` 페이지를 403으로 막고, GitHub MCP는 저장소가 세션에 구성되지 않았다고 답한다(2026-10-16). SysPro의 입력이 댓글을 포함하는지도 정해지지 않았다(§4.3 항목 3) |
 | 7 | 논문 내부 불일치의 해소 | 벤치마크 수, 비직접 언급 비율, 성공 건수(§1.3 항목 10, 12). 학술지판이 바로잡았는지 모른다 |
 | 8 | Figure 2–4, 6–10의 세부 | 본문 서술과 캡션 위주로 읽었다. 이 문서는 그림의 값을 쓰지 않았다 |
 | 9 | 사례 쪽 사실(`ledger.md`, `availability.md`, `syspro.md` §6) | 저장소 기록을 그대로 썼다. 소스를 다시 열어 재확인하지 않았다. 이슈 본문만 오늘 보존본을 다시 읽었다 |
-| 10 | SSRN, Semantic Scholar, OpenAlex, Internet Archive | 도전 페이지 또는 요청 한도 또는 연결 재설정. 새 정보를 기대하기 어렵다 |
+| 10 | SSRN, Semantic Scholar, Unpaywall, Internet Archive, Scholar Gateway | 도전 페이지, 요청 한도, 이메일 요구(사용자 이메일을 보내지 않음), 연결 재설정, 커넥터 접근 거부. OpenAlex는 2026-10-16에 열렸고 서지만 준다 |
+| 11 | NSF 과제 RepSON과 SysPro·ReproSys의 관계 | 과제 초록은 trace 수집을 포함한 계획을 서술한다(§1.3 항목 16). 같은 도구인지, 이후 판에 trace 단계가 들어갔는지는 학술지판 본문이나 구현을 읽어야 알 수 있다 |
 
 ---
 
@@ -415,9 +468,13 @@ Kairos의 "실제 실행에서 확인", "관련 작업으로 범위를 좁힌 �
 - SysPro arXiv TeX 원본: https://arxiv.org/e-print/2601.09616v1
 - SysPro 학술지판(열지 못함): https://doi.org/10.1016/j.jss.2026.112785 (JSS vol. 236, 112785)
 - SysPro 학술지판 Crossref 서지: https://api.crossref.org/works/10.1016/j.jss.2026.112785
+- SysPro 학술지판 OpenAlex 서지(2026-10-16): https://api.openalex.org/works/doi:10.1016/j.jss.2026.112785
+- SysPro NSF PAR 레코드(본문 엠바고 2027-06-01, 2026-10-16): https://par.nsf.gov/biblio/10682187
 - SysPro 구현(열지 못함): https://github.com/tarannumzaman/ReproSys/tree/main
 
 **인접 자료**
+- NSF 과제 2518445 공개 초록(RepSON, `2차`, 2026-10-16): https://api.nsf.gov/services/v1/awards/2518445.json
+- 저자 홈페이지와 CV(`2차`, 2026-10-16): https://tarannumzaman.github.io/ , https://raw.githubusercontent.com/tarannumzaman/tarannumzaman.github.io/master/files/CV_zaman.pdf
 - 같은 저자의 공개 저장소(SCMiner, SysPro 자료 아님): https://github.com/tarannumzaman/Scminer
 - Intel PIN 소개 페이지(WebFetch 요약만): https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-dynamic-binary-instrumentation-tool.html
 - SysPro 참고문헌이 가리키는 system call 이름 출처(HEAD 도달성만 확인): https://manpages.ubuntu.com/manpages/focal/en/man2/syscalls.2.html, https://filippo.io/linux-syscall-table/

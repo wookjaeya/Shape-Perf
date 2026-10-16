@@ -24,6 +24,8 @@ occurrences 0
 findings 1
 finding #5: rule R19: the poll CFE_ES_MainTaskSyncDelay (#3) did not reach its exit outcome, and the next call of the actor is OS_TaskCreate, not the terminal operation CFE_PSP_Panic
 
+guard failures 0
+
 final state
   es.app[1] = RESERVED id 0xffffffff
   loc CFE_SB_Global.AppId = 0

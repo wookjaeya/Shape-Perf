@@ -49,6 +49,15 @@ std::string status_value(const std::string& text, const std::string& key) {
 
 }  // namespace
 
+const char* proc_capture_mode_name(ProcCaptureMode mode) { return mode == ProcCaptureMode::Status ? "status" : "full"; }
+
+bool parse_proc_capture_mode(const std::string& text, ProcCaptureMode* out) {
+  if (text == "full") *out = ProcCaptureMode::Full;
+  else if (text == "status") *out = ProcCaptureMode::Status;
+  else return false;
+  return true;
+}
+
 const char* policy_name(int policy) {
   switch (policy) {
     case 0: return "SCHED_OTHER";
@@ -88,20 +97,24 @@ Status capture_thread(uint32_t pid, uint32_t tid, ThreadCapture* out) {
   out->tid = tid;
   const std::string base = "/proc/" + std::to_string(pid) + "/task/" + std::to_string(tid);
   std::string stat;
+  ++out->reads;
   if (!read_file(base + "/stat", &stat)) return Status::error(Err::Io, "thread " + std::to_string(tid) + " is gone or unreadable");
   Status s = parse_stat_line(stat, out);
   if (!s.ok()) return s;
   std::string status;
+  ++out->reads;
   if (read_file(base + "/status", &status)) out->cpus_allowed = status_value(status, "Cpus_allowed_list");
   out->ok = true;
   return Status::success();
 }
 
-Status capture_process(uint32_t pid, ProcessCapture* out) {
+Status capture_process(uint32_t pid, ProcessCapture* out, ProcCaptureMode mode) {
   *out = ProcessCapture();
   out->pid = pid;
+  out->mode = mode;
   const std::string base = "/proc/" + std::to_string(pid);
   std::string status;
+  ++out->reads;
   if (!read_file(base + "/status", &status)) return Status::error(Err::Io, "process " + std::to_string(pid) + " is gone or unreadable");
   out->uid = status_value(status, "Uid");
   out->gid = status_value(status, "Gid");
@@ -112,7 +125,12 @@ Status capture_process(uint32_t pid, ProcessCapture* out) {
   out->no_new_privs = status_value(status, "NoNewPrivs");
   out->seccomp = status_value(status, "Seccomp");
   out->cpus_allowed = status_value(status, "Cpus_allowed_list");
+  if (mode == ProcCaptureMode::Status) {
+    out->ok = true;
+    return Status::success();
+  }
   std::string cmd;
+  ++out->reads;
   if (read_file(base + "/cmdline", &cmd)) {
     for (char& c : cmd)
       if (c == '\0') c = ' ';
@@ -121,7 +139,9 @@ Status capture_process(uint32_t pid, ProcessCapture* out) {
   }
   out->exe = link_target(base + "/exe");
   out->cwd = link_target(base + "/cwd");
+  out->reads += 2;
   std::string env;
+  ++out->reads;
   if (read_file(base + "/environ", &env)) {
     out->env_bytes = env.size();
     out->env_sha256 = kz::to_hex(kz::sha256(env.data(), env.size()));
@@ -136,12 +156,14 @@ Status capture_process(uint32_t pid, ProcessCapture* out) {
     std::sort(out->env_names.begin(), out->env_names.end());
   }
   std::string cg;
+  ++out->reads;
   if (read_file(base + "/cgroup", &cg)) {
     while (!cg.empty() && cg.back() == '\n') cg.pop_back();
     std::replace(cg.begin(), cg.end(), '\n', ';');
     out->cgroup = cg;
   }
   std::string limits;
+  ++out->reads;
   if (read_file(base + "/limits", &limits)) {
     size_t pos = 0;
     while (pos < limits.size()) {

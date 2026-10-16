@@ -6,6 +6,8 @@
 #include <queue>
 #include <tuple>
 
+#include "unroll.hpp"
+
 namespace kzs {
 
 // ---- function-pointer flow --------------------------------------------------------------------------
@@ -155,8 +157,10 @@ bool has_prefix_entries(const std::vector<ImageFact>& img, const std::string& pr
 
 }  // namespace
 
-bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::vector<ImageFact>* elements, int64_t* trip, std::string* why) {
+bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::vector<ImageFact>* elements, int64_t* trip, std::string* why,
+                        std::vector<ImageFact>* entries) {
   elements->clear();
+  if (entries != nullptr) entries->clear();
   auto find_image = [&](const std::string& obj) -> const std::vector<ImageFact>* {
     auto it = model.object_images.find(obj);
     return it == model.object_images.end() ? nullptr : &it->second;
@@ -208,6 +212,7 @@ bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::ve
       terminated = true;
       break;
     }
+    if (entries != nullptr) entries->push_back(*e);
     ++n;
     if (e->kind == KZ_IMAGE_KIND_ADDR) {
       const std::vector<ImageFact>* eo = find_image(e->text);
@@ -276,6 +281,7 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     if (uit != flow.unknown.end() && uit->second) *unknown = true;
   };
   std::map<std::string, std::set<std::string>> indirect_targets;  // call key -> function keys
+  std::set<std::string> unresolved_calls;
   for (const IndirectCall& ic : m.indirect_calls) {
     ++R.indirect_total;
     std::set<std::string> fns;
@@ -297,6 +303,7 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       t.reason = unknown ? KZ_CALL_TARGET_REASON_UNKNOWN_SOURCE : KZ_CALL_TARGET_REASON_NO_FLOW;
       m.targets.push_back(t);
       ++R.indirect_unresolved;
+      unresolved_calls.insert(ic.call_key);
     } else {
       ++R.indirect_resolved;
     }
@@ -339,17 +346,32 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     }
   }
 
+  // ---- the program graph: calls, resolved indirect targets, unresolved sites
+  ProgramGraph graph;
+  graph.indirect_targets = indirect_targets;
+  graph.unresolved_calls = unresolved_calls;
+  for (const CallFact& c : m.calls) {
+    const std::string key = c.pos.str() + "#" + std::to_string(c.ordinal);
+    graph.call_caller[key] = c.caller_key;
+    if (!c.callee_key.empty()) graph.cg[c.caller_key].insert(c.callee_key);
+    auto it = indirect_targets.find(key);
+    if (it != indirect_targets.end()) graph.cg[c.caller_key].insert(it->second.begin(), it->second.end());
+  }
+  find_spawn_params(&m, graph);
+
   // ---- table walks
+  std::map<std::string, std::vector<ImageFact>> walk_entries;  // loop key -> one entry per iteration
   for (const Model::WalkSpec& w : m.walks) {
     auto lit = R.loop_index.find(w.loop_key);
     if (lit == R.loop_index.end()) continue;
     LoopFact& lf = m.loops[lit->second];
-    std::vector<ImageFact> elems;
+    std::vector<ImageFact> elems, entries;
     int64_t trip = 0;
     std::string why;
-    if (resolve_table_walk(m, w, &elems, &trip, &why)) {
+    if (resolve_table_walk(m, w, &elems, &trip, &why, &entries)) {
       lf.trip = trip;
       lf.trip_status = KZ_TRIP_STATUS_EXACT;
+      walk_entries[w.loop_key] = entries;
       ++R.walks_resolved;
       std::set<std::pair<std::string, std::string>> seen;
       for (const ImageFact& e : m.images) seen.insert({e.object, e.path});
@@ -361,17 +383,10 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       ++R.walks_failed;
     }
   }
+  unroll_table_walks(&m, walk_entries);
 
   // ---- call graph (for the early-initialization flags)
-  std::map<std::string, std::set<std::string>> cg;
-  for (const CallFact& c : m.calls) {
-    if (!c.callee_key.empty()) cg[c.caller_key].insert(c.callee_key);
-    else {
-      const std::string key = c.pos.str() + "#" + std::to_string(c.ordinal);
-      auto it = indirect_targets.find(key);
-      if (it != indirect_targets.end()) cg[c.caller_key].insert(it->second.begin(), it->second.end());
-    }
-  }
+  const std::map<std::string, std::set<std::string>>& cg = graph.cg;
   std::set<std::string> walk_called;
   for (const LoopFact& lf : m.loops) {
     if (lf.kind != KZ_LOOP_KIND_TABLE_WALK) continue;
@@ -548,6 +563,9 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     l.status = (l.n_untyped + l.n_escape + l.n_cast + l.n_union) > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
     m.locs.push_back(l);
   }
+
+  // ---- the certificate-view rule of every loop (needs the writer-set status of the targets)
+  decide_loop_rules(&m, spec, graph);
 
   // ---- sites: one number for every located fact, in the order of (file, line, col, category)
   struct SiteRow {

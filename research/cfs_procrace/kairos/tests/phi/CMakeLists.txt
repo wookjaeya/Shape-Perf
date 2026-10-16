@@ -15,7 +15,8 @@ set(kz_phi_cases
   profile_canonical profile_summary
   replay_startup_ok replay_startup_old_version replay_startup_no_version replay_startup_no_predicate
   replay_kid_illegal replay_kid_unregistered replay_kid_ordinals replay_kid_disagree
-  replay_shutdown_scope replay_poll_timeout replay_poll_timeout_wrong)
+  replay_shutdown_scope replay_poll_timeout replay_poll_timeout_wrong
+  replay_kid_outcomes replay_effects_core replay_effects_external replay_cleanup_window)
 foreach(kz_case IN LISTS kz_phi_cases)
   add_test(NAME phi_golden_${kz_case}
     COMMAND kz_phi_golden ${kz_case} ${KZ_PROFILE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_SOURCE_DIR}/traces)

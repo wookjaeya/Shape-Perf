@@ -13,6 +13,7 @@ add_library(kz-llvm STATIC
   serialize.cpp
   facts_text.cpp
   facts_query.cpp
+  unroll.cpp
   elf_info.cpp
   linkset.cpp
   gitrev.cpp

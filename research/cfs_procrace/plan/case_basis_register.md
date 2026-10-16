@@ -1,12 +1,12 @@
-# 사례 기준 대장 — 다섯 사례의 조건표와 기대 결과표 초안 (2026-10-15)
+# 사례 기준 대장 — 다섯 사례의 조건표와 기대 결과표 초안 (2026-10-15, 2026-10-16 개정)
 
 - 대상: C1 (nasa/CF #184), C2 (nasa/cFE #198), C3 (cFE #73), C5 (cFE #72), R2 (cFE #2663).
 - 위치와 역할: `plan/case_basis_register.md`. `plan/ROADMAP_20261015.md` §6.1의 조건표(9개 필드)를 다섯 사례에 채우고(§3–§7), 사례별 기대 결과표 골격과 해시 규칙(§8), 사례별 확정·제안·미비 요약(§1), 1차 출처 점검 기록(§9), 남은 항목(§10)을 붙인 것이다. ROADMAP §12의 작업 3 "다섯 사례의 조건·미확인 항목을 한 형식으로 정리"의 산출물이며, §6.3의 완료 기준(확정된 항목 / 실험 설계로 제안된 항목 / 아직 없는 항목의 분리)에 대응한다.
-- 읽은 입력: `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `plan/ROADMAP_20261015.md`, `Architecture/spec/SPEC_FINAL.md` rev 1.2(미커밋 작업 트리, sha256 앞 8자 `741809d5`; 앵커 확인은 §9.2 V-SPEC-1. 초안은 rev 1.1을 읽고 썼다), `CONDITIONS_POLICY.md`, `cases/C1.md`·`C2.md`·`C3.md`·`C5.md`·`R2.md`·`ledger.md`·`mapping_v701.md`, `env/CONDITIONS.md`, `results/R2_gdb_v701.md`, `env/logs/r2_g1..3_trace.jsonl`. 2026-10-15 검토 반영 때 추가로 읽은 것: `roadmap_input_20261007.md`, `env/ENV.md`, `env/CONDITIONS.md`의 E4·M1-3·M1-5, `env/logs/s1r2_p1*`(파일 이름·시각·머리말만).
+- 읽은 입력: `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `plan/ROADMAP_20261015.md`, `Architecture/spec/SPEC_FINAL.md` rev 1.2(2026-10-16 개정 때 읽은 것은 2026-10-16의 정합성 수정이 들어간 미커밋 작업 트리, sha256 앞 8자 `861041ac`; 커밋 `6be8935`의 파일은 `741809d5`. 앵커 확인은 §9.2 V-SPEC-1과 §9.3 V-SPEC-2. 초안은 rev 1.1을 읽고 썼다), `CONDITIONS_POLICY.md`, `cases/C1.md`·`C2.md`·`C3.md`·`C5.md`·`R2.md`·`ledger.md`·`mapping_v701.md`, `env/CONDITIONS.md`, `results/R2_gdb_v701.md`, `env/logs/r2_g1..3_trace.jsonl`. 2026-10-15 검토 반영 때 추가로 읽은 것: `roadmap_input_20261007.md`, `env/ENV.md`, `env/CONDITIONS.md`의 E4·M1-3·M1-5, `env/logs/s1r2_p1*`(파일 이름·시각·머리말만).
 - 성격: **초안이다.** 구현·빌드·실행·설치·삭제를 하지 않았고 커밋하지 않았다. Kairos는 SPEC rev 1.2의 설계 단계이고 SPEC S1 기록기의 R2 첫 실행이 한 번 있다(아래 '상태 주의'). 이 문서의 도구 분류(§8의 T 항목)는 SPEC이 서술한 기대를 옮긴 것이며 도구 출력이 아니다. 값을 새로 정하지 않았다. 출처가 정하지 않은 값은 `미`로 남겼고, PI 결정은 결정으로만 적었으며 사실로 옮기지 않았다.
-- **상태 주의 (2026-10-15 검토 반영 개정; 먼저 읽을 것).**
-  1. **R2에는 Kairos의 첫 도구 출력이 이미 있고 R2 시트는 그보다 먼저 동결되지 않았다.** 작업 트리에 `env/logs/s1r2_p1*`(파일 10개, 2026-10-15T11:17Z; ENV 바이너리 `core-cpu1`에 Kairos의 `kz observe`로 한 SPEC S1 기록 실행; driver 머리말의 `kz` 경로는 kairos 빌드 디렉터리의 `tools/kz/kz`)가 있다. 이 문서는 파일 이름·시각·머리말만 확인했고 내용과 gdb 기록과의 일치 여부를 평가하지 않았다. 이 대장 §8에는 R2 시트의 sha256이 없다. 따라서 §8.1 규칙 5(a)와 SPEC §7.2·§9.3('사례의 첫 도구 출력 전에 시트를 해시로 동결')의 순서가 R2에서는 지켜지지 않았다. R2 시트(§8.6)의 기대는 **사전 등록이 아니라** 출력 이후에 기재한 것으로 읽어야 한다(특히 E-R2-T3; §8.1 규칙 10). 시트를 지금 동결하고 실제 순서를 변경 로그에 적을지는 orchestrator·PI가 정할 일이다(§10 항목 16). 이 문서가 확인한 한 다른 사례(C1, C2, C3, C5)의 Kairos 출력 파일은 `env/logs`에 없다(`git status`의 미추적 파일 기준; `kairos/` 안은 보지 않았다).
-  2. **SPEC은 rev 1.2다.** `Architecture/spec/SPEC_FINAL.md`는 rev 1.2(미커밋 작업 트리, 2026-10-15T11:03Z 수정, sha256 앞 8자 `741809d5`)이고 이 대장의 SPEC 앵커는 그 파일에서 다시 확인했다(§9.2 V-SPEC-1). 이 파일은 용어 변경 단계 등으로 계속 고쳐지므로 해시가 바뀌면 앵커를 다시 확인한다.
+- **상태 주의 (2026-10-15 검토 반영 개정, 2026-10-16 재확인; 먼저 읽을 것).**
+  1. **R2에는 Kairos의 첫 도구 출력이 이미 있고 R2 시트는 그보다 먼저 동결되지 않았다.** 작업 트리에 `env/logs/s1r2_p1*`(파일 10개, 2026-10-15T11:17Z; ENV 바이너리 `core-cpu1`에 Kairos의 `kz observe`로 한 SPEC S1 기록 실행; driver 머리말의 `kz` 경로는 kairos 빌드 디렉터리의 `tools/kz/kz`)가 있다. 이 문서는 파일 이름·시각·머리말만 확인했고 내용과 gdb 기록과의 일치 여부를 평가하지 않았다. 이 대장 §8에는 R2 시트의 sha256이 없다. 따라서 §8.1 규칙 5(a)와 SPEC §7.2·§9.3('사례의 첫 도구 출력 전에 시트를 해시로 동결')의 순서가 R2에서는 지켜지지 않았다. R2 시트(§8.6)의 기대는 **사전 등록이 아니라** 출력 이후에 기재한 것으로 읽어야 한다(특히 E-R2-T3; §8.1 규칙 10). 시트를 지금 동결하고 실제 순서를 변경 로그에 적을지는 orchestrator·PI가 정할 일이다(§10 항목 16). 이 문서가 확인한 한 다른 사례(C1, C2, C3, C5)의 Kairos 출력 파일은 `env/logs`에 없다(`kairos/` 안은 보지 않았다). **2026-10-16 재확인:** `s1r2_p1*` 10개는 커밋 `6be8935`(2026-10-15T23:59Z)로 저장소에 들어갔다. `env/logs`의 파일 목록과 `kairos/` 밖의 `*.kzt` 검색에서 그 뒤의 Kairos 출력은 없고, R2 시트의 해시도 여전히 없다(§9.3 V-R2-R5).
+  2. **SPEC은 rev 1.2다.** 2026-10-15 개정은 rev 1.2 작업 트리(sha256 앞 8자 `741809d5`; 그 뒤 커밋 `6be8935`에 같은 파일로 들어갔다)에서 앵커를 확인했다(§9.2 V-SPEC-1). 2026-10-16 현재 작업 트리는 같은 rev 1.2에 2026-10-16의 정합성 수정(D11의 커널을 실행마다 기록, recall을 확장 평가로 배치, ADR 주석)이 더해진 미커밋 파일(2026-10-16T00:07Z 수정, `861041ac`)이며 앵커를 그 파일에서 다시 확인했다(§9.3 V-SPEC-2). SPEC은 용어 변경 단계 Spec-C(T1 = (a))를 적용했으므로 SPEC 본문도 'readiness specification'을 쓴다(SPEC §0.11, 부록 C). 한국어 거울 문서의 이름 변경은 별도 단계로 진행 중이다(2026-10-16 `grep` 기준 `Architecture/01`–`05`에는 새 용어가 있고 `06`–`10`에는 없다). 해시가 바뀌면 앵커를 다시 확인한다.
 
 ## 0. 읽는 법
 
@@ -25,7 +25,7 @@
 보조 표시:
 
 - `†` — 행의 내용 중 일부라도 이슈·댓글·PR 페이지 자체에 기대고, 그 페이지를 이 문서 작성 중에 다시 읽지 못했다. 이 세션에서 nasa/CF와 nasa/cFE의 이슈 페이지와 API는 HTTP 403이다(§9). 해당 내용은 사례 기록이 보존한 인용(GitHub MCP 검색 본문, 웹 조각, 검색 발췌)에 근거한다. 같은 행의 `검`은 직접 다시 읽은 부분에만 해당한다. **`†` 행은 §1에서 확정 항목에 더하지 않고 따로 센다.**
-- `검` — 행의 주장(또는 `†`가 같이 있으면 그 중 명시한 부분)을 이 문서 작성 중(2026-10-15)에 1차 출처(raw.githubusercontent.com의 고정 SHA 파일, 공식 tarball의 sha256 일치 확인 후 파일, 얕은 git fetch, 저장소의 원시 기록 재집계)로 직접 다시 확인했다. 확인 내용은 §9에 있다.
+- `검` — 행의 주장(또는 `†`가 같이 있으면 그 중 명시한 부분)을 이 문서 작성·개정 중(2026-10-15, 2026-10-16)에 1차 출처(raw.githubusercontent.com의 고정 SHA 파일, 공식 tarball의 sha256 일치 확인 후 파일, 얕은 git fetch, 저장소의 원시 기록 재집계, 2026-10-16에는 로컬 전체 git 클론)로 직접 다시 확인했다. 확인 내용은 §9에 있다(2026-10-16 재점검은 §9.3).
 - `M` — 실행에서 측정·기록된 값.
 
 ### 0.2 `from-reference`의 뜻
@@ -66,12 +66,12 @@
 
 ### 1.1 태그별 행 수 (필드 A–G)
 
-집계는 §3–§7의 A–G 필드 행에서 태그의 첫 글자와 `†`·`검` 표시를 센 것이다. 초안의 표를 같은 방식으로 다시 세어 초안의 숫자와 일치함을 확인한 뒤, 2026-10-15 검토 반영(행 쪼개기, 태그 수정)을 마친 문서에서 다시 센 값이다. 행 수는 항목 수이며 중요도나 진척률이 아니다. 서로 다른 단위를 합산하지 않는다. §3–§7의 태그를 고치면 다시 세어야 한다.
+집계는 §3–§7의 A–G 필드 행에서 태그의 첫 글자와 `†`·`검` 표시를 센 것이다. 초안의 표를 같은 방식으로 다시 세어 초안의 숫자와 일치함을 확인한 뒤, 2026-10-15 검토 반영(행 쪼개기, 태그 수정)을 마친 문서에서 다시 센 값이다. 2026-10-16 개정에서 C2만 바뀌었다(C2.B2를 `원·검` 행과 `분` 행 C2.B2a로 나누고 `원·검` 행 C2.B9를 더해 행 56 → 58, 확정 11 → 13, `검` 7 → 9; 같은 스크립트로 다시 세었고 다른 사례의 수는 그대로다). 행 수는 항목 수이며 중요도나 진척률이 아니다. 서로 다른 단위를 합산하지 않는다. §3–§7의 태그를 고치면 다시 세어야 한다.
 
 | 사례 | 행 수(A–G) | 확정: 원+저(`†` 없음) | 원문 미재확인: `†` 행(원/저) | 분 | 선: 결정 ID | 선: 제안 | 선: 차이 | 미 | `검` 표시 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | **C1** | 77 | 21 (17+4) | 7 (7/0) | 10 | 18 | 7 | 0 | 14 | 17 |
-| **C2** | 56 | 11 (6+5) | 7 (7/0) | 7 | 10 | 6 | 1 | 14 | 7 |
+| **C2** | 58 | 13 (8+5) | 7 (7/0) | 7 | 10 | 6 | 1 | 14 | 9 |
 | **C3** | 66 | 19 (14+5) | 11 (11/0) | 9 | 9 | 7 | 0 | 11 | 15 |
 | **C5** | 64 | 18 (14+4) | 5 (5/0) | 7 | 8 | 9 | 0 | 17 | 15 |
 | **R2** | 74 | 24 (11+13) | 9 (7/2) | 12 | 14 | 7 | 2 | 6 | 16 |
@@ -89,7 +89,7 @@
 | 사례 | 확정된 항목(`†` 없는 `원`·`저`) | 원문 미재확인 항목(`†`) | 실험 설계로 제안·결정된 항목 | 아직 없는 항목 |
 |---|---|---|---|---|
 | **C1** | 보고 리비전 2a024d8의 단일 조회 코드(`검`), 수정 833fdbb의 제한 재시도(NAME_NOT_FOUND만, 25회·100 ms; `검`), 수정 전 부모 281a941(`검`), 공개 BP 소스의 이름·시작 순서·우선순위(`검`; 원 보고자 환경의 값이 아님), 기본 표의 빈 이름(`검`), BP PR CI의 CF 브랜치 이름과 PR #342 head 브랜치 이름의 일치(`검`; 그 CI가 833fdbb를 썼다는 것은 `분`) | 이슈 #184의 주장과 일자 | 공개 BP 기반 기준 구성과 CF 281a941→833fdbb 후보(D22), 생성 직전 사건 기반 보류와 사건 기준 해제(P-C1HOLD), 재시도 상수는 선택 버전에서 읽기, v7.0.1 빈 이름 구성은 경로 비활성 음성 대조, N은 SPEC S1(D14), 관측 영향 점검(D1) | 원 보고자의 provider·세마포어 이름·core 리비전·플랫폼·로그·빈도, 이슈 댓글 5개(→ 입력 로드맵 `roadmap_input_20261007.md`의 "BP를 먼저 시작해도" 서술은 미검증이며 공개 BP 스크립트는 CF 먼저이고 20261015 로드맵에는 그 서술이 없다), BP CI 구성요소 SHA(변동 참조), 공개 통합의 core 조합 빌드 가능성, D17·K8–K10의 D22 기준 적용성(C1.D5), 공개 BP 구성에서의 우선순위 효과(C1.C7은 추정), OS 실시간 우선순위 적용·CPU 수, 보류 감시 한도·hang 한계 |
-| **C2** | 단일 OPERATIONAL 배리어 코드(6.4.2 tarball sha256 일치, v6.5.0a; `검`), 수정 v6.6.0a의 APPS_INIT·LATE_INIT·2단계 ES 배리어(`검`), 6.6.0 VDD의 #167 행(`검`), 현재 dev의 같은 설계와 void 반환(`검`) | 이슈 본문의 8개 문장(조각 인용), 이슈 본문의 6.4.2 시작 동기화 서술(C2.B1) | 역할 재구성까지 진행(P-C2), 결과 명칭 "C2 메커니즘의 역할 기반 검증", 단일/두 단계 배리어 × 기존/수정 provider 2×2, Q22: 1차 대조는 late init이 정상 완료하는 구성, 사건 기반 보류, 재구성 플랫폼은 어느 레퍼런스에도 없는 값을 고르는 것이므로 차이 제안(C2.C8) | EVA CWS의 앱·함수·cFE 버전·플랫폼·증상·빈도 전부, "R의 호출이 P를 향했다"는 해석, R→P 요청 방식·초기화 내용·타임아웃 인자·우선순위·앱 수의 재구성 값, 단일 단계 셀에 쓸 cFE 코드(6.4.2 대 v6.5.0a)와 OSAL/PSP 짝, Trac #167 원 기록 |
+| **C2** | 단일 OPERATIONAL 배리어 코드(6.4.2 tarball sha256 일치, v6.5.0a; `검`), 6.4.2와 v6.5.0a의 세 동기화 함수가 공백 무시 같음(`검`, 2026-10-16), 단일 단계 코드에 `WaitForSystemState`·`APPS_INIT`·`LATE_INIT` 없음(`검`, 2026-10-16), 수정 v6.6.0a의 APPS_INIT·LATE_INIT·2단계 ES 배리어(`검`), 6.6.0 VDD의 #167 행(`검`), 현재 dev의 같은 설계와 void 반환(`검`) | 이슈 본문의 8개 문장(조각 인용), 이슈 본문의 6.4.2 시작 동기화 서술(C2.B1) | 역할 재구성까지 진행(P-C2), 결과 명칭 "C2 메커니즘의 역할 기반 검증", 단일/두 단계 배리어 × 기존/수정 provider 2×2, Q22: 1차 대조는 late init이 정상 완료하는 구성, 사건 기반 보류, 재구성 플랫폼은 어느 레퍼런스에도 없는 값을 고르는 것이므로 차이 제안(C2.C8) | EVA CWS의 앱·함수·cFE 버전·플랫폼·증상·빈도 전부, "R의 호출이 P를 향했다"는 해석, R→P 요청 방식·초기화 내용·타임아웃 인자·우선순위·앱 수의 재구성 값, 단일 단계 셀에 쓸 cFE 코드(6.4.2 대 v6.5.0a)와 OSAL/PSP 짝, '단일 단계 × 수정 provider' 셀의 제외·이식 선택(C2.B9), 세 함수 밖의 동등성(C2.B2a), Trac #167 원 기록 |
 | **C3** | 6.4.1 tarball에서 이슈의 호출 경로·생성 순서·우선순위 샘플 값·SB L198/L257·EVS L190/L385/L393·TIME L252/L308·EVS_SendEvent 무검사(`검`), 6.4.2의 F1·F2·F3(`검`), 두 tarball의 sha256·크기(`검`), 6.4.1 readme의 OSAL 요구·출처와 파생 후보 플랫폼의 값(SH-5, SH-9; `검`) | #73 = Trac #42의 헤더 증거와 수정 커밋 ID·병합일(검색 발췌 경유, X2 미결정), 이슈가 우선순위 값을 인용했다는 서술(C3.C3) | D13: 분석 전용 파싱 인정, (b)(i)부터, F1 전에 배치. Q16 버전별 대응 시험. 공유 6.4.x 기준. 실제 실행 검증은 별도 산출물. 현재 v7.0.1의 R2 기록을 C3 증거로 세지 않음 | Microblaze OS/PSP/OSAL/컴파일러, EVA가 실행한 cFE 빌드, fault 위치·로그·빈도, 댓글 14개 중 4개 미식별과 전문 전부, 실제 우선순위 적용·CPU 수·순서 제어 방식, OSAL artifact 통일(X3; readme가 말하는 것과 'git tag는 차이 조건'이라는 분류는 구분, SH-5b), 주 oracle(X7), C3와 R2를 한 패턴으로 세는지(X4) |
 | **C5** | 6.4.1/6.4.0의 같은 `cfe_es_apps.c`와 락 해제 L610–재획득 L637(`검`), GetAppID 실패 조건(`검`), 6.4.2의 락 범위 확장 L571–L669(`검`), OSAL 4.1.1 SourceForge artifact와 git tag의 차이가 `osapi-version.h`뿐(`검`), 현재 코드의 가드와 잔여 창 코드(`검`) | 이슈 #72의 제목·milestone·주장(#72 = Trac #41 대응 자체는 `분`, C5.A8), 호출자 요구(C5.F2: 이슈 본문†, VDD, `0749d692` 주석) | D13·Q16, 사건 기반 보류(생성자를 OS_TaskCreate 반환 후 재획득 전에 보류), P-RGIT 보조 대조(원 C5의 대체 아님), 현재 버전 App-record 잔여는 별도 파생 결과(D16) | 관측자의 플랫폼·OSAL·앱·생성 경로·우선순위·루트/RT·CPU 수·로그, 댓글 9개와 [C5-context], `OS_TaskGetId` 순서(A8), stale TaskTable 항목 도달성, 빌드 호스트·권한 선택(X3), 보류 감시 한도 |
 | **R2** | ENV 리비전 5개(`검`), 게시·거부·사용·직렬화 코드 줄(`검`), 보고 리비전 후보 B의 코드(`검`), gdb 3회의 원시 기록 재집계(각 부팅에서 거부된 이벤트 요청 24회, ES 20·EVS 4, 3 정적 사이트, 6 문맥; `검`), `b9bec567`의 전체 SHA·부모·변경 파일 수(`검`) | 이슈의 보고자 환경(Ubuntu 22.04.5, "cFE v6.7")과 재현 서술, 코멘트 2개, PR #2820과 그 head | ENV 기준 첫 전체 구현(P-LADDER), 자연 쌍 `b9bec567^`/`b9bec567` 1차·v7.0.0 보조·PR #2820 무변화 대조(P-R2CTRL), 정상 종료·정규화 부팅 기준(D17), `msg_max=10` 유지(D19), 관측 영향 점검(D1), 커널 변경 후 재측정(D11). gdb 15.1·all-stop·3회는 어느 레퍼런스에도 없는 값을 고른 것(차이; R2.C7, R2.C9) | B가 보고 시점 main이라는 확정, 보고자의 CPU·커밋·컴파일러·gdb·실행 횟수, 비-gdb 비수정 바이너리의 측정, 결정성의 증명(3회 반복으로 불가), 콘솔·카운터·시스템 호출의 관측(코드 읽기만 있다, R2.F8a), 보고의 "ES and EVS"가 B에서 성립하는지(Q1), 코멘트 원문의 누락 구간, 임무상 피해. **R2에는 시트 동결 전에 Kairos 첫 출력이 있다(상태 주의, §8.1 규칙 10)** |
@@ -107,8 +107,8 @@ ENV는 `env/CONDITIONS.md`가 고정한 빌드·실행 환경이다. R2의 첫 �
 | K3 | 빌드 | `make native_std.prep`, `make native_std.install`(옵션·-j 없음), CMake debug, `-O` 없음(GCC 기본 -O0), 단위 시험 포함, 경고를 오류로 취급(-Werror) | 저 | CONDITIONS C1–C5(cFS v7.0.1 README L102–L105 기반). R2 보고자의 빌드와 다르다(R2.I2). |
 | K4 | 실행 | 사용자 `ubuntu`(uid 1000), 작업 디렉터리 `build-native_std/exe/cpu1`, 명령 `./core-cpu1`(옵션 없음), root 세션에서 `setsid setpriv`로 기동 | 저 | CONDITIONS E1–E3, E9. |
 | K5 | 스케줄링 | `RLIMIT_RTPRIO` 0이어서 OSAL task 27개가 모두 `SCHED_OTHER` nice 0(12개 스냅샷에서 동일). 시작 스크립트의 우선순위는 스케줄링에 영향이 없다 | 저·M | CONDITIONS E4, M1-5. 측정 대상은 ENV 프로세스(시작 스크립트의 CF 우선순위 70, BP 없음; `env/ENV.md` L149)이며 C1의 공개 BP 구성(CF 65·BP 55)이 아니다(C1.C7). |
-| K6 | 호스트 | Ubuntu 24.04.4 LTS, 4 vCPU, x86_64. ENV 기록 당시 커널 6.18.44-fc-v80. 이 세션의 `uname -r`는 6.18.44-fc-v114 | 저·검 | CONDITIONS B3; 2026-10-15 `uname -r`. |
-| K7 | 커널 변경 후 재측정 | 커널이 바뀌었으므로 기준 실행을 SPEC S1의 관측 영향 비교보다 먼저 재측정한다. 예전 커널의 결과를 현재 기준 실행처럼 합산하지 않는다 | 선(D11) | RESOLVED §2.2, §4.1. |
+| K6 | 호스트 | Ubuntu 24.04.4 LTS, 4 vCPU, x86_64. 커널은 VM 세션마다 바뀌어 실행마다 기록한다: gdb 기준 실행 3회는 6.18.44-fc-v80(`env/logs/r2_g1_gdb_operational_esrestart.log.meta` L12), SPEC S1-R2 시험 실행 `s1r2_p1`은 -fc-v114(`env/logs/s1r2_p1_perf_operational_esrestart.log.meta` L13), 2026-10-15 이 대장 작성 때 `uname -r`는 -fc-v114, 2026-10-16에는 -fc-v139 | 저·M·검 | CONDITIONS B3; 두 meta 파일의 해당 줄과 2026-10-16 `uname -r`를 직접 읽었다(§9.3 V-R2-R6). SPEC rev 1.2는 2026-10-16 정합성 수정에서 커널을 실행마다 기록하도록 했다(SPEC §1.7 Env). |
+| K7 | 커널 변경 후 재측정 | 커널이 바뀌었으므로 기준 실행을 SPEC S1의 관측 영향 비교보다 먼저 재측정한다. 예전 커널의 결과를 현재 기준 실행처럼 합산하지 않는다. 재측정은 SPEC S1 때 쓰는 커널에서 하고, 재측정과 비교 사이에 커널이 바뀌면 재측정을 되풀이한다 | 선(D11) | RESOLVED §2.2, §4.1. 'SPEC S1 때의 커널, 실행마다 기록'이라는 적용 방식은 `PI_DECISIONS.md` D11의 Resolution 줄과 SPEC §1.7 Env(2026-10-16 수정)의 것이다. |
 | K8 | 메시지 큐 | `msg_max=10` 현 기준을 유지하고 큐 손실과 설정을 함께 기록한다. 손실이 목표 경로를 방해하면 민감도 구성을 별도로 설계하며 값을 조용히 바꾸지 않는다 | 선(D19) | RESOLVED §4.1. `env/CONDITIONS.md` E5의 "PI decision pending"은 이 결정으로 해소된 것으로 읽는다(그 파일은 갱신되지 않았다). |
 | K8b | 큐 손실 측정 | 기동 중 큐 가득 참 손실 33, 37, 4, 49, 45, 41회/실행(M1 6회). 모두 ES 직렬화 S1(`cases/R2.md` §6; ENV M1-3의 'S1') 이전 | 저·M | CONDITIONS M1-3. |
 | K9 | 정상·비정상 종료 후 정규화 | CI의 ES POWERON 재시작 명령(`cmd_send … --pktid=0x1806 --cmdcode=2 --half=0x0002`)을 기준으로 한다. 초기 상태와 종료 기록을 남긴다. POWERON이 모든 유지 파일·파일 캐시·공유 파일시스템을 초기화한다는 뜻으로 쓰지 않는다 | 선(D17) | RESOLVED §2; CONDITIONS E11(a). |
@@ -276,7 +276,7 @@ C1의 공개 구성과 버전 호환성에 대한 자세한 정리는 ROADMAP §
 | C1.I1 | 원출처의 조건 | 보고 리비전 2a024d8(B1), 보고자 OS Ubuntu 21.10(C1), 재현 서술(A3), 요구 순서(E5), 수정 833fdbb·PR #342(A5) | 원 | 행: C1.A1–A5, B1, C1, E5. |
 | C1.I2 | 원출처와 다른 조건 | (1) 기준 CF를 보고 리비전 2a024d8이 아니라 281a941→833fdbb로 둔다: 이유는 공개 BP 표가 281a941 레이아웃이고 혼합하지 않기 위해서(D22); 영향은 실패 전파 구조가 다르다(C1.F4). (2) provider를 원 보고자의 것이 아닌 공개 BP로 둔다: 동일성은 미확인. (3) 이름·시작 순서·우선순위가 공개 BP 값이며 원 보고자 값이 아니다. (4) 실행 호스트가 Ubuntu 24.04(원 21.10, 수정 시험 22.04). (5) ENV의 환경 이탈(K15). (6) 보류로 만든 실패는 제어된 실행이며 자연 실행이 아니다. (7) 공개 통합을 다른 core 조합·v7.0.1로 옮기면 그 구성·코드 차이 전부 | 선(차이) | RESOLVED §3.2–§3.3. |
 | C1.I3 | 출처가 정하지 않은 조건 | A8, A9, B8, B9, C2, C6, C12, C13, D4, D5(적용성 미확인), E11, F10, F11, G2(확정된 core 조합이 없다는 점은 분석 행 B7에 후보로만 있다) | 미 | 위 행의 `미`. |
-| C1.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 이 작성 중 281a941의 실패 전파 구조 차이(C1.F4)를 새로 확인했다 | 저 | §11. |
+| C1.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 이 작성 중 281a941의 실패 전파 구조 차이(C1.F4)를 새로 확인했다. 2026-10-16 재점검(V-C1-R1–R5): 행 변경 없음 | 저 | §11. |
 
 ## 4. C2 — nasa/cFE #198 (시작 동기화 이후의 late initialization)
 
@@ -303,13 +303,15 @@ C1의 공개 구성과 버전 호환성에 대한 자세한 정리는 ROADMAP §
 | ID | 항목 | 내용 | 태그 | 근거·비고 |
 |---|---|---|---|---|
 | C2.B1 | 단일 단계 쪽 후보 (a) | cFE 6.4.2 tarball(sha256 `c64ed2aa…a53a4f`, SH-2). 이슈 본문이 6.4.2의 시작 동기화를 서술한다 | 원·검† | tarball sha256·크기 일치(`검`). 이슈 본문의 6.4.2 서술은 †(이슈 미재확인, 조각 인용; 이슈가 EVA의 빌드를 말하지는 않는다 — C2.A8). 클래식 make 빌드뿐, CMake 파일 없음(저). |
-| C2.B2 | 단일 단계 쪽 후보 (b) | v6.5.0a(`b2765d9f`)의 동기화 함수가 6.4.2와 논리적으로 같다는 코드 비교 추정. 이 문서에서는 b2765d9f의 ES 메인·`WaitForStartupSync`·`cfe_es.h` 문서만 다시 읽었고 6.4.2와의 diff는 하지 않았다 | 분 | C2.md §1.2. CMake 빌드는 `_ENHANCED_BUILD_`로 정적 앱을 스크립트 앱보다 먼저 만든다는 차이가 있다(저). |
+| C2.B2 | 단일 단계 쪽 후보 (b): 세 함수의 비교 | v6.5.0a(`b2765d9f`)와 6.4.2 tarball에서 `CFE_ES_WaitForStartupSync`(`cfe_es_api.c` 6.4.2 L652–L695, v6.5.0a L651–L694)와 `CFE_ES_ApplicationSyncDelay`(`cfe_es_start.c` 6.4.2 L1007–L1040, v6.5.0a L1009–L1042)는 공백을 무시하면 같다. `CFE_ES_Main`(6.4.2 L166–L294, v6.5.0a L164–L292)은 인자 `StartFilePath`의 형(`uint8 *` 대 `const char *`)과 syslog 인자 하나의 형 변환만 다르고, 동기화 말미(6.4.2 L268–L294, v6.5.0a L266–L292)는 같다 | 원·검 | 2026-10-16 직접 비교(§9.3 V-C2-8). 같은 결과가 `plan/case_setup_C2_C3_C5.md` §2.2에도 기록돼 있다. |
+| C2.B2a | 단일 단계 쪽 후보 (b): 전체 동등성 | 세 함수 밖의 시작 동기화 관련 코드(`cfe_es_apps.c`의 `AppStartedCount` 증가, `RunLoop`, 빌드 순서)까지 두 개정이 같은 동작을 하는지는 비교하지 않았다. 따라서 'v6.5.0a는 6.4.2와 동기화가 같다'는 전체 주장은 분석으로 남는다 | 분 | C2.md §1.2. CMake 빌드는 `_ENHANCED_BUILD_`로 정적 앱을 스크립트 앱보다 먼저 만든다는 차이가 있다(저). |
 | C2.B3 | 수정 쪽 | v6.6.0a `8811c92094512975e14fd545df355705141560b2`(첫 공개 커밋 `2661d19f` "Bulk add of cFE 6.6.0a") 또는 현재 dev | 원·검 | 8811c920 내용 직접 확인. `2661d19f`는 저. |
 | C2.B4 | 리비전별 OSAL/PSP 짝 | 6.4.2: OSAL 4.1.1·PSP 1.2.0.0. v6.5.0a: git의 OSAL gitlink `7139592f`(4.2.1a-1)와 PSP 1.3.0.0, 그러나 VDD는 OSAL 4.2.0. 6.6.0: OSAL 4.2.1, OSAL 4.2.0·PSP 1.3.0 미만과 비호환. 리비전별 짝을 따라야 한다 | 저 | C2.md §3, §10 #10b. VDD와 git이 어긋난다는 점도 기록에 있다. |
-| C2.B5 | 단일 단계 셀에 쓸 cFE 코드의 선택 | 6.4.2와 v6.5.0a 중 어느 것인지, 어떤 빌드 시스템·OSAL/PSP 짝을 쓰는지 정해지지 않았다. 6.4.2 행은 D13의 하위 항목이다 | 미 | C2.md D2; SPEC §9.3("D13 for a 6.4.2 row"). |
+| C2.B5 | 단일 단계 셀에 쓸 cFE 코드의 선택 | 6.4.2와 v6.5.0a 중 어느 것인지, 어떤 빌드 시스템·OSAL/PSP 짝을 쓰는지 정해지지 않았다. 6.4.2 행은 D13의 하위 항목이다 | 미 | C2.md D2; SPEC §9.3("D13 for a 6.4.2 row"). 병행 계획 문서 `plan/case_setup_C2_C3_C5.md` §1은 6.4.2를 단일 단계 기준으로 삼는 안을 적었다. 이는 계획 문서의 제안이며 PI 결정이 아니어서 이 행의 상태를 바꾸지 않는다. |
 | C2.B6 | 역할 앱의 정의 | provider P(late init 완료 후 서비스 준비)와 consumer R(의존 사용)의 역할만 재구성한다. 요청 방식·초기화 내용·우선순위·timeout은 재구성 실험의 선택으로 기록하고 원 보고자의 값으로 인용하지 않는다 | 선(P-C2) | RESOLVED §3.5. |
 | C2.B7 | 2×2 교차 | 단일 단계/두 단계 시작 동기화 × 기존/수정 provider 역할. 평가에는 각 셀을 그대로 제시하고 네 셀을 독립된 실제 결함 네 개로 세지 않는다. 실행 가능한 셀과 제외한 셀의 이유를 남긴다 | 선(P-C2) | RESOLVED §3.5; ROADMAP §9.1. |
 | C2.B8 | Q22 | 1차 대조는 provider의 late init이 정상 완료하는 구성. 초기화 실패까지 가능한 구성은 별도 보조 실험. "초기화는 실패하지 않는다"는 가정은 재구성 구성에만 적용하고 cFS 전체의 보장으로 일반화하지 않는다. 모델 분류는 가정의 포함 여부와 함께 보고 | 선(Q22) | RESOLVED §3.5. |
+| C2.B9 | 단일 단계 코드에 없는 기호 | 6.4.2 tarball의 `cfe/fsw/cfe-core/src` 전체와 v6.5.0a(`b2765d9f`)의 `cfe/fsw/cfe-core/src`에 `WaitForSystemState`, `APPS_INIT`, `LATE_INIT`이라는 문자열이 없다. v6.6.0a(`8811c920`)에는 있다(`cfe_es_api.c`, `cfe_es_start.c`, `cfe_es_task.c` 등) | 원·검 | 2026-10-16 `grep`(§9.3 V-C2-9). 그 결과 '단일 단계 × 수정 provider' 셀은 이 코드에 이식 없이 만들 수 없다는 것은 분석이며, 이식하면 다른 프로그램 변형(U3)이 된다. 셀을 제외할지 이식할지는 P-C2의 하위 선택이다(E-C2-P4). |
 
 ### 4.C 실행 조건
 
@@ -384,7 +386,7 @@ C1의 공개 구성과 버전 호환성에 대한 자세한 정리는 ROADMAP §
 | C2.I1 | 원출처의 조건 | 이슈 본문이 말하는 구조: 단일 `OPERATIONAL` 배리어, late init 이후에야 완전히 동작, P와 R의 같은 호출 사용, 새 시작 상태를 제안 | 원 | 행: C2.A1, A2, E1, E4, F4. |
 | C2.I2 | 원출처와 다른 조건 | (1) 비공개 EVA CWS 대신 역할 기반 합성 대조(원 시스템 재현이 아님). (2) 단일 단계 셀을 6.x 코드(6.4.2 또는 v6.5.0a)로 만들면 ENV(v7.0.1)와 다른 빌드 시스템·OSAL/PSP 짝을 쓰게 된다. (3) 역할 앱의 요청 방식·초기화 내용·우선순위·timeout은 재구성의 선택이다. (4) 네이티브 Linux(pc-linux): EVA 플랫폼이 불명이어서 비교할 값은 없지만 어느 레퍼런스에도 없는 값을 고르는 것이므로 차이로 기록한다(C2.C8) | 선(차이) | P-C2; C2.md §11. |
 | C2.I3 | 출처가 정하지 않은 조건 | A8, A10, B5, C1–C6, D1–D3, F8, G3 | 미 | 위 행의 `미`. |
-| C2.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안) | 저 | §11. |
+| C2.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 2026-10-16: C2.B2를 C2.B2(`원·검`)와 C2.B2a(`분`)로 나누고 C2.B9를 더했으며 E-C2-P4를 고쳤다(V-C2-8, V-C2-9); C2.B5에 병행 계획 문서의 제안을 비고로 적었다 | 저 | §11. |
 
 ## 5. C3 — nasa/cFE #73 (core 앱 시작 순서와 EVS 오류 경로)
 
@@ -504,7 +506,7 @@ C1의 공개 구성과 버전 호환성에 대한 자세한 정리는 ROADMAP §
 | C3.I1 | 원출처의 조건 | 보고 호출 경로와 생성 순서·우선순위(이슈의 "default/example configuration"), 원 플랫폼 Microblaze, 관측 결과 crash, 6.4.2의 수정 | 원 | 행: C3.A3–A6, C1, C3, C5, F3. |
 | C3.I2 | 원출처와 다른 조건 | (1) 플랫폼을 Microblaze 대신 32-bit x86 Linux(-m32 -g -O0, posix/pc-linux)로 둔다: Microblaze의 OS·PSP·OSAL·툴체인을 구할 수 없기 때문; 영향: 스케줄링·메모리 배치·fault 동작이 다르다. (2) 현재 컨테이너의 32-bit 헤더를 쓰는 첫 파싱은 분석 전용이다(D13). (3) OSAL을 git tag로 쓰면 `osapi-version.h`가 SourceForge artifact와 다르다(SH-7). 이것을 차이 조건으로 셀지는 X3 전의 해석이다(SH-5b). (4) ENV 환경 이탈(K15)은 이 사례에는 해당하지 않으나 파생 6.4.x 환경에서 같은 종류의 이탈을 기록해야 한다. (5) 순서 제어를 도입하면 그것은 제어된 실행이다 | 선(차이) | C3.md §10, A1; RESOLVED §3.4. |
 | C3.I3 | 출처가 정하지 않은 조건 / 지위가 미결정인 근거 | 미: A10, A13(X4), B3, C2, C4, C9, C11, D1, F6, F8, G5. 검색 발췌(댓글 헤더·커밋 ID·병합일)를 레퍼런스로 인정할지는 X2로 미결정이어서, 인정하지 않으면 `원†`으로 둔 A2·A7의 해당 부분이 `저`로 내려간다(§1은 `†` 행을 확정에 더하지 않는다) | 미 | ledger §5 X2. |
-| C3.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안) | 저 | §11. |
+| C3.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 2026-10-16 재점검(V-C3-R1–R4): 행 변경 없음 | 저 | §11. |
 
 ## 6. C5 — nasa/cFE #72 (task 생성과 앱 등록 사이의 공백)
 
@@ -620,7 +622,7 @@ C1의 공개 구성과 버전 호환성에 대한 자세한 정리는 ROADMAP §
 | C5.I1 | 원출처의 조건 | 버그 쪽 6.4.1(·6.4.0)의 락 해제–재획득 구조, `GetAppID`의 실패 조건, 이슈의 안전 주장, 6.4.2의 락 범위 확장 | 원 | 행: C5.A1–A6, E4. |
 | C5.I2 | 원출처와 다른 조건 | (1) 플랫폼은 파생이다(관측 플랫폼이 정해져 있지 않으므로 편차 기준이 없지만, 현재 컨테이너 Ubuntu 24.04와 32-bit 헤더 사용은 readme의 빌드 호스트 목록 밖이다). (2) OSAL을 git tag로 쓰면 `osapi-version.h`가 SourceForge artifact와 다르다(SH-7). 이것을 차이 조건으로 셀지는 X3 전의 해석이다(SH-5b). (3) 순서 제어는 제어된 실행이다. (4) 현재 버전 잔여 후보는 원 C5가 아닌 파생이다. (5) 분석 전용 파싱은 실행 재현이 아니다 | 선(차이) | C5.md §3, A2·A3; RESOLVED §3.4. |
 | C5.I3 | 출처가 정하지 않은 조건 | A9, A10, B6, B9, C1, C3, C4, C6, C7, C9, C10, D1(관측), D2, D4, F4, F7, G7 | 미 | 위 행의 `미`. |
-| C5.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안) | 저 | §11. |
+| C5.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 2026-10-16 재점검(V-C5-R1–R5): 행 변경 없음 | 저 | §11. |
 
 ## 7. R2 — nasa/cFE #2663 (SB AppId가 게시되기 전의 사용)
 
@@ -748,7 +750,7 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 | R2.I1 | 원출처의 조건 | 보고자 OS(Ubuntu 22.04.5), "cFE v6.7", 빌드 명령 세 개와 gdb 중단점 방법, 관측 기준(중단점 정지), 보고자의 설명("might have gone unnoticed…") | 원 | 행: R2.A1–A3, C1–C3. |
 | R2.I2 | 원출처와 다른 조건 | (1) cFE가 "v6.7"/`main`@2025-08-06(B로 추정)이 아니라 v7.0.1(`c5fb2b4d`): 이유는 R2의 첫 전체 구현을 현재 기본 구성에 둔다는 결정(P-LADDER); 영향: core 순서가 달라 ES도 SB보다 먼저가 된다. (2) 빌드가 `SIMULATION=native prep/make/make install`이 아니라 `make native_std.prep/install`. (3) 호스트 Ubuntu 24.04.4(보고 22.04.5). (4) 중단점이 `cfe_evs.c` L185가 아니라 L188(내용 이동). (5) 일반 사용자로 root 세션에서 기동. (6) ENV 환경 이탈(K15). (7) 시작 시 유지 상태가 정리되지 않았다(R2.D2). (8) gdb 3회는 gdb 아래 교란이 있다(R2.C8). (9) gdb 15.1과 all-stop 모드, 실행 횟수 3은 어느 레퍼런스에도 없는 값을 고른 것이다(R2.C7, R2.C9) | 선(차이) | R2.B1, A4; CONDITIONS §F. |
 | R2.I3 | 출처가 정하지 않은 조건 | A5, C4, B13, D6, F9, F10 | 미 | 위 행의 `미`. |
-| R2.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 이 작성 중 `b9bec567`의 전체 SHA·부모·변경 파일 수(R2.B5)를 새로 확인했다 | 저 | §11. |
+| R2.I4 | 이 대장의 변경 기록 | 2026-10-15 최초 작성(초안). 이 작성 중 `b9bec567`의 전체 SHA·부모·변경 파일 수(R2.B5)를 새로 확인했다. 2026-10-16 재점검(V-R2-R1–R6): 사례 행 변경 없음, 공통 행 K6·K7 갱신 | 저 | §11. |
 
 ## 8. 기대 결과표 초안 (사례별 골격과 해시 규칙)
 
@@ -830,7 +832,7 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 | E-C2-P1 | 단일 단계 배리어 + 기존 방식 provider(sync 호출 뒤 late init): R의 요청이 P의 late-init 완료 전에 도달할 수 있다. 단일 호출이 '준비됨(RUNNING)'을 먼저 게시하고 OPERATIONAL이 P의 late init 중에 선언될 수 있다는 코드 읽기에 근거한다. 실제 발생·빈도는 역할 재구성 실행이 필요하다 | 기대[I] / 발생 미정[U] | C2.A2, C2.E2, C2.E6 |
 | E-C2-P2 | 두 단계 배리어 + 수정 provider(`WaitForSystemState(APPS_INIT)` → late init → RunLoop): ES는 P가 RUNNING이 되기 전에는 OPERATIONAL을 선언하지 않아 R은 P의 late init 뒤에 풀린다(소프트 타임아웃이 만료되지 않는 한) | 기대[I] | C2.E6, C2.A4 |
 | E-C2-P3 | 두 단계 배리어 + 기존 방식 provider: 호환 규칙상 여전히 일찍 RUNNING이 되어 P1과 같은 조기 해제가 가능하다 | 기대[I] | C2.E6 |
-| E-C2-P4 | 단일 단계 + 수정 provider: `APPS_INIT`와 `WaitForSystemState`가 없는 코드에서는 구성하지 못할 수 있다. 제외 셀이면 이유를 기록한다 | 기대[I] / 셀 설계 미정[U] | C2.B7 |
+| E-C2-P4 | 단일 단계 + 수정 provider: 단일 단계 코드(6.4.2, v6.5.0a)에는 `WaitForSystemState`·`APPS_INIT`·`LATE_INIT`이 없으므로(C2.B9, `검`) 이 셀은 이식 없이는 구성되지 않는다. 이식하면 다른 프로그램 변형이 된다. 제외 셀이면 이유를 기록한다 | 기대[I] / 제외·이식 선택 미정[U] | C2.B7, C2.B9 |
 | E-C2-P5 | ES 단계 소프트 타임아웃이 만료되면 waiter가 `CFE_SUCCESS`로 풀려 정상 초기화 완료와 구분되지 않는다 | 기대[I] | C2.E7 |
 | E-C2-P6 | provider의 late init이 실패할 수 있는 구성의 현상(별도 보조 실험, Q22) | 미정[U] | C2.B8 |
 | E-C2-P7 | 원 보고의 증상(충돌·오류 코드·로그)은 없다. 재구성에서 관측되는 추가 증상은 파생 결과로 표시한다 | 미정[U] | C2.F4, F5 |
@@ -987,7 +989,9 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 | 작업 트리의 `env/logs/s1r2_p1*` 파일 이름·시각·머리말, `git status` | R2 | 내용·집계는 읽지 않았다. 존재와 시각만 확인했다 |
 | `plan/ROADMAP_20261015.md`와 `roadmap_input_20261007.md`의 grep | C1, C5 | 인용된 서술이 어느 로드맵에 있는지 확인 |
 | 6.4.1 tarball(sha256 일치 확인 뒤)과 OSAL 4.1.1 artifact(sha256 일치 확인 뒤)에서 readme·PSP·make 파일 읽기 | C3, C5 | 이 개정에서 추가. 추출은 별도 임시 디렉터리에서 읽기만 했다 |
-| **접근 불가** | 이슈·댓글·PR 페이지와 API (nasa/CF, nasa/cFE) | HTTP 403 "GitHub access to this repository is not enabled for this session". 우회하지 않았다. 따라서 `†` 행(이슈 본문·댓글 인용)은 이 문서가 재확인하지 못했다. 자격 있는 접근은 PI의 결정 사항이다(X1) |
+| 로컬 전체 git 클론(`/home/user/work/procrace/refs/` 아래 nasa/CF, nasa/cFE, nasa/osal, nasa/bp)의 `git show`·`git grep`·`git log` | 2026-10-16 재점검(§9.3), 모든 사례 | 읽기만 했다. 작업 트리·빌드 트리를 바꾸지 않았다 |
+| 2026-10-15에 받은 SourceForge tarball 사본의 sha256·크기 재계산과 새 빈 디렉터리 추출 | 2026-10-16 재점검(§9.3), C2, C3, C5 | 사본은 이 저장소 밖 임시 디렉터리에 있고 저장소에 넣지 않았다 |
+| **접근 불가** | 이슈·댓글·PR 페이지와 API (nasa/CF, nasa/cFE) | HTTP 403(2026-10-15, 2026-10-16 모두) "GitHub access to this repository is not enabled for this session". 우회하지 않았다. 따라서 `†` 행(이슈 본문·댓글 인용)은 이 문서가 재확인하지 못했다. 자격 있는 접근은 PI의 결정 사항이다(X1) |
 
 ### 9.2 사례별 확인 결과
 
@@ -1038,26 +1042,59 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 | V-R2-9 | R2 | 첫 Kairos 출력의 존재와 R2 시트의 해시 부재 | `env/logs/s1r2_p1*`의 `ls`·시각·머리말, `git status` | 파일 10개(`.kzt`, `.kzt.record.txt`, `_basis.kz`, `_conditions.tsv`, `_driver.txt`, `_hits.txt`, `_perf_operational_esrestart.log`(+`.meta`), `_persist_before.txt`, `_persist_after.txt`), 2026-10-15T11:17:24Z–11:17:31Z, 기록 머리말은 `kz observe`, 실행 컨테이너 artifact_sha256 앞 8자 `6df021fb`. 내용은 평가하지 않았다. 이 대장 §8에 R2 시트의 해시는 없다 |
 | V-SPEC-1 | SPEC | 이 대장이 인용한 SPEC 앵커 | SPEC_FINAL.md rev 1.2 작업 트리(sha256 앞 8자 `741809d5`) | 존재 확인: §0.9(항목 4: "rejected", 항목 5: D22), §6.4 항목 47, §7.2(F1 항목: 사례 시트는 첫 도구 출력 전에 해시로 동결), §7.5 항목 5, §7.6 H-V, §8.2, §9.3(단계표 S0–S10, 사다리 V0–V4·VP-D3/D4/D5, 하위 게이트 S1-R2, 사례별 경로 표, E-post/E-TBL), App. A.1(단계 9·9a·13a·15), A.2, A.3, A.4(단계 2–6), App. C. 본문은 §0.9 항목 4, §6.4 항목 47, §7.2 F1 항목, 용어집의 'Pre-registered expectation sheet' 행(§8.1 규칙 1이 인용하는 시트의 행 구성), §9.3 단계표·사다리·S1-R2·사례별 경로 표, App. A.4 단계 2–6을 읽었다. 용어집의 그 행은 시트를 'frozen by hash at F1'이라 적어 §7.2·§9.3의 '사례의 첫 도구 출력 전'과 어긋난다(SPEC 안의 불일치이며 이 대장은 후자를 따랐다) 그 밖의 앵커 본문은 이 개정에서 다시 읽지 않았다 |
 
+### 9.3 2026-10-16 재점검
+
+2026-10-15의 점검(§9.2)과 다른 경로로 사례마다 사실 세 개 이상을 다시 확인했다. 방법: (1) `/home/user/work/procrace/refs/` 아래의 전체 git 클론(nasa/CF, nasa/cFE, nasa/osal, nasa/bp; 얕은 클론이 아니다)에서 고정 SHA의 파일을 `git show`·`git cat-file`·`git grep`·`git log`로 읽기만 했다(작업 트리·빌드 트리를 바꾸지 않았다). (2) 2026-10-15에 SourceForge에서 받아 이 저장소 밖 임시 디렉터리에 둔 tarball 사본 3개의 sha256과 크기를 다시 계산해 기록값과 일치함을 확인한 뒤, 필요한 파일만 새 빈 디렉터리에 풀어 읽었다. (3) 저장소의 gdb 원시 기록을 새 읽기 전용 스크립트(`python3 -I`)로 다시 집계했다. 이슈·PR 페이지는 2026-10-16에도 HTTP 403이었다(`gh api repos/nasa/CF/issues/184`, `https://github.com/nasa/CF/issues/184`, `https://api.github.com/repos/nasa/cFE/issues/2663`). 따라서 `†` 행은 여전히 재확인되지 않았다.
+
+| # | 사례 | 확인한 주장 | 1차 출처와 방법 | 결과 |
+|---|---|---|---|---|
+| V-C1-R1 | C1 | C1.A4: `2a024d8` `fsw/src/cf_cfdp.c` L1012–L1023에서 이름마다 `OS_CountSemGetIdByName` 한 번, 실패하면 `CF_EID_ERR_INIT_SEM`("…error=0x%08x") 후 `goto err_out`; 기본 표 `fsw/tables/cf_def_config.c` L42·L51의 `sem_name`이 `""` | 로컬 클론 `git show 2a024d8:…` | 일치 |
+| V-C1-R2 | C1 | C1.A5, C1.C10: `833fdbb`는 L1000에서 `ret = OS_ERR_NAME_NOT_FOUND`, L1001 `for (j < CF_STARTUP_SEM_MAX_RETRIES)`, L1006 `NAME_NOT_FOUND`가 아니면 탈출, L1011 `OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY)`, L1016 실패 이벤트; `fsw/platform_inc/cf_platform_cfg.h` L338 `25`, L349 `100`. `281a941`은 L993 단일 조회, L997 이벤트(`error=%ld`), 이어서 `break` | 로컬 클론 `git show` | 일치 |
+| V-C1-R3 | C1 | C1.B4·B6: `833fdbb27a26…`의 부모 `281a94188cd7…`, 저자 시각 2022-11-17 16:37:36 -0500, 제목 "Fix #184, work around throttle sem creation race". 병합 `2ffbeccc…`(2022-12-01 14:35:23 -0500)의 부모 `32a8b035…`·`833fdbb`, 제목 "Merge pull request #342 from jphickey/fix-184-throttle-sem-race" | 로컬 클론 `git log -1` | 일치 |
+| V-C1-R4 | C1 | 공개 BP `b051eb0`: `.github/buildconfig/cfe_es_startup.scr` L6 `cf … 65`, L7 `bp … 55`(CF가 BP보다 먼저); tx·rx 표 `cf_def_config.c` L40 `BP0_tsem`, L54 `BP1_tsem`; `fsw/custom/bp_semcfg.c` L44·L48; `build-run-bp-pullreq.yml`의 `upstream-cf-repo: jphickey/cf`, `upstream-cf-ref: fix-184-throttle-sem-race` | 로컬 클론 `git show b051eb0:…`, `git grep` | 일치. 원 보고자 환경의 값이라는 뜻은 아니다(§0.2) |
+| V-C1-R5 | C1 | C1.B11: v7.0.1의 CF `15a871e` 기본 표 `fsw/tables/cf_def_config.c` L60·L78의 `sem_name`이 `""`; `cf_cfdp.c` L1290 `OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY)`(재시도 루프), L1295 `CF_INIT_SEM_ERR_EID` | 로컬 클론 `git show` | 일치 |
+| V-C2-R1 | C2 | C2.A3: v6.5.0a `b2765d9f` `cfe/fsw/cfe-core/src/es/cfe_es_start.c` L266–L291이 `CORE_READY` 설정 → `CFE_ES_StartApplications` → `CFE_ES_ApplicationSyncDelay(CFE_ES_SYSTEM_STATE_UNDEFINED, …)`(실패 시 syslog "Startup Sync failed - Applications may not have all started") → `OPERATIONAL` 설정 | 로컬 클론 `git show` | 일치 |
+| V-C2-R2 | C2 | C2.F1: v6.5.0a `cfe_es.h` L665 "This API should only be called as the last item of an Apps initialization.", L671 "This parameter must be at least 1000. Lower values" | 로컬 클론 `git show` | 일치 |
+| V-C2-R3 | C2 | C2.A4·A5·A7: v6.6.0a `8811c920`의 `cfe_es_extern_typedefs.h` L204 `APPS_INIT = 4`, L209 `OPERATIONAL = 5`; `cfe_es_start.c` L207 `MainTaskSyncDelay(LATE_INIT, …)` → L214 `APPS_INIT` → L223 `MainTaskSyncDelay(RUNNING, …)` → L233 `OPERATIONAL`; `docs/cFE_6_6_0_version_description.md` L189–L190의 #167 행(`465a958`, `b227d57`); dev `f22e538c` `modules/es/fsw/src/cfe_es_api.c` L616–L619의 `void` 래퍼 | 로컬 클론 `git show`, `git grep` | 일치 |
+| V-C2-8 | C2 | C2.B2(신규 확인): 6.4.2와 v6.5.0a의 시작 동기화 함수 비교 | 6.4.2 tarball(sha256 일치 확인 뒤 추출)과 로컬 클론의 `b2765d9f` 파일을 함수 단위로 잘라 공백을 지우고 비교 | `CFE_ES_WaitForStartupSync`와 `CFE_ES_ApplicationSyncDelay`는 같다. `CFE_ES_Main`은 인자 형(`uint8 *StartFilePath` 대 `const char *StartFilePath`)과 syslog 인자의 `(unsigned int)` 형 변환 한 곳만 다르고 동기화 말미(6.4.2 L268–L294, v6.5.0a L266–L292)는 같다. 세 함수 밖의 코드는 비교하지 않았다(C2.B2a) |
+| V-C2-9 | C2 | C2.B9(신규 확인): 단일 단계 코드에 두 단계 기호가 없다 | 6.4.2 tarball의 `cfe/fsw/cfe-core/src` 전체 `grep -r`, 로컬 클론 `git grep b2765d9f -- cfe/fsw/cfe-core/src`, `git grep 8811c920` | 6.4.2·v6.5.0a: `WaitForSystemState`·`APPS_INIT`·`LATE_INIT`을 담은 파일 0개. v6.6.0a: `cfe_es_api.c`, `cfe_es_start.c`, `cfe_es_task.c` 등에 있다 |
+| V-C3-R1 | C3, C5 | SH-1·SH-2·SH-6: tarball sha256·크기 | 2026-10-15 SourceForge 사본의 sha256·크기 재계산 | 일치: cFE 6.4.1 `ec26e33b4ab40b96…5a29c23e98f` 39,586,940 B; cFE 6.4.2 `c64ed2aac910e79a…56b595d47e16a3f53a4f` 36,411,531 B; OSAL 4.1.1 `8f0f2b23d8226256…9fcb560b38434411dc12cb4f7f35b9c19e61d46` 1,973,805 B |
+| V-C3-R2 | C3 | C3.A5·C3.C3: 6.4.1 `cfe_es_objtab.c` L120·L122·L124·L126·L129의 core task 순서 EVS, SB, ES, TIME, TBL; `cpu1/cfe_platform_cfg.h` L1115 `61`, L1138 `64`, L1161 `68`, L1188 `60`, L1189·L1190 `25`, L1217 `70` | 6.4.1 tarball에서 추출 | 일치 |
+| V-C3-R3 | C3 | C3.A5·C3.E3: 6.4.1 `cfe_evs_task.c` L190 `EVS_AppID = CFE_EVS_UNDEF_APPID`, L385 `EVS_GetAppID`, L393 `CFE_EVS_Register`; `cfe_sb_task.c` L198 `CFE_ES_GetAppID(&CFE_SB.AppId)`, L257 `CFE_EVS_Register`; `cfe_time_task.c` L252 `CFE_EVS_Register`, L308 `CFE_SB_CreatePipe`; `cfe_evs_utils.c` L608 `EVS_SendEvent`, L616 범위 검사 없는 `EVS_IsFiltered(CFE_EVS_GlobalData.EVS_AppID, …)`(함수 머리 주석: "without having to verify that the caller has a valid AppID") | 6.4.1 tarball에서 추출 | 일치 |
+| V-C3-R4 | C3 | C3.A6: 6.4.2 `cfe_evs_utils.c` L615–L621의 `EVS_AppID < CFE_ES_MAX_APPLICATIONS` 검사(F1), `cfe_evs_task.c` L436의 `EVS_AppID = AppID`(F2), EVS·SB·ES·TIME·TBL의 `*_task.c`가 각각 `CFE_ES_WaitForStartupSync`를 부름(F3의 일부) | 6.4.2 tarball에서 추출 | 일치 |
+| V-C5-R1 | C5 | C5.A3: 6.4.1 `cfe_es_apps.c` L571 락, L610 해제, L614 `OS_TaskCreate`, L637 재획득, L649 `TaskTable[TaskId].RecordUsed = TRUE`, L651 `TaskTable[TaskId].AppId = i`, L673 해제; 파일 sha256 앞 16자 `0a54974ba77af3db`, git blob 앞 8자 `8c6d0417` | 6.4.1 tarball에서 추출, `sha256sum`, `git hash-object`(저장소 밖 파일) | 일치 |
+| V-C5-R2 | C5 | C5.A4: 6.4.1 `cfe_es_api.c` L846–L871의 `CFE_ES_GetAppID`가 `Result = CFE_ES_ERR_APPID`로 시작하고 `OS_TaskGetId()`로 찾은 `TaskTable` 항목이 `RecordUsed == TRUE`일 때만 성공 | 6.4.1 tarball에서 추출 | 일치 |
+| V-C5-R3 | C5 | C5.B·SH: 6.4.2 `cfe_es_apps.c` L571 락, L607 `++AppStartedCount`, L619 `OS_TaskCreate`, L669 해제(git blob `94362464`). 그 사이의 다른 해제는 L634 하나이며 `OS_TaskCreate` 실패 가지(`RecordUsed = FALSE` 후 `return CFE_ES_ERR_APP_CREATE`)다 | 6.4.2 tarball에서 추출 | 일치(실패 가지 해제는 `cases/C5.md`에 이미 기록됨) |
+| V-C5-R4 | C5 | SH-7: OSAL `2f1fdb0c`의 `src/os/posix/osapi.c` L587 `geteuid() == 0`, L645 `pthread_create`, L690 `*task_id = possible_taskid`; 이 파일은 SourceForge 4.1.1 artifact의 같은 파일과 바이트 단위로 같다 | 로컬 클론 `git show`, tarball에서 추출 후 `cmp` | 일치 |
+| V-C5-R5 | C5 | C5.A12·C5.F2: `0749d692` `fsw/cfe-core/src/es/cfe_es_apps.c` L500–L506의 설계 주석("…before its fully registered in the global app table"); main `12cb84fc` `modules/es/fsw/src/cfe_es_apps.c` L664 `OS_TaskCreate`, L672 락, L722 해제, L861 락, L869 `CFE_ES_AppRecordSetUsed` | 로컬 클론 `git show` | 일치 |
+| V-R2-R1 | R2 | R2.B·E: ENV cFE `c5fb2b4d`의 `modules/sb/fsw/src/cfe_sb_task.c` L138 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, L155 `CFE_EVS_Register`; `modules/evs/fsw/src/cfe_evs.c` L186–L188(`EVS_GetAppDataByID`가 NULL이면 `CFE_EVS_APP_ILLEGAL_APP_ID`); `modules/es/fsw/src/cfe_es_start.c` L810 `CFE_ES_StartAppTask`, L835 `CFE_ES_MainTaskSyncDelay(RUNNING, …)` | 로컬 클론 `git show` | 일치 |
+| V-R2-R2 | R2 | R2.A5·B: 보고 리비전 후보 B `fc8c48ad`의 `cfe_sb_task.c` L126 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, L193 `CFE_EVS_Register` | 로컬 클론 `git show` | 일치 |
+| V-R2-R3 | R2 | R2.B5: `b9bec5679c748d6a7c1181d74a2f52dd6ba70688`의 부모 `063cb3022abd7b8193280fad9552fb11f194b47b`, 저자 날짜 2026-03-26, 커밋 날짜 2026-04-07, 부모와의 차이 52개 파일(삽입 817, 삭제 404) | 로컬 클론 `git log -1`, `git diff --shortstat` | 일치. 삽입·삭제 줄 수는 이번에 새로 적은 것이다 |
+| V-R2-R4 | R2 | R2.C6·F8·F9: gdb 3회 트레이스의 sha256 앞 8자 `34759887`/`5dfc9a46`/`7b959389`; 각 실행에서 SB 호출자 사용(스택 둘째 프레임이 `cfe_sb*` 파일) 223/229/229, 그중 `SB_PUB` 이전 24(ES 20·EVS 4, 모두 `app_id` 0), `OUT_ILLEGAL_APP_ID` 24(ES 20·EVS 4). 트레이스의 `SEND_WITH_APPID` 전체는 251/257/257 | 저장소 기록 `env/logs/r2_g1..3_trace.jsonl`을 새 읽기 전용 스크립트로 집계 | 일치(저장소 기록의 재집계이며 새 실행이 아니다) |
+| V-R2-R5 | R2 | 상태 주의 1, 규칙 10: R2 첫 Kairos 출력 뒤의 상황 | `git log -1 -- env/logs/s1r2_p1.kzt`, `env/logs` 파일 목록, `kairos/` 밖의 `*.kzt` 검색 | `s1r2_p1*` 10개는 커밋 `6be8935`(2026-10-15T23:59Z)에 들어갔다. 그 밖의 Kairos 출력 파일은 없다. 이 대장에 R2 시트의 해시는 여전히 없다 |
+| V-R2-R6 | R2 | K6: 실행별 커널 | `env/logs/r2_g1_gdb_operational_esrestart.log.meta` L12, `env/logs/s1r2_p1_perf_operational_esrestart.log.meta` L13, `uname -r` | `6.18.44-fc-v80`, `-fc-v114`, 2026-10-16 `-fc-v139` |
+| V-SPEC-2 | SPEC | 이 대장이 인용한 SPEC 앵커(2026-10-16 작업 트리) | `SPEC_FINAL.md` rev 1.2 + 2026-10-16 정합성 수정(sha256 앞 8자 `861041ac`); 커밋 `6be8935`의 파일(`741809d5`)과의 차이를 `git diff`로 읽음 | 존재 확인: §0.9 항목 4('rejected')·5(D22), §6.4 항목 47, §7.2 F1 항목('A case's expectation sheet is frozen by hash before the first tool output on that case (§9.3), not at F1'), §7.5 항목 5, §7.6 H-V, §8.2, §9.3(단계표, 사다리, VP-D3/D4/D5, S1-R2 행, 'the expectation was measured before it was written' 1회), App. A.1 단계 9·9a·13a·15, A.2, A.3, A.4 단계 2–6, App. C. 용어집의 'Pre-registered expectation sheet' 행은 여전히 'frozen by hash at F1 (§7.2)'이어서 §7.2 F1 항목과 어긋난다(V-SPEC-1의 불일치가 남아 있다). 2026-10-16 수정은 D11의 커널 기록 방식, recall의 확장 평가 배치, ADR 주석에 관한 것이며 이 대장이 옮긴 §8의 T 항목 문장을 바꾸는 줄은 차이에서 찾지 못했다 |
+
 ## 10. 남은 항목
 
 | # | 항목 | 영향 | 필요한 것 |
 |---|---|---|---|
-| 1 | 이슈·댓글·PR 페이지에 접근하지 못했다. C1 댓글 5개(→ 아래 2), C3 댓글 14개(4개 미식별), C5 댓글 9개, R2 코멘트 2개와 PR #2820, C2 #198의 타임라인. `†` 행 전부가 재확인되지 않았다 | C1, C2, C3, C5, R2 | 자격 있는 접근(X1) 또는 PI가 원문 제공 |
+| 1 | 이슈·댓글·PR 페이지에 접근하지 못했다(2026-10-16에도 403, §9.3). C1 댓글 5개(→ 아래 2), C3 댓글 14개(4개 미식별), C5 댓글 9개, R2 코멘트 2개와 PR #2820, C2 #198의 타임라인. `†` 행 전부가 재확인되지 않았다 | C1, C2, C3, C5, R2 | 자격 있는 접근(X1) 또는 PI가 원문 제공 |
 | 2 | 입력 로드맵 `roadmap_input_20261007.md`(L86)의 "BP를 먼저 시작해도 객체 생성 전에 CF가 조회" 서술의 근거 댓글([C1-BP])을 읽지 못했고, 공개 BP 시작 스크립트는 CF를 BP보다 먼저 시작한다. `plan/ROADMAP_20261015.md`에는 그 서술이 없다 | C1 | 댓글 열람(X1). 서술 정정을 요청할 대상 문서는 20261015 로드맵이 아니라 입력 로드맵이다(정정 여부는 PI·orchestrator 몫이며 이 문서의 범위 밖) |
 | 3 | 공개 BP 통합이 해당 core 조합에서 빌드되는지, BP CI 구성요소의 당시 SHA, core 조합 | C1 | 호환성 확인(D22 적용 순서 1단계); 같은 단계에서 D17 명령(K9)과 K8–K10의 적용성도 확인(C1.D5). 안 되면 이식 차이 기록 |
 | 4 | 보류 감시 한도·중단 조건, A2에서의 해제 사건, hang 판정 한계, 보조 문제 범위 | C1 | 파일럿 후 기록(P-C1HOLD) |
 | 5 | 281a941의 실패 전파 구조(`break` 말미 반환)는 2a024d8의 `goto err_out`과 다르다. 앵커 감사에서 후속 경로 전체를 다시 읽어야 한다 | C1 | SPEC S3a 앵커 감사 |
-| 6 | 단일 단계 셀의 cFE 코드(6.4.2 대 v6.5.0a)와 OSAL/PSP 짝, 제외 셀의 이유, 역할 앱 정의(R→P 방식, late-init 내용, timeout, 우선순위, 앱 수), v6.5.0a와 6.4.2 동기화 코드 동등성의 diff(이 문서에서 하지 않음) | C2 | D13의 하위 항목 결정, P-C2 구성 단계 |
+| 6 | 단일 단계 셀의 cFE 코드(6.4.2 대 v6.5.0a)와 OSAL/PSP 짝, 역할 앱 정의(R→P 방식, late-init 내용, timeout, 우선순위, 앱 수). 2026-10-16: 세 동기화 함수의 비교는 했다(C2.B2, V-C2-8; 같음). 세 함수 밖의 동등성은 비교하지 않았다(C2.B2a). 단일 단계 코드에 두 단계 기호가 없어(C2.B9, V-C2-9) '단일 단계 × 수정 provider' 셀은 이식 없이 만들 수 없으므로 그 셀을 제외할지 이식할지 정해야 한다. 병행 계획 문서(`plan/case_setup_C2_C3_C5.md` §1, §7 항목 1)의 '6.4.2를 단일 단계 기준으로, 3셀 + 1셀 제외' 안은 제안이며 결정이 아니다 | C2 | D13의 하위 항목 결정, P-C2 구성 단계(셀 제외·이식의 PI 확인) |
 | 7 | 공유 6.4.x 기준: OSAL artifact 통일(SourceForge 대 git tag), 빌드 호스트, 폭, 권한, C3 순서 제어, 6.x에서 D17 명령의 적용성 | C3, C5 | X3 결정 |
 | 8 | C3의 주 oracle(X7), `AppData[-1]`의 fault 여부, C3와 R2의 계수(X4), 검색 발췌의 지위(X2) | C3, R2 | PI 결정 |
 | 9 | `OS_TaskGetId` 순서(A8), stale 항목 도달성, 잔여 창 도달성, 보류 감시 한도, `mv osal` 문제 | C5 | 관측·결정 |
 | 10 | B가 보고 시점 main인지(D1), 보고의 "ES and EVS"가 B에서 성립하는지(Q1), 보고자 환경, '현재 코드' 기준 리비전(X6) | R2 | 실행·PI 결정 |
 | 11 | (c2) 대조 쌍은 52개 파일을 바꾼다. 순서 이외의 동시 변경이 판정에 영향을 주는지 먼저 확인해야 한다 | R2 | P-R2CTRL 첫 단계 |
 | 12 | SPEC S1 기록기의 R2 첫 실행(`env/logs/s1r2_p1*`, 2026-10-15T11:17Z)이 있다. 이 문서는 그 내용을 평가하지 않았고 판정기·증명 확인기의 구현 상태도 확인하지 않았다(`kairos/`는 다른 작업이 진행 중이다). §8의 모든 T 항목은 SPEC이 서술한 기대이며 도구 출력이 아니다 | 전부 | 구현 진행(별도). R2 시트의 동결 순서는 항목 16 |
-| 13 | 커널 변경 후 기준 실행 재측정이 없다(D11). N의 값이 없다(D14). `env/CONDITIONS.md`의 'PI decision pending' 표시(E5, E7, E11)는 D19·D17 결정 뒤에도 갱신되지 않았고 A2(번들 리비전)는 여전히 pending이다 | R2와 ENV 기반 전부 | D11 재측정, SPEC S1에서 N, 해당 기록의 갱신(이 문서는 그 파일을 고치지 않았다) |
+| 13 | 커널 변경 후 기준 실행 재측정이 없다(D11). 커널은 2026-10-16에 다시 바뀌었다(-fc-v80 → -fc-v114 → -fc-v139, K6); D11은 'SPEC S1 때의 커널에서, 실행마다 기록'으로 적용된다(K7). N의 값이 없다(D14). `env/CONDITIONS.md`의 'PI decision pending' 표시(E5, E7, E11)는 D19·D17 결정 뒤에도 갱신되지 않았고 A2(번들 리비전)는 여전히 pending이다 | R2와 ENV 기반 전부 | D11 재측정, SPEC S1에서 N, 해당 기록의 갱신(이 문서는 그 파일을 고치지 않았다) |
 | 14 | 시트 해시의 직렬화·기록 위치·담당자 | 전부 | 구현자와 PI |
 | 15 | ROADMAP §6.1의 소스 기준 필드가 요구하는 "앱의 커밋 또는 배포 파일 해시" 중 C1의 provider 앱(BP)·bplib·tinycbor의 당시 SHA와 C2의 역할 앱은 아직 없다 | C1, C2 | 기준 구성 확정 뒤 기록 |
-| 16 | R2 시트(§8.6)는 R2의 첫 Kairos 출력(`s1r2_p1`, 2026-10-15T11:17Z)보다 먼저 해시로 동결되지 않았고 지금도 해시가 없다. SPEC §7.2·§9.3과 §8.1 규칙 5(a)의 순서를 지키지 못했다 | R2 | orchestrator·PI의 결정: 시트를 지금 동결할지, 변경 로그에 실제 순서(출력 시각 → 동결 시각)를 어떻게 적을지, E-R2-T3를 어떻게 표시할지. SPEC 용어집의 'frozen by hash at F1'과 §7.2·§9.3의 '사례의 첫 도구 출력 전'이 어긋나므로(V-SPEC-1) 어느 시점을 시트의 동결 시점으로 볼지도 정해야 한다. 이 문서는 시트를 출력에 맞추어 고치지 않았다 |
+| 16 | R2 시트(§8.6)는 R2의 첫 Kairos 출력(`s1r2_p1`, 2026-10-15T11:17Z)보다 먼저 해시로 동결되지 않았고 지금도 해시가 없다. SPEC §7.2·§9.3과 §8.1 규칙 5(a)의 순서를 지키지 못했다 | R2 | orchestrator·PI의 결정: 시트를 지금 동결할지, 변경 로그에 실제 순서(출력 시각 → 동결 시각)를 어떻게 적을지, E-R2-T3를 어떻게 표시할지. SPEC 용어집의 'frozen by hash at F1'과 §7.2·§9.3의 '사례의 첫 도구 출력 전'이 어긋나므로(V-SPEC-1) 어느 시점을 시트의 동결 시점으로 볼지도 정해야 한다. 이 문서는 시트를 출력에 맞추어 고치지 않았다. 2026-10-16 상태: `research/cfs_procrace`의 Markdown 문서(`kairos/` 제외)에서 R2 시트 동결에 관한 결정 기록을 찾지 못했고 출력 파일은 커밋 `6be8935`에 들어갔으며 시트 해시는 여전히 없다(V-R2-R5). 용어집과 §7.2의 어긋남도 2026-10-16 작업 트리에 남아 있다(V-SPEC-2) |
 | 17 | `results/R2_gdb_v701.md` §2·§5가 '24 SB events were lost silently'·'no syscall was made'·'invisible … at the syscall level'이라고 적는다. 이 대장은 채택하지 않았다(R2.F8a). SPEC §0.9 항목 4, §6.4 항목 47과 `plan/ROADMAP_20261015.md` §3은 'rejected' 표현과 코드 분석/관측의 구분을 요구한다 | R2 | 그 기록 파일의 문장 정정 여부(이 문서의 범위 밖; 과거 기록의 보존 여부는 PI·orchestrator). 정정 전에는 이 대장이 그 표현을 인용하지 않는다 |
 
 ## 11. 이 대장의 변경 기록
@@ -1066,6 +1103,7 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 |---|---|
 | 2026-10-15 | 최초 초안. 다섯 사례의 조건표(필드 A–I), 공통 기준(ENV, 공유 6.4.x), 사례별 기대 결과표 골격과 해시 규칙, 1차 출처 점검 기록, 남은 항목. 작성 중 새로 확인·보완한 것: (1) `b9bec567`의 전체 SHA·부모·변경 파일 수(R2.B5), (2) 281a941의 실패 전파 구조(C1.F4), (3) cFE 6.4.1·6.4.2와 OSAL 4.1.1 artifact의 sha256·크기 재확인 및 OSAL SourceForge/git tag 차이의 재확인(SH-6, SH-7), (4) 공개 BP CI 워크플로의 러너·cmake 명령·패치 브랜치 지정. 사례 기록(`cases/*.md`)과 어긋난 사실은 발견하지 못했다(보완은 (1)·(2)뿐이다) |
 | 2026-10-15 (검토 반영) | 외부 검토 11건을 verify하고 고쳤다. (1) R2.F8을 쪼갰다: 도달은 `저·M·검`(R2.F8), 콘솔·카운터·syscall 비가시성은 코드 읽기 `분`(R2.F8a, 'syscall: not observed; code analysis only'). 'losses'를 R2.F9·E-R2-P7에서 '거부된 이벤트 요청'으로 바꿨다. (2) C1.D5를 `미`로, C1.C7을 `분`으로 내렸다(K5·D17은 ENV의 것이고 D22 기준에 옮겨지지 않았다). (3) R2에 이미 있는 Kairos 첫 출력(`s1r2_p1`, 11:17Z)과 시트 해시 부재를 '상태 주의', §8.1 규칙 10, §10 항목 12·16에 적었고 SPEC 참조를 rev 1.2로 올렸다(V-SPEC-1). (4) E-R2-P1에서 'ENV 기본 구성의 매 부팅'을 'gdb 아래 3회의 각 부팅'으로 고쳤다. (5) 6.4.1 readme의 OSAL 서술을 직접 다시 읽어 SH-5(`원·검`, 줄 번호 인용)와 해석 SH-5b(`분`)로 나눴다. (6) SH-9를 `원·검`으로 고치고 V-C3-10을 붙였으며 D13이 정한 것은 SH-9a로 분리했다. C3.C8도 같다. (7) `미`였던 R2.C7·R2.C9·K2를 `선(차이)`로, C2.C8을 `선(차이)`로 고쳐 C2.I2(4)와 맞추고 §1.1을 다시 셌다. (8) '로드맵' 서술의 출처를 입력 로드맵 `roadmap_input_20261007.md`로 바로잡았다(C1.A9, C5.A10, V-C1-4, §10 항목 2). (9) C1.G1의 이벤트 이름과 C1.B6의 PR CI 브랜치 근거를 고치고 V-C1-9·V-C1-10을 추가했다. (10) 혼합 행을 쪼개고(C3.E6/E6a, C5.E6/E6a) `†`를 붙였으며(C2.B1, C3.C3, C5.F2) §1을 '확정'과 '원문 미재확인'으로 나눴다. (11) §2.2의 행 ID를 `S1`–`S17`에서 `SH-1`–`SH-17`로 바꾸고 SPEC·ES 직렬화 단계에 접두어를 붙였으며 §0.5에 표기표를 넣었다. 거절한 항목은 없고 처리하지 않은 부분은 §12에 있다 |
+| 2026-10-16 (재점검) | (1) 사례마다 사실 3개 이상을 2026-10-15와 다른 경로(로컬 전체 git 클론, tarball 사본의 sha256 재계산 뒤 추출, gdb 원시 기록 재집계)로 다시 확인했다(§9.3, 26행). 사례 기록이나 이 대장과 어긋난 사실은 없었다. (2) C2: 6.4.2와 v6.5.0a의 세 동기화 함수를 직접 비교해 C2.B2를 `원·검`으로 올리고 비교하지 않은 부분을 C2.B2a(`분`)로 남겼다. 단일 단계 코드에 두 단계 기호가 없음을 확인해 C2.B9를 더하고 E-C2-P4를 고쳤다. §1.1의 C2 행을 다시 셌다. (3) SPEC 작업 트리가 2026-10-16 정합성 수정으로 `861041ac`가 되어 앵커를 다시 확인했다(V-SPEC-2; T 항목 문장에 영향 없음, 용어집과 §7.2의 어긋남은 남음). (4) 커널이 -fc-v139로 바뀌어 K6·K7을 실행별 기록으로 고쳤다. (5) R2 첫 Kairos 출력이 커밋 `6be8935`에 들어갔고 그 밖의 출력은 없으며 R2 시트 해시는 여전히 없음을 기록했다(상태 주의 1, §10 항목 16). (6) 이슈·PR 페이지는 여전히 403이다. 값을 새로 정하지 않았고 해시를 계산하지 않았다 |
 
 ## 12. 거절한 검토 항목과 처리하지 않은 부분
 
@@ -1075,3 +1113,4 @@ R2의 실행 근거는 gdb 원시 기록(`env/logs/r2_g1..3_*`)과 `results/R2_g
 - **처리하지 않은 부분 2 — 쪼개지 않은 혼합 행.** 검토의 '혼합 행을 쪼갠다'는 이름을 든 행(C3.E6, C5.E6, C1.C7)과 `†` 누락 행(C2.B1, C3.C3; 같은 사유로 C5.F2)에 적용했다. C1.A5, C1.C10, C1.E4, C3.E3, C5.A5, C5.E3, C5.F1처럼 태그가 직접 확인한 주장 부분에 붙고 곁가지만 `저`로 구분해 둔 행은 쪼개지 않았다.
 - **처리하지 않은 부분 3 — 다른 문서.** `results/R2_gdb_v701.md`의 'lost silently'·'no syscall was made' 문장(§10 항목 17), 같은 유형의 과장이 `plan/` 아래 다른 문서나 `Architecture/`에 있는지는 이 문서의 범위 밖이어서 확인하지 않았다. 입력 로드맵 `roadmap_input_20261007.md`의 서술 정정 여부도 같다.
 - **처리하지 않은 부분 4 — SPEC 본문 대조.** SPEC rev 1.2에서 앵커의 존재는 확인했으나 이 대장이 SPEC에서 옮긴 모든 기대 문장(§8의 T 항목)을 rev 1.2 본문과 한 줄씩 대조하지는 않았다(V-SPEC-1). 검토 보고는 A.4, §8.2, §9.3, §7.6, VP-D4/D5가 rev 1.2에서도 유지된다고 적었다.
+- **2026-10-16 개정에서 처리하지 않은 부분.** (a) R2 시트의 동결 여부는 여전히 orchestrator·PI의 결정으로 남겼고 해시를 만들지 않았다(§10 항목 16). (b) `s1r2_p1*`의 내용은 이번에도 읽거나 평가하지 않았다. (c) `†` 행은 이슈·PR 페이지가 403이어서 다시 확인하지 못했다. (d) SPEC은 커밋된 rev 1.2(`741809d5`)와 작업 트리(`861041ac`)의 차이만 읽었다. 이 대장이 옮긴 §8의 T 항목을 SPEC 본문과 한 줄씩 대조하는 일(처리하지 않은 부분 4)은 이번에도 하지 않았다. (e) 병행 계획 문서 `plan/case_setup_C2_C3_C5.md`는 C2.B2·C2.B5의 비고와 §10 항목 6에서 가리키기만 했고 그 문서의 다른 주장은 이 대장의 행으로 옮기지 않았다. `plan/C1_basis_plan.md`는 §3 머리말대로 인용하지 않았다.

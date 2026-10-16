@@ -5,6 +5,8 @@ extract
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
   loops                      0 (table walks resolved 0, failed 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        2 in the program, 2 of them count for a target
   location Cast.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 2, escape 0, cast 1, union 0  -> DISABLED
@@ -39,6 +41,8 @@ facts-view 1
       arg 2:const 4 sizeof g_safe
 [derives] 0
 [loops] 0
+[iters] 0
+[order] 0
 [init] 6
   Cast.id in g_cast zero-initialized value=0 defined at atype.c:17:6
   Esc.id in g_esc zero-initialized value=0 defined at atype.c:18:5
@@ -48,9 +52,9 @@ facts-view 1
   Safe.id in g_safe zero-initialized value=0 defined at atype.c:21:6
 [consts] 0
 [writers] 3
-  Plain.id assign at atype.c:30:26 in plain_write value=const 1 [1] key=g_plain {} COMPUTED
-  Safe.id memset at atype.c:52:3 in data_writers value=const 0 [fill 0] key=&g_safe {covers-more-than-the-field} COMPUTED
-  Safe.id memcpy at atype.c:53:3 in data_writers value=top [copy of src] key=&g_safe {covers-more-than-the-field} COMPUTED
+  Plain.id assign at atype.c:30:26 in plain_write value=const 1 [1] key=g_plain {} n/a
+  Safe.id memset at atype.c:52:3 in data_writers value=const 0 [fill 0] key=&g_safe {covers-more-than-the-field} n/a
+  Safe.id memcpy at atype.c:53:3 in data_writers value=top [copy of src] key=&g_safe {covers-more-than-the-field} n/a
 [atype] 13
   Cast.id untyped-write at atype.c:27:3 in fill_buffer: store through an untyped pointer: q[0]
   Cast.id untyped-write at atype.c:35:3 in poke_cast: store through an untyped pointer: p[0]
@@ -74,6 +78,18 @@ facts-view 1
   Plain.id writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
   Safe.id writer-set-complete writers=2 (direct 0, data-fn 2, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
 [targets] 0
+[spawnparams] 0
 [image] 0
 [terminals] 0
 [outcalls] 0
+[fwrites] 10
+  data_writers field <global>.g_safe at atype.c:52
+  data_writers address-argument <global>.g_safe at atype.c:52
+  data_writers record Safe.* at atype.c:52
+  fill_buffer untyped at atype.c:27
+  leak_address address-argument Esc.id at atype.c:40
+  plain_write field Plain.id at atype.c:30
+  poke_cast untyped at atype.c:35
+  poke_cast address-argument <global>.g_cast at atype.c:34
+  write_other_member field Mix.raw at atype.c:45
+  write_raw field Over.raw at atype.c:48

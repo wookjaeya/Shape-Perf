@@ -308,6 +308,15 @@ struct StateGen {
     }
     return v;
   }
+  // An owner that is not a record of the context's owner kind (slot, one key element): another kind,
+  // or the slot kind with a key of the wrong width.  Both domains read it as undefined (eval.hpp).
+  ResId ill_formed_owner() {
+    switch (r.below(3)) {
+      case 0: return ResId{w.stage, {static_cast<int64_t>(r.below(5))}};
+      case 1: return ResId{w.slot, {static_cast<int64_t>(r.below(5)), 1}};
+      default: return ResId{w.gate, {}};
+    }
+  }
   std::vector<int64_t> int_pool() const { return {0, 1, 2, 3, 4, 5, -1, 7, 0xfff, 0x1000, 0x1100, 100}; }
 
   ConcreteState make() {
@@ -321,7 +330,7 @@ struct StateGen {
     for (int i = 0; i < n_slot; ++i) st.instances[w.slot].push_back({i});
     for (int i = 0; i < n_stage; ++i) st.instances[w.stage].push_back({i});
     st.has_owner = r.coin(60);
-    if (st.has_owner) st.owner = ResId{w.slot, {static_cast<int64_t>(r.below(5))}};
+    if (st.has_owner) st.owner = r.coin(85) ? ResId{w.slot, {static_cast<int64_t>(r.below(5))}} : ill_formed_owner();
     for (int64_t ci : w.table_consts) st.consts[static_cast<int32_t>(ci)] = r.coin(70) ? static_cast<int64_t>(r.below(8)) : 4;
     for (int64_t k = 0; k < 6; ++k) {
       if (r.coin(55)) st.state[ResId{w.slot, {k}}] = static_cast<int32_t>(r.below(w.n_states(w.slot)));
@@ -358,11 +367,21 @@ AbstractState abstract_of(World& w, const ConcreteState& c, Rng& r, bool exact) 
   if (!exact && r.coin(30)) a.args.resize(static_cast<size_t>(r.below(a.args.size() + 1)));
   a.instances = c.instances;
   a.owner_none = c.has_owner ? (!exact && r.coin(40)) : true;
+  // Extra listed owners, some of them ill-formed (another kind or key width): a listed owner that is
+  // not the concrete one only widens the abstraction.
+  auto extra_owner = [&]() {
+    switch (r.below(5)) {
+      case 0: return ResId{w.stage, {static_cast<int64_t>(r.below(5))}};
+      case 1: return ResId{w.slot, {static_cast<int64_t>(r.below(5)), 2}};
+      default: return ResId{w.slot, {static_cast<int64_t>(r.below(5))}};
+    }
+  };
   if (c.has_owner) {
     a.owners.push_back(c.owner);
-    if (!exact && r.coin(40)) a.owners.push_back(ResId{w.slot, {static_cast<int64_t>(r.below(5))}});
+    if (!exact && r.coin(40)) a.owners.push_back(extra_owner());
+    if (!exact && r.coin(20)) a.owners.insert(a.owners.begin(), extra_owner());
   } else if (!exact && r.coin(40)) {
-    a.owners.push_back(ResId{w.slot, {static_cast<int64_t>(r.below(5))}});
+    a.owners.push_back(extra_owner());
   }
   for (const auto& kv : c.consts) {
     if (exact || r.coin(70)) a.consts[kv.first] = widen(r, kv.second, exact);

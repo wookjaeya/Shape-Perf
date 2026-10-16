@@ -11,6 +11,8 @@
  *   - SITES (kz_site) is version 2: `rsv1` became `line`, and `label`/`source` were added
  *     (the plan's name for the site and the source position it came from);
  *   - LOSS (kz_loss) is version 2: `t_ns` was added (where in time the loss was reported);
+ *   - PERTURBATION (kz_perturbation) is version 2: `rsv2` became `shares_trap_with`, the cost
+ *     class `ret-trampoline` and the kind `proc-capture` were added (review of 2026-10-16);
  *   - new sections: SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS (run containers) and SYMBOLS,
  *     TARGETS (basis containers).
  *
@@ -21,13 +23,20 @@
  *     (timestamp, CPU, arrival).  The kernel assigns nothing here, so a gap in `tseq` is not
  *     a loss detector: loss is reported only by the kernel (LOSS: perf-record-lost,
  *     perf-throttle).  Per-thread program order is therefore evidence under the
- *     clock assumption A-CLK-PO (SPEC 5.4), and cross-thread order is never taken from
- *     timestamps;
+ *     clock assumption A-CLK-PO (SPEC 5.4).  A timestamp order between DIFFERENT threads is
+ *     never a happens-before edge (SPEC 5.8): counting tools may sort and count by it, as
+ *     one-clock evidence that says what the clock showed, and must say so in their output;
+ *     the checker never derives an HB edge from it;
  *   - `objseq` is 0 and OBJSEQ_VALID is clear: there is no kernel-side object token;
- *   - a[0..3] are filled by the site's slot descriptors (SITE_SLOTS), never by position.
- *     By convention a plan that wants entry/return matching puts the return address in
- *     a[3] at both the ENTRY site (the word at the top of the stack) and the RET site (the
- *     sample's instruction pointer).
+ *   - a[0..3] are filled by the site's slot descriptors (SITE_SLOTS).  A GENERIC site is read
+ *     by role (the slot whose role is "event_id", ...).  Two engine functions read fixed
+ *     positions, and the plan checker (kz::trace::check_site / check_plan) refuses a plan
+ *     whose slots do not declare the required role at those positions:
+ *       - the identity join reads the KZ_DECODER positions listed below;
+ *       - entry/return matching reads a[3] with role "return_address" at both the ENTRY site
+ *         (the word at the top of the stack) and the RET site (the sample's instruction
+ *         pointer).
+ *     An event with TRUNC set may hold 0 in any slot: it is never matched on a slot value.
  *
  * Not usable alone: include kz_schema.h.
  */
@@ -59,7 +68,7 @@ enum kz_raw_section_id {
   S(STACKS, 43, kz_stack_frame, 1)       \
   S(LOSS, 44, kz_loss, 2)                \
   S(RUNMETA, 45, kz_runmeta, 1)          \
-  S(PERTURBATION, 46, kz_perturbation, 1) \
+  S(PERTURBATION, 46, kz_perturbation, 2) \
   S(SITE_SLOTS, 50, kz_site_slot, 1)     \
   S(SIDE_EVENTS, 51, kz_side_ev, 1)      \
   S(THREADS, 52, kz_thread, 1)           \
@@ -177,14 +186,30 @@ enum kz_raw_section_id {
   X(T, uint64_t, observer_cpu_ns, )                                                  \
   X(T, uint64_t, boot_ns, )
 
-/* One row of the per-run perturbation accounting (SPEC 4.13). */
+/*
+ * One row of the per-run perturbation accounting (SPEC 4.13).
+ *   probe-hits    `site`, `count` hits.  An ENTRY or POINT site costs one trap per hit at its
+ *                 address (`cost_class` = the instruction class there).  A RET site costs the
+ *                 return trampoline per hit (`cost_class` ret-trampoline) and, at the function's
+ *                 entry, a trap that a breakpoint at the same address shares: `shares_trap_with`
+ *                 is then the site whose row already counts that trap (KZ_NONE32 if no site at
+ *                 the same file offset counts it, and then the entry trap is in no row).  Any
+ *                 site with an earlier site at the same file offset names it the same way, so a
+ *                 cost estimate counts every trap once.
+ *   observer-cpu  `ns` CPU time of the observer's drain thread.
+ *   boot-time     `ns` lifetime of the traced process as the observer saw it (kz_runmeta).
+ *   proc-capture  the observer's reads of /proc/<pid>/... while the traced process ran:
+ *                 `count` files read, `ns` the wall time the observer spent in them (cost_class
+ *                 unknown).  Reading `environ` and `cmdline` copies the target's memory and takes
+ *                 its address-space lock; the observation record names the capture mode.
+ */
 #define KZ_PERTURBATION_FIELDS(X, T)                                                 \
   X(T, uint8_t, kind, )                                                              \
   X(T, uint8_t, rsv0, )                                                              \
   X(T, uint16_t, rsv1, )                                                             \
   X(T, uint32_t, cost_class, )                                                       \
   X(T, uint32_t, site, )                                                             \
-  X(T, uint32_t, rsv2, )                                                             \
+  X(T, uint32_t, shares_trap_with, ) /* site whose row counts this site's trap, or KZ_NONE32 */ \
   X(T, uint64_t, count, )                                                            \
   X(T, uint64_t, ns, )
 
@@ -329,9 +354,13 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  * assigned only to the instruction patterns that [R07 4.7] measured (a probe on the push
  * after endbr64 is emulated; a probe on endbr64 or on the mov after the push traps);
  * every other instruction is `unknown` until the S1 calibration measures it.
+ * `ret-trampoline` is not an instruction class: it is the cost class of the RETURN side of a
+ * return probe in PERTURBATION (the kernel's uretprobe trampoline, entered once per return).
+ * No site's insn_class is ever ret-trampoline, and its cost is unknown until S1 measures it.
  */
-#define KZ_ENUM_INSN_CLASS(ITEM, P) \
-  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, EMULATED, 1, "emulated") ITEM(P, TRAP, 2, "trap")
+#define KZ_ENUM_INSN_CLASS(ITEM, P)                                                   \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, EMULATED, 1, "emulated") ITEM(P, TRAP, 2, "trap") \
+  ITEM(P, RET_TRAMPOLINE, 3, "ret-trampoline")
 
 #define KZ_ENUM_SITE_PHASES(ITEM, P) /* set */                                       \
   ITEM(P, ENTRY, 0x1, "ENTRY") ITEM(P, POINT, 0x2, "POINT") ITEM(P, RET, 0x4, "RET") \
@@ -339,11 +368,14 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
 
 /*
  * How the trace layer reads a site.  GENERIC: the slot roles say everything.  The three
- * others are the roles the identity join (SPEC 5.7) needs, independent of any framework:
- *   SPAWN_CREATE  creator side, ENTRY: a[0] name pointer, a[1] entry function pointer,
- *                 a[2] priority, a[3] return address
- *   SPAWN_RETURN  creator side, RET:   a[0] status, a[3] return address (the sample ip)
- *   THREAD_ENTRY  child side, ENTRY:   a[0] the id the thread announces
+ * others are the roles the identity join (SPEC 5.7) needs, independent of any framework.  The
+ * join reads these positions; check_site refuses a site whose slots do not declare them (the
+ * role names in quotes are required, the others are free):
+ *   SPAWN_CREATE  creator side, ENTRY: a[1] "entry_fn", a[2] "priority" (at most 4 bytes),
+ *                 a[3] "return_address"; a[0] (a name pointer) is kept raw and not read
+ *   SPAWN_RETURN  creator side, RET:   a[3] "return_address" (the sample ip); a[0] status
+ *   THREAD_ENTRY  child side, ENTRY:   a[0] the id the thread announces (any role, at most
+ *                 4 bytes)
  */
 #define KZ_ENUM_DECODER(ITEM, P)                                                     \
   ITEM(P, NONE, 0, "none") ITEM(P, GENERIC, 1, "generic")                            \
@@ -383,14 +415,26 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
 
 #define KZ_ENUM_PERTURBATION_KIND(ITEM, P)                                           \
   ITEM(P, NONE, 0, "none") ITEM(P, PROBE_HITS, 1, "probe-hits") ITEM(P, HOLD, 2, "hold") \
-  ITEM(P, OBSERVER_CPU, 3, "observer-cpu") ITEM(P, BOOT_TIME, 4, "boot-time")
+  ITEM(P, OBSERVER_CPU, 3, "observer-cpu") ITEM(P, BOOT_TIME, 4, "boot-time")      \
+  ITEM(P, PROC_CAPTURE, 5, "proc-capture")
 
 #define KZ_ENUM_SIDE_KIND(ITEM, P) \
   ITEM(P, NONE, 0, "none") ITEM(P, FORK, 1, "FORK") ITEM(P, EXIT, 2, "EXIT") ITEM(P, COMM, 3, "COMM")
 
 #define KZ_ENUM_SIDE_FLAGS(ITEM, P) /* set */ ITEM(P, COMM_EXEC, 0x1, "comm-exec")
 
-/* Evidence of an identity record (a flag that is clear was not established). */
+/*
+ * Evidence of an identity record (a flag that is clear was not established).
+ *   SPAWN_MATCHED    the thread's FORK lies inside exactly one closed creator-side interval of
+ *                    its creating thread.  The perf-sample backend has no other key: the match
+ *                    is by timestamps of ONE thread (the creator's events and the kernel's FORK
+ *                    record of the same thread), so it holds under A-CLK-PO; MATCH_BY_TIME says so.
+ *   MATCH_BY_TIME    the creator link (matched or ambiguous) rests on timestamp containment only.
+ *   ID_UNVERIFIED    the announced id was recorded but not compared with a creator-side value:
+ *                    the id the spawn call assigns is an out-parameter that the perf-sample
+ *                    backend cannot read (it cannot dereference memory).  Deferred to a backend
+ *                    that reads it at the spawn return.
+ */
 #define KZ_ENUM_THREAD_FLAGS(ITEM, P) /* set */                                      \
   ITEM(P, FORK_SEEN, 0x1, "fork-seen") ITEM(P, COMM_SEEN, 0x2, "comm-seen")          \
   ITEM(P, ENTRY_SEEN, 0x4, "entry-seen") ITEM(P, SPAWN_MATCHED, 0x8, "spawn-matched") \
@@ -398,7 +442,8 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
   ITEM(P, NAME_INHERITED, 0x20, "name-inherited")                                    \
   ITEM(P, NAME_AFTER_FIRST_EVENT, 0x40, "name-after-first-event")                    \
   ITEM(P, TID_REUSED, 0x80, "tid-reused") ITEM(P, EXIT_SEEN, 0x100, "exit-seen")     \
-  ITEM(P, ENTRY_UNMATCHED, 0x200, "entry-unmatched")
+  ITEM(P, ENTRY_UNMATCHED, 0x200, "entry-unmatched")                                \
+  ITEM(P, MATCH_BY_TIME, 0x400, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x800, "id-unverified")
 
 #define KZ_ENUM_SYMBOL_BIND(ITEM, P) \
   ITEM(P, LOCAL, 0, "local") ITEM(P, GLOBAL, 1, "global") ITEM(P, WEAK, 2, "weak")
@@ -453,6 +498,7 @@ KZ_DEFINE_ENUM(KZ_REG, KZ_ENUM_REG, 0)
   F(kz_perturbation, kind, ENUM, KZ_PERTURBATION_KIND) \
   F(kz_perturbation, cost_class, ENUM, KZ_INSN_CLASS) \
   F(kz_perturbation, site, IDX, 0)                 \
+  F(kz_perturbation, shares_trap_with, IDX, 0)     \
   F(kz_side_ev, kind, ENUM, KZ_SIDE_KIND)          \
   F(kz_side_ev, flags, FLAGS, KZ_SIDE_FLAG)        \
   F(kz_map_ev, addr, HEX, 0)                       \

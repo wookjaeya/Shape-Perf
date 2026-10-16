@@ -397,12 +397,31 @@ prov es_apps_scan_waiting {
   sha256 "1a32b2de48737dd6b671bcf92a666c37ec98b8dd6c00dd35458dd0855da3324b";
 }
 
+prov es_apps_cleanup_match {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1435 1435;
+  sha256 "8625ab326d48e2ddf6496a20b9a10b015583db4da2915076ca6df36729b36925";
+  note "CFE_ES_CleanUpApp collects and retires the record only if it still carries the AppId it was asked to clean up (the record is LIVE).";
+}
+
+prov es_apps_cleanup_retire {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1493 1498;
+  sha256 "61d0ae0979967ba082d8e0b435ed1a11549581c81c81c552962f39e5c03a137f";
+  note "The first step of the cleanup: the record is set to RESERVED (LIVE -> RESERVED) while the other resources of the application are freed, so that the slot is not reallocated.";
+}
+
 prov es_apps_cleanup_free {
   tier code-derived;
   kind code_pattern;
   file "cfe/modules/es/fsw/src/cfe_es_apps.c";
   lines 1632 1635;
   sha256 "aea30540a03f6d888d06f944732e0f94fcf07ffdd034451c6cee6b7bf4da7030";
+  note "The last step of the cleanup: the record is freed only if it is still RESERVED (RESERVED -> FREE).";
 }
 
 prov es_apps_startapptask_create {

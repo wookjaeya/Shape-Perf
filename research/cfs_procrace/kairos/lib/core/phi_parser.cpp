@@ -938,7 +938,12 @@ struct Parser {
     } else {
       return fail_at(kloc, "unknown effect '" + kw + "' (expected lifecycle, use, store, settag, mark, sync or env)");
     }
-    if (accept_kw("when")) P_TRY(parse_expr(&e->when));
+    if (accept_kw("when")) {
+      P_TRY(parse_expr(&e->when));
+    } else if (accept_kw("filter")) {
+      e->filter = true;
+      P_TRY(parse_expr(&e->when));
+    }
     P_TRY(expect_kw("lp", "to give the linearization point of the effect"));
     P_TRY(parse_lp(&e->lp));
     while (true) {

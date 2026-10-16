@@ -52,17 +52,21 @@ add_test(NAME static_golden_core_cpu1
 set_tests_properties(static_golden_core_cpu1 PROPERTIES LABELS "static;golden;integration" SKIP_RETURN_CODE 77 TIMEOUT 600)
 
 # ---- unit tests ---------------------------------------------------------------------------------------------
-foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev)
+foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll)
   kz_add_unit_test(${kz_name} SOURCES ${kz_name}.cpp LIBS kz-llvm kz-testsupport LABEL static)
 endforeach()
 
 # Object files for the link-set test, built with the C compiler of the build.
+# They are data for the link-set reader, not code under test: a sanitizer build must not add its
+# runtime symbols to them (the test checks their symbol tables).
 foreach(kz_obj main_obj whole_member lazy_used lazy_unused)
   add_library(kz_static_${kz_obj} OBJECT objects/${kz_obj}.c)
-  target_compile_options(kz_static_${kz_obj} PRIVATE -std=c99)
+  target_compile_options(kz_static_${kz_obj} PRIVATE -std=c99 -fno-sanitize=all)
 endforeach()
 kz_add_unit_test(test_static_link SOURCES test_static_link.cpp LIBS kz-llvm kz-testsupport LABEL static
   ARGS $<TARGET_OBJECTS:kz_static_main_obj> $<TARGET_OBJECTS:kz_static_whole_member> $<TARGET_OBJECTS:kz_static_lazy_used> $<TARGET_OBJECTS:kz_static_lazy_unused>)
+# the objects are arguments, not sources: building the test must build them too
+add_dependencies(test_static_link kz_static_main_obj kz_static_whole_member kz_static_lazy_used kz_static_lazy_unused)
 
 kz_add_unit_test(test_static_cli SOURCES test_static_cli.cpp LIBS kz-core kz-testsupport LABEL static
   ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_BINARY_DIR})

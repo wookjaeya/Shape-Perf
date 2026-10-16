@@ -1,6 +1,7 @@
 # SimEvo (ICSME 2017) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 09:09–09:20, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:24–00:30). (1) 열려 있던 경로를 다시 시도했다(§1.1 E, 경로 35–50). 피인용 3건을 확인하고 세 편 모두 인용 문맥을 읽었다 `[2차]`. 어느 것도 코드·artifact 위치를 적지 않는다. (2) 같은 계보의 2013년 서술 Sim-O/C(ITJ 17(2) p.188)를 직접 읽어 `[2차]` 출처로 더했다(§2.3). (3) SimEvo 본문의 핵심 인용(p.3, p.6, p.7, p.8)을 같은 PDF(sha256 `143f7351…`)에서 다시 대조했다. 바뀐 곳은 없다. (4) Q1 라벨을 왜 "분석"으로 두는지 근거를 §3.1에 적었다(형제 문서 `SimRacer.md`는 같은 칸을 "불명"으로 바꿨다. 근거 차이 때문이다). (5) STVR 쪽 인용에 "단일 취득 경로, 독립 재확인 안 됨" 표시를 붙였다(`process_race_method_matrix.md` §1.1). (6) R2의 수치 근거를 로드맵에서 gdb 원시 기록으로 바꿨다(값은 같다). (7) 환경을 다시 측정했다(§4.1). (8) CPS-VO 라이선스 표기의 위치를 다시 확인했다(§1.3). 이번에도 SimEvo를 실행하지 않았다.
 - 대상: T. Yu, *SimEvo: Testing Evolving Multi-Process Software Systems*, ICSME 2017, pp. 204–215. DOI 10.1109/ICSME.2017.29. 단독 저자, 당시 University of Kentucky.
 - 범위: 로드맵 §10 (M6)의 SimEvo 항목(회귀 관련 분석). 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. SimEvo를 실행하지 않았다(실행할 구현이 없다). 어느 사례에 대해서도 "탐지하지 못한다"는 결과를 담지 않는다.
@@ -14,7 +15,7 @@
 | 태그 | 뜻 | 이 문서에서의 쓰임 |
 |---|---|---|
 | [F] | 인용이 있는 사실 | 원출처(논문 쪽·절) 또는 저장소 기록(문서·절). 저장소 기록은 "기록"으로 표시하며 이번에 재검증하지 않았다 |
-| [M] | 측정 | 오늘(2026-10-15) 이 컨테이너에서 읽기 전용으로 확인한 값 |
+| [M] | 측정 | 2026-10-15 또는 2026-10-16(날짜를 적었다) 이 컨테이너에서 읽기 전용으로 확인한 값 |
 | [I] | 추론·분석 | 설계 기술에서 도출한 해석. 도구를 실행하지 않았다 |
 | [D] | 결정 | PI 결정 |
 | [U] | 미확인 | 자료가 없거나 읽지 못함 |
@@ -23,7 +24,7 @@
 
 | 등급 | 뜻 |
 |---|---|
-| `[전문]` | 본문 전체를 텍스트로 추출해 읽었다. SimEvo는 그림 1, 2, 3, 5를 이미지로도 확인했다. STVR은 본문 전체를 텍스트로 추출했고 p.2–3, p.7–14, p.24를 읽었다(§2·3·4·7.1에 해당) |
+| `[전문]` | 본문 전체를 텍스트로 추출해 읽었다. SimEvo는 그림 1, 2, 3, 5를 이미지로도 확인했다. STVR은 본문 전체를 텍스트로 추출했고 p.2–3, p.7–14, p.24를 읽었다(§2·3·4·7.1에 해당). STVR 사본은 CPS-VO 한 경로에서 얻었으므로 STVR 쪽 번호 인용은 **단일 취득 경로, 독립 재확인 안 됨**이다(`process_race_method_matrix.md` §1.1) |
 | `[초록]` | 초록·서지만 읽었다 |
 | `[2차]` | 다른 논문·페이지가 이 도구를 서술한 문장, 또는 이 도구가 위임한 출처의 문장을 읽었다. 도구 자신의 서술이 아니다 |
 | `[기록]` | 저장소의 이전 보고서에 있는 값. 이번에 재검증하지 않았다 |
@@ -38,13 +39,13 @@
 
 ## 0. 한눈에 보기
 
-1. **SimEvo 논문 전문을 읽었다** `[전문]`. NSF Public Access Repository(PAR)의 PDF(12쪽, sha256 `143f7351…adc31be6`)다. 이전 기록(2026-10-08)은 이 논문을 열지 못해 검색 발췌만 갖고 있었다(§1.3). 논문 안에는 코드·artifact 위치에 관한 서술이 없다(키워드 검색: URL은 CodeSurfer 제품 페이지 하나뿐).
+1. **SimEvo 논문 전문을 읽었다** `[전문]`. NSF Public Access Repository(PAR)의 PDF(12쪽, sha256 `143f7351…adc31be6`)다. 이전 기록(2026-10-08)은 이 논문을 열지 못해 검색 발췌만 갖고 있었다(§1.3). 논문 안에는 코드·artifact 위치에 관한 서술이 없다(키워드 검색: URL은 CodeSurfer 제품 페이지 하나뿐). 2026-10-16에 피인용 3건의 인용 문맥도 읽었으나 실행·artifact 언급은 없다 `[2차]`(§1.3).
 2. **역할은 회귀 시험(regression testing)이다.** 두 버전 S, S′의 소스와 기존 테스트 T, interleaving 커버리지 기준 PT를 받아 변경 영향 분석(정적·동적), 변경 유도 test input 생성(GA), 영향받은 interleaving의 예측·재생을 한다 `[전문]` p.4. 오라클이 확인하는 결함(F)을 출력하지만, 변경 영향 범위로 좁힌 회귀 시험이라는 점에서 범용 탐지 도구(RacePro, SimRacer 계열)나 보고·로그 기반 재현 도구(RRF, DESCRY, SysPro)와 입력과 목적이 다르다. 출력은 선택된 테스트 집합, 영향받은 Def-Use 쌍의 커버리지, 결함(F)이다 p.4.
-3. **사건 모델은 SimEvo 본문에 직접 있다.** system call의 read/write 효과와 fork, wait, exit, pipe, signal 동기화 연산이다 p.1, p.3. 이전 기록(`baselines/yu-group.md` §4, §7.2)은 발췌만 보고 "시스템 호출 모델이 서술되지 않았다"고 적었다. 전문으로 이 부분은 정정된다(§1.3).
+3. **사건 모델은 SimEvo 본문에 직접 있다.** system call의 read/write 효과와 fork, wait, exit, pipe, signal 동기화 연산이다 p.1, p.3. 이전 기록(`baselines/yu-group.md` §4, §7.2)은 발췌만 보고 "시스템 호출 모델이 서술되지 않았다"고 적었다. 전문으로 이 부분은 정정된다(§1.3). 탐색이 맞추는 Def-Use 패턴도 system call write·read로 정의된다 p.6. 같은 계열의 2013년 서술(Sim-O/C, ITJ p.188 `[2차]`)도 process 사이 시험을 system call 쌍으로 서술한다.
 4. **메모리 접근·lock·반환값·재시도는 SimEvo 본문에 사건으로 나오지 않는다.** 키워드 검색에서 load, store, lock, mutex, semaphore, return value, retry가 0건이다. "memory"는 thread-level 버그와의 대비(p.1)와 참고문헌 제목에만 있다. 자원 모델의 세부는 RacePro [26]과 SimRacer [57]에 위임한다("Details of shared resource and event modeling can be found in prior work [26], [57]", p.3). 동적 CIA와 interleaving 탐색은 SimRacer 위에 구현했다 p.7. SimRacer 원문(ISSTA'13)은 오늘도 열리지 않았다. 그래서 SimEvo 구현이 메모리 접근을 관측하는지는 **불명**이다(§2.3).
 5. **필요한 순서(readiness precondition)와 허용 오류는 입력이 아니다.** 입력은 S, S′, T, PT이고 p.4, 실패 판정은 순차 실행의 출력(콘솔 메시지·파일)과의 비교다 p.8. 논문은 "출력이 오류 없이 interleaving마다 바뀔 수 있는 문제"를 미해결로 남겼다 p.8.
 6. **다섯 사례의 의존성은 SimEvo가 서술한 사건 집합에 들어 있지 않다 (분석, 미실행).** C1·C3·C5·R2의 공개와 사용은 메모리 쓰기·읽기와 함수 호출이고, 사건 모델의 다섯 순서 관계(program, fork-return, wait-exit, pipe-read, signal; p.3)에 readiness 관계가 없다. 이것은 "탐지 실패"가 아니라 입력 정의가 정해지지 않은 상태다. C2는 대상 앱이 비공개라 대부분 칸이 불명이다.
-7. **실행은 불가능하고 오늘 적용되는 상태는 다섯 사례 모두 `NOT_RUN`이다.** 구현을 찾지 못했고, 동적 단계의 기반인 SimRacer의 구현도 찾지 못했다. Simics는 이 컨테이너에 없고 `/dev/kvm`도 없다. 논문이 Simics 버전·시뮬레이션 머신·guest OS를 적지 않아 그 선택은 `unspecified_by_reference`다. static CIA에 쓴 CodeSurfer(상용)의 현재 가용성은 불명이다. `INAPPLICABLE`은 PI 판단이다(§4.3).
+7. **실행은 불가능하고 오늘 적용되는 상태는 다섯 사례 모두 `NOT_RUN`이다.** 구현을 찾지 못했고, 동적 단계의 기반인 SimRacer의 구현도 찾지 못했다. Simics는 이 컨테이너에 없고 `/dev/kvm`도 없다(2026-10-16 재측정 같음. `/` 여유는 1.4 GB). 논문이 Simics 버전·시뮬레이션 머신·guest OS를 적지 않아 그 선택은 `unspecified_by_reference`다. static CIA에 쓴 CodeSurfer(상용)의 현재 가용성은 불명이다. `INAPPLICABLE`은 PI 판단이다(§4.3).
 8. **Kairos 가설은 근거가 있는 만큼만 올렸다(§5).** 변경 영향 분석, 관측 trace에서 실행되지 않은 순서를 offline으로 만들고 재생해 확인하는 구조는 SimEvo에 이미 있다. 차별점으로 쓰지 않는다. "SimEvo가 메모리를 못 본다"는 가설도 근거가 반대 방향이라 올리지 않았다.
 
 ---
@@ -107,14 +108,37 @@
 |---|---|---|---|
 | 32 | Intel Simics Simulator 공개 배포 페이지 `intel.com/…/simics-simulator.html` | HTTP 200. WebFetch의 요약이 돌아왔다(페이지 "Updated 9/8/2023"). 원문을 직접 대조하지 않았다 | `[2차]`(요약) |
 | 33 | GrammaTech `www.grammatech.com/`, 논문이 인용한 `…/products/codesurfer/overview.html` | 루트 200, 인용 URL은 404 [M]. WebSearch는 오래된 제품 소개만 돌려줬다 | 현재 상태 불명 |
-| 34 | 컨테이너 읽기 전용 확인 | 커널 `6.18.44-fc-v114`, `/dev/kvm` 없음, `/proc/cpuinfo`의 vmx/svm 0, `simics`·`qemu-system-x86_64`·`codesurfer` 실행 파일 없음, `/` 여유 16 GB [M] | `[M]` |
+| 34 | 컨테이너 읽기 전용 확인 | 커널 `6.18.44-fc-v114`, `/dev/kvm` 없음, `/proc/cpuinfo`의 vmx/svm 0, `simics`·`qemu-system-x86_64`·`codesurfer` 실행 파일 없음, `/` 여유 16 GB [M] | `[M]` (2026-10-15) |
+
+**E. 2026-10-16 보완 (UTC 00:24–00:30)**
+
+| # | 경로 | 결과 | 등급·비고 |
+|---|---|---|---|
+| 35 | OpenAlex `api.openalex.org/works/doi:10.1109/ICSME.2017.29` | 200. id `W2767952634`, `cited_by_count: 3`(2019년 1건, 2020년 2건) [M] | 서지 |
+| 36 | Semantic Scholar Graph API `…/paper/DOI:10.1109/ICSME.2017.29/citations` | 200(어제는 429). 피인용 3건: Bertolino·Inverardi 2019(Springer 장, DOI 10.1007/978-3-030-30985-5_5), Fu·Li·Cai·Li 2020 *SEADS*(TOSEM, DOI 10.1145/3379345), Al-Taharwa 2020(iJET, DOI 10.3991/ijet.v15i18.15489) | 서지. 경로 25의 미해결 항목이 해소됐다 |
+| 37 | Bertolino·Inverardi 2019 저자 postprint. OpenAlex가 가리킨 `openportal.isti.cnr.it` 레코드(200)가 링크한 `iris.cnr.it/bitstream/20.500.14243/373683/1/prod_413383-doc_145525.pdf` | 200, PDF 12쪽, sha256 `8e120cb51526bc484b35884882147f834d23c51fbd91984de3cbcea091473314` [M]. 인용 문맥(PDF p.6)만 읽었다 | SimEvo에 대해 `[2차]` |
+| 38 | SEADS(TOSEM 2020) NSF PAR 사본 `par.nsf.gov/servlets/purl/10251191`(서지 `par.nsf.gov/biblio/10251191`) | 200, PDF 43쪽, sha256 `a99b65179ef99ee35ed6d076cc9f75d8317221316d57fe8c16cbdbb8640ba9ef` [M]. 인용 문맥(PDF p.37)만 읽었다. OpenAlex는 이 논문을 `is_oa: false`로 적었으나 PAR에 사본이 있었다 | SimEvo에 대해 `[2차]` |
+| 39 | Al-Taharwa 2020(iJET) `online-journals.org/index.php/i-jet/article/download/15489/7911` | 200, PDF, sha256 `a7c7249bda0af92d785f3567262e992e9f89c7fda9c847647d01d9301187452d` [M]. SimEvo는 [42]로 "System testing and maintenance … [39-42]" 묶음 인용 한 번뿐이다. 도구 서술이 없다 | 서지 |
+| 40 | arXiv API `ti:SEADS`, `ti:"Changing Software in a Changing World"` | 무관 5건, 0건 | 사본 없음(PAR·CNR 사본으로 대체) |
+| 41 | IEEE Xplore `ieeexplore.ieee.org/document/8094422` | HTTP 202, 본문 0 B, `x-amzn-waf-action: challenge`(어제와 같다) | `[미도달]` |
+| 42 | DBLP `dblp.org/rec/conf/icsm/Yu17.xml` | HTTP 202, 약 7 KB 도전 페이지(어제와 같다) | `[미도달]` |
+| 43 | SimRacer ISSTA'13 `dl.acm.org/doi/pdf/10.1145/2483760.2483771` | HTTP 403, `cf-mitigated: challenge`. 같은 날 `SimRacer.md` 경로 26–39가 14개 경로를 더 시도한 기록이 있어 반복하지 않았다 | `[미도달]` |
+| 44 | 학위논문(Yu 2014) PDF `digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1093&context=computerscidiss` | HTTP 403(5.6 KB 도전 페이지) | `[미도달]`. 도전 페이지를 우회하지 않았다 |
+| 45 | Sim-O/C, Intel Technology Journal 17(2), 2013, 178–197쪽. `intel.com/content/dam/www/public/us/en/documents/research/2013-vol17-iss-2-intel-technology-journal.pdf` | 같은 날 `SIMEXPLORER.md` 경로 16이 받은 파일을 다시 열었다. sha256 `24080f8ec175aecb7e6c93fd0a436dd8532c856375d8b356b772030dc8c1813c`로 일치 [M]. p.188(인쇄 쪽, 꼬리말 "188 \|")만 읽었다 | SimEvo에 대해 `[2차]`(계보의 앞선 서술). 경로 26(`noggin.intel.com`)의 목적이 이 경로로 해소됐다 |
+| 46 | GrammaTech `www.grammatech.com/`, 논문 인용 URL `…/products/codesurfer/overview.html` | 루트 200(받은 HTML에 "codesurfer" 문자열 없음), 인용 URL 404 [M] | 현재 상태 불명 |
+| 47 | WebSearch "CodeSurfer GrammaTech availability license 2024" | 2001–2002년 무렵 보도자료(버전 1.5–1.7)만 돌아왔다. 현재 판매·라이선스를 말하는 결과가 없다 | 현재 상태 불명 |
+| 48 | WebSearch(SEADS 사본 찾기) | PAR 레코드를 돌려줬다(경로 38로 이어짐) | 경로 탐색 |
+| 49 | CPS-VO 파일 페이지 `archive.cps-vo.org/node/36388`을 `curl`(클라이언트 문자열 `Mozilla/5.0 (X11; Linux x86_64) research-fetch`)로 요청 | 200, 32,583 B [M]. 페이지 텍스트에 "License: Creative Commons 2.5"가 있다(필드 `field-field-license`). PDF 파일 자체는 다시 받지 않았다 | §1.3 마지막 행 |
+| 50 | 컨테이너 재측정 | 커널 `6.18.44-fc-v139`, `/dev/kvm` 없음, `simics`·`qemu-system-x86_64`·`codesurfer`·`csurf` 실행 파일 없음, `/` 여유 1.4 GB(크기 252 GB, 사용률 97%) [M] | `[M]` (2026-10-16) |
 
 ### 1.2 이 문서가 쓰는 출처별 등급
 
 | 출처 | 등급 | 무엇에 썼나 |
 |---|---|---|
 | SimEvo 본문(PAR PDF) | `[전문]` | §2의 도구 서술 전부, §3의 "도구 수준의 답" 중 SimEvo 쪽 |
-| STVR 2017(SIMEXPLORER) | SimEvo에는 `[2차]` | SimEvo가 위임한 [57]의 확장판이라고 STVR이 스스로 밝히므로(STVR p.2 각주), SimEvo 본문이 정하지 않는 사건·자원 모델의 **계보 근거**로만. SimEvo 구현의 서술로 쓰지 않는다 |
+| STVR 2017(SIMEXPLORER) | SimEvo에는 `[2차]`. 단일 취득 경로, 독립 재확인 안 됨 | SimEvo가 위임한 [57]의 확장판이라고 STVR이 스스로 밝히므로(STVR p.2 각주), SimEvo 본문이 정하지 않는 사건·자원 모델의 **계보 근거**로만. SimEvo 구현의 서술로 쓰지 않는다 |
+| Sim-O/C, ITJ 2013 (2026-10-16 추가) | SimEvo에는 `[2차]`(p.188만 읽음) | 같은 저자 계열의 2013년 서술. process 사이 시험의 사건 층위(§2.3). SimEvo 구현의 서술로 쓰지 않는다 |
+| 피인용 3건 (2026-10-16 추가) | `[2차]`(인용 문맥만 읽음) | 다른 저자가 SimEvo를 어떻게 서술하는지와 artifact 언급 유무(§1.3) |
 | RacePro(SOSP'11) | SimEvo에는 `[2차]` | SimEvo가 [26]으로 위임한 자원 모델의 참고 |
 | 저자 홈페이지, NSF 과제 초록, UKy 기록 | 서지 | artifact 소재 확인 |
 | Intel Simics 페이지(WebFetch 요약) | `[2차]` | 실행 환경의 일반 요구. 요약이라 문구를 인용하지 않았다 |
@@ -131,6 +155,9 @@
 | `yu-group.md` §7.2, `availability.md` §3: SimEvo를 SimRacer와 한 행으로 묶음 | 일부 분리한다. SimEvo는 자기 사건 서술과 회귀 전용 단계(변경 영향 분석, 테스트 생성)를 가진다. 다만 **사건·자원 모델의 세부는 SimRacer·RacePro에 위임**하므로 그 부분은 SimRacer 원문 없이는 정해지지 않는다 |
 | 구현 없음("None found") | 오늘 경로 12–26을 더 시도했고 결과는 같다. 코드·VM 이미지·스크립트를 찾지 못했다. "존재하지 않는다"가 아니라 "접근 가능한 출처에서 찾지 못했다"이다 |
 | (새로 확정) | SimEvo의 동적 CIA와 interleaving 탐색은 **SimRacer 위에 구현**됐다 p.7. SimEvo를 쓰려면 SimRacer 구현이 필요한데 그것도 찾지 못했다. static CIA는 상용 CodeSurfer, GA는 C++로 별도다 |
+| (2026-10-16) 피인용 문헌이 SimEvo의 사용 가능성을 서술하는지 미확인(§6 항목 3) | 세 편의 인용 문맥을 읽었다. Bertolino·Inverardi 2019 p.6은 진화하는 소프트웨어 시험의 과제로 "dependencies among concurrently running processes"를 고려하는 black-box 접근을 들며 그 예로 SimEvo를 인용한다. SEADS p.37은 SimEvo가 "static and dynamic analysis techniques to identify system-level concurrent dependencies"를 쓰는 hybrid 분석이라고 적는다. iJET 2020은 묶음 인용뿐이다. **세 편 모두 SimEvo를 실행했다거나 코드·artifact 위치를 적지 않는다** `[2차]`. 다른 저자가 SimEvo를 baseline으로 실행했다는 기록은 찾지 못했다(피인용 3건 범위 안에서) |
+| (2026-10-16) SimEvo가 위임한 사건 모델의 층위 | 같은 계열의 2013년 서술 Sim-O/C는 여러 user process 사이의 시험을 "identifies system calls that can potentially race with each other"로 적고 그 순서를 바꿔 본다고 서술한다(ITJ p.188 `[2차]`). SimEvo 본문의 사건 서술(system call 효과, p.3)과 같은 층위다. 이 서술은 SimEvo 구현이 메모리를 보지 않는다는 근거가 아니다(메모리 관측을 배제하는 문장이 없다) |
+| (2026-10-16) CPS-VO 사본의 "Creative Commons 2.5" 표기 | `SIMEXPLORER.md` §1.3 항목 10은 저장한 **레코드 페이지**(`node/36387`)에서 이 문구를 찾지 못해 지웠다. 이 문서가 경로 29에 적은 표기는 **파일 페이지**(`node/36388`)의 것이다. 오늘 그 페이지를 다시 받아 "License: Creative Commons 2.5"를 확인했다 [M](경로 49). 두 문서는 서로 다른 페이지를 본 것이다. 이 표기가 PDF의 재배포 조건을 확정하는지는 이 문서가 판단하지 않는다. PDF를 저장소에 넣지 않았다 |
 
 ### 1.4 주요 진술의 등급
 
@@ -142,7 +169,9 @@
 | 자원 모델의 세부는 [26], [57]에 위임됐다 | `[전문]` | p.3 |
 | 오라클은 순차 실행 출력 또는 내장 오라클이다 | `[전문]` | p.8 |
 | SimEvo 구현이 메모리 접근을 관측한다 / 관측하지 않는다 | `[U]` 불명. 어느 쪽도 쓰지 않는다 | — |
-| 계보 도구 SIMEXPLORER는 SR 연산에 메모리 중단점을 건다 | `[2차]` | STVR p.8, p.14 |
+| 계보 도구 SIMEXPLORER는 SR 연산에 메모리 중단점을 건다 | `[2차]`, 단일 취득 경로 | STVR p.8, p.14 |
+| 2013년 계보 서술은 process 사이 시험을 system call 쌍의 순서 바꾸기로 서술한다 | `[2차]` | ITJ p.188 |
+| 다른 저자들은 SimEvo를 system-level 동시성 의존을 정적·동적 분석으로 찾는 접근으로 서술한다. 실행·artifact 언급은 없다 | `[2차]` | SEADS PDF p.37; Bertolino·Inverardi postprint PDF p.6 |
 | SimEvo 구현·artifact를 찾지 못했다 | 접근 가능한 출처에서 찾지 못했다는 뜻이다. 부재의 증명이 아니다 | §1.1 경로 12–26 |
 | OSAL 이름 등록·조회는 syscall 0건이었다 | `[기록]` (OSAL 자체 시험의 probe. SimEvo의 결과가 아니다) | `availability.md` §4.2 |
 | 사례별 의존성과 현상, 수정 내용 | `[기록]` | `cases/*.md` |
@@ -181,7 +210,7 @@
 
 | 항목 | SimEvo 본문(`[전문]`) | 위임·계보 근거(`[2차]`) |
 |---|---|---|
-| 사건 종류 | system call의 R/W 효과 + fork, wait, exit, pipe, signal p.1, p.3. 기술 문구는 "system-level concurrent events (i.e., system calls)" | STVR p.8(SIMEXPLORER): SR로 shared memory, fd, inode, file data, process data, hardware components를 열거하고 23개 system call을 추적한다. **memory 접근의 read/write는 "observability support implemented in our prior work [16,33]"으로 식별한다.** [16]은 SimRacer(ISSTA'13), [33]은 SimTester(VEE'12)다. 어느 쪽이 어느 부분을 맡는지는 서술이 없다 |
+| 사건 종류 | system call의 R/W 효과 + fork, wait, exit, pipe, signal p.1, p.3. 기술 문구는 "system-level concurrent events (i.e., system calls)". 탐색이 맞추는 패턴도 system call로 정의한다: "a definition is a system call write access and use is system call read access" p.6 | ITJ p.188(Sim-O/C, 2013, 2026-10-16 추가): process 사이 시험은 서로 race할 수 있는 system call을 찾아 순서를 바꾼다. STVR p.8(SIMEXPLORER): SR로 shared memory, fd, inode, file data, process data, hardware components를 열거하고 23개 system call을 추적한다. **memory 접근의 read/write는 "observability support implemented in our prior work [16,33]"으로 식별한다.** [16]은 SimRacer(ISSTA'13), [33]은 SimTester(VEE'12)다. 어느 쪽이 어느 부분을 맡는지는 서술이 없다 |
 | 메모리 관측 | 본문에 서술 없음(load/store 0건) | STVR p.8, p.12, p.14: Observer가 SR 연산에 메모리 중단점을 건다. 전역 변수 load/store 사건 예가 있다(p.12). SIMEXPLORER의 서술이며 SimRacer·SimEvo 구현에 해당하는지는 **불명** |
 | 같은 자원 판정 | 서술 없음. 파일 이름 통일만(p.5). 세부는 [26], [57]에 위임 p.3 | RacePro §5.2(`[2차]`): 자원은 커널 객체(inode, file, file-table, mmap, pid …; Table 2)이고 pathname마다 별도 메모리 위치로 모델링한다. 커널 객체 모델이며 SimEvo 구현이 같은지는 불명 |
 | thread 단위 | 대비 대상으로만 언급 p.1 | STVR p.13: "every thread is a lightweight process with its own Process Identification Number (PID), so SIMEXPLORER can track it just like a process". SIMEXPLORER에 대한 서술이다 |
@@ -224,6 +253,8 @@
 - (a) 사례의 접근이 SimEvo의 사건 집합(system call 효과와 다섯 동기화 연산)에 들어 있어야 한다.
 - (b) 사례의 task들은 한 Linux process 안의 pthread다(저장소 기록: `yu-group.md` §7.1). SimEvo의 PuT는 process다 p.1, p.7. 한 process 안의 cFS app/task 쌍을 PuT 쌍으로 줄 수 있는지는 SimEvo 본문에 서술이 없다. 이 연구의 Process-Level은 cFS app/task를 작업 단위로 쓰는 운용상 정의라는 PI 결정 `[D]`과 SimEvo의 명시 대상(multi-process, 신호·인터럽트 핸들러) 사이의 차이는 §4.3에서 PI 판단 후보로 올렸다.
 
+**Q1·Q3을 "분석"으로 두는 근거 (2026-10-16 추가).** 형제 문서 `SimRacer.md`는 C1·C3·C5·R2의 Q1·Q2를 "불명"으로 바꿨다. SimRacer 본문(ISSTA'13)을 읽지 못해 그 도구가 무엇을 사건으로 보는지 도구 자신의 서술이 없기 때문이다. SimEvo는 사정이 다르다. SimEvo 본문을 전부 읽었고, 본문이 스스로 사건 종류(p.3)와 탐색이 맞추는 패턴(Def-Use = system call write·read, p.6)을 정의한다. 그래서 "읽은 설계 서술에 비추어 사례의 공개·사용이 그 정의에 들어 있는가"는 SimEvo에 대해 분석할 수 있다. 다만 구현의 범위는 위임돼 있어(p.3) 서술보다 넓을 수 있다. 이 한계는 전제 (a)와 §3.6에 남긴다. Q2는 본문이 식별 기준을 정하지 않으므로 계속 "불명"이다.
+
 ### 3.2 사례 쪽에서 쓴 사실과 SimEvo가 요구하는 버전 쌍 (모두 저장소 기록, 재검증하지 않음)
 
 | 사례 | 의존성과 현상 | 회귀 버전 쌍 (S → S′) 후보 |
@@ -232,7 +263,7 @@
 | C2 cFE#198 | 앱 P의 late init 완료와 앱 R의 의존 호출. P·R은 비공개(EVA CWS)이고 통신·초기화 내용이 공개되지 않았다. 공개된 것은 단일 상태 시작 동기화와 6.6.0a의 두 단계 방식(`APPS_INIT`, `LATE_INIT`)이다(`cases/C2.md` §4–§8) | cFE 6.5.0a → 6.6.0a(수정과 #198의 연결은 추론, 기록). P·R 쪽은 소스 없음 |
 | C3 cFE#73 | SB task의 `CFE_SB.AppId`와 EVS task의 `EVS_AppID`·등록 플래그가 설정되기 전에 TIME task가 `CFE_SB_CreatePipe` 안에서 이벤트를 보내고, `EVS_IsFiltered(0xFFFFFFFF)`가 범위 검사 없이 접근한다. 오류 지점은 미확인이다(`cases/C3.md` §4, §5, §7) | cFE 6.4.1 → 6.4.2. 수정에 해당하는 공개 git 객체가 없고 SourceForge tarball 차이로만 관측된다(`cases/C3.md` §8.1) |
 | C5 cFE#72 | `CFE_ES_AppCreate`가 ES lock을 `OS_TaskCreate` 앞에서 풀고 뒤에서 다시 잡아 `TaskTable`을 채운다. 그 사이 새 task의 `CFE_ES_GetAppID`가 `CFE_ES_ERR_APPID`를 반환할 수 있다. 새 task가 먼저 실행된 것만으로는 위반이 아니다(`cases/C5.md` §4–§7) | cFE 6.4.1 → 6.4.2. 같은 이유로 tarball 차이뿐(`cases/C5.md` §8). 수정은 lock 범위 확장 |
-| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로를 실행해 EVS 조회가 `CFE_EVS_APP_ILLEGAL_APP_ID`를 낸다. 서술은 "이벤트 요청 거부"이고 gdb 3회 모두 설정 전 사용 24회다(로드맵 §2.2). 출력 메시지는 없다(`cfe_evs.c:185-188`, `availability.md` §1). 이 이슈에는 병합된 수정이 없다(`cases/R2.md` §8) | `b9bec567^` → `b9bec567` `[D]` (P-R2CTRL (c2). core 목록 순서를 바꾼 변경이며 CMake 목록 `mission_defaults.cmake`가 바뀐다. `cases/R2.md` §9) |
+| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로를 실행해 EVS 조회가 `CFE_EVS_APP_ILLEGAL_APP_ID`를 낸다. 서술은 "이벤트 요청 거부"이고 gdb 3회 모두 설정 전 사용 24회다(ES 20, EVS 4. `results/R2_gdb_v701.md` §2, §7, 원시 기록 `env/logs/r2_g1..3_*`. 2026-10-15판은 로드맵 §2.2를 인용했다. 값은 같다). 출력 메시지는 없다(`cfe_evs.c:185-188`, `availability.md` §1). 이 이슈에는 병합된 수정이 없다(`cases/R2.md` §8) | `b9bec567^` → `b9bec567` `[D]` (P-R2CTRL (c2). core 목록 순서를 바꾼 변경이며 CMake 목록 `mission_defaults.cmake`가 바뀐다. `cases/R2.md` §9) |
 | 공통 | native cFS는 한 Linux process이고 OSAL task는 `pthread_create` thread다. OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 **syscall 0건**이었다(probe이며 SimEvo의 결과가 아니다) | `availability.md` §4.2 `[기록]` |
 
 ### 3.3 도구 수준의 답 (사례와 무관)
@@ -332,8 +363,8 @@
 |---|---|---|
 | SimEvo 구현(코드·VM 이미지·스크립트) | — | 찾지 못했다(§1.1 경로 12–26). 논문에도 위치 서술이 없다. NSF 과제 초록의 "make available"은 계획 서술이고 위치가 없다 |
 | 기반 도구 SimRacer 구현 | p.7 | 찾지 못했다. 오늘 GitHub 코드 검색 `SimRacer Simics "process-level"`은 1건이고 무관했다. `plan/methods/SimRacer.md` §1.1의 기록과 같은 결론이다. 원문은 열지 못했다 |
-| Simics | p.1, p.7 | **이 컨테이너에 없다** [M]. 논문은 버전·시뮬레이션 머신·guest OS·kernel을 적지 않았다 → 선택하면 `unspecified_by_reference`다. Intel 공개 배포 페이지의 요약(`[2차]`): 연구자에게 무료이고 EULA 동의가 필요하며, 호스트는 64-bit Linux(RHEL 8이 권장 최소)나 Windows, RAM 16 GB 이상이다. VT-x는 선택이며, VM 안에서 돌리면 VT-x를 쓰지 못하거나 느려진다고 한다. 이 컨테이너는 `/dev/kvm`이 없고 vmx/svm이 0이다 [M]. 논문이 쓴 Simics가 이 공개판과 같은 버전인지는 불명이다 |
-| CodeSurfer(상용, static CIA) | p.7 [17] | 현재 판매·라이선스는 불명. 논문이 인용한 제품 URL은 404 [M]. 이 컨테이너에 없다 |
+| Simics | p.1, p.7 | **이 컨테이너에 없다** [M]. 논문은 버전·시뮬레이션 머신·guest OS·kernel을 적지 않았다 → 선택하면 `unspecified_by_reference`다. Intel 공개 배포 페이지의 요약(`[2차]`): 연구자에게 무료이고 EULA 동의가 필요하며, 호스트는 64-bit Linux(RHEL 8이 권장 최소)나 Windows, RAM 16 GB 이상이다. VT-x는 선택이며, VM 안에서 돌리면 VT-x를 쓰지 못하거나 느려진다고 한다. 이 컨테이너는 `/dev/kvm`이 없고 vmx/svm이 0이다 [M]. 논문이 쓴 Simics가 이 공개판과 같은 버전인지는 불명이다. **2026-10-16 재측정** [M]: `simics`가 없고 `/dev/kvm`도 없다. `/` 여유는 1.4 GB로 줄었다(어제 16 GB). 같은 날 `SIMEXPLORER.md`가 옮긴 벤더 문서의 설치 크기(약 10 GB)보다 작다. 설치하지 않았다 |
+| CodeSurfer(상용, static CIA) | p.7 [17] | 현재 판매·라이선스는 불명. 논문이 인용한 제품 URL은 404 [M]. 2026-10-16에도 GrammaTech 루트 페이지에 이 제품 이름이 없고, WebSearch는 2001–2002년 무렵 보도자료만 돌려줬다(경로 46–47). 이 컨테이너에 없다 |
 | 두 버전의 소스 S, S′ | p.4 | 사례별로 §3.2. C1은 결정 후보 `[D]`, C3·C5는 tarball 차이뿐, C2는 P·R 소스가 없음, R2는 병합된 수정이 없어 자연 쌍 `[D]`을 쓴다 |
 | 기존 테스트 T (구체 입력) | p.4, p.7 | cFS에서 "테스트 입력"이 무엇인지 레퍼런스가 정하지 않았다 → `unspecified_by_reference` |
 | 오라클 | p.8 | 사례별 출력 기준이 정해지지 않았다. 순차 실행 출력 방식은 cFS 다중 task 시작에는 정의가 없다 → `unspecified_by_reference` |
@@ -364,6 +395,7 @@
 3. **방법 재구현을 할지**(A9). 하게 되면 SimRacer 원문 열람(ISSTA'13)과 Simics 버전·타깃의 `unspecified_by_reference` 처리가 먼저다.
 4. **Simics를 설치해 볼지.** 이 컨테이너에는 `/dev/kvm`이 없고, Intel 페이지의 요약은 VM 안에서 VT-x가 안 되거나 느려진다고 적는다. 설치하면 버전·타깃 선택이 `deviation` 또는 `unspecified_by_reference` 기록 대상이다.
 5. **cFS에서 "테스트 입력"과 "오라클"을 무엇으로 정의할지.** SimEvo의 두 입력(T, 오라클)에 해당하는 레퍼런스가 없다.
+6. **(2026-10-16 추가) STVR 사본의 취득 방식이 P-PAPERS의 취지에 맞는지.** 경로 29는 호스트 WAF가 기본 `curl`을 거부한 뒤 WebFetch 도구로 받은 것이다. 같은 질문이 `process_race_method_matrix.md` §1.1에 열려 있다. 이 문서에서 STVR은 `[2차]` 계보 근거로만 쓰이므로, 확인 결과에 따라 §2.3의 오른쪽 칸과 §5.3의 근거 한 줄만 영향을 받는다. SimEvo 본문 근거(PAR 사본)는 영향을 받지 않는다.
 
 ---
 
@@ -407,10 +439,10 @@
 
 1. **SimRacer ISSTA'13 본문.** SimEvo가 사건·자원 모델을 위임한 [57]이다. ACM과 Wiley는 Cloudflare 도전으로 403이다. STVR 전문은 CPS-VO 사본으로 읽었으나 SimRacer 자체의 서술은 아니다. SimRacer 원문을 열어야 H-SE-1, §3의 Q1·Q2 칸을 더 정할 수 있다.
 2. **RacePro [26]의 해당 절을 SimEvo 구현에 대응시키는 일.** RacePro는 커널 객체를 모델로 하고(§5.2) SimEvo가 이를 그대로 쓰는지는 서술이 없다.
-3. **피인용 3건의 제목.** OpenAlex·Semantic Scholar 인용 조회가 429로 막혔다. 피인용 문헌이 SimEvo의 사용 가능성을 서술하는지 확인하지 못했다.
-4. **`noggin.intel.com`의 Sim-OC 페이지.** 저자 프로젝트 페이지가 링크한 페이지이며 열지 못했다. SimEvo와의 관계는 불명이다.
-5. **CodeSurfer의 현재 상태.** 판매·라이선스를 확인하지 못했다.
-6. **학위논문(Yu 2014) 본문.** PDF를 시도하지 않았다.
+3. ~~피인용 3건의 제목.~~ **2026-10-16 해소.** 세 편을 확인하고 인용 문맥을 읽었다(경로 36–39, §1.3). 실행·artifact 언급은 없다. 피인용 목록은 OpenAlex·Semantic Scholar 기준이며 다른 색인에 더 있을 수 있다.
+4. ~~`noggin.intel.com`의 Sim-OC 페이지.~~ **2026-10-16 해소.** 같은 글(Sim-O/C, ITJ 2013)을 Intel이 올린 학술지 PDF로 읽었다(경로 45). SimEvo와의 관계는 같은 저자 계열의 앞선 서술이라는 것뿐이다 `[2차]`. Sim-O/C는 SimEvo(2017)보다 앞서므로 회귀 단계 서술이 없다.
+5. **CodeSurfer의 현재 상태.** 2026-10-16에도 판매·라이선스를 확인하지 못했다(경로 46–47).
+6. **학위논문(Yu 2014) 본문.** 2026-10-16 PDF를 시도했으나 403 도전 페이지였다(경로 44). 우회하지 않았다. 학위논문은 SimEvo(2017)보다 앞서므로 SimEvo 자체의 서술은 아니다.
 7. **이슈 댓글.** 사례별 댓글은 읽지 않았다(`availability.md` A6). 이 문서의 사례 서술은 저장소 기록이다.
 8. **저자 문의.** 하지 않았다(A2).
 
@@ -424,6 +456,8 @@
 - O. Laadan et al., *Pervasive Detection of Process Races in Deployed Systems*, SOSP 2011. https://www.cs.columbia.edu/~orenl/papers/sosp2011-racepro.pdf
 - T. Yu, W. Srisa-an, G. Rothermel, *SimRacer*, ISSTA 2013, DOI 10.1145/2483760.2483771. 본문 미도달
 - Intel Simics Simulator 공개 배포 페이지: https://www.intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html (요약만 읽음)
+- T. Yu, W. Srisa-an, G. Rothermel, *Sim-O/C: An Observable and Controllable Testing Framework for Elusive Faults*, Intel Technology Journal 17(2), 2013, pp. 178–197. https://www.intel.com/content/dam/www/public/us/en/documents/research/2013-vol17-iss-2-intel-technology-journal.pdf (sha256 `24080f8e…1813c`). p.188만 읽음 `[2차]`
+- 피인용(인용 문맥만 읽음, `[2차]`): A. Bertolino, P. Inverardi, *Changing Software in a Changing World: How to Test in Presence of Variability, Adaptation and Evolution?*, 2019, DOI 10.1007/978-3-030-30985-5_5, postprint https://iris.cnr.it/bitstream/20.500.14243/373683/1/prod_413383-doc_145525.pdf (PDF p.6). X. Fu, L. Li, H. Cai, W. Li, *SEADS*, TOSEM 2020, DOI 10.1145/3379345, 사본 https://par.nsf.gov/servlets/purl/10251191 (PDF p.37). I. Al-Taharwa, *Teamwork Distribution: Local vs. Global Software Engineering Project Development Teamwork*, iJET 15(18), 2020, DOI 10.3991/ijet.v15i18.15489 (묶음 인용뿐)
 - NSF 과제 CCF-1652149, CCF-1464032: `api.nsf.gov/services/v1/awards/`
 - 저자 페이지: https://homepages.uc.edu/~tyu/links/research.html, https://homepages.uc.edu/~tyu/links/projects.html
 

@@ -58,6 +58,8 @@ occurrence K-ID.send-with-appid actor T_SB ordinal 2 key [0] call #12 return #13
 findings 1
 finding #14: 2 event(s) follow the process-terminal step and are not replayed (a real run has none)
 
+guard failures 0
+
 final state
   es.app[2] = LIVE id 0x110002
   es.shutdown[] = SHUTDOWN_REQ

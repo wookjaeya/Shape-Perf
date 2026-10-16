@@ -8,9 +8,15 @@
  * records (23-29) are defined here for the skeleton builder and are not written yet.  Only the
  * certificate view of the skeleton exists: the exploration view belongs to the explorer.
  *
- * Revision 2 of the extraction records (this file): sections 10-18 were widened and sections
- * 20, 31-36 were added.  Nothing was renamed or removed, so code written against revision 1
- * still compiles; the section schema versions are 2 for every widened section.
+ * Revision 2 of the extraction records: sections 10-18 were widened and sections 20, 31-36 were
+ * added.  Revision 3 (this file): FACT_LOOPS carries the certificate-view rule of SPEC 4.3 that
+ * the extractor can decide (cert, pred_form, lflags, pred_root, cond_root, parent, cert_note;
+ * schema version 3); FACT_EXPRS has the operators `forall` and `cursor` and the reference kind
+ * `element` (version 3); sections 37 (LOOP_ITERS: the unrolled iterations of table walks),
+ * 38 (SPAWN_PARAMS: parameters that carry the function a spawned task runs) and 39 (FUNC_WRITES:
+ * the fields each function writes) are new.  Writers no longer claim the transition status
+ * COMPUTED: the extractor did steps 2-3 of SPEC 4.2 only, so tstatus is n/a until the census
+ * classifies the entry.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -57,15 +63,18 @@ enum kz_facts_section_id {
   KZ_SEC_FACT_LOCS = 33,
   KZ_SEC_TERMINALS = 34,
   KZ_SEC_OUTCALLS = 35,
-  KZ_SEC_TUS = 36
+  KZ_SEC_TUS = 36,
+  KZ_SEC_LOOP_ITERS = 37,
+  KZ_SEC_SPAWN_PARAMS = 38,
+  KZ_SEC_FUNC_WRITES = 39
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
   S(FACTS, 10, kz_fact_call, 2)                \
   S(FACT_ARGS, 11, kz_fact_arg, 2)             \
   S(DERIVES, 12, kz_fact_derives, 2)           \
-  S(FACT_EXPRS, 13, kz_fact_expr, 2)           \
-  S(FACT_LOOPS, 14, kz_fact_loop, 2)           \
+  S(FACT_EXPRS, 13, kz_fact_expr, 3)           \
+  S(FACT_LOOPS, 14, kz_fact_loop, 3)           \
   S(FACT_INIT, 15, kz_fact_init, 2)            \
   S(FACT_CONSTS, 16, kz_fact_const, 2)         \
   S(FACT_ATYPE, 17, kz_fact_atype, 2)          \
@@ -83,7 +92,10 @@ enum kz_facts_section_id {
   S(FACT_LOCS, 33, kz_fact_loc, 1)             \
   S(TERMINALS, 34, kz_fact_terminal, 1)        \
   S(OUTCALLS, 35, kz_fact_outcall, 1)          \
-  S(TUS, 36, kz_tu, 1)
+  S(TUS, 36, kz_tu, 1)                         \
+  S(LOOP_ITERS, 37, kz_fact_iter, 1)           \
+  S(SPAWN_PARAMS, 38, kz_fact_spawn_param, 1)  \
+  S(FUNC_WRITES, 39, kz_fact_fwrite, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -184,6 +196,16 @@ enum kz_facts_section_id {
  * kind and, when the trip count can be computed from build constants, the count (`trip`,
  * `trip_status`); the expression trees (exit conditions, body mod set, budget) are written for
  * the loops that contain a call to a delay operation and for table walks.
+ *
+ * `cert` is the rule of SPEC 4.3 for the certificate view, as far as the extractor can decide
+ * it: UNROLL (the trip count is exact: a constant-trip loop, a resolved table walk, a
+ * count-bounded retry loop), AWAIT (a poll loop whose condition exit has a recognised predicate
+ * form and for which both preconditions of lemma L1 hold at the level of the extracted facts:
+ * `lflags` L1-i and L1-ii), STAR (anything else).  The lemma itself is not decided here; its
+ * proof status belongs to the certificate.  `cond_root` is the condition exits (the exits that
+ * do not test the budget), `pred_root` the predicate extracted from them (forms of SPEC 4.3:
+ * a direct test, or a counter-zero test after a constant-trip loop, rewritten as `forall`).
+ * `cert_note` says why, in words.
  */
 #define KZ_FACT_LOOP_FIELDS(X, T)                                                    \
   X(T, uint32_t, site, )                                                             \
@@ -196,8 +218,9 @@ enum kz_facts_section_id {
   X(T, uint32_t, budget_root, )                                                      \
   X(T, uint32_t, lock_site, )  /* the lock acquisition that brackets the test, or KZ_NONE32 */ \
   X(T, uint8_t, lock_kind, )                                                         \
-  X(T, uint8_t, rsv0, )                                                              \
-  X(T, uint16_t, rsv1, )                                                             \
+  X(T, uint8_t, cert, )      /* KZ_LOOP_CERT */                                      \
+  X(T, uint8_t, pred_form, ) /* KZ_PRED_FORM */                                      \
+  X(T, uint8_t, lflags, )    /* KZ_LOOP_FLAG */                                      \
   X(T, uint32_t, loop, ) /* its own index */                                         \
   X(T, uint32_t, fn, )                                                               \
   X(T, uint32_t, col, )                                                              \
@@ -207,10 +230,13 @@ enum kz_facts_section_id {
   X(T, uint8_t, trip_status, ) /* KZ_TRIP_STATUS */                                  \
   X(T, uint32_t, n_exits, )                                                          \
   X(T, uint32_t, n_calls, )                                                          \
-  X(T, uint32_t, rsv2, )                                                             \
+  X(T, uint32_t, parent, ) /* FACT_LOOPS index of the enclosing loop, or KZ_NONE32 */ \
   X(T, int64_t, trip, )                                                              \
   X(T, kz_str, table, ) /* TABLE_WALK: the table symbol */                          \
-  X(T, kz_str, trip_note, ) /* why the trip count is unknown, when a walk could not be resolved */
+  X(T, kz_str, trip_note, ) /* why the trip count is unknown, when a walk could not be resolved */ \
+  X(T, uint32_t, pred_root, ) /* FACT_EXPRS: the extracted predicate, or KZ_NONE32 */ \
+  X(T, uint32_t, cond_root, ) /* FACT_EXPRS: the condition exits, or KZ_NONE32 */     \
+  X(T, kz_str, cert_note, )
 
 /* One location of the INIT image (SPEC 4.2 step 9): the program-entry state of a field. */
 #define KZ_FACT_INIT_FIELDS(X, T)                                                    \
@@ -464,6 +490,76 @@ enum kz_facts_section_id {
   X(T, kz_str, compiler, )                                                           \
   X(T, uint8_t, command_sha256, [32])
 
+/*
+ * One unrolled iteration of a resolved table walk (SPEC 4.3: constant-trip loops over B
+ * constants are unrolled), evaluated against the static-initializer image of the element.
+ *   ELEMENT  one row per iteration: the element object (`text`) and where its initializer is.
+ *   CALL     one row per (iteration, call in the loop body): whether the call is reached in this
+ *            iteration.  The guards of the call inside the loop are partially evaluated with
+ *            the element's field values: TAKEN (they hold), SKIPPED (one is false), RESIDUAL
+ *            (what is left does not depend on the element: `guard_root`).
+ *   ARG      an argument of such a call that reads a field of the element, with its value in
+ *            this iteration (`value_kind`, `value`, `text`, `fn`).  `spawn` marks the argument
+ *            that is the entry of a spawn operation, or the task-main parameter of a function
+ *            that spawns (SPAWN_PARAMS).
+ *   CALLEE   an indirect call through a field of the element: the function it calls.
+ * (file, line, fh) locate the value: the initializer of the element object.
+ */
+#define KZ_FACT_ITER_FIELDS(X, T)                                                    \
+  X(T, uint32_t, loop, ) /* FACT_LOOPS index */                                     \
+  X(T, uint32_t, iter, ) /* 0-based */                                               \
+  X(T, uint32_t, site, ) /* the call, or KZ_NONE32 for an ELEMENT row */             \
+  X(T, uint32_t, arg_index, ) /* ARG rows, else KZ_NONE32 */                         \
+  X(T, uint8_t, kind, )       /* KZ_ITER_KIND */                                     \
+  X(T, uint8_t, status, )     /* KZ_ITER_STATUS */                                   \
+  X(T, uint8_t, value_kind, ) /* KZ_IMAGE_KIND */                                    \
+  X(T, uint8_t, spawn, )      /* KZ_ITER_SPAWN */                                    \
+  X(T, uint32_t, guard_root, ) /* FACT_EXPRS: the residual guard, or KZ_NONE32 */    \
+  X(T, uint32_t, fn, )         /* FUNCS index of a function value, or KZ_NONE32 */   \
+  X(T, uint32_t, rsv0, )                                                             \
+  X(T, int64_t, value, )                                                             \
+  X(T, kz_str, text, )                                                               \
+  X(T, kz_str, file, )                                                               \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, fh, )
+
+/*
+ * A parameter of a function that carries the function a task it spawns will run.  DIRECT: the
+ * parameter flows to the entry argument of a spawn call inside the function.  VIA_ENTRY: it
+ * flows (through the function-pointer flow graph, field-based) to the callee of an indirect call
+ * in a function reachable from the entry of such a spawn call; the spawned task may call it.
+ * This is a may-flow fact: which value one particular task calls is not decided here.
+ */
+#define KZ_FACT_SPAWN_PARAM_FIELDS(X, T)                                             \
+  X(T, uint32_t, fn, )         /* FUNCS index */                                     \
+  X(T, uint32_t, param, )                                                            \
+  X(T, uint32_t, spawn_site, ) /* the spawn call inside fn */                        \
+  X(T, uint32_t, entry_fn, )   /* VIA_ENTRY: the spawned entry, else KZ_NONE32 */    \
+  X(T, uint32_t, call_site, )  /* VIA_ENTRY: the indirect call, else KZ_NONE32 */    \
+  X(T, uint8_t, kind, )        /* KZ_SPAWN_PARAM_KIND */                             \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, kz_str, via, )
+
+/*
+ * A field a function writes in its own body (not through its callees): an assignment or an
+ * increment of the field (FIELD), a whole-record write (RECORD, field "*": an aggregate
+ * assignment or a typed data function; one row per record type it contains by value), the
+ * address of the field passed to a call (OUTARG), or a write through an untyped pointer
+ * (UNTYPED, no type).  (file, line) is the first such write in the function.  The transitive
+ * write set of a loop body is the union over the calls it makes (FACTS, CALL_TARGETS).
+ */
+#define KZ_FACT_FWRITE_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint8_t, kind, ) /* KZ_FWRITE_KIND */                                         \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, kz_str, type, )                                                               \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, file, )                                                               \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, fh, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -487,7 +583,10 @@ enum kz_facts_section_id {
   R(kz_fact_loc, KZ_FACT_LOC_FIELDS)              \
   R(kz_fact_terminal, KZ_FACT_TERMINAL_FIELDS)    \
   R(kz_fact_outcall, KZ_FACT_OUTCALL_FIELDS)      \
-  R(kz_tu, KZ_TU_FIELDS)
+  R(kz_tu, KZ_TU_FIELDS)                          \
+  R(kz_fact_iter, KZ_FACT_ITER_FIELDS)            \
+  R(kz_fact_spawn_param, KZ_FACT_SPAWN_PARAM_FIELDS) \
+  R(kz_fact_fwrite, KZ_FACT_FWRITE_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -539,13 +638,22 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, BITXOR, 23, "bitxor") ITEM(P, SHL, 24, "shl") ITEM(P, SHR, 25, "shr")      \
   ITEM(P, NEG, 26, "neg") ITEM(P, BITNOT, 27, "bitnot") ITEM(P, COND, 28, "cond")    \
   ITEM(P, TOP, 29, "top") ITEM(P, ADDR, 30, "addr") ITEM(P, INDEX, 31, "index")      \
-  ITEM(P, DEREF, 32, "deref") ITEM(P, STORE, 33, "store")
+  ITEM(P, DEREF, 32, "deref") ITEM(P, STORE, 33, "store")                            \
+  ITEM(P, FORALL, 34, "forall") ITEM(P, CURSOR, 35, "cursor")
 
-/* What a LOAD node reads (kz_fact_expr.flags). */
+/*
+ * `forall`: name = the induction variable, value = the trip count N, a = the body (a condition
+ * that holds for every i in [0, N)), b = a list (SEQ) of `cursor` nodes.  `cursor`: name = a
+ * local pointer that starts at `a` and advances by one element per iteration, value = the
+ * number of elements of `a` when it is an array of known size (else 0).
+ */
+
+/* What a LOAD node reads (kz_fact_expr.flags).  ELEMENT: a field (name) of the current element
+ * of a table walk; an empty name is the element pointer itself. */
 #define KZ_ENUM_EXPR_REF(ITEM, P)                                                    \
   ITEM(P, NONE, 0, "none") ITEM(P, FIELD, 1, "field") ITEM(P, GLOBAL, 2, "global")   \
   ITEM(P, LOCAL, 3, "local") ITEM(P, PARAM, 4, "param") ITEM(P, STRING, 5, "string") \
-  ITEM(P, FUNC, 6, "function")
+  ITEM(P, FUNC, 6, "function") ITEM(P, ELEM, 7, "element")
 
 #define KZ_ENUM_LOCK_KIND(ITEM, P) \
   ITEM(P, NONE, 0, "none") ITEM(P, ONE_REGION, 1, "one-lock-region") ITEM(P, ATOMIC_READ, 2, "atomic-read")
@@ -554,6 +662,40 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, OTHER, 0, "other") ITEM(P, CONST_TRIP, 1, "constant-trip")                 \
   ITEM(P, COUNT_BOUNDED, 2, "count-bounded") ITEM(P, POLL, 3, "poll")                \
   ITEM(P, TABLE_WALK, 4, "table-walk") ITEM(P, MESSAGE, 5, "message-loop")
+
+#define KZ_ENUM_LOOP_CERT(ITEM, P)                                                   \
+  ITEM(P, UNDECIDED, 0, "undecided") ITEM(P, UNROLL, 1, "unroll")                    \
+  ITEM(P, AWAIT, 2, "await") ITEM(P, STAR, 3, "star-closed")
+
+#define KZ_ENUM_PRED_FORM(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, DIRECT, 1, "direct-test")                         \
+  ITEM(P, COUNTER_ZERO, 2, "counter-zero") ITEM(P, COMBINED, 3, "combination")
+
+/* L1-i: the body writes none of the relevant locations (the fields the predicate reads and the
+ * extraction targets), through its callees included; L1-ii: the test reads happen in one
+ * critical section of one lock, or are one atomic read; MOD_INCOMPLETE: the transitive write set
+ * could not be closed (an unresolved indirect call or an untyped write is reachable). */
+#define KZ_ENUM_LOOP_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, DELAY_DIRECT, 0x1, "delay-in-body") ITEM(P, L1_MOD, 0x2, "L1-i")           \
+  ITEM(P, L1_READ, 0x4, "L1-ii") ITEM(P, MOD_INCOMPLETE, 0x8, "mod-incomplete")
+
+#define KZ_ENUM_ITER_KIND(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, ELEMENT, 1, "element") ITEM(P, CALL, 2, "call")   \
+  ITEM(P, ARG, 3, "argument") ITEM(P, CALLEE, 4, "callee")
+
+#define KZ_ENUM_ITER_STATUS(ITEM, P)                                                 \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, TAKEN, 1, "taken") ITEM(P, SKIPPED, 2, "skipped") \
+  ITEM(P, RESIDUAL, 3, "residual")
+
+#define KZ_ENUM_ITER_SPAWN(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, ENTRY, 1, "spawn-entry") ITEM(P, TASK_MAIN, 2, "task-main")
+
+#define KZ_ENUM_SPAWN_PARAM_KIND(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, DIRECT, 1, "entry-argument") ITEM(P, VIA_ENTRY, 2, "called-by-entry")
+
+#define KZ_ENUM_FWRITE_KIND(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, FIELD, 1, "field") ITEM(P, RECORD, 2, "record")   \
+  ITEM(P, OUTARG, 3, "address-argument") ITEM(P, UNTYPED, 4, "untyped")
 
 #define KZ_ENUM_TRIP_STATUS(ITEM, P)                                                 \
   ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, EXACT, 1, "exact") ITEM(P, UPPER_BOUND, 2, "upper-bound") \
@@ -656,6 +798,14 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_EXPR_REF, KZ_ENUM_EXPR_REF, 0)          \
   D(KZ_LOCK_KIND, KZ_ENUM_LOCK_KIND, 0)        \
   D(KZ_LOOP_KIND, KZ_ENUM_LOOP_KIND, 0)        \
+  D(KZ_LOOP_CERT, KZ_ENUM_LOOP_CERT, 0)        \
+  D(KZ_PRED_FORM, KZ_ENUM_PRED_FORM, 0)        \
+  D(KZ_LOOP_FLAG, KZ_ENUM_LOOP_FLAGS, 1)       \
+  D(KZ_ITER_KIND, KZ_ENUM_ITER_KIND, 0)        \
+  D(KZ_ITER_STATUS, KZ_ENUM_ITER_STATUS, 0)    \
+  D(KZ_ITER_SPAWN, KZ_ENUM_ITER_SPAWN, 0)      \
+  D(KZ_SPAWN_PARAM_KIND, KZ_ENUM_SPAWN_PARAM_KIND, 0) \
+  D(KZ_FWRITE_KIND, KZ_ENUM_FWRITE_KIND, 0)    \
   D(KZ_TRIP_STATUS, KZ_ENUM_TRIP_STATUS, 0)    \
   D(KZ_INIT_SOURCE, KZ_ENUM_INIT_SOURCE, 0)    \
   D(KZ_CONST_KIND, KZ_ENUM_CONST_KIND, 0)      \
@@ -712,6 +862,29 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_loop, fh, IDX, 0)                         \
   F(kz_fact_loop, kind, ENUM, KZ_LOOP_KIND)           \
   F(kz_fact_loop, trip_status, ENUM, KZ_TRIP_STATUS)  \
+  F(kz_fact_loop, cert, ENUM, KZ_LOOP_CERT)           \
+  F(kz_fact_loop, pred_form, ENUM, KZ_PRED_FORM)      \
+  F(kz_fact_loop, lflags, FLAGS, KZ_LOOP_FLAG)        \
+  F(kz_fact_loop, parent, IDX, 0)                     \
+  F(kz_fact_loop, pred_root, IDX, 0)                  \
+  F(kz_fact_loop, cond_root, IDX, 0)                  \
+  F(kz_fact_iter, site, IDX, 0)                       \
+  F(kz_fact_iter, arg_index, IDX, 0)                  \
+  F(kz_fact_iter, kind, ENUM, KZ_ITER_KIND)           \
+  F(kz_fact_iter, status, ENUM, KZ_ITER_STATUS)       \
+  F(kz_fact_iter, value_kind, ENUM, KZ_IMAGE_KIND)    \
+  F(kz_fact_iter, spawn, ENUM, KZ_ITER_SPAWN)         \
+  F(kz_fact_iter, guard_root, IDX, 0)                 \
+  F(kz_fact_iter, fn, IDX, 0)                         \
+  F(kz_fact_iter, fh, IDX, 0)                         \
+  F(kz_fact_spawn_param, fn, IDX, 0)                  \
+  F(kz_fact_spawn_param, spawn_site, IDX, 0)          \
+  F(kz_fact_spawn_param, entry_fn, IDX, 0)            \
+  F(kz_fact_spawn_param, call_site, IDX, 0)           \
+  F(kz_fact_spawn_param, kind, ENUM, KZ_SPAWN_PARAM_KIND) \
+  F(kz_fact_fwrite, fn, IDX, 0)                       \
+  F(kz_fact_fwrite, kind, ENUM, KZ_FWRITE_KIND)       \
+  F(kz_fact_fwrite, fh, IDX, 0)                       \
   F(kz_fact_init, source, ENUM, KZ_INIT_SOURCE)       \
   F(kz_fact_init, prov, IDX, 0)                       \
   F(kz_fact_init, fh, IDX, 0)                         \

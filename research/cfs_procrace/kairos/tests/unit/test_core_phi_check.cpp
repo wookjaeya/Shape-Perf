@@ -218,6 +218,11 @@ int main() {
       {2, "refutable_by O9;", "", "a trusted entry is refutable, not proved"},
       {2, "refutable_by O9;", "refutable_by O11;", "'O11' is not an obligation"},
       {2, "hb H4 {", "hb H1 {", "duplicate hb rule 'H1'"},
+
+      // ---- caller-side records (QT-4, QT-9) and effect guards -------------------------------------
+      {0, "prov hand_a { tier researcher; kind researcher; authored", "prov hand_a { tier researcher; kind researcher; side caller; authored", "cannot have side caller"},
+      {0, "side rule; file \"libx/b.c\"", "side caller; file \"libx/b.c\"", "a record of tier 'code-derived' cannot have side caller"},
+      {2, "effect free: lifecycle slot(lp.n) -> FREE id UNDEF when tag", "effect free: lifecycle slot(lp.n) -> FREE id UNDEF filter tag", "the guard of a declared_trusted effect is asserted"},
   };
 
   for (const Neg& n : cases) {
@@ -232,6 +237,44 @@ int main() {
       std::fprintf(stderr, "case \"%s\" -> \"%s\"\n  wanted a diagnostic containing: %s\n  got:\n%s\n", n.from, n.to, n.expect, got.c_str());
       ++kztest::state().failures;
     }
+  }
+
+  {  // an appreq that cites a hand-entered record with side caller: the record and the appreq are errors
+    std::vector<SourceText> f = kzmini::files();
+    const std::string from = "prov hand_a { tier researcher; kind researcher; authored";
+    f[0].text.replace(f[0].text.find(from), from.size(), "prov hand_a { tier researcher; kind researcher; side caller; authored");
+    f[2].text.replace(f[2].text.find("appreq doc_call;"), 16, "appreq hand_a;");
+    Profile p;
+    std::vector<Diag> diags;
+    KZ_CHECK(!kz::phi::load_profile(f, &p, &diags).ok());
+    bool record = false, appreq = false;
+    for (const Diag& d : diags) {
+      if (d.message.find("'hand_a': a record of tier 'researcher' cannot have side caller") != std::string::npos) record = true;
+      if (d.message.find("no researcher-authored appreq") != std::string::npos) appreq = true;
+    }
+    KZ_CHECK(record);
+    KZ_CHECK(appreq);
+  }
+  {  // an admitted or issue-derived record may be caller-side (a cited text addressed to the caller)
+    std::vector<SourceText> f = kzmini::files();
+    f[0].text += "prov adm_a { tier admitted; kind code_admission; side caller; file \"src/a.c\"; lines 9 9;\n  sha256 \"1111111111111111111111111111111111111111111111111111111111111111\"; }\n"
+                 "prov iss_a { tier issue-derived; kind issue; side caller; cite \"issue 1\"; }\n";
+    Profile p;
+    std::vector<Diag> diags;
+    KZ_CHECK_OK(kz::phi::load_profile(f, &p, &diags));
+    KZ_CHECK(!kz::phi::has_errors(diags));
+  }
+  {  // an Id compared with an integer outside 0 .. 0xFFFFFFFF: a warning (the comparison is decided by the sorts)
+    std::vector<SourceText> f = kzmini::files();
+    const std::string from = "when state(self(exec)) = PRESENT && tag(owner(exec), Type) != CORE";
+    f[2].text.replace(f[2].text.find(from), from.size(), from + " && id(owner(exec)) != -1 && !(id(owner(exec)) in {0x100000000, BASE}) && id(owner(exec)) != RESERVED");
+    Profile p;
+    std::vector<Diag> diags;
+    KZ_CHECK_OK(kz::phi::load_profile(f, &p, &diags));
+    int warned = 0;
+    for (const Diag& d : diags)
+      if (d.severity == kz::phi::Severity::Warning && d.message.find("is outside 0 .. 0xFFFFFFFF and is compared with the Id") != std::string::npos) ++warned;
+    KZ_CHECK_EQ(warned, 2);  // -1 and 0x100000000; BASE and RESERVED (0xffffffff) are inside
   }
 
   // Positive cases: edits that must still load.

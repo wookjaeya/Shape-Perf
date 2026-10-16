@@ -14,6 +14,11 @@
 // Every table is sorted by a key that does not depend on the order in which the units were read.
 #pragma once
 
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "model.hpp"
 #include "spec.hpp"
 
@@ -23,7 +28,9 @@ void finalize(Model* model, const ExtractSpec& spec);
 
 // The access path of a table walk, resolved against the images of the global objects.  Exposed
 // for tests.  Returns false (with `why`) when the root image or the path is missing.
-bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::vector<ImageFact>* elements, int64_t* trip, std::string* why);
+// `entries` (optional) receives the array entries before the terminator, one per iteration.
+bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::vector<ImageFact>* elements, int64_t* trip, std::string* why,
+                        std::vector<ImageFact>* entries = nullptr);
 
 // Solves the function-pointer flow graph: the functions each node may hold, and whether the
 // node also has a source that cannot be followed.  Exposed for tests.

@@ -191,6 +191,53 @@ int main() {
     KZ_CHECK_ERR(kz::phi::verify_symbols(p, "", &sp, &rep), kz::Err::Invalid);
   }
 
+  // ---- the revision pins, read from git metadata files (no git command) ---------------------------
+  {
+    Profile p;
+    std::vector<Diag> diags;
+    KZ_CHECK(profile_with("", &p, &diags));
+    std::vector<kz::phi::RevisionCheck> revs;
+    // no metadata at all: both pins unverifiable, which is not an error of the call
+    KZ_CHECK_OK(kz::phi::verify_revisions(p, root.string(), &revs));
+    KZ_CHECK_EQ(revs.size(), static_cast<size_t>(2));
+    for (const kz::phi::RevisionCheck& c : revs) KZ_CHECK_EQ(static_cast<int>(c.state), static_cast<int>(kz::phi::RevState::Unverifiable));
+    // main: a detached HEAD; libx: a gitdir file, a symbolic HEAD and a packed ref
+    write_file(root / ".git" / "HEAD", "abcdef0123456789abcdef0123456789abcdef01\n");
+    write_file(root / "libx" / ".git", "gitdir: ../gitmods/libx\n");
+    write_file(root / "gitmods" / "libx" / "HEAD", "ref: refs/heads/main\n");
+    write_file(root / "gitmods" / "libx" / "packed-refs", "# pack-refs with: peeled\n1234567aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/main\n");
+    KZ_CHECK_OK(kz::phi::verify_revisions(p, root.string(), &revs));
+    KZ_CHECK_EQ(revs.size(), static_cast<size_t>(2));
+    // one check per source, in the order of the sources of the checked profile (sorted by name)
+    if (revs.size() == 2) {
+      KZ_CHECK_EQ(revs[0].source, std::string("libx"));
+      KZ_CHECK_EQ(static_cast<int>(revs[0].state), static_cast<int>(kz::phi::RevState::Match));
+      KZ_CHECK_EQ(revs[0].found, std::string("1234567aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+      KZ_CHECK_EQ(revs[1].source, std::string("main"));
+      KZ_CHECK_EQ(static_cast<int>(revs[1].state), static_cast<int>(kz::phi::RevState::Match));
+      KZ_CHECK_EQ(revs[1].found, std::string("abcdef0123456789abcdef0123456789abcdef01"));
+    }
+    // a loose ref wins over the packed one; another commit is a mismatch
+    write_file(root / "gitmods" / "libx" / "refs" / "heads" / "main", "fedcba9876543210fedcba9876543210fedcba98\n");
+    KZ_CHECK_OK(kz::phi::verify_revisions(p, root.string(), &revs));
+    if (revs.size() == 2) {
+      KZ_CHECK_EQ(static_cast<int>(revs[0].state), static_cast<int>(kz::phi::RevState::Mismatch));
+      KZ_CHECK_EQ(revs[0].found, std::string("fedcba9876543210fedcba9876543210fedcba98"));
+      KZ_CHECK_EQ(std::string(kz::phi::rev_state_text(revs[0].state)), std::string("MISMATCH"));
+    }
+    // a HEAD that names an unknown ref is unverifiable, with the reason
+    write_file(root / "gitmods" / "libx" / "HEAD", "ref: refs/heads/other\n");
+    KZ_CHECK_OK(kz::phi::verify_revisions(p, root.string(), &revs));
+    if (revs.size() == 2) {
+      KZ_CHECK_EQ(static_cast<int>(revs[0].state), static_cast<int>(kz::phi::RevState::Unverifiable));
+      KZ_CHECK(revs[0].message.find("refs/heads/other") != std::string::npos);
+    }
+    KZ_CHECK_ERR(kz::phi::verify_revisions(p, (root / "does-not-exist").string(), &revs), kz::Err::Io);
+    fs::remove_all(root / ".git");
+    fs::remove_all(root / "gitmods");
+    fs::remove(root / "libx" / ".git");
+  }
+
   // ---- the source that owns a path (the longest root wins; the empty root has the lowest priority)
   {
     Profile p;

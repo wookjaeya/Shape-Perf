@@ -406,17 +406,30 @@ AVal AbstractDomain::owner_of(const AVal& actor) const {
     r.may_be_undefined = r.must_be_undefined = true;
     return r;
   }
-  r.may_be_undefined = !sure_exec || s_.owner_none;
-  bool first = true;
+  // A listed owner that is not a record of the owner kind of the context (another kind, another key
+  // width) is not an owner: the concrete domain reads it as undefined.  Only the well-formed owners
+  // are hulled, all of the context kind; an ill-formed one only adds "maybe undefined".
+  const int32_t ok_kind = p_.context.owner_kind_index;
+  const size_t width = ok_kind >= 0 ? key_width(p_, ok_kind) : 0;
+  bool first = true, ill_formed = false;
   for (const ResId& o : s_.owners) {
-    r.kind = o.kind;
+    if (o.kind != ok_kind || o.key.size() != width) {
+      ill_formed = true;
+      continue;
+    }
     if (first) {
       for (int64_t k : o.key) r.key.push_back({k, k});
       first = false;
-    } else if (o.key.size() == r.key.size()) {
+    } else {
       for (size_t i = 0; i < o.key.size(); ++i) r.key[i] = hull(r.key[i], {o.key[i], o.key[i]});
     }
   }
+  if (first) {  // no well-formed owner: the owner is undefined in every concrete state described
+    r.may_be_undefined = r.must_be_undefined = true;
+    r.key.clear();
+    return r;
+  }
+  r.may_be_undefined = !sure_exec || s_.owner_none || ill_formed;
   return r;
 }
 

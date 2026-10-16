@@ -67,6 +67,8 @@ occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0] call #19 return #20
 
 findings 0
 
+guard failures 0
+
 final state
   es.app[0] = FREE
   es.app[1] = FREE

@@ -1,3 +1,146 @@
+# analysis basis
+recipe.name = core-cpu1 of the native build, cpu1  (unset)
+recipe.path = core-cpu1.kzb  (unset)
+recipe.sha256 = 442176be01f20001bb92b42143b1250cf18f8946464ada611eb8d13ea376500f  (unset)
+bundle.root = /home/user/work/procrace/cfs_ref/cFS  (unset)
+build.dir = /home/user/work/procrace/cfs_ref/cFS/build-native_std  (unset)
+profile.name = cfs-v7.0.1 / cFS 088b2fa8 / cFE c5fb2b4d / OSAL d2d877a6 / PSP c4b3b0b6  (unset)
+source.cfe.root = cfe  (unset)
+source.cfe.revision_declared = c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd  (from-reference)
+source.cfe.revision_actual = c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd  (from-reference)
+source.cfs.root = .  (unset)
+source.cfs.revision_declared = 088b2fa828db9ff7e00733f1908e0eeb59f66ce3  (from-reference)
+source.cfs.revision_actual = 088b2fa828db9ff7e00733f1908e0eeb59f66ce3  (from-reference)
+source.osal.root = osal  (unset)
+source.osal.revision_declared = d2d877a69cff47452bcca274b309147d48e6c16f  (from-reference)
+source.osal.revision_actual = d2d877a69cff47452bcca274b309147d48e6c16f  (from-reference)
+source.psp.root = psp  (unset)
+source.psp.revision_declared = c4b3b0b65b119e106481ad8e20976ae4d7f554e3  (from-reference)
+source.psp.revision_actual = c4b3b0b65b119e106481ad8e20976ae4d7f554e3  (from-reference)
+source.worktree_state = not checked: the commit is HEAD of the repository; every source file read is hashed (FILE_HASHES)  (unspecified_by_reference)
+compile_db.path = build-native_std/native/default_cpu1/compile_commands.json  (unset)
+compile_db.entries = 1417  (unset)
+link.command = build-native_std/native/default_cpu1/cpu1/CMakeFiles/core-cpu1.dir/link.txt  (unset)
+link.cwd = build-native_std/native/default_cpu1/cpu1  (unset)
+link.inputs = 28 (21 archives)  (unset)
+link.members_total = 173  (unset)
+link.members_in_program = 168  (unset)
+link.not_in_program[libendian_api.a] = cfe_psp_endian_wrappers.c.o  (unset)
+link.not_in_program[libosal_bsp.a] = bsp_default_app_run.c.o, bsp_default_app_startup.c.o, bsp_default_symtab.c.o, bsp_default_resourcecfg.c.o  (unset)
+link.options_ignored = -g -Wl,--export-dynamic -rdynamic -lpthread -ldl -lrt  (unset)
+units.count = 168  (unset)
+units.distinct_flag_sets = 20  (unset)
+compiler.recorded = /usr/bin/cc  (unset)
+binary.path = build-native_std/exe/cpu1/core-cpu1  (unset)
+binary.sha256 = 0edb1ae28780160ebee95adf8861fc76fe7119a30434e9cd8698cb505bc97799  (unset)
+binary.build_id = be6d04f1f80d421efea50cc9f47db848b2a52941  (unset)
+binary.type = ET_DYN (a position-independent executable or a shared object)  (unset)
+compiler.identification = GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0  (unset)
+front_end = Clang LibTooling, clang version 23.0.0git (https://github.com/llvm/llvm-project.git 1053047a4be7d1fece3adaf5e7597f838058c947)  (deviation)
+front_end.arguments_added = -Wno-unknown-warning-option -Wno-error -w -resource-dir=/home/user/work/llvm-project/build/lib/clang/23  (deviation)
+const.CFE_PLATFORM_ES_VOLATILE_STARTUP_FILE = "/ram/cfe_es_startup.scr"   [evaluated in cfe/modules/es/fsw/src/cfe_es_apps.c]  (unset)
+const.CFE_PLATFORM_ES_NONVOL_STARTUP_FILE = "/cf/cfe_es_startup.scr"   [evaluated in cfe/modules/es/fsw/src/cfe_es_apps.c]  (unset)
+const.CFE_PLATFORM_CORE_MAX_STARTUP_MSEC = 30000   [evaluated in cfe/modules/es/fsw/src/cfe_es_start.c]  (unset)
+const.CFE_PLATFORM_ES_MAX_APPLICATIONS = 32   [evaluated in cfe/modules/es/fsw/src/cfe_es_start.c]  (unset)
+generated.core_module_list.path = build-native_std/native/default_cpu1/cpu1/cfe_static_module_list.c  (unset)
+generated.core_module_list.sha256 = 4ce2e4f8f10e2bb8291362621e73773aee246a5b53d04095487e43fdc27b1a1c  (unset)
+generated.module_version_table.path = build-native_std/native/default_cpu1/cpu1/cfe_module_version_table.c  (unset)
+generated.module_version_table.sha256 = 4615470b7c90f7042ba7123a6b2af7b656e2b3cbff612370d123f35fd0367bb9  (unset)
+generated.static_symbol_list.path = build-native_std/native/default_cpu1/cpu1/cfe_static_symbol_list.c  (unset)
+generated.static_symbol_list.sha256 = e39bed306e84c14c43bd780c37b613145ba3a5e19f546ac4f9aba2158217c537  (unset)
+generated.psp_module_list.path = build-native_std/native/default_cpu1/cpu1/cfe_psp_module_list.c  (unset)
+generated.psp_module_list.sha256 = cc10a3506f6f7b81282e7a84dcd2171b4533638cc8c02431817c38e19f088d32  (unset)
+generated.build_env_table.path = build-native_std/native/default_cpu1/cpu1/cfe_build_env_table.c  (unset)
+generated.build_env_table.sha256 = ebac47dd2849b67c191d0dc04b43db4cfa3c696d2f648f6d4e2edb655092971e  (unset)
+table.CFE_CORE_MODULE_LIST.entries = 13 (null-terminated)   [initializer in build-native_std/native/default_cpu1/cpu1/cfe_static_module_list.c]  (unset)
+table.CFE_CORE_MODULE_LIST[0] = "core_api"  (unset)
+table.CFE_CORE_MODULE_LIST[1] = "config"  (unset)
+table.CFE_CORE_MODULE_LIST[2] = "es"  (unset)
+table.CFE_CORE_MODULE_LIST[3] = "evs"  (unset)
+table.CFE_CORE_MODULE_LIST[4] = "fs"  (unset)
+table.CFE_CORE_MODULE_LIST[5] = "sb"  (unset)
+table.CFE_CORE_MODULE_LIST[6] = "tbl"  (unset)
+table.CFE_CORE_MODULE_LIST[7] = "time"  (unset)
+table.CFE_CORE_MODULE_LIST[8] = "osal"  (unset)
+table.CFE_CORE_MODULE_LIST[9] = "psp"  (unset)
+table.CFE_CORE_MODULE_LIST[10] = "msg"  (unset)
+table.CFE_CORE_MODULE_LIST[11] = "sbr"  (unset)
+table.CFE_CORE_MODULE_LIST[12] = "resourceid"  (unset)
+table.CFE_CORE_MODULE_OBJTAB.entries = 10 (null-terminated)   [initializer in build-native_std/native/default_cpu1/cpu1/cfe_static_module_list.c]  (unset)
+table.CFE_CORE_MODULE_OBJTAB[0] = &CFE_CONFIG_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[1] = &CFE_ES_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[2] = &CFE_EVS_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[3] = &CFE_FS_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[4] = &CFE_SB_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[5] = &CFE_TBL_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[6] = &CFE_TIME_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[7] = &CFE_MSG_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[8] = &CFE_SBR_ModuleEntry  (unset)
+table.CFE_CORE_MODULE_OBJTAB[9] = &CFE_RESOURCEID_ModuleEntry  (unset)
+table.CFE_MODULE_VERSION_TABLE.entries = 35 (null-terminated)   [initializer in build-native_std/native/default_cpu1/cpu1/cfe_module_version_table.c]  (unset)
+table.CFE_MODULE_VERSION_TABLE[0] = "MISSION", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[1] = "core_api", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[2] = "core_private", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[3] = "ci_lab", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[4] = "to_lab", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[5] = "sch_lab", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[6] = "cfe_assert", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[7] = "cfe_testcase", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[8] = "sample_app", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[9] = "sample_lib", "git:v7.0.0-10-g2d8b7e8"  (unset)
+table.CFE_MODULE_VERSION_TABLE[10] = "cf", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[11] = "hs", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[12] = "md", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[13] = "mm", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[14] = "cs", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[15] = "fm", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[16] = "lc", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[17] = "sc", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[18] = "ds", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[19] = "hk", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[20] = "sbn", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[21] = "sbn_udp", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[22] = "sbn_f_remap", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[23] = "config", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[24] = "es", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[25] = "evs", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[26] = "fs", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[27] = "sb", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[28] = "tbl", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[29] = "time", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[30] = "osal", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[31] = "psp", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[32] = "msg", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[33] = "sbr", "git:v7.0.1"  (unset)
+table.CFE_MODULE_VERSION_TABLE[34] = "resourceid", "git:v7.0.1"  (unset)
+startup.reset_type = POWERON  (declared-assumption)
+startup.rule_source[cfe/modules/es/fsw/src/cfe_es_apps.c:111-200] = CFE_ES_StartApplications: the file that is opened for each reset type  (unset)
+startup.rule_source[psp/fsw/pc-linux/src/cfe_psp_start.c:374-383] = the PSP maps /cf to ./cf  (unset)
+startup.rule_source[psp/fsw/pc-linux/src/cfe_psp_start.c:449-449] = the PSP passes the non-volatile startup file name to the cFE entry point  (unset)
+startup.files_tried = nonvolatile  (unset)
+startup.file[nonvolatile] = /cf/cfe_es_startup.scr -> build-native_std/exe/cpu1/cf/cfe_es_startup.scr  (unset)
+startup.script = build-native_std/exe/cpu1/cf/cfe_es_startup.scr  (unset)
+startup.script.sha256 = 9f934bad571a1fbb0645fc8ac654f8e8d70de21b2bfd955e147764ae6b03613f  (unset)
+startup.entry[0] = library cfe_assert, CFE_Assert_LibInit, ASSERT_LIB, 0, 0, 0x0, 0  (unset)
+startup.entry[1] = library sample_lib, SAMPLE_LIB_Init, SAMPLE_LIB, 0, 0, 0x0, 0  (unset)
+startup.entry[2] = app sch_lab, SCH_LAB_AppMain, SCH_LAB, 35, 32768, 0x0, 0  (unset)
+startup.entry[3] = app ci_lab, CI_LAB_AppMain, CI_LAB, 40, 32768, 0x0, 0  (unset)
+startup.entry[4] = app to_lab, TO_LAB_AppMain, TO_LAB, 45, 32768, 0x0, 0  (unset)
+startup.entry[5] = app sample_app, SAMPLE_APP_Main, SAMPLE_APP, 50, 32768, 0x0, 0  (unset)
+startup.entry[6] = app lc, LC_AppMain, LC, 70, 131072, 0x0, 0  (unset)
+startup.entry[7] = app cf, CF_AppMain, CF, 70, 131072, 0x0, 0  (unset)
+startup.entry[8] = app ds, DS_AppMain, DS, 70, 131072, 0x0, 0  (unset)
+startup.entry[9] = app fm, FM_AppMain, FM, 70, 131072, 0x0, 0  (unset)
+startup.entry[10] = app hk, HK_AppMain, HK, 70, 131072, 0x0, 0  (unset)
+startup.entry[11] = app hs, HS_AppMain, HS, 70, 131072, 0x0, 0  (unset)
+startup.entry[12] = app mm, MM_AppMain, MM, 70, 131072, 0x0, 0  (unset)
+startup.entry[13] = app sc, SC_AppMain, SC, 70, 131072, 0x0, 0  (unset)
+startup.entry[14] = app md, MD_AppMain, MD, 70, 131072, 0x0, 0  (unset)
+startup.entry[15] = app cs, CS_AppMain, CS, 70, 131072, 0x0, 0  (unset)
+startup.entry[16] = app sbn, SBN_AppMain, SBN, 70, 131072, 0x0, 0  (unset)
+startup.entries = 2 libraries, 15 applications  (unset)
+config.module_version_table.effect_on_observed_uses = 24 observed uses with the generated table, 11 with a NULL table (claim, unchecked)  (declared-assumption)
+
 # extraction summary
 extract
   translation units          168
@@ -6,6 +149,8 @@ extract
   indirect calls             54 (resolved 47, unresolved 7)
   spawn calls                4 (entry resolved 4)
   loops                      257 (table walks resolved 3, failed 0)
+  certificate-view rules     unroll 58, await 1, star-closed 198
+  spawn parameters           1, unrolled iteration rows 314
   out-pointer summaries      store-only 1, escaping 0, unsummarized 0
   untyped write sites        99 in the program, 0 of them count for a target
   location CFE_ES_AppRecord_t.AppId   writers 5 (direct 2, data function 3, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
@@ -20,56 +165,104 @@ extract
 [init] 1
   CFE_SB_Global_t.AppId in CFE_SB_Global zero-initialized value=0 defined at cfe/modules/sb/fsw/src/cfe_sb_task.c:40:17
 [writers] 3
-  CFE_SB_Global_t.AppId memset at cfe/modules/sb/fsw/src/cfe_sb_init.c:50:5 in CFE_SB_EarlyInit value=const 0 [fill 0] key=&CFE_SB_Global {early-init,init-tree,covers-more-than-the-field} COMPUTED
-  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:754 value=symbolic [CFE_ES_AppRecordGetID(AppRecPtr)] key=*CFE_ES_GetAppID argument 0 guard=(ne local:AppRecPtr 0) {} COMPUTED
-  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:759 value=const 0 [CFE_ES_APPID_UNDEFINED] key=*CFE_ES_GetAppID argument 0 guard=(not (ne local:AppRecPtr 0)) {} COMPUTED
-[locs] 6
+  CFE_SB_Global_t.AppId memset at cfe/modules/sb/fsw/src/cfe_sb_init.c:50:5 in CFE_SB_EarlyInit value=const 0 [fill 0] key=&CFE_SB_Global {early-init,init-tree,covers-more-than-the-field} n/a
+  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:754 value=symbolic [CFE_ES_AppRecordGetID(AppRecPtr)] key=*CFE_ES_GetAppID argument 0 guard=(and (not (eq param:AppIdPtr#0 0)) (ne local:AppRecPtr 0)) {} n/a
+  CFE_SB_Global_t.AppId out-pointer at cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 in CFE_SB_AppInit via CFE_ES_GetAppID cfe/modules/es/fsw/src/cfe_es_api.c:759 value=const 0 [CFE_ES_APPID_UNDEFINED] key=*CFE_ES_GetAppID argument 0 guard=(and (not (eq param:AppIdPtr#0 0)) (not (ne local:AppRecPtr 0))) {} n/a
+[locs] 1
   CFE_SB_Global_t.AppId writer-set-complete writers=3 (direct 0, data-fn 1, out-pointer 2) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=7
 [outcalls] 1
   site 2436 cfe/modules/sb/fsw/src/cfe_sb_task.c:138:5 CFE_ES_GetAppID arg 0 = &CFE_SB_Global_t.AppId store-only stores=2
+
+# functions whose own body writes the identity field (or the whole record)
+[fwrites] 2
+  CFE_SB_AppInit address-argument CFE_SB_Global_t.AppId at cfe/modules/sb/fsw/src/cfe_sb_task.c:138
+  CFE_SB_EarlyInit record CFE_SB_Global_t.* at cfe/modules/sb/fsw/src/cfe_sb_init.c:50
 
 # loops that walk a table or wait
   loop 8 site 135 cfe/modules/es/fsw/src/cfe_es_api.c:410:13 in CFE_ES_ExitApp depth=1 poll trip=unknown exits=0 calls=1
       delay-call site 136
       exit 0
       mod [(call-result OS_TaskDelay)]
+      rule star-closed {delay-in-body,L1-i}: star-closed, unmodelled-sync: no recognised predicate (the loop has no exit)
   loop 9 site 148 cfe/modules/es/fsw/src/cfe_es_api.c:585:5 in CFE_ES_WaitForSystemState depth=1 poll trip=unknown exits=1 calls=1
       delay-call site 149
+      lock atomic-read site -
       exit (or (not (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0)) (and (and (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0) (not (gt local:WaitRemaining 50))) (not (gt local:WaitRemaining 0))))
       mod [local:Status, local:WaitRemaining, local:WaitTime, (call-result OS_TaskDelay)]
       budget [local:WaitRemaining, param:TimeOutMilliseconds#1, local:WaitTime, (store local:WaitTime 50), (store local:WaitTime local:WaitRemaining)]
+      condition-exits (not (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0))
+      predicate direct-test (not (lt field:CFE_ES_Global_t.SystemState param:MinSystemState#0))
+      rule star-closed {delay-in-body,L1-ii,mod-incomplete}: star-closed, unmodelled-sync: L1 (i) undecided: CFE_ES_Global_t.SystemState is not an extraction target: no A-TYPE listing, writes through pointers are not excluded
   loop 13 site 418 cfe/modules/es/fsw/src/cfe_es_apps.c:573:5 in CFE_ES_GetTaskFunction depth=1 poll trip=unknown exits=1 calls=5
       delay-call site 419
       lock one-lock-region site 420
       exit (or (eq local:ReturnCode 0) (le local:Timeout 0))
       mod [local:EntryFunc, local:ReturnCode, local:TaskRecPtr, local:Timeout, (call-result CFE_ES_GetTaskRecordByContext), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_UnlockSharedData), (call-result CFE_ResourceId_IsDefined), (call-result OS_TaskDelay)]
       budget [local:Timeout, 1000, 50]
+      condition-exits (eq local:ReturnCode 0)
+      rule star-closed {delay-in-body,L1-i,L1-ii}: star-closed, unmodelled-sync: no recognised predicate (the condition reads the local ReturnCode, which is not a recognised counter: it is defined at cfe/modules/es/fsw/src/cfe_es_apps.c:584:28 otherwise than by one reset to 0 and increments in one inner loop)
   loop 18 site 529 cfe/modules/es/fsw/src/cfe_es_apps.c:1526:5 in CFE_ES_CleanUpApp depth=1 table-walk trip=exact(10) exits=1 calls=3 table=GLOBAL_CONFIGDATA.CoreObjectTable
       exit (eq local:Entry 0)
       mod [local:CleanupStatus, local:Entry, local:ReturnCode, local:i, (call-result <indirect>), (call-result CFE_ES_WriteToSysLog), (call-result CFE_ResourceId_ToInteger)]
+      rule unroll {}: unrolled: 10 iterations, one per element of GLOBAL_CONFIGDATA.CoreObjectTable in its static-initializer image
   loop 42 site 1109 cfe/modules/es/fsw/src/cfe_es_start.c:752:5 in CFE_ES_CreateObjects depth=1 table-walk trip=exact(10) exits=1 calls=5 table=GLOBAL_CONFIGDATA.CoreObjectTable
       delay-call site 1113
       exit (eq local:Entry 0)
       mod [local:Entry, local:ReturnCode, local:i, (call-result <indirect>), (call-result CFE_ES_WriteToSysLog), (call-result CFE_PSP_Panic), (call-result OS_TaskDelay)]
+      rule unroll {delay-in-body}: unrolled: 10 iterations, one per element of GLOBAL_CONFIGDATA.CoreObjectTable in its static-initializer image
   loop 43 site 1115 cfe/modules/es/fsw/src/cfe_es_start.c:776:5 in CFE_ES_CreateObjects depth=1 table-walk trip=exact(10) exits=1 calls=16 table=GLOBAL_CONFIGDATA.CoreObjectTable
       delay-call site 1134
       lock none site 1116
       exit (eq local:Entry 0)
       mod [field:CFE_ES_AppRecord_t.AppName, field:CFE_ES_AppRecord_t.Type, field:CFE_ES_AppStartParams_t.ExceptionAction, field:CFE_ES_ControlReq_t.AppControlRequest, field:CFE_ES_ControlReq_t.AppTimerMsec, field:CFE_ES_Global_t.LastAppId, field:CFE_ES_Global_t.RegisteredCoreApps, field:CFE_ES_TaskStartParams_t.Priority, field:CFE_ES_TaskStartParams_t.StackSize, local:AppRecPtr, local:Entry, local:PendingAppId, local:ReturnCode, local:i, (call-result CFE_ES_AppRecordSetUsed), (call-result CFE_ES_LocateAppRecordByID), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_MainTaskSyncDelay), (call-result CFE_ES_StartAppTask), (call-result CFE_ES_UnlockSharedData), (call-result CFE_ES_WriteToSysLog), (call-result CFE_PSP_Panic), (call-result CFE_ResourceId_FindNext), (call-result OS_TaskDelay), (call-result memset), (call-result strncpy)]
+      rule unroll {delay-in-body}: unrolled: 10 iterations, one per element of GLOBAL_CONFIGDATA.CoreObjectTable in its static-initializer image
   loop 44 site 1137 cfe/modules/es/fsw/src/cfe_es_start.c:871:5 in CFE_ES_MainTaskSyncDelay@cfe/modules/es/fsw/src/cfe_es_start.c:860 depth=1 poll trip=unknown exits=2 calls=5
       delay-call site 1142
       lock one-lock-region site 1138
-      exit (or (eq local:AppNotReadyCounter 0) (and (not (gt local:WaitRemaining 50)) (not (gt local:WaitRemaining 0))))
+      exit (or (eq local:AppNotReadyCounter 0) (and (and (not (eq local:AppNotReadyCounter 0)) (not (gt local:WaitRemaining 50))) (not (gt local:WaitRemaining 0))))
       mod [local:AppNotReadyCounter, local:AppRecPtr, local:Status, local:WaitRemaining, local:WaitTime, local:i, (call-result CFE_ES_AppRecordIsUsed), (call-result CFE_ES_LockSharedData), (call-result CFE_ES_UnlockSharedData), (call-result OS_TaskDelay)]
       budget [local:WaitRemaining, param:TimeOutMilliseconds#1, local:WaitTime, (store local:WaitTime 50), (store local:WaitTime local:WaitRemaining)]
+      condition-exits (eq local:AppNotReadyCounter 0)
+      predicate counter-zero (forall i 32 (not (and (call-result CFE_ES_AppRecordIsUsed (seq local:AppRecPtr)) (lt field:CFE_ES_AppRecord_t.AppState param:AppStateId#0))) (seq (cursor AppRecPtr 32 field:CFE_ES_Global_t.AppTable)))
+      rule await {delay-in-body,L1-i,L1-ii}: await(predicate) {success} {timeout}: a counter-zero test after a constant-trip loop, rewritten as forall; L1 (i) and (ii) hold on the extracted facts (relevant locations: 6, functions called from the body: 93); lemma L1 itself is not decided here
   loop 194 site 4921 osal/src/os/shared/src/osapi-common.c:367:5 in OS_DeleteAllObjects depth=1 poll trip=unknown exits=1 calls=5
       delay-call site 4926
       exit (or (eq local:ObjectCount 0) (gt local:TryCount 4))
       mod [local:ObjectCount, local:TryCount, (call-result OS_ForEachObject), (call-result OS_ForEachObjectOfType), (call-result OS_TaskDelay)]
+      condition-exits (or (eq local:ObjectCount 0) (gt local:TryCount 4))
+      rule star-closed {delay-in-body,mod-incomplete}: star-closed, unmodelled-sync: no recognised predicate (the condition reads the local ObjectCount, which is not a recognised counter: its address is taken)
   loop 246 site 5965 psp/fsw/modules/linux_sysmon/linux_sysmon.c:341:17 in linux_sysmon_Start@psp/fsw/modules/linux_sysmon/linux_sysmon.c:304 depth=1 poll trip=unknown exits=0 calls=1
       delay-call site 5966
       exit (not (and (eq field:linux_sysmon_cpuload_state_t.num_cpus 0) (lt local:DelayCount 100000000)))
       mod [local:DelayCount, (call-result OS_TaskDelay)]
+      condition-exits (not (and (eq field:linux_sysmon_cpuload_state_t.num_cpus 0) (lt local:DelayCount 100000000)))
+      rule star-closed {delay-in-body,mod-incomplete}: star-closed, unmodelled-sync: no recognised predicate (the condition reads the local DelayCount, which is not a recognised counter: it is defined at psp/fsw/modules/linux_sysmon/linux_sysmon.c:343:21 otherwise than by one reset to 0 and increments in one inner loop)
+
+# the order the table walks establish (unrolled iterations)
+[order] 3
+  loop 18 cfe/modules/es/fsw/src/cfe_es_apps.c:1526 in CFE_ES_CleanUpApp: call site 530 <indirect> (the callee per iteration)
+    iter 2 CFE_EVS_ModuleEntry -> CFE_EVS_CleanUpApp  taken
+    iter 4 CFE_SB_ModuleEntry -> CFE_SB_CleanUpApp  taken
+    iter 5 CFE_TBL_ModuleEntry -> CFE_TBL_CleanUpApp  taken
+    iter 6 CFE_TIME_ModuleEntry -> CFE_TIME_CleanUpApp  taken
+  loop 42 cfe/modules/es/fsw/src/cfe_es_start.c:752 in CFE_ES_CreateObjects: call site 1111 <indirect> (the callee per iteration)
+    iter 0 CFE_CONFIG_ModuleEntry -> CFE_Config_Init  taken
+    iter 1 CFE_ES_ModuleEntry -> CFE_ES_CDS_EarlyInit  taken
+    iter 2 CFE_EVS_ModuleEntry -> CFE_EVS_EarlyInit  taken
+    iter 3 CFE_FS_ModuleEntry -> CFE_FS_EarlyInit  taken
+    iter 4 CFE_SB_ModuleEntry -> CFE_SB_EarlyInit  taken
+    iter 5 CFE_TBL_ModuleEntry -> CFE_TBL_EarlyInit  taken
+    iter 6 CFE_TIME_ModuleEntry -> CFE_TIME_EarlyInit  taken
+  loop 43 cfe/modules/es/fsw/src/cfe_es_start.c:776 in CFE_ES_CreateObjects: call site 1123 CFE_ES_StartAppTask arg 2 (task-main)
+    iter 1 CFE_ES_ModuleEntry -> CFE_ES_TaskMain  residual if (ne local:AppRecPtr 0)
+    iter 2 CFE_EVS_ModuleEntry -> CFE_EVS_TaskMain  residual if (ne local:AppRecPtr 0)
+    iter 4 CFE_SB_ModuleEntry -> CFE_SB_TaskMain  residual if (ne local:AppRecPtr 0)
+    iter 5 CFE_TBL_ModuleEntry -> CFE_TBL_TaskMain  residual if (ne local:AppRecPtr 0)
+    iter 6 CFE_TIME_ModuleEntry -> CFE_TIME_TaskMain  residual if (ne local:AppRecPtr 0)
+
+# parameters that carry the function a spawned task runs
+[spawnparams] 1
+  CFE_ES_StartAppTask param 2 called-by-entry: spawn site 429 entry CFE_ES_TaskEntryPoint called at site 428 cfe/modules/es/fsw/src/cfe_es_apps.c:639:9 via L:CFE_ES_TaskEntryPoint/RealEntryFunc
 
 # the images of the tables the loops walk
 [image] 72
@@ -297,6 +490,52 @@ extract
   site 6220 psp/fsw/shared/src/cfe_psp_module.c:101:17 in CFE_PSP_ModuleInitList indirect-call -> timebase_posix_clock_Init via CFE_PSP_ModuleApi_t.Init of 8
 
 # derives rows of the event calls: 59, of them derived from CFE_SB_Global_t.AppId: 39
+  cfe/modules/sb/fsw/src/cfe_sb_api.c: 34
+  cfe/modules/sb/fsw/src/cfe_sb_priv.c: 1
+  cfe/modules/sb/fsw/src/cfe_sb_task.c: 4
+  site 1931 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:228:54 hops=0
+  site 1933 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:239:54 hops=0
+  site 1935 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:247:54 hops=0
+  site 1937 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:255:54 hops=0
+  site 1939 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:262:54 hops=0
+  site 1941 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:277:50 hops=0
+  site 1967 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:474:54 hops=0
+  site 1969 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:482:54 hops=0
+  site 1972 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:504:50 hops=0
+  site 1981 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:582:54 hops=0
+  site 1984 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:590:54 hops=0
+  site 1988 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:607:50 hops=0
+  site 1995 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:678:54 hops=0
+  site 1997 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:685:54 hops=0
+  site 2000 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:698:50 hops=0
+  site 2004 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:753:54 hops=0
+  site 2006 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:761:54 hops=0
+  site 2016 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:864:54 hops=0
+  site 2018 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:872:54 hops=0
+  site 2020 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:885:50 hops=0
+  site 2043 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1108:54 hops=0
+  site 2046 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1118:54 hops=0
+  site 2050 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1128:54 hops=0
+  site 2054 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1138:54 hops=0
+  site 2056 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1146:54 hops=0
+  site 2059 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1157:54 hops=0
+  site 2062 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1168:54 hops=0
+  site 2066 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1185:50 hops=0
+  site 2071 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1201:50 hops=0
+  site 2090 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1345:54 hops=0
+  site 2093 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1355:54 hops=0
+  site 2097 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1365:54 hops=0
+  site 2101 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1375:54 hops=0
+  site 2105 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_api.c:1392:50 hops=0
+  site 2322 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_priv.c:786:70 hops=0
+  site 2530 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_task.c:673:50 hops=0
+  site 2534 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_task.c:744:54 hops=0
+  site 2535 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_task.c:755:54 hops=0
+  site 2536 arg 2 of CFE_EVS_SendEventWithAppID: derived from CFE_SB_Global_t.AppId read at cfe/modules/sb/fsw/src/cfe_sb_task.c:765:54 hops=0
+# the violating sites of the gdb record among the derived sites
+  cfe/modules/sb/fsw/src/cfe_sb_api.c:277: derived
+  cfe/modules/sb/fsw/src/cfe_sb_api.c:1185: derived
+  cfe/modules/sb/fsw/src/cfe_sb_priv.c:786: derived
 
 # reachability of the event calls (counts per root), spawn edges not followed
 reach-report 1

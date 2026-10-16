@@ -3,6 +3,14 @@
 // environment).  Reading /proc/<pid>/... is not an in-process lookup: the traced process runs no
 // code of the observer (SPEC 5.7).  Everything is best effort at the time of the call; a thread
 // that is gone by then is reported as missing, never filled in.
+//
+// These reads are actions of the observer on the running target (PI decision D1: separate the
+// observer's actions in the observation-effect record).  Every capture counts the /proc entries
+// it read (`reads`); the caller times them and reports both as PERTURBATION kind proc-capture.
+// Reading `environ` and `cmdline` copies the target's memory (access_remote_vm), which takes the
+// target's address-space lock; mode `status` reads only /proc/<pid>/status of the process (and
+// stat/status of each thread), mode `full` also cmdline, environ, the exe and cwd links, cgroup
+// and limits.
 #pragma once
 
 #include <cstdint>
@@ -13,9 +21,14 @@
 
 namespace kz::probe {
 
+enum class ProcCaptureMode { Full, Status };
+const char* proc_capture_mode_name(ProcCaptureMode mode);
+bool parse_proc_capture_mode(const std::string& text, ProcCaptureMode* out);  // "full" | "status"
+
 struct ThreadCapture {
   uint32_t pid = 0, tid = 0;
   bool ok = false;
+  uint32_t reads = 0;         // /proc entries read (attempted)
   std::string comm;
   char state = '?';
   int policy = -1;            // 0 other, 1 fifo, 2 rr, 3 batch, 5 idle, 6 deadline
@@ -29,6 +42,8 @@ struct ThreadCapture {
 struct ProcessCapture {
   uint32_t pid = 0;
   bool ok = false;
+  ProcCaptureMode mode = ProcCaptureMode::Full;
+  uint32_t reads = 0;                     // /proc entries read (attempted)
   std::string uid, gid, groups;           // the Uid:/Gid:/Groups: lines of /proc/<pid>/status
   std::string cap_eff, cap_prm, cap_bnd, no_new_privs, seccomp, cpus_allowed;
   std::string cmdline;                    // arguments joined by single spaces
@@ -41,8 +56,8 @@ struct ProcessCapture {
 };
 
 Status capture_thread(uint32_t pid, uint32_t tid, ThreadCapture* out);
-Status capture_process(uint32_t pid, ProcessCapture* out);
-// The tids that exist now in /proc/<pid>/task, sorted.
+Status capture_process(uint32_t pid, ProcessCapture* out, ProcCaptureMode mode = ProcCaptureMode::Full);
+// The tids that exist now in /proc/<pid>/task, sorted (one read of the directory).
 std::vector<uint32_t> list_threads(uint32_t pid);
 const char* policy_name(int policy);
 

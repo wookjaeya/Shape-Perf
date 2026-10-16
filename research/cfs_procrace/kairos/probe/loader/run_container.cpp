@@ -24,6 +24,21 @@ bool build_id_from_hex(const std::string& hex, uint8_t out[20]) {
   return true;
 }
 
+std::vector<uint32_t> trap_owners(const std::vector<kz::trace::SiteSpec>& sites) {
+  std::vector<uint32_t> out(sites.size(), KZ_NONE32);
+  for (size_t i = 0; i < sites.size(); ++i) {
+    // The owner of the trap at a file offset: the first ENTRY or POINT site there.
+    uint32_t own = KZ_NONE32;
+    for (size_t j = 0; j < sites.size(); ++j)
+      if (sites[j].file_offset == sites[i].file_offset && sites[j].kind != KZ_SITE_KIND_RET_PROBE) {
+        own = static_cast<uint32_t>(j);
+        break;
+      }
+    if (own != KZ_NONE32 && own != i) out[i] = sites[own].site;
+  }
+  return out;
+}
+
 Status write_run_container(const RunInputs& in, Bytes* out) {
   ContainerWriter w(KZ_ARTIFACT_RUN);
   w.set_basis_hash(in.basis_artifact);
@@ -90,14 +105,17 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
   meta[0].boot_ns = in.boot_ns;
   if (!(s = w.add_section(KZ_SEC_RUNMETA, meta)).ok()) return s;
 
-  // Perturbation accounting (SPEC 4.13): hits per site, observer CPU, process lifetime.
+  // Perturbation accounting (SPEC 4.13): hits per site, observer CPU, process lifetime, /proc reads.
   std::vector<kz_perturbation> pert;
+  const std::vector<uint32_t> owner = trap_owners(in.sites);
   for (size_t i = 0; i < in.sites.size(); ++i) {
     kz_perturbation p;
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_PROBE_HITS;
-    p.cost_class = in.sites[i].insn_class;
+    // A return site's own cost is the return trampoline; its entry trap is in the owner's row.
+    p.cost_class = in.sites[i].kind == KZ_SITE_KIND_RET_PROBE ? static_cast<uint32_t>(KZ_INSN_CLASS_RET_TRAMPOLINE) : in.sites[i].insn_class;
     p.site = in.sites[i].site;
+    p.shares_trap_with = owner[i];
     p.count = i < in.decoded.stats.site_hits.size() ? in.decoded.stats.site_hits[i] : 0;
     pert.push_back(p);
   }
@@ -106,12 +124,22 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_OBSERVER_CPU;
     p.site = KZ_NONE32;
+    p.shares_trap_with = KZ_NONE32;
     p.ns = in.observer_cpu_ns;
     pert.push_back(p);
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_BOOT_TIME;
     p.site = KZ_NONE32;
+    p.shares_trap_with = KZ_NONE32;
     p.ns = in.boot_ns;
+    pert.push_back(p);
+    std::memset(&p, 0, sizeof p);
+    p.kind = KZ_PERTURBATION_KIND_PROC_CAPTURE;
+    p.cost_class = KZ_INSN_CLASS_UNKNOWN;
+    p.site = KZ_NONE32;
+    p.shares_trap_with = KZ_NONE32;
+    p.count = in.proc_reads;
+    p.ns = in.proc_ns;
     pert.push_back(p);
   }
   if (!(s = w.add_section(KZ_SEC_PERTURBATION, pert)).ok()) return s;

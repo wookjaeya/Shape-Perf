@@ -182,8 +182,31 @@ Z get_id ret result=0xc0000001
 )",
                          with_version);
     KZ_CHECK_OK(r.status);
-    if (!r.result.findings.empty()) std::fprintf(stderr, "findings:\n%s", show_findings(r).c_str());
-    KZ_CHECK_EQ(r.result.findings.size(), static_cast<size_t>(0));
+    // Four points execute while their asserted guard (`when`) is false in the replay: W's finish (tag
+    // CORE), Z's finish (its slot is not LIVE), the scan of slot 1 (stage not TWO) and the free of slot 1
+    // (not EXTERNAL).  Each is a finding and a guard failure; the last one is a refutation of the
+    // declared-trusted guard of free_up.free and names its obligations.  None of them is applied.
+    if (r.result.findings.size() != 4) std::fprintf(stderr, "findings:\n%s", show_findings(r).c_str());
+    KZ_CHECK_EQ(r.result.findings.size(), static_cast<size_t>(4));
+    KZ_CHECK_EQ(r.result.guard_failures.size(), static_cast<size_t>(4));
+    if (r.result.guard_failures.size() == 4) {
+      const std::vector<kz::eval::GuardFailure>& g = r.result.guard_failures;
+      KZ_CHECK_EQ(g[0].op + "." + g[0].effect, std::string("finish.to_two"));
+      KZ_CHECK_EQ(g[1].op + "." + g[1].effect, std::string("finish.to_two"));
+      KZ_CHECK_EQ(g[2].op + "." + g[2].effect, std::string("scan.wait_one"));
+      KZ_CHECK_EQ(g[3].op + "." + g[3].effect, std::string("free_up.free"));
+      KZ_CHECK(!g[0].trusted && !g[1].trusted && !g[2].trusted);
+      KZ_CHECK(g[0].refutable_by.empty());
+      KZ_CHECK(g[3].trusted);
+      KZ_CHECK_EQ(g[3].refutable_by.size(), static_cast<size_t>(2));
+      if (g[3].refutable_by.size() == 2) {
+        KZ_CHECK_EQ(g[3].refutable_by[0], std::string("O3"));
+        KZ_CHECK_EQ(g[3].refutable_by[1], std::string("O4"));
+      }
+      KZ_CHECK(g[0].event < g[1].event && g[1].event < g[2].event && g[2].event < g[3].event);
+    }
+    KZ_CHECK(r.dump.find("refuted refutable_by O3 O4") != std::string::npos);
+    KZ_CHECK(r.dump.find("guard failures 4") != std::string::npos);
     // `lifecycle all` set every instance; later effects changed single ones
     KZ_CHECK_EQ(state_name(p, r, "slot", 0), std::string("FREE"));
     KZ_CHECK_EQ(state_name(p, r, "slot", 1), std::string("LIVE"));
@@ -216,6 +239,75 @@ Z get_id ret result=0xc0000001
     }
     // the second task's get_id: the conjunct fails and the outcome says not ready because of it
     KZ_CHECK(r.dump.find("finding") != std::string::npos);
+  }
+  {  // a filter guard (`filter`) at a point both branches reach: a false guard selects the other branch
+    // and is not a finding; an asserted guard (`when`) that holds is applied as usual
+    const Run r = replay(p, R"(
+const TABLE 4
+owner W 1
+M create_all.reserve pt lp.n=1
+M create_all.publish pt lp.n=1 lp.pid=0x1001
+W get_id call
+W get_id.alive pt
+W get_id.store_ok pt out.IdPtr=@Box.id value=0x1001
+W get_id.store_bad pt out.IdPtr=@Box.id
+W get_id ret result=0
+)",
+                         with_version);
+    KZ_CHECK_OK(r.status);
+    if (!r.result.findings.empty()) std::fprintf(stderr, "findings:\n%s", show_findings(r).c_str());
+    KZ_CHECK_EQ(r.result.findings.size(), static_cast<size_t>(0));
+    KZ_CHECK_EQ(r.result.guard_failures.size(), static_cast<size_t>(0));
+    KZ_CHECK_EQ(loc_value(p, r, "Box.id"), static_cast<int64_t>(0x1001));  // the filtered store did not run
+  }
+  {  // an asserted guard that is false at a point the trace shows: W is live, so the failure-branch store
+     // of a profile that asserted (instead of filtering) its guard is a disagreement, and not applied
+    std::vector<kz::phi::SourceText> files = kzmini::files();
+    for (kz::phi::SourceText& f : files) {
+      const std::string from = "effect store_bad: store *IdPtr := UNDEF filter";
+      const size_t at = f.text.find(from);
+      if (at != std::string::npos) f.text.replace(at, from.size(), "effect store_bad: store *IdPtr := UNDEF when");
+    }
+    const Profile asserted = load(files);
+    KZ_CHECK(asserted.checked);
+    const Run r = replay(asserted, R"(
+const TABLE 4
+owner W 1
+M create_all.reserve pt lp.n=1
+M create_all.publish pt lp.n=1 lp.pid=0x1001
+W get_id call
+W get_id.alive pt
+W get_id.store_ok pt out.IdPtr=@Box.id value=0x1001
+W get_id.store_bad pt out.IdPtr=@Box.id
+W get_id ret result=0
+)");
+    KZ_CHECK_OK(r.status);
+    KZ_CHECK_EQ(r.result.guard_failures.size(), static_cast<size_t>(1));
+    if (r.result.guard_failures.size() == 1) {
+      KZ_CHECK_EQ(r.result.guard_failures[0].effect, std::string("store_bad"));
+      KZ_CHECK(!r.result.guard_failures[0].trusted);
+      KZ_CHECK_EQ(r.result.guard_failures[0].event, static_cast<uint64_t>(5));
+    }
+    KZ_CHECK(r.dump.find("guard_failure #5 effect get_id.store_bad disagreement") != std::string::npos);
+    KZ_CHECK_EQ(loc_value(asserted, r, "Box.id"), static_cast<int64_t>(0x1001));
+  }
+  {  // an owner whose key does not have the width of the owner kind: a finding, and the actor has no owner
+    const Run r = replay(p, R"(
+const TABLE 4
+owner W 1 7
+M create_all.reserve pt lp.n=1
+M create_all.publish pt lp.n=1 lp.pid=0x1001
+W get_id call
+W get_id.alive pt
+W get_id.store_bad pt out.IdPtr=@Box.id value=0
+W get_id ret result=0xc0000001
+)",
+                         with_version);
+    KZ_CHECK_OK(r.status);
+    KZ_CHECK(r.dump.find("the owner of actor W has 2 key element(s), kind slot has 1: the actor has no owner in the replay") != std::string::npos);
+    // without an owner the task is not live: the failure branch is taken and the outcome agrees
+    KZ_CHECK(r.dump.find("returned NOT_READY_A") == std::string::npos);
+    KZ_CHECK_EQ(r.result.guard_failures.size(), static_cast<size_t>(0));
   }
   {  // the outcome of get_id for a task that is not live: the conjunct is false and the code agrees
     const Run r = replay(p, R"(

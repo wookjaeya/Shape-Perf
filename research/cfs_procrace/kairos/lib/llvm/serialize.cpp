@@ -1,11 +1,14 @@
 // serialize.cpp -- see serialize.hpp.
 #include "serialize.hpp"
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <functional>
+#include <map>
 #include <set>
 #include <sstream>
+#include <tuple>
 
 namespace kzs {
 
@@ -125,6 +128,8 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     add(o.tu);
   }
   for (const ImageFact& i : m.images) add(i.pos.file);
+  for (const IterFact& i : m.iters) add(i.pos.file);
+  for (const WriteEvent& we : m.write_events) add(we.pos.file);
   for (const std::string& f : m.main_files) add(f);
   std::map<std::string, uint32_t> fh;
   std::vector<kz_file_hash> file_rows;
@@ -255,6 +260,14 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     r.budget_root = exprs.index_of(l.budget);
     r.lock_site = site_of_call(l.lock_call_key);
     r.lock_kind = l.lock_kind;
+    r.cert = l.cert;
+    r.pred_form = l.pred_form;
+    r.lflags = l.lflags;
+    auto pit = l.parent_key.empty() ? R.loop_index.end() : R.loop_index.find(l.parent_key);
+    r.parent = pit == R.loop_index.end() ? KZ_NONE32 : static_cast<uint32_t>(pit->second);
+    r.pred_root = exprs.index_of(l.pred);
+    r.cond_root = exprs.index_of(l.cond);
+    r.cert_note = w.intern(l.cert_note.empty() ? l.pred_note : l.cert_note);
     r.loop = static_cast<uint32_t>(li);
     r.fn = fn_of(l.func_key);
     r.col = l.pos.col;
@@ -335,7 +348,10 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     r.site = R.writer_site[i];
     r.kind = x.kind;
     r.value_kind = x.value_kind;
-    r.tstatus = KZ_TSTATUS_COMPUTED;
+    // The transition status (SPEC 4.2 step 7) needs steps 6-7 (transition filtering against a
+    // conjunct, mapping to the profile's effects): the census does them.  The extractor did
+    // steps 2-3 only, so it claims no status.
+    r.tstatus = KZ_TSTATUS_NA;
     r.kstatus = KZ_KSTATUS_NA;
     r.wd = 0;  // the W / W_must / D classification belongs to the census, which knows the conjunct
     r.guard_root = exprs.index_of(x.guard);
@@ -434,6 +450,87 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     outcalls.push_back(r);
   }
 
+  // ---- unrolled iterations of table walks
+  std::vector<kz_fact_iter> iters;
+  {
+    struct Row {
+      uint32_t loop, iter, site_order, kind, arg;
+      const IterFact* f;
+    };
+    std::vector<Row> rows;
+    for (const IterFact& f : m.iters) {
+      auto lit = R.loop_index.find(f.loop_key);
+      if (lit == R.loop_index.end()) continue;
+      const uint32_t site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      // the element first, then per call: the call row, its callee, its arguments
+      rows.push_back(Row{static_cast<uint32_t>(lit->second), f.iter, f.kind == KZ_ITER_KIND_ELEMENT ? 0u : site + 1u,
+                         f.kind == KZ_ITER_KIND_CALL ? 0u : f.kind == KZ_ITER_KIND_CALLEE ? 1u : 2u, f.arg_index, &f});
+    }
+    std::sort(rows.begin(), rows.end(), [](const Row& a, const Row& b) {
+      return std::tie(a.loop, a.iter, a.site_order, a.kind, a.arg) < std::tie(b.loop, b.iter, b.site_order, b.kind, b.arg);
+    });
+    for (const Row& row : rows) {
+      const IterFact& f = *row.f;
+      kz_fact_iter r = zero<kz_fact_iter>();
+      r.loop = row.loop;
+      r.iter = f.iter;
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.arg_index = f.kind == KZ_ITER_KIND_ARG ? f.arg_index : KZ_NONE32;
+      r.kind = f.kind;
+      r.status = f.status;
+      r.value_kind = f.value_kind;
+      r.spawn = f.spawn;
+      r.guard_root = exprs.index_of(f.guard);
+      r.fn = fn_of(f.fn_key);
+      r.value = f.value;
+      r.text = w.intern(f.text);
+      r.file = w.intern(f.pos.file);
+      r.line = f.pos.line;
+      r.fh = fh_of(f.pos.file);
+      iters.push_back(r);
+    }
+  }
+
+  // ---- spawn parameters
+  std::vector<kz_fact_spawn_param> spawn_params;
+  for (const SpawnParamFact& sp : m.spawn_params) {
+    kz_fact_spawn_param r = zero<kz_fact_spawn_param>();
+    r.fn = fn_of(sp.func_key);
+    r.param = sp.param;
+    r.spawn_site = site_of_call(sp.spawn_call_key);
+    r.entry_fn = fn_of(sp.entry_key);
+    r.call_site = sp.call_key.empty() ? KZ_NONE32 : site_of_call(sp.call_key);
+    r.kind = sp.kind;
+    r.via = w.intern(sp.via);
+    spawn_params.push_back(r);
+  }
+  std::sort(spawn_params.begin(), spawn_params.end(), [](const kz_fact_spawn_param& a, const kz_fact_spawn_param& b) {
+    return std::tie(a.fn, a.param, a.spawn_site, a.kind, a.entry_fn, a.call_site) < std::tie(b.fn, b.param, b.spawn_site, b.kind, b.entry_fn, b.call_site);
+  });
+
+  // ---- the fields each function writes in its own body (first write of each)
+  std::vector<kz_fact_fwrite> fwrites;
+  {
+    std::map<std::tuple<uint32_t, std::string, std::string, uint8_t>, const WriteEvent*> first;
+    for (const WriteEvent& e : m.write_events) {
+      const auto key = std::make_tuple(fn_of(e.func_key), e.type, e.field, e.kind);
+      auto it = first.find(key);
+      if (it == first.end() || e.pos < it->second->pos) first[key] = &e;
+    }
+    for (const auto& kv : first) {
+      const WriteEvent& e = *kv.second;
+      kz_fact_fwrite r = zero<kz_fact_fwrite>();
+      r.fn = std::get<0>(kv.first);
+      r.kind = e.kind;
+      r.type = w.intern(e.type);
+      r.field = w.intern(e.field);
+      r.file = w.intern(e.pos.file);
+      r.line = e.pos.line;
+      r.fh = fh_of(e.pos.file);
+      fwrites.push_back(r);
+    }
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -476,6 +573,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   item("count.indirect_calls", num(R.indirect_total), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.indirect_calls_unresolved", num(R.indirect_unresolved), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.loops", num(m.loops.size()), KZ_POLICY_UNSET, KZ_NONE32);
+  item("count.loops_unrolled", num(R.loops_unroll), KZ_POLICY_UNSET, KZ_NONE32);
+  item("count.loops_await", num(R.loops_await), KZ_POLICY_UNSET, KZ_NONE32);
+  item("count.loops_star_closed", num(R.loops_star), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.sites", num(R.n_sites), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.untyped_write_sites_all", num(R.atype_untyped_sites_total), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.untyped_write_sites_counted", num(R.atype_untyped_sites_relevant), KZ_POLICY_UNSET, KZ_NONE32);
@@ -493,7 +593,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (!put(KZ_SEC_FACT_LOOPS, loops) || !put(KZ_SEC_FACT_INIT, inits) || !put(KZ_SEC_FACT_CONSTS, consts)) return s;
   if (!put(KZ_SEC_FACT_ATYPE, atypes) || !put(KZ_SEC_WRITERS, writers) || !put(KZ_SEC_CALL_TARGETS, targets)) return s;
   if (!put(KZ_SEC_STATIC_IMAGE, images) || !put(KZ_SEC_FACT_LOCS, locs) || !put(KZ_SEC_TERMINALS, terminals)) return s;
-  if (!put(KZ_SEC_OUTCALLS, outcalls)) return s;
+  if (!put(KZ_SEC_OUTCALLS, outcalls) || !put(KZ_SEC_LOOP_ITERS, iters) || !put(KZ_SEC_SPAWN_PARAMS, spawn_params) || !put(KZ_SEC_FUNC_WRITES, fwrites)) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

@@ -5,8 +5,10 @@
 //   kz-phi hash   <dir|file>...                 print the profile hash
 //   kz-phi stats  <dir|file>...                 provenance tiers and hand-entered entries
 //   kz-phi verify-prov --root <bundle> <dir|file>...
-//                                               re-read every citation under the bundle and compare the hash, and look up the
-//                                               identifiers that entries name in the texts they cite
+//                                               re-read every citation under the bundle and compare the hash, look up the
+//                                               identifiers that entries name in the texts they cite, and compare each
+//                                               source revision pin with the commit checked out (read from git metadata
+//                                               files; uncommitted edits are not detected)
 //   kz-phi replay --trace <file> [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...
 //                                               replay a trace (text form, eval_trace.hpp) and print the result
 //
@@ -184,6 +186,12 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "kz-phi: %s\n", s.describe().c_str());
       return 2;
     }
+    std::vector<kz::phi::RevisionCheck> revs;
+    s = kz::phi::verify_revisions(p, root, &revs);
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz-phi: %s\n", s.describe().c_str());
+      return 2;
+    }
     for (const kz::phi::ProvProblem& pr : problems) std::printf("%s: %s\n", pr.prov.c_str(), pr.message.c_str());
     for (const kz::phi::SymbolProblem& sp : symbol_problems) std::printf("%s: %s\n", sp.entry.c_str(), sp.message.c_str());
     size_t cited = 0;
@@ -192,6 +200,21 @@ int main(int argc, char** argv) {
     // The first line says what the check is: the cited text is the text the profile hashed.  It does
     // not say the text supports the claim; the second line is a weaker, mechanical step toward that.
     std::printf("%zu citations hash-checked (the text is unchanged), %zu problems\n", cited, problems.size());
+    // The revision pins: the commit checked out in each source tree, read from its git metadata.  An
+    // uncommitted edit of the tree is not detected here; the hash check above covers the cited lines.
+    size_t rev_match = 0, rev_mismatch = 0, rev_unverifiable = 0;
+    for (const kz::phi::RevisionCheck& c : revs) {
+      if (c.state == kz::phi::RevState::Match) ++rev_match;
+      else if (c.state == kz::phi::RevState::Mismatch) ++rev_mismatch;
+      else ++rev_unverifiable;
+    }
+    std::printf("%zu source revision pins: %zu match the checked-out commit, %zu mismatch, %zu unverifiable (uncommitted edits are not detected)\n", revs.size(), rev_match,
+                rev_mismatch, rev_unverifiable);
+    for (const kz::phi::RevisionCheck& c : revs) {
+      if (c.state == kz::phi::RevState::Match) continue;
+      std::printf("  source %s (root \"%s\") pinned %s: %s%s%s\n", c.source.c_str(), c.root.c_str(), c.pinned.c_str(), kz::phi::rev_state_text(c.state),
+                  c.found.empty() ? "" : (", checked out " + c.found).c_str(), c.message.empty() ? "" : (", " + c.message).c_str());
+    }
     std::printf("%zu identifier claims: %zu looked up in the cited texts, %zu unverifiable (hand-entered records only), %zu problems\n", report.claims,
                 report.checked, report.unverifiable, symbol_problems.size());
     for (const std::string& u : report.unverifiable_claims) std::printf("  unverifiable (no cited text): %s\n", u.c_str());
@@ -199,7 +222,7 @@ int main(int argc, char** argv) {
       std::printf("%zu cited records show none of the identifiers that the entries citing them name (context texts, or a wrong range: read them):\n", report.idle_records.size());
       for (const std::string& r : report.idle_records) std::printf("  %s\n", r.c_str());
     }
-    return problems.empty() && symbol_problems.empty() ? 0 : 1;
+    return problems.empty() && symbol_problems.empty() && rev_mismatch == 0 ? 0 : 1;
   }
   return usage();
 }

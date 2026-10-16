@@ -100,6 +100,10 @@ bool tier_kind_compatible(const std::string& tier, const std::string& kind) {
   return false;
 }
 
+bool caller_side_tier(const std::string& tier) {
+  return tier == "contract-backed" || tier == "requirement-derived" || tier == "admitted" || tier == "issue-derived";
+}
+
 int tier_rank(const std::string& tier) {
   if (tier == "contract-backed") return 0;
   if (tier == "requirement-derived") return 1;
@@ -186,6 +190,131 @@ Status verify_provenance(const Profile& p, const std::string& bundle_root, std::
   std::sort(problems->begin(), problems->end(), [](const ProvProblem& a, const ProvProblem& b) {
     return a.prov != b.prov ? a.prov < b.prov : a.message < b.message;
   });
+  return Status::success();
+}
+
+// ---- revision pins ----------------------------------------------------------------------------------
+
+const char* rev_state_text(RevState s) {
+  switch (s) {
+    case RevState::Match: return "match";
+    case RevState::Mismatch: return "MISMATCH";
+    case RevState::Unverifiable: return "unverifiable";
+  }
+  return "?";
+}
+
+namespace {
+
+bool read_text(const std::string& path, std::string* out) {
+  Bytes b;
+  if (!read_whole_file(path, &b).ok()) return false;
+  out->assign(b.begin(), b.end());
+  return true;
+}
+
+std::string trim(const std::string& s) {
+  size_t a = 0, b = s.size();
+  while (a < b && (s[a] == ' ' || s[a] == '\t' || s[a] == '\r' || s[a] == '\n')) ++a;
+  while (b > a && (s[b - 1] == ' ' || s[b - 1] == '\t' || s[b - 1] == '\r' || s[b - 1] == '\n')) --b;
+  return s.substr(a, b - a);
+}
+
+bool is_sha(const std::string& s) {
+  if (s.size() != 40) return false;
+  for (char c : s)
+    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+  return true;
+}
+
+// The commit checked out in the tree `dir`, read from its git metadata as files.
+bool checked_out_commit(const std::string& dir, std::string* sha, std::string* why) {
+  namespace fs = std::filesystem;
+  std::error_code ec;
+  const std::string dotgit = dir + "/.git";
+  std::string gitdir;
+  if (fs::is_directory(dotgit, ec)) {
+    gitdir = dotgit;
+  } else {
+    std::string link;
+    if (!read_text(dotgit, &link)) {
+      *why = "no git metadata at " + dotgit;
+      return false;
+    }
+    link = trim(link);
+    if (link.compare(0, 8, "gitdir: ") != 0) {
+      *why = dotgit + " is neither a directory nor a gitdir file";
+      return false;
+    }
+    gitdir = link.substr(8);
+    if (gitdir.empty() || gitdir[0] != '/') gitdir = dir + "/" + gitdir;
+  }
+  std::string head;
+  if (!read_text(gitdir + "/HEAD", &head)) {
+    *why = "cannot read " + gitdir + "/HEAD";
+    return false;
+  }
+  head = trim(head);
+  if (is_sha(head)) {
+    *sha = head;
+    return true;
+  }
+  if (head.compare(0, 5, "ref: ") != 0) {
+    *why = gitdir + "/HEAD names neither a commit nor a ref";
+    return false;
+  }
+  const std::string ref = trim(head.substr(5));
+  // Refs live in the common directory of a linked worktree.
+  std::string common = gitdir, cd;
+  if (read_text(gitdir + "/commondir", &cd)) {
+    cd = trim(cd);
+    common = !cd.empty() && cd[0] == '/' ? cd : gitdir + "/" + cd;
+  }
+  std::string loose;
+  if (read_text(common + "/" + ref, &loose) && is_sha(trim(loose))) {
+    *sha = trim(loose);
+    return true;
+  }
+  std::string packed;
+  if (read_text(common + "/packed-refs", &packed)) {
+    size_t pos = 0;
+    while (pos < packed.size()) {
+      size_t end = packed.find('\n', pos);
+      if (end == std::string::npos) end = packed.size();
+      const std::string line = trim(packed.substr(pos, end - pos));
+      pos = end + 1;
+      if (line.size() > 41 && line[40] == ' ' && line.substr(41) == ref && is_sha(line.substr(0, 40))) {
+        *sha = line.substr(0, 40);
+        return true;
+      }
+    }
+  }
+  *why = "the ref " + ref + " of " + gitdir + " cannot be resolved";
+  return false;
+}
+
+}  // namespace
+
+Status verify_revisions(const Profile& p, const std::string& bundle_root, std::vector<RevisionCheck>* out) {
+  out->clear();
+  const Status root_ok = check_root(bundle_root);
+  if (!root_ok.ok()) return root_ok;
+  std::string base = bundle_root;
+  while (base.size() > 1 && base.back() == '/') base.pop_back();
+  for (const SourceDecl& s : p.sources) {
+    RevisionCheck c;
+    c.source = s.name;
+    c.root = s.root;
+    c.pinned = s.rev;
+    std::string why;
+    if (!checked_out_commit(s.root.empty() ? base : base + "/" + s.root, &c.found, &why)) {
+      c.state = RevState::Unverifiable;
+      c.message = why;
+    } else {
+      c.state = !s.rev.empty() && c.found.compare(0, s.rev.size(), s.rev) == 0 ? RevState::Match : RevState::Mismatch;
+    }
+    out->push_back(std::move(c));
+  }
   return Status::success();
 }
 

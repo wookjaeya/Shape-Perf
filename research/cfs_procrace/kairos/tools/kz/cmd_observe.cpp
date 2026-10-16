@@ -65,7 +65,11 @@ void usage(FILE* f) {
                "  --poll-ms N         the longest the drain sleeps with data possibly waiting (default 10)\n"
                "  --drain-cpus LIST   run the drain thread on these CPUs only (default: the observer's own placement)\n"
                "  --run-ordinal N     the ordinal of this run in its series (default 0)\n"
-               "  --stratum S         cold | warm | none (default none): declared by the caller, not detected\n"
+               "  --stratum S         cold | warm | none (default none): declared by the caller, not detected; give\n"
+               "                      cold or warm only when the procedure established it (otherwise none, and say why\n"
+               "                      in --conditions)\n"
+               "  --proc-capture M    full | status (default full): what the observer reads from /proc while the\n"
+               "                      command runs; full also reads cmdline and environ (copies of the target's memory)\n"
                "  --check             verify basis, profile and binary, print the plan and stop (attaches nothing)\n"
                "The command follows `--`; it is started as the observer's child after the probes are attached.\n");
 }
@@ -116,23 +120,35 @@ std::string wall_clock_utc() {
   return buf;
 }
 
-// What the drain thread learns about the traced processes while they run.
+// What the drain thread learns about the traced processes while they run.  These /proc reads are
+// actions of the observer on the running target: they are counted and timed (`reads`, `ns`, the
+// first and last read) for PERTURBATION kind proc-capture (PI decision D1).
 struct LiveCapture {
+  kz::probe::ProcCaptureMode mode = kz::probe::ProcCaptureMode::Full;
   std::set<uint32_t> pids, tids;
   std::vector<kz::probe::ProcessCapture> processes;
   std::vector<kz::probe::ThreadCapture> threads;
   std::vector<uint64_t> thread_delay_ns;  // capture time - the time of the record that revealed the thread
+  uint64_t reads = 0, ns = 0, first_ns = 0, last_ns = 0;  // CLOCK_MONOTONIC
 
+  void account(uint64_t begin, uint64_t end, uint64_t n) {
+    reads += n;
+    ns += end >= begin ? end - begin : 0;
+    if (first_ns == 0 || begin < first_ns) first_ns = begin;
+    last_ns = std::max(last_ns, end);
+  }
   void note_thread(uint32_t pid, uint32_t tid, uint64_t record_time) {
     if (!tids.insert(tid).second) return;
     kz::probe::ThreadCapture tc;
+    const uint64_t begin = kz::probe::monotonic_ns();
     (void)kz::probe::capture_thread(pid, tid, &tc);
+    const uint64_t now = kz::probe::monotonic_ns();
+    account(begin, now, tc.reads);
     if (!tc.ok) {  // gone before we looked: say so, with what we know
       tc.pid = pid;
       tc.tid = tid;
     }
     threads.push_back(tc);
-    const uint64_t now = kz::probe::monotonic_ns();
     thread_delay_ns.push_back(now >= record_time ? now - record_time : 0);
   }
   void scan(uint16_t, const std::vector<kz::trace::PerfRecord>& recs) {
@@ -140,10 +156,13 @@ struct LiveCapture {
       if (r.kind == kz::trace::RecKind::Sample) {
         if (pids.insert(r.pid).second) {
           kz::probe::ProcessCapture pc;
-          (void)kz::probe::capture_process(r.pid, &pc);
+          const uint64_t begin = kz::probe::monotonic_ns();
+          (void)kz::probe::capture_process(r.pid, &pc, mode);
+          const std::vector<uint32_t> tids_now = kz::probe::list_threads(r.pid);
+          account(begin, kz::probe::monotonic_ns(), pc.reads + 1);
           pc.pid = r.pid;
           processes.push_back(pc);
-          for (uint32_t t : kz::probe::list_threads(r.pid)) note_thread(r.pid, t, r.time);
+          for (uint32_t t : tids_now) note_thread(r.pid, t, r.time);
         }
         note_thread(r.pid, r.tid, r.time);
       } else if (r.kind == kz::trace::RecKind::Fork && pids.count(r.pid) != 0) {
@@ -156,7 +175,7 @@ struct LiveCapture {
 struct Options {
   std::string basis, profile, out, record, conditions, binary;
   uint32_t ring_pages = 512, poll_ms = 10, run_ordinal = 0;
-  std::string drain_cpus, stratum = "none";
+  std::string drain_cpus, stratum = "none", proc_capture = "full";
   bool check = false;
   std::vector<std::string> command;
 };
@@ -191,6 +210,7 @@ bool parse_options(int argc, char** argv, Options* o) {
     else if (a == "--run-ordinal") { if (!number(&o->run_ordinal)) return false; }
     else if (a == "--drain-cpus") { if (!value(&o->drain_cpus)) return false; }
     else if (a == "--stratum") { if (!value(&o->stratum)) return false; }
+    else if (a == "--proc-capture") { if (!value(&o->proc_capture)) return false; }
     else if (a == "--check") o->check = true;
     else if (!a.empty() && a[0] == '-') { std::fprintf(stderr, "kz observe: unknown option %s\n", a.c_str()); return false; }
     else positional.push_back(a);
@@ -203,6 +223,8 @@ bool parse_options(int argc, char** argv, Options* o) {
   if (o->command.empty() && !o->check) { std::fprintf(stderr, "kz observe: the command to run follows `--`\n"); return false; }
   if (o->record.empty() && !o->out.empty()) o->record = o->out + ".record.txt";
   if (o->stratum != "cold" && o->stratum != "warm" && o->stratum != "none") { std::fprintf(stderr, "kz observe: --stratum is cold, warm or none\n"); return false; }
+  kz::probe::ProcCaptureMode m;
+  if (!kz::probe::parse_proc_capture_mode(o->proc_capture, &m)) { std::fprintf(stderr, "kz observe: --proc-capture is full or status\n"); return false; }
   return true;
 }
 
@@ -298,6 +320,7 @@ int run(int argc, char** argv) {
   s = session.open(cfg);
   if (!s.ok()) { std::fprintf(stderr, "kz observe: cannot attach: %s\n", s.message.c_str()); return 3; }
   LiveCapture live;
+  (void)kz::probe::parse_proc_capture_mode(opt.proc_capture, &live.mode);
   s = session.enable();
   if (s.ok()) s = session.start_drain([&live](uint16_t cpu, const std::vector<kz::trace::PerfRecord>& r) { live.scan(cpu, r); });
   if (!s.ok()) { std::fprintf(stderr, "kz observe: cannot start: %s\n", s.message.c_str()); return 3; }
@@ -393,6 +416,16 @@ int run(int argc, char** argv) {
   // each removal wait for a grace period (measured at about 0.1 s per uprobe event with strace).
   // This time is spent when the traced command no longer runs.
   add("observer.stop_ns", num(stop_end_ns - stop_begin_ns));
+  add("observer.proc_capture.mode", std::string(kz::probe::proc_capture_mode_name(live.mode)) +
+                                        (live.mode == kz::probe::ProcCaptureMode::Full ? ": status, cmdline, environ, exe, cwd, cgroup, limits of each traced process"
+                                                                                        : ": status of each traced process") +
+                                        "; stat and status of each thread; read by the drain thread while the command runs");
+  add("observer.proc_capture.reads", num(live.reads));
+  add("observer.proc_capture.ns", num(live.ns) + " (wall time in the reads)");
+  add("observer.proc_capture.window",
+      live.reads == 0 ? std::string("none")
+                      : "from " + std::to_string(static_cast<int64_t>(live.first_ns) - static_cast<int64_t>(tr.t_start_ns)) + " ns to " +
+                            std::to_string(static_cast<int64_t>(live.last_ns) - static_cast<int64_t>(tr.t_start_ns)) + " ns after the command started");
   add("target.child_cpu_ms", num(static_cast<uint64_t>(tr.usage.ru_utime.tv_sec + tr.usage.ru_stime.tv_sec) * 1000 +
                                   static_cast<uint64_t>(tr.usage.ru_utime.tv_usec + tr.usage.ru_stime.tv_usec) / 1000));
   for (const kz::probe::ProcessCapture& p : live.processes) {
@@ -452,6 +485,8 @@ int run(int argc, char** argv) {
   add("match.call_pairs", num(mstats.pairs));
   add("match.entries_without_return", num(mstats.entries_without_return));
   add("match.returns_without_entry", num(mstats.returns_without_entry));
+  add("match.events_with_unreadable_key", num(mstats.events_with_unreadable_key));
+  add("match.site_pairs_without_key", num(mstats.sites_without_key));
   add("identity.threads", num(jstats.threads));
   add("identity.spawn_matched", num(jstats.spawn_matched));
   add("identity.spawn_ambiguous", num(jstats.spawn_ambiguous));
@@ -462,6 +497,13 @@ int run(int argc, char** argv) {
   add("identity.threads_without_name", num(jstats.threads_without_name));
   add("identity.names_after_first_event", num(jstats.names_after_first_event));
   add("identity.events_without_thread", num(jstats.events_without_thread));
+  add("identity.creates_unreadable", num(jstats.creates_unreadable));
+  add("identity.returns_unreadable", num(jstats.returns_unreadable));
+  add("identity.entries_unreadable", num(jstats.entries_unreadable));
+  add("identity.matched_by_time", num(jstats.matched_by_time) +
+                                      " (the creator link of these records is FORK-time containment in the creator's call: one thread's timestamps, under A-CLK-PO)");
+  add("identity.ids_unverified", num(jstats.ids_unverified) +
+                                     " (announced ids not compared with the creator side: the spawn call's out-parameter is not readable by this backend)");
 
   uint64_t boot_ns = 0;
   {
@@ -497,6 +539,8 @@ int run(int argc, char** argv) {
   ri.placement = "observer affinity " + cpu_set_text(aff) + "; drain thread " + (opt.drain_cpus.empty() ? "unpinned" : "pinned to " + opt.drain_cpus) + ", last on CPU " + std::to_string(sstats.drain_last_cpu);
   ri.observer_cpu_ns = sstats.drain_cpu_ns;
   ri.boot_ns = boot_ns;
+  ri.proc_reads = live.reads;
+  ri.proc_ns = live.ns;
   if (!tr.exited || tr.exit_code != 0) ri.run_flags |= KZ_RUN_FLAG_ABNORMAL_EXIT;
 
   const bool damaged = !stop_status.ok() || !decode_status.ok() || !join_status.ok();

@@ -31,7 +31,9 @@
 //   findings     disagreements between the trace and the profile (an outcome that disagrees with the
 //                computed state, a capture that disagrees with the replayed cell, an event after a
 //                terminal step, a point outside of its call, a poll whose other branch does not end
-//                in the terminal operation ...).
+//                in the terminal operation, a point whose asserted effect guard is false ...);
+//   guard_failures  the points whose asserted effect guard is false: a refutation of a
+//                declared_trusted guard (with its obligations), a disagreement otherwise.
 // A status is final once decided (L-STATUS).  The replay is one pass over the trace; the edges that
 // pair two events by a value (task creation) are matched when the pass is over.
 #pragma once
@@ -145,6 +147,17 @@ struct ReplayFinding {
   std::string what;
 };
 
+// A point event whose effect has an asserted guard (`when`, not `filter`) that is false in the replay.
+// The trace says that the linearization point executed, and the code reaches it only where the guard
+// holds, so either the replayed state is not the state of the run or, for a declared_trusted effect,
+// the trusted guard is refuted by this observation.  The effect is not applied.
+struct GuardFailure {
+  uint64_t event = 0;
+  std::string op, effect;
+  bool trusted = false;                   // the effect is declared_trusted: a refutation
+  std::vector<std::string> refutable_by;  // its obligations (trusted only), sorted
+};
+
 struct Options {
   // The awaited predicate of an observation rule that takes `predicate from_code` (the extractor's
   // job, here supplied by the caller), by rule name.  It is resolved with the parameters of the
@@ -159,6 +172,7 @@ struct Result {
   std::vector<HbEdge> edges;
   std::vector<Occurrence> occurrences;
   std::vector<ReplayFinding> findings;
+  std::vector<GuardFailure> guard_failures;  // in the order of the events (also listed as findings)
   ConcreteState final_state;
   bool terminated = false;     // a process-terminal step was replayed
   uint64_t terminal_event = 0;

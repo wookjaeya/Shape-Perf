@@ -25,10 +25,16 @@
 //   - the first value of a tag is the value of a resource that never set it;
 //   - an Id is a 32-bit value.  Both domains read a value of sort Id modulo 2^32 where it enters
 //     (an argument, the value of a location, the id of a resource, a key), so an Id is always in
-//     0 .. 0xFFFFFFFF whatever the recorder delivered, and a comparison of an Id with an Int
-//     compares the 32-bit value.  valid(x) holds iff (x - base) mod 2^32 <= serial_max in the id
-//     space of the kind, so the undefined and the reserved markers are never valid;
-//   - owner(a) is undefined if the actor has no owner; the state of an undefined resource is
+//     0 .. 0xFFFFFFFF whatever the recorder delivered.  A comparison of an Id with an Int
+//     compares the 64-bit values as they are: only the Id operand is reduced, the Int operand is
+//     not, so `x = -1` and `x = 0x1FFFFFFFF` are false and `x < 0x100000000` is true for every Id
+//     (the checker warns about an integer literal or constant outside 0 .. 0xFFFFFFFF compared
+//     with an Id: its result is decided by the sorts alone).  valid(x) holds iff
+//     (x - base) mod 2^32 <= serial_max in the id space of the kind, so the undefined and the
+//     reserved markers are never valid;
+//   - owner(a) is undefined if the actor has no owner, and if its owner is not a record of the
+//     owner kind of the context (another kind or another key width: such a state is ill-formed
+//     and both domains read the owner as undefined); the state of an undefined resource is
 //     the initial state of its kind, its id is the undefined marker of the kind, its tags are
 //     the first values.
 #pragma once
@@ -161,7 +167,8 @@ struct AVal {
 //   - the executing actor and the result are inside their intervals; an argument that has no
 //     interval (`args` is shorter than the parameter list) is unknown: any value of its sort (an
 //     Id: 0 .. 0xFFFFFFFF); the owner is one of the listed owners, or undefined if `owner_none`
-//     holds;
+//     holds (a listed owner that is not a record of the context's owner kind, with its key width,
+//     is read as undefined, as the concrete domain reads it);
 //   - the instances of a finite kind are exactly the listed keys.
 struct AbstractRes {
   uint64_t states = 0;                       // possible state ordinals

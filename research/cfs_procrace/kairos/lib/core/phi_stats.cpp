@@ -71,7 +71,50 @@ ProfileStats profile_stats(const Profile& p) {
   }
   for (const InitDecl& d : p.inits) count(p, &st, "init", d.name, d.prov);
   for (const HbRuleDecl& d : p.rules) count(p, &st, "hb", d.name, d.prov);
-  for (const RspecDecl& d : p.rspecs) count(p, &st, "rspec", d.name, d.prov);
+  for (const RspecDecl& d : p.rspecs) {
+    count(p, &st, "rspec", d.name, d.prov);
+    // The caller level: appreq and the Allowed entries are entries of their own.
+    auto describe = [&](const std::vector<std::string>& names, bool* hand) {
+      std::string t;
+      for (const std::string& n : names) {
+        const int32_t i = p.find_prov(n);
+        if (!t.empty()) t += ", ";
+        if (i < 0) {
+          t += n + " (unknown record)";
+          *hand = true;
+          continue;
+        }
+        const ProvDecl& r = p.provs[static_cast<size_t>(i)];
+        t += n + " (" + r.tier + ", side " + (r.side.empty() ? std::string("n/a") : r.side) + ")";
+        if (r.tier == "researcher" || r.tier == "unreferenced") *hand = true;
+      }
+      if (names.empty()) {
+        t = "no record";
+        *hand = true;
+      }
+      return t;
+    };
+    if (d.appreq_unspecified) {
+      st.caller_level_lines.push_back("rspec " + d.name + " appreq unspecified_by_reference");
+    } else {
+      ++st.appreq_specified;
+      const std::vector<std::string> one{d.appreq};
+      count(p, &st, "appreq", d.name, one);
+      bool hand = false;
+      st.caller_level_lines.push_back("rspec " + d.name + " appreq " + describe(one, &hand));
+      if (hand) ++st.caller_level_hand_entered;
+    }
+    if (d.allowed.empty()) st.caller_level_lines.push_back("rspec " + d.name + " allowed " + allowed_text(d.allowed_head.kind));
+    for (size_t i = 0; i < d.allowed.size(); ++i) {
+      const AllowedEntry& a = d.allowed[i];
+      const std::string label = d.name + "." + allowed_text(a.kind) + "#" + std::to_string(i + 1);
+      ++st.allowed_entries;
+      count(p, &st, "allowed", label, a.prov);
+      bool hand = false;
+      st.caller_level_lines.push_back("rspec " + d.name + " allowed " + allowed_text(a.kind) + "#" + std::to_string(i + 1) + ": " + describe(a.prov, &hand));
+      if (hand) ++st.caller_level_hand_entered;
+    }
+  }
   for (const TrustedDecl& d : p.trusted) {
     count(p, &st, "trusted", d.name, d.prov);
     if (d.cls == "declared_trusted") {
@@ -106,6 +149,9 @@ std::string stats_text(const ProfileStats& st) {
   out += "declared-trusted: " + std::to_string(st.declared_trusted) + "\n";
   for (const std::string& n : st.declared_trusted_names) out += "  " + n + "\n";
   out += "assumptions: " + std::to_string(st.assumptions) + "\n";
+  out += "caller level (SPEC 1.6): " + std::to_string(st.appreq_specified) + " specified appreq, " + std::to_string(st.allowed_entries) + " Allowed entries, " +
+         std::to_string(st.caller_level_hand_entered) + " citing a hand-entered record or none\n";
+  for (const std::string& l : st.caller_level_lines) out += "  " + l + "\n";
   return out;
 }
 

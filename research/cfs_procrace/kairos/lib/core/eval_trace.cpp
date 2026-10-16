@@ -451,6 +451,16 @@ void Replayer::set_context(const std::string& actor) {
   st_.exec = actor_number(actor);
   const auto it = t_.owners.find(actor);
   if (it != t_.owners.end() && p_.context.present && p_.context.owner_kind_index >= 0) {
+    const size_t width = key_width(p_, p_.context.owner_kind_index);
+    if (it->second.size() != width) {
+      // Not a record of the owner kind: the actor is treated as having no owner (both domains read
+      // such an owner as undefined, eval.hpp).
+      finding(kNoEvent, "the owner of actor " + actor + " has " + std::to_string(it->second.size()) + " key element(s), kind " +
+                            p_.kinds[static_cast<size_t>(p_.context.owner_kind_index)].name + " has " + std::to_string(width) + ": the actor has no owner in the replay");
+      st_.has_owner = false;
+      st_.owner = ResId();
+      return;
+    }
     st_.has_owner = true;
     st_.owner = ResId{p_.context.owner_kind_index, it->second};
   } else {
@@ -1019,7 +1029,29 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
   CVal v;
   if (eff.when) {
     if (!evaluate(*eff.when, op, &eff.lp, ev, frame_args, &v)) return;
-    if (!v.is_true()) return;
+    if (!v.is_true()) {
+      // A filter selects the branch at a point that several branches share: nothing to report.
+      if (eff.filter) return;
+      // An asserted guard: the code reaches this point only where the guard holds, and the trace
+      // says the point executed.  The replayed state is not the state of the run, or the trusted
+      // guard is refuted.  The effect is not applied (its target state would be invented).
+      GuardFailure g;
+      g.event = ev.id;
+      g.op = op.name;
+      g.effect = eff.label;
+      g.trusted = eff.status == "declared_trusted";
+      if (g.trusted) g.refutable_by = eff.refutable_by;
+      std::sort(g.refutable_by.begin(), g.refutable_by.end());
+      std::string obligations;
+      for (const std::string& o : g.refutable_by) obligations += (obligations.empty() ? "" : ", ") + o;
+      if (g.trusted)
+        finding(ev.id, what + ": its declared-trusted guard is false at its linearization point, which the trace shows executed: the guard is refuted by this observation (refutable_by " +
+                           obligations + "); the effect is not applied");
+      else
+        finding(ev.id, what + ": its guard is false at its linearization point, which the trace shows executed and the code reaches only where the guard holds: the trace and the profile disagree; the effect is not applied");
+      r_.guard_failures.push_back(std::move(g));
+      return;
+    }
   }
   auto check_value = [&](int64_t stored) {
     const auto it = ev.values.find("value");
@@ -1245,6 +1277,12 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
   out += "\nfindings " + std::to_string(r.findings.size()) + "\n";
   for (const ReplayFinding& f : r.findings)
     out += std::string("finding ") + (f.event == kNoEvent ? std::string("-") : "#" + std::to_string(f.event)) + ": " + f.what + "\n";
+  out += "\nguard failures " + std::to_string(r.guard_failures.size()) + "\n";
+  for (const GuardFailure& g : r.guard_failures) {
+    out += "guard_failure #" + std::to_string(g.event) + " effect " + g.op + "." + g.effect + (g.trusted ? " refuted refutable_by" : " disagreement");
+    for (const std::string& o : g.refutable_by) out += " " + o;
+    out += "\n";
+  }
 
   out += "\nfinal state\n";
   for (const auto& s : r.final_state.state) {

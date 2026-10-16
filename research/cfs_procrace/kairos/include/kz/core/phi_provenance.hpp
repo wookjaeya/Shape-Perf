@@ -50,6 +50,17 @@ int32_t resolve_source(const Profile& p, const std::string& path);
 // `requirement-derived` yet, so a profile cannot name that tier and a `requirement` record is
 // rejected by the checker with a message that says so (docs/phi_reference.md section 10).
 bool tier_kind_compatible(const std::string& tier, const std::string& kind);
+// Whether a record of this tier may have side `caller` (SPEC 1.6 "Three judgements", QT-4, QT-9): a
+// caller-side record is a cited text that states what the using code must achieve or how it handles
+// an outcome.  Allowed: contract-backed (an API document addressed to the caller), requirement-derived
+// (an application or mission requirement), admitted (a comment in the using code that admits the
+// handling, SPEC 3.9 "side caller, code_admission") and issue-derived (a maintainer's statement in an
+// issue or commit).  Not allowed: code-derived (a code pattern is a fixed rule of the tool, side
+// `rule`), researcher and unreferenced (hand-entered: a researcher rule alone never accepts an
+// outcome, QT-4, and no researcher-authored appreq turns an occurrence into a readiness violation,
+// QT-9).  The checker rejects the other pairings; derive_caller_allowed() reads such a record as a
+// rule if it meets one in a profile that was not checked.
+bool caller_side_tier(const std::string& tier);
 // Rank of a tier in the order of SPEC 1.6 (0 contract-backed, 1 requirement-derived, 2 admitted,
 // 3 issue-derived, 4 code-derived, 5 researcher, 6 unreferenced); the lower, the stronger.  -1 for
 // an unknown word.
@@ -67,6 +78,27 @@ struct ProvProblem {
 // text is what the profile says it is.  Status is not Ok for an unusable `bundle_root` (not a
 // directory): the problems are then not meaningful.
 Status verify_provenance(const Profile& p, const std::string& bundle_root, std::vector<ProvProblem>* problems);
+
+// The revision pin of a source (`source NAME root R rev X`) against the bundle on disk.  The commit
+// that is checked out is read from the git metadata of the source tree as files (`.git` as a directory
+// or a `gitdir:` file, then `HEAD`, a loose ref or `packed-refs`); no git command runs, so a read-only
+// bundle stays untouched.  What this does NOT verify: that the working tree has no uncommitted edits
+// (that needs the index and the objects).  verify_provenance covers the cited lines themselves.
+enum class RevState : uint8_t { Match, Mismatch, Unverifiable };
+const char* rev_state_text(RevState s);
+
+struct RevisionCheck {
+  std::string source;   // the source name
+  std::string root;     // its root, relative to the bundle
+  std::string pinned;   // the `rev` of the profile
+  std::string found;    // the checked-out commit (empty if it cannot be read)
+  RevState state = RevState::Unverifiable;
+  std::string message;  // Unverifiable: why
+};
+
+// One check per declared source, in the order of Profile::sources (sorted by name after normalize).
+// Status is not Ok for an unusable `bundle_root`.
+Status verify_revisions(const Profile& p, const std::string& bundle_root, std::vector<RevisionCheck>* out);
 
 // An identifier of the analysed program that an entry of the profile names, and the records whose
 // cited lines may show it.

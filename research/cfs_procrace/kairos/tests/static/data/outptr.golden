@@ -5,6 +5,8 @@ extract
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
   loops                      0 (table walks resolved 0, failed 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
   out-pointer summaries      store-only 3, escaping 1, unsummarized 1
   untyped write sites        0 in the program, 0 of them count for a target
   location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
@@ -39,17 +41,19 @@ facts-view 1
       arg 0:addr-of-field &g_other.id of Slot.id
 [derives] 0
 [loops] 0
+[iters] 0
+[order] 0
 [init] 2
   Slot.id in g_other zero-initialized value=0 defined at outptr.c:10:6
   Slot.id in g_slot zero-initialized value=0 defined at outptr.c:9:6
 [consts] 0
 [writers] 6
-  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_id argument 0 guard=(ne global:g_ready 0) {} COMPUTED
-  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_id argument 0 {} COMPUTED
-  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_nested argument 0 guard=(ne global:g_ready 0) {} COMPUTED
-  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_nested argument 0 {} COMPUTED
-  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:28 value=const 1 [1] key=*fetch_twice argument 0 {} COMPUTED
-  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:29 value=const 2 [2] key=*fetch_twice argument 0 guard=(gt (deref param:out#0) 0) {} COMPUTED
+  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_id argument 0 guard=(ne global:g_ready 0) {} n/a
+  Slot.id out-pointer at outptr.c:40:28 in publish via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_id argument 0 guard=(not (ne global:g_ready 0)) {} n/a
+  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:16 value=const 3 [3] key=*fetch_nested argument 0 guard=(ne global:g_ready 0) {} n/a
+  Slot.id out-pointer at outptr.c:41:35 in publish_nested via fetch_id outptr.c:19 value=const 0 [0] key=*fetch_nested argument 0 guard=(not (ne global:g_ready 0)) {} n/a
+  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:28 value=const 1 [1] key=*fetch_twice argument 0 {} n/a
+  Slot.id out-pointer at outptr.c:42:34 in publish_twice via fetch_twice outptr.c:29 value=const 2 [2] key=*fetch_twice argument 0 guard=(gt (deref param:out#0) 0) {} n/a
 [atype] 2
   Slot.id address-escape at outptr.c:43:27 in publish_kept: the address is passed to keep_pointer: binary operator at outptr.c:35:40
   Slot.id address-escape at outptr.c:44:37 in publish_external: the address is passed to fetch_external: the callee has no body in the closed program
@@ -57,6 +61,7 @@ facts-view 1
   Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
   Slot.id DISABLED writers=6 (direct 0, data-fn 0, out-pointer 6) atype: untyped=0 escape=2 cast=0 union=0 init=2 unresolved-indirect=0
 [targets] 0
+[spawnparams] 0
 [image] 0
 [terminals] 0
 [outcalls] 5
@@ -65,3 +70,10 @@ facts-view 1
   site 3 outptr.c:42:34 fetch_twice arg 0 = &Slot.id store-only stores=2
   site 4 outptr.c:43:27 keep_pointer arg 0 = &Slot.id escapes stores=0
   site 6 outptr.c:44:37 fetch_external arg 0 = &Slot.id unsummarized stores=0
+[fwrites] 6
+  keep_pointer field <global>.g_kept at outptr.c:35
+  publish address-argument Slot.id at outptr.c:40
+  publish_external address-argument Slot.id at outptr.c:44
+  publish_kept address-argument Slot.id at outptr.c:43
+  publish_nested address-argument Slot.id at outptr.c:41
+  publish_twice address-argument Slot.id at outptr.c:42

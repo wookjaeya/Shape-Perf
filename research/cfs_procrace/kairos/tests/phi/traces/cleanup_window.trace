@@ -1,0 +1,52 @@
+# cleanup_window -- the window of CFE_ES_CleanUpApp between the retire step (the record is set to
+# RESERVED, cfe_es_apps.c:1498) and the free step (:1632-1635).  In that window the record is not
+# LIVE, so a task of the application has no execution context: CFE_ES_GetAppID fails, stores the
+# undefined id, and an event request that carries that id is rejected.
+#
+# Unit-test values only: nothing here is a recorded run and no value is a research condition.
+#
+#   slot 1  an external application with a main task (T_APP) and a child task (T_CHILD) that run
+#           while the application is cleaned up
+#   1. before the cleanup: the child's GetAppID succeeds and stores the application's id
+#   2. the main task exits (STOPPED); the cleanup retires the record (RESERVED)
+#   3. in the window: the child's GetAppID fails (self_live false, ERR_RESOURCEID_NOT_VALID, the
+#      failure-branch store of the undefined id); a request that carries the stored id is rejected
+#   4. the cleanup frees the record (FREE)
+# The replay has no finding: the outcome ERR_RESOURCEID_NOT_VALID of step 3 is not_ready(self_live), and
+# the replay finds self_live false there.  A profile that kept the record LIVE until the free (no
+# retire step) would find it true and report the outcome as a disagreement.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+owner T_APP 1
+owner T_CHILD 1
+
+T0 CFE_ES_AppCreate call
+T0 app_create_clear pt lp.slot=1
+T0 CFE_ES_AppCreate.type_external pt lp.slot=1
+T0 CFE_ES_AppCreate.reserve_external pt lp.slot=1
+T0 CFE_ES_AppCreate.publish_external pt lp.slot=1 lp.pending_id=0x110001
+T0 CFE_ES_AppCreate ret result=0
+T_APP CFE_ES_RunLoop call arg.RunStatus=1
+T_APP CFE_ES_RunLoop.raise_running pt
+T_APP CFE_ES_RunLoop ret result=1
+
+T_CHILD CFE_ES_GetAppID call
+T_CHILD CFE_ES_GetAppID.self_live pt
+T_CHILD CFE_ES_GetAppID.store_ok pt out.AppIdPtr=@CFE_SB_Global.AppId value=0x110001
+T_CHILD CFE_ES_GetAppID.store_fail pt out.AppIdPtr=@CFE_SB_Global.AppId
+T_CHILD CFE_ES_GetAppID ret result=0
+
+T_APP CFE_ES_ExitApp call arg.ExitStatus=0
+T_APP CFE_ES_ExitApp.stop_external pt
+T0 CFE_ES_CleanUpApp call arg.AppId=0x110001
+T0 CFE_ES_CleanUpApp.retire pt lp.slot=1
+
+T_CHILD CFE_ES_GetAppID call
+T_CHILD CFE_ES_GetAppID.self_live pt
+T_CHILD CFE_ES_GetAppID.store_fail pt out.AppIdPtr=@CFE_SB_Global.AppId value=0
+T_CHILD CFE_ES_GetAppID ret result=0xc4000001
+T_CHILD CFE_EVS_SendEventWithAppID.id_valid pt arg.AppID=0 cell=@CFE_SB_Global.AppId value=0
+T_CHILD CFE_EVS_SendEventWithAppID call arg.AppID=0
+T_CHILD CFE_EVS_SendEventWithAppID ret result=0xc2000003
+
+T0 CFE_ES_CleanUpApp.free_record pt lp.slot=1
+T0 CFE_ES_CleanUpApp ret result=0

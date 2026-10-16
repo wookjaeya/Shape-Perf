@@ -27,7 +27,7 @@ text (.kzp) ──parse──▶ Profile ──normalize──▶ ──check─
 | Allowed | `lib/core/phi_allowed.cpp` | 호출자 수준 Allowed 의 엄격 해석 |
 | 평가기 | `include/kz/core/eval*.hpp`, `lib/core/eval_{concrete,abstract}.cpp` | 하나의 평가기와 두 domain |
 | 재생 | `include/kz/core/eval_trace.hpp`, `lib/core/eval_trace.cpp` | trace 위에서 효과, HB 간선, 상태 |
-| 도구 | `tools/kz-phi/` | `check`, `dump`, `hash`, `stats`, `verify-prov --root <번들>`, `replay --trace <파일> [--predicate 규칙=식] [--version 성분=버전]`. 디렉터리 인자는 그 안의 `*.kzp` 를 이름순으로 읽는다. 종료 코드: 0 정상, 1 프로필·인용이 틀림, 2 사용법·입출력 오류 |
+| 도구 | `tools/kz-phi/` | `check`, `dump`, `hash`, `stats`, `verify-prov --root <번들>`(인용 해시, 식별자, source 의 개정 고정), `replay --trace <파일> [--predicate 규칙=식] [--version 성분=버전]`. 디렉터리 인자는 그 안의 `*.kzp` 를 이름순으로 읽는다. 종료 코드: 0 정상, 1 프로필·인용이 틀림, 2 사용법·입출력 오류 |
 | 프로필 | `profiles/cfs-v7.0.1/*.kzp` | V1 부분집합 (SPEC §9.3 S0-R2) |
 
 엔진 코드(`include/`, `lib/`)에는 사례 식별자가 없다(`lint_case-ids`) [M]. cFS 의 이름은 프로필과 시험에만 있다.
@@ -83,7 +83,7 @@ oparam   = [ role ] NAME [ ":" sort ] ;              (* role = out | stamp | key
 opitem   = ( "bind" "symbol" STR | conjunct | effect | outcome | terminal | common ) ";" ;
 conjunct = "conjunct" NAME ":" expr "lp" lp ;
 lp       = ( "capture" | "at" pattern | "site" NAME ) [ "values" NAME ":" sort { "," NAME ":" sort } ] ;
-effect   = "effect" NAME ":" eff [ "when" expr ] "lp" lp
+effect   = "effect" NAME ":" eff [ ( "when" | "filter" ) expr ] "lp" lp
            { "status" NAME | "refutable_by" names | "prov" names | "guard" NAME cmp STR } ;
 eff      = "lifecycle" ( "all" NAME | expr ) ( "->" NAME [ "id" expr ] | "raise" expr )
          | "use" expr | "store" [ "*" ] NAME ":=" expr | "settag" NAME "of" expr ":=" NAME
@@ -142,7 +142,7 @@ term     = INT | STR | "true" | "false" | NAME | NAME "(" [ expr { "," expr } ] 
 | `State<K>`, `Tag<K,T>` | 종류 K 의 상태, 태그 T 의 값(상수는 비교 상대의 sort 로 정해진다) |
 | `Res<K>` | 자원 하나: 종류 K 와 키 |
 
-비교 규칙: `Int` 와 `Id` 는 서로 비교된다. `Id<K>` 끼리는 같은 K 여야 한다(`Id<*>` 는 아무 Id 와 맞는다). `State`, `Res` 는 같은 종류끼리, `Tag` 는 같은 종류·같은 태그끼리. 순서 비교(`< <= > >=`)는 `Int`, `Id`, `State` 에만 있다. 상태 상수·태그 상수의 이름은 비교 상대의 sort 를 보고 풀린다(`state(x) = REG`, `REG = state(x)` 모두 된다).
+비교 규칙: `Int` 와 `Id` 는 서로 비교된다. 이때 `Id` 쪽만 2³² 로 나눈 나머지(0..0xFFFFFFFF)이고 `Int` 쪽은 줄이지 않은 64비트 값 그대로 비교한다. 그래서 `x = -1`, `x = 0x1FFFFFFFF` 는 어떤 Id `x` 에도 거짓이고 `x < 0x100000000` 은 언제나 참이다. 결과가 sort 만으로 정해지는 이런 비교는 거의 틀림없이 작성 실수이므로, 검사기는 `Id` 와 비교되는 정수 리터럴·정수 상수가 0..0xFFFFFFFF 밖이면 **경고**한다(`=`, `!=`, 순서 비교, `in` 집합) [M: `test_core_phi_check`]. `Id<K>` 끼리는 같은 K 여야 한다(`Id<*>` 는 아무 Id 와 맞는다). `State`, `Res` 는 같은 종류끼리, `Tag` 는 같은 종류·같은 태그끼리. 순서 비교(`< <= > >=`)는 `Int`, `Id`, `State` 에만 있다. 상태 상수·태그 상수의 이름은 비교 상대의 sort 를 보고 풀린다(`state(x) = REG`, `REG = state(x)` 모두 된다).
 
 | 형태 | sort | 뜻 |
 |---|---|---|
@@ -188,7 +188,7 @@ kind K(p1: sort, ...) {
 1. 상태가 정해진 적이 없는 자원은 종류의 `initial` 상태다. 그래서 `state(K(key))` 는 전함수다.
 2. 태그가 정해진 적이 없으면 첫 값이다. 식별자가 정해진 적이 없으면 `ids.undefined` 다.
 3. `Id` 는 32비트 값이다. `valid(x)` 는 `(x − base) mod 2³² ≤ serial_max` 일 때 참이므로 `undefined` 와 `reserved` 표지는 (그 값이 구간 밖이면) 유효하지 않다. 검사기는 `base` 와 `base + serial_max` 가 `0..0xFFFFFFFF` 에 들어갈 것을 요구한다.
-4. `owner(a)` 는 실행 주체 `a` 가 속한 자원이다. 소속이 없으면 *정의되지 않은 자원*이고, 정의되지 않은 자원의 상태는 종류의 초기 상태, id 는 `undefined`, 태그는 첫 값이다.
+4. `owner(a)` 는 실행 주체 `a` 가 속한 자원이다. 소속이 없거나, 소속 자원이 `context` 의 `owner_kind` 의 레코드가 아니면(다른 종류이거나 키 폭이 다르면; 그런 상태는 잘못 만들어진 것이다) *정의되지 않은 자원*이고(두 domain 이 같게 읽는다; 재생은 `owner` 머리말의 키 폭이 틀리면 발견 사항을 남기고 소속을 없앤다), 정의되지 않은 자원의 상태는 종류의 초기 상태, id 는 `undefined`, 태그는 첫 값이다.
 5. 파생 종류의 상태는 파생 규칙을 **높은 상태부터** 시험해 처음 참인 규칙의 상태이고, 없으면 초기 상태다.
 6. 한 종류의 상태와 태그 값은 각각 최대 64개(추상 domain 이 상태 집합을 한 워드에 둔다). `Res<>` 매개변수가 순환하면 안 된다.
 
@@ -204,14 +204,15 @@ kind K(p1: sort, ...) {
 op NAME(params) {
   bind symbol "C 함수 이름";
   conjunct LABEL: expr lp (capture | at pattern | site NAME) [values ...];
-  effect LABEL: <효과> [when expr] lp (...) [status declared_trusted refutable_by O3, O4] prov ...;
+  effect LABEL: <효과> [when expr | filter expr] lp (...) [status declared_trusted refutable_by O3, O4] prov ...;
   outcome CODE: (ready | error | not_ready(LABEL)) [documented "..." prov ...];
   terminal [process_terminal] [after pattern];
 }
 ```
 
 - **준비 조건(conjunct)** 은 readiness precondition 이다. `lp capture` 는 호출자가 인자로 넘기는 값의 포획 지점(T-DERIVE)이고, 그 식은 role `stamp`/`key`/`id` 인 매개변수와 상수·리터럴, 함수 `valid(...)` 만 읽을 수 있다. `lp at pattern` 은 함수 안의 지점, `lp site NAME` 은 이름 붙은 지점을 효과들이 공유한다.
-- **효과** 종류: `lifecycle R -> S [id e]`(자원을 상태 S 로; id 를 함께 정함), `lifecycle all K -> S`(K 의 모든 인스턴스; memset), `lifecycle R raise e`(단조 상승: 현재보다 높은 수준으로만), `settag T of R := V`, `store *P := e`(out 매개변수가 가리키는 위치에 쓴다), `store L := e`(위치에 쓴다), `use R`(상태를 바꾸지 않음), `mark handler_begin|handler_end`, `sync role "object"`, `env "input"`. `when` 은 보호 조건이고 `status declared_trusted` 는 사람이 선언한 효과다(반드시 `refutable_by` 로 반박할 의무를 적는다).
+- **효과** 종류: `lifecycle R -> S [id e]`(자원을 상태 S 로; id 를 함께 정함), `lifecycle all K -> S`(K 의 모든 인스턴스; memset), `lifecycle R raise e`(단조 상승: 현재보다 높은 수준으로만), `settag T of R := V`, `store *P := e`(out 매개변수가 가리키는 위치에 쓴다), `store L := e`(위치에 쓴다), `use R`(상태를 바꾸지 않음), `mark handler_begin|handler_end`, `sync role "object"`, `env "input"`. `status declared_trusted` 는 사람이 선언한 효과다(반드시 `refutable_by` 로 반박할 의무를 적는다).
+- **보호 조건의 두 형태** [D: K1 round 4]: `when expr` 는 *단언*이다. 코드는 보호 조건이 참일 때만 그 선형화 지점에 이르므로, trace 가 그 지점을 보였는데 재생 상태에서 조건이 거짓이면 그것은 발견 사항이다: `declared_trusted` 효과면 그 신뢰한 조건이 이 관측으로 **반박됨**(`refutable_by` 의 의무를 적는다), 아니면 **trace 와 프로필의 불일치**다. 어느 쪽이든 효과는 적용하지 않는다(§7.3). `filter expr` 는 *가지 선택*이다. 여러 가지가 함께 지나는 지점(예: `CFE_ES_GetAppID` 의 실패 가지 저장을 뒤따르는 `UnlockSharedData` 에 묶은 경우, 성공 가지도 이 지점을 지난다)에서 조건이 참인 가지에만 효과를 적용하고, 거짓이면 아무것도 보고하지 않는다. `declared_trusted` 효과는 `filter` 를 쓸 수 없다(반박하는 관측을 숨기게 되므로; 검사기 오류).
 - **`values`**: 그 지점의 사건이 매개변수 외에 싣는 값(`lp.NAME`). 기록기와 프로필이 사건의 내용을 맞추는 약속이다.
 - **outcome**: 결과 코드(상수)를 `ready`(준비되어 성공), `not_ready(LABEL)`(그 준비 조건이 거짓일 때 이 코드), `error`(준비 여부와 무관한 오류)로 분류한다. `documented` 는 *공급자 쪽* 기록(side supplier)이 뒷받침하는 문서화된 결과다.
 - **terminal**: 이 연산의 호출(또는 `after` 패턴의 지점)이 호출자의 후속을 없앤다. `process_terminal` 이면 프로세스 전체가 끝난다(T-TERM).
@@ -242,9 +243,11 @@ rspec NAME {
 | 항목 없음, `none`, `appreq` 미지정 | `unspecified_by_reference` ("`none` 은 지정된 appreq 를 요구") |
 | 항목 없음, `unspecified_by_reference` | `unspecified_by_reference` |
 | 항목 중 `caller` 기록이 하나라도 있는 것 | 그 항목이 **판정한다**(`Entries`): horizon monitor 로 읽힌다 |
-| 항목이 `rule` 기록만(또는 supplier 와 rule 만) | 받아들이지 않는다 → `unspecified_by_reference` ("규칙 하나는 결코 수용하지 않는다") |
+| 항목이 `rule` 기록만(또는 supplier 와 rule 만) | 그 항목은 받아들이지 않는다("규칙 하나는 결코 수용하지 않는다"). 호출자 수준에 들지 않으므로 결과는 항목이 없을 때와 같다: `appreq` 지정이면 `none`(그래서 VIOLATING), 미지정이면 `unspecified_by_reference` (SPEC App. A.8 litmus LP-ALLOW (b1r): "NOT_READY_UNJUDGED …; VIOLATING with an `appreq` that requires `R`'s state") |
 | 항목이 `supplier` 기록만 | 프레임워크 수준 정보일 뿐 호출자 수준에서는 아무것도 판정하지 않는다. `appreq` 지정이면 `none`, 아니면 `unspecified_by_reference` |
 | `caller` 항목에 `conflicts_appreq` | 판정을 보류: `unspecified_by_reference`, 충돌 표시 (TOLERATED 가 되지 않는다) |
+
+**caller 쪽 기록이 될 수 있는 tier** (QT-4, QT-9) [M: `test_core_phi_check`, `test_core_phi_allowed`]: `side caller` 는 호출자에게 하는 말을 *인용한 본문*에만 붙는다: `contract-backed`(API 문서), `requirement-derived`(응용·임무 요구; 이 빌드의 어휘에는 아직 없음, §10), `admitted`(사용 코드의 주석이 처리를 인정함, SPEC §3.9 "side caller, code_admission"), `issue-derived`(유지보수자가 이슈·커밋에서 한 말). `code-derived`(코드 패턴은 도구의 고정 규칙, side `rule`), `researcher`, `unreferenced` 기록에 `side caller` 를 붙이면 검사기 오류다. 그래서 손으로 넣은 기록은 `appreq` 가 될 수 없고(QT-9: 연구자가 쓴 appreq 로 발생을 readiness violation 으로 만들지 않는다), 판정하는 Allowed 항목도 만들 수 없다(QT-4: 연구자 규칙 하나는 수용을 확정하지 않는다). `derive_caller_allowed` 도 검사되지 않은 프로필에서 그런 기록을 만나면 `rule` 로 읽고 appreq 를 미지정으로 본다.
 
 ### 5.8 trusted, context, scope
 
@@ -301,7 +304,7 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 한 번의 통과다. 사건마다: (a) 프로그램 순서 간선; (b) 호출이면 열린 호출 목록에 넣고, 그 연산의 *포획된* 준비 조건에 붙은 포획을 가져오고(없으면 호출 자체에서 평가), rspec 의 발생을 만들고; 지점이면 그 지점의 준비 조건을 **먼저**(효과 이전의 상태에서) 평가하고 그 다음 효과를 적용하고; 반환이면 열린 호출을 닫고, 결과 코드를 검사하고, 아직 결정되지 않은 발생을 NOT_EVALUATED 로 결정하고, 관측 규칙을 적용한다. 종료 단계를 만나면 이후의 사건은 재생하지 않는다(발견 사항 하나). 끝난 뒤 값으로 짝을 짓는 간선(생성 → 진입, phase)을 만든다. 같은 내용의 간선은 한 번만, (목표, 출발, 규칙) 순으로 정렬한다.
 
-**발견 사항(finding)** 은 trace 가 프로필과 맞지 않는 곳이다: 모르는 연산/지점, 호출 밖의 지점, 반환되지 않은 호출, 필요한 값이 사건에 없음(식을 평가하지 않는다), 저장한 값이 프로필 계산과 다름, 포획한 값이 재생한 위치 값과 다름, 정의되지 않은 자원에 대한 효과, 범위 밖 상승 수준, 결과 코드가 outcome 목록에 없음, 결과 코드와 계산한 준비 상태가 어긋남(O4(a)), 규칙의 다른 가지가 종료 연산으로 이어지지 않음, 가드 때문에 적용되지 않은 규칙·효과. 발견 사항은 오류가 아니라 보고다: 재생은 계속된다. `Status` 가 `Invalid` 인 것은 검사되지 않은 프로필과, 표 크기를 주지 않은 trace(`const NAME N` 필요), 크기가 0..4096 밖일 때, 유한 종류의 키가 한 원소가 아닐 때뿐이다 [M].
+**발견 사항(finding)** 은 trace 가 프로필과 맞지 않는 곳이다: 모르는 연산/지점, 호출 밖의 지점, 반환되지 않은 호출, 필요한 값이 사건에 없음(식을 평가하지 않는다), 저장한 값이 프로필 계산과 다름, 포획한 값이 재생한 위치 값과 다름, 정의되지 않은 자원에 대한 효과, 범위 밖 상승 수준, 결과 코드가 outcome 목록에 없음, 결과 코드와 계산한 준비 상태가 어긋남(O4(a)), 규칙의 다른 가지가 종료 연산으로 이어지지 않음, 가드 때문에 적용되지 않은 규칙·효과, 단언한 보호 조건(`when`)이 거짓인 지점(§7.3; `Result::guard_failures` 에도 구조로 남는다), `owner` 머리말의 키 폭이 소속 종류와 다름. 발견 사항은 오류가 아니라 보고다: 재생은 계속된다. `Status` 가 `Invalid` 인 것은 검사되지 않은 프로필과, 표 크기를 주지 않은 trace(`const NAME N` 필요), 크기가 0..4096 밖일 때, 유한 종류의 키가 한 원소가 아닐 때뿐이다 [M].
 
 ### 7.3 효과 적용
 
@@ -316,7 +319,7 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 | `mark handler_begin` | 이 사건이 새 핸들러를 시작한다 (프로그램 순서의 looper 규칙) |
 | `use`, `sync`, `env`, `mark handler_end` | 상태 변화 없음 |
 
-`when` 이 거짓이거나 평가할 수 없으면 적용하지 않는다. 효과의 `guard` 가 만족되지 않거나 평가할 수 없으면 적용하지 않고 발견 사항을 남긴다. 파생 종류(`derived`)는 저장하지 않고 평가 때 계산한다. 쓴 위치(상태 변경)는 *마지막 쓴 사건*으로 기록해 관측 규칙이 쓴다.
+보호 조건을 평가할 수 없으면(필요한 값이 사건에 없음) 적용하지 않는다. `filter` 조건이 거짓이면 조용히 적용하지 않는다(가지 선택). `when` 조건이 거짓이면 적용하지 않고 **보고한다**: 발견 사항 하나와 `Result::guard_failures` 의 항목 하나(사건, 연산, 효과, `declared_trusted` 여부, 그 `refutable_by` 의무). 결과 text 에는 `guard failures N` 절과 `guard_failure #E effect OP.LABEL refuted refutable_by O3 O4` (신뢰한 조건의 반박) 또는 `... disagreement` (trace 와 프로필의 불일치) 줄로 나온다 [M: `test_core_replay`, golden `replay_effects_external`]. 효과의 `guard` 가 만족되지 않거나 평가할 수 없으면 적용하지 않고 발견 사항을 남긴다. 파생 종류(`derived`)는 저장하지 않고 평가 때 계산한다. 쓴 위치(상태 변경)는 *마지막 쓴 사건*으로 기록해 관측 규칙이 쓴다.
 
 ### 7.4 happens-before 템플릿의 재생 의미
 
@@ -346,12 +349,12 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 ## 8. 검사기 규칙
 
-`check_profile` 은 이름·sort·어휘·출처를 확인하고 **모든 오류를 모은다**. 아래는 규칙의 분류이고, 메시지는 안정되어 있으며 시험(`test_core_phi_check`, 사례 117개 [M])이 각각을 한 번의 편집으로 일으켜 확인한다. 정상 프로필은 오류가 없고 경고·메모만 있다.
+`check_profile` 은 이름·sort·어휘·출처를 확인하고 **모든 오류를 모은다**. 아래는 규칙의 분류이고, 메시지는 안정되어 있으며 시험(`test_core_phi_check`, 사례 126개와 별도 블록 [M])이 각각을 한 번의 편집으로 일으켜 확인한다. 정상 프로필은 오류가 없고 경고·메모만 있다.
 
 | 영역 | 규칙 |
 |---|---|
 | 머리 | `profile` 이 있다 (`CheckOptions::require_header`) |
-| 출처 기록 | tier, kind, side 가 K0 어휘에 있다; tier 와 kind 가 짝이 맞다(§10); `api_doc`/`requirement`/`code_admission`/`code_pattern` 은 file, lines, sha256 을 가진다; sha256 은 소문자 16진 64자; file 이 있으면 lines 가 있고 그 file 은 선언한 source 에 속한다 (`require_sources`); `issue` 는 `cite`; `researcher` 는 `authored` |
+| 출처 기록 | tier, kind, side 가 K0 어휘에 있다; tier 와 kind 가 짝이 맞다(§10); `side caller` 는 tier `contract-backed`/`requirement-derived`/`admitted`/`issue-derived` 에만(§5.7); `api_doc`/`requirement`/`code_admission`/`code_pattern` 은 file, lines, sha256 을 가진다; sha256 은 소문자 16진 64자; file 이 있으면 lines 가 있고 그 file 은 선언한 source 에 속한다 (`require_sources`); `issue` 는 `cite`; `researcher` 는 `authored` |
 | source | rev 는 소문자 16진 7~40자; 같은 root 가 둘이면 안 된다; root 는 상대 경로(앞뒤 `/` 없음); guard 의 성분은 선언한 source, 버전 형식 |
 | 주장의 출처 | 모든 주장(상수, 종류, 위치, 바인딩, 사이트, 연산, 효과, 규칙, rspec, trusted …)은 알려진 출처 기록을 하나 이상 인용한다 (`require_provenance`) |
 | const | `ref eval` 은 기호와 번역 단위(source 에 속함)를 가진다 |
@@ -359,13 +362,13 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 | context, scope | `owner_kind`, scope 의 kind 가 존재; request/teardown 은 그 종류의 상태이고 request 가 teardown 앞 |
 | loc, bind, site, init | loc 은 struct·field·holds; 바인딩 대상은 `state/tag/id/value` 형태이고 위치는 같은 struct.field; 패턴은 함수 이름·callee 가 있고 비교 상수가 선언됨; INIT 의 위치·상태가 존재하고 값 sort 가 맞음 |
 | 식 | 이름이 풀림(`exec`/`result` 는 쓸 수 있는 곳에서만); 인자 수; 자원이 필요한 곳에 자원; `valid` 는 Id; `value` 는 위치; `tag` 의 둘째 인자는 그 종류의 태그; `owner` 는 Actor 와 `context`; 키 인자 sort; 비교 sort 호환; 순서 비교는 Int/Id/State; `in` 집합의 sort; 양화는 `table` 이 있는 종류 |
-| op | 매개변수 role, 중복 없음; `lp capture` 조건은 stamp/key/id 매개변수만 읽고 상태를 읽지 않음; 효과에 `lp capture` 불가; 효과마다 lp 가 있음; `declared_trusted` 효과는 `refutable_by`(O1~O10)를 가짐; `lifecycle` 의 상태가 존재, `id` 절은 `ids` 가 있는 종류에만, `all` 은 `table` 이 있는 종류에만 id 없이; `raise` 수준은 State/Int; `store *P` 의 P 는 `out` 매개변수; `store L` 의 위치와 값 sort; `settag` 의 태그와 값; `mark` 는 handler_begin/handler_end; `sync` 역할; outcome 의 코드는 정수 상수, `not_ready(L)` 의 L 은 conjunct, 중복 outcome 없음, `documented` 는 **공급자 쪽** 기록을 인용; `terminal` 은 `bind symbol` 필요 |
+| op | 매개변수 role, 중복 없음; `lp capture` 조건은 stamp/key/id 매개변수만 읽고 상태를 읽지 않음; 효과에 `lp capture` 불가; 효과마다 lp 가 있음; `declared_trusted` 효과는 `refutable_by`(O1~O10)를 가짐; `declared_trusted` 효과의 보호 조건은 `filter` 가 아니라 `when`; `lifecycle` 의 상태가 존재, `id` 절은 `ids` 가 있는 종류에만, `all` 은 `table` 이 있는 종류에만 id 없이; `raise` 수준은 State/Int; `store *P` 의 P 는 `out` 매개변수; `store L` 의 위치와 값 sort; `settag` 의 태그와 값; `mark` 는 handler_begin/handler_end; `sync` 역할; outcome 의 코드는 정수 상수, `not_ready(L)` 의 L 은 conjunct, 중복 outcome 없음, `documented` 는 **공급자 쪽** 기록을 인용; `terminal` 은 `bind symbol` 필요 |
 | hb | 층–강건성 짝(§5.6); spawn 의 create 연산·`out` 매개변수·entry 가 존재; phase 의 `from` 이 연산 또는 사이트이고 단계가 call/return/point; observe 의 poll·called_at·exit_outcome(정수 상수)·else_terminal(종료 연산)·watch(존재하는 종류); `obs_fatal` observe 는 `else_terminal` 필요 |
-| rspec | 사용 연산 존재; `key` 는 자원; `requires` 의 각 conjunct 는 연산의 conjunct 중 **정확히 하나**와 text 가 같고(그래서 각각 선형화 지점을 가진다) 중복 없음; `appreq` 는 **side caller** 기록; `allowed` 항목은 출처(side 가 있는)를 인용하고 코드·상수·연산이 존재; `harm` 은 K0 어휘 |
+| rspec | 사용 연산 존재; `key` 는 자원; `requires` 의 각 conjunct 는 연산의 conjunct 중 **정확히 하나**와 text 가 같고(그래서 각각 선형화 지점을 가진다) 중복 없음; `appreq` 는 **side caller** 기록이고 그 tier 가 caller 쪽이 될 수 있는 것(§5.7; 손으로 넣은 기록·code-derived 기록은 안 됨); `allowed` 항목은 출처(side 가 있는)를 인용하고 코드·상수·연산이 존재; `harm` 은 K0 어휘 |
 | trusted | class 는 declared_trusted/assumption; statement 가 있음; `refutable_by` 가 있고 O1~O10 |
 | 중복 | 같은 종류의 선언 이름은 한 번만; 한 연산 안에서 conjunct/effect 레이블, outcome 코드, 한 종류 안에서 태그 이름은 한 번만 |
 
-경고·메모(오류가 아님): 연산에 `bind symbol` 이 없음, 패턴이 연산의 심볼과 다른 함수를 찾음, rspec 에 oracle·harm·authored 가 없음, `allowed none` 인데 appreq 가 미지정(→ 호출자 수준 Allowed 는 `unspecified_by_reference`라는 메모).
+경고·메모(오류가 아님): 연산에 `bind symbol` 이 없음, `Id` 와 비교되는 정수 리터럴·상수가 0..0xFFFFFFFF 밖(§4), 패턴이 연산의 심볼과 다른 함수를 찾음, rspec 에 oracle·harm·authored 가 없음, `allowed none` 인데 appreq 가 미지정(→ 호출자 수준 Allowed 는 `unspecified_by_reference`라는 메모).
 
 ## 9. 정규형과 프로필 해시
 
@@ -377,13 +380,15 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 ## 10. 출처 규칙
 
-**tier–kind 짝** (K1 의 결정; SPEC rev 1.2 에서 확정 필요): `contract-backed` ← `api_doc`, `requirement`; `admitted` ← `code_admission`; `code-derived` ← `code_pattern`; `issue-derived` ← `issue`; `researcher` ← `researcher`; `unreferenced` ← `none`. 항목이 인용한 기록 중 **가장 좋은** tier 가 그 항목의 tier 다(순서는 앞의 열거 순서; `unreferenced` 가 가장 약함).
+**tier–kind 짝** (K1 의 결정; SPEC rev 1.2 에서 확정 필요; `phi_provenance.cpp` 의 `tier_kind_compatible`): `contract-backed` ← `api_doc`; `requirement-derived` ← `requirement`(이 빌드의 K0 어휘 `KZ_TIER` 에 `requirement-derived` 가 아직 없어 `requirement` 기록은 검사기가 그 사실을 말하며 거절한다); `admitted` ← `code_admission`; `code-derived` ← `code_pattern`; `issue-derived` ← `issue`; `researcher` ← `researcher`; `unreferenced` ← `none`. `kz-phi stats` 는 항목마다 인용한 기록 중 **가장 강한** tier 와 **가장 약한** tier(SPEC 1.6: 섞인 항목은 부분 중 가장 약한 tier 를 갖는다) 두 가지로 센다(순서는 앞의 열거 순서; `unreferenced` 가 가장 약함).
 
-**인용 본문의 해시**: `file` 의 `lines a b` 의 각 줄 뒤에 LF 를 붙인 바이트열의 SHA-256 이다. `sed -n 'a,bp' file | sha256sum` 과 같다(마지막 줄에 줄 바꿈이 없으면 있는 것으로 본다; CR 은 줄의 일부로 남는다). 이 프로필의 인용은 `sed`+`sha256sum` 으로 따로 계산해 적었고, 저장소의 코드가 만든 값이 아니다. `kz-phi verify-prov --root <번들>` 와 ctest `phi_profile_provenance` 가 번들에서 다시 읽어 맞춘다: V1 프로필의 74개 인용을 모두 대조했다 [M]. 번들이 없는 머신에서는 시험이 SKIP(77)으로 보고한다.
+**인용 본문의 해시**: `file` 의 `lines a b` 의 각 줄 뒤에 LF 를 붙인 바이트열의 SHA-256 이다. `sed -n 'a,bp' file | sha256sum` 과 같다(마지막 줄에 줄 바꿈이 없으면 있는 것으로 본다; CR 은 줄의 일부로 남는다). 이 프로필의 인용은 `sed`+`sha256sum` 으로 따로 계산해 적었고, 저장소의 코드가 만든 값이 아니다. `kz-phi verify-prov --root <번들>` 와 ctest `phi_profile_provenance` 가 번들에서 다시 읽어 맞춘다: V1 프로필의 98개 인용을 모두 대조했다 [M]. 번들이 없는 머신에서는 시험이 SKIP(77)으로 보고한다.
+
+**개정 고정(revision pin)의 확인** [M: `test_core_phi_provenance`, 번들에서 4개 source 모두 일치]: `verify-prov` 는 `source NAME root R rev X` 마다 그 트리에서 체크아웃된 커밋을 git 메타데이터 **파일**에서 읽어(`.git` 디렉터리 또는 `gitdir:` 파일, `HEAD`, loose ref 또는 `packed-refs`; git 명령은 돌리지 않으므로 읽기 전용 번들을 건드리지 않는다) `rev` 로 시작하는지 본다. 다르면 `MISMATCH` 이고 종료 코드 1, 메타데이터가 없으면 `unverifiable` 로 이유와 함께 출력한다(종료 코드에는 영향 없음). **확인하지 않는 것**: 작업 트리에 커밋되지 않은 수정이 있는지(index 와 객체가 필요하다). 출력의 해당 줄이 그렇게 말한다. 인용한 줄 자체는 위의 해시 대조가 덮는다.
 
 **side** (기록과 rspec 의 짝에 대해 저자가 판단): `supplier`(공급자가 반환·문서화하는 것), `caller`(호출 코드가 달성/처리해야 할 것을 말하는 텍스트), `rule`(텍스트 없이 도구의 고정 규칙). `appreq` 는 caller 기록만, `documented` outcome 은 supplier 기록만 인용할 수 있다.
 
-**손으로 넣은 항목**: tier `researcher`(또는 `unreferenced`)가 가장 좋은 항목과 `declared_trusted` 항목을 보고에서 센다(`kz-phi stats`). V1 프로필: 항목 78개(best tier 기준 contract-backed 2, code-derived 73, researcher 3), 손으로 넣은 것 3개(hb R1, kind cell, op abort), `researcher` 기록을 *하나라도* 인용하는 항목 12개, `declared_trusted` 3개(효과 `CFE_ES_CleanUpApp.free_record`, trusted A-FRESH, A-OWNER) [M]. 정확한 목록은 `tests/phi/data/profile_summary.golden`.
+**손으로 넣은 항목**: tier `researcher`(또는 `unreferenced`)가 가장 강한 항목과 `declared_trusted` 항목을 보고에서 센다(`kz-phi stats`). 호출자 수준의 인용도 항목으로 센다: `appreq RSPEC` 하나, Allowed 항목마다 `allowed RSPEC.KIND#N` 하나, 그리고 그 기록들의 tier·side 를 `caller level` 절에 줄마다 적고, 손으로 넣은 기록(또는 기록 없음)을 인용하는 appreq·항목의 수를 센다 [M: `test_core_phi_allowed`]. V1 프로필(출처 기록 109개): 항목 91개(가장 강한 tier 기준 contract-backed 3, code-derived 85, researcher 3; 가장 약한 tier 기준 contract-backed 1, code-derived 78, researcher 12), 손으로 넣은 것 3개(hb R1, kind cell, op abort), `researcher` 기록을 *하나라도* 인용하는 항목 12개, `declared_trusted` 3개(효과 `CFE_ES_CleanUpApp.retire`, trusted A-FRESH, A-OWNER), 호출자 수준: 지정된 appreq 1개(`evs_h_appid_note`, contract-backed, side caller), Allowed 항목 0개(`allowed none`), 손으로 넣은 인용 0개 [M]. 프로필 해시 `bc8a3401e6b53b23642e258363dd27eabd7187eea2790f463a45171ae5ec90a4`. 정확한 목록은 `tests/phi/data/profile_summary.golden`.
 
 ## 11. SPEC·자료와의 불일치
 
@@ -395,13 +400,16 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 4. **R19 의 버전 가드 `cfe >= 6.4.2`** 는 SPEC 의 값이다. 이 프로필을 쓰면서 6.4.x 소스를 읽지 않았으므로 가드의 하한은 **재검증하지 않았다**(`r_guard_core_serial` 에 적음).
 5. **SPEC rev 1.2**: §2.3 의 DSL 발췌는 아직 `contract` 를 쓴다. 이 구현은 `rspec`/`requires` 를 쓴다. tier–kind 짝(§10)도 SPEC 에 명시가 없어 K1 이 정했다.
 6. **ES AppId 의 base**(`CFE_ES_APPID_BASE = 0x110000`)는 SIMPLE 모드의 값이다. STRICT 빌드에서는 `0x02110000` 이다. 번들의 설정으로 정해지는 *basis* 의 성질이므로 basis 레코드와 일치해야 한다(K4a 가 대조).
+7. **`CFE_ES_CleanUpApp` 의 생명주기** (K1 round 4 에서 고침): 이전 프로필은 정리를 `LIVE -> FREE` 한 걸음(`:1632–1635` 의 해제)으로 두었다. 고정된 소스에서는 먼저 **:1498** 에서 레코드를 `RESERVED` 로 두고(`CFE_ES_AppRecordSetUsed(AppRecPtr, CFE_RESOURCEID_RESERVED)`, 주석 "Set the record to RESERVED", :1493–1498), 나머지 자원을 잠금 밖에서 푼 뒤, 끝에서 아직 `RESERVED` 일 때만 해제한다(:1632–1635). 그 사이에는 레코드가 `LIVE` 가 아니므로 `CFE_ES_GetAppRecordByContext` 가 그 앱의 task 에 대해 실패한다. 지금 프로필은 효과 `retire`(`LIVE -> RESERVED`, `es_apps_cleanup_retire`, 신뢰한 보호 조건 `EXTERNAL && AppState > RUNNING` 은 이 효과로 옮김)와 `free_record`(`RESERVED -> FREE`, 보호 조건은 코드의 시험 :1632)를 두고, 종류 `es.app` 의 간선도 `LIVE -> RESERVED on retire`, `RESERVED -> FREE on free` 로 바꿨다. 그 창은 golden `replay_cleanup_window` 가 보인다.
 
-모형의 근사(`02_researcher.kzp` 에 `researcher` 기록으로 남김): EarlyInit 이 함수 포인터로 불려 패턴 언어가 이름을 붙일 수 없어 R18 의 기준점을 둘째 루프의 첫 `LockSharedData` 로 잡았다; 실패 가지의 out 포인터 저장에 패턴이 없어 그 선형화 지점을 뒤따르는 `UnlockSharedData` 에 묶었다; `evs.reg` 는 정확한 AppId 로 키를 잡고 세대는 모형에 없다; `es.self` 는 task 레코드와 App 레코드의 조회를 App 레코드 하나로 줄였다.
+모형의 근사(`02_researcher.kzp` 에 `researcher` 기록으로 남김): EarlyInit 이 함수 포인터로 불려 패턴 언어가 이름을 붙일 수 없어 R18 의 기준점을 둘째 루프의 첫 `LockSharedData` 로 잡았다; 실패 가지의 out 포인터 저장에 패턴이 없어 그 선형화 지점을 뒤따르는 `UnlockSharedData` 에 묶었다(두 가지가 모두 그 지점을 지나므로 보호 조건은 `filter`); `evs.reg` 는 정확한 AppId 로 키를 잡고 세대는 모형에 없다; `es.self` 는 task 레코드와 App 레코드의 조회를 App 레코드 하나로 줄였다.
 
 ## 12. 증명 상태와 한계 (D20, PS2)
 
 - 이 도구와 프로필은 **무엇도 증명하지 않는다**. 목록에 의무로 적은 것(O3, O4, O9)은 반박 가능한 항목이다. `declared_trusted` 와 `assumption` 은 "증명됨"이 아니다. 출력 어디에도 의무를 적어 두었다는 이유로 증명·검증·인증이라는 말을 쓰지 않는다.
 - 규칙 하나로는 수용하지 않는다(QT-4/Q15). `PENDING` 은 `TOLERATED` 로 세지 않는다.
+- 손으로 넣은 기록(`researcher`, `unreferenced`)과 code-derived 기록은 `side caller` 가 될 수 없다(검사기 오류). 그래서 연구자가 쓴 appreq 도, 연구자 규칙으로 판정하는 Allowed 항목도 없다(QT-4, QT-9).
+- 신뢰한 보호 조건(`declared_trusted` 효과의 `when`)은 재생에서 **반박만** 될 수 있다: 그 지점이 관측되었는데 조건이 거짓이면 `guard_failure ... refuted` 로 보고한다. 조건이 참이었다는 관측은 그 조건을 증명하지 않는다.
 - 구현하지 않은 것 [I]: Allowed 항목의 horizon monitor(→ `PENDING` 으로 남음); 생명주기 간선(`transition`)의 합법성 검사(재생은 효과가 가리키는 상태를 그대로 쓴다); 세대와 재시작; 패턴을 소스에 맞춰 찾기(K4a); 관측 규칙의 `called_at`·쓰기 집합 완전성·falsifier; operational domain; 패턴 언어의 "포인터를 통한 저장"과 "간접 호출 이름 붙이기".
 - 시험의 trace, 값, 식별자는 모두 합성이다. cFS 를 실행하지 않았다.
 
@@ -409,15 +417,15 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 | 시험 | 확인하는 것 |
 |---|---|
-| `test_core_phi_parser` | 어휘·구문 오류 69개를 줄:열과 함께; 식의 우선순위·평탄화·출력의 고정점; 받아들이는 형태 전부 |
-| `test_core_phi_check` | §8 의 규칙마다 한 번의 편집으로 오류를 일으킴(117개); 정상 프로필은 오류 없음 |
-| `test_core_phi_canonical` | 정규 text 의 고정점; 해시의 불변성(주석·공백·순서·파일 분할·정수 철자·인용 순서)과 변화(12가지 의미 편집이 모두 다른 해시) |
-| `test_core_phi_allowed` | `derive_caller_allowed` 의 모든 가지 |
-| `test_core_phi_provenance` | 인용 해시(경계·CR·마지막 줄), tier–kind, 번들 검증(임시 트리), source 해석 |
+| `test_core_phi_parser` | 어휘·구문 오류 71개를 줄:열과 함께; 식의 우선순위·평탄화·출력의 고정점; 받아들이는 형태 전부 |
+| `test_core_phi_check` | §8 의 규칙마다 한 번의 편집으로 오류를 일으킴(126개); 손으로 넣은 기록의 `side caller`·그 기록을 인용한 appreq·`declared_trusted` 효과의 `filter`·Id 와 범위 밖 정수의 비교 경고; 정상 프로필은 오류 없음 |
+| `test_core_phi_canonical` | 정규 text 의 고정점(`when`/`filter` 보호 조건 포함); 해시의 불변성(주석·공백·순서·파일 분할·정수 철자·인용 순서)과 변화(14가지 의미 편집이 모두 다른 해시) |
+| `test_core_phi_allowed` | `derive_caller_allowed` 의 모든 가지; 손으로 넣은·code-derived 기록의 `side caller` 는 판정하지 않고 appreq 를 지정하지 않음; `stats` 의 호출자 수준 인용 |
+| `test_core_phi_provenance` | 인용 해시(경계·CR·마지막 줄), tier–kind, 번들 검증(임시 트리), 개정 고정(임시 트리의 git 메타데이터: 일치·불일치·확인 불가), source 해석 |
 | `test_core_eval` | 모든 구성의 구체 의미; 추상 domain 의 삼치 논리·구간·상태 집합 |
-| `test_property_eval_agreement` | 추상 결과가 구체 결과를 포함함(§6) |
-| `test_core_replay` | 효과, HB 템플릿 4개, 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 재생이 죽지 않고 두 번 돌려도 같은 결과(총함수) |
-| `phi_golden_*` (13개) | 실제 프로필의 정규 text, 해시·통계, 합성 trace 8개로 만든 재생 결과 11개(predicate 유무·버전을 바꾼 변형 포함) |
+| `test_property_eval_agreement` | 추상 결과가 구체 결과를 포함함(§6); 잘못 만들어진 소유자(다른 종류·다른 키 폭)를 섞은 상태 포함 — round 4 이전의 `owner_of` 로 돌리면 넓힌 추상화에서 위반 92개로 실패한다 |
+| `test_core_replay` | 효과, 단언한 보호 조건의 반박·불일치 보고(`guard_failures`)와 `filter` 의 가지 선택, HB 템플릿 4개, 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 재생이 죽지 않고 두 번 돌려도 같은 결과(총함수) |
+| `phi_golden_*` (17개) | 실제 프로필의 정규 text, 해시·통계, 합성 trace 12개로 만든 재생 결과 15개(predicate 유무·버전을 바꾼 변형 포함; `kid_outcomes`, `effects_core`, `effects_external`(보호 조건의 반박·불일치 5개), `cleanup_window`(정리 중 RESERVED 창) 포함) |
 | `phi_profile_check`, `phi_profile_provenance`, `test_phi_cli` | `kz-phi` 가 라이브러리와 같은 출력을 냄, 종료 코드 |
 
 golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest -R phi_golden` 후 `tests/phi/data/` 의 diff 를 읽는다.

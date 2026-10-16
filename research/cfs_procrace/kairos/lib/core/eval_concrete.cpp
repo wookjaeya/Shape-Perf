@@ -212,7 +212,10 @@ CVal ConcreteDomain::id_of(const CVal& res) const {
 
 CVal ConcreteDomain::owner_of(const CVal& actor) const {
   CVal r = make(SortKind::Res, 0, p_.context.owner_kind_index);
-  if (s_.has_owner && actor.v == s_.exec) {
+  // An owner that is not a record of the owner kind of the context (another kind, another key
+  // width) is not an owner: undefined, as in the abstract domain.
+  const bool well_formed = s_.owner.kind == p_.context.owner_kind_index && s_.owner.key.size() == key_width(p_, s_.owner.kind);
+  if (s_.has_owner && well_formed && actor.v == s_.exec) {
     r.kind = s_.owner.kind;
     r.key = s_.owner.key;
   } else {

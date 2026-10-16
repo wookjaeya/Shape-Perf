@@ -5,6 +5,8 @@ extract
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
   loops                      0 (table walks resolved 0, failed 0)
+  certificate-view rules     unroll 0, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
   location Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
@@ -31,6 +33,8 @@ facts-view 1
       arg 2:const 8 sizeof g_cell
 [derives] 0
 [loops] 0
+[iters] 0
+[order] 0
 [init] 5
   Cell.id in g_cell zero-initialized value=0 defined at writers.c:17:6
   Cell.id in g_holder static-initializer value=3 defined at writers.c:19:8
@@ -39,20 +43,34 @@ facts-view 1
   Cell.id in g_table static-initializer value=12 defined at writers.c:20:13
 [consts] 0
 [writers] 10
-  Cell.id assign at writers.c:22:24 in set_const value=const 5 [5] key=g_cell {} COMPUTED
-  Cell.id assign at writers.c:23:25 in set_param value=symbolic [v] key=g_cell {} COMPUTED
-  Cell.id assign at writers.c:24:40 in set_via_pointer value=top [v + 1] key=c {} COMPUTED
-  Cell.id assign at writers.c:25:30 in set_nested value=const 9 [9] key=h->inner {} COMPUTED
-  Cell.id assign at writers.c:26:25 in set_array value=const 8 [8] key=g_table[i] {} COMPUTED
-  Cell.id inc-dec at writers.c:27:19 in bump value=top [g_cell.id++] key=g_cell {} COMPUTED
-  Cell.id memset at writers.c:28:20 in reset value=const 0 [fill 0] key=&g_cell {covers-more-than-the-field} COMPUTED
-  Cell.id aggregate-assign at writers.c:29:34 in copy_all value=top [*src] key=g_cell {covers-more-than-the-field} COMPUTED
-  Cell.id assign at writers.c:33:5 in guarded value=const 1 [1] key=g_cell guard=(gt param:x#0 0) {} COMPUTED
-  Cell.id assign at writers.c:35:5 in guarded value=const 2 [2] key=g_cell guard=(not (gt param:x#0 0)) {} COMPUTED
+  Cell.id assign at writers.c:22:24 in set_const value=const 5 [5] key=g_cell {} n/a
+  Cell.id assign at writers.c:23:25 in set_param value=symbolic [v] key=g_cell {} n/a
+  Cell.id assign at writers.c:24:40 in set_via_pointer value=top [v + 1] key=c {} n/a
+  Cell.id assign at writers.c:25:30 in set_nested value=const 9 [9] key=h->inner {} n/a
+  Cell.id assign at writers.c:26:25 in set_array value=const 8 [8] key=g_table[i] {} n/a
+  Cell.id inc-dec at writers.c:27:19 in bump value=top [g_cell.id++] key=g_cell {} n/a
+  Cell.id memset at writers.c:28:20 in reset value=const 0 [fill 0] key=&g_cell {covers-more-than-the-field} n/a
+  Cell.id aggregate-assign at writers.c:29:34 in copy_all value=top [*src] key=g_cell {covers-more-than-the-field} n/a
+  Cell.id assign at writers.c:33:5 in guarded value=const 1 [1] key=g_cell guard=(gt param:x#0 0) {} n/a
+  Cell.id assign at writers.c:35:5 in guarded value=const 2 [2] key=g_cell guard=(not (gt param:x#0 0)) {} n/a
 [atype] 0
 [locs] 1
   Cell.id writer-set-complete writers=10 (direct 9, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=5 unresolved-indirect=0
 [targets] 0
+[spawnparams] 0
 [image] 0
 [terminals] 0
 [outcalls] 0
+[fwrites] 12
+  bump field Cell.id at writers.c:27
+  copy_all field <global>.g_cell at writers.c:29
+  copy_all record Cell.* at writers.c:29
+  guarded field Cell.id at writers.c:33
+  reset field <global>.g_cell at writers.c:28
+  reset address-argument <global>.g_cell at writers.c:28
+  reset record Cell.* at writers.c:28
+  set_array field Cell.id at writers.c:26
+  set_const field Cell.id at writers.c:22
+  set_nested field Cell.id at writers.c:25
+  set_param field Cell.id at writers.c:23
+  set_via_pointer field Cell.id at writers.c:24

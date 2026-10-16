@@ -1,28 +1,33 @@
 extract
   translation units          1
-  functions                  9 (bodies read 8, in system headers skipped 0)
-  call sites                 5
-  indirect calls             0 (resolved 0, unresolved 0)
-  spawn calls                4 (entry resolved 3)
-  loops                      0 (table walks resolved 0, failed 0)
+  functions                  12 (bodies read 11, in system headers skipped 0)
+  call sites                 8
+  indirect calls             1 (resolved 1, unresolved 0)
+  spawn calls                5 (entry resolved 4)
+  loops                      1 (table walks resolved 1, failed 0)
+  certificate-view rules     unroll 1, await 0, star-closed 0
+  spawn parameters           3, unrolled iteration rows 8
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
   location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
   hand-entered inputs        12 (built-in data-function table 12, command line 0)
 facts-view 1
 [files] 1
-  0 spawn.c 05115402b999 809
-[functions] 9
+  0 spawn.c 422f8023dc2c 1795
+[functions] 12
   fn 0 fx_spawn spawn.c:5 params=3 {}
   fn 1 start_direct spawn.c:11-14 params=0 {defined}
   fn 2 start_from_table spawn.c:30-33 params=0 {defined}
   fn 3 start_indirect spawn.c:21-21 params=0 {defined}
-  fn 4 start_unknown spawn.c:35-38 params=1 {defined}
-  fn 5 start_with spawn.c:16-19 params=1 {defined,static}
-  fn 6 worker_a spawn.c:7-7 params=0 {defined,static,address-taken}
-  fn 7 worker_b spawn.c:8-8 params=0 {defined,static,address-taken}
-  fn 8 worker_c spawn.c:9-9 params=0 {defined,static}
-[calls] 5
+  fn 4 start_task spawn.c:50-54 params=1 {defined,static}
+  fn 5 start_units spawn.c:67-76 params=0 {defined}
+  fn 6 start_unknown spawn.c:35-38 params=1 {defined}
+  fn 7 start_with spawn.c:16-19 params=1 {defined,static}
+  fn 8 trampoline spawn.c:48-48 params=0 {defined,static,address-taken}
+  fn 9 worker_a spawn.c:7-7 params=0 {defined,static,address-taken}
+  fn 10 worker_b spawn.c:8-8 params=0 {defined,static,address-taken}
+  fn 11 worker_c spawn.c:9-9 params=0 {defined,static}
+[calls] 8
   site 0 spawn.c:13:3 start_direct -> fx_spawn direct {spawn-op}
       arg 0:addr-of-object t
       arg 1:string "a"
@@ -41,19 +46,62 @@ facts-view 1
       arg 0:addr-of-object t
       arg 1:string "unknown"
       arg 2:top ~f
+  site 5 spawn.c:48:32 trampoline@spawn.c:48 -> <indirect> indirect {}
+  site 6 spawn.c:53:3 start_task@spawn.c:50 -> fx_spawn direct {spawn-op}
+      arg 0:addr-of-object t
+      arg 1:string "task"
+      arg 2:function trampoline fn=trampoline@spawn.c:48
+  site 8 spawn.c:74:5 start_units -> start_task direct {intra-tu,in-loop} loop=0 depth=1
+      arg 0:symbolic Unit.main
 [derives] 0
-[loops] 0
+[loops] 1
+  loop 0 site 7 spawn.c:70:3 in start_units depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_units
+      exit (eq local:u 0)
+      mod [local:i, local:u, (call-result start_task)]
+      rule unroll {}: unrolled: 3 iterations, one per element of g_units in its static-initializer image
+[iters] 8
+  loop 0 iter 0 element address unit_x@spawn.c:62 at spawn.c:62
+    call site 8 start_task taken
+      arg 0 = function worker_a@spawn.c:7 [task-main] at spawn.c:62
+  loop 0 iter 1 element address unit_y@spawn.c:63 at spawn.c:63
+    call site 8 start_task skipped
+  loop 0 iter 2 element address unit_z@spawn.c:64 at spawn.c:64
+    call site 8 start_task taken
+      arg 0 = function worker_c@spawn.c:9 [task-main] at spawn.c:64
+[order] 1
+  loop 0 spawn.c:70 in start_units: call site 8 start_task arg 0 (task-main)
+    iter 0 unit_x@spawn.c:62 -> worker_a@spawn.c:7  taken
+    iter 2 unit_z@spawn.c:64 -> worker_c@spawn.c:9  taken
 [init] 0
 [consts] 0
 [writers] 0
 [atype] 0
 [locs] 1
   Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
-[targets] 4
+[targets] 7
   site 0 spawn.c:13:3 in start_direct spawn-entry -> worker_a@spawn.c:7 via F:worker_a@spawn.c:7 of 1
   site 1 spawn.c:18:3 in start_with@spawn.c:16 spawn-entry -> worker_b@spawn.c:8 via P:start_with@spawn.c:16#0 of 1
   site 3 spawn.c:32:3 in start_from_table spawn-entry -> worker_c@spawn.c:9 via Desc.entry of 1
   site 4 spawn.c:37:3 in start_unknown spawn-entry -> UNRESOLVED(no-function-flows-to-it) via P:start_unknown#0 of 0
-[image] 0
+  site 5 spawn.c:48:32 in trampoline@spawn.c:48 indirect-call -> worker_a@spawn.c:7 via TaskRec.main of 2
+  site 5 spawn.c:48:32 in trampoline@spawn.c:48 indirect-call -> worker_c@spawn.c:9 via TaskRec.main of 2
+  site 6 spawn.c:53:3 in start_task@spawn.c:50 spawn-entry -> trampoline@spawn.c:48 via F:trampoline@spawn.c:48 of 1
+[spawnparams] 3
+  start_task@spawn.c:50 param 0 called-by-entry: spawn site 6 entry trampoline@spawn.c:48 called at site 5 spawn.c:48:32 via TaskRec.main
+  start_unknown param 0 entry-argument: spawn site 4 via P:start_unknown#0
+  start_with@spawn.c:16 param 0 entry-argument: spawn site 1 via P:start_with@spawn.c:16#0
+[image] 10
+  g_units@spawn.c:65[0] address unit_x@spawn.c:62
+  g_units@spawn.c:65[1] address unit_y@spawn.c:63
+  g_units@spawn.c:65[2] address unit_z@spawn.c:64
+  g_units@spawn.c:65[3] null
+  unit_x@spawn.c:62.main function worker_a
+  unit_x@spawn.c:62.name string "x"
+  unit_y@spawn.c:63.main null
+  unit_y@spawn.c:63.name string "y"
+  unit_z@spawn.c:64.main function worker_c
+  unit_z@spawn.c:64.name string "z"
 [terminals] 0
 [outcalls] 0
+[fwrites] 1
+  start_task@spawn.c:50 field TaskRec.main at spawn.c:52

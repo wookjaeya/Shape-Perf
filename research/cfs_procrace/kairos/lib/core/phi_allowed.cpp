@@ -1,6 +1,7 @@
 #include "kz/core/phi_allowed.hpp"
 
 #include "kz/core/phi.hpp"
+#include "kz/core/phi_provenance.hpp"
 
 namespace kz {
 namespace phi {
@@ -16,12 +17,20 @@ const char* caller_allowed_text(CallerAllowedKind k) {
 
 CallerAllowed derive_caller_allowed(const Profile& p, const RspecDecl& r) {
   CallerAllowed out;
-  const bool appreq = !r.appreq_unspecified && r.appreq_idx >= 0;
+  // A caller-side record of a tier that cannot be caller-side (hand-entered or code-derived) is read as
+  // a rule: it never decides a status and never specifies appreq (QT-4, QT-9).  The checker rejects
+  // such records; this keeps an unchecked or hand-built profile from getting around it.
+  auto caller_record = [&](int32_t pi) {
+    const ProvDecl& d = p.provs[static_cast<size_t>(pi)];
+    return d.side == "caller" && caller_side_tier(d.tier);
+  };
+  const bool appreq = !r.appreq_unspecified && r.appreq_idx >= 0 && caller_record(r.appreq_idx);
   for (const AllowedEntry& a : r.allowed) {
     bool caller = false, rule = false, supplier = false;
     for (int32_t pi : a.prov_idx) {
       const std::string& side = p.provs[static_cast<size_t>(pi)].side;
-      if (side == "caller") caller = true;
+      if (caller_record(pi)) caller = true;
+      else if (side == "caller") rule = true;
       else if (side == "rule") rule = true;
       else if (side == "supplier") supplier = true;
     }

@@ -116,6 +116,15 @@ struct ProfileStats {
   size_t cites_researcher = 0;
   std::vector<std::string> cites_researcher_names;  // sorted, "kind NAME"
   std::vector<std::string> declared_trusted_names;  // sorted, "kind NAME"
+  // The caller-level citations of the readiness specifications (SPEC 1.6): the appreq record and the
+  // records of every Allowed entry, with tier and side.  They are also counted as entries above
+  // ("appreq RSPEC", "allowed RSPEC.KIND#N").  `caller_level_hand_entered` counts the appreqs and
+  // entries that cite a researcher or unreferenced record (the checker never lets such a record be
+  // caller-side, so they decide nothing; they are listed so that a reader sees them).
+  size_t appreq_specified = 0;
+  size_t allowed_entries = 0;
+  size_t caller_level_hand_entered = 0;
+  std::vector<std::string> caller_level_lines;      // in the order of the declarations
 };
 ProfileStats profile_stats(const Profile& p);
 // The report of `kz-phi stats` (also the form of its golden file).

@@ -150,7 +150,7 @@ op get_id(out IdPtr) {
   bind symbol "get_id";
   conjunct alive: state(self(exec)) = PRESENT lp at fn("get_id").call("lookup");
   effect store_ok: store *IdPtr := id(owner(exec)) when state(self(exec)) = PRESENT lp at fn("get_id").call("get_rec") prov code_a;
-  effect store_bad: store *IdPtr := UNDEF when state(self(exec)) != PRESENT lp at fn("get_id").call("unlock") prov code_a;
+  effect store_bad: store *IdPtr := UNDEF filter state(self(exec)) != PRESENT lp at fn("get_id").call("unlock") prov code_a;
   outcome OK: ready;
   outcome NOT_READY_A: not_ready(alive) documented "retval NOT_READY_A of get_id" prov doc_sup;
   prov code_a;

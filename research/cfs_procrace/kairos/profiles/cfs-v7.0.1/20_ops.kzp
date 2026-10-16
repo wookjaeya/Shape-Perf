@@ -41,11 +41,14 @@ op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
 # ---------------------------------------------------------------------------------------------
 # The identity of the executing application, and the out-pointer store that publishes it.
 # ---------------------------------------------------------------------------------------------
+# store_ok sits at a call the code makes only in the success branch, so its guard is asserted
+# (`when`: a false guard at an observed point is a finding).  store_fail sits at the unlock that both
+# branches reach (r_lp_store_via_unlock), so its guard selects the branch (`filter`).
 op CFE_ES_GetAppID(out AppIdPtr) {
   bind symbol "CFE_ES_GetAppID";
   conjunct self_live: state(es.self(exec)) = LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_GetAppRecordByContext");
   effect store_ok: store *AppIdPtr := id(owner(exec)) when state(es.self(exec)) = LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_AppRecordGetID") prov es_getappid_ok, sb_appinit_getappid;
-  effect store_fail: store *AppIdPtr := CFE_RESOURCEID_UNDEFINED when state(es.self(exec)) != LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_UnlockSharedData") prov es_getappid_fail, r_lp_store_via_unlock;
+  effect store_fail: store *AppIdPtr := CFE_RESOURCEID_UNDEFINED filter state(es.self(exec)) != LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_UnlockSharedData") prov es_getappid_fail, r_lp_store_via_unlock;
   outcome CFE_SUCCESS: ready;
   outcome CFE_ES_ERR_RESOURCEID_NOT_VALID: not_ready(self_live) documented "retval CFE_ES_ERR_RESOURCEID_NOT_VALID of CFE_ES_GetAppID (cfe_es.h:519); the out parameter is documented as set to the application ID of the caller" prov es_h_getappid_doc;
   outcome CFE_ES_BAD_ARGUMENT: error documented "retval CFE_ES_BAD_ARGUMENT of CFE_ES_GetAppID (cfe_es.h:520): the out pointer is NULL" prov es_h_getappid_doc;
@@ -135,13 +138,19 @@ op CFE_ES_RunAppTableScan(ElapsedTime, Arg) {
   prov es_runapptablescan_fn, es_apps_scan_waiting;
 }
 
-# Cleanup frees the record of an external application whose AppState is above RUNNING.  The
-# condition is a relational test on one record that the abstract domain cannot exclude: declared,
-# trusted, refutable by observation.
+# Cleanup of an application in two steps.  First the record is set to RESERVED (cfe_es_apps.c:1498),
+# then the other resources of the application are freed outside the lock, and at the end the record is
+# freed only if it is still RESERVED (:1632-1635).  Between the two steps the record is not LIVE, so
+# CFE_ES_GetAppRecordByContext fails for the application's tasks.  The cleanup is reached only for an
+# external application whose AppState is above RUNNING (the background scan, :1109-1114).  That is a
+# relational test on one record that the abstract domain cannot exclude, so the guard of `retire` is
+# declared, trusted and refutable by observation.  The guard of `free_record` is the test of the code
+# itself (:1632).
 op CFE_ES_CleanUpApp(AppId) {
   bind symbol "CFE_ES_CleanUpApp";
-  effect free_record: lifecycle es.app(lp.slot) -> FREE id CFE_RESOURCEID_UNDEFINED when tag(es.app(lp.slot), Type) = EXTERNAL && state(es.appstate(es.app(lp.slot))) > RUNNING lp at fn("CFE_ES_CleanUpApp").call("CFE_ES_AppRecordSetFree") values slot: Int status declared_trusted refutable_by O3, O4 prov es_apps_cleanup_free, es_apps_scan_filter, r_cleanup_guard;
-  prov es_cleanupapp_fn, es_apps_cleanup_free;
+  effect retire: lifecycle es.app(lp.slot) -> RESERVED id CFE_RESOURCEID_RESERVED when state(es.app(lp.slot)) = LIVE && tag(es.app(lp.slot), Type) = EXTERNAL && state(es.appstate(es.app(lp.slot))) > RUNNING lp at fn("CFE_ES_CleanUpApp").call("CFE_ES_AppRecordSetUsed", arg[1] == CFE_RESOURCEID_RESERVED) values slot: Int status declared_trusted refutable_by O3, O4 prov es_apps_cleanup_match, es_apps_cleanup_retire, es_apps_scan_filter, r_cleanup_guard;
+  effect free_record: lifecycle es.app(lp.slot) -> FREE id CFE_RESOURCEID_UNDEFINED when state(es.app(lp.slot)) = RESERVED lp at fn("CFE_ES_CleanUpApp").call("CFE_ES_AppRecordSetFree") values slot: Int prov es_apps_cleanup_free;
+  prov es_cleanupapp_fn, es_apps_cleanup_retire, es_apps_cleanup_free;
 }
 
 # ---------------------------------------------------------------------------------------------

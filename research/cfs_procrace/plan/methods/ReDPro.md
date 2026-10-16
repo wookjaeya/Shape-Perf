@@ -1,6 +1,7 @@
 # ReDPro (ACMSE 2022) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 09:27–09:37, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:30–00:45). (1) 1차 출처 경로를 다시 시도했다(§1.1 둘째 표, 경로 28–41). 전문은 이번에도 읽지 못했다. 새로 확인한 것은 하나다. Internet Archive의 availability API가 ACM PDF 주소의 2022-05-07 스냅숏(기록 상태 200)이 있다고 답했다. 그러나 `web.archive.org`는 이 세션의 egress 정책이 막는다(HTTP는 프록시의 "Blocked by egress policy", HTTPS는 연결 재설정). 우회하지 않았고 스냅숏의 내용이 PDF인지도 확인하지 못했다(§4.3 D-RD-1 (e)). (2) 제1저자 ORCID의 작품 목록을 읽었다. ReDPro 항목은 ACM DOI 링크뿐이다. (3) 피인용 논문의 인용 문맥 목록을 다시 받아 SysPro의 ReDPro 문맥 두 곳(p.22, p.34–35)을 더했다(§2.3) `[2차]`. 바뀐 라벨은 없다. (4) Q6의 도구 수준 라벨("분석")과 사례별 라벨("불명")이 다른 이유를 §3.4에 적었다(`process_race_method_matrix.md` §2.5 항목 4가 지적한 차이). (5) R2의 수치 근거를 gdb 원시 기록(`env/logs/r2_g{1,2,3}_trace.jsonl`, `_summary.txt`)으로 바꾸고 다시 셌다. 값은 같다(§3.2). (6) 환경을 다시 측정했다(§4.1). 이번에도 ReDPro를 실행하지 않았다(구현이 없다).
 - 대상: T. S. Zaman, T. Islam, *ReDPro: an automated technique to detect and regenerate process-level concurrency failures*, ACM SE '22 (2022 ACM Southeast Conference, Virtual Event), pp. 106–112. DOI 10.1145/3476883.3520207. 철자: ACM 서지와 ACMSE 프로그램은 "ReDPro", 초록 본문과 이 논문을 인용하는 논문들은 "RedPro" 또는 "Redpro"로 적는다. 같은 DOI다.
 - 범위: 로드맵 §10 (M6)의 ReDPro 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. ReDPro를 실행하지 않았다(실행할 구현이 없다). 어느 사례에 대해서도 "탐지하지 못한다" 또는 "재생성하지 못한다"는 결과를 담지 않는다.
@@ -37,7 +38,7 @@
 
 ## 0. 한눈에 보기
 
-1. **논문을 찾았고 서지는 확정되었다. 전문은 오늘도 열리지 않았다.** ACM DL은 Cloudflare 도전 페이지(`cf-mitigated: challenge`, HTTP 403)로 막혔다. 도전 페이지를 우회하려고 하지 않았다. Unpaywall, OpenAlex, Semantic Scholar는 모두 사본이 없다(closed)고 답했다. 저자 홈페이지, NSF PAR, arXiv, Internet Archive 검색에도 사본이 없다. 경로 27개와 결과는 §1.1에 있다. `[미도달]`
+1. **논문을 찾았고 서지는 확정되었다. 전문은 오늘도 열리지 않았다.** ACM DL은 Cloudflare 도전 페이지(`cf-mitigated: challenge`, HTTP 403)로 막혔다. 도전 페이지를 우회하려고 하지 않았다. Unpaywall, OpenAlex, Semantic Scholar는 모두 사본이 없다(closed)고 답했다. 저자 홈페이지, NSF PAR, arXiv, Internet Archive 검색에도 사본이 없다. 경로 27개와 결과는 §1.1에 있다. `[미도달]` 2026-10-16에 경로 14개를 더 시도했다(§1.1 둘째 표). 결과는 같고, 남은 단서는 Internet Archive 스냅숏 하나다. 이 세션에서는 `web.archive.org`가 egress 정책으로 막혀 있다.
 2. **초록이 말하는 것은 네 가지다.** (a) process-level 실패는 여러 process가 공유 데이터를 동기화 없이 읽고 쓸 때 생기며 system call 실행 순서에 민감하다. (b) RedPro는 process-level race를 탐지하고 그 실패를 다시 만들어낸다(regenerate). (c) binary instrumentation 도구 PIN으로 run-time 감시와 "potential race pairs"의 실행 순서 제어를 한다. (d) 실제 버그 9건으로 평가했고 effective and efficient하다고 결론짓는다. 이 이상의 방법은 읽지 못했다. `[초록]`
 3. **역할은 초록 수준에서 "탐지 + 실패 재생성"이다.** 그러나 로드맵 §4.6과 §10.1은 원문 확인 전 탐지·재현 표의 확정 행으로 채우지 않는다고 정한다. 이 문서도 어느 역할 표에도 ReDPro를 넣지 않는다. 같은 저자(Zaman)가 쓴 2025년 논문이 ReDPro를 process-level 버그 재현 연구 표에 넣고 "Dynamic Binary Analysis"로 분류하지만(Gender p.3), 이것도 2차 설명이다. `[2차]`
 4. **다섯 사례 × 여섯 질문 30칸 중 26칸이 "불명", 4칸이 "분석"(Q5), "답"은 0칸이다.** 읽은 자료가 관측 사건의 종류, 자원 식별 방식, 입력, 출력 형식을 하나도 밝히지 않는다. "분석" 4칸도 초록의 "order 제어와 failure 재생성 단계가 있다"는 설계 진술에 근거한 조건부 서술이다(§3.4). 어느 칸도 탐지 실패를 뜻하지 않는다.
@@ -51,7 +52,7 @@
 
 ### 1.1 시도한 경로와 결과
 
-시각은 2026-10-15 UTC 09:27–09:37이다. 접속 실패는 원인을 기록한 것까지만 썼고 TLS 검증을 끄거나 프록시를 우회하지 않았으며 도전 페이지(Cloudflare, Anubis)를 풀려고 하지 않았다. 같은 호스트의 반복 재시도는 속도 제한(429) 때만 한 번 했다.
+첫째 표의 시각은 2026-10-15 UTC 09:27–09:37이다. 접속 실패는 원인을 기록한 것까지만 썼고 TLS 검증을 끄거나 프록시를 우회하지 않았으며 도전 페이지(Cloudflare, Anubis)를 풀려고 하지 않았다. 같은 호스트의 반복 재시도는 속도 제한(429) 때만 한 번 했다.
 
 | # | 경로 | 결과 | 등급·비고 |
 |---|---|---|---|
@@ -83,6 +84,25 @@
 | 26 | 이 논문을 인용한 세 편의 전문 PDF: SysPro `arxiv.org/pdf/2601.09616`(47쪽, sha256 `8fe5daa4c7c3794715632e4379d9160a9852b723dc4a649317ef6bae0a75e726`), Gender Dynamics `arxiv.org/pdf/2502.20289`(7쪽, sha256 `5acf7a35cc4a85669b9cc68f92a6a997c429fb13053f3a99ec0f2f2fd85d7543`), LLPut `arxiv.org/pdf/2503.20578v3`(8쪽, sha256 `1eeebf3fcb3ae959d6c0af1472756b6770949e091429a2064ad91a4355735877`) | 모두 200. ReDPro를 언급한 문장만 읽었다(§2.3) | `[2차]` |
 | 27 | Pin 3.21 User Guide `software.intel.com/sites/landingpage/pintool/docs/98484/Pin/html/` (ReDPro 참고문헌 항목이 적은 바로 그 주소), Intel Pin 소개 페이지 | 둘 다 200. User guide sha256 `b01a9d692fed96323ed1775b5c5313b3639a854bdd4c27839262b3e9f4d6316b`. **ReDPro의 문장이 아니라 PIN의 일반 문서다.** 맥락용으로만 읽었다 | 맥락(§2.2, §4.1) |
 
+**둘째 표: 2026-10-16 재시도** (UTC 00:30–00:45). 요청 방식은 첫날과 같다. 도전 페이지와 egress 차단을 우회하지 않았고, 막힌 주소를 다른 도구(WebFetch 등)로 다시 열지도 않았다. 일부 curl 호출에는 일반 브라우저형 `User-Agent` 문자열을 처음부터 붙였다. 거부된 뒤에 문자열을 바꾼 일은 없다.
+
+| # | 경로 | 결과 | 등급·비고 |
+|---|---|---|---|
+| 28 | ACM `doi/…`, `doi/pdf/…`, `doi/epdf/…`, `doi/abs/…` (curl) | 모두 HTTP 403, 응답 헤더 `cf-mitigated: challenge`, `server: cloudflare` | `[미도달]`. 2026-10-15와 같다 |
+| 29 | 학위논문 PDF `uknowledge.uky.edu/cgi/viewcontent.cgi?article=1125&context=cs_etds` | 403, Cloudflare 도전("Just a moment...")이다. 레코드 페이지 `cs_etds/119/`는 200이고 다운로드 링크는 이 주소 하나다 | `[미도달]` |
+| 30 | OpenAlex(같은 DOI) 다시 받음 | 200. `oa_status: closed`, `any_repository_has_fulltext: false`, 위치는 `doi.org` 하나다. 초록 역색인을 펼치면 앞 다섯 문장뿐이다(첫날 기록과 같다) | `[서지]` |
+| 31 | Unpaywall 다시 받음 | 200. `is_oa: false`, `oa_locations: []` | 사본 없음 |
+| 32 | Semantic Scholar Graph API 다시 받음 | 200. 초록 아홉 문장이 첫날 사본과 글자 단위로 같다. `openAccessPdf.status: CLOSED`, `citationCount: 4` | `[초록]` |
+| 33 | Semantic Scholar `…/citations?fields=contexts` | 첫 호출 429, 다음 호출 200. 인용 논문 4편과 각 문맥 문장. SysPro 문맥 7개(첫날 읽은 5곳에 p.22와 p.34의 2곳이 더해짐). SLR(DBLP 키 `journals/scp/LotaZAFCAIK27`, *Science of Computer Programming* 2026, DOI `10.1016/j.scico.2026.103552`)은 문맥 0개 | `[2차]` 후보. SysPro 문장은 PDF에서 다시 찾았다(행 34) |
+| 34 | SysPro `arxiv.org/pdf/2601.09616v1` 다시 받음 | 200, sha256 `8fe5daa4…`로 첫날과 같다. `arxiv.org/abs/2601.09616`의 제출 이력은 v1뿐이다 | `[2차]` §2.3 |
+| 35 | 제1저자 CV 다시 받음 | 200, sha256이 첫날과 같다(`bf2ad801…`). 현 소속은 University of Maryland, Baltimore County(2025-01–), 그 전은 SUNY Polytechnic Institute(2022-08 – 2024-12)라고 적는다 | `[서지]`. 새 기관 저장소 후보를 찾는 데만 썼다 |
+| 36 | ORCID 공개 API: 이름 검색 2건 → `0000-0002-8634-524X`(이름 "Tarannum Shaila Zaman")의 작품 목록 | 200. 22건 중 ReDPro 항목의 링크는 `dx.doi.org/10.1145/3476883.3520207` 하나다. 같은 목록에 SysPro의 JSS판(`10.1016/j.jss.2026.112785`)과 위 SLR이 있다 | `[서지]`. 사본 없음 |
+| 37 | UMBC 기관 저장소 MDSOAR(`mdsoar.org`)의 검색 API와 검색 페이지, UMBC 학과 홈 | 검색 API 경로는 404(경로가 맞지 않음), 검색 페이지는 400. 학과 홈은 200이나 저자 이름이 나오지 않는다 | 사본 찾지 못함. 경로 오류 가능성이 있어 "없다"로 쓰지 않는다 |
+| 38 | University of Kentucky 연구자 포털 `scholars.uky.edu` 검색 | 403, Cloudflare 도전 | `[미도달]` |
+| 39 | CPS-VO `archive.cps-vo.org` 저자 목록·검색 | 저자 목록은 빈 응답(curl 52)이 두 번, 검색은 "Request Rejected". 다른 도구로 다시 열지 않았다(`process_race_method_matrix.md` §5.4 항목 16이 이 호스트의 취득 방식을 PI 사안으로 둔다) | `[미도달]` |
+| 40 | Internet Archive: availability API `archive.org/wayback/available?url=dl.acm.org/doi/pdf/10.1145/3476883.3520207` → 스냅숏 `20220507074916`, 기록 상태 200. 그 스냅숏을 `web.archive.org`에서 받기(`id_` 형식 포함) | availability API는 200. 스냅숏 주소는 HTTPS에서 연결 재설정, HTTP에서 프록시의 403 "Blocked by egress policy". 프록시 상태 페이지도 `web.archive.org:443` 거부를 기록한다 | **단서.** 스냅숏이 실제 PDF인지 도전 페이지인지 알 수 없다(기록 상태 200만 안다). `[미도달]` |
+| 41 | `scholar.archive.org` 검색, BASE(`base-search.net`) 검색, arXiv API(`export.arxiv.org`), WebSearch 3회(standard), SLR의 DOI | 각각 "Session Verification" 페이지, 봇 확인 페이지, 시간 초과(HTTPS 25초, HTTP는 301). WebSearch는 새 1차 출처 없음. SLR DOI는 Elsevier `linkinghub`로 이동하고 본문은 열지 않았다. WebSearch로 SLR의 arXiv판을 찾지 못했다 | `[미도달]` |
+
 2026-10-08 기록(`baselines/availability.md` A1, `baselines/yu-group.md` D1)은 `dl.acm.org`, `acmse.net`, `ischool.syracuse.edu` 등을 세션의 egress 정책이 막았다고 적었다. 오늘 ACM의 거부는 원 서버의 Cloudflare 도전이고, `acmse.net`과 `ischool.syracuse.edu` 홈은 열린다(후자의 ReDPro 항목은 찾지 못했다). 날짜에 따라 원인이 다르므로 두 기록을 합쳐 읽지 않는다.
 
 ### 1.2 이 문서가 쓰는 출처별 등급
@@ -112,6 +132,7 @@
 | 4 | 서지 | 저자, 소속, 쪽, 정식 제목, 발표 일정이 확정되었다. 이전 기록에는 "ACMSE schedule"과 "ischool.syracuse.edu"가 열리지 않아 없었다 |
 | 5 | 로드맵 §4.6·[P8], §10.1 "ReDPro: 역할·세부 모델 미확인" | 유지된다. 오늘의 새 근거는 초록과 2차 설명뿐이고 전문이 없으므로 확정 행으로 채우지 않는다 |
 | 6 | 역할 | 초록은 "detect process-level races and also regenerate the failures"라고 한다. 이 문장은 역할 표에 넣는 근거가 아니라 §2.1의 기술 근거다 |
+| 7 | 경로 21의 Wayback availability API(2026-10-15에 429) | 2026-10-16에 200으로 답했고 ACM PDF 주소의 스냅숏이 있다고 알렸다(경로 40). 스냅숏 자체는 egress 정책 때문에 열지 못했다. 첫날의 "Internet Archive에 사본이 없다"는 서술은 전문 검색(`advancedsearch`)의 결과이고, 웹 보관본이 없다는 뜻으로 읽지 않는다 |
 
 ---
 
@@ -123,7 +144,7 @@
 
 | 항목 | 읽은 것 | 태그 | 등급·근거 |
 |---|---|---|---|
-| 역할 | 초록: "automated technique, RedPro that can detect process-level races and also regenerate the failures." SysPro p.35: "detects system-level race conditions through runtime monitoring and then regenerates the race condition by instrumenting the code". Gender p.3 Table III는 ReDPro를 process-level 버그 재현 연구 표에 두고 type "System-level races", technique "Dynamic Binary Analysis"로 적는다 | [F] | `[초록]`, `[2차]`. 로드맵 역할 분류(탐지/재현/회귀)로의 확정은 전문 확인 뒤(§4.2, §4.3) |
+| 역할 | 초록: "automated technique, RedPro that can detect process-level races and also regenerate the failures." SysPro p.35: "detects system-level race conditions through runtime monitoring and then regenerates the race condition by instrumenting the code". Gender p.3 Table III는 ReDPro를 process-level 버그 재현 연구 표에 두고 type "System-level races", technique "Dynamic Binary Analysis"로 적는다. SysPro pp.34–35는 ReDPro를 "automatically reproduce such bugs" 하는 접근들의 인용 묶음에 넣는다(2026-10-16 추가) | [F] | `[초록]`, `[2차]`. 로드맵 역할 분류(탐지/재현/회귀)로의 확정은 전문 확인 뒤(§4.2, §4.3) |
 | 실행 단위 | 초록: "multiple processes read and write a shared data item without proper synchronization". 제목: process-level. 인용 논문 둘은 "system-level"이라 적는다 | [F] | `[초록]`, `[2차]`. 논문이 process를 OS process로 한정하는지, 같은 process의 thread 사이도 포함하는지는 [U] |
 | 무엇을 관측하는가 | 초록: PIN으로 "run-time monitoring". 감시하는 사건의 종류(syscall, 메모리 접근, 함수 호출)는 쓰여 있지 않다. 문제 정의 문장은 "sensitive to the execution order of system calls"이고 "specific system-call interleaving"을 언급한다 | [F] / [U] | `[초록]`. 사건 종류는 [U] |
 | 자원 식별 | 초록은 "a shared data item"이라고만 한다. 이름·ID·경로·세대로 식별하는지는 쓰여 있지 않다 | [U] | `[미도달]` |
@@ -150,6 +171,8 @@
 | SysPro | pp.21–22 §4.1 | 벤치마크는 선행 연구가 "examined and confirmed"한 것만 쓴다 ([26, 12, 11, 29]) | ReDPro의 9건이 SysPro의 24건과 겹치는지는 알 수 없다 |
 | SysPro | p.32 §5 | "Many related works [11, 13, 42, 29] assume that inputs are known to developers" | ReDPro가 실행 입력을 개발자가 안다고 가정한다는 뜻으로 읽힌다. 필요 순서나 허용 오류를 입력으로 받는다는 뜻이 아니다 |
 | SysPro | p.34 §6 | 버그 보고서에서 키워드 검색과 수작업 검토로 대상 버그를 고르는 방법이 "successfully applied in prior studies [26, 12, 9, 29]"라고 적는다 | ReDPro가 평가 대상 버그를 버그 트래커에서 같은 방식으로 골랐다는 뜻으로 읽힐 수 있다. 확정할 수 없다. ReDPro의 참고문헌에 Bugzilla, Debian, GNU 버그 트래커가 있다(§2.4)는 점과 겹쳐 보일 뿐이다 |
+| SysPro (2026-10-16 추가) | p.22 §4.1 | SysPro의 정답(ground truth)을 정할 때 버그 보고 댓글, patch, 개발자 논의와 함께 "earlier research works [26, 12, 11, 29]"를 수작업으로 살폈다고 적는다. 같은 쪽과 p.23은 DESCRY 21건, SCMiner, RRF 7건의 벤치마크 수를 들지만 ReDPro의 수는 들지 않는다 | SysPro 벤치마크와 ReDPro 평가 대상이 겹칠 수 있다는 정도로만 읽힌다. ReDPro 9건의 목록은 여전히 [U] |
+| SysPro (2026-10-16 추가) | pp.34–35 §7 | "Various approaches[11, 12, 29, 56] have been proposed to automatically reproduce such bugs." 이어서 이들 중 어느 것도 버그 보고서를 "the primary input"으로 삼는 데 집중하지 않는다고 적는다 | SysPro 저자들이 ReDPro를 자동 **재현** 계열로 묶는다는 2차 서술이다. 로드맵 §10.1의 역할 확정 근거로 쓰지 않는다. 입력이 버그 보고서가 아니라는 부정 서술에서 ReDPro의 실제 입력이 무엇인지는 알 수 없다 |
 | Gender Dynamics (Zaman 외) | p.3 Table III | RedPro, 2022, type "System-level races", technique "Dynamic Binary Analysis" | 연구 분류표의 한 줄. 사건·자원 모델을 서술하지 않는다 |
 | LLPut (Zaman 포함) | p.1 | "To reproduce a bug, developers need the failure-inducing input [60, 61]" ([61]이 ReDPro) | 일반 배경 문장에 붙은 인용이다. ReDPro의 내용을 서술하지 않는다 |
 
@@ -195,7 +218,7 @@ Crossref가 등록한 24건(키 `e_1_3_2_1_14_1`이 빠져 있다)을 읽었다.
 | C2 cFE#198 | 앱 P의 late init 완료와 다른 앱 R의 의존 호출. P·R은 비공개(EVA CWS)이고 통신 방식과 초기화 내용이 공개되지 않았다. 공개된 것은 단일 상태 시작 동기화(`WaitForStartupSync`)와 6.6.0a의 두 단계 방식(`APPS_INIT`/`LATE_INIT`, `CFE_ES_WaitForSystemState`) | `ledger.md` §1a, §1b, §2; 로드맵 §9.1 |
 | C3 cFE#73 | SB task의 `CFE_SB.AppId`와 EVS task의 `EVS_AppID`·등록 플래그가 설정되기 전에, TIME task가 `CFE_SB_CreatePipe` 뒤 `CFE_EVS_SendEventWithAppID`(AppId=0)를 호출하고 `EVS_IsFiltered(0xFFFFFFFF)`가 범위 검사 없이 접근한다. 원 플랫폼은 Microblaze. segfault 지점은 사례 기록에서 미확인 | `ledger.md` §1a, §2 |
 | C5 cFE#72 | `CFE_ES_AppCreate`가 `OS_TaskCreate` 전에 ES lock을 풀고 뒤에 다시 잡아 `TaskTable` 항목을 채운다. 그 사이 새 task의 `CFE_ES_GetAppID`가 `CFE_ES_ERR_APPID`를 반환할 수 있다 | `ledger.md` §1a, §2 |
-| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로를 실행하고, `EVS_GetAppDataByID`가 NULL을 돌려 `ILLEGAL_APP_ID`가 된다. 서술은 "이벤트 요청 거부"이고, gdb 3회 모두 설정 전 사용 24회 = 거부 24회(`CreatePipe` 2 + `SubscribeFull` 4 + `ReportSingleEvent` 18). 프로세스 실패는 없다. race인지 고정 순서인지는 실행으로 가려야 한다 | `ledger.md` §1a, §2; 로드맵 §2.2; `results/R2_gdb_v701.md` |
+| R2 cFE#2663 | SB가 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`로 AppId를 저장하기 전에 ES/EVS task가 SB API 경로를 실행하고, `EVS_GetAppDataByID`가 NULL을 돌려 `ILLEGAL_APP_ID`가 된다. 서술은 "이벤트 요청 거부"이고, gdb 3회 모두 설정 전 사용 24회 = 거부 24회(`CreatePipe` 2 + `SubscribeFull` 4 + `ReportSingleEvent` 18; ES 20, EVS 4). 프로세스 실패는 없다(세 실행 모두 종료 상태 0). race인지 고정 순서인지는 실행으로 가려야 한다 | `ledger.md` §1a, §2; gdb 원시 기록 `env/logs/r2_g{1,2,3}_trace.jsonl`·`_summary.txt`와 그 정리 `results/R2_gdb_v701.md` §2. 2026-10-16에 원시 trace에서 `OUT_ILLEGAL_APP_ID`(`cfe_evs.c:188`) 적중을 다시 셌다: 세 실행 모두 24 [M]. 호출자별 내역은 `_summary.txt`의 `violation_appid` 줄과 같다 |
 | 공통 | native cFS는 **한 Linux process**이고 OSAL task는 `pthread_create` thread다(osal `os-impl-tasks.c:568`). OSAL 자체 시험에서 named count semaphore의 생성과 이름 조회는 **syscall 0건**이었다. 이름 조회는 사용자 공간 테이블 검색이며 semaphore는 `sem_init`한 이름 없는 process-private 객체다. `CFE_SB_CreatePipe`가 부르는 `mq_open("<pid>.<name>")`은 syscall로 보인다 | `baselines/yu-group.md` §7.1; `baselines/availability.md` §3, §4.2. 이것은 OSAL 시험의 probe이지 ReDPro의 결과가 아니다 |
 
 ### 3.3 도구 수준의 답 (사례와 무관)
@@ -205,7 +228,7 @@ Crossref가 등록한 24건(키 `e_1_3_2_1_14_1`이 빠져 있다)을 읽었다.
 | 1 관측 사건 | 불명 | PIN으로 "run-time monitoring"을 한다. 감시하는 사건의 종류는 쓰여 있지 않다. 문제 정의가 system call 순서이므로 syscall이 감시 대상에 포함될 수 있다[I]. 그것만인지, 메모리 접근 등도 포함하는지는 알 수 없다. PIN은 일반적으로 메모리 접근과 routine도 계측할 수 있다(Pin 3.21 user guide, 맥락) | 초록; §2.2 |
 | 2 자원·세대 식별 | 불명 | "a shared data item"이라고만 쓰여 있다. 식별 방식도, 세대(식별자 재사용)에 대한 서술도 읽지 못했다 | 초록 |
 | 3 생성·등록 vs 의존 사용 | 불명 | 초록의 실패 정의는 "read and write a shared data item without proper synchronization"이다. readiness precondition(생성·초기화 완료가 의존 사용보다 먼저여야 한다는 전제)을 표현하는지는 쓰여 있지 않다. 쓰여 있지 않다는 것이 표현하지 못한다는 뜻은 아니다 | 초록 |
-| 4 필요 순서·허용 오류 입력 | 불명 | 초록에 입력 서술이 없다. SysPro p.32는 ReDPro를 실행 입력을 개발자가 안다고 가정하는 작업으로 묶는다(2차). 필요 순서, 허용 오류, 실패 판정 기준을 입력으로 받는지는 알 수 없다 | 초록; SysPro p.32 |
+| 4 필요 순서·허용 오류 입력 | 불명 | 초록에 입력 서술이 없다. SysPro p.32는 ReDPro를 실행 입력을 개발자가 안다고 가정하는 작업으로 묶는다(2차). 필요 순서, 허용 오류, 실패 판정 기준을 입력으로 받는지는 알 수 없다. SysPro pp.34–35는 ReDPro를 포함한 자동 재현 연구들이 버그 보고서를 주 입력으로 삼지 않는다고 적는다(2차, 2026-10-16 추가). 이것도 입력이 무엇인지는 말하지 않는다 | 초록; SysPro p.32, pp.34–35 |
 | 5 예측·탐색, 확인 | 분석 | 초록은 PIN이 "potential race pairs"의 실행 순서를 제어하고 failure를 "regenerate"한다고 서술한다. 즉 순서를 바꾸는 단계와 실제 실행에서 failure를 다시 만드는 단계가 설계에 있다. 순서를 바꿀 pair가 어떻게 만들어지는지(관측한 실행에서의 예측인지 탐색인지)는 알 수 없다 | 초록; SysPro p.35 |
 | 6 출력 | 분석 | 초록의 출력은 "detect process-level races"와 "regenerate the failures"다. 보고 형식과 failure의 정의(crash, 출력 메시지, 사용자 oracle)는 알 수 없다 | 초록 |
 
@@ -220,6 +243,8 @@ Crossref가 등록한 24건(키 `e_1_3_2_1_14_1`이 빠져 있다)을 읽었다.
 | **R2** | 불명 | 불명 | 불명 | 불명 | 분석 | 불명 |
 
 Q5의 "분석" 4칸은 **조건부**다. 설계에 순서 제어와 failure 재생성 단계가 있다는 진술은 초록에 있지만, 사례의 의존 pair가 ReDPro의 "potential race pair"가 되는지는 Q1–Q3가 불명이라 알 수 없다. 그 4칸은 "ReDPro가 이 사례를 다룬다"가 아니라 "설계에 이 단계가 있다"를 뜻한다.
+
+**Q6의 두 라벨 (2026-10-16 추가).** §3.3의 도구 수준 Q6은 "분석"이고 위 표의 사례별 Q6은 모두 "불명"이다. 두 질문이 다르기 때문이다. 도구 수준 Q6은 "출력의 종류가 무엇인가"이고, 초록이 race 탐지와 failure 재생성이라는 두 출력을 서술하므로 설계 진술에서 도출한 "분석"이다. 사례별 Q6은 로드맵 §10.2의 뒷부분인 "원 사례의 현상과 대응하는가"까지 묻는다. 그러려면 ReDPro의 failure 정의와 보고 형식이 필요한데 읽은 자료에 없다. 그래서 사례별 칸은 "불명"이다. 집계(`process_race_method_matrix.md`)는 사례별 라벨을 쓴다. Q5에서 도구 수준과 사례별 라벨이 같은 것은 Q5의 사례별 칸이 "설계에 단계가 있다"까지만 말하고 사례와의 대응을 주장하지 않기 때문이다(C2는 앵커를 알 수 없어 "불명").
 
 ### 3.5 사례별 셀 (근거 포함)
 
@@ -298,9 +323,9 @@ Q5의 "분석" 4칸은 **조건부**다. 설계에 순서 제어와 failure 재�
 |---|---|---|
 | 도구 구현(소스, 바이너리, VM 이미지, 스크립트) | 어떤 읽은 자료도 위치를 말하지 않는다. 초록과 서지에 artifact 링크가 없다 | **없음.** GitHub 저장소·코드·사용자 검색, 제1저자 홈과 CV, NSF PAR, arXiv, Internet Archive 검색에서 찾지 못했다(경로 12–21). 제2저자 쪽은 동일인 확인 없이 이름과 소속이 같은 홈만 확인했다(경로 15). "접근 가능한 출처에서 못 찾았다"이지 "없다"가 아니다. 저자에게 문의한 적은 없다 |
 | 논문 전문(방법, 입력, 관측 사건, 평가 대상, 구현 환경 서술) | 이 문서의 모든 "불명"의 원인 | **못 읽음.** ACM이 Cloudflare 도전으로 막고, 합법적 공개 사본이 없다(경로 1–10, 14, 19–24) |
-| Intel PIN | 초록: "binary instrumentation tool named PIN" | **이 컨테이너에 없다**(`pin` 실행 파일이 PATH에 없고 `/opt/*pin*`도 없음 `[M]`, 오늘 확인). Intel의 PIN 소개 페이지와 Pin 3.21 User Guide는 열린다(HTTP 200). 설치하지 않았다 |
+| Intel PIN | 초록: "binary instrumentation tool named PIN" | **이 컨테이너에 없다**(`pin` 실행 파일이 PATH에 없고 `/opt/*pin*`도 없음 `[M]`, 2026-10-15 확인, 2026-10-16T00:40Z 재확인). Intel의 PIN 소개 페이지와 Pin 3.21 User Guide는 열린다(HTTP 200). 설치하지 않았다 |
 | PIN의 버전 | 쓰여 있지 않다. 참고문헌 목록에 "Pin 3.21 User Guide"가 있으나 사용 버전의 서술이 아니다 | `unspecified_by_reference`. 버전을 고르면 레퍼런스에 없는 선택이다 |
-| PIN이 이 컨테이너 커널에서 동작하는지 | 확인하지 않았다 | [U]. 커널은 `6.18.44-fc-v114`다. 2026-10-08 기록(`availability.md` §1.1)의 `ptrace` 동작 확인은 `fc-v80`에서의 것이고 오늘 재확인하지 않았다. PIN이 ptrace 주입에 의존하는지도 확인하지 않았다 |
+| PIN이 이 컨테이너 커널에서 동작하는지 | 확인하지 않았다 | [U]. 커널은 2026-10-15에 `6.18.44-fc-v114`, 2026-10-16T00:30Z에 `6.18.44-fc-v139`였다 [M]. `/` 여유는 2026-10-16에 1.3 GB(사용률 97%) [M]로, 설치를 정하더라도 공간이 먼저 문제가 된다. 2026-10-08 기록(`availability.md` §1.1)의 `ptrace` 동작 확인은 `fc-v80`에서의 것이고 2026-10-15·16에 재확인하지 않았다. PIN이 ptrace 주입에 의존하는지도 확인하지 않았다 |
 | 사용자가 줘야 하는 입력(실행 입력, oracle, 계측 위치 등) | 쓰여 있지 않다. SysPro p.32가 ReDPro를 "실행 입력을 개발자가 안다고 가정하는" 작업으로 묶는다(2차) | [U] |
 | cFS 쪽 구성 | cFS 기준 구성은 별도 작업의 대상이다(`env/ENV.md`) | 이 문서는 정하지 않는다. 도구가 요구하는 대상 형식(process 단위인지)을 모르므로 적용 구성을 정할 수 없다 |
 
@@ -332,7 +357,7 @@ Q5의 "분석" 4칸은 **조건부**다. 설계에 순서 제어와 failure 재�
 
 | # | 항목 | 선택지 | 이 문서의 기본 |
 |---|---|---|---|
-| D-RD-1 | 전문을 얻는 방법 | (a) ACM DL에 접근되는 환경에서 다시 시도한다. (b) PI가 PDF를 `paper/`에 둔다(P-PAPERS [D]는 이것을 연구 착수의 필수 조건으로 만들지 않는다고 했으므로 선택 사항이다). (c) 저자에게 PDF와 구현 문의(`availability.md` A2의 결정 사항과 같다, 문의한 적 없음). (d) 전문 없이 간다 | (d). 모든 칸이 "불명"으로 남는다 |
+| D-RD-1 | 전문을 얻는 방법 | (a) ACM DL에 접근되는 환경에서 다시 시도한다. (b) PI가 PDF를 `paper/`에 둔다(P-PAPERS [D]는 이것을 연구 착수의 필수 조건으로 만들지 않는다고 했으므로 선택 사항이다). (c) 저자에게 PDF와 구현 문의(`availability.md` A2의 결정 사항과 같다, 문의한 적 없음). (d) 전문 없이 간다. (e) (2026-10-16 추가) Internet Archive 스냅숏(`web.archive.org/web/20220507074916/https://dl.acm.org/doi/pdf/10.1145/3476883.3520207`, availability API의 기록 상태 200)을 `web.archive.org`가 열리는 환경에서 받는다. 이 세션에서는 egress 정책이 이 호스트를 막는다. 스냅숏이 PDF인지 도전 페이지인지는 모른다. 공개 보관본을 출처로 인정할지, 받은 뒤 ACM 판과 같은 판본인지 어떻게 확인할지도 함께 정해야 한다. | (d). 모든 칸이 "불명"으로 남는다 |
 | D-RD-2 | 관련 연구에서 ReDPro를 어떻게 서술할지 | 전문 확인 전에는 초록 수준의 서술만 허용한다(§4.4의 문구). 역할 표에서는 제외한다 | 제외 |
 | D-RD-3 | 전문을 얻은 뒤 로드맵 §10.2의 여섯 질문을 다시 채울지 | §6의 확인 목록으로 채운다 | 전문을 얻으면 채운다 |
 | D-RD-4 | 구현을 얻은 뒤 PIN 버전과 실행 구성을 정하는 방법 | 도구 문서나 artifact 절에 있으면 그 값(`from-reference`), 없으면 `unspecified_by_reference`로 두고 선택은 PI 결정 | 선택하지 않는다 |
@@ -402,7 +427,9 @@ ReDPro에 부족한 것으로 확인된 사항은 **없다**. 아래는 연구 �
 | 6 | 출력 형식과 failure의 정의. 평가 9건의 목록과 각 건의 결과, bug 438076(`mv`)이 포함되는지, effective·efficient의 측정 방식 | Q6 |
 | 7 | 대상 범위: process의 정의, 같은 process의 thread 사이 race를 다루는지(§5.3). `INAPPLICABLE` 판정이 필요하면 원문 쪽·절 | `INAPPLICABLE` |
 | 8 | 구현 위치, artifact 절, PIN 버전, 실행 환경(OS, 커널, 아키텍처) | §4.1 |
-| 9 | 학위논문(`uknowledge.uky.edu/cs_etds/119`)에 ReDPro 내용이 있는지. 초록은 언급하지 않는다. 본문은 Cloudflare 도전으로 못 열었다 | 보조 |
+| 9 | 학위논문(`uknowledge.uky.edu/cs_etds/119`)에 ReDPro 내용이 있는지. 초록은 언급하지 않는다. 본문은 Cloudflare 도전으로 못 열었다(2026-10-16에도 같다) | 보조 |
+| 10 | (2026-10-16 추가) Internet Archive 스냅숏 `20220507074916`의 내용이 ACM PDF인지. 이 세션에서는 egress 정책으로 열 수 없다(D-RD-1 (e)) | 전문 확보 |
+| 11 | (2026-10-16 추가) SLR(*SCP* 2026, `10.1016/j.scico.2026.103552`)이 ReDPro를 어떻게 서술하는지. Semantic Scholar에 문맥 문장이 없고 본문은 열지 않았다 | 보조 `[2차]` |
 
 **이 문서가 확인하지 못한 것의 목록:**
 - ACM 원 페이지의 초록이 Semantic Scholar 사본과 같은지(OpenAlex의 앞 다섯 문장과는 일치한다).
@@ -424,11 +451,14 @@ ReDPro에 부족한 것으로 확인된 사항은 **없다**. 아래는 연구 �
 - 프로그램: [ACMSE 2022 Schedule of Paper Presentations](https://acmse.net/2022/schedule-papers/), Session 5.
 - 저자 CV: [tarannumzaman.github.io/files/CV_zaman.pdf](https://tarannumzaman.github.io/files/CV_zaman.pdf), sha256 `bf2ad801c0e16d79ebaa2ca0e6816886dc718aed3e6d951edaa9212ef0767182`.
 - 학위논문 레코드: [UKnowledge, 119](https://uknowledge.uky.edu/cs_etds/119). PDF `[미도달]`.
+- 제1저자 ORCID [0000-0002-8634-524X](https://orcid.org/0000-0002-8634-524X) 작품 목록(공개 API, 2026-10-16). ReDPro 항목은 DOI 링크뿐이다.
+- Internet Archive availability API 응답(2026-10-16): 스냅숏 `20220507074916`. 스냅숏 자체는 `[미도달]`.
 
 **ReDPro를 인용한 논문(2차):**
-- T. S. Zaman 외, *SysPro: Reproducing System-level Concurrency Bugs from Bug Reports*, [arXiv:2601.09616v1](https://arxiv.org/abs/2601.09616). pp.8, 21–22, 32, 34–35.
+- T. S. Zaman 외, *SysPro: Reproducing System-level Concurrency Bugs from Bug Reports*, [arXiv:2601.09616v1](https://arxiv.org/abs/2601.09616). pp.8, 21–23, 32, 34–35. 같은 논문의 JSS판(`10.1016/j.jss.2026.112785`)은 읽지 않았다.
 - T. S. Zaman, M. H. Kishan, L. N. Lota, *Gender Dynamics in Software Engineering: Insights from Research on Concurrency Bug Reproduction*, [arXiv:2502.20289](https://arxiv.org/abs/2502.20289). p.3 Table III.
 - A. Al Hasan 외, *LLPut*, [arXiv:2503.20578v3](https://arxiv.org/abs/2503.20578). p.1.
+- Lota 외(DBLP 키 `journals/scp/LotaZAFCAIK27`, 저자 전체는 확인하지 않았다), *NLP Techniques for software debugging tasks: A systematic literature review…*, Science of Computer Programming 2026, DOI `10.1016/j.scico.2026.103552`. 피인용 목록에서만 확인했고 본문은 열지 않았다.
 
 **맥락(ReDPro의 문장이 아님):**
 - Intel, [Pin 3.21 User Guide](https://software.intel.com/sites/landingpage/pintool/docs/98484/Pin/html/). ReDPro의 참고문헌 항목이 적은 주소와 같다.
@@ -437,8 +467,9 @@ ReDPro에 부족한 것으로 확인된 사항은 **없다**. 아래는 연구 �
 - `research/cfs_procrace/baselines/availability.md` §1, §3, §4.2, §5
 - `research/cfs_procrace/baselines/yu-group.md` §1, §3.2, §4, §5(R11), §7
 - `research/cfs_procrace/cases/ledger.md` §1a, §1b, §2
-- `research/cfs_procrace/results/R2_gdb_v701.md`
+- `research/cfs_procrace/results/R2_gdb_v701.md` §1–§2, 그리고 원시 기록 `research/cfs_procrace/env/logs/r2_g{1,2,3}_trace.jsonl`, `r2_g{1,2,3}_summary.txt` (2026-10-16 재계수)
 - `research/cfs_procrace/plan/ROADMAP_20261015.md` §1.2, §2.2, §4.6, §10, §12
 - `research/cfs_procrace/Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md` (P-PAPERS, P-CLASSGT, P-C2, T1 [D])
 - `research/cfs_procrace/CONDITIONS_POLICY.md`
 - `research/cfs_procrace/plan/methods/RacePro.md` (같은 형식의 자매 문서)
+- `research/cfs_procrace/plan/process_race_method_matrix.md` §2.5 항목 4, §5.4 항목 16

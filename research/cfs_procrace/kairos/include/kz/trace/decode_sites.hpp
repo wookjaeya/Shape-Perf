@@ -47,7 +47,25 @@ struct PerfNeeds {
   uint32_t stack_bytes = 0;
 };
 
+// The roles that the engine reads at fixed positions (kz_raw.h, KZ_DECODER and the entry/return
+// matching).  They name what a value is, not where it comes from in any framework.
+inline constexpr const char* kRoleReturnAddress = "return_address";
+inline constexpr const char* kRoleEntryFn = "entry_fn";
+inline constexpr const char* kRolePriority = "priority";
+inline constexpr uint8_t kSlotReturnAddress = 3;  // a[3] at a paired ENTRY and RET site, and at the spawn sites
+
+// The slot declared at position `slot`, or nullptr.
+const SlotSpec* slot_at(const SiteSpec& s, uint8_t slot);
+// True if the site declares the role "return_address" at slot 3 (the key of entry/return matching).
+bool has_return_address_key(const SiteSpec& s);
+
+// One site: kind, phases, slot sources and widths, and, for a site with a KZ_DECODER other than
+// GENERIC, the slots the decoder reads at fixed positions (kz_raw.h).  A site that would make the
+// identity join read a value from a slot the plan does not fill is refused here, not decoded as 0.
 Status check_site(const SiteSpec& s);
+// The whole plan: every site (check_site), and for every ENTRY site that has a RET site of the same
+// symbol (the pair that entry/return matching uses), both declare "return_address" at slot 3.
+Status check_plan(const std::vector<SiteSpec>& sites);
 PerfNeeds needs_of(const SiteSpec& s);
 uint32_t perf_reg_of(uint32_t kz_reg);  // KZ_REG_* -> perf register number; KZ_NONE32 if invalid
 

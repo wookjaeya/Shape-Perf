@@ -35,6 +35,8 @@ occurrence K-ID.send-with-appid actor T_SB ordinal 1 key [0x110002] call #7 retu
 
 findings 0
 
+guard failures 0
+
 final state
   es.app[2] = LIVE id 0x110002
   loc CFE_SB_Global.AppId = 0x110002

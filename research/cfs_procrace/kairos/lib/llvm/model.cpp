@@ -120,7 +120,7 @@ void emit(ExprRef e, std::string* out, int depth) {
   *out += "(";
   *out += op_name(e->op);
   if (!e->name.empty()) *out += " " + e->name;
-  if (e->op == KZ_EXPR_OP_CONST) *out += " " + std::to_string(e->value);
+  if (e->op == KZ_EXPR_OP_CONST || e->op == KZ_EXPR_OP_FORALL || e->op == KZ_EXPR_OP_CURSOR) *out += " " + std::to_string(e->value);
   if (e->a != nullptr) {
     *out += " ";
     emit(e->a, out, depth + 1);

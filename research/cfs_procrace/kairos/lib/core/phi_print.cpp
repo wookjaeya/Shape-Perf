@@ -191,7 +191,7 @@ void print_op(Out* o, const OpDecl& d) {
   }
   for (const EffectDecl& e : d.effects) {
     std::string t = "effect " + e.label + ": " + effect_body(e);
-    if (e.when) t += " when " + expr_text(*e.when);
+    if (e.when) t += std::string(e.filter ? " filter " : " when ") + expr_text(*e.when);
     t += " " + lp_text(e.lp);
     if (!e.status.empty()) t += " status " + e.status;
     if (!e.refutable_by.empty()) t += " refutable_by " + sorted_join(e.refutable_by, ", ");

@@ -1,6 +1,7 @@
 # RacePro (SOSP 2011) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 08:12–08:35, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:00–00:25). `plan/process_race_method_matrix.md`가 남긴 후속 항목(A3, R2 사건표의 task 생성 행, 후보 클래스별 대조)을 처리했다. Scribe 커널과 py-scribe의 코드를 더 읽어 §6 항목 1·4를 코드 수준에서 정리했고(§2.5), R2 사건표에 task 생성 행과 클래스별 대조표를 넣었다(§3.5). 논문의 보고 조건을 R2에 적용한 분석과 가설 H-RP-5를 추가했다. 환경 값은 오늘 다시 측정했다(§4.1). 이번에도 RacePro나 Scribe를 실행하지 않았다.
 - 대상: Laadan, Viennot, Tsai, Blinn, Yang, Nieh, *Pervasive Detection of Process Races in Deployed Systems*, SOSP 2011, pp. 353–367. DOI 10.1145/2043556.2043589.
 - 범위: 로드맵 §10 (M6)의 RacePro 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. RacePro를 실행하지 않았다. 사례에 대한 "탐지 못 함" 결과를 담지 않는다.
@@ -29,8 +30,10 @@
 3. **RacePro는 순서위반을 겨냥한다.** 연구한 process race 109건 중 79건이 execution order violation이다(p.355). 논문의 선행 사례 launchpad-596064는 "생성 후 사용" 구조다(upstart가 smbd의 디렉터리 생성을 기다리지 않고 nmbd를 시작, Table 4). "기존 기법은 순서위반을 못 다룬다"는 문장은 쓸 수 없다. [F]
 4. **다섯 사례의 의존성 쌍은 후보 입력 사건으로 이어지는 경로가 확인되지 않는다 (분석, 미실행).** 사례의 의존성은 사용자 공간의 메모리 상태이고, 논문은 HB 그래프가 "dependencies between processes via shared memory"를 담지 않는다고 스스로 밝힌다(p.358). 이것은 "탐지 실패"가 아니다. 다른 후보의 go-live 뒤에 실패가 자연스럽게 나타나면 checker가 보고할 수 있고, 논문도 이때 원인을 짚지 못한다고 밝힌다(p.363). [I]
 5. **논문 §6.2가 직접 관련된 한계를 적는다.** 같은 process 안의 thread 사이 OS 자원 race에는 "less effective"라고 한다(p.362). native cFS는 한 process 안의 OSAL task(pthread)다. 이 문장을 INAPPLICABLE 근거로 볼지는 PI 판단이다(§4.3). [F]
-6. **실행은 오늘도 불가능하다.** 문서화된 환경이 i386 Linux 2.6.35 + Scribe 내장 커널이고, 이 컨테이너(Firecracker guest, `6.18.44-fc-v114`)는 kexec·모듈·KVM이 모두 없다. 결과 상태는 다섯 사례 모두 `NOT_RUN`이다. [M]
+6. **실행은 오늘도 불가능하다.** 문서화된 환경이 i386 Linux 2.6.35 + Scribe 내장 커널이고, 이 컨테이너(Firecracker guest, 2026-10-16 측정 `6.18.44-fc-v139`)는 kexec·모듈·KVM이 모두 없다. 결과 상태는 다섯 사례 모두 `NOT_RUN`이다. [M]
 7. **Kairos 가설을 근거가 있는 만큼만 세운다.** 근거가 지지하는 것은 "cFS 내부 사건이 후보 생성 입력에 없음"(H-RP-1)과 "고정된 순서의 이유를 도구 안에서 설명하지 않음"(H-RP-4)이다. 로드맵 §10.5의 "관측된 실행만 다룸" 행은 RacePro에 근거가 없다. 예측·탐색·실행 확인은 RacePro에 이미 있다(§5.1).
+8. **보고 조건 (2026-10-16 추가).** 논문은 checker가 "a failure that did not occur during recording"을 볼 때 버그로 보고한다(§6.3 p.363). R2 현상은 저장소 기록상 gdb 3회 모두 나타났다. 녹화한 실행에 현상이 이미 있다면 그것은 이 보고 조건이 겨냥하는 "녹화 때 없던 실패"가 아니라는 분석이 나온다. RacePro 녹화에서도 같은 순서가 나오는지는 실행하지 않아 미확인이다(§3.5 R2 Q6, H-RP-5). [I]
+9. **POSIX mqueue (코드 읽기, 2026-10-16).** Scribe 커널의 `ipc/mqueue.c`에는 Scribe 호출이 없다. `mq_open`의 fd 할당과 설치는 공통 경로(`alloc_fd`, `fd_install`)에서 FILES_STRUCT 쓰기로 잡힌다. 큐 이름 조회와 `mq_timedsend`/`mq_timedreceive`의 큐 객체 접근에는 Scribe 자원 잠금 경로가 보이지 않는다(§2.5). 실행으로 확인하지 않았다. [F 코드][I]
 
 ---
 
@@ -73,6 +76,9 @@
 | 18 | `raw.githubusercontent.com` — 커널 `README.md`, `Documentation/scribe.md`, `include/linux/scribe_resource.h`, 번들의 `config/kernel_config`, `config/deploy.rb`, `racepro/setup.py` | 모두 200 | 코드 직접 읽음 |
 | 19 | WebSearch (standard) | 위 호스트들의 목록. 새로운 1차 출처는 없다 | — |
 | 20 | Scholar Gateway 전문 검색 | 이번에는 시도하지 않았다. 2026-10-08 기록에서는 ACCESS_DENIED | 미시도 |
+| 21 | 경로 1 재확인 (2026-10-16T00:05Z) | HTTP 200, 1,740,862 B | 같은 판본. 인용 문장 10개를 추출 텍스트에서 다시 찾았다 |
+| 22 | `git clone --depth 1 --filter=blob:none` + sparse checkout — `columbia/linux-2.6-racepro` (HEAD `b29e9afb`). 받은 경로: `ipc/`, `scribe/`, `include/linux/scribe*.h`, `include/linux/file.h`, `fs/{file.c, open.c, namei.c, file_table.c, read_write.c}`, `kernel/fork.c` | 성공 (2026-10-16) | **코드 직접 읽음** (§2.5). 트리 전체는 받지 않았다 |
+| 23 | `git clone --depth 1 columbia/py-scribe-racepro` (HEAD `56d6187e`) | 성공 (2026-10-16) | **코드 직접 읽음** (§2.5) |
 
 ### 1.3 이 문서가 쓰는 출처별 등급
 
@@ -84,6 +90,7 @@
 | 그룹·저자 페이지(경로 5, 6) | 초록만 | 코드 위치 확인 |
 | `racepro` @`681f94e3` | **코드 직접 읽음** | `racecore.py`, `execgraph.py`, `racetest.py`, `scribewrap.py`, `unistd.py`, `setup.py`, `TODO`, `tests/tests.list`. 줄 번호는 이 커밋 기준 |
 | 커널 README·`scribe.md`·`scribe_resource.h`, 번들 `kernel_config`·`deploy.rb` | 코드 직접 읽음 | 요구 조건(§4) |
+| 커널 @`b29e9afb`의 `ipc/{mqueue,msg,sem,shm}.c`, `fs/{file,open,file_table,read_write}.c`, `include/linux/{file,scribe_events,scribe_api}.h`, `scribe/resource/lock_wrappers.c`, `scribe/pump.c`, `kernel/fork.c`; `racepro`의 `syscalls.py`, `toctou.py`, `session.py`; py-scribe @`56d6187e`의 `src/record`, `src/scribe/event_iterators.pxi` | 코드 직접 읽음 (2026-10-16) | §2.5, §3.5의 R2·C3 표 |
 | 커널 diff 목록 130개 파일 | 기록 재사용 | 저장소 밖 작업 디렉터리의 `/home/user/work/procrace/baselines/racepro/scribe_changed_files.txt`(2026-10-08 저장)를 오늘 다시 읽어 `ipc/mqueue.c` 부재와 `arch/x86`의 `*_32` 편중을 확인했다. `git diff`는 다시 돌리지 않았다 |
 | `baselines/racepro.md`의 그 밖의 코드 서술 | 기록 재사용 | 예: `lock_wrappers.c`, `memory.c`, Python 모듈의 이벤트 참조. 이번에 재검증하지 않았다 |
 | 사례 쪽 사실 | 기록 재사용 | `cases/ledger.md`, `baselines/availability.md` §3–§4, 로드맵 §2.2, §9 |
@@ -100,7 +107,7 @@
 | 6 | 소프트웨어·하드웨어 값 | `racepro.md` R7, R8, R10, R11, R14는 `unspecified_by_reference`였지만 논문 §7에 값이 있다(§4.1). 이것이 정책상 "레퍼런스"인지는 PI 판단(§4.3) |
 | 7 | DOI | 로드맵의 DOI `…2043589`가 맞다. DBLP 서지, 저자 페이지, OpenAlex가 일치한다. `racepro.md`가 시도한 `…590`은 잘못된 주소였다 |
 | 8 | `SPEC_FINAL.md`의 RacePro 등급 | SPEC은 RacePro를 `[V-abs]`(초록 확인)로 표기한다(줄 662, 줄 3349). 전문 열람 수준으로 올릴 수 있다. 이 작업 범위 밖이라 수정하지 않았다 |
-| 9 | 환경 수치 | 오늘 커널 `6.18.44-fc-v114`, `/` 여유 16 GB. 2026-10-08 기록은 `fc-v80`, 여유 2.x GB였다. 블로커 자체는 그대로다(§4.1) |
+| 9 | 환경 수치 | 2026-10-15 커널 `6.18.44-fc-v114`(2026-10-16 재측정 `fc-v139`), `/` 여유 16 GB(2026-10-15), 2.7 GB(2026-10-16). 2026-10-08 기록은 `fc-v80`, 여유 2.x GB였다. 블로커 자체는 그대로다(§4.1) |
 
 ---
 
@@ -155,6 +162,22 @@
 | HB 간선 | 4종 + 프로그램 순서 | `execgraph.py:87-137, 139-180, 182-186` 일치. `clone`을 fork로 취급(`unistd.py:373`) |
 
 [I] 코드는 논문 직후(2011-08)의 스냅샷이다. 위 차이가 프로토타입 판본 차이인지 구현 선택인지는 자료로 결정되지 않는다.
+
+### 2.5 코드 추가 확인 (2026-10-16, 읽기만, 실행 없음)
+
+줄 번호는 커널 @`b29e9afb`, `racepro` @`681f94e3`, py-scribe @`56d6187e` 기준이다.
+
+| # | 질문 | 확인한 것 | 근거 (파일:줄) | 등급 |
+|---|---|---|---|---|
+| K1 | POSIX mqueue의 큐 객체를 Scribe가 자원으로 잠그는가 | `ipc/mqueue.c`에는 `scribe` 문자열이 0건이다. 같은 디렉터리의 System V IPC는 `scribe_lock_ipc`를 부른다 | `ipc/msg.c:488`, `ipc/sem.c:1099`, `ipc/shm.c:655`; `ipc/mqueue.c` 검색 0건 | 코드 직접 읽음 |
+| K2 | `mq_open`이 Scribe 자원 접근을 만드는가 | `mq_open`은 `get_unused_fd_flags`(= `alloc_fd`)로 fd를 받고 `fd_install`로 넣는다. 두 함수 모두 `scribe_lock_files_write(files)`를 부르므로 FILES_STRUCT 쓰기가 된다. 큐 이름 조회는 mqueue 파일 시스템 루트 inode의 `i_mutex`만 잡고 Scribe 잠금은 없다 | `ipc/mqueue.c:673, 691, 695–696, 730`; `include/linux/file.h:44`; `fs/file.c:464–467, 509`; `fs/open.c:937–948` | 코드 직접 읽음 |
+| K3 | `mq_timedsend`/`mq_timedreceive`가 큐 file 객체를 잠그는가 | 둘 다 `fget(mqdes)`를 부른다. `fget`의 Scribe 잠금은 같은 syscall에서 먼저 `scribe_track_next_file*`가 `lock_next_file`을 세웠을 때만 걸린다. 그 호출은 `fs/read_write.c`, `fs/open.c`에서 찾았고 `ipc/mqueue.c`에는 없다 | `ipc/mqueue.c:866, 956`; `fs/file_table.c:288–306`; `scribe/resource/lock_wrappers.c:220–233, 274–292`; `fs/read_write.c:175` 외 | 코드 직접 읽음. 받은 디렉터리(행 22)만 검색했다 |
+| K4 | explorer가 FILES_STRUCT를 후보 자원으로 쓰는가 | RESOURCE 탐색은 FUTEX만 종류로 제외하고, 쓰기 접근이 있는 나머지 자원에서 HB상 동시인 쌍을 찾는다. 경로가 다른 접근을 걸러 내는 규칙(`skip_parent_dir_race`)은 INODE·FILES_STRUCT에 적용되지만, 경로를 아는 syscall 목록(`get_resource_path`)에 `mq_open`이 없다 | `racecore.py:194, 196–213, 276–303`; `syscalls.py:434–459` | 코드 직접 읽음 |
+| K5 | 공유 메모리 기록을 사용자 공간 도구가 읽을 수 있는가 | 커널은 `mem_owned_read/write`(serial)와 주소가 붙은 `_extra` 판 사건을 정의한다. py-scribe는 이 사건을 파싱하고, `record` 스크립트에 메모리 추적을 끄는 `--no-mm`과 `SCRIBE_MEM_EXTRA` 플래그가 있다. `racepro` Python 코드에는 이 사건 참조가 없다 | `include/linux/scribe_events.h:160–177`; `include/linux/scribe_api.h:64`; py-scribe `src/scribe/event_iterators.pxi:200–211`, `src/record:59–61, 101` | 코드 직접 읽음 |
+| K6 | thread가 explorer에서 별도 Process가 되는가 | Scribe 상태(`scribe_ps`)는 task마다 붙는다. 로그는 큐의 `pid`가 바뀔 때 PID 사건을 넣고, explorer는 그 값으로 Process를 나눈다. 그 값이 thread id인지는 실행해야 확인된다 | `kernel/fork.c:987–1027`; `scribe/pump.c:125–131`; `session.py:305–308` | 코드 직접 읽음 + 미확인 |
+| K7 | TOCTOU 클래스가 기본 탐색에 들어가는가 | `find_show_races`는 RESOURCE, EXIT-WAIT, SIGNAL 세 단계만 돈다. TOCTOU는 별도 함수 `find_show_toctou`이고, 패턴은 stat·access·open·chmod·chown·link 계열 파일 syscall이다 | `racecore.py:692–727, 773`; `toctou.py:245–314` | 코드 직접 읽음 |
+
+[I] K2–K4에서 나오는 분석이다. 같은 process의 thread가 fd table(files_struct)을 공유한다면(pthread의 일반 동작이며 이번 출처로 확인하지 않았다), 서로 다른 OSAL task의 `mq_open`은 같은 FILES_STRUCT 자원에 대한 쓰기 접근이 된다. 두 접근 사이에 HB가 없으면 RESOURCE 후보 쌍이 될 수 있다. 그 쌍이 뜻하는 것은 "fd table 접근 순서"이고, 큐 이름이나 cFS의 AppId 상태가 아니다. 실제 로그에 이 사건이 찍히는지는 실행하지 않아 미확인이다.
 
 ---
 
@@ -278,17 +301,29 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | 2 | 분석 | SB AppId의 값(0 대 유효값)은 메모리의 정수다 | Table 2 p.357 |
 | 3 | 분석 | 설정(저장)과 사용(읽기)이 메모리라 store/load 쌍으로 표현되지 않는다 | §5.1 p.358 |
 | 4 | 답 | 도구 수준 답과 같다. R2의 요구 순서("SB AppId 저장이 SB API 경로의 이벤트 요청보다 먼저")를 넣을 입력은 없다 | §5.1 p.357; §6.3 p.363 |
-| 5 | 분석 | R2의 순서는 core 시작 직렬화가 ES/EVS를 SB보다 먼저 실행하게 해서 고정된다(사례 기록). HB 그래프는 이런 사용자 수준 직렬화를 담지 않으므로(p.358) 도구 안에서는 이 순서의 이유가 설명되지 않는다. 앵커 쌍이 커널 객체의 syscall이 아니어서 순서를 뒤집은 branch도 만들어지지 않는다 | §5.1 p.358; `ledger.md` §1a |
-| 6 | 분석 | 사례 현상은 "이벤트 요청 거부 24회"이고 프로세스 실패가 없다(상태 폐기). built-in checker는 내부 반환값을 보지 않는다. 출력으로 대응하려면 사용자 checker가 내부 상태를 볼 수 있어야 한다. R2는 실패 메시지도 출력하지 않는다 | `availability.md` §1 DESCRY 행; 로드맵 §2.2 |
+| 5 | 분석 | R2의 순서는 core 시작 직렬화가 ES/EVS를 SB보다 먼저 실행하게 해서 고정된다(사례 기록). 이 직렬화는 ES가 각 core task가 RUNNING이 될 때까지 기다리는 폴링이다(`CFE_ES_CreateObjects`, `CFE_ES_MainTaskSyncDelay`, 사례 기록). HB 그래프는 이런 사용자 수준 직렬화를 담지 않으므로(p.358) 도구 안에서는 이 순서의 이유가 설명되지 않는다. AppId 설정·사용 쌍은 커널 객체의 syscall이 아니어서 그 순서를 뒤집은 branch는 만들어지지 않는다. ③의 `mq_open`이 만드는 FILES_STRUCT 쌍은 앵커가 될 수 있지만(§2.5 K2·K4, 분석), 그 branch가 뒤집는 것은 fd table 접근 순서다. 그 branch가 replay에서 diverge하는지, go-live 뒤 AppId 설정 순서가 달라지는지는 읽은 자료로 정할 수 없다 | §5.1 p.358; §6.1 p.361; `ledger.md` §1a; `plan/case_basis_register.md` R2.E5 |
+| 6 | 분석 | 사례 현상은 "이벤트 요청 거부 24회"이고 프로세스 실패가 없다(상태 폐기). built-in checker는 내부 반환값을 보지 않는다. 출력으로 대응하려면 사용자 checker가 내부 상태를 볼 수 있어야 한다. R2는 실패 메시지도 출력하지 않는다. 또한 논문의 보고 조건은 checker가 "a failure that did not occur during recording"을 보는 것이다(p.363). R2 현상은 기록상 gdb 3회 모두에서 나타났고 사례 기록은 코드상 매 부팅 결정적이라고 예측한다(미실행 예측). RacePro 녹화에도 현상이 들어 있다면 branch에서 보이는 같은 현상은 "녹화 때 없던 실패"가 아니다. RacePro 녹화에서 같은 순서가 나오는지는 미확인이다 | `availability.md` §1 DESCRY 행; 로드맵 §2.2; §6.3 p.363; `ledger.md` §2 R2 "Established" |
 
 **R2 사건 대응표** (로드맵 §10.3 첫 산출물). 참조 revision은 사례 기록의 B/M/D(`fc8c48ad`/`12cb84fc`/`f22e538c`)이며 v7.0.1 코드와 다를 수 있다.
 
 | R2 사건 | 커널에서 보이는 흔적 | Scribe 기록 | micro-op | HB 간선 | 후보 규칙 | 라벨 |
 |---|---|---|---|---|---|---|
+| ⓪ core task 생성 (2026-10-16 추가): ES가 `CFE_ES_CreateObjects`에서 core task를 `OS_TaskCreate`로 하나씩 만들고, 각 task가 RUNNING이 될 때까지 `CFE_ES_MainTaskSyncDelay`로 기다린다(사례 기록) | `OS_TaskCreate` → `pthread_create` → `clone` 계열 syscall. C5 보충표와 같은 근거이며 cFS에서 측정하지 않았다. 기다림은 메모리 폴링과 지연이다 | `clone`은 syscall로 기록된다 | 코드가 `clone`을 fork로 취급한다(`unistd.py:373`) | ES task의 `clone` → 새 task의 첫 syscall. RUNNING 대기(폴링)는 공유 메모리를 통한 의존이라 HB 간선이 되지 않는다(p.358) | 후보 규칙의 대상이 아니라 HB 간선의 원천 | 분석 |
 | ① SB AppId 설정: `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, 반환값 무시 (B `cfe_sb_task.c` L126, M L138, D L128) | syscall 없음. ES 조회는 메모리 + `pthread_getspecific`(소스 수준, 실행 미확인) | 메모리 page ownership 순서만(재생용) | 없음 | 없음 | 적용 규칙 없음 | 분석 |
 | ② 값 전달: EVS(B) 또는 ES·EVS(M, D) task가 같은 전역을 읽음 | syscall 없음 | 위와 같다 | 없음 | 없음 | 없음 | 분석 |
-| ③ 이벤트 요청: `CFE_SB_CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`을 부른다(OSAL 시험에서 69회 측정, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준) | `mq_open`이 추적 객체 접근을 만드는지 확인되지 않았다. 커널 diff에 `ipc/mqueue.c`가 없고, 논문 Table 2에 POSIX mqueue 객체가 없다 | **불명** | 없음 | 불명 | 불명 |
+| ③ 이벤트 요청: `CFE_SB_CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`을 부른다(OSAL 시험에서 69회 측정, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준) | 코드 읽기(§2.5 K1–K3): `mq_open`의 fd 할당·설치가 FILES_STRUCT 쓰기를 만든다. 큐 이름 조회, 큐 객체 자체에는 Scribe 자원이 없다. 2026-10-15판의 "불명"을 코드 수준에서 바꿨다. 실행 확인은 없다 | FILES_STRUCT store (fd table). 이벤트 요청 자체에는 없음 | 같은 process의 thread 사이 `mq_open`끼리는 syscall 의미에서 나오는 간선이 없다 | RESOURCE: 다른 task의 fd 할당과 HB상 동시이면 쌍이 될 수 있다(§2.5 K4). 그 쌍은 fd table 접근이며 AppId 설정·사용이 아니다 | 분석 |
 | ④ 오류 반환: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기 (B `cfe_evs.c` L182-186) | 반환값, syscall 없음 | 없음 | 없음 | 없음 | 없음 | 분석 |
+
+**R2 × 코드의 후보 클래스** (2026-10-16 추가). 코드의 `find_show_races`가 도는 세 클래스와 별도 함수인 TOCTOU를 사건 ⓪–④에 하나씩 대조했다. 모두 코드 읽기에서 나온 분석이며 실행하지 않았다.
+
+| 클래스 | 코드상 적용 조건 | 근거 | ⓪ | ① | ② | ③ | ④ |
+|---|---|---|---|---|---|---|---|
+| RESOURCE | FUTEX 이외 자원에서 쓰기를 포함한 HB상 동시 접근 쌍 | `racecore.py:185–303` | 대상 아님(HB 간선) | 자원 접근 없음 | 자원 접근 없음 | FILES_STRUCT 쌍 가능(fd table) | 자원 접근 없음 |
+| EXIT-WAIT | 같은 reaper가 거두는 두 exit와 wait | `racecore.py:396`(클래스), `525` 이후(`find_races`) | 해당 없음(생성) | exit·wait 아님 | 아님 | 아님 | 아님 |
+| SIGNAL | 기록된 신호 전달 | `racecore.py:388–391` | 신호 아님 | 아님 | 아님 | 아님 | 아님 |
+| TOCTOU | 기본 탐색 밖(`find_show_toctou`). stat·access·open·chmod·chown·link 계열 패턴. `TODO` 5행이 이 시험이 후보를 만들지 못한다고 적는다 | `racecore.py:625–672, 773`; `toctou.py:245–314` | 아님 | 아님 | 아님 | `mq_open`은 패턴 syscall이 아님 | 아님 |
+
+[I] 표에서 사건 ①②④(AppId 설정, 값 전달, 오류 반환)에 적용되는 클래스는 없다. ③에서 RESOURCE가 적용될 여지가 있지만 대상은 fd table이다. 이것은 "RacePro가 R2를 탐지하지 못한다"는 결과가 아니다. 위 Q5·Q6 셀과 함께 읽는다.
 
 #### C1·C3·C5 보충 사건 대응표
 
@@ -298,7 +333,7 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | C1 조회: `OS_CountSemGetIdByName` | 0 syscalls (probe) | 없음 | 분석 |
 | C1 수정 후 재시도 대기: `OS_TaskDelay(100)` ×25 | sleep 계열 syscall로 추정 | Table 2 객체를 건드리지 않아 micro-op 없음 | 분석 |
 | C3 SB `AppId` 저장, EVS `EVS_AppID`·등록 | syscall 없음 | 없음 | 분석 |
-| C3 TIME의 `CreatePipe` | `mq_open`(probe에서 부분 가시) | 추적 여부 | 불명 |
+| C3 TIME의 `CreatePipe` | 현재 OSAL에서는 `mq_open`(probe에서 부분 가시). C3의 원 판본(OSAL 4.1.1 posix)의 queue 구현이 `mq_open`을 쓰는지는 이 문서에서 확인하지 않았다 | `mq_open`이라면 R2 ③과 같다: FILES_STRUCT 쓰기(fd table)만 자원 접근이 되고 큐 이름·큐 객체는 Scribe 자원이 아니다(§2.5 K1–K3) | 분석(조건부) |
 | C5 `OS_TaskCreate` | `pthread_create` → `clone3`. 에이전트가 쓴 작은 C 프로그램에서 관측된 기록이다(`availability.md` §4 끝). OSAL이나 cFS에서 측정한 것은 아니다 | clone은 HB 노드·간선(코드가 `clone`을 fork로 취급) | 분석 |
 | C5 PSP의 `prctl(PR_SET_NAME)` | 소스 수준. ES 레코드 쓰기와 순서가 정해지지 않는다 | 이름 설정은 Table 2 객체가 아니다 | 분석 |
 | C5 ES 레코드 쓰기·`GetAppID` 조회 | 0 syscalls(OSAL 시험의 task 레지스트리 대기는 futex 대기만 보임) | 없음 | 분석 |
@@ -318,7 +353,7 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | 요구 | 레퍼런스 | 값의 상태 | 오늘 상태 |
 |---|---|---|---|
 | i386 Linux **2.6.35** + Scribe 내장 커널 | 번들 `kernel_config` L3 `2.6.35`, L6 `# CONFIG_64BIT is not set`, L7 `CONFIG_X86_32=y`, L1609 `CONFIG_SCRIBE=y`. 논문 §7 p.363 "Linux kernel 2.6.35" | from-reference | 이 컨테이너에서 충족 불가 |
-| 커널을 설치하고 부팅 | `deploy.rb` L24–25 `make install`, `mkinitramfs` | from-reference | **불가.** [M 2026-10-15T08:17Z] `uname -r` = `6.18.44-fc-v114` x86_64, `/proc/cmdline`에 `nomodule`·`--firecracker-init`, `# CONFIG_KEXEC is not set`, `# CONFIG_KEXEC_FILE is not set`, `# CONFIG_MODULES is not set`, `/dev/kvm` 없음(`CONFIG_KVM=y`지만), vmx/svm 플래그 0개, `/boot` 비어 있음 |
+| 커널을 설치하고 부팅 | `deploy.rb` L24–25 `make install`, `mkinitramfs` | from-reference | **불가.** [M 2026-10-16T00:07Z] `uname -r` = `6.18.44-fc-v139` x86_64 (2026-10-15T08:17Z에는 `fc-v114`; 아래 항목은 두 시각 모두 같다), `/proc/cmdline`에 `nomodule`·`--firecracker-init`, `# CONFIG_KEXEC is not set`, `# CONFIG_KEXEC_FILE is not set`, `# CONFIG_MODULES is not set`, `/dev/kvm` 없음(`CONFIG_KVM=y`지만), vmx/svm 플래그 0개, `/boot` 비어 있음 |
 | Python 2, Cython ≥ 0.13, networkx, pygraphviz, `scribe` 확장 | 커널 README 39–44행; `setup.py` L13. 논문 §7 p.363: Python **2.6.6**, Cython **0.14**, Networkx **1.1-2**, UnionFs-Fuse **0.23** | README는 하한만, 논문은 값을 적음. 정책상 "레퍼런스"인지는 PI 판단(§4.3) | [M] `python2`, `python2.7`, `cython`, `qemu-system-i386` 모두 없음 |
 | replay용 파일 시스템 체크포인트 | 논문 p.362: unionfs로 체크포인트·복원 | 논문 기술 | 미준비 |
 | 하드웨어 | 논문 §7.3 pp.364–365: IBM HS20 BladeCenter(듀얼 3.06 GHz Xeon, HT, 2.5 GB RAM, 40 GB 디스크)와 HP DL360 G3(듀얼 3.06 GHz Xeon, 4 GB, 18 GB 디스크 2개). `kernel_config`는 `CONFIG_SMP=y`, `NR_CPUS=8` | 논문 기술 | 이 컨테이너는 4 vCPU 가상 머신 |
@@ -382,11 +417,12 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | **H-RP-2** 이름·ID·등록 정보를 같은 자원·세대로 잇는 장치가 없다 | C1, C5 | OSAL 이름 → ID → 테이블 항목, task ↔ AppId 연결이 도구의 식별 장치(경로, 파일 핸들, pid)에 대응하지 않는다 | §5.2 p.358; 본문에 세대 서술 없음(키워드 0건) | 이름과 객체 ID·세대, task와 AppId의 관계 추적 | **근거가 약하다.** 경로 이름 기반 식별은 RacePro에 이미 있어 "이름으로 식별"은 새롭지 않다. 새로울 수 있는 것은 cFS 내부 레지스트리에 대한 것뿐이다. 세대는 "본문에 없다"는 부재 확인이다 |
 | **H-RP-3** 오류 반환·재시도·최종 결과가 도구 안의 일급 입력이 아니다 | C1 (R2, C5에도 같은 성격) | 허용 오류 처리(재시도)와 최종 실패를 기술하는 입력이 없고 판정은 checker에 위임된다. 내부 API 반환값은 입력에도 없다 | §5.1 p.357(HB는 syscall 의미에서 추론한 것뿐); §6.3 p.363 ("can detect only what is checked"); 본문에 retry 서술 없음 | 반환값·재시도·초기화 최종 결과 추적 | 사용자가 최종 초기화 결과를 판정하는 checker를 쓰면 구분할 수 있을 수 있다. 부족이라기보다 "도구 안에 입력 형식이 없다"에 가깝다 |
 | **H-RP-4** 고정된 순서의 이유를 도구 안에서 설명하지 않는다 | R2 | 사용자 수준 직렬화가 만든 순서는 HB에 없다. 도구는 불가능한 후보를 replay 결과로 걸러 낼 뿐 순서가 고정된 이유를 설명하지 않는다 | §5.1 p.358(HB가 못 담는 의존, 검증이 걸러 냄); §6.2 p.362(divergence가 필터); R2의 순서는 core 시작 직렬화가 만든다(사례 기록) | 소스 기반 순서 근거·전제·신뢰 범위를 결과에 연결 | divergence 필터링도 일종의 근거이고 실제 동작은 미실행이다. R2의 순서 고정은 사례 기록에 근거한다 |
+| **H-RP-5** (2026-10-16 추가) 관측된 실행에 이미 있는 위반은 보고 조건이 겨냥하는 대상이 아니다 | R2 | 보고 조건이 "녹화 때 없던 실패"라서, 매 부팅 나타나는 것으로 기록된 R2 현상은 branch에서 새로 생긴 실패로 보고되는 경우에 해당하지 않는다는 분석 | §6.3 p.363; R2 gdb 3회 모두 거부 24회(기록), 코드상 결정적이라는 예측(`ledger.md` §2, 미실행) | 관측된 실행 하나를 readiness specification에 대어 readiness violation을 판정. 로드맵 §10.5 표에 같은 행은 없고, 가장 가까운 행은 "잘못된 순서가 고정된 이유"(R2)다 | RacePro의 목적(해로운 다른 순서 찾기)과 범위가 다르다는 뜻이지 결함이 아니다. 원 녹화에 checker를 돌리는 일은 RacePro의 race 검증 절차 밖에서도 할 수 있다. RacePro 녹화에서 현상이 나타나는지는 미실행. C1·C3·C5처럼 순서에 따라 나타나는 사례에는 적용하지 않는다 |
 
 **근거가 부족해 가설로 올리지 않는 것**
 
 - **C2 (시작 동기화와 앱 고유 초기화 완료의 혼동, 로드맵 §10.5 3행).** P·R이 의존에 쓰는 자원이 비공개라 RacePro가 그 관계를 표현할 수 있는지 판단할 근거가 없다. 논문에 startup/readiness 상태 개념이 없다는 것만 확인된다. 역할 재구성 실험(결정 P-C2)에서 선택한 요청 방식이 정해진 뒤에야 같은 분석을 할 수 있다.
-- **R2와 C3의 통신 경로(`mq_open`).** POSIX mqueue가 Scribe의 추적 대상인지 확인되지 않았다(§6). 확인 전에는 "SB pipe 통신이 도구에 보이지 않는다"고 쓰지 않는다.
+- **R2와 C3의 통신 경로(`mq_open`).** 2026-10-16 코드 읽기로 큐 이름과 큐 객체에는 Scribe 자원 잠금 경로가 보이지 않고 fd table 접근만 잡힌다는 것을 확인했다(§2.5 K1–K3). 그래도 가설로 올리지 않는다. 다섯 사례의 의존성은 SB 메시지 전달이 아니라 AppId·레지스트리 상태이고, 실제 로그는 실행하지 않아 미확인이기 때문이다. "SB pipe 통신이 도구에 보이지 않는다"는 결과 문장으로 쓰지 않는다.
 
 ### 5.3 비교 논문에서 먼저 밝혀야 할 정의 차이
 
@@ -400,10 +436,10 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | # | 미확인 | 이유·다음 단계 |
 |---|---|---|
-| 1 | Scribe 커널이 POSIX mqueue(`mq_open`, `mq_timedsend`, `mq_timedreceive`)를 추적하는지 | 논문 Table 2에 없고, 커널 diff 130개 파일에 `ipc/mqueue.c`가 없다(오늘 목록 확인). `mq_open`의 fd 할당이 `FILES_STRUCT` 이벤트를 만드는지는 `racepro.md` §5.1에서도 미확인이다. 커널 소스 직접 확인이 필요하다 |
-| 2 | thread 생성(`clone`)과 thread 종료가 explorer에 어떻게 전달되는지 | 코드는 `clone`을 fork로 취급한다. futex 기반 join에는 HB가 없다. 실행하지 못해 확인 불가 |
+| 1 | Scribe 커널이 POSIX mqueue(`mq_open`, `mq_timedsend`, `mq_timedreceive`)를 추적하는지 | **코드 수준에서 정리 (2026-10-16, §2.5 K1–K3).** `ipc/mqueue.c`에 Scribe 호출이 없다. `mq_open`의 fd 할당·설치는 FILES_STRUCT 쓰기가 된다. 큐 이름 조회와 큐 객체 접근에는 잠금 경로가 보이지 않는다. 남은 것: 실제 로그 확인(실행 필요, P-3) |
+| 2 | thread 생성(`clone`)과 thread 종료가 explorer에 어떻게 전달되는지 | 코드는 `clone`을 fork로 취급한다. futex 기반 join에는 HB가 없다. Scribe 상태는 task마다 붙고 explorer는 로그의 PID 사건 값으로 Process를 나눈다(§2.5 K6). 그 값이 thread id인지는 실행하지 못해 확인 불가 |
 | 3 | 논문 판본(2011-09)과 공개 커널·도구 스냅샷(2011-08)의 차이 | §2.4의 차이가 판본 차이인지 구현 선택인지 자료로 결정되지 않는다 |
-| 4 | 공유 메모리 page ownership 기록을 explorer가 읽을 수 있는지 | 논문은 재생용이라고만 한다. `racepro` Python 코드에는 참조가 없다. py-scribe 쪽은 이번에 열지 않았다 |
+| 4 | 공유 메모리 page ownership 기록을 explorer가 읽을 수 있는지 | **코드 수준에서 정리 (2026-10-16, §2.5 K5).** py-scribe는 `mem_owned_*` 사건을 파싱할 수 있고(주소는 `SCRIBE_MEM_EXTRA` 때만), `racepro` explorer는 쓰지 않는다. 이 사건을 후보 생성에 쓰는 것은 EXTENSION이다 |
 | 5 | 문서화된 예제 실행(`tests/tests.list`) | 별도 머신이 있을 때만 가능(`DOCUMENTED-SETUP-RUN`). 이 컨테이너에서는 불가(P-3) |
 | 6 | cFS를 i386 2.6.35 시대 userland에서 빌드·실행하는 조건 | 레퍼런스가 정하지 않았다. 별도 조건 기록과 PI 승인이 필요하다(`racepro.md` D3) |
 | 7 | 논문의 연구 자료 `races.xlsx`/`races.txt`(109건) | 열지 않았다. 이 문서의 질문과 직접 관련이 없다 |
@@ -417,5 +453,5 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 - HotOS'11 예비 설계(전문 읽음): `https://www.usenix.org/legacy/event/hotos11/tech/final_files/Laadan.pdf` (sha256 `e25380f9d9d8c7e95e837575889725e2f807c737987435bff4ac18630ad7f815`).
 - 저자 슬라이드(2차): `https://www.sigops.org/s/conferences/sosp/2011/current/2011-Cascais/25-laadan-slides.pdf`.
 - 그룹 페이지·저자 페이지: `https://systems.cs.columbia.edu/projects/racepro/`, `https://www.cs.columbia.edu/~junfeng/papers/racepro/`.
-- 코드: `github.com/columbia/racepro` @`681f94e39bf5049e24fd2641099001f5246a7b6d`; `github.com/columbia/linux-2.6-racepro` @`b29e9afb4dae248e83aeb58482fb60013017576f`; `github.com/columbia/racepro-bundle` @`72e9c55dc5c05354dff31820d2ba57b2917b806c`; `github.com/columbia/libscribe-racepro` @`011b64426dbd7d3f9185a8d2b61b0c476ec5164c`; `github.com/columbia/py-scribe-racepro` @`56d6187eafd7ec2d650099c7d7afd6130d4c5bff`. 마지막 세 저장소는 HEAD 확인만 했다.
-- 저장소 기록: `baselines/availability.md`, `baselines/racepro.md`, `cases/ledger.md`, `plan/ROADMAP_20261015.md`(§1.2, §2.2, §9, §10), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`.
+- 코드: `github.com/columbia/racepro` @`681f94e39bf5049e24fd2641099001f5246a7b6d`; `github.com/columbia/linux-2.6-racepro` @`b29e9afb4dae248e83aeb58482fb60013017576f`; `github.com/columbia/racepro-bundle` @`72e9c55dc5c05354dff31820d2ba57b2917b806c`; `github.com/columbia/libscribe-racepro` @`011b64426dbd7d3f9185a8d2b61b0c476ec5164c`; `github.com/columbia/py-scribe-racepro` @`56d6187eafd7ec2d650099c7d7afd6130d4c5bff`. `racepro-bundle`과 `libscribe-racepro`는 HEAD 확인과 개별 파일 읽기만 했다. 커널은 2026-10-16에 일부 경로를 sparse checkout으로 읽었고, `py-scribe-racepro`는 2026-10-16에 받아 읽었다(§1.2 행 22–23).
+- 저장소 기록: `baselines/availability.md`, `baselines/racepro.md`, `cases/ledger.md`, `plan/case_basis_register.md`(R2.E5), `plan/process_race_method_matrix.md`(후속 항목 A3), `plan/ROADMAP_20261015.md`(§1.2, §2.2, §9, §10), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`.

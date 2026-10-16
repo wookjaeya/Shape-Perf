@@ -2,7 +2,7 @@
 
 cFS 애플리케이션·task 수준의 준비 상태(readiness)와 순서 위반을 판정하는 도구. 설계는 `../Architecture/spec/SPEC_FINAL.md`, 구현 계획은 `../plan/ROADMAP_20261015.md`, PI 결정은 `../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md` 에 있다.
 
-이 트리의 현재 단계는 **M2(R2 사례의 최소 전체 경로)의 토대(K0)**이다: 레코드 형식, KZ 컨테이너 입출력, 해시, 정규 dump, 판정·신뢰 원장 레코드, 시험, lint. 정적 추출, 근거 검사기, 판정 엔진은 **아직 없다**(아래 상태 표). 관측기(perf-sample 백엔드, K2)는 있다(`docs/observer.md`). 이 트리의 시험 값은 단위 시험 값이며 연구 조건이나 실험 결과가 아니다.
+이 트리의 현재 단계는 **M2(R2 사례의 최소 전체 경로)의 토대(K0)**이다: 레코드 형식, KZ 컨테이너 입출력, 해시, 정규 dump, 판정·신뢰 원장 레코드, 시험, lint. 근거 검사기와 판정 엔진은 **아직 없다**(아래 상태 표). 관측기(perf-sample 백엔드, K2)는 있다(`docs/observer.md`). 정적 추출층(`kz-static basis`/`extract`, K4a)은 있다(`docs/static_facts.md`). 이 트리의 시험 값은 단위 시험 값이며 연구 조건이나 실험 결과가 아니다.
 
 표기: **[M]** 이번 구현에서 실행해 확인, **[D]** 설계 결정, **[I]** 계획·미확인.
 
@@ -24,7 +24,7 @@ kairos/
   docs/phi_reference.md      (K1) Φ 프로필 언어: 어휘·문법·의미, 평가기, 재생 엔진, 검사기 규칙, 정규형·해시, 출처 규칙, SPEC 과의 불일치
   profiles/cfs-v7.0.1/*.kzp  (K1) 판정용 Φ 프로필(V1 부분집합). 프레임워크 지식은 여기에만 있다
   tools/kz-phi/              (K1) 프로필 check·dump·hash·stats·verify-prov·replay
-  tests/phi/                 (K1) 실제 프로필의 golden(정규 text, 해시, 합성 trace 재생 11개), CLI 시험, 인용 대조
+  tests/phi/                 (K1) 실제 프로필의 golden(정규 text, 해시, 합성 trace 재생 15개), CLI 시험, 인용 대조
   tests/property/            (K1) 평가기 성질 시험(추상 결과가 구체 결과를 포함함)
   lib/trace/                 (K2) perf 기록 해석, 병합·손실, 정체성 결합, 호출 짝짓기 — 순수 함수
   probe/                     (K2) anchor/ ELF·DWARF 줄 표·앵커, plan/ 관측 프로필·basis, loader/ perf_event_open·실행 컨테이너, scripts/ 연습 실행 드라이버
@@ -33,9 +33,14 @@ kairos/
   profiles/cfs-v7.0.1/observe/  (K2) 관측용 프로브 계획
   docs/observer.md           관측기 사용법과 설계 세부
   docs/observer_smoke_run.md 실제 cFS 에 한 번 붙인 기록(조건, deviation, 개수)
+  lib/llvm/                  (K4a) Clang 으로 읽는 정적 추출층: basis, 사실(writer, A-TYPE, INIT, derives, 루프와 인증 뷰 규칙, table walk 펼치기, spawn)
+  tools/kz-static/           (K4a) CLI `kz-static`: basis, extract, show, reach (-DKZ_BUILD_LLVM_TOOLS=ON 일 때만)
+  tests/static/              (K4a) 고정 C 프로그램의 golden, core-cpu1 golden, 단위 시험
+  profiles/cfs-v7.0.1/basis/ (K4a) basis recipe(core-cpu1.kzb): link 명령, 생성 파일, 표, 시작 스크립트 규칙
+  docs/static_facts.md       (K4a) 정적 추출층의 사용법, 사실의 뜻, core-cpu1 결과, 한계
 ```
 
-Architecture/08_roadmap.md §2 의 나머지 폴더(`lib/llvm`, `lib/static`, `lib/proofcheck`, `tools/kz-static` 등)는 해당 구성요소가 만들 때 같이 생긴다. **빈 틀은 만들지 않았다.** 구성요소는 자기 폴더에 `CMakeLists.txt` 를 두면 최상위가 자동으로 추가한다. 단위 시험은 `kz_add_unit_test()` 로 등록한다(이름은 `test_<구성요소>_*.cpp`; `test_core_*` 는 libkz-core 몫).
+Architecture/08_roadmap.md §2 의 나머지 폴더(`lib/static`, `lib/proofcheck` 등)는 해당 구성요소가 만들 때 같이 생긴다. **빈 틀은 만들지 않았다.** 구성요소는 자기 폴더에 `CMakeLists.txt` 를 두면 최상위가 자동으로 추가한다. 단위 시험은 `kz_add_unit_test()` 로 등록한다(이름은 `test_<구성요소>_*.cpp`; `test_core_*` 는 libkz-core 몫).
 
 ## 2. 빌드와 시험
 
@@ -103,15 +108,15 @@ ctest 의 시험 이름과 라벨 (K0 토대의 32개 [M]; 관측기 시험은 �
 
 | 라벨 | 시험 | 확인하는 것 |
 |---|---|---|
-| unit | `test_core_phi_parser` | 어휘·구문 오류 69개를 줄:열과 함께, 식의 우선순위·출력의 고정점, 받아들이는 형태 |
-| unit | `test_core_phi_check` | 검사기 규칙마다 한 번의 편집으로 오류를 일으킴(117개) |
-| unit | `test_core_phi_canonical` | 정규 text 의 고정점, 프로필 해시의 불변성(주석·공백·순서·파일 분할·정수 철자)과 변화(의미 편집 12가지) |
-| unit | `test_core_phi_allowed`, `test_core_phi_provenance` | 호출자 수준 Allowed 의 모든 가지(규칙 하나는 수용하지 않음), 인용 본문 해시와 번들 대조 |
+| unit | `test_core_phi_parser` | 어휘·구문 오류 71개를 줄:열과 함께, 식의 우선순위·출력의 고정점, 받아들이는 형태 |
+| unit | `test_core_phi_check` | 검사기 규칙마다 한 번의 편집으로 오류를 일으킴(126개). 손으로 넣은·code-derived 기록의 `side caller` 와 그것을 인용한 appreq 를 거절(QT-4, QT-9) |
+| unit | `test_core_phi_canonical` | 정규 text 의 고정점, 프로필 해시의 불변성(주석·공백·순서·파일 분할·정수 철자)과 변화(의미 편집 14가지; `when`/`filter` 보호 조건) |
+| unit | `test_core_phi_allowed`, `test_core_phi_provenance` | 호출자 수준 Allowed 의 모든 가지(규칙 하나는 수용하지 않음; 손으로 넣은 caller 기록은 규칙으로 읽음), `stats` 의 호출자 수준 인용, 인용 본문 해시와 번들 대조, source 개정 고정(git 메타데이터 파일) |
 | unit | `test_core_eval` | 평가기의 구체 의미(모든 구성)와 추상 domain 의 삼치 논리·구간·상태 집합 |
-| property | `test_property_eval_agreement` | 생성한 식·상태·추상화에서 추상 결과가 구체 결과를 포함함(고정 시드, 약 96,000 평가). 일부러 틀린 추상화가 위반을 내는지도 확인 |
-| unit | `test_core_replay` | 효과 종류별 재생, 규칙 템플릿 4개의 간선, 발생의 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 죽지 않고 결정적임 |
-| golden | `phi_golden_*` (13개) | 실제 프로필의 정규 text·해시·통계, 합성 trace 11개의 재생 결과(규칙마다) |
-| unit | `phi_profile_check`, `phi_profile_provenance`, `test_phi_cli` | `kz-phi check`, 인용 74개를 고정된 번들에서 다시 읽어 대조(번들이 없으면 건너뜀), CLI 출력·종료 코드 |
+| property | `test_property_eval_agreement` | 생성한 식·상태·추상화에서 추상 결과가 구체 결과를 포함함(고정 시드, 약 96,000 평가). 일부러 틀린 추상화가 위반을 내는지도 확인. 잘못 만들어진 소유자(다른 종류·키 폭)를 섞은 상태 포함 |
+| unit | `test_core_replay` | 효과 종류별 재생, 단언한 보호 조건이 거짓인 지점의 보고(반박·불일치)와 `filter`, 규칙 템플릿 4개의 간선, 발생의 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 죽지 않고 결정적임 |
+| golden | `phi_golden_*` (17개) | 실제 프로필의 정규 text·해시·통계, 합성 trace 12개로 만든 재생 결과 15개(규칙마다; 보호 조건의 반박, CleanUpApp 의 RESERVED 창 포함) |
+| unit | `phi_profile_check`, `phi_profile_provenance`, `test_phi_cli` | `kz-phi check`, 인용 98개를 고정된 번들에서 다시 읽어 대조하고 source 4개의 개정 고정을 확인(번들이 없으면 건너뜀; 커밋되지 않은 수정은 확인하지 않음), CLI 출력·종료 코드 |
 
 golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌드> -R phi_golden` 후 `tests/phi/data/` 의 diff 를 읽는다.
 
@@ -165,7 +170,7 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 |---|---|---|
 | 스키마 `kz_schema.h` (컨테이너, 출처, deviation, witness, bound, verdict, verdict cell) | `include/kz/schema/` | 구현, 시험 통과 [M] |
 | `kz_raw.h` (관측 레코드) | `include/kz/schema/` | 구현(K2 소유). 초기 정의에서 SITES·LOSS 가 v2 가 되고 SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS, SYMBOLS, TARGETS 가 더해졌다(`docs/schema.md` §9) [M] |
-| `kz_facts.h` (사실·skeleton 레코드) | `include/kz/schema/` | **초기 정의**(K4a 소유). 추출기는 없음 |
+| `kz_facts.h` (사실·skeleton 레코드) | `include/kz/schema/` | 추출 레코드는 구현(K4a 소유, revision 3: 루프의 인증 뷰 규칙, 섹션 37–39) [M]. skeleton 레코드(23–29)는 초기 정의이고 K4b 가 쓴다 |
 | `kz_cert.h` (certificate, 신뢰 원장) | `include/kz/schema/` | **초기 정의**(K4b 소유). 생성기·검사기는 없음 |
 | KZ 컨테이너 입출력, SHA-256, CRC-32, 정규 dump, 레지스트리 | `lib/core/` | 구현, 시험 통과 [M] |
 | 판정 셀·원장·증명 상태 보조 (기본값, 불변식, 서술) | `lib/core/verdict.cpp` | 구현, 시험 통과 [M]. 판정 격자(lattice)는 **미구현** |
@@ -176,13 +181,13 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 | 평가기(구체·추상 domain) | `include/kz/core/eval*.hpp`, `lib/core/eval_{concrete,abstract}.cpp` | 구현, 성질 시험 통과 [M]. operational domain(탐색기용)은 **미구현** |
 | 재생 엔진: 효과, HB 간선 4개 템플릿, readiness 발생의 상태, 결과 코드 검사 | `lib/core/eval_trace.cpp` | 구현, **합성 trace** 로 시험 통과 [M]. 실제 trace 에는 아직 쓰지 않았다. Allowed 항목의 horizon monitor, vector clock, 탐색기는 **미구현** (항목이 판정하는 발생은 `PENDING` 으로 남는다) |
 | `tools/kz-phi` | `tools/kz-phi/` | 구현, 시험 통과 [M] |
-| `profiles/cfs-v7.0.1/*.kzp` | `profiles/` | 판정용 Φ 프로필의 **V1 부분집합**(K-ID.send-with-appid, cell 과 INIT 사실, GetAppID 의 out 포인터 효과, App 레코드의 AppState, HB R1·R2-P-TASK·R18·R19, T-TERM 선언)은 구현. 인용 74개를 고정된 번들에서 다시 읽어 본문 해시를 대조했다 [M]. 항목 78개 중 손으로 넣은 것(best tier researcher) 3개, `researcher` 기록을 하나라도 인용하는 항목 12개, `declared_trusted` 3개(`kz-phi stats`). 나머지 프레임워크(C1·C2·C3·C5 의 지식)는 **미작성**. 관측용 프로브 계획 `profiles/cfs-v7.0.1/observe/sites.kzp` 는 있다(K2; 형식 `kzp-observe 1`, 인용 해시 검증됨 [M]) |
-| basis, extract, link, skel (LLVM) | `lib/llvm/` | **미구현** |
+| `profiles/cfs-v7.0.1/*.kzp` | `profiles/` | 판정용 Φ 프로필의 **V1 부분집합**(K-ID.send-with-appid, cell 과 INIT 사실, GetAppID 의 out 포인터 효과, App 레코드의 AppState, HB R1·R2-P-TASK·R18·R19, T-TERM 선언)은 구현. 인용 98개를 고정된 번들에서 다시 읽어 본문 해시를 대조했고 source 4개의 개정 고정이 체크아웃된 커밋과 같음을 확인했다 [M]. 출처 기록 109개, 항목 91개 중 손으로 넣은 것(가장 강한 tier researcher) 3개, `researcher` 기록을 하나라도 인용하는 항목 12개, `declared_trusted` 3개, 호출자 수준 인용: appreq 1개(contract-backed, side caller), 손으로 넣은 인용 0개(`kz-phi stats`). 프로필 해시 `bc8a3401e6b53b23642e258363dd27eabd7187eea2790f463a45171ae5ec90a4`. 나머지 프레임워크(C1·C2·C3·C5 의 지식)는 **미작성**. 관측용 프로브 계획 `profiles/cfs-v7.0.1/observe/sites.kzp` 는 있다(K2; 형식 `kzp-observe 1`, 인용 해시 검증됨 [M]) |
+| basis, extract (LLVM) | `lib/llvm/`, `tools/kz-static/` | 구현(K4a), 시험 통과 [M] (`docs/static_facts.md`): core-cpu1 의 basis 와 facts. app-unit link probe, anchor audit, transition filtering·key 상태, 문서 주석 후보는 **미구현**. skel 은 K4b |
 | MustBefore, certificate, census, plan | `lib/static/` | **미구현** |
 | 근거 검사기 `kz proofcheck` | `lib/proofcheck/` | **미구현** |
 | 관측기 perf-sample 백엔드(F0), 앵커 해석, loader | `probe/` | 구현(K2), 시험 통과 [M]. 실제 cFS 에 한 번 붙여 보았다(`docs/observer_smoke_run.md`). BPF 백엔드, 프로브 비용 측정, 앱 `.so` inode 등록은 **미구현**(V1b/S1) |
 | trace 해석: 병합, 손실, 정체성 결합, 호출 짝짓기 | `lib/trace/` | 구현(K2), 시험 통과 [M]. HB 간선과 사건 판정은 **미구현** |
-| CLI `kz anchor`, `kz observe`, `kz hits` | `tools/kz/` | 구현(K2), 시험 통과 [M]. `kz-static` 은 **미구현**. 사용법: `docs/observer.md` |
+| CLI `kz anchor`, `kz observe`, `kz hits` | `tools/kz/` | 구현(K2), 시험 통과 [M]. `kz-static` 은 K4a 행 참조. 사용법: `docs/observer.md` |
 | conform, predict, explore, confirm, baselines, gate | `lib/*`, `gate/` | **미구현** (R2 경로 밖) |
 | 스키마의 EVENTS, EDGES, INSTANCES, TEMPLATES 등 | — | id 만 예약, 레코드 **미정의** (`docs/schema.md` §3) |
 

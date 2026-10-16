@@ -52,6 +52,10 @@ const ReplayCase kReplayCases[] = {
     {"shutdown_scope", "shutdown_scope", true, "7.0.1"},
     {"poll_timeout", "poll_timeout", true, "7.0.1"},
     {"poll_timeout_wrong", "poll_timeout_wrong", true, "7.0.1"},
+    {"kid_outcomes", "kid_outcomes", true, "7.0.1"},
+    {"effects_core", "effects_core", true, "7.0.1"},
+    {"effects_external", "effects_external", true, "7.0.1"},
+    {"cleanup_window", "cleanup_window", true, "7.0.1"},
 };
 
 const char* const kPredicate = "forall r: es.app where state(r) != FREE { state(es.appstate(r)) >= RUNNING }";

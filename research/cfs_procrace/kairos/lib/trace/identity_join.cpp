@@ -43,6 +43,13 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     return Status::error(Err::Invalid, "join_identities: events, sites and side events are required");
   const std::vector<kz_raw_ev>& events = *in.events;
   const std::vector<SiteSpec>& sites = *in.sites;
+  // The decoders read fixed slot positions (kz_raw.h): a site that does not declare them would be
+  // read as zeros.  Refuse it instead.
+  for (const SiteSpec& site : sites)
+    if (site.decoder != KZ_DECODER_GENERIC && site.decoder != KZ_DECODER_NONE) {
+      Status cs = check_site(site);
+      if (!cs.ok()) return Status::error(Err::Invalid, "join_identities: " + cs.message);
+    }
 
   // 1. Thread incarnations from the side-band stream, in time order.
   std::vector<Incarnation> inc;
@@ -133,16 +140,29 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     ++n->n_events;
     if (ev.site >= sites.size()) continue;
     const SiteSpec& site = sites[ev.site];
+    // An event with TRUNC set may hold 0 in the very slot a decoder reads: it is counted, never
+    // used as a key or as an announced id.
+    const bool unreadable = (ev.flags & KZ_RAW_FLAG_TRUNC) != 0;
     switch (site.decoder) {
       case KZ_DECODER_THREAD_ENTRY:
-        if ((n->flags & KZ_THREAD_FLAG_ENTRY_SEEN) != 0) {
+        if (unreadable) {
+          ++st.entries_unreadable;
+        } else if ((n->flags & KZ_THREAD_FLAG_ENTRY_SEEN) != 0) {
           ++st.duplicate_entries;
         } else {
           n->announced = static_cast<uint32_t>(ev.a[0] & 0xffffffffu);
-          n->flags |= KZ_THREAD_FLAG_ENTRY_SEEN;
+          // Nothing on the creator side can be compared with it: the id the spawn call assigns is
+          // an out-parameter, which this backend cannot read (kz_raw.h, KZ_THREAD_FLAG).
+          n->flags |= KZ_THREAD_FLAG_ENTRY_SEEN | KZ_THREAD_FLAG_ID_UNVERIFIED;
         }
         break;
       case KZ_DECODER_SPAWN_CREATE: {
+        if (unreadable) {
+          // Without its return address the call cannot be closed by its return, and without its
+          // entry function it says nothing about the child: it opens no interval.
+          ++st.creates_unreadable;
+          break;
+        }
         Interval iv;
         iv.creator_tid = ev.tid;
         iv.create_event = i;
@@ -152,14 +172,19 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
         // the return address of this call identifies its return event
         open_creates[ev.tid].push_back(iv);
         // stash the return address in t_end until the return is seen
-        open_creates[ev.tid].back().t_end = ev.a[3];
+        open_creates[ev.tid].back().t_end = ev.a[kSlotReturnAddress];
         break;
       }
       case KZ_DECODER_SPAWN_RETURN: {
+        if (unreadable) {
+          // The open call it would close stays open: forks after it become ambiguous, not assigned.
+          ++st.returns_unreadable;
+          break;
+        }
         std::vector<Interval>& stack = open_creates[ev.tid];
         // The matching entry is the innermost open one with this return address.
         size_t k = stack.size();
-        while (k > 0 && stack[k - 1].t_end != ev.a[3]) --k;
+        while (k > 0 && stack[k - 1].t_end != ev.a[kSlotReturnAddress]) --k;
         if (k == 0) {
           ++st.returns_without_create;
           break;
@@ -220,14 +245,17 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
       // More than one thread could belong to this call, or the call has no recorded end so
       // that later forks could also be its own: say so and assign nothing.
       for (uint32_t idx : cands) {
-        inc[idx].flags |= KZ_THREAD_FLAG_SPAWN_AMBIGUOUS;
+        inc[idx].flags |= KZ_THREAD_FLAG_SPAWN_AMBIGUOUS | KZ_THREAD_FLAG_MATCH_BY_TIME;
         claimed[idx] = true;
       }
       continue;
     }
     Incarnation& c = inc[cands[0]];
     claimed[cands[0]] = true;
-    c.flags |= KZ_THREAD_FLAG_SPAWN_MATCHED;
+    // The only key is containment of the FORK time in the creator's interval: timestamps of one
+    // thread (the creator's probe events and the kernel's FORK record of that thread), so the
+    // match holds under A-CLK-PO (SPEC 5.4).
+    c.flags |= KZ_THREAD_FLAG_SPAWN_MATCHED | KZ_THREAD_FLAG_MATCH_BY_TIME;
     c.creator_event = iv.create_event;
     c.entry_fn = iv.entry_fn;
     c.priority = iv.priority;
@@ -253,6 +281,8 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     }
     if ((n.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) != 0) ++st.spawn_matched;
     if ((n.flags & KZ_THREAD_FLAG_SPAWN_AMBIGUOUS) != 0) ++st.spawn_ambiguous;
+    if ((n.flags & KZ_THREAD_FLAG_MATCH_BY_TIME) != 0) ++st.matched_by_time;
+    if ((n.flags & KZ_THREAD_FLAG_ID_UNVERIFIED) != 0) ++st.ids_unverified;
     if ((n.flags & KZ_THREAD_FLAG_ENTRY_SEEN) != 0 && (n.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) == 0) {
       n.flags |= KZ_THREAD_FLAG_ENTRY_UNMATCHED;
       ++st.entries_unmatched;

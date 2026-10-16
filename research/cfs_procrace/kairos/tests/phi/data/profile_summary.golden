@@ -1,21 +1,29 @@
 profile "cfs-v7.0.1"
 revision "cFS 088b2fa8 / cFE c5fb2b4d / OSAL d2d877a6 / PSP c4b3b0b6"
-hash c62892dde8236faa2d8e0ea2c81ab5909183e8c3da3ec743d20887e1b2ee183c
+hash bc8a3401e6b53b23642e258363dd27eabd7187eea2790f463a45171ae5ec90a4
 
-provenance records: 85
-entries with provenance (best tier): 78
-  contract-backed: 2
+provenance records: 109
+entries with provenance: 91
+by strongest cited tier (the best part of the entry):
+  contract-backed: 3
   admitted: 0
-  code-derived: 73
+  code-derived: 85
   issue-derived: 0
   researcher: 3
   unreferenced: 0
-hand-entered (best tier researcher or unreferenced): 3
+by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
+  contract-backed: 1
+  admitted: 0
+  code-derived: 78
+  issue-derived: 0
+  researcher: 12
+  unreferenced: 0
+hand-entered (strongest cited tier researcher or unreferenced): 3
   hb R1
   kind cell
   op abort
 entries citing at least one researcher record: 12
-  effect CFE_ES_CleanUpApp.free_record
+  effect CFE_ES_CleanUpApp.retire
   effect CFE_ES_GetAppID.store_fail
   hb R1
   hb R18
@@ -28,10 +36,13 @@ entries citing at least one researcher record: 12
   trusted A-FRESH
   trusted A-OWNER
 declared-trusted: 3
-  effect CFE_ES_CleanUpApp.free_record
+  effect CFE_ES_CleanUpApp.retire
   trusted A-FRESH
   trusted A-OWNER
 assumptions: 0
+caller level (SPEC 1.6): 1 specified appreq, 0 Allowed entries, 0 citing a hand-entered record or none
+  rspec K-ID.send-with-appid appreq evs_h_appid_note (contract-backed, side caller)
+  rspec K-ID.send-with-appid allowed none
 
 readiness specifications
   K-ID.send-with-appid: caller-level Allowed none (Allowed none, and appreq is specified by a caller-side record: no not-ready outcome is acceptable)

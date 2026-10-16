@@ -14,6 +14,7 @@
 // Nothing here knows a framework: every name comes from the ExtractSpec.
 #include <algorithm>
 #include <functional>
+#include <tuple>
 
 #include "ast_reader.hpp"
 #include "clang/AST/APValue.h"
@@ -189,7 +190,35 @@ struct LoopCtx {
   std::string bound_text;
   bool has_cond = false;
   std::string delay_call, lock_call;
+  bool delay_direct = false;  // a delay call in this loop's own body (not in an inner loop)
   bool is_for = false;
+  size_t body_guard_base = 0;  // guards_.size() when the body starts (after the loop condition)
+  std::vector<ExprRef> triggers;  // per exit (parallel to `exits`): the condition that decides it
+  std::vector<Pos> exit_pos;      // per exit: where it is (the loop itself for the loop condition)
+  bool cond_exit = false;         // exits[0] is the negated loop condition
+  const VarDecl* budget_var = nullptr;
+  // A table walk: the element variable, and the walk found before the body is read.
+  const VarDecl* walk_var = nullptr;
+  bool walk_found = false;
+  Model::WalkSpec walk;
+};
+
+// A definition of a local variable inside a loop, for the counter and cursor patterns of
+// SPEC 4.3 (form (b): `cnt := 0; for i in [0,N): if phi(i) then cnt++; exit iff cnt = 0`).
+struct LocalEvent {
+  enum Kind { Reset0, Inc1, Other } kind = Other;
+  const VarDecl* var = nullptr;
+  std::vector<size_t> loops;  // Model::loops indices of the enclosing loops, outermost first
+  size_t guard_depth = 0;     // guards_.size() at the event
+  ExprRef guard_inner = nullptr;  // the guards from the innermost loop's body down to the event
+  const Expr* rhs = nullptr;  // Other: the value assigned, if a plain assignment
+  Pos pos;
+};
+
+// What a finished inner loop leaves for the counter pattern of its enclosing loop.
+struct InnerInfo {
+  const VarDecl* induction = nullptr;
+  size_t body_guard_base = 0;
 };
 
 class FnWalker {
@@ -255,6 +284,7 @@ class FnWalker {
     if (const auto* ic = dyn_cast<ImplicitCastExpr>(e)) return to_expr(ic->getSubExpr(), depth);
     if (const auto* cc = dyn_cast<CStyleCastExpr>(e)) return to_expr(cc->getSubExpr(), depth);
     if (const auto* dre = dyn_cast<DeclRefExpr>(e)) {
+      if (elem_var_ != nullptr && dre->getDecl() == elem_var_) return pool().load(KZ_EXPR_REF_ELEM, "");
       if (const auto* pv = dyn_cast<ParmVarDecl>(dre->getDecl())) return pool().load(KZ_EXPR_REF_PARAM, pv->getNameAsString(), pv->getFunctionScopeIndex());
       if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl()))
         return pool().load(vd->hasGlobalStorage() ? KZ_EXPR_REF_GLOBAL : KZ_EXPR_REF_LOCAL, vd->getNameAsString());
@@ -262,8 +292,10 @@ class FnWalker {
       return pool().top("declref");
     }
     if (const auto* me = dyn_cast<MemberExpr>(e)) {
-      if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl()))
+      if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) {
+        if (is_elem_member(me)) return pool().load(KZ_EXPR_REF_ELEM, fl->getNameAsString());
         return pool().load(KZ_EXPR_REF_FIELD, field_type_name(fl) + "." + fl->getNameAsString());
+      }
       return pool().top("member");
     }
     if (const auto* sl = dyn_cast<StringLiteral>(e)) return pool().load(KZ_EXPR_REF_STRING, sl->getString().str());
@@ -319,9 +351,31 @@ class FnWalker {
     return pool().top("expression");
   }
 
+  // `e->f` where e is the element variable of the table walk being expressed (elem_var_).
+  bool is_elem_member(const MemberExpr* me) const {
+    if (elem_var_ == nullptr || !me->isArrow()) return false;
+    const auto* dre = dyn_cast<DeclRefExpr>(me->getBase()->IgnoreParenImpCasts());
+    return dre != nullptr && dre->getDecl() == elem_var_;
+  }
+  // Does `e` read the element variable `v`?
+  static bool mentions_var(const Expr* e, const VarDecl* v) {
+    if (e == nullptr) return false;
+    struct V : RecursiveASTVisitor<V> {
+      const VarDecl* var = nullptr;
+      bool found = false;
+      bool VisitDeclRefExpr(DeclRefExpr* d) {
+        if (d->getDecl() == var) found = true;
+        return !found;
+      }
+    } vis;
+    vis.var = v;
+    vis.TraverseStmt(const_cast<Expr*>(e));
+    return vis.found;
+  }
+
   // The condition `c` with the polarity it holds under.
   ExprRef cond_expr(const Expr* c, bool polarity) {
-    const auto key = std::make_pair(c, polarity);
+    const auto key = std::make_tuple(c, polarity, elem_var_);
     auto it = cond_cache_.find(key);
     if (it != cond_cache_.end()) return it->second;
     ExprRef e = to_expr(c);
@@ -380,6 +434,41 @@ class FnWalker {
     m_.atypes.push_back(a);
   }
 
+  // ---- FUNC_WRITES: what the function's own body writes ----
+  void note_write(uint8_t kind, const std::string& type, const std::string& field, const Stmt* at) {
+    WriteEvent ev;
+    ev.func_key = fkey_;
+    ev.kind = kind;
+    ev.type = type;
+    ev.field = field;
+    ev.pos = tu_.pos_of(at->getBeginLoc());
+    if (!loops_.empty()) ev.loop_key = m_.loops[loops_.back()->index].key;
+    m_.write_events.push_back(ev);
+  }
+  // Every record type a value of type `t` holds by value (itself, nested records, array elements).
+  void contained_records(QualType t, std::set<const RecordDecl*>* seen, std::vector<std::string>* out) {
+    const RecordDecl* rd = tu_.record_of(t);
+    if (rd == nullptr) return;
+    if (const RecordDecl* def = rd->getDefinition()) rd = def;
+    if (!seen->insert(rd).second) return;
+    out->push_back(tu_.record_name(rd));
+    for (const FieldDecl* fd : rd->fields()) contained_records(fd->getType(), seen, out);
+  }
+  void note_record_write(QualType t, const Stmt* at) {
+    std::set<const RecordDecl*> seen;
+    std::vector<std::string> names;
+    contained_records(t, &seen, &names);
+    std::sort(names.begin(), names.end());
+    names.erase(std::unique(names.begin(), names.end()), names.end());
+    for (const std::string& n : names) note_write(KZ_FWRITE_KIND_RECORD, n, "*", at);
+  }
+  void note_global_write(const DeclRefExpr* dre, const Stmt* at) {
+    const auto* vd = dyn_cast<VarDecl>(dre->getDecl());
+    if (vd == nullptr || !vd->hasGlobalStorage()) return;
+    note_write(KZ_FWRITE_KIND_FIELD, "<global>", vd->getNameAsString(), at);
+    if (vd->getType()->isRecordType() || vd->getType()->isArrayType()) note_record_write(vd->getType(), at);
+  }
+
   // The name under which a field's owner type is reported: the spelling the targets use when
   // the field is a target, else the type's own name.
   std::string field_type_name(const FieldDecl* fl) {
@@ -412,9 +501,37 @@ class FnWalker {
       case Stmt::DeclStmtClass: return visit_declstmt(cast<DeclStmt>(s));
       case Stmt::InitListExprClass: return visit_initlist(cast<InitListExpr>(s));
       case Stmt::UnaryExprOrTypeTraitExprClass: return;  // sizeof and alignof do not evaluate their operand
+      case Stmt::CompoundStmtClass: return visit_compound(cast<CompoundStmt>(s));
       default: break;
     }
     for (const Stmt* c : s->children()) visit(c);
+  }
+
+  // A statement that never falls through to the next one: a jump, or a block or an if/else whose
+  // every path ends in one.  (Calls to terminal operations are not counted: T-TERM is a rule of
+  // the skeleton, not of the extracted guards.)
+  static bool always_leaves(const Stmt* s) {
+    if (s == nullptr) return false;
+    if (isa<BreakStmt>(s) || isa<ContinueStmt>(s) || isa<ReturnStmt>(s) || isa<GotoStmt>(s) || isa<IndirectGotoStmt>(s)) return true;
+    if (const auto* cs = dyn_cast<CompoundStmt>(s)) return !cs->body_empty() && always_leaves(cs->body_back());
+    if (const auto* is = dyn_cast<IfStmt>(s)) return is->getElse() != nullptr && always_leaves(is->getThen()) && always_leaves(is->getElse());
+    return false;
+  }
+
+  // A block.  After `if (c) <leave>;` without an else, the rest of the block runs only when c was
+  // false at the test: that is pushed as a guard until the block ends.  A label (or a case label)
+  // is a join point: the guards of the early exits before it are dropped there.
+  void visit_compound(const CompoundStmt* cs) {
+    const size_t base = guards_.size();
+    for (const Stmt* st : cs->body()) {
+      if (isa<SwitchCase>(st) || isa<LabelStmt>(st))
+        while (guards_.size() > base) guards_.pop_back();
+      visit(st);
+      if (const auto* is = dyn_cast<IfStmt>(st))
+        if (is->getElse() == nullptr && is->getConditionVariable() == nullptr && is->getInit() == nullptr && always_leaves(is->getThen()))
+          guards_.push_back({is->getCond(), false});
+    }
+    while (guards_.size() > base) guards_.pop_back();
   }
 
   // ---- control constructs ----
@@ -455,26 +572,35 @@ class FnWalker {
     lf.func_key = fkey_;
     lf.func_name = fname_;
     lf.depth = static_cast<uint16_t>(loops_.size() + 1);
+    if (!loops_.empty()) lf.parent_key = m_.loops[loops_.back()->index].key;
     m_.loops.push_back(lf);
     auto ctx = std::make_unique<LoopCtx>();
     ctx->index = m_.loops.size() - 1;
     ctx->stmt = s;
     ctx->range = s->getSourceRange();
     ctx->guard_base = guards_.size();
+    ctx->body_guard_base = guards_.size();
     ctx->is_for = is_for;
     ctx->has_cond = cond != nullptr;
-    if (cond != nullptr && cond_first) ctx->exits.push_back(cond_expr(cond, false));
+    if (cond != nullptr && cond_first) {
+      ctx->exits.push_back(cond_expr(cond, false));
+      ctx->triggers.push_back(ctx->exits.back());
+      ctx->exit_pos.push_back(lf.pos);
+      ctx->cond_exit = true;
+    }
     loops_.push_back(std::move(ctx));
     breakables_.push_back(loops_.back().get());
     return loops_.back().get();
   }
 
   void end_loop(LoopCtx* lc, const Stmt* body) {
+    (void)body;
     LoopFact& lf = m_.loops[lc->index];
     lf.n_exits = lc->n_exits;
     lf.n_calls = lc->n_calls;
     lf.delay_call_key = lc->delay_call;
     lf.lock_call_key = lc->lock_call;
+    lf.delay_direct = lc->delay_direct;
     // lock kind: all shared loads of the body inside one lock region, or a single atomic load
     if (lc->shared_loads > 0 && lc->shared_loads == lc->shared_loads_locked && lc->lock_calls == 1) lf.lock_kind = KZ_LOCK_KIND_ONE_REGION;
     else if (lc->shared_loads == 1 && lc->shared_loads_locked == 0 && lc->volatile_load) lf.lock_kind = KZ_LOCK_KIND_ATOMIC_READ;
@@ -512,11 +638,19 @@ class FnWalker {
       }
     }
     if (!trip_known && lc->has_cond) lf.trip_status = KZ_TRIP_STATUS_UNKNOWN;
-    // table walk?
-    const bool walk = detect_table_walk(lc, body);
+    // table walk?  (found before the body was read, so that the calls in it could be recorded
+    // in element form)
+    const bool walk = lc->walk_found;
+    if (walk) {
+      m_.walks.push_back(lc->walk);
+      lf.table = lc->walk.text;
+      lf.table_root = lc->walk.root_object;
+    }
+    // A loop is a poll or a retry loop only if the delay call is in its own body; a loop that
+    // contains a polling loop is classified by its own shape.
     if (walk) {
       lf.kind = KZ_LOOP_KIND_TABLE_WALK;
-    } else if (!lc->delay_call.empty()) {
+    } else if (lc->delay_direct) {
       lf.kind = trip_known ? KZ_LOOP_KIND_COUNT_BOUNDED : KZ_LOOP_KIND_POLL;
     } else if (trip_known) {
       lf.kind = KZ_LOOP_KIND_CONST_TRIP;
@@ -536,6 +670,268 @@ class FnWalker {
       lf.modset = pool().list(KZ_EXPR_OP_LOCSET, mods);
       lf.budget = build_budget(lc);
     }
+    if (lf.kind == KZ_LOOP_KIND_POLL || lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED) extract_predicate(lc, &lf);
+  }
+
+  // ---- SPEC 4.3: the condition exits of a poll loop and the predicate they test -------------
+  //
+  // The exits are split by what decides them (the innermost guard at the exit, or the negated
+  // loop condition): an exit decided by a test of the budget variable is a budget exit, every
+  // other exit is a condition exit.  The condition exits, with the conjuncts that only test the
+  // budget removed, give `cond`.  The predicate is `cond` with every counter-zero test of form
+  // (b) rewritten as a `forall` over the constant-trip loop that counts; it is a direct test
+  // (form (a)) when it reads no local variable at all.
+  void extract_predicate(LoopCtx* lc, LoopFact* lf) {
+    const std::string budget = lc->budget_var != nullptr ? lc->budget_var->getNameAsString() : std::string();
+    std::vector<ExprRef> cond_terms;
+    std::vector<size_t> cond_index;  // the exit each condition term comes from
+    bool any_exit = false;
+    for (size_t i = 0; i < lc->exits.size(); ++i) {
+      ExprRef full = lc->exits[i];
+      if (full != nullptr && full->op == KZ_EXPR_OP_CONST && full->a == nullptr && full->value == 0) continue;  // never taken (`while (1)`)
+      any_exit = true;
+      ExprRef trig = i < lc->triggers.size() ? lc->triggers[i] : nullptr;
+      ExprRef term = full;
+      if (!budget.empty() && trig != nullptr && expr_mentions_local(trig, budget)) {
+        // The deciding test mentions the budget: its disjuncts that do not are condition exits
+        // (`if (ready || left <= 0) break;`, `while (!ready && left > 0)`).
+        std::vector<ExprRef> ds, keep;
+        disjuncts(trig, &ds);
+        for (ExprRef d : ds)
+          if (!expr_mentions_local(d, budget)) keep.push_back(d);
+        if (keep.empty()) continue;  // a budget exit
+        ExprRef rest = nullptr;  // the other guards of the exit: `full` is (and rest trig) or trig
+        if (full != trig && full != nullptr && full->op == KZ_EXPR_OP_AND && full->b == trig) rest = full->a;
+        else if (full != trig) rest = full;
+        term = pool().conj(KZ_EXPR_OP_AND, {rest, pool().conj(KZ_EXPR_OP_OR, keep)});
+      }
+      if (!budget.empty()) term = drop_conjuncts_on(term, budget);
+      if (term == nullptr) term = pool().constant(1);  // the exit is taken whatever the condition
+      cond_terms.push_back(term);
+      cond_index.push_back(i);
+    }
+    if (cond_terms.empty()) {
+      lf->pred_note = any_exit ? "no exit other than the budget" : "the loop has no exit";
+      return;
+    }
+    lf->cond = pool().conj(KZ_EXPR_OP_OR, cond_terms);
+    ExprRef pred = lf->cond;
+    std::set<std::string> locals;
+    collect_locals(pred, &locals);
+    bool rewrote = false;
+    for (const std::string& name : locals) {
+      const VarDecl* var = local_by_name(lc, name);
+      std::string why;
+      size_t inner = kNone;
+      ExprRef forall = var != nullptr ? counter_forall(lc, var, &inner, &why) : nullptr;
+      // every exit that tests the counter must come after the counting loop; the loop condition
+      // is tested before the reset of the first iteration, so it must not read the counter
+      for (size_t k = 0; forall != nullptr && k < cond_terms.size(); ++k) {
+        if (!expr_mentions_local(cond_terms[k], name)) continue;
+        const size_t ex = cond_index[k];
+        if (lc->cond_exit && ex == 0) {
+          why = "the loop condition reads it before the reset";
+          forall = nullptr;
+        } else if (!(m_.loops[inner].pos < lc->exit_pos[ex])) {
+          why = "an exit at " + lc->exit_pos[ex].str() + " tests it before the counting loop";
+          forall = nullptr;
+        }
+      }
+      if (forall == nullptr) {
+        lf->pred_note = "the condition reads the local " + name + ", which is not a recognised counter" + (why.empty() ? "" : ": " + why);
+        return;
+      }
+      pred = substitute_counter(pred, name, forall);
+      rewrote = true;
+    }
+    std::set<std::string> left;
+    collect_free_locals(pred, &left);
+    if (!left.empty()) {
+      lf->pred_note = "the condition still reads the local " + *left.begin() + " after the rewriting";
+      return;
+    }
+    lf->pred = pred;
+    if (!rewrote) {
+      lf->pred_form = KZ_PRED_FORM_DIRECT;
+      lf->pred_note = "a direct test of shared loads, parameters and call results";
+    } else if (pred->op == KZ_EXPR_OP_FORALL) {
+      lf->pred_form = KZ_PRED_FORM_COUNTER_ZERO;
+      lf->pred_note = "a counter-zero test after a constant-trip loop, rewritten as forall";
+    } else {
+      lf->pred_form = KZ_PRED_FORM_COMBINED;
+      lf->pred_note = "a combination of direct tests and counter-zero tests";
+    }
+  }
+
+  // The disjuncts of a condition: `or` is split, and `not (and a b)` is `(not a) or (not b)`.
+  void disjuncts(ExprRef e, std::vector<ExprRef>* out) {
+    if (e == nullptr) return;
+    if (e->op == KZ_EXPR_OP_OR) {
+      disjuncts(e->a, out);
+      disjuncts(e->b, out);
+      return;
+    }
+    if (e->op == KZ_EXPR_OP_NOT && e->a != nullptr && e->a->op == KZ_EXPR_OP_AND) {
+      disjuncts(pool().unary(KZ_EXPR_OP_NOT, e->a->a), out);
+      disjuncts(pool().unary(KZ_EXPR_OP_NOT, e->a->b), out);
+      return;
+    }
+    out->push_back(e);
+  }
+
+  // The conjunction `e` without its conjuncts that mention the local `name`.
+  ExprRef drop_conjuncts_on(ExprRef e, const std::string& name) {
+    if (e == nullptr) return nullptr;
+    if (e->op == KZ_EXPR_OP_AND) {
+      ExprRef a = drop_conjuncts_on(e->a, name), b = drop_conjuncts_on(e->b, name);
+      if (a == nullptr) return b;
+      if (b == nullptr) return a;
+      return pool().binary(KZ_EXPR_OP_AND, a, b);
+    }
+    return expr_mentions_local(e, name) ? nullptr : e;
+  }
+
+  static void collect_locals(ExprRef e, std::set<std::string>* out) {
+    if (e == nullptr) return;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL) out->insert(e->name);
+    collect_locals(e->a, out);
+    collect_locals(e->b, out);
+  }
+  // The locals outside `forall` nodes: inside one, the induction variable and the cursors are
+  // bound, and counter_forall has checked that no other local occurs.
+  static void collect_free_locals(ExprRef e, std::set<std::string>* out) {
+    if (e == nullptr || e->op == KZ_EXPR_OP_FORALL) return;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL) out->insert(e->name);
+    collect_free_locals(e->a, out);
+    collect_free_locals(e->b, out);
+  }
+
+  const VarDecl* local_by_name(const LoopCtx* lc, const std::string& name) {
+    (void)lc;
+    for (const auto& kv : locals_)
+      if (kv.first->getNameAsString() == name) return kv.first;
+    return nullptr;
+  }
+
+  // `cnt == 0` (and its spellings) replaced by `forall`.  Any other use of the counter stays and
+  // makes the rewriting fail (the caller checks that no local is left).
+  ExprRef substitute_counter(ExprRef e, const std::string& name, ExprRef forall) {
+    if (e == nullptr) return nullptr;
+    auto is_counter = [&](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_LOAD && x->ref == KZ_EXPR_REF_LOCAL && x->name == name; };
+    auto is_zero = [](ExprRef x) { return x != nullptr && x->op == KZ_EXPR_OP_CONST && x->a == nullptr && x->value == 0; };
+    if (e->op == KZ_EXPR_OP_EQ && ((is_counter(e->a) && is_zero(e->b)) || (is_zero(e->a) && is_counter(e->b)))) return forall;
+    if (e->op == KZ_EXPR_OP_NE && ((is_counter(e->a) && is_zero(e->b)) || (is_zero(e->a) && is_counter(e->b)))) return pool().unary(KZ_EXPR_OP_NOT, forall);
+    if (e->op == KZ_EXPR_OP_LOAD || e->op == KZ_EXPR_OP_CONST) return e;
+    ExprRef a = substitute_counter(e->a, name, forall), b = substitute_counter(e->b, name, forall);
+    if (a == e->a && b == e->b) return e;
+    if (e->op == KZ_EXPR_OP_NOT) return pool().unary(KZ_EXPR_OP_NOT, a);
+    if (e->op == KZ_EXPR_OP_AND || e->op == KZ_EXPR_OP_OR) return pool().binary(e->op, a, b);
+    return pool().make(e->op, e->ref, e->value, e->name, a, b);
+  }
+
+  // Form (b) for the counter `var` of loop `lc`: one reset to 0 at the top level of the loop's
+  // body, increments by one only inside one directly nested loop with an exact trip count and no
+  // exit, and no other definition inside the loop.  Then `var == 0` after the inner loop means
+  // that the increment's guard held for no iteration: forall i < N: not guard(i).  Locals the
+  // guard reads must be the inner loop's induction variable or cursors: a pointer set once before
+  // the inner loop and advanced by one element, unconditionally, in every iteration.
+  ExprRef counter_forall(LoopCtx* lc, const VarDecl* var, size_t* inner_out, std::string* why) {
+    const size_t L = lc->index;
+    if (locals_[var].addr_taken) {
+      *why = "its address is taken";
+      return nullptr;
+    }
+    const LocalEvent* reset = nullptr;
+    std::vector<const LocalEvent*> incs;
+    for (const LocalEvent& ev : local_events_) {
+      if (ev.var != var || std::find(ev.loops.begin(), ev.loops.end(), L) == ev.loops.end()) continue;
+      if (ev.kind == LocalEvent::Reset0 && ev.loops.back() == L && ev.guard_depth == lc->body_guard_base && reset == nullptr) {
+        reset = &ev;
+        continue;
+      }
+      if (ev.kind == LocalEvent::Inc1 && ev.loops.size() >= 2 && ev.loops[ev.loops.size() - 2] == L) {
+        incs.push_back(&ev);
+        continue;
+      }
+      *why = "it is defined at " + ev.pos.str() + " otherwise than by one reset to 0 and increments in one inner loop";
+      return nullptr;
+    }
+    if (reset == nullptr) {
+      *why = "no unconditional reset to 0 at the top of the loop body";
+      return nullptr;
+    }
+    if (incs.empty()) {
+      *why = "no increment";
+      return nullptr;
+    }
+    const size_t L2 = incs.front()->loops.back();
+    for (const LocalEvent* ev : incs)
+      if (ev->loops.back() != L2) {
+        *why = "it is incremented in more than one inner loop";
+        return nullptr;
+      }
+    const LoopFact& inner = m_.loops[L2];
+    if (!(inner.kind == KZ_LOOP_KIND_CONST_TRIP && inner.trip_status == KZ_TRIP_STATUS_EXACT && inner.n_exits == 0)) {
+      *why = "the inner loop at " + inner.pos.str() + " has no exact constant trip count";
+      return nullptr;
+    }
+    if (inner.pos < reset->pos) {
+      *why = "the reset comes after the inner loop";
+      return nullptr;
+    }
+    auto it = inner_ctx_.find(L2);
+    if (it == inner_ctx_.end()) {
+      *why = "the inner loop was not recorded";
+      return nullptr;
+    }
+    const InnerInfo& info = it->second;
+    std::vector<ExprRef> phis;
+    for (const LocalEvent* ev : incs) phis.push_back(ev->guard_inner != nullptr ? ev->guard_inner : pool().constant(1));
+    ExprRef phi = pool().conj(KZ_EXPR_OP_OR, phis);
+    // the locals of the guard: the induction variable, cursors
+    std::set<std::string> names;
+    collect_locals(phi, &names);
+    std::vector<ExprRef> cursors;
+    for (const std::string& n : names) {
+      if (info.induction != nullptr && n == info.induction->getNameAsString()) continue;
+      const VarDecl* p = local_by_name(lc, n);
+      ExprRef cur = p != nullptr ? cursor_of(lc, L2, info, p) : nullptr;
+      if (cur == nullptr) {
+        *why = "the increment's guard reads the local " + n + ", which is neither the induction variable nor a cursor";
+        return nullptr;
+      }
+      cursors.push_back(cur);
+    }
+    const std::string iv = info.induction != nullptr ? info.induction->getNameAsString() : std::string("i");
+    *inner_out = L2;
+    return pool().make(KZ_EXPR_OP_FORALL, 0, inner.trip, iv, pool().unary(KZ_EXPR_OP_NOT, phi), pool().list(KZ_EXPR_OP_SEQ, cursors));
+  }
+
+  // A cursor of inner loop L2 (inside loop lc): one plain assignment `p = base` at the top level
+  // of lc's body before L2, one unconditional `++p` (or `p++`, `p += 1`) at the top level of L2's
+  // body, nothing else inside lc.
+  ExprRef cursor_of(LoopCtx* lc, size_t L2, const struct InnerInfo& info, const VarDecl* p) {
+    const size_t L = lc->index;
+    if (!p->getType()->isPointerType() || locals_[p].addr_taken) return nullptr;
+    const LocalEvent* set = nullptr;
+    const LocalEvent* inc = nullptr;
+    for (const LocalEvent& ev : local_events_) {
+      if (ev.var != p || std::find(ev.loops.begin(), ev.loops.end(), L) == ev.loops.end()) continue;
+      if (ev.kind == LocalEvent::Other && ev.rhs != nullptr && ev.loops.back() == L && ev.guard_depth == lc->body_guard_base && set == nullptr) {
+        set = &ev;
+        continue;
+      }
+      if (ev.kind == LocalEvent::Inc1 && ev.loops.back() == L2 && ev.guard_depth == info.body_guard_base && inc == nullptr) {
+        inc = &ev;
+        continue;
+      }
+      return nullptr;
+    }
+    if (set == nullptr || inc == nullptr || m_.loops[L2].pos < set->pos) return nullptr;
+    int64_t len = 0;
+    const Expr* base = set->rhs->IgnoreParenImpCasts();
+    if (const auto* cat = ctx_.getAsConstantArrayType(base->getType())) len = static_cast<int64_t>(cat->getSize().getZExtValue());
+    return pool().make(KZ_EXPR_OP_CURSOR, 0, len, p->getNameAsString(), to_expr(base), nullptr);
   }
 
   ExprRef build_budget(LoopCtx* lc) {
@@ -546,6 +942,7 @@ class FnWalker {
       bool tested = false;
       for (ExprRef x : lc->exits) tested |= expr_mentions_local(x, v->getNameAsString());
       if (!tested) continue;
+      lc->budget_var = v;
       const LocalInfo& li = locals_[v];
       const Expr* init = nullptr;
       int outside = 0;
@@ -586,6 +983,7 @@ class FnWalker {
   }
 
   // A loop that reads NULL-terminated table elements: `V = Table[i]; if (V == NULL) break;`.
+  // Called before the body is read; sets lc->walk_found, lc->walk_var and lc->walk.
   bool detect_table_walk(LoopCtx* lc, const Stmt* body) {
     const auto* comp = body != nullptr ? dyn_cast<CompoundStmt>(body) : nullptr;
     if (comp == nullptr) return false;
@@ -639,9 +1037,9 @@ class FnWalker {
         w.root_object = tu_.object_key(root);
         w.fields = fields;
         w.text = tu_.source_text(as->getBase()->getSourceRange());
-        m_.walks.push_back(w);
-        m_.loops[lc->index].table = w.text;
-        m_.loops[lc->index].table_root = w.root_object;
+        lc->walk = w;
+        lc->walk_found = true;
+        lc->walk_var = tested_var;
         return true;
       }
     }
@@ -650,6 +1048,7 @@ class FnWalker {
 
   void leave_loop(LoopCtx* lc, const Stmt* body) {
     end_loop(lc, body);
+    inner_ctx_[lc->index] = InnerInfo{lc->induction, lc->body_guard_base};
     breakables_.pop_back();
     // fold the inner loop's findings into the outer loops
     LoopCtx* outer = loops_.size() >= 2 ? loops_[loops_.size() - 2].get() : nullptr;
@@ -671,14 +1070,18 @@ class FnWalker {
 
   void visit_while(const WhileStmt* s) {
     LoopCtx* lc = begin_loop(s, s->getCond(), false, true);
+    detect_table_walk(lc, s->getBody());
     visit(s->getCond());
     guards_.push_back({s->getCond(), true});
+    lc->body_guard_base = guards_.size();
     visit(s->getBody());
     guards_.pop_back();
     leave_loop(lc, s->getBody());
   }
   void visit_do(const DoStmt* s) {
     LoopCtx* lc = begin_loop(s, s->getCond(), false, true);
+    detect_table_walk(lc, s->getBody());
+    lc->body_guard_base = guards_.size();
     visit(s->getBody());
     visit(s->getCond());
     leave_loop(lc, s->getBody());
@@ -687,8 +1090,10 @@ class FnWalker {
     visit(s->getInit());
     LoopCtx* lc = begin_loop(s, s->getCond(), true, true);
     recognise_counted(lc, s);
+    detect_table_walk(lc, s->getBody());
     if (s->getCond() != nullptr) visit(s->getCond());
     if (s->getCond() != nullptr) guards_.push_back({s->getCond(), true});
+    lc->body_guard_base = guards_.size();
     visit(s->getBody());
     // The step of a counted loop modifies its induction variable by definition; only a
     // modification in the body (or in an inner loop) makes the trip count unknown.
@@ -766,25 +1171,27 @@ class FnWalker {
     lc->bound_text = tu_.source_text(bound_expr->getSourceRange());
   }
 
-  void note_exit(LoopCtx* lc, bool via_return_or_goto) {
-    (void)via_return_or_goto;
+  void note_exit(LoopCtx* lc, const Stmt* at) {
     ++lc->n_exits;
     lc->exits.push_back(guard_from(lc->guard_base));
+    // what decides this exit: the innermost guard inside the loop (none: an unconditional exit)
+    lc->triggers.push_back(guards_.size() > lc->body_guard_base ? cond_expr(guards_.back().cond, guards_.back().polarity) : nullptr);
+    lc->exit_pos.push_back(tu_.pos_of(at->getBeginLoc()));
   }
-  void visit_break(const BreakStmt*) {
+  void visit_break(const BreakStmt* s) {
     if (breakables_.empty() || breakables_.back() == nullptr) return;  // leaves a switch, not a loop
-    note_exit(breakables_.back(), false);
+    note_exit(breakables_.back(), s);
   }
   void visit_return(const ReturnStmt* s) {
-    for (auto& lc : loops_) note_exit(lc.get(), true);
+    for (auto& lc : loops_) note_exit(lc.get(), s);
     if (const Expr* rv = s->getRetValue()) {
       visit(rv);
       if (is_fp_type(fd_->getReturnType())) add_flow_to("R:" + fkey_, rv);
       check_address_use(rv, "returned");
     }
   }
-  void visit_goto(const Stmt*) {
-    for (auto& lc : loops_) note_exit(lc.get(), true);
+  void visit_goto(const Stmt* s) {
+    for (auto& lc : loops_) note_exit(lc.get(), s);
   }
 
   // ---- fp-flow helpers ----
@@ -1122,8 +1529,30 @@ class FnWalker {
         ++lc->lock_calls;
       }
     }
+    if (is_delay && !loops_.empty()) loops_.back()->delay_direct = true;
     if (is_lock) ++lock_depth_;
     if (is_unlock && lock_depth_ > 0) --lock_depth_;
+
+    // table walks around the call: its guards and the arguments that read the element, in
+    // element form, for the per-iteration evaluation in finalize
+    for (auto& lcp : loops_) {
+      LoopCtx* lc = lcp.get();
+      if (!lc->walk_found || lc->walk_var == nullptr) continue;
+      WalkUse wu;
+      wu.loop_key = m_.loops[lc->index].key;
+      wu.call_key = ckey;
+      elem_var_ = lc->walk_var;
+      wu.guard = guard_from(lc->body_guard_base);
+      if (callee == nullptr) {
+        const Expr* cexpr = ce->getCallee()->IgnoreParenImpCasts();
+        if (const auto* um = dyn_cast<UnaryOperator>(cexpr); um != nullptr && um->getOpcode() == UO_Deref) cexpr = um->getSubExpr()->IgnoreParenImpCasts();
+        if (const auto* cme = dyn_cast<MemberExpr>(cexpr); cme != nullptr && is_elem_member(cme)) wu.callee_field = cme->getMemberDecl()->getNameAsString();
+      }
+      for (unsigned i = 0; i < ce->getNumArgs(); ++i)
+        if (mentions_var(ce->getArg(i), lc->walk_var)) wu.args.push_back({i, to_expr(ce->getArg(i))});
+      elem_var_ = nullptr;
+      m_.walk_uses.push_back(wu);
+    }
 
     // derives rows for the arguments with a role
     for (unsigned i = 0; i < cf.args.size(); ++i) {
@@ -1169,6 +1598,7 @@ class FnWalker {
       for (unsigned i = 0; i < ce->getNumArgs() && i < callee->getNumParams(); ++i) {
         if (!callee->getParamDecl(i)->getType().getCanonicalType()->isFunctionPointerType()) continue;
         nodes = fp_sources(ce->getArg(i));
+        m_.spawn_entry_arg[ckey] = i;
         break;
       }
       m_.spawn_entry_nodes[ckey] = nodes;
@@ -1285,6 +1715,27 @@ class FnWalker {
     } else if (core->getType()->isArrayType()) {
       for (size_t t : tu_.owners_contained_in(core->getType())) contained.insert(t);
     }
+    // FUNC_WRITES: the region the destination denotes (a pointer to another scalar type writes
+    // the object whose address was taken elsewhere: that use is an OUTARG row of its own)
+    if (untyped) {
+      note_write(KZ_FWRITE_KIND_UNTYPED, "", "", ce);
+    } else if (const auto* uo = dyn_cast<UnaryOperator>(core); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
+      const Expr* lv = uo->getSubExpr()->IgnoreParens();
+      while (const auto* as = dyn_cast<ArraySubscriptExpr>(lv)) lv = as->getBase()->IgnoreParenImpCasts();
+      if (const auto* me = dyn_cast<MemberExpr>(lv)) {
+        if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) note_write(KZ_FWRITE_KIND_FIELD, field_type_name(fl), fl->getNameAsString(), ce);
+      } else if (const auto* gd = dyn_cast<DeclRefExpr>(lv)) {
+        note_global_write(gd, ce);
+      }
+      note_record_write(uo->getSubExpr()->getType(), ce);
+    } else if (core->getType()->isPointerType() && tu_.record_of(core->getType()->getPointeeType()) != nullptr) {
+      note_record_write(core->getType()->getPointeeType(), ce);
+    } else if (const auto* me3 = dyn_cast<MemberExpr>(core)) {
+      if (const auto* fl = dyn_cast<FieldDecl>(me3->getMemberDecl())) note_write(KZ_FWRITE_KIND_FIELD, field_type_name(fl), fl->getNameAsString(), ce);
+      note_record_write(me3->getType(), ce);
+    } else if (const auto* gd2 = dyn_cast<DeclRefExpr>(core)) {
+      note_global_write(gd2, ce);
+    }
     // a conversion of a typed region to an untyped pointer at this call is the summary itself,
     // not a cast hit: handled by is_data_arg in visit_cast.
     for (size_t t : contained) {
@@ -1331,6 +1782,24 @@ class FnWalker {
     }
   }
 
+  // A definition of a local variable inside a loop (counter and cursor patterns).
+  void note_local_event(const VarDecl* vd, LocalEvent::Kind kind, const Expr* rhs, SourceLocation loc) {
+    if (loops_.empty() || vd == nullptr || vd->hasGlobalStorage()) return;
+    LocalEvent ev;
+    ev.kind = kind;
+    ev.var = vd;
+    for (const auto& lc : loops_) ev.loops.push_back(lc->index);
+    ev.guard_depth = guards_.size();
+    ev.guard_inner = guard_from(loops_.back()->body_guard_base);
+    ev.rhs = rhs;
+    ev.pos = tu_.pos_of(loc);
+    local_events_.push_back(ev);
+  }
+  bool is_const_value(const Expr* e, int64_t v) {
+    int64_t c = 0;
+    return e != nullptr && tu_.eval_int(e->IgnoreParenCasts(), &c) && c == v;
+  }
+
   void visit_binary(const BinaryOperator* bo) {
     const BinaryOperatorKind k = bo->getOpcode();
     if (k == BO_LAnd || k == BO_LOr) {
@@ -1342,6 +1811,14 @@ class FnWalker {
     }
     if (bo->isAssignmentOp()) {
       const Expr* lhs = bo->getLHS();
+      if (const auto* ldre = dyn_cast<DeclRefExpr>(lhs->IgnoreParenImpCasts())) {
+        if (const auto* lvd = dyn_cast<VarDecl>(ldre->getDecl())) {
+          if (k == BO_Assign) note_local_event(lvd, is_const_value(bo->getRHS(), 0) ? LocalEvent::Reset0 : LocalEvent::Other, bo->getRHS(), bo->getOperatorLoc());
+          else if (k == BO_AddAssign && is_const_value(bo->getRHS(), 1)) note_local_event(lvd, LocalEvent::Inc1, nullptr, bo->getOperatorLoc());
+          else note_local_event(lvd, LocalEvent::Other, nullptr, bo->getOperatorLoc());
+        }
+        note_global_write(ldre, bo);
+      }
       // loop bookkeeping: decrements are budget candidates; everything else modifies the variable
       if (!loops_.empty()) {
         const auto* dre = dyn_cast<DeclRefExpr>(lhs->IgnoreParenImpCasts());
@@ -1355,6 +1832,7 @@ class FnWalker {
       }
       handle_assign_flow(bo);
       if (QualType lt = lhs->getType(); lt->isRecordType() || lt->isUnionType()) {
+        note_record_write(lt, bo);
         for (size_t t : tu_.owners_contained_in(lt)) {
           ValueInfo v;
           v.kind = KZ_ARG_KIND_TOP;
@@ -1403,6 +1881,7 @@ class FnWalker {
     if (base == nullptr) return;
     if (!base->getType()->isPointerType()) return;
     if (!is_untyped_pointee(base->getType()->getPointeeType())) return;
+    note_write(KZ_FWRITE_KIND_UNTYPED, "", "", at);
     Model::UntypedWrite u;
     u.pos = tu_.pos_of(at->getBeginLoc());
     u.func_key = fkey_;
@@ -1415,6 +1894,11 @@ class FnWalker {
   void visit_unary(const UnaryOperator* uo) {
     if (uo->isIncrementDecrementOp()) {
       const Expr* sub = uo->getSubExpr();
+      if (const auto* sdre = dyn_cast<DeclRefExpr>(sub->IgnoreParenImpCasts())) {
+        if (const auto* svd = dyn_cast<VarDecl>(sdre->getDecl()))
+          note_local_event(svd, uo->isIncrementOp() ? LocalEvent::Inc1 : LocalEvent::Other, nullptr, uo->getOperatorLoc());
+        note_global_write(sdre, uo);
+      }
       if (!loops_.empty()) {
         const auto* dre = dyn_cast<DeclRefExpr>(sub->IgnoreParenImpCasts());
         const VarDecl* vd = dre != nullptr ? dyn_cast<VarDecl>(dre->getDecl()) : nullptr;
@@ -1425,6 +1909,11 @@ class FnWalker {
           note_mod(sub);
         }
       }
+    } else if (uo->getOpcode() == UO_AddrOf) {
+      // the address of a global object leaves the expression: whoever receives it may write it
+      if (const auto* adre = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParens()))
+        if (const auto* avd = dyn_cast<VarDecl>(adre->getDecl()); avd != nullptr && avd->hasGlobalStorage())
+          note_write(KZ_FWRITE_KIND_OUTARG, "<global>", avd->getNameAsString(), uo);
     }
     visit(uo->getSubExpr());
   }
@@ -1502,6 +1991,12 @@ class FnWalker {
             if (vd->isLocalVarDecl() && !vd->isStaticLocal()) base_flags |= KZ_WRITER_FLAG_BASE_LOCAL;
       }
       const std::string key = tu_.source_text(me->getBase()->getSourceRange(), 60);
+      if (use.kind == LvalueUse::Assign || use.kind == LvalueUse::IncDec) {
+        note_write(KZ_FWRITE_KIND_FIELD, field_type_name(fl), fl->getNameAsString(), use.stmt);
+        if (use.kind == LvalueUse::Assign && (fl->getType()->isRecordType() || fl->getType()->isArrayType())) note_record_write(fl->getType(), use.stmt);
+      } else if (use.kind == LvalueUse::AddrOf) {
+        note_write(KZ_FWRITE_KIND_OUTARG, field_type_name(fl), fl->getNameAsString(), use.stmt);
+      }
       for (size_t t : tgts) {
         switch (use.kind) {
           case LvalueUse::Assign: {
@@ -1548,16 +2043,45 @@ class FnWalker {
         }
         for (size_t t : exposed) add_atype(KZ_ATYPE_KIND_UNION, t, use.stmt, "a store through a member of a union that also holds the type");
       }
-      // shared loads of loops
-      if (use.kind == LvalueUse::Read && !loops_.empty()) {
-        for (auto& lc : loops_) {
-          ++lc->shared_loads;
-          if (lock_depth_ > 0) ++lc->shared_loads_locked;
-          if (me->getType().isVolatileQualified()) lc->volatile_load = true;
-        }
-      }
+      // shared loads of loops: a read of the field's value (an lvalue-to-rvalue conversion);
+      // `x.f` as the base of another access, or an array that decays, reads nothing
+      if (use.kind == LvalueUse::Read && !loops_.empty() && is_rvalue_load(me)) note_shared_load(me->getType());
     }
     visit(me->getBase());
+  }
+
+  // Is the lvalue `e` read, i.e. converted to an rvalue (through parentheses)?
+  bool is_rvalue_load(const Expr* e) {
+    const Stmt* cur = e;
+    for (;;) {
+      const Stmt* p = parent_stmt(cur);
+      if (p == nullptr) return false;
+      if (isa<ParenExpr>(p)) {
+        cur = p;
+        continue;
+      }
+      const auto* ic = dyn_cast<ImplicitCastExpr>(p);
+      return ic != nullptr && ic->getCastKind() == CK_LValueToRValue;
+    }
+  }
+  // A read that is one atomic access: an _Atomic object, or a volatile object of the C type
+  // sig_atomic_t (C11 7.14), whose reads are single accesses.
+  static bool is_atomic_read_type(QualType t) {
+    if (t->isAtomicType()) return true;
+    if (!t.isVolatileQualified()) return false;
+    for (QualType u = t;;) {
+      const auto* tt = u->getAs<TypedefType>();
+      if (tt == nullptr) return false;
+      if (tt->getDecl()->getName() == "sig_atomic_t") return true;
+      u = tt->getDecl()->getUnderlyingType();
+    }
+  }
+  void note_shared_load(QualType t) {
+    for (auto& lc : loops_) {
+      ++lc->shared_loads;
+      if (lock_depth_ > 0) ++lc->shared_loads_locked;
+      if (is_atomic_read_type(t)) lc->volatile_load = true;
+    }
   }
 
   // ---- casts ----
@@ -1616,15 +2140,7 @@ class FnWalker {
       return;
     }
     if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl())) {
-      if (vd->hasGlobalStorage() && !loops_.empty()) {
-        const LvalueUse use = classify_lvalue_use(dre);
-        if (use.kind == LvalueUse::Read)
-          for (auto& lc : loops_) {
-            ++lc->shared_loads;
-            if (lock_depth_ > 0) ++lc->shared_loads_locked;
-            if (vd->getType().isVolatileQualified()) lc->volatile_load = true;
-          }
-      }
+      if (vd->hasGlobalStorage() && !loops_.empty() && is_rvalue_load(dre)) note_shared_load(dre->getType());
     }
   }
 
@@ -1744,6 +2260,10 @@ class FnWalker {
     for (const Decl* d : ds->decls()) {
       const auto* vd = dyn_cast<VarDecl>(d);
       if (vd == nullptr) continue;
+      if (!vd->isStaticLocal()) {
+        const Expr* init0 = vd->getInit();
+        note_local_event(vd, init0 != nullptr && is_const_value(init0, 0) ? LocalEvent::Reset0 : LocalEvent::Other, init0, vd->getLocation());
+      }
       if (const Expr* init = vd->getInit()) {
         if (is_fp_type(vd->getType())) {
           const std::string dst = var_node(vd);
@@ -1801,8 +2321,11 @@ class FnWalker {
   std::vector<Guard> guards_;
   std::vector<std::unique_ptr<LoopCtx>> loops_;
   std::vector<LoopCtx*> breakables_;
-  std::map<std::pair<const Expr*, bool>, ExprRef> cond_cache_;
+  std::map<std::tuple<const Expr*, bool, const VarDecl*>, ExprRef> cond_cache_;  // lookup only
   int lock_depth_ = 0;
+  const VarDecl* elem_var_ = nullptr;  // set while an expression is built in element form
+  std::vector<LocalEvent> local_events_;
+  std::map<size_t, InnerInfo> inner_ctx_;  // Model::loops index -> what the finished loop left
 };
 
 // ---- static initializers: function values stored in tables -------------------------------------------

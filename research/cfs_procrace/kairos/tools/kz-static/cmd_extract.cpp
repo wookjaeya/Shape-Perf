@@ -66,6 +66,8 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
   os << "  indirect calls             " << R.indirect_total << " (resolved " << R.indirect_resolved << ", unresolved " << R.indirect_unresolved << ")\n";
   os << "  spawn calls                " << R.spawn_total << " (entry resolved " << R.spawn_resolved << ")\n";
   os << "  loops                      " << m.loops.size() << " (table walks resolved " << R.walks_resolved << ", failed " << R.walks_failed << ")\n";
+  os << "  certificate-view rules     unroll " << R.loops_unroll << ", await " << R.loops_await << ", star-closed " << R.loops_star << "\n";
+  os << "  spawn parameters           " << m.spawn_params.size() << ", unrolled iteration rows " << m.iters.size() << "\n";
   os << "  out-pointer summaries      store-only " << R.outptr_store_only << ", escaping " << R.outptr_escapes << ", unsummarized " << R.outptr_unsummarized << "\n";
   os << "  untyped write sites        " << R.atype_untyped_sites_total << " in the program, " << R.atype_untyped_sites_relevant << " of them count for a target\n";
   const kz::EnumDesc* status = kz::find_enum("KZ_LOC_STATUS");
@@ -150,6 +152,11 @@ int cmd_extract(int argc, char** argv) {
       units.push_back(u);
     }
     so.notes.push_back({"extract.units_from", "command line: " + flags});
+  }
+  // recorded paths are made relative to the root, which is compared with absolute paths
+  if (!root.empty()) {
+    root = fs::absolute(root).lexically_normal().generic_string();
+    while (root.size() > 1 && root.back() == '/') root.pop_back();
   }
   ro.root = root;
   so.root = root;

@@ -1,6 +1,7 @@
 # SimRacer (ISSTA 2013) 분석 — Kairos 비교용
 
 - 작성일: 2026-10-15 (UTC 08:28–08:44, 경로 시도와 읽기 시각).
+- 보완: 2026-10-16 (UTC 00:09–00:30). (1) 1차 출처 경로를 다시 시도했다(§1.1 경로 26–38). ISSTA'13 전문은 여전히 열리지 않았고, STVR의 둘째 취득 경로도 찾지 못했다. (2) 같은 저자의 2013년 동시대 서술 Sim-O/C(Intel Technology Journal 17(2))와 그 앞선 SimTester(VEE'12)를 `[2차]` 출처로 추가했다. Sim-O/C는 여러 user process 사이의 시험을 "system call" 쌍의 순서 바꾸기로 서술한다(ITJ p.188). (3) 그 결과 이 문서 스스로 [U]로 둔 "SimRacer 자체의 메모리 SR 관측"과 Q1·Q2 라벨이 어긋나 있던 것을 고쳤다. C1·C3·C5·R2의 Q1·Q2를 "분석"에서 "불명"으로 바꿨다(§3.4, 변경 이유는 §1.3 항목 8–10). Q3·Q5·Q6은 조건부 "분석"으로 남겼다. (4) R2 사건 대응표에 core task 생성 행(⓪)을 넣었다. (5) 가설 H-SM-1과 §5.1 표를 SimRacer 자체에 맞게 고쳤다. (6) 환경을 다시 측정했다(§4.1). 이번에도 SimRacer를 실행하지 않았다.
 - 대상: T. Yu, W. Srisa-an, G. Rothermel, *SimRacer: an automated framework to support testing for process-level races*, ISSTA 2013, pp. 167–177. DOI 10.1145/2483760.2483771. ISSTA 프로그램 쪽은 제목을 "SimRacer: A Scalable and Automated Framework to Support Testing for Process-Level Races"로 적는다(§1.1 경로 7).
 - 범위: 로드맵 §10 (M6)의 SimRacer 항목. 여섯 분석 질문(§10.2)을 사례 C1, C2, C3, C5, R2에 적용한다. 로드맵 §12 작업 6(`process_race_method_matrix.md`)의 입력으로 쓴다.
 - 이 문서의 성격: **분석 문서**다. SimRacer를 실행하지 않았다(실행할 구현이 없다). 어느 사례에 대해서도 "탐지하지 못한다"는 결과를 담지 않는다.
@@ -32,19 +33,22 @@
 쪽 번호 표기:
 - **STVR p.N**: Yu, Srisa-an, Rothermel, STVR 27(4–5), e1634(2017)의 논문 쪽 "N of 26". PDF 쪽과 같다.
 - **SimEvo p.N, DESCRY p.N, RRF p.N**: 각 PDF 파일의 쪽(SimEvo 12쪽, DESCRY 11쪽, RRF 11쪽). 인쇄 쪽과 다를 수 있다.
+- **ITJ p.N** (2026-10-16 추가): Intel Technology Journal 17(2), 2013의 인쇄 쪽. Sim-O/C 논문은 178–197쪽이다. 쪽 번호는 각 쪽 꼬리말에서 읽었다. `plan/methods/SIMEXPLORER.md`의 표기와 같다.
+- **VEE'12 p.N** (2026-10-16 추가): SimTester 논문의 인쇄 쪽(51–61). PDF 쪽 + 50이다. `SIMEXPLORER.md`의 표기와 같다.
 
 ---
 
 ## 0. 한눈에 보기
 
-1. **SimRacer 논문(ISSTA'13) 전문은 오늘도 열리지 않았다.** 읽은 것은 초록과 서지뿐이다 `[초록]`. 저자 공개본, 기관 저장소, arXiv, NSF PAR, Internet Archive에는 사본이 없었고, ACM·ResearchGate·Wiley는 Cloudflare가 403으로 막았다. 학위논문(Yu 2014, SimExplorer) PDF도 Cloudflare 도전 페이지에서 멈췄다(§1.1). 도전 페이지를 우회하려고 하지 않았다. `[미도달]`
+1. **SimRacer 논문(ISSTA'13) 전문은 오늘도 열리지 않았다.** 읽은 것은 초록과 서지뿐이다 `[초록]`. 저자 공개본, 기관 저장소, arXiv, NSF PAR, Internet Archive에는 사본이 없었고, ACM·ResearchGate·Wiley는 Cloudflare가 403으로 막았다. 학위논문(Yu 2014, SimExplorer) PDF도 Cloudflare 도전 페이지에서 멈췄다(§1.1). 도전 페이지를 우회하려고 하지 않았다. `[미도달]` 2026-10-16에 14개 경로를 더 시도했으나 결과는 같다(§1.1 경로 26–39).
 2. **같은 저자들이 SimRacer의 "revised and expanded version"이라고 밝힌 STVR 2017 논문(SIMEXPLORER, 26쪽)의 전문을 읽었다** `[전문]`. CPS-VO 아카이브가 올린 파일이다(페이지에 Creative Commons 2.5 표기). 이 문서의 도구 설명(관측 사건, happens-before 규칙, Phase 1·2 알고리즘, 구현, 한계)은 대부분 이 논문에 근거한다. 이 서술이 ISSTA'13의 SimRacer에 그대로 해당하는지는 §2.3에서 항목별로 구분했고, 자료로 정해지지 않는 항목은 "불명"으로 두었다.
 3. **이전 기록의 조건부 서술 하나가 STVR 전문으로 더는 유지되지 않는다.** `baselines/yu-group.md` §4·§7.2와 `baselines/availability.md` §1·§3은 "추론한 system call 모델 아래에서" C1·C3·R2의 의존성이 "shared-resource 사건이 아니다"라고 적었다(SimRacer 자체 모델은 미열람이라는 단서가 붙어 있었다). STVR 전문은 shared memory와 hardware components를 shared resource(SR)로 열거하고(p.8) 전역 변수의 load/store 사건을 예로 든다(p.12). 그 모델은 system call만 보는 모델보다 넓다. 그래서 이 문서는 "syscall 모델이라 사건이 아니다"라는 서술을 쓰지 않는다. 다만 SimRacer 자체가 메모리를 관측했는지는 자료로 정해지지 않는다(§2.3).
 4. **역할은 탐지(testing-based detection)다.** Phase 1이 한 번의 실행 trace에서 잠재 race 쌍을 계산하고, Phase 2가 쌍의 순서를 실제 실행에서 뒤집어 real race를 확인한다. 재현 도구(RRF, DESCRY, SysPro)도 회귀 도구(SimEvo)도 아니다.
 5. **필요한 순서와 허용 오류는 입력이 아니다.** 논문은 race를 "의도한 순서와 다른 순서로 접근할 수 있는 것"으로 정의하지만(p.3), 의도한 순서를 받는 인터페이스는 서술에 없다. 순서는 syscall 의미와 signal·interrupt 활성 상태에서 추론한 happens-before로만 들어간다(p.9). 실패 판정은 출력 기반 oracle이다(p.17–18).
-6. **다섯 사례의 의존성 쌍은, SR로 관측된다면 이 설계의 후보 쌍 모양(같은 SR, 한쪽 이상 쓰기, happens-before 없음)과 맞는다 (분석, 미실행).** C1·C3·C5·R2의 공개와 사용은 사용자 공간 메모리의 쓰기와 읽기다. 설계는 메모리 접근을 Simics 중단점으로 잡고 SR 지정 인터페이스가 있다고 하지만, cFS 내부 상태가 SR이 되는 경로와 입도는 서술이 없다. 이것은 "탐지 실패"가 아니라 입력 정의가 정해지지 않은 상태다. 한 process 안의 task 쌍을 도구의 입력 단위로 줄 수 있는지도 서술이 없다.
+6. **다섯 사례의 의존성 쌍은, SR로 관측된다면 이 설계의 후보 쌍 모양(같은 SR, 한쪽 이상 쓰기, happens-before 없음)과 맞는다 (분석, 미실행).** C1·C3·C5·R2의 공개와 사용은 사용자 공간 메모리의 쓰기와 읽기다. STVR의 SIMEXPLORER는 메모리 접근을 Simics 중단점으로 잡고 SR 지정 인터페이스가 있다고 하지만, cFS 내부 상태가 SR이 되는 경로와 입도는 서술이 없다. 이것은 "탐지 실패"가 아니라 입력 정의가 정해지지 않은 상태다. 한 process 안의 task 쌍을 도구의 입력 단위로 줄 수 있는지도 서술이 없다.
+   **2026-10-16 보정.** 위 메모리 관측은 SIMEXPLORER의 서술이다. SimRacer 자체가 process 사이의 메모리 접근을 SR로 관측했는지는 읽은 자료로 정해지지 않는다. 같은 저자의 2013년 서술(Sim-O/C, ITJ p.188 `[2차]`)은 여러 user process 사이의 시험을 "identifies system calls that can potentially race with each other"로 적고, 메모리 중단점은 응용과 ISR 사이의 예(ITJ p.185–187, VEE'12 p.54 `[2차]`)에서만 보인다. 그래서 SimRacer 행의 C1·C3·C5·R2 Q1(관측 사건)과 Q2(자원 식별)를 "불명"으로 바꿨다. "SimRacer는 메모리를 관측하지 못한다"고도 쓰지 않는다. Sim-O/C는 SimRacer 논문이 아니고, 메모리 관측을 배제한다는 문장도 없다.
 7. **실행은 불가능하고 오늘 적용되는 상태는 다섯 사례 모두 `NOT_RUN`이다.** 구현을 찾지 못했고, Simics는 이 컨테이너에 없으며, 원 구성(Simics 버전, 시뮬레이션 머신, guest 이미지, 제어용 driver)이 읽은 자료에 없다. `INAPPLICABLE`은 PI 판단이다(§4.3).
-8. **Kairos 가설은 근거가 있는 만큼만 올렸다(§5).** 예측·탐색과 실행 확인은 SimRacer 계열에 이미 있으므로 차별점으로 쓰지 않는다. 메모리 관측 부재도 근거가 반대이므로 가설로 쓰지 않는다.
+8. **Kairos 가설은 근거가 있는 만큼만 올렸다(§5).** 예측·탐색과 실행 확인은 SimRacer 계열에 이미 있으므로 차별점으로 쓰지 않는다. 메모리 관측 부재도 가설로 쓰지 않는다. 확장판(SIMEXPLORER)에는 근거가 반대이고, SimRacer 자체에는 있었는지 없었는지 정해지지 않기 때문이다(항목 6 보정).
 
 ---
 
@@ -82,6 +86,27 @@
 | 24 | Intel Simics 공개 릴리스 페이지 `intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html` | 200. 오늘의 벤더 문서다(§4.1) | 컨텍스트 |
 | 25 | WebSearch (extended 1회, standard 4회) | 위 호스트들의 목록. 새 1차 출처는 CPS-VO 두 파일뿐이다 | — |
 
+**2026-10-16 재시도 (UTC 00:09–00:25).** 같은 방식으로 기록한다. 우회는 하지 않았다.
+
+| # | 경로 | 결과 | 등급·비고 |
+|---|---|---|---|
+| 26 | `dl.acm.org/doi/pdf/10.1145/2483760.2483771` | HTTP 403, Cloudflare 도전 | `[미도달]` ISSTA'13 전문 |
+| 27 | Unpaywall API (ISSTA'13 DOI, STVR DOI) | 200. 두 DOI 모두 `is_oa: false`, `oa_status: closed`, 사본 위치 없음 | 사본 없음 |
+| 28 | OpenAlex (STVR DOI) | 200. `is_oa: false`, `any_repository_has_fulltext: false`, 위치는 `doi.org`뿐 | STVR 둘째 경로 없음 |
+| 29 | Semantic Scholar Graph API (STVR DOI) | 200. `openAccessPdf`가 `doi.org/10.1002/stvr.1634`를 가리키고 "author manuscript" 라이선스를 적는다. 그 주소는 Wiley로 간다. 같은 API의 ISSTA'13 조회는 429(요청 한도) | 서지 |
+| 30 | Crossref (STVR DOI) | 200. 전문 링크는 Wiley(`pdf`, `full-xml`, `am-pdf`, TDM API)뿐이다. 참고문헌 85건 중 SimRacer 항목은 DOI 10.1145/2483760.2483771로 연결된다 | 서지 |
+| 31 | Wiley `onlinelibrary.wiley.com/doi/am-pdf/10.1002/stvr.1634`, Wiley TDM API | am-pdf는 403(`cf-mitigated: challenge`). TDM API는 400(토큰 없음). 토큰을 만들지 않았다 | `[미도달]` STVR 둘째 경로 |
+| 32 | 학위논문 PDF `digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1093&context=computerscidiss` (curl, WebFetch), digitalcommons 검색 `?q=SimRacer` | 모두 403(Cloudflare) | `[미도달]` |
+| 33 | `cse.unl.edu`: `https://…/~witty/CV/witty_CV.pdf`(WebSearch 결과) | https는 인증서 체인 검증 실패(어제와 같다). TLS 검증을 끄지 않았다. `http://…/~witty/CV/witty_CV.pdf`는 404, `http://…/~witty/`는 `witawassrisaan.wordpress.com`으로 넘긴다. 그 블로그 첫 페이지(200)에 SimRacer·ISSTA 2013 문자열이 없다 | `[미도달]` |
+| 34 | Wayback 가용성 API(`archive.org/wayback/available`) | `cse.unl.edu/~tyu/papers/issta13.pdf`, `~grother/papers/issta13.pdf`는 스냅샷 없음. `cse.unl.edu/~tyu/`는 2016-02-04 스냅샷이 있다. 그 스냅샷은 curl로 연결이 끊기거나 403, WebFetch는 "unable to fetch from web.archive.org"였다 | `[미도달]`. 스냅샷 안에 PDF 링크가 있는지 모른다 |
+| 35 | dblp 검색 API, CORE API, `scholar.archive.org`, NSF PAR 검색 `process-level race` | dblp는 봇 확인 페이지, CORE는 429와 500, scholar.archive.org는 302(따라가지 않음). PAR 결과 HTML에 SimRacer·Yu 항목 없음 | 사본 없음 |
+| 36 | NCSU(Rothermel 현 소속) `people.engr.ncsu.edu/gerother/`, 도서관 저장소 저자 검색 | 앞은 프록시 CONNECT 502, 뒤는 200이나 SimRacer·ISSTA 2013 문자열 없음 | 사본 없음 |
+| 37 | GitHub 저장소 검색 `simics race`(32건), 코드 검색 `"RaceController" simics`(0건) | 저장소 32건은 목록·무관 프로젝트다. Sim-O/C의 제어 모듈 이름으로 찾은 코드는 없다 | 구현 없음 |
+| 38 | Intel ITJ 17(2) PDF `intel.com/content/dam/www/public/us/en/documents/research/2013-vol17-iss-2-intel-technology-journal.pdf`, SimTester `cl.cam.ac.uk/research/srg/netos/vee_2012/papers/p51.pdf` | 둘 다 200. ITJ는 16,555,438 B, sha256 `24080f8ec175aecb7e6c93fd0a436dd8532c856375d8b356b772030dc8c1813c`. SimTester는 1,145,000 B, sha256 `206c12cef8dc9f01fe2ae0b2d16dc2d2c719ce60f553fe75aa8627e3022b08cb`. 두 해시는 `SIMEXPLORER.md` 경로 16·17의 값과 같다. Sim-O/C 본문(178–197쪽)과 SimTester의 관측기 부분을 읽었다 | `[2차]` (§1.2) |
+| 39 | WebSearch (extended 1회) | 새로 나온 것은 위 Srisa-an CV 주소뿐이다. 요약문은 ResearchGate가 "No full-text available"이라고 적는다고 했다(열지 못한 페이지의 요약) | — |
+
+STVR 사본(CPS-VO)은 이 작업 공간에서 두 번 받은 파일의 sha256이 같다(어제 WebFetch로 받은 것과 `SIMEXPLORER.md` 경로 14의 클라이언트 문자열 변경 요청). 그러나 같은 호스트의 같은 파일이므로 **독립된 둘째 취득 경로가 아니다.** 쪽 번호 인용의 "단일 취득 경로, 독립 재확인 안 됨" 표시는 그대로다(`process_race_method_matrix.md` A10).
+
 2026-10-08 기록(`baselines/availability.md` A1, `baselines/yu-group.md` D1)은 이 호스트들을 세션의 egress 정책이 막았다고 적었다. 오늘 ACM·Wiley·digitalcommons의 거부는 원 서버의 Cloudflare 도전(`cf-mitigated: challenge`)이다. 같은 호스트의 거부 원인이 날짜에 따라 다르므로 두 기록을 합쳐 읽지 않는다.
 
 ### 1.2 이 문서가 쓰는 출처별 등급
@@ -95,6 +120,8 @@
 | RRF(ISSRE'16) | `[2차]` | SimRacer를 active testing 계열로 서술한 두 곳 |
 | SysPro(arXiv 2601.09616v1) | `[2차]` | SimRacer 인용 두 곳. 설명 문장 한 줄 |
 | SCMiner preprint p.11 | `[2차]` | "interleavings of system calls" 한 문장 |
+| Sim-O/C, Intel Technology Journal 17(2), 2013 (같은 세 저자, 2026-10-16 추가) | `[2차]`. 본문 178–197쪽을 읽었다. SimRacer라는 이름은 본문에 없다(검색 0건). SimRacer와 같은 해, 같은 Simics 기반 틀의 서술이다. 같은 도구의 서술이라는 판단은 [I]다 | 여러 user process 사이의 시험 방식(p.188), 관측기가 process와 thread를 구별하는 방법(p.185), 다루는 fault 3종(p.183) |
+| SimTester, VEE'12 (같은 세 저자, 2026-10-16 추가) | `[2차]`(부분). 관측기 부분만 읽었다 | STVR p.8이 메모리 관측의 선행 연구로 [16](SimRacer)과 함께 인용하는 [33]이다. 메모리 중단점은 응용과 ISR 사이의 공유 변수에 건다(p.54) |
 | Yu 2014 학위논문 | 초록 `[초록]`. 본문 `[미도달]` | 범위 확인뿐 |
 | 사례 쪽 사실 | `[기록]` | `cases/ledger.md` §1a, §1b, §2; `baselines/availability.md` §4.2 |
 | Intel Simics 공개 페이지 | 벤더 문서(오늘) | 가용성 컨텍스트(§4.1). SimRacer가 쓴 제품·버전과의 동일성은 정해지지 않는다 |
@@ -110,6 +137,9 @@
 | 5 | `yu-group.md` R3 "Simics version, simulated machine, guest OS/kernel: not stated" | 일부 해소되었다. STVR p.18은 단일 코어 x86 Linux 2.6.15와 3.5.0 guest를 적는다. Simics 버전, 머신 모델, 스크립트는 여전히 없다 |
 | 6 | SimRacer와 SIMEXPLORER를 별개 도구로 다룬 표 | 저자가 같은 계보로 밝힌다(STVR p.2 각주 †). 로드맵 §10.1과 `availability.md` 표에서 두 행은 같은 계보의 두 판본이다 |
 | 7 | 제목 표기 | 출판본 PDF 제목은 "An automated framework to support testing for process-level race conditions"이고 저자 CV는 "SIMEXPLORER: An Automated Framework to Support Testing for System-Level Race Conditions"로 적는다. 같은 논문(DOI 10.1002/stvr.1634)에 대한 표기 차이다 |
+| 8 | (2026-10-16) 이 문서 2026-10-15판의 Q1·Q2 라벨 | 2026-10-15판은 §2.3에서 "메모리 관측이 SimRacer에 있었는지 [U]"라고 적으면서, C1·C3·C5·R2의 Q1(관측 사건)을 "분석"(SR로 지정되면 메모리 중단점으로 사건이 된다)으로 두었다. 그 "분석"의 근거는 SIMEXPLORER의 설계였다. SimRacer 행의 Q1에는 SimRacer 자체의 서술이 필요하므로 "불명"으로 바꿨다 |
+| 9 | (2026-10-16) Q2 라벨과 `process_race_method_matrix.md` §2.5 항목 1 | 그 문서가 지적한 대로 C1·C5의 Q2가 SIMEXPLORER.md(불명)와 달랐다. 2026-10-15판은 "같은 SR 판정 기준 = 주소"라는 가정 [I]을 붙여 "분석"으로 두었다. 가정은 서술된 설계가 아니다. 또 SimRacer의 SR에 메모리가 있었는지부터 정해지지 않는다. 그래서 C1·C3·C5·R2의 Q2를 모두 "불명"으로 바꿨다. C3·R2는 SIMEXPLORER.md에서 "분석"이지만, 그쪽은 STVR이 서술하는 도구 자체를 다루므로 근거가 다르다 |
+| 10 | (2026-10-16) Sim-O/C(ITJ 2013)의 process 사이 서술 | 같은 해 같은 저자의 서술은 여러 user process 사이의 시험을 "system calls that can potentially race with each other"의 순서 바꾸기로 적는다(p.188). SCMiner p.11 `[2차]`의 "interleavings of system calls"와 같은 층위다. SimRacer의 process 사이 사건이 system call에 한정됐다는 결론은 아니다. Sim-O/C 본문은 메모리 관측을 배제하지 않고, 관측기가 BasicConfig에 적힌 공유 메모리 주소를 다른 프로그램도 접근할 수 있다고 적는다(p.185). 그러나 메모리 중단점의 예는 응용과 ISR 사이다 |
 
 ---
 
@@ -151,15 +181,18 @@ STVR p.24 §7.1이 "SimRacer 알고리즘이 하지 못했던 것"을 직접 나
 | hardware interrupt | STVR p.24 [F] | "The algorithm presented in [16] did not handle hardware interrupts." SimRacer에는 없다 |
 | 중첩 handler | STVR p.24 [F] | 중첩된 interrupt·software signal handler를 SimRacer 알고리즘은 다루지 않았다 |
 | signal 종류 | STVR p.24 [F] | SimRacer 알고리즘은 한 종류의 signal handler만 다뤘고, STVR은 Linux의 31종을 다룬다 |
-| 평가 대상 | STVR p.24 [F]; ISSTA 초록 | SimRacer 연구는 process-level race만, 16개 프로그램이었다. STVR은 24개다 |
+| 평가 대상 | STVR p.24 [F]; ISSTA 초록 | SimRacer 연구는 process-level race만, 16개 프로그램이었다. STVR은 24개다. STVR은 그 이전 연구가 "included in this article"이라고 적는다 |
+| 알고리즘 개선 목록 | STVR p.24 [F] | STVR이 꼽는 알고리즘 개선은 세 가지(hardware interrupt, 중첩 handler, signal 31종)다. SR 종류(메모리 포함)를 넓혔다는 항목은 이 목록에 없다. 이것은 SimRacer에 메모리 SR이 있었다는 근거가 아니다. 목록에 없다는 것만 확인된다 |
+| process 사이 사건의 층위 (2026-10-16) | ITJ p.188 `[2차]` | 같은 해의 Sim-O/C는 여러 user process 사이를 "first observes the correct execution of two processes and identifies system calls that can potentially race with each other"로 적고, 그 순서를 바꿔 실패가 나면 결함으로 본다 |
+| 실행 단위 구별 (2026-10-16) | ITJ p.185 `[2차]` | Simics 콜백만으로는 process와 thread 같은 실행 단위를 구별하지 못하고, Simics의 process tracker가 user-space process를 구별한다고 적는다. thread를 따로 구별한다는 서술은 이 쪽에 없다 |
 | 구현 서술 | STVR p.24 [F] | 구현을 설명한 §4는 STVR에서 새로 넣은 절이다. ISSTA'13이 같은 구현 내용을 담았는지는 정해지지 않는다 |
 | 제약(HB) 모델 | SimEvo p.3 `[2차]` | SimEvo는 "previous work [57](SimRacer)"의 partial order로 program order, fork-return, wait-exit, pipe-read, signal order 다섯 가지를 든다. STVR p.9의 규칙 ①②(fork, wait-exit, pipe)와 signal 규칙에 대응한다 [I] |
-| 메모리 관측 | STVR p.8 [F] | "SimExplorer identifies reads and writes using the observability support implemented in our prior work [16,33]." [16]은 SimRacer, [33]은 SimTester(VEE 2012)다. 메모리 관측이 SimRacer에 있었는지 SimTester에 있었는지 정해지지 않는다 **[U]** |
+| 메모리 관측 | STVR p.8 [F]; VEE'12 p.54 `[2차]` | "SimExplorer identifies reads and writes using the observability support implemented in our prior work [16,33]." [16]은 SimRacer, [33]은 SimTester(VEE 2012)다. SimTester는 응용과 ISR이 함께 쓰는 공유 변수에 메모리 read/write 중단점을 건다(2026-10-16 확인). 이 관측 지원이 SimRacer의 process 사이 SR에도 쓰였는지는 정해지지 않는다 **[U]** |
 | 시스템콜 서술 | SCMiner p.11 `[2차]` | "SimRacer [18] and RacePro [11] aim to detect process-level concurrency faults by testing for different interleavings of system calls." 이 문장은 SIMEXPLORER가 shared memory와 hardware를 SR로 둔다는 STVR 서술과 층위가 다르다. 둘 중 어느 쪽이 SimRacer를 더 정확히 말하는지 정해지지 않는다 |
 | 탐색 방식 | SimEvo p.8 `[2차]` vs STVR p.10–13 | SimEvo는 SimRacer가 "first identifies anomalous event pairs and then randomly explores interleaving schedules"라고 적는다. STVR의 Phase 2는 쌍마다 순서를 뒤집는 결정적 제어다. "randomly"가 쌍의 선택을 뜻하는지 스케줄 제어를 뜻하는지 정해지지 않는다 **[U]** |
 | 입력 | DESCRY p.8, SimEvo p.8 `[2차]` | SimRacer는 구체적 data input을 요구하고 새 입력을 만들지 못한다. 기존 입력만 쓴다 |
 
-**정리.** process·signal 부분의 Phase 1–2 구조(관측 → HB로 쌍 계산 → 순서 뒤집기 확인)는 ISSTA 초록의 서술(computes potential races … controls process scheduling relative to the potential races)과 일치하므로 SimRacer에도 해당한다고 본다 [I]. §3의 도구 수준 답은 이 부분에 한정해 SimRacer에 연결하고, 메모리 관측처럼 정해지지 않는 항목은 "SimRacer 근거" 칸에 따로 적는다.
+**정리.** process·signal 부분의 Phase 1–2 구조(관측 → HB로 쌍 계산 → 순서 뒤집기 확인)는 ISSTA 초록의 서술(computes potential races … controls process scheduling relative to the potential races)과 일치하므로 SimRacer에도 해당한다고 본다 [I]. §3의 도구 수준 답은 이 부분에 한정해 SimRacer에 연결하고, 메모리 관측처럼 정해지지 않는 항목은 "SimRacer 근거" 칸에 따로 적는다. 사례별 칸(§3.5)에서는 SR의 종류(메모리가 SR인지)에 기대는 Q1·Q2를 SimRacer에 대해 "불명"으로 두고, 쌍의 모양·순서 뒤집기·출력 종류에 기대는 Q3·Q5·Q6만 "분석"으로 둔다(2026-10-16).
 
 ### 2.4 논문이 직접 밝힌 한계 중 cFS와 관련 있는 것
 
@@ -217,8 +250,8 @@ STVR p.24 §7.1이 "SimRacer 알고리즘이 하지 못했던 것"을 직접 나
 
 | Q | 라벨 | SIMEXPLORER(STVR `[전문]`)의 답 | 근거 | SimRacer 자체에 대한 근거 |
 |---|---|---|---|---|
-| 1 관측 사건 | 답 | SR 접근(shared memory, fd, inode, file data, `/proc` process 데이터, hardware)과 동기화 사건(fork, wait, exit, pipe, signal, interrupt 비트)을 모은다. 메모리 접근은 Simics 중단점으로 잡는다. 응용 함수의 반환값과 메모리에 쓰인 값은 수집 대상으로 열거되지 않는다(PuT 함수의 frame pointer를 call stack으로 따라가지만 PuT가 아닌 연산을 거르는 용도다). 개발자가 SR과 syscall을 더 지정할 수 있다 | p.8, p.14 | 초록: "runtime traces obtained by running existing tests" `[초록]`. SimEvo p.3 `[2차]`: shared resource와 event 모델링의 세부는 선행 연구 [26](RacePro)과 [57](SimRacer)에 있다고 하며, trace의 사건은 shared resource access(R/W)와 동기화 연산이다. 메모리 load/store가 SimRacer에 있었는지는 **불명**(STVR p.8이 [16,33]을 함께 인용) |
-| 2 자원·세대 식별 | 답 | SR 종류별로 같은 SR 접근을 짝짓는다. "같은 SR"의 판정 기준, 이름·ID·슬롯 대응, 세대에 관한 서술은 없다(본문 "generation" 0건) | p.8, p.10; 키워드 검색 | 서술 없음. SimRacer 전문 **불명** |
+| 1 관측 사건 | 답 | SR 접근(shared memory, fd, inode, file data, `/proc` process 데이터, hardware)과 동기화 사건(fork, wait, exit, pipe, signal, interrupt 비트)을 모은다. 메모리 접근은 Simics 중단점으로 잡는다. 응용 함수의 반환값과 메모리에 쓰인 값은 수집 대상으로 열거되지 않는다(PuT 함수의 frame pointer를 call stack으로 따라가지만 PuT가 아닌 연산을 거르는 용도다). 개발자가 SR과 syscall을 더 지정할 수 있다 | p.8, p.14 | 초록: "runtime traces obtained by running existing tests" `[초록]`. SimEvo p.3 `[2차]`: shared resource와 event 모델링의 세부는 선행 연구 [26](RacePro)과 [57](SimRacer)에 있다고 하며, trace의 사건은 shared resource access(R/W)와 동기화 연산이다. 메모리 load/store가 SimRacer에 있었는지는 **불명**(STVR p.8이 [16,33]을 함께 인용). 2013년 Sim-O/C 서술(ITJ p.188 `[2차]`)은 process 사이 사건을 system call로 적는다(§2.3) |
+| 2 자원·세대 식별 | 답 | SR 종류별로 같은 SR 접근을 짝짓는다. "같은 SR"의 판정 기준, 이름·ID·슬롯 대응, 세대에 관한 서술은 없다(본문 "generation" 0건) | p.8, p.10; 키워드 검색 | 서술 없음. SimRacer 전문 **불명**. Sim-O/C의 예는 "두 process가 모두 `write`로 같은 파일에 쓰는" 경우다(ITJ p.188 `[2차]`). 같은 파일의 판정 기준은 적혀 있지 않다 |
 | 3 생성·등록 vs 의존 사용 | 답 | "같은 SR, 하나 이상 write, HB 없음"인 접근 쌍으로 표현한다(Figure 10). 생성은 write, 사용은 read다. 등록 완료나 초기화 완료 같은 상태 개념은 없다. HB는 process 순서, fork 이전 사건, wait-exit, pipe, signal·interrupt 활성에서만 나온다. lock과 semaphore는 모델 밖이다 | p.9, p.10 | SimEvo p.3 `[2차]`: 같은 종류의 partial order |
 | 4 필요 순서·허용 오류 입력 | 답 | 입력이 아니다. race 정의에 "intended order"가 있지만 입력 필드는 없고, 순서는 syscall 의미에서 추론한 HB로만 들어온다. 허용 오류와 재시도에 관한 서술은 없다(본문 "retry" 0건). 입력은 PuT 쌍, 기존 test input, oracle(출력 기반)이다 | p.3, p.9, p.16–18 | DESCRY p.8, SimEvo p.8 `[2차]`: 구체적 data input을 요구하고 입력을 만들지 못한다 |
 | 5 예측·탐색, 확인 | 답 | 설계상 있다. Phase 1이 한 실행의 trace에서 실행되지 않은 반대 순서의 잠재 쌍을 계산하고, Phase 2가 쌍마다 실제 실행에서 순서를 뒤집어 확인한다. 한 실행에 한 쌍이고 두 접근 사이의 order violation에 한정한다 | p.7, p.10–11, p.13–14 | 초록 `[초록]`: "computes potential races … controls process scheduling relative to the potential races so that real races can be created". RRF p.3 `[2차]`: "pause and resume binary execution" |
@@ -228,22 +261,26 @@ STVR p.24 §7.1이 "SimRacer 알고리즘이 하지 못했던 것"을 직접 나
 
 | | Q1 관측 | Q2 식별 | Q3 생성·사용 | Q4 입력 | Q5 예측·확인 | Q6 출력 |
 |---|---|---|---|---|---|---|
-| **C1** | 분석 | 분석 | 분석 | 답 | 분석 | 분석 |
+| **C1** | 불명 | 불명 | 분석 | 답 | 분석 | 분석 |
 | **C2** | 불명 | 불명 | 불명 | 답 | 불명 | 불명 |
-| **C3** | 분석 | 분석 | 분석 | 답 | 분석 | 분석 |
-| **C5** | 분석 | 분석 | 분석 | 답 | 분석 | 분석 |
-| **R2** | 분석 | 분석 | 분석 | 답 | 분석 | 분석 |
+| **C3** | 불명 | 불명 | 분석 | 답 | 분석 | 분석 |
+| **C5** | 불명 | 불명 | 분석 | 답 | 분석 | 분석 |
+| **R2** | 불명 | 불명 | 분석 | 답 | 분석 | 분석 |
+
+2026-10-16 변경: C1·C3·C5·R2의 Q1·Q2가 "분석"에서 "불명"으로 바뀌었다(이유는 §1.3 항목 8–10). Q4를 뺀 사례별 25칸은 이제 분석 12, 불명 13이다. 2026-10-15판은 분석 20, 불명 5였다. 이 숫자는 점수가 아니고 근거의 종류를 센 것이다.
 
 ### 3.5 사례별 셀 (근거 포함)
 
 모든 "분석" 셀에는 한 가지 전제가 공통으로 걸려 있다. **사례의 접근이 SR로 관측되어야 한다.** 이 전제와, 한 process 안의 task 쌍을 PuT 쌍으로 줄 수 있는지는 §6 항목 3, 4에 미확인으로 적었다.
 
+Q1·Q2 칸(2026-10-16 "불명"으로 변경)은 두 층으로 적는다. 라벨은 **SimRacer(ISSTA'13) 자체**에 대한 것이다. 그 뒤의 "SIMEXPLORER 설계 기준" 문장은 확장판 STVR의 설계에서 도출한 분석으로, 라벨을 정하지 않는다. 같은 분석은 `plan/methods/SIMEXPLORER.md`가 그 도구의 칸으로 다룬다.
+
 #### C1 — CF#184 (named count semaphore의 생성 vs 이름 조회)
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | 필요한 사건은 provider의 이름 등록(OSAL 이름 테이블 쓰기)과 CF의 이름 조회(읽기)다. 둘 다 syscall이 아니다(OSAL 자체 시험, probe). 설계는 SR 접근을 메모리 중단점으로 잡으므로(p.14) OSAL 테이블의 해당 주소가 SR로 지정되면 사건이 될 수 있다는 것이 설계에서 도출된다. 어떤 주소가 SR이 되는지(자동 선택인지 사용자 지정인지)와 지정 인터페이스의 입도는 서술이 없다. 두 사건은 한 process 안의 서로 다른 thread다 | p.8, p.14; `availability.md` §4.2 `[기록]`; §6 항목 3 |
-| 2 | 분석 | 이름 `BP0_tsem` → OSAL ID → 이름 테이블 슬롯 → `sem_init`된 객체를 같은 자원으로 잇는 장치는 서술이 없다. SR 종류에도 OSAL 객체가 없고 세대 서술도 없다. 메모리 SR이 같은 슬롯의 쓰기와 읽기를 짝지을 수 있다는 해석은 같은 SR의 판정 기준이 주소라는 가정이 필요하다 [I] | p.8, p.10; 키워드 검색 |
+| 1 | 불명 | **SimRacer 자체:** 필요한 사건 중 메모리 쓰기·읽기가 SimRacer의 SR 사건이었는지 정해지지 않는다(§2.3, §1.3 항목 8·10). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 필요한 사건은 provider의 이름 등록(OSAL 이름 테이블 쓰기)과 CF의 이름 조회(읽기)다. 둘 다 syscall이 아니다(OSAL 자체 시험, probe). 설계는 SR 접근을 메모리 중단점으로 잡으므로(p.14) OSAL 테이블의 해당 주소가 SR로 지정되면 사건이 될 수 있다는 것이 설계에서 도출된다. 어떤 주소가 SR이 되는지(자동 선택인지 사용자 지정인지)와 지정 인터페이스의 입도는 서술이 없다. 두 사건은 한 process 안의 서로 다른 thread다 | p.8, p.14; `availability.md` §4.2 `[기록]`; §6 항목 3 |
+| 2 | 불명 | **SimRacer 자체:** "같은 SR"의 판정 기준도, 메모리가 SR이었는지도 서술되지 않았다(§1.3 항목 9). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 세마포어 이름(공개 BP 구성에서는 `BP0_tsem`. 원 보고자 환경의 이름은 미확인, `cases/C1.md`) → OSAL ID → 이름 테이블 슬롯 → `sem_init`된 객체를 같은 자원으로 잇는 장치는 서술이 없다. SR 종류에도 OSAL 객체가 없고 세대 서술도 없다. 메모리 SR이 같은 슬롯의 쓰기와 읽기를 짝지을 수 있다는 해석은 같은 SR의 판정 기준이 주소라는 가정이 필요하다 [I] | p.8, p.10; 키워드 검색 |
 | 3 | 분석 | 생성(쓰기)과 조회(읽기)는 "같은 SR, 하나 이상 쓰기, HB 없음" 쌍(Figure 10)으로 표현될 수 있다. OSAL 레코드가 예약된 상태인지 공개 완료인지, 재시도 중인지 최종 실패인지를 구분하는 개념은 모델에 없다. OSAL 이름 테이블 lock(PI mutex)은 HB 규칙에 없다 | p.9, p.10 |
 | 4 | 답 | 도구 수준 답과 같다. C1이 필요로 하는 허용 오류("재시도는 `OS_ERR_NAME_NOT_FOUND`일 때만")를 넣을 인터페이스는 없다. 실패 기준은 사용자가 출력 기반 oracle로 써야 한다(예: CF 초기화 실패 이벤트나 종료) | p.17–18 |
 | 5 | 분석 | 쌍이 SR로 관측되면 Phase 1 → Phase 2 구조가 적용될 수 있는 모양이다. 관측된 trace의 순서가 생성 → 조회이면 Phase 2는 조회를 생성 앞으로 뒤집는다. 이 방향이 실패 순서다. 어느 쪽이 정상 순서인지는 도구가 알지 못한다. 확인은 Simics 실행이다. 25회 재시도 수정 버전에서도 같은 쌍이 real race가 될 수 있고, 최종 실패인지는 oracle이 정한다 [I] | p.10–11, p.13 |
@@ -260,7 +297,7 @@ STVR p.24 §7.1이 "SimRacer 알고리즘이 하지 못했던 것"을 직접 나
 | 5 | 불명 | 쌍이 될 접근을 알 수 없다 | — |
 | 6 | 불명 | 원 현상이 구체 출력으로 공개되지 않았다 | `ledger.md` §1a `[기록]` |
 
-C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
+C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건). 아래 라벨은 SIMEXPLORER 설계 기준이다. SimRacer 자체로는 상태 필드가 메모리라서 불명이다(§1.3 항목 8):
 
 | 사건 | 흔적 | SIMEXPLORER 입력(설계) | 라벨 |
 |---|---|---|---|
@@ -273,8 +310,8 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | 필요한 사건은 `CFE_SB.AppId` 저장, `EVS_AppID`와 등록 플래그 설정, TIME의 이벤트 요청(AppId=0)과 `EVS_IsFiltered`의 범위 검사 없는 접근이다. 모두 사용자 공간의 전역 메모리 읽기와 쓰기다. 설계상 SR로 지정되면 사건이 된다. TIME의 `CreatePipe`가 부르는 `mq_open`(현재 OSAL에서 측정, 6.4.1 시대는 추정)이 모델링된 syscall에 드는지는 서술이 없다. 원 플랫폼(Microblaze)은 STVR이 시험한 플랫폼(x86 Linux)이 아니다. "Simics에서 돌 수 있는 시스템이면 쓸 수 있다"는 서술만 있다 | p.2, p.8, p.18; `ledger.md` §1a `[기록]` |
-| 2 | 분석 | 의존 상태는 서로 다른 세 필드(SB AppId, EVS AppId, EVS 등록 플래그)다. 메모리 위치로 구별할 수 있다는 해석은 주소 기반 동일성 가정이 필요하다 [I]. AppId 값 0이 EVS 배열의 인덱스로 쓰이는 관계(값 → 슬롯)를 추적하는 서술은 없다 | p.8, p.10 |
+| 1 | 불명 | **SimRacer 자체:** 필요한 사건 중 메모리 쓰기·읽기가 SimRacer의 SR 사건이었는지 정해지지 않는다(§2.3, §1.3 항목 8·10). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 필요한 사건은 `CFE_SB.AppId` 저장, `EVS_AppID`와 등록 플래그 설정, TIME의 이벤트 요청(AppId=0)과 `EVS_IsFiltered`의 범위 검사 없는 접근이다. 모두 사용자 공간의 전역 메모리 읽기와 쓰기다. 설계상 SR로 지정되면 사건이 된다. TIME의 `CreatePipe`가 부르는 `mq_open`(현재 OSAL에서 측정, 6.4.1 시대는 추정)이 모델링된 syscall에 드는지는 서술이 없다. 원 플랫폼(Microblaze)은 STVR이 시험한 플랫폼(x86 Linux)이 아니다. "Simics에서 돌 수 있는 시스템이면 쓸 수 있다"는 서술만 있다 | p.2, p.8, p.18; `ledger.md` §1a `[기록]` |
+| 2 | 불명 | **SimRacer 자체:** "같은 SR"의 판정 기준도, 메모리가 SR이었는지도 서술되지 않았다(§1.3 항목 9). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 의존 상태는 서로 다른 세 필드(SB AppId, EVS AppId, EVS 등록 플래그)다. 메모리 위치로 구별할 수 있다는 해석은 주소 기반 동일성 가정이 필요하다 [I]. AppId 값 0이 EVS 배열의 인덱스로 쓰이는 관계(값 → 슬롯)를 추적하는 서술은 없다 | p.8, p.10 |
 | 3 | 분석 | 공개(쓰기)와 사용(읽기)이 메모리라 같은 SR의 쌍으로 표현될 수 있다. core 시작 순서를 정하는 ES의 task 대기(F3 수정)와 우선순위는 HB 규칙에 없다 | p.9, p.10 |
 | 4 | 답 | 도구 수준 답과 같다. 원 보고의 실패는 EVS 내부의 잘못된 인덱스 접근이고 오류 지점과 주 결과는 사례 기록상 미결이라, oracle이 무엇을 봐야 하는지 지금 정할 수 없다 | p.17–18; `ledger.md` §2 `[기록]` |
 | 5 | 분석 | C1과 같다. 사례의 순서(TIME 사용 → SB/EVS 공개)는 우선순위가 만든 것이라 관측된 trace에 이미 있을 수 있다. 그러면 Phase 2는 그 반대(공개 → 사용)를 시도한다. 도구는 어느 쪽이 정상 순서인지 알지 못한다 [I] | p.10–11 |
@@ -284,8 +321,8 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | `OS_TaskCreate`의 `pthread_create`는 `clone` 계열이다. `clone`은 모델링된 syscall의 예시에 들고(p.8) `/proc`에 process inode를 만드는 쓰기로 모델링된다. `TaskTable` 등록 쓰기와 새 task의 `GetAppID` 조회는 사용자 공간 메모리 접근이라 SR로 지정되어야 사건이 된다 | p.8; `ledger.md` §1a `[기록]` |
-| 2 | 분석 | 커널 쪽 task 식별은 PID다(thread도 PID를 가진 lightweight process, p.13). OSAL task ID, ES `TaskTable` 인덱스, AppId 사이의 연결을 식별하는 서술은 없다 | p.13 |
+| 1 | 불명 | **SimRacer 자체:** 필요한 사건 중 메모리 쓰기·읽기가 SimRacer의 SR 사건이었는지 정해지지 않는다(§2.3, §1.3 항목 8·10). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** `OS_TaskCreate`의 `pthread_create`는 `clone` 계열이다. `clone`은 모델링된 syscall의 예시에 들고(p.8) `/proc`에 process inode를 만드는 쓰기로 모델링된다. `TaskTable` 등록 쓰기와 새 task의 `GetAppID` 조회는 사용자 공간 메모리 접근이라 SR로 지정되어야 사건이 된다 | p.8; `ledger.md` §1a `[기록]` |
+| 2 | 불명 | **SimRacer 자체:** "같은 SR"의 판정 기준도, 메모리가 SR이었는지도 서술되지 않았다(§1.3 항목 9). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 커널 쪽 task 식별은 PID다(thread도 PID를 가진 lightweight process, p.13). OSAL task ID, ES `TaskTable` 인덱스, AppId 사이의 연결을 식별하는 서술은 없다 | p.13 |
 | 3 | 분석 | `fork` 규칙은 "fork 이전의 부모 사건은 자식의 모든 사건보다 앞선다"(p.9)다. thread 생성(`clone`)이 이 규칙의 대상인지는 서술이 없다. 어느 쪽이든 등록 쓰기는 task 생성 뒤에 있으므로 자식의 조회와 HB가 없고 잠재 쌍이 된다. "등록 공개 완료"라는 상태는 모델에 없다. 6.4.2의 lock 범위 확장은 lock이 모델 밖이라(p.9) Phase 1이 같은 쌍을 다시 내고, Phase 2에서 자식이 lock에 막혀 뒤집기가 불가능해지는지로 가려질 것이다 [I] | p.9, p.11, p.13 |
 | 4 | 답 | 도구 수준 답과 같다. 원 현상(등록 전 조회의 실패 반환)은 crash가 아니라 내부 API 반환값이다. 출력 기반 oracle이 이를 보려면 앱의 출력에 나타나야 한다. 원 보고에 없는 앱 crash는 기대 결과로 넣지 않는다(로드맵 §9.3) | p.17–18 |
 | 5 | 분석 | 이 쌍(task 생성 뒤 부모의 등록 쓰기 vs 자식의 조회)은 설계가 드는 예(부모가 fork한 자식과의 race, Figure 1)와 모양이 가장 가깝다 [I]. 관측만 되면 Phase 1 → Phase 2가 적용될 수 있다. 실행 확인은 Simics 실행이다 | p.3, p.10–11 |
@@ -295,23 +332,30 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | Q | 라벨 | 내용 | 근거 |
 |---|---|---|---|
-| 1 | 분석 | 아래 사건 대응표의 네 사건(AppId 설정, 값 읽기, 이벤트 요청, 오류 반환) 중 앞의 둘은 전역 메모리 쓰기와 읽기다. `CreatePipe`의 `mq_open`만 syscall이다. 오류 반환은 반환값이다 | 아래 표 |
-| 2 | 분석 | `CFE_SB_Global.AppId` 하나의 메모리 위치다. 쓰기와 읽기의 짝은 같은 위치로 맺을 수 있다는 해석이 가능하다(주소 기반 동일성 가정). EVS가 이 값을 이벤트 원천 ID로 받아 자기 테이블을 찾는 값 전달은 추적하지 않는다 | p.8, p.10 |
+| 1 | 불명 | **SimRacer 자체:** 필요한 사건 중 메모리 쓰기·읽기가 SimRacer의 SR 사건이었는지 정해지지 않는다(§2.3, §1.3 항목 8·10). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** 아래 사건 대응표의 네 사건(AppId 설정, 값 읽기, 이벤트 요청, 오류 반환) 중 앞의 둘은 전역 메모리 쓰기와 읽기다. `CreatePipe`의 `mq_open`만 syscall이다. 오류 반환은 반환값이다 | 아래 표 |
+| 2 | 불명 | **SimRacer 자체:** "같은 SR"의 판정 기준도, 메모리가 SR이었는지도 서술되지 않았다(§1.3 항목 9). **SIMEXPLORER 설계 기준(분석, 라벨 아님):** `CFE_SB_Global.AppId` 하나의 메모리 위치다. 쓰기와 읽기의 짝은 같은 위치로 맺을 수 있다는 해석이 가능하다(주소 기반 동일성 가정). EVS가 이 값을 이벤트 원천 ID로 받아 자기 테이블을 찾는 값 전달은 추적하지 않는다 | p.8, p.10 |
 | 3 | 분석 | 설정(쓰기)과 사용(읽기)이 같은 SR의 쌍이다. 이 순서를 정하는 core 시작 직렬화(S1)는 HB 규칙에 없다 | p.9 |
 | 4 | 답 | 도구 수준 답과 같다. R2의 요구 순서("SB AppId 저장이 SB API 경로의 이벤트 요청보다 먼저")를 넣을 입력은 없다 | p.3, p.9 |
-| 5 | 분석 | 쌍이 관측되면 Phase 2는 기록 순서의 반대를 시도한다. 시작 직렬화 때문에 반대 순서를 스케줄로 만들 수 없다면 그 쌍은 race로 세지 않는다(p.11). R2의 순서가 스케줄로 뒤집힐 수 있는지가 사례 기록상 미결이므로(race인지 결정적 순서인지, `ledger.md` §2 R2 Open D2·Q3) 이 칸이 답하는 범위는 "설계상 시도하고, 불가능하면 세지 않는다"까지다. 실제 결과는 자료로 정해지지 않는다. 순서가 고정된 이유를 담는 출력 항목은 서술에 없다 | p.10–11; `ledger.md` §2 `[기록]` |
+| 5 | 분석 | 쌍이 관측되면 Phase 2는 기록 순서의 반대를 시도한다. 시작 직렬화 때문에 반대 순서를 스케줄로 만들 수 없다면 그 쌍은 race로 세지 않는다(p.11). R2의 순서가 스케줄로 뒤집힐 수 있는지가 사례 기록상 미결이므로(race인지 결정적 순서인지, `ledger.md` §2 R2 Open D2·Q3) 이 칸이 답하는 범위는 "설계상 시도하고, 불가능하면 세지 않는다"까지다. 실제 결과는 자료로 정해지지 않는다. 순서가 고정된 이유를 담는 출력 항목은 서술에 없다. **(2026-10-16 추가, [I] 미실행)** 사례 기록의 코드 읽기에 따르면 S1은 ES 시작 thread가 core task를 하나씩 만들고 그 task가 init 뒤 `CFE_ES_WaitForSystemState`에 이를 때까지 폴링으로 기다리는 구조이고, 그래서 EVS(B) 또는 ES·EVS(M, D)의 init이 SB task 생성 전에 끝난다(`cases/R2.md` §6 S1·S2, §6.1 추론; `case_basis_register.md` R2.E5 "분"). 이 구조를 STVR의 Phase 2 서술에 대입하면 다음이 도출된다. 뒤집기는 사용 task(예: EVS)를 사용 직전에 멈추고 SB의 ① 쓰기를 먼저 진행시켜야 한다. 그런데 SB task는 멈춘 task가 RUNNING에 이른 뒤에야 만들어진다. 이것은 STVR p.13이 적는 "한쪽을 멈추면 다른 쪽이 기다리는" 교착 모양이다. 교착을 풀면(p.13) 사용이 먼저 일어나 뒤집기가 이뤄지지 않고, 그 쌍은 race로 세지 않는다(p.11). 교착 해소 전에 S1의 시간 상한이 지나면 ES panic이라는 다른 결과가 된다(`cases/R2.md` A7). 이 도출은 S1에 대한 코드 읽기와 설계 서술만 쓴 것이고, 둘 중 어느 결과가 나오는지, 쌍이 애초에 관측되는지는 정해지지 않는다 | p.10–11, p.13; `ledger.md` §2 `[기록]`; `cases/R2.md` §6 `[기록]` |
 | 6 | 분석 | 사례 현상은 "이벤트 요청 24회 거부"이고 프로세스 실패가 없다(상태 폐기). 반환값은 출력 항목이 아니고 실패 메시지도 출력하지 않는다. 출력 기반 oracle에는 차이가 나타나지 않을 수 있다. 같은 명령어 위치의 반복 접근은 한 쌍으로 합쳐지므로(p.10, p.13) "24"는 이 도구의 출력 수량이 아니다 | p.10, p.13, p.18; 로드맵 §2.2 `[기록]` |
 
 **R2 사건 대응표** (로드맵 §10.3 방식의 SimRacer판). 참조 revision은 사례 기록의 B/M/D(`fc8c48ad`/`12cb84fc`/`f22e538c`)이며 v7.0.1 코드와 다를 수 있다.
 
-| R2 사건 | 커널에서 보이는 흔적 | SIMEXPLORER 기록 사건(설계) | HB 간선 | 후보 규칙 | 라벨 |
-|---|---|---|---|---|---|
-| ① SB AppId 설정: `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, 반환값 무시 (B `cfe_sb_task.c` L126, M L138, D L128) | syscall 없음(소스 수준) | 대상 주소가 SR이면 memory write | SB task 생성 이전 사건과만 HB. 생성 뒤의 이 쓰기는 다른 task와 HB 없음 | Figure 10: 같은 SR, 쓰기, HB 없음이면 쌍 | 분석 |
-| ② 값 읽기: EVS(B) 또는 ES·EVS(M, D) task가 같은 전역을 읽음 | syscall 없음 | memory read | ①과 HB 없음 | ①과의 쌍 | 분석 |
-| ③ 이벤트 요청: `CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`(OSAL 시험 69회, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준) | `mq_open`이 23개 syscall에 드는지는 서술이 없다 | — | — | **불명** |
-| ④ 오류 반환: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기 (B `cfe_evs.c` L182-L186) | 반환값 | SR이 아니다 | — | — | 분석 |
+2026-10-16부터 라벨 열을 둘로 나눈다. "SIMEXPLORER 설계" 열은 STVR 설계에서 도출한 분석이고, "SimRacer 자체" 열이 이 문서의 대상 도구에 대한 라벨이다.
+
+| R2 사건 | 커널에서 보이는 흔적 | SIMEXPLORER 기록 사건(설계) | HB 간선 | 후보 규칙 | 라벨: SIMEXPLORER 설계 | 라벨: SimRacer 자체 |
+|---|---|---|---|---|---|---|
+| ⓪ core task 생성 (2026-10-16 추가): ES 시작 thread가 `CFE_ES_CreateObjects`에서 core task를 하나씩 `OS_TaskCreate`로 만들고, 각 task가 init 뒤 RUNNING이 될 때까지 `CFE_ES_MainTaskSyncDelay`로 폴링한다(`cases/R2.md` §6 S1·S2 `[기록]`) | `pthread_create` → `clone` 계열 syscall(C5 보충표와 같은 근거, cFS에서 측정하지 않음). 폴링은 메모리 읽기와 지연 | `clone`은 모델링된 syscall의 예시다(p.8) | fork 규칙(p.9)이 `clone`에 적용된다면 생성자의 생성 이전 사건 → 새 task의 모든 사건. 적용되는지는 서술이 없다. RUNNING 폴링은 HB 규칙(fork, wait-exit, pipe, signal·interrupt)에 없어 간선이 되지 않는다 | 후보 쌍이 아니라 HB 간선의 원천 | 분석 | 불명: SimRacer의 partial order에 fork-return이 있다(SimEvo p.3 `[2차]`). thread 생성이 그 대상인지는 서술이 없다 |
+| ① SB AppId 설정: `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`, 반환값 무시 (B `cfe_sb_task.c` L126, M L138, D L128) | syscall 없음(소스 수준) | 대상 주소가 SR이면 memory write | SB task 생성 이전 사건과만 HB. 생성 뒤의 이 쓰기는 다른 task와 HB 없음 | Figure 10: 같은 SR, 쓰기, HB 없음이면 쌍 | 분석 | 불명(메모리 SR 여부, §1.3 항목 8) |
+| ② 값 읽기: EVS(B) 또는 ES·EVS(M, D) task가 같은 전역을 읽음 | syscall 없음 | memory read | ①과 HB 없음. ⓪의 폴링은 간선이 아니다 | ①과의 쌍 | 분석 | 불명(같은 이유) |
+| ③ 이벤트 요청: `CreatePipe`/`Subscribe`/전송 → `CFE_EVS_SendEventWithAppID` | `CreatePipe`는 `mq_open("<pid>.<name>")`(OSAL 시험 69회, probe). `Subscribe`와 이벤트 전송 자체는 syscall이 아니다(소스 수준) | `mq_open`이 23개 syscall에 드는지는 서술이 없다 | — | — | **불명** | **불명**(SimRacer의 syscall 목록도 읽지 못했다) |
+| ④ 오류 반환: `EVS_GetAppDataByID` NULL → `ILLEGAL_APP_ID`, 상태 폐기 (B `cfe_evs.c` L182-L186) | 반환값 | SR이 아니다 | — | — | 분석 | 분석: 출력 기반 oracle(초록·STVR p.17–18)의 대상이 아닌 내부 반환값이다. 사용자 oracle이 이를 볼 수 있는지는 사용자 입력의 문제다 |
+
+[I] ⓪이 들어가도 ①과 ②는 HB가 없는 쌍으로 남는다. ⓪이 주는 간선은 생성자 쪽 사건에서 새 task 쪽으로만 가고, ②를 실행하는 EVS(ES) task와 ①을 실행하는 SB task 사이에는 간선이 없다. 이것은 사용 task가 생성자인 ES 시작 thread 자신이 아니라는 전제에 선다(사례 기록의 호출 task는 ES·EVS task다, `case_basis_register.md` R2.E3). 사용이 생성자 thread에서 SB 생성 전에 일어난다면 fork 규칙이 적용되는 경우 사용 → 설정의 HB가 생겨 그 쌍은 후보가 아니다. 이 전제는 이 문서에서 코드로 다시 확인하지 않았다. 반대 순서를 실제로 만들 수 있는지는 위 Q5 칸의 도출(교착 또는 시간 상한)과 함께 읽는다.
 
 #### C1·C3·C5 보충 사건 대응표
+
+이 표의 라벨은 SIMEXPLORER 설계 기준이다. SimRacer 자체로는 메모리 접근 행(C1 생성·조회, C3 AppId 저장, C5 레코드 쓰기·조회)이 모두 불명이다(§1.3 항목 8). C5 `OS_TaskCreate` 행도 thread 생성이 SimRacer의 fork-return 순서 대상인지 서술이 없어 불명이다.
 
 | 사례·사건 | 커널에서 보이는 흔적 | SIMEXPLORER 입력(설계) | 라벨 |
 |---|---|---|---|
@@ -326,7 +370,7 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 ### 3.6 이 절이 말하지 않는 것
 
 - 어느 셀도 "SimRacer가 사례를 탐지하지 못한다"는 뜻이 아니다. 실행하지 않았고, 사례의 접근이 SR로 지정될 수 있는지는 자료로 정해지지 않는다.
-- "SimRacer는 메모리를 관측하지 못한다"는 문장은 틀리다. SIMEXPLORER는 shared memory를 SR로 두고 메모리 접근을 중단점으로 잡는다(p.8, p.14). SimRacer 자체의 메모리 관측은 정해지지 않았다.
+- "SimRacer는 메모리를 관측하지 못한다"는 문장은 근거가 없다. SIMEXPLORER는 shared memory를 SR로 두고 메모리 접근을 중단점으로 잡는다(p.8, p.14). SimRacer 자체의 메모리 관측은 정해지지 않았다. 2026-10-16에 Q1·Q2를 "불명"으로 바꾼 것은 이 미정 상태를 라벨에 반영한 것이며, "관측하지 못한다"는 뜻이 아니다. 반대로 "SimRacer는 메모리를 SR로 관측한다"도 쓰지 않는다.
 - 이 절의 "분석"은 도구의 원래 설계에 대한 것이다. cFS 내부 상태를 SR로 지정하는 입력을 연구 쪽에서 추가하면 EXTENSION이며 원 도구의 결과가 아니다(로드맵 §10.4 끝, `availability.md` §5.1).
 - 이 절의 도구 서술은 STVR의 SIMEXPLORER이다. ISSTA'13의 SimRacer와 같다고 확인된 것은 §2.3에 적은 범위뿐이다.
 
@@ -338,9 +382,9 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | 요구 | 레퍼런스(등급) | 값의 상태 | 오늘 상태 |
 |---|---|---|---|
-| **도구 구현**(소스, 바이너리, 스크립트) | 없음. STVR §4는 구현을 설명하며 다른 연구자가 재현할 수 있게 하려는 것이라고 적는다(p.24) | 정책상 도구 레퍼런스(README, artifact 절)가 없다 | **없음** [M]. GitHub 저장소 검색 34건 중 해당 없음, 코드 검색 1건(BibTeX 색인). 저자 홈, CV, UConn 홈에 소프트웨어 항목이 없다(§1.1 경로 8, 9, 14, 15) |
+| **도구 구현**(소스, 바이너리, 스크립트) | 없음. STVR §4는 구현을 설명하며 다른 연구자가 재현할 수 있게 하려는 것이라고 적는다(p.24) | 정책상 도구 레퍼런스(README, artifact 절)가 없다 | **없음** [M]. GitHub 저장소 검색 34건 중 해당 없음, 코드 검색 1건(BibTeX 색인). 저자 홈, CV, UConn 홈에 소프트웨어 항목이 없다(§1.1 경로 8, 9, 14, 15). 2026-10-16에 다시 찾았으나 없다(경로 33, 36, 37) |
 | 연구 자료(objects of analysis 등) | STVR p.15 각주 §: "The objects of analysis and other artifacts used in this study can be obtained by contacting the first author." `[전문]` | 저자 연락 필요 | 연락하지 않았다(`availability.md` A2). "other artifacts"가 도구 코드를 포함하는지는 서술이 없다 |
-| **Simics** | ISSTA 초록 "commercial virtual platform" `[초록]`; STVR p.2, p.14 `[전문]`; SimEvo p.7 `[2차]` | **버전, 시뮬레이션 머신, 스크립트: `unspecified_by_reference`** | 이 컨테이너에 없다 [M 2026-10-15]: `simics`·`simics-gui`가 PATH에 없고 `/opt/*simics*`도 없다. 설치하지 않았다. 벤더 공개 페이지(오늘 200, 페이지에 "Updated 9/8/2023")는 Intel Simics 공개 릴리스를 커뮤니티에 무료로 제공하고 사용 전 EULA 동의를 요구한다고 적는다. 다운로드 약 2 GB, 설치 약 10 GB, host는 64-bit Linux(권장 최소 RHEL 8 동등, glibc ≥ 2.22) 또는 64-bit Windows다. 이 컨테이너의 `/` 여유는 16 GB다 [M]. 이 제품·버전이 SimRacer(2013)가 쓴 Simics와 같은지는 서술이 없다. EULA 동의는 PI 결정 항목이다 |
+| **Simics** | ISSTA 초록 "commercial virtual platform" `[초록]`; STVR p.2, p.14 `[전문]`; SimEvo p.7 `[2차]` | **버전, 시뮬레이션 머신, 스크립트: `unspecified_by_reference`** | 이 컨테이너에 없다 [M 2026-10-15]: `simics`·`simics-gui`가 PATH에 없고 `/opt/*simics*`도 없다. 설치하지 않았다. 벤더 공개 페이지(오늘 200, 페이지에 "Updated 9/8/2023")는 Intel Simics 공개 릴리스를 커뮤니티에 무료로 제공하고 사용 전 EULA 동의를 요구한다고 적는다. 다운로드 약 2 GB, 설치 약 10 GB, host는 64-bit Linux(권장 최소 RHEL 8 동등, glibc ≥ 2.22) 또는 64-bit Windows다. 이 컨테이너의 `/` 여유는 16 GB다 [M]. 이 제품·버전이 SimRacer(2013)가 쓴 Simics와 같은지는 서술이 없다. EULA 동의는 PI 결정 항목이다. **2026-10-16 재측정** [M]: `simics`·`simics-gui`가 PATH에 없고 `/opt/*simics*`가 없으며 `/dev/kvm`도 없다. 커널 `6.18.44-fc-v139`. `/`의 여유는 2.0 GB로 줄었다(크기 252 GB, 사용 95%). 벤더 페이지가 적는 설치 크기(약 10 GB)보다 작다. 설치는 여전히 하지 않았다 |
 | Guest 환경 | STVR p.18: Simics로 단일 코어 x86 Linux 2.6.15와 3.5.0 가상화. p.15: UART 연구는 Fedora Core 2.6.15, Ubuntu 12.04 | 논문 기술(정책상 레퍼런스인지는 PI 판단, §4.3 P-1) | cFS(6.4.x 또는 7.0.1)를 그 guest에 올리는 조건은 `unspecified_by_reference`다. 현재 기준 바이너리 `core-cpu1`은 x86-64 ELF이고 커널 ≥ 3.2.0을 요구한다(`baselines/availability.md` A4 기록) |
 | 제어용 장치 | dummy device와 guest 안의 driver 프로그램(p.14) | 논문 기술. 세부(kernel module 여부 등) 서술 없음 | 구현 없음 |
 | Python | Simics tool을 Python으로 작성(p.14) | 버전 서술 없음 | — |
@@ -359,9 +403,9 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | C5 | `NOT_RUN` | 위와 같다 |
 | R2 | `NOT_RUN` | 위와 같다 |
 
-- `INAPPLICABLE`을 붙이지 않는다. STVR의 대상은 process, signal, interrupt, kernel thread이고(p.7) 같은 process 안의 thread는 "lightweight process"라 추적할 수 있다고 한 줄만 있다(p.13). 입력은 PuT 쌍(basic program과 짝 program 또는 handler, p.16)이다. cFS task가 이 입력 단위에 해당하는지는 서술이 없고, 이를 "명시된 입력·대상 범위"의 제외로 볼지는 PI 판단이다.
+- `INAPPLICABLE`을 붙이지 않는다. STVR의 대상은 process, signal, interrupt, kernel thread이고(p.7) 같은 process 안의 thread는 "lightweight process"라 추적할 수 있다고 한 줄만 있다(p.13). 입력은 PuT 쌍(basic program과 짝 program 또는 handler, p.16)이다. cFS task가 이 입력 단위에 해당하는지는 서술이 없고, 이를 "명시된 입력·대상 범위"의 제외로 볼지는 PI 판단이다. 2026-10-16에 읽은 Sim-O/C(ITJ p.185 `[2차]`)는 Simics 콜백만으로는 process와 thread를 구별하지 못하고 process tracker가 user-space process를 구별한다고 적는다. thread 단위 구별 방법은 그 쪽에 없다. 이 서술은 판단 자료를 더할 뿐 `INAPPLICABLE`의 근거로 쓰지 않았다.
 - `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP`, `REPORTED`는 도구를 실행한 뒤에만 쓸 수 있다. 이 문서는 어느 것도 예측하지 않는다. 로드맵이 말하듯 사건 기록의 기준이 부족한 경우를 `ANALYSIS_GAP`으로 서둘러 분류하지 않는다.
-- 이 문서의 §3 내용은 라벨 `ANALYSIS`(observation-model analysis, not run)이고 등급은 SIMEXPLORER `[전문]` + SimRacer `[초록]`이다. 원 도구 결과가 아니다.
+- 이 문서의 §3 내용은 라벨 `ANALYSIS`(observation-model analysis, not run)이고 등급은 SIMEXPLORER `[전문]` + SimRacer `[초록]` + Sim-O/C·SimTester `[2차]`이다. 원 도구 결과가 아니다.
 
 ### 4.3 PI 판단이 필요한 항목 (결정 후보. 여기서 정하지 않았다)
 
@@ -385,8 +429,9 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | 기능 | 근거 |
 |---|---|
 | 기록된 실행에서 **실행되지 않은 반대 순서를 예측**하고(Phase 1) 순서를 뒤집어 **실제 실행으로 확인**(Phase 2) | p.7, p.10–11. SimRacer: 초록 `[초록]` |
-| 공유 메모리 접근을 SR로 두고 load/store 사건을 기록 | p.8, p.12, p.14 (SIMEXPLORER) |
-| 개발자가 SR과 syscall을 추가 지정하는 인터페이스 | p.8 (입도는 서술 없음) |
+| 공유 메모리 접근을 SR로 두고 load/store 사건을 기록 | p.8, p.12, p.14. **SIMEXPLORER에만 확인된다.** SimRacer 자체에 있었는지는 [U]라서(§2.3) 이 행은 SimRacer의 기존 기능 목록에서 뺀다(2026-10-16, `process_race_method_matrix.md` §4.3과 같은 처리) |
+| 개발자가 SR과 syscall을 추가 지정하는 인터페이스 | p.8 (입도는 서술 없음). SIMEXPLORER의 서술이며 SimRacer에 있었는지는 서술이 없다 |
+| system call 쌍의 순서를 바꿔 실행으로 확인하는 process 사이 시험 | ITJ p.188 `[2차]`(같은 해 같은 저자의 Sim-O/C 서술). 초록의 "controls process scheduling"과 같은 방향이다 |
 | 거짓 양성을 Phase 2의 실제 실행으로 걸러 냄 | p.10–11, p.18 |
 | race와 oracle이 보는 fault를 나눠 보고 | p.19, p.22 |
 | 같은 명령어 위치의 반복 접근을 한 쌍으로 합침 | p.10, p.13 |
@@ -400,15 +445,15 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 
 | 가설 | 대상 사례 | 관찰된 부족 (분석) | 근거 | 연결되는 Kairos 기능 후보 (로드맵 §10.5) | 한계·반증 가능성 |
 |---|---|---|---|---|---|
-| **H-SM-1** cFS 내부 상태가 기본 SR 목록에 없고, SR이 되는 경로가 서술에 없다 | R2, C3, C5, C1 | 기본 SR은 shared memory, fd, inode, file data, `/proc`, hardware다. AppId, 등록 플래그, `TaskTable`, OSAL 이름 테이블이 어떤 경로로 SR이 되는지는 서술이 없고, 지정 인터페이스의 입도도 알 수 없다. 공개·조회가 syscall이 아니라는 측정(OSAL 자체 시험의 probe)은 syscall 중심 관측에만 관계된다 | p.8, p.14; `availability.md` §4.2 `[기록]` | cFS 내부 API·상태 변화·값 전달을 관측하고 소스와 연결 | **메모리 접근은 설계상 관측되므로 "관측 불가능"이 아니다.** 지정 인터페이스로 메울 수 있다면 부족은 입력 작성 비용이다. 이 가설은 "Kairos만 가능하다"가 아니라 "원 도구의 기본 입력 정의 밖에 있다"는 뜻이다. 실행 미확인 |
+| **H-SM-1** cFS 내부 상태가 기본 SR 목록에 없고, SR이 되는 경로가 서술에 없다 (2026-10-16 보정: SimRacer 자체에는 SR에 메모리가 있었는지부터 [U]) | R2, C3, C5, C1 | SIMEXPLORER의 기본 SR은 shared memory, fd, inode, file data, `/proc`, hardware다. AppId, 등록 플래그, `TaskTable`, OSAL 이름 테이블이 어떤 경로로 SR이 되는지는 서술이 없고, 지정 인터페이스의 입도도 알 수 없다. 공개·조회가 syscall이 아니라는 측정(OSAL 자체 시험의 probe)은 syscall 중심 관측에만 관계된다 | p.8, p.14; `availability.md` §4.2 `[기록]` | cFS 내부 API·상태 변화·값 전달을 관측하고 소스와 연결 | **SIMEXPLORER에서는 메모리 접근이 설계상 관측되므로 "관측 불가능"이 아니다.** 지정 인터페이스로 메울 수 있다면 부족은 입력 작성 비용이다. SimRacer 자체에 대해서는 같은 해 서술(ITJ p.188 `[2차]`)이 process 사이 사건을 system call로 적지만 메모리 관측을 배제하지 않으므로, 이 가설을 "SimRacer가 메모리를 보지 못한다"로 강하게 쓰지 않는다. 이 가설은 "Kairos만 가능하다"가 아니라 "원 도구의 기본 입력 정의 밖에 있다"는 뜻이다. 실행 미확인 |
 | **H-SM-2** 등록 상태와 lock 범위가 후보 모델에 없다 | C1, C5 (R2는 값 0 vs 유효값) | 잠재 쌍은 "같은 SR, 하나 이상 쓰기, HB 없음"뿐이다. 쓰기가 예약인지 공개 완료인지, lock 안인지를 구분하는 개념이 없다. lock과 semaphore는 모델 밖이다. 이름 → ID → 슬롯의 대응과 세대도 서술이 없다 | p.9, p.10; 키워드 검색(generation 0건) | 이름과 객체 ID·세대, task와 AppId의 관계 추적 | **근거가 약하다.** 근거는 "서술 없음"이고, 이 논문의 목적이 아닌 영역이다. Phase 2의 실제 실행이 불가능한 쌍을 걸러 낸다(p.11, p.13). C1의 RESERVED 구간은 코드 읽기 가설이며 미확인이다(`ledger.md` §2) |
 | **H-SM-3** 오류 반환, 재시도, 최종 결과가 입력과 출력의 항목이 아니다 | C1, C5, R2 | oracle은 출력 기반이고 내부 반환값을 보는 oracle은 비용이 든다고만 적는다. 재시도 서술은 없다. 출력에 "회복 vs 최종 실패"가 없다 | p.18; 키워드 "retry" 0건 | 반환값·재시도·초기화 최종 결과 추적 | 사용자가 내부 oracle을 쓰면 구분할 수 있다(p.18이 가능성을 인정). "도구 안에 입력 형식이 없다"에 가깝다 |
-| **H-SM-4** 순서가 고정된 이유(사용자 수준 직렬화)가 출력에 없다 | R2 (C3의 core 시작 순서도 같은 성격) | 뒤집을 수 없는 쌍은 race로 세지 않고 이유를 출력한다는 서술이 없다. HB는 syscall·signal·interrupt 활성에서만 나온다(p.9). Phase 1은 모든 동기화 연산을 식별하지 못한다고 적고(p.10), 사용자 정의 동기화를 인식하지 못할 수 있다는 서술은 HB 기반 기법 일반에 대한 것이다(p.2) | p.2, p.9, p.10, p.11 | 소스 기반 순서 근거·전제·신뢰 범위를 결과에 연결 | 실행하지 않았다. R2의 순서가 스케줄로 뒤집힐 수 있는지(race vs 결정적)가 사례 기록상 미결이다. 이유를 출력하지 않는다는 것은 서술의 부재 확인이다 |
+| **H-SM-4** 순서가 고정된 이유(사용자 수준 직렬화)가 출력에 없다 | R2 (C3의 core 시작 순서도 같은 성격) | 뒤집을 수 없는 쌍은 race로 세지 않고 이유를 출력한다는 서술이 없다. HB는 syscall·signal·interrupt 활성에서만 나온다(p.9). Phase 1은 모든 동기화 연산을 식별하지 못한다고 적고(p.10), 사용자 정의 동기화를 인식하지 못할 수 있다는 서술은 HB 기반 기법 일반에 대한 것이다(p.2) | p.2, p.9, p.10, p.11 | 소스 기반 순서 근거·전제·신뢰 범위를 결과에 연결 | 실행하지 않았다. R2의 순서가 스케줄로 뒤집힐 수 있는지(race vs 결정적)가 사례 기록상 미결이다. 이유를 출력하지 않는다는 것은 서술의 부재 확인이다. 2026-10-16 보충: §3.5 R2 Q5 칸의 도출([I])대로 뒤집기가 교착 해소 뒤 실패하면 그 쌍은 race로 세지 않으므로, 이 경우 도구 출력에는 그 쌍이 나타나지 않을 수 있다. 이것도 실행 결과가 아니다 |
 
 ### 5.3 근거가 부족해 가설로 올리지 않는 것
 
 - **C2 (시작 동기화와 앱 고유 초기화 완료의 혼동, 로드맵 §10.5 3행).** P·R이 의존에 쓰는 자원이 비공개라 SimRacer 계열이 그 관계를 표현할 수 있는지 판단할 근거가 없다. 논문에 startup·readiness 상태 개념이 없다는 키워드 확인(0건)만 있다. 역할 재구성 실험(결정 P-C2)에서 선택한 요청 방식이 정해진 뒤에야 같은 분석을 할 수 있다.
-- **"SimRacer 계열은 메모리를 관측하지 못한다."** STVR p.8, p.12, p.14가 반대다. 쓰지 않는다.
+- **"SimRacer 계열은 메모리를 관측하지 못한다."** SIMEXPLORER에는 STVR p.8, p.12, p.14가 반대다. SimRacer 자체에는 정해지지 않는다(2026-10-16의 Sim-O/C 서술도 배제 문장이 아니다). 어느 쪽으로도 쓰지 않는다.
 - **R2와 C3의 통신 경로(`mq_open`).** 모델링된 23개 syscall의 전체 목록이 없어 SB pipe 통신이 도구에 보이는지 판단할 수 없다. "SB pipe 통신이 도구에 보이지 않는다"고 쓰지 않는다.
 - **"한 process 안의 task라서 대상이 아니다."** 이를 대상 범위 제외로 읽을지는 PI 판단(§4.3 P-2)이고 논문은 thread를 추적 가능하다고만 적는다.
 
@@ -436,12 +481,18 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 | 10 | SimEvo, RRF, SysPro의 나머지 본문 | 이 작업은 SimRacer의 서술을 찾는 데 필요한 부분만 읽었다. 각 도구의 문서에서 따로 다룬다 |
 | 11 | `baselines/yu-group.md`와 `baselines/availability.md`의 갱신 필요 칸(§1.3 항목 2–6) | 이 작업의 소유 파일이 아니라 수정하지 않았다. 담당 작업에서 반영해야 한다. 특히 "shared-resource 사건이 아니다"(§1.3 항목 3)와 SIMEXPLORER 행의 "Unknown" |
 | 12 | 이 문서의 §3을 `process_race_method_matrix.md`(로드맵 §12 작업 6)에 옮길 때 SimRacer와 SIMEXPLORER를 한 계보로 표시할지 | P-6 |
+| 13 | (2026-10-16) `process_race_method_matrix.md`의 SimRacer 행 갱신: §2.2 라벨 표(C1·C3·C5·R2의 Q1·Q2가 불명으로 바뀜), §2.3 합계(SimRacer 사례별 25칸이 분석 12·불명 13), §2.4.2 칸, §2.5 항목 1(C1·C5 Q2 불일치는 SimRacer 쪽이 불명이 되어 해소), §6 R2 사건표의 SimRacer 행(⓪ 행 추가, ①② SimRacer 자체 불명) | 그 문서는 이 작업의 소유가 아니다. 담당 작업에서 반영해야 한다 |
+| 14 | (2026-10-16) R2 사건표 ⓪의 전제: R2의 사용 task가 생성자 thread(ES 시작 thread)가 아니라는 것 | 사례 기록 R2.E3에 기댄다. 코드로 다시 확인하지 않았다. 이 전제가 틀리면 fork 규칙 아래에서 그 쌍은 후보가 아니다 |
+| 15 | (2026-10-16) Sim-O/C(ITJ 2013)와 SimRacer(ISSTA'13)가 같은 도구의 서술인지 | 같은 저자, 같은 해, 같은 Simics 기반 제어(dummy device, `task_struct`)이지만 Sim-O/C 본문에 SimRacer라는 이름이 없다. [I]로만 쓴다 |
+| 16 | (2026-10-16) Yu의 2016년 UNL 홈 스냅샷(Wayback) 안에 ISSTA'13 PDF 링크가 있는지 | 이 작업 공간에서 web.archive.org를 열 수 없었다(경로 34). 다른 환경에서 확인할 수 있다 |
 
 ---
 
 ## 7. 출처 목록
 
 - STVR 2017(`[전문]`): T. Yu, W. Srisa-an, G. Rothermel, *An automated framework to support testing for process-level race conditions*, Softw. Test. Verif. Reliab. 27(4–5), e1634, 2017. DOI 10.1002/stvr.1634. 사본: `https://archive.cps-vo.org/node/36387`(레코드), `https://archive.cps-vo.org/node/36388`(파일 `Yu_SimExplorer_JA.pdf`). sha256 `af805231f69ffc0e12d96fe4e4e9a356932653c56c382fdd3debd211bcdd3e08`, 26쪽.
+- Sim-O/C(`[2차]`, 2026-10-16 추가): T. Yu, W. Srisa-an, G. Rothermel, *Sim-O/C: An Observable and Controllable Testing Framework for Elusive Faults*, Intel Technology Journal 17(2), 2013, pp. 178–197. `https://www.intel.com/content/dam/www/public/us/en/documents/research/2013-vol17-iss-2-intel-technology-journal.pdf`(호 전체 PDF). sha256 `24080f8ec175aecb7e6c93fd0a436dd8532c856375d8b356b772030dc8c1813c`.
+- SimTester(`[2차]` 부분, 2026-10-16 추가): T. Yu, W. Srisa-an, G. Rothermel, *SimTester: a controllable and observable testing framework for embedded systems*, VEE 2012, pp. 51–61. `https://www.cl.cam.ac.uk/research/srg/netos/vee_2012/papers/p51.pdf`. sha256 `206c12cef8dc9f01fe2ae0b2d16dc2d2c719ce60f553fe75aa8627e3022b08cb`.
 - SimRacer(`[초록]`): DOI 10.1145/2483760.2483771. 서지·초록: `https://api.openalex.org/works/doi:10.1145/2483760.2483771`, `https://api.crossref.org/works/10.1145/2483760.2483771`, Semantic Scholar Graph API(corpus ID 18130539). ISSTA 2013 프로그램: `https://issta2013.inf.usi.ch/program/`.
 - SimEvo(`[2차]`): T. Yu, *SimEvo: Testing Evolving Multi-process Software Systems*, ICSME 2017, pp. 204–215. `https://par.nsf.gov/servlets/purl/10089644`. sha256 `143f7351489367d9301b97ac2317e3f1f263ac159ee737ffcff14bb0adc31be6`.
 - DESCRY(`[2차]`): T. Yu, T. S. Zaman, C. Wang, ESEC/FSE 2017. `https://chaowang-vt.github.io/pubDOC/YuZW17.pdf`. sha256 `f9d7b57bbb0c1269f9143b4ec69286e90348a58fadd071f76f11022e06dfbf60`.
@@ -451,4 +502,4 @@ C2의 **공개 부분** (역할 재구성에 쓸 수 있는 알려진 조건):
 - 학위논문 landing(`[초록]`): `https://digitalcommons.unl.edu/computerscidiss/77`, `https://digitalcommons.unl.edu/dissertations/AAI3626337/`.
 - 저자 페이지: `https://homepages.uc.edu/~tyu/`(`links/research.html`, `links/projects.html`, `CV/tyu_cv.pdf`), `https://tingting-yu.scholar.uconn.edu`.
 - Intel Simics 공개 릴리스(오늘의 벤더 문서, 컨텍스트): `https://www.intel.com/content/www/us/en/developer/articles/tool/simics-simulator.html`.
-- 저장소 기록: `baselines/availability.md`, `baselines/yu-group.md`, `cases/ledger.md`, `plan/ROADMAP_20261015.md`(§1.2, §1.4, §2.2, §9, §10), `plan/methods/RacePro.md`(같은 형식), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`.
+- 저장소 기록: `baselines/availability.md`, `baselines/yu-group.md`, `cases/ledger.md`, `plan/ROADMAP_20261015.md`(§1.2, §1.4, §2.2, §9, §10), `plan/methods/RacePro.md`(같은 형식), `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md`, `CONDITIONS_POLICY.md`. 2026-10-16 추가: `cases/R2.md`(§6 S1·S2, §6.1, A7), `cases/C1.md`, `plan/case_basis_register.md`(R2.E3, R2.E5), `plan/process_race_method_matrix.md`(§2.5 항목 1, §4.3, A10), `plan/methods/SIMEXPLORER.md`(경로 14, 16, 17의 쪽 표기와 해시).

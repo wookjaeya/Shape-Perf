@@ -1,14 +1,20 @@
-# effects_external -- the life cycle of an external application: the effects guarded by
-# Type = EXTERNAL can only apply to a record that CFE_ES_AppCreate tagged.
+# effects_external -- the life cycle of an external application, and the refutation checks of the
+# asserted effect guards.  The effects guarded by Type = EXTERNAL can only apply to a record that
+# CFE_ES_AppCreate tagged; the cleanup retires the record (LIVE -> RESERVED) before it frees it.
 #
 # Unit-test values only: nothing here is a recorded run and no value is a research condition.
 #
-#   slot 2  a core application, for the negative checks: the guards leave it alone
 #   slot 1  an external application: AppCreate clears the record, tags it EXTERNAL, reserves it and
 #           publishes it; the task runs (RUNNING); the background scan moves it to WAITING; its exit
-#           marks it STOPPED; the cleanup frees the record
+#           marks it STOPPED; the cleanup retires the record (RESERVED), then frees it (FREE)
+#   slot 2  a core application.  The trace shows points that the code never reaches for it: the scan
+#           store, the exit store, the cleanup retire and the cleanup free.  Each guard is false in the
+#           replay, so each point is a finding and a guard failure, and nothing is applied: three are
+#           trace/profile disagreements, and the retire is a refutation of its declared-trusted guard
+#           (refutable_by O3, O4)
 #   slot 3  an external application whose start fails: reserved and tagged, then freed again; the
-#           task that belonged to it exits without any effect (its record is not live)
+#           task that belonged to it shows the exit store although its record is not live, which is a
+#           disagreement as well
 const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
 owner T_EXT 1
 owner T_CORE 2
@@ -47,6 +53,8 @@ T_CORE CFE_ES_ExitApp.stop_external pt
 T_CORE CFE_ES_ExitApp ret
 
 T0 CFE_ES_CleanUpApp call arg.AppId=0x110001
+T0 CFE_ES_CleanUpApp.retire pt lp.slot=1
+T0 CFE_ES_CleanUpApp.retire pt lp.slot=2
 T0 CFE_ES_CleanUpApp.free_record pt lp.slot=1
 T0 CFE_ES_CleanUpApp.free_record pt lp.slot=2
 T0 CFE_ES_CleanUpApp ret result=0

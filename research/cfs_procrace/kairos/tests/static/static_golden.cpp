@@ -20,6 +20,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -36,14 +38,14 @@ struct Case {
 };
 
 // The sections that carry facts; `basis` (tool hash, counts) is left out, it changes with the tool.
-const std::vector<std::string> kFactSections = {"files", "functions", "calls", "derives", "loops", "init", "consts", "writers", "atype", "locs", "targets", "image", "terminals", "outcalls"};
+const std::vector<std::string> kFactSections = {"files", "functions", "calls", "derives", "loops", "iters", "order", "init", "consts", "writers", "atype", "locs", "targets", "spawnparams", "image", "terminals", "outcalls", "fwrites"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
       {"writers", "writers.c", {}, kFactSections},
       {"outptr", "outptr.c", {"--target", "Slot.id"}, kFactSections},
       {"derives", "derives.c", {}, kFactSections},
-      {"loops", "loops.c", {"--target", "Gate.state", "--delay-op", "fx_delay"}, kFactSections},
+      {"loops", "loops.c", {"--target", "Gate.state", "--target", "Rec.state", "--target", "Sys.ready", "--target", "Sys.phase", "--delay-op", "fx_delay", "--lock-op", "fx_lock", "--unlock-op", "fx_unlock"}, kFactSections},
       {"spawn", "spawn.c", {}, kFactSections},
       {"atype", "atype.c", {"--target", "Plain.id", "--target", "Cast.id", "--target", "Esc.id", "--target", "Mix.id", "--target", "Inner.id", "--target", "Safe.id"}, kFactSections},
   };
@@ -204,9 +206,25 @@ int run_core(const std::string& tool, const std::string& profile, const std::str
     return 1;
   }
 
-  // The numbers: the summary of the run, the writers of the identity field with their INIT image,
-  // the core module order, the spawn sites and the derives of the event calls.
-  std::string text = "# extraction summary\n" + without_first_line(log1);
+  // The numbers: the analysis basis, the summary of the run, the writers of the identity field
+  // with their INIT image, the loops of the core serialization and their certificate-view rules,
+  // the order the core table walks establish, the spawn facts and the derives of the event calls.
+  std::string text;
+  {
+    // the basis items; `front_end.build_identity` names the compiler that built this tool and
+    // is left out, so that the golden is the same for every build of the tool
+    std::string v;
+    if (run(quote(tool) + " show " + quote(basis), &v) != 0) {
+      std::fprintf(stderr, "show basis failed:\n%s\n", v.c_str());
+      return 1;
+    }
+    text += "# analysis basis\n";
+    std::istringstream in(v);
+    std::string l;
+    while (std::getline(in, l))
+      if (l.rfind("front_end.build_identity ", 0) != 0) text += l + "\n";
+  }
+  text += "\n# extraction summary\n" + without_first_line(log1);
   auto show = [&](const std::string& args, const char* title) {
     std::string v;
     if (run(quote(tool) + " show " + quote(facts) + " " + args, &v) != 0) {
@@ -235,20 +253,46 @@ int run_core(const std::string& tool, const std::string& profile, const std::str
     return true;
   };
   if (!show("--section locs --section init --section writers --section outcalls --loc CFE_SB_Global_t.AppId", "the identity field of the SB task")) return 1;
+  if (!show("--section fwrites --loc CFE_SB_Global_t.AppId", "functions whose own body writes the identity field (or the whole record)")) return 1;
   if (!show_loops()) return 1;
+  if (!show("--section order", "the order the table walks establish (unrolled iterations)")) return 1;
+  if (!show("--section spawnparams", "parameters that carry the function a spawned task runs")) return 1;
   if (!show("--section image", "the images of the tables the loops walk")) return 1;
   if (!show("--section targets", "indirect call and spawn targets")) return 1;
   std::string derives;
   if (run(quote(tool) + " show " + quote(facts) + " --section derives --callee CFE_EVS_SendEventWithAppID", &derives) != 0) return 1;
   size_t from_sb = 0, rows = 0;
+  std::map<std::string, size_t> per_file;
+  std::vector<std::string> sb_rows;
+  std::set<std::string> capture_points;  // file:line of the read of the field
   std::istringstream ds(derives);
   std::string line;
   while (std::getline(ds, line)) {
     if (line.find(" arg ") == std::string::npos) continue;
     ++rows;
-    if (line.find("derived from CFE_SB_Global_t.AppId") != std::string::npos) ++from_sb;
+    if (line.find("derived from CFE_SB_Global_t.AppId") == std::string::npos) continue;
+    ++from_sb;
+    const size_t chain = line.find(" chain=");
+    sb_rows.push_back(chain == std::string::npos ? line : line.substr(0, chain));
+    const size_t at = line.find(" read at ");
+    if (at != std::string::npos) {
+      std::string where = line.substr(at + 9);
+      where = where.substr(0, where.find(' '));
+      const size_t c1 = where.find(':'), c2 = where.find(':', c1 + 1);
+      ++per_file[where.substr(0, c1)];
+      capture_points.insert(where.substr(0, c2));
+    }
   }
   text += "\n# derives rows of the event calls: " + std::to_string(rows) + ", of them derived from CFE_SB_Global_t.AppId: " + std::to_string(from_sb) + "\n";
+  for (const auto& kv : per_file) text += "  " + kv.first + ": " + std::to_string(kv.second) + "\n";
+  for (const std::string& r : sb_rows) text += r + "\n";
+  // Cross-check against the gdb record (results/R2_gdb_v701.md section 6, recount of 2026-10-12):
+  // 39 static SB call sites pass the field (cfe_sb_api.c 34, cfe_sb_priv.c 1, cfe_sb_task.c 4), and
+  // the three sites executed before the publication read the field at cfe_sb_api.c:277,
+  // cfe_sb_api.c:1185 and cfe_sb_priv.c:786.  Test data from that document, not an output of the tool.
+  text += "# the violating sites of the gdb record among the derived sites\n";
+  for (const char* site : {"cfe/modules/sb/fsw/src/cfe_sb_api.c:277", "cfe/modules/sb/fsw/src/cfe_sb_api.c:1185", "cfe/modules/sb/fsw/src/cfe_sb_priv.c:786"})
+    text += std::string("  ") + site + ": " + (capture_points.count(site) != 0 ? "derived" : "NOT FOUND") + "\n";
   // The reachability of the event calls from the startup thread and from the core task mains, without and with the
   // spawn edges (counts per root; the per-site lines are left out).
   for (const char* follow : {"", " --follow-spawn"}) {

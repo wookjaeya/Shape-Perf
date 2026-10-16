@@ -1,34 +1,49 @@
 extract
   translation units          1
-  functions                  14 (bodies read 11, in system headers skipped 0)
-  call sites                 7
+  functions                  24 (bodies read 19, in system headers skipped 0)
+  call sites                 26
   indirect calls             2 (resolved 2, unresolved 0)
   spawn calls                1 (entry resolved 1)
-  loops                      8 (table walks resolved 2, failed 0)
+  loops                      16 (table walks resolved 2, failed 0)
+  certificate-view rules     unroll 6, await 3, star-closed 7
+  spawn parameters           0, unrolled iteration rows 18
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
   location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
-  location Gate.state   writers 2 (direct 2, data function 0, out-pointer 0, initial values 2), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
-  hand-entered inputs        14 (built-in data-function table 12, command line 2)
+  location Gate.state   writers 3 (direct 3, data function 0, out-pointer 0, initial values 2), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location Rec.state   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location Sys.phase   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  location Sys.ready   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  hand-entered inputs        19 (built-in data-function table 12, command line 7)
 facts-view 1
 [files] 1
-  0 loops.c 2647a528f679 2598
-[functions] 14
+  0 loops.c 71cc1aec4f62 5420
+[functions] 24
   fn 0 a_init loops.c:64-67 params=0 {defined,static}
   fn 1 b_init loops.c:68-71 params=0 {defined,static}
   fn 2 b_task loops.c:72-72 params=0 {defined,static}
-  fn 3 c_task loops.c:73-73 params=0 {defined,static}
-  fn 4 counted loops.c:36-39 params=0 {defined}
-  fn 5 fx_abort loops.c:15 params=0 {}
-  fn 6 fx_delay loops.c:14 params=1 {}
-  fn 7 fx_spawn loops.c:62 params=3 {}
-  fn 8 init_all loops.c:81-89 params=0 {defined}
-  fn 9 init_flat loops.c:105-108 params=0 {defined}
-  fn 10 poll_budget loops.c:25-33 params=1 {defined}
-  fn 11 poll_flag loops.c:18-22 params=0 {defined}
-  fn 12 spawn_all loops.c:91-101 params=0 {defined}
-  fn 13 wait_all loops.c:42-47 params=0 {defined}
-[calls] 7
+  fn 3 bump_gate loops.c:185-185 params=0 {defined,static}
+  fn 4 c_task loops.c:73-73 params=0 {defined,static}
+  fn 5 counted loops.c:36-39 params=0 {defined}
+  fn 6 counter_in_condition loops.c:171-181 params=0 {defined}
+  fn 7 fx_abort loops.c:15 params=0 {}
+  fn 8 fx_delay loops.c:14 params=1 {}
+  fn 9 fx_lock loops.c:126 params=0 {}
+  fn 10 fx_spawn loops.c:62 params=3 {}
+  fn 11 fx_unlock loops.c:127 params=0 {}
+  fn 12 init_all loops.c:81-89 params=0 {defined}
+  fn 13 init_flat loops.c:105-108 params=0 {defined}
+  fn 14 poll_budget loops.c:25-33 params=1 {defined}
+  fn 15 poll_flag loops.c:18-22 params=0 {defined}
+  fn 16 poll_mixed loops.c:201-213 params=1 {defined}
+  fn 17 poll_untargeted loops.c:226-236 params=0 {defined}
+  fn 18 poll_writer loops.c:186-197 params=0 {defined}
+  fn 19 rec_used loops.c:129-129 params=1 {defined,static}
+  fn 20 spawn_all loops.c:91-101 params=0 {defined}
+  fn 21 sync_delay loops.c:134-167 params=2 {defined}
+  fn 22 wait_all loops.c:42-47 params=0 {defined}
+  fn 23 wait_phase loops.c:216-222 params=2 {defined}
+[calls] 26
   site 1 loops.c:20:5 poll_flag -> fx_delay direct {in-loop,delay-op} loop=0 depth=1
       arg 0:const 5 5
   site 3 loops.c:29:5 poll_budget -> fx_delay direct {in-loop,delay-op} loop=1 depth=1
@@ -42,46 +57,174 @@ facts-view 1
       arg 1:symbolic Mod.name
       arg 2:symbolic Mod.task
   site 16 loops.c:107:42 init_flat -> <indirect> indirect {in-loop} loop=7 depth=1
+  site 18 loops.c:143:5 sync_delay -> fx_lock direct {in-loop,lock-op} loop=8 depth=1
+  site 20 loops.c:146:11 sync_delay -> rec_used direct {intra-tu,result-used,result-tested,in-loop} loop=9 depth=2
+      arg 0:top ~r
+  site 21 loops.c:151:5 sync_delay -> fx_unlock direct {in-loop,unlock-op} loop=8 depth=1
+  site 22 loops.c:163:5 sync_delay -> fx_delay direct {in-loop,delay-op} loop=8 depth=1
+      arg 0:top ~wait
+  site 25 loops.c:179:5 counter_in_condition -> fx_delay direct {in-loop,delay-op} loop=10 depth=1
+      arg 0:const 1 1
+  site 28 loops.c:188:5 poll_writer -> fx_lock direct {in-loop,lock-op} loop=12 depth=1
+  site 29 loops.c:190:7 poll_writer -> fx_unlock direct {in-loop,unlock-op} loop=12 depth=1
+  site 30 loops.c:193:5 poll_writer -> fx_unlock direct {in-loop,unlock-op} loop=12 depth=1
+  site 31 loops.c:194:5 poll_writer -> bump_gate direct {intra-tu,in-loop} loop=12 depth=1
+  site 32 loops.c:195:5 poll_writer -> fx_delay direct {in-loop,delay-op} loop=12 depth=1
+      arg 0:const 1 1
+  site 34 loops.c:204:5 poll_mixed -> fx_lock direct {in-loop,lock-op} loop=13 depth=1
+  site 35 loops.c:206:7 poll_mixed -> fx_unlock direct {in-loop,unlock-op} loop=13 depth=1
+  site 36 loops.c:209:5 poll_mixed -> fx_unlock direct {in-loop,unlock-op} loop=13 depth=1
+  site 37 loops.c:210:5 poll_mixed -> fx_delay direct {in-loop,delay-op} loop=13 depth=1
+      arg 0:const 1 1
+  site 39 loops.c:219:5 wait_phase -> fx_delay direct {in-loop,delay-op} loop=14 depth=1
+      arg 0:const 5 5
+  site 41 loops.c:228:5 poll_untargeted -> fx_lock direct {in-loop,lock-op} loop=15 depth=1
+  site 42 loops.c:230:7 poll_untargeted -> fx_unlock direct {in-loop,unlock-op} loop=15 depth=1
+  site 43 loops.c:233:5 poll_untargeted -> fx_unlock direct {in-loop,unlock-op} loop=15 depth=1
+  site 44 loops.c:234:5 poll_untargeted -> fx_delay direct {in-loop,delay-op} loop=15 depth=1
+      arg 0:const 1 1
 [derives] 0
-[loops] 8
+[loops] 16
   loop 0 site 0 loops.c:19:3 in poll_flag depth=1 poll trip=unknown exits=0 calls=1
       delay-call site 1
       exit (not (ne global:g_flag 1))
       mod [(call-result fx_delay)]
+      condition-exits (not (ne global:g_flag 1))
+      predicate direct-test (not (ne global:g_flag 1))
+      rule star-closed {delay-in-body,mod-incomplete}: star-closed, unmodelled-sync: L1 (ii) fails: the test reads are not in one critical section of one lock, nor one atomic read
   loop 1 site 2 loops.c:27:3 in poll_budget depth=1 poll trip=unknown exits=1 calls=1
       delay-call site 3
       exit (or (not (gt local:left 0)) (and (gt local:left 0) (eq field:Gate.state 2)))
       mod [local:left, (call-result fx_delay)]
       budget [local:left, param:timeout#0, 10]
+      condition-exits (eq field:Gate.state 2)
+      predicate direct-test (eq field:Gate.state 2)
+      rule star-closed {delay-in-body,L1-i}: star-closed, unmodelled-sync: L1 (ii) fails: the test reads are not in one critical section of one lock, nor one atomic read
   loop 2 site 5 loops.c:38:3 in counted depth=1 constant-trip trip=exact(4) exits=0 calls=0
-  loop 3 site 6 loops.c:44:3 in wait_all depth=1 count-bounded trip=exact(3) exits=0 calls=2
+      rule unroll {}: unrolled: 4 iterations from the constant bound
+  loop 3 site 6 loops.c:44:3 in wait_all depth=1 constant-trip trip=exact(3) exits=0 calls=2
       delay-call site 8
       exit (not (lt local:i 3))
       mod [local:i, (call-result fx_delay)]
+      rule unroll {}: unrolled: 3 iterations from the constant bound
   loop 4 site 7 loops.c:45:5 in wait_all depth=2 poll trip=unknown exits=0 calls=1
       delay-call site 8
       exit (not (ne field:Gate.state 2))
       mod [(call-result fx_delay)]
+      condition-exits (not (ne field:Gate.state 2))
+      predicate direct-test (not (ne field:Gate.state 2))
+      rule star-closed {delay-in-body,L1-i} parent=3: star-closed, unmodelled-sync: L1 (ii) fails: the test reads are not in one critical section of one lock, nor one atomic read
   loop 5 site 11 loops.c:84:3 in init_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
       exit (eq local:e 0)
       mod [local:e, local:i, (call-result <indirect>)]
+      rule unroll {}: unrolled: 3 iterations, one per element of g_cfg.list in its static-initializer image
   loop 6 site 13 loops.c:95:3 in spawn_all depth=1 table-walk trip=exact(3) exits=1 calls=1 table=g_cfg.list
       exit (eq local:e 0)
       mod [local:e, local:i, (call-result fx_spawn)]
+      rule unroll {}: unrolled: 3 iterations, one per element of g_cfg.list in its static-initializer image
   loop 7 site 15 loops.c:107:3 in init_flat depth=1 other trip=unknown exits=0 calls=1
-[init] 2
+      rule star-closed {}: star-closed: no exact trip count
+  loop 8 site 17 loops.c:141:3 in sync_delay depth=1 poll trip=unknown exits=2 calls=5
+      delay-call site 22
+      lock one-lock-region site 18
+      exit (or (eq local:pending 0) (and (and (not (eq local:pending 0)) (not (gt local:left 10))) (not (gt local:left 0))))
+      mod [local:i, local:left, local:pending, local:r, local:status, local:wait, (call-result fx_delay), (call-result fx_lock), (call-result fx_unlock), (call-result rec_used)]
+      budget [local:left, param:timeout#1, local:wait, (store local:wait 10), (store local:wait local:left)]
+      condition-exits (eq local:pending 0)
+      predicate counter-zero (forall i 4 (not (and (call-result rec_used (seq local:r)) (lt field:Rec.state param:want#0))) (seq (cursor r 4 global:g_recs)))
+      rule await {delay-in-body,L1-i,L1-ii}: await(predicate) {success} {timeout}: a counter-zero test after a constant-trip loop, rewritten as forall; L1 (i) and (ii) hold on the extracted facts (relevant locations: 5, functions called from the body: 4); lemma L1 itself is not decided here
+  loop 9 site 19 loops.c:145:5 in sync_delay depth=2 constant-trip trip=exact(4) exits=0 calls=1
+      rule unroll {} parent=8: unrolled: 4 iterations from the constant bound
+  loop 10 site 23 loops.c:174:3 in counter_in_condition depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 25
+      exit (not (ne local:pending 0))
+      mod [local:i, local:pending, (call-result fx_delay)]
+      condition-exits (not (ne local:pending 0))
+      rule star-closed {delay-in-body,L1-i}: star-closed, unmodelled-sync: no recognised predicate (the condition reads the local pending, which is not a recognised counter: the loop condition reads it before the reset)
+  loop 11 site 24 loops.c:176:5 in counter_in_condition depth=2 constant-trip trip=exact(4) exits=0 calls=0
+      rule unroll {} parent=10: unrolled: 4 iterations from the constant bound
+  loop 12 site 27 loops.c:187:3 in poll_writer depth=1 poll trip=unknown exits=1 calls=5
+      delay-call site 32
+      lock one-lock-region site 28
+      exit (eq field:Gate.state 2)
+      mod [(call-result bump_gate), (call-result fx_delay), (call-result fx_lock), (call-result fx_unlock)]
+      condition-exits (eq field:Gate.state 2)
+      predicate direct-test (eq field:Gate.state 2)
+      rule star-closed {delay-in-body,L1-ii}: star-closed, unmodelled-sync: L1 (i) fails: the body writes Gate.state by bump_gate@loops.c:185 at loops.c:185:31
+  loop 13 site 33 loops.c:203:3 in poll_mixed depth=1 poll trip=unknown exits=1 calls=4
+      delay-call site 37
+      lock one-lock-region site 34
+      exit (or (ne field:Sys.ready 0) (le local:left 0))
+      mod [local:left, (call-result fx_delay), (call-result fx_lock), (call-result fx_unlock)]
+      budget [local:left, param:timeout#0, 1]
+      condition-exits (ne field:Sys.ready 0)
+      predicate direct-test (ne field:Sys.ready 0)
+      rule await {delay-in-body,L1-i,L1-ii}: await(predicate) {success} {timeout}: a direct test of shared loads, parameters and call results; L1 (i) and (ii) hold on the extracted facts (relevant locations: 5, functions called from the body: 3); lemma L1 itself is not decided here
+  loop 14 site 38 loops.c:218:3 in wait_phase depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 39
+      lock atomic-read site -
+      exit (not (and (lt field:Sys.phase param:want#0) (gt local:left 0)))
+      mod [local:left, (call-result fx_delay)]
+      budget [local:left, param:timeout#1, 5]
+      condition-exits (not (lt field:Sys.phase param:want#0))
+      predicate direct-test (not (lt field:Sys.phase param:want#0))
+      rule await {delay-in-body,L1-i,L1-ii}: await(predicate) {success} {timeout}: a direct test of shared loads, parameters and call results; L1 (i) and (ii) hold on the extracted facts (relevant locations: 5, functions called from the body: 1); lemma L1 itself is not decided here
+  loop 15 site 40 loops.c:227:3 in poll_untargeted depth=1 poll trip=unknown exits=1 calls=4
+      delay-call site 44
+      lock one-lock-region site 41
+      exit (ne field:Rec.used 0)
+      mod [(call-result fx_delay), (call-result fx_lock), (call-result fx_unlock)]
+      condition-exits (ne field:Rec.used 0)
+      predicate direct-test (ne field:Rec.used 0)
+      rule star-closed {delay-in-body,L1-ii,mod-incomplete}: star-closed, unmodelled-sync: L1 (i) undecided: Rec.used is not an extraction target: no A-TYPE listing, writes through pointers are not excluded
+[iters] 18
+  loop 5 iter 0 element address mod_a@loops.c:75 at loops.c:75
+    call site 12 <indirect> taken
+      callee = function a_init@loops.c:64 at loops.c:75
+  loop 5 iter 1 element address mod_b@loops.c:76 at loops.c:76
+    call site 12 <indirect> taken
+      callee = function b_init@loops.c:68 at loops.c:76
+  loop 5 iter 2 element address mod_c@loops.c:77 at loops.c:77
+    call site 12 <indirect> skipped
+  loop 6 iter 0 element address mod_a@loops.c:75 at loops.c:75
+    call site 14 fx_spawn skipped
+  loop 6 iter 1 element address mod_b@loops.c:76 at loops.c:76
+    call site 14 fx_spawn taken
+      arg 1 = string "b" at loops.c:76
+      arg 2 = function b_task@loops.c:72 [spawn-entry] at loops.c:76
+  loop 6 iter 2 element address mod_c@loops.c:77 at loops.c:77
+    call site 14 fx_spawn taken
+      arg 1 = string "c" at loops.c:77
+      arg 2 = function c_task@loops.c:73 [spawn-entry] at loops.c:77
+[order] 2
+  loop 5 loops.c:84 in init_all: call site 12 <indirect> (the callee per iteration)
+    iter 0 mod_a@loops.c:75 -> a_init@loops.c:64  taken
+    iter 1 mod_b@loops.c:76 -> b_init@loops.c:68  taken
+  loop 6 loops.c:95 in spawn_all: call site 14 fx_spawn arg 2 (spawn-entry)
+    iter 1 mod_b@loops.c:76 -> b_task@loops.c:72  taken
+    iter 2 mod_c@loops.c:77 -> c_task@loops.c:73  taken
+[init] 5
   Gate.state in g_gate zero-initialized value=0 defined at loops.c:9:6
   Gate.state in g_gates zero-initialized value=0 defined at loops.c:12:6
-[consts] 2
+  Rec.state in g_recs zero-initialized value=0 defined at loops.c:118:5
+  Sys.phase in g_sys zero-initialized value=0 defined at loops.c:124:5
+  Sys.ready in g_sys zero-initialized value=0 defined at loops.c:124:5
+[consts] 4
   4 = 4 at loops.c:38
   3 = 3 at loops.c:44
-[writers] 2
-  Gate.state assign at loops.c:65:3 in a_init value=const 1 [1] key=g_gate {early-init,init-tree} COMPUTED
-  Gate.state assign at loops.c:69:3 in b_init value=const 2 [2] key=g_gate {early-init,init-tree} COMPUTED
+  4 = 4 at loops.c:145
+  4 = 4 at loops.c:176
+[writers] 3
+  Gate.state assign at loops.c:65:3 in a_init value=const 1 [1] key=g_gate {early-init,init-tree} n/a
+  Gate.state assign at loops.c:69:3 in b_init value=const 2 [2] key=g_gate {early-init,init-tree} n/a
+  Gate.state inc-dec at loops.c:185:31 in bump_gate value=top [g_gate.state++] key=g_gate {} n/a
 [atype] 0
-[locs] 2
+[locs] 5
   Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
-  Gate.state writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=2 unresolved-indirect=0
+  Gate.state writer-set-complete writers=3 (direct 3, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=2 unresolved-indirect=0
+  Rec.state writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
+  Sys.phase writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
+  Sys.ready writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
 [targets] 6
   site 12 loops.c:87:29 in init_all indirect-call -> a_init@loops.c:64 via Mod.init of 2
   site 12 loops.c:87:29 in init_all indirect-call -> b_init@loops.c:68 via Mod.init of 2
@@ -89,6 +232,7 @@ facts-view 1
   site 14 loops.c:99:5 in spawn_all spawn-entry -> c_task@loops.c:73 via Mod.task of 2
   site 16 loops.c:107:42 in init_flat indirect-call -> a_init@loops.c:64 via Mod.init of 2
   site 16 loops.c:107:42 in init_flat indirect-call -> b_init@loops.c:68 via Mod.init of 2
+[spawnparams] 0
 [image] 14
   g_cfg.list address mod_list@loops.c:78
   mod_a@loops.c:75.init function a_init
@@ -107,3 +251,8 @@ facts-view 1
 [terminals] 1
   site 4 fx_abort at loops.c:32:3 in poll_budget depth=0 {process-terminal,unguarded} guard=-
 [outcalls] 0
+[fwrites] 4
+  a_init@loops.c:64 field Gate.state at loops.c:65
+  b_init@loops.c:68 field Gate.state at loops.c:69
+  bump_gate@loops.c:185 field Gate.state at loops.c:185
+  counted field <global>.g_count at loops.c:38

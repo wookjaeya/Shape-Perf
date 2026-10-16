@@ -211,6 +211,24 @@ class Checker {
   bool resolve_name(Expr* e, ExprEnv* env, Sort hint, bool report);
   bool resolve_call(Expr* e, ExprEnv* env);
   bool resolve_cmp(Expr* e, ExprEnv* env);
+  // Warns when an Id is compared with an integer literal or constant outside 0 .. 0xFFFFFFFF: an Id
+  // is a 32-bit value and the Int operand is not reduced (eval.hpp), so the result is decided by the
+  // sorts alone (`id = -1` is always false).
+  void warn_id_range(const Expr& id_side, const Expr& int_side, const SrcLoc& loc) {
+    if (id_side.sort.kind != SortKind::Id || int_side.sort.kind != SortKind::Int) return;
+    int64_t v = 0;
+    if (int_side.kind == ExprKind::IntLit) {
+      v = int_side.ival;
+    } else if (int_side.kind == ExprKind::Name && int_side.ref == NameRef::Const && int_side.ref_index >= 0 &&
+               p_.consts[static_cast<size_t>(int_side.ref_index)].value == ConstDecl::Value::Int) {
+      v = p_.consts[static_cast<size_t>(int_side.ref_index)].ival;
+    } else {
+      return;
+    }
+    if (v < 0 || v > 0xFFFFFFFFll)
+      warn(loc, "'" + expr_text(int_side) + "' is outside 0 .. 0xFFFFFFFF and is compared with the Id '" + expr_text(id_side) +
+                    "': an Id is a 32-bit value and the integer is not reduced, so the comparison is decided by the sorts alone");
+  }
   bool expect_bool(Expr* e, ExprEnv* env) {
     if (!resolve_expr(e, env, simple(SortKind::Unknown))) return false;
     if (e->sort.kind != SortKind::Bool) {
@@ -382,6 +400,8 @@ bool Checker::resolve_cmp(Expr* e, ExprEnv* env) {
       return false;
     }
   }
+  warn_id_range(*l, *r, e->loc);
+  warn_id_range(*r, *l, e->loc);
   return true;
 }
 
@@ -556,6 +576,10 @@ bool Checker::resolve_expr(Expr* e, ExprEnv* env, Sort hint) {
           err(e->args[i]->loc, "cannot compare " + sort_name(x->sort) + " with " + sort_name(e->args[i]->sort) + " in a set");
           ok = false;
         }
+        if (ok) {
+          warn_id_range(*x, *e->args[i], e->args[i]->loc);
+          warn_id_range(*e->args[i], *x, e->args[i]->loc);
+        }
       }
       e->sort = bool_sort();
       return ok;
@@ -607,6 +631,9 @@ void Checker::check_provs() {
     }
     if (!d.side.empty() && d.side != "supplier" && d.side != "caller" && d.side != "rule")
       err(d.loc, "provenance '" + d.name + "': unknown side '" + d.side + "' (expected supplier, caller or rule)");
+    if (d.side == "caller" && !caller_side_tier(d.tier))
+      err(d.loc, "provenance '" + d.name + "': a record of tier '" + d.tier +
+                     "' cannot have side caller: a caller-side record is a cited text addressed to the caller (tier contract-backed, requirement-derived, admitted or issue-derived); a code pattern is a rule, and a hand-entered record never accepts an outcome (QT-4) nor states an appreq (QT-9)");
     const bool cites_text = d.kind == "api_doc" || d.kind == "requirement" || d.kind == "code_admission" || d.kind == "code_pattern";
     if (cites_text) {
       if (d.file.empty()) err(d.loc, "provenance '" + d.name + "' of kind " + d.kind + " names no file");
@@ -928,6 +955,8 @@ void Checker::check_ops() {
       for (const std::string& o : e.refutable_by)
         if (!is_obligation(o)) err(e.loc, ewhat + ": '" + o + "' is not an obligation (O1 ... O10)");
       if (e.when) expect_bool(e.when.get(), &env);
+      if (e.filter && e.status == "declared_trusted")
+        err(e.loc, ewhat + ": the guard of a declared_trusted effect is asserted (`when`), never a filter: a filter would hide the observations that refute it");
       auto res_of = [&](Sort* s) {
         if (!e.res || !resolve_expr(e.res.get(), &env, simple(SortKind::Unknown))) return false;
         if (e.res->sort.kind != SortKind::Res) {
@@ -1166,6 +1195,9 @@ void Checker::check_rspecs() {
         err(r.loc, what + ": appreq must cite a caller-side record (side caller), '" + r.appreq + "' has side '" +
                        (p_.provs[static_cast<size_t>(r.appreq_idx)].side.empty() ? "n/a" : p_.provs[static_cast<size_t>(r.appreq_idx)].side) +
                        "'; a supplier-side text or a rule never states what the caller must achieve");
+      else if (!caller_side_tier(p_.provs[static_cast<size_t>(r.appreq_idx)].tier))
+        err(r.loc, what + ": appreq cites '" + r.appreq + "' of tier '" + p_.provs[static_cast<size_t>(r.appreq_idx)].tier +
+                       "'; an appreq is a cited reference addressed to the caller, never a hand-entered or code-derived record (QT-9: no researcher-authored appreq)");
     }
     if (r.allowed_head.kind == AllowedKind::None && r.appreq_unspecified)
       note(r.loc, what + ": 'allowed none' without a specified appreq: the caller-level Allowed is unspecified_by_reference (SPEC 1.6)");

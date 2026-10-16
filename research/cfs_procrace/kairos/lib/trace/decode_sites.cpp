@@ -53,6 +53,64 @@ Status check_site(const SiteSpec& s) {
     }
     if (sl.role.empty()) return Status::error(Err::Invalid, who + ": slot " + std::to_string(sl.slot) + " has no role");
   }
+  // The decoders of the identity join read fixed positions (kz_raw.h, KZ_DECODER).
+  auto need = [&](uint8_t slot, const char* role, uint8_t max_width) -> Status {
+    const SlotSpec* sl = slot_at(s, slot);
+    if (sl == nullptr)
+      return Status::error(Err::Invalid, who + ": the decoder reads slot " + std::to_string(slot) + (role != nullptr ? std::string(" (role ") + role + ")" : std::string()) + ", which the site does not declare");
+    if (role != nullptr && sl->role != role)
+      return Status::error(Err::Invalid, who + ": the decoder reads slot " + std::to_string(slot) + " as " + role + ", but the site declares it as " + sl->role);
+    if (sl->width > max_width) return Status::error(Err::Invalid, who + ": slot " + std::to_string(slot) + " is wider than the decoder keeps (" + std::to_string(max_width) + " bytes)");
+    return Status::success();
+  };
+  Status st = Status::success();
+  switch (s.decoder) {
+    case KZ_DECODER_SPAWN_CREATE:
+      if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": a spawn-create site is an entry site");
+      if (!(st = need(1, kRoleEntryFn, 8)).ok()) return st;
+      if (!(st = need(2, kRolePriority, 4)).ok()) return st;
+      if (!(st = need(kSlotReturnAddress, kRoleReturnAddress, 8)).ok()) return st;
+      break;
+    case KZ_DECODER_SPAWN_RETURN:
+      if (s.kind != KZ_SITE_KIND_RET_PROBE) return Status::error(Err::Invalid, who + ": a spawn-return site is a return site");
+      if (!(st = need(kSlotReturnAddress, kRoleReturnAddress, 8)).ok()) return st;
+      break;
+    case KZ_DECODER_THREAD_ENTRY:
+      if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": a thread-entry site is an entry site");
+      if (!(st = need(0, nullptr, 4)).ok()) return st;
+      break;
+    default:
+      break;
+  }
+  return Status::success();
+}
+
+const SlotSpec* slot_at(const SiteSpec& s, uint8_t slot) {
+  for (const SlotSpec& sl : s.slots)
+    if (sl.slot == slot) return &sl;
+  return nullptr;
+}
+
+bool has_return_address_key(const SiteSpec& s) {
+  const SlotSpec* sl = slot_at(s, kSlotReturnAddress);
+  return sl != nullptr && sl->role == kRoleReturnAddress && sl->width == 8;
+}
+
+Status check_plan(const std::vector<SiteSpec>& sites) {
+  for (const SiteSpec& s : sites) {
+    Status st = check_site(s);
+    if (!st.ok()) return st;
+  }
+  for (const SiteSpec& e : sites) {
+    if (e.kind != KZ_SITE_KIND_ENTRY_PROBE || e.symbol.empty()) continue;
+    for (const SiteSpec& r : sites) {
+      if (r.kind != KZ_SITE_KIND_RET_PROBE || r.symbol != e.symbol) continue;
+      for (const SiteSpec* x : {&e, &r})
+        if (!has_return_address_key(*x))
+          return Status::error(Err::Invalid, "site " + std::to_string(x->site) + " (" + x->label + "): the entry and return sites of " + e.symbol +
+                                                 " are matched on slot 3, which must be an 8-byte return_address");
+    }
+  }
   return Status::success();
 }
 

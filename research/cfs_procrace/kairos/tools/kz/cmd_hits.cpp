@@ -4,15 +4,18 @@
 //           [--basis basis.kz --group-caller]
 //
 // Without options: the events of every site and of every thread.  With --site S and --before T: how
-// many events of site S come before the first event of site T in the container's merged order
-// (time, CPU, arrival), per thread name; --group-slot groups them also by the value of S's slot with
-// that role, --group-return-slot by the value of that role in the paired return event.  With the
-// run's basis (its parent) --group-caller names the function that contains the return address
-// (the slot with role return_address, less the load bias of the run) of each counted event.
+// many events of site S have a timestamp that precedes the first event of site T in the container's
+// merged order (time, CPU, arrival), per thread name; --group-slot groups them also by the value of
+// S's slot with that role (and per thread), --group-return-slot by the value of that role in the
+// paired return event.  With the run's basis (its parent) --group-caller names the function that
+// contains the return address (the slot with role return_address, less the load bias of the run) of
+// each counted event, also per thread and per value of the --group-slot role.
 //
 // The merged order is built from timestamps of one clock (recorded in the run's conditions).  It is
-// evidence of what happened first, not a happens-before relation between threads: a count "before"
-// says what the clock showed, nothing more.
+// one-clock evidence of what the clock showed first, not a happens-before relation between threads
+// (kz_raw.h, SPEC 5.8).  The time of a probe is the time the probe fired, not the time of the
+// program effect the site stands for: a probe placed after a call fires after everything the call
+// did, so "before T" there means "before the return from the call", an upper bound on the effect.
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -182,12 +185,25 @@ int run(int argc, char** argv) {
     std::printf("\n");
   }
 
-  // Pairing for --group-return-slot.
+  // Pairing for --group-return-slot: the sites with their slots, as the observer attached them
+  // (match_calls pairs only sites that declare the return_address key).
   std::vector<kz::trace::SiteSpec> specs(sites.size());
   for (size_t i = 0; i < sites.size(); ++i) {
     specs[i].site = static_cast<uint32_t>(i);
     specs[i].kind = sites[i].kind;
+    specs[i].decoder = sites[i].decoder;
     c.string(sites[i].symbol, &specs[i].symbol);
+    c.string(sites[i].label, &specs[i].label);
+  }
+  for (const kz_site_slot& sl : slots) {
+    if (sl.site >= specs.size()) continue;
+    kz::trace::SlotSpec ss;
+    ss.slot = sl.slot;
+    ss.src = sl.src;
+    ss.width = sl.width;
+    ss.index = sl.index;
+    c.string(sl.role, &ss.role);
+    specs[sl.site].slots.push_back(ss);
   }
   const std::vector<kz::trace::CallPair> pairs = kz::trace::match_calls(events, specs, nullptr);
   std::map<uint32_t, uint32_t> return_of;  // entry event index -> return event index
@@ -207,19 +223,20 @@ int run(int argc, char** argv) {
   if (group_caller) {
     for (int k = 0; k < 4; ++k) {
       auto it = role_of.find({static_cast<uint32_t>(sid), static_cast<uint8_t>(k)});
-      if (it != role_of.end() && it->second == "return_address") caller_slot = k;
+      if (it != role_of.end() && it->second == kz::trace::kRoleReturnAddress) caller_slot = k;
     }
     if (caller_slot < 0) { std::fprintf(stderr, "kz hits: site %s has no slot with role return_address\n", site_label.c_str()); return 2; }
   }
 
   uint64_t total = 0;
   std::map<std::string, uint64_t> by_thread, by_slot, by_return, by_caller;
-  std::map<std::pair<std::string, std::string>, uint64_t> by_thread_slot;
-  uint64_t no_return = 0;
+  std::map<std::pair<std::string, std::string>, uint64_t> by_thread_slot, by_thread_caller, by_caller_slot;
+  uint64_t no_return = 0, unreadable = 0;
   for (size_t i = 0; i < limit; ++i) {
     const kz_raw_ev& e = events[i];
     if (e.site != sid) continue;
     ++total;
+    if ((e.flags & KZ_RAW_FLAG_TRUNC) != 0) ++unreadable;
     by_thread[thread_name(e)]++;
     if (slot_index >= 0) {
       by_slot[hex(e.a[slot_index])]++;
@@ -227,7 +244,10 @@ int run(int argc, char** argv) {
     }
     if (caller_slot >= 0) {
       const kz::trace::SymbolEntry* sym = symbols.find(e.a[caller_slot] - bias);
-      by_caller[sym != nullptr ? sym->name : std::string("(no symbol)")]++;
+      const std::string caller = sym != nullptr ? sym->name : std::string("(no symbol)");
+      by_caller[caller]++;
+      by_thread_caller[{thread_name(e), caller}]++;
+      if (slot_index >= 0) by_caller_slot[{caller, hex(e.a[slot_index])}]++;
     }
     if (!group_return.empty()) {
       auto it = return_of.find(static_cast<uint32_t>(i));
@@ -246,7 +266,8 @@ int run(int argc, char** argv) {
     }
   }
   if (tid_site >= 0)
-    std::printf("events of site %s before the first event of site %s: %llu\n", site_label.c_str(), before_label.c_str(), static_cast<unsigned long long>(total));
+    std::printf("events of site %s before the first event of site %s: %llu (timestamp order of one clock)\n", site_label.c_str(), before_label.c_str(),
+                static_cast<unsigned long long>(total));
   else
     std::printf("events of site %s: %llu\n", site_label.c_str(), static_cast<unsigned long long>(total));
   std::printf("  by thread name:\n");
@@ -261,13 +282,25 @@ int run(int argc, char** argv) {
   if (caller_slot >= 0) {
     std::printf("  by the function that contains the return address (slot %d, load bias %s):\n", caller_slot, hex(bias).c_str());
     for (const auto& t : by_caller) std::printf("    %-36s %llu\n", t.first.c_str(), static_cast<unsigned long long>(t.second));
+    if (slot_index >= 0) {
+      std::printf("  by caller and %s:\n", group_slot.c_str());
+      for (const auto& t : by_caller_slot)
+        std::printf("    %-36s %-11s %llu\n", t.first.first.c_str(), t.first.second.c_str(), static_cast<unsigned long long>(t.second));
+    }
+    std::printf("  by thread name and caller:\n");
+    for (const auto& t : by_thread_caller)
+      std::printf("    %-24s %-36s %llu\n", t.first.first.c_str(), t.first.second.c_str(), static_cast<unsigned long long>(t.second));
   }
+  if (unreadable != 0)
+    std::printf("  events with an unreadable slot (TRUNC; their slot values are 0 and were counted as such): %llu\n", static_cast<unsigned long long>(unreadable));
   if (!group_return.empty()) {
     std::printf("  by %s of the paired return:\n", group_return.c_str());
     for (const auto& t : by_return) std::printf("    %-36s %llu\n", t.first.c_str(), static_cast<unsigned long long>(t.second));
     std::printf("    %-36s %llu\n", "(no return event paired)", static_cast<unsigned long long>(no_return));
   }
-  std::printf("note: \"before\" is the container's merged order (time, CPU, arrival) of one clock; it is evidence, not a happens-before relation.\n");
+  std::printf("note: \"before\" is the container's merged order (time, CPU, arrival) of one clock; it is one-clock evidence, not a happens-before relation.\n");
+  if (tid_site >= 0)
+    std::printf("note: an event's time is when its probe fired; for a probe after a call (a point site), that is after the call returned, an upper bound on the time of the call's effect.\n");
   return 0;
 }
 

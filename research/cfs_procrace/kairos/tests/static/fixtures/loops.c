@@ -106,3 +106,131 @@ void init_flat(void) {
   int i;
   for (i = 0; g_flat[i] != 0; i++) (void)g_flat[i]->init();
 }
+
+/* ---- poll loops and the predicate forms of SPEC 4.3 (lock: fx_lock / fx_unlock) ---------------- */
+#include <signal.h>
+
+typedef struct {
+  int used;
+  int state;
+} Rec;
+
+Rec g_recs[4];
+typedef struct {
+  int ready;
+  volatile sig_atomic_t phase;
+} Sys;
+
+Sys g_sys;
+
+void fx_lock(void);
+void fx_unlock(void);
+
+static int rec_used(const Rec *r) { return r->used != 0; }
+
+/* The shape of a startup serialization: under the lock, count the used records that have not
+ * reached the awaited state; leave when none is left (form (b): a counter-zero test after a
+ * constant-trip loop, with a cursor over the table), or when the budget is spent. */
+int sync_delay(int want, int timeout) {
+  int status = -1;
+  int left = timeout;
+  int wait;
+  int pending;
+  int i;
+  const Rec *r;
+  while (1) {
+    pending = 0;
+    fx_lock();
+    r = g_recs;
+    for (i = 0; i < 4; i++) {
+      if (rec_used(r) && r->state < want) {
+        ++pending;
+      }
+      ++r;
+    }
+    fx_unlock();
+    if (pending == 0) {
+      status = 0;
+      break;
+    }
+    if (left > 10) {
+      wait = 10;
+    } else if (left > 0) {
+      wait = left;
+    } else {
+      break;
+    }
+    fx_delay(wait);
+    left -= wait;
+  }
+  return status;
+}
+
+/* The counter is tested by the loop condition, before the reset of the first iteration: the
+ * rewriting must not be made. */
+void counter_in_condition(void) {
+  int pending = 1;
+  int i;
+  while (pending != 0) {
+    pending = 0;
+    for (i = 0; i < 4; i++) {
+      if (g_recs[i].state != 2) ++pending;
+    }
+    fx_delay(1);
+  }
+}
+
+/* A direct test under the lock, but the body writes the tested field through a callee:
+ * L1 (i) fails. */
+static void bump_gate(void) { g_gate.state++; }
+void poll_writer(void) {
+  while (1) {
+    fx_lock();
+    if (g_gate.state == 2) {
+      fx_unlock();
+      break;
+    }
+    fx_unlock();
+    bump_gate();
+    fx_delay(1);
+  }
+}
+
+/* One test that decides both the condition exit and the budget exit: the part that does not
+ * test the budget is the condition. */
+void poll_mixed(int timeout) {
+  int left = timeout;
+  while (1) {
+    fx_lock();
+    if (g_sys.ready != 0 || left <= 0) {
+      fx_unlock();
+      break;
+    }
+    fx_unlock();
+    fx_delay(1);
+    left -= 1;
+  }
+}
+
+/* The loop condition reads one volatile sig_atomic_t field: one atomic read (L1 (ii)). */
+void wait_phase(int want, int timeout) {
+  int left = timeout;
+  while (g_sys.phase < want && left > 0) {
+    fx_delay(5);
+    left -= 5;
+  }
+}
+
+/* The shape of poll_mixed, but the tested field is not an extraction target: it has no A-TYPE
+ * listing, so writes through pointers cannot be excluded and L1 (i) stays undecided. */
+void poll_untargeted(void) {
+  while (1) {
+    fx_lock();
+    if (g_recs[0].used != 0) {
+      fx_unlock();
+      break;
+    }
+    fx_unlock();
+    fx_delay(1);
+  }
+}

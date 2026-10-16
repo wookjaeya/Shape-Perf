@@ -154,6 +154,71 @@ int main() {
     KZ_CHECK_EQ(static_cast<int>(a.kind), static_cast<int>(CallerAllowedKind::None));
   }
 
+  // (6) a hand-entered record never decides (QT-4) and never specifies appreq (QT-9).  The checker
+  // rejects `side caller` on it; an entry citing it is refused at load time.
+  {
+    Profile p;
+    std::vector<SourceText> f = kzmini::files();
+    const std::string from = "prov hand_a { tier researcher; kind researcher; authored";
+    f[0].text.replace(f[0].text.find(from), from.size(), "prov hand_a { tier researcher; kind researcher; side caller; authored");
+    f[2].text.replace(f[2].text.find("allowed none;"), 13, "allowed { documented_drop \"hand-entered\" prov hand_a; }");
+    std::vector<Diag> diags;
+    KZ_CHECK(!kz::phi::load_profile(f, &p, &diags).ok());
+  }
+  {  // the derivation itself reads such a record as a rule, for a profile that was not checked
+    Profile p;
+    KZ_CHECK(load_with(specified, "allowed { documented_drop \"x\" prov code_rule; }", &p));
+    kz::phi::ProvDecl& rule = p.provs[static_cast<size_t>(p.find_prov("code_rule"))];
+    rule.tier = "researcher";
+    rule.kind = "researcher";
+    rule.side = "caller";
+    CallerAllowed a = kz::phi::derive_caller_allowed(p, p.rspecs[0]);
+    KZ_CHECK(a.deciding.empty());
+    KZ_CHECK_EQ(a.rule_only.size(), static_cast<size_t>(1));
+    KZ_CHECK_EQ(static_cast<int>(a.kind), static_cast<int>(CallerAllowedKind::None));  // appreq doc_call still specified
+    // the appreq record made hand-entered: appreq counts as unspecified, so the caller level is unspecified
+    kz::phi::ProvDecl& call = p.provs[static_cast<size_t>(p.find_prov("doc_call"))];
+    call.tier = "researcher";
+    call.kind = "researcher";
+    a = kz::phi::derive_caller_allowed(p, p.rspecs[0]);
+    KZ_CHECK(a.deciding.empty());
+    KZ_CHECK_EQ(static_cast<int>(a.kind), static_cast<int>(CallerAllowedKind::Unspecified));
+    // a code-derived record with side caller is a rule as well
+    call.tier = "code-derived";
+    call.kind = "code_pattern";
+    a = kz::phi::derive_caller_allowed(p, p.rspecs[0]);
+    KZ_CHECK_EQ(static_cast<int>(a.kind), static_cast<int>(CallerAllowedKind::Unspecified));
+    // an admitted record with side caller decides
+    rule.tier = "admitted";
+    rule.kind = "code_admission";
+    a = kz::phi::derive_caller_allowed(p, p.rspecs[0]);
+    KZ_CHECK_EQ(static_cast<int>(a.kind), static_cast<int>(CallerAllowedKind::Entries));
+    KZ_CHECK_EQ(a.deciding.size(), static_cast<size_t>(1));
+  }
+
+  // (7) the caller level in the statistics: appreq and every Allowed entry are counted, with tier and side
+  {
+    Profile p;
+    std::vector<SourceText> f = kzmini::files();
+    f[0].text += "prov hand_r { tier researcher; kind researcher; side rule; authored \"unit test\"; }\n";
+    f[2].text.replace(f[2].text.find("allowed none;"), 13, "allowed { documented_drop \"a\" prov doc_call; documented_drop \"b\" prov hand_r; }");
+    std::vector<Diag> diags;
+    KZ_CHECK_OK(kz::phi::load_profile(f, &p, &diags));
+    const kz::phi::ProfileStats st = kz::phi::profile_stats(p);
+    KZ_CHECK_EQ(st.appreq_specified, static_cast<size_t>(1));
+    KZ_CHECK_EQ(st.allowed_entries, static_cast<size_t>(2));
+    KZ_CHECK_EQ(st.caller_level_hand_entered, static_cast<size_t>(1));
+    const std::string text = kz::phi::stats_text(st);
+    KZ_CHECK(text.find("rspec K-SEND appreq doc_call (contract-backed, side caller)") != std::string::npos);
+    KZ_CHECK(text.find("rspec K-SEND allowed documented_drop#1: doc_call (contract-backed, side caller)") != std::string::npos);
+    KZ_CHECK(text.find("rspec K-SEND allowed documented_drop#2: hand_r (researcher, side rule)") != std::string::npos);
+    KZ_CHECK(text.find("1 specified appreq, 2 Allowed entries, 1 citing a hand-entered record or none") != std::string::npos);
+    bool listed = false;
+    for (const std::string& n : st.hand_entered_names)
+      if (n == "allowed K-SEND.documented_drop#2") listed = true;
+    KZ_CHECK(listed);  // the hand-entered entry is in the hand-entered count as well
+  }
+
   // the words
   KZ_CHECK_EQ(std::string(kz::phi::caller_allowed_text(CallerAllowedKind::None)), std::string("none"));
   KZ_CHECK_EQ(std::string(kz::phi::caller_allowed_text(CallerAllowedKind::Unspecified)), std::string("unspecified_by_reference"));

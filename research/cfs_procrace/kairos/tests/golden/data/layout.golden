@@ -368,7 +368,7 @@ record kz_fact_expr size=32 fields=7
   rsv0 offset=12 size=4 count=1 kind=u32
   value offset=16 size=8 count=1 kind=i64
   name offset=24 size=8 count=1 kind=str
-record kz_fact_loop size=96 fields=24
+record kz_fact_loop size=120 fields=29
   site offset=0 size=4 count=1 kind=u32
   line offset=4 size=4 count=1 kind=u32
   file offset=8 size=8 count=1 kind=str
@@ -379,8 +379,9 @@ record kz_fact_loop size=96 fields=24
   budget_root offset=36 size=4 count=1 kind=u32
   lock_site offset=40 size=4 count=1 kind=u32
   lock_kind offset=44 size=1 count=1 kind=u8
-  rsv0 offset=45 size=1 count=1 kind=u8
-  rsv1 offset=46 size=2 count=1 kind=u16
+  cert offset=45 size=1 count=1 kind=u8
+  pred_form offset=46 size=1 count=1 kind=u8
+  lflags offset=47 size=1 count=1 kind=u8
   loop offset=48 size=4 count=1 kind=u32
   fn offset=52 size=4 count=1 kind=u32
   col offset=56 size=4 count=1 kind=u32
@@ -390,9 +391,13 @@ record kz_fact_loop size=96 fields=24
   trip_status offset=67 size=1 count=1 kind=u8
   n_exits offset=68 size=4 count=1 kind=u32
   n_calls offset=72 size=4 count=1 kind=u32
-  rsv2 offset=76 size=4 count=1 kind=u32
+  parent offset=76 size=4 count=1 kind=u32
   trip offset=80 size=8 count=1 kind=i64
   table offset=88 size=8 count=1 kind=str
+  trip_note offset=96 size=8 count=1 kind=str
+  pred_root offset=104 size=4 count=1 kind=u32
+  cond_root offset=108 size=4 count=1 kind=u32
+  cert_note offset=112 size=8 count=1 kind=str
 record kz_fact_init size=64 fields=13
   loc_type offset=0 size=8 count=1 kind=str
   loc_field offset=8 size=8 count=1 kind=str
@@ -582,14 +587,53 @@ record kz_fact_outcall size=64 fields=14
   summary offset=60 size=1 count=1 kind=u8
   rsv0 offset=61 size=1 count=1 kind=u8
   rsv1 offset=62 size=2 count=1 kind=u16
-record kz_tu size=72 fields=7
+record kz_tu size=88 fields=9
   tu offset=0 size=4 count=1 kind=u32
   fh offset=4 size=4 count=1 kind=u32
   source offset=8 size=8 count=1 kind=str
   object offset=16 size=8 count=1 kind=str
   flags offset=24 size=8 count=1 kind=str
   member offset=32 size=8 count=1 kind=str
-  command_sha256 offset=40 size=1 count=32 kind=u8
+  directory offset=40 size=8 count=1 kind=str
+  compiler offset=48 size=8 count=1 kind=str
+  command_sha256 offset=56 size=1 count=32 kind=u8
+record kz_fact_iter size=64 fields=16
+  loop offset=0 size=4 count=1 kind=u32
+  iter offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  arg_index offset=12 size=4 count=1 kind=u32
+  kind offset=16 size=1 count=1 kind=u8
+  status offset=17 size=1 count=1 kind=u8
+  value_kind offset=18 size=1 count=1 kind=u8
+  spawn offset=19 size=1 count=1 kind=u8
+  guard_root offset=20 size=4 count=1 kind=u32
+  fn offset=24 size=4 count=1 kind=u32
+  rsv0 offset=28 size=4 count=1 kind=u32
+  value offset=32 size=8 count=1 kind=i64
+  text offset=40 size=8 count=1 kind=str
+  file offset=48 size=8 count=1 kind=str
+  line offset=56 size=4 count=1 kind=u32
+  fh offset=60 size=4 count=1 kind=u32
+record kz_fact_spawn_param size=32 fields=9
+  fn offset=0 size=4 count=1 kind=u32
+  param offset=4 size=4 count=1 kind=u32
+  spawn_site offset=8 size=4 count=1 kind=u32
+  entry_fn offset=12 size=4 count=1 kind=u32
+  call_site offset=16 size=4 count=1 kind=u32
+  kind offset=20 size=1 count=1 kind=u8
+  rsv0 offset=21 size=1 count=1 kind=u8
+  rsv1 offset=22 size=2 count=1 kind=u16
+  via offset=24 size=8 count=1 kind=str
+record kz_fact_fwrite size=40 fields=9
+  fn offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=1 count=1 kind=u8
+  rsv0 offset=5 size=1 count=1 kind=u8
+  rsv1 offset=6 size=2 count=1 kind=u16
+  type offset=8 size=8 count=1 kind=str
+  field offset=16 size=8 count=1 kind=str
+  file offset=24 size=8 count=1 kind=str
+  line offset=32 size=4 count=1 kind=u32
+  fh offset=36 size=4 count=1 kind=u32
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1065,6 +1109,8 @@ enum KZ_EXPR_OP
   0x1f INDEX "index"
   0x20 DEREF "deref"
   0x21 STORE "store"
+  0x22 FORALL "forall"
+  0x23 CURSOR "cursor"
 enum KZ_EXPR_REF
   0x0 NONE "none"
   0x1 FIELD "field"
@@ -1073,6 +1119,7 @@ enum KZ_EXPR_REF
   0x4 PARAM "param"
   0x5 STRING "string"
   0x6 FUNC "function"
+  0x7 ELEM "element"
 enum KZ_LOCK_KIND
   0x0 NONE "none"
   0x1 ONE_REGION "one-lock-region"
@@ -1084,6 +1131,46 @@ enum KZ_LOOP_KIND
   0x3 POLL "poll"
   0x4 TABLE_WALK "table-walk"
   0x5 MESSAGE "message-loop"
+enum KZ_LOOP_CERT
+  0x0 UNDECIDED "undecided"
+  0x1 UNROLL "unroll"
+  0x2 AWAIT "await"
+  0x3 STAR "star-closed"
+enum KZ_PRED_FORM
+  0x0 NONE "none"
+  0x1 DIRECT "direct-test"
+  0x2 COUNTER_ZERO "counter-zero"
+  0x3 COMBINED "combination"
+flags KZ_LOOP_FLAG
+  0x1 DELAY_DIRECT "delay-in-body"
+  0x2 L1_MOD "L1-i"
+  0x4 L1_READ "L1-ii"
+  0x8 MOD_INCOMPLETE "mod-incomplete"
+enum KZ_ITER_KIND
+  0x0 NONE "none"
+  0x1 ELEMENT "element"
+  0x2 CALL "call"
+  0x3 ARG "argument"
+  0x4 CALLEE "callee"
+enum KZ_ITER_STATUS
+  0x0 UNKNOWN "unknown"
+  0x1 TAKEN "taken"
+  0x2 SKIPPED "skipped"
+  0x3 RESIDUAL "residual"
+enum KZ_ITER_SPAWN
+  0x0 NONE "none"
+  0x1 ENTRY "spawn-entry"
+  0x2 TASK_MAIN "task-main"
+enum KZ_SPAWN_PARAM_KIND
+  0x0 NONE "none"
+  0x1 DIRECT "entry-argument"
+  0x2 VIA_ENTRY "called-by-entry"
+enum KZ_FWRITE_KIND
+  0x0 NONE "none"
+  0x1 FIELD "field"
+  0x2 RECORD "record"
+  0x3 OUTARG "address-argument"
+  0x4 UNTYPED "untyped"
 enum KZ_TRIP_STATUS
   0x0 UNKNOWN "unknown"
   0x1 EXACT "exact"
@@ -1313,8 +1400,8 @@ section REF_LISTS type=6 record=kz_ref version=1
 section FACTS type=10 record=kz_fact_call version=2
 section FACT_ARGS type=11 record=kz_fact_arg version=2
 section DERIVES type=12 record=kz_fact_derives version=2
-section FACT_EXPRS type=13 record=kz_fact_expr version=2
-section FACT_LOOPS type=14 record=kz_fact_loop version=2
+section FACT_EXPRS type=13 record=kz_fact_expr version=3
+section FACT_LOOPS type=14 record=kz_fact_loop version=3
 section FACT_INIT type=15 record=kz_fact_init version=2
 section FACT_CONSTS type=16 record=kz_fact_const version=2
 section FACT_ATYPE type=17 record=kz_fact_atype version=2
@@ -1333,6 +1420,9 @@ section FACT_LOCS type=33 record=kz_fact_loc version=1
 section TERMINALS type=34 record=kz_fact_terminal version=1
 section OUTCALLS type=35 record=kz_fact_outcall version=1
 section TUS type=36 record=kz_tu version=1
+section LOOP_ITERS type=37 record=kz_fact_iter version=1
+section SPAWN_PARAMS type=38 record=kz_fact_spawn_param version=1
+section FUNC_WRITES type=39 record=kz_fact_fwrite version=1
 section SITES type=40 record=kz_site version=2
 section RAW_EVENTS type=41 record=kz_raw_ev version=1
 section STACKS type=43 record=kz_stack_frame version=1
@@ -1482,6 +1572,29 @@ format kz_fact_loop.fn idx 0
 format kz_fact_loop.fh idx 0
 format kz_fact_loop.kind enum KZ_LOOP_KIND
 format kz_fact_loop.trip_status enum KZ_TRIP_STATUS
+format kz_fact_loop.cert enum KZ_LOOP_CERT
+format kz_fact_loop.pred_form enum KZ_PRED_FORM
+format kz_fact_loop.lflags flags KZ_LOOP_FLAG
+format kz_fact_loop.parent idx 0
+format kz_fact_loop.pred_root idx 0
+format kz_fact_loop.cond_root idx 0
+format kz_fact_iter.site idx 0
+format kz_fact_iter.arg_index idx 0
+format kz_fact_iter.kind enum KZ_ITER_KIND
+format kz_fact_iter.status enum KZ_ITER_STATUS
+format kz_fact_iter.value_kind enum KZ_IMAGE_KIND
+format kz_fact_iter.spawn enum KZ_ITER_SPAWN
+format kz_fact_iter.guard_root idx 0
+format kz_fact_iter.fn idx 0
+format kz_fact_iter.fh idx 0
+format kz_fact_spawn_param.fn idx 0
+format kz_fact_spawn_param.spawn_site idx 0
+format kz_fact_spawn_param.entry_fn idx 0
+format kz_fact_spawn_param.call_site idx 0
+format kz_fact_spawn_param.kind enum KZ_SPAWN_PARAM_KIND
+format kz_fact_fwrite.fn idx 0
+format kz_fact_fwrite.kind enum KZ_FWRITE_KIND
+format kz_fact_fwrite.fh idx 0
 format kz_fact_init.source enum KZ_INIT_SOURCE
 format kz_fact_init.prov idx 0
 format kz_fact_init.fh idx 0
@@ -1555,4 +1668,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=a244133c5918d6272133a83ca41536b52dc9894112db6d279a9ad5830eb5c90f
+fingerprint=d564a43a5474c1c7cfd138b4caa03262e20e7d42f8dd3454ea24fad014607a2e

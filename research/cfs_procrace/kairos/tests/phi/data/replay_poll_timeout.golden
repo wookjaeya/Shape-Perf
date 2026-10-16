@@ -36,6 +36,8 @@ occurrences 0
 
 findings 0
 
+guard failures 0
+
 final state
   es.app[2] = LIVE id 0x110002
   loc CFE_SB_Global.AppId = 0

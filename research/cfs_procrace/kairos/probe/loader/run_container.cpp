@@ -24,17 +24,18 @@ bool build_id_from_hex(const std::string& hex, uint8_t out[20]) {
   return true;
 }
 
-std::vector<uint32_t> trap_owners(const std::vector<kz::trace::SiteSpec>& sites) {
-  std::vector<uint32_t> out(sites.size(), KZ_NONE32);
+std::vector<uint8_t> trap_accounts(const std::vector<kz::trace::SiteSpec>& sites) {
+  std::vector<uint8_t> out(sites.size(), KZ_TRAP_ACCOUNT_UNCOUNTED);
   for (size_t i = 0; i < sites.size(); ++i) {
-    // The owner of the trap at a file offset: the first ENTRY or POINT site there.
-    uint32_t own = KZ_NONE32;
+    // The row that counts the trap at a file offset: the first ENTRY or POINT site there.
+    size_t own = sites.size();
     for (size_t j = 0; j < sites.size(); ++j)
       if (sites[j].file_offset == sites[i].file_offset && sites[j].kind != KZ_SITE_KIND_RET_PROBE) {
-        own = static_cast<uint32_t>(j);
+        own = j;
         break;
       }
-    if (own != KZ_NONE32 && own != i) out[i] = sites[own].site;
+    if (own == i) out[i] = KZ_TRAP_ACCOUNT_COUNTED_HERE;
+    else if (own < sites.size()) out[i] = KZ_TRAP_ACCOUNT_IN_OTHER_ROW;
   }
   return out;
 }
@@ -107,15 +108,16 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
 
   // Perturbation accounting (SPEC 4.13): hits per site, observer CPU, process lifetime, /proc reads.
   std::vector<kz_perturbation> pert;
-  const std::vector<uint32_t> owner = trap_owners(in.sites);
+  const std::vector<uint8_t> account = trap_accounts(in.sites);
   for (size_t i = 0; i < in.sites.size(); ++i) {
     kz_perturbation p;
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_PROBE_HITS;
-    // A return site's own cost is the return trampoline; its entry trap is in the owner's row.
+    // A return site's own cost is the return trampoline; its entry trap is counted by the first
+    // ENTRY or POINT site at the same file offset, if there is one (trap_account).
     p.cost_class = in.sites[i].kind == KZ_SITE_KIND_RET_PROBE ? static_cast<uint32_t>(KZ_INSN_CLASS_RET_TRAMPOLINE) : in.sites[i].insn_class;
     p.site = in.sites[i].site;
-    p.shares_trap_with = owner[i];
+    p.trap_account = account[i];
     p.count = i < in.decoded.stats.site_hits.size() ? in.decoded.stats.site_hits[i] : 0;
     pert.push_back(p);
   }
@@ -124,20 +126,17 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_OBSERVER_CPU;
     p.site = KZ_NONE32;
-    p.shares_trap_with = KZ_NONE32;
     p.ns = in.observer_cpu_ns;
     pert.push_back(p);
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_BOOT_TIME;
     p.site = KZ_NONE32;
-    p.shares_trap_with = KZ_NONE32;
     p.ns = in.boot_ns;
     pert.push_back(p);
     std::memset(&p, 0, sizeof p);
     p.kind = KZ_PERTURBATION_KIND_PROC_CAPTURE;
     p.cost_class = KZ_INSN_CLASS_UNKNOWN;
     p.site = KZ_NONE32;
-    p.shares_trap_with = KZ_NONE32;
     p.count = in.proc_reads;
     p.ns = in.proc_ns;
     pert.push_back(p);

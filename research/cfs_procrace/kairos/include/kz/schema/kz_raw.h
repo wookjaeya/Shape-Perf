@@ -11,8 +11,11 @@
  *   - SITES (kz_site) is version 2: `rsv1` became `line`, and `label`/`source` were added
  *     (the plan's name for the site and the source position it came from);
  *   - LOSS (kz_loss) is version 2: `t_ns` was added (where in time the loss was reported);
- *   - PERTURBATION (kz_perturbation) is version 2: `rsv2` became `shares_trap_with`, the cost
- *     class `ret-trampoline` and the kind `proc-capture` were added (review of 2026-10-16);
+ *   - PERTURBATION (kz_perturbation): the reserved byte `rsv0` became `trap_account`
+ *     (KZ_TRAP_ACCOUNT, 0 = not stated), and the cost class `ret-trampoline` and the kind
+ *     `proc-capture` were added (review of 2026-10-16).  Offsets and sizes are unchanged and
+ *     the value 0 means what every earlier container holds there, so the section stays at
+ *     version 1 and run containers written before (env/logs/s1r2_p1.kzt) stay readable;
  *   - new sections: SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS (run containers) and SYMBOLS,
  *     TARGETS (basis containers).
  *
@@ -68,7 +71,7 @@ enum kz_raw_section_id {
   S(STACKS, 43, kz_stack_frame, 1)       \
   S(LOSS, 44, kz_loss, 2)                \
   S(RUNMETA, 45, kz_runmeta, 1)          \
-  S(PERTURBATION, 46, kz_perturbation, 2) \
+  S(PERTURBATION, 46, kz_perturbation, 1) \
   S(SITE_SLOTS, 50, kz_site_slot, 1)     \
   S(SIDE_EVENTS, 51, kz_side_ev, 1)      \
   S(THREADS, 52, kz_thread, 1)           \
@@ -190,12 +193,14 @@ enum kz_raw_section_id {
  * One row of the per-run perturbation accounting (SPEC 4.13).
  *   probe-hits    `site`, `count` hits.  An ENTRY or POINT site costs one trap per hit at its
  *                 address (`cost_class` = the instruction class there).  A RET site costs the
- *                 return trampoline per hit (`cost_class` ret-trampoline) and, at the function's
- *                 entry, a trap that a breakpoint at the same address shares: `shares_trap_with`
- *                 is then the site whose row already counts that trap (KZ_NONE32 if no site at
- *                 the same file offset counts it, and then the entry trap is in no row).  Any
- *                 site with an earlier site at the same file offset names it the same way, so a
- *                 cost estimate counts every trap once.
+ *                 return trampoline per hit (`cost_class` ret-trampoline); the trap it needs at
+ *                 the function's entry is the breakpoint at its address, shared with any other
+ *                 site at the same file offset.  `trap_account` says where each row's trap is
+ *                 counted, so that a cost estimate counts every trap once (KZ_TRAP_ACCOUNT):
+ *                 counted-here (the first ENTRY or POINT site at its file offset), in-other-row
+ *                 (that site's row, found by the same SITES.file_offset), uncounted (a RET site
+ *                 with no ENTRY or POINT site at its offset: its entry trap is in no row), or
+ *                 0 = not stated (rows of other kinds, and containers written before the field).
  *   observer-cpu  `ns` CPU time of the observer's drain thread.
  *   boot-time     `ns` lifetime of the traced process as the observer saw it (kz_runmeta).
  *   proc-capture  the observer's reads of /proc/<pid>/... while the traced process ran:
@@ -205,11 +210,11 @@ enum kz_raw_section_id {
  */
 #define KZ_PERTURBATION_FIELDS(X, T)                                                 \
   X(T, uint8_t, kind, )                                                              \
-  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint8_t, trap_account, ) /* KZ_TRAP_ACCOUNT; 0 = not stated */                \
   X(T, uint16_t, rsv1, )                                                             \
   X(T, uint32_t, cost_class, )                                                       \
   X(T, uint32_t, site, )                                                             \
-  X(T, uint32_t, shares_trap_with, ) /* site whose row counts this site's trap, or KZ_NONE32 */ \
+  X(T, uint32_t, rsv2, )                                                             \
   X(T, uint64_t, count, )                                                            \
   X(T, uint64_t, ns, )
 
@@ -418,6 +423,10 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
   ITEM(P, OBSERVER_CPU, 3, "observer-cpu") ITEM(P, BOOT_TIME, 4, "boot-time")      \
   ITEM(P, PROC_CAPTURE, 5, "proc-capture")
 
+#define KZ_ENUM_TRAP_ACCOUNT(ITEM, P)                                                 \
+  ITEM(P, NOT_STATED, 0, "not-stated") ITEM(P, COUNTED_HERE, 1, "counted-here")       \
+  ITEM(P, IN_OTHER_ROW, 2, "in-other-row") ITEM(P, UNCOUNTED, 3, "uncounted")
+
 #define KZ_ENUM_SIDE_KIND(ITEM, P) \
   ITEM(P, NONE, 0, "none") ITEM(P, FORK, 1, "FORK") ITEM(P, EXIT, 2, "EXIT") ITEM(P, COMM, 3, "COMM")
 
@@ -465,6 +474,7 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
   D(KZ_STRATUM, KZ_ENUM_STRATUM, 0)               \
   D(KZ_RUN_FLAG, KZ_ENUM_RUN_FLAGS, 1)            \
   D(KZ_PERTURBATION_KIND, KZ_ENUM_PERTURBATION_KIND, 0) \
+  D(KZ_TRAP_ACCOUNT, KZ_ENUM_TRAP_ACCOUNT, 0)     \
   D(KZ_SIDE_KIND, KZ_ENUM_SIDE_KIND, 0)           \
   D(KZ_SIDE_FLAG, KZ_ENUM_SIDE_FLAGS, 1)          \
   D(KZ_THREAD_FLAG, KZ_ENUM_THREAD_FLAGS, 1)      \
@@ -498,7 +508,7 @@ KZ_DEFINE_ENUM(KZ_REG, KZ_ENUM_REG, 0)
   F(kz_perturbation, kind, ENUM, KZ_PERTURBATION_KIND) \
   F(kz_perturbation, cost_class, ENUM, KZ_INSN_CLASS) \
   F(kz_perturbation, site, IDX, 0)                 \
-  F(kz_perturbation, shares_trap_with, IDX, 0)     \
+  F(kz_perturbation, trap_account, ENUM, KZ_TRAP_ACCOUNT) \
   F(kz_side_ev, kind, ENUM, KZ_SIDE_KIND)          \
   F(kz_side_ev, flags, FLAGS, KZ_SIDE_FLAG)        \
   F(kz_map_ev, addr, HEX, 0)                       \

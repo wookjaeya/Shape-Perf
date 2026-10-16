@@ -8,7 +8,7 @@
 //                       decoder proved there was none: see kz_raw.h)
 //   RUNMETA, PERTURBATION, BASIS items, DEVIATIONS, FILE_HASHES
 //                       (PERTURBATION: one probe-hits row per site, a return site with cost class
-//                       ret-trampoline and the site that counts its shared entry trap; then
+//                       ret-trampoline, each with the place where its trap is counted; then
 //                       observer-cpu, boot-time and proc-capture; kz_raw.h)
 // The parent is the basis container the anchors came from.  Content is a function of the run's
 // records and the caller's record: nothing about wall-clock time is written.
@@ -48,10 +48,10 @@ struct RunInputs {
 
 Status write_run_container(const RunInputs& in, Bytes* out);
 
-// For every site: the site whose PERTURBATION row counts the trap at its file offset (the first
-// ENTRY or POINT site at that offset), or KZ_NONE32 when the site is that site itself or when no
-// ENTRY or POINT site is at its offset (a return site alone: its entry trap is in no row).
-std::vector<uint32_t> trap_owners(const std::vector<kz::trace::SiteSpec>& sites);
+// For every site, where the trap at its file offset is counted (KZ_TRAP_ACCOUNT): counted-here for
+// the first ENTRY or POINT site at that offset, in-other-row for every other site at an offset that
+// has one, uncounted for a site at an offset with only RET sites (their entry trap is in no row).
+std::vector<uint8_t> trap_accounts(const std::vector<kz::trace::SiteSpec>& sites);
 
 // Hex text (40 digits for a 20-byte build id) to bytes; false if the text is not that long.
 bool build_id_from_hex(const std::string& hex, uint8_t out[20]);

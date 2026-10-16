@@ -200,7 +200,7 @@ KZ=/home/user/work/kairos-build/k2-gcc/tools/kz/kz CFS_NORMAL_USER=ubuntu \
 
 - 컨테이너(와 같은 실행의 basis)의 도구 해시는 `c9af043dbd587cf0caca3dabeec671535c0f0ee7b81d1477d0823a40edd24856` 이다. 도구 해시는 kz 를 이루는 원본 파일 전체의 해시(source identity)에서 나온다(`include/kz/core/identity.hpp`).
 - 실행에 쓴 `kz` 는 `/home/user/work/kairos-build/k2-gcc/tools/kz/kz`, SHA-256 `e1ed2cbd…5518` 이다(driver). 그 파일은 실행 16분 뒤(11:33:57) 다시 빌드되어 덮였다(지금 SHA-256 `84b85f8b…`). 실행 뒤 `kz hits` 에 옵션을 더했고(§1), 다른 에이전트도 같은 원본 트리(`include/`, `lib/core` 등)를 고치고 있었다.
-- 확인한 것 [M]: 실행 뒤의 네 K2 빌드(`k2-gcc`, `k2-clang`, `k2-gcc-asan`, `k2-clang-ubsan`)의 도구 해시는 모두 `bfb4cbe7…` 이고, commit `6be8935` 의 `kairos/` 를 따로 빌드한 kz 의 도구 해시는 `faaee20a…` 이다. 어느 것도 `c9af043d…` 가 아니다. SHA-256 `e1ed2cbd…` 인 파일은 빌드 트리에 남아 있지 않다.
+- 확인한 것 [M] (2026-10-16 에 각 빌드의 `kz anchor` 가 쓴 basis 의 헤더로 확인; 그 뒤 이 빌드들은 검토 반영으로 다시 빌드되었고 `k2-gcc` 는 디스크 공간 때문에 지웠다): 실행 뒤의 네 K2 빌드(`k2-gcc`, `k2-clang`, `k2-gcc-asan`, `k2-clang-ubsan`)의 도구 해시는 모두 `bfb4cbe7…` 이고, commit `6be8935` 의 `kairos/` 를 따로 빌드한 kz 의 도구 해시는 `faaee20a…` 이다. 어느 것도 `c9af043d…` 가 아니다. SHA-256 `e1ed2cbd…` 인 파일은 빌드 트리에 남아 있지 않다.
 - 결론: **c9af043d 를 낸 원본 상태는 되찾을 수 없다.** 어느 commit 에도 대응하지 않고, 그 상태의 diff 도 남지 않았다. 이 실행의 개수(§4, §5)는 그 도구가 쓴 컨테이너에서 지금의 도구로 다시 읽은 값이고, 컨테이너 자체는 해시로 고정되어 있다. 그러나 컨테이너를 **쓴** 코드(해석기, 정체성 결합)는 원본으로 검토할 수 없다.
 - 다음 실행부터: 스크립트가 실행 전에 저장소 commit 과 `kairos/` 의 diff(`<tag>_source.diff`, 추적되지 않은 파일 목록과 함께)를 남기고, kz 사본을 저장소 밖(`<빌드 루트>/runs/<tag>/kz`)에 두며, kz 의 원본이 kz 보다 새로우면(낡은 빌드) 시작하지 않는다.
 

@@ -1,95 +1,189 @@
 extract
   translation units          1
-  functions                  9 (bodies read 7, in system headers skipped 0)
-  call sites                 2
-  indirect calls             0 (resolved 0, unresolved 0)
+  functions                  20 (bodies read 17, in system headers skipped 0)
+  call sites                 7
+  indirect calls             1 (resolved 0, unresolved 1)
   spawn calls                0 (entry resolved 0)
-  loops                      0 (table walks resolved 0, failed 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
   certificate-view rules     unroll 0, await 0, star-closed 0
   spawn parameters           0, unrolled iteration rows 0
-  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
-  untyped write sites        2 in the program, 2 of them count for a target
-  location Cast.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 2, escape 0, cast 1, union 0  -> DISABLED
-  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
-  location Esc.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 2, escape 2, cast 0, union 0  -> DISABLED
-  location Inner.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 2, escape 0, cast 0, union 1  -> DISABLED
-  location Mix.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 2, escape 0, cast 0, union 1  -> DISABLED
-  location Plain.id   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
-  location Safe.id   writers 2 (direct 0, data function 2, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
-  hand-entered inputs        18 (built-in data-function table 12, command line 6)
+  out-pointer summaries      store-only 1, escaping 0, unsummarized 0
+  untyped write sites        3 in the program, 3 of them count for a target
+  unknown-effect passes      3 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Asm.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 0, unknown effect 1  -> DISABLED
+  location Cast.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 1, union 0, unknown effect 0  -> DISABLED
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Esc.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location Ext.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 0, unknown effect 1  -> DISABLED
+  location Ind.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 0, unknown effect 1  -> DISABLED
+  location Inner.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 1, unknown effect 0  -> DISABLED
+  location Laund.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 1, union 0, unknown effect 0  -> DISABLED
+  location Mix.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 1, unknown effect 0  -> DISABLED
+  location Outp.id   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Plain.id   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Safe.id   writers 2 (direct 0, data function 2, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Span.id   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Sub.id   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Var.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 3, escape 0, cast 0, union 0, unknown effect 1  -> DISABLED
+  hand-entered inputs        26 (built-in data-function table 12, command line 14)
+  declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
 [files] 1
-  0 atype.c 0b3aa97a804d 1565
-[functions] 9
-  fn 0 data_writers atype.c:51-54 params=1 {defined}
-  fn 1 fill_buffer atype.c:25-28 params=0 {defined}
-  fn 2 leak_address atype.c:39-42 params=0 {defined}
-  fn 3 memcpy atype.c:6 params=3 {builtin}
-  fn 4 memset atype.c:5 params=3 {builtin}
-  fn 5 plain_write atype.c:30-30 params=0 {defined}
-  fn 6 poke_cast atype.c:33-36 params=0 {defined}
-  fn 7 write_other_member atype.c:45-45 params=0 {defined}
-  fn 8 write_raw atype.c:48-48 params=0 {defined}
-[calls] 2
-  site 14 atype.c:52:3 data_writers -> memset direct {data-fn}
+  0 atype.c b5db0adffc50 4064
+[functions] 20
+  fn 0 data_writers atype.c:52-55 params=1 {defined}
+  fn 1 ext_fill atype.c:78 params=1 {}
+  fn 2 fill_buffer atype.c:26-29 params=0 {defined}
+  fn 3 leak_address atype.c:40-43 params=0 {defined}
+  fn 4 log_values atype.c:80-80 params=1 {defined,variadic}
+  fn 5 memcpy atype.c:7 params=3 {builtin}
+  fn 6 memset atype.c:6 params=3 {builtin}
+  fn 7 plain_write atype.c:31-31 params=0 {defined}
+  fn 8 poke_cast atype.c:34-37 params=0 {defined}
+  fn 9 set_wrap atype.c:105-108 params=1 {defined,static}
+  fn 10 t_asm atype.c:96-96 params=0 {defined}
+  fn 11 t_ext atype.c:83-87 params=0 {defined}
+  fn 12 t_ind atype.c:90-90 params=0 {defined}
+  fn 13 t_laund atype.c:113-117 params=0 {defined}
+  fn 14 t_out atype.c:109-109 params=0 {defined}
+  fn 15 t_span atype.c:99-99 params=0 {defined}
+  fn 16 t_sub atype.c:102-102 params=0 {defined}
+  fn 17 t_var atype.c:93-93 params=0 {defined}
+  fn 18 write_other_member atype.c:46-46 params=0 {defined}
+  fn 19 write_raw atype.c:49-49 params=0 {defined}
+[calls] 7
+  site 24 atype.c:53:3 data_writers -> memset direct {data-fn}
       arg 0:addr-of-object g_safe
       arg 1:const 0 0
       arg 2:const 4 sizeof g_safe
-  site 16 atype.c:53:3 data_writers -> memcpy direct {data-fn}
+  site 26 atype.c:54:3 data_writers -> memcpy direct {data-fn}
       arg 0:addr-of-object g_safe
       arg 1:top ~src
       arg 2:const 4 sizeof g_safe
+  site 28 atype.c:86:3 t_ext -> ext_fill direct {}
+      arg 0:addr-of-object h
+  site 30 atype.c:90:20 t_ind -> <indirect> indirect {}
+      arg 0:addr-of-object g_ind
+  site 32 atype.c:93:20 t_var -> log_values direct {intra-tu}
+      arg 0:const 1 1
+      arg 1:addr-of-object g_var
+  site 35 atype.c:99:21 t_span -> memset direct {data-fn}
+      arg 0:addr-of-field &g_span.pre of Span.pre
+      arg 1:const 0 0
+      arg 2:const 8 sizeof g_span
+  site 38 atype.c:109:20 t_out -> set_wrap direct {intra-tu}
+      arg 0:addr-of-field &g_outp.id of Outp.id
 [derives] 0
 [loops] 0
 [iters] 0
 [order] 0
-[init] 6
-  Cast.id in g_cast zero-initialized value=0 defined at atype.c:17:6
-  Esc.id in g_esc zero-initialized value=0 defined at atype.c:18:5
-  Inner.id in g_over zero-initialized value=0 defined at atype.c:20:6
-  Mix.id in g_mix zero-initialized value=0 defined at atype.c:19:5
-  Plain.id in g_plain zero-initialized value=0 defined at atype.c:16:7
-  Safe.id in g_safe zero-initialized value=0 defined at atype.c:21:6
+[init] 14
+  Asm.id in g_asm zero-initialized value=0 defined at atype.c:72:5
+  Cast.id in g_cast zero-initialized value=0 defined at atype.c:18:6
+  Esc.id in g_esc zero-initialized value=0 defined at atype.c:19:5
+  Ext.id in g_ext zero-initialized value=0 defined at atype.c:69:5
+  Ind.id in g_ind zero-initialized value=0 defined at atype.c:70:5
+  Inner.id in g_over zero-initialized value=0 defined at atype.c:21:6
+  Laund.id in g_laund zero-initialized value=0 defined at atype.c:76:7
+  Mix.id in g_mix zero-initialized value=0 defined at atype.c:20:5
+  Outp.id in g_outp zero-initialized value=0 defined at atype.c:75:6
+  Plain.id in g_plain zero-initialized value=0 defined at atype.c:17:7
+  Safe.id in g_safe zero-initialized value=0 defined at atype.c:22:6
+  Span.id in g_span zero-initialized value=0 defined at atype.c:73:6
+  Sub.id in g_sub zero-initialized value=0 defined at atype.c:74:5
+  Var.id in g_var zero-initialized value=0 defined at atype.c:71:5
 [consts] 0
-[writers] 3
-  Plain.id assign at atype.c:30:26 in plain_write value=const 1 [1] key=g_plain {} n/a
-  Safe.id memset at atype.c:52:3 in data_writers value=const 0 [fill 0] key=&g_safe {covers-more-than-the-field} n/a
-  Safe.id memcpy at atype.c:53:3 in data_writers value=top [copy of src] key=&g_safe {covers-more-than-the-field} n/a
-[atype] 13
-  Cast.id untyped-write at atype.c:27:3 in fill_buffer: store through an untyped pointer: q[0]
-  Cast.id untyped-write at atype.c:35:3 in poke_cast: store through an untyped pointer: p[0]
-  Cast.id cast at atype.c:34:13 in poke_cast: a pointer to the type is converted to a pointer to another type
-  Esc.id untyped-write at atype.c:27:3 in fill_buffer: store through an untyped pointer: q[0]
-  Esc.id untyped-write at atype.c:35:3 in poke_cast: store through an untyped pointer: p[0]
-  Esc.id address-escape at atype.c:40:12 in leak_address: the address of the field is used to initialize a variable
-  Esc.id address-escape at atype.c:40:12 in leak_address: the address of the field: initializer of q
-  Inner.id untyped-write at atype.c:27:3 in fill_buffer: store through an untyped pointer: q[0]
-  Inner.id untyped-write at atype.c:35:3 in poke_cast: store through an untyped pointer: p[0]
-  Inner.id union at atype.c:48:24 in write_raw: a store through a member of a union that also holds the type
-  Mix.id untyped-write at atype.c:27:3 in fill_buffer: store through an untyped pointer: q[0]
-  Mix.id untyped-write at atype.c:35:3 in poke_cast: store through an untyped pointer: p[0]
-  Mix.id union at atype.c:45:33 in write_other_member: a store through a member of a union that also holds the type
-[locs] 7
-  Cast.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=2 escape=0 cast=1 union=0 init=1 unresolved-indirect=0
-  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
-  Esc.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=2 escape=2 cast=0 union=0 init=1 unresolved-indirect=0
-  Inner.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=2 escape=0 cast=0 union=1 init=1 unresolved-indirect=0
-  Mix.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=2 escape=0 cast=0 union=1 init=1 unresolved-indirect=0
-  Plain.id writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
-  Safe.id writer-set-complete writers=2 (direct 0, data-fn 2, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=1 unresolved-indirect=0
-[targets] 0
+[writers] 7
+  Outp.id out-pointer at atype.c:109:20 in t_out via set_wrap@atype.c:105 atype.c:106 value=top [store to a member of the pointee: (*p).v = 3u] key=*set_wrap argument 0 {} n/a
+  Outp.id out-pointer at atype.c:109:20 in t_out via set_wrap@atype.c:105 atype.c:107 value=top [store to a member of the pointee: p->v += 1u] key=*set_wrap argument 0 {} n/a
+  Plain.id assign at atype.c:31:26 in plain_write value=const 1 [1] key=g_plain {} n/a
+  Safe.id memset at atype.c:53:3 in data_writers value=const 0 [fill 0] key=&g_safe {covers-more-than-the-field} n/a
+  Safe.id memcpy at atype.c:54:3 in data_writers value=top [copy of src] key=&g_safe {covers-more-than-the-field} n/a
+  Span.id memset at atype.c:99:21 in t_span value=const 0 [fill 0; the size goes beyond the destination: covers g_span] key=&g_span.pre {covers-more-than-the-field} n/a
+  Sub.id assign at atype.c:102:20 in t_sub value=top [g_sub.id.v = 7u] key=g_sub {partial-write} n/a
+[atype] 37
+  Asm.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Asm.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Asm.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Asm.id unknown-effect at atype.c:96:20 in t_asm: inline assembly with an operand that reaches the type
+  Cast.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Cast.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Cast.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Cast.id cast at atype.c:35:13 in poke_cast: a pointer to the type is converted to a pointer to another type
+  Esc.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Esc.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Esc.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Esc.id address-escape at atype.c:41:12 in leak_address: the address of the field is used to initialize a variable
+  Esc.id address-escape at atype.c:41:12 in leak_address: the address of the field: initializer of q
+  Ext.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Ext.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Ext.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Ext.id unknown-effect at atype.c:86:3 in t_ext: a pointer that reaches the type (argument 0: &h) is passed to ext_fill, which has no body in the closed program
+  Ind.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Ind.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Ind.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Ind.id unknown-effect at atype.c:90:20 in t_ind: a pointer that reaches the type (argument 0: &g_ind) is passed to an indirect call whose targets are not all known
+  Inner.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Inner.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Inner.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Inner.id union at atype.c:49:24 in write_raw: a store through a member of a union that also holds the type
+  Laund.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Laund.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Laund.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Laund.id cast at atype.c:114:19 in t_laund: a pointer to the type is converted to a const pointer to another type
+  Mix.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Mix.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Mix.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Mix.id union at atype.c:46:33 in write_other_member: a store through a member of a union that also holds the type
+  Var.id untyped-write at atype.c:28:3 in fill_buffer: store through an untyped pointer: q[0]
+  Var.id untyped-write at atype.c:36:3 in poke_cast: store through an untyped pointer: p[0]
+  Var.id untyped-write at atype.c:116:3 in t_laund: store through an untyped pointer: p[0]
+  Var.id unknown-effect at atype.c:93:20 in t_var: a pointer that reaches the type (argument 1: &g_var) is passed to log_values, in a variadic position (its va_arg reads are not followed)
+[locs] 15
+  Asm.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=0 unknown-effect=1 init=1 unresolved-indirect=1
+  Cast.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=1 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=1
+  Esc.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Ext.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=0 unknown-effect=1 init=1 unresolved-indirect=1
+  Ind.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=0 unknown-effect=1 init=1 unresolved-indirect=1
+  Inner.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=1 unknown-effect=0 init=1 unresolved-indirect=1
+  Laund.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=1 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Mix.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=1 unknown-effect=0 init=1 unresolved-indirect=1
+  Outp.id writer-set-complete writers=2 (direct 0, data-fn 0, out-pointer 2) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Plain.id writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Safe.id writer-set-complete writers=2 (direct 0, data-fn 2, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Span.id writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Sub.id writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=1
+  Var.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=3 escape=0 cast=0 union=0 unknown-effect=1 init=1 unresolved-indirect=1
+[targets] 1
+  site 30 atype.c:90:20 in t_ind indirect-call -> UNRESOLVED(no-function-flows-to-it) via G:g_hook of 0
 [spawnparams] 0
 [image] 0
 [terminals] 0
-[outcalls] 0
-[fwrites] 10
-  data_writers field <global>.g_safe at atype.c:52
-  data_writers address-argument <global>.g_safe at atype.c:52
-  data_writers record Safe.* at atype.c:52
-  fill_buffer untyped at atype.c:27
-  leak_address address-argument Esc.id at atype.c:40
-  plain_write field Plain.id at atype.c:30
-  poke_cast untyped at atype.c:35
-  poke_cast address-argument <global>.g_cast at atype.c:34
-  write_other_member field Mix.raw at atype.c:45
-  write_raw field Over.raw at atype.c:48
+[outcalls] 1
+  site 38 atype.c:109:20 set_wrap arg 0 = &Outp.id store-only stores=2
+[fwrites] 24
+  data_writers field <global>.g_safe at atype.c:53
+  data_writers address-argument <global>.g_safe at atype.c:53
+  data_writers record Safe.* at atype.c:53
+  fill_buffer untyped at atype.c:28
+  leak_address address-argument Esc.id at atype.c:41
+  plain_write field Plain.id at atype.c:31
+  poke_cast untyped at atype.c:36
+  poke_cast address-argument <global>.g_cast at atype.c:35
+  set_wrap@atype.c:105 field Wrap.v at atype.c:106
+  t_asm address-argument <global>.g_asm at atype.c:96
+  t_ext address-argument <global>.g_ext at atype.c:85
+  t_ext field Holder.ext at atype.c:85
+  t_ind address-argument <global>.g_ind at atype.c:90
+  t_laund untyped at atype.c:116
+  t_laund address-argument <global>.g_laund at atype.c:114
+  t_out address-argument Outp.id at atype.c:109
+  t_span record Span.* at atype.c:99
+  t_span field Span.pre at atype.c:99
+  t_span address-argument Span.pre at atype.c:99
+  t_sub field Sub.id at atype.c:102
+  t_sub field Wrap.v at atype.c:102
+  t_var address-argument <global>.g_var at atype.c:93
+  write_other_member field Mix.raw at atype.c:46
+  write_raw field Over.raw at atype.c:49

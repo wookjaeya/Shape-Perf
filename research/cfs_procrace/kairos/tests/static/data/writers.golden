@@ -4,13 +4,15 @@ extract
   call sites                 1
   indirect calls             0 (resolved 0, unresolved 0)
   spawn calls                0 (entry resolved 0)
-  loops                      0 (table walks resolved 0, failed 0)
+  loops                      0 (table walks resolved 0, failed 0, under a declared assumption 0)
   certificate-view rules     unroll 0, await 0, star-closed 0
   spawn parameters           0, unrolled iteration rows 0
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
-  location Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
 [files] 1
   0 writers.c b04c0d0b55c3 1229
@@ -55,13 +57,13 @@ facts-view 1
   Cell.id assign at writers.c:35:5 in guarded value=const 2 [2] key=g_cell guard=(not (gt param:x#0 0)) {} n/a
 [atype] 0
 [locs] 1
-  Cell.id writer-set-complete writers=10 (direct 9, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=5 unresolved-indirect=0
+  Cell.id writer-set-complete writers=10 (direct 9, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=5 unresolved-indirect=0
 [targets] 0
 [spawnparams] 0
 [image] 0
 [terminals] 0
 [outcalls] 0
-[fwrites] 12
+[fwrites] 13
   bump field Cell.id at writers.c:27
   copy_all field <global>.g_cell at writers.c:29
   copy_all record Cell.* at writers.c:29
@@ -72,5 +74,6 @@ facts-view 1
   set_array field Cell.id at writers.c:26
   set_const field Cell.id at writers.c:22
   set_nested field Cell.id at writers.c:25
+  set_nested field Holder.inner at writers.c:25
   set_param field Cell.id at writers.c:23
   set_via_pointer field Cell.id at writers.c:24

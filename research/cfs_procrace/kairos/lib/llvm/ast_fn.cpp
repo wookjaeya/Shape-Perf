@@ -1757,8 +1757,8 @@ class FnWalker {
     for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
       if (is_data) continue;  // the summary of a data function says what it writes (its destination)
       std::set<size_t> reached = targets_reached(ce->getArg(i)->IgnoreParenImpCasts()->getType());
-      const std::set<size_t> r2 = targets_reached(ce->getArg(i)->IgnoreParenCasts()->getType());
-      reached.insert(r2.begin(), r2.end());
+      const std::set<size_t> before_casts = targets_reached(ce->getArg(i)->IgnoreParenCasts()->getType());
+      reached.insert(before_casts.begin(), before_casts.end());
       if (reached.empty()) continue;
       Model::ReachPass rp;
       rp.call_key = ckey;
@@ -2021,7 +2021,9 @@ class FnWalker {
     if (const auto* uo = dyn_cast<UnaryOperator>(core); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
       region_lv = uo->getSubExpr()->IgnoreParens();
       region_t = region_lv->getType();
-    } else if (isa<MemberExpr>(core) || (isa<DeclRefExpr>(core) && core->getType()->isArrayType()) || isa<ArraySubscriptExpr>(core)) {
+    } else if (core->getType()->isArrayType() && (isa<MemberExpr>(core) || isa<DeclRefExpr>(core) || isa<ArraySubscriptExpr>(core))) {
+      // an array lvalue that decays: the array itself is the region (a pointer-valued member or
+      // variable is a pointer: the next case)
       region_lv = core;
       region_t = core->getType();
     } else if (core->getType()->isPointerType()) {

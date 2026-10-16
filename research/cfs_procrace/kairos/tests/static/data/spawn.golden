@@ -4,13 +4,15 @@ extract
   call sites                 8
   indirect calls             1 (resolved 1, unresolved 0)
   spawn calls                5 (entry resolved 4)
-  loops                      1 (table walks resolved 1, failed 0)
+  loops                      1 (table walks resolved 1, failed 0, under a declared assumption 0)
   certificate-view rules     unroll 1, await 0, star-closed 0
   spawn parameters           3, unrolled iteration rows 8
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
-  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0  -> writer-set-complete
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
 [files] 1
   0 spawn.c 422f8023dc2c 1795
@@ -77,7 +79,7 @@ facts-view 1
 [writers] 0
 [atype] 0
 [locs] 1
-  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 init=0 unresolved-indirect=0
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=0
 [targets] 7
   site 0 spawn.c:13:3 in start_direct spawn-entry -> worker_a@spawn.c:7 via F:worker_a@spawn.c:7 of 1
   site 1 spawn.c:18:3 in start_with@spawn.c:16 spawn-entry -> worker_b@spawn.c:8 via P:start_with@spawn.c:16#0 of 1

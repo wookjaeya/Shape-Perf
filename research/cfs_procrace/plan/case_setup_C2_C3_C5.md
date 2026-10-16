@@ -5,7 +5,8 @@
 - 읽은 입력: [PI_DECISIONS_RESOLVED_20261015.md](../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md) §2·§3.3–§3.6·§4, [ROADMAP_20261015.md](ROADMAP_20261015.md) §3·§6.1·§9·§12·§13, `Architecture/spec/SPEC_FINAL.md` rev 1.1 (§7.6, §8.2, §9.3, §10.1, 부록 A.3·A.8; 2026-10-16에 rev 1.2에서 재확인, 부록 D.1), `Architecture/spec/PI_DECISIONS.md` (D13, D14, D15, P-C1HOLD, P-C2, P-RGIT), [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md), `cases/ledger.md`, `cases/C2.md`·`C3.md`·`C5.md`, `env/ENV.md`, `env/CONDITIONS.md`, `env/logs/f_root_capability_probe.log`.
 - 성격: **읽기, 파일 가져오기, 해시 계산, 압축 해제, 정적 ELF 점검, 구문 분석 전용 프로브**만 수행했다(§0.3). cFS·cFE·OSAL·PSP·CF를 빌드·링크·실행하지 않았고, 패키지를 설치하지 않았고, 파일을 삭제하지 않았고, git add/commit/push를 하지 않았다. 내려받은 외부 바이너리(CentOS RPM의 실행 파일)는 실행하지 못했다(§3.3.1). `kairos/`와 소스 코드를 건드리지 않았다. N·임계값·예산·노력 수치를 새로 정하지 않았다. PI 결정은 결정[D]으로만 적었고 사실로 옮기지 않았다.
 - 검토 반영: 검토 지적 11건을 원본과 대조해 반영했다. 항목별 처리는 부록 C이다. ID 표기: `D13`·`D14`·`P-C2`·`Q22`처럼 사례 접두사가 없는 ID는 PI 결정(`Architecture/spec/PI_DECISIONS.md`)이고(모호하면 `PI-D1`처럼 접두사를 붙인다), 사례 기록(`cases/C*.md`)의 결정·가정 ID는 `C2-D4`·`C3-D3(a)`처럼 항상 사례 접두사를 붙이며, `ledger X3`은 `cases/ledger.md` §5의 항목이다.
-- 2026-10-16 보완(부록 D): (1) SPEC이 rev 1.2로 바뀌어(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함) 이 문서가 인용한 SPEC 문구를 rev 1.2에서 다시 찾아 줄 번호를 붙였다. 인용한 문구는 모두 rev 1.2에 남아 있다(부록 D.1). (2) 6.4.1·6.4.2·OSAL 4.1.1 tarball을 다시 내려받아 같은 sha256을 확인했다. (3) 컴파일 DB를 **6.4.2와 앱 번역 단위(5개)까지** 넓혀 같은 구문 분석·민감도 프로브를 돌렸다(§3.2, §3.3, 부록 D.2). (4) C3·C5의 관측 사건과 식별 방법을 §4.3으로 추가했다(ROADMAP §9.2·§9.3의 `[제안]` 항목 대응). (5) 이슈 페이지를 다시 읽으려 했으나 막혔다(§2.1). 이번에도 cFS를 빌드·실행하지 않았고 설치·삭제·git 조작을 하지 않았다.
+- 2026-10-16 보완(부록 D): (1) SPEC이 rev 1.2로 바뀌어(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함) 이 문서가 인용한 SPEC 문구를 rev 1.2에서 다시 찾았다. 인용한 문구는 모두 rev 1.2에 남아 있다(부록 D.1). SPEC은 계속 편집되어 줄 번호가 움직이므로 절과 행 이름으로 인용한다(부록 E 지적 5). (2) 6.4.1·6.4.2·OSAL 4.1.1 tarball을 다시 내려받아 같은 sha256을 확인했다. (3) 컴파일 DB를 **6.4.2와 앱 번역 단위(5개)까지** 넓혀 같은 구문 분석·민감도 프로브를 돌렸다(§3.2, §3.3, 부록 D.2). (4) C3·C5의 관측 사건과 식별 방법을 §4.3으로 추가했다(ROADMAP §9.2·§9.3의 `[제안]` 항목 대응). (5) 이슈 페이지를 다시 읽으려 했으나 막혔다(§2.1). 이번에도 cFS를 빌드·실행하지 않았고 설치·삭제·git 조작을 하지 않았다.
+- 2026-10-16 2차 검토 반영(부록 E): 지적 8건을 원본(OSAL 4.1.1 posix `osapi.c`, 6.4.1 `cfe_es_api.c`, v6.6.0a·v7.0.1 `cfe_es_api.c`, `58abd38d`의 `cfe_es_apps.c`·`cfe_es_api.c`, `cases/C2.md`·`C5.md`·`ledger.md`, SPEC rev 1.2, PI 결정문 D19, CONDITIONS_POLICY)과 대조해 반영했다. C5 판정 단위를 미승인 가정(`C5.md` A7, `ledger.md` X7)으로 표시하고 창 주장을 A8 조건부로 바꿨다(§4.3). 셀 D의 이른 해제를 R 자신의 timeout까지 포함해 다시 썼다(§2.4). 셀 A·C·D의 "실행 가능"을 "구성 가능(코드 읽기)"으로 낮췄다. 프로브 옵션은 기준 조건이 아닌 진단 선택으로 다시 표시했다(§3.3). P의 early init 단계를 [I]로(§2.1, §2.3), `msg_max` 상향을 D19 아래의 별도 민감도 구성으로(§3.5, §7 항목 4), P-RGIT 창을 락이 없는 구간 L632–L772로, VP-D5·LP-CASE-C2 기대 class를 [I]로(§5, §2.4) 고쳤다. SPEC은 절과 행 이름으로 인용한다(부록 D.1).
 - 용어: T1 = (a)에 따라 판정 대상은 **준비 상태 명세(readiness specification)**, 전제는 **준비 상태 전제(readiness precondition)**, 위반은 **준비 상태 위반(readiness violation)** 이다. "API contract"는 문서화된 API 의미(헤더의 `\retcode` 등)를 말할 때만 쓴다. 원출처의 "race"는 도구 class로 자동 변환하지 않는다(P-CLASSGT).
 
 ## 0. 읽는 법
@@ -52,15 +53,15 @@
 | 항목 | 이번에 확인한 것 | 아직 없는 것·결정 필요 | 비용 |
 |---|---|---|---|
 | **C2 단일/두 단계 동기화 코드 읽기** | 6.4.2·v6.5.0a의 `WaitForStartupSync`·`ApplicationSyncDelay`·`ES_Main` 말미가 공백 무시 비교로 동일[M]. v6.6.0a·v7.0.1은 `APPS_INIT`·`LATE_INIT`·`WaitForSystemState`·2단계 `MainTaskSyncDelay`[F] (§2.2) | 6.4.1의 세마포어 기반 동기화(Trac #40 이전)는 이 절에서 다루지 않음. C2는 6.4.2를 단일 단계 기준으로 삼는다 | 읽기 |
-| **C2 역할·2×2** | P(late init 제공)·R(의존 호출)의 정의를 보고 사실과 재구성 선택으로 분리. 4셀 중 3셀 실행 가능, 1셀(단일 단계×새 provider)은 심볼 부재로 제외[M]. 따라서 PI 결정문·SPEC이 서술한 교차 2×2는 그대로는 실현되지 않는다 (§2.3–§2.4) | 3셀 + B 제외로 충분한지 PI 확인(§7 항목 1), 요청 방식(C2-D4), 앱 수·우선순위·timeout 인자, 단일 단계 쪽 개정(6.4.2 대 v6.5.0a), 6.5.0a·6.6.0a configure 결정 — 모두 P-C2 | 읽기(역할·설계) / 빌드·실행(셀 실행) |
+| **C2 역할·2×2** | P(late init 제공)·R(의존 호출)의 정의를 보고 사실과 재구성 선택으로 분리. 4셀 중 3셀(A·C·D)은 코드 읽기로 구성 가능[I]하나 빌드·실행은 시험하지 않았다[U]. 1셀(B, 단일 단계×새 provider)은 새 provider가 부르는 심볼이 없어 제외(grep 0건 [M]; [M]은 이 심볼 부재 측정에만 해당). 따라서 PI 결정문·SPEC이 서술한 교차 2×2는 그대로는 실현되지 않는다 (§2.3–§2.4) | 3셀 + B 제외로 충분한지 PI 확인(§7 항목 1), 요청 방식(C2-D4), 앱 수·우선순위·timeout 인자, 단일 단계 쪽 개정(6.4.2 대 v6.5.0a), 6.5.0a·6.6.0a configure 결정 — 모두 P-C2 | 읽기(역할·설계) / 빌드·실행(셀 실행) |
 | **C3·C5 분석 기반 아티팩트** | 6.4.1·6.4.2·OSAL 4.1.1 tarball을 원 배포처(SourceForge)에서 지금 가져올 수 있음. sha256이 ledger·C3·C5 기록과 일치[M] (§3.1). 2026-10-16 재수신에서도 HTTP 200, 같은 sha256[M] | 6.4.1·6.4.2의 git 이력은 없음(기록) | 읽기 |
-| **컴파일 DB·파싱 (D13 (a)/(b)(i))** | 2026-10-15: 6.4.1 코어·OSAL·PSP 53개 번역 단위. 2026-10-16: 6.4.1과 6.4.2 각각 58개(53 + 앱 5: `sample_lib`·`sample_app`·`ci_lab`·`to_lab`·`sch_lab`). 컨테이너의 32비트 헤더로 clang 18 기본 설정은 두 판 모두 56/58 통과, 오류 2건(같은 두 줄, §3.3), `-Wno-error=incompatible-function-pointer-types`를 주면 58/58, 0 오류. gcc 13은 플래그 없이 58/58 [M]. 이 옵션은 레퍼런스에 없는 우회책이며 `deviation`으로 기록했다(§3.3) | 구문 분석이 통과했다는 사실은 빌드·실행 가능성의 근거가 아님. 단위 시험·링크 단계는 미포함 | 파싱 |
+| **컴파일 DB·파싱 (D13 (a)/(b)(i))** | 2026-10-15: 6.4.1 코어·OSAL·PSP 53개 번역 단위. 2026-10-16: 6.4.1과 6.4.2 각각 58개(53 + 앱 5: `sample_lib`·`sample_app`·`ci_lab`·`to_lab`·`sch_lab`). 컨테이너의 32비트 헤더에서, 레퍼런스 make 트리의 옵션만 쓴(추가 플래그 없는) gcc 13 파싱이 두 판 모두 58/58, 0 오류이다[M]. 이것이 레퍼런스 옵션을 따른 파싱 결과이다(컴파일러·헤더 자체는 §3.3의 `deviation`). clang 18 기본 설정은 56/58, 오류 2건(같은 두 줄, §3.3)[M]. 참고로 clang 18에 `-Wno-error=incompatible-function-pointer-types`를 준 프로브는 58/58이나, 이 플래그는 레퍼런스에 없는 진단 프로브 선택이고 필요성 근거가 없어(gcc 13이 플래그 없이 통과) 기준 조건으로 쓰지 않는다(§3.3) | 구문 분석이 통과했다는 사실은 빌드·실행 가능성의 근거가 아님. 단위 시험·링크 단계는 미포함 | 파싱 |
 | **헤더·환경 민감도 (deviation)** | 구조체 크기 7종·OS/기본 타입 크기 7종은 컨테이너 헤더(glibc 2.39)와 CentOS 6.5 헤더(glibc 2.12)에서 동일(6.4.1·6.4.2 모두). 전처리한 프로젝트 토큰열은 판마다 58개 중 56개 동일, 2개는 `sched_priority` 멤버 이름 별칭만 다름. clang 대 gcc는 58/58 동일[M] (§3.3) | 민감성 판정과 (ii) 전환 여부는 PI. 이름에 의존하는 바인딩은 보류 대상 후보. 문헌상 host의 gcc·전체 sysroot를 실행해 본 시험은 없음[U] (§3.3.1) | 파싱 / (ii) 확대: 헤더 추출 범위에서는 설치 없음[I], 전체 sysroot·gcc는 미시험[U] |
 | **원 사례 플랫폼 대비** | 이 문서의 파생 기반(6.4.1 `pc-linux`, 32비트 x86)은 6.4.1 readme가 지원 런타임으로 적은 플랫폼이다. C3의 보고 플랫폼 Microblaze에 대해서는 `deviation`, C5(#72)의 플랫폼은 `unspecified_by_reference` (§3.3.2) | Microblaze의 OS·PSP·OSAL·툴체인(레퍼런스에 없음). RQ2·H-V 보고에 `deviation`을 이월(PI D13 (b)) | 읽기 |
 | **Q16 표 골격** | C3 13행, C5 12행. 6.4.1·6.4.2 파일:줄을 tarball에서 읽어 채움[F] (§4). 2026-10-16 재수신 tarball에서 부록 A.5 앵커가 같은 줄을 돌려줌[M] | Φ_6.4.x의 Allowed 항목(6.4.1 레퍼런스 인용)은 `unspecified_by_reference` 유지. 기계 검증용 golden 시험 미작성 | 읽기 |
-| **C3·C5 관측 사건** | 사건 목록, 식별 방법(새 task를 `GetAppID`가 아니라 OS thread와 생성 관계로 식별), 판정 단위와 파생 결과(충돌)의 분리, 6.4.2 diff에 Trac #40·#41·#42가 섞였다는 표시 (§4.3) | 관측 도구·보류 지점·순서 제어 방식은 PI(C3-D3, `ledger.md` X3). 실행은 6.4.x 실행 기반 이후 | 읽기(설계) / 실행 |
+| **C3·C5 관측 사건** | 사건 목록, 식별 방법(새 task를 `GetAppID`가 아니라 OS thread와 생성 관계로 식별), 판정 단위와 파생 결과(충돌)의 분리, 6.4.2 diff에 Trac #40·#41·#42가 섞였다는 표시 (§4.3) | 관측 도구·보류 지점·순서 제어 방식은 PI(C3-D3, `ledger.md` X3). C3·C5의 판정 단위(C3-D4, `C5.md` A7)는 미승인이며 `ledger.md` X7과 함께 PI가 정한다. C5의 실패 창은 OSAL 등록 순서(`C5.md` A8, 미확인)에 조건부이다. 실행은 6.4.x 실행 기반 이후 | 읽기(설계) / 실행 |
 | **P-RGIT 보조 쌍** | `58abd38d^` = `6b9c267e`, 각 쪽에서 §5.2가 인용하는 ES 소스 3파일(`cfe_es_api.c`·`cfe_es_apps.c`·`cfe_es_resource.c`)을 가져와 읽음(변경 파일 10개의 목록은 두 커밋의 변경 파일 목록에서 확인), 대기 함수 변경점(앱 레코드 → 태스크 레코드) 확인. 공개 번들 `a41549cb`가 `58abd38d^`와 OSAL·PSP 쌍을 이룸[M] (§5) | 입력 대응 비용 확인 뒤 수행(PI). 쌍의 모든 조건은 `unspecified_by_reference` | 읽기 / 수행 시 빌드·실행 |
-| **6.4.x 실행 (분석 전용과 별도)** | 32비트 런타임은 있음. root의 `CAP_SYS_RESOURCE` 부재와 `msg_max` 10이 큐 깊이 10 초과 큐 생성에 걸릴 가능성(§3.5) | 이 조건에서 6.4.1이 기동하는지는 미시험[U] | 실행·플랫폼(권한) |
+| **6.4.x 실행 (분석 전용과 별도)** | 32비트 런타임은 있음. root의 `CAP_SYS_RESOURCE` 부재와 `msg_max` 10이 큐 깊이 10 초과 큐 생성에 걸릴 가능성(§3.5) | 이 조건에서 6.4.1이 기동하는지는 미시험[U]. `msg_max=10`은 PI D19가 현 기준으로 유지하므로 값 변경은 별도로 기록하는 민감도 구성이며 PI 몫(§3.5, §7 항목 4) | 실행·플랫폼(권한) |
 
 ## 2. C2 — 역할 재구성 (P-C2, Q22)
 
@@ -73,7 +74,7 @@
 | 항목 | 보고가 고정하는 것 [F](기록) | 보고가 열어 둔 것 [U] |
 |---|---|---|
 | 앱 | "one app"(late init을 하는 앱, 이하 **P**)과 "other applications"(**R**). 프로젝트명 EVA CWS | 앱 이름·수·시작 순서·우선순위 |
-| P의 구조 | "early" init(로컬 자료구조 초기화) 뒤에 "late" init(다른 앱·라이브러리와의 통신이 필요할 수 있음). 문장 4: late init까지 마쳐야 "completely up and running" | late init의 내용·소요 시간·"fully initialized"의 관측 가능한 의미 |
+| P의 구조 | [F](기록): 일반 문장 3a–3b는 "some applications"가 "early" init(로컬 자료구조 초기화) 뒤에 "late" init(다른 앱·라이브러리와의 통신이 필요할 수 있음)을 한다고 서술한다. 문장 4: late init까지 마쳐야 "completely up and running". P 자체에 대해 보고가 고정하는 것은 sync 호출 뒤 late init(6b, 아래 행)뿐이다. **P가 sync 전에 early init을 했다는 것은 일반 문장 3a·5a에서의 추론[I]**이다(`C2.md` §10 행 2: "That P had an early init before the sync is inference from the generic sentences 3a and 5a.") | late init의 내용·소요 시간·"fully initialized"의 관측 가능한 의미 |
 | 동기화 사용 | P는 late init **전에** `CFE_ES_WaitForStartupSync()`를 호출(6b). R도 "the same sync call"을 사용(7) | 인자(timeout) 값. R의 "other functions" 호출이 sync 반환 뒤였는지. R이 OPERATIONAL로 풀렸는지 timeout으로 풀렸는지 |
 | 관측된 현상 | R이 P의 late-phase init 완료 전에 "other functions"를 호출(7). 요청이 완전히 초기화되지 않은 앱에 도달하는 것을 "race condition"이라 부름(5b–5c) | 함수 이름·호출 방식·증상(충돌·오류 코드·로그)·빈도·관측 방법 |
 | 제안 | late-phase init을 위한 새 시작 상태(8) | 이름·API |
@@ -113,7 +114,7 @@
 
 | 역할 | 보고에서 오는 부분 [F](기록) | 재구성에서 선택하는 부분 (보고자의 값이 아님) |
 |---|---|---|
-| **P** (provider, late init 제공) | early init → `WaitForStartupSync` → late init 순서(6b). late init은 다른 앱·라이브러리와의 통신을 포함할 수 있음(3b) | late init의 내용. **관측 가능한 완료 지표**(P 내부의 readiness 표식)를 어디에 두는가. 요청을 받는 방식 |
+| **P** (provider, late init 제공) | `WaitForStartupSync` → late init 순서(6b)[F](기록). 그 앞의 early init 단계는 일반 문장 3a·5a에서의 추론[I](`C2.md` §10 행 2). late init은 다른 앱·라이브러리와의 통신을 포함할 수 있음(3b, "some applications"에 대한 일반 문장) | late init의 내용. **관측 가능한 완료 지표**(P 내부의 readiness 표식)를 어디에 두는가. 요청을 받는 방식 |
 | **R** (consumer, 의존 호출) | 같은 sync 호출을 사용하고(7), late-phase init 완료 전에 "other functions"를 호출 | R이 부르는 대상·방식(C2-D4). R의 수 |
 | **장벽(ES)** | 보고 시점 6.4.2에서 OPERATIONAL 한 단계(1a–1b) | 어느 개정을 쓰는가(§2.4) |
 
@@ -121,22 +122,24 @@
 
 ### 2.4 2×2 설계 — 장벽 × provider
 
-축 두 개를 정한다. **장벽** = ES 쪽 코드: 단일 OPERATIONAL(6.4.2 tarball 또는 v6.5.0a) 대 2단계(v6.6.0a, 또는 ENV의 v7.0.1). **provider** = P의 코드: 기존(late init **전에** `WaitForStartupSync`) 대 새(`WaitForSystemState(APPS_INIT)` → late init → `RunLoop`). R의 코드는 구성하는 셀에서 같다(`WaitForStartupSync` 뒤에 의존 호출). **PI 결정문(§3.5)은 이를 두 축을 "교차하는" 2×2로, SPEC §8.2·§9.3은 "a 2 × 2, not a pair"로 서술하며 provider 축을 "on the ENV cFE"로 적는다[D]. 이 문서가 코드로 확인한 바로는 네 셀 가운데 셀 B(단일 장벽 × 새 provider)를 구성할 수 없으므로, 교차 2×2가 서술된 그대로 실현되지는 않는다. 구성 가능한 것은 3셀(A·C·D)이고 B는 아래 이유로 제외한다.** 3셀로 충분한지, B를 별도로 정의할지는 PI 확인 사항이다(§7 항목 1). 이 문서는 어느 쪽도 정하지 않는다.
+축 두 개를 정한다. **장벽** = ES 쪽 코드: 단일 OPERATIONAL(6.4.2 tarball 또는 v6.5.0a) 대 2단계(v6.6.0a, 또는 ENV의 v7.0.1). **provider** = P의 코드: 기존(late init **전에** `WaitForStartupSync`) 대 새(`WaitForSystemState(APPS_INIT)` → late init → `RunLoop`). R의 코드는 구성하는 셀에서 같다(`WaitForStartupSync` 뒤에 의존 호출). **PI 결정문(§3.5)은 이를 두 축을 "교차하는" 2×2로 서술한다. SPEC §8.2 표 C2 행은 "a 2 × 2 of barrier granularity … crossed with provider role (old against new)"라고 쓰고, "a 2 × 2, not a pair"와 provider 축의 "on the ENV cFE"라는 문구는 SPEC §9.3 표 C2 행(그리고 PI_DECISIONS의 P-C2 Facts)에만 있다[D]. 이 문서가 코드로 확인한 바로는 네 셀 가운데 셀 B(단일 장벽 × 새 provider)를 구성할 수 없으므로, 교차 2×2가 서술된 그대로 실현되지는 않는다. 구성 가능한 것은 3셀(A·C·D)이고 B는 아래 이유로 제외한다.** 3셀로 충분한지, B를 별도로 정의할지는 PI 확인 사항이다(§7 항목 1). 이 문서는 어느 쪽도 정하지 않는다.
 
 **1차 대조는 provider의 late initialization이 정상 완료하는 구성이다(Q22)[D].** "초기화는 실패하지 않는다"는 가정은 재구성 구성에만 적용하며 실제 cFS 전체의 보장으로 일반화하지 않는다. 모델 분류는 이 가정의 포함 여부와 함께 보고한다. 초기화 실패가 가능한 구성은 별도 보조 실험으로 구분한다. 구성하는 셀은 **각 셀을 그대로 제시**하고, 제외한 셀 B는 이유와 함께 표시하며, 독립된 실제 결함 네 개(또는 셋)로 세지 않는다[D].
 
-| 셀 | 장벽 × provider | 실행 가능 여부와 이유 | 필요한 기반 | 1차 대조(late init 정상 완료)에서 기대하는 관측 [I] |
+| 셀 | 장벽 × provider | 구성 가능 여부와 이유 (빌드·실행은 어느 셀도 시험하지 않음) | 필요한 기반 | 1차 대조(late init 정상 완료)에서 기대하는 관측 [I] |
 |---|---|---|---|---|
-| **A** | 단일 × 기존 | **실행 가능.** 보고가 서술한 구성에 가장 가깝다. 이 셀이 "수정 전" 쪽이다 | v6.5.0a: CMake 빌드, OSAL gitlink `7139592f`(`osal-4.2.1a-1-g7139592`)[M: `git ls-tree`, `git describe`], 트리 안 PSP 1.3.0.0(기록). 또는 6.4.2 tarball: classic make, OSAL 4.1.1, PSP 1.2.0.0, `-m32` — 이 행은 D13이 필요하다(SPEC §8.2) | P와 R이 모두 OPERATIONAL에서 동시에 풀린다. P의 late-init 완료 지표가 R의 요청 진입보다 앞선다는 보장이 없다(SPEC LP-CASE-C2 (buggy): `schedule-dependent`, 미실행 설계 기대[D]) |
+| **A** | 단일 × 기존 | **구성 가능(코드 읽기 [I]); 빌드·실행 미시험 [U].** 보고가 서술한 구성에 가장 가깝다. 이 셀이 "수정 전" 쪽이다. v6.5.0a의 CMake 2.6.4 빌드를 CMake 3.28.3에서, 6.4.2 행을 §3.5의 `msg_max`·권한 조건에서 돌려 본 적이 없다 | v6.5.0a: CMake 빌드, OSAL gitlink `7139592f`(`osal-4.2.1a-1-g7139592`)[M: `git ls-tree`, `git describe`], 트리 안 PSP 1.3.0.0(기록). 또는 6.4.2 tarball: classic make, OSAL 4.1.1, PSP 1.2.0.0, `-m32` — 이 행은 D13이 필요하다(SPEC §8.2) | P와 R이 모두 OPERATIONAL에서 동시에 풀린다. P의 late-init 완료 지표가 R의 요청 진입보다 앞선다는 보장이 없다(SPEC 부록 A.8 LP-CASE-C2 (buggy)의 기대 class `schedule-dependent`: SPEC의 설계 기대이며 실행하지 않았다[I]) |
 | **B** | 단일 × 새 | **제외.** 새 provider가 부르는 `CFE_ES_WaitForSystemState`·`CFE_ES_SystemState_APPS_INIT`·`CFE_ES_AppState_LATE_INIT`가 6.4.2 `fsw` 트리 전체와 v6.5.0a의 ES 소스 4개·`cfe_es.h`에 없다(grep 0건 [M]). 컴파일되지 않는다. 심볼을 몰래 추가하면 "새 provider"가 아니라 다른 코드가 된다 | — | 셀 없음. "late init을 sync 호출 **뒤가 아니라 마지막 항목**에 둔다"는 문서화된 사용(`cfe_es.h` L665)은 P가 다른 앱의 로드를 기다린다는 보고의 이유(6a)를 없애므로 별도 역할이며 PI 결정 없이 2×2에 넣지 않는다 |
-| **C** | 2단계 × 기존 | **실행 가능.** 하위 호환 주석에 따라 기존 provider도 컴파일·실행된다 | v6.6.0a(트리에 osal·psp 없음; 아래 configure 결정 필요) 또는 v7.0.1(ENV 번들, 이미 빌드 기록 있음) | 기존 provider는 sync 호출 시 RUNNING을 late init 전에 게시하므로 A와 같은 경합이 남는다 — 수정이 호출 측 변경 없이는 효력이 없다는 코드 읽기 결과[I]를 확인하는 셀 |
-| **D** | 2단계 × 새 | **실행 가능.** 이 셀이 "수정 후" 쪽이다 | C와 같음 | P의 late init이 끝나 RUNNING이 된 뒤에야 ES가 OPERATIONAL을 올리므로 R은 P의 완료 뒤에 풀린다(G1, `C2.md` §8). 단 ES 2단계의 소프트 timeout(`SCRIPT_TIMEOUT`)이 먼저 지나면 R이 일찍 풀린다 |
+| **C** | 2단계 × 기존 | **구성 가능(코드 읽기 [I]); 빌드·실행 미시험 [U].** 기존 provider가 컴파일·실행된다는 것은 하위 호환 주석(v6.6.0a `cfe_es_api.c` L632–L637)과 `void` 래퍼가 남아 있다는 코드 읽기에서의 추론이다[I] | v6.6.0a(트리에 osal·psp 없음; 아래 configure 결정 필요) 또는 v7.0.1(ENV 번들, 이미 빌드 기록 있음) | 기존 provider는 sync 호출 시 RUNNING을 late init 전에 게시하므로 A와 같은 경합이 남는다 — 수정이 호출 측 변경 없이는 효력이 없다는 코드 읽기 결과[I]를 확인하는 셀 |
+| **D** | 2단계 × 새 | **구성 가능(코드 읽기 [I]); 빌드·실행 미시험 [U].** 이 셀이 "수정 후" 쪽이다 | C와 같음 | P의 late init이 끝나 RUNNING이 된 뒤에야 ES가 OPERATIONAL을 올리므로 R은 P의 완료 뒤에 풀린다(G1, `C2.md` §8). 단 ES 2단계의 소프트 timeout(`SCRIPT_TIMEOUT`)이나 **R 자신의 sync timeout**이 먼저 지나면 R이 일찍 풀린다(`C2.md` §8 G1의 "or R's own wait times out"; 아래 불릿) |
 
 **셀 D에서 Q22가 갈리는 지점**[I]:
 
-- late init이 정상 완료하는 1차 구성에서, "P의 late init 완료를 R의 요청 진입까지 **사건 기반으로 보류**"하면 위반은 ES 소프트 timeout이 지나야만 생긴다. 그 경우 이 셀의 분류는 timeout 의존(`timeout-dependent`)이며, SPEC rev 1.1은 이 분류를 "provider의 late init이 실패할 수 없을 때만" 허용한다(PI_DECISIONS의 P-C2 Facts가 SPEC을 인용; 부록 A.8 LP-CASE-C2 (fixed))[D]. 보류로 만든 실행은 자연 실행과 구분한다(P-C1HOLD와 같은 원칙).
+- late init이 정상 완료하는 1차 구성에서, "P의 late init 완료를 R의 요청 진입까지 **사건 기반으로 보류**"하면 위반은 R의 대기가 timeout으로 끝나야만 생긴다. 그 경우 이 셀의 기대 class는 timeout 의존(`timeout-dependent`)이다(SPEC 부록 A.8 LP-CASE-C2 (fixed)의 설계 기대, 미실행[I]). SPEC은 이 class를 "provider의 late init이 실패할 수 없을 때만" 둔다(PI_DECISIONS의 P-C2 Facts가 SPEC §7.3과 LP-CASE-C2를 인용)[D]. 보류로 만든 실행은 자연 실행과 구분한다(P-C1HOLD와 같은 원칙).
 - late init이 실패하면(P가 `ExitApp`으로 STOPPED), STOPPED가 장벽을 통과하므로 **timeout 없이도** R이 풀린다(§2.2). 이것은 별도 보조 실험이며 1차 대조의 결과에 섞지 않는다.
-- 보류 지점이 만드는 ES timeout 만료는 레퍼런스 상수에서 오지, 새로 고른 값에서 오지 않는다: v6.6.0a 샘플 구성의 `SCRIPT_TIMEOUT` 1000 ms, ENV(v7.0.1) 쪽은 ENV가 컴파일하는 모듈 기본값 1000 ms(`env/CONDITIONS.md` C8; 위 표). 보류의 감시 한도(벽시계 중단 조건)는 C2에 대한 PI 결정이 없어 `unspecified_by_reference`이다. C1에 대해서는 P-C1HOLD가 "중단 조건·감시 한도를 본실험 전에 기록한다"고 정하며, C2에 같은 원칙을 적용하는 것은 유추[I]이고 PI가 정할 일이다. D15는 작업량 단위 탐색 예산의 결정이며 이 한도를 정하지 않는다.
+- **R을 일찍 푸는 timeout은 두 가지이다**[I, 코드 읽기]. (1) ES main 2단계 대기의 `SCRIPT_TIMEOUT` 만료: syslog 뒤 OPERATIONAL로 진행하므로 R은 `CFE_SUCCESS`로 풀린다(§2.2). (2) R 자신의 sync timeout 만료: `CFE_ES_WaitForSystemState`는 호출자마다 자기 `WaitRemaining` 루프를 돌고, 자기 timeout이 다하면 `CFE_ES_OPERATION_TIMED_OUT`으로 빠져나온다(v6.6.0a `cfe_es_api.c` L648–L667, 반환 대입 L663; v7.0.1 L599)[F, 고정 SHA에서 재확인]. 따라서 R은 두 만료 중 먼저 오는 쪽에서 풀린다(각각 자기 대기의 시작부터 센다). 이 중 **레퍼런스 상수인 것은 (1)뿐이다**: v6.6.0a 샘플 구성의 `SCRIPT_TIMEOUT` 1000 ms, ENV(v7.0.1) 쪽은 ENV가 컴파일하는 모듈 기본값 1000 ms(`env/CONDITIONS.md` C8; 위 표). (2)는 R이 넘기는 timeout 인자에 달려 있고, 이 인자는 `unspecified_by_reference`이다(§2.6 "sync timeout 인자" 행, `C2.md` A7). 그러므로 셀 D의 이른 해제와 그 timeout 의존 class가 레퍼런스 상수에서 오는지는 아직 정하지 않은 실험 선택(R의 timeout 인자)에 달려 있다. `C2.md` A8 (iii)은 (1)만 다룬다.
+- 기존 래퍼 `CFE_ES_WaitForStartupSync`는 `void`이고 `WaitForSystemState`의 반환값을 버린다(v6.6.0a L686–L689, v7.0.1 L616–L619)[F]. 그래서 R이 래퍼를 부르면 호출자 쪽에서는 (2)의 timeout 해제와 장벽 해제(OPERATIONAL)를 구분할 수 없다. ROADMAP §9.1 항목 6(timeout으로 끝난 대기를 정상 완료와 구분)을 위해 §2.5의 E-WAIT는 래퍼 안에서 `WaitForSystemState`의 내부 반환값을 기록한다.
+- 보류의 감시 한도(벽시계 중단 조건)는 C2에 대한 PI 결정이 없어 `unspecified_by_reference`이다. C1에 대해서는 P-C1HOLD가 "중단 조건·감시 한도를 본실험 전에 기록한다"고 정하며, C2에 같은 원칙을 적용하는 것은 유추[I]이고 PI가 정할 일이다. D15는 작업량 단위 탐색 예산의 결정이며 이 한도를 정하지 않는다.
 
 **개정 선택지와 비용** (선택은 P-C2이며 이 문서는 정하지 않는다):
 
@@ -152,7 +155,7 @@
 |---|---|---|---|---|
 | **E-SYS** | ES 시스템 상태 대입 | 6.4.2 `cfe_es_start.c` L257·L268·L293; v6.6.0a L180·L191·L214·L233; v7.0.1 L183·L194·L216·L234 | 대입 지점의 중단점·프로브 | 실행 |
 | **E-APP** | 앱 상태 대입(RUNNING 게시, LATE_INIT 게시, STOPPED) | 단일: `cfe_es_api.c` L585·L672(RUNNING), L509(STOPPED) (6.4.2); v6.5.0a는 L584·L671·L508. 2단계: `SetAppState` 호출 지점 L520(RunLoop)·L637(WaitForSystemState)·L451(STOPPED) (v6.6.0a); v7.0.1 L471·L573·L399 | 같음 | 실행 |
-| **E-WAIT** | 앱 쪽 sync 호출의 진입·반환과 반환값(`void` 또는 `CFE_ES_OPERATION_TIMED_OUT`) | `WaitForStartupSync`/`WaitForSystemState` 진입·반환 | 같음 | 실행 |
+| **E-WAIT** | 앱 쪽 sync 호출의 진입·반환과 반환값. 래퍼 `WaitForStartupSync`는 `void`라 호출자 쪽에서는 해제 원인이 보이지 않으므로, **래퍼 안에서** `WaitForSystemState`의 내부 반환값(`CFE_SUCCESS` 대 `CFE_ES_OPERATION_TIMED_OUT`)을 기록한다. 이것으로 R 자신의 timeout 해제와 장벽 해제를 가른다(ROADMAP §9.1 항목 6) | `WaitForStartupSync`/`WaitForSystemState` 진입·반환. 내부 반환: v6.6.0a `cfe_es_api.c` L663(TIMED_OUT 대입)·L671(`return Status`), 래퍼 L686–L689; v7.0.1 L599, 래퍼 L616–L619. 단일 단계 쪽은 `ApplicationSyncDelay`의 반환(`cfe_es_start.c`, §2.2 표) | 같음 | 실행 |
 | **E-MAIN** | ES main 단계의 timeout 여부 | 6.4.2 L283–L287; v6.6.0a·v7.0.1 `MainTaskSyncDelay` 반환(성공/TIMED_OUT) | 반환값과 syslog 문구("Startup Sync failed…") | 실행 |
 | **E-P1** | P: sync 호출 진입/반환 | 역할 앱(재구성) | 역할 앱의 함수 심볼 | 빌드·실행 |
 | **E-P2** | P: late init 시작·**완료**(준비 지표 설정) | 역할 앱. 완료 지표의 위치가 이 사례의 "게시 지점"이다 | 지표를 설정하는 함수 하나를 프로브 지점으로 둔다 | 빌드·실행 |
@@ -171,7 +174,7 @@
 | 시작 스크립트 순서·우선순위·스택 | 개정의 샘플 스크립트가 **형식**만 준다 | `unspecified_by_reference` | 형식은 해당 개정 샘플에서 가져오고 값은 PI 결정 후 기록 |
 | 요청 방식(R→P): SB 명령 / 라이브러리 호출 / 공유 표식 | 없음(C2-D4) | `unspecified_by_reference` | PI. SB 방식은 큐 손실(D19, `msg_max=10`)과 시간 영향이 섞이고, 호출 방식은 사건이 단순한 대신 앱 경계를 단순화한다는 점이 다르다 |
 | P의 late init 내용·소요 | 없음 | 소요는 **고정 지연을 쓰지 않는다**(정책). 사건 기반 보류 | 보류 지점·해제 사건 정의 후 파일럿 |
-| sync timeout 인자(P·R) | 문서의 "최소 1000"은 문서 전용. 해당 개정 샘플 구성의 상수(§2.2)는 레퍼런스 | `unspecified_by_reference` | 후보는 샘플 상수와 문서 최소값. 선택 사유 기록 |
+| sync timeout 인자(P·R) | 문서의 "최소 1000"은 문서 전용. 해당 개정 샘플 구성의 상수(§2.2)는 레퍼런스 | `unspecified_by_reference` (`C2.md` A7). R의 인자는 셀 D에서 R이 자기 timeout으로 일찍 풀리는지를 정하므로, 이른 해제가 레퍼런스 상수(ES `SCRIPT_TIMEOUT`)에서 오는지도 이 선택에 달려 있다(§2.4) | PI. 후보는 샘플 상수와 문서 최소값. 선택 사유 기록 |
 | late init 실패 가능 여부 | 없음 | 1차 대조 = 정상 완료 [D]. 실패 가능 = 별도 보조 | Q22 |
 | 완료 지표(readiness 표식)의 위치 | 없음(`C2.md` A3) | `unspecified_by_reference` | 역할 앱 설계 시 기록 |
 | 플랫폼 | EVA CWS 미상. pc-linux는 6.4.2 지원 목록·6.5.0·6.6.0 시험 목록에 있음(기록) | `unspecified_by_reference`. 선택은 `deviation`이 아니라 가정(`C2.md` A6) | OSAL·PSP는 개정별 짝을 따른다 |
@@ -253,8 +256,8 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 |---|---|---|---|
 | 빌드 host | "built on CentOS/RHEL 6.x x86 (32 bit)", "compiled on CentOS 6.5-x86, CentOS-7.0-x64, Ubuntu 12.04 LTS x86, Ubuntu 14.04 LTS x64"(L83·L88–L89). 64비트 host에서는 "build and run as a 32 bit application"(L86–L87). 6.4.2 readme도 같은 줄(L83–L91)에 같은 문구이고, 빠른 시작에 "cFS has been built and run on Ubuntu 13.10 x64 and CentOS 6.5 i386"(L129)을 더한다[F, 2026-10-16 재수신 tarball] | Ubuntu 24.04.4 LTS, x86_64, 커널 6.18.44, 4 CPU | **deviation**. 이유: 이 컨테이너는 readme가 나열한 host 중 어느 것도 아니다. 영향: 아래 표. **그렇게 할 수밖에 없다는 근거는 시험하지 않았다[U]**: 목록 host의 재구성(VM·컨테이너 이미지·사용자 영역 조립)을 시도한 시험이 없다. §3.3.1의 프로브는 사용자 영역 파일이 vault에서 모두 가져와지고 정적 의존이 닫힌다는 것까지만 보였고, 실행은 하지 못했다 |
 | 컴파일러 | readme는 gcc 버전을 쓰지 않는다. "On Ubuntu 14.04, the cFE unit tests do not work due to differences in the GCC compiler"(L90–L91) — 컴파일러 차이가 알려져 있다는 뜻 | clang 18.1.3, gcc 13.3.0 | deviation. 목록 host의 gcc 버전은 `unspecified_by_reference`. CentOS 6.5 GA 패키지 세트의 gcc는 `gcc-4.4.7-4.el6`이다(vault 색인; RPM 안 `cc1`의 버전 문자열 `4.4.7 20120313 (Red Hat 4.4.7-4)`[M]). 목록 host가 그 gcc를 썼다는 것은 가정[I] |
-| 진단 옵션 `-Wno-error=incompatible-function-pointer-types` (프로브에서만 사용) | 레퍼런스에 없다. 6.4.1 make 트리(`*.mak`·`Makefile`·`*.sh`)에 `-std=`·`-Wno-error`·`-Werror`가 없고, pc-linux 경고 옵션은 `-Wall -Wstrict-prototypes`뿐이다(`compiler-opts.mak` L13)[M: grep] | clang 18 기본 설정에서 번역 단위 2개(`osapi.c:647`, `cfe_psp_start.c:270`)가 오류로 막힘. 이 플래그로 진단을 경고로 내리면 53/53 통과(§3.3 ⑤) | **deviation**(우회책). 이유: clang 16 이후 이 진단이 기본 오류이다. 영향: 오류가 경고가 되어 두 번역 단위가 구문 분석을 통과하며 소스는 바꾸지 않는다. 불가피성은 없다: 컨테이너 gcc 13은 이 플래그 없이 53/53 통과(22 경고). 목록 host의 gcc에서 이 두 호출이 오류였는지는 시험하지 않았다[U] |
-| 언어 표준 `-std=gnu89` (프로브에서만 사용) | 레퍼런스에 없다(readme·make 트리가 `-std`를 정하지 않음; 위 grep) | 지정해도 결과가 같다(53/53, 0 오류, 20 경고) | `unspecified_by_reference`. 기본 표준과 비교하려는 프로브 선택이며 레퍼런스에서 읽은 값이 아니다. 근거 [U→부분 확인]: 당초 "gcc 4.x의 기본이 gnu89"라는 배경 지식[U]이었고, 이번에 `gcc-4.4.7-4.el6` RPM의 man 페이지(`gcc.1.gz`)에서 "gnu89 … This is the default for C code"를 읽었다[F: RPM 내용 읽기만]. 목록 host가 그 gcc였는지는 [I] |
+| 진단 옵션 `-Wno-error=incompatible-function-pointer-types` (프로브에서만 사용) | 레퍼런스에 없다. 6.4.1 make 트리(`*.mak`·`Makefile`·`*.sh`)에 `-std=`·`-Wno-error`·`-Werror`가 없고, pc-linux 경고 옵션은 `-Wall -Wstrict-prototypes`뿐이다(`compiler-opts.mak` L13)[M: grep] | clang 18 기본 설정에서 번역 단위 2개(`osapi.c:647`, `cfe_psp_start.c:270`)가 오류로 막힘. 이 플래그로 진단을 경고로 내리면 53/53 통과(§3.3 ⑤) | **진단 프로브 선택. 기준 조건이 아니다.** CONDITIONS_POLICY의 `deviation`은 "그렇게 할 수밖에 없다는 근거"를 요구하는데 이 플래그에는 그런 근거가 없다: 컨테이너 gcc 13이 이 플래그 없이 53/53(2026-10-16에는 58/58) 통과한다. 그래서 분석 기반 조건으로 쓰지 않고, clang 기본 설정의 두 오류가 무엇인지 확인하는 진단에만 썼다. 영향: 오류가 경고가 되어 두 번역 단위가 구문 분석을 통과하며 소스는 바꾸지 않는다. 기준 조건으로 쓰려면 PI의 기록된 결정이 필요하다. 목록 host의 gcc에서 이 두 호출이 오류였는지는 시험하지 않았다[U] |
+| 언어 표준 `-std=gnu89` (프로브에서만 사용) | 레퍼런스에 없다(readme·make 트리가 `-std`를 정하지 않음; 위 grep) | 지정해도 결과가 같다(53/53, 0 오류, 20 경고) | **진단 프로브 선택. 기준 조건이 아니다.** 레퍼런스는 언어 표준을 정하지 않으므로(`unspecified_by_reference`) 기준 조건에서는 값을 고르지 않는다(CONDITIONS_POLICY). 이 프로브는 값을 하나 골라 썼으므로 그 상태 이름으로 부를 수 없고, 기본 표준과 비교하려는 진단에만 썼다. 기준 조건으로 쓰려면 PI의 기록된 결정이 필요하다. 근거 [U→부분 확인]: 당초 "gcc 4.x의 기본이 gnu89"라는 배경 지식[U]이었고, 이번에 `gcc-4.4.7-4.el6` RPM의 man 페이지(`gcc.1.gz`)에서 "gnu89 … This is the default for C code"를 읽었다[F: RPM 내용 읽기만]. 목록 host가 그 gcc였는지는 [I] |
 | C 라이브러리 헤더 | host 배포판의 것. readme는 "CentOS 6.5-x86"(L88)만 적고 패키지 수준은 적지 않는다 → 정확한 패키지 수준은 `unspecified_by_reference`. 이 문서의 프로브는 CentOS 6.5 GA 트리(`vault.centos.org/6.5/os/i386`)의 `glibc-headers-2.12-1.132.el6`를 썼다. 이는 **CentOS 6.5 GA 패키지 세트를 가정한 프로브 선택**이며 레퍼런스가 정한 값이 아니다. 6.4.1 배포(gzip 헤더 2014-12-12)의 host가 이후 el6 갱신 패키지나 6.6 패키지를 가졌을 수 있다[I] | glibc 2.39-0ubuntu8.9, `libc6-dev-i386` 2.39 | deviation |
 | 커널 헤더 | 위와 같이 패키지 수준 `unspecified_by_reference`. 프로브는 GA 트리의 `kernel-headers-2.6.32-431.el6`를 썼다(GA 세트 가정) | linux-libc-dev 6.8.0-106 | deviation |
 | 32비트 | `-m32` (`compiler-opts.mak` L33) | `-m32` 사용. 이 배치에서 `clang -m32`의 시스템 include 경로는 `/usr/include`뿐이고 `i386-linux-gnu` 디렉터리가 없다. `/usr/include/bits`·`/usr/include/asm`은 `x86_64-linux-gnu/…`로 가는 심볼릭 링크이고 각각 `libc6-dev-i386`·`gcc-multilib` 패키지가 설치했다(`dpkg -S`). 즉 32비트 파싱은 x86_64 multiarch 헤더를 `__i386__` 분기로 읽는다 | 같은 플래그. 헤더 배치는 deviation |
@@ -267,17 +270,17 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 | **② include 목록** | 컨테이너 헤더 기준으로 계산한 프로젝트(cFE·OSAL·PSP) 헤더·소스 닫힘은 113개이며, CentOS 헤더 쪽 전처리 토큰열이 51/53에서 같으므로(④) 사실상 같다. 시스템 헤더(clang 내장 제외)는 컨테이너 172개, CentOS 6.5 113개, 공통 93개, 컨테이너만 79개(예: `bits/atomic_wide_counter.h`, `bits/floatn.h`), CentOS만 20개(예: `libio.h`, `stdint.h`, `xlocale.h`) | 시스템 헤더 목록은 host마다 다르다. 이 차이가 프로젝트 코드의 해석을 바꾸는지는 ③–⑤가 답한다 |
 | **③ 정수·포인터 크기** | `-m32`에서 `__SIZEOF_LONG__`·포인터·`size_t` = 4. `int32` = `long int`(4), `uint32` = `unsigned long int`(4), `cpuaddr` = `unsigned long int`(4)(`common_types.h` L135·L139·L142). `sizeof` 14종(`EVS_AppData_t` 70, `CFE_EVS_GlobalData_t` 2540, `CFE_ES_AppRecord_t` 168, `CFE_ES_TaskRecord_t` 36, `CFE_ES_Global_t` 34812, `cfe_sb_t` 549076, `CFE_SB_PipeD_t` 68, `pthread_t` 4, `pthread_mutex_t` 24, `time_t` 4, `uint32` 4, `cpuaddr` 4, `void*` 4, `int32` 4)이 컨테이너 헤더·CentOS 6.5 헤더(clang)·컨테이너 gcc 13에서 모두 같다(gcc는 `_Static_assert` 14건 통과, 음성 대조 1건 실패 확인). **`-m32`를 빼면 53개 번역 단위가 모두 실패**한다(오류 106건, 첫 오류 `common_types.h:256 CompileTimeAssert(sizeof(uint32)==4)`) | 크기 수준에서는 헤더에 민감하지 않다. 대신 `-m32`는 **필수**이다: `_ix86_`가 `-D`로 정의되어 `uint32 = unsigned long`이 고정되므로 64비트 대상은 성립하지 않는다. 포인터↔`uint32` 변환이 곳곳에 있다(예: `cfe_esmempool.c` L196·L203, `osapi.c` L968 `OS_TaskGetId`의 `memcpy(&task_id_int,&task_id,sizeof(uint32))`) |
 | **④ 매크로가 선택한 소스 경로** | 닫힘 113개 파일 중 환경·컴파일러 매크로를 거는 조건문이 있는 파일은 6개(50줄): `common_types.h` L114(`__GNUC__`)·L126(`_ix86_`‖`__i386__`)·L144(`_ix64_`‖`__x86_64__`)·L162(PPC), `EXCLUDE_CFE_TBL`(`cfe_es_apps.c` L130·L1199, `cfe_es_objtab.c` L57·L67·L100·L128), `SOFTWARE_LITTLE_BIT_ORDER`(`cfe_psp_eeprom.c`), `OS_DEBUG_PRINTF`(OSAL posix; `osconfig.h`에 정의 없음). 전처리 후 프로젝트 파일 토큰열(공백 제거)은 **clang 18 대 gcc 13에서 53/53 동일**(각 1,669,604자). **컨테이너 헤더 대 CentOS 6.5 헤더에서는 51/53 동일**, 다른 2개(`osapi.c`, `cfe_psp_start.c`)는 `sched_priority` 대 `__sched_priority`뿐. clang은 `__GNUC__ 4`(minor 2)를, gcc 13은 `13`을 정의한다 | 닫힘 안에서 `__GNUC__`는 `defined` 형태로만 쓰여 컴파일러 차이가 경로를 바꾸지 않는다. 경로 선택은 `-D`(`_ix86_` 등)와 `-m32`(`__i386__`)가 정하고, `EXCLUDE_CFE_TBL`·`OS_DEBUG_PRINTF`는 정의되지 않은 쪽이 기본이다. 헤더 차이는 **멤버 이름 별칭**에서만 나타난다: CentOS 6.5의 glibc 2.12는 구조체 멤버를 `__sched_priority`로 두고(`bits/sched.h` L76) `sched_priority`를 매크로 별칭으로 정의한다(`sched.h` L45, 전처리 결과가 `__sched_priority`). 컨테이너의 glibc 2.39는 멤버가 `sched_priority`이고(`bits/types/struct_sched_param.h` L25) `/usr/include/sched.h` L47–L48에 항등 매크로(`sched_priority`)와 역방향 별칭(`__sched_priority` → `sched_priority`)이 있다 |
-| **⑤ 구조체·반환값 해석** | 반환 코드 상수는 매크로라 동일(`CFE_ES_ERR_APPID` 0xc4000001, `CFE_EVS_APP_NOT_REGISTERED` 0xc2000002, `CFE_EVS_APP_ILLEGAL_APP_ID` 0xc2000003; 오류 심각도 마스크 `0xc0000000`, `cfe_error.h` L132–L136). clang 18 기본 설정에서 **오류 2건**: `osapi.c:647` `pthread_create`에 `osal_task_entry`(`void(*)(void)`)를 전달, `cfe_psp_start.c:270` 시그널 핸들러. 둘 다 `-Wincompatible-function-pointer-types`가 clang 16 이후 기본 오류라서 생긴다. 이 플래그를 경고로 내리면 53/53 통과, 0 오류, 20 경고. `-std=gnu89`를 줘도 같은 결과. 컨테이너 gcc 13은 53/53, 22 경고 | `osapi.c:647`은 `OS_TaskCreate`가 새 task를 `pthread_create`로 시작하는 바로 그 호출이다(C5 Q16 행). 오류가 있는 번역 단위를 버리는 분석기라면 이 호출을 잃는다. `-std=gnu89`는 레퍼런스에서 읽은 값이 아니라 프로브 선택이다(§3.3의 해당 행; 당초 근거는 "gcc 4.x의 기본 표준"이라는 배경 지식[U]) |
+| **⑤ 구조체·반환값 해석** | 반환 코드 상수는 매크로라 동일(`CFE_ES_ERR_APPID` 0xc4000001, `CFE_EVS_APP_NOT_REGISTERED` 0xc2000002, `CFE_EVS_APP_ILLEGAL_APP_ID` 0xc2000003; 오류 심각도 마스크 `0xc0000000`, `cfe_error.h` L132–L136). clang 18 기본 설정에서 **오류 2건**: `osapi.c:647` `pthread_create`에 `osal_task_entry`(`void(*)(void)`)를 전달, `cfe_psp_start.c:270` 시그널 핸들러. 둘 다 `-Wincompatible-function-pointer-types`가 clang 16 이후 기본 오류라서 생긴다. 이 플래그를 경고로 내리면 53/53 통과, 0 오류, 20 경고. `-std=gnu89`를 줘도 같은 결과. 컨테이너 gcc 13은 53/53, 22 경고 | `osapi.c:647`은 `OS_TaskCreate`가 새 task를 `pthread_create`로 시작하는 바로 그 호출이다(C5 Q16 행). 오류가 있는 번역 단위를 버리는 분석기라면 이 호출을 잃는다. 레퍼런스 옵션만 쓴 파싱 결과는 gcc 13의 53/53이다. `-Wno-error=…`와 `-std=gnu89`는 레퍼런스에서 읽은 값이 아니라 기준 조건이 아닌 진단 프로브 선택이다(§3.3의 해당 행; `-std=gnu89`의 당초 근거는 "gcc 4.x의 기본 표준"이라는 배경 지식[U]) |
 
 **2026-10-16 확장 — 6.4.2와 앱 번역 단위** [M] (같은 방법; 컴파일 DB는 판마다 58개, 부록 D.2):
 
 | 프로브 | 6.4.1 (58) | 6.4.2 (58) |
 |---|---|---|
 | clang 18 기본 | 56/58, 오류 2 (`osapi.c:647:34`, `cfe_psp_start.c:270:19`; 앱 5개는 통과) | 같음 |
-| clang 18 + `-Wno-error=incompatible-function-pointer-types` | 58/58, 0 오류 | 같음 |
-| 위 + `-std=gnu89` | 58/58, 0 오류 | 같음 |
-| gcc 13 (플래그 없음) | 58/58, 0 오류 | 같음 |
-| clang 18 + 우회 플래그, CentOS 6.5 헤더(`-nostdinc`) | 58/58, 0 오류 | 같음 |
+| gcc 13 (플래그 없음; 레퍼런스 옵션만) | 58/58, 0 오류 | 같음 |
+| clang 18 + `-Wno-error=incompatible-function-pointer-types` (진단 프로브 선택, 기준 조건 아님) | 58/58, 0 오류 | 같음 |
+| 위 + `-std=gnu89` (진단 프로브 선택, 기준 조건 아님) | 58/58, 0 오류 | 같음 |
+| clang 18 + 위 진단 플래그, CentOS 6.5 헤더(`-nostdinc`) | 58/58, 0 오류 | 같음 |
 | `-m32` 제거 | 0/58 (`common_types.h:256`·`:260` 크기 단정 실패) | 같음 |
 | 전처리 프로젝트 토큰열: 컨테이너 헤더 대 CentOS 6.5 헤더 | 56/58 동일. 다른 2개(`osapi.c`, `cfe_psp_start.c`)는 `__` 접두(= `__sched_priority`)만 다름 | 같음 |
 | 전처리 프로젝트 토큰열: clang 대 gcc | 58/58 동일 | 같음 |
@@ -337,12 +340,12 @@ CONDITIONS_POLICY에 따라 먼저 요구 조건과 레퍼런스를 적고, 우�
 | 조건 | 레퍼런스 | 이 컨테이너 [M] | 비용·판단 |
 |---|---|---|---|
 | 32비트 런타임 | readme: 32비트 앱으로 실행 | `libc6-i386` 2.39, `/lib/ld-linux.so.2` 있음 | 있음 |
-| 큐 깊이 | readme L168–L174: `msg_max`를 올리거나 root로 실행 | `msg_max` = 10. root는 `CAP_SYS_RESOURCE`가 없다(`env/logs/f_root_capability_probe.log`: CapEff에 비트 24 없음). v7.x OSAL에서 root 실행이 `OS_QueueCreate … errno 22`로 실패한 기록이 있다(`env/ENV.md` D-4) | OSAL 4.1.1 posix `OS_QueueCreate`는 `mq_maxmsg = queue_depth`로 `mq_open`한다(`osapi.c` L1598·L1625)[F]. 깊이 10을 넘는 큐가 있으면 root여도 `mq_open`이 EINVAL일 것으로 추정[I]. **readme의 "root로 실행" 대안이 여기서는 성립하지 않을 수 있다.** 해결은 `msg_max` 상향(호스트 공유 sysctl; 시험하지 않음) 또는 권한 부여 — 플랫폼·권한 결정 |
+| 큐 깊이 | readme L168–L174: `msg_max`를 올리거나 root로 실행 | `msg_max` = 10. root는 `CAP_SYS_RESOURCE`가 없다(`env/logs/f_root_capability_probe.log`: CapEff에 비트 24 없음). v7.x OSAL에서 root 실행이 `OS_QueueCreate … errno 22`로 실패한 기록이 있다(`env/ENV.md` D-4) | OSAL 4.1.1 posix `OS_QueueCreate`는 `mq_maxmsg = queue_depth`로 `mq_open`한다(`osapi.c` L1598·L1625)[F]. 깊이 10을 넘는 큐가 있으면 root여도 `mq_open`이 EINVAL일 것으로 추정[I]. **readme의 "root로 실행" 대안이 여기서는 성립하지 않을 수 있다.** PI 결정 D19[D](PI_DECISIONS_RESOLVED §4.1): 현 기준은 `msg_max=10`을 유지하고, 큐 손실과 설정을 함께 기록하며, 손실이 목표 경로를 방해하면 민감도 구성을 별도로 설계하고, 값을 조용히 바꾸지 않는다. 따라서 `msg_max` 상향은 6.4.x 실행의 해결책으로 바로 쓸 수 없고, 쓴다면 **별도로 기록하는 민감도 구성**이어야 하며 ENV/R2 기준을 바꾸어서는 안 된다. 이 값은 ENV/R2 기준이 도는 같은 컨테이너와 공유되는 sysctl이므로, 상향한다면 범위(6.4.x 실행에 한정)·기록·원복이 필요하다. 다른 길은 6.4.x 실행에만 한정한 권한 부여인데, 이 세션의 root는 `CAP_SYS_RESOURCE`를 bounding set에서도 갖지 않으므로(`CapBnd` `000001fffeffffff`, 비트 24 없음; `env/logs/f_root_capability_probe.log`) 컨테이너 구성 변경이 필요할 것으로 보인다[I]. 어느 쪽도 시험하지 않았고, 선택은 PI 몫이다 |
 | RT 우선순위 | OSAL 4.1.1은 `geteuid()==0`일 때만 SCHED_FIFO와 재매핑 우선순위를 건다(`osapi.c` L435·L587–L632)[F]. readme L176–L177 | root, `CAP_SYS_NICE` 있음 | 가능. 적용 여부는 실행 중 확인해야 함(U-RT) |
 | CPU 수 | 레퍼런스 없음 | 4 CPU, `taskset` 있음 | 우선순위 기반 순서(C3-D3(a))는 단일 CPU 또는 동등한 제한이 필요하다(`C3.md` A10). `taskset`으로 가능하나 값은 `unspecified_by_reference` |
 | 순서 제어 | C3의 순서는 우선순위가 만든다(이슈 항목 2·3) | — | (a) root+RT+단일 CPU, (b) 사건 기반 보류(정책이 선호). 선택은 PI(C3-D3, `cases/C3.md`) |
 
-비용: 빌드·실행·권한(플랫폼). 설치는 필요 없을 수 있다[I]. 다만 `msg_max` 상향은 시스템 설정 변경이다.
+비용: 빌드·실행·권한(플랫폼). 설치는 필요 없을 수 있다[I]. 다만 `msg_max` 상향은 시스템 설정 변경이고 D19가 고정한 현 기준 조건을 건드리므로, 별도 기록되는 민감도 구성으로만 가능하다(PI 결정 사항).
 
 ## 4. Q16 표 골격 — 상태·반환·소스 위치의 버전별 대응
 
@@ -372,7 +375,7 @@ Q16의 범위[D]: Φ_6.4.x의 outcome map·binding과, C3·C5의 Allowed 항목�
 
 ### 4.2 C5 — `OS_TaskCreate` 전 락 해제, 재획득, 등록 전 `GetAppID`
 
-준비 상태 전제(`C5.md` §7의 정식화를 옮김; 연구자가 세운 호출자 요구이며 [I]/[D]이다): 새 task가 처음 `GetAppID`를 읽기 전에 생성자의 등록이 끝나고 락이 풀려 있다. **위반**은 아직 등록되지 않을 task의 `GetAppID`가 실패하는 것이다. [F]는 인용에만 쓴다: 이슈 본문 "opportunity for the child thread to read the shared table data before it is fully populated … CFE_ES_GetAppID() … will fail"(`C5.md` §7 출처 1, 기록)과 아래 표의 코드 줄. "새 task가 먼저 실행되었다는 사실만으로는 위반이 아니다"는 원출처의 문장이 아니라 로드맵·연구자의 정의이다(`C5.md` §7이 로드맵을 출처로 적는다. ROADMAP_20261015 §9.3의 완료 기준도 같은 구분을 요구한다). 로드맵은 CONDITIONS_POLICY가 인정하는 레퍼런스가 아니다.
+준비 상태 전제(`C5.md` §7의 정식화를 옮김; 연구자가 세운 호출자 요구이며 [I]/[D]이다): 새 task가 처음 `GetAppID`를 읽기 전에 생성자의 등록이 끝나고 락이 풀려 있다. 사례 기록이 제안하는 **위반** 판정은 아직 등록되지 않은 task의 `GetAppID`가 실패하는 것이다. 이 "실패만" 세는 판정은 `C5.md` A7이 스스로 "a **choice**, an assumption that needs your approval"이라고 적은 **미승인 가정**이며, 코드는 잘못된 AppID가 성공으로 반환되는 형태도 허용한다(`C5.md` A8; §4.3). `ledger.md` X7이 이 가정을 사례 전반의 판정 정책에 합쳐 열어 두었다. [F]는 인용에만 쓴다: 이슈 본문 "opportunity for the child thread to read the shared table data before it is fully populated … CFE_ES_GetAppID() … will fail"(`C5.md` §7 출처 1, 기록)과 아래 표의 코드 줄. "새 task가 먼저 실행되었다는 사실만으로는 위반이 아니다"는 원출처의 문장이 아니라 로드맵·연구자의 정의이다(`C5.md` §7이 로드맵을 출처로 적는다. ROADMAP_20261015 §9.3의 완료 기준도 같은 구분을 요구한다). 로드맵은 CONDITIONS_POLICY가 인정하는 레퍼런스가 아니다.
 
 | ID | 경로 단계 | 상태 / 자원 | 6.4.1 | 6.4.2 | 반환·결과 | 판 간 차이 |
 |---|---|---|---|---|---|---|
@@ -408,7 +411,7 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 | E3-SCHED | 각 코어 task의 실제 정책·우선순위와 CPU 집합 | `geteuid()==0`일 때만 OSAL이 SCHED_FIFO·재매핑을 건다(`osapi.c` L435·L587). 실제 적용값은 실행 중 기록(U-RT). CPU 수·고정 여부는 `unspecified_by_reference`(§3.5) | 실행 |
 
 - 해석 규칙[I]: ROADMAP §9.2 완료 기준대로 "잘못된 상태 사용"(E3-USE·E3-IDX)과 "실제 crash"(E3-FAULT)를 나누어 보고한다. 6.4.2에서 crash가 사라진 것만으로 순서 의존이 없어졌다고 쓰지 않는다: 6.4.2는 F3(Trac #40, 순서 보장)·F1·F2(Trac #42, 사용 지점 가드와 게시 순서)를 한 diff에 담고(`ledger.md` §3.3 L214–L216, L225), C5의 Trac #41도 같은 diff에 있다. 판 전체 비교의 결과에는 "여러 수정이 섞였다"를 표시한다. 하나만 떼는 것은 구성한 부분 diff이며 `deviation`이다(같은 곳).
-- 현재 판(v7.0.1)의 R2 기록은 C3의 실행 근거로 세지 않는다(ROADMAP §9.2, SPEC rev 1.2 L2828 "Not independent C3 evidence").
+- 현재 판(v7.0.1)의 R2 기록은 C3의 실행 근거로 세지 않는다(ROADMAP §9.2; SPEC rev 1.2 §9.3 표 C3 행의 "Not independent C3 evidence").
 
 **C5** (준비 상태 전제는 §4.2):
 
@@ -417,13 +420,14 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 | E5-UNLOCK | `es/cfe_es_apps.c` L610 생성자의 락 해제 | 생성자 thread, 앱 슬롯 `i` | 실행 |
 | E5-CREATE | L614 `OS_TaskCreate` 진입, OSAL `osapi.c` L645 `pthread_create` | 생성자 thread와 이 호출의 순번 | 실행 |
 | E5-START | 새 thread의 첫 실행. OSAL은 ES가 넘긴 진입 주소(`(void*)StartAddr`, `cfe_es_apps.c` L616)를 `pthread_create`의 시작 함수로 그대로 넘긴다(`osapi.c` L645–L648) | 새 thread의 OS thread ID와, 그것을 만든 E5-CREATE. **`pthread_create`가 반환하기 전에 새 thread가 실행될 수 있다**는 것을 전제로 한다(ROADMAP §9.3 항목 2) | 실행 |
-| E5-REG | 새 thread의 `CFE_ES_RegisterApp` → `OS_TaskRegister`(`cfe_es_api.c` L776) 반환 | 반환값 | 실행 |
-| E5-USE | 새 thread의 첫 `CFE_ES_GetAppID`(L846): 락 획득 L851, `OS_TaskGetId` 결과, 검사 L861, 반환값 | `TaskId`, `RecordUsed`, 반환값(`CFE_SUCCESS`/`CFE_ES_ERR_APPID`) | 실행 |
+| E5-REG | 새 thread의 `CFE_ES_RegisterApp`(L767; ES 락 L771) → `OS_TaskRegister`(L776) 반환 | `OS_TaskRegister`의 반환값(`OS_SUCCESS` / `OS_ERR_INVALID_ID` / `OS_ERROR`; OSAL `osapi.c` L906–L948)과 `RegisterApp`의 반환값(실패 시 `CFE_ES_ERR_APP_REGISTER`, L788), 그리고 이 호출이 E5-RELOCK·PUB(L637)보다 먼저였는지. `OS_TaskRegister`는 성공할 때만 `pthread_setspecific`(L938)을 부르므로, 실패하면 그 thread의 `thread_key`는 설정되지 않은 채 남는다[F, `osapi.c` 재확인] | 실행 |
+| E5-USE | 새 thread의 첫 `CFE_ES_GetAppID`(L846): 락 획득 L851, `OS_TaskGetId` 결과, 검사 L861, 반환값 | `TaskId`, `RecordUsed`, 반환값(`CFE_SUCCESS`/`CFE_ES_ERR_APPID`). 추가로 **`TaskId`가 0이거나 새 task의 OSAL ID(`OS_TaskCreate`가 `*task_id`에 쓰는 값, `osapi.c` L690)와 다른지**, 그리고 **`CFE_SUCCESS`인데 반환된 AppId가 생성자의 슬롯 `i`와 다른지**(잘못된 AppID, `C5.md` A8)를 기록한다 | 실행 |
 | E5-RELOCK·PUB | 생성자의 재획득 L637, `RecordUsed = TRUE` L649, `AppId = i` L651, 해제 L673 | 게시 시점 | 실행 |
 | E5-CONSUME | 실패한 `GetAppID`의 소비: `EVS_GetAppID`(`evs/cfe_evs_utils.c` L127)를 거친 등록 건너뜀, `CFE_SB_CreatePipe`의 반환 무시(`sb/cfe_sb_api.c` L224), `RunLoop` 실패 로그(`cfe_es_api.c` L658) | 각 경로의 결과. **파생 결과**로 기록 | 실행 |
 
 - **식별 방법**[I] (ROADMAP §9.3 항목 3): 관측기는 새 thread를 그 thread 자신의 `GetAppID`로 식별하지 않는다. 그 호출이 바로 판정 대상이고 등록 전에는 실패하기 때문이다. 대신 (1) OS thread ID(Linux에서는 LWP ID)와 (2) 그 thread를 만든 E5-CREATE(생성자 thread, 호출 순번, 앱 슬롯 `i`, 앱 이름 인자)를 임시 식별로 쓰고, (3) E5-RELOCK·PUB에서 `TaskTable[TaskId].AppId = i`가 기록된 뒤 앱 정보와 연결한다. `TaskId`는 OSAL 표 인덱스이며 `OS_TaskGetId`가 `thread_key`의 값에서 하위 16비트로 계산한다(`osapi.c` L959–L972). 이 연결 방식은 설계 제안이며 아직 어떤 도구로도 시험하지 않았다.
-- **판정 단위**[I]: 위반은 "E5-USE가 E5-RELOCK·PUB보다 먼저 일어나고 그 결과가 `CFE_ES_ERR_APPID`"인 것이다(§4.2 준비 상태 전제). E5-START가 E5-CREATE의 반환보다 먼저인 것만으로는 위반이 아니다(ROADMAP §9.3 완료 기준). `CFE_ES_GetAppID`가 락을 잡으므로(L851) 생성자가 L637–L673을 쥐고 있는 동안의 호출은 기다렸다가 성공한다[I, 코드 읽기]. 따라서 창은 L610(해제)부터 L637(재획득)까지이다. 6.4.2는 이 구간의 해제·재획득이 없다(§4.2 Q16-C5-02).
+- **판정 단위 — 미승인 가정**[I]: 사례 기록이 제안하는 판정은 "E5-USE가 E5-RELOCK·PUB보다 먼저 일어나고 그 결과가 `CFE_ES_ERR_APPID`"인 것이다(§4.2). 이것은 `C5.md` A7의 **미승인 가정**이다: A7은 실패만 세는 판정을 "a **choice**, an assumption that needs your approval, not a reference-determined condition"이라고 적고, 코드가 잘못된 AppID 형태(A8)도 허용한다고 덧붙인다. `ledger.md` X7이 A7을 사례 전반의 판정 정책(C3 D4·R2 D2·C1 A8·C2 A4와 함께)에 합쳐 열어 두었다. PI 결정 전까지 이 문서는 실패 결과와 잘못된 AppID 결과를 **둘 다 기록**하고(E5-REG·E5-USE), 어느 쪽을 주 결과로 세는지는 정하지 않는다(§7 항목 8). E5-START가 E5-CREATE의 반환보다 먼저인 것만으로는 위반이 아니다(ROADMAP §9.3 완료 기준).
+- **창 — A8 조건부**[I, 코드 읽기]: `CFE_ES_GetAppID`가 락을 잡으므로(L851) 생성자가 L637–L673을 쥐고 있는 동안의 호출은 기다린다. 기다린 뒤 성공하는 것은 **새 task의 `OS_TaskRegister`가 성공해 `thread_key`가 설정된 경우에만**이다. 이 조건에서 실패 창은 L610(해제)부터 L637(재획득)까지이다. 6.4.2는 이 구간의 해제·재획득이 없다(§4.2 Q16-C5-02). 조건이 깨지는 경로(`C5.md` A8, 미확인[U]): `CFE_ES_RegisterApp`도 ES 락을 잡으므로(L771) 그 안의 `OS_TaskRegister`(L776)는 창 안이나 L673 뒤에 돈다. 창 안에서 돌 때 `pthread_create`가 아직 `OS_task_table[i].id`를 쓰지 않았으면(OSAL `osapi.c` L645, 새 thread의 검색 L921–L927) `OS_ERR_INVALID_ID`로 실패하고, `pthread_setspecific`(L938)이 불리지 않는다. 그러면 `OS_TaskGetId`(L959–L972)는 그 thread에서 L673 뒤에도 계속 0을 돌려주고, `GetAppID`는 `TaskTable[0]`을 읽는다. `TaskTable[0].RecordUsed`가 참이면 **다른 task의 AppId로 `CFE_SUCCESS`**(잘못된 AppID)가 되고, 거짓이면 L673 뒤에도 `CFE_ES_ERR_APPID`가 된다[I]. 이 순서(`pthread_create`의 ID 저장 대 새 thread의 검색)를 정하는 레퍼런스는 없고(`C5.md` A8, §12 Q6), 이 문서도 확인하지 않았다.
 - **원 보고에 없는 결과를 기대하지 않는다**: 사례 기록이 보존한 #72 인용은 `GetAppID` 실패를 서술하고(`C5.md` §7 출처 1, 기록), `C5.md` 전체에 crash라는 낱말이 없다(grep 0건[M]; 이슈 원문과 댓글 9개는 이 세션에서 다시 읽지 못함). crash는 기대 결과에 넣지 않는다(ROADMAP §9.3 항목 5).
 - 현재 판의 App-record 잔여 후보(SPEC 부록 A.3)와 `58abd38d^`/`58abd38d` 쌍(§5)은 #72와 별도 결과로 관리한다.
 
@@ -435,7 +439,7 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 
 ## 5. 보조 쌍 `58abd38d^`/`58abd38d` (P-RGIT) — #72와 따로 보고
 
-**결정[D]**: 보조 대조로 승인. 원 C5(#72)의 대체 검증으로 쓰지 않는다. 원 C5의 과거 버전 락 공백 검증을 먼저 하고, 이 쌍은 추가 입력 대응 비용이 확인된 뒤 수행한다. 설계 문서에 이미 알려진 쌍이므로 **맹검 결과로 보고하지 않는다**. 기대(SPEC §9.3 VP-D5): `58abd38d^`에서 PROTECTED 증명서가 나타나고 `58abd38d`에서 보류된다[D, 미실행]. 쌍의 조건은 모두 `unspecified_by_reference`이다(PI_DECISIONS).
+**결정[D]**: 보조 대조로 승인. 원 C5(#72)의 대체 검증으로 쓰지 않는다. 원 C5의 과거 버전 락 공백 검증을 먼저 하고, 이 쌍은 추가 입력 대응 비용이 확인된 뒤 수행한다. 설계 문서에 이미 알려진 쌍이므로 **맹검 결과로 보고하지 않는다**. 기대(SPEC §9.3 VP-D5): `58abd38d^`에서 PROTECTED 증명서가 나타나고 `58abd38d`에서 보류된다. 이것은 결정이 아니라 SPEC의 설계 기대이며 실행하지 않았다[I] (PI_DECISIONS P-RGIT Facts도 "Expected [I]"로 적는다). 쌍의 조건은 모두 `unspecified_by_reference`이다(PI_DECISIONS).
 
 ### 5.1 쌍의 정체 [M]
 
@@ -459,7 +463,7 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 | 앱 레코드 확정 | `CFE_ES_AppCreate` L637: 락 L666, `AppRecordSetUsed(RESERVED)` L736, 해제 L742, `StartAppTask` 호출 L763, **재획득 L774**, `AppRecordSetUsed(PendingResourceId)` **L783**, 해제 L799 | `CFE_ES_AppCreate` L648: 락 L671, `RESERVED` L733, 해제 L739, `StartAppTask` 호출 L760, **재획득 L772**, `AppRecordSetUsed` **L780**, 해제 L796 |
 | `GetAppID` | `cfe_es_api.c` L812–L836: `CFE_ES_GetAppRecordByContext()`가 NULL이면 `CFE_ES_ERR_RESOURCEID_NOT_VALID`(L829) | 같음 |
 
-[I] `58abd38d^`에서는 새 task의 진입 대기가 **앱 레코드 확정**(L783)까지 이어지므로, 앱의 진입 함수 안에서 `GetAppID`가 실패할 창이 닫혀 있다. `58abd38d`에서는 대기가 태스크 레코드 게시(L615)에서 끝나므로 L615–L780 사이에 `GetAppID`가 `CFE_ES_ERR_RESOURCEID_NOT_VALID`를 반환하는 창이 생길 수 있다. 이는 C5 기록 §9의 잔여 창 후보와 같은 줄거리이며 코드 읽기만의 추론이다. 실행으로 도달 여부를 확인한 적이 없다.
+[I] `58abd38d^`에서는 새 task의 진입 대기가 **앱 레코드 확정**(L783)까지 이어지므로, 앱의 진입 함수 안에서 `GetAppID`가 실패할 창이 닫혀 있다. `58abd38d`에서는 대기가 태스크 레코드 게시(L615)에서 끝난다. 다만 L615는 `StartAppTask`의 락 구간(L585–L632) 안이고, 새 task의 대기(`CFE_ES_GetTaskFunction`)와 `CFE_ES_GetAppID`(`cfe_es_api.c` L817)도 ES 락을 잡는다. 따라서 새 task가 `GetAppID`에서 `CFE_ES_ERR_RESOURCEID_NOT_VALID`를 받을 수 있는 창은 **락이 없는 구간**, 곧 `StartAppTask`의 해제 L632부터 `AppCreate`의 재획득 L772까지이다. 재획득 뒤(L772–L796)의 호출은 기다렸다가 앱 레코드 확정(L780) 뒤에 성공한다. 같은 추론을 C5(6.4.1)의 창 L610–L637에 적용했다(§4.3). 이는 C5 기록 §9의 잔여 창 후보와 같은 줄거리이며 코드 읽기만의 추론이다. 실행으로 도달 여부를 확인한 적이 없다.
 
 ### 5.3 입력 대응 비용의 목록 (PI가 요구한 "비용 확인")
 
@@ -469,7 +473,7 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 | cFE·OSAL·PSP 조합 | 공개 번들 nasa/cFS `a41549cb201b8d53b9e5aea81b1e7bb660e6cb8b`("Integration Candidate 2021-02-02", 2021-02-16)가 **cfe = `6b9c267e`**(`58abd38d^`와 같음), osal = `ff4f52312297a3cdf3ddc0cf5ead95f27954630b`(nasa/osal 태그 `v6.0.0-rc1`), psp = `a1a7e7a3bfd6d2d82bb5d099c1f757ff60ba2431`(2021-02-16 병합)을 고정한다[M: 신규 얕은 fetch로 확인]. `58abd38d` 자체를 고정한 번들 커밋은 확인하지 못했다. 번들 `8d0f9dc3ce9ce83ebd90da5a489094f5b497ed94`("Integration Candidate 2021-02-23")는 cfe `672b2dc4`(PR #1171 병합, `58abd38d`를 조상으로 포함[M])를 고정한다 | 읽기. 이 조합을 쓰는 것은 실험 선택이며 `unspecified_by_reference` |
 | 빌드 방식 | 이 시점의 cFS 번들은 CMake 기반(`fsw/cfe-core/…`는 이 커밋에서 아직 `modules/` 이전 구조). 컴파일 DB는 CMake의 `CMAKE_EXPORT_COMPILE_COMMANDS`로 얻을 수 있다고 추정[I]. 미시험 | 빌드(설치 없음 추정) |
 | Φ 입력 | 이 쌍의 API(`CFE_ES_GetAppRecordByContext`, `CFE_ES_TaskRecordSetUsed`, `CFE_ES_AppRecordSetUsed`, `CFE_ES_APPID_UNDEFINED`)는 Φ_6.4.x에 없다. 별도 버전 가드·결과 맵이 필요 | 읽기(Φ 작성) |
-| 관측 | 앱 레코드 확정(L783/L780)과 `GetAppID`의 반환을 사건으로 기록해야 하며, 생성자를 `StartAppTask` 반환 직후·재획득 직전에 보류하는 사건 기반 제어가 필요하다(SPEC 부록 A.3 확인 4와 같은 위치) | 실행 |
+| 관측 | 앱 레코드 확정(L783/L780), `58abd38d` 쪽 락 해제 L632·재획득 L772, `GetAppID`의 반환을 사건으로 기록해야 하며, 생성자를 `StartAppTask` 반환 직후·재획득 직전에 보류하는 사건 기반 제어가 필요하다(SPEC 부록 A.3 확인 4와 같은 위치) | 실행 |
 | 보고 | #72의 결과와 합산하지 않는다. "맹검 아님" 표시. D16(App-record 보류 실험)은 파생 실험으로 따로 표시 | — |
 
 ## 6. 항목별 비용 총괄 — 설치 / 플랫폼 / 읽기
@@ -489,7 +493,7 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 | 헤더 민감도 (ii) CentOS 6.5 헤더 | ● | ● | | | | | 압축 해제만, 설치 아님. 헤더 3종만 완료. 전체 sysroot·gcc 4.4.7의 실행은 미시험[U] |
 | 목록 host 자체 재현(CentOS 6.5-x86 등) | | | | (●) | (●) | (●) | 시험하지 않음[U] (§3.3.1). 사용자 영역 파일은 가져와지고 정적 의존이 닫혔으나 실행·이미지·VM은 미시험이다. 필요한 비용 분류도 확정하지 않았다 |
 | Microblaze (C3 원 플랫폼) | | | | | | ● | OS·PSP·OSAL·툴체인이 레퍼런스에 없음. C3의 파생 기반은 `deviation`, C5(#72)의 플랫폼은 `unspecified_by_reference`(§3.3.2) |
-| 6.4.1/6.4.2 pc-linux 실행(§3.5) | | | ● | ● | (●) | (●) | root 큐 제한 때문에 `msg_max` 상향 또는 권한이 필요할 수 있음 |
+| 6.4.1/6.4.2 pc-linux 실행(§3.5) | | | ● | ● | (●) | (●) | root 큐 제한 때문에 `msg_max` 상향 또는 권한이 필요할 수 있음. D19가 `msg_max=10`을 현 기준으로 유지하므로 상향은 별도 기록되는 민감도 구성(PI) |
 | Q16 표 골격·앵커(§4) | ● | | | | | | golden 시험 코드는 이 문서의 범위 밖 |
 | P-RGIT 소스 대응(§5) | ● | | | | | | 완료 |
 | P-RGIT 파생 실행 | | | ● | ● | | | 비용 확인 뒤 수행(PI) |
@@ -501,15 +505,16 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 **PI 결정이 필요한 것**
 
 1. **P-C2 세부**: 단일 단계 쪽 개정(6.4.2 대 v6.5.0a)과 2단계 쪽(v6.6.0a 대 v7.0.1), 6.5.0a·6.6.0a configure 결정, 요청 방식(C2-D4), 앱 수·우선순위·timeout 인자, 어느 대조를 RQ9에 세는가(§2.4, §2.6). 추가로 두 가지를 PI가 확인해야 한다.
-   - **2×2의 실현 가능성**: PI 결정문 §3.5는 "교차하는 2×2", SPEC §8.2·§9.3은 provider 축을 "on the ENV cFE"로 서술한다. 셀 B(단일 장벽 × 새 provider)는 새 provider가 부르는 심볼이 6.4.2·v6.5.0a에 없어 구성할 수 없다(§2.4 셀 B; grep 0건 [M], 이번에 재확인). 서술된 교차 2×2는 그대로는 실현되지 않는다. 3셀(A·C·D)과 B의 제외 사유를 문서화하는 것으로 충분한지, 아니면 B를 별도로 정의할지(예: 심볼을 추가한 변형은 "다른 코드"이므로 별도 정의 필요) 확인이 필요하다.
+   - **2×2의 실현 가능성**: PI 결정문 §3.5는 "교차하는 2×2"로, SPEC §8.2 표 C2 행은 "crossed with provider role (old against new)"로 서술하며, "not a pair"와 provider 축의 "on the ENV cFE"는 SPEC §9.3 표 C2 행(과 PI_DECISIONS P-C2 Facts)의 문구이다. 셀 B(단일 장벽 × 새 provider)는 새 provider가 부르는 심볼이 6.4.2·v6.5.0a에 없어 구성할 수 없다(§2.4 셀 B; grep 0건 [M], 이번에 재확인). 서술된 교차 2×2는 그대로는 실현되지 않는다. 3셀(A·C·D)과 B의 제외 사유를 문서화하는 것으로 충분한지, 아니면 B를 별도로 정의할지(예: 심볼을 추가한 변형은 "다른 코드"이므로 별도 정의 필요) 확인이 필요하다.
    - **판정 단위(oracle)**: `E-P2` 대 `E-R2`의 선후(`C2.md` A4)는 미승인 가정이다. `ledger.md` X7(사례 전반의 주 결과 정책)과 함께 정한다(§2.6).
+   - **셀 D의 이른 해제와 R의 timeout 인자**: 셀 D에서 R은 ES 2단계 `SCRIPT_TIMEOUT`(레퍼런스 상수)과 R 자신의 sync timeout(인자, `unspecified_by_reference`, `C2.md` A7) 중 먼저 만료되는 쪽에서 일찍 풀린다(§2.4). 따라서 셀 D의 timeout 의존 class가 레퍼런스 상수에서 오는지는 R의 timeout 인자 선택에 달려 있다. 이 인자를 PI가 정할 때 이 의존을 함께 본다.
 2. **X3 (D13 (c)의 후속)**: (c)는 "F1 전에 배치"로 이미 결정되었다(PI_DECISIONS_RESOLVED §3.4)[D]. 남은 PI 몫은 `ledger.md` §5 X3의 항목이다: 공유 플랫폼의 OSAL artifact 배치(SourceForge 파일을 기준 artifact로 쓰는 안은 §3.1), 호스트(§3.3.1: 목록 host 재구성은 미시험), 권한, 순서 제어 방식. 그리고 기반을 F1 전에 두는 비용(§6의 실행 열: `msg_max`·권한·순서 제어, 목록 host 재현 여부).
 3. **(b)(i) 민감도 판정**: `sched_priority` 멤버 이름 별칭을 민감성으로 볼지, 보류 대상(§3.3 영향 후보)을 확정할지, (ii)로 확대할지. (ii)는 PI_DECISIONS D13이 "obtaining the literature host's sysroot (an install decision)"(영문 원문)로 서술하므로 그 문구대로 PI가 정한다. 이 문서는 헤더 추출만 시험했고 전체 sysroot·gcc의 비용은 미시험이다[U].
-4. **6.4.x 실행 조건**: 깊이 10 초과 큐에 대한 `msg_max` 상향 또는 `CAP_SYS_RESOURCE` 부여(§3.5). 호스트 공유 sysctl이라 시험하지 않았다.
+4. **6.4.x 실행 조건**: 깊이 10 초과 큐에 대한 처리(§3.5). PI 결정 D19[D]는 현 기준을 `msg_max=10`으로 유지하고 손실을 기록하며 민감도 구성은 별도로 설계하고 값을 조용히 바꾸지 않는다고 정한다. 따라서 선택지는 (a) 6.4.x 실행에만 범위를 한정하고 기록·원복하는 별도의 `msg_max` 민감도 구성(ENV/R2 기준을 바꾸지 않아야 함), (b) 6.4.x 실행에만 한정한 `CAP_SYS_RESOURCE` 부여(이 세션의 bounding set에 없어 컨테이너 구성 변경이 필요할 것으로 보임[I]), (c) 큐 생성 실패를 기록하는 것이다. 이 문서는 고르지 않았고 아무것도 시험하지 않았다.
 5. **P-RGIT 수행 시점**: 입력 대응 비용(§5.3)을 본 뒤.
 6. **목록 host 재구성 시험의 허용 여부**: 데몬 기동·이미지 pull·내려받은 외부 바이너리 실행을 허용할지(§3.3.1). 허용되기 전까지 §3.3 빌드 host 행의 불가피성은 [U]로 남는다.
 7. **C2 보류 감시 한도**: C1의 P-C1HOLD와 같은 원칙(중단 조건·감시 한도를 본실험 전에 기록)을 C2에 적용할지(§2.6).
-8. **C3·C5 관측 방식**: §4.3 사건을 어떤 도구로 기록할지(gdb 중단점은 관측 영향 점검 PI-D1 대상), C3의 순서 제어(우선순위 대 사건 기반 보류, C3-D3), C3의 주 판정 단위(C3-D4 (a)/(b); 사례 전반은 `ledger.md` X7). 6.4.2 diff에 섞인 Trac #40·#41·#42를 떼어 보는 부분 diff는 `deviation`이며 계획에 없다(SPEC rev 1.2 L2829의 C5 행: PI가 D13에 추가할 때만).
+8. **C3·C5 관측 방식과 판정 단위**: §4.3 사건을 어떤 도구로 기록할지(gdb 중단점은 관측 영향 점검 PI-D1 대상), C3의 순서 제어(우선순위 대 사건 기반 보류, C3-D3), C3의 주 판정 단위(C3-D4 (a)/(b)), **C5의 판정 단위**(`C5.md` A7: `GetAppID` 실패만 셀지, A8의 잘못된 AppID 결과도 셀지; A7은 스스로 승인이 필요한 선택이라고 적는다). 둘 다 사례 전반의 `ledger.md` X7과 함께 정한다. C5의 창(§4.3)은 `OS_TaskRegister` 성공에 조건부이며 그 OSAL 순서(A8)는 미확인이다. 6.4.2 diff에 섞인 Trac #40·#41·#42를 떼어 보는 부분 diff는 `deviation`이며 계획에 없다(SPEC rev 1.2 §9.3 표 C5 행: PI가 D13에 기록된 deviation으로 추가할 때만).
 9. **이슈 원문 접근(ledger X1)**: nasa/cFE 이슈 페이지와 API가 이 세션에서 403이다(§2.1). 원문·댓글을 다시 읽으려면 사용자가 이 저장소의 GitHub 접근을 세션에 추가해야 한다.
 
 **이 문서가 확인하지 못한 것**
@@ -518,6 +523,8 @@ ROADMAP §9.2·§9.3의 `[제안]` 항목(관측 계획, 식별 방법, 판정�
 - 6.4.2 VDD, 6.4.1 VDD의 본문은 다시 읽지 않았다(기록). 6.6.0 VDD의 Trac #167 행만 재확인했다.
 - 6.4.1·6.4.2 번역 단위 중 단위 시험·링크는 파싱하지 않았다(앱 5개와 6.4.2 번역 단위는 2026-10-16에 파싱함, §3.3).
 - §4.3의 식별 방법(OS thread ID + 생성 관계 → 나중의 `AppId` 연결)은 어떤 관측 도구로도 시험하지 않은 설계이다.
+- C5의 OSAL 순서(`C5.md` A8: `pthread_create`가 `OS_task_table[i].id`를 쓰는 시점 대 새 thread의 `OS_TaskRegister` 검색)는 확인하지 않았다. 그래서 §4.3의 실패 창 L610–L637은 `OS_TaskRegister` 성공을 조건으로 한 코드 읽기이다.
+- C2 셀 A·C·D는 어느 것도 빌드·실행하지 않았다. 구성 가능하다는 것은 코드 읽기 결과이다(§2.4).
 - 목록 host의 gcc 버전·기본 C 표준은 레퍼런스가 정하지 않는다. CentOS 6.5 GA의 `gcc-4.4.7-4.el6` RPM man 페이지에서 `gnu89`가 C의 기본이라는 문구를 읽었으나(§3.3), 목록 host가 그 gcc였는지는 [I]이다.
 - 풀어낸 CentOS 6.5 사용자 영역(gcc 4.4.7 포함)의 **실행** 시험, 컨테이너 데몬·이미지 경로, QEMU·VM 경로(§3.3.1).
 - C3의 순서 제어(우선순위 대 사건 기반 보류), 주 oracle(C3-D4; 사례 전반은 ledger X7), C3와 R2를 한 패턴으로 세는지(ledger X4), 현재 R2 기록을 C3 증거로 세지 않는다는 원칙은 이 문서가 건드리지 않았다.
@@ -580,9 +587,9 @@ json.dump(ents,open(W+"/compile_args_641.json","w"),indent=1); print(len(ents),"
 ```sh
 # 각 항목에서 'gcc'를 컴파일러로 바꾸고 '-c <src>'를 '-fsyntax-only <src>'로 바꾼다. 작업 디렉터리는 새 빈 디렉터리.
 clang       -fsyntax-only ...                              # 기본: 2 오류 (osapi.c:647, cfe_psp_start.c:270)
-clang       -Wno-error=incompatible-function-pointer-types -fsyntax-only ...   # 53/53, 0 오류, 20 경고
+clang       -Wno-error=incompatible-function-pointer-types -fsyntax-only ...   # 53/53, 0 오류, 20 경고 (진단 프로브 선택, 기준 조건 아님)
 clang -std=gnu89 -Wno-error=incompatible-function-pointer-types -fsyntax-only ... # 동일
-gcc         -fsyntax-only ...                              # 53/53, 22 경고
+gcc         -fsyntax-only ...                              # 53/53, 22 경고 (레퍼런스 옵션만 쓴 파싱)
 # -m32를 뺀 clang                                           # 53개 모두 실패 (common_types.h:256)
 # CentOS 6.5 헤더: clang … -nostdinc -isystem /usr/lib/llvm-18/lib/clang/18/include -isystem <압축 해제한 usr/include> -fsyntax-only ...
 # 전처리 토큰열 비교: <compiler> … -E 의 출력에서 '# N "file"' 줄표시를 따라 프로젝트 파일의 줄만 모아 공백을 지우고 이어 붙여 비교
@@ -713,18 +720,18 @@ zcat <풀어낸 트리>/usr/share/man/man1/gcc.1.gz | grep -n -B1 -A2 'gnu89'   
 
 ### D.1 SPEC rev 1.2에서 다시 찾은 인용
 
-SPEC이 rev 1.2(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함)로 바뀌었으므로 이 문서가 인용한 문구를 현재 파일에서 다시 찾았다[M: grep]. 절 번호는 바뀌지 않았다.
+SPEC이 rev 1.2(헤더 "Revision 1.2 (2026-10-15)", 2026-10-16 일관성 편집 포함)로 바뀌었으므로 이 문서가 인용한 문구를 현재 파일에서 다시 찾았다[M: grep]. 절 번호는 바뀌지 않았다. 처음 적은 줄 번호는 SPEC의 이어진 편집으로 한 줄씩 밀려 다른 행을 가리키게 되었다(부록 E 지적 5). 그래서 아래는 **절과 행 이름**으로만 인용한다. 2026-10-16 2차 검토 반영 때 각 문구가 아래 위치에 있음을 다시 확인했다[M: grep].
 
 | 이 문서의 인용 | rev 1.2의 위치 |
 |---|---|
-| C2 행 "a **2 × 2**, not a pair", "the old against the new role-derived provider on the ENV cFE" (§2.4) | §9.3 표 C2 행, L2827 |
-| C2 기반 "the 6.4.2 tarball, or v6.5.0a", 4셀을 독립 결함으로 세지 않음, Q22 (§2.4) | §8.2 표 C2 행, L2505. VP-D4 L2803. §10.1 P-C2·Q22 행 L2898 |
-| H-V "Allowed `unspecified_by_reference` until Φ_6.4.x cites 6.4.1 references" (§4.1) | §7.6 L2470 |
-| VP-D5, P-RGIT "not a substitute … not blind" (§5) | §9.3 L2804, C5 행 L2829 |
-| LP-CASE-C2 (buggy)/(fixed)/(fixed, fail) (§2.4) | 부록 A.8 L3618 |
-| 부록 A.3 확인 4(생성자 보류 위치) (§5.3) | L3542–L3550 |
-| C3 행 "Not independent C3 evidence"(§4.3) | §9.3 L2828 |
-| 부분 diff는 PI가 D13에 추가할 때만(§7 항목 8) | §9.3 C5 행 L2829 |
+| "a **2 × 2**, not a pair", "the old against the new role-derived provider on the ENV cFE" (§2.4, §7 항목 1) | §9.3 표의 C2 행에만 있다(PI_DECISIONS P-C2 Facts에도 같은 문구). §8.2 표의 C2 행에는 없다 |
+| "a 2 × 2 of barrier granularity … crossed with provider role (old against new)", C2 기반 "the 6.4.2 tarball, or v6.5.0a", 4셀을 독립 결함으로 세지 않음, Q22 (§2.4) | §8.2 표의 C2 행. 그리고 §9.3 표의 VP-D4 행, §10.1 표의 "P-C2 and Q22" 행 |
+| H-V "Allowed `unspecified_by_reference` until Φ_6.4.x cites 6.4.1 references" (§4.1) | §7.6의 H-V 항목 |
+| VP-D5, P-RGIT "not a substitute … not blind" (§5) | §9.3 표의 VP-D5 행과 C5 행 |
+| LP-CASE-C2 (buggy)/(fixed)/(fixed, fail) (§2.4) | 부록 A.8 표의 LP-CASE-C2 행 |
+| 부록 A.3 확인 4(생성자 보류 위치) (§5.3) | 부록 A.3 항목 4 "Confirmation" |
+| C3 행 "Not independent C3 evidence"(§4.3) | §9.3 표의 C3 행 |
+| 부분 diff는 PI가 D13에 기록된 deviation으로 추가할 때만(§7 항목 8) | §9.3 표의 C5 행 |
 
 rev 1.2는 T1 이름 변경(Spec-C)을 적용했다(SPEC §0.11, 부록 C). 이 문서는 처음부터 새 이름을 쓴다.
 
@@ -751,3 +758,26 @@ Q16 앵커(부록 A.5)는 재수신 tarball에서 §4의 줄 번호를 그대로
 - 이슈 #198·#73·#72 원문(§2.1): 403. 저장소 접근 추가는 사용자 승인 사항이라 요청하지 않았다.
 - 목록 host의 gcc 4.4.7 실행, 컨테이너 이미지·VM 경로(§3.3.1): 이번에도 시험하지 않았다.
 - 6.4.x 실행과 §4.3 사건 기록: 실행 기반이 없다(§3.5).
+
+## 부록 E. 2026-10-16 2차 검토 반영 기록
+
+지적 8건을 원본과 대조했다. 다시 읽은 원본: OSAL 4.1.1 posix `osapi.c`(sha256 `32649c6f1cf3b586…`, 부록 A.4와 같음), 6.4.1 `cfe_es_api.c`(`0cb4c1c740f897a3…`), v6.6.0a `cfe_es_api.c`(`46fd0c13190518c2…`), v7.0.1 `cfe_es_api.c`(`e1b3bcdb3fd884e2…`), `58abd38d`의 `cfe_es_apps.c`(`adda7298c9fe0db8…`)·`cfe_es_api.c`(`f9fb412391d38571…`), `cases/C2.md`(§10 행 2, §11 A7·A8), `cases/C5.md`(§11 A7·A8, §12 Q6), `cases/ledger.md` X7, SPEC rev 1.2(§8.2·§9.3·§10.1·부록 A.3·A.8), PI_DECISIONS(P-C2·P-RGIT Facts), PI_DECISIONS_RESOLVED §4.1 D19, CONDITIONS_POLICY, `env/logs/f_root_capability_probe.log`. 이번에도 cFS를 빌드·실행하지 않았고 설치·삭제·git 조작을 하지 않았다.
+
+| # | 지적 (심각도) | 확인한 것 | 처리 |
+|---|---|---|---|
+| 1 | C5 판정 단위와 창을 확정처럼 서술, A7·A8 누락 (major) | `C5.md` A7: 실패만 세는 판정은 "a **choice**, an assumption that needs your approval". A8: `OS_TaskGetId`가 창 안에서 새 task의 ID를 돌려주는지는 OSAL 순서에 달림. `ledger.md` X7이 A7을 합침. `osapi.c`: `OS_TaskRegister`(L906–L948)는 성공할 때만 `pthread_setspecific`(L938), `OS_TaskGetId`(L959–L972)는 키가 없으면 0. 6.4.1 `CFE_ES_RegisterApp`도 ES 락(L771) 안에서 `OS_TaskRegister`(L776)를 부르고 실패 시 `CFE_ES_ERR_APP_REGISTER`(L788) | §4.2 위반 문장과 §4.3 판정 단위를 미승인 가정(A7, X7)으로 표시. 창 주장을 `OS_TaskRegister` 성공 조건부로 바꾸고 A8 경로(L673 뒤에도 `TaskTable[0]`을 읽어 잘못된 AppID 또는 실패)를 [I]/[U]로 적음. E5-REG에 `OS_TaskRegister`·`RegisterApp` 반환과 창 안 여부, E5-USE에 `TaskId` 0·불일치와 잘못된 AppID의 `CFE_SUCCESS` 기록을 추가. §7 항목 8에 C5 판정 단위(A7/X7) 추가. §1 요약 행·§7 "확인하지 못한 것" 보완 |
+| 2 | 셀 D의 이른 해제가 ES 상수에서만 온다는 서술 (major) | v6.6.0a `cfe_es_api.c` L648–L667: 호출자마다 자기 `WaitRemaining` 루프, 만료 시 `CFE_ES_OPERATION_TIMED_OUT`(L663), `return Status` L671. 래퍼 L686–L689가 반환값을 버림. v7.0.1 L599, 래퍼 L616–L619. `C2.md` A7: timeout 인자 미정. `C2.md` §8 G1이 "or R's own wait times out"을 적음. ROADMAP §9.1 항목 6 | §2.4 불릿을 다시 씀: R은 ES `SCRIPT_TIMEOUT`(레퍼런스 상수)과 R 자신의 timeout(인자, `unspecified_by_reference`) 중 먼저 만료되는 쪽에서 풀림. 셀 D 표 행에 R 자신의 timeout 추가. §2.6 timeout 인자 행과 §7 항목 1에 이 의존 추가. E-WAIT가 래퍼 안의 내부 반환값을 기록하도록 수정. 다듬은 점: "min"은 두 timeout이 각자 다른 시작 시점부터 세어지므로 "먼저 만료되는 쪽"으로 적음 |
+| 3 | 셀 A·C·D "실행 가능"과 [M] (minor) | 이 문서는 아무것도 빌드·실행하지 않았다. [M]의 근거는 셀 B 심볼 부재 grep뿐 | §1 요약, §2.4 표 머리·셀 A·C·D를 "구성 가능(코드 읽기 [I]); 빌드·실행 미시험 [U]"로 바꿈. [M]은 셀 B의 grep에만 남김. 셀 C의 "컴파일·실행된다"를 하위 호환 주석에서의 추론[I]으로 바꿈 |
+| 4 | P의 early init 단계를 [F]로 표시 (minor) | 이슈 6b는 sync 뒤 late init만 말하고, 3a·5a는 "some applications"의 일반 문장이다. `C2.md` §10 행 2: "That P had an early init before the sync is inference from the generic sentences 3a and 5a." | §2.1 "P의 구조" 행과 §2.3 P 행에서 early init 단계를 [I]로 표시하고, [F]는 sync 뒤 late init(6b)과 R의 같은 호출 사용(7)에만 남김 |
+| 5 | SPEC 줄 번호가 한 줄씩 밀림, 문구 귀속 오류 (minor) | grep 결과: C2 행 L2828, C3 행 L2829, C5 행 L2830, VP-D4 L2804, VP-D5 L2805, §10.1 P-C2·Q22 L2899, H-V L2471, §8.2 C2 행 L2506, LP-CASE-C2 L3619. "not a pair"와 "on the ENV cFE"는 §9.3 C2 행(과 PI_DECISIONS P-C2 Facts)에만 있고, §8.2 C2 행은 "crossed with provider role (old against new)" | SPEC이 계속 편집되므로 부록 D.1, §4.3, §7 항목 8을 절과 행 이름으로만 인용하도록 바꿈(줄 번호 제거). §2.4와 §7 항목 1의 문구 귀속을 §9.3(과 P-C2 Facts)으로 고치고 §8.2의 실제 문구를 적음 |
+| 6 | `msg_max` 상향을 D19 없이 제시 (minor) | PI_DECISIONS_RESOLVED §4.1 D19: "현 기준 `msg_max=10` 유지 … 민감도 구성을 별도로 설계하며, 조용히 값을 변경하지 않음". 캡 탐침 로그: `CapEff`·`CapBnd` 모두 비트 24 없음 | §3.5 표와 비용 줄, §1 요약 행, §6 표, §7 항목 4에 D19를 인용. 상향은 6.4.x에 범위를 한정하고 기록·원복하는 별도 민감도 구성이어야 하며 ENV/R2 기준을 바꾸면 안 된다고 적음. 권한 경로는 bounding set에 없어 컨테이너 구성 변경이 필요할 것이라는 점을 [I]로 덧붙임. 선택은 PI에게 남김 |
+| 7 | 프로브 옵션의 상태 이름이 정책 정의와 맞지 않음 (minor) | CONDITIONS_POLICY: `unspecified_by_reference`는 "값을 고르지 않고", `deviation`은 "그렇게 할 수밖에 없다는 근거"가 필요. `-std=gnu89`는 값을 골라 썼고, `-Wno-error=…`는 gcc 13이 플래그 없이 통과하므로 필요성 근거가 없다 | §3.3 두 행을 "진단 프로브 선택, 기준 조건 아님"으로 바꾸고 기준 조건으로 쓰려면 PI의 기록된 결정이 필요하다고 적음. §1 요약은 레퍼런스 옵션만 쓴 gcc 13의 58/58을 앞세우고 clang+플래그 결과는 필요성 근거 없는 진단 프로브로 적음. §3.3 ⑤, 확장 표, 부록 A.3 주석도 맞춤 |
+| 8 | P-RGIT 창이 ES 락을 무시, 기대 class를 [D]로 표시 (minor) | `58abd38d` `cfe_es_apps.c`: `StartAppTask` 락 L585–해제 L632(L615 `TaskRecordSetUsed`는 그 안), `AppCreate` 재획득 L772·`AppRecordSetUsed` L780·해제 L796. `cfe_es_api.c` `GetAppID` 락 L817. 새 task의 대기 `GetTaskFunction`도 락을 잡음. PI_DECISIONS P-RGIT Facts: "Expected [I]" | §5.2 [I]의 창을 락이 없는 구간 L632–L772로 바꿈(미실행 [I] 유지). §5 서두의 VP-D5 기대와 §2.4 셀 A의 LP-CASE-C2 (buggy) 기대를 [I](SPEC 설계 기대, 미실행)로 바꿈. §2.4 Q22 불릿의 LP-CASE-C2 (fixed) 기대 class도 [I]로, SPEC이 그 class를 두는 조건만 [D]로 남김. §5.3 관측 행에 L632·L772를 추가 |
+
+
+### 거부한 지적 (Rejected findings)
+
+전부 또는 일부를 거부한 지적은 없다. 다음 두 곳은 지적을 받아들이되 표현을 다듬었다.
+
+- 지적 2의 "R의 해제 = min(R 자신의 timeout, ES `SCRIPT_TIMEOUT`)": R의 timeout은 R의 호출 시점부터, ES 2단계 timeout은 ES main의 2단계 대기 시작부터 센다(v6.6.0a `cfe_es_start.c` L223의 `MainTaskSyncDelay`). 두 값의 min이 아니라 "두 만료 중 먼저 오는 쪽"으로 적었다. 결론(이른 해제가 레퍼런스 상수에서만 오지 않는다)은 그대로이다.
+- 지적 6의 "6.4.x 실행에 한정한 권한 경로를 선호": 캡 탐침 로그에서 `CAP_SYS_RESOURCE`가 bounding set에도 없으므로, 그 경로도 컨테이너 구성 변경이 필요할 것으로 보인다[I]. 그래서 어느 경로를 선호한다고 쓰지 않고 선택지만 적어 PI에게 남겼다(§7 항목 4).

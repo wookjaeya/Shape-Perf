@@ -64,7 +64,7 @@
 ### 2.1 실제 cFS 관측 1회 (`env/logs/s1r2_p1*`, 10/15, 당시 커널 `-fc-v114`)
 
 - **조건.** `run_cfs.sh`로 실행했다. 실행 사용자는 `ubuntu`, 바이너리는 기준 build와 같은 sha256 `0edb1ae2…`이고, root 관측기가 붙었다.
-- **결과.** SB AppId 저장 전에 `CFE_EVS_SendEventWithAppID`가 **24회** 호출됐다.
+- **결과.** AppId 0을 전달한 `CFE_EVS_SendEventWithAppID` 요청 **24회**가 관측됐고, 대응하는 반환값은 모두 `CFE_EVS_APP_ILLEGAL_APP_ID`였다. 이 요청들의 timestamp는 SB의 AppId 저장 함수를 호출한 뒤의 관측점보다 앞섰다(한 시계의 순서이며 happens-before가 아니다). 실제 저장과의 선후와 원인 설명에는 값의 전달 경로와 task 간 순서 근거를 함께 쓴다. *(2026-10-22 정정: 처음 문안 "SB AppId 저장 전에 24회 호출"은 관측점의 의미보다 강했다. 2026-10-19 검토 §3.2.)*
   - task별: ES 20, EVS 4.
   - 호출 함수별: CreatePipe 2 / SubscribeFull 4 / ReportSingleEvent 18.
   - 모두 AppId 0이었고, 반환값은 `0xc2000003`(ILLEGAL_APP_ID)였다.

@@ -1,5 +1,7 @@
 # C2·C3·C5 사례 설정 — 첫 분석·실행 경로 (2026-10-15, 2026-10-16 보완)
 
+> **2026-10-22 정정 (SPEC rev 1.3, 2026-10-19 검토 §6.3):** C2는 **세 구성 비교**로 정리한다. 셀 B(단일 단계 × 새 provider)는 새 provider가 부르는 심볼이 과거 버전에 없어 구성할 수 없으므로(§2.4) 2×2는 성립하지 않는다. 비교하는 세 구성은 A(과거 단일 단계 + 기존 provider: 원 보고의 메커니즘을 역할 재구성으로 나타낼 수 있는가), C(현재 두 단계 + 기존 provider: 프레임워크만 바꾸고 앱 초기화 순서를 유지하면 문제가 남는가), D(현재 두 단계 + 새 provider: 앱이 새 초기화 절차를 따르면 의존 순서가 보장되는가)이다. 버전 간 다른 변경도 있으므로 완전한 요인 실험으로 해석하지 않는다. 없는 API를 덧붙인 조합을 만들면 별도의 파생 실험으로 표시한다. D를 무조건 정상 대조로 두지 않고, 정상 완료를 가정한 1차 구성과 초기화 실패 보조 구성을 나눈다. 아래 본문의 "2×2"는 이 세 구성(셀 B 제외)으로 읽는다.
+
 - 대상: C2 (nasa/cFE #198), C3 (nasa/cFE #73), C5 (nasa/cFE #72). 보조 쌍: cFE `58abd38d^`/`58abd38d` (P-RGIT).
 - 위치와 역할: `plan/case_setup_C2_C3_C5.md`. [ROADMAP_20261015.md](ROADMAP_20261015.md) §12 작업 5의 산출물이며, §9.1(C2)·§9.2(C3)·§9.3(C5)의 `[제안]` 작업을 "첫 분석 또는 실행 경로"로 구체화한다. 조건표·기대 결과표는 병행 문서 `plan/case_basis_register.md`가 다룬다. 이 문서는 그 문서의 ID를 인용하지 않는다.
 - 읽은 입력: [PI_DECISIONS_RESOLVED_20261015.md](../Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md) §2·§3.3–§3.6·§4, [ROADMAP_20261015.md](ROADMAP_20261015.md) §3·§6.1·§9·§12·§13, `Architecture/spec/SPEC_FINAL.md` rev 1.1 (§7.6, §8.2, §9.3, §10.1, 부록 A.3·A.8; 2026-10-16에 rev 1.2에서 재확인, 부록 D.1), `Architecture/spec/PI_DECISIONS.md` (D13, D14, D15, P-C1HOLD, P-C2, P-RGIT), [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md), `cases/ledger.md`, `cases/C2.md`·`C3.md`·`C5.md`, `env/ENV.md`, `env/CONDITIONS.md`, `env/logs/f_root_capability_probe.log`.
@@ -120,7 +122,7 @@
 
 재구성의 원칙[D] (PI 결정문 §3.5의 요지를 옮긴 한국어 요약이며 원문 인용이 아니다; 결정문의 두 문장을 합쳐 적었다): provider의 late initialization과 consumer의 의존 사용을 구분하고, 요청 방식·초기화 내용·우선순위·timeout은 재구성 실험의 선택으로 기록하며 원 보고자의 값으로 인용하지 않는다.
 
-### 2.4 2×2 설계 — 장벽 × provider
+### 2.4 세 구성 설계(2×2 중 셀 B 제외) — 장벽 × provider
 
 축 두 개를 정한다. **장벽** = ES 쪽 코드: 단일 OPERATIONAL(6.4.2 tarball 또는 v6.5.0a) 대 2단계(v6.6.0a, 또는 ENV의 v7.0.1). **provider** = P의 코드: 기존(late init **전에** `WaitForStartupSync`) 대 새(`WaitForSystemState(APPS_INIT)` → late init → `RunLoop`). R의 코드는 구성하는 셀에서 같다(`WaitForStartupSync` 뒤에 의존 호출). **PI 결정문(§3.5)은 이를 두 축을 "교차하는" 2×2로 서술한다. SPEC §8.2 표 C2 행은 "a 2 × 2 of barrier granularity … crossed with provider role (old against new)"라고 쓰고, "a 2 × 2, not a pair"와 provider 축의 "on the ENV cFE"라는 문구는 SPEC §9.3 표 C2 행(그리고 PI_DECISIONS의 P-C2 Facts)에만 있다[D]. 이 문서가 코드로 확인한 바로는 네 셀 가운데 셀 B(단일 장벽 × 새 provider)를 구성할 수 없으므로, 교차 2×2가 서술된 그대로 실현되지는 않는다. 구성 가능한 것은 3셀(A·C·D)이고 B는 아래 이유로 제외한다.** 3셀로 충분한지, B를 별도로 정의할지는 PI 확인 사항이다(§7 항목 1). 이 문서는 어느 쪽도 정하지 않는다.
 

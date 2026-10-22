@@ -574,8 +574,17 @@ feedback loop ablation(3번)은 여기에 더해, 반복마다 해석한 key와 
 | 20 | syscall만 관측; 메모리 수준 HB만 | |
 | 21 | once와 KEY-SEP 끔: frontier를 spawn이 하나뿐인 actor에만 쓰고 key 분리 없음 | X1-M2/M3 장치가 얻는 것 |
 | 22 | A-COMM 검사 끔: 모든 예측을 `predicted`로 label | label이 바뀌는 witness 수, 그중 바이너리에서 반박되는 수 |
+| 23 | **Allowed 끔**(P-ABL-ALLOWED, 2026-10-15 채택): 허용 처리 정보를 뺀다. Allowed 항목을 모두 버리고, 각 instance의 호출자 수준 Allowed는 spec §1.6 규칙 (1)로 유도한다. `appreq`가 정해진 곳에서는 `none`, 그 밖에서는 `unspecified_by_reference`다 | 판정, 판정되지 않고 남은 비율, 비용 변화를 보고한다. 정의는 설계자의 제안 [I]이고, PI는 이름으로 이 ablation을 채택했다 |
+| 24 | **결과 의미 끔**(P-ABL-ALLOWED, 2026-10-15 채택): 반환값과 결과의 의미를 뺀다. 연산의 outcome map을 적용하지 않으므로 반환 code를 해석하지 않고, `codes` 위의 항목은 `unspecified_by_reference`이며, O4에는 비교할 code가 없다. LP에서 준비 사전조건 `Req`를 상태로 평가하는 것은 남긴다 | 같은 세 가지를 보고한다. 정의는 설계자의 제안 [I]이다 |
 
-"Allowed 끔"과 "결과 의미 끔"은 후보일 뿐이다. P-ABL-ALLOWED가 정하기 전에는 이 목록에 없고, 그때까지 Allowed 한 요소만 빼는 ablation은 없다(spec §8.3, §10.1).
+Allowed, 결과 의미, capture point, certificate를 한꺼번에 뺀, GPredict 이름이 붙은 예전 묶음은 비교로 **두지 않는다**(P-ABL-ALLOWED). ablation 9(capture point 없음)와 certificate 관련 ablation은 각자 단일 요소 ablation으로 남는다.
+
+**revision 1.3의 단일 요소 비교** [D] ([P0.2] §16.2, §16.4; P-ABL-ALLOWED 유지; 변경표 C-40; spec §8.4). 같은 basis, profile, 관측 위에서 다음을 한다.
+
+- (a) 단순 관측 검사, 자원 상태/연산 쌍 후보 방법, 유계 예측(spec §4.9)을 방법 선택으로 비교한다. 이름 있는 도구의 재구현으로 부르지 않는다.
+- (b) 한 번에 한 요소를 뺀다: 자원과 수명 대응, cFS 실행 제약, **앱 귀속**, 예측, 선택 관측.
+- 앱 label만 뺀 대조에서는, 조건이 귀속에 의존하지 않는 곳의 기본 위반 판정이 바뀌지 않아야 한다(시험 T-14). 귀속이 조건의 입력인 실험은 따로 보고한다.
+- 한 방법에 정답이나 상태 정보를 더 준 데서 온 효과는 알고리즘의 이점으로 보고하지 않는다.
 
 ### 5.3 빼는 요소가 cFS에서 맡는 역할
 

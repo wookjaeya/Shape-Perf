@@ -292,7 +292,7 @@ flowchart TD
 
 ## 4. 기법 계열별 관계
 
-각 절은 같은 순서로 쓴다. **핵심**(그 계열이 하는 것), **cFS에서**(보는 것과 놓치는 것), **빌린 것**(spec 위치), **다른 점**, 해당하면 **기준선**. cFS에서 무엇을 보고 놓치는지는 대부분 [R04]·[R05]의 추론 [I]이다.
+각 절은 같은 순서로 쓴다. **핵심**(그 계열이 하는 것), **cFS에서**(보는 것과 놓치는 것), **빌린 것**(spec 위치), **다른 점**, 해당하면 **비교에서의 자리**(revision 1.2부터. 그 전에는 "기준선"). cFS에서 무엇을 보고 놓치는지는 대부분 [R04]·[R05]의 추론 [I]이다.
 
 ### 4.1 Happens-before와 vector clock
 
@@ -681,56 +681,70 @@ gap G3에는 특히 조심한다. 새로움 문구는 P-PAPERS 항목 5의 targe
 
 ---
 
-## 7. 기준선으로 쓰는 것 (spec §8.3)
+## 7. 실험 비교와 관련 연구 (spec §8.3)
 
-자세한 비교 방법은 [07_evaluation.md §4](07_evaluation.md#4-기준선과-비교-방법-spec-83)에 있다. 여기서는 선행 연구 계열과의 연결만 정리한다.
+revision 1.2는 비교의 범위를 바꾸었다 [D] (2026-10-15 PI 결정; spec §8.3 "Scope and rules"; ADR-046, ADR-047). revision 1.1의 기준선 표는 철회되었다. 실험 비교는 기존 **Process-Level Race 연구**와 Kairos를 다섯 설계 사례에서 비교하는 것이다. thread data-race 도구(helgrind, DRD, ThreadSanitizer 등)와 GPredict·happens-before(FastTrack, WCP, SHB, SyncP, M2)·lockset 방식 재구현은 실험 비교군이 아니고 관련 연구다(§1.3). 비교의 자세한 방법(여섯 분석 질문, 결과 상태 표, 비교 대상의 역할)은 [01_overview.md §2.5](01_overview.md#25-실험-비교의-범위-기존-process-level-race-연구-spec-83)에 있다. [07_evaluation.md §4](07_evaluation.md#4-기준선과-비교-방법-spec-83)는 아직 revision 1.1의 기준선 서술이다. 여기서는 선행 연구 계열과의 연결만 정리한다.
 
 ### 7.1 규칙
 
-1. **비교의 세 종류를 이름, 표, 결론에서 섞지 않는다** [D] (spec §8.3; ADR-042). K1은 공개된 그대로 돌린 원 도구, K2는 같은 대상에서 돌리는 선행 기법의 재구현, K3은 Kairos의 한 요소를 뺀 ablation이다(§7.3). K2는 쓴 정보를 밝힌다. **같은 정보**는 instance의 Req, oracle 결과 code, 호출자 수준 Allowed 항목과 B에서 얻은 경계·이어짐 사건을 그 기법의 형식이 허락하는 만큼 인코딩한 것이고, **자기 정보**는 그 기법 자신의 HB 규칙이나 학습한 불변식이다. K2의 결과는 만든 그대로의 재구현의 결과이고 원 도구의 결과가 아니다([R06 S5]).
+1. **결과의 세 종류를 이름, 표, 결론에서 섞지 않는다** [D] (spec §8.3; ADR-042, ADR-046). K1은 공개된 그대로 돌린 원 도구, K2는 원 도구를 돌릴 수 없을 때만 논문·코드로 만든 process-level 기법의 재구현, K3은 Kairos의 한 요소를 뺀 ablation이다(§7.4). K2는 원 도구가 모으는 것 밖에 받은 사건, 기법을 확장했는지, 구현자, 구현자가 본 설계 사례를 기록한다. K2의 결과는 만든 그대로의 재구현의 결과이고, 기법에 충실한지는 논문을 읽을 때까지 [U]다(P-PAPERS).
 2. **ablation 결과는 선행 기법이 어떤 성질을 표현하지 못한다는 증거가 결코 아니다.** 선행 기법이 무엇을 표현할 수 있는지는 1차 문헌 없이 말하지 않는다(P-PAPERS). 재구현의 침묵도 원 도구가 무엇을 보고할지의 증거가 아니다(spec §0.7 항목 6, §8.3; §6.4 항목 37).
-3. **`NOT_RUN`은 결코 false negative가 아니다**([R06 S5]).
-4. **thread data-race 도구는 기준선이 아니다.** 사용자의 결정이다([R06 S13]). 표시된 참조점으로만 나온다([J3-M12]).
-5. **같은 계열에서 실행 가능한 가장 강한 도구와 같은 대상에서 비교한다**([R05 §6.3]). K2에서 이것은 그 계열의 문서화된 형식이 허락하는 가장 강한 인코딩이고, 요소를 뺀 변형이 아니다. 이 규범 때문에 X1이 같은 계열의 lock 뒤집기 예측기를 요구했다([X1-M12]).
-6. **세 결과** [D] (spec §8.3; EXT-20261012 §5.2): 표시된 단위마다 Kairos와 각 비교 도구가 탐지, 분류, 근거를 따로 기록한다. 탐지는 경보와 `not-ready-unjudged` 보고를 모든 도구에 같은 규칙으로 센다. 탐지만 짝지은 검정으로 비교한다. 분류는 F1에 동결한 미리 등록한 기대표와 비교하고, reference의 class 진술과는 P-CLASSGT가 채택한 대응 아래에서만 채점한다. 근거는 서술로 보고한다. 검정, 단위, 그 단위의 독립 가정은 F1 전에 가정으로 기록하고(P-STATS), 비교 도구의 결과를 미리 적지 않는다.
-7. **구현 규율**: 재구현한 비교 도구와 그 같은 정보 인코딩은 F1에서 동결하고, 원 논문의 worked example로 golden test를 만들며(원문에 접근할 수 있을 때만, P-PAPERS), 구현자를 기록한다. 같은 정보 인코딩은 누가 썼는지, 그때 어느 설계 사례를 보았는지도 기록한다. 그 인코딩이 원 기법의 형식에 충실한지는 논문을 읽기 전까지 [U]다. Kairos trace 위에서 도는 비교 도구는 Kairos의 probe plan에 의존한다는 점을 모든 비교에 적는다.
+3. **`NOT_RUN`은 결코 false negative가 아니다**([R06 S5]). 출력이 있다는 것(`REPORTED`)도 사례의 탐지가 아니며, 사례 현상과의 대응과 실제 근거를 확인해야 한다(spec §6.4 항목 14).
+4. **thread data-race 도구는 기준선이 아니다.** 사용자의 결정이다([R06 S13]). revision 1.2부터는 표시된 참조점으로도 나오지 않는다(P-VALGRIND, P-TSAN 제외; Nidhugg 보류, P-NIDHUGG) (spec §8.3).
+5. **여섯 분석 질문과 결과 상태** [D] (spec §8.3; ADR-047). (도구, 사례)마다 같은 질문 여섯(관측 사건, 같은 자원·같은 세대의 식별, 생성·등록·초기화 완료와 의존 사용의 관계, 필요한 순서나 허용된 오류 처리를 입력으로 받는지 추론하는지, 실행되지 않은 순서의 예측·탐색과 실제 실행에서의 확인, 출력의 종류와 사례 현상과의 대응)에 답하고 각 답의 근거 등급을 적는다. 칸마다 상태 하나(`NOT_RUN`, `INAPPLICABLE`, `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP`, `REPORTED`)를 붙인다. 관측 가능성, 표현 가능성, 실제 탐지 성공은 한 칸에 합치지 않는다. 상태 이름은 결과를 정리하는 것이고 도구의 순위를 매기지 않는다.
+6. **도구 사이의 점수, 순위, 짝지은 검정은 없다.** 도구마다 역할, 입력, 출력이 다르고, 첫 사례 평가는 기술 통계다(P-STATS; spec §8.3, §8.7). Kairos 자신의 결과는 탐지, 분류, 근거 세 부분으로 따로 보고한다(spec §8.5).
+7. **부족이 확인된 행만 Kairos 기능과 잇는다** [계획, I] (spec §8.3 "From a confirmed shortage to a Kairos function"). 기존 도구가 이미 가진 기능은 차이로 주장하지 않는다.
+8. **구현 규율**: K2 재구현은 F1에서 동결하고, 원 논문의 worked example로 golden test를 만들며(원문에 접근할 수 있을 때만, P-PAPERS), 구현자와 그가 본 설계 사례를 기록한다. Kairos trace 위에서 도는 재구현은 Kairos의 probe plan에 의존한다는 점을 비교에 적는다.
 
-### 7.2 비교 대상과 선행 연구 계열
+### 7.2 선행 연구 계열마다 비교에서의 자리
 
-| 비교 대상 | 계열 (이 문서 절) | 종류 | 무엇을 가르는가 |
-|---|---|---|---|
-| FastTrack 방식 HB(lifecycle LP를 쓰기로, 사용을 읽기로, lock을 edge로) | HB (§4.1) | 재구현(K2), 참조점 | 같은 근거 위에서 순서 없는 쌍만 찾는 검출기 |
-| WCP·SHB 방식 관계 | 예측 (§4.3) | 재구현(K2), 참조점 | lock 순서를 지키는 예측 |
-| **GPredict 방식 예측기, 같은 정보**(MCM, GPredict. key를 충돌 대상으로, lock을 원자성으로 두고, instance마다 Req와 호출자 수준 Allowed 항목을 성질로 인코딩한다) | 예측 (§4.3) | 같은 정보 재구현(K2), **같은 계열 비교 대상** | 같은 정보에서 분석(예측, certificate, 탐색, σ 분리)이 더하는 것. 형식에 충실한지는 [U] (P-PAPERS) |
-| 단순 상태 monitor, 같은 정보 | typestate (§4.12) | 같은 정보 재구현(K2) | 실현된 발생에서는 Kairos와 비길 것으로 본다 [I]. certificate와 예측의 가치는 탐지가 아니라 분류와 근거로 잰다 |
-| DefUse 방식 학습 불변식 | order violation (§4.4) | 자기 정보 재구현(K2) | reference 계약 대 학습 불변식 |
-| DCatch 방식 framework HB(자기 정보: framework HB 규칙만. 계약·결과 의미·조건부 edge 없음) | 분산 (§4.6) | 자기 정보 재구현(K2) | 같은 근거에서 framework HB가 보는 것. 계약의 가치는 이 행이 아니라 ablation 16이 잰다 |
-| RacePro 방식 syscall 모형 (같은 실행의 syscall tracepoint) | process-level (§4.10) | 관측 모형의 재구현 | syscall만 보는 관측이 보는 것 |
-| 통제하지 않은 반복 boot와 SB/EVS counter; gdb 기록 [R2g] | — | 참조 관측 | 순서 없이 counter만으로 드러나는 것; 보고자의 방법과 그 교란 |
-| valgrind helgrind, DRD (`RUN_CFS_WRAP`로 수정하지 않은 바이너리에서) | lockset·HB (§4.2) | **외부 참조점, 실제 실행**. P-VALGRIND | 메모리 수준만 본다. 설치 없이 여기서 도는 유일한 외부 도구이고, Kairos probe plan에 의존하지 않는 비교를 하나 준다 (P-VALGRIND) |
-| ThreadSanitizer (gcc 변형) | HB (§4.1) | 참조점. P-TSAN 승인 시에만 | 메모리 수준 race |
-| 원 process-level 도구 (RacePro, SimRacer, …) | §4.10 | 원 도구(K1). `NOT_RUN`, 차단 사유 기록 | — |
-| Nidhugg | §4.7 | 원 도구(K1). `NOT_RUN`. 차단 사유는 설치 결정(`llvm-18-dev`; P-NIDHUGG). 승인 뒤에는 pthread create·join·mutex만 쓰는 litmus 프로그램에서 explorer를 교차 확인하는 선택 항목 | — |
-| GenMC, CBMC | §4.7, §4.8 | 원 도구(K1). `NOT_RUN`. GenMC는 LLVM 19–22가 필요하고, CBMC는 설치되어 있지 않다 | — |
+| 계열 (이 문서 절) | revision 1.1의 자리 | revision 1.2–1.3의 자리 |
+|---|---|---|
+| HB·vector clock: FastTrack 방식 HB, ThreadSanitizer (§4.1) | 재구현(K2) 참조점; TSan은 P-TSAN 승인 시 참조점 | 관련 연구. FastTrack 방식 행은 철회, TSan 재빌드 없음(P-TSAN 제외) |
+| lockset·HB: valgrind helgrind, DRD (§4.2) | 외부 참조점, 실제 실행(P-VALGRIND) | 관련 연구. helgrind·DRD 실행 없음(P-VALGRIND 제외) |
+| 예측: WCP·SHB 방식 관계, GPredict 방식 같은 정보 예측기 (§4.3) | 재구현(K2) 참조점; GPredict 방식은 같은 계열 비교 대상 | 관련 연구. 두 행과 GPredict 방식 표현 가능성 표는 철회 |
+| typestate: 단순 상태 monitor, 같은 정보 (§4.12) | 같은 정보 재구현(K2) | 비교군 아님. R2 원시 기록의 단순 상태 검사는 recorder 분류의 내부 정확성 확인에만 쓴다 |
+| order violation: DefUse 방식 학습 불변식 (§4.4) | 자기 정보 재구현(K2) | 관련 연구. 행 철회 |
+| 분산: DCatch 방식 framework HB (§4.6) | 자기 정보 재구현(K2) | 관련 연구. 행 철회. 준비 상태 명세의 가치는 ablation 16이 Kairos 안에서 잰다 |
+| process-level: RacePro 방식 syscall 모형 (§4.10) | 관측 모형의 재구현 | 행 철회. 원 도구 자체가 비교 대상이다(아래 행) |
+| process-level: RacePro, SimRacer, SIMEXPLORER, RRF, DESCRY, SimEvo, ReDPro, SysPro (§4.10) | 원 도구(K1), `NOT_RUN` | **실험 비교 대상.** 여섯 분석 질문과 결과 상태. 첫 비교는 RacePro와 R2. 원 도구를 돌릴 수 없을 때만 K2 |
+| 체계적 테스트: Nidhugg, GenMC (§4.7) | 원 도구(K1), `NOT_RUN` | 비교 행 철회. Nidhugg는 첫 구현에서 보류(P-NIDHUGG). process-level 비교를 대신하지 않는다 |
+| BMC: CBMC (§4.8) | 원 도구(K1), `NOT_RUN` | 비교 행 철회 |
+| 참조 관측: 통제하지 않은 반복 boot와 SB/EVS counter; gdb 기록 [R2g] | 참조 관측 | Kairos 평가의 참조 관측으로 표시하고 비교가 아니다. counter는 R2의 거부된 이벤트 요청을 관측하지 못한다(`ILLEGAL_APP_ID` 분기는 counter를 올리지 않음, `cfe_evs.c:185–188`) (spec §8.3) |
 
-Φ의 결과 의미, Allowed, capture point, certificate를 뺀 예전 MCM/GPredict 변형은 기준선이 아니다. 남긴다면 표시한 묶음(bundle) ablation이다. 그 여부와, 한 요소 ablation 후보 "Allowed 끔"·"결과 의미 끔"을 더할지는 PI 결정 P-ABL-ALLOWED다. 정하기 전에는 어느 것도 spec §8.4의 목록에 없다(spec §8.3, §10.1).
+출처: spec §8.3 "Withdrawn in revision 1.2"(철회한 행의 목록. 어느 문서도 이것을 현재의 것으로 인용하지 않도록 남겨 둔다), "Scope and rules", "Roles". P-ABL-ALLOWED(2026-10-15)는 단일 요소 ablation 둘(Allowed 끔, 결과 의미 끔; spec §8.4 항목 23, 24)을 채택했고, GPredict 이름이 붙은 묶음은 비교로 두지 않는다(spec §10.1).
 
-data race 도구가 보호된 준비 위반에 침묵하는 것은 **질문이 다르다는 발견**이지 도구 품질에 대한 발견이 아니다([R05 §6.3 (c)]). 어느 비교 도구든 침묵은 "문제가 없다"는 증거가 아니다.
+data race 도구가 보호된 준비 상태 위반에 침묵하는 것은 **질문이 다르다는 발견**이지 도구 품질에 대한 발견이 아니다([R05 §6.3 (c)]). 어느 도구든 침묵은 "문제가 없다"는 증거가 아니다.
 
-### 7.3 선행 연구의 가정을 흉내 내는 ablation
+### 7.3 실행하지 못한 원 도구 (revision 1.3)
 
-[R06]은 기준선을 돌릴 수 없을 때, 기준선의 관측 모형을 대신하는 내부 ablation을 두되 그것을 기준선이라 부르지 말라고 권고했다. 예로 syscall만 보는 관측, framework 규칙 없는 메모리 접근 HB, 계약 없는 framework HB를 들었다([R06 §3]의 v0.1 §14 검토). spec §8.4의 ablation 가운데 선행 연구의 가정과 직접 겹치는 것은 다음과 같다. 모두 같은 engine, 같은 trace에서 한 요소만 뺀다.
+2026-10-22 결정 D4에 따라, 원 process-level 도구를 빌드하거나 실행하지 못하면 "기존 기법이 이 위반을 놓친다"는 가설(§1.1)은 **문헌·코드 분석의 결과 상태로만** 적는다. "탐지하지 못한다"고 쓰지 않고, `NOT_RUN`을 놓친 것으로 세지 않는다 [D] (spec §8.3 "Unrun tools"; ADR-058; §6.4 항목 60). 원 도구마다 확인 순서는 빌드·실행 가능성 → 실제 관측 범위 → 자원과 조건의 표현 → 후보 생성 → 보고 기준이다. 결과 상태와 §7.1 항목 5의 상태의 대응은 다음과 같다.
 
-**읽는 법** (spec §8.3의 K3, §8.4). 아래 ablation은 Kairos에서 한 요소를 뺀 K3다. 그 결과는 그 요소가 Kairos에 더하는 것만 말한다. 선행 기법이 그 성질을 표현하지 못한다는 증거도, 원 도구가 무엇을 보고할지의 증거도 아니다(spec §6.4 항목 37). 선행 기법과의 비교는 §7.2의 K1·K2로 한다. ablation마다 표시된 집합에서 단위별 탐지 차이를 짝지은 검정과 효과 크기로 보고하고, class·결과 label·근거의 변화는 서술로 보고한다(spec §8.4). Allowed 하나만 빼는 ablation은 아직 목록에 없다(P-ABL-ALLOWED). 절의 제목은 링크를 지키려고 그대로 두었다. "흉내"는 ablation이 닮은 가정을 뜻하고, 비교를 뜻하지 않는다.
+| revision 1.3의 결과 상태 | §7.1 항목 5의 상태 |
+|---|---|
+| `not run` | `NOT_RUN` |
+| `environment not buildable` | `NOT_RUN`(이유와 함께) |
+| `out of observation scope`, `insufficient expressiveness` (문헌·코드 분석 결과) | 질문에 따라 `INAPPLICABLE` 또는 `OBSERVATION_GAP` / `ANALYSIS_GAP` |
+| `run but not reported` | 원인에 따라 `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP` |
+| `detected` | `REPORTED`(대응을 확인한 뒤) |
+
+도구 자신의 실패 기준이 이 spec의 순서 위반 기준과 다르면 표에 둘 다 적는다. 어떤 도구의 착안을 Kairos 안에 넣은 내부 비교는 결코 그 도구의 결과라고 부르지 않는다(spec §8.3).
+
+### 7.4 선행 연구의 가정을 흉내 내는 ablation
+
+[R06]은 기준선을 돌릴 수 없을 때, 기준선의 관측 모형을 대신하는 내부 ablation을 두되 그것을 기준선이라 부르지 말라고 권고했다. 예로 syscall만 보는 관측, framework 규칙 없는 메모리 접근 HB, 준비 상태 명세 없는 framework HB를 들었다([R06 §3]의 v0.1 §14 검토). spec §8.4의 ablation(revision 1.2부터 24개) 가운데 선행 연구의 가정과 직접 겹치는 것은 다음과 같다. 모두 같은 engine, 같은 trace에서 한 요소만 뺀다.
+
+**읽는 법** (spec §8.3의 K3, §8.4). 아래 ablation은 Kairos에서 한 요소를 뺀 K3다. 그 결과는 그 요소가 Kairos에 더하는 것만 말한다. 선행 기법이 그 성질을 표현하지 못한다는 증거도, 원 도구가 무엇을 보고할지의 증거도 아니다(spec §6.4 항목 37). 선행 기법과의 비교는 §7.1–§7.3의 process-level 비교로 한다. 모든 ablation은 다섯 설계 사례와 그것이 필요로 하는 대조에서, 전체 시스템과 비교한 단위별 변화로 **기술적으로** 보고한다. 첫 사례 평가에는 검정도 효과 크기도 고르지 않는다(P-STATS; spec §8.4). Allowed 하나만 빼는 ablation(항목 23)과 결과 의미를 빼는 ablation(항목 24)은 P-ABL-ALLOWED로 채택되었다. revision 1.3의 단일 요소 비교에는 애플리케이션 소유를 빼는 시험이 더해졌고, 조건이 소유에 기대지 않는 곳에서는 앱 label만 빼도 기본 위반 판정이 바뀌지 않아야 한다(spec §8.4; 시험 T-14). "흉내"는 ablation이 닮은 가정을 뜻하고, 비교를 뜻하지 않는다.
 
 | spec §8.4 ablation | 닮은 선행 연구의 가정 (비교가 아니다) |
 |---|---|
-| 16. 계약 끔(순수 HB race 보고) | HB race detector의 질문 (§4.1) |
+| 16. 준비 상태 명세 끔(Kairos 자신의 HB 층이 준비 상태 명세 없이 race를 보고. Kairos의 ablation이고 thread data-race 도구와의 비교가 아니다) | HB race detector의 질문 (§4.1) |
 | 20. syscall만 관측; 메모리만으로 HB | process-level 도구와 data race 도구의 관측 모형 (§4.10, §4.1) |
 | 15. looper 제한 끔(handler 사이 thread program order) | CAFA가 지적한 thread 기반 도구의 거짓 의존 (§4.5) |
 | 10. 조건부 edge를 무조건으로(soft barrier를 must-edge로) | 무조건적인 init·once edge (§4.4, §4.5; [R04 §5]의 gap G3) |
 | 13. 예측 끔 | 관측 순서만 보는 검사 (§4.3) |
 | 22. A-COMM 검사 끔(모든 예측을 `predicted`로) | 성긴 trace에서 예측 건전성을 그대로 가정 (§4.3) |
+| 23. Allowed 끔; 24. 결과 의미 끔 | 허용된 처리나 반환값의 의미를 쓰지 않는 검사 (§4.3, §4.12) |
 
 ---
 

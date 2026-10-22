@@ -1216,8 +1216,10 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 - reference의 class 진술 없이 class 정확도를 말하지 않는다(항목 41). C1, C2, C3, C5를 v7.0.1 기본 구성에서 "재현했다"고 하지 않는다(항목 42). 한 설계 사례의 결과를 다른 사례의 근거로 쓰거나 다섯 사례를 독립 표본으로 세지 않는다. TIME/TBL 문맥의 R2 template 결과는 C3의 결과가 아니고, A.3의 결과는 C5의 결과가 아니며, 기본 B의 C1 `inactive(B)`와 K-PHASE census는 C1, C2의 결과가 아니다(항목 43).
 - SB 무구독 손실의 framework 수준 `documented-not-error`를 호출자 수준 판정과 합치지 않는다. 그것만으로 손실이 허용되었다고 하지 않는다. 전달을 요구하는 reference가 없으면 호출자 수준 label은 `violation`이 아니라 LOSS-UNDER-ORDER다(2.9; spec §1.6, §1.10, §4.12 item 6).
 - 3절의 coverage 개수(full 10, partial 5)는 census 전의 [I]다. 6절의 기대 판정도 모두 [I]다.
-- 소속 앱(`app_owner`)이 `undetermined`인 결과를 앱 사이 결과로 세지 않는다. `inferred`(`match-by-time`) 매핑을 `confirmed`로 쓰지 않는다(spec §1.2, §5.7, ADR-056).
-- C1의 OSAL RESERVED 구간 경로(A5, K-LOCKBAL)를 다섯 사례의 결과 수에 넣지 않는다(P-C1HOLD).
+- actor의 소속 앱(`app_owner`)이 `undetermined`인 instance의 결과를 앱 사이 결과로 내지 않는다(항목 61, 개정 1.3; ADR-056).
+- RESERVED 구간과 lock 누수 실험을 C1 검증의 일부나 다섯 사례 결과의 하나로 내지 않는다. hold가 만든 실패를 자연 실패로, timeout 관측만을 영구 교착으로 쓰지 않는다(항목 52; P-C1HOLD).
+- `rule` 기록이나 추출한 후보 연속만으로 받아들임, TOLERATED, harm을 내지 않는다. 어떤 reference도 정하지 않은 우선순위를 충돌하는 글 사이에 두지 않는다. K-SPAWN.osal이나 K-LOCKBAL을 준비 상태 위반으로 만드는 연구자 작성 요구를 더하지 않는다(항목 53; QT-4, Q15, QT-5, QT-9).
+- C3·C5의 6.4.1 원 플랫폼 실행을 이 container의 32-bit header로 한 분석 전용 parse로 재현했다고 하지 않는다(항목 51; D13).
 
 ---
 
@@ -1231,13 +1233,13 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O10(그림 D1, D2) | §2 |
 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
-| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
-| **05_cfs_mapping.md (이 문서)** | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·준비 상태 명세, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| **05_cfs_mapping.md (이 문서)** | cFS 계층과 Φ_cFS의 대응, 준비 상태 명세 template K-*와 준비 범주 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| [10_decisions_adr.md](10_decisions_adr.md) | ADR 44개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 목록, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -1246,5 +1248,5 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 **이 문서와 특히 관련된 곳.**
 
 - spec: 주로 §3, §7.3, §8.2, §9.3(사례별 경로와 대조, E-post/E-TBL), App. A.1(신뢰 장부 step 9a, 세 판단 step 13a, 대조 step 15), A.4, A.7을 따른다. R2 certificate의 형식 유도(MustBefore 사슬, FRONTIER, 검사기, 신뢰 장부)는 [04_formal_model.md §10](04_formal_model.md#10-r2로-읽는-once-mustbefore-pwb-certificate)에 있다.
-- PI 결정: D9, D12, D13, D16, D17, D18 등([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). EXT-20261012로 새로 요청한 결정(D22, P-R2CTRL, P-C2, P-C1HOLD, P-RGIT, P-CLASSGT, P-F1GATE, QT-4, QT-9 등)은 spec §10.1에 있다.
+- PI 결정: D9, D12, D13, D16, D17, D18, D19 등([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). EXT-20261012로 새로 요청한 결정(D22, P-R2CTRL, P-C2, P-C1HOLD, P-RGIT, P-CLASSGT, P-F1GATE, QT-4, QT-9 등)은 2026-10-15에 정해졌고 spec §10.1에 있다(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md); D18은 C1 몫 밖이 아직 열려 있다). 2026-10-22의 결정 D1–D5는 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md)와 spec §0.12, §10.1에 있다.
 - 검토 쟁점: 이 문서에 나온 [X2-01]–[X2-14] 등의 출처([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)).

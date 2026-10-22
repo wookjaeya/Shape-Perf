@@ -168,7 +168,7 @@ GPredict의 원리를 cFS에 적용한 것만으로 충분한 새 기여가 보�
 
 ### 1.3 관련 연구와 실험 비교 (revision 1.2)
 
-이 문서가 다루는 기법 계열 가운데 thread data-race 탐지기(FastTrack, TSan, Djit+, Eraser 방식 lockset 도구), 예측 분석(CP, WCP, SHB, M2, SyncP, RVPredict, GPredict, ExceptioNULL), DefUse, DCatch는 위치를 잡기 위한 **관련 연구**다 [D] (spec §1.11 "Related work and the experimental comparison"; ADR-046). 이들은 실험 비교군이 아니고, 비교를 위한 재구현도 만들지 않는다. 실험 비교는 기존 Process-Level Race 연구(RacePro, SimRacer, SIMEXPLORER, RRF, DESCRY, SimEvo, ReDPro, SysPro)와 한다(spec §8.3; §7). 이 결정은 위 표들이 각 선행 연구가 하는 일에 대해 적은 것을 바꾸지 않고, 그 서술은 [R04]에 기댄다. 2026-10-15의 로드맵(`plan/ROADMAP_20261015.md` §10.3, §11.5)과 결정 기록(§4.4)은 결정 전 검토에서 RacePro와 GPredict의 저자 공개본을 읽었다고 적는다. spec은 그것에 [R04] 이상으로 기대지 않고, GPredict의 형식에 대한 진술은 그 §II.B를 여기서 읽을 때까지 [U]다(P-PAPERS, 2026-10-15 승인, 바로 시작) (spec §1.11).
+이 문서가 다루는 기법 계열 가운데 thread data-race 탐지기(FastTrack, TSan, Djit+, Eraser 방식 lockset 도구), 예측 분석(CP, WCP, SHB, M2, SyncP, RVPredict, GPredict, ExceptioNULL), DefUse, DCatch는 위치를 잡기 위한 **관련 연구**다 [D] (spec §1.11 "Related work and the experimental comparison"; ADR-046). 이들은 실험 비교군이 아니고, 비교를 위한 재구현도 만들지 않는다. 실험 비교는 기존 Process-Level Race 연구(RacePro, SimRacer, SIMEXPLORER, RRF, DESCRY, SimEvo, ReDPro, SysPro)와 한다(spec §8.3; §7). 이 결정은 spec §1.11 표(이 문서의 §2.2)와 이 문서 §4가 각 선행 연구가 하는 일에 대해 적은 것을 바꾸지 않고, 그 서술은 [R04]에 기댄다. 2026-10-15의 로드맵(`plan/ROADMAP_20261015.md` §10.3, §11.5)과 결정 기록(§4.4)은 결정 전 검토에서 RacePro와 GPredict의 저자 공개본을 읽었다고 적는다. spec은 그것에 [R04] 이상으로 기대지 않고, GPredict의 형식에 대한 진술은 그 §II.B를 여기서 읽을 때까지 [U]다(P-PAPERS, 2026-10-15 승인, 바로 시작) (spec §1.11).
 
 이 입장은 검토에서 고쳐졌다. 검토 X1은 이전 판(v1)이 InitRacer와 RVPredict/GPredict에 이미 있는 것을 Kairos가 더하는 것처럼 적었고, ExceptioNULL을 인용하지 않았으며, gap G3의 새로움을 검색하지 않았다고 지적했다([X1-M12]). spec은 이를 받아 §1.11을 고치고 같은 계열의 비교 도구 셋을 더했다(ADR-025, ADR-037). 외부 검토 EXT-20261012는 비교를 다시 고쳤다(spec §0.7 항목 6; ADR-042). 그때 같은 계열 비교 도구는 Kairos와 같은 성질 정보를 받았다. **revision 1.2는 이 비교 도구들을 철회했다**(ADR-046, ADR-047. ADR-025는 대체되었고, ADR-037의 비교 관련 부분과 ADR-042의 일부도 대체되었다. 선행 연구에 대한 인정은 그대로다). 요소를 뺀 결과는 Kairos의 ablation으로만 읽고, 선행 기법이 무엇을 표현하는지의 증거로 쓰지 않는다(§7).
 
@@ -183,7 +183,7 @@ GPredict의 원리를 cFS에 적용한 것만으로 충분한 새 기여가 보�
 - **vector clock**: HB를 계산하는 자료 구조다. thread마다 "다른 각 thread의 사건을 몇 번째까지 알고 있는가"를 숫자 벡터로 들고 다닌다(Fidge 1988; Mattern 1989 [V-abs]).
 - HB detector는 **HB로 순서가 정해지지 않은** 충돌 접근 쌍을 보고한다. 예측 detector도 **재배열할 수 있는** 쌍만 보고한다([R04 §3 L4]).
 
-Netzer와 Miller(LOPLAS 1992 [V-abs])는 data race(동기화 없는 충돌 접근)와 general race(의도한 순서가 보장되지 않는 것)를 구분하고, 실제로 일어날 수 있는 race(feasible)와 겉보기 race(apparent)도 구분한다. [R04]는 cFS의 준비 위반이 data race라기보다 general race나 order violation이라고 본다 [I] ([R04 §0.5]). 그래서 조사 범위를 data race detector 밖으로 넓혔다.
+Netzer와 Miller(LOPLAS 1992 [V-abs])는 data race(동기화 없는 충돌 접근)와 general race(의도한 순서가 보장되지 않는 것)를 구분하고, 실제로 일어날 수 있는 race(feasible)와 겉보기 race(apparent)도 구분한다. [R04]는 cFS의 준비 상태 위반이 data race라기보다 general race나 order violation이라고 본다 [I] ([R04 §0.5]). 그래서 조사 범위를 data race detector 밖으로 넓혔다.
 
 ### 2.2 cFS 현상과 기존 기법 (spec §1.11 표)
 
@@ -418,7 +418,7 @@ flowchart TD
 **cFS에서.**
 - cFS 앱의 main loop(`CFE_SB_ReceiveBuffer` → dispatch → handle)는 SB pipe 위의 looper다 [I] ([R04 §2.7]).
 - **SB 구독 전 송신.** 구독자가 없는 메시지는 송신자에게 성공을 반환하며 버려진다. SB는 `NoSubscribersCounter`를 올리고 `SEND_NO_SUBS` event를 시도한다(`cfe_sb_priv.c:1082–1087`; spec §3.9). InitRacer의 "늦은 handler 등록"과 같은 모양이다. R2 기록의 ES 사용 중 17건이 이 경로의 `SEND_NO_SUBS` 이벤트다([R04 §2.7]; [R2g §2]).
-- **준비 위반**은 InitRacer의 "정의 전 접근"을 DOM 이름에서 cFS registry로 옮긴 것이다 [I] ([R04 §2.7]).
+- **준비 상태 위반**은 InitRacer의 "정의 전 접근"을 DOM 이름에서 cFS registry로 옮긴 것이다 [I] ([R04 §2.7]).
 - Go의 용량 규칙(k번째 수신이 k+C번째 송신보다 먼저)은 옮겨지지 않는다. SB 송신은 결코 막히지 않고, 꽉 찬 queue는 edge가 아니라 **손실**을 만든다 [I] ([R04 §2.7]).
 
 **빌린 것.**

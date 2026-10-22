@@ -333,14 +333,14 @@ revision 1.2부터 GPredict, FastTrack 등은 관련 연구이고(spec §1.11), 
 
 ### 1.12 spec 안의 ADR 번호 불일치
 
-spec §2.6(기술 결정)이 가리키는 ADR 번호 두 개는 §11의 내용과 맞지 않는다 [F] (spec §2.6, §11을 대조함).
+revision 1.1의 spec §2.6(기술 결정)이 가리키던 ADR 번호 두 개는 §11의 내용과 맞지 않았다 [F] (그때의 spec §2.6, §11을 대조함). **revision 1.2에서 둘 다 바로잡혔다** [F] (지금의 spec §2.6을 다시 읽음).
 
-| spec §2.6의 문장 | §2.6이 적은 번호 | §11에서 그 내용을 다루는 ADR |
-|---|---|---|
-| "SMT solver optional [D]" | ADR-014(token에서만 인과) | ADR-016(예측, "SMT-LIB only after P-Z3") |
-| "eBPF userland [D]" | ADR-013, ADR-038(triage) | ADR-013, ADR-036(attach cookie와 inode 등록) |
+| revision 1.1의 spec §2.6 문장 | 그때 적은 번호 | §11에서 그 내용을 다루는 ADR | revision 1.2 이후의 spec §2.6 |
+|---|---|---|---|
+| "SMT solver optional [D]" | ADR-014(token에서만 인과) | ADR-016(예측, "SMT-LIB only after P-Z3") | "An SMT solver is not a condition of the first implementation [D] (P-Z3, decided 2026-10-15)". ADR 번호를 적지 않는다 |
+| "eBPF userland [D]" | ADR-013, ADR-038(triage) | ADR-013, ADR-036(attach cookie와 inode 등록) | "(ADR-013, ADR-036; the earlier reference to ADR-038, the triage ADR, was a slip)" |
 
-이 문서는 §11의 번호와 내용을 따른다. spec은 읽기 전용 입력이므로 고치지 않았다.
+이 문서는 §11의 번호와 내용을 따른다. spec은 이 문서의 입력이므로 이 문서에서 고치지 않는다.
 
 ---
 

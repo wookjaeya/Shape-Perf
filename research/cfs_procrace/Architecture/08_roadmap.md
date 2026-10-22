@@ -533,16 +533,16 @@ S4는 예측이나 hold 없이 `static`과 `trace`만으로 loop를 돌린다. `
 
 **출구 조건 (모두 충족).**
 
-- **Kairos 자신의 recorder가 수정하지 않은 바이너리에서 R2를 다시 관측한다.** 사용별 집합(task, SB 함수, EID)이 [R2g §2]의 표와, B에서 계산한 기대값과 맞아야 한다. 기대값은 ENV의 version table이 있는 basis에서 24(ES 20 + EVS 4), 없으면 11이다. 어긋나면 조사해 보고하고, **맞추려고 조정하지 않는다.**
+- **Kairos 자신의 recorder가 수정하지 않은 바이너리에서 R2를 다시 관측한다.** 사용별 집합(task, SB 함수, EID)이 [R2g §2]의 표와, B에서 계산한 기대값과 맞아야 한다. 기대값은 ENV basis에서 24(ES 20 + EVS 4, [R2g §2])다. 생성된 module version table이 없는 basis에서는 recorder가 수를 정하고, 그 의존은 구성 발견으로 기록하며 결코 가정하지 않는다. 어긋나면 조사해 보고하고, **맞추려고 조정하지 않는다.**
 - 사용한 backend를 기록한다([X3-m8] 반영).
 - trace 손실이 0이거나, 손실이 계산되어 있다.
 - 반환값 capture 방식 R-a…R-e의 비용, BPF 본체 비용, cookie 비용, perf-sample 비용을 잰다(R-a uretprobe, R-b 호출 뒤 `mov`, R-c `leave`, R-d 지연 읽기, R-e 호출 뒤 첫 에뮬레이션 명령; spec §5.2).
 - 앱 `.so`에서 inode 등록을 시험한다.
-- 실험군 A(관측기 없는 수정하지 않은 바이너리)를 현재 kernel `-fc-v114`에서 cold/warm 층(stratum)별로 다시 잰다. 기존 기록은 `-fc-v80`에서 만들었다(PI_DECISIONS D11).
-- S1의 실행 횟수 N을 deviation으로 정한다(PI 결정 D14를 이 단계로 옮겼다).
-- 실험군 A, B(빈 BPF 프로그램을 단 uprobe), C′(R2 site와 identity bootstrap만 있는 최소 plan)를, 관측 장치 없이도 볼 수 있는 지표로 비교한다. 예: cFE 시간으로 본 CORE_READY → OPERATIONAL 구간, 15개 "Loading file … APP:" 줄의 폭, 종료 때 읽는 SB 카운터(spec §8.6).
+- 실험군 A(관측기 없는 수정하지 않은 바이너리)를 S1에서 쓰는 kernel에서 cold/warm 층(stratum)별로 다시 잰다. kernel은 실행마다 기록한다(spec §1.7 Env; PI 결정 D11).
+- **S1의 실행 횟수 N을 목적별로(동작 확인, 관측 영향 비교, 발생 빈도) 파일럿과 자원 예산에서 deviation으로 정하고, 해당 본실험 전에 동결한다**(PI 결정 D14, 2026-10-15 결정).
+- 실험군 A, B(빈 BPF 프로그램을 단 uprobe), C′(R2 site와 identity bootstrap만 있는 최소 plan)를, 관측 장치 없이도 볼 수 있는 지표로 비교한다. 이것이 관측 영향 점검이고(D1; spec §8.6), 실험군 A 재측정 **뒤에** 한다(D11). 예: cFE 시간으로 본 CORE_READY → OPERATIONAL 구간, 15개 "Loading file … APP:" 줄의 폭, 종료 때 읽는 SB 카운터.
 
-**이 조건이 보이는 것.** "분석을 믿기 전에 ground truth는 새 recorder에서 와야 한다"(spec §9.4). 기존 R2 기록은 gdb로 만든 것이고, gdb는 breakpoint hit마다 모든 thread를 잠시 멈추므로 교란 없는 스케줄의 증거가 아니다([R2g] 머리말; [01_overview.md §1.3](01_overview.md#13-네-가지-구체-예)). 24와 11의 구분은 새 증거가 아니라 basis 민감도와 S1 gate를 확인하는 장치다(spec App. A.1 step 12). **S1 전에는 어떤 R2 수도 Kairos의 결과가 아니다**(spec §6.4 항목 21).
+**이 조건이 보이는 것.** "분석을 믿기 전에 ground truth는 새 recorder에서 와야 한다"(spec §9.4). 기존 R2 기록은 gdb로 만든 것이고, gdb는 breakpoint hit마다 모든 thread를 잠시 멈추므로 교란 없는 스케줄의 증거가 아니다([R2g] 머리말; [01_overview.md §1.3](01_overview.md#13-네-가지-구체-예)). 부팅당 수가 생성된 module version table에 의존한다는 것은 퇴역한 recorder의 발견이었고, revision 1.2부터는 Kairos 자신의 recorder가 확인할 구성 사실로만 남는다(계획 [I]; spec §0.11 항목 1, App. A.1 step 12). **S1 전에는 어떤 R2 수도 Kairos의 결과가 아니고, "24"는 ENV basis 밖에서는 쓰지 않는다**(spec §6.4 항목 21).
 
 **rung V1의 하위 관문 S1-R2**는 위 목록 가운데 perf-sample backend, V1 site의 probe, identity join, 손실, backend 기록, 사용별 집합의 일치, 관측한 발생에서 얻는 M_impl의 reach `proved`만 요구한다. 나머지 출구 조건(R-a…R-e·BPF 본체·cookie·perf-sample 비용 측정, 앱 `.so`의 inode 등록 시험, 실험군 A 재측정, A·B·C′ 비교)은 rung V1b에 남는다. V1의 `n of N` 표기에는 PI 결정 D14의 S1 몫이 필요하다(§4.15).
 
@@ -557,7 +557,7 @@ S4는 예측이나 hold 없이 `static`과 `trace`만으로 loop를 돌린다. `
 **출구 조건 (모두 충족).**
 
 - R2의 모든 사용이 분류된다.
-- SB 발행 뒤의 모든 사용이 순서가 정해진다. **시스템 상태 대기로만 순서가 정해지는 사용도 포함한다**([R2c §4.3]). 퇴역한 CORD recorder의 HB 모형에는 `CFE_ES_WaitForSystemState`의 시스템 상태(CORE_READY) 대기 edge가 없었다. 그래서 발행 뒤에 ES나 EVS가 SB의 AppId를 쓰는 사용이 있었다면 false positive로 표시했을 것이라고 그 기록은 적었다. 그 실행들에서는 그런 사용이 나오지 않았다([R2c §4.3]).
+- SB 발행 뒤의 모든 사용이 순서가 정해진다. **시스템 상태 대기로만 순서가 정해지는 사용이 있다면 그것도 포함한다.** 그런 사용이 있는지는 Kairos 자신의 trace가 보일 일이다 [I].
 - O3–O5, O9가 기본 trace에서 통과한다.
 - ES 문맥의 `SEND_NO_SUBS` 사용 17개가 K-ROUTE에 사슬로 이어진다. 18번째(EVS 문맥) 사용은 사슬로 이어지거나, 그 MsgId 귀속이 열려 있다고 [U]로 보고된다(spec App. A.1 step 13a).
 

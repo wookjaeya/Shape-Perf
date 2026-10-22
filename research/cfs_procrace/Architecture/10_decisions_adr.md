@@ -656,7 +656,7 @@ spec rev 1.1이 요청한 결정이고(spec §0.7 항목 7; ADR-044), 2026-10-15
 | 이전 ID | 이전 질문(STATUS §3.1) | spec rev 1.1에서 | 결정(2026-10-15) |
 |---|---|---|---|
 | **G0** | 첫 목표 범위를 thin MVC(S0–S3a)로 할지 | **P-LADDER가 대신한다.** 첫 목표는 thin MVC 전체가 아니라 검증 사다리의 rung V1이다. thin MVC의 출구 조건 전체는 rung V1b로 남는다. ADR-044는 "thin MVC를 첫 목표로"를 거절한 대안으로 적는다 | P-LADDER 승인([§2.11](#211-0순위-첫-목표와-rung-v0의-결정)). 2026-10-22 결정 D1이 재정의했다(첫 rung V1′) |
-| **T2** | 근거 종류에 `requirement`를 더할지, SB 구독 전 송신 손실을 cSB4305.5에 따라 허용된 drop(`documented_drop`)으로 볼지 | **QT-2로 다시 묻는다.** 이전 권고("허용으로 분류")는 쓰지 않는다. spec은 손실을 framework 수준 `documented-not-error`와 caller 수준 LOSS-UNDER-ORDER의 세 판단으로 보고한다(spec §0.7 항목 4; ADR-043) | QT-2 승인: 근거 종류 `requirement`; 구독자 없는 송신의 SB 규칙과 R2의 잘못된 AppId 오류를 나눈다([§2.11](#211-0순위-첫-목표와-rung-v0의-결정)) |
+| **T2** | 근거 종류에 `requirement`를 더할지, SB 구독 전 송신 손실을 cSB4305.5에 따라 허용된 drop(`documented_drop`)으로 볼지 | **QT-2로 다시 물었다.** 이전 권고("허용으로 분류")는 쓰지 않는다. spec은 손실을 framework 수준 `documented-not-error`와 caller 수준 LOSS-UNDER-ORDER의 세 판단으로 보고한다(spec §0.7 항목 4; ADR-043) | QT-2 승인: 근거 종류 `requirement`; 구독자 없는 송신의 SB 규칙과 R2의 잘못된 AppId 오류를 나눈다([§2.11](#211-0순위-첫-목표와-rung-v0의-결정)) |
 | **T1** | 판정 대상의 이름(계약을 다른 말로 바꿀지) | 미결이었다. spec과 이 폴더의 문서는 결정이 나올 때까지 "contract"(계약)라는 말을 그대로 썼다(spec §0.7 항목 4) | **PI 결정 T1 = (a)**: "readiness specification"(준비 상태 명세). spec은 Spec-C 단계에서 바꾸었고(§0.11, 부록 C, ADR-052), 이 문서는 이번 반영에서 따른다([§2.11](#211-0순위-첫-목표와-rung-v0의-결정)) |
 
 ### 2.14 rung과 사례 track마다 필요한 결정
@@ -815,22 +815,27 @@ spec §13의 용어 102개를 spec의 순서(대체로 영문 알파벳 순)대�
 |---|---|---|
 | **ADR** | architecture decision record. 계기, 결정, 대안, 결과로 적은 설계 결정 기록이다 | §11 |
 | **from-reference / deviation** | 코드 상수나 고정 문서에서 인용한 값 / reference와 다르거나 reference에 없는 값. 이유, 효과, 필요성을 기록한다 | spec 머리말 Policy; `CONDITIONS_POLICY.md` |
-| **thin MVC** | 최소 핵심(minimum viable core): S0 + S1 + S2 + S3a. 잘라 내지 않는다. 첫 목표는 thin MVC 전체가 아니라 검증 사다리의 rung V1이고, thin MVC의 출구 조건 전체는 rung V1b다. 사례 자체의 도구 수준 근거가 R2뿐이면 thin MVC는 단일 사례 결과다 | §9.3, §9.4; ADR-026, ADR-044 |
-| **S0–S10** | 구현 단계다. 단계마다 출구 조건이 있다 | §9.3 |
+| **thin MVC** | 최소 핵심(minimum viable core): S0 + S1 + S2 + S3a. 잘라 내지 않는다. revision 1.2부터 claims table과 자르는 순서를 부르는 이름이고 첫 완료 조건이 아니다(P-LADDER; ADR-050). 첫 목표는 thin MVC 전체가 아니라 검증 사다리의 rung V1이었고(revision 1.3에서는 V1′, ADR-057), thin MVC의 출구 조건 전체는 rung V1b다. 사례 자체의 도구 수준 근거가 R2뿐이면 thin MVC는 단일 사례 결과다 | §9.3, §9.4; ADR-026, ADR-044, ADR-050, ADR-057 |
+| **S0–S10** | 구현 단계다. 단계마다 출구 조건이 있다. S8(MLIR)은 revision 1.2에서 제거되었고 번호는 다시 쓰지 않는다(D6) | §9.3 |
 | **하위 관문 S0-R2, S3a-R2, S1-R2, S2-R2** | rung V1이 단계 S0, S3a, S1, S2의 출구 조건에서 R2 사슬에 필요한 항목만 떼어 쓰는 관문이다. 각 단계 출구 조건의 나머지는 rung V1b가 맡는다 | §9.3 |
 | **paper track** | 사례 track의 첫 단계다. 고정한 공개 revision에서 코드를 읽고, 첫 도구 출력 전에 hash로 동결한 기대표를 쓴다. 단계도 결정도 필요 없다. 다섯 사례 모두 지금 할 수 있다 | §9.3 |
-| **freeze F1 / F2** | 첫 평가 실행 전에 Φ, 추출기, engine, 보정표, lint, 비교 도구와 같은 정보 encoding, 평가 기준, 사전 등록 기대표를 hash로 고정하는 것 / held-out 항목을 열기 전에 고정하는 것(recall protocol과 노출 기록 포함) | §7.2 |
-| **RC1–RC15** | [R03 §4]의 준비 계약 종류 15개 | §3.15 |
+| **freeze F1 / F2** | 첫 평가 실행 전에 Φ, 추출기, engine, 보정표, lint, process-level 기법의 재구현(revision 1.2 전에는 비교 도구와 같은 정보 encoding), 평가 기준, 사전 등록 기대표들의 hash를 고정하는 것(기대표는 사례마다 첫 출력 전에 동결한다, P-F1GATE) / held-out 항목을 열기 전에 고정하는 것(recall protocol과 노출 기록 포함) | §7.2 |
+| **RC1–RC15** | 준비 범주 15개(위 Readiness category). [R03 §4]에서는 "readiness-contract kinds"라 불렀다 | §3.15 |
 | **RQ1–RQ9** | 평가의 연구 질문 | §8.1 |
-| **보장 G1–G11** | 보장 진술. 예: 보장 G5는 bounded model 분류, 보장 G7은 PCT(PI 결정 D3이 승인될 때), 보장 G10은 신뢰 사실의 투명성, 보장 G11은 경계 안의 progress다. [R04 §5]의 gap G1–G8과는 다른 번호 체계다(§0.2) | §6.3 |
-| **STATUS 결정 G0, T1, T2** | `STATUS_20261012.md` §3.1이 물은 결정이다. G0은 P-LADDER가 대신하고, T2는 QT-2로 다시 묻고, T1은 미결이다([§2.13](#213-이전-현황-결정-g0와-t2의-처리)) | §0.7 항목 4, §10.1 |
+| **보장 G1–G11** | 보장 진술. 예: 보장 G5는 bounded model 분류, 보장 G7은 PCT(PI 결정 D3에 따라 gate를 나중에 더할 때), 보장 G10은 신뢰 사실의 투명성, 보장 G11은 경계 안의 progress다. [R04 §5]의 gap G1–G8과는 다른 번호 체계다(§0.2) | §6.3 |
+| **STATUS 결정 G0, T1, T2** | `STATUS_20261012.md` §3.1이 물은 결정이다. G0은 P-LADDER가 대신하고, T2는 QT-2로 다시 물었으며, T1은 2026-10-15에 PI 결정 T1 = (a)로 정해졌다([§2.13](#213-이전-현황-결정-g0와-t2의-처리)) | §0.7 항목 4, §0.11, §10.1 |
 | **gap G1–G8** | [R04 §5]가 "조사한 기법이 모형화하지 않는데 cFS가 요구하는 것"으로 정리한 공백 목록이다([R04]의 추론). 예: gap G3은 timeout 조건부 barrier edge, gap G5는 손실하는 bounded queue다. 정리와 spec의 현재 입장은 [09_prior_work.md §5](09_prior_work.md#5-무엇이-새로운가-gap-g1g8) | §1.11 |
 | **H-V** | 일반화 가설이다. 버전과 backend에 따라 바뀌는 것은 Φ와 `P_sched`뿐이라는 가설이다. 진술만 하고 주장하지 않는다 | §7.6 |
-| **실험군 A, B, C′, C, D, W** | 관측 비용과 교란을 나눠 재는 실행 묶음이다. A는 관측기 없는 기준이고, W는 PI 결정 D3이 승인될 때만 쓴다. 설계안 [A]/[B]/[C], basis B와 다르다(§0.2) | §8.6 |
-| **K-* (계약 template)** | `K-<family>.<변형>` 꼴의 이름은 계약 template family다. 예: K-ID(넘긴 identity 값이 유효하고 등록됨), K-SELF.es(호출자 자신의 App·task record가 LIVE), K-ROUTE(송신 시점에 route가 있음), K-CAP / K-CAP.msglim(queue 깊이 / 구독별 MsgLim), K-SPAWN.osal(새 task의 OSAL handshake), K-LOCKBAL(조회 실패 때 lock을 풂), K-TEARDOWN(종료 요청 뒤의 사용). 전체 목록과 [R03 §4]의 계약 종류 RC1–RC15와의 대응은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-준비-상태-명세-catalogue와-15개-준비-범주) | §3.15 |
+| **실험군 A, B, C′, C, D, W** | 관측 비용과 교란을 나눠 재는 실행 묶음이다. A는 관측기 없는 기준이고, W는 PI 결정 D3에 따라 `--wrap` gate를 더할 때만 쓴다. 설계안 [A]/[B]/[C], basis B와 다르다(§0.2) | §8.6 |
+| **K-* (준비 상태 명세 template)** | `K-<family>.<변형>` 꼴의 이름은 준비 상태 명세 template family다. 예: K-ID(넘긴 identity 값이 유효하고 등록됨), K-SELF.es(호출자 자신의 App·task record가 LIVE), K-ROUTE(송신 시점에 route가 있음), K-CAP / K-CAP.msglim(queue 깊이 / 구독별 MsgLim), K-SPAWN.osal(새 task의 OSAL handshake), K-LOCKBAL(조회 실패 때 lock을 풂. K-SPAWN.osal과 함께 QT-9에 따라 구현 결함 family다), K-TEARDOWN(종료 요청 뒤의 사용). 전체 목록과 준비 범주 RC1–RC15와의 대응은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-준비-상태-명세-catalogue와-15개-준비-범주) | §3.15 |
 | **stratum (실행 층: cold/warm)** | VM을 다시 켠 뒤 첫 실행(cold)과 그 뒤 실행(warm)의 구분이다. pool key의 일부이고 cold와 warm은 한 pool에 섞지 않는다. HB edge의 stratum S/O/C_σ와 다른 뜻이다(§0.2) | §1.7, §4.12 항목 4, §4.13 |
 | **Init snapshot S0** | 실행마다 뜨는 유지 상태(boot record, CDS, SysV segment, `EEPROM.DAT` 등)의 snapshot이다. 정규형으로 만든 내용 hash를 B.Init에 기록한다. 구현 단계 S0와 다른 뜻이다(§0.2) | §1.7, §4.13 |
 | **pool key** | 빈도 `n of N`을 합칠 때 같아야 하는 (B hash, plan hash, cold/warm 층)이다 | §4.12 항목 4 |
+| **rung V1′** | revision 1.3의 첫 rung인 R2 기반 검증이다. ENV basis에서 관측, task→앱 매핑을 포함한 정규화, 관측 기반 판정, trust ledger를 R2의 동결한 기대표와 대조한다. V1의 certificate 출구 항목은 선택이다 | §9.3 "Ladder of revision 1.3"; ADR-057 |
+| **요약 뷰(summary view)** | 바뀌지 않은 status, 세 판단, 근거 등급, 근거 축에서 계산하는 판정의 뷰다. 관측 결과 넷, 예측 결과 넷, 확인 결과 셋과 실행 관계로 보인다. `PENDING`과 `OPEN`은 `INCONCLUSIVE(horizon-open)`이다. 기록은 원래 값을 지닌다 | §1.10 "Summary view"; ADR-054 |
+| **task→앱 매핑(`app_owner`)** | actor instance마다 그것을 만든 애플리케이션과 그 근거, 수준(`confirmed`, `inferred`, `undetermined`)이다. revision 1.3에서 필수 산출물이다 | §1.2, §5.7; ADR-056 |
+| **필수 경로 / 선택 경로** | revision 1.3의 필수 경로는 closure와 추출 → probe plan → 관측 → 정규화 → 관측 기반 판정 → 한정 예측 → 제어 실행 확인이다. MustBefore, certificate, `kz proofcheck`, explorer, 진행 결과, loop는 선택 경로다 | §0.12; ADR-053 |
+| **2026-10-22 결정 D1–D5** | revision 1.3의 기초가 된 PI 결정이다. 같은 번호의 이전 PI 결정과 다르다([§2.15](#215-2026-10-22의-결정-d1d5)) | §0.12, §10.1 |
 
 **표기 통일.** 같은 개념을 이 폴더의 모든 문서에서 아래 한 가지 꼴로 쓴다.
 
@@ -852,7 +857,8 @@ spec §13의 용어 102개를 spec의 순서(대체로 영문 알파벳 순)대�
 | case track | 사례 track | 사례 트랙 |
 | v7.0.1 counterpart | v7.0.1 대응물 | 대응 사례 |
 | negative control | 음성 대조 | negative control |
-| contract | 계약(용어 결정 T1이 나올 때까지) | T1이 정하기 전에 쓰는 다른 이름 |
+| readiness specification(옛 readiness contract) | 준비 상태 명세(줄이지 않는다). "계약"은 문서화된 API 의미(API 계약, M_api)와 근거 등급 이름 `contract-backed`에만 쓴다(용어 결정 T1 = (a)) | 준비 계약, 계약, 그냥 "명세" |
+| readiness precondition / readiness violation / source tier | 준비 사전조건 / 준비 상태 위반 / 근거 등급 | 요구 상태, 준비 위반, 출처 층 |
 
 ---
 
@@ -866,13 +872,13 @@ spec §13의 용어 102개를 spec의 순서(대체로 영문 알파벳 순)대�
 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O10(그림 D1, D2) | §2 |
 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
-| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
-| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·준비 상태 명세, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 준비 상태 명세 template K-*와 준비 범주 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| **10_decisions_adr.md (이 문서)** | ADR 44개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| **10_decisions_adr.md (이 문서)** | ADR 58개(ADR-001–ADR-058), PI 결정과 그 해결(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -880,6 +886,7 @@ spec §13의 용어 102개를 spec의 순서(대체로 영문 알파벳 순)대�
 
 **이 문서와 특히 관련된 곳.**
 
-- spec: 주로 §10.1, §11, §13을 옮긴 것이다. PI 결정의 원문(질문, 선택지, 근거, 권고, 기본값)은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)다.
+- spec: 주로 §10.1, §11, §13을 옮긴 것이다. PI 결정의 원문(질문, 선택지, 근거, 해결 전의 권고, 해결 값과 날짜와 출처)은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)이고, 해결의 원문은 결정 기록 `spec/PI_DECISIONS_RESOLVED_20261015.md`와 `spec/PI_DECISIONS_RESOLVED_20261022.md`다. revision 1.3의 반영 경로는 변경표 `plan/REV13_CHANGE_TABLE.md`(이 문서에 걸린 행은 C-46, C-47)다.
 - 단계별로 어느 PI 결정이 필요한지는 [08_roadmap.md §5](08_roadmap.md#5-단계별-pi-결정)가 단계 순서로 다시 묶는다. 검증 사다리와 다섯 사례의 경로·대조는 [08_roadmap.md §4.14–§4.17](08_roadmap.md#414-첫-목표-검증-사다리-v0v4)에 있다.
 - 외부 검토: [history/review_EXT_20261012.md](history/review_EXT_20261012.md). 그 처리는 spec §0.7과 ADR-039–ADR-044다. 이 문서에는 새 ADR 여섯 개, 그것이 고친 앞의 ADR, 새 PI 결정(P-LADDER, D20–D22, QT-2–QT-5, QT-9, Q15, P-R2CTRL, P-C1HOLD, P-C2, P-RGIT, P-F1GATE, P-D18GATES, P-CLASSGT, P-ABL-ALLOWED), 새 용어 25개가 반영되어 있다.
+- revision 1.2–1.3: spec §0.9–§0.12, ADR-045–ADR-058, 결정 기록 둘, 변경표 `plan/REV13_CHANGE_TABLE.md`. 이 문서에는 새 ADR 열넷과 그것이 고친 앞의 ADR, 2026-10-15의 해결 값과 2026-10-22의 결정 D1–D5(§2), revision 1.2가 바꾸거나 더한 용어(§3)가 반영되어 있다. 이 반영은 결정 [D]이고 결과가 아니다.

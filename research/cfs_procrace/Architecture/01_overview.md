@@ -150,7 +150,7 @@ PI는 2026-10-15에 QT-2·QT-3을 승인하고, QT-4·Q15에는 엄격한 대안
 
 **지원하는 조건** [D] (revision 1.3; spec §1.6 "Supported conditions"; C-07). 준비 상태 명세는 상태·수명·값에 기대는 순서 조건을 나타내는 한 가지 표현이다. 연구 대상은 process-level 순서 위반이고, 이 표현이 덮는 조건의 부류가 아니다. profile 언어와 evaluator가 표현하지 못하는 순서 조건은 이유와 함께 `not supported`로 기록하고, 확장이 필요한지는 그 조건에서 따진다. 모든 사례의 판정 규칙으로 고정된 두 사건 모형을 들이지 않는다. 식별자 `rspec`, `Req`, `Allowed`는 그대로다(T1). 위의 여섯 상태, 세 판단, QT-4 엄격한 대안은 바뀌지 않는다.
 
-**준비 상태 명세 이름.** K-로 시작하는 이름은 준비 상태 명세 template family다. `K-<family>.<변형>` 꼴로 쓴다. 예를 들어 K-ID는 "넘긴 identity 값이 유효하고 등록되어 있다", K-ROUTE는 "송신 시점에 route가 있다", K-SELF.es는 "호출자 자신의 ES App·task record가 LIVE다"이다. 전체 목록과, [R03 §4]가 "readiness-contract kinds"라 부른 15개를 이 spec에서 준비 범주 RC1–RC15로 부르는 것과의 대응은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-계약-라이브러리와-15개-계약-종류)에 있다.
+**준비 상태 명세 이름.** K-로 시작하는 이름은 준비 상태 명세 template family다. `K-<family>.<변형>` 꼴로 쓴다. 예를 들어 K-ID는 "넘긴 identity 값이 유효하고 등록되어 있다", K-ROUTE는 "송신 시점에 route가 있다", K-SELF.es는 "호출자 자신의 ES App·task record가 LIVE다"이다. 전체 목록과, [R03 §4]가 "readiness-contract kinds"라 부른 15개를 이 spec에서 준비 범주 RC1–RC15로 부르는 것과의 대응은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-준비-상태-명세-catalogue와-15개-준비-범주)에 있다.
 
 ### 1.3 네 가지 구체 예
 
@@ -907,7 +907,7 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 | 관측과 환경 | 관측이 시간만 바꾼다거나 영향이 없다는 것(기준 실행과 견준 점검이 있고, 기준 실행이 없는 내부 사건에는 결론을 내리지 않는다). POWERON 재시작이 유지 파일·파일 캐시·공유 파일시스템을 모두 초기화한다는 것 | 48, 49 |
 | 판정 규칙 | `rule` 기록만으로, 또는 추출한 후속 경로 후보만으로 허용·TOLERATED·harm을 정하는 것. 어떤 reference도 정하지 않은 문서 사이의 우선순위. 연구자가 만든 요구사항으로 K-SPAWN.osal·K-LOCKBAL을 준비 상태 위반으로 만드는 것 | 53 |
 | 비교와 통계 | 기존 Process-Level 도구 사이의 점수·순위. `NOT_RUN` 칸을 미탐지로, 확인 안 한 `REPORTED` 칸을 사례 탐지로 세는 것. 재구현의 결과를 원 도구 결과로 쓰는 것. 읽지 않은 도구의 표현력·관측 범위를 검색 발췌로 말하는 것. 다섯 사례를 독립 표본으로 본 유의성 검정·일반 비율·구간. 원출처의 "race"에서 자동으로 만든 class. 독립 검토 인력이 없을 때의 독립 검토 주장. 변형 예제의 결과를 변형 집합 밖으로 확장하는 것 | 54, 55 |
-| 사례별 해석 | C2의 비공개 시스템을 재현했다는 것(결과는 "C2 메커니즘의 역할 기반 검증"이다. 초기화가 실패하지 않는다는 가정은 재구성에만 적용하고, 2×2의 네 셀은 독립된 실제 결함 네 개가 아니다). 분석 전용 파싱(이 컨테이너의 32-bit 헤더)에서 원 6.4.1 플랫폼의 실행을 재현했다는 것, 헤더에 민감한 결과를 민감성이 해소되기 전에 쓰는 것. RESERVED 구간·lock 누수 실험을 C1 검증의 일부나 다섯 사례 성과로 세는 것, hold로 만든 실패를 자연 실행으로, timeout 관측만으로 영구 교착으로 판정하는 것 | 50, 51, 52 |
+| 사례별 해석 | C2의 비공개 시스템을 재현했다는 것(결과는 "C2 메커니즘의 역할 기반 검증"이다. 초기화가 실패하지 않는다는 가정은 재구성에만 적용하고, 세 구성(rev 1.3: 2×2 중 구성할 수 없는 셀 B를 뺀 A·C·D)은 독립된 실제 결함이 아니다). 분석 전용 파싱(이 컨테이너의 32-bit 헤더)에서 원 6.4.1 플랫폼의 실행을 재현했다는 것, 헤더에 민감한 결과를 민감성이 해소되기 전에 쓰는 것. RESERVED 구간·lock 누수 실험을 C1 검증의 일부나 다섯 사례 성과로 세는 것, hold로 만든 실패를 자연 실행으로, timeout 관측만으로 영구 교착으로 판정하는 것 | 50, 51, 52 |
 | 실행 범위 | 모델 기반 σ_R1에서 나온 결과를 실제 실시간 실행 결과라 부르는 것(D4), F1 `--wrap` gate와 PCT의 결과(D3, 후순위) | 56 |
 | 완료 | 사례를 수행하지 않는다는 기록이나 다른 코드의 결과로 다섯 사례 검증을 완료했다고 쓰는 것 | 57 |
 | 기반 검증과 기여 (rev 1.3) | R2의 관측 기반 결과를 기여의 증거로 쓰는 것(같은 준비 사전조건을 받은 단순 상태 검사도 같은 발생을 찾을 것으로 예상된다, 항목 38. R2는 관측 경로의 기반 검증이다, ADR-057) | 58 |
@@ -936,7 +936,7 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| [10_decisions_adr.md](10_decisions_adr.md) | ADR 52개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 58개(ADR-053–058은 rev 1.3), PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -958,7 +958,7 @@ spec이 방어 가능하다고 보는 기여는 다음 조합이다(spec §1.11 
 | 준비 상태 명세 / 준비 사전조건 / 준비 상태 위반 | 판정 대상 κ(Kairos가 쓰고 판정하는 규칙) / 그 `Req`(자원이 있어야 할 상태) / 범위 안의 VIOLATING 발생. 순서위반의 한 부류다. "계약"은 문서화된 API 의미(API 계약)에만 쓴다 |
 | 증명 상태 | lemma·보장·certificate의 `proved` / `depends-on-stated-assumption` / `unproved`. 여러 lemma를 쓴 진술은 가장 약한 것을 따른다 |
 | 근거 등급 | 준비 상태 명세가 어떤 종류의 근거 위에 서는지. 보고 시점에 유도하는 값이고 필드가 없다 |
-| K-* | 준비 상태 명세 template family의 이름(예: K-ID, K-ROUTE). 목록은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-계약-라이브러리와-15개-계약-종류) |
+| K-* | 준비 상태 명세 template family의 이름(예: K-ID, K-ROUTE). 목록은 [05_cfs_mapping.md §3](05_cfs_mapping.md#3-준비-상태-명세-catalogue와-15개-준비-범주) |
 | LP / capture point | linearization point. 연산의 효과가 한순간에 일어났다고 보는 지점이고, 조건(conjunct)마다 둔다 / 호출자가 넘길 값을 미리 읽은 load 지점. 값 조건의 LP다 |
 | MustBefore(MB) / PWB | 모든 실행에서 반드시 먼저 일어나는 사건의 정적 집합(최대 고정점) / 둘 다 일어나면 항상 a가 먼저라는 관계 |
 | S / O / C_σ (HB stratum) | 두 끝이 모두 있는 모든 실행에서 성립하는 구조적 순서 / 관측한 실행에서만 성립하는 순서 / σ_R1의 우선순위 제약(HB가 아님) |

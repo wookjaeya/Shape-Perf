@@ -683,7 +683,7 @@ gap G3에는 특히 조심한다. 새로움 문구는 P-PAPERS 항목 5의 targe
 
 ## 7. 실험 비교와 관련 연구 (spec §8.3)
 
-revision 1.2는 비교의 범위를 바꾸었다 [D] (2026-10-15 PI 결정; spec §8.3 "Scope and rules"; ADR-046, ADR-047). revision 1.1의 기준선 표는 철회되었다. 실험 비교는 기존 **Process-Level Race 연구**와 Kairos를 다섯 설계 사례에서 비교하는 것이다. thread data-race 도구(helgrind, DRD, ThreadSanitizer 등)와 GPredict·happens-before(FastTrack, WCP, SHB, SyncP, M2)·lockset 방식 재구현은 실험 비교군이 아니고 관련 연구다(§1.3). 비교의 자세한 방법(여섯 분석 질문, 결과 상태 표, 비교 대상의 역할)은 [01_overview.md §2.5](01_overview.md#25-실험-비교의-범위-기존-process-level-race-연구-spec-83)에 있다. [07_evaluation.md §4](07_evaluation.md#4-기준선과-비교-방법-spec-83)는 아직 revision 1.1의 기준선 서술이다. 여기서는 선행 연구 계열과의 연결만 정리한다.
+revision 1.2는 비교의 범위를 바꾸었다 [D] (2026-10-15 PI 결정; spec §8.3 "Scope and rules"; ADR-046, ADR-047). revision 1.1의 기준선 표는 철회되었다. 실험 비교는 기존 **Process-Level Race 연구**와 Kairos를 다섯 설계 사례에서 비교하는 것이다. thread data-race 도구(helgrind, DRD, ThreadSanitizer 등)와 GPredict·happens-before(FastTrack, WCP, SHB, SyncP, M2)·lockset 방식 재구현은 실험 비교군이 아니고 관련 연구다(§1.3). 비교의 자세한 방법(여섯 분석 질문, 결과 상태 표, 비교 대상의 역할)은 [01_overview.md §2.5](01_overview.md#25-실험-비교의-범위-기존-process-level-race-연구-spec-83)에 있다. 평가 계획 안의 자리는 [07_evaluation.md §4](07_evaluation.md#4-기존-process-level-race-연구와의-비교-spec-83)에 있다. 여기서는 선행 연구 계열과의 연결만 정리한다.
 
 ### 7.1 규칙
 
@@ -756,11 +756,11 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 |---|---|---|
 | C (뼈대) | KEM과 Φ의 세 해석, S/O/C_σ 층, σ_U∞와 containment, obligation, feedback loop, solver 없는 예측기, 재시도·대칭에서 유도한 template | §1, §2, §4.8–4.9, §4.14, §7 |
 | A | MustBefore fixpoint(T-PO, T-SPAWN, T-OBS, T-TERM), trusted base에 상대적인 독립 추론을 하는 certificate 검사기(trust ledger)와 mutation test, M_api/M_impl, LOSS-UNDER-ORDER, conformance, litmus suite | §1.4, §1.10, §4.2–4.5, §4.10–4.11, §8 |
-| B | VC/VC_R와 robustness tag, `timeout-dependent`·`tolerated`, outcome mining과 key-pair 열거, hold-until-event, **같은 trace 위의 기준선** | §1.9, §4.6–4.9, §4.13, §5, §8 |
+| B | VC/VC_R와 robustness tag, `timeout-dependent`·`allowed-not-ready`(옛 이름 `tolerated`), outcome mining과 key-pair 열거, hold-until-event, **같은 trace 위의 기준선**(revision 1.2에서 철회: 비교는 process-level race 연구와 한다, spec §8.3) | §1.9, §4.6–4.9, §4.13, §5, §8 |
 | 심사 J1–J3 | PWB certificate, transition-aware writer 집합, LP, Allowed horizon, DPOR 정확성 진술, explorer kill criterion | 곳곳; §0.4 |
-| X1 | 두 skeleton view, per-M containment, A-COMM과 `predicted-modelled`, σ_U∞의 patient retry, 보장 G5를 명명된 정리에 조건부로, L3를 mover reduction으로, **선행 연구 귀속 정정과 같은 계열 비교 도구**(EXT-20261012 §5.1이 고쳤다: 비교 도구는 같은 성질 정보를 받고, 요소를 뺀 변형은 남긴다면 묶음 ablation이다, P-ABL-ALLOWED) | §1.4–1.10, §4.2–4.12, §6, §8.3 |
+| X1 | 두 skeleton view, per-M containment, A-COMM과 `predicted-modelled`, σ_U∞의 patient retry, 보장 G5를 명명된 정리에 조건부로, L3를 mover reduction으로, **선행 연구 귀속 정정과 같은 계열 비교 도구**(EXT-20261012 §5.1이 고쳤다: 비교 도구는 같은 성질 정보를 받는다. revision 1.2에서 철회: thread 수준과 GPredict 방식 비교 도구는 관련 연구일 뿐이고, 요소를 뺀 묶음은 두지 않는다, P-ABL-ALLOWED, ADR-046) | §1.4–1.10, §4.2–4.12, §6, §8.3 |
 | X2 | cFS 메커니즘 정정(K-SELF.es, OSAL timed wait, 2단계 SB transmit, σ_R1 scheduling profile 등) | §1.3, §1.7, §3, App. A |
-| X3 | recall protocol, S3a AST writer 추출, thin MVC, 탐지·분류·근거로 하는 비교와 동결된 비교 도구, 층화 표본 triage와 masking한 평가자(EXT-20261012 §5.2–§5.3이 고쳤다), work-unit 예산 | §2, §4, §5, §8, §9 |
+| X3 | recall protocol, S3a AST writer 추출, thin MVC, 탐지·분류·근거로 하는 비교와 동결된 비교 도구(revision 1.2에서 process-level race 연구와의 비교로 바뀌었다. 탐지·분류·근거는 Kairos 자신의 보고 부분으로 남는다, spec §8.3, §8.5), 층화 표본 triage와 masking한 평가자(EXT-20261012 §5.2–§5.3과 P-TRIAGE가 고쳤다), work-unit 예산 | §2, §4, §5, §8, §9 |
 
 선행 연구를 잘못 적용했다가 고친 예도 spec §0.5 errata에 남아 있다.
 - 제안 B는 script 앱의 App-record 구간을 "순서 없음 → SHB로 예측"이라 했다. 그러나 발행(`cfe_es_apps.c:861–869`)과 `CFE_ES_GetAppID`(`cfe_es_api.c:738–765`)가 모두 ES lock을 잡으므로 이 구간은 O-ordered이고, lock 뒤집기가 필요하다. SHB의 영역이 아니다.
@@ -770,15 +770,17 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 
 ## 9. 이 문서가 주장하지 않는 것
 
-- **구현과 측정.** 아무것도 구현·실행·측정하지 않았다. 이 문서의 [M]은 spec이 인용한 기존 기록이다. 비교 도구와 ablation의 결과는 예측해 적지 않았다. DefUse가 R2의 잘못된 정의를 배울 것이라는 문장은 그 비교를 둔 설계상 이유 [I]일 뿐이다.
+- **구현과 측정.** 이 문서를 위해 아무것도 구현·실행·측정하지 않았다. 이 문서의 [M]은 spec이 인용한 기존 기록이다. 비교와 ablation의 결과는 예측해 적지 않았다. 폐기한 기록기 CORD의 결과는 근거로 쓰지 않는다(PI 결정 D12). DefUse가 R2의 잘못된 정의를 배울 것이라는 문장은 그 비교를 둔 설계상 이유 [I]일 뿐이다.
 - **메커니즘의 새로움.** HB/vector clock, DPOR, PCT, lockset, delay injection, 예측 분석, SMT 인코딩, points-to, key 충돌 lock 뒤집기, 늦은 등록 손실, 예측된 초기화 전 사용, framework typestate의 새로움을 주장하지 않는다. "최초의 process race detector"도 아니다(spec §6.4 항목 18, 24).
 - **명세 사용의 새로움.** 명세나 framework typestate를 쓰는 것 자체를 새롭다고 하지 않는다. Joshi & Sen, Lifestate와의 차이는 두 논문을 읽기 전까지 확정하지 않는다(spec §1.11).
-- **표현력의 차이.** GPredict 방식이나 다른 명세 기반 기법이 Allowed 결과, 유한 재시도, 유한 horizon을 표현하지 못한다고 주장하지 않는다. 같은 정보 재구현의 결과와 Kairos ablation의 결과는 그런 주장의 근거가 아니다(spec §6.4 항목 37).
+- **표현력의 차이.** GPredict 방식이나 다른 명세 기반 기법이 Allowed 결과, 유한 재시도, 유한 horizon을 표현하지 못한다고 주장하지 않는다. revision 1.2부터 그런 기법의 재구현은 평가에 없고, Kairos ablation의 결과는 그런 주장의 근거가 아니다(spec §6.4 항목 37).
 - **탐지만으로 본 가치.** 경보 yes/no만으로 certificate와 예측이 더하는 것을 말하지 않는다(spec §6.4 항목 38).
 - **R2 하나의 결과를 일반화.** R2에 그친 결과는 단일 사례 결과다. 다섯 사례를 독립 표본으로 세지 않는다(spec §6.4 항목 43; §8.8).
 - **gap G3의 새로움.** 문헌 확인 전이다. "open literature check"로만 쓴다.
 - **원문 확인.** V-abs는 초록 수준 확인이다. 어느 논문의 본문 규칙표나 정리도 확인했다고 주장하지 않는다(§0.3). spec 미사용 문헌은 맥락일 뿐이다.
-- **기존 도구의 실패.** 외부 process-level 도구는 모두 `NOT_RUN`이고, `NOT_RUN`은 false negative가 아니다(spec §6.4 항목 14).
+- **기존 도구의 실패.** 외부 process-level 도구는 조사에서 모두 `NOT_RUN`이고, `NOT_RUN`은 false negative가 아니다(spec §6.4 항목 14). 빌드하거나 실행하지 못한 기존 도구에 대해 "탐지하지 못한다"나 놓쳤다고 쓰지 않고, 그 부족은 문헌·코드 분석의 결과 상태로만 적는다(spec §6.4 항목 60; 2026-10-22 결정 D4).
+- **R2를 기여의 증거로.** 같은 준비 사전조건을 받은 단순 상태 검사도 같은 발생을 찾을 것으로 보므로, R2의 관측 기반 결과는 기여의 증거가 아니라 관측 경로의 기반 검증이다(spec §6.4 항목 38, 58; ADR-057).
+- **그 자체로의 새로움.** 불완전한 기록 위의 보수적 판정, SMT solver의 사용, 애플리케이션 소유의 표시, certificate가 있다는 사실을 그 자체로 새롭다고 하지 않는다(spec §6.4 항목 62; §1.11). 불완전 기록 감시의 두 선행 문헌(§4.13)은 읽지 않았고 [U], 그 정리를 Kairos에 옮기지 않는다.
 - **"sound", "안전".** 한정어 없는 "sound"를 쓰지 않는다(항목 1). 경보 없음, 비교 도구·prefilter의 침묵, 경계를 넘은 탐색에서 "안전"을 끌어내지 않는다(항목 2).
 - **예측 건전성.** Kairos의 예측이 RVPredict만큼 건전하다고 주장하지 않는다. 더 약하며, A-COMM 검사에 실패한 witness는 `predicted-modelled`다(spec §1.11; 항목 8).
 - **DPOR의 정확성.** T-JACM이 확인되기 전에는 `dpor`가 "b 안에서 정확하다"고 하지 않는다. "class당 실행 하나"는 아예 주장하지 않는다(항목 9).
@@ -802,7 +804,7 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | **09_prior_work.md (이 문서)** | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| [10_decisions_adr.md](10_decisions_adr.md) | ADR 44개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR 58개(ADR-001–ADR-058), PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -811,15 +813,15 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 **이 문서와 특히 관련된 곳.**
 
 - spec: 주로 §1.11, §0.3, §0.5, §1.6(세 판단), §6.4, §8.3–8.4, App. B를 풀어 쓴 것이다.
-- PI 결정: P-PAPERS, P-Z3, P-NIDHUGG, P-VALGRIND, P-TSAN, P-ABL-ALLOWED, P-CLASSGT, PI 결정 D3, D9, QT-2–QT-4([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md); 새 항목은 spec §10.1).
-- 검토 쟁점: X1-M12(선행 연구 귀속, 같은 계열 비교 도구), X1-m6(예측 분석 보장 문구), X1-M9(DPOR 정확성), X3-M6(비교 방법, 외부 참조점)([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012의 §5.1–§5.2(비교의 세 종류, 세 결과)와 §6.2–§6.4(용어, 세 판단)([history/review_EXT_20261012.md](history/review_EXT_20261012.md); spec §0.7 항목 4, 6; ADR-042, ADR-043).
-- 배경: [background/04_lit_dynamic.md](background/04_lit_dynamic.md)([R04]: 대응 표 §4, gap G1–G8 §5, 참고문헌과 검증 상태 §9), [background/05_lit_systematic_static.md](background/05_lit_systematic_static.md)([R05]: 주장 템플릿 §5, 평가 관행 §6, 참고문헌 §8), [background/06_critique_v01.md](background/06_critique_v01.md)([R06]: 요구사항 S5, S13, K6, 기여 구도 §6). 용어 검토는 [background/08_terminology.md](background/08_terminology.md)(계약, invariant, census의 범위)다.
+- PI 결정: P-PAPERS, P-Z3, P-NIDHUGG, P-VALGRIND, P-TSAN, P-ABL-ALLOWED, P-CLASSGT, PI 결정 D3, D9, D12, T1, QT-2–QT-4. 모두 2026-10-15에 정해졌다(결정 기록 `spec/PI_DECISIONS_RESOLVED_20261015.md`; [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md); spec §10.1). 2026-10-22 결정 D1(제안 0.2 채택), D3(C1이 기여 증거의 첫 사례), D4(실행하지 못한 원 도구에 대한 주장)(결정 기록 `spec/PI_DECISIONS_RESOLVED_20261022.md`; spec §10.1 "Decisions of 2026-10-22"). 결정의 한국어 정리는 [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정)다.
+- 검토 쟁점: X1-M12(선행 연구 귀속, 같은 계열 비교 도구), X1-m6(예측 분석 보장 문구), X1-M9(DPOR 정확성), X3-M6(비교 방법, 외부 참조점)([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012의 §5.1–§5.2(비교의 세 종류, 세 결과)와 §6.2–§6.4(용어, 세 판단)([history/review_EXT_20261012.md](history/review_EXT_20261012.md); spec §0.7 항목 4, 6; ADR-042, ADR-043). revision 1.2–1.3의 반영은 spec §0.10–§0.12와 ADR-045–ADR-058이고, 이 문서에 직접 걸린 것은 ADR-046(실험 비교의 범위), ADR-047(여섯 분석 질문과 결과 상태), ADR-052(용어 T1), ADR-053(필수 경로와 선택 경로), ADR-058(실행하지 못한 원 도구)이다.
+- 배경: [background/04_lit_dynamic.md](background/04_lit_dynamic.md)([R04]: 대응 표 §4, gap G1–G8 §5, 참고문헌과 검증 상태 §9), [background/05_lit_systematic_static.md](background/05_lit_systematic_static.md)([R05]: 주장 템플릿 §5, 평가 관행 §6, 참고문헌 §8), [background/06_critique_v01.md](background/06_critique_v01.md)([R06]: 요구사항 S5, S13, K6, 기여 구도 §6). 용어 검토는 [background/08_terminology.md](background/08_terminology.md)('계약(contract)'이라는 이름의 타당성, invariant, census의 범위. 결정 T1 = (a)의 근거)다.
 
 ---
 
 ## 부록 A. 문헌과 검증 상태 일람
 
-이 문서가 언급한 문헌이다. "부록 B" 열은 spec 부록 B(spec이 기대는 문헌)에 있는지를 뜻한다. "없음"이면 이 문서에서 맥락으로만 쓴다. 상태는 [R04 §9], [R05 §8], [R06 §9]를 따른다. Joshi & Sen과 Lifestate는 spec App. B를 따른다.
+이 문서가 언급한 문헌이다. "부록 B" 열은 spec 부록 B(spec이 기대는 문헌)에 있는지를 뜻한다. "없음"이면 이 문서에서 맥락으로만 쓴다. 단, spec §8.3의 비교 대상인 process-level 도구와 spec §1.11 표에 [U]로 오른 두 문헌은 따로 표시했다. 상태는 [R04 §9], [R05 §8], [R06 §9]를 따른다. Joshi & Sen과 Lifestate는 spec App. B를 따른다. revision 1.2부터 부록 B의 thread 수준 도구와 기법은 관련 연구이거나 메커니즘의 출처이고, 어느 것도 실험 비교군이 아니다(spec App. B; ADR-046). 이 표의 상태는 revision 1.2–1.3에서 하나도 바뀌지 않았다(P-PAPERS는 읽기를 승인했을 뿐이다).
 
 | 문헌 | 학회·연도 | 상태 | 부록 B | 이 문서 |
 |---|---|---|---|---|
@@ -840,7 +842,7 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 | Vindicator | PLDI 2018 | V-abs | 있음 | §4.3 |
 | Maximal causal models | RV 2012 | V-abs | 있음 | §4.3, §7 |
 | RVPredict | PLDI 2014 | V-abs | 있음 | §4.3 |
-| GPredict | ICSE 2015 | V-abs (§II.B 성질 형식은 외부 검토와 검색 snippet으로만 앎 [U], P-PAPERS) | 있음 | §1, §2.2, §4.3, §5, §7 |
+| GPredict | ICSE 2015 | V-abs (§II.B 성질 형식은 여기서는 외부 검토와 검색 snippet으로만 앎 [U], P-PAPERS. 결정 기록은 결정 전 검토에서 저자 공개본을 읽었다고 적는다, spec App. B) | 있음 | §1, §2.2, §4.3, §5, §7 |
 | ExceptioNULL | FSE 2012 | V-abs | 있음 | §4.3 |
 | AVIO | ASPLOS 2006 | V-abs | 있음 | §4.4 |
 | Velodrome | PLDI 2008 | V-abs | 있음 | §4.4 |
@@ -887,12 +889,12 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 | MLTA | CCS 2019 | V-abs | 있음 | §4.9 |
 | Soundiness (Livshits et al.) | CACM 2015 | V-abs | 있음 | §0.4, §4.9 |
 | Schwarz et al.; Tulsyan et al. | POPL 2011; FSTTCS 2020 | V-abs | 없음 ([R05 §2.7]로 인용) | §4.9 |
-| RacePro | SOSP 2011 | V-abs | 있음 | §4.10, §7 |
-| SimRacer | ISSTA 2013 | P (제목 미확인) | 없음 | §4.10 |
-| SIMEXPLORER; RRF; SysPro | STVR 2017; ISSRE 2016; arXiv 2026 | V-abs | 없음 | §4.10 |
-| DESCRY | ESEC/FSE 2017 | V-abs | 있음 | §4.10 |
-| SimEvo | ICSME 2017 | V-abs (저자 P) | 없음 | §4.10 |
-| ReDPro | ACMSE 2022 (기록 없음) | UNVERIFIED | 없음 | §4.10 |
+| RacePro | SOSP 2011 | V-abs | 있음 (spec §8.3 비교 대상, 첫 비교) | §4.10, §7 |
+| SimRacer | ISSTA 2013 | P (제목 미확인) | 없음 (spec §8.3 비교 대상; 상태 기록은 `baselines/availability.md`) | §4.10, §7 |
+| SIMEXPLORER; RRF; SysPro | STVR 2017; ISSRE 2016; arXiv 2026 | V-abs | 없음 (spec §8.3 비교 대상; 상태 기록은 `baselines/availability.md`) | §4.10, §7 |
+| DESCRY | ESEC/FSE 2017 | V-abs | 있음 (spec §8.3 비교 대상) | §4.10, §7 |
+| SimEvo | ICSME 2017 | V-abs (저자 P) | 없음 (spec §8.3 비교 대상; 상태 기록은 `baselines/availability.md`) | §4.10, §7 |
+| ReDPro | ACMSE 2022 (기록 없음) | UNVERIFIED | 없음 (spec §8.3 비교 대상; 역할 미확인) | §4.10, §7 |
 | LiteRace; Pacer | PLDI 2009; PLDI 2010 | V-abs | 없음 | §4.11 |
 | DataCollider | OSDI 2010 | V-abs | 있음 | §4.11 |
 | KCSAN 설계 문서 | Linux `kcsan.rst` | V-doc | 있음 | §0.4, §4.1, §4.12 |
@@ -904,5 +906,7 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 | Strom & Yemini (typestate) | IEEE TSE 1986 | V-me | 있음 | §4.12 |
 | Joshi & Sen (predictive typestate checking) | ASE 2008 | 서지 V([background/08_terminology.md](background/08_terminology.md) §8). 내용은 초록과 외부 검토로만 앎 | 있음 (선행 연구로만) | §1, §2.2, §4.12, §5 |
 | Lifestate (Meier, Mover, Chang) | ECOOP 2019 | 서지 V(같은 곳). 내용은 초록과 외부 검토로만 앎 | 있음 (선행 연구로만) | §1, §2.2, §4.12, §5 |
+| Leucker, Sánchez, Scheffel, Schmitz, Thoma (불완전한 timed event stream의 감시) | RV 2019 | [U] (제안 0.2 [P0.2] §2.3가 보고한 대로; 이 저장소에서 원문 미확인) | 없음 (spec §1.11 "Established theory" 표에만, revision 1.3) | §4.13 |
+| Basin, Klaedtke, Zălinescu (지연·재배열·손실 stream의 세 값 관측 의미론) | TOCL 2019 | [U] (같음) | 없음 (spec §1.11 표에만, revision 1.3) | §4.13 |
 
 spec 부록 B는 다음 넷을 **open literature check**로 남겨 둔다. 이 확인이 끝나기 전에는 어떤 주장도 이것들에 기대지 않는다: L3 뒤의 left/right mover reduction 정리, JACM 2017의 source-DPOR disabling 정리(T-JACM), timeout 조건부 barrier edge(gap G3)의 새로움, DroidRacer·CAFA·EventRacer·DCatch의 HB 규칙표(spec App. B; P-PAPERS).

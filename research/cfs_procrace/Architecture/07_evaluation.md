@@ -28,7 +28,7 @@
 4. [기존 Process-Level Race 연구와의 비교](#4-기준선과-비교-방법-spec-83) (spec §8.3): 비교의 범위와 세 종류, 도구의 역할, 분석 질문 여섯 개, 결과 상태 여섯 개, 첫 비교 RacePro, 원 도구를 실행하지 못한 경우
 5. [Ablation](#5-ablation-spec-84) (spec §8.4): 24개 ablation, rev 1.3의 단일 요소 비교
 6. [지표](#6-지표-spec-85) (spec §8.5): recall protocol(확장 평가), soundness failure, triage(확장 평가), Kairos 결과의 보고 부분
-7. [관측 영향 점검과 perturbation 실험](#7-오버헤드와-perturbation-실험-spec-86) (spec §8.6)
+7. [오버헤드와 perturbation 실험](#7-오버헤드와-perturbation-실험-spec-86) (spec §8.6): 관측 영향 점검(D1, D11) 포함
 8. [통계와 재현성](#8-통계와-재현성-spec-87) (spec §8.7): 목적별 N, 기술 통계, 분석 단위와 의존
 9. [N, cap, 표본 크기를 기록하는 법](#9-n-cap-표본-크기를-기록하는-법-conditions_policy) (CONDITIONS_POLICY): reference가 정하지 않은 조건 포함
 10. [타당성 위협](#10-타당성-위협-spec-88) (spec §8.8)
@@ -85,7 +85,7 @@ spec은 평가 전체에 걸쳐 세 원칙을 둔다. 셋 다 설계 결정 [D]�
 | 예측 분석, lock 뒤집기 | 예측 분석(predictive analysis)은 관측한 trace 하나에서, 동기화 제약을 지키면서 사건 순서를 바꾼 다른 실행이 가능한지 추론하는 기법이다. lock 뒤집기는 같은 lock을 잡는 두 구간의 순서를 바꾼 실행을 예측하는 것이다 | §4.9, §1.11 |
 | typestate | 자원마다 상태 automaton을 두고, 연산이 허용된 상태에서만 일어나는지 검사하는 방식이다 | §1.11 |
 | linearization point (LP) | 연산의 효과가 "이 명령에서 한순간에 일어났다"고 보는 지점이다. Kairos는 요구 조건의 conjunct(∧로 묶인 조건 하나)마다 LP를 둔다. capture point는 호출자가 넘길 값을 미리 읽어 둔 load 지점이다 | §1.4 |
-| certificate, `kz proofcheck` | certificate는 안전성 진술 하나(`fixed-order`의 `¬OK_i`, `protected`의 `¬NR_i`)의 증명 기록이다. `kz proofcheck`는 분석기와 코드를 공유하지 않는 검사기로(공유 `libkz-core`는 예외), 명시한 trusted base에 상대적으로 certificate의 추론 단계를 다시 검증하고 trust ledger에 남긴다. certificate는 진행에 대해서는 아무것도 주장하지 않는다 | §4.5, §4.5.1, §6.4 항목 26 |
+| certificate, `kz proofcheck` | certificate는 안전성 진술 하나(`fixed-order`의 `¬OK_i`, `protected`의 `¬NR_i`)의 증명 기록이다. `kz proofcheck`는 분석기와 코드를 공유하지 않는 검사기로(공유 `libkz-core`는 예외), 명시한 trusted base에 상대적으로 certificate의 추론 단계를 다시 검증하고 trust ledger에 남긴다. certificate는 진행에 대해서는 아무것도 주장하지 않는다. revision 1.3부터 certificate, `kz proofcheck`, explorer는 보편 순서 주장이 필요할 때 쓰는 선택 경로다(ADR-053) | §4.5, §4.5.1, §6.4 항목 26 |
 | uprobe, eBPF | uprobe는 실행 파일을 고치지 않고 사용자 프로그램의 명령 주소에 kernel이 거는 probe다. eBPF는 그 probe가 걸릴 때 kernel 안에서 실행되는, 검증을 거친 작은 프로그램이다 | §5.1, §5.3 |
 | DPOR | dynamic partial-order reduction. 의존하는(dependent) transition이 뒤바뀔 수 있는 곳에만 backtracking 지점(다른 순서를 시도하려고 되돌아갈 지점)을 두어, 독립 연산의 순서만 다른 interleaving의 탐색을 줄이는 체계적 탐색 기법이다([R05 §2.2]; DPOR POPL 2005 [V-abs; 보장 문구 UNVERIFIED]). Kairos explorer의 `dpor` engine이 쓴다. Kairos의 source-DPOR은 class(독립 연산의 순서만 다른 실행들의 동치류)당 실행 하나를 주장하지 않는다(spec §6.4 항목 9). | §4.10, §6.4 항목 9 |
 | program mutant | 원래 프로그램의 코드를 일부러 조금 바꾼 변형이다. 여기서는 정해진 연산자나 과거 수정의 역(되돌리기)으로 만든다 | §8.5 |
@@ -605,7 +605,7 @@ ablation의 결과는 예측하지 않는다. 다만 몇몇 요소가 cFS의 어
 
 ### 6.1 recall protocol [D]
 
-recall protocol은 Kairos가 무엇을 놓치는지 재는 장치다([X3-C1]; ADR-035). 아래 항목 1, 2, 3, 6(연산자, history query, 기대 판정 규칙, 동치 mutant 제외 규칙)은 **F2 전에 동결한다**(spec §7.2). recall 항목마다의 노출·동결 기록도 F2와 함께 동결한다(§3.5).
+recall protocol은 Kairos가 무엇을 놓치는지 재는 장치다([X3-C1]; ADR-035). **확장 평가**에 속하고(D8/P-RECALL, D9), 그 결과는 변형 집합에만 해당한다. 아래 항목 1, 2, 3, 6(연산자, history query, 기대 판정 규칙, 동치 mutant 제외 규칙)은 **F2 전에 동결한다**(spec §7.2). recall 항목마다의 노출·동결 기록도 F2와 함께 동결한다(§3.5).
 
 **1. 연산자.** 순서 버그를 만드는 mutation 연산자는 다섯이다([R06 §5.6]; [R05 §6.2]). 연산자마다 본뜬 설계 사례가 있다 [I]. 그래서 모든 연산자를 그 설계 사례를 알고 만든 것으로 기록하고, 그 사례들의 위치에 만든 mutant는 맹검이 아니다(spec §8.5 항목 1, §7.5 항목 5; §3.5).
 
@@ -621,18 +621,18 @@ recall protocol은 Kairos가 무엇을 놓치는지 재는 장치다([X3-C1]; AD
 
 **2. history query.** 오프라인으로 받아 둔 cFE 이력(전체 2047 commit [M] [X3, here]), OSAL 이력, 앱 이력에서 keyword와 날짜 cut으로 수정 commit을 찾는다. keyword와 날짜 cut, 그리고 맞추는 field와 대소문자 구분은 F2 전에 query와 함께 고정한다([X3 §1]). 예를 들어 고정 commit에서 전체 메시지가 `race|startup sync|order`에 대소문자 무시로 맞는 cFE commit은 23개이고, 이것은 관련성을 아직 분류하지 않은 출발 집합이다. 제목만 맞추면 대소문자 구분으로 8개, 무시로 11개다. CF 이력에서는 같은 keyword가 C1 자신의 수정 `833fdbb`를 고른다([M], 읽기 전용 `git log`, EXT-20261012 §5.3). 예: `6932f1fe` "Fix #950, race condition in control request", `58abd38d` "Fix #978, store task parameters in task record". 둘 다 설계 중에 이름이 나왔고([X3] L59), `58abd38d`는 C5 사례 기록에도 있으므로, 여기서 나온 항목은 맹검이 아니다(§3.5). 관련 있는 수정 가운데 그 코드가 고정 commit에 있는 것마다, 수정의 **역**을 v7.0.1에 mutant로 다시 만든다. query가 조회 이력 안의 설계 사례 수정을 뺄지는 D8이다(§3.4). 수정 문서가 class를 말하면(예: `6932f1fe`와 `58abd38d`의 "race condition") 기대 판정과 함께 기록한다(항목 3).
 
-**3. 기대 판정.** mutant마다 기대 판정을 수정의 issue 본문과 commit에서 가져온다. 이것은 [POL]이 인정하는 reference 종류 1–2(L7–8)다. 기대 판정은 어긴 계약, instance, 방향(예: "사용이 발행보다 앞설 수 있다"), 그리고 기대가 준비성과 진행성(문서화된 hang) 중 무엇에 관한 것인지로 적는다. 이 마지막 칸도 F2 전의 기대 판정 규칙이 mutant마다 수정 문서에서 가져온다. 수정 문서가 class를 자기 말로 밝히면(예: `6932f1fe` "race condition in control request", `58abd38d` "Fixes a race condition …") 그 진술을 출처와 함께 적는다. 수정 문서는 이 칸들의 정답 출처이지, 맹검의 근거가 아니다(§3.5). 기록한 class 진술은 PI 결정 P-CLASSGT가 채택한 대응 아래에서만 class label(σ별 fixed-order나 schedule-dependent)이 된다. 그 전에는, 그리고 진술이 없는 수정 문서에서는 class label이 `unspecified_by_reference`다. 여기서 class 규칙이나 대응을 만들지 않는다.
+**3. 기대 판정.** mutant마다 기대 판정을 수정의 issue 본문과 commit에서 가져온다. 이것은 [POL]이 인정하는 reference 종류 1–2(L7–8)다. 기대 판정은 어긴 준비 상태 명세, instance, 방향(예: "사용이 발행보다 앞설 수 있다"), 그리고 기대가 준비성과 진행성(문서화된 hang) 중 무엇에 관한 것인지로 적는다. 이 마지막 칸도 F2 전의 기대 판정 규칙이 mutant마다 수정 문서에서 가져온다. 수정 문서가 class를 자기 말로 밝히면(예: `6932f1fe` "race condition in control request", `58abd38d` "Fixes a race condition …") 그 진술을 출처와 함께 적는다. 수정 문서는 이 칸들의 정답 출처이지, 맹검의 근거가 아니다(§3.5). 기록한 class 진술은 자동으로 class label이 되지 않는다(P-CLASSGT, 2026-10-15 결정). `fixed-order`와 `schedule-dependent`는 밝힌 모형, 구성, 실제 근거로 판단한다. 진술이 없는 수정 문서, 또는 진술에 그런 뒷받침이 없는 수정 문서에서는 class label이 `unspecified_by_reference`다. 여기서 class 규칙이나 대응을 만들지 않는다.
 
-**4. 채점.** mutant마다, 층마다 다음으로 채점한다(진행 counting rule 포함, EXT-20261012 §4.1). 이것은 **class 탐지**이고, RQ9를 위한 Kairos의 recall 점수다. 발생 탐지(§4.2)는 비교 기록에 그 옆에 적고, §4.2와 §5.1의 짝지은 검정이 비교하는 것은 발생 탐지다(spec §8.5 항목 4).
+**4. 채점.** mutant마다, 층마다 다음으로 채점한다(진행 counting rule 포함, EXT-20261012 §4.1). 이것은 **class 탐지**이고, RQ9를 위한 Kairos의 recall 점수다. 발생 탐지(아래 §6.6의 보고 부분)는 그 옆에 적는다(spec §8.5 항목 4).
 
 | 결과 | 조건 |
 |---|---|
 | `detected`(class 탐지) | 기대 instance에서 `fixed-order`나 `schedule-dependent` class(수정 문서가 서수에 따른 결함을 문서화했으면 `ordinal-split`도)가 나오고 shape가 맞는다. hang을 문서화한 mutant에서는, 기대 instance의 진행 축이나 그 진행 사슬의 root에 **센** stall witness가 있다(§0.4의 세는 법). `fixed-order`는 `¬OK_i`가 결정적(deciding)이어서만 세므로, 결정 경로 없는 `¬OK_i`(`unknown(no_decision_route)`)는 결코 `detected`가 아니다 |
-| `class-correct` | `detected`의 하위 수로 따로 보고한다. σ별 class가 mutant의 class label과 같다. P-CLASSGT의 대응 아래 label이 있는 mutant에서만 센다(항목 3). 나머지 mutant와, P-CLASSGT가 정해지기 전의 모든 mutant에서는 `not-scored`이고, 맞음이나 틀림으로 세지 않는다 |
+| `class-correct` | `detected`의 하위 수로 따로 보고한다. σ별 class가 mutant의 class label과 같다. 밝힌 모형, 구성, 실제 근거가 뒷받침하는 class label이 있는 mutant에서만 센다(항목 3; P-CLASSGT). 나머지 mutant에서는 `not-scored`이고, 맞음이나 틀림으로 세지 않는다 |
 | `unknown(reason)` | class가 정해지지 않았다. 이유를 함께 센다. hang을 문서화한 mutant의 진행 `unknown(not_checked)`와 세지 않은 모형 stall witness도 여기에 들고, qualifier별로 수를 보고한다 |
 | `missed` | hang을 문서화한 mutant에서는 `no-stall-within(b)`와 함께 protected. 나머지에서는 `protected`, `inactive`, 또는 instance 자체가 없다 |
 
-층은 static, trace, prediction, exploration, confirmation 다섯이다. 층별 결과와 전체 결과를 **mutant별, 원래 수정(U2)별, 원인(U1)별, 그리고 맹검 label별로** 보고한다. mutant 위의 exact binomial 신뢰구간은 그 단위와 독립 가정과 함께만 낸다(§8.4). exact binomial 신뢰구간은 비율의 신뢰구간을 정규 근사 없이 이항분포에서 직접 계산한 것이다. 한 수정에서 나온 mutant, 또는 한 계약의 여러 위치에 쓴 한 연산자의 mutant는 독립이 아니다. 그래서 mutant 위의 구간은 수정이나 원인에 대한 진술이 아니다. 모형 stall witness 가운데 `idle`, `terminal-pending`, `choice-dependent`인 것의 비율은 모형 정밀도 지표로 보고한다. S7 전까지는 알 수 없다 [U].
+층은 static, trace, prediction, exploration, confirmation 다섯이다. 층별 결과와 전체 결과를 **mutant별, 원래 수정(U2)별, 원인(U1)별, 그리고 맹검 label별로** 보고한다. mutant 위의 exact binomial 신뢰구간은 그 단위와 독립 가정과 함께만 낸다(§8.4). exact binomial 신뢰구간은 비율의 신뢰구간을 정규 근사 없이 이항분포에서 직접 계산한 것이다. 한 수정에서 나온 mutant, 또는 한 준비 상태 명세의 여러 위치에 쓴 한 연산자의 mutant는 독립이 아니다. 그래서 mutant 위의 구간은 수정이나 원인에 대한 진술이 아니다. 모형 stall witness 가운데 `idle`, `terminal-pending`, `choice-dependent`인 것의 비율은 모형 정밀도 지표로 보고한다. S7 전까지는 알 수 없다 [U].
 
 `unknown`과 `missed`를 나누는 것이 중요하다. `unknown`은 Kairos가 class를 내지 않고 이유와 함께 "모른다"고 답한 경우이고, `missed`는 Kairos가 기대와 반대 방향의 판정(protected, inactive, 문서화된 hang에서 `no-stall-within(b)`)을 냈거나 instance를 만들지 못한 경우다.
 
@@ -649,7 +649,7 @@ recall protocol은 Kairos가 무엇을 놓치는지 재는 장치다([X3-C1]; AD
 
 - 준비성 수정: 안전성 class.
 - hang 수정: 진행 결과. 수정 전 쪽에 센 stall witness가 있고, 같은 b 안에서 수정 후 쪽에는 없어야 한다.
-- 순서 논리 위반을 timing 여유로 바꾸는 수정: refinement. C1이 그렇다. 수정 전에는 σ_U∞에서 schedule-dependent, 수정 후에는 timeout-dependent이고, `exh`로만 보인다. 이 방향은 `returned_and_tested`의 정상 이어짐을 어느 쪽으로 읽어도 성립한다(spec §1.6).
+- 순서 논리 위반을 timing 여유로 바꾸는 수정: refinement. C1이 그렇다. 수정 전에는 σ_U∞에서 schedule-dependent, 수정 후에는 timeout-dependent이고, `exh`로만 보인다. 수정 전 발생이 NOT_READY_UNJUDGED이든 VIOLATING이든 둘 다 bad이므로 이 방향은 성립한다(spec §1.6).
 
 설계 사례 자신의 쌍(C1, C3, C5와 C2의 2 × 2)은 개발 집합의 대조로, 같은 이동 규칙으로 채점하되 RQ2 아래 사례별로 보고한다(§3.6).
 
@@ -674,20 +674,20 @@ kill rate가 높아도 분석이 맞다는 뜻은 아니다. 그것은 checker�
 
 ### 6.3 triage [D]
 
-census는 instance를 아주 많이 만들 수 있다. 사람이 판정이 맞는지 보는 일(triage)을 어떻게 할지가 문제다([X3-M7]; ADR-038).
+census는 instance를 아주 많이 만들 수 있다. 사람이 판정이 맞는지 보는 일(triage)을 어떻게 할지가 문제다([X3-M7]; ADR-038). triage는 확장 평가에 속한다.
 
 - **보고 대상의 정의.** "보고"는 둘 중 하나다. outcome label이 `violation`이고 class가 `fixed-order`(`¬OK_i`가 결정적인 것), `schedule-dependent`, `ordinal-split` 중 하나인 판정. 또는 센 진행 `stall-witness`(label `liveness`. §6.1 항목 4처럼 wait-for root 집합마다 한 번 센다)이고, 진행 사슬이 있으면 그 root에서 보고한다. 세지 않은 모형 stall witness는 진행 후보로 따로 나열하고, 보고로 triage하지 않는다.
 - **규모** [M] [X3, here]. `cfe/modules`와 `apps`에 `CFE_EVS_SendEvent` 호출 위치 1,208개, `CFE_SB_TransmitMsg`/`Subscribe*` 133개가 있다. 시험과 stub은 뺐고, link 포함 여부는 거르지 않았고, 문맥 구분 전의 수다. instance는 수천 개일 가능성이 크다 [I].
-- **층화 무작위 표본.** 그래서 전수 triage 대신 (class, RC 종류, 결정한 층)별로 층화 무작위 표본을 뽑는다. RC 종류는 [R03 §4]의 readiness-contract 종류 15개다(spec §3.15). **표본 크기는 deviation**이다(유한한 평가자 시간). exact 신뢰구간은 각 층의 표본 instance 모집단에 대한 설계 기반 추정이고, 원인이 몇 개인지는 말하지 않는다. 그래서 표본의 보고 instance에 든 서로 다른 원인(U1)의 수를 함께 보고한다.
-- **평가자.** 둘이다. 산출한 층, ablation, 그리고 서로를 모르게 한다. 이것은 평가자 masking이지 데이터 맹검이 아니다(§3.5). 평가자마다 설계 사례, 그 수정, Φ를 미리 보았는지 노출 기록에 적는다. 누가 평가하는지와 Φ 작성자와의 독립성은 P-TRIAGE다(권고: 적어도 한 명은 Φ 작성자가 아님. 평가자마다 노출을 기록). 일치 통계량은 triage 전에 가정으로 기록한다.
+- **층화 무작위 표본.** 그래서 전수 triage 대신 (class, RC 범주, 결정한 층)별로 층화 무작위 표본을 뽑는다. RC 범주는 준비 범주 RC1–RC15이고, [R03 §4]가 "readiness-contract kinds"라 부른 15개다(spec §3.15). **표본 크기는 deviation**이다(유한한 평가자 시간). exact 신뢰구간은 각 층의 표본 instance 모집단에 대한 설계 기반 추정이고, 원인이 몇 개인지는 말하지 않는다. 그래서 표본의 보고 instance에 든 서로 다른 원인(U1)의 수를 함께 보고한다.
+- **평가자**(P-TRIAGE, 2026-10-15 결정). 정량 판정을 하는 곳에서는 **독립된 평가자 둘**을 쓴다. 산출한 층, ablation, 그리고 서로를 모르게 한다. 이것은 평가자 masking이지 데이터 맹검이 아니다(§3.5). 적어도 한 명은 관련 규칙의 작성자가 아니다. 평가자마다 설계 사례, 그 수정, Φ를 미리 보았는지 노출 기록에 적고, 불일치도 기록한다. 일치 통계량은 triage 전에 가정으로 기록한다. 사람을 확보하기 전에는 독립 검토를 했다고 하지 않고, 그에 해당하는 정량 정밀도도 주장하지 않는다.
 - **LOSS-UNDER-ORDER는 평가하지 않는다.** 대신 SB counter와 put 결과 oracle과의 일치를 보고한다. `not-ready-unjudged` 판정은 세기만 한다. Allowed가 정해지지 않았으므로 옳고 그름이 정의되지 않기 때문이다.
 - **평가자 노력**은 여섯 비용 가운데 하나로 보고한다(§7.6).
 
 ### 6.4 그 밖의 지표
 
-- **분모가 있는 instance 수.** class, refinement, σ, M, provider, reach, 진행 값(stall 조항, 종류, qualifier, 센 것과 세지 않은 것의 구분을 포함하고 wait-for root마다 센다), 근거(두 축), RC 종류, 발견 출처(spec §7.1)별로 센다. 언제나 분모와 함께 보고한다([R06 R3]).
+- **분모가 있는 instance 수.** class, refinement, σ, M, provider, reach, 진행 값(stall 조항, 종류, qualifier, 센 것과 세지 않은 것의 구분을 포함하고 wait-for root마다 센다), 근거(두 축), RC 범주, 발견 출처(spec §7.1), 근거 등급(spec §1.6)별로 센다. 언제나 분모와 함께 보고한다([R06 R3]). `NOT_RUN`, `NOT_MEASURED`, `NOT_FROZEN`은 결코 0이나 "통과"가 아니다([R06 R2]).
 - **결정 비율.** 층별, (σ, M)별 결정 비율과 이유별 unknown 비율. 예측, 탐색, O8에는 **anytime curve**(투입한 work unit에 따른 결정 비율 곡선)를 그린다. cap(deviation)에 걸린 결과는 `unknown(budget)`과 이 곡선으로 함께 보고한다(PI 결정 D15).
-- **비교 기록.** 도구와 표시된 단위마다 탐지·분류·근거·모델링 비용(§6.6).
+- **보고 부분과 비교.** Kairos 결과의 탐지·분류·근거, 기존 Process-Level Race 연구와의 비교, 모델링 비용(§6.6).
 - **확인.** 실현·반박·결론 없음의 비율(naturalness별), gate에 이르지 못한 비율, 확인당 hold 수, perturbation 비율.
 - **정적 범위**([R06 T3]). 해석한 entry 함수, 규칙별로 해석한 간접 호출 위치, key 비율, message provenance로 접힌 수.
 - **충실도.** RQ4와 같다.
@@ -697,24 +697,28 @@ census는 instance를 아주 많이 만들 수 있다. 사람이 판정이 맞�
 
 RQ1과 RQ3를 위해 개방성을 따로 보고한다([R06 §5.7]).
 
-- 다룬 계약 종류 대 census에서 발견한 종류. 작성한 template이 없는 종류는 빼지 않고 "작성하지 않음"으로 보고한다(spec §9.3 expansion rule).
+- 다룬 준비 범주(RC1–RC15) 대 census에서 발견한 범주. 작성한 template이 없는 범주는 빼지 않고 "작성하지 않음"으로 보고한다(spec §9.3 expansion rule).
 - 자동으로 발견한 instance(spec §7.1의 출처 1–6, 10–12)와 사람이 쓴 instance의 비율.
 - 사례 전용 refinement나 사례를 알고 쓴 framework 규칙이 필요했던 판정의 비율.
 - held-out과 mutant 결과는 설계 사례 결과와 떼어 보고한다. v7.0.1 대응물의 결과는 그것이 닮은 사례의 결과와 떼어 보고한다(§3.6). 변형 B′별 instance는 기본 B와 떼어 보고한다.
 - 층별 recall(§6.1). held-out과 recall 결과는 맹검 label별로 보고한다(§3.5).
 
-### 6.6 비교 기록 [D]
+### 6.6 Kairos 결과의 보고 부분 [D]
 
-비교 기록(comparison record)은 (도구, 표시된 단위)마다 하나씩 만든다(spec §8.5; EXT-20261012 §5.2). 칸 이름은 S9를 위한 제안이다.
+(spec §8.5; EXT-20261012 §5.2. revision 1.2에서 Kairos 자신의 보고 형식으로 남겼다; `plan/ROADMAP_20261015.md` §11.1.) 사례, 대조, ablation에 대한 결과는 따로 된 세 부분을 가진다. 칸 이름은 S9를 위한 제안이다.
 
-| 칸 | 내용 |
+| 부분 | 내용 |
 |---|---|
-| 탐지(발생 탐지, §4.2) | {기대 instance에 경보나 `not-ready-unjudged` 보고, 다른 곳에만 보고, 보고 없음, `NOT_RUN`, 적용할 수 없음(도구에 입력이 없음)}. 단위의 label에 대어 detected, missed, false alarm으로 채점한다. Kairos(VIOLATING이나 NOT_READY_UNJUDGED 발생)와 모든 비교 도구에 같은 규칙이다. false alarm은 label이 나쁜 발생을 기대하지 않는 단위에서 나온 그런 보고다. `NOT_RUN`과 적용할 수 없는 단위는 detected도 missed도 아니다. 이유와 함께 따로 보고하고 짝지은 검정에서 뺀다. Kairos는 그 옆에 class 탐지(§6.1 항목 4)도 적는다 |
-| 분류 | 그 도구 자신의 σ·M·b별 class 출력. class 출력이 없는 도구는 harness가 그 witness에서 유도한 class(§4.2, "harness가 유도함"으로 표시). 보고의 outcome label(`violation`, `not-ready-unjudged`, …)과 진행 결과. 도구의 좋은 witness와 나쁜 witness, 그 서수. 결과가 정해지지 않은 이유(예: 열린 horizon, 예측 없음, 한쪽뿐). Kairos는 미리 등록한 기대표와의 일치, 그리고 P-CLASSGT의 이름 붙은 선택지마다 reference의 class 진술과의 일치도 적는다 |
-| 근거 | 경로(certificate, b 안의 `exh`, label이 붙은 예측, 실현된 자연 실행이나 hold 실행), 실현과 naturalness, 경계 b, σ·M 범위, reach, trust ledger 부분별 크기와 T5를 거쳐 다시 검증한 단계, `DECLARED_TRUSTED` 항목, 반박될 수 있는 항목과 그 obligation 상태, `kz proofcheck`가 certificate를 받아들였는지 |
-| 모델링 비용 | Kairos의 Φ와 같은 정보 인코딩마다: 밝힌 작성 범위, 작성 시간, 항목이나 규칙 수, 동결 뒤에 고친 것(spec §7.2; EXT-20261012 §5.1) |
+| 탐지(**발생 탐지**. §6.1 항목 4의 class 탐지와 가를 때 이렇게 부른다) | 기대 instance의 미준비 발생을 어느 outcome label로든(VIOLATING이나 NOT_READY_UNJUDGED 발생, 또는 hang을 문서화한 항목에서는 센 stall witness) 보고했는가. detected, missed, false alarm으로 기록한다. false alarm은 label이 나쁜 발생을 기대하지 않는 단위(예: 쌍의 수정 후 쪽)에서 나온 그런 보고다. 보고한 미준비 발생 없이 certificate나 class만 있으면 발생 탐지가 아니다. 그것은 분류와 근거에 나온다 |
+| 분류 | (σ, M, b)별 class와 refinement, outcome label, 진행 결과. 미리 등록한 기대표와의 일치, 좋은 witness와 나쁜 witness와 그 서수, 결과가 정해지지 않은 이유(예: 열린 horizon, 예측 없음, 한쪽뿐). reference가 class를 말한 경우 그것과의 일치·불일치는 결과로 보고하고 채점하지 않는다(P-CLASSGT: 출처의 "race"를 도구 class로 자동으로 바꾸지 않는다) |
+| 근거 | 경로(certificate, b 안의 `exh`, label이 붙은 예측, 실현된 자연 실행이나 hold 실행), 실현과 naturalness, 경계 b, σ·M 범위, reach, trust ledger 부분별 크기, T5를 거쳐 다시 검증한 단계와 각 lemma의 증명 상태(spec §6.2), `DECLARED_TRUSTED` 항목, 반박될 수 있는 항목과 그 obligation 상태, `kz proofcheck`가 certificate를 받아들였는지 |
 
-칸이 없는 도구는 그 칸을 0이 아니라 "없음"으로 보고한다.
+그 밖에 둘을 함께 보고한다.
+
+- **기존 Process-Level Race 연구와의 비교**(§4): (도구, 사례)마다 여섯 분석 질문의 답과 답마다의 근거 등급, 결과 상태 하나. `NOT_RUN`과 `INAPPLICABLE` 칸은 이유와 함께 보고하고, 결코 놓친 것으로 세지 않는다.
+- **모델링 비용**: Kairos의 Φ와 재구현마다, 밝힌 작성 범위, 작성 시간, 항목이나 규칙 수, 동결 뒤에 고친 것(spec §7.2).
+
+칸이 없는 것은 그 칸을 0이 아니라 "없음"으로 보고한다.
 
 ---
 
@@ -724,18 +728,26 @@ RQ1과 RQ3를 위해 개방성을 따로 보고한다([R06 §5.7]).
 
 관측은 실행을 흔든다. 예를 들어 R2의 gdb 기록은 breakpoint가 걸릴 때마다 모든 thread를 잠시 멈췄으므로, 교란 없는 스케줄의 증거가 아니다([R2g] 머리말). Kairos는 수정하지 않은 바이너리에 uprobe와 eBPF를 붙여 관측하고, 확인 실행에서는 ptrace로 thread를 붙잡는다(hold). 이 비용과 교란이 판정을 흐리지 않았는지 보이려면, 관측기의 각 부분이 무엇을 더하는지 실험군으로 나누어 재야 한다([J3-M6]; [A §5.8]; [B §5.6]).
 
+**관측 영향 점검** [D] (PI 결정 D1을 고친 설명과 함께 승인, D11; revision 1.2; spec §8.6).
+
+- cFS 실행 사용자와 기준 바이너리를 바꾸지 않고 돌리는 것은 관측 영향이 없다는 것과 같지 않다. spec은 "시간만 바뀐다"고 주장하지 않는다.
+- 점검은 아래 실험군을 기록 손실, 사건 대응 실패(반환 없는 요청, task 없는 사건), boot와 OPERATIONAL까지의 시간, 밖에서 보이는 기능 결과(console 줄, 종료 때 읽는 counter, 넘친 pipe)로 비교한다.
+- 관측하지 않은 기준 실행에 대응물이 없는 내부 사건에 대해서는 "영향 없음"이라는 결론을 내지 않는다.
+- 모든 실행은 cFS process의 실제 user ID, 명령, 우선순위와 scheduling 정책, 환경과 초기 상태, 그리고 관측만 한 실행인지 제어한 실행(hold, 정지, 해제)인지를 기록한다.
+- **작업 순서**(D11, 2026-10-15 결정): S1의 관측 영향 비교 전에 S1에서 쓰는 kernel에서 실험군 A를 다시 잰다. 예전 kernel에서 잰 결과는 현재 기준 실행에 더하지 않는다. kernel이 여러 번 바뀌었으므로 실행마다 kernel을 기록한다(gdb 기준 실행은 `-fc-v80`, [R07 §1]과 S1-R2 smoke run은 `-fc-v114`, 2026-10-16에는 `-fc-v139`; spec §1.7 Env). 재측정과 비교 사이에 kernel이 바뀌면 재측정을 다시 한다.
+
 ### 7.2 실험군
 
 | 실험군 | 구성 | 가르는 것 |
 |---|---|---|
-| A | 수정하지 않은 바이너리, 관측기 없음. **kernel `-fc-v114`에서 다시 잰다** | 기준 |
+| A | 수정하지 않은 바이너리, 관측기 없음. **S1에서 쓰는 kernel에서 다시 잰다**(D11) | 기준 |
 | B | 빈 BPF 프로그램을 단 uprobe | trap 비용 |
 | C′ | 최소 R2 plan(R2 위치와 identity bootstrap만) | 좁은 plan의 비용 |
 | C | 전체 plan | 기록 비용 |
 | D | C + hold. **hold plan별로**, 같은 plan hash의 C 실행과 비교한다([X3-M2]) | 제어 효과 |
-| W | F1 `--wrap` 빌드에서 gate를 끈 것. PI 결정 D3 승인 시만 | 변형 빌드의 code layout 효과 |
+| W | F1 `--wrap` 빌드에서 gate를 끈 것. F1 arm을 더할 때만(PI 결정 D3: 후순위) | 변형 빌드의 code layout 효과 |
 
-실험군 A를 다시 재는 이유는 기존 기록이 `-fc-v80` kernel에서 만들어졌기 때문이다. 다시 재는 것은 필수다(PI 결정 D11; spec §5.10).
+실험군 A를 다시 재는 것은 필수이고, 관측 영향 비교보다 먼저 한다(PI 결정 D11; spec §5.10, §8.6). 기존 기록과 kernel이 다르기 때문이다(위의 작업 순서).
 
 ### 7.3 측정은 무엇이 볼 수 있느냐로 나눈다
 
@@ -745,7 +757,7 @@ RQ1과 RQ3를 위해 개방성을 따로 보고한다([R06 §5.7]).
 
 | 측정 | 기존 기록의 값 [M] |
 |---|---|
-| console에 찍힌 cFE 시간 기준 **CORE_READY → OPERATIONAL** | 아홉 번 실행에서 103.2–104.6 ms, 폭이 좁은 지표([R2c §4.4]) |
+| console에 찍힌 cFE 시간 기준 **CORE_READY → OPERATIONAL** | 후보 지표. 그 폭은 알려지지 않았고, 실험군 A 재측정에서 잰다(D11) |
 | 15개 "Loading file … APP:" 줄의 **간격** | warm에서 2.2–3.3 ms([BM] L278) |
 | 앱별 init offset, OPERATIONAL 줄의 벽시계 시간 | — |
 | 종료 시 읽는 SB counter: `PipeOverflowErrorCounter` | 같은 조건 여섯 번에서 4–49, 검정력이 낮다([BM §2.3]) |
@@ -778,7 +790,7 @@ RQ1과 RQ3를 위해 개방성을 따로 보고한다([R06 §5.7]).
 
 단위 비용 가운데 일부는 이미 측정되었다 [M] ([R07 §4.7]). uprobe trap은 entry+4 위치에서 0.57 µs, 에뮬레이션이 안 되는 명령 위치에서 31.7 µs다. HW watchpoint hit는 약 34 µs, gdb breakpoint는 약 203 µs다. BPF 프로그램 본체, 반환값 capture 방식, 전용 holder의 비용은 아직 재지 않았고, S1과 S6에서 잰다.
 
-spec은 다음 계산을 "측정값의 산술일 뿐 예측이 아니다"로 표시한다 [I]. 퇴역한 recorder가 부팅마다 기록한 626 hit에 0.57 µs를 곱하면 부팅당 약 0.36 ms이고, 31.7 µs를 곱하면 약 20 ms다. OPERATIONAL은 약 1.6 s이다 [M] ([R2g §1]). 시작 직후의 burst(`SBNSubPipe` overflow가 OPERATIONAL 뒤 약 47–49 ms에 생김, [BM §1.3])에 probe 시간이 몰리고, perturbation 비율도 거기서 가장 클 것이다(spec §5.10). S1 전에는 overhead 수치를 주장하지 않는다(spec §5.2).
+spec은 다음 계산을 "측정값의 산술일 뿐 예측이 아니다"로 표시한다 [I]. 위치 하나 `CFE_EVS_SendEventWithAppID`만 보면, gdb가 관측한 251–257 hit에 0.57 µs를 곱하면 부팅당 약 0.14–0.15 ms이고, 31.7 µs를 곱하면 약 8 ms다. 다른 위치의 비용은 알려지지 않았다. OPERATIONAL은 약 1.6 s이다([M] 1613–1636 ms, [R2g §1]). 이 계산은 revision 1.2에서 퇴역한 recorder의 626 hit에 기댄 계산을 바꾼 것이다(spec §0.11 항목 1). 시작 직후의 burst(`SBNSubPipe` overflow가 OPERATIONAL 뒤 약 47–49 ms에 생김, [BM §1.3])에 probe 시간이 몰리고, perturbation 비율도 거기서 가장 클 것이다(spec §5.10). S1 전에는 overhead 수치를 주장하지 않는다(spec §5.2).
 
 ---
 
@@ -786,45 +798,52 @@ spec은 다음 계산을 "측정값의 산술일 뿐 예측이 아니다"로 표
 
 ### 8.1 실행 횟수 N
 
-실험군별, 반복별, σ_E 빈도별 실행 수 N은 **deviation**이다([X3-M9]). 기록 내용은 이렇다.
+실행 수 N은 **S1에서 목적별로 정하고**(PI 결정 D14, 2026-10-15) **deviation**이다([X3-M9]). 기록 내용은 이렇다.
 
 - 이유: 자원이 유한하다.
 - 영향: 결과에 경계가 생기고, exact 구간이나 `unknown(budget)`으로 보고된다.
 - 필요성: 어떤 reference도 N을 정하지 않는다.
 
-S1의 특성 측정에 쓸 N은 S1에서 정한다(PI 결정 D14를 S1로 옮겼다. V1의 `n of N` label도 여기에 든다). 이후의 N은 S9 전에 정한다. **사건 기반 정지가 있으면 그것을 우선한다.** 소진, 고정점, loop 종료가 그 예다. N이 정해지지 않으면 실험군 비교를 보고하지 않는다(PI_DECISIONS D14 "Default if undecided").
+목적 셋을 가른다. (1) 동작 확인(경로가 돌고 기록되는가), (2) 관측 영향 비교(§7.1), (3) 발생 빈도의 평가. N마다 파일럿 결과와 자원 예산에 근거하고, **해당 본실험 전에 동결한다**. spec은 어떤 N도 고르지 않는다. V1의 `n of N` label도 S1의 몫에 든다. **사건 기반 정지가 있으면 그것을 우선한다.** 소진, 고정점, loop 종료가 그 예다.
 
 ### 8.2 통계 절차
 
-통계 절차는 **가정**으로 기록한다. 방법론 문헌은 [POL]이 인정하는 reference 종류(L5–10)가 아니기 때문이다. 이 절차를 F1 전에 승인할지는 P-STATS다.
+**통계 절차** [D] (P-STATS, 2026-10-15 결정). 첫 사례 평가는 **기술 통계와 사례별 근거**로 한다.
 
-| 대상 | 절차 | 쉬운 설명 |
+- 원인, 수정, 정적 위치, 동적 발생, 실행을 따로 센다(§3.8의 단위). 전체 분포와 원래 수를 보고한다.
+- 다섯 사례를 독립 표본으로 삼는 자동 유의성 검정은 하지 않는다(§3.1의 사례 사이 의존).
+- 따로 하는 정량 실험(예: 실행에 걸친 관측 영향 비교 §7, 확장 평가의 recall protocol §6.1)은 분석 단위와 표본 설계를 먼저 정하고, 그 뒤에 절차를 동결한다.
+
+아래 표의 검정과 구간은 **그런 실험을 위한 후보이고, 어느 것도 고르지 않았다.** 고르면 그 선택은 가정으로 기록한다. 방법론 문헌은 [POL]이 인정하는 reference 종류(L5–10)가 아니기 때문이다.
+
+| 대상 | 후보 절차 | 쉬운 설명 |
 |---|---|---|
-| 모든 측정 | 전체 분포를 보고한다 | 평균 하나로 줄이지 않는다 |
+| 모든 측정 | 전체 분포를 보고한다(첫 사례 평가에서도) | 평균 하나로 줄이지 않는다 |
 | 실행에 걸친 시간과 횟수 | Mann–Whitney U | 두 집단의 값을 순위로 바꾸어 분포가 다른지 보는 비모수 검정 |
 | 실행에 걸친 발생 여부 | Fisher's exact test | "일어났다/안 일어났다"의 2×2 표에서 차이를 정확 확률로 검정 |
-| 단위별 발생 탐지 비교(§4.2, §5.1) | 짝지은 검정 | 같은 단위에서 두 도구나 두 구성을 짝지어 비교. 어떤 검정인지는 F1 전에 가정으로 기록 |
 | 차이의 크기 | 표준화 효과 크기 | 단위에 기대지 않는 차이의 크기 |
 | 비율 | exact binomial 신뢰구간 | §6.1 참조 |
+
+revision 1.1의 "단위별 발생 탐지 비교에 짝지은 검정"은 revision 1.2에서 빠졌다. 도구 사이에도 짝지은 검정은 없다(§4.6).
 
 **모든 검정과 구간은 단위(§3.8)와 독립 가정을 밝힌다**(EXT-20261012 §5.4). Arcuri와 Briand(ICSE 2011 [V-abs])는 지침으로 인용한다. Klees et al.의 "약 30회 시행"은 2차 요약으로만 알려져 있으므로([R05 §6.5], P) 값으로 쓰지 않는다.
 
 ### 8.3 합치는 규칙과 재현성
 
-- **pool.** σ_E 빈도는 pool key(B hash, plan hash, cold/warm 층)가 똑같은 실행끼리만 합친다. 바이너리나 관측 방법이 다르면 합치지 않는다(예: R2의 gdb, C-init, C-restored 실험군, [R2c §8]).
+- **pool.** σ_E 빈도는 pool key(B hash, plan hash, cold/warm 층)가 똑같은 실행끼리만 합친다. 바이너리나 관측 방법이 다르면 합치지 않는다(예: R2의 gdb 실행 [R2g]은 같은 바이너리 위 Kairos 자신의 recorder 실행과 합치지 않는다).
 - **재현성.** 보고하는 모든 수는 저장된 산출물에서 다시 만들 수 있어야 한다. 모든 분석은 저장된 산출물의 순수 함수다. 반복 순서는 정렬되어 있고, 탐색 순서는 결정적이며, 예산은 work unit이고, 벽시계 시간에 기대지 않는다. 그래서 저장된 trace에서 다시 돌리면 판정 저장소가 byte 단위로 같아야 하고, 이것 자체가 시험이다(spec §4.14; 보장 G8). 벽시계 cap으로 얻은 결과는 PI 결정 D15가 허용할 때만 있을 수 있고, 표시해서 replay 시험에서 뺀다.
 - **고정점은 run 집합과 함께.** feedback loop의 고정점은 그것을 만든 실행 집합과 함께 보고한다(spec §4.14).
 
 ### 8.4 분석 단위와 의존
 
-의존을 어떻게 다룰지는 P-STATS 아래의 가정이다 [D] (spec §8.7). 여기서는 N, cluster 크기, 문턱값을 고르지 않는다.
+의존을 어떻게 다룰지는 P-STATS 아래의 가정이다 [D] (spec §8.7). 여기서는 N, cluster 크기, 문턱값을 고르지 않는다. 마지막 열은 나중의 정량 실험을 위한 선택지이고, 어느 것도 고르지 않았다.
 
-| 통계 | 단위 | 기록할 독립 가정 | 알려진 의존 [I] | 선택지(P-STATS; 고르지 않음) |
+| 통계 | 단위 | 기록할 독립 가정 | 알려진 의존 [I] | 나중의 정량 실험을 위한 선택지(P-STATS; 고르지 않음) |
 |---|---|---|---|---|
-| 짝지은 발생 탐지 비교(§4.2)와 ablation의 발생 탐지 차이(§5.1) | 한 평가 집합(개발, recall, triage 표본, held-out 출처 각각)의 표시된 단위. 집합을 넘어 합치지 않는다 | 도구가 주어지면 단위들의 결과는 독립이다 | 한 계약의 instance는 certificate 하나를 공유한다(R2의 certificate는 모든 R2 instance를 덮는다). 한 원인의 instance와 발생. 한 수정의 mutant, 한 계약의 여러 위치에 쓴 한 연산자의 mutant | 검정 전에 U1/U2 cluster로 묶는다 / 단위별로 보고하고 cluster 수준 요약을 붙인다 / 서술만 한다 |
+| ablation의 차이(§5.1)와, 확장 평가에서의 단위별 비교 | 한 평가 집합(개발, recall, triage 표본, held-out 출처 각각)의 표시된 단위. 집합을 넘어 합치지 않는다 | 도구가 주어지면 단위들의 결과는 독립이다 | 한 준비 상태 명세의 instance는 certificate 하나를 공유한다(R2의 certificate는 모든 R2 instance를 덮는다). 한 원인의 instance와 발생. 한 수정의 mutant, 한 준비 상태 명세의 여러 위치에 쓴 한 연산자의 mutant | 검정 전에 U1/U2 cluster로 묶는다 / 단위별로 보고하고 cluster 수준 요약을 붙인다 / 서술만 한다 |
 | recall의 exact binomial 구간(§6.1 항목 4) | mutant(U3) | mutant는 독립 Bernoulli 시행이다 | 한 수정의 역들, 여러 위치에 쓴 한 연산자, 설계 사례에서 나온 mutant | mutant별과 U2/U1별로 보고한다. 구간은 동결한 mutant 모집단에 대해서만 읽는다 |
 | triage 정밀도(§6.3) | 층 안의 표본 instance(U4) | 층화 무작위 표본 설계 | 많은 보고 instance가 원인 하나를 공유할 수 있다 | instance 모집단에 대한 설계 기반 추정. 서로 다른 원인 수를 옆에 보고한다. PI가 채택하지 않으면 원인에 대한 구간은 없다 |
-| Fisher's exact test, Mann–Whitney U(§7) | 실험군·층·pool key 안의 실행(U6) | 교차한 실험군 안에서 실행은 서로 바꿀 수 있다 | 공유하고 표류하는 host, 유지 상태, 실험군마다 바이너리 하나 | 기록한 가정 아래에서만 검정한다. 아니면 "n of N (pool key)"로 쓴다 |
+| 후보 실행 수준 검정 Fisher's exact test와 Mann–Whitney U(§7) | 실험군·층·pool key 안의 실행(U6) | 교차한 실험군 안에서 실행은 서로 바꿀 수 있다 | 공유하고 표류하는 host, 유지 상태, 실험군마다 바이너리 하나 | 기록한 가정 아래에서만 검정한다. 아니면 "n of N (pool key)"로 쓴다 |
 | 첫 검출까지의 시간(§6.1 항목 8) | 한 pool key 안의 mutant별 실행 | 위와 같다 | 위와 같고, mutant가 수정별로 묶인다 | 서술용 분포 |
 
 U5 발생의 수는 결코 표본 크기가 아니다. R2의 부팅당 발생 24건은 정적 위치 3곳에 있는 원인 하나다(spec §8.2).
@@ -847,34 +866,34 @@ spec은 이 구분을 분명히 한다. 사람이 자원 때문에 고른 값은
 
 | 조건 | 기록 | 누가, 언제 정하나 | 근거 |
 |---|---|---|---|
-| 실행 횟수 N(실험군별, 반복별, σ_E 빈도별) | deviation | S1의 N은 S1에서, 나머지는 S9 전(PI 결정 D14) | spec §8.7 |
-| work-unit cap(예측, 탐색, O8, skeleton 구성) | deviation | S5 전과 S7 검토 전(PI 결정 D15). work unit만 쓴다 | spec §4.15; PI 결정 D15 |
-| triage 표본 크기(층별) | deviation | P-TRIAGE | spec §8.5 |
-| PCT 깊이 d를 늘리는 실행 예산 | deviation | PI 결정 D3 승인 시만 | spec §4.13, §4.15 |
-| helgrind·DRD의 감싼 실행 명령 | deviation | P-VALGRIND | spec §8.3 |
-| TSan 재빌드 | deviation | P-TSAN 승인 시만 | spec §8.3 |
-| 통계 절차, 짝지은 검정, 효과 크기, 검정마다의 단위와 독립 가정 | 가정 | F1 전(P-STATS) | spec §8.3, §8.7 |
-| 의존 처리(U1/U2 cluster로 묶을지 등) | 가정. 선택지만 있고 고르지 않았다 | F1 전(P-STATS) | spec §8.7 |
+| 실행 횟수 N(동작 확인, 관측 영향 비교, 발생 빈도 평가로 목적별) | deviation | S1에서 목적별로, 파일럿과 자원 예산에서 정하고 해당 본실험 전에 동결(PI 결정 D14, 2026-10-15 결정). 여기서는 값을 고르지 않는다 | spec §8.7, §10.1 |
+| work-unit cap(예측, 탐색, O8, skeleton 구성) | deviation | 결정적 단위(예측 node, 탐색 상태, transition)의 예산. 단계마다 파일럿 뒤에 동결하고, 넘으면 `unknown(budget)`(PI 결정 D15, 2026-10-15 결정). 값은 S5 전과 S7 검토 전에 | spec §4.15, §10.1 |
+| triage 표본 크기(층별) | deviation | P-TRIAGE(독립 평가자 둘은 2026-10-15 결정. 표본 크기는 확장 평가에서) | spec §8.5 |
+| PCT 깊이 d를 늘리는 실행 예산 | deviation | PI 결정 D3에 따라 후순위. F1 arm을 더할 때만 | spec §4.13, §4.15 |
+| 통계 절차 | 첫 사례 평가는 기술 통계(P-STATS, 2026-10-15 결정). 따로 하는 정량 실험이 검정, 효과 크기, 검정마다의 단위와 독립 가정을 고르면 가정으로 기록한다 | 그 실험이 단위와 표본 설계를 정한 뒤 | spec §8.7 |
+| 의존 처리(U1/U2 cluster로 묶을지 등) | 가정. 선택지만 있고 고르지 않았다 | 나중의 정량 실험에서(P-STATS) | spec §8.7 |
 | triage 일치 통계량 | 가정 | triage 전(P-TRIAGE) | spec §8.5 |
 | 실험군 교차 순서 | 가정(이유와 함께) | 실험 전 | spec §8.6 |
-| reference의 class 진술("race")을 σ·M별 class로 옮기는 대응 | `unspecified_by_reference`. 값을 고르지 않는다. 그때까지 분류는 미리 등록한 기대표와 비교한다 | P-CLASSGT | spec §8.2, §8.5 항목 3, §10.1 |
-| C1의 파생 basis B′(제공자, 이름, 시작 순서, 우선순위) | `unspecified_by_reference`. PI가 정하면 기록한 deviation이다 | D22(S9가 아니라 V3 전에 필요) | spec §10.1 |
-| R2 대조용 core module 순서에서 `config`, `fs`, `osal`, `psp`, `msg`, `sbr`, `resourceid`의 위치 | `unspecified_by_reference`. PI가 D18 아래 기록한 deviation으로 정한다 | D18, P-R2CTRL | spec §7.4 |
-| A.3 선의 `58abd38d^`/`58abd38d` basis 조건 | `unspecified_by_reference` | P-RGIT | spec §10.1 |
+| reference의 class 진술("race")을 σ·M별 class로 옮기는 대응 | 대응을 만들지 않는다. 출처의 "race"를 도구 class로 자동으로 바꾸지 않고(P-CLASSGT, 2026-10-15 결정), class label은 밝힌 모형, 구성, 실제 근거가 뒷받침할 때만 있다. 그렇지 않으면 `unspecified_by_reference`다. 분류는 미리 등록한 기대표와 비교한다 | — | spec §7.2, §8.2, §8.5 항목 3, §10.1 |
+| C1의 basis B′(제공자, 이름, 시작 순서, 우선순위) | 공개 BP basis(D22 [D]). 이름(`BP0_tsem`/`BP1_tsem`), 시작 순서(CF 다음 BP), 설정 우선순위(CF 65, BP 55)는 nasa/bp `b051eb0`의 공개 값이고 원 보고자 환경의 값이 아니다. 공개 통합의 버전 호환성을 먼저 확인하고, 그대로 만들 수 없으면 다른 버전으로 옮긴 파생 basis에 차이를 모두 기록한다. reference가 없는 값은 모두 기록한 deviation이거나 `unspecified_by_reference`다 | D22(결정. 확인은 V3의 일부) | spec §10.1, §10.2 |
+| R2 대조용 core module 순서에서 `config`, `fs`, `osal`, `psp`, `msg`, `sbr`, `resourceid`의 위치 | `unspecified_by_reference`. PI가 D18 아래 기록한 deviation으로 정한다 | 선택지 (c3), (d)를 나중에 더할 때만(P-R2CTRL), D18 | spec §7.4 |
+| A.3 선의 `58abd38d^`/`58abd38d` basis 조건 | `unspecified_by_reference` | P-RGIT(보조 대조로 승인. 입력 대응 비용을 확인한 뒤 실행) | spec §10.1 |
 | C5의 대조에서 Trac #41만 떼어 낸 6.4.2 diff 부분집합 | deviation(구성한 부분집합). reference가 정하지 않는다 | PI가 D13에 기록된 deviation으로 더할 때만. 계획에 없음(대조는 C3와 공유하는 diff 전체) | spec §9.3(C5 행); [LED §3.3] |
-| C2의 역할 파생 쌍(앱, script 순서, 우선순위, 요청 메커니즘 C2-D4, oracle, timeout), Q22, 버그·수정 revision, 6.5.0a/6.6.0a의 configure, RQ9에 셀 2 × 2 대비 | `unspecified_by_reference`. PI가 정하면 기록한 deviation이다 | P-C2(VP-D4 전) | spec §8.2, §9.3, §10.1; `cases/C2.md` |
-| C3·C5의 6.4.x 파생 basis: Q16(Φ_6.4.x의 outcome map과 binding, C3·C5 Allowed 항목의 6.4.1 reference), (a) 재구성한 compile DB의 분석 전용 parse를 "코드 읽기 근거만"으로 볼지, (b) compile DB 입력(OSAL artifact와 위치, host, gcc version, include 집합), (c) basis를 F1 전에 둘지 | (b)는 입력마다 reference 상태를 적고, reference가 정하지 않은 입력은 `unspecified_by_reference`다. PI가 정하면 기록한 deviation이다. Q16, (a), (c)는 PI 결정이고 권고한 선택지가 없다 | D13 (a)–(c), Q16(VP-D3 전; P-F1GATE) | spec §8.2, §9.3, §10.1, §10.2 |
-| C1의 RESERVED 구간 실험의 hang 경계 | `unspecified_by_reference`. PI가 정하면 기록한 deviation이다 | P-C1HOLD(V3의 S6 부분 전) | spec App. A.4 step 5, §10.1 |
-| R2의 대조 basis B′ 선택(P-R2CTRL 선택지 (a)–(f)) | 선택지마다 reference 상태가 다르다(PI_DECISIONS P-R2CTRL). reference가 정하지 않은 조건은 `unspecified_by_reference`이고, PI가 정하면 기록한 deviation이다. 권고한 선택지가 없다 | P-R2CTRL(V2 전). 선택지 (c3), (d)는 D18도 | spec §7.4, §9.3, §10.1 |
+| C2의 역할 재구성(요청 방식, 초기화 내용, 우선순위, timeout 등), 버그·수정 revision, 6.5.0a/6.6.0a의 configure | 재구성의 선택으로 기록하고, 보고자의 값으로 인용하지 않는다(P-C2). Q22: 첫 대조는 late init이 정상으로 끝나는 제공자, 실패할 수 있는 변형은 따로. 초기화가 실패하지 않는다는 가정은 재구성에만 적용한다 | P-C2와 Q22(2026-10-15 결정; VP-D4 전) | spec §8.2, §9.3, §10.1; `cases/C2.md` |
+| C3·C5의 6.4.x 파생 basis: Q16(Φ_6.4.x의 outcome map과 binding, C3·C5 Allowed 항목의 6.4.1 reference), (a) 재구성한 compile DB의 분석 전용 parse, (b) compile DB 입력(OSAL artifact와 위치, host, gcc version, include 집합), (c) basis의 자리 | (a) 인정: 분석 전용·차이 있는 조건의 코드 읽기 근거이고 원 platform 실행의 재현이 아니다. (b) (i)부터: 이 container의 32-bit header를 deviation으로 기록한다. 관련 경로나 자료형 해석이 header·환경에 민감하면 (ii) 문헌상 host의 sysroot(설치 결정)로 바꾸고, 민감성이 풀릴 때까지 영향받는 결과를 보류한다. 입력마다 reference 상태를 적는다. (c) F1 전. Q16: 버전별 상태, 반환값, 소스 위치의 대응을 밝히고 시험한다 | D13 (a)–(c), Q16(2026-10-15 결정; VP-D3 전) | spec §8.2, §9.3, §10.1, §10.2 |
+| C1 hold의 감시 한도와 중단 조건 | 본실험 전에 기록한다. 재시도 수와 지연은 고른 CF 버전에서 읽고, 그 곱을 안전한 벽시계 대기 상한으로 보지 않는다. RESERVED 구간 실험은 다섯 사례 밖의 후속 OSAL 결함 후보 항목이다 | P-C1HOLD(2026-10-15 결정; V3의 S6 부분 전) | spec App. A.4 step 5, §10.1 |
+| R2의 대조 basis B′ 선택 | (c2) 먼저, (c1) 보조, (b) 선택. (c3), (d), (e), (f)는 첫 검증에 들지 않는다. reference가 정하지 않은 조건은 `unspecified_by_reference`이고, PI가 정하면 기록한 deviation이다 | P-R2CTRL(2026-10-15 결정). 선택지 (c3), (d)를 더하면 D18도 | spec §7.4, §9.3, §10.1 |
 | exploration horizon h | 고르지 않는다. 완료한 h마다 결과를 보고한다 | — | spec §4.15, §13 |
 | hold watchdog | from-reference. Φ와 B에서 platform 상수를 읽는다(예: `CFE_PLATFORM_ES_STARTUP_SCRIPT_TIMEOUT_MSEC`, `CFE_PSP_RESTART_DELAY`) | — | spec §4.13 |
 | hold 해제 | 사건 기반(L22). 기다리는 사건이 결과와 함께 live stream에 나타나거나, 상대가 막히거나 끝났을 때 푼다 | — | spec §4.13 |
+
+helgrind·DRD의 감싼 실행 명령과 TSan 재빌드는 revision 1.2에서 조건 목록에서 빠졌다. P-VALGRIND와 P-TSAN으로 제외했기 때문이다(§4.1).
 
 몇 가지를 덧붙인다.
 
 - **deviation은 숨기지 않는다.** 모든 deviation은 deviation 기록으로 남고(그림 D4의 점선), 타당성 위협에서도 다시 밝힌다(§10 결론 타당성).
 - **방법론 문헌은 reference가 아니다.** Arcuri와 Briand의 지침이나 "약 30회"라는 관행은 N을 고르는 동기는 될 수 있어도 `from-reference`가 될 수는 없다(PI_DECISIONS D14).
-- **class 대응을 만들지 않는다.** "race"를 σ·M별 class로 옮기는 규칙은 어느 reference에도 없으므로, 이 문서와 spec은 그 대응을 고르지 않는다. P-CLASSGT는 선택지를 나열할 뿐 어느 것도 권고하지 않는다(spec §10.1).
+- **class 대응을 만들지 않는다.** "race"를 σ·M별 class로 옮기는 규칙은 어느 reference에도 없다. PI는 2026-10-15에 그 말을 도구 class로 자동으로 바꾸지 않기로 했고(P-CLASSGT), 근거 없는 정확도 분모를 만들지 않는다(spec §10.1).
 - **단위 시험의 값은 연구 조건이 아니다**(L23). Kairos 자신의 단위 시험에 쓴 값을 평가 결과로 쓰지 않는다.
 - **도구 상수는 코드에서 `KZ_REF(value, "path:line")`로만 쓴다**(spec 머리말, §9.2). 출처 없는 상수가 도구에 섞이지 않게 하는 lint다.
 
@@ -895,8 +914,8 @@ spec이 적은 위협과, 그 위협에 대해 설계가 두는 장치를 함께
 | kernel 표류와 공유 host | 실험군 A 재측정, 교차 실행, cold/warm 층 분리, 분석은 work unit 예산(spec §10.2) |
 | 실행 사이에 남는 유지 상태 | normalization boot |
 | `DECLARED_TRUSTED` 항목(검증하지 못하고 신뢰한 항목) | certificate마다 나열, O9 |
-| 비교 도구의 품질이 Kairos 자신의 probe plan에 기댐 | 의존성을 모든 비교에 명시, helgrind·DRD를 독립 참조점으로 |
-| 같은 정보 인코딩도 Kairos의 정적 사실(경계, 이어짐 node)에 기대고, 사례를 아는 저자가 쓴다 | 작성 기록(누가 썼고, 어느 설계 사례를 보았는가; §4.3) |
+| process-level 기법의 재구현(있다면)이 Kairos의 probe plan에 기대고, 사례를 아는 저자가 쓴다 | 의존성을 비교에 명시, 작성 기록(누가 썼고, 어느 설계 사례를 보았는가; §4.6) |
+| 관측하지 않은 기준 실행과 비교할 수 없는 관측 영향 | 관측 영향 점검. 대응물이 없는 내부 사건에는 "영향 없음"이라 하지 않는다(D1, §7.1) |
 
 ### 10.2 외적 타당성: 다른 곳에도 통하는가
 
@@ -904,19 +923,20 @@ spec이 적은 위협과, 그 위협에 대해 설계가 두는 장치를 함께
 
 - **한 platform.** Linux `SCHED_OTHER`, 4 vCPU, permissive mode, `msg_max` 10, euid ≠ 0. 여기서 잰 timing과 overhead는 비행 환경을 대표하지 않는다(spec §6.4 항목 17).
 - **한 OSAL backend**(POSIX), **한 bundle version**.
-- **RT 동작은 모형에서만** 다룬다(σ_R1[P_sched]). RTEMS나 VxWorks의 RT 판정은 그 profile이 생기기 전에는 하지 않는다.
-- **C1, C2, C3, C5는 파생 사례**다.
+- **RT 동작은 모형에서만** 다룬다(σ_R1[P_sched]). PI 결정 D4: 실제 실시간 arm은 나중의 별도 구성이고, 모형 결과를 실제 실시간 결과로 표시하지 않는다. RTEMS나 VxWorks의 RT 판정은 그 profile이 생기기 전에는 하지 않는다.
+- **C1, C2, C3, C5는 파생 사례**다(C2는 역할 재구성).
 - **recall은 synthetic mutant에서 잰다.**
 
 ### 10.3 구성 타당성: 재는 것이 재려던 것인가
 
-- **계약은 사람이 쓴다.** 그래서 oracle은 그 provenance만큼만 좋다. provenance는 판정마다 보인다.
+- **준비 상태 명세는 사람이 쓴다.** 그래서 oracle은 그 provenance만큼만 좋다. provenance는 판정마다 근거 등급과 함께 보인다.
 - **harm은 호출자 쪽 근거로만 판단한다.** 공급자가 문서화한 결과는 결과를 허용으로 만들지 않는다(spec §1.6).
-- **route와 capacity 손실은 위반이 아니다.** 전달을 요구하는 `appreq`가 없으면 LOSS-UNDER-ORDER로만 표시한다. 관측 손실 수는 그와 상관없이 보고한다.
+- **route와 capacity 손실은 준비 상태 위반이 아니다.** 전달을 요구하는 `appreq`가 없으면 LOSS-UNDER-ORDER로만 표시한다. 관측 손실 수는 그와 상관없이 보고한다.
 - **mutant는 수정의 역이다.** 아직 고쳐지지 않은 버그를 대표하지 않을 수 있다.
 - **ablation은 Kairos의 요소를 잰다.** 선행 기법이 표현할 수 있는 것을 재지 않는다. 재구현은 만든 그대로의 자신을 잰다.
-- **탐지만으로는 certificate가 더하는 것을 보일 수 없다.** 같은 정보를 받은 monitor가 실현된 발생에서 비길 것이기 때문이다 [I].
-- **"race"에는 class label이 없다.** reference는 C1, C2, C3, C5를 race라 부르고, R2에는 class 진술이 없다. "race"를 σ·M별 class로 옮기는 reference가 없으므로 P-CLASSGT 전까지 class label은 없다. reference 진술과 Kairos의 기대는 어긋날 수 있고(σ_R1의 C3), 그것은 결과로 보고한다.
+- **탐지만으로는 certificate가 더하는 것을 보일 수 없다.** 원시 R2 기록 위의 단순 상태 검사도 관측된 거부 요청을 찾기 때문이다 [I].
+- **비교하는 도구는 역할, 입력, 출력이 다른 process-level 연구다.** 그래서 도구 사이에 점수를 매기지 않는다(§4).
+- **"race"에서 class label을 만들지 않는다.** reference는 C1, C2, C3, C5를 race라 부르고, R2에는 class 진술이 없다. "race"를 σ·M별 class로 옮기는 reference가 없으므로 그 말에서 class label을 유도하지 않는다(P-CLASSGT, 2026-10-15 결정). reference 진술과 Kairos의 기대는 어긋날 수 있고(σ_R1의 C3), 그것은 결과로 보고한다.
 
 ### 10.4 결론 타당성: 결론이 통계적으로 받쳐지는가
 
@@ -933,64 +953,82 @@ spec이 적은 위협과, 그 위협에 대해 설계가 두는 장치를 함께
 
 ### 11.1 단계
 
-평가 전체는 S9에서 한다. S9의 출구 조건은 넷이다. template-only 실행을 refinement 전에 기록한다. §8을 실행한다. 설계 사례마다 그 사례의 현상으로 보고하거나, 도구 수준 결과가 없는 이유를 기록한다(P-F1GATE). held-out과 recall 항목은 F2 뒤에만 연다(spec §9.3). S9에 걸린 결정은 D8, D14, P-RECALL, P-TRIAGE, P-STATS, P-CLASSGT, P-F1GATE다.
+평가 전체는 S9에서 한다. S9는 freeze F1, 다섯 사례의 평가와 기존 Process-Level Race 연구와의 비교(V4a), 그리고 F2 뒤의 확장 평가(recall protocol, held-out 출처, triage; V4b)다. S9의 출구 조건은 넷이다. template-only 실행을 refinement 전에 기록한다. §8을 실행한다. 설계 사례마다 그 사례의 현상으로 보고하거나, 하지 못한 사례는 그 이유와 연구 범위의 한계와 함께 보고하고, 다른 코드의 결과로 완료하지 않는다(P-F1GATE). held-out과 recall 항목은 F2 뒤에만 연다(spec §9.3). S9에 걸린 결정은 D8, D14, P-RECALL, P-TRIAGE, P-STATS, P-CLASSGT, P-F1GATE다. spec은 S9의 추정 8–12 pw [I]가 비교 도구 판 S9에 대해 쓴 것이고 revision 1.2에서 다시 추정하지 않았다고 적는다.
+
+**F1이 기다리는 것**(P-F1GATE, 2026-10-15 승인; spec §7.2). D13, D22, P-C2의 선택과 필요한 세부가 기록되고, 다섯 사례마다 자기 기준 구성, 기대표, 필요한 구현 기능, 검증 단계가 있거나, 하지 못한 사례의 이유와 연구 범위의 한계가 기록될 때까지 F1은 기다린다. 사례를 하지 않는다는 기록으로 다섯 사례 검증이 끝나지 않고, 어느 사례도 다른 코드의 결과로 완료되지 않는다. 기대표는 F1을 기다리지 않고 사례마다 첫 도구 출력 전에 동결한다.
 
 검증 사다리(spec §9.3; ADR-044)로 보면 평가는 다음 두 rung이다.
 
 | rung | 무엇을 확인하나 | 출구 조건 | 주장할 수 있는 것 | 필요한 결정 |
 |---|---|---|---|---|
-| V4a 비교 | 도구와 표시된 단위마다 세 결과(§4.2) | S9, F1 뒤. §8의 비교 protocol | 분류와 근거에서의 추가 가치뿐이고, 그것도 비교 도구에 구조상 없는 것에서만이다: σ_U∞와 σ_R1 칸과 M 수준, refinement, 진행 축, certificate, b 안의 `exh` 결과. 비교 도구의 harness 유도 class가 Kairos의 class와 같으면 분류에서 추가 가치를 주장하지 않는다 | P-STATS, P-CLASSGT, P-PAPERS(golden test), P-VALGRIND, P-F1GATE |
-| V4b held-out과 수정 전후 쌍 | §7.5의 출처 (a)–(e), recall(§8.5) | S9, F2 뒤. S9 출구 조건. F2 뒤에 더한 규칙은 `oracle refinement`로 보고하고, 수작업 비용과 층별 `unknown` 이유를 함께 낸다 | §7.5, §8.5가 정한 것 | D8/P-RECALL, P-TRIAGE, P-STATS, D14, P-CLASSGT |
+| V4a 기존 Process-Level Race 연구와의 비교 | (도구, 사례)마다 분석 질문 여섯 개와 결과 상태 하나(§4), 그리고 Kairos의 보고 부분(§6.6) | S9, F1 뒤. §8의 비교 protocol | 여섯 답이 확인한 기존 도구의 부족에 대해서만 차이를 주장한다. 도구가 이미 가진 기능은 차이로 주장하지 않는다. `NOT_RUN`은 결코 놓친 것이 아니고, 재구현은 원 도구의 결과와 떼어 둔다 | P-STATS, P-CLASSGT, P-PAPERS(접근 경로 먼저), P-F1GATE |
+| V4b held-out과 수정 전후 쌍(확장 평가) | §7.5의 출처 (a)–(e), recall(§8.5) | S9, F2 뒤. S9 출구 조건. F2 뒤에 더한 규칙은 `oracle refinement`로 보고하고, 수작업 비용과 층별 `unknown` 이유를 함께 낸다 | §7.5, §8.5가 정한 것 | D8/P-RECALL, P-TRIAGE, P-STATS, D14, P-CLASSGT |
 
 F2 뒤의 변경이 건드린 held-out·recall 항목은 `post-freeze-adjusted`로 따로 보고한다(spec §7.2; §3.5).
 
-각 단계에는 자기 출구 조건과 자기 주장이 있다. 어느 절단이 발표할 만한지는 끝낸 단계가 아니라 구별력과 평가에 달려 있다(spec §9.3; EXT-20261012 §9). S3a 이후에는 그때까지 만든 층에 대한 recall을 보고할 수 있다.
+**revision 1.3의 사다리** [D] (10-22 결정 D1, D3, D5; P-LADDER 재정의; ADR-057; 변경표 C-42, C-43; spec §9.3 "Ladder of revision 1.3"). 아래가 위의 사다리와 다르면 아래가 앞선다.
+
+- **V1′ R2 기반 검증**이 V1 대신 첫 rung이다. ENV basis에서 관측(S1), task→앱 매핑을 포함한 정규화, 설명 집합을 쓴 관측 기반 판정(S2, spec §4.8)과 신뢰 장부를 R2의 동결한 기대표에 댄다. V1의 certificate 출구 항목(FIXED_ORDER, `kz proofcheck`, R2 certificate의 장부)은 **선택**이 되고, 논문이 R2의 보편 진술을 할 때만 쓴다. V2(R2의 대조 basis)는 V1′ 뒤에 온다.
+- **D22 basis 위의 V3(C1)는 V1′와 나란히 간다.** 공개 BP basis를 만드는 일, 앱 closure(spec §4.1 "Closure per case"), C1의 관측 계획(spec §4.7)은 단계 B와 함께 시작한다. C1의 예측, 확인, 기여 증거가 뒤따른다(spec §8.2).
+- **[P0.2]의 단계 A–F**와 rung의 대응: A(자산과 준비 상태 명세의 대응; 다섯 사례가 모두 나온다) = V0와 paper track. B(실제 기록 판정) = V1′와 V3, VP-D3, VP-D4의 관측 부분. C(유계 예측) = V3에서 먼저 하는 S5. D(통제된 확인) = V3에서 먼저 하는 S6이고, **R2의 관측만으로는 끝나지 않는다**. E(동결 뒤 독립 평가) = V4b. F(논문의 주장) = V4a와 spec §1.11의 기여 가설.
+- **단계 B의 사례별 완료 조건**(10-22 결정 D5): 실제 기록 판정과 올바른 대조 판정이 그 근거까지 추적되고, 시험 T-05, T-17–T-20을 통과하고, 그 사례의 closure가 조건에 필요한 writer와 별칭을 덮는다(spec §4.1). 그래서 C1, C2, C5는 앱 closure가 필요하고, 그 track에서는 S3a의 app-unit link probe가 필수다(C-43). 사례의 조건이 덮이는 곳에서는 S2가 S3a의 전체 추출을 기다리지 않는다.
+- 구현은 실행할 수 있는 사례부터 시작해도 되지만, 나머지 넷의 표현을 미룬 채 한 사례 전용 engine을 완성하지 않는다. "다섯 사례를 검토했다"는 결코 "다섯 사례를 탐지했다"가 아니고, 원래 사례와 그 재구성을 한 결과로 더하지 않는다.
+
+**revision 1.3의 시험 T-01–T-22** [D] ([P0.2] §15.1; 변경표 C-45; spec §9.2). unit, golden, litmus 층에 들어간다. T-05, T-17, T-18, T-19, T-20은 trace 판정(단계 B)의 완료 조건이다. 평가와 직접 닿는 것은 T-13(작은 유한 모형에서 독립 전수 평가 `exh`와 예측 engine의 일치), T-14(앱 label만 바꾼 대조에서 판정 불변, §5.2), T-15(다섯 사례의 올바른 대조와 기록에서 판정, 미지원, 보류, 재구성을 사례마다 떼어 둔다. 돌리지 않은 사례를 결코 통과로 보이지 않는다), T-19(요약에서 `PENDING`/`OPEN`은 `INCONCLUSIVE(horizon-open)`), T-21(σ_U, σ_U∞, 지원하는 우선순위 모형을 떼어 두고 실제 실행 결과와 섞지 않는다), T-22(다른 버전이나 조건 basis에서 버전 밖의 규칙과 caller 기록을 물려받지 않는다)다. 전체 목록은 [08_roadmap.md §3.5](08_roadmap.md)에 있다.
+
+각 단계에는 자기 출구 조건과 자기 주장이 있다. 어느 절단이 발표할 만한지는 끝낸 단계가 아니라 구별력과 평가에 달려 있다(spec §9.3; EXT-20261012 §9). recall은 확장 평가에서만 보고한다(D8/P-RECALL, 결과는 변형 집합).
 
 | 끊는 지점 | 평가 쪽에서 주장할 수 있는 것 [I] (spec §9.3 표) |
 |---|---|
 | S0 + S1 | R2 사용 집합을 Kairos recorder로 재관측, 측정된 비용과 교란 |
-| + S2 | 동적 계약 검사로 R2를 사용별로 분류, SB oracle과 함께 LOSS-UNDER-ORDER 수 |
-| + S3a(thin MVC) | census. V0-P 뒤: 안전성 진술로서의 R2 fixed-order certificate((σ_U, M_api)와 (σ_U, M_impl); 명시한 trusted base(추출 사실, skeleton, Φ)에 상대적으로 추론 단계를 독립적으로 다시 검증; trust ledger). V0-P 전: "`kz proofcheck`가 받아들임, 아직 쓰지 않은 lemma obligation에 조건부". 구성 closure와 message provenance에서 나온 inactive와 provider 판정. **정적 층과 trace 층의 recall** |
+| + S2 | 동적 준비 상태 검사로 R2를 사용별로 분류, SB oracle과 함께 LOSS-UNDER-ORDER 수 |
+| + S3a(thin MVC) | census. V0-P 뒤: 안전성 진술로서의 R2 fixed-order certificate((σ_U, M_api)와 (σ_U, M_impl); 명시한 trusted base(추출 사실, skeleton, closure 목록, Φ와 `libkz-core`)에 상대적으로 추론 단계를 독립적으로 다시 검증; trust ledger; lemma마다 증명 상태 출력). V0-P 전: "`kz proofcheck`가 받아들임, 아직 쓰지 않은 lemma obligation에 조건부". 구성 closure와 message provenance에서 나온 inactive와 provider 판정. 확장 평가에서만(결과는 변형 집합): 정적 층과 trace 층의 recall |
 | + S4 | 재현 가능한 고정점, 모형 충실도(O1–O7, O9) |
-| + S5 | App-record 구간의 schedule-dependent witness(predicted / predicted-modelled). C1 파생 instance에서는 M_impl의 `predicted` 나쁜 witness와 관측한 좋은 실행이 함께 있으면 schedule-dependent이고, M_api에서는 예측한 미준비 근거뿐이다(retry summary가 O2를 통과한 곳에서는 `predicted-extrapolated` witness). **예측 층의 recall** |
+| + S5 | App-record 구간의 schedule-dependent witness(predicted / predicted-modelled, REJECT가 결정 뒤에 오는 곳에서는 horizon completion으로 `predicted-extrapolated`). C1 파생 instance에서는 M_impl의 `predicted` 나쁜 witness와 관측한 좋은 실행이 함께 있으면 schedule-dependent이고, M_api에서는 예측한 미준비 근거뿐이다(retry summary가 O2를 통과한 곳에서는 `predicted-extrapolated` witness). 확장 평가에서만: 예측 층의 recall |
 | + S6 | 실현된(hold) witness와 perturbation 비율 |
 | + S7 | b 안의 유계 안전성 기록과 class(`no-final-status`, `ordinal-split` 포함), σ_U∞ refinement(S7 없이는 없다), 모형 진행 결과 |
 
-범위를 줄여야 할 때 버리는 순서도 정해져 있다(spec §9.3 cut list). **thin MVC(S0 + S1 + S2 + S3a)와 그 층들에 대한 recall protocol은 끊지 않는다.** 검증 사다리의 V1과 다섯 사례의 paper track도 끊지 않는다. 끊을 때는 그것이 지우는 사례 근거를 함께 보고한다.
+범위를 줄여야 할 때 버리는 순서도 정해져 있다(spec §9.3 cut list): S10의 D3·D4 arm → S3b → S7 → O8 → S6 → S5. S8(MLIR)은 revision 1.2에서 삭제되어 목록에 없다(D6). **검증 사다리의 V1과 다섯 사례의 paper track, 그리고 사례의 도구 단계가 필요로 하는 S0–S3a 부분은 끊지 않는다.** recall protocol은 확장 평가에 속하고 다섯 사례 검증과 따로 일정을 잡는다. 끊을 때는 그것이 지우는 사례 근거를 함께 보고한다.
 
-- S10을 끊으면 C3·C5의 도구 수준 근거와 C2의 6.4.2 행이 사라진다. D13 (c)가 6.4.x basis를 F1 전에 두었다면 예외다.
+- S10의 6.4.x basis arm을 끊으면 C3·C5의 도구 수준 근거와 C2의 6.4.2 행이 사라지고, 연구 범위의 한계로 보고한다(basis는 F1 전에 둔다, D13 (c), P-F1GATE). F1 gate나 native σ_R1 arm을 끊으면 사례 근거는 사라지지 않는다.
 - S7을 끊으면 C1의 refinement와 진행 행, C2의 refinement, C3·C5의 수정 쪽이 답할 수 없게 된다.
 - S5나 S6을 끊으면 C1의 예측 갈래와 hold 갈래가 사라진다.
 - R2 하나에만 도구 수준 근거를 남기는 절단은 한 사례의 결과로 보고한다(ADR-042).
 
 ### 11.2 평가에 걸린 PI 결정
 
-평가에 걸린 PI 결정은 다음 스물둘이다.
+평가에 걸린 PI 결정과, 2026-10-15·2026-10-22에 내린 값은 다음과 같다(spec §0.10, §0.12, §10.1). 결정은 연구 계획에 대한 [D]이고 결과가 아니다.
 
-- held-out과 recall: D8/P-RECALL(held-out 출처, history query의 keyword·맞추는 field와 대소문자·날짜 cut, 연산자, 기대 판정 규칙과 제외 규칙, 설계 사례의 수정과 이미 이름이 나온 항목을 뺄지, 노출·동결 기록, 누가 돌리나. F2 전).
-- 채점과 통계: P-TRIAGE(평가자, masking, 표본 크기, 평가자 노출), P-STATS(F1 전. 검정마다 단위와 독립 가정, 원인·수정으로 묶이는 의존의 처리), P-CLASSGT(reference의 "race" 진술을 σ·M별 class로 옮기는 대응), D14(N), D15(work-unit cap).
-- 동결과 사례 basis: P-F1GATE(F1이 D13, D22, P-C2가 정해지거나 결과를 기록하고 거절될 때까지 기다리는가), D13(6.4.x platform, Q16 포함), D22(C1의 B′. 후보), P-C2(C2의 역할 파생 쌍과 2 × 2, Q22), P-R2CTRL(R2의 대조 basis), P-RGIT(A.3 선의 `58abd38d`), D18(변형 B′), D19(`msg_max` 변형).
-- 비교와 ablation: P-ABL-ALLOWED("Allowed 끔"·"결과 의미 끔" ablation과 예전 GPredict 방식 변형 묶음), P-VALGRIND, P-TSAN, P-PAPERS(golden test, GPredict 성질 형식 포함), P-NIDHUGG, P-Z3.
-- 관측: D11(실험군 A 재측정), D3(F1 `--wrap` gate, PCT, 실험군 W).
+- held-out과 recall: D8/P-RECALL — 다섯 사례를 먼저, 추가 평가 절차(확장 평가)는 따로. 다섯 설계 사례와 그 수정은 미관측 평가 집합에서 뺀다. 새 출처마다 query, 노출, 동결을 기록하고, 변형 예제의 결과는 변형 집합의 결과로만 보고한다. **아직 열림:** mutation 연산자, history query(keyword, 맞추는 field, 날짜 cut), 기대 판정 규칙과 동치 mutant 규칙, 누가 query를 돌리나, spec에 이름만 나온 다른 항목을 뺄지.
+- 채점과 통계: P-TRIAGE — 정량 판정에는 독립 평가자 둘. P-STATS — 첫 사례 평가는 기술 통계와 사례별 근거. P-CLASSGT — "race"를 도구 class로 자동으로 바꾸지 않음. D14 — S1에서 목적별 N, 본실험 전 동결. D15 — 결정적 단위의 work-unit 예산, 단계 파일럿 뒤 동결.
+- 동결과 사례 basis: P-F1GATE — 승인(위의 "F1이 기다리는 것"). D13 — (a) 인정, (b) (i)부터, (c) F1 전, Q16 시험. D22 — 공개 BP basis, 후보 쌍 CF `281a941` → `833fdbb`. P-C2와 Q22 — 역할 재구성, 첫 대조는 정상 완료 제공자. P-R2CTRL — (c2) 먼저, (c1) 보조, (b) 선택. P-RGIT — 보조 대조로 승인. D19 — `msg_max` 10 유지, 손실 기록. D18 — C1 부분을 빼고 **아직 열림**.
+- 비교와 ablation: 비교는 기존 Process-Level Race 연구끼리(ADR-046, ADR-047). P-ABL-ALLOWED — 단일 요소 ablation 23, 24 채택, GPredict 이름의 묶음은 두지 않음. P-VALGRIND, P-TSAN — 제외. P-NIDHUGG — 첫 구현에서 보류. P-PAPERS — 접근 가능한 원문 경로부터 바로 조사. P-Z3 — 첫 구현의 필수 조건이 아님.
+- 관측: D1 — 고친 설명과 함께 승인, 관측 영향 점검. D11 — S1의 관측 영향 비교 전에 실험군 A 재측정, kernel은 실행마다 기록. D3 — `--wrap` gate, PCT, 실험군 W는 후순위. D4 — 모형 기반 단일 코어 실시간 해석 먼저.
+- 2026-10-22: D1 — 명세안 0.2를 rev 1.3의 기초로. D2 — 요약 뷰에서 `PENDING`·`OPEN`은 `INCONCLUSIVE(horizon-open)`. D3 — C1이 기여 증거의 첫 사례. D4 — 원 도구를 실행하지 못하면 문헌·코드 분석 결과 상태로만. D5 — 단계 B의 사례별 완료 조건에 closure 범위.
 
-질문, 선택지, 권고, 막는 것, 결정하지 않았을 때의 기본값은 [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정)에 한 곳으로 모았다(원문 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). revision 1.1의 새 항목(P-CLASSGT, P-F1GATE, P-ABL-ALLOWED, P-R2CTRL, P-C2, P-RGIT)과 후보 D22는 spec §10.1에 있다. spec §10.1은 PI_DECISIONS.md에 같은 ID로 더할 때까지 그 표가 이 항목들의 유일한 기록이라고 적는다.
+질문, 선택지, 권고, 막는 것, 결정하지 않았을 때의 기본값은 [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정)에 한 곳으로 모았다(원문 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). 2026-10-15에 내린 값은 결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md)와 spec §10.1에, 2026-10-22의 결정은 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md)와 spec §0.12에 있다. P-TRACEFS도 아직 열려 있다.
 
 ---
 
 ## 12. 이 문서가 주장하지 않는 것
 
-- **구현과 측정.** 평가는 아무것도 실행되지 않았다. 이 문서의 [M] 값은 모두 spec이 인용한 기존 측정이다. 비교 도구와 ablation의 결과는 예측해 적지 않았다. spec 표의 [I] 문장(DefUse 행, 단순 상태 monitor 행, 표현 가능성 표)은 그 비교를 둔 설계 근거로만 옮겼고, 채점하지 않는다.
-- **"안전".** 경보 없음, 비교 도구의 침묵, `unknown`, `NOT_RUN`은 안전의 근거가 아니다(spec §6.4 항목 2). 관측에서 나쁜 실행이 없었다는 것은 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"으로만 쓴다(항목 3).
-- **기존 도구의 실패.** "기존 도구가 C1–R2를 놓친다"고 쓰지 않는다. 외부 process-level 도구는 모두 `NOT_RUN`이고, `NOT_RUN`은 false negative가 아니다(항목 14).
-- **선행 기법의 표현력.** 명세 기반 기법이나 GPredict 방식 기법이 Allowed, 유한 retry, 유한 horizon을 표현하지 못한다고 하지 않는다. 같은 정보 재구현의 결과는 만든 그대로의 재구현의 결과이고, ablation은 선행 기법이 무엇을 표현할 수 있는지 말하지 않는다(항목 37).
-- **탐지만으로 본 가치.** 경보 yes/no만으로 certificate나 예측이 무엇을 더하는지 말하지 않는다(항목 38).
+- **구현과 측정.** 평가는 아무것도 실행되지 않았다. 이 문서의 [M] 값은 모두 spec이 인용한 기존 측정이다. 기존 도구와의 비교와 ablation의 결과는 예측해 적지 않았다. RacePro에 대한 분석과 "확인된 부족에서 Kairos 기능으로" 표(§4.5)는 계획 [I]이고 비교 결과가 아니다.
+- **"안전".** 경보 없음, 기존 도구의 침묵, `unknown`, `NOT_RUN`은 안전의 근거가 아니다(spec §6.4 항목 2). 관측에서 나쁜 실행이 없었다는 것은 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"으로만 쓴다(항목 3).
+- **기존 도구의 실패.** "기존 도구가 C1–R2를 놓친다"고 쓰지 않는다. 조사에서 외부 process-level 도구는 모두 `NOT_RUN`이고, `NOT_RUN`은 false negative가 아니며, 확인하지 않은 `REPORTED` 칸은 사례의 탐지가 아니다(항목 14). 빌드하거나 실행하지 않은 기존 도구에 대해 "탐지하지 못한다"나 놓쳤다고 쓰지 않고, 그 빈틈은 문헌·코드 분석 결과 상태로만 적는다(항목 60; 10-22 결정 D4).
+- **비교의 범위.** 기존 process-level 도구 사이에 점수나 순위를 매기지 않는다. `NOT_RUN` 칸을 놓친 것으로, 확인하지 않은 `REPORTED` 칸을 사례 탐지로 세지 않는다. 재구현의 결과를 원 도구의 결과로 쓰지 않고, 읽지 않은 도구의 표현력이나 관측 범위를 검색 발췌로 말하지 않는다(항목 54).
+- **선행 기법의 표현력.** specification 기반 기법이나 GPredict 방식 기법이 Allowed, 유한 retry, 유한 horizon을 표현하지 못한다고 하지 않는다. revision 1.2부터 그런 기법의 재구현은 평가에 없고, Kairos에서 요소를 뺀 ablation은 선행 기법이 무엇을 표현할 수 있는지 말하지 않는다(항목 37).
+- **탐지만으로 본 가치.** 경보 yes/no만으로 certificate나 예측이 무엇을 더하는지 말하지 않는다. 같은 준비 사전조건을 받은 단순 상태 검사도 실현된 R2 발생을 모두 찾을 것으로 본다 [I]. certificate와 예측의 가치는 분류와 근거에서만 잰다(항목 38).
+- **R2를 기여 증거로.** R2의 관측 기반 결과를 기여의 증거로 쓰지 않는다. R2는 관측 경로의 기반 검증이다(항목 58; ADR-057).
 - **맹검.** 노출·동결 기록 없이, 기대 판정이 수정 문서에서 온다는 이유로, 또는 평가자 masking만으로 맹검을 말하지 않는다(항목 39).
 - **구간과 단위.** 발생, instance, mutant, 실행 위의 구간을 독립 결함이나 원인에 대한 진술로 읽지 않는다. 동적 발생의 수를 표본 크기로 쓰지 않는다. 바이너리, 관측 방법, pool key를 넘어 합친 수를 쓰지 않는다(항목 40).
-- **class label 없는 정확도.** P-CLASSGT 전에는 class label이 없으므로 class 정확도를 말하지 않는다. 기대표와의 일치, 이름 붙은 대응 선택지 아래 reference 진술과의 일치·불일치는 그대로 보고한다(항목 41).
+- **class label 없는 정확도.** class label이 없는 곳에서 class 정확도를 말하지 않는다. 출처의 "race"를 도구 class로 자동으로 바꾸지 않으므로(P-CLASSGT), class label은 밝힌 모형, 구성, 실제 근거에서만 나온다. 기대표와의 일치, reference 진술과의 일치·불일치는 결과로 보고한다(항목 41).
+- **통계와 독립 검토.** 다섯 사례를 독립 표본으로 삼는 유의성 검정, 일반 비율, 구간을 내지 않는다(P-STATS). 독립 평가자 둘이 생기기 전에 독립 검토를 했다고 하지 않는다(P-TRIAGE). 변형 예제의 결과를 변형 집합 밖의 결과로 쓰지 않는다(D8/P-RECALL)(항목 55).
 - **일반성과 새 버그.** 다섯 설계 사례로 일반성을 주장하지 않는다. 파생, 역할 파생, seeded, mutant, 구성 변경 시험에서 나온 것을 "새 버그"라 부르지 않는다(항목 16).
 - **사례 사이의 대체.** 한 설계 사례의 결과를 다른 사례의 근거로 쓰지 않고, 다섯 사례를 독립 표본 다섯으로 세지 않는다. v7.0.1 대응물의 결과(TIME/TBL 문맥에 쓴 R2 template, App-record 구간 A.3, 기본 B에서 C1의 `inactive(B)` 증명, bundle의 K-PHASE census)는 C3, C5, C1, C2의 결과가 아니다(항목 43).
-- **recall의 범위.** recall 수치는 history에서 만든 program mutant와 수정 전후 쌍의 검출률이다. 실제 순서 버그 일반의 recall이 아니다(항목 25).
-- **R2 수치.** Kairos recorder가 사용 집합을 재관측하기 전에는 어떤 R2 수도 Kairos 결과가 아니다(항목 21). R2는 race가 아니라 순서가 고정된 의존 오류다(항목 12).
+- **recall의 범위.** recall 수치는 history에서 만든 program mutant와 수정 전후 쌍의 검출률이다. 실제 순서 버그 일반의 recall이 아니다(항목 25). 확장 평가의 결과이고, 빠진 사례를 대신하지 않는다.
+- **다섯 사례 검증의 완료.** 사례를 하지 않는다는 기록이나 다른 코드의 결과로 다섯 사례 검증이 끝났다고 하지 않는다(항목 57; P-F1GATE, P-D18GATES (b)).
+- **요약 뷰와 앱 귀속.** `PENDING`이나 `OPEN` 발생에서 나온 `INCONCLUSIVE(horizon-open)`을 위반 없음이나 허용된 결과로 세지 않는다(항목 59; 10-22 결정 D2). actor의 앱 귀속이 정해지지 않은 instance의 결과를 앱 사이의 결과로 세지 않는다(항목 61; ADR-056).
+- **R2 수치.** Kairos recorder가 사용 집합을 재관측하기 전에는 어떤 R2 수도 Kairos 결과가 아니다. "24"는 ENV basis의 수이고 다른 basis에는 쓰지 않는다(항목 21). R2는 race가 아니라 순서가 고정된 의존 오류다(항목 12).
 - **C3·C5의 v7.0.1 재현.** 그 버그 코드는 v7.0.1에 없다(항목 13). C1, C2, C3, C5를 v7.0.1 기본 구성에서 "재현했다"고도 하지 않는다. C1의 조회는 잠재 상태이고(`cf_def_config.c:60, 78`), C2의 앱은 비공개라 역할 파생 쌍을 쓴다(항목 42).
 - **비행 환경 대표성.** Linux `SCHED_OTHER`, permissive mode의 timing과 overhead는 비행 환경을 대표하지 않는다(항목 17).
 
@@ -1006,13 +1044,13 @@ F2 뒤의 변경이 건드린 held-out·recall 항목은 `post-freeze-adjusted`�
 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O10(그림 D1, D2) | §2 |
 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
-| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
-| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·준비 상태 명세, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 준비 상태 명세 template K-*와 준비 범주 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
-| **07_evaluation.md (이 문서)** | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
-| [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
+| **07_evaluation.md (이 문서)** | 평가 계획: 연구 질문(Q1–Q4, RQ1–RQ9), 기존 Process-Level Race 연구와의 비교, ablation과 단일 요소 비교, recall protocol과 triage(확장 평가), 관측 영향 점검과 perturbation 실험군, 기술 통계(그림 D4 상세) | §7.2, §7.5, §8 |
+| [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10(S8은 삭제), 검증 사다리(rev 1.3의 V1′), 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |
 | [09_prior_work.md](09_prior_work.md) | 선행 연구와의 관계, 빌려 온 것과 새로움, [R04 §5]의 gap G1–G8(그림 D0) | §1.11, §0.3, §0.5, App. B |
-| [10_decisions_adr.md](10_decisions_adr.md) | ADR 44개, PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
+| [10_decisions_adr.md](10_decisions_adr.md) | ADR(원문 spec §11), PI 결정 목록(§2), 이름 충돌 주의(§0.2), 한국어 용어집(§3) | §10, §11, §13 |
 | [diagrams/README.md](diagrams/README.md) | 그림 D0–D10 목록, 범례, 다시 렌더링하는 법 | §12 |
 | [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md) | 규범 원문(영문). 검토 쟁점 처리는 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md), PI 결정 원문은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) | — |
 | [background/README.md](background/README.md) | 배경 보고서 [R01]–[R07]의 목록 | — |
@@ -1021,6 +1059,7 @@ F2 뒤의 변경이 건드린 held-out·recall 항목은 `post-freeze-adjusted`�
 **이 문서와 특히 관련된 곳.**
 
 - spec: 주로 §8과 §7.2, §7.3, §7.5, §7.7, §4.13, §5.10, 그리고 §9.3의 검증 사다리와 사례별 경로·대조를 풀어 쓴 것이다. 연구 단계 전체에서 평가가 놓이는 자리는 [03_workflow.md §4](03_workflow.md#4-연구-워크플로우-그림-d4)에 있다.
-- PI 결정: D3, D8/P-RECALL, D11, D13, D14, D15, D18, D19, D22(후보), P-TRIAGE, P-STATS, P-CLASSGT, P-F1GATE, P-ABL-ALLOWED, P-R2CTRL, P-C2, P-RGIT, P-VALGRIND, P-TSAN, P-PAPERS, P-NIDHUGG, P-Z3(목록과 권고는 [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정), 새 항목은 spec §10.1).
-- 검토 쟁점: X3-C1(recall protocol), X3-M2(측정 분리, perturbation 비율), X3-M3(normalization boot), X3-M6(세 결과, 외부 참조점), X3-M7(triage), X3-M8(ablation 채점), X3-M9(N과 cap은 deviation), X3-M10(work unit), X1-M12(같은 계열 비교 대상)([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012 §5.1–§5.4(비교의 세 종류, 세 결과, 노출·동결 기록, 단위)와 §7(사례별 경로와 대조)의 처리는 spec §0.7 항목 6, 7과 ADR-042, ADR-044에 있다.
+- PI 결정: D1, D3, D4, D8/P-RECALL, D9, D11, D12, D13, D14, D15, D18, D19, D22, P-TRIAGE, P-STATS, P-CLASSGT, P-F1GATE, P-ABL-ALLOWED, P-R2CTRL, P-C2, P-RGIT, P-VALGRIND, P-TSAN, P-PAPERS, P-NIDHUGG, P-Z3(2026-10-15 결정; 목록과 권고는 [10_decisions_adr.md §2](10_decisions_adr.md#2-pi가-내려야-할-결정), 값은 spec §10.1과 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md)). 2026-10-22 결정 D1–D5는 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md)와 spec §0.12.
+- revision 1.2·1.3: 2026-10-15 결정의 반영은 spec §0.10, §0.11과 ADR-046–ADR-052에, 2026-10-22 결정의 반영은 spec §0.12, ADR-053–ADR-058, 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)에 있다.
+- 검토 쟁점: X3-C1(recall protocol), X3-M2(측정 분리, perturbation 비율), X3-M3(normalization boot), X3-M6(세 결과. 외부 참조점은 revision 1.2에서 철회), X3-M7(triage), X3-M8(ablation 채점), X3-M9(N과 cap은 deviation), X3-M10(work unit), X1-M12(같은 계열 비교 대상. revision 1.2에서 비교 범위가 바뀌었다)([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012 §5.1–§5.4(비교의 세 종류, 세 결과, 노출·동결 기록, 단위)와 §7(사례별 경로와 대조)의 처리는 spec §0.7 항목 6, 7과 ADR-042, ADR-044에 있다.
 - 조건 설정 원칙: [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md)(from-reference, deviation, unspecified_by_reference).

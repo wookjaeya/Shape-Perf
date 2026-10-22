@@ -3,7 +3,9 @@
 이 문서는 Kairos가 준비 상태 명세 instance(이하 준비 instance) 하나를 어떤 순서로 판정하는지, feedback loop가 그 판정을 어떻게 고정점까지 끌고 가는지, 판정 기록이 어떤 상태를 지나는지, 그리고 도구를 만들고 동결하고 평가하는 연구 단계가 어떻게 이어지는지를 그림과 함께 설명한다.
 spec을 읽지 않은 연구자가 "무엇이 어떤 순서로 일어나고, 어디서 멈추며, 무엇을 주장하지 않는가"를 15–25분 안에 파악하는 것이 목적이다. spec에 없는 설계 요소·수치·인용은 더하지 않는다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+
+> **rev 1.3 반영 (2026-10-22).** spec 개정 1.3은 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md))를 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)(행 C-01–C-52)를 거쳐 적용했다(spec §0.12, ADR-053–ADR-058). 모두 결정 [D]이고 결과가 아니다. 이 개정에서도 빌드·실행은 없었다. 이 문서에 옮긴 변경표 행: C-15·C-18(§1.1 필수 경로와 선택 경로), C-22(§1.2 머리), C-24(§1.3 plan의 수동 보강, OB-04), C-05(§1.3 step 2의 `app_owner`), C-25(§1.3 설명 집합, OB-01–OB-03), C-26(§1.3 재생 규약, OB-05), C-27(§1.3 보류 사유), C-28(§1.4 rev 1.3 추가), C-29(§1.5 머리), C-31(§1.6 재사용 조건, CF-01–CF-04), C-30(§1.7 규칙 10), C-49·C-50(§1.10 끝), C-42·C-43·C-45(§4.1 rev 1.3의 사다리, 시험 T-01–T-22), C-36(§6 항목 58–62), C-52(이 문서). **우선순위**(spec §0.12, ADR-053): 개정 1.0–1.2를 위해 쓴 문장이 certificate, explorer, progress 결과, loop를 Kairos의 첫 산출물, 필수 산출물, 정의하는 산출물로 말하면 ADR-053으로 읽는다. 그 경로는 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 판정·예측·확인의 전제 조건이 아니다. 이 문서에서는 §1.1–§1.2(정적 census와 certificate가 먼저인 순서), 그림 D3와 D4(아직 rev 1.2 판), §1.10의 R2 행, §4.1의 rung V1과 S3a 출구 조건이 그런 문장이다.
 
 ## 목차
 
@@ -86,6 +88,8 @@ revision 1.2는 PI의 2026-10-15 결정을 반영한다(spec §0.10). 그 결정
 ### 1.1 한 장으로 보기
 
 준비 instance 하나는 최대 7단계를 지난다. 모든 instance가 모든 단계를 거치지는 않는다. 정적 단계에서 certificate가 나오면 그 안전성 진술은 곧바로 결합(단계 6)으로 간다. 그 instance는 open되지 않으므로 progress 후보가 되고, explorer가 있으면 단계 4에서 진행을 본다(spec §4.6). 관측에서 모든 조건이 성립하면 그 관측은 뒷받침 근거로만 결합에 들어간다. 단계 4(explorer)는 구현 단계 S7부터만, 그리고 kill criterion을 통과할 때만 쓰므로 점선 테두리로 그렸다.
+
+**rev 1.3: 필수 경로와 선택 경로** [D] (spec §2.2 "Required and optional routes", §2.4; ADR-053; C-15, C-18). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 plan, §1.3) → `observe` → `trace`(정규화, task–애플리케이션 매핑, 관측 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. 선택 경로는 바뀌지 않은 채 정의되어 있고 그 주장이 필요할 때 쓴다: `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform` O8, `loop`, `gate`. `modref`는 전과 같다. `static`의 census와 `skel`의 view는 선택 경로나 closure 검사(spec §4.1)가 필요로 하는 곳에서 여전히 쓴다. `proofcheck`는 certificate를 낼 때만 만든다. 관측 판정은 certificate를 기다리지 않는다. 입력이나 상태 근거가 모자란 판정은 certificate가 생길 때까지 미루지 않고 보류한다(spec §4.8; §1.3의 설명 집합). 그래서 아래 7단계에서 단계 1의 certificate 갈래와 단계 4(explorer)는 선택 경로로 읽는다. 아래 그림 D3는 아직 rev 1.2 판이다. spec §12 D3의 rev 1.3 고침(certificate 판단 앞에 "관측 판정(설명 집합) → 요약 뷰" 경로와 그 끝 노드 `OBSERVED_VIOLATION`, `NO_VIOLATION_IN_CHECKED_PREFIX`, `INCONCLUSIVE(reason)`(`horizon-open` 포함), `NOT_APPLICABLE`, 그리고 "예측 → `MODEL_CANDIDATE` / `NONE_IN_SCOPE` / `INCONCLUSIVE` → 확인 → `CONFIRMED` / `NOT_CONFIRMED`"을 더하고 certificate 갈래를 선택으로 표시)은 그림 쪽 단계에서 반영한다.
 
 **그림 D3 개요. 준비 instance 하나의 분석 순서** (렌더링: [diagrams/D3_analysis_overview.svg](diagrams/D3_analysis_overview.svg); spec §12 D3 (rev 1.2); §1.8, §1.10, §2.5, §4.6, §4.8–4.14)
 
@@ -182,13 +186,15 @@ flowchart TD
 **칸의 순서.** σ_U를 먼저, 그다음 σ_U∞를 계산하고, σ_R1[P_sched]는 요청이 있을 때만 계산한다. σ_E는 마지막이다(spec §4.12 항목 1). M_api는 항상 분석하고, M_impl은 cone에 M_impl-relevant 연산(두 수준에서 다르게 모형화되는 OSAL 연산: idmap 생성·조회·삭제·token 변환, task 생성·준비·삭제, binsem, queue 생성·put·get)이 있을 때 분석한다(spec §1.4, §4.6, §4.12 항목 7).
 
 **흐름 전체에 걸린 세 규칙.**
-- **관측은 보편 class를 만들지 않는다.** 보편 진술(`¬Bad_i`, `¬OK_i`)과 그래서 protected, fixed-order, no-final-status에는 certificate(`Sk^cert` 위, b = ∞), 경계 b 안의 전수 탐색, 또는 전이(§1.8)가 필요하다. 관측은 뒷받침 근거일 뿐이다(spec §4.12 항목 2). 반복해서 실패한 실행으로 fixed-order를 내지 않고, trace 하나의 강건한 순서 사슬(`VC_R`)로도 내지 않는다(spec §6.4 항목 4–5).
+- **관측은 보편 class를 만들지 않는다.** 보편 진술(`¬Bad_i`, `¬OK_i`)과 그래서 protected, fixed-order, no-final-status에는 certificate(`Sk^cert` 위, b = ∞), 경계 b 안의 전수 탐색, 또는 전이(§1.8)가 필요하다. 관측은 뒷받침 근거일 뿐이다(spec §4.12 항목 2). 반복해서 실패한 실행으로 fixed-order를 내지 않고, trace 하나의 강건한 순서 사슬(`VC_R`)로도 내지 않는다(spec §6.4 항목 4–5). rev 1.3의 관측 요약 `OBSERVED_VIOLATION`은 기록된 실행에 대한 것이고 보편 class가 아니다. 보편 근거가 없으면 칸은 "스케줄 의존성 미확정"으로 읽고, 그것은 관측된 위반을 지우지 않는다(spec §1.10; [04 §11.7](04_formal_model.md#117-고정-순서-근거와-미확정-스케줄-의존성-rev-13)).
 - **안전성과 진행은 따로 간다.** class는 안전성 진술에서만 나오고, stall은 class를 정하지 않는다. 진행 결과는 `exh`(단계 4)나 실현된 wait-for 사실(단계 5)에서만 나오고, certificate는 진행을 말하지 않는다(spec §4.12 항목 9).
 - **obligation이 실패하면 빨간 경로로 빠진다.** 단계 2와 5에서 계층 간 검사가 어긋나면 그 판정은 `unknown(model_gap | model_fault | conformance)`가 되고, 경우에 따라 그 Φ version의 반복이 끝난다. 모형 증거와의 불일치(O6 (b), O10)는 탐색한 경계만 `contested`로 만든다(§1.9).
 
 ### 1.2 단계 1: 정적 census (spec §4.5, §4.6)
 
 census는 모든 판정의 출발점이다. Φ의 각 준비 상태 명세를 맞는 모든 문맥 위치에서 instance로 만들고, 아래 순서로 판단한다. 판단은 M마다 따로 한다(spec §4.6).
+
+> **rev 1.3부터 선택 경로** [D] (spec §4.4 머리; ADR-053; C-22). 아래 FIXED_ORDER·PROTECTED certificate와 `kz proofcheck`(spec §4.4–§4.5)는 보편 순서 진술이 필요할 때 쓴다. 관측 판정(§1.3), 예측(§1.4), 확인(§1.6)의 전제 조건이 아니고, R2도 그것을 요구하지 않는다. 다시 적용할 때는 보고서가 관계의 정의, 분석 영역, 전이 규칙의 단조성, 수렴 조건, 그리고 계산한 관계와 프로그램 순서 사이의 보존 논증을 준다. 고정점이 수렴했다는 것만으로 그 관계가 프로그램의 올바른 순서라는 뜻은 아니며, certificate는 늘 그 전제, 모형 범위, 증명되지 않은 lemma와 함께 보고한다. census와 skeleton view는 선택 경로나 closure 검사(spec §4.1)가 필요로 하는 곳에서 그대로 쓴다. 아래 본문은 바뀌지 않았다.
 
 **그림 D3 상세 1. 정적 census 판단** (렌더링: [diagrams/D3_analysis_static.svg](diagrams/D3_analysis_static.svg); spec §12 D3 (rev 1.2); §4.2, §4.5, §4.5.1, §4.6)
 
@@ -423,15 +429,25 @@ flowchart TD
 
 **칸별 reach를 위한 prefix probe**(spec §4.7 항목 6) [D]. (σ_U, M_impl) 밖의 칸에서 reach를 run으로 증명하려면 plan이 probe를 더한다. M_api에서는(L-MLEVEL이 적용되지 않으면) closed cone의 모든 actor가 발생까지의 prefix에서 부른 OSAL 호출의 반환값과, 돌아온 API가 type lock을 남겼는지를 본다. σ_U∞에서는 cone actor의 주기적이지 않은 timed wait와 지연을 둔 retry의 결과, kill timer 만료를 보고, M_impl에서는 OSAL RESERVED 대기의 반환 원인도 본다. hold·gate run에서는 같은 probe로 `timeout-exercised`를 정한다. 개수는 정하지 않았다. 이 probe가 생기기 전에는 그 칸의 run 기반 reach는 `assumed`다.
 
+**plan의 수동 보강** [D] (rev 1.3; spec §4.7 "Manual augmentation of the plan"; [P0.2] §5.4; C-24). [P0.2]는 2026-10-22 사용자가 올린 제안 0.2로, 개정 1.3의 기초다(D1). 위의 합성(`kz-static plan`)이 생기기 전까지 plan은 손으로 쓰거나 늘릴 수 있다(`profiles/<basis>/observe/sites.kzp`). 그때 계획한 site마다 자기가 채우는 요구를 적고, plan을 조건 instance마다 아래 목록과 대조한다.
+1. 조건의 검사·capture·효과 지점, 그리고 instance와 그 actor를 식별하는 생성·종료 event(`app_owner` 근거 포함, ADR-056).
+2. 관련된 상태, 등록, 이름, ID, 관계를 바꿀 수 있는 모든 writer, 별칭, 호출 경로. 애플리케이션, core service, OSAL에 걸쳐 찾는다. 풀리지 않은 호출과 외부 호출은 누락 가능성으로 기록한다.
+3. 예측을 위해, 조건이 이름을 대지 않더라도 cone이 필요로 하는 생성, lock 획득·해제, semaphore와 barrier, 송신·수신, 분기 결과 event(§1.4).
+4. 소스와 바이너리 위치에 묶은 값·actor·수명 capture. probe 예산 때문에 뺀 site는 나열한다.
+5. 실행 때: 부착 성공, 활성 구간, 수집기의 손실 보고, 새 task의 capture, 시작 상태 근거. 수집기가 보고하지 않는 종류의 손실에 대해 손실이 없다고 가정하지 않는다.
+6. 조건 instance마다 충족·미충족 요구. 이것은 아래 설명 집합으로 간다. 후보에 writer나 분기가 더 필요하면 그 instance의 plan을 늘린다.
+
+**OB-04.** plan과 관측 적합성 기록(spec §2.3)은 서로 다른 산출물이다. 계획한 site만으로는 관측되지 않은 쓰기를 배제하지 않는다. 설명 집합은 5번이 probe가 부착되었고 활성이었으며 손실이 보고되지 않았음을 보이는 곳에서만 좁아진다.
+
 **관측.** `kz observe`가 수정하지 않은 gcc 바이너리를 B 아래에서 실행하고 `run-*.kzt`를 쓴다. 파이프라인은 §5에서 다룬다.
 
 **`kz trace`가 하는 일**(spec §4.8. 번호는 spec의 step 번호와 같다).
 1. **decode와 loss.** thread별 순번(`tseq`)의 빈틈과 CPU별 drop counter로 기록 손실을 찾는다. 손실 구간에 기대는 판정은 `unknown(loss)`다. 손실을 "사건이 없었다"로 읽지 않는다(spec §5.6).
-2. **identity 결합.** 실행 task, 소유 앱, 서비스, 찍힌 AppId를 오프라인에서 결합한다. 프로세스 안에서 아무것도 조회하지 않는다(spec §5.7).
+2. **identity 결합.** 실행 task, 소유 앱, 서비스, 찍힌 AppId를 오프라인에서 결합한다. 프로세스 안에서 아무것도 조회하지 않는다(spec §5.7). rev 1.3(ADR-056; C-05): 결합은 모든 actor의 `app_owner`를 그 근거와 수준(`confirmed | inferred | undetermined`)과 함께 낸다([04 §1.4](04_formal_model.md#14-실행-관계와-생성-앱-rev-13)). 미확정 소유는 그대로 두고 보류 사유가 되며(아래 보류 사유), 분석하는 table의 조회로 결코 풀지 않는다.
 3. **HB 계산.** `VC`는 모든 확정 edge로, `VC_R`은 `unconditional`·`obs-fatal` edge(구조적 S 순서)로만 계산한다. **looper rule**: 한 looper(message를 받아 handler로 나누어 실행하는 actor)의 두 handler 사이에는 HB edge를 두지 않는다(CAFA PLDI 2014 [V-abs]; DCatch ASPLOS 2017 [P]; spec §1.9).
 4. **conjunct별 LP 구간.** 각 LP를 [그 actor의 직전 관측 사건, 직후 관측 사건] 구간으로 둔다. 두 LP의 구간이 HB로 순서 지어지면 HB-decided, Φ의 결과 대응표로만 정해지면 outcome-decided, 둘 다 아니면 ambiguous다.
 5. **routing.** 아래 표.
-6. **Allowed 평가.** 호출자 수준 Allowed를 §1.6의 horizon monitor로, 그 항목이 감시하는 actor(사용하는 actor, `defer_by_design`이면 미루는 actor)의 이어지는 실행 위에서 평가한다. monitor가 OPEN인 채 trace가 끝나면 그 발생은 PENDING이고 결과는 `unknown(horizon)`이다. `caller` 기록이 없는 항목(`rule` 기록뿐이거나 `supplier` 기록뿐인 항목)과 정상 연속을 인용하지 않은 `returned_and_tested` 항목은 monitor가 없고, 그 발생은 NOT_READY_UNJUDGED다(QT-4, Q15 엄격한 대안). 코드 사실(상태 변화, 반환 코드, 오류 반환·종료, 추출한 `cont_candidate`)은 그 발생의 consequence에 적는다.
+6. **Allowed 평가.** 호출자 수준 Allowed를 §1.6의 horizon monitor로, 그 항목이 감시하는 actor(사용하는 actor, `defer_by_design`이면 미루는 actor)의 이어지는 실행 위에서 평가한다. monitor가 OPEN인 채 trace가 끝나면 그 발생은 PENDING이고 결과는 `unknown(horizon)`이다(rev 1.3 요약 뷰에서는 `INCONCLUSIVE(horizon-open)`이고 위반 없음으로 세지 않는다, D2; [04 §11.6](04_formal_model.md#116-요약-뷰-rev-13)). `caller` 기록이 없는 항목(`rule` 기록뿐이거나 `supplier` 기록뿐인 항목)과 정상 연속을 인용하지 않은 `returned_and_tested` 항목은 monitor가 없고, 그 발생은 NOT_READY_UNJUDGED다(QT-4, Q15 엄격한 대안). 코드 사실(상태 변화, 반환 코드, 오류 반환·종료, 추출한 `cont_candidate`)은 그 발생의 consequence에 적는다.
 7. **race coverage.** 어떤 짝을 뒤집으려면 ad hoc 동기화 짝을 먼저 뒤집어야 하면, 그 동기화 짝을 뿌리로 보고하고 종속 짝을 붙인다(EventRacer OOPSLA 2013 [V-abs]).
 8. **준비 상태 위반 사슬.** frame 포함 관계와 Φ의 `emits` 표시로 사슬을 만든다. 예: R2의 `SEND_NO_SUBS` use 17개는 route가 없는 송신(K-ROUTE instance) 안에서 나온 event이므로 그 송신을 뿌리로 하는 사슬로 이어진다(K-ROUTE ⇝ K-ID; spec App. A.1 step 13).
 9. **template 없는 출처.** outcome mining과 key-pair enumeration을 계산한다(spec §7.1 항목 2–3).
@@ -450,6 +466,41 @@ flowchart TD
 wrong-way가 관측에서 끝나지 않고 정적 단계로 되돌아가는 이유는, trace 하나에서 본 구조적 순서는 그 실행에 대한 사실일 뿐 모든 실행에 대한 주장이 아니기 때문이다(spec §1.9 항목 3: "never an Exec-level claim").
 
 **결과 코드 일치(O4).** 프로그램 자신의 결과 코드(`ILLEGAL_APP_ID`, `NAME_NOT_FOUND`, `Q_FULL` 등)는 LP에서 계산한 상태와 맞아야 한다(O4(a)). 이 검사의 점검력은 HB-decided 사용에 대해서만 보고한다. outcome-decided 사용은 상태 자체를 검사 대상 코드에서 끌어냈으므로 점검으로 세지 않는다(spec §4.8 step 5). PROTECTED certificate가 있는 instance에서 관측된 미준비 발생(TOLERATED, PENDING 포함)과 FIXED_ORDER certificate가 있는 instance에서 관측된 READY·TOLERATED 발생은 O4(b) 위반이다. NOT_EVALUATED 발생은 어느 쪽도 아니고, 막힌 thread는 O4(b)가 아니라 진행 결과로 간다(spec §2.5).
+
+**불완전한 기록의 설명 집합** [D] (rev 1.3; spec §4.8 "Explanation set of an incomplete record"; ADR-055; [P0.2] §9.1–§9.3; C-25). trace는 event의 일부만 기록한다. 관측 판정은 **기록과 양립하는 실행의 모든 설명에서 성립할 때만 확정**이다. `Cobs`를 기록의 제약, `Vφ`를 검사한 구간에서 조건의 위반이라 하면, 판정은 `Qv = SAT(Cobs ∧ Vφ)`와 `Qn = SAT(Cobs ∧ ¬Vφ)`로 정한다.
+
+| `Qv` | `Qn` | 결과 |
+|---|---|---|
+| SAT | UNSAT | 모든 설명에서 계산한 status(`VIOLATING`, 요약 `OBSERVED_VIOLATION`, spec §1.10) |
+| UNSAT | SAT | 모든 설명에서 계산한 status(`READY`, 또는 ACCEPT를 가진 `TOLERATED`; 요약 `NO_VIOLATION_IN_CHECKED_PREFIX`) |
+| SAT | SAT | `INCONCLUSIVE(explanation_ambiguous)` |
+| UNSAT | UNSAT | 분석 입력 오류(spec §1.10) |
+| unknown 또는 끝나지 않음 | 무엇이든 | 다른 완전한 근거가 정하지 않으면 `INCONCLUSIVE(limit)` |
+
+이 표는 뜻을 정할 뿐, 검사마다 solver를 두 번 부르라는 요구가 아니다. 순서가 다 정해지고 다 덮인 구간은 재생이 바로 평가한다. 추상 영역의 가능한 상태 집합이 설명들을 대신할 수 있다(L-OBS, [04 §12.3](04_formal_model.md#123-lemma)). `Vφ`는 검사한 구간에 대한 것이고 미래에 대해서는 말하지 않는다. 열린 retry나 horizon 의무는 구간에 위반이 없어도 따로 보고한다. `Cobs`는 실행 **하나**의 모호함이고, 결코 예측한 다른 스케줄로 세지 않는다(§1.4).
+
+`Cobs`의 구성:
+
+| 정보 | 규칙 |
+|---|---|
+| 시작 상태 | INIT, 초기화 코드, 일관된 상태 capture로 정한다(IN-03, [04 §6](04_formal_model.md#6-분석-기준-b)). 모르는 값, 등록, 존재, 수명, 소유는 대안을 남긴다 |
+| 관측된 event | 값, 연산, actor, 호출 관계는 관측된 곳에서만 고정한다. event는 관측됐지만 그 내부 효과 지점은 관측되지 않았으면 가능한 구간을 남긴다(EV-04) |
+| 순서 | actor마다의 program order, 확인된 동기화 edge, 믿을 수 있는 관측 순서를 남긴다. 수집기의 병합 순서나 출력 순서를 결코 실행 순서로 쓰지 않는다(spec §5.8) |
+| 관측된 효과 | 그 버전의 효과 의미와 capture 지점이 대응하는 곳에서만 상태 전이로 적용한다 |
+| 관측되지 않은 효과 | 관련 자원, 값, 관계에 그것이 줄 수 있는 효과의 상위 근사를 넣는다. ID, 수명, 소유를 고정하지 않고 kind의 상태 집합을 넓힌다 |
+| 판정 구간 | 조건의 시작, 결정, Allowed horizon을 밝힌다. 기록의 끝은 열린 의무를 닫지 않는다 |
+
+**기록된 쓰기만으로** 자원을 갱신해도 되는 것은 다음이 모두 성립하는 구간뿐이다: 그 writer, 별칭, 외부 효과가 덮여 있다(위 수동 보강, spec §4.1 "Closure per case"); 시작 상태와 수명을 안다; 모든 효과의 probe가 맞는 지점에 부착되어 활성이었다; 그것에 대해 손실이 보고되지 않았다. 하나라도 성립하지 않으면 가능한 상태가 그 효과만큼 넓어지거나 판정을 보류한다. 순서 모호함은 writer 포괄과 따로 다룬다. 빠진 event의 수를 임의의 경계에서 잘라 다른 설명이 없다고 결론짓지 않는다. 유한 상태 요약이 지원하는 값·관계 영역에서 관련된 빠진 효과를 모두 덮지 못하면 결과는 `INCONCLUSIVE`다. 설명 집합을 예측 예산에 맞추려고 줄이지 않는다.
+
+- **OB-01.** 합성 재생 시험의 초기 상태 규약(`phi_reference.md` §6–§7)은 실제 부분 관측과 따로 둔다. 합성 시험의 편의를 실제 실행에 적용하지 않는다.
+- **OB-02.** 적용되지 않는 조건과 평가하지 않은 조건을 구분한다. 조기 반환으로 건너뛴 검사 지점은 통과한 검사가 아니다(`NOT_EVALUATED`). 그 반환 자체가 다른 조건을 위반하는지는 그 조건이 판정한다.
+- **OB-03.** 빠진 정보는 그것이 관련된 instance와 구간에만 영향을 준다. 다른 task의 관련 없는 빠진 event 하나가 모든 위반을 지우거나 모든 결과를 보류하게 하지 않는다.
+
+**실제 기록의 재생 규약** [D] (rev 1.3; spec §4.8 "Replay convention for real records"; ADR-055; C-26). 목록에 없는 자원은 그 kind의 초기 상태이고 목록에 없는 위치는 0이라는 재생기의 규약(`phi_reference.md` §6, 구체화 규칙 (2))은 합성 trace와 INIT에는 맞고, 실제 실행의 관측되지 않은 자원에는 **맞지 않는다**. **OB-05.** 실제 기록을 재생할 때, 조건이 읽는 관측되지 않은 자원이나 위치마다 가능한 상태, 값, ID, 수명, 관계를 명시적으로 준다. 모르는 자원 instance나 관계의 집합을 현재 영역에서 표현할 수 없으면 그것에 기대는 결과를 보류한다. 모든 상태 bit를 켜는 것만으로는 불확실성 전체를 나타내지 못한다(ID, 수명, 소유가 열려 있다).
+
+**보류 사유** [D] (rev 1.3; spec §4.8 "Reasons for withholding"; [P0.2] §9.3; C-27). `INCONCLUSIVE` 관측 결과는 다음 중 적어도 하나를 적는다: `start_state_unknown`, `loss`, `resource_or_lifetime_unmatched`, `ownership_undetermined`(task–애플리케이션), `effect_point_ambiguous`, `caller_requirement_absent`, `effect_unsupported`, `horizon-open`, `not_evaluated`, `explanation_ambiguous`, `limit`. 숫자로 된 신뢰도 점수가 확정 판정을 대신하지 않는다.
+
+**관측 판정의 검증** [D] (rev 1.3; spec §4.8 "Validation of the observation judgement"; [P0.2] §9.4). 작은 유한 기준 모형에서 구체적 실행을 독립적으로 나열한다. 그다음 event를 지우거나, 값을 모르게 하거나, 순서를 모호하게 만들고, 분석 결과를 그 부분 기록과 양립하는 구체적 실행의 집합과 견준다. 확정 판정은 그 집합 안에 반례가 없어야 하고, 추상화 때문에 생긴 보류는 따로 센다. 다루는 경우는 모르는 시작 상태, 빠진 writer, 실제 손실이 있는 계획된 probe, 별칭, ID 재사용, 조기 반환, 닫히지 않은 Allowed horizon이다(시험 T-17–T-20, spec §9.2). 이 시험과 evaluator agreement property test는 서로 다른 오류를 본다. 어느 것도 cFS에 대한 증명이 아니다.
 
 ### 1.4 단계 3: 예측 (spec §4.9)
 
@@ -480,7 +531,16 @@ wrong-way가 관측에서 끝나지 않고 정적 단계로 되돌아가는 이�
 
 **cFS 예 [I].** core task의 App-record 구간에서는 기본 boot trace에서 startup thread의 `cfe_es_start.c:816–818` critical section과 자식 task의 `GetAppID` critical section을 뒤집는다. task record가 먼저 채워졌으므로 자식의 poll은 성공 결과를 유지한다. witness가 나오면 `schedule-dependent(σ_U, M_api와 M_impl)`이다. label은 instance마다 정한다. 발생이 사용 시점에 정해지는 곳에서는 A-COMM이 `predicted`와 `predicted-modelled`를 가른다. 여기에는 core raise, 상태를 버리는 SB·TBL의 `GetAppID`, 그리고 엄격한 대안(Q15) 아래에서 `returned_and_tested` 항목이 연속을 인용하지 않아 사용 시점에 NOT_READY_UNJUDGED가 되는 EVS의 `GetAppID`와 TIME의 `CreateChildTask` 호출이 든다. REJECT가 결정 뒤에 오는 항목(연속을 인용한 `returned_and_tested`, `retry_until_ready`)에서는 예측한 뒤집기가 예측된 미준비 근거(PENDING)이고, horizon 완성으로만 witness가 되며 그때의 label은 `predicted-extrapolated`다. EVS 쪽 `GetAppID`(`cfe_evs_task.c:273`)는 검사된 상태를 `CFE_EVS_TaskInit`가 그대로 돌려주고(`:274–278`), 그 검사의 모든 post-dominator가 함수의 반환이므로 추출한 `cont_candidate`는 없다(§1.6). 이어서 `CFE_EVS_TaskMain`이 `CFE_ES_ExitApp(CORE_APP_INIT_ERROR)`를 부른다(`:215–220`). 이는 코드 사실이고 그 발생의 consequence로 남는다. EVS의 처리에 정상 연속을 인용한 reference가 없으므로 그 발생은 TOLERATED도 VIOLATING도 아니고 NOT_READY_UNJUDGED다(QT-4, Q15 엄격한 대안; spec App. A.2 step 3).
 
+**rev 1.3 추가** [D] (spec §4.9 "Revision 1.3 additions"; [P0.2] §7.3, §10; P-Z3 유지; C-28).
+- **engine.** 첫 구현은 작은 유한 cone 위의 명시적 상태 탐색(spec §4.9 step 5, 위 "탐색과 예산")이고, 기준 대조(시험 T-13)를 위해 reduction 없이 돈다. reduction은 독립성이 정당화된 연산에만 쓴다. SMT는 같은 작은 모형에서 구체적인 필요(상태 폭발, 명시적 탐색이 표현하지 못하는 제약, 탐색 비용)가 보일 때만 들인다. 그때 step 10이 교차 검사이고, 그 인코딩은 적어도 다음을 덮는다: event 위치와 순서 변수, actor마다의 prefix와 그 생성 제약; 유한 상태, 수명, 버전별 값 영역(C 정수 폭이 중요한 곳은 bit-vector); 값 출처에 묶인 읽기, 분기, 결과; lock 소유, 재귀, 해제 대응(상호 배제만으로는 방향이 결코 나오지 않는다); 지원하는 의미 안의 queue, counter, timeout(결코 빈 제약이 아니다). solver 버전, build, 설정, 인코딩 revision, 입력 hash를 결과의 근거에 넣는다. SAT 모델은 재생하고 그 조건을 다시 평가한다. unknown과 한도 도달은 `INCONCLUSIVE`다. solver 사용을 기여로 주장하지 않는다.
+- **관련 event의 역방향 닫힘**(step 1의 cone을 worklist로 쓴 것이고, §1.2의 MustBefore 고정점과 다르다). (1) 조건의 결정 event, 그 자원에 대한 효과, Allowed horizon의 결정 구간에서 시작한다. (2) 각 event의 actor prefix와 생성 근거를 더하고, 생략한 영역은 검증된 효과 요약으로만 바꾼다. (3) 동기화 선행자, 제어에 관련된 읽기의 값 출처, 그 값에 영향을 줄 수 있는 쓰기와 별칭, lock 소유 구간, message 대응을 더한다. (4) 읽기의 출처가 여럿일 수 있으면 대안을 남기고, 다른 task가 관련 상태를 바꿀 수 있으면 그것을 더하거나 간섭 없음을 정당화한다. (5) 더할 것이 없을 때까지 되풀이한다. 풀리지 않은 호출, 외부 효과, 한도로 멈춘 닫힘은 그것이 영향을 주는 후보와 함께 불완전으로 표시한다. 관측된 동기화 사실, program order, 모형이 다시 배열할 수 있는 lock 순서는 서로 다른 관계로 둔다. 관측된 task 사이 edge를 예측에 불변식으로 베끼지 않는다.
+- **값과 뒤 경로.** 순서를 바꾸면 조회 결과, 성공, 분기, 뒤 event가 바뀔 수 있다. 기록된 연속을 새 실패 실행에 붙이지 않는다. 목표 event까지는 필요한 값·제어 의존을 남긴다. 목표 event의 결과가 바뀌면 그 새 상태와 결과는 그 버전의 검토된 효과 의미로 계산한다. 실행 가능성을 계산하지 않은 연속은 거기서 후보를 끝낸다(또는 step 7a의 horizon 완성이 채운다). 그 구간 안에서 위반이 확립되지 않은 후보는 올리지 않는다. 새 분기나 retry 경로는 그 의미와 기록된 탐색 범위 변경과 함께만 들어온다. 효과, 메모리, 외부 호출 의미가 빠지면 예측을 보류한다.
+- **PR-01–PR-04.** lock 뒤집기는 상호 배제, 소유, data 효과를 만족해야 한다(step 3). lock edge를 지우는 것만으로는 아무것도 나오지 않는다. 만족하는 linearization은 요약 뷰에서 `MODEL_CANDIDATE`이고, step 4의 label(`predicted`, `predicted-modelled`, `predicted-extrapolated`)과 A-COMM 결과를 그대로 지닌다. `MODEL_CANDIDATE`는 프로그램 위의 실행 가능성에 대해 아무것도 말하지 않는다. "linearization 없음"은 밝힌 모형, 구간, 경로 범위에 대해서만 `NONE_IN_SCOPE`다. 시간·메모리·event 한도, unknown, 지원하지 않는 효과는 `INCONCLUSIVE`이고 놓친 수에서 결코 숨기지 않는다. L-PRED와 보장 G4는 `unproved`로 남는다(spec §6.2).
+- **내부 대조.** 단순 관측 검사와 자원 상태·연산 쌍 후보 방법이 이 engine과 같은 입력을 받는다(spec §8.4). 예측이 사례에 아무것도 더하지 않으면 그 근거로 방법을 단순화한다.
+
 ### 1.5 단계 4: bounded explorer (spec §4.10; S7, gated)
+
+> **rev 1.3부터 선택 경로** [D] (spec §4.10 머리; ADR-053; C-29). 작은 유한 모형 위의 전수 모드 `exh`는 먼저 시험 T-13의 독립 기준(예측 engine과의 대조, §1.4)으로 쓴다. 닫힌 cone 위의 전체 explorer, 그 refinement, 그 진행 결과는 그대로 아래 kill criterion(spec §4.10 항목 9)에 묶여 있다.
 
 explorer는 후보마다 닫힌 모형을 만들고 실행을 체계적으로 나열한다. 구현 단계 S7부터 쓰는 늦은 구성요소이고, kill criterion을 통과해야 쓴다.
 
@@ -560,6 +620,17 @@ stall은 안전성 기록을 정하지 않는다. 특히 나쁜 발생 없는 st
 - **결과 label.** `realized`(naturalness `held-F0`, `gated-F1`, `timeout-exercised`; 구성한 스케줄이면 flag `derived`), `refuted`(순서는 일어났는데 결과가 좋음: 그 witness를 낸 모형이나 요약이 그 prefix에서 틀렸다. witness를 거두고 O6으로 보고하며, `exh` witness였으면 탐색한 경계가 `contested`가 된다. 규칙은 정지하지 않는다), `inconclusive`다([06 §12.7](06_observation_confirmation.md#127-label)). `timeout-exercised`는 hold 중이나 hold 뒤 witness의 판정 사건 전에 cone actor에 시간 기반 전이가 일어났다는 뜻이고, prefix probe로 정한다.
 - **σ_E와의 관계.** hold나 gate로 얻은 witness는 σ_E class를 만들지 않는다(`σ_E(held)`). 실현된 witness마다 perturbation 비율을 문턱값 없이 붙인다([06 §12.8](06_observation_confirmation.md#128-perturbation-기록과-비율); spec §4.12 항목 8).
 - **보류의 기준과 표시**(P-C1HOLD, D1 [D]). hold는 사건 기반으로 푼다. C1의 실패 경로는 provider를 생성 직전에 보류하고, CF의 재시도 종료나 최종 초기화 결과라는 사건에서 푼다. 재시도 수와 지연은 선택한 CF 버전의 소스에서 읽고, 그 곱을 벽시계상의 안전한 상한으로 간주하지 않는다. 감시 한도(watchdog)와 중단 조건은 본실험 전에 기록한다. 보류로 만든 실패는 자연 실행과 구분해 표시하고, timeout 관측만으로 영구 교착이라 판정하지 않는다. RESERVED 구간 실험은 다섯 사례 밖의 후속 OSAL 결함 후보 항목이다. hold·정지·해제를 쓴 통제 run은 관측만 한 run과 구분해 표시하고 관측 영향 점검(spec §8.6)에서 섞지 않는다.
+- **재사용 조건과 확인 규칙** [D] (rev 1.3; spec §4.13 "Reuse conditions and confirmation rules"; [P0.2] §11.1–§11.1.1; C-31). 위 기제는 측정하지 않은 설계다(spec §5.11). 다음 조건에서 쓴다.
+  - 먼저 작은 두 task 프로그램에서 검증하고(개별 정지, 해제, 기다리는 event의 실제 도착, 교란), 그다음 cFS에서 쓴다.
+  - gate 위치는 gate 위치 규칙(아래 06 §12)을 따른다. 어느 쪽에도 안전한 지점이 없으면 그 후보는 현재 기제로 확인할 수 없다고 보고한다.
+  - 해제는 자원, 호출, 수명, 결과가 맞는 event를 기다린다. 오류나 종료 시의 해제와 관측을 포기하는 조건은 plan과 함께 기록한다. C1의 해제는 `plan/C1_basis_plan.md`를 따른다(P-C1HOLD).
+  - ptrace, hardware breakpoint, 새 task에 대한 자동 부착은 그 플랫폼 지원, slot 사용, signal 상호작용, 정지 부작용을 확인한 뒤에만 쓴다. 설계가 그것을 이름으로 든다는 것은 동작한다는 근거가 아니다.
+  - watchdog은 reference의 timeout과 파일럿에서 잰 경과 시간에서 온다. retry 수 곱하기 지연을 그것만으로 안전한 벽시계 한도로 쓰지 않는다.
+  - 자연 실행, 순서를 정한 실행, 제어가 timeout을 일으킨 실행, 코드·구성 변경 실험을 따로 둔다. 비정상 종료 뒤에는 다음 실행의 초기 상태와 유지 자원을 확인한다(normalization).
+  - **CF-01.** `CONFIRMED`에는 통제 실행에서의 조건 위반이 필요하다. crash 하나만으로는 아무것도 확인하지 않는다.
+  - **CF-02.** 다른 자원, 호출, 경로의 위반은 따로 된 발견이고, 결코 그 후보의 재현이 아니다.
+  - **CF-03.** 재현 실패나 시간 한도는 `NOT_CONFIRMED(reason)`(도달 못함, 제어 실패, 상태 불일치)이고, 결코 실행 불가능의 증명이 아니다.
+  - **CF-04.** 제어가 새 timeout이나 입력 차이를 만들어야 나오는 결과는 후보의 위반과 따로 둔다. 코드 변경이 필요한 결과는 mutant나 재구성 실험이다. 모형은 같은 실행 조건을 만족하고 예측과 모순되는 관측으로만 반박된다(위 `refuted` label).
 
 gate 위치 규칙 네 가지, 사건 기반 해제와 watchdog, wait-for oracle, normalization boot, 그리고 cFS 예(core task App-record 구간 확인, PI 결정 D16)는 [06_observation_confirmation.md §12](06_observation_confirmation.md#12-확인-실행-spec-413)에 있다.
 
@@ -576,6 +647,7 @@ gate 위치 규칙 네 가지, 사건 기반 해제와 watchdog, wait-for oracle
 | 7 M 수준 | M_api는 항상, M_impl은 cone이 M_impl-relevant일 때. 두 수준이 다르면 `portability-hazard`나 `implementation-defect-candidate` |
 | 8 perturbation | 실현된 witness마다 perturbation 비율을 붙이고 문턱값은 두지 않는다 |
 | 9 진행 | `exh`(§1.5)나 wait-for 사실이 있는 실현된 hang(§1.6)에서만 나온다. certificate, 예측, σ 사이의 전이로는 정하지 않는다(`deadlock-cycle`, `leaked-lock` stall 상태는 예외). 기본값은 `unknown(not_checked)`, K-TEARDOWN instance는 `unknown(teardown_scope)`다. 딸린 진행 결과는 progress chain으로 뿌리에 붙이고, 보고는 뿌리를 한다 |
+| 10 요약 뷰 (rev 1.3) | 요약 값([04 §11.6](04_formal_model.md#116-요약-뷰-rev-13))은 마지막에, 칸마다 그리고 종류(관측, 예측, 확인)마다 기록에서 계산한다. 관측, 예측, 확인은 따로 보고하고 따로 센다(OUT-01). instance의 실행 관계(spec §1.1)를 함께 보고하고, 어떤 actor의 `app_owner`가 미확정이면 `ownership undetermined`다(spec §4.12 항목 10; ADR-054; C-30) |
 
 ### 1.8 단계 7: σ_E로 옮기기 (spec §1.8 전이 규칙, §4.12 항목 4)
 
@@ -619,6 +691,10 @@ gate 위치 규칙 네 가지, 사건 기반 해제와 watchdog, wait-for oracle
 | C1 | 기본 B: `inactive(B)`. 공개 BP 기반 B′(D22): open | B′: O-ordered(countsem table lock을 거친 reads-from) | explorer σ_U 대 σ_U∞; M_impl deadlock 검사; 선언한 실험의 hold | B′ M_api: σ_U `schedule-dependent`, σ_U∞에서 `¬Bad_i`이므로 refinement `timeout-dependent`(`exh`). 수정 전(CF `281a941`)의 발생은 NOT_READY_UNJUDGED이고 σ_U∞에서도 schedule-dependent다. M_impl: CF의 retry 항목이 `caller` 기록을 가질 때 [I] `INCORRECT_OBJ_STATE`는 결정 시점의 REJECT라 VIOLATING(그 기록이 없으면 NOT_READY_UNJUDGED; refinement 없음), 남은 lock 뒤의 actor들은 `leaked-lock` 진행 결과로 CF의 시도에 사슬; implementation-defect candidate(OSAL F1). σ_E로 옮기지 않음 | spec App. A.4 |
 | SB 구독 전 송신: SCH_LAB wakeup 대 늦은 구독자(K-ROUTE) | — | — | 예측; 구독자 hold | `schedule-dependent(σ_U)`, 호출자 수준 LOSS-UNDER-ORDER(framework 수준 cSB4305.5 `documented-not-error`는 따로); 지금까지 "no σ_E bad witness in n of N runs" | spec §7.3 |
 | 시작 폭주 `SBNSubPipe`(K-MODE + K-CAP + K-CAP.msglim) | backlog 경계가 용량 10을 넘어 protected certificate 없음 → open | — | 통제하지 않은 실행이 σ_E witness를 준다 | 같은 put 서수가 한 자연 run에서 전달되고 다른 자연 run에서 넘치면 `schedule-dependent(σ_E)`, 한 run 안의 앞뒤 put만이면 `ordinal-split(σ_E)`; LOSS-UNDER-ORDER, harm `unspecified_by_reference` | spec App. A.5 |
+
+**rev 1.3** [D] (ADR-053, ADR-057; spec App. A.1, A.4 머리; C-49, C-50).
+- **R2.** 위 표의 R2 행은 선택 경로인 certificate를 쓸 때의 기대 기록이다. R2는 관측 경로의 **기반 검증**(rung V1′, §4.1)이고 기여의 증거가 아니다(spec §6.4 항목 58). certificate는 논문이 "도달한 모든 발생이 VIOLATING"이라는 보편 진술을 할 때만 쓰고, 그것이 없으면 R2의 칸은 "스케줄 의존성 미확정"으로 읽는다(spec §1.10). **관측 판정의 기대 결과** [I] (S1-R2의 8-site plan, `kairos/profiles/cfs-v7.0.1/observe/sites.kzp`): `AppID` 인자가 0이고 반환이 `CFE_EVS_APP_ILLEGAL_APP_ID`인 사용 24개는 그 호출에서 `VIOLATING`이고(value conjunct는 관측되는 인자에서 capture한다) 요약은 `OBSERVED_VIOLATION`이며, actor ES와 EVS의 `app_owner`는 `inferred`(`match-by-time`)다. 발행 뒤의 사용은 registry conjunct에 대해 `INCONCLUSIVE`(`start_state_unknown` / `effect_unsupported`: registry conjunct의 LP도 등록 writer도 계획되지 않았다)이고, 결코 `VIOLATING`이 아니며 `NOT_EVALUATED`를 준비됨으로 읽지도 않는다(ADR-055). registry LP와 `register` 효과를 plan에 더하면(§1.3 수동 보강) 그 사용들은 `READY`로 기대한다. 24개가 store보다 앞선다는 것은 HB edge나 certificate로 순서가 확립될 때까지 단일 시계의 근거다(spec §5.8).
+- **C1**은 기여 증거의 첫 사례다(D3; spec §8.2). 경로는 버전으로 나눈다. CF `281a941`(retry 없음)에서는 실패한 조회 한 번이 CF의 초기화를 끝낸다. CF `833fdbb`(retry 추가)에서는 앞의 실패 시도가 그 revision으로 다시 묶은 CF 시작 인정의 `caller` record를 거쳐서만 허용되고(anchor audit이 C1의 첫 출력의 전제 조건이다), 소진은 따로 된 결과다. OSAL 내부 object 상태와 lock에 기대는 경로(`OS_ERR_INCORRECT_OBJ_STATE`, K-LOCKBAL)는 다른 결함 후보이고 다섯 사례의 수에 더하지 않는다(P-C1HOLD). C1을 retry 소진으로 줄이지 않는다(spec §1.8). 표의 C1 행에서 수정 전 발생이 NOT_READY_UNJUDGED인 것은, rev 1.3이 App. A.4 step 6의 이전 label "VIOLATING"을 QT-4/Q15 엄격한 대안을 적용한 step 3 쪽으로 정리한 것과 같다. 둘 다 bad이므로 class는 같다.
 
 ---
 
@@ -1026,6 +1102,15 @@ stateDiagram-v2
 
 **첫 목표: 검증 사다리**(validation ladder; spec §9.3; ADR-044; P-LADDER는 2026-10-15에 승인) [D]. 사다리 V0–V4와 사례별 경로가 채택됐다. R2 처리 경로를 먼저 끝까지 구현하면서 다른 사례의 reference 원문과 구성을 병행해 준비한다. 앞서의 큰 최소 묶음 전체는 첫 완료 조건이 아니고, thin MVC는 주장 표와 자르는 순서의 이름이다. 첫 목표는 thin MVC 전체가 아니라 사다리의 rung V1이다. 사다리는 단계 의존성, 입력, 결정에 따라서만 순서를 정한다. 단계(S0–S10)는 무엇을 만드는지, rung은 무엇을 끝에서 끝까지 확인하는지를 말한다.
 
+**rev 1.3의 사다리** [D] (spec §9.3 "Ladder of revision 1.3", §9.4 머리; D1, D3, D5; P-LADDER 재정의; ADR-057; C-42, C-43). 사다리를 다음처럼 다시 정한다. 서로 다른 곳에서는 이 문단이 이 절의 다른 문단, 아래 사다리 표와 단계 표, 그림 D4(아직 rev 1.2 판)보다 앞선다.
+- **V1′ R2 기반 검증**이 V1을 대신해 첫 rung이 된다. ENV basis에서 관측(S1), task–애플리케이션 매핑을 포함한 정규화, 설명 집합을 가진 관측 판정(S2, §1.3), 신뢰 장부를 R2의 동결된 기대표(spec App. A.1의 rev 1.3 주석, §1.10 끝)와 대조한다. V1의 certificate 출구 항목(FIXED_ORDER, `kz proofcheck`, R2 certificate 장부)은 **선택**이고, 논문이 R2의 보편 진술을 할 때만 쓴다. V2(R2의 대조 basis)는 V1′ 뒤에 온다.
+- **V3, 곧 D22 basis 위의 C1은 V1′와 병행한다.** 공개 BP basis 구축, 애플리케이션 닫힘(spec §4.1 "Closure per case"), C1의 관측 계획(§1.3)은 단계 B와 함께 시작한다. C1의 예측, 확인, 기여 증거가 뒤따른다(spec §8.2).
+- **[P0.2]의 단계 A–F**는 rung에 대응한다. A(자산과 사양의 대응; 다섯 사례가 모두 나타남) = V0와 paper track. B(실제 기록 판정) = V1′와, V3, VP-D3, VP-D4의 관측 부분. C(한정 예측) = V3에서 먼저 S5. D(실행 확인) = V3에서 먼저 S6이고, **R2의 관측만으로는 끝나지 않는다**. E(동결 뒤 독립 평가) = V4b. F(논문 주장) = spec §1.11의 기여 가설과 함께 V4a.
+- **사례마다 단계 B의 완료(D5)**에는 다음이 필요하다: 근거까지 추적할 수 있는 실제 기록 판정과 올바른 대조 판정; 시험 T-05, T-17–T-20 통과; 그 사례의 조건이 필요로 하는 writer와 별칭을 그 사례의 닫힘이 덮는 것(spec §4.1). 그래서 C1, C2, C5에는 애플리케이션 닫힘이 필요하고, 그 track에서는 S3a의 app-unit link probe가 필수다(C-43). 사례의 조건이 덮이는 곳에서는 S2가 S3a의 전체 추출을 기다리지 않는다.
+- 실행할 수 있는 사례부터 구현을 시작해도 되지만, 다른 네 사례의 표현을 미룬 채 한 사례용 engine을 완성하지 않는다. "다섯 사례를 검토했다"는 결코 "다섯 사례를 탐지했다"가 아니고, 원래 사례와 그 재구성을 한 결과로 더하지 않는다.
+- **만드는 순서**(spec §9.4 머리): R2에서 spec §2.2의 필수 경로를 만들고(V1′), C1의 basis, 닫힘, 관측 계획을 병행한다(V3). certificate 경로는 보편 순서 주장을 할 때만 만든다.
+- **시험 T-01–T-22**(spec §9.2 "Tests added in revision 1.3"; [P0.2] §15.1; C-45)가 단위, golden, litmus 수준에 더해진다. T-05, T-17, T-18, T-19, T-20은 trace 판정(단계 B)의 완료 조건이다. 각 시험의 구성과 기대 결과는 spec §9.2의 표에 있다.
+
 | rung·track | 확인하는 것 | 필요한 결정 |
 |---|---|---|
 | V0 | 형식 수정(ADR-039–ADR-043). litmus LP-DL과 LP-TW의 기대 결과, 열린 lemma 의무 목록, D20 결정(A, 2026-10-15). **V0-P**: V1의 결과를 certificate나 전이로 적기 전에 그 말이 쓰는 lemma 의무를 적고 검토한다. 그런 lemma는 각각 증명 상태를 달고(spec §6.2), 문구는 가장 약한 상태를 따르며(PS3), 상태는 써 넣은 증명만 올린다(PS1) | D20(A, 결정); QT-2–QT-5, QT-9, Q15(2026-10-15 결정; ADR-048) |
@@ -1316,7 +1401,7 @@ flowchart TD
 
 ## 6. 이 문서가 주장하지 않는 것
 
-spec §6.4의 57개 항목 중 워크플로우와 직접 관련된 것만 묶었다. 항목 26–43은 EXT-20261012가, 항목 44–57은 revision 1.2(2026-10-15)가 더했다.
+spec §6.4의 62개 항목 중 워크플로우와 직접 관련된 것만 묶었다. 항목 26–43은 EXT-20261012가, 항목 44–57은 revision 1.2(2026-10-15)가, 항목 58–62는 revision 1.3(2026-10-22)이 더했다.
 
 - **경보 없음에서 안전을 말하지 않는다.** 경보 없음, 경계 밖 탐색, 예측·prefilter의 침묵, obligation이 실패한 모형은 "safe"나 "위반 없음"의 근거가 아니다(항목 2). σ_E에서는 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"만 쓰고 "timing-protected"라 하지 않는다(항목 3).
 - **보편 class의 근거를 넓히지 않는다.** 반복 실패 실행이나 trace 하나의 `VC_R` 사슬에서 fixed-order를 내지 않는다(항목 4–5). h로 자른 view의 결과에는 h를 b에 적는다(항목 6). cone이 M_impl-relevant인 M_api 판정의 σ_E 타당성을 말하지 않는다(항목 7). fixed-order instance의 모든 실행이 결정에 이른다고 말하지 않는다(항목 35).
@@ -1331,6 +1416,7 @@ spec §6.4의 57개 항목 중 워크플로우와 직접 관련된 것만 묶었
 - **사례의 범위를 넓히지 않는다.** C2의 비공개 시스템을 재현했다고 하지 않는다. 결과는 C2 기제의 역할 기반 검증이고, 공급자의 늦은 초기화가 실패하지 않는다는 가정은 재구성에만 적용되며 2 × 2의 네 칸은 독립된 실제 결함 네 개가 아니다(항목 50; P-C2, Q22). 이 container의 32-bit header로 한 analysis-only parse에서 C3·C5의 원래 6.4.1 플랫폼 실행을 재현했다고 하지 않고, header에 민감한 결과는 그 민감성이 풀리기 전에 쓰지 않는다(항목 51; D13). RESERVED 구간·lock 누수 실험을 C1 검증이나 다섯 사례의 결과로 세지 않고, hold가 만든 실패를 자연 실행의 실패로 부르지 않으며, 시간 초과 관측만으로 영구 deadlock이라 하지 않는다(항목 52; P-C1HOLD).
 - **판정의 근거를 만들지 않는다.** `rule` 기록만으로, 또는 추출한 후보 continuation만으로 발생이 받아들여졌다거나 `TOLERATED`라거나 harm이라고 하지 않는다. 어떤 reference도 정하지 않은 상충하는 reference 문서 사이의 우선순위를 만들지 않는다. K-SPAWN.osal과 K-LOCKBAL을 준비 상태 위반(호출자 요구사항의 위반)으로 만드는 연구자 작성 요구사항을 두지 않는다(항목 53; QT-4, Q15, QT-5, QT-9).
 - **비교와 통계의 범위를 넘기지 않는다.** 기존 process-level 도구 사이의 점수나 순위를 매기지 않고, `NOT_RUN` 칸을 놓친 것으로 세지 않으며, 확인하지 않은 `REPORTED` 칸을 사례 탐지로 세지 않는다. 재구현의 결과를 원래 도구의 결과로 쓰지 않고, 읽지 않은 도구의 표현력이나 관측 범위를 검색 발췌에서 말하지 않는다(항목 54; spec §8.3, P-PAPERS). 다섯 사례를 독립 표본으로 삼는 유의성 검정, 일반 비율, 구간을 만들지 않고, 출처의 "race"라는 말에서 도구 class 라벨을 자동으로 만들지 않으며, 독립 평가자 두 명이 생기기 전에 독립 검토를 했다고 하지 않고, 변형 예제의 결과를 변형 집합 밖의 결과로 쓰지 않는다(항목 55; P-STATS, P-CLASSGT, P-TRIAGE, D8/P-RECALL). 모형 기반 σ_R1(D4)에서 실제 실시간 실행 결과를 말하지 않으며, 후순위인 F1 `--wrap` gate와 PCT의 결과는 없다(항목 56). 사례를 하지 않는다는 기록이나 다른 코드의 결과로 다섯 사례 검증을 완료했다고 하지 않는다(항목 57; P-F1GATE, P-D18GATES (b)). MLIR은 로드맵에서 제외했으므로 MLIR 표현에 대해서는 아무것도 주장하지 않는다(항목 15; D6).
+- **rev 1.3에서 더한 것** [D] (C-36). R2의 관측 판정 결과를 기여의 증거로 쓰지 않는다. R2는 관측 경로의 기반 검증이다(항목 58; ADR-057). `PENDING`·`OPEN` 발생에서 나온 `INCONCLUSIVE(horizon-open)`을 위반 없음이나 허용된 결과로 세지 않는다(항목 59; D2). 빌드하거나 실행하지 않은 기존 도구를 "탐지하지 못한다"고 쓰거나 놓친 것으로 세지 않고, 그 부족분은 문헌·코드 분석의 결과 상태로만 말한다(항목 60; D4, ADR-058). 애플리케이션 소유가 미확정인 instance의 결과를 앱 간 결과로 내지 않는다(항목 61; ADR-056). 불완전한 기록 위의 보수적 판정, SMT solver 사용, 애플리케이션 소유 표시, certificate의 존재를 그 자체로 새로움이라 주장하지 않는다(항목 62).
 
 ---
 
@@ -1361,4 +1447,5 @@ spec §6.4의 57개 항목 중 워크플로우와 직접 관련된 것만 묶었
 - spec: 주로 §4.6–4.14, §1.10, §7.2, §9.3을 풀어 쓴 것이다. 평가 계획(§7.5, §8)의 상세는 [07_evaluation.md](07_evaluation.md), 관측·확인의 상세는 [06_observation_confirmation.md](06_observation_confirmation.md)가 맡는다.
 - PI 결정: D1, D3, D8, D13–D17, D20–D22, P-LADDER, P-D18GATES, P-F1GATE, P-RECALL, P-TRIAGE, P-STATS, P-CLASSGT 등 단계와 rung을 여는 결정. 2026-10-15에 결정된 값은 spec §10.1에 있다([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). 열린 채 남은 것은 D18(C1 부분 제외), P-TRACEFS, D8/P-RECALL의 세부다.
 - revision 1.2: 2026-10-15 결정의 반영은 spec §0.9–§0.11과 ADR-045–ADR-052에 있다. 용어 결정 T1은 ADR-052이고, 이름의 대응은 spec Appendix C에 있다.
+- revision 1.3: 2026-10-22 결정(D1–D5)의 반영은 spec §0.12와 ADR-053–ADR-058에 있다(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md), 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)). 요약 뷰, 고정 순서 근거, `app_owner`, A-OBS·L-OBS는 [04_formal_model.md](04_formal_model.md) §1.4, §11.6–§11.8, §12에 있다.
 - 검토 쟁점: X1–X3의 57개 처리([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012의 처리는 spec §0.7과 ADR-039–ADR-044에 있다. 이 문서의 안전성·진행 분리, 발생 서수, 네 질의, O10, 검증 사다리가 그 반영이다.

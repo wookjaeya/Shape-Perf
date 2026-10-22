@@ -134,20 +134,43 @@ spec의 선행 연구 입장은 한 문장이다. **"개별 메커니즘에는 �
 
 "최초의 process race detector"라는 말도 쓰지 않는다. RacePro, SimRacer 등이 이미 있다(spec §6.4 항목 24; [R06 §6.3 항목 11]).
 
-spec이 방어할 수 있다고 보는 기여는 다음 조합이다 [I] (spec §1.11 "Defensible contribution". [X1 §4]를 따르고 EXT-20261012 §3, §5.1–§5.2가 고쳤다).
+revision 1.3은 그 밖에 다음도 그 자체로는 새로움으로 주장하지 않는다고 적는다: 불완전한 기록 위에서의 보수적 판정, 애플리케이션 소유의 표시, SMT solver의 사용, certificate가 있다는 사실(spec §1.11 "Contribution hypotheses"; §6.4 항목 62).
 
-1. σ와 M을 밝힌 **must-order certificate**. 관측된, HB상 순서가 정해진 계약 위반을 보편 class `fixed-order`로 끌어올린다. 이것은 명시한 trusted base에 상대적으로 다시 검증한 안전성 진술이다(trust ledger, spec §4.5.1).
+### 1.1 기여 가설과 반증 조건 (revision 1.3)
+
+revision 1.3은 기여를 사실이 아니라 **시험할 가설**로 적는다 [D] (spec §1.11 "Contribution hypotheses and their falsification"; [P0.2] §16.1.1; 2026-10-22 결정 D4; ADR-053, ADR-058; 변경표 C-13).
+
+**가설.** cFS task 사이에는 기존 process race 탐지의 관측 표현과 자원 효과 표현이 놓치는 process-level 순서 위반이 있다. 그리고 cFS의 자원 identity, 상태 효과, 실행 제약, task→앱 매핑을 명시적으로 잇는 탐지기가 그 차이를 줄인다. 연구 대상은 여전히 process-level 순서 위반의 탐지다.
+
+| 시험할 주장 | 필요한 근거 | 주장할 수 없는 경우 |
+|---|---|---|
+| 기존 기법이 이 사례들에서 실제로 모자란다 | 같은 사례와 basis에서 원 도구의 관측, 표현, 탐색, 판정을 따라가 본 것. **원 도구를 돌릴 수 없으면 spec §8.3의 문헌·코드 분석 결과 상태만** 쓴다(2026-10-22 결정 D4) | 원 도구가 이미 그 조건을 탐지하거나, 환경 구축 실패만 보인 경우 |
+| 새 모형화와 분석이 탐지를 낫게 한다 | 같은 입력과 조건에서 요소 하나씩의 효과(자원 수명, 값의 출처, 실행 제약, 소유; spec §8.4) | 보고서에 앱 이름만 더해지거나, 단순 상태 검사가 같은 판정과 발견을 내는 경우(R2, spec §6.4 항목 58) |
+| 실행에서 보이지 않은 실제 잠재 위반을 찾는다 | 기록에 없는 후보가 유효한 값과 경로를 갖고, 같은 basis에서 확인되거나(spec §4.13), 근거 있는 예측 보장이 있는 것 | 실현 불가능한 후보만 더해지거나, 실패가 통제의 부작용에서만 오는 경우(CF-04) |
+| 규칙이 다섯 사례에 맞춘 것이 아니다 | 동결한 engine과 일반 규칙을 새 사용에 적용하고, 그때 더 든 적응 비용(spec §7.5) | 대상마다 버그 전용 조건이 필요한 경우 |
+
+GPredict의 원리를 cFS에 적용한 것만으로 충분한 새 기여가 보이지 않으면, 그 한계를 보고하고 알고리즘과 표현이 실제로 더하는 효과를 더 시험한다. 관측 판정과 사례 basis 구축은 차별점 시험보다 먼저 한다(spec §1.11). 기존 도구에 대한 이 주장은 "탐지하지 못한다"로 쓰지 않는다(§7.3; ADR-058).
+
+### 1.2 revision 1.2까지의 기여 문단 (기록으로 남김)
+
+아래는 revision 1.2의 "Defensible contribution" 문단이다. spec은 이것을 이전 주장의 기록으로 남기고, certificate를 첫 기여로 부르는 곳에서는 ADR-053이 앞선다고 적는다(spec §1.11). 그 문단이 방어할 수 있다고 본 기여는 다음 조합이다 [I] ([X1 §4]를 따르고 EXT-20261012 §3, §5.1–§5.2가 고쳤다).
+
+1. σ와 M을 밝힌 **must-order certificate**. 관측된, HB상 순서가 정해진 준비 상태 위반을 보편 class `fixed-order`로 끌어올린다. 이것은 명시한 trusted base에 상대적으로 다시 검증한 안전성 진술이다(trust ledger, spec §4.5.1). revision 1.3에서 이 경로는 선택 경로이고, R2에 certificate가 필요하지 않다(ADR-053).
 2. 출처와 reference horizon이 붙은 **호출자 수준 Allowed** 결과(spec §1.6 "Three judgements")와 **conjunct별 LP**.
-3. 위 둘을 **lock을 뒤집는 예측**, **hold 확인**(실제 바이너리에서 한 thread를 붙잡아 순서를 강제하는 확인), **평가**와 결합한 것. 평가는 탐지, 분류, 근거를 따로 보고하고, 놓친 것을 history 유래 mutant와 수정 전후 쌍으로 잰다(recall protocol).
+3. 위 둘을 **lock을 뒤집는 예측**, **hold 확인**(실제 바이너리에서 한 thread를 붙잡아 순서를 강제하는 확인), **평가**와 결합한 것. 평가는 다섯 설계 사례에서 탐지, 분류, 근거를 따로 보고하고, spec §8.3의 여섯 분석 질문으로 기존 Process-Level Race 연구와 비교하며(차이는 기존 도구의 부족이 확인된 곳에서만), 별도의 확장 평가(D8/P-RECALL)에서 놓친 것을 history 유래 mutant와 수정 전후 쌍으로 잰다(recall protocol).
 4. 이 전체를 cFS 의미론, 곧 [R04 §5]의 **gap G1–G8**(§5)을 중심으로 조직한 것.
 
 **더 가까운 선행 연구 셋** (spec §1.11). 개별 메커니즘 말고도 세 갈래가 더 가깝다. 예측된 trace에서 사용자가 쓴 속성을 검사하는 GPredict(ICSE 2015 [V-abs]), 다중 thread 프로그램의 predictive typestate checking(Joshi & Sen, ASE 2008), trace 위에서 검사하는 framework 생애주기 typestate와 protocol 명세(Lifestate, ECOOP 2019)다. 세 논문 모두 전문을 읽지 않았다(P-PAPERS; §0.3).
 - 그래서 후보 기여는 cFS에 특화한 추출, 분류, 근거다. 명세나 framework typestate를 쓰는 것 자체가 아니다.
 - Joshi & Sen과 Lifestate에 대해 주장하는 차이는 하나뿐이다. 호출자·소비자·미션의 reference가 받아들이는 미준비 결과마다 reference horizon과 출처가 붙고, framework의 문서화된 결과는 따로 보고한다(spec §1.6). 이 차이도 두 논문을 확인할 때까지 보류다.
 - 다른 명세 기반 기법이 Allowed를 표현하지 못한다는 주장이 아니다(spec §6.4 항목 37).
-- R2 밖에서도 보여야 한다. C1, C2, C3, C5에서 분류 차이는 explorer(S7)와 사례 basis(C1은 D22, C2는 P-C2, C3·C5는 D13)가 있어야 나온다. R2 하나에 그친 결과는 단일 사례 결과다(spec §1.11, §8.8, §9.3).
+- R2 밖에서도 보여야 한다. C1, C2, C3, C5에서 분류 차이는 explorer(S7)와 사례 basis(C1은 D22: 결정됐고 아직 만들지 않음, C2는 P-C2, C3·C5는 D13)가 있어야 나온다. R2 하나에 그친 결과는 단일 사례 결과다(spec §1.11, §8.8, §9.3). revision 1.3에서 R2는 관측 경로의 기반 검증이고 기여의 증거가 아니며, 기여 증거의 첫 사례는 C1이다(2026-10-22 결정 D3; ADR-057; spec §6.4 항목 58).
 
-이 입장은 검토에서 고쳐졌다. 검토 X1은 이전 판(v1)이 InitRacer와 RVPredict/GPredict에 이미 있는 것을 Kairos가 더하는 것처럼 적었고, ExceptioNULL을 인용하지 않았으며, gap G3의 새로움을 검색하지 않았다고 지적했다([X1-M12]). spec은 이를 받아 §1.11을 고치고 같은 계열의 비교 도구 셋을 더했다(ADR-025, ADR-037). 외부 검토 EXT-20261012는 비교를 다시 고쳤다(spec §0.7 항목 6; ADR-042). 같은 계열 비교 도구는 Kairos와 같은 성질 정보를 받는다. 요소를 뺀 결과는 Kairos의 ablation으로만 읽고, 선행 기법이 무엇을 표현하는지의 증거로 쓰지 않는다(§7).
+### 1.3 관련 연구와 실험 비교 (revision 1.2)
+
+이 문서가 다루는 기법 계열 가운데 thread data-race 탐지기(FastTrack, TSan, Djit+, Eraser 방식 lockset 도구), 예측 분석(CP, WCP, SHB, M2, SyncP, RVPredict, GPredict, ExceptioNULL), DefUse, DCatch는 위치를 잡기 위한 **관련 연구**다 [D] (spec §1.11 "Related work and the experimental comparison"; ADR-046). 이들은 실험 비교군이 아니고, 비교를 위한 재구현도 만들지 않는다. 실험 비교는 기존 Process-Level Race 연구(RacePro, SimRacer, SIMEXPLORER, RRF, DESCRY, SimEvo, ReDPro, SysPro)와 한다(spec §8.3; §7). 이 결정은 위 표들이 각 선행 연구가 하는 일에 대해 적은 것을 바꾸지 않고, 그 서술은 [R04]에 기댄다. 2026-10-15의 로드맵(`plan/ROADMAP_20261015.md` §10.3, §11.5)과 결정 기록(§4.4)은 결정 전 검토에서 RacePro와 GPredict의 저자 공개본을 읽었다고 적는다. spec은 그것에 [R04] 이상으로 기대지 않고, GPredict의 형식에 대한 진술은 그 §II.B를 여기서 읽을 때까지 [U]다(P-PAPERS, 2026-10-15 승인, 바로 시작) (spec §1.11).
+
+이 입장은 검토에서 고쳐졌다. 검토 X1은 이전 판(v1)이 InitRacer와 RVPredict/GPredict에 이미 있는 것을 Kairos가 더하는 것처럼 적었고, ExceptioNULL을 인용하지 않았으며, gap G3의 새로움을 검색하지 않았다고 지적했다([X1-M12]). spec은 이를 받아 §1.11을 고치고 같은 계열의 비교 도구 셋을 더했다(ADR-025, ADR-037). 외부 검토 EXT-20261012는 비교를 다시 고쳤다(spec §0.7 항목 6; ADR-042). 그때 같은 계열 비교 도구는 Kairos와 같은 성질 정보를 받았다. **revision 1.2는 이 비교 도구들을 철회했다**(ADR-046, ADR-047. ADR-025는 대체되었고, ADR-037의 비교 관련 부분과 ADR-042의 일부도 대체되었다. 선행 연구에 대한 인정은 그대로다). 요소를 뺀 결과는 Kairos의 ablation으로만 읽고, 선행 기법이 무엇을 표현하는지의 증거로 쓰지 않는다(§7).
 
 ---
 
@@ -164,10 +187,12 @@ Netzer와 Miller(LOPLAS 1992 [V-abs])는 data race(동기화 없는 충돌 접�
 
 ### 2.2 cFS 현상과 기존 기법 (spec §1.11 표)
 
+아래 "기존 기법" 열의 도구는 모두 관련 연구이고 실험 비교군이 아니다(§1.3; ADR-046). 각 기법이 하는 일에 대한 서술은 [R04]가 확인한 수준이다.
+
 | cFS 현상 | 기존 기법이 하는 것 | Kairos가 더하는 것 (새 메커니즘 주장 없음) | [R04 §5]의 gap (§5) |
 |---|---|---|---|
-| **R2**: SB의 AppId가 발행되기 전에 ES·EVS init이 SB 코드로 이벤트를 보낸다. 위반 사용은 core 직렬화 때문에 HB상 발행보다 **앞선다** | FastTrack, TSan, Djit+는 순서 없는 충돌만 보고한다. CP, WCP, SHB, M2, SyncP는 재배열 가능한 쌍만 보고한다. DefUse는 R2의 잘못된 정의를 정상으로 배울 것이다 [I]. GPredict는 사용자가 쓴 일반 속성의 위반을 인과 모형 아래에서 예측한다. [R04 L553]의 "합법적 오류 결과라는 개념이 없다"는 [R04 §5]의 초록 수준 추론이다. [R04]는 GPredict에 문서화된 미준비 결과의 어휘가 내장되어 있다고 기록하지 않는다(초록 수준, [I]). 도구와 그 속성 형식(MOP에서 가져옴, P)은 확인하지 못했다(P-PAPERS) [U]. spec은 유한 horizon Allowed를 GPredict 방식 성질로 쓸 수 있다고 추론한다 [I] (spec §8.3) | reference에서 온 계약과 호출자 수준 Allowed(출처와 reference horizon이 붙는다. spec §1.6 "Three judgements")를 **순서가 정해진 쌍**에도 검사하고, σ·M을 밝힌 PWB certificate로 "잘못된 방향으로 정해짐"을 `fixed-order`로 끌어올린다 | gap G1, G2 |
-| **C1, C5, App-record 구간**: 같은 lock 아래의 생성/조회, 발행/`GetAppID` | HB는 lock으로 순서를 정하고, lockset은 일관된 보호를 본다. RVPredict·GPredict 식 제약 인코딩은 이미 key를 충돌 대상으로, lock을 원자성으로 다룬다. ExceptioNULL은 "초기화 전 사용"을 예측한다 | solver 대신 explicit-state 탐색(공학적 선택). framework typestate에는 선행 연구가 있다(predictive typestate checking, ASE 2008; Lifestate, ECOOP 2019). Kairos가 여기에 더하는 것은 호출자·소비자·미션의 reference가 받아들이는 미준비 결과(호출자 수준 Allowed)에 reference horizon과 출처를 붙이는 것뿐이고(framework의 문서화된 결과는 따로 보고한다), 두 논문을 확인할 때까지 보류다(P-PAPERS). GPredict 방식 성질로도 쓸 수 있다고 보므로 [I] 표현력의 차이로 주장하지 않는다. 그 밖에 같은 서수 짝으로 정하는 σ별 class, S-edge가 쌍의 순서를 정하는 곳에서만 나오는 certificate(C1의 B′에서 앱이 제공자인 경우와 C5의 lock 범위 수정에는 없을 것으로 본다 [I]), hold 확인. **예측 건전성은 RVPredict보다 약하다**(A-COMM) | gap G4(좁혀짐: RVPredict·GPredict) |
+| **R2**: SB의 AppId가 발행되기 전에 ES·EVS init이 SB 코드로 이벤트를 보낸다. 위반 사용은 core 직렬화 때문에 HB상 발행보다 **앞선다** | FastTrack, TSan, Djit+는 순서 없는 충돌만 보고한다. CP, WCP, SHB, M2, SyncP는 재배열 가능한 쌍만 보고한다. DefUse는 R2의 잘못된 정의를 정상으로 배울 것이다 [I]. GPredict는 사용자가 쓴 일반 속성의 위반을 인과 모형 아래에서 예측한다. [R04 L553]의 "합법적 오류 결과라는 개념이 없다"는 [R04 §5]의 초록 수준 추론이다. [R04]는 GPredict에 문서화된 미준비 결과의 어휘가 내장되어 있다고 기록하지 않는다(초록 수준, [I]). 도구와 그 속성 형식(MOP에서 가져옴, P)은 확인하지 못했다(P-PAPERS) [U]. spec은 유한 horizon Allowed를 GPredict 방식 성질로 쓸 수 있다고 추론한다 [I]. revision 1.2부터 이것은 관련 연구에 대한 설계 근거 추론이고 실험이 아니다 (spec §1.11, §8.3) | reference에서 유도한 준비 상태 명세(R2의 K-ID, 근거 등급 `contract-backed`)와 호출자 수준 Allowed(출처와 reference horizon이 붙는다. spec §1.6 "Three judgements")를 **순서가 정해진 쌍**에도 검사하고, σ·M을 밝힌 PWB certificate로 "잘못된 방향으로 정해짐"을 `fixed-order`로 끌어올린다 | gap G1, G2 |
+| **C1, C5, App-record 구간**: 같은 lock 아래의 생성/조회, 발행/`GetAppID` | HB는 lock으로 순서를 정하고, lockset은 일관된 보호를 본다. RVPredict·GPredict 식 제약 인코딩은 이미 key를 충돌 대상으로, lock을 원자성으로 다룬다. ExceptioNULL은 "초기화 전 사용"을 예측한다 | solver 대신 explicit-state 탐색(공학적 선택). framework typestate에는 선행 연구가 있다(predictive typestate checking, ASE 2008; Lifestate, ECOOP 2019). Kairos가 여기에 더하는 것은 호출자·소비자·미션의 reference가 받아들이는 미준비 결과(호출자 수준 Allowed)에 reference horizon과 출처를 붙이는 것뿐이고(framework의 문서화된 결과는 따로 보고한다), 두 논문을 확인할 때까지 보류다(P-PAPERS). 첫 행의 추론이 미치는 만큼 GPredict 방식 성질로도 쓸 수 있다고 보므로 [I] 표현력의 차이로 주장하지 않는다. 그 밖에 같은 서수 짝으로 정하는 σ별 class, S-edge가 쌍의 순서를 정하는 곳에서만 나오는 certificate(C1의 B′에서 앱이 제공자인 경우와 C5의 lock 범위 수정에는 없을 것으로 본다 [I]), hold 확인. **예측 건전성은 RVPredict보다 약하다**(A-COMM) | gap G4(좁혀짐: RVPredict·GPredict) |
 | **SB 구독 전 송신**: 늦은 구독 때문에 송신이 손실된다. 송신자에게는 성공 반환이라 보이지 않는다. SB는 이를 세고(`NoSubscribersCounter`) `SEND_NO_SUBS` event를 시도한다. R2 구간에서는 그 event가 EVS에서 거부되고 [M], 구간의 counter 증가는 나중에 SB 자신의 초기화가 지운다 [I]. 그래서 그 구간의 손실은 구간 뒤에 남는 흔적이 없다 [I] | InitRacer의 "late event handler registration" | 그 분류의 cFS instance. registry를 key로 쓰고, 전달을 요구하는 `appreq`가 없으면 호출자 수준에서 LOSS-UNDER-ORDER다. framework 수준 판단(cSB4305.5: 오류 아님)은 옆에 따로 적고 합치지 않는다 (spec §1.10, §3.9) | gap G5 아님(InitRacer의 늦은 등록) |
 | **용량 손실**: queue가 차면 조용히 버린다. 부팅당 4–49건 [M] ([BM §0]) | event·분산 HB 모형은 전달을 가정한다 | 용량을 typestate로 두고 가능한 순서가 결과를 바꾸는지 묻는다. **gap G5가 실제로 열린 곳은 용량뿐이다** | gap G5 |
 | **soft barrier**: `WaitForStartupSync`는 void를 반환한다(`cfe_es_api.c:616–619`) | EventRacer, Tian et al.은 ad hoc 동기화를 인식하지만 timeout 조건부 edge는 없다 | 조건부 O-edge, guard가 붙은 S-edge, σ_U/σ_U∞ 분리, timeout-dependent refinement. **새로움은 open literature check** | gap G3 |
@@ -175,11 +200,11 @@ Netzer와 Miller(LOPLAS 1992 [V-abs])는 data race(동기화 없는 충돌 접�
 | 구성이 도달 여부와 용량을 정한다 | 구성을 주어진 것으로 받는다 | 구성 closure를 포함한 basis B, `inactive`, provider 축 | gap G7 |
 | 우선순위 순서는 RT target에서만 성립한다 | edge도 없고 판정도 없다 | σ_R1[P_sched]를 schedule 제약으로 두고 σ마다 판정 | gap G8 |
 
-출처: spec §1.11, §3.9, App. A.1 step 13a. 그 안의 인용은 [R04 §3 L4–L5, §5], [R04 L249–251, L253–255, L259, L492, L553], [R2g §2], [R2c §7]이다.
+출처: spec §1.11, §3.9, App. A.1 step 13a. 그 안의 인용은 [R04 §3 L4–L5, §5], [R04 L249–251, L253–255, L259, L492, L553], [R2g §2]이다. revision 1.1의 R2 행에 있던 CORD 기록 인용은 PI 결정 D12에 따라 spec에서 지웠다(spec §0.11 항목 1).
 
 두 예를 조금 더 보자.
 
-- **R2.** gdb 기록에서 부팅마다 위반 사용 24건(ES 20, EVS 4)이 모두 SB의 AppId 저장보다 먼저 나왔다 [M] ([R2g §2]). 그 순서가 core 직렬화에서 온다는 것은 기록 자신의 추론이다 [I]. 24는 Kairos의 결과가 아니며, ENV의 version table이 있는 basis에서만 맞는 수다(spec §6.4 항목 21). 순서가 정해진 쌍은 정의상 race가 아니므로 HB·예측 race detector는 R2에 대해 보고할 쌍이 없다([R04 §3 L4]). spec은 R2를 race가 아니라 순서가 고정된 의존 오류로 다룬다(spec §6.4 항목 12).
+- **R2.** gdb 기록에서 부팅마다 위반 사용 24건(ES 20, EVS 4)이 모두 SB의 AppId 저장보다 먼저 나왔다 [M] ([R2g §2]). 그 순서가 core 직렬화에서 온다는 것은 기록 자신의 추론이다 [I]. 24는 Kairos의 결과가 아니며, 생성된 module version table을 입력으로 가진 ENV basis의 수다. 그 표에 대한 의존은 Kairos 자신의 recorder가 확인할 구성 사실로만 남는다 [I] (spec §6.4 항목 21; §0.11 항목 1). 순서가 정해진 쌍은 정의상 race가 아니므로 HB·예측 race detector는 R2에 대해 보고할 쌍이 없다([R04 §3 L4]). spec은 R2를 race가 아니라 순서가 고정된 의존 오류로 다룬다(spec §6.4 항목 12).
 - **C1.** CF가 다른 앱이 만들 counting semaphore를 이름으로 찾는다. 생성과 조회는 각각 OSAL table lock 아래에서 원자적이지만, 둘의 순서를 정하는 장치는 없다([LED §1a]). 관측한 실행 하나에서 HB는 lock edge로 그 실행의 순서를 기록하고 반대 순서를 숨긴다([R04 §3 L5]). v7.0.1 기본 구성에서는 table의 이름이 비어 있어 이 조회 경로가 실행되지 않는다(latent) [F] ([LED §2]).
 
 ---
@@ -196,7 +221,7 @@ flowchart TD
     %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
 
     B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
-    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
+    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, readiness specifications")]
 
     CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
@@ -209,9 +234,9 @@ flowchart TD
 
     CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
 
-    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
+    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later"]
 
-    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason)<br/>no alarm ≠ safe")]
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress, proof status<br/>no alarm ≠ safe")]
     REP["L5 kz report / kz loop<br/>fixed point + run set"]
     FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
@@ -247,15 +272,17 @@ flowchart TD
     class BIN bin
 ```
 
+이 코드 블록은 [01_overview.md](01_overview.md)의 그림 D0와 같은 revision 1.2 판이다(T1 이름, 증명 상태, F1 gate는 후순위). `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 같은 내용으로 맞춘다. revision 1.3에서 L3 abstract 해석(certificate, `kz proofcheck`)과 operational 해석(explorer)은 선택 경로이고, 필수 경로는 관측 → 관측 기반 판정 → 한정 예측 → 제어 실행 확인이다(ADR-053). 그림은 아직 이 구분을 그리지 않는다.
+
 그림의 상자마다 어느 계열의 기법을 빌렸는지 적으면 다음과 같다.
 
 | 그림 D0의 상자 | 하는 일 | 빌려 온 계열 (이 문서 절) |
 |---|---|---|
 | L1 static closure + skeletons | 구성 자료(startup script, core 객체 표, 모듈 표, 플랫폼 상수)로 프로그램을 닫고 actor별 skeleton을 만든다 | 환경 모형과 harness(SDV, Holzmann & Joshi, FlowDroid), points-to(Andersen, SVF, MLTA) (§4.9) |
 | L2 formal core | 하나의 typed event model, Φ evaluator, vector clock | HB와 vector clock (§4.1), typestate (§4.12) |
-| L3 abstract 해석 | census, MustBefore, certificate(안전성 진술 하나), `kz proofcheck`의 재검증(명시한 trusted base에 상대적, trust ledger) | 정적 action HB(SIERRA), soundiness (§4.9). gap G2를 여기서 다룬다 (§5) |
-| L3 concrete 해석 | trace의 HB, conjunct별 LP, lock 뒤집기 예측 | HB/VC (§4.1), event·분산 HB 규칙 (§4.5, §4.6), 예측 분석 (§4.3), race coverage (§4.5) |
-| L3 operational 해석 (S7, gated) | 후보마다 닫힌 모형의 bounded explorer | DPOR 계열, BPOR, fair SMC, SCTBench의 bound sweep (§4.7), BMC의 두 질의 (§4.8) |
+| L3 abstract 해석 | census, MustBefore, certificate(안전성 진술 하나), `kz proofcheck`의 재검증(명시한 trusted base에 상대적, trust ledger). revision 1.3에서 MustBefore·certificate·`kz proofcheck`는 보편 순서 주장이 필요할 때 쓰는 선택 경로다(ADR-053) | 정적 action HB(SIERRA), soundiness (§4.9). gap G2를 여기서 다룬다 (§5) |
+| L3 concrete 해석 | trace의 HB, conjunct별 LP, 관측 기반 판정(불완전한 기록에 맞는 설명 집합, rev 1.3), lock 뒤집기 예측 | HB/VC (§4.1), event·분산 HB 규칙 (§4.5, §4.6), 예측 분석 (§4.3), race coverage (§4.5), 불완전 기록 감시 (§4.13, [U]) |
+| L3 operational 해석 (S7, gated) | 후보마다 닫힌 모형의 bounded explorer. revision 1.3에서 선택 경로(ADR-053) | DPOR 계열, BPOR, fair SMC, SCTBench의 bound sweep (§4.7), BMC의 두 질의 (§4.8) |
 | L4 kz observe | **uprobe**(실행 파일을 바꾸지 않고 사용자 프로그램의 명령 주소에 거는 kernel probe)와 **eBPF**(그 자리에서 도는 작은 kernel 프로그램)로 수정하지 않은 바이너리를 관측한다 | 메모리 접근 대신 framework 수준 연산을 사건 단위로 삼는 선택(CAFA, DCatch, RacePro, GPredict; [R04 §3 L1]) (§4.1) |
 | L4 kz hold / kz gate | 한 thread를 붙잡아 순서를 강제하는 확인 | CTrigger, RaceFuzzer, RacePro, DataCollider·KCSAN의 지연, Portend (§4.11), PCT (§4.7) |
 | L5 verdicts, report | (σ, M) 칸마다 class 또는 `unknown(reason)` | 결과 중심 분류(ConMem, Portend) (§4.4, §4.11) |
@@ -285,11 +312,11 @@ flowchart TD
 - KCSAN 설계 문서[V-doc]의 교훈: HB 모형이 ordering 규칙 하나만 빠뜨려도 false positive가 쏟아진다(`kcsan.rst` L366–373). 그래서 Φ에 없는 동기화는 `unmodelled-sync`로 표시하고, 그것에 기대는 instance는 `unknown(unmodelled)`로 둔다. 조용히 "순서 없음"으로 취급하지 않는다(spec §1.9; [R04 §3 L2]).
 
 **다른 점.**
-- **사건 단위.** 메모리 접근이 아니라 framework 수준 연산의 LP다. 메모리 접근은 계약이 필드를 명시한 곳(예: `CFE_SB_Global.AppId`)에만 더한다([R04 §3 L1]; spec §1.4).
+- **사건 단위.** 메모리 접근이 아니라 framework 수준 연산의 LP다. 메모리 접근은 준비 상태 명세가 필드를 명시한 곳(예: `CFE_SB_Global.AppId`)에만 더한다([R04 §3 L1]; spec §1.4).
 - **두 clock.** `VC`는 모든 확정 edge로, `VC_R`은 unconditional·obs-fatal로 표시된 edge로만 계산한다. `VC_R` 순서는 정적 certificate를 찾기 전의 값싼 prefilter일 뿐, 모든 실행에 대한 주장이 아니다(spec §1.9; 출처는 proposal B, §8).
 - **층.** 규칙을 S, O, C_σ로 나눈다. 우선순위는 C_σ이고 결코 HB edge가 아니다(spec §1.9).
 
-**기준선.** FastTrack 방식 HB를 Kairos trace 위에 재구현해 참조점으로 둔다. ThreadSanitizer는 PI가 재빌드 deviation(P-TSAN)을 승인할 때만 참조점이 된다(spec §8.3).
+**비교에서의 자리.** 관련 연구이고 실험 비교군이 아니다(revision 1.2; ADR-046). revision 1.1이 두었던 FastTrack 방식 HB 재구현(참조점)은 철회되었고, ThreadSanitizer 재빌드는 하지 않는다(P-TSAN 제외, 2026-10-15) (spec §8.3 "Withdrawn in revision 1.2").
 
 ### 4.2 Lockset과 hybrid
 
@@ -307,7 +334,7 @@ flowchart TD
 - HB의 false negative가 **우연한 lock 순서**에서 온다는 O'Callahan–Choi의 관찰이 예측 분석(§4.3)으로 넘어가는 이유다([R04 §2.3]).
 - lockset을 탐지기로 쓰지 않는다. hold 지점을 고를 때 그 thread가 잡은 lock이 없어야 한다는 조건에서, 관측된 lock 사건과 함께 정적 lockset을 쓴다(spec §4.13 gate placement 1).
 
-**기준선.** thread data-race 도구는 사용자의 결정으로 기준선이 아니다([R06 S13]). valgrind의 helgrind와 DRD는 수정하지 않은 바이너리에서 실제로 돌리는 **외부 참조점**이다. 메모리 수준만 보고, valgrind가 thread를 직렬화하므로 schedule이 README 방식과 다르며, 다른 질문에 답할 것으로 본다(spec §8.3; P-VALGRIND; [R05 §6.3 (c)]).
+**비교에서의 자리.** thread data-race 도구는 사용자의 결정으로 기준선이 아니다([R06 S13]). revision 1.1은 valgrind의 helgrind와 DRD를 수정하지 않은 바이너리에서 돌리는 외부 참조점으로 두었지만, 2026-10-15의 P-VALGRIND는 이것을 **제외**했다. helgrind·DRD 실행과 valgrind 참조점은 없다(spec §8.3; ADR-046). lockset 방식 재구현도 비교군이 아니고 관련 연구다.
 
 ### 4.3 예측 분석 (CP, WCP, SHB, M2, SyncP, Vindicator, MCM, RVPredict, GPredict, ExceptioNULL)
 
@@ -336,16 +363,16 @@ flowchart TD
 - 예측 모형 Pred(π)는 MCM, RVPredict의 control-flow 추상화, GPredict의 "속성을 제약으로" 방식에서 온다.
 - **lock 뒤집기**를 허용한다. critical section은 원자 블록이고 registry key가 충돌 대상이다. 획득 시점에 lock이 비어 있어야 한다는 제약을 둔다([X1-M4]).
 - SHB, WCP, SyncP는 **prefilter**로만 먼저 돌린다. 이들이 제안한 재배열은 Pred(π)의 검사기로 다시 확인한다(Vindicator의 후보·확인 분리). **이들의 침묵은 아무 뜻도 없다.**
-- 선택 사항인 SMT 교차 확인은 Alglave, Kroening, Tautschnig(CAV 2013 [V-abs])와 Wang et al.(FM 2009 [V-abs]) 방식의 순서 변수 인코딩이다. PI 결정 P-Z3 이후에만, 작은 cone에만 쓰고, 결코 핵심 경로에 두지 않는다(spec §4.9 step 10). P-Z3의 권고는 "설치하지 않음"이다.
+- 선택 사항인 SMT 교차 확인은 Alglave, Kroening, Tautschnig(CAV 2013 [V-abs])와 Wang et al.(FM 2009 [V-abs]) 방식의 순서 변수 인코딩이다. 작은 cone에만 쓰고, 결코 핵심 경로에 두지 않는다(spec §4.9 step 10). PI 결정 P-Z3(2026-10-15; 2026-10-22에 유지)는 SMT solver를 첫 구현의 조건으로 두지 않는다. 예측은 명시적 탐색을 먼저 하고, 지금 구현으로 다룰 수 없는 예측·탐색 질문이 구체적으로 보일 때 다시 검토한다(spec §10.1).
 
 **다른 점.**
 - **solver 대신 explicit-state 탐색.** 가능한 선형화를 sleep-set partial-order reduction과 함께 하나씩 탐색한다. 새로움이 아니라 공학적 선택이고, 이 환경에는 solver가 설치되어 있지 않다(spec §1.11; ADR-016).
-- **더 약한 건전성.** Kairos trace는 동기화 skeleton, LP 구간, 계약 위치의 결과만 담고 모든 공유 접근을 담지 않는다. 그래서 예측 건전성은 RVPredict보다 **약하다**(spec §1.11). 이를 드러내려고 witness마다 가정 **A-COMM**을 검사한다. cone 안 actor가 읽을 수 있는 위치를 다른 actor가 쓸 수 있으면, 그 쓰기가 모두 관측되었거나, 상수이거나, 유지된 결과로만 읽혀야 한다. 실패하면 witness는 `predicted-modelled`(모형 근거)로 내려간다(spec §4.9 step 4).
-- **결과 의미.** 계약마다 reference에서 온 호출자 수준 Allowed와 그 reference horizon이 있어, 호출자 쪽 근거가 받아들인 not-ready 결과(예: CF 코드가 인정한 bounded retry)는 위반이 아니다. API가 그 결과를 문서화했다는 사실만으로는 허용이 되지 않는다(spec §1.6 "Three judgements"). spec은 유한 horizon Allowed를 GPredict 방식 성질로도 쓸 수 있다고 추론하므로 [I], 이것을 GPredict와의 표현력 차이로 주장하지 않는다(spec §8.3; §6.4 항목 37).
+- **더 약한 건전성.** Kairos trace는 동기화 skeleton, LP 구간, 준비 상태 명세 위치의 결과만 담고 모든 공유 접근을 담지 않는다. 그래서 예측 건전성은 RVPredict보다 **약하다**(spec §1.11). 이를 드러내려고 witness마다 가정 **A-COMM**을 검사한다. cone 안 actor가 읽을 수 있는 위치를 다른 actor가 쓸 수 있으면, 그 쓰기가 모두 관측되었거나, 상수이거나, 유지된 결과로만 읽혀야 한다. 실패하면 witness는 `predicted-modelled`(모형 근거)로 내려간다(spec §4.9 step 4).
+- **결과 의미.** 준비 상태 명세마다 reference에서 온 호출자 수준 Allowed와 그 reference horizon이 있어, 호출자 쪽 근거(`caller` 기록)가 받아들인 not-ready 결과(예: CF 코드가 인정한 bounded retry)는 위반이 아니다. API가 그 결과를 문서화했다는 사실만으로는 허용이 되지 않고, 규칙만으로도 허용이 되지 않는다(spec §1.6 "Three judgements"; QT-4). spec은 유한 horizon Allowed를 GPredict 방식 성질로도 쓸 수 있다고 추론하므로 [I], 이것을 GPredict와의 표현력 차이로 주장하지 않는다. revision 1.2부터 이 추론은 관련 연구에 대한 설계 근거이고 실험이 아니다(spec §1.11; §6.4 항목 37).
 - **"예측하지 못함"은 판정이 아니다.** witness가 없거나 work-unit cap에 걸린 것은 `protected`가 아니다(spec §4.9 step 9).
 - **복잡도.** 동기화를 한 번 뒤집는 예측은 NP-complete이고 W[1]-hard다(SyncP). explicit 탐색은 최악의 경우 cone 크기에 지수적이다(spec §4.9).
 
-**기준선.** WCP·SHB 방식 관계는 lock 순서를 지키는 참조점이다. **GPredict 방식 lock 뒤집기 예측기**는 같은 cone에서 Kairos와 같은 성질 정보(Req, oracle 결과 code, 호출자 수준 Allowed 항목과 B에서 얻은 경계·이어짐 사건)를 그 형식이 허락하는 만큼 받는 **같은 정보 재구현**(K2)이고, 같은 계열 비교 대상이다([X1-M12]; spec §8.3). 그 인코딩이 GPredict의 형식에 충실한지는 P-PAPERS 전까지 [U]다. Φ 결과 의미, Allowed, capture point, certificate를 뺀 예전 변형은 기준선이 아니다. 남긴다면 표시한 묶음 ablation이고, 그 여부는 PI 결정 P-ABL-ALLOWED다. P-Z3 승인 뒤에는 SMT-LIB 변형도 가능하다.
+**비교에서의 자리.** 이 계열은 관련 연구이고 실험 비교군이 아니다(revision 1.2; ADR-046). revision 1.1이 두었던 WCP·SHB 방식 관계(참조점)와 **GPredict 방식 lock 뒤집기 예측기**(같은 정보 재구현 K2. 검토 [X1-M12]가 요구한 같은 계열 비교 대상), 그리고 준비 상태 명세를 GPredict 방식 성질로 쓰는 표현 가능성 표는 철회되었다(spec §8.3 "Withdrawn in revision 1.2"). P-ABL-ALLOWED(2026-10-15)는 단일 요소 ablation 둘(Allowed 끔, 결과 의미 끔; spec §8.4 항목 23, 24)을 채택했고, GPredict 이름이 붙은 묶음 변형은 비교로 두지 않는다. revision 1.3의 단일 요소 비교에서도 계획 수준의 방법 선택(단순 관측 검사, 자원 상태·연산 쌍 후보, 한정 예측)은 이름 붙은 도구의 재구현으로 부르지 않는다(spec §8.4).
 
 ### 4.4 Order·atomicity violation 탐지와 ad hoc 동기화
 
@@ -361,13 +388,13 @@ flowchart TD
 - ad hoc 동기화: Xiong et al.(OSDI 2010 [V-abs])은 12개 프로그램에서 229개 instance를 찾았고, Tian et al.(ISSTA 2008 [V-abs])은 spinning-read loop를 동적으로 동기화로 인식한다.
 
 **cFS에서.**
-- 다섯 사례는 모두 order violation이나 준비 위반이다. ledger의 수정(재시도, 새 phase, 직렬화와 guard, lock 범위 확장 뒤 guard, 수정 없음)은 "lock으로 고치지 않음"과 맞는다 [I] ([R04 §2.6]).
+- 다섯 사례는 모두 order violation이나 준비 상태 위반이다. ledger의 수정(재시도, 새 phase, 직렬화와 guard, lock 범위 확장 뒤 guard, 수정 없음)은 "lock으로 고치지 않음"과 맞는다 [I] ([R04 §2.6]).
 - DefUse는 R2와 C5에 가장 가까운 기법이다. EVS가 쓰는 `CFE_SB_Global.AppId`가 SB의 저장 대신 EarlyInit의 0인 것이 바로 "잘못된 정의 사용"이다 [I] ([R04 §2.6]). 그러나 **학습**한 불변식은 R2의 잘못된 정의를 정상으로 배울 것이다. 모든 실행이 그 값을 읽기 때문이다 [I] (spec §1.11).
 - `CFE_ES_WaitForSystemState`(`cfe_es_api.c:585–603`), `CFE_ES_MainTaskSyncDelay`(`cfe_es_start.c:860ff`), CF의 이름 조회 재시도(`cf_cfdp.c:1280–1290`)는 sleep이 든 spinning-read 또는 재시도 loop다 [F] ([R04 §2.6]).
 
 **빌린 것.**
-- **계약은 reference에서 온다.** DefUse처럼 정의-사용 쌍을 검사 단위로 삼되, 검사 기준을 실행에서 배우지 않고 reference(API 문서, 기능 요구사항, 코드 주석 등)에서 가져온다. 연구 조건 정책이 reference를 요구하기 때문이다([R04 §2.6]; spec §7.1–7.2). HB 규칙 RF(결과가 함축하는 reads-from: 성공한 조회는 같은 generation의 발행을 읽었다)는 DefUse를 출처로 적는다(spec §3.16).
-- **계약을 invariant라 부르지 않는다.** 계약(spec §1.6의 κ)은 술어 하나가 아니라 명세 객체다. 요구 상태, reference가 받아들이는 미준비 결과와 그 reference horizon, `appreq`, harm, 출처, scope를 함께 담는다. 학습한 불변식(DefUse, AVIO)과 섞여 읽힐 위험은 부차적인 이유다 [I]. 논의는 용어 검토 [background/08_terminology.md](background/08_terminology.md) §0, §6.5에 있다(spec §0.8).
+- **준비 상태 명세는 reference에서 온다.** DefUse처럼 정의-사용 쌍을 검사 단위로 삼되, 검사 기준을 실행에서 배우지 않고 reference(API 문서, 기능 요구사항, 코드 주석 등)에서 가져온다. 연구 조건 정책이 reference를 요구하기 때문이다([R04 §2.6]; spec §7.1–7.2). HB 규칙 RF(결과가 함축하는 reads-from: 성공한 조회는 같은 generation의 발행을 읽었다)는 DefUse를 출처로 적는다(spec §3.16).
+- **준비 상태 명세를 invariant라 부르지 않는다.** 준비 상태 명세(spec §1.6의 κ)는 술어 하나가 아니라 여러 칸을 가진 객체다. 준비 사전조건, reference가 받아들이는 미준비 결과와 그 reference horizon, `appreq`, harm, 출처, scope를 함께 담는다. 평가 전에 작성하거나 프로그램 글에서 고정 규칙으로 만들고, hash로 동결하며, 실행에서 배우지 않는다(spec §13 "Readiness specification"). 학습한 불변식(DefUse, AVIO)과 섞여 읽힐 위험은 부차적인 이유다 [I]. 논의는 용어 검토 [background/08_terminology.md](background/08_terminology.md) §0, §5, §6.5에 있고, 이름은 용어 결정 T1 = (a)로 정했다(spec §0.8, §0.11; ADR-052).
 - **결과 중심 분류.** 판정 기록의 consequence 어휘(crash, deadlock, 앱 오류 종료, 효과가 조용히 사라짐 등)는 ConMem과 Portend처럼 결과 중심이다(spec §1.10).
 - **직렬성.** 파일 handoff의 check-then-act(K-ATOM.file, RC12)는 선언한 transaction의 직렬성을 Velodrome·AVIO 방식으로 본다. 입력이 필요해 coverage는 partial이다(spec §3.15).
 - **ad hoc 동기화 인식.** polling barrier는 **조건으로 빠져나왔을 때만** edge를 만든다(규칙 R5, obs-soft). timeout으로 빠져나오면 edge가 없다. predicate는 코드에서 추출하고 검사기가 다시 유도한다(spec §1.9, §3.16; ADR-030). predicate를 추출할 수 없는 loop는 `unmodelled-sync`다.
@@ -375,9 +402,9 @@ flowchart TD
 
 **다른 점.**
 - timeout에 따라 edge가 성립하거나 사라지는 것을 σ_U(timeout이 언제든 날 수 있음)와 σ_U∞(timeout이 없음)로 나눠 판정하고, "timeout을 거쳐야만 위반되는" 경우를 refinement `timeout-dependent`로 따로 표시한다(spec §1.8, §1.10). 이 형식화(gap G3)의 새로움은 확인되지 않았다(§5).
-- volatile flag polling의 메모리 가시성은 가정 A4로 두고 판정마다 표시한다. 그 정확성은 주장하지 않는다(spec §1.9 `assumed` 태그; §6.4 항목 20).
+- volatile flag polling의 메모리 가시성은 가정 A4로 두고 판정마다 표시한다. 그 정확성은 주장하지 않는다(spec §1.9 `assumed` 태그; §6.4 항목 20; PI 결정 D10, 2026-10-15: 가정을 표시하고 보장을 제한한다).
 
-**기준선.** DefUse 방식 학습 불변식을 같은 trace 위에 재구현한다(자기 정보 재구현, K2). reference에서 온 계약과 대비하려는 것이다. R2의 잘못된 정의를 정상으로 배울 것이라는 문장은 설계 추론 [I]이고, 결과를 미리 적은 것이 아니다(spec §8.3).
+**비교에서의 자리.** DefUse는 관련 연구이고 실험 비교군이 아니다(revision 1.2; ADR-046). revision 1.1이 두었던 DefUse 방식 학습 불변식의 재구현(자기 정보 재구현, K2)은 철회되었다(spec §8.3 "Withdrawn in revision 1.2"). R2의 잘못된 정의를 정상으로 배울 것이라는 문장은 설계 추론 [I]이고, 결과를 미리 적은 것이 아니다(spec §1.11).
 
 ### 4.5 Event 구동 시스템 (EventRacer, CAFA, DroidRacer, InitRacer)
 
@@ -397,7 +424,7 @@ flowchart TD
 **빌린 것.**
 - **looper 규칙.** looper에서 program order는 handler 하나 안과, init 부분에서 각 handler로만 성립한다. **handler 사이에는 HB edge가 없다.** 순차 실행은 예측에서만 제약으로 남는다. 같은 looper의 handler는 겹치지 않고, 같은 pipe의 메시지 handler는 enqueue 순서대로 실행된다(spec §1.9; ADR-029; CAFA [V-abs], DCatch Rule-Pnreg [P]).
 - **race coverage.** 어떤 쌍을 뒤집으려면 ad hoc 동기화 쌍을 먼저 뒤집어야 할 때, 그 동기화 쌍을 root로 보고하고 나머지를 붙인다(spec §4.8 step 7).
-- **구독은 상태다.** SB 구독은 HB edge가 아니라 route 상태다(규칙 R8). 계약 K-ROUTE는 송신의 route_lookup 시점에 route가 있는지를 묻는다. 소비자나 미션의 reference가 말하지 않으면(`appreq`, 또는 TO_LAB의 `defer_by_design` 같은 호출자 쪽 항목) 호출자 수준 결과 label LOSS-UNDER-ORDER를 붙인다. cSB4305.5(구독자 없음은 오류가 아님)는 framework 수준 판단(`fw_doc` = `documented-not-error`)으로 옆에 따로 적는다(spec §3.9, §3.15 RC5). spec은 이것을 InitRacer 분류의 cFS instance라고 적는다(spec §1.11).
+- **구독은 상태다.** SB 구독은 HB edge가 아니라 route 상태다(규칙 R8). 준비 상태 명세 K-ROUTE는 송신의 route_lookup 시점에 route가 있는지를 묻는다. 소비자나 미션의 reference가 말하지 않으면(`appreq`, 또는 TO_LAB의 `defer_by_design` 같은 호출자 쪽 항목) 호출자 수준 결과 label LOSS-UNDER-ORDER를 붙인다. cSB4305.5(구독자 없음은 오류가 아님)는 framework 수준 판단(`fw_doc` = `documented-not-error`)으로 옆에 따로 적는다(spec §3.9, §3.15 RC5). spec은 이것을 InitRacer 분류의 cFS instance라고 적는다(spec §1.11).
 
 **다른 점.**
 - timeout 조건부 barrier edge(gap G3)와 용량 손실(gap G5)은 이 계열에 없다([R04 §5]).
@@ -418,9 +445,9 @@ flowchart TD
 - 후보 출처 10번 **always-one-order 쌍**. 여러 실행에서 한 순서로만 관측된 쌍을 예측의 뒤집기 후보로 삼는다(CloudRaid; spec §7.1).
 - 다층 identity(gap G6)를 다룰 때 DCatch의 RPC pool 추상화를 가까운 선행 예로 든다(spec §1.11).
 
-**범위.** FCatch 방식 crash 시점 탐색은 첫 범위 밖이다. 그래서 영속 복원 계약(RC8)은 partial이다(spec §3.15; PI 결정 D9).
+**범위.** FCatch 방식 crash 시점 탐색은 첫 범위 밖이다. 그래서 영속 복원 범주(RC8)는 partial이다(spec §3.15). PI 결정 D9(2026-10-15)는 첫 논문의 범위를 다섯 사례와 그것이 직접 필요로 하는 대조로 한정했다. 영속 상태 계열은 사례가 필요로 할 때 모형 입력으로만 기록하고 독립 목표로 두지 않는다(spec §10.1).
 
-**기준선.** **DCatch 방식 framework HB**를 그 기법 자신의 정보(framework HB 규칙)로 재구현한다(자기 정보 재구현, K2). 계약, 결과 의미, 조건부 edge는 없다. 같은 근거에서 framework HB 검출기가 무엇을 보고하는지 보려는 것이다. 계약의 가치는 이 비교가 아니라 ablation 16이 잰다(spec §8.3, §8.4).
+**비교에서의 자리.** DCatch는 관련 연구이고 실험 비교군이 아니다(revision 1.2; ADR-046). revision 1.1이 두었던 DCatch 방식 framework HB의 재구현(자기 정보 재구현, K2)은 철회되었다(spec §8.3 "Withdrawn in revision 1.2"). 준비 상태 명세의 가치는 ablation 16("Readiness specifications off")이 Kairos 안에서 잰다. 이것은 Kairos의 ablation이지 thread data-race 도구와의 비교가 아니다(spec §8.4).
 
 ### 4.7 체계적 테스트 (CHESS, PCT, DPOR, optimal DPOR)
 
@@ -485,7 +512,7 @@ flowchart TD
 | RacerF, arXiv 2025 [V-abs; ECOOP venue P] | Frama-C EVA 위의 경량 정적 race 탐지 |
 
 - **보장.** lockset 도구는 일관되게 보호되지 않는 접근을 보고한다. over-approximate하는 도구는 자기 모형과 가정에 상대적으로 모든 잠재적 data race를 찾는다고 주장한다. **올바르게 lock된 접근 사이의 order violation을 찾는다고 주장하는 도구는 없다**([R05 §2.4]).
-- **cFS에서** [I] ([R05 §2.4]). C5의 ES table 접근은 ES lock 아래에 있으므로 lockset 탐지기는 *protected*로 분류하고 침묵한다. data race로는 맞고, 준비 계약과는 무관하다.
+- **cFS에서** [I] ([R05 §2.4]). C5의 ES table 접근은 ES lock 아래에 있으므로 lockset 탐지기는 *protected*로 분류하고 침묵한다. data race로는 맞고, 준비 상태 명세와는 무관하다.
 
 **정적 순서 분석과 초기화 전 사용.**
 - SIERRA(ASPLOS 2018 [V-abs])는 Android의 thread, event, 메시지, 시스템·사용자 action을 "concurrency action"으로 만들고, 그 사이의 HB를 **정적으로** 유도한다. spec은 "정적 action HB"의 출처로 인용한다(spec §1.11).
@@ -571,15 +598,15 @@ Kairos의 확인은 다음 점에서 신중하다(spec §4.13).
 - 11번 **앱별 profiling**(Snowboard SOSP 2021 [V-abs]). 앱을 하나씩 돌려 부팅 순서와 무관한 잠재 발행 → 사용 통신을 모은다. 후보만 낸다.
 - 12번 **watchpoint 발견**(DataCollider; 위).
 
-### 4.12 계약의 뿌리: typestate
+### 4.12 준비 상태 명세의 뿌리: typestate
 
 **핵심.** typestate(Strom & Yemini, IEEE TSE 1986 [V-me])는 객체의 상태에 따라 허용되는 연산이 달라진다는 개념이다.
 
 **Kairos에서.**
-- 준비 계약은 공유 자원의 typestate 전제 조건을 **다른 task의 사용 사건**에서 검사하는 것이다([R06 §3]의 v0.1 §2 검토).
+- 준비 상태 명세는 공유 자원의 typestate 전제 조건을 **다른 task의 사용 사건**에서 검사하는 것이다([R06 §3]의 v0.1 §2 검토).
 - Φ의 resource kind마다 lifecycle automaton이 있다(spec §1.3). 예를 들어 `osal.obj<T>`는 FREE → ALLOC → RES_C(이름 안 보임) → RES_CN(이름은 보이지만 RESERVED, type lock은 안 잡힘) → LIVE → RES_D → FREE이고, 발행 LP는 type lock 아래의 최종 ID 쓰기(`osapi-idmap.c:1092`)다.
 - RES_CN에서 by-name 조회는 `OS_ERR_INCORRECT_OBJ_STATE`로 실패하고, 이 경로는 M_impl에서만 보인다(spec §1.3, §3.2). 코드 읽기에서 나온 후보이며 확인 실행 전에는 버그라 부르지 않는다(spec §6.4 항목 23).
-- KCSAN의 `ASSERT_EXCLUSIVE_*` 매크로는 실행 중에 검사하는 **선언된 계약**의 가장 가까운 선행 예다. 다만 준비가 아니라 배타성을 선언한다 [I] ([R04 §2.4]; [R04 §5]의 gap G1).
+- KCSAN의 `ASSERT_EXCLUSIVE_*` 매크로는 실행 중에 검사하는 **선언된 요구**([R04]의 표현으로 "declared contract")의 가장 가까운 선행 예다. 다만 준비가 아니라 배타성을 선언한다 [I] ([R04 §2.4]; [R04 §5]의 gap G1).
 - **framework typestate의 선행 연구.** 다중 thread 프로그램의 predictive typestate checking(Joshi & Sen, ASE 2008)과, trace에서 framework 생애주기 typestate와 protocol 명세를 검사하는 Lifestate(ECOOP 2019)가 가장 가까운 선행 연구다(spec §1.11). 둘 다 서지만 확인했고, 내용은 초록과 외부 검토로만 안다(P-PAPERS; spec App. B). 주장하는 차이는 호출자 쪽 reference가 받아들인 미준비 결과마다 reference horizon과 출처가 붙는다는 것뿐이고, 두 논문을 확인하기 전까지 보류다. framework typestate는 새 메커니즘으로 주장하지 않는다(spec §6.4 항목 18).
 
 **비교 대상.** Req, oracle code, Kairos의 horizon을 붙인 호출자 수준 Allowed 항목을 관측 trace에서 검사하는 **단순 상태 monitor**를 재구현한다(같은 정보 재구현, K2. runtime verification 계열). 예측, 탐색, certificate, σ 분리가 없다. K-ID의 Req를 받으면 실현된 R2 발생마다 경보를 낼 것으로 본다 [I]. 그래서 certificate와 예측의 가치는 탐지가 아니라 분류와 근거로만 잰다(spec §8.3; §6.4 항목 38).

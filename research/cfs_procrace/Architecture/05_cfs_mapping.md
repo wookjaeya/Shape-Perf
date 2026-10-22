@@ -1,12 +1,14 @@
 # 05 cFS 대응: Φ_cFS 프로파일, 준비 상태 명세 coverage, R2 certificate, 종료 범위
 
-이 문서는 Kairos의 cFS 프로파일 Φ_cFS가 cFS v7.0.1의 실제 구조(PSP, OSAL, cFE의 ES·EVS·SB·TBL·TIME·FS·CDS, 앱)를 어떤 resource kind·HB 규칙·준비 상태 명세로 옮기는지 설명한다. R03이 찾은 15개 범주(spec의 준비 범주 RC1–RC15)의 coverage, 다섯 설계 사례와 그 밖의 후보가 들어가는 자리와 사례별 기대 판정, R2 certificate의 모양과 신뢰 장부, SB 손실의 세 판단, 종료(teardown) 범위도 다룬다. spec에 없는 설계 요소·수치·인용은 더하지 않으며, 세부는 spec의 해당 절로 넘긴다. 기준은 spec 개정 1.2다. 개정 1.1은 외부 검토 EXT-20261012에 답한 것이고(spec §0.7, ADR-039–ADR-044), 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md))을 반영하고 형식 정정 둘(σ_E 진술, 신뢰 장부)과 증명 상태를 더했다(spec §0.9–§0.11, ADR-045–ADR-052). 이 문서에서 바뀐 곳은 §0.4에 모았다.
+이 문서는 Kairos의 cFS 프로파일 Φ_cFS가 cFS v7.0.1의 실제 구조(PSP, OSAL, cFE의 ES·EVS·SB·TBL·TIME·FS·CDS, 앱)를 어떤 resource kind·HB 규칙·준비 상태 명세로 옮기는지 설명한다. R03이 찾은 15개 범주(spec의 준비 범주 RC1–RC15)의 coverage, 다섯 설계 사례와 그 밖의 후보가 들어가는 자리와 사례별 기대 판정, R2 certificate의 모양과 신뢰 장부, SB 손실의 세 판단, 종료(teardown) 범위도 다룬다. spec에 없는 설계 요소·수치·인용은 더하지 않으며, 세부는 spec의 해당 절로 넘긴다. 기준은 spec 개정 1.3이다. 개정 1.1은 외부 검토 EXT-20261012에 답한 것이고(spec §0.7, ADR-039–ADR-044), 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md))을 반영하고 형식 정정 둘(σ_E 진술, 신뢰 장부)과 증명 상태를 더했다(spec §0.9–§0.11, ADR-045–ADR-052). 개정 1.3은 2026-10-22의 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md))를 반영했다(spec §0.12, ADR-053–ADR-058; 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)). 개정 1.2에서 바뀐 곳은 §0.4에, 개정 1.3에서 바뀐 곳은 §0.5에 모았다.
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
 
+**rev 1.2·1.3 반영.** rev 1.2: 용어 T1 = (a)(준비 상태 명세, 준비 사전조건, 준비 상태 위반, 준비 범주, `allowed-not-ready`)를 문서 전체에, CORD 인용 제거(§0.11 항목 1의 규칙: gdb 기록이 직접 뒷받침하는 것만 남김)를 §2.3·§6.2·§7에, QT-4 엄격 대안을 §2.2·§3(RC1)·§6.4에, D17 (a)를 §8.1·§8.2에, D19를 §2.9에, D22·P-C1HOLD를 §6.1·§6.3·§6.4에, P-R2CTRL·P-C2·D13·P-RGIT·D9를 §6.2·§6.3에, R2 표현(`event_request_rejected`)과 증명 상태·L-CONT (c)를 §7에 옮겼다(§0.4). rev 1.3: 사례별 closure 기록(C-19)을 §2.1에, `app_owner`에 쓰는 생성 사건(C-20)을 §2.3에, R2 = 기반 검증과 certificate의 선택 경로화(D1, C-49)를 §6.1·§6.3·§7에, C1 = 첫 기여 근거 사례와 버전별 경로 분리(D3, C-50)를 §6.1·§6.4에, C2의 세 구성(§8.2 개정 1.3)을 §6.3에, 신뢰 장부의 일반화(C-23)를 §7.4에 옮겼다(§0.5). 본문에 그대로 옮긴 그림 D7·D8·D9의 Mermaid 사본은 `diagrams/`의 원본과 같게 두었고, 바뀐 spec 내용은 그림 아래 글에 적었다.
+
 ## 목차
 
-- [0. 읽기 전에](#0-읽기-전에): 표기, Φ_cFS가 담는 것, 필요한 용어, 개정 1.2에서 바뀐 곳
+- [0. 읽기 전에](#0-읽기-전에): 표기, Φ_cFS가 담는 것, 필요한 용어, 개정 1.2에서 바뀐 곳, 개정 1.3에서 바뀐 곳
 - [1. 한 장으로 보기 (그림 D5)](#1-한-장으로-보기-그림-d5): cFS 계층과 Φ_cFS 항목의 대응
 - [2. 계층별 대응](#2-계층별-대응): actor, OSAL, task 생성과 App-record 구간, PSP, ES, 앱 적재, 재시작, SB, EVS, TBL, CDS, TIME, ad hoc 동기화 (spec §3.1–3.14)
 - [3. 준비 상태 명세 catalogue와 15개 준비 범주](#3-준비-상태-명세-catalogue와-15개-준비-범주) (spec §3.15)
@@ -89,6 +91,7 @@ Kairos는 cFS에 대한 지식을 분석 엔진 코드에 넣지 않는다. 작�
 | 예측 / explorer | 예측은 관측한 trace에서 다른 순서가 가능한지 찾는 단계다(spec §4.9). explorer는 후보 하나의 작은 모형 위에서 실행을 체계적으로 탐색하는 단계이며, 늦은 단계 S7의 조건부(gated) 구성요소다(spec §4.10) |
 | hold, F0, derived | hold는 확인 실행에서 한 thread를 지정한 지점에 붙잡아 두는 방법이다. F0는 기준 바이너리를 같은 cFS 사용자와 같은 명령으로 실행하고, 별도의 root 프로세스가 그 프로세스에 hook을 거는 수준이다. "시간만 바뀐다"고 쓰지 않고, 관측 영향은 점검한다(PI 결정 D1; spec §5.1, §8.6). 구성한 스케줄로 얻은 확인에는 `derived` 표시를 단다(spec §1.10, §4.13, §5.1) |
 | `n of N`, pool key | 자연 실행 N번 중 n번에서 관측했다는 기록과, 같은 조건이라 한데 모아 센 실행 묶음의 식별자다(spec §1.10, §2.3) |
+| `app_owner` (소속 앱) | actor instance마다 붙는, 그 actor를 만든 애플리케이션이다. 수명, 근거, 근거 수준 `confirmed`·`inferred`·`undetermined`를 함께 적는다. 순서를 분석하는 바로 그 table(ES task·App record)이 분석 대상인 곳에서는 그 table 조회로 정하지 않는다(EV-03). 개정 1.3에서 필수 산출물이 되었다(spec §1.2 "Creating application", ADR-056) |
 
 ### 0.4 개정 1.2에서 바뀐 곳
 
@@ -106,6 +109,23 @@ spec 개정 1.2가 이 문서의 범위에 준 변경이다. 모두 [D]다. PI �
 | D17 (a): POWERON 재시작은 shm segment를 지우지만 모든 유지 파일, file cache, 공유 file system을 초기화하지 않는다 | §8.1, §8.2 | §3.5, §4.13, §6.4 항목 49, ADR-049 |
 | 용어 T1 = (a): 준비 상태 명세, 준비 사전조건, 준비 상태 위반, 근거 등급, `allowed-not-ready`, 준비 범주 | 문서 전체, §3 | §0.11, 부록 C, ADR-052 |
 | CORD 인용 정리(D12): R2의 실행 근거는 gdb 기록뿐이다. 11개 구성, 범위 211–229, 사용 집합의 CORD 대조를 지웠다 | §0.1, §2.3, §6.2, §7.1, §7.3, §7.5 | §0.11, 머리말 |
+| D19: `msg_max` 기준값 10을 유지하고 queue 손실은 구성과 함께 기록한다 | §2.9 | §9.3 S6, §7.4 |
+| D9: §7.3의 후보는 모형 입력과 확장 평가 자료다. 첫 논문의 독립 목표도, 설계 사례의 대체물도 아니다 | §6.2 | §7.3 |
+
+### 0.5 개정 1.3에서 바뀐 곳
+
+spec 개정 1.3이 이 문서의 범위에 준 변경이다. 모두 [D]이거나 설계 요구이고, 결과·수치·연구 조건을 더하지 않았다(spec §0.12). 여기서 D1–D5는 **2026-10-22의 결정**이다. 2026-10-15의 D1(root 쪽 hook), D3(F1 gate) 등과 이름이 같으므로 이 문서는 날짜를 붙여 구별한다. 행 끝의 C-번호는 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)의 행이다.
+
+| 바뀐 것 | 이 문서 | spec |
+|---|---|---|
+| D1(2026-10-22): 중심 주장이 관측 판정 + 한정 예측 + 실행 확인으로 옮겨졌다. MustBefore, certificate, `kz proofcheck`, explorer, progress, loop는 정의를 그대로 둔 **선택 경로**이고, 보편 순서 주장을 할 때만 쓴다. 보편 `fixed-order` 주장에는 여전히 certificate나 완전한 유한 모형 분석이 필요하고, 그것이 없으면 칸은 "schedule dependence undetermined"다 | §6.1, §6.3, §7 | §0.12, §1.10 "Fixed-order evidence", §4.4, ADR-053 [C-22, C-49] |
+| 사례별 closure 기록(D5, IN-02): 기본 closure는 core-cpu1과 startup script 앱이다. 사례마다 compile DB에 넣은 앱 코드와 뺀 코드를 기록한다 | §2.1 | §3.1 [C-19] |
+| `app_owner`에 쓰는 생성 사건: ES 요청, `CFE_ES_StartAppTask`의 `ParentAppId`, `OS_TaskCreate`의 entry·return과 그 안의 kernel fork 기록, 자식의 첫 사건. ES task·App record가 분석 대상인 곳에서는 근거로 쓰지 않는다 | §0.3, §2.3 | §1.2, §3.3, §5.7, ADR-056 [C-05, C-20] |
+| D3(2026-10-22): R2는 관측 경로의 **기반 검증**(rung V1′)이고 기여 근거가 아니다. C1이 기여 근거의 첫 사례이고, D22 공개 BP 기반을 단계 B와 병행해 만든다 | §6.1, §6.3, §7 | §8.2, §9.3, App. A.1, App. A.4, §6.4 항목 58, ADR-057 [C-41, C-42, C-49, C-50] |
+| C1의 경로를 버전별로 나눈다: `281a941`(재시도 없음)과 `833fdbb`(재시도 있음). OSAL 내부 상태·lock에 기대는 경로는 다른 결함 후보이고 다섯 사례 수에 넣지 않는다. 수정 전 갈래의 표지는 NOT_READY_UNJUDGED로 정리되었다 | §6.4 | App. A.4 [C-50] |
+| C2는 2 × 2가 아니라 **세 구성**(A, C, D)의 비교다 | §6.3 | §8.2 개정 1.3 문단 |
+| 신뢰 장부를 certificate 없는 관측 판정·예측·확인 결과로 일반화했다. 그런 결과는 (i)부가 비어도 나머지 부분을 기록한다 | §7.4 | §4.5.1 "Results without a certificate" [C-23] |
+| R2의 관측 판정 기대: 8-site plan에서 위반 사용 24개가 `VIOLATING`, 요약 `OBSERVED_VIOLATION`, actor ES·EVS의 `app_owner`는 `inferred`(`match-by-time`). 발행 뒤 사용은 등록 conjunct에 대해 `INCONCLUSIVE` | §7 머리 | App. A.1 개정 1.3 문단 [C-49] |
 
 ---
 
@@ -256,6 +276,16 @@ flowchart LR
 - 관측 기준점은 주로 `CFE_ES_StartAppTask` 안의 `OS_TaskCreate`와 자식의 `OS_TaskEntryPoint`(`osapi-task.c:124`)다. callback은 사용자 stack의 **on-behalf frame**으로 잡는다. on-behalf frame은 어떤 thread가 다른 앱을 대신해 코드를 실행 중이라는 표시다(spec §1.2).
 - **간접 호출** 110곳([R07 §4.2])은 구성(task entry, trampoline의 `RealEntryFunc`, core `TaskMain`/`EarlyInit`, `CFE_Config_IterateAll` callback, SBN module ops) → 등록 위치 → struct type 계층(MLTA, CCS 2019 [V-abs]) → `unknown_effect` 순으로 푼다. closure 보고서는 규칙마다 푼 개수를 적는다.
 - **once와 generation.** once(τ)는 actor τ가 한 실행에 많아야 하나 존재한다는 사실이다. 주장하지 않고 증명한다(spec §1.2). 기본 B에서는 모든 정적 actor를 once로 검사한다. 재시작 시나리오 `B_restart`에서는 재시작된 앱(과 그 자식)의 skeleton을 generation 1용으로 복제하고, 그 spawn site를 background scan의 재시작 경로로 둔다(spec §3.1, §3.8).
+- **사례별 closure 기록** [D] (개정 1.3; 2026-10-22 결정 D5, IN-02; spec §3.1). 위의 기본 closure는 core-cpu1과, 동적으로 적재되는 startup script 앱이다. 개정 1.2의 정적 추출은 core-cpu1만 덮는다(`kairos/docs/static_facts.md` §8 G1). 사례마다 compile DB에 넣은 앱 코드와 뺀 코드를 기록한다.
+
+  | 사례 | closure에 넣는 코드 |
+  |---|---|
+  | R2 | core-cpu1(그 조건에는 이것으로 충분하다) |
+  | C1 | D22 공개 BP 기반의 CF와 semaphore provider(`plan/C1_basis_plan.md`) |
+  | C2 | 역할에서 끌어낸 provider 앱과 호출자 앱(P-C2) |
+  | C5 | 6.4.x의 앱 생성 경로와 그것으로 시작한 앱(D13) |
+
+  writer나 alias가 뺀 코드에 있을 수 있는 결과는 그 코드를 이름으로 밝히고, 그것이 결과를 좌우하는 곳에서는 판정을 보류한다(spec §4.8).
 
 ### 2.2 OSAL ID map: 생성과 조회 (spec §3.2)
 
@@ -331,6 +361,18 @@ Allowed가 `unspecified_by_reference`인 행은 harm도 `unspecified_by_referenc
 - 표의 panic과 abort는 그 발생의 관측된 consequence다. 뿌리 발생의 호출자 수준 Allowed가 정해지지 않았으므로 harm이 아니다. progress 결과가 아니고, 어떤 horizon도 정하지 않는다(spec §1.6, §3.3, App. A.2 step 3).
 
 **삭제와 종료 (P-TASK-JOIN / R17, S).** `OS_TaskDelete`는 취소한 뒤 join한다(`os-impl-tasks.c:693–723`). 지연 취소(deferred cancellation)는 피해 task가 취소 지점에서 program lock을 잡고 있으면 그 lock을 남긴다([R01 §2.4]). 그래서 ES lock 아래에서 삭제하는 `CFE_ES_DeleteChildTask`(`cfe_es_api.c:1348, 1383`)에 **K-LOCK.cancel**을 둔다.
+
+**`app_owner`에 쓰는 생성 사건** [D] (개정 1.3; ADR-056; spec §3.3). v7.0.1에서 task→앱 매핑은 만든 task마다 다음을 잇는다(spec §5.7 항목 1–4; 관측 쪽은 [06_observation_confirmation.md §7](06_observation_confirmation.md#7-getappid-없이-identity-bootstrap-spec-57)).
+
+| 근거 | 무엇을 알려 주나 |
+|---|---|
+| ES 요청: startup script 앱은 `CFE_ES_AppCreate`, child task는 `CFE_ES_CreateChildTask`, core task는 `CFE_ES_CreateObjects`의 core object loop | 앱이나 부모의 이름 |
+| `CFE_ES_StartAppTask`의 `ParentAppId` 인자 | 만든 앱 |
+| `OS_TaskCreate`의 entry와 return, 그 사이의 kernel fork 기록 | 생성 호출과 새 thread |
+| 자식의 첫 사건 `OS_TaskEntryPoint(osal_id)` | 새 task의 OSAL id |
+
+- ES task·App record 자체가 분석하는 자원인 곳(이 절의 App-record 구간, 6.4.x의 C5)에서는 그 record를 매핑의 근거로 쓰지 않는다.
+- v7.0.1의 정확한 줄은 anchor audit(5절, spec §3.17)가 묶으며 spec은 여기서 다시 적지 않는다.
 
 ### 2.4 OSAL 기본 연산 (spec §3.4)
 
@@ -408,7 +450,7 @@ falsifier `f`에 대해 관측하는 conjunct는 `ρ(f)`에서의 instance `C = 
 
 - **R15 CTRL-REQ (O).** ES lock 아래에서 쓴 요청 → 앱의 `RunLoop`이 읽음 → `ExitApp` → scan이 STOPPED를 봄. 앱 동작 없이 scan timer로 오는 kill 경로(RUNNING + 요청 → kill timer 5 × 1000 ms의 WAITING, `cfe_es_apps.c:1139–1146`)에는 edge가 없다.
 - **`CFE_ES_CleanUpApp`**(`:1407–1640`): record를 RESERVED로 표시 → core module의 `Cleanup` hook을 **생성된 core object table 순서로**, ES lock 없이 실행(`:1525–1545`. 순서는 하드코딩이 아니라 B에서 온다) → task 삭제(자식 먼저) → pool 삭제 → module unload → record 해제. **앱의 task는 module cleanup이 끝난 뒤까지 계속 돈다.** 이 구간이 K-LIFE 구간이다([X2-14 (d)]).
-- **계약.** `K-LIFE`(퇴역 뒤 사용: 삭제된 pipe에 `ReceiveBuffer`, RESERVED task record로 `GetAppID`, module unload 뒤의 TIME synch callback, K-LIFE 구간 안의 사용), `K-GEN`(동료가 이전 generation의 ID나 주소를 들고 있음: CF의 semaphore ID, MD가 풀어 둔 주소, SBN module symbol; [R03 §4 RC15]), generation을 건너는 `K-PERSIST`(2.12).
+- **준비 상태 명세.** `K-LIFE`(퇴역 뒤 사용: 삭제된 pipe에 `ReceiveBuffer`, RESERVED task record로 `GetAppID`, module unload 뒤의 TIME synch callback, K-LIFE 구간 안의 사용), `K-GEN`(동료가 이전 generation의 ID나 주소를 들고 있음: CF의 semaphore ID, MD가 풀어 둔 주소, SBN module symbol; [R03 §4 RC15]), generation을 건너는 `K-PERSIST`(2.12).
 - **시나리오 family.** `B_restart(app, request)`는 B.Input에 한 앱에 대한 문서화된 제어 요청 **하나**를 넣고 사건(OPERATIONAL 관측)으로 촉발한다. 경로를 지나는 최소 경우다. 더 긴 요청 순서는 `unspecified_by_reference`이고 길이를 고르지 않는다. `B_stop`은 정지 명령과 그것이 일으키는 teardown이다(8절).
 
 ### 2.9 Software Bus (spec §3.9)
@@ -428,7 +470,7 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 | buffer 수명 | 같은 pipe의 다음 `ReceiveBuffer`나 pipe 삭제까지 유효하다(`cfe_sb.h:449–464`) → `K-LIFE.sb-buffer` |
 | 호출자 대신 내는 event | SB API 코드는 호출자의 task 안에서 `CFE_SB_Global.AppId`를 stamp로 event를 낸다(`cfe_sb_priv.c:786`) → K-ID instance. **사례 R2가 여기다.** **문서화된 drop**(`documented_drop`, 사용하는 코드는 SB 자신의 event 코드)은 하나다. 호출자의 task별 재귀 bit가 서 있는 경우다(`cfe_sb_priv.c:305–328, 773–790`; "This prevents recursive events from occurring", `cfe_sb_priv.h:550–558`; 호출자 쪽 `caller`, `code_admission`). **문서화되지 않은 drop**: 호출자에게 ES task record가 없으면 SB의 event 코드는 자기 `CFE_ES_GetTaskID` 호출의 status를 무시하고(`cfe_sb_priv.c:773`, K-SELF.es instance, spec §3.3), 이어 `CFE_ES_TaskID_ToIndex`가 실패해 event가 버려진다(`cfe_sb_priv.c:315–318, 784`). 이 drop을 문서화한 주석이 없고 이를 받아들이는 Kairos 규칙도 없으므로 Allowed 항목이 아니다. 그래서 그 K-SELF.es instance의 호출자 수준 Allowed는 `unspecified_by_reference`이고(NOT_READY_UNJUDGED; harm `unspecified_by_reference`; 결과는 effect lost silently, 곧 event가 버려진다), SB의 `appreq`가 기록되면 `none`(VIOLATING)이다(spec §1.6 `appreq` step (1)). SB가 버린 event를 보내라는 cSB 요구(cSB4305.3–.5)는 SB의 event site에서 호출자 쪽 글이다. 그것을 그 site의 `appreq`로 기록할지는 열려 있다(PI). 기록하면 spec §1.6이 충돌로 적고 판정을 보류하므로(QT-5), 재귀 guard의 허용은 그것과 충돌한다(충돌을 적은 NOT_READY_UNJUDGED, 우선순위를 정하지 않는다). 기록하지 않으면 재귀 guard drop은 TOLERATED다(spec §3.9; [X2-14 (a)]) |
 | 구독 보고 mode ([X2-05]) | SBN은 `ENABLE_SUB_REPORTING`과 `SEND_PREV_SUBS` 명령을 **보낼 뿐이다**(`sbn_subs.c:43–60`). mode 변경(LP `cfe_sb_task.c:1224–1227`)과 재전송 송신 loop(`:1169`)는 **SB 자신의 main task**가 한다. 구독자 task는 SB unlock 뒤 lock 없이 flag를 읽는다(`:659`, `assumed`). K-MODE는 SB 명령 pipe 위의 R7로 이어지고, 그 pipe에도 K-CAP과 K-CAP.msglim instance가 있다 |
-| 용량, 두 수준 | `sb.queue(p)`의 `cap_B(p)` → **K-CAP**. `cap_B(p) = min(요청 깊이, msg_max)`는 euid ≠ 0일 때만 맞다(spec §1.3; [M] `msg_max` 10, 26개 pipe 중 22개가 잘림, [BM §3.1]). `sb.msglim(m,p)`의 한도는 각 `Subscribe` 지점의 `MsgLim` 인자를 상수 평가한다(기본 4) → **K-CAP.msglim**. 1단계 상한은 certificate view의 MB 순서 위에서 put과 get의 maximum-weight closure로 구한다(표준 알고리즘 사실, 인용은 미확인). star-closed loop 안의 put은 무게가 무한이므로 protected certificate가 없다 |
+| 용량, 두 수준 | `sb.queue(p)`의 `cap_B(p)` → **K-CAP**. `cap_B(p) = min(요청 깊이, msg_max)`는 euid ≠ 0일 때만 맞다(spec §1.3; [M] `msg_max` 10, 26개 pipe 중 22개가 잘림, [BM §3.1]). 기준값 10은 유지하고 queue 손실은 구성과 함께 기록한다. 손실이 목표 경로를 막으면 민감도 구성을 따로 설계하고, 값을 조용히 바꾸지 않는다(PI 결정 D19, 2026-10-15). `sb.msglim(m,p)`의 한도는 각 `Subscribe` 지점의 `MsgLim` 인자를 상수 평가한다(기본 4) → **K-CAP.msglim**. 1단계 상한은 certificate view의 MB 순서 위에서 put과 get의 maximum-weight closure로 구한다(표준 알고리즘 사실, 인용은 미확인). star-closed loop 안의 put은 무게가 무한이므로 protected certificate가 없다 |
 
 **Allowed와 세 판단** [D] (spec §1.6 "Three judgements", §3.9; ADR-043). route와 용량 준비 상태 명세의 손실은 세 판단으로 따로 기록하고, 어느 규칙도 셋을 합치지 않는다(spec §4.12 item 6).
 
@@ -510,16 +552,16 @@ ad hoc 동기화는 lock·semaphore 같은 정식 기본 연산 없이 flag poll
 
 ---
 
-## 3. 계약 라이브러리와 15개 계약 종류
+## 3. 준비 상태 명세 catalogue와 15개 준비 범주
 
 (spec §3.15)
 
-[R03 §4]는 cFS core와 앱에서 준비 계약 15종(RC1–RC15)을 찾았다. spec §3.15는 Φ_cFS의 계약 template이 각 종류를 얼마나 덮는지 적는다.
+[R03 §4]는 cFS core와 앱에서 15개 범주를 찾았다([R03]의 이름은 "readiness-contract kinds"이고, spec은 이것을 준비 범주 RC1–RC15라 부른다). spec §3.15는 Φ_cFS의 준비 상태 명세 template이 각 범주를 얼마나 덮는지 적는다.
 
 - **full**: 기본 B나 선언한 variant에서 instance가 만들어지고, 분류되고, 관측 가능하다. **partial**: 무엇이 빠졌는지 적는다.
-- v1 설계는 [X2 §C] 검토에서 15종 중 약 6종만 full이었다. 아래는 수정 뒤의 평가이며, **census를 실행하기 전까지 모두 [I]다**.
+- v1 설계는 [X2 §C] 검토에서 15개 범주 중 약 6개만 full이었다. 아래는 수정 뒤의 평가이며, **census를 실행하기 전까지 모두 [I]다**.
 
-| RC | 종류 | template | coverage [I] |
+| RC | 범주 | template | coverage [I] |
 |---|---|---|---|
 | RC1 | 이름으로 찾는 OSAL/PSP object | K-REG.osal, K-REG.psp-dev, K-LOCKBAL | full(2.2와 종료 범위가 전제). HS device는 provider `env-absent` |
 | RC2 | 정상 운용 중 ES 이름 조회 | K-REG.es(앱, lib, counter). **task 이름 조회는 `K-REG.osal<task>`와 K-LOCKBAL로 재분류**(`CFE_ES_GetTaskIDByName` → `OS_TaskGetIdByName`, `cfe_es_api.c:716–717`) | 순서는 full. harm은 partial(HS AppMon이 not-found를 "진행 없음"으로 셈) |
@@ -538,25 +580,25 @@ ad hoc 동기화는 lock·semaphore 같은 정식 기본 연산 없이 flag poll
 | RC15 | owner 재시작 뒤 낡은 참조 | K-GEN | **partial**: B′에 재시작 입력이 필요 |
 
 - **TOCTOU**(time-of-check to time-of-use)는 검사와 사용 사이에 상태가 바뀌는 문제다. RC12는 선언한 transaction의 serializability(다른 연산과 섞여 실행되어도 어떤 순차 실행과 같은 결과를 내는 성질)로 판정한다(Velodrome PLDI 2008, AVIO ASPLOS 2006 [V-abs]). **latent**는 기본 구성에서는 실행되지 않는 경로라는 뜻이다.
-- 각 종류의 Req, Allowed(출처 포함), 판정 경로, oracle은 spec §3.15 원표에 있다.
+- 각 범주의 준비 사전조건(`Req`), Allowed(출처 포함), 판정 경로, oracle은 spec §3.15 원표에 있다.
 - **Allowed의 쪽과 framework 수준** (spec §3.15; §1.6 "Three judgements"). 원표의 Allowed 열은 이제 출처의 쪽과 framework 수준 판단을 함께 적는다.
 
 | RC | 호출자 수준 Allowed (쪽) | framework 수준 |
 |---|---|---|
-| RC1 | CF의 `retry_until_ready`(유효 경계, 호출자 쪽 `code_admission`). 그 밖에는 `returned_and_tested`(규칙 `rule`: 기본 정상 연속, rule-backed로 보고) | `@retval` 목록(`osapi-countsem.h:157–160`), `documented-result` |
+| RC1 | CF의 `retry_until_ready`(유효 경계, 호출자 쪽 `code_admission`). 그 밖에는 `unspecified_by_reference`이고, reference가 호출자의 처리와 그 연속을 인용한 곳에서만 `returned_and_tested`다. 추출한 `cont_candidate`, error 반환, exit는 사실로 보고한다(엄격한 대안 QT-4, Q15, 2026-10-15) | `@retval` 목록(`osapi-countsem.h:157–160`), `documented-result` |
 | RC5 | TO_LAB의 `defer_by_design`(`to_lab_app.c:64–68`, 호출자 쪽). 그 밖에는 `unspecified_by_reference` → LOSS-UNDER-ORDER | cSB4305.5, `documented-not-error` |
 | RC6 | `none`(`cfe_evs.h:168–172`가 드는 `CFE_ES_WriteToSysLog`는 다른 API). EVS own-ID guard와 SB 재귀 guard는 `documented_drop`(호출자 쪽: 사용하는 코드가 EVS나 SB 자신이고 guard 주석이 그 코드에 속함) | — |
 | RC7 | 소비자 reference마다. 없으면 `unspecified_by_reference` | barrier의 soft timeout 문서("soft limit"; `CFE_ES_WaitForStartupSync`의 timeout 설명; cES1335)는 framework 수준일 뿐이고 소비자 발생을 TOLERATED로 만들지 않는다. timeout 의존은 explorer로만 가린다 |
 | RC14 | `unspecified_by_reference` → LOSS-UNDER-ORDER | cSB4305.3/.4, `documented-result` |
 
-**개수 [I].** full 10종(RC1, RC2(harm 요소는 partial), RC3, RC4, RC6, RC7, RC10, RC11, RC13, RC14), partial 5종(RC5(key 비율 측정 전), RC8, RC9, RC12, RC15)이다.
+**개수 [I].** full 10개 범주(RC1, RC2(harm 요소는 partial), RC3, RC4, RC6, RC7, RC10, RC11, RC13, RC14), partial 5개 범주(RC5(key 비율 측정 전), RC8, RC9, RC12, RC15)다.
 
-**15종 밖의 template.** [R01]/[R02]의 발견과 검토에서 나온 `K-SPAWN`(timebase thread를 포함한 OSAL handshake, ES task record, ES App record의 script·core 경로), `K-SELF.es`, `K-LIFE`, `K-LOCKBAL`, `K-ATOM.tbl-load`, `K-ATOM.synchcb`, `K-LOCK.cancel`, `K-REG.unique`, `K-TEARDOWN`이 있다. spec은 "조용히 버린 것은 없다"고 적는다.
+**15개 범주 밖의 template.** [R01]/[R02]의 발견과 검토에서 나온 `K-SPAWN`(timebase thread를 포함한 OSAL handshake, ES task record, ES App record의 script·core 경로), `K-SELF.es`, `K-LIFE`, `K-LOCKBAL`, `K-ATOM.tbl-load`, `K-ATOM.synchcb`, `K-LOCK.cancel`, `K-REG.unique`, `K-TEARDOWN`이 있다. spec은 "조용히 버린 것은 없다"고 적는다.
 
 **사례에 맞추지 않는다** (spec §7.1–7.2).
-- 계약은 사례가 아니라 **API와 resource kind마다** 쓴다. census가 cFE core와 15개 앱의 모든 문맥 위치에 instance로 만든다.
-- 후보는 14개 발견 출처의 합집합에서 온다. 예: not-ready 결과 코드 mining, 재시도 loop에서 끌어낸 계약, 생애주기 대칭(create와 delete가 있는 kind는 자동으로 K-REG, K-LIFE, K-GEN), API header의 `\par Assumptions` 138개, 순서 가정을 밝힌 코드 주석, belief deviance(대부분의 호출 지점이 상태를 검사하는 API에서 검사하지 않는 지점의 순위; 판정이 아니라 순위일 뿐이다, Engler et al. SOSP 2001 [V-me]).
-- Φ 항목마다 출처 종류, `path:line`, 인용 문장의 sha256, 작성자와 작성 시각, 작성자가 그 API에 대해 본 설계 사례를 기록하고, freeze F1·F2로 hash를 고정한다.
+- 준비 상태 명세는 사례가 아니라 **API와 resource kind마다** 쓴다. census가 cFE core와 15개 앱의 모든 문맥 위치에 instance로 만든다.
+- 후보는 14개 발견 출처의 합집합에서 온다. 예: not-ready 결과 코드 mining, 재시도 loop에서 끌어낸 후보 준비 상태 명세(그 Allowed 항목은 `caller` 기록이 재시도를 받아들이는 곳에서만 `retry_until_ready`이고, pattern만으로는 `unspecified_by_reference`다. QT-4), 생애주기 대칭(create와 delete가 있는 kind는 자동으로 K-REG, K-LIFE, K-GEN), API header의 `\par Assumptions` 138개, 순서 가정을 밝힌 코드 주석, belief deviance(대부분의 호출 지점이 상태를 검사하는 API에서 검사하지 않는 지점의 순위; 판정이 아니라 순위일 뿐이다, Engler et al. SOSP 2001 [V-me]).
+- Φ 항목마다 출처 종류(`api_doc`, `requirement`, `code_admission`, `code_pattern`, `issue`, `researcher`)와 쪽(`supplier`, `caller`, `rule`), `path:line`이나 요구 ID, 인용 문장의 sha256, 작성자와 작성 시각, 작성자가 그 API에 대해 본 설계 사례를 기록하고, freeze F1·F2로 hash를 고정한다. **근거 등급**(source tier)은 보고할 때 이 기록에서 유도하고 판정마다 함께 보인다(spec §7.2, §1.6).
 
 ---
 
@@ -600,7 +642,7 @@ HB 규칙은 "e₁ → e₂"를 정하는 추론 규칙이다. 각 규칙은 짝
 
 (spec §3.17)
 
-Φ의 operation과 계약은 코드의 특정 지점에 묶여야 한다. 이 묶음을 **site binding**이라 한다.
+Φ의 operation과 준비 상태 명세는 코드의 특정 지점에 묶여야 한다. 이 묶음을 **site binding**이라 한다.
 
 - **줄 번호 probe를 쓰지 않는다** [D] (ADR-019; [J2-9]). 줄 번호는 revision마다 바뀐다. 내부 지점은 모두 **AST pattern**으로 묶는다. AST(abstract syntax tree)는 compiler가 소스를 구조로 나타낸 트리다. pattern 언어(spec §2.3)는 `fn(함수).call(callee, 인자 조건)`, `.store(TYPE.FIELD)`, `.memset(TYPE)`, `.load(TYPE.FIELD)`, `.loop(poll)`, `.return` 같은 모양이고, match가 정확히 하나일 때만 묶인다.
 - **바이너리로 푸는 법.** `kz-static link`가 pattern을 basis 자신의 gcc 바이너리 명령으로 푼다. **DWARF**(compiler가 바이너리에 남기는 디버그 정보 형식으로, 소스 줄·함수·inline 정보를 담는다)의 line table과 subprogram·inlined-subroutine 항목을 쓰고, LLVM MC로 역어셈블해 명령과 그 비용 등급을 얻는다.
@@ -612,7 +654,7 @@ fn("CFE_ES_CreateObjects").call("CFE_ES_AppRecordSetUsed", arg[1] != CFE_RESOURC
 
 - **anchor audit.** match가 여럿이거나 없는 지점은 anchor audit 목록에 오른다([R06 T7]). 묶이지 않은 지점에 기댄 instance는 관측 쪽에서 `unknown(model_gap)`이다. 정적 certificate는 그래도 적용된다.
 - **version guard.** Φ의 모든 규칙과 효과에 version guard를 단다. 예: R19는 `cfe >= 6.4.2`, 2단계 barrier는 `cfe >= 6.6.0`이다([LED §3.3]). spec §2.3의 Φ 발췌에도 `rule CORE-SERIAL stratum S robust obs_fatal guard cfe >= "6.4.2"`로 적혀 있다.
-- **가설 H-V(진술하되 주장하지 않는다).** 다른 revision용 profile은 Φ와 scheduling profile `P_sched`만 바꾼다. 시험: Φ_6.4.x, 6.4.x backend의 인용한 `P_sched`, 바꾸지 않은 엔진으로, C3(6.4.1)의 사슬로 묶인 두 instance(TIME의 `CFE_SB_CreatePipe` event의 K-ID 사용, TIME 문맥의 EVS 자기 AppID 사용)는 각각 σ_R1에서 fixed-order(`exh`만, S7)이고 σ_U에서 schedule-dependent로, C5(6.4.1)는 schedule-dependent로 분류되어야 한다. Φ_6.4.x가 6.4.1 reference를 인용하기 전까지 Allowed는 `unspecified_by_reference`이고, 잘못된 identity 갈래가 READY인 것은 K-ID가 표현하지 못하는 계약의 적합성 빈틈이지 엔진 변경이 아니다. 엔진을 바꿔야 하면 강한 형태의 H-V는 반증된다. 인용한 `P_sched`가 없으면 σ_R1 주장은 하지 않는다(spec §7.6; PI 결정 D13).
+- **가설 H-V(진술하되 주장하지 않는다).** 다른 revision용 profile은 Φ와 scheduling profile `P_sched`만 바꾼다. 시험: Φ_6.4.x, 6.4.x backend의 인용한 `P_sched`, 바꾸지 않은 엔진으로, C3(6.4.1)의 사슬로 묶인 두 instance(TIME의 `CFE_SB_CreatePipe` event의 K-ID 사용, TIME 문맥의 EVS 자기 AppID 사용)는 각각 σ_R1에서 fixed-order(`exh`만, S7)이고 σ_U에서 schedule-dependent로, C5(6.4.1)는 schedule-dependent로 분류되어야 한다. Φ_6.4.x가 6.4.1 reference를 인용하기 전까지 Allowed는 `unspecified_by_reference`이고, 잘못된 identity 갈래가 READY인 것은 K-ID가 표현하지 못하는 것, 곧 준비 상태 명세의 적합성 빈틈이지 엔진 변경이 아니다. 엔진을 바꿔야 하면 강한 형태의 H-V는 반증된다. 인용한 `P_sched`가 없으면 σ_R1 주장은 하지 않는다(spec §7.6; PI 결정 D13).
 
 ---
 
@@ -620,11 +662,11 @@ fn("CFE_ES_CreateObjects").call("CFE_ES_AppRecordSetUsed", arg[1] != CFE_RESOURC
 
 ### 6.1 다섯 설계 사례가 들어가는 곳
 
-다섯 사례는 설계 중 개발 사례로 썼다([LED]). 아래 표는 각 사례가 Φ_cFS의 어느 계약 종류·template에 들어가고 어떤 basis에서 다뤄지는지 보인다. 사례 설명은 [01_overview.md §1.3–1.4](01_overview.md#13-네-가지-구체-예)에 있다. 기대 판정은 모두 [I]이고 실행 전이다. 사례마다 자기 basis에서, 자기 현상에 대해, 자기 대조와 함께 평가한다(6.3; spec §8.2, §9.3).
+다섯 사례는 설계 중 개발 사례로 썼다([LED]). 아래 표는 각 사례가 Φ_cFS의 어느 준비 범주·template에 들어가고 어떤 basis에서 다뤄지는지 보인다. 사례 설명은 [01_overview.md §1.3–1.4](01_overview.md#13-네-가지-구체-예)에 있다. 기대 판정은 모두 [I]이고 실행 전이다. 사례마다 자기 basis에서, 자기 현상에 대해, 자기 대조와 함께 평가한다(6.3; spec §8.2, §9.3).
 
-| 사례 | 계약 종류와 template | 쓰는 Φ 항목 | basis와 결정 | 기대 판정 [I] | spec |
+| 사례 | 준비 범주와 template | 쓰는 Φ 항목 | basis와 결정 | 기대 판정 [I] | spec |
 |---|---|---|---|---|---|
-| **R2** (cFE #2663): SB의 AppId가 발행 전에 쓰인다 | RC6. generic 계약 `K-ID.send-with-appid`(출처 `cfe_evs.h:168–172`) | R19 CORE-SERIAL, `cell(CFE_SB_Global.AppId)`와 capture point(`derives`), T-SPAWN | ENV basis(v7.0.1)의 기본 B. 자기 instance에는 새 결정이 필요 없다(실행에는 D1). 대상 revision에서 재현된 유일한 자연 사례다. reference의 class 진술은 없고, fixed-order 읽기는 코드 읽기에 기댄다(spec §8.2) | ES와 EVS 두 절반에서 `fixed-order(σ_U, M_api)`, `fixed-order(σ_U, M_impl)`. b = ∞의 safety 진술 `¬OK_i`이고, `Allowed = none`이 결정에서 정하므로 decision route가 있다. σ_U∞·σ_R1 칸은 전이 규칙 1(a), σ_E 칸은 M_impl에서 규칙 2로 온다. reach는 칸마다 따로, progress는 모든 칸에서 `unknown(not_checked)`. 출처 회계는 "generic 계약 K-ID + framework 규칙 R19". 음성 대조 E-post/E-TBL에는 fixed-order가 없다(6.3) | App. A.1; §8.2; §9.3; 이 문서 7절 |
+| **R2** (cFE #2663): SB의 AppId가 발행 전에 쓰인다 | RC6. generic 준비 상태 명세 `K-ID.send-with-appid`(출처 `cfe_evs.h:168–172`) | R19 CORE-SERIAL, `cell(CFE_SB_Global.AppId)`와 capture point(`derives`), T-SPAWN | ENV basis(v7.0.1)의 기본 B. 자기 instance에는 새 결정이 필요 없다(실행에는 D1). 대상 revision에서 재현된 유일한 자연 사례다. reference의 class 진술은 없고, fixed-order 읽기는 코드 읽기에 기댄다(spec §8.2) | ES와 EVS 두 절반에서 `fixed-order(σ_U, M_api)`, `fixed-order(σ_U, M_impl)`. b = ∞의 safety 진술 `¬OK_i`이고, `Allowed = none`이 결정에서 정하므로 decision route가 있다. σ_U∞·σ_R1 칸은 전이 규칙 1(a), σ_E 칸은 M_impl에서 규칙 2로 온다. reach는 칸마다 따로, progress는 모든 칸에서 `unknown(not_checked)`. 출처 회계는 "generic 준비 상태 명세 K-ID + framework 규칙 R19". 음성 대조 E-post/E-TBL에는 fixed-order가 없다(6.3). **개정 1.3**: R2는 관측 경로의 기반 검증(rung V1′)이고 기여 근거가 아니다. 이 certificate는 보편 진술을 할 때만 쓰는 선택 경로이고, 쓰지 않으면 칸은 "schedule dependence undetermined"다. 관측 판정 기대는 7절 머리 | App. A.1; §8.2; §9.3; 이 문서 7절 |
 | **C1** (CF #184): CF가 다른 앱이 만들 counting semaphore를 이름으로 찾는다 | RC1. `K-REG.osal`(spec §2.3 발췌의 `K-REG.osal-countsem-lookup`, Allowed `retry_until_ready`(호출자 쪽 `cf_cfdp.c:1272–1278`), 경계는 유효 `CF_STARTUP_SEM_MAX_RETRIES`). M_impl에서 `K-LOCKBAL`. phase 쪽은 K-PHASE(6.2) | P-CNT, RF, M_impl의 by-name token | 기본 B: 조회가 비어 있지 않은 `sem_name` 검사 뒤에 있는데 기본 항목이 둘 다 비어 있다(`cf_cfdp.c:1270`; `cf_def_config.c:60, 78`). B′: 공개 코드에서 파생(nasa/bp, [LED §1a]). B′는 PI 결정 D22(D18의 C1 몫과 함께)다 | 기본 B: `inactive(B)`(증명은 `Sk^cert`의 접힌 경로 조건). B′ M_api: σ_U에서 schedule-dependent. σ_U∞에서는 provider가 아직 돌 수 있으면 `¬Bad_i`이므로, 사용에 도달하면 refinement `timeout-dependent`(`exh`만). B′ M_impl: RESERVED 구간의 by-name 조회가 `OS_ERR_INCORRECT_OBJ_STATE`로 결정에서 VIOLATING이고, 시간 기반 전이가 필요 없어 refinement가 없다. type lock 누수로 `leaked-lock` stall witness가 사슬로 붙는다. 구현 결함 후보(F1). 상세와 결과 구분 A1–A5는 6.4 | App. A.4; §8.2; §9.3 |
 | **C2** (cFE #198): late init이 끝나기 전에 다른 앱이 진행했다 | RC7. K-PHASE(소비자 쪽, 수준별) | R5/R6, script phase barrier(O, obs-soft), 2단계 barrier의 version guard `cfe >= 6.6.0` | 역할 파생(role-derived): 구성한 앱 쌍, synthetic control. 원 시스템은 비공개다. PI 결정 P-C2(6.4.2 행에는 D13도) | template-only 결과(`unknown(unmodelled)`)를 먼저 기록한다. class는 Q22(provider의 late init이 실패할 수 있는가)의 두 경우를 모두 보고한다. 같은 모양의 litmus LP-CASE-C2에 대한 기대: 옛 설계(선언이 late init 앞)는 σ_U와 σ_U∞에서 schedule-dependent, refinement 없음. 고친 설계는 σ_U에서 schedule-dependent, σ_U∞에서 `¬Bad_i`이고 도달하면 timeout-dependent. late init이 실패할 수 있으면 STOPPED store가 barrier를 통과시키는 시간 기반 전이 없는 bad 실행이 있어 refinement가 없다. litmus는 정의에 대한 근거이지 사례 근거가 아니다 | §3.6; §8.2; §9.3; App. A.8 |
 | **C3** (cFE #73): 6.4.1에서 우선순위 때문에 TIME이 먼저 실행되어 core 시작 중 crash | R2와 같은 자원 가족(SB AppId)이라 독립 사례로 세지 않는다(spec §8.2; [LED §3.1]). spec §2.3 발췌에서 `K-ID.send-with-appid`의 작성 기록은 `inspected { R2, C3 }`다 | σ_R1[P_sched], R19의 version guard `cfe >= 6.4.2` | 6.4.1 tarball, 공유 파생 6.4.x 플랫폼(PI 결정 D13 (a)–(c), Q16) | H-V 시험. 사슬로 묶인 instance 둘(TIME의 `CFE_SB_CreatePipe` event의 K-ID 사용, TIME 문맥의 EVS 자기 AppID 사용)이 σ_R1에서 fixed-order(`exh`만, S7), σ_U에서 schedule-dependent. Φ_6.4.x가 6.4.1 reference를 인용하기 전까지 Allowed는 `unspecified_by_reference`. 잘못된 identity 갈래는 READY인데 K-ID가 표현하지 못한다(계약의 적합성 빈틈이지 엔진 변경이 아니다) | §7.6; §8.2; §9.3 |

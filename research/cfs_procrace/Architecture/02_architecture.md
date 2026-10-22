@@ -2,7 +2,9 @@
 
 이 문서는 Kairos(도구 접두어 `kz`)가 어떤 구성요소로 이루어지는지, 구성요소들이 어떤 typed 산출물을 주고받는지, 계층들이 서로를 어떻게 검사하는지를 설명한다. spec을 읽지 않은 연구자가 전체 구조를 한 번에 파악하는 것이 목적이다. 정의와 근거의 세부는 각 문장이 가리키는 spec 절에 있다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+
+> **rev 1.3 반영 (2026-10-22).** 이 문서는 SPEC revision 1.3(spec §0.12; 변경표 `plan/REV13_CHANGE_TABLE.md`; 결정 기록 `spec/PI_DECISIONS_RESOLVED_20261022.md`) 가운데 이 문서가 풀어 쓰는 절의 변경을 반영했다. 반영한 변경표 행: C-01, C-03, C-05, C-10, C-13, C-15, C-16, C-17, C-18, C-19, C-21, C-22, C-23, C-24, C-25, C-26, C-27, C-28, C-29, C-30, C-31, C-32, C-36, C-41, C-42, C-43, C-46, C-48, C-49, C-50, C-51(C-52는 이 반영 자체다). 이 변경은 결정 [D]이고 결과가 아니다. 이 판을 위해 만들거나 실행한 것은 없고, 연구 조건도 정하지 않았다. **우선 규칙**(spec §0.12 "Precedence", ADR-053): revision 1.0–1.2를 위해 쓴 문장 가운데 certificate, explorer, 진행(progress) 결과, loop를 Kairos의 첫 산출물·필수 산출물·정의적 산출물로 부르는 것은 ADR-053에 따라 읽는다. 이 경로들은 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 기반 판정·한정 예측·제어 실행 확인의 전제 조건이 아니다. 아래에서 그런 문장 옆에는 "rev 1.3" 표시를 붙였다. 그림 D2의 코드 블록 세 개는 spec §12의 revision 1.3 지시(C-48)에 맞춰 고쳤다.
 
 ## 목차
 
@@ -29,7 +31,9 @@ spec은 근거의 종류를 표기한다(spec 머리말 L11). **[F]** 인용이 
 
 revision 1.2는 PI의 2026-10-15 결정을 반영한다(spec §0.10; 결정 원문은 `spec/PI_DECISIONS_RESOLVED_20261015.md`). 그 결정은 연구 계획·범위·표현에 대한 결정 [D]이고, 도구·논문·출처에 대한 사실도 실행 기록도 아니다. 폐기한 기록기 CORD의 결과는 이 문서에서 근거로 쓰지 않는다(PI 결정 D12). R2의 실행 근거는 gdb 원시 기록 `env/logs/r2_g1..3_*`와 `results/R2_gdb_v701.md`([R2g])다. 값이 reference에 없으면 고르지 않는다. 이 문서에는 실행 횟수 N, 작업량 상한, 감시 한도가 없다.
 
-**인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
+revision 1.3은 PI의 2026-10-22 결정 D1–D5를 반영한다(spec §0.12, §10.1 "Decisions of 2026-10-22"; ADR-053–ADR-058; 결정 원문은 `spec/PI_DECISIONS_RESOLVED_20261022.md`). 2026-10-22 결정 D1은 검토된 제안 문서 0.2(spec의 [P0.2])를 기초로 채택하고, 중심 주장을 "must-order certificate가 관측된 잘못된 방향의 위반을 `fixed-order`로 끌어올린다"에서 **불완전 관측 아래의 관측 기반 판정, 한정 예측, 제어 실행 확인**으로 옮긴다. MustBefore 고정점, certificate, `kz proofcheck`, explorer, 진행 결과는 그대로 정의된 **선택 경로**가 된다. 2026-10-22 결정 D2는 `PENDING`과 `OPEN`의 요약을 `INCONCLUSIVE(horizon-open)`으로, D3은 C1을 기여 증거의 첫 사례로, D4는 실행하지 못한 원 도구에 대한 주장을 문헌·코드 분석 결과 상태로, D5는 단계 B의 사례별 완료에 writer와 별칭을 덮는 닫힘을 요구하는 것으로 정했다. 같은 날 task→앱 매핑이 구현 범위로 확인되었다(ADR-056). 이 결정도 결정 [D]이고 결과가 아니다. spec §1의 정의, lemma와 증명 상태, 가정, 비교 집합(ADR-046), P-Z3, QT-4/QT-5/Q15, T1은 바뀌지 않았다.
+
+**인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 2026-10-22의 결정 D1–D5는 같은 번호의 이전 PI 결정(관측 hook의 D1, F1 gate 후순위의 D3, native σ_R1의 D4 등)과 다르므로 늘 "2026-10-22 결정"을 붙인다. 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
 
 ### 1.2 핵심 용어
 
@@ -49,22 +53,26 @@ revision 1.2는 PI의 2026-10-15 결정을 반영한다(spec §0.10; 결정 원�
 | linearization point (LP) | 연산의 효과가 "이 명령에서 일어났다"고 보는 한 지점. Kairos는 요구 조건의 conjunct(∧로 묶인 각 조건)마다 LP를 따로 둔다. 호출자가 인자 값을 미리 읽어 둔 load 지점은 **capture point**라 부른다 | §1.4 |
 | happens-before (HB) | 한 실행 안에서 동기화(lock, message, thread 생성 등)로 정해지는 "먼저 일어남"의 부분 순서. **vector clock**은 thread마다 카운터 벡터를 들고 다니며 이 순서를 계산하는 자료 구조다(Lamport 1978; Fidge 1988; Mattern 1989 [V-abs]) | §1.9 |
 | MustBefore (MB) | "모든 실행에서 a가 n보다 먼저 일어난다"는 정적 관계. 코드 구조만으로 계산한다 | §1.9, §4.4 |
-| certificate | 안전성 진술 하나(fixed-order의 `¬OK_i`, protected의 `¬NR_i`)를 다른 프로그램(`kz proofcheck`)이 한 단계씩 다시 확인할 수 있게 적은 증명 기록. 검사기는 명시한 trusted base에 상대적으로 추론 단계를 다시 검증한다. 증명 상태가 붙는다 | §4.5 |
-| trust ledger | certificate와 판정 칸마다 붙는 네 부분 기록: 다시 검증한 단계, 추출 사실, 신뢰 항목(쓴 lemma와 그 증명 상태 포함), 관측으로 반박될 수 있지만 증명되지 않은 항목 | §4.5.1 |
+| certificate | 안전성 진술 하나(fixed-order의 `¬OK_i`, protected의 `¬NR_i`)를 다른 프로그램(`kz proofcheck`)이 한 단계씩 다시 확인할 수 있게 적은 증명 기록. 검사기는 명시한 trusted base에 상대적으로 추론 단계를 다시 검증한다. 증명 상태가 붙는다. revision 1.3부터 보편 순서 주장이 필요할 때 쓰는 선택 경로다(ADR-053) | §4.5 |
+| trust ledger | certificate와 판정 칸마다 붙는 네 부분 기록: 다시 검증한 단계, 추출 사실, 신뢰 항목(쓴 lemma와 그 증명 상태 포함), 관측으로 반박될 수 있지만 증명되지 않은 항목. revision 1.3부터 certificate 없는 관측 판정·예측·확인·정적 증명에도 붙고, 그때 부분 (i)은 비어 있을 수 있다(C-23) | §4.5.1 |
+| 필수 경로 / 선택 경로 (rev 1.3) | 필수 경로: 닫힘과 추출 → probe 계획 → 관측 → 정규화(task→앱 매핑 포함) → 관측 기반 판정 → 한정 예측(명시적 상태 탐색 먼저) → 제어 실행 확인. 선택 경로: MustBefore·certificate·`kz proofcheck`, explorer, 진행 결과, loop. 선택 경로는 그대로 정의되어 있고 보편 순서 주장이나 진행 결과가 필요할 때 쓴다 | §2.2, ADR-053 |
+| 관측 기반 판정 / 설명 집합 (rev 1.3) | 실제 기록 위에서 조건 instance를 판정하는 것. 판정은 기록과 양립하는 run의 모든 설명(설명 집합 `Cobs`)에서 성립할 때만 확정되고, 아니면 이유를 붙인 `INCONCLUSIVE`다. `Cobs`는 한 run의 모호성이고 예측한 스케줄이 아니다 | §4.8, ADR-055 |
+| 요약 뷰 (rev 1.3) | 바뀌지 않은 상태 위에 계산하는 판정 요약: 관측(`OBSERVED_VIOLATION`, `NO_VIOLATION_IN_CHECKED_PREFIX`, `INCONCLUSIVE(reason)`, `NOT_APPLICABLE`), 예측(`MODEL_CANDIDATE`, `NONE_IN_SCOPE`, `INCONCLUSIVE(reason)`, `NOT_RUN`), 확인(`CONFIRMED`, `NOT_CONFIRMED(reason)`, `NOT_RUN`), 실행 관계. `PENDING`과 `OPEN`은 `INCONCLUSIVE(horizon-open)`이다(2026-10-22 결정 D2) | §1.10, ADR-054 |
+| `app_owner` (소속 앱, rev 1.3) | actor instance를 만든 애플리케이션. 근거(생성 요청, 생성 호출 안의 kernel fork 기록, 자식이 알리는 OSAL id, 분석 대상이 아닐 때의 ES 기록)와 수준 `confirmed` / `inferred` / `undetermined`을 가진다. 분석하는 표 자체에서 얻지 않는다 | §1.2, §5.7, ADR-056 |
 | 증명 상태 (proof status) | lemma·보장·certificate·판정 칸의 `proved` / `depends-on-stated-assumption` / `unproved`. 여러 lemma를 쓴 진술은 가장 약한 것을 따른다. 상태는 증명을 써 넣는 수정만 올리고, 실행·시험·통과한 obligation은 올리지 못한다. 첫 R2 결과의 certificate 칸은 모두 `unproved`다 | §6.2 |
 | 근거 등급 (source tier) | 준비 상태 명세가 어떤 종류의 근거 위에 서는지: `contract-backed`, `requirement-derived`, `admitted`, `issue-derived`, `code-derived`, `researcher`, `unreferenced`. 보고 시점에 `prov` 기록에서 유도하고 기록 필드는 없다 | §1.6 |
 | σ, M | σ는 스케줄 의미론이다. σ_U는 시간을 무시한 임의 interleaving, σ_U∞는 σ_U에서 시간 기반 전이(TB: 주기적이지 않은 timed wait의 timeout, 지연을 둔 retry의 마지막 시도의 실패, ES kill timer의 강제 종료)를 뺀 의미, σ_R1은 한 CPU의 고정 우선순위, σ_E는 실제 환경이다. M은 OSAL을 API 계약 수준(M_api)과 POSIX 구현 수준(M_impl) 중 어디까지 모형화하는지다 | §1.8, §1.4 |
 | uprobe, eBPF | **uprobe**는 실행 파일을 고치지 않고 사용자 프로그램의 특정 명령 주소에 kernel이 거는 probe다. **eBPF**는 kernel이 안전성을 검증한 뒤 kernel 안에서 실행하는 작은 프로그램이다. Kairos는 uprobe가 걸릴 때마다 eBPF 프로그램이 인자와 순서 token을 기록하게 한다 | §5.1, §5.3 |
 | DPOR | dynamic partial-order reduction. 의존하는(dependent) transition이 뒤바뀔 수 있는 곳에만 backtracking 지점(다른 순서를 시도하려고 되돌아갈 지점)을 두어, 독립 연산의 순서만 다른 interleaving의 탐색을 줄이는 체계적 탐색 기법이다([R05 §2.2]; DPOR POPL 2005 [V-abs; 보장 문구 UNVERIFIED]; source/optimal DPOR POPL 2014 [V-abs]). Kairos의 source-DPOR은 class(독립 연산의 순서만 다른 실행들의 동치류)당 실행 하나를 주장하지 않는다(spec §6.4 항목 9). | §1.11, §4.10, §6.4 |
 | F0, F1 | 관측 충실도 등급([R07 §7]). F0는 수정하지 않은 기준 바이너리를 같은 사용자·같은 명령으로 실행하고 별도의 root 프로세스가 관측한다. "시간만 바뀐다"고는 주장하지 않고 관측 영향을 점검한다. F1은 같은 소스와 컴파일러로 링크 옵션만 바꾼다 | §5.1 |
-| S0–S10 | 구현 단계. S8(MLIR)은 revision 1.2에서 제거되었고 번호를 다시 쓰지 않는다. thin MVC(S0+S1+S2+S3a)는 claims table과 자르는 순서를 부르는 이름이고 첫 완료 조건이 아니다(P-LADDER) | §9.3 |
-| PI 결정 D1, D3, P-Z3 … | PI가 정한(또는 정할) 결정의 ID. 그림 D1–D10과 다른 번호 체계다. 2026-10-15에 대부분 정해졌고, D18(C1 부분 제외), P-TRACEFS, D8/P-RECALL의 세부는 열려 있다 | [PI_DECISIONS.md](spec/PI_DECISIONS.md), spec §10.1 |
+| S0–S10 | 구현 단계. S8(MLIR)은 revision 1.2에서 제거되었고 번호를 다시 쓰지 않는다. thin MVC(S0+S1+S2+S3a)는 claims table과 자르는 순서를 부르는 이름이고 첫 완료 조건이 아니다(P-LADDER). revision 1.3에서 P-LADDER는 재정의되었다. 첫 rung은 V1′(R2 기반 검증)이고 V3(C1)이 병행한다(ADR-057; [§8.5](#85-예-r2가-흐름을-지나는-모습-기대-동작-실행한-적-없음)) | §9.3 |
+| PI 결정 D1, D3, P-Z3 … | PI가 정한(또는 정할) 결정의 ID. 그림 D1–D10과 다른 번호 체계다. 2026-10-15에 대부분 정해졌고, D18(C1 부분 제외), P-TRACEFS, D8/P-RECALL의 세부는 열려 있다. 2026-10-22에 결정 D1–D5가 더해졌고, 같은 번호의 이전 결정과 구분해 "2026-10-22 결정"을 붙인다 | [PI_DECISIONS.md](spec/PI_DECISIONS.md), spec §10.1 |
 
 ### 1.3 예로 쓰는 cFS 사례
 
 이 문서는 아래 네 가지를 반복해서 예로 든다. 모두 spec이 이미 다룬 것이다.
 
-- **R2** (spec §1.2, §1.11, App. A.1). cFE core가 시작하는 동안 ES와 EVS task가 SB 코드를 실행하고, 그 코드가 SB가 아직 발행하지 않은 AppId(`CFE_SB_Global.AppId`, 초기값 0 = UNDEFINED)를 event에 찍는다. SB는 자기 task의 `cfe_sb_task.c:138`에 와서야 이 값을 쓴다. core serialization 규칙 R19(`cfe_es_start.c:835`) 때문에, 매 boot의 위반 use 24개는 모두 발행보다 **앞서도록 HB로 순서가 정해져 있다**([R2g §2]). 이 24개는 한 원인에서 나온 반복 호출이다(정적 위치 3곳, task × 함수 문맥 6개, [R2g §6]). "순서가 없는 두 접근"을 찾는 data-race 검출기는 이런 경우를 보고하지 않는다(spec §1.11).
+- **R2** (spec §1.2, §1.11, App. A.1). cFE core가 시작하는 동안 ES와 EVS task가 SB 코드를 실행하고, 그 코드가 SB가 아직 발행하지 않은 AppId(`CFE_SB_Global.AppId`, 초기값 0 = UNDEFINED)를 event에 찍는다. SB는 자기 task의 `cfe_sb_task.c:138`에 와서야 이 값을 쓴다. core serialization 규칙 R19(`cfe_es_start.c:835`) 때문에, 매 boot의 위반 use 24개는 모두 발행보다 **앞서도록 HB로 순서가 정해져 있다**([R2g §2]). 이 24개는 한 원인에서 나온 반복 호출이다(정적 위치 3곳, task × 함수 문맥 6개, [R2g §6]). "순서가 없는 두 접근"을 찾는 data-race 검출기는 이런 경우를 보고하지 않는다(spec §1.11). revision 1.3에서 R2는 관측 경로의 기반 검증이고 기여의 증거가 아니다(spec §8.2; 2026-10-22 결정 D3; C-41).
 - **C1** (spec §1.11, App. A.4; [LED]). CF가 table에 적힌 이름으로 OSAL counting semaphore를 찾는데(lookup), 그것을 만드는 provider app과의 순서를 정하는 장치가 없다. create와 lookup은 같은 OSAL lock 아래에서 일어나므로 HB는 둘을 lock으로 순서 짓는다. default B에서는 이름이 비어 있어 이 경로가 실행되지 않는다(`inactive`). 이 경로가 실행되는 파생 구성 B′는 공개 BP 코드 기반이다(PI 결정 D22; spec App. A.4).
 - **OSAL RESERVED 구간** (spec §1.3, §1.4, App. A.4). OSAL 객체를 만드는 도중, 이름은 이미 보이지만 최종 ID는 아직 쓰이지 않은 구간이다(`osal.obj` 상태 RES_CN). M_api는 create를 원자적으로 보므로 이 구간이 없고, M_impl에서만 나타난다. 이름(by-name) lookup이 이 구간에 닿으면 기다리지 않고 바로 `OS_ERR_INCORRECT_OBJ_STATE`를 받는다(`osapi-idmap.c:401–404`). spec App. A.4는 C1의 파생 설정 B′에서 이것이 CF의 retry loop를 끝내고, countsem table lock이 잡힌 채 남아 provider가 막히는 경로를 M_impl의 기대 동작(implementation-defect candidate)으로 적는다 [I].
 - **SB 구독 전 송신** (spec §1.11, §3.9, §3.15 RC5). 구독(route)이 생기기 전에 보낸 message는 `CFE_SUCCESS`를 돌려받으면서 조용히 사라진다(`NoSubscribersCounter++`, `SEND_NO_SUBS` event). R2의 24개 use 중 18개가 이런 `SEND_NO_SUBS` event의 사용이고, 그중 17개가 ES 문맥, 1개가 EVS 문맥이다 [M] ([R2g §2]; spec §1.6, App. A.1 steps 12, 13a). EVS 문맥 1개의 MsgId 귀속은 열려 있다 [U].

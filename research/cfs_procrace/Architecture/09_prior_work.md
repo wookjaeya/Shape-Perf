@@ -3,18 +3,29 @@
 이 문서는 Kairos 설계가 기존 race·순서 위반 탐지 연구에서 무엇을 빌려 왔고 무엇만 새롭다고 주장하는지를, spec을 읽지 않은 연구자가 15–25분 안에 파악하도록 기법 계열별로 정리한다.
 근거는 spec §1.11·§0.3과 배경 보고서 [R04](동적 탐지)·[R05](체계적 테스트·정적 분석)·[R06](설계안 v0.1 비판)이 검증한 문헌뿐이다. 모든 인용에 검증 상태를 붙이며, spec에 없는 설계 요소·수치·인용은 더하지 않는다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+
+> **rev 1.2·1.3 반영 (2026-10-22).** 이 문서는 SPEC revision 1.1을 풀어 썼고, 이번에 revision 1.2(spec §0.10, §0.11; 결정 기록 `spec/PI_DECISIONS_RESOLVED_20261015.md`; ADR-046–ADR-052)와 revision 1.3(spec §0.12; 변경표 `plan/REV13_CHANGE_TABLE.md`; 결정 기록 `spec/PI_DECISIONS_RESOLVED_20261022.md`; ADR-053–ADR-058) 가운데 이 문서가 풀어 쓰는 절(spec §1.11, App. B, 그리고 그와 맞물리는 §8.3의 비교 범위)의 변경을 반영했다. 반영한 것은 다음과 같다.
+> - **rev 1.2, 관련 연구와 실험 비교(ADR-046, ADR-047).** spec §1.11의 새 문단 "Related work and the experimental comparison"과 App. B의 머리 문단. thread data-race 도구와 FastTrack·WCP·SHB·GPredict·DefUse·DCatch 방식 재구현, 단순 상태 monitor, helgrind/DRD·ThreadSanitizer 참조점은 **관련 연구일 뿐 실험 비교군이 아니다**. 실험 비교는 기존 Process-Level Race 연구와 하고, 여섯 분석 질문과 여섯 결과 상태로 정리한다. 이에 맞춰 §0.3, §0.5, §1, §2.2, §4의 "기준선" 문단, §7, §9, 부록 A를 고쳤다.
+> - **rev 1.2, §1.11 본문.** GPredict 방식 성질로 쓸 수 있다는 추론은 관련 연구에 대한 설계 근거 추론이고 실험이 아니다. R2의 행은 "reference에서 유도한 준비 상태 명세(R2의 K-ID, 근거 등급 `contract-backed`)"로 쓴다. 기여 문단에 다섯 설계 사례, 여섯 분석 질문에 의한 비교, 별도 확장 평가(D8/P-RECALL)를 넣었다. C1의 basis D22는 "결정됐고 아직 만들지 않음"이다. App. B: GPredict §II.B는 결정 전 검토에서 저자 공개본을 읽었다고 결정 기록이 적는다(이 spec은 [R04]가 확인한 것 이상으로 기대지 않는다).
+> - **rev 1.2, PI 결정(2026-10-15).** P-PAPERS 승인(접근 가능한 경로부터 즉시 읽음), P-VALGRIND·P-TSAN 제외, P-NIDHUGG 보류, P-Z3(SMT는 첫 구현의 조건이 아님), P-ABL-ALLOWED(단일 요소 ablation 둘 채택, GPredict 이름의 묶음은 두지 않음), D3(F1 gate는 후순위), D9(다섯 사례와 필요한 대조).
+> - **rev 1.2, 용어 결정 T1 = (a)(ADR-052).** 판정 대상은 **준비 상태 명세**(readiness specification), `Req`는 준비 사전조건, 위반은 준비 상태 위반, 출처 층은 근거 등급(source tier), refinement `tolerated`는 `allowed-not-ready`다. "계약"은 문서화된 API 의미(API 계약, M_api)와 근거 등급 이름 `contract-backed`에만 남는다. [R04]의 표현을 인용할 때는 원어를 따옴표로 둔다.
+> - **rev 1.2, CORD 인용 정리(PI 결정 D12; spec §0.11 항목 1).** 참고 항목 `[R2c]`와 그 인용을 지웠다(§0.1, §2.2 출처 줄). R2의 실행 근거는 gdb 기록 [R2g]다.
+> - **rev 1.3, §1.11(변경표 C-13, C-14).** 기여 문단을 **기여 가설과 반증 조건 표**로 바꾸었다(§1.1). certificate·explorer·진행 결과·loop는 선택 경로다(ADR-053). 불완전 기록 감시의 선행 연구 행(Leucker et al. RV 2019; Basin et al. TOCL 2019, 둘 다 [U])을 더했다(§4.13, 부록 A). 실행하지 못한 원 도구에 대한 기여 주장은 문헌·코드 분석의 결과 상태로만 적는다(2026-10-22 결정 D4, ADR-058; §4.10, §7). spec §6.4 항목 58–62 가운데 선행 연구와 맞닿은 것을 §9에 옮겼다.
+> - **바꾸지 않은 것.** 문헌의 검증 상태(V-doc, V-abs, V-me, P, UNVERIFIED, [U])는 spec App. B와 [R04]·[R05]·[R06]의 것 그대로이고, 읽지 않은 논문의 상태를 올리지 않았다(P-PAPERS). App. B는 revision 1.3에서 바뀌지 않았다. 그림 D0의 코드 블록은 [01_overview.md](01_overview.md)와 같은 revision 1.2 판으로 맞췄고, `diagrams/`의 원본은 그림 단계에서 맞춘다.
+>
+> 이 변경은 결정 [D]이고 결과가 아니다. 이 판을 위해 만들거나 실행한 것은 없고, 연구 조건도 정하지 않았다. **우선 규칙**(spec §0.12 "Precedence", ADR-053): revision 1.0–1.2를 위해 쓴 문장 가운데 certificate, explorer, 진행 결과, loop를 Kairos의 첫 산출물·필수 산출물로 부르는 것은 ADR-053에 따라 읽는다.
 
 ## 목차
 
 - [0. 읽기 전에](#0-읽기-전에): 표기, 검증 상태, **원문 PDF를 열지 못한 제약(P-PAPERS)**, "sound"라는 말, Kairos 용어
-- [1. 입장: 메커니즘은 빌렸고, 조합만 주장한다](#1-입장-메커니즘은-빌렸고-조합만-주장한다)
+- [1. 입장: 메커니즘은 빌렸고, 조합만 주장한다](#1-입장-메커니즘은-빌렸고-조합만-주장한다): 기여 가설과 반증 조건(rev 1.3), 관련 연구와 실험 비교(rev 1.2)
 - [2. 왜 data race 탐지만으로는 부족한가](#2-왜-data-race-탐지만으로는-부족한가) (spec §1.11)
 - [3. 빌려 온 기법이 Kairos 안에서 놓이는 자리 (그림 D0)](#3-빌려-온-기법이-kairos-안에서-놓이는-자리-그림-d0)
-- [4. 기법 계열별 관계](#4-기법-계열별-관계): HB·vector clock, lockset, 예측 분석, order·atomicity violation, event 구동, 분산, 체계적 테스트, BMC·SMT, 정적 분석, process-level 도구, 확인·triage·후보 발견, typestate
+- [4. 기법 계열별 관계](#4-기법-계열별-관계): HB·vector clock, lockset, 예측 분석, order·atomicity violation, event 구동, 분산, 체계적 테스트, BMC·SMT, 정적 분석, process-level 도구, 확인·triage·후보 발견, typestate, 불완전 기록 감시(rev 1.3)
 - [5. 무엇이 새로운가: gap G1–G8](#5-무엇이-새로운가-gap-g1g8)
 - [6. cFS 메커니즘 → 기법 대응 표](#6-cfs-메커니즘--기법-대응-표)
-- [7. 기준선으로 쓰는 것](#7-기준선으로-쓰는-것-spec-83) (spec §8.3)
+- [7. 실험 비교와 관련 연구](#7-실험-비교와-관련-연구-spec-83) (spec §8.3; rev 1.2부터 기준선 표는 철회)
 - [8. 설계 안의 계보](#8-설계-안의-계보-spec-03-05) (spec §0.3, §0.5)
 - [9. 이 문서가 주장하지 않는 것](#9-이-문서가-주장하지-않는-것)
 - [10. 관련 문서](#10-관련-문서)
@@ -36,7 +47,7 @@
 | [D] | 설계 결정. spec §11의 ADR이 기록한다 |
 | [U] | 미확인 |
 
-인용 형식: "(spec §4.9)"는 SPEC_FINAL.md의 절이다. "[R04 §2.5]"는 `background/`의 보고서이고, "[R04 L259]"는 그 보고서의 줄 번호다. "[X1-M12]"는 검토 쟁점 번호다([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). "[B §4.4]"처럼 쓴 [A]·[B]·[C]는 `history/`의 설계 제안 A·B·C다(§8). "[LED]"는 `cases/ledger.md`, "[R2g]"·"[R2c]"는 `results/`의 R2 기록(gdb, CORD), "[BM]"은 `env/BASELINE_MEASURE.md`다.
+인용 형식: "(spec §4.9)"는 SPEC_FINAL.md의 절이다. "[R04 §2.5]"는 `background/`의 보고서이고, "[R04 L259]"는 그 보고서의 줄 번호다. "[X1-M12]"는 검토 쟁점 번호다([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). "[B §4.4]"처럼 쓴 [A]·[B]·[C]는 `history/`의 설계 제안 A·B·C다(§8). "[LED]"는 `cases/ledger.md`, "[R2g]"는 `results/R2_gdb_v701.md`(R2의 gdb 기록), "[BM]"은 `env/BASELINE_MEASURE.md`다. 폐기한 기록기 CORD의 결과는 근거로 쓰지 않는다(PI 결정 D12). 참고 항목 `[R2c]`와 그 인용은 revision 1.2에서 spec에서 지웠고, 이 문서에서도 지웠다(spec §0.11 항목 1). R2의 실행 근거는 gdb 원시 기록 `env/logs/r2_g1..3_*`와 [R2g]다. "[P0.2]"는 revision 1.3의 기초가 된 제안 문서 0.2다(spec 머리말; 이 폴더에는 없다).
 
 **인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
 
@@ -50,7 +61,7 @@
 | P | 일부만 확인했다. 확인하지 못한 세부를 함께 적는다 |
 | UNVERIFIED | 확인하지 않았다. 어떤 결론에도 쓰지 않는다 |
 
-spec 부록 B는 spec이 기대는 문헌 목록을 닫아 두고, 그 밖의 문헌에는 기대지 않는다고 적는다(spec App. B). 이 문서는 기법 계열을 설명하려고 [R04]·[R05]에만 있는 문헌도 언급한다. 그런 문헌에는 **"spec 미사용"**을 붙인다. spec 미사용 문헌은 맥락일 뿐이며, Kairos의 어떤 설계 결정이나 주장도 그것에 기대지 않는다.
+spec 부록 B는 spec이 기대는 문헌 목록을 닫아 두고, 그 밖의 문헌에는 기대지 않는다고 적는다(spec App. B). revision 1.2부터 부록 B의 thread 수준 도구와 기법은 관련 연구이거나 메커니즘의 출처일 뿐이고, 어느 것도 실험 비교군이 아니다(spec App. B 머리 문단; §8.3; ADR-046). 실험 비교는 기존 Process-Level Race 연구와 하며, 그 논문들은 P-PAPERS 아래에서 읽고 상태는 `baselines/availability.md`에 있다(spec App. B). 이 문서는 기법 계열을 설명하려고 [R04]·[R05]에만 있는 문헌도 언급한다. 그런 문헌에는 **"spec 미사용"**을 붙인다. spec 미사용 문헌은 맥락일 뿐이며, Kairos의 어떤 설계 결정이나 주장도 그것에 기대지 않는다. 예외로, 부록 B에 없지만 spec §8.3이 실험 비교 대상으로 이름을 대는 process-level 도구(SimRacer, SIMEXPLORER, RRF, SimEvo, ReDPro, SysPro)에는 "spec §8.3 비교 대상"을 붙인다. 이 문서가 적는 상태 표지는 [R05]의 것 그대로이고, spec이 비교에 쓰는 상태와 자료 기록은 `baselines/availability.md`다.
 
 ### 0.3 원문 PDF를 열지 못했다 (P-PAPERS)
 
@@ -70,11 +81,11 @@ spec 부록 B는 spec이 기대는 문헌 목록을 닫아 두고, 그 밖의 �
 | source-DPOR를 disabling(한 연산이 다른 연산을 막는 경우, 예: lock)까지 넓힌 JACM 2017 정리(가정 T-JACM) | explorer `dpor` 엔진의 보장 G5 | `dpor` 판정은 "unverified"로 표시한다. 상태를 저장하는 완전 탐색 엔진 `exh`는 영향이 없다 (spec §4.10 항목 4, §6.2 L-DPOR) |
 | left/right mover reduction 정리 | explorer 축약 L3의 인용 | L3을 증명 의무로만 쓰고, 인용은 open literature check로 둔다 (spec §4.10 항목 5) |
 | timeout 조건부 HB edge(gap G3)의 새로움 | 새로움 문구 | RV·TACAS 등에 대한 targeted search를 하지 않았다. "open literature check"로만 적는다 ([R04 §8 항목 5]; spec §1.11) |
-| 비교 도구 원 논문의 worked example | 재구현한 비교 도구의 golden test(정답이 정해진 회귀 시험) | 원문에 접근할 수 있을 때만 만든다 (spec §8.3) |
-| GPredict(ICSE 2015)의 §II.B 성질 형식(MOP에서 가져옴, P) | §2.2, §4.3, §5의 GPredict 서술. 같은 정보 비교 도구의 인코딩(§7) | [R04]가 기록한 만큼만 적는다. 그 형식이 무엇을 표현하는지는 [U]다. spec은 유한 horizon Allowed 항목을 GPredict 방식 성질로 쓸 수 있다고 추론한다 [I]. 그래서 표현력의 차이를 주장하지 않는다 (spec §1.11, §8.3, App. B; §6.4 항목 37) |
+| 원 논문의 worked example | process-level 기법 재구현(K2, 원 도구를 돌릴 수 없을 때만)의 golden test(정답이 정해진 회귀 시험) | 원문에 접근할 수 있을 때만 만든다 (spec §8.3) |
+| GPredict(ICSE 2015)의 §II.B 성질 형식(MOP에서 가져옴, P) | §2.2, §4.3, §5의 GPredict 서술 | [R04]가 기록한 만큼만 적는다. 그 형식이 무엇을 표현하는지는 [U]다. spec은 유한 horizon Allowed 항목을 GPredict 방식 성질로 쓸 수 있다고 추론한다 [I]. revision 1.2부터 이 추론은 관련 연구에 대한 설계 근거이고 실험이 아니며, GPredict 방식 재구현은 비교군이 아니다. 그래서 표현력의 차이를 주장하지 않는다 (spec §1.11, §8.3, App. B; §6.4 항목 37). 결정 기록은 결정 전 검토에서 GPredict의 저자 공개본을 읽었다고 적지만, spec은 [R04]가 확인한 것 이상으로 기대지 않고, 이 형식에 대한 진술은 §II.B를 여기서 읽을 때까지 [U]다 (spec §1.11, App. B) |
 | Joshi & Sen(ASE 2008)과 Lifestate(ECOOP 2019)의 본문 | framework typestate에 대해 주장하는 차이(§1, §4.12, §5 gap G1) | 선행 연구로만 인용한다. 서지는 V이고, 내용은 초록과 외부 검토로만 안다. 차이 주장은 두 논문을 읽기 전까지 확정하지 않는다 (spec §1.11, App. B) |
 
-PI 결정 **P-PAPERS**는 원문 PDF를 제공하거나 host를 허용해 달라고 요청한다. 권고는 승인이다. 결정 전까지 위 항목은 막혀 있다([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md) P-PAPERS; spec §10.1). [R04 §8]과 [R05 §7 항목 6]에 남은 인용 확인 목록도 같은 제약 때문에 열려 있다. spec §10.1의 P-PAPERS는 GPredict §II.B의 성질 형식, Joshi & Sen(ASE 2008), Lifestate(ECOOP 2019)도 포함한다. 이 셋을 읽기 전에는 §1.11의 GPredict 서술, 같은 정보 인코딩(§8.3), framework typestate에 대해 주장하는 차이가 확정되지 않는다(spec §10.1).
+PI 결정 **P-PAPERS**(원 논문에 접근하는 길)는 2026-10-15에 **승인되었고 바로 시작한다** [D]. 접근 가능한 경로(저자 공개본, 기관 저장소, 연결된 학술 검색)부터 읽고, 한 환경이 막혔다고 사용자가 주는 PDF를 전제 조건으로 삼지 않는다. 결정 기록은 RacePro와 GPredict의 저자 공개본을 결정 전 검토에서 확인했다고 적는다. 다른 논문에 접근했다고 가정하지 않으며, 읽지 않은 도구의 표현력이나 관측 범위를 검색 발췌로 말하지 않는다(spec §10.1 P-PAPERS; [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)). 이 결정은 계획에 대한 결정이고 논문을 읽은 결과가 아니다. 그래서 위 표의 항목은 **논문을 읽을 때까지** 그대로 막혀 있다. spec §10.1이 아직 막혀 있다고 적는 것은 `dpor`의 보장 G5, L3 인용, golden test(V4a), [U]로 표시한 진술이다. [R04 §8]과 [R05 §7 항목 6]에 남은 인용 확인 목록도 같은 이유로 열려 있다. P-PAPERS의 항목에는 GPredict §II.B의 성질 형식, Joshi & Sen(ASE 2008), Lifestate(ECOOP 2019)도 들어 있다. 이 셋을 읽기 전에는 §1.11의 GPredict 서술과 framework typestate에 대해 주장하는 차이가 확정되지 않는다(spec §1.11, App. B). 이 문서의 문헌 상태 표지는 이 결정으로 바뀌지 않았다.
 
 ### 0.4 "sound"라는 말
 
@@ -93,15 +104,17 @@ PI 결정 **P-PAPERS**는 원문 PDF를 제공하거나 host를 허용해 달라
 
 | 용어 | 뜻 (spec 위치) |
 |---|---|
-| 준비 계약 (readiness contract) | framework 자원(OSAL object, ES 기록, SB route 등)을 쓰는 연산이 그 자원의 특정 lifecycle 상태를 요구한다는 계약. 요구 상태 **Req**, 상태가 맞지 않을 때 호출자·소비자·미션 쪽 근거가 받아들이는 결과 **Allowed**(재시도, 문서화된 연기, 문서화된 대안 등. 항목마다 reference horizon이 붙는다), 그 사용이 호출하는 앱이나 미션을 위해 이뤄야 할 것을 적은 **`appreq`**를 가진다. API가 문서화한 오류 반환 자체는 Allowed가 아니라 framework 수준 판단으로 따로 적는다 (§1.6). 용어 결정 T1이 나올 때까지 "계약"이라는 말을 그대로 쓴다 (§0.7 항목 4) |
-| 세 판단 | 준비되지 않은 사용을 세 번 따로 판단하고 기록도 따로 둔다. framework 수준(공급자가 문서화하고 하는 것: `fw_doc`, `fw_conf`), 호출자 수준(`appreq`와 호출자 수준 Allowed. 상태, class, 결과 label, harm을 정한다), 관측된 결과(`consequence`)다. 공급자의 문서화된 결과만으로 TOLERATED가 되는 발생은 없다 (§1.6 "Three judgements", §1.10; ADR-043) |
-| 비교의 세 종류 K1–K3 | K1 공개된 그대로 돌린 원 도구, K2 같은 정보나 자기 정보로 재구현한 선행 기법, K3 Kairos의 한 요소를 뺀 ablation. 이름, 표, 결론에서 섞지 않는다 (§8.3; ADR-042) |
-| Φ_cFS | 자원 종류, lifecycle automaton, 연산의 효과, HB 규칙, 계약을 선언한 cFS profile. Kairos의 세 해석기가 같은 Φ를 쓴다 (§0.2) |
+| 준비 상태 명세 (readiness specification, κ) | framework 자원(OSAL object, ES 기록, SB route 등)을 쓰는 연산이 그 자원의 특정 lifecycle 상태를 요구한다는 규칙. 준비 사전조건 **Req**(readiness precondition: 사용 시점에 참이어야 할 조건의 논리곱. 자원 상태에 대한 요구이고, 누가 그것을 약속했다는 뜻이 아니다), 상태가 맞지 않을 때 호출자·소비자·미션 쪽 근거가 받아들이는 결과 **Allowed**(재시도, 문서화된 연기, 문서화된 대안 등. 항목마다 reference horizon이 붙는다), 그 사용이 호출하는 앱이나 미션을 위해 이뤄야 할 것을 적은 **`appreq`**를 가진다. API가 문서화한 오류 반환 자체는 Allowed가 아니라 framework 수준 판단으로 따로 적는다. 준비되지 않은 `VIOLATING` 발생은 **준비 상태 위반**(readiness violation)이고 순서 위반의 한 부류다. 용어 결정 T1 = (a)(2026-10-15)에 따른 이름이고, 옛 이름은 "준비 계약(readiness contract)"이다. "계약"은 문서화된 API 의미(API 계약, M_api)와 근거 등급 이름 `contract-backed`에만 남는다. 한국어로는 줄이지 않고 "준비 상태 명세"로 쓴다 (§1.6, §0.11, App. C; ADR-052) |
+| 근거 등급 (source tier) | instance 뒤에 어떤 종류의 근거가 서 있는지: `contract-backed`, `requirement-derived`, `admitted`, `issue-derived`, `code-derived`, `researcher`, `unreferenced`. 보고할 때 `prov` 기록과 호출자 수준 Allowed에서 유도하고, 섞이면 약한 쪽을 쓴다 (§1.6, §13) |
+| 세 판단 | 준비되지 않은 사용을 세 번 따로 판단하고 기록도 따로 둔다. framework 수준(공급자가 문서화하고 하는 것: `fw_doc`, `fw_conf`), 호출자 수준(`appreq`와 호출자 수준 Allowed. 상태, class, 결과 label, harm을 정한다), 관측된 결과(`consequence`)다. 공급자의 문서화된 결과만으로 TOLERATED가 되는 발생은 없다. `rule` 기록만으로는 어떤 발생도 받아들여지지 않는다(QT-4 엄격한 대안, 2026-10-15) (§1.6 "Three judgements", §1.10; ADR-043, ADR-048) |
+| 비교의 세 종류 K1–K3 | K1 공개된 그대로 돌린 원 도구, K2 원 도구를 돌릴 수 없을 때만 그 논문·코드로 만든 **process-level 기법**의 재구현(원 도구 결과와 따로 둔다), K3 Kairos의 한 요소를 뺀 ablation. 이름, 표, 결론에서 섞지 않는다. revision 1.2 전의 K2(thread 수준·예측 기법의 같은 정보 재구현)는 철회되었다 (§8.3; ADR-042, ADR-046) |
+| 여섯 분석 질문, 결과 상태 | 기존 Process-Level Race 연구의 (도구, 사례)마다 답하는 같은 질문 여섯과, 칸마다 하나씩 붙는 상태 `NOT_RUN`, `INAPPLICABLE`, `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP`, `REPORTED` (§8.3; ADR-047). 표는 [01_overview.md §2.5](01_overview.md#25-실험-비교의-범위-기존-process-level-race-연구-spec-83)에 있다 |
+| Φ_cFS | 자원 종류, lifecycle automaton, 연산의 효과, HB 규칙, 준비 상태 명세를 선언한 cFS profile. Kairos의 세 해석기가 같은 Φ를 쓴다 (§0.2) |
 | linearization point (LP) | 연산의 효과가 한 순간에 일어났다고 보는 지점. Kairos는 요구 조건의 conjunct마다 LP를 둔다. **capture point**는 호출자가 값을 미리 읽어 둔 load 지점이다 (§1.4) |
 | σ, M | 스케줄 의미론(σ_U: 시간을 무시한 임의 interleaving, σ_U∞: σ_U에서 시간 기반 전이(timeout 등)를 뺀 것, σ_R1: 한 CPU의 고정 우선순위, σ_E: 실제 실행)과 OSAL 모형 수준(M_api: API 계약 수준, M_impl: POSIX 구현 수준) (§1.8, §1.4) |
 | S / O / C_σ | HB 규칙의 층. S는 두 끝이 있는 모든 실행에서 성립하는 구조적 순서, O는 관측한 실행에서만 성립하는 동기화 순서(예측에서 뒤집을 수 있음), C_σ는 σ_R1의 스케줄 제약(HB가 아님) (§1.9) |
 | MustBefore, PWB | MustBefore는 "모든 실행에서 a가 n보다 먼저"라는 정적 관계다. PWB(precedes-whenever-both-occur)는 "둘 다 일어나는 실행에서는 항상 a가 먼저"라는 관계다 (§1.9, §4.4) |
-| certificate | **안전성 진술 하나**의 검사 가능한 증명 기록. FIXED_ORDER certificate는 `¬OK_i`(도달한 in-scope 발생 중 READY나 TOLERATED가 없다)를 증명하고, 그 REJECT가 발생의 결정 시점에 있을 때 fixed-order를 뒷받침한다. PROTECTED certificate는 `¬NR_i`(도달한 in-scope 발생 중 미준비로 결정된 것이 없다)를 증명하고 protected를 뒷받침한다. 검사기 `kz proofcheck`가 명시한 trusted base(추출 사실, skeleton, closure 목록, Φ, `libkz-core`)에 상대적으로 그 추론 단계를 다시 검증하고, `libkz-core`를 부른 단계를 표시해 네 부분 **trust ledger**(다시 검증한 단계, 추출 사실, 신뢰 항목, 반박될 수 있지만 증명되지 않은 항목)에 남긴다 (§4.5, §4.5.1, §13) |
+| certificate | **안전성 진술 하나**의 검사 가능한 증명 기록. FIXED_ORDER certificate는 `¬OK_i`(도달한 in-scope 발생 중 READY나 TOLERATED가 없다)를 증명하고, 그 REJECT가 발생의 결정 시점에 있을 때 fixed-order를 뒷받침한다. PROTECTED certificate는 `¬NR_i`(도달한 in-scope 발생 중 미준비로 결정된 것이 없다)를 증명하고 protected를 뒷받침한다. 검사기 `kz proofcheck`가 명시한 trusted base(추출 사실, skeleton, closure 목록, Φ, `libkz-core`)에 상대적으로 그 추론 단계를 다시 검증하고, `libkz-core`를 부른 단계를 표시해 네 부분 **trust ledger**(다시 검증한 단계, 추출 사실, 신뢰 항목, 반박될 수 있지만 증명되지 않은 항목)에 남긴다. revision 1.3부터 certificate는 **선택 경로**다. 필수 경로는 관측 기반 판정, 한정 예측, 제어 실행 확인이고, certificate는 보편 순서 주장이 필요할 때 쓴다(ADR-053) (§4.5, §4.5.1, §13) |
 | witness | 판정을 뒷받침하는 구체적 실행 순서 (§4.9) |
 | class | `inactive`, `protected`, `fixed-order`, `no-final-status`, `schedule-dependent`, `ordinal-split`, `unknown(reason)`. 유한 실행 위의 안전성 진술에서 정한다. 영구 대기와 deadlock은 class가 아니라 칸마다의 진행(progress) 결과다. **어떤 class도 "safe"가 아니다.** 경보가 없다는 것은 근거가 없다는 뜻이다 (§0.1, §1.10) |
 

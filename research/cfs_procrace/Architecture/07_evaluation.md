@@ -1,24 +1,38 @@
 # 07 평가 계획: 무엇을 묻고, 무엇과 비교하며, 놓친 것을 어떻게 재는가
 
-이 문서는 Kairos 설계의 평가 계획(spec §8)을 spec을 읽지 않은 연구자가 15–25분 안에 파악하도록 정리한다. 연구 질문, 평가 대상(사례별 대상과 대조, 관측 단위 U1–U6 포함), 비교의 세 종류와 세 결과(탐지·분류·근거), ablation, 지표(특히 Kairos가 놓친 것을 재는 recall protocol), 오버헤드·perturbation 실험, 통계·재현성, 타당성 위협을 차례로 다룬다.
+이 문서는 Kairos 설계의 평가 계획(spec §8)을 spec을 읽지 않은 연구자가 15–25분 안에 파악하도록 정리한다. 연구 질문(Q1–Q4와 그 부분인 RQ1–RQ9), 평가 대상(사례별 대상과 대조, 사례의 역할, 관측 단위 U1–U6 포함), 기존 Process-Level Race 연구와의 비교(분석 질문 여섯 개와 결과 상태 여섯 개), ablation과 단일 요소 비교, 지표(Kairos 결과의 세 보고 부분, 확장 평가의 recall protocol과 triage), 관측 영향 점검과 perturbation 실험, 통계·재현성, 타당성 위협을 차례로 다룬다.
 평가 조건 가운데 사람이 고르는 값(실행 횟수 N, 탐색 cap, 표본 크기)과 reference가 정하지 않은 조건을 CONDITIONS_POLICY에 따라 어떻게 기록하는지도 함께 적는다. spec에 없는 설계 요소·수치·인용은 더하지 않는다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.10–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+
+**rev 1.2·1.3 반영.** 이 문서가 풀어 쓰는 spec §7–§8(그리고 그것이 가리키는 §9.3의 평가 관련 행)에서 두 개정이 바꾼 것을 옮겼다. 모두 결정 [D]이거나 설계 요구이고, 실행 결과가 아니다. 이 개정들에서도 아무것도 빌드·설치·실행하지 않았다.
+
+- rev 1.2(2026-10-15 결정, 결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md); spec §0.10, §0.11, ADR-046–ADR-052):
+  - 비교는 기존 Process-Level Race 연구끼리만 한다. (도구, 사례)마다 분석 질문 여섯 개에 답하고 결과 상태 여섯 개 가운데 하나를 붙인다. thread 수준 도구(helgrind, DRD, ThreadSanitizer 등)와 GPredict·HB·lockset 방식 재구현은 관련 연구일 뿐 비교군이 아니다. 예전 비교 도구 표와 GPredict 방식 표현 가능성 표는 철회했다(§4).
+  - 첫 논문의 필수 범위는 다섯 사례와 그 사례에 직접 필요한 대조다(D9). held-out, recall, triage는 확장 평가로 따로 한다(D8/P-RECALL)(§2, §3, §6).
+  - 첫 사례 평가는 기술 통계와 사례별 근거로 한다(P-STATS). 짝지은 검정과 도구 사이의 점수는 없다(§4, §5, §8).
+  - 출처의 "race"를 도구 class로 자동으로 바꾸지 않는다(P-CLASSGT). 독립 평가자 두 명을 쓴다(P-TRIAGE). 단일 요소 ablation 23(Allowed 끔)과 24(결과 의미 끔)를 더하고 GPredict 이름의 묶음은 두지 않는다(P-ABL-ALLOWED)(§5, §6).
+  - 관측 영향 점검(D1, D11)과 목적별 N(D14)(§7, §8). 사례 basis와 대조의 결정(D22 공개 BP basis, P-C2·Q22 역할 재구성, D13·Q16, P-R2CTRL, P-RGIT, P-F1GATE)(§3). MLIR 단계 S8 삭제(D6)(§11).
+  - 용어 T1: 판정 대상은 "준비 상태 명세"다. 퇴역한 recorder CORD의 결과는 근거로 쓰지 않는다(D12; spec §0.11 항목 1의 규칙으로 [R2c] 인용과 그에 기댄 수를 지웠다).
+- rev 1.3(2026-10-22 결정 D1–D5, 결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md); 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md) C-37–C-45; spec §0.12):
+  - 연구 질문을 Q1–Q4로 다시 묶었다(C-38, §2). 사례의 역할: R2는 기반 검증, C1은 기여 증거의 첫 사례다(10-22 결정 D3, C-41, §3.1).
+  - 원 도구를 실행하지 못한 경우의 표현(10-22 결정 D4, C-39, §4). 단일 요소 비교와 앱 귀속 제거(C-40, §5). held-out protocol은 그대로 둔다(C-37, §3.5). C2는 세 구성의 비교다(2026-10-19 검토 §6.3, §3.6).
+  - 시험 T-01–T-22와 단계 B의 사례별 완료 조건(10-22 결정 D5), 사다리의 V1′(C-42, C-43, C-45, §11).
 
 ## 목차
 
 0. [읽기 전에](#0-읽기-전에): 표기, 이 문서의 자리, 평가의 세 원칙, 필요한 용어
 1. [한 장으로 보기: 평가 경로 (그림 D4 상세)](#1-한-장으로-보기-평가-경로-그림-d4-상세)
-2. [연구 질문](#2-연구-질문-spec-81) (spec §8.1)
-3. [평가 대상](#3-평가-대상-spec-82-75) (spec §8.2, §7.5, §7.3): 개발 집합, census, recall, held-out, 맹검과 노출·동결 기록, 사례별 대상과 대조, ENV 후보와 다섯 사례, 관측 단위 U1–U6
-4. [기준선과 비교 방법](#4-기준선과-비교-방법-spec-83) (spec §8.3): 비교의 세 종류, 세 결과(탐지·분류·근거), GPredict 서술과 표현 가능성
-5. [Ablation](#5-ablation-spec-84) (spec §8.4)
-6. [지표](#6-지표-spec-85) (spec §8.5): recall protocol, soundness failure, triage, 비교 기록
-7. [오버헤드와 perturbation 실험](#7-오버헤드와-perturbation-실험-spec-86) (spec §8.6)
-8. [통계와 재현성](#8-통계와-재현성-spec-87) (spec §8.7): 분석 단위와 의존
+2. [연구 질문](#2-연구-질문-spec-81) (spec §8.1): 필수 범위와 확장 평가, RQ1–RQ9, rev 1.3의 Q1–Q4
+3. [평가 대상](#3-평가-대상-spec-82-75) (spec §8.2, §7.5, §7.3): 개발 집합과 사례의 역할, census, recall, held-out(확장 평가), 맹검과 노출·동결 기록, 사례별 대상과 대조, ENV 후보와 다섯 사례, 관측 단위 U1–U6
+4. [기존 Process-Level Race 연구와의 비교](#4-기준선과-비교-방법-spec-83) (spec §8.3): 비교의 범위와 세 종류, 도구의 역할, 분석 질문 여섯 개, 결과 상태 여섯 개, 첫 비교 RacePro, 원 도구를 실행하지 못한 경우
+5. [Ablation](#5-ablation-spec-84) (spec §8.4): 24개 ablation, rev 1.3의 단일 요소 비교
+6. [지표](#6-지표-spec-85) (spec §8.5): recall protocol(확장 평가), soundness failure, triage(확장 평가), Kairos 결과의 보고 부분
+7. [관측 영향 점검과 perturbation 실험](#7-오버헤드와-perturbation-실험-spec-86) (spec §8.6)
+8. [통계와 재현성](#8-통계와-재현성-spec-87) (spec §8.7): 목적별 N, 기술 통계, 분석 단위와 의존
 9. [N, cap, 표본 크기를 기록하는 법](#9-n-cap-표본-크기를-기록하는-법-conditions_policy) (CONDITIONS_POLICY): reference가 정하지 않은 조건 포함
 10. [타당성 위협](#10-타당성-위협-spec-88) (spec §8.8)
-11. [평가를 여는 단계와 PI 결정](#11-평가를-여는-단계와-pi-결정-spec-93-101) (spec §9.3, §10.1): 검증 사다리의 V4a, V4b
+11. [평가를 여는 단계와 PI 결정](#11-평가를-여는-단계와-pi-결정-spec-93-101) (spec §9.3, §10.1): 검증 사다리의 V4a, V4b, rev 1.3의 사다리와 단계 B 완료 조건, 시험 T-01–T-22
 12. [이 문서가 주장하지 않는 것](#12-이-문서가-주장하지-않는-것)
 13. [관련 문서](#13-관련-문서)
 
@@ -33,30 +47,30 @@
 | 표기 | 뜻 |
 |---|---|
 | [F] | 코드·기록·보고서 인용이 있는 사실 |
-| [M] | 측정값. **이 문서의 [M]은 모두 spec이 인용한 기존 측정**이다: [BM] (`env/BASELINE_MEASURE.md`), [R2g]·[R2c] (R2의 gdb 기록과 퇴역한 CORD recorder 기록), [R07] (환경 타당성 보고서), 검토 X3가 이 머신에서 확인한 값([X3, here]), spec이 읽기 전용 `git log`로 확인한 값. Kairos는 아직 아무것도 측정하지 않았다 |
+| [M] | 측정값. **이 문서의 [M]은 모두 spec이 인용한 기존 측정**이다: [BM] (`env/BASELINE_MEASURE.md`), [R2g] (R2의 gdb 기록), [R07] (환경 타당성 보고서), 검토 X3가 이 머신에서 확인한 값([X3, here]), spec이 읽기 전용 `git log`로 확인한 값. 퇴역한 recorder(CORD)의 결과는 근거로 쓰지 않는다(PI 결정 D12; spec §0.11 항목 1). Kairos는 아직 아무것도 측정하지 않았다 |
 | [I] | 추론 또는 설계상 추론. 실행하지 않았다 |
 | [D] | 설계 결정. spec §11의 ADR이 기록한다 |
 | [U] | 미확인 |
 
 문헌의 상태 표시는 spec과 [R04]·[R05]가 확인한 그대로 옮긴다. V-abs는 서지와 초록 수준의 주장을 확인한 것, V-me는 해당 보고서 작성자가 검색으로 서지·초록 수준을 확인한 것, P는 일부만 확인한 것이다([R04 §0.2]; [R05 §0.2]; V-me는 [R06 §9]).
 
-인용 형식은 01, 03, 06과 같다. "(spec §8.5)"는 SPEC_FINAL.md의 절, "[R05 §6.3]"은 `background/`의 보고서, [LED]는 `cases/ledger.md`, [POL] Ln은 [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md)의 n번째 줄이다. PI 결정 D8, D14, P-TRIAGE 같은 이름은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)의 PI 결정이고, revision 1.1에서 새로 생긴 항목(P-CLASSGT, P-F1GATE 등)은 spec §10.1에 있다. X3-C1, X3-M6 같은 이름은 검토 쟁점이고 처리 내용은 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)에 있다. EXT-20261012 §5.1 같은 이름은 외부 검토(`history/review_EXT_20261012.md`)의 절이고, 그 처리는 spec §0.7과 ADR-039–ADR-044에 있다. [A]·[B]는 `history/`의 설계 제안, [J1]–[J3]은 심사, [X1]–[X3]은 적대적 검토다. 실험군 이름 A, B와 혼동하지 않도록, 제안은 언제나 대괄호로 쓴다.
+인용 형식은 01, 03, 06과 같다. "(spec §8.5)"는 SPEC_FINAL.md의 절, "[R05 §6.3]"은 `background/`의 보고서, [LED]는 `cases/ledger.md`, [POL] Ln은 [CONDITIONS_POLICY.md](../CONDITIONS_POLICY.md)의 n번째 줄이다. PI 결정 D8, D14, P-TRIAGE 같은 이름은 [spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)의 PI 결정이고, revision 1.1에서 새로 생긴 항목(P-CLASSGT, P-F1GATE 등)은 spec §10.1에 있다. 2026-10-15에 내린 결정의 값은 결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md)와 spec §0.10, §10.1에 있다. 2026-10-22의 결정 D1–D5는 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md)와 spec §0.12에 있고, 2026-10-15 결정 목록의 D1, D3, D4, D5와 이름이 같지만 다른 결정이다. 이 문서는 2026-10-22 결정을 "10-22 결정 D3"처럼 날짜를 붙여 쓴다. X3-C1, X3-M6 같은 이름은 검토 쟁점이고 처리 내용은 [spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)에 있다. EXT-20261012 §5.1 같은 이름은 외부 검토(`history/review_EXT_20261012.md`)의 절이고, 그 처리는 spec §0.7과 ADR-039–ADR-044에 있다. [A]·[B]는 `history/`의 설계 제안, [J1]–[J3]은 심사, [X1]–[X3]은 적대적 검토다. 실험군 이름 A, B와 혼동하지 않도록, 제안은 언제나 대괄호로 쓴다.
 
 **인용 형식과 이름이 겹치는 기호.** 인용 형식(설계안 [A]/[B]/[C], 심사 [J1]–[J3], 검토 [X1]–[X3], [X3, here], v0.1 등)은 [01_overview.md §0](01_overview.md#0-읽는-법)에 모아 두었다. 같은 기호가 여러 뜻으로 쓰이므로 이 문서는 앞에 종류를 붙인다: "PI 결정 D4"와 "그림 D4", "보장 G5"와 "gap G5", "단계 S0"와 "Init snapshot S0", HB stratum S/O와 cold/warm 층(stratum). 관측 단위 U1–U6와 분석 예산의 work unit도 다른 것이다. 전체 목록은 [10_decisions_adr.md §0.2](10_decisions_adr.md#02-이름-충돌-주의)다.
 
 ### 0.2 이 문서의 자리
 
-평가는 연구 단계 S9에서 한다(spec §9.3). S9는 freeze F1, freeze F2, 그리고 §8 전체(recall protocol, 비교, triage)를 실행하는 단계다. 검증 사다리(validation ladder; spec §9.3, ADR-044)로 보면 평가는 V4a(F1 뒤의 비교)와 V4b(F2 뒤의 held-out과 수정 전후 쌍)다(§11.1). 다만 다섯 사례의 paper track(고정한 revision을 읽고 기대표를 동결하는 일)은 단계와 결정 없이 지금 할 수 있다(spec §9.3). [03_workflow.md §4](03_workflow.md#4-연구-워크플로우-그림-d4)가 이 경로를 짧게 요약했고, 이 문서는 같은 내용을 spec §8을 따라 넓히면서 이유와 cFS 예를 붙인다. 평가의 어떤 부분도 아직 실행되지 않았다.
+평가는 연구 단계 S9에서 한다(spec §9.3). S9는 freeze F1, 다섯 사례의 평가와 기존 Process-Level Race 연구와의 비교(V4a), 그리고 F2 뒤의 확장 평가(recall protocol, held-out 출처, triage; V4b)를 실행하는 단계다. 검증 사다리(validation ladder; spec §9.3, ADR-044, 2026-10-15에 P-LADDER로 승인)로 보면 평가는 V4a(F1 뒤의 비교)와 V4b(F2 뒤의 held-out과 수정 전후 쌍, 확장 평가)다(§11.1). 다만 다섯 사례의 paper track(고정한 revision을 읽고 기대표를 동결하는 일)은 단계와 결정 없이 지금 할 수 있다(spec §9.3). revision 1.3에서 사다리의 첫 rung은 R2의 기반 검증 V1′이고, C1의 V3가 그와 나란히 간다(ADR-057; §11.1). [03_workflow.md §4](03_workflow.md#4-연구-워크플로우-그림-d4)가 이 경로를 짧게 요약했고, 이 문서는 같은 내용을 spec §8을 따라 넓히면서 이유와 cFS 예를 붙인다. 평가의 어떤 부분도 아직 실행되지 않았다.
 
 ### 0.3 평가의 세 원칙
 
 spec은 평가 전체에 걸쳐 세 원칙을 둔다. 셋 다 설계 결정 [D]이다.
 
-1. **평가는 놓친 것을 잰다**(spec §0.2 항목 8). 개발 사례에서 찾은 것만으로는 무엇을 놓치는지 알 수 없다([X3-C1]). 그래서 과거 수정 이력에서 만든 program mutant와 수정 전후 쌍으로 Kairos가 무엇을 찾고, 무엇을 `unknown`으로 남기고, 무엇을 놓치는지 층별로 잰다(§6.1). class label이 있는 곳에서는 class가 맞았는지(class-correct)를 따로 센다. certificate가 틀린 경우는 soundness failure로 따로 센다(§6.2).
-2. **동결 순서가 평가의 순서를 정한다**(spec §7.2). F1(첫 평가 실행 전. 도구와 비교 도구에 더해 평가 기준과 미리 등록한 기대표도 hash로 동결한다) → 사례 전용 항목 없는 template-only 실행 → 표시된 refinement → F2(held-out을 열기 전. 노출·동결 기록도 이때 동결한다)의 순서를 지킨다. 결과를 본 뒤 도구나 규칙을 고치지 못하게 하는 장치다. F1 뒤에 바꾼 것은 모두 시각, 이유, 계기가 된 항목, 바뀐 판정과 함께 기록한다. 항목마다 지배 동결(개발 항목은 F1, held-out과 recall 항목은 F2)이 있고, 그 뒤의 변경이 건드린 항목은 `post-freeze-adjusted`로 따로 보고한다. 예외는 F1과 F2 사이에 개발 항목을 건드린 Φ·규칙·예외 보강 하나다. 이것은 계획된 `oracle refinement`다(§3.5). 평가 기준, 인코딩, 기대표를 F1 뒤에 바꾼 것은 결코 `oracle refinement`가 아니다.
-3. **사람이 고른 값은 deviation, 통계 절차는 가정이다**(spec 머리말, §8.7). 실행 횟수 N, 탐색 cap, 표본 크기는 reference가 정하지 않으므로 이유·영향·필요성과 함께 deviation으로 기록한다. 방법론 문헌은 [POL]이 인정하는 reference 종류가 아니므로, 통계 절차는 가정(assumption)으로 미리 기록한다(§9). 모든 검정과 구간은 그 단위와 독립 가정을 밝힌다(§8.4).
+1. **평가는 놓친 것을 잰다**(spec §0.2 항목 8). 개발 사례에서 찾은 것만으로는 무엇을 놓치는지 알 수 없다([X3-C1]). 그래서 과거 수정 이력에서 만든 program mutant와 수정 전후 쌍으로 Kairos가 무엇을 찾고, 무엇을 `unknown`으로 남기고, 무엇을 놓치는지 층별로 잰다(§6.1). class label이 있는 곳에서는 class가 맞았는지(class-correct)를 따로 센다. certificate가 틀린 경우는 soundness failure로 따로 센다(§6.2). revision 1.2부터 이 일은 **확장 평가**에 속한다(D8/P-RECALL). 다섯 사례의 검증과 따로 그 뒤에 하고, 결과는 변형 집합에 한정된다.
+2. **동결 순서가 평가의 순서를 정한다**(spec §7.2). F1(본 평가 전. 평가 engine과 규칙, process-level 기법의 재구현이 있다면 그 재구현, 평가 기준, 사례별 기대표의 hash를 동결한다. 기대표 자체는 사례마다 첫 도구 출력 전에 hash로 동결한다) → 사례 전용 항목 없는 template-only 실행 → 표시된 refinement → F2(held-out을 열기 전. 노출·동결 기록도 이때 동결한다)의 순서를 지킨다. 결과를 본 뒤 도구나 규칙을 고치지 못하게 하는 장치다. F1 뒤에 바꾼 것은 모두 시각, 이유, 계기가 된 항목, 바뀐 판정과 함께 기록한다. 항목마다 지배 동결(개발 항목은 F1, held-out과 recall 항목은 F2)이 있고, 그 뒤의 변경이 건드린 항목은 `post-freeze-adjusted`로 따로 보고한다. 예외는 F1과 F2 사이에 개발 항목을 건드린 Φ·규칙·예외 보강 하나다. 이것은 계획된 `oracle refinement`다(§3.5). 평가 기준, 인코딩, 기대표를 F1 뒤에 바꾼 것은 결코 `oracle refinement`가 아니다.
+3. **사람이 고른 값은 deviation, 통계 절차는 가정이다**(spec 머리말, §8.7). 실행 횟수 N, 탐색 cap, 표본 크기는 reference가 정하지 않으므로 이유·영향·필요성과 함께 deviation으로 기록한다. 첫 사례 평가는 기술 통계와 사례별 근거로 하고, 다섯 사례를 독립 표본으로 삼는 자동 유의성 검정은 하지 않는다(P-STATS, 2026-10-15 결정). 따로 하는 정량 실험이 검정을 고르면, 방법론 문헌은 [POL]이 인정하는 reference 종류가 아니므로 그 선택은 가정(assumption)으로 기록한다(§8.2, §9). 모든 검정과 구간은 그 단위와 독립 가정을 밝힌다(§8.4).
 
-그리고 판정 체계 전체의 원칙이 평가에도 그대로 적용된다. **경보 없음은 안전이 아니다**(spec §0.1, §6.4 항목 2). 비교 도구가 조용한 것, `NOT_RUN`인 것, Kairos가 `unknown`을 낸 것은 모두 "문제가 없다"는 뜻이 아니다. 또 **한 사례의 결과로 다른 사례를 대신하지 않는다**(spec §8.2, §6.4 항목 43). 설계 사례는 저마다 자기 현상, 자기 basis, 자기 대조로 평가한다(§3.6).
+그리고 판정 체계 전체의 원칙이 평가에도 그대로 적용된다. **경보 없음은 안전이 아니다**(spec §0.1, §6.4 항목 2). 기존 도구가 조용한 것, `NOT_RUN`인 것, Kairos가 `unknown`을 낸 것은 모두 "문제가 없다"는 뜻이 아니다. 또 **한 사례의 결과로 다른 사례를 대신하지 않는다**(spec §8.2, §6.4 항목 43). 설계 사례는 저마다 자기 현상, 자기 basis, 자기 대조로 평가한다(§3.6).
 
 ### 0.4 필요한 용어
 
@@ -64,7 +78,7 @@ spec은 평가 전체에 걸쳐 세 원칙을 둔다. 셋 다 설계 결정 [D]�
 
 | 용어 | 쉬운 설명 | spec |
 |---|---|---|
-| 계약 instance | 프레임워크 자원을 쓰는 사용 지점 하나와, 그때 그 자원이 있어야 할 lifecycle 상태의 쌍. Kairos는 instance마다 판정 기록을 만든다. 예: R2에서 ES가 SB API를 부를 때 SB의 AppId가 발행되어 있어야 한다 | §0.1, §1.6 |
+| 준비 instance | 준비 상태 명세(readiness specification) instance. 프레임워크 자원을 쓰는 사용 지점 하나와, 그때 그 자원이 있어야 할 lifecycle 상태의 쌍. Kairos는 instance마다 판정 기록을 만든다. 예: R2에서 ES가 SB API를 부를 때 SB의 AppId가 발행되어 있어야 한다 | §0.1, §1.6 |
 | (σ, M) 칸, class | 판정은 스케줄 의미론 σ(σ_U 시간 무시, σ_U∞ σ_U에서 시간 기반 전이를 뺀 것, σ_R1 한 CPU 고정 우선순위, σ_E 실제 환경)와 OSAL 모형 수준 M(M_api API 계약 수준, M_impl POSIX 구현 수준)의 조합마다, 경계 b마다 따로 낸다. class는 안전성 기록에서 나오며 `inactive`, `protected`(↳`tolerated`), `fixed-order`, `no-final-status`, `schedule-dependent`(↳`timeout-dependent`), `ordinal-split`, `unknown(reason)` 중 하나다. "safe"는 없다 | §0.1, §1.8, §1.10 |
 | 진행(progress) 결과, stall witness | 영구 대기와 deadlock은 class가 아니라 칸마다 따로 적는 진행 결과다: `stall-witness`, `no-stall-within(b)`(`exh`만), `unknown(reason)`(기본 `not_checked`). "live"를 뜻하는 값은 없다. 평가에서 stall witness는 `realized`이거나, 확인할 수 있는 종류(`deadlock-cycle`, `leaked-lock`)이면서 `idle`·`terminal-pending`이 아니고 `choice-dependent`도 아닌 모형 witness일 때만 센다. 센 것은 wait-for root 집합마다 한 번 센다 | §1.8, §1.10, §8.5 |
 | happens-before (HB), vector clock | HB는 한 실행 안에서 동기화(lock, message, thread 생성 등)로 정해지는 "먼저 일어남"의 부분 순서다. vector clock은 thread마다 카운터 벡터를 들고 다니며 HB를 계산하는 자료 구조다 | §1.9, §1.11 |
@@ -75,22 +89,24 @@ spec은 평가 전체에 걸쳐 세 원칙을 둔다. 셋 다 설계 결정 [D]�
 | uprobe, eBPF | uprobe는 실행 파일을 고치지 않고 사용자 프로그램의 명령 주소에 kernel이 거는 probe다. eBPF는 그 probe가 걸릴 때 kernel 안에서 실행되는, 검증을 거친 작은 프로그램이다 | §5.1, §5.3 |
 | DPOR | dynamic partial-order reduction. 의존하는(dependent) transition이 뒤바뀔 수 있는 곳에만 backtracking 지점(다른 순서를 시도하려고 되돌아갈 지점)을 두어, 독립 연산의 순서만 다른 interleaving의 탐색을 줄이는 체계적 탐색 기법이다([R05 §2.2]; DPOR POPL 2005 [V-abs; 보장 문구 UNVERIFIED]). Kairos explorer의 `dpor` engine이 쓴다. Kairos의 source-DPOR은 class(독립 연산의 순서만 다른 실행들의 동치류)당 실행 하나를 주장하지 않는다(spec §6.4 항목 9). | §4.10, §6.4 항목 9 |
 | program mutant | 원래 프로그램의 코드를 일부러 조금 바꾼 변형이다. 여기서는 정해진 연산자나 과거 수정의 역(되돌리기)으로 만든다 | §8.5 |
-| recall | 실제로 있는 문제 가운데 도구가 찾은 비율이다. Kairos는 이것을 mutant와 수정 전후 쌍에서만 잰다 | §8.5 |
+| recall | 실제로 있는 문제 가운데 도구가 찾은 비율이다. Kairos는 이것을 mutant와 수정 전후 쌍에서만 잰다. 확장 평가에 속하고, 결과는 변형 집합에 한정된다 | §8.5 |
+| 필수 범위, 확장 평가 | 첫 논문의 필수 범위는 다섯 설계 사례와 그 사례에 직접 필요한 대조다(D9). held-out, recall, triage는 확장 평가로, 다섯 사례의 검증과 따로 그 뒤에 하며 새 출처마다 질의·노출·동결을 기록한다(D8/P-RECALL). 확장 평가의 결과는 빠진 사례를 대신하지 않고 사례의 결과로 세지 않는다 | §8.1, §7.5 항목 4 |
 | held-out | 설계하는 동안 열어 보지 않고 평가용으로 남겨 둔 대상이다. 맹검인지는 노출·동결 기록으로만 정한다 | §7.5 |
-| freeze F1, F2 | 그 시점의 Φ(cFS 지식을 담은 profile), 도구, 비교 도구, 규칙을 hash로 고정해 이후 바꾸지 못하게 하는 것이다. F1은 평가 기준(채점 규칙과 비교 기록의 칸, class label 규칙, 단위 규칙, 통계 가정)과 미리 등록한 기대표도 고정한다. F1 뒤의 변경은 모두 기록한다 | §7.2 |
+| freeze F1, F2 | 그 시점의 Φ(cFS 지식을 담은 profile), 도구, 규칙을 hash로 고정해 이후 바꾸지 못하게 하는 것이다. F1은 본 평가 전에 평가 engine과 규칙, process-level 기법의 재구현(있다면)과 그 작성 기록, 평가 기준(§8.5의 채점 규칙과 보고 칸, class label 규칙, 단위 규칙, 통계 가정), 사례별 기대표의 hash를 고정한다. F2는 held-out을 열기 전이다. F1 뒤의 변경은 모두 기록한다 | §7.2 |
 | template-only 실행 | 사례 전용 항목 없이 동결한 generic profile만으로 돌린 평가 실행이다 | §7.2, §13 |
 | 표시된 단위(labelled unit) | 정답 label이 있는 평가 단위. 개발 사례, recall mutant와 쌍, triage 표본이 여기에 든다. label은 기대 instance, 방향, 그리고 준비성과 진행성 중 무엇에 관한 기대인지를 담는다 | §8.2, §8.3, §8.5 |
-| 비교의 세 종류 K1–K3 | K1 공개된 그대로 돌린 원 도구, K2 같은 정보나 자기 정보로 재구현한 선행 기법, K3 Kairos의 한 요소를 뺀 ablation. 이름, 표, 결론에서 섞지 않는다 | §8.3, §8.4 |
-| 탐지·분류·근거 | 표시된 단위마다 도구별로 따로 적는 세 결과. 탐지(발생 탐지)는 기대 instance의 미준비 발생을 보고했는가(경보와 `not-ready-unjudged` 보고를 똑같이 센다. recall의 class 탐지와 다르다, §4.2), 분류는 class·refinement·outcome label·진행 결과(class를 내지 않는 도구는 harness가 유도한 class를 표시해 적는다), 근거는 경로·실현·경계·범위·reach·trust ledger다 | §8.3, §8.5 |
-| 미리 등록한 기대표 | 개발 사례·basis·(σ, M, b) 칸·instance마다 기대 class, refinement, 진행 값, outcome label, 그리고 reference가 class를 말한 경우 그 진술과 출처를 적은 표(pre-registered expectation sheet). F1에서 hash로 동결한다 | §7.2 |
-| reference의 class 진술, P-CLASSGT | issue나 수정 문서가 사례를 "race (condition)"라고 부르는 것. 이것을 σ·M별 class로 옮기는 대응은 어느 reference에도 없어 PI 결정 P-CLASSGT로 남는다. 그때까지 class label은 없다 | §8.2, §8.5, §10.1 |
+| 결과의 세 종류 K1–K3 | K1 공개된 그대로 돌린 원 도구, K2 원 도구를 돌릴 수 없을 때만 논문이나 코드로 만든 process-level 기법의 재구현, K3 Kairos의 한 요소를 뺀 ablation. 이름, 표, 결론에서 섞지 않는다 | §8.3, §8.4 |
+| 분석 질문 여섯 개, 결과 상태 | (도구, 사례)마다 같은 여섯 질문(관측 사건, 자원 동일성, 생성·등록·초기화 완료와 의존 사용의 관계, 요구 순서와 허용 오류 처리, 실행하지 않은 순서의 예측·탐색과 확인, 출력의 종류와 대응)에 답하고, `NOT_RUN`, `INAPPLICABLE`, `PATH_NOT_EXECUTED`, `OBSERVATION_GAP`, `ANALYSIS_GAP`, `REPORTED` 가운데 결과 상태 하나를 붙인다. 결과 상태는 도구의 순위가 아니다 | §8.3 |
+| 탐지·분류·근거 | Kairos의 결과(사례, 대조, ablation)를 보고하는 세 부분. 탐지(발생 탐지)는 기대 instance의 미준비 발생을 보고했는가(VIOLATING과 NOT_READY_UNJUDGED를 똑같이 센다. recall의 class 탐지와 다르다, §6.6), 분류는 class·refinement·outcome label·진행 결과와 기대표와의 일치, 근거는 경로·실현·경계·범위·reach·trust ledger·lemma의 증명 상태다 | §8.5 |
+| 미리 등록한 기대표 | 개발 사례·basis·(σ, M, b) 칸·instance마다 기대 class, refinement, 진행 값, outcome label, 그리고 reference가 class를 말한 경우 그 진술과 출처를 적은 표(pre-registered expectation sheet). 사례마다 그 사례의 첫 도구 출력 전에 hash로 동결하고, F1은 그 hash를 담는다 | §7.2 |
+| reference의 class 진술, P-CLASSGT | issue나 수정 문서가 사례를 "race (condition)"라고 부르는 것. 2026-10-15 결정 P-CLASSGT: 출처의 "race"를 도구 class로 자동으로 바꾸지 않는다. `fixed-order`와 `schedule-dependent`는 밝힌 모형, 구성, 실제 근거로 판단하고, 그런 뒷받침이 없으면 class label은 `unspecified_by_reference`다 | §7.2, §8.2, §8.5 |
 | 노출·동결 기록, 맹검 | 누가 언제 어느 사례·수정·기대 판정을 보았는지를, 동결과 동결 뒤 변경과 함께 적는 덧붙이기만 하는(append-only) 기록 / 그 기록이 항목의 지배 동결 전에 노출이 없었음을 보일 때만 붙이는 label `blind` | §7.2, §7.5 항목 5 |
 | 단위 U1–U6 | 결함 원인, 수정 이력, 프로그램 변형, 정적 instance, 동적 발생, 실행. 모든 수는 이 가운데 하나를 밝힌다(§3.8) | §8.2 |
-| `NOT_RUN` | 실행하지 않은 비교 도구나 항목의 상태. false negative(놓침)로 세지 않는다. 적용할 수 없는 단위와 함께 탐지에서 detected도 missed도 아니고, 따로 보고하며 짝지은 검정에서 뺀다 | §8.3, §8.5 |
+| `NOT_RUN` | 환경, 자료, 결정 때문에 실행하지 않은 도구나 항목의 상태. false negative(놓침)로 세지 않는다. `INAPPLICABLE` 칸과 함께 이유를 붙여 보고한다 | §8.3, §8.5 |
 | perturbation(교란) | 관측이나 제어가 실행 timing을 바꾸는 것 | §8.6, §4.13 |
 | pool key, cold/warm 층(stratum) | 여러 실행의 빈도를 합칠 때 같아야 하는 열쇠(B hash, plan hash, cold/warm 층). cold/warm 층(spec의 stratum)은 VM 재부팅 뒤 첫 실행(cold)과 나머지(warm)의 구분이다. HB edge의 stratum S/O/C_σ와 다른 뜻이다 | §4.12, §8.6 |
 | work unit | 탐색 상태 수, transition 수 같은 결정적 횟수. 모든 분석 예산을 이것으로 잰다. 벽시계 시간은 비용으로만 보고한다. 관측 단위 U1–U6와 다르다 | §4.14, §13 |
-| 검증 사다리 V0–V4 | 끝에서 끝까지 확인하는 일의 순서. 첫 목표는 R2의 K-ID 사슬(V1)이다. 평가는 V4a(F1 뒤 비교)와 V4b(F2 뒤 held-out과 수정 전후 쌍)다 | §9.3, §13 |
+| 검증 사다리 V0–V4 | 끝에서 끝까지 확인하는 일의 순서. revision 1.2까지의 첫 목표는 R2의 K-ID 사슬(V1)이었고, revision 1.3에서는 R2의 기반 검증 V1′이 첫 rung이며 C1의 V3가 나란히 간다. 평가는 V4a(F1 뒤 기존 Process-Level Race 연구와의 비교)와 V4b(F2 뒤 held-out과 수정 전후 쌍, 확장 평가)다 | §9.3, §13 |
 
 ---
 

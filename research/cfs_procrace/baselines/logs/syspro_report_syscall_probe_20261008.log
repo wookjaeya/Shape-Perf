@@ -1,0 +1,29 @@
+# STAND-IN PROBE, NOT A SysPro RUN. 2026-10-08T01:36:16Z
+# Name list: /usr/include/x86_64-linux-gnu/asm/unistd_64.h from linux-libc-dev 6.8.0-106.106 (container package; SysPro's own list is unknown -> unspecified_by_reference)
+# Command: python3 -I /home/user/work/procrace/baselines/syspro/syscall_name_probe.py /usr/include/x86_64-linux-gnu/asm/unistd_64.h /home/user/work/procrace/baselines/syspro/inputs/*.md
+# syscall names in /usr/include/x86_64-linux-gnu/asm/unistd_64.h: 373
+
+## /home/user/work/procrace/baselines/syspro/inputs/C1_CF184.md
+whole-word matches : ['bind', 'exit', 'sync', 'time']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+call-syntax matches 'name(' : []
+
+## /home/user/work/procrace/baselines/syspro/inputs/C2_cFE198.md
+whole-word matches : ['sync']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+call-syntax matches 'name(' : []
+
+## /home/user/work/procrace/baselines/syspro/inputs/C3_cFE73.md
+whole-word matches : ['time']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+call-syntax matches 'name(' : []
+
+## /home/user/work/procrace/baselines/syspro/inputs/C5_cFE72.md
+whole-word matches : ['read']
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+call-syntax matches 'name(' : []
+
+## /home/user/work/procrace/baselines/syspro/inputs/R2_cFE2663.md
+whole-word matches : []
+identifier-fragment matches (e.g. 'sync' inside WaitForStartupSync is NOT split; only '_' splits): []
+call-syntax matches 'name(' : []

@@ -1,0 +1,77 @@
+# Tests of the static analysis layer (lib/llvm and tools/kz-static).  They exist only in a tree
+# configured with -DKZ_BUILD_LLVM_TOOLS=ON, like the code they test.
+#
+#   fixtures/        small self-contained C programs, one for each kind of fact; each is compiled by the
+#                    C compiler of the build with -std=c99 -pedantic -Wall -Wextra -Werror, and read by
+#                    kz-static with -std=c99 -pedantic (static_fixture_compile_*, static_golden_*);
+#                    clobber.c is read only (see below)
+#   data/*.golden    the text view of the facts of each fixture and of the core executable
+#   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
+#                    walks, recipe, commit reader, link set, command line, basis -> extract on a
+#                    synthetic program)
+#   static_golden    the golden driver; `core` runs on the pinned bundle and is skipped (exit 77) where
+#                    the bundle or its build is not there
+#
+# Accept a deliberate change of a golden with KZ_GOLDEN_UPDATE=1 ctest -R static_golden, then review
+# the diff of data/.  The values in the goldens are those of the programs under analysis; they are
+# not experiment results.
+if(NOT KZ_BUILD_LLVM_TOOLS)
+  return()
+endif()
+
+include_directories("${CMAKE_SOURCE_DIR}/tests/unit" "${CMAKE_SOURCE_DIR}/lib/llvm")
+
+set(KZ_PROFILE_DIR "${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1" CACHE PATH "The profile directory the tests use")
+set(KZ_BUNDLE_ROOT "/home/user/work/procrace/cfs_ref/cFS" CACHE PATH "The pinned bundle the real run reads")
+set(kz_fixture_dir "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
+
+# ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
+# clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
+# compilers reject that at -Werror, so it is read by kz-static but not compiled here.
+set(kz_fixtures writers outptr derives loops spawn atype)
+set(kz_golden_fixtures ${kz_fixtures} clobber)
+foreach(kz_name IN LISTS kz_fixtures)
+  add_test(NAME static_fixture_compile_${kz_name}
+    COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)
+  set_tests_properties(static_fixture_compile_${kz_name} PROPERTIES LABELS static)
+endforeach()
+
+# ---- golden files ---------------------------------------------------------------------------------------
+add_executable(static_golden static_golden.cpp)
+target_link_libraries(static_golden PRIVATE kz-core)
+kz_apply_settings(static_golden)
+add_dependencies(static_golden kz-static)
+foreach(kz_name IN LISTS kz_golden_fixtures)
+  add_test(NAME static_golden_${kz_name}
+    COMMAND static_golden fixture ${kz_name} $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${kz_fixture_profile}
+            ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_${kz_name})
+  set_tests_properties(static_golden_${kz_name} PROPERTIES LABELS "static;golden")
+endforeach()
+
+# The core executable of the pinned bundle: basis, extract, numbers.
+add_test(NAME static_golden_core_cpu1
+  COMMAND static_golden core $<TARGET_FILE:kz-static> ${KZ_PROFILE_DIR} ${KZ_PROFILE_DIR}/basis/core-cpu1.kzb ${KZ_BUNDLE_ROOT}
+          ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_core)
+set_tests_properties(static_golden_core_cpu1 PROPERTIES LABELS "static;golden;integration" SKIP_RETURN_CODE 77 TIMEOUT 600)
+
+# ---- unit tests ---------------------------------------------------------------------------------------------
+foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll)
+  kz_add_unit_test(${kz_name} SOURCES ${kz_name}.cpp LIBS kz-llvm kz-testsupport LABEL static)
+endforeach()
+
+# Object files for the link-set test, built with the C compiler of the build.
+# They are data for the link-set reader, not code under test: a sanitizer build must not add its
+# runtime symbols to them (the test checks their symbol tables).
+foreach(kz_obj main_obj whole_member lazy_used lazy_unused)
+  add_library(kz_static_${kz_obj} OBJECT objects/${kz_obj}.c)
+  target_compile_options(kz_static_${kz_obj} PRIVATE -std=c99 -fno-sanitize=all)
+endforeach()
+kz_add_unit_test(test_static_link SOURCES test_static_link.cpp LIBS kz-llvm kz-testsupport LABEL static
+  ARGS $<TARGET_OBJECTS:kz_static_main_obj> $<TARGET_OBJECTS:kz_static_whole_member> $<TARGET_OBJECTS:kz_static_lazy_used> $<TARGET_OBJECTS:kz_static_lazy_unused>)
+# the objects are arguments, not sources: building the test must build them too
+add_dependencies(test_static_link kz_static_main_obj kz_static_whole_member kz_static_lazy_used kz_static_lazy_unused)
+
+kz_add_unit_test(test_static_cli SOURCES test_static_cli.cpp LIBS kz-core kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(test_static_cli kz-static)

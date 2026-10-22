@@ -1,0 +1,28 @@
+# 40_rspec.kzp -- readiness specifications.
+#
+# K-ID.send-with-appid: a request for an event on behalf of an application needs a valid AppId
+# that is registered with the event service.  The two readiness preconditions are the conjuncts of
+# CFE_EVS_SendEventWithAppID with the same expressions: the value conjunct is read at the capture
+# point, the registry conjunct inside the call.
+#
+# Three judgements, kept apart (SPEC 1.6):
+#   framework  CFE_EVS_APP_ILLEGAL_APP_ID is a documented return value of error severity
+#              (cfe_evs.h:199, cfe_error.h:267);
+#   caller     the header tells the caller that the AppId must correspond to a registered
+#              application or core service, and names the system log, a different API, for
+#              messages outside that context (cfe_evs.h:168-172).  That text is the appreq, and it
+#              is a caller-side text.  No text accepts the rejection, so Allowed is none;
+#   observed   what happened is the consequence of the verdict, not part of this file.
+phi 1;
+
+rspec K-ID.send-with-appid {
+  use op CFE_EVS_SendEventWithAppID;
+  key evs.reg(arg.AppID);
+  requires valid(arg.AppID) && state(evs.reg(arg.AppID)) = REG;
+  oracle fns "EVS_GetAppDataByID", "EVS_AppDataIsMatch";
+  appreq evs_h_appid_note;
+  allowed none;
+  harm event_request_rejected;
+  authored "2026-10-15, K1 (Claude Sonnet 5.5), from SPEC_FINAL 1.6, 2.3 and A.1 and the pinned source; cases inspected for this API: R2";
+  prov evs_h_appid_note, evs_h_retval, evs_send_check, evs_utils_getbyid, evs_utils_ismatch;
+}

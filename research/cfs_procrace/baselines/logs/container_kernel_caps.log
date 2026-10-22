@@ -1,0 +1,30 @@
+# kallsyms entries matching 'scribe' (excluding 'subscribe'/'describe'):
+(count=0)
+# sample of matches:
+__pfx_blacklist_describe
+blacklist_describe
+__pfx_fscrypt_provisioning_key_describe
+# CapEff bit 16 (CAP_SYS_MODULE):
+True
+# modprobe/insmod availability:
+# /proc/config.gz:
+/proc/config.gz
+# /sys/module count:
+75
+# init_module attempt (finit_module with /dev/null) via python ctypes:
+finit_module ret -1 errno Function not implemented
+# zgrep /proc/config.gz
+CONFIG_SYSVIPC=y
+CONFIG_POSIX_MQUEUE=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_FUTEX=y
+CONFIG_PERF_EVENTS=y
+# CONFIG_KPROBES is not set
+CONFIG_UPROBES=y
+CONFIG_SECCOMP=y
+# CONFIG_MODULES is not set
+CONFIG_PROC_FS=y
+CONFIG_FTRACE=y
+CONFIG_UPROBE_EVENTS=y
+# kernel.perf_event_paranoid: 2
+# ptrace_scope: cat: /proc/sys/kernel/yama/ptrace_scope: No such file or directory

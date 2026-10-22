@@ -1,0 +1,59 @@
+# yu-group: search-engine excerpts (2026-10-08, via the session's WebSearch tool).
+# STATUS OF THESE EXCERPTS: NOT OPENED. Every page below returned EGRESS_BLOCKED (WebFetch) or
+# "CONNECT tunnel failed, response 403" (curl) from this container (see yu-group_source_fetch_20261008.log).
+# The text in quotes is what the search tool returned as quoted snippets of the page; I could not check it
+# against the page itself. These excerpts are leads, not verified primary-source quotes. They are used in
+# yu-group.md only with this label and never as the sole basis for a "met/not met" requirement row.
+
+## Q1 "SimRacer automated framework testing process-level races Yu Srisa-an Rothermel ISSTA 2013" (standard)
+# snippet source pages listed: scholars.uky.edu (STVR record), archive.cps-vo.org/node/36387, springerprofessional.de/doi/10.1145/2483760.2483771
+"SIMRACER first computes potential races based on runtime traces obtained by running existing tests on target processes, and then it controls process scheduling relative to the potential races so that real races can be created."
+"We implemented SIMRACER on a commercial virtual platform that is widely used to support hardware/software co-design."
+"They evaluated its effectiveness on sixteen real-world applications containing known process-level races."
+# STVR (SIMEXPLORER) abstract snippets:
+"SIMEXPLORER first uses dynamic analysis techniques to observe system execution, identify program locations of interest, and report faults related to oracles. Next, it uses virtualization to achieve the fine-grained controllability needed to exercise event interleavings that are likely to expose races."
+"They evaluated the effectiveness of SIMEXPLORER on 24 real-world applications containing both known and unknown process-level race conditions."
+
+## Q2 "\"RRF\" race reproduction framework debugging process-level races Rattanasuksun ISSRE 2016" (standard)
+# snippet source: archive.cps-vo.org/node/30361 (abstract), ieeexplore.ieee.org/document/7774517 (listed in Q5)
+paraphrased by the tool (no verbatim quote returned): RRF "combines existing static program analysis tools, dynamic kernel event reporting tools, and yield points" to provide "observability and controllability needed to reproduce races". No tracer/kernel/platform named.
+
+## Q3 "SimEvo testing evolving multi-process software systems Tingting Yu ICSME 2017" (standard)
+# snippet source: https://par.nsf.gov/servlets/purl/10089644 (NSF Public Access Repository copy of the paper)
+"SimEvo employs novel impact analysis techniques to identify system-level concurrent events that are affected by the changes."
+"It then reuses existing test cases, as well as generating new test cases, focused on the set of impacted events."
+
+## Q4 "SimRacer process-level races implemented on Simics virtual platform ..." (extended)
+# snippet source: https://par.nsf.gov/servlets/purl/10089644 (SimEvo)
+"SimEvo employs the Simics Virtualization Platform [14] to observe system execution and to deterministically control occurrences of system-level events."
+"SimEvo leverages the VM's controllability to permute process interleavings by causing the kernel scheduler to explore the affected interleavings."
+"SimEvo was more effective than SimRacer in terms of coverage and fault detection effectiveness"
+"active testing [41], [57], which first identifies anomalous event pairs and then randomly explores interleaving schedules"
+# tool summary (not a quote): SimEvo evaluation covered 13 unique multi-process Linux applications.
+
+## Q5 "SimExplorer STVR 2017 ... Simics implementation Linux kernel version" (extended)
+# snippet sources: onlinelibrary.wiley.com/doi/am-pdf/10.1002/stvr.1634 (author manuscript), digitalcommons.unl.edu/computerscidiss/77 (T. Yu PhD dissertation, UNL 2014, "SimExplorer: A Testing Framework to Detect Elusive Software Faults")
+"By using Simics, our framework also operates at the binary level so it is capable of detecting races between applications written in different languages."
+"To evaluate our SimExplorer framework we conducted an empirical study using 24 Unix programs that contain actual process-level races."
+dissertation (paraphrase by tool): instantiation "that tests for races at the process level, in both user and kernel modes, involving files, shared memory, hardware components, signals, and processing cores."
+# Intel Simics documentation snippet (Simics host requirement; page not opened):
+"In order to run Intel Architecture targets quickly on IA-based hosts, the Simics simulator makes use of Intel VT-x. This requires that you install a Linux kernel module known as VMXMON on the host running the simulator."
+# No snippet stated the Simics version, simulated machine, guest OS or kernel version for any of the five tools.
+
+## Q6 "\"ReDPro\" process-level concurrency failures" (extended) and Q7 "ReDPro Zaman ACM SE 2022 abstract PIN ..." (extended)
+# snippet source: https://dl.acm.org/doi/10.1145/3476883.3520207
+"Process-level failures are difficult to detect because they are sensitive to the execution order of system calls. These failures can not be detected unless a specific system-call interleaving is exercised during testing."
+"In this paper, we presented an automated technique, RedPro that can detect process-level races and also regenerate the failures."
+"We used a binary instrumentation tool named PIN for run-time monitoring and controlling the order of execution for potential race pairs."
+"We evaluated the performance of RedPro by detecting and regenerating nine real-world bugs."
+"PIN [12], a dynamic binary instrumentation framework which provides rich APIs to write user-defined C/C++ instrumentation tools (i.e., Pintools)."
+# No snippet stated a Pin version, kernel, or any code/artifact URL.
+
+## Q8 "Tingting Yu dissertation \"SimExplorer: A Testing Framework to Detect Elusive Software Faults\" ..." (extended)
+# snippet sources: digitalcommons.unl.edu (article=1093), blogs.windriver.com/engblom/2012/05/forcing-rare-bugs-to-appear-an-interview-with-tingting-yu.html
+# Dissertation: UNL, August 2014, advisors G. Rothermel and W. Srisa-an (record metadata). Predecessor SimTester described as
+# "implemented for applications running on x86/Linux environments" interacting with Simics (tool paraphrase, not verbatim).
+
+## Artifact-availability statements
+# None of the snippets above contained a URL or statement of a released implementation, VM image, or artifact for
+# SimRacer, SIMEXPLORER, RRF, SimEvo or ReDPro.

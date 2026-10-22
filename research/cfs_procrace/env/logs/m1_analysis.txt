@@ -1,0 +1,220 @@
+## 1. Console: SB 'Pipe Overflow' events (EID 25, filter CFE_EVS_FIRST_16_STOP), 'Events squelched' (EVS 44), 'Msg Limit Err' (SB 17), 'No subscribers' (SB 14)
+log                                   ovf  =16? per pipe (sender)                              sqlch msglm nosub  dots reset      exit    
+run01_operational.log                  16   yes SBNSubPipe(TO_LAB)=16                              1     0     4     0 POWER ON   PROCESSOR
+run02_fixed30s.log                     16   yes SBNSubPipe(TO_LAB)=16                              1     0     4     4 PROCESSOR  PROCESSOR
+run03_audit_operational.log            16   yes DS_CMD_PIPE(HS)=1 SBNSubPipe(TO_LAB)=15            1     0     4     0 PROCESSOR  POWERON 
+run04_po_operational_sigint.log        16   yes DS_CMD_PIPE(SBN)=7 SBNSubPipe(TO_LAB)=9            1     0     4     0 POWER ON   PROCESSOR
+run05_pr_operational_esrestart.log     16   yes DS_CMD_PIPE(SBN)=8 SBNSubPipe(TO_LAB)=8            1     0     4     0 PROCESSOR  POWERON 
+run06_po_operational_esrestart.log     16   yes SBNSubPipe(TO_LAB)=16                              1     0     4     0 POWER ON   POWERON 
+run07_po_fixed30s_esrestart.log        16   yes DS_CMD_PIPE(CS)=1 DS_CMD_PIPE(DS)=1 DS_CMD_PIPE(HS)=1 DS_CMD_PIPE(MD)=1 DS_CMD_PIPE(SC)=1 SBNSubPipe(TO_LAB)=11     1     0     4     4 POWER ON   POWERON 
+m1_A1_po_fixed30s_esrestart.log        16   yes SBNSubPipe(TO_LAB)=16                              1     0     4     4 POWER ON   POWERON 
+m1_A2_po_fixed30s_esrestart.log        16   yes DS_CMD_PIPE(CS)=1 DS_CMD_PIPE(DS)=1 DS_CMD_PIPE(MD)=1 SBNSubPipe(TO_LAB)=13     1     0     4     4 POWER ON   POWERON 
+m1_A3_po_fixed30s_esrestart.log         2    no TO_LAB_TLM_PIPE(SBN)=2                             1     0     4     4 POWER ON   POWERON 
+m1_B1_po_fixed30s_esrestart.log        16   yes DS_CMD_PIPE(TO_LAB)=4 SBNSubPipe(TO_LAB)=12        1     0     4     4 POWER ON   POWERON 
+m1_B2_po_fixed30s_esrestart.log        16   yes DS_CMD_PIPE(CS)=1 DS_CMD_PIPE(DS)=1 DS_CMD_PIPE(HS)=1 DS_CMD_PIPE(MD)=1 DS_CMD_PIPE(SBN)=3 DS_CMD_PIPE(SC)=1 SBNSubPipe(TO_LAB)=8     1     0     4     4 POWER ON   POWERON 
+m1_B3_po_fixed30s_esrestart.log        16   yes DS_CMD_PIPE(TO_LAB)=3 SBNSubPipe(TO_LAB)=13        1     0     4     4 POWER ON   POWERON 
+dots = HS aliveness string '.' (HS_CPU_ALIVE_STRING, printed every HS_CPU_ALIVE_PERIOD=5 HS cycles; OS_printf without newline)
+
+## 2. M1 runs: cFE counters read from memory at S1 (OPERATIONAL line read) and S2 (end of 30 s window)
+run pt    POEC MsgSErr MsgLim  NoSub   f25cnt printed SBNsqlch   EVSsent  LogOvf* LogFull*
+A1  S1      33      33      0     18       32               13       113        0       0
+A1  S2      33      33      0     18       32      16       17       123      103       1
+A2  S1      37      37      0     25       34               13       113        0       0
+A2  S2      37      37      0     25       34      16       17       121      101       1
+A3  S1       4       4      0     15        2               13        99        0       0
+A3  S2       4       4      0     15        2       2       18       109       89       1
+B1  S1      49      40      0     16       40               13       113        0       0
+B1  S2      49      40      0     16       40      16       17       123      103       1
+B1  S2b     49      40      0     16       40               17       125      103       1
+B2  S1      45      45      0     26       39               13       113        0       0
+B2  S2      45      45      0     26       39      16       17       121      101       1
+B2  S2b     45      45      0     26       39               17       123      101       1
+B3  S1      41      38      0     19       35               13       113        0       0
+B3  S2      41      38      0     19       35      16       17       123      103       1
+B3  S2b     41      38      0     19       35               17       125      103       1
+POEC = CFE_SB HK PipeOverflowErrorCounter (incremented on every OS_QUEUE_FULL, cfe_sb_priv.c L1190-1193);
+f25cnt = EVS binary-filter counter of CFE_SB event 25 (attempts that reached EVS); printed = console lines.
+* LogOvf/LogFull are copied into the EVS HK packet only when EVS housekeeping runs (every 4.2 s, sch_lab_table.c L60).
+
+## 3. Queue capacity: requested (SB CreatePipe depth) / OSAL record / kernel mq_getattr, S1 of every M1 run
+identical in all 12 snapshots (A1-B3, S1+S2): True; non-SB OSAL queues: [0]; mq_probe queues per snapshot: [26]
+pipe                 app          SBreq   OSAL  kernel  msgsize truncated
+ES_CMD_PIPE          CFE_ES          12     12      10        8       yes
+EVS_CMD_PIPE         CFE_EVS         32     32      10        8       yes
+SB_CMD_PIPE          CFE_SB          32     32      10        8       yes
+TBL_CMD_PIPE         CFE_TBL         12     12      10        8       yes
+TIME_CMD_PIPE        CFE_TIME        12     12      10        8       yes
+CI_LAB_CMD_PIPE      CI_LAB          32     32      10        8       yes
+SAMPLE_APP_CMD_PIPE  SAMPLE_APP      32     32      10        8       yes
+TO_LAB_CMD_PIPE      TO_LAB           8      8       8        8        no
+SCH_LAB_CMD_PIPE     SCH_LAB          8      8       8        8        no
+TO_LAB_TLM_PIPE      TO_LAB          50     50      10        8       yes
+LC_CMD_PIPE          LC              12     12      10        8       yes
+CF_CMD_PIPE          CF              32     32      10        8       yes
+CF_CHAN_0            CF              16     16      10        8       yes
+CF_CHAN_1            CF              16     16      10        8       yes
+DS_CMD_PIPE          DS              45     45      10        8       yes
+FM_CMD_PIPE          FM              10     10      10        8        no
+HK_CMD_PIPE          HK              40     40      10        8       yes
+HS_CMD_PIPE          HS              12     12      10        8       yes
+HS_EVENT_PIPE        HS              32     32      10        8       yes
+HS_WAKEUP_PIPE       HS               1      1       1        8        no
+MM_CMD_PIPE          MM              12     12      10        8       yes
+SC_CMD_PIPE          SC              12     12      10        8       yes
+MD_CMD_PIPE          MD              50     50      10        8       yes
+CS_CMD_PIPE          CS              12     12      10        8       yes
+SBNCmdPipe           SBN             20     20      10        8       yes
+SBNSubPipe           SBN             32     32      10        8       yes
+sum requested=584, sum kernel=247, pipes=26
+
+## 4. Per-pipe SB statistics at S2 (memory read): PeakQueueDepth (SendErrors); kernel depth for comparison
+pipe                 kmax A1      A2      A3      B1      B2      B3     
+ES_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+EVS_CMD_PIPE           10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+SB_CMD_PIPE            10  2(0)    2(0)    2(0)    1(0)    2(0)    2(0)  
+TBL_CMD_PIPE           10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+TIME_CMD_PIPE          10  2(0)    2(0)    2(0)    2(0)    2(0)    2(0)  
+CI_LAB_CMD_PIPE        10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+SAMPLE_APP_CMD_PIPE    10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+TO_LAB_CMD_PIPE         8  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+SCH_LAB_CMD_PIPE        8  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+TO_LAB_TLM_PIPE        10 11(0)*   9(0)   12(0)*  11(0)*   4(0)   11(0)* 
+LC_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+CF_CMD_PIPE            10  2(0)    2(0)    2(0)    2(0)    2(0)    2(0)  
+CF_CHAN_0              10  0(0)    0(0)    0(0)    0(0)    0(0)    0(0)  
+CF_CHAN_1              10  0(0)    0(0)    0(0)    0(0)    0(0)    0(0)  
+DS_CMD_PIPE            10 10(0)   11(0)*   5(0)   12(0)*  12(0)*  12(0)* 
+FM_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+HK_CMD_PIPE            10  2(0)    2(0)    1(0)    2(0)    2(0)    1(0)  
+HS_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+HS_EVENT_PIPE          10  0(0)    0(0)    0(0)    0(0)    0(0)    0(0)  
+HS_WAKEUP_PIPE          1  0(0)    0(0)    0(0)    0(0)    0(0)    0(0)  
+MM_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+SC_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+MD_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+CS_CMD_PIPE            10  1(0)    1(0)    1(0)    1(0)    1(0)    1(0)  
+SBNCmdPipe             10  2(0)    2(0)    2(0)    2(0)    2(0)    2(0)  
+SBNSubPipe             10 11(0)*  11(0)*   5(0)   11(0)*  11(0)*  11(0)* 
+* PeakQueueDepth above the kernel depth: SB counted more buffers in flight than the queue can hold.
+SendErrors is incremented only for the per-MsgId limit (cfe_sb_priv.c L1058-1063), not for a full queue.
+
+## 5. Variant B: SB Write-Pipe-Info file vs memory read (S2 before the command, S2b after the file)
+B1: 26 entries, 1624 bytes (64 header + 60 x n), header={'ContentType': '0x63464531', 'SubType': 20, 'Description': 'SB Pipe Information'}; file before command: absent; command->close 391.2 ms
+    differences file vs S2: none
+    differences file vs S2b: none
+B2: 26 entries, 1624 bytes (64 header + 60 x n), header={'ContentType': '0x63464531', 'SubType': 20, 'Description': 'SB Pipe Information'}; file before command: present size=1624 mtime=2026-10-08T06:25:29.708751640Z; command->close 339.0 ms
+    differences file vs S2: none
+    differences file vs S2b: none
+B3: 26 entries, 1624 bytes (64 header + 60 x n), header={'ContentType': '0x63464531', 'SubType': 20, 'Description': 'SB Pipe Information'}; file before command: present size=1624 mtime=2026-10-08T06:26:08.928753972Z; command->close 379.1 ms
+    differences file vs S2: ['SCH_LAB_CMD_PIPE.CurrentQueueDepth file=0 mem=1']
+    differences file vs S2b: none
+
+## 6. Scheduling: ES requested priority / OSAL record / kernel (policy, rt_priority, nice), every M1 snapshot
+CFE_ES                                                     [(68, 255, 'SCHED_OTHER', 0, 0)]
+ES_BG_TASK                                                 [(200, 255, 'SCHED_OTHER', 0, 0)]
+CFE_EVS                                                    [(61, 255, 'SCHED_OTHER', 0, 0)]
+CFE_SB                                                     [(64, 255, 'SCHED_OTHER', 0, 0)]
+CFE_TBL                                                    [(70, 255, 'SCHED_OTHER', 0, 0)]
+CFE_TIME                                                   [(60, 255, 'SCHED_OTHER', 0, 0)]
+TIME_TONE_TASK                                             [(25, 255, 'SCHED_OTHER', 0, 0)]
+TIME_ONEHZ_TASK                                            [(25, 255, 'SCHED_OTHER', 0, 0)]
+SCH_LAB                                                    [(35, 255, 'SCHED_OTHER', 0, 0)]
+CI_LAB                                                     [(40, 255, 'SCHED_OTHER', 0, 0)]
+TO_LAB                                                     [(45, 255, 'SCHED_OTHER', 0, 0)]
+SAMPLE_APP                                                 [(50, 255, 'SCHED_OTHER', 0, 0)]
+LC                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+CF                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+DS                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+FM                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+FM_CHILD_TASK                                              [(205, 255, 'SCHED_OTHER', 0, 0)]
+HK                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+HS                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+MM                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+SC                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+MD                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+CS                                                         [(70, 255, 'SCHED_OTHER', 0, 0)]
+SBN                                                        [(70, 255, 'SCHED_OTHER', 0, 0)]
+(unnamed) core-cpu1 syscall 128 do_sigtimedwait.isra.0     [('-', '-', 'SCHED_OTHER', 0, 0)]
+(unnamed) core-cpu1 syscall 202 futex_do_wait              [('-', '-', 'SCHED_OTHER', 0, 0)]
+autogroup per run (S1): ['/autogroup-143', '/autogroup-147', '/autogroup-148', '/autogroup-150', '/autogroup-152', '/autogroup-153']
+
+## 7. App status split per run: (a) created  (b) own init-complete report  (c) at S2
+(a) = ES 'Loading file ... APP: X' line (core apps: CFE_ES_CreateObjects) and, for M1, a thread named X in /proc at S1
+(b) = the app's own init-complete report on the console (list in BASELINE_MEASURE.md §7)
+(c) = M1 only: thread present at S2, ES AppState at S2, main-loop ExecutionCounter S1->S2 (CFE_ES_RunLoop L441)
+run01_operational.log                CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run02_fixed30s.log                   CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run03_audit_operational.log          CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run04_po_operational_sigint.log      CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run05_pr_operational_esrestart.log   CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run06_po_operational_esrestart.log   CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+run07_po_fixed30s_esrestart.log      CFE_ES:ab  CFE_EVS:ab  CFE_SB:ab  CFE_TBL:ab  CFE_TIME:ab  SCH_LAB:ab  CI_LAB:ab  TO_LAB:ab  SAMPLE_APP:ab  LC:ab  CF:ab  DS:ab  FM:ab  HK:ab  HS:a-  MM:ab  SC:ab  MD:ab  CS:ab  SBN:a-
+m1_A1_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+5  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+115  SCH_LAB:ab/T,RUN,+274  CI_LAB:ab/T,RUN,+59  TO_LAB:ab/T,RUN,+542  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+552  DS:ab/T,RUN,+58  FM:ab/T,RUN,+30  HK:ab/T,RUN,+45  HS:a-/T,RUN,+23  MM:ab/T,RUN,+29  SC:ab/T,RUN,+60  MD:ab/T,RUN,+28  CS:ab/T,RUN,+57  SBN:a-/T,RUN,+279
+m1_A2_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+5  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+119  SCH_LAB:ab/T,RUN,+275  CI_LAB:ab/T,RUN,+61  TO_LAB:ab/T,RUN,+567  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+562  DS:ab/T,RUN,+58  FM:ab/T,RUN,+30  HK:ab/T,RUN,+45  HS:a-/T,RUN,+23  MM:ab/T,RUN,+30  SC:ab/T,RUN,+60  MD:ab/T,RUN,+29  CS:ab/T,RUN,+59  SBN:a-/T,RUN,+283
+m1_A3_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+5  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+116  SCH_LAB:ab/T,RUN,+275  CI_LAB:ab/T,RUN,+61  TO_LAB:ab/T,RUN,+562  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+562  DS:ab/T,RUN,+59  FM:ab/T,RUN,+30  HK:ab/T,RUN,+45  HS:a-/T,RUN,+23  MM:ab/T,RUN,+30  SC:ab/T,RUN,+60  MD:ab/T,RUN,+29  CS:ab/T,RUN,+59  SBN:a-/T,RUN,+283
+m1_B1_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+5  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+116  SCH_LAB:ab/T,RUN,+275  CI_LAB:ab/T,RUN,+61  TO_LAB:ab/T,RUN,+566  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+562  DS:ab/T,RUN,+60  FM:ab/T,RUN,+30  HK:ab/T,RUN,+45  HS:a-/T,RUN,+23  MM:ab/T,RUN,+30  SC:ab/T,RUN,+60  MD:ab/T,RUN,+29  CS:ab/T,RUN,+59  SBN:a-/T,RUN,+283
+m1_B2_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+6  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+119  SCH_LAB:ab/T,RUN,+276  CI_LAB:ab/T,RUN,+61  TO_LAB:ab/T,RUN,+566  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+564  DS:ab/T,RUN,+59  FM:ab/T,RUN,+30  HK:ab/T,RUN,+46  HS:a-/T,RUN,+23  MM:ab/T,RUN,+30  SC:ab/T,RUN,+60  MD:ab/T,RUN,+29  CS:ab/T,RUN,+59  SBN:a-/T,RUN,+286
+m1_B3_po_fixed30s_esrestart.log      CFE_ES:ab/T,RUN,+6  CFE_EVS:ab/T,RUN,+6  CFE_SB:ab/T,RUN,+5  CFE_TBL:ab/T,RUN,+5  CFE_TIME:ab/T,RUN,+116  SCH_LAB:ab/T,RUN,+275  CI_LAB:ab/T,RUN,+61  TO_LAB:ab/T,RUN,+567  SAMPLE_APP:ab/T,RUN,+5  LC:ab/T,RUN,+30  CF:ab/T,RUN,+561  DS:ab/T,RUN,+60  FM:ab/T,RUN,+30  HK:ab/T,RUN,+45  HS:a-/T,RUN,+23  MM:ab/T,RUN,+30  SC:ab/T,RUN,+60  MD:ab/T,RUN,+29  CS:ab/T,RUN,+59  SBN:a-/T,RUN,+283
+child tasks (M1, S1->S2 voluntary context switches; no RunLoop counter): 
+  A1: ES_BG_TASK 5->38 (state S), TIME_TONE_TASK 2->52 (state S), TIME_ONEHZ_TASK 4->34 (state S), FM_CHILD_TASK 2->2 (state S)
+  A2: ES_BG_TASK 2->36 (state S), TIME_TONE_TASK 2->46 (state S), TIME_ONEHZ_TASK 2->33 (state S), FM_CHILD_TASK 2->2 (state S)
+  A3: ES_BG_TASK 4->38 (state S), TIME_TONE_TASK 2->53 (state S), TIME_ONEHZ_TASK 2->31 (state S), FM_CHILD_TASK 2->2 (state S)
+  B1: ES_BG_TASK 2->36 (state S), TIME_TONE_TASK 2->50 (state S), TIME_ONEHZ_TASK 2->35 (state S), FM_CHILD_TASK 4->4 (state S)
+  B2: ES_BG_TASK 2->37 (state S), TIME_TONE_TASK 2->49 (state S), TIME_ONEHZ_TASK 2->36 (state S), FM_CHILD_TASK 2->2 (state S)
+  B3: ES_BG_TASK 2->36 (state S), TIME_TONE_TASK 2->50 (state S), TIME_ONEHZ_TASK 2->33 (state S), FM_CHILD_TASK 2->2 (state S)
+
+## 8. HS: console after HS event 74, and HS_AppData from memory
+run01_operational.log                HS events after 74: 0 []; HS syslog/exit lines: 0
+run02_fixed30s.log                   HS events after 74: 0 []; HS syslog/exit lines: 0
+run03_audit_operational.log          HS events after 74: 0 []; HS syslog/exit lines: 0
+run04_po_operational_sigint.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+run05_pr_operational_esrestart.log   HS events after 74: 0 []; HS syslog/exit lines: 0
+run06_po_operational_esrestart.log   HS events after 74: 0 []; HS syslog/exit lines: 0
+run07_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_A1_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_A2_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_A3_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_B1_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_B2_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+m1_B3_po_fixed30s_esrestart.log      HS events after 74: 0 []; HS syslog/exit lines: 0
+A1 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+A1 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+A2 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+A2 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+A3 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+A3 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+B1 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+B1 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+B2 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+B2 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+B3 S1 HS: RunStatus=1 exec=1 Aliveness=0 CmdCount=0 UtilCpuAvg=0x00000000 UtilCpuPeak=0x00000000 SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=0
+B3 S2 HS: RunStatus=1 exec=24 Aliveness=3 CmdCount=0 UtilCpuAvg=0xffffffff UtilCpuPeak=0xffffffff SysMonPspModuleId=0x0110ff05 Subsys=0 Subch=0 AppMon=1 EventMon=0 CPUHog=1 WatchdogFlag=1 CDSState=1 UtilCycleCtr=7
+
+## 9. Persisted data before/after each M1 run
+A1 before EEPROM size=524288 mtime=02:10:34.211 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=none | files=none
+A1 after  EEPROM size=524288 mtime=06:22:52.684 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+A2 before EEPROM size=524288 mtime=06:22:52.684 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+A2 after  EEPROM size=524288 mtime=06:23:51.264 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+A3 before EEPROM size=524288 mtime=06:23:51.264 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+A3 after  EEPROM size=524288 mtime=06:24:23.084 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+B1 before EEPROM size=524288 mtime=06:24:23.084 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=none
+B1 after  EEPROM size=524288 mtime=06:24:59.213 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=[('cfe_sb_pipe.dat', '1624', '2026-10-08T06:25:29.708751640Z', 'f63dd1cf738a')]
+B2 before EEPROM size=524288 mtime=06:24:59.213 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=[('cfe_sb_pipe.dat', '1624', '2026-10-08T06:25:29.708751640Z', 'f63dd1cf738a')]
+B2 after  EEPROM size=524288 mtime=06:25:38.487 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=[('cfe_sb_pipe.dat', '1624', '2026-10-08T06:26:08.928753972Z', 'b317ec2e330e')]
+B3 before EEPROM size=524288 mtime=06:25:38.487 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=[('cfe_sb_pipe.dat', '1624', '2026-10-08T06:26:08.928753972Z', 'b317ec2e330e')]
+B3 after  EEPROM size=524288 mtime=06:26:10.919 sha256=07854d2fef29.. nonzero=0 | shm segs=none | osal dirs=['/dev/shm/osal:RAM'] | files=[('cfe_sb_pipe.dat', '1624', '2026-10-08T06:26:41.392755901Z', 'b67e40b28f0b')]
+
+## 10. Timing (ms since launch, run_cfs.sh .meta)
+A1: operational_line_read=2570 hook_calls=S1@2587-2663ms(rc=0),S2@30006-30080ms(rc=0) (output in m1_A1_po_fixed30s_esrestart.log.hook) stop_initiated=30082 process_end=30236 exit=0
+A2: operational_line_read=1633 hook_calls=S1@1642-1715ms(rc=0),S2@30006-30077ms(rc=0) (output in m1_A2_po_fixed30s_esrestart.log.hook) stop_initiated=30079 process_end=30574 exit=0
+A3: operational_line_read=1626 hook_calls=S1@1635-1708ms(rc=0),S2@30007-30076ms(rc=0) (output in m1_A3_po_fixed30s_esrestart.log.hook) stop_initiated=30078 process_end=30634 exit=0
+B1: operational_line_read=1613 hook_calls=S1@1623-1714ms(rc=0),S2@30007-30637ms(rc=0) (output in m1_B1_po_fixed30s_esrestart.log.hook) stop_initiated=30639 process_end=31097 exit=0
+B2: operational_line_read=1629 hook_calls=S1@1638-1711ms(rc=0),S2@30007-30554ms(rc=0) (output in m1_B2_po_fixed30s_esrestart.log.hook) stop_initiated=30556 process_end=31073 exit=0
+B3: operational_line_read=1624 hook_calls=S1@1633-1721ms(rc=0),S2@30007-30590ms(rc=0) (output in m1_B3_po_fixed30s_esrestart.log.hook) stop_initiated=30591 process_end=31103 exit=0
+run01_operational.log: operational_line_read=None
+run02_fixed30s.log: operational_line_read=None
+run03_audit_operational.log: operational_line_read=None
+run04_po_operational_sigint.log: operational_line_read=1630
+run05_pr_operational_esrestart.log: operational_line_read=1636
+run06_po_operational_esrestart.log: operational_line_read=1625
+run07_po_fixed30s_esrestart.log: operational_line_read=1624

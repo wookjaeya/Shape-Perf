@@ -1,0 +1,84 @@
+# 00_fixture.kzp -- the profile of the static-analysis fixtures (tests/static/fixtures).
+#
+# It names the little the fixtures need: one identity location, the operations whose parameters
+# have roles, one spawn rule and one terminal operation.  Everything here is entered by hand for
+# the tests (tier researcher): it says nothing about any framework.  The names are those of the
+# fixture programs.
+phi 1;
+
+profile "static-fixtures" revision "test data";
+
+prov fx_author {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-15, K4a (Claude Sonnet 5.5); the fixtures of tests/static, no framework";
+  note "Test data. The fixtures are small C programs written for the golden files of the static extractor.";
+}
+
+const FX_NONE = 0 prov fx_author;
+const FX_FIRST = 0x100 prov fx_author;
+const FX_LAST = 0xff prov fx_author;
+const FX_RESERVED = 0xffffffff prov fx_author;
+
+kind fx.res(rec: Int) {
+  states FREE < LIVE;
+  initial FREE;
+  scope process;
+  ids {
+    undefined FX_NONE;
+    reserved FX_RESERVED;
+    base FX_FIRST;
+    serial_max FX_LAST;
+  }
+  transition FREE -> LIVE on publish;
+  transition LIVE -> FREE on clear;
+  prov fx_author;
+}
+
+# The identity location of the writer fixture.
+loc Cell.id {
+  struct "Cell";
+  field "id";
+  holds Id<fx.res>;
+  prov fx_author;
+}
+
+# A call whose first argument carries an identity (derives rows), and a call that stores one.
+op fx_consume(stamp who: Id<fx.res>) {
+  bind symbol "fx_consume";
+  prov fx_author;
+}
+
+op fx_fetch(out slot) {
+  bind symbol "fx_fetch";
+  prov fx_author;
+}
+
+# A spawn call and the entry the child starts at.
+op fx_spawn(out tid, name, entry) {
+  bind symbol "fx_spawn";
+  prov fx_author;
+}
+
+op fx_entry(tid) {
+  bind symbol "fx_entry";
+  prov fx_author;
+}
+
+hb FX-SPAWN {
+  title "spawn: the create call precedes the first event of the child";
+  stratum S;
+  robust unconditional;
+  template spawn {
+    create fx_spawn out tid;
+    entry fx_entry;
+  }
+  prov fx_author;
+}
+
+# Terminal operations.
+op fx_abort() {
+  bind symbol "fx_abort";
+  terminal process_terminal;
+  prov fx_author;
+}

@@ -1,0 +1,25 @@
+## persisted-data snapshot: after m1_A2 (2026-10-08T06:24:21.979Z); boot time 2026-10-08 06:00:21 (uptime -s, local=UTC)
+EEPROM.DAT: size=524288 mtime=2026-10-08T06:23:51.264090171Z ctime=2026-10-08 06:23:51.264090171 +0000 sha256=07854d2fef297a06ba81685e660c332de36d5d18d546927d30daad6d7fda1541 nonzero_bytes=0
+.cdskeyfile: inode=2155973 dev=65024 mtime=2026-10-08T01:29:46.776904947Z size=0 ftok_key=0x5200e5c5
+.resetkeyfile: inode=2155974 dev=65024 mtime=2026-10-08T01:29:46.776904947Z size=0 ftok_key=0x5200e5c6
+.reservedkeyfile: inode=2155975 dev=65024 mtime=2026-10-08T01:29:46.776904947Z size=0 ftok_key=0x5200e5c7
+ipcs -m:
+  
+  ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status      
+  
+ipcs -m -p (creator/last pids):
+  
+  ------ Shared Memory Creator/Last-op PIDs --------
+  shmid      owner      cpid       lpid      
+  
+mqueue queues in this IPC namespace: /proc/sys/fs/mqueue/queues_max=256 (no per-namespace count file; /dev/mqueue mounted: 0)
+/dev/shm:
+  total 0
+  drwxrwxrwt 4 root   root     80 2026-10-08 06:22:53.684742366 +0000 .
+  drwxr-xr-x 6 root   root   2260 2026-10-08 06:00:23.900662130 +0000 ..
+  drwx------ 2 ubuntu ubuntu   40 2026-10-08 06:22:53.684742366 +0000 osal:RAM
+  drwx------ 2 root   root     40 2026-10-08 06:00:23.900662130 +0000 rclone-vfscache
+/dev/shm/osal:RAM: dir mtime=2026-10-08T06:22:53.684742366Z owner=ubuntu mode=700
+  files: 0
+cf/tmp: 0 entries

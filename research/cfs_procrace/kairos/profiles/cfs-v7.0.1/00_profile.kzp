@@ -1,0 +1,28 @@
+# 00_profile.kzp -- profile cfs-v7.0.1 (Kairos), the V1 subset.
+#
+# This profile is DATA.  The engine (libkz-core) contains no cFS knowledge; everything below is
+# either cited from the pinned source with file, lines and a hash (01_prov.kzp) or marked as
+# hand-entered (02_researcher.kzp, tier `researcher`).  The profile is the subset that the sub-gate
+# S0-R2 of SPEC 9.3 needs:
+#
+#   kinds       es.app, es.appstate, es.self, evs.reg, es.shutdown, cell        (10_kinds.kzp)
+#   operations  the readiness check of CFE_EVS_SendEventWithAppID, CFE_ES_GetAppID with its
+#               out-pointer effect, the AppState writers, the terminal operations (T-TERM)   (20_ops.kzp)
+#   hb rules    R1, R2-P-TASK, R18, R19                                                         (30_hb.kzp)
+#   rspec       K-ID.send-with-appid                                                            (40_rspec.kzp)
+#   trusted     the declared-trusted entries (A-FRESH, A-OWNER; the CleanUpApp guard is an effect)
+#                                                                                               (50_trusted.kzp)
+#
+# Nothing here was derived by running cFS.  The line numbers are those of the pinned tree, read
+# for this profile; where SPEC_FINAL cites a different line, the source was followed (see
+# docs/phi_reference.md section 11).
+phi 1;
+
+profile "cfs-v7.0.1" revision "cFS 088b2fa8 / cFE c5fb2b4d / OSAL d2d877a6 / PSP c4b3b0b6";
+
+# The pinned bundle (CONDITIONS.md, "Pinned revisions").  Paths in provenance records are relative to
+# its root; the source with the longest matching root says which tree a path belongs to.
+source cfs root "" rev "088b2fa828db9ff7e00733f1908e0eeb59f66ce3";
+source cfe root "cfe" rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+source osal root "osal" rev "d2d877a69cff47452bcca274b309147d48e6c16f";
+source psp root "psp" rev "c4b3b0b65b119e106481ad8e20976ae4d7f554e3";

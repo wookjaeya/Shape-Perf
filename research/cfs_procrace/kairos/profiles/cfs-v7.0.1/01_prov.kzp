@@ -1,0 +1,810 @@
+# 01_prov.kzp -- the cited texts of profile cfs-v7.0.1.
+#
+# Every record names a file of the pinned bundle (relative to its root), the cited lines and the
+# SHA-256 of those lines (each followed by LF; `sed -n 'A,Bp' file | sha256sum` gives the same
+# value).  `kz-phi verify-prov` and the ctest `profile_provenance` re-read the bundle and compare.
+# The records here were read at the pins of 00_profile.kzp; nothing is quoted from memory.
+#
+# Tier and kind: contract-backed <- api_doc; code-derived <- code_pattern; researcher <- researcher.
+# A record with a side (supplier, caller, rule) says what kind of statement the text is for the
+# readiness specification that cites it (SPEC 1.6 "Side of a provenance record").
+phi 1;
+
+prov evs_h_appid_note {
+  tier contract-backed;
+  kind api_doc;
+  side caller;
+  file "cfe/modules/core_api/fsw/inc/cfe_evs.h";
+  lines 168 172;
+  sha256 "acb3967b445672203af748f7bc65f2f3a91187ef107a607b1645420e1570f1ed";
+}
+
+prov evs_h_retval {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "cfe/modules/core_api/fsw/inc/cfe_evs.h";
+  lines 198 199;
+  sha256 "d33ca01e1340a77e3e36c99b15cc5ad349ab49a60f04101c6a31fba8565f10d8";
+}
+
+prov err_h_severity {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 115 119;
+  sha256 "3971843b1cb061685a43369e1845a68c753e57e06a742cb29f779d683a1401e6";
+}
+
+prov err_h_success {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 147 147;
+  sha256 "bc03a6e49c6c9c42a9e5d29c72061438315c0c09a2d9155ef35092385883ae40";
+}
+
+prov err_h_not_registered {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 258 258;
+  sha256 "1b961d15f98821a0d3dcd0a38426909289b6a934b4a46f9a3c3f1a3492c9fd94";
+}
+
+prov err_h_illegal_app_id {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 267 267;
+  sha256 "6fa0c8ec9d1c17653f9c7b078a3c830ee6c65fc0f59aef7ed91fe3e26a2b1dac";
+}
+
+prov err_h_invalid_parameter {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 310 310;
+  sha256 "28815378b09c508073b3053b647ed57f03c7c521c3a924c03748768695d81e21";
+}
+
+prov err_h_resourceid_not_valid {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 342 342;
+  sha256 "534ca01013466a429c3fe3cb51b0e805494cb3c837aa0ad2ebbcaa56264901cf";
+}
+
+prov err_h_timed_out {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 622 622;
+  sha256 "87e989fb1dbf1ea396a39405d7d79438c93c11952d0f06b8bae4264448ec47c8";
+}
+
+prov evs_send_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 169 214;
+  sha256 "422b8b94579a037d29e42f7a463aa06fb81617654aa755543912b1704a7bdb40";
+}
+
+prov evs_send_check {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 185 194;
+  sha256 "8cdf5d5177a0cb2cf4bcd29916ebe0ca7d60e360ee51e3034247a2a67028f15c";
+}
+
+prov evs_reg_memset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 56 56;
+  sha256 "530ae464148c9cf04d9a7e768afe38132d5e458e3f0d922c0043cefdd1b459d5";
+}
+
+prov evs_reg_publish {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 106 106;
+  sha256 "1ac5045232ef7f06b036927192dcbcd63efc5aca5045474d1ea54f2c3b34a256";
+}
+
+prov evs_utils_ismatch {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.h";
+  lines 164 167;
+  sha256 "3c44baf17a538b4cc2d94a8e5d891e4ea4c8d8166e2282f9b4b4a90db0be361d";
+}
+
+prov evs_utils_setused {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.h";
+  lines 134 137;
+  sha256 "c8082b6d41956219e84f94b0db94dff2a5cafab4da68b284d30b0ca58f58aeba";
+}
+
+prov evs_utils_getbyid {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.c";
+  lines 48 63;
+  sha256 "da393de31d6d4a51793aecc98cf1dbaa65095ece2fec5e9aa95d0b05ccfb9388";
+}
+
+prov sb_global_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_task.c";
+  lines 40 40;
+  sha256 "83c9eeb6ab597588fa385a21e57cac1904c7606a2c284926ffe5f421ce183d60";
+}
+
+prov sb_earlyinit_memset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_init.c";
+  lines 50 50;
+  sha256 "33b812a6e3f104b018a0a69aab9d332982e3443fc4677f5d24fbe4c9accd6d8f";
+}
+
+prov sb_appinit_getappid {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_task.c";
+  lines 138 138;
+  sha256 "71651783668ec441e89a38086dd8ae4fd8e27ceee108596a421c2f6d7675773b";
+}
+
+prov sb_api_event_site {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_api.c";
+  lines 226 228;
+  sha256 "8eee7af5e9eeff5d2e61ce28928147f4b9df3409e1470084761d9bd64e845a9a";
+}
+
+prov es_getappid_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 738 766;
+  sha256 "5177e5fdbb52e5a2c782f0c78f1d39187ceca8e73e2d0800875f0eec4f4a4862";
+}
+
+prov es_getappid_ctx {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 750 750;
+  sha256 "c5863bbc0200f1b036de3fbcbcc0d01074cc8ec7b7c479fd31f545c317f41377";
+}
+
+prov es_getappid_ok {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 752 756;
+  sha256 "7967a0e3946b143da89f7430cec68b9bf0f0663b40c21d7764dfd8a17cbb0e36";
+}
+
+prov es_getappid_fail {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 757 763;
+  sha256 "cec8049671d0b81af7aa52387f5ceff3ef7faf02b596695130c09e4770762e7f";
+}
+
+prov es_ctx_lookup {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_resource.c";
+  lines 308 341;
+  sha256 "ab2ac550e9f17819f36166d562c65b5a8cb939e91471ab63db6310ffb1dd3538";
+}
+
+prov es_appstate_enum {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/config/default_cfe_es_extern_typedefs.h";
+  lines 259 295;
+  sha256 "5cdf46d0f0622b8a07c728d1eb2d98e706b8d249da260e3ffee595fbdf6f4835";
+}
+
+prov es_apptype_enum {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/config/default_cfe_es_extern_typedefs.h";
+  lines 83 99;
+  sha256 "bc0daee3ccb880a81624b69dd00473154b83569c2fd9a62e6e9553bb88a30e5b";
+}
+
+prov es_record_helpers {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_resource.h";
+  lines 204 227;
+  sha256 "ae709ce46a151eb01f3e1edd97bded850c3afcb78061cca7b8538f6a5f041ff7";
+}
+
+prov es_start_main_memset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 82 82;
+  sha256 "a99fd434cae6051efd0cec4ff53b5898f5b918bc448f6ab03e0f96e8dd1e269f";
+}
+
+prov es_start_earlyinit_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 752 773;
+  sha256 "8bc37d33fc9a89beeb247e9bc5db0e478c2eb881b89f3d9ced6278cbdee107a9";
+}
+
+prov es_start_taskmain_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 776 847;
+  sha256 "2314f5b394a527dd5923d3d40d9226ff59a489dfd4fbc33844f840477083e6fb";
+}
+
+prov es_start_phase2_begin {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 788 788;
+  sha256 "98fff4521a85276c774c5a8138f62d895a708816336ba73b1adfb9a0ea91b1c2";
+}
+
+prov es_start_type_core {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 795 795;
+  sha256 "2d71cdf49dd06753258feb565c4a0c3c5bb9d5554218482d7763abebb7c59156";
+}
+
+prov es_start_reserve {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 803 803;
+  sha256 "a71084d65ee3a47f72d884e4524fc475ff14bad3a08d9187777984029566cd7f";
+}
+
+prov es_start_starttask {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 810 814;
+  sha256 "eba07006985ab60b0e7ddb73c23e25f5f7c716ae1a3e976e35a59efa6d5ae1b7";
+}
+
+prov es_start_publish {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 816 818;
+  sha256 "d4fccccadf82f13ca421dfa045d656e61e054bcabc584caa2d1c94286defe771";
+}
+
+prov es_start_clear {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 821 824;
+  sha256 "6903d7db9935050fc65d64c2cfb7d77a7e296fd0ea0851a50ff86bda8603705a";
+}
+
+prov es_start_sync_call {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 833 835;
+  sha256 "5fa85fe9c94982e9a761ce74878418437eb441a3ed8409e72eb90c723317386b";
+}
+
+prov es_start_panic {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 838 846;
+  sha256 "a28d34cd6626247baf345a563ce5691f1404cadf9642072b3d506b0883f3d91d";
+}
+
+prov es_start_syncdelay_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 860 918;
+  sha256 "f60f77b3ca1d27093d055e021fda88f108fb902d18b908fe152d282ac706cf12";
+}
+
+prov es_start_table_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 878 890;
+  sha256 "25d9d4c172ee009423f914886733ba01c9598c38caaf7b2e1f1d2c25abbb0d29";
+}
+
+prov es_api_wait_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 514 576;
+  sha256 "0b5c87b0b606b003740a6c7221eae54475469548d4c1055b7df966078a077052";
+}
+
+prov es_api_wait_levels {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 536 573;
+  sha256 "23a343a972733659797fca26a0e67c87fc0698bd1c9159773a3144bf575e43aa";
+}
+
+prov es_api_runloop_raise {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 463 472;
+  sha256 "61ba2e28880910d222a6f5ce6dfe7a686c6a97d5060c399c509303e7da6fe4f0";
+}
+
+prov es_api_exitapp_stopped {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 393 399;
+  sha256 "59383115d3d26fb0037e4639de9a9ec58faed79563f4a6aad8adf82bf2ec382f";
+}
+
+prov es_api_exitapp_ctx {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 312 313;
+  sha256 "cdda8ffc495dcc190e571f2ebadf0b464f1b2ff345caf9d61dec0a2da54d22a1";
+}
+
+prov es_apps_scan_filter {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1109 1114;
+  sha256 "bfcac80d53ae88386329cce74feee05d08507220eb7d69b9134fc9ed6393afd3";
+}
+
+prov es_apps_scan_waiting {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1139 1146;
+  sha256 "1a32b2de48737dd6b671bcf92a666c37ec98b8dd6c00dd35458dd0855da3324b";
+}
+
+prov es_apps_cleanup_match {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1435 1435;
+  sha256 "8625ab326d48e2ddf6496a20b9a10b015583db4da2915076ca6df36729b36925";
+  note "CFE_ES_CleanUpApp collects and retires the record only if it still carries the AppId it was asked to clean up (the record is LIVE).";
+}
+
+prov es_apps_cleanup_retire {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1493 1498;
+  sha256 "61d0ae0979967ba082d8e0b435ed1a11549581c81c81c552962f39e5c03a137f";
+  note "The first step of the cleanup: the record is set to RESERVED (LIVE -> RESERVED) while the other resources of the application are freed, so that the slot is not reallocated.";
+}
+
+prov es_apps_cleanup_free {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1632 1635;
+  sha256 "aea30540a03f6d888d06f944732e0f94fcf07ffdd034451c6cee6b7bf4da7030";
+  note "The last step of the cleanup: the record is freed only if it is still RESERVED (RESERVED -> FREE).";
+}
+
+prov es_apps_startapptask_create {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 664 670;
+  sha256 "0eb13ea4ab0938cb74f6290b70ff1eb5dfdef92f031e5bd755a48e7c9bb44130";
+}
+
+prov es_apps_taskrecord_fill {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 694 703;
+  sha256 "290b27acba25815dad4bfb1ae5ff92e041d96f38657fe94fc2acb176cc9a1e2d";
+}
+
+prov osal_entrypoint {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 124 138;
+  sha256 "d5a27a7b41d28db45fac53fa108761c7b9073e78162ca354a58b49e9f975d2cb";
+}
+
+prov osal_pthread_create {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/src/os-impl-tasks.c";
+  lines 568 568;
+  sha256 "bf6685d59f473ba13bb5b8823e878acbde11552b164869cac52762b10b84b16e";
+}
+
+prov osal_type_user {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-idmap.h";
+  lines 53 53;
+  sha256 "135babcd288eec17f49b1f74455c5450adead207d61bacc4e8cd50837427b749";
+}
+
+prov osal_index_mask_shift {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-idmap.h";
+  lines 32 33;
+  sha256 "9f0362ed60ecc258f5da6601b9d66619b3b17e21b96633ed651a164a52e92987";
+}
+
+prov psp_restart_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 60 108;
+  sha256 "5fa8c90bf61cc1dbf2c8476be20052c3f92d2776c42ae491e6e691dbbaf63dc3";
+}
+
+prov psp_restart_req {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 87 87;
+  sha256 "94bc76fe35425fda05924a0e43d6dcfd4c7fd154172011bfd944c2ec7b5aa7b4";
+}
+
+prov psp_restart_abort {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 99 107;
+  sha256 "7c4ca3b672d38e79819985f5daf823e4dd386e68cb0bc8658ca32066e77bdb44";
+}
+
+prov psp_panic_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 116 121;
+  sha256 "322c5ce05ea898113ea7777bfc11c29033e460a22c1bf0ecfbdeaaaedd0d61f7";
+}
+
+prov psp_teardown {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_start.c";
+  lines 488 507;
+  sha256 "5005392f89e34ed750249d0ca88450f97467563f07a6e34c9fb4a21e95655e13";
+}
+
+prov bsp_main_return {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/bsp/generic-linux/src/bsp_start.c";
+  lines 244 248;
+  sha256 "9d70c114b0b8bdad2e8fc3ef049a16a9beeec25a6bf3b11d8d4099e9faea826b";
+}
+
+prov resid_undefined_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_resourceid_api_typedefs.h";
+  lines 65 65;
+  sha256 "50c0a87441bc4ceae9ee278f9fddde6c65ee621d477b16df578660ed661303ae";
+}
+
+prov resid_reserved_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_resourceid_api_typedefs.h";
+  lines 74 74;
+  sha256 "8830becf464cc3bdf8a5df5af018d561750d0034e273b678faec7a343b0f9457";
+}
+
+prov resid_max_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_resourceid_basevalue.h";
+  lines 64 65;
+  sha256 "4bab338e6a54a6a09e56b82e7c5cd82fadb441d79c58222204ea84ee932a9a20";
+}
+
+prov resid_make_base {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_resourceid_basevalue.h";
+  lines 73 73;
+  sha256 "a9fc4416a7cb7b51e542850d3509f0a6378a0c6cb89d0ba906f4d246a8ae3cf1";
+}
+
+prov resid_appid_offset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_core_resourceid_basevalues.h";
+  lines 62 62;
+  sha256 "649df3c6a2a42afbaf4ad5009a965bc5d4b020c55d39a6c25c079bd570222d88";
+}
+
+prov resid_appid_base {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_core_resourceid_basevalues.h";
+  lines 91 91;
+  sha256 "94f4ce09b5ae9fcd4518f6496523f86cc116e881b02ca3b0a8e8d97aad89e855";
+}
+
+prov resid_mark_simple {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/option_inc/cfe_resourceid_simple.h";
+  lines 54 54;
+  sha256 "9e06be696e2ee20bb5be0712e6b1806d370f3e81884df0d85e6f35afe47091a0";
+}
+
+prov resid_mode_cmake {
+  tier code-derived;
+  kind code_pattern;
+  file "sample_defs/global_build_options.cmake";
+  lines 19 27;
+  sha256 "e5e63fcc6d12112c682a0bdbd37b66537653fef8282686699a20fae49994c5f2";
+}
+
+
+prov es_apprecord_struct {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.h";
+  lines 128 138;
+  sha256 "8c93a3743c5ae6844f2dc3dab7913f33a0c61a15604ce2cc203f2ee10fa2120a";
+}
+
+prov evs_appdata_struct {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.h";
+  lines 87 100;
+  sha256 "ab11d121694cadc8a23766cfca650ba4fd6429d5ccd24ced2c1a8695d4a6daaa";
+}
+
+prov sb_global_appid_field {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_priv.h";
+  lines 241 241;
+  sha256 "b30e12a23eb10a229efe800aedc6bd7a190f9e5afaa773a8ac28ba7b204ff3f7";
+}
+
+prov psp_idle_shutdownreq_field {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/inc/cfe_psp_config.h";
+  lines 106 107;
+  sha256 "0ec16f937947a0adba6ede2f4596e081ee804f3af53da857620cd7aaa0b180a0";
+}
+
+prov es_h_getappid_doc {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "cfe/modules/core_api/fsw/inc/cfe_es.h";
+  lines 514 520;
+  sha256 "4745089a30fd0d4ef1caeafc4eec686f019f50f940a284995ecefcf9cc32e237";
+}
+
+# ---- added in review round 3: the id-validity rule, function heads, typedef names, result codes ----
+
+# The rule behind valid(): an Id is a valid index into the table iff (Id - base) mod 2^32 <= CFE_RESOURCEID_MAX.
+prov resid_toindex_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/src/cfe_resourceid_api.c";
+  lines 123 141;
+  sha256 "134cb69d5091f39c067a7f9b3ca74fe19b61715dd5e5e5c1f287fd1b1d8545b0";
+}
+
+prov es_appid_toindex_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 1998 2004;
+  sha256 "fd02ca49ddeb9c41314a2d89b12af7a6c3820dd0809fb914a9fd3544df3f97d7";
+}
+
+# Heads of the functions the operations are bound to (the text that names the symbol).
+prov es_main_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 73 73;
+  sha256 "757db2b478eb612227732ec640036bb15417b5136f54f537b4d74fb1ff9ef383";
+}
+
+prov es_createobjects_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 741 741;
+  sha256 "68ec46c56bec61bc59d48c00ac1a137c81762087ad69b4a3b107e9276a50f23b";
+}
+
+prov es_runapptablescan_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1063 1063;
+  sha256 "2f42f35193f1dba8b68ab70f61ae227fcad2fd031c58ccdd50da5549bdb42637";
+}
+
+prov es_cleanupapp_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1407 1407;
+  sha256 "256944922e3c2ae15544e93d06902ccf3f4969a286f7c07a17c6756f3025156a";
+}
+
+prov es_runloop_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 426 426;
+  sha256 "ecc5b713d42109951889f3540c69f72dfa10a122de8176948ef8deef7e72c1bb";
+}
+
+prov evs_register_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 42 42;
+  sha256 "7143276be272c390e3be209cd98b7764f8c742700a4c4ea7985a0323e7c37218";
+}
+
+prov sb_earlyinit_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_init.c";
+  lines 44 44;
+  sha256 "ffbd4422b61629e931d622d17335507f94f4c5df4448d86e4430cd7eb6cade80";
+}
+
+prov psp_app_run_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_start.c";
+  lines 452 452;
+  sha256 "edd7278c8f5f5eae0da3c161c9de2d3927960ab178ede49e3855a806d91ea150";
+}
+
+prov bsp_main_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/bsp/generic-linux/src/bsp_start.c";
+  lines 196 196;
+  sha256 "0442f74c381b86949cd2e6669231911c7f4338c48fa425fe93fa3766088d02af";
+}
+
+# The closing line of a struct is where its type name is spelled.
+prov sb_global_typedef {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/sb/fsw/src/cfe_sb_priv.h";
+  lines 260 260;
+  sha256 "6a91a263364c4156c1ce234ec56c3abcd82e56436c0c3292e3ea0c6b1671970c";
+}
+
+# Result codes and the squelch branch of CFE_EVS_SendEventWithAppID.
+prov err_h_unknown_filter {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 250 250;
+  sha256 "cba7a242203cbf5163da1c8b86691485e8b33a81998e5724a44276d6bb1590a1";
+}
+
+prov err_h_squelched {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 318 318;
+  sha256 "2a01f74a5560acba2a8af3c2597f54f0707209f9fd9b5dc5cb72ec271b3347fb";
+}
+
+prov err_h_bad_argument {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_error.h";
+  lines 399 399;
+  sha256 "daaeafbeb7718e201d563ac73d65185369c91bd9c35f669255f4ceb6c24af83f";
+}
+
+prov evs_send_squelch {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 207 210;
+  sha256 "6f487ff1409a491bd3a43098f0c4601f5b77eb1476ee68aa34fde03e67a74328";
+}
+
+# Creation of an external application (CFE_ES_AppCreate): the same record life cycle as the core creation.
+prov es_appcreate_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 733 733;
+  sha256 "3b6e751bf76d301d8af066b19b220bd68455ed633d6d4f9719df1e46b143a229";
+}
+
+prov es_appcreate_clear {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 799 799;
+  sha256 "669c6a0b1f8a20169d3f75dc97328dbd134feb468bc50b9867deca5585e02adf";
+}
+
+prov es_appcreate_type {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 804 804;
+  sha256 "130ae3406180e36d96518a7cf36564b1ef394895d35e6b225aed61e811c9e3bf";
+}
+
+prov es_appcreate_reserve {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 821 821;
+  sha256 "a71084d65ee3a47f72d884e4524fc475ff14bad3a08d9187777984029566cd7f";
+}
+
+prov es_appcreate_publish {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 863 869;
+  sha256 "269a7832f33f0d07e63d22ff7e0321aa7adf405c6d785dddc8fe4a65e47fb4c1";
+}
+
+prov es_appcreate_fail {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 893 894;
+  sha256 "be10e06ff6e9c72eb4371d97ba5b330fce67584b454729bb4f9de8afcd80628b";
+}

@@ -1,0 +1,17 @@
+# libkz-trace: offline decoding of observation streams (decode_*) and the identity join
+# (identity_*).  Standard library and libkz-core only; no LLVM; no exceptions.  The HB and
+# classification parts of lib/trace belong to later stages and add their own files here.
+add_library(kz-trace STATIC
+  decode_merge.cpp
+  decode_match.cpp
+  decode_perf.cpp
+  decode_sites.cpp
+  identity_join.cpp
+  identity_symbols.cpp)
+target_include_directories(kz-trace PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_compile_features(kz-trace PUBLIC cxx_std_17)
+target_compile_options(kz-trace PRIVATE -fno-exceptions)
+target_link_libraries(kz-trace PUBLIC kz-core)
+kz_apply_settings(kz-trace)
+set_target_properties(kz-trace PROPERTIES POSITION_INDEPENDENT_CODE ON)
+kz_declare_sources(kz-trace PATHS include/kz/trace)

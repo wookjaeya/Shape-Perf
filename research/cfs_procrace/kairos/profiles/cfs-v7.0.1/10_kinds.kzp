@@ -1,0 +1,125 @@
+# 10_kinds.kzp -- resource kinds, the context, the scope, locations and bindings.
+#
+# A kind is a typestate: ordered states, an initial state, a scope, and optionally the identifier
+# space of its resources, tags (attributes with a fixed set of values), a finite instance set
+# (`table`, needed to quantify over it) and derived states.  A resource that was never given a
+# state is in the initial state of its kind.
+phi 1;
+
+# The actor that executes an operation belongs to an ES App record: owner(exec) is that record.
+context {
+  owner_kind es.app;
+  prov es_ctx_lookup;
+}
+
+# The default scope of every readiness specification ends at the shutdown request (SPEC 1.6):
+# an occurrence decided after the request belongs to the teardown family.
+scope {
+  kind es.shutdown;
+  request SHUTDOWN_REQ;
+  teardown TEARDOWN;
+  prov psp_restart_req, psp_teardown;
+}
+
+# ES App record: free -> reserved -> live, and back through reserved when an application is cleaned
+# up (CFE_ES_CleanUpApp retires the record to RESERVED first and frees it at the end).  The state
+# follows the AppId stored in the record: undefined = free, reserved marker = reserved, an ID = live.  The `ids` block is the rule that
+# valid(x) evaluates: x is a valid index into the table iff (x - base) mod 2^32 <= serial_max, which
+# is CFE_ResourceId_ToIndex reached through CFE_ES_AppID_ToIndex (resid_toindex_fn,
+# es_appid_toindex_fn); the constants are those of the build (05_consts.kzp).
+kind es.app(rec: Int) {
+  states FREE < RESERVED < LIVE;
+  initial FREE;
+  scope process;
+  table CFE_PLATFORM_ES_MAX_APPLICATIONS;
+  ids {
+    undefined CFE_RESOURCEID_UNDEFINED;
+    reserved CFE_RESOURCEID_RESERVED;
+    base CFE_ES_APPID_BASE;
+    serial_max CFE_RESOURCEID_MAX;
+  }
+  tag Type { UNSET, CORE, EXTERNAL, LIBRARY };
+  transition FREE -> RESERVED on reserve;
+  transition RESERVED -> LIVE on publish;
+  transition RESERVED -> FREE on clear;
+  transition LIVE -> RESERVED on retire;
+  transition RESERVED -> FREE on free;
+  prov es_record_helpers, es_start_reserve, es_start_publish, es_start_clear, es_apps_cleanup_retire, es_apps_cleanup_free, es_apptype_enum, es_start_type_core, es_apprecord_struct, es_appid_toindex_fn, resid_toindex_fn;
+}
+
+# The AppState field of the App record.  The ordinals are those of the cFS enumeration
+# (UNDEFINED 0 ... STOPPED 5); the raise is monotone (CFE_ES_WaitForSystemState, RunLoop).
+kind es.appstate(rec: Res<es.app>) {
+  states UNDEFINED < EARLY_INIT < LATE_INIT < RUNNING < WAITING < STOPPED;
+  initial UNDEFINED;
+  scope process;
+  table CFE_PLATFORM_ES_MAX_APPLICATIONS;
+  prov es_appstate_enum, es_apprecord_struct;
+}
+
+# The execution context of an actor: both its task and its App record resolve.  Modelled as: the
+# App record that owns the actor is LIVE.
+kind es.self(a: Actor) {
+  states ABSENT < LIVE;
+  initial ABSENT;
+  scope process;
+  derived LIVE when state(owner(a)) = LIVE;
+  prov es_ctx_lookup, r_es_self_derived;
+}
+
+# EVS registry slot of an application: unregistered -> registered, keyed by the exact AppId.
+kind evs.reg(app: Id<es.app>) {
+  states UNREG < REG;
+  initial UNREG;
+  scope process;
+  transition UNREG -> REG on register;
+  transition REG -> UNREG on clear;
+  prov evs_reg_memset, evs_reg_publish, evs_utils_ismatch, evs_utils_setused, evs_appdata_struct, r_evs_reg_key_by_id;
+}
+
+# The shutdown of the process: requested by the restart request, executed by the teardown.
+kind es.shutdown() {
+  states RUN < SHUTDOWN_REQ < TEARDOWN;
+  initial RUN;
+  scope process;
+  transition RUN -> SHUTDOWN_REQ on request;
+  transition SHUTDOWN_REQ -> TEARDOWN on teardown;
+  prov psp_restart_req, psp_teardown, psp_idle_shutdownreq_field;
+}
+
+# A shared location whose value is a resource identity: valid iff the value is a valid Id of the
+# kind the location holds (SPEC 1.3 row cell(loc)).
+kind cell(l: Loc) {
+  states INVALID < VALID;
+  initial INVALID;
+  scope process;
+  derived VALID when valid(value(l));
+  prov r_cell_generic;
+}
+
+# The identity cell of the SB task: written through the out parameter of CFE_ES_GetAppID.
+loc CFE_SB_Global.AppId {
+  struct "CFE_SB_Global_t";
+  field "AppId";
+  holds Id<es.app>;
+  prov sb_global_appid_field, sb_global_def, sb_global_typedef, sb_appinit_getappid;
+}
+
+# Bindings of record fields to components of resources (SPEC 2.3, sublanguage 2).
+bind field "CFE_ES_AppRecord_t" "AppId" as state(es.app(rec)) prov es_apprecord_struct, es_record_helpers;
+bind field "CFE_ES_AppRecord_t" "AppState" as state(es.appstate(rec)) prov es_apprecord_struct, es_appstate_enum;
+bind field "CFE_ES_AppRecord_t" "Type" as tag(es.app(rec), Type) prov es_apprecord_struct, es_apptype_enum;
+bind field "CFE_SB_Global_t" "AppId" as value(CFE_SB_Global.AppId) prov sb_global_appid_field, sb_global_typedef;
+bind field "EVS_AppData_t" "AppID" as state(evs.reg(rec)) prov evs_appdata_struct, evs_utils_ismatch;
+bind field "CFE_PSP_IdleTaskState_t" "ShutdownReq" as state(es.shutdown()) prov psp_idle_shutdownreq_field, psp_restart_req;
+
+# Program-entry (INIT) facts: the static-initializer image of the closed program.  CFE_SB_Global
+# is a global without initializer, hence zero; EarlyInit clears it again (op CFE_SB_EarlyInit).
+init sb_identity_image: loc CFE_SB_Global.AppId = CFE_RESOURCEID_UNDEFINED prov sb_global_def note "global object without an initializer: zero, i.e. CFE_ES_APPID_UNDEFINED";
+
+# Named observation sites (probe anchors and shared linearization points).
+site sb_publication = fn("CFE_SB_AppInit").call("CFE_ES_GetAppID", arg[0] is addr(CFE_SB_Global_t.AppId)) prov sb_appinit_getappid;
+site core_phase2_begin = fn("CFE_ES_CreateObjects").call("CFE_ES_LockSharedData") nth 1 prov es_start_phase2_begin, r_phase_anchor;
+site core_sync_call = fn("CFE_ES_CreateObjects").call("CFE_ES_MainTaskSyncDelay") prov es_start_sync_call;
+site core_clear = fn("CFE_ES_CreateObjects").call("memset") prov es_start_clear;
+site app_create_clear = fn("CFE_ES_AppCreate").call("memset") prov es_appcreate_clear;

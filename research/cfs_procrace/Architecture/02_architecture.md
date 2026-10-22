@@ -731,6 +731,16 @@ flowchart TD
 | 11 | (전체) | 불일치는 Φ, 추출기, model에 대한 발견, 즉 **도구에 대한** 발견으로 보고한다(feedback F4) | 보고 |
 | 12 | `kz loop`, `kz report` | `kz loop`가 고정점에서 멈추고(spec §4.14) 그 run 집합을 기록한다. `kz report`가 판정을 보여 준다 | `loop-*.kz`, `verdicts.kz` |
 
+이 코드 블록은 revision 1.3에 맞춰 관측 적합성 기록, `trace`의 `app_owner`와 설명 집합, 보고서의 요약 뷰를 더하고 `kz loop`를 선택 경로로 표시했다(C-48). `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 맞춘다.
+
+**rev 1.3에서 단계 7, 9, 10, 12에 더한 것.**
+- **단계 7: 설명 집합** [D] (spec §4.8 "Explanation set of an incomplete record"; ADR-055; C-25). trace는 사건의 일부만 기록한다. 관측 기반 판정은 기록과 양립하는 run의 **모든** 설명에서 성립할 때만 확정된다. 기록의 제약 `Cobs`와 검사 구간의 조건 위반 `Vφ`로 `Qv = SAT(Cobs ∧ Vφ)`, `Qn = SAT(Cobs ∧ ¬Vφ)`를 보고, SAT/UNSAT이면 모든 설명에서의 위반(`VIOLATING`, 요약 `OBSERVED_VIOLATION`), UNSAT/SAT이면 모든 설명에서의 비위반(`READY` 또는 ACCEPT가 있는 `TOLERATED`, 요약 `NO_VIOLATION_IN_CHECKED_PREFIX`), SAT/SAT이면 `INCONCLUSIVE(explanation_ambiguous)`, UNSAT/UNSAT이면 분석 입력 오류, unknown이거나 끝나지 않았으면 다른 완전한 근거가 없는 한 `INCONCLUSIVE(limit)`다. 이것은 뜻을 정할 뿐 검사마다 solver를 두 번 부르라는 것이 아니다. `Cobs`는 한 run의 모호성이고 예측한 스케줄이 아니다. 기록된 쓰기만으로 자원을 갱신하려면 그 구간에서 writer·별칭·외부 효과가 덮이고, 시작 상태와 수명을 알고, probe가 제때 붙어 활성이었고, 손실 보고가 없어야 한다. 아니면 가능한 상태를 넓히거나 판정을 보류한다.
+- **단계 7: 재생 규약** [D] (spec §4.8 "Replay convention for real records"; C-26). 나열되지 않은 자원을 초기 상태로, 나열되지 않은 위치를 0으로 두는 재생 규약(`phi_reference.md` §6)은 합성 trace와 INIT에만 맞다. 실제 기록을 재생할 때(OB-05)는 조건이 읽는 관측되지 않은 자원·위치마다 가능한 상태, 값, ID, 수명, 관계를 명시하고, 현재 영역으로 나타낼 수 없으면 그것에 기대는 결과를 보류한다.
+- **단계 7: 보류 사유** [D] (spec §4.8 "Reasons for withholding"; C-27). `INCONCLUSIVE` 관측 결과는 `start_state_unknown`, `loss`, `resource_or_lifetime_unmatched`, `ownership_undetermined`, `effect_point_ambiguous`, `caller_requirement_absent`, `effect_unsupported`, `horizon-open`, `not_evaluated`, `explanation_ambiguous`, `limit` 가운데 적어도 하나를 밝힌다. 수치 신뢰도 점수가 확정 판정을 대신하지 않는다.
+- **단계 9: 예측** [D] (spec §4.9 "Revision 1.3 additions"; P-Z3 유지; C-28). 명시적 상태 탐색이 먼저다. SMT는 같은 작은 모형에서 구체적 필요(상태 폭발, 명시적 탐색이 표현하지 못하는 제약, 탐색 비용)가 보일 때만 들이고, 그때 solver의 version, build, 설정, encoding revision, 입력 hash를 결과의 근거에 넣으며, SAT 모형은 재생해 조건을 다시 평가한다. solver의 사용은 기여로 주장하지 않는다. 관측된 동기화 사실, program order, 모형이 재배열할 수 있는 lock 순서는 다른 관계로 두고, 관측된 task 사이 edge를 예측의 불변식으로 옮기지 않는다. PR-01–PR-04: lock edge를 지우기만 해서는 아무것도 나오지 않고, 만족하는 linearization은 단계 4의 label과 A-COMM 결과를 지닌 `MODEL_CANDIDATE`이며, linearization 없음은 그 범위의 `NONE_IN_SCOPE`이고, 한도·unknown·지원하지 않는 효과는 `INCONCLUSIVE`로 놓친 수에서 숨기지 않는다.
+- **단계 10: 확인의 재사용 조건** [D] (spec §4.13 "Reuse conditions and confirmation rules"; C-31). hold 메커니즘은 측정하지 않은 설계다. 작은 두 task 프로그램에서 개별 정지, 해제, 기다린 사건의 실제 도착, 교란을 먼저 확인하고 cFS로 간다. 해제는 자원, 호출, 수명, 결과가 맞는 사건을 기다린다. ptrace, hardware breakpoint, 새 task 자동 부착은 플랫폼 지원, slot 사용, signal 상호작용, 정지 부작용을 확인한 뒤에만 쓴다. watchdog은 reference의 timeout과 파일럿에서 잰 경과 시간에서 오고, 재시도 횟수 × 지연을 안전한 벽시계 한도로 보지 않는다. CF-01: `CONFIRMED`에는 제어한 run에서의 조건 위반이 필요하고 crash 하나로는 아무것도 확인하지 않는다. CF-02: 다른 자원·호출·경로의 위반은 별개의 발견이다. CF-03: 재현 실패나 시간 한도는 `NOT_CONFIRMED(reason)`이고 실행 불가능의 증명이 아니다. CF-04: 제어가 새 timeout이나 입력 차이를 만들어야 나오는 결과는 후보의 위반과 따로 둔다.
+- **단계 12: 요약 뷰** [D] (spec §4.12 항목 10; ADR-054; C-30). 요약 값은 칸마다, 종류(관측, 예측, 확인)마다 기록에서 마지막에 계산한다. 관측, 예측, 확인은 따로 보고하고 따로 센다(OUT-01). instance의 실행 관계도 함께 보고하고, 어느 actor의 `app_owner`가 미확정이면 `ownership undetermined`다. `PENDING`과 `OPEN`은 `INCONCLUSIVE(horizon-open)`이다(2026-10-22 결정 D2). 상태와 요약의 대응 전체는 [01_overview.md §4.9](01_overview.md#49-요약-뷰와-불완전-기록-위의-판정-revision-13)에 있다.
+
 ### 8.3 routing 네 갈래
 
 단계 7에서 `kz trace`는 각 use를 네 갈래 중 하나로 보낸다(spec §2.4 step 7, §4.8 step 5).
@@ -743,6 +753,8 @@ flowchart TD
 | unordered | conjunct의 LP와 상태를 정하는 lifecycle LP 사이에 HB 순서가 없다 | outcome code로 정해진 순서의 반대를 예측한다 | — |
 
 stratum S는 "두 끝이 모두 있는 모든 실행에서 성립하는" 구조적 순서이고, stratum O는 "관측된 실행에서만 성립하는" 동기화 순서다(spec §1.9). 둘을 나누는 이유는, O edge는 예측에서 뒤집을 수 있지만 S edge는 뒤집을 수 없기 때문이다.
+
+**rev 1.3** (ADR-053). wrong-way 갈래의 FIXED_ORDER certificate 요청은 선택 경로다. 관측 기반 판정은 그것을 기다리지 않고, certificate나 유한 모형의 완전한 분석이 없으면 그 칸은 "스케줄 의존성 미확정"으로 읽으며, 이것은 관측된 위반을 지우지 않는다(spec §1.10 "Fixed-order evidence and undetermined schedule dependence").
 
 ### 8.4 feedback F1–F4
 
@@ -759,17 +771,22 @@ stratum S는 "두 끝이 모두 있는 모든 실행에서 성립하는" 구조�
 
 spec App. A.1과 §9.3의 단계 통과 조건이 R2의 기대 동작을 적는다. 12단계 중 어디서 무엇이 나오는지만 짚는다. **아직 아무것도 실행하지 않았다.**
 
+**rev 1.3** (spec App. A.1 머리 주석; ADR-053, ADR-057; C-49). R2는 관측 경로의 **기반 검증**(rung V1′)이고 기여의 증거가 아니다(spec §6.4 항목 58). 아래 표에서 단계 2–4의 certificate 행은 모든 도달한 발생이 위반이라는 보편 진술을 위한 선택 경로이고, 논문이 그 진술을 할 때만 쓴다. certificate가 없으면 R2의 칸은 "스케줄 의존성 미확정"으로 읽는다(spec §1.10).
+
 | 단계 | R2에서 나오는 것 | 통과 조건 (spec §9.3) |
 |---|---|---|
 | 1 extract | SB event 지점마다 `derives` 사실과 capture point `c` | — |
 | 2–3 skel, writer 집합 | 코드에서 뽑은 core 직렬화 predicate(`cfe_es_start.c:835`)와 writer `x`(`cfe_sb_task.c:138`) | — |
-| 4 static, proofcheck | ES·EVS 두 절반의 FIXED_ORDER certificate(M_api, M_impl). 절반과 M마다 네 부분 trust ledger가 붙고(App. A.1 step 9a), progress는 `unknown(not_checked)`다 | S3a: `kz proofcheck`가 trust ledger와 함께 받아들이고, early-return 회귀와 `:823`·once 사실 mutation 등 망가뜨린 certificate를 모두 거부. 증명 상태는 현재 분류에서 `unproved`다 |
+| 4 static, proofcheck (rev 1.3: 선택 경로) | ES·EVS 두 절반의 FIXED_ORDER certificate(M_api, M_impl). 절반과 M마다 네 부분 trust ledger가 붙고(App. A.1 step 9a), progress는 `unknown(not_checked)`다 | S3a: `kz proofcheck`가 trust ledger와 함께 받아들이고, early-return 회귀와 `:823`·once 사실 mutation 등 망가뜨린 certificate를 모두 거부. 증명 상태는 현재 분류에서 `unproved`다 |
 | 6 observe | Kairos 자신의 recorder가 다시 관측한 R2 use 집합. (σ_U, M_impl) 칸의 reach가 `proved`가 된다 | S1: ENV basis의 기대는 24개(ES 20 + EVS 4)다. version table이 없는 basis의 수는 recorder가 정하고, 그 의존성은 설정에 대한 발견으로 기록한다. 어긋나면 조사해 보고하고 맞추려고 조정하지 않는다 |
 | 7 trace | 각 use는 wrong-way로 routing된다 [I: spec §4.8 step 5의 routing 표를 R2에 적용한 것]. ES 문맥의 `SEND_NO_SUBS` use 17개는 K-ROUTE에 사슬로 이어진다(EVS 문맥의 1개는 MsgId 귀속이 열려 있다 [U], App. A.1 step 13a) | S2: 모든 R2 use가 분류됨 |
+| 7 trace: 관측 기반 판정 (rev 1.3) [I] | S1-R2의 8개 지점 계획(`kairos/profiles/cfs-v7.0.1/observe/sites.kzp`)에서: `AppID` 인자가 0이고 반환이 `CFE_EVS_APP_ILLEGAL_APP_ID`인 24개 사용은 호출 시점에 `VIOLATING`(값 conjunct는 관측된 인자에서 capture), 요약 `OBSERVED_VIOLATION`, actor ES와 EVS의 `app_owner`는 `inferred`(`match-by-time`). SB 발행 뒤의 사용은 registry conjunct에 대해 `INCONCLUSIVE`(`start_state_unknown` / `effect_unsupported`: registry conjunct의 LP도 등록 writer도 계획에 없다). 결코 `VIOLATING`이 아니고, `NOT_EVALUATED`를 준비됨으로 읽지도 않는다. registry LP와 `register` 효과를 계획에 더하면(spec §4.7) `READY`로 예상한다. 24개가 저장보다 앞선다는 것은 HB edge나 certificate로 순서가 세워질 때까지 한 시계의 근거다(spec §5.8; `observer_smoke_run.md` §5) | V1′: R2의 동결된 기대표와 견준 관측, 정규화(task→앱 매핑 포함), 설명 집합을 쓴 판정, trust ledger(spec §9.3 "Ladder of revision 1.3"). 단계 B 완료에는 시험 T-05, T-17–T-20 통과도 든다 |
 
-검증 사다리의 첫 목표 V1은 이 R2 사슬만 떼어 낸 하위 관문 S0-R2, S3a-R2, S1-R2, S2-R2로 이루어진다(spec §9.3; ADR-044). V1의 결과를 certificate라는 말로 적기 전에, 그 말이 쓰는 lemma 의무를 먼저 적고 검토한다(V0-P). PI는 2026-10-15에 이 사다리를 승인했다(P-LADDER). thin MVC 전체는 첫 완료 조건이 아니다. 첫 R2 결과의 모든 certificate 칸은 "lemma status: unproved"를 보이므로, 결과는 "신뢰 기반과 그 lemma에 상대적으로 검사기가 받아들였다"로 쓴다(ADR-045).
+**rev 1.3의 사다리** [D] (spec §9.3 "Ladder of revision 1.3"; 2026-10-22 결정 D1, D3, D5; P-LADDER 재정의; ADR-057; C-42, C-43). 아래 문단(revision 1.2)과 다른 곳에서 이 문단이 우선한다. **V1′ R2 기반 검증**이 V1을 대신해 첫 rung이다. V1의 certificate 출구 항목(FIXED_ORDER, `kz proofcheck`, R2 certificate ledger)은 **선택**이고, 논문이 R2의 보편 진술을 할 때만 한다. V2(R2의 대조 basis)는 V1′ 뒤에 온다. **V3 C1(D22 basis)은 V1′와 병행한다**: 공개 BP basis의 구축, 애플리케이션 닫힘, C1의 관측 계획이 단계 B와 함께 시작한다. 사례별 단계 B의 완료에는 근거까지 거슬러 가는 실제 기록·올바른 대조 판정, 시험 T-05, T-17–T-20 통과, 조건에 필요한 writer와 별칭을 덮는 닫힘이 필요하다. 그래서 C1, C2, C5의 트랙에서 S3a의 app-unit link probe가 필수다. 사례의 조건이 덮이는 곳에서 S2는 S3a의 전체 추출을 기다리지 않는다. 제어 실행 확인(제안 0.2의 단계 D)은 R2의 관측만으로는 끝나지 않는다.
 
-certificate의 형식 유도(MustBefore 사슬, FRONTIER, 검사기와 mutation test)는 [04_formal_model.md §10](04_formal_model.md#10-r2로-읽는-once-mustbefore-pwb-certificate)에, cFS 사실이 certificate의 어느 재료가 되는지와 그림 D8은 [05_cfs_mapping.md §7](05_cfs_mapping.md#7-r2-certificate-예-그림-d8)에 있다. 기대 판정은 `fixed-order(σ_U, M_api)`와 `fixed-order(σ_U, M_impl)`이다. 이것은 결정 경로가 있는 안전성 진술 `¬OK_i`이고, progress는 `unknown(not_checked)`다. 출처 회계는 "generic 준비 상태 명세 K-ID + framework 규칙 R19"다(spec App. A.1 steps 9–10).
+(revision 1.2의 기록; rev 1.3에서는 위 사다리가 우선한다.) 검증 사다리의 첫 목표 V1은 이 R2 사슬만 떼어 낸 하위 관문 S0-R2, S3a-R2, S1-R2, S2-R2로 이루어진다(spec §9.3; ADR-044). V1의 결과를 certificate라는 말로 적기 전에, 그 말이 쓰는 lemma 의무를 먼저 적고 검토한다(V0-P). PI는 2026-10-15에 이 사다리를 승인했다(P-LADDER). thin MVC 전체는 첫 완료 조건이 아니다. 첫 R2 결과의 모든 certificate 칸은 "lemma status: unproved"를 보이므로, 결과는 "신뢰 기반과 그 lemma에 상대적으로 검사기가 받아들였다"로 쓴다(ADR-045).
+
+certificate의 형식 유도(MustBefore 사슬, FRONTIER, 검사기와 mutation test)는 [04_formal_model.md §10](04_formal_model.md#10-r2로-읽는-once-mustbefore-pwb-certificate)에, cFS 사실이 certificate의 어느 재료가 되는지와 그림 D8은 [05_cfs_mapping.md §7](05_cfs_mapping.md#7-r2-certificate-예-그림-d8)에 있다. certificate 경로(rev 1.3: 선택 경로)의 기대 판정은 `fixed-order(σ_U, M_api)`와 `fixed-order(σ_U, M_impl)`이다. 이것은 결정 경로가 있는 안전성 진술 `¬OK_i`이고, progress는 `unknown(not_checked)`다. 출처 회계는 "generic 준비 상태 명세 K-ID + framework 규칙 R19"다(spec App. A.1 steps 9–10).
 
 ---
 
@@ -821,7 +838,7 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 | Clang/LLVM은 분석 전용 | Clang은 macro 출처, 상수 평가, 소스 위치, S3a가 필요로 하는 명시적 field 정체를 준다. link unit 전체의 IR은 archive 의미를 지킨 call graph를 준다. DWARF와 MC는 모든 사실을 실제로 실행되는 gcc 바이너리에 묶는다. **Clang은 실행되는 바이너리를 빌드하지 않는다.** Clang parse에 쓰는 진단 전용 flag 조정 두 개(`-Wno-unknown-warning-option`, `-Wno-error`)는 분석 전용 변환으로 B에 기록한다 | spec §2.6, §4.1 step 2 | [D] ADR-023 |
 | 실행되는 것은 gcc 바이너리 | gcc 13.3.0, `-O0 -g`([R06 K1]). 다시 compile한 객체는 build tree의 객체와 byte 단위로 같다([R07 §3.5]). 다른 컴파일러로 빌드한 실행(F3)은 하지 않는다 | spec §2.6, §5.1 | [F] |
 | MLIR은 쓰지 않는다 | MLIR 단계(S8)와 G-MLIR gate는 이 로드맵에서 제외되었다(PI 결정 D6, 2026-10-15). 구성요소는 평범한 C++17과 C이고, MLIR dialect, ODS, TableGen을 계획하지 않는다. 그 단계를 필수나 선택 단계로 되살리지 않는다. S8 번호는 다시 쓰지 않는다 | spec §2.6, §9.3 | [D] ADR-051(ADR-018을 대체) |
-| SMT solver는 첫 구현의 조건이 아니다 | SMT solver(정수 같은 이론이 들어간 논리식이 만족 가능한지 푸는 프로그램, 예: Z3)를 쓰지 않는다. `kz predict`는 명시적 상태 탐색으로 lock 순서를 뒤집는다. 명세의 예측·탐색 질문을 현재 구현으로 다룰 수 없는 구체적 이유가 확인될 때만 도입을 검토하고, 그때 SMT-LIB2 emitter는 교차 검사용이다(P-Z3, 2026-10-15) | spec §2.6, §4.9 | [D] ADR-016; PI 결정 P-Z3 |
+| SMT solver는 첫 구현의 조건이 아니다 | SMT solver(정수 같은 이론이 들어간 논리식이 만족 가능한지 푸는 프로그램, 예: Z3)를 쓰지 않는다. `kz predict`는 명시적 상태 탐색으로 lock 순서를 뒤집는다. 명세의 예측·탐색 질문을 현재 구현으로 다룰 수 없는 구체적 이유가 확인될 때만 도입을 검토하고, 그때 SMT-LIB2 emitter는 교차 검사용이다(P-Z3, 2026-10-15). **rev 1.3**(spec §4.9; C-28): 필요성은 같은 작은 모형에서 보여야 한다(상태 폭발, 명시적 탐색이 표현하지 못하는 제약, 탐색 비용). 들인다면 encoding은 적어도 사건 위치와 순서 변수, 유한 상태·수명·버전별 값 영역(C 정수 폭이 중요하면 bit-vector), 값 출처에 묶인 읽기·분기·결과, lock 소유·재귀·해제 대응, 지원하는 의미론 안의 queue·counter·timeout을 덮고, solver의 version·build·설정·encoding revision·입력 hash를 결과의 근거에 넣는다. SAT 모형은 재생해 조건을 다시 평가하고, unknown과 한도 도달은 `INCONCLUSIVE`다. solver의 사용은 기여로 주장하지 않는다 | spec §2.6, §4.9 | [D] ADR-016; PI 결정 P-Z3 |
 | eBPF userland | perf-PMU uprobe와 attach cookie, 자체 raw `bpf()` loader, 손으로 쓴 helper prototype, glibc `<elf.h>`로 BPF ELF parse. libbpf는 기존 환경에서 먼저 진행하는 동안 쓰지 않는다. 로더가 연구의 별도 대형 과제가 되지 않게 하고, 필요한 기능이 모자란 것이 확인되면 유지되는 공개 라이브러리를 검토하며 환경 변경을 기록한다(P-LIBBPF, 2026-10-15). perf-sample backend가 설치 없는 초기(bring-up) 경로다. tracefs dynamic event는 선택 사항이고(P-TRACEFS는 열려 있다), 쓰게 되면 spec §5.4의 규칙(전용 instance, 명시적 CPU 간 clock, 종료 시 event 삭제, host 상태 변경 기록)을 따른다 | spec §2.6, §5.3, §5.4 | [D] ADR-013, ADR-036; PI 결정 P-LIBBPF, P-TRACEFS |
 | 도구 안에 Python·JSON 없음 | 모든 구성요소는 C/C++다. 기존 harness `env/run_cfs.sh`가 계속 실행을 맡고, Kairos는 root 쪽 observer hook 하나를 더한다 | spec §2.6; [R07 §9 항목 1] | [D] ADR-001; PI 결정 D1 |
 | 설치 없는 핵심 | thin MVC(S0+S1+S2+S3a)와 S4–S6에는 아무것도 설치하지 않는다. 고정된 LLVM 23 build(Clang LibTooling, IR, DWARF, MC), system clang-18(BPF backend), gcc 13.3, kernel 기능이 이미 있다([R07 §2]) | spec §2.1 원칙 7 | [PI_DECISIONS.md](spec/PI_DECISIONS.md) "Tool installs" |
@@ -843,7 +860,7 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 | app `.so`에 대한 inode 등록 uprobe | 주 바이너리에서만 확인 | 설계상 필요 없음. startup thread를 붙잡는 옛 방식은 쓰더라도 σ_E pool에서 뺀다 |
 | BPF 본문 비용 `c_bpf`, 반환값 캡처 방식 R-a…R-e | 측정하지 않음 | S1의 보정표가 지점마다 정한다 |
 | libbpf 없는 BPF ELF loading | 설계 추론 | 필요한 기능이 모자란 것이 확인되면 유지되는 공개 라이브러리 검토(P-LIBBPF) |
-| app unit의 link | 측정하지 않음 | unit별로 정의되지 않은 symbol을 보고한다(spec §4.1 step 6) |
+| app unit의 link | 측정하지 않음. revision 1.3에서 C1, C2, C5 트랙에는 필수(2026-10-22 결정 D5; spec §4.1 "Closure per case") | unit별로 정의되지 않은 symbol을 보고한다(spec §4.1 step 6) |
 
 ---
 

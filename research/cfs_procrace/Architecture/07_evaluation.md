@@ -344,27 +344,31 @@ held-out은 확장 평가에 속하고, F2를 동결한 뒤에만 연다(spec §
 
 - C1, C2, C3, C5의 v7.0.1 대응물은 generic 층만 시험한다. 그 사례의 평가 대상이 결코 아니다.
 - 설계 사례의 수정 전후 쌍은 개발 집합의 대조다. 맹검이 아니고(§3.5), §6.1 항목 7의 이동 규칙으로 채점하며, RQ2 아래 사례별로 보고한다. held-out 쌍으로 세지 않는다. EXT-20261012 §7 step 5가 설계에 쓰지 않은 쌍을 요구하기 때문이다.
-- F1 때 basis가 정해지지 않은 사례는 "도구 수준에서 평가하지 않음"과 기록한 이유로 보고한다(P-F1GATE).
+- F1 때 하지 못한 사례는 그 이유와 그것이 연구 범위에 두는 한계와 함께 보고한다(P-F1GATE).
 
 | 사례 | 결함이 있는 대상(U3) | 대조(U2)와 기대 이동 [I] | basis 결정 | v7.0.1 대응물(그 사례의 대상이 아님) |
 |---|---|---|---|---|
-| R2 | ENV basis(v7.0.1) | 병합된 수정이 없어 수정 전후 쌍이 없다. P-R2CTRL 아래의 대체 대조: `b9bec567^`/`b9bec567`, bundle tag `v7.0.0` → v7.0.1, PR #2820 head(이동이 없어야 한다), 구성한 core 순서(§3.2). 순서를 바로잡은 절반에서는 fixed-order가 철회되고, protected 판정이 그 자리를 대신하지 않는다(spec App. A.1 step 15). 이것은 구성·revision 민감도이고 결코 schedule 증거가 아니다 | 자기 instance에는 없다(실행에는 D1). 대조는 P-R2CTRL | 없다. R2는 대상 revision에 있다. basis 안의 음성 대조 E-post/E-TBL(spec §9.3)은 R2 근거의 일부다 |
-| C1 | 파생 B′ 위의 CF `2a024d8`(보고된 revision)이나 `281a941`(수정의 base). v7.0.1 B′ 위의 CF `15a871e`([LED §1b]) | CF `833fdbb`. `281a941`과 최소 쌍을 이룬다. 이동은 (σ_U∞, M_api) 칸(refinement 없음 → `timeout-dependent`, `exh`만)과 마지막 실패의 naturalness에서만 있다(§6.1 항목 7) | D22(D18의 C1 부분 포함). C1 D2–D4(`cases/C1.md`) | 두 조회가 모두 `inactive(B)`인 기본 B(`cf_def_config.c:60, 78`) |
-| C2 | 단일 OPERATIONAL counter barrier(6.4.2 tarball이나 v6.5.0a)나 옛 제공자를 쓴 역할 파생 제공자·소비자 쌍([LED §1b]) | 2 × 2: two-phase barrier(v6.6.0a)와 새 제공자. 어느 대비를 셀지, 버그 설계와 고친 설계를 구별할 수 있는지(Q22)는 P-C2 | P-C2. 6.4.2 행은 D13 | v7.0.1 barrier의 writer 집합과 bundle의 K-PHASE census |
+| R2 | ENV basis(v7.0.1) | 병합된 수정이 없어 수정 전후 쌍이 없다. P-R2CTRL(2026-10-15 결정) 아래: 먼저 자연 회귀 쌍 `b9bec567^`/`b9bec567`((c2)). 다음으로 bundle tag `v7.0.0` → v7.0.1((c1)). 배포 전체가 달라지므로 시작 순서만 바꾼 것으로 읽지 않는다. 선택으로 PR #2820의 변경을 적용한 무변화 대조((b). 이동이 없어야 한다). 구성한 core 순서, lazy resolution 구현, 모형 수준 mutant((c3), (d), (e), (f))는 첫 검증에 들지 않고, 자연 쌍으로 답할 수 없는 질문이 남을 때만 더한다(§3.2). 순서를 바로잡은 절반에서는 fixed-order가 철회되고, protected 판정이 그 자리를 대신하지 않는다(spec App. A.1 step 15). 이것은 구성·revision 민감도이고 결코 schedule 증거가 아니다 | 자기 instance에는 없다(실행에는 D1). 대조는 P-R2CTRL | 없다. R2는 대상 revision에 있다. basis 안의 음성 대조 E-post/E-TBL(spec §9.3)은 R2 근거의 일부다 |
+| C1 | 공개 BP basis(D22 [D]) 위의 CF `281a941`(수정의 base). 공개 값은 nasa/bp `b051eb0`의 것이다. 보고자의 `2a024d8`은 공개 BP table과 섞지 않는다([LED §1b]) | CF `833fdbb`. `281a941`과 최소 쌍을 이룬다. 이동은 (σ_U∞, M_api) 칸(refinement 없음 → `timeout-dependent`, `exh`만)과 마지막 실패의 naturalness에서만 있다(§6.1 항목 7) | D22, 결정(공개 BP basis, 후보 쌍 `281a941` → `833fdbb`, D18의 C1 부분 포함). C1 D2–D4(`cases/C1.md`) | 두 조회가 모두 `inactive(B)`인 기본 B(`cf_def_config.c:60, 78`): 경로가 비활성인 음성 대조 |
+| C2 | 단일 OPERATIONAL counter barrier(6.4.2 tarball이나 v6.5.0a)나 옛 제공자를 쓴 역할 파생 제공자·소비자 쌍([LED §1b]) | barrier 세밀도(단일 단계 counter barrier 대 v6.6.0a의 두 단계 barrier)와 제공자 역할(옛 것 대 새 것)을 교차한 2 × 2. 네 칸은 있는 그대로 보이고, 독립된 실제 결함 넷으로 세지 않는다. 첫 대조는 late init이 정상으로 끝나는 제공자를 쓴다. 실패할 수 있는 제공자는 따로 둔 변형이다(Q22, 2026-10-15 결정). 초기화가 실패하지 않는다는 가정은 재구성에만 적용한다 | P-C2와 Q22(결정). 6.4.2 행은 D13 | v7.0.1 barrier의 writer 집합과 bundle의 K-PHASE census |
 | C3 | 6.4.1 tarball | 6.4.2 tarball. 그 diff에 Trac #40, #41, #42가 함께 있어 C5와 수정 이력을 공유한다([LED §3.3]). schedule-dependent → b 안의 protected. `exh`로만 보인다 | D13 (a)–(c), Q16 | TIME과 TBL TaskInit의 SB 도장 사건. E-post 안에 있고 R2와 함께 센다 |
-| C5 | 6.4.1 tarball(6.4.0의 `cfe_es_apps.c`는 같다, [LED §1b]) | 6.4.2 tarball(Trac #41, lock 범위 확장. C3의 수정과 같은 diff). `exh`로만 움직이고, S7이 없으면 protected가 아니라 `unknown`으로 간다. `58abd38d^`/`58abd38d`는 #72가 아니라 A.3 선 위에 있다(P-RGIT) | D13, Q16 | App. A.3. #72와 떼어 둔 잔여 후보 |
+| C5 | 6.4.1 tarball(6.4.0의 `cfe_es_apps.c`는 같다, [LED §1b]) | 6.4.2 tarball(Trac #41, lock 범위 확장. C3의 수정과 같은 diff). `exh`로만 움직이고, S7이 없으면 protected가 아니라 `unknown`으로 간다. `58abd38d^`/`58abd38d`는 #72가 아니라 A.3 선 위에 있다. 보조 대조이고(P-RGIT, 2026-10-15 승인), 원 #72 검증을 대신하지 않으며, 맹검으로 보고하지 않는다 | D13(결정), Q16 | App. A.3. #72와 떼어 둔 잔여 후보 |
 
-사례마다 지금 할 수 있는 일과 도구 단계는 다음과 같다(spec §9.3). 셋째 열(결정 없이 가능한 첫 도구 단계)의 결과는 R2를 빼면 그 사례의 근거가 아니다.
+**C2는 세 구성의 비교다(revision 1.3)** (spec §8.2 C2 행; 2026-10-19 검토 §6.3; `plan/case_setup_C2_C3_C5.md` §2.4). 교차한 2 × 2는 만들 수 없다. 새 제공자가 단일 단계 revision에 없는 symbol을 부르기 때문이다(칸 B). 그래서 C2는 **세 구성**의 비교다: 단일 단계 barrier와 옛 제공자(A), 두 단계 barrier와 옛 제공자(C), 두 단계 barrier와 새 제공자(D). revision들이 다른 변경에서도 다르므로 완전 요인 실험이 아니다. 없는 API를 더해 만든 조합은 따로 둔 파생 실험이다. D를 올바른 대조라고 가정하지 않고, 정상 완료를 가정한 1차 구성과 late init이 실패하는 보조 구성을 떼어 둔다. spec §9.3의 VP-D4 행과 사례별 경로 표는 아직 2 × 2라고 적는다.
 
-| 사례 | 지금, 결정 없이 | 결정 없이 가능한 첫 도구 단계 | 그 사례 자신의 현상에 대한 첫 도구 단계 |
+사례마다 지금 할 수 있는 일과 도구 단계는 다음과 같다(spec §9.3). 셋째 열(새 결정 없이 가능한 첫 도구 단계)의 결과는 R2를 빼면 그 사례의 근거가 아니다.
+
+| 사례 | 지금, 결정 없이 | 새 결정 없이 가능한 첫 도구 단계 | 그 사례 자신의 현상에 대한 첫 도구 단계 |
 |---|---|---|---|
 | R2 | ENV 저장소 이력에서 만든 대조 표, template별·칸별로 나눈 E-post/E-TBL 목록, 동결한 기대표 | V1: (σ_U, M_api)와 (σ_U, M_impl)에서 ES와 EVS 절반의 FIXED_ORDER, E-post·E-TBL에는 없음. **이것은 R2 근거다** | 같은 V1(S1 부분에는 D1). 대조는 V2(P-R2CTRL) |
-| C1 | 기본 B의 정적 표(init과 re-bind 조회, take 위치, key, 생성한 header로 상수 평가한 경계 25와 지연 100, 접힌 `inactive(B)` 증명) | V1b: 두 CF 조회의 `inactive(B)`. 구성 closure를 시험한다. C1 근거가 아니다 | V3(D22, P-C1HOLD) |
-| C2 | 6.5.0a, 6.6.0a, v7.0.1의 barrier 다시 읽기, "C2를 알고 찾음"으로 표시한 K-PHASE 코드 읽기 census | V1b: phase-2 conjunct의 writer 집합, generic K-PHASE census. C2 근거가 아니다 | VP-D4(P-C2) |
+| C1 | 기본 B의 정적 표(init과 re-bind 조회, take 위치, key, 생성한 header로 상수 평가한 경계 25와 지연 100, 접힌 `inactive(B)` 증명) | V1b: 두 CF 조회의 `inactive(B)`. 구성 closure를 시험한다. C1 근거가 아니다 | V3(D22 [D]: 공개 BP basis. nasa/bp `b051eb0`의 공개 값(`BP0_tsem`/`BP1_tsem`, 시작 순서 CF 다음 BP, 설정 우선순위 CF 65, BP 55)은 보고자 환경의 값이 아니다. P-C1HOLD) |
+| C2 | 6.5.0a, 6.6.0a, v7.0.1의 barrier 다시 읽기, "C2를 알고 찾음"으로 표시한 K-PHASE 코드 읽기 census | V1b: phase-2 conjunct의 writer 집합, generic K-PHASE census. C2 근거가 아니다 | VP-D4(P-C2, 역할 재구성) |
 | C3 | C5와 함께 쓰는 종이 위의 Φ_6.4.x 표, compile DB 입력 표(D13 (b)) | V1: TIME과 TBL의 SB 도장 문맥(보류). E-post 안에 있고 R2와 함께 센다. 독립 C3 근거가 아니다 | VP-D3(D13 (a)–(c), Q16) |
 | C5 | 6.4.2와 OSAL 4.1.1 읽기, C5의 Allowed 항목을 두 값으로 둔 instance 표 | V1b: App. A.3 census(certificate 보류). C5 근거가 아니다 | VP-D3(#72), VP-D5(P-RGIT; A.3 선, 따로 보고) |
 
-D13, D22, P-C2가 없으면 사례 자신의 현상에 대한 도구 수준 근거는 R2에만 있다. 이것은 숨기지 않고 보고한다(P-F1GATE). 어느 칸도 "safe"로 읽지 않는다(spec §9.3).
+C1(D22, 결정), C2(P-C2), C3·C5(D13)의 basis를 만들어 도구 출력이 나오기 전까지, 사례 자신의 현상에 대한 도구 수준 근거는 R2에만 있다. 이것은 숨기지 않고 보고한다(P-F1GATE). 어느 칸도 "safe"로 읽지 않는다(spec §9.3).
+
+revision 1.3에서 R2의 첫 rung은 V1′(기반 검증)이다. 위 표의 V1 certificate 항목(FIXED_ORDER, `kz proofcheck`)은 R2의 보편 순서 주장을 할 때만 쓰는 선택 항목이 되었다(spec §9.3 "Ladder of revision 1.3"; §11.1).
 
 ### 3.7 ENV 후보와 다섯 사례
 
@@ -373,7 +377,7 @@ spec §7.3의 후보는 census가 generic template으로 찾은 것이고, loop�
 | 메커니즘 | 그것이 자기 basis에서 필요한 사례 | 먼저 시험하는 ENV 후보(사례 근거가 아님) |
 |---|---|---|
 | A-COMM label이 붙은 lock 뒤집기 예측, 같은 서수 쌍에서 나온 schedule 의존, hold 확인(S5, S6) | C1(D22), C3와 C5(D13) | 두 App-record 구간(App. A.2, A.3): 기본 boot에서 예측, D16 아래 hold |
-| explorer의 유계 class, `unreached(b)`, kill criterion(S7) | C1, C2, C3, C5 | App-record 구간과 `SBNSubPipe`(spec §4.10 항목 9. C1 파생 cone 둘은 D22가 필요) |
+| explorer의 유계 class, `unreached(b)`, kill criterion(S7) | C1, C2, C3, C5 | App-record 구간과 `SBNSubPipe`(spec §4.10 항목 9. C1 파생 cone 둘은 C1의 basis, 곧 D22가 필요) |
 | M_api/M_impl 불일치, K-LOCKBAL, `leaked-lock` stall witness | M_impl의 C1 | OSAL lock 누수 행(F1) |
 | PROTECTED certificate | 다섯 사례의 issue instance에는 없다. 조건부로 C3의 6.4.1 census에서 EVS 자기 identity 문맥(D13), A.3 선의 `58abd38d^`(P-RGIT) | App. A.7의 timebase 조회, RC10과 RC11(spec §3.15) |
 | 증명이 붙은 `inactive(B)` | 기본 B의 C1(C1이 잠재 상태인 동안의 구성 closure) | `K-ATOM.tbl-load`, 기본 table의 HS 행 |
@@ -396,7 +400,7 @@ spec §7.3의 후보는 census가 generic template으로 찾은 것이고, loop�
 | U5 동적 발생 | 한 실행 안에서 instance의 발생 하나와 그 서수 |
 | U6 실행 | U3 하나를 pool key 하나와 관측 방법 하나로 boot한 한 번 |
 
-R2의 예 [M]: U1 = 1. U2는 없다(PR 하나가 병합되지 않고 닫혔다, `cases/R2.md` L49–52). 그래서 R2에는 수정 전후 쌍이 없다. U3 = ENV 바이너리와 CORD 복사본 둘. U4 = 위반 정적 위치 3곳의 instance(task × 함수 문맥 6개, call string 12개를 거쳐 도달한다, [R2g §6]). U5 = 부팅마다 24(`NULL` version table이면 11). U6 = 실험군마다 3, 합치지 않는다([R2c §8]). 다른 개발 사례에는 아직 U5와 U6가 없다. U2–U4는 사례마다 기록하고, C3와 C5는 U2 하나를 공유한다.
+R2의 예 [M]: U1 = 1. U2는 없다(PR 하나가 병합되지 않고 닫혔다, `cases/R2.md` L49–52). 그래서 R2에는 수정 전후 쌍이 없다. U3 = ENV 바이너리. U4 = 위반 정적 위치 3곳의 instance(task × 함수 문맥 6개, call string 12개를 거쳐 도달한다, [R2g §6]). U5 = 부팅마다 24(`NULL` version table이면 11). U6 = 실험군마다 3, 합치지 않는다([R2c §8]). 다른 개발 사례에는 아직 U5와 U6가 없다. U2–U4는 사례마다 기록하고, C3와 C5는 U2 하나를 공유한다.
 
 ---
 

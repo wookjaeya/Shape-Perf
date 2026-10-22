@@ -457,12 +457,12 @@ flowchart TD
 |---|---|---|
 | CHESS, OSDI 2008 [V-abs]; spec 미사용 | thread 스케줄을 장악해 interleaving을 체계적으로 탐색하고, 찾은 버그마다 재현 실행을 준다 | [R05]는 OSAL API 경계를 CHESS의 동기화 가로채기에 대응하는 scheduling point로 제안했다 [I] ([R05 §2.1, §4]). spec의 F1 `kz gate`는 동기화 skeleton API에 손으로 쓴 `__wrap_*` gate를 두지만 CHESS를 인용하지 않는다 (spec §4.13) |
 | Fair stateless model checking, PLDI 2008 [V-abs] | strongly fair 스케줄러로 끝나지 않는 프로그램도 다룬다 | σ_U∞의 최대 실행에 붙는 strong fairness가 이 스케줄러를 따른다. 판정은 fairness 가정에 기대지 않는다. 최대 실행은 주장하지 않는 것을 적을 때만 쓴다 (spec §1.8; [X1-m6]) |
-| PCT, ASPLOS 2010 [V-abs; 메커니즘 P] | 무작위 우선순위 스케줄러. thread n개, 단계 k개인 프로그램에서 depth d 버그를 한 실행에 확률 ≥ 1/(n·k^(d−1))로 찾는다 | F1 `kz gate`의 PCT 실행. PI 결정 D3 이후에만, n과 k를 실행마다 재고, gate한 scheduling point에 상대적으로 (spec §4.13; 보장 G7) |
+| PCT, ASPLOS 2010 [V-abs; 메커니즘 P] | 무작위 우선순위 스케줄러. thread n개, 단계 k개인 프로그램에서 depth d 버그를 한 실행에 확률 ≥ 1/(n·k^(d−1))로 찾는다 | F1 `kz gate`의 PCT 실행. PI 결정 D3(2026-10-15: 후순위. 지금의 사건 기반 hold로 부족한 질문이 확인될 때 더한다) 뒤에만, n과 k를 실행마다 재고, gate한 scheduling point에 상대적으로 (spec §4.13; 보장 G7) |
 | SCTBench, PPoPP 2014 [V-abs] | 52개 버그 벤치마크의 실증 연구. 대부분 bound 1–3이면 충분하다 | bound를 고정하지 않고 0부터 cap까지 sweep하는 규범 (spec §4.10 항목 6) |
 | DPOR, POPL 2005 [V-abs; 보장 문구 UNVERIFIED] | 실행 중 thread 상호작용을 추적해, 의존 transition이 뒤바뀔 수 있는 곳에만 backtracking 지점을 둔다 | 기원으로만 인용한다. 보장 문구는 근거로 쓰지 않는다 |
 | source/optimal DPOR, POPL 2014 [V-abs; JACM 2017 확장은 P] | source set과 wakeup tree. optimal DPOR은 동치류마다 실행 하나를 탐색한다 | `dpor` 엔진은 **source-DPOR + sleep set**이다. disabling 아래 정확성은 JACM 정리(T-JACM, 상태 P)에 기대므로 "unverified"로 표시한다. **optimal DPOR과 "class당 실행 하나"는 채택하지도 주장하지도 않는다** (spec §4.10 항목 4; §6.4 항목 9) |
 | BPOR, OOPSLA 2013 [V-abs] | DPOR에 preemption bound를 순진하게 붙이면 bound 안에서도 unsound하다. BPOR은 이를 고친다 | 기본으로는 preemption bound가 없다. bound를 도입하면 BPOR을 쓴다 (spec §4.10 항목 6) |
-| Nidhugg, TACAS 2015 [V-abs; README V-doc]; GenMC, PLDI 2019 [V-abs; README V-doc] | LLVM IR 수준의 C/pthreads stateless model checker | **둘 다 `NOT_RUN`** (§7) |
+| Nidhugg, TACAS 2015 [V-abs; README V-doc]; GenMC, PLDI 2019 [V-abs; README V-doc] | LLVM IR 수준의 C/pthreads stateless model checker | 비교군이 아니다. revision 1.2에서 비교 행은 철회되었다. Nidhugg는 첫 구현에서 보류하고(P-NIDHUGG), 작은 모형의 explorer 교차 확인이 필요하고 지원 입력 범위가 확인될 때만 나중에 검토하며, process-level 비교를 대신하지 않는다. GenMC는 LLVM 19–22가 필요하다 (spec §8.3, §10.1; §7) |
 
 출처: [R05 §2.1, §2.2]; spec §1.11, App. B. ICB(PLDI 2007), MCR(PLDI 2015), TruSt(POPL 2022)는 [R05]에 V-abs로 있으나 spec 미사용이다.
 
@@ -471,7 +471,7 @@ flowchart TD
 **빌린 것** (spec §4.10; explorer는 단계 S7이며 gate를 통과해야 쓴다).
 - **후보마다 닫힌 모형(cone).** 사용 `u`, writer, 지원 객체를 담은 actor와 그들을 만드는 spawn 사슬을 fixpoint까지 모은다.
 - **두 엔진.** `exh`는 방문 상태 집합을 두는 완전 탐색이다. 정확성은 유한 graph의 도달성이므로 모형에 상대적인 보장 G5를 가진다. `dpor`는 위 표대로 조건부다. `exh`와의 차분 시험은 **검증 증거일 뿐 증명이 아니다**.
-- **축약 L3.** critical section을 mover-reduced 원자 블록으로 만든다. lock이 모든 경로에서 풀려야 한다는 조건이 있어서, M_impl에서 lock이 남는 경로(OSAL RESERVED 구간의 by-name 조회, 계약 K-LOCKBAL)는 검사에 실패하고 잘게 남는다. mover reduction 정리의 인용은 open literature check다.
+- **축약 L3.** critical section을 mover-reduced 원자 블록으로 만든다. lock이 모든 경로에서 풀려야 한다는 조건이 있어서, M_impl에서 lock이 남는 경로(OSAL RESERVED 구간의 by-name 조회, K-LOCKBAL. K-LOCKBAL은 QT-9에 따라 구현 결함 family다)는 검사에 실패하고 잘게 남는다. mover reduction 정리의 인용은 open literature check다.
 - **네 질의.** `Q_reach`(평가된 in-scope 발생이 있는가), `Q_bad`(나쁜 발생이 있는가), `Q_ok`(READY나 TOLERATED 발생이 있는가), `Q_stall`(stall 상태가 있는가)이다. (`Q_bad`, `Q_ok`)가 (yes, no)면 b 안의 fixed-order, (no, yes)면 protected, (no, no)면 no-final-status, (yes, yes)면 어떤 서수가 둘 다 yes일 때 schedule-dependent이고 아니면 ordinal-split이다. `Q_stall`은 진행 결과만 정하고 class를 정하지 않는다(spec §4.10 항목 7). 이 분류는 [R05 §2.3]의 두 SMT 질의에서 왔다(§4.8).
 - **deadlock 검사.** 실행마다 도는 monitor가 M_impl에서 OSAL F1(by-name 조회가 lock을 남겨 생성자가 발행 단계에서 막힘)을 드러낸다(spec §4.10 항목 8). 확인 실행 전에는 버그라 부르지 않는다(spec §6.4 항목 23).
 - **kill criterion.** 개발 집합에서 certificate가 없는 cone을 하나도 판정하지 못하거나, `dpor`와 `exh`가 작은 모형에서 한 번이라도 다르면 explorer를 동결하고 그 결과를 ablation으로만 보고한다(spec §4.10 항목 9).
@@ -493,9 +493,9 @@ flowchart TD
 
 **빌린 것.**
 - 두 질의 분류는 explorer의 `Q_bad`/`Q_ok`로 들어갔다. 지금은 `Q_reach`, `Q_stall`과 함께 네 질의다(spec §4.10 항목 7).
-- 순서 변수 SMT 인코딩(Alglave, Wang)은 **선택 사항인 교차 확인**으로만 남았다. SMT-LIB2 emitter가 있고, P-Z3 이후 작은 cone에만 쓴다(spec §2.6, §4.9 step 10).
+- 순서 변수 SMT 인코딩(Alglave, Wang)은 **선택 사항인 교차 확인**으로만 남았다. SMT-LIB2 emitter가 있고, 작은 cone에만 쓴다. P-Z3(2026-10-15)에 따라 SMT solver는 첫 구현의 조건이 아니다(spec §2.6, §4.9 step 10, §10.1).
 
-**다른 점.** solver는 설치되어 있지 않다(P-Z3 권고: 설치하지 않음). 예측과 explorer는 explicit 탐색으로 한다(ADR-016, ADR-017). CBMC는 설치되어 있지 않아 `NOT_RUN`이다(spec §8.3).
+**다른 점.** solver는 설치되어 있지 않고 첫 구현의 조건도 아니다(P-Z3). 예측과 explorer는 explicit 탐색으로 한다(ADR-016, ADR-017). CBMC는 설치되어 있지 않다. revision 1.1의 CBMC 비교 행(`NOT_RUN`)은 revision 1.2에서 철회되었다(spec §8.3 "Withdrawn in revision 1.2").
 
 ### 4.9 정적 race 탐지, 정적 순서 분석, 환경 모형, points-to
 
@@ -609,7 +609,7 @@ Kairos의 확인은 다음 점에서 신중하다(spec §4.13).
 - KCSAN의 `ASSERT_EXCLUSIVE_*` 매크로는 실행 중에 검사하는 **선언된 요구**([R04]의 표현으로 "declared contract")의 가장 가까운 선행 예다. 다만 준비가 아니라 배타성을 선언한다 [I] ([R04 §2.4]; [R04 §5]의 gap G1).
 - **framework typestate의 선행 연구.** 다중 thread 프로그램의 predictive typestate checking(Joshi & Sen, ASE 2008)과, trace에서 framework 생애주기 typestate와 protocol 명세를 검사하는 Lifestate(ECOOP 2019)가 가장 가까운 선행 연구다(spec §1.11). 둘 다 서지만 확인했고, 내용은 초록과 외부 검토로만 안다(P-PAPERS; spec App. B). 주장하는 차이는 호출자 쪽 reference가 받아들인 미준비 결과마다 reference horizon과 출처가 붙는다는 것뿐이고, 두 논문을 확인하기 전까지 보류다. framework typestate는 새 메커니즘으로 주장하지 않는다(spec §6.4 항목 18).
 
-**비교 대상.** Req, oracle code, Kairos의 horizon을 붙인 호출자 수준 Allowed 항목을 관측 trace에서 검사하는 **단순 상태 monitor**를 재구현한다(같은 정보 재구현, K2. runtime verification 계열). 예측, 탐색, certificate, σ 분리가 없다. K-ID의 Req를 받으면 실현된 R2 발생마다 경보를 낼 것으로 본다 [I]. 그래서 certificate와 예측의 가치는 탐지가 아니라 분류와 근거로만 잰다(spec §8.3; §6.4 항목 38).
+**비교에서의 자리.** revision 1.1은 Req, oracle code, Kairos의 horizon을 붙인 호출자 수준 Allowed 항목을 관측 trace에서 검사하는 **단순 상태 monitor**를 같은 정보 재구현(K2, runtime verification 계열)으로 두었다. revision 1.2는 이것을 비교군에서 뺐다. R2의 원시 기록에 대한 단순 상태 검사는 recorder 분류의 내부 정확성 확인에만 쓰고, 비교군도 thread 수준 비교 집단도 아니다(spec §8.3; ADR-046). 같은 준비 사전조건을 받은 단순 상태 검사는 실현된 R2 발생을 모두 찾을 것으로 본다 [I]. 그래서 certificate와 예측의 가치는 탐지가 아니라 분류와 근거로만 잰다(spec §6.4 항목 38). revision 1.3은 이 점을 받아, R2의 관측 기반 결과를 기여의 증거로 쓰지 않고 관측 경로의 기반 검증으로만 쓴다(spec §6.4 항목 58; ADR-053, ADR-057).
 
 ---
 
@@ -619,8 +619,8 @@ Kairos의 확인은 다음 점에서 신중하다(spec §4.13).
 
 | Gap | 내용 ([R04 §5]) | 가장 가까운 선행 연구 | spec의 현재 입장 | Kairos 요소 (spec) |
 |---|---|---|---|---|
-| **gap G1** framework 수준 준비 계약과 합법 결과 | "자원 R이 상태 S일 때만 연산 O, 아니면 허용 결과는 {기다림, 재시도, 명시적 오류}". 계약을 framework API 문서에서 가져온다. 준수는 문서화된 오류 반환 자체가 아니라, 그 반환을 호출자가 근거에 맞게 처리했는지로 판정한다(예: CF 코드가 인정한, `NAME_NOT_FOUND` 뒤 bounded retry). R2도 문서화된 오류 반환(`cfe_evs.h:199`)을 받지만 호출자 의무(`cfe_evs.h:169–172`)를 어긴 위반이다 (spec §1.6 "Three judgements", App. A.1 step 8에 맞춰 다시 씀) | InitRacer(웹 특화 오류 유형 셋), DefUse·AVIO(학습한 불변식), GPredict(사용자 속성. [R04]는 합법 오류 결과의 어휘를 기록하지 않는다 [I]. 도구와 형식은 확인 전 [U], P-PAPERS), Joshi & Sen(ASE 2008, predictive typestate checking), Lifestate(ECOOP 2019, trace에서 framework 생애주기 typestate 검사), KCSAN `ASSERT_EXCLUSIVE`(배타성) | **좁혀졌다.** 명세와 framework typestate를 쓰는 것 자체에는 선행 연구가 있다. 주장하는 차이는 호출자 수준 Allowed에 reference horizon과 출처를 붙이고 framework의 문서화된 결과를 따로 보고하는 것뿐이며, 두 typestate 논문을 확인할 때까지 보류다. 표현력의 차이로 주장하지 않는다 (spec §1.11; §6.4 항목 37) | Req, `appreq`, 호출자 수준 Allowed(유한 어휘, reference horizon), 세 판단(`fw_doc`, `fw_conf`, `consequence`), Φ 항목별 출처 기록(쪽 `supplier`/`caller`/`rule`), `\par Assumptions` 블록 등 발견 출처 (§1.6, §1.10, §7.1–7.2) |
-| **gap G2** HB상 잘못된 방향으로 정해진 위반 | 모든 HB·예측 race detector는 순서 없는 쌍만 보고한다. R2는 framework 시작 직렬화로 순서가 정해져 있다 | 조사한 것 중 없음 | 열려 있다. spec이 내세우는 **기여 후보** [I] 조합의 첫 요소가 여기에 답한다: 관측된, HB상 순서가 정해진 위반을 σ·M을 밝힌 `fixed-order`로 끌어올리는 must-order certificate. 그것은 안전성 진술 하나이고, 명시한 trusted base에 상대적으로 다시 검증한 것이다(trust ledger) (spec §1.11 "Defensible contribution") | MustBefore, PWB certificate(안전성 진술 하나), 명시한 trusted base에 상대적으로 추론 단계를 다시 검증하는 검사기 `kz proofcheck`(trust ledger). R2 certificate를 끝까지 적어 둔다 (§4.4–4.5, §4.5.1, App. A.1; [05_cfs_mapping.md](05_cfs_mapping.md)) |
+| **gap G1** framework 수준 준비 요구와 합법 결과([R04 §5]의 이름은 "Framework-level readiness contracts with legal outcomes") | "자원 R이 상태 S일 때만 연산 O, 아니면 허용 결과는 {기다림, 재시도, 명시적 오류}". 그 요구(Kairos의 준비 상태 명세)를 framework API 문서에서 가져온다. 준수는 문서화된 오류 반환 자체가 아니라, 그 반환을 호출자가 근거에 맞게 처리했는지로 판정한다(예: CF 코드가 인정한, `NAME_NOT_FOUND` 뒤 bounded retry). R2도 문서화된 오류 반환(`cfe_evs.h:199`)을 받지만 호출자 의무(`cfe_evs.h:169–172`)를 어긴 위반이다 (spec §1.6 "Three judgements", App. A.1 step 8에 맞춰 다시 씀) | InitRacer(웹 특화 오류 유형 셋), DefUse·AVIO(학습한 불변식), GPredict(사용자 속성. [R04]는 합법 오류 결과의 어휘를 기록하지 않는다 [I]. 도구와 형식은 확인 전 [U], P-PAPERS), Joshi & Sen(ASE 2008, predictive typestate checking), Lifestate(ECOOP 2019, trace에서 framework 생애주기 typestate 검사), KCSAN `ASSERT_EXCLUSIVE`(배타성) | **좁혀졌다.** 명세와 framework typestate를 쓰는 것 자체에는 선행 연구가 있다. 주장하는 차이는 호출자 수준 Allowed에 reference horizon과 출처를 붙이고 framework의 문서화된 결과를 따로 보고하는 것뿐이며, 두 typestate 논문을 확인할 때까지 보류다. 표현력의 차이로 주장하지 않는다 (spec §1.11; §6.4 항목 37) | Req, `appreq`, 호출자 수준 Allowed(유한 어휘, reference horizon), 세 판단(`fw_doc`, `fw_conf`, `consequence`), Φ 항목별 출처 기록(쪽 `supplier`/`caller`/`rule`), `\par Assumptions` 블록 등 발견 출처 (§1.6, §1.10, §7.1–7.2) |
+| **gap G2** HB상 잘못된 방향으로 정해진 위반 | 모든 HB·예측 race detector는 순서 없는 쌍만 보고한다. R2는 framework 시작 직렬화로 순서가 정해져 있다 | 조사한 것 중 없음 | 열려 있다. revision 1.2까지 spec이 내세운 **기여 후보** [I] 조합의 첫 요소가 여기에 답한다(revision 1.3에서 certificate는 선택 경로이고, 기여는 §1.1의 가설로 시험한다, ADR-053): 관측된, HB상 순서가 정해진 위반을 σ·M을 밝힌 `fixed-order`로 끌어올리는 must-order certificate. 그것은 안전성 진술 하나이고, 명시한 trusted base에 상대적으로 다시 검증한 것이다(trust ledger) (spec §1.11 "Defensible contribution") | MustBefore, PWB certificate(안전성 진술 하나), 명시한 trusted base에 상대적으로 추론 단계를 다시 검증하는 검사기 `kz proofcheck`(trust ledger). R2 certificate를 끝까지 적어 둔다 (§4.4–4.5, §4.5.1, App. A.1; [05_cfs_mapping.md](05_cfs_mapping.md)) |
 | **gap G3** soft·opt-in·timed barrier | timeout 조건부 edge, "검사 시점에 등록된 앱"이 참가자인 barrier, 일부 task만 지키는 barrier, 상태 발행을 겸하는 wait 호출 | EventRacer, Tian et al., Xiong et al.(ad hoc 동기화 인식) | **새로움은 open literature check**. targeted search를 하지 않았다 | 조건부 O-edge, guard가 붙은 S-edge, σ_U/σ_U∞, timeout-dependent 등의 refinement (§1.8–1.10) |
 | **gap G4** 사용자 공간 registry(예약, 확정, 재사용) | registry key를 충돌 대상으로, lock을 원자성으로, finalize를 발행으로 보는 도구가 없다 | RacePro(kernel namespace) | **좁혀졌다.** key 충돌·lock 원자성 재배열은 RVPredict·GPredict 방식에 이미 있고, ExceptioNULL이 가장 가까운 예측 연구다 (spec §1.11; [X1-M12]) | explicit 탐색(공학적 선택), framework typestate(RESERVED 구간, generation 포함. typestate 자체는 선행 연구가 있다)와 호출자 수준 Allowed, σ별 class와 같은 서수 짝, certificate, hold 확인 |
 | **gap G5** 손실하는 bounded non-blocking queue | 어떤 기법도 "가능한 순서에서 메시지가 사라짐"을 일급 속성으로 예측하지 않는다 | event·분산 HB 모형은 전달을 가정한다. 구독자 없음 손실은 InitRacer의 늦은 등록이다 | **용량에 대해서만 열려 있다** | K-CAP, K-CAP.msglim, LOSS-UNDER-ORDER, max-weight closure 상한(검증된 인용 없이 쓰는 표준 알고리즘 사실, spec App. B) (§3.9, §3.15 RC14) |
@@ -631,8 +631,9 @@ Kairos의 확인은 다음 점에서 신중하다(spec §4.13).
 **요약.** [R04 §5] 마지막 문단의 결론은 그대로 유지된다 [I].
 - 확립된 기법이 부품을 준다. HB/VC, 예측, framework HB 규칙, 초기화 race 분류, def-use, 확인이 그것이다.
 - 조사한 어느 것도 이 부품들을 cFS 의미론(gap G1–G8) 둘레로 결합하지 않았다.
-- 논문은 이 결합, cFS HB 규칙 집합, 계약 형식화를 주장할 수 있다. 개별 메커니즘의 새로움은 주장할 수 없다.
-- spec §1.11은 이 결론을 더 좁혔다. 후보 기여는 cFS에 특화한 추출, 분류, 근거이고, 명세나 framework typestate를 쓰는 것 자체가 아니다(§1).
+- 논문은 이 결합, cFS HB 규칙 집합, 준비 요구의 형식화([R04]의 "contract formulation")를 주장할 수 있다. 개별 메커니즘의 새로움은 주장할 수 없다.
+- spec §1.11은 이 결론을 더 좁혔다. 후보 기여는 cFS에 특화한 추출, 분류, 근거이고, 명세나 framework typestate를 쓰는 것 자체가 아니다(§1.2).
+- revision 1.3은 기여를 시험할 가설로 적는다. 기존 process race 탐지가 놓치는 cFS task 사이의 순서 위반이 있고, cFS의 자원 identity, 상태 효과, 실행 제약, task→앱 매핑을 잇는 탐지기가 그 차이를 줄인다는 가설이고, 반증 조건이 붙는다(§1.1).
 
 gap G3에는 특히 조심한다. 새로움 문구는 P-PAPERS 항목 5의 targeted search가 끝날 때까지 "open literature check"로만 쓴다(§0.3). "조사한 것 중 없음"도 "존재하지 않는다"가 아니다. [R05]는 cFS·cFE·OSAL의 동시성 검증에 관한 동료 심사 논문을 **찾지 못했다**고 적고, 이것을 "we found none"으로만 써야 한다고 경고한다([R05 §2.8]).
 
@@ -652,12 +653,12 @@ gap G3에는 특히 조심한다. 새로움 문구는 P-PAPERS 항목 5의 targe
 | 6 | SB 송신 → 수신 (`OS_QueuePut`, `cfe_sb_priv.c:1177–1178` ↔ `OS_QueueGet`) | 메시지 송신 → 수신, enqueue → handler 시작. Lamport, DroidRacer post → begin, CAFA, DCatch Rule-Eenq [P] | R7 SB-DELIVER, P-Q (O): 같은 descriptor와 pipe. **전달된 것만** | zero-timeout `mq_timedsend`라 꽉 차면 버린다. 용량 edge는 없다 |
 | 7 | 한 pipe 안의 FIFO (mq 우선순위는 항상 1, `os-impl-queues.c:305`) | 단일 소비자 FIFO. DroidRacer·CAFA의 looper FIFO 규칙 (정확한 형태 UNVERIFIED) | HB edge가 아니라 **예측 제약**: 같은 pipe 메시지의 handler는 enqueue 순서대로 (spec §1.9, §4.9) | POSIX 동일 우선순위 FIFO 자체가 UNVERIFIED다. 가정 A7-impl에 그렇게 적혀 있다 (spec §6.1) |
 | 8 | 앱 main loop dispatch | handler 안에서만 program order, handler 사이에는 edge 없음. CAFA [V-abs], DCatch Rule-Pnreg [P] | looper 규칙 (spec §1.9; ADR-029) | 이것이 없으면 thread 수준 HB가 앱이 처리하는 모든 메시지를 순서 지어 송신자 사이 race를 가린다 |
-| 9 | SB 구독 대 첫 송신 (구독자가 없으면 성공을 반환하며 버림, `cfe_sb_priv.c:1082–1087`) | late event handler registration. InitRacer [V-abs] | R8: edge가 아니라 **상태**(route_lookup 시점에 route가 있는가). 계약 K-ROUTE (RC5) | 송신자에게는 성공 반환이라 보이지 않는 손실이다. SB는 counter와 event로 기록하지만, R2 구간에서는 event가 EVS에서 거부되고 [M] 그 구간의 counter 증가도 나중에 지워진다 [I]. 전달을 요구하는 `appreq`가 없으면 호출자 수준에서 LOSS-UNDER-ORDER이고, framework 수준 판단(cSB4305.5: 오류 아님)은 따로 적는다 (spec §3.9, App. A.1 step 13a) |
+| 9 | SB 구독 대 첫 송신 (구독자가 없으면 성공을 반환하며 버림, `cfe_sb_priv.c:1082–1087`) | late event handler registration. InitRacer [V-abs] | R8: edge가 아니라 **상태**(route_lookup 시점에 route가 있는가). 준비 상태 명세 K-ROUTE (RC5) | 송신자에게는 성공 반환이라 보이지 않는 손실이다. SB는 counter와 event로 기록하지만, R2 구간에서는 event가 EVS에서 거부되고 [M] 그 구간의 counter 증가도 나중에 지워진다 [I]. 전달을 요구하는 `appreq`가 없으면 호출자 수준에서 LOSS-UNDER-ORDER이고, framework 수준 판단(cSB4305.5: 오류 아님)은 따로 적는다 (spec §3.9, App. A.1 step 13a) |
 | 10 | ES phase barrier: `WaitForSystemState`, `WaitForStartupSync` (`volatile SystemState` polling, `cfe_es_api.c:585–619`) | barrier·init·once edge, ad hoc 동기화 인식. Tian [V-abs], Xiong [V-abs], EventRacer race coverage [V-abs] (Go init·once 규칙은 V-doc, spec 미사용) | R5 (O, obs-soft. `SystemState`는 assumed), R6 (조합) | 조건이 참이 되어 빠져나올 때만 edge이고, timeout이면 없다. opt-in이다. wait 호출이 자기 상태의 발행도 겸한다 (`cfe_es_api.c:566–574`) |
 | 11 | core 직렬 시작 (`MainTaskSyncDelay`, `cfe_es_start.c:835`) | 행 10과 같은 barrier. 그 아래의 결함은 HB상 잘못된 방향으로 정해져 race detector가 닿지 않는다 ([R04 §3 L4]) | R19 CORE-SERIAL (S, obs-fatal): writer 집합이 완전하고 predicate를 코드에서 추출한 T-OBS와 T-TERM(timeout이면 panic) | R2 certificate의 핵심 규칙이다 (App. A.1). 사례를 아는 상태에서 쓴 framework 규칙으로 판정마다 밝힌다 (spec §7.2) |
 | 12 | 이름 registry: `OS_ObjectIdFindByName` 대 `OS_ObjectIdFinalizeNew`, `CFE_ES_GetAppIDByName`, `CFE_TBL_Share`, SB pipe 이름 조회 | access-before-definition(insert = store, lookup = load). InitRacer, DefUse, RacePro micro-op [V-abs] | K-REG의 lifecycle automaton. RF(결과가 함축하는 reads-from, DefUse) | registry는 사용자 메모리라 RacePro에 보이지 않는다. 조회 실패를 호출자 쪽 근거가 받아들일 수 있다(CF 코드가 인정한 재시도, `retry_until_ready`). M_impl에서는 이름이 RESERVED 구간에 보인다 (spec §3.2) |
 | 13 | task 등록 (생성자가 `OS_TaskCreate` 뒤 `TaskTable`을 씀, 자식은 `CFE_ES_GetAppID`) | order violation(def-use). Lu et al. [V-abs], DefUse [V-abs], Unicorn [P; spec 미사용] | K-SPAWN, K-SELF.es (spec §3.3) | fork edge의 위치(행 2)가 이 쌍이 순서 없는지(race) 정해져 있는지를 가른다 |
-| 14 | 준비 필드: `CFE_SB_Global.AppId` 저장(`cfe_sb_task.c:138`)과 EVS 등록 대 `CFE_EVS_SendEventWithAppID`의 읽기 → `ILLEGAL_APP_ID` | 정의-사용 불변식, 일반 예측 속성. DefUse, GPredict, ExceptioNULL [V-abs] | K-ID(capture point 포함)와 R19 certificate (App. A.1) | R2의 사용은 HB상 저장보다 앞서므로 race 탐지가 아니라 계약 검사가 필요하다 |
+| 14 | 준비 필드: `CFE_SB_Global.AppId` 저장(`cfe_sb_task.c:138`)과 EVS 등록 대 `CFE_EVS_SendEventWithAppID`의 읽기 → `ILLEGAL_APP_ID` | 정의-사용 불변식, 일반 예측 속성. DefUse, GPredict, ExceptioNULL [V-abs] | K-ID(capture point 포함)와 R19 certificate (App. A.1) | R2의 사용은 HB상 저장보다 앞서므로 race 탐지가 아니라 준비 상태 명세 검사가 필요하다 |
 | 15 | 표: `CFE_TBL_GetAddress` … `ReleaseAddress`, 소유자의 `CFE_TBL_Manage` | 원자 구역과 갱신 지연, 직렬성. Velodrome, AVIO [V-abs] | R11, R12, R13 (O. R13은 assumed) | lock이 아니라 규약이다 |
 | 16 | 주기적 깨우기(SCH_LAB), SB 수신 timeout, `OS_TaskDelay` | timer 사건: 등록 → 발화 edge, 결코 벽시계 시간에서 오지 않음. EventRacer·WebRacer timer, DroidRacer delayed post, Lamport | P-TB(timer add/set → callback). 우선순위·sleep·timeout된 barrier는 **edge 없음** | 시간에서 HB를 끌어내지 않는다 (spec §5.8) |
 | 17 | 외부 입력(CI_LAB UDP 명령, 지상) | 들어오는 HB가 없는 환경 root. EventRacer, CAFA, DCatch | `T_env` actor, basis의 Input (spec §1.2, §1.7) | basis B가 입력과 그 시각을 정해야 한다 |
@@ -770,8 +771,8 @@ Kairos는 세 설계 제안(A "CAIRN": 정적 모형, B "Sextant": 동적·예�
 | [01_overview.md](01_overview.md) | 문제, 네 가지 예(R2, C1, SB 구독 전 송신, OSAL RESERVED 구간), 기존 기법의 한계, 판정 체계, 기여 가설과 하지 않는 주장(그림 D0) | §0, §1, §6.4 |
 | [02_architecture.md](02_architecture.md) | 계층 L0–L5, 구성요소, 두 실행 파일, typed 산출물, 데이터 흐름, obligation O1–O10(그림 D1, D2) | §2 |
 | [03_workflow.md](03_workflow.md) | instance 하나의 분석 순서, feedback loop, 판정 상태 기계, 연구 단계 개요(그림 D3, D4 개요, D6, D7) | §4, §9.3 |
-| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·계약, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
-| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 계약 template K-*와 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
+| [04_formal_model.md](04_formal_model.md) | 형식 모형: actor·자원·준비 상태 명세, 의미론 σ와 모형 수준 M, MustBefore·PWB·certificate의 형식 유도, 보장(그림 D10) | §1, §4.2–4.5, §6 |
+| [05_cfs_mapping.md](05_cfs_mapping.md) | cFS 계층과 Φ_cFS의 대응, 준비 상태 명세 template K-*와 준비 범주 RC1–RC15, R2 certificate, 종료 범위(그림 D5, D8, D9) | §3, §7.3, App. A |
 | [06_observation_confirmation.md](06_observation_confirmation.md) | 수정하지 않은 바이너리의 관측(`kz observe`)과 확인 실행(`kz hold`, `kz gate`), 비용 모형(그림 D7) | §4.13, §5 |
 | [07_evaluation.md](07_evaluation.md) | 평가 계획: 연구 질문, 기준선, ablation, recall protocol, triage, perturbation 실험군, 통계(그림 D4 상세) | §7.2, §7.5, §8 |
 | [08_roadmap.md](08_roadmap.md) | 구현 단계 S0–S10, 출구 조건, 공수 추정, 범위를 줄이는 순서, 위험(그림 D4 개요) | §9, §10.2 |

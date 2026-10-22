@@ -543,30 +543,30 @@ flowchart TD
 **핵심.** RacePro(SOSP 2011 [V-abs])는 배포된 시스템에서 process를 기록하고, 공유 kernel 객체를 건드리는 **system call** 사이의 race를 찾은 뒤, replay와 go-live로 해로운 race를 가려낸다. 원래 제목은 "Pervasive Detection of Process Races in Deployed Systems"다([R04 §0.4]). 연구 기록이 코드에서 확인한 것은 다음과 같다 [F] ([R04 §2.9]).
 - HB 출처: program order, fork/clone, wait, pipe/socket, signal.
 - 후보 부류: RESOURCE, EXIT-WAIT, SIGNAL, TOCTOU. 메모리 사건은 후보가 되지 않는다.
-- 다섯 사례의 의존 쌍에 해당하는 후보를 내지 않는다. i386 Linux 2.6.35와 Scribe가 필요해 이 환경에서 돌릴 수 없다(`not_runnable_here`).
+- 다섯 사례의 의존 쌍에 해당하는 후보를 내지 않는다. i386 Linux 2.6.35와 Scribe가 필요해 이 환경에서 돌릴 수 없다(`not_runnable_here`). 이것은 [R04 §2.9]의 코드 읽기이고 실행 결과가 아니다. revision 1.3에서는 실행하지 못한 원 도구에 대해 이런 진술을 문헌·코드 분석의 결과 상태로만 적고, "탐지하지 못한다"로 쓰지 않는다(2026-10-22 결정 D4; ADR-058; §7.3).
 
-같은 계열의 다른 도구([R05 §2.9]):
+같은 계열의 다른 도구([R05 §2.9]). 상태 표지는 [R05]의 것 그대로다. spec §8.3이 비교에 쓰는 역할과 자료 기록은 `baselines/availability.md`에 있고, 그 표는 [01_overview.md §2.5](01_overview.md#25-실험-비교의-범위-기존-process-level-race-연구-spec-83)에 옮겨져 있다.
 
 | 도구 (상태) | 핵심 |
 |---|---|
-| SimRacer, ISSTA 2013 [P: 제목 미확인]; spec 미사용 | 기존 테스트 trace에서 잠재 process race를 계산하고 가상 플랫폼에서 process 스케줄을 통제 |
-| SIMEXPLORER, STVR 2017 [V-abs]; spec 미사용 | 동적 분석과 가상화로 process 수준 race를 시험 |
-| RRF, ISSRE 2016 [V-abs]; spec 미사용 | 정적 분석, kernel 사건 보고, yield point로 사용자가 보고한 race를 재현 |
+| SimRacer, ISSTA 2013 [P: 제목 미확인]; spec §8.3 비교 대상 | 기존 테스트 trace에서 잠재 process race를 계산하고 가상 플랫폼에서 process 스케줄을 통제 |
+| SIMEXPLORER, STVR 2017 [V-abs]; spec §8.3 비교 대상 | 동적 분석과 가상화로 process 수준 race를 시험 |
+| RRF, ISSRE 2016 [V-abs]; spec §8.3 비교 대상 | 정적 분석, kernel 사건 보고, yield point로 사용자가 보고한 race를 재현 |
 | DESCRY, ESEC/FSE 2017 [V-abs] | 기본 log만으로 시스템 수준 동시성 실패를 재현 |
-| SysPro, arXiv 2026 (JSS 게재 승인) [V-abs]; spec 미사용 | bug report의 syscall 이름에서 재현 |
-| SimEvo, ICSME 2017 [V-abs; 저자 P]; spec 미사용 | 다중 process 시스템의 회귀 시험 |
-| ReDPro [UNVERIFIED] | 기록을 찾지 못했다 |
+| SysPro, arXiv 2026 (JSS 게재 승인) [V-abs]; spec §8.3 비교 대상 | bug report의 syscall 이름에서 재현 |
+| SimEvo, ICSME 2017 [V-abs; 저자 P]; spec §8.3 비교 대상 | 다중 process 시스템의 회귀 시험 |
+| ReDPro [UNVERIFIED]; spec §8.3 비교 대상 | 기록을 찾지 못했다. spec §8.3은 역할과 세부 모형이 확인되지 않았으므로 논문을 읽기 전에는 탐지나 재현 행에 넣지 않는다 |
 
 **cFS에서.**
 - native cFS는 **한 process**다. 모든 OSAL task는 같은 process의 pthread다 [F] (spec §1.1; [R05 §1 F1]; `os-impl-tasks.c:568`).
-- 확인된 process-level 도구는 모두 syscall이나 kernel 객체 사건을 관측한다. cFS의 의존은 한 process 안 **사용자 메모리**에 있다 [I] ([R05 §2.9]). 기존 기록은 OSAL 이름 생성과 조회에서 syscall이 0개임을 보였다([R06 §6.2 C5]; spec §8.3).
+- 확인된 process-level 도구는 모두 syscall이나 kernel 객체 사건을 관측한다. cFS의 의존은 한 process 안 **사용자 메모리**에 있다 [I] ([R05 §2.9]). 기존 기록은 OSAL 이름 생성과 조회에서 syscall이 0개임을 보였다([R06 §6.2 C5]; spec §8.3). spec §8.3은 이것을 도구 결과가 아니라 저장소 probe로 표시한다. OSAL 자체 unit test 하나이고 cFS가 아니다(`baselines/availability.md` §4). CF의 조회, ES 기록 쓰기, R2의 거부된 이벤트 요청이 syscall을 내지 않는다는 것은 참조 cFS를 system-call 관측기 아래에서 돌리기 전까지 코드 분석 [I]이다(spec §8.3; §6.4 항목 47). "RacePro는 공유 메모리를 전혀 기록하지 못한다"는 설명으로 쓰지 않는다(spec §8.3).
 - spec의 "process-level"은 OS process 경계가 아니라 **서로 다른 앱·서비스 task·실행 문맥의 논리적 작업 사이의 순서**를 뜻한다(spec §1.1).
 
 **빌린 것.**
 - RacePro의 **namespace micro-op 모형**(같은 이름의 생성과 조회를 store와 load로 봄)을 kernel이 아닌 사용자 공간 registry(OSAL idmap, ES app/task 표, TBL registry, SB pipe 이름)로 옮긴다 [I] ([R04 §2.9]).
 - **replay + go-live**는 확인 단계의 틀이다. 보장 G6("`realized` 판정은 선언한 통제 아래 B의 gcc 바이너리에서 재현되었다")의 선행 예로 RacePro, DESCRY, CTrigger를 든다(spec §6.3).
 
-**기준선.** 원 process-level 도구는 모두 `NOT_RUN`이고 차단 사유를 기록한다. RacePro는 i386 Linux 2.6.35가 필요하고, 나머지 일곱은 접근할 수 있는 구현이 없다([R06 K6]). 대신 **RacePro 방식 syscall 관측 모형**을 같은 실행의 syscall tracepoint 위에 재구현한다(spec §8.3). "기존 도구가 C1–R2를 놓친다"고는 쓰지 않는다. `NOT_RUN`은 false negative가 아니다(spec §6.4 항목 14).
+**실험 비교에서의 자리** (revision 1.2–1.3; spec §8.3; ADR-046, ADR-047, ADR-058). 이 계열이 Kairos의 **실험 비교 대상**이다. 비교는 기존 Process-Level Race 연구(RacePro, SimRacer, SIMEXPLORER, RRF, DESCRY, SimEvo, ReDPro, SysPro)와 Kairos를 다섯 설계 사례에서 하고, (도구, 사례)마다 같은 여섯 분석 질문에 답하며 칸마다 결과 상태 하나를 붙인다(§7.2). 조사(`baselines/availability.md`, 2026-10-08)에서는 어느 도구도 돌리지 않았고 다섯 사례의 모든 칸이 `NOT_RUN`이다. 그것은 사례에 대한 결과가 아니라 실행 가능성 기록이다. RacePro는 기록기가 i386 Linux 2.6.35 kernel patch라서 조사 환경에서 돌릴 수 없었고, 나머지는 접근할 수 있는 구현을 찾지 못했거나 저장소를 읽을 수 없었다([R06 K6]; spec §8.3 "Roles"). **첫 비교는 RacePro와 R2다**: R2의 AppId 저장, 값 전달, 이벤트 요청, 오류 반환을 RacePro의 기록 사건·후보 사건에 대응시키고, 원 코드의 어느 규칙이 적용되며 어느 사건이 대응하지 않는지 적는다. 같은 분석을 C1, C3, C5에 하고, C2는 역할 재구성에서 아는 조건만 쓴다(P-C2) [계획, I]. 원 도구를 돌릴 수 없을 때만 그 논문·코드로 process-level 기법을 재구현하고(K2), 원 도구 결과와 따로 둔다. revision 1.1이 두었던 "RacePro 방식 syscall 관측 모형을 Kairos trace 위에 재구현"한 행은 철회되었다. RacePro 등을 돌릴 수 없으면 "기존 기법이 이 위반을 놓친다"는 가설은 문헌·코드 분석의 결과 상태(`관측 범위 밖`, `표현 불충분` 등)로만 적고, "기존 도구가 C1–R2를 탐지하지 못한다"고는 쓰지 않는다. `NOT_RUN`은 false negative가 아니다(spec §6.4 항목 14, 60; 2026-10-22 결정 D4).
 
 ### 4.11 Sampling·watchpoint, 확인, triage, 후보 발견
 
@@ -610,6 +610,17 @@ Kairos의 확인은 다음 점에서 신중하다(spec §4.13).
 - **framework typestate의 선행 연구.** 다중 thread 프로그램의 predictive typestate checking(Joshi & Sen, ASE 2008)과, trace에서 framework 생애주기 typestate와 protocol 명세를 검사하는 Lifestate(ECOOP 2019)가 가장 가까운 선행 연구다(spec §1.11). 둘 다 서지만 확인했고, 내용은 초록과 외부 검토로만 안다(P-PAPERS; spec App. B). 주장하는 차이는 호출자 쪽 reference가 받아들인 미준비 결과마다 reference horizon과 출처가 붙는다는 것뿐이고, 두 논문을 확인하기 전까지 보류다. framework typestate는 새 메커니즘으로 주장하지 않는다(spec §6.4 항목 18).
 
 **비교에서의 자리.** revision 1.1은 Req, oracle code, Kairos의 horizon을 붙인 호출자 수준 Allowed 항목을 관측 trace에서 검사하는 **단순 상태 monitor**를 같은 정보 재구현(K2, runtime verification 계열)으로 두었다. revision 1.2는 이것을 비교군에서 뺐다. R2의 원시 기록에 대한 단순 상태 검사는 recorder 분류의 내부 정확성 확인에만 쓰고, 비교군도 thread 수준 비교 집단도 아니다(spec §8.3; ADR-046). 같은 준비 사전조건을 받은 단순 상태 검사는 실현된 R2 발생을 모두 찾을 것으로 본다 [I]. 그래서 certificate와 예측의 가치는 탐지가 아니라 분류와 근거로만 잰다(spec §6.4 항목 38). revision 1.3은 이 점을 받아, R2의 관측 기반 결과를 기여의 증거로 쓰지 않고 관측 경로의 기반 검증으로만 쓴다(spec §6.4 항목 58; ADR-053, ADR-057).
+
+
+### 4.13 불완전하거나 순서가 뒤섞인 기록의 감시 (revision 1.3)
+
+**핵심.** revision 1.3은 spec §1.11의 "Established theory" 표에 이 계열을 한 행으로 더했다(변경표 C-14). 두 문헌 모두 제안 문서 0.2([P0.2] §2.3)가 보고한 대로만 알고, **이 저장소에서 원문을 읽지 않았다 [U]**(spec §1.11).
+- Leucker, Sánchez, Scheffel, Schmitz, Thoma(RV 2019) [U]: 부분 정보가 있는 timed event stream을 다루고, 가능한 stream들의 추상화된 집합 위에서 sound한 출력을 낸다([P0.2] §2.3의 보고).
+- Basin, Klaedtke, Zălinescu(TOCL 2019) [U]: 지연되고 순서가 바뀌고 손실되는 stream 위의 세 값 관측 의미론이다([P0.2] §2.3의 보고).
+
+**Kairos에서.** revision 1.3의 trace 분석은 불완전한 기록과 맞는 설명 집합을 만드는 규칙을 두고, 관측하지 않은 자원을 초기 상태로 읽지 않는다. 관측 기반 판정은 기록과 맞는 모든 설명에서 성립할 때만 확정된다(spec §4.8; ADR-055). 이 절에서 "sound"는 위 문헌의 용어다(§0.4).
+
+**다른 점과 주장하지 않는 것.** Kairos는 불완전한 기록 위의 보수적 판정이라는 원리를 자기 기여로 주장하지 않는다. spec §4.8의 구성은 이 범위에서 검증해야 할 설계이고, 두 논문의 정리를 거기에 옮겨 오지 않는다(spec §1.11; §6.4 항목 62). 두 문헌은 spec App. B에 없다(부록 A).
 
 ---
 

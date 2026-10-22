@@ -491,7 +491,7 @@ SB는 cFS 앱 사이 통신의 중심이다. 구독 전 송신 손실과 용량 
 R2 구간에서 이 손실의 세 판단은 다음과 같다 [I] (spec App. A.1 step 13a; 실행한 것은 없다).
 - **framework 수준.** `fw_doc` = {`documented-not-error`}(cSB4305.5의 근거 문장). 이 구간의 칸과 실행에서 `fw_conf` = `deviates`다. cSB4305.5의 shall 문장이 요구하는 `SEND_NO_SUBS` event를 EVS가 `ILLEGAL_APP_ID`로 거절하기 때문이다(ES 문맥에서 17개 [M], [R2g §2]). 이 구간의 `NoSubscribersCounter` 증가는 SB가 나중에 HK packet을 초기화할 때 지워진다(`cfe_sb_task.c:164–166`; `CFE_MSG_Init`이 message를 지운다, `cfe_msg_init.c:45`) [I]. shall 문장은 증가만 요구하므로 이것은 이탈이 아니라 관측된 결과로 적는다.
 - **호출자 수준.** 소비자 TO_LAB의 `defer_by_design`이 적용되는 곳은 7.5의 사슬처럼 PENDING → TOLERATED 또는 VIOLATING이다. 소비자 reference가 말하지 않는 곳에서는 LOSS-UNDER-ORDER다.
-- **관측된 결과.** "message lost"와 "event rejected"다. 이 구간에서는 손실이 구간 뒤에 남는 흔적을 남기지 않는다 [I].
+- **관측된 결과.** ES event packet의 "message lost"와 `SEND_NO_SUBS` event 요청의 "event rejected"다. 거절된 요청은 packet이 만들어지기 전이므로 잃은 packet이 아니다. 이 구간에서 ES packet의 손실은 구간 뒤에 남는 흔적을 남기지 않는다 [I].
 
 ### 2.10 Event Services (spec §3.10)
 
@@ -1057,18 +1057,18 @@ flowchart TD
 ### 7.5 그 밖에 이 예가 보여 주는 것
 
 - **checker 시험 (S3a 출구, step 11).** 일곱 가지 certificate 변형을 `kz proofcheck`가 모두 거부해야 한다. 목록은 [04_formal_model.md §10.5](04_formal_model.md#105-certificate와-독립-검사기)에 있다.
-- **기대하는 사용 집합 (step 12).** basis 민감도와 S1 관문의 검사이지 새 증거가 아니다. ENV의 version table이 있는 basis에서 부팅마다 ES 20개(`SEND_NO_SUBS` 17 + `SUBSCRIPTION_RCVD` 2 + `PIPE_ADDED` 1)와 EVS 4개(`SEND_NO_SUBS` 1 + `SUBSCRIPTION_RCVD` 2 + `PIPE_ADDED` 1), 합계 24개다([R2g §2]; [R2c §7]). EVS의 나눔은 측정한 값이다 [M] ([R2g] L47–49; ES 순서로 읽은 예전의 "2 + 1 + 1"은 그것과 어긋났다). ES의 `SEND_NO_SUBS` 17개는 문맥이 구분된 template 다섯에서 나온다: version-event loop에서 13개, EID 1, 2, 91, 92에서 하나씩([R2g] L101). version table이 NULL인 basis에서는 11개(ES 7, EVS 4)다([R2c §4.2]).
+- **기대하는 사용 집합 (step 12).** basis 민감도와 S1 관문의 검사이지 새 증거가 아니다. ENV basis에서 부팅마다 ES 20개(`SEND_NO_SUBS` 17 + `SUBSCRIPTION_RCVD` 2 + `PIPE_ADDED` 1)와 EVS 4개(`SEND_NO_SUBS` 1 + `SUBSCRIPTION_RCVD` 2 + `PIPE_ADDED` 1), 합계 24개다([R2g §2]). EVS의 나눔은 측정한 값이다 [M] ([R2g] L47–49; ES 순서로 읽은 예전의 "2 + 1 + 1"은 그것과 어긋났다). ES의 `SEND_NO_SUBS` 17개는 기록된 호출 문자열 다섯에서 나온다: version-event callback loop(`CFE_Config_IterateAll` → `CFE_ES_ModSrcVerCallback` → `CFE_ES_GenerateSingleVersionEvent`, `cfe_es_task.c:241, 218`)에서 13개, 그리고 ordinal 하나씩인 문자열 넷 `CFE_ES_INIT_INF_EID`(1, `cfe_es_task.c:442`), `CFE_ES_INITSTATS_INF_EID`(2, `:449`), mission version event의 `CFE_ES_VERSION_INF_EID`(91, `:259` → `:218`), `CFE_ES_BUILD_INF_EID`(92, `:287`)에서 하나씩이다. 줄과 EID는 고정 tree에서 다시 읽은 [F]이고, 다섯 문자열과 개수 13 + 1 + 1 + 1 + 1은 gdb stack `env/logs/r2_g1_trace.jsonl`–`r2_g3_trace.jsonl`에 있으며 `results/R2_gdb_v701.md:101`이 요약한다. 생성된 module version table이 없는 basis의 기대 개수는 spec이 적지 않는다. 13개 version event가 그 table에 기댈 것으로 보는 부분이고 [I], 나머지는 recorder가 정한다(S1 관문).
 - **사슬 (step 13).** `SEND_NO_SUBS` 사용 17개(version-event loop template에서 13개, ordinal 하나씩인 template 넷에서 하나씩)는 ES event packet(MsgId 0x808)에 대한 K-ROUTE instance에 묶인다. 이 packet들이 어떤 구독보다 먼저 송신된다는 귀속은 [R2g §2]의 추론이다 [I].
   - 소비자는 TO_LAB의 telemetry pipe다. TO_LAB은 table에서 `CFE_EVS_LONG_EVENT_MSG_MID`를 구독한다(`to_lab_sub.c:50`; 이 MID가 0x808이라는 것은 [I]). 그 연기는 문서화되어 있어(TO_LAB은 `CFE_ES_WaitForStartupSync` 뒤에 구독한다, `to_lab_app.c:64–68`) `defer_by_design`이다(3절 RC5).
   - monitor가 지켜보는 actor는 TO_LAB의 main task이고, ES가 송신할 때는 아직 없다. 그래서 각 발생은 송신에서 PENDING이고, TO_LAB이 구독하면 TOLERATED다. TO_LAB이 먼저 끝나거나 더는 먼저 구독할 수 없으면 같은 ordinal에서 VIOLATING이다. 예를 들어 TO_LAB 자신의 App-record 구간이 `TO_LAB_init`의 `CFE_EVS_Register`를 실패시키는 경우다(`to_lab_app.c:134`; App. A.3). 그래서 이 K-ROUTE instance는 schedule-dependent이고 그 구간의 발생에 사슬로 붙는다 [I]. panic은 이 발생들 가운데 어느 것도 정하지 않는다(spec §1.6).
   - 문서화된 연기가 없는 소비자의 K-ROUTE instance는 `Allowed = unspecified_by_reference`이고 label LOSS-UNDER-ORDER, harm 미지정이다. ES의 version-event packet용 K-ROUTE template은 `CFE_Config_IterateAll` loop에서 module version event마다 한 번 닿으므로(`cfe_config_get.c:180–187`; `cfe_es_task.c:235–241, 265, 466`) 부팅마다 ordinal이 여럿이고 ordinal마다 분류한다. 연기가 문서화되지 않은 소비자에서는 route 없이 이른 발생과 route 있는 늦은 발생이 `ordinal-split`을 줄 뿐이고, 같은 ordinal 짝을 보여야 schedule-dependent다.
-- **사슬의 세 판단 (step 13a).** framework 수준 `documented-not-error`(cSB4305.5)와 이 구간의 `fw_conf` = `deviates`, 호출자 수준 `defer_by_design` 또는 LOSS-UNDER-ORDER, 관측된 결과 "message lost"와 "event rejected"다. 상세는 2.9의 "예: SB 구독 전 송신"에 있다.
+- **사슬의 세 판단 (step 13a).** framework 수준 `documented-not-error`(cSB4305.5)와 이 구간의 `fw_conf` = `deviates`, 호출자 수준 `defer_by_design` 또는 LOSS-UNDER-ORDER다. 관측된 결과는 ES event packet의 "message lost"(packet은 만들어져 송신되었고, SB의 문서화된 무구독 결과다)와 cSB4305.5의 `SEND_NO_SUBS` event의 "event rejected"(EVS가 packet을 만들기 전에 요청을 거절하므로 잃은 packet이 아니다)다. 이 구간에서 ES packet의 손실은 구간 뒤에 남는 흔적을 남기지 않는다. 그것을 기록할 event는 거절되고 counter 증가는 지워지기 때문이다 [I]. 상세는 2.9의 "예: SB 구독 전 송신"에 있다.
 - **주장하지 않는 것 (step 14).** R2가 race라는 것, S1 전에 어떤 개수든 Kairos의 결과라는 것, 반복 실행에서 결정성을 끌어내는 것, certificate가 framework 규칙 없이 나온다는 것, 모든 실행에서 사용에 도달한다는 것(reach는 따로 둔 축이다), 어떤 progress 진술, 검사기가 추출된 사실이나 skeleton을 검증했다는 것.
-- **순서를 고친 대조에서의 기대 기록 (step 15; rung V2; 실행 전에 미리 등록 [I]).** SB의 발행이 한 절반의 사용보다 앞서도록 만든 basis(P-R2CTRL 선택지 (c1)–(d))에서는 그 절반의 FIXED_ORDER item 4가 실패한다. SB의 `CFE_ES_GetAppID` 호출(`cfe_sb_task.c:138`)의 성공 store가 이제 사용보다 앞서기 때문이다. 그래서 **fixed-order는 나오지 않는다**. PROTECTED (b)도 실패한다. `CFE_ES_GetAppID`의 실패 갈래가 `UNDEFINED`를 저장하고 SB가 반환값을 무시하기 때문이다(어느 조항이 실패하는지는 S3a에서 정한다). 그래서 판정은 **protected도 아니다**. 그 호출은 open인 App. A.2의 K-SELF.es instance이므로, 그 절반은 **open이고 App. A.2 뿌리에 사슬로 붙는다**. class는 S5/S7까지 `unknown`이고, 그 뒤에는 shape ABSENT의 schedule-dependent(σ_U)를 기대한다. 자연 실행은 "no σ_E bad witness in n of N runs; σ_E class unknown"을 준다.
+- **순서를 고친 대조에서의 기대 기록 (step 15; rung V2; 실행 전에 미리 등록 [I]).** SB의 발행이 한 절반의 사용보다 앞서도록 만든 basis(P-R2CTRL 선택지 (c1)–(d). 첫 검증은 (c2), (c1)과 바뀌지 않아야 하는 대조 (b)를 쓰고, (c3), (d), (e), (f)는 나중에 더할 때만 쓴다)에서는 그 절반의 FIXED_ORDER item 4가 실패한다. SB의 `CFE_ES_GetAppID` 호출(`cfe_sb_task.c:138`)의 성공 store가 이제 사용보다 앞서기 때문이다. 그래서 **fixed-order는 나오지 않는다**. PROTECTED (b)도 실패한다. `CFE_ES_GetAppID`의 실패 갈래가 `UNDEFINED`를 저장하고 SB가 반환값을 무시하기 때문이다(어느 조항이 실패하는지는 S3a에서 정한다). 그래서 판정은 **protected도 아니다**. 그 호출은 open인 App. A.2의 K-SELF.es instance이므로, 그 절반은 **open이고 App. A.2 뿌리에 사슬로 붙는다**. class는 S5/S7까지 `unknown`이고, 그 뒤에는 shape ABSENT의 schedule-dependent(σ_U)를 기대한다. 자연 실행은 "no σ_E bad witness in n of N runs; σ_E class unknown"을 준다.
   - 순서가 바뀌지 않은 절반에서는 fixed-order를 다시 기대하고, 바뀌는 것이 없는 대조(선택지 (b))에서는 fixed-order가 유지된다.
   - 줄 번호는 v7.0.1의 것이다(실패 store `cfe_es_api.c:758–760`). basis마다 anchor audit가 다시 묶는다(`v7.0.0`에서는 그 store가 `cfe_es_api.c:741`에 있다).
   - 선택지 (e)(지연 풀이 변경)의 기대는 코드가 생긴 뒤에만 쓰고 동결한다. 그것이 움직이는 절반과 App. A.2 사슬의 유무가 쓴 코드에 달려 있기 때문이다. 선택지 (f)(모형 수준 mutant)에는 정적 부분만 적용된다(실행, O4, reach는 없다).
-  - 이런 결과는 모두 구성이나 revision에 대한 민감도이고, 결코 스케줄의 근거나 기본 구성이 race라는 근거가 아니다.
+  - 이런 결과는 모두 구성이나 revision에 대한 민감도이고, 결코 스케줄의 근거나 기본 구성이 race라는 근거가 아니다. 순서 근거가 다른 곳에서 fixed-order가 철회되었다는 것만으로 전체 안전이 세워지지 않는다.
 
 ### 7.6 σ_E 칸: 실제 실행은 유한 실행이다
 
@@ -1076,8 +1076,8 @@ flowchart TD
 
 R2의 σ_E 칸은 실행에서 세지 않고 M_impl certificate에서 옮겨 온다. 옮길 수 있는 이유는 prefix containment다 [D].
 - **실제 실행.** 실제 실행은 gcc 바이너리의 유한한 LP 단위 사건 열이다. 끝나는 방법은 정지 방법(PI 결정 D17), `abort()`(`cfe_psp_support.c:107, :120`), teardown 뒤 `main`의 반환, harness kill, watchdog이다. 실제 실행은 유한 실행이고 maximal일 필요가 없다. 어떤 주장도 실행이 maximal인지에 기대지 않는다. 실행의 끝 상태는 아직 σ_U 전이를 허락할 수 있다.
-- **prefix containment** (L-CONT (c)). 모든 유한 실제 실행을 LP 단위 사건으로 투영하면 `Pref(B,σ_U,M_impl)`에 든다. (σ_U, M_impl)의 FIXED_ORDER certificate는 그 모든 유한 실행에서 `¬OK_i`를 증명하므로, 전이 규칙 2에 따라 σ_E 칸은 "어떤 실제 실행에서도 범위 안 발생이 `READY`나 `TOLERATED`가 아니다"를 말한다. M_api 결과는 σ_E로 바로 옮기지 않는다. R2의 cone에는 task 생성(M_impl-relevant)이 있기 때문이다.
-- **옮기는 것은 b = ∞의 safety 진술뿐이다.** reach, witness, progress, 빈도는 σ_E로 옮기지 않는다. σ_E의 reach는 S1이 관측한 발생으로 `proved`가 된다. σ_E의 progress는 wait-for 사실 없이는 `unknown(not_checked)`다.
+- **prefix containment** (L-CONT (c)). 모든 유한 실제 실행을 LP 단위 사건으로 투영하면 `Pref(B,σ_U,M_impl)`에 든다. (σ_U, M_impl)의 FIXED_ORDER certificate는 그 모든 유한 실행에서 `¬OK_i`를 증명하므로, 전이 규칙 2에 따라 σ_E 칸은 "어떤 실제 실행에서도 판정된 범위 안 발생이 `READY`나 `TOLERATED`가 아니다"를 말한다. 호출이 conjunct의 LP 전에 돌아온 `NOT_EVALUATED` 발생은 세 safety 진술 모두가 허용한다(spec §0.9 항목 1). M_api 결과는 σ_E로 바로 옮기지 않는다. R2의 cone에는 task 생성(M_impl-relevant)이 있기 때문이다.
+- **옮기는 것은 b = ∞의 safety 진술뿐이다.** reach, witness, progress, 빈도는 σ_E로 옮기지 않는다. σ_E의 reach는 S1이 판정되고 평가된 발생을 관측하면 L-CONT (c)를 거쳐 `proved`가 된다. σ_E의 progress는 wait-for 사실 없이는 `unknown(not_checked)`다.
 - **실행이 맞설 때.** 같은 칸과 bound 안에서 실현된 good witness(범위 안 READY 발생)가 나오면 O4(b)의 모순이다. rule이 정지되고 영향받은 판정은 `unknown(model_fault)`가 된다(spec §4.12 item 5).
 - **teardown.** 실험의 정지 방법이 ES POWERON 재시작 명령이므로, 정지 방법으로 끝나는 실행은 teardown으로 끝난다. 결정 event가 종료 요청 뒤에 오는 발생은 K-TEARDOWN instance로 따로 센다(8.2). process를 끝내는 terminal 단계 뒤의 발생은 status가 없다(2.5).
 - 관측과 확인 쪽에서 실행이 끝나는 법, normalization boot, σ_E 칸의 나머지 규칙은 [06_observation_confirmation.md §12.11](06_observation_confirmation.md#1211-실제-실행이-끝나는-법과-σ_e-칸-spec-18-412)에 있다.
@@ -1088,7 +1088,7 @@ R2의 σ_E 칸은 실행에서 세지 않고 M_impl certificate에서 옮겨 온
 
 (spec §3.5, §1.6, §4.5, App. A.7)
 
-pc-linux에서 종료는 모든 OSAL object를 지우는 `OS_DeleteAllObjects`로 끝난다. 이 연산은 모든 `osal.obj` 자원의 disabler다(App. A.7). Kairos는 모든 계약에 "종료 요청 전"이라는 **범위(scope)**를 붙이고, 결정 event가 종료 요청 뒤에 오는 발생은 별도 family로 따로 분류·보고한다(spec §1.6, §3.5). 그림 D9가 pc-linux의 실제 종료 모형과 그 범위를 보인다. 이 그림에서만 점선 화살표는 spec 표기 "⇢"(SCOPE로 제외되는 disabler 관계)이고, 점선 테두리는 다음 실행이다.
+pc-linux에서 종료는 모든 OSAL object를 지우는 `OS_DeleteAllObjects`로 끝난다. 이 연산은 모든 `osal.obj` 자원의 disabler다(App. A.7). Kairos는 모든 준비 상태 명세에 "종료 요청 전"이라는 **범위(scope)**를 붙이고, 결정 event가 종료 요청 뒤에 오는 발생은 별도 family로 따로 분류·보고한다(spec §1.6, §3.5). 그림 D9가 pc-linux의 실제 종료 모형과 그 범위를 보인다. 이 그림에서만 점선 화살표는 spec 표기 "⇢"(SCOPE로 제외되는 disabler 관계)이고, 점선 테두리는 다음 실행이다.
 
 **그림 D9. 종료 범위** (렌더링: [diagrams/D9_teardown_scoping.svg](diagrams/D9_teardown_scoping.svg); spec §12 D9; §3.5, §1.6, §4.5, §4.13)
 
@@ -1156,22 +1156,24 @@ flowchart TD
     style NEXT stroke-dasharray:5 5
 ```
 
+**그림과 spec 개정 1.2의 차이.** 그림의 다음 실행 상자 "POWERON restart → clean Init"는 개정 1.1의 표현이다. PI 결정 D17 (a)(2026-10-15) 뒤의 spec §3.5는 POWERON 재시작이 shm segment를 지우지만 모든 유지 파일, file cache, 공유 file system을 초기화하지는 않으므로, 그것만으로 다음 실행의 B.Init을 깨끗하다고 보지 않는다고 적는다. 실행마다 초기 상태와 종료 기록을 기록하고 정규화한다(8.1 항목 3). 그림 원본 `diagrams/D9_teardown_scoping.mmd`를 고칠 때 이 상자를 함께 고친다.
+
 ### 8.1 pc-linux의 재시작은 세 효과다
 
 kind는 `es.shutdown`이고 상태는 RUN → SHUTDOWN_REQ → TEARDOWN이다(spec §1.3). 재시작과 종료는 세 효과로 모형화한다 [D] [F] (spec §3.5; [X1-M6], [X2-04]; 줄은 `psp/fsw/pc-linux/src`).
 
 1. **요청자**(`CFE_PSP_Restart`를 부르는 아무 actor. 예: `CFE_ES_ResetCFE`를 통해). POWERON이면 shm segment를 지운다(`cfe_psp_support.c:62–69`). boot record의 `NextResetType`을 쓴다(`:78–79`). `ShutdownReq = true`를 저장한다(`:87`). 이것이 **SHUTDOWN_REQ LP**다. PSP main thread에 `SIGUSR1`을 보내고(`:88`), `CFE_PSP_RESTART_DELAY` = 10000 ms를 기다린 뒤(`:99`) `abort()`한다(`:107`). 요청자는 **돌아오지 않는다.** `CFE_PSP_Restart`는 호출자에게 종료 연산이다(지연 뒤 T-TERM).
 2. **PSP main thread**, `CFE_ES_Main`이 돌아온 뒤에만. `OS_Application_Run`이 `ShutdownReq`를 볼 때까지 `sigwait`로 돌고(`cfe_psp_start.c:484–499`), `OS_TaskDelay(100)` 뒤 `OS_DeleteAllObjects`(`:505–507`)를 한다. 이것이 **TEARDOWN LP**다. `SIGUSR1`은 process 전체에서 막혀 있으므로(`os-impl-tasks.c:262–291`), startup thread가 아직 `CFE_ES_Main` 안에 있으면 재시작 요청은 teardown을 일으키지 않고 10 s 뒤 요청자의 abort만 남긴다. 2.3의 EVS 갈래 (b)가 이 경우다.
-3. **다음 실행.** `CFE_PSP_Restart(POWERON)`은 shm segment를 지우므로 다음 실행의 B.Init이 깨끗하다. 다른 종료(abort, PROCESSOR 재시작, harness kill)는 segment를 남기고, 다음 부팅은 PROCESSOR reset이 된다(spec §1.7, §4.13).
+3. **다음 실행.** `CFE_PSP_Restart(POWERON)`은 shm segment를 지운다. 그것만으로 다음 실행의 B.Init을 깨끗하다고 보지 않는다. POWERON은 모든 유지 파일, file cache, 공유 file system을 초기화하지 않으므로(PI 결정 D17 (a), 2026-10-15), 실행마다 초기 상태와 종료 기록을 기록하고 정규화한다(Init snapshot S0; spec §1.7, §4.13). 다른 종료(abort, PROCESSOR 재시작, harness kill)는 segment를 남기고, 다음 부팅은 PROCESSOR reset이 된다(spec §1.7, §4.13).
 
 ### 8.2 범위 조건과 SCOPE 제외
 
 - **SR 규칙.** `ShutdownReq`의 writer 집합은 위 store 하나다(`psp/fsw/pc-linux/src`에 다른 writer가 없다). skeleton에서 `OS_DeleteAllObjects` 앞에는 `ShutdownReq` 관측이 있으므로, T-OBS가 `SHUTDOWN_REQ ∈ MB(OS_DeleteAllObjects)`를 준다.
-- **범위 conjunct.** 모든 계약에는 "`es.shutdown`의 SHUTDOWN_REQ LP가 발생의 **결정 event**보다 앞서지 않는다"라는 암묵적 조건이 붙는다. 발생의 readiness가 정해질 때 정하고, 결정 뒤의 conjunct LP는 상관없다. conjunct가 하나인 계약에서는 "사용의 LP보다 앞서지 않는다"와 같다(spec §1.6 scope; EXT-20261012 §4.1).
+- **범위 conjunct.** 모든 준비 상태 명세에는 "`es.shutdown`의 SHUTDOWN_REQ LP가 발생의 **결정 event**보다 앞서지 않는다"라는 암묵적 조건이 붙는다. 발생의 readiness가 정해질 때 정하고, 결정 뒤의 conjunct LP는 상관없다. conjunct가 하나인 준비 상태 명세에서는 "사용의 LP보다 앞서지 않는다"와 같다(spec §1.6 scope; EXT-20261012 §4.1).
 - **SCOPE 제외 [D].** `SHUTDOWN_REQ ∈ MB(d)`인 writer나 disabler `d` 뒤에는 범위 밖 발생만 올 수 있다. 그래서 범위 안 발생에 대한 certificate는 **conjunct마다** `d`를 뺀다(spec §4.5). 발생의 결정 이전에 있는 conjunct LP 앞에 `d`가 일어나면 그 발생은 범위 밖이다. scope는 결정 event에서 정하기 때문이다(L-SCOPE). SCOPE는 T-OBS 안에서는 쓰지 않는다. MB 사실은 teardown을 포함한 모든 실행에서 성립하기 때문이다.
 - **결과.** 기본 B의 certificate는 **"teardown 밖에서"**로 진술한다. 결정 event가 종료 요청 뒤에 오는 발생은 기본 범위의 여집합인 별도 family **K-TEARDOWN**(삭제 중의 K-LIFE)이 되어 같은 상태로 분류하고 따로 보고한다. trace에서는 결정 event가 관측한 SHUTDOWN_REQ LP 뒤에 오는 발생이 K-TEARDOWN instance다. 그 앞에서 결정된 발생은 뒤의 conjunct LP가 그 뒤에 와도 범위 안에 남는다(spec §4.8 step 11). K-TEARDOWN instance의 progress는 `unknown(teardown_scope)`이고, 기본 범위 instance의 stall 평가에서는 SHUTDOWN_REQ LP 뒤의 상태가 빠진다(spec §1.8).
-- **실험의 정지 방법.** 실험을 멈추는 방법이 ES POWERON 재시작 명령이다(CI 단계 `build-run-app-reusable.yml` L209–214, [BM]의 E11(a); PI 결정 D17의 후보). 그래서 관측하는 모든 실행은 teardown으로 끝나고, 그 안에서 결정된 발생은 K-TEARDOWN instance가 된다. 실제 실행이 끝나는 다른 방법(`abort()`, harness kill, watchdog)과 그 뒤의 처리는 7.6과 [06_observation_confirmation.md §12.11](06_observation_confirmation.md#1211-실제-실행이-끝나는-법과-σ_e-칸-spec-18-412)에 있다.
-- **normalization boot.** POWERON 재시작으로 끝나지 않은 실행은 SysV segment와 `NextResetType = PROCESSOR`인 boot record를 남긴다. 그래서 다음 pool 실행 전에 관측하지 않는 normalization boot를 한 번 하고, Init을 정규 S0와 대조한다(spec §1.7, §4.13).
+- **실험의 정지 방법.** 실험을 멈추는 방법이 ES POWERON 재시작 명령이다(CI 단계 `build-run-app-reusable.yml` L209–214, [BM]의 E11(a); PI 결정 D17 (a), 2026-10-15에 정함). 그래서 관측하는 모든 실행은 teardown으로 끝나고, 그 안에서 결정된 발생은 K-TEARDOWN instance가 된다. 실제 실행이 끝나는 다른 방법(`abort()`, harness kill, watchdog)과 그 뒤의 처리는 7.6과 [06_observation_confirmation.md §12.11](06_observation_confirmation.md#1211-실제-실행이-끝나는-법과-σ_e-칸-spec-18-412)에 있다.
+- **normalization boot.** POWERON 재시작으로 끝나지 않은 실행은 SysV segment와 `NextResetType = PROCESSOR`인 boot record를 남긴다. 그래서 다음 pool 실행 전에 관측하지 않는 normalization boot를 한 번 하고, Init을 정규 S0와 대조한다(spec §1.7, §4.13). POWERON 재시작이 모든 유지 파일, file cache, 공유 file system을 초기화하지 않으므로(D17 (a)) 이 대조가 검사다.
 
 ### 8.3 calibration 예: timebase 조회는 teardown 밖에서 protected (App. A.7)
 
@@ -1179,7 +1181,7 @@ kind는 `es.shutdown`이고 상태는 RUN → SHUTDOWN_REQ → TEARDOWN이다(sp
 
 - `cFS-Master`는 PSP의 module init이 main thread에서 `CFE_ES_Main` 전에 만들고 시작한다(2.5). 그 발행 LP `x*`(이름 상수 `"cFS-Master"`)는 `W^must`(조건을 확실히 참으로 만드는 writer) 항목이며 MUST_KEY, COMPUTED다. PSP main thread의 T-PO와 T-SPAWN으로 모든 cFE task entry의 MB에 들어간다.
 - `osal.obj<timebase>("cFS-Master")`의 disabler는 `OS_DeleteAllObjects`(`cfe_psp_start.c:507`)뿐으로 기대한다. 이것은 `SHUTDOWN_REQ ∈ MB`이므로 **SCOPE로 제외**된다. census가 `OS_TimeBaseDelete` 지점을 찾으면(기본 B에서는 없을 것으로 기대한다) PWB로 순서가 정해져야 하고, 아니면 certificate를 보류한다.
-- 그래서 TIME과 SCH_LAB의 조회(`cfe_time_task.c:311`, `sch_lab_app.c:176`)는 safety 진술로 `protected(σ_U, M_api)`다. 조회가 돌 때 record가 이미 LIVE이므로(`x*`가 최종 발행) `protected(σ_U, M_impl)`이기도 하다(`¬NR_i`: 도달한 모든 조회가 READY). σ_U∞와 σ_R1 칸은 전이 규칙 1(a)로, σ_E 칸은 M_impl에서 전이 규칙 2로 온다. 모두 **teardown 밖에서**로 진술한다.
+- 그래서 TIME과 SCH_LAB의 조회(`cfe_time_task.c:311`, `sch_lab_app.c:176`)는 safety 진술로 `protected(σ_U, M_api)`다. 조회가 돌 때 record가 이미 LIVE이므로(`x*`가 최종 발행) `protected(σ_U, M_impl)`이기도 하다(`¬NR_i`: 판정된 범위 안 조회 발생은 모두 READY나 NOT_EVALUATED이므로, 도달한 조회는 모두 READY다). σ_U∞와 σ_R1 칸은 전이 규칙 1(a)로, σ_E 칸은 M_impl에서 전이 규칙 2로 온다. 모두 **teardown 밖에서**로 진술한다.
 - **progress는 주장하지 않는다.** certificate가 낸 모든 칸에서 `unknown(not_checked)`다. explorer를 M_api에서 돌리면 이 조회들의 σ_U∞ stall 상태는 건너뛴 core raise 뒤에서만 닿는다. 그때 startup thread는 `cfe_es_start.c:835`에서 dead이고 TIME과 SCH_LAB의 spawn은 앞에 남는다(`CFE_ES_MainTaskSyncDelay`에 L1 적용; L1을 끄면 `unknown(unmodelled)`). 이 stall은 `tml-root`를 지닌 App. A.2 뿌리에 사슬로 붙는다. M_impl에서는 F7로 잃은 core task 뒤에서도 닿고(`osapi-task.c:128–137`), 그 task의 K-SPAWN.osal 발생에 붙는다 [I].
 - 이 진술은 기본 B에 상대적이다. C1의 B′ M_impl에서는 SCH_LAB의 조회가 누수된 countsem type lock 뒤에도 있다(`sch_lab_app.c:167`의 `OS_CountSemCreate`). 그것은 CF의 VIOLATING 시도에 사슬로 붙는 `leaked-lock` stall이다(6.4).
 - timebase handshake를 잃어도 이 조회에는 영향이 없다. 두 조회는 TaskInit과 AppInit에서 `OS_TimerAdd` 전에 돌고 callback을 기다리지 않는다. 영향은 1 Hz pipeline과 SCH_LAB의 loop에만 간다(2.13).
@@ -1196,17 +1198,17 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 
 - 경보가 없다는 것에서 "안전"이나 "위반 없음"을 끌어내지 않는다(항목 2). 실행에서 bad가 없었다는 것에서 σ_E class를 끌어내지 않는다. 쓸 수 있는 말은 정확히 "no σ_E bad witness in n of N runs (pool key); σ_E class unknown"뿐이다(N번 중 n번 실행에서 σ_E bad witness 없음, σ_E class 모름; 항목 3).
 - 반복 실패 실행에서 "fixed-order"나 "결정적"을 끌어내지 않는다(항목 4).
-- R2가 race라고 하지 않는다. R2 certificate가 generic template만으로 나온다고 하지 않는다. generic 계약 K-ID와 framework 규칙 R19를 함께 쓴다(항목 12).
+- R2가 race라고 하지 않는다. R2 certificate가 generic template만으로 나온다고 하지 않는다. generic 준비 상태 명세 K-ID와 framework 규칙 R19를 함께 쓴다(항목 12). R2의 관측 판정을 기여의 근거로 주장하지 않는다. 같은 준비 사전조건이 주어지면 단순한 상태 검사도 같은 발생을 찾을 것으로 보기 때문이다(항목 58, 개정 1.3; R2는 관측 경로의 기반 검증이다).
 - C3·C5를 v7.0.1에서 재현했다고 하지 않는다(항목 13). 기존 도구가 C1–R2에서 실패한다고 하지 않는다(항목 14).
 - 다섯 사례로 일반성을 주장하지 않는다. derived, role-derived, 변형, mutant, 구성 변경 시험의 결과를 "새 버그"라 하지 않는다(항목 16).
 - Linux `SCHED_OTHER`, permissive mode에서 비행 대표 timing이나 overhead를 주장하지 않는다. RTEMS/VxWorks profile이 생기기 전에는 그 RT 판정도 하지 않는다(항목 17).
 - F Prime 등 다른 framework에 대해서는 가설 H-F 밖의 아무것도 주장하지 않는다. 그 메커니즘은 R01–R07에서 검토하지 않았다(항목 19; spec §7.6).
 - ad hoc 동기화 위치의 memory model 정확성을 주장하지 않는다(가정 A4, 항목 20).
-- Kairos의 recorder가 사용 집합을 재현하기 전에는 R2의 어떤 개수도 Kairos의 결과가 아니다. "24"는 ENV의 version table이 있는 basis에서만 맞다(항목 21).
+- Kairos의 recorder가 사용 집합을 재현하기 전에는 R2의 어떤 개수도 Kairos의 결과가 아니다. "24"는 ENV basis에서만 맞다. 생성된 module version table이 그 입력 중 하나이고, 개수가 그 table에 기대는지는 Kairos 자신의 recorder가 확인한다 [I] (항목 21).
 - 거절된 event 요청을 "잃어버린 packet"이라 하지 않는다. EVS는 packet을 만들기 전에 거절한다(항목 22).
 - OSAL F1, F7, timebase handshake 소실, 두 App-record 구간을 확인 실행 전에 버그라 하지 않는다(항목 23).
 - certificate에서 progress, 종료, deadlock 없음, 도달을 끌어내지 않는다. certified protected나 fixed-order는 사용에 닿지 않는 실행, 사용 전·안·뒤의 영원한 대기와 deadlock, 잃은 provider나 spawn, Allowed horizon이 닫히는지에 대해 아무것도 말하지 않는다(항목 26). K-TEARDOWN instance의 progress도 말하지 않는다(항목 32).
-- maximal 실행의 containment를 주장하지 않는다. 실제 실행은 유한 실행이지 maximal 실행이 아니다(항목 27). reach, witness(그래서 `tolerated`, `schedule-dependent`, `ordinal-split`), progress를 σ 사이에서 옮기지 않는다(deadlock 순환과 누수된 lock의 stall만 예외). σ_E로 옮긴 progress 진술이나 bounded 진술도 없다(항목 28).
+- maximal 실행의 containment를 주장하지 않는다. 실제 실행은 유한 실행이지 maximal 실행이 아니다(항목 27). reach, witness(그래서 `allowed-not-ready`, `schedule-dependent`, `ordinal-split`), progress를 σ 사이에서 옮기지 않는다(deadlock 순환과 누수된 lock의 stall만 예외). σ_E로 옮긴 progress 진술이나 bounded 진술도 없다(항목 28).
 - `kz proofcheck`의 "독립 검증"을, 신뢰 기반에 상대적으로 추론 단계를 다시 확인했다는 것보다 강한 뜻으로 쓰지 않는다(항목 31).
 - `ordinal-split`인 instance가 스케줄에 달려 있다고 하지 않는다(항목 30). 모형 stall witness가 kind `other`이거나 `idle`, `terminal-pending`, `choice-dependent`이면 바이너리의 hang이라 하지 않는다. explorer 없이 refinement가 있다고 하지 않는다(항목 33).
 - 사용의 actor instance나 그 spawn 사슬의 actor가 발생 없이 끝나는 실행(F7로 잃은 task, timebase thread의 조용한 return)과 panic으로 끝나는 실행에 대해서는 아무것도 주장하지 않는다. 그 기록은 그곳으로 이끈 not-ready 뿌리 발생의 safety 결과와 그 사슬의 harm뿐이다(항목 34).
@@ -1214,6 +1216,8 @@ spec §6.4 중 이 문서와 관련된 항목이다.
 - reference의 class 진술 없이 class 정확도를 말하지 않는다(항목 41). C1, C2, C3, C5를 v7.0.1 기본 구성에서 "재현했다"고 하지 않는다(항목 42). 한 설계 사례의 결과를 다른 사례의 근거로 쓰거나 다섯 사례를 독립 표본으로 세지 않는다. TIME/TBL 문맥의 R2 template 결과는 C3의 결과가 아니고, A.3의 결과는 C5의 결과가 아니며, 기본 B의 C1 `inactive(B)`와 K-PHASE census는 C1, C2의 결과가 아니다(항목 43).
 - SB 무구독 손실의 framework 수준 `documented-not-error`를 호출자 수준 판정과 합치지 않는다. 그것만으로 손실이 허용되었다고 하지 않는다. 전달을 요구하는 reference가 없으면 호출자 수준 label은 `violation`이 아니라 LOSS-UNDER-ORDER다(2.9; spec §1.6, §1.10, §4.12 item 6).
 - 3절의 coverage 개수(full 10, partial 5)는 census 전의 [I]다. 6절의 기대 판정도 모두 [I]다.
+- 소속 앱(`app_owner`)이 `undetermined`인 결과를 앱 사이 결과로 세지 않는다. `inferred`(`match-by-time`) 매핑을 `confirmed`로 쓰지 않는다(spec §1.2, §5.7, ADR-056).
+- C1의 OSAL RESERVED 구간 경로(A5, K-LOCKBAL)를 다섯 사례의 결과 수에 넣지 않는다(P-C1HOLD).
 
 ---
 

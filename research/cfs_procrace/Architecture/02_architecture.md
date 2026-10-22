@@ -874,10 +874,11 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 - **증명 상태.** "proved", "verified", "certified"는 증명 상태가 `proved`인 lemma에만 쓴다. 의무로만 나열된 lemma와 그것에 기댄 진술에는 쓰지 않고, `proved`를 이진 파일에 대한 진술로 읽지 않는다. `reach = proved`는 관측만으로 성립하지 않고 L-CONT (c) 등에 기댄다(spec §6.4 항목 45, 46).
 - **관측 영향.** 관측이 시간만 바꾼다거나 영향이 없다고 하지 않는다. 기준 실행과 견준 점검이 있고, 기준 실행이 없는 내부 사건에는 "영향 없음"이라는 결론을 내리지 않는다(spec §6.4 항목 48).
 - **R2 결과의 표현.** EVS가 거부한 이벤트 요청은 "이벤트 요청 거부"이고 잃어버린 packet이 아니다. gdb 로그만으로 시스템 호출의 유무를 말하지 않는다(spec §6.4 항목 22, 47).
-- **비교.** 기존 Process-Level Race 연구 사이에 점수나 순위를 매기지 않는다. `NOT_RUN`은 미탐지가 아니다(spec §6.4 항목 14, 54).
+- **비교.** 기존 Process-Level Race 연구 사이에 점수나 순위를 매기지 않는다. `NOT_RUN`은 미탐지가 아니다(spec §6.4 항목 14, 54). 빌드하거나 실행하지 않은 기존 도구에 대해 "탐지하지 못한다"고 쓰지 않고, 그 틈은 문헌·코드 분석 결과 상태로만 적는다(spec §6.4 항목 60; 2026-10-22 결정 D4, ADR-058).
+- **요약 뷰와 세는 법** (rev 1.3; C-36). `PENDING`이나 `OPEN`에서 나온 `INCONCLUSIVE(horizon-open)`을 위반 없음이나 허용된 결과로 세지 않는다(항목 59). actor의 애플리케이션 소유가 미확정인 instance를 애플리케이션 사이의 결과로 세지 않는다(항목 61). R2의 관측 기반 결과를 기여의 증거로 쓰지 않는다(항목 58). 관측된 위반, 모형 후보, 확인된 실행을 한 탐지 수로 더하지 않는다(OUT-01, spec §1.10).
 - **conformance의 충분성.** O1/O2/O8 통과는 필요조건일 뿐이다([§9.1](#91-실패가-낳는-세-가지-결과)).
 - **`dpor`의 정확성.** `dpor` engine은 근거 정리의 상태가 P인 동안 "unverified"로 표시한다. 전수 탐색 engine `exh`는 영향을 받지 않는다(ADR-017).
-- **새 기법.** spec은 개별 기법 어느 것도 새롭다고 주장하지 않는다. 주장할 수 있는 기여는 조합이다 [I] (spec §1.11).
+- **새 기법.** spec은 개별 기법 어느 것도 새롭다고 주장하지 않는다. 주장할 수 있는 기여는 조합이다 [I] (spec §1.11). revision 1.3에서 기여는 시험할 가설과 그 반증 조건으로 적고(spec §1.11 "Contribution hypotheses and their falsification"; C-13; [01_overview.md §5.1](01_overview.md#51-기여-가설-i)), 불완전 기록 위의 보수적 판정, 애플리케이션 소유의 표시, SMT solver의 사용, certificate의 존재는 그 자체로 새로움으로 주장하지 않는다(spec §6.4 항목 62).
 
 ---
 
@@ -907,5 +908,5 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 
 - spec: 주로 §2(아키텍처)를 풀어 쓴 것이다.
 - PI 결정: D1, D3, D6, P-Z3, P-LIBBPF 등([spec/PI_DECISIONS.md](spec/PI_DECISIONS.md)).
-- 검토 쟁점: X3-m6(X-macro), X3-m7(두 실행 파일), X3-M11(Φ 하위 언어) 등([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012의 처리는 spec §0.7과 ADR-039–ADR-044에 있고, 이 문서에는 trust ledger(ADR-041), O10과 O6 (b)(ADR-040), 세 판단(ADR-043)이 반영되어 있다. revision 1.2의 반영은 spec §0.9–§0.11과 ADR-045–ADR-052에 있다. 이 문서에는 증명 상태(ADR-045), 관측 영향 점검(ADR-049), MLIR 제외(ADR-051), 용어 결정 T1(ADR-052)이 반영되어 있다.
+- 검토 쟁점: X3-m6(X-macro), X3-m7(두 실행 파일), X3-M11(Φ 하위 언어) 등([spec/ISSUE_RESOLUTION.md](spec/ISSUE_RESOLUTION.md)). 외부 검토 EXT-20261012의 처리는 spec §0.7과 ADR-039–ADR-044에 있고, 이 문서에는 trust ledger(ADR-041), O10과 O6 (b)(ADR-040), 세 판단(ADR-043)이 반영되어 있다. revision 1.2의 반영은 spec §0.9–§0.11과 ADR-045–ADR-052에 있다. 이 문서에는 증명 상태(ADR-045), 관측 영향 점검(ADR-049), MLIR 제외(ADR-051), 용어 결정 T1(ADR-052)이 반영되어 있다. revision 1.3의 반영은 spec §0.12와 ADR-053–ADR-058에 있다. 이 문서에는 필수 경로와 선택 경로(ADR-053), 요약 뷰(ADR-054), 설명 집합과 재생 규약(ADR-055), task→앱 매핑(ADR-056), 사다리 재정의와 사례별 닫힘(ADR-057), 실행하지 못한 도구에 대한 표현(ADR-058)이 반영되어 있다(머리의 "rev 1.3 반영" 참고).
 - 배경: [background/07_env_feasibility.md](background/07_env_feasibility.md)([R07]). 이 문서의 측정값 대부분의 출처다.

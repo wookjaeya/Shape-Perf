@@ -115,7 +115,7 @@
 
 ```mermaid
 flowchart TD
-    %% D7 - observation and hold pipeline on the unmodified gcc binary. Source: spec §12 D7; §5.1-5.7, §4.13.
+    %% D7 - observation and hold pipeline on the unmodified gcc binary. Source: spec §12 D7 (rev 1.2: kernel recorded per run, §1.7 Env, D11); §5.1-5.7, §4.13.
     %% Costs marked [M] are measured values quoted by the spec ([R07 §4.7]); nothing here was run by Kairos.
     %% Dashed border = optional (tracefs; P-TRACEFS recommends no).
 
@@ -129,7 +129,7 @@ flowchart TD
     NBD["normalization-boot driver"]
     TFS["optional tracefs instance"]
 
-    subgraph KERN["Linux kernel 6.18.44-fc-v114"]
+    subgraph KERN["Linux kernel, recorded per run (6.18.44-fc-v114 in [R07 §1], -fc-v139 on 2026-10-16; §1.7 Env)"]
         UPR["uprobe registrations by (inode, offset)<br/>core-cpu1 and app .so, before launch"]
         WP["per-task write watchpoints"]
         BPF["BPF programs<br/>entry, point, return, watch"]
@@ -180,7 +180,7 @@ flowchart TD
     class THR bin
 ```
 
-**그림과 spec 개정 1.2의 차이.** 그림의 kernel 상자는 "6.18.44-fc-v114"라고 적는다. 개정 1.2의 spec은 kernel을 실행마다 기록한다(gdb 기준 실행은 `-fc-v80`, [R07 §1]과 S1-R2 smoke run은 `-fc-v114`, 2026-10-16에는 `-fc-v139`; spec §1.7 Env, §12 D1). spec §12 D7의 항목은 바뀌지 않았고, 그림 원본 `diagrams/D7_observation_pipeline.mmd`를 고칠 때 이 상자를 함께 고친다. harness root hook은 PI 결정 D1으로 승인되었다(2026-10-15).
+**그림의 kernel 상자** (개정 1.2). 개정 1.2의 spec은 kernel을 실행마다 기록한다(gdb 기준 실행은 `-fc-v80`, [R07 §1]과 S1-R2 smoke run은 `-fc-v114`, 2026-10-16에는 `-fc-v139`; spec §1.7 Env, §12 D1). 그림의 kernel 상자는 이것을 따른다. spec §12 D7의 항목은 바뀌지 않았다. harness root hook은 PI 결정 D1으로 승인되었다(2026-10-15).
 
 분석 워크플로우 안에서 관측이 놓이는 자리는 [03_workflow.md §5](03_workflow.md#5-관측-파이프라인-개요-그림-d7)에 있다. 이 문서는 그림의 각 노드를 아래 절에서 자세히 다룬다.
 

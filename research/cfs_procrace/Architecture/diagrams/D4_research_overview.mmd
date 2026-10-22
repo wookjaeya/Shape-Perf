@@ -1,21 +1,25 @@
 flowchart TD
-    %% D4 overview - research workflow: validation ladder (first target: rung V1), case tracks, stages, freezes, PI decisions.
-    %% Source: spec §12 D4 (rev 1.1); §9.3, §9.4, §10.1; ADR-044. Detail: D4_research_evaluation.mmd (evaluation path).
-    %% Dashed border = conditional or PI-gated (its basis or arm exists only after a PI decision). Dashed edge = PI decision gating a rung, track or stage, or a conditional path.
-    %% No edge between V2 and V3: the order of EXT-20261012 §7 (step 3, then step 4) is a reporting order. No effort estimate exists for any rung.
+    %% D4 overview - research workflow: validation ladder (first rung: V1′, R2 baseline validation; V3 in parallel), case tracks, stages, freezes, decisions.
+    %% Source: spec §12 D4 (rev 1.2); §9.3 "Ladder of revision 1.3", §9.4, §10.1; ADR-044, ADR-053, ADR-057. Detail: D4_research_evaluation.mmd (evaluation path).
+    %% Dashed border = optional route (rev 1.3, ADR-053), or conditional, later or not yet built (its basis or arm exists only after the work its decision names).
+    %% Dashed edge = a decision gating a rung, track or stage (the values are in spec §10.1), an optional route, or a conditional path.
+    %% V3 runs in parallel with V1′ (rev 1.3); V2 follows V1′. No edge between V2 and V3: the order of EXT-20261012 §7 is a reporting order. No effort estimate exists for any rung.
 
     PHI["Φ authoring<br/>provenance, authoring records,<br/>refinement accounting"]
 
-    subgraph LAD["validation ladder (ADR-044): the first target is rung V1, not the whole thin MVC"]
+    subgraph LAD["validation ladder (ADR-044, P-LADDER; redefined in rev 1.3, ADR-057): the first rung is V1′, with V3 in parallel"]
         V0["V0 formal fixes<br/>definitions of ADR-039 to ADR-043;<br/>litmus LP-DL, LP-TW"]
         V0P["V0-P lemma obligations written<br/>before any certificate or transfer wording"]
-        V1["V1 R2's K-ID chain end to end, ENV basis<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2"]
+        V1P["V1′ R2 baseline validation (first rung, rev 1.3)<br/>observation, normalization with app_owner,<br/>observation-based judgement (explanation set),<br/>trust ledger; ENV basis; against R2's frozen sheet;<br/>not evidence of the contribution"]
+        V1["V1 certificate exit items (optional, rev 1.3)<br/>FIXED_ORDER, kz proofcheck, R2 certificate ledger;<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2;<br/>only if the paper makes R2's universal statement"]
         V1B["V1b the rest of the thin MVC gates<br/>(results on counterparts are not case evidence)"]
-        V2["V2 R2's control basis B′"]
-        V3["V3 C1 on its B′"]
-        V4A["V4a same-information comparison<br/>(in S9, after F1)"]
-        V4B["V4b held-out and pre/post-fix pairs<br/>(in S9, after F2)"]
+        V2["V2 R2's control basis B′<br/>(follows V1′)"]
+        V3["V3 C1 on its B′ (public BP basis, D22)<br/>in parallel with V1′: basis, application closure,<br/>observation plan start with stage B;<br/>first case for contribution evidence"]
+        V4A["V4a comparison with existing<br/>process-level race work<br/>(in S9, after F1)"]
+        V4B["V4b held-out and pre/post-fix pairs<br/>(extended evaluation, in S9, after F2)"]
     end
+
+    STGAF["stages A-F of [P0.2] on the rungs (rev 1.3):<br/>A = V0 + paper track; B = V1′ + observation parts of V3, VP-D3, VP-D4;<br/>C = S5 on V3 first; D = S6 on V3 first (not complete with R2's observations alone);<br/>E = V4b; F = V4a with the contribution hypotheses (§1.11).<br/>Stage B per case (D5): records traceable to evidence, tests T-05, T-17-T-20,<br/>closure covering the writers and aliases its conditions need"]
 
     subgraph TRK["case tracks (beside the ladder)"]
         PAP["paper track, all five cases<br/>reading at pinned revisions;<br/>expectation sheets frozen before tool output"]
@@ -27,74 +31,77 @@ flowchart TD
     subgraph MVC["thin MVC = S0 + S1 + S2 + S3a (never cut; its full gates are rung V1b)"]
         S0["S0 formats + formal core<br/>kz_schema.h, Φ grammar + semantics,<br/>one evaluator, golden harness"]
         S1["S1 F0 observer<br/>gate: R2 per-use set re-observed<br/>by Kairos's own recorder"]
-        S2["S2 trace HB + dynamic contracts<br/>gate: every R2 use classified"]
-        S3A["S3a static closure, writers, two views,<br/>census, certificates, kz proofcheck<br/>gate: R2 FIXED_ORDER accepted, with trust<br/>ledger and progress unknown(not_checked)"]
+        S2["S2 trace HB + dynamic readiness checking,<br/>observation-based judgement (rev 1.3)<br/>gate: every R2 use classified"]
+        S3A["S3a static closure, writers, two views, census;<br/>app-unit link probe required on C1, C2, C5 (D5);<br/>certificates + kz proofcheck (optional route, rev 1.3):<br/>R2 FIXED_ORDER accepted, with trust ledger<br/>and progress unknown(not_checked)"]
     end
 
     subgraph LATER["later stages"]
         S3B["S3b points-to (conditional:<br/>only if O7 shows blocking DISABLED)"]
         S4["S4 feedback loop, O1-O7 + O9,<br/>byte-exact replay"]
-        S5["S5 prediction + O8"]
+        S5["S5 prediction + O8<br/>(explicit-state search first)"]
         S6["S6 F0 confirmation (kz hold)"]
-        S7["S7 explorer: exh then dpor<br/>kill criterion"]
-        S8["S8 G-MLIR gate (optional)"]
-        S10["S10 PI-gated arms:<br/>--wrap gates + PCT, native σ_R1, 6.4.x basis"]
+        S7["S7 explorer: exh then dpor<br/>kill criterion (optional route)"]
+        S10["S10 arms: --wrap gates + PCT (D3, later),<br/>native σ_R1 (D4, model first),<br/>6.4.x basis (before F1, D13)"]
     end
 
     subgraph EVL["S9 freezes and evaluation (D4 evaluation detail)"]
         EXR[("exposure and freeze record")]
-        F1{{"freeze F1 (by hash)<br/>incl. comparators, evaluation criteria,<br/>pre-registered expectation sheet"}}
+        F1{{"freeze F1 (by hash)<br/>evaluation engine and rules, any re-implementation<br/>of a process-level technique, evaluation criteria,<br/>expectation-sheet hashes (each sheet frozen<br/>before its case's first output)"}}
         TO["template-only development runs"]
         REF["labelled refinements"]
         F2{{"freeze F2 (by hash)<br/>incl. recall protocol, exposure record"}}
-        HO["held-out sources (a)-(e);<br/>recall mutants, pre/post-fix pairs"]
-        EVA["comparators, ablations (22), sampled triage;<br/>perturbation groups, normalization boots"]
-        STAT["statistics<br/>(assumptions; N and caps as deviations)"]
+        HO["held-out sources (a)-(e);<br/>recall mutants, pre/post-fix pairs<br/>(extended evaluation)"]
+        EVA["comparison among existing process-level race work,<br/>ablations (24, descriptive), sampled triage (extended);<br/>perturbation groups, normalization boots"]
+        STAT["descriptive statistics (P-STATS)<br/>(N per purpose frozen; caps as deviations)"]
     end
 
     CLAIMS[("claims table")]
     DEV[("deviation records<br/>(every deviation)")]
 
     PHI --> S0
-    S0 --> S1 --> S2 --> S3A --> S4 --> S5 --> S6 --> S7 --> S8
+    S0 --> S1 --> S2 --> S3A --> S4 --> S5 --> S6 --> S7
     S3A -.-> S3B
     S1 -->|"perturbation groups"| EVA
-    S8 -->|"stage outputs"| EVA
+    S7 -->|"stage outputs"| EVA
     S3A --> F1 --> TO --> REF --> F2 --> HO
     EXR --> F1
     EXR --> F2
     HO --> EVA --> STAT --> CLAIMS
     STAT -->|"N and caps"| DEV
 
-    V0 --> V1
+    V0 --> V1P
+    S1 -->|"observation"| V1P
+    S2 -->|"judgement, explanation set"| V1P
+    V1P -.->|"optional"| V1
     V0P -->|"V1's certificate wording"| V1
     MVC -->|"sub-gates"| V1
     MVC -->|"full gates"| V1B
-    V1 --> V2
-    V1 --> V3
+    V1P --> V2
+    V1P ---|"in parallel (rev 1.3)"| V3
     V1B -->|"the App. A.2 instance"| V2
-    V1B -->|"app-unit closure, app .so probes"| V3
-    S5 -->|"classes"| V3
-    S6 -->|"holds"| V3
-    S7 -->|"classes"| V3
+    V1B -->|"app-unit closure (required, D5),<br/>app .so probes"| V3
+    S5 -->|"prediction (stage C), V3 first"| V3
+    S6 -->|"holds (stage D), V3 first"| V3
+    S7 -.->|"classes"| V3
     F1 --> V4A --> F2
     F2 --> V4B
+    STGAF --- V1P
 
-    PAP -->|"sheets frozen before tool output"| V1
+    PAP -->|"sheets frozen before tool output"| V1P
     PAP --> VPD3
     PAP --> VPD4
     PAP --> VPD5
     VPD3 -->|"template-only on own basis,<br/>or a recorded reason"| F1
     VPD4 --> F1
     VPD5 --> F1
-    VPD3 -.->|"in S10 unless D13 (c)<br/>places it before F1"| S10
+    VPD3 -.->|"in S10, placed before F1<br/>(D13 (c))"| S10
 
-    DLAD["P-LADDER<br/>approve the ladder"]
-    D20["D20 option A or B<br/>(progress on certificates)"]
+    DLAD["P-LADDER (approved 2026-10-15;<br/>redefined by the 2026-10-22<br/>decisions D1, D3, D5)"]
+    D20["D20 = A (decided)<br/>(certificates prove safety statements only)"]
     D1["D1 root-side hook,<br/>D17 stop method"]
-    D14["D14 N (deviation)"]
-    DR2["P-R2CTRL<br/>R2 control basis"]
-    DC1["D22 C1 bases,<br/>P-C1HOLD C1 holds"]
+    D14["D14 N per purpose<br/>(deviation, frozen)"]
+    DR2["P-R2CTRL<br/>(c2) first, (c1), (b) optional"]
+    DC1["D22 public BP basis,<br/>P-C1HOLD C1 holds"]
     D13["D13 6.4.x platform<br/>(with Q16)"]
     DC2["P-C2 role-derived pair"]
     DRG["P-RGIT A.3 pair"]
@@ -102,10 +109,10 @@ flowchart TD
     D16["D16 App-record probes"]
     DF1["P-F1GATE"]
     DS9["P-RECALL, P-TRIAGE,<br/>P-STATS, P-CLASSGT"]
-    D34["D3 --wrap and PCT,<br/>D4 native σ_R1"]
-    D6["D6 MLIR gate"]
+    D34["D3 --wrap and PCT (later),<br/>D4 native σ_R1 (model first)"]
 
-    DLAD -.-> V1
+    DLAD -.-> V1P
+    DLAD -.-> V3
     D20 -.-> V0
     D1 -.-> S1
     D14 -.-> S1
@@ -121,15 +128,16 @@ flowchart TD
     DF1 -.-> F1
     DS9 -.-> EVL
     D34 -.-> S10
-    D6 -.-> S8
 
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef frz fill:#e9e4f5,stroke:#5b3f99,color:#111
-    class PHI,S0,S1,S2,S3A,S4,S5,S6,S7,V0,V0P,V1,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
-    class S3B,S8,S10,V2,V3,VPD3,VPD4,VPD5 gated
-    class DLAD,D20,D1,D14,DR2,DC1,D13,DC2,DRG,D15,D16,DF1,DS9,D34,D6 dec
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class PHI,S0,S1,S2,S3A,S4,S5,S6,V0,V0P,V1P,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
+    class S3B,S7,S10,V1,V2,V3,VPD3,VPD4,VPD5 gated
+    class DLAD,D20,D1,D14,DR2,DC1,D13,DC2,DRG,D15,D16,DF1,DS9,D34 dec
     class CLAIMS,DEV,EXR art
     class F1,F2 frz
+    class STGAF ref

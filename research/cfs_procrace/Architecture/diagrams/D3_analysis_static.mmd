@@ -1,6 +1,8 @@
 flowchart TD
-    %% D3 detail (1/2) - static census decisions for one instance, per model level M. Source: spec §12 D3 (rev 1.1); §4.2, §4.5, §4.5.1, §4.6.
-    %% Diamond = decision. Rounded = terminal value (per M, σ_U, b = ∞ on Sk^cert). Dashed border = gated (S7 explorer). Dashed edge = gated path.
+    %% D3 detail (1/2) - static census decisions for one instance, per model level M. Source: spec §12 D3 (rev 1.3, C-48); §2.2, §2.4, §4.2, §4.5, §4.5.1, §4.6.
+    %% Diamond = decision. Rounded = terminal value (per M, σ_U, b = ∞ on Sk^cert). Dashed border = optional route or gated (S7 explorer). Dashed edge = gated path.
+    %% Rev 1.3 (ADR-053): the certificate branch (dashed box) is an optional route, taken only for a universal order claim; the census is used where an optional route
+    %% or the closure check (§4.1) needs it. The observation-based judgement does not wait for a certificate (§2.4).
     %% A certificate gives one safety statement; its progress stays unknown(not_checked) unless exh runs on it as a progress candidate.
 
     TM{"template matched<br/>(certificate view Sk^cert)"}
@@ -8,22 +10,25 @@ flowchart TD
     KEY{"key resolved?<br/>concrete / symbolic / ⊤"}
     WS{"writer sets complete?<br/>(A-TYPE, O7)"}
     PRV["provider axis: none / env-absent / present<br/>none = INIT_FALSE and empty complete writer set"]
-    FO{"FIXED_ORDER certificate?<br/>once, frontier / once-PWB, derives,<br/>badness with its REJECT events, reach"}
-    PR{"PROTECTED certificate?<br/>MUST_KEY must-writer, SCOPE,<br/>PWB for disablers"}
-    PC{"kz proofcheck<br/>re-validates inference steps;<br/>trusts facts, skel, Φ, libkz-core"}
-    DR{"every REJECT event at<br/>the occurrence's decision?"}
+    UOC{"universal order claim wanted?<br/>(certificate route optional, ADR-053)"}
 
-    LED[("trust ledger, four parts<br/>(i) re-validated steps (own or via T5)<br/>(ii) extracted facts (iii) trusted entries<br/>(iv) refutable, not proved")]
+    subgraph OPTC["optional route (rev 1.3): certificates and kz proofcheck"]
+        FO{"FIXED_ORDER certificate?<br/>once, frontier / once-PWB, derives,<br/>badness with its REJECT events, reach"}
+        PR{"PROTECTED certificate?<br/>MUST_KEY must-writer, SCOPE,<br/>PWB for disablers"}
+        PC{"kz proofcheck<br/>re-validates inference steps;<br/>trusts facts, skel, Φ, libkz-core"}
+        DR{"every REJECT event at<br/>the occurrence's decision?"}
+        LED[("trust ledger, four parts<br/>(i) re-validated steps (own or via T5)<br/>(ii) extracted facts<br/>(iii) trusted entries, lemmas with proof status<br/>(iv) refutable, not proved")]
+        FIX(["fixed-order(σ_U, M), b = ∞<br/>¬OK_i with decision route;<br/>reach proved, or assumed: if reached"])
+        NDR(["unknown(no_decision_route), b = ∞<br/>¬OK_i shown, no label"])
+        PRO(["protected(σ_U, M), b = ∞<br/>¬NR_i: every decided in-scope occurrence<br/>READY or NOT_EVALUATED;<br/>reach proved, or assumed: if reached"])
+        PCD["progress candidate<br/>progress unknown(not_checked)<br/>(no route checks it without the explorer)"]
+    end
 
     INA(["inactive(B)<br/>proof: folded path condition + provenance sets"])
-    FIX(["fixed-order(σ_U, M), b = ∞<br/>¬OK_i with decision route;<br/>reach proved, or assumed: if reached"])
-    NDR(["unknown(no_decision_route), b = ∞<br/>¬OK_i shown, no label"])
-    PRO(["protected(σ_U, M), b = ∞<br/>¬NR_i: every reached in-scope occurrence READY;<br/>reach proved, or assumed: if reached"])
-    PCD["progress candidate<br/>progress unknown(not_checked)<br/>(no route checks it without the explorer)"]
     EXQ["→ explorer, all four queries<br/>(D3 dynamic detail)"]
     UWI(["unknown(writer_incomplete)"])
     OPEN["open: probe obligations<br/>reason ∈ unordered, O-ordered-only,<br/>conditional-observation, key_unresolved,<br/>writer_incomplete, horizon, unmodelled"]
-    DYN["→ observation (D3 dynamic detail)"]
+    DYN["→ observation-based judgement,<br/>prediction, confirmation (D3 dynamic detail)"]
 
     TM --> RCH
     RCH -->|"no Sk^cert path"| INA
@@ -33,7 +38,9 @@ flowchart TD
     WS -->|"DISABLED entry"| UWI
     UWI --> OPEN
     WS -->|"complete"| PRV
-    PRV -->|"provider none: classified by badness,<br/>not a separate terminal"| FO
+    PRV -->|"provider none: classified by badness,<br/>not a separate terminal"| UOC
+    UOC -->|"no (required path only): the judgement<br/>does not wait for a certificate"| DYN
+    UOC -.->|"yes"| FO
     FO -->|"yes"| PC
     FO -->|"no"| PR
     PR -->|"yes"| PC
@@ -57,10 +64,11 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef ref fill:#ffffff,stroke:#999,color:#555
-    class TM,RCH,KEY,WS,FO,PR,PC,DR dec
+    class TM,RCH,KEY,WS,UOC,FO,PR,PC,DR dec
     class INA,FIX,PRO term
     class UWI,NDR unk
     class PRV,OPEN,PCD comp
     class LED art
     class EXQ gated
     class DYN ref
+    style OPTC stroke-dasharray:5 5

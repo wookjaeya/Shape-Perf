@@ -10,7 +10,7 @@
 > - **spec §13.** revision 1.2가 바꾸거나 더한 용어(준비 상태 명세, 준비 사전조건, 준비 상태 위반, 준비 범주, 준비 instance, 근거 등급, API 계약, `cont_candidate`, 여섯 분석 질문과 결과 상태, Allowed·appreq·Side·Normal continuation의 엄격한 대안 등. 93개에서 102개). revision 1.3은 §13을 바꾸지 않았다(§3).
 > - **용어 결정 T1 = (a)(ADR-052).** 판정 대상은 **준비 상태 명세**이고, "계약"은 문서화된 API 의미(API 계약, M_api)와 근거 등급 이름 `contract-backed`에만 남긴다(§0.2, §3 표기 통일).
 > - **CORD 인용 정리(PI 결정 D12; spec §0.11 항목 1).** `[R2c]`를 이름 충돌 표와 PI 결정 D12 행에서 지웠다. ADR-001이 CORD를 폐기한 시제품으로 이름 대는 것은 프로젝트 이력이고 결과를 인용하지 않으므로 그대로 둔다.
-> - **그림 D4.** spec §12 D4는 revision 1.2에서 바뀌었고 revision 1.3에서는 바뀌지 않았다. 코드 블록을 [03_workflow.md](03_workflow.md)와 같은 revision 1.2 판으로 바꾸었다. `diagrams/`의 원본은 그림 단계에서 맞춘다.
+> - **그림 D4.** spec §12 D4는 revision 1.2에서 바뀌었다. 코드 블록은 `diagrams/D4_research_overview.mmd`와 같고, 그 위에 revision 1.3의 사다리(spec §9.3 "Ladder of revision 1.3", ADR-057)를 그렸다.
 >
 > 이 변경은 결정 [D]이고 결과가 아니다. 이 판을 위해 만들거나 실행한 것은 없고, 연구 조건도 정하지 않았다. **우선 규칙**(spec §0.12 "Precedence", ADR-053): revision 1.0–1.2를 위해 쓴 문장 가운데 certificate, explorer, 진행 결과, loop를 Kairos의 첫 산출물·필수 산출물로 부르는 것은 ADR-053에 따라 읽는다. 아래 ADR 표의 그런 문장도 같다.
 
@@ -364,7 +364,7 @@ revision 1.1의 spec §2.6(기술 결정)이 가리키던 ADR 번호 두 개는 
 
 그림의 파란 상자는 Φ 작성, 단계, rung(V0, V0-P, V1, V1b, V4a, V4b), paper track, 평가 경로의 상자다. 노란 상자(`P-LADDER`, `D1` 등)는 PI 결정이고, 대부분 2026-10-15에 정해졌다(값은 [§2.4](#24-1순위-s1을-열기-위해-지금-필요한-결정)–[§2.12](#212-1a순위-사례-경로와-rung-v2v3의-결정)와 spec §10.1). 노란 상자에서 나가는 점선 화살표는 그 결정이 여는 rung, 사례 track, 단계(freeze F1과 평가 묶음 포함)를 가리킨다. 그 밖의 점선 화살표는 조건부 경로 둘이다: S3a → S3b, 그리고 VP-D3 → S10(D13 (c)에 따라 6.4.x basis는 F1 앞에 둔다). 점선 테두리는 조건부이거나, 나중이거나, 아직 만들지 않은 상자다: S3b(조건부), S10(arm: `--wrap` gate와 PCT는 나중, native σ_R1은 모형 먼저, 6.4.x basis), 그리고 basis나 arm이 결정이 이름 댄 작업 뒤에만 생기는 V2, V3, VP-D3, VP-D4, VP-D5. S8(MLIR)은 revision 1.2에서 제거되어 그림에 없다(D6). 보라 육각형은 freeze F1과 F2이고, 원통은 기록(claims table, deviation 기록, 노출·동결 기록)이다. **V2와 V3 사이에는 edge가 없다.** EXT-20261012 §7의 순서(순서 3 다음 순서 4)는 보고 순서이고 의존이 아니다. 그림의 어느 rung에도 공수 추정은 없다. 노란 상자의 `D1`은 그림 D1이 아니라 PI 결정 D1이고(2026-10-22 결정 D1도 아니다), track 이름 VP-D3–VP-D5의 D3–D5는 PI 결정도 그림도 아니다([§0.2](#02-이름-충돌-주의)).
 
-이 코드 블록은 spec §12 D4의 revision 1.2 판이고 [03_workflow.md](03_workflow.md)의 그림 D4 개요와 같다. revision 1.3은 spec §12 D4를 바꾸지 않았다. 그래서 revision 1.3의 사다리 재정의(첫 rung V1′, V3가 V1′과 나란히; ADR-057)와 certificate 경로의 선택화(ADR-053)는 그림에 없고, [§2.15](#215-2026-10-22의-결정-d1d5)와 [§2.14](#214-rung과-사례-track마다-필요한-결정)의 글이 앞선다. `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 맞춘다.
+이 코드 블록은 `diagrams/D4_research_overview.mmd`와 같다. spec §12 D4의 revision 1.2 판 위에 revision 1.3의 사다리 재정의(spec §9.3 "Ladder of revision 1.3", ADR-057: 첫 rung V1′, V3 병행, V1의 certificate 출구 항목은 선택, 단계 A–F와 단계 B의 사례별 완료 조건)를 그렸다.
 
 rung과 track마다 필요한 결정은 [§2.14](#214-rung과-사례-track마다-필요한-결정)의 표가, 사다리와 그림을 읽는 법은 [08_roadmap.md §1](08_roadmap.md#1-한-장으로-보기)과 [§4.14](08_roadmap.md#414-첫-목표-검증-사다리-v0v4)가 자세히 보인다.
 
@@ -372,23 +372,27 @@ rung과 track마다 필요한 결정은 [§2.14](#214-rung과-사례-track마다
 
 ```mermaid
 flowchart TD
-    %% D4 overview - research workflow: validation ladder (first target: rung V1), case tracks, stages, freezes, PI decisions.
-    %% Source: spec §12 D4 (rev 1.2); §9.3, §9.4, §10.1; ADR-044. Detail: D4_research_evaluation.mmd (evaluation path).
-    %% Dashed border = conditional, later or not yet built (its basis or arm exists only after the work its decision names). Dashed edge = a decision gating a rung, track or stage (most are decided on 2026-10-15; the values are in spec §10.1), or a conditional path.
-    %% No edge between V2 and V3: the order of EXT-20261012 §7 (step 3, then step 4) is a reporting order. No effort estimate exists for any rung.
+    %% D4 overview - research workflow: validation ladder (first rung: V1′, R2 baseline validation; V3 in parallel), case tracks, stages, freezes, decisions.
+    %% Source: spec §12 D4 (rev 1.2); §9.3 "Ladder of revision 1.3", §9.4, §10.1; ADR-044, ADR-053, ADR-057. Detail: D4_research_evaluation.mmd (evaluation path).
+    %% Dashed border = optional route (rev 1.3, ADR-053), or conditional, later or not yet built (its basis or arm exists only after the work its decision names).
+    %% Dashed edge = a decision gating a rung, track or stage (the values are in spec §10.1), an optional route, or a conditional path.
+    %% V3 runs in parallel with V1′ (rev 1.3); V2 follows V1′. No edge between V2 and V3: the order of EXT-20261012 §7 is a reporting order. No effort estimate exists for any rung.
 
     PHI["Φ authoring<br/>provenance, authoring records,<br/>refinement accounting"]
 
-    subgraph LAD["validation ladder (ADR-044, approved as P-LADDER): the first target is rung V1, not the whole thin MVC"]
+    subgraph LAD["validation ladder (ADR-044, P-LADDER; redefined in rev 1.3, ADR-057): the first rung is V1′, with V3 in parallel"]
         V0["V0 formal fixes<br/>definitions of ADR-039 to ADR-043;<br/>litmus LP-DL, LP-TW"]
         V0P["V0-P lemma obligations written<br/>before any certificate or transfer wording"]
-        V1["V1 R2's K-ID chain end to end, ENV basis<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2"]
+        V1P["V1′ R2 baseline validation (first rung, rev 1.3)<br/>observation, normalization with app_owner,<br/>observation-based judgement (explanation set),<br/>trust ledger; ENV basis; against R2's frozen sheet;<br/>not evidence of the contribution"]
+        V1["V1 certificate exit items (optional, rev 1.3)<br/>FIXED_ORDER, kz proofcheck, R2 certificate ledger;<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2;<br/>only if the paper makes R2's universal statement"]
         V1B["V1b the rest of the thin MVC gates<br/>(results on counterparts are not case evidence)"]
-        V2["V2 R2's control basis B′"]
-        V3["V3 C1 on its B′ (public BP basis, D22)"]
+        V2["V2 R2's control basis B′<br/>(follows V1′)"]
+        V3["V3 C1 on its B′ (public BP basis, D22)<br/>in parallel with V1′: basis, application closure,<br/>observation plan start with stage B;<br/>first case for contribution evidence"]
         V4A["V4a comparison with existing<br/>process-level race work<br/>(in S9, after F1)"]
         V4B["V4b held-out and pre/post-fix pairs<br/>(extended evaluation, in S9, after F2)"]
     end
+
+    STGAF["stages A-F of [P0.2] on the rungs (rev 1.3):<br/>A = V0 + paper track; B = V1′ + observation parts of V3, VP-D3, VP-D4;<br/>C = S5 on V3 first; D = S6 on V3 first (not complete with R2's observations alone);<br/>E = V4b; F = V4a with the contribution hypotheses (§1.11).<br/>Stage B per case (D5): records traceable to evidence, tests T-05, T-17-T-20,<br/>closure covering the writers and aliases its conditions need"]
 
     subgraph TRK["case tracks (beside the ladder)"]
         PAP["paper track, all five cases<br/>reading at pinned revisions;<br/>expectation sheets frozen before tool output"]
@@ -400,16 +404,16 @@ flowchart TD
     subgraph MVC["thin MVC = S0 + S1 + S2 + S3a (never cut; its full gates are rung V1b)"]
         S0["S0 formats + formal core<br/>kz_schema.h, Φ grammar + semantics,<br/>one evaluator, golden harness"]
         S1["S1 F0 observer<br/>gate: R2 per-use set re-observed<br/>by Kairos's own recorder"]
-        S2["S2 trace HB + dynamic readiness checking<br/>gate: every R2 use classified"]
-        S3A["S3a static closure, writers, two views,<br/>census, certificates, kz proofcheck<br/>gate: R2 FIXED_ORDER accepted, with trust<br/>ledger and progress unknown(not_checked)"]
+        S2["S2 trace HB + dynamic readiness checking,<br/>observation-based judgement (rev 1.3)<br/>gate: every R2 use classified"]
+        S3A["S3a static closure, writers, two views, census;<br/>app-unit link probe required on C1, C2, C5 (D5);<br/>certificates + kz proofcheck (optional route, rev 1.3):<br/>R2 FIXED_ORDER accepted, with trust ledger<br/>and progress unknown(not_checked)"]
     end
 
     subgraph LATER["later stages"]
         S3B["S3b points-to (conditional:<br/>only if O7 shows blocking DISABLED)"]
         S4["S4 feedback loop, O1-O7 + O9,<br/>byte-exact replay"]
-        S5["S5 prediction + O8"]
+        S5["S5 prediction + O8<br/>(explicit-state search first)"]
         S6["S6 F0 confirmation (kz hold)"]
-        S7["S7 explorer: exh then dpor<br/>kill criterion"]
+        S7["S7 explorer: exh then dpor<br/>kill criterion (optional route)"]
         S10["S10 arms: --wrap gates + PCT (D3, later),<br/>native σ_R1 (D4, model first),<br/>6.4.x basis (before F1, D13)"]
     end
 
@@ -438,21 +442,25 @@ flowchart TD
     HO --> EVA --> STAT --> CLAIMS
     STAT -->|"N and caps"| DEV
 
-    V0 --> V1
+    V0 --> V1P
+    S1 -->|"observation"| V1P
+    S2 -->|"judgement, explanation set"| V1P
+    V1P -.->|"optional"| V1
     V0P -->|"V1's certificate wording"| V1
     MVC -->|"sub-gates"| V1
     MVC -->|"full gates"| V1B
-    V1 --> V2
-    V1 --> V3
+    V1P --> V2
+    V1P ---|"in parallel (rev 1.3)"| V3
     V1B -->|"the App. A.2 instance"| V2
-    V1B -->|"app-unit closure, app .so probes"| V3
-    S5 -->|"classes"| V3
-    S6 -->|"holds"| V3
-    S7 -->|"classes"| V3
+    V1B -->|"app-unit closure (required, D5),<br/>app .so probes"| V3
+    S5 -->|"prediction (stage C), V3 first"| V3
+    S6 -->|"holds (stage D), V3 first"| V3
+    S7 -.->|"classes"| V3
     F1 --> V4A --> F2
     F2 --> V4B
+    STGAF --- V1P
 
-    PAP -->|"sheets frozen before tool output"| V1
+    PAP -->|"sheets frozen before tool output"| V1P
     PAP --> VPD3
     PAP --> VPD4
     PAP --> VPD5
@@ -461,7 +469,7 @@ flowchart TD
     VPD5 --> F1
     VPD3 -.->|"in S10, placed before F1<br/>(D13 (c))"| S10
 
-    DLAD["P-LADDER<br/>(ladder approved)"]
+    DLAD["P-LADDER (approved 2026-10-15;<br/>redefined by the 2026-10-22<br/>decisions D1, D3, D5)"]
     D20["D20 = A (decided)<br/>(certificates prove safety statements only)"]
     D1["D1 root-side hook,<br/>D17 stop method"]
     D14["D14 N per purpose<br/>(deviation, frozen)"]
@@ -476,7 +484,8 @@ flowchart TD
     DS9["P-RECALL, P-TRIAGE,<br/>P-STATS, P-CLASSGT"]
     D34["D3 --wrap and PCT (later),<br/>D4 native σ_R1 (model first)"]
 
-    DLAD -.-> V1
+    DLAD -.-> V1P
+    DLAD -.-> V3
     D20 -.-> V0
     D1 -.-> S1
     D14 -.-> S1
@@ -498,11 +507,13 @@ flowchart TD
     classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef frz fill:#e9e4f5,stroke:#5b3f99,color:#111
-    class PHI,S0,S1,S2,S3A,S4,S5,S6,S7,V0,V0P,V1,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
-    class S3B,S10,V2,V3,VPD3,VPD4,VPD5 gated
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class PHI,S0,S1,S2,S3A,S4,S5,S6,V0,V0P,V1P,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
+    class S3B,S7,S10,V1,V2,V3,VPD3,VPD4,VPD5 gated
     class DLAD,D20,D1,D14,DR2,DC1,D13,DC2,DRG,D15,D16,DF1,DS9,D34 dec
     class CLAIMS,DEV,EXR art
     class F1,F2 frz
+    class STGAF ref
 ```
 
 ### 2.3 묶음의 기준(revision 1.1의 우선순위)

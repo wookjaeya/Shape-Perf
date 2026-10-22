@@ -99,7 +99,7 @@ Kairos는 cFS 프로세스 **바깥에서** 도는 두 개의 명령행 프로�
 
 ```mermaid
 flowchart TD
-    %% D1 - System context. Source: spec §12 D1; §2.2, §2.6, §5.1, §1.7, §10.1.
+    %% D1 - System context. Source: spec §12 D1 (rev 1.2; unchanged in rev 1.3); §2.2, §2.6, §5.1, §1.7, §10.1.
     %% Dashed border + dashed edge = later or conditional node (not installed; not a condition of the first implementation). Revision 1.2 removed MLIR (D6), the TSan variant (P-TSAN) and the valgrind reference point (P-VALGRIND).
 
     PI(["PI / Researcher"])
@@ -121,7 +121,7 @@ flowchart TD
     end
 
     subgraph HOST["Linux host (4 vCPU)"]
-        KER["Linux kernel 6.18.44-fc-v114<br/>perf uprobe PMU with attach cookies, bpf(),<br/>perf breakpoint PMU, ptrace, tracepoints"]
+        KER["Linux kernel, recorded per run<br/>(6.18.44-fc-v114 in [R07 §1], -fc-v139 on 2026-10-16; §1.7 Env)<br/>perf uprobe PMU with attach cookies, bpf(),<br/>perf breakpoint PMU, ptrace, tracepoints"]
         HAR["run harness env/run_cfs.sh<br/>root-side hook (decision D1),<br/>RUN_CFS_WRAP (gdb)"]
         CFS["cFS process core-cpu1<br/>README mode, user ubuntu, 27 threads"]
         PST[("persistent state<br/>/dev/shm/osal:RAM, EEPROM.DAT,<br/>SysV segments, key files")]
@@ -168,7 +168,7 @@ flowchart TD
     style GATED stroke-dasharray:5 5
 ```
 
-읽는 법: 사각형은 구성요소, 원통은 산출물이나 저장소다. 점선 테두리와 점선 화살표는 후순위이거나 조건부인 도구다. 이 코드 블록은 revision 1.2에 맞췄다. `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 같은 내용으로 맞춘다. `kz-static`은 소스와 build tree만 읽고, kernel과 이야기하는 것은 `kz`뿐이다.
+읽는 법: 사각형은 구성요소, 원통은 산출물이나 저장소다. 점선 테두리와 점선 화살표는 후순위이거나 조건부인 도구다. 이 코드 블록은 `diagrams/D1_system_context.mmd`와 같고 revision 1.2에 맞췄다(revision 1.3은 spec §12 D1을 바꾸지 않았다). kernel 상자는 kernel을 실행마다 기록한다는 spec §1.7 Env를 따른다. `kz-static`은 소스와 build tree만 읽고, kernel과 이야기하는 것은 `kz`뿐이다.
 
 ---
 
@@ -295,7 +295,7 @@ flowchart TD
     class CORE core
 ```
 
-읽는 법: 실선은 revision 1.3의 필수 경로의 산출물 흐름이다(spec §12 D2 revision 1.3 지시; ADR-053; C-48). 점선 테두리는 선택 경로(`skel`, `static`, `proofcheck`, `explore`)와 조건부 구성요소(`modref`, S3b)이고, 점선 화살표는 선택 경로의 흐름과 feedback F1–F4다. `kz gate`와 `kz loop`는 실선 상자 안에 있지만 선택 경로라 이름 옆에 적었다. `conform`의 O8도 선택 경로다. `observe`와 `trace` 사이의 원통은 revision 1.3에서 더한 관측 적합성 기록이고([§7.2](#72-x-macro-schema)), `report`는 요약 뷰를 보인다. 이 코드 블록은 revision 1.3에 맞췄다. `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 같은 내용으로 맞춘다. `libkz-core`는 BPF 프로그램을 뺀 모든 구성요소가 link한다(spec §12 D2). `kz proofcheck`는 `static`과 분석 코드를 공유하지 않지만 `libkz-core`는 link하고, 명시한 trusted base(추출 사실, skeleton, closure 목록, Φ, `libkz-core`, reach 단계의 run)에 상대적으로 추론 단계를 다시 검증한다. "trusted" edge는 검사기가 다시 만들지 않고 믿는 입력이고, 되돌아가는 edge는 accept/reject(CC)와 trust ledger다(spec §4.5, §4.5.1; [§6](#6-두-실행-파일)의 T1–T6).
+읽는 법: 실선은 revision 1.3의 필수 경로의 산출물 흐름이다(spec §12 D2 revision 1.3 지시; ADR-053; C-48). 점선 테두리는 선택 경로(`skel`, `static`, `proofcheck`, `explore`)와 조건부 구성요소(`modref`, S3b)이고, 점선 화살표는 선택 경로의 흐름과 feedback F1–F4다. `kz gate`와 `kz loop`는 실선 상자 안에 있지만 선택 경로라 이름 옆에 적었다. `conform`의 O8도 선택 경로다. `observe`와 `trace` 사이의 원통은 revision 1.3에서 더한 관측 적합성 기록이고([§7.2](#72-x-macro-schema)), `report`는 요약 뷰를 보인다. 이 코드 블록은 revision 1.3에 맞췄고 `diagrams/D2_components_overview.mmd`와 같다. `libkz-core`는 BPF 프로그램을 뺀 모든 구성요소가 link한다(spec §12 D2). `kz proofcheck`는 `static`과 분석 코드를 공유하지 않지만 `libkz-core`는 link하고, 명시한 trusted base(추출 사실, skeleton, closure 목록, Φ, `libkz-core`, reach 단계의 run)에 상대적으로 추론 단계를 다시 검증한다. "trusted" edge는 검사기가 다시 만들지 않고 믿는 입력이고, 되돌아가는 edge는 accept/reject(CC)와 trust ledger다(spec §4.5, §4.5.1; [§6](#6-두-실행-파일)의 T1–T6).
 
 **rev 1.3: 구성요소의 지위** (spec §2.2 "Required and optional routes"; ADR-053; C-16). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 계획, spec §4.7) → `observe` → `trace`(정규화, task→앱 매핑, 관측 기반 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. 선택 경로는 바뀌지 않은 채 정의되어 있고 그 주장이 필요할 때 쓴다: `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform`의 O8, `loop`, `gate`, 그리고 전과 같이 `modref`. `static`의 census와 `skel`의 view는 선택 경로나 닫힘 검사(spec §4.1)가 필요로 하는 곳에서 계속 쓴다. `proofcheck`는 certificate를 발행할 때만 만든다. 아래 표의 구성요소 설명은 revision 1.2 그대로이고, 지위는 이 문단을 따른다.
 
@@ -562,6 +562,7 @@ spec §2.4는 데이터 흐름을 12단계로 정한다 [D]. 단계 1–5는 주
 flowchart TD
     %% D2 detail (1/2) - kz-static pipeline and the checker (independent inference relative to its trusted base). Source: spec §12 D2 (rev 1.3, C-48); §2.2-2.4, §4.1-4.7, §4.5.1.
     %% Rectangle = component, cylinder = KZ artifact. Dashed border = optional route (rev 1.3, ADR-053: skel, static, proofcheck) or conditional (S3b).
+    %% Solid edge = required path (basis, extract, link → plan). Dashed edge = optional-route flow or conditional flow.
 
     INB[("build tree, link.txt, generated files,<br/>startup scripts, .tbl, Env/Init snapshots, argv")]
     PROF[("profile.kzp (text) → profile.kz<br/>Φ: kinds, ops, per-conjunct LPs, bindings,<br/>rules, readiness specifications (human-authored)")]
@@ -569,46 +570,49 @@ flowchart TD
     BAS["kz-static basis<br/>script selection, reset type,<br/>content-only Init hash"]
     BK[("basis.kz")]
     EXT["kz-static extract<br/>Clang AST facts, derives,<br/>S3a writer extraction, loop-exit trees"]
-    LNK["kz-static link<br/>IR call graph, DWARF/MC binder,<br/>anchor audit"]
+    LNK["kz-static link<br/>IR call graph, DWARF/MC binder,<br/>anchor audit; closure per case"]
     MOD["kz-static modref<br/>(S3b, conditional)"]
     FK[("facts.kz<br/>incl. derives, writers,<br/>loop-exit trees")]
     AK[("anchors.kz<br/>site → gcc address, cost class")]
-    SKL["kz-static skel<br/>two views, once facts,<br/>message provenance, await predicates"]
+    SKL["kz-static skel (optional route)<br/>two views, once facts,<br/>message provenance, await predicates"]
     SK[("skel.kz<br/>cert view, exploration view,<br/>once, provenance")]
-    STA["kz-static static<br/>MustBefore per M, census,<br/>certificates, open candidates"]
+    STA["kz-static static (optional route)<br/>MustBefore per M, census,<br/>certificates, open candidates"]
     CEN[("census.kz")]
-    PCK["kz proofcheck<br/>(in kz; no LLVM; no analysis code shared<br/>with static; links libkz-core: T5 steps marked)<br/>re-validates inference steps, writes trust ledgers with proof status"]
+    PCK["kz proofcheck (optional route; built only when a certificate is issued)<br/>(in kz; no LLVM; no analysis code shared<br/>with static; links libkz-core: T5 steps marked)<br/>re-validates inference steps, writes trust ledgers with proof status"]
     RUNS[("trusted input: run-*.kzt, hb-*.kz,<br/>prefix probes named by the reach step<br/>(D2 dynamic detail)")]
+    HAND[("hand-augmented plan (§4.7)<br/>profiles/#60;basis#62;/observe/sites.kzp;<br/>each site with the requirement it meets")]
     PLN["kz-static plan<br/>probe sites, joint debug-register allocator"]
     PK[("plan.kz")]
 
     INB --> BAS --> BK
     BK --> EXT
     BK --> LNK
-    BK --> SKL
+    BK -.-> SKL
     EXT --> FK
     LNK --> AK
     LNK -.->|"closed IR"| MOD
     PROF -.-> MOD
     MOD -.->|"points-to writer sets"| FK
-    FK --> SKL
-    AK --> SKL
-    PROF --> SKL
-    SKL --> SK
-    SK --> STA
-    FK --> STA
-    PROF --> STA
-    STA -->|"O7: writer sites vs Φ effects"| CEN
-    CEN -->|"certificates"| PCK
-    PCK -->|"accept / reject (CC), trust ledgers"| CEN
-    FK -->|"trusted"| PCK
-    SK -->|"trusted"| PCK
-    AK -->|"trusted"| PCK
-    PROF -->|"trusted"| PCK
-    RUNS --> PCK
-    CEN --> PLN
+    FK -.-> SKL
+    AK -.-> SKL
+    PROF -.-> SKL
+    SKL -.-> SK
+    SK -.-> STA
+    FK -.-> STA
+    PROF -.-> STA
+    STA -.->|"O7: writer sites vs Φ effects"| CEN
+    CEN -.->|"certificates"| PCK
+    PCK -.->|"accept / reject (CC), trust ledgers"| CEN
+    FK -.->|"trusted"| PCK
+    SK -.->|"trusted"| PCK
+    AK -.->|"trusted"| PCK
+    PROF -.->|"trusted"| PCK
+    RUNS -.-> PCK
+    FK --> PLN
     AK --> PLN
+    CEN -.->|"open candidates"| PLN
     PLN --> PK
+    HAND -->|"written or widened by hand<br/>until the synthesis exists"| PK
     PK --> NEXT["→ kz observe<br/>(D2 dynamic detail)"]
 
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
@@ -616,12 +620,12 @@ flowchart TD
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef ref fill:#ffffff,stroke:#999,color:#555
     class BAS,EXT,LNK,PLN comp
-    class INB,PROF,BK,FK,AK,SK,CEN,PK art
+    class INB,PROF,BK,FK,AK,SK,CEN,PK,HAND art
     class MOD,SKL,STA,PCK gated
     class NEXT,RUNS ref
 ```
 
-읽는 법: `kz proofcheck`로 들어가는 "trusted" edge(`facts.kz`, `skel.kz`, `anchors.kz`, profile)와 run 쪽 입력 상자(reach 단계가 가리키는 run, `hb-*.kz`, prefix-probe 산출물)는 검사기가 다시 만들지 않고 믿는 입력이다([§6](#6-두-실행-파일)의 T1, T2, T4, T6). 검사기는 이것들과 `libkz-core`(T5)에 상대적으로 추론 단계를 다시 검증하고, accept/reject(CC)와 함께 trust ledger를 census에 돌려준다. `libkz-core`의 evaluator나 rule engine을 부른 단계는 ledger에 "via T5"로 표시된다(spec §4.5, §4.5.1, §12 D2). revision 1.3에 맞춰 `skel`, `static`, `kz proofcheck`는 선택 경로로 점선 테두리를 가진다(C-48). 필수 경로에서 `plan`은 `basis`, `extract`, `link`의 사실과 anchor 위에서, 또는 손으로 보강한 계획으로 만든다. 그림의 edge 구성은 revision 1.2 그대로다.
+읽는 법: `kz proofcheck`로 들어가는 "trusted" edge(`facts.kz`, `skel.kz`, `anchors.kz`, profile)와 run 쪽 입력 상자(reach 단계가 가리키는 run, `hb-*.kz`, prefix-probe 산출물)는 검사기가 다시 만들지 않고 믿는 입력이다([§6](#6-두-실행-파일)의 T1, T2, T4, T6). 검사기는 이것들과 `libkz-core`(T5)에 상대적으로 추론 단계를 다시 검증하고, accept/reject(CC)와 함께 trust ledger를 census에 돌려준다. `libkz-core`의 evaluator나 rule engine을 부른 단계는 ledger에 "via T5"로 표시된다(spec §4.5, §4.5.1, §12 D2). revision 1.3에 맞춰 `skel`, `static`, `kz proofcheck`는 선택 경로로 점선 테두리를 가진다(C-48). 필수 경로에서 `plan`은 `basis`, `extract`, `link`의 사실과 anchor 위에서, 또는 손으로 보강한 계획으로 만든다. 선택 경로 구성요소로 들어가고 나오는 edge는 점선이다. `plan`은 실선으로 `facts.kz`와 `anchors.kz`를 받고, census의 open 후보는 점선으로 받는다. 손으로 보강한 계획(`sites.kzp`, spec §4.7)은 합성이 생기기 전까지 `plan.kz`를 쓰거나 넓힌다. 이 코드 블록은 `diagrams/D2_components_static_detail.mmd`와 같다.
 
 | 단계 | 누가 | 무엇을 하나 (spec §2.4) | 산출물 |
 |---|---|---|---|
@@ -651,7 +655,8 @@ flowchart TD
 flowchart TD
     %% D2 detail (2/2) - observation, concrete and operational interpreters, confirmation, verdicts, loop.
     %% Source: spec §12 D2 (rev 1.3, C-48); §2.2-2.5, §4.8-4.14.
-    %% Dashed border = optional route (rev 1.3, ADR-053: explore, gate, loop) or gated (explore: S7; gate: later, decision D3). Dashed edge = feedback F1-F4.
+    %% Dashed border = optional route (rev 1.3, ADR-053: explore, gate, loop) or gated (explore: S7; gate: later, decision D3).
+    %% Dashed edge = optional-route flow (explore, census, gate, loop) or feedback F1-F4. conform's O8 is an optional route too.
 
     PK[("plan.kz<br/>(from D2 static detail)")]
     SK[("skel.kz")]
@@ -684,27 +689,27 @@ flowchart TD
     OBS --> ADQ
     ADQ --> TRC
     TRC -->|"O3-O5, O9"| HB
-    RUN -->|"O1, O2; O8 from S5"| CNF
+    RUN -->|"O1, O2; O8 from S5 (optional route)"| CNF
     SK --> CNF
     HB --> PRD
     FK -->|"A-COMM read/write sets"| PRD
     PRD --> WIT
-    SK --> EXP
-    CEN --> EXP
-    EXP -->|"O6 vs predict"| WIT
+    SK -.-> EXP
+    CEN -.-> EXP
+    EXP -.->|"O6 vs predict"| WIT
     WIT --> HPL
     HPL --> HLD
     HPL -.-> GAT
     HLD --> RUN
     GAT -.-> RUN
-    CEN --> VER
+    CEN -.-> VER
     HB --> VER
     PRD --> VER
-    EXP --> VER
+    EXP -.-> VER
     VER --> REP
     VER --> DMP
-    LOOP --> LK
-    LOOP -->|"drives each iteration"| OBS
+    LOOP -.-> LK
+    LOOP -.->|"drives each iteration"| OBS
 
     TRC -.->|"F1 keys, targets, opened script"| BASK
     CNF -.->|"F2 model gaps"| BASK
@@ -731,7 +736,7 @@ flowchart TD
 | 11 | (전체) | 불일치는 Φ, 추출기, model에 대한 발견, 즉 **도구에 대한** 발견으로 보고한다(feedback F4) | 보고 |
 | 12 | `kz loop`, `kz report` | `kz loop`가 고정점에서 멈추고(spec §4.14) 그 run 집합을 기록한다. `kz report`가 판정을 보여 준다 | `loop-*.kz`, `verdicts.kz` |
 
-이 코드 블록은 revision 1.3에 맞춰 관측 적합성 기록, `trace`의 `app_owner`와 설명 집합, 보고서의 요약 뷰를 더하고 `kz loop`를 선택 경로로 표시했다(C-48). `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 맞춘다.
+이 코드 블록은 revision 1.3에 맞춰 관측 적합성 기록, `trace`의 `app_owner`와 설명 집합, 보고서의 요약 뷰를 더하고 `kz loop`를 선택 경로로 표시했다(C-48). `explore`, census, `gate`, `loop`로 들어가고 나오는 edge는 선택 경로라 점선이고, `conform`의 O8도 선택 경로라 edge label에 적었다. 이 코드 블록은 `diagrams/D2_components_dynamic_detail.mmd`와 같다.
 
 **rev 1.3에서 단계 7, 9, 10, 12에 더한 것.**
 - **단계 7: 설명 집합** [D] (spec §4.8 "Explanation set of an incomplete record"; ADR-055; C-25). trace는 사건의 일부만 기록한다. 관측 기반 판정은 기록과 양립하는 run의 **모든** 설명에서 성립할 때만 확정된다. 기록의 제약 `Cobs`와 검사 구간의 조건 위반 `Vφ`로 `Qv = SAT(Cobs ∧ Vφ)`, `Qn = SAT(Cobs ∧ ¬Vφ)`를 보고, SAT/UNSAT이면 모든 설명에서의 위반(`VIOLATING`, 요약 `OBSERVED_VIOLATION`), UNSAT/SAT이면 모든 설명에서의 비위반(`READY` 또는 ACCEPT가 있는 `TOLERATED`, 요약 `NO_VIOLATION_IN_CHECKED_PREFIX`), SAT/SAT이면 `INCONCLUSIVE(explanation_ambiguous)`, UNSAT/UNSAT이면 분석 입력 오류, unknown이거나 끝나지 않았으면 다른 완전한 근거가 없는 한 `INCONCLUSIVE(limit)`다. 이것은 뜻을 정할 뿐 검사마다 solver를 두 번 부르라는 것이 아니다. `Cobs`는 한 run의 모호성이고 예측한 스케줄이 아니다. 기록된 쓰기만으로 자원을 갱신하려면 그 구간에서 writer·별칭·외부 효과가 덮이고, 시작 상태와 수명을 알고, probe가 제때 붙어 활성이었고, 손실 보고가 없어야 한다. 아니면 가능한 상태를 넓히거나 판정을 보류한다.

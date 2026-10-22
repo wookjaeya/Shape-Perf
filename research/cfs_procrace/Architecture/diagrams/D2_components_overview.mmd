@@ -1,40 +1,50 @@
 flowchart TD
-    %% D2 overview - components by layer and the main artifact flow. Source: spec §12 D2 (rev 1.1); §2.1-2.4, §4.5.1.
+    %% D2 overview - components by layer and the main artifact flow. Source: spec §12 D2 (rev 1.3: required path solid, optional routes dashed, C-48); §2.1-2.4, §4.5.1.
     %% Detail: D2_components_static_detail.mmd (L1 + abstract interpreter) and
     %%         D2_components_dynamic_detail.mmd (observation, concrete/operational interpreters, confirmation, loop).
-    %% Dashed border = conditional or PI-gated component. Dashed edge = feedback path.
+    %% Dashed border = optional route (rev 1.3, ADR-053) or conditional / PI-gated component. Dashed edge = optional-route flow or feedback path.
 
     IN[("L0 input<br/>basis B (build tree, config, Env, Init, Input)<br/>profile.kzp (Φ text, human-authored)")]
 
-    L1["L1 kz-static: basis, extract, link, skel<br/>configuration-closed program → facts and skeletons"]
+    L1["L1 kz-static: basis, extract, link<br/>configuration-closed program → facts, anchors, closure"]
+    SKL["L1 kz-static skel<br/>(optional route) skeleton views"]
     MR["L1 kz-static modref<br/>(S3b, conditional)"]
     CORE["L2 libkz-core (shared)<br/>KEM types, Φ parser, one evaluator,<br/>vector clocks, verdict lattice, KZ container I/O<br/>linked by every component (except BPF)"]
 
-    STAT["L3 abstract: kz-static static + plan<br/>census, MustBefore, certificates, probe plan"]
-    PCK["L5 kz proofcheck<br/>re-validates inference steps relative to its trusted base<br/>(facts, skeleton, closure lists, Φ, libkz-core, runs);<br/>shares no analysis code with static, links libkz-core"]
+    PLN["kz-static plan<br/>probe plan (or hand-augmented plan, §4.7)"]
+    STAT["L3 abstract: kz-static static<br/>(optional route) census, MustBefore, certificates"]
+    PCK["L5 kz proofcheck (optional route; built only when a certificate is issued)<br/>re-validates inference steps relative to its trusted base<br/>(facts, skeleton, closure lists, Φ, libkz-core, runs);<br/>shares no analysis code with static, links libkz-core"]
 
     OBS["L4 kz observe (F0)"]
-    TRC["L3 concrete: kz trace, kz conform, kz predict"]
-    EXP["L3 operational: kz explore<br/>(S7, gated)"]
-    CNF["L4 kz hold (F0) / kz gate (F1, D3)"]
+    ADQ[("observation adequacy record")]
+    TRC["L3 concrete: kz trace (normalization, task→app mapping,<br/>observation-based judgement), kz conform,<br/>kz predict (explicit-state search first)"]
+    EXP["L3 operational: kz explore<br/>(optional route; S7, gated)"]
+    CNF["L4 kz hold (F0) / kz gate (F1, D3 later; optional route)"]
 
-    OUT["L5 kz loop, kz report, kz dump"]
+    OUT["L5 kz report (summary view), kz dump<br/>kz loop (optional route)"]
 
     IN -->|"basis.kz, profile.kz"| L1
-    L1 -->|"facts.kz, anchors.kz, skel.kz"| STAT
+    L1 -->|"facts.kz, anchors.kz"| PLN
+    L1 -.->|"facts.kz"| SKL
+    SKL -.->|"skel.kz"| STAT
+    L1 -.->|"facts.kz, anchors.kz"| STAT
     L1 -.-> MR
     MR -.->|"writer sets"| STAT
-    STAT -->|"certificates"| PCK
-    L1 -->|"trusted: facts.kz, skel.kz, anchors.kz"| PCK
-    PCK -->|"accept / reject (CC), trust ledgers"| STAT
-    STAT -->|"plan.kz"| OBS
+    STAT -.->|"certificates"| PCK
+    L1 -.->|"trusted: facts.kz, anchors.kz"| PCK
+    SKL -.->|"trusted: skel.kz"| PCK
+    PCK -.->|"accept / reject (CC), trust ledgers"| STAT
+    STAT -.->|"census.kz (open candidates)"| PLN
+    PLN -->|"plan.kz"| OBS
     OBS -->|"run-*.kzt"| TRC
-    STAT -->|"census.kz"| EXP
+    OBS --> ADQ
+    ADQ --> TRC
+    STAT -.->|"census.kz"| EXP
     TRC -->|"witness-*.kz → holdplan-*.kz"| CNF
-    EXP -->|"witness-*.kz"| CNF
-    STAT -->|"verdicts.kz"| OUT
+    EXP -.->|"witness-*.kz"| CNF
+    STAT -.->|"verdicts.kz"| OUT
     TRC -->|"verdicts.kz"| OUT
-    EXP -->|"verdicts.kz"| OUT
+    EXP -.->|"verdicts.kz"| OUT
 
     CNF -.->|"F3 confirmation runs"| TRC
     TRC -.->|"F1 keys, targets, opened script / F2 model gaps"| L1
@@ -46,7 +56,7 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef core fill:#e9e4f5,stroke:#5b3f99,color:#111
-    class L1,STAT,PCK,OBS,TRC,CNF,OUT,PHIFIX comp
-    class IN art
-    class MR,EXP gated
+    class L1,PLN,OBS,TRC,CNF,OUT,PHIFIX comp
+    class IN,ADQ art
+    class SKL,MR,STAT,PCK,EXP gated
     class CORE core

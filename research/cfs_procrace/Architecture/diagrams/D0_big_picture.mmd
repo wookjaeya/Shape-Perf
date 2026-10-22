@@ -1,43 +1,54 @@
 flowchart TD
-    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
-    %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
+    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §0.12, §2.1, §2.2, §2.4, §4.14 (rev 1.3).
+    %% Solid = required path (rev 1.3, ADR-053): basis/extract/link → plan → observe → trace → predict → hold → report.
+    %% Dashed border = optional route (rev 1.3, ADR-053: skel, static, proofcheck, explore, loop, gate) or late, gated component.
+    %% Dashed edge = optional-route flow or feedback path (F1-F4).
 
     B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
-    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, contracts")]
+    PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, readiness specifications")]
 
-    CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
+    CLO["L1 static closure (kz-static)<br/>basis, extract, link<br/>facts, anchors, closure per case"]
+    SKL["L1 kz-static skel (optional route)<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
+    PLN["kz-static plan<br/>probe plan (or hand-augmented plan, §4.7)"]
 
-    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
-    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+    ABS["L3 abstract interpretation (optional route)<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation (optional route)<br/>kz explore: bounded explorer<br/>(S7, gated)"]
 
     OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    ADQ[("observation adequacy record")]
     BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
 
-    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+    CON["L3 concrete interpretation<br/>kz trace: normalization, task→app mapping (app_owner),<br/>observation-based judgement over the explanation set;<br/>kz predict: explicit-state search first; kz conform"]
 
-    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): PI decision D3"]
+    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later (optional route)"]
 
-    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress<br/>no alarm ≠ safe")]
-    REP["L5 kz report / kz loop<br/>fixed point + run set"]
+    VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress, proof status<br/>no alarm ≠ safe")]
+    REP["L5 kz report: summary view first<br/>(observation / prediction / confirmation),<br/>full record below; kz loop (optional route)"]
     FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
     B --> CLO
     PHI -->|"bindings, patterns"| CLO
     PHI --> CORE
-    CLO --> ABS
-    CORE --> ABS
-    CORE --> OPR
+    CLO -->|"facts, anchors"| PLN
+    CLO -.-> SKL
+    SKL -.-> ABS
+    SKL -.-> OPR
     CORE --> CON
-    ABS -->|"open candidates → probe plan"| OBS
+    CORE -.-> ABS
+    CORE -.-> OPR
+    ABS -.->|"open candidates"| PLN
+    PLN -->|"plan.kz"| OBS
     OBS ---|"observe"| BIN
     OBS -->|"run-*.kzt traces"| CON
+    OBS --> ADQ
+    ADQ --> CON
     CON -->|"witness → hold plan"| HOLD
-    OPR -->|"witness → hold plan"| HOLD
+    OPR -.->|"witness → hold plan"| HOLD
     HOLD ---|"hold"| BIN
-    ABS -->|"certificates, inactive"| VER
-    CON -->|"observed / predicted evidence"| VER
-    OPR -->|"model(b) evidence"| VER
+    ABS -.->|"certificates, inactive"| VER
+    CON -->|"observed / predicted / confirmed evidence"| VER
+    OPR -.->|"model(b) evidence"| VER
     VER --> REP
 
     HOLD -.->|"F3 confirmation runs"| CON
@@ -48,7 +59,7 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
-    class CLO,CORE,ABS,CON,OBS,HOLD,REP,FIX comp
-    class B,PHI,VER art
-    class OPR gated
+    class CLO,CORE,PLN,CON,OBS,HOLD,REP,FIX comp
+    class B,PHI,VER,ADQ art
+    class SKL,ABS,OPR gated
     class BIN bin

@@ -12,7 +12,7 @@
 > - **rev 1.2, 용어 결정 T1 = (a)(ADR-052).** 판정 대상은 **준비 상태 명세**(readiness specification), `Req`는 준비 사전조건, 위반은 준비 상태 위반, 출처 층은 근거 등급(source tier), refinement `tolerated`는 `allowed-not-ready`다. "계약"은 문서화된 API 의미(API 계약, M_api)와 근거 등급 이름 `contract-backed`에만 남는다. [R04]의 표현을 인용할 때는 원어를 따옴표로 둔다.
 > - **rev 1.2, CORD 인용 정리(PI 결정 D12; spec §0.11 항목 1).** 참고 항목 `[R2c]`와 그 인용을 지웠다(§0.1, §2.2 출처 줄). R2의 실행 근거는 gdb 기록 [R2g]다.
 > - **rev 1.3, §1.11(변경표 C-13, C-14).** 기여 문단을 **기여 가설과 반증 조건 표**로 바꾸었다(§1.1). certificate·explorer·진행 결과·loop는 선택 경로다(ADR-053). 불완전 기록 감시의 선행 연구 행(Leucker et al. RV 2019; Basin et al. TOCL 2019, 둘 다 [U])을 더했다(§4.13, 부록 A). 실행하지 못한 원 도구에 대한 기여 주장은 문헌·코드 분석의 결과 상태로만 적는다(2026-10-22 결정 D4, ADR-058; §4.10, §7). spec §6.4 항목 58–62 가운데 선행 연구와 맞닿은 것을 §9에 옮겼다.
-> - **바꾸지 않은 것.** 문헌의 검증 상태(V-doc, V-abs, V-me, P, UNVERIFIED, [U])는 spec App. B와 [R04]·[R05]·[R06]의 것 그대로이고, 읽지 않은 논문의 상태를 올리지 않았다(P-PAPERS). App. B는 revision 1.3에서 바뀌지 않았다. 그림 D0의 코드 블록은 [01_overview.md](01_overview.md)와 같은 revision 1.2 판으로 맞췄고, `diagrams/`의 원본은 그림 단계에서 맞춘다.
+> - **바꾸지 않은 것.** 문헌의 검증 상태(V-doc, V-abs, V-me, P, UNVERIFIED, [U])는 spec App. B와 [R04]·[R05]·[R06]의 것 그대로이고, 읽지 않은 논문의 상태를 올리지 않았다(P-PAPERS). App. B에는 revision 1.3에서 불완전 기록 감시 논문 두 편이 [U]로 더해졌다. 그림 D0의 코드 블록은 `diagrams/D0_big_picture.mmd`(rev 1.3: 필수 경로 실선, 선택 경로 점선, 관측 적합성 기록, 요약 뷰)와 같다.
 >
 > 이 변경은 결정 [D]이고 결과가 아니다. 이 판을 위해 만들거나 실행한 것은 없고, 연구 조건도 정하지 않았다. **우선 규칙**(spec §0.12 "Precedence", ADR-053): revision 1.0–1.2를 위해 쓴 문장 가운데 certificate, explorer, 진행 결과, loop를 Kairos의 첫 산출물·필수 산출물로 부르는 것은 ADR-053에 따라 읽는다.
 
@@ -217,45 +217,56 @@ Netzer와 Miller(LOPLAS 1992 [V-abs])는 data race(동기화 없는 충돌 접�
 
 ```mermaid
 flowchart TD
-    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
-    %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
+    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §0.12, §2.1, §2.2, §2.4, §4.14 (rev 1.3).
+    %% Solid = required path (rev 1.3, ADR-053): basis/extract/link → plan → observe → trace → predict → hold → report.
+    %% Dashed border = optional route (rev 1.3, ADR-053: skel, static, proofcheck, explore, loop, gate) or late, gated component.
+    %% Dashed edge = optional-route flow or feedback path (F1-F4).
 
     B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
     PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, readiness specifications")]
 
-    CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
+    CLO["L1 static closure (kz-static)<br/>basis, extract, link<br/>facts, anchors, closure per case"]
+    SKL["L1 kz-static skel (optional route)<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
+    PLN["kz-static plan<br/>probe plan (or hand-augmented plan, §4.7)"]
 
-    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
-    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+    ABS["L3 abstract interpretation (optional route)<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation (optional route)<br/>kz explore: bounded explorer<br/>(S7, gated)"]
 
     OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    ADQ[("observation adequacy record")]
     BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
 
-    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+    CON["L3 concrete interpretation<br/>kz trace: normalization, task→app mapping (app_owner),<br/>observation-based judgement over the explanation set;<br/>kz predict: explicit-state search first; kz conform"]
 
-    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later"]
+    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later (optional route)"]
 
     VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress, proof status<br/>no alarm ≠ safe")]
-    REP["L5 kz report / kz loop<br/>fixed point + run set"]
+    REP["L5 kz report: summary view first<br/>(observation / prediction / confirmation),<br/>full record below; kz loop (optional route)"]
     FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
     B --> CLO
     PHI -->|"bindings, patterns"| CLO
     PHI --> CORE
-    CLO --> ABS
-    CORE --> ABS
-    CORE --> OPR
+    CLO -->|"facts, anchors"| PLN
+    CLO -.-> SKL
+    SKL -.-> ABS
+    SKL -.-> OPR
     CORE --> CON
-    ABS -->|"open candidates → probe plan"| OBS
+    CORE -.-> ABS
+    CORE -.-> OPR
+    ABS -.->|"open candidates"| PLN
+    PLN -->|"plan.kz"| OBS
     OBS ---|"observe"| BIN
     OBS -->|"run-*.kzt traces"| CON
+    OBS --> ADQ
+    ADQ --> CON
     CON -->|"witness → hold plan"| HOLD
-    OPR -->|"witness → hold plan"| HOLD
+    OPR -.->|"witness → hold plan"| HOLD
     HOLD ---|"hold"| BIN
-    ABS -->|"certificates, inactive"| VER
-    CON -->|"observed / predicted evidence"| VER
-    OPR -->|"model(b) evidence"| VER
+    ABS -.->|"certificates, inactive"| VER
+    CON -->|"observed / predicted / confirmed evidence"| VER
+    OPR -.->|"model(b) evidence"| VER
     VER --> REP
 
     HOLD -.->|"F3 confirmation runs"| CON
@@ -266,13 +277,13 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
-    class CLO,CORE,ABS,CON,OBS,HOLD,REP,FIX comp
-    class B,PHI,VER art
-    class OPR gated
+    class CLO,CORE,PLN,CON,OBS,HOLD,REP,FIX comp
+    class B,PHI,VER,ADQ art
+    class SKL,ABS,OPR gated
     class BIN bin
 ```
 
-이 코드 블록은 [01_overview.md](01_overview.md)의 그림 D0와 같은 revision 1.2 판이다(T1 이름, 증명 상태, F1 gate는 후순위). `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 같은 내용으로 맞춘다. revision 1.3에서 L3 abstract 해석(certificate, `kz proofcheck`)과 operational 해석(explorer)은 선택 경로이고, 필수 경로는 관측 → 관측 기반 판정 → 한정 예측 → 제어 실행 확인이다(ADR-053). 그림은 아직 이 구분을 그리지 않는다.
+이 코드 블록은 `diagrams/D0_big_picture.mmd`와 [01_overview.md](01_overview.md)의 그림 D0와 같다(rev 1.3). L3 abstract 해석(certificate, `kz proofcheck`)과 operational 해석(explorer), loop, gate는 점선의 선택 경로이고, 필수 경로는 관측 → 관측 적합성 기록 → 정규화(task→앱 매핑)·관측 기반 판정(설명 집합) → 한정 예측(명시적 탐색 우선) → 제어 실행 확인 → 요약 뷰다(ADR-053).
 
 그림의 상자마다 어느 계열의 기법을 빌렸는지 적으면 다음과 같다.
 

@@ -1,5 +1,5 @@
 flowchart TD
-    %% D9 - teardown scoping on pc-linux. Source: spec §12 D9; §3.5, §1.6 (scope), §4.5 (SCOPE), §4.13, App. A.7.
+    %% D9 - teardown scoping on pc-linux. Source: spec §12 D9 (rev 1.2: D17 (a)); §3.5, §1.6 (scope), §4.5 (SCOPE), §4.13, §6.4 item 49, App. A.7.
     %% Lines are in psp/fsw/pc-linux/src. In this diagram the dashed edge is the spec's "⇢" (disabler relation,
     %% SCOPE-excluded from in-scope certificates); the dashed border marks the next run.
 
@@ -32,10 +32,13 @@ flowchart TD
     NOTE["SIGUSR1 is blocked process-wide: while the startup thread<br/>is inside CFE_ES_Main, a restart request causes no teardown,<br/>only the requester's abort after 10 s"]
 
     subgraph NEXT["next run: B.Init"]
-        N1(["POWERON restart → clean Init"])
+        N1(["POWERON restart → shm segments deleted;<br/>not every persisted file, file cache or shared file system (D17 (a)):<br/>the initial state is recorded and checked, not assumed clean"])
         N2(["other exits (abort, PROCESSOR restart, harness kill)<br/>→ segments and boot record left → PROCESSOR reset"])
         N3["normalization boot (unobserved, excluded);<br/>Init checked against canonical S0"]
+        N4["Init snapshot S0 and termination record<br/>recorded and canonicalized for every run (§1.7, §4.13)"]
         N2 --> N3
+        N1 --> N4
+        N3 --> N4
     end
 
     Q4 -->|"T-OBS: SR ∈ MB(OS_DeleteAllObjects)"| M4
@@ -57,5 +60,5 @@ flowchart TD
     class Q7,KTD term
     class INS ok
     class NOTE note
-    class N1,N2,N3 next
+    class N1,N2,N3,N4 next
     style NEXT stroke-dasharray:5 5

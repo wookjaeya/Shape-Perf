@@ -362,45 +362,56 @@ spec §0.2는 설계의 형식적 핵심을 여덟 요점으로 적는다. 이 �
 
 ```mermaid
 flowchart TD
-    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §2.1, §2.4, §4.14.
-    %% Dashed border = PI-gated or late-stage component. Dashed edge = feedback path (F1-F4).
+    %% D0 - Kairos big picture (one screen). Sources: spec §0.1-0.2, §0.12, §2.1, §2.2, §2.4, §4.14 (rev 1.3).
+    %% Solid = required path (rev 1.3, ADR-053): basis/extract/link → plan → observe → trace → predict → hold → report.
+    %% Dashed border = optional route (rev 1.3, ADR-053: skel, static, proofcheck, explore, loop, gate) or late, gated component.
+    %% Dashed edge = optional-route flow or feedback path (F1-F4).
 
     B[("L0 input: basis B<br/>build, config, Init, Env, Input")]
     PHI[("L0 input: profile Φ_cFS<br/>kinds, ops + per-conjunct LP,<br/>HB rules, readiness specifications")]
 
-    CLO["L1 static closure + skeletons (kz-static)<br/>basis, extract, link, skel<br/>Sk^cert certificate view / Sk^h exploration view"]
+    CLO["L1 static closure (kz-static)<br/>basis, extract, link<br/>facts, anchors, closure per case"]
+    SKL["L1 kz-static skel (optional route)<br/>Sk^cert certificate view / Sk^h exploration view"]
     CORE["L2 formal core: libkz-core<br/>KEM event type, one Φ evaluator,<br/>vector clocks, verdict lattice"]
+    PLN["kz-static plan<br/>probe plan (or hand-augmented plan, §4.7)"]
 
-    ABS["L3 abstract interpretation<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
-    OPR["L3 operational interpretation<br/>kz explore: bounded explorer<br/>(S7, gated)"]
+    ABS["L3 abstract interpretation (optional route)<br/>kz-static static: census, MustBefore,<br/>certificates → kz proofcheck"]
+    OPR["L3 operational interpretation (optional route)<br/>kz explore: bounded explorer<br/>(S7, gated)"]
 
     OBS["L4 kz observe (F0)<br/>uprobe + eBPF, driven by plan.kz"]
+    ADQ[("observation adequacy record")]
     BIN["cFS process core-cpu1<br/>unmodified gcc binary"]
 
-    CON["L3 concrete interpretation<br/>kz trace / predict / conform:<br/>HB, per-conjunct LP, lock reversal"]
+    CON["L3 concrete interpretation<br/>kz trace: normalization, task→app mapping (app_owner),<br/>observation-based judgement over the explanation set;<br/>kz predict: explicit-state search first; kz conform"]
 
-    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later"]
+    HOLD["L4 kz hold (F0): ptrace + debug-register gate<br/>kz gate (F1): decision D3, later (optional route)"]
 
     VER[("L5 verdicts.kz<br/>per (σ, M) cell: class or unknown(reason),<br/>reach, progress, proof status<br/>no alarm ≠ safe")]
-    REP["L5 kz report / kz loop<br/>fixed point + run set"]
+    REP["L5 kz report: summary view first<br/>(observation / prediction / confirmation),<br/>full record below; kz loop (optional route)"]
     FIX["Φ revision (human review)<br/>→ new Φ hash, new loop"]
 
     B --> CLO
     PHI -->|"bindings, patterns"| CLO
     PHI --> CORE
-    CLO --> ABS
-    CORE --> ABS
-    CORE --> OPR
+    CLO -->|"facts, anchors"| PLN
+    CLO -.-> SKL
+    SKL -.-> ABS
+    SKL -.-> OPR
     CORE --> CON
-    ABS -->|"open candidates → probe plan"| OBS
+    CORE -.-> ABS
+    CORE -.-> OPR
+    ABS -.->|"open candidates"| PLN
+    PLN -->|"plan.kz"| OBS
     OBS ---|"observe"| BIN
     OBS -->|"run-*.kzt traces"| CON
+    OBS --> ADQ
+    ADQ --> CON
     CON -->|"witness → hold plan"| HOLD
-    OPR -->|"witness → hold plan"| HOLD
+    OPR -.->|"witness → hold plan"| HOLD
     HOLD ---|"hold"| BIN
-    ABS -->|"certificates, inactive"| VER
-    CON -->|"observed / predicted evidence"| VER
-    OPR -->|"model(b) evidence"| VER
+    ABS -.->|"certificates, inactive"| VER
+    CON -->|"observed / predicted / confirmed evidence"| VER
+    OPR -.->|"model(b) evidence"| VER
     VER --> REP
 
     HOLD -.->|"F3 confirmation runs"| CON
@@ -411,19 +422,19 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
-    class CLO,CORE,ABS,CON,OBS,HOLD,REP,FIX comp
-    class B,PHI,VER art
-    class OPR gated
+    class CLO,CORE,PLN,CON,OBS,HOLD,REP,FIX comp
+    class B,PHI,VER,ADQ art
+    class SKL,ABS,OPR gated
     class BIN bin
 ```
 
 읽는 법은 다음과 같다(범례는 [diagrams/README.md](diagrams/README.md)).
 
 - L0–L5는 spec §2.1의 계층이다. L0 입력, L1 정적 closure와 skeleton(§3.2), L2 formal core, L3 세 해석기, L4 실제 바이너리 관측·제어, L5 orchestration·보고.
-- 원통은 산출물이고, 점선 테두리는 PI 결정이 있어야 하거나 늦은 단계에 쓰는 구성요소다. explorer가 그런 예다.
-- 점선 화살표는 feedback F1–F4다(§3.5).
-- 이 코드 블록은 revision 1.2에 맞췄다(T1 이름, 증명 상태, F1 gate는 후순위). `diagrams/`의 원본과 렌더링 파일은 그림 단계에서 같은 내용으로 맞춘다.
-- **rev 1.3의 필수 경로와 선택 경로** (spec §2.2 "Required and optional routes"; ADR-053; C-15, C-16). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 계획, spec §4.7) → `observe` → `trace`(정규화, task→앱 매핑, 관측 기반 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform`의 O8, `loop`, `gate`, 그리고 전과 같이 `modref`는 바뀌지 않은 채 정의된 선택 경로이고, 그 주장이 필요할 때 쓴다. `static`의 census와 `skel`의 view는 선택 경로나 닫힘 검사(spec §4.1)가 필요로 하는 곳에서 계속 쓴다. `proofcheck`는 certificate를 발행할 때만 만든다. 그림 D0은 아직 이 구분을 그리지 않았다. 그림 D2·D3의 개정 지시(spec §12, C-48)는 그림 단계에서 반영한다.
+- 원통은 산출물이다. 실선 상자와 실선 화살표는 revision 1.3의 필수 경로이고, 점선 테두리는 선택 경로(`skel`, `static`과 `kz proofcheck`, explorer)다. explorer는 늦은 단계(S7)이기도 하다.
+- 점선 화살표는 선택 경로의 흐름과 feedback F1–F4다(§3.5).
+- 이 코드 블록은 `diagrams/D0_big_picture.mmd`와 같고 revision 1.3에 맞췄다. revision 1.2의 고침(T1 이름, 증명 상태, F1 gate는 후순위)에 더해, `plan`을 `static`에서 떼어 필수 경로에 두고, `observe`와 `trace` 사이에 관측 적합성 기록을, `report`에 요약 뷰를 그렸다(spec §12 D2의 revision 1.3 지시를 개요 그림에도 적용).
+- **rev 1.3의 필수 경로와 선택 경로** (spec §2.2 "Required and optional routes"; ADR-053; C-15, C-16). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 계획, spec §4.7) → `observe` → `trace`(정규화, task→앱 매핑, 관측 기반 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform`의 O8, `loop`, `gate`, 그리고 전과 같이 `modref`는 바뀌지 않은 채 정의된 선택 경로이고, 그 주장이 필요할 때 쓴다. `static`의 census와 `skel`의 view는 선택 경로나 닫힘 검사(spec §4.1)가 필요로 하는 곳에서 계속 쓴다. `proofcheck`는 certificate를 발행할 때만 만든다. 그림 D0은 이 구분을 실선과 점선으로 그린다. 그림 D2·D3도 같은 개정 지시(spec §12, C-48)에 맞췄다.
 - 판정(L5)에는 "safe" 상태가 없고, "live"나 "deadlock-free"를 뜻하는 진행 값도 없다(§4.7).
 
 ### 3.1 하나의 typed event model과 framework profile Φ_cFS

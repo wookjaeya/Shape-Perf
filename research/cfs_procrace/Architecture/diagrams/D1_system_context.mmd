@@ -1,6 +1,6 @@
 flowchart TD
-    %% D1 - System context. Source: spec §12 D1; §2.2, §2.6, §5.1, §1.7, §10.1.
-    %% Dashed border + dashed edge = PI-gated node (not installed / not approved).
+    %% D1 - System context. Source: spec §12 D1 (rev 1.2; unchanged in rev 1.3); §2.2, §2.6, §5.1, §1.7, §10.1.
+    %% Dashed border + dashed edge = later or conditional node (not installed; not a condition of the first implementation). Revision 1.2 removed MLIR (D6), the TSan variant (P-TSAN) and the valgrind reference point (P-VALGRIND).
 
     PI(["PI / Researcher"])
 
@@ -21,21 +21,19 @@ flowchart TD
     end
 
     subgraph HOST["Linux host (4 vCPU)"]
-        KER["Linux kernel 6.18.44-fc-v114<br/>perf uprobe PMU with attach cookies, bpf(),<br/>perf breakpoint PMU, ptrace, tracepoints"]
-        HAR["run harness env/run_cfs.sh<br/>root-side hook (decision D1),<br/>RUN_CFS_WRAP (gdb, valgrind)"]
+        KER["Linux kernel, recorded per run<br/>(6.18.44-fc-v114 in [R07 §1], -fc-v139 on 2026-10-16; §1.7 Env)<br/>perf uprobe PMU with attach cookies, bpf(),<br/>perf breakpoint PMU, ptrace, tracepoints"]
+        HAR["run harness env/run_cfs.sh<br/>root-side hook (decision D1),<br/>RUN_CFS_WRAP (gdb)"]
         CFS["cFS process core-cpu1<br/>README mode, user ubuntu, 27 threads"]
         PST[("persistent state<br/>/dev/shm/osal:RAM, EEPROM.DAT,<br/>SysV segments, key files")]
     end
 
     STORE[("KZ artifact store<br/>typed KZ containers")]
 
-    subgraph GATED["PI-gated (not yet installed or approved)"]
-        Z3["Z3 (P-Z3)"]
-        LBPF["libbpf (P-LIBBPF)"]
-        NID["llvm-18-dev + Nidhugg (P-NIDHUGG)"]
-        WRAP["F1 --wrap variant (D3)"]
-        MLIR["MLIR (D6)"]
-        TSAN["TSan variant (P-TSAN)"]
+    subgraph GATED["later or conditional (not installed)"]
+        Z3["Z3 (P-Z3: not a condition of the first implementation)"]
+        LBPF["libbpf (P-LIBBPF: only if a needed function is shown missing)"]
+        NID["llvm-18-dev + Nidhugg (P-NIDHUGG: held)"]
+        WRAP["F1 --wrap variant (D3: later)"]
     end
 
     PI -->|"Φ edits, decisions, freezes F1/F2"| KZC
@@ -58,8 +56,6 @@ flowchart TD
     LBPF -.-> KZC
     NID -.-> KZC
     WRAP -.-> KZC
-    MLIR -.-> KZS
-    TSAN -.-> KZC
 
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
@@ -67,6 +63,6 @@ flowchart TD
     classDef bin fill:#eaf6ea,stroke:#2e7d32,color:#111
     class KZS,KZC,LLVM,CL18,KER,HAR comp
     class TREE,BUILD,REC,PST,STORE art
-    class Z3,LBPF,NID,WRAP,MLIR,TSAN gated
+    class Z3,LBPF,NID,WRAP gated
     class CFS bin
     style GATED stroke-dasharray:5 5

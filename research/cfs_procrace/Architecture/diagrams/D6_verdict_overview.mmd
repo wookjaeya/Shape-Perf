@@ -1,11 +1,11 @@
 stateDiagram-v2
     direction LR
-    %% D6 overview - class region of the verdict state machine for one (σ, M) cell and bound. Source: spec §12 D6 (rev 1.1); §1.10, §4.12, §4.14.
+    %% D6 overview - class region of the verdict state machine for one (σ, M) cell and bound. Source: spec §12 D6 (rev 1.2; unchanged in rev 1.3); §1.10, §4.12, §4.14; rev 1.3 notes from §1.10 "Summary view" and ADR-053.
     %% The class is a safety classification, a function of the safety record (¬Bad_i, ¬OK_i, ¬NR_i, witnesses with ordinals).
     %% Parallel regions (evidence, naturalness, provider, reach, scope, progress, trust ledger): D6_verdict_axes.mmd.
 
     state "candidate (census instance)" as candidate
-    state "open" as open
+    state "open (not a class: rendered unknown(open-route reason))" as open
     state "inactive (static: no Sk^cert path under B)" as inactive
     state "unknown(no_decision_route), certified ¬OK_i shown" as unkNDR
     state "unknown(budget)" as unkBudget
@@ -16,10 +16,10 @@ stateDiagram-v2
     state "model-fault record" as mfr
 
     state "classes derived from the safety record (per cell and bound)" as classes {
-        state "protected[cert]: ¬NR_i, b = ∞, every reached occurrence READY" as protCert
+        state "protected[cert]: ¬NR_i, b = ∞, every decided occurrence READY or NOT_EVALUATED" as protCert
         state "fixed-order[cert]: ¬OK_i with decision route, b = ∞" as fixCert
         state "protected[model b]: ¬Bad_i within b" as protModel
-        state "tolerated[model b]" as tolModel
+        state "allowed-not-ready[model b]" as tolModel
         state "fixed-order[model b]: ¬OK_i and a bad witness within b" as fixModel
         state "no-final-status: ¬Bad_i and ¬OK_i" as nfs
         state "ordinal-split: bad and good at different ordinals" as ordSplit
@@ -65,8 +65,8 @@ stateDiagram-v2
 
     note left of candidate
         A certificate gives one safety statement; progress stays unknown(not_checked) unless exh runs.
-        There is no protected[cert] to tolerated transition.
-        A universal class is rendered with its reach and progress, e.g. protected: every reached occurrence READY (certificate, b = ∞), reach proved, progress not checked.
+        There is no protected[cert] to allowed-not-ready transition.
+        A universal class is rendered with its reach and progress, e.g. protected: every decided occurrence READY or NOT_EVALUATED (certificate, b = ∞), reach proved, progress not checked, lemma status: unproved.
     end note
 
     note right of contested
@@ -79,6 +79,12 @@ stateDiagram-v2
         An M_api-only certificate contradicted by an observation gives portability-hazard-evidence; no state change at M_api.
     end note
 
+    note right of open
+        open is not a class; it is rendered unknown(open-route reason) (§1.10, §4.6).
+        Rev 1.3: the certificate transitions from candidate are an optional route (ADR-053).
+        The summary view (§1.10) is computed over the record and changes no state; PENDING and OPEN occurrences summarize as INCONCLUSIVE(horizon-open).
+    end note
+
     note right of unkOther
-        Other reasons: not_reached, bound, key_unresolved, loss, unmodelled, writer_incomplete, horizon, conformance, model_level.
+        Other reasons: not_reached, bound, key_unresolved, loss, unmodelled, writer_incomplete, horizon, horizon_static, one_sided, unordered, O-ordered-only, conditional-observation, conformance, model_level.
     end note

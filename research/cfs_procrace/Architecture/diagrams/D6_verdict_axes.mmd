@@ -1,5 +1,5 @@
 stateDiagram-v2
-    %% D6 detail - parallel regions of one verdict cell, per (σ, M) and bound. Source: spec §12 D6 (rev 1.1); §1.8, §1.10, §4.5.1, §4.12-4.14.
+    %% D6 detail - parallel regions of one verdict cell, per (σ, M) and bound. Source: spec §12 D6 (rev 1.2; unchanged in rev 1.3); §1.8, §1.10, §4.5.1 (rev 1.3: results without a certificate), §4.12-4.14.
     %% Each region evolves independently of the class region in D6_verdict_overview.mmd. A stall witness never moves the class region.
 
     state "verdict cell: parallel regions (per (σ, M) and bound)" as axes {
@@ -85,11 +85,11 @@ stateDiagram-v2
             gNS --> gCont : realized stall within b (O6)
         }
         --
-        state "trust ledger (certificate-based states): four parts, all present" as ledger {
+        state "trust ledger (every cell): four parts; part (i) is empty without a certificate" as ledger {
             direction LR
             state "(i) re-validated inference steps, ACCEPTED or ACCEPTED_VIA_T5, correct relative to (ii) and (iii)" as l1
             state "(ii) extracted facts: typed references with artifact hashes" as l2
-            state "(iii) trusted entries: Φ entries, DECLARED_TRUSTED, assumptions, lemma sketches, tool base" as l3
+            state "(iii) trusted entries: Φ entries, DECLARED_TRUSTED, assumptions, lemmas with proof status, tool base" as l3
             state "(iv) refutable, not proved: entries of (ii) or (iii) with obligation, status, exercised-path limit" as l4
         }
     }
@@ -104,4 +104,6 @@ stateDiagram-v2
         Progress record: the set of stall clauses (pre-use, in-use, horizon), kind (deadlock-cycle, leaked-lock, other), qualifiers (idle, terminal-pending, choice-dependent), wait-for root set, harm and progress chain; flags timeout-masked-liveness (per instance) and tml-root.
         No transition goes from a certificate into the progress region. No progress value means live or deadlock-free.
         Trust ledger: derived per cell (transfer lemmas added); part (i) is empty for a verdict without a certificate; passing an obligation is never recorded as proof.
+        Rev 1.3 (§4.5.1, C-23): observation-based judgements, predictions and confirmations carry the four parts too; for an observation-based judgement part (iii) includes A-OBS and L-OBS.
+        Proof status: the weakest status among the lemmas the cell's statements use (proved above depends-on-stated-assumption above unproved); only a written proof raises it.
     end note

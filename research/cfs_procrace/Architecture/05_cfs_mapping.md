@@ -4,7 +4,7 @@
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
 
-**rev 1.2·1.3 반영.** rev 1.2: 용어 T1 = (a)(준비 상태 명세, 준비 사전조건, 준비 상태 위반, 준비 범주, `allowed-not-ready`)를 문서 전체에, CORD 인용 제거(§0.11 항목 1의 규칙: gdb 기록이 직접 뒷받침하는 것만 남김)를 §2.3·§6.2·§7에, QT-4 엄격 대안을 §2.2·§3(RC1)·§6.4에, D17 (a)를 §8.1·§8.2에, D19를 §2.9에, D22·P-C1HOLD를 §6.1·§6.3·§6.4에, P-R2CTRL·P-C2·D13·P-RGIT·D9를 §6.2·§6.3에, R2 표현(`event_request_rejected`)과 증명 상태·L-CONT (c)를 §7에 옮겼다(§0.4). rev 1.3: 사례별 closure 기록(C-19)을 §2.1에, `app_owner`에 쓰는 생성 사건(C-20)을 §2.3에, R2 = 기반 검증과 certificate의 선택 경로화(D1, C-49)를 §6.1·§6.3·§7에, C1 = 첫 기여 근거 사례와 버전별 경로 분리(D3, C-50)를 §6.1·§6.4에, C2의 세 구성(§8.2 개정 1.3)을 §6.3에, 신뢰 장부의 일반화(C-23)를 §7.4에 옮겼다(§0.5). 본문에 그대로 옮긴 그림 D8 상세·D9의 Mermaid 사본은 `diagrams/`의 원본과 같게 두었고, 바뀐 spec 내용은 그림 아래 글에 적었다(§7.4, §8).
+**rev 1.2·1.3 반영.** rev 1.2: 용어 T1 = (a)(준비 상태 명세, 준비 사전조건, 준비 상태 위반, 준비 범주, `allowed-not-ready`)를 문서 전체에, CORD 인용 제거(§0.11 항목 1의 규칙: gdb 기록이 직접 뒷받침하는 것만 남김)를 §2.3·§6.2·§7에, QT-4 엄격 대안을 §2.2·§3(RC1)·§6.4에, D17 (a)를 §8.1·§8.2에, D19를 §2.9에, D22·P-C1HOLD를 §6.1·§6.3·§6.4에, P-R2CTRL·P-C2·D13·P-RGIT·D9를 §6.2·§6.3에, R2 표현(`event_request_rejected`)과 증명 상태·L-CONT (c)를 §7에 옮겼다(§0.4). rev 1.3: 사례별 closure 기록(C-19)을 §2.1에, `app_owner`에 쓰는 생성 사건(C-20)을 §2.3에, R2 = 기반 검증과 certificate의 선택 경로화(D1, C-49)를 §6.1·§6.3·§7에, C1 = 첫 기여 근거 사례와 버전별 경로 분리(D3, C-50)를 §6.1·§6.4에, C2의 세 구성(§8.2 개정 1.3)을 §6.3에, 신뢰 장부의 일반화(C-23)를 §7.4에 옮겼다(§0.5). 본문에 옮긴 그림 D8 개요·상세와 D9의 Mermaid 사본은 rev 1.3에 맞춰 고친 `diagrams/`의 원본과 같다(D8: 선택 경로 표시, lemma의 증명 상태와 L-CONT (c); D9: D17 (a)의 다음 실행 상자).
 
 ## 목차
 
@@ -832,7 +832,8 @@ C1은 기본 B에서 잠복한다. 사례 자신의 현상은 파생 구성 B′
 ```mermaid
 flowchart TD
     %% D8 overview - the R2 FIXED_ORDER certificate (ES and EVS halves), expected behaviour; nothing was run.
-    %% Source: spec §12 D8; App. A.1; §4.4, §4.5. Writer lists: D8_r2_certificate_writers.mmd.
+    %% Source: spec §12 D8; App. A.1 (rev 1.3 head note); §4.4, §4.5, §6.2. Writer lists: D8_r2_certificate_writers.mmd.
+    %% Rev 1.3 (ADR-053, ADR-057): R2 is the baseline validation (rung V1′); this certificate is the optional route for the universal statement.
     %% Edge labels name the rule. "--x" = excluded / no path (the rule named on the edge proves it).
 
     INIT["INIT: CFE_SB_Global is zero-initialized<br/>(cfe_sb_task.c:40)"]
@@ -867,7 +868,8 @@ flowchart TD
     end
 
     DER["derives(c, CFE_SB_Global.AppId)<br/>T-DERIVE: V evaluated at c"]
-    RESULT(["m_ES ∈ MB(x), m_EVS ∈ MB(x), m ∉ Anc(c)<br/>⇒ PWB(c, x) by FRONTIER<br/>⇒ fixed-order(σ_U, M_api and M_impl)"])
+    RESULT(["m_ES ∈ MB(x), m_EVS ∈ MB(x), m ∉ Anc(c)<br/>⇒ PWB(c, x) by FRONTIER<br/>⇒ fixed-order(σ_U, M_api and M_impl)<br/>relative to its trusted base; lemma status: unproved"])
+    OPT["optional route (rev 1.3, ADR-053): used only if the paper makes<br/>R2's universal statement; R2 is the baseline validation (V1′).<br/>Without it, R2's cell reads schedule dependence undetermined (§1.10)"]
 
     INIT --> V0
     FES -->|"falsifier dominates o"| OES
@@ -895,6 +897,7 @@ flowchart TD
     DER --- WX
     V0 --- DER
     WX --> RESULT
+    OPT -.- RESULT
 
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
     classDef obs fill:#fffbe6,stroke:#a07a00,color:#111
@@ -906,13 +909,16 @@ flowchart TD
     class PAN term
     class RESULT,V0 res
     class CES,CEV,WX,DER cap
+    classDef note fill:#ffffff,stroke:#999,stroke-dasharray:5 5,color:#555
+    class OPT note
 ```
 
 읽는 법:
 - 가운데 상자는 startup thread가 펼친 core loop다. ES 반복(`f_ES` → `o_ES`)과 EVS 반복(`f_EVS` → `o_EVS`) 뒤에 SB 반복의 spawn이 온다.
 - ES main 상자와 EVS main 상자는 각각 capture point `c`, frontier 노드 `m`, raise를 가진다.
 - `--x` 화살표는 "경로 없음" 또는 "writer 집합에서 제외"이고, 화살표 위 글자가 그것을 증명하는 규칙이다.
-- 결론 상자: `m_ES ∈ MB(x)`, `m_EVS ∈ MB(x)`, `m ∉ Anc(c)`이므로 FRONTIER로 `PWB(c, x)`이고, 따라서 fixed-order다.
+- 결론 상자: `m_ES ∈ MB(x)`, `m_EVS ∈ MB(x)`, `m ∉ Anc(c)`이므로 FRONTIER로 `PWB(c, x)`이고, 따라서 fixed-order다. 신뢰 기반에 상대적이고 "lemma status: unproved"로 출력한다(7.4).
+- 점선 테두리의 주석 상자는 개정 1.3의 표시다. 이 certificate는 논문이 R2의 보편 진술을 할 때만 쓰는 선택 경로이고, R2는 기반 검증(V1′)이다(7절 머리 "개정 1.3").
 
 ### 7.3 cFS 사실이 certificate의 어느 재료가 되는가
 
@@ -940,11 +946,12 @@ flowchart TD
 ```mermaid
 flowchart TD
     %% D8 detail - writer entries of the R2 certificate with transition and key status, and the four-part trust ledger.
-    %% Source: spec §12 D8 (rev 1.1); App. A.1 steps 3-5, 9, 9a; §4.2, §4.4, §4.5.1. Expected behaviour; nothing here was run.
+    %% Source: spec §12 D8 (rev 1.2: lemma proof statuses, L-CONT (c)); App. A.1 steps 3-5, 9, 9a; §4.2, §4.4, §4.5.1, §6.2. Expected behaviour; nothing here was run.
+    %% Rev 1.3 (ADR-053, ADR-057): R2 is the baseline validation (rung V1′); this certificate and its ledger are the optional route for the universal statement.
     %% Each column is one list (the thin links only stack the entries). Red = DECLARED_TRUSTED entry.
     %% The ledger parts are declared (iv) to (i) so that Mermaid places them (i) to (iv) from left to right.
 
-    subgraph TL["trust ledger, four parts (A.1 step 9a): one per half and per M, for (σ_U, M_api) and (σ_U, M_impl), b = ∞; the other cells' ledgers are derived (§4.5.1)"]
+    subgraph TL["trust ledger, four parts (A.1 step 9a): one per half and per M, for (σ_U, M_api) and (σ_U, M_impl), b = ∞; the other cells' ledgers are derived (§4.5.1); every R2 certificate cell prints lemma status: unproved"]
         direction TB
         subgraph TL4["(iv) refutable, not proved (not run until S1 / S2)"]
             direction TB
@@ -953,18 +960,20 @@ flowchart TD
             F3R["A-SKEL: O1 / O2,<br/>O8 from S5;<br/>closure: O5;<br/>once and MB facts: O3"]
             F4R["Φ effects, LPs, derives,<br/>Pred_code: O4(a) / (b);<br/>writer completeness:<br/>O7 (model build)"]
             F5R["exercised-path limit:<br/>default boots cannot refute<br/>the :823 → panic branch,<br/>the early returns<br/>(cfe_es_task.c:340/371/381/393)<br/>or the timed-out-wait<br/>ExitApp path"]
-            F6R["passing an obligation<br/>is never proof; reach is<br/>the one item that an<br/>observation proves"]
-            F1R --- F2R --- F3R --- F4R --- F5R --- F6R
+            F7R["L-CONT (c), L-MAPI-CONE,<br/>L-REACH-CONE (derived σ_U∞):<br/>through their run-side<br/>premises, by O1, O2,<br/>O4, O5 on the runs R"]
+            F6R["passing an obligation<br/>is never proof; reach is<br/>the one item that an<br/>observation proves, through<br/>L-CONT (c) and its lemmas"]
+            F1R --- F2R --- F3R --- F4R --- F7R --- F5R --- F6R
         end
         subgraph TL3["(iii) trusted entries"]
             direction TB
             P1["Φ: K-ID.send-with-appid<br/>(Req; capture-point and<br/>slot-check LPs; outcome<br/>map; Allowed none; harm)"]
             P2["Φ: T-DERIVE;<br/>CFE_ES_GetAppID effects;<br/>R19 binding (predicate<br/>re-derived, not trusted);<br/>T-TERM declarations;<br/>AppState / IsUsed bindings;<br/>Φ_L-1 (M_impl)"]
             P3["DECLARED_TRUSTED<br/>(counted by trusted:#60;n#62;):<br/>CleanUpApp relational<br/>guard (both halves);<br/>A-FRESH, A-OWNER<br/>(EVS half), incl. the<br/>ExitApp STOPPED exclusion"]
-            P4["assumptions: A1, A3, A4,<br/>A9, A-SKEL, A-WS,<br/>A-TYPE, A-EXTRACT,<br/>A-CORE; A2, A6 (reach);<br/>A7-impl, A7-api, A10<br/>(M_impl)"]
-            P5["lemma obligations:<br/>L-MB, L-ONCE, L-PWB,<br/>L-DERIVE, L-FO, L1;<br/>L-MAPI-CONE<br/>(M_api reach by a run);<br/>derived cells: L-STATUS,<br/>L-MON, L-CONT, L-TRANS;<br/>L-REACH-CONE<br/>(σ_U∞ reach by a run)"]
+            P4["assumptions: A1, A3, A4,<br/>A9, A-SKEL, A-WS,<br/>A-TYPE, A-EXTRACT,<br/>A-CORE; A2, A6 (reach);<br/>A7-impl, A7-api, A10<br/>(M_impl); A7-api also for<br/>the M_api cell's run-based reach"]
+            P5["lemmas, each with its proof status<br/>own cells: L-MB, L-ONCE, L-PWB,<br/>L-FO, L1, L-STATUS: unproved;<br/>L-DERIVE: depends-on-stated-<br/>assumption; L-SCOPE only if<br/>a SCOPE exclusion is used"]
+            P7["lemmas for reach:<br/>L-CONT (c): depends-on-<br/>stated-assumption (M_impl;<br/>M_api through L-MAPI-CONE:<br/>unproved);<br/>derived cells: L-MON, L-TRANS,<br/>L-REACH-CONE, L-CONT (b), (b′):<br/>unproved; L-CONT (a): proved;<br/>L-CONT (c) for σ_E.<br/>Weakest status printed:<br/>lemma status: unproved"]
             P6["tool base: libkz-core,<br/>checker tool hash"]
-            P1 --- P2 --- P3 --- P4 --- P5 --- P6
+            P1 --- P2 --- P3 --- P4 --- P5 --- P7 --- P6
         end
         subgraph TL2["(ii) extracted facts, recorded by hash"]
             direction TB
@@ -1032,7 +1041,7 @@ flowchart TD
     classDef trust fill:#fdeceb,stroke:#b23b3b,color:#111
     classDef chk fill:#fffbe6,stroke:#a07a00,color:#111
     class V1,V2,V3,E1,E2,E3,E4,E6,E7,E8,E9,E10,F1,F2,F3,F5,F7,F8,F9 ok
-    class R1,R2,R3,R4,R5,R6,R7,X1,X2,X3,X4,X5,X6,X7,P1,P2,P4,P5,P6,F1R,F2R,F3R,F4R,F5R,F6R ok
+    class R1,R2,R3,R4,R5,R6,R7,X1,X2,X3,X4,X5,X6,X7,P1,P2,P4,P5,P6,P7,F1R,F2R,F3R,F4R,F5R,F6R,F7R ok
     class E5,F4,F6,P3 trust
     class V4 chk
 ```
@@ -1051,7 +1060,7 @@ flowchart TD
 - obligation 통과는 결코 증명으로 기록하지 않는다. 관측이 세우는 유일한 항목은 reach이고, 그것도 L-CONT (c)와 그 칸에 위에서 적은 lemma를 거쳐서만이다(spec §4.5.1, App. A.1 step 9a).
 - `kz report`는 이 장부를 판정과 함께 출력하고, 네 부분의 크기를 label `ledger:<i>/<ii>/<iii>/<iv>`로 보인다. S3a gate와 rung V1의 S3a-R2 하위 관문은 이 장부를 요구한다(spec §9.3). 개정 1.3에서 V1′가 첫 rung이 되면서 V1의 certificate 출구 항목(FIXED_ORDER, `kz proofcheck`, 이 장부)은 선택 항목이다.
 - **certificate 없는 결과의 장부** [D] (개정 1.3; spec §4.5.1 "Results without a certificate"; D20 유지; C-23). 관측 판정, 예측, 확인, 정적 증명은 모두 네 부분 장부를 가진다: (i) 검사기가 실제로 다시 확인한 관계와 계산, (ii) 출처에서 믿은 코드·문서·모형 사실, (iii) 실행·관측·요약 가정(관측 판정에는 A-OBS와 L-OBS, spec §6.1, §6.2), (iv) 증명되지 않은 의무와 지원하지 않는 경로. certificate가 없으면 (i)부는 비어 있을 수 있지만 나머지 부분은 언제나 있다. 어떤 결과도 조건 없는 탐지로 보이지 않는다. 7절 머리의 R2 관측 판정도 이 장부를 가진다.
-- 그림 D8 상세의 신뢰 장부 상자는 이 표의 네 부분을 줄여 보인다(spec §12 D8). 이 절의 Mermaid 원본은 `diagrams/D8_r2_certificate_writers.mmd`와 같은 사본이므로, 그림을 고칠 때 함께 고친다. 그 사본은 아직 개정 1.1의 상자다. 이 표가 적은 증명 상태, (iii)부의 L-CONT (c), (iv)부의 L-CONT (c)·L-MAPI-CONE·L-REACH-CONE 반박 항목, A7-api(M_api reach)는 그림에 없다. 그림 원본을 고칠 때 함께 옮긴다.
+- 그림 D8 상세의 신뢰 장부 상자는 이 표의 네 부분을 줄여 보인다(spec §12 D8). 이 절의 Mermaid 원본은 `diagrams/D8_r2_certificate_writers.mmd`와 같은 사본이므로, 그림을 고칠 때 함께 고친다. 상자에는 이 표가 적은 lemma별 증명 상태와 "lemma status: unproved", (iii)부의 L-CONT (c), (iv)부의 L-CONT (c)·L-MAPI-CONE·L-REACH-CONE 반박 항목, A7-api(M_api reach)가 들어 있다.
 - **EVS 쪽 writer 처리** (step 5). ES main의 raise가 ONCE-PWB로 빠지는 이유, `ExitApp` STOPPED store가 A-OWNER 아래에서만 빠지는 이유, `f_EVS` 직후의 사실에 A-FRESH와 A-OWNER가 필요한 이유는 [04_formal_model.md §10.2](04_formal_model.md#102-mustbefore-사슬)가 형식 규칙으로 설명한다.
 
 ### 7.5 그 밖에 이 예가 보여 주는 것
@@ -1094,7 +1103,7 @@ pc-linux에서 종료는 모든 OSAL object를 지우는 `OS_DeleteAllObjects`�
 
 ```mermaid
 flowchart TD
-    %% D9 - teardown scoping on pc-linux. Source: spec §12 D9; §3.5, §1.6 (scope), §4.5 (SCOPE), §4.13, App. A.7.
+    %% D9 - teardown scoping on pc-linux. Source: spec §12 D9 (rev 1.2: D17 (a)); §3.5, §1.6 (scope), §4.5 (SCOPE), §4.13, §6.4 item 49, App. A.7.
     %% Lines are in psp/fsw/pc-linux/src. In this diagram the dashed edge is the spec's "⇢" (disabler relation,
     %% SCOPE-excluded from in-scope certificates); the dashed border marks the next run.
 
@@ -1127,10 +1136,13 @@ flowchart TD
     NOTE["SIGUSR1 is blocked process-wide: while the startup thread<br/>is inside CFE_ES_Main, a restart request causes no teardown,<br/>only the requester's abort after 10 s"]
 
     subgraph NEXT["next run: B.Init"]
-        N1(["POWERON restart → clean Init"])
+        N1(["POWERON restart → shm segments deleted;<br/>not every persisted file, file cache or shared file system (D17 (a)):<br/>the initial state is recorded and checked, not assumed clean"])
         N2(["other exits (abort, PROCESSOR restart, harness kill)<br/>→ segments and boot record left → PROCESSOR reset"])
         N3["normalization boot (unobserved, excluded);<br/>Init checked against canonical S0"]
+        N4["Init snapshot S0 and termination record<br/>recorded and canonicalized for every run (§1.7, §4.13)"]
         N2 --> N3
+        N1 --> N4
+        N3 --> N4
     end
 
     Q4 -->|"T-OBS: SR ∈ MB(OS_DeleteAllObjects)"| M4
@@ -1152,11 +1164,11 @@ flowchart TD
     class Q7,KTD term
     class INS ok
     class NOTE note
-    class N1,N2,N3 next
+    class N1,N2,N3,N4 next
     style NEXT stroke-dasharray:5 5
 ```
 
-**그림과 spec 개정 1.2의 차이.** 그림의 다음 실행 상자 "POWERON restart → clean Init"는 개정 1.1의 표현이다. PI 결정 D17 (a)(2026-10-15) 뒤의 spec §3.5는 POWERON 재시작이 shm segment를 지우지만 모든 유지 파일, file cache, 공유 file system을 초기화하지는 않으므로, 그것만으로 다음 실행의 B.Init을 깨끗하다고 보지 않는다고 적는다. 실행마다 초기 상태와 종료 기록을 기록하고 정규화한다(8.1 항목 3). 그림 원본 `diagrams/D9_teardown_scoping.mmd`를 고칠 때 이 상자를 함께 고친다.
+**그림의 다음 실행 상자** (개정 1.2, PI 결정 D17 (a), 2026-10-15). POWERON 재시작은 shm segment를 지우지만 모든 유지 파일, file cache, 공유 file system을 초기화하지는 않는다. 그래서 그것만으로 다음 실행의 B.Init을 깨끗하다고 보지 않고, 실행마다 초기 상태와 종료 기록을 기록하고 정규화한다(8.1 항목 3; spec §3.5, §6.4 항목 49).
 
 ### 8.1 pc-linux의 재시작은 세 효과다
 

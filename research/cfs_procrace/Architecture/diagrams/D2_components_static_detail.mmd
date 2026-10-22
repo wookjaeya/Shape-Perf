@@ -1,60 +1,64 @@
 flowchart TD
-    %% D2 detail (1/2) - kz-static pipeline and the checker (independent inference relative to its trusted base). Source: spec §12 D2 (rev 1.1); §2.2-2.4, §4.1-4.7, §4.5.1.
-    %% Rectangle = component, cylinder = KZ artifact. Dashed border = conditional (S3b).
+    %% D2 detail (1/2) - kz-static pipeline and the checker (independent inference relative to its trusted base). Source: spec §12 D2 (rev 1.3, C-48); §2.2-2.4, §4.1-4.7, §4.5.1.
+    %% Rectangle = component, cylinder = KZ artifact. Dashed border = optional route (rev 1.3, ADR-053: skel, static, proofcheck) or conditional (S3b).
+    %% Solid edge = required path (basis, extract, link → plan). Dashed edge = optional-route flow or conditional flow.
 
     INB[("build tree, link.txt, generated files,<br/>startup scripts, .tbl, Env/Init snapshots, argv")]
-    PROF[("profile.kzp (text) → profile.kz<br/>Φ: kinds, ops, per-conjunct LPs, bindings,<br/>rules, contracts (human-authored)")]
+    PROF[("profile.kzp (text) → profile.kz<br/>Φ: kinds, ops, per-conjunct LPs, bindings,<br/>rules, readiness specifications (human-authored)")]
 
     BAS["kz-static basis<br/>script selection, reset type,<br/>content-only Init hash"]
     BK[("basis.kz")]
     EXT["kz-static extract<br/>Clang AST facts, derives,<br/>S3a writer extraction, loop-exit trees"]
-    LNK["kz-static link<br/>IR call graph, DWARF/MC binder,<br/>anchor audit"]
+    LNK["kz-static link<br/>IR call graph, DWARF/MC binder,<br/>anchor audit; closure per case"]
     MOD["kz-static modref<br/>(S3b, conditional)"]
     FK[("facts.kz<br/>incl. derives, writers,<br/>loop-exit trees")]
     AK[("anchors.kz<br/>site → gcc address, cost class")]
-    SKL["kz-static skel<br/>two views, once facts,<br/>message provenance, await predicates"]
+    SKL["kz-static skel (optional route)<br/>two views, once facts,<br/>message provenance, await predicates"]
     SK[("skel.kz<br/>cert view, exploration view,<br/>once, provenance")]
-    STA["kz-static static<br/>MustBefore per M, census,<br/>certificates, open candidates"]
+    STA["kz-static static (optional route)<br/>MustBefore per M, census,<br/>certificates, open candidates"]
     CEN[("census.kz")]
-    PCK["kz proofcheck<br/>(in kz; no LLVM; no analysis code shared<br/>with static; links libkz-core: T5 steps marked)<br/>re-validates inference steps, writes trust ledgers"]
+    PCK["kz proofcheck (optional route; built only when a certificate is issued)<br/>(in kz; no LLVM; no analysis code shared<br/>with static; links libkz-core: T5 steps marked)<br/>re-validates inference steps, writes trust ledgers with proof status"]
     RUNS[("trusted input: run-*.kzt, hb-*.kz,<br/>prefix probes named by the reach step<br/>(D2 dynamic detail)")]
+    HAND[("hand-augmented plan (§4.7)<br/>profiles/#60;basis#62;/observe/sites.kzp;<br/>each site with the requirement it meets")]
     PLN["kz-static plan<br/>probe sites, joint debug-register allocator"]
     PK[("plan.kz")]
 
     INB --> BAS --> BK
     BK --> EXT
     BK --> LNK
-    BK --> SKL
+    BK -.-> SKL
     EXT --> FK
     LNK --> AK
     LNK -.->|"closed IR"| MOD
     PROF -.-> MOD
     MOD -.->|"points-to writer sets"| FK
-    FK --> SKL
-    AK --> SKL
-    PROF --> SKL
-    SKL --> SK
-    SK --> STA
-    FK --> STA
-    PROF --> STA
-    STA -->|"O7: writer sites vs Φ effects"| CEN
-    CEN -->|"certificates"| PCK
-    PCK -->|"accept / reject (CC), trust ledgers"| CEN
-    FK -->|"trusted"| PCK
-    SK -->|"trusted"| PCK
-    AK -->|"trusted"| PCK
-    PROF -->|"trusted"| PCK
-    RUNS --> PCK
-    CEN --> PLN
+    FK -.-> SKL
+    AK -.-> SKL
+    PROF -.-> SKL
+    SKL -.-> SK
+    SK -.-> STA
+    FK -.-> STA
+    PROF -.-> STA
+    STA -.->|"O7: writer sites vs Φ effects"| CEN
+    CEN -.->|"certificates"| PCK
+    PCK -.->|"accept / reject (CC), trust ledgers"| CEN
+    FK -.->|"trusted"| PCK
+    SK -.->|"trusted"| PCK
+    AK -.->|"trusted"| PCK
+    PROF -.->|"trusted"| PCK
+    RUNS -.-> PCK
+    FK --> PLN
     AK --> PLN
+    CEN -.->|"open candidates"| PLN
     PLN --> PK
+    HAND -->|"written or widened by hand<br/>until the synthesis exists"| PK
     PK --> NEXT["→ kz observe<br/>(D2 dynamic detail)"]
 
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef ref fill:#ffffff,stroke:#999,color:#555
-    class BAS,EXT,LNK,SKL,STA,PCK,PLN comp
-    class INB,PROF,BK,FK,AK,SK,CEN,PK art
-    class MOD gated
+    class BAS,EXT,LNK,PLN comp
+    class INB,PROF,BK,FK,AK,SK,CEN,PK,HAND art
+    class MOD,SKL,STA,PCK gated
     class NEXT,RUNS ref

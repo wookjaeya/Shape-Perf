@@ -5,7 +5,7 @@ spec을 읽지 않은 연구자가 "무엇이 어떤 순서로 일어나고, 어
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
 
-> **rev 1.3 반영 (2026-10-22).** spec 개정 1.3은 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md))를 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)(행 C-01–C-52)를 거쳐 적용했다(spec §0.12, ADR-053–ADR-058). 모두 결정 [D]이고 결과가 아니다. 이 개정에서도 빌드·실행은 없었다. 이 문서에 옮긴 변경표 행: C-15·C-18(§1.1 필수 경로와 선택 경로), C-22(§1.2 머리), C-24(§1.3 plan의 수동 보강, OB-04), C-05(§1.3 step 2의 `app_owner`), C-25(§1.3 설명 집합, OB-01–OB-03), C-26(§1.3 재생 규약, OB-05), C-27(§1.3 보류 사유), C-28(§1.4 rev 1.3 추가), C-29(§1.5 머리), C-31(§1.6 재사용 조건, CF-01–CF-04), C-30(§1.7 규칙 10), C-49·C-50(§1.10 끝), C-42·C-43·C-45(§4.1 rev 1.3의 사다리, 시험 T-01–T-22), C-36(§6 항목 58–62), C-52(이 문서). **우선순위**(spec §0.12, ADR-053): 개정 1.0–1.2를 위해 쓴 문장이 certificate, explorer, progress 결과, loop를 Kairos의 첫 산출물, 필수 산출물, 정의하는 산출물로 말하면 ADR-053으로 읽는다. 그 경로는 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 판정·예측·확인의 전제 조건이 아니다. 이 문서에서는 §1.1–§1.2(정적 census와 certificate가 먼저인 순서), 그림 D3와 D4(아직 rev 1.2 판), §1.10의 R2 행, §4.1의 rung V1과 S3a 출구 조건이 그런 문장이다.
+> **rev 1.3 반영 (2026-10-22).** spec 개정 1.3은 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md))를 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)(행 C-01–C-52)를 거쳐 적용했다(spec §0.12, ADR-053–ADR-058). 모두 결정 [D]이고 결과가 아니다. 이 개정에서도 빌드·실행은 없었다. 이 문서에 옮긴 변경표 행: C-15·C-18(§1.1 필수 경로와 선택 경로), C-22(§1.2 머리), C-24(§1.3 plan의 수동 보강, OB-04), C-05(§1.3 step 2의 `app_owner`), C-25(§1.3 설명 집합, OB-01–OB-03), C-26(§1.3 재생 규약, OB-05), C-27(§1.3 보류 사유), C-28(§1.4 rev 1.3 추가), C-29(§1.5 머리), C-31(§1.6 재사용 조건, CF-01–CF-04), C-30(§1.7 규칙 10), C-49·C-50(§1.10 끝), C-42·C-43·C-45(§4.1 rev 1.3의 사다리, 시험 T-01–T-22), C-36(§6 항목 58–62), C-52(이 문서). **우선순위**(spec §0.12, ADR-053): 개정 1.0–1.2를 위해 쓴 문장이 certificate, explorer, progress 결과, loop를 Kairos의 첫 산출물, 필수 산출물, 정의하는 산출물로 말하면 ADR-053으로 읽는다. 그 경로는 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 판정·예측·확인의 전제 조건이 아니다. 이 문서에서는 §1.1–§1.2(정적 census와 certificate가 먼저인 순서), §1.10의 R2 행, §4.1의 rung V1과 S3a 출구 조건이 그런 문장이다.
 
 ## 목차
 
@@ -89,32 +89,55 @@ revision 1.2는 PI의 2026-10-15 결정을 반영한다(spec §0.10). 그 결정
 
 준비 instance 하나는 최대 7단계를 지난다. 모든 instance가 모든 단계를 거치지는 않는다. 정적 단계에서 certificate가 나오면 그 안전성 진술은 곧바로 결합(단계 6)으로 간다. 그 instance는 open되지 않으므로 progress 후보가 되고, explorer가 있으면 단계 4에서 진행을 본다(spec §4.6). 관측에서 모든 조건이 성립하면 그 관측은 뒷받침 근거로만 결합에 들어간다. 단계 4(explorer)는 구현 단계 S7부터만, 그리고 kill criterion을 통과할 때만 쓰므로 점선 테두리로 그렸다.
 
-**rev 1.3: 필수 경로와 선택 경로** [D] (spec §2.2 "Required and optional routes", §2.4; ADR-053; C-15, C-18). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 plan, §1.3) → `observe` → `trace`(정규화, task–애플리케이션 매핑, 관측 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. 선택 경로는 바뀌지 않은 채 정의되어 있고 그 주장이 필요할 때 쓴다: `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform` O8, `loop`, `gate`. `modref`는 전과 같다. `static`의 census와 `skel`의 view는 선택 경로나 closure 검사(spec §4.1)가 필요로 하는 곳에서 여전히 쓴다. `proofcheck`는 certificate를 낼 때만 만든다. 관측 판정은 certificate를 기다리지 않는다. 입력이나 상태 근거가 모자란 판정은 certificate가 생길 때까지 미루지 않고 보류한다(spec §4.8; §1.3의 설명 집합). 그래서 아래 7단계에서 단계 1의 certificate 갈래와 단계 4(explorer)는 선택 경로로 읽는다. 아래 그림 D3는 아직 rev 1.2 판이다. spec §12 D3의 rev 1.3 고침(certificate 판단 앞에 "관측 판정(설명 집합) → 요약 뷰" 경로와 그 끝 노드 `OBSERVED_VIOLATION`, `NO_VIOLATION_IN_CHECKED_PREFIX`, `INCONCLUSIVE(reason)`(`horizon-open` 포함), `NOT_APPLICABLE`, 그리고 "예측 → `MODEL_CANDIDATE` / `NONE_IN_SCOPE` / `INCONCLUSIVE` → 확인 → `CONFIRMED` / `NOT_CONFIRMED`"을 더하고 certificate 갈래를 선택으로 표시)은 그림 쪽 단계에서 반영한다.
+**rev 1.3: 필수 경로와 선택 경로** [D] (spec §2.2 "Required and optional routes", §2.4; ADR-053; C-15, C-18). 필수 경로는 `basis`, `extract`, `link` → `plan`(또는 손으로 보강한 plan, §1.3) → `observe` → `trace`(정규화, task–애플리케이션 매핑, 관측 판정) → `predict`(명시적 상태 탐색 먼저) → `hold` → `report`다. 선택 경로는 바뀌지 않은 채 정의되어 있고 그 주장이 필요할 때 쓴다: `skel`과 `static`(MustBefore, certificate), `proofcheck`, `explore`, `conform` O8, `loop`, `gate`. `modref`는 전과 같다. `static`의 census와 `skel`의 view는 선택 경로나 closure 검사(spec §4.1)가 필요로 하는 곳에서 여전히 쓴다. `proofcheck`는 certificate를 낼 때만 만든다. 관측 판정은 certificate를 기다리지 않는다. 입력이나 상태 근거가 모자란 판정은 certificate가 생길 때까지 미루지 않고 보류한다(spec §4.8; §1.3의 설명 집합). 그래서 아래 7단계에서 단계 1의 certificate 갈래와 단계 4(explorer)는 선택 경로로 읽는다. 아래 그림 D3 세 장은 spec §12 D3의 rev 1.3 고침(C-48)을 반영했다: certificate 판단 앞에 "관측 판정(설명 집합) → 요약 뷰" 경로와 그 끝 노드 `OBSERVED_VIOLATION`, `NO_VIOLATION_IN_CHECKED_PREFIX`, `INCONCLUSIVE(reason)`(`PENDING`과 `OPEN`의 `horizon-open` 포함), `NOT_APPLICABLE`을 두고, "예측 → `MODEL_CANDIDATE` / `NONE_IN_SCOPE` / `INCONCLUSIVE` → 확인 → `CONFIRMED` / `NOT_CONFIRMED`"을 더했으며, certificate 갈래(단계 1)와 explorer(단계 4)를 점선 테두리·점선 화살표의 선택 경로로 그렸다. 단계 번호는 아래 표와 같다.
 
-**그림 D3 개요. 준비 instance 하나의 분석 순서** (렌더링: [diagrams/D3_analysis_overview.svg](diagrams/D3_analysis_overview.svg); spec §12 D3 (rev 1.2); §1.8, §1.10, §2.5, §4.6, §4.8–4.14)
+**그림 D3 개요. 준비 instance 하나의 분석 순서** (렌더링: [diagrams/D3_analysis_overview.svg](diagrams/D3_analysis_overview.svg); spec §12 D3 (rev 1.3); §1.8, §1.10, §2.2, §2.5, §4.6, §4.8–4.14)
 
 ```mermaid
 flowchart TD
-    %% D3 overview - analysis workflow per readiness instance and (σ, M) cell. Source: spec §12 D3 (rev 1.2); §1.8, §1.10, §2.5, §4.6, §4.8-4.14.
-    %% Detail: D3_analysis_static.mmd (census decisions) and D3_analysis_dynamic.mmd (from an open or progress candidate to the per-cell record).
-    %% Dashed border = gated stage (S7 explorer). Dashed edge = gated path or loop path. Red = obligation failure, unknown, contested or portability hazard.
+    %% D3 overview - analysis workflow per readiness instance and (σ, M) cell. Source: spec §12 D3 (rev 1.3, C-48); §1.8, §1.10, §2.2, §2.5, §4.6, §4.8-4.14.
+    %% Detail: D3_analysis_static.mmd (census decisions, optional certificate route) and D3_analysis_dynamic.mmd (observation-based judgement, prediction, confirmation, per-cell record).
+    %% Rev 1.3 (ADR-053): observation-based judgement, prediction and confirmation are the required path; the certificate branch (step 1) and the explorer (step 4) are optional routes.
+    %% Dashed border = optional route (certificate branch, S7 explorer). Dashed edge = optional-route path or loop path. Red = obligation failure, unknown, inconclusive, contested or portability hazard.
+    %% Summary view (§1.10): computed last from the record, per cell and per kind; observation, prediction and confirmation are reported and counted separately (OUT-01).
     %% Three separate outputs per (σ, M) cell and bound: class (derived from the safety record), reach, progress. A stall never leads into a class.
 
-    INST["readiness instance i = (κ, context-qualified template t, key, scope)<br/>from the census"]
-    STAT{"1 static census on Sk^cert, per M<br/>reachable? key? writer sets complete (O7)?<br/>FIXED_ORDER / PROTECTED certificate?<br/>kz proofcheck (CC)"}
+    INST["readiness instance i = (κ, context-qualified template t, key, scope)<br/>from Φ and the probe plan (hand-augmented, §4.7);<br/>the census where a route needs it"]
+
+    OBS["2 observation on the unmodified binary<br/>kz observe → run-*.kzt + observation adequacy record;<br/>kz trace: normalization, app_owner, HB, routing; kz conform"]
+    JUD{"2 observation-based judgement (§4.8)<br/>explanation set Cobs of the incomplete record:<br/>Qv = SAT(Cobs ∧ Vφ), Qn = SAT(Cobs ∧ ¬Vφ)"}
+
+    subgraph SUMO["summary view: observation (§1.10)"]
+        OV(["OBSERVED_VIOLATION<br/>VIOLATING in every explanation"])
+        NV(["NO_VIOLATION_IN_CHECKED_PREFIX<br/>READY, or TOLERATED with a caller record and ACCEPT;<br/>only the conditions and interval evaluated"])
+        OI(["INCONCLUSIVE(reason)<br/>PENDING, OPEN: horizon-open;<br/>NOT_READY_UNJUDGED: caller_requirement_absent;<br/>NOT_EVALUATED: not_evaluated;<br/>explanation_ambiguous, limit, start_state_unknown, …"])
+        NA(["NOT_APPLICABLE<br/>outside the condition's scope,<br/>shown by its own evidence"])
+    end
+    AIE(["analysis input error (Qv and Qn UNSAT)<br/>reported apart, never as no violation"])
+
+    PRD["3 prediction (kz predict)<br/>explicit-state search first;<br/>lock reversal, A-COMM label"]
+    subgraph SUMP["summary view: prediction (NOT_RUN if not run)"]
+        MC(["MODEL_CANDIDATE<br/>a satisfying linearization;<br/>feasibility not claimed"])
+        NIS(["NONE_IN_SCOPE<br/>no linearization in that model,<br/>interval and path scope"])
+        PIN(["INCONCLUSIVE(reason)<br/>limit, unknown, unsupported effect"])
+    end
+    CNF["5 confirmation<br/>kz hold F0 / kz gate F1 (optional route)<br/>naturalness, perturbation ratio"]
+    subgraph SUMC["summary view: confirmation (NOT_RUN if not run)"]
+        CO(["CONFIRMED<br/>the condition violated in a controlled run"])
+        NC(["NOT_CONFIRMED(reason)<br/>not reproduced or time limit;<br/>no proof of infeasibility"])
+    end
+
+    STAT{"1 static census on Sk^cert, per M (optional route)<br/>reachable? key? writer sets complete (O7)?<br/>FIXED_ORDER / PROTECTED certificate?<br/>kz proofcheck (CC)"}
     INA(["inactive(B)<br/>path-condition proof on Sk^cert"])
     CERT(["certificate result (σ_U, M), b = ∞, with trust ledger and proof status<br/>fixed-order: ¬OK_i, REJECT at the decision /<br/>unknown(no_decision_route): ¬OK_i shown /<br/>protected: ¬NR_i<br/>progress unknown(not_checked)"])
     PCD["progress candidate<br/>(certified instance; never opened)"]
     OPEN["open candidate<br/>reason + probe obligations"]
-    OBS["2 observation on the unmodified binary<br/>kz observe, kz trace, kz conform;<br/>routing of each use"]
-    PRD["3 prediction (kz predict)<br/>lock reversal, A-COMM label"]
-    EXP["4 explorer (kz explore; S7, gated)<br/>exh or dpor; σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view Sk^h, h in b<br/>four queries per σ: Q_reach, Q_bad, Q_ok, Q_stall"]
-    CNF["5 confirmation<br/>kz hold F0 / kz gate F1<br/>naturalness, perturbation ratio"]
+    EXP["4 explorer (kz explore; S7, gated; optional route)<br/>exh or dpor; σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view Sk^h, h in b<br/>four queries per σ: Q_reach, Q_bad, Q_ok, Q_stall"]
     CMB["6 combine per (σ, M) cell and bound (§4.12)<br/>safety record: ¬Bad_i, ¬OK_i, ¬NR_i with routes,<br/>witnesses with ordinals"]
     TRN{"7 transfer (§1.8)<br/>safety statements only"}
 
     subgraph REC["verdict record per (σ, M) cell and bound: three separate outputs; axes provider, scope"]
-        CLS(["class, derived from the safety record<br/>inactive / protected (allowed-not-ready) / fixed-order /<br/>no-final-status / schedule-dependent (timeout-dependent) /<br/>ordinal-split / unknown(reason)"])
+        CLS(["class, derived from the safety record<br/>inactive / protected (allowed-not-ready) / fixed-order /<br/>no-final-status / schedule-dependent (timeout-dependent) /<br/>ordinal-split / unknown(reason);<br/>without a certificate or exh: schedule dependence undetermined"])
         RCH(["reach<br/>proved / assumed (if reached) /<br/>model(b) / unreached(b) / contested"])
         PRG(["progress (a stall never decides the class)<br/>stall-witness / no-stall-within(b) / unknown(reason);<br/>default unknown(not_checked);<br/>timeout-masked-liveness; root via a progress chain"])
     end
@@ -124,37 +147,51 @@ flowchart TD
     CTD(["contested bound (O6(b), O10)<br/>rendered unknown(model_fault); no suspension"])
     PHE(["portability-hazard-evidence<br/>M_api-only certificate contradicted (O4(b));<br/>no state change"])
 
-    INST --> STAT
-    STAT -->|"no Sk^cert path"| INA
-    STAT -->|"certificate accepted (CC)"| CERT
-    STAT -->|"no certificate; key ⊤; writer set DISABLED (O7);<br/>proofcheck reject (CC)"| OPEN
-    INA --> CMB
-    CERT -->|"one safety statement"| CMB
-    CERT -->|"proved or assumed"| RCH
-    CERT -->|"PROTECTED: added;<br/>FIXED_ORDER: may be added (§4.6)"| PCD
-    PCD -.->|"S7 explorer, if not frozen:<br/>all four queries; D15 work-unit caps"| EXP
-    PCD -->|"explorer frozen or cut:<br/>stays unknown(not_checked)"| PRG
-    OPEN --> OBS
-    OBS -->|"wrong-way: ask for a FIXED_ORDER certificate"| STAT
+    INST -->|"required path (rev 1.3)"| OBS
+    OBS --> JUD
+    JUD -->|"Qv SAT, Qn UNSAT"| OV
+    JUD -->|"Qv UNSAT, Qn SAT"| NV
+    JUD -->|"both SAT; unknown or limit;<br/>a reason for withholding"| OI
+    JUD -->|"out of scope"| NA
+    JUD -->|"both UNSAT"| AIE
+    JUD -->|"occurrence statuses (record kept in full)"| CMB
     OBS -->|"O-ordered / unordered"| PRD
     OBS -->|"conforming: supporting evidence"| CMB
     OBS -->|"observed occurrence: proved"| RCH
+    PRD -->|"satisfying linearization"| MC
+    PRD -->|"no linearization"| NIS
+    PRD -->|"limit, unknown,<br/>unsupported effect"| PIN
     PRD -->|"predicted witnesses"| CMB
-    PRD -->|"witness → hold plan"| CNF
-    PRD -->|"no witness within work-unit cap"| EXP
-    EXP -->|"Q_bad, Q_ok: statements within b,<br/>witnesses per ordinal"| CMB
-    EXP -->|"Q_reach"| RCH
-    EXP -->|"Q_stall (exh only)"| PRG
-    EXP -->|"witness → hold plan"| CNF
+    MC -->|"witness → hold plan"| CNF
+    CNF -->|"condition violated in the controlled run"| CO
+    CNF -->|"not reproduced, time limit"| NC
     CNF -->|"realized / inconclusive"| CMB
     CNF -->|"realized hang, wait-for fact"| PRG
+
+    INST -.->|"optional route: universal order claim"| STAT
+    OBS -.->|"wrong-way: ask for a FIXED_ORDER certificate<br/>(optional route)"| STAT
+    STAT -.->|"no Sk^cert path"| INA
+    STAT -.->|"certificate accepted (CC)"| CERT
+    STAT -.->|"no certificate; key ⊤; writer set DISABLED (O7);<br/>proofcheck reject (CC)"| OPEN
+    OPEN -.->|"probe obligations"| OBS
+    INA -.-> CMB
+    CERT -.->|"one safety statement"| CMB
+    CERT -.->|"proved or assumed"| RCH
+    CERT -.->|"PROTECTED: added;<br/>FIXED_ORDER: may be added (§4.6)"| PCD
+    PCD -.->|"S7 explorer, if not frozen:<br/>all four queries; D15 work-unit caps"| EXP
+    PCD -.->|"explorer frozen or cut:<br/>stays unknown(not_checked)"| PRG
+    PRD -.->|"no witness within work-unit cap"| EXP
+    EXP -.->|"Q_bad, Q_ok: statements within b,<br/>witnesses per ordinal"| CMB
+    EXP -.->|"Q_reach"| RCH
+    EXP -.->|"Q_stall (exh only)"| PRG
+    EXP -.->|"witness → hold plan"| CNF
     CMB -->|"class from the record"| CLS
     CMB --> TRN
     TRN -->|"rule 1(a): statement into the receiving cell"| CMB
     TRN -->|"rule 2 (b = ∞; M_impl or M agreement): σ_E statement;<br/>rule 2 fails: σ_E unknown(model_level)"| CLS
     OBS -->|"every trace: O1-O5, O9; O8 on a sample"| OBL
     CNF -->|"confirmation traces; refuted witness (O6)"| OBL
-    EXP -->|"O6, O10"| OBL
+    EXP -.->|"O6, O10"| OBL
     OBL -->|"O1, O2, O6(a): model_gap; O8: conformance;<br/>O3, O4 (at M_impl), O9: model_fault"| UNK
     OBL -->|"O6(b), O10"| CTD
     OBL -->|"O4(b) at M_api only"| PHE
@@ -166,11 +203,15 @@ flowchart TD
     classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
     classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
-    class INST,PCD,OPEN,OBS,PRD,CNF,CMB comp
-    class STAT,TRN dec
-    class INA,CERT,CLS,RCH,PRG term
-    class OBL,UNK,CTD,PHE unk
-    class EXP gated
+    classDef optdec fill:#fffbe6,stroke:#a07a00,stroke-dasharray:5 5,color:#111
+    classDef optterm fill:#eaf6ea,stroke:#2e7d32,stroke-dasharray:5 5,color:#111
+    class INST,OBS,PRD,CNF,CMB comp
+    class JUD,TRN dec
+    class OV,NV,NA,MC,NIS,CO,NC,CLS,RCH,PRG term
+    class OI,PIN,AIE,OBL,UNK,CTD,PHE unk
+    class STAT optdec
+    class INA,CERT optterm
+    class PCD,OPEN,EXP gated
 ```
 
 | 단계 | 구성요소 | 묻는 것 | 낼 수 있는 결과 | spec |
@@ -196,12 +237,14 @@ census는 모든 판정의 출발점이다. Φ의 각 준비 상태 명세를 �
 
 > **rev 1.3부터 선택 경로** [D] (spec §4.4 머리; ADR-053; C-22). 아래 FIXED_ORDER·PROTECTED certificate와 `kz proofcheck`(spec §4.4–§4.5)는 보편 순서 진술이 필요할 때 쓴다. 관측 판정(§1.3), 예측(§1.4), 확인(§1.6)의 전제 조건이 아니고, R2도 그것을 요구하지 않는다. 다시 적용할 때는 보고서가 관계의 정의, 분석 영역, 전이 규칙의 단조성, 수렴 조건, 그리고 계산한 관계와 프로그램 순서 사이의 보존 논증을 준다. 고정점이 수렴했다는 것만으로 그 관계가 프로그램의 올바른 순서라는 뜻은 아니며, certificate는 늘 그 전제, 모형 범위, 증명되지 않은 lemma와 함께 보고한다. census와 skeleton view는 선택 경로나 closure 검사(spec §4.1)가 필요로 하는 곳에서 그대로 쓴다. 아래 본문은 바뀌지 않았다.
 
-**그림 D3 상세 1. 정적 census 판단** (렌더링: [diagrams/D3_analysis_static.svg](diagrams/D3_analysis_static.svg); spec §12 D3 (rev 1.2); §4.2, §4.5, §4.5.1, §4.6)
+**그림 D3 상세 1. 정적 census 판단** (렌더링: [diagrams/D3_analysis_static.svg](diagrams/D3_analysis_static.svg); spec §12 D3 (rev 1.3); §2.2, §2.4, §4.2, §4.5, §4.5.1, §4.6)
 
 ```mermaid
 flowchart TD
-    %% D3 detail (1/2) - static census decisions for one instance, per model level M. Source: spec §12 D3 (rev 1.2); §4.2, §4.5, §4.5.1, §4.6.
-    %% Diamond = decision. Rounded = terminal value (per M, σ_U, b = ∞ on Sk^cert). Dashed border = gated (S7 explorer). Dashed edge = gated path.
+    %% D3 detail (1/2) - static census decisions for one instance, per model level M. Source: spec §12 D3 (rev 1.3, C-48); §2.2, §2.4, §4.2, §4.5, §4.5.1, §4.6.
+    %% Diamond = decision. Rounded = terminal value (per M, σ_U, b = ∞ on Sk^cert). Dashed border = optional route or gated (S7 explorer). Dashed edge = gated path.
+    %% Rev 1.3 (ADR-053): the certificate branch (dashed box) is an optional route, taken only for a universal order claim; the census is used where an optional route
+    %% or the closure check (§4.1) needs it. The observation-based judgement does not wait for a certificate (§2.4).
     %% A certificate gives one safety statement; its progress stays unknown(not_checked) unless exh runs on it as a progress candidate.
 
     TM{"template matched<br/>(certificate view Sk^cert)"}
@@ -209,22 +252,25 @@ flowchart TD
     KEY{"key resolved?<br/>concrete / symbolic / ⊤"}
     WS{"writer sets complete?<br/>(A-TYPE, O7)"}
     PRV["provider axis: none / env-absent / present<br/>none = INIT_FALSE and empty complete writer set"]
-    FO{"FIXED_ORDER certificate?<br/>once, frontier / once-PWB, derives,<br/>badness with its REJECT events, reach"}
-    PR{"PROTECTED certificate?<br/>MUST_KEY must-writer, SCOPE,<br/>PWB for disablers"}
-    PC{"kz proofcheck<br/>re-validates inference steps;<br/>trusts facts, skel, Φ, libkz-core"}
-    DR{"every REJECT event at<br/>the occurrence's decision?"}
+    UOC{"universal order claim wanted?<br/>(certificate route optional, ADR-053)"}
 
-    LED[("trust ledger, four parts<br/>(i) re-validated steps (own or via T5)<br/>(ii) extracted facts<br/>(iii) trusted entries, lemmas with proof status<br/>(iv) refutable, not proved")]
+    subgraph OPTC["optional route (rev 1.3): certificates and kz proofcheck"]
+        FO{"FIXED_ORDER certificate?<br/>once, frontier / once-PWB, derives,<br/>badness with its REJECT events, reach"}
+        PR{"PROTECTED certificate?<br/>MUST_KEY must-writer, SCOPE,<br/>PWB for disablers"}
+        PC{"kz proofcheck<br/>re-validates inference steps;<br/>trusts facts, skel, Φ, libkz-core"}
+        DR{"every REJECT event at<br/>the occurrence's decision?"}
+        LED[("trust ledger, four parts<br/>(i) re-validated steps (own or via T5)<br/>(ii) extracted facts<br/>(iii) trusted entries, lemmas with proof status<br/>(iv) refutable, not proved")]
+        FIX(["fixed-order(σ_U, M), b = ∞<br/>¬OK_i with decision route;<br/>reach proved, or assumed: if reached"])
+        NDR(["unknown(no_decision_route), b = ∞<br/>¬OK_i shown, no label"])
+        PRO(["protected(σ_U, M), b = ∞<br/>¬NR_i: every decided in-scope occurrence<br/>READY or NOT_EVALUATED;<br/>reach proved, or assumed: if reached"])
+        PCD["progress candidate<br/>progress unknown(not_checked)<br/>(no route checks it without the explorer)"]
+    end
 
     INA(["inactive(B)<br/>proof: folded path condition + provenance sets"])
-    FIX(["fixed-order(σ_U, M), b = ∞<br/>¬OK_i with decision route;<br/>reach proved, or assumed: if reached"])
-    NDR(["unknown(no_decision_route), b = ∞<br/>¬OK_i shown, no label"])
-    PRO(["protected(σ_U, M), b = ∞<br/>¬NR_i: every decided in-scope occurrence<br/>READY or NOT_EVALUATED;<br/>reach proved, or assumed: if reached"])
-    PCD["progress candidate<br/>progress unknown(not_checked)<br/>(no route checks it without the explorer)"]
     EXQ["→ explorer, all four queries<br/>(D3 dynamic detail)"]
     UWI(["unknown(writer_incomplete)"])
     OPEN["open: probe obligations<br/>reason ∈ unordered, O-ordered-only,<br/>conditional-observation, key_unresolved,<br/>writer_incomplete, horizon, unmodelled"]
-    DYN["→ observation (D3 dynamic detail)"]
+    DYN["→ observation-based judgement,<br/>prediction, confirmation (D3 dynamic detail)"]
 
     TM --> RCH
     RCH -->|"no Sk^cert path"| INA
@@ -234,7 +280,9 @@ flowchart TD
     WS -->|"DISABLED entry"| UWI
     UWI --> OPEN
     WS -->|"complete"| PRV
-    PRV -->|"provider none: classified by badness,<br/>not a separate terminal"| FO
+    PRV -->|"provider none: classified by badness,<br/>not a separate terminal"| UOC
+    UOC -->|"no (required path only): the judgement<br/>does not wait for a certificate"| DYN
+    UOC -.->|"yes"| FO
     FO -->|"yes"| PC
     FO -->|"no"| PR
     PR -->|"yes"| PC
@@ -258,13 +306,14 @@ flowchart TD
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
     classDef ref fill:#ffffff,stroke:#999,color:#555
-    class TM,RCH,KEY,WS,FO,PR,PC,DR dec
+    class TM,RCH,KEY,WS,UOC,FO,PR,PC,DR dec
     class INA,FIX,PRO term
     class UWI,NDR unk
     class PRV,OPEN,PCD comp
     class LED art
     class EXQ gated
     class DYN ref
+    style OPTC stroke-dasharray:5 5
 ```
 
 | 판단 | 내용 | 결과 |
@@ -314,26 +363,50 @@ flowchart TD
 
 open 후보는 관측으로 넘어가고, certificate가 있는 instance는 progress 후보로서 explorer가 있을 때 단계 4로 간다(§1.2; spec §4.6). 아래 그림은 단계 2부터 7까지의 상세다.
 
-**그림 D3 상세 2. open 후보와 progress 후보에서 칸별 기록까지** (렌더링: [diagrams/D3_analysis_dynamic.svg](diagrams/D3_analysis_dynamic.svg); spec §12 D3 (rev 1.2); §1.8, §1.10, §4.8–4.14)
+**그림 D3 상세 2. open 후보와 progress 후보에서 칸별 기록까지** (렌더링: [diagrams/D3_analysis_dynamic.svg](diagrams/D3_analysis_dynamic.svg); spec §12 D3 (rev 1.3); §1.8, §1.10, §4.8–4.14)
 
 ```mermaid
 flowchart TD
-    %% D3 detail (2/2) - from an open or progress candidate to the per-cell record. Source: spec §12 D3 (rev 1.2); §1.8, §1.10, §4.8-4.14.
-    %% Diamond = decision. Rounded = terminal value. Dashed border = gated (S7 explorer). Dashed edge = loop path. Red = unknown, contested or obligation failure.
+    %% D3 detail (2/2) - from an instance on the required path, an open or a progress candidate to the summary view and the per-cell record.
+    %% Source: spec §12 D3 (rev 1.3, C-48); §1.8, §1.10, §4.8-4.14.
+    %% Diamond = decision. Rounded = terminal value. Dashed border = optional route (certificate request, explorer, progress candidate). Dashed edge = optional-route or loop path.
+    %% Red = unknown, inconclusive, contested or obligation failure.
+    %% Summary view (§1.10): computed last from the record, per cell and per kind; observation, prediction and confirmation are counted separately (OUT-01).
     %% Three separate outputs per (σ, M) cell and bound: safety record → class, reach, progress. A stall never leads into a class.
 
-    OPEN["open candidate<br/>(from D3 static detail)"]
+    OPEN["instance on the required path, or open candidate<br/>(from D3 static detail)"]
     PCD["progress candidate<br/>(certified instance, from D3 static detail)"]
-    OBS["observation<br/>kz observe → run-*.kzt → kz trace"]
+    OBS["observation<br/>kz observe → run-*.kzt + observation adequacy record<br/>→ kz trace (normalization, app_owner)"]
+    JUD{"observation-based judgement (§4.8)<br/>explanation set Cobs of the incomplete record:<br/>Qv = SAT(Cobs ∧ Vφ), Qn = SAT(Cobs ∧ ¬Vφ)"}
     RT{"routing<br/>per conjunct LP vs deciding lifecycle LP"}
     CONF(["conforming: READY / TOLERATED<br/>supporting evidence only"])
-    CERTQ["ask static for a FIXED_ORDER certificate<br/>(VC_R order as prefilter)"]
-    PRD{"prediction (kz predict)<br/>lock reversal; A-COMM label;<br/>horizon completion"}
+    CERTQ["ask static for a FIXED_ORDER certificate<br/>(VC_R order as prefilter; optional route)"]
+    SDU(["schedule dependence undetermined<br/>(no certificate and no exh within b);<br/>removes no observed violation"])
+    PRD{"prediction (kz predict)<br/>explicit-state search first; lock reversal;<br/>A-COMM label; horizon completion"}
     PNR(["predicted not-ready evidence<br/>PENDING occurrence, no class"])
     EXP{"explorer (exh or dpor)<br/>σ_U, σ_U∞, σ_R1[P_sched]; exploration view, h in b<br/>Q_reach, Q_bad, Q_ok, Q_stall"}
     CNF{"confirmation (kz hold F0 / kz gate F1)<br/>naturalness, perturbation ratio"}
     CMB["combine per (σ, M) cell and bound (§4.12)<br/>safety record: ¬Bad_i, ¬OK_i, ¬NR_i with routes,<br/>witnesses with ordinals; weaker evidence kept per axis;<br/>axes provider and scope"]
     TRN{"transfer (§1.8)<br/>safety statements only"}
+
+    subgraph SUMO["summary view: observation"]
+        OV(["OBSERVED_VIOLATION<br/>VIOLATING in every explanation"])
+        NV(["NO_VIOLATION_IN_CHECKED_PREFIX<br/>READY, or TOLERATED with a caller record and ACCEPT"])
+        OI(["INCONCLUSIVE(reason)<br/>PENDING, OPEN: horizon-open;<br/>NOT_READY_UNJUDGED: caller_requirement_absent;<br/>NOT_EVALUATED: not_evaluated; explanation_ambiguous;<br/>limit; start_state_unknown; loss; ownership_undetermined; …"])
+        NA(["NOT_APPLICABLE<br/>outside the condition's scope, own evidence"])
+    end
+    AIE(["analysis input error (Qv and Qn UNSAT)<br/>reported apart; result marked partial"])
+
+    subgraph SUMP["summary view: prediction (NOT_RUN if not run)"]
+        MC(["MODEL_CANDIDATE<br/>with its label and A-COMM result"])
+        NIS(["NONE_IN_SCOPE<br/>for that model, interval and path scope"])
+        PIN(["INCONCLUSIVE(reason)<br/>limit, unknown, unsupported effect"])
+    end
+
+    subgraph SUMC["summary view: confirmation (NOT_RUN if not run)"]
+        CO(["CONFIRMED<br/>condition violated in the controlled run (CF-01)"])
+        NC(["NOT_CONFIRMED(reason)<br/>not reproduced or time limit (CF-03)"])
+    end
 
     subgraph SAF["class, derived from the safety record"]
         FO(["fixed-order<br/>¬OK_i with a decision route"])
@@ -365,25 +438,39 @@ flowchart TD
     CTD(["contested bound (O6(b), O10)<br/>rendered unknown(model_fault); no suspension"])
     PHE(["portability-hazard-evidence<br/>(M_api-only certificate contradicted<br/>by the binary; no state change)"])
 
-    OPEN --> OBS --> RT
+    OPEN --> OBS
+    OBS --> JUD
+    JUD -->|"Qv SAT, Qn UNSAT"| OV
+    JUD -->|"Qv UNSAT, Qn SAT"| NV
+    JUD -->|"both SAT; unknown or limit;<br/>a reason for withholding"| OI
+    JUD -->|"out of scope"| NA
+    JUD -->|"both UNSAT"| AIE
+    JUD -->|"occurrence statuses"| CMB
+    OBS --> RT
     RT -->|"conforming"| CONF
-    RT -->|"wrong-way (S-ordered)"| CERTQ
+    RT -.->|"wrong-way (S-ordered)"| CERTQ
+    RT -->|"wrong-way, certificate route not taken"| SDU
     RT -->|"O-ordered (lock, message, soft poll)"| PRD
     RT -->|"unordered"| PRD
+    PRD -->|"satisfying linearization"| MC
+    PRD -->|"no linearization"| NIS
+    PRD -->|"limit, unknown, unsupported effect"| PIN
     PRD -->|"witness: predicted / predicted-modelled /<br/>predicted-extrapolated"| CMB
-    PRD -->|"witness → hold plan"| CNF
+    MC -->|"witness → hold plan"| CNF
     PRD -->|"PENDING, horizon not completed"| PNR
-    PRD -->|"no witness within work-unit cap"| EXP
+    PRD -.->|"no witness within work-unit cap"| EXP
     PRD -->|"no witness, explorer frozen"| UB
     PCD -.->|"if the explorer is available"| EXP
-    PCD -->|"explorer frozen or cut"| PUN
-    EXP -->|"Q_bad, Q_ok per ordinal:<br/>statements within b, witnesses"| CMB
-    EXP -->|"Q_reach"| REACH
-    EXP -->|"Q_stall yes (exh only)"| PSW
-    EXP -->|"Q_stall no, no undecided test"| PNS
-    EXP -->|"deadness test undecided, cap"| PUN
-    EXP -->|"witness → hold plan"| CNF
-    EXP -->|"O10: exh witness against a<br/>certified or transferred statement"| CTD
+    PCD -.->|"explorer frozen or cut"| PUN
+    EXP -.->|"Q_bad, Q_ok per ordinal:<br/>statements within b, witnesses"| CMB
+    EXP -.->|"Q_reach"| REACH
+    EXP -.->|"Q_stall yes (exh only)"| PSW
+    EXP -.->|"Q_stall no, no undecided test"| PNS
+    EXP -.->|"deadness test undecided, cap"| PUN
+    EXP -.->|"witness → hold plan"| CNF
+    EXP -.->|"O10: exh witness against a<br/>certified or transferred statement"| CTD
+    CNF -->|"condition violated in the controlled run"| CO
+    CNF -->|"not reproduced, time limit"| NC
     CNF -->|"realized (natural / held-F0 /<br/>gated-F1 / timeout-exercised)"| CMB
     CNF -->|"inconclusive"| CMB
     CNF -->|"realized hang, wait-for fact<br/>(deadlock-cycle, leaked-lock)"| PSW
@@ -418,11 +505,11 @@ flowchart TD
     classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
     classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
-    class RT,PRD,CNF,TRN dec
-    class EXP gated
-    class CONF,PNR,FO,PR,NFS,SD,REF,OSP,REACH,PSW,PNS,TML,ROOT,SEU,SDE,SEH term
-    class UB,NDR,PUN,UML,UMF,OBL,CTD,PHE unk
-    class OPEN,PCD,OBS,CERTQ,CMB comp
+    class JUD,RT,PRD,CNF,TRN dec
+    class EXP,CERTQ,PCD gated
+    class CONF,PNR,FO,PR,NFS,SD,REF,OSP,REACH,PSW,PNS,TML,ROOT,SEU,SDE,SEH,OV,NV,NA,MC,NIS,CO,NC,SDU term
+    class UB,NDR,PUN,UML,UMF,OBL,CTD,PHE,OI,PIN,AIE unk
+    class OPEN,OBS,CMB comp
 ```
 
 **probe plan.** `kz-static plan`은 모든 actor의 필수 동기화 skeleton(OSAL task·mutex·semaphore·queue·timer·module 연산, ES lock과 대기, SB 생성·구독·송신·수신, shutdown 저장)과 open 후보의 의무(conjunct별 LP 구간, capture 위치, 결과 코드, A-COMM 검사에 필요한 writer)를 덮는 probe를 고른다(spec §4.7). 필수 skeleton을 모두 남기는 이유는, 제3자 동기화를 잘라 내면 순서를 잘못 읽기 때문이다(spec §4.7; v0.1 §7.3).
@@ -806,12 +893,12 @@ lattice는 "더 많이 안다"의 순서를 정한 구조다. Kairos의 칸은 �
 ```mermaid
 stateDiagram-v2
     direction LR
-    %% D6 overview - class region of the verdict state machine for one (σ, M) cell and bound. Source: spec §12 D6 (rev 1.2); §1.10, §4.12, §4.14.
+    %% D6 overview - class region of the verdict state machine for one (σ, M) cell and bound. Source: spec §12 D6 (rev 1.2; unchanged in rev 1.3); §1.10, §4.12, §4.14; rev 1.3 notes from §1.10 "Summary view" and ADR-053.
     %% The class is a safety classification, a function of the safety record (¬Bad_i, ¬OK_i, ¬NR_i, witnesses with ordinals).
     %% Parallel regions (evidence, naturalness, provider, reach, scope, progress, trust ledger): D6_verdict_axes.mmd.
 
     state "candidate (census instance)" as candidate
-    state "open" as open
+    state "open (not a class: rendered unknown(open-route reason))" as open
     state "inactive (static: no Sk^cert path under B)" as inactive
     state "unknown(no_decision_route), certified ¬OK_i shown" as unkNDR
     state "unknown(budget)" as unkBudget
@@ -885,6 +972,12 @@ stateDiagram-v2
         An M_api-only certificate contradicted by an observation gives portability-hazard-evidence; no state change at M_api.
     end note
 
+    note right of open
+        open is not a class; it is rendered unknown(open-route reason) (§1.10, §4.6).
+        Rev 1.3: the certificate transitions from candidate are an optional route (ADR-053).
+        The summary view (§1.10) is computed over the record and changes no state; PENDING and OPEN occurrences summarize as INCONCLUSIVE(horizon-open).
+    end note
+
     note right of unkOther
         Other reasons: not_reached, bound, key_unresolved, loss, unmodelled, writer_incomplete, horizon, horizon_static, one_sided, unordered, O-ordered-only, conditional-observation, conformance, model_level.
     end note
@@ -944,7 +1037,7 @@ lattice(§2.5)와 맞춰 읽으면, 같은 Φ version 안에서 정지가 없는
 
 ```mermaid
 stateDiagram-v2
-    %% D6 detail - parallel regions of one verdict cell, per (σ, M) and bound. Source: spec §12 D6 (rev 1.2); §1.8, §1.10, §4.5.1, §4.12-4.14.
+    %% D6 detail - parallel regions of one verdict cell, per (σ, M) and bound. Source: spec §12 D6 (rev 1.2; unchanged in rev 1.3); §1.8, §1.10, §4.5.1 (rev 1.3: results without a certificate), §4.12-4.14.
     %% Each region evolves independently of the class region in D6_verdict_overview.mmd. A stall witness never moves the class region.
 
     state "verdict cell: parallel regions (per (σ, M) and bound)" as axes {
@@ -1030,7 +1123,7 @@ stateDiagram-v2
             gNS --> gCont : realized stall within b (O6)
         }
         --
-        state "trust ledger (certificate-based states): four parts, all present" as ledger {
+        state "trust ledger (every cell): four parts; part (i) is empty without a certificate" as ledger {
             direction LR
             state "(i) re-validated inference steps, ACCEPTED or ACCEPTED_VIA_T5, correct relative to (ii) and (iii)" as l1
             state "(ii) extracted facts: typed references with artifact hashes" as l2
@@ -1049,6 +1142,7 @@ stateDiagram-v2
         Progress record: the set of stall clauses (pre-use, in-use, horizon), kind (deadlock-cycle, leaked-lock, other), qualifiers (idle, terminal-pending, choice-dependent), wait-for root set, harm and progress chain; flags timeout-masked-liveness (per instance) and tml-root.
         No transition goes from a certificate into the progress region. No progress value means live or deadlock-free.
         Trust ledger: derived per cell (transfer lemmas added); part (i) is empty for a verdict without a certificate; passing an obligation is never recorded as proof.
+        Rev 1.3 (§4.5.1, C-23): observation-based judgements, predictions and confirmations carry the four parts too; for an observation-based judgement part (iii) includes A-OBS and L-OBS.
         Proof status: the weakest status among the lemmas the cell's statements use (proved above depends-on-stated-assumption above unproved); only a written proof raises it.
     end note
 ```
@@ -1102,7 +1196,7 @@ stateDiagram-v2
 
 **첫 목표: 검증 사다리**(validation ladder; spec §9.3; ADR-044; P-LADDER는 2026-10-15에 승인) [D]. 사다리 V0–V4와 사례별 경로가 채택됐다. R2 처리 경로를 먼저 끝까지 구현하면서 다른 사례의 reference 원문과 구성을 병행해 준비한다. 앞서의 큰 최소 묶음 전체는 첫 완료 조건이 아니고, thin MVC는 주장 표와 자르는 순서의 이름이다. 첫 목표는 thin MVC 전체가 아니라 사다리의 rung V1이다. 사다리는 단계 의존성, 입력, 결정에 따라서만 순서를 정한다. 단계(S0–S10)는 무엇을 만드는지, rung은 무엇을 끝에서 끝까지 확인하는지를 말한다.
 
-**rev 1.3의 사다리** [D] (spec §9.3 "Ladder of revision 1.3", §9.4 머리; D1, D3, D5; P-LADDER 재정의; ADR-057; C-42, C-43). 사다리를 다음처럼 다시 정한다. 서로 다른 곳에서는 이 문단이 이 절의 다른 문단, 아래 사다리 표와 단계 표, 그림 D4(아직 rev 1.2 판)보다 앞선다.
+**rev 1.3의 사다리** [D] (spec §9.3 "Ladder of revision 1.3", §9.4 머리; D1, D3, D5; P-LADDER 재정의; ADR-057; C-42, C-43). 사다리를 다음처럼 다시 정한다. 서로 다른 곳에서는 이 문단이 이 절의 다른 문단, 아래 사다리 표와 단계 표보다 앞선다. 그림 D4 개요는 이 사다리(V1′ 먼저, V3 병행, 단계 A–F 대응, 단계 B의 사례별 완료 조건)를 그린다.
 - **V1′ R2 기반 검증**이 V1을 대신해 첫 rung이 된다. ENV basis에서 관측(S1), task–애플리케이션 매핑을 포함한 정규화, 설명 집합을 가진 관측 판정(S2, §1.3), 신뢰 장부를 R2의 동결된 기대표(spec App. A.1의 rev 1.3 주석, §1.10 끝)와 대조한다. V1의 certificate 출구 항목(FIXED_ORDER, `kz proofcheck`, R2 certificate 장부)은 **선택**이고, 논문이 R2의 보편 진술을 할 때만 쓴다. V2(R2의 대조 basis)는 V1′ 뒤에 온다.
 - **V3, 곧 D22 basis 위의 C1은 V1′와 병행한다.** 공개 BP basis 구축, 애플리케이션 닫힘(spec §4.1 "Closure per case"), C1의 관측 계획(§1.3)은 단계 B와 함께 시작한다. C1의 예측, 확인, 기여 증거가 뒤따른다(spec §8.2).
 - **[P0.2]의 단계 A–F**는 rung에 대응한다. A(자산과 사양의 대응; 다섯 사례가 모두 나타남) = V0와 paper track. B(실제 기록 판정) = V1′와, V3, VP-D3, VP-D4의 관측 부분. C(한정 예측) = V3에서 먼저 S5. D(실행 확인) = V3에서 먼저 S6이고, **R2의 관측만으로는 끝나지 않는다**. E(동결 뒤 독립 평가) = V4b. F(논문 주장) = spec §1.11의 기여 가설과 함께 V4a.
@@ -1124,27 +1218,31 @@ stateDiagram-v2
 
 V2와 V3는 서로 기다리지 않는다. rung마다의 공수 추정은 없다(`unspecified_by_reference`, P-LADDER (b)). 사다리와 사례별 경로·대조의 상세는 [08_roadmap.md](08_roadmap.md)가 다룬다.
 
-**그림 D4 개요. 검증 사다리, 사례 track, 연구 단계, 동결, PI 결정** (렌더링: [diagrams/D4_research_overview.svg](diagrams/D4_research_overview.svg); spec §12 D4 (rev 1.2); §9.3, §9.4, §10.1; ADR-044)
+**그림 D4 개요. 검증 사다리, 사례 track, 연구 단계, 동결, PI 결정** (렌더링: [diagrams/D4_research_overview.svg](diagrams/D4_research_overview.svg); spec §12 D4 (rev 1.2); §9.3 "Ladder of revision 1.3", §9.4, §10.1; ADR-044, ADR-057)
 
 ```mermaid
 flowchart TD
-    %% D4 overview - research workflow: validation ladder (first target: rung V1), case tracks, stages, freezes, PI decisions.
-    %% Source: spec §12 D4 (rev 1.2); §9.3, §9.4, §10.1; ADR-044. Detail: D4_research_evaluation.mmd (evaluation path).
-    %% Dashed border = conditional, later or not yet built (its basis or arm exists only after the work its decision names). Dashed edge = a decision gating a rung, track or stage (most are decided on 2026-10-15; the values are in spec §10.1), or a conditional path.
-    %% No edge between V2 and V3: the order of EXT-20261012 §7 (step 3, then step 4) is a reporting order. No effort estimate exists for any rung.
+    %% D4 overview - research workflow: validation ladder (first rung: V1′, R2 baseline validation; V3 in parallel), case tracks, stages, freezes, decisions.
+    %% Source: spec §12 D4 (rev 1.2); §9.3 "Ladder of revision 1.3", §9.4, §10.1; ADR-044, ADR-053, ADR-057. Detail: D4_research_evaluation.mmd (evaluation path).
+    %% Dashed border = optional route (rev 1.3, ADR-053), or conditional, later or not yet built (its basis or arm exists only after the work its decision names).
+    %% Dashed edge = a decision gating a rung, track or stage (the values are in spec §10.1), an optional route, or a conditional path.
+    %% V3 runs in parallel with V1′ (rev 1.3); V2 follows V1′. No edge between V2 and V3: the order of EXT-20261012 §7 is a reporting order. No effort estimate exists for any rung.
 
     PHI["Φ authoring<br/>provenance, authoring records,<br/>refinement accounting"]
 
-    subgraph LAD["validation ladder (ADR-044, approved as P-LADDER): the first target is rung V1, not the whole thin MVC"]
+    subgraph LAD["validation ladder (ADR-044, P-LADDER; redefined in rev 1.3, ADR-057): the first rung is V1′, with V3 in parallel"]
         V0["V0 formal fixes<br/>definitions of ADR-039 to ADR-043;<br/>litmus LP-DL, LP-TW"]
         V0P["V0-P lemma obligations written<br/>before any certificate or transfer wording"]
-        V1["V1 R2's K-ID chain end to end, ENV basis<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2"]
+        V1P["V1′ R2 baseline validation (first rung, rev 1.3)<br/>observation, normalization with app_owner,<br/>observation-based judgement (explanation set),<br/>trust ledger; ENV basis; against R2's frozen sheet;<br/>not evidence of the contribution"]
+        V1["V1 certificate exit items (optional, rev 1.3)<br/>FIXED_ORDER, kz proofcheck, R2 certificate ledger;<br/>sub-gates S0-R2, S3a-R2, S1-R2, S2-R2;<br/>only if the paper makes R2's universal statement"]
         V1B["V1b the rest of the thin MVC gates<br/>(results on counterparts are not case evidence)"]
-        V2["V2 R2's control basis B′"]
-        V3["V3 C1 on its B′ (public BP basis, D22)"]
+        V2["V2 R2's control basis B′<br/>(follows V1′)"]
+        V3["V3 C1 on its B′ (public BP basis, D22)<br/>in parallel with V1′: basis, application closure,<br/>observation plan start with stage B;<br/>first case for contribution evidence"]
         V4A["V4a comparison with existing<br/>process-level race work<br/>(in S9, after F1)"]
         V4B["V4b held-out and pre/post-fix pairs<br/>(extended evaluation, in S9, after F2)"]
     end
+
+    STGAF["stages A-F of [P0.2] on the rungs (rev 1.3):<br/>A = V0 + paper track; B = V1′ + observation parts of V3, VP-D3, VP-D4;<br/>C = S5 on V3 first; D = S6 on V3 first (not complete with R2's observations alone);<br/>E = V4b; F = V4a with the contribution hypotheses (§1.11).<br/>Stage B per case (D5): records traceable to evidence, tests T-05, T-17-T-20,<br/>closure covering the writers and aliases its conditions need"]
 
     subgraph TRK["case tracks (beside the ladder)"]
         PAP["paper track, all five cases<br/>reading at pinned revisions;<br/>expectation sheets frozen before tool output"]
@@ -1156,16 +1254,16 @@ flowchart TD
     subgraph MVC["thin MVC = S0 + S1 + S2 + S3a (never cut; its full gates are rung V1b)"]
         S0["S0 formats + formal core<br/>kz_schema.h, Φ grammar + semantics,<br/>one evaluator, golden harness"]
         S1["S1 F0 observer<br/>gate: R2 per-use set re-observed<br/>by Kairos's own recorder"]
-        S2["S2 trace HB + dynamic readiness checking<br/>gate: every R2 use classified"]
-        S3A["S3a static closure, writers, two views,<br/>census, certificates, kz proofcheck<br/>gate: R2 FIXED_ORDER accepted, with trust<br/>ledger and progress unknown(not_checked)"]
+        S2["S2 trace HB + dynamic readiness checking,<br/>observation-based judgement (rev 1.3)<br/>gate: every R2 use classified"]
+        S3A["S3a static closure, writers, two views, census;<br/>app-unit link probe required on C1, C2, C5 (D5);<br/>certificates + kz proofcheck (optional route, rev 1.3):<br/>R2 FIXED_ORDER accepted, with trust ledger<br/>and progress unknown(not_checked)"]
     end
 
     subgraph LATER["later stages"]
         S3B["S3b points-to (conditional:<br/>only if O7 shows blocking DISABLED)"]
         S4["S4 feedback loop, O1-O7 + O9,<br/>byte-exact replay"]
-        S5["S5 prediction + O8"]
+        S5["S5 prediction + O8<br/>(explicit-state search first)"]
         S6["S6 F0 confirmation (kz hold)"]
-        S7["S7 explorer: exh then dpor<br/>kill criterion"]
+        S7["S7 explorer: exh then dpor<br/>kill criterion (optional route)"]
         S10["S10 arms: --wrap gates + PCT (D3, later),<br/>native σ_R1 (D4, model first),<br/>6.4.x basis (before F1, D13)"]
     end
 
@@ -1194,21 +1292,25 @@ flowchart TD
     HO --> EVA --> STAT --> CLAIMS
     STAT -->|"N and caps"| DEV
 
-    V0 --> V1
+    V0 --> V1P
+    S1 -->|"observation"| V1P
+    S2 -->|"judgement, explanation set"| V1P
+    V1P -.->|"optional"| V1
     V0P -->|"V1's certificate wording"| V1
     MVC -->|"sub-gates"| V1
     MVC -->|"full gates"| V1B
-    V1 --> V2
-    V1 --> V3
+    V1P --> V2
+    V1P ---|"in parallel (rev 1.3)"| V3
     V1B -->|"the App. A.2 instance"| V2
-    V1B -->|"app-unit closure, app .so probes"| V3
-    S5 -->|"classes"| V3
-    S6 -->|"holds"| V3
-    S7 -->|"classes"| V3
+    V1B -->|"app-unit closure (required, D5),<br/>app .so probes"| V3
+    S5 -->|"prediction (stage C), V3 first"| V3
+    S6 -->|"holds (stage D), V3 first"| V3
+    S7 -.->|"classes"| V3
     F1 --> V4A --> F2
     F2 --> V4B
+    STGAF --- V1P
 
-    PAP -->|"sheets frozen before tool output"| V1
+    PAP -->|"sheets frozen before tool output"| V1P
     PAP --> VPD3
     PAP --> VPD4
     PAP --> VPD5
@@ -1217,7 +1319,7 @@ flowchart TD
     VPD5 --> F1
     VPD3 -.->|"in S10, placed before F1<br/>(D13 (c))"| S10
 
-    DLAD["P-LADDER<br/>(ladder approved)"]
+    DLAD["P-LADDER (approved 2026-10-15;<br/>redefined by the 2026-10-22<br/>decisions D1, D3, D5)"]
     D20["D20 = A (decided)<br/>(certificates prove safety statements only)"]
     D1["D1 root-side hook,<br/>D17 stop method"]
     D14["D14 N per purpose<br/>(deviation, frozen)"]
@@ -1232,7 +1334,8 @@ flowchart TD
     DS9["P-RECALL, P-TRIAGE,<br/>P-STATS, P-CLASSGT"]
     D34["D3 --wrap and PCT (later),<br/>D4 native σ_R1 (model first)"]
 
-    DLAD -.-> V1
+    DLAD -.-> V1P
+    DLAD -.-> V3
     D20 -.-> V0
     D1 -.-> S1
     D14 -.-> S1
@@ -1254,11 +1357,13 @@ flowchart TD
     classDef dec fill:#fffbe6,stroke:#a07a00,color:#111
     classDef art fill:#fff8e6,stroke:#a07a00,color:#111
     classDef frz fill:#e9e4f5,stroke:#5b3f99,color:#111
-    class PHI,S0,S1,S2,S3A,S4,S5,S6,S7,V0,V0P,V1,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
-    class S3B,S10,V2,V3,VPD3,VPD4,VPD5 gated
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class PHI,S0,S1,S2,S3A,S4,S5,S6,V0,V0P,V1P,V1B,V4A,V4B,PAP,TO,REF,HO,EVA,STAT comp
+    class S3B,S7,S10,V1,V2,V3,VPD3,VPD4,VPD5 gated
     class DLAD,D20,D1,D14,DR2,DC1,D13,DC2,DRG,D15,D16,DF1,DS9,D34 dec
     class CLAIMS,DEV,EXR art
     class F1,F2 frz
+    class STGAF ref
 ```
 
 | 단계 | 내용 | 출구 조건의 핵심 | PI 결정 |
@@ -1330,7 +1435,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    %% D7 - observation and hold pipeline on the unmodified gcc binary. Source: spec §12 D7; §5.1-5.7, §4.13.
+    %% D7 - observation and hold pipeline on the unmodified gcc binary. Source: spec §12 D7 (rev 1.2: kernel recorded per run, §1.7 Env, D11); §5.1-5.7, §4.13.
     %% Costs marked [M] are measured values quoted by the spec ([R07 §4.7]); nothing here was run by Kairos.
     %% Dashed border = optional (tracefs; P-TRACEFS recommends no).
 
@@ -1344,7 +1449,7 @@ flowchart TD
     NBD["normalization-boot driver"]
     TFS["optional tracefs instance"]
 
-    subgraph KERN["Linux kernel 6.18.44-fc-v114"]
+    subgraph KERN["Linux kernel, recorded per run (6.18.44-fc-v114 in [R07 §1], -fc-v139 on 2026-10-16; §1.7 Env)"]
         UPR["uprobe registrations by (inode, offset)<br/>core-cpu1 and app .so, before launch"]
         WP["per-task write watchpoints"]
         BPF["BPF programs<br/>entry, point, return, watch"]

@@ -1,24 +1,47 @@
 flowchart TD
-    %% D3 overview - analysis workflow per contract instance and (σ, M) cell. Source: spec §12 D3 (rev 1.1); §1.8, §1.10, §2.5, §4.6, §4.8-4.14.
-    %% Detail: D3_analysis_static.mmd (census decisions) and D3_analysis_dynamic.mmd (from an open or progress candidate to the per-cell record).
-    %% Dashed border = gated stage (S7 explorer). Dashed edge = gated path or loop path. Red = obligation failure, unknown, contested or portability hazard.
+    %% D3 overview - analysis workflow per readiness instance and (σ, M) cell. Source: spec §12 D3 (rev 1.3, C-48); §1.8, §1.10, §2.2, §2.5, §4.6, §4.8-4.14.
+    %% Detail: D3_analysis_static.mmd (census decisions, optional certificate route) and D3_analysis_dynamic.mmd (observation-based judgement, prediction, confirmation, per-cell record).
+    %% Rev 1.3 (ADR-053): observation-based judgement, prediction and confirmation are the required path; the certificate branch (step 1) and the explorer (step 4) are optional routes.
+    %% Dashed border = optional route (certificate branch, S7 explorer). Dashed edge = optional-route path or loop path. Red = obligation failure, unknown, inconclusive, contested or portability hazard.
+    %% Summary view (§1.10): computed last from the record, per cell and per kind; observation, prediction and confirmation are reported and counted separately (OUT-01).
     %% Three separate outputs per (σ, M) cell and bound: class (derived from the safety record), reach, progress. A stall never leads into a class.
 
-    INST["contract instance i = (κ, context-qualified template t, key, scope)<br/>from the census"]
-    STAT{"1 static census on Sk^cert, per M<br/>reachable? key? writer sets complete (O7)?<br/>FIXED_ORDER / PROTECTED certificate?<br/>kz proofcheck (CC)"}
+    INST["readiness instance i = (κ, context-qualified template t, key, scope)<br/>from Φ and the probe plan (hand-augmented, §4.7);<br/>the census where a route needs it"]
+
+    OBS["2 observation on the unmodified binary<br/>kz observe → run-*.kzt + observation adequacy record;<br/>kz trace: normalization, app_owner, HB, routing; kz conform"]
+    JUD{"2 observation-based judgement (§4.8)<br/>explanation set Cobs of the incomplete record:<br/>Qv = SAT(Cobs ∧ Vφ), Qn = SAT(Cobs ∧ ¬Vφ)"}
+
+    subgraph SUMO["summary view: observation (§1.10)"]
+        OV(["OBSERVED_VIOLATION<br/>VIOLATING in every explanation"])
+        NV(["NO_VIOLATION_IN_CHECKED_PREFIX<br/>READY, or TOLERATED with a caller record and ACCEPT;<br/>only the conditions and interval evaluated"])
+        OI(["INCONCLUSIVE(reason)<br/>PENDING, OPEN: horizon-open;<br/>NOT_READY_UNJUDGED: caller_requirement_absent;<br/>NOT_EVALUATED: not_evaluated;<br/>explanation_ambiguous, limit, start_state_unknown, …"])
+        NA(["NOT_APPLICABLE<br/>outside the condition's scope,<br/>shown by its own evidence"])
+    end
+    AIE(["analysis input error (Qv and Qn UNSAT)<br/>reported apart, never as no violation"])
+
+    PRD["3 prediction (kz predict)<br/>explicit-state search first;<br/>lock reversal, A-COMM label"]
+    subgraph SUMP["summary view: prediction (NOT_RUN if not run)"]
+        MC(["MODEL_CANDIDATE<br/>a satisfying linearization;<br/>feasibility not claimed"])
+        NIS(["NONE_IN_SCOPE<br/>no linearization in that model,<br/>interval and path scope"])
+        PIN(["INCONCLUSIVE(reason)<br/>limit, unknown, unsupported effect"])
+    end
+    CNF["5 confirmation<br/>kz hold F0 / kz gate F1 (optional route)<br/>naturalness, perturbation ratio"]
+    subgraph SUMC["summary view: confirmation (NOT_RUN if not run)"]
+        CO(["CONFIRMED<br/>the condition violated in a controlled run"])
+        NC(["NOT_CONFIRMED(reason)<br/>not reproduced or time limit;<br/>no proof of infeasibility"])
+    end
+
+    STAT{"1 static census on Sk^cert, per M (optional route)<br/>reachable? key? writer sets complete (O7)?<br/>FIXED_ORDER / PROTECTED certificate?<br/>kz proofcheck (CC)"}
     INA(["inactive(B)<br/>path-condition proof on Sk^cert"])
-    CERT(["certificate result (σ_U, M), b = ∞, with trust ledger<br/>fixed-order: ¬OK_i, REJECT at the decision /<br/>unknown(no_decision_route): ¬OK_i shown /<br/>protected: ¬NR_i<br/>progress unknown(not_checked)"])
+    CERT(["certificate result (σ_U, M), b = ∞, with trust ledger and proof status<br/>fixed-order: ¬OK_i, REJECT at the decision /<br/>unknown(no_decision_route): ¬OK_i shown /<br/>protected: ¬NR_i<br/>progress unknown(not_checked)"])
     PCD["progress candidate<br/>(certified instance; never opened)"]
     OPEN["open candidate<br/>reason + probe obligations"]
-    OBS["2 observation on the unmodified binary<br/>kz observe, kz trace, kz conform;<br/>routing of each use"]
-    PRD["3 prediction (kz predict)<br/>lock reversal, A-COMM label"]
-    EXP["4 explorer (kz explore; S7, gated)<br/>exh or dpor; σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view Sk^h, h in b<br/>four queries per σ: Q_reach, Q_bad, Q_ok, Q_stall"]
-    CNF["5 confirmation<br/>kz hold F0 / kz gate F1<br/>naturalness, perturbation ratio"]
+    EXP["4 explorer (kz explore; S7, gated; optional route)<br/>exh or dpor; σ_U, σ_U∞, σ_R1[P_sched];<br/>exploration view Sk^h, h in b<br/>four queries per σ: Q_reach, Q_bad, Q_ok, Q_stall"]
     CMB["6 combine per (σ, M) cell and bound (§4.12)<br/>safety record: ¬Bad_i, ¬OK_i, ¬NR_i with routes,<br/>witnesses with ordinals"]
     TRN{"7 transfer (§1.8)<br/>safety statements only"}
 
     subgraph REC["verdict record per (σ, M) cell and bound: three separate outputs; axes provider, scope"]
-        CLS(["class, derived from the safety record<br/>inactive / protected (tolerated) / fixed-order /<br/>no-final-status / schedule-dependent (timeout-dependent) /<br/>ordinal-split / unknown(reason)"])
+        CLS(["class, derived from the safety record<br/>inactive / protected (allowed-not-ready) / fixed-order /<br/>no-final-status / schedule-dependent (timeout-dependent) /<br/>ordinal-split / unknown(reason);<br/>without a certificate or exh: schedule dependence undetermined"])
         RCH(["reach<br/>proved / assumed (if reached) /<br/>model(b) / unreached(b) / contested"])
         PRG(["progress (a stall never decides the class)<br/>stall-witness / no-stall-within(b) / unknown(reason);<br/>default unknown(not_checked);<br/>timeout-masked-liveness; root via a progress chain"])
     end
@@ -28,37 +51,51 @@ flowchart TD
     CTD(["contested bound (O6(b), O10)<br/>rendered unknown(model_fault); no suspension"])
     PHE(["portability-hazard-evidence<br/>M_api-only certificate contradicted (O4(b));<br/>no state change"])
 
-    INST --> STAT
-    STAT -->|"no Sk^cert path"| INA
-    STAT -->|"certificate accepted (CC)"| CERT
-    STAT -->|"no certificate; key ⊤; writer set DISABLED (O7);<br/>proofcheck reject (CC)"| OPEN
-    INA --> CMB
-    CERT -->|"one safety statement"| CMB
-    CERT -->|"proved or assumed"| RCH
-    CERT -->|"PROTECTED: added;<br/>FIXED_ORDER: may be added (§4.6)"| PCD
-    PCD -.->|"S7 explorer, if not frozen:<br/>all four queries; D15 work-unit caps"| EXP
-    PCD -->|"explorer frozen or cut:<br/>stays unknown(not_checked)"| PRG
-    OPEN --> OBS
-    OBS -->|"wrong-way: ask for a FIXED_ORDER certificate"| STAT
+    INST -->|"required path (rev 1.3)"| OBS
+    OBS --> JUD
+    JUD -->|"Qv SAT, Qn UNSAT"| OV
+    JUD -->|"Qv UNSAT, Qn SAT"| NV
+    JUD -->|"both SAT; unknown or limit;<br/>a reason for withholding"| OI
+    JUD -->|"out of scope"| NA
+    JUD -->|"both UNSAT"| AIE
+    JUD -->|"occurrence statuses (record kept in full)"| CMB
     OBS -->|"O-ordered / unordered"| PRD
     OBS -->|"conforming: supporting evidence"| CMB
     OBS -->|"observed occurrence: proved"| RCH
+    PRD -->|"satisfying linearization"| MC
+    PRD -->|"no linearization"| NIS
+    PRD -->|"limit, unknown,<br/>unsupported effect"| PIN
     PRD -->|"predicted witnesses"| CMB
-    PRD -->|"witness → hold plan"| CNF
-    PRD -->|"no witness within work-unit cap"| EXP
-    EXP -->|"Q_bad, Q_ok: statements within b,<br/>witnesses per ordinal"| CMB
-    EXP -->|"Q_reach"| RCH
-    EXP -->|"Q_stall (exh only)"| PRG
-    EXP -->|"witness → hold plan"| CNF
+    MC -->|"witness → hold plan"| CNF
+    CNF -->|"condition violated in the controlled run"| CO
+    CNF -->|"not reproduced, time limit"| NC
     CNF -->|"realized / inconclusive"| CMB
     CNF -->|"realized hang, wait-for fact"| PRG
+
+    INST -.->|"optional route: universal order claim"| STAT
+    OBS -.->|"wrong-way: ask for a FIXED_ORDER certificate<br/>(optional route)"| STAT
+    STAT -.->|"no Sk^cert path"| INA
+    STAT -.->|"certificate accepted (CC)"| CERT
+    STAT -.->|"no certificate; key ⊤; writer set DISABLED (O7);<br/>proofcheck reject (CC)"| OPEN
+    OPEN -.->|"probe obligations"| OBS
+    INA -.-> CMB
+    CERT -.->|"one safety statement"| CMB
+    CERT -.->|"proved or assumed"| RCH
+    CERT -.->|"PROTECTED: added;<br/>FIXED_ORDER: may be added (§4.6)"| PCD
+    PCD -.->|"S7 explorer, if not frozen:<br/>all four queries; D15 work-unit caps"| EXP
+    PCD -.->|"explorer frozen or cut:<br/>stays unknown(not_checked)"| PRG
+    PRD -.->|"no witness within work-unit cap"| EXP
+    EXP -.->|"Q_bad, Q_ok: statements within b,<br/>witnesses per ordinal"| CMB
+    EXP -.->|"Q_reach"| RCH
+    EXP -.->|"Q_stall (exh only)"| PRG
+    EXP -.->|"witness → hold plan"| CNF
     CMB -->|"class from the record"| CLS
     CMB --> TRN
     TRN -->|"rule 1(a): statement into the receiving cell"| CMB
     TRN -->|"rule 2 (b = ∞; M_impl or M agreement): σ_E statement;<br/>rule 2 fails: σ_E unknown(model_level)"| CLS
     OBS -->|"every trace: O1-O5, O9; O8 on a sample"| OBL
     CNF -->|"confirmation traces; refuted witness (O6)"| OBL
-    EXP -->|"O6, O10"| OBL
+    EXP -.->|"O6, O10"| OBL
     OBL -->|"O1, O2, O6(a): model_gap; O8: conformance;<br/>O3, O4 (at M_impl), O9: model_fault"| UNK
     OBL -->|"O6(b), O10"| CTD
     OBL -->|"O4(b) at M_api only"| PHE
@@ -70,8 +107,12 @@ flowchart TD
     classDef term fill:#eaf6ea,stroke:#2e7d32,color:#111
     classDef unk fill:#fdeceb,stroke:#b23b3b,color:#111
     classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
-    class INST,PCD,OPEN,OBS,PRD,CNF,CMB comp
-    class STAT,TRN dec
-    class INA,CERT,CLS,RCH,PRG term
-    class OBL,UNK,CTD,PHE unk
-    class EXP gated
+    classDef optdec fill:#fffbe6,stroke:#a07a00,stroke-dasharray:5 5,color:#111
+    classDef optterm fill:#eaf6ea,stroke:#2e7d32,stroke-dasharray:5 5,color:#111
+    class INST,OBS,PRD,CNF,CMB comp
+    class JUD,TRN dec
+    class OV,NV,NA,MC,NIS,CO,NC,CLS,RCH,PRG term
+    class OI,PIN,AIE,OBL,UNK,CTD,PHE unk
+    class STAT optdec
+    class INA,CERT optterm
+    class PCD,OPEN,EXP gated

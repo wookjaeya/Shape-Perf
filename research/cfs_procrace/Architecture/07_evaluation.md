@@ -116,17 +116,18 @@ spec은 평가 전체에 걸쳐 세 원칙을 둔다. 셋 다 설계 결정 [D]�
 
 **그림 D4 상세. 평가 경로** (렌더링: [diagrams/D4_research_evaluation.svg](diagrams/D4_research_evaluation.svg); spec §12 D4 (rev 1.2); §7.2, §7.5, §8.2–8.7)
 
-렌더링 파일(`diagrams/D4_research_evaluation.mmd`·`.svg`)은 아직 rev 1.1 판이다(같은 정보 재구현 비교 도구, helgrind·DRD 참조점, 22개 ablation, 통계 검정). 아래 블록은 spec §12 D4(rev 1.2)의 노드와 edge 목록을 따라 고친 것이고, 둘이 다르면 아래 블록과 spec을 따른다.
+아래 블록은 `diagrams/D4_research_evaluation.mmd`와 같다(rev 1.3: spec §12 D4 rev 1.2 바탕에 사례 역할, 미실행 원 도구의 표현(2026-10-22 결정 D4), 단일 요소 비교, OUT-01을 더했다; §8.1–§8.7).
 
 ```mermaid
 flowchart TD
     %% D4 detail - evaluation path: freezes, development runs, extended evaluation (held-out, recall, triage), comparison, statistics.
-    %% Source: spec §12 D4 (rev 1.2); §7.2, §7.5, §8.2-8.7, [POL].
+    %% Source: spec §12 D4 (rev 1.2); §7.2, §7.5, §8.1-8.7 (rev 1.3: §8.2 case roles, §8.3 unrun tools, §8.4 single-element comparisons), [POL].
     %% Dashed border = later or added only by a decision. Dashed edge = record-keeping or decision-gated path.
 
     S1["S1 recorder ready"]
-    S3A["S3a census + certificates"]
+    S3A["S3a closure, writers, census<br/>(certificates: optional route, rev 1.3)"]
     STG["stages S0-S7 outputs (S8 removed, D6)"]
+    ROLE["case roles (rev 1.3, §8.2):<br/>R2 = baseline validation (V1′), not contribution evidence;<br/>C1 = first case for contribution evidence (V3)"]
 
     F1{{"freeze F1 (by hash)<br/>evaluation engine and rules: Φ, extractor, engines,<br/>calibration, lints, any re-implementation of a<br/>process-level technique, evaluation criteria,<br/>expectation-sheet hashes (each sheet frozen<br/>before its case's first output)"}}
     TO["template-only development runs, each case on its own basis<br/>R2, C1 public BP basis (D22), C2 role-reconstructed (P-C2),<br/>C3/C5 at 6.4.1 (D13), App-record windows;<br/>or the reason and the scope limit (P-F1GATE)"]
@@ -136,13 +137,13 @@ flowchart TD
     HO["held-out sources (a)-(e), extended evaluation<br/>(a) other cFS revisions, (b) other configurations,<br/>(c) issues from a fixed query, (d) recall items,<br/>(e) unused in-code admissions"]
     RCL["recall mutants and pre/post-fix pairs<br/>(extended evaluation; variant set only)<br/>labelled synthetic; detected / unknown / missed per layer;<br/>class-correct apart (P-CLASSGT)"]
     TRI["sampled triage (extended evaluation)<br/>stratified sample, two independent masked raters,<br/>rater exposure recorded (P-TRIAGE)"]
-    ABL["ablations K3 (24, descriptive)"]
-    BAS["comparison among existing process-level race work<br/>six analysis questions, one result state per (tool, case);<br/>K1 original / K2 re-implementation kept apart;<br/>Kairos's report parts: detection / classification / evidence"]
+    ABL["ablations K3 (24, descriptive);<br/>single-element comparisons (rev 1.3): resource and lifetime<br/>correspondence, cFS execution constraints, application<br/>ownership, prediction, selective observation removed one at a time"]
+    BAS["comparison among existing process-level race work<br/>six analysis questions, one result state per (tool, case);<br/>K1 original / K2 re-implementation kept apart;<br/>an unrun original tool: literature-and-code result state only<br/>(2026-10-22 decision D4);<br/>Kairos's report parts: detection / classification / evidence"]
     PG["perturbation groups A, B, C′, C, D (per plan), W<br/>interleaved; cold and warm strata;<br/>observation-effect check (D1, D11)"]
     NB["normalization boots<br/>after abnormal exits; excluded from pools"]
     WG["group W (only if the F1 arm is added; D3 later)"]
-    STAT["descriptive statistics (P-STATS)<br/>N per purpose frozen (D14); caps as deviations;<br/>a later quantitative experiment fixes<br/>its unit and procedure first"]
-    CLAIMS[("claims table")]
+    STAT["descriptive statistics (P-STATS)<br/>N per purpose frozen (D14); caps as deviations;<br/>observed violations, model candidates and confirmed<br/>executions counted separately (OUT-01);<br/>a later quantitative experiment fixes<br/>its unit and procedure first"]
+    CLAIMS[("claims table<br/>(questions Q1-Q4 of rev 1.3;<br/>contribution hypotheses, §1.11)")]
     DEV[("deviation records ([POL])")]
 
     S3A --> F1 --> TO --> REF --> F2
@@ -157,9 +158,9 @@ flowchart TD
     STG --> BAS
     STG --> TRI
     HO --> TRI
-    RCL --> ABL
     TO --> ABL
     TO --> BAS
+    ROLE --- TO
     ABL --> STAT
     BAS --> STAT
     TRI --> STAT
@@ -180,7 +181,7 @@ flowchart TD
     class F1,F2 frz
     class CLAIMS,DEV,EXP art
     class WG gated
-    class S1,S3A,STG,NOTE ref
+    class S1,S3A,STG,NOTE,ROLE ref
 ```
 
 그림은 세 줄기로 읽는다.

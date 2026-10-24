@@ -137,6 +137,7 @@ K0 의 초기 정의에서 K2 가 perf-sample 백엔드를 구현하며 바꾼 �
 | SLOT_FETCHES (58) | 실행 | 원천이 `mem`/`str` 인 슬롯의 레지스터와 오프셋(커널의 probe-event fetch argument가 읽은 메모리) (2026-10-24) |
 | EVENT_STRINGS (59) | 실행 | `str` 슬롯의 문자열, `RAW_EVENTS` 인덱스와 슬롯으로. 슬롯 값 `a[]` 는 바이트 길이 (2026-10-24) |
 
+- **2026-10-24 추가(R2 잔여)**: 열거 값 `KZ_TARGET_KIND` 의 `at-call` 5 하나(호출 명령 자체의 점 사이트). 레이아웃은 그대로이다. `layout.golden`, `records.golden` 을 갱신했다(diff: 열거 값 한 줄, 지문, 무작위 레코드 두 개의 대상 종류 이름이 열거 수에 따라 바뀜). 재생 출력 컨테이너가 REF_LISTS 를 처음 쓴다(§11).
 - **2026-10-24 추가(C1 판정 가능성)**: 섹션 세 개(관측 범위 40–59 의 남은 번호)와 열거 값(`KZ_SLOT_SRC` 의 `mem` 4·`str` 5, `KZ_TARGET_KIND` 의 `entry-reached` 4, 새 `KZ_FETCH_KIND`, `KZ_VIA_FLAG`)만 더했다. 기존 레이아웃과 섹션 버전은 그대로이므로 smoke1 의 실행·basis 컨테이너도 읽힌다. 섹션은 그 사이트가 있는 계획에서만 쓰이므로 다른 계획의 컨테이너와 계획 해시는 바뀌지 않는다(`test_probe_golden`). `layout.golden`, `records.golden` 은 갱신했다(diff 확인: 새 레코드 세 개와 열거 값, 무작위 레코드의 섹션 이름 참조가 등록 순서에 따라 바뀜).
 - **디코더 의미**(SITES 의 `decoder`): `generic`, `spawn-create`(`a[0]` 이름 포인터 — 읽지 않음, `a[1]` 역할 `entry_fn`, `a[2]` 역할 `priority`(4바이트 이하), `a[3]` 역할 `return_address`), `spawn-return`(`a[0]` 상태, `a[3]` 역할 `return_address` = 명령 포인터), `thread-entry`(`a[0]` 알린 id, 4바이트 이하). 이 의미는 정체성 결합이 쓴다. `check_site` 가 이 위치·역할을 요구하고, 정체성 결합도 맞지 않는 사이트를 받으면 오류로 끝난다.
 - **진입·복귀 짝**: 진입 사이트와 복귀 사이트가 기호가 같고 **둘 다 `a[3]` 에 역할 `return_address`(8바이트)를 선언하면** 짝짓기 후보이다(`check_plan` 이 요구한다). 진입에서는 스택 꼭대기의 단어, 복귀에서는 표본의 명령 포인터.
@@ -173,9 +174,10 @@ SPEC rev 1.3 의 "Formats added in revision 1.3"(ADR-054–ADR-056, C-17)을 구
 |---|---|
 | SUMMARIES | 발생 하나에 한 레코드(재생 결과의 순서). 요약 뷰와 실행 관계(`relation`, 플래그 `relation-inferred`·`core-status-unknown`). `cell` = none(재생은 판정 셀을 쓰지 않는다), `model` = 0, `adequacy` = 그 발생의 OBS_ADEQUACY 레코드, `identity_first`/`n_identities` = 그 발생의 정체성 |
 | MODEL_IDS | 한 레코드. 관측 결과이므로 `sigma` = `sigma_E`, 모델·스케줄 프로필 없음(`model_id`·`schedule_profile_id` 빈 문자열, `model_level` unset), `basis_id` = 실행의 basis 해시(hex), `profile_id` = 해석 프로필 해시(hex). `scope_id` 는 비운다(재생이 세우지 않음) |
-| OBS_ADEQUACY | 발생마다. `established` = 조건이 읽은 것에 대해 기록이 세운 적합성, `absent` = 0, `reasons` = 발생의 보류 사유, `start_evidence`, 판정 구간(재생 trace 의 사건 위치: 호출부터 결정 또는 반환까지), 그 구간과 겹치는 손실 구간 수, `end_reason`(결정 / 손실 / 프로세스 종료 / 기록 끝). `probes` 는 null, `unobserved` 는 빈 문자열(이 writer 가 아직 쓰지 않음; "없음"이 아니라 "기록 안 함") |
+| OBS_ADEQUACY | 발생마다. `established` = 조건이 읽은 것에 대해 기록이 세운 적합성, `absent` = 0, `reasons` = 발생의 보류 사유, `start_evidence`, 판정 구간(재생 trace 의 사건 위치: 호출부터 결정 또는 반환까지), 그 구간과 겹치는 손실 구간 수, `end_reason`(결정 / 손실 / 프로세스 종료 / 기록 끝). `probes` = 그 발생의 조건이 기대는 부모 SITES 의 목록(REF_LISTS 안, 아래), 목록이 비거나 부모가 없으면 null. `unobserved` = 관측되지 않은 조건 지점·writer 효과(`OP.label`)와 정적 닫힘의 관측되지 않은 writer·별칭 위치(`<종류|위치>: …`), 닫힘을 주지 않았으면 `<종류|위치>: static closure not given`, `;` 로 구분(2026-10-24 R2 잔여; 그 전의 컨테이너는 null 과 빈 문자열 = "기록 안 함") |
+| REF_LISTS | (2026-10-24 R2 잔여) `probes` 의 목록들. 목록 하나는 부모 실행 컨테이너의 SITES 를 가리키는 참조(`artifact_sha256` = 실행 컨테이너 해시, `section` = SITES, `index` = 사이트 id)가 이어지고 **null 참조로 끝난다**. 같은 목록은 한 번만 쓴다. 실행 컨테이너의 사이트는 기록 전체에 걸쳐 붙어 있고 활성이었다(붙이지 못하면 관측기가 실행을 실패시킨다) |
 | IDENTITIES | 발생마다 사용의 실행 task 가 먼저(전달된 식별자 `passed_id`·`passed_role` 포함), 이어서 실행 관계가 쓴 등록·게시 행위자. 각 레코드는 네 범주를 따로 적는다: 실행 task(tid·세대, `exec-known`), 생성 실행자(tid 를 알면 `creator-known`; 이름만 알면 이름만), 소유 앱(레코드 키·수준·근거·이름), 전달 식별자 |
 | ACTOR_OWNERS | 실행 컨테이너의 것을 그대로 복사한다(문자열만 다시 넣음). **`thread`, `creator_thread`, `creation_event` 는 부모 실행 컨테이너의 THREADS·RAW_EVENTS 인덱스이다.** 이전 컨테이너(ACTOR_OWNERS 없음)를 재생하면 이 섹션도 없다 |
-| BASIS | 호출자가 준 재생 입력: `replay.mode`, `replay.outcome_narrowing`(P1 의 현행 `on` / 대안 `off`), `replay.const.<이름>`, `replay.version.<성분>`, `replay.predicate`, `replay.core_request_caller`. policy 는 `unset` 이다. 값만 기록하며 그 출처는 호출자가 밝힌다(이 writer 는 확인하지 않는다) |
+| BASIS | 호출자가 준 재생 입력: `replay.mode`, `replay.outcome_narrowing`(P1 의 현행 `on` / 대안 `off`), `replay.const.<이름>`, `replay.version.<성분>`, `replay.predicate`, `replay.core_request_caller`, `replay.facts.sha256`·`replay.static_basis.sha256`(정적 닫힘을 줬을 때). policy 는 `unset` 이다. 값만 기록하며 그 출처는 호출자가 밝힌다(이 writer 는 확인하지 않는다) |
 
 `kz-dump` 가 이 컨테이너를 다른 컨테이너와 같은 정규 dump 로 읽는다 [M: v153 pilot 재생 출력, `test_trace_replay_out` 의 dump 검사].

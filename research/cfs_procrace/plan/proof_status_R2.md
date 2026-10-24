@@ -237,6 +237,8 @@ L-DPOR, L-DEAD, L-REF, L-PRED, L-LOOP, L2, L3: 인증서 경로가 진행 결과
 | `sb.appid.store` (2) | `cfe_sb_task.c:138` | 호출 직후(142 줄) | SB 의 `CFE_ES_GetAppID` 반환(저장 시각의 상한). 라벨이 Φ 지점 이름이 아니어서 재생에는 대응되지 않는다 | L-DERIVE 의 셀 writer `x` (개수 비교용) |
 | `es.start_task.entry/ret` (21, 22) | `cfe_es_apps.c:649-670`, 넘기는 쪽 `cfe_es_start.c:810-814`, `cfe_es_apps.c:849-854` | 함수 진입(`r8` = `ParentAppId`), 복귀 | 생성 요청과 그것이 지정한 앱 | `app_owner` (생성 요청), K-ID 의 `owner(exec)` 키 |
 | `es.child_task.entry/ret` (23, 24) | `cfe_es_api.c:1202-1208`, `:1255-1290` | 함수 진입, 복귀 | 자식 task 요청(앱 = 요청한 task 의 앱). 안에 겹친 `ParentAppId` 는 App 표 조회값이라 쓰지 않음 | `app_owner` (`creator-owner`, EV-03) |
+| `sb_publication` (26, R2 잔여) | `cfe_sb_task.c:138` (사이트 2 와 같은 명령) | 호출 직후 `0x34129` | 프로필의 게시 사이트 `sb_publication`(`arg[0] is addr(CFE_SB_Global_t.AppId)`): 실행 thread 가 이 호출로 `CFE_SB_Global.AppId` 를 썼다는 사실(값은 읽지 않음) | 실행 관계에서 포획한 위치의 writer; 정적 out-pointer writer 둘(`cfe_es_api.c:754`, `:759` 경유)의 관측 지점 |
+| `CFE_EVS_SendEventWithAppID.id_valid@sb_api_275`, `@sb_api_1183`, `@sb_priv_786` (27–29, R2 잔여) | `cfe_sb_api.c:275-277`, `:1183-1185`, `cfe_sb_priv.c:786` (해시 일치) | `call CFE_EVS_SendEventWithAppID` 명령 자체(`at-call`) `0x2f62e`, `0x309da`, `0x32e42` | `id_valid` 의 포획: `rdx` = 넘기는 AppID, 역할 `value(CFE_SB_Global.AppId)`(정적 derives hops 0: `core_cpu1.golden` 503·525·532행) | `id_valid: valid(arg.AppID)` (capture), 전달 값의 위치 `cell` |
 | `osal.task_create.id` (25) | `os-impl-tasks.c:457-462`, `:596-625`; 같은 값이 출력 인자에 쓰임 `osapi-idmap.c:838-873` | `OS_Posix_InternalTaskCreate_Impl` 진입(`r9` 하위 4바이트) | 생성 호출이 배정한 OSAL id | 자식의 `OS_TaskEntryPoint(task_id)`(사이트 7)와 대조 → `confirmed` |
 
 **포괄의 빈 곳** [F/I]. 이 표로 상태를 읽는 조건이 바로 풀리지는 않는다.
@@ -245,3 +247,4 @@ L-DPOR, L-DEAD, L-REF, L-PRED, L-LOOP, L2, L3: 인증서 경로가 진행 결과
 - **효과 값.** `lp.slot`, `lp.pending_id`, `lp.required` 를 S1 백엔드가 읽지 못한다. 그래서 효과의 대상이 정해지지 않는다.
 - **행위자 사이 순서.** 다른 thread 가 쓴 등록을 읽는 사용에는 행위자 사이 순서가 필요하다. 재생은 병합 순서를 실행 순서로 쓰지 않는다(W1). 그래서 등록 조건의 값은 보류된다(`effect_unsupported`, `resource_or_lifetime_unmatched`). SPEC App. A.1 의 "registry LP 와 register 효과를 계획에 넣으면 READY" 는 writer 포괄과 순서가 세워진 뒤의 기대로 읽는다.
 - **실행 결과.** 이 표로 처음 돈 실행은 pilot/dev 기록이다(`kairos/docs/r2_pilot_v153.md`).
+- **정적 닫힘과 대조 (R2 잔여, 2026-10-24)** [M: `kairos/docs/r2_pilot_v153.md` §8.4]. kz-static facts 를 재생에 주면 묶인 필드 6개 모두 `writer-set-complete`(A-TYPE 0)라 별칭 포괄은 선다. writer 포괄은 서지 않는다: `EVS_AppData_t.AppID` 4 중 2(EarlyInit memset `cfe_evs_task.c:63`, CleanUpApp 의 SetFree `cfe_evs_utils.h:150` 미관측), `CFE_SB_Global_t.AppId` 3 중 2(SB EarlyInit memset `cfe_sb_init.c:50` 미관측), App 레코드 필드 일부. 위 "빈 곳"의 진단과 같은 목록이 이제 도구 출력(`unobserved`)으로 나온다.

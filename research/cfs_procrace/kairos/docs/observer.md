@@ -83,7 +83,7 @@ kz hits <run.kzt> [--site 라벨 --before 라벨] [--group-slot 역할] [--group
 ```
 kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]... [--predicate R=E]...
           [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off] [--compare-narrowing]
-          [--out <file.kz>] [--emit-trace]
+          [--facts <facts.kz> --static-basis <basis.kz>] [--out <file.kz>] [--emit-trace]
 ```
 
 실행 컨테이너를 Φ 프로필의 **실제 기록 trace** 로 바꾸고(`include/kz/trace/real_trace.hpp`), 재생 엔진의 실제 기록 모드(`docs/phi_reference.md` §7.6)로 재생해 발생마다 상태, 요약 뷰(`OBSERVED_VIOLATION` / `NO_VIOLATION_IN_CHECKED_PREFIX` / `INCONCLUSIVE(사유)`), 적합성, 정체성을 낸다. `--emit-trace` 는 재생 대신 trace text 를 낸다(`kz-phi replay` 로 다시 읽힌다). 어댑터가 세우는 것과 세우지 않는 것:
@@ -95,7 +95,9 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 | 행위자 | thread 생애마다 하나(커널 이름; 겹치면 tid·세대를 붙임; 이름 없으면 `tid<N>`). 생성 실행자 = FORK 의 부모 thread | THREADS |
 | 관측 지점 | 대응된 POINT 사이트의 이름 | SITES |
 | 시작 상태 | 첫 사건보다 이르거나 같은 MAPS(대상 파일의 첫 실행 mapping)가 있으면 프로세스 시작부터의 기록: `start_evidence init`, 모든 종류·위치 `start=known` | INIT, IN-03 |
-| writer·별칭 포괄, 수명 | **세우지 않는다**(계획의 추적표와 닫힘이 필요: SPEC §4.7, §4.1). 그래서 기록된 쓰기는 어떤 종류도 고정하지 않는다 | ADR-055 |
+| writer·별칭 포괄, 수명 | 수명은 **세우지 않는다**. writer·별칭 포괄은 `--facts`(kz-static 의 닫힘)가 있을 때만 아래 "정적 닫힘" 규칙으로 세우고, 없으면 세우지 않는다(SPEC §4.7, §4.1). 수명이 없으므로 기록된 쓰기는 어떤 종류도 고정하지 않는다 | ADR-055 |
+| 포획 사이트 (2026-10-24, R2 잔여) | 라벨이 `P@Q` 이고 P 가 프로필의 포획 지점 이름(`lp capture` 조건의 `OP.LABEL`)이면 지점 P 로 대응한다. Q 는 호출 지점을 구분할 뿐이다(계획 라벨은 하나뿐이어야 한다). 포획은 호출마다이므로 일부 호출 지점만 붙여도 된다: 포획 사건이 없는 호출은 호출에서 읽는다 | `real_trace.hpp` "capture sites" |
+| 읽은 위치 (같음) | 슬롯 역할이 `value(L)` 이면 `value` 와 텍스트 `cell` = L(프로필의 위치)을 준다. 값이 그 위치에서 읽혔다는 것은 계획이 소스 줄과 정적 derives 로 진술한다 | `real_trace.hpp` "cells" |
 | 손실 | RUNMETA `loss-present`·LOSS 를 손실 구간으로: throttle 은 그 시작부터, lost-records 보고는 기록 처음부터(언제 버려졌는지 커널이 말하지 않음) 보고 시각까지, 기록 없는 손실은 전체. RUNMETA 가 없으면 손실 증거가 없는 것이므로 전체를 손실로 본다 | §7 |
 | 소유 앱 | ACTOR_OWNERS(스키마 개정 2)의 수준과 앱 id. 앱 id 는 소유 kind 의 id 규칙과 표 크기(`--const`)로 레코드 키가 된다(W2). 레코드가 없는 thread, 이전 컨테이너의 모든 thread, 키가 없거나 id 규칙이 거부하는 기록은 `undetermined`(줄을 쓰지 않음 → 재생은 소유자를 모름으로 보고 `ownership_undetermined`; "소유자 없음"으로 읽지 않는다). 보고에 thread 마다 생성 실행자·수준·id·근거를 적는다 | ADR-056 |
 | 상수 | 컨테이너에 `ref eval` 상수의 값이 없다: `--const` 로, 각각 출처에서 가져온 값을 준다(CONDITIONS_POLICY). 없으면 재생이 표 크기를 요구하며 거부한다 | — |
@@ -107,6 +109,8 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 | 손실의 task 귀속 | 하지 않는다: LOSS 의 `cpu` 는 기록을 버린 ring 이지만 사건에 CPU 가 없고 문맥 전환 기록도 없다. 보고에 손실마다 CPU ring 과 개수를 적는다 | §7 |
 
 **선택 사항(2026-10-24, W2 잔여)** [D]. `--outcome-narrowing off` 는 PI 결정 P1 의 대안(반환 코드가 열린 조건을 고정하지 않음)으로 재생한다. 기본은 `on`(현행)이다. `--compare-narrowing` 은 다른 쪽으로도 재생해 두 읽기의 요약 개수(관측, 관계, 관계×관측)를 나란히 쓰고, 요약이 달라진 발생 수를 적는다. 본 출력은 선택한 쪽이다. 출력 끝에는 항상 `summary counts` 가 붙는다. `--out` 은 선택한 쪽의 요약·모델 id·적합성·정체성과 ACTOR_OWNERS 를 컨테이너에 쓴다(`docs/schema.md` §11). 발생마다 `relation` 줄이 붙는다(`docs/phi_reference.md` §7.6).
+
+**정적 닫힘과 관측 목록 (2026-10-24, R2 잔여)** [D][M: `test_trace_static_closure`]. `--facts` 는 추적한 바이너리의 kz-static FACTS 컨테이너, `--static-basis` 는 그 부모 basis 이다. 둘은 `--basis` 와 함께만 받는다: static basis 의 `binary.sha256` 이 실행 basis 의 것과 같고, facts 의 profile 해시가 재생 프로필의 해시와 같아야 하며, 아니면 거부한다(종료 2). 어댑터(`include/kz/trace/static_closure.hpp`)는 종류·위치마다 프로필이 묶은 필드(`bind field`)의 FACT_LOCS 상태, WRITERS, FACT_ATYPE 를 읽어 **두 항목만** 세운다: `aliases_covered` = 묶인 필드가 모두 닫힘의 대상이고 상태가 `writer-set-complete`(A-TYPE 0; G1–G4 가정 위, `docs/static_facts.md` §8); `writers_covered` = 그에 더해 모든 정적 writer 가 기록이 관측한 지점에 있다 — 그 writer 의 파일·줄에 붙은 점 사이트이고 그 지점의 프로필 효과가 같은 성분을 쓴다(상태 필드는 그 종류의 lifecycle·raise, 태그는 settag, id 는 `id` 가 있는 효과, 값 필드는 그 위치로의 저장이나 그 위치의 게시 사이트), 또는 writer 가 든 함수의 **직접 호출이 모두**(몇 단계 위까지) 그런 지점에 있다. 간접 호출의 대상이거나 직접 호출이 없는 함수의 writer, 그리고 다른 성분만 쓰는 지점은 덮지 않는다. out-pointer writer 는 호출 지점으로 맞춘다. 나머지 ADR-055 조건(시작 상태, 수명, 프로필 writer 효과 지점의 관측, 손실 없음)은 재생이 그대로 요구한다. 덮지 못한 writer·별칭 위치는 종류·위치마다 목록으로 남고(`real record knowledge` 의 `static closure:` 줄), 발생마다 그 조건이 읽은 종류·위치의 것이 `unobserved` 에 들어간다. 발생의 `probes` 는 기록이 관측한 것(연산의 호출·반환, 조건 지점, 쓰인 포획, 읽은 종류·위치의 writer 효과 지점과 게시 사이트)이고, `--out` 컨테이너에서는 부모 SITES 를 가리키는 REF_LISTS 목록이 된다(`docs/schema.md` §11). 출력 BASIS 에 `replay.facts.sha256`, `replay.static_basis.sha256` 이 붙는다.
 
 **S1-R2 개발 실행 컨테이너에 적용한 결과** [M] (개발 기록이며 본 실험 결과가 아니다; `env/logs/s1r2_p1.kzt`, 상수 `CFE_PLATFORM_ES_MAX_APPLICATIONS` 는 고정 소스의 추출 golden `tests/static/data/core_cpu1.golden:44` 의 값): 발생 271개 중 `OBSERVED_VIOLATION` 24개(전달된 id 인자 0, 인자만으로 결정; 소유 앱 `undetermined`), `INCONCLUSIVE` 247개(사유 `resource_or_lifetime_unmatched`, `effect_point_ambiguous`, `effect_unsupported`, `not_evaluated`: 등록 writer 와 등록 조건의 지점이 계획에 없음), `NO_VIOLATION_IN_CHECKED_PREFIX` 0개, 입력 오류 0개. SPEC App. A.1 의 기대 결과와 같은 갈래이다. 같은 컨테이너의 파생 기록 71개(사이트 하나 제거, 손실을 선언한 사건 묶음 삭제, 흩어진 삭제(선언·무선언), 늦은 시작)에서 원래보다 결정적인 결과는 0개였다(`test_realrecord_derived`). 이 개수는 분석기의 불완전 정보 처리 시험이며 프로그램에 대한 증거가 아니다.
 
@@ -126,7 +130,7 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 kzp-observe 1
 binary <이름>
 prov <id> tier=<층> kind=<종류> [side=<면>] file="<경로>" lines=A-B cite="<문구>" [authored="<문구>"] [root=<이름>] [sha256=<64 hex>]
-site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파일 접미어>:<줄> (after-call=<기호> | line-start)
+site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파일 접미어>:<줄> (after-call=<기호> | at-call=<기호> | line-start)
      | func=<기호> after-call=<기호> | func=<기호> enter=<함수>[><함수>…]
      [decoder=generic|spawn-create|spawn-return|thread-entry|owner-request|child-request|request-return|spawn-id]
      [prov=<id>] [s0..s3=<원천>:<너비>:<역할>]
@@ -147,13 +151,16 @@ site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파�
 
 역할 이름 `entry_fn`, `priority`, `return_address` 는 값이 무엇인지를 말할 뿐 프레임워크의 이름이 아니다(`decode_sites.hpp`). 이 프로필 형식은 준비 상태 명세용 프로필 언어(Φ, `profiles/cfs-v7.0.1/*.kzp` 의 `phi 1;` 파일)가 **아니다**. 같은 사실을 검사기는 Φ 로, 프로브는 이 파일로 따로 갖고 있다. 둘을 하나로 합치는 일은 하지 않았다 [I].
 
-cFS v7.0.1 의 계획은 `profiles/cfs-v7.0.1/observe/sites.kzp` 이다. **W2(2026-10-24)에 26개로 늘었다**: 0–7 은 아래의 s1r2_p1 계획 그대로(번호 유지), 8–20 은 X-03 등록·writer 지점(EVS 등록의 지우기·게시, 전송 함수의 등록 검사 지점, AppState 올림 `cfe_es_api.c:573`, ES 전역 memset `cfe_es_start.c:82`, 예약 `:803`, 게시 `:818`, 실패 지우기 `:823`), 21–25 는 `app_owner` 생성 측 근거(§9). 지점 사이트의 라벨은 Φ 프로필의 지점 이름(`OP.LABEL` 또는 공유 사이트 이름)이어서 `kz replay` 가 그대로 대응시킨다. 사이트와 줄·효과·조건의 추적표는 `plan/proof_status_R2.md` §12, 인용 33개는 고정 트리에서 모두 해시가 일치했다(`kz anchor`) [M]. 처음 계획의 사이트 여덟 개: 이벤트 전송 함수의 진입·복귀, SB task 의 AppId 저장 직후, 시작 동기화 함수의 진입·복귀, task 생성의 진입·복귀, 새 task 의 첫 함수(진입). 인용한 줄과 해시는 파일 안에 있고, 이번 실행에서 모두 원문과 일치했다(8개 검증) [M]. SPEC §9.3 S1-R2 에 이 사이트들이 속한다는 진술은 `researcher` 층으로 기록했고, SPEC 이 개정 중이므로 해시하지 않았다.
+슬롯 역할 `value(L)` 은 그 값이 프로필의 위치 L 에서 읽혔다는 진술이다(`kz replay` 의 `cell`). 포획 지점의 라벨 `P@Q` 는 §3.4 를 본다.
+
+cFS v7.0.1 의 계획은 `profiles/cfs-v7.0.1/observe/sites.kzp` 이다. **R2 잔여(2026-10-24)에 30개**: 26 `sb_publication`(사이트 2 와 같은 명령, 프로필의 게시 사이트 이름), 27–29 `CFE_EVS_SendEventWithAppID.id_valid@…`(SB 가 `CFE_SB_Global.AppId` 를 넘기는 호출 지점 셋 `cfe_sb_api.c:275`, `:1183`, `cfe_sb_priv.c:786` 의 `at-call`, `rdx` = AppID, 역할 `value(CFE_SB_Global.AppId)`; 인용 36개 해시 일치 [M]). **W2(2026-10-24)에 26개로 늘었다**: 0–7 은 아래의 s1r2_p1 계획 그대로(번호 유지), 8–20 은 X-03 등록·writer 지점(EVS 등록의 지우기·게시, 전송 함수의 등록 검사 지점, AppState 올림 `cfe_es_api.c:573`, ES 전역 memset `cfe_es_start.c:82`, 예약 `:803`, 게시 `:818`, 실패 지우기 `:823`), 21–25 는 `app_owner` 생성 측 근거(§9). 지점 사이트의 라벨은 Φ 프로필의 지점 이름(`OP.LABEL` 또는 공유 사이트 이름)이어서 `kz replay` 가 그대로 대응시킨다. 사이트와 줄·효과·조건의 추적표는 `plan/proof_status_R2.md` §12, 인용 33개는 고정 트리에서 모두 해시가 일치했다(`kz anchor`) [M]. 처음 계획의 사이트 여덟 개: 이벤트 전송 함수의 진입·복귀, SB task 의 AppId 저장 직후, 시작 동기화 함수의 진입·복귀, task 생성의 진입·복귀, 새 task 의 첫 함수(진입). 인용한 줄과 해시는 파일 안에 있고, 이번 실행에서 모두 원문과 일치했다(8개 검증) [M]. SPEC §9.3 S1-R2 에 이 사이트들이 속한다는 진술은 `researcher` 층으로 기록했고, SPEC 이 개정 중이므로 해시하지 않았다.
 
 ## 5. 앵커
 
 - **함수 진입**: 함수가 `endbr64` 로 시작하면 그 4바이트 뒤, 아니면 첫 바이트. gcc `-O0` 의 함수는 `endbr64; push %rbp; mov %rsp,%rbp` 로 시작하므로 프로브는 `push %rbp`(진입+4)에 놓인다. 거기서는 인자 레지스터가 그대로이고 스택 꼭대기가 반환 주소이다. 복귀 프로브는 같은 주소를 쓴다(uretprobe).
 - **비용 부류**: 진입+4 의 `push %rbp` 는 `emulated`(커널이 명령을 직접 흉내 낸다)로 분류한다. 이 분류는 SPEC 이 인용하는 측정 [R07 §4.7]에 근거한 **표시**이다. 이번 구현은 어떤 비용도 새로 재지 않았다. 나머지는 `unknown`.
 - **소스 줄 직후** (`point ... after-call=`): 줄의 기계어를 DWARF 줄 표에서 구한 뒤, 줄의 **마지막 명령이 지정한 함수로의 `call rel32`** 일 때만 그 다음 명령을 앵커로 삼는다. 호출이 마지막 명령이 아니거나, 같은 줄에 조건에 맞는 호출이 둘 이상이면 거부한다. 추측하지 않는다 [D]. W2 보강: (a) 줄 표의 행 경계(예: gcc 가 조건 안 호출 뒤에 시작하는 discriminator 행)도 명령 경계로 인정한다, (b) 공유 라이브러리 함수(`memset`)의 호출은 PLT 스텁 호출로 찾는다(`.rela.plt` 와 `.plt.sec`), (c) 반환 지점이 함수 안의 직접 분기 대상이면(여러 경로의 합류: 호출하지 않은 경로에서도 발화) 거부한다. 분기 검사는 함수의 모든 바이트 위치를 jmp/jcc 로 읽으므로 직접 분기를 놓치지 않고, 잘못 읽은 바이트는 좋은 사이트를 거부할 수만 있다(보수적). 간접 점프는 보지 못한다.
+- **호출 명령 자체** (`point ... at-call=`, 2026-10-24 R2 잔여): 줄의 기계어 안에서 지정한 함수로의 `call rel32` 의 첫 바이트. 인자 레지스터가 호출이 넘기는 값을 담고 호출은 아직 실행되지 않았다: 호출자가 읽어 넘기는 값의 포획 지점(SPEC §1.4 `lp capture`)이다. 스택 인자를 호출 뒤 같은 줄에서 걷으므로 호출이 줄의 끝이 아닐 수 있다. 그래서 줄의 모든 바이트 위치를 `call rel32` 로 읽고(선 표 없는 경우와 같은 방식) **정확히 하나**일 때만 받는다(둘 이상이면 거부, 고르지 않음). 함수 안의 직접 분기가 그 호출 명령에 닿으면(인자 레지스터가 다른 경로에서 왔을 수 있음) 거부한다. 대상 종류 `at-call`(KZ_TARGET_KIND 5). 실행 뒤 `--xcheck` 출력에서 프로브 명령이 `call <함수>` 임을 확인한다 [M: v153_pilot2 사이트 27–29].
 - **줄 시작** (`point ... line-start`, W2): 줄의 기계어가 한 함수 안의 연속된 한 덩어리일 때 그 첫 명령. 문장이 실행되기 **직전**에 발화한다. 호출이 없는 저장(`cfe_es_api.c:573`)과, 반환 지점이 합류점이라 (c)로 거부된 호출 줄(`cfe_evs.c:106`, `cfe_es_start.c:823`)에 쓴다. 저장되는 값은 레지스터에 있지만 ABI 가 정한 위치가 아니므로 읽지 않는다.
 - 자체 ELF/DWARF 읽기를 쓴 이유: `tools/kz` 와 `libkz-core` 는 LLVM 을 링크할 수 없고, 필요한 것은 줄 표와 기호 표뿐이다. 읽기 코드는 gcc/clang 이 만든 DWARF 4·5 파일에서 `addr2line` 과 비교했고 [M], 합성 ELF 로 DWARF 2–5, 64비트 형식, 두 번역 단위, 시퀀스 순서, 거부 사례를 시험한다.
 - 실제 cFS 바이너리의 앵커 여덟 개: 2026-10-15 의 작업 세션에서 `objdump -d` 와 `addr2line` 으로 보았으나 **그 출력은 저장하지 않았다**. 그래서 이것은 재현할 수 있는 증거가 아니다 [I]. 간접 근거만 남아 있다: basis 에 기록된 프로브 주소의 첫 바이트가 진입 사이트 다섯 곳 모두 `55 48 89 e5`(`push %rbp; mov %rsp,%rbp`)이고 함수 안 거리가 4(=`endbr64` 다음), 줄 사이트의 대상은 `addr2line` 기준 142 줄로 기준 gdb 실행의 `SB_PUB` 중단점(`cfe_sb_task.c:142`)과 같은 줄이며, 반환 주소로 찾은 호출 함수가 기준과 같았다(`observer_smoke_run.md` §5). 이제 `probe/scripts/observe_cfs_smoke.sh` 가 실행 **뒤에** 같은 basis 의 사이트마다 `addr2line -f -i -a` 와 `objdump -d --disassemble=<함수>` 의 해당 줄 앞뒤를 `<tag>_anchor_xcheck.txt` 로 남기고, 같은 단계(`--xcheck`)를 시험 `probe_anchor_xcheck_script` 가 목적 제작 프로그램에서 확인한다 [M]. cFS 바이너리에 대한 저장된 교차 확인은 다음 실행에서 처음 생긴다.
@@ -283,10 +290,11 @@ observe_cfs_smoke.sh --xcheck ...   # 실행 뒤: 앵커의 addr2line·objdump �
 | `test_trace_decode_merge` | CPU 사이 병합 순서, 적재 편향, 손실·throttle 기록, 추적 대상 선별 |
 | `test_trace_identity` | 생성 관계, 구간 포함, 모호, 알린 id, 이름, tid 재사용, `match-by-time`·`id-unverified` 표시, 디코더 슬롯을 선언하지 않은 사이트의 거부, TRUNC 사건을 열쇠·id 로 쓰지 않음 |
 | `test_trace_symbols` | 기호 조회와 별칭 선택 |
-| `test_probe_elf_dwarf` | ELF/DWARF 읽기(DWARF 2–5, 64비트, 두 번역 단위, 거부 사례)와 앵커 해석기의 거부 사례(모호함, 호출이 줄의 마지막이 아님) |
+| `test_probe_elf_dwarf` | ELF/DWARF 읽기(DWARF 2–5, 64비트, 두 번역 단위, 거부 사례)와 앵커 해석기의 거부 사례(모호함, 호출이 줄의 마지막이 아님), `at-call`(호출 명령, 분기 합류 거부) |
 | `test_probe_anchor_compilers` | gcc/clang, DWARF 4/5 로 만든 같은 프로그램의 앵커. `addr2line` 이나 다른 컴파일러 빌드가 없으면 77 로 끝나 **건너뜀**으로 보고된다 |
 | `probe_anchor_xcheck_script` | `observe_cfs_smoke.sh --xcheck` 가 목적 제작 프로그램의 모든 사이트를 `addr2line`·`objdump` 로 찾고, 출력이 두 번 같음 |
-| `test_probe_profile` | 프로필 문법과 거부 사례(디코더 슬롯, 진입·복귀 짝의 열쇠 포함) |
+| `test_probe_profile` | 프로필 문법과 거부 사례(디코더 슬롯, 진입·복귀 짝의 열쇠, `at-call` 과 `value(L)` 역할 포함) |
+| `test_trace_static_closure` | 합성 실행·facts 컨테이너: `P@Q` 포획 사이트와 `value(L)` 슬롯, 게시 사이트가 지목한 writer 와의 실행 관계, 정적 닫힘(complete → 별칭 포괄, writer 가 모두 관측 지점일 때만 writer 포괄, 다른 성분만 쓰는 지점·관측 안 된 호출·대상 아닌 필드), 출력 컨테이너의 REF_LISTS `probes`(null 로 끝남)와 `unobserved` |
 | `test_probe_basis` | basis 만들기·읽기, 결정성, 출처 해시, 바이너리 검증의 거부 사례 |
 | `test_probe_record` | 조건 파일, `/proc` 읽기(읽은 수, `full`/`status` 모드), CPU 목록, 대상 실행 |
 | `test_probe_golden` | basis 와 실행 컨테이너의 정규 dump 와 artifact 해시(합성 입력; `tests/cfs-free/golden/`), PERTURBATION 의 복귀 행·`proc-capture` 행, 트랩 계수 규칙 |

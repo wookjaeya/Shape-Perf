@@ -94,6 +94,8 @@ basis 가 하는 일 [D]:
 3. **적재기 결합**: 모듈의 미정의 기호(member 의 미정의 − 정의) 중 적재 파일의 `.dynsym` 에 미정의로 남은 것을 실행 파일의 `.dynsym` 정의 → 그보다 먼저 적재된 global 라이브러리 순으로 찾는다(`module[x].bound[...]`, `.unbound`, `.resolved_by_its_link`). 시스템 라이브러리(DT_NEEDED)는 읽지 않으므로 `unbound` 는 "적재된 단위 중 내보내는 것이 없음"이다(`closure.binding_model`).
 4. **이름 결합 대조**: extract 는 합친 프로그램에서 외부 함수·객체를 이름으로 결합한다. 이것이 적재기 결합과 같으려면 (a) 닫힘 안의 두 단위가 같은 이름을 정의하지 않고, (b) 단위 사이 참조마다 적재기가 그 이름을 정의한 단위로 결합해야 한다. 어긋나면 deviation 으로 기록한다(`closure.duplicate_definitions`, `closure.name_binding`).
 
+**재생에서 쓰는 곳 (2026-10-24, R2 잔여)**: `kz replay --facts <facts.kz> --static-basis <basis.kz>` 가 FACT_LOCS·WRITERS·FACTS·FACT_ATYPE·CALL_TARGETS 를 읽어, 프로필이 묶은 필드가 모두 `writer-set-complete` 이면 별칭 포괄을, 그에 더해 모든 writer 가 기록의 관측 지점에 있으면 writer 포괄을 세운다(`include/kz/trace/static_closure.hpp`, `docs/observer.md` §3.4). 이 문서 §8 의 가정 G1–G4 가 그대로 따라간다.
+
 extract 쪽은 바뀌지 않는다: basis 의 번역 단위 표를 읽으므로 앱의 호출이 OSAL 본문의 out 포인터 요약으로 이어진다. 남은 차이: SPEC 의 IR 수준 link(bitcode)와 gcc `-fcallgraph-info` 대조는 하지 않았고, 표 객체(`.tbl` 대상)는 모듈 link 에 들어 있지 않아 따로 제외하지 않는다. C1 결과는 `plan/C1_build_manifest.md` §8.5 에 있다.
 
 ## 4. facts 컨테이너

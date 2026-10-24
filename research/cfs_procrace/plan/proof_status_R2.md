@@ -175,7 +175,7 @@ L-DPOR, L-DEAD, L-REF, L-PRED, L-LOOP, L2, L3: 인증서 경로가 진행 결과
 | EVS 4 | `SubscribeFull` 2, `CreatePipe` 1, `ReportSingleEvent` 1 | [M] §2 표 |
 | 17개의 `SEND_NO_SUBS`의 출처 | ES의 이벤트 패킷(MsgId 0x808)이 구독자 없이 전송됨 | [I] 이벤트 ID와 콘솔의 'No subscribers for MsgId 0x808'에서 추론 (§2). MsgId 귀속은 EVS 문맥의 1개에 대해 열려 있음 [U] |
 | 단위 | 원인 1개, 정적 호출 사이트 39개 중 실행된 5개와 위반 3개, 문맥 6개(task × SB 함수), 호출 문자열 12개, 부팅당 발생 24회, 실행 3회 | [M] `results/R2_gdb_v701.md` §6, §7 |
-| Kairos 자체 기록기의 재관측 | **미실행.** S1-R2 게이트: 사용별 집합(task, SB 함수, EID)이 [R2g §2]와, B에서 계산한 기대와 일치해야 하며 불일치는 조사하고 규칙을 맞추어 고치지 않는다 | 구현 전 |
+| Kairos 자체 기록기의 재관측 | **S1-R2 게이트는 미실행.** 게이트: 사용별 집합(task, SB 함수, EID)이 [R2g §2]와, B에서 계산한 기대와 일치해야 하며 불일치는 조사하고 규칙을 맞추어 고치지 않는다. 2026-10-24 pilot/dev 실행 1회(커널 v153, 사이트 26개): 24 = ES 20 + EVS 4, 함수별 2/4/18, EID별 2/4/18 로 같은 값. 요약 `OBSERVED_VIOLATION` 24, 실행 task 소유 앱 `confirmed`(`kairos/docs/r2_pilot_v153.md`) | [M] pilot 1회. 게이트의 고정 실행 묶음·반복 수는 PI 결정(D14) |
 | 이 관측과 증명의 관계 | 관측은 인증서를 반증할 수 있으나 증명하지 못한다. 관측이 하는 일은 (σ_U, M_impl) 셀의 도달 `proved`뿐이며 그것도 L-CONT (c)를 거친다 | |
 | 이번 표가 쓰지 않는 것 | 버전 테이블 유무에 따라 부팅당 횟수가 달라진다는 기록은 폐기된 도구에서만 측정한 것이어서 쓰지 않았다 | SPEC에는 그런 문장이 남아 있다. CORD 정리 단계가 처리한다 |
 

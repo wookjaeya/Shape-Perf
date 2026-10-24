@@ -158,7 +158,11 @@ ONLY_USED="$(comm -13 <(printf '%s\n' "${REF_NAMES}") <(printf '%s\n' "${USED_NA
 N_REF="$(printf '%s\n' "${REF_NAMES}" | grep -c .)"
 N_USED="$(printf '%s\n' "${USED_NAMES}" | grep -c .)"
 {
-    echo "# conditions of ${TAG}: declared by the caller of kz observe (run ordinal ${ORDINAL} of the S1-R2 functional check)"
+    if [ "${PURPOSE}" = pilot ]; then
+        echo "# conditions of ${TAG}: declared by the caller of kz observe (pilot/dev run, ordinal ${ORDINAL})"
+    else
+        echo "# conditions of ${TAG}: declared by the caller of kz observe (run ordinal ${ORDINAL} of the S1-R2 functional check)"
+    fi
     echo "item${T}cfs.mode${T}operational (env/run_cfs.sh: stop when the console shows CFE_ES_Main entering OPERATIONAL state)${T}from-reference"
     echo "item${T}cfs.stop${T}ci-es-restart-poweron (the bundle CI's ES restart command, RestartType 2; PI decision D3 on the stop method is open)${T}from-reference"
     echo "item${T}cfs.user${T}${CFS_NORMAL_USER} (run_cfs.sh drops to it with setpriv; README: run as a normal user)${T}from-reference"

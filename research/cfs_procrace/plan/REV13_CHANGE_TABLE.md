@@ -155,5 +155,5 @@
 | X-04–X-07 문서 | **적용** | `763a4ea` | C1 계획, proof_status_R2, observer_smoke_run(165→167 등), MIDREVIEW, C2 세 구성 |
 | X-01 스키마 | **적용** (2026-10-24, W1) | `79f827e` | 스키마 개정 2: 새 섹션만(SUMMARIES, MODEL_IDS, OBS_ADEQUACY, IDENTITIES, ACTOR_OWNERS), 기존 레이아웃·섹션 버전 그대로라 이전 컨테이너는 쓴 그대로 읽힘(`kairos/docs/schema.md` §10). `test_core_vocab` 갱신 |
 | X-02 재생 엔진 | **적용** (2026-10-24, W1) | `0bf8d6a`, `a5bf24f`, `fde25a7` | 실제 기록 모드(명시 선택; 모델 trace 와 golden 은 그대로), 미관측 = 미지, ADR-055 쓰기 조건, 행위자 사이 병합 순서 불신, D2 요약, 설명 집합 공집합 = 입력 오류, `.kzt` 어댑터 `kz replay`, 파생 기록 시험(`kairos/docs/phi_reference.md` §7.6, `observer.md` §3.4) |
-| X-03 `sites.kzp` | **미적용** | — | W2 |
+| X-03 `sites.kzp` | **적용** (2026-10-24, W2) | `e37e76c` | 사이트 8 → 26(X-03 등록·writer 13개, `app_owner` 생성 근거 5개). 줄 번호는 R2 빌드 트리에서 재확인(인용 33개 해시 일치). 추적표 `plan/proof_status_R2.md` §12. 앵커에 줄 시작·PLT·합류점 거부를 더했다. pilot/dev 실행 1회 `kairos/docs/r2_pilot_v153.md` |
 | 추가 정정(표에 없던 것) | **적용** | `763a4ea`, `d4f0b3e`, `08c37f7`, `33b9541` | SPEC의 C2 "2 × 2" 잔여 표현 전부를 세 구성으로, §3.9 QT-5 문구, §2.5 의무 적용 범위 메모, Architecture README rev 1.3, 깨진 링크·ADR 개수 |

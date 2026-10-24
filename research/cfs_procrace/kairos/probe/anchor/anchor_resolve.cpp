@@ -122,9 +122,22 @@ Status resolve_entry(const ElfImage& elf, const LineTable& lines, const std::str
   return Status::success();
 }
 
-Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line,
-                          const std::string& callee, ResolvedTarget* out) {
-  *out = ResolvedTarget();
+namespace {
+
+// The one `call rel32` of `callee` that ends a piece of the code of file_suffix:line (after-call and
+// at-call share it): its end (the return site), the column of its piece and the function holding it.
+struct LineCall {
+  uint64_t ret = 0;
+  uint32_t col = 0;
+  const ElfFunction* in = nullptr;
+  std::string file;
+};
+
+// `any_position`: the call may end anywhere in the line's code (at-call: the probe is the call's first byte,
+// read at every byte position as without a line table, and a unique match is required); otherwise it must end
+// at an instruction boundary the line table states (after-call: the probe is the byte after it).
+Status find_line_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, const std::string& callee, LineCall* out,
+                      bool any_position = false) {
   const std::string where = file_suffix + ":" + std::to_string(line);
   const std::vector<uint32_t> ids = lines.files_matching(file_suffix);
   if (ids.empty()) return Status::error(Err::Invalid, "no source file of the line table ends in " + file_suffix);
@@ -149,6 +162,10 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
     ends.push_back(r.end);
     for (const LineRow& row : lines.rows())
       if (!row.end_sequence && row.addr > r.begin && row.addr < r.end) ends.push_back(row.addr);
+    if (any_position) {
+      ends.clear();
+      for (uint64_t e = r.begin + 5; e <= r.end; ++e) ends.push_back(e);
+    }
     for (uint64_t end : ends) {
       if (end - r.begin < 5) continue;
       uint8_t ins[5];
@@ -164,11 +181,27 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
   cands.erase(std::unique(cands.begin(), cands.end(), [](const Cand& a, const Cand& b) { return a.ret == b.ret; }), cands.end());
   if (cands.empty())
     return Status::error(Err::Invalid, "the code of " + where + " has no call to " + callee +
-                                           " that ends at an instruction boundary of the line table (the end of the line's code or a row inside it)");
+                                           (any_position ? std::string() : std::string(" that ends at an instruction boundary of the line table (the end of the line's code or a row inside it)")));
   if (cands.size() > 1) return Status::error(Err::Invalid, std::to_string(cands.size()) + " calls to " + callee + " end the code of " + where);
-  const uint64_t ret = cands[0].ret;
-  const ElfFunction* in = elf.function_at(ret - 1);
-  if (in == nullptr) return Status::error(Err::Invalid, "the call at " + where + " is not inside a function symbol");
+  out->ret = cands[0].ret;
+  out->col = cands[0].col;
+  out->in = elf.function_at(out->ret - 1);
+  out->file = lines.files()[ranges.front().file];
+  if (out->in == nullptr) return Status::error(Err::Invalid, "the call at " + where + " is not inside a function symbol");
+  return Status::success();
+}
+
+}  // namespace
+
+Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line,
+                          const std::string& callee, ResolvedTarget* out) {
+  *out = ResolvedTarget();
+  const std::string where = file_suffix + ":" + std::to_string(line);
+  LineCall lc;
+  Status s = find_line_call(elf, lines, file_suffix, line, callee, &lc);
+  if (!s.ok()) return s;
+  const uint64_t ret = lc.ret;
+  const ElfFunction* in = lc.in;
   if (elf.function_at(ret) != in) return Status::error(Err::Invalid, "the call at " + where + " is the last instruction of " + in->name + ": no instruction follows it");
   // A return site that a direct branch also reaches is a join of paths (branch_to above).
   {
@@ -187,9 +220,44 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
   t.func_vaddr = in->vaddr;
   t.delta = static_cast<uint32_t>(ret - in->vaddr);
   t.line = line;
-  t.col = cands[0].col;
+  t.col = lc.col;
   t.func = in->name;
-  t.file = lines.files()[ranges.front().file];
+  t.file = lc.file;
+  fill_insn(elf, off, &t);
+  *out = t;
+  return Status::success();
+}
+
+Status resolve_at_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, const std::string& callee,
+                       ResolvedTarget* out) {
+  *out = ResolvedTarget();
+  const std::string where = file_suffix + ":" + std::to_string(line);
+  LineCall lc;
+  Status s = find_line_call(elf, lines, file_suffix, line, callee, &lc, true);
+  if (!s.ok()) return s;
+  const uint64_t at = lc.ret - 5;  // the `call rel32` itself
+  if (elf.function_at(at) != lc.in) return Status::error(Err::Invalid, "the call at " + where + " does not lie inside one function");
+  // A call instruction that a direct branch also reaches is a join: the argument registers could have
+  // been set on another path than the line's own code (where the argument was read).
+  {
+    const int64_t p = branch_to(elf, *lc.in, at);
+    if (p >= 0)
+      return Status::error(Err::Invalid, "the call at " + where + " is also reached by a branch (at function offset " + std::to_string(p) +
+                                             "): its argument registers may come from another path");
+  }
+  uint64_t off = 0;
+  if (!elf.vaddr_to_offset(at, &off)) return Status::error(Err::Invalid, "the call of " + where + " is not in file-backed code");
+  ResolvedTarget t;
+  t.kind = KZ_TARGET_KIND_AT_CALL;
+  t.insn_class = KZ_INSN_CLASS_UNKNOWN;
+  t.vaddr = at;
+  t.file_offset = off;
+  t.func_vaddr = lc.in->vaddr;
+  t.delta = static_cast<uint32_t>(at - lc.in->vaddr);
+  t.line = line;
+  t.col = lc.col;
+  t.func = lc.in->name;
+  t.file = lc.file;
   fill_insn(elf, off, &t);
   *out = t;
   return Status::success();

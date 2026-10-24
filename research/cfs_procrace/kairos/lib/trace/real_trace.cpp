@@ -123,6 +123,10 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
     if (op.terminal.present && op.terminal.process_terminal && op.terminal.after.present) point_names[eval::terminal_name(op)];
   }
   for (const phi::SiteDecl& sd : p.sites) point_names[sd.name];
+  std::set<std::string> capture_points;
+  for (const phi::OpDecl& op : p.ops)
+    for (const phi::ConjunctDecl& c : op.conjuncts)
+      if (c.lp.kind == phi::LpKind::Capture) capture_points.insert(eval::lp_name(op, c.label, c.lp));
 
   // ---- the sites ----
   std::vector<SiteMap> site_map(sites.size());
@@ -144,7 +148,14 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       m.kind = MapKind::Point;
       m.name = labels[i];
       out->observed_points.insert(labels[i]);
+    } else if (sites[i].kind == KZ_SITE_KIND_POINT_PROBE && labels[i].find('@') != std::string::npos &&
+               capture_points.count(labels[i].substr(0, labels[i].find('@'))) != 0) {
+      // one of several call sites of a capture point (header, "capture sites")
+      m.kind = MapKind::Point;
+      m.name = labels[i].substr(0, labels[i].find('@'));
+      out->observed_points.insert(m.name);
     }
+    report->site_map.push_back(SiteMapEntry{static_cast<uint32_t>(i), static_cast<uint8_t>(m.kind == MapKind::Call ? 1 : m.kind == MapKind::Return ? 2 : m.kind == MapKind::Point ? 3 : 0), m.name});
     switch (m.kind) {
       case MapKind::Call: report->sites.push_back(labels[i] + ": call of " + m.name); break;
       case MapKind::Return: report->sites.push_back(labels[i] + ": return of " + m.name); break;
@@ -356,6 +367,16 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
           if (!is_text) te.values["value"] = v;
           continue;
         }
+        // `value(L)`: the value loaded from the location L (header, "cells")
+        const std::string& raw = r->second;
+        if (raw.size() > 7 && raw.compare(0, 6, "value(") == 0 && raw.back() == ')') {
+          if (!is_text) {
+            te.values["value"] = v;
+            te.texts["cell"] = raw.substr(6, raw.size() - 7);
+            ++report->cell_values;
+          }
+          continue;
+        }
         const auto& names = point_names[m.name];
         const auto it = names.find(key);
         if (it != names.end()) {
@@ -429,6 +450,24 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       a.start_known = true;
       out->loc_adequacy[l.name] = a;
     }
+  }
+
+  // ---- the static closure (header, "closure") ----
+  if (opt.facts != nullptr) {
+    std::vector<ObservedSite> obs;
+    for (size_t i = 0; i < sites.size(); ++i) {
+      if (site_map[i].kind != MapKind::Point) continue;
+      ObservedSite o;
+      o.point = site_map[i].name;
+      run.string(sites[i].source, &o.file);
+      o.line = sites[i].line;
+      obs.push_back(std::move(o));
+    }
+    ClosureReport cr;
+    s = apply_static_closure(*opt.facts, p, obs, out, &cr);
+    if (!s.ok()) return s;
+    report->closure_given = true;
+    report->closure_lines = cr.lines;
   }
 
   // ---- losses ----
@@ -516,7 +555,13 @@ std::string report_text(const RealTraceReport& r) {
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
   for (const auto& lc : r.loss_cpus)
     out += "loss report: CPU ring " + std::to_string(lc.first) + ", " + std::to_string(lc.second) + " record(s); the task whose events were lost is not established\n";
-  out += "writer and alias coverage, lifetimes, order between actors: not established by a run container\n";
+  if (r.cell_values != 0) out += "values loaded from a named location (value(L) slots) " + std::to_string(r.cell_values) + "\n";
+  if (r.closure_given) {
+    for (const std::string& l : r.closure_lines) out += l + "\n";
+    out += "lifetimes, order between actors: not established by a run container; writer and alias coverage: from the static closure above\n";
+  } else {
+    out += "writer and alias coverage, lifetimes, order between actors: not established by a run container (no static closure given)\n";
+  }
   return out;
 }
 

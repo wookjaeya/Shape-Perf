@@ -1,6 +1,6 @@
 // anchor_resolve.hpp -- from a symbolic probe target to a file offset in the traced binary.
 //
-// Three kinds of target exist (KZ_TARGET_KIND):
+// Five kinds of target exist (KZ_TARGET_KIND):
 //   func-entry   the first instruction after the function's entry marker.  A gcc -O0 function
 //                starts `endbr64; push %rbp; mov %rsp,%rbp`; the probe goes on the push (entry
 //                + 4), where the argument registers still hold the arguments and the top of the
@@ -19,6 +19,14 @@
 //                (memset) counts as a call of that function.
 //                Without a line table, `resolve_call_in_function` finds the one call of the callee
 //                inside a named function instead (same refusals; line 0).
+//   at-call      the `call rel32` instruction itself of a call of a named function at a source line, where the
+//                argument registers hold the arguments the call passes and the call has not run yet: the
+//                capture point of a value the caller read and passes (SPEC 1.4 `lp capture`).  The call need
+//                not end the line's code (stack arguments are popped after it on the same line): every byte
+//                position of the line's code is read as a possible `call rel32` to the callee, as without a
+//                line table, and exactly one match is required (two are refused, never chosen between).
+//                Refused if a direct branch of the function reaches the call instruction (the registers could
+//                have been set on another path).
 //   line-start   the first instruction of a source line's code: the probe fires before the
 //                statement runs (a store written as an assignment, which has no call to follow).
 //                The line's code must be one contiguous piece inside one function.
@@ -68,6 +76,8 @@ Status resolve_entry(const ElfImage& elf, const LineTable& lines, const std::str
 Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line,
                           const std::string& callee, ResolvedTarget* out);
 Status resolve_line_start(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, ResolvedTarget* out);
+Status resolve_at_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, const std::string& callee,
+                       ResolvedTarget* out);
 // after-call without a line table (a binary built without -g): the instruction after the one call of
 // `callee` (its symbol or PLT stub) inside the function `func`.  Kind after-call, line 0.  Refused if
 // the function has no such call or more than one (instruction boundaries are not known, so two

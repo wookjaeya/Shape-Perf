@@ -489,6 +489,44 @@ void test_resolve_after_call_ambiguity_and_function_end() {
   }
 }
 
+void test_resolve_at_call() {
+  // The same line 20 as above, ending with the call to B at [0x1110, 0x1115): at-call probes the call itself.
+  Resolve r;
+  r.prog.set_address(0x1100); r.prog.advance_line(9); r.prog.copy();
+  r.prog.advance_pc(8); r.prog.advance_line(10); r.prog.set_column(5); r.prog.copy();
+  r.prog.advance_pc(0x0d); r.prog.advance_line(1); r.prog.copy();
+  r.prog.advance_pc(3); r.prog.end_sequence();
+  r.finish();
+  ResolvedTarget t;
+  KZ_CHECK_OK(resolve_at_call(r.image, r.lines, "sb/x.c", 20, "B", &t));
+  KZ_CHECK_EQ(t.kind, uint16_t(KZ_TARGET_KIND_AT_CALL));
+  KZ_CHECK_EQ(t.vaddr, uint64_t(0x1110));           // the call rel32 itself
+  KZ_CHECK_EQ(t.file_offset, uint64_t(0x1110));
+  KZ_CHECK_EQ(t.insn[0], uint8_t(0xe8));
+  KZ_CHECK_EQ(t.func, std::string("A"));
+  KZ_CHECK_EQ(t.delta, 0x10u);
+  KZ_CHECK_EQ(t.line, 20u);
+  KZ_CHECK_EQ(t.col, 5u);
+  KZ_CHECK_ERR(resolve_at_call(r.image, r.lines, "sb/x.c", 20, "C", &t), kz::Err::Invalid);   // the call is to B
+  KZ_CHECK_ERR(resolve_at_call(r.image, r.lines, "sb/x.c", 10, "B", &t), kz::Err::Invalid);   // no call ends line 10
+  // a direct branch of A to the call instruction: a join, refused (the registers may come from another path)
+  {
+    Resolve j;
+    const int32_t rel = static_cast<int32_t>(0x1110 - (0x1108 + 5));  // jmp rel32 at 0x1108 (inside A) to the call
+    j.text[0x108] = 0xe9;
+    j.text[0x109] = static_cast<uint8_t>(rel); j.text[0x10a] = static_cast<uint8_t>(rel >> 8);
+    j.text[0x10b] = static_cast<uint8_t>(rel >> 16); j.text[0x10c] = static_cast<uint8_t>(rel >> 24);
+    j.elf.text = j.text;
+    j.prog.set_address(0x1100); j.prog.advance_line(9); j.prog.copy();
+    j.prog.advance_pc(8); j.prog.advance_line(10); j.prog.copy();
+    j.prog.advance_pc(0x0d); j.prog.advance_line(1); j.prog.copy();
+    j.prog.advance_pc(3); j.prog.end_sequence();
+    j.finish();
+    KZ_CHECK_ERR(resolve_at_call(j.image, j.lines, "sb/x.c", 20, "B", &t), kz::Err::Invalid);
+    KZ_CHECK_OK(resolve_after_call(j.image, j.lines, "sb/x.c", 20, "B", &t));  // the return site is not the branch target
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -504,5 +542,6 @@ int main() {
   test_resolve_after_call();
   test_resolve_after_call_refuses_when_the_call_is_not_last();
   test_resolve_after_call_ambiguity_and_function_end();
+  test_resolve_at_call();
   return kztest::finish("test_probe_elf_dwarf");
 }

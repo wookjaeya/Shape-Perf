@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstring>
 #include <map>
+#include <set>
 
 namespace kz::trace {
 
@@ -96,6 +97,46 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
   std::vector<kz_summary> summaries;
   std::vector<kz_obs_adequacy> adequacy;
   std::vector<kz_identity> identities;
+  // REF_LISTS: the probe lists of OBS_ADEQUACY, each a run of references to the parent's SITES ended by a null
+  // reference; equal lists are written once.
+  std::vector<kz_ref> ref_lists;
+  std::map<std::vector<uint32_t>, uint32_t> list_at;
+  auto probe_list = [&](const eval::Occurrence& o) {
+    kz_ref r = zeroed<kz_ref>();
+    if (in.run == nullptr) return r;
+    std::set<uint32_t> ids;
+    for (const std::string& name : o.probes) {
+      uint8_t kind = 3;
+      std::string n = name;
+      if (name.rfind("call ", 0) == 0) {
+        kind = 1;
+        n = name.substr(5);
+      } else if (name.rfind("return ", 0) == 0) {
+        kind = 2;
+        n = name.substr(7);
+      }
+      for (const SiteMapEntry& e : report.site_map)
+        if (e.kind == kind && e.name == n) ids.insert(e.site);
+    }
+    if (ids.empty()) return r;
+    const std::vector<uint32_t> key(ids.begin(), ids.end());
+    auto it = list_at.find(key);
+    if (it == list_at.end()) {
+      it = list_at.emplace(key, static_cast<uint32_t>(ref_lists.size())).first;
+      const Digest run_hash = in.run->artifact_hash();
+      for (uint32_t id : key) {
+        kz_ref e = zeroed<kz_ref>();
+        std::memcpy(e.artifact_sha256, run_hash.data(), run_hash.size());
+        e.section = KZ_SEC_SITES;
+        e.index = id;
+        ref_lists.push_back(e);
+      }
+      ref_lists.push_back(zeroed<kz_ref>());  // the end of the list
+    }
+    r.section = KZ_SEC_REF_LISTS;
+    r.index = it->second;
+    return r;
+  };
   for (const eval::Occurrence& o : result.occurrences) {
     kz_summary s = o.summary;
     s.cell = KZ_NONE32;
@@ -131,8 +172,10 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
     else if (losses != 0) a.end_reason = KZ_INTERVAL_END_LOSS;
     else if (result.terminated) a.end_reason = KZ_INTERVAL_END_PROCESS_TERMINAL;
     else a.end_reason = KZ_INTERVAL_END_RECORD_END;
-    a.probes = zeroed<kz_ref>();
-    a.unobserved = w.intern("");
+    a.probes = probe_list(o);
+    std::string unobs;
+    for (const std::string& u : o.unobserved) unobs += (unobs.empty() ? "" : ";") + u;
+    a.unobserved = w.intern(unobs);
     adequacy.push_back(a);
   }
 
@@ -149,6 +192,7 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
   }
 
   Status s = w.add_section(KZ_SEC_BASIS, items);
+  if (s.ok() && !ref_lists.empty()) s = w.add_section(KZ_SEC_REF_LISTS, ref_lists);
   if (s.ok()) s = w.add_section(KZ_SEC_SUMMARIES, summaries);
   if (s.ok()) s = w.add_section(KZ_SEC_MODEL_IDS, models);
   if (s.ok()) s = w.add_section(KZ_SEC_OBS_ADEQUACY, adequacy);

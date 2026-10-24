@@ -10,7 +10,13 @@
 //                 it (`profile_id`, hex of phi::profile_hash); `scope_id` is empty (not established);
 //   OBS_ADEQUACY  one per occurrence: what the record establishes for what its conditions read, the reasons,
 //                 the start evidence, the checked interval in positions of the replayed trace, the number of
-//                 loss intervals overlapping it; `probes` null and `unobserved` empty (not written yet);
+//                 loss intervals overlapping it; `probes` the list in REF_LISTS of the parent's SITES the
+//                 conditions rest on (eval::Occurrence::probes mapped to sites through the adapter's site map;
+//                 every site of a run container is attached for the whole record and was active, the observer
+//                 fails the run otherwise), null when there is none or no parent; `unobserved` the names of
+//                 eval::Occurrence::unobserved, ';'-separated (empty: nothing found missing);
+//   REF_LISTS     the probe lists: each a run of references to the parent's SITES ended by a null reference,
+//                 equal lists written once;
 //   IDENTITIES    per occurrence: the executing task of the use first (with the passed identifier), then the
 //                 actor of every registration or publication the execution relation used, each with its
 //                 four identity categories as far as the record states them;

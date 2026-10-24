@@ -90,6 +90,7 @@ struct ProfileSite {
   std::string at_file;            // point
   uint32_t at_line = 0;
   std::string after_call;
+  std::string at_call;            // point: the call instruction itself (KZ_TARGET_KIND_AT_CALL), before the call runs
   bool line_start = false;        // point: the first instruction of the line (KZ_TARGET_KIND_LINE_START)
   std::vector<std::string> enter; // point: the chain of callees from func= (KZ_TARGET_KIND_ENTRY_REACHED)
   uint16_t decoder = KZ_DECODER_GENERIC;

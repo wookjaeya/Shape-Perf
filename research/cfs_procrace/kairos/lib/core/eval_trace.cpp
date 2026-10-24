@@ -167,6 +167,29 @@ bool version_satisfies(const std::string& have, CmpOp op, const std::string& wan
   return false;
 }
 
+// A call site pattern that passes `addr(T.F)` to an out parameter of the called operation, through which the
+// operation stores, where `bind field T F as value(L)`: the site is a publication site of L.
+std::map<std::string, int32_t> publication_sites(const Profile& p) {
+  std::map<std::string, int32_t> out;
+  for (const phi::SiteDecl& sd : p.sites) {
+    const phi::Pattern& pt = sd.pattern;
+    if (!pt.present || pt.op != phi::PatOp::Call) continue;
+    for (const OpDecl& op : p.ops) {
+      if (op.symbol.empty() || op.symbol != pt.callee) continue;
+      for (const phi::ArgPred& ap : pt.args) {
+        if (ap.cmp != phi::ArgCmp::AddrOf || ap.index >= op.params.size() || op.params[ap.index].role != "out") continue;
+        bool stores = false;
+        for (const EffectDecl& e : op.effects) stores = stores || (e.kind == EffectKind::StoreOut && e.target == op.params[ap.index].name);
+        if (!stores) continue;
+        for (const phi::BindDecl& b : p.binds)
+          if (b.struct_name + "." + b.field == ap.name && b.target && b.target->kind == ExprKind::Call && b.target->fn == phi::CallFn::Value && b.target->ref_aux >= 0)
+            out.emplace(sd.name, b.target->ref_aux);
+      }
+    }
+  }
+  return out;
+}
+
 // ---- the replayer ---------------------------------------------------------------------------
 
 namespace {
@@ -185,6 +208,25 @@ void collect_used(const Expr& e, Used* u) {
   }
   for (const phi::ExprPtr& a : e.args)
     if (a) collect_used(*a, u);
+}
+
+// The kinds and locations an expression can read (statically): resources through state/tag/id, quantified
+// kinds, the owner kind, locations through value; a derived kind adds what its predicates read.
+void collect_reads(const Profile& p, const Expr& e, std::set<int32_t>* kinds, std::set<int32_t>* locs, int depth = 0) {
+  if (depth > 16) return;
+  auto add_kind = [&](int32_t k) {
+    if (k < 0 || static_cast<size_t>(k) >= p.kinds.size() || !kinds->insert(k).second) return;
+    for (const phi::DerivedDecl& d : p.kinds[static_cast<size_t>(k)].derived)
+      if (d.when) collect_reads(p, *d.when, kinds, locs, depth + 1);
+  };
+  if (e.kind == ExprKind::Call) {
+    if (e.fn == phi::CallFn::Res) add_kind(e.ref_index);
+    if (e.fn == phi::CallFn::Value && e.ref_aux >= 0) locs->insert(e.ref_aux);
+    if (e.fn == phi::CallFn::Owner && p.context.present) add_kind(p.context.owner_kind_index);
+  }
+  if (e.kind == ExprKind::Quant) add_kind(e.ref_index);
+  for (const phi::ExprPtr& a : e.args)
+    if (a) collect_reads(p, *a, kinds, locs, depth + 1);
 }
 
 uint32_t u32(int64_t v) { return static_cast<uint32_t>(v); }
@@ -412,6 +454,23 @@ class Replayer {
     std::string actor;
   };
   std::vector<Publication> pubs_;
+  // The writes of a location in the record (the execution relation of a captured value, SPEC 1.1): a store
+  // effect into it, or a publication site (below).  loc -1: the record does not say which location (a store
+  // through a pointer without the location's name), so any location may have been written.
+  struct LocWrite {
+    int32_t loc = -1;
+    bool maybe = false;   // the effect may not have been applied (a `filter` the record leaves open)
+    std::string actor;
+  };
+  std::vector<LocWrite> loc_writes_;
+  // A site of the profile whose call passes the address of a location's field (`arg[i] is addr(T.F)`, `bind
+  // field T F as value(L)`) to an `out` parameter through which the called operation stores: the site event
+  // (after the call, in the caller) records that its actor wrote L through that call.  Site name -> location.
+  std::map<std::string, int32_t> pub_site_loc_;
+  std::vector<std::vector<std::string>> loc_pub_sites_;           // per location: its publication sites
+  std::vector<std::vector<std::string>> kind_unobs_, loc_unobs_;  // per kind / location: writer effects whose point is not observed
+  std::vector<std::vector<std::string>> kind_wpoints_, loc_wpoints_;  // per kind / location: the observed points of its writer effects
+  void observation_lists(Occurrence* o);
   void note_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool maybe);
   void relate(Occurrence* o);
   size_t next_loss_ = 0;
@@ -536,6 +595,10 @@ Status Replayer::prepare() {
   }
   for (const phi::SiteDecl& s : p_.sites) site_names_.insert(s.name);
   for (size_t ri = 0; ri < p_.roles.size(); ++ri) role_of_site_[p_.roles[ri].site] = ri;
+  // publication sites of locations (pub_site_loc_)
+  pub_site_loc_ = publication_sites(p_);
+  loc_pub_sites_.assign(p_.locs.size(), {});
+  for (const auto& kv : pub_site_loc_) loc_pub_sites_[static_cast<size_t>(kv.second)].push_back(kv.first);
 
   // readiness specifications
   for (size_t ri = 0; ri < p_.rspecs.size(); ++ri) {
@@ -599,6 +662,11 @@ void Replayer::prepare_real() {
   loc_contra_.assign(nl, false);
   std::vector<std::vector<std::string>> kind_unobserved(nk), loc_unobserved(nl);
   std::vector<std::string> any_loc_unobserved;  // stores through a pointer: any location
+  kind_wpoints_.assign(nk, {});
+  loc_wpoints_.assign(nl, {});
+  for (size_t li = 0; li < nl; ++li)
+    for (const std::string& ps : loc_pub_sites_[li])
+      if (t_.observed_points.count(ps) != 0) loc_wpoints_[li].push_back(ps);
   for (const OpDecl& op : p_.ops) {
     for (const EffectDecl& e : op.effects) {
       int32_t kind = -1, loc = -1;
@@ -614,7 +682,13 @@ void Replayer::prepare_real() {
         default: continue;  // no state change
       }
       const std::string name = e.lp.kind == LpKind::None ? std::string() : lp_name(op, e.label, e.lp);
-      if (!name.empty() && t_.observed_points.count(name) != 0) continue;
+      if (!name.empty() && t_.observed_points.count(name) != 0) {
+        if (kind >= 0 && static_cast<size_t>(kind) < nk) kind_wpoints_[static_cast<size_t>(kind)].push_back(name);
+        if (loc >= 0 && static_cast<size_t>(loc) < nl) loc_wpoints_[static_cast<size_t>(loc)].push_back(name);
+        if (any_loc)
+          for (size_t li = 0; li < nl; ++li) loc_wpoints_[li].push_back(name);
+        continue;
+      }
       const std::string w = op.name + "." + e.label;
       if (kind >= 0 && static_cast<size_t>(kind) < nk) kind_unobserved[static_cast<size_t>(kind)].push_back(w);
       if (loc >= 0 && static_cast<size_t>(loc) < nl) loc_unobserved[static_cast<size_t>(loc)].push_back(w);
@@ -654,6 +728,8 @@ void Replayer::prepare_real() {
     kind_adeq_[ki] = adeq;
     kind_reasons_[ki] = why;
   }
+  kind_unobs_ = kind_unobserved;
+  loc_unobs_.assign(nl, {});
   for (size_t li = 0; li < nl; ++li) {
     const auto it = t_.loc_adequacy.find(p_.locs[li].name);
     const Adequacy a = it != t_.loc_adequacy.end() ? it->second : Adequacy();
@@ -663,6 +739,7 @@ void Replayer::prepare_real() {
     if (a.aliases_covered) adeq |= KZ_ADEQ_ALIASES_COVERED; else why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
     std::vector<std::string> unobserved = loc_unobserved[li];
     unobserved.insert(unobserved.end(), any_loc_unobserved.begin(), any_loc_unobserved.end());
+    loc_unobs_[li] = unobserved;
     if (unobserved.empty()) {
       adeq |= KZ_ADEQ_PROBES_ATTACHED | KZ_ADEQ_PROBES_ACTIVE;
     } else {
@@ -1574,6 +1651,22 @@ void Replayer::on_point(const TraceEvent& ev) {
     terminate(ev);
   }
   if (site_names_.count(ev.site) != 0) known = true;
+  // A publication site of a location (pub_site_loc_): the actor wrote the location through the call that just
+  // returned.  The value is the one the record carries (`value`); without it the location is not fixed by the
+  // record from here on (the stores of the call are the operation's effects, at their own points).
+  const auto pub = pub_site_loc_.find(ev.site);
+  if (real_ && pub != pub_site_loc_.end()) {
+    const int32_t li = pub->second;
+    loc_writes_.push_back(LocWrite{li, false, ev.actor});
+    const auto v = ev.values.find("value");
+    if (v != ev.values.end()) {
+      st_.loc_values[li] = v->second;
+      loc_writers_[li].insert(ev.actor);
+    } else {
+      untrack_loc(li, KZ_WITHHOLD_EFFECT_UNSUPPORTED);
+    }
+    update_intervals(ev.id);
+  }
   const auto it = points_.find(ev.site);
   if (it == points_.end()) {
     if (!known) finding(ev.id, "point '" + ev.site + "' is neither a linearization point, nor a site, nor a terminal step of the profile");
@@ -1592,6 +1685,7 @@ void Replayer::on_point(const TraceEvent& ev) {
       // cross-check against the replayed cell, where the record fixes it
       const auto cell = ev.texts.find("cell");
       const auto value = ev.values.find("value");
+      if (cell != ev.texts.end() && p_.find_loc(cell->second) >= 0) res.cell = cell->second;
       if (cell != ev.texts.end() && value != ev.values.end()) {
         const int32_t li = p_.find_loc(cell->second);
         if (li < 0) {
@@ -1853,6 +1947,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
     if (g.v.tri == Tri::Maybe && eff.filter) {
       // a branch that may or may not have been taken
       note_publication(op, eff, ev, frame_args, true);
+      if (eff.kind == EffectKind::StoreLoc || eff.kind == EffectKind::StoreOut) loc_writes_.push_back(LocWrite{tloc, true, ev.actor});
       untrack_kind(tkind, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       untrack_loc(tloc, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       if (eff.kind == EffectKind::StoreOut && tloc < 0)
@@ -1980,6 +2075,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       const auto where = ev.texts.find("out." + eff.target);
       if (where == ev.texts.end()) {
         // the record does not say where the pointer pointed: any location may have been written
+        loc_writes_.push_back(LocWrite{-1, false, ev.actor});
         for (size_t li = 0; li < loc_reasons_.size(); ++li) untrack_loc(static_cast<int32_t>(li), KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
         return;
       }
@@ -1987,11 +2083,15 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
         finding(ev.id, what + ": '" + where->second + "' is not a location of the profile");
         return;
       }
+      loc_writes_.push_back(LocWrite{tloc, false, ev.actor});
       stored(tloc);
       return;
     }
     case EffectKind::StoreLoc:
-      if (tloc >= 0) stored(tloc);
+      if (tloc >= 0) {
+        loc_writes_.push_back(LocWrite{tloc, false, ev.actor});
+        stored(tloc);
+      }
       return;
     case EffectKind::Mark:
       if (eff.target == "handler_begin") began_handler_ = true;
@@ -2230,28 +2330,52 @@ void Replayer::relate(Occurrence* o) {
     if (!pb.exact) open_writers.insert(pb.actor);
     else if (pb.key == o->key) (pb.maybe ? open_writers : cps).insert(pb.actor);
   }
+  const bool key_published = !cps.empty();
+  // A value the use passes that a capture read from a location (`cell`): the actors that wrote that location
+  // in the record are actors of the use as well (the passed identity is theirs to publish).  A write whose
+  // location the record does not name, or that may not have been applied, leaves it open.
+  std::set<int32_t> cells;
+  for (const ConjunctResult& c : o->conjuncts) {
+    if (c.source != LpSource::Capture || c.cell.empty()) continue;
+    const int32_t li = p_.find_loc(c.cell);
+    if (li >= 0) cells.insert(li);
+  }
+  std::string extra;
+  for (int32_t li : cells) {
+    std::set<std::string> by;
+    for (const LocWrite& lw : loc_writes_) {
+      if (lw.loc == -1 || (lw.loc == li && lw.maybe)) open_writers.insert(lw.actor);
+      else if (lw.loc == li) by.insert(lw.actor);
+    }
+    std::string who;
+    for (const std::string& a : by) who += (who.empty() ? "" : ",") + a;
+    extra += "; the passed value was read from " + p_.locs[static_cast<size_t>(li)].name + (by.empty() ? std::string(", which no recorded write targets") : ", written by " + who);
+    cps.insert(by.begin(), by.end());
+  }
   for (const std::string& a : cps) open_writers.erase(a);
   o->counterparts.assign(cps.begin(), cps.end());
   const uint8_t lu = level_of(o->actor);
   if (lu == KZ_OWNER_LEVEL_UNDETERMINED) {
-    o->relation_note = "the owner of the executing task " + o->actor + " is undetermined";
+    o->relation_note = "the owner of the executing task " + o->actor + " is undetermined" + extra;
     return;
   }
   if (!open_writers.empty()) {
-    o->relation_note = "a write of " + kname + " by " + *open_writers.begin() + " whose target the record does not establish (its owner is undetermined or a value is not recorded)";
+    o->relation_note = "a write of " + kname + (cells.empty() ? std::string() : " or of a captured location") + " by " + *open_writers.begin() +
+                       " whose target the record does not establish (its owner is undetermined or a value is not recorded)" + extra;
     return;
   }
   if (cps.empty()) {
-    o->relation_note = "no registration or publication of " + kname + key_text(o->key) + " in the record";
+    o->relation_note = "no registration or publication of " + kname + key_text(o->key) + " in the record" + extra;
     return;
   }
+  if (!key_published) extra = "; no registration or publication of " + kname + key_text(o->key) + " in the record" + extra;
   uint8_t level = lu;
   bool any_inter = false, any_inter_known = false, any_core = false, any_creation = false, all_intra = true;
   std::string intra_note;
   for (const std::string& c : cps) {
     const uint8_t lc = level_of(c);
     if (lc == KZ_OWNER_LEVEL_UNDETERMINED) {
-      o->relation_note = "the owner of " + c + ", which wrote " + kname + key_text(o->key) + ", is undetermined";
+      o->relation_note = "the owner of " + c + ", which wrote " + (key_published ? kname + key_text(o->key) : std::string("the captured location")) + ", is undetermined" + extra;
       return;
     }
     level = std::min(level, lc);
@@ -2283,17 +2407,17 @@ void Replayer::relate(Occurrence* o) {
   o->relation_level = level;
   if (all_intra) {
     o->relation = KZ_EXEC_RELATION_INTRA_APPLICATION;
-    o->relation_note = intra_note + " (" + who + ")";
+    o->relation_note = intra_note + " (" + who + ")" + extra;
   } else if (any_inter) {
     o->relation = KZ_EXEC_RELATION_INTER_APPLICATION;
-    o->relation_note = std::string(any_inter_known ? "different applications, neither a core service" : "different applications; core status not established") + " (" + who + ")";
+    o->relation_note = std::string(any_inter_known ? "different applications, neither a core service" : "different applications; core status not established") + " (" + who + ")" + extra;
     if (!any_inter_known && !any_core) o->summary.flags |= KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN;
   } else if (any_core) {
     o->relation = KZ_EXEC_RELATION_CORE_APPLICATION;
-    o->relation_note = "different applications, a core service among them (" + who + ")";
+    o->relation_note = "different applications, a core service among them (" + who + ")" + extra;
   } else if (any_creation) {
     o->relation = KZ_EXEC_RELATION_CREATION_FRAMEWORK;
-    o->relation_note = "one created the other (" + who + ")";
+    o->relation_note = "one created the other (" + who + ")" + extra;
   }
 }
 
@@ -2562,14 +2686,70 @@ void Replayer::finish() {
       relate(&o);
       o.summary.relation = o.relation;
       if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED && o.relation_level == KZ_OWNER_LEVEL_INFERRED) o.summary.flags |= KZ_SUMMARY_FLAG_RELATION_INFERRED;
+      observation_lists(&o);
     }
   }
   if (!real_) return;
   for (size_t ki = 0; ki < p_.kinds.size(); ++ki) {
     if (!p_.kinds[ki].derived.empty()) continue;
-    r_.knowledge.push_back(Knowledge{p_.kinds[ki].name, false, kind_reasons_[ki], kind_adeq_[ki], kind_contra_[ki]});
+    r_.knowledge.push_back(Knowledge{p_.kinds[ki].name, false, kind_reasons_[ki], kind_adeq_[ki], kind_contra_[ki], kind_unobs_[ki]});
   }
-  for (size_t li = 0; li < p_.locs.size(); ++li) r_.knowledge.push_back(Knowledge{p_.locs[li].name, true, loc_reasons_[li], loc_adeq_[li], loc_contra_[li]});
+  for (size_t li = 0; li < p_.locs.size(); ++li) r_.knowledge.push_back(Knowledge{p_.locs[li].name, true, loc_reasons_[li], loc_adeq_[li], loc_contra_[li], loc_unobs_[li]});
+}
+
+// The observation an occurrence's conditions rest on (Occurrence::probes, ::unobserved).
+void Replayer::observation_lists(Occurrence* o) {
+  size_t si = p_.rspecs.size();
+  for (size_t i = 0; i < p_.rspecs.size(); ++i)
+    if (p_.rspecs[i].name == o->rspec) si = i;
+  if (si == p_.rspecs.size()) return;
+  const RspecInfo& info = rspec_info_[si];
+  const OpDecl& op = p_.ops[info.op];
+  std::set<std::string> probes, unobs;
+  probes.insert("call " + op.name);
+  if (o->returned) probes.insert("return " + op.name);
+  std::set<int32_t> kinds, locs;
+  for (size_t ci : info.conj) {
+    const phi::ConjunctDecl& c = op.conjuncts[ci];
+    if (c.expr) collect_reads(p_, *c.expr, &kinds, &locs);
+    if (c.lp.kind == LpKind::None) continue;
+    const std::string name = lp_name(op, c.label, c.lp);
+    if (c.lp.kind == LpKind::Capture) {
+      // the capture where one was used (a value conjunct without one is read at the call), and the location
+      // it names
+      for (const ConjunctResult& r : o->conjuncts) {
+        if (r.label != c.label || r.source != LpSource::Capture) continue;
+        probes.insert(name);
+        const int32_t li = r.cell.empty() ? -1 : p_.find_loc(r.cell);
+        if (li >= 0) locs.insert(li);
+      }
+      continue;
+    }
+    (t_.observed_points.count(name) != 0 ? probes : unobs).insert(name);
+  }
+  auto closure = [&](const std::map<std::string, StaticClosure>& m, const std::string& name) {
+    const auto it = m.find(name);
+    if (it == m.end()) {
+      unobs.insert(name + ": static closure not given");
+      return;
+    }
+    for (const std::string& u : it->second.unobserved) unobs.insert(name + ": " + u);
+  };
+  for (int32_t k : kinds) {
+    const size_t ki = static_cast<size_t>(k);
+    if (!p_.kinds[ki].derived.empty()) continue;
+    probes.insert(kind_wpoints_[ki].begin(), kind_wpoints_[ki].end());
+    unobs.insert(kind_unobs_[ki].begin(), kind_unobs_[ki].end());
+    closure(t_.kind_closure, p_.kinds[ki].name);
+  }
+  for (int32_t l : locs) {
+    const size_t li = static_cast<size_t>(l);
+    probes.insert(loc_wpoints_[li].begin(), loc_wpoints_[li].end());
+    unobs.insert(loc_unobs_[li].begin(), loc_unobs_[li].end());
+    closure(t_.loc_closure, p_.locs[li].name);
+  }
+  o->probes.assign(probes.begin(), probes.end());
+  o->unobserved.assign(unobs.begin(), unobs.end());
 }
 
 // ---- edges that pair events by a value --------------------------------------------------------
@@ -2730,6 +2910,11 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       out += "  relation " + enum_text_of("KZ_EXEC_RELATION", o.relation);
       if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED) out += " owners " + enum_text_of("KZ_OWNER_LEVEL", o.relation_level);
       out += ": " + o.relation_note + "\n";
+      std::string pr, un;
+      for (const std::string& x : o.probes) pr += (pr.empty() ? "" : ", ") + x;
+      for (const std::string& x : o.unobserved) un += (un.empty() ? "" : "; ") + x;
+      out += "  probes " + (pr.empty() ? std::string("-") : pr) + "\n";
+      out += "  unobserved " + (un.empty() ? std::string("-") : un) + "\n";
     }
   }
   out += "\nfindings " + std::to_string(r.findings.size()) + "\n";
@@ -2777,6 +2962,19 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
     for (const Knowledge& k : r.knowledge) {
       out += std::string("  ") + (k.is_loc ? "loc " : "kind ") + k.name + (k.reasons == 0 ? " fixed" : " open " + set_text("KZ_WITHHOLD", k.reasons));
       out += " established " + set_text("KZ_ADEQ", k.adequacy) + (k.contradicted ? " contradicted" : "") + "\n";
+      std::string w;
+      for (const std::string& x : k.unobserved_writers) w += (w.empty() ? "" : ", ") + x;
+      out += "    writer effects not observed: " + (w.empty() ? std::string("-") : w) + "\n";
+      const auto& cm = k.is_loc ? trace.loc_closure : trace.kind_closure;
+      const auto cl = cm.find(k.name);
+      if (cl == cm.end()) {
+        out += "    static closure: not given\n";
+      } else {
+        std::string u;
+        for (const std::string& x : cl->second.unobserved) u += (u.empty() ? "" : "; ") + x;
+        out += "    static closure: " + cl->second.status + "; writers " + std::to_string(cl->second.writers) + ", at observed points " + std::to_string(cl->second.covered) +
+               "; not observed: " + (u.empty() ? std::string("-") : u) + "\n";
+      }
     }
   }
   return out;
@@ -2849,7 +3047,7 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       continue;
     }
     if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "owner_id" || tok[0] == "owner_core" ||
-        tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order") {
+        tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order" || tok[0] == "closure" || tok[0] == "unobserved") {
       if (out->record != RecordKind::Real) return line_error(line_no, "'" + tok[0] + "' belongs to a real record: 'record real' must come first");
       if (tok[0] == "start_evidence") {
         static const char* names[] = {"none", "init", "state-capture", "declared"};
@@ -2876,6 +3074,23 @@ Status parse_trace_text(const std::string& text, Trace* out) {
           else return line_error(line_no, "adequacy: '" + t + "' is not start=known|unknown, writers=covered|uncovered, aliases=covered|uncovered or (a kind) lifetime=known|unknown");
         }
         (tok[1] == "kind" ? out->kind_adequacy : out->loc_adequacy)[tok[2]] = a;
+      } else if (tok[0] == "closure" || tok[0] == "unobserved") {
+        if (tok.size() < 4 || (tok[1] != "kind" && tok[1] != "loc"))
+          return line_error(line_no, tok[0] == "closure" ? "expected: closure kind|loc NAME writers=N covered=M STATUS ..." : "expected: unobserved kind|loc NAME TEXT ...");
+        StaticClosure& c = (tok[1] == "kind" ? out->kind_closure : out->loc_closure)[tok[2]];
+        size_t i = 3;
+        if (tok[0] == "closure") {
+          int64_t w = 0, cv = 0;
+          if (tok.size() < 6 || tok[3].rfind("writers=", 0) != 0 || tok[4].rfind("covered=", 0) != 0 || !parse_int(tok[3].substr(8), &w) || !parse_int(tok[4].substr(8), &cv) || w < 0 || cv < 0 || cv > w)
+            return line_error(line_no, "expected: closure kind|loc NAME writers=N covered=M STATUS ... (0 <= M <= N)");
+          c.writers = static_cast<uint32_t>(w);
+          c.covered = static_cast<uint32_t>(cv);
+          i = 5;
+        }
+        std::string rest;
+        for (; i < tok.size(); ++i) rest += (rest.empty() ? "" : " ") + tok[i];
+        if (tok[0] == "closure") c.status = rest;
+        else c.unobserved.push_back(rest);
       } else if (tok[0] == "order") {
         if (tok.size() != 2 || (tok[1] != "established" && tok[1] != "merged")) return line_error(line_no, "expected: order established|merged");
         out->order_established = tok[1] == "established";
@@ -2973,6 +3188,15 @@ std::string trace_text(const Trace& t) {
     for (const auto& kv : t.kind_adequacy) adequacy("kind", kv.first, kv.second, true);
     for (const auto& kv : t.loc_adequacy) adequacy("loc", kv.first, kv.second, false);
     for (const std::string& pt : t.observed_points) out += "observed " + pt + "\n";
+    auto closure = [&](const char* what, const std::map<std::string, StaticClosure>& m) {
+      for (const auto& kv : m) {
+        out += std::string("closure ") + what + " " + kv.first + " writers=" + std::to_string(kv.second.writers) + " covered=" + std::to_string(kv.second.covered) + " " +
+               (kv.second.status.empty() ? std::string("-") : kv.second.status) + "\n";
+        for (const std::string& u : kv.second.unobserved) out += std::string("unobserved ") + what + " " + kv.first + " " + u + "\n";
+      }
+    };
+    closure("kind", t.kind_closure);
+    closure("loc", t.loc_closure);
     for (const auto& kv : t.owner_levels) {
       static const char* lv[] = {"undetermined", "inferred", "confirmed"};
       out += "owner_level " + kv.first + " " + (kv.second < 3 ? lv[kv.second] : "undetermined") + "\n";

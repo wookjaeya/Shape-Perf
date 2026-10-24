@@ -17,8 +17,13 @@
 //   - the execution relation (SPEC 1.1) between the use and the registrations of its key: same task, same
 //     application, different applications (core status established or not), the creating executor, an
 //     inferred owner, an undetermined owner on either side, no registration, the identity value of an owner;
-//   - the alternative of the pending PI decision P1 (no outcome narrowing).
+//   - the alternative of the pending PI decision P1 (no outcome narrowing);
+//   - a value a capture read from a named location (`cell`): the actors that wrote that location (a
+//     publication site, a store effect) are actors of the relation; a write to an unnamed location leaves it open;
+//   - the observation an occurrence rests on (probes, unobserved) and the static closure in the text form.
 
+#include <algorithm>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -518,6 +523,92 @@ void test_derived_records() {
   KZ_CHECK(weaker > 0);
 }
 
+
+// A value the use passes that a capture read from a location (`cell`), R2 remainder 2026-10-24: the actors that
+// wrote that location in the record are actors of the use.  The mini profile's site box_pub passes
+// addr(Box_t.id) to get_id's out parameter, through which get_id stores, and Box_t.id is bound to value(Box.id):
+// a publication site of Box.id.
+void test_captured_location_relation() {
+  const Profile p = load(kzmini::files());
+  const std::map<std::string, int32_t> pubs = kz::eval::publication_sites(p);
+  KZ_CHECK(pubs.size() == 1 && pubs.count("box_pub") == 1 && pubs.at("box_pub") == p.find_loc("Box.id"));
+  const std::string x = "owner X 3\nowner_level X confirmed\nowner_core W yes\n";
+  // X passes the value 0 it read from Box.id; W publishes Box.id (after X's use in the merged order, which is
+  // not the execution order and is not read by the relation); nobody registers reg[0]
+  const std::string cap = "X send.who_valid pt arg.Who=0 value=0 cell=@Box.id\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
+  const Run r = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\n");
+  check_summary(r, "OBSERVED_VIOLATION", "captured, published");
+  check_relation(r, KZ_EXEC_RELATION_CORE_APPLICATION, "no registration or publication of reg[0] in the record; the passed value was read from Box.id, written by W",
+                 "captured, published");
+  KZ_CHECK(r.occ().counterparts == std::vector<std::string>{"W"});
+  bool cell_kept = false;
+  for (const kz::eval::ConjunctResult& c : r.occ().conjuncts) cell_kept = cell_kept || (c.label == "who_valid" && c.cell == "Box.id");
+  KZ_CHECK(cell_kept);
+  // the same use without the location: no actor is named
+  const Run nocell = replay(p, preamble() + x + kSetup + "X send.who_valid pt arg.Who=0\nX send call arg.Who=0\nX send ret result=0xc0000001\n" + "W box_pub pt\n");
+  check_relation(nocell, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "no registration or publication of reg[0] in the record", "no cell");
+  KZ_CHECK(nocell.occ().relation_note.find("Box.id") == std::string::npos);
+  // a location nobody wrote in the record
+  const Run unwritten = replay(p, preamble() + x + kSetup + cap);
+  check_relation(unwritten, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "Box.id, which no recorded write targets", "no write");
+  // the writer's owner is undetermined
+  const Run y = replay(p, preamble() + x + kSetup + cap + "Y box_pub pt\n");
+  check_relation(y, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of Y, which wrote the captured location, is undetermined", "writer undetermined");
+  // a store through a pointer whose location the record does not name may have written any location (an actor
+  // already named needs nothing more: its actor set is the same either way)
+  const Run anyloc = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nZ get_id call\nZ get_id.store_ok pt\nZ get_id ret result=0\n");
+  check_relation(anyloc, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "a write of reg or of a captured location by Z whose target the record does not establish",
+                 "unnamed location");
+  const Run named = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nW get_id call\nW get_id.store_ok pt\nW get_id ret result=0\n");
+  check_relation(named, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W", "unnamed location by a named writer");
+  // a store effect into the location counts like the publication site; the same application is intra
+  const Run store = replay(p, preamble() + x + kSetup + cap + "W init_box call\nW init_box.clear_box pt\nW init_box ret\n");
+  check_relation(store, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W", "store effect");
+  const Run self = replay(p, preamble() + x + kSetup + cap + "X box_pub pt\n");
+  check_relation(self, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task (X)", "own publication");
+  // the publication site changes the replayed location: with a value it fixes it (a fixed Box.id), without one
+  // the location is open from there on
+  const std::string box = "adequacy loc Box.id start=known writers=covered aliases=covered\nobserved init_box.clear_box\nobserved get_id.store_ok\nobserved get_id.store_bad\n";
+  const Run fixed = replay(p, preamble() + box + x + kSetup + "W box_pub pt value=0x1002\n" + cap);
+  KZ_CHECK(fixed.finding("the value loaded from Box.id is 0, the replay of the recorded effects has 0x1002"));
+  const Run open = replay(p, preamble() + box + x + kSetup + "W box_pub pt\n" + cap);
+  KZ_CHECK(!open.finding("the value loaded from Box.id"));
+  KZ_CHECK(open.dump.find("loc Box.id open {effect_unsupported}") != std::string::npos);
+}
+
+// The observation an occurrence rests on (Occurrence::probes / ::unobserved) and the static closure lines of
+// the text form (StaticClosure; the adapter sets them from kz-static facts, static_closure.hpp).
+void test_observation_lists() {
+  const Profile p = load(kzmini::files());
+  const std::string x = "owner X 3\nowner_level X confirmed\n";
+  const std::string cap = "X send.who_valid pt arg.Who=0 value=0 cell=@Box.id\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
+  const Run r = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\n");
+  const std::vector<std::string>& pr = r.occ().probes;
+  auto has = [](const std::vector<std::string>& v, const std::string& x2) { return std::find(v.begin(), v.end(), x2) != v.end(); };
+  KZ_CHECK(has(pr, "call send") && has(pr, "return send") && has(pr, "send.who_valid") && has(pr, "send.who_reg"));
+  KZ_CHECK(has(pr, "sign_in.clear_reg") && has(pr, "sign_in.set_reg"));  // the observed writers of reg
+  KZ_CHECK(!has(pr, "box_pub"));  // a publication site of Box.id is not in the plan of this record (no `observed box_pub`)
+  const std::vector<std::string>& un = r.occ().unobserved;
+  KZ_CHECK(has(un, "reg: static closure not given") && has(un, "Box.id: static closure not given"));
+  KZ_CHECK(has(un, "init_box.clear_box") && has(un, "get_id.store_ok") && has(un, "get_id.store_bad"));  // the writers of Box.id, not observed
+  KZ_CHECK(r.dump.find("  probes call send, return send,") != std::string::npos);
+  KZ_CHECK(r.dump.find("writer effects not observed: init_box.clear_box, get_id.store_bad, get_id.store_ok") != std::string::npos);
+  // a use without a capture reads no location; the static closure's unobserved locations are listed by name
+  const std::string closure = "closure kind reg writers=3 covered=2 Reg_t.app writer-set-complete\nunobserved kind reg Reg_t.app writer memset at src/r.c:9 in early\n";
+  const Run c = replay(p, preamble() + closure + x + "observed box_pub\n" + kSetup + kRegister + send_by("X", kOk));
+  KZ_CHECK(has(c.occ().unobserved, "reg: Reg_t.app writer memset at src/r.c:9 in early"));
+  KZ_CHECK(!has(c.occ().unobserved, "reg: static closure not given") && !has(c.occ().unobserved, "Box.id: static closure not given"));
+  KZ_CHECK(c.dump.find("static closure: Reg_t.app writer-set-complete; writers 3, at observed points 2; not observed: Reg_t.app writer memset at src/r.c:9 in early") !=
+           std::string::npos);
+  KZ_CHECK(c.trace.kind_closure.at("reg").covered == 2u);
+  const Run back = replay(p, kz::eval::trace_text(c.trace));
+  KZ_CHECK_EQ(back.dump, c.dump);
+  Trace t;
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nclosure kind reg writers=2 covered=3 x\n", &t).ok());  // more covered than writers
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nclosure kind reg 2 3 x\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("closure kind reg writers=1 covered=1 x\n", &t).ok());  // real records only
+}
+
 }  // namespace
 
 int main() {
@@ -531,5 +622,7 @@ int main() {
   test_execution_relation();
   test_outcome_narrowing_alternative();
   test_derived_records();
+  test_captured_location_relation();
+  test_observation_lists();
   return kztest::finish("test_core_realrecord");
 }

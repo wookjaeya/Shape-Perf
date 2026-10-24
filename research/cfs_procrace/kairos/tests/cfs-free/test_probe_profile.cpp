@@ -161,6 +161,18 @@ void test_errors() {
   KZ_CHECK(bad(h + "site s point at=x.c:7 line-start after-call=g\n"));
   KZ_CHECK(bad(h + "site s point at=x.c:7\n"));
   KZ_CHECK(bad(h + "site s entry func=f line-start\n"));
+  // at-call points (R2 remainder): the call instruction itself, one line form only, a value(L) slot role
+  {
+    Profile p;
+    KZ_CHECK_OK(parse((h + "site c@one point at=x.c:7 at-call=g s1=rdx:u32:value(Loc.f) s2=rdx:u32:who\n").c_str(), &p));
+    KZ_CHECK_EQ(p.sites[0].at_call, std::string("g"));
+    KZ_CHECK(p.sites[0].after_call.empty() && !p.sites[0].line_start);
+    KZ_CHECK_EQ(p.sites[0].slots[0].role, std::string("value(Loc.f)"));
+  }
+  KZ_CHECK(bad(h + "site s point at=x.c:7 at-call=g after-call=g\n"));
+  KZ_CHECK(bad(h + "site s point at=x.c:7 at-call=g line-start\n"));
+  KZ_CHECK(bad(h + "site s point func=f at-call=g\n"));
+  KZ_CHECK(bad(h + "site s entry func=f at-call=g\n"));
   // creation-side decoders (W2): the request names the owner at slot 2, the returns and the spawn id carry their keys
   {
     Profile p;

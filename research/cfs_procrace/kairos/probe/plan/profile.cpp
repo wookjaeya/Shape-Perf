@@ -227,6 +227,7 @@ Status parse_profile(std::string_view text, Profile* out) {
           if (colon == std::string::npos || !parse_uint(v.substr(colon + 1), &s.at_line) || s.at_line == 0) return err(lineno, "at=<file suffix>:<line>");
           s.at_file = v.substr(0, colon);
         } else if (k == "after-call") s.after_call = v;
+        else if (k == "at-call") s.at_call = v;
         else if (k == "enter") {
           size_t b = 0;
           while (b <= v.size()) {
@@ -259,13 +260,14 @@ Status parse_profile(std::string_view text, Profile* out) {
         } else return err(lineno, "unknown site key '" + k + "'");
       }
       if (s.kind == KZ_SITE_KIND_POINT_PROBE) {
-        const bool by_line = !s.at_file.empty() && s.func.empty() && s.after_call.empty() == s.line_start;
-        const bool by_function = s.at_file.empty() && !s.func.empty() && !s.after_call.empty() && !s.line_start && s.in_suffix.empty() && s.enter.empty();
-        const bool by_entry = s.at_file.empty() && !s.func.empty() && s.after_call.empty() && !s.line_start && s.in_suffix.empty() && !s.enter.empty();
+        const int line_forms = (s.after_call.empty() ? 0 : 1) + (s.line_start ? 1 : 0) + (s.at_call.empty() ? 0 : 1);
+        const bool by_line = !s.at_file.empty() && s.func.empty() && line_forms == 1;
+        const bool by_function = s.at_file.empty() && !s.func.empty() && !s.after_call.empty() && !s.line_start && s.at_call.empty() && s.in_suffix.empty() && s.enter.empty();
+        const bool by_entry = s.at_file.empty() && !s.func.empty() && s.after_call.empty() && !s.line_start && s.at_call.empty() && s.in_suffix.empty() && !s.enter.empty();
         if ((!by_line || !s.enter.empty()) && !by_function && !by_entry)
-          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start, func=<symbol> after-call=<symbol>, or func=<symbol> enter=<function>[>...]");
+          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol>, at-call=<symbol> or line-start, func=<symbol> after-call=<symbol>, or func=<symbol> enter=<function>[>...]");
       } else {
-        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || s.line_start || !s.enter.empty())
+        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || !s.at_call.empty() || s.line_start || !s.enter.empty())
           return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
       }
       out->sites.push_back(std::move(s));

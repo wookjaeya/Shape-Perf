@@ -2,7 +2,7 @@
 //
 //   kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...
 //             [--predicate RULE=EXPR]... [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off]
-//             [--compare-narrowing] [--out <file.kz>] [--emit-trace]
+//             [--compare-narrowing] [--facts <facts.kz> --static-basis <basis.kz>] [--out <file.kz>] [--emit-trace]
 //
 // Builds the real-record trace of the container (kz/trace/real_trace.hpp) and replays it with the profile
 // in the real-record mode of kz/core/eval_trace.hpp: a resource the record does not fix is unknown, a result
@@ -21,6 +21,11 @@
 // leaves open); --compare-narrowing prints the counts of both readings side by side (the main output stays
 // the selected one).  --out writes the summaries, model ids, adequacy, identities and app_owner records of
 // the selected reading to a container (kz/trace/replay_container.hpp) that kz-dump reads.
+//
+// --facts gives the static closure of the traced binary (a kz-static FACTS container) with --static-basis, its
+// parent: writer and alias coverage are then set where the closure says so (kz/trace/static_closure.hpp); the
+// other conditions of ADR-055 still apply.  The closure is refused unless its basis names the binary the run's
+// basis (--basis) names (binary.sha256) and it was extracted with the same profile (profile hash).
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
@@ -48,7 +53,7 @@ void usage(FILE* f) {
   std::fprintf(f,
                "usage: kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...\n"
                "                 [--predicate RULE=EXPR]... [--basis B --core-request-caller FUNC...] [--outcome-narrowing on|off]\n"
-               "                 [--compare-narrowing] [--out FILE.kz] [--emit-trace]\n"
+               "                 [--compare-narrowing] [--facts F --static-basis S] [--out FILE.kz] [--emit-trace]\n"
                "  --profile P         the profile (a directory stands for its *.kzp files, in name order)\n"
                "  --const NAME=VALUE  the value of a `ref eval` constant (a table size), from its reference\n"
                "  --version C=V       the version of a component, for the guards of rules and effects\n"
@@ -57,6 +62,8 @@ void usage(FILE* f) {
                "  --core-request-caller F  a function whose creation requests start core applications, from its reference\n"
                "  --outcome-narrowing on|off  whether the returned code fixes conditions the record leaves open (P1; default on)\n"
                "  --compare-narrowing also replay with the other setting and print both counts side by side\n"
+               "  --facts F           the static closure (kz-static facts) of the traced binary: writer and alias coverage\n"
+               "  --static-basis S    the kz-static basis container that F was extracted from (needs --basis)\n"
                "  --out FILE          write the summary view records of the selected reading to a container\n"
                "  --emit-trace        print the real-record trace instead of replaying it\n");
 }
@@ -117,7 +124,7 @@ bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceTe
 }
 
 int run(int argc, char** argv) {
-  std::string path, basis_path, out_path, narrowing = "on";
+  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path;
   std::vector<std::string> profile_args, consts, versions, predicates, core_callers;
   bool emit = false, compare = false;
   for (int i = 1; i < argc; ++i) {
@@ -142,10 +149,10 @@ int run(int argc, char** argv) {
       if (!value(&versions)) return 1;
     } else if (a == "--predicate") {
       if (!value(&predicates)) return 1;
-    } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing") {
+    } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing" || a == "--facts" || a == "--static-basis") {
       std::vector<std::string> v;
       if (!value(&v)) return 1;
-      (a == "--basis" ? basis_path : a == "--out" ? out_path : narrowing) = v.front();
+      (a == "--basis" ? basis_path : a == "--out" ? out_path : a == "--facts" ? facts_path : a == "--static-basis" ? static_basis_path : narrowing) = v.front();
     } else if (a == "--core-request-caller") {
       if (!value(&core_callers)) return 1;
     } else if (a == "--compare-narrowing") {
@@ -162,7 +169,8 @@ int run(int argc, char** argv) {
       return 1;
     }
   }
-  if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!core_callers.empty() && basis_path.empty())) {
+  if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!core_callers.empty() && basis_path.empty()) ||
+      (facts_path.empty() != static_basis_path.empty()) || (!facts_path.empty() && basis_path.empty())) {
     usage(stderr);
     return 1;
   }
@@ -202,8 +210,8 @@ int run(int argc, char** argv) {
   }
   // The core status of owners: the basis symbols and the named calling functions (real_trace.hpp, "core").
   kz::trace::SymbolIndex symbols;
+  kz::Container basis;
   if (!basis_path.empty()) {
-    kz::Container basis;
     s = kz::Container::read_file(basis_path, &basis);
     if (s.ok()) s = basis.verify_content();
     if (s.ok() && basis.header().artifact_kind != KZ_ARTIFACT_BASIS) s = kz::Status::error(kz::Err::Invalid, "not a basis container");
@@ -215,6 +223,36 @@ int run(int argc, char** argv) {
     }
     ropt.symbols = &symbols;
     ropt.core_request_callers.insert(core_callers.begin(), core_callers.end());
+  }
+  // The static closure: the facts, their basis, the same binary as the run's basis, the same profile.
+  kz::Container facts, static_basis;
+  if (!facts_path.empty()) {
+    auto item = [](const kz::Container& from, const char* name) {
+      std::vector<kz_basis_item> items;
+      std::string v;
+      if (!from.read_section(KZ_SEC_BASIS, &items).ok()) return v;
+      for (const kz_basis_item& b : items) {
+        std::string n;
+        from.string(b.name, &n);
+        if (n == name) from.string(b.value, &v);
+      }
+      return v;
+    };
+    s = kz::Container::read_file(facts_path, &facts);
+    if (s.ok()) s = facts.verify_content();
+    if (s.ok() && facts.header().artifact_kind != KZ_ARTIFACT_FACTS) s = kz::Status::error(kz::Err::Invalid, "not a facts container");
+    if (s.ok()) s = kz::Container::read_file(static_basis_path, &static_basis);
+    if (s.ok()) s = static_basis.verify_content();
+    if (s.ok()) s = facts.verify_parent(static_basis);
+    if (s.ok() && (item(static_basis, "binary.sha256").empty() || item(static_basis, "binary.sha256") != item(basis, "binary.sha256")))
+      s = kz::Status::error(kz::Err::Invalid, "the static basis names binary " + item(static_basis, "binary.sha256") + ", the run's basis " + item(basis, "binary.sha256"));
+    if (s.ok() && kz::Digest(facts.profile_hash()) != kz::phi::profile_hash(p))
+      s = kz::Status::error(kz::Err::Invalid, "the facts were extracted with profile " + kz::to_hex(facts.profile_hash()) + ", the replay uses " + kz::to_hex(kz::phi::profile_hash(p)));
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz replay: --facts %s: %s\n", facts_path.c_str(), s.describe().c_str());
+      return 2;
+    }
+    ropt.facts = &facts;
   }
   // The constants are given to the adapter as well: the owner kind's table size maps an owner identity
   // to its record key (real_trace.hpp, "owners").
@@ -265,6 +303,7 @@ int run(int argc, char** argv) {
   }
   std::printf("kz replay %s (real record)\nartifact_sha256 %s\n", path.c_str(), kz::to_hex(c.artifact_hash()).c_str());
   std::printf("outcome narrowing %s%s\n", narrowing.c_str(), narrowing == "on" ? " (current behaviour; PI decision P1 pending)" : " (the alternative of PI decision P1)");
+  if (!facts_path.empty()) std::printf("static closure %s artifact_sha256 %s (basis %s)\n", facts_path.c_str(), kz::to_hex(facts.artifact_hash()).c_str(), kz::to_hex(static_basis.artifact_hash()).c_str());
   std::fputs(kz::trace::report_text(report).c_str(), stdout);
   std::printf("\n");
   std::fputs(kz::eval::dump_result(p, trace, result).c_str(), stdout);
@@ -299,6 +338,10 @@ int run(int argc, char** argv) {
     for (const auto& kv : options.versions) in.basis.push_back({"replay.version." + kv.first, kv.second});
     for (const std::string& pr : predicates) in.basis.push_back({"replay.predicate", pr});
     for (const std::string& f : core_callers) in.basis.push_back({"replay.core_request_caller", f});
+    if (!facts_path.empty()) {
+      in.basis.push_back({"replay.facts.sha256", kz::to_hex(facts.artifact_hash())});
+      in.basis.push_back({"replay.static_basis.sha256", kz::to_hex(static_basis.artifact_hash())});
+    }
     kz::Bytes bytes;
     s = kz::trace::write_replay_container(in, trace, result, report, &bytes);
     if (s.ok()) s = kz::write_whole_file(out_path, bytes);

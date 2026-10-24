@@ -97,6 +97,18 @@ struct Adequacy {
   bool lifetime_known = false;   // the lifetime and identity of every instance is known (kinds; n/a for a location)
 };
 
+// What the static closure says about one kind or location (SPEC 4.1 "Closure per case", 4.2; kz-static's
+// FACT_LOCS and WRITERS for the record fields the profile binds to it), as the adapter matched it with the
+// probe plan of the record.  Informational for the replay: the closure enters the replay only through
+// Adequacy::writers_covered / aliases_covered, which the adapter sets from it (and every other condition of
+// ADR-055 still applies).  Absent: no closure was given.
+struct StaticClosure {
+  std::string status;                   // per bound field: "<Type.field> writer-set-complete|DISABLED|not in the closure", ';'-joined
+  uint32_t writers = 0;                 // static writers of the bound fields
+  uint32_t covered = 0;                 // of those, at a point the plan observes and the profile maps to a write of it
+  std::vector<std::string> unobserved;  // the static writer and alias locations the plan does not observe
+};
+
 // A loss reported in a real record: events may be missing from position `begin` (the first event that
 // may follow a lost one) up to `end` (exclusive; kNoEvent: up to the end of the record).
 struct LossInterval {
@@ -113,6 +125,8 @@ struct Trace {
   uint8_t start_evidence = KZ_START_EVIDENCE_NONE;        // what the record's start is (informational)
   std::map<std::string, Adequacy> kind_adequacy;          // by kind name; absent: nothing established
   std::map<std::string, Adequacy> loc_adequacy;           // by location name
+  std::map<std::string, StaticClosure> kind_closure;      // by kind name; absent: no static closure given
+  std::map<std::string, StaticClosure> loc_closure;       // by location name
   std::set<std::string> observed_points;                  // points attached and active over the whole record
   std::map<std::string, uint8_t> owner_levels;            // actor -> KZ_OWNER_LEVEL; absent: undetermined
   // actor -> the identity value of its owning application in the id space of the owner kind (the value the
@@ -141,6 +155,12 @@ struct Trace {
 std::string lp_name(const phi::OpDecl& op, const std::string& label, const phi::LpSpec& lp);
 // The name of the point at which the terminal step of an operation with an `after` pattern happens.
 std::string terminal_name(const phi::OpDecl& op);
+// The publication sites of locations: a site of the profile whose call pattern passes the address of a field
+// (`arg[i] is addr(T.F)`) to an `out` parameter of the called operation (the operation that binds the callee's
+// symbol) through which that operation stores (`store *P := ...`), where `bind field T F as value(L)`.  An
+// event at such a site (after the call, in the caller) records that its actor wrote L through that call.
+// Site name -> location index.
+std::map<std::string, int32_t> publication_sites(const phi::Profile& p);
 
 struct HbEdge {
   uint64_t from = 0, to = 0;
@@ -185,6 +205,10 @@ struct ConjunctResult {
   bool contradicted = false;     // the record contradicts the model here (an empty explanation set)
   uint32_t reasons = 0;          // set KZ_WITHHOLD: why the value or the passage is unknown
   uint32_t adequacy = 0;         // set KZ_ADEQ: what the record establishes for what the conjunct read
+  // A capture (real records): the location the value was loaded from, as the capture event names it
+  // (`cell`); empty when the record does not name it.  The execution relation names the actors that wrote
+  // that location (Occurrence::relation).
+  std::string cell;
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
@@ -250,6 +274,16 @@ struct Occurrence {
   // Real records: why the caller-level Allowed withholds a not-ready occurrence, where it records a conflict
   // (SPEC 1.6 step 3, QT-5: "the conflict named in the verdict"); empty otherwise.
   std::string allowed_note;
+  // Real records: the observation the conditions rest on (OBS_ADEQUACY `probes` and `unobserved`).  `probes`
+  // names what the record observes, as "call OP", "return OP" or a point / site name: the operation's call and
+  // return, the points of its conditions (a capture where one was used), the points of the profile's writer
+  // effects of every kind and location the conditions read (a captured location included) and the
+  // publication sites of those locations.  `unobserved` names what is missing: a condition's point the record
+  // does not observe, a writer effect whose point it does not observe ("OP.label"), and the static writer and
+  // alias locations the static closure gives that the plan does not observe ("<kind or loc>: ..."), or
+  // "<kind or loc>: static closure not given".  Both sorted, without duplicates.
+  std::vector<std::string> probes;
+  std::vector<std::string> unobserved;
 };
 
 // A call bound to a declared role of its call context (the role's site event right after the call's
@@ -303,6 +337,7 @@ struct Knowledge {
   uint32_t reasons = 0;    // set KZ_WITHHOLD: why recorded writes do not fix it (0: they do)
   uint32_t adequacy = 0;   // set KZ_ADEQ
   bool contradicted = false;
+  std::vector<std::string> unobserved_writers;  // the profile's writer effects whose point the record does not observe
 };
 
 struct Result {
@@ -354,6 +389,8 @@ std::string dump_result(const phi::Profile& p, const Trace& trace, const Result&
 //   creator <actor> <creating actor>
 //   order established|merged                 default merged: the order of different actors' events is not established
 //   loss begin | loss end                    events may be missing from the next event on, up to the next event
+//   closure kind|loc <name> writers=<n> covered=<m> <status ...>   what the static closure says (StaticClosure)
+//   unobserved kind|loc <name> <text ...>    one static writer or alias location the plan does not observe
 Status parse_trace_text(const std::string& text, Trace* out);
 
 // The text form of a trace (parse_trace_text reads it back); a real record with its preamble.

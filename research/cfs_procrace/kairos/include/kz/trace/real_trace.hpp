@@ -56,6 +56,15 @@
 //   strings     a string slot (a fetch slot of the probe event, EVENT_STRINGS) gives a text: `arg.NAME=@text`
 //               for a parameter of sort Str (the replay reads its handle), never its length as a number; a
 //               string the kernel could not read leaves the value unknown.
+//   capture sites  a point site labelled `P@Q`, where P is the name of a capture point of the profile (`OP.LABEL` of an
+//               `lp capture` conjunct), is that point P observed at one of its call sites (Q only tells the sites
+//               apart: a plan label is unique).  A capture is per call, so probing some call sites of an operation
+//               and not others is allowed: a call without a capture event is read at the call (eval_trace.hpp).
+//   cells       a slot whose role is `value(L)` gives `value` and the text `cell` = L: the value was loaded from
+//               the location L of the profile (stated by the plan from the source line and the static derives).
+//   closure     with RealTraceOptions::facts (a kz-static FACTS container of the traced binary), writer and alias
+//               coverage are set from the static closure, matched with the point sites of the record
+//               (static_closure.hpp); without it they stay uncovered.
 //   out values  a point site that names no point of the profile, but whose slot role names an `out`
 //               parameter of the operation of the actor's innermost open call, gives that parameter's value
 //               (out.NAME) on the call's return, unless the return carries it itself: the value the call
@@ -73,6 +82,7 @@
 #include "kz/core/phi.hpp"
 #include "kz/core/status.hpp"
 #include "kz/trace/identity_symbols.hpp"
+#include "kz/trace/static_closure.hpp"
 
 namespace kz::trace {
 
@@ -82,6 +92,16 @@ struct RealTraceOptions {
   // calling functions of a core application's creation request.  Both needed; otherwise not established.
   const SymbolIndex* symbols = nullptr;
   std::set<std::string> core_request_callers;
+  // The static closure (header, "closure"): a FACTS container of the traced binary (not owned), or null.
+  const Container* facts = nullptr;
+};
+
+// How the adapter maps one site of the run container: kind 0 not mapped, 1 call of `name` (an operation),
+// 2 return of it, 3 the point or site `name`.
+struct SiteMapEntry {
+  uint32_t site = 0;
+  uint8_t kind = 0;
+  std::string name;
 };
 
 // One thread's identities as the container states them (for the report).
@@ -124,6 +144,10 @@ struct RealTraceReport {
   uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
   bool core_evidence = false;      // symbols and core request callers were given
   std::vector<std::pair<uint32_t, uint64_t>> loss_cpus;  // per kernel loss report: (CPU ring, count)
+  std::vector<SiteMapEntry> site_map;  // per site of the run container (SITES order)
+  uint64_t cell_values = 0;        // slot values taken as `value` with a named location (`value(L)` roles)
+  bool closure_given = false;
+  std::vector<std::string> closure_lines;  // per kind and location: what the static closure established
 };
 
 // Normalized parameter / role name: lower case, without '_'.

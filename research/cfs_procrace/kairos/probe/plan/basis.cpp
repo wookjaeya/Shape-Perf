@@ -141,6 +141,7 @@ Status build_basis(const Bytes& binary, const Profile& profile, const BasisOptio
                : ps.entry_reached()                  ? anchor::resolve_entry_reached(elf, lines, ps.func, ps.enter, &t, &path)
                : ps.function_scoped()                ? anchor::resolve_call_in_function(elf, ps.func, ps.after_call, &t)
                : ps.line_start                       ? anchor::resolve_line_start(elf, lines, ps.at_file, ps.at_line, &t)
+               : !ps.at_call.empty()                 ? anchor::resolve_at_call(elf, lines, ps.at_file, ps.at_line, ps.at_call, &t)
                                                      : anchor::resolve_after_call(elf, lines, ps.at_file, ps.at_line, ps.after_call, &t);
     if (!r.ok()) return Status::error(r.code, site_error(ps, r));
     if (ps.entry_reached()) {
@@ -335,6 +336,7 @@ Status make_plan(const Profile& profile, const std::vector<const LoadedBasis*>& 
     const uint16_t want_kind = ps.kind != KZ_SITE_KIND_POINT_PROBE ? KZ_TARGET_KIND_FUNC_ENTRY
                                : ps.entry_reached()             ? KZ_TARGET_KIND_ENTRY_REACHED
                                : ps.line_start                  ? KZ_TARGET_KIND_LINE_START
+                               : !ps.at_call.empty()            ? KZ_TARGET_KIND_AT_CALL
                                                                 : KZ_TARGET_KIND_AFTER_CALL;
     if (t.kind != want_kind) return Status::error(Err::Invalid, "target '" + ps.label + "' has the wrong kind for the site");
     kz::trace::SiteSpec spec;

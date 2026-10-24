@@ -31,6 +31,10 @@
  *     jump from the named function itself: the named function's own return address).  An event of such a
  *     site is kept only where it is attributed to an open call of the named function on the same thread.
  *
+ * KZ_TARGET_KIND gains AT_CALL (2026-10-24, an enum value only; no layout changed): a point target on the
+ * `call rel32` instruction itself, where the argument registers hold what the call passes (the capture
+ * point of a value the caller read, SPEC 1.4).
+ *
  * Schema revision 2 (SPEC rev 1.3, ADR-056): the new section ACTOR_OWNERS holds app_owner, the
  * application that created / owns each thread incarnation, with its evidence level.  THREADS is
  * unchanged (version 1); a run container without ACTOR_OWNERS (every container written before) has
@@ -569,7 +573,7 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  * without a call on its line, e.g. an effect written as an assignment). */
 #define KZ_ENUM_TARGET_KIND(ITEM, P) \
   ITEM(P, NONE, 0, "none") ITEM(P, FUNC_ENTRY, 1, "func-entry") ITEM(P, AFTER_CALL, 2, "after-call") \
-  ITEM(P, LINE_START, 3, "line-start") ITEM(P, ENTRY_REACHED, 4, "entry-reached")
+  ITEM(P, LINE_START, 3, "line-start") ITEM(P, ENTRY_REACHED, 4, "entry-reached") ITEM(P, AT_CALL, 5, "at-call")
 
 #define KZ_RAW_ENUMS(D)                           \
   D(KZ_PHASE, KZ_ENUM_PHASE, 0)                   \

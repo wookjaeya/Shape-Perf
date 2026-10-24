@@ -29,7 +29,12 @@
 # the ES global, reserve, publish, failure clear).  Sites 21-25 carry the creation-side evidence of
 # app_owner (SPEC 1.2 "Creating application", 5.7 items 2 and 4, ADR-056): the start-task request
 # with the application it names, the child-task request, and the id the spawn call assigns where it
-# passes it to the new thread.  The point sites are named after the linearization points of the
+# passes it to the new thread.  Sites 26-29 (R2 remainder, 2026-10-24) give the location the AppID of the
+# send function was read from and the actor that wrote that location: the SB task's store of its own id at
+# cfe_sb_task.c:138 as the profile's publication site `sb_publication` (the same instruction as site 2, which
+# stays for the counts), and the capture point of the send's value condition at the three SB call sites that
+# pass CFE_SB_Global.AppId and that ES and EVS reach before that store (cases/R2.md section 5;
+# plan/proof_status_R2.md section 12).  The point sites are named after the linearization points of the
 # phi profile (OP.LABEL, or the shared site), so that `kz replay` maps them; plan/proof_status_R2.md
 # section 12 is the trace table (site -> source line -> effect -> conjunct).  Every line below was
 # re-read in the tree the R2 binary was built from (cFS 088b2fa8, build-native_std; the hashes are
@@ -138,3 +143,23 @@ site es.child_task.ret   ret   func=CFE_ES_CreateChildTask decoder=request-retur
 # The id OS_TaskCreate assigns (the value of its out-parameter), read where the spawn passes it to the
 # new thread: entry_arg is the 6th argument (r9); its low 4 bytes are the id.
 site osal.task_create.id entry func=OS_Posix_InternalTaskCreate_Impl decoder=spawn-id prov=osal_taskcreate_impl_arg s0=r9:u32:task_id s1=r8:u64:entry_fn s3=stack+0:u64:return_address
+
+# ---- R2 remainder: the location the passed AppID was read from, and its writer (2026-10-24) -------------
+#
+# The value the SB call sites pass as AppID is loaded from CFE_SB_Global.AppId in the same statement (the static
+# derives of the pinned bundle: the AppID argument at cfe_sb_api.c:277:50, :1185:50 and cfe_sb_priv.c:786:70 is
+# CFE_SB_Global_t.AppId with hops 0, kairos/tests/static/data/core_cpu1.golden lines 503, 525, 532).  At the
+# call instruction (at-call) rdx holds that argument (System V x86-64, third argument); the slot role
+# value(CFE_SB_Global.AppId) names the location for the replay (`cell`).  The labels are the capture point of
+# the profile, CFE_EVS_SendEventWithAppID.id_valid, with '@' and the call site (a plan label is unique).
+prov sb_api_pipe_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_api.c" lines=275-277 cite="CFE_SB_CreatePipe's debug event: CFE_EVS_SendEventWithAppID(CFE_SB_PIPE_ADDED_EID, CFE_EVS_EventType_DEBUG, CFE_SB_Global.AppId, ...)" sha256=e6e4f79f9ed774e777bc817259d86cbffcf2903f7d625d4a935c76da329874b3
+prov sb_api_sub_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_api.c" lines=1183-1185 cite="CFE_SB_SubscribeFull's debug event: CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RCVD_EID, CFE_EVS_EventType_DEBUG, CFE_SB_Global.AppId, ...)" sha256=4c888b7ea9a929d63d26c9ef7dbc463d8dcf4696a7142179242d9045c38f0a10
+prov sb_priv_report_event tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_priv.c" lines=786-786 cite="CFE_SB_MessageTxn_ReportSingleEvent: CFE_EVS_SendEventWithAppID(EventId, EventType, CFE_SB_Global.AppId, \"%s\", Message)" sha256=fae9472a7b6b3bf2d9038868a4af1de25005457200cc798e67da9a6634935f4b
+
+# The SB task's store of its own id through CFE_ES_GetAppID's out parameter (the profile's site sb_publication:
+# fn("CFE_SB_AppInit").call("CFE_ES_GetAppID", arg[0] is addr(CFE_SB_Global_t.AppId))).  After the call: the
+# store has happened on either branch of CFE_ES_GetAppID; the stored value is not read here.
+site sb_publication point at=cfe_sb_task.c:138 after-call=CFE_ES_GetAppID prov=sb_task_138 s0=rax:u32:status
+site CFE_EVS_SendEventWithAppID.id_valid@sb_api_275 point at=cfe_sb_api.c:275 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_pipe_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+site CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183 point at=cfe_sb_api.c:1183 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_sub_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+site CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786 point at=cfe_sb_priv.c:786 at-call=CFE_EVS_SendEventWithAppID prov=sb_priv_report_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id

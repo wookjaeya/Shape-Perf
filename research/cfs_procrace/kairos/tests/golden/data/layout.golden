@@ -1202,6 +1202,7 @@ enum KZ_TARGET_KIND
   0x2 AFTER_CALL "after-call"
   0x3 LINE_START "line-start"
   0x4 ENTRY_REACHED "entry-reached"
+  0x5 AT_CALL "at-call"
 enum KZ_FETCH_KIND
   0x0 NONE "none"
   0x1 MEM "mem"
@@ -1905,4 +1906,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=b398736e0c33689325da94b9fba7adcb0192da0d362256aa481279e9ce1d1fb2
+fingerprint=97f0c4f0d1fdef6e7a4f928cd43017b70b284eaaa78c086a2dbdeda726a8260b

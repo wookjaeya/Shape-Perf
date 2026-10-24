@@ -397,16 +397,32 @@ void test_execution_relation() {
   const Run none = replay(p, preamble() + kSetup + send(kNotReadyB));
   check_relation(none, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "no registration or publication of reg[0x1002]", "never registered");
   check_summary(none, "OBSERVED_VIOLATION", "never registered");  // the violation and the undetermined relation are reported apart
-  // The collector's merged order leaves the slot's identity open, so the registration's target is not fixed by
-  // the state; the identity value the record gives for W's owner names it.  The state stays open: the
-  // relation is computed, the observation is not made more decisive.
+  // The collector's merged order leaves the slot's identity open (T0 wrote it, and no edge orders T0 with W), so
+  // the registration's target is not fixed by the state; the identity value the record gives for W's confirmed
+  // owner names it.  With Options::owner_identity_targets (the default since 2026-10-24) it also fixes the
+  // registration's target: reg[0x1002] is registered by W and W's own send reads it in program order, so the
+  // occurrence is READY from the state, and its condition says that it rests on the writer's identity.  Without
+  // the option the state stays open (the reading before): the relation is computed, the observation is not made
+  // more decisive.
   const std::string merged = preamble("start=known writers=covered aliases=covered lifetime=known", true, true, true, false);
   const Run open = replay(p, merged + kSetup + kRegister + send(kBadArg));
   check_relation(open, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "whose target the record does not establish", "merged order, no identity value");
   const Run named = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg));
   check_relation(named, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "merged order, identity value");
-  check_status(named, OccStatus::Undetermined, "merged order, identity value");
-  KZ_CHECK_EQ(named.summary(), open.summary());
+  check_status(named, OccStatus::Ready, "merged order, identity value");
+  KZ_CHECK(named.dump.find("owner-identity") != std::string::npos);
+  KZ_CHECK((named.occ().summary.flags & KZ_SUMMARY_FLAG_OUTCOME_NARROWED) == 0);
+  kz::eval::Options no_identity;
+  no_identity.owner_identity_targets = false;
+  const Run named_off = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg), no_identity);
+  check_relation(named_off, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "merged order, identity value, option off");
+  check_status(named_off, OccStatus::Undetermined, "merged order, identity value, option off");
+  KZ_CHECK_EQ(named_off.summary(), open.summary());
+  KZ_CHECK(named_off.dump.find("owner-identity") == std::string::npos);
+  // an inferred owner's identity value fixes nothing
+  const Run inferred_id = replay(p, preamble("start=known writers=covered aliases=covered lifetime=known", true, true, false, false) + "owner_level W inferred\nowner_id W 0x1002\n" +
+                                        kSetup + kRegister + send(kBadArg));
+  check_status(inferred_id, OccStatus::Undetermined, "merged order, inferred owner's identity value");
   // a model trace computes no relation and prints none
   const Run model = replay(p, std::string(kSetup) + kRegister + send(kOk));
   KZ_CHECK_EQ(static_cast<int>(model.occ().relation), static_cast<int>(KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED));
@@ -611,6 +627,64 @@ void test_observation_lists() {
 
 }  // namespace
 
+
+// The state from observed effects (2026-10-24): an effect on every resource of a kind without a table returns
+// them to the initial state and is the evidence of the kind's start state from that event on (IN-03); the
+// order of different actors is read from the happens-before edges over every write of the record; a confirmed
+// owner's identity fixes the target of its own effects; the clearing writes of the execution relation (P10).
+void test_state_from_effects() {
+  const Profile p = load_edited("op init_box() {", "op zero_regs() {\n  bind symbol \"zero_regs\";\n  effect wipe: lifecycle all reg -> UNREG lp at fn(\"zero_regs\").memset(Reg_t) prov code_a;\n  prov code_a;\n}\n\nop init_box() {");
+  // the reg kind's start state is not declared: it is fixed by the observed wipe
+  const std::string head =
+      "record real\nstart_evidence init\n"
+      "adequacy kind reg writers=covered aliases=covered lifetime=known\n"
+      "observed zero_regs.wipe\nobserved sign_in.clear_reg\nobserved sign_in.set_reg\nobserved send.who_reg\n"
+      "owner_level W confirmed\nowner_id W 0x1002\nconst TABLE 4\nowner W 2\n";
+  const std::string reg = "W sign_in call\nW sign_in.set_reg pt\nW sign_in ret result=0\n";
+  // same actor: the wipe, the registration and the use are program order
+  const Run own = replay(p, head + "W zero_regs.wipe pt\n" + reg + send(kBadArg));
+  check_status(own, OccStatus::Ready, "own wipe, registration and use");
+  KZ_CHECK(own.dump.find("start state: from zero_regs.wipe #0") != std::string::npos);
+  KZ_CHECK(own.dump.find("owner-identity") != std::string::npos);
+  // no wipe: the start state stays unknown
+  const Run nowipe = replay(p, head + reg + send(kBadArg));
+  check_status(nowipe, OccStatus::Undetermined, "no wipe");
+  KZ_CHECK((nowipe.occ().reasons & KZ_WITHHOLD_START_STATE_UNKNOWN) != 0);
+  // another actor wiped: ordered with W's events only through the task creation edge
+  const std::string spawn = "T0 spawn_it call\nT0 spawn_it ret result=0 out.Handle=7\nW child_main call arg.Handle=7\n";
+  const Run created = replay(p, head + "T0 zero_regs.wipe pt\n" + spawn + reg + send(kBadArg));
+  check_status(created, OccStatus::Ready, "wipe before the creation of the user");
+  KZ_CHECK(created.finding("read from the happens-before edges of the record (1 between actors)"));
+  const Run unordered = replay(p, head + "T0 zero_regs.wipe pt\n" + reg + send(kBadArg));
+  check_status(unordered, OccStatus::Undetermined, "wipe by an actor not ordered with the user");
+  KZ_CHECK((unordered.occ().reasons & KZ_WITHHOLD_EXPLANATION_AMBIGUOUS) != 0);
+  // a write of another actor that is not ordered with the read leaves it open even when it is merged after it
+  const std::string y = "owner_level Y confirmed\nowner_id Y 0x1002\nowner Y 2\n";
+  const Run later = replay(p, head + y + "W zero_regs.wipe pt\n" + reg + send(kBadArg) + "Y sign_in call\nY sign_in.clear_reg pt\nY sign_in ret result=0\n");
+  check_status(later, OccStatus::Undetermined, "a concurrent write merged after the read");
+  KZ_CHECK((later.occ().reasons & KZ_WITHHOLD_EXPLANATION_AMBIGUOUS) != 0);
+  // ... and fixed when the write happens after the read (Y is created by W after the use)
+  const std::string after = "W spawn_it call\nW spawn_it ret result=0 out.Handle=9\nY child_main call arg.Handle=9\nY sign_in call\nY sign_in.clear_reg pt\nY sign_in ret result=0\n";
+  const Run ordered = replay(p, head + y + "W zero_regs.wipe pt\n" + reg + send(kBadArg) + after);
+  check_status(ordered, OccStatus::Ready, "a write ordered after the read");
+  // the kind without a table: the model replay returns every resource to the initial state
+  const Run model = replay(p, std::string("const TABLE 4\nowner W 2\nT0 create_all.publish pt lp.n=2 lp.pid=0x1002\n") + reg + "W zero_regs.wipe pt\n" + send(kBadArg));
+  check_status(model, OccStatus::Violating, "model: the wipe after the registration");
+  // P10: a clearing store into the captured location (Box.id := UNDEF, not a valid identity) by an actor whose
+  // owner is undetermined: counted (current) the relation is undetermined; not counted, W's publication decides
+  const std::string x = "owner X 3\nowner_level X confirmed\nowner_core W yes\n";
+  const std::string cap = "X send.who_valid pt arg.Who=0 value=0 cell=@Box.id\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
+  const std::string writes = "T9 init_box call\nT9 init_box.clear_box pt\nT9 init_box ret\nW box_pub pt\n";
+  const Run counted = replay(p, preamble() + x + kSetup + writes + cap);
+  check_relation(counted, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "P10 current");
+  kz::eval::Options alt;
+  alt.relation_clearing_writes = false;
+  const Run excluded = replay(p, preamble() + x + kSetup + writes + cap, alt);
+  check_relation(excluded, KZ_EXEC_RELATION_CORE_APPLICATION, "1 clearing write(s) not counted (P10 alternative)", "P10 alternative");
+  KZ_CHECK(excluded.occ().counterparts == std::vector<std::string>{"W"});
+  KZ_CHECK_EQ(excluded.summary(), counted.summary());  // the observation does not depend on P10
+}
+
 int main() {
   test_full_adequacy_agrees_with_model();
   test_no_initial_state_default();
@@ -624,5 +698,6 @@ int main() {
   test_derived_records();
   test_captured_location_relation();
   test_observation_lists();
+  test_state_from_effects();
   return kztest::finish("test_core_realrecord");
 }

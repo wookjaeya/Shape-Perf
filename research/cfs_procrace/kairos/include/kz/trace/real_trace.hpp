@@ -17,10 +17,13 @@
 //               generation where needed; "tid<N>" for a thread without a name.
 //   observed    the labels of the point sites that map: they were attached for the whole record.
 //   start       when the record covers the process from its first execution mapping of the traced file
-//               (a MAPS record no later than the first event), every kind and location of the profile has
-//               a known start state (INIT at program entry): start_evidence init, start=known.  Writer and
-//               alias coverage and lifetimes are NOT established by a run container (they need the
-//               plan's tracing table and the closure, SPEC 4.7, 4.1): left uncovered / unknown.
+//               (a MAPS record no later than the first event), the record starts at program entry
+//               (start_evidence init): a location with an INIT fact of the profile has a known start state.
+//               A kind's start state is not declared (2026-10-24, IN-03, OB-05): the replay takes it from an
+//               observed effect that sets every resource of the kind.
+//   lifetime    in such a record, a kind of scope `process` whose every effect that returns a resource to its
+//               initial state (an end of a lifetime in the profile) has its point observed: lifetime=known.
+//               Writer and alias coverage need the closure (below).
 //   loss        a reported loss (RUNMETA loss-present, LOSS) becomes a loss interval: a throttle interval
 //               from its start; a lost-records report from the start of the record (the kernel does not
 //               say when the lost records were written) up to the report; a loss without a record (stream
@@ -148,6 +151,7 @@ struct RealTraceReport {
   uint64_t cell_values = 0;        // slot values taken as `value` with a named location (`value(L)` roles)
   bool closure_given = false;
   std::vector<std::string> closure_lines;  // per kind and location: what the static closure established
+  std::vector<std::string> lifetime_lines;  // per kind: whether the lifetime is established, and why not
 };
 
 // Normalized parameter / role name: lower case, without '_'.

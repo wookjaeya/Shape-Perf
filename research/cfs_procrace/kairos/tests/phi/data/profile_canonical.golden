@@ -425,6 +425,44 @@ prov evs_appdata_struct {
   lines 87 100;
   sha256 "ab11d121694cadc8a23766cfca650ba4fd6429d5ccd24ced2c1a8695d4a6daaa";
 }
+prov evs_cleanup_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 178 178;
+  sha256 "92011400cc69e2c71bacecb7ec818ea3268c7f871a26b01540e68bc1606da749";
+}
+prov evs_cleanup_setfree {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 186 197;
+  sha256 "9dad409ee96443edc49bb6edbfab0311dcacb808a61a549fc955648696c289e9";
+  note "the slot of the given AppID is freed (EVS_AppDataSetFree) only where it is a match for that AppID (EVS_AppDataIsMatch)";
+}
+prov evs_earlyinit_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 54 54;
+  sha256 "7e9963ad54babbf3ce52aa5caf4333cda24c2de1ca7ccf621f9887de01f328f1";
+}
+prov evs_earlyinit_memset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 63 63;
+  sha256 "938c5eb47b03716e2441cceb327664df4230ed356eea7f29482a7cb1d4a169dc";
+  note "memset(&CFE_EVS_Global, 0, sizeof(CFE_EVS_Global)): every byte of the EVS global object becomes 0, the AppID of every registry slot included";
+}
+prov evs_global_appdata {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.h";
+  lines 116 116;
+  sha256 "20fb2732eec831ade9b680bc48d0bdedf9d9e1faac10f21aa9f195c8989df4f5";
+  note "the registry slots (EVS_AppData_t AppData[CFE_PLATFORM_ES_MAX_APPLICATIONS]) are a member of CFE_EVS_Global_t";
+}
 prov evs_h_appid_note {
   tier contract-backed;
   kind api_doc;
@@ -455,6 +493,14 @@ prov evs_reg_publish {
   lines 106 106;
   sha256 "1ac5045232ef7f06b036927192dcbcd63efc5aca5045474d1ea54f2c3b34a256";
 }
+prov evs_register_context {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 51 53;
+  sha256 "66a2eea973e6979fd7cc90fa892f48ebb729f4a362819220efc3406f5e0bb7be";
+  note "CFE_EVS_Register clears and fills the slot only after EVS_GetCurrentContext returned CFE_SUCCESS";
+}
 prov evs_register_fn {
   tier code-derived;
   kind code_pattern;
@@ -483,6 +529,14 @@ prov evs_send_squelch {
   lines 207 210;
   sha256 "6f487ff1409a491bd3a43098f0c4601f5b77eb1476ee68aa34fde03e67a74328";
 }
+prov evs_utils_context {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.c";
+  lines 71 104;
+  sha256 "b532e09db5187781ee9f039849cbb55629a331e2779e54a6c8e66e58ebe26f44";
+  note "EVS_GetCurrentContext: success only if CFE_ES_GetAppID succeeded; the slot and the AppID it returns are those of that AppID";
+}
 prov evs_utils_getbyid {
   tier code-derived;
   kind code_pattern;
@@ -496,6 +550,14 @@ prov evs_utils_ismatch {
   file "cfe/modules/evs/fsw/src/cfe_evs_utils.h";
   lines 164 167;
   sha256 "3c44baf17a538b4cc2d94a8e5d891e4ea4c8d8166e2282f9b4b4a90db0be361d";
+}
+prov evs_utils_setfree {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.h";
+  lines 148 151;
+  sha256 "05d84c02fe052330940aa4a6f5b93705554d5348924eef34fdcdc3ec18823ce6";
+  note "EVS_AppDataSetFree stores CFE_ES_APPID_UNDEFINED into the slot's AppID";
 }
 prov evs_utils_setused {
   tier code-derived;
@@ -842,7 +904,7 @@ kind evs.reg(app: Id<es.app>) {
   scope process;
   transition REG -> UNREG on clear;
   transition UNREG -> REG on register;
-  prov evs_appdata_struct, evs_reg_memset, evs_reg_publish, evs_utils_ismatch, evs_utils_setused, r_evs_reg_key_by_id;
+  prov evs_appdata_struct, evs_earlyinit_memset, evs_global_appdata, evs_reg_memset, evs_reg_publish, evs_utils_ismatch, evs_utils_setfree, evs_utils_setused, r_evs_reg_key_by_id;
 }
 loc CFE_SB_Global.AppId {
   struct "CFE_SB_Global_t";
@@ -931,6 +993,16 @@ op CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds) {
   outcome CFE_SUCCESS: ready;
   prov es_api_wait_fn;
 }
+op CFE_EVS_CleanUpApp(Id: Id<es.app>) {
+  bind symbol "CFE_EVS_CleanUpApp";
+  effect free_slot: lifecycle evs.reg(arg.Id) -> UNREG when state(evs.reg(arg.Id)) = REG lp at fn("CFE_EVS_CleanUpApp").call("EVS_AppDataSetFree") prov evs_cleanup_setfree, evs_utils_setfree;
+  prov evs_cleanup_fn, evs_cleanup_setfree;
+}
+op CFE_EVS_EarlyInit() {
+  bind symbol "CFE_EVS_EarlyInit";
+  effect clear_registry: lifecycle all evs.reg -> UNREG lp at fn("CFE_EVS_EarlyInit").memset(CFE_EVS_Global_t) prov evs_earlyinit_memset, evs_global_appdata;
+  prov evs_earlyinit_fn, evs_earlyinit_memset;
+}
 op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
   bind symbol "CFE_EVS_Register";
   effect clear_slot: lifecycle evs.reg(id(owner(exec))) -> UNREG lp at fn("CFE_EVS_Register").memset(EVS_AppData_t) prov evs_reg_memset;
@@ -939,7 +1011,7 @@ op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
   outcome CFE_EVS_APP_ILLEGAL_APP_ID: error;
   outcome CFE_EVS_UNKNOWN_FILTER: error;
   outcome CFE_SUCCESS: ready;
-  prov evs_reg_memset, evs_reg_publish, evs_register_fn;
+  prov es_apps_taskrecord_fill, es_ctx_lookup, es_getappid_ok, evs_reg_memset, evs_reg_publish, evs_register_context, evs_register_fn, evs_utils_context;
 }
 op CFE_EVS_SendEventWithAppID(EventID, EventType, stamp AppID: Id<es.app>, Spec) {
   bind symbol "CFE_EVS_SendEventWithAppID";

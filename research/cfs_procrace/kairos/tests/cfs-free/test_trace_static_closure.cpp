@@ -255,7 +255,16 @@ void test_adapter_closure_relation_container() {
   KZ_CHECK(box.writers == 2 && box.covered == 1);
   KZ_CHECK(has_prefix(box.unobserved, "Box_t.id writer memset at src/init.c:5 in init_box"));
   KZ_CHECK(t.loc_adequacy.at("Box.id").aliases_covered && !t.loc_adequacy.at("Box.id").writers_covered);
-  KZ_CHECK(t.loc_adequacy.at("Box.id").start_known);  // from the start of the record, kept
+  KZ_CHECK(t.loc_adequacy.at("Box.id").start_known);  // the INIT fact box_zero, from the start of the record, kept
+  // a kind's start state is not declared by the adapter (the replay takes it from an observed effect on all of
+  // it); its lifetime is known where every end of a lifetime in the profile is observed (none of slot's are:
+  // reset_all.zero_slots, create_all.clear, free_up.free), and trivially for a kind whose profile ends none (reg)
+  KZ_CHECK(!t.kind_adequacy.at("slot").start_known && !t.kind_adequacy.at("slot").lifetime_known);
+  KZ_CHECK(!t.kind_adequacy.at("reg").start_known);
+  KZ_CHECK_EQ(t.kind_adequacy.at("reg").lifetime_known, t.observed_points.count("sign_in.clear_reg") != 0);
+  bool lifetime_line = false;
+  for (const std::string& l : rep.lifetime_lines) lifetime_line = lifetime_line || l == "kind slot: lifetime not established: the end of a lifetime reset_all.zero_slots is not observed";
+  KZ_CHECK(lifetime_line);
   const kz::eval::StaticClosure& slot = t.kind_closure.at("slot");
   KZ_CHECK(slot.writers == 2 && slot.covered == 0);  // set_used: the call at other.c:7 is not observed; reset_all's memset: no site
   KZ_CHECK(has_prefix(slot.unobserved, "Slot_t.state writer assign at src/util.h:3 in set_used (the call at src/other.c:7 (free_up) is not observed)"));

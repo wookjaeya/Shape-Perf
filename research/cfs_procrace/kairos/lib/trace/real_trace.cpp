@@ -437,17 +437,39 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   if (!events.empty())
     for (const kz_map_ev& mp : maps)
       if (mp.t_ns <= events.front().t_ns) report->starts_at_exec = true;
+  // Start state (IN-03, OB-05; 2026-10-24): what the record covers from the process start is the program entry,
+  // so a location with an INIT fact of the profile (`init NAME: loc L = ...`, with its citation) has a known
+  // start state.  A kind's start state is not declared here: the replay takes it from an observed effect that
+  // sets every resource of the kind (the initialization code, e.g. the memset of a whole table), from that
+  // event on (eval_trace.hpp).  Lifetime (ADR-055, IN-04): a kind of scope `process` whose every effect that
+  // returns a resource to the kind's initial state (where the profile ends a lifetime) has its point observed,
+  // in a record that covers the process from its start: the profile's life cycle is then tracked from the
+  // first instance on.
   if (report->starts_at_exec) {
     out->start_evidence = KZ_START_EVIDENCE_INIT;
     for (const phi::KindDecl& k : p.kinds) {
       if (!k.derived.empty()) continue;
       eval::Adequacy a;
-      a.start_known = true;
+      bool ends_observed = k.scope.empty() || k.scope == "process";
+      for (const phi::OpDecl& op : p.ops)
+        for (const phi::EffectDecl& e : op.effects) {
+          if (e.kind != phi::EffectKind::Set || e.to_state != k.initial) continue;
+          const int32_t ki = !e.all_kind.empty() ? p.find_kind(e.all_kind) : (e.res ? e.res->sort.kind_index : -1);
+          if (ki < 0 || p.kinds[static_cast<size_t>(ki)].name != k.name) continue;
+          const std::string pt = e.lp.kind == phi::LpKind::None ? std::string() : eval::lp_name(op, e.label, e.lp);
+          if (pt.empty() || out->observed_points.count(pt) == 0) {
+            ends_observed = false;
+            report->lifetime_lines.push_back("kind " + k.name + ": lifetime not established: the end of a lifetime " + op.name + "." + e.label + " is not observed");
+          }
+        }
+      a.lifetime_known = ends_observed;
+      if (ends_observed) report->lifetime_lines.push_back("kind " + k.name + ": lifetime established (scope process, every end of a lifetime observed, record from the process start)");
       out->kind_adequacy[k.name] = a;
     }
     for (const phi::LocDecl& l : p.locs) {
       eval::Adequacy a;
-      a.start_known = true;
+      for (const phi::InitDecl& in : p.inits)
+        if (in.is_loc && in.loc_name == l.name) a.start_known = true;
       out->loc_adequacy[l.name] = a;
     }
   }
@@ -550,7 +572,8 @@ std::string report_text(const RealTraceReport& r) {
                                 std::to_string(r.threads - r.owners_core - r.owners_not_core)
                           : std::string("not established (no basis symbols or no core request caller given)")) +
          "\n";
-  out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies)" : "not shown to be the process start (start state unknown)") + "\n";
+  out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies; a kind's start state comes from an observed effect on all of it)" : "not shown to be the process start (start state unknown)") + "\n";
+  for (const std::string& l : r.lifetime_lines) out += l + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
   for (const auto& lc : r.loss_cpus)
@@ -558,9 +581,9 @@ std::string report_text(const RealTraceReport& r) {
   if (r.cell_values != 0) out += "values loaded from a named location (value(L) slots) " + std::to_string(r.cell_values) + "\n";
   if (r.closure_given) {
     for (const std::string& l : r.closure_lines) out += l + "\n";
-    out += "lifetimes, order between actors: not established by a run container; writer and alias coverage: from the static closure above\n";
+    out += "writer and alias coverage: from the static closure above; order between actors: from the happens-before edges in the replay (the merged order is not used)\n";
   } else {
-    out += "writer and alias coverage, lifetimes, order between actors: not established by a run container (no static closure given)\n";
+    out += "writer and alias coverage: not established by a run container (no static closure given); order between actors: from the happens-before edges in the replay\n";
   }
   return out;
 }

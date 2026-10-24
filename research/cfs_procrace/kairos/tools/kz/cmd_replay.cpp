@@ -3,6 +3,7 @@
 //   kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...
 //             [--predicate RULE=EXPR]... [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off]
 //             [--compare-narrowing] [--facts <facts.kz> --static-basis <basis.kz>] [--out <file.kz>] [--emit-trace]
+//             [--clearing-writes counted|excluded] [--owner-identity-targets on|off]
 //
 // Builds the real-record trace of the container (kz/trace/real_trace.hpp) and replays it with the profile
 // in the real-record mode of kz/core/eval_trace.hpp: a resource the record does not fix is unknown, a result
@@ -21,6 +22,12 @@
 // leaves open); --compare-narrowing prints the counts of both readings side by side (the main output stays
 // the selected one).  --out writes the summaries, model ids, adequacy, identities and app_owner records of
 // the selected reading to a container (kz/trace/replay_container.hpp) that kz-dump reads.
+// --clearing-writes excluded replays with the alternative of the pending PI decision P10 (a write that clears the
+// key resource or stores an invalid identity into a captured location does not make its actor an actor of the
+// execution relation; current: counted).  --owner-identity-targets off keeps the effect operands that only the
+// writer's confirmed creation identity fixes open (the reading before 2026-10-24; default on).  The counts end
+// with the basis of every decided occurrence: state (with how many rest on the writer's identity), outcome
+// (fixed by the returned code), or withheld.
 //
 // --facts gives the static closure of the traced binary (a kz-static FACTS container) with --static-basis, its
 // parent: writer and alias coverage are then set where the closure says so (kz/trace/static_closure.hpp); the
@@ -54,6 +61,7 @@ void usage(FILE* f) {
                "usage: kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...\n"
                "                 [--predicate RULE=EXPR]... [--basis B --core-request-caller FUNC...] [--outcome-narrowing on|off]\n"
                "                 [--compare-narrowing] [--facts F --static-basis S] [--out FILE.kz] [--emit-trace]\n"
+               "                 [--clearing-writes counted|excluded] [--owner-identity-targets on|off]\n"
                "  --profile P         the profile (a directory stands for its *.kzp files, in name order)\n"
                "  --const NAME=VALUE  the value of a `ref eval` constant (a table size), from its reference\n"
                "  --version C=V       the version of a component, for the guards of rules and effects\n"
@@ -65,7 +73,9 @@ void usage(FILE* f) {
                "  --facts F           the static closure (kz-static facts) of the traced binary: writer and alias coverage\n"
                "  --static-basis S    the kz-static basis container that F was extracted from (needs --basis)\n"
                "  --out FILE          write the summary view records of the selected reading to a container\n"
-               "  --emit-trace        print the real-record trace instead of replaying it\n");
+               "  --emit-trace        print the real-record trace instead of replaying it\n"
+               "  --clearing-writes counted|excluded  whether a clearing write makes its actor an actor of the relation (P10; default counted)\n"
+               "  --owner-identity-targets on|off  whether a confirmed owner's identity fixes the operands of its effects (default on)\n");
 }
 
 std::string enum_name(const char* en, uint64_t v) {
@@ -77,9 +87,20 @@ std::string enum_name(const char* en, uint64_t v) {
 // Counts of the summary view: observation, relation, relation x observation, outcome-narrowed.
 std::string counts_text(const kz::eval::Result& r, const char* title) {
   std::map<std::string, uint64_t> obs, rel, cross;
-  uint64_t narrowed = 0, inferred = 0, core_unknown = 0;
+  uint64_t narrowed = 0, inferred = 0, core_unknown = 0, by_state = 0, by_identity = 0, withheld = 0;
   for (const kz::eval::Occurrence& o : r.occurrences) {
     const bool err = (o.summary.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) != 0;
+    // the basis of the summary: withheld, fixed by the returned code (outcome-narrowed), or the computed state
+    if (err || o.summary.observation == KZ_OBS_INCONCLUSIVE || o.summary.observation == KZ_OBS_NONE) {
+      ++withheld;
+    } else if ((o.summary.flags & KZ_SUMMARY_FLAG_OUTCOME_NARROWED) == 0) {
+      ++by_state;
+      for (const kz::eval::ConjunctResult& cr : o.conjuncts)
+        if (cr.owner_identity) {
+          ++by_identity;
+          break;
+        }
+    }
     const std::string ob = err ? std::string("analysis-input-error") : enum_name("KZ_OBS", o.summary.observation);
     const std::string re = enum_name("KZ_EXEC_RELATION", o.summary.relation);
     ++obs[ob];
@@ -94,6 +115,8 @@ std::string counts_text(const kz::eval::Result& r, const char* title) {
   for (const auto& kv : obs) out += "  observation " + kv.first + " " + std::to_string(kv.second) + "\n";
   for (const auto& kv : rel) out += "  relation " + kv.first + " " + std::to_string(kv.second) + "\n";
   for (const auto& kv : cross) out += "  relation/observation " + kv.first + " " + std::to_string(kv.second) + "\n";
+  out += "  basis state " + std::to_string(by_state) + " (of them resting on a writer's confirmed identity " + std::to_string(by_identity) + "), outcome-narrowed " +
+         std::to_string(narrowed) + ", withheld " + std::to_string(withheld) + "\n";
   return out;
 }
 
@@ -124,7 +147,7 @@ bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceTe
 }
 
 int run(int argc, char** argv) {
-  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path;
+  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path, clearing = "counted", identity = "on";
   std::vector<std::string> profile_args, consts, versions, predicates, core_callers;
   bool emit = false, compare = false;
   for (int i = 1; i < argc; ++i) {
@@ -149,10 +172,17 @@ int run(int argc, char** argv) {
       if (!value(&versions)) return 1;
     } else if (a == "--predicate") {
       if (!value(&predicates)) return 1;
-    } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing" || a == "--facts" || a == "--static-basis") {
+    } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing" || a == "--facts" || a == "--static-basis" || a == "--clearing-writes" ||
+               a == "--owner-identity-targets") {
       std::vector<std::string> v;
       if (!value(&v)) return 1;
-      (a == "--basis" ? basis_path : a == "--out" ? out_path : a == "--facts" ? facts_path : a == "--static-basis" ? static_basis_path : narrowing) = v.front();
+      (a == "--basis"                    ? basis_path
+       : a == "--out"                    ? out_path
+       : a == "--facts"                  ? facts_path
+       : a == "--static-basis"           ? static_basis_path
+       : a == "--clearing-writes"        ? clearing
+       : a == "--owner-identity-targets" ? identity
+                                         : narrowing) = v.front();
     } else if (a == "--core-request-caller") {
       if (!value(&core_callers)) return 1;
     } else if (a == "--compare-narrowing") {
@@ -169,7 +199,8 @@ int run(int argc, char** argv) {
       return 1;
     }
   }
-  if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!core_callers.empty() && basis_path.empty()) ||
+  if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (clearing != "counted" && clearing != "excluded") ||
+      (identity != "on" && identity != "off") || (!core_callers.empty() && basis_path.empty()) ||
       (facts_path.empty() != static_basis_path.empty()) || (!facts_path.empty() && basis_path.empty())) {
     usage(stderr);
     return 1;
@@ -295,6 +326,8 @@ int run(int argc, char** argv) {
     options.versions[v.substr(0, eq)] = v.substr(eq + 1);
   }
   options.outcome_narrowing = narrowing == "on";
+  options.relation_clearing_writes = clearing == "counted";
+  options.owner_identity_targets = identity == "on";
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {
@@ -303,6 +336,8 @@ int run(int argc, char** argv) {
   }
   std::printf("kz replay %s (real record)\nartifact_sha256 %s\n", path.c_str(), kz::to_hex(c.artifact_hash()).c_str());
   std::printf("outcome narrowing %s%s\n", narrowing.c_str(), narrowing == "on" ? " (current behaviour; PI decision P1 pending)" : " (the alternative of PI decision P1)");
+  std::printf("clearing writes %s%s\n", clearing.c_str(), clearing == "counted" ? " in the execution relation (current behaviour; PI decision P10 pending)" : " from the execution relation (the alternative of PI decision P10)");
+  std::printf("owner identity targets %s%s\n", identity.c_str(), identity == "on" ? " (a confirmed owner's creation identity fixes the operands of its effects)" : " (effect operands stay open where the state does not fix them)");
   if (!facts_path.empty()) std::printf("static closure %s artifact_sha256 %s (basis %s)\n", facts_path.c_str(), kz::to_hex(facts.artifact_hash()).c_str(), kz::to_hex(static_basis.artifact_hash()).c_str());
   std::fputs(kz::trace::report_text(report).c_str(), stdout);
   std::printf("\n");
@@ -334,6 +369,8 @@ int run(int argc, char** argv) {
     in.tool_sha256 = KZ_THIS_TOOL_HASH("kz");
     in.basis.push_back({"replay.mode", "real-record"});
     in.basis.push_back({"replay.outcome_narrowing", narrowing});
+    in.basis.push_back({"replay.clearing_writes", clearing});
+    in.basis.push_back({"replay.owner_identity_targets", identity});
     for (const auto& kv : ropt.consts) in.basis.push_back({"replay.const." + kv.first, std::to_string(kv.second)});
     for (const auto& kv : options.versions) in.basis.push_back({"replay.version." + kv.first, kv.second});
     for (const std::string& pr : predicates) in.basis.push_back({"replay.predicate", pr});

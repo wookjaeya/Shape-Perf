@@ -25,7 +25,13 @@ op CFE_EVS_SendEventWithAppID(EventID, EventType, stamp AppID: Id<es.app>, Spec)
   prov evs_send_fn, evs_send_check, evs_send_squelch, evs_utils_getbyid, evs_utils_ismatch, sb_api_event_site;
 }
 
-# Registration with EVS: the slot is cleared, then published (without a lock).
+# Registration with EVS: the slot is cleared, then published (without a lock).  Both points are reached only
+# after EVS_GetCurrentContext succeeded (cfe_evs.c:51-53), so the slot is that of the AppID CFE_ES_GetAppID
+# returned to the caller: the AppId of the App record that the caller's task record names, checked to match
+# (cfe_es_resource.c:308-341, cfe_es_api.c:752-756); the task record's AppId is the ParentAppId of the request
+# that created the task (cfe_es_apps.c:694-703).  That is id(owner(exec)), and for an actor whose app_owner is
+# confirmed it is the identity value of its creation request (the replay's owner identity targets; the step from
+# the task record to the App record is the trusted A-OWNER, 50_trusted.kzp).
 op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
   bind symbol "CFE_EVS_Register";
   effect clear_slot: lifecycle evs.reg(id(owner(exec))) -> UNREG lp at fn("CFE_EVS_Register").memset(EVS_AppData_t) prov evs_reg_memset;
@@ -35,7 +41,26 @@ op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
   outcome CFE_EVS_UNKNOWN_FILTER: error;
   outcome CFE_ES_BAD_ARGUMENT: error;
   outcome CFE_EVS_APP_ILLEGAL_APP_ID: error;
-  prov evs_register_fn, evs_reg_memset, evs_reg_publish;
+  prov evs_register_fn, evs_reg_memset, evs_reg_publish, evs_register_context, evs_utils_context, es_getappid_ok, es_ctx_lookup, es_apps_taskrecord_fill;
+}
+
+# EarlyInit of EVS clears its whole global object, the registry slots included (cfe_evs_task.h:116): every slot's
+# AppID becomes 0, which is no valid AppId, so no AppId is registered (R2 state-based round, 2026-10-24).  The
+# function is called through the function pointer of the core module table (cfe_es_start.c:762); the point is the
+# memset itself.  An effect on every resource of a kind without a table returns them to the initial state.
+op CFE_EVS_EarlyInit() {
+  bind symbol "CFE_EVS_EarlyInit";
+  effect clear_registry: lifecycle all evs.reg -> UNREG lp at fn("CFE_EVS_EarlyInit").memset(CFE_EVS_Global_t) prov evs_earlyinit_memset, evs_global_appdata;
+  prov evs_earlyinit_fn, evs_earlyinit_memset;
+}
+
+# The cleanup of an application's EVS slot (called by the ES cleanup of the application): the slot of the given
+# AppID is freed only where it is a match for that AppID, by storing CFE_ES_APPID_UNDEFINED (R2 state-based round,
+# 2026-10-24).  The uint32 parameter is the AppId's integer value (CFE_ResourceId_FromInteger, cfe_evs_task.c:184).
+op CFE_EVS_CleanUpApp(Id: Id<es.app>) {
+  bind symbol "CFE_EVS_CleanUpApp";
+  effect free_slot: lifecycle evs.reg(arg.Id) -> UNREG when state(evs.reg(arg.Id)) = REG lp at fn("CFE_EVS_CleanUpApp").call("EVS_AppDataSetFree") prov evs_cleanup_setfree, evs_utils_setfree;
+  prov evs_cleanup_fn, evs_cleanup_setfree;
 }
 
 # ---------------------------------------------------------------------------------------------

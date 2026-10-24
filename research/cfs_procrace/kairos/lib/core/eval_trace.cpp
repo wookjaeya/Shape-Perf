@@ -326,6 +326,7 @@ struct RealEval {
   uint32_t reasons = 0;               // KZ_WITHHOLD of the unknown inputs it read
   uint32_t adequacy = kAllAdequacy;   // KZ_ADEQ: what the record establishes for what it read
   bool contradicted = false;
+  bool owner_identity = false;        // it read a resource whose state an identity-resolved effect set
 };
 
 bool exact_key(const AVal& r, std::vector<int64_t>* key) {
@@ -400,16 +401,129 @@ struct SpawnRec {
   uint64_t entry = 0;
 };
 
+// ---- real records: the order of different actors from the happens-before edges ------------------
+//
+// SPEC 4.8 "order": the program order of each actor and the confirmed synchronization edges are kept; the
+// collector's merged order is never the execution order.  A first pass over the record gives its edges and
+// every write it applied (the whole record, not only the writes before a read); the next pass reads a value
+// that another actor wrote as fixed only where every write of it happens before the read and is merged before
+// it, or happens after the read and is merged after it, and the writes before it are ordered among themselves.
+// The passes repeat until the writes a pass applies are among those the previous passes logged.
+
+// Every write a pass applied, by event: of one resource, of any resource of a kind (an effect on every
+// instance, or one whose target the record does not fix) and of a location (any location: logged for each).
+struct WriteLog {
+  std::map<ResId, std::set<uint64_t>> res;
+  std::map<int32_t, std::set<uint64_t>> kind_wide;
+  std::map<int32_t, std::set<uint64_t>> loc;
+  bool covered_by(const WriteLog& o) const {
+    auto has = [](const std::map<int32_t, std::set<uint64_t>>& m, int32_t k, uint64_t e) {
+      const auto it = m.find(k);
+      return it != m.end() && it->second.count(e) != 0;
+    };
+    for (const auto& kv : res) {
+      const auto it = o.res.find(kv.first);
+      for (uint64_t e : kv.second)
+        if ((it == o.res.end() || it->second.count(e) == 0) && !has(o.kind_wide, kv.first.kind, e)) return false;
+    }
+    for (const auto& kv : kind_wide)
+      for (uint64_t e : kv.second)
+        if (!has(o.kind_wide, kv.first, e)) return false;
+    for (const auto& kv : loc)
+      for (uint64_t e : kv.second)
+        if (!has(o.loc, kv.first, e)) return false;
+    return true;
+  }
+  void merge(const WriteLog& o) {
+    for (const auto& kv : o.res) res[kv.first].insert(kv.second.begin(), kv.second.end());
+    for (const auto& kv : o.kind_wide) kind_wide[kv.first].insert(kv.second.begin(), kv.second.end());
+    for (const auto& kv : o.loc) loc[kv.first].insert(kv.second.begin(), kv.second.end());
+  }
+};
+
+// The happens-before order of a pass's edges as vector clocks over the actors' chains (program order is the
+// chain of an actor's events, as everywhere in the replay of a real record).
+struct HbOrder {
+  std::vector<uint32_t> actor;            // per event: the actor's index
+  std::vector<uint32_t> pos;              // per event: its position in its actor's chain (from 1)
+  std::vector<std::vector<uint32_t>> vc;  // per event: per actor, the last position that happens before or is it
+  size_t edges = 0;                       // cross-actor edges used
+  bool before(uint64_t a, uint64_t b) const {  // a happens before b
+    if (a == b || a >= vc.size() || b >= vc.size()) return false;
+    return vc[static_cast<size_t>(b)][actor[static_cast<size_t>(a)]] >= pos[static_cast<size_t>(a)];
+  }
+};
+
+struct Prior {
+  HbOrder hb;
+  WriteLog writes;
+};
+
+// Builds the order of the first `limit` events of `t` from `edges`.  False (with the reason) where it cannot
+// stand for the order: an edge that goes back in the merged order, or a size beyond what is kept.
+bool build_hb_order(const Trace& t, const std::vector<HbEdge>& edges, uint64_t limit, HbOrder* out, std::string* why) {
+  const size_t n = static_cast<size_t>(std::min<uint64_t>(limit, t.events.size()));
+  std::map<std::string, uint32_t> index;
+  for (size_t i = 0; i < n; ++i) index.emplace(t.events[i].actor, static_cast<uint32_t>(index.size()));
+  const size_t na = index.size();
+  if (n != 0 && na > (size_t{1} << 26) / n) {
+    *why = "the record has too many events and actors for the order table (" + std::to_string(n) + " x " + std::to_string(na) + ")";
+    return false;
+  }
+  std::vector<std::vector<uint64_t>> incoming(n);
+  for (const HbEdge& e : edges) {
+    if (e.from >= n || e.to >= n) continue;
+    if (t.events[static_cast<size_t>(e.from)].actor == t.events[static_cast<size_t>(e.to)].actor) continue;  // program order
+    if (e.from >= e.to) {
+      *why = "edge " + e.rule + " #" + std::to_string(e.from) + " -> #" + std::to_string(e.to) + " goes back in the merged order";
+      return false;
+    }
+    incoming[static_cast<size_t>(e.to)].push_back(e.from);
+    ++out->edges;
+  }
+  out->actor.assign(n, 0);
+  out->pos.assign(n, 0);
+  out->vc.assign(n, std::vector<uint32_t>(na, 0));
+  std::vector<int64_t> last(na, -1);
+  std::vector<uint32_t> count(na, 0);
+  for (size_t i = 0; i < n; ++i) {
+    const uint32_t a = index[t.events[i].actor];
+    out->actor[i] = a;
+    out->pos[i] = ++count[a];
+    std::vector<uint32_t>& v = out->vc[i];
+    if (last[a] >= 0) v = out->vc[static_cast<size_t>(last[a])];
+    for (uint64_t f : incoming[i]) {
+      const std::vector<uint32_t>& w = out->vc[static_cast<size_t>(f)];
+      for (size_t k = 0; k < na; ++k) v[k] = std::max(v[k], w[k]);
+    }
+    v[a] = out->pos[i];
+    last[a] = static_cast<int64_t>(i);
+  }
+  return true;
+}
+
 class Replayer {
  public:
-  Replayer(const Profile& p, const Trace& t, const Options& o, Result* r) : p_(p), t_(t), o_(o), r_(*r) {}
+  Replayer(const Profile& p, const Trace& t, const Options& o, Result* r, const Prior* prior = nullptr) : p_(p), t_(t), o_(o), r_(*r), prior_(prior) {}
   Status run();
+  // After run() on a real record: the writes this pass applied, and the order of its edges (false, with the
+  // reason, where the edges cannot stand for the order of different actors).
+  const WriteLog& writes() const { return log_; }
+  bool order_of_edges(HbOrder* out, std::string* why) const {
+    if (any_handler_) {
+      *why = "an actor began a new handler (program order is not one chain per actor)";
+      return false;
+    }
+    const uint64_t limit = r_.terminated ? r_.terminal_event + 1 : t_.events.size();
+    return build_hb_order(t_, r_.edges, limit, out, why);
+  }
 
  private:
   const Profile& p_;
   const Trace& t_;
   const Options& o_;
   Result& r_;
+  const Prior* prior_ = nullptr;  // real records: the order and writes of the previous pass, or null
   ConcreteState st_;
 
   std::map<std::string, std::vector<PointRef>> points_;
@@ -444,6 +558,20 @@ class Replayer {
   std::vector<bool> kind_contra_, loc_contra_;        // the record contradicted the replayed state
   std::map<ResId, std::set<std::string>> res_writers_;  // the actors whose recorded writes set a resource
   std::map<int32_t, std::set<std::string>> loc_writers_;
+  std::map<int32_t, std::set<std::string>> kind_wide_writers_;  // the actors of effects on every resource of a kind without a table
+  WriteLog log_;                  // every write this pass applied (the next pass's prior)
+  uint64_t cur_event_ = 0;        // the event being replayed
+  bool any_handler_ = false;      // some actor began a new handler (mark handler_begin)
+  // Resources whose replayed state was last set by an effect whose target or value is fixed only by the writer's
+  // own identity (Options::owner_identity_targets).
+  std::set<ResId> identity_res_;
+  std::vector<std::string> kind_start_, loc_start_;  // the observed effect that fixed the start state, where one did
+  bool identity_of(const std::string& actor) const;
+  RealEval effect_operand(const Expr& e, const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool resource, bool* by_identity);
+  bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader) const;
+  bool clearing_value(int32_t loc, int64_t v) const;
+  void fix_start_kind(int32_t kind, const std::string& what, uint64_t event);
+  void fix_start_loc(int32_t loc, const std::string& what, uint64_t event);
   // The registrations and publications in the record (the execution relation, SPEC 1.1): every effect on a
   // resource that may have been applied, with its target read with the writer's own identity.
   struct Publication {
@@ -451,6 +579,7 @@ class Replayer {
     std::vector<int64_t> key;
     bool exact = false;   // the target is established
     bool maybe = false;   // the effect may not have been applied (a `filter` guard the record leaves open)
+    bool clearing = false;  // it returns the resource to its kind's initial state (P10)
     std::string actor;
   };
   std::vector<Publication> pubs_;
@@ -461,6 +590,7 @@ class Replayer {
     int32_t loc = -1;
     bool maybe = false;   // the effect may not have been applied (a `filter` the record leaves open)
     std::string actor;
+    bool clearing = false;  // the value stored is known and is not a valid identity of the kind the location holds (P10)
   };
   std::vector<LocWrite> loc_writes_;
   // A site of the profile whose call passes the address of a location's field (`arg[i] is addr(T.F)`, `bind
@@ -660,6 +790,8 @@ void Replayer::prepare_real() {
   loc_adeq_.assign(nl, 0);
   kind_contra_.assign(nk, false);
   loc_contra_.assign(nl, false);
+  kind_start_.assign(nk, std::string());
+  loc_start_.assign(nl, std::string());
   std::vector<std::vector<std::string>> kind_unobserved(nk), loc_unobserved(nl);
   std::vector<std::string> any_loc_unobserved;  // stores through a pointer: any location
   kind_wpoints_.assign(nk, {});
@@ -777,11 +909,13 @@ void Replayer::apply_losses(uint64_t position) {
 
 void Replayer::untrack_kind(int32_t kind, uint32_t why) {
   if (kind < 0 || static_cast<size_t>(kind) >= kind_reasons_.size() || !p_.kinds[static_cast<size_t>(kind)].derived.empty()) return;
+  log_.kind_wide[kind].insert(cur_event_);  // a write that may have hit any resource of the kind
   kind_reasons_[static_cast<size_t>(kind)] |= why != 0 ? why : static_cast<uint32_t>(KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED);
 }
 
 void Replayer::untrack_loc(int32_t loc, uint32_t why) {
   if (loc < 0 || static_cast<size_t>(loc) >= loc_reasons_.size()) return;
+  log_.loc[loc].insert(cur_event_);
   loc_reasons_[static_cast<size_t>(loc)] |= why != 0 ? why : static_cast<uint32_t>(KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
 }
 
@@ -792,6 +926,99 @@ void Replayer::contradict(int32_t kind, int32_t loc, uint64_t event, const std::
   if (loc >= 0 && static_cast<size_t>(loc) < loc_contra_.size()) loc_contra_[static_cast<size_t>(loc)] = true;
   r_.partial = true;
   finding(event, "real record: " + what + ": the record contradicts the replayed state (analysis input error for what reads it)");
+}
+
+// Whether a read at event `at` by `reader` sees, in every explanation, the value the writes merged before it
+// leave: every write of it (`writes` and `more`, the previous pass's log of the whole record) is the reader's
+// own (program order), or happens before the read and is merged before it, or happens after the read and is
+// merged after it; and the writes before the read are ordered among themselves.
+bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader) const {
+  if (prior_ == nullptr) return false;
+  const HbOrder& hb = prior_->hb;
+  std::vector<uint64_t> before;
+  auto one = [&](uint64_t w) {
+    if (w == at) return true;  // the event's own effects (program order)
+    if (w >= t_.events.size()) return false;
+    if (t_.events[static_cast<size_t>(w)].actor == reader) {
+      if (w < at) before.push_back(w);
+      return true;
+    }
+    if (w < at && hb.before(w, at)) {
+      before.push_back(w);
+      return true;
+    }
+    return w > at && hb.before(at, w);
+  };
+  for (uint64_t w : writes)
+    if (!one(w)) return false;
+  if (more != nullptr)
+    for (uint64_t w : *more)
+      if (!one(w)) return false;
+  std::sort(before.begin(), before.end());
+  before.erase(std::unique(before.begin(), before.end()), before.end());
+  for (size_t i = 0; i + 1 < before.size(); ++i) {
+    const uint64_t x = before[i], y = before[i + 1];
+    if (t_.events[static_cast<size_t>(x)].actor != t_.events[static_cast<size_t>(y)].actor && !hb.before(x, y)) return false;
+  }
+  return true;
+}
+
+// Whether the identity value the record gives for the actor's app_owner may fix the target of its effects
+// (Options::owner_identity_targets): only for a `confirmed` owner whose identity value is recorded.
+bool Replayer::identity_of(const std::string& actor) const {
+  if (!o_.owner_identity_targets) return false;
+  const auto lv = t_.owner_levels.find(actor);
+  return lv != t_.owner_levels.end() && lv->second == KZ_OWNER_LEVEL_CONFIRMED && t_.owner_ids.count(actor) != 0 && t_.owners.count(actor) != 0;
+}
+
+// An operand of an effect (its resource, id or value) over the explanations of the record.  Where it is not
+// fixed and the writer's owner is confirmed, it is read again with the writer's own identity for
+// `id(owner(exec))` (the identity value of its creation request); *by_identity says that this decided it.
+RealEval Replayer::effect_operand(const Expr& e, const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool resource, bool* by_identity) {
+  *by_identity = false;
+  RealEval r = evaluate_real(e, op, &eff.lp, ev, frame_args);
+  auto exact = [&](const RealEval& x) {
+    std::vector<int64_t> key;
+    int64_t v = 0;
+    return resource ? (!x.v.must_be_undefined && exact_key(x.v, &key)) : exact_value(x.v, &v);
+  };
+  if (exact(r) || !identity_of(ev.actor)) return r;
+  RealEval ri = evaluate_real(e, op, &eff.lp, ev, frame_args, true);
+  if (!exact(ri)) return r;
+  *by_identity = true;
+  return ri;
+}
+
+// Whether a value stored into a location is known not to be a valid identity of the kind the location holds
+// (a clearing write, P10).
+bool Replayer::clearing_value(int32_t loc, int64_t v) const {
+  if (loc < 0 || static_cast<size_t>(loc) >= p_.locs.size()) return false;
+  const phi::Sort& s = p_.locs[static_cast<size_t>(loc)].holds.resolved;
+  if (s.kind != phi::SortKind::Id || s.kind_index < 0) return false;
+  const KindDecl& k = p_.kinds[static_cast<size_t>(s.kind_index)];
+  if (!k.ids.present) return false;
+  const uint32_t off = static_cast<uint32_t>(static_cast<uint32_t>(v) - static_cast<uint32_t>(k.ids.base));
+  return static_cast<int64_t>(off) > k.ids.serial_max;
+}
+
+// An observed effect that sets every resource of a kind (or a location) to a fixed state (value) is the
+// evidence of its start state from that event on (SPEC 4.8 "start state": the initialization code, IN-03).
+void Replayer::fix_start_kind(int32_t kind, const std::string& what, uint64_t event) {
+  if (kind < 0 || static_cast<size_t>(kind) >= kind_reasons_.size()) return;
+  const size_t k = static_cast<size_t>(kind);
+  if ((kind_reasons_[k] & KZ_WITHHOLD_START_STATE_UNKNOWN) == 0) return;
+  kind_reasons_[k] &= ~static_cast<uint32_t>(KZ_WITHHOLD_START_STATE_UNKNOWN);
+  kind_adeq_[k] |= KZ_ADEQ_START_STATE_KNOWN;
+  kind_start_[k] = "from " + what + " #" + std::to_string(event);
+}
+
+void Replayer::fix_start_loc(int32_t loc, const std::string& what, uint64_t event) {
+  if (loc < 0 || static_cast<size_t>(loc) >= loc_reasons_.size()) return;
+  const size_t l = static_cast<size_t>(loc);
+  if ((loc_reasons_[l] & KZ_WITHHOLD_START_STATE_UNKNOWN) == 0) return;
+  loc_reasons_[l] &= ~static_cast<uint32_t>(KZ_WITHHOLD_START_STATE_UNKNOWN);
+  loc_adeq_[l] |= KZ_ADEQ_START_STATE_KNOWN;
+  loc_start_[l] = "from " + what + " #" + std::to_string(event);
 }
 
 bool Replayer::overlaps_loss(uint64_t from, uint64_t to) const {
@@ -881,30 +1108,60 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (fixed(kv.first.first)) entry(kv.first.first).tags[kv.first.second] = 1ull << kv.second;
   // Order (SPEC 4.8, 5.8): the merged order of a record is not the execution order of different actors.
   // A resource or location that an actor other than the reader wrote in the record may hold any of the
-  // values of the interleavings, unless the record declares the order of its events established.
+  // values of the interleavings, unless the record declares the order of its events established, or (with
+  // the previous pass's order and writes) every write of it is ordered with this read.
   auto foreign = [&](const std::set<std::string>& writers) {
     for (const std::string& w : writers)
       if (w != ev.actor) return true;
     return false;
   };
+  auto any_res = [&](int32_t kind) {
+    const KindDecl& k = p_.kinds[static_cast<size_t>(kind)];
+    AbstractRes any;
+    any.states = k.states.size() >= 64 ? ~0ull : ((1ull << k.states.size()) - 1);
+    for (size_t ti = 0; ti < k.tags.size(); ++ti)
+      any.tags[static_cast<int32_t>(ti)] = k.tags[ti].values.size() >= 64 ? ~0ull : ((1ull << k.tags[ti].values.size()) - 1);
+    if (k.ids.present) {
+      any.has_id = true;
+      any.id = {0, 0xFFFFFFFFll};
+    }
+    return any;
+  };
   std::set<ResId> order_open;
-  std::set<int32_t> order_open_kinds, order_open_locs;
-  if (!t_.order_established) {
-    for (const auto& kv : res_writers_) {
-      if (!fixed(kv.first) || !foreign(kv.second)) continue;
-      const KindDecl& k = p_.kinds[static_cast<size_t>(kv.first.kind)];
-      AbstractRes any;
-      any.states = k.states.size() >= 64 ? ~0ull : ((1ull << k.states.size()) - 1);
-      for (size_t ti = 0; ti < k.tags.size(); ++ti)
-        any.tags[static_cast<int32_t>(ti)] = k.tags[ti].values.size() >= 64 ? ~0ull : ((1ull << k.tags[ti].values.size()) - 1);
-      if (k.ids.present) {
-        any.has_id = true;
-        any.id = {0, 0xFFFFFFFFll};
-      }
-      a.res[kv.first] = any;
+  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole;
+  auto open_whole_kind = [&](int32_t kind) {
+    // a write that may have hit any resource of the kind: every resource of it is open at this read
+    a.open_kinds.insert(kind);
+    for (auto& r : a.res)
+      if (r.first.kind == kind) r.second = any_res(kind);
+    order_open_whole.insert(kind);
+    order_open_kinds.insert(kind);
+  };
+  auto kind_fixed = [&](int32_t kind) {
+    return kind >= 0 && static_cast<size_t>(kind) < kind_reasons_.size() && kind_reasons_[static_cast<size_t>(kind)] == 0 && p_.kinds[static_cast<size_t>(kind)].derived.empty();
+  };
+  if (!t_.order_established && prior_ != nullptr) {
+    for (const auto& kv : prior_->writes.res) {
+      if (!fixed(kv.first)) continue;
+      const auto wide = prior_->writes.kind_wide.find(kv.first.kind);
+      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor)) continue;
+      a.res[kv.first] = any_res(kv.first.kind);
       order_open.insert(kv.first);
       order_open_kinds.insert(kv.first.kind);
     }
+    for (const auto& kv : prior_->writes.kind_wide)
+      if (kind_fixed(kv.first) && !ordered_at(kv.second, nullptr, ev.id, ev.actor)) open_whole_kind(kv.first);
+    for (const auto& kv : prior_->writes.loc)
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor)) order_open_locs.insert(kv.first);
+  } else if (!t_.order_established) {
+    for (const auto& kv : res_writers_) {
+      if (!fixed(kv.first) || !foreign(kv.second)) continue;
+      a.res[kv.first] = any_res(kv.first.kind);
+      order_open.insert(kv.first);
+      order_open_kinds.insert(kv.first.kind);
+    }
+    for (const auto& kv : kind_wide_writers_)
+      if (kind_fixed(kv.first) && foreign(kv.second)) open_whole_kind(kv.first);
     for (const auto& kv : loc_writers_)
       if (foreign(kv.second)) order_open_locs.insert(kv.first);
   }
@@ -939,8 +1196,10 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     out.adequacy &= kind_adeq_[static_cast<size_t>(k)];
     out.contradicted = out.contradicted || kind_contra_[static_cast<size_t>(k)];
   }
-  for (const ResId& id : reads.res)
-    if (order_open.count(id) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+  for (const ResId& id : reads.res) {
+    if (order_open.count(id) != 0 || order_open_whole.count(id.kind) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+    else if (identity_res_.count(id) != 0 && fixed(id)) out.owner_identity = true;
+  }
   for (int32_t k : reads.boxes)
     if (order_open_kinds.count(k) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
   for (int32_t l : reads.locs) {
@@ -1111,6 +1370,7 @@ Status Replayer::run() {
 
 void Replayer::begin_event(const TraceEvent& ev) {
   began_handler_ = false;
+  cur_event_ = ev.id;
   actor_number(ev.actor);
   if (first_event_.find(ev.actor) == first_event_.end()) first_event_[ev.actor] = ev.id;
   // the other branch of a poll: the next call of the actor must be the terminal operation
@@ -1281,6 +1541,7 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
     res.reasons = r.reasons;
     res.adequacy = r.adequacy;
     res.contradicted = r.contradicted;
+    res.owner_identity = r.owner_identity;
     if (r.v.tri == Tri::Maybe) {
       res.unknown = true;
     } else {
@@ -1662,6 +1923,8 @@ void Replayer::on_point(const TraceEvent& ev) {
     if (v != ev.values.end()) {
       st_.loc_values[li] = v->second;
       loc_writers_[li].insert(ev.actor);
+      log_.loc[li].insert(ev.id);
+      loc_writes_.back().clearing = clearing_value(li, v->second);
     } else {
       untrack_loc(li, KZ_WITHHOLD_EFFECT_UNSUPPORTED);
     }
@@ -1806,8 +2069,16 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
         const int32_t ki = p_.find_kind(eff.all_kind);
         if (ki < 0) return;
         const int32_t to = state_ordinal(p_.kinds[static_cast<size_t>(ki)], eff.to_state);
+        if (to < 0) return;
+        if (p_.kinds[static_cast<size_t>(ki)].table.empty()) {
+          // a kind without a finite instance set: every resource of it back to the initial state (the checker
+          // allows no other state), i.e. no resource of it keeps a state of its own
+          if (to != p_.kinds[static_cast<size_t>(ki)].initial_ordinal) return;
+          for (auto it = st_.state.begin(); it != st_.state.end();) it = it->first.kind == ki ? st_.state.erase(it) : std::next(it);
+          return;
+        }
         const auto inst = st_.instances.find(ki);
-        if (to < 0 || inst == st_.instances.end()) return;
+        if (inst == st_.instances.end()) return;
         for (const std::vector<int64_t>& key : inst->second) {
           const ResId id{ki, key};
           st_.state[id] = to;
@@ -1891,7 +2162,7 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
       return;
     }
     case EffectKind::Mark:
-      if (eff.target == "handler_begin") began_handler_ = true;
+      if (eff.target == "handler_begin") began_handler_ = any_handler_ = true;
       return;
     case EffectKind::Use:
     case EffectKind::Sync:
@@ -1962,43 +2233,77 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       r_.shutdown_event = ev.id;
     }
   };
-  // The stored value: the one the record carries (`value`), else the profile's where it is fixed.
+  // The stored value: the one the record carries (`value`), else the profile's where it is fixed.  The write
+  // is logged; a fixed value of a location whose start state is not known is its start evidence.  The last
+  // location write is marked clearing where the value is known and is not a valid identity (P10).
   auto stored = [&](int32_t li) {
     const auto rec = ev.values.find("value");
-    const RealEval v = evaluate_real(*eff.value, op, &eff.lp, ev, frame_args);
+    bool by_identity = false;
+    const RealEval v = effect_operand(*eff.value, op, eff, ev, frame_args, false, &by_identity);
     int64_t computed = 0;
     const bool fixed = exact_value(v.v, &computed);
+    int64_t value = 0;
     if (rec != ev.values.end()) {
       if (fixed && computed != rec->second) contradict(-1, li, ev.id, what + ": the record says the stored value is " + hex_or_dec(rec->second) + ", the profile computes " + hex_or_dec(computed));
-      st_.loc_values[li] = rec->second;
-      loc_writers_[li].insert(ev.actor);
-      return;
-    }
-    if (fixed) {
-      st_.loc_values[li] = computed;
-      loc_writers_[li].insert(ev.actor);
+      value = rec->second;
+    } else if (fixed) {
+      value = computed;
     } else {
       untrack_loc(li, v.reasons);
+      return;
     }
+    st_.loc_values[li] = value;
+    loc_writers_[li].insert(ev.actor);
+    log_.loc[li].insert(ev.id);
+    if (!loc_writes_.empty() && loc_writes_.back().loc == li && loc_writes_.back().actor == ev.actor) loc_writes_.back().clearing = clearing_value(li, value);
+    if (!by_identity) fix_start_loc(li, op.name + "." + eff.label, ev.id);
+  };
+  auto wrote = [&](const ResId& id, bool by_identity) {
+    note_write(id, ev);
+    res_writers_[id].insert(ev.actor);
+    log_.res[id].insert(ev.id);
+    if (by_identity) identity_res_.insert(id);
+    else identity_res_.erase(id);
   };
   switch (eff.kind) {
     case EffectKind::Set: {
       if (!eff.all_kind.empty()) {
         const int32_t ki = p_.find_kind(eff.all_kind);
         if (ki < 0) return;
-        const int32_t to = state_ordinal(p_.kinds[static_cast<size_t>(ki)], eff.to_state);
-        const auto inst = st_.instances.find(ki);
-        if (to < 0 || inst == st_.instances.end()) return;
-        for (const std::vector<int64_t>& key : inst->second) {
-          const ResId id{ki, key};
-          st_.state[id] = to;
-          note_write(id, ev);
-          res_writers_[id].insert(ev.actor);
+        const KindDecl& k = p_.kinds[static_cast<size_t>(ki)];
+        const int32_t to = state_ordinal(k, eff.to_state);
+        if (to < 0) return;
+        log_.kind_wide[ki].insert(ev.id);
+        for (auto it = identity_res_.begin(); it != identity_res_.end();) it = it->kind == ki ? identity_res_.erase(it) : std::next(it);
+        if (k.table.empty()) {
+          // a kind without a finite instance set: every resource of it back to the initial state (the only
+          // state the checker allows here)
+          if (to != k.initial_ordinal) return;
+          for (auto it = st_.state.begin(); it != st_.state.end();) {
+            if (it->first.kind == ki) {
+              res_writers_[it->first].insert(ev.actor);
+              it = st_.state.erase(it);
+            } else {
+              ++it;
+            }
+          }
+          kind_wide_writers_[ki].insert(ev.actor);
+        } else {
+          const auto inst = st_.instances.find(ki);
+          if (inst == st_.instances.end()) return;
+          for (const std::vector<int64_t>& key : inst->second) {
+            const ResId id{ki, key};
+            st_.state[id] = to;
+            note_write(id, ev);
+            res_writers_[id].insert(ev.actor);
+          }
         }
+        fix_start_kind(ki, op.name + "." + eff.label, ev.id);
         note_shutdown(ki, to);
         return;
       }
-      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
+      bool by_identity = false;
+      const RealEval r = effect_operand(*eff.res, op, eff, ev, frame_args, true, &by_identity);
       if (r.v.must_be_undefined) {
         finding(ev.id, what + " applies to an undefined resource and is not applied");
         return;
@@ -2012,20 +2317,22 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       if (to < 0) return;
       const ResId id{r.v.kind, key};
       st_.state[id] = to;
-      note_write(id, ev);
-          res_writers_[id].insert(ev.actor);
       if (eff.with_id) {
-        const RealEval idv = evaluate_real(*eff.with_id, op, &eff.lp, ev, frame_args);
+        bool id_by_identity = false;
+        const RealEval idv = effect_operand(*eff.with_id, op, eff, ev, frame_args, false, &id_by_identity);
+        by_identity = by_identity || id_by_identity;
         int64_t v = 0;
-        if (exact_value(idv.v, &v)) st_.ids[id] = id_value(v);  // (the writer is noted with the state above)
+        if (exact_value(idv.v, &v)) st_.ids[id] = id_value(v);
         else untrack_kind(tkind, idv.reasons);
       }
+      wrote(id, by_identity);
       note_shutdown(r.v.kind, to);
       return;
     }
     case EffectKind::Raise: {
-      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
-      const RealEval level = evaluate_real(*eff.value, op, &eff.lp, ev, frame_args);
+      bool by_identity = false, level_by_identity = false;
+      const RealEval r = effect_operand(*eff.res, op, eff, ev, frame_args, true, &by_identity);
+      const RealEval level = effect_operand(*eff.value, op, eff, ev, frame_args, false, &level_by_identity);
       if (r.v.must_be_undefined) {
         finding(ev.id, what + " applies to an undefined resource and is not applied");
         return;
@@ -2046,13 +2353,13 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       const int32_t now = cur == st_.state.end() ? k.initial_ordinal : cur->second;
       if (lv > now) {
         st_.state[id] = static_cast<int32_t>(lv);
-        note_write(id, ev);
-          res_writers_[id].insert(ev.actor);
+        wrote(id, by_identity || level_by_identity);
       }
       return;
     }
     case EffectKind::SetTag: {
-      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
+      bool by_identity = false;
+      const RealEval r = effect_operand(*eff.res, op, eff, ev, frame_args, true, &by_identity);
       if (r.v.must_be_undefined) {
         finding(ev.id, what + " applies to an undefined resource and is not applied");
         return;
@@ -2069,6 +2376,8 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
           if (k.tags[ti].values[vi] == eff.tag_value) st_.tags[std::make_pair(ResId{r.v.kind, key}, static_cast<int32_t>(ti))] = static_cast<int32_t>(vi);
       }
       res_writers_[ResId{r.v.kind, key}].insert(ev.actor);
+      log_.res[ResId{r.v.kind, key}].insert(ev.id);
+      if (by_identity) identity_res_.insert(ResId{r.v.kind, key});
       return;
     }
     case EffectKind::StoreOut: {
@@ -2094,7 +2403,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       }
       return;
     case EffectKind::Mark:
-      if (eff.target == "handler_begin") began_handler_ = true;
+      if (eff.target == "handler_begin") began_handler_ = any_handler_ = true;
       return;
     case EffectKind::Use:
     case EffectKind::Sync:
@@ -2290,6 +2599,8 @@ void Replayer::note_publication(const OpDecl& op, const EffectDecl& eff, const T
   const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args, true);
   pb.exact = !r.v.must_be_undefined && exact_key(r.v, &pb.key);
   if (r.v.kind >= 0) pb.kind = r.v.kind;
+  if (eff.kind == EffectKind::Set && pb.kind >= 0 && static_cast<size_t>(pb.kind) < p_.kinds.size())
+    pb.clearing = state_ordinal(p_.kinds[static_cast<size_t>(pb.kind)], eff.to_state) == p_.kinds[static_cast<size_t>(pb.kind)].initial_ordinal;
   pubs_.push_back(std::move(pb));
 }
 
@@ -2325,8 +2636,17 @@ void Replayer::relate(Occurrence* o) {
   const int32_t kk = rs->key->sort.kind_index;
   const std::string kname = kk >= 0 ? p_.kinds[static_cast<size_t>(kk)].name : std::string("?");
   std::set<std::string> cps, open_writers;
+  // P10 (STATUS_W0W3_20261024 section 2a, a pending PI decision): whether a clearing write (one that returns the
+  // key resource to its kind's initial state, or stores a value that is not a valid identity into a captured
+  // location) makes its actor an actor involved.  Current: yes, every observed write counts.
+  const bool count_clearing = o_.relation_clearing_writes;
+  size_t clearing_skipped = 0;
   for (const Publication& pb : pubs_) {
     if (pb.kind != kk) continue;
+    if (!count_clearing && pb.clearing) {
+      ++clearing_skipped;
+      continue;
+    }
     if (!pb.exact) open_writers.insert(pb.actor);
     else if (pb.key == o->key) (pb.maybe ? open_writers : cps).insert(pb.actor);
   }
@@ -2344,6 +2664,10 @@ void Replayer::relate(Occurrence* o) {
   for (int32_t li : cells) {
     std::set<std::string> by;
     for (const LocWrite& lw : loc_writes_) {
+      if (!count_clearing && lw.clearing && lw.loc == li && !lw.maybe) {
+        ++clearing_skipped;
+        continue;
+      }
       if (lw.loc == -1 || (lw.loc == li && lw.maybe)) open_writers.insert(lw.actor);
       else if (lw.loc == li) by.insert(lw.actor);
     }
@@ -2352,6 +2676,7 @@ void Replayer::relate(Occurrence* o) {
     extra += "; the passed value was read from " + p_.locs[static_cast<size_t>(li)].name + (by.empty() ? std::string(", which no recorded write targets") : ", written by " + who);
     cps.insert(by.begin(), by.end());
   }
+  if (clearing_skipped != 0) extra += "; " + std::to_string(clearing_skipped) + " clearing write(s) not counted (P10 alternative)";
   for (const std::string& a : cps) open_writers.erase(a);
   o->counterparts.assign(cps.begin(), cps.end());
   const uint8_t lu = level_of(o->actor);
@@ -2692,9 +3017,10 @@ void Replayer::finish() {
   if (!real_) return;
   for (size_t ki = 0; ki < p_.kinds.size(); ++ki) {
     if (!p_.kinds[ki].derived.empty()) continue;
-    r_.knowledge.push_back(Knowledge{p_.kinds[ki].name, false, kind_reasons_[ki], kind_adeq_[ki], kind_contra_[ki], kind_unobs_[ki]});
+    r_.knowledge.push_back(Knowledge{p_.kinds[ki].name, false, kind_reasons_[ki], kind_adeq_[ki], kind_contra_[ki], kind_unobs_[ki], kind_start_[ki]});
   }
-  for (size_t li = 0; li < p_.locs.size(); ++li) r_.knowledge.push_back(Knowledge{p_.locs[li].name, true, loc_reasons_[li], loc_adeq_[li], loc_contra_[li], loc_unobs_[li]});
+  for (size_t li = 0; li < p_.locs.size(); ++li)
+    r_.knowledge.push_back(Knowledge{p_.locs[li].name, true, loc_reasons_[li], loc_adeq_[li], loc_contra_[li], loc_unobs_[li], loc_start_[li]});
 }
 
 // The observation an occurrence's conditions rest on (Occurrence::probes, ::unobserved).
@@ -2793,8 +3119,33 @@ void Replayer::final_edges() {
 
 Status replay(const Profile& p, const Trace& trace, const Options& options, Result* out) {
   *out = Result();
-  Replayer r(p, trace, options, out);
-  return r.run();
+  Replayer first(p, trace, options, out);
+  Status s = first.run();
+  if (!s.ok() || trace.record != RecordKind::Real || trace.order_established) return s;
+  // A real record whose order is not declared established: the order of different actors is read from the
+  // happens-before edges of the first pass (SPEC 4.8 "order"), over the writes of the whole record.
+  Prior prior;
+  std::string why;
+  if (!first.order_of_edges(&prior.hb, &why)) {
+    out->findings.push_back(ReplayFinding{kNoEvent, "real record: the order of different actors is not read from the happens-before edges (" + why + "): a value another actor wrote stays open"});
+    return s;
+  }
+  prior.writes = first.writes();
+  for (int pass = 0; pass < 4; ++pass) {
+    Result next;
+    Replayer again(p, trace, options, &next, &prior);
+    s = again.run();
+    if (!s.ok()) return s;
+    if (again.writes().covered_by(prior.writes)) {
+      next.findings.push_back(ReplayFinding{kNoEvent, "real record: the order of different actors is read from the happens-before edges of the record (" + std::to_string(prior.hb.edges) +
+                                                          " between actors) over every write of the record; the merged order is not used"});
+      *out = std::move(next);
+      return s;
+    }
+    prior.writes.merge(again.writes());
+  }
+  out->findings.push_back(ReplayFinding{kNoEvent, "real record: the writes did not settle over the passes, so the order of different actors is not read from the happens-before edges: a value another actor wrote stays open"});
+  return s;
 }
 
 Status resolve_rule_predicate(const Profile& p, const std::string& rule, const std::string& text, phi::ExprPtr* out, std::vector<phi::Diag>* diags) {
@@ -2885,6 +3236,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
         out += c.evaluated ? (c.holds ? " holds" : " fails") : (real && c.unknown) ? " unknown" : " not evaluated";
       }
       if (real) {
+        if (c.owner_identity) out += " owner-identity";
         if (c.passage_unknown) out += " passage-unknown";
         if (c.contradicted) out += " contradicted";
         if ((c.unknown || c.passage_unknown) && c.reasons != 0) out += " reasons " + set_text("KZ_WITHHOLD", c.reasons);
@@ -2962,6 +3314,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
     for (const Knowledge& k : r.knowledge) {
       out += std::string("  ") + (k.is_loc ? "loc " : "kind ") + k.name + (k.reasons == 0 ? " fixed" : " open " + set_text("KZ_WITHHOLD", k.reasons));
       out += " established " + set_text("KZ_ADEQ", k.adequacy) + (k.contradicted ? " contradicted" : "") + "\n";
+      if (!k.start.empty()) out += "    start state: " + k.start + "\n";
       std::string w;
       for (const std::string& x : k.unobserved_writers) w += (w.empty() ? "" : ", ") + x;
       out += "    writer effects not observed: " + (w.empty() ? std::string("-") : w) + "\n";

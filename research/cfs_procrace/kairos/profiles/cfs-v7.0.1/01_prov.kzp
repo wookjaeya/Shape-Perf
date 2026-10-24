@@ -808,3 +808,82 @@ prov es_appcreate_fail {
   lines 893 894;
   sha256 "be10e06ff6e9c72eb4371d97ba5b330fce67584b454729bb4f9de8afcd80628b";
 }
+
+# ---------------------------------------------------------------------------------------------
+# R2 state-based round (2026-10-24).  The writers of the EVS registry slots that the static closure counts
+# (kairos/tests/static/data/core_cpu1.golden:162, EVS_AppData_t.AppID: 4 writers) and that were not effects
+# of this profile: the memset of the whole EVS global object in EarlyInit (the slots are inside it) and the
+# free of a slot in CFE_EVS_CleanUpApp.  And the code that says whose slot CFE_EVS_Register clears and
+# publishes: the AppID that EVS_GetCurrentContext obtained from CFE_ES_GetAppID, reached only on success.
+# Lines and hashes re-read in the pinned tree (sed -n 'A,Bp' FILE | sha256sum).
+# ---------------------------------------------------------------------------------------------
+
+prov evs_earlyinit_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 54 54;
+  sha256 "7e9963ad54babbf3ce52aa5caf4333cda24c2de1ca7ccf621f9887de01f328f1";
+}
+
+prov evs_earlyinit_memset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 63 63;
+  sha256 "938c5eb47b03716e2441cceb327664df4230ed356eea7f29482a7cb1d4a169dc";
+  note "memset(&CFE_EVS_Global, 0, sizeof(CFE_EVS_Global)): every byte of the EVS global object becomes 0, the AppID of every registry slot included";
+}
+
+prov evs_global_appdata {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.h";
+  lines 116 116;
+  sha256 "20fb2732eec831ade9b680bc48d0bdedf9d9e1faac10f21aa9f195c8989df4f5";
+  note "the registry slots (EVS_AppData_t AppData[CFE_PLATFORM_ES_MAX_APPLICATIONS]) are a member of CFE_EVS_Global_t";
+}
+
+prov evs_cleanup_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 178 178;
+  sha256 "92011400cc69e2c71bacecb7ec818ea3268c7f871a26b01540e68bc1606da749";
+}
+
+prov evs_cleanup_setfree {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_task.c";
+  lines 186 197;
+  sha256 "9dad409ee96443edc49bb6edbfab0311dcacb808a61a549fc955648696c289e9";
+  note "the slot of the given AppID is freed (EVS_AppDataSetFree) only where it is a match for that AppID (EVS_AppDataIsMatch)";
+}
+
+prov evs_utils_setfree {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.h";
+  lines 148 151;
+  sha256 "05d84c02fe052330940aa4a6f5b93705554d5348924eef34fdcdc3ec18823ce6";
+  note "EVS_AppDataSetFree stores CFE_ES_APPID_UNDEFINED into the slot's AppID";
+}
+
+prov evs_register_context {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 51 53;
+  sha256 "66a2eea973e6979fd7cc90fa892f48ebb729f4a362819220efc3406f5e0bb7be";
+  note "CFE_EVS_Register clears and fills the slot only after EVS_GetCurrentContext returned CFE_SUCCESS";
+}
+
+prov evs_utils_context {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.c";
+  lines 71 104;
+  sha256 "b532e09db5187781ee9f039849cbb55629a331e2779e54a6c8e66e58ebe26f44";
+  note "EVS_GetCurrentContext: success only if CFE_ES_GetAppID succeeded; the slot and the AppID it returns are those of that AppID";
+}

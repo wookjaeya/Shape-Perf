@@ -120,8 +120,16 @@ void test_round_trip() {
   Trace t;
   KZ_CHECK_OK(kz::eval::parse_trace_text(kTrace, &t));
   Result r;
-  KZ_CHECK_OK(kz::eval::replay(p, t, kz::eval::Options(), &r));
+  // The slot's writer points are not all observed, so the registration's target is fixed only by W's identity
+  // value; this test keeps that off so that X's occurrence is fixed by its returned code (the outcome-narrowed
+  // flag the container must carry).  With the default (on), X's occurrence is READY from the state.
+  kz::eval::Options options;
+  options.owner_identity_targets = false;
+  KZ_CHECK_OK(kz::eval::replay(p, t, options, &r));
   KZ_CHECK_EQ(r.occurrences.size(), static_cast<size_t>(2));
+  Result by_identity;
+  KZ_CHECK_OK(kz::eval::replay(p, t, kz::eval::Options(), &by_identity));
+  KZ_CHECK(by_identity.occurrences.size() == 2 && by_identity.occurrences[0].status == kz::eval::OccStatus::Ready && !by_identity.occurrences[0].outcome_narrowed);
   const Container run = make_run();
   const kz::trace::RealTraceReport rep = make_report();
   kz::trace::ReplayContainerInput in;

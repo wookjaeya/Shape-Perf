@@ -978,8 +978,12 @@ void Checker::check_ops() {
               break;
             }
             const KindDecl& k = p_.kinds[static_cast<size_t>(ki)];
-            if (k.table.empty()) err(e.loc, ewhat + ": 'lifecycle all " + k.name + "' needs a kind with a finite set of instances (a 'table' clause)");
-            if (find_state(k, e.to_state) < 0) err(e.loc, ewhat + ": '" + e.to_state + "' is not a state of kind '" + k.name + "'");
+            const int32_t to = find_state(k, e.to_state);
+            if (to < 0) err(e.loc, ewhat + ": '" + e.to_state + "' is not a state of kind '" + k.name + "'");
+            // Without a finite instance set, every resource of the kind can only be returned to the initial state:
+            // the replay keeps no state of its own for any of them (a memset of the whole table, 2026-10-24).
+            if (k.table.empty() && to >= 0 && k.initial != e.to_state)
+              err(e.loc, ewhat + ": 'lifecycle all " + k.name + " -> " + e.to_state + "' needs a kind with a finite set of instances (a 'table' clause); without one, only the initial state '" + k.initial + "' can be set");
             if (e.with_id) err(e.loc, ewhat + ": an effect on every instance cannot carry an id");
             break;
           }

@@ -7,7 +7,8 @@
 #
 #   kinds       es.app, es.appstate, es.self, evs.reg, es.shutdown, cell        (10_kinds.kzp)
 #   operations  the readiness check of CFE_EVS_SendEventWithAppID, CFE_ES_GetAppID with its
-#               out-pointer effect, the AppState writers, the terminal operations (T-TERM)   (20_ops.kzp)
+#               out-pointer effect, the AppState writers, the writers of the EVS registry slots
+#               (registration, EarlyInit, cleanup), the terminal operations (T-TERM)          (20_ops.kzp)
 #   hb rules    R1, R2-P-TASK, R18, R19                                                         (30_hb.kzp)
 #   rspec       K-ID.send-with-appid                                                            (40_rspec.kzp)
 #   trusted     the declared-trusted entries (A-FRESH, A-OWNER; the CleanUpApp guard is an effect)

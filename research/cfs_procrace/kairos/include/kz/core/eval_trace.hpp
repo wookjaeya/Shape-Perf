@@ -209,6 +209,9 @@ struct ConjunctResult {
   // (`cell`); empty when the record does not name it.  The execution relation names the actors that wrote
   // that location (Occurrence::relation).
   std::string cell;
+  // Real records: the value read a resource whose replayed state was set by an effect whose operand only the
+  // writer's own identity fixed (Options::owner_identity_targets).
+  bool owner_identity = false;
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
@@ -328,6 +331,17 @@ struct Options {
   // alternative: the code fixes nothing, and is still checked against what every explanation fixes (a
   // disagreement stays an analysis input error).
   bool outcome_narrowing = true;
+  // Real records: whether the identity value the record gives for a `confirmed` app_owner (Trace::owner_ids, the
+  // value its creation request passed) fixes `id(owner(exec))` in the target, id or value of an effect of that
+  // actor where the replayed state does not (true, 2026-10-24).  The conditions that read a resource such an
+  // effect set say so (ConjunctResult::owner_identity).  false: the effect's operand stays open (the reading
+  // before 2026-10-24, in which the identity named only the actors of the execution relation).
+  bool owner_identity_targets = true;
+  // Real records, P10 of STATUS_W0W3_20261024 section 2a (a pending PI decision): whether a clearing write (an
+  // effect that returns the key resource to its kind's initial state, or a store of a known value that is not a
+  // valid identity into a captured location) makes its actor one of the actors of the execution relation.
+  // true is the current behaviour (every observed write counts); false is the alternative.
+  bool relation_clearing_writes = true;
 };
 
 // What the real-record replay established for one kind or location (printed with the result).
@@ -338,6 +352,7 @@ struct Knowledge {
   uint32_t adequacy = 0;   // set KZ_ADEQ
   bool contradicted = false;
   std::vector<std::string> unobserved_writers;  // the profile's writer effects whose point the record does not observe
+  std::string start;  // the observed effect from which the start state is known, where the record did not declare it
 };
 
 struct Result {

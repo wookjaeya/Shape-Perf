@@ -34,7 +34,11 @@
 # cfe_sb_task.c:138 as the profile's publication site `sb_publication` (the same instruction as site 2, which
 # stays for the counts), and the capture point of the send's value condition at the three SB call sites that
 # pass CFE_SB_Global.AppId and that ES and EVS reach before that store (cases/R2.md section 5;
-# plan/proof_status_R2.md section 12).  The point sites are named after the linearization points of the
+# plan/proof_status_R2.md section 12).  Sites 30-34 (R2 state-based round, 2026-10-24) observe the remaining writers
+# of the EVS registry slots and of the SB identity cell that the static closure counts: the memsets of the EVS and
+# SB global objects in their EarlyInit (called through the core module table's function pointers, so the point is
+# the memset itself) and the free of a slot in CFE_EVS_CleanUpApp, with its call and return for the AppId it is
+# given.  The point sites are named after the linearization points of the
 # phi profile (OP.LABEL, or the shared site), so that `kz replay` maps them; plan/proof_status_R2.md
 # section 12 is the trace table (site -> source line -> effect -> conjunct).  Every line below was
 # re-read in the tree the R2 binary was built from (cFS 088b2fa8, build-native_std; the hashes are
@@ -163,3 +167,24 @@ site sb_publication point at=cfe_sb_task.c:138 after-call=CFE_ES_GetAppID prov=s
 site CFE_EVS_SendEventWithAppID.id_valid@sb_api_275 point at=cfe_sb_api.c:275 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_pipe_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
 site CFE_EVS_SendEventWithAppID.id_valid@sb_api_1183 point at=cfe_sb_api.c:1183 at-call=CFE_EVS_SendEventWithAppID prov=sb_api_sub_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
 site CFE_EVS_SendEventWithAppID.id_valid@sb_priv_786 point at=cfe_sb_priv.c:786 at-call=CFE_EVS_SendEventWithAppID prov=sb_priv_report_event s0=rdi:u16:event_id s1=rdx:u32:value(CFE_SB_Global.AppId) s2=rdx:u32:app_id
+
+# ---- R2 state-based round: the remaining writers of evs.reg and CFE_SB_Global.AppId (2026-10-24) ----------------
+#
+# The static closure counts four writers of EVS_AppData_t.AppID and three of CFE_SB_Global_t.AppId
+# (kairos/tests/static/data/core_cpu1.golden:161-162); sites 10, 11 and 26 observe four of them.  The three left:
+# the memset of CFE_EVS_Global in CFE_EVS_EarlyInit (every slot's AppID becomes 0), the memset of CFE_SB_Global in
+# CFE_SB_EarlyInit (the identity cell becomes 0, CFE_ES_APPID_UNDEFINED), and EVS_AppDataSetFree reached from
+# CFE_EVS_CleanUpApp (the slot's AppID becomes CFE_ES_APPID_UNDEFINED, only where it matches the given AppId).  Both
+# EarlyInit functions run on the startup thread through Entry->EarlyInit (cfe_es_start.c:762).  At -O0 the static
+# inline EVS_AppDataSetFree is a call; the instruction after it is the join of the function's return paths, so the
+# point is the call instruction itself (at-call), before the store in the callee.
+prov evs_earlyinit_memset tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=63-63 cite="memset(&CFE_EVS_Global, 0, sizeof(CFE_EVS_Global)): every EVS registry slot's AppID becomes 0 (no AppId registered)" sha256=938c5eb47b03716e2441cceb327664df4230ed356eea7f29482a7cb1d4a169dc
+prov sb_earlyinit_memset tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_init.c" lines=50-50 cite="memset(&CFE_SB_Global, 0, sizeof(CFE_SB_Global)): the SB identity cell CFE_SB_Global.AppId becomes 0 (CFE_ES_APPID_UNDEFINED)" sha256=33b812a6e3f104b018a0a69aab9d332982e3443fc4677f5d24fbe4c9accd6d8f
+prov evs_cleanup_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=178-198 cite="CFE_EVS_CleanUpApp(uint32 Id): the AppId of the application to clean up (its integer value); returns a status" sha256=1f59bd8b6a454723ab88130210b1da4fab8e674694b0d55664f158ab6b7161d6
+prov evs_cleanup_setfree tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_task.c" lines=192-194 cite="else if (EVS_AppDataIsMatch(AppDataPtr, AppID)) EVS_AppDataSetFree(AppDataPtr): the slot is freed only where it matches" sha256=a96319a8ed76ee46333541fe83085cbf88b2bbff0e17008fba0895e69a4a0cc2
+
+site CFE_EVS_EarlyInit.clear_registry point at=cfe_evs_task.c:63 after-call=memset prov=evs_earlyinit_memset s0=rax:u64:dest
+site CFE_SB_EarlyInit.clear_global point at=cfe_sb_init.c:50 after-call=memset prov=sb_earlyinit_memset s0=rax:u64:dest
+site evs.cleanup.entry entry func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rdi:u32:id s3=stack+0:u64:return_address
+site evs.cleanup.ret   ret   func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rax:u32:status s3=ip:u64:return_address
+site CFE_EVS_CleanUpApp.free_slot point at=cfe_evs_task.c:194 at-call=EVS_AppDataSetFree prov=evs_cleanup_setfree

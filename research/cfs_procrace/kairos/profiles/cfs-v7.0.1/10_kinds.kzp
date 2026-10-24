@@ -67,14 +67,16 @@ kind es.self(a: Actor) {
   prov es_ctx_lookup, r_es_self_derived;
 }
 
-# EVS registry slot of an application: unregistered -> registered, keyed by the exact AppId.
+# EVS registry slot of an application: unregistered -> registered, keyed by the exact AppId.  Cleared by the
+# registration itself (memset), by the EarlyInit memset of the whole EVS global object and by the cleanup of the
+# application (EVS_AppDataSetFree).
 kind evs.reg(app: Id<es.app>) {
   states UNREG < REG;
   initial UNREG;
   scope process;
   transition UNREG -> REG on register;
   transition REG -> UNREG on clear;
-  prov evs_reg_memset, evs_reg_publish, evs_utils_ismatch, evs_utils_setused, evs_appdata_struct, r_evs_reg_key_by_id;
+  prov evs_reg_memset, evs_reg_publish, evs_utils_ismatch, evs_utils_setused, evs_appdata_struct, evs_earlyinit_memset, evs_global_appdata, evs_utils_setfree, r_evs_reg_key_by_id;
 }
 
 # The shutdown of the process: requested by the restart request, executed by the teardown.

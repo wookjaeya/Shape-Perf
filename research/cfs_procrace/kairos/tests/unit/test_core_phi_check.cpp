@@ -167,7 +167,7 @@ int main() {
       {2, "status declared_trusted refutable_by", "status trusted_ish refutable_by", "unknown status 'trusted_ish'"},
       {2, "-> TWO when", "-> TWO id UNDEF when", "kind 'stage' has no ids, so the effect cannot carry an id"},
       {2, "lifecycle all slot -> FREE lp", "lifecycle all slot -> FREE id UNDEF lp", "an effect on every instance cannot carry an id"},
-      {2, "lifecycle all slot -> FREE lp", "lifecycle all reg -> UNREG lp", "needs a kind with a finite set of instances"},
+      {2, "lifecycle all slot -> FREE lp", "lifecycle all reg -> REG lp", "needs a kind with a finite set of instances"},
       {2, "lifecycle all slot -> FREE lp", "lifecycle all nothing -> FREE lp", "unknown kind 'nothing'"},
       {2, "-> RESERVED id RESERVED lp", "-> NOWHERE id RESERVED lp", "'NOWHERE' is not a state of kind 'slot'"},
       {2, "-> RESERVED id RESERVED lp", "-> RESERVED id \"text\" lp", "the id is Str, the kind wants Id<slot>"},

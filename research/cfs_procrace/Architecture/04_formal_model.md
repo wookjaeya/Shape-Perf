@@ -6,14 +6,16 @@
 
 > **rev 1.3 반영 (2026-10-22).** spec 개정 1.3은 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md))를 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md)(행 C-01–C-52)를 거쳐 적용했다(spec §0.12, ADR-053–ADR-058). 모두 결정 [D]이고 결과가 아니다. 이 개정에서도 빌드·실행은 없었다. §1의 정의, lemma와 그 증명 상태, 가정은 지우거나 약하게 하지 않았다. 이 문서에 옮긴 변경표 행: C-04·C-05(§1.4 실행 관계, `app_owner`), C-06(§2.5 EV-01–EV-04), C-07(§5.10 지원하는 순서 조건), C-08(§6 IN-01–IN-05), C-09(§7.6 모형 식별자), C-10(§11.6 요약 뷰), C-11(§11.7 고정 순서 근거), C-12(§11.8 OUT-01, OUT-02), C-22(§9.2, §10 머리의 선택 경로 표시), C-23(§10.7 certificate 없는 결과의 장부), C-30(§11.6 끝), C-33(§12.2 A-OBS), C-34(§12.3 L-OBS), C-35(§12.4 G2 표시, G3 다시 씀), C-36(§12.5 항목 58–62), C-49(§10 머리), C-52(이 문서). **우선순위**(spec §0.12, ADR-053): 개정 1.0–1.2를 위해 쓴 문장이 certificate, explorer, progress 결과, loop를 Kairos의 첫 산출물, 필수 산출물, 정의하는 산출물로 말하면 ADR-053으로 읽는다. 그 경로는 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 판정·예측·확인의 전제 조건이 아니다. 이 문서의 §9–§10(MustBefore, PWB, R2 certificate)과 §12.4 G2가 그런 경로를 다룬다.
 
+> **rev 1.3 보충 (2026-10-24).** 2026-10-24 마스터플랜에서 받아들인 작은 보충 둘을 spec과 같이 옮긴다(spec 머리말 "Revision 1.3 amendment"; 반영 기록 [../plan/MASTERPLAN_ADOPTION_20261024.md](../plan/MASTERPLAN_ADOPTION_20261024.md) §2). 모두 결정 [D]이고, 정의·status·lemma·가정을 지우거나 약하게 하지 않는다. (i) 요구를 붙이는 호출 문맥의 규칙: §5.11. (ii) 정체성 네 범주의 구분: §1.4 끝.
+
 ## 목차
 
 - [0. 읽기 전에](#0-읽기-전에): 표기, 예로 쓰는 사례, 모형의 뼈대, 개정 1.2에서 바뀐 곳
-- [1. Actor, instance, once(τ), 네 가지 identity](#1-actor-instance-onceτ-네-가지-identity) (spec §1.2): 실행 사이의 actor instance 이름 포함; 실행 관계와 생성 앱 `app_owner`(spec §1.1, §1.2, rev 1.3)
+- [1. Actor, instance, once(τ), 네 가지 identity](#1-actor-instance-onceτ-네-가지-identity) (spec §1.2): 실행 사이의 actor instance 이름 포함; 실행 관계와 생성 앱 `app_owner`(spec §1.1, §1.2, rev 1.3); 정체성 네 범주(rev 1.3 보충)
 - [2. 자원: kind, lifecycle automaton, generation, key](#2-자원-kind-lifecycle-automaton-generation-key) (spec §1.3): 자원 identity 규칙 EV-01–EV-04(rev 1.3)
 - [3. 연산, effect, LP, capture point, 모형 수준 M](#3-연산-effect-lp-capture-point-모형-수준-m) (spec §1.4)
 - [4. Event, template, trace](#4-event-template-trace) (spec §1.5)
-- [5. 준비 상태 명세](#5-준비-상태-명세) (spec §1.6): 준비 상태 명세의 요소, Allowed와 horizon monitor, 발생과 status(`NOT_EVALUATED`, `PENDING` 포함), 준비 상태 위반 사슬과 progress 사슬, 세 판단, 이름과 근거 등급, 지원하는 순서 조건(rev 1.3)
+- [5. 준비 상태 명세](#5-준비-상태-명세) (spec §1.6): 준비 상태 명세의 요소, Allowed와 horizon monitor, 발생과 status(`NOT_EVALUATED`, `PENDING` 포함), 준비 상태 위반 사슬과 progress 사슬, 세 판단, 이름과 근거 등급, 지원하는 순서 조건(rev 1.3), 요구를 붙이는 호출 문맥(rev 1.3 보충)
 - [6. 분석 기준 B](#6-분석-기준-b) (spec §1.7): 관측한 실행의 basis 규칙 IN-01–IN-05(rev 1.3)
 - [7. 스케줄·시간 의미 σ와 containment](#7-스케줄시간-의미-σ와-containment) (spec §1.8): 유한 실행과 maximal 실행, 시간 기반 전이, 죽은 actor와 stall, refinement, prefix containment와 전이 규칙(σ_E 진술의 정정 포함), 모형·스케줄 식별자(rev 1.3)
 - [8. Skeleton의 두 view](#8-skeleton의-두-view) (spec §4.3, 그림 D10)
@@ -161,7 +163,18 @@ R2의 사용 하나에 정의를 적용하면 네 필드가 모두 다르다. `e
 3. 자식이 첫 event에서 알리는 OSAL id.
 4. ES task record와 App record. **다만 그 record가 순서를 분석하는 자원 자체이면 쓰지 않는다**(EV-03, §2.5). C5에서는 task–애플리케이션 table 자체가 대상이므로, 그 table의 조회로는 결코 매핑을 세울 수 없다.
 
-생성자 쪽 out 매개변수 없이 시간 포함 관계에만 기댄 매핑은 `inferred`이고 `match-by-time`으로 표시한다. 매핑은 정규화(spec §4.8 step 2)의 필수 산출물이고, process 안에서 framework 조회를 불러 얻지 않는다(spec §5.7). actor의 `app_owner`가 미확정인 instance의 결과는 따로 보고하고 앱 간 결과로 세지 않는다(ADR-056; §12.5 항목 61). 요약 뷰의 실행 관계는 §11.6에 있다.
+생성자 쪽 out 매개변수 없이 시간 포함 관계에만 기댄 매핑은 `inferred`이고 `match-by-time`으로 표시한다. 매핑은 정규화(spec §4.8 step 2)의 필수 산출물이고, process 안에서 framework 조회를 불러 얻지 않는다(spec §5.7). 정규화는 아래 네 범주를 따로 둔다(rev 1.3 보충). actor의 `app_owner`가 미확정인 instance의 결과는 따로 보고하고 앱 간 결과로 세지 않는다(ADR-056; §12.5 항목 61). 요약 뷰의 실행 관계는 §11.6에 있다.
+
+**정체성 네 범주** [D] (rev 1.3 보충 2026-10-24; spec §1.2 "Identity categories kept apart"; ADR-056). 다음 넷을 따로 기록하고 **어느 둘도 같다고 가정하지 않는다**.
+
+| 범주 | 뜻 | 기록하는 곳 |
+|---|---|---|
+| 실행 task | event를 실행하는 actor instance | `exec(e)` |
+| 생성 실행자 | 그 task의 생성 호출을 실행한 actor. 스크립트 앱이면 `CFE_ES_AppCreate`를 도는 ES 경로, child task이면 그것을 만든 task | `creator_event` |
+| 소유(생성) 앱 | task가 속한 애플리케이션 | `app_owner`(근거·수준), event 시점의 `owner(e)` |
+| 전달 AppID | 인자로 넘기거나 저장한 identity 값(예: `CFE_EVS_SendEventWithAppID`의 `AppID`) | `stamp(e)` |
+
+둘이 같다는 것은 그 instance의 근거로 보여야 하는 사실이고 기본값이 아니다. 생성 실행자는 자기가 만든 task의 소유 앱이 아니다(ES가 CF와 BP의 task를 만든다). 함수가 어느 모듈 파일에 있다고 실행 task가 그 모듈의 앱에 속하지 않는다(SB 코드는 호출자의 task에서 돈다). 전달 AppID를 실행자의 정체성으로 믿지 않는다(R2: ES task가 SB의 발행되지 않은 AppId를 넘긴다). 앱 간 결과에는 각 actor의 소유 앱이 필요하고, 나머지 셋은 함께 기록한다.
 
 ---
 
@@ -519,6 +532,17 @@ not-ready 사용은 세 번 판단하고, 기록은 셋을 따로 둔다 [D] (sp
 ### 5.10 지원하는 순서 조건 (rev 1.3)
 
 [D] (spec §1.6 "Supported conditions"; [P0.2] §6.4; C-07). 준비 상태 명세는 상태, 수명, 값에 기대는 순서 조건을 나타내는 한 표현이다. 연구 대상은 process-level 순서 위반이지, 이 표현이 덮는 조건의 부류가 아니다. profile 언어와 evaluator가 표현하지 못하는 순서 조건은 이유와 함께 `not supported`로 기록하고, 확장이 필요한지는 그 조건에서 확인한다. 고정된 두 event 모형을 모든 사례의 판정 규칙으로 들이지 않는다. 식별자 `rspec`, `Req`, `Allowed`는 그대로 둔다(T1). spec 부록 C의 rev 1.3 용어 대응에서 [P0.2]의 "순서 조건 φ"는 준비 상태 명세 κ(`rspec`)이거나 `not supported`이고, 새 식별자는 없다.
+
+### 5.11 요구를 붙이는 호출 문맥 (rev 1.3 보충, 2026-10-24)
+
+[D] (spec §1.6 "Call contexts"; 2026-10-24 마스터플랜 §5.1). `U`의 site 술어를 어떻게 고르는지를 정한다. 위의 정의는 바뀌지 않는다.
+
+- 준비 상태 명세는 출처가 정당화한 **역할**(호출 목적과 그 호출에 대한 요구. 예: 자원이 준비돼 있어야 하는 의존적 사용)을 가진 호출 문맥에만 붙는다. 출처는 문서, 호출자 코드, 이슈, 수정 설명이며 provenance와 side를 함께 기록한다.
+- 소스 위치(고정 판의 `path:line`, basis마다 anchor audit가 다시 묶음)는 그 역할을 바이너리의 호출 지점에 묶는 근거일 뿐이다. 위치만으로 어떤 호출이 준비 사전조건을 지닌 사용이 되지 않는다.
+- 같은 연산이라도 출처가 보이는 역할이 다르면 κ의 instance가 아니다. 그 호출은 역할과 출처로 선언하고, 그 event는 사실로 계속 기록한다.
+- 사례 결과를 맞추려고 호출 문맥을 빼는 규칙(앱 이름으로, 역할 없는 호출 지점으로, 결과를 본 뒤에)은 금지한다.
+- API의 모든 호출자에게 문서화된 의무에서 온 역할(K-ID, `cfe_evs.h:169–172`)은 그 API의 모든 호출 문맥을 덮는다.
+- 예(C1; [../plan/C1_basis_plan.md](../plan/C1_basis_plan.md) §9.7): CF의 throttle semaphore 조회는 의존적 사용이다(CF 문서, 이슈 #184). nasa/bp가 자기 생성 전에 하는 조회는 존재 확인이다. "없음" 결과가 같은 이름을 만드는 조건이기 때문이다(`bp_flow.c` L121–L144 @`b051eb0`). 그래서 BP의 조회에는 준비 사전조건이 붙지 않는다.
 
 ---
 

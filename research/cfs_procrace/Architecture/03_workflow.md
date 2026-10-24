@@ -530,7 +530,7 @@ flowchart TD
 
 **`kz trace`가 하는 일**(spec §4.8. 번호는 spec의 step 번호와 같다).
 1. **decode와 loss.** thread별 순번(`tseq`)의 빈틈과 CPU별 drop counter로 기록 손실을 찾는다. 손실 구간에 기대는 판정은 `unknown(loss)`다. 손실을 "사건이 없었다"로 읽지 않는다(spec §5.6).
-2. **identity 결합.** 실행 task, 소유 앱, 서비스, 찍힌 AppId를 오프라인에서 결합한다. 프로세스 안에서 아무것도 조회하지 않는다(spec §5.7). rev 1.3(ADR-056; C-05): 결합은 모든 actor의 `app_owner`를 그 근거와 수준(`confirmed | inferred | undetermined`)과 함께 낸다([04 §1.4](04_formal_model.md#14-실행-관계와-생성-앱-rev-13)). 미확정 소유는 그대로 두고 보류 사유가 되며(아래 보류 사유), 분석하는 table의 조회로 결코 풀지 않는다.
+2. **identity 결합.** 실행 task, 소유 앱, 서비스, 찍힌 AppId를 오프라인에서 결합한다. 프로세스 안에서 아무것도 조회하지 않는다(spec §5.7). rev 1.3(ADR-056; C-05): 결합은 모든 actor의 `app_owner`를 그 근거와 수준(`confirmed | inferred | undetermined`)과 함께 낸다([04 §1.4](04_formal_model.md#14-실행-관계와-생성-앱-rev-13)). 미확정 소유는 그대로 두고 보류 사유가 되며(아래 보류 사유), 분석하는 table의 조회로 결코 풀지 않는다. rev 1.3 보충(2026-10-24): 실행 task, 생성 실행자, 소유(생성) 앱, 전달 AppID의 네 범주를 따로 두고 같다고 가정하지 않는다([04 §1.4](04_formal_model.md#14-실행-관계와-생성-앱-rev-13) 끝).
 3. **HB 계산.** `VC`는 모든 확정 edge로, `VC_R`은 `unconditional`·`obs-fatal` edge(구조적 S 순서)로만 계산한다. **looper rule**: 한 looper(message를 받아 handler로 나누어 실행하는 actor)의 두 handler 사이에는 HB edge를 두지 않는다(CAFA PLDI 2014 [V-abs]; DCatch ASPLOS 2017 [P]; spec §1.9).
 4. **conjunct별 LP 구간.** 각 LP를 [그 actor의 직전 관측 사건, 직후 관측 사건] 구간으로 둔다. 두 LP의 구간이 HB로 순서 지어지면 HB-decided, Φ의 결과 대응표로만 정해지면 outcome-decided, 둘 다 아니면 ambiguous다.
 5. **routing.** 아래 표.

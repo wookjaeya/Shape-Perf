@@ -844,7 +844,8 @@ spec §13의 용어 102개를 spec의 순서(대체로 영문 알파벳 순)대�
 | **pool key** | 빈도 `n of N`을 합칠 때 같아야 하는 (B hash, plan hash, cold/warm 층)이다 | §4.12 항목 4 |
 | **rung V1′** | revision 1.3의 첫 rung인 R2 기반 검증이다. ENV basis에서 관측, task→앱 매핑을 포함한 정규화, 관측 기반 판정, trust ledger를 R2의 동결한 기대표와 대조한다. V1의 certificate 출구 항목은 선택이다 | §9.3 "Ladder of revision 1.3"; ADR-057 |
 | **요약 뷰(summary view)** | 바뀌지 않은 status, 세 판단, 근거 등급, 근거 축에서 계산하는 판정의 뷰다. 관측 결과 넷, 예측 결과 넷, 확인 결과 셋과 실행 관계로 보인다. `PENDING`과 `OPEN`은 `INCONCLUSIVE(horizon-open)`이다. 기록은 원래 값을 지닌다 | §1.10 "Summary view"; ADR-054 |
-| **task→앱 매핑(`app_owner`)** | actor instance마다 그것을 만든 애플리케이션과 그 근거, 수준(`confirmed`, `inferred`, `undetermined`)이다. revision 1.3에서 필수 산출물이다 | §1.2, §5.7; ADR-056 |
+| **task→앱 매핑(`app_owner`)** | actor instance마다 그것을 만든 애플리케이션과 그 근거, 수준(`confirmed`, `inferred`, `undetermined`)이다. revision 1.3에서 필수 산출물이다. rev 1.3 보충(2026-10-24): 실행 task, 생성 실행자, 소유(생성) 앱, 전달 AppID를 따로 두고 같다고 가정하지 않는다(ADR-056 보충; [04 §1.4](04_formal_model.md#14-실행-관계와-생성-앱-rev-13)) | §1.2, §5.7; ADR-056 |
+| **호출 문맥 규칙** (rev 1.3 보충, 2026-10-24) | 준비 상태 명세는 출처가 정당화한 역할(목적·요구)을 가진 호출 문맥에만 붙는다. 소스 위치는 그 역할을 바이너리에 묶을 뿐이다. 사례 결과에 맞춘 제외 규칙은 금지한다([04 §5.11](04_formal_model.md#511-요구를-붙이는-호출-문맥-rev-13-보충-2026-10-24)) | §1.6 "Call contexts" |
 | **필수 경로 / 선택 경로** | revision 1.3의 필수 경로는 closure와 추출 → probe plan → 관측 → 정규화 → 관측 기반 판정 → 한정 예측 → 제어 실행 확인이다. MustBefore, certificate, `kz proofcheck`, explorer, 진행 결과, loop는 선택 경로다 | §0.12; ADR-053 |
 | **2026-10-22 결정 D1–D5** | revision 1.3의 기초가 된 PI 결정이다. 같은 번호의 이전 PI 결정과 다르다([§2.15](#215-2026-10-22의-결정-d1d5)) | §0.12, §10.1 |
 

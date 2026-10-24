@@ -56,6 +56,12 @@ const ReplayCase kReplayCases[] = {
     {"effects_core", "effects_core", true, "7.0.1"},
     {"effects_external", "effects_external", true, "7.0.1"},
     {"cleanup_window", "cleanup_window", true, "7.0.1"},
+    // C1 (profile c1-bp-b051eb0 with the variant directories the test names): the roles of the call
+    // contexts, the caller-level Allowed per CF revision.
+    {"c1_pre_fail", "c1_pre_fail", false, nullptr},
+    {"c1_post_retry", "c1_post_retry", false, nullptr},
+    {"c1_post_retry_altP3", "c1_post_retry", false, nullptr},
+    {"c1_role_unbound", "c1_role_unbound", false, nullptr},
 };
 
 const char* const kPredicate = "forall r: es.app where state(r) != FREE { state(es.appstate(r)) >= RUNNING }";
@@ -69,12 +75,21 @@ bool read_file(const std::string& path, std::string* out) {
   return true;
 }
 
-bool load_profile(const std::string& dir, kz::phi::Profile* p) {
+// `dirs` is one directory or several separated by ':' (a profile with variant directories, e.g. C1).
+bool load_profile(const std::string& dirs, kz::phi::Profile* p) {
   std::vector<std::string> paths;
   std::error_code ec;
-  for (const fs::directory_entry& e : fs::directory_iterator(dir, ec))
-    if (e.is_regular_file() && e.path().extension() == ".kzp") paths.push_back(e.path().string());
-  std::sort(paths.begin(), paths.end());
+  const std::string dir = dirs;
+  for (size_t b = 0; b <= dirs.size();) {
+    size_t e = dirs.find(':', b);
+    if (e == std::string::npos) e = dirs.size();
+    std::vector<std::string> in_dir;
+    for (const fs::directory_entry& de : fs::directory_iterator(dirs.substr(b, e - b), ec))
+      if (de.is_regular_file() && de.path().extension() == ".kzp") in_dir.push_back(de.path().string());
+    std::sort(in_dir.begin(), in_dir.end());
+    paths.insert(paths.end(), in_dir.begin(), in_dir.end());
+    b = e + 1;
+  }
   std::vector<kz::phi::SourceText> files;
   for (const std::string& path : paths) {
     kz::phi::SourceText t;
@@ -185,18 +200,19 @@ int compare(const std::string& name, const std::string& got, const std::string& 
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 5) {
-    std::fprintf(stderr, "usage: kz_phi_golden <case> <profile-dir> <data-dir> <trace-dir>\n");
+  if (argc != 5 && argc != 6) {
+    std::fprintf(stderr, "usage: kz_phi_golden <case> <profile-dir[:dir...]> <data-dir> <trace-dir> [<golden name>]\n");
     return 2;
   }
   const std::string name = argv[1];
+  const std::string golden = argc == 6 ? argv[5] : name;  // a profile with variants names its golden files
   kz::phi::Profile p;
   if (!load_profile(argv[2], &p)) return 2;
-  if (name == "profile_canonical") return compare(name, kz::phi::canonical_text(p), argv[3]);
-  if (name == "profile_summary") return compare(name, case_summary(p), argv[3]);
+  if (name == "profile_canonical") return compare(golden, kz::phi::canonical_text(p), argv[3]);
+  if (name == "profile_summary") return compare(golden, case_summary(p), argv[3]);
   if (name.rfind("replay_", 0) == 0) {
     for (const ReplayCase& c : kReplayCases)
-      if (name == std::string("replay_") + c.name) return compare(name, case_replay(p, c, argv[4]), argv[3]);
+      if (name == std::string("replay_") + c.name) return compare(golden, case_replay(p, c, argv[4]), argv[3]);
   }
   std::fprintf(stderr, "unknown case %s\n", name.c_str());
   return 2;

@@ -1,0 +1,6 @@
+# 00_source.kzp -- cFS bundle candidate A 1df262a (plan/C1_build_manifest.md 1: unspecified_by_reference
+# which candidate the CI used; both are kept, PI decision P4).
+phi 1;
+
+source cfe root "cfe" rev "6cccb3f5d10664b5b10aeb9cfcda871ba2d99b32";
+source osal root "osal" rev "f34759d6d6f7087e81afda94eccf7554e013cbe6";

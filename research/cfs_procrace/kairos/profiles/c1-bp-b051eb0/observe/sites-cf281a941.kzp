@@ -1,0 +1,83 @@
+# sites-cf281a941.kzp -- the probe plan of the perf-sample observer for case C1 on the W3 builds with CF 281a941
+# (plan/C1_build_manifest.md; the bundle candidates 1df262a and 1b0b338 share this plan: the cited OSAL and
+# cFE files are byte-identical in both, and the anchors are resolved per binary by kz anchor).
+#
+# DATA for `kz anchor` and `kz observe` (format kzp-observe 1, probe/plan/profile.hpp), not the profile
+# language of the readiness specification (../*.kzp).  Point sites are named after the Phi sites (role
+# sites and call sites), so that `kz replay` maps them.  Source root: a C1 source view (cf/, bp/, osal/,
+# cfe/; docs/c1_smoke_observe.md); each sha256 is that of the cited lines, recomputed by kz anchor.
+#
+# Three files: the executable core-tx (primary) and the shared objects cf.so and bp.so that the start script
+# loads (one basis per file: kz anchor --bin, kz observe --basis).  The W3 builds are Release builds
+# without a line table: entry/return sites and function-scoped call sites only (the W2 anchor rules: PLT
+# calls, refusal of a branch-joined return site).  The tx instance only (PI decision P7 is open): rx runs
+# from other files and is not probed.
+kzp-observe 1
+binary core-tx
+binary cf.so
+binary bp.so
+
+# ---- cited text -----------------------------------------------------------------------------------
+prov osal_countsem_lookup_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-countsem.c" lines=204-215 cite="OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name) returns a status; the id goes to *sem_id" sha256=aaa80e692241a94867b279e2b3a112b50ffd1b26c011ea4fdebe2ac0e407f546
+prov osal_countsem_lookup_doc tier=contract-backed kind=api_doc side=supplier file="osal/src/os/inc/osapi-countsem.h" lines=147-162 cite="the documented results of the lookup: OS_SUCCESS, OS_INVALID_POINTER, OS_ERR_NAME_TOO_LONG, OS_ERR_NAME_NOT_FOUND" sha256=9d7f3829a7927300cb1b547dec7532c96691e2ba70ec166fd9dcb8d845d7fa32
+prov osal_countsem_create_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-countsem.c" lines=83-109 cite="OS_CountSemCreate(osal_id_t *sem_id, const char *sem_name, uint32 sem_initial_value, uint32 options) returns a status" sha256=1eec04aa4faf5e3a347cb8033d09b7b0cb6a9752b22f8b875acac78336d52b98
+prov es_exitapp_sig tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=340-340 cite="void CFE_ES_ExitApp(uint32 ExitStatus): the exit status is the first argument" sha256=619688757208e86148bcff308d085c835b7038066d843b51f8e03c2c79ab2e4b
+prov es_startapptask_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=576-591 cite="CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId) makes the one OS_TaskCreate call of the task" sha256=b9b1e95f7ec8bb36c3bf515c9f85cdf646208607a88cc5f0f3e971e2a8b6f0ed
+prov es_taskrecord_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=619-619 cite="TaskRecPtr->AppId = ParentAppId: the task belongs to the application the request named" sha256=02877d004b4ca6dbe455db0ea72f5143e97ea0c4a128fab4e1b26081d21bbd47
+prov es_core_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=767-769 cite="the core start passes the AppId it reserved (PendingAppId) as ParentAppId" sha256=c1ac08c8dbb94b8256cda122284c92d2ac159516963fb19871a15c588cf06bdc
+prov es_appcreate_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=768-773 cite="CFE_ES_AppCreate passes the AppId it reserved (PendingResourceId) as ParentAppId" sha256=9f2aa6ba6dae3501cf857465b06c621514f1a12d19f5f6ee15651dfaf259c750
+prov es_childtask_sig tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1247-1249 cite="CFE_ES_CreateChildTask(TaskIdPtr, TaskName, FunctionPtr, StackPtr, StackSize, Priority, Flags): no application argument" sha256=f23332b800fd4261bfc1a89eba0dc4425f98e8d816e371340a4ed3b4c2328039
+prov es_childtask_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1302-1329 cite="the parent application is the caller own (an App-record lookup by context, refused from a child task); it is passed to CFE_ES_StartAppTask as ParentAppId" sha256=533a723105e89a29e8d0c9320ce00668328fa570cce52be0eb715a5fb8f78698
+prov osal_task_create_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=164-200 cite="OS_TaskCreate(task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags): OS_TaskCreate_Impl, then OS_ObjectIdFinalizeNew writes the id to the out-parameter" sha256=6cf44c2d13450aa7e84059fe910a03542837cfed63e64c8398d9e26e15a422d0
+prov osal_task_entry_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=124-140 cite="OS_TaskEntryPoint(task_id) runs first in the new task" sha256=3bf9fc898ea14c151819ca508d616e6e48416577f41095624c1340eb7535e5ce
+prov osal_taskcreate_impl_arg tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=571-590 cite="OS_TaskCreate_Impl zeroes the argument wrapper, sets arg.id = OS_ObjectIdFromToken(token) and passes arg.opaque_arg as entry_arg, the 5th argument, to OS_Posix_InternalTaskCreate_Impl" sha256=2ba2122cd904130c87363320bbdcfa0ceada9cbb04edc809acbbe800f8ad80b1
+prov osal_internal_create_sig tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=434-435 cite="OS_Posix_InternalTaskCreate_Impl(pthr, priority, stacksz, entry, entry_arg): entry_arg is the 5th argument (r8)" sha256=e986943f33b04e8ded67d155e2b7d97ef328ea4aaefce5659ac50223f337e99f
+prov osal_pthread_entry tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=113-122 cite="the new thread receives the same argument and calls OS_TaskEntryPoint(local_arg.id)" sha256=884ef27008c1905e4fabdd0059603124ecf33b796331c0a1ebef6b14edd8305a
+prov bp_flowinit_calls_throttle tier=code-derived kind=code_pattern file="bp/fsw/src/bp_flow.c" lines=519-524 cite="BP_FlowInit calls initialize_throttling first" sha256=ced87b122011dfaa33c45f863c05ad3590955827f7ab150e805f2f242bb8f993
+prov bp_flow_throttle_init tier=code-derived kind=code_pattern file="bp/fsw/src/bp_flow.c" lines=121-144 cite="initialize_throttling is static, called only from BP_FlowInit; per name the lookup (L126) and, if it did not succeed, the create (L132)" sha256=bbc7ada3f6d6438215abf9d6afa19a3b02e4a7c129d471f1c4253fa66f49fdbb
+prov cf_app_init_engine_call tier=code-derived kind=code_pattern file="cf/fsw/src/cf_app.c" lines=252-252 cite="CF_Init calls CF_CFDP_InitEngine" sha256=e29b625b7d2f02ec5d8f3d06517a12e405b2318117cdcf13772126315ce15a9f
+prov cf_app_init_status tier=code-derived kind=code_pattern file="cf/fsw/src/cf_app.c" lines=330-334 cite="CF_AppMain calls CF_Init and sets APP_ERROR on failure" sha256=58ab8c2b8ce8fd468467e659de72bdc8a1e36d598ff4e9e8d5e8cb2081283fae
+prov cf_cfdp_lookup_call tier=code-derived kind=code_pattern file="cf/fsw/src/cf_cfdp.c" lines=993-994 cite="the one OS_CountSemGetIdByName call of CF_CFDP_InitEngine at 281a941" sha256=d7239ca41f6f6bcc05179554fcd4edad993edda32a8cfb9d804ac7031dafdc9e
+
+# ---- core-tx: the semaphore API (the lookup and the creation, every caller) ---------------------
+# The name and the id are in memory: an observer of registers keeps the pointers only (the slot roles
+# are not the parameter names, so the replay does not take a pointer for the name).
+site osal.countsem_lookup.entry entry func=OS_CountSemGetIdByName prov=osal_countsem_lookup_def s0=rdi:u64:sem_id_ptr s1=rsi:u64:sem_name_ptr s3=stack+0:u64:return_address
+site osal.countsem_lookup.ret   ret   func=OS_CountSemGetIdByName prov=osal_countsem_lookup_doc s0=rax:u32:status s3=ip:u64:return_address
+site osal.countsem_create.entry entry func=OS_CountSemCreate prov=osal_countsem_create_def s0=rdi:u64:sem_id_ptr s1=rsi:u64:sem_name_ptr s2=rdx:u32:sem_initial_value s3=stack+0:u64:return_address
+site osal.countsem_create.ret   ret   func=OS_CountSemCreate prov=osal_countsem_create_def s0=rax:u32:status s3=ip:u64:return_address
+# The exit of an application task (CF on its init failure, BP on a provider init failure): the status.
+site es.exit_app.entry entry func=CFE_ES_ExitApp prov=es_exitapp_sig s0=rdi:u32:exit_status s3=stack+0:u64:return_address
+
+# ---- cf.so: the dependent lookup in its caller ---------------------------------------------------------
+site cf.init.entry entry func=CF_Init bin=cf.so prov=cf_app_init_status s3=stack+0:u64:return_address
+site cf.init.ret   ret   func=CF_Init bin=cf.so prov=cf_app_init_status s0=rax:u32:status s3=ip:u64:return_address
+site cf.init_engine.entry entry func=CF_CFDP_InitEngine bin=cf.so prov=cf_app_init_engine_call s3=stack+0:u64:return_address
+site cf.init_engine.ret   ret   func=CF_CFDP_InitEngine bin=cf.so prov=cf_app_init_engine_call s0=rax:u32:status s3=ip:u64:return_address
+# The role site of cf-dependent-lookup (the Phi site cf_lookup_call): right after the lookup returns in
+# CF_CFDP_InitEngine, with the status CF sees.  The build has no line table: the call is found in the
+# function (one call of OS_CountSemGetIdByName through its PLT stub).
+site cf_lookup_call point func=CF_CFDP_InitEngine after-call=OS_CountSemGetIdByName bin=cf.so prov=cf_cfdp_lookup_call s0=rax:u32:status
+
+# ---- bp.so: the provider ---------------------------------------------------------------------------
+site bp.flow_init.entry entry func=BP_FlowInit bin=bp.so prov=bp_flowinit_calls_throttle s3=stack+0:u64:return_address
+site bp.flow_init.ret   ret   func=BP_FlowInit bin=bp.so prov=bp_flowinit_calls_throttle s0=rax:u32:status s3=ip:u64:return_address
+# The role site of bp-existence-probe (Phi site bp_existence_probe_call) and the create call site (Phi
+# site bp_create_call).  initialize_throttling is static and called only from BP_FlowInit (bp_flow.c L121,
+# L524); the release build has no symbol for it (nm): its calls are in the code of BP_FlowInit, one call of
+# each callee (checked by kz anchor).
+site bp_existence_probe_call point func=BP_FlowInit after-call=OS_CountSemGetIdByName bin=bp.so prov=bp_flow_throttle_init s0=rax:u32:status
+site bp_create_call point func=BP_FlowInit after-call=OS_CountSemCreate bin=bp.so prov=bp_flow_throttle_init s0=rax:u32:status
+
+# ---- core-tx: creation-side evidence of app_owner (as cfs-v7.0.1 sites 21-25, re-anchored) -------------
+site es.start_task.entry entry func=CFE_ES_StartAppTask decoder=owner-request prov=es_startapptask_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r8:u32:owner_id s3=stack+0:u64:return_address
+site es.start_task.ret   ret   func=CFE_ES_StartAppTask decoder=request-return prov=es_startapptask_def s0=rax:u32:status s3=ip:u64:return_address
+site es.child_task.entry entry func=CFE_ES_CreateChildTask decoder=child-request prov=es_childtask_owner s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s3=stack+0:u64:return_address
+site es.child_task.ret   ret   func=CFE_ES_CreateChildTask decoder=request-return prov=es_childtask_sig s0=rax:u32:status s3=ip:u64:return_address
+site osal.task_create.entry entry func=OS_TaskCreate decoder=spawn-create prov=osal_task_create_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r9:u32:priority s3=stack+0:u64:return_address
+site osal.task_create.ret   ret   func=OS_TaskCreate decoder=spawn-return prov=osal_task_create_def s0=rax:u32:status s3=ip:u64:return_address
+site osal.task_entry entry func=OS_TaskEntryPoint decoder=thread-entry prov=osal_task_entry_def s0=rdi:u32:task_id s3=stack+0:u64:return_address
+# The id OS_TaskCreate assigns, where it is passed to the new thread: in these OSAL revisions entry_arg is
+# the 5th argument (r8), not the 6th as in cfs-v7.0.1; OS_TaskCreate_Impl reaches the function by a tail
+# jump, on the creating thread, inside the OS_TaskCreate call.
+site osal.task_create.id entry func=OS_Posix_InternalTaskCreate_Impl decoder=spawn-id prov=osal_taskcreate_impl_arg s0=r8:u32:task_id s1=rcx:u64:entry_fn s3=stack+0:u64:return_address

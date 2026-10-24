@@ -1,0 +1,31 @@
+# C1 at CF 281a941 in the start order of the public BP build (CF before BP), a synthetic model trace:
+# every value is a unit-test value, not a research condition and not a result.  CF's one lookup finds no
+# semaphore and CF exits; then BP checks for the name (its role: an existence probe) and creates both.
+const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
+CF CF_Init call
+CF CF_CFDP_InitEngine call
+CF OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+CF OS_CountSemGetIdByName.exists pt
+CF OS_CountSemGetIdByName ret result=-17
+CF cf_lookup_call pt
+CF CF_CFDP_InitEngine ret result=-17
+CF CF_Init ret result=-17
+CF CFE_ES_ExitApp call arg.ExitStatus=3
+BP BP_FlowInit call
+BP OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem
+BP OS_CountSemGetIdByName.exists pt
+BP OS_CountSemGetIdByName ret result=-17
+BP bp_existence_probe_call pt
+BP OS_CountSemCreate call arg.sem_name=@BP0_tsem arg.sem_initial_value=10 arg.options=0
+BP OS_CountSemCreate.publish pt lp.operation_status=0
+BP OS_CountSemCreate ret result=0
+BP bp_create_call pt
+BP OS_CountSemGetIdByName call arg.sem_name=@BP1_tsem
+BP OS_CountSemGetIdByName.exists pt
+BP OS_CountSemGetIdByName ret result=-17
+BP bp_existence_probe_call pt
+BP OS_CountSemCreate call arg.sem_name=@BP1_tsem arg.sem_initial_value=10 arg.options=0
+BP OS_CountSemCreate.publish pt lp.operation_status=0
+BP OS_CountSemCreate ret result=0
+BP bp_create_call pt
+BP BP_FlowInit ret result=0

@@ -1,0 +1,34 @@
+# 40_rspec.kzp -- NOT THE CURRENT READING.  The alternative of the open PI decision P3 (Q-12) at CF 833fdbb
+# (plan/C1_basis_plan.md 9.8 conclusion 4): the documentation was not changed by the fix, so binding
+# cfs_cf.dox L212-L214 as a caller record that accepts the exit applies here too, and it conflicts with
+# the admission of the retry (G1) for the same outcome OS_ERR_NAME_NOT_FOUND (QT-5).  The conflict is
+# marked on the entry (conflicts_caller): the caller-level Allowed is unspecified_by_reference with the
+# conflict named, so every not-ready attempt is NOT_READY_UNJUDGED, INCONCLUSIVE(caller_requirement_absent).
+# Whether the facts of the version, target and scope check (G5 predates the fix, its context is the
+# configuration of the name) resolve the conflict, the references do not say.
+phi 1;
+
+prov cf_dox_terminate {
+  tier contract-backed;
+  kind api_doc;
+  side caller;
+  file "cf/docs/dox_src/cfs_cf.dox";
+  lines 212 214;
+  sha256 "cbb00c82e0aa992e65640128a2b781f598c2f3a6b3fc62c49dfe074d785c7a32";
+  note "P3 alternative only: the sentence read as a caller record that accepts the exit (exit(APP_ERROR)). The current reading does not bind it (plan/C1_basis_plan.md 9.7, 9.8 G5).";
+}
+
+rspec K-REG.osal-countsem-lookup {
+  use op OS_CountSemGetIdByName;
+  key osal.countsem(arg.sem_name);
+  requires state(osal.countsem(arg.sem_name)) = LIVE;
+  oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
+  appreq unspecified_by_reference;
+  allowed {
+    retry_until_ready codes { OS_ERR_NAME_NOT_FOUND } bound CF_STARTUP_SEM_MAX_RETRIES conflicts_caller prov cf_cfdp_startup_admission;
+    exit CFE_ES_RunStatus_APP_ERROR "cfs_cf.dox L212-L214" conflicts_caller prov cf_dox_terminate;
+  }
+  harm app_error_exit;
+  authored "2026-10-24, C1 profile, P3 alternative (not current), from plan/C1_basis_plan.md 9.8 conclusion 4; cases inspected: C1";
+  prov cf_dox_flow_control, issue_184_body, cf_events_sem_eid, osal_countsem_h_getidbyname, cf_cfdp_lookup, cf_cfdp_retry_loop, cf_cfdp_fail_event, cf_platform_retries, cf_app_init_status, cf_app_exit;
+}

@@ -240,8 +240,9 @@ bool parse_options(int argc, char** argv, Options* o) {
 void print_plan(const std::vector<kz::trace::SiteSpec>& sites) {
   static const char* kinds[] = {"?", "entry", "point", "ret"};
   for (const kz::trace::SiteSpec& s : sites) {
-    std::printf("  site %-2u %-22s %-5s in %s  address %s  file offset %s%s\n", s.site, s.label.c_str(), kinds[s.kind <= 3 ? s.kind : 0],
-                s.symbol.c_str(), hex64(s.vaddr).c_str(), hex64(s.file_offset).c_str(), s.insn_class == KZ_INSN_CLASS_EMULATED ? "  [emulated insn]" : "");
+    std::printf("  site %-2u %-22s %-5s in %s  address %s  file offset %s%s%s\n", s.site, s.label.c_str(), kinds[s.kind <= 3 ? s.kind : 0],
+                s.symbol.c_str(), hex64(s.vaddr).c_str(), hex64(s.file_offset).c_str(), s.insn_class == KZ_INSN_CLASS_EMULATED ? "  [emulated insn]" : "",
+                s.binary != 0 ? ("  [file " + std::to_string(s.binary) + "]").c_str() : "");
     for (const kz::trace::SlotSpec& sl : s.slots) std::printf("      slot %u: %s\n", sl.slot, sl.role.c_str());
   }
 }

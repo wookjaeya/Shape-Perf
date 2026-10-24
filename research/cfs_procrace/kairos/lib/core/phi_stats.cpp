@@ -59,6 +59,7 @@ ProfileStats profile_stats(const Profile& p) {
   for (const LocDecl& d : p.locs) count(p, &st, "loc", d.name, d.prov);
   for (const BindDecl& d : p.binds) count(p, &st, "bind", d.name, d.prov);
   for (const SiteDecl& d : p.sites) count(p, &st, "site", d.name, d.prov);
+  for (const RoleDecl& d : p.roles) count(p, &st, "role", d.name, d.prov);
   for (const OpDecl& d : p.ops) {
     count(p, &st, "op", d.name, d.prov);
     for (const EffectDecl& e : d.effects) {

@@ -15,9 +15,10 @@
 //     (litmus LP-ALLOW (b1r)); `none` needs a specified appreq (a caller-side record);
 //   - a caller entry that the author marked as in conflict with appreq makes the caller-level
 //     Allowed unspecified_by_reference, with the conflict named; it is never TOLERATED silently.
-// Not implemented: the second kind of conflict of SPEC 1.6 step 3, two caller entries that accept
-// incompatible continuations.  It needs a notion of compatible continuations that the profile does
-// not carry; only the author's `conflicts_appreq` mark is read.
+// The second kind of conflict of SPEC 1.6 step 3, two caller entries that accept incompatible
+// continuations, is read only as the author's mark `conflicts_caller` on an entry (the profile carries no
+// notion of compatible continuations to compute it): it makes the caller level unspecified_by_reference
+// with the conflict named, like `conflicts_appreq`.
 // The function below derives the result and says why; the reason text is what a report prints.
 #pragma once
 

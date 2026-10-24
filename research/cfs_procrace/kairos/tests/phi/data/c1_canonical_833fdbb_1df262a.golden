@@ -1,0 +1,685 @@
+phi 1;
+profile "c1-bp-b051eb0" revision "nasa/bp b051eb0; CF and cFS bundle per variant directory";
+prov bp_app_init_before_flow {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_app.c";
+  lines 151 205;
+  sha256 "30b41020112565bdbc91fd7d25ac120d9ca8cda0bc5e15440a8dfa7280e85364";
+  note "AppInit returns early on EVS registration, AppID, name, pipe, subscriptions or BP_SetupLibrary failure, before BP_FlowInit (L203)";
+}
+prov bp_app_main_exit {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_app.c";
+  lines 804 845;
+  sha256 "1e863c73260fd45c8d7a790ccb6025c556329701cdeebbd050ecaffca81353c8";
+  note "BP_AppMain: run_status APP_ERROR unless AppInit succeeds; exit event BP_EXIT_ERR_EID and CFE_ES_ExitApp(run_status)";
+}
+prov bp_app_setup_library {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_app.c";
+  lines 109 127;
+  sha256 "2ce4c1cb3630323bd3008e38da17b5bc319d1cd1424d763bcbd4f7d3f8177b99";
+  note "BP_SetupLibrary: bplib_init or bplib_route_alloc_table failing returns CFE_STATUS_EXTERNAL_RESOURCE_FAIL";
+}
+prov bp_app_throttles_ptr {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_app.c";
+  lines 146 147;
+  sha256 "375ae5c39db8fd99e3cda66c9348e415dc184ddf09b571d66b31eba525278428";
+  note "AppInit clears BP_GlobalData and points Throttles at BP_Throttles";
+}
+prov bp_cfg_rx_ch0_name {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/.github/buildconfig/rx/tables/cf_def_config.c";
+  lines 40 40;
+  sha256 "9d29c7284558b851f2c7f7c84b44936ca0ebd8173633f1d345cd62b726acff1a";
+  note "the rx instance table: the same names";
+}
+prov bp_cfg_rx_ch1_name {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/.github/buildconfig/rx/tables/cf_def_config.c";
+  lines 54 54;
+  sha256 "f1e52713704113b00aacceaabff91c2ed8974334e304ee01c242d4e8a87fba1a";
+  note "the rx instance table: the same names";
+}
+prov bp_cfg_tx_ch0_name {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/.github/buildconfig/tx/tables/cf_def_config.c";
+  lines 40 40;
+  sha256 "9d29c7284558b851f2c7f7c84b44936ca0ebd8173633f1d345cd62b726acff1a";
+  note "the CF table of the public BP build, channel 0 sem_name BP0_tsem";
+}
+prov bp_cfg_tx_ch1_name {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/.github/buildconfig/tx/tables/cf_def_config.c";
+  lines 54 54;
+  sha256 "f1e52713704113b00aacceaabff91c2ed8974334e304ee01c242d4e8a87fba1a";
+  note "channel 1 sem_name BP1_tsem";
+}
+prov bp_events_ids {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_events.h";
+  lines 34 42;
+  sha256 "4bc6f6cd1497ae77df70489b91f6f8239edffd94abd23390556be24bd58d0281";
+  note "BP_EXIT_ERR_EID 7, BP_SEM_ERR_EID 14, BP_SEM_INFO_EID 15";
+}
+prov bp_flow_create_call {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_flow.c";
+  lines 132 133;
+  sha256 "f3b22d06f2ab2968b616e8b6e10cca62b696feb58299f6668827b434b9cf2a9e";
+  note "the creation, reached only when the existence check did not succeed (else if): OS_CountSemCreate(&Sem, Name, Max, 0)";
+}
+prov bp_flow_h_throttle {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_flow.h";
+  lines 54 61;
+  sha256 "02da1bfb1eda588289d754914e9f18e12451b9dffde17545ecf4fb09005bc50b";
+  note "BP_Throttle_t: const char Name[], MsgId, Max, Throttle, osal_id_t Sem";
+}
+prov bp_flow_lookup_call {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_flow.c";
+  lines 126 127;
+  sha256 "bb180aa549793b2326145341a2f181b935a52fe1c90d9c2149243b665d100bf4";
+  note "the existence check: OS_CountSemGetIdByName(&Throttles[index].Sem, Throttles[index].Name) compared with CFE_SUCCESS";
+}
+prov bp_flow_throttle_init {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_flow.c";
+  lines 121 144;
+  sha256 "bbc7ada3f6d6438215abf9d6afa19a3b02e4a7c129d471f1c4253fa66f49fdbb";
+  note "initialize_throttling: for each throttle, OS_CountSemGetIdByName; if it is not CFE_SUCCESS, OS_CountSemCreate of the same name with Max and options 0; Found/Created/Failed events";
+}
+prov bp_flowinit_calls_throttle {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/src/bp_flow.c";
+  lines 519 524;
+  sha256 "ced87b122011dfaa33c45f863c05ad3590955827f7ab150e805f2f242bb8f993";
+  note "BP_FlowInit calls initialize_throttling first; initialize_throttling is static and has no other caller";
+}
+prov bp_semcfg_names {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/custom/bp_semcfg.c";
+  lines 43 49;
+  sha256 "da8c07cf779c7ee56bffa1cac8c10c693181d9755f3c82890723780c0ef21e33";
+  note "default names CF_CHANNEL_0_SEM_NAME BP0_tsem and CF_CHANNEL_1_SEM_NAME BP1_tsem";
+}
+prov bp_semcfg_purpose {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/custom/bp_semcfg.c";
+  lines 33 36;
+  sha256 "18709e650bb1958c7051b8c6403f68c69c7dd2720be125965f05e29f9fdf853f";
+  note "the provider comment: the CF task uses these semaphores to throttle its CFDP PDUs";
+}
+prov bp_semcfg_table {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/fsw/custom/bp_semcfg.c";
+  lines 68 70;
+  sha256 "c027cf639569302797c3d57acc5698b905c54d6df2221f2aa024b6ec628afe98";
+  note "BP_Throttles: the two names with Max BP_CF_SEM_MAX_COUNT";
+}
+prov bp_startup_script {
+  tier code-derived;
+  kind code_pattern;
+  file "bp/.github/buildconfig/cfe_es_startup.scr";
+  lines 6 7;
+  sha256 "fb3dbb505db6e89e37502e8b94f82ff96180518158e3e1ee9db7ca17a3b0885a";
+  note "the start script: CF (priority 65) is started before BP (priority 55)";
+}
+prov cf_app_exit {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_app.c";
+  lines 366 366;
+  sha256 "d88c5f365823d286d62dc149ffad82769abb0739f2145f4bde9ae029899bc74c";
+  note "CF_AppMain ends with CFE_ES_ExitApp(run_status)";
+}
+prov cf_app_init_engine_call {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_app.c";
+  lines 252 252;
+  sha256 "e29b625b7d2f02ec5d8f3d06517a12e405b2318117cdcf13772126315ce15a9f";
+  note "CF_Init calls CF_CFDP_InitEngine";
+}
+prov cf_app_init_status {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_app.c";
+  lines 330 334;
+  sha256 "58ab8c2b8ce8fd468467e659de72bdc8a1e36d598ff4e9e8d5e8cb2081283fae";
+  note "CF_AppMain: a CF_Init status other than CFE_SUCCESS sets run_status APP_ERROR";
+}
+prov cf_cfdp_fail_event {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1014 1019;
+  sha256 "d0578c3b3250125947587ac34fc2ce9fb3c9576ffaa06e602e95f1e0107d018d";
+  note "after the loop a result other than OS_SUCCESS: event 30 and break";
+}
+prov cf_cfdp_initengine_return {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1048 1053;
+  sha256 "a4e3fd0e9cc9645cbfcf9792669d2159e8b8fa3fe7027037dc8fd75fd3e1f3d3";
+  note "CF_CFDP_InitEngine enables the engine only if ret is CFE_SUCCESS and returns ret";
+}
+prov cf_cfdp_lookup {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 991 1021;
+  sha256 "d26540d1c94c3e37017b7d331f92c449c77c3b8d710d2fcc99cb6f9214ce5a5a";
+  note "the dependent lookup at 833fdbb: a non-empty configured name, the admission comment, up to CF_STARTUP_SEM_MAX_RETRIES lookups with OS_TaskDelay between them while the result is OS_ERR_NAME_NOT_FOUND, on final failure event 30 and break";
+}
+prov cf_cfdp_lookup_call {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1003 1004;
+  sha256 "a95f17b1027115160fddb7e923de8dc0e65d722cc4886f3f0ddf2aa9e2feb330";
+  note "the call OS_CountSemGetIdByName(&channels[i].sem_id, config_table->chan[i].sem_name) inside the retry loop of CF_CFDP_InitEngine";
+}
+prov cf_cfdp_retry_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1000 1012;
+  sha256 "b6e324a138e8a4abe4dcb6262737ba8ca3f5d62d06cc554a519282a38708b40e";
+  note "the retry loop: for j below CF_STARTUP_SEM_MAX_RETRIES, lookup, break unless OS_ERR_NAME_NOT_FOUND, OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY)";
+}
+prov cf_cfdp_startup_admission {
+  tier admitted;
+  kind code_admission;
+  side caller;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 993 999;
+  sha256 "1c4876202fc2428a8fc1a0f9668118b3cc32a1407c99a5b86c6fee72cee9842f";
+  note "the start-up race admission: if OSAL returns OS_ERR_NAME_NOT_FOUND, assume the providing application has not created it yet, delay and try again (G1; the same text as 15a871e cf_cfdp.c 1272-1278 that SPEC 2.3 cites)";
+}
+prov cf_dox_flow_control {
+  tier contract-backed;
+  kind api_doc;
+  side caller;
+  file "cf/docs/dox_src/cfs_cf.dox";
+  lines 208 214;
+  sha256 "a38ddc835d1d0c8b911ba5435706b3a107f8ea9dd1e3adfa82b10540a45366ee";
+  note "CF documentation, Flow Control: CF assumes a per-channel semaphore provided by TO or an equivalent application; the configured name must match the provider; if a semaphore is expected and not found, the application terminates during initialization";
+}
+prov cf_events_sem_eid {
+  tier contract-backed;
+  kind api_doc;
+  side caller;
+  file "cf/fsw/src/cf_events.h";
+  lines 148 158;
+  sha256 "83e52a4ee3de1ef7b4da11e4b3f44a473b3257c37d0a4ef4ecb290b9109b7fb5";
+  note "event 30 CF_EID_ERR_INIT_SEM, type ERROR: the semaphore needs to exist before the engine is initialized";
+}
+prov cf_platform_delay {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/platform_inc/cf_platform_cfg.h";
+  lines 340 349;
+  sha256 "5e4a5938ac11a5395d1f085db8ffba4c97bad5b6507c376f7d117daf56c769ca";
+  note "CF_STARTUP_SEM_TASK_DELAY 100 milliseconds between retries";
+}
+prov cf_platform_retries {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/platform_inc/cf_platform_cfg.h";
+  lines 329 338;
+  sha256 "8552d436dd08ecfc1d1db977d00b5ef296c17fd0e7125c82714002566590951d";
+  note "CF_STARTUP_SEM_MAX_RETRIES 25: limits the retries to obtain the CF throttle sem";
+}
+prov cf_sbintf_use {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp_sbintf.c";
+  lines 91 93;
+  sha256 "6d29fa340e7cd01e270cab2fe93386802bf2336b94c3ff2627c01a2b6f1b08dc";
+  note "the use of the id the lookup stored: OS_CountSemTimedWait(c->sem_id, 0)";
+}
+prov es_exitapp_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 340 340;
+  sha256 "619688757208e86148bcff308d085c835b7038066d843b51f8e03c2c79ab2e4b";
+  note "void CFE_ES_ExitApp(uint32 ExitStatus)";
+}
+prov es_runstatus_app_error {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_es_extern_typedefs.h";
+  lines 139 139;
+  sha256 "197ca56924aeec04a974410750772a77af549c3f7a11f7576eb6d840634a8f4c";
+  note "CFE_ES_RunStatus_APP_ERROR = 3";
+}
+prov es_start_table_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_start.c";
+  lines 728 729;
+  sha256 "c6230c43085e1d21bb3fefea88174753bd4b8b6a8146ee40ea570c799cf0daa9";
+  note "the App table has CFE_PLATFORM_ES_MAX_APPLICATIONS records";
+}
+prov issue_184_body {
+  tier issue-derived;
+  kind issue;
+  side caller;
+  cite "nasa/CF issue #184, body (2022-01-13): the CF app expects that semaphore to be created before it starts";
+  note "Written about 2a024d8 (cases/C1.md F1); cited for the role of CF's lookup (a dependent use), not as an Allowed entry.";
+}
+prov osal_countsem_create_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 83 109;
+  sha256 "1eec04aa4faf5e3a347cb8033d09b7b0cb6a9752b22f8b875acac78336d52b98";
+  note "OS_CountSemCreate: allocate the record by name, implementation create, OS_ObjectIdFinalizeNew";
+}
+prov osal_countsem_finalize {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 106 106;
+  sha256 "2f8bc922f5cf70fc1ab6473113d3c979d3434a82aae1be083c9cc377cc6ee15a";
+  note "OS_ObjectIdFinalizeNew(return_code, &token, sem_id): the record becomes active and the id is stored on success";
+}
+prov osal_countsem_getidbyname_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 204 215;
+  sha256 "aaa80e692241a94867b279e2b3a112b50ffd1b26c011ea4fdebe2ac0e407f546";
+  note "OS_CountSemGetIdByName: OS_ObjectIdFindByName of the countsem type";
+}
+prov osal_countsem_h_create {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "osal/src/os/inc/osapi-countsem.h";
+  lines 59 73;
+  sha256 "e43bed0a3eac935cfe7b5526c1e66d7195e70f9d218c718199b74b8211b3a86f";
+  note "OS_CountSemCreate: parameters and documented return values";
+}
+prov osal_countsem_h_getidbyname {
+  tier contract-backed;
+  kind api_doc;
+  side supplier;
+  file "osal/src/os/inc/osapi-countsem.h";
+  lines 147 162;
+  sha256 "9d7f3829a7927300cb1b547dec7532c96691e2ba70ec166fd9dcb8d845d7fa32";
+  note "OS_CountSemGetIdByName: finds an existing semaphore id by name; retval OS_ERR_NAME_NOT_FOUND if the name was not found in the table";
+}
+prov osal_delete_all {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-common.c";
+  lines 356 380;
+  sha256 "9b6813c5ec5e9b0165ad35b05381e5ebe993032fb84fa07de90177c11f1ad6d5";
+  note "OS_DeleteAllObjects: at teardown every object of every type is deleted";
+}
+prov osal_err_error {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 97 97;
+  sha256 "7d3cffa41c09c021ca8131c23a2a3bf7b2a0c5873a59f414f0312c8ad5b9b098";
+  note "OS_ERROR -1";
+}
+prov osal_err_invalid_pointer {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 98 98;
+  sha256 "3b886d9d5fdf40f21417cf23d296ab221ec33c7da43712f66d5d6ff8fdfff3bc";
+  note "OS_INVALID_POINTER -2";
+}
+prov osal_err_invalid_sem_value {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 116 116;
+  sha256 "9d380653feb7aa8181385a97c504c9b809fb8c8cc017f358d58fdb0df7a98ee6";
+  note "OS_INVALID_SEM_VALUE -20";
+}
+prov osal_err_name_not_found {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 113 113;
+  sha256 "8017b08c390cb71b8dad93289ea0d7493d9f67b58ca992053486a6d95ca80a4b";
+  note "OS_ERR_NAME_NOT_FOUND -17";
+}
+prov osal_err_name_taken {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 111 111;
+  sha256 "d57484a1eda82c1d0e2f6ce87386d2d53baf1ec2cd5707381242d874c1eb19e8";
+  note "OS_ERR_NAME_TAKEN -15";
+}
+prov osal_err_name_too_long {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 109 109;
+  sha256 "73c636c202a23133ea8ff3b4798d6e04ace174da886de5636690ec26b1a1ca69";
+  note "OS_ERR_NAME_TOO_LONG -13";
+}
+prov osal_err_no_free_ids {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 110 110;
+  sha256 "f68188941aa1dafde74e11a443dfe1101ffd4814e7e1aee4934e182e6a6c1c09";
+  note "OS_ERR_NO_FREE_IDS -14";
+}
+prov osal_err_sem_failure {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 102 102;
+  sha256 "7629be22e4a5c359da5639a88d1beb5d20d8a624ed721a3cb2d04b1d860eb6e0";
+  note "OS_SEM_FAILURE -6";
+}
+prov osal_err_success {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-error.h";
+  lines 96 96;
+  sha256 "f691259f17976143d5cae396f303289b915a656a3b0c378618cb94c80384df17";
+  note "OS_SUCCESS 0";
+}
+prov osal_find_by_name {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 962 984;
+  sha256 "be753d8be2645a7ff0e1ba952c82c9ccaddb512e70669b215ad8967af18e3b7b";
+  note "OS_ObjectIdFindByName: OS_ObjectIdGetByName; on success the out-parameter receives the id";
+}
+prov osal_index_mask_shift {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-idmap.h";
+  lines 32 33;
+  sha256 "9f0362ed60ecc258f5da6601b9d66619b3b17e21b96633ed651a164a52e92987";
+  note "OS_OBJECT_INDEX_MASK 0xFFFF, OS_OBJECT_TYPE_SHIFT 16";
+}
+prov osal_pthread_entry {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/src/os-impl-tasks.c";
+  lines 113 122;
+  sha256 "884ef27008c1905e4fabdd0059603124ecf33b796331c0a1ebef6b14edd8305a";
+  note "the new thread calls OS_TaskEntryPoint(local_arg.id)";
+}
+prov osal_task_create_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 164 200;
+  sha256 "6cf44c2d13450aa7e84059fe910a03542837cfed63e64c8398d9e26e15a422d0";
+  note "OS_TaskCreate(task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags): OS_TaskCreate_Impl, then OS_ObjectIdFinalizeNew";
+}
+prov osal_task_entry_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 124 140;
+  sha256 "3bf9fc898ea14c151819ca508d616e6e48416577f41095624c1340eb7535e5ce";
+  note "OS_TaskEntryPoint(task_id) runs first in the new task";
+}
+prov osal_type_user {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-idmap.h";
+  lines 52 52;
+  sha256 "135babcd288eec17f49b1f74455c5450adead207d61bacc4e8cd50837427b749";
+  note "OS_OBJECT_TYPE_USER 0x10";
+}
+prov r_axiom_program_order {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-24, C1 profile, from SPEC_FINAL 1.9 and 3.16 row R1 (as cfs-v7.0.1); cases inspected: C1";
+  note "Program order inside one actor is an axiom of the model (A3, A4), not a cited text.";
+}
+prov r_countsem_by_name {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-24, C1 profile, from plan/C1_basis_plan.md 1.2 and 9.1; cases inspected: C1";
+  note "The counting semaphore is keyed by its name: the lookup compares names (OS_ObjectIdFindByName). Two states: ABSENT, LIVE. The RESERVED window inside OS_CountSemCreate (name visible before the id is final) is not modelled: it is the follow-up item A5 of P-C1HOLD, outside C1. A delete is not modelled either: no application of the closure calls OS_CountSemDelete (plan/C1_build_manifest.md 8.5, the countsem API callers), and OS_DeleteAllObjects runs at teardown only. Generations (delete and re-create of a name) are not in this subset.";
+}
+prov r_role_binding {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-24, C1 profile, from SPEC rev 1.3 amendment 1.6 Call contexts and plan/C1_basis_plan.md 9.7; cases inspected: C1";
+  note "A role binds a call context to a declared site: the site event follows the return of the call on the same actor (an after-call probe in the caller). The binding of a site to a binary (a function of a release build, inlining) is stated in the observation plan, not here.";
+}
+prov resid_appid_base {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_core_resourceid_basevalues.h";
+  lines 84 84;
+  sha256 "94f4ce09b5ae9fcd4518f6496523f86cc116e881b02ca3b0a8e8d97aad89e855";
+  note "CFE_ES_APPID_BASE = CFE_RESOURCEID_MAKE_BASE(offset)";
+}
+prov resid_appid_offset {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_core_resourceid_basevalues.h";
+  lines 62 62;
+  sha256 "649df3c6a2a42afbaf4ad5009a965bc5d4b020c55d39a6c25c079bd570222d88";
+  note "the ES AppId offset is OS_OBJECT_TYPE_USER + 1";
+}
+prov resid_make_base {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_resourceid_basevalue.h";
+  lines 73 73;
+  sha256 "a9fc4416a7cb7b51e542850d3509f0a6378a0c6cb89d0ba906f4d246a8ae3cf1";
+  note "CFE_RESOURCEID_MAKE_BASE(offset) = MARK | (offset << SHIFT)";
+}
+prov resid_mark_simple {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/option_inc/cfe_resourceid_simple.h";
+  lines 54 54;
+  sha256 "9e06be696e2ee20bb5be0712e6b1806d370f3e81884df0d85e6f35afe47091a0";
+  note "CFE_RESOURCEID_MARK is 0 in the SIMPLE mode";
+}
+prov resid_max_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/resourceid/fsw/inc/cfe_resourceid_basevalue.h";
+  lines 64 65;
+  sha256 "4bab338e6a54a6a09e56b82e7c5cd82fadb441d79c58222204ea84ee932a9a20";
+  note "CFE_RESOURCEID_SHIFT and CFE_RESOURCEID_MAX are the OSAL type shift and index mask";
+}
+prov resid_mode_cmake {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/cmake/sample_defs/global_build_options.cmake";
+  lines 19 27;
+  sha256 "e5e63fcc6d12112c682a0bdbd37b66537653fef8282686699a20fae49994c5f2";
+  note "SIMPLE unless OMIT_DEPRECATED is set";
+}
+prov resid_reserved_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_resourceid_api_typedefs.h";
+  lines 74 74;
+  sha256 "8830becf464cc3bdf8a5df5af018d561750d0034e273b678faec7a343b0f9457";
+  note "CFE_RESOURCEID_RESERVED is 0xFFFFFFFF";
+}
+prov resid_undefined_def {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/core_api/fsw/inc/cfe_resourceid_api_typedefs.h";
+  lines 65 65;
+  sha256 "50c0a87441bc4ceae9ee278f9fddde6c65ee621d477b16df578660ed661303ae";
+  note "CFE_RESOURCEID_UNDEFINED is 0";
+}
+source bp root "bp" rev "b051eb0d12bfe76c0230215c2ff851cfaa553ce4";
+source cf root "cf" rev "833fdbb27a26f15f2429e79392e7eb73d61abdea";
+source cfe root "cfe" rev "6cccb3f5d10664b5b10aeb9cfcda871ba2d99b32";
+source osal root "osal" rev "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+const CFE_ES_APPID_BASE = 0x110000 prov osal_index_mask_shift, osal_type_user, resid_appid_base, resid_appid_offset, resid_make_base, resid_mark_simple, resid_mode_cmake note "SIMPLE resource-ID mode; a STRICT build has 0x02110000";
+const CFE_ES_RunStatus_APP_ERROR = 3 prov es_runstatus_app_error;
+const CFE_PLATFORM_ES_MAX_APPLICATIONS = ref eval "CFE_PLATFORM_ES_MAX_APPLICATIONS" in "cfe/modules/es/fsw/src/cfe_es_start.c" prov es_start_table_loop;
+const CFE_RESOURCEID_MAX = 65535 prov osal_index_mask_shift, resid_max_def;
+const CFE_RESOURCEID_RESERVED = 0xffffffff prov resid_reserved_def;
+const CFE_RESOURCEID_UNDEFINED = 0 prov resid_undefined_def;
+const CF_CHANNEL_0_SEM_NAME = "BP0_tsem" prov bp_cfg_rx_ch0_name, bp_cfg_tx_ch0_name, bp_semcfg_names;
+const CF_CHANNEL_1_SEM_NAME = "BP1_tsem" prov bp_cfg_rx_ch1_name, bp_cfg_tx_ch1_name, bp_semcfg_names;
+const CF_STARTUP_SEM_MAX_RETRIES = 25 prov cf_platform_retries;
+const CF_STARTUP_SEM_TASK_DELAY = 100 prov cf_platform_delay;
+const OS_ERROR = -1 prov osal_err_error;
+const OS_ERR_NAME_NOT_FOUND = -17 prov osal_err_name_not_found;
+const OS_ERR_NAME_TAKEN = -15 prov osal_err_name_taken;
+const OS_ERR_NAME_TOO_LONG = -13 prov osal_err_name_too_long;
+const OS_ERR_NO_FREE_IDS = -14 prov osal_err_no_free_ids;
+const OS_INVALID_POINTER = -2 prov osal_err_invalid_pointer;
+const OS_INVALID_SEM_VALUE = -20 prov osal_err_invalid_sem_value;
+const OS_SEM_FAILURE = -6 prov osal_err_sem_failure;
+const OS_SUCCESS = 0 prov osal_err_success;
+context {
+  owner_kind es.app;
+  prov es_start_table_loop;
+}
+kind es.app(rec: Int) {
+  states FREE < RESERVED < LIVE;
+  initial FREE;
+  scope process;
+  table CFE_PLATFORM_ES_MAX_APPLICATIONS;
+  ids {
+    undefined CFE_RESOURCEID_UNDEFINED;
+    reserved CFE_RESOURCEID_RESERVED;
+    base CFE_ES_APPID_BASE;
+    serial_max CFE_RESOURCEID_MAX;
+  }
+  prov es_start_table_loop, resid_appid_base, resid_max_def, resid_reserved_def, resid_undefined_def;
+}
+kind osal.countsem(name: Str) {
+  states ABSENT < LIVE;
+  initial ABSENT;
+  scope process;
+  transition ABSENT -> LIVE on create;
+  transition LIVE -> ABSENT on delete;
+  prov bp_flow_throttle_init, bp_semcfg_table, osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_delete_all, osal_find_by_name, r_countsem_by_name;
+}
+site bp_create_call = fn("initialize_throttling").call("OS_CountSemCreate") prov bp_flow_create_call;
+site bp_existence_probe_call = fn("initialize_throttling").call("OS_CountSemGetIdByName") prov bp_flow_lookup_call;
+site cf_lookup_call = fn("CF_CFDP_InitEngine").call("OS_CountSemGetIdByName") prov cf_cfdp_lookup_call;
+site cf_retry_delay = fn("CF_CFDP_InitEngine").call("OS_TaskDelay") prov cf_cfdp_retry_loop;
+role bp-existence-probe {
+  op OS_CountSemGetIdByName;
+  site bp_existence_probe_call;
+  purpose existence_probe;
+  prov bp_flow_create_call, bp_flow_lookup_call, bp_flow_throttle_init, bp_semcfg_purpose, r_role_binding;
+}
+role cf-dependent-lookup {
+  op OS_CountSemGetIdByName;
+  site cf_lookup_call;
+  purpose dependent_use;
+  prov cf_cfdp_lookup, cf_dox_flow_control, cf_events_sem_eid, issue_184_body, r_role_binding;
+}
+op BP_FlowInit(AppName) {
+  bind symbol "BP_FlowInit";
+  prov bp_flowinit_calls_throttle;
+}
+op CFE_ES_ExitApp(ExitStatus) {
+  bind symbol "CFE_ES_ExitApp";
+  prov bp_app_main_exit, cf_app_exit, es_exitapp_sig;
+}
+op CF_CFDP_InitEngine() {
+  bind symbol "CF_CFDP_InitEngine";
+  prov cf_app_init_engine_call, cf_cfdp_initengine_return;
+}
+op CF_Init() {
+  bind symbol "CF_Init";
+  prov cf_app_init_status;
+}
+op OS_CountSemCreate(out sem_id, sem_name: Str, sem_initial_value, options) {
+  bind symbol "OS_CountSemCreate";
+  effect publish: lifecycle osal.countsem(arg.sem_name) -> LIVE filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemCreate").call("OS_ObjectIdFinalizeNew") values operation_status: Int prov osal_countsem_create_def, osal_countsem_finalize;
+  outcome OS_ERR_NAME_TAKEN: error documented "retval OS_ERR_NAME_TAKEN of OS_CountSemCreate: already the name of a counting semaphore" prov osal_countsem_h_create;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NO_FREE_IDS: error documented "retval OS_ERR_NO_FREE_IDS of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_INVALID_SEM_VALUE: error documented "retval OS_INVALID_SEM_VALUE of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_SEM_FAILURE: error documented "retval OS_SEM_FAILURE of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_SUCCESS: ready;
+  prov osal_countsem_create_def, osal_countsem_h_create;
+}
+op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
+  bind symbol "OS_CountSemGetIdByName";
+  conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
+  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  outcome OS_SUCCESS: ready;
+  prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;
+}
+op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
+  bind symbol "OS_TaskCreate";
+  prov osal_task_create_def;
+}
+op OS_TaskEntryPoint(task_id) {
+  bind symbol "OS_TaskEntryPoint";
+  prov osal_pthread_entry, osal_task_entry_def;
+}
+hb R1 {
+  title "program order";
+  stratum S;
+  robust unconditional;
+  template program_order {
+    looper yes;
+  }
+  prov r_axiom_program_order;
+}
+hb R2-P-TASK {
+  title "task creation: the creating call precedes the first event of the child";
+  stratum S;
+  robust unconditional;
+  template spawn {
+    create OS_TaskCreate out task_id;
+    entry OS_TaskEntryPoint;
+  }
+  prov osal_pthread_entry, osal_task_create_def, osal_task_entry_def;
+}
+rspec K-REG.osal-countsem-lookup {
+  use op OS_CountSemGetIdByName;
+  key osal.countsem(arg.sem_name);
+  requires state(osal.countsem(arg.sem_name)) = LIVE;
+  oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
+  appreq unspecified_by_reference;
+  allowed {
+    retry_until_ready codes {OS_ERR_NAME_NOT_FOUND} bound CF_STARTUP_SEM_MAX_RETRIES prov cf_cfdp_startup_admission;
+  }
+  harm app_error_exit;
+  authored "2026-10-24, C1 profile, from SPEC_FINAL rev 1.3 1.6, 2.3 and App. A.4 steps 3 and 6, plan/C1_basis_plan.md 9.3, 9.7, 9.8 (G-REBIND); cases inspected: C1";
+  prov cf_app_exit, cf_app_init_status, cf_cfdp_fail_event, cf_cfdp_lookup, cf_cfdp_retry_loop, cf_dox_flow_control, cf_events_sem_eid, cf_platform_retries, issue_184_body, osal_countsem_h_getidbyname;
+}

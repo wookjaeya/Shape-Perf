@@ -1,0 +1,66 @@
+# 20_ops.kzp -- operations of profile c1-bp-b051eb0.
+phi 1;
+
+# The lookup.  Its readiness precondition is that a semaphore of that name exists (plan/C1_basis_plan.md
+# 1.2: the definition is the object at the lookup's linearization point, the table search).  The returned
+# codes are the documented ones: OS_ERR_NAME_NOT_FOUND is the not-ready outcome.  OS_ERR_INCORRECT_OBJ_STATE
+# (the RESERVED window, A5) and OS_ERROR are not documented for this API and are not mapped.  The name is
+# a string in memory; an observer that reads registers only does not have it (a slot holds the pointer and
+# is not named like the parameter).
+op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
+  bind symbol "OS_CountSemGetIdByName";
+  conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
+  outcome OS_SUCCESS: ready;
+  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname;
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
+  prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;
+}
+
+# The creation.  The semaphore is LIVE when OS_ObjectIdFinalizeNew is called with a successful status
+# (the record becomes active and the out-parameter gets the id).
+op OS_CountSemCreate(out sem_id, sem_name: Str, sem_initial_value, options) {
+  bind symbol "OS_CountSemCreate";
+  effect publish: lifecycle osal.countsem(arg.sem_name) -> LIVE filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemCreate").call("OS_ObjectIdFinalizeNew") values operation_status: Int prov osal_countsem_finalize, osal_countsem_create_def;
+  outcome OS_SUCCESS: ready;
+  outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NO_FREE_IDS: error documented "retval OS_ERR_NO_FREE_IDS of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_ERR_NAME_TAKEN: error documented "retval OS_ERR_NAME_TAKEN of OS_CountSemCreate: already the name of a counting semaphore" prov osal_countsem_h_create;
+  outcome OS_INVALID_SEM_VALUE: error documented "retval OS_INVALID_SEM_VALUE of OS_CountSemCreate" prov osal_countsem_h_create;
+  outcome OS_SEM_FAILURE: error documented "retval OS_SEM_FAILURE of OS_CountSemCreate" prov osal_countsem_h_create;
+  prov osal_countsem_create_def, osal_countsem_h_create;
+}
+
+# The functions of CF and BP that frame the lookup (plan/C1_basis_plan.md 9.1: C-0/C-6, P-0/P-5) and the
+# exit of an application (C-7, P-E): events only, no effect.
+op CF_CFDP_InitEngine() {
+  bind symbol "CF_CFDP_InitEngine";
+  prov cf_app_init_engine_call, cf_cfdp_initengine_return;
+}
+
+op CF_Init() {
+  bind symbol "CF_Init";
+  prov cf_app_init_status;
+}
+
+op BP_FlowInit(AppName) {
+  bind symbol "BP_FlowInit";
+  prov bp_flowinit_calls_throttle;
+}
+
+op CFE_ES_ExitApp(ExitStatus) {
+  bind symbol "CFE_ES_ExitApp";
+  prov es_exitapp_sig, cf_app_exit, bp_app_main_exit;
+}
+
+# Task creation (R2-P-TASK): the child's first event is the OSAL entry point.
+op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
+  bind symbol "OS_TaskCreate";
+  prov osal_task_create_def;
+}
+
+op OS_TaskEntryPoint(task_id) {
+  bind symbol "OS_TaskEntryPoint";
+  prov osal_task_entry_def, osal_pthread_entry;
+}

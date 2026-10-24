@@ -1,0 +1,25 @@
+# 40_rspec.kzp -- K-REG.osal-countsem-lookup at CF 833fdbb, after the G-REBIND anchor audit
+# (plan/C1_basis_plan.md 9.8, conclusions 1-3).
+#
+# The caller-level Allowed is retry_until_ready on OS_ERR_NAME_NOT_FOUND, bounded by
+# CF_STARTUP_SEM_MAX_RETRIES (25 at this revision), decided by the caller record cf_cfdp_startup_admission
+# (cf_cfdp.c L993-L999, code_admission, side caller; the same text as 15a871e L1272-L1278 that SPEC 2.3
+# cites).  An earlier not-ready attempt followed by a READY attempt of the same loop is TOLERATED; all 25
+# attempts not ready are VIOLATING (the exhaustion is rejected: no caller record accepts the exit).  The
+# replay of this tool does not run the horizon monitor yet: such attempts stay PENDING
+# (INCONCLUSIVE(horizon-open)) and are never counted as TOLERATED (docs/phi_reference.md 7.5).
+phi 1;
+
+rspec K-REG.osal-countsem-lookup {
+  use op OS_CountSemGetIdByName;
+  key osal.countsem(arg.sem_name);
+  requires state(osal.countsem(arg.sem_name)) = LIVE;
+  oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
+  appreq unspecified_by_reference;
+  allowed {
+    retry_until_ready codes { OS_ERR_NAME_NOT_FOUND } bound CF_STARTUP_SEM_MAX_RETRIES prov cf_cfdp_startup_admission;
+  }
+  harm app_error_exit;
+  authored "2026-10-24, C1 profile, from SPEC_FINAL rev 1.3 1.6, 2.3 and App. A.4 steps 3 and 6, plan/C1_basis_plan.md 9.3, 9.7, 9.8 (G-REBIND); cases inspected: C1";
+  prov cf_dox_flow_control, issue_184_body, cf_events_sem_eid, osal_countsem_h_getidbyname, cf_cfdp_lookup, cf_cfdp_retry_loop, cf_cfdp_fail_event, cf_platform_retries, cf_app_init_status, cf_app_exit;
+}

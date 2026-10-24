@@ -130,6 +130,7 @@ std::string allowed_entry_text(const AllowedEntry& a) {
     default: break;
   }
   if (a.conflicts_appreq) out += " conflicts_appreq";
+  if (a.conflicts_caller) out += " conflicts_caller";
   if (!a.prov.empty()) out += " prov " + sorted_join(a.prov, ", ");
   return out;
 }
@@ -322,6 +323,14 @@ std::string canonical_text(const Profile& p) {
   for (const BindDecl& d : p.binds)
     o.line(0, "bind field " + quote_string(d.struct_name) + " " + quote_string(d.field) + " as " + expr_text(*d.target) + clauses_inline(d) + ";");
   for (const SiteDecl& d : p.sites) o.line(0, "site " + d.name + " = " + pattern_text(d.pattern) + clauses_inline(d) + ";");
+  for (const RoleDecl& d : p.roles) {
+    o.line(0, "role " + d.name + " {");
+    o.line(1, "op " + d.op + ";");
+    o.line(1, "site " + d.site + ";");
+    o.line(1, "purpose " + d.purpose + ";");
+    clauses_block(&o, 1, d);
+    o.line(0, "}");
+  }
   for (const OpDecl& d : p.ops) print_op(&o, d);
   for (const InitDecl& d : p.inits) {
     if (d.is_loc)

@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <map>
 #include <set>
 
 #include "kz/core/phi.hpp"
@@ -253,6 +254,7 @@ class Checker {
   void check_rules();
   void check_rspecs();
   void check_trusted();
+  void check_roles();
 
   void check_pattern(const Pattern& pat, const std::string& what);
   void check_lp(LpSpec* lp, const std::string& what);
@@ -1228,6 +1230,48 @@ void Checker::check_rspecs() {
   }
 }
 
+// Roles of call contexts (SPEC 1.6 "Call contexts"): the operation and the site exist, the site is a
+// call of the operation's symbol, the purpose is one of the vocabulary, one role per site.  A role that
+// takes calls out of a readiness specification (any purpose but dependent_use) must be justified by a
+// source: at least one cited record whose tier is not researcher or unreferenced, so that a hand-entered
+// claim alone never removes a call context (the rule against exclusions written to fit a result).
+void Checker::check_roles() {
+  std::map<std::string, std::string> by_site;
+  for (RoleDecl& r : p_.roles) {
+    const std::string what = "role '" + r.name + "'";
+    entry_common(&r, what);
+    r.op_index = p_.find_op(r.op);
+    r.site_index = p_.find_site(r.site);
+    if (r.op.empty()) err(r.loc, what + " names no operation (op NAME;)");
+    else if (r.op_index < 0) err(r.loc, what + ": unknown operation '" + r.op + "'");
+    if (r.site.empty()) err(r.loc, what + " names no site (site NAME;)");
+    else if (r.site_index < 0) err(r.loc, what + ": unknown site '" + r.site + "'");
+    if (r.purpose != "dependent_use" && r.purpose != "existence_probe")
+      err(r.loc, what + ": purpose is dependent_use or existence_probe, found '" + r.purpose + "'");
+    if (r.site_index >= 0) {
+      const auto ins = by_site.emplace(r.site, r.name);
+      if (!ins.second) err(r.loc, what + ": the site '" + r.site + "' already has the role '" + ins.first->second + "'");
+      const Pattern& pat = p_.sites[static_cast<size_t>(r.site_index)].pattern;
+      if (pat.op != PatOp::Call) err(r.loc, what + ": the site '" + r.site + "' is not a call pattern");
+      else if (r.op_index >= 0) {
+        const OpDecl& op = p_.ops[static_cast<size_t>(r.op_index)];
+        const std::string sym = op.symbol.empty() ? op.name : op.symbol;
+        if (pat.callee != sym) err(r.loc, what + ": the site '" + r.site + "' calls '" + pat.callee + "', the operation binds '" + sym + "'");
+      }
+    }
+    if (r.purpose != "dependent_use" && !r.prov_idx.empty()) {
+      bool sourced = false;
+      for (int32_t pi : r.prov_idx) {
+        if (pi < 0) continue;
+        const std::string& t = p_.provs[static_cast<size_t>(pi)].tier;
+        if (t != "researcher" && t != "unreferenced") sourced = true;
+      }
+      if (!sourced)
+        err(r.loc, what + ": a role that takes calls out of a readiness specification cites a source (a record of tier other than researcher or unreferenced); hand-entered records alone do not justify it");
+    }
+  }
+}
+
 void Checker::check_trusted() {
   for (TrustedDecl& t : p_.trusted) {
     const std::string what = "trusted entry '" + t.name + "'";
@@ -1256,6 +1300,7 @@ bool Checker::run() {
   check_rules();
   check_rspecs();
   check_trusted();
+  check_roles();
   p_.checked = ok_;
   return ok_;
 }

@@ -383,6 +383,7 @@ class Replayer {
   std::map<std::string, uint64_t> last_event_;
   std::map<std::string, uint64_t> first_event_;
   std::map<std::string, int64_t> ordinals_;
+  std::map<std::string, size_t> role_of_site_;  // site name -> role index (SPEC 1.6 "Call contexts")
   std::map<ResId, WriteInfo> last_write_;
   std::map<std::string, std::pair<size_t, uint64_t>> expect_terminal_;  // actor -> (rule, poll return event)
   std::set<size_t> predicate_missing_reported_;
@@ -445,6 +446,7 @@ class Replayer {
   void on_call(const TraceEvent& ev);
   void on_return(const TraceEvent& ev);
   void on_point(const TraceEvent& ev);
+  void on_role_point(const TraceEvent& ev, size_t role);
   void terminate(const TraceEvent& ev);
 
   void apply_effect(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args);
@@ -532,6 +534,7 @@ Status Replayer::prepare() {
     if (op.terminal.present && op.terminal.process_terminal && op.terminal.after.present) terminal_points_[terminal_name(op)] = oi;
   }
   for (const phi::SiteDecl& s : p_.sites) site_names_.insert(s.name);
+  for (size_t ri = 0; ri < p_.roles.size(); ++ri) role_of_site_[p_.roles[ri].site] = ri;
 
   // readiness specifications
   for (size_t ri = 0; ri < p_.rspecs.size(); ++ri) {
@@ -1076,6 +1079,13 @@ void Replayer::on_call(const TraceEvent& ev) {
   f.op = oi;
   f.call = ev.id;
   f.args = ev.values;
+  // A string argument (a parameter of sort Str) is given as text (`arg.NAME=@text`); expressions read
+  // its handle (eval.hpp str_handle), the value a string constant of the profile has.
+  for (const phi::OpParam& prm : op.params) {
+    if (prm.role == "out" || !prm.has_sort || prm.sort.resolved.kind != phi::SortKind::Str) continue;
+    const auto t = ev.texts.find("arg." + prm.name);
+    if (t != ev.texts.end() && f.args.count("arg." + prm.name) == 0) f.args["arg." + prm.name] = str_handle(t->second);
+  }
   f.conj.resize(op.conjuncts.size());
   for (size_t ci = 0; ci < op.conjuncts.size(); ++ci) f.conj[ci].label = op.conjuncts[ci].label;
 
@@ -1508,8 +1518,47 @@ int32_t state_ordinal(const KindDecl& k, const std::string& name) {
 
 }  // namespace
 
+// The site of a role follows the call it names: in the recorded program order of the actor, the event
+// right before it is the return of a call of the role's operation (a point after the call returns, e.g.
+// a function-scoped after-call probe in the caller).  The role then binds that call's context.  A role
+// whose purpose is not dependent_use takes the call's occurrences out of the readiness specifications
+// (they are not instances: SPEC 1.6 "Call contexts"); the call itself is kept as a role fact.  Anything
+// else is a finding and binds nothing (the occurrences stay instances).
+void Replayer::on_role_point(const TraceEvent& ev, size_t ri) {
+  const phi::RoleDecl& role = p_.roles[ri];
+  const auto le = last_event_.find(ev.actor);
+  const TraceEvent* prev = le == last_event_.end() || le->second >= t_.events.size() ? nullptr : &t_.events[le->second];
+  if (prev == nullptr || prev->phase != Phase::Return || prev->site != role.op) {
+    finding(ev.id, "role " + role.name + ": its site " + ev.site + " does not follow a return of " + role.op + " by the actor " + ev.actor + ": no call context is bound");
+    return;
+  }
+  RoleFact rf;
+  rf.role = role.name;
+  rf.purpose = role.purpose;
+  rf.actor = ev.actor;
+  rf.op = role.op;
+  rf.point = ev.id;
+  rf.ret = prev->id;
+  rf.has_result = prev->has_result;
+  rf.result = prev->result;
+  for (Occurrence& o : r_.occurrences) {
+    if (o.actor != ev.actor || !o.returned || o.ret != prev->id) continue;
+    o.context = role.name;
+    rf.call = o.call;
+    if (role.purpose == "dependent_use") continue;
+    o.role_excluded = true;
+    rf.excluded.push_back(o.rspec);
+    // not an instance: its ordinal is not counted (it is the actor's latest occurrence of that key)
+    auto ord = ordinals_.find(o.actor + "\n" + o.rspec + "\n" + key_text(o.key));
+    if (ord != ordinals_.end() && ord->second == o.ordinal) --ord->second;
+  }
+  r_.role_facts.push_back(std::move(rf));
+}
+
 void Replayer::on_point(const TraceEvent& ev) {
   bool known = false;
+  const auto role = role_of_site_.find(ev.site);
+  if (role != role_of_site_.end()) on_role_point(ev, role->second);
   const auto tp = terminal_points_.find(ev.site);
   if (tp != terminal_points_.end()) {
     known = true;
@@ -2242,6 +2291,8 @@ void Replayer::relate(Occurrence* o) {
 // The summary view of every occurrence (SPEC 1.10, D2), computed last; for a real record also the
 // adequacy of each occurrence and what the replay established per kind and location.
 void Replayer::finish() {
+  // Occurrences a role took out are not instances (on_role_point): drop them before anything is counted.
+  r_.occurrences.erase(std::remove_if(r_.occurrences.begin(), r_.occurrences.end(), [](const Occurrence& o) { return o.role_excluded; }), r_.occurrences.end());
   if (real_) {
     for (Occurrence& o : r_.occurrences) {
       uint32_t adeq = kAllAdequacy;
@@ -2407,6 +2458,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
   for (const Occurrence& o : r.occurrences) {
     out += "occurrence " + o.rspec + " actor " + o.actor + " ordinal " + std::to_string(o.ordinal) + " key " + key_text(o.key) + " call #" + std::to_string(o.call);
     out += o.returned ? " return #" + std::to_string(o.ret) : std::string(" not returned");
+    if (!o.context.empty()) out += " context " + o.context;
     out += "\n";
     out += std::string("  status ") + occ_status_text(o.status);
     if (o.decided_at != DecidedAt::None)
@@ -2446,6 +2498,18 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
   out += "\nfindings " + std::to_string(r.findings.size()) + "\n";
   for (const ReplayFinding& f : r.findings)
     out += std::string("finding ") + (f.event == kNoEvent ? std::string("-") : "#" + std::to_string(f.event)) + ": " + f.what + "\n";
+  if (!r.role_facts.empty() || !p.roles.empty()) {
+    out += "\nrole facts " + std::to_string(r.role_facts.size()) + "\n";
+    for (const RoleFact& f : r.role_facts) {
+      out += "role_fact " + f.role + " purpose " + f.purpose + " actor " + f.actor + " " + f.op + (f.call == kNoEvent ? std::string() : " call #" + std::to_string(f.call)) +
+             " return #" + std::to_string(f.ret) + (f.has_result ? " result " + hex_or_dec(f.result) : std::string(" result -")) + " site #" + std::to_string(f.point);
+      if (!f.excluded.empty()) {
+        out += " not an instance of";
+        for (const std::string& e : f.excluded) out += " " + e;
+      }
+      out += "\n";
+    }
+  }
   out += "\nguard failures " + std::to_string(r.guard_failures.size()) + "\n";
   for (const GuardFailure& g : r.guard_failures) {
     out += "guard_failure #" + std::to_string(g.event) + " effect " + g.op + "." + g.effect + (g.trusted ? " refuted refutable_by" : " disagreement");

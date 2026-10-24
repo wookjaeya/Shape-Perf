@@ -230,6 +230,20 @@ struct SiteDecl : EntryBase {
   Pattern pattern;
 };
 
+// The role of a call context of an operation (SPEC rev 1.3 amendment 2026-10-24, 1.6 "Call
+// contexts"): the purpose of the calls made at a declared site, justified by the cited sources.  A
+// readiness specification of the operation applies to a call context through its role: a call at a
+// site whose role is `existence_probe` (a lookup whose not-found outcome is the condition for the
+// caller's own creation of the resource) carries no readiness precondition and is not an instance;
+// its events are kept as facts.  `dependent_use` names a context that does carry it.  A call at no
+// declared role's site stays an instance (an exclusion needs a stated, source-justified role).
+struct RoleDecl : EntryBase {
+  std::string op;       // the operation whose calls the role describes
+  std::string site;     // a declared site (its pattern binds the role to the call site)
+  std::string purpose;  // dependent_use | existence_probe
+  int32_t op_index = -1, site_index = -1;
+};
+
 struct OpParam {
   std::string role;  // "", out, stamp, key, id, buffer, msg
   std::string name;
@@ -370,6 +384,7 @@ struct AllowedEntry {
   std::string op;                   // fallback
   std::string exit_code;            // exit
   bool conflicts_appreq = false;    // the author recorded a conflict with appreq
+  bool conflicts_caller = false;    // the author recorded a conflict with another caller entry (QT-5)
   std::vector<std::string> prov;
   std::vector<int32_t> prov_idx;
 };
@@ -429,6 +444,7 @@ struct Profile {
   std::vector<LocDecl> locs;
   std::vector<BindDecl> binds;
   std::vector<SiteDecl> sites;
+  std::vector<RoleDecl> roles;
   std::vector<OpDecl> ops;
   std::vector<InitDecl> inits;
   std::vector<HbRuleDecl> rules;
@@ -454,6 +470,7 @@ struct Profile {
   int32_t find_source(const std::string& n) const;
   int32_t find_rspec(const std::string& n) const;
   int32_t find_rule(const std::string& n) const;
+  int32_t find_role(const std::string& n) const;
 };
 
 // Names of the closed vocabularies of the language (single source for the parser, the printer

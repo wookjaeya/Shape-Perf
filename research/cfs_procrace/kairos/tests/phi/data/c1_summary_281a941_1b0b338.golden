@@ -1,0 +1,35 @@
+profile "c1-bp-b051eb0"
+revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
+hash ee4ea11e076381cf382179212a04b14e3eba6d57eaabaa0a8bb45ddf3423b887
+
+provenance records: 63
+entries with provenance: 37
+by strongest cited tier (the best part of the entry):
+  contract-backed: 4
+  admitted: 0
+  code-derived: 32
+  issue-derived: 0
+  researcher: 1
+  unreferenced: 0
+by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
+  contract-backed: 0
+  admitted: 0
+  code-derived: 33
+  issue-derived: 0
+  researcher: 4
+  unreferenced: 0
+hand-entered (strongest cited tier researcher or unreferenced): 1
+  hb R1
+entries citing at least one researcher record: 4
+  hb R1
+  kind osal.countsem
+  role bp-existence-probe
+  role cf-dependent-lookup
+declared-trusted: 0
+assumptions: 0
+caller level (SPEC 1.6): 0 specified appreq, 0 Allowed entries, 0 citing a hand-entered record or none
+  rspec K-REG.osal-countsem-lookup appreq unspecified_by_reference
+  rspec K-REG.osal-countsem-lookup allowed unspecified_by_reference
+
+readiness specifications
+  K-REG.osal-countsem-lookup: caller-level Allowed unspecified_by_reference (Allowed is unspecified_by_reference)

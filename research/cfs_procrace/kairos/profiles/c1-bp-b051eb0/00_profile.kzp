@@ -1,0 +1,28 @@
+# 00_profile.kzp -- profile c1-bp-b051eb0 (Kairos): case C1 on the public BP basis (D22).
+#
+# The provider nasa/bp b051eb0 is fixed; CF and the cFS bundle vary.  A profile instance is this
+# directory plus one directory of each kind (kz-phi and kz replay take several directories):
+#
+#   cf-281a941/ | cf-833fdbb/          the CF revision of the D22 pair: source pin and CF citations
+#   bundle-1df262a/ | bundle-1b0b338/  the cFS bundle candidate (cFE, OSAL source pins); P4 is open, so both
+#   rspec-281a941/ | rspec-833fdbb/    the readiness specification as it stands (rev 1.3, G-REBIND)
+#   rspec-281a941-altP3/ | rspec-833fdbb-altP3/
+#                                      the alternative of the open PI decision P3 (Q-12): cfs_cf.dox L212-L214
+#                                      bound as a caller exit record.  Not the current reading; selectable only.
+#
+# e.g.  kz-phi check c1-bp-b051eb0 c1-bp-b051eb0/cf-281a941 c1-bp-b051eb0/bundle-1df262a c1-bp-b051eb0/rspec-281a941
+#
+# What the profile states (plan/C1_basis_plan.md 9.7, 9.8; SPEC rev 1.3 1.6 "Call contexts", App. A.4):
+#   kinds       osal.countsem by name (the throttle semaphore; BP0_tsem, BP1_tsem as built), es.app (owners)
+#   operations  OS_CountSemGetIdByName (the lookup with its readiness precondition), OS_CountSemCreate (the
+#               provider's creation), the task spawn of OSAL, and the CF / BP functions the observation names
+#   roles       CF's lookup is a dependent use; BP's lookup before its own create is an existence probe
+#               (no readiness precondition) -- a role from the calling code, not an exception by name
+#   rspec       K-REG.osal-countsem-lookup, per CF revision (rspec-*/)
+#
+# Nothing here was derived by running cFS.  Line numbers are those of the pinned trees.
+phi 1;
+
+profile "c1-bp-b051eb0" revision "nasa/bp b051eb0; CF and cFS bundle per variant directory";
+
+source bp root "bp" rev "b051eb0d12bfe76c0230215c2ff851cfaa553ce4";

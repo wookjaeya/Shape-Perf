@@ -1,0 +1,35 @@
+# trace c1_role_unbound.trace, predicate not supplied, cfe version not given
+replay profile "c1-bp-b051eb0"
+events 6
+terminated no
+shutdown_request no
+
+event table
+  #0 BP BP_FlowInit call
+  #1 BP OS_CountSemGetIdByName call
+  #2 BP OS_CountSemGetIdByName.exists pt
+  #3 BP OS_CountSemGetIdByName ret
+  #4 BP BP_FlowInit ret
+  #5 BP bp_existence_probe_call pt
+
+edges 5
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+
+occurrences 1
+occurrence K-REG.osal-countsem-lookup actor BP ordinal 1 key [0x5be5dc6a107c0903] call #1 return #3
+  status NOT_READY_UNJUDGED decided at point #2 scope default
+  conjunct exists point #2 fails
+  result 0xffffffef outcome agrees
+
+findings 1
+finding #5: role bp-existence-probe: its site bp_existence_probe_call does not follow a return of OS_CountSemGetIdByName by the actor BP: no call context is bound
+
+role facts 0
+
+guard failures 0
+
+final state

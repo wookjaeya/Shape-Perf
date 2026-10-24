@@ -1,0 +1,24 @@
+# 30_hb.kzp -- happens-before rules of profile c1-bp-b051eb0 (the two structural rules the C1 observation
+# uses; the core serialization rules of cfs-v7.0.1 are not restated for these bundles).
+phi 1;
+
+hb R1 {
+  title "program order";
+  stratum S;
+  robust unconditional;
+  template program_order {
+    looper yes;
+  }
+  prov r_axiom_program_order;
+}
+
+hb R2-P-TASK {
+  title "task creation: the creating call precedes the first event of the child";
+  stratum S;
+  robust unconditional;
+  template spawn {
+    create OS_TaskCreate out task_id;
+    entry OS_TaskEntryPoint;
+  }
+  prov osal_task_create_def, osal_task_entry_def, osal_pthread_entry;
+}

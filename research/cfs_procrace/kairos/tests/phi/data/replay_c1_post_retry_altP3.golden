@@ -1,0 +1,78 @@
+# trace c1_post_retry.trace, predicate not supplied, cfe version not given
+replay profile "c1-bp-b051eb0"
+events 23
+terminated no
+shutdown_request no
+
+event table
+  #0 CF CF_CFDP_InitEngine call
+  #1 CF OS_CountSemGetIdByName call
+  #2 CF OS_CountSemGetIdByName.exists pt
+  #3 CF OS_CountSemGetIdByName ret
+  #4 CF cf_lookup_call pt
+  #5 CF cf_retry_delay pt
+  #6 BP BP_FlowInit call
+  #7 BP OS_CountSemGetIdByName call
+  #8 BP OS_CountSemGetIdByName.exists pt
+  #9 BP OS_CountSemGetIdByName ret
+  #10 BP bp_existence_probe_call pt
+  #11 BP OS_CountSemCreate call
+  #12 BP OS_CountSemCreate.publish pt
+  #13 BP OS_CountSemCreate ret
+  #14 BP bp_create_call pt
+  #15 CF OS_CountSemGetIdByName call
+  #16 CF OS_CountSemGetIdByName.exists pt
+  #17 CF OS_CountSemGetIdByName ret
+  #18 CF cf_lookup_call pt
+  #19 CF CF_CFDP_InitEngine ret
+  #20 X OS_CountSemGetIdByName call
+  #21 X OS_CountSemGetIdByName.exists pt
+  #22 X OS_CountSemGetIdByName ret
+
+edges 20
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #8 -> #9
+edge R1 S unconditional #9 -> #10
+edge R1 S unconditional #10 -> #11
+edge R1 S unconditional #11 -> #12
+edge R1 S unconditional #12 -> #13
+edge R1 S unconditional #13 -> #14
+edge R1 S unconditional #5 -> #15
+edge R1 S unconditional #15 -> #16
+edge R1 S unconditional #16 -> #17
+edge R1 S unconditional #17 -> #18
+edge R1 S unconditional #18 -> #19
+edge R1 S unconditional #20 -> #21
+edge R1 S unconditional #21 -> #22
+
+occurrences 3
+occurrence K-REG.osal-countsem-lookup actor CF ordinal 1 key [0x5be5dc6a107c0903] call #1 return #3 context cf-dependent-lookup
+  status NOT_READY_UNJUDGED decided at point #2 scope default
+  conjunct exists point #2 fails
+  result 0xffffffef outcome agrees
+occurrence K-REG.osal-countsem-lookup actor CF ordinal 2 key [0x5be5dc6a107c0903] call #15 return #17 context cf-dependent-lookup
+  status READY decided at point #16 scope default
+  conjunct exists point #16 holds
+  result 0 outcome agrees
+occurrence K-REG.osal-countsem-lookup actor X ordinal 1 key [0x961e9586b17971e6] call #20 return #22
+  status NOT_READY_UNJUDGED decided at point #21 scope default
+  conjunct exists point #21 fails
+  result 0xffffffef outcome agrees
+
+findings 0
+
+role facts 3
+role_fact cf-dependent-lookup purpose dependent_use actor CF OS_CountSemGetIdByName call #1 return #3 result -17 site #4
+role_fact bp-existence-probe purpose existence_probe actor BP OS_CountSemGetIdByName call #7 return #9 result -17 site #10 not an instance of K-REG.osal-countsem-lookup
+role_fact cf-dependent-lookup purpose dependent_use actor CF OS_CountSemGetIdByName call #15 return #17 result 0 site #18
+
+guard failures 0
+
+final state
+  osal.countsem[0x5be5dc6a107c0903] = LIVE

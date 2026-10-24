@@ -233,6 +233,23 @@ struct Occurrence {
   uint8_t relation_level = KZ_OWNER_LEVEL_UNDETERMINED;  // the weakest owner level the relation used
   std::vector<std::string> counterparts;  // the actors of the registrations / publications, sorted
   std::string relation_note;              // which pair decided it, or why it is undetermined
+  // The role of the call context (SPEC 1.6 "Call contexts"): the profile role whose site event followed
+  // the return of this call on the same actor; empty when no role site was seen for it.
+  std::string context;
+  bool role_excluded = false;             // internal: the role takes the call out (moved to Result::role_facts)
+};
+
+// A call bound to a declared role of its call context (the role's site event right after the call's
+// return, same actor).  A role whose purpose is not dependent_use carries no readiness precondition: the
+// occurrences its call began are not instances (they are listed here as `excluded`), the call stays a fact.
+struct RoleFact {
+  std::string role, purpose, actor, op;
+  uint64_t point = 0;                     // the role's site event
+  uint64_t ret = 0;                       // the return it follows
+  uint64_t call = kNoEvent;               // the call, where an occurrence names it
+  bool has_result = false;
+  int64_t result = 0;
+  std::vector<std::string> excluded;      // the readiness specifications whose occurrence the role took out
 };
 
 struct ReplayFinding {
@@ -283,6 +300,7 @@ struct Result {
   std::vector<Occurrence> occurrences;
   std::vector<ReplayFinding> findings;
   std::vector<GuardFailure> guard_failures;  // in the order of the events (also listed as findings)
+  std::vector<RoleFact> role_facts;          // calls bound to a role of their call context, in event order
   ConcreteState final_state;
   bool terminated = false;     // a process-terminal step was replayed
   uint64_t terminal_event = 0;

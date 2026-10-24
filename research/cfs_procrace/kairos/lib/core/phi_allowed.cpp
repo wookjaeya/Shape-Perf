@@ -38,8 +38,11 @@ CallerAllowed derive_caller_allowed(const Profile& p, const RspecDecl& r) {
     else if (rule) out.rule_only.push_back(&a);
     else if (supplier) out.framework_only.push_back(&a);
   }
-  for (const AllowedEntry* a : out.deciding)
+  bool caller_conflict = false;
+  for (const AllowedEntry* a : out.deciding) {
     if (a->conflicts_appreq) out.conflict = true;
+    if (a->conflicts_caller) caller_conflict = true;
+  }
 
   if (r.allowed.empty()) {
     if (r.allowed_head.kind == AllowedKind::None) {
@@ -61,6 +64,13 @@ CallerAllowed derive_caller_allowed(const Profile& p, const RspecDecl& r) {
     out.kind = CallerAllowedKind::Unspecified;
     out.deciding.clear();
     out.reason = "a caller entry is recorded as in conflict with appreq: the caller-level Allowed is unspecified_by_reference until the PI sets a precedence";
+    return out;
+  }
+  if (caller_conflict) {
+    out.conflict = true;
+    out.kind = CallerAllowedKind::Unspecified;
+    out.deciding.clear();
+    out.reason = "caller entries are recorded as accepting incompatible continuations (QT-5): the caller-level Allowed is unspecified_by_reference until the PI sets a precedence";
     return out;
   }
   if (!out.deciding.empty()) {

@@ -1,0 +1,23 @@
+# 40_rspec.kzp -- K-REG.osal-countsem-lookup at CF 281a941, as it stands (SPEC rev 1.3 App. A.4 steps 3
+# and 6; plan/C1_basis_plan.md 9.3, 9.6).
+#
+# The readiness precondition applies to the dependent use of CF (role cf-dependent-lookup); BP's existence
+# probe is not an instance (role bp-existence-probe, 10_kinds.kzp).  At 281a941 there is one lookup and no
+# record that accepts or rejects the pre-fix handling (exit with APP_ERROR): the caller-level Allowed is
+# unspecified_by_reference, so a not-ready lookup is NOT_READY_UNJUDGED, summary
+# INCONCLUSIVE(caller_requirement_absent).  The open PI decision P3 (Q-12) could change this only through
+# a caller record of the pre-fix handling; its alternative is ../rspec-281a941-altP3/, not the current
+# reading.  The event, CF's exit and the harm are consequences, recorded apart.
+phi 1;
+
+rspec K-REG.osal-countsem-lookup {
+  use op OS_CountSemGetIdByName;
+  key osal.countsem(arg.sem_name);
+  requires state(osal.countsem(arg.sem_name)) = LIVE;
+  oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
+  appreq unspecified_by_reference;
+  allowed unspecified_by_reference;
+  harm app_error_exit;
+  authored "2026-10-24, C1 profile, from SPEC_FINAL rev 1.3 1.6, 2.3 and App. A.4 steps 3 and 6, plan/C1_basis_plan.md 9.3, 9.7, 9.8; cases inspected: C1";
+  prov cf_dox_flow_control, issue_184_body, cf_events_sem_eid, osal_countsem_h_getidbyname, cf_cfdp_lookup, cf_app_init_status, cf_app_exit;
+}

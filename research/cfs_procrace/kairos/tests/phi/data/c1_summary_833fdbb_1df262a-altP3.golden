@@ -1,0 +1,36 @@
+profile "c1-bp-b051eb0"
+revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
+hash 6f56010c411879764e18b0299a3b936b3a5ed8b5589ad35c8f345a83c31758ac
+
+provenance records: 69
+entries with provenance: 42
+by strongest cited tier (the best part of the entry):
+  contract-backed: 5
+  admitted: 1
+  code-derived: 35
+  issue-derived: 0
+  researcher: 1
+  unreferenced: 0
+by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
+  contract-backed: 1
+  admitted: 1
+  code-derived: 36
+  issue-derived: 0
+  researcher: 4
+  unreferenced: 0
+hand-entered (strongest cited tier researcher or unreferenced): 1
+  hb R1
+entries citing at least one researcher record: 4
+  hb R1
+  kind osal.countsem
+  role bp-existence-probe
+  role cf-dependent-lookup
+declared-trusted: 0
+assumptions: 0
+caller level (SPEC 1.6): 0 specified appreq, 2 Allowed entries, 0 citing a hand-entered record or none
+  rspec K-REG.osal-countsem-lookup appreq unspecified_by_reference
+  rspec K-REG.osal-countsem-lookup allowed retry_until_ready#1: cf_cfdp_startup_admission (admitted, side caller)
+  rspec K-REG.osal-countsem-lookup allowed exit#2: cf_dox_terminate (contract-backed, side caller)
+
+readiness specifications
+  K-REG.osal-countsem-lookup: caller-level Allowed unspecified_by_reference (caller entries are recorded as accepting incompatible continuations (QT-5): the caller-level Allowed is unspecified_by_reference until the PI sets a precedence)

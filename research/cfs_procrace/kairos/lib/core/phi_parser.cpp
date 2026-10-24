@@ -510,6 +510,7 @@ struct Parser {
     if (kw == "loc") return parse_loc(loc);
     if (kw == "bind") return parse_bind(loc);
     if (kw == "site") return parse_site(loc);
+    if (kw == "role") return parse_role(loc);
     if (kw == "op") return parse_op(loc);
     if (kw == "init") return parse_init(loc);
     if (kw == "hb") return parse_hb(loc);
@@ -517,7 +518,7 @@ struct Parser {
     if (kw == "trusted") return parse_trusted(loc);
     if (kw == "prov") return parse_prov(loc);
     return fail_at(loc, "unknown declaration '" + kw +
-                            "' (expected profile, source, const, context, scope, kind, loc, bind, site, op, init, hb, rspec, trusted or prov)");
+                            "' (expected profile, source, const, context, scope, kind, loc, bind, site, role, op, init, hb, rspec, trusted or prov)");
   }
 
   bool parse_profile_decl(const SrcLoc& loc) {
@@ -1133,6 +1134,7 @@ struct Parser {
                                  "' (expected documented_drop, returned_and_tested, retry_until_ready, fallback, defer_by_design or exit)");
     }
     if (accept_kw("conflicts_appreq")) a->conflicts_appreq = true;
+    if (accept_kw("conflicts_caller")) a->conflicts_caller = true;
     if (accept_kw("prov")) P_TRY(parse_name_list(&a->prov, "the name of a provenance record"));
     return true;
   }
@@ -1213,6 +1215,30 @@ struct Parser {
       P_TRY(expect_semi("after the specification item"));
     }
     prof->rspecs.push_back(std::move(d));
+    return true;
+  }
+
+  bool parse_role(const SrcLoc& loc) {
+    RoleDecl d;
+    d.loc = loc;
+    P_TRY(expect_ident(&d.name, "the name of the role"));
+    P_TRY(expect(Tok::LBrace, "after the name"));
+    while (!accept(Tok::RBrace)) {
+      if (is_common_clause()) {
+        P_TRY(parse_common_clause(&d));
+        P_TRY(expect_semi("after the clause"));
+        continue;
+      }
+      std::string kw;
+      const SrcLoc kloc = cur().loc;
+      P_TRY(expect_ident(&kw, "an item of the role"));
+      if (kw == "op") P_TRY(expect_ident(&d.op, "the operation"));
+      else if (kw == "site") P_TRY(expect_ident(&d.site, "a declared site"));
+      else if (kw == "purpose") P_TRY(expect_ident(&d.purpose, "dependent_use or existence_probe"));
+      else return fail_at(kloc, "unknown item '" + kw + "' in role (expected op, site, purpose, prov, guard or note)");
+      P_TRY(expect_semi("after the role item"));
+    }
+    prof->roles.push_back(std::move(d));
     return true;
   }
 

@@ -64,6 +64,7 @@ int32_t Profile::find_prov(const std::string& n) const { return find_by_name(pro
 int32_t Profile::find_source(const std::string& n) const { return find_by_name(sources, n); }
 int32_t Profile::find_rspec(const std::string& n) const { return find_by_name(rspecs, n); }
 int32_t Profile::find_rule(const std::string& n) const { return find_by_name(rules, n); }
+int32_t Profile::find_role(const std::string& n) const { return find_by_name(roles, n); }
 
 bool normalize_profile(Profile* p, std::vector<Diag>* diags) {
   bool ok = true;
@@ -74,6 +75,7 @@ bool normalize_profile(Profile* p, std::vector<Diag>* diags) {
   ok &= sort_unique(&p->locs, "location", p->files, diags);
   ok &= sort_unique(&p->binds, "binding", p->files, diags);
   ok &= sort_unique(&p->sites, "site", p->files, diags);
+  ok &= sort_unique(&p->roles, "role", p->files, diags);
   ok &= sort_unique(&p->ops, "operation", p->files, diags);
   ok &= sort_unique(&p->inits, "INIT fact", p->files, diags);
   ok &= sort_unique(&p->rules, "hb rule", p->files, diags);
@@ -92,6 +94,7 @@ bool normalize_profile(Profile* p, std::vector<Diag>* diags) {
   for (ConstDecl& d : p->consts) sort_entry(&d);
   for (BindDecl& d : p->binds) sort_entry(&d);
   for (SiteDecl& d : p->sites) sort_entry(&d);
+  for (RoleDecl& d : p->roles) sort_entry(&d);
   for (InitDecl& d : p->inits) sort_entry(&d);
   for (HbRuleDecl& d : p->rules) {
     sort_entry(&d);

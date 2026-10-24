@@ -6,12 +6,15 @@
 # difference from either is written into the run's conditions file (deviations) and listed in
 # docs/c1_smoke_observe.md.
 #
-#   observe_c1_smoke.sh <cfg pre|post> <cand 1df262a|1b0b338> <kz-executable> --out-dir DIR [--tracefs DIR]
+#   observe_c1_smoke.sh <cfg pre|post> <cand 1df262a|1b0b338> <kz-executable> --out-dir DIR [--tracefs DIR] [--closure DIR]
 #   observe_c1_smoke.sh --instances <instance dir> <meta file>      (internal: the start/stop steps; the
 #                                                                    command kz observe runs)
 #
 # --tracefs DIR: a mounted tracefs, passed to kz observe for the plan's memory reads (fetch slots: the
 # semaphore name, the ids; 2026-10-24, smoke2).  The script does not mount it; the operator states where.
+# --closure DIR: the static closure of this build extracted with the C1 profile (c1_build/kz_run_c1.sh: DIR/c1prof/ for
+# the current rspec, DIR/c1prof_altP3/ for the P3 alternative, each closure.basis.kz + closure.facts.kz; 2026-10-24,
+# smoke3).  The replays then take writer and alias coverage from it (kz replay --facts, with the run's basis).
 #
 # Must run as root (the observer, D1); cFS runs as the existing non-root account `ubuntu` (cFS README L107,
 # "as a normal user"), as in W3.  Nothing here sets a CPU, affinity, priority, sysctl or repetition count.
@@ -59,8 +62,9 @@ if [ "${1:-}" = "--instances" ]; then
 fi
 
 CFG="${1:?usage: $0 <pre|post> <1df262a|1b0b338> <kz> --out-dir DIR}"; CAND="${2:?cand}"; KZ_BIN="${3:?kz}"; shift 3
-OUT=""; TRACEFS=""
-while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; --tracefs) TRACEFS="${2:?}"; shift 2 ;; *) echo "unknown argument: $1" >&2; exit 64 ;; esac; done
+OUT=""; TRACEFS=""; CLOSURE=""
+while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; --tracefs) TRACEFS="${2:?}"; shift 2 ;; --closure) CLOSURE="${2:?}"; shift 2 ;; *) echo "unknown argument: $1" >&2; exit 64 ;; esac; done
+if [ -n "$CLOSURE" ]; then for v in c1prof c1prof_altP3; do for f in closure.basis.kz closure.facts.kz; do [ -f "$CLOSURE/$v/$f" ] || { echo "closure file missing: $CLOSURE/$v/$f" >&2; exit 64; }; done; done; fi
 [ -n "$OUT" ] || { echo "--out-dir is required (runs are kept outside the repository)" >&2; exit 64; }
 case "$CFG" in pre) REV=281a941 ;; post) REV=833fdbb ;; *) echo "cfg is pre or post" >&2; exit 64 ;; esac
 case "$CAND" in 1df262a|1b0b338) ;; *) echo "cand is 1df262a or 1b0b338" >&2; exit 64 ;; esac
@@ -93,6 +97,7 @@ git -C "$REPO" diff --no-ext-diff --binary HEAD -- kairos > "$RUN/source.diff"
   echo "kz=$KZ_BIN sha256=$(sha256sum "$KZ_BIN" | cut -c1-64)"
   echo "kz.source: repository commit $(git -C "$REPO" rev-parse HEAD); uncommitted changes of kairos/ in source.diff sha256=$(sha256sum "$RUN/source.diff" | cut -c1-64)"
   echo "plan=$PLAN sha256=$(sha256sum "$PLAN" | cut -c1-64)"
+  [ -n "$CLOSURE" ] && for v in c1prof c1prof_altP3; do echo "closure $v: facts sha256=$(sha256sum "$CLOSURE/$v/closure.facts.kz" | cut -c1-64) basis sha256=$(sha256sum "$CLOSURE/$v/closure.basis.kz" | cut -c1-64) ($CLOSURE/$v)"; done
   echo "source view=$VIEW (cf $(git -C "$VIEW/cf" rev-parse HEAD), bp $(git -C "$VIEW/bp" rev-parse HEAD), cfe $(git -C "$VIEW/cfe" rev-parse HEAD), osal $(git -C "$VIEW/osal" rev-parse HEAD))"
 } > "$D"
 
@@ -147,16 +152,29 @@ M="$RUN/smoke.meta"
 RC=$?
 echo "kz observe exit=$RC end_utc=$(date -u +%FT%T.%3NZ)" >> "$D"
 
-# 5. counts and the replays (the current reading; the P3 alternative; both P1 readings side by side)
+# 5. counts and the replays (the current reading; the P3 alternative; both P1 readings side by side).  With --closure:
+#    writer and alias coverage from the static closure (the run's basis names the binary), two more readings (P3
+#    alternative with P1 off; the current reading without the reads-from edges, to compare).
 CONSTS="--const CFE_PLATFORM_ES_MAX_APPLICATIONS=32"   # bpxfer_defs/default_platform_cfg.h L491, evaluated with the build's compile command
+CUR=(); ALT=()
+if [ -n "$CLOSURE" ]; then
+  CUR=(--basis "$RUN/basis_core-tx.kz" --facts "$CLOSURE/c1prof/closure.facts.kz" --static-basis "$CLOSURE/c1prof/closure.basis.kz")
+  ALT=(--basis "$RUN/basis_core-tx.kz" --facts "$CLOSURE/c1prof_altP3/closure.facts.kz" --static-basis "$CLOSURE/c1prof_altP3/closure.basis.kz")
+fi
 if [ -e "$RUN/run.kzt" ]; then
   "$KZ_BIN" hits "$RUN/run.kzt" > "$RUN/hits.txt" 2>&1 || true
-  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS --compare-narrowing \
+  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS "${CUR[@]}" --compare-narrowing \
       --out "$RUN/replay.kz" > "$RUN/replay.txt" 2>&1; echo "kz replay (current) exit=$?" >> "$D"
-  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV-altP3" $CONSTS \
+  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV-altP3" $CONSTS "${ALT[@]}" \
       > "$RUN/replay_altP3.txt" 2>&1; echo "kz replay (P3 alternative, not current) exit=$?" >> "$D"
-  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS --outcome-narrowing off \
+  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS "${CUR[@]}" --outcome-narrowing off \
       > "$RUN/replay_p1off.txt" 2>&1; echo "kz replay (P1 alternative: outcome narrowing off, not current) exit=$?" >> "$D"
+  if [ -n "$CLOSURE" ]; then
+    "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV-altP3" $CONSTS "${ALT[@]}" --outcome-narrowing off \
+        > "$RUN/replay_altP3_p1off.txt" 2>&1; echo "kz replay (P3 and P1 alternatives, not current) exit=$?" >> "$D"
+    "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS "${CUR[@]}" --reads-from-edges off \
+        > "$RUN/replay_norf.txt" 2>&1; echo "kz replay (current, reads-from edges left out, to compare) exit=$?" >> "$D"
+  fi
 fi
 
 # 6. the anchors against objdump, after the run (no line table: the disassembly around each probe)

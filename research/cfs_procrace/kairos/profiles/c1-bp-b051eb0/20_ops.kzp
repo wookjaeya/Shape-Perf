@@ -49,9 +49,52 @@ op BP_FlowInit(AppName) {
   prov bp_flowinit_calls_throttle;
 }
 
+# The exit of an application (C-7, P-E).  For an external application (CF, BP: the start script's applications) the
+# call does not return (es_exitapp_external): a terminal operation, an exit of the exit monitor (SPEC 1.6 "Horizon
+# monitors", exit(code, src); its code is the one parameter, ExitStatus).  The core-application branch, which may
+# return, is not modelled.
 op CFE_ES_ExitApp(ExitStatus) {
   bind symbol "CFE_ES_ExitApp";
-  prov es_exitapp_sig, cf_app_exit, bp_app_main_exit;
+  terminal;
+  prov es_exitapp_sig, cf_app_exit, bp_app_main_exit, es_exitapp_external;
+}
+
+# ---- the start state, the end of a lifetime, the scope (2026-10-24, C1 state-based) ----------------------------
+# OS_API_Init clears the whole object table once, before any object exists (OS_ObjectIdInit), and then the name
+# storage of the counting semaphores (OS_CountSemAPI_Init): from either point no name is the name of a counting
+# semaphore (a record counts only with a defined id and a matching name).  Observed, they are the start state of
+# osal.countsem (IN-03: the initialization code), not an assumption.
+op OS_ObjectIdInit() {
+  bind symbol "OS_ObjectIdInit";
+  effect clear_table: lifecycle all osal.countsem -> ABSENT lp at fn("OS_ObjectIdInit").memset(OS_common_record_t) prov osal_objectid_init, osal_api_init_call, osal_find_next_match, osal_name_match, osal_id_defined, osal_countsem_slice;
+  prov osal_objectid_init, osal_api_init_call;
+}
+
+op OS_CountSemAPI_Init() {
+  bind symbol "OS_CountSemAPI_Init";
+  effect clear_names: lifecycle all osal.countsem -> ABSENT lp at fn("OS_CountSemAPI_Init").memset(OS_count_sem_internal_record_t) prov osal_countsem_api_init, osal_api_init_countsem;
+  prov osal_countsem_api_init, osal_api_init_countsem;
+}
+
+# The delete (the cleanup of an application's resources, the teardown).  The record does not give the name of the
+# deleted semaphore (the id is the argument): the effect's resource is then not fixed and the kind is open from that
+# event on.
+op OS_CountSemDelete(sem_id) {
+  bind symbol "OS_CountSemDelete";
+  effect retire: lifecycle osal.countsem(lp.sem_name) -> ABSENT filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemDelete").call("OS_ObjectIdFinalizeDelete") values sem_name: Str, operation_status: Int prov osal_countsem_delete_def, osal_finalize_delete;
+  prov osal_countsem_delete_def, osal_cleanup_object, es_cleanup_object_cb, osal_delete_all;
+}
+
+op CFE_PSP_Restart(reset_type) {
+  bind symbol "CFE_PSP_Restart";
+  effect request_shutdown: lifecycle psp.shutdown() -> SHUTDOWN_REQ lp at fn("CFE_PSP_Restart").store(CFE_PSP_IdleTaskState_t.ShutdownReq) prov psp_restart_req;
+  prov psp_restart_fn, psp_restart_req;
+}
+
+op OS_Application_Run() {
+  bind symbol "OS_Application_Run";
+  effect teardown: lifecycle psp.shutdown() -> TEARDOWN lp at fn("OS_Application_Run").call("OS_DeleteAllObjects") prov psp_teardown;
+  prov psp_app_run_fn, psp_teardown, osal_delete_all;
 }
 
 # Task creation (R2-P-TASK): the child's first event is the OSAL entry point.

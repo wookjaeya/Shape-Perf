@@ -176,11 +176,54 @@ Status apply_static_closure(const Container& facts, const phi::Profile& p, const
     return any;
   };
 
+  // ---- key separation (`bind ... via`; SPEC 4.2 step 8) ----
+  // A field the records of several kinds share (a table of all object types): the profile names the functions inside
+  // whose executions a write of the field changes the bound component.  A static writer whose function is one of them,
+  // or is reached from one by direct calls, is covered where that function's operation has an observed effect point
+  // that writes the component (the operation's effects stand for the writes it makes); a writer reached from none of
+  // them is key-separated (its executions address records of another key) unless its function is the target of an
+  // indirect call (then it is not covered: separation is not shown).
+  std::map<std::string, std::set<std::string>> callees;  // caller -> direct callees
+  for (const kz_fact_call& k : calls) callees[str(k.caller)].insert(str(k.callee));
+  std::set<std::string> observed_points;
+  for (const ObservedSite& o : observed) observed_points.insert(o.point);
+  auto via_covers = [&](const std::string& fn, const Component& c, std::string* lp) {
+    for (const phi::OpDecl& op : p.ops) {
+      if (op.symbol != fn) continue;
+      for (const phi::EffectDecl& e : op.effects) {
+        if (e.lp.kind == phi::LpKind::None) continue;
+        const std::string name = eval::lp_name(op, e.label, e.lp);
+        const auto w = writes.find(name);
+        if (w == writes.end() || w->second.count(c) == 0 || observed_points.count(name) == 0) continue;
+        *lp = name;
+        return true;
+      }
+    }
+    return false;
+  };
+  std::map<std::string, std::set<std::string>> reach_cache;
+  auto reach_of = [&](const std::string& root) -> const std::set<std::string>& {
+    auto it = reach_cache.find(root);
+    if (it != reach_cache.end()) return it->second;
+    std::set<std::string>& seen = reach_cache[root];
+    std::vector<std::string> work{root};
+    seen.insert(root);
+    while (!work.empty()) {
+      const std::string f = work.back();
+      work.pop_back();
+      const auto cs = callees.find(f);
+      if (cs == callees.end()) continue;
+      for (const std::string& g : cs->second)
+        if (seen.insert(g).second) work.push_back(g);
+    }
+    return seen;
+  };
+
   // ---- per kind and location ----
   struct Acc {
     std::vector<std::string> status, unobserved;
-    uint32_t writers = 0, covered = 0;
-    bool all_complete = true, any_bound = false;
+    uint32_t writers = 0, covered = 0, separated = 0;
+    bool all_complete = true, any_bound = false, via = false;
   };
   std::map<int32_t, Acc> by_kind, by_loc;
   for (const phi::BindDecl& b : p.binds) {
@@ -211,6 +254,7 @@ Status apply_static_closure(const Container& facts, const phi::Profile& p, const
         a.unobserved.push_back(field + " alias " + (an != nullptr ? an : "?") + " at " + str(t.file) + ":" + std::to_string(t.line));
       }
     }
+    if (!b.via.empty()) a.via = true;
     for (const kz_fact_writer& w : writers) {
       if (str(w.loc_type) != b.struct_name || str(w.loc_field) != b.field) continue;
       ++a.writers;
@@ -219,6 +263,38 @@ Status apply_static_closure(const Container& facts, const phi::Profile& p, const
       why.clear();
       const bool at_point = direct(file, w.line, c);
       const std::string here = at_line;
+      if (!at_point && !b.via.empty()) {
+        std::vector<std::string> roots;
+        for (const std::string& v : b.via)
+          if (reach_of(v).count(fn) != 0) roots.push_back(v);
+        bool ok = true;
+        std::string missing;
+        if (roots.empty()) {
+          if (indirect_targets.count(fn) != 0) {
+            ok = false;
+            missing = fn + " is the target of an indirect call and none of the 'via' functions reaches it by direct calls: key separation not shown";
+          } else {
+            ++a.separated;
+          }
+        } else {
+          for (const std::string& v : roots) {
+            std::string lp;
+            if (!via_covers(v, c, &lp)) {
+              ok = false;
+              missing = "reached from " + v + ", whose operation has no observed effect point that writes " + component_text(c);
+            }
+          }
+        }
+        if (ok) {
+          ++a.covered;
+          ++report->writers_observed;
+          continue;
+        }
+        const EnumDesc* wd = find_enum("KZ_WRITER_KIND");
+        const char* wn = wd != nullptr ? enum_display(*wd, w.kind) : nullptr;
+        a.unobserved.push_back(field + " writer " + (wn != nullptr ? wn : "?") + " at " + file + ":" + std::to_string(w.line) + " in " + fn + " (" + missing + ")");
+        continue;
+      }
       const bool ok = at_point || (w.kind != KZ_WRITER_KIND_OUTPTR && calls_covered(fn, c, 0));
       if (ok) {
         ++a.covered;
@@ -244,8 +320,8 @@ Status apply_static_closure(const Container& facts, const phi::Profile& p, const
     adq->aliases_covered = a.all_complete;
     adq->writers_covered = a.all_complete && a.covered == a.writers;
     report->lines.push_back(std::string("static closure ") + what + " " + name + ": " + out->status + "; writers " + std::to_string(a.writers) + ", at observed points " +
-                            std::to_string(a.covered) + "; aliases " + (adq->aliases_covered ? "covered" : "not covered") + ", writers " +
-                            (adq->writers_covered ? "covered" : "not covered"));
+                            std::to_string(a.covered - a.separated) + (a.via ? ", key-separated by 'via' " + std::to_string(a.separated) : std::string()) + "; aliases " +
+                            (adq->aliases_covered ? "covered" : "not covered") + ", writers " + (adq->writers_covered ? "covered" : "not covered"));
   };
   for (auto& kv : by_kind) {
     const phi::KindDecl& k = p.kinds[static_cast<size_t>(kv.first)];

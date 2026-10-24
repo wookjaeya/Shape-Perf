@@ -825,6 +825,19 @@ void Checker::check_binds() {
       if (l.struct_name != b.struct_name || l.field != b.field)
         err(b.loc, "binding " + b.struct_name + "." + b.field + " names location '" + l.name + "', which is declared as " + l.struct_name + "." + l.field);
     }
+    // key separation (`via`): each function is the bound symbol of an operation, whose effects stand for its writes
+    std::set<std::string> seen;
+    for (const std::string& f : b.via) {
+      if (f.empty()) {
+        err(b.loc, "binding " + b.name + ": an empty function name after 'via'");
+        continue;
+      }
+      if (!seen.insert(f).second) err(b.loc, "binding " + b.name + ": '" + f + "' is named twice after 'via'");
+      bool bound = false;
+      for (const OpDecl& op : p_.ops) bound = bound || op.symbol == f;
+      if (!bound) err(b.loc, "binding " + b.name + ": the 'via' function '" + f + "' is not the bound symbol of an operation (its effects stand for its writes)");
+    }
+    if (!b.via.empty() && b.prov.empty() && opt_.require_provenance) err(b.loc, "binding " + b.name + ": a key separation ('via') cites no provenance record");
   }
 }
 
@@ -1150,6 +1163,44 @@ void Checker::check_rules() {
           expect_bool(r.predicate.get(), &env);
         }
         if (r.robust == Robust::ObsFatal && r.else_terminal.empty()) err(r.loc, what + ": an obs_fatal rule names the terminal escape of the other branch (else_terminal)");
+        break;
+      }
+      case RuleTemplate::ReadsFrom: {
+        // SPEC 3.16 row RF: an observed (O) rule; the use's conjunct reads the state of the resource the effect sets
+        if (r.stratum != Stratum::O) err(r.loc, what + ": a reads-from rule is an observed (O) rule");
+        const int32_t ui = p_.find_op(r.use_op), pi = p_.find_op(r.pub_op);
+        const ConjunctDecl* conj = nullptr;
+        const EffectDecl* eff = nullptr;
+        if (ui < 0) {
+          err(r.loc, what + ": the using operation '" + r.use_op + "' is not declared");
+        } else {
+          const OpDecl& u = p_.ops[static_cast<size_t>(ui)];
+          for (const ConjunctDecl& c : u.conjuncts)
+            if (c.label == r.use_conjunct) conj = &c;
+          if (conj == nullptr) err(r.loc, what + ": '" + r.use_conjunct + "' is not a conjunct of '" + r.use_op + "'");
+          bool ready = false;
+          for (const OutcomeDecl& oc : u.outcomes) ready = ready || (oc.code == r.use_outcome && oc.cls == OutcomeClass::Ready);
+          if (!ready) err(r.loc, what + ": '" + r.use_outcome + "' is not a ready outcome of '" + r.use_op + "'");
+        }
+        if (pi < 0) {
+          err(r.loc, what + ": the publishing operation '" + r.pub_op + "' is not declared");
+        } else {
+          for (const EffectDecl& e : p_.ops[static_cast<size_t>(pi)].effects)
+            if (e.label == r.pub_effect) eff = &e;
+          if (eff == nullptr) err(r.loc, what + ": '" + r.pub_effect + "' is not an effect of '" + r.pub_op + "'");
+          else if (eff->kind != EffectKind::Set || !eff->all_kind.empty() || !eff->res || eff->lp.kind == LpKind::None)
+            err(r.loc, what + ": the publication is a lifecycle effect on one resource, at a linearization point");
+        }
+        if (conj != nullptr && eff != nullptr && conj->expr && eff->res && find_state_resource(*conj->expr, eff->res->sort.kind_index) == nullptr)
+          err(r.loc, what + ": the conjunct '" + r.use_conjunct + "' reads no state of the kind the publication sets");
+        if (!r.match.empty()) {
+          for (int32_t oi : {ui, pi}) {
+            if (oi < 0) continue;
+            bool out = false;
+            for (const OpParam& prm : p_.ops[static_cast<size_t>(oi)].params) out = out || (prm.role == "out" && prm.name == r.match);
+            if (!out) err(r.loc, what + ": 'match " + r.match + "' is not an out parameter of '" + p_.ops[static_cast<size_t>(oi)].name + "'");
+          }
+        }
         break;
       }
     }

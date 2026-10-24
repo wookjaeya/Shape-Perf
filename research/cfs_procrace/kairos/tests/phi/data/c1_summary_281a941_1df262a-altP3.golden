@@ -1,27 +1,31 @@
 profile "c1-bp-b051eb0"
 revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
-hash 75664c098f00e233ce8e113044a0157e6c257d6274bfe053f2f9674c2653d9b2
+hash a87482a03f289453b2ab53e666f3bac5a7b2fea8fef6f263ea7a23c77fd6c1eb
 
-provenance records: 64
-entries with provenance: 38
+provenance records: 92
+entries with provenance: 54
 by strongest cited tier (the best part of the entry):
   contract-backed: 5
   admitted: 0
-  code-derived: 32
+  code-derived: 48
   issue-derived: 0
   researcher: 1
   unreferenced: 0
 by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
   contract-backed: 1
   admitted: 0
-  code-derived: 33
+  code-derived: 45
   issue-derived: 0
-  researcher: 4
+  researcher: 8
   unreferenced: 0
 hand-entered (strongest cited tier researcher or unreferenced): 1
   hb R1
-entries citing at least one researcher record: 4
+entries citing at least one researcher record: 8
+  bind OS_common_record_t.active_id
+  bind OS_common_record_t.name_entry
+  bind OS_count_sem_internal_record_t.obj_name
   hb R1
+  hb RF
   kind osal.countsem
   role bp-existence-probe
   role cf-dependent-lookup

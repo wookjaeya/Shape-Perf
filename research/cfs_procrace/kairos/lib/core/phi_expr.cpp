@@ -7,6 +7,16 @@
 namespace kz {
 namespace phi {
 
+const Expr* find_state_resource(const Expr& e, int32_t kind_index) {
+  if (e.kind == ExprKind::Call && e.fn == CallFn::State && !e.args.empty() && e.args[0] && e.args[0]->kind == ExprKind::Call && e.args[0]->fn == CallFn::Res &&
+      e.args[0]->ref_index == kind_index)
+    return e.args[0].get();
+  for (const ExprPtr& a : e.args)
+    if (a)
+      if (const Expr* r = find_state_resource(*a, kind_index)) return r;
+  return nullptr;
+}
+
 ExprPtr clone_expr(const Expr& e) {
   ExprPtr c(new Expr());
   c->kind = e.kind;
@@ -123,6 +133,7 @@ const char* template_text(RuleTemplate t) {
     case RuleTemplate::Spawn: return "spawn";
     case RuleTemplate::Phase: return "phase";
     case RuleTemplate::Observe: return "observe";
+    case RuleTemplate::ReadsFrom: return "reads_from";
   }
   return "?";
 }

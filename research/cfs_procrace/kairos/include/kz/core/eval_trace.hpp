@@ -29,7 +29,9 @@
 //                entries only `retry_until_ready` is run (SPEC 1.6 "Horizon monitors"; see
 //                Occurrence::monitor): it turns a PENDING attempt into TOLERATED (a later attempt of the
 //                same loop instance is READY within the bound) or VIOLATING (the bound is exhausted, or an
-//                attempt's outcome is outside its codes); an attempt it cannot count stays withheld.  An
+//                attempt's outcome is outside its codes); an attempt it cannot count stays withheld.  The
+//                monitor of `exit(code, src)` is run too (2026-10-24): ACCEPT when the using actor calls a
+//                terminal operation with that code, REJECT when it calls one with another code.  An
 //                occurrence that another entry would judge stays PENDING and is never TOLERATED;
 //   findings     disagreements between the trace and the profile (an outcome that disagrees with the
 //                computed state, a capture that disagrees with the replayed cell, an event after a
@@ -181,7 +183,7 @@ struct HbEdge {
   bool operator==(const HbEdge& o) const { return from == o.from && to == o.to && rule == o.rule; }
 };
 
-// Tolerated is produced only by the retry_until_ready monitor (an ACCEPT); no other monitor is run.
+// Tolerated is produced only by an ACCEPT of the retry_until_ready or the exit monitor; no other monitor is run.
 // Undetermined is not a status: a real record whose explanations allow more than one status (the
 // list is Occurrence::possible).  A model trace never produces it.
 enum class OccStatus : uint8_t { Ready, NotEvaluated, Violating, NotReadyUnjudged, Tolerated, Pending, Open, Undetermined };
@@ -342,6 +344,11 @@ struct Options {
   // valid identity into a captured location) makes its actor one of the actors of the execution relation.
   // true is the current behaviour (every observed write counts); false is the alternative.
   bool relation_clearing_writes = true;
+  // Whether the edges of `reads_from` rules are made (SPEC 3.16 row RF, stratum O: a successful use reads from the
+  // publication of the same resource and generation; with `match`, the out values of both are equal).  true: the
+  // rules of the profile apply (2026-10-24); false: their edges are left out (a reading to compare with, not a PI
+  // decision).
+  bool reads_from_edges = true;
 };
 
 // What the real-record replay established for one kind or location (printed with the result).
@@ -369,6 +376,8 @@ struct Result {
   uint64_t terminal_event = 0;
   bool shutdown_requested = false;
   uint64_t shutdown_event = 0;  // the SHUTDOWN_REQ point
+  bool teardown_started = false;
+  uint64_t teardown_event = 0;  // the TEARDOWN point (the scope kind reaches its teardown state)
 };
 
 // Replays `trace` with a checked profile.  Status Invalid only for an unusable profile or trace

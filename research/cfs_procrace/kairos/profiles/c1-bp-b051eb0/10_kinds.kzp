@@ -32,7 +32,36 @@ kind osal.countsem(name: Str) {
   scope process;
   transition ABSENT -> LIVE on create;
   transition LIVE -> ABSENT on delete;
-  prov osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_find_by_name, osal_delete_all, bp_flow_throttle_init, bp_semcfg_table, r_countsem_by_name;
+  prov osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_find_by_name, osal_delete_all, bp_flow_throttle_init, bp_semcfg_table, r_countsem_by_name,
+       osal_objectid_init, osal_name_match, osal_find_next_match, osal_id_defined, osal_countsem_slice;
+}
+
+# The record fields of the counting semaphores (2026-10-24, C1 state-based): the name a lookup compares and the id
+# that makes a record count are the state of osal.countsem; the static closure (plan/C1_build_manifest.md 8.5) gives
+# their writers.  The fields are shared by every OSAL object type: `via` names the four functions inside which a write
+# changes a counting semaphore (r_countsem_type_slices); the adapter covers a writer through the observed effect of
+# those operations and separates the writers of other types (kz/trace/static_closure.hpp).
+bind field "OS_common_record_t" "active_id" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_find_next_match, osal_id_defined, osal_countsem_slice, r_countsem_type_slices;
+bind field "OS_common_record_t" "name_entry" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_name_match, osal_countsem_slice, r_countsem_type_slices;
+bind field "OS_count_sem_internal_record_t" "obj_name" as state(osal.countsem(name)) via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete" prov osal_countsem_api_init, osal_countsem_create_def, r_countsem_type_slices;
+
+# The shutdown of the process (2026-10-24): the default scope of the readiness specification ends at the shutdown
+# request (SPEC 1.6); the teardown deletes every OSAL object on the main thread after the request is observed
+# (SPEC 3.16 row SR).
+scope {
+  kind psp.shutdown;
+  request SHUTDOWN_REQ;
+  teardown TEARDOWN;
+  prov psp_restart_req, psp_teardown;
+}
+
+kind psp.shutdown() {
+  states RUN < SHUTDOWN_REQ < TEARDOWN;
+  initial RUN;
+  scope process;
+  transition RUN -> SHUTDOWN_REQ on request;
+  transition SHUTDOWN_REQ -> TEARDOWN on teardown;
+  prov psp_restart_req, psp_teardown;
 }
 
 # ---- named call sites (the source binding of the roles; the observation plan binds them to the binaries)

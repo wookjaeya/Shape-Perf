@@ -218,6 +218,22 @@ prov cf_sbintf_use {
   sha256 "6d29fa340e7cd01e270cab2fe93386802bf2336b94c3ff2627c01a2b6f1b08dc";
   note "the use of the id the lookup stored: OS_CountSemTimedWait(c->sem_id, 0)";
 }
+prov es_cleanup_object_cb {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  lines 1560 1600;
+  sha256 "6e1532e8c44d1a00915a45642152e861622e970346dd2c7c64bd7967b3a53f60";
+  note "CFE_ES_CleanupObjectCallback (the cleanup of an application's resources): a counting semaphore is deleted by OS_CountSemDelete";
+}
+prov es_exitapp_external {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/es/fsw/src/cfe_es_api.c";
+  lines 427 447;
+  sha256 "99089437fba7be1529de068e7b747a8dd09111d98f858d08059ed6e62f934595";
+  note "CFE_ES_ExitApp of an external application: AppState STOPPED, then an endless OS_TaskDelay loop until ES deletes the task; the call does not return";
+}
 prov es_exitapp_sig {
   tier code-derived;
   kind code_pattern;
@@ -249,6 +265,62 @@ prov issue_184_body {
   cite "nasa/CF issue #184, body (2022-01-13): the CF app expects that semaphore to be created before it starts";
   note "Written about 2a024d8 (cases/C1.md F1); cited for the role of CF's lookup (a dependent use), not as an Allowed entry.";
 }
+prov osal_allocate_new {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 1146 1209;
+  sha256 "aceba90e47c6c2af9a4dc6f4fe326c625387362ad67da623eb226fc9a1bb07fc";
+  note "OS_ObjectIdAllocateNew(idtype, name, token): an EXCLUSIVE transaction of the caller's object type; name check, OS_ObjectIdFindNextFree, OS_ObjectIdConvertToken; on a failure OS_ObjectIdFinalizeNew clears the record";
+}
+prov osal_api_init_call {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-common.c";
+  lines 116 138;
+  sha256 "641cc34508a7be9b7fe180ed3dd4a113dc3f9eaed4c0d86716c4d8cd4e40e123";
+  note "OS_API_Init: a repeated call returns at once (GlobalState already OS_INIT_MAGIC_NUMBER); the first call sets the magic number and calls OS_ObjectIdInit before any object can exist";
+}
+prov osal_api_init_countsem {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-common.c";
+  lines 161 163;
+  sha256 "94804c9235d0cae3690daf7e8ebed06ed9937c89aad0332ae56b4c887677bb85";
+  note "OS_API_Init calls OS_CountSemAPI_Init for the counting semaphore type (after OS_ObjectIdInit)";
+}
+prov osal_cleanup_object {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-common.c";
+  lines 304 348;
+  sha256 "09c06c066e3cc4525d60e2328a46b8b87eda29ddb52d74a669a415c3b84dca0f";
+  note "OS_CleanUpObject (the callback of OS_DeleteAllObjects): a counting semaphore is deleted by OS_CountSemDelete";
+}
+prov osal_convert_token_exclusive {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 418 433;
+  sha256 "86304b2e8b3f3117065057a3781b6608585df20bcf6d433482cf7b480c3768b7";
+  note "OS_ObjectIdConvertToken writes active_id (RESERVED) only in EXCLUSIVE lock mode";
+}
+prov osal_convert_token_restore {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 512 519;
+  sha256 "53eccaa81903b5313b57359f2aeef8306604be86bd196ff47c6ddae783cb0f6d";
+  note "on failure in EXCLUSIVE mode OS_ObjectIdConvertToken restores the record's id from the token";
+}
+prov osal_countsem_api_init {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 71 75;
+  sha256 "0f1be9e70fc154af5db6ba40431e06a3a1fbc4915ef90799b2df749cf85d142c";
+  note "OS_CountSemAPI_Init: memset of OS_count_sem_table (the obj_name storage of every counting semaphore record)";
+}
 prov osal_countsem_create_def {
   tier code-derived;
   kind code_pattern;
@@ -256,6 +328,14 @@ prov osal_countsem_create_def {
   lines 83 109;
   sha256 "1eec04aa4faf5e3a347cb8033d09b7b0cb6a9752b22f8b875acac78336d52b98";
   note "OS_CountSemCreate: allocate the record by name, implementation create, OS_ObjectIdFinalizeNew";
+}
+prov osal_countsem_delete_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 118 133;
+  sha256 "882276e3fd423bbc18af06cb615a9b8fa89c170d2eab65b33bfc7efade9ed72d";
+  note "OS_CountSemDelete(sem_id): an EXCLUSIVE OS_ObjectIdGetById of its own type, OS_CountSemDelete_Impl, then OS_ObjectIdFinalizeDelete";
 }
 prov osal_countsem_finalize {
   tier code-derived;
@@ -272,6 +352,14 @@ prov osal_countsem_getidbyname_def {
   lines 204 215;
   sha256 "aaa80e692241a94867b279e2b3a112b50ffd1b26c011ea4fdebe2ac0e407f546";
   note "OS_CountSemGetIdByName: OS_ObjectIdFindByName of the countsem type";
+}
+prov osal_countsem_getinfo {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 223 249;
+  sha256 "e0b60380fe737f4ab8db7709b9a00d889d27fbbef790e4ec7160db8f1664c9c3";
+  note "OS_CountSemGetInfo: a GLOBAL OS_ObjectIdGetById and OS_ObjectIdRelease (TransactionFinish without a final id: no write of active_id)";
 }
 prov osal_countsem_h_create {
   tier contract-backed;
@@ -290,6 +378,30 @@ prov osal_countsem_h_getidbyname {
   lines 147 162;
   sha256 "9d7f3829a7927300cb1b547dec7532c96691e2ba70ec166fd9dcb8d845d7fa32";
   note "OS_CountSemGetIdByName: finds an existing semaphore id by name; retval OS_ERR_NAME_NOT_FOUND if the name was not found in the table";
+}
+prov osal_countsem_lock_none {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 141 196;
+  sha256 "52e1532bb41799230d09c4613877b58889b2c6f260d02526c09ba016316fdc48";
+  note "OS_CountSemGive, OS_CountSemTake, OS_CountSemTimedWait take the record in lock mode NONE (no write of the record)";
+}
+prov osal_countsem_slice {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 95 95;
+  sha256 "058e1ab90fb12e0175d5f29b81a3b2e954bac50bff5ec7278f876a9f07cba724";
+  note "the counting semaphore records are the slice of OS_common_table that begins at OS_COUNTSEM_BASE";
+}
+prov osal_countsem_type {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-countsem.c";
+  lines 53 57;
+  sha256 "b6a77de6ce08de448fb7ca31c6e36833c0c3d0fa56608567567d9ea8f1f6c1f3";
+  note "LOCAL_OBJID_TYPE of the counting semaphore API is OS_OBJECT_TYPE_OS_COUNTSEM";
 }
 prov osal_delete_all {
   tier code-derived;
@@ -371,6 +483,22 @@ prov osal_err_success {
   sha256 "f691259f17976143d5cae396f303289b915a656a3b0c378618cb94c80384df17";
   note "OS_SUCCESS 0";
 }
+prov osal_finalize_delete {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 871 896;
+  sha256 "8c2defca89cf4076507f898cf90e8db7d39cb787bc0dbb7bbabcbbe08e784304";
+  note "OS_ObjectIdFinalizeDelete: on OS_SUCCESS the record's active_id becomes undefined (the record returns to the pool), otherwise the id is restored";
+}
+prov osal_finalize_new {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 828 864;
+  sha256 "1c7fdbdb5359ba7cec1aa4c8c068d94425da46a5989dbdf3b20a4bff3c9365a0";
+  note "OS_ObjectIdFinalizeNew: on OS_SUCCESS the record's active_id becomes token->obj_id (TransactionFinish) and *outid receives the same value; otherwise both are 0";
+}
 prov osal_find_by_name {
   tier code-derived;
   kind code_pattern;
@@ -379,6 +507,30 @@ prov osal_find_by_name {
   sha256 "be753d8be2645a7ff0e1ba952c82c9ccaddb512e70669b215ad8967af18e3b7b";
   note "OS_ObjectIdFindByName: OS_ObjectIdGetByName; on success the out-parameter receives the id";
 }
+prov osal_find_next_free {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 587 655;
+  sha256 "d89db2ca297fb8e347d2c284d963c84e68c352f1269f05ca164d9f991fbb946a";
+  note "OS_ObjectIdFindNextFree: a new record is taken in the slice of the token's object type (base and count from token->obj_type); its id is composed from a serial that grows from the last id issued, so a later object in the same slot has another id";
+}
+prov osal_find_next_match {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 538 568;
+  sha256 "62b956c4dfc61ff0d8bd05ee70425c2f35132518d04d9d53f50e8ada10f9a439";
+  note "OS_ObjectIdFindNextMatch: the search runs over the records of the token's object type only; a record counts only if its active_id is defined; on a match the token's obj_id is the record's active_id, else OS_ERR_NAME_NOT_FOUND";
+}
+prov osal_id_defined {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-idmap.h";
+  lines 148 151;
+  sha256 "2e56905e5e677f0b10d2a23759f1d5e4a410401a997c7f0541ee4375a96c3f89";
+  note "OS_ObjectIdDefined: an id is defined if it is not 0";
+}
 prov osal_index_mask_shift {
   tier code-derived;
   kind code_pattern;
@@ -386,6 +538,22 @@ prov osal_index_mask_shift {
   lines 32 33;
   sha256 "9f0362ed60ecc258f5da6601b9d66619b3b17e21b96633ed651a164a52e92987";
   note "OS_OBJECT_INDEX_MASK 0xFFFF, OS_OBJECT_TYPE_SHIFT 16";
+}
+prov osal_name_match {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 269 272;
+  sha256 "729b1ab4a5555246e6b689795802fe13a2c7f14333b463405edbaef985d2b2f6";
+  note "OS_ObjectNameMatch: a record matches a name only if its name_entry is not NULL and the strings are equal";
+}
+prov osal_objectid_init {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 118 123;
+  sha256 "a2a838996c06fdb7b9ae15ddeb5c2fa326758e44c1faa74b4a351c6d77f5be71";
+  note "OS_ObjectIdInit: memset of the whole OS_common_table (every record of every object type: active_id, name_entry and creator zero) and of the per-type state";
 }
 prov osal_pthread_entry {
   tier code-derived;
@@ -411,6 +579,14 @@ prov osal_task_entry_def {
   sha256 "3bf9fc898ea14c151819ca508d616e6e48416577f41095624c1340eb7535e5ce";
   note "OS_TaskEntryPoint(task_id) runs first in the new task";
 }
+prov osal_transaction_finish {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 1046 1099;
+  sha256 "441acd1b6244c3c1b14337e2a63f7a20784dc01b4b481a931df39fa8bbc4009d";
+  note "OS_ObjectIdTransactionFinish: lock mode NONE returns at once; otherwise active_id is written only with a final id (create, delete) or, in EXCLUSIVE mode, restored from the token";
+}
 prov osal_type_user {
   tier code-derived;
   kind code_pattern;
@@ -418,6 +594,38 @@ prov osal_type_user {
   lines 52 52;
   sha256 "135babcd288eec17f49b1f74455c5450adead207d61bacc4e8cd50837427b749";
   note "OS_OBJECT_TYPE_USER 0x10";
+}
+prov psp_app_run_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_start.c";
+  lines 432 432;
+  sha256 "edd7278c8f5f5eae0da3c161c9de2d3927960ab178ede49e3855a806d91ea150";
+  note "void OS_Application_Run(void): the main thread after the start";
+}
+prov psp_restart_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 66 66;
+  sha256 "a0a7cbf894989bc13bd8add0eb30ae5885d9f924a26afdad469c8d4736c77563";
+  note "void CFE_PSP_Restart(uint32 reset_type)";
+}
+prov psp_restart_req {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_support.c";
+  lines 93 94;
+  sha256 "0a3efeeb521365b2759be8bffda136387382f437963921536d6a1259258f433a";
+  note "CFE_PSP_Restart sets CFE_PSP_IdleTaskState.ShutdownReq and signals the main thread (the shutdown request)";
+}
+prov psp_teardown {
+  tier code-derived;
+  kind code_pattern;
+  file "psp/fsw/pc-linux/src/cfe_psp_start.c";
+  lines 467 487;
+  sha256 "781f668b32d36b44b52889e23b4650932728074dbcfa28dfd8c53e36a534087a";
+  note "OS_Application_Run: the main thread waits until ShutdownReq is set, then OS_TaskDelay(100) and OS_DeleteAllObjects (the teardown)";
 }
 prov r_axiom_program_order {
   tier researcher;
@@ -429,7 +637,19 @@ prov r_countsem_by_name {
   tier researcher;
   kind researcher;
   authored "2026-10-24, C1 profile, from plan/C1_basis_plan.md 1.2 and 9.1; cases inspected: C1";
-  note "The counting semaphore is keyed by its name: the lookup compares names (OS_ObjectIdFindByName). Two states: ABSENT, LIVE. The RESERVED window inside OS_CountSemCreate (name visible before the id is final) is not modelled: it is the follow-up item A5 of P-C1HOLD, outside C1. A delete is not modelled either: no application of the closure calls OS_CountSemDelete (plan/C1_build_manifest.md 8.5, the countsem API callers), and OS_DeleteAllObjects runs at teardown only. Generations (delete and re-create of a name) are not in this subset.";
+  note "The counting semaphore is keyed by its name: the lookup compares names (OS_ObjectIdFindByName). Two states: ABSENT, LIVE. The RESERVED window inside OS_CountSemCreate (name visible before the id is final) is not modelled: it is the follow-up item A5 of P-C1HOLD, outside C1. No application of the closure calls OS_CountSemDelete (plan/C1_build_manifest.md 8.5, the countsem API callers); it is reached from the cleanup of an application's resources (CFE_ES_CleanupObjectCallback) and from OS_DeleteAllObjects at teardown (OS_CleanUpObject). Since 2026-10-24 the delete is an effect (OS_CountSemDelete.retire) whose name the record does not give: from such an event on the kind is not fixed by the record. A name is not re-created in this subset; where a delete may lie between two attempts the attempts are not counted as one loop (the generation boundary of the retry monitor).";
+}
+prov r_countsem_type_slices {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-24, C1 profile, from the cited OSAL code (osal_* records of 01_prov.kzp) and the static closure plan/C1_build_manifest.md 8.5; cases inspected: C1";
+  note "Key separation of the OSAL object table for osal.countsem (the 'via' of the bindings in 10_kinds.kzp). OS_common_record_t and the per-type internal records are shared by every object type, so the static closure lists writers of every type. A counting semaphore record lies in the slice at OS_COUNTSEM_BASE (osal_countsem_slice), and the shared helpers address a record only through a token of one object type (osal_find_next_free, osal_find_next_match). active_id and name_entry are written by OS_ObjectIdInit (whole table), by OS_ObjectIdFindNextFree, OS_ObjectIdConvertToken in EXCLUSIVE mode and OS_ObjectIdTransactionFinish with a final id or in EXCLUSIVE mode (osal_convert_token_exclusive, osal_convert_token_restore, osal_transaction_finish), and by the OS_OBJECT_INIT of a create; obj_name by OS_CountSemAPI_Init and OS_CountSemCreate. A countsem-typed token in a mode that writes is made only by OS_CountSemCreate (OS_ObjectIdAllocateNew(LOCAL_OBJID_TYPE), osapi-countsem.c 94, EXCLUSIVE, osal_allocate_new) and OS_CountSemDelete (EXCLUSIVE, osapi-countsem.c 123); Give, Take, TimedWait use lock mode NONE and GetInfo GLOBAL without a final id (osal_countsem_lock_none, osal_countsem_getinfo). Every other EXCLUSIVE token of the closure's OSAL is of another type: OS_ObjectIdAllocateNew at osapi-condvar.c 90, osapi-task.c 182, osapi-binsem.c 102, osapi-mutex.c 99, osapi-printf.c 95, osapi-queue.c 98, osapi-timebase.c 122, osapi-time.c 134, osapi-sockets.c 129 and 252, osapi-dir.c 119, osapi-module.c 203, osapi-filesys.c 153 and 274, osapi-file.c 136; OS_ObjectIdGetById(EXCLUSIVE) at osapi-condvar.c 119, osapi-task.c 219, osapi-binsem.c 131, osapi-mutex.c 128, osapi-queue.c 130, osapi-timebase.c 231, osapi-time.c 387, osapi-sockets.c 165 and 301, osapi-dir.c 150, osapi-module.c 271, osapi-file.c 167; OS_ObjectIdGetByName(EXCLUSIVE) at osapi-filesys.c 360 (each with its own type; grep of the pinned OSAL, the same in both bundle candidates). Hence a write changes osal.countsem only inside OS_ObjectIdInit, OS_CountSemAPI_Init, OS_CountSemCreate or OS_CountSemDelete (SPEC 4.2 step 8, NO_KEY by distinct type constants); the effects of those four operations stand for their writes. Not shown here: indirect calls (the adapter does not separate a writer whose function is an indirect-call target), and the RESERVED window (A5).";
+}
+prov r_reads_from_lookup {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-24, C1 profile, from SPEC_FINAL 3.16 row RF and 3.17 'Outcome-implied reads-from'; cases inspected: C1";
+  note "A successful OS_CountSemGetIdByName returns the active_id of the record whose name matched (osal_find_by_name, osal_find_next_match); that id was written into the record by the OS_ObjectIdFinalizeNew of its creation, which also returned it through the creator's out-parameter (osal_finalize_new); a later object in the same slot has another id (osal_find_next_free). So a lookup whose out id equals the id a recorded creation returned read from that creation (the same generation): the reads-from edge of rule RF (stratum O, observed synchronization). The edge rests on the success outcome and on the equality of the two recorded ids; it gives no order for a failed lookup (an order the outcome alone decides, SPEC 4.8 'Trace analysis' step 4, 'outcome-decided').";
 }
 prov r_role_binding {
   tier researcher;
@@ -505,6 +725,7 @@ source bp root "bp" rev "b051eb0d12bfe76c0230215c2ff851cfaa553ce4";
 source cf root "cf" rev "281a94188cd7d885a5aed01ee041f3ece2b0486f";
 source cfe root "cfe" rev "6cccb3f5d10664b5b10aeb9cfcda871ba2d99b32";
 source osal root "osal" rev "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+source psp root "psp" rev "bd4a2ea239cff013b24bf93a5e8c451dbcb7cf97";
 const CFE_ES_APPID_BASE = 0x110000 prov osal_index_mask_shift, osal_type_user, resid_appid_base, resid_appid_offset, resid_make_base, resid_mark_simple, resid_mode_cmake note "SIMPLE resource-ID mode; a STRICT build has 0x02110000";
 const CFE_ES_RunStatus_APP_ERROR = 3 prov es_runstatus_app_error;
 const CFE_PLATFORM_ES_MAX_APPLICATIONS = ref eval "CFE_PLATFORM_ES_MAX_APPLICATIONS" in "cfe/modules/es/fsw/src/cfe_es_start.c" prov es_start_table_loop;
@@ -526,6 +747,12 @@ context {
   owner_kind es.app;
   prov es_start_table_loop;
 }
+scope {
+  kind psp.shutdown;
+  request SHUTDOWN_REQ;
+  teardown TEARDOWN;
+  prov psp_restart_req, psp_teardown;
+}
 kind es.app(rec: Int) {
   states FREE < RESERVED < LIVE;
   initial FREE;
@@ -545,8 +772,19 @@ kind osal.countsem(name: Str) {
   scope process;
   transition ABSENT -> LIVE on create;
   transition LIVE -> ABSENT on delete;
-  prov bp_flow_throttle_init, bp_semcfg_table, osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_delete_all, osal_find_by_name, r_countsem_by_name;
+  prov bp_flow_throttle_init, bp_semcfg_table, osal_countsem_create_def, osal_countsem_finalize, osal_countsem_getidbyname_def, osal_countsem_slice, osal_delete_all, osal_find_by_name, osal_find_next_match, osal_id_defined, osal_name_match, osal_objectid_init, r_countsem_by_name;
 }
+kind psp.shutdown() {
+  states RUN < SHUTDOWN_REQ < TEARDOWN;
+  initial RUN;
+  scope process;
+  transition RUN -> SHUTDOWN_REQ on request;
+  transition SHUTDOWN_REQ -> TEARDOWN on teardown;
+  prov psp_restart_req, psp_teardown;
+}
+bind field "OS_common_record_t" "active_id" as state(osal.countsem(name)) via "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete", "OS_ObjectIdInit" prov osal_countsem_slice, osal_find_next_match, osal_id_defined, r_countsem_type_slices;
+bind field "OS_common_record_t" "name_entry" as state(osal.countsem(name)) via "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete", "OS_ObjectIdInit" prov osal_countsem_slice, osal_name_match, r_countsem_type_slices;
+bind field "OS_count_sem_internal_record_t" "obj_name" as state(osal.countsem(name)) via "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete", "OS_ObjectIdInit" prov osal_countsem_api_init, osal_countsem_create_def, r_countsem_type_slices;
 site bp_create_call = fn("initialize_throttling").call("OS_CountSemCreate") prov bp_flow_create_call;
 site bp_existence_probe_call = fn("initialize_throttling").call("OS_CountSemGetIdByName") prov bp_flow_lookup_call;
 site cf_lookup_call = fn("CF_CFDP_InitEngine").call("OS_CountSemGetIdByName") prov cf_cfdp_lookup_call;
@@ -568,7 +806,13 @@ op BP_FlowInit(AppName) {
 }
 op CFE_ES_ExitApp(ExitStatus) {
   bind symbol "CFE_ES_ExitApp";
-  prov bp_app_main_exit, cf_app_exit, es_exitapp_sig;
+  terminal;
+  prov bp_app_main_exit, cf_app_exit, es_exitapp_external, es_exitapp_sig;
+}
+op CFE_PSP_Restart(reset_type) {
+  bind symbol "CFE_PSP_Restart";
+  effect request_shutdown: lifecycle psp.shutdown() -> SHUTDOWN_REQ lp at fn("CFE_PSP_Restart").store(CFE_PSP_IdleTaskState_t.ShutdownReq) prov psp_restart_req;
+  prov psp_restart_fn, psp_restart_req;
 }
 op CF_CFDP_InitEngine() {
   bind symbol "CF_CFDP_InitEngine";
@@ -577,6 +821,16 @@ op CF_CFDP_InitEngine() {
 op CF_Init() {
   bind symbol "CF_Init";
   prov cf_app_init_status;
+}
+op OS_Application_Run() {
+  bind symbol "OS_Application_Run";
+  effect teardown: lifecycle psp.shutdown() -> TEARDOWN lp at fn("OS_Application_Run").call("OS_DeleteAllObjects") prov psp_teardown;
+  prov osal_delete_all, psp_app_run_fn, psp_teardown;
+}
+op OS_CountSemAPI_Init() {
+  bind symbol "OS_CountSemAPI_Init";
+  effect clear_names: lifecycle all osal.countsem -> ABSENT lp at fn("OS_CountSemAPI_Init").memset(OS_count_sem_internal_record_t) prov osal_api_init_countsem, osal_countsem_api_init;
+  prov osal_api_init_countsem, osal_countsem_api_init;
 }
 op OS_CountSemCreate(out sem_id, sem_name: Str, sem_initial_value, options) {
   bind symbol "OS_CountSemCreate";
@@ -590,6 +844,11 @@ op OS_CountSemCreate(out sem_id, sem_name: Str, sem_initial_value, options) {
   outcome OS_SUCCESS: ready;
   prov osal_countsem_create_def, osal_countsem_h_create;
 }
+op OS_CountSemDelete(sem_id) {
+  bind symbol "OS_CountSemDelete";
+  effect retire: lifecycle osal.countsem(lp.sem_name) -> ABSENT filter lp.operation_status = OS_SUCCESS lp at fn("OS_CountSemDelete").call("OS_ObjectIdFinalizeDelete") values sem_name: Str, operation_status: Int prov osal_countsem_delete_def, osal_finalize_delete;
+  prov es_cleanup_object_cb, osal_cleanup_object, osal_countsem_delete_def, osal_delete_all;
+}
 op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
   bind symbol "OS_CountSemGetIdByName";
   conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
@@ -598,6 +857,11 @@ op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
   outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
   outcome OS_SUCCESS: ready;
   prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;
+}
+op OS_ObjectIdInit() {
+  bind symbol "OS_ObjectIdInit";
+  effect clear_table: lifecycle all osal.countsem -> ABSENT lp at fn("OS_ObjectIdInit").memset(OS_common_record_t) prov osal_api_init_call, osal_countsem_slice, osal_find_next_match, osal_id_defined, osal_name_match, osal_objectid_init;
+  prov osal_api_init_call, osal_objectid_init;
 }
 op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
   bind symbol "OS_TaskCreate";
@@ -625,6 +889,18 @@ hb R2-P-TASK {
     entry OS_TaskEntryPoint;
   }
   prov osal_pthread_entry, osal_task_create_def, osal_task_entry_def;
+}
+hb RF {
+  title "outcome-implied reads-from: a successful lookup reads from the creation of the same name and id";
+  stratum O;
+  robust obs_soft;
+  template reads_from {
+    use OS_CountSemGetIdByName.exists;
+    outcome OS_SUCCESS;
+    publish OS_CountSemCreate.publish;
+    match sem_id;
+  }
+  prov osal_countsem_finalize, osal_finalize_new, osal_find_by_name, osal_find_next_free, osal_find_next_match, r_reads_from_lookup;
 }
 rspec K-REG.osal-countsem-lookup {
   use op OS_CountSemGetIdByName;

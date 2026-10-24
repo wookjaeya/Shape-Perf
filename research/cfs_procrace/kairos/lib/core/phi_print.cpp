@@ -239,6 +239,12 @@ void print_rule(Out* o, const HbRuleDecl& r) {
       if (!r.else_terminal.empty()) o->line(2, "else_terminal " + quote_string(r.else_terminal) + ";");
       if (!r.watch_kinds.empty()) o->line(2, "watch " + sorted_join(r.watch_kinds, ", ") + ";");
       break;
+    case RuleTemplate::ReadsFrom:
+      o->line(2, "use " + r.use_op + "." + r.use_conjunct + ";");
+      o->line(2, "outcome " + r.use_outcome + ";");
+      o->line(2, "publish " + r.pub_op + "." + r.pub_effect + ";");
+      if (!r.match.empty()) o->line(2, "match " + r.match + ";");
+      break;
   }
   o->line(1, "}");
   clauses_block(o, 1, r);
@@ -320,8 +326,16 @@ std::string canonical_text(const Profile& p) {
     clauses_block(&o, 1, d);
     o.line(0, "}");
   }
-  for (const BindDecl& d : p.binds)
-    o.line(0, "bind field " + quote_string(d.struct_name) + " " + quote_string(d.field) + " as " + expr_text(*d.target) + clauses_inline(d) + ";");
+  for (const BindDecl& d : p.binds) {
+    std::string via;
+    if (!d.via.empty()) {
+      std::vector<std::string> v = d.via;  // a set of functions: the normal form sorts it
+      std::sort(v.begin(), v.end());
+      v.erase(std::unique(v.begin(), v.end()), v.end());
+      for (const std::string& f : v) via += (via.empty() ? " via " : ", ") + quote_string(f);
+    }
+    o.line(0, "bind field " + quote_string(d.struct_name) + " " + quote_string(d.field) + " as " + expr_text(*d.target) + via + clauses_inline(d) + ";");
+  }
   for (const SiteDecl& d : p.sites) o.line(0, "site " + d.name + " = " + pattern_text(d.pattern) + clauses_inline(d) + ";");
   for (const RoleDecl& d : p.roles) {
     o.line(0, "role " + d.name + " {");

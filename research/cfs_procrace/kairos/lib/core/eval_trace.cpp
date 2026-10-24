@@ -457,6 +457,9 @@ struct HbOrder {
 struct Prior {
   HbOrder hb;
   WriteLog writes;
+  // The first pass's scope points (kNoEvent: not in the record): the SHUTDOWN_REQ and TEARDOWN points.
+  uint64_t request = ~static_cast<uint64_t>(0);
+  uint64_t teardown = ~static_cast<uint64_t>(0);
 };
 
 // Builds the order of the first `limit` events of `t` from `edges`.  False (with the reason) where it cannot
@@ -550,6 +553,30 @@ class Replayer {
   bool began_handler_ = false;
   size_t after_terminal_ = 0;
   int32_t request_ordinal_ = -1;  // the state of the shutdown kind that is the request
+  int32_t teardown_ordinal_ = -1;  // the state of the shutdown kind that is the teardown
+  // reads_from rules (SPEC 3.16 row RF): the publications applied and the successful uses, matched in final_edges()
+  struct RfPub {
+    size_t rule = 0;
+    ResId res;
+    uint64_t event = 0, call = kNoEvent;
+    std::string actor;
+    bool has_value = false;
+    int64_t value = 0;
+  };
+  struct RfUse {
+    size_t rule = 0;
+    ResId res;
+    uint64_t lp = 0, ret = 0;
+    std::string actor;
+    bool has_value = false;
+    int64_t value = 0;
+  };
+  std::vector<RfPub> rf_pubs_;
+  std::vector<RfUse> rf_uses_;
+  void note_rf_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ResId& id);
+  void note_rf_use(const OpDecl& op, const Frame& f, const TraceEvent& ev);
+  void reads_from_edges();
+  mutable std::set<uint64_t> scope_left_out_;  // writes after the TEARDOWN point that a read of the default scope left out (SCOPE)
 
   // Real records (SPEC 4.8, ADR-055).
   bool real_ = false;
@@ -618,6 +645,7 @@ class Replayer {
   void check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& ev);
   void decide_real(Frame* f, size_t k, const TraceEvent& ev);
   void run_monitors();
+  void run_exit_monitor(size_t si, std::vector<size_t>* rejects);
   void finish();
 
   void finding(uint64_t event, const std::string& what) {
@@ -705,6 +733,8 @@ Status Replayer::prepare() {
     const KindDecl& sk = p_.kinds[static_cast<size_t>(p_.scope.kind_index)];
     for (size_t i = 0; i < sk.states.size(); ++i)
       if (sk.states[i] == p_.scope.request) request_ordinal_ = static_cast<int32_t>(i);
+    for (size_t i = 0; i < sk.states.size(); ++i)
+      if (sk.states[i] == p_.scope.teardown) teardown_ordinal_ = static_cast<int32_t>(i);
   }
 
   // points: conjuncts and effects by the name of their linearization point
@@ -932,10 +962,19 @@ void Replayer::contradict(int32_t kind, int32_t loc, uint64_t event, const std::
 // leave: every write of it (`writes` and `more`, the previous pass's log of the whole record) is the reader's
 // own (program order), or happens before the read and is merged before it, or happens after the read and is
 // merged after it; and the writes before the read are ordered among themselves.
+//
+// SCOPE (SPEC 4.5 "SCOPE exclusion"; 1.6 "Teardown decides no default-scope occurrence"; 3.16 row SR): a write at or
+// after the profile's TEARDOWN point (that point or happening after it; SR puts the shutdown request before it) cannot
+// precede the reads of an occurrence of the default scope, which is decided before the shutdown request.  For a read
+// that the record places in the default scope (merged before the SHUTDOWN_REQ point, if observed, and before the
+// TEARDOWN point, and not happening after the TEARDOWN point) such a write is left out; the result is a statement of
+// the default scope (the scope of an occurrence is decided by the merged order of its decision and the request).
 bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader) const {
   if (prior_ == nullptr) return false;
   const HbOrder& hb = prior_->hb;
-  std::vector<uint64_t> before;
+  const uint64_t td = prior_->teardown;
+  const bool default_scope_read = td != kNoEvent && at < td && !(prior_->request != kNoEvent && prior_->request < at) && !hb.before(td, at);
+  std::vector<uint64_t> before, left_out;
   auto one = [&](uint64_t w) {
     if (w == at) return true;  // the event's own effects (program order)
     if (w >= t_.events.size()) return false;
@@ -945,6 +984,10 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
     }
     if (w < at && hb.before(w, at)) {
       before.push_back(w);
+      return true;
+    }
+    if (default_scope_read && w > at && (w == td || hb.before(td, w))) {
+      left_out.push_back(w);
       return true;
     }
     return w > at && hb.before(at, w);
@@ -960,6 +1003,7 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
     const uint64_t x = before[i], y = before[i + 1];
     if (t_.events[static_cast<size_t>(x)].actor != t_.events[static_cast<size_t>(y)].actor && !hb.before(x, y)) return false;
   }
+  scope_left_out_.insert(left_out.begin(), left_out.end());
   return true;
 }
 
@@ -1361,6 +1405,9 @@ Status Replayer::run() {
   if (after_terminal_ != 0)
     finding(r_.terminal_event, std::to_string(after_terminal_) + " event(s) follow the process-terminal step and are not replayed (a real run has none)");
   final_edges();
+  if (!scope_left_out_.empty())
+    finding(prior_ != nullptr ? prior_->teardown : kNoEvent, "order: " + std::to_string(scope_left_out_.size()) +
+                " write(s) at or after the TEARDOWN point were left out of the order of the reads of the default scope (SCOPE, SPEC 4.5; teardown decides no default-scope occurrence, SPEC 1.6)");
   std::sort(r_.edges.begin(), r_.edges.end());
   r_.edges.erase(std::unique(r_.edges.begin(), r_.edges.end()), r_.edges.end());
   r_.final_state = st_;
@@ -1646,6 +1693,7 @@ void Replayer::on_return(const TraceEvent& ev) {
   Frame f = std::move(stack.back());
   stack.pop_back();
 
+  note_rf_use(op, f, ev);
   if (real_) {
     return_real(op, &f, ev);
     observe_return(op, f, ev);
@@ -2062,6 +2110,10 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
       r_.shutdown_requested = true;
       r_.shutdown_event = ev.id;
     }
+    if (p_.scope.present && kind == p_.scope.kind_index && teardown_ordinal_ >= 0 && to >= teardown_ordinal_ && !r_.teardown_started) {
+      r_.teardown_started = true;
+      r_.teardown_event = ev.id;
+    }
   };
   switch (eff.kind) {
     case EffectKind::Set: {
@@ -2102,6 +2154,7 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
         CVal idv;
         if (evaluate(*eff.with_id, op, &eff.lp, ev, frame_args, &idv)) st_.ids[id] = idv.v;
       }
+      note_rf_publication(op, eff, ev, id);
       note_shutdown(r.kind, to);
       return;
     }
@@ -2232,6 +2285,10 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       r_.shutdown_requested = true;
       r_.shutdown_event = ev.id;
     }
+    if (p_.scope.present && kind == p_.scope.kind_index && teardown_ordinal_ >= 0 && to >= teardown_ordinal_ && !r_.teardown_started) {
+      r_.teardown_started = true;
+      r_.teardown_event = ev.id;
+    }
   };
   // The stored value: the one the record carries (`value`), else the profile's where it is fixed.  The write
   // is logged; a fixed value of a location whose start state is not known is its start evidence.  The last
@@ -2326,6 +2383,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
         else untrack_kind(tkind, idv.reasons);
       }
       wrote(id, by_identity);
+      note_rf_publication(op, eff, ev, id);
       note_shutdown(r.v.kind, to);
       return;
     }
@@ -2769,12 +2827,15 @@ void Replayer::relate(Occurrence* o) {
 // UNDETERMINED (possible PENDING, TOLERATED and, for the only deciding entry, VIOLATING), reason
 // explanation_ambiguous.  A run the trace ends before ACCEPT or REJECT stays PENDING: OPEN never counts as
 // ACCEPT, and its summary is INCONCLUSIVE(horizon-open).  ACCEPT makes TOLERATED.  REJECT makes VIOLATING
-// only where the retry entry is the only deciding entry (no other entry's monitor is run, and another
-// entry might accept); otherwise the occurrence stays PENDING with the REJECT stated.
+// only once every deciding entry's monitor has REJECTed it (the exit monitor runs first; another entry might
+// accept); otherwise the occurrence stays PENDING with the REJECT stated.
 void Replayer::run_monitors() {
   for (size_t si = 0; si < rspec_info_.size(); ++si) {
     const RspecInfo& info = rspec_info_[si];
     if (info.allowed.kind != phi::CallerAllowedKind::Entries) continue;
+    // per occurrence: how many deciding entries' monitors REJECTed it (VIOLATING once every deciding entry has)
+    std::vector<size_t> rejects(r_.occurrences.size(), 0);
+    run_exit_monitor(si, &rejects);
     const phi::AllowedEntry* retry = nullptr;
     for (const phi::AllowedEntry* e : info.allowed.deciding)
       if (e->kind == phi::AllowedKind::RetryUntilReady) {
@@ -2924,6 +2985,7 @@ void Replayer::run_monitors() {
             }
           }
           const std::string n_text = std::to_string(inst.size());
+          std::vector<size_t>* rejects_of = &rejects;
           for (size_t j = 0; j < inst.size(); ++j) {
             Occurrence& o = r_.occurrences[inst[j]];
             if (o.status != OccStatus::Pending) continue;
@@ -2940,8 +3002,9 @@ void Replayer::run_monitors() {
                                              ? "REJECT at #" + std::to_string(at) + ": the bound is exhausted, attempt " + n_text + " not ready"
                                              : "REJECT at #" + std::to_string(at) + ": the outcome " + hex_or_dec(static_cast<int64_t>(u32(r_.occurrences[inst.back()].result))) +
                                                    " of attempt " + n_text + " is outside the codes";
-                if (sole) o.status = OccStatus::Violating;
-                o.monitor = "retry_until_ready " + what + " (" + self + "; " + bound_text + ")" + (sole ? "" : "; another deciding entry is not monitored: stays PENDING");
+                const bool all = ++(*rejects_of)[inst[j]] >= info.allowed.deciding.size();
+                if (all) o.status = OccStatus::Violating;
+                o.monitor = "retry_until_ready " + what + " (" + self + "; " + bound_text + ")" + (all ? "" : "; another deciding entry has not rejected: stays PENDING");
                 break;
               }
               case End::Open:
@@ -2955,6 +3018,88 @@ void Replayer::run_monitors() {
         }
       }
     }
+  }
+}
+
+// exit(code, src) (SPEC 1.6 "Horizon monitors"): the monitored actor is the using actor; ACCEPT when it reaches the
+// documented exit with `code`, REJECT when it exits otherwise, other than by a process-terminal step.  On a trace an
+// exit is a call of a terminal operation of the profile (a call without a successor for its caller) by that actor
+// after the occurrence's decision; the code is the value of the operation's one parameter that is not `out` (an
+// operation with another number of such parameters gives no code: the monitor stays OPEN for it).  A
+// process-terminal step makes no ACCEPT and no REJECT.  For an occurrence of the default scope, nothing at or after
+// the TEARDOWN point decides it (SPEC 1.6 "Teardown decides no default-scope occurrence").  A recorded exit whose code
+// the record does not carry, or a reported loss between the decision and the exit, leaves the occurrence UNDETERMINED
+// (possible PENDING, TOLERATED and, for the only deciding entry, VIOLATING), reason explanation_ambiguous (and loss).
+// A trace that ends first leaves it PENDING (OPEN never counts as ACCEPT).  Only PENDING occurrences are monitored.
+void Replayer::run_exit_monitor(size_t si, std::vector<size_t>* rejects) {
+  const RspecInfo& info = rspec_info_[si];
+  const phi::AllowedEntry* ex = nullptr;
+  for (const phi::AllowedEntry* e : info.allowed.deciding)
+    if (e->kind == phi::AllowedKind::Exit) ex = e;
+  if (ex == nullptr) return;
+  const phi::RspecDecl& rs = p_.rspecs[si];
+  const bool sole = info.allowed.deciding.size() == 1;
+  const int32_t ci = p_.find_const(ex->exit_code);
+  if (ci < 0 || p_.consts[static_cast<size_t>(ci)].value != phi::ConstDecl::Value::Int) {
+    finding(kNoEvent, "rspec " + rs.name + ": the exit monitor is not run (the code " + ex->exit_code + " is not an integer constant of the profile); its not-ready occurrences stay PENDING");
+    return;
+  }
+  const uint32_t code = u32(p_.consts[static_cast<size_t>(ci)].ival);
+  const std::string code_text = "code " + ex->exit_code + " = " + std::to_string(p_.consts[static_cast<size_t>(ci)].ival);
+  for (size_t oi = 0; oi < r_.occurrences.size(); ++oi) {
+    Occurrence& o = r_.occurrences[oi];
+    if (o.rspec != rs.name || o.status != OccStatus::Pending) continue;
+    const uint64_t from = o.decision;
+    bool decided = false;
+    for (uint64_t e = from + 1; e < t_.events.size() && !decided; ++e) {
+      const TraceEvent& ev = t_.events[static_cast<size_t>(e)];
+      if (r_.terminated && e > r_.terminal_event) break;
+      if (o.in_scope && r_.teardown_started && e >= r_.teardown_event) {
+        o.monitor = "exit OPEN: the teardown begins at #" + std::to_string(r_.teardown_event) + " before the actor exits; teardown decides no default-scope occurrence (" + code_text + ")";
+        decided = true;
+        break;
+      }
+      if (ev.actor != o.actor || ev.phase != Phase::Call) continue;
+      const int32_t top_i = p_.find_op(ev.site);
+      if (top_i < 0 || !p_.ops[static_cast<size_t>(top_i)].terminal.present) continue;
+      const OpDecl& top = p_.ops[static_cast<size_t>(top_i)];
+      decided = true;
+      if (top.terminal.process_terminal) {
+        o.monitor = "exit: the process-terminal step " + top.name + " at #" + std::to_string(e) + " makes no ACCEPT and no REJECT (" + code_text + ")";
+        break;
+      }
+      std::vector<const phi::OpParam*> in;
+      for (const phi::OpParam& prm : top.params)
+        if (prm.role != "out") in.push_back(&prm);
+      if (in.size() != 1) {
+        o.monitor = "exit OPEN: the terminal operation " + top.name + " at #" + std::to_string(e) + " has " + std::to_string(in.size()) + " parameters that are not out, so it carries no single code (" + code_text + ")";
+        break;
+      }
+      const auto v = ev.values.find("arg." + in.front()->name);
+      const bool loss = real_ && overlaps_loss(from, e);
+      if (v == ev.values.end() || loss) {
+        o.possible = {OccStatus::Pending, OccStatus::Tolerated};
+        if (sole) o.possible.push_back(OccStatus::Violating);
+        o.status = OccStatus::Undetermined;
+        o.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+        if (loss) o.reasons |= KZ_WITHHOLD_LOSS;
+        o.monitor = std::string("exit not decidable: ") + (loss ? "a reported loss overlaps the events from #" + std::to_string(from) + " to the exit #" + std::to_string(e)
+                                                                 : "the exit " + top.name + " at #" + std::to_string(e) + " carries no " + in.front()->name) +
+                    " (" + code_text + ")";
+        break;
+      }
+      if (u32(v->second) == code) {
+        o.status = OccStatus::Tolerated;
+        o.accepted = true;
+        o.monitor = "exit ACCEPT at #" + std::to_string(e) + ": " + top.name + "(" + in.front()->name + " = " + hex_or_dec(v->second) + ") is the documented exit (" + code_text + ")";
+      } else {
+        const bool all = ++(*rejects)[oi] >= info.allowed.deciding.size();
+        if (all) o.status = OccStatus::Violating;
+        o.monitor = "exit REJECT at #" + std::to_string(e) + ": " + top.name + "(" + in.front()->name + " = " + hex_or_dec(v->second) + ") is another exit (" + code_text + ")" +
+                    (all ? "" : "; another deciding entry has not rejected: stays PENDING");
+      }
+    }
+    if (!decided) o.monitor = "exit OPEN: the trace ends before the actor reaches an exit (" + code_text + ")";
   }
 }
 
@@ -3081,7 +3226,137 @@ void Replayer::observation_lists(Occurrence* o) {
 
 // ---- edges that pair events by a value --------------------------------------------------------
 
+// ---- reads_from rules (SPEC 3.16 row RF, 3.17 "Outcome-implied reads-from") ---------------------------
+//
+// A use whose result is the rule's ready outcome read, at the linearization point of the rule's conjunct, the
+// publication of the same resource and generation: an edge from the publication's point to that linearization
+// point (to the call where the point was not passed).  The publication is an applied lifecycle effect on one
+// resource; the resource of the use is the resource of the conjunct's `state(R)` of the publication's kind, read
+// with the call's arguments; both must be fixed.  The generation: with `match`, the out values of both calls must
+// be recorded and equal, and exactly one publication may carry the value; without it, the resource must have
+// exactly one publication in the record and no write of the whole kind after it before the use.  Another actor's
+// publication only (the actor's own is program order), merged before the use (an edge never goes back).
+// Timestamps are not used (SPEC 3.17).
+void Replayer::note_rf_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ResId& id) {
+  for (size_t ri = 0; ri < p_.rules.size(); ++ri) {
+    const HbRuleDecl& rule = p_.rules[ri];
+    if (rule.tmpl != RuleTemplate::ReadsFrom || rule.pub_op != op.name || rule.pub_effect != eff.label) continue;
+    RfPub pb;
+    pb.rule = ri;
+    pb.res = id;
+    pb.event = ev.id;
+    pb.actor = ev.actor;
+    const auto st = frames_.find(ev.actor);
+    if (st != frames_.end())
+      for (size_t k = st->second.size(); k > 0; --k)
+        if (p_.ops[st->second[k - 1].op].name == op.name) {
+          pb.call = st->second[k - 1].call;
+          break;
+        }
+    rf_pubs_.push_back(std::move(pb));
+  }
+}
+
+void Replayer::note_rf_use(const OpDecl& op, const Frame& f, const TraceEvent& ev) {
+  for (size_t ri = 0; ri < p_.rules.size(); ++ri) {
+    const HbRuleDecl& rule = p_.rules[ri];
+    if (rule.tmpl != RuleTemplate::ReadsFrom) continue;
+    // the out value of a publishing call reaches its publications here
+    if (rule.pub_op == op.name && !rule.match.empty()) {
+      const auto v = ev.values.find("out." + rule.match);
+      for (RfPub& pb : rf_pubs_)
+        if (pb.rule == ri && pb.actor == ev.actor && pb.call == f.call && v != ev.values.end()) {
+          pb.has_value = true;
+          pb.value = v->second;
+        }
+    }
+    if (rule.use_op != op.name || !ev.has_result) continue;
+    const int32_t ci = p_.find_const(rule.use_outcome);
+    if (ci < 0 || u32(p_.consts[static_cast<size_t>(ci)].ival) != u32(ev.result)) continue;
+    const int32_t pi = p_.find_op(rule.pub_op);
+    const EffectDecl* eff = nullptr;
+    if (pi >= 0)
+      for (const EffectDecl& e : p_.ops[static_cast<size_t>(pi)].effects)
+        if (e.label == rule.pub_effect) eff = &e;
+    size_t cidx = op.conjuncts.size();
+    for (size_t k = 0; k < op.conjuncts.size(); ++k)
+      if (op.conjuncts[k].label == rule.use_conjunct) cidx = k;
+    if (eff == nullptr || !eff->res || cidx == op.conjuncts.size()) continue;
+    const phi::ConjunctDecl& c = op.conjuncts[cidx];
+    const Expr* re = find_state_resource(*c.expr, eff->res->sort.kind_index);
+    if (re == nullptr) continue;
+    TraceEvent probe;  // the arguments are those of the call
+    probe.id = ev.id;
+    probe.actor = ev.actor;
+    probe.site = op.name;
+    RfUse u;
+    u.rule = ri;
+    u.actor = ev.actor;
+    u.ret = ev.id;
+    if (real_) {
+      const RealEval r = evaluate_real(*re, op, &c.lp, probe, &f.args);
+      std::vector<int64_t> key;
+      if (!exact_key(r.v, &key)) continue;
+      u.res = ResId{r.v.kind, key};
+    } else {
+      CVal r;
+      if (!evaluate(*re, op, &c.lp, probe, &f.args, &r, true) || !r.defined) continue;
+      u.res = ResId{r.kind, r.key};
+    }
+    u.lp = cidx < f.conj.size() && f.conj[cidx].source == LpSource::Point ? f.conj[cidx].event : f.call;
+    const auto v = rule.match.empty() ? ev.values.end() : ev.values.find("out." + rule.match);
+    if (v != ev.values.end()) {
+      u.has_value = true;
+      u.value = v->second;
+    }
+    rf_uses_.push_back(std::move(u));
+  }
+}
+
+void Replayer::reads_from_edges() {
+  if (!o_.reads_from_edges) return;
+  for (const RfUse& u : rf_uses_) {
+    const HbRuleDecl& rule = p_.rules[u.rule];
+    if (!rule_applies(u.rule)) continue;
+    const std::string what = "rule " + rule.name + ": the use #" + std::to_string(u.ret);
+    std::vector<const RfPub*> cand;
+    if (!rule.match.empty()) {
+      if (!u.has_value) {
+        finding(u.ret, what + " carries no out." + rule.match + ", so the publication it read from is not named");
+        continue;
+      }
+      for (const RfPub& pb : rf_pubs_)
+        if (pb.rule == u.rule && pb.res == u.res && pb.has_value && pb.value == u.value) cand.push_back(&pb);
+    } else {
+      for (const RfPub& pb : rf_pubs_)
+        if (pb.rule == u.rule && pb.res == u.res) cand.push_back(&pb);
+      if (cand.size() == 1) {
+        const auto wide = log_.kind_wide.find(u.res.kind);
+        if (wide != log_.kind_wide.end())
+          for (uint64_t w : wide->second)
+            if (w > cand.front()->event && w < u.lp) {
+              finding(u.ret, what + ": a write of the whole kind (#" + std::to_string(w) + ") lies between the publication and the read, so the generation is not established");
+              cand.clear();
+              break;
+            }
+      }
+    }
+    if (cand.size() != 1) {
+      if (cand.size() > 1) finding(u.ret, what + " matches " + std::to_string(cand.size()) + " publications: the one it read from is not established");
+      continue;
+    }
+    const RfPub& pb = *cand.front();
+    if (pb.actor == u.actor) continue;  // program order
+    if (pb.event >= u.lp) {
+      finding(u.ret, what + " matches the publication #" + std::to_string(pb.event) + ", which the record merges after the read: no edge");
+      continue;
+    }
+    add_edge(pb.event, u.lp, rule);
+  }
+}
+
 void Replayer::final_edges() {
+  reads_from_edges();
   std::vector<SpawnRec> spawns;
   for (size_t ri = 0; ri < p_.rules.size(); ++ri) {
     const HbRuleDecl& rule = p_.rules[ri];
@@ -3132,6 +3407,8 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
     return s;
   }
   prior.writes = first.writes();
+  if (out->shutdown_requested) prior.request = out->shutdown_event;
+  if (out->teardown_started) prior.teardown = out->teardown_event;
   for (int pass = 0; pass < 4; ++pass) {
     Result next;
     Replayer again(p, trace, options, &next, &prior);

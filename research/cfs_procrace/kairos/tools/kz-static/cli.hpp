@@ -35,7 +35,7 @@ struct Args {
 bool parse_args(int argc, char** argv, int first, const std::set<std::string>& valued, const std::set<std::string>& boolean, Args* out, std::string* error);
 
 // Reads the profile directory or file; prints the diagnostics to stderr.  False on errors.
-bool load_profile(const std::string& path, kz::phi::Profile* profile);
+bool load_profile(const std::vector<std::string>& paths, kz::phi::Profile* profile);  // --profile, repeatable
 
 bool read_text_file(const std::string& path, std::string* out);
 

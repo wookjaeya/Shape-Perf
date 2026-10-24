@@ -1,5 +1,6 @@
 # 30_hb.kzp -- happens-before rules of profile c1-bp-b051eb0 (the two structural rules the C1 observation
-# uses; the core serialization rules of cfs-v7.0.1 are not restated for these bundles).
+# uses and, since 2026-10-24, the outcome-implied reads-from of a successful lookup; the core serialization rules
+# of cfs-v7.0.1 are not restated for these bundles).
 phi 1;
 
 hb R1 {
@@ -21,4 +22,20 @@ hb R2-P-TASK {
     entry OS_TaskEntryPoint;
   }
   prov osal_task_create_def, osal_task_entry_def, osal_pthread_entry;
+}
+
+# Outcome-implied reads-from (SPEC 3.16 row RF, 3.17): a successful lookup of a name read from the creation of that
+# name.  Matched by the name (the resource) and by the id: the out id of the lookup equals the out id the creation
+# returned (r_reads_from_lookup).  Stratum O: it holds in the observed execution; it orders no failed lookup.
+hb RF {
+  title "outcome-implied reads-from: a successful lookup reads from the creation of the same name and id";
+  stratum O;
+  robust obs_soft;
+  template reads_from {
+    use OS_CountSemGetIdByName.exists;
+    outcome OS_SUCCESS;
+    publish OS_CountSemCreate.publish;
+    match sem_id;
+  }
+  prov osal_find_by_name, osal_find_next_match, osal_finalize_new, osal_find_next_free, osal_countsem_finalize, r_reads_from_lookup;
 }

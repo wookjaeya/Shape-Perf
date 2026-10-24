@@ -194,7 +194,7 @@ void test_exhaustion() {
   const Profile two = load(std::string(kHead) + rspec(std::string(kRetry) + " exit BAD_PTR \"user text\" prov adm_call;"));
   const Run r2 = replay(two, kReal + attempt("C", "S0", "-17") + attempt("C", "S0", "-17") + attempt("C", "S0", "-17"));
   for (size_t i = 0; i < 3; ++i) expect(r2, i, OccStatus::Pending, "INCONCLUSIVE(horizon-open)", "two entries");
-  KZ_CHECK(has(r2.occ(0).monitor, "another deciding entry is not monitored"));
+  KZ_CHECK(has(r2.occ(0).monitor, "another deciding entry has not rejected"));
 }
 
 void test_record_ends_mid_retry() {

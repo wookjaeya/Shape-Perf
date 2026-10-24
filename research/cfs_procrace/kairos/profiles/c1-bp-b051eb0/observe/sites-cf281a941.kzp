@@ -13,6 +13,9 @@
 # calls, refusal of a branch-joined return site).  The tx instance only (PI decision P7 is open): rx runs
 # from other files and is not probed.
 #
+# 2026-10-24 (smoke3): the start state, the delete and the shutdown scope of the counting semaphores (sites below,
+# the Phi effects OS_ObjectIdInit.clear_table, OS_CountSemAPI_Init.clear_names, OS_CountSemDelete.retire,
+# CFE_PSP_Restart.request_shutdown, OS_Application_Run.teardown); the PSP file is read from psp/ of the view.
 # 2026-10-24 (smoke2): the semaphore name and the ids are read from memory by the kernel's probe-event fetch
 # arguments (slots +<offset>(<register>), `string`; kz observe --tracefs), and the points inside OSAL that
 # these builds reach by a tail jump (the search of the lookup) or through an inlined helper are entry-reached
@@ -94,6 +97,30 @@ site bp.flow_init.ret   ret   func=BP_FlowInit bin=bp.so prov=bp_flowinit_calls_
 # each callee (checked by kz anchor).
 site bp_existence_probe_call point func=BP_FlowInit after-call=OS_CountSemGetIdByName bin=bp.so prov=bp_flow_throttle_init s0=rax:u32:status
 site bp_create_call point func=BP_FlowInit after-call=OS_CountSemCreate bin=bp.so prov=bp_flow_throttle_init s0=rax:u32:status
+
+# ---- core-tx: the start state, the end of a lifetime, the shutdown scope (2026-10-24, smoke3) -----------------
+# The two clearings of the object table in OS_API_Init (Phi effects OS_ObjectIdInit.clear_table and
+# OS_CountSemAPI_Init.clear_names): both memsets are inline (rep stos) in these builds, so each point is the return
+# of its call in OS_API_Init (one call of each; the memset is done there), on the main thread before any task exists.
+prov osal_api_init_call tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-common.c" lines=116-138 cite="OS_API_Init calls OS_ObjectIdInit once, before any object exists (a repeated call returns at once)" sha256=641cc34508a7be9b7fe180ed3dd4a113dc3f9eaed4c0d86716c4d8cd4e40e123
+prov osal_api_init_countsem tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-common.c" lines=161-163 cite="OS_API_Init calls OS_CountSemAPI_Init for the counting semaphore type" sha256=94804c9235d0cae3690daf7e8ebed06ed9937c89aad0332ae56b4c887677bb85
+prov osal_countsem_delete_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-countsem.c" lines=118-133 cite="OS_CountSemDelete(osal_id_t sem_id): GetById(EXCLUSIVE), OS_CountSemDelete_Impl, OS_ObjectIdFinalizeDelete, whose status it returns" sha256=882276e3fd423bbc18af06cb615a9b8fa89c170d2eab65b33bfc7efade9ed72d
+prov osal_finalize_delete tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=871-896 cite="OS_ObjectIdFinalizeDelete(operation_status, token) returns operation_status; on success the record's id becomes undefined" sha256=8c2defca89cf4076507f898cf90e8db7d39cb787bc0dbb7bbabcbbe08e784304
+prov psp_restart_req tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_support.c" lines=93-94 cite="CFE_PSP_Restart: ShutdownReq = true, then pthread_kill of the main thread" sha256=0a3efeeb521365b2759be8bffda136387382f437963921536d6a1259258f433a
+prov psp_teardown tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_start.c" lines=467-487 cite="OS_Application_Run: after ShutdownReq, OS_TaskDelay(100) and then OS_DeleteAllObjects" sha256=781f668b32d36b44b52889e23b4650932728074dbcfa28dfd8c53e36a534087a
+site OS_ObjectIdInit.clear_table point func=OS_API_Init after-call=OS_ObjectIdInit prov=osal_api_init_call s0=rax:u32:status
+site OS_CountSemAPI_Init.clear_names point func=OS_API_Init after-call=OS_CountSemAPI_Init prov=osal_api_init_countsem s0=rax:u32:status
+# The delete of a counting semaphore (the Phi effect OS_CountSemDelete.retire): the return of the call of
+# OS_ObjectIdFinalizeDelete in OS_CountSemDelete, with the status it returns (the operation_status it was given).
+# The name of the deleted semaphore is not read (the argument is the id).
+site osal.countsem_delete.entry entry func=OS_CountSemDelete prov=osal_countsem_delete_def s0=rdi:u32:sem_id s3=stack+0:u64:return_address
+site osal.countsem_delete.ret   ret   func=OS_CountSemDelete prov=osal_countsem_delete_def s0=rax:u32:status s3=ip:u64:return_address
+site OS_CountSemDelete.retire point func=OS_CountSemDelete after-call=OS_ObjectIdFinalizeDelete prov=osal_finalize_delete s0=rax:u32:operation_status
+# The shutdown request (Phi effect CFE_PSP_Restart.request_shutdown): right after the signal that follows the store
+# of ShutdownReq.  The teardown (Phi effect OS_Application_Run.teardown, the call of OS_DeleteAllObjects): the return
+# of OS_TaskDelay, which is the address of that call (one call of OS_TaskDelay in OS_Application_Run).
+site CFE_PSP_Restart.request_shutdown point func=CFE_PSP_Restart after-call=pthread_kill prov=psp_restart_req s0=rax:u32:status
+site OS_Application_Run.teardown point func=OS_Application_Run after-call=OS_TaskDelay prov=psp_teardown s0=rax:u32:status
 
 # ---- core-tx: creation-side evidence of app_owner (as cfs-v7.0.1 sites 21-25, re-anchored) -------------
 site es.start_task.entry entry func=CFE_ES_StartAppTask decoder=owner-request prov=es_startapptask_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r8:u32:owner_id s3=stack+0:u64:return_address

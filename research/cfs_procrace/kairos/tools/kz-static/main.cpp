@@ -1,7 +1,7 @@
 // kz-static -- the static analysis front end.
 //
-//   kz-static basis   --profile P --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F] -o OUT [--text]
-//   kz-static extract --profile P (--basis B | --source S... [-- <compile flags>]) -o OUT [options] [--text]
+//   kz-static basis   --profile P [--profile P2 ...] --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F] -o OUT [--text]
+//   kz-static extract --profile P [--profile P2 ...] (--basis B | --source S... [-- <compile flags>]) -o OUT [options] [--text]
 //   kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]
 //   kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]
 //   kz-static --identity
@@ -47,11 +47,13 @@ bool parse_args(int argc, char** argv, int first, const std::set<std::string>& v
   return true;
 }
 
-bool load_profile(const std::string& path, kz::phi::Profile* profile) {
+bool load_profile(const std::vector<std::string>& paths, kz::phi::Profile* profile) {
   std::string diag;
-  const kz::Status s = kzs::load_profile_dir(path, profile, &diag);
+  const kz::Status s = kzs::load_profile_paths(paths, profile, &diag);
   if (!diag.empty()) std::fputs(diag.c_str(), stderr);
   if (!s.ok()) {
+    std::string path;
+    for (const std::string& x : paths) path += (path.empty() ? "" : " ") + x;
     std::fprintf(stderr, "kz-static: profile %s: %s\n", path.c_str(), s.describe().c_str());
     return false;
   }

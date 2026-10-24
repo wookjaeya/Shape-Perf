@@ -65,7 +65,8 @@ occurrence K-REG.osal-countsem-lookup actor X ordinal 1 key [0x961e9586b17971e6]
   conjunct exists point #21 fails
   result 0xffffffef outcome agrees
 
-findings 0
+findings 1
+finding #17: rule RF: the use #17 carries no out.sem_id, so the publication it read from is not named
 
 role facts 3
 role_fact cf-dependent-lookup purpose dependent_use actor CF OS_CountSemGetIdByName call #1 return #3 result -17 site #4

@@ -91,6 +91,8 @@ struct Expr {
 };
 
 ExprPtr clone_expr(const Expr& e);
+// The first resource term R of `state(R)` in `e` (depth first) whose kind is `kind_index`, or null (a resolved expression).
+const Expr* find_state_resource(const Expr& e, int32_t kind_index);
 ExprPtr make_bool(bool v);
 ExprPtr make_int(int64_t v);
 ExprPtr make_name(std::string path);
@@ -224,6 +226,12 @@ struct LocDecl : EntryBase {
 struct BindDecl : EntryBase {  // name = "Struct.field"
   std::string struct_name, field;
   ExprPtr target;  // state(kind(v)) | tag(kind(v), T) | id(kind(v)) | value(loc)
+  // Key separation of a field the records of several kinds share (`via "F", ...`; 2026-10-24): a write of the
+  // field changes the bound component only inside an execution of one of these functions (each the bound symbol of
+  // an operation of the profile, whose effects stand for the writes it makes); every other execution of a writer of
+  // the field addresses records of another key (SPEC 4.2 step 8, NO_KEY).  The claim is the profile's, with its
+  // citations; the static-closure adapter reads it (kz/trace/static_closure.hpp).  Empty: no separation declared.
+  std::vector<std::string> via;
 };
 
 struct SiteDecl : EntryBase {
@@ -344,7 +352,7 @@ struct InitDecl : EntryBase {
 
 enum class Stratum : uint8_t { S, O, C };
 enum class Robust : uint8_t { Unconditional, ObsFatal, ObsSoft, ScheduleChosen, Assumed };
-enum class RuleTemplate : uint8_t { ProgramOrder, Spawn, Phase, Observe };
+enum class RuleTemplate : uint8_t { ProgramOrder, Spawn, Phase, Observe, ReadsFrom };
 
 struct HbRuleDecl : EntryBase {
   std::string title;
@@ -365,6 +373,11 @@ struct HbRuleDecl : EntryBase {
   ExprPtr predicate;          // optional explicit predicate (tests, tools)
   std::string else_terminal;  // a function whose call ends the other branch
   std::vector<std::string> watch_kinds;  // the kinds whose lifecycle effects are the writers
+  // ReadsFrom (SPEC 3.16 row RF, 3.17 "Outcome-implied reads-from"; 2026-10-24): a use of `use_op` whose result is
+  // `use_outcome` read, at the linearization point of its conjunct `use_conjunct`, the publication made by the effect
+  // `pub_effect` of `pub_op` on the same resource and generation; with `match`, also the value of the out
+  // parameter `match` of both operations is the same (the record carries both).
+  std::string use_op, use_conjunct, use_outcome, pub_op, pub_effect, match;
 };
 
 // ---- readiness specifications -------------------------------------------------------------

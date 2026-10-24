@@ -743,6 +743,14 @@ struct Parser {
     P_TRY(expect_str(&d.field, "the field name as a string"));
     P_TRY(expect_kw("as", "in a binding"));
     P_TRY(parse_expr(&d.target));
+    if (accept_kw("via")) {
+      while (true) {
+        std::string f;
+        P_TRY(expect_str(&f, "a function name as a string"));
+        d.via.push_back(std::move(f));
+        if (!accept(Tok::Comma)) break;
+      }
+    }
     while (is_common_clause()) P_TRY(parse_common_clause(&d));
     P_TRY(expect_semi("after the binding"));
     d.name = d.struct_name + "." + d.field;
@@ -1046,12 +1054,13 @@ struct Parser {
   bool parse_template(HbRuleDecl* d) {
     std::string t;
     const SrcLoc tloc = cur().loc;
-    P_TRY(expect_ident(&t, "program_order, spawn, phase or observe"));
+    P_TRY(expect_ident(&t, "program_order, spawn, phase, observe or reads_from"));
     if (t == "program_order") d->tmpl = RuleTemplate::ProgramOrder;
     else if (t == "spawn") d->tmpl = RuleTemplate::Spawn;
     else if (t == "phase") d->tmpl = RuleTemplate::Phase;
     else if (t == "observe") d->tmpl = RuleTemplate::Observe;
-    else return fail_at(tloc, "unknown template '" + t + "' (expected program_order, spawn, phase or observe)");
+    else if (t == "reads_from") d->tmpl = RuleTemplate::ReadsFrom;
+    else return fail_at(tloc, "unknown template '" + t + "' (expected program_order, spawn, phase, observe or reads_from)");
     P_TRY(expect(Tok::LBrace, "after the template name"));
     while (!accept(Tok::RBrace)) {
       std::string kw;
@@ -1089,6 +1098,18 @@ struct Parser {
         P_TRY(expect_str(&d->else_terminal, "the terminal function as a string"));
       } else if (d->tmpl == RuleTemplate::Observe && kw == "watch") {
         P_TRY(parse_name_list(&d->watch_kinds, "a kind name"));
+      } else if (d->tmpl == RuleTemplate::ReadsFrom && (kw == "use" || kw == "publish")) {
+        // `use OP.CONJUNCT;` / `publish OP.EFFECT;` (one identifier: a name may contain '.', the label follows the last)
+        std::string name;
+        P_TRY(expect_ident(&name, kw == "use" ? "OP.CONJUNCT, the using operation and the label of its conjunct" : "OP.EFFECT, the publishing operation and the label of its effect"));
+        const size_t dot = name.rfind('.');
+        if (dot == std::string::npos || dot == 0 || dot + 1 == name.size()) return fail_at(kloc, "expected OP.LABEL after '" + kw + "', found '" + name + "'");
+        (kw == "use" ? d->use_op : d->pub_op) = name.substr(0, dot);
+        (kw == "use" ? d->use_conjunct : d->pub_effect) = name.substr(dot + 1);
+      } else if (d->tmpl == RuleTemplate::ReadsFrom && kw == "outcome") {
+        P_TRY(expect_ident(&d->use_outcome, "a result constant of the use"));
+      } else if (d->tmpl == RuleTemplate::ReadsFrom && kw == "match") {
+        P_TRY(expect_ident(&d->match, "an out parameter of both operations"));
       } else {
         return fail_at(kloc, "unknown item '" + kw + "' in template " + t);
       }

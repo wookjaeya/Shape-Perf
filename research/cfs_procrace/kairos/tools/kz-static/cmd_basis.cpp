@@ -25,7 +25,7 @@ int cmd_basis(int argc, char** argv) {
       return 2;
     }
   kz::phi::Profile profile;
-  if (!load_profile(args.one("--profile"), &profile)) return 1;
+  if (!load_profile(args.many("--profile"), &profile)) return 1;
 
   kzs::BasisInputs in;
   in.compile_db = args.one("--compile-db");

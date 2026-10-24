@@ -3,3 +3,4 @@ phi 1;
 
 source cfe root "cfe" rev "fef4a0dacabf7e59f054c8aa2c9160a2f3d8db83";
 source osal root "osal" rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23";
+source psp root "psp" rev "bd4a2ea239cff013b24bf93a5e8c451dbcb7cf97";

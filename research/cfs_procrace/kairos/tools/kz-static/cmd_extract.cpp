@@ -106,7 +106,7 @@ int cmd_extract(int argc, char** argv) {
     return 2;
   }
   kz::phi::Profile profile;
-  if (!load_profile(args.one("--profile"), &profile)) return 1;
+  if (!load_profile(args.many("--profile"), &profile)) return 1;
 
   kzs::ExtractSpec spec;
   kzs::spec_from_profile(profile, &spec);

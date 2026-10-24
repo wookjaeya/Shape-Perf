@@ -36,16 +36,32 @@
 //                declared_trusted guard (with its obligations), a disagreement otherwise.
 // A status is final once decided (L-STATUS).  The replay is one pass over the trace; the edges that
 // pair two events by a value (task creation) are matched when the pass is over.
+//
+// Two kinds of trace, chosen explicitly by the trace (`record real`) or by the caller, never guessed:
+//   Model  a complete model trace (synthetic traces, the golden files, INIT): a resource the trace never
+//          set is in the initial state of its kind and a location holds its INIT value or 0
+//          (docs/phi_reference.md section 6, concretization rule (2)).  Everything below is unchanged
+//          for it.
+//   Real   a real record (SPEC 4.8 "Explanation set", "Replay convention for real records", OB-05,
+//          ADR-055; docs/phi_reference.md section 7.6).  The conditions are evaluated in the abstract
+//          domain over every explanation the record allows: a resource or location the record does not
+//          fix is unknown (no initial-state default) unless its start state is evidenced, and recorded
+//          writes fix a kind or location only while its writers and aliases are covered, its start state
+//          and lifetime are known, every writer's point was observed and no loss was reported.  A result
+//          the explanations disagree on is withheld with its reasons; a decision the trace does not
+//          reach stays OPEN; a record that contradicts the model is an analysis input error.
 #pragma once
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
 #include "kz/core/eval.hpp"
 #include "kz/core/phi.hpp"
 #include "kz/core/status.hpp"
+#include "kz/schema/kz_schema.h"
 
 namespace kz {
 namespace eval {
@@ -64,10 +80,40 @@ struct TraceEvent {
   std::map<std::string, std::string> texts;    // "out.X", "cell": names of locations
 };
 
+constexpr uint64_t kNoEvent = ~static_cast<uint64_t>(0);
+
+enum class RecordKind : uint8_t { Model, Real };
+const char* record_kind_text(RecordKind k);
+
+// What a real record establishes for one kind or one location (SPEC 4.8 "Recorded writes alone",
+// ADR-055).  Nothing is established unless the record says so.
+struct Adequacy {
+  bool start_known = false;      // the start state is fixed (INIT at the process start, or a consistent capture)
+  bool writers_covered = false;  // every writer is in the plan (SPEC 4.7, 4.1 "Closure per case")
+  bool aliases_covered = false;  // every alias and external effect is in the plan
+  bool lifetime_known = false;   // the lifetime and identity of every instance is known (kinds; n/a for a location)
+};
+
+// A loss reported in a real record: events may be missing from position `begin` (the first event that
+// may follow a lost one) up to `end` (exclusive; kNoEvent: up to the end of the record).
+struct LossInterval {
+  uint64_t begin = 0;
+  uint64_t end = kNoEvent;
+};
+
 struct Trace {
   std::vector<TraceEvent> events;
   std::map<std::string, int64_t> ref_consts;              // value of a `ref eval` constant, by name
   std::map<std::string, std::vector<int64_t>> owners;     // actor -> key of its owner record
+  RecordKind record = RecordKind::Model;
+  // Real records only (all empty for a model trace).
+  uint8_t start_evidence = KZ_START_EVIDENCE_NONE;        // what the record's start is (informational)
+  std::map<std::string, Adequacy> kind_adequacy;          // by kind name; absent: nothing established
+  std::map<std::string, Adequacy> loc_adequacy;           // by location name
+  std::set<std::string> observed_points;                  // points attached and active over the whole record
+  std::map<std::string, uint8_t> owner_levels;            // actor -> KZ_OWNER_LEVEL; absent: undetermined
+  std::map<std::string, std::string> creators;            // actor -> the actor that created it (creating executor)
+  std::vector<LossInterval> losses;
   uint64_t add(TraceEvent e) {
     e.id = events.size();
     events.push_back(std::move(e));
@@ -101,18 +147,29 @@ struct HbEdge {
 };
 
 // Tolerated is part of the vocabulary of SPEC 1.6; the replay never produces it (no monitor).
-enum class OccStatus : uint8_t { Ready, NotEvaluated, Violating, NotReadyUnjudged, Tolerated, Pending, Open };
+// Undetermined is not a status: a real record whose explanations allow more than one status (the
+// list is Occurrence::possible).  A model trace never produces it.
+enum class OccStatus : uint8_t { Ready, NotEvaluated, Violating, NotReadyUnjudged, Tolerated, Pending, Open, Undetermined };
 const char* occ_status_text(OccStatus s);
 
-enum class LpSource : uint8_t { Capture, Call, Point, NotPassed };
+// Interval and Outcome occur in real records only: a conjunct whose linearization point the record
+// does not observe is read over the whole call (every state between the call and the return), and a
+// conjunct can be fixed by the returned code under O4 (the outcome list of the operation).
+enum class LpSource : uint8_t { Capture, Call, Point, NotPassed, Interval, Outcome };
 const char* lp_source_text(LpSource s);
 
 struct ConjunctResult {
   std::string label;
   LpSource source = LpSource::NotPassed;
   uint64_t event = 0;     // the event whose state the conjunct was read at
-  bool evaluated = false;
+  bool evaluated = false; // a value is known (real records: in every explanation)
   bool holds = false;
+  // Real records only.
+  bool unknown = false;          // reached, but the explanations of the record disagree on the value
+  bool passage_unknown = false;  // whether the linearization point was passed is not observed
+  bool contradicted = false;     // the record contradicts the model here (an empty explanation set)
+  uint32_t reasons = 0;          // set KZ_WITHHOLD: why the value or the passage is unknown
+  uint32_t adequacy = 0;         // set KZ_ADEQ: what the record establishes for what the conjunct read
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
@@ -138,9 +195,24 @@ struct Occurrence {
   bool has_result = false;
   int64_t result = 0;
   OutcomeCheck outcome = OutcomeCheck::NotChecked;
+  // The summary view (SPEC 1.10, ADR-054, D2), computed last for every occurrence.  Printed only for a
+  // real record, so that the text of a model trace is unchanged.
+  kz_summary summary{};
+  // Real records only.
+  std::vector<OccStatus> possible;  // Undetermined: the statuses the explanations allow
+  uint32_t reasons = 0;             // set KZ_WITHHOLD
+  uint32_t adequacy = 0;            // set KZ_ADEQ: what the record establishes for everything the conditions read
+  bool input_error = false;         // the explanation set is empty: never a violation, never no violation
+  bool outcome_narrowed = false;    // a conjunct was fixed by the returned code (O4)
+  // The identities of the executing actor (SPEC 1.2; schema kz_identity), as far as the record states them.
+  std::string creator;              // the creating executor, empty if the record does not state it
+  uint8_t owner_level = KZ_OWNER_LEVEL_UNDETERMINED;
+  bool has_owner_key = false;
+  std::vector<int64_t> owner_key;
+  std::string passed_role;          // the operation's `stamp` parameter, if any
+  bool has_passed = false;
+  int64_t passed = 0;
 };
-
-constexpr uint64_t kNoEvent = ~static_cast<uint64_t>(0);
 
 struct ReplayFinding {
   uint64_t event = kNoEvent;  // the event the finding is about, or kNoEvent
@@ -168,7 +240,19 @@ struct Options {
   std::map<std::string, std::string> versions;
 };
 
+// What the real-record replay established for one kind or location (printed with the result).
+struct Knowledge {
+  std::string name;
+  bool is_loc = false;
+  uint32_t reasons = 0;    // set KZ_WITHHOLD: why recorded writes do not fix it (0: they do)
+  uint32_t adequacy = 0;   // set KZ_ADEQ
+  bool contradicted = false;
+};
+
 struct Result {
+  RecordKind record = RecordKind::Model;
+  bool partial = false;                // real records: an input error somewhere (SPEC 1.10)
+  std::vector<Knowledge> knowledge;    // real records: per kind and location, in profile order
   std::vector<HbEdge> edges;
   std::vector<Occurrence> occurrences;
   std::vector<ReplayFinding> findings;
@@ -202,7 +286,18 @@ std::string dump_result(const phi::Profile& p, const Trace& trace, const Result&
 //   <actor> <site> call|ret|pt [name=value ...]
 //       value: an integer (decimal or 0x...) or @NAME, the name of a location (a text);
 //       `result=N` on a ret
+// A real record (docs/phi_reference.md section 7.6) starts with `record real` and may then say:
+//   start_evidence none|init|state-capture|declared
+//   adequacy kind|loc <name> [start=known|unknown] [writers=covered|uncovered] [aliases=covered|uncovered]
+//            [lifetime=known|unknown]
+//   observed <point>                         a point attached and active over the whole record
+//   owner_level <actor> confirmed|inferred|undetermined
+//   creator <actor> <creating actor>
+//   loss begin | loss end                    events may be missing from the next event on, up to the next event
 Status parse_trace_text(const std::string& text, Trace* out);
+
+// The text form of a trace (parse_trace_text reads it back); a real record with its preamble.
+std::string trace_text(const Trace& t);
 
 }  // namespace eval
 }  // namespace kz

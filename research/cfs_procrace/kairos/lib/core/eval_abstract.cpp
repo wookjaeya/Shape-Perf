@@ -89,6 +89,9 @@ bool within_box(const std::vector<int64_t>& key, const std::vector<std::pair<int
   return true;
 }
 
+// Every ordinal of a list of n names (n <= 64).
+uint64_t all_of(size_t n) { return n >= 64 ? ~0ull : ((1ull << n) - 1); }
+
 bool all_singletons(const std::vector<std::pair<int64_t, int64_t>>& box, std::vector<int64_t>* key) {
   key->clear();
   for (const auto& iv : box) {
@@ -270,13 +273,15 @@ AVal AbstractDomain::state_of(const AVal& res) const {
   const phi::KindDecl& k = p_.kinds[static_cast<size_t>(res.kind)];
   const uint64_t init = bit(k.initial_ordinal);
   if (res.must_be_undefined) return mask_val(SortKind::State, init, res.kind);
+  // A resource that is not listed is in the initial state, or in any state of an open kind.
+  const uint64_t unlisted = s_.open_kinds.count(res.kind) != 0 ? all_of(k.states.size()) : init;
   uint64_t m = 0;
   std::vector<int64_t> key;
   if (all_singletons(res.key, &key)) {
     const auto it = s_.res.find(ResId{res.kind, key});
-    m = it != s_.res.end() ? it->second.states : init;
+    m = it != s_.res.end() ? it->second.states : unlisted;
   } else {
-    m = init;  // a resource in the box that is not listed is in the initial state
+    m = unlisted;  // a resource in the box that is not listed
     for (const auto& kv : s_.res)
       if (kv.first.kind == res.kind && within_box(kv.first.key, res.key)) m |= kv.second.states;
   }
@@ -341,6 +346,7 @@ AVal AbstractDomain::value_of(const AVal& loc) const {
     const Sort& h = p_.locs[static_cast<size_t>(li)].holds.resolved;
     const auto it = s_.locs.find(static_cast<int32_t>(li));
     std::pair<int64_t, int64_t> v = it != s_.locs.end() ? it->second : std::pair<int64_t, int64_t>{0, 0};
+    if (it == s_.locs.end() && s_.open_locs) v = {kMin, kMax};  // a real record: any value of its sort (an Id: below)
     if (h.kind == SortKind::Id) {
       v = id_interval(v);  // the concrete value of an Id location is read modulo 2^32
       any_id = true;
@@ -366,11 +372,17 @@ AVal AbstractDomain::tag_of(const AVal& res, int32_t tag) const {
     const auto it = r.tags.find(tag);
     return it != r.tags.end() ? it->second : bit(0);
   };
+  // A resource that is not listed has the first value, or any value in an open kind.
+  uint64_t unlisted = bit(0);
+  if (s_.open_kinds.count(res.kind) != 0) {
+    const phi::KindDecl& k = p_.kinds[static_cast<size_t>(res.kind)];
+    if (tag >= 0 && static_cast<size_t>(tag) < k.tags.size()) unlisted = all_of(k.tags[static_cast<size_t>(tag)].values.size());
+  }
   if (all_singletons(res.key, &key)) {
     const auto it = s_.res.find(ResId{res.kind, key});
-    m = it != s_.res.end() ? tag_mask(it->second) : bit(0);
+    m = it != s_.res.end() ? tag_mask(it->second) : unlisted;
   } else {
-    m = bit(0);
+    m = unlisted;
     for (const auto& kv : s_.res)
       if (kv.first.kind == res.kind && within_box(kv.first.key, res.key)) m |= tag_mask(kv.second);
   }
@@ -385,10 +397,14 @@ AVal AbstractDomain::id_of(const AVal& res) const {
   if (res.must_be_undefined) return range(SortKind::Id, iv.first, iv.second, res.kind);
   std::vector<int64_t> key;
   auto id_range = [&](const AbstractRes& r) { return r.has_id ? id_interval(r.id) : std::pair<int64_t, int64_t>{undef, undef}; };
+  // A resource of an open kind that is not listed may carry any id (only kinds with ids carry one).
+  const bool open = k.ids.present && s_.open_kinds.count(res.kind) != 0;
   if (all_singletons(res.key, &key)) {
     const auto it = s_.res.find(ResId{res.kind, key});
     if (it != s_.res.end()) iv = id_range(it->second);
+    else if (open) iv = {0, kId32Max};
   } else {
+    if (open) iv = {0, kId32Max};
     for (const auto& kv : s_.res)
       if (kv.first.kind == res.kind && within_box(kv.first.key, res.key)) iv = hull(iv, id_range(kv.second));
   }
@@ -402,6 +418,12 @@ AVal AbstractDomain::owner_of(const AVal& actor) const {
   r.kind = p_.context.owner_kind_index;
   const bool maybe_exec = !(actor.hi < s_.exec.first || actor.lo > s_.exec.second);
   const bool sure_exec = actor.lo == actor.hi && s_.exec.first == s_.exec.second && actor.lo == s_.exec.first;
+  if (maybe_exec && s_.owner_any && r.kind >= 0) {
+    // A real record whose owner is undetermined: any record of the owner kind, or undefined.
+    for (size_t i = 0; i < key_width(p_, r.kind); ++i) r.key.push_back({kMin, kMax});
+    r.may_be_undefined = true;
+    return r;
+  }
   if (!maybe_exec || (s_.owners.empty())) {
     r.may_be_undefined = r.must_be_undefined = true;
     return r;

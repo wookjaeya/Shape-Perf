@@ -429,6 +429,30 @@ AbstractState abstract_of(World& w, const ConcreteState& c, Rng& r, bool exact) 
   return a;
 }
 
+// Opens an abstraction the way a real record does (SPEC 4.8 OB-05): some kinds become open (their
+// unlisted resources may be in any state, with any tag and id) and some of their listed resources are
+// dropped, unlisted locations may become unknown, and the owner may become unknown.  Every concrete
+// state the abstraction described is still described, so no evaluation may leave it out.
+void open_up(AbstractState* a, const World& w, Rng& r) {
+  for (size_t ki = 0; ki < w.p.kinds.size(); ++ki) {
+    if (!r.coin(40)) continue;
+    const int32_t kind = static_cast<int32_t>(ki);
+    a->open_kinds.insert(kind);
+    for (auto it = a->res.begin(); it != a->res.end();) {
+      if (it->first.kind == kind && r.coin(50)) it = a->res.erase(it);
+      else ++it;
+    }
+  }
+  if (r.coin(50)) {
+    a->open_locs = true;
+    for (auto it = a->locs.begin(); it != a->locs.end();) {
+      if (r.coin(50)) it = a->locs.erase(it);
+      else ++it;
+    }
+  }
+  if (r.coin(30)) a->owner_any = true;
+}
+
 // Moves an abstraction so that it leaves the concrete state out: the test must notice.
 void break_abstraction(AbstractState* a, const ConcreteState& c) {
   for (size_t i = 0; i < a->args.size(); ++i) a->args[i] = {sat_add(c.args[i], 1), sat_add(c.args[i], 2)};
@@ -439,7 +463,8 @@ struct Totals {
   long evaluations = 0, violations = 0, definite = 0, bool_results = 0, exact_checked = 0, exact_failures = 0, exact_definite = 0;
 };
 
-// Runs `n_expr` expressions against `n_state` states each.  mode 0: exact abstraction, 1: widened, 2: broken.
+// Runs `n_expr` expressions against `n_state` states each.  mode 0: exact abstraction, 1: widened, 2: broken,
+// 3: widened and opened as a real record opens it.
 void run(World& w, uint64_t seed, int n_expr, int n_state, int mode, bool in_range_ids, Totals* t) {
   Rng r(seed);
   ExprGen gen(&r);
@@ -465,6 +490,7 @@ void run(World& w, uint64_t seed, int n_expr, int n_state, int mode, bool in_ran
       ConcreteState c = sg.make();
       AbstractState a = abstract_of(w, c, r, mode == 0);
       if (mode == 2) break_abstraction(&a, c);
+      if (mode == 3) open_up(&a, w, r);
       ConcreteDomain cd(w.p, c);
       AbstractDomain ad(w.p, a);
       const CVal cv = Evaluator<ConcreteDomain>(w.p, cd).eval(*e);
@@ -513,6 +539,13 @@ int main() {
   KZ_CHECK(wide.evaluations >= 70000);
   // the abstraction says something: a good part of the results is true or false, not maybe
   KZ_CHECK(wide.definite * 100 >= wide.evaluations * 15);
+
+  // 2b. abstractions opened as a real record opens them (open kinds, unknown locations, unknown owner)
+  Totals opened;
+  for (uint64_t seed = 11; seed <= 14; ++seed) run(w, seed, 1200, 10, 3, seed % 2 == 0, &opened);
+  std::printf("opened abstractions: %ld evaluations, %ld violations, %ld definite results\n", opened.evaluations, opened.violations, opened.definite);
+  KZ_CHECK_EQ(opened.violations, 0L);
+  KZ_CHECK(opened.evaluations >= 45000);
 
   // 3. the test can fail: with abstractions that leave the concrete state out, violations appear
   Totals broken;

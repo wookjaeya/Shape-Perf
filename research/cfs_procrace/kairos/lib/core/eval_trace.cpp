@@ -15,10 +15,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <set>
 #include <tuple>
 
 #include "kz/core/phi_allowed.hpp"
+#include "kz/core/registry.hpp"
+#include "kz/core/verdict.hpp"
 
 namespace kz {
 namespace eval {
@@ -58,9 +61,12 @@ const char* occ_status_text(OccStatus s) {
     case OccStatus::Tolerated: return "TOLERATED";
     case OccStatus::Pending: return "PENDING";
     case OccStatus::Open: return "OPEN";
+    case OccStatus::Undetermined: return "UNDETERMINED";
   }
   return "?";
 }
+
+const char* record_kind_text(RecordKind k) { return k == RecordKind::Real ? "real" : "model"; }
 
 const char* lp_source_text(LpSource s) {
   switch (s) {
@@ -68,6 +74,8 @@ const char* lp_source_text(LpSource s) {
     case LpSource::Call: return "call";
     case LpSource::Point: return "point";
     case LpSource::NotPassed: return "not_passed";
+    case LpSource::Interval: return "interval";
+    case LpSource::Outcome: return "outcome";
   }
   return "?";
 }
@@ -212,6 +220,85 @@ struct PollWatch {
   std::map<ResId, WriteInfo> seen;
 };
 
+// ---- real records: the abstract evaluation over the explanations of the record ----------------
+
+// What an evaluation read: kinds through state/tag/id, locations through value, the owner of the
+// executing actor.  The reasons and the adequacy of a result are those of what it read.
+struct Reads {
+  std::set<int32_t> kinds;
+  std::set<int32_t> locs;
+  bool owner = false;
+};
+
+// The abstract domain of eval.hpp, recording what it is asked.  The evaluator template calls the
+// methods of the class it is instantiated with, so these hide the base ones.
+class RecordingDomain : public AbstractDomain {
+ public:
+  RecordingDomain(const Profile& p, const AbstractState& s, Reads* reads) : AbstractDomain(p, s), p_(p), reads_(reads) {}
+  AVal state_of(const AVal& res) const {
+    reads_->kinds.insert(res.kind);
+    return AbstractDomain::state_of(res);
+  }
+  AVal tag_of(const AVal& res, int32_t tag) const {
+    reads_->kinds.insert(res.kind);
+    return AbstractDomain::tag_of(res, tag);
+  }
+  AVal id_of(const AVal& res) const {
+    reads_->kinds.insert(res.kind);
+    return AbstractDomain::id_of(res);
+  }
+  AVal value_of(const AVal& loc) const {
+    const int64_t n = static_cast<int64_t>(p_.locs.size());
+    for (int64_t li = std::max<int64_t>(loc.lo, 0); li <= std::min<int64_t>(loc.hi, n - 1); ++li) reads_->locs.insert(static_cast<int32_t>(li));
+    return AbstractDomain::value_of(loc);
+  }
+  AVal owner_of(const AVal& actor) const {
+    reads_->owner = true;
+    return AbstractDomain::owner_of(actor);
+  }
+
+ private:
+  const Profile& p_;
+  Reads* reads_;
+};
+
+constexpr uint32_t kAllAdequacy = KZ_ADEQ_WRITERS_COVERED | KZ_ADEQ_ALIASES_COVERED | KZ_ADEQ_START_STATE_KNOWN | KZ_ADEQ_LIFETIME_KNOWN |
+                                  KZ_ADEQ_PROBES_ATTACHED | KZ_ADEQ_PROBES_ACTIVE | KZ_ADEQ_LOSS_FREE;
+
+struct RealEval {
+  AVal v;
+  uint32_t reasons = 0;               // KZ_WITHHOLD of the unknown inputs it read
+  uint32_t adequacy = kAllAdequacy;   // KZ_ADEQ: what the record establishes for what it read
+  bool contradicted = false;
+};
+
+bool exact_key(const AVal& r, std::vector<int64_t>* key) {
+  key->clear();
+  if (r.may_be_undefined || r.must_be_undefined) return false;
+  for (const auto& iv : r.key) {
+    if (iv.first != iv.second) return false;
+    key->push_back(iv.first);
+  }
+  return true;
+}
+
+bool exact_value(const AVal& v, int64_t* out) {
+  if (v.lo != v.hi) return false;
+  *out = v.lo;
+  return true;
+}
+
+// A conjunct of a real record, read over the whole call because its point is not observed: the join of
+// the values in every state between the call and the return.
+struct IntervalRead {
+  bool active = false;
+  bool any = false;
+  Tri tri = Tri::Maybe;
+  uint32_t reasons = 0;
+  uint32_t adequacy = kAllAdequacy;
+  bool contradicted = false;
+};
+
 struct Frame {
   size_t op = 0;
   uint64_t call = 0;
@@ -219,6 +306,7 @@ struct Frame {
   std::vector<ConjunctResult> conj;  // one per conjunct of the operation
   std::vector<size_t> occs;          // indices into Result::occurrences, one per rspec of the operation
   std::vector<PollWatch> watches;    // one per observation rule that polls in this operation
+  std::vector<IntervalRead> intervals;  // real records: one per conjunct, active where its point is not observed
 };
 
 struct PointRef {
@@ -292,6 +380,27 @@ class Replayer {
   size_t after_terminal_ = 0;
   int32_t request_ordinal_ = -1;  // the state of the shutdown kind that is the request
 
+  // Real records (SPEC 4.8, ADR-055).
+  bool real_ = false;
+  std::vector<uint32_t> kind_reasons_, loc_reasons_;  // KZ_WITHHOLD: why recorded writes do not fix it (0: they do)
+  std::vector<uint32_t> kind_adeq_, loc_adeq_;        // KZ_ADEQ: what the record establishes
+  std::vector<bool> kind_contra_, loc_contra_;        // the record contradicted the replayed state
+  size_t next_loss_ = 0;
+  void prepare_real();
+  void apply_losses(uint64_t position);
+  void untrack_kind(int32_t kind, uint32_t why);
+  void untrack_loc(int32_t loc, uint32_t why);
+  void contradict(int32_t kind, int32_t loc, uint64_t event, const std::string& what);
+  RealEval evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args);
+  void apply_effect_real(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args);
+  void update_intervals(uint64_t at);
+  void join_interval(IntervalRead* acc, const RealEval& r);
+  bool overlaps_loss(uint64_t from, uint64_t to) const;
+  void return_real(const OpDecl& op, Frame* f, const TraceEvent& ev);
+  void check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& ev);
+  void decide_real(Frame* f, size_t k, const TraceEvent& ev);
+  void finish();
+
   void finding(uint64_t event, const std::string& what) {
     if (seen_findings_.insert(std::make_pair(event, what)).second) r_.findings.push_back(ReplayFinding{event, what});
   }
@@ -321,6 +430,7 @@ class Replayer {
   void sync_occurrence(const Frame& f, size_t k);
   void check_outcome(const OpDecl& op, Frame* f, const TraceEvent& ev);
   void observe_return(const OpDecl& op, const Frame& f, const TraceEvent& ev);
+  void spawn_return(const OpDecl& op, const Frame& f, const TraceEvent& ev);
   const Expr* rule_predicate(size_t ri) const;
   bool poll_predicate_holds(size_t ri, const OpDecl& op, const std::string& actor, const ArgMap& args, uint64_t at, bool* holds);
   void open_watches(Frame* f, const OpDecl& op, const TraceEvent& call);
@@ -436,7 +546,281 @@ Status Replayer::prepare() {
       }
     }
   }
+  real_ = t_.record == RecordKind::Real;
+  r_.record = t_.record;
+  if (real_) prepare_real();
   return Status::success();
+}
+
+// ---- real records: what the record fixes ------------------------------------------------------
+
+// Per kind and location: recorded writes fix it only if its start state and lifetime are known, its
+// writers and aliases are covered and every writer's point of the profile is observed (ADR-055).  A
+// derived kind is never stored (its state is computed from others) and needs nothing.
+void Replayer::prepare_real() {
+  const size_t nk = p_.kinds.size(), nl = p_.locs.size();
+  kind_reasons_.assign(nk, 0);
+  loc_reasons_.assign(nl, 0);
+  kind_adeq_.assign(nk, 0);
+  loc_adeq_.assign(nl, 0);
+  kind_contra_.assign(nk, false);
+  loc_contra_.assign(nl, false);
+  std::vector<std::vector<std::string>> kind_unobserved(nk), loc_unobserved(nl);
+  std::vector<std::string> any_loc_unobserved;  // stores through a pointer: any location
+  for (const OpDecl& op : p_.ops) {
+    for (const EffectDecl& e : op.effects) {
+      int32_t kind = -1, loc = -1;
+      bool any_loc = false;
+      switch (e.kind) {
+        case EffectKind::Set:
+          kind = !e.all_kind.empty() ? p_.find_kind(e.all_kind) : (e.res ? e.res->sort.kind_index : -1);
+          break;
+        case EffectKind::Raise:
+        case EffectKind::SetTag: kind = e.res ? e.res->sort.kind_index : -1; break;
+        case EffectKind::StoreLoc: loc = p_.find_loc(e.target); break;
+        case EffectKind::StoreOut: any_loc = true; break;
+        default: continue;  // no state change
+      }
+      const std::string name = e.lp.kind == LpKind::None ? std::string() : lp_name(op, e.label, e.lp);
+      if (!name.empty() && t_.observed_points.count(name) != 0) continue;
+      const std::string w = op.name + "." + e.label;
+      if (kind >= 0 && static_cast<size_t>(kind) < nk) kind_unobserved[static_cast<size_t>(kind)].push_back(w);
+      if (loc >= 0 && static_cast<size_t>(loc) < nl) loc_unobserved[static_cast<size_t>(loc)].push_back(w);
+      if (any_loc) any_loc_unobserved.push_back(w);
+    }
+  }
+  auto list = [](const std::vector<std::string>& v) {
+    std::string out;
+    for (const std::string& x : v) out += (out.empty() ? "" : ", ") + x;
+    return out;
+  };
+  for (const auto& kv : t_.kind_adequacy)
+    if (p_.find_kind(kv.first) < 0) finding(kNoEvent, "real record: adequacy of '" + kv.first + "', which is not a kind of the profile");
+  for (const auto& kv : t_.loc_adequacy)
+    if (p_.find_loc(kv.first) < 0) finding(kNoEvent, "real record: adequacy of '" + kv.first + "', which is not a location of the profile");
+  for (size_t ki = 0; ki < nk; ++ki) {
+    const KindDecl& k = p_.kinds[ki];
+    if (!k.derived.empty()) {
+      kind_adeq_[ki] = kAllAdequacy;
+      continue;
+    }
+    const auto it = t_.kind_adequacy.find(k.name);
+    const Adequacy a = it != t_.kind_adequacy.end() ? it->second : Adequacy();
+    uint32_t adeq = KZ_ADEQ_LOSS_FREE, why = 0;
+    if (a.start_known) adeq |= KZ_ADEQ_START_STATE_KNOWN; else why |= KZ_WITHHOLD_START_STATE_UNKNOWN;
+    if (a.writers_covered) adeq |= KZ_ADEQ_WRITERS_COVERED; else why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+    if (a.aliases_covered) adeq |= KZ_ADEQ_ALIASES_COVERED; else why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+    if (a.lifetime_known) adeq |= KZ_ADEQ_LIFETIME_KNOWN; else why |= KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED;
+    if (kind_unobserved[ki].empty()) {
+      adeq |= KZ_ADEQ_PROBES_ATTACHED | KZ_ADEQ_PROBES_ACTIVE;
+    } else {
+      why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+      if (a.writers_covered)
+        finding(kNoEvent, "real record: kind " + k.name + " is declared writers=covered, but the point of its writer(s) " + list(kind_unobserved[ki]) +
+                              " is not observed: recorded writes do not fix it");
+    }
+    kind_adeq_[ki] = adeq;
+    kind_reasons_[ki] = why;
+  }
+  for (size_t li = 0; li < nl; ++li) {
+    const auto it = t_.loc_adequacy.find(p_.locs[li].name);
+    const Adequacy a = it != t_.loc_adequacy.end() ? it->second : Adequacy();
+    uint32_t adeq = KZ_ADEQ_LOSS_FREE | KZ_ADEQ_LIFETIME_KNOWN, why = 0;  // a location has no lifetime of its own
+    if (a.start_known) adeq |= KZ_ADEQ_START_STATE_KNOWN; else why |= KZ_WITHHOLD_START_STATE_UNKNOWN;
+    if (a.writers_covered) adeq |= KZ_ADEQ_WRITERS_COVERED; else why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+    if (a.aliases_covered) adeq |= KZ_ADEQ_ALIASES_COVERED; else why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+    std::vector<std::string> unobserved = loc_unobserved[li];
+    unobserved.insert(unobserved.end(), any_loc_unobserved.begin(), any_loc_unobserved.end());
+    if (unobserved.empty()) {
+      adeq |= KZ_ADEQ_PROBES_ATTACHED | KZ_ADEQ_PROBES_ACTIVE;
+    } else {
+      why |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+      if (a.writers_covered)
+        finding(kNoEvent, "real record: location " + p_.locs[li].name + " is declared writers=covered, but the point of its possible writer(s) " + list(unobserved) +
+                              " is not observed: recorded writes do not fix it");
+    }
+    loc_adeq_[li] = adeq;
+    loc_reasons_[li] = why;
+  }
+}
+
+// A reported loss: from its first possible position on, recorded writes fix nothing (ADR-055: no loss is
+// recorded for the interval from the start to the read).  The kernel does not say which records were
+// lost, so every kind and location is affected.
+void Replayer::apply_losses(uint64_t position) {
+  bool any = false;
+  while (next_loss_ < t_.losses.size() && t_.losses[next_loss_].begin <= position) {
+    ++next_loss_;
+    any = true;
+  }
+  if (!any) return;
+  for (size_t ki = 0; ki < kind_reasons_.size(); ++ki) {
+    if (!p_.kinds[ki].derived.empty()) continue;
+    kind_reasons_[ki] |= KZ_WITHHOLD_LOSS;
+    kind_adeq_[ki] &= ~static_cast<uint32_t>(KZ_ADEQ_LOSS_FREE);
+  }
+  for (size_t li = 0; li < loc_reasons_.size(); ++li) {
+    loc_reasons_[li] |= KZ_WITHHOLD_LOSS;
+    loc_adeq_[li] &= ~static_cast<uint32_t>(KZ_ADEQ_LOSS_FREE);
+  }
+  update_intervals(position);
+}
+
+void Replayer::untrack_kind(int32_t kind, uint32_t why) {
+  if (kind < 0 || static_cast<size_t>(kind) >= kind_reasons_.size() || !p_.kinds[static_cast<size_t>(kind)].derived.empty()) return;
+  kind_reasons_[static_cast<size_t>(kind)] |= why != 0 ? why : static_cast<uint32_t>(KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED);
+}
+
+void Replayer::untrack_loc(int32_t loc, uint32_t why) {
+  if (loc < 0 || static_cast<size_t>(loc) >= loc_reasons_.size()) return;
+  loc_reasons_[static_cast<size_t>(loc)] |= why != 0 ? why : static_cast<uint32_t>(KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
+}
+
+// The record contradicts the state the replay fixed: no explanation agrees with both (an analysis input
+// error for every result that reads it from now on, SPEC 1.10).
+void Replayer::contradict(int32_t kind, int32_t loc, uint64_t event, const std::string& what) {
+  if (kind >= 0 && static_cast<size_t>(kind) < kind_contra_.size()) kind_contra_[static_cast<size_t>(kind)] = true;
+  if (loc >= 0 && static_cast<size_t>(loc) < loc_contra_.size()) loc_contra_[static_cast<size_t>(loc)] = true;
+  r_.partial = true;
+  finding(event, "real record: " + what + ": the record contradicts the replayed state (analysis input error for what reads it)");
+}
+
+bool Replayer::overlaps_loss(uint64_t from, uint64_t to) const {
+  for (const LossInterval& l : t_.losses)
+    if (l.begin <= to && l.end > from) return true;
+  return false;
+}
+
+// Evaluates `e` at `ev` over the explanations of the real record: the abstract domain over the replayed
+// state of what the record fixes; everything else is open (unknown), and so is a value the event lacks.
+RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args) {
+  constexpr int64_t kLo = std::numeric_limits<int64_t>::min(), kHi = std::numeric_limits<int64_t>::max();
+  RealEval out;
+  std::vector<std::string> names;
+  for (const phi::OpParam& prm : op.params)
+    if (prm.role != "out") names.push_back("arg." + prm.name);
+  if (lp != nullptr)
+    for (const phi::OpParam& v : lp->values) names.push_back("lp." + v.name);
+  Used used;
+  collect_used(e, &used);
+  AbstractState a;
+  for (size_t i = 0; i < names.size(); ++i) {
+    auto it = ev.values.find(names[i]);
+    bool found = it != ev.values.end();
+    if (!found && frame_args != nullptr) {
+      it = frame_args->find(names[i]);
+      found = it != frame_args->end();
+    }
+    if (found) {
+      a.args.push_back({it->second, it->second});
+    } else {
+      a.args.push_back({kLo, kHi});  // not recorded: any value
+      if (used.args.count(static_cast<int32_t>(i)) != 0) out.reasons |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+    }
+  }
+  if (ev.has_result) {
+    a.result = {ev.result, ev.result};
+  } else {
+    a.result = {kLo, kHi};
+    if (used.result) out.reasons |= KZ_WITHHOLD_EFFECT_UNSUPPORTED;
+  }
+  const int64_t me = actor_number(ev.actor);
+  a.exec = {me, me};
+  // the owner: as the record states it, with an evidence level; otherwise undetermined
+  bool owner_open = false;
+  const auto lv = t_.owner_levels.find(ev.actor);
+  const uint8_t level = lv != t_.owner_levels.end() ? lv->second : static_cast<uint8_t>(KZ_OWNER_LEVEL_UNDETERMINED);
+  if (level == KZ_OWNER_LEVEL_UNDETERMINED) {
+    a.owner_any = true;
+    owner_open = true;
+  } else {
+    const auto ow = t_.owners.find(ev.actor);
+    a.owner_none = true;
+    if (ow != t_.owners.end() && p_.context.present && p_.context.owner_kind_index >= 0 && ow->second.size() == key_width(p_, p_.context.owner_kind_index)) {
+      a.owners.push_back(ResId{p_.context.owner_kind_index, ow->second});
+      a.owner_none = false;
+    }
+  }
+  for (const auto& c : st_.consts) a.consts[c.first] = {c.second, c.second};
+  a.instances = st_.instances;
+  for (size_t ki = 0; ki < kind_reasons_.size(); ++ki)
+    if (kind_reasons_[ki] != 0) a.open_kinds.insert(static_cast<int32_t>(ki));
+  auto fixed = [&](const ResId& id) { return id.kind >= 0 && static_cast<size_t>(id.kind) < kind_reasons_.size() && kind_reasons_[static_cast<size_t>(id.kind)] == 0; };
+  auto entry = [&](const ResId& id) -> AbstractRes& {
+    auto it = a.res.find(id);
+    if (it == a.res.end()) {
+      AbstractRes r;
+      const auto st = st_.state.find(id);
+      r.states = 1ull << (st != st_.state.end() ? st->second : p_.kinds[static_cast<size_t>(id.kind)].initial_ordinal);
+      const auto idv = st_.ids.find(id);
+      if (idv != st_.ids.end()) {
+        r.has_id = true;
+        r.id = {idv->second, idv->second};
+      }
+      it = a.res.emplace(id, r).first;
+    }
+    return it->second;
+  };
+  for (const auto& kv : st_.state)
+    if (fixed(kv.first)) entry(kv.first);
+  for (const auto& kv : st_.ids)
+    if (fixed(kv.first)) entry(kv.first);
+  for (const auto& kv : st_.tags)
+    if (fixed(kv.first.first)) entry(kv.first.first).tags[kv.first.second] = 1ull << kv.second;
+  a.open_locs = true;
+  for (size_t li = 0; li < loc_reasons_.size(); ++li) {
+    if (loc_reasons_[li] != 0) continue;
+    const auto lv2 = st_.loc_values.find(static_cast<int32_t>(li));
+    const int64_t v = lv2 != st_.loc_values.end() ? lv2->second : 0;
+    a.locs[static_cast<int32_t>(li)] = {v, v};
+  }
+  Reads reads;
+  RecordingDomain dom(p_, a, &reads);
+  Evaluator<RecordingDomain> evaluator(p_, dom);
+  out.v = evaluator.eval(e);
+  for (int32_t k : reads.kinds) {
+    if (k < 0 || static_cast<size_t>(k) >= kind_reasons_.size()) continue;
+    out.reasons |= kind_reasons_[static_cast<size_t>(k)];
+    out.adequacy &= kind_adeq_[static_cast<size_t>(k)];
+    out.contradicted = out.contradicted || kind_contra_[static_cast<size_t>(k)];
+  }
+  for (int32_t l : reads.locs) {
+    out.reasons |= loc_reasons_[static_cast<size_t>(l)];
+    out.adequacy &= loc_adeq_[static_cast<size_t>(l)];
+    out.contradicted = out.contradicted || loc_contra_[static_cast<size_t>(l)];
+  }
+  if (reads.owner && owner_open) out.reasons |= KZ_WITHHOLD_OWNERSHIP_UNDETERMINED;
+  return out;
+}
+
+void Replayer::join_interval(IntervalRead* acc, const RealEval& r) {
+  if (!acc->any) {
+    acc->tri = r.v.tri;
+    acc->any = true;
+  } else if (acc->tri != r.v.tri) {
+    if (acc->tri != Tri::Maybe && r.v.tri != Tri::Maybe) acc->reasons |= KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS;  // two values over the call
+    acc->tri = Tri::Maybe;
+  }
+  acc->reasons |= r.reasons;
+  acc->adequacy &= r.adequacy;
+  acc->contradicted = acc->contradicted || r.contradicted;
+}
+
+// The conjuncts read over a call (their point is not observed) see every state the call can see.
+void Replayer::update_intervals(uint64_t at) {
+  for (auto& stack : frames_) {
+    for (Frame& fr : stack.second) {
+      const OpDecl& op = p_.ops[fr.op];
+      for (size_t ci = 0; ci < fr.intervals.size(); ++ci) {
+        if (!fr.intervals[ci].active) continue;
+        TraceEvent probe;  // no values of its own: the arguments are those of the call
+        probe.id = at;
+        probe.actor = stack.first;
+        probe.site = op.name;
+        join_interval(&fr.intervals[ci], evaluate_real(*op.conjuncts[ci].expr, op, &op.conjuncts[ci].lp, probe, &fr.args));
+      }
+    }
+  }
 }
 
 int64_t Replayer::actor_number(const std::string& actor) {
@@ -546,6 +930,7 @@ Status Replayer::run() {
       ++after_terminal_;
       continue;
     }
+    if (real_) apply_losses(ev.id);
     begin_event(ev);
     switch (ev.phase) {
       case Phase::Call: on_call(ev); break;
@@ -560,6 +945,7 @@ Status Replayer::run() {
   std::sort(r_.edges.begin(), r_.edges.end());
   r_.edges.erase(std::unique(r_.edges.begin(), r_.edges.end()), r_.edges.end());
   r_.final_state = st_;
+  finish();
   return Status::success();
 }
 
@@ -627,6 +1013,18 @@ void Replayer::on_call(const TraceEvent& ev) {
     }
   }
 
+  // real records: a conjunct whose point the record does not observe is read over the whole call
+  if (real_) {
+    f.intervals.resize(op.conjuncts.size());
+    for (size_t ci = 0; ci < op.conjuncts.size(); ++ci) {
+      const phi::ConjunctDecl& c = op.conjuncts[ci];
+      if (c.lp.kind == LpKind::Capture) continue;
+      if (c.lp.kind != LpKind::None && t_.observed_points.count(lp_name(op, c.label, c.lp)) != 0) continue;
+      f.intervals[ci].active = true;
+      join_interval(&f.intervals[ci], evaluate_real(*c.expr, op, &c.lp, ev, &f.args));
+    }
+  }
+
   // occurrences
   for (size_t si : rspecs_of_op_[oi]) {
     const phi::RspecDecl& rs = p_.rspecs[si];
@@ -634,8 +1032,36 @@ void Replayer::on_call(const TraceEvent& ev) {
     o.rspec = rs.name;
     o.actor = ev.actor;
     o.call = ev.id;
-    CVal key;
-    if (rs.key && evaluate(*rs.key, op, nullptr, ev, &f.args, &key) && key.defined) o.key = key.key;
+    if (real_) {
+      if (rs.key) {
+        const RealEval kr = evaluate_real(*rs.key, op, nullptr, ev, &f.args);
+        std::vector<int64_t> k;
+        if (exact_key(kr.v, &k)) o.key = k;
+        else o.reasons |= kr.reasons != 0 ? kr.reasons : static_cast<uint32_t>(KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED);
+      }
+      // the identities the record states (SPEC 1.2): creator, owner with its level, the passed identifier
+      const auto cr = t_.creators.find(ev.actor);
+      if (cr != t_.creators.end()) o.creator = cr->second;
+      const auto lv = t_.owner_levels.find(ev.actor);
+      if (lv != t_.owner_levels.end()) o.owner_level = lv->second;
+      const auto ow = t_.owners.find(ev.actor);
+      if (ow != t_.owners.end() && o.owner_level != KZ_OWNER_LEVEL_UNDETERMINED) {
+        o.has_owner_key = true;
+        o.owner_key = ow->second;
+      }
+      for (const phi::OpParam& prm : op.params) {
+        if (prm.role != "stamp") continue;
+        o.passed_role = prm.name;
+        const auto pv = ev.values.find("arg." + prm.name);
+        if (pv != ev.values.end()) {
+          o.has_passed = true;
+          o.passed = pv->second;
+        }
+      }
+    } else {
+      CVal key;
+      if (rs.key && evaluate(*rs.key, op, nullptr, ev, &f.args, &key) && key.defined) o.key = key.key;
+    }
     o.ordinal = ++ordinals_[ev.actor + "\n" + rs.name + "\n" + key_text(o.key)];
     for (size_t ci : rspec_info_[si].conj) o.conjuncts.push_back(f.conj[ci]);
     f.occs.push_back(r_.occurrences.size());
@@ -672,7 +1098,23 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
   const OpDecl& op = p_.ops[f->op];
   const phi::ConjunctDecl& c = op.conjuncts[ci];
   ConjunctResult& res = f->conj[ci];
-  if (res.evaluated) return;  // the first pass of the linearization point decides
+  if (res.evaluated || res.unknown) return;  // the first pass of the linearization point decides
+  if (real_) {
+    const RealEval r = evaluate_real(*c.expr, op, &c.lp, ev, frame_args);
+    res.source = source;
+    res.event = ev.id;
+    res.reasons = r.reasons;
+    res.adequacy = r.adequacy;
+    res.contradicted = r.contradicted;
+    if (r.v.tri == Tri::Maybe) {
+      res.unknown = true;
+    } else {
+      res.evaluated = true;
+      res.holds = r.v.tri == Tri::True;
+    }
+    if (ci < f->intervals.size()) f->intervals[ci].active = false;  // the point was observed after all: it was passed
+    return;
+  }
   CVal v;
   if (!evaluate(*c.expr, op, &c.lp, ev, frame_args, &v)) return;
   res.source = source;
@@ -717,7 +1159,7 @@ void Replayer::progress(Frame* f) {
     bool all_true = !info.conj.empty();
     for (size_t ci : info.conj) {
       const ConjunctResult& c = f->conj[ci];
-      if (!c.evaluated) {
+      if (!c.evaluated || c.passage_unknown) {  // a real record that does not show whether the point was passed decides nothing here
         all_true = false;
         continue;
       }
@@ -727,18 +1169,20 @@ void Replayer::progress(Frame* f) {
       }
     }
     if (bad != nullptr) {
-      const bool at_call = bad->source != LpSource::Point;
-      decide(&o, not_ready_status(info), at_call ? DecidedAt::Call : DecidedAt::Point, at_call ? f->call : bad->event);
+      // (a conjunct fixed by the returned code of a real record is decided at the return)
+      const DecidedAt at = bad->source == LpSource::Point ? DecidedAt::Point : bad->source == LpSource::Outcome ? DecidedAt::Return : DecidedAt::Call;
+      decide(&o, not_ready_status(info), at, at == DecidedAt::Call ? f->call : bad->event);
     } else if (all_true) {
       uint64_t last = f->call;
-      bool in_call_only = true;
+      bool in_call_only = true, by_outcome = false;
       for (size_t ci : info.conj) {
-        if (f->conj[ci].source == LpSource::Point) {
+        if (f->conj[ci].source == LpSource::Point || f->conj[ci].source == LpSource::Outcome) {
           in_call_only = false;
+          by_outcome = by_outcome || f->conj[ci].source == LpSource::Outcome;
           last = std::max(last, f->conj[ci].event);
         }
       }
-      decide(&o, OccStatus::Ready, in_call_only ? DecidedAt::Call : DecidedAt::Point, in_call_only ? f->call : last);
+      decide(&o, OccStatus::Ready, in_call_only ? DecidedAt::Call : by_outcome ? DecidedAt::Return : DecidedAt::Point, in_call_only ? f->call : last);
     }
   }
 }
@@ -766,6 +1210,13 @@ void Replayer::on_return(const TraceEvent& ev) {
   Frame f = std::move(stack.back());
   stack.pop_back();
 
+  if (real_) {
+    return_real(op, &f, ev);
+    observe_return(op, f, ev);
+    spawn_return(op, f, ev);
+    return;
+  }
+
   // occurrences: the return decides what is still open
   for (size_t k = 0; k < f.occs.size(); ++k) {
     sync_occurrence(f, k);
@@ -785,8 +1236,11 @@ void Replayer::on_return(const TraceEvent& ev) {
   }
   check_outcome(op, &f, ev);
   observe_return(op, f, ev);
+  spawn_return(op, f, ev);
+}
 
-  // spawn: the value the create operation returned through its out parameter
+// spawn: the value the create operation returned through its out parameter
+void Replayer::spawn_return(const OpDecl& op, const Frame& f, const TraceEvent& ev) {
   for (CreateRec& c : creates_) {
     if (c.call != f.call) continue;
     const phi::HbRuleDecl& rule = p_.rules[c.rule];
@@ -866,11 +1320,20 @@ void Replayer::observe_return(const OpDecl& op, const Frame& f, const TraceEvent
         finding(ev.id, "rule " + rule.name + ": the awaited predicate comes from the code and none was supplied, so no observation edge is derived");
       continue;
     }
-    CVal v;
-    if (!evaluate(*pred, op, nullptr, ev, &f.args, &v)) continue;
-    if (!v.is_true()) {
-      finding(ev.id, "rule " + rule.name + ": the poll " + op.name + " returned its exit outcome while its awaited predicate is false in the replay");
-      continue;
+    if (real_) {
+      const RealEval rv = evaluate_real(*pred, op, nullptr, ev, &f.args);
+      if (rv.v.tri != Tri::True) {
+        finding(ev.id, "rule " + rule.name + ": the poll " + op.name + " returned its exit outcome while its awaited predicate is " +
+                           (rv.v.tri == Tri::False ? "false in every explanation of the real record" : "not fixed by the real record") + ": no observation edge");
+        continue;
+      }
+    } else {
+      CVal v;
+      if (!evaluate(*pred, op, nullptr, ev, &f.args, &v)) continue;
+      if (!v.is_true()) {
+        finding(ev.id, "rule " + rule.name + ": the poll " + op.name + " returned its exit outcome while its awaited predicate is false in the replay");
+        continue;
+      }
     }
     // The writes the scan that let the poll exit can have seen: the last writes at the moment the
     // predicate became true.  Without that moment (the watch could not evaluate the predicate) the
@@ -906,6 +1369,12 @@ bool Replayer::poll_predicate_holds(size_t ri, const OpDecl& op, const std::stri
   probe.id = at;
   probe.actor = actor;
   probe.site = op.name;
+  if (real_) {
+    const RealEval r = evaluate_real(*pred, op, nullptr, probe, &args);
+    if (r.v.tri == Tri::Maybe) return false;  // not fixed by the record: no moment
+    *holds = r.v.tri == Tri::True;
+    return true;
+  }
   CVal v;
   if (!evaluate(*pred, op, nullptr, probe, &args, &v, true)) return false;
   *holds = v.is_true();
@@ -978,7 +1447,39 @@ void Replayer::on_point(const TraceEvent& ev) {
     if (!ref.conjunct) continue;
     const OpDecl& op = p_.ops[ref.op];
     const phi::ConjunctDecl& c = op.conjuncts[ref.index];
-    if (c.lp.kind == LpKind::Capture) {
+    if (c.lp.kind == LpKind::Capture && real_) {
+      ConjunctResult res;
+      res.label = c.label;
+      res.source = LpSource::Capture;
+      res.event = ev.id;
+      // cross-check against the replayed cell, where the record fixes it
+      const auto cell = ev.texts.find("cell");
+      const auto value = ev.values.find("value");
+      if (cell != ev.texts.end() && value != ev.values.end()) {
+        const int32_t li = p_.find_loc(cell->second);
+        if (li < 0) {
+          finding(ev.id, "capture " + ev.site + ": '" + cell->second + "' is not a location of the profile");
+        } else if (loc_reasons_[static_cast<size_t>(li)] == 0) {
+          const auto lv = st_.loc_values.find(li);
+          const int64_t replayed = lv == st_.loc_values.end() ? 0 : lv->second;
+          if (replayed != value->second) {
+            contradict(-1, li, ev.id, "capture " + ev.site + ": the value loaded from " + cell->second + " is " + hex_or_dec(value->second) + ", the replay of the recorded effects has " + hex_or_dec(replayed));
+            res.contradicted = true;
+          }
+        }
+      }
+      const RealEval r = evaluate_real(*c.expr, op, &c.lp, ev, nullptr);
+      res.reasons = r.reasons;
+      res.adequacy = r.adequacy;
+      res.contradicted = res.contradicted || r.contradicted;
+      if (r.v.tri == Tri::Maybe) {
+        res.unknown = true;
+      } else {
+        res.evaluated = true;
+        res.holds = r.v.tri == Tri::True;
+      }
+      captures_[std::make_tuple(ev.actor, ref.op, ref.index)] = res;
+    } else if (c.lp.kind == LpKind::Capture) {
       // cross-check against the replayed cell
       const auto cell = ev.texts.find("cell");
       const auto value = ev.values.find("value");
@@ -1017,10 +1518,14 @@ void Replayer::on_point(const TraceEvent& ev) {
     if (ref.conjunct) continue;
     const OpDecl& op = p_.ops[ref.op];
     Frame* f = top_frame_of(ev.actor, ref.op);
-    apply_effect(op, op.effects[ref.index], ev, f != nullptr ? &f->args : nullptr);
+    if (real_) apply_effect_real(op, op.effects[ref.index], ev, f != nullptr ? &f->args : nullptr);
+    else apply_effect(op, op.effects[ref.index], ev, f != nullptr ? &f->args : nullptr);
     applied_any = true;
   }
-  if (applied_any) update_watches(ev);
+  if (applied_any) {
+    update_watches(ev);
+    if (real_) update_intervals(ev.id);
+  }
 }
 
 void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args) {
@@ -1163,6 +1668,414 @@ void Replayer::apply_effect(const OpDecl& op, const EffectDecl& eff, const Trace
   }
 }
 
+// ---- real records: effects, returns, decisions ------------------------------------------------
+
+// An effect of a real record (ADR-055).  The resource, the value and a `filter` are evaluated over the
+// explanations of the record: where they are not fixed, the effect may have hit another resource or
+// stored another value, so the target kind or location is no longer fixed by recorded writes.  An
+// asserted guard (`when`) that is unknown holds in every explanation the record allows (the trace shows
+// the point executed); one that is false contradicts the replayed state.
+void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args) {
+  const std::string what = "effect " + op.name + "." + eff.label;
+  if (!guards_hold(eff.guards, ev.id, what)) return;
+  int32_t tkind = -1, tloc = -1;
+  switch (eff.kind) {
+    case EffectKind::Set: tkind = !eff.all_kind.empty() ? p_.find_kind(eff.all_kind) : (eff.res ? eff.res->sort.kind_index : -1); break;
+    case EffectKind::Raise:
+    case EffectKind::SetTag: tkind = eff.res ? eff.res->sort.kind_index : -1; break;
+    case EffectKind::StoreLoc: tloc = p_.find_loc(eff.target); break;
+    case EffectKind::StoreOut: {
+      const auto where = ev.texts.find("out." + eff.target);
+      if (where != ev.texts.end()) tloc = p_.find_loc(where->second);
+      break;
+    }
+    default: break;
+  }
+  if (eff.when) {
+    const RealEval g = evaluate_real(*eff.when, op, &eff.lp, ev, frame_args);
+    if (g.v.tri == Tri::False) {
+      if (eff.filter) return;
+      GuardFailure gf;
+      gf.event = ev.id;
+      gf.op = op.name;
+      gf.effect = eff.label;
+      gf.trusted = eff.status == "declared_trusted";
+      if (gf.trusted) gf.refutable_by = eff.refutable_by;
+      std::sort(gf.refutable_by.begin(), gf.refutable_by.end());
+      std::string obligations;
+      for (const std::string& o : gf.refutable_by) obligations += (obligations.empty() ? "" : ", ") + o;
+      if (gf.trusted)
+        finding(ev.id, what + ": its declared-trusted guard is false at its linearization point in every explanation of the real record, which shows the point executed: the guard is refuted by this observation (refutable_by " +
+                           obligations + "); the effect is not applied");
+      else
+        finding(ev.id, what + ": its guard is false at its linearization point in every explanation of the real record, which shows the point executed: the trace and the profile disagree; the effect is not applied");
+      r_.guard_failures.push_back(std::move(gf));
+      contradict(tkind, tloc, ev.id, what + " executed while its asserted guard is false");
+      return;
+    }
+    if (g.v.tri == Tri::Maybe && eff.filter) {
+      // a branch that may or may not have been taken
+      untrack_kind(tkind, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
+      untrack_loc(tloc, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
+      if (eff.kind == EffectKind::StoreOut && tloc < 0)
+        for (size_t li = 0; li < loc_reasons_.size(); ++li) untrack_loc(static_cast<int32_t>(li), g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
+      return;
+    }
+  }
+  auto note_shutdown = [&](int32_t kind, int32_t to) {
+    if (p_.scope.present && kind == p_.scope.kind_index && request_ordinal_ >= 0 && to >= request_ordinal_ && !r_.shutdown_requested) {
+      r_.shutdown_requested = true;
+      r_.shutdown_event = ev.id;
+    }
+  };
+  // The stored value: the one the record carries (`value`), else the profile's where it is fixed.
+  auto stored = [&](int32_t li) {
+    const auto rec = ev.values.find("value");
+    const RealEval v = evaluate_real(*eff.value, op, &eff.lp, ev, frame_args);
+    int64_t computed = 0;
+    const bool fixed = v.v.tri == Tri::Maybe && exact_value(v.v, &computed);
+    if (rec != ev.values.end()) {
+      if (fixed && computed != rec->second) contradict(-1, li, ev.id, what + ": the record says the stored value is " + hex_or_dec(rec->second) + ", the profile computes " + hex_or_dec(computed));
+      st_.loc_values[li] = rec->second;
+      return;
+    }
+    if (fixed) st_.loc_values[li] = computed;
+    else untrack_loc(li, v.reasons);
+  };
+  switch (eff.kind) {
+    case EffectKind::Set: {
+      if (!eff.all_kind.empty()) {
+        const int32_t ki = p_.find_kind(eff.all_kind);
+        if (ki < 0) return;
+        const int32_t to = state_ordinal(p_.kinds[static_cast<size_t>(ki)], eff.to_state);
+        const auto inst = st_.instances.find(ki);
+        if (to < 0 || inst == st_.instances.end()) return;
+        for (const std::vector<int64_t>& key : inst->second) {
+          const ResId id{ki, key};
+          st_.state[id] = to;
+          note_write(id, ev);
+        }
+        note_shutdown(ki, to);
+        return;
+      }
+      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
+      if (r.v.must_be_undefined) {
+        finding(ev.id, what + " applies to an undefined resource and is not applied");
+        return;
+      }
+      std::vector<int64_t> key;
+      if (!exact_key(r.v, &key)) {
+        untrack_kind(tkind, r.reasons);
+        return;
+      }
+      const int32_t to = state_ordinal(p_.kinds[static_cast<size_t>(r.v.kind)], eff.to_state);
+      if (to < 0) return;
+      const ResId id{r.v.kind, key};
+      st_.state[id] = to;
+      note_write(id, ev);
+      if (eff.with_id) {
+        const RealEval idv = evaluate_real(*eff.with_id, op, &eff.lp, ev, frame_args);
+        int64_t v = 0;
+        if (exact_value(idv.v, &v)) st_.ids[id] = id_value(v);
+        else untrack_kind(tkind, idv.reasons);
+      }
+      note_shutdown(r.v.kind, to);
+      return;
+    }
+    case EffectKind::Raise: {
+      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
+      const RealEval level = evaluate_real(*eff.value, op, &eff.lp, ev, frame_args);
+      if (r.v.must_be_undefined) {
+        finding(ev.id, what + " applies to an undefined resource and is not applied");
+        return;
+      }
+      std::vector<int64_t> key;
+      int64_t lv = 0;
+      if (!exact_key(r.v, &key) || !exact_value(level.v, &lv)) {
+        untrack_kind(tkind, r.reasons | level.reasons);
+        return;
+      }
+      const KindDecl& k = p_.kinds[static_cast<size_t>(r.v.kind)];
+      if (lv < 0 || lv >= static_cast<int64_t>(k.states.size())) {
+        finding(ev.id, what + ": the level " + hex_or_dec(lv) + " is not a state of kind " + k.name);
+        return;
+      }
+      const ResId id{r.v.kind, key};
+      const auto cur = st_.state.find(id);
+      const int32_t now = cur == st_.state.end() ? k.initial_ordinal : cur->second;
+      if (lv > now) {
+        st_.state[id] = static_cast<int32_t>(lv);
+        note_write(id, ev);
+      }
+      return;
+    }
+    case EffectKind::SetTag: {
+      const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args);
+      if (r.v.must_be_undefined) {
+        finding(ev.id, what + " applies to an undefined resource and is not applied");
+        return;
+      }
+      std::vector<int64_t> key;
+      if (!exact_key(r.v, &key)) {
+        untrack_kind(tkind, r.reasons);
+        return;
+      }
+      const KindDecl& k = p_.kinds[static_cast<size_t>(r.v.kind)];
+      for (size_t ti = 0; ti < k.tags.size(); ++ti) {
+        if (k.tags[ti].name != eff.target) continue;
+        for (size_t vi = 0; vi < k.tags[ti].values.size(); ++vi)
+          if (k.tags[ti].values[vi] == eff.tag_value) st_.tags[std::make_pair(ResId{r.v.kind, key}, static_cast<int32_t>(ti))] = static_cast<int32_t>(vi);
+      }
+      return;
+    }
+    case EffectKind::StoreOut: {
+      const auto where = ev.texts.find("out." + eff.target);
+      if (where == ev.texts.end()) {
+        // the record does not say where the pointer pointed: any location may have been written
+        for (size_t li = 0; li < loc_reasons_.size(); ++li) untrack_loc(static_cast<int32_t>(li), KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
+        return;
+      }
+      if (tloc < 0) {
+        finding(ev.id, what + ": '" + where->second + "' is not a location of the profile");
+        return;
+      }
+      stored(tloc);
+      return;
+    }
+    case EffectKind::StoreLoc:
+      if (tloc >= 0) stored(tloc);
+      return;
+    case EffectKind::Mark:
+      if (eff.target == "handler_begin") began_handler_ = true;
+      return;
+    case EffectKind::Use:
+    case EffectKind::Sync:
+    case EffectKind::Env: return;
+  }
+}
+
+// The return of a call in a real record.
+void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
+  // 1. a conjunct read over the call: the join of the values in every state between the call and the
+  //    return; whether its point was passed is not observed
+  for (size_t ci = 0; ci < f->intervals.size(); ++ci) {
+    const IntervalRead& in = f->intervals[ci];
+    ConjunctResult& c = f->conj[ci];
+    if (!in.active || c.evaluated || c.unknown) continue;
+    c.source = LpSource::Interval;
+    c.event = ev.id;
+    c.passage_unknown = true;
+    c.reasons = in.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS;
+    c.adequacy = in.adequacy;
+    c.contradicted = in.contradicted;
+    if (!in.any || in.tri == Tri::Maybe) {
+      c.unknown = true;
+    } else {
+      c.evaluated = true;
+      c.holds = in.tri == Tri::True;
+    }
+  }
+  // 2. an observed point the call did not pass, while events may be missing: its passage is unknown
+  if (overlaps_loss(f->call, ev.id)) {
+    for (size_t ci = 0; ci < f->conj.size(); ++ci) {
+      ConjunctResult& c = f->conj[ci];
+      if (c.evaluated || c.unknown || c.passage_unknown || op.conjuncts[ci].lp.kind == LpKind::Capture) continue;
+      c.passage_unknown = true;
+      c.unknown = true;
+      c.reasons |= KZ_WITHHOLD_LOSS;
+    }
+  }
+  for (size_t k = 0; k < f->occs.size(); ++k) {
+    Occurrence& o = r_.occurrences[f->occs[k]];
+    o.returned = true;
+    o.ret = ev.id;
+    o.has_result = ev.has_result;
+    o.result = ev.result;
+  }
+  // 3. the returned code, under O4 (the outcome list of the operation)
+  check_outcome_real(op, f, ev);
+  // 4. decide what is still open
+  progress(f);
+  for (size_t k = 0; k < f->occs.size(); ++k) decide_real(f, k, ev);
+}
+
+// O4(a) for a real record.  The returned code is observed, and the outcome list says what it means for
+// the conjuncts: `not_ready(L)` means L was reached and false, `ready` that no reached conjunct is false.
+// So the code fixes a conjunct the record left open (the explanations that disagree with the code are
+// not explanations of the record), and a code that disagrees with a conjunct fixed in every explanation
+// leaves no explanation at all: an analysis input error, never a violation and never no violation.
+void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
+  OutcomeCheck chk = OutcomeCheck::NotChecked;
+  bool narrowed = false, contra = false;
+  if (!op.outcomes.empty() && ev.has_result) {
+    const phi::OutcomeDecl* hit = nullptr;
+    for (const phi::OutcomeDecl& oc : op.outcomes) {
+      if (oc.code_const < 0) continue;
+      const phi::ConstDecl& c = p_.consts[static_cast<size_t>(oc.code_const)];
+      if (c.value == phi::ConstDecl::Value::Int && u32(c.ival) == u32(ev.result)) {
+        hit = &oc;
+        break;
+      }
+    }
+    if (hit == nullptr) {
+      chk = OutcomeCheck::Unmapped;
+      finding(ev.id, op.name + " returned " + hex_or_dec(static_cast<int64_t>(u32(ev.result))) + ", which its outcome list does not map");
+    } else if (hit->cls == OutcomeClass::Ready) {
+      for (ConjunctResult& c : f->conj) {
+        if (c.evaluated && !c.holds) {
+          if (c.passage_unknown) {  // false wherever it is passed: it was not passed
+            c.evaluated = false;
+            c.passage_unknown = false;
+            c.source = LpSource::Outcome;
+            c.event = ev.id;
+            narrowed = true;
+          } else {
+            c.contradicted = true;
+            contra = true;
+          }
+        } else if (c.unknown) {
+          c.unknown = false;
+          c.evaluated = true;
+          c.holds = true;
+          c.source = LpSource::Outcome;
+          c.event = ev.id;
+          narrowed = true;
+        }
+      }
+      chk = contra ? OutcomeCheck::Disagrees : OutcomeCheck::Agrees;
+      if (contra) finding(ev.id, op.name + " returned " + hit->code + " (ready), and a conjunct of the call is false in every explanation of the real record: analysis input error");
+    } else if (hit->cls == OutcomeClass::NotReady) {
+      if (hit->conjunct_index < 0 || static_cast<size_t>(hit->conjunct_index) >= f->conj.size()) {
+        chk = OutcomeCheck::Disagrees;
+      } else {
+        ConjunctResult& c = f->conj[static_cast<size_t>(hit->conjunct_index)];
+        const bool not_passed = !c.evaluated && !c.unknown && !c.passage_unknown;
+        if ((c.evaluated && c.holds) || not_passed) {
+          c.contradicted = true;
+          contra = true;
+          chk = OutcomeCheck::Disagrees;
+          finding(ev.id, op.name + " returned " + hit->code + " (not ready: " + hit->conjunct + "), and in every explanation of the real record that conjunct is " +
+                             (not_passed ? "not reached" : "true") + ": analysis input error");
+        } else {
+          if (!(c.evaluated && !c.holds && !c.passage_unknown)) {
+            c.source = LpSource::Outcome;
+            c.event = ev.id;
+            narrowed = true;
+          }
+          c.evaluated = true;
+          c.holds = false;
+          c.unknown = false;
+          c.passage_unknown = false;
+          chk = OutcomeCheck::Agrees;
+        }
+      }
+    }
+  }
+  for (size_t idx : f->occs) {
+    Occurrence& o = r_.occurrences[idx];
+    o.outcome = chk;
+    if (narrowed) o.outcome_narrowed = true;
+    if (contra) o.input_error = true;
+  }
+  if (contra) r_.partial = true;
+}
+
+// The status of an occurrence of a real record that the conjuncts fixed in every explanation did not
+// decide: the statuses the explanations allow (SPEC 4.8 "Explanation set").  One status: that status;
+// more: UNDETERMINED with the list and the reasons.
+void Replayer::decide_real(Frame* f, size_t k, const TraceEvent& ev) {
+  sync_occurrence(*f, k);
+  Occurrence& o = r_.occurrences[f->occs[k]];
+  if (o.decided_at != DecidedAt::None) return;
+  const RspecInfo& info = rspec_info_[rspecs_of_op_[f->op][k]];
+  bool must_false = false, can_false = false, can_all_true = !info.conj.empty(), may_skip = false;
+  uint32_t why = 0;
+  uint64_t last = f->call;
+  for (size_t ci : info.conj) {
+    const ConjunctResult& c = f->conj[ci];
+    const int passed = c.passage_unknown ? 2 : (c.evaluated || c.unknown) ? 1 : 0;  // no, yes, maybe
+    const int value = c.evaluated ? (c.holds ? 1 : 0) : 2;                           // false, true, maybe
+    if (passed == 1 && value == 0) must_false = true;
+    if (passed != 0 && value != 1) can_false = true;
+    if (!(passed != 0 && value != 0)) can_all_true = false;
+    if (passed != 1) may_skip = true;
+    if (c.unknown || c.passage_unknown) why |= c.reasons;
+    if (c.evaluated && !c.passage_unknown) last = std::max(last, c.event);
+  }
+  std::vector<OccStatus> poss;
+  if (info.conj.empty()) {
+    poss.push_back(OccStatus::NotEvaluated);
+  } else {
+    if (can_false) poss.push_back(not_ready_status(info));
+    if (can_all_true && !must_false) poss.push_back(OccStatus::Ready);
+    if (!must_false && may_skip) poss.push_back(OccStatus::NotEvaluated);
+  }
+  o.reasons |= why;
+  if (poss.size() == 1) {
+    decide(&o, poss[0], DecidedAt::Return, poss[0] == OccStatus::NotEvaluated ? last : ev.id);
+    return;
+  }
+  for (OccStatus st : poss) {
+    if (st == OccStatus::Pending) o.reasons |= KZ_WITHHOLD_HORIZON_OPEN;
+    if (st == OccStatus::NotReadyUnjudged) o.reasons |= KZ_WITHHOLD_CALLER_REQUIREMENT_ABSENT;
+    if (st == OccStatus::NotEvaluated) o.reasons |= KZ_WITHHOLD_NOT_EVALUATED;
+  }
+  if (o.reasons == 0) o.reasons = KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+  o.possible = poss;
+  decide(&o, OccStatus::Undetermined, DecidedAt::Return, ev.id);
+}
+
+// The summary view of every occurrence (SPEC 1.10, D2), computed last; for a real record also the
+// adequacy of each occurrence and what the replay established per kind and location.
+void Replayer::finish() {
+  if (real_) {
+    for (Occurrence& o : r_.occurrences) {
+      uint32_t adeq = kAllAdequacy;
+      bool any = false;
+      for (const ConjunctResult& c : o.conjuncts) {
+        if (c.contradicted) o.input_error = true;
+        if (c.evaluated || c.unknown) {
+          adeq &= c.adequacy;
+          any = true;
+        }
+        if (o.status == OccStatus::Open && (c.unknown || c.passage_unknown)) o.reasons |= c.reasons;
+      }
+      o.adequacy = any ? adeq : 0;
+      if (o.input_error) r_.partial = true;
+    }
+  }
+  for (Occurrence& o : r_.occurrences) {
+    SummaryInput in;
+    switch (o.status) {
+      case OccStatus::Ready: in.status = KZ_OCC_READY; break;
+      case OccStatus::NotEvaluated: in.status = KZ_OCC_NOT_EVALUATED; break;
+      case OccStatus::Violating: in.status = KZ_OCC_VIOLATING; break;
+      case OccStatus::NotReadyUnjudged: in.status = KZ_OCC_NOT_READY_UNJUDGED; break;
+      case OccStatus::Tolerated: in.status = KZ_OCC_TOLERATED; break;
+      case OccStatus::Pending: in.status = KZ_OCC_PENDING; break;
+      case OccStatus::Open: in.status_flags = KZ_STATUS_FLAG_OPEN; break;
+      case OccStatus::Undetermined: in.status_flags = KZ_STATUS_FLAG_UNDETERMINED; break;
+    }
+    // A model trace is one explanation; in a real record a status is decided only where every
+    // explanation agrees (the abstract evaluation, under the obligation L-OBS).
+    in.all_explanations = true;
+    in.input_error = o.input_error;
+    in.reasons = o.reasons;
+    o.summary = summarize_observation(in);
+    if (real_) {
+      o.summary.flags |= KZ_SUMMARY_FLAG_REAL_RECORD;
+      if (o.outcome_narrowed) o.summary.flags |= KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
+      if (r_.partial) o.summary.flags |= KZ_SUMMARY_FLAG_PARTIAL;
+    }
+  }
+  if (!real_) return;
+  for (size_t ki = 0; ki < p_.kinds.size(); ++ki) {
+    if (!p_.kinds[ki].derived.empty()) continue;
+    r_.knowledge.push_back(Knowledge{p_.kinds[ki].name, false, kind_reasons_[ki], kind_adeq_[ki], kind_contra_[ki]});
+  }
+  for (size_t li = 0; li < p_.locs.size(); ++li) r_.knowledge.push_back(Knowledge{p_.locs[li].name, true, loc_reasons_[li], loc_adeq_[li], loc_contra_[li]});
+}
+
 // ---- edges that pair events by a value --------------------------------------------------------
 
 void Replayer::final_edges() {
@@ -1235,6 +2148,22 @@ Status resolve_rule_predicate(const Profile& p, const std::string& rule, const s
 
 namespace {
 
+// "{a,b}" with the display names of the set enumeration `name`.
+std::string set_text(const char* name, uint64_t v) {
+  const EnumDesc* en = find_enum(name);
+  std::string out;
+  if (en != nullptr)
+    for (size_t i = 0; i < en->nitems; ++i)
+      if ((v & en->items[i].value) != 0) out += (out.empty() ? "" : ",") + std::string(en->items[i].display);
+  return "{" + out + "}";
+}
+
+std::string enum_text_of(const char* name, uint64_t v) {
+  const EnumDesc* en = find_enum(name);
+  const char* d = en != nullptr ? enum_display(*en, v) : nullptr;
+  return d != nullptr ? d : "?";
+}
+
 std::string describe(const Trace& t, uint64_t id) {
   if (id >= t.events.size()) return "#" + std::to_string(id);
   const TraceEvent& e = t.events[id];
@@ -1245,7 +2174,9 @@ std::string describe(const Trace& t, uint64_t id) {
 
 std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
   std::string out;
+  const bool real = r.record == RecordKind::Real;
   out += "replay profile " + phi::quote_string(p.name) + "\n";
+  if (real) out += "record real\n";
   out += "events " + std::to_string(trace.events.size()) + "\n";
   out += std::string("terminated ") + (r.terminated ? "yes at " + describe(trace, r.terminal_event) : std::string("no")) + "\n";
   out += std::string("shutdown_request ") + (r.shutdown_requested ? "yes at " + describe(trace, r.shutdown_event) : std::string("no")) + "\n";
@@ -1263,16 +2194,34 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
     out += std::string("  status ") + occ_status_text(o.status);
     if (o.decided_at != DecidedAt::None)
       out += std::string(" decided at ") + decided_at_text(o.decided_at) + " #" + std::to_string(o.decision) + (o.in_scope ? " scope default" : " scope teardown");
+    if (real && !o.possible.empty()) {
+      out += " possible {";
+      for (size_t i = 0; i < o.possible.size(); ++i) out += std::string(i != 0 ? "," : "") + occ_status_text(o.possible[i]);
+      out += "}";
+    }
     out += "\n";
     for (const ConjunctResult& c : o.conjuncts) {
       out += "  conjunct " + c.label + " " + lp_source_text(c.source);
-      if (c.source != LpSource::NotPassed) {
-        out += " #" + std::to_string(c.event);
-        out += c.evaluated ? (c.holds ? " holds" : " fails") : " not evaluated";
+      if (c.source != LpSource::NotPassed || (real && (c.unknown || c.passage_unknown))) {
+        if (c.source != LpSource::NotPassed) out += " #" + std::to_string(c.event);
+        out += c.evaluated ? (c.holds ? " holds" : " fails") : (real && c.unknown) ? " unknown" : " not evaluated";
+      }
+      if (real) {
+        if (c.passage_unknown) out += " passage-unknown";
+        if (c.contradicted) out += " contradicted";
+        if ((c.unknown || c.passage_unknown) && c.reasons != 0) out += " reasons " + set_text("KZ_WITHHOLD", c.reasons);
       }
       out += "\n";
     }
     if (o.has_result) out += "  result " + hex_or_dec(static_cast<int64_t>(u32(o.result))) + " outcome " + outcome_check_text(o.outcome) + "\n";
+    if (real) {
+      out += "  summary " + render_observation(o.summary) + " flags " + set_text("KZ_SUMMARY_FLAG", o.summary.flags) + "\n";
+      out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";
+      out += "  identity exec " + o.actor + " creator " + (o.creator.empty() ? std::string("(not recorded)") : o.creator) + " owner " + enum_text_of("KZ_OWNER_LEVEL", o.owner_level);
+      if (o.has_owner_key) out += " " + key_text(o.owner_key);
+      if (!o.passed_role.empty()) out += " passed " + o.passed_role + "=" + (o.has_passed ? hex_or_dec(o.passed) : std::string("(not recorded)"));
+      out += "\n";
+    }
   }
   out += "\nfindings " + std::to_string(r.findings.size()) + "\n";
   for (const ReplayFinding& f : r.findings)
@@ -1298,6 +2247,17 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
     out += "  " + k.name + key_text(t.first.first.key) + " tag " + td.name + " = " + td.values[static_cast<size_t>(t.second)] + "\n";
   }
   for (const auto& l : r.final_state.loc_values) out += "  loc " + p.locs[static_cast<size_t>(l.first)].name + " = " + hex_or_dec(l.second) + "\n";
+  if (real) {
+    // What the real record lets recorded writes fix (ADR-055); the final state above is the replay of the
+    // recorded effects and is meaningful only for what is fixed here.
+    out += "\nreal record knowledge\n";
+    out += std::string("  partial ") + (r.partial ? "yes" : "no") + "\n";
+    out += "  losses " + std::to_string(trace.losses.size()) + "\n";
+    for (const Knowledge& k : r.knowledge) {
+      out += std::string("  ") + (k.is_loc ? "loc " : "kind ") + k.name + (k.reasons == 0 ? " fixed" : " open " + set_text("KZ_WITHHOLD", k.reasons));
+      out += " established " + set_text("KZ_ADEQ", k.adequacy) + (k.contradicted ? " contradicted" : "") + "\n";
+    }
+  }
   return out;
 }
 
@@ -1361,6 +2321,68 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       out->ref_consts[tok[1]] = v;
       continue;
     }
+    if (tok[0] == "record") {
+      if (tok.size() != 2 || (tok[1] != "real" && tok[1] != "model")) return line_error(line_no, "expected: record real|model");
+      if (!out->events.empty()) return line_error(line_no, "'record' must precede the events");
+      out->record = tok[1] == "real" ? RecordKind::Real : RecordKind::Model;
+      continue;
+    }
+    if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "creator" || tok[0] == "loss") {
+      if (out->record != RecordKind::Real) return line_error(line_no, "'" + tok[0] + "' belongs to a real record: 'record real' must come first");
+      if (tok[0] == "start_evidence") {
+        static const char* names[] = {"none", "init", "state-capture", "declared"};
+        bool ok = false;
+        for (uint8_t i = 0; i < 4; ++i)
+          if (tok.size() == 2 && tok[1] == names[i]) {
+            out->start_evidence = i;
+            ok = true;
+          }
+        if (!ok) return line_error(line_no, "expected: start_evidence none|init|state-capture|declared");
+      } else if (tok[0] == "adequacy") {
+        if (tok.size() < 3 || (tok[1] != "kind" && tok[1] != "loc")) return line_error(line_no, "expected: adequacy kind|loc NAME [start=..] [writers=..] [aliases=..] [lifetime=..]");
+        Adequacy a;
+        for (size_t i = 3; i < tok.size(); ++i) {
+          const std::string& t = tok[i];
+          if (t == "start=known") a.start_known = true;
+          else if (t == "start=unknown") a.start_known = false;
+          else if (t == "writers=covered") a.writers_covered = true;
+          else if (t == "writers=uncovered") a.writers_covered = false;
+          else if (t == "aliases=covered") a.aliases_covered = true;
+          else if (t == "aliases=uncovered") a.aliases_covered = false;
+          else if (t == "lifetime=known" && tok[1] == "kind") a.lifetime_known = true;
+          else if (t == "lifetime=unknown" && tok[1] == "kind") a.lifetime_known = false;
+          else return line_error(line_no, "adequacy: '" + t + "' is not start=known|unknown, writers=covered|uncovered, aliases=covered|uncovered or (a kind) lifetime=known|unknown");
+        }
+        (tok[1] == "kind" ? out->kind_adequacy : out->loc_adequacy)[tok[2]] = a;
+      } else if (tok[0] == "observed") {
+        if (tok.size() != 2) return line_error(line_no, "expected: observed POINT");
+        out->observed_points.insert(tok[1]);
+      } else if (tok[0] == "owner_level") {
+        uint8_t lv = 0;
+        if (tok.size() != 3) return line_error(line_no, "expected: owner_level ACTOR confirmed|inferred|undetermined");
+        if (tok[2] == "undetermined") lv = KZ_OWNER_LEVEL_UNDETERMINED;
+        else if (tok[2] == "inferred") lv = KZ_OWNER_LEVEL_INFERRED;
+        else if (tok[2] == "confirmed") lv = KZ_OWNER_LEVEL_CONFIRMED;
+        else return line_error(line_no, "expected: owner_level ACTOR confirmed|inferred|undetermined");
+        out->owner_levels[tok[1]] = lv;
+      } else if (tok[0] == "creator") {
+        if (tok.size() != 3) return line_error(line_no, "expected: creator ACTOR CREATING_ACTOR");
+        out->creators[tok[1]] = tok[2];
+      } else {  // loss
+        if (tok.size() != 2 || (tok[1] != "begin" && tok[1] != "end")) return line_error(line_no, "expected: loss begin|end");
+        const bool open = !out->losses.empty() && out->losses.back().end == kNoEvent;
+        if (tok[1] == "begin") {
+          if (open) return line_error(line_no, "loss begin: the previous loss has not ended");
+          LossInterval l;
+          l.begin = out->events.size();
+          out->losses.push_back(l);
+        } else {
+          if (!open) return line_error(line_no, "loss end without a loss begin");
+          out->losses.back().end = out->events.size();
+        }
+      }
+      continue;
+    }
     if (tok[0] == "owner") {
       if (tok.size() < 3) return line_error(line_no, "expected: owner ACTOR KEY [KEY ...]");
       std::vector<int64_t> key;
@@ -1400,6 +2422,51 @@ Status parse_trace_text(const std::string& text, Trace* out) {
     out->add(std::move(ev));
   }
   return Status::success();
+}
+
+std::string trace_text(const Trace& t) {
+  std::string out;
+  auto num = [](int64_t v) { return hex_or_dec(v); };
+  if (t.record == RecordKind::Real) {
+    static const char* evidence[] = {"none", "init", "state-capture", "declared"};
+    out += "record real\n";
+    out += std::string("start_evidence ") + (t.start_evidence < 4 ? evidence[t.start_evidence] : "none") + "\n";
+    auto adequacy = [&](const char* what, const std::string& name, const Adequacy& a, bool kind) {
+      out += std::string("adequacy ") + what + " " + name + (a.start_known ? " start=known" : " start=unknown") + (a.writers_covered ? " writers=covered" : " writers=uncovered") +
+             (a.aliases_covered ? " aliases=covered" : " aliases=uncovered");
+      if (kind) out += a.lifetime_known ? " lifetime=known" : " lifetime=unknown";
+      out += "\n";
+    };
+    for (const auto& kv : t.kind_adequacy) adequacy("kind", kv.first, kv.second, true);
+    for (const auto& kv : t.loc_adequacy) adequacy("loc", kv.first, kv.second, false);
+    for (const std::string& pt : t.observed_points) out += "observed " + pt + "\n";
+    for (const auto& kv : t.owner_levels) {
+      static const char* lv[] = {"undetermined", "inferred", "confirmed"};
+      out += "owner_level " + kv.first + " " + (kv.second < 3 ? lv[kv.second] : "undetermined") + "\n";
+    }
+    for (const auto& kv : t.creators) out += "creator " + kv.first + " " + kv.second + "\n";
+  }
+  for (const auto& kv : t.ref_consts) out += "const " + kv.first + " " + num(kv.second) + "\n";
+  for (const auto& kv : t.owners) {
+    out += "owner " + kv.first;
+    for (int64_t k : kv.second) out += " " + num(k);
+    out += "\n";
+  }
+  for (size_t i = 0; i <= t.events.size(); ++i) {
+    // loss markers sit before the event at their position
+    for (size_t j = 0; j < t.losses.size(); ++j) {
+      if (t.losses[j].begin == i) out += "loss begin\n";
+      if (t.losses[j].end == i) out += "loss end\n";
+    }
+    if (i == t.events.size()) break;
+    const TraceEvent& e = t.events[i];
+    out += e.actor + " " + e.site + " " + phase_text(e.phase);
+    for (const auto& kv : e.values) out += " " + kv.first + "=" + num(kv.second);
+    for (const auto& kv : e.texts) out += " " + kv.first + "=@" + kv.second;
+    if (e.has_result) out += " result=" + num(e.result);
+    out += "\n";
+  }
+  return out;
 }
 
 }  // namespace eval

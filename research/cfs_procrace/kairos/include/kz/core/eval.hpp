@@ -41,6 +41,7 @@
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -170,6 +171,12 @@ struct AVal {
 //     holds (a listed owner that is not a record of the context's owner kind, with its key width,
 //     is read as undefined, as the concrete domain reads it);
 //   - the instances of a finite kind are exactly the listed keys.
+// Real records (SPEC 4.8 OB-05, ADR-055) replace the two "not listed" defaults where nothing fixes
+// them: a resource of a kind in `open_kinds` that is not listed may be in any state of its kind,
+// carry any tag value and any id (the undefined marker included); with `open_locs` a location that
+// is not listed may hold any value of its sort; with `owner_any` the owner of the executing actor may
+// be any record of the owner kind, or undefined.  The defaults (none open) are the convention of
+// synthetic traces and of INIT, unchanged.
 struct AbstractRes {
   uint64_t states = 0;                       // possible state ordinals
   std::map<int32_t, uint64_t> tags;          // tag index -> possible value ordinals (absent: the first value only)
@@ -187,6 +194,9 @@ struct AbstractState {
   std::vector<std::pair<int64_t, int64_t>> args;
   std::pair<int64_t, int64_t> result{0, 0};
   std::map<int32_t, std::pair<int64_t, int64_t>> consts;  // ref eval constants (absent: unknown)
+  std::set<int32_t> open_kinds;              // real records: kinds whose unlisted resources are unknown
+  bool open_locs = false;                    // real records: unlisted locations are unknown
+  bool owner_any = false;                    // real records: the owner of the executing actor is unknown
 };
 
 // Whether the concrete value is one of the values the abstract value stands for.

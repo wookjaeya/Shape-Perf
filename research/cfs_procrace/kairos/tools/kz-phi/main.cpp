@@ -9,8 +9,11 @@
 //                                               identifiers that entries name in the texts they cite, and compare each
 //                                               source revision pin with the commit checked out (read from git metadata
 //                                               files; uncommitted edits are not detected)
-//   kz-phi replay --trace <file> [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...
-//                                               replay a trace (text form, eval_trace.hpp) and print the result
+//   kz-phi replay --trace <file> [--real-record] [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...
+//                                               replay a trace (text form, eval_trace.hpp) and print the result;
+//                                               --real-record replays it as a real record (SPEC 4.8, ADR-055), as a
+//                                               `record real` line in the trace does; without either it is a complete
+//                                               model trace
 //
 // A directory stands for the *.kzp files in it, in the order of their names.  Exit status:
 // 0 = ok, 1 = the profile or a citation is wrong, 2 = usage or I/O error.
@@ -35,7 +38,7 @@ int usage() {
   std::fprintf(stderr,
                "usage: kz-phi check|dump|hash|stats <dir|file>...\n"
                "       kz-phi verify-prov --root <bundle> <dir|file>...\n"
-               "       kz-phi replay --trace <file> [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...\n");
+               "       kz-phi replay --trace <file> [--real-record] [--predicate RULE=EXPR]... [--version COMPONENT=VERSION]... <dir|file>...\n");
   return 2;
 }
 
@@ -86,6 +89,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> args;
   std::string root, trace_path;
   std::vector<std::string> predicates, versions;
+  bool real_record = false;
   for (int i = 2; i < argc; ++i) {
     if (std::strcmp(argv[i], "--root") == 0) {
       if (i + 1 >= argc) return usage();
@@ -99,6 +103,8 @@ int main(int argc, char** argv) {
     } else if (std::strcmp(argv[i], "--version") == 0) {
       if (i + 1 >= argc) return usage();
       versions.push_back(argv[++i]);
+    } else if (std::strcmp(argv[i], "--real-record") == 0) {
+      real_record = true;
     } else {
       args.push_back(argv[i]);
     }
@@ -141,6 +147,7 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "kz-phi: %s\n", s.describe().c_str());
       return 2;
     }
+    if (real_record) trace.record = kz::eval::RecordKind::Real;
     kz::eval::Options options;
     std::vector<kz::phi::ExprPtr> owned;
     for (const std::string& pr : predicates) {

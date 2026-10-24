@@ -75,9 +75,51 @@ kz::Status read_object_symbols(const std::string& path, ObjectSymbols* out) {
         if (bind != STB_WEAK) out->undefined.insert(name);
       } else {
         out->defined.insert(name);
+        const unsigned vis = ELF64_ST_VISIBILITY(sym.st_other);
+        if (vis == STV_HIDDEN || vis == STV_INTERNAL) out->hidden.insert(name);
       }
     }
   }
+  return kz::Status::success();
+}
+
+kz::Status read_dynamic_symbols(const std::string& path, ObjectSymbols* out) {
+  kz::Bytes bytes;
+  Elf64_Ehdr eh;
+  kz::Status st = load(path, &bytes, &eh);
+  if (!st.ok()) return st;
+  if (eh.e_type != ET_DYN && eh.e_type != ET_EXEC) return bad(path, "not a linked executable or shared object");
+  const View v{bytes.data(), bytes.size()};
+  bool found = false;
+  for (uint32_t i = 0; i < eh.e_shnum; ++i) {
+    Elf64_Shdr sh;
+    if (!section_at(v, eh, i, &sh)) return bad(path, "section header out of range");
+    if (sh.sh_type != SHT_DYNSYM) continue;
+    found = true;
+    Elf64_Shdr strsh;
+    if (!section_at(v, eh, sh.sh_link, &strsh) || !v.in(strsh.sh_offset, strsh.sh_size)) return bad(path, "dynamic string table out of range");
+    if (!v.in(sh.sh_offset, sh.sh_size) || sh.sh_entsize < sizeof(Elf64_Sym)) return bad(path, "dynamic symbol table out of range");
+    const uint64_t count = sh.sh_size / sh.sh_entsize;
+    for (uint64_t k = 1; k < count; ++k) {
+      Elf64_Sym sym;
+      std::memcpy(&sym, v.p + sh.sh_offset + k * sh.sh_entsize, sizeof sym);
+      const unsigned bind = ELF64_ST_BIND(sym.st_info);
+      const unsigned type = ELF64_ST_TYPE(sym.st_info);
+      if (bind != STB_GLOBAL && bind != STB_WEAK && bind != STB_GNU_UNIQUE) continue;
+      if (type == STT_SECTION || type == STT_FILE) continue;
+      if (sym.st_name >= strsh.sh_size) return bad(path, "symbol name out of range");
+      const std::string name = cstr_at(v, strsh.sh_offset + sym.st_name, strsh.sh_offset + strsh.sh_size);
+      if (name.empty()) continue;
+      if (sym.st_shndx == SHN_UNDEF) {
+        if (bind != STB_WEAK) out->undefined.insert(name);
+        continue;
+      }
+      const unsigned vis = ELF64_ST_VISIBILITY(sym.st_other);
+      if (vis == STV_HIDDEN || vis == STV_INTERNAL) continue;
+      out->defined.insert(name);
+    }
+  }
+  if (!found) return bad(path, "no dynamic symbol table");
   return kz::Status::success();
 }
 

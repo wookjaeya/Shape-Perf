@@ -1,6 +1,7 @@
 // The kz-static command line: usage errors, a unit that does not parse, damaged inputs, and the
 // whole basis -> extract path on a small synthetic program (two units, a link command, a table,
-// a startup script, a source tree with a commit).
+// a startup script, a source tree with a commit), and a closure of an executable with the
+// modules its startup script loads (recipe `module`).
 //
 //   test_static_cli <kz-static> <fixtures-dir> <objects-dir> <profile-dir> <c-compiler> <work-dir>
 #include <sys/wait.h>
@@ -13,6 +14,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "kz/core/container.hpp"
 #include "support/kz_test.hpp"
@@ -204,6 +206,112 @@ startup_script {
   KZ_CHECK_EQ(run(q(tool) + " show " + q(facts_mini) + " --section init", &out), 0);
   KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=1"));
   KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=40"));
+
+  // ---- a closure: the executable linked with the modules its startup script loads ------------------
+  // The application stores an id through the executable's API (an out pointer); without the
+  // executable's body the field would be DISABLED (address escape), in the closure it has a writer.
+  {
+    const fs::path C = work / "clos";
+    for (const char* d : {"src", "obj", "cf", "mods/mylib", "mods/myapp", "profile"}) fs::create_directories(C / d);
+    write(C / "src/core_main.c",
+          "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n"
+          "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
+          "const char *startup_file(void) { return STARTUP_FILE; }\nint main(void) { return 0; }\n");
+    write(C / "src/core_api.c", "typedef struct { int obj_id; } Rec;\nRec rec_table[2];\nint sem_create(int *sem_id) { rec_table[0].obj_id = 7; *sem_id = rec_table[0].obj_id; return 0; }\n");
+    write(C / "src/lib.c", "int lib_helper(int x) { return x + 1; }\n");
+    write(C / "src/app.c",
+          "typedef struct { int sem; } Throttle;\nThrottle thr[2];\nint sem_create(int *sem_id);\nint lib_helper(int x);\nint ext_fn(void);\n"
+          "int app_main(void) {\n  int i;\n  for (i = 0; i < 2; ++i)\n    if (sem_create(&thr[i].sem) != 0) return lib_helper(i);\n  return ext_fn();\n}\n");
+    write(C / "src/ext.c", "int ext_fn(void) { return 3; }\n");
+    std::string cdb = "[\n";
+    for (const char* n : {"core_main", "core_api", "lib", "app"}) {
+      const std::string src = (C / "src" / (std::string(n) + ".c")).string();
+      const std::string cmd = cc + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
+      KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + cmd, &out), 0);
+      cdb += std::string(cdb.size() > 2 ? ",\n" : "") + "{\"directory\": \"" + C.string() + "\", \"command\": \"" + cmd + "\", \"file\": \"" + src + "\"}";
+    }
+    write(C / "compile_commands.json", cdb + "\n]\n");
+    // the executable exports its symbols (-rdynamic); the modules are shared objects
+    write(C / "link_core.txt", cc + " -rdynamic -o core obj/core_main.o obj/core_api.o\n");
+    write(C / "mods/mylib/link.txt", cc + " -shared -o mylib.so ../../obj/lib.o\n");
+    write(C / "mods/myapp/link.txt", cc + " -shared -o myapp.so ../../obj/app.o\n");
+    KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + read(C / "link_core.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((C / "mods/mylib").string()) + " && " + read(C / "mods/mylib/link.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((C / "mods/myapp").string()) + " && " + read(C / "mods/myapp/link.txt"), &out), 0);
+    KZ_CHECK_EQ(run(q(cc) + " -shared -fPIC -o " + q((C / "cf/extlib.so").string()) + " " + q((C / "src/ext.c").string()), &out), 0);
+    fs::copy_file(C / "mods/mylib/mylib.so", C / "cf/mylib.so");
+    fs::copy_file(C / "mods/myapp/myapp.so", C / "cf/myapp.so");
+    const std::string script_ok = "LIB, extlib, NULL, EXT_LIB, 0;\nLIB, mylib, NULL, MY_LIB, 0;\nAPP, myapp, app_main, MY_APP, 50;\n";
+    write(C / "cf/start.scr", script_ok);
+    write(C / "recipe.kzb", R"(kzb 1;
+name "closure";
+link "link_core.txt";
+binary "core";
+module "mylib" link "mods/mylib/link.txt";
+module "myapp" link "mods/myapp/link.txt";
+module "unused" link "mods/unused/link.txt";
+startup_script {
+  reset POWERON;
+  rule POWERON nonvolatile;
+  file nonvolatile const "STARTUP_FILE" in "src/core_main.c";
+  mount "/cf" "cf";
+  entry library "LIB" global;
+  entry app "APP" local;
+  module_file field 1 path const "NONVOL_MOUNT" extension const "MODULE_EXT" in "src/core_main.c";
+}
+)");
+    for (const fs::directory_entry& e : fs::directory_iterator(profile))
+      if (e.path().extension() == ".kzp") fs::copy_file(e.path(), C / "profile" / e.path().filename());
+    const std::string cbasis = q(tool) + " basis --profile " + q((C / "profile").string()) + " --compile-db " + q((C / "compile_commands.json").string()) + " --build-dir " + q(C.string()) +
+                               " --bundle-root " + q(C.string()) + " --recipe " + q((C / "recipe.kzb").string()) + " --text -o ";
+    const std::string cb = (C / "basis.kz").string(), cf = (C / "facts.kz").string();
+    KZ_CHECK_EQ(run(cbasis + q(cb), &out), 0);
+    KZ_CHECK(has(out, "translation units          4"));
+    KZ_CHECK(has(out, "modules in the closure     2 (units 2), loaded outside the closure 1"));
+    KZ_CHECK(has(out, "(bound otherwise by the loader 0, names defined twice 0)"));
+    KZ_CHECK(has(out, "module[extlib] = library (startup.entry[0], symbols global): /cf/extlib.so -> cf/extlib.so; outside the closure"));
+    KZ_CHECK(has(out, "module[myapp] = app (startup.entry[2], symbols local): /cf/myapp.so -> cf/myapp.so  (unset)"));
+    KZ_CHECK(has(out, "module[myapp].link.output_is_the_loaded_file = yes: mods/myapp/myapp.so"));
+    KZ_CHECK(has(out, "module[myapp].bound[core] = sem_create"));
+    KZ_CHECK(has(out, "module[myapp].bound[mylib] = lib_helper"));
+    KZ_CHECK(has(out, "module[myapp].bound[extlib] = ext_fn"));
+    KZ_CHECK(has(out, "module[unused] = not loaded by the selected startup script"));
+    KZ_CHECK(has(out, "closure.name_binding = the loader's binding: each of the 2 references across units"));
+    KZ_CHECK(has(out, "closure.units = 4 (2 of core, 2 of 2 modules"));
+    // the units of a module carry where they come from
+    kz::Container cbc;
+    KZ_CHECK_OK(kz::Container::read_file(cb, &cbc));
+    std::vector<kz_tu> tus;
+    KZ_CHECK_OK(cbc.read_section(KZ_SEC_TUS, &tus));
+    KZ_CHECK_EQ(tus.size(), size_t(4));
+    bool app_member = false;
+    for (const kz_tu& t : tus) {
+      std::string m;
+      cbc.string(t.member, &m);
+      if (m == "module myapp (app, symbols local), named on its link command") app_member = true;
+    }
+    KZ_CHECK(app_member);
+    // the extraction of the closure: the out-pointer store of the executable's body is a writer
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((C / "profile").string()) + " --basis " + q(cb) + " -o " + q(cf) + " --target Throttle.sem", &out), 0);
+    KZ_CHECK(has(out, "translation units          4"));
+    KZ_CHECK(has(out, "location Throttle.sem   writers 1 (direct 0, data function 0, out-pointer 1"));
+    KZ_CHECK(has(out, "escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete"));
+    // the library loaded after the application: the loader cannot bind lib_helper, the merged
+    // program would; that is a deviation, not hidden
+    write(C / "cf/start.scr", "LIB, extlib, NULL, EXT_LIB, 0;\nAPP, myapp, app_main, MY_APP, 50;\nLIB, mylib, NULL, MY_LIB, 0;\n");
+    KZ_CHECK_EQ(run(cbasis + q((C / "basis_late.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "(bound otherwise by the loader 1, names defined twice 0)"));
+    KZ_CHECK(has(out, "myapp: lib_helper is defined in the closure by mylib, the loader binds it to nothing  (deviation)"));
+    // the file the script loads is not what the link wrote: the module is not linked
+    write(C / "cf/start.scr", script_ok);
+    {
+      std::ofstream(C / "cf/myapp.so", std::ios::binary | std::ios::app) << '\0';
+    }
+    KZ_CHECK_EQ(run(cbasis + q((C / "basis_other.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "module[myapp].link.output_is_the_loaded_file = no:"));
+    KZ_CHECK(has(out, "module myapp not linked: the bytes the link wrote are not the bytes the script loads"));
+    KZ_CHECK(has(out, "translation units          3"));
+  }
 
   fs::remove_all(work);
   return kztest::finish("test_static_cli");

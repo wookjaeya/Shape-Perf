@@ -5,7 +5,10 @@
 //           the generated files by hash (with the tables they hold), the link command and the
 //           members it takes in;
 //   Config  the platform constants evaluated in the unit of their use, the startup script the
-//           reset type selects and its entries;
+//           reset type selects and its entries, and the units that script loads at run time
+//           (recipe `module`): their link members join the program, and the binding of their
+//           undefined symbols by the dynamic loader is recorded and compared with the binding by
+//           name that the extraction of the merged program uses (SPEC 4.1 step 6);
 //   Env     the front end that reads the program (an analysis-only substitute for the compiler
 //           that built it, recorded as a deviation), and the identity of the built binary.
 // Every item has a value, a policy status (CONDITIONS_POLICY) and, where a person entered it, a
@@ -43,6 +46,11 @@ struct BasisReport {
   size_t hand_entered = 0;
   size_t startup_libraries = 0, startup_apps = 0;
   std::string startup_script;
+  // the units the startup script loads, linked with the executable (recipe `module`, SPEC 4.1 step 6)
+  bool modules_requested = false;
+  size_t modules_in = 0, modules_outside = 0, module_units = 0;
+  size_t bound_executable = 0, bound_library = 0, unbound = 0, across_units = 0;
+  size_t binding_differs = 0, duplicate_definitions = 0;
   std::vector<std::string> warnings;
 };
 

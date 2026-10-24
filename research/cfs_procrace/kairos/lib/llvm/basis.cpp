@@ -162,6 +162,9 @@ class Builder {
   kz::Status constants(const kz::phi::Profile& profile, const Recipe& recipe);
   kz::Status generated_and_tables(const Recipe& recipe);
   kz::Status startup(const Recipe& recipe);
+  kz::Status modules(const Recipe& recipe);
+  size_t record_tus(size_t from);
+  std::string map_virtual(const Recipe::Startup& st, const std::string& name) const;
 
   const UnitCommand* unit_of(const std::string& source_rel) const {
     for (const UnitCommand& u : units_)
@@ -182,6 +185,15 @@ class Builder {
   std::map<std::string, std::string> string_consts_;  // recipe string constants by name
   std::map<std::string, std::string> unit_member_;    // object -> how the link command takes it in
   std::string compiler_;
+  std::vector<CdbEntry> cdb_;
+  std::map<std::string, size_t> by_object_;           // object -> compile database entry
+  std::vector<std::string> core_objects_;             // the members the executable's link takes in
+  struct ScriptEntry {
+    size_t index = 0;
+    std::string kind;                 // "library", "app" or "other"
+    std::vector<std::string> fields;  // fields[0] is the entry word
+  };
+  std::vector<ScriptEntry> script_entries_;
 };
 
 kz::Status Builder::revisions(const kz::phi::Profile& profile) {
@@ -213,7 +225,7 @@ kz::Status Builder::revisions(const kz::phi::Profile& profile) {
 }
 
 kz::Status Builder::program(const Recipe& recipe) {
-  std::vector<CdbEntry> cdb;
+  std::vector<CdbEntry>& cdb = cdb_;
   kz::Status s = load_compile_db(in_.compile_db, &cdb);
   if (!s.ok()) return s;
   rep_->cdb_entries = cdb.size();
@@ -221,7 +233,7 @@ kz::Status Builder::program(const Recipe& recipe) {
   item("compile_db.path", rel_to(in_.compile_db, in_.bundle_root));
   item("compile_db.entries", std::to_string(cdb.size()));
 
-  std::map<std::string, size_t> by_object;
+  std::map<std::string, size_t>& by_object = by_object_;
   for (size_t i = 0; i < cdb.size(); ++i) {
     const CdbEntry& e = cdb[i];
     std::string out;
@@ -274,6 +286,7 @@ kz::Status Builder::program(const Recipe& recipe) {
           continue;
       }
       chosen.push_back({m.object, how});
+      core_objects_.push_back(m.object);
     }
     for (const auto& kv : not_pulled) {
       std::string v;
@@ -315,9 +328,15 @@ kz::Status Builder::program(const Recipe& recipe) {
   item("units.count", std::to_string(units_.size()));
   if (!units_.empty() && !units_.front().command_line.empty()) compiler_ = units_.front().command_line.front();
 
-  // flag sets
+  item("units.distinct_flag_sets", std::to_string(record_tus(0)));
+  return kz::Status::success();
+}
+
+// The rows of the TU table for units_[from..]; returns the number of distinct flag sets among them.
+size_t Builder::record_tus(size_t from) {
   std::map<std::string, size_t> distinct;
-  for (const UnitCommand& u : units_) {
+  for (size_t ui = from; ui < units_.size(); ++ui) {
+    const UnitCommand& u = units_[ui];
     const std::vector<std::string> fl = flag_list(u.command_line);
     kz_tu t = zero<kz_tu>();
     t.tu = static_cast<uint32_t>(tus_.size());
@@ -342,8 +361,7 @@ kz::Status Builder::program(const Recipe& recipe) {
     tus_.push_back(t);
     ++distinct[join_command(fl)];
   }
-  item("units.distinct_flag_sets", std::to_string(distinct.size()));
-  return kz::Status::success();
+  return distinct.size();
 }
 
 kz::Status Builder::front_end(const Recipe& recipe) {
@@ -404,6 +422,15 @@ kz::Status Builder::constants(const kz::phi::Profile& profile, const Recipe& rec
     g.source = f.source;
     g.queries.push_back(ConstQuery{f.constant, true});
     g.names.push_back("const." + f.constant);
+  }
+  const Recipe::Startup::ModuleFile& mf = recipe.startup.module_file;
+  if (mf.present && !recipe.modules.empty()) {
+    Q& g = groups[mf.source];
+    g.source = mf.source;
+    for (const std::string& c : {mf.path_const, mf.ext_const}) {
+      g.queries.push_back(ConstQuery{c, true});
+      g.names.push_back("const." + c);
+    }
   }
   for (const auto& kv : groups) {
     const Q& g = kv.second;
@@ -551,14 +578,7 @@ kz::Status Builder::startup(const Recipe& recipe) {
       continue;
     }
     const std::string name = cit->second;
-    // map the virtual path onto the build's directory
-    std::string mapped;
-    size_t best = 0;
-    for (const Recipe::Startup::Mount& m : st.mounts)
-      if (name.compare(0, m.point.size(), m.point) == 0 && m.point.size() >= best) {
-        best = m.point.size();
-        mapped = abs_in(in_.build_dir, m.dir) + name.substr(m.point.size());
-      }
+    const std::string mapped = map_virtual(st, name);
     if (mapped.empty()) {
       item("startup.file[" + role + "]", name + " (no mount point maps it into the build: a run-time file)", KZ_POLICY_UNSPECIFIED);
       continue;
@@ -610,11 +630,300 @@ kz::Status Builder::startup(const Recipe& recipe) {
     }
     std::string text = kind;
     for (size_t i = 1; i < fields.size(); ++i) text += (i == 1 ? " " : ", ") + fields[i];
+    script_entries_.push_back(ScriptEntry{idx, kind, fields});
     item("startup.entry[" + std::to_string(idx++) + "]", text);
   }
   rep_->startup_libraries = libs;
   rep_->startup_apps = apps;
   item("startup.entries", std::to_string(libs) + " libraries, " + std::to_string(apps) + " applications" + (other != 0 ? ", " + std::to_string(other) + " of another kind" : ""));
+  return kz::Status::success();
+}
+
+// A virtual path of the target (e.g. /mnt/x) mapped onto the build's directory by the longest
+// mount point that is a prefix of it; empty when no mount point maps it.
+std::string Builder::map_virtual(const Recipe::Startup& st, const std::string& name) const {
+  std::string mapped;
+  size_t best = 0;
+  for (const Recipe::Startup::Mount& m : st.mounts)
+    if (name.compare(0, m.point.size(), m.point) == 0 && m.point.size() >= best) {
+      best = m.point.size();
+      mapped = abs_in(in_.build_dir, m.dir) + name.substr(m.point.size());
+    }
+  return mapped;
+}
+
+std::string join_set(const std::set<std::string>& names, const char* sep = ", ") {
+  std::string v;
+  for (const std::string& n : names) v += (v.empty() ? "" : sep) + n;
+  return v;
+}
+
+// The units the selected startup script loads at run time, linked with the executable (SPEC 4.1
+// step 6, the app-unit probe).  A script line names a file (recipe `module_file`, constants
+// evaluated in the unit of their use); the recipe's `module` names the link command that builds
+// it, and the bytes that link wrote must be the bytes the script loads, or the unit is not linked.
+// The link members of each module join the program.  The loader's binding is then recorded: a
+// module's undefined symbols are looked up in the executable's exported symbols (its dynamic
+// symbol table), then in the libraries with global scope loaded before it, in script order; an
+// application's own symbols stay local (the scope words of the recipe).  The extraction of the
+// merged program binds external names by name; that is the loader's binding only when no name is
+// defined twice in the closure and every reference across units goes to the unit that defines
+// it.  Both are checked here, and a difference is a deviation, not hidden.
+kz::Status Builder::modules(const Recipe& recipe) {
+  if (recipe.modules.empty()) return kz::Status::success();
+  rep_->modules_requested = true;
+  const Recipe::Startup& st = recipe.startup;
+  const Recipe::Startup::ModuleFile& mf = st.module_file;
+  auto pit = string_consts_.find(mf.path_const), eit = string_consts_.find(mf.ext_const);
+  std::string why_not;
+  if (script_entries_.empty()) why_not = "no startup script was selected";
+  else if (pit == string_consts_.end() || eit == string_consts_.end()) why_not = "the constants that name a module's file were not evaluated";
+  const std::string exe = abs_in(in_.build_dir, recipe.binary);
+  const std::string exe_label = fs::path(exe).filename().string();
+  ObjectSymbols exports;
+  if (why_not.empty()) {
+    kz::Status s = read_dynamic_symbols(exe, &exports);
+    if (!s.ok()) why_not = "the executable's exported symbols are not readable: " + s.message;
+  }
+  if (!why_not.empty()) {
+    item("closure", "the executable only: " + why_not, KZ_POLICY_UNSPECIFIED);
+    rep_->warnings.push_back("modules not linked: " + why_not);
+    return kz::Status::success();
+  }
+  const size_t core_units = units_.size();
+  item("closure.executable_exports", std::to_string(exports.defined.size()) + " symbols in the dynamic symbol table of " + rel_to(exe, in_.bundle_root));
+  item("closure.binding_model",
+       "a module's undefined symbol is bound to the executable's export, else to the first library with global scope loaded before it (script order); "
+       "an application's symbols stay local; the system libraries in the loader's search list (the executable's and the modules' DT_NEEDED) are not read: "
+       "a symbol none of the loaded units exports is listed as unbound here");
+
+  // which unit of the closure defines each name (by name, as the merged extraction binds)
+  std::map<std::string, std::set<std::string>> defined_by;
+  for (const std::string& o : core_objects_) {
+    ObjectSymbols os;
+    if (read_object_symbols(o, &os).ok())
+      for (const std::string& d : os.defined) defined_by[d].insert(exe_label);
+  }
+  struct Loaded {
+    std::string name;
+    std::set<std::string> exports;
+  };
+  std::vector<Loaded> global_scope;  // libraries with global scope, in load order
+  struct Probe {
+    std::string name;
+    std::map<std::string, std::string> bound;  // undefined symbol -> provider ("" = none of the loaded units)
+  };
+  std::vector<Probe> probes;
+  std::set<std::string> used, in_names, out_names;
+  for (const ScriptEntry& e : script_entries_) {
+    if (e.kind != "library" && e.kind != "app") continue;
+    const std::string scope = e.kind == "library" ? st.library_scope : st.app_scope;
+    if (e.fields.size() <= mf.field) {
+      item("module[startup.entry[" + std::to_string(e.index) + "]]", "the line has no field " + std::to_string(mf.field) + ": no file named", KZ_POLICY_UNSPECIFIED);
+      continue;
+    }
+    const std::string fname = e.fields[mf.field];
+    std::string vpath = fname.find('/') == std::string::npos ? pit->second + "/" + fname : fname;
+    if (fs::path(vpath).filename().string().find('.') == std::string::npos) vpath += eit->second;
+    const std::string mapped = map_virtual(st, vpath);
+    std::error_code ec;
+    const bool exists = !mapped.empty() && fs::is_regular_file(mapped, ec);
+    const std::string key = "module[" + fname + "]";
+    const std::string head = e.kind + " (startup.entry[" + std::to_string(e.index) + "], symbols " + scope + "): " + vpath +
+                             (mapped.empty() ? " (no mount point maps it into the build)" : " -> " + rel_to(mapped, in_.bundle_root)) + (exists || mapped.empty() ? "" : " (absent)");
+    const Recipe::Module* rm = nullptr;
+    for (const Recipe::Module& m : recipe.modules)
+      if (m.name == fname) rm = &m;
+    if (rm == nullptr) {
+      ++rep_->modules_outside;
+      out_names.insert(fname);
+      Loaded l{fname, {}};
+      std::string why = "outside the closure: the recipe names no link command for it";
+      ObjectSymbols ds;
+      if (exists && read_dynamic_symbols(mapped, &ds).ok()) {
+        l.exports = ds.defined;
+        why += "; the " + std::to_string(ds.defined.size()) + " symbols it exports are read from the loaded file, for the binding only";
+      }
+      item(key, head + "; " + why, KZ_POLICY_UNSPECIFIED);
+      if (scope == "global") global_scope.push_back(l);
+      continue;
+    }
+    used.insert(fname);
+    item(key, head);
+    auto not_linked = [&](const std::string& why) {
+      item(key + ".closure", "not linked: " + why, KZ_POLICY_UNSPECIFIED);
+      rep_->warnings.push_back("module " + fname + " not linked: " + why);
+    };
+    if (!exists) {
+      not_linked("the file the script loads is not in the build");
+      continue;
+    }
+    const std::string link_file = abs_in(in_.build_dir, rm->link);
+    std::ifstream f(link_file);
+    if (!f) {
+      not_linked("cannot read the link command file " + rel_to(link_file, in_.bundle_root));
+      continue;
+    }
+    std::ostringstream ss;
+    ss << f.rdbuf();
+    std::string cwd = fs::path(link_file).parent_path().string();
+    const size_t cm = link_file.find("/CMakeFiles/");
+    if (cm != std::string::npos) cwd = link_file.substr(0, cm);
+    LinkPlan plan;
+    LinkSet set;
+    kz::Status s = parse_link_command(ss.str(), cwd, &plan);
+    if (s.ok()) s = resolve_link_set(plan, &set);
+    if (!s.ok()) {
+      not_linked(s.message);
+      continue;
+    }
+    add_file(link_file);
+    item(key + ".link.command", rel_to(link_file, in_.bundle_root));
+    const std::string out_sha = plan.output.empty() ? "unreadable" : file_sha(plan.output), loaded_sha = file_sha(mapped);
+    if (out_sha == "unreadable" || out_sha != loaded_sha) {
+      item(key + ".link.output_is_the_loaded_file",
+           "no: the link writes " + (plan.output.empty() ? std::string("no named file") : rel_to(plan.output, in_.bundle_root) + " (sha256 " + out_sha + ")") + ", the script loads sha256 " + loaded_sha,
+           KZ_POLICY_UNSPECIFIED);
+      not_linked("the bytes the link wrote are not the bytes the script loads");
+      continue;
+    }
+    add_file(mapped);
+    item(key + ".link.output_is_the_loaded_file", "yes: " + rel_to(plan.output, in_.bundle_root) + ", sha256 " + out_sha);
+    // the members join the program
+    ObjectSymbols syms;
+    size_t nunits = 0;
+    for (const LinkMember& m : set.members) {
+      if (m.mode == LinkMember::NotPulled) continue;
+      ObjectSymbols os;
+      if (read_object_symbols(m.object, &os).ok()) {
+        syms.defined.insert(os.defined.begin(), os.defined.end());
+        syms.hidden.insert(os.hidden.begin(), os.hidden.end());
+        syms.undefined.insert(os.undefined.begin(), os.undefined.end());
+      }
+      auto it = by_object_.find(m.object);
+      if (it == by_object_.end()) {
+        ++rep_->unmatched_objects;
+        rep_->warnings.push_back("no compile command produces " + m.object + " (module " + fname + ")");
+        continue;
+      }
+      if (unit_member_.count(m.object) != 0) continue;
+      const CdbEntry& ce = cdb_[it->second];
+      UnitCommand u;
+      u.directory = ce.directory;
+      u.source = abs_in(ce.directory, ce.file);
+      u.object = m.object;
+      u.command_line = ce.command_line;
+      units_.push_back(u);
+      std::string how = m.mode == LinkMember::Named ? "named on its link command" : "member of " + fs::path(m.archive).filename().string();
+      unit_member_[m.object] = "module " + fname + " (" + e.kind + ", symbols " + scope + "), " + how;
+      ++nunits;
+    }
+    for (const std::string& d : syms.defined) syms.undefined.erase(d);
+    for (const std::string& d : syms.defined) defined_by[d].insert(fname);
+    ++rep_->modules_in;
+    rep_->module_units += nunits;
+    in_names.insert(fname);
+    item(key + ".units", std::to_string(nunits));
+    // the loader's binding of its undefined symbols: those the loaded file still asks the loader
+    // for (its dynamic symbol table); the others the module's own link resolved (e.g. symbols the
+    // static linker defines in its output)
+    ObjectSymbols loaded;
+    kz::Status ls = read_dynamic_symbols(mapped, &loaded);
+    if (!ls.ok()) rep_->warnings.push_back("module " + fname + ": " + ls.message);
+    Probe p;
+    p.name = fname;
+    std::map<std::string, std::set<std::string>> by_provider;
+    std::set<std::string> by_link;
+    for (const std::string& u : syms.undefined) {
+      if (ls.ok() && loaded.undefined.count(u) == 0) {
+        by_link.insert(u);
+        p.bound[u] = "the link of " + fname;
+        continue;
+      }
+      std::string provider;
+      if (exports.defined.count(u) != 0) provider = exe_label;
+      else
+        for (const Loaded& l : global_scope)
+          if (l.exports.count(u) != 0) {
+            provider = l.name;
+            break;
+          }
+      p.bound[u] = provider;
+      by_provider[provider].insert(u);
+    }
+    std::string counts;
+    for (const auto& kv : by_provider) {
+      if (kv.first.empty()) continue;
+      counts += (counts.empty() ? "" : ", ") + kv.first + " " + std::to_string(kv.second.size());
+      (kv.first == exe_label ? rep_->bound_executable : rep_->bound_library) += kv.second.size();
+    }
+    const size_t nun = by_provider.count("") != 0 ? by_provider[""].size() : 0;
+    rep_->unbound += nun;
+    item(key + ".undefined", std::to_string(syms.undefined.size()) + " (bound to " + (counts.empty() ? std::string("none") : counts) + "; unbound " + std::to_string(nun) +
+                                 "; resolved by the module's own link " + std::to_string(by_link.size()) + ")");
+    for (const auto& kv : by_provider)
+      item(key + (kv.first.empty() ? std::string(".unbound") : ".bound[" + kv.first + "]"), join_set(kv.second));
+    if (!by_link.empty()) item(key + ".resolved_by_its_link", join_set(by_link));
+    if (scope == "global") {
+      Loaded l{fname, {}};
+      for (const std::string& d : syms.defined)
+        if (syms.hidden.count(d) == 0) l.exports.insert(d);
+      global_scope.push_back(l);
+    }
+    probes.push_back(p);
+  }
+  for (const Recipe::Module& m : recipe.modules)
+    if (used.count(m.name) == 0) item("module[" + m.name + "]", "not loaded by the selected startup script: not in the closure", KZ_POLICY_UNSPECIFIED);
+
+  // the merged program binds by name: compare with the loader
+  std::set<std::string> dups, differs;
+  for (const auto& kv : defined_by)
+    if (kv.second.size() > 1) dups.insert(kv.first + " (" + join_set(kv.second, " and ") + ")");
+  size_t across = 0;
+  for (const Probe& p : probes)
+    for (const auto& kv : p.bound) {
+      auto it = defined_by.find(kv.first);
+      if (it == defined_by.end()) continue;  // no unit of the closure defines it: no body either way
+      ++across;
+      if (it->second.size() != 1 || it->second.count(kv.second) == 0)
+        differs.insert(p.name + ": " + kv.first + " is defined in the closure by " + join_set(it->second, " and ") + ", the loader binds it to " +
+                       (kv.second.empty() ? std::string("nothing") : kv.second));
+    }
+  rep_->across_units = across;
+  rep_->duplicate_definitions = dups.size();
+  rep_->binding_differs = differs.size();
+  std::vector<std::string> mods(in_names.begin(), in_names.end());
+  item("closure.modules", exe_label + (mods.empty() ? "" : " + " + join_set(in_names)));
+  item("closure.loaded_outside", out_names.empty() ? "none" : join_set(out_names), out_names.empty() ? KZ_POLICY_UNSET : KZ_POLICY_UNSPECIFIED);
+  if (dups.empty()) {
+    item("closure.duplicate_definitions", "none");
+  } else {
+    const uint32_t dev = add_deviation("names defined by more than one unit of the closure", "one definition per name", join_set(dups, "; "),
+                                       "the loader binds each reference to one definition; the units define the same name",
+                                       "the extraction keys external functions and objects by name and reads the first definition: the facts of the others are missing",
+                                       KZ_AVOIDABLE_UNKNOWN);
+    item("closure.duplicate_definitions", join_set(dups, "; "), KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+    rep_->warnings.push_back(std::to_string(dups.size()) + " names are defined by more than one unit of the closure");
+  }
+  if (differs.empty()) {
+    item("closure.name_binding", "the loader's binding: each of the " + std::to_string(across) + " references across units goes to the one unit that defines the name");
+  } else {
+    const uint32_t dev = add_deviation("binding of references across units", "the dynamic loader's binding (closure.binding_model)", join_set(differs, "; "),
+                                       "the merged extraction binds by name", "these references reach, in the facts, a body the loader does not bind them to", KZ_AVOIDABLE_UNKNOWN);
+    item("closure.name_binding", std::to_string(differs.size()) + " of " + std::to_string(across) + " references across units differ from the loader: " + join_set(differs, "; "),
+         KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+    rep_->warnings.push_back(std::to_string(differs.size()) + " references across units are bound differently by the loader");
+  }
+  // the rows of the new units, in source order after those of the executable
+  std::sort(units_.begin() + static_cast<std::ptrdiff_t>(core_units), units_.end(), [&](const UnitCommand& a, const UnitCommand& b) {
+    const std::string sa = rel_to(a.source, in_.bundle_root), sb = rel_to(b.source, in_.bundle_root);
+    if (sa != sb) return sa < sb;
+    return a.object < b.object;
+  });
+  const size_t flag_sets = record_tus(core_units);
+  item("closure.units", std::to_string(units_.size()) + " (" + std::to_string(core_units) + " of " + exe_label + ", " + std::to_string(units_.size() - core_units) + " of " +
+                            std::to_string(in_names.size()) + " modules; distinct flag sets among the module units " + std::to_string(flag_sets) + ")");
+  rep_->units = units_.size();
   return kz::Status::success();
 }
 
@@ -640,6 +949,7 @@ kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   if (!(s = constants(profile, recipe)).ok()) return s;
   if (!(s = generated_and_tables(recipe)).ok()) return s;
   if (!(s = startup(recipe)).ok()) return s;
+  if (!(s = modules(recipe)).ok()) return s;
   for (const Recipe::Declared& d : recipe.declared) {
     const uint32_t prov = add_prov(KZ_TIER_RESEARCHER, KZ_PROV_KIND_RESEARCHER, KZ_PROV_SIDE_NA, "", 0, 0, "recipe " + in_.recipe_path, d.authored, nullptr);
     item(d.name, d.value, KZ_POLICY_DECLARED, prov);

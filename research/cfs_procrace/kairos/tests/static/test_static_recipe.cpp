@@ -30,6 +30,19 @@ startup_script {
 }
 )";
 
+const char* kModules = R"(kzb 1;
+link "core/link.txt";
+binary "exe/core";
+module "app_a" link "apps/a/link.txt";
+module "lib_b" link "apps/b/link.txt";
+startup_script {
+  reset POWERON;
+  entry library "LIB" global;
+  entry app "APP" local;
+  module_file field 1 path const "MOUNT" extension const "EXT" in "src/t.c";
+}
+)";
+
 }  // namespace
 
 int main() {
@@ -60,6 +73,24 @@ int main() {
   KZ_CHECK_EQ(r.startup.cites[0].note, std::string("where the rule is"));
   KZ_CHECK(r.startup.cites[1].note.empty());
 
+  // modules: the link command of each, the scope of each entry kind, how a script line names its file
+  {
+    Recipe m;
+    KZ_CHECK_OK(parse_recipe(kModules, &m));
+    KZ_CHECK_EQ(m.modules.size(), size_t(2));
+    KZ_CHECK_EQ(m.modules[1].name, std::string("lib_b"));
+    KZ_CHECK_EQ(m.modules[1].link, std::string("apps/b/link.txt"));
+    KZ_CHECK_EQ(m.startup.library_scope, std::string("global"));
+    KZ_CHECK_EQ(m.startup.app_scope, std::string("local"));
+    KZ_CHECK(m.startup.module_file.present);
+    KZ_CHECK_EQ(m.startup.module_file.field, 1u);
+    KZ_CHECK_EQ(m.startup.module_file.path_const, std::string("MOUNT"));
+    KZ_CHECK_EQ(m.startup.module_file.ext_const, std::string("EXT"));
+    KZ_CHECK_EQ(m.startup.module_file.source, std::string("src/t.c"));
+    // without modules the scope words stay optional
+    KZ_CHECK(r.startup.library_scope.empty() && r.modules.empty());
+  }
+
   // errors say where
   struct Bad {
     const char* text;
@@ -76,6 +107,13 @@ int main() {
       {"kzb 1;\nlink \"x\";\nstartup_script {\n  entry thing \"w\";\n}\n", "entry role must be"},
       {"kzb 1;\nlink \"x\";\nstartup_script {\n  mystery;\n}\n", "unknown statement `mystery` in startup_script"},
       {"kzb 1;\nlink \"unterminated;\n", "expected a quoted string"},
+      {"kzb 1;\nlink \"x\";\nbinary \"b\";\nmodule \"m\" link \"m.txt\";\n", "needs a startup_script block"},
+      {"kzb 1;\nlink \"x\";\nbinary \"b\";\nmodule \"m\" link \"m.txt\";\nstartup_script {\n  entry library \"L\" global;\n  entry app \"A\" local;\n}\n", "needs `module_file`"},
+      {"kzb 1;\nlink \"x\";\nbinary \"b\";\nmodule \"m\" link \"m.txt\";\nstartup_script {\n  entry library \"L\";\n  entry app \"A\" local;\n  module_file field 1 path const \"P\" extension const \"E\" in \"s.c\";\n}\n", "symbol scope of both entry kinds"},
+      {"kzb 1;\nlink \"x\";\nmodule \"m\" link \"m.txt\";\nstartup_script {\n  entry library \"L\" global;\n  entry app \"A\" local;\n  module_file field 1 path const \"P\" extension const \"E\" in \"s.c\";\n}\n", "needs `binary`"},
+      {"kzb 1;\nlink \"x\";\nmodule \"m\" link \"a\";\nmodule \"m\" link \"b\";\n", "line 4: the module `m` is named twice"},
+      {"kzb 1;\nlink \"x\";\nstartup_script {\n  entry app \"A\" shared;\n}\n", "is `global` or `local`"},
+      {"kzb 1;\nlink \"x\";\nstartup_script {\n  module_file field 0 path const \"P\" extension const \"E\" in \"s.c\";\n}\n", "not field 0"},
   };
   for (const Bad& b : bad) {
     Recipe rr;

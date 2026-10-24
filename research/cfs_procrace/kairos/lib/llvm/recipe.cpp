@@ -99,6 +99,13 @@ class Parser {
         Recipe::Declared d;
         if (!str(&d.name) || !str(&d.value) || !word("authored") || !str(&d.authored) || !semi()) return err_;
         r->declared.push_back(d);
+      } else if (kw == "module") {
+        Recipe::Module m;
+        if (!str(&m.name)) return err_;
+        for (const Recipe::Module& o : r->modules)
+          if (o.name == m.name) return fail("the module `" + m.name + "` is named twice");
+        if (!word("link") || !str(&m.link) || !semi()) return err_;
+        r->modules.push_back(m);
       } else if (kw == "startup_script") {
         if (!startup(r)) return err_;
       } else {
@@ -106,6 +113,13 @@ class Parser {
       }
     }
     if (r->link.empty()) return fail("the recipe has no `link` statement");
+    if (!r->modules.empty()) {
+      const Recipe::Startup& st = r->startup;
+      if (!st.present) return fail("a `module` needs a startup_script block: the script decides which modules are loaded");
+      if (!st.module_file.present) return fail("a `module` needs `module_file` in startup_script: how a script line names its file");
+      if (st.library_scope.empty() || st.app_scope.empty()) return fail("a `module` needs the symbol scope of both entry kinds (`entry library \"W\" global;`)");
+      if (r->binary.empty()) return fail("a `module` needs `binary`: the symbols the executable exports are read from it");
+    }
     return kz::Status::success();
   }
 
@@ -192,14 +206,37 @@ class Parser {
         if (!str(&m.point) || !str(&m.dir) || !semi()) return false;
         r->startup.mounts.push_back(m);
       } else if (kw == "entry") {
-        std::string role, w;
-        if (!ident(&role) || !str(&w) || !semi()) return false;
-        if (role == "library") r->startup.library_word = w;
-        else if (role == "app") r->startup.app_word = w;
-        else {
+        std::string role, w, scope;
+        if (!ident(&role) || !str(&w)) return false;
+        if (cur_.kind == Tok::Word) {
+          scope = cur_.text;
+          if (scope != "global" && scope != "local") {
+            fail("the symbol scope of an entry is `global` or `local`");
+            return false;
+          }
+          advance();
+        }
+        if (!semi()) return false;
+        if (role == "library") {
+          r->startup.library_word = w;
+          r->startup.library_scope = scope;
+        } else if (role == "app") {
+          r->startup.app_word = w;
+          r->startup.app_scope = scope;
+        } else {
           fail("entry role must be `library` or `app`");
           return false;
         }
+      } else if (kw == "module_file") {
+        Recipe::Startup::ModuleFile& mf = r->startup.module_file;
+        if (!word("field") || !num(&mf.field) || !word("path") || !word("const") || !str(&mf.path_const) || !word("extension") || !word("const") || !str(&mf.ext_const) ||
+            !word("in") || !str(&mf.source) || !semi())
+          return false;
+        if (mf.field == 0) {
+          fail("the file-name field of a script line is not field 0 (the entry word)");
+          return false;
+        }
+        mf.present = true;
       } else if (kw == "cite") {
         Recipe::Startup::Cite c;
         if (!str(&c.file) || !num(&c.from) || !num(&c.to)) return false;

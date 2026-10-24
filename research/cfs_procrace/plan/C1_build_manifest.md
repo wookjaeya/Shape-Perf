@@ -13,7 +13,7 @@
 2. **원문 그대로의 첫 빌드는 실패했다.** 실패 지점은 OSAL `os-impl-filesys.c:171`의 `snprintf`에 대한 gcc 13.3의 `-Werror=restrict` 하나뿐이다(§4.1). 계획 §8.5의 분류로는 (b) 이 호스트의 도구 차이로 본다 [I]. 최소 이식은 `CFLAGS=-Wno-error=restrict` 하나이며 진단 수준만 바꾼다. 자원 이름·생성/조회 순서·재시도 설정·우선순위는 바뀌지 않았다(§6에서 산출물로 대조 [M]). 그래서 멈추지 않고 진행했다. 이 이탈의 수용은 PI 확인 사항이다(§10 PI-2).
 3. **유효 설정**(산출물에서 읽음 [M]): 이름 `BP0_tsem`·`BP1_tsem`(CF 표 `.tbl` 바이트, BP `.so`의 기본값, BP 이벤트 문구 모두 일치). CF 재시도: 수정 전 없음, 수정 후 `CF_STARTUP_SEM_MAX_RETRIES`=25·`CF_STARTUP_SEM_TASK_DELAY`=100(빌드 명령으로 매크로 평가). 시작 순서는 스크립트 L1–L7 그대로(CF 다음 BP), 설정 우선순위 CF 65·BP 55.
 4. **build-smoke 관측**(빌드마다 1회, tx·rx 두 인스턴스): 수정 전 4개 인스턴스 모두 CF 이벤트 30 "failed to get sem id for name BP0_tsem, error=-17"(`OS_ERR_NAME_NOT_FOUND`) 후 CF 종료, 그 뒤 BP가 두 semaphore를 "Created". 수정 후 4개 인스턴스 모두 BP "Created" 두 줄과 CF 이벤트 20 "CF Initialized". 스케줄러는 모든 스레드 `SCHED_OTHER`(nice 0): OSAL이 `SCHED_RR`을 고르지만 `setschedparam`이 `EPERM`. affinity는 기본값(0–3) 그대로이며 이 작업은 아무것도 설정하지 않았다. 수정 전 실패 시도의 판정 라벨은 rev 1.3 그대로 NOT_READY_UNJUDGED이며, 이 smoke는 판정 출력이 아니다.
-5. **앱 포함 정적 범위(D5)**: 기존 `kz-static`(k1r3-llvm)으로 링크 단위마다 basis·extract를 돌렸다(core-tx, cf.so, bp.so, bplib.so). CF·BP의 semaphore 호출 지점 전부와 OSAL 쪽 이름·id writer가 각 단위의 사실에 들어왔다. 그러나 **코어와 앱 `.so`를 하나의 닫힌 프로그램으로 묶는 기능이 없어서**(recipe의 `link`가 하나뿐, app-unit probe 미구현) CF·BP 쪽 id 필드는 단위 안에서 DISABLED이다. 빠진 것을 §8.4에 적었다.
+5. **앱 포함 정적 범위(D5)**: 기존 `kz-static`(k1r3-llvm)으로 링크 단위마다 basis·extract를 돌렸다(core-tx, cf.so, bp.so, bplib.so). CF·BP의 semaphore 호출 지점 전부와 OSAL 쪽 이름·id writer가 각 단위의 사실에 들어왔다. 그러나 **코어와 앱 `.so`를 하나의 닫힌 프로그램으로 묶는 기능이 없어서**(recipe의 `link`가 하나뿐, app-unit probe 미구현) CF·BP 쪽 id 필드는 단위 안에서 DISABLED이다. 빠진 것을 §8.4에 적었다. **후속(§8.5)**: recipe `module`로 코어와 스크립트가 적재하는 `.so` 6개를 한 닫힘으로 묶었다. 닫힘 조건은 CF·BP 모두 충족, `BP_Throttle_t.Sem`은 writer-set-complete, CF 두 필드는 CF 자체의 cast로 DISABLED가 남는다.
 6. ENV 이식(B0–B8)은 시작하지 않았다. P0이 조립·기동됐으므로 계획 §8.0에 따라 공개 통합 구성이 기준이고, ENV 이식은 필요하면 PI가 정하는 비교용 파생이다.
 
 ## 1. 구성요소 SHA
@@ -204,10 +204,52 @@ semaphore 호출 지점(사실 컨테이너의 `calls`) [M]:
 
 ### 8.4 빠진 것(정확히)
 
-1. **다중 링크 단위**: recipe 문법은 `link`를 하나만 받는다(`lib/llvm/recipe.cpp` L86–L87, 두 번째 `link`는 앞의 값을 덮어씀). 코어와 `dlopen`으로 적재되는 `.so`를 한 프로그램으로 묶는 app-unit probe(SPEC §4.1 6)는 미구현이다(`kairos/docs/static_facts.md` §1 표 "link unit / app-unit probe" 행). 필요한 것: 여러 link 단위의 합집합과 단위 사이 기호 해석(앱의 미정의 함수 → 코어 정의), 그리고 적재 순서의 근거(시작 스크립트)를 basis에 싣는 것.
+1. **다중 링크 단위**: recipe 문법은 `link`를 하나만 받는다(`lib/llvm/recipe.cpp` L86–L87, 두 번째 `link`는 앞의 값을 덮어씀). 코어와 `dlopen`으로 적재되는 `.so`를 한 프로그램으로 묶는 app-unit probe(SPEC §4.1 6)는 미구현이다(`kairos/docs/static_facts.md` §1 표 "link unit / app-unit probe" 행). 필요한 것: 여러 link 단위의 합집합과 단위 사이 기호 해석(앱의 미정의 함수 → 코어 정의), 그리고 적재 순서의 근거(시작 스크립트)를 basis에 싣는 것. → §8.5에서 구현(소스 수준).
 2. **`.tbl` 바이트 대조**: 표 내용(`sem_name`)이 실행 시 코어 TBL이 파일에서 채우는 값이라 도구가 static image로 볼 수 없다. `.tbl` 대조는 미구현이다(같은 문서 §1 "상수·표" 행).
 3. **C1 프로필**: 프로필은 `cfs-v7.0.1` 하나이고 ENV SHA를 고정한다. 2022 스택의 `source` 선언, countsem 종류·조회/생성 연산(`K-REG.osal-countsem-lookup`)·대상 위치가 프로필에 없어서 이번에는 대상을 명령줄 `--target`으로 줬다(사람이 넣은 입력 6건으로 기록됨). K4b(census, Φ 대응)는 이 범위에서 돌리지 않았다.
 4. **바이너리 연결 관측점**(마스터플랜 W3 산출물 "바이너리에 연결된 프로필·관측점"): 하지 않았다(W2의 `sites.kzp` 보강과 W4의 몫).
+
+### 8.5 결합 닫힘 (D5 후속, 2026-10-24) [M]
+
+정적 분석만 했다(cFS 실행 없음, 실험 결과 아님). 도구: 이번 커밋의 `kz-static`(k1r3-llvm 재빌드, `tool_sha256=9647b97a…`)과 recipe `module`(`kairos/docs/static_facts.md` §3.1). 실행 `c1_build/kz_run.sh <cfg> <cand> closure`(W3 판은 `kz_run.sh.w3`로 보존), 산출물 `c1_build/kz/<cfg>_<cand>/closure.{kzb,basis.kz,facts.kz,basis.log,extract.log}`. recipe 값의 근거 줄은 A 번들(cFE `6cccb3f`, OSAL `f34759d`, PSP `bd4a2ea`) 기준이며, B 번들의 해당 파일 5개는 바이트가 같다 [M: `cmp`].
+
+| recipe 항목 | 값 | 근거 | 상태 |
+|---|---|---|---|
+| 실행 파일 | `core-tx`의 link·binary(§8.2와 같음) | 빌드 트리 | from-reference |
+| 스크립트 선택 | `reset POWERON` → nonvolatile `CFE_PLATFORM_ES_NONVOL_STARTUP_FILE`(`target_config.c`에서 평가 = `/cf/cfe_es_startup.scr`) | `cfe_es_apps.c` L86–L150, `cfe_psp_start.c` L67·L387–L415·L429, `target_config.c` L143–L145. reset 종류는 basis 입력이며, 네 빌드의 smoke 콘솔이 "Starting the cFE with a POWER ON reset"을 냈다(§7) | declared(근거 있음) |
+| `/cf` 대응 | `../exe/tx/cf` | `cfe_psp_start.c` L355–L358(`./cf` → `/cf`), smoke는 `tx/`에서 실행(`smoke_one.sh`) | from-reference |
+| 모듈 파일 | 스크립트 필드 1 + 기본 경로 `/cf` + 기본 확장자 `.so`(둘 다 `target_config.c`에서 평가) | `cfe_es_apps.c` L316–L317, `cfe_fs_api.c` L53–L110·L582–L588, `target_config.c` L171 | from-reference |
+| 기호 범위 | `CFE_LIB` global, `CFE_APP` local, `RTLD_NOW` | `cfe_es_apps.c` L410–L430, `os-impl-posix-dl-loader.c` L72–L96 | from-reference |
+| 모듈 link | bplib·ci_lab·to_lab·sch_lab·cf·bp·cfe_assert의 `link.txt` | 묶을지는 스크립트가 정한다. link 출력과 적재 파일의 sha256이 같음을 모듈마다 확인 [M] | from-reference |
+
+결과(네 빌드 모두 basis·extract 종료 코드 0):
+
+| 항목 | pre/A | post/A | pre/B | post/B |
+|---|---|---|---|---|
+| 번역 단위 | 177 = core-tx 132 + 모듈 45(bplib 21, cf 13, bp 8, ci_lab·to_lab·sch_lab 각 1) | 177 | 177 | 177 |
+| 모듈 미정의 기호의 결합 | core-tx 178, 라이브러리 31(bp→bplib 17, bplib→tinycbor 14), 없음 46(시스템 라이브러리 몫) | core-tx 179(CF의 `OS_TaskDelay`) | 178 | 179 |
+| 단위 사이 참조 / 적재기와 다른 결합 / 두 번 정의된 이름 | 195 / 0 / 0 | 196 / 0 / 0 | 195 / 0 / 0 | 196 / 0 / 0 |
+| 함수(본문) / 호출 지점 | 2180 (1981) / 7908 | 2180 (1981) / 7909 | 2180 (1981) / 7908 | 2180 (1981) / 7909 |
+
+닫힘 밖: `tinycbor.so`(L1, 이 빌드가 만들지 않아 compile DB 없음; 내보내는 기호 43개는 결합 판단에만 씀), `cfe_assert.so`(스크립트에 없음), 시스템 라이브러리.
+
+대상 위치(네 빌드 같은 값; 줄은 수정 전/후 CF):
+
+| 위치 | W3(단위별, §8.2) | 결합 닫힘 |
+|---|---|---|
+| `BP_Throttle_t.Sem` | DISABLED(escape 2) | **writer-set-complete**: out-pointer writer 2(`bp_flow.c:126` → `OS_ObjectIdFindByName` `osapi-idmap.c:978`; `:132` → `OS_ObjectIdFinalizeNew` `:860`), A-TYPE 0 |
+| `BP_Throttle_t.Name` | writer-set-complete(초기값만) | 같음 |
+| `CF_Channel_t.sem_id` | DISABLED(escape 1, cast 1, untyped 10) | **DISABLED**: writer 2(memset `cf_cfdp.c:965`, out-pointer `:993`/`:1003` → `osapi-idmap.c:978`), escape 0, cast 1, untyped 133. escape는 풀렸고, 남은 원인은 CF 자체의 cast `cf_cmd.c:734` `(CF_CListFn_t)CF_PurgeHistory`(채널 포인터를 `void *` 문맥으로 넘김)다. cast 노출이 있으면 프로그램의 untyped 쓰기 133곳이 모두 센다 |
+| `CF_ChannelConfig_t.sem_name` | DISABLED(cast 1, unknown-effect 2, untyped 10) | **DISABLED**: writer 0, cast 1(`cf_app.c:114`, `void *tbl_ptr` → `CF_ConfigTable_t *`), unknown-effect 0, untyped 133. 표 내용은 코어 TBL이 파일에서 untyped 복사로 채우므로 `.tbl` 대조(§8.4 2) 없이는 닫히지 않는다 |
+| OSAL `OS_common_record_t.name_entry`·`.active_id`, `OS_count_sem_internal_record_t.obj_name` | writer-set-complete(18·6·3) | 같음(앱 코드가 A-TYPE을 더하지 않음) |
+
+countsem API 호출자(닫힘 안 전부): BP `bp_flow.c:126` GetIdByName, `:132` Create, `:184` Give; CF `cf_cfdp.c:993`/`:1003` GetIdByName, `cf_cfdp_sbintf.c:93` TimedWait; sch_lab `sch_lab_app.c:168` Create(`"SCH_LAB"`), `:146` Give, `:100` Take. bplib·ci_lab·to_lab에는 없다.
+
+판단:
+- **D5의 닫힘 조건**(코어와 적재 `.so`를 한 프로그램으로 묶는 app-unit probe, SPEC §4.1 "Closure per case")은 CF·BP 모두 **충족** [M]: 위 writer·별칭(id 쓰기 경로, 이름 복사 경로, API 호출자)이 한 facts 컨테이너에 있고, 이름 결합이 적재기 결합과 같다(차이 0, 중복 0).
+- **writer 집합 상태**: BP 두 필드와 OSAL 쪽 세 위치는 writer-set-complete. CF 두 필드는 DISABLED로 남는다. 원인은 닫힘 경계가 아니라 CF 코드 안의 cast(A-TYPE)이고, SPEC상 그 위치에 기대는 conjunct는 `unknown(writer_incomplete)`가 된다(SPEC §4.2 A-TYPE, O7). S3b(points-to)는 DISABLED가 인증서를 막을 때만 만든다(SPEC §4.1 10).
+- 남은 것: `.tbl` 대조(§8.4 2), C1 프로필(§8.4 3), IR 수준 link와 `-fcallgraph-info` 대조(SPEC §4.1 6의 나머지), 바이너리 관측점(§8.4 4).
+- **PI 확인(결정하지 않음)**: C1 단계 B의 완료에 CF 쪽 두 필드의 writer-set-complete까지 필요한가. 레퍼런스가 정하지 않는 이유: SPEC §4.1 "Closure per case"는 "the closure covers the writers and aliases its conditions need"라고만 하고 A-TYPE 목록에 오른 별칭이 '포괄됨'에 드는지 말하지 않는다. 어느 conjunct가 이 필드를 support location으로 쓰는지는 아직 없는 C1 Φ 프로필이 정한다. 현행: DISABLED를 그대로 보고하고 S3b나 선언 규칙은 만들지 않았다.
 
 ## 9. 원 보고(#184)·BP CI와의 차이
 
@@ -233,5 +275,5 @@ semaphore 호출 지점(사실 컨테이너의 `calls`) [M]:
 - **PI-2 (DV-P1 수용)**: gcc 13.3에서 `-Wno-error=restrict` 하나로 진단을 강등한 빌드를 P0의 "그대로 구성됨"으로 볼지, 러너 시기의 컴파일러를 따로 구하라고 할지. 레퍼런스가 정하지 않는 이유: `runs-on: ubuntu-22.04`(L51)는 갱신되는 이미지이고 그때의 컴파일러 판은 어디에도 기록되지 않았다. 의미 영향(이름·순서·재시도·우선순위)은 없음을 §6에서 대조했다.
 - **PI-3 (Q-5의 후속)**: P0은 조립·기동됐다. 계획 §8.0에 따라 ENV 이식(B0–B8)은 비교용 파생이며 할지 말지는 PI가 정한다. 그 경우 Q-1·Q-2·Q-4가 다시 필요하다.
 - **PI-4 (인스턴스, Q-3)**: P-REC는 CI대로 tx·rx를 함께 띄운다. W4에서 한 인스턴스만 관측할지 둘 다 관측할지는 레퍼런스가 정하지 않는다(C1B-U10).
-- 열린 기술 항목: D5 결합 닫힘(§8.4 1–3), 수정 후 첫 조회 실패·재시도 여부의 관측(§7, W4의 관측기 몫), OSAL·ES 내부 우선순위 기록값 [U], G-REBIND(`833fdbb`의 `caller` 기록 다시 묶기, 계획 §9.3)는 W4 첫 출력 전 선행 조건으로 그대로 남는다.
+- 열린 기술 항목: D5의 남은 부분(§8.4 2–4; 결합 닫힘 자체는 §8.5), 수정 후 첫 조회 실패·재시도 여부의 관측(§7, W4의 관측기 몫), OSAL·ES 내부 우선순위 기록값 [U], G-REBIND(`833fdbb`의 `caller` 기록 다시 묶기, 계획 §9.3)는 W4 첫 출력 전 선행 조건으로 그대로 남는다.
 - 위험 목록(마스터플랜 §11) 갱신: **F01** — 실제 실행에서 CF 조회와 BP 생성이 서로 다른 앱·스레드(`CF`, `BP`)에서 같은 이름으로 일어남을 콘솔·스레드 표로 확인 [M]; task→생성 앱 매핑의 도구 경로는 아직 없음(W2). **F05** — 이번 smoke에는 관측기가 없다; 판정에 필요한 사건(생성·조회 순서, 재시도) 중 콘솔로 얻을 수 없는 것이 있음을 확인(§7). **D5** — 단위별 범위는 확보, 결합 닫힘은 미충족(§8.3).

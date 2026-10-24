@@ -110,7 +110,11 @@ kz::Status parse_link_command(const std::string& text, const std::string& cwd, L
       const std::string& t = tok[i];
       if (t == "-Wl,--whole-archive") { whole = true; continue; }
       if (t == "-Wl,--no-whole-archive") { whole = false; continue; }
-      if (t == "-o") { ++i; continue; }  // the output
+      if (t == "-o") {  // the output
+        if (i + 1 < tok.size()) out->output = absolute_in(out->cwd, tok[i + 1]);
+        ++i;
+        continue;
+      }
       if (!t.empty() && t[0] == '-') {
         out->ignored.push_back(t);
         continue;

@@ -13,7 +13,7 @@
 | 호출 지점 사실, `derives` | §4.1 3 | 인자 분류(상수·기호·주소·함수·top), 결과 사용·검사, 루프 문맥, 역할 있는 인자의 copy chain | 구현 [M] |
 | 상수·표 | §4.1 4 | 표의 static initializer image(정수·문자열·주소·함수), 상수의 단위 내 평가 | 구현 [M]. `.tbl` 바이트 대조는 **미구현** |
 | 문서 주석 후보 | §4.1 5 | — | **미구현** |
-| link unit / app-unit probe | §4.1 6 | basis 의 link set(archive 의미, 지연 member) | core 만 [M]. app-unit probe, `-fcallgraph-info` 대조는 **미구현** |
+| link unit / app-unit probe | §4.1 6 | basis 의 link set(archive 의미, 지연 member). recipe `module` 이 있으면 시작 스크립트가 적재하는 `.so` 단위를 실행 파일과 한 닫힘으로 묶고, 단위마다 미정의 기호와 적재기 결합을 기록(§3.1) | 구현 [M](소스 수준: 이름 결합 + 적재기 결합 대조). IR 수준 link, `-fcallgraph-info` 대조는 **미구현** |
 | 루프 사실 | §4.1 8, §4.3 | 종류, 횟수, 탈출식, mod set, 예산, 잠금 구간, 조건 탈출, 술어, 인증 뷰 규칙, table walk 펼치기 | 구현 [M] (§5) |
 | writer 집합 | §4.2 1–3 | field 기반 writer(대입·증감·통째 대입·memset 계열·out 포인터), A-TYPE 목록, INIT image | 구현 [M] |
 | transition filtering, Φ 대응, key 상태 | §4.2 6–8 | — | **하지 않음**: census(K4b) 몫. writer 의 `tstatus` 는 `n/a` |
@@ -72,6 +72,29 @@ $B/tools/kz-static/kz-static reach facts.kz --root CFE_ES_TaskMain --loc CFE_SB_
 | compile DB 경로 | SPEC §4.1: cpu1 compile DB(1417 항목). 작업 지시문은 `build-native_std/compile_commands.json` 을 적었다 | `build-native_std/native/default_cpu1/compile_commands.json`(1417 항목, basis 항목 `compile_db.path`·`compile_db.entries`) | 지시문의 파일은 mission 빌드의 host 도구 14 항목뿐이고 cpu1 번역 단위가 없다. 사용한 DB 는 SPEC 이 말하는 것과 같다(레퍼런스와의 차이는 없음, 지시문의 경로만 다름) | 없음 |
 | front end | 기록된 명령(gcc 13.3.0) | Clang 23.0.0git LibTooling | SPEC §4.2 가 필드 정체성이 명시된 AST 를 요구 | basis 의 deviation 기록 그대로 |
 | 실행 횟수 N | — | 해당 없음 | K4a 는 cFS 를 실행하지 않는다 | — |
+
+### 3.1 적재 모듈 닫힘(recipe `module`, SPEC §4.1 6, D5)
+
+실행 파일 하나의 link 단위로는 `dlopen` 으로 적재되는 앱이 닫힘 밖이다. 앱이 넘긴 주소를 받는 OSAL 함수의 본문이 앱 단위에 없으면 그 필드는 address escape 로 DISABLED 가 된다(C1 W3, `plan/C1_build_manifest.md` §8). recipe 에 다음을 더하면 basis 가 실행 파일과 **선택된 시작 스크립트가 적재하는 모듈**을 한 프로그램으로 묶는다.
+
+```
+binary "../exe/tx/core-tx";                                   # 실행 파일이 내보내는 기호를 여기서 읽는다(필수)
+module "cf" link "native/default/apps/cf/CMakeFiles/cf.dir/link.txt";   # 이름 = 스크립트 줄의 파일 이름 필드
+startup_script {
+  ...
+  entry library "CFE_LIB" global;   # 종류별 기호 범위(적재기 규칙, cite 로 근거를 단다)
+  entry app "CFE_APP" local;
+  module_file field 1 path const "CFE_PLATFORM_ES_NONVOL_DISK_MOUNT_STRING" extension const "CFE_DEFAULT_MODULE_EXTENSION" in "cfe/cmake/target/src/target_config.c";
+}
+```
+
+basis 가 하는 일 [D]:
+1. 스크립트 줄마다 파일 이름 필드(`module_file field`)에 경로가 없으면 기본 경로를, 확장자가 없으면 기본 확장자를 붙인다(두 값은 사용 단위에서 상수 평가). `mount` 로 빌드의 파일에 대응한다.
+2. 같은 이름의 `module` 이 있으면 그 link 명령을 archive 의미로 풀고, **link 가 쓴 파일과 스크립트가 적재하는 파일의 바이트가 같을 때만** 그 member 를 프로그램에 넣는다(다르면 넣지 않고 경고). 번역 단위의 `member` 에 `module cf (app, symbols local), …` 가 남는다. `module` 이 없는 줄(예: compile DB 에 없는 `tinycbor`)은 닫힘 밖이며, 적재 파일의 `.dynsym` 이 내보내는 기호만 결합 판단에 쓴다. 스크립트가 적재하지 않는 `module` 은 넣지 않는다.
+3. **적재기 결합**: 모듈의 미정의 기호(member 의 미정의 − 정의) 중 적재 파일의 `.dynsym` 에 미정의로 남은 것을 실행 파일의 `.dynsym` 정의 → 그보다 먼저 적재된 global 라이브러리 순으로 찾는다(`module[x].bound[...]`, `.unbound`, `.resolved_by_its_link`). 시스템 라이브러리(DT_NEEDED)는 읽지 않으므로 `unbound` 는 "적재된 단위 중 내보내는 것이 없음"이다(`closure.binding_model`).
+4. **이름 결합 대조**: extract 는 합친 프로그램에서 외부 함수·객체를 이름으로 결합한다. 이것이 적재기 결합과 같으려면 (a) 닫힘 안의 두 단위가 같은 이름을 정의하지 않고, (b) 단위 사이 참조마다 적재기가 그 이름을 정의한 단위로 결합해야 한다. 어긋나면 deviation 으로 기록한다(`closure.duplicate_definitions`, `closure.name_binding`).
+
+extract 쪽은 바뀌지 않는다: basis 의 번역 단위 표를 읽으므로 앱의 호출이 OSAL 본문의 out 포인터 요약으로 이어진다. 남은 차이: SPEC 의 IR 수준 link(bitcode)와 gcc `-fcallgraph-info` 대조는 하지 않았고, 표 객체(`.tbl` 대상)는 모듈 link 에 들어 있지 않아 따로 제외하지 않는다. C1 결과는 `plan/C1_build_manifest.md` §8.5 에 있다.
 
 ## 4. facts 컨테이너
 
@@ -195,7 +218,7 @@ INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped
 | `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
 | `static_golden_core_cpu1` | 고정 번들의 core-cpu1: basis 항목, 요약, SB identity 필드의 INIT·writer·A-TYPE·out 포인터, 함수별 쓰기, poll·walk 루프의 규칙, table walk 순서, spawn 매개변수, image, 간접 대상, derives 39 의 목록·파일별 수·gdb 기록 지점 대조, 도달성. 번들이 없으면 건너뜀(77) |
 | `test_static_unroll` | 부분 평가, 반복 펼치기(taken/skipped/residual, 인자·callee 값, spawn 표시), task-main 매개변수(DIRECT/VIA_ENTRY), 루프 규칙(각 실패 이유와 A-TYPE 상태에 따른 untyped write 처리), table walk image 확인(const 고리, 형 있는 쓰기, 객체 주소, 원소 필드), finalize 의 unknown-effect 결정(본문 없음, 가변 위치, 미해결 간접 호출, 해결된 간접 호출, 데이터 함수) |
-| `test_static_{expr,flow,recipe,gitrev,link,cli}` | 식 pool, 흐름 그래프·table walk, recipe 문법, commit 읽기, link set, CLI(basis→extract 합성 프로그램) |
+| `test_static_{expr,flow,recipe,gitrev,link,cli}` | 식 pool, 흐름 그래프·table walk, recipe 문법(`module`, 범위 단어, `module_file` 과 그 오류), commit 읽기, link set, CLI(basis→extract 합성 프로그램; 실행 파일 + global 라이브러리 + local 앱 + 닫힘 밖 라이브러리의 닫힘: 앱이 out 포인터로 넘긴 필드가 실행 파일 본문으로 writer-set-complete, 늦게 적재된 라이브러리의 결합 차이 deviation, 적재 파일과 link 출력이 다르면 묶지 않음) |
 
 고정 도구가 덮는 경우: 필드 writer(대입, 증감, 통째, memset, guard), A-TYPE 으로 DISABLED 되는 대상(cast, escape, union, untyped), out 포인터(중첩, 두 번 저장, escape), derives chain, 루프 탈출식(poll, 예산, counted, 중첩, table walk), counter-zero 술어와 cursor(`sync_delay`), 루프 조건이 counter 를 읽어 거부되는 경우, 본문이 시험 필드를 써서 L1 (i) 실패, 시험 필드가 추출 대상이 아니라 L1 (i) 미결정(`poll_untargeted`), 조건·예산이 섞인 탈출, `sig_atomic_t` 원자 읽기, spawn 지점(직접, 매개변수, 표, 미해결)과 trampoline 을 통한 task-main.
 
@@ -204,7 +227,7 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 ## 8. 한계와 남은 일
 
 **writer 집합 완전성(`writer-set-complete`)이 기대는 가정** [D]. 상태 `writer-set-complete` 는 §4.1 의 검사(형 있는 writer 수집, A-TYPE 의 cast·escape·union·untyped·unknown-effect)가 아무것도 찾지 못했다는 뜻이고, 다음 가정 위에서만 writer 집합이 완전하다. 증명된 성질이 아니다.
-- G1. 본문 없는 코드(시스템 라이브러리, 시스템 헤더의 함수)는 프로그램의 전역을 **이름으로** 쓰지 않는다: 받은 포인터를 통해서만 쓴다(unknown-effect 는 이 경로만 본다). 실행 중 적재되는 앱(.so)이 cFE 전역을 이름으로 쓰는 경우는 닫힌 프로그램(core-cpu1) 밖이다.
+- G1. 본문 없는 코드(시스템 라이브러리, 시스템 헤더의 함수)는 프로그램의 전역을 **이름으로** 쓰지 않는다: 받은 포인터를 통해서만 쓴다(unknown-effect 는 이 경로만 본다). 실행 중 적재되는 앱(.so)이 cFE 전역을 이름으로 쓰는 경우는 닫힌 프로그램(core-cpu1) 밖이다. recipe `module` 로 묶은 닫힘(§3.1)에서는 시작 스크립트가 적재하고 link 명령이 있는 모듈이 닫힘 안이고, 밖에 남는 것은 link 명령이 없는 모듈과 시스템 라이브러리다.
 - G2. 상수가 아닌 크기의 데이터 함수 쓰기는 둘러싼 객체 안에 머문다(벗어나면 C 에서 정의되지 않은 동작). `T *` 목적지에 상수가 아닌 크기는 `T` 배열 안에 머문다.
 - G3. 데이터 함수 요약(C 라이브러리 12 개: 목적지 인자만 쓴다, `%n` 없음)은 사람이 넣은 표다(`spec.cpp`, BASIS 에 `researcher` 로 기록). Φ 데이터로 옮기는 일은 K1 에 남은 일이다(아래).
 - G4. 포인터 도달은 형으로 따진다(필드 기반): `void*`·`char*` 필드는 아무 형에도 닿지 않는다(그 형으로의 변환이 cast hit 이기 때문).
@@ -215,6 +238,6 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 - 호출 그래프의 미해결 간접 호출 7 개는 간선을 더하지 않는다. 그런 호출에 닿는 루프는 `mod-incomplete` 로 결정하지 않는다. writer 집합에 대해서는 정보용이다(§4.1).
 - task-main 매개변수와 간접 대상은 field 기반 may-flow 다(인스턴스 대응 없음).
 - table walk 의 image 확인은 형 있는 쓰기만 본다. const 아닌 고리를 포인터·cast·본문 없는 코드로 바꾸는 쓰기는 배제하지 않으며, 그래서 그 경우는 선언된 가정으로 센다(core-cpu1 은 0 개).
-- 하지 않은 SPEC 단계: §4.1 5(문서 주석), §4.1 6 의 app-unit probe와 `-fcallgraph-info` 대조, `.tbl` 바이트 대조, §4.2 6–8(transition filtering, Φ 대응, key·allocation), §3.17 anchor audit, message provenance(§4.3).
+- 하지 않은 SPEC 단계: §4.1 5(문서 주석), §4.1 6 의 IR 수준 link 와 `-fcallgraph-info` 대조(app-unit probe 는 소스 수준으로 구현, §3.1), `.tbl` 바이트 대조, §4.2 6–8(transition filtering, Φ 대응, key·allocation), §3.17 anchor audit, message provenance(§4.3).
 - 프로필 문법에 지연·잠금 연산과 **데이터 함수 요약**을 선언하는 수단이 없다(K1 에 요청할 항목). 그때까지 지연·잠금은 명령줄 입력, 데이터 함수 표는 엔진의 내장 표이며 둘 다 사람이 넣은 입력으로 센다.
 - core golden 은 지금 프로필의 대상·역할·종료·spawn 선언에 의존한다. 프로필이 바뀌면 다시 만들고 diff 를 검토해야 한다.

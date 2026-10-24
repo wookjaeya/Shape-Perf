@@ -71,6 +71,11 @@ int cmd_basis(int argc, char** argv) {
   std::printf("  generated files, tables    %zu, %zu\n", rep.generated, rep.tables);
   if (!rep.startup_script.empty())
     std::printf("  startup script             %s (%zu libraries, %zu applications)\n", rep.startup_script.c_str(), rep.startup_libraries, rep.startup_apps);
+  if (rep.modules_requested) {
+    std::printf("  modules in the closure     %zu (units %zu), loaded outside the closure %zu\n", rep.modules_in, rep.module_units, rep.modules_outside);
+    std::printf("  module symbols bound       to the executable %zu, to libraries %zu, unbound %zu\n", rep.bound_executable, rep.bound_library, rep.unbound);
+    std::printf("  references across units    %zu (bound otherwise by the loader %zu, names defined twice %zu)\n", rep.across_units, rep.binding_differs, rep.duplicate_definitions);
+  }
   std::printf("  hand-entered items         %zu\n", rep.hand_entered);
   for (const std::string& w2 : rep.warnings) std::printf("  warning: %s\n", w2.c_str());
   if (args.has("--text")) std::fputs(kzs::basis_items_text(c).c_str(), stdout);

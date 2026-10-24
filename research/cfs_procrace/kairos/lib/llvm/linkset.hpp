@@ -27,6 +27,7 @@ struct LinkInput {
 
 struct LinkPlan {
   std::string cwd;                    // the directory the command ran in
+  std::string output;                 // the file it writes (-o), absolute; empty if not named
   std::vector<LinkInput> inputs;      // in command-line order
   std::vector<std::string> ignored;   // -l options and other flags, for the record
 };

@@ -3,6 +3,8 @@
 //   * the global symbols of a relocatable object (defined and undefined), to emulate the
 //     archive-member selection of the link command (SPEC 4.1 step 1 / R07: "archive semantics
 //     come from the link command");
+//   * the dynamic symbols of a linked executable or shared object (.dynsym): what it exports to
+//     the dynamic loader and what it asks the loader for (SPEC 4.1 step 6, the app-unit probe);
 //   * the compiler identification strings (.comment) and the build-id of a linked binary.
 //
 // Every read is bounds checked: a damaged file gives a Status, not a crash.
@@ -19,9 +21,14 @@ namespace kzs {
 struct ObjectSymbols {
   std::set<std::string> defined;    // global or weak symbols defined here (common symbols included)
   std::set<std::string> undefined;  // global symbols referenced and not defined (weak references excluded)
+  std::set<std::string> hidden;     // the defined ones with hidden or internal visibility (not exported by a link)
 };
 
 kz::Status read_object_symbols(const std::string& path, ObjectSymbols* out);
+
+// The dynamic symbol table of an executable or a shared object: `defined` = the symbols it exports
+// (global or weak, default or protected visibility), `undefined` = the non-weak symbols it needs.
+kz::Status read_dynamic_symbols(const std::string& path, ObjectSymbols* out);
 
 struct ElfNotes {
   std::string build_id_hex;           // empty if the file has no GNU build-id note

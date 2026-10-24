@@ -683,6 +683,10 @@ void test_state_from_effects() {
   check_relation(excluded, KZ_EXEC_RELATION_CORE_APPLICATION, "1 clearing write(s) not counted (P10 alternative)", "P10 alternative");
   KZ_CHECK(excluded.occ().counterparts == std::vector<std::string>{"W"});
   KZ_CHECK_EQ(excluded.summary(), counted.summary());  // the observation does not depend on P10
+  // a writer of the captured location only is named as such, also where the key is registered
+  const std::string cap2 = "X send.who_valid pt arg.Who=0x1002 value=0x1002 cell=@Box.id\nX send call arg.Who=0x1002\nX send.who_reg pt\nX send ret result=0\n";
+  const Run both = replay(p, preamble() + x + kSetup + kRegister + writes + cap2);
+  check_relation(both, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "key registered, location cleared by T9");
 }
 
 int main() {

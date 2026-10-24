@@ -2651,6 +2651,7 @@ void Replayer::relate(Occurrence* o) {
     else if (pb.key == o->key) (pb.maybe ? open_writers : cps).insert(pb.actor);
   }
   const bool key_published = !cps.empty();
+  const std::set<std::string> key_writers = cps;
   // A value the use passes that a capture read from a location (`cell`): the actors that wrote that location
   // in the record are actors of the use as well (the passed identity is theirs to publish).  A write whose
   // location the record does not name, or that may not have been applied, leaves it open.
@@ -2700,7 +2701,7 @@ void Replayer::relate(Occurrence* o) {
   for (const std::string& c : cps) {
     const uint8_t lc = level_of(c);
     if (lc == KZ_OWNER_LEVEL_UNDETERMINED) {
-      o->relation_note = "the owner of " + c + ", which wrote " + (key_published ? kname + key_text(o->key) : std::string("the captured location")) + ", is undetermined" + extra;
+      o->relation_note = "the owner of " + c + ", which wrote " + (key_writers.count(c) != 0 ? kname + key_text(o->key) : std::string("the captured location")) + ", is undetermined" + extra;
       return;
     }
     level = std::min(level, lc);

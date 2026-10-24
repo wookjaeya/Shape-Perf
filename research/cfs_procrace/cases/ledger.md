@@ -72,7 +72,7 @@ No case has an `original` reproduction. Every case lacks the reporter's exact pl
     - a full CI build recipe.
   - Neither to_lab nor ci_lab ever creates a counting semaphore.
 - *Open:*
-  - The five comments of #184, including [C1-BP], are unread. The roadmap's "BP started first" claim is therefore unverified; the public CI starts CF first.
+  - The five comments of #184, including [C1-BP], are unread. The roadmap's "BP started first" claim is therefore unverified; the public CI starts CF first. *(2026-10-24: read, C1 §0a. "BP started first" holds for the 2022-08-02 report; its versions, configuration and logs are unknown, and it is not the public CI configuration.)*
   - The reporter's core revisions, provider and names.
   - The BP CI component SHAs (mutable refs), and whether BP CI failed without the patch.
   - The OSAL RESERVED-window hypothesis. It is code reading only: possibly `OS_ERR_INCORRECT_OBJ_STATE` and a count-sem table lock left held.
@@ -389,7 +389,7 @@ These conditions might be determined if the text were read.
 
 | Case | Unread reference | What it might settle |
 |---|---|---|
-| C1 | 5 comments of CF #184, incl. `issuecomment-1202543669` [C1-BP] | Provider (BP version), start order ("BP started first"), names, failure log |
+| C1 | 5 comments of CF #184, incl. `issuecomment-1202543669` [C1-BP] (read 2026-10-24, C1 §0a: start order settled; BP version, names, failure log still unknown) | Provider (BP version), start order ("BP started first"), names, failure log |
 | C2 | Trac #167 (host unreachable); #198 REST timeline | Reporter, EVA CWS details, closing event |
 | C3 | Full text of #73's 14 comments, 4 unidentified; Trac #42 | Platform details, close record, the full fix discussion |
 | C5 | 9 comments of #72 incl. [C5-fix] `536673810`, [C5-context] `536673820`; Trac #41 | Reporter, platform, runtime-load/watchdog context |

@@ -11,6 +11,14 @@ sources:
     what: "comment on #184 cited by roadmap as BP-CF integration"
     url: "https://github.com/nasa/CF/issues/184#issuecomment-1202543669"
     retrieved: "NOT RETRIEVED (re-tested 2026-10-08): gh api -> HTTP 403 from the session's GitHub proxy, scoped per repository, naming the remedy add_repo with access:'push' (credentialed attach; needs user consent, may be refused; not attempted); GraphQL not served by the proxy; GitHub MCP issue_read refuses nasa/CF (allowed: wookjaeya/shape-perf); WebFetch renders no comments; archive mirrors CONNECT 403 per 2026-10-08 audit. Not a general egress denial."
+  - id: C1-comments-20261024
+    what: "the 5 comments on #184, read 2026-10-24 (C1.md section 0a). #2 issuecomment-1202543669 (jphickey, 2022-08-02): 'BP creates the throttle sem, and although CF is started after BP,' / 'it still hasn't been created by the time CF checks for it so it fails out.' #3 issuecomment-1319057031 (2022-11-17): 'This old issue is becoming a real pain point for BP startup' / 'it hits this race quite often and CF bails out.' #5 issuecomment-1319061815 (2022-11-17): 'I had been locally using a patched/hacked version of CF with a sleep'. Comments #1 (2022-01-13) and #4 (skliper, 2022-11-17) are listed in C1.md section 0a"
+    url: "https://github.com/nasa/CF/issues/184"
+    retrieved: "2026-10-24 via WebFetch of the public issue page (extractor returns short verbatim quotes, 125 chars or less; full text not saved). curl through the session proxy still HTTP 403. Masterplan 2026-10-24 section 4.2 [N01a, N01b] reports the same reading"
+    status: "fact for the quoted text only; versions, bplib, configuration files, CPU/scheduling and execution records at comment time unspecified_by_reference; not the D22 public BP configuration (public CI starts cf before bp); pre-fix label NOT_READY_UNJUDGED unchanged"
+  - id: C1-PR-merge-local
+    what: "local clones refs/CF_833fdbb and refs/CF_281a941: merge 2ffbeccc3e75fc69cd4a10652e7cc6abc2e4c90e 'Merge pull request #342 from jphickey/fix-184-throttle-sem-race', parents 32a8b03 and 833fdbb (git log --all --merges, 2026-10-24); 833fdbb parent 281a941"
+    url: "https://github.com/nasa/CF/commit/2ffbeccc3e75fc69cd4a10652e7cc6abc2e4c90e"
   - id: C1-178
     what: "nasa/CF issue #178 (default table sem names -> empty)"
     url: "https://github.com/nasa/CF/issues/178"
@@ -285,7 +293,7 @@ assumptions_needed:
   - "A10 if a derived control adds CFE_ES_WaitForStartupSync to CF (issue suggestion), its TimeOutMilliseconds argument has no reference value"
 
 open_questions:
-  - "Content/author/date of the 5 comments on #184, incl. issuecomment-1202543669 ([C1-BP]); not retrievable in this session (per-repo proxy block; credentialed attach via add_repo access:'push' needs user consent and may be refused)"
+  - "Content/author/date of the 5 comments on #184, incl. issuecomment-1202543669 ([C1-BP]); not retrievable in this session (per-repo proxy block; credentialed attach via add_repo access:'push' needs user consent and may be refused). PARTLY CLOSED 2026-10-24: read via the public issue page (source C1-comments-20261024); BP version, configuration and failure log still unknown"
   - "Did nasa/bp CI fail without the CF patch; Actions logs from 2022-11 not retrieved (may be expired); 'needed the race fix' is inference"
   - "CLOSED 2026-10-08: c2671e8 (PR #342 initial head) fetched from jphickey/cf; whitespace-only diff to 833fdbb; PR head for minutes on 2022-11-17; neither commit existed on 2022-11-15; earlier premise 'BP CI would have used it on 2022-11-15' withdrawn (b051eb0 committed 2022-11-18). Remaining unknown: any earlier unpublished BP branch state running CI against an earlier fix-184 branch state"
   - "Can OS_CountSemGetIdByName return OS_ERR_INCORRECT_OBJ_STATE during concurrent create, and does that path leave the count-sem table lock held so the provider blocks in OS_CountSemCreate (code reading of OSAL 42af0f7, e98bb23, f34759d, b44f4ce, 24c8641; same structure)? needs controlled test with hang oracle"

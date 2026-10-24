@@ -93,7 +93,15 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   if (s.ok()) s = run.read_section(KZ_SEC_RUNMETA, &meta);
   if (s.ok()) s = run.read_section(KZ_SEC_LOSS, &losses);
   if (s.ok()) s = run.read_section(KZ_SEC_ACTOR_OWNERS, &owners);
+  std::vector<kz_ev_str> strings;  // the texts of string slots (containers with fetch slots only)
+  if (s.ok() && run.find_section(KZ_SEC_EVENT_STRINGS) != nullptr) s = run.read_section(KZ_SEC_EVENT_STRINGS, &strings);
   if (!s.ok()) return s;
+  std::map<std::pair<uint32_t, uint8_t>, std::string> text_of;
+  for (const kz_ev_str& e : strings) {
+    std::string t;
+    if (!run.string(e.text, &t)) return Status::error(Err::BadRef, "EVENT_STRINGS: a string does not resolve");
+    text_of[{e.event, e.slot}] = t;
+  }
   report->raw_events = events.size();
   report->threads = threads.size();
   report->owner_section = run.find_section(KZ_SEC_ACTOR_OWNERS) != nullptr;
@@ -145,10 +153,25 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
     }
   }
   std::map<std::pair<uint32_t, uint8_t>, std::string> role_of;
+  std::set<std::pair<uint32_t, uint8_t>> string_slot;
   for (const kz_site_slot& sl : slots) {
     std::string r;
     run.string(sl.role, &r);
     role_of[{sl.site, sl.slot}] = r;
+    if (sl.src == KZ_SLOT_SRC_STR) string_slot.insert({sl.site, sl.slot});
+  }
+  // A point site that names no point of the profile but whose slot role names an `out` parameter of an
+  // operation: inside a call of that operation it gives the value the call stores through the parameter
+  // (out.NAME on that call's return; header, "out values").
+  for (size_t i = 0; i < sites.size(); ++i) {
+    if (site_map[i].kind != MapKind::None || sites[i].kind != KZ_SITE_KIND_POINT_PROBE) continue;
+    for (uint8_t k = 0; k < 4; ++k) {
+      const auto r = role_of.find({static_cast<uint32_t>(i), k});
+      if (r == role_of.end()) continue;
+      for (const phi::OpDecl& op : p.ops)
+        for (const phi::OpParam& prm : op.params)
+          if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) report->sites[i] = labels[i] + ": out value " + prm.name + " of the innermost open call of " + op.name;
+    }
   }
 
   // ---- the actors: one per thread incarnation ----
@@ -277,10 +300,33 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   report->owners_undetermined = threads.size() - report->owners_confirmed - report->owners_inferred;
 
   // ---- the events ----
+  // the open calls of each actor in the trace being built (operation index), with the out values that
+  // points inside them gave
+  struct OpenOp {
+    int32_t op;
+    std::map<std::string, int64_t> outs;
+  };
+  std::map<std::string, std::vector<OpenOp>> open_ops;
   for (size_t ei = 0; ei < events.size(); ++ei) {
     const kz_raw_ev& e = events[ei];
     if (e.site >= site_map.size() || site_map[e.site].kind == MapKind::None) {
       ++report->unmapped_events;
+      // an out value from a point inside the actor's innermost open call
+      if (e.site < sites.size() && sites[e.site].kind == KZ_SITE_KIND_POINT_PROBE && (e.flags & KZ_RAW_FLAG_TRUNC) == 0) {
+        std::vector<OpenOp>& st = open_ops[actor_of(e.tid, e.t_ns)];
+        if (!st.empty()) {
+          const phi::OpDecl& op = p.ops[static_cast<size_t>(st.back().op)];
+          for (uint8_t k = 0; k < 4; ++k) {
+            const auto r = role_of.find({e.site, k});
+            if (r == role_of.end() || string_slot.count({e.site, k}) != 0) continue;
+            for (const phi::OpParam& prm : op.params)
+              if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) {
+                st.back().outs["out." + prm.name] = static_cast<int64_t>(e.a[k]);
+                ++report->out_values_from_points;
+              }
+          }
+        }
+      }
       continue;
     }
     const SiteMap& m = site_map[e.site];
@@ -295,14 +341,22 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       if (r == role_of.end()) continue;
       const std::string key = role_key(r->second);
       const int64_t v = static_cast<int64_t>(e.a[k]);
+      // a string slot gives a text (a Str parameter or value), never its length as a number
+      const bool is_text = string_slot.count({e.site, k}) != 0;
+      const auto tx = text_of.find({static_cast<uint32_t>(ei), k});
+      if (is_text && tx == text_of.end()) continue;  // the kernel gave no string: the value stays unknown
+      if (is_text) ++report->string_values;
       if (m.kind == MapKind::Point) {
         if (key == "value") {
-          te.values["value"] = v;
+          if (!is_text) te.values["value"] = v;
           continue;
         }
         const auto& names = point_names[m.name];
         const auto it = names.find(key);
-        if (it != names.end()) te.values[it->second] = v;
+        if (it != names.end()) {
+          if (is_text) te.texts[it->second] = tx->second;
+          else te.values[it->second] = v;
+        }
         continue;
       }
       const phi::OpDecl& op = p.ops[static_cast<size_t>(m.op)];
@@ -313,8 +367,26 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       }
       for (const phi::OpParam& prm : op.params) {
         if (role_key(prm.name) != key) continue;
-        if (m.kind == MapKind::Call && prm.role != "out") te.values["arg." + prm.name] = v;
-        if (m.kind == MapKind::Return && prm.role == "out") te.values["out." + prm.name] = v;
+        const std::string name = (m.kind == MapKind::Call ? "arg." : "out.") + prm.name;
+        if ((m.kind == MapKind::Call) != (prm.role != "out")) continue;
+        if (is_text) te.texts[name] = tx->second;
+        else te.values[name] = v;
+      }
+    }
+    // the open calls of the actor (out values from points inside them go to their return)
+    {
+      std::vector<OpenOp>& st = open_ops[te.actor];
+      if (m.kind == MapKind::Call) {
+        st.push_back(OpenOp{m.op, {}});
+      } else if (m.kind == MapKind::Return) {
+        size_t k = st.size();
+        while (k > 0 && st[k - 1].op != m.op) --k;
+        if (k > 0) {
+          if (!unreadable)
+            for (const auto& ov : st[k - 1].outs)
+              if (te.values.count(ov.first) == 0) te.values[ov.first] = ov.second;
+          st.resize(k - 1);
+        }
       }
     }
     if (m.kind == MapKind::Return) {
@@ -427,6 +499,8 @@ std::string report_text(const RealTraceReport& r) {
     }
   }
   out += "spawn returns " + std::to_string(r.spawn_returns) + ", out-parameter bound by the id " + std::to_string(r.spawn_outs_bound) + "\n";
+  if (r.string_values != 0 || r.out_values_from_points != 0)
+    out += "string values (fetch slots) " + std::to_string(r.string_values) + ", out values from points inside a call " + std::to_string(r.out_values_from_points) + "\n";
   out += std::string("core status of owners: ") +
          (r.core_evidence ? "core " + std::to_string(r.owners_core) + ", not core " + std::to_string(r.owners_not_core) + ", not established " +
                                 std::to_string(r.threads - r.owners_core - r.owners_not_core)

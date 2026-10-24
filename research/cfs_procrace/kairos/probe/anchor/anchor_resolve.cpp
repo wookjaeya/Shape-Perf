@@ -243,6 +243,96 @@ Status resolve_call_in_function(const ElfImage& elf, const std::string& func, co
   return Status::success();
 }
 
+Status resolve_entry_reached(const ElfImage& elf, const LineTable& lines, const std::string& func, const std::vector<std::string>& chain, ResolvedTarget* out,
+                             ReachedPath* path) {
+  *out = ResolvedTarget();
+  *path = ReachedPath();
+  if (chain.empty()) return Status::error(Err::Invalid, "an entry-reached target needs at least one callee");
+  auto unique_function = [&](const std::string& name, const ElfFunction** f) -> Status {
+    std::vector<const ElfFunction*> found = elf.find_functions(name);
+    std::set<uint64_t> starts;
+    for (const ElfFunction* x : found) starts.insert(x->vaddr);
+    if (starts.empty()) {
+      if (elf.plt_stub(name) != 0) return Status::error(Err::Invalid, name + " is reached through its PLT stub: it is in another file, where a probe of this file cannot be");
+      return Status::error(Err::Invalid, "no function symbol named " + name);
+    }
+    if (starts.size() > 1) return Status::error(Err::Invalid, std::to_string(starts.size()) + " different functions are named " + name);
+    *f = found.front();
+    return Status::success();
+  };
+  const ElfFunction* from = nullptr;
+  Status s = unique_function(func, &from);
+  if (!s.ok()) return s;
+  path->via_func = from->name;
+  path->chain = from->name;
+  uint64_t last_call_end = 0;
+  bool any_call = false;
+  for (const std::string& callee : chain) {
+    const ElfFunction* to = nullptr;
+    s = unique_function(callee, &to);
+    if (!s.ok()) return s;
+    const uint64_t stub = elf.plt_stub(callee);
+    std::vector<uint8_t> code(from->size);
+    if (from->size == 0 || !elf.read_vaddr(from->vaddr, from->size, code.data())) return Status::error(Err::Invalid, "the function " + from->name + " has no file-backed code");
+    struct Transfer {
+      uint64_t end;
+      bool call;
+    };
+    std::vector<Transfer> found;
+    bool via_stub = false;
+    for (uint64_t p = 0; p < from->size; ++p) {
+      const uint64_t at = from->vaddr + p;
+      const uint8_t b0 = code[p];
+      uint64_t target = 0, end = 0;
+      bool call = false, transfer = false;
+      if ((b0 == 0xe8 || b0 == 0xe9) && p + 5 <= from->size) {
+        int32_t rel;
+        std::memcpy(&rel, &code[p + 1], 4);
+        end = at + 5;
+        target = end + static_cast<uint64_t>(static_cast<int64_t>(rel));
+        call = b0 == 0xe8;
+        transfer = true;
+      } else if (b0 == 0x0f && p + 6 <= from->size && code[p + 1] >= 0x80 && code[p + 1] <= 0x8f) {
+        int32_t rel;
+        std::memcpy(&rel, &code[p + 2], 4);
+        end = at + 6;
+        target = end + static_cast<uint64_t>(static_cast<int64_t>(rel));
+        transfer = true;
+      } else if ((b0 == 0xeb || (b0 >= 0x70 && b0 <= 0x7f)) && p + 2 <= from->size) {
+        end = at + 2;
+        target = end + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int8_t>(code[p + 1])));
+        transfer = true;
+      }
+      if (!transfer) continue;
+      if (target == to->vaddr) found.push_back(Transfer{end, call});
+      if (stub != 0 && target == stub) via_stub = true;
+    }
+    const std::string hop = from->name + " -> " + to->name;
+    if (via_stub) return Status::error(Err::Invalid, "the hop " + hop + " goes through the PLT stub of " + callee + ": the callee is in another file");
+    if (found.empty()) return Status::error(Err::Invalid, from->name + " makes no direct call or jump to " + callee);
+    if (found.size() > 1)
+      return Status::error(Err::Invalid, std::to_string(found.size()) + " calls or jumps to " + callee + " are in " + from->name + ": an entry-reached hop needs exactly one");
+    path->hop_is_call.push_back(found[0].call);
+    if (found[0].call) {
+      any_call = true;
+      last_call_end = found[0].end;
+    }
+    ++path->hops;
+    path->chain += ">" + to->name;
+    from = to;
+  }
+  // The return address at the top of the stack at the probe: a jump leaves the one of the frame it jumps
+  // from, so it is the end of the last call hop, or F's own return address if no hop is a call.
+  path->ret_dynamic = !any_call;
+  path->expect_ret = any_call ? last_call_end : 0;
+  ResolvedTarget t;
+  s = resolve_entry(elf, lines, from->name, "", &t);
+  if (!s.ok()) return s;
+  t.kind = KZ_TARGET_KIND_ENTRY_REACHED;
+  *out = t;
+  return Status::success();
+}
+
 Status resolve_line_start(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, ResolvedTarget* out) {
   *out = ResolvedTarget();
   const std::string where = file_suffix + ":" + std::to_string(line);

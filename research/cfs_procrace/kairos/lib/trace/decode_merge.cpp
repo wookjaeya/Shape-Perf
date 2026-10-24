@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstring>
 #include <map>
+#include <set>
 #include <unordered_map>
 
 namespace kz::trace {
@@ -28,6 +29,19 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
   *out = DecodedRun();
   DecodeStats& st = out->stats;
   st.site_hits.assign(in.sites.size(), 0);
+  st.via_unattributed.assign(in.sites.size(), 0);
+  // Open calls of the functions that sites are reached from, per thread: (symbol, file, return address).
+  std::set<std::pair<std::string, uint16_t>> via_funcs;
+  for (const SiteSpec& v : in.sites)
+    if (!v.via_symbol.empty()) via_funcs.insert(std::make_pair(v.via_symbol, v.binary));
+  struct OpenCall {
+    const SiteSpec* fn;
+    uint64_t ret;
+    bool sp_known;
+    uint64_t sp;  // the stack pointer at the entry probe (a tail jump enters the callee with the same one)
+  };
+  const uint32_t sp_reg = perf_reg_of(KZ_REG_RSP);
+  std::unordered_map<uint32_t, std::vector<OpenCall>> open_calls;
 
   // 1. Parse every stream.
   std::vector<PerfRecord> all;
@@ -94,15 +108,57 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
         ev.phase = phase_of(site);
         uint16_t flags = 0;
         uint64_t vals[4];
-        if (!apply_slots(site, r, vals, &flags).ok()) {
+        std::string strs[4];
+        bool str_read[4];
+        if (!apply_slots(site, r, lay->fields, vals, &flags, strs, str_read).ok()) {
           ++st.slot_failures;
           break;
+        }
+        ++st.site_hits[lay->site];
+        const bool readable_ret = (flags & KZ_RAW_FLAG_TRUNC) == 0 || [&] {
+          // only the return address matters for the open calls and the attribution
+          const SlotSpec* k = slot_at(site, kSlotReturnAddress);
+          return k != nullptr && !is_fetch_slot(*k) && (k->src != KZ_SLOT_SRC_REG || (r.regs_valid & (1ull << perf_reg_of(k->index))) != 0) &&
+                 (k->src != KZ_SLOT_SRC_STACK || static_cast<uint64_t>(k->index) + k->width <= r.stack.size());
+        }();
+        if (!site.via_symbol.empty()) {
+          // a point reached from a named function: attributed to its innermost open call, or not kept
+          std::vector<OpenCall>& oc = open_calls[r.tid];
+          bool ok = readable_ret && has_return_address_key(site) && !oc.empty() && oc.back().fn->symbol == site.via_symbol && oc.back().fn->binary == site.binary;
+          if (ok) {
+            const uint64_t ra = vals[kSlotReturnAddress];
+            if (site.via_ret_dynamic) {
+              // Every hop is a jump: the callee runs in the frame the open call was entered with, so its stack
+              // pointer at the entry probe is the one of the open call's entry.  (The return address word is
+              // the same in the program, but a return probe of the reaching function replaces it with the
+              // kernel's return trampoline when that function is entered, so it is not compared.)
+              ok = oc.back().sp_known && (r.regs_valid & (1ull << sp_reg)) != 0 && r.regs[sp_reg] == oc.back().sp;
+            } else {
+              ok = ra == site.via_expect_ret + (r.ip - site.vaddr);  // the load bias of this file, from this sample
+            }
+          }
+          if (!ok) {
+            ++st.via_unattributed[lay->site];
+            break;
+          }
+        } else if (readable_ret && has_return_address_key(site) && via_funcs.count(std::make_pair(site.symbol, site.binary)) != 0) {
+          std::vector<OpenCall>& oc = open_calls[r.tid];
+          const uint64_t ra = vals[kSlotReturnAddress];
+          if (site.kind == KZ_SITE_KIND_ENTRY_PROBE) {
+            const bool sp_known = (r.regs_valid & (1ull << sp_reg)) != 0;
+            oc.push_back(OpenCall{&site, ra, sp_known, sp_known ? r.regs[sp_reg] : 0});
+          } else if (site.kind == KZ_SITE_KIND_RET_PROBE) {
+            size_t k = oc.size();
+            while (k > 0 && !(oc[k - 1].fn->symbol == site.symbol && oc[k - 1].fn->binary == site.binary && oc[k - 1].ret == ra)) --k;
+            if (k > 0) oc.resize(k - 1);
+          }
         }
         ev.flags = flags;
         if ((flags & KZ_RAW_FLAG_TRUNC) != 0) ++st.slots_truncated;
         for (int i = 0; i < 4; ++i) ev.a[i] = vals[i];
+        for (uint8_t i = 0; i < 4; ++i)
+          if (str_read[i]) out->strings.push_back(EventString{static_cast<uint32_t>(out->events.size()), i, strs[i]});
         out->events.push_back(ev);
-        ++st.site_hits[lay->site];
         // The load bias of the site's file: an entry or point sample stops at the probed instruction itself.
         if (site.kind != KZ_SITE_KIND_RET_PROBE && site.vaddr != 0 && site.binary < files.size()) {
           const uint64_t bias = r.ip - site.vaddr;

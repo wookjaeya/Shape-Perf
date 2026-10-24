@@ -48,6 +48,12 @@ Status check_site(const SiteSpec& s) {
         break;
       case KZ_SLOT_SRC_IP:
         break;
+      case KZ_SLOT_SRC_MEM:
+      case KZ_SLOT_SRC_STR:
+        if (perf_reg_of(sl.index) == KZ_NONE32) return Status::error(Err::Invalid, who + ": slot " + std::to_string(sl.slot) + " reads memory at an unknown register");
+        if (sl.src == KZ_SLOT_SRC_STR && sl.width != 4)
+          return Status::error(Err::Invalid, who + ": slot " + std::to_string(sl.slot) + " is a string: it keeps the string's length in 4 bytes");
+        break;
       default:
         return Status::error(Err::Invalid, who + ": slot " + std::to_string(sl.slot) + " has no source");
     }
@@ -61,6 +67,7 @@ Status check_site(const SiteSpec& s) {
     if (role != nullptr && sl->role != role)
       return Status::error(Err::Invalid, who + ": the decoder reads slot " + std::to_string(slot) + " as " + role + ", but the site declares it as " + sl->role);
     if (sl->width > max_width) return Status::error(Err::Invalid, who + ": slot " + std::to_string(slot) + " is wider than the decoder keeps (" + std::to_string(max_width) + " bytes)");
+    if (sl->src == KZ_SLOT_SRC_STR) return Status::error(Err::Invalid, who + ": the decoder reads slot " + std::to_string(slot) + " as a number, but the site reads a string there");
     return Status::success();
   };
   Status st = Status::success();
@@ -113,10 +120,32 @@ bool has_return_address_key(const SiteSpec& s) {
   return sl != nullptr && sl->role == kRoleReturnAddress && sl->width == 8;
 }
 
+bool has_fetch_slots(const SiteSpec& s) {
+  for (const SlotSpec& sl : s.slots)
+    if (is_fetch_slot(sl)) return true;
+  return false;
+}
+
 Status check_plan(const std::vector<SiteSpec>& sites) {
   for (const SiteSpec& s : sites) {
     Status st = check_site(s);
     if (!st.ok()) return st;
+  }
+  // A point reached from a named function: its events are attributed by the return address (slot 3) to an
+  // open call of that function, so the plan must probe that function's entry and return with their keys.
+  for (const SiteSpec& v : sites) {
+    if (v.via_symbol.empty()) continue;
+    const std::string who = "site " + std::to_string(v.site) + " (" + v.label + ")";
+    if (v.kind != KZ_SITE_KIND_POINT_PROBE) return Status::error(Err::Invalid, who + ": a site reached from a function is a point site");
+    if (!has_return_address_key(v)) return Status::error(Err::Invalid, who + ": a site reached from " + v.via_symbol + " is attributed by slot 3, which must be an 8-byte return_address");
+    bool entry = false, ret = false;
+    for (const SiteSpec& f : sites) {
+      if (f.symbol != v.via_symbol || f.binary != v.binary || !has_return_address_key(f)) continue;
+      entry = entry || f.kind == KZ_SITE_KIND_ENTRY_PROBE;
+      ret = ret || f.kind == KZ_SITE_KIND_RET_PROBE;
+    }
+    if (!entry || !ret)
+      return Status::error(Err::Invalid, who + ": it is reached from " + v.via_symbol + ", whose entry and return sites (with return_address at slot 3, in the same file) the plan must have");
   }
   for (const SiteSpec& e : sites) {
     if (e.kind != KZ_SITE_KIND_ENTRY_PROBE || e.symbol.empty()) continue;
@@ -134,6 +163,7 @@ Status check_plan(const std::vector<SiteSpec>& sites) {
 PerfNeeds needs_of(const SiteSpec& s) {
   PerfNeeds n;
   for (const SlotSpec& sl : s.slots) {
+    if (is_fetch_slot(sl)) continue;  // the probe event's fetch arguments read it, not the sample
     if (sl.src == KZ_SLOT_SRC_REG) {
       const uint32_t r = perf_reg_of(sl.index);
       if (r != KZ_NONE32) n.regs_user |= 1ull << r;
@@ -150,6 +180,18 @@ PerfNeeds needs_of(const SiteSpec& s) {
 }
 
 Status apply_slots(const SiteSpec& s, const PerfRecord& sample, uint64_t out[4], uint16_t* raw_flags) {
+  static const std::vector<RawField> none;
+  std::string strings[4];
+  bool read[4];
+  return apply_slots(s, sample, none, out, raw_flags, strings, read);
+}
+
+Status apply_slots(const SiteSpec& s, const PerfRecord& sample, const std::vector<RawField>& fields, uint64_t out[4], uint16_t* raw_flags,
+                   std::string strings[4], bool string_read[4]) {
+  for (int i = 0; i < 4; ++i) {
+    strings[i].clear();
+    string_read[i] = false;
+  }
   out[0] = out[1] = out[2] = out[3] = 0;
   *raw_flags = 0;
   if (sample.kind != RecKind::Sample) return Status::error(Err::Invalid, "apply_slots: not a sample");
@@ -178,6 +220,34 @@ Status apply_slots(const SiteSpec& s, const PerfRecord& sample, uint64_t out[4],
         v = sample.ip;
         have = true;
         break;
+      case KZ_SLOT_SRC_MEM:
+      case KZ_SLOT_SRC_STR: {
+        const RawField* f = nullptr;
+        for (const RawField& rf : fields)
+          if (rf.slot == sl.slot) f = &rf;
+        if (f == nullptr || f->is_string != (sl.src == KZ_SLOT_SRC_STR)) break;
+        const uint64_t end = static_cast<uint64_t>(f->offset) + f->size;
+        if (end > sample.raw.size() || f->size == 0 || f->size > 8) break;
+        uint64_t w = 0;
+        for (uint32_t b = 0; b < f->size; ++b) w |= static_cast<uint64_t>(sample.raw[f->offset + b]) << (8 * b);
+        if (!f->is_string) {
+          v = w;
+          have = true;
+          break;
+        }
+        // __data_loc: offset of the text in the record (low 16 bits), its length with the NUL (high 16 bits)
+        const uint32_t loc = static_cast<uint32_t>(w);
+        const uint32_t at = loc & 0xffffu, len = loc >> 16;
+        if (len == 0 || static_cast<uint64_t>(at) + len > sample.raw.size()) break;
+        size_t n = 0;
+        while (n < len && sample.raw[at + n] != 0) ++n;
+        if (n == len) break;  // no NUL inside the field: not a string the kernel completed
+        strings[sl.slot].assign(reinterpret_cast<const char*>(&sample.raw[at]), n);
+        string_read[sl.slot] = true;
+        v = n;
+        have = true;
+        break;
+      }
       default:
         break;
     }

@@ -56,6 +56,52 @@ Status uprobe_retprobe_bit(unsigned* bit) {
   return Status::success();
 }
 
+// The register names of the probe-event fetch arguments (x86-64), by KZ_REG.
+const char* fetch_reg_name(uint32_t kz_reg) {
+  static const char* const names[16] = {"ax", "bx", "cx", "dx", "si", "di", "bp", "sp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
+  return kz_reg < 16 ? names[kz_reg] : nullptr;
+}
+
+Status append_line(const std::string& path, const std::string& line) {
+  const int fd = ::open(path.c_str(), O_WRONLY | O_APPEND | O_CLOEXEC);
+  if (fd < 0) return Status::error(Err::Io, "cannot open " + path + ": " + errno_text(errno));
+  const ssize_t n = ::write(fd, line.data(), line.size());
+  const int e = errno;
+  ::close(fd);
+  if (n != static_cast<ssize_t>(line.size())) return Status::error(Err::Io, "writing '" + line + "' to " + path + " failed: " + errno_text(e));
+  return Status::success();
+}
+
+// The fields f0..f3 of a probe event's format file: "field:<type> <name>;\toffset:<n>;\tsize:<n>;...".
+Status parse_fetch_format(const std::string& text, std::vector<kz::trace::RawField>* out) {
+  size_t pos = 0;
+  while (pos < text.size()) {
+    const size_t nl = text.find('\n', pos);
+    const std::string line = text.substr(pos, nl == std::string::npos ? std::string::npos : nl - pos);
+    pos = nl == std::string::npos ? text.size() : nl + 1;
+    const size_t f = line.find("field:");
+    const size_t semi = line.find(';');
+    if (f == std::string::npos || semi == std::string::npos) continue;
+    const std::string decl = line.substr(f + 6, semi - f - 6);
+    const size_t sp = decl.find_last_of(' ');
+    if (sp == std::string::npos) continue;
+    const std::string name = decl.substr(sp + 1);
+    if (name.size() != 2 || name[0] != 'f' || name[1] < '0' || name[1] > '3') continue;
+    unsigned off = 0, size = 0;
+    const size_t o = line.find("offset:"), z = line.find("size:");
+    if (o == std::string::npos || z == std::string::npos || std::sscanf(line.c_str() + o, "offset:%u;", &off) != 1 || std::sscanf(line.c_str() + z, "size:%u;", &size) != 1)
+      return Status::error(Err::Invalid, "unexpected probe event format line: " + line);
+    kz::trace::RawField rf;
+    rf.slot = static_cast<uint8_t>(name[1] - '0');
+    rf.offset = off;
+    rf.size = size;
+    rf.is_string = decl.find("__data_loc") != std::string::npos;
+    if (decl.find("__rel_loc") != std::string::npos) return Status::error(Err::Invalid, "the probe event stores a string as __rel_loc, which this decoder does not read: " + line);
+    out->push_back(rf);
+  }
+  return Status::success();
+}
+
 }  // namespace
 
 Status parse_cpu_list(const std::string& text, std::vector<int>* out) {
@@ -112,6 +158,24 @@ struct PerfSession::Impl {
   SessionStats stats;
   Status drain_error = Status::success();
   bool opened = false;
+  // Probe events created for sites with fetch slots: per site index, the tracepoint id and the fields.
+  struct Fetch {
+    bool used = false;
+    uint64_t id = 0;
+    std::vector<kz::trace::RawField> fields;
+  };
+  std::vector<Fetch> fetch;
+  std::vector<std::string> created;  // "<group>/<event>", removed by remove_fetch_events
+
+  void remove_fetch_events() {
+    std::string report;
+    for (const std::string& e : created) {
+      Status s = append_line(cfg.tracefs + "/uprobe_events", "-:" + e + "\n");
+      if (!s.ok()) report += (report.empty() ? "" : "; ") + s.message;
+    }
+    if (!created.empty()) stats.fetch_cleanup = report.empty() ? "removed " + std::to_string(created.size()) + " probe event(s)" : report;
+    created.clear();
+  }
 
   // Closing a uprobe event removes the probe, and the kernel waits for a grace period before the
   // close returns: about 0.1 s per event (measured with strace).  Closing from several threads
@@ -126,6 +190,7 @@ struct PerfSession::Impl {
     }
     cpus.clear();
     opened = false;
+    remove_fetch_events();  // after every descriptor of the events is closed (the kernel refuses to remove a busy event)
   }
 
   // Moves what the kernel has written into the CPU's byte stream; returns the bytes moved.
@@ -228,6 +293,53 @@ Status PerfSession::open(const SessionConfig& cfg) {
   const long page = sysconf(_SC_PAGESIZE);
   const size_t map_len = static_cast<size_t>(page) * (1 + cfg.ring_data_pages);
 
+  // Probe events for the sites with fetch slots (the memory reads are the kernel's fetch arguments).
+  m.fetch.assign(cfg.sites.size(), Impl::Fetch());
+  for (size_t si = 0; si < cfg.sites.size(); ++si) {
+    const SiteSpec& site = cfg.sites[si];
+    if (!kz::trace::has_fetch_slots(site)) continue;
+    if (cfg.tracefs.empty())
+      return Status::error(Err::Invalid, "site '" + site.label + "' reads memory (a fetch slot): the observer needs a mounted tracefs with uprobe_events (--tracefs DIR)");
+    if (site.binary != 0 && site.binary > cfg.also_paths.size())
+      return Status::error(Err::Invalid, "site '" + site.label + "' is in file " + std::to_string(site.binary) + " of the plan, which was not given");
+    const std::string& path = site.binary == 0 ? cfg.exe_path : cfg.also_paths[site.binary - 1];
+    const std::string group = "kz" + std::to_string(static_cast<long>(getpid()));
+    const std::string event = "s" + std::to_string(site.site);
+    char off[32];
+    std::snprintf(off, sizeof off, "0x%llx", static_cast<unsigned long long>(site.file_offset));
+    std::string def = std::string(site.kind == KZ_SITE_KIND_RET_PROBE ? "r:" : "p:") + group + "/" + event + " " + path + ":" + off;
+    for (const kz::trace::SlotSpec& sl : site.slots) {
+      if (!kz::trace::is_fetch_slot(sl)) continue;
+      const char* reg = fetch_reg_name(sl.index);
+      if (reg == nullptr) { m.close_all(); return Status::error(Err::Invalid, "site '" + site.label + "': a fetch slot names an unknown register"); }
+      const char* type = sl.src == KZ_SLOT_SRC_STR ? "string" : sl.width == 1 ? "u8" : sl.width == 2 ? "u16" : sl.width == 4 ? "u32" : "u64";
+      def += " f" + std::to_string(sl.slot) + "=" + (sl.offset < 0 ? "-" : "+") + std::to_string(sl.offset < 0 ? -static_cast<int64_t>(sl.offset) : sl.offset) + "(%" + reg + "):" + type;
+    }
+    s = append_line(cfg.tracefs + "/uprobe_events", def + "\n");
+    if (!s.ok()) {
+      std::string log;
+      (void)read_small_file(cfg.tracefs + "/error_log", &log);
+      m.close_all();
+      return Status::error(Err::Io, "creating the probe event of site '" + site.label + "' failed: " + s.message + (log.empty() ? std::string() : "; error_log: " + log));
+    }
+    m.created.push_back(group + "/" + event);
+    const std::string dir = cfg.tracefs + "/events/" + group + "/" + event;
+    std::string id_text, format;
+    s = read_small_file(dir + "/id", &id_text);
+    if (s.ok()) s = read_small_file(dir + "/format", &format);
+    if (s.ok()) s = parse_fetch_format(format, &m.fetch[si].fields);
+    if (!s.ok()) { m.close_all(); return s; }
+    m.fetch[si].used = true;
+    m.fetch[si].id = std::strtoull(id_text.c_str(), nullptr, 10);
+    for (const kz::trace::SlotSpec& sl : site.slots) {
+      if (!kz::trace::is_fetch_slot(sl)) continue;
+      bool found = false;
+      for (const kz::trace::RawField& rf : m.fetch[si].fields) found = found || (rf.slot == sl.slot && rf.is_string == (sl.src == KZ_SLOT_SRC_STR));
+      if (!found) { m.close_all(); return Status::error(Err::Invalid, "the format of probe event " + group + "/" + event + " has no field for slot " + std::to_string(sl.slot)); }
+    }
+    m.stats.fetch_events.push_back(FetchEvent{site.site, group + "/" + event, def, m.fetch[si].id});
+  }
+
   for (int cpu : cpus) {
     Impl::PerCpu c;
     c.cpu = cpu;
@@ -287,13 +399,15 @@ Status PerfSession::open(const SessionConfig& cfg) {
     if (!s.ok()) { m.cpus.push_back(std::move(c)); m.close_all(); return s; }
 
     // One uprobe event per site.
-    for (const SiteSpec& site : cfg.sites) {
+    for (size_t si = 0; si < cfg.sites.size(); ++si) {
+      const SiteSpec& site = cfg.sites[si];
       const PerfNeeds need = kz::trace::needs_of(site);
       perf_event_attr u;
       std::memset(&u, 0, sizeof u);
       u.size = sizeof u;
       u.type = m.pmu_type;
       u.config = site.kind == KZ_SITE_KIND_RET_PROBE ? (1ull << ret_bit) : 0;
+      const bool fetches = m.fetch[si].used;
       if (site.binary != 0 && site.binary > cfg.also_paths.size()) {
         m.cpus.push_back(std::move(c));
         m.close_all();
@@ -302,8 +416,15 @@ Status PerfSession::open(const SessionConfig& cfg) {
       const std::string& path = site.binary == 0 ? cfg.exe_path : cfg.also_paths[site.binary - 1];
       u.config1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(path.c_str()));  // uprobe_path
       u.config2 = site.file_offset;                                                         // probe_offset
+      if (fetches) {  // the probe event created above (same file, offset and return flag)
+        u.type = PERF_TYPE_TRACEPOINT;
+        u.config = m.fetch[si].id;
+        u.config1 = 0;
+        u.config2 = 0;
+      }
       u.sample_period = 1;
       u.sample_type = PERF_SAMPLE_IDENTIFIER | PERF_SAMPLE_IP | PERF_SAMPLE_TID | PERF_SAMPLE_TIME | PERF_SAMPLE_CPU;
+      if (fetches) u.sample_type |= PERF_SAMPLE_RAW;
       if (need.regs_user != 0 || need.stack_bytes != 0) u.sample_type |= PERF_SAMPLE_REGS_USER;
       u.sample_regs_user = need.regs_user;
       if (need.stack_bytes != 0) {
@@ -346,6 +467,7 @@ Status PerfSession::open(const SessionConfig& cfg) {
       lay.regs_user = u.sample_regs_user;
       lay.stack_user = u.sample_stack_user;
       lay.site = site.site;
+      if (fetches) lay.fields = m.fetch[si].fields;
       s = m.layouts.add(lay);
       if (!s.ok()) { m.cpus.push_back(std::move(c)); m.close_all(); return s; }
     }
@@ -432,8 +554,8 @@ Status PerfSession::stop(std::vector<CpuStream>* streams, LayoutTable* layouts, 
     m.stats.cpus.push_back(c.stats);
   }
   *layouts = m.layouts;
+  m.close_all();  // closes the events, then removes the probe events it created (the report is in the stats)
   *stats = m.stats;
-  m.close_all();
   return first_error;
 }
 

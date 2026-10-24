@@ -93,6 +93,24 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
   if (!(s = w.add_section(KZ_SEC_SITES, sites)).ok()) return s;
   if (!slots.empty() && !(s = w.add_section(KZ_SEC_SITE_SLOTS, slots)).ok()) return s;
   if (!in.decoded.events.empty() && !(s = w.add_section(KZ_SEC_RAW_EVENTS, in.decoded.events)).ok()) return s;
+  // Memory reads of fetch slots, call paths of entry-reached sites, and the strings the kernel fetched
+  // (sections written only where the plan has them: other run containers are unchanged).
+  std::vector<kz_slot_fetch> fetches;
+  kz::plan::fetch_records(in.sites, &fetches);
+  if (!fetches.empty() && !(s = w.add_section(KZ_SEC_SLOT_FETCHES, fetches)).ok()) return s;
+  std::vector<kz_via> vias;
+  kz::plan::via_records(in.sites, &w, &vias);
+  if (!vias.empty() && !(s = w.add_section(KZ_SEC_VIA, vias)).ok()) return s;
+  std::vector<kz_ev_str> strs;
+  for (const kz::trace::EventString& e : in.decoded.strings) {
+    kz_ev_str k;
+    std::memset(&k, 0, sizeof k);
+    k.event = e.event;
+    k.slot = e.slot;
+    k.text = w.intern(e.text);
+    strs.push_back(k);
+  }
+  if (!strs.empty() && !(s = w.add_section(KZ_SEC_EVENT_STRINGS, strs)).ok()) return s;
 
   std::vector<kz_side_ev> side;
   for (const kz::trace::SideEvent& e : in.decoded.side) {

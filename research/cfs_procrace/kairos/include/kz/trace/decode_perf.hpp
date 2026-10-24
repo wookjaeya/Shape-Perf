@@ -11,9 +11,10 @@
 // Every event of a session carries PERF_SAMPLE_IDENTIFIER and sample_id_all, so the id of
 // the event that wrote a record is the first word of a sample and the last word of every
 // other record; that id selects the EventLayout used to parse the rest.  The decoder
-// accepts exactly the sample layouts it understands (IDENTIFIER, IP, TID, TIME, CPU,
+// accepts exactly the sample layouts it understands (IDENTIFIER, IP, TID, TIME, CPU, RAW,
 // REGS_USER, STACK_USER) and refuses any other bit: a misread layout would mis-assign
-// every later field, so it fails closed.
+// every later field, so it fails closed.  RAW is the record of a probe event of the kernel's
+// probe-event interface (uprobe_events): the values its fetch arguments read from memory.
 //
 // All functions are total on arbitrary bytes: they never read outside the buffer and
 // report malformed input as a Status (tests feed them every truncation and corrupted
@@ -63,6 +64,16 @@ constexpr uint16_t kMiscCommExec = 1u << 13;
 constexpr uint32_t kRegCount = 24;  // x86-64 perf register numbers 0..23
 }  // namespace perfabi
 
+// Where the kernel puts the fetched value of a fetch slot inside the raw record of the probe event
+// (PERF_SAMPLE_RAW): the field's byte offset and size from the event's format file.  A STR field is a
+// __data_loc word (low 16 bits: offset of the text in the record, high 16 bits: its length with the NUL).
+struct RawField {
+  uint8_t slot = 0;
+  uint32_t offset = 0;
+  uint32_t size = 0;
+  bool is_string = false;
+};
+
 // How the records of one event are laid out.
 struct EventLayout {
   uint64_t id = 0;            // PERF_EVENT_IOC_ID of the event = the IDENTIFIER of its records
@@ -70,6 +81,7 @@ struct EventLayout {
   uint64_t regs_user = 0;     // attr.sample_regs_user: bit n = perf register number n
   uint32_t stack_user = 0;    // attr.sample_stack_user: bytes requested
   uint32_t site = KZ_NONE32;  // plan site this event feeds; KZ_NONE32 for a side-band event
+  std::vector<RawField> fields;  // RAW: where each fetch slot's value is in the raw record
 };
 
 // The events of a session, looked up by id.
@@ -102,6 +114,7 @@ struct PerfRecord {
   std::vector<uint8_t> stack;  // the bytes dumped from the user stack, trimmed to dyn_size
   uint64_t stack_dyn = 0;      // bytes the kernel actually copied
   uint32_t stack_requested = 0;
+  std::vector<uint8_t> raw;    // PERF_SAMPLE_RAW: the probe event's record (with its padding)
   // Lost.
   uint64_t lost = 0;
   // Fork / Exit: pid/tid above are the thread; ppid/ptid its parent.

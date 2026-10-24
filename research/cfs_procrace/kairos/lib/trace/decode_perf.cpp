@@ -38,7 +38,7 @@ int popcount64(uint64_t v) {
 
 // The bits of sample_type that this decoder understands.
 constexpr uint64_t kUnderstood = perfabi::kSampleIp | perfabi::kSampleTid | perfabi::kSampleTime | perfabi::kSampleCpu |
-                                 perfabi::kSampleIdentifier | perfabi::kSampleRegsUser | perfabi::kSampleStackUser;
+                                 perfabi::kSampleIdentifier | perfabi::kSampleRaw | perfabi::kSampleRegsUser | perfabi::kSampleStackUser;
 
 // The sample_id trailer that follows the body of every record that is not a sample.
 size_t trailer_size(uint64_t sample_type) {
@@ -112,6 +112,15 @@ Status parse_sample(const uint8_t* body, size_t len, const EventLayout& lay, Per
   if ((lay.sample_type & perfabi::kSampleCpu) != 0) {
     r->cpu = c.u32();
     (void)c.u32();
+  }
+  // RAW (the kernel's order puts it after CPU and before the user registers): u32 size, then size bytes,
+  // the size including the padding that aligns the sample to 8 bytes.
+  if ((lay.sample_type & perfabi::kSampleRaw) != 0) {
+    const uint32_t size = c.u32();
+    if (!c.ok) return Status::error(Err::Truncated, "sample: no size of the raw record");
+    if (size > c.left) return Status::error(Err::Truncated, "sample: raw record longer than the record");
+    const uint8_t* data = c.take(size);
+    if (data != nullptr) r->raw.assign(data, data + size);
   }
   if ((lay.sample_type & perfabi::kSampleRegsUser) != 0) {
     const uint64_t abi = c.u64();

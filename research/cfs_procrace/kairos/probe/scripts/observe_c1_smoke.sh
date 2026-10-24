@@ -6,9 +6,12 @@
 # difference from either is written into the run's conditions file (deviations) and listed in
 # docs/c1_smoke_observe.md.
 #
-#   observe_c1_smoke.sh <cfg pre|post> <cand 1df262a|1b0b338> <kz-executable> --out-dir DIR
+#   observe_c1_smoke.sh <cfg pre|post> <cand 1df262a|1b0b338> <kz-executable> --out-dir DIR [--tracefs DIR]
 #   observe_c1_smoke.sh --instances <instance dir> <meta file>      (internal: the start/stop steps; the
 #                                                                    command kz observe runs)
+#
+# --tracefs DIR: a mounted tracefs, passed to kz observe for the plan's memory reads (fetch slots: the
+# semaphore name, the ids; 2026-10-24, smoke2).  The script does not mount it; the operator states where.
 #
 # Must run as root (the observer, D1); cFS runs as the existing non-root account `ubuntu` (cFS README L107,
 # "as a normal user"), as in W3.  Nothing here sets a CPU, affinity, priority, sysctl or repetition count.
@@ -56,8 +59,8 @@ if [ "${1:-}" = "--instances" ]; then
 fi
 
 CFG="${1:?usage: $0 <pre|post> <1df262a|1b0b338> <kz> --out-dir DIR}"; CAND="${2:?cand}"; KZ_BIN="${3:?kz}"; shift 3
-OUT=""
-while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; *) echo "unknown argument: $1" >&2; exit 64 ;; esac; done
+OUT=""; TRACEFS=""
+while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; --tracefs) TRACEFS="${2:?}"; shift 2 ;; *) echo "unknown argument: $1" >&2; exit 64 ;; esac; done
 [ -n "$OUT" ] || { echo "--out-dir is required (runs are kept outside the repository)" >&2; exit 64; }
 case "$CFG" in pre) REV=281a941 ;; post) REV=833fdbb ;; *) echo "cfg is pre or post" >&2; exit 64 ;; esac
 case "$CAND" in 1df262a|1b0b338) ;; *) echo "cand is 1df262a or 1b0b338" >&2; exit 64 ;; esac
@@ -128,6 +131,10 @@ TB=$'\t'
   echo "deviation${TB}observer.instances${TB}P7 open: tx only or tx and rx${TB}tx only (rx runs as in W3, unprobed)${TB}the plan is per file; rx runs from separate copies (a second plan over the rx files would observe it)${TB}rx results are not observed${TB}yes"
   echo "deviation${TB}anchors.line_table${TB}the W2 anchor rules use the DWARF line table (line-start, after-call at a line)${TB}the W3 builds are Release without -g: entry/return sites and function-scoped call sites (after-call inside a named function)${TB}no line table in the built files; rebuilding with -g would change the build${TB}no line-start sites; a call site is found by its callee inside a function (one call, no branch-joined return)${TB}no"
   echo "deviation${TB}run.stratum${TB}cold = first run after a VM boot${TB}not established, RUNMETA stratum none${TB}the files are read before the run${TB}page cache warm; not measured${TB}yes"
+  if [ -n "$TRACEFS" ]; then
+    echo "item${TB}observer.tracefs${TB}$TRACEFS (mounted by the operator; kz observe creates one probe event per site with memory reads and removes it at the end)${TB}unspecified_by_reference"
+    echo "deviation${TB}observer.memory_reads${TB}smoke1: the perf-sample backend read registers and stack words only (the name and the ids were not recorded)${TB}the sites with fetch slots are probe events of tracefs uprobe_events (the semaphore name as a string, the ids from memory), opened as tracepoint events with PERF_SAMPLE_RAW${TB}the key of an occurrence is the name, and the ids are in memory (docs/c1_smoke_observe.md 8)${TB}the probes at those sites carry fetch arguments; the kernel reads user memory when they fire; not measured${TB}no"
+  fi
 } > "$RUN/conditions.tsv"
 
 # 4. the observation: kz observe runs the start/stop steps as its child
@@ -135,7 +142,7 @@ M="$RUN/smoke.meta"
 { echo "label=build-smoke/pilot (not a W4 experiment, not a main-experiment result)"; echo "cfg=$CFG cand=$CAND"; echo "kernel=$(uname -r)"; echo "nproc=$(nproc)"
   echo "run_user=$U ($(id $U))"; echo "mqueue.msg_max=$(cat /proc/sys/fs/mqueue/msg_max)"; } > "$M"
 "$KZ_BIN" observe "$RUN/basis_core-tx.kz" "$PLAN" --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz" \
-    -o "$RUN/run.kzt" --record "$RUN/run.kzt.record.txt" --conditions "$RUN/conditions.tsv" --stratum none --run-ordinal 0 \
+    -o "$RUN/run.kzt" --record "$RUN/run.kzt.record.txt" --conditions "$RUN/conditions.tsv" --stratum none --run-ordinal 0 ${TRACEFS:+--tracefs "$TRACEFS"} \
     -- "$SELF" --instances "$RUN/inst" "$M" >> "$D" 2>&1
 RC=$?
 echo "kz observe exit=$RC end_utc=$(date -u +%FT%T.%3NZ)" >> "$D"
@@ -148,6 +155,8 @@ if [ -e "$RUN/run.kzt" ]; then
       --out "$RUN/replay.kz" > "$RUN/replay.txt" 2>&1; echo "kz replay (current) exit=$?" >> "$D"
   "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV-altP3" $CONSTS \
       > "$RUN/replay_altP3.txt" 2>&1; echo "kz replay (P3 alternative, not current) exit=$?" >> "$D"
+  "$KZ_BIN" replay "$RUN/run.kzt" --profile "$PROF" --profile "$PROF/cf-$REV" --profile "$PROF/bundle-$CAND" --profile "$PROF/rspec-$REV" $CONSTS --outcome-narrowing off \
+      > "$RUN/replay_p1off.txt" 2>&1; echo "kz replay (P1 alternative: outcome narrowing off, not current) exit=$?" >> "$D"
 fi
 
 # 6. the anchors against objdump, after the run (no line table: the disassembly around each probe)

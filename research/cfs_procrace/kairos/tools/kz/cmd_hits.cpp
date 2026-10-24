@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstring>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -125,11 +126,26 @@ int run(int argc, char** argv) {
     c.string(sites[i].label, &labels[i]);
   }
   std::map<std::pair<uint32_t, uint8_t>, std::string> role_of;  // (site, slot) -> role
+  std::set<std::pair<uint32_t, uint8_t>> string_slot;            // (site, slot) of a string fetch slot
   for (const kz_site_slot& sl : slots) {
     std::string r;
     c.string(sl.role, &r);
     role_of[{sl.site, sl.slot}] = r;
+    if (sl.src == KZ_SLOT_SRC_STR) string_slot.insert({sl.site, sl.slot});
   }
+  std::map<std::pair<uint32_t, uint8_t>, std::string> text_of;   // (event, slot) -> string (EVENT_STRINGS)
+  if (c.find_section(KZ_SEC_EVENT_STRINGS) != nullptr) {
+    std::vector<kz_ev_str> strs;
+    s = c.read_section(KZ_SEC_EVENT_STRINGS, &strs);
+    if (!s.ok()) { std::fprintf(stderr, "kz hits: %s\n", s.describe().c_str()); return 2; }
+    for (const kz_ev_str& e : strs) c.string(e.text, &text_of[{e.event, e.slot}]);
+  }
+  // a slot value as printed: a string slot by its text, any other slot in hex
+  auto value_text = [&](size_t ev, const kz_raw_ev& e, int k) -> std::string {
+    if (string_slot.count({e.site, static_cast<uint8_t>(k)}) == 0) return hex(e.a[k]);
+    const auto t = text_of.find({static_cast<uint32_t>(ev), static_cast<uint8_t>(k)});
+    return t == text_of.end() ? std::string("(no string)") : "\"" + t->second + "\"";
+  };
   auto thread_name = [&](const kz_raw_ev& e) {
     // The incarnation of the tid that was alive at the event: the latest generation forked before it.
     const kz_thread* best = nullptr;
@@ -239,15 +255,15 @@ int run(int argc, char** argv) {
     if ((e.flags & KZ_RAW_FLAG_TRUNC) != 0) ++unreadable;
     by_thread[thread_name(e)]++;
     if (slot_index >= 0) {
-      by_slot[hex(e.a[slot_index])]++;
-      by_thread_slot[{thread_name(e), hex(e.a[slot_index])}]++;
+      by_slot[value_text(i, e, slot_index)]++;
+      by_thread_slot[{thread_name(e), value_text(i, e, slot_index)}]++;
     }
     if (caller_slot >= 0) {
       const kz::trace::SymbolEntry* sym = symbols.find(e.a[caller_slot] - bias);
       const std::string caller = sym != nullptr ? sym->name : std::string("(no symbol)");
       by_caller[caller]++;
       by_thread_caller[{thread_name(e), caller}]++;
-      if (slot_index >= 0) by_caller_slot[{caller, hex(e.a[slot_index])}]++;
+      if (slot_index >= 0) by_caller_slot[{caller, value_text(i, e, slot_index)}]++;
     }
     if (!group_return.empty()) {
       auto it = return_of.find(static_cast<uint32_t>(i));
@@ -261,7 +277,7 @@ int run(int argc, char** argv) {
           if (rr != role_of.end() && rr->second == group_return) rk = k;
         }
         if (rk < 0) { std::fprintf(stderr, "kz hits: the return site has no slot with role %s\n", group_return.c_str()); return 2; }
-        by_return[hex(r.a[rk])]++;
+        by_return[value_text(it->second, r, rk)]++;
       }
     }
   }

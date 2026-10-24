@@ -65,6 +65,7 @@ kz hits <run.kzt> [--site 라벨 --before 라벨] [--group-slot 역할] [--group
 | `--run-ordinal N` | 이 실행의 시리즈 안 번호(기본 0) |
 | `--stratum cold|warm|none` | 호출자가 **선언**하는 층(탐지하지 않는다). 절차가 그 층을 **확립**했을 때만 `cold`/`warm` 을 준다. 확립하지 못했으면 `none` 을 주고 이유를 `--conditions` 의 deviation 으로 적는다(RUNMETA 의 값과 deviation 이 어긋나지 않게) |
 | `--proc-capture full|status` | 명령이 도는 동안 관측기가 `/proc` 에서 읽는 범위(기본 `full`). `full` 은 프로세스의 status, cmdline, environ, exe·cwd 링크, cgroup, limits 와 thread 마다 stat·status 를 읽고, `status` 는 프로세스의 status 와 thread 의 stat·status 만 읽는다. cmdline·environ 읽기는 대상의 메모리를 복사하므로 대상의 주소 공간 잠금을 잡는다. 어느 쪽이든 읽은 수와 시간이 PERTURBATION `proc-capture` 에 남는다(§10) |
+| `--tracefs DIR` | 메모리를 읽는 사이트(가져오기 슬롯, §4)에 필요한 tracefs(쓸 수 있는 `uprobe_events`). 주지 않으면 `/sys/kernel/tracing` 을 쓸 수 있을 때만 그것. 관측기가 그런 사이트마다 probe event 하나(`kz<pid>/s<사이트>`)를 만들고 세션을 닫을 때 지운다. 관측기는 tracefs 를 마운트하지 않는다(2026-10-24) |
 | `--check` | 검증하고 계획을 인쇄한 뒤 멈춘다(아무것도 붙이지 않고 실행하지 않는다) |
 
 `--ring-pages`, `--poll-ms` 는 레퍼런스가 정하지 않은 도구 매개변수이므로 기록에 `unspecified_by_reference` 로 남는다. 기본값은 선택이 아니라 도구의 임시 값이고, S1 에서 정한다 [I].
@@ -101,6 +102,8 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 | 소유 앱 id 값 | 소유 앱이 정해진 thread 마다 생성 요청이 넘긴 id 값(`owner_id`). 실행 관계의 등록·게시 행위자를 지목하는 데만 쓴다(`id(owner(exec))`), 재생 상태를 고정하지 않는다(2026-10-24 W2 잔여) | ADR-056 |
 | 코어 서비스 여부 | `--basis`(실행의 부모 basis, 기호)와 `--core-request-caller`(출처가 있는 함수 이름)가 둘 다 있을 때만: 소유 앱의 OWNER_REQUEST 사건의 반환 주소가 든 함수가 그 이름이면 코어 서비스, 다른 함수면 아님. 자식 task 는 생성자의 소유 앱을 따른다. 기호가 없거나 한 앱에 두 종류가 섞이면 세우지 않는다 | SPEC §3.3 "Creation events used for `app_owner`" |
 | spawn out 인자 | spawn 규칙의 생성 연산 반환에 `out.<이름>` 을 붙인다. 신원 결합이 그 호출을 id 로 묶은 thread(ID_MATCHED: 호출 안 SPAWN_ID 사이트가 읽은 배정 id = 자식이 알린 id)가 있을 때만. FORK 시각으로만 묶인 호출에는 붙이지 않는다 | SPEC §5.7 항목 2, `osal_finalize_new` |
+| 문자열 슬롯 | `str` 슬롯(EVENT_STRINGS)은 텍스트로: 역할이 `Str` 매개변수 이름이면 `arg.NAME=@텍스트`(재생은 그 handle 을 읽는다). 길이(`a[]`)를 숫자 값으로 쓰지 않는다. 커널이 읽지 못한 문자열은 값 없음(모름) (2026-10-24) | §3.5 |
+| 호출 안 지점의 out 값 | Φ 지점 이름이 아닌 점 사이트의 슬롯 역할이 그 행위자의 가장 안쪽 열린 호출의 `out` 매개변수 이름이면, 그 호출의 반환에 `out.NAME` 을 붙인다(반환 자신이 그 값을 싣지 않을 때). 호출이 반환하기 전에 매개변수로 저장한 값을 호출 안에서 읽은 것이다. 재생 결과의 발생에 `out` 줄로 나온다 (2026-10-24) | §3.5 |
 | 손실의 task 귀속 | 하지 않는다: LOSS 의 `cpu` 는 기록을 버린 ring 이지만 사건에 CPU 가 없고 문맥 전환 기록도 없다. 보고에 손실마다 CPU ring 과 개수를 적는다 | §7 |
 
 **선택 사항(2026-10-24, W2 잔여)** [D]. `--outcome-narrowing off` 는 PI 결정 P1 의 대안(반환 코드가 열린 조건을 고정하지 않음)으로 재생한다. 기본은 `on`(현행)이다. `--compare-narrowing` 은 다른 쪽으로도 재생해 두 읽기의 요약 개수(관측, 관계, 관계×관측)를 나란히 쓰고, 요약이 달라진 발생 수를 적는다. 본 출력은 선택한 쪽이다. 출력 끝에는 항상 `summary counts` 가 붙는다. `--out` 은 선택한 쪽의 요약·모델 id·적합성·정체성과 ACTOR_OWNERS 를 컨테이너에 쓴다(`docs/schema.md` §11). 발생마다 `relation` 줄이 붙는다(`docs/phi_reference.md` §7.6).
@@ -110,6 +113,8 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 ### 3.5 여러 파일의 계획 (2026-10-24, C1) [M]
 
 프로세스가 적재하는 공유 객체(cFS 앱 `.so`)도 같은 방식으로 관측한다. 계획에 `binary` 를 여러 번 쓰면(첫째가 실행 파일) 사이트마다 `bin=<이름>` 으로 파일을 고른다. 파일마다 basis 가 하나이고(`kz anchor --bin`, 기본은 파일 이름이 같은 선언), `kz observe` 는 첫 basis(주 파일)와 `--basis` 들을 이름으로 맞춘다. 파일마다 한 번 열어 해시·build-id·대상 바이트를 basis 와 대조하고 그 기술자로 uprobe 를 건다. uprobe 는 inode 에 등록되므로 나중에 `dlopen` 으로 매핑되는 파일도 매핑 때 걸린다. 해석기는 파일마다 적재 편향을 따로 구하고(진입·점 표본과 그 파일의 MMAP2), 컨테이너의 SITES 는 사이트마다 그 파일의 inode·경로·build-id 를, FILE_HASHES 는 모든 파일을 싣는다. 진입·복귀 짝은 (파일, 기호)로 맺는다. 한 파일 계획의 basis·plan hash·컨테이너는 바뀌지 않는다(`test_probe_golden`). 시험: `test_probe_profile`, `test_probe_basis`(두 파일 계획, 선 표 없는 파일). C1 실행: `docs/c1_smoke_observe.md`.
+
+**꼬리 점프 너머의 지점과 메모리 읽기 (2026-10-24, C1 판정 가능성)** [D][M]. (1) `point func=F enter=G[>H…]`: G(사슬의 끝 함수)의 진입(함수 진입과 같은 +4 규칙)에 프로브를 두고, F 에서 G 로 가는 홉마다 **직접 전달이 하나뿐**인지 확인한다(`call rel32`, 꼬리 점프 `jmp rel32/rel8`, 조건 점프 `jcc rel32/rel8`; 모든 바이트 위치를 읽으므로 둘 이상이면 거부하고 고르지 않는다). 홉이 PLT 스텁을 거치면(피호출자가 다른 파일) 거부한다. 다른 호출자도 G 에 들어오므로, 사건은 **같은 thread 에서 F 의 열린 호출(계획의 F 진입·복귀 사이트로 추적, 가장 안쪽)에 귀속될 때만** 남긴다: 홉에 `call` 이 있으면 스택 꼭대기의 반환 주소가 마지막 `call` 의 다음 주소(링크 시점 주소 + 이 파일의 편향)와 같아야 하고, 모든 홉이 점프이면(F 자신의 꼬리 점프) G 진입의 스택 포인터가 F 진입의 스택 포인터와 같아야 한다. 이 경우 반환 주소 단어는 비교하지 않는다 — F 의 복귀 프로브가 F 진입 때 그 단어를 커널 trampoline 주소로 바꾸기 때문이다 [M: 목적 제작 프로그램에서 먼저 반환 주소로 비교했을 때 귀속 0 이었다]. 귀속되지 않은 표본은 트랩으로는 세고(`hits.site…`) 사건으로는 남기지 않는다(`decode.via.site…`). 반환 지점 합류 거부(W2)는 이 형태에 해당하지 않는다: 프로브가 반환 지점이 아니라 피호출자 진입에 있고, "호출이 실제로 있었다"는 요구는 위의 귀속이 실행 때 확인한다. basis 의 TARGETS 에는 종류 `entry-reached`, 새 섹션 VIA 에 사슬·홉 수·기대 반환 주소(또는 동적)가 들어간다(`kz_raw.h`). (2) 슬롯 원천 `+<오프셋>(<레지스터>)` 와 너비 `string`: 프로브가 발화할 때 커널이 사용자 메모리를 읽는 **probe-event fetch argument**(tracefs `uprobe_events`)이다. 그런 슬롯이 있는 사이트는 uprobe PMU 이벤트 대신 같은 파일·오프셋·복귀 여부의 probe event 를 만들고(파일은 검증한 기술자의 `/proc/self/fd/N`), tracepoint 이벤트로 `PERF_SAMPLE_RAW` 를 더해 연다. 나머지 슬롯(레지스터·스택)은 전과 같다. 형식 파일(`events/<그룹>/<이벤트>/format`)에서 필드의 오프셋·크기를 읽고, 문자열은 `__data_loc`(하위 16비트 오프셋, 상위 16비트 NUL 포함 길이)로 읽는다. 커널이 읽지 못한 문자열(길이 0)은 TRUNC, 문자열이 아닌 값으로 쓰지 않는다. 문자열 슬롯의 `a[]` 는 바이트 길이이고 본문은 EVENT_STRINGS 에 있다. 확인한 것과 없는 것 [M: 커널 6.18.44-fc-v153]: `+0(%si):string`, `+16(%di):u32` 는 진입·복귀 프로브 모두 된다. **복귀 프로브의 `$argN` 은 없다**(`trace_uprobe: error: $arg* can be used only on function entry or exit`; README 의 "kernel return probes support: $retval, $arg<N>, $comm" 은 kretprobe 만), 그리고 uprobe event 에는 진입에서 복귀로 값을 넘길 저장소가 없다. 그래서 "진입의 포인터를 저장해 복귀에서 out 인자를 읽기"는 이 커널에서 할 수 없다. 대신 out 값은 피호출자 안의 지점(저장 직후의 호출, 인자로 읽을 수 있는 곳)에서 읽는다. eBPF(맵에 진입 포인터 저장)는 쓰지 않았다(P-LIBBPF, 이 관측기는 라이브러리 없이 perf_event_open 만 쓴다).
 
 **선 표 없는 빌드**: DWARF 가 없으면 선 사이트를 풀 수 없다. `point func=<함수> after-call=<호출 대상>` 은 함수 안에서 그 호출 대상(기호 또는 PLT 스텁)으로 가는 `call rel32` 를 찾는다. 후보가 없거나 둘 이상이면(명령 경계를 모르므로 고르지 않는다) 거부하고, 반환 지점이 함수 안 분기의 목적지이면 거부한다(W2 규칙과 같음). basis 는 선 사이트가 있는 파일에만 선 표를 요구한다.
 
@@ -122,11 +127,12 @@ kzp-observe 1
 binary <이름>
 prov <id> tier=<층> kind=<종류> [side=<면>] file="<경로>" lines=A-B cite="<문구>" [authored="<문구>"] [root=<이름>] [sha256=<64 hex>]
 site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파일 접미어>:<줄> (after-call=<기호> | line-start)
+     | func=<기호> after-call=<기호> | func=<기호> enter=<함수>[><함수>…]
      [decoder=generic|spawn-create|spawn-return|thread-entry|owner-request|child-request|request-return|spawn-id]
      [prov=<id>] [s0..s3=<원천>:<너비>:<역할>]
 ```
 
-슬롯의 원천은 레지스터 이름, `stack+<바이트>`, `ip` 이다. 사이트는 최대 네 값(`a[0..3]`)을 낸다. `generic` 사이트는 역할(role)로 읽는다. 엔진이 **위치로** 읽는 곳은 두 군데이고, 계획 검사(`check_site`, `check_plan`; 프로필을 읽을 때와 `make_plan` 에서 둘 다)가 그 위치에 요구한 역할이 선언되지 않은 계획을 **거부**한다(0 으로 해석하지 않는다) [D][M]:
+슬롯의 원천은 레지스터 이름, `stack+<바이트>`, `ip`, 그리고 메모리 `+<오프셋>(<레지스터>)`(너비 `u8`…`u64` 또는 `string`; §3.5, `--tracefs` 필요)이다. 정해진 위치를 읽는 디코더의 슬롯에는 문자열을 쓸 수 없다. 사이트는 최대 네 값(`a[0..3]`)을 낸다. `generic` 사이트는 역할(role)로 읽는다. 엔진이 **위치로** 읽는 곳은 두 군데이고, 계획 검사(`check_site`, `check_plan`; 프로필을 읽을 때와 `make_plan` 에서 둘 다)가 그 위치에 요구한 역할이 선언되지 않은 계획을 **거부**한다(0 으로 해석하지 않는다) [D][M]:
 
 | 읽는 곳 | 요구 |
 |---|---|
@@ -285,6 +291,8 @@ observe_cfs_smoke.sh --xcheck ...   # 실행 뒤: 앵커의 addr2line·objdump �
 | `test_probe_record` | 조건 파일, `/proc` 읽기(읽은 수, `full`/`status` 모드), CPU 목록, 대상 실행 |
 | `test_probe_golden` | basis 와 실행 컨테이너의 정규 dump 와 artifact 해시(합성 입력; `tests/cfs-free/golden/`), PERTURBATION 의 복귀 행·`proc-capture` 행, 트랩 계수 규칙 |
 | `test_realrecord_derived` | `env/logs/s1r2_p1.kzt`(제자리에서 읽음, 복사하지 않음)의 실제 기록 재생: 원래 기록의 요약(위반 24, 위반 없음 0, 입력 오류 0, 소유자 모두 `undetermined`)과 파생 기록 71개가 원래보다 결정적이지 않음. 컨테이너가 없으면 77(건너뜀) |
+| `test_trace_decode_fetch` | 가져오기 슬롯(RAW 의 정수·`__data_loc` 문자열, 읽지 못한 문자열·범위 밖 필드는 TRUNC), 꼬리 점프 너머 지점의 귀속(스택 포인터, 기대 반환 주소, 중첩, 열린 호출 없음), 계획 검사 |
+| `test_probe_anchor_reached` | `-O2`, `-g` 없는 목적 제작 프로그램(`target/tailjump_prog.c`)을 두 컴파일러로: `enter=` 해석(꼬리 점프 → 동적, 호출 홉 → 기대 반환 주소, `objdump` 와 대조), 거부(두 전달, PLT, 전달 없음), basis·계획, 그리고 root 와 tracefs(`KZ_TRACEFS`)가 있으면 `kz observe` 실행: 조회를 거친 2회만 남고 이름 `alpha`/`gamma`, 토큰 id `0x30004`, probe event 정리. 일부를 못 돌리면 77 |
 | `test_probe_observe` | **통합**: 목적 제작 C 프로그램에 실제 uprobe 를 붙임 — 인자, 반환 주소 귀속, thread 정체성, 호출 짝, 손실 0; 1쪽 ring 의 손실 계수; 동시 thread; 같은 바이트의 다른 경로; 바뀐 바이트·잘린 파일·다른 프로필·basis 아님의 거부; 종료 코드; `--check`. root 가 아니면 77 로 끝나 **건너뜀**으로 보고된다(통과로 세지 않는다) |
 
 환경: 이 VM(`Linux 6.18.44-fc-v114`, 4 vCPU, root)에서 gcc 13(일반, ASan+UBSan)과 clang 18(일반, UBSan trap) 네 빌드로 전체를 돌렸다. 2026-10-16 의 검토 반영은 `k2rv-gcc`(gcc 13, RelWithDebInfo; 새로 구성)와 `k2-clang`, `k2-gcc-asan`, `k2-clang-ubsan`(증분 빌드)에서 돌렸다. 네 빌드 모두 74개 가운데 73개 통과, 실패 1개는 `lint_case-ids` 로 다른 작업이 고치고 있는 `lib/llvm/ast_fn.cpp` 의 사례 식별자 때문이다(K2 파일이 아니다). 디스크가 가득 차서 `k2-gcc` 는 지웠다. `test_probe_observe` 는 관찰마다 프로브를 닫는 시간(§6) 때문에 약 20 초 걸린다.
@@ -293,7 +301,7 @@ observe_cfs_smoke.sh --xcheck ...   # 실행 뒤: 앵커의 addr2line·objdump �
 
 - **F0 의 뜻**: 디스크의 바이너리와 기호를 바꾸지 않는다. uprobe 는 대상 프로세스의 **메모리 안** 코드 쪽에 중단점 명령을 넣는다(그 프로세스의 페이지가 비공유 사본이 된다). "수정하지 않은 바이너리"는 파일에 대한 말이다.
 - **프로브 비용은 재지 않았다.** R-a…R-e(비용), BPF 본문·cookie 백엔드, 앱 `.so` 의 inode 등록 시험, group A 재측정, S1 의 N 결정은 V1b/S1 의 몫이고 하지 않았다. `emulated` 표시는 인용한 측정에 근거한 분류일 뿐이다.
-- perf-sample 은 인자 **레지스터**와 스택의 앞쪽 단어만 읽는다. 대상 메모리를 따라가야 하는 값(task 이름 문자열 등)은 읽지 못한다.
+- perf-sample 은 인자 **레지스터**와 스택의 앞쪽 단어만 읽는다. 대상 메모리를 따라가야 하는 값은 가져오기 슬롯(§3.5, tracefs probe event)으로만 읽고, 진입에서 저장한 포인터로 복귀 때 읽는 일은 이 커널에서 할 수 없다(§3.5). 관측기가 비정상 종료하면 만든 probe event 가 tracefs 에 남는다(`kz<pid>/…`; 다음 실행과 이름이 겹치지 않는다).
 - 프로브는 시스템 전체에서 대상 파일을 실행하는 모든 프로세스에 걸린다(§6).
 - 서로 다른 thread 의 사건 사이의 시각 순서는 한 시계의 증거이지 happens-before 가 아니다. `kz hits --before` 의 "앞섬"도 그렇고, 점 사이트의 시각은 효과 시각의 상한이다(§3.3).
 - 정체성 결합의 생성자 연결은 FORK 시각의 포함 하나에 기대고(A-CLK-PO), 알린 id 는 생성자 쪽과 대조되지 않는다(§9).

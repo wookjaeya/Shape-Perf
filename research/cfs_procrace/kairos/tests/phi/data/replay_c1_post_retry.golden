@@ -53,7 +53,8 @@ edge R1 S unconditional #21 -> #22
 
 occurrences 3
 occurrence K-REG.osal-countsem-lookup actor CF ordinal 1 key [0x5be5dc6a107c0903] call #1 return #3 context cf-dependent-lookup
-  status PENDING decided at point #2 scope default
+  status TOLERATED decided at point #2 scope default
+  monitor retry_until_ready ACCEPT at #16: attempt 2 is READY (attempt 1 of 2 of the run from #1; bound CF_STARTUP_SEM_MAX_RETRIES = 25)
   conjunct exists point #2 fails
   result 0xffffffef outcome agrees
 occurrence K-REG.osal-countsem-lookup actor CF ordinal 2 key [0x5be5dc6a107c0903] call #15 return #17 context cf-dependent-lookup
@@ -62,6 +63,7 @@ occurrence K-REG.osal-countsem-lookup actor CF ordinal 2 key [0x5be5dc6a107c0903
   result 0 outcome agrees
 occurrence K-REG.osal-countsem-lookup actor X ordinal 1 key [0x961e9586b17971e6] call #20 return #22
   status PENDING decided at point #21 scope default
+  monitor retry_until_ready OPEN: the trace ends after attempt 1 (attempt 1 of 1 of the run from #20; bound CF_STARTUP_SEM_MAX_RETRIES = 25)
   conjunct exists point #21 fails
   result 0xffffffef outcome agrees
 

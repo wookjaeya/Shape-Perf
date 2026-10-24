@@ -12,6 +12,12 @@
 # without a line table: entry/return sites and function-scoped call sites only (the W2 anchor rules: PLT
 # calls, refusal of a branch-joined return site).  The tx instance only (PI decision P7 is open): rx runs
 # from other files and is not probed.
+#
+# 2026-10-24 (smoke2): the semaphore name and the ids are read from memory by the kernel's probe-event fetch
+# arguments (slots +<offset>(<register>), `string`; kz observe --tracefs), and the points inside OSAL that
+# these builds reach by a tail jump (the search of the lookup) or through an inlined helper are entry-reached
+# points (func=F enter=G[>H]): the entry of G, kept only where attributed to an open call of F on the same
+# thread (docs/observer.md 3.5).
 kzp-observe 1
 binary core-tx
 binary cf.so
@@ -20,6 +26,10 @@ binary bp.so
 # ---- cited text -----------------------------------------------------------------------------------
 prov osal_countsem_lookup_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-countsem.c" lines=204-215 cite="OS_CountSemGetIdByName(osal_id_t *sem_id, const char *sem_name) returns a status; the id goes to *sem_id" sha256=aaa80e692241a94867b279e2b3a112b50ffd1b26c011ea4fdebe2ac0e407f546
 prov osal_countsem_lookup_doc tier=contract-backed kind=api_doc side=supplier file="osal/src/os/inc/osapi-countsem.h" lines=147-162 cite="the documented results of the lookup: OS_SUCCESS, OS_INVALID_POINTER, OS_ERR_NAME_TOO_LONG, OS_ERR_NAME_NOT_FOUND" sha256=9d7f3829a7927300cb1b547dec7532c96691e2ba70ec166fd9dcb8d845d7fa32
+prov osal_find_by_name_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=962-984 cite="OS_ObjectIdFindByName(idtype, name, object_id): the table search by name; on success *object_id = token.obj_id, then OS_ObjectIdRelease(&token)" sha256=be753d8be2645a7ff0e1ba952c82c9ccaddb512e70669b215ad8967af18e3b7b
+prov osal_release_finish tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=1113-1116 cite="OS_ObjectIdRelease(token) is OS_ObjectIdTransactionFinish(token, NULL): the token is the first argument" sha256=554136c17d9220d9f1f4c9d59b28a7f0e66e1f6a0391cad187b3ad420c4a0a66
+prov osal_token_layout tier=code-derived kind=code_pattern file="osal/src/os/shared/inc/os-shared-idmap.h" lines=88-95 cite="struct OS_object_token: lock_mode, lock_key, obj_type, obj_idx, obj_id, five 4-byte members: obj_id at byte offset 16" sha256=4a5f9a905eb75933e62f314753a68e1c4623f36fc6d2cd67699b1680245c62a1
+prov osal_finalize_new_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=828-862 cite="OS_ObjectIdFinalizeNew(operation_status, token, outid): on OS_SUCCESS final_id = token->obj_id and OS_NotifyEvent(OS_EVENT_RESOURCE_CREATED, token->obj_id, NULL); *outid = final_id" sha256=905488ef08c56dd2b0e3ffbe6330d8224a2fa825df56fa2147e1aa37deca968b
 prov osal_countsem_create_def tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-countsem.c" lines=83-109 cite="OS_CountSemCreate(osal_id_t *sem_id, const char *sem_name, uint32 sem_initial_value, uint32 options) returns a status" sha256=1eec04aa4faf5e3a347cb8033d09b7b0cb6a9752b22f8b875acac78336d52b98
 prov es_exitapp_sig tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=340-340 cite="void CFE_ES_ExitApp(uint32 ExitStatus): the exit status is the first argument" sha256=619688757208e86148bcff308d085c835b7038066d843b51f8e03c2c79ab2e4b
 prov es_startapptask_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=576-591 cite="CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId) makes the one OS_TaskCreate call of the task" sha256=b9b1e95f7ec8bb36c3bf515c9f85cdf646208607a88cc5f0f3e971e2a8b6f0ed
@@ -41,12 +51,28 @@ prov cf_cfdp_lookup_call tier=code-derived kind=code_pattern file="cf/fsw/src/cf
 prov cf_cfdp_retry_loop tier=code-derived kind=code_pattern file="cf/fsw/src/cf_cfdp.c" lines=1000-1012 cite="the retry loop: the delay OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY) follows each OS_ERR_NAME_NOT_FOUND" sha256=b6e324a138e8a4abe4dcb6262737ba8ca3f5d62d06cc554a519282a38708b40e
 
 # ---- core-tx: the semaphore API (the lookup and the creation, every caller) ---------------------
-# The name and the id are in memory: an observer of registers keeps the pointers only (the slot roles
-# are not the parameter names, so the replay does not take a pointer for the name).
-site osal.countsem_lookup.entry entry func=OS_CountSemGetIdByName prov=osal_countsem_lookup_def s0=rdi:u64:sem_id_ptr s1=rsi:u64:sem_name_ptr s3=stack+0:u64:return_address
+# The name is the string at the second argument, read by the kernel when the probe fires (the slot role is
+# the parameter name, so the replay takes it as the key text); the pointers stay as numbers.
+site osal.countsem_lookup.entry entry func=OS_CountSemGetIdByName prov=osal_countsem_lookup_def s0=rdi:u64:sem_id_ptr s1=+0(rsi):string:sem_name s2=rsi:u64:sem_name_ptr s3=stack+0:u64:return_address
 site osal.countsem_lookup.ret   ret   func=OS_CountSemGetIdByName prov=osal_countsem_lookup_doc s0=rax:u32:status s3=ip:u64:return_address
-site osal.countsem_create.entry entry func=OS_CountSemCreate prov=osal_countsem_create_def s0=rdi:u64:sem_id_ptr s1=rsi:u64:sem_name_ptr s2=rdx:u32:sem_initial_value s3=stack+0:u64:return_address
+site osal.countsem_create.entry entry func=OS_CountSemCreate prov=osal_countsem_create_def s0=rdi:u64:sem_id_ptr s1=+0(rsi):string:sem_name s2=rdx:u32:sem_initial_value s3=stack+0:u64:return_address
 site osal.countsem_create.ret   ret   func=OS_CountSemCreate prov=osal_countsem_create_def s0=rax:u32:status s3=ip:u64:return_address
+# The linearization point of the lookup's precondition (the Phi point OS_CountSemGetIdByName.exists, the call
+# of OS_ObjectIdFindByName): in these builds the lookup reaches it by a tail jump (`jmp`, kz anchor checks it
+# is the only transfer), so the point is the search's entry reached from the lookup, attributed by the stack
+# pointer of the open lookup call.  The name the search reads is its second argument.
+site OS_CountSemGetIdByName.exists point func=OS_CountSemGetIdByName enter=OS_ObjectIdFindByName prov=osal_find_by_name_def s1=+0(rsi):string:sem_name s3=stack+0:u64:return_address
+# The id the lookup stores through its out-parameter: inside the search, after `*object_id = token.obj_id`,
+# the release of the token is OS_ObjectIdTransactionFinish(&token, NULL) (inlined OS_ObjectIdRelease; one
+# call in the search's code); the token's obj_id is at byte offset 16.  The slot role names the out
+# parameter, so the replay sets out.sem_id on the lookup's return.
+site osal.countsem_lookup.found point func=OS_CountSemGetIdByName enter=OS_ObjectIdFindByName>OS_ObjectIdTransactionFinish prov=osal_token_layout s0=+16(rdi):u32:sem_id s3=stack+0:u64:return_address
+# The creation's effect point (the Phi point OS_CountSemCreate.publish, the call of OS_ObjectIdFinalizeNew,
+# osapi-countsem.c L106), with the status it finalizes (first argument), and the id it publishes: the only
+# OS_NotifyEvent call of OS_ObjectIdFinalizeNew is made on success with token->obj_id, the value stored to the
+# out-parameter (second argument).
+site OS_CountSemCreate.publish point func=OS_CountSemCreate enter=OS_ObjectIdFinalizeNew prov=osal_countsem_create_def s0=rdi:u32:operation_status s3=stack+0:u64:return_address
+site osal.countsem_create.created point func=OS_CountSemCreate enter=OS_ObjectIdFinalizeNew>OS_NotifyEvent prov=osal_finalize_new_def s0=rdi:u32:event s1=rsi:u32:sem_id s3=stack+0:u64:return_address
 # The exit of an application task (CF on its init failure, BP on a provider init failure): the status.
 site es.exit_app.entry entry func=CFE_ES_ExitApp prov=es_exitapp_sig s0=rdi:u32:exit_status s3=stack+0:u64:return_address
 

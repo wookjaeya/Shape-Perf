@@ -12,7 +12,19 @@
 //   - the executable mappings of the traced file become map events (of every traced file, for a plan
 //     over several files: the executable and the shared objects it loads, each with its own bias);
 //   - LOST and THROTTLE records become loss records (SPEC 5.6: loss is never read as the
-//     absence of events).
+//     absence of events);
+//   - the text of a string slot (a fetch argument of the probe event) is kept beside its event;
+//   - a sample of a site reached from a named function (SiteSpec::via_symbol: a probe at a function entry
+//     that other callers reach too) is kept only where it is attributed to an open call of that function on
+//     the same thread: that call is the innermost open call, among the calls of the plan's reached-from
+//     functions, whose entry was seen and whose return was not, and the callee was entered as the call path
+//     says: where a hop is a call, the return address at the top of the stack is the one the last call leaves
+//     (the site's link-time address plus the file's load bias); where every hop is a jump (a tail jump of the
+//     function itself), the stack pointer at the callee's entry is the one at the open call's entry (the
+//     return address word is not compared there: a return probe of the function replaces it with the
+//     kernel's trampoline).  Both entry samples carry the stack pointer (their return-address slot reads the
+//     stack, so the user registers include it).  Other samples of the site are counted
+//     (DecodeStats::via_unattributed), not kept: they are calls from elsewhere.
 // A process is traced if it maps the traced file or produced a sample.  The side-band stream is
 // system-wide (the kernel reports every fork and rename on the CPU), so everything about other
 // processes is dropped and counted.
@@ -37,6 +49,13 @@ struct SideEvent {
 struct MapEvent {
   kz_map_ev rec;     // rec.path is not set, as above
   std::string path;
+};
+
+// The text of a string slot of events[event] (a STR fetch slot).
+struct EventString {
+  uint32_t event = 0;
+  uint8_t slot = 0;
+  std::string text;
 };
 
 struct CpuStream {
@@ -73,7 +92,8 @@ struct DecodeStats {
   uint64_t throttle_intervals = 0;
   uint64_t stream_errors = 0;          // streams that ended in a malformed record
   uint64_t bias_mismatches = 0;        // entry/point samples whose address disagrees with the first
-  std::vector<uint64_t> site_hits;     // per site
+  std::vector<uint64_t> site_hits;     // per site: every sample (each one is a trap, kept or not)
+  std::vector<uint64_t> via_unattributed;  // per site reached from a function: samples not attributed to an open call of it
 };
 
 struct DecodedRun {
@@ -81,6 +101,7 @@ struct DecodedRun {
   std::vector<SideEvent> side;
   std::vector<MapEvent> maps;
   std::vector<kz_loss> loss;
+  std::vector<EventString> strings;    // the texts of string slots, by event index
   std::vector<uint32_t> traced_pids;   // sorted
   bool bias_known = false;
   uint64_t load_bias = 0;              // runtime address - link-time address of the traced file (the primary)

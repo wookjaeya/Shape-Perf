@@ -49,6 +49,18 @@ add_custom_command(OUTPUT target_prog_nodebug
   COMMAND ${CMAKE_C_COMPILER} -O0 -fno-omit-frame-pointer -fcf-protection=full -fPIE -pie -pthread -o target_prog_nodebug ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c VERBATIM)
 list(APPEND kz_alt_binaries target_prog_nodebug)
+# The entry-reached tests: a program whose lookup reaches its search by a tail jump, at -O2 without -g (a
+# release-like build), by the build's compiler and by the other one.
+add_custom_command(OUTPUT tailjump_prog_cc
+  COMMAND ${CMAKE_C_COMPILER} -O2 -fcf-protection=full -fPIE -pie -o tailjump_prog_cc ${CMAKE_CURRENT_SOURCE_DIR}/target/tailjump_prog.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/target/tailjump_prog.c VERBATIM)
+list(APPEND kz_alt_binaries tailjump_prog_cc)
+if(KZ_ALT_CC)
+  add_custom_command(OUTPUT tailjump_prog_alt
+    COMMAND ${KZ_ALT_CC} -O2 -fcf-protection=full -fPIE -pie -o tailjump_prog_alt ${CMAKE_CURRENT_SOURCE_DIR}/target/tailjump_prog.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/target/tailjump_prog.c VERBATIM)
+  list(APPEND kz_alt_binaries tailjump_prog_alt)
+endif()
 add_custom_target(target_prog_variants DEPENDS ${kz_alt_binaries})
 
 set(kz_probe_libs kz-loader kz-plan kz-anchor kz-trace kz-testsupport)
@@ -72,6 +84,9 @@ set_tests_properties(test_probe_golden PROPERTIES LABELS "unit;golden")
 # test_probe_anchor_compilers exits 77 when addr2line or the other compiler's build is missing: the
 # cross-check did not run, so the test is reported as skipped, not as passed.
 set_tests_properties(test_probe_anchor_compilers PROPERTIES SKIP_RETURN_CODE 77)
+# test_probe_anchor_reached exits 77 when a part could not run: the other compiler's build, or the run
+# under kz observe (root and a tracefs: KZ_TRACEFS or /sys/kernel/tracing).
+set_tests_properties(test_probe_anchor_reached PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
 set_tests_properties(test_probe_observe PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 900)
 
 # The anchor cross-check step of probe/scripts/observe_cfs_smoke.sh (--xcheck), on the target program:

@@ -102,13 +102,26 @@ Status parse_slot(uint32_t line, const std::string& key, const std::string& val,
   out->slot = static_cast<uint8_t>(key[1] - '0');
   out->role = role;
   if (role.empty()) return err(line, key + ": a slot needs a role");
+  const bool is_string = width == "string";
   if (width == "u8") out->width = 1;
   else if (width == "u16") out->width = 2;
   else if (width == "u32") out->width = 4;
   else if (width == "u64") out->width = 8;
-  else return err(line, key + ": width must be u8, u16, u32 or u64");
+  else if (is_string) out->width = 4;  // the slot keeps the string's byte length; the text goes beside the event
+  else return err(line, key + ": width must be u8, u16, u32, u64 or string");
   uint32_t reg = 0;
-  if (src == "ip") {
+  const bool deref = !src.empty() && (src[0] == '+' || src[0] == '-') && src.back() == ')' && src.find('(') != std::string::npos;
+  if (is_string && !deref) return err(line, key + ": a string is read from memory: +<offset>(<register>)");
+  if (deref) {
+    // +<offset>(<register>) or -<offset>(<register>): memory at register + offset, read by the kernel when the probe fires
+    const size_t open = src.find('(');
+    uint32_t off = 0;
+    if (!parse_uint(src.substr(1, open - 1), &off) || off > 0x7fffffffu) return err(line, key + ": +<offset>(<register>) with a decimal offset");
+    if (!lookup(kRegs, src.substr(open + 1, src.size() - open - 2), &reg)) return err(line, key + ": unknown register in '" + src + "'");
+    out->src = is_string ? KZ_SLOT_SRC_STR : KZ_SLOT_SRC_MEM;
+    out->index = reg;
+    out->offset = src[0] == '-' ? -static_cast<int32_t>(off) : static_cast<int32_t>(off);
+  } else if (src == "ip") {
     out->src = KZ_SLOT_SRC_IP;
   } else if (src.rfind("stack+", 0) == 0) {
     uint32_t off = 0;
@@ -214,6 +227,17 @@ Status parse_profile(std::string_view text, Profile* out) {
           if (colon == std::string::npos || !parse_uint(v.substr(colon + 1), &s.at_line) || s.at_line == 0) return err(lineno, "at=<file suffix>:<line>");
           s.at_file = v.substr(0, colon);
         } else if (k == "after-call") s.after_call = v;
+        else if (k == "enter") {
+          size_t b = 0;
+          while (b <= v.size()) {
+            const size_t e = v.find('>', b);
+            const std::string part = v.substr(b, e == std::string::npos ? std::string::npos : e - b);
+            if (part.empty()) return err(lineno, "enter=<function>[><function>...]: an empty function name");
+            s.enter.push_back(part);
+            if (e == std::string::npos) break;
+            b = e + 1;
+          }
+        }
         else if (k.empty() && v == "line-start") s.line_start = true;
         else if (k == "decoder") { if (!lookup(kDecoders, v, &x)) return err(lineno, "unknown decoder '" + v + "'"); s.decoder = static_cast<uint16_t>(x); }
         else if (k == "bin") {
@@ -236,11 +260,13 @@ Status parse_profile(std::string_view text, Profile* out) {
       }
       if (s.kind == KZ_SITE_KIND_POINT_PROBE) {
         const bool by_line = !s.at_file.empty() && s.func.empty() && s.after_call.empty() == s.line_start;
-        const bool by_function = s.at_file.empty() && !s.func.empty() && !s.after_call.empty() && !s.line_start && s.in_suffix.empty();
-        if (!by_line && !by_function)
-          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start, or func=<symbol> after-call=<symbol>");
+        const bool by_function = s.at_file.empty() && !s.func.empty() && !s.after_call.empty() && !s.line_start && s.in_suffix.empty() && s.enter.empty();
+        const bool by_entry = s.at_file.empty() && !s.func.empty() && s.after_call.empty() && !s.line_start && s.in_suffix.empty() && !s.enter.empty();
+        if ((!by_line || !s.enter.empty()) && !by_function && !by_entry)
+          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start, func=<symbol> after-call=<symbol>, or func=<symbol> enter=<function>[>...]");
       } else {
-        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || s.line_start) return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
+        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || s.line_start || !s.enter.empty())
+          return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
       }
       out->sites.push_back(std::move(s));
     } else {
@@ -268,6 +294,10 @@ Status parse_profile(std::string_view text, Profile* out) {
     spec.symbol = s.func;
     spec.slots = s.slots;
     spec.binary = s.bin;
+    if (s.entry_reached()) {
+      spec.symbol = s.enter.back();  // the probe is in the last function of the chain
+      spec.via_symbol = s.func;
+    }
     Status st = kz::trace::check_site(spec);
     if (!st.ok()) return Status::error(Err::Invalid, "profile line " + std::to_string(s.source_line) + ": " + st.message);
     specs.push_back(std::move(spec));

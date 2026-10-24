@@ -133,6 +133,11 @@ K0 의 초기 정의에서 K2 가 perf-sample 백엔드를 구현하며 바꾼 �
 | SYMBOLS | basis | 바이너리의 함수 기호(주소, 크기, 파일 오프셋, 이름, 결합). 반환 주소를 함수 이름으로 바꾸는 데 쓴다. |
 | TARGETS | basis | 계획의 사이트마다 해석된 프로브 대상: 링크 시점 주소, 파일 오프셋, 함수 시작과 거리, 줄, 처음 8바이트, 비용 부류. 관측기는 붙이기 전에 이 바이트를 파일에서 다시 확인한다. |
 
+| VIA (57) | basis·실행 | `enter=` 사이트(대상 종류 `entry-reached`)의 호출 경로: 사슬 `F>G[>H]`, 홉 수, 기대 반환 주소(링크 시점) 또는 `ret-dynamic`(모든 홉이 점프: 스택 포인터로 귀속). basis 에서는 `id` = 대상 인덱스, 실행에서는 사이트 id (2026-10-24) |
+| SLOT_FETCHES (58) | 실행 | 원천이 `mem`/`str` 인 슬롯의 레지스터와 오프셋(커널의 probe-event fetch argument가 읽은 메모리) (2026-10-24) |
+| EVENT_STRINGS (59) | 실행 | `str` 슬롯의 문자열, `RAW_EVENTS` 인덱스와 슬롯으로. 슬롯 값 `a[]` 는 바이트 길이 (2026-10-24) |
+
+- **2026-10-24 추가(C1 판정 가능성)**: 섹션 세 개(관측 범위 40–59 의 남은 번호)와 열거 값(`KZ_SLOT_SRC` 의 `mem` 4·`str` 5, `KZ_TARGET_KIND` 의 `entry-reached` 4, 새 `KZ_FETCH_KIND`, `KZ_VIA_FLAG`)만 더했다. 기존 레이아웃과 섹션 버전은 그대로이므로 smoke1 의 실행·basis 컨테이너도 읽힌다. 섹션은 그 사이트가 있는 계획에서만 쓰이므로 다른 계획의 컨테이너와 계획 해시는 바뀌지 않는다(`test_probe_golden`). `layout.golden`, `records.golden` 은 갱신했다(diff 확인: 새 레코드 세 개와 열거 값, 무작위 레코드의 섹션 이름 참조가 등록 순서에 따라 바뀜).
 - **디코더 의미**(SITES 의 `decoder`): `generic`, `spawn-create`(`a[0]` 이름 포인터 — 읽지 않음, `a[1]` 역할 `entry_fn`, `a[2]` 역할 `priority`(4바이트 이하), `a[3]` 역할 `return_address`), `spawn-return`(`a[0]` 상태, `a[3]` 역할 `return_address` = 명령 포인터), `thread-entry`(`a[0]` 알린 id, 4바이트 이하). 이 의미는 정체성 결합이 쓴다. `check_site` 가 이 위치·역할을 요구하고, 정체성 결합도 맞지 않는 사이트를 받으면 오류로 끝난다.
 - **진입·복귀 짝**: 진입 사이트와 복귀 사이트가 기호가 같고 **둘 다 `a[3]` 에 역할 `return_address`(8바이트)를 선언하면** 짝짓기 후보이다(`check_plan` 이 요구한다). 진입에서는 스택 꼭대기의 단어, 복귀에서는 표본의 명령 포인터.
 - **2026-10-16 개정(검토 반영)**: 열거 값만 더했다 — `KZ_INSN_CLASS` 에 `ret-trampoline`(3; PERTURBATION 의 복귀 행 전용, 사이트의 `insn_class` 에는 쓰지 않는다), `KZ_PERTURBATION_KIND` 에 `proc-capture`(5), `KZ_THREAD_FLAG` 에 `match-by-time`(0x400)과 `id-unverified`(0x800). 레코드 레이아웃과 섹션 버전은 그대로이므로 그 전의 실행 컨테이너(`env/logs/s1r2_p1.kzt`)도 읽힌다. 헤더 주석의 두 문장도 바로잡았다: 시각 순서는 서로 다른 thread 사이의 HB 간선이 될 수 없고(세는 도구는 한 시계의 증거로 쓸 수 있다), `a[]` 는 `generic` 에서는 역할로, 디코더와 짝짓기에서는 검사된 위치로 읽는다.

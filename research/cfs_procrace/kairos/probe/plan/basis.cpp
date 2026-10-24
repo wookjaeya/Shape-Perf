@@ -79,7 +79,7 @@ Status build_basis(const Bytes& binary, const Profile& profile, const BasisOptio
   // built without -g serves function targets and function-scoped call targets.
   bool needs_lines = false;
   for (const ProfileSite& ps : profile.sites)
-    if (ps.bin == opt.bin && ((ps.kind == KZ_SITE_KIND_POINT_PROBE && !ps.function_scoped()) || !ps.in_suffix.empty())) needs_lines = true;
+    if (ps.bin == opt.bin && ((ps.kind == KZ_SITE_KIND_POINT_PROBE && !ps.function_scoped() && !ps.entry_reached()) || !ps.in_suffix.empty())) needs_lines = true;
   if (lines.rows().empty() && needs_lines)
     return Status::error(Err::Invalid, "the binary has no DWARF line table (build it with -g): after-call targets cannot be resolved");
   if (elf.build_id_hex().empty()) return Status::error(Err::Invalid, "the binary has no build-id note: its identity would rest on the file hash alone; refusing to write a basis");
@@ -131,15 +131,29 @@ Status build_basis(const Bytes& binary, const Profile& profile, const BasisOptio
 
   // Targets.
   std::vector<kz_target> targets;
+  std::vector<kz_via> vias;
   for (uint32_t i = 0; i < profile.sites.size(); ++i) {
     const ProfileSite& ps = profile.sites[i];
     if (ps.bin != opt.bin) continue;  // a site of another file of the plan: that file's basis
     anchor::ResolvedTarget t;
+    anchor::ReachedPath path;
     Status r = ps.kind != KZ_SITE_KIND_POINT_PROBE ? anchor::resolve_entry(elf, lines, ps.func, ps.in_suffix, &t)
+               : ps.entry_reached()                  ? anchor::resolve_entry_reached(elf, lines, ps.func, ps.enter, &t, &path)
                : ps.function_scoped()                ? anchor::resolve_call_in_function(elf, ps.func, ps.after_call, &t)
                : ps.line_start                       ? anchor::resolve_line_start(elf, lines, ps.at_file, ps.at_line, &t)
                                                      : anchor::resolve_after_call(elf, lines, ps.at_file, ps.at_line, ps.after_call, &t);
     if (!r.ok()) return Status::error(r.code, site_error(ps, r));
+    if (ps.entry_reached()) {
+      kz_via v;
+      std::memset(&v, 0, sizeof v);
+      v.id = static_cast<uint32_t>(targets.size());  // the target index in this basis
+      v.hops = path.hops;
+      v.flags = path.ret_dynamic ? KZ_VIA_FLAG_RET_DYNAMIC : 0;
+      v.expect_ret = path.expect_ret;
+      v.via_func = w.intern(path.via_func);
+      v.chain = w.intern(path.chain);
+      vias.push_back(v);
+    }
     kz_target k;
     std::memset(&k, 0, sizeof k);
     k.id = i;
@@ -212,6 +226,7 @@ Status build_basis(const Bytes& binary, const Profile& profile, const BasisOptio
   if (!provs.empty() && !(s = w.add_section(KZ_SEC_PROVENANCE, provs)).ok()) return s;
   if (!(s = w.add_section(KZ_SEC_SYMBOLS, syms)).ok()) return s;
   if (!(s = w.add_section(KZ_SEC_TARGETS, targets)).ok()) return s;
+  if (!vias.empty() && !(s = w.add_section(KZ_SEC_VIA, vias)).ok()) return s;
   return w.finish(out);
 }
 
@@ -247,6 +262,24 @@ Status load_basis_bytes(Bytes bytes, LoadedBasis* out) {
     out->target_funcs.push_back(func);
     out->target_files.push_back(file);
   }
+  out->target_via.assign(out->targets.size(), LoadedBasis::Via());
+  if (out->container.find_section(KZ_SEC_VIA) != nullptr) {
+    std::vector<kz_via> vias;
+    s = out->container.read_section(KZ_SEC_VIA, &vias);
+    if (!s.ok()) return s;
+    for (const kz_via& v : vias) {
+      if (v.id >= out->targets.size() || out->targets[v.id].kind != KZ_TARGET_KIND_ENTRY_REACHED || v.hops == 0)
+        return Status::error(Err::Invalid, "VIA: a row does not name an entry-reached target");
+      LoadedBasis::Via& d = out->target_via[v.id];
+      d.hops = v.hops;
+      d.ret_dynamic = (v.flags & KZ_VIA_FLAG_RET_DYNAMIC) != 0;
+      d.expect_ret = v.expect_ret;
+      if (!out->container.string(v.via_func, &d.via_func) || !out->container.string(v.chain, &d.chain)) return Status::error(Err::BadRef, "VIA: a string does not resolve");
+    }
+  }
+  for (size_t i = 0; i < out->targets.size(); ++i)
+    if (out->targets[i].kind == KZ_TARGET_KIND_ENTRY_REACHED && out->target_via[i].hops == 0)
+      return Status::error(Err::Invalid, "TARGETS: the entry-reached target '" + out->target_labels[i] + "' has no call path (section VIA)");
   return Status::success();
 }
 
@@ -299,7 +332,10 @@ Status make_plan(const Profile& profile, const std::vector<const LoadedBasis*>& 
     const kz_target& t = basis.targets[ti];
     if (t.id != i || basis.target_labels[ti] != ps.label)
       return Status::error(Err::Invalid, "target " + std::to_string(t.id) + " is '" + basis.target_labels[ti] + "' but the profile's site " + std::to_string(i) + " is '" + ps.label + "'");
-    const uint16_t want_kind = ps.kind != KZ_SITE_KIND_POINT_PROBE ? KZ_TARGET_KIND_FUNC_ENTRY : ps.line_start ? KZ_TARGET_KIND_LINE_START : KZ_TARGET_KIND_AFTER_CALL;
+    const uint16_t want_kind = ps.kind != KZ_SITE_KIND_POINT_PROBE ? KZ_TARGET_KIND_FUNC_ENTRY
+                               : ps.entry_reached()             ? KZ_TARGET_KIND_ENTRY_REACHED
+                               : ps.line_start                  ? KZ_TARGET_KIND_LINE_START
+                                                                : KZ_TARGET_KIND_AFTER_CALL;
     if (t.kind != want_kind) return Status::error(Err::Invalid, "target '" + ps.label + "' has the wrong kind for the site");
     kz::trace::SiteSpec spec;
     spec.site = i;
@@ -315,6 +351,16 @@ Status make_plan(const Profile& profile, const std::vector<const LoadedBasis*>& 
     spec.source = ps.kind == KZ_SITE_KIND_POINT_PROBE ? basis.target_files[ti] : std::string();
     spec.slots = ps.slots;
     spec.binary = ps.bin;
+    if (ps.entry_reached()) {
+      const LoadedBasis::Via& v = basis.target_via[ti];
+      if (v.via_func != ps.func) return Status::error(Err::Invalid, "target '" + ps.label + "' is reached from " + v.via_func + ", the profile says " + ps.func);
+      spec.via_symbol = v.via_func;
+      spec.via_chain = v.chain;
+      spec.via_hops = v.hops;
+      spec.via_ret_dynamic = v.ret_dynamic;
+      spec.via_expect_ret = v.expect_ret;
+      spec.source = "entry reached by " + v.chain + (v.ret_dynamic ? std::string(" (return address: that of the call of ") + v.via_func + ")" : std::string());
+    }
     sites->push_back(std::move(spec));
   }
   // Every site, and the slot-3 key of every entry/return pair (kz::trace::check_plan).
@@ -392,11 +438,45 @@ Digest plan_hash(const std::vector<kz::trace::SiteSpec>& sites) {
     h.update(t);
     for (const kz::trace::SlotSpec& sl : s.slots) {
       std::string u = " slot " + std::to_string(sl.slot) + " src=" + std::to_string(sl.src) + " width=" + std::to_string(sl.width) +
-                      " index=" + std::to_string(sl.index) + " role=" + sl.role + "\n";
+                      " index=" + std::to_string(sl.index) + " role=" + sl.role + (kz::trace::is_fetch_slot(sl) ? " offset=" + std::to_string(sl.offset) : std::string()) + "\n";
       h.update(u);
     }
+    // a call path (entry-reached): appended only where present, so other plans hash as before
+    if (!s.via_symbol.empty())
+      h.update(" via " + s.via_symbol + " chain=" + s.via_chain + " hops=" + std::to_string(s.via_hops) +
+               (s.via_ret_dynamic ? std::string(" ret=dynamic") : " ret=" + std::to_string(s.via_expect_ret)) + "\n");
   }
   return h.finish();
+}
+
+void fetch_records(const std::vector<kz::trace::SiteSpec>& sites, std::vector<kz_slot_fetch>* out) {
+  for (const kz::trace::SiteSpec& s : sites)
+    for (const kz::trace::SlotSpec& sl : s.slots) {
+      if (!kz::trace::is_fetch_slot(sl)) continue;
+      kz_slot_fetch f;
+      std::memset(&f, 0, sizeof f);
+      f.site = s.site;
+      f.slot = sl.slot;
+      f.kind = sl.src == KZ_SLOT_SRC_STR ? KZ_FETCH_KIND_STR : KZ_FETCH_KIND_MEM;
+      f.reg = sl.index;
+      f.offset = sl.offset;
+      out->push_back(f);
+    }
+}
+
+void via_records(const std::vector<kz::trace::SiteSpec>& sites, ContainerWriter* w, std::vector<kz_via>* out) {
+  for (const kz::trace::SiteSpec& s : sites) {
+    if (s.via_symbol.empty()) continue;
+    kz_via v;
+    std::memset(&v, 0, sizeof v);
+    v.id = s.site;
+    v.hops = s.via_hops;
+    v.flags = s.via_ret_dynamic ? KZ_VIA_FLAG_RET_DYNAMIC : 0;
+    v.expect_ret = s.via_expect_ret;
+    v.via_func = w->intern(s.via_symbol);
+    v.chain = w->intern(s.via_chain);
+    out->push_back(v);
+  }
 }
 
 }  // namespace kz::plan

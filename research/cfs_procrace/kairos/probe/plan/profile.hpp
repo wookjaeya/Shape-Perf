@@ -27,9 +27,25 @@
 //                                                             no such call or more than one, or if a
 //                                                             branch of the function reaches the return
 //                                                             site (the same rules as at=...after-call)
+//            func=<symbol> enter=<G>[><H>...]               for point: the entry of the last function of
+//                                                             the chain, reached from func= through one
+//                                                             direct call or jump (a tail jump: jmp or a
+//                                                             conditional jump) per hop, each the only
+//                                                             transfer to that callee in its caller; a
+//                                                             hop through a PLT stub is refused (the callee
+//                                                             is in another file).  For a callee reached by
+//                                                             a tail jump, where an after-call point never
+//                                                             fires.  The events are attributed to an open
+//                                                             call of func= by the return address at the
+//                                                             top of the stack (slot 3, return_address):
+//                                                             the plan must probe func='s entry and return
 //   bin=<name>  (any site) the declared binary the site is in; default the primary
 //   slot:    <src>:<width>:<role>      src = a register name | stack+<byte offset> | ip
-//            width = u8 | u16 | u32 | u64
+//                                                | +<offset>(<register>) | -<offset>(<register>)
+//            width = u8 | u16 | u32 | u64 | string (string: a memory source only)
+//            A memory source is read by the kernel's probe-event fetch arguments (uprobe_events: the
+//            integer, or the NUL-terminated string, at register + offset when the probe fires); the
+//            observer then needs tracefs (kz observe --tracefs).
 //   decoder: generic (default) | spawn-create | spawn-return | thread-entry | owner-request |
 //            child-request | request-return | spawn-id   (kz_raw.h, KZ_DECODER)
 //
@@ -75,6 +91,7 @@ struct ProfileSite {
   uint32_t at_line = 0;
   std::string after_call;
   bool line_start = false;        // point: the first instruction of the line (KZ_TARGET_KIND_LINE_START)
+  std::vector<std::string> enter; // point: the chain of callees from func= (KZ_TARGET_KIND_ENTRY_REACHED)
   uint16_t decoder = KZ_DECODER_GENERIC;
   int prov = -1;                  // index into Profile::provs, or -1
   std::vector<kz::trace::SlotSpec> slots;
@@ -82,7 +99,9 @@ struct ProfileSite {
   uint16_t bin = 0;               // index into Profile::binaries (0 = the primary)
   // A point site with func= and after-call= (no at=): the call is found in the function's code, not
   // through the line table.
-  bool function_scoped() const { return kind == KZ_SITE_KIND_POINT_PROBE && at_file.empty() && !func.empty(); }
+  bool function_scoped() const { return kind == KZ_SITE_KIND_POINT_PROBE && at_file.empty() && !func.empty() && enter.empty(); }
+  // A point at the entry of a function reached from func= (enter=).
+  bool entry_reached() const { return kind == KZ_SITE_KIND_POINT_PROBE && at_file.empty() && !func.empty() && !enter.empty(); }
 };
 
 struct Profile {

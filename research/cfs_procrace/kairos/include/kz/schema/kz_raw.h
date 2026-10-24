@@ -18,6 +18,19 @@
  *   - new sections: SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS (run containers) and SYMBOLS,
  *     TARGETS (basis containers).
  *
+ * Memory fetches and call-path targets (2026-10-24): three new sections, no layout of an
+ * existing section changed (run and basis containers written before stay readable):
+ *   - SLOT_FETCHES (run): a slot whose source is MEM (an integer read from memory at register + offset) or
+ *     STR (a string read there) states its register and offset; such a slot is filled by the kernel's
+ *     probe-event fetch arguments (uprobe_events), not from the sampled registers.  A STR slot's a[slot] is
+ *     the byte length of the string; the text is in EVENT_STRINGS;
+ *   - EVENT_STRINGS (run): the strings of STR slots, by RAW_EVENTS index and slot;
+ *   - VIA (in a basis: per target; in a run: per site): a point target at the entry of a function reached from a named
+ *     function through one direct call or jump per hop (KZ_TARGET_KIND ENTRY_REACHED), with the return
+ *     address the reaching call leaves at the top of the stack: a link-time address, or "dynamic" (a tail
+ *     jump from the named function itself: the named function's own return address).  An event of such a
+ *     site is kept only where it is attributed to an open call of the named function on the same thread.
+ *
  * Schema revision 2 (SPEC rev 1.3, ADR-056): the new section ACTOR_OWNERS holds app_owner, the
  * application that created / owns each thread incarnation, with its evidence level.  THREADS is
  * unchanged (version 1); a run container without ACTOR_OWNERS (every container written before) has
@@ -67,7 +80,10 @@ enum kz_raw_section_id {
   KZ_SEC_MAPS = 53,
   KZ_SEC_SYMBOLS = 54,
   KZ_SEC_TARGETS = 55,
-  KZ_SEC_ACTOR_OWNERS = 56
+  KZ_SEC_ACTOR_OWNERS = 56,
+  KZ_SEC_VIA = 57,
+  KZ_SEC_SLOT_FETCHES = 58,
+  KZ_SEC_EVENT_STRINGS = 59
 };
 
 #define KZ_RAW_SECTIONS(S)               \
@@ -83,7 +99,10 @@ enum kz_raw_section_id {
   S(MAPS, 53, kz_map_ev, 1)              \
   S(SYMBOLS, 54, kz_symbol, 1)           \
   S(TARGETS, 55, kz_target, 1)           \
-  S(ACTOR_OWNERS, 56, kz_app_owner, 1)
+  S(ACTOR_OWNERS, 56, kz_app_owner, 1)   \
+  S(VIA, 57, kz_via, 1)                  \
+  S(SLOT_FETCHES, 58, kz_slot_fetch, 1)  \
+  S(EVENT_STRINGS, 59, kz_ev_str, 1)
 
 /*
  * Raw event record (64 bytes, SPEC 2.3).  The timestamp is evidence and a search
@@ -352,6 +371,37 @@ enum kz_raw_section_id {
   X(T, uint32_t, evidence, )                                                         \
   X(T, kz_str, app_name, )
 
+/*
+ * A call-path target (section VIA; in a basis `id` is the target index, in a run container the site id).  The probe is at the entry of the last function of `chain` ("F>G" or "F>G>H"), reached from
+ * `via_func` (= F) through one direct call or jump per hop.  `expect_ret` is the link-time address of the
+ * return address the reaching call leaves at the top of the stack (flag RET_DYNAMIC: none; the chain begins
+ * with a tail jump of F itself, so it is F's own return address, read at F's entry site).
+ */
+#define KZ_VIA_FIELDS(X, T)                                                          \
+  X(T, uint32_t, id, )                                                               \
+  X(T, uint16_t, hops, )                                                             \
+  X(T, uint16_t, flags, ) /* KZ_VIA_FLAG */                                          \
+  X(T, uint64_t, expect_ret, )                                                       \
+  X(T, kz_str, via_func, )                                                           \
+  X(T, kz_str, chain, )
+
+/* A MEM or STR slot: the register and the byte offset of the memory read (kind KZ_FETCH_KIND). */
+#define KZ_SLOT_FETCH_FIELDS(X, T)                                                   \
+  X(T, uint32_t, site, )                                                             \
+  X(T, uint8_t, slot, )                                                              \
+  X(T, uint8_t, kind, )                                                              \
+  X(T, uint16_t, rsv0, )                                                             \
+  X(T, uint32_t, reg, ) /* KZ_REG */                                                 \
+  X(T, int32_t, offset, )
+
+/* The string of a STR slot of RAW_EVENTS[event] (flag TRUNC on the event if the kernel gave none). */
+#define KZ_EV_STR_FIELDS(X, T)                                                       \
+  X(T, uint32_t, event, )                                                            \
+  X(T, uint8_t, slot, )                                                              \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, kz_str, text, )
+
 #define KZ_RAW_RECORDS(R)                  \
   R(kz_raw_ev, KZ_RAW_EV_FIELDS)           \
   R(kz_site, KZ_SITE_FIELDS)               \
@@ -365,7 +415,10 @@ enum kz_raw_section_id {
   R(kz_thread, KZ_THREAD_FIELDS)           \
   R(kz_symbol, KZ_SYMBOL_FIELDS)           \
   R(kz_target, KZ_TARGET_FIELDS)           \
-  R(kz_app_owner, KZ_APP_OWNER_FIELDS)
+  R(kz_app_owner, KZ_APP_OWNER_FIELDS)     \
+  R(kz_via, KZ_VIA_FIELDS)                 \
+  R(kz_slot_fetch, KZ_SLOT_FETCH_FIELDS)   \
+  R(kz_ev_str, KZ_EV_STR_FIELDS)
 
 KZ_RAW_RECORDS(KZ_RECORD)
 
@@ -438,7 +491,11 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
 
 #define KZ_ENUM_SLOT_SRC(ITEM, P)                                                    \
   ITEM(P, NONE, 0, "none") ITEM(P, REG, 1, "reg") ITEM(P, STACK, 2, "stack")         \
-  ITEM(P, IP, 3, "ip")
+  ITEM(P, IP, 3, "ip") ITEM(P, MEM, 4, "mem") ITEM(P, STR, 5, "str")
+
+#define KZ_ENUM_FETCH_KIND(ITEM, P) ITEM(P, NONE, 0, "none") ITEM(P, MEM, 1, "mem") ITEM(P, STR, 2, "str")
+
+#define KZ_ENUM_VIA_FLAGS(ITEM, P) /* set */ ITEM(P, RET_DYNAMIC, 0x1, "ret-dynamic")
 
 /* Registers by name, independent of the backend (x86-64). */
 #define KZ_ENUM_REG(ITEM, P)                                                         \
@@ -512,7 +569,7 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  * without a call on its line, e.g. an effect written as an assignment). */
 #define KZ_ENUM_TARGET_KIND(ITEM, P) \
   ITEM(P, NONE, 0, "none") ITEM(P, FUNC_ENTRY, 1, "func-entry") ITEM(P, AFTER_CALL, 2, "after-call") \
-  ITEM(P, LINE_START, 3, "line-start")
+  ITEM(P, LINE_START, 3, "line-start") ITEM(P, ENTRY_REACHED, 4, "entry-reached")
 
 #define KZ_RAW_ENUMS(D)                           \
   D(KZ_PHASE, KZ_ENUM_PHASE, 0)                   \
@@ -532,7 +589,9 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
   D(KZ_SIDE_FLAG, KZ_ENUM_SIDE_FLAGS, 1)          \
   D(KZ_THREAD_FLAG, KZ_ENUM_THREAD_FLAGS, 1)      \
   D(KZ_SYMBOL_BIND, KZ_ENUM_SYMBOL_BIND, 0)       \
-  D(KZ_TARGET_KIND, KZ_ENUM_TARGET_KIND, 0)
+  D(KZ_TARGET_KIND, KZ_ENUM_TARGET_KIND, 0)       \
+  D(KZ_FETCH_KIND, KZ_ENUM_FETCH_KIND, 0)         \
+  D(KZ_VIA_FLAG, KZ_ENUM_VIA_FLAGS, 1)
 
 KZ_RAW_ENUMS(KZ_DEFINE_ENUM_ENTRY)
 
@@ -586,6 +645,10 @@ KZ_DEFINE_ENUM(KZ_REG, KZ_ENUM_REG, 0)
   F(kz_app_owner, creation_event, IDX, 0)          \
   F(kz_app_owner, owner_key, IDX, 0)               \
   F(kz_app_owner, level, ENUM, KZ_OWNER_LEVEL)     \
-  F(kz_app_owner, evidence, FLAGS, KZ_OWNER_EVIDENCE)
+  F(kz_app_owner, evidence, FLAGS, KZ_OWNER_EVIDENCE) \
+  F(kz_via, flags, FLAGS, KZ_VIA_FLAG)             \
+  F(kz_via, expect_ret, HEX, 0)                    \
+  F(kz_slot_fetch, kind, ENUM, KZ_FETCH_KIND)      \
+  F(kz_ev_str, event, IDX, 0)
 
 #endif /* KZ_SCHEMA_KZ_RAW_H */

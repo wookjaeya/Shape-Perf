@@ -64,6 +64,7 @@ class Stream {
     std::vector<uint8_t> stack;       // the dumped bytes (size = stack.size() rounded as given)
     uint64_t stack_size = ~0ull;      // 'size' field; default stack.size()
     uint64_t stack_dyn = ~0ull;       // 'dyn_size' field; default stack.size()
+    std::vector<uint8_t> raw_data;    // PERF_SAMPLE_RAW: the probe event's record (padded here so that u32 size + data is 8-aligned)
   };
 
   void sample(const EventLayout& l, const SampleArgs& a) {
@@ -72,6 +73,12 @@ class Stream {
     if (l.sample_type & pa::kSampleTid) { u32(a.pid); u32(a.tid); }
     if (l.sample_type & pa::kSampleTime) u64(a.time);
     if (l.sample_type & pa::kSampleCpu) { u32(a.cpu); u32(0); }
+    if (l.sample_type & pa::kSampleRaw) {
+      std::vector<uint8_t> r = a.raw_data;
+      while ((4 + r.size()) % 8 != 0) r.push_back(0);  // the kernel's padding is counted in the size
+      u32(static_cast<uint32_t>(r.size()));
+      raw(r.data(), r.size());
+    }
     if (l.sample_type & pa::kSampleRegsUser) {
       u64(a.abi);
       if (a.abi != 0)

@@ -22,10 +22,15 @@ namespace kz::trace {
 struct SlotSpec {
   uint8_t slot = 0;   // 0..3: the index into kz_raw_ev.a
   uint8_t src = 0;    // KZ_SLOT_SRC_*
-  uint8_t width = 8;  // bytes kept: 1, 2, 4 or 8
-  uint32_t index = 0; // KZ_REG_* for a register, the byte offset in the stack dump for a stack word
+  uint8_t width = 8;  // bytes kept: 1, 2, 4 or 8 (a STR slot keeps the string's byte length in 4 bytes)
+  uint32_t index = 0; // KZ_REG_* for a register (also the base register of MEM and STR), the byte offset in the stack dump for a stack word
   std::string role;
+  int32_t offset = 0; // MEM, STR: the byte offset added to the base register (the address read)
 };
+
+// A slot the kernel fills by a fetch argument of a probe event (memory at register + offset), not from
+// the sampled registers or stack.
+inline bool is_fetch_slot(const SlotSpec& s) { return s.src == 4 /* KZ_SLOT_SRC_MEM */ || s.src == 5 /* KZ_SLOT_SRC_STR */; }
 
 struct SiteSpec {
   uint32_t site = 0;
@@ -42,7 +47,21 @@ struct SiteSpec {
   // file of the plan (a shared object the process loads).  The load bias and the probed inode are
   // per file.
   uint16_t binary = 0;
+  // A point at the entry of a function reached from `via_symbol` (KZ_TARGET_KIND_ENTRY_REACHED; kz_raw.h,
+  // VIA): its events are kept only where attributed to an open call of `via_symbol` on the same thread
+  // (decode_merge.hpp): the return address at the top of the stack (slot 3, role return_address) equals
+  // `via_expect_ret` (a link-time address of this file) or, with `via_ret_dynamic` (every hop a jump), the
+  // stack pointer equals the one at the entry of that open call.  Empty `via_symbol`: an ordinary site.
+  std::string via_symbol;
+  std::string via_chain;      // "F>G[>H]" as the plan wrote it (report only)
+  uint64_t via_expect_ret = 0;
+  bool via_ret_dynamic = false;
+  uint16_t via_hops = 0;
 };
+
+// True if any slot of the site is a fetch slot (MEM or STR).
+bool has_fetch_slots(const SiteSpec& s);
+
 
 // What a site's slots require from the kernel: a mask of perf register numbers (bit n =
 // PERF_REG_X86 register n) and the number of stack bytes to dump.
@@ -81,5 +100,11 @@ uint16_t phase_of(const SiteSpec& s);
 // register the kernel did not copy, a stack word beyond the bytes it did copy) is zero and sets
 // KZ_RAW_FLAG_TRUNC, so a value is never taken from a record that did not carry it.
 Status apply_slots(const SiteSpec& s, const PerfRecord& sample, uint64_t out[4], uint16_t* raw_flags);
+// The same for a site with fetch slots: `fields` say where each fetched value is in sample.raw; the text of
+// a STR slot goes to strings[slot] (its byte length to out[slot]) and string_read[slot] is set.  A fetch slot
+// without a field, a field beyond the raw record, or a string the kernel could not read (length 0) is
+// unreadable (zero, TRUNC, string_read false).
+Status apply_slots(const SiteSpec& s, const PerfRecord& sample, const std::vector<RawField>& fields, uint64_t out[4], uint16_t* raw_flags,
+                   std::string strings[4], bool string_read[4]);
 
 }  // namespace kz::trace

@@ -25,9 +25,12 @@
 // What the replay computes:
 //   edges        happens-before edges of the rules (stratum, robustness), sorted;
 //   occurrences  one per call of the operation of a readiness specification, with the status of
-//                SPEC 1.6 under the strict reading (QT-4, Q15).  A monitor for an Allowed entry is
-//                not implemented here: an occurrence that such an entry would judge is PENDING and
-//                never TOLERATED;
+//                SPEC 1.6 under the strict reading (QT-4, Q15).  Of the horizon monitors of the Allowed
+//                entries only `retry_until_ready` is run (SPEC 1.6 "Horizon monitors"; see
+//                Occurrence::monitor): it turns a PENDING attempt into TOLERATED (a later attempt of the
+//                same loop instance is READY within the bound) or VIOLATING (the bound is exhausted, or an
+//                attempt's outcome is outside its codes); an attempt it cannot count stays withheld.  An
+//                occurrence that another entry would judge stays PENDING and is never TOLERATED;
 //   findings     disagreements between the trace and the profile (an outcome that disagrees with the
 //                computed state, a capture that disagrees with the replayed cell, an event after a
 //                terminal step, a point outside of its call, a poll whose other branch does not end
@@ -158,7 +161,7 @@ struct HbEdge {
   bool operator==(const HbEdge& o) const { return from == o.from && to == o.to && rule == o.rule; }
 };
 
-// Tolerated is part of the vocabulary of SPEC 1.6; the replay never produces it (no monitor).
+// Tolerated is produced only by the retry_until_ready monitor (an ACCEPT); no other monitor is run.
 // Undetermined is not a status: a real record whose explanations allow more than one status (the
 // list is Occurrence::possible).  A model trace never produces it.
 enum class OccStatus : uint8_t { Ready, NotEvaluated, Violating, NotReadyUnjudged, Tolerated, Pending, Open, Undetermined };
@@ -237,6 +240,13 @@ struct Occurrence {
   // the return of this call on the same actor; empty when no role site was seen for it.
   std::string context;
   bool role_excluded = false;             // internal: the role takes the call out (moved to Result::role_facts)
+  bool key_known = false;                 // the key was evaluated (real records: fixed in every explanation)
+  // The horizon monitor of a deciding Allowed entry (SPEC 1.6 "Horizon monitors"), where one ran on this
+  // occurrence: its verdict and why (ACCEPT / REJECT / OPEN / not countable), with the events it used.
+  // Only retry_until_ready is implemented.  `accepted` is the ACCEPT that makes the status TOLERATED; the
+  // entry that accepted rests on a caller record (the caller-level Allowed reads only such entries).
+  std::string monitor;
+  bool accepted = false;
 };
 
 // A call bound to a declared role of its call context (the role's site event right after the call's

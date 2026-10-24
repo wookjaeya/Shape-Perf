@@ -428,6 +428,7 @@ class Replayer {
   void return_real(const OpDecl& op, Frame* f, const TraceEvent& ev);
   void check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& ev);
   void decide_real(Frame* f, size_t k, const TraceEvent& ev);
+  void run_monitors();
   void finish();
 
   void finding(uint64_t event, const std::string& what) {
@@ -1121,12 +1122,17 @@ void Replayer::on_call(const TraceEvent& ev) {
     o.rspec = rs.name;
     o.actor = ev.actor;
     o.call = ev.id;
+    o.key_known = !rs.key;
     if (real_) {
       if (rs.key) {
         const RealEval kr = evaluate_real(*rs.key, op, nullptr, ev, &f.args);
         std::vector<int64_t> k;
-        if (exact_key(kr.v, &k)) o.key = k;
-        else o.reasons |= kr.reasons != 0 ? kr.reasons : static_cast<uint32_t>(KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED);
+        if (exact_key(kr.v, &k)) {
+          o.key = k;
+          o.key_known = true;
+        } else {
+          o.reasons |= kr.reasons != 0 ? kr.reasons : static_cast<uint32_t>(KZ_WITHHOLD_RESOURCE_OR_LIFETIME_UNMATCHED);
+        }
       }
       // the identities the record states (SPEC 1.2): creator, owner with its level, the passed identifier
       const auto cr = t_.creators.find(ev.actor);
@@ -1149,7 +1155,10 @@ void Replayer::on_call(const TraceEvent& ev) {
       }
     } else {
       CVal key;
-      if (rs.key && evaluate(*rs.key, op, nullptr, ev, &f.args, &key) && key.defined) o.key = key.key;
+      if (rs.key && evaluate(*rs.key, op, nullptr, ev, &f.args, &key) && key.defined) {
+        o.key = key.key;
+        o.key_known = true;
+      }
     }
     o.ordinal = ++ordinals_[ev.actor + "\n" + rs.name + "\n" + key_text(o.key)];
     for (size_t ci : rspec_info_[si].conj) o.conjuncts.push_back(f.conj[ci]);
@@ -2288,11 +2297,223 @@ void Replayer::relate(Occurrence* o) {
   }
 }
 
+// ---- horizon monitors (SPEC 1.6 "Horizon monitors") ---------------------------------------------
+//
+// retry_until_ready(codes, bound): the monitored actor is the using actor; ACCEPT when a later attempt of
+// the same loop instance is READY (a NOT_EVALUATED attempt is not); REJECT when the loop takes its
+// exhaustion path, or an attempt's outcome is outside `codes`.  On a trace a loop instance is read as a
+// maximal run of consecutive attempts (occurrences of the readiness specification) of one actor, in one
+// call context, on one key and one generation of the key resource.  The run ends at a READY attempt, at an
+// attempt whose outcome is not in `codes`, or at the bound-th attempt whose outcome is in `codes` (the
+// exhaustion path: the loop makes at most `bound` attempts).  The loop's own entry is not an event of the
+// trace, so two loops of one actor on one key and generation with nothing between them read as one run.
+// The bound is the value of the entry's constant: an integer of the profile (with its provenance) or the
+// value the trace gives for a `ref eval` constant; the tool has no number of its own.
+// A generation boundary is an effect that returns a resource of the key's kind to the kind's initial
+// state.  Where the profile has none, all attempts are of one generation (gen(R) = 0 in this subset);
+// where one may lie between two attempts (its point is between them, or a real record does not observe
+// its point), the two are not counted as one run.
+// What cannot be counted is withheld, never decided: an attempt whose key is not fixed, a run that a
+// reported loss overlaps (attempts may be missing), a possible generation boundary, a later attempt whose
+// own status is undetermined with READY among its possibilities.  The not-ready attempts of such a run are
+// UNDETERMINED (possible PENDING, TOLERATED and, for the only deciding entry, VIOLATING), reason
+// explanation_ambiguous.  A run the trace ends before ACCEPT or REJECT stays PENDING: OPEN never counts as
+// ACCEPT, and its summary is INCONCLUSIVE(horizon-open).  ACCEPT makes TOLERATED.  REJECT makes VIOLATING
+// only where the retry entry is the only deciding entry (no other entry's monitor is run, and another
+// entry might accept); otherwise the occurrence stays PENDING with the REJECT stated.
+void Replayer::run_monitors() {
+  for (size_t si = 0; si < rspec_info_.size(); ++si) {
+    const RspecInfo& info = rspec_info_[si];
+    if (info.allowed.kind != phi::CallerAllowedKind::Entries) continue;
+    const phi::AllowedEntry* retry = nullptr;
+    for (const phi::AllowedEntry* e : info.allowed.deciding)
+      if (e->kind == phi::AllowedKind::RetryUntilReady) {
+        retry = e;
+        break;
+      }
+    if (retry == nullptr) continue;
+    const phi::RspecDecl& rs = p_.rspecs[si];
+    const bool sole = info.allowed.deciding.size() == 1;
+
+    // the codes and the bound, from the profile's constants
+    std::set<uint32_t> codes;
+    std::string problem;
+    for (const std::string& c : retry->codes) {
+      const int32_t ci = p_.find_const(c);
+      if (ci < 0 || p_.consts[static_cast<size_t>(ci)].value != phi::ConstDecl::Value::Int) problem = "the code " + c + " is not an integer constant of the profile";
+      else codes.insert(u32(p_.consts[static_cast<size_t>(ci)].ival));
+    }
+    int64_t bound = -1;
+    const int32_t bi = p_.find_const(retry->bound);
+    if (bi < 0) {
+      problem = "the bound " + retry->bound + " is not a constant of the profile";
+    } else {
+      const phi::ConstDecl& c = p_.consts[static_cast<size_t>(bi)];
+      if (c.value == phi::ConstDecl::Value::Int) {
+        bound = c.ival;
+      } else if (c.value == phi::ConstDecl::Value::RefEval) {
+        const auto it = t_.ref_consts.find(c.name);
+        if (it != t_.ref_consts.end()) bound = it->second;
+        else problem = "the bound " + c.name + " is a ref eval constant the trace does not give (const " + c.name + " N)";
+      } else {
+        problem = "the bound " + c.name + " is not an integer constant";
+      }
+      if (problem.empty() && bound <= 0) problem = "the bound " + c.name + " is " + std::to_string(bound) + ", not a positive number of attempts";
+    }
+    if (!problem.empty()) {
+      finding(kNoEvent, "rspec " + rs.name + ": the retry_until_ready monitor is not run (" + problem + "); its not-ready attempts stay PENDING");
+      continue;
+    }
+    const std::string bound_text = "bound " + retry->bound + " = " + std::to_string(bound);
+
+    // generation boundaries of the key's kind: effects that return a resource of it to the initial state
+    const int32_t key_kind = rs.key ? rs.key->sort.kind_index : -1;
+    std::set<std::string> reset_points;
+    bool reset_unobserved = false;
+    if (key_kind >= 0) {
+      const KindDecl& kd = p_.kinds[static_cast<size_t>(key_kind)];
+      for (const OpDecl& op : p_.ops)
+        for (const EffectDecl& e : op.effects) {
+          if (e.kind != EffectKind::Set || e.to_state != kd.initial) continue;
+          const bool hits = !e.all_kind.empty() ? p_.find_kind(e.all_kind) == key_kind : (e.res && e.res->sort.kind_index == key_kind);
+          if (!hits) continue;
+          if (e.lp.kind == LpKind::None) {
+            reset_unobserved = true;
+            continue;
+          }
+          const std::string name = lp_name(op, e.label, e.lp);
+          reset_points.insert(name);
+          if (real_ && t_.observed_points.count(name) == 0) reset_unobserved = true;
+        }
+    }
+    auto boundary_between = [&](uint64_t a, uint64_t b) {
+      if (reset_unobserved) return true;
+      for (uint64_t e = a + 1; e < b && e < t_.events.size(); ++e)
+        if (t_.events[e].phase == Phase::Point && reset_points.count(t_.events[e].site) != 0) return true;
+      return false;
+    };
+
+    auto withhold = [&](Occurrence& o, const std::string& why, bool loss) {
+      o.possible = {OccStatus::Pending, OccStatus::Tolerated};
+      if (sole) o.possible.push_back(OccStatus::Violating);
+      o.status = OccStatus::Undetermined;
+      o.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+      if (loss) o.reasons |= KZ_WITHHOLD_LOSS;
+      o.monitor = "retry_until_ready not countable: " + why + " (" + bound_text + ")";
+    };
+
+    // the attempts per actor and call context, in the order of their calls
+    std::map<std::pair<std::string, std::string>, std::vector<size_t>> runs;
+    for (size_t i = 0; i < r_.occurrences.size(); ++i)
+      if (r_.occurrences[i].rspec == rs.name) runs[std::make_pair(r_.occurrences[i].actor, r_.occurrences[i].context)].push_back(i);
+    for (const auto& run : runs) {
+      const std::vector<size_t>& seq = run.second;
+      bool unknown_key = false;
+      for (size_t i : seq) unknown_key = unknown_key || !r_.occurrences[i].key_known;
+      if (unknown_key) {
+        for (size_t i : seq)
+          if (r_.occurrences[i].status == OccStatus::Pending)
+            withhold(r_.occurrences[i], "the key of an attempt of actor " + run.first.first + " is not fixed, so the attempts of a loop instance cannot be counted", false);
+        continue;
+      }
+      std::map<std::vector<int64_t>, std::vector<size_t>> by_key;
+      for (size_t i : seq) by_key[r_.occurrences[i].key].push_back(i);
+      for (const auto& kk : by_key) {
+        const std::vector<size_t>& att = kk.second;
+        size_t k = 0;
+        while (k < att.size()) {
+          enum class End { Open, Accept, Exhausted, Outside, Ambiguous } end = End::Open;
+          std::vector<size_t> inst;
+          std::string why;
+          bool loss = false;
+          uint64_t at = 0;  // the event of the ACCEPT or REJECT
+          while (k < att.size()) {
+            Occurrence& a = r_.occurrences[att[k]];
+            if (!inst.empty() && boundary_between(r_.occurrences[inst.back()].call, a.call)) {
+              end = End::Ambiguous;
+              why = "a generation boundary of the key resource may lie between the attempts #" + std::to_string(r_.occurrences[inst.back()].call) + " and #" + std::to_string(a.call);
+              break;  // `a` begins the next run
+            }
+            inst.push_back(att[k]);
+            ++k;
+            const bool in_codes = a.has_result && codes.count(u32(a.result)) != 0;
+            if (a.status == OccStatus::Ready) {
+              end = End::Accept;
+              at = a.decision;
+              break;
+            }
+            if (a.status == OccStatus::Open || !a.returned) break;  // the run is open at the end of the trace
+            if (a.status == OccStatus::Undetermined &&
+                std::find(a.possible.begin(), a.possible.end(), OccStatus::Ready) != a.possible.end()) {
+              end = End::Ambiguous;
+              why = "the status of the attempt at #" + std::to_string(a.call) + " is undetermined, READY among its possibilities";
+              break;
+            }
+            if (!in_codes) {
+              end = End::Outside;
+              at = a.ret;
+              break;
+            }
+            if (inst.size() == static_cast<size_t>(bound)) {
+              end = End::Exhausted;
+              at = a.ret;
+              break;
+            }
+          }
+          if (inst.empty()) {  // a boundary before the first attempt cannot happen; keep the loop finite
+            ++k;
+            continue;
+          }
+          if (real_ && end != End::Ambiguous) {
+            const uint64_t from = r_.occurrences[inst.front()].call;
+            const uint64_t to = end == End::Open ? (t_.events.empty() ? from : t_.events.size() - 1) : r_.occurrences[inst.back()].ret;
+            if (overlaps_loss(from, to)) {
+              end = End::Ambiguous;
+              loss = true;
+              why = "a reported loss overlaps the attempts from #" + std::to_string(from) + " to #" + std::to_string(to) + ", so attempts may be missing";
+            }
+          }
+          const std::string n_text = std::to_string(inst.size());
+          for (size_t j = 0; j < inst.size(); ++j) {
+            Occurrence& o = r_.occurrences[inst[j]];
+            if (o.status != OccStatus::Pending) continue;
+            const std::string self = "attempt " + std::to_string(j + 1) + " of " + n_text + " of the run from #" + std::to_string(r_.occurrences[inst.front()].call);
+            switch (end) {
+              case End::Accept:
+                o.status = OccStatus::Tolerated;
+                o.accepted = true;
+                o.monitor = "retry_until_ready ACCEPT at #" + std::to_string(at) + ": attempt " + n_text + " is READY (" + self + "; " + bound_text + ")";
+                break;
+              case End::Exhausted:
+              case End::Outside: {
+                const std::string what = end == End::Exhausted
+                                             ? "REJECT at #" + std::to_string(at) + ": the bound is exhausted, attempt " + n_text + " not ready"
+                                             : "REJECT at #" + std::to_string(at) + ": the outcome " + hex_or_dec(static_cast<int64_t>(u32(r_.occurrences[inst.back()].result))) +
+                                                   " of attempt " + n_text + " is outside the codes";
+                if (sole) o.status = OccStatus::Violating;
+                o.monitor = "retry_until_ready " + what + " (" + self + "; " + bound_text + ")" + (sole ? "" : "; another deciding entry is not monitored: stays PENDING");
+                break;
+              }
+              case End::Open:
+                o.monitor = "retry_until_ready OPEN: the trace ends after attempt " + n_text + " (" + self + "; " + bound_text + ")";
+                break;
+              case End::Ambiguous:
+                withhold(o, why + " (" + self + ")", loss);
+                break;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 // The summary view of every occurrence (SPEC 1.10, D2), computed last; for a real record also the
 // adequacy of each occurrence and what the replay established per kind and location.
 void Replayer::finish() {
   // Occurrences a role took out are not instances (on_role_point): drop them before anything is counted.
   r_.occurrences.erase(std::remove_if(r_.occurrences.begin(), r_.occurrences.end(), [](const Occurrence& o) { return o.role_excluded; }), r_.occurrences.end());
+  run_monitors();
   if (real_) {
     for (Occurrence& o : r_.occurrences) {
       uint32_t adeq = kAllAdequacy;
@@ -2324,6 +2545,8 @@ void Replayer::finish() {
     // A model trace is one explanation; in a real record a status is decided only where every
     // explanation agrees (the abstract evaluation, under the obligation L-OBS).
     in.all_explanations = true;
+    in.caller_record = o.status == OccStatus::Tolerated;  // only an entry with a caller record decides (derive_caller_allowed)
+    in.accepted = o.accepted;
     in.input_error = o.input_error;
     in.reasons = o.reasons;
     o.summary = summarize_observation(in);
@@ -2469,6 +2692,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       out += "}";
     }
     out += "\n";
+    if (!o.monitor.empty()) out += "  monitor " + o.monitor + "\n";
     for (const ConjunctResult& c : o.conjuncts) {
       out += "  conjunct " + c.label + " " + lp_source_text(c.source);
       if (c.source != LpSource::NotPassed || (real && (c.unknown || c.passage_unknown))) {
@@ -2483,6 +2707,13 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       out += "\n";
     }
     if (o.has_result) out += "  result " + hex_or_dec(static_cast<int64_t>(u32(o.result))) + " outcome " + outcome_check_text(o.outcome) + "\n";
+    if (real && o.returned && o.ret < trace.events.size()) {
+      // the out values the record gives on the return (what the call stored through its out parameters)
+      std::string outs;
+      for (const auto& v : trace.events[o.ret].values)
+        if (v.first.rfind("out.", 0) == 0) outs += " " + v.first.substr(4) + "=" + hex_or_dec(v.second);
+      if (!outs.empty()) out += "  out" + outs + "\n";
+    }
     if (real) {
       out += "  summary " + render_observation(o.summary) + " flags " + set_text("KZ_SUMMARY_FLAG", o.summary.flags) + "\n";
       out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";

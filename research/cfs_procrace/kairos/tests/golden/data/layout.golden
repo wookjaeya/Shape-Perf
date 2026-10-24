@@ -363,6 +363,26 @@ record kz_app_owner size=32 fields=9
   rsv1 offset=18 size=2 count=1 kind=u16
   evidence offset=20 size=4 count=1 kind=u32
   app_name offset=24 size=8 count=1 kind=str
+record kz_via size=32 fields=6
+  id offset=0 size=4 count=1 kind=u32
+  hops offset=4 size=2 count=1 kind=u16
+  flags offset=6 size=2 count=1 kind=u16
+  expect_ret offset=8 size=8 count=1 kind=u64
+  via_func offset=16 size=8 count=1 kind=str
+  chain offset=24 size=8 count=1 kind=str
+record kz_slot_fetch size=16 fields=6
+  site offset=0 size=4 count=1 kind=u32
+  slot offset=4 size=1 count=1 kind=u8
+  kind offset=5 size=1 count=1 kind=u8
+  rsv0 offset=6 size=2 count=1 kind=u16
+  reg offset=8 size=4 count=1 kind=u32
+  offset offset=12 size=4 count=1 kind=i32
+record kz_ev_str size=16 fields=5
+  event offset=0 size=4 count=1 kind=u32
+  slot offset=4 size=1 count=1 kind=u8
+  rsv0 offset=5 size=1 count=1 kind=u8
+  rsv1 offset=6 size=2 count=1 kind=u16
+  text offset=8 size=8 count=1 kind=str
 record kz_fact_func size=48 fields=10
   fn offset=0 size=4 count=1 kind=u32
   tu offset=4 size=4 count=1 kind=u32
@@ -1114,6 +1134,8 @@ enum KZ_SLOT_SRC
   0x1 REG "reg"
   0x2 STACK "stack"
   0x3 IP "ip"
+  0x4 MEM "mem"
+  0x5 STR "str"
 enum KZ_LOSS_SOURCE
   0x0 NONE "none"
   0x1 RING_RESERVE_FAIL "ring-reserve-fail"
@@ -1179,6 +1201,13 @@ enum KZ_TARGET_KIND
   0x1 FUNC_ENTRY "func-entry"
   0x2 AFTER_CALL "after-call"
   0x3 LINE_START "line-start"
+  0x4 ENTRY_REACHED "entry-reached"
+enum KZ_FETCH_KIND
+  0x0 NONE "none"
+  0x1 MEM "mem"
+  0x2 STR "str"
+flags KZ_VIA_FLAG
+  0x1 RET_DYNAMIC "ret-dynamic"
 enum KZ_ARG_KIND
   0x0 NONE "none"
   0x1 CONST "const"
@@ -1596,6 +1625,9 @@ section MAPS type=53 record=kz_map_ev version=1
 section SYMBOLS type=54 record=kz_symbol version=1
 section TARGETS type=55 record=kz_target version=1
 section ACTOR_OWNERS type=56 record=kz_app_owner version=1
+section VIA type=57 record=kz_via version=1
+section SLOT_FETCHES type=58 record=kz_slot_fetch version=1
+section EVENT_STRINGS type=59 record=kz_ev_str version=1
 section CERTIFICATES type=60 record=kz_cert version=1
 section CERT_STEPS type=61 record=kz_cert_step version=1
 section TRUST_LEDGERS type=62 record=kz_trust_ledger version=1
@@ -1742,6 +1774,10 @@ format kz_app_owner.creation_event idx 0
 format kz_app_owner.owner_key idx 0
 format kz_app_owner.level enum KZ_OWNER_LEVEL
 format kz_app_owner.evidence flags KZ_OWNER_EVIDENCE
+format kz_via.flags flags KZ_VIA_FLAG
+format kz_via.expect_ret hex 0
+format kz_slot_fetch.kind enum KZ_FETCH_KIND
+format kz_ev_str.event idx 0
 format kz_fact_func.tu idx 0
 format kz_fact_func.fh idx 0
 format kz_fact_func.flags flags KZ_FUNC_FLAG
@@ -1869,4 +1905,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=b1f9bda4af3182d3c61ce8d345e1a5e0dedda122140cbdf5ed3cb3439a9943e7
+fingerprint=b398736e0c33689325da94b9fba7adcb0192da0d362256aa481279e9ce1d1fb2

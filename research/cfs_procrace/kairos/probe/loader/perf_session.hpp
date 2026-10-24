@@ -15,7 +15,14 @@
 //                   kernel);
 //   per record      IDENTIFIER (the event, hence the site), IP, TID, TIME on the clock named in the
 //                   run record (CLOCK_MONOTONIC), CPU, the user registers and the user-stack bytes
-//                   that the site's slots need and no more.
+//                   that the site's slots need and no more;
+//   memory reads    a site with fetch slots (an integer or a string at register + offset) is a probe
+//                   event of the kernel's probe-event interface instead (tracefs uprobe_events: the same
+//                   file, offset and return flag, with one fetch argument per such slot, created before
+//                   the CPUs are opened and removed when the session closes), opened as a tracepoint
+//                   event whose records also carry PERF_SAMPLE_RAW: the fetched values, read by the
+//                   kernel when the probe fires.  Nothing else changes for the site (same ring, same
+//                   registers and stack).  Without tracefs such a site is refused, never read as zero.
 // The drain copies ring bytes into memory and nothing else; decoding is offline
 // (kz/trace/decode_*).  Loss comes from the kernel's own reports (LOST, THROTTLE) and is decoded
 // into LOSS records; there is no other loss detector in this backend.
@@ -42,6 +49,15 @@ struct SessionConfig {
   uint32_t poll_timeout_ms = 10;   // the longest the drain sleeps with data possibly waiting
   std::vector<int> cpus;           // empty: every online CPU
   std::vector<int> drain_cpus;     // empty: the drain thread keeps the placement it inherits; else it runs on these CPUs only
+  std::string tracefs;             // a mounted tracefs (with uprobe_events): needed only by sites with fetch slots
+};
+
+// A probe event the session created for a site with fetch slots (the run record lists them).
+struct FetchEvent {
+  uint32_t site = 0;
+  std::string name;        // "<group>/<event>"
+  std::string definition;  // the line written to uprobe_events
+  uint64_t id = 0;         // the tracepoint id
 };
 
 struct CpuStats {
@@ -59,6 +75,8 @@ struct SessionStats {
   int drain_last_cpu = -1;
   uint32_t uprobe_pmu_type = 0;
   std::string clock = "CLOCK_MONOTONIC";
+  std::vector<FetchEvent> fetch_events;  // probe events created for sites with fetch slots
+  std::string fetch_cleanup;             // empty, or what removing them reported
 };
 
 // Called by the drain thread with the records of each chunk, parsed online; used only to learn

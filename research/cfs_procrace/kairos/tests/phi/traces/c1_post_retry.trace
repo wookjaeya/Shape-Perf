@@ -1,8 +1,9 @@
 # C1 at CF 833fdbb, a synthetic model trace (unit-test values): CF's first lookup of BP0_tsem finds
 # nothing and CF delays; BP checks (existence probe) and creates the name; CF's second lookup succeeds.
-# The first attempt is judged by retry_until_ready, whose horizon monitor this replay does not run: it
-# stays PENDING (never TOLERATED); the second is READY.  A lookup by a third actor at a call site with no
-# declared role stays an instance (no context).
+# The first attempt is judged by retry_until_ready: its horizon monitor ACCEPTs at the second attempt of
+# the same actor, key and call context, which is READY within the bound (TOLERATED); the second is READY.
+# A lookup by a third actor at a call site with no declared role stays an instance (no context); the trace
+# ends after its first not-ready attempt, so its monitor is OPEN and it stays PENDING.
 const CFE_PLATFORM_ES_MAX_APPLICATIONS 4
 CF CF_CFDP_InitEngine call
 CF OS_CountSemGetIdByName call arg.sem_name=@BP0_tsem

@@ -56,6 +56,14 @@ struct LoadedBasis {
   uint64_t binary_size = 0;
   std::vector<kz_target> targets;
   std::vector<std::string> target_labels, target_funcs, target_files;
+  // Per target: its call path, for an entry-reached target (section VIA); hops 0 otherwise.
+  struct Via {
+    uint16_t hops = 0;
+    bool ret_dynamic = false;
+    uint64_t expect_ret = 0;
+    std::string via_func, chain;
+  };
+  std::vector<Via> target_via;
 };
 
 Status load_basis(const std::string& path, LoadedBasis* out);
@@ -77,5 +85,9 @@ Digest plan_hash(const std::vector<kz::trace::SiteSpec>& sites);
 // Site and slot records for a run container (inode/device/path filled by the caller).
 void site_records(const std::vector<kz::trace::SiteSpec>& sites, ContainerWriter* w, std::vector<kz_site>* out_sites,
                   std::vector<kz_site_slot>* out_slots);
+// The memory reads of the plan's fetch slots (SLOT_FETCHES) and the call paths of its entry-reached sites
+// (VIA, by site id), for a run container.
+void fetch_records(const std::vector<kz::trace::SiteSpec>& sites, std::vector<kz_slot_fetch>* out);
+void via_records(const std::vector<kz::trace::SiteSpec>& sites, ContainerWriter* w, std::vector<kz_via>* out);
 
 }  // namespace kz::plan

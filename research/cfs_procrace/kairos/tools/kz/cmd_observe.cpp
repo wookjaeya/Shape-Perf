@@ -77,6 +77,9 @@ void usage(FILE* f) {
                "                      in --conditions)\n"
                "  --proc-capture M    full | status (default full): what the observer reads from /proc while the\n"
                "                      command runs; full also reads cmdline and environ (copies of the target's memory)\n"
+               "  --tracefs DIR       a mounted tracefs (with uprobe_events), needed by sites that read memory (fetch\n"
+               "                      slots); default /sys/kernel/tracing if it has uprobe_events.  The observer creates\n"
+               "                      one probe event per such site there and removes it when the session closes\n"
                "  --check             verify basis, profile and binary, print the plan and stop (attaches nothing)\n"
                "The command follows `--`; it is started as the observer's child after the probes are attached.\n");
 }
@@ -182,7 +185,7 @@ struct LiveCapture {
 struct Options {
   std::string basis, profile, out, record, conditions, binary;
   uint32_t ring_pages = 512, poll_ms = 10, run_ordinal = 0;
-  std::string drain_cpus, stratum = "none", proc_capture = "full";
+  std::string drain_cpus, stratum = "none", proc_capture = "full", tracefs;
   bool check = false;
   std::vector<std::string> command;
   std::vector<std::string> also_bases;
@@ -220,6 +223,7 @@ bool parse_options(int argc, char** argv, Options* o) {
     else if (a == "--drain-cpus") { if (!value(&o->drain_cpus)) return false; }
     else if (a == "--stratum") { if (!value(&o->stratum)) return false; }
     else if (a == "--proc-capture") { if (!value(&o->proc_capture)) return false; }
+    else if (a == "--tracefs") { if (!value(&o->tracefs)) return false; }
     else if (a == "--check") o->check = true;
     else if (!a.empty() && a[0] == '-') { std::fprintf(stderr, "kz observe: unknown option %s\n", a.c_str()); return false; }
     else positional.push_back(a);
@@ -243,7 +247,20 @@ void print_plan(const std::vector<kz::trace::SiteSpec>& sites) {
     std::printf("  site %-2u %-22s %-5s in %s  address %s  file offset %s%s%s\n", s.site, s.label.c_str(), kinds[s.kind <= 3 ? s.kind : 0],
                 s.symbol.c_str(), hex64(s.vaddr).c_str(), hex64(s.file_offset).c_str(), s.insn_class == KZ_INSN_CLASS_EMULATED ? "  [emulated insn]" : "",
                 s.binary != 0 ? ("  [file " + std::to_string(s.binary) + "]").c_str() : "");
-    for (const kz::trace::SlotSpec& sl : s.slots) std::printf("      slot %u: %s\n", sl.slot, sl.role.c_str());
+    if (!s.via_symbol.empty())
+      std::printf("      reached by %s; kept where %s\n", s.via_chain.c_str(),
+                  s.via_ret_dynamic ? ("the stack pointer is the one at the entry of the open call of " + s.via_symbol + " (tail jump)").c_str()
+                                    : ("the return address is " + hex64(s.via_expect_ret) + " (link-time), inside an open call of " + s.via_symbol).c_str());
+    for (const kz::trace::SlotSpec& sl : s.slots) {
+      if (kz::trace::is_fetch_slot(sl))
+        std::printf("      slot %u: %s (%s at %+d(%s), probe-event fetch argument)\n", sl.slot, sl.role.c_str(), sl.src == KZ_SLOT_SRC_STR ? "string" : "memory", sl.offset,
+                    [&] {
+                      static const char* const regs[16] = {"rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
+                      return sl.index < 16 ? regs[sl.index] : "?";
+                    }());
+      else
+        std::printf("      slot %u: %s\n", sl.slot, sl.role.c_str());
+    }
   }
 }
 
@@ -369,6 +386,15 @@ int run(int argc, char** argv) {
   cfg.sites = sites;
   cfg.ring_data_pages = opt.ring_pages;
   cfg.poll_timeout_ms = opt.poll_ms;
+  cfg.tracefs = opt.tracefs;
+  bool any_fetch = false;
+  for (const kz::trace::SiteSpec& site : sites) any_fetch = any_fetch || kz::trace::has_fetch_slots(site);
+  if (any_fetch && cfg.tracefs.empty() && access("/sys/kernel/tracing/uprobe_events", W_OK) == 0) cfg.tracefs = "/sys/kernel/tracing";
+  if (any_fetch && cfg.tracefs.empty()) {
+    std::fprintf(stderr, "kz observe: the plan reads memory at %s: give a mounted tracefs with --tracefs DIR (/sys/kernel/tracing has no writable uprobe_events)\n",
+                 "some site (fetch slots)");
+    return 3;
+  }
   if (!opt.drain_cpus.empty()) {
     s = kz::probe::parse_cpu_list(opt.drain_cpus, &cfg.drain_cpus);
     if (!s.ok()) { std::fprintf(stderr, "kz observe: --drain-cpus: %s\n", s.describe().c_str()); return 1; }
@@ -449,6 +475,12 @@ int run(int argc, char** argv) {
                                                      static_cast<uint64_t>(self_at_exit.ru_utime.tv_usec + self_at_exit.ru_stime.tv_usec) * 1000ull));
   add("observer.cpu_ns.drain_thread", num(sstats.drain_cpu_ns));
   add("observer.drain_thread_last_cpu", std::to_string(sstats.drain_last_cpu));
+  if (!sstats.fetch_events.empty()) {
+    add("observer.fetch", "tracefs " + cfg.tracefs + ": " + num(sstats.fetch_events.size()) +
+                              " probe event(s) of uprobe_events with fetch arguments (memory read by the kernel when the probe fires), opened as tracepoint events "
+                              "with PERF_SAMPLE_RAW; " + (sstats.fetch_cleanup.empty() ? std::string("not removed") : sstats.fetch_cleanup));
+    for (const kz::probe::FetchEvent& fe : sstats.fetch_events) add("observer.fetch.site" + num(fe.site), fe.name + " id " + num(fe.id) + ": " + fe.definition);
+  }
   add("tool.ring.data_pages_per_cpu", num(opt.ring_pages), KZ_POLICY_UNSPECIFIED);
   add("tool.drain.poll_timeout_ms", num(opt.poll_ms), KZ_POLICY_UNSPECIFIED);
   add("tool.clock", sstats.clock + " (use_clockid): one clock for all CPUs; evidence only, never an HB edge");
@@ -564,6 +596,12 @@ int run(int argc, char** argv) {
     add("decode.traced_pids", pids);
   }
   for (size_t i = 0; i < sites.size(); ++i) add("hits.site" + num(i) + "." + sites[i].label, num(decoded.stats.site_hits[i]));
+  for (size_t i = 0; i < sites.size(); ++i)
+    if (!sites[i].via_symbol.empty())
+      add("decode.via.site" + num(i) + "." + sites[i].label, num(decoded.stats.site_hits[i] - decoded.stats.via_unattributed[i]) + " kept (attributed to an open call of " +
+                                                                 sites[i].via_symbol + " by the return address), " + num(decoded.stats.via_unattributed[i]) +
+                                                                 " not kept (other callers, or no open call)");
+  add("decode.strings", num(decoded.strings.size()) + " string value(s) of fetch slots");
   for (size_t i = 0; i < sites.size(); ++i) add("perturbation.site" + num(i) + ".trap", kz::probe::trap_account_text(sites, i));
   add("match.call_pairs", num(mstats.pairs));
   add("match.entries_without_return", num(mstats.entries_without_return));

@@ -53,6 +53,13 @@
 //               ring (`kz_loss.cpu`), but the events carry no CPU and the backend records no context
 //               switches, so which task's events were lost is not established.
 //   constants   a run container carries no value of a `ref eval` constant: the caller supplies them.
+//   strings     a string slot (a fetch slot of the probe event, EVENT_STRINGS) gives a text: `arg.NAME=@text`
+//               for a parameter of sort Str (the replay reads its handle), never its length as a number; a
+//               string the kernel could not read leaves the value unknown.
+//   out values  a point site that names no point of the profile, but whose slot role names an `out`
+//               parameter of the operation of the actor's innermost open call, gives that parameter's value
+//               (out.NAME) on the call's return, unless the return carries it itself: the value the call
+//               stores through the parameter, read inside the call before it returns.
 #pragma once
 
 #include <cstdint>
@@ -112,6 +119,8 @@ struct RealTraceReport {
   bool starts_at_exec = false;
   uint64_t spawn_returns = 0;      // returns of a spawn rule's create operation
   uint64_t spawn_outs_bound = 0;   // of those, with the out-parameter bound by the id (ID_MATCHED)
+  uint64_t string_values = 0;      // slot values taken as text (string fetch slots, EVENT_STRINGS)
+  uint64_t out_values_from_points = 0;  // out values set on a return from a point inside the call
   uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
   bool core_evidence = false;      // symbols and core request callers were given
   std::vector<std::pair<uint32_t, uint64_t>> loss_cpus;  // per kernel loss report: (CPU ring, count)

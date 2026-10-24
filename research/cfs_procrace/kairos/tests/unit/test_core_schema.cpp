@@ -86,6 +86,12 @@ void check_known_sizes() {
       {"kz_cert_step", 36}, // SPEC 2.3: 32, plus flags and rsv0
       {"kz_trust", 60},     // SPEC 2.3: 60 bytes, with proof
       {"kz_trust_ledger", 224},  // SPEC 2.3: 224 bytes
+      // schema revision 2 (SPEC rev 1.3 2.3, X-01): new sections only; no earlier record changed
+      {"kz_summary", 44},        // summary view of a cell (ADR-054)
+      {"kz_model_id", 44},       // model identifiers (1.8)
+      {"kz_obs_adequacy", 88},   // observation adequacy record (ADR-055)
+      {"kz_identity", 68},       // the four identities of an actor at an event (1.2, ADR-056)
+      {"kz_app_owner", 32},      // app_owner of a thread incarnation (ADR-056)
   };
   for (const Known& k : known) {
     const kz_record_desc* rec = kz::find_record(k.name);
@@ -242,6 +248,14 @@ void check_conservative_defaults() {
   KZ_CHECK_EQ(zero_name("KZ_OCC"), std::string("NOT_EVALUATED"));
   KZ_CHECK_EQ(zero_name("KZ_PROGRESS_HARM"), std::string("none"));
   KZ_CHECK_EQ(zero_name("KZ_ROUTE"), std::string("none"));
+  // schema revision 2: a zero summary claims nothing, a zero owner is undetermined
+  KZ_CHECK_EQ(zero_name("KZ_OBS"), std::string("none"));
+  KZ_CHECK_EQ(zero_name("KZ_PRED"), std::string("NOT_RUN"));
+  KZ_CHECK_EQ(zero_name("KZ_CONF"), std::string("NOT_RUN"));
+  KZ_CHECK_EQ(zero_name("KZ_EXEC_RELATION"), std::string("ownership-undetermined"));
+  KZ_CHECK_EQ(zero_name("KZ_OWNER_LEVEL"), std::string("undetermined"));
+  KZ_CHECK_EQ(zero_name("KZ_START_EVIDENCE"), std::string("none"));
+  KZ_CHECK_EQ(zero_name("KZ_INTERVAL_END"), std::string("unknown"));
   KZ_CHECK_EQ(zero_name("KZ_OUTCOME_LABEL"), std::string("none"));
   // Tier names are the ones the PI fixed (T1).
   const kz::EnumDesc* tier = kz::find_enum("KZ_TIER");

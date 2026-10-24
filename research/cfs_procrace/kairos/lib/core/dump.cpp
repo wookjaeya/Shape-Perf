@@ -232,7 +232,7 @@ std::string dump_container(const Container& c) {
 }
 
 std::string layout_text() {
-  std::string out = "kz-layout abi=" + decimal(KZ_ABI_VERSION) + "\n";
+  std::string out = "kz-layout abi=" + decimal(KZ_ABI_VERSION) + " revision=" + decimal(KZ_SCHEMA_REVISION) + "\n";
   for (const kz_record_desc* rec : records()) {
     out += "record " + std::string(rec->name) + " size=" + decimal(rec->size) + " fields=" + decimal(rec->nfields) + "\n";
     for (uint32_t i = 0; i < rec->nfields; ++i) {

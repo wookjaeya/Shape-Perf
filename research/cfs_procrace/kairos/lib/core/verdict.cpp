@@ -547,4 +547,93 @@ std::string render_acceptance(const kz_cert& cert, const LedgerCounts* lemmas) {
   return "accepted by kz proofcheck, relative to its trusted base; " + lemma_status_text(cert.proof_status, lemmas);
 }
 
+// ---- summary view ---------------------------------------------------------------------
+
+kz_summary summarize_observation(const SummaryInput& in) {
+  kz_summary s;
+  std::memset(&s, 0, sizeof s);
+  s.cell = KZ_NONE32;
+  s.model = KZ_NONE32;
+  s.adequacy = KZ_NONE32;
+  s.identity_first = KZ_NONE32;
+  s.prediction = KZ_PRED_NOT_RUN;
+  s.confirmation = KZ_CONF_NOT_RUN;
+  s.status = in.status;
+  s.status_flags = in.status_flags;
+  if (in.caller_record) s.flags |= KZ_SUMMARY_FLAG_CALLER_RECORD;
+  if (in.accepted) s.flags |= KZ_SUMMARY_FLAG_ACCEPT;
+  if (in.input_error) {
+    s.flags |= KZ_SUMMARY_FLAG_INPUT_ERROR;
+    s.observation = KZ_OBS_NONE;
+    return s;
+  }
+  auto inconclusive = [&](uint32_t why) {
+    s.observation = KZ_OBS_INCONCLUSIVE;
+    s.obs_reasons = why;
+  };
+  if ((in.status_flags & KZ_STATUS_FLAG_OPEN) != 0) {
+    inconclusive(KZ_WITHHOLD_HORIZON_OPEN | in.reasons);
+    return s;
+  }
+  if ((in.status_flags & KZ_STATUS_FLAG_UNDETERMINED) != 0) {
+    inconclusive(in.reasons != 0 ? in.reasons : static_cast<uint32_t>(KZ_WITHHOLD_EXPLANATION_AMBIGUOUS));
+    return s;
+  }
+  switch (in.status) {
+    case KZ_OCC_VIOLATING:
+      if (in.all_explanations) s.observation = KZ_OBS_OBSERVED_VIOLATION;
+      else inconclusive(KZ_WITHHOLD_EXPLANATION_AMBIGUOUS | in.reasons);
+      break;
+    case KZ_OCC_READY: s.observation = KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX; break;
+    case KZ_OCC_TOLERATED:
+      if (in.caller_record && in.accepted) s.observation = KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX;
+      else inconclusive(KZ_WITHHOLD_CALLER_REQUIREMENT_ABSENT);
+      break;
+    case KZ_OCC_NOT_READY_UNJUDGED: inconclusive(KZ_WITHHOLD_CALLER_REQUIREMENT_ABSENT); break;
+    case KZ_OCC_PENDING: inconclusive(KZ_WITHHOLD_HORIZON_OPEN); break;
+    case KZ_OCC_NOT_EVALUATED: inconclusive(KZ_WITHHOLD_NOT_EVALUATED); break;
+    default: inconclusive(KZ_WITHHOLD_EXPLANATION_AMBIGUOUS); break;  // a value outside KZ_OCC claims nothing
+  }
+  return s;
+}
+
+std::string render_observation(const kz_summary& s) {
+  if ((s.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) != 0) return "analysis input error (reported apart)";
+  std::string out = enum_text("KZ_OBS", s.observation);
+  if (s.observation == KZ_OBS_INCONCLUSIVE) {
+    const EnumDesc* en = find_enum("KZ_WITHHOLD");
+    std::string r;
+    if (en != nullptr)
+      for (size_t i = 0; i < en->nitems; ++i)
+        if ((s.obs_reasons & en->items[i].value) != 0) r += (r.empty() ? "" : ",") + std::string(en->items[i].display);
+    out += "(" + r + ")";
+  }
+  return out;
+}
+
+std::vector<Finding> validate_summary(const kz_summary& s) {
+  std::vector<Finding> out;
+  check_reserved("kz_summary", &s, "summary", &out);
+  const bool input_error = (s.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) != 0;
+  if (input_error && s.observation != KZ_OBS_NONE) add(&out, "summary", "an analysis input error is reported apart: its observation must be none");
+  if (s.observation == KZ_OBS_INCONCLUSIVE && s.obs_reasons == 0) add(&out, "summary", "INCONCLUSIVE names no reason");
+  if (s.observation != KZ_OBS_INCONCLUSIVE && s.obs_reasons != 0) add(&out, "summary", "only INCONCLUSIVE carries reasons");
+  if (s.observation > KZ_OBS_NOT_APPLICABLE) add(&out, "summary", "observation value out of range");
+  const bool definite = s.status_flags == 0;
+  if (s.observation == KZ_OBS_OBSERVED_VIOLATION && !(definite && s.status == KZ_OCC_VIOLATING))
+    add(&out, "summary", "OBSERVED_VIOLATION needs the status VIOLATING");
+  if (s.observation == KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX) {
+    const bool tolerated_ok = s.status == KZ_OCC_TOLERATED && (s.flags & KZ_SUMMARY_FLAG_CALLER_RECORD) != 0 && (s.flags & KZ_SUMMARY_FLAG_ACCEPT) != 0;
+    if (!(definite && (s.status == KZ_OCC_READY || tolerated_ok)))
+      add(&out, "summary", "NO_VIOLATION_IN_CHECKED_PREFIX needs READY, or TOLERATED with a caller record and ACCEPT (D2)");
+  }
+  if ((s.status_flags & KZ_STATUS_FLAG_OPEN) != 0 && s.observation != KZ_OBS_INCONCLUSIVE && !input_error)
+    add(&out, "summary", "an OPEN occurrence is INCONCLUSIVE(horizon-open) (D2)");
+  if (definite && s.status == KZ_OCC_PENDING && s.observation != KZ_OBS_INCONCLUSIVE && !input_error)
+    add(&out, "summary", "a PENDING occurrence is INCONCLUSIVE(horizon-open) (D2)");
+  if (definite && s.status == KZ_OCC_NOT_READY_UNJUDGED && s.observation != KZ_OBS_INCONCLUSIVE && !input_error)
+    add(&out, "summary", "a NOT_READY_UNJUDGED occurrence is INCONCLUSIVE(caller_requirement_absent)");
+  return out;
+}
+
 }  // namespace kz

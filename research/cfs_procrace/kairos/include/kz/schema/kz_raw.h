@@ -18,6 +18,11 @@
  *   - new sections: SITE_SLOTS, SIDE_EVENTS, THREADS, MAPS (run containers) and SYMBOLS,
  *     TARGETS (basis containers).
  *
+ * Schema revision 2 (SPEC rev 1.3, ADR-056): the new section ACTOR_OWNERS holds app_owner, the
+ * application that created / owns each thread incarnation, with its evidence level.  THREADS is
+ * unchanged (version 1); a run container without ACTOR_OWNERS (every container written before) has
+ * no owner for any thread: its owners are undetermined, never "no owner".
+ *
  * Conventions of the perf-sample backend (SPEC 5.1, "zero-install bring-up backend"):
  *   - `site` is the id of the plan's site; the backend knows it from the perf event that
  *     produced the record (every record carries PERF_SAMPLE_IDENTIFIER), not from a cookie;
@@ -61,7 +66,8 @@ enum kz_raw_section_id {
   KZ_SEC_THREADS = 52,
   KZ_SEC_MAPS = 53,
   KZ_SEC_SYMBOLS = 54,
-  KZ_SEC_TARGETS = 55
+  KZ_SEC_TARGETS = 55,
+  KZ_SEC_ACTOR_OWNERS = 56
 };
 
 #define KZ_RAW_SECTIONS(S)               \
@@ -76,7 +82,8 @@ enum kz_raw_section_id {
   S(THREADS, 52, kz_thread, 1)           \
   S(MAPS, 53, kz_map_ev, 1)              \
   S(SYMBOLS, 54, kz_symbol, 1)           \
-  S(TARGETS, 55, kz_target, 1)
+  S(TARGETS, 55, kz_target, 1)           \
+  S(ACTOR_OWNERS, 56, kz_app_owner, 1)
 
 /*
  * Raw event record (64 bytes, SPEC 2.3).  The timestamp is evidence and a search
@@ -321,6 +328,26 @@ enum kz_raw_section_id {
   X(T, kz_str, file, )                                                               \
   X(T, kz_str, label, )
 
+/*
+ * app_owner of one thread incarnation (SPEC 1.2 "Creating application", 5.7, ADR-056; 32 bytes).
+ * `thread` and `creator_thread` are THREADS indices (the executing task and the creating executor);
+ * `creation_event` the RAW_EVENTS index of the creation request or creating call; `owner_key` the key
+ * of the owning application's record in the profile's owner kind (KZ_NONE32: not established, also
+ * when only the name is known); `level` KZ_OWNER_LEVEL and `evidence` KZ_OWNER_EVIDENCE.  The owner
+ * is never taken from a table whose ordering is analysed (EV-03).  A thread without a record here
+ * has an undetermined owner.
+ */
+#define KZ_APP_OWNER_FIELDS(X, T)                                                    \
+  X(T, uint32_t, thread, )                                                           \
+  X(T, uint32_t, creator_thread, )                                                   \
+  X(T, uint32_t, creation_event, )                                                   \
+  X(T, uint32_t, owner_key, )                                                        \
+  X(T, uint8_t, level, )                                                             \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, uint32_t, evidence, )                                                         \
+  X(T, kz_str, app_name, )
+
 #define KZ_RAW_RECORDS(R)                  \
   R(kz_raw_ev, KZ_RAW_EV_FIELDS)           \
   R(kz_site, KZ_SITE_FIELDS)               \
@@ -333,7 +360,8 @@ enum kz_raw_section_id {
   R(kz_map_ev, KZ_MAP_EV_FIELDS)           \
   R(kz_thread, KZ_THREAD_FIELDS)           \
   R(kz_symbol, KZ_SYMBOL_FIELDS)           \
-  R(kz_target, KZ_TARGET_FIELDS)
+  R(kz_target, KZ_TARGET_FIELDS)           \
+  R(kz_app_owner, KZ_APP_OWNER_FIELDS)
 
 KZ_RAW_RECORDS(KZ_RECORD)
 
@@ -523,6 +551,12 @@ KZ_DEFINE_ENUM(KZ_REG, KZ_ENUM_REG, 0)
   F(kz_target, vaddr, HEX, 0)                      \
   F(kz_target, file_offset, HEX, 0)                \
   F(kz_target, func_vaddr, HEX, 0)                 \
-  F(kz_target, prov, IDX, 0)
+  F(kz_target, prov, IDX, 0)                       \
+  F(kz_app_owner, thread, IDX, 0)                  \
+  F(kz_app_owner, creator_thread, IDX, 0)          \
+  F(kz_app_owner, creation_event, IDX, 0)          \
+  F(kz_app_owner, owner_key, IDX, 0)               \
+  F(kz_app_owner, level, ENUM, KZ_OWNER_LEVEL)     \
+  F(kz_app_owner, evidence, FLAGS, KZ_OWNER_EVIDENCE)
 
 #endif /* KZ_SCHEMA_KZ_RAW_H */

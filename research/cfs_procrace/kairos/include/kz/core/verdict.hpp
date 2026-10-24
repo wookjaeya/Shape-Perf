@@ -103,4 +103,36 @@ std::string render_cell(const kz_verdict_cell& cell, const LedgerCounts* lemmas 
 // the same ledger check as render_cell.
 std::string render_acceptance(const kz_cert& cert, const LedgerCounts* lemmas = nullptr);
 
+// ---- summary view (SPEC 1.10 "Summary view", ADR-054, D2; schema revision 2) --------
+// The observation summary is a view computed last from the record; it never replaces the status.
+// Each row of the D2 table applies only under its condition (never a mechanical substitution):
+//   VIOLATING           OBSERVED_VIOLATION if the violation holds in every explanation of the record
+//                       (SPEC 4.8), else INCONCLUSIVE(explanation_ambiguous)
+//   READY               NO_VIOLATION_IN_CHECKED_PREFIX
+//   TOLERATED           NO_VIOLATION_IN_CHECKED_PREFIX only with a caller record and the horizon
+//                       monitor's ACCEPT (QT-4); else INCONCLUSIVE(caller_requirement_absent)
+//   NOT_READY_UNJUDGED  INCONCLUSIVE(caller_requirement_absent)
+//   PENDING, OPEN       INCONCLUSIVE(horizon-open)
+//   NOT_EVALUATED       INCONCLUSIVE(not_evaluated)
+//   undetermined        INCONCLUSIVE(the reasons of the record; explanation_ambiguous if none is known)
+// No status maps to NOT_APPLICABLE (it needs its own evidence).  An empty explanation set (the record
+// and the model contradict each other) is an analysis input error: observation `none` with the flag
+// input-error, reported apart, never a violation and never no violation.
+struct SummaryInput {
+  uint8_t status = 0;             // KZ_OCC
+  uint8_t status_flags = 0;       // set KZ_STATUS_FLAG: open (no decision in the trace), undetermined
+  bool all_explanations = false;  // VIOLATING: the violation holds in every explanation of the record
+  bool caller_record = false;     // TOLERATED: the Allowed entry rests on a caller record
+  bool accepted = false;          // TOLERATED: the horizon monitor ACCEPTed
+  bool input_error = false;       // the explanation set is empty (Qv and Qn both UNSAT)
+  uint32_t reasons = 0;           // set KZ_WITHHOLD: what the record lacks (for INCONCLUSIVE)
+};
+// A summary record with observation, obs_reasons, status, status_flags and the flags input-error,
+// caller-record and accept set; prediction and confirmation NOT_RUN, indices KZ_NONE32.
+kz_summary summarize_observation(const SummaryInput& in);
+// "OBSERVED_VIOLATION", "INCONCLUSIVE(horizon-open)", "analysis input error (reported apart)" ...
+std::string render_observation(const kz_summary& s);
+// The invariants of the D2 table on a stored summary.
+std::vector<Finding> validate_summary(const kz_summary& s);
+
 }  // namespace kz

@@ -619,8 +619,55 @@ void test_rendering_rules_of_the_spec() {
 
 }  // namespace
 
+// SPEC 1.10 "Summary view" with D2 (ADR-054): each row under its condition.
+void test_summary_view() {
+  auto obs = [](uint8_t status, uint8_t flags, bool all = true, bool caller = false, bool accept = false, uint32_t reasons = 0) {
+    kz::SummaryInput in;
+    in.status = status;
+    in.status_flags = flags;
+    in.all_explanations = all;
+    in.caller_record = caller;
+    in.accepted = accept;
+    in.reasons = reasons;
+    const kz_summary s = kz::summarize_observation(in);
+    KZ_CHECK(kz::validate_summary(s).empty());
+    return kz::render_observation(s);
+  };
+  KZ_CHECK_EQ(obs(KZ_OCC_VIOLATING, 0), std::string("OBSERVED_VIOLATION"));
+  KZ_CHECK_EQ(obs(KZ_OCC_VIOLATING, 0, false), std::string("INCONCLUSIVE(explanation_ambiguous)"));
+  KZ_CHECK_EQ(obs(KZ_OCC_READY, 0), std::string("NO_VIOLATION_IN_CHECKED_PREFIX"));
+  KZ_CHECK_EQ(obs(KZ_OCC_TOLERATED, 0, true, true, true), std::string("NO_VIOLATION_IN_CHECKED_PREFIX"));
+  KZ_CHECK_EQ(obs(KZ_OCC_TOLERATED, 0, true, false, true), std::string("INCONCLUSIVE(caller_requirement_absent)"));
+  KZ_CHECK_EQ(obs(KZ_OCC_NOT_READY_UNJUDGED, 0), std::string("INCONCLUSIVE(caller_requirement_absent)"));
+  KZ_CHECK_EQ(obs(KZ_OCC_PENDING, 0), std::string("INCONCLUSIVE(horizon-open)"));            // D2
+  KZ_CHECK_EQ(obs(KZ_OCC_NOT_EVALUATED, KZ_STATUS_FLAG_OPEN), std::string("INCONCLUSIVE(horizon-open)"));  // D2: OPEN
+  KZ_CHECK_EQ(obs(KZ_OCC_NOT_EVALUATED, 0), std::string("INCONCLUSIVE(not_evaluated)"));
+  KZ_CHECK_EQ(obs(KZ_OCC_NOT_EVALUATED, KZ_STATUS_FLAG_UNDETERMINED, true, false, false, KZ_WITHHOLD_START_STATE_UNKNOWN | KZ_WITHHOLD_LOSS),
+              std::string("INCONCLUSIVE(start_state_unknown,loss)"));
+  KZ_CHECK_EQ(obs(KZ_OCC_NOT_EVALUATED, KZ_STATUS_FLAG_UNDETERMINED), std::string("INCONCLUSIVE(explanation_ambiguous)"));
+  // an empty explanation set is an input error, reported apart: never a violation, never no violation
+  kz::SummaryInput err;
+  err.status = KZ_OCC_VIOLATING;
+  err.all_explanations = true;
+  err.input_error = true;
+  const kz_summary e = kz::summarize_observation(err);
+  KZ_CHECK_EQ(static_cast<int>(e.observation), static_cast<int>(KZ_OBS_NONE));
+  KZ_CHECK(kz::validate_summary(e).empty());
+  KZ_CHECK_EQ(kz::render_observation(e), std::string("analysis input error (reported apart)"));
+  // a stored summary that maps PENDING to no violation is rejected (the alternative D2 rejected)
+  kz_summary bad = kz::summarize_observation(kz::SummaryInput{});
+  bad.status = KZ_OCC_PENDING;
+  bad.observation = KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX;
+  bad.obs_reasons = 0;
+  KZ_CHECK(!kz::validate_summary(bad).empty());
+  bad.status = KZ_OCC_NOT_READY_UNJUDGED;
+  bad.observation = KZ_OBS_OBSERVED_VIOLATION;
+  KZ_CHECK(!kz::validate_summary(bad).empty());
+}
+
 int main() {
   test_defaults();
+  test_summary_view();
   test_routes();
   test_cell_invariants();
   test_verdict_invariants();

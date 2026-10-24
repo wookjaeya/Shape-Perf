@@ -1,4 +1,4 @@
-kz-layout abi=1
+kz-layout abi=1 revision=2
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -158,6 +158,59 @@ record kz_verdict_cell size=472 fields=32
   witness_stall offset=352 size=40 count=1 kind=ref
   progress_chain offset=392 size=40 count=1 kind=ref
   runs offset=432 size=40 count=1 kind=ref
+record kz_summary size=44 fields=15
+  cell offset=0 size=4 count=1 kind=u32
+  observation offset=4 size=1 count=1 kind=u8
+  prediction offset=5 size=1 count=1 kind=u8
+  confirmation offset=6 size=1 count=1 kind=u8
+  relation offset=7 size=1 count=1 kind=u8
+  obs_reasons offset=8 size=4 count=1 kind=u32
+  pred_reasons offset=12 size=4 count=1 kind=u32
+  status offset=16 size=1 count=1 kind=u8
+  status_flags offset=17 size=1 count=1 kind=u8
+  flags offset=18 size=2 count=1 kind=u16
+  model offset=20 size=4 count=1 kind=u32
+  adequacy offset=24 size=4 count=1 kind=u32
+  identity_first offset=28 size=4 count=1 kind=u32
+  n_identities offset=32 size=4 count=1 kind=u32
+  conf_reason offset=36 size=8 count=1 kind=str
+record kz_model_id size=44 fields=8
+  model_id offset=0 size=8 count=1 kind=str
+  model_level offset=8 size=1 count=1 kind=u8
+  sigma offset=9 size=1 count=1 kind=u8
+  rsv0 offset=10 size=2 count=1 kind=u16
+  schedule_profile_id offset=12 size=8 count=1 kind=str
+  basis_id offset=20 size=8 count=1 kind=str
+  scope_id offset=28 size=8 count=1 kind=str
+  profile_id offset=36 size=8 count=1 kind=str
+record kz_obs_adequacy size=88 fields=11
+  established offset=0 size=4 count=1 kind=u32
+  absent offset=4 size=4 count=1 kind=u32
+  reasons offset=8 size=4 count=1 kind=u32
+  start_evidence offset=12 size=1 count=1 kind=u8
+  end_reason offset=13 size=1 count=1 kind=u8
+  rsv0 offset=14 size=2 count=1 kind=u16
+  first_event offset=16 size=8 count=1 kind=u64
+  last_event offset=24 size=8 count=1 kind=u64
+  loss_reports offset=32 size=8 count=1 kind=u64
+  probes offset=40 size=40 count=1 kind=ref
+  unobserved offset=80 size=8 count=1 kind=str
+record kz_identity size=68 fields=15
+  exec_tid offset=0 size=4 count=1 kind=u32
+  exec_generation offset=4 size=4 count=1 kind=u32
+  creator_tid offset=8 size=4 count=1 kind=u32
+  creator_generation offset=12 size=4 count=1 kind=u32
+  owner_key offset=16 size=4 count=1 kind=u32
+  owner_level offset=20 size=1 count=1 kind=u8
+  rsv0 offset=21 size=1 count=1 kind=u8
+  rsv1 offset=22 size=2 count=1 kind=u16
+  owner_evidence offset=24 size=4 count=1 kind=u32
+  passed_id offset=28 size=4 count=1 kind=u32
+  flags offset=32 size=4 count=1 kind=u32
+  exec_name offset=36 size=8 count=1 kind=str
+  creator_name offset=44 size=8 count=1 kind=str
+  owner_name offset=52 size=8 count=1 kind=str
+  passed_role offset=60 size=8 count=1 kind=str
 record kz_raw_ev size=64 fields=8
   t_ns offset=0 size=8 count=1 kind=u64
   tid offset=8 size=4 count=1 kind=u32
@@ -300,6 +353,16 @@ record kz_target size=80 fields=14
   func offset=56 size=8 count=1 kind=str
   file offset=64 size=8 count=1 kind=str
   label offset=72 size=8 count=1 kind=str
+record kz_app_owner size=32 fields=9
+  thread offset=0 size=4 count=1 kind=u32
+  creator_thread offset=4 size=4 count=1 kind=u32
+  creation_event offset=8 size=4 count=1 kind=u32
+  owner_key offset=12 size=4 count=1 kind=u32
+  level offset=16 size=1 count=1 kind=u8
+  rsv0 offset=17 size=1 count=1 kind=u8
+  rsv1 offset=18 size=2 count=1 kind=u16
+  evidence offset=20 size=4 count=1 kind=u32
+  app_name offset=24 size=8 count=1 kind=str
 record kz_fact_func size=48 fields=10
   fn offset=0 size=4 count=1 kind=u32
   tu offset=4 size=4 count=1 kind=u32
@@ -923,6 +986,85 @@ enum KZ_OCC
   0x3 VIOLATING "VIOLATING"
   0x4 PENDING "PENDING"
   0x5 NOT_READY_UNJUDGED "NOT_READY_UNJUDGED"
+enum KZ_OBS
+  0x0 NONE "none"
+  0x1 OBSERVED_VIOLATION "OBSERVED_VIOLATION"
+  0x2 NO_VIOLATION_IN_CHECKED_PREFIX "NO_VIOLATION_IN_CHECKED_PREFIX"
+  0x3 INCONCLUSIVE "INCONCLUSIVE"
+  0x4 NOT_APPLICABLE "NOT_APPLICABLE"
+enum KZ_PRED
+  0x0 NOT_RUN "NOT_RUN"
+  0x1 MODEL_CANDIDATE "MODEL_CANDIDATE"
+  0x2 NONE_IN_SCOPE "NONE_IN_SCOPE"
+  0x3 INCONCLUSIVE "INCONCLUSIVE"
+enum KZ_CONF
+  0x0 NOT_RUN "NOT_RUN"
+  0x1 CONFIRMED "CONFIRMED"
+  0x2 NOT_CONFIRMED "NOT_CONFIRMED"
+enum KZ_EXEC_RELATION
+  0x0 OWNERSHIP_UNDETERMINED "ownership-undetermined"
+  0x1 INTER_APPLICATION "inter-application"
+  0x2 CORE_APPLICATION "core-application"
+  0x3 CREATION_FRAMEWORK "creation-framework-new-application"
+  0x4 INTRA_APPLICATION "intra-application"
+flags KZ_WITHHOLD
+  0x1 START_STATE_UNKNOWN "start_state_unknown"
+  0x2 LOSS "loss"
+  0x4 RESOURCE_OR_LIFETIME_UNMATCHED "resource_or_lifetime_unmatched"
+  0x8 OWNERSHIP_UNDETERMINED "ownership_undetermined"
+  0x10 EFFECT_POINT_AMBIGUOUS "effect_point_ambiguous"
+  0x20 CALLER_REQUIREMENT_ABSENT "caller_requirement_absent"
+  0x40 EFFECT_UNSUPPORTED "effect_unsupported"
+  0x80 HORIZON_OPEN "horizon-open"
+  0x100 NOT_EVALUATED "not_evaluated"
+  0x200 EXPLANATION_AMBIGUOUS "explanation_ambiguous"
+  0x400 LIMIT "limit"
+flags KZ_STATUS_FLAG
+  0x1 OPEN "open"
+  0x2 UNDETERMINED "undetermined"
+flags KZ_SUMMARY_FLAG
+  0x1 INPUT_ERROR "analysis-input-error"
+  0x2 PARTIAL "partial"
+  0x4 CALLER_RECORD "caller-record"
+  0x8 ACCEPT "accept"
+  0x10 REAL_RECORD "real-record"
+  0x20 OUTCOME_NARROWED "outcome-narrowed"
+flags KZ_ADEQ
+  0x1 WRITERS_COVERED "writers-covered"
+  0x2 ALIASES_COVERED "aliases-covered"
+  0x4 START_STATE_KNOWN "start-state-known"
+  0x8 LIFETIME_KNOWN "lifetime-known"
+  0x10 PROBES_ATTACHED "probes-attached"
+  0x20 PROBES_ACTIVE "probes-active"
+  0x40 LOSS_FREE "loss-free"
+enum KZ_START_EVIDENCE
+  0x0 NONE "none"
+  0x1 INIT "init"
+  0x2 CAPTURE "state-capture"
+  0x3 DECLARED "declared"
+enum KZ_INTERVAL_END
+  0x0 UNKNOWN "unknown"
+  0x1 RECORD_END "record-end"
+  0x2 PROCESS_TERMINAL "process-terminal"
+  0x3 LOSS "loss"
+  0x4 DECISION "decision"
+enum KZ_OWNER_LEVEL
+  0x0 UNDETERMINED "undetermined"
+  0x1 INFERRED "inferred"
+  0x2 CONFIRMED "confirmed"
+flags KZ_OWNER_EVIDENCE
+  0x1 CREATION_REQUEST "creation-request"
+  0x2 FORK_IN_CALL "fork-in-creating-call"
+  0x4 ANNOUNCED_ID "announced-id"
+  0x8 ES_RECORDS "es-records"
+  0x10 MATCH_BY_TIME "match-by-time"
+  0x20 ID_UNVERIFIED "id-unverified"
+  0x40 RAW_THREAD "raw-thread"
+  0x80 ANALYSED_TABLE_EXCLUDED "analysed-table-excluded"
+flags KZ_IDENTITY_FLAG
+  0x1 EXEC_KNOWN "exec-known"
+  0x2 CREATOR_KNOWN "creator-known"
+  0x4 PASSED_ID_PRESENT "passed-id-present"
 enum KZ_PHASE
   0x0 NONE "none"
   0x1 ENTRY "ENTRY"
@@ -1443,6 +1585,7 @@ section THREADS type=52 record=kz_thread version=1
 section MAPS type=53 record=kz_map_ev version=1
 section SYMBOLS type=54 record=kz_symbol version=1
 section TARGETS type=55 record=kz_target version=1
+section ACTOR_OWNERS type=56 record=kz_app_owner version=1
 section CERTIFICATES type=60 record=kz_cert version=1
 section CERT_STEPS type=61 record=kz_cert_step version=1
 section TRUST_LEDGERS type=62 record=kz_trust_ledger version=1
@@ -1452,6 +1595,10 @@ section WITNESSES type=80 record=kz_witness version=1
 section VERDICTS type=81 record=kz_verdict version=1
 section VERDICT_CELLS type=82 record=kz_verdict_cell version=1
 section BOUNDS type=83 record=kz_bound version=1
+section SUMMARIES type=84 record=kz_summary version=1
+section MODEL_IDS type=85 record=kz_model_id version=1
+section OBS_ADEQUACY type=86 record=kz_obs_adequacy version=1
+section IDENTITIES type=87 record=kz_identity version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -1509,6 +1656,36 @@ format kz_verdict_cell.progress_flags flags KZ_PROGRESS_FLAG
 format kz_verdict_cell.progress_kind flags KZ_PROGRESS_KIND
 format kz_verdict_cell.fw_conf enum KZ_FW_CONF
 format kz_verdict_cell.proof_status enum KZ_PROOF
+format kz_summary.cell idx 0
+format kz_summary.observation enum KZ_OBS
+format kz_summary.prediction enum KZ_PRED
+format kz_summary.confirmation enum KZ_CONF
+format kz_summary.relation enum KZ_EXEC_RELATION
+format kz_summary.obs_reasons flags KZ_WITHHOLD
+format kz_summary.pred_reasons flags KZ_WITHHOLD
+format kz_summary.status enum KZ_OCC
+format kz_summary.status_flags flags KZ_STATUS_FLAG
+format kz_summary.flags flags KZ_SUMMARY_FLAG
+format kz_summary.model idx 0
+format kz_summary.adequacy idx 0
+format kz_summary.identity_first idx 0
+format kz_model_id.model_level enum KZ_MLEVEL
+format kz_model_id.sigma enum KZ_SIGMA
+format kz_obs_adequacy.established flags KZ_ADEQ
+format kz_obs_adequacy.absent flags KZ_ADEQ
+format kz_obs_adequacy.reasons flags KZ_WITHHOLD
+format kz_obs_adequacy.start_evidence enum KZ_START_EVIDENCE
+format kz_obs_adequacy.end_reason enum KZ_INTERVAL_END
+format kz_obs_adequacy.first_event idx 0
+format kz_obs_adequacy.last_event idx 0
+format kz_obs_adequacy.loss_reports idx 0
+format kz_identity.creator_tid idx 0
+format kz_identity.creator_generation idx 0
+format kz_identity.owner_key idx 0
+format kz_identity.owner_level enum KZ_OWNER_LEVEL
+format kz_identity.owner_evidence flags KZ_OWNER_EVIDENCE
+format kz_identity.passed_id hex 0
+format kz_identity.flags flags KZ_IDENTITY_FLAG
 format kz_raw_ev.phase enum KZ_PHASE
 format kz_raw_ev.flags flags KZ_RAW_FLAG
 format kz_raw_ev.objseq hex 0
@@ -1549,6 +1726,12 @@ format kz_target.vaddr hex 0
 format kz_target.file_offset hex 0
 format kz_target.func_vaddr hex 0
 format kz_target.prov idx 0
+format kz_app_owner.thread idx 0
+format kz_app_owner.creator_thread idx 0
+format kz_app_owner.creation_event idx 0
+format kz_app_owner.owner_key idx 0
+format kz_app_owner.level enum KZ_OWNER_LEVEL
+format kz_app_owner.evidence flags KZ_OWNER_EVIDENCE
 format kz_fact_func.tu idx 0
 format kz_fact_func.fh idx 0
 format kz_fact_func.flags flags KZ_FUNC_FLAG
@@ -1676,4 +1859,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=bbb82e8246896d8c938269aff1ba5cc8d0816d3e61cb2b3c0b4e1ca3bee164eb
+fingerprint=153899a4b8154a87aff6d7273c3ed301899d3bc685b1b67e1064fb35d1b7add1

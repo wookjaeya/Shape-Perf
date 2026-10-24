@@ -167,6 +167,55 @@ void test_provenance_and_proof() {
                    {{0, "n/a"}, {1, "unproved"}, {2, "depends-on-stated-assumption"}, {3, "proved"}});
 }
 
+void test_summary_view() {
+  // SPEC 1.10 "Summary view" (rev 1.3, ADR-054, D2): four observation results, four prediction results,
+  // three confirmation results.  The stored value 0 of the observation is "none" (no summary computed):
+  // a zero record claims nothing.  INCONCLUSIVE carries its reasons in a separate set.
+  check_vocabulary("KZ_OBS", "SPEC 1.10 summary view, observation",
+                   {{0, "none"}, {1, "OBSERVED_VIOLATION"}, {2, "NO_VIOLATION_IN_CHECKED_PREFIX"}, {3, "INCONCLUSIVE"}, {4, "NOT_APPLICABLE"}});
+  check_vocabulary("KZ_PRED", "SPEC 1.10 summary view, prediction",
+                   {{0, "NOT_RUN"}, {1, "MODEL_CANDIDATE"}, {2, "NONE_IN_SCOPE"}, {3, "INCONCLUSIVE"}});
+  check_vocabulary("KZ_CONF", "SPEC 1.10 summary view, confirmation", {{0, "NOT_RUN"}, {1, "CONFIRMED"}, {2, "NOT_CONFIRMED"}});
+  // SPEC 1.1 "Execution relations" / 1.10 (the fifth row: ownership undetermined, the conservative value).
+  check_vocabulary("KZ_EXEC_RELATION", "SPEC 1.1 execution relations",
+                   {{0, "ownership-undetermined"},
+                    {1, "inter-application"},
+                    {2, "core-application"},
+                    {3, "creation-framework-new-application"},
+                    {4, "intra-application"}});
+  // SPEC 4.8 "Reasons for withholding" (C-27), in the SPEC's order.
+  check_vocabulary("KZ_WITHHOLD", "SPEC 4.8 reasons for withholding",
+                   {{0x1, "start_state_unknown"},
+                    {0x2, "loss"},
+                    {0x4, "resource_or_lifetime_unmatched"},
+                    {0x8, "ownership_undetermined"},
+                    {0x10, "effect_point_ambiguous"},
+                    {0x20, "caller_requirement_absent"},
+                    {0x40, "effect_unsupported"},
+                    {0x80, "horizon-open"},
+                    {0x100, "not_evaluated"},
+                    {0x200, "explanation_ambiguous"},
+                    {0x400, "limit"}});
+  // SPEC 1.2 "Creating application" (ADR-056): confirmed | inferred | undetermined; the zero value is undetermined.
+  check_vocabulary("KZ_OWNER_LEVEL", "SPEC 1.2 app_owner level", {{0, "undetermined"}, {1, "inferred"}, {2, "confirmed"}});
+  // SPEC 1.2 / 5.7: the marks of a mapping that rests on time containment alone (C-32).
+  const kz::EnumDesc* ev = kz::find_enum("KZ_OWNER_EVIDENCE");
+  KZ_CHECK(ev != nullptr);
+  bool by_time = false, unverified = false;
+  if (ev != nullptr)
+    for (size_t i = 0; i < ev->nitems; ++i) {
+      by_time = by_time || std::strcmp(ev->items[i].display, "match-by-time") == 0;
+      unverified = unverified || std::strcmp(ev->items[i].display, "id-unverified") == 0;
+    }
+  KZ_CHECK(by_time);
+  KZ_CHECK(unverified);
+  // The summary keeps the occurrence status: the six statuses stay as they were (SPEC 1.6), and OPEN
+  // and an undetermined status are flags of the summary, not statuses.
+  check_vocabulary("KZ_OCC", "SPEC 1.6 occurrence status",
+                   {{0, "NOT_EVALUATED"}, {1, "READY"}, {2, "TOLERATED"}, {3, "VIOLATING"}, {4, "PENDING"}, {5, "NOT_READY_UNJUDGED"}});
+  check_vocabulary("KZ_STATUS_FLAG", "SPEC 1.10 summary view (OPEN, undetermined)", {{0x1, "open"}, {0x2, "undetermined"}});
+}
+
 // The words the SPEC retired must not reappear in any enumeration, whatever its list says.
 void test_retired_words() {
   const char* retired[] = {"event_lost", "event-lost", "events_lost", "events-lost", "packet_lost", "packets_lost", "packet-lost", "packets-lost", "lost_silently"};
@@ -192,6 +241,7 @@ int main() {
   test_consequence_and_labels();
   test_classes_and_axes();
   test_provenance_and_proof();
+  test_summary_view();
   test_retired_words();
   return kztest::finish("test_core_vocab");
 }

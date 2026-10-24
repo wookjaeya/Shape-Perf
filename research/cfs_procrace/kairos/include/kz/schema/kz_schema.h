@@ -25,6 +25,14 @@
  *   - the proof status fields of D20 (KZ_TRUST.proof, KZ_CERT.proof_status,
  *     KZ_VERDICT_CELL.proof_status) are as in SPEC rev 1.2; see kz_cert.h.
  *
+ * Schema revision 2 (SPEC rev 1.3, ADR-054 to ADR-056, change table X-01): the summary view, the
+ * model identifiers, the observation adequacy record and the actor identities are NEW sections
+ * (SUMMARIES, MODEL_IDS, OBS_ADEQUACY, IDENTITIES here; ACTOR_OWNERS in kz_raw.h).  No record of
+ * revision 1 changed its layout and no section changed its version, so every container written
+ * before (ABI 1, revision 1) is read as it was written.  A container without the new sections has
+ * no summary, no adequacy record and no owner: a reader reports them absent and never fills them
+ * with a normal value (docs/schema.md section 10).
+ *
  * Component-owned parts live in separate headers that this file includes at its end:
  *   kz_raw.h    (observer records, initial, owned by K2)
  *   kz_facts.h  (extraction and skeleton records, initial, owned by K4a)
@@ -43,6 +51,9 @@
 #endif
 
 #define KZ_ABI_VERSION 1u
+/* Revision of the record set (docs/schema.md section 10).  Revision 2 adds sections only; it is part
+ * of the layout text, hence of the schema fingerprint and of every tool hash. */
+#define KZ_SCHEMA_REVISION 2u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu
@@ -170,7 +181,11 @@ enum kz_section_id {
   KZ_SEC_WITNESSES = 80,
   KZ_SEC_VERDICTS = 81,
   KZ_SEC_VERDICT_CELLS = 82,
-  KZ_SEC_BOUNDS = 83
+  KZ_SEC_BOUNDS = 83,
+  KZ_SEC_SUMMARIES = 84,
+  KZ_SEC_MODEL_IDS = 85,
+  KZ_SEC_OBS_ADEQUACY = 86,
+  KZ_SEC_IDENTITIES = 87
 };
 
 /* S(NAME, id, record, schema_version).  Sections defined by this file. */
@@ -184,7 +199,11 @@ enum kz_section_id {
   S(WITNESSES, 80, kz_witness, 1)          \
   S(VERDICTS, 81, kz_verdict, 1)           \
   S(VERDICT_CELLS, 82, kz_verdict_cell, 1) \
-  S(BOUNDS, 83, kz_bound, 1)
+  S(BOUNDS, 83, kz_bound, 1)               \
+  S(SUMMARIES, 84, kz_summary, 1)          \
+  S(MODEL_IDS, 85, kz_model_id, 1)         \
+  S(OBS_ADEQUACY, 86, kz_obs_adequacy, 1)  \
+  S(IDENTITIES, 87, kz_identity, 1)
 
 /* ------------------------------------------------------------------------- */
 /* Generic records                                                           */
@@ -384,6 +403,95 @@ enum kz_section_id {
   X(T, kz_ref, progress_chain, )                                                     \
   X(T, kz_ref, runs, )
 
+/*
+ * Summary view of one verdict cell (SPEC 1.10 "Summary view", ADR-054, D2; 44 bytes).  A VIEW: it is
+ * computed last from the unchanged record (occurrence status, three judgements, tier, evidence) and
+ * never replaces it.  Observation, prediction and confirmation are reported and counted apart
+ * (OUT-01).  `status` is the occurrence status the observation summary was computed from; OPEN (no
+ * decision in the trace) and an undetermined status (the explanations of a real record disagree)
+ * are status_flags, because neither is one of the six statuses.  An analysis input error (an empty
+ * explanation set: the record and the model contradict each other) is the flag `input-error` with
+ * observation `none`: it is reported apart, never as a violation and never as no violation.
+ */
+#define KZ_SUMMARY_FIELDS(X, T)                                                      \
+  X(T, uint32_t, cell, )          /* VERDICT_CELLS index of the cell, or KZ_NONE32 */ \
+  X(T, uint8_t, observation, )    /* KZ_OBS */                                       \
+  X(T, uint8_t, prediction, )     /* KZ_PRED */                                      \
+  X(T, uint8_t, confirmation, )   /* KZ_CONF */                                      \
+  X(T, uint8_t, relation, )       /* KZ_EXEC_RELATION (SPEC 1.1) */                  \
+  X(T, uint32_t, obs_reasons, )   /* set KZ_WITHHOLD: the reasons of INCONCLUSIVE */ \
+  X(T, uint32_t, pred_reasons, )  /* set KZ_WITHHOLD */                              \
+  X(T, uint8_t, status, )         /* KZ_OCC */                                       \
+  X(T, uint8_t, status_flags, )   /* set KZ_STATUS_FLAG: open, undetermined */       \
+  X(T, uint16_t, flags, )         /* set KZ_SUMMARY_FLAG */                          \
+  X(T, uint32_t, model, )         /* MODEL_IDS index, or KZ_NONE32 */                \
+  X(T, uint32_t, adequacy, )      /* OBS_ADEQUACY index, or KZ_NONE32 */             \
+  X(T, uint32_t, identity_first, ) /* IDENTITIES index of the first actor identity, or KZ_NONE32 */ \
+  X(T, uint32_t, n_identities, )                                                     \
+  X(T, kz_str, conf_reason, )     /* NOT_CONFIRMED(reason): the SPEC fixes no vocabulary */
+
+/*
+ * Model identifiers of a result (SPEC 1.8 "Model and schedule identifiers on every result", C-09;
+ * 44 bytes).  `profile_id` is the profile used to interpret an observed result, recorded apart.
+ */
+#define KZ_MODEL_ID_FIELDS(X, T)                                                     \
+  X(T, kz_str, model_id, )                                                           \
+  X(T, uint8_t, model_level, ) /* KZ_MLEVEL: M_api | M_impl; unset = not recorded */ \
+  X(T, uint8_t, sigma, )       /* KZ_SIGMA of the schedule profile */                \
+  X(T, uint16_t, rsv0, )                                                             \
+  X(T, kz_str, schedule_profile_id, )                                                \
+  X(T, kz_str, basis_id, )                                                           \
+  X(T, kz_str, scope_id, )                                                           \
+  X(T, kz_str, profile_id, )
+
+/*
+ * Observation adequacy of one condition instance (SPEC 2.3 rev 1.3, 4.7, 4.8 "Recorded writes alone",
+ * ADR-055; 88 bytes).  `established` is what the record establishes for the resources and locations
+ * the condition reads; `absent` what the source did not carry at all (an earlier container): an
+ * absent item is never read as established.  `reasons` are the withholding reasons the missing items
+ * cause.  The interval is in event positions of the replayed record.
+ */
+#define KZ_OBS_ADEQUACY_FIELDS(X, T)                                                 \
+  X(T, uint32_t, established, ) /* set KZ_ADEQ */                                    \
+  X(T, uint32_t, absent, )      /* set KZ_ADEQ */                                    \
+  X(T, uint32_t, reasons, )     /* set KZ_WITHHOLD */                                \
+  X(T, uint8_t, start_evidence, ) /* KZ_START_EVIDENCE */                            \
+  X(T, uint8_t, end_reason, )   /* KZ_INTERVAL_END */                                \
+  X(T, uint16_t, rsv0, )                                                             \
+  X(T, uint64_t, first_event, ) /* KZ_NONE64 if unknown */                           \
+  X(T, uint64_t, last_event, )                                                       \
+  X(T, uint64_t, loss_reports, ) /* losses reported in the interval; KZ_NONE64 = not recorded */ \
+  X(T, kz_ref, probes, )        /* REF_LISTS list of the SITES attached and active, or null */ \
+  X(T, kz_str, unobserved, )    /* unobserved effects and points, by name, ';'-separated */
+
+/*
+ * The identities of one actor at one event (SPEC 1.2 "Four identity fields" and "Creating
+ * application", ADR-056; masterplan 2026-10-24 section 3.2; 68 bytes).  Four categories, never
+ * merged and never assumed equal:
+ *   1 executing task      the thread incarnation that executes the event (exec(e));
+ *   2 creating executor   the thread incarnation that ran the creation of the executing task;
+ *   3 owning application  app_owner of the executing task: the application that created / owns it,
+ *                         with its evidence level and evidence (match-by-time, id-unverified ...);
+ *   4 passed identifier   an identity value the code passes (stamp(e)): e.g. an application id argument.
+ * The owning application is never taken from a table whose ordering is analysed (EV-03).
+ */
+#define KZ_IDENTITY_FIELDS(X, T)                                                     \
+  X(T, uint32_t, exec_tid, )                                                         \
+  X(T, uint32_t, exec_generation, )                                                  \
+  X(T, uint32_t, creator_tid, )        /* valid with CREATOR_KNOWN */                \
+  X(T, uint32_t, creator_generation, )                                               \
+  X(T, uint32_t, owner_key, )          /* key in the profile's owner kind; KZ_NONE32: none established */ \
+  X(T, uint8_t, owner_level, )         /* KZ_OWNER_LEVEL */                          \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, uint32_t, owner_evidence, )     /* set KZ_OWNER_EVIDENCE */                   \
+  X(T, uint32_t, passed_id, )          /* valid with PASSED_ID_PRESENT */            \
+  X(T, uint32_t, flags, )              /* set KZ_IDENTITY_FLAG */                    \
+  X(T, kz_str, exec_name, )                                                          \
+  X(T, kz_str, creator_name, )                                                       \
+  X(T, kz_str, owner_name, )                                                         \
+  X(T, kz_str, passed_role, )          /* the parameter that carried passed_id, e.g. the name of an id parameter */
+
 /* Records of this file, in definition order (kz_ref and kz_str first). */
 #define KZ_CORE_RECORDS(R)                      \
   R(kz_byte, KZ_BYTE_FIELDS)                    \
@@ -399,7 +507,11 @@ enum kz_section_id {
   R(kz_witness, KZ_WITNESS_FIELDS)              \
   R(kz_bound, KZ_BOUND_FIELDS)                  \
   R(kz_verdict, KZ_VERDICT_FIELDS)              \
-  R(kz_verdict_cell, KZ_VERDICT_CELL_FIELDS)
+  R(kz_verdict_cell, KZ_VERDICT_CELL_FIELDS)    \
+  R(kz_summary, KZ_SUMMARY_FIELDS)              \
+  R(kz_model_id, KZ_MODEL_ID_FIELDS)            \
+  R(kz_obs_adequacy, KZ_OBS_ADEQUACY_FIELDS)    \
+  R(kz_identity, KZ_IDENTITY_FIELDS)
 
 KZ_CORE_RECORDS(KZ_RECORD)
 
@@ -580,6 +692,86 @@ KZ_CORE_RECORDS(KZ_RECORD)
   ITEM(P, TOLERATED, 2, "TOLERATED") ITEM(P, VIOLATING, 3, "VIOLATING")                    \
   ITEM(P, PENDING, 4, "PENDING") ITEM(P, NOT_READY_UNJUDGED, 5, "NOT_READY_UNJUDGED")
 
+/* ---- Summary view and observation records (schema revision 2, SPEC rev 1.3) ---------------- */
+
+/* Observation summary (SPEC 1.10, ADR-054).  0: no summary was computed (never read as a result). */
+#define KZ_ENUM_OBS(ITEM, P)                                                            \
+  ITEM(P, NONE, 0, "none") ITEM(P, OBSERVED_VIOLATION, 1, "OBSERVED_VIOLATION")            \
+  ITEM(P, NO_VIOLATION_IN_CHECKED_PREFIX, 2, "NO_VIOLATION_IN_CHECKED_PREFIX")          \
+  ITEM(P, INCONCLUSIVE, 3, "INCONCLUSIVE") ITEM(P, NOT_APPLICABLE, 4, "NOT_APPLICABLE")
+
+/* Prediction summary (SPEC 1.10, 4.9 PR-01-PR-04). */
+#define KZ_ENUM_PRED(ITEM, P)                                                           \
+  ITEM(P, NOT_RUN, 0, "NOT_RUN") ITEM(P, MODEL_CANDIDATE, 1, "MODEL_CANDIDATE")            \
+  ITEM(P, NONE_IN_SCOPE, 2, "NONE_IN_SCOPE") ITEM(P, INCONCLUSIVE, 3, "INCONCLUSIVE")
+
+/* Confirmation summary (SPEC 1.10, 4.13). */
+#define KZ_ENUM_CONF(ITEM, P) \
+  ITEM(P, NOT_RUN, 0, "NOT_RUN") ITEM(P, CONFIRMED, 1, "CONFIRMED") ITEM(P, NOT_CONFIRMED, 2, "NOT_CONFIRMED")
+
+/* Execution relation of an instance (SPEC 1.1 "Execution relations").  0: ownership undetermined. */
+#define KZ_ENUM_EXEC_RELATION(ITEM, P)                                                  \
+  ITEM(P, OWNERSHIP_UNDETERMINED, 0, "ownership-undetermined")                          \
+  ITEM(P, INTER_APPLICATION, 1, "inter-application")                                    \
+  ITEM(P, CORE_APPLICATION, 2, "core-application")                                      \
+  ITEM(P, CREATION_FRAMEWORK, 3, "creation-framework-new-application")                  \
+  ITEM(P, INTRA_APPLICATION, 4, "intra-application")
+
+/* Reasons for withholding (SPEC 4.8 "Reasons for withholding", C-27). */
+#define KZ_ENUM_WITHHOLD(ITEM, P) /* set */                                             \
+  ITEM(P, START_STATE_UNKNOWN, 0x1, "start_state_unknown") ITEM(P, LOSS, 0x2, "loss")      \
+  ITEM(P, RESOURCE_OR_LIFETIME_UNMATCHED, 0x4, "resource_or_lifetime_unmatched")        \
+  ITEM(P, OWNERSHIP_UNDETERMINED, 0x8, "ownership_undetermined")                        \
+  ITEM(P, EFFECT_POINT_AMBIGUOUS, 0x10, "effect_point_ambiguous")                       \
+  ITEM(P, CALLER_REQUIREMENT_ABSENT, 0x20, "caller_requirement_absent")                 \
+  ITEM(P, EFFECT_UNSUPPORTED, 0x40, "effect_unsupported")                               \
+  ITEM(P, HORIZON_OPEN, 0x80, "horizon-open") ITEM(P, NOT_EVALUATED, 0x100, "not_evaluated") \
+  ITEM(P, EXPLANATION_AMBIGUOUS, 0x200, "explanation_ambiguous") ITEM(P, LIMIT, 0x400, "limit")
+
+/* A summary's occurrence status that is not one of the six statuses. */
+#define KZ_ENUM_STATUS_FLAGS(ITEM, P) /* set */ \
+  ITEM(P, OPEN, 0x1, "open") ITEM(P, UNDETERMINED, 0x2, "undetermined")
+
+#define KZ_ENUM_SUMMARY_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, INPUT_ERROR, 0x1, "analysis-input-error") ITEM(P, PARTIAL, 0x2, "partial")       \
+  ITEM(P, CALLER_RECORD, 0x4, "caller-record") ITEM(P, ACCEPT, 0x8, "accept")              \
+  ITEM(P, REAL_RECORD, 0x10, "real-record") ITEM(P, OUTCOME_NARROWED, 0x20, "outcome-narrowed")
+
+/* What a record establishes for the resources and locations a condition reads (ADR-055). */
+#define KZ_ENUM_ADEQ(ITEM, P) /* set */                                                 \
+  ITEM(P, WRITERS_COVERED, 0x1, "writers-covered") ITEM(P, ALIASES_COVERED, 0x2, "aliases-covered") \
+  ITEM(P, START_STATE_KNOWN, 0x4, "start-state-known") ITEM(P, LIFETIME_KNOWN, 0x8, "lifetime-known") \
+  ITEM(P, PROBES_ATTACHED, 0x10, "probes-attached") ITEM(P, PROBES_ACTIVE, 0x20, "probes-active") \
+  ITEM(P, LOSS_FREE, 0x40, "loss-free")
+
+/* Evidence of the start state (SPEC 4.8 construction of Cobs, IN-03). */
+#define KZ_ENUM_START_EVIDENCE(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, INIT, 1, "init") ITEM(P, CAPTURE, 2, "state-capture")   \
+  ITEM(P, DECLARED, 3, "declared")
+
+/* Why the checked interval ended. */
+#define KZ_ENUM_INTERVAL_END(ITEM, P)                                                   \
+  ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, RECORD_END, 1, "record-end")                      \
+  ITEM(P, PROCESS_TERMINAL, 2, "process-terminal") ITEM(P, LOSS, 3, "loss") ITEM(P, DECISION, 4, "decision")
+
+/* Evidence level of app_owner (SPEC 1.2 "Creating application", ADR-056). */
+#define KZ_ENUM_OWNER_LEVEL(ITEM, P) \
+  ITEM(P, UNDETERMINED, 0, "undetermined") ITEM(P, INFERRED, 1, "inferred") ITEM(P, CONFIRMED, 2, "confirmed")
+
+/* The evidence app_owner rests on (SPEC 5.7 items 1-4).  match-by-time: the creator link rests on the
+ * containment of the fork record in the creating call alone (one thread's clock, A-CLK-PO);
+ * id-unverified: the announced id was not compared with a creator-side value; analysed-table-excluded:
+ * the task-application table was not used because its ordering is analysed (EV-03). */
+#define KZ_ENUM_OWNER_EVIDENCE(ITEM, P) /* set */                                       \
+  ITEM(P, CREATION_REQUEST, 0x1, "creation-request") ITEM(P, FORK_IN_CALL, 0x2, "fork-in-creating-call") \
+  ITEM(P, ANNOUNCED_ID, 0x4, "announced-id") ITEM(P, ES_RECORDS, 0x8, "es-records")        \
+  ITEM(P, MATCH_BY_TIME, 0x10, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x20, "id-unverified") \
+  ITEM(P, RAW_THREAD, 0x40, "raw-thread") ITEM(P, ANALYSED_TABLE_EXCLUDED, 0x80, "analysed-table-excluded")
+
+#define KZ_ENUM_IDENTITY_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, EXEC_KNOWN, 0x1, "exec-known") ITEM(P, CREATOR_KNOWN, 0x2, "creator-known")      \
+  ITEM(P, PASSED_ID_PRESENT, 0x4, "passed-id-present")
+
 /* ITEM(P, id, value, display) lists registered for dumping.  D(prefix, list, is_set). */
 #define KZ_CORE_ENUMS(D)                                            \
   D(KZ_ARTIFACT, KZ_ENUM_ARTIFACT_KIND, 0)                          \
@@ -614,7 +806,20 @@ KZ_CORE_RECORDS(KZ_RECORD)
   D(KZ_HARM, KZ_ENUM_HARM, 0)                                       \
   D(KZ_SUBLABEL, KZ_ENUM_SUBLABEL, 1)                               \
   D(KZ_WITNESS_KIND, KZ_ENUM_WITNESS_KIND, 0)                       \
-  D(KZ_OCC, KZ_ENUM_OCC_STATUS, 0)
+  D(KZ_OCC, KZ_ENUM_OCC_STATUS, 0)                                  \
+  D(KZ_OBS, KZ_ENUM_OBS, 0)                                         \
+  D(KZ_PRED, KZ_ENUM_PRED, 0)                                       \
+  D(KZ_CONF, KZ_ENUM_CONF, 0)                                       \
+  D(KZ_EXEC_RELATION, KZ_ENUM_EXEC_RELATION, 0)                     \
+  D(KZ_WITHHOLD, KZ_ENUM_WITHHOLD, 1)                               \
+  D(KZ_STATUS_FLAG, KZ_ENUM_STATUS_FLAGS, 1)                        \
+  D(KZ_SUMMARY_FLAG, KZ_ENUM_SUMMARY_FLAGS, 1)                      \
+  D(KZ_ADEQ, KZ_ENUM_ADEQ, 1)                                       \
+  D(KZ_START_EVIDENCE, KZ_ENUM_START_EVIDENCE, 0)                   \
+  D(KZ_INTERVAL_END, KZ_ENUM_INTERVAL_END, 0)                       \
+  D(KZ_OWNER_LEVEL, KZ_ENUM_OWNER_LEVEL, 0)                         \
+  D(KZ_OWNER_EVIDENCE, KZ_ENUM_OWNER_EVIDENCE, 1)                   \
+  D(KZ_IDENTITY_FLAG, KZ_ENUM_IDENTITY_FLAGS, 1)
 
 #define KZ_DEFINE_ENUM_ENTRY(P, LIST, is_set) KZ_DEFINE_ENUM(P, LIST, is_set)
 KZ_CORE_ENUMS(KZ_DEFINE_ENUM_ENTRY)
@@ -687,7 +892,37 @@ KZ_CORE_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_verdict_cell, progress_flags, FLAGS, KZ_PROGRESS_FLAG)        \
   F(kz_verdict_cell, progress_kind, FLAGS, KZ_PROGRESS_KIND)         \
   F(kz_verdict_cell, fw_conf, ENUM, KZ_FW_CONF)                      \
-  F(kz_verdict_cell, proof_status, ENUM, KZ_PROOF)
+  F(kz_verdict_cell, proof_status, ENUM, KZ_PROOF)                   \
+  F(kz_summary, cell, IDX, 0)                                        \
+  F(kz_summary, observation, ENUM, KZ_OBS)                           \
+  F(kz_summary, prediction, ENUM, KZ_PRED)                           \
+  F(kz_summary, confirmation, ENUM, KZ_CONF)                         \
+  F(kz_summary, relation, ENUM, KZ_EXEC_RELATION)                    \
+  F(kz_summary, obs_reasons, FLAGS, KZ_WITHHOLD)                     \
+  F(kz_summary, pred_reasons, FLAGS, KZ_WITHHOLD)                    \
+  F(kz_summary, status, ENUM, KZ_OCC)                                \
+  F(kz_summary, status_flags, FLAGS, KZ_STATUS_FLAG)                 \
+  F(kz_summary, flags, FLAGS, KZ_SUMMARY_FLAG)                       \
+  F(kz_summary, model, IDX, 0)                                       \
+  F(kz_summary, adequacy, IDX, 0)                                    \
+  F(kz_summary, identity_first, IDX, 0)                              \
+  F(kz_model_id, model_level, ENUM, KZ_MLEVEL)                       \
+  F(kz_model_id, sigma, ENUM, KZ_SIGMA)                              \
+  F(kz_obs_adequacy, established, FLAGS, KZ_ADEQ)                    \
+  F(kz_obs_adequacy, absent, FLAGS, KZ_ADEQ)                         \
+  F(kz_obs_adequacy, reasons, FLAGS, KZ_WITHHOLD)                    \
+  F(kz_obs_adequacy, start_evidence, ENUM, KZ_START_EVIDENCE)        \
+  F(kz_obs_adequacy, end_reason, ENUM, KZ_INTERVAL_END)              \
+  F(kz_obs_adequacy, first_event, IDX, 0)                            \
+  F(kz_obs_adequacy, last_event, IDX, 0)                             \
+  F(kz_obs_adequacy, loss_reports, IDX, 0)                           \
+  F(kz_identity, creator_tid, IDX, 0)                                \
+  F(kz_identity, creator_generation, IDX, 0)                         \
+  F(kz_identity, owner_key, IDX, 0)                                  \
+  F(kz_identity, owner_level, ENUM, KZ_OWNER_LEVEL)                  \
+  F(kz_identity, owner_evidence, FLAGS, KZ_OWNER_EVIDENCE)           \
+  F(kz_identity, passed_id, HEX, 0)                                  \
+  F(kz_identity, flags, FLAGS, KZ_IDENTITY_FLAG)
 
 /* ------------------------------------------------------------------------- */
 /* Component-owned parts                                                     */

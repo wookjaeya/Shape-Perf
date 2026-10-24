@@ -247,6 +247,9 @@ struct Occurrence {
   // entry that accepted rests on a caller record (the caller-level Allowed reads only such entries).
   std::string monitor;
   bool accepted = false;
+  // Real records: why the caller-level Allowed withholds a not-ready occurrence, where it records a conflict
+  // (SPEC 1.6 step 3, QT-5: "the conflict named in the verdict"); empty otherwise.
+  std::string allowed_note;
 };
 
 // A call bound to a declared role of its call context (the role's site event right after the call's

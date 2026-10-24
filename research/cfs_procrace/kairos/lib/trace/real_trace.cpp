@@ -168,9 +168,14 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
     for (uint8_t k = 0; k < 4; ++k) {
       const auto r = role_of.find({static_cast<uint32_t>(i), k});
       if (r == role_of.end()) continue;
+      std::string ops, param;
       for (const phi::OpDecl& op : p.ops)
         for (const phi::OpParam& prm : op.params)
-          if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) report->sites[i] = labels[i] + ": out value " + prm.name + " of the innermost open call of " + op.name;
+          if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) {
+            ops += (ops.empty() ? "" : ", ") + op.name;
+            param = prm.name;
+          }
+      if (!ops.empty()) report->sites[i] = labels[i] + ": out value " + param + " of the actor's innermost open call (if it is one of " + ops + ")";
     }
   }
 

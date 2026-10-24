@@ -599,7 +599,8 @@ int run(int argc, char** argv) {
   for (size_t i = 0; i < sites.size(); ++i)
     if (!sites[i].via_symbol.empty())
       add("decode.via.site" + num(i) + "." + sites[i].label, num(decoded.stats.site_hits[i] - decoded.stats.via_unattributed[i]) + " kept (attributed to an open call of " +
-                                                                 sites[i].via_symbol + " by the return address), " + num(decoded.stats.via_unattributed[i]) +
+                                                                 sites[i].via_symbol + " by its call path: " + (sites[i].via_ret_dynamic ? "the stack pointer" : "the return address") + "), " +
+                                                                 num(decoded.stats.via_unattributed[i]) +
                                                                  " not kept (other callers, or no open call)");
   add("decode.strings", num(decoded.strings.size()) + " string value(s) of fetch slots");
   for (size_t i = 0; i < sites.size(); ++i) add("perturbation.site" + num(i) + ".trap", kz::probe::trap_account_text(sites, i));

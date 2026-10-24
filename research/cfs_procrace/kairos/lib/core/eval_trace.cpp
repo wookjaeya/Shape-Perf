@@ -2516,6 +2516,11 @@ void Replayer::finish() {
   run_monitors();
   if (real_) {
     for (Occurrence& o : r_.occurrences) {
+      // a withheld not-ready occurrence names the conflict of the caller level (QT-5)
+      const bool unjudged = o.status == OccStatus::NotReadyUnjudged ||
+                            (o.status == OccStatus::Undetermined && std::find(o.possible.begin(), o.possible.end(), OccStatus::NotReadyUnjudged) != o.possible.end());
+      for (size_t si = 0; si < p_.rspecs.size() && unjudged; ++si)
+        if (p_.rspecs[si].name == o.rspec && rspec_info_[si].allowed.conflict) o.allowed_note = rspec_info_[si].allowed.reason;
       uint32_t adeq = kAllAdequacy;
       bool any = false;
       for (const ConjunctResult& c : o.conjuncts) {
@@ -2715,6 +2720,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       if (!outs.empty()) out += "  out" + outs + "\n";
     }
     if (real) {
+      if (!o.allowed_note.empty()) out += "  allowed " + o.allowed_note + "\n";
       out += "  summary " + render_observation(o.summary) + " flags " + set_text("KZ_SUMMARY_FLAG", o.summary.flags) + "\n";
       out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";
       out += "  identity exec " + o.actor + " creator " + (o.creator.empty() ? std::string("(not recorded)") : o.creator) + " owner " + enum_text_of("KZ_OWNER_LEVEL", o.owner_level);

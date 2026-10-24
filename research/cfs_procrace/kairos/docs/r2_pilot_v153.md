@@ -66,9 +66,9 @@ kz replay v153_pilot1.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7
 | `CFE_SB_Global.AppId` | start-state-known, lifetime-known, loss-free | `effect_unsupported` |
 
 - 판정 찾기 결과 25건:
-  - `R2-P-TASK` 24건: `OS_TaskCreate` 의 복귀에 `out.task_id` 가 없어 생성 간선을 만들지 못했다. 배정 id 는 사이트 25 가 읽지만, 어댑터는 아직 그 값을 복귀 사건으로 옮기지 않는다.
+  - `R2-P-TASK` 24건: `OS_TaskCreate` 의 복귀에 `out.task_id` 가 없어 생성 간선을 만들지 못했다. 배정 id 는 사이트 25 가 읽지만, 어댑터는 아직 그 값을 복귀 사건으로 옮기지 않는다. (W2 잔여에서 해소: §5.2)
   - `R19` 1건: 버전이 주어지지 않아 적용하지 않았다.
-- 실행 관계: 요약의 `relation` 은 여전히 `ownership-undetermined` 이다. 실행 관계 계산은 W1 에서 남긴 일이다.
+- 실행 관계: 요약의 `relation` 은 여전히 `ownership-undetermined` 이다. 실행 관계 계산은 W1 에서 남긴 일이다. (W2 잔여에서 계산: §5.2)
 
 ### 5.1 R2 발생별 요약 뷰
 
@@ -112,6 +112,49 @@ kz replay v153_pilot1.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7
 
 `kz hits` 의 묶음은 기준과 같다. ES 20 + EVS 4, `app_id` 0, 상태 `0xc2000003` 24, 호출 함수 `CFE_SB_CreatePipe` 2 / `CFE_SB_SubscribeFull` 4 / `CFE_SB_MessageTxn_ReportSingleEvent` 18, event id 5 / 10 / 14 = 2 / 4 / 18 이다. "24개가 `sb.appid.store` 보다 앞섬"은 한 시계의 병합 순서이고 happens-before 가 아니다(SPEC §5.8). 전체 진입은 275개이다. s1r2_p1 271, gdb 251/257/257 과 다르다. 원인은 조사하지 않았고 맞추려고 아무것도 바꾸지 않았다.
 
+### 5.2 W2 잔여 재생: 실행 관계, 생성 id 결합, 출력 컨테이너, P1 두 읽기 (2026-10-24) [M]
+
+같은 실행 컨테이너를 다시 재생한 것이다. 새 실행은 없다. kz 는 commit `ada3422` 를 같은 빌드 디렉터리에서 빌드한 것이다: SHA-256 `f5367833…4f5c`, 사본 `/home/user/work/kairos-build/runs/w2r_ada3422/kz`, 출력 컨테이너의 도구 해시 `bbb328c9…a024`. 이 결과도 pilot/dev 재생이다.
+
+```sh
+kz replay v153_pilot1.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7.0.1 \
+    --const CFE_PLATFORM_ES_MAX_APPLICATIONS=32 --basis v153_pilot1_basis.kz \
+    --core-request-caller CFE_ES_CreateObjects --outcome-narrowing on --compare-narrowing \
+    --out v153_pilot1_replay_w2r.kz > v153_pilot1_replay_w2r.txt
+# 같은 명령에 --outcome-narrowing off, 출력 이름 v153_pilot1_replay_w2r_p1off.{kz,txt}
+```
+
+- `--core-request-caller CFE_ES_CreateObjects` 의 출처는 두 가지이다 [F].
+  - SPEC §3.3 "Creation events used for `app_owner`": 코어 task 의 요청은 `CFE_ES_CreateObjects` 의 코어 객체 루프에서 나온다.
+  - 계획의 인용 `es_core_starttask`(`cfe_es_start.c:810-814`). 외부 앱의 요청 함수 `CFE_ES_AppCreate`(`es_appcreate_starttask`, `cfe_es_apps.c:849-854`)는 코어가 아닌 쪽으로 읽힌다.
+- **생성 id 결합.** `OS_TaskCreate` 반환 24개 모두에 `out.task_id` 를 붙였다. 신원 결합의 `ID_MATCHED` 24개이다. 배정 id(사이트 25)와 자식이 알린 id 가 같은 경우만 묶었다. 그 결과 `R2-P-TASK` 간선 24개가 생겼고, 판정 찾기의 `R2-P-TASK` 24건이 사라졌다. 남은 찾기는 `R19` 1건이다(버전을 주지 않음, 전과 같음).
+- **코어 여부.** 코어 서비스로 읽힌 thread 는 8개이다(`CFE_ES`, `ES_BG_TASK`, `CFE_EVS`, `CFE_SB`, `CFE_TBL`, `CFE_TIME`, `TIME_TONE_TASK`, `TIME_ONEHZ_TASK`). 이 앱들의 요청 함수가 `CFE_ES_CreateObjects` 이고, 자식 task 는 생성자의 앱을 따른다. 코어 아님은 16개이다(`CFE_ES_AppCreate` 로 요청된 15개 앱과 `FM_CHILD_TASK`). 소유 앱이 미정인 3개 thread 는 코어 여부도 세우지 않았다.
+- **실행 관계.** 상대는 그 발생의 키 `evs.reg(AppID)` 를 등록한 task 이다. 사용한 소유 앱은 모두 `confirmed` 이다(`relation-inferred` 0, `core-status-unknown` 0).
+
+| 관계 | 발생 | 내용 |
+|---|---|---|
+| `ownership-undetermined` | 24 | `CFE_ES` 20, `CFE_EVS` 4. 전달된 AppID 0 의 등록·게시가 기록에 없다(`evs.reg[0]`). 값 0 은 어떤 앱도 가리키지 않는다. 그 값을 읽어 온 SB 의 AppId 셀은 포획 지점이 아니어서, 기록이 상대 앱(SB)을 지목하지 못한다 [I] |
+| `intra-application` | 5 | `CFE_SB` 가 SB 자신의 AppID 로 보낸 것(같은 task) |
+| `core-application` | 246 | 전달 AppID 가 SB(0x110003)인 218, TBL(0x110004)인 28. 상대는 그 앱의 EVS 등록 task(`CFE_SB` / `CFE_TBL`)이다. 코어–코어 12(`CFE_TIME`→SB 8, `CFE_TBL`→SB 4), 앱–코어 234(`TO_LAB` 111, `DS` 21, `HS` 13, `HK` 12, `CF` 10, `LC` 10, 그 밖 57) |
+| `inter-application`, `creation-framework-new-application` | 0 | — |
+
+- **P1 두 읽기.** 발생 275개이다. 관계는 두 읽기에서 같다.
+
+| 요약 | 반환 코드 고정 켬(현행) | 끔(P1 대안) |
+|---|---|---|
+| `OBSERVED_VIOLATION` | 24 (관계 미정 24) | 24 (관계 미정 24) |
+| `NO_VIOLATION_IN_CHECKED_PREFIX` | 251 (core-application 246, intra 5) | 0 |
+| `INCONCLUSIVE` | 0 | 251 (`resource_or_lifetime_unmatched`, `effect_unsupported`; 상태 `UNDETERMINED` {VIOLATING, READY}) |
+| 입력 오류 | 0 | 0 |
+
+  요약이 달라진 발생은 251개이다. 24개 위반은 인자만으로 결정되므로 두 읽기에서 같다.
+- **과거 개발 기록 s1r2_p1**(개발 기록, 이 실행과 합치지 않음). 출력은 저장소 밖 `/home/user/work/procrace/r2_runs/s1r2_p1_rereplay/` 이다.
+  - 발생 271개이다. 두 읽기 모두 `OBSERVED_VIOLATION` 24 / `INCONCLUSIVE` 247 이고, 달라진 발생은 0개이다. 247개는 등록 지점과 writer 가 계획에 없어 이미 열려 있다. 고정은 적용되지만(`outcome-narrowed` 247) 결정적이 되지 않는다.
+  - 관계는 271개 모두 `ownership-undetermined` 이다(ACTOR_OWNERS 없음).
+  - `R2-P-TASK` 24건은 그대로이다. 그 계획에는 배정 id 사이트가 없다.
+- **출력 컨테이너**(`docs/schema.md` §11). 종류 `verdicts`, 부모는 실행 컨테이너 `dddd7746…3835`, 섹션 7개이다: STRINGS, BASIS 4, ACTOR_OWNERS 27, SUMMARIES 275, MODEL_IDS 1, OBS_ADEQUACY 275, IDENTITIES 526(사용 275 + 등록 task 251). `kz-dump` 로 읽었다.
+- **손실의 task 귀속.** 이 실행은 손실 보고가 0 이다. 일반적으로도 하지 못한다: LOSS 의 `cpu` 는 기록을 버린 ring 이지만, RAW_EVENTS 에 CPU 가 없고 백엔드가 문맥 전환을 기록하지 않는다. 귀속에는 두 가지가 필요하다 [I]: 사건마다 CPU 를 남기는 것(디코더는 표본의 CPU 를 읽지만 버린다), 그리고 그 CPU 에서 손실 구간 동안 돈 task 의 기록(sched 전환)이다. 그때까지 손실은 기록 전체에 걸친다(P2 의 현행 유지와 같음).
+
 ## 6. 산출물과 SHA-256
 
 `/home/user/work/procrace/r2_runs/v153_pilot1/` (저장소 밖). kz 사본은 `/home/user/work/kairos-build/runs/v153_pilot1/kz` 이다.
@@ -132,6 +175,15 @@ kz replay v153_pilot1.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7
 | `v153_pilot1_replay.err` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 | `v153_pilot1_replay.txt` | `5e5798d23a4045cddf9b92475ccbddfa99954eba640a26b0f73a1762ad29cef2` |
 | `v153_pilot1_source.diff` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `v153_pilot1_replay_w2r.txt` (§5.2) | `84d8185a0903033f6fdf8e5982986a05cd10679a0a98d44545edad6844c31d17` |
+| `v153_pilot1_replay_w2r.kz` | `88b2c863cb28e7bcf0bab26b4d325dc2765e2be0386101a6936a1febd93964c0` |
+| `v153_pilot1_replay_w2r.kz.dump.txt` | `886d43829acea28e8dbd9644c8448531cd4c70277224d4b35681cbc9e0fbe889` |
+| `v153_pilot1_replay_w2r_p1off.txt` | `8767af2df29d4bd784d41d199edd0cdb954490d5faa93d9a36c0f9eaf3634170` |
+| `v153_pilot1_replay_w2r_p1off.kz` | `b025532d8fcdf3bd91bb0e3ff85cf9aabdd0ae85ddf3b78b963d5474d2a28e16` |
+| `v153_pilot1_replay_w2r_p1off.kz.dump.txt` | `e6b0201993cce501314791a0938b19dfd99007a3716770863ddc0639615eda42` |
+| `v153_pilot1_replay_w2r{,_p1off}.err` | `e3b0c442…b855` (빈 파일) |
+| `../s1r2_p1_rereplay/s1r2_p1_replay_w2r.txt` | `a539172e7909291e828d6d422599970caeff32cb23ceb179e573574a7a6726fd` |
+| `../s1r2_p1_rereplay/s1r2_p1_replay_w2r.kz` | `d117113679fdbe460210ad6db68428d51d65f7833526b9bbfd6ae2595a456fbb` |
 
 컨테이너 헤더: basis `7c942049…bccf`, 관측 프로필(`sites.kzp`) `fbb31fda…1776`, 섹션 13개(ACTOR_OWNERS 27행 포함).
 
@@ -144,8 +196,12 @@ kz replay v153_pilot1.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7
   - AppCreate·CleanUpApp 의 `es.app` writer 에는 사이트가 없다.
   - 효과 값(`lp.*`)은 S1 백엔드가 읽지 못한다.
   - 행위자 사이 순서는 확립되지 않는다.
-- `R2-P-TASK` 간선에 필요한 `out.task_id` 를 배정 id(사이트 25)에서 복귀 사건으로 옮기는 일, 실행 관계 계산, 요약을 컨테이너에 쓰는 writer 가 남았다(W1 의 남은 일과 같음).
+- W2 잔여(`ada3422`)에서 한 일(§5.2): `R2-P-TASK` 간선에 필요한 `out.task_id` 를 배정 id(사이트 25)에서 복귀 사건으로 옮기는 일, 실행 관계 계산, 요약을 컨테이너에 쓰는 writer.
+- 남은 일:
+  - 위반 24개의 관계 상대(SB)를 기록으로 지목하는 일. 전달 값을 읽은 위치의 포획(`cell`)이 필요하다.
+  - 손실의 task 귀속. 사건별 CPU 와 문맥 전환 기록이 필요하다.
+  - OBS_ADEQUACY 의 `probes`·`unobserved` 채우기.
 - L-OBS 는 여전히 `unproved` 이다.
 - 위험 목록(마스터플랜 §11) 갱신:
-  - **F01**: 실제 실행에서 task 24개의 소유 앱을 생성 측 근거(요청 인자, 생성자 소유, 배정 id = 알린 id)로 `confirmed` 했다 [M]. 실행 task, 생성 실행자, 소유 앱, 전달 AppID 를 따로 출력한다. 앱 사이 관계(실행 관계)의 계산은 아직 없다.
+  - **F01**: 실제 실행에서 task 24개의 소유 앱을 생성 측 근거(요청 인자, 생성자 소유, 배정 id = 알린 id)로 `confirmed` 했다 [M]. 실행 task, 생성 실행자, 소유 앱, 전달 AppID 를 따로 출력한다. 실행 관계는 W2 잔여에서 계산했다(§5.2): core-application 246, intra-application 5, 미정 24(위반 24개; 상대를 기록이 지목하지 못함).
   - **F05**: 등록 효과·등록 LP·App 레코드 writer·생성 근거를 실제 바이너리에서 손실 보고 없이 관측했다 [M]. 그러나 writer 포괄·수명·행위자 사이 순서가 없어서 상태로 판정하는 조건은 관측만으로 서지 않는다. 그 대신 반환 코드 고정(PI 결정 대기)에 기댄다.

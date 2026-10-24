@@ -2644,7 +2644,7 @@ void Replayer::relate(Occurrence* o) {
   for (const Publication& pb : pubs_) {
     if (pb.kind != kk) continue;
     if (!count_clearing && pb.clearing) {
-      ++clearing_skipped;
+      if (!pb.exact || pb.key == o->key) ++clearing_skipped;  // only those that could have been counted
       continue;
     }
     if (!pb.exact) open_writers.insert(pb.actor);

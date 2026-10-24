@@ -687,6 +687,10 @@ void test_state_from_effects() {
   const std::string cap2 = "X send.who_valid pt arg.Who=0x1002 value=0x1002 cell=@Box.id\nX send call arg.Who=0x1002\nX send.who_reg pt\nX send ret result=0\n";
   const Run both = replay(p, preamble() + x + kSetup + kRegister + writes + cap2);
   check_relation(both, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "key registered, location cleared by T9");
+  // the alternative counts only the clearing writes that could have been counted: T9's store, not another key's clear
+  const std::string y1 = "owner Y 1\nowner_level Y confirmed\nowner_id Y 0x1001\n";
+  const Run both_alt = replay(p, preamble() + x + y1 + kSetup + kRegister + "Y sign_in call\nY sign_in.clear_reg pt\nY sign_in ret result=0\n" + writes + cap2, alt);
+  check_relation(both_alt, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W; 1 clearing write(s) not counted (P10 alternative)", "P10 alternative, key registered");
 }
 
 int main() {

@@ -15,7 +15,7 @@ using namespace kz::plan;
 
 namespace {
 
-std::string g_binary, g_profile_path, g_source, g_root;
+std::string g_binary, g_profile_path, g_source, g_root, g_bindir;
 
 std::string slurp(const std::string& path) {
   std::ifstream f(path, std::ios::binary);
@@ -327,6 +327,98 @@ void test_build_refusals() {
 
 }  // namespace
 
+// A plan over two files, and function-scoped call targets in a binary without a line table: each
+// file has its own basis (the sites with its bin=), make_plan joins them by the binary name, and the
+// function-scoped target is the same instruction as the line target in a build with -g.
+void test_several_files() {
+  kz::Bytes withg, nodebug;
+  KZ_CHECK_OK(kz::read_whole_file(g_binary, &withg));
+  if (!kz::read_whole_file(g_bindir + "/target_prog_nodebug", &nodebug).ok()) {
+    std::fprintf(stderr, "target_prog_nodebug missing: the no-line-table cases did not run\n");
+    KZ_CHECK(false);
+    return;
+  }
+  const std::string text =
+      "kzp-observe 1\nbinary target_prog\nbinary other\n"
+      "site send.entry entry func=tp_send s0=rdi:u16:event_id s3=stack+0:u64:return_address\n"
+      "site send.ret ret func=tp_send s0=rax:u32:status s3=ip:u64:return_address\n"
+      "site publish.after point func=tp_publish after-call=tp_get_identity bin=other s0=rax:u32:status\n"
+      "site other.send entry func=tp_send bin=other s0=rdi:u16:event_id\n";
+  Profile p;
+  KZ_CHECK_OK(parse_profile(text, &p));
+  BasisOptions o0, o1;
+  o0.binary_path = g_binary;
+  o0.tool_hash = kz::sha256("test tool");
+  o1 = o0;
+  o1.binary_path = g_bindir + "/target_prog_nodebug";
+  o1.bin = 1;
+  kz::Bytes b0, b1;
+  BasisReport r1;
+  KZ_CHECK_OK(build_basis(withg, p, o0, &b0, nullptr));
+  KZ_CHECK_OK(build_basis(nodebug, p, o1, &b1, &r1));  // no line table, but no site of bin 1 needs one
+  KZ_CHECK_EQ(r1.targets, size_t(2));
+  LoadedBasis l0, l1;
+  KZ_CHECK_OK(load_basis_bytes(b0, &l0));
+  KZ_CHECK_OK(load_basis_bytes(b1, &l1));
+  KZ_CHECK_EQ(l0.binary_name, std::string("target_prog"));
+  KZ_CHECK_EQ(l1.binary_name, std::string("other"));
+  KZ_CHECK_EQ(l1.targets[0].id, 2u);  // ids are the sites' indexes in the whole profile
+  KZ_CHECK_EQ(l1.targets[0].kind, uint16_t(KZ_TARGET_KIND_AFTER_CALL));
+  KZ_CHECK_EQ(l1.targets[0].line, 0u);
+  KZ_CHECK_EQ(l1.target_funcs[0], std::string("tp_publish"));
+  std::vector<kz::trace::SiteSpec> plan;
+  KZ_CHECK_OK(make_plan(p, std::vector<const LoadedBasis*>{&l1, &l0}, &plan));  // joined by name, in any order
+  KZ_CHECK_EQ(plan.size(), size_t(4));
+  KZ_CHECK_EQ(plan[0].binary, uint16_t(0));
+  KZ_CHECK_EQ(plan[2].binary, uint16_t(1));
+  KZ_CHECK_EQ(plan[3].binary, uint16_t(1));
+  KZ_CHECK_EQ(plan[2].label, std::string("publish.after"));
+  // one basis missing, the same file twice, a basis of another profile text
+  std::vector<kz::trace::SiteSpec> refused;
+  KZ_CHECK_ERR(make_plan(p, std::vector<const LoadedBasis*>{&l0}, &refused), kz::Err::Invalid);
+  KZ_CHECK_ERR(make_plan(p, std::vector<const LoadedBasis*>{&l0, &l0}, &refused), kz::Err::Invalid);
+  if (plan.size() != 4) return;
+  // the plan hash of a one-file plan does not change; a site in another file changes it
+  {
+    std::vector<kz::trace::SiteSpec> moved = plan;
+    moved[2].binary = 0;
+    KZ_CHECK(plan_hash(moved) != plan_hash(plan));
+  }
+  // The function-scoped target in the -g build is the instruction the line target (target_prog.c:64,
+  // after-call tp_get_identity) resolves to.
+  {
+    const std::string t2 =
+        "kzp-observe 1\nbinary target_prog\n"
+        "site a point at=target_prog.c:64 after-call=tp_get_identity s0=rax:u32:status\n"
+        "site b point func=tp_publish after-call=tp_get_identity s0=rax:u32:status\n";
+    Profile q;
+    KZ_CHECK_OK(parse_profile(t2, &q));
+    kz::Bytes bq;
+    KZ_CHECK_OK(build_basis(withg, q, o0, &bq, nullptr));
+    LoadedBasis lq;
+    KZ_CHECK_OK(load_basis_bytes(bq, &lq));
+    KZ_CHECK_EQ(lq.targets[0].file_offset, lq.targets[1].file_offset);
+    KZ_CHECK_EQ(lq.targets[0].vaddr, lq.targets[1].vaddr);
+  }
+  // Refusals without a line table: a line target; a function that makes no call to the callee.
+  {
+    BasisOptions on = o0;
+    on.binary_path = g_bindir + "/target_prog_nodebug";
+    Profile q;
+    kz::Bytes out;
+    KZ_CHECK_OK(parse_profile("kzp-observe 1\nbinary x\nsite a point at=target_prog.c:64 after-call=tp_get_identity\n", &q));
+    kz::Status s = build_basis(nodebug, q, on, &out, nullptr);
+    KZ_CHECK_ERR(s, kz::Err::Invalid);
+    KZ_CHECK(contains(s.message, "line table"));
+    KZ_CHECK_OK(parse_profile("kzp-observe 1\nbinary x\nsite a point func=tp_publish after-call=tp_send\n", &q));
+    s = build_basis(nodebug, q, on, &out, nullptr);
+    KZ_CHECK_ERR(s, kz::Err::Invalid);
+    KZ_CHECK(contains(s.message, "no call to tp_send"));
+    KZ_CHECK_OK(parse_profile("kzp-observe 1\nbinary x\nsite a point func=tp_not_there after-call=tp_send\n", &q));
+    KZ_CHECK_ERR(build_basis(nodebug, q, on, &out, nullptr), kz::Err::Invalid);
+  }
+}
+
 int main(int argc, char** argv) {
   if (argc < 7) {
     std::fprintf(stderr, "usage: test_probe_basis <target_prog> <dwarf4> <alt> <profile> <source> <root>\n");
@@ -336,10 +428,12 @@ int main(int argc, char** argv) {
   g_profile_path = argv[4];
   g_source = argv[5];
   g_root = argv[6];
+  if (argc > 8) g_bindir = argv[8];
   test_build_and_load();
   test_plan();
   test_verify_binary();
   test_provenance_hashes();
   test_build_refusals();
+  if (!g_bindir.empty()) test_several_files();
   return kztest::finish("test_probe_basis");
 }

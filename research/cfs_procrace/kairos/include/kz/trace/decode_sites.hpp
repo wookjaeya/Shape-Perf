@@ -38,6 +38,10 @@ struct SiteSpec {
   uint32_t line = 0;
   std::string label, symbol, source;
   std::vector<SlotSpec> slots;
+  // Which traced file the site is in: 0 = the primary binary (the executable), n = the n-th further
+  // file of the plan (a shared object the process loads).  The load bias and the probed inode are
+  // per file.
+  uint16_t binary = 0;
 };
 
 // What a site's slots require from the kernel: a mask of perf register numbers (bit n =

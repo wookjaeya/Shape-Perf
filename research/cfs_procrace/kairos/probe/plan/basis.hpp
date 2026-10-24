@@ -1,6 +1,8 @@
 // basis.hpp -- the anchor table as a basis container, and the plan the observer derives from it.
 //
-// `build_basis` reads the traced binary and a profile and writes a KZ container of kind BASIS:
+// `build_basis` reads the traced binary and a profile and writes a KZ container of kind BASIS (for a
+// profile over several files, one basis per file: the targets of the sites with that bin=, each with
+// its index in the whole profile):
 //   BASIS        items: binary.path, binary.sha256, binary.build_id, binary.size, binary.type, ...
 //   FILE_HASHES  the binary (path, size, SHA-256)
 //   SYMBOLS      every function symbol (for naming code by address, offline)
@@ -30,6 +32,7 @@ struct BasisOptions {
   std::vector<std::pair<std::string, std::string>> roots;  // further named roots: (name, directory)
   Digest tool_hash = {};
   std::string build_identity;  // recorded as tool.build_identity; empty: the identity of this build of the tool (compiler, source hash)
+  uint16_t bin = 0;            // which declared binary of the profile this basis anchors (0 = the primary)
 };
 
 struct BasisReport {
@@ -48,6 +51,7 @@ struct LoadedBasis {
   Container container;
   std::string binary_path;
   std::string build_id;
+  std::string binary_name;     // the profile binary the basis anchors (item profile.binary_name)
   Digest binary_sha256 = {};
   uint64_t binary_size = 0;
   std::vector<kz_target> targets;
@@ -59,6 +63,8 @@ Status load_basis_bytes(Bytes bytes, LoadedBasis* out);
 
 // The sites to attach, one per profile site, in profile order.
 Status make_plan(const Profile& profile, const LoadedBasis& basis, std::vector<kz::trace::SiteSpec>* sites);
+// A plan over several files: one basis per declared binary (each anchors the sites with that bin=).
+Status make_plan(const Profile& profile, const std::vector<const LoadedBasis*>& bases, std::vector<kz::trace::SiteSpec>* sites);
 
 // Compares a binary (its full contents) with the basis: size, SHA-256, build-id, and the bytes at
 // every target.  All differences are listed.

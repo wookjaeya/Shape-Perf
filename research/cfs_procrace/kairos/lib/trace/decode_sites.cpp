@@ -121,7 +121,7 @@ Status check_plan(const std::vector<SiteSpec>& sites) {
   for (const SiteSpec& e : sites) {
     if (e.kind != KZ_SITE_KIND_ENTRY_PROBE || e.symbol.empty()) continue;
     for (const SiteSpec& r : sites) {
-      if (r.kind != KZ_SITE_KIND_RET_PROBE || r.symbol != e.symbol) continue;
+      if (r.kind != KZ_SITE_KIND_RET_PROBE || r.symbol != e.symbol || r.binary != e.binary) continue;  // a pair is one function of one file
       for (const SiteSpec* x : {&e, &r})
         if (!has_return_address_key(*x))
           return Status::error(Err::Invalid, "site " + std::to_string(x->site) + " (" + x->label + "): the entry and return sites of " + e.symbol +

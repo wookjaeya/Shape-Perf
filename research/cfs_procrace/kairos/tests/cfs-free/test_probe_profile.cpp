@@ -107,7 +107,26 @@ void test_errors() {
   KZ_CHECK(bad(h + "prov p tier=code-derived file=\"f\" lines=0-2\nsite a entry func=f\n"));
   KZ_CHECK(bad(h + "prov p tier=unreferenced\nprov p tier=unreferenced\nsite a entry func=f\n"));  // id twice
   KZ_CHECK(bad(h + "prov p tier=unreferenced sha256=zz\nsite a entry func=f\n"));
-  KZ_CHECK(bad(h + "binary a\nbinary b\nsite a entry func=f\n"));
+  // A plan over several files: binaries are declared once each, before the sites; bin= names one of them.
+  KZ_CHECK(bad(h + "binary a\nbinary a\nsite a entry func=f\n"));
+  KZ_CHECK(bad(h + "binary a\nsite s entry func=f\nbinary b\n"));
+  KZ_CHECK(bad(h + "binary a\nsite s entry func=f bin=b\n"));
+  {
+    kz::plan::Profile mp;
+    KZ_CHECK_OK(kz::plan::parse_profile(h + "binary a\nbinary b.so\nsite s entry func=f\nsite t entry func=g bin=b.so\n"
+                                            "site u point func=g after-call=h bin=b.so\n", &mp));
+    KZ_CHECK_EQ(mp.binaries.size(), size_t(2));
+    KZ_CHECK_EQ(mp.binary_name, std::string("a"));
+    KZ_CHECK_EQ(mp.sites[0].bin, uint16_t(0));
+    KZ_CHECK_EQ(mp.sites[1].bin, uint16_t(1));
+    KZ_CHECK(mp.sites[2].function_scoped());
+    KZ_CHECK(!mp.sites[1].function_scoped());
+  }
+  // A function-scoped point names the function and the callee; it is not mixed with a line target.
+  KZ_CHECK(bad(h + "site p point func=g\n"));                                  // no callee
+  KZ_CHECK(bad(h + "site p point func=g line-start\n"));                       // line-start needs a line
+  KZ_CHECK(bad(h + "site p point func=g at=x.c:3 after-call=h\n"));            // both forms
+  KZ_CHECK(bad(h + "site p point func=g in=x.c after-call=h\n"));              // in= selects by line table
   // The decoders of the identity join read fixed slots, and an entry/return pair is matched on slot 3:
   // a profile that does not declare them is refused (never decoded as zeros).
   const std::string ra = " s3=stack+0:u64:return_address";

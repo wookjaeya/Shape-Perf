@@ -9,7 +9,8 @@
 //   - every sample becomes a raw event of its site, with the per-thread sequence number the
 //     merged order gives it;
 //   - FORK, EXIT and COMM records of the traced processes become side events;
-//   - the executable mappings of the traced file become map events;
+//   - the executable mappings of the traced file become map events (of every traced file, for a plan
+//     over several files: the executable and the shared objects it loads, each with its own bias);
 //   - LOST and THROTTLE records become loss records (SPEC 5.6: loss is never read as the
 //     absence of events).
 // A process is traced if it maps the traced file or produced a sample.  The side-band stream is
@@ -54,7 +55,8 @@ struct DecodeInput {
   std::vector<CpuStream> streams;
   LayoutTable layouts;
   std::vector<SiteSpec> sites;  // the plan; a site's id is its index
-  TracedFile traced;
+  TracedFile traced;            // the primary file (SiteSpec::binary 0)
+  std::vector<TracedFile> also; // further files of a plan over several files (SiteSpec::binary 1, 2, ...)
 };
 
 struct DecodeStats {
@@ -81,7 +83,10 @@ struct DecodedRun {
   std::vector<kz_loss> loss;
   std::vector<uint32_t> traced_pids;   // sorted
   bool bias_known = false;
-  uint64_t load_bias = 0;              // runtime address - link-time address of the traced file
+  uint64_t load_bias = 0;              // runtime address - link-time address of the traced file (the primary)
+  // Per file of the plan (index = SiteSpec::binary): the load bias from its entry/point samples.
+  std::vector<bool> file_bias_known;
+  std::vector<uint64_t> file_bias;
   DecodeStats stats;
   std::vector<Status> stream_status;   // per input stream: ok, or the parse error
 };

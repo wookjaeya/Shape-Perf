@@ -16,7 +16,7 @@ std::vector<CallPair> match_calls(const std::vector<kz_raw_ev>& events, const st
   for (size_t i = 0; i < sites.size(); ++i) {
     if (sites[i].kind != KZ_SITE_KIND_ENTRY_PROBE || sites[i].symbol.empty()) continue;
     for (size_t j = 0; j < sites.size(); ++j)
-      if (sites[j].kind == KZ_SITE_KIND_RET_PROBE && sites[j].symbol == sites[i].symbol) {
+      if (sites[j].kind == KZ_SITE_KIND_RET_PROBE && sites[j].symbol == sites[i].symbol && sites[j].binary == sites[i].binary) {
         // The key is slot 3 with role return_address on both sides; a pair without it is not
         // matched at all (check_plan refuses such a plan before an observation).
         if (!has_return_address_key(sites[i]) || !has_return_address_key(sites[j])) {

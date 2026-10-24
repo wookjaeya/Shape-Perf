@@ -21,6 +21,53 @@ void fill_insn(const ElfImage& elf, uint64_t file_offset, ResolvedTarget* t) {
     }
 }
 
+// The addresses a call of `callee` can target: its function symbols and, for a function of another
+// file (a shared library, or an exported function of a shared object itself), its PLT stub; `name` and
+// `name@plt` both name the stub.
+std::set<uint64_t> callee_addresses(const ElfImage& elf, const std::string& callee) {
+  std::set<uint64_t> addrs;
+  for (const ElfFunction* c : elf.find_functions(callee)) addrs.insert(c->vaddr);
+  std::string base = callee;
+  if (base.size() > 4 && base.compare(base.size() - 4, 4, "@plt") == 0) base.resize(base.size() - 4);
+  const uint64_t stub = elf.plt_stub(base);
+  if (stub != 0) addrs.insert(stub);
+  return addrs;
+}
+
+// A return site that a direct branch of the function also reaches is a join of several paths: the
+// probe would fire on paths that never made the call.  The scan reads every byte position of the
+// function as a possible jmp/jcc (rel8 or rel32), so it cannot miss a direct branch; a byte pattern
+// inside another instruction can only make it refuse a good site (conservative), never accept a bad
+// one.  Indirect jumps (tables) are not seen; the anchor cross-check prints the code around the site.
+// Returns the function offset of a branch to `ret`, or -1.
+int64_t branch_to(const ElfImage& elf, const ElfFunction& in, uint64_t ret) {
+  const uint64_t fsize = in.size;
+  std::vector<uint8_t> code(fsize);
+  if (fsize == 0 || !elf.read_vaddr(in.vaddr, fsize, code.data())) return -1;
+  for (uint64_t p = 0; p < fsize; ++p) {
+    const uint64_t at = in.vaddr + p;
+    uint64_t target = 0;
+    bool branch = false;
+    const uint8_t b0 = code[p];
+    if ((b0 == 0xeb || (b0 >= 0x70 && b0 <= 0x7f)) && p + 2 <= fsize) {
+      target = at + 2 + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int8_t>(code[p + 1])));
+      branch = true;
+    } else if (b0 == 0xe9 && p + 5 <= fsize) {
+      int32_t rel;
+      std::memcpy(&rel, &code[p + 1], 4);
+      target = at + 5 + static_cast<uint64_t>(static_cast<int64_t>(rel));
+      branch = true;
+    } else if (b0 == 0x0f && p + 6 <= fsize && code[p + 1] >= 0x80 && code[p + 1] <= 0x8f) {
+      int32_t rel;
+      std::memcpy(&rel, &code[p + 2], 4);
+      target = at + 6 + static_cast<uint64_t>(static_cast<int64_t>(rel));
+      branch = true;
+    }
+    if (branch && target == ret) return static_cast<int64_t>(p);
+  }
+  return -1;
+}
+
 }  // namespace
 
 uint16_t classify_entry_probe(const uint8_t bytes[8], uint32_t delta) {
@@ -88,17 +135,8 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
   }
   const std::vector<LineRange> ranges = lines.ranges_of(ids, line);
   if (ranges.empty()) return Status::error(Err::Invalid, "no machine code is attributed to " + where);
-  const std::vector<const ElfFunction*> callees = elf.find_functions(callee);
-  std::set<uint64_t> callee_addrs;
-  for (const ElfFunction* c : callees) callee_addrs.insert(c->vaddr);
-  // A function of a shared library (memset) is called through its PLT stub; `memset` and
-  // `memset@plt` both name the stub.
-  {
-    std::string base = callee;
-    if (base.size() > 4 && base.compare(base.size() - 4, 4, "@plt") == 0) base.resize(base.size() - 4);
-    const uint64_t stub = elf.plt_stub(base);
-    if (stub != 0) callee_addrs.insert(stub);
-  }
+  // A function of a shared library (memset) is called through its PLT stub.
+  const std::set<uint64_t> callee_addrs = callee_addresses(elf, callee);
   if (callee_addrs.empty()) return Status::error(Err::Invalid, "no function symbol or PLT stub named " + callee);
 
   struct Cand { uint64_t ret; uint32_t col; };
@@ -132,39 +170,12 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
   const ElfFunction* in = elf.function_at(ret - 1);
   if (in == nullptr) return Status::error(Err::Invalid, "the call at " + where + " is not inside a function symbol");
   if (elf.function_at(ret) != in) return Status::error(Err::Invalid, "the call at " + where + " is the last instruction of " + in->name + ": no instruction follows it");
-  // A return site that a direct branch of the function also reaches is a join of several paths: the
-  // probe would fire on paths that never made the call.  The scan reads every byte position of the
-  // function as a possible jmp/jcc (rel8 or rel32), so it cannot miss a direct branch; a byte pattern
-  // inside another instruction can only make it refuse a good site (conservative), never accept a bad
-  // one.  Indirect jumps (tables) are not seen; the anchor cross-check prints the code around the site.
+  // A return site that a direct branch also reaches is a join of paths (branch_to above).
   {
-    const uint64_t fsize = in->size;
-    std::vector<uint8_t> code(fsize);
-    if (fsize != 0 && elf.read_vaddr(in->vaddr, fsize, code.data())) {
-      for (uint64_t p = 0; p < fsize; ++p) {
-        const uint64_t at = in->vaddr + p;
-        uint64_t target = 0;
-        bool branch = false;
-        const uint8_t b0 = code[p];
-        if ((b0 == 0xeb || (b0 >= 0x70 && b0 <= 0x7f)) && p + 2 <= fsize) {
-          target = at + 2 + static_cast<uint64_t>(static_cast<int64_t>(static_cast<int8_t>(code[p + 1])));
-          branch = true;
-        } else if (b0 == 0xe9 && p + 5 <= fsize) {
-          int32_t rel;
-          std::memcpy(&rel, &code[p + 1], 4);
-          target = at + 5 + static_cast<uint64_t>(static_cast<int64_t>(rel));
-          branch = true;
-        } else if (b0 == 0x0f && p + 6 <= fsize && code[p + 1] >= 0x80 && code[p + 1] <= 0x8f) {
-          int32_t rel;
-          std::memcpy(&rel, &code[p + 2], 4);
-          target = at + 6 + static_cast<uint64_t>(static_cast<int64_t>(rel));
-          branch = true;
-        }
-        if (branch && target == ret)
-          return Status::error(Err::Invalid, "the return site of the call at " + where + " is also reached by a branch (at function offset " + std::to_string(p) +
-                                                 "): the point would fire on paths without the call; probe the call's line with line-start instead");
-      }
-    }
+    const int64_t p = branch_to(elf, *in, ret);
+    if (p >= 0)
+      return Status::error(Err::Invalid, "the return site of the call at " + where + " is also reached by a branch (at function offset " + std::to_string(p) +
+                                             "): the point would fire on paths without the call; probe the call's line with line-start instead");
   }
   uint64_t off = 0;
   if (!elf.vaddr_to_offset(ret, &off)) return Status::error(Err::Invalid, "the return site of " + where + " is not in file-backed code");
@@ -179,6 +190,54 @@ Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std
   t.col = cands[0].col;
   t.func = in->name;
   t.file = lines.files()[ranges.front().file];
+  fill_insn(elf, off, &t);
+  *out = t;
+  return Status::success();
+}
+
+Status resolve_call_in_function(const ElfImage& elf, const std::string& func, const std::string& callee, ResolvedTarget* out) {
+  *out = ResolvedTarget();
+  const std::string where = "the function " + func;
+  std::vector<const ElfFunction*> found = elf.find_functions(func);
+  std::set<uint64_t> starts;
+  for (const ElfFunction* f : found) starts.insert(f->vaddr);
+  if (starts.empty()) return Status::error(Err::Invalid, "no function symbol named " + func);
+  if (starts.size() > 1) return Status::error(Err::Invalid, std::to_string(starts.size()) + " different functions are named " + func);
+  const ElfFunction& in = *found.front();
+  const std::set<uint64_t> callee_addrs = callee_addresses(elf, callee);
+  if (callee_addrs.empty()) return Status::error(Err::Invalid, "no function symbol or PLT stub named " + callee);
+  // Every byte position of the function read as a `call rel32` to the callee.  Without a line table
+  // the instruction boundaries are not known: a byte pattern inside another instruction could look
+  // like such a call, so more than one candidate is refused (never a guess between them), and the one
+  // candidate's return site must be inside the function and reached by no branch.
+  std::vector<uint64_t> rets;
+  std::vector<uint8_t> code(in.size);
+  if (in.size == 0 || !elf.read_vaddr(in.vaddr, in.size, code.data())) return Status::error(Err::Invalid, where + " has no file-backed code");
+  for (uint64_t p = 0; p + 5 <= in.size; ++p) {
+    if (code[p] != 0xe8) continue;
+    int32_t rel;
+    std::memcpy(&rel, &code[p + 1], 4);
+    const uint64_t end = in.vaddr + p + 5;
+    if (callee_addrs.count(end + static_cast<uint64_t>(static_cast<int64_t>(rel))) != 0) rets.push_back(end);
+  }
+  if (rets.empty()) return Status::error(Err::Invalid, where + " makes no call to " + callee);
+  if (rets.size() > 1) return Status::error(Err::Invalid, std::to_string(rets.size()) + " calls to " + callee + " are in " + where + ": a function-scoped point needs exactly one");
+  const uint64_t ret = rets[0];
+  if (elf.function_at(ret) != &in) return Status::error(Err::Invalid, "the call to " + callee + " is the last instruction of " + func + ": no instruction follows it");
+  const int64_t p = branch_to(elf, in, ret);
+  if (p >= 0)
+    return Status::error(Err::Invalid, "the return site of the call to " + callee + " in " + func + " is also reached by a branch (at function offset " + std::to_string(p) +
+                                           "): the point would fire on paths without the call");
+  uint64_t off = 0;
+  if (!elf.vaddr_to_offset(ret, &off)) return Status::error(Err::Invalid, "the return site of the call in " + func + " is not in file-backed code");
+  ResolvedTarget t;
+  t.kind = KZ_TARGET_KIND_AFTER_CALL;
+  t.insn_class = KZ_INSN_CLASS_UNKNOWN;
+  t.vaddr = ret;
+  t.file_offset = off;
+  t.func_vaddr = in.vaddr;
+  t.delta = static_cast<uint32_t>(ret - in.vaddr);
+  t.func = in.name;
   fill_insn(elf, off, &t);
   *out = t;
   return Status::success();

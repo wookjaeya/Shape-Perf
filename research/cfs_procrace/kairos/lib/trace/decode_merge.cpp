@@ -16,6 +16,12 @@ bool less_key(const PerfRecord& a, const PerfRecord& b) {
   return a.order < b.order;
 }
 
+int file_of_map(const std::vector<TracedFile>& files, const kz_map_ev& m) {
+  for (size_t f = 0; f < files.size(); ++f)
+    if (files[f].known && m.ino == files[f].ino && m.dev_major == files[f].dev_major && m.dev_minor == files[f].dev_minor) return static_cast<int>(f);
+  return -1;
+}
+
 }  // namespace
 
 Status decode_run(const DecodeInput& in, DecodedRun* out) {
@@ -42,13 +48,23 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
   // Stable total order: time, CPU, arrival.
   std::sort(all.begin(), all.end(), less_key);
 
+  // The traced files: the primary and the further files of the plan (index = SiteSpec::binary).
+  std::vector<TracedFile> files;
+  files.push_back(in.traced);
+  files.insert(files.end(), in.also.begin(), in.also.end());
+  auto file_of = [&](const PerfRecord& r) -> int {
+    for (size_t f = 0; f < files.size(); ++f)
+      if (files[f].known && r.ino == files[f].ino && r.dev_major == files[f].dev_major && r.dev_minor == files[f].dev_minor) return static_cast<int>(f);
+    return -1;
+  };
+  out->file_bias_known.assign(files.size(), false);
+  out->file_bias.assign(files.size(), 0);
+
   // 2. Which processes are traced.
   std::vector<uint32_t> pids;
   for (const PerfRecord& r : all) {
     if (r.kind == RecKind::Sample) pids.push_back(r.pid);
-    if (r.kind == RecKind::Mmap2 && in.traced.known && r.ino == in.traced.ino && r.dev_major == in.traced.dev_major &&
-        r.dev_minor == in.traced.dev_minor)
-      pids.push_back(r.pid);
+    if (r.kind == RecKind::Mmap2 && file_of(r) >= 0) pids.push_back(r.pid);
   }
   std::sort(pids.begin(), pids.end());
   pids.erase(std::unique(pids.begin(), pids.end()), pids.end());
@@ -87,13 +103,13 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
         for (int i = 0; i < 4; ++i) ev.a[i] = vals[i];
         out->events.push_back(ev);
         ++st.site_hits[lay->site];
-        // The load bias: an entry or point sample stops at the probed instruction itself.
-        if (site.kind != KZ_SITE_KIND_RET_PROBE && site.vaddr != 0) {
+        // The load bias of the site's file: an entry or point sample stops at the probed instruction itself.
+        if (site.kind != KZ_SITE_KIND_RET_PROBE && site.vaddr != 0 && site.binary < files.size()) {
           const uint64_t bias = r.ip - site.vaddr;
-          if (!out->bias_known) {
-            out->bias_known = true;
-            out->load_bias = bias;
-          } else if (bias != out->load_bias) {
+          if (!out->file_bias_known[site.binary]) {
+            out->file_bias_known[site.binary] = true;
+            out->file_bias[site.binary] = bias;
+          } else if (bias != out->file_bias[site.binary]) {
             ++st.bias_mismatches;
           }
         }
@@ -123,9 +139,8 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
         break;
       }
       case RecKind::Mmap2: {
-        const bool is_traced = in.traced.known && r.ino == in.traced.ino && r.dev_major == in.traced.dev_major &&
-                               r.dev_minor == in.traced.dev_minor;
-        if (!is_traced) {
+        const int fi = file_of(r);
+        if (fi < 0) {
           ++st.maps_dropped;
           break;
         }
@@ -149,6 +164,7 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
         bool agree = true, any = false;
         uint64_t bias = 0;
         for (const SiteSpec& site : in.sites) {
+          if (site.binary != static_cast<uint16_t>(fi)) continue;
           if (site.vaddr == 0 || site.file_offset < r.pgoff || site.file_offset - r.pgoff >= r.len) continue;
           const uint64_t b = r.addr + (site.file_offset - r.pgoff) - site.vaddr;
           if (!any) { bias = b; any = true; }
@@ -218,8 +234,12 @@ Status decode_run(const DecodeInput& in, DecodedRun* out) {
     ++st.throttle_intervals;
   }
   (void)last_time;
-  for (const MapEvent& m : out->maps)
-    if (m.rec.bias_known != 0 && out->bias_known && m.rec.bias != out->load_bias) ++st.bias_mismatches;
+  out->bias_known = out->file_bias_known[0];
+  out->load_bias = out->file_bias[0];
+  for (const MapEvent& m : out->maps) {
+    const int fi = file_of_map(files, m.rec);
+    if (fi >= 0 && m.rec.bias_known != 0 && out->file_bias_known[static_cast<size_t>(fi)] && m.rec.bias != out->file_bias[static_cast<size_t>(fi)]) ++st.bias_mismatches;
+  }
   std::stable_sort(out->loss.begin(), out->loss.end(), [](const kz_loss& a, const kz_loss& b) {
     if (a.t_ns != b.t_ns) return a.t_ns < b.t_ns;
     if (a.cpu != b.cpu) return a.cpu < b.cpu;

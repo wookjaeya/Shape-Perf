@@ -1,7 +1,10 @@
 // kz anchor -- build the basis container (anchor table) of a binary for a profile.
 //
-//   kz anchor <binary> <profile.kzp> -o <basis.kz> [--source-root DIR] [--root NAME=DIR]... [--binary-path PATH]
+//   kz anchor <binary> <profile.kzp> -o <basis.kz> [--source-root DIR] [--root NAME=DIR]... [--binary-path PATH] [--bin NAME]
 //
+// A profile over several files (several `binary` statements) has one basis per file: --bin names the
+// file this basis anchors (default: the declared binary whose name is the file name of <binary>, else
+// the primary).
 // The binary is only read.  The basis records its identity (path, size, SHA-256, build-id), its
 // function symbols and, for every site of the profile, the file offset of the probe target.
 #include <limits.h>
@@ -25,11 +28,13 @@ void usage(FILE* f) {
                "  --source-root DIR   directory that the profile's cited files are relative to; the cited\n"
                "                      lines are hashed and checked against the profile's declarations\n"
                "  --root NAME=DIR     a further named source root (a prov entry says root=NAME)\n"
-               "  --binary-path PATH  the path to record for the binary (default: its absolute path)\n");
+               "  --binary-path PATH  the path to record for the binary (default: its absolute path)\n"
+               "  --bin NAME          the declared binary of the profile this basis anchors (default: the one named\n"
+               "                      like the file, else the primary)\n");
 }
 
 int run(int argc, char** argv) {
-  std::string binary, profile_path, out_path, source_root, binary_path;
+  std::string binary, profile_path, out_path, source_root, binary_path, bin_name;
   std::vector<std::pair<std::string, std::string>> roots;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -42,6 +47,7 @@ int run(int argc, char** argv) {
     if (a == "-o") { if (!value(&out_path)) return 1; }
     else if (a == "--source-root") { if (!value(&source_root)) return 1; }
     else if (a == "--binary-path") { if (!value(&binary_path)) return 1; }
+    else if (a == "--bin") { if (!value(&bin_name)) return 1; }
     else if (a == "--root") {
       std::string v;
       if (!value(&v)) return 1;
@@ -65,6 +71,17 @@ int run(int argc, char** argv) {
   if (!s.ok()) { std::fprintf(stderr, "kz anchor: %s\n", s.describe().c_str()); return 2; }
 
   kz::plan::BasisOptions opt;
+  {
+    const std::string base = binary.substr(binary.find_last_of('/') == std::string::npos ? 0 : binary.find_last_of('/') + 1);
+    const std::string want = bin_name.empty() ? base : bin_name;
+    size_t b = 0;
+    while (b < profile.binaries.size() && profile.binaries[b] != want) ++b;
+    if (b == profile.binaries.size()) {
+      if (!bin_name.empty()) { std::fprintf(stderr, "kz anchor: the profile declares no binary '%s'\n", bin_name.c_str()); return 2; }
+      b = 0;
+    }
+    opt.bin = static_cast<uint16_t>(b);
+  }
   if (binary_path.empty()) {
     char real[PATH_MAX];
     binary_path = realpath(binary.c_str(), real) != nullptr ? std::string(real) : binary;

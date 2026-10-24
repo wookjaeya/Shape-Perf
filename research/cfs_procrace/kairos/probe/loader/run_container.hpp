@@ -25,6 +25,16 @@
 
 namespace kz::probe {
 
+// A further file of a plan over several files (a shared object the process loads): its identity as
+// the observer verified it, written with the sites in it and into FILE_HASHES.
+struct FileIdentity {
+  std::string path;
+  uint64_t inode = 0, device = 0;
+  uint8_t build_id[20] = {0};
+  uint64_t size = 0;
+  Digest sha256 = {};
+};
+
 struct RunInputs {
   Digest basis_artifact = {};
   Digest profile_sha256 = {};
@@ -35,6 +45,7 @@ struct RunInputs {
   uint8_t build_id[20] = {0};
   uint64_t exe_size = 0;
   Digest exe_sha256 = {};
+  std::vector<FileIdentity> also;  // SiteSpec::binary 1, 2, ...
   kz::trace::DecodedRun decoded;
   std::vector<kz::trace::ThreadRecord> threads;
   std::vector<kz::trace::OwnerRecord> owners;  // app_owner per thread (ACTOR_OWNERS); empty: the section is not written

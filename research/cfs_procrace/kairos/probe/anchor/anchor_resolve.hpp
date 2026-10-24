@@ -17,6 +17,8 @@
 //                a return site that a direct branch of the function reaches (a join of paths:
 //                the probe would fire where the call was not made); line-start fits there.  A call through the PLT stub of a shared-library function
 //                (memset) counts as a call of that function.
+//                Without a line table, `resolve_call_in_function` finds the one call of the callee
+//                inside a named function instead (same refusals; line 0).
 //   line-start   the first instruction of a source line's code: the probe fires before the
 //                statement runs (a store written as an assignment, which has no call to follow).
 //                The line's code must be one contiguous piece inside one function.
@@ -53,6 +55,11 @@ Status resolve_entry(const ElfImage& elf, const LineTable& lines, const std::str
 Status resolve_after_call(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line,
                           const std::string& callee, ResolvedTarget* out);
 Status resolve_line_start(const ElfImage& elf, const LineTable& lines, const std::string& file_suffix, uint32_t line, ResolvedTarget* out);
+// after-call without a line table (a binary built without -g): the instruction after the one call of
+// `callee` (its symbol or PLT stub) inside the function `func`.  Kind after-call, line 0.  Refused if
+// the function has no such call or more than one (instruction boundaries are not known, so two
+// candidates are never decided between), or if a branch of the function reaches the return site.
+Status resolve_call_in_function(const ElfImage& elf, const std::string& func, const std::string& callee, ResolvedTarget* out);
 
 // The cost class of a probe on `bytes` at `delta` bytes after the entry of a function, from the
 // instruction patterns that were measured (see KZ_ENUM_INSN_CLASS); everything else is unknown.

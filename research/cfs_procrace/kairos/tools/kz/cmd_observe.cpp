@@ -1,6 +1,12 @@
 // kz observe -- run a command under the perf-sample observer and record what its probes see.
 //
-//   kz observe <basis.kz> <profile.kzp> -o <run.kzt> [options] -- <command> [arguments]
+//   kz observe <basis.kz> <profile.kzp> -o <run.kzt> [--basis <basis2.kz>]... [options] -- <command> [arguments]
+//
+// A profile over several files (several `binary` statements: the executable and shared objects the
+// process loads) needs one basis per file: the first argument is the primary's, --basis gives the
+// others.  Every file is opened once, verified against its basis and probed through that descriptor;
+// the uprobes are registered by inode before the command starts, so a shared object the process maps
+// later is probed when it is mapped.
 //
 // The observer attaches uprobes by file and offset (through perf_event_open, as root) to the
 // binary that the basis names, BEFORE the command starts, then starts the command exactly as
@@ -61,6 +67,7 @@ void usage(FILE* f) {
                "  --record FILE       the human-readable record (default: <run.kzt>.record.txt)\n"
                "  --conditions FILE   conditions and deviations declared by the caller (tab separated; see run_record.hpp)\n"
                "  --binary PATH       the traced file, if it is not at the path recorded in the basis\n"
+               "  --basis FILE        the basis of a further file of a plan over several files (repeat per file)\n"
                "  --ring-pages N      data pages of each CPU's ring buffer, a power of two (default 512)\n"
                "  --poll-ms N         the longest the drain sleeps with data possibly waiting (default 10)\n"
                "  --drain-cpus LIST   run the drain thread on these CPUs only (default: the observer's own placement)\n"
@@ -178,6 +185,7 @@ struct Options {
   std::string drain_cpus, stratum = "none", proc_capture = "full";
   bool check = false;
   std::vector<std::string> command;
+  std::vector<std::string> also_bases;
 };
 
 bool parse_options(int argc, char** argv, Options* o) {
@@ -205,6 +213,7 @@ bool parse_options(int argc, char** argv, Options* o) {
     else if (a == "--record") { if (!value(&o->record)) return false; }
     else if (a == "--conditions") { if (!value(&o->conditions)) return false; }
     else if (a == "--binary") { if (!value(&o->binary)) return false; }
+    else if (a == "--basis") { std::string v; if (!value(&v)) return false; o->also_bases.push_back(v); }
     else if (a == "--ring-pages") { if (!number(&o->ring_pages)) return false; }
     else if (a == "--poll-ms") { if (!number(&o->poll_ms)) return false; }
     else if (a == "--run-ordinal") { if (!number(&o->run_ordinal)) return false; }
@@ -251,9 +260,20 @@ int run(int argc, char** argv) {
   kz::plan::LoadedBasis basis;
   s = kz::plan::load_basis(opt.basis, &basis);
   if (!s.ok()) { std::fprintf(stderr, "kz observe: basis: %s\n", s.describe().c_str()); return 2; }
+  std::vector<kz::plan::LoadedBasis> also_bases(opt.also_bases.size());
+  for (size_t i = 0; i < opt.also_bases.size(); ++i) {
+    s = kz::plan::load_basis(opt.also_bases[i], &also_bases[i]);
+    if (!s.ok()) { std::fprintf(stderr, "kz observe: basis %s: %s\n", opt.also_bases[i].c_str(), s.describe().c_str()); return 2; }
+  }
+  std::vector<const kz::plan::LoadedBasis*> all_bases{&basis};
+  for (const kz::plan::LoadedBasis& b : also_bases) all_bases.push_back(&b);
   std::vector<kz::trace::SiteSpec> sites;
-  s = kz::plan::make_plan(profile, basis, &sites);
+  s = kz::plan::make_plan(profile, all_bases, &sites);
   if (!s.ok()) { std::fprintf(stderr, "kz observe: %s\n", s.describe().c_str()); return 2; }
+  if (profile.binaries.size() > 1 && basis.binary_name != profile.binaries[0]) {
+    std::fprintf(stderr, "kz observe: the first basis must be the primary binary's ('%s'); it is for '%s'\n", profile.binaries[0].c_str(), basis.binary_name.c_str());
+    return 2;
+  }
 
   // 2. The binary: one open descriptor, hashed and verified, then probed by that same descriptor.
   const std::string exe_path = opt.binary.empty() ? basis.binary_path : opt.binary;
@@ -275,9 +295,46 @@ int run(int argc, char** argv) {
     std::fprintf(stderr, "kz observe: REFUSED: %s\n  (%s)\n", s.message.c_str(), exe_path.c_str());
     return 2;
   }
+  // The further files: each opened once, verified against its basis, probed through that descriptor.
+  struct AlsoFile {
+    const kz::plan::LoadedBasis* basis = nullptr;
+    std::string path;
+    int fd = -1;
+    struct stat st = {};
+    kz::Digest sha256 = {};
+    uint64_t size = 0;
+  };
+  std::vector<AlsoFile> also_files;
+  for (size_t b = 1; b < profile.binaries.size(); ++b) {
+    AlsoFile af;
+    for (const kz::plan::LoadedBasis& lb : also_bases)
+      if (lb.binary_name == profile.binaries[b]) af.basis = &lb;
+    af.path = af.basis->binary_path;
+    af.fd = open(af.path.c_str(), O_RDONLY | O_CLOEXEC);
+    if (af.fd < 0) { std::fprintf(stderr, "kz observe: cannot open the traced file %s: %s\n", af.path.c_str(), std::strerror(errno)); return 2; }
+    if (fstat(af.fd, &af.st) != 0 || !S_ISREG(af.st.st_mode)) { std::fprintf(stderr, "kz observe: %s is not a regular file\n", af.path.c_str()); return 2; }
+    kz::Bytes bytes(static_cast<size_t>(af.st.st_size));
+    size_t got = 0;
+    while (got < bytes.size()) {
+      const ssize_t n = pread(af.fd, bytes.data() + got, bytes.size() - got, static_cast<off_t>(got));
+      if (n <= 0) { std::fprintf(stderr, "kz observe: cannot read %s\n", af.path.c_str()); return 2; }
+      got += static_cast<size_t>(n);
+    }
+    s = kz::plan::verify_binary(bytes, *af.basis);
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz observe: REFUSED: %s\n  (%s)\n", s.message.c_str(), af.path.c_str());
+      return 2;
+    }
+    af.sha256 = kz::sha256(bytes.data(), bytes.size());
+    af.size = bytes.size();
+    also_files.push_back(af);
+  }
   if (opt.check) {
-    std::printf("basis %s\nbinary %s: hash, size, build-id and the bytes at %zu targets match\nplan (%zu sites):\n", kz::to_hex(basis.container.artifact_hash()).c_str(), exe_path.c_str(),
-                basis.targets.size(), sites.size());
+    std::printf("basis %s\nbinary %s: hash, size, build-id and the bytes at %zu targets match\n", kz::to_hex(basis.container.artifact_hash()).c_str(), exe_path.c_str(), basis.targets.size());
+    for (const AlsoFile& af : also_files)
+      std::printf("basis %s\nbinary %s: hash, size, build-id and the bytes at %zu targets match\n", kz::to_hex(af.basis->container.artifact_hash()).c_str(), af.path.c_str(),
+                  af.basis->targets.size());
+    std::printf("plan (%zu sites):\n", sites.size());
     print_plan(sites);
     return 0;
   }
@@ -307,6 +364,7 @@ int run(int argc, char** argv) {
 
   kz::probe::SessionConfig cfg;
   cfg.exe_path = "/proc/self/fd/" + std::to_string(exe_fd);
+  for (const AlsoFile& af : also_files) cfg.also_paths.push_back("/proc/self/fd/" + std::to_string(af.fd));
   cfg.sites = sites;
   cfg.ring_data_pages = opt.ring_pages;
   cfg.poll_timeout_ms = opt.poll_ms;
@@ -348,6 +406,14 @@ int run(int argc, char** argv) {
   din.traced.ino = st.st_ino;
   din.traced.dev_major = major(st.st_dev);
   din.traced.dev_minor = minor(st.st_dev);
+  for (const AlsoFile& af : also_files) {
+    kz::trace::TracedFile tf;
+    tf.known = true;
+    tf.ino = af.st.st_ino;
+    tf.dev_major = major(af.st.st_dev);
+    tf.dev_minor = minor(af.st.st_dev);
+    din.also.push_back(tf);
+  }
   kz::trace::DecodedRun decoded;
   const Status decode_status = kz::trace::decode_run(din, &decoded);
   kz::trace::SymbolIndex symbols;
@@ -399,6 +465,20 @@ int run(int argc, char** argv) {
   add("binary.inode", num(st.st_ino) + " on device " + num(major(st.st_dev)) + ":" + num(minor(st.st_dev)));
   add("binary.verified_against_basis", "size, SHA-256, build-id and the bytes at " + num(basis.targets.size()) + " targets");
   add("basis.artifact_sha256", kz::to_hex(basis.container.artifact_hash()));
+  for (size_t i = 0; i < also_files.size(); ++i) {
+    const AlsoFile& af = also_files[i];
+    const std::string pre = "binary.also" + num(i + 1) + ".";
+    add(pre + "name", af.basis->binary_name);
+    add(pre + "path", af.path);
+    add(pre + "sha256", kz::to_hex(af.sha256));
+    add(pre + "build_id", af.basis->build_id);
+    add(pre + "size", num(af.size));
+    add(pre + "inode", num(af.st.st_ino) + " on device " + num(major(af.st.st_dev)) + ":" + num(minor(af.st.st_dev)));
+    add(pre + "verified_against_basis", "size, SHA-256, build-id and the bytes at " + num(af.basis->targets.size()) + " targets");
+    add(pre + "basis_artifact_sha256", kz::to_hex(af.basis->container.artifact_hash()));
+    add(pre + "load_bias", i + 1 < decoded.file_bias_known.size() && decoded.file_bias_known[i + 1] ? hex64(decoded.file_bias[i + 1])
+                                                                                                    : std::string("unknown (no entry or point sample of this file)"));
+  }
   add("profile.sha256", kz::to_hex(profile.sha256));
   add("plan.sites", num(sites.size()));
   {
@@ -538,6 +618,16 @@ int run(int argc, char** argv) {
   kz::probe::build_id_from_hex(basis.build_id, ri.build_id);
   ri.exe_size = binary.size();
   ri.exe_sha256 = kz::sha256(binary.data(), binary.size());
+  for (const AlsoFile& af : also_files) {
+    kz::probe::FileIdentity fi;
+    fi.path = af.path;
+    fi.inode = af.st.st_ino;
+    fi.device = af.st.st_dev;
+    kz::probe::build_id_from_hex(af.basis->build_id, fi.build_id);
+    fi.size = af.size;
+    fi.sha256 = af.sha256;
+    ri.also.push_back(fi);
+  }
   ri.decoded = decoded;
   ri.threads = threads;
   ri.owners = owners;

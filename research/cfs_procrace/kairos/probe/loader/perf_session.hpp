@@ -36,6 +36,7 @@ namespace kz::probe {
 
 struct SessionConfig {
   std::string exe_path;            // the file to probe; resolved by the kernel (e.g. /proc/self/fd/N of a verified descriptor)
+  std::vector<std::string> also_paths;  // further files of a plan over several files (SiteSpec::binary 1, 2, ...), as exe_path
   std::vector<kz::trace::SiteSpec> sites;
   uint32_t ring_data_pages = 512;  // per CPU; a power of two (the kernel requires it)
   uint32_t poll_timeout_ms = 10;   // the longest the drain sleeps with data possibly waiting

@@ -43,6 +43,12 @@ add_custom_command(OUTPUT target_prog_dwarf4
   COMMAND ${CMAKE_C_COMPILER} -g -gdwarf-4 -O0 -fno-omit-frame-pointer -fcf-protection=full -fPIE -pie -pthread -o target_prog_dwarf4 ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c VERBATIM)
 list(APPEND kz_alt_binaries target_prog_dwarf4)
+# Without -g: no line table (a release build such as the C1 builds); function and function-scoped
+# call targets only.
+add_custom_command(OUTPUT target_prog_nodebug
+  COMMAND ${CMAKE_C_COMPILER} -O0 -fno-omit-frame-pointer -fcf-protection=full -fPIE -pie -pthread -o target_prog_nodebug ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/target/target_prog.c VERBATIM)
+list(APPEND kz_alt_binaries target_prog_nodebug)
 add_custom_target(target_prog_variants DEPENDS ${kz_alt_binaries})
 
 set(kz_probe_libs kz-loader kz-plan kz-anchor kz-trace kz-testsupport)

@@ -6,7 +6,10 @@
 // space; a quoted token "..." may contain white space, \" and \\):
 //
 //   kzp-observe 1                                  first statement
-//   binary <name>                                  the file name of the traced binary (a check, not a path)
+//   binary <name>                                  the file name of the traced binary (a check, not a path);
+//                                                  repeated for a plan over several files: the first is the
+//                                                  primary (the executable), the others are files the process
+//                                                  maps (shared objects it loads), each with its own basis
 //   prov <id> tier=<tier> kind=<kind> [side=<side>] file="<path>" lines=<from>-<to> cite="<text>" [authored="<text>"]
 //             [root=<name>] [sha256=<64 hex digits>]
 //   site <label> <entry|ret|point> <target> [decoder=<name>] [prov=<id>] [s0=<slot> .. s3=<slot>]
@@ -17,6 +20,14 @@
 //                                                             of the symbol counts as the symbol)
 //            at=<file suffix>:<line> line-start               for point: the first instruction of the
 //                                                             line's code, before the statement runs
+//            func=<symbol> after-call=<symbol>                for point, without a line table: the
+//                                                             instruction after the one call of the
+//                                                             callee inside the function (PLT stub
+//                                                             included); refused if the function makes
+//                                                             no such call or more than one, or if a
+//                                                             branch of the function reaches the return
+//                                                             site (the same rules as at=...after-call)
+//   bin=<name>  (any site) the declared binary the site is in; default the primary
 //   slot:    <src>:<width>:<role>      src = a register name | stack+<byte offset> | ip
 //            width = u8 | u16 | u32 | u64
 //   decoder: generic (default) | spawn-create | spawn-return | thread-entry | owner-request |
@@ -68,10 +79,15 @@ struct ProfileSite {
   int prov = -1;                  // index into Profile::provs, or -1
   std::vector<kz::trace::SlotSpec> slots;
   uint32_t source_line = 0;
+  uint16_t bin = 0;               // index into Profile::binaries (0 = the primary)
+  // A point site with func= and after-call= (no at=): the call is found in the function's code, not
+  // through the line table.
+  bool function_scoped() const { return kind == KZ_SITE_KIND_POINT_PROBE && at_file.empty() && !func.empty(); }
 };
 
 struct Profile {
-  std::string binary_name;
+  std::string binary_name;              // the primary binary (= binaries[0])
+  std::vector<std::string> binaries;    // every declared binary, in declaration order
   std::vector<ProvDecl> provs;
   std::vector<ProfileSite> sites;
   Digest sha256 = {};             // of the profile text as read

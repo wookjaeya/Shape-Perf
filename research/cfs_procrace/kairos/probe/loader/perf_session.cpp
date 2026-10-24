@@ -294,7 +294,13 @@ Status PerfSession::open(const SessionConfig& cfg) {
       u.size = sizeof u;
       u.type = m.pmu_type;
       u.config = site.kind == KZ_SITE_KIND_RET_PROBE ? (1ull << ret_bit) : 0;
-      u.config1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(cfg.exe_path.c_str()));  // uprobe_path
+      if (site.binary != 0 && site.binary > cfg.also_paths.size()) {
+        m.cpus.push_back(std::move(c));
+        m.close_all();
+        return Status::error(Err::Invalid, "site '" + site.label + "' is in file " + std::to_string(site.binary) + " of the plan, which was not given");
+      }
+      const std::string& path = site.binary == 0 ? cfg.exe_path : cfg.also_paths[site.binary - 1];
+      u.config1 = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(path.c_str()));  // uprobe_path
       u.config2 = site.file_offset;                                                         // probe_offset
       u.sample_period = 1;
       u.sample_type = PERF_SAMPLE_IDENTIFIER | PERF_SAMPLE_IP | PERF_SAMPLE_TID | PERF_SAMPLE_TIME | PERF_SAMPLE_CPU;

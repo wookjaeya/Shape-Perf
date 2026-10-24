@@ -74,11 +74,21 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
   std::vector<kz_site> sites;
   std::vector<kz_site_slot> slots;
   kz::plan::site_records(in.sites, &w, &sites, &slots);
-  for (kz_site& k : sites) {
-    k.inode = in.inode;
-    k.device = in.device;
-    k.path = w.intern(in.exe_path);
-    std::memcpy(k.build_id, in.build_id, 20);
+  for (size_t i = 0; i < sites.size(); ++i) {
+    kz_site& k = sites[i];
+    const uint16_t b = i < in.sites.size() ? in.sites[i].binary : 0;
+    if (b == 0 || b > in.also.size()) {
+      k.inode = in.inode;
+      k.device = in.device;
+      k.path = w.intern(in.exe_path);
+      std::memcpy(k.build_id, in.build_id, 20);
+    } else {
+      const FileIdentity& f = in.also[b - 1];
+      k.inode = f.inode;
+      k.device = f.device;
+      k.path = w.intern(f.path);
+      std::memcpy(k.build_id, f.build_id, 20);
+    }
   }
   if (!(s = w.add_section(KZ_SEC_SITES, sites)).ok()) return s;
   if (!slots.empty() && !(s = w.add_section(KZ_SEC_SITE_SLOTS, slots)).ok()) return s;
@@ -203,6 +213,15 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
   std::memcpy(files[0].sha256, in.exe_sha256.data(), 32);
   files[0].size = in.exe_size;
   files[0].prov = KZ_NONE32;
+  for (const FileIdentity& f : in.also) {
+    kz_file_hash h;
+    std::memset(&h, 0, sizeof h);
+    h.path = w.intern(f.path);
+    std::memcpy(h.sha256, f.sha256.data(), 32);
+    h.size = f.size;
+    h.prov = KZ_NONE32;
+    files.push_back(h);
+  }
   if (!(s = w.add_section(KZ_SEC_FILE_HASHES, files)).ok()) return s;
   return w.finish(out);
 }

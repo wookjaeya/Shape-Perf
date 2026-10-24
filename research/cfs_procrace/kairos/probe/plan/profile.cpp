@@ -150,8 +150,12 @@ Status parse_profile(std::string_view text, Profile* out) {
     }
     if (cmd == "binary") {
       if (toks.size() != 2) return err(lineno, "binary <name>");
-      if (!out->binary_name.empty()) return err(lineno, "binary is declared twice");
-      out->binary_name = toks[1].text;
+      if (std::find(out->binaries.begin(), out->binaries.end(), toks[1].text) != out->binaries.end())
+        return err(lineno, "binary '" + toks[1].text + "' is declared twice");
+      if (!out->sites.empty()) return err(lineno, "binaries are declared before the first site");
+      if (out->binaries.size() >= 0xffff) return err(lineno, "too many binaries");
+      out->binaries.push_back(toks[1].text);
+      if (out->binary_name.empty()) out->binary_name = toks[1].text;
     } else if (cmd == "prov") {
       if (toks.size() < 2) return err(lineno, "prov <id> key=value ...");
       ProvDecl p;
@@ -212,6 +216,11 @@ Status parse_profile(std::string_view text, Profile* out) {
         } else if (k == "after-call") s.after_call = v;
         else if (k.empty() && v == "line-start") s.line_start = true;
         else if (k == "decoder") { if (!lookup(kDecoders, v, &x)) return err(lineno, "unknown decoder '" + v + "'"); s.decoder = static_cast<uint16_t>(x); }
+        else if (k == "bin") {
+          const auto it = std::find(out->binaries.begin(), out->binaries.end(), v);
+          if (it == out->binaries.end()) return err(lineno, "binary '" + v + "' is not declared before this site");
+          s.bin = static_cast<uint16_t>(it - out->binaries.begin());
+        }
         else if (k == "prov") {
           auto it = prov_index.find(v);
           if (it == prov_index.end()) return err(lineno, "provenance '" + v + "' is not declared before this site");
@@ -226,8 +235,10 @@ Status parse_profile(std::string_view text, Profile* out) {
         } else return err(lineno, "unknown site key '" + k + "'");
       }
       if (s.kind == KZ_SITE_KIND_POINT_PROBE) {
-        if (s.at_file.empty() || s.after_call.empty() == !s.line_start || !s.func.empty())
-          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start");
+        const bool by_line = !s.at_file.empty() && s.func.empty() && s.after_call.empty() == s.line_start;
+        const bool by_function = s.at_file.empty() && !s.func.empty() && !s.after_call.empty() && !s.line_start && s.in_suffix.empty();
+        if (!by_line && !by_function)
+          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start, or func=<symbol> after-call=<symbol>");
       } else {
         if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || s.line_start) return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
       }
@@ -237,6 +248,11 @@ Status parse_profile(std::string_view text, Profile* out) {
     }
   }
   if (!header) return Status::error(Err::Invalid, "profile: empty (no 'kzp-observe 1' header)");
+  if (out->binaries.empty() && !out->sites.empty()) {
+    // A plan without a binary statement has one, unnamed, primary binary (the earlier grammar did not
+    // require the statement).
+    out->binaries.push_back(std::string());
+  }
   if (out->sites.empty()) return Status::error(Err::Invalid, "profile: no site is declared");
   // The slots of every site must be valid for the perf-sample backend, and the decoders and the
   // entry/return pairs (same func=) must find their keys (kz::trace::check_plan).  The function
@@ -251,6 +267,7 @@ Status parse_profile(std::string_view text, Profile* out) {
     spec.decoder = s.decoder;
     spec.symbol = s.func;
     spec.slots = s.slots;
+    spec.binary = s.bin;
     Status st = kz::trace::check_site(spec);
     if (!st.ok()) return Status::error(Err::Invalid, "profile line " + std::to_string(s.source_line) + ": " + st.message);
     specs.push_back(std::move(spec));

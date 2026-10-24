@@ -80,7 +80,9 @@ kz hits <run.kzt> [--site 라벨 --before 라벨] [--group-slot 역할] [--group
 ### 3.4 `kz replay` (실제 기록 재생, 2026-10-24, 변경표 X-02) [D][M]
 
 ```
-kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]... [--predicate R=E]... [--emit-trace]
+kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]... [--predicate R=E]...
+          [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off] [--compare-narrowing]
+          [--out <file.kz>] [--emit-trace]
 ```
 
 실행 컨테이너를 Φ 프로필의 **실제 기록 trace** 로 바꾸고(`include/kz/trace/real_trace.hpp`), 재생 엔진의 실제 기록 모드(`docs/phi_reference.md` §7.6)로 재생해 발생마다 상태, 요약 뷰(`OBSERVED_VIOLATION` / `NO_VIOLATION_IN_CHECKED_PREFIX` / `INCONCLUSIVE(사유)`), 적합성, 정체성을 낸다. `--emit-trace` 는 재생 대신 trace text 를 낸다(`kz-phi replay` 로 다시 읽힌다). 어댑터가 세우는 것과 세우지 않는 것:
@@ -96,6 +98,12 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 | 손실 | RUNMETA `loss-present`·LOSS 를 손실 구간으로: throttle 은 그 시작부터, lost-records 보고는 기록 처음부터(언제 버려졌는지 커널이 말하지 않음) 보고 시각까지, 기록 없는 손실은 전체. RUNMETA 가 없으면 손실 증거가 없는 것이므로 전체를 손실로 본다 | §7 |
 | 소유 앱 | ACTOR_OWNERS(스키마 개정 2)의 수준과 앱 id. 앱 id 는 소유 kind 의 id 규칙과 표 크기(`--const`)로 레코드 키가 된다(W2). 레코드가 없는 thread, 이전 컨테이너의 모든 thread, 키가 없거나 id 규칙이 거부하는 기록은 `undetermined`(줄을 쓰지 않음 → 재생은 소유자를 모름으로 보고 `ownership_undetermined`; "소유자 없음"으로 읽지 않는다). 보고에 thread 마다 생성 실행자·수준·id·근거를 적는다 | ADR-056 |
 | 상수 | 컨테이너에 `ref eval` 상수의 값이 없다: `--const` 로, 각각 출처에서 가져온 값을 준다(CONDITIONS_POLICY). 없으면 재생이 표 크기를 요구하며 거부한다 | — |
+| 소유 앱 id 값 | 소유 앱이 정해진 thread 마다 생성 요청이 넘긴 id 값(`owner_id`). 실행 관계의 등록·게시 행위자를 지목하는 데만 쓴다(`id(owner(exec))`), 재생 상태를 고정하지 않는다(2026-10-24 W2 잔여) | ADR-056 |
+| 코어 서비스 여부 | `--basis`(실행의 부모 basis, 기호)와 `--core-request-caller`(출처가 있는 함수 이름)가 둘 다 있을 때만: 소유 앱의 OWNER_REQUEST 사건의 반환 주소가 든 함수가 그 이름이면 코어 서비스, 다른 함수면 아님. 자식 task 는 생성자의 소유 앱을 따른다. 기호가 없거나 한 앱에 두 종류가 섞이면 세우지 않는다 | SPEC §3.3 "Creation events used for `app_owner`" |
+| spawn out 인자 | spawn 규칙의 생성 연산 반환에 `out.<이름>` 을 붙인다. 신원 결합이 그 호출을 id 로 묶은 thread(ID_MATCHED: 호출 안 SPAWN_ID 사이트가 읽은 배정 id = 자식이 알린 id)가 있을 때만. FORK 시각으로만 묶인 호출에는 붙이지 않는다 | SPEC §5.7 항목 2, `osal_finalize_new` |
+| 손실의 task 귀속 | 하지 않는다: LOSS 의 `cpu` 는 기록을 버린 ring 이지만 사건에 CPU 가 없고 문맥 전환 기록도 없다. 보고에 손실마다 CPU ring 과 개수를 적는다 | §7 |
+
+**선택 사항(2026-10-24, W2 잔여)** [D]. `--outcome-narrowing off` 는 PI 결정 P1 의 대안(반환 코드가 열린 조건을 고정하지 않음)으로 재생한다. 기본은 `on`(현행)이다. `--compare-narrowing` 은 다른 쪽으로도 재생해 두 읽기의 요약 개수(관측, 관계, 관계×관측)를 나란히 쓰고, 요약이 달라진 발생 수를 적는다. 본 출력은 선택한 쪽이다. 출력 끝에는 항상 `summary counts` 가 붙는다. `--out` 은 선택한 쪽의 요약·모델 id·적합성·정체성과 ACTOR_OWNERS 를 컨테이너에 쓴다(`docs/schema.md` §11). 발생마다 `relation` 줄이 붙는다(`docs/phi_reference.md` §7.6).
 
 **S1-R2 개발 실행 컨테이너에 적용한 결과** [M] (개발 기록이며 본 실험 결과가 아니다; `env/logs/s1r2_p1.kzt`, 상수 `CFE_PLATFORM_ES_MAX_APPLICATIONS` 는 고정 소스의 추출 golden `tests/static/data/core_cpu1.golden:44` 의 값): 발생 271개 중 `OBSERVED_VIOLATION` 24개(전달된 id 인자 0, 인자만으로 결정; 소유 앱 `undetermined`), `INCONCLUSIVE` 247개(사유 `resource_or_lifetime_unmatched`, `effect_point_ambiguous`, `effect_unsupported`, `not_evaluated`: 등록 writer 와 등록 조건의 지점이 계획에 없음), `NO_VIOLATION_IN_CHECKED_PREFIX` 0개, 입력 오류 0개. SPEC App. A.1 의 기대 결과와 같은 갈래이다. 같은 컨테이너의 파생 기록 71개(사이트 하나 제거, 손실을 선언한 사건 묶음 삭제, 흩어진 삭제(선언·무선언), 늦은 시작)에서 원래보다 결정적인 결과는 0개였다(`test_realrecord_derived`). 이 개수는 분석기의 불완전 정보 처리 시험이며 프로그램에 대한 증거가 아니다.
 

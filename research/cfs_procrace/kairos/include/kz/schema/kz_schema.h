@@ -732,10 +732,17 @@ KZ_CORE_RECORDS(KZ_RECORD)
 #define KZ_ENUM_STATUS_FLAGS(ITEM, P) /* set */ \
   ITEM(P, OPEN, 0x1, "open") ITEM(P, UNDETERMINED, 0x2, "undetermined")
 
+/* relation-inferred: the execution relation rests on at least one `inferred` app_owner (the weakest level
+ * of the owners it used; absent on a determined relation: every owner it used is `confirmed`).
+ * core-status-unknown: the relation is inter-application because the owners differ, but the record did
+ * not establish for both owners whether they are core services, so core-application is not excluded
+ * (2026-10-24, enum values only). */
 #define KZ_ENUM_SUMMARY_FLAGS(ITEM, P) /* set */                                        \
   ITEM(P, INPUT_ERROR, 0x1, "analysis-input-error") ITEM(P, PARTIAL, 0x2, "partial")       \
   ITEM(P, CALLER_RECORD, 0x4, "caller-record") ITEM(P, ACCEPT, 0x8, "accept")              \
-  ITEM(P, REAL_RECORD, 0x10, "real-record") ITEM(P, OUTCOME_NARROWED, 0x20, "outcome-narrowed")
+  ITEM(P, REAL_RECORD, 0x10, "real-record") ITEM(P, OUTCOME_NARROWED, 0x20, "outcome-narrowed") \
+  ITEM(P, RELATION_INFERRED, 0x40, "relation-inferred")                                  \
+  ITEM(P, CORE_STATUS_UNKNOWN, 0x80, "core-status-unknown")
 
 /* What a record establishes for the resources and locations a condition reads (ADR-055). */
 #define KZ_ENUM_ADEQ(ITEM, P) /* set */                                                 \

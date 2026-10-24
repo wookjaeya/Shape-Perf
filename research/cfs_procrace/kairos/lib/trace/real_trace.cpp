@@ -3,6 +3,7 @@
 #include "kz/trace/real_trace.hpp"
 
 #include "kz/core/registry.hpp"
+#include "kz/trace/decode_sites.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -186,9 +187,36 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   for (size_t i = 0; i < threads.size(); ++i) {
     ThreadIdentity& ti = report->identities[i];
     ti.actor = thread_names[i];
+    ti.tid = threads[i].tid;
+    ti.generation = threads[i].generation;
     ti.thread_flags = threads[i].flags;
     const auto cr = out->creators.find(thread_names[i]);
     if (cr != out->creators.end()) ti.creator = cr->second;
+  }
+  // the slot of a site that holds the return address (role return_address), or -1
+  auto return_slot = [&](uint32_t site) {
+    for (uint8_t k = 0; k < 4; ++k) {
+      const auto r = role_of.find({site, k});
+      if (r != role_of.end() && r->second == kRoleReturnAddress) return static_cast<int>(k);
+    }
+    return -1;
+  };
+  // Core status of owners (header, "core"): per owner identity, from its OWNER_REQUESTs' calling functions.
+  report->core_evidence = opt.symbols != nullptr && !opt.core_request_callers.empty();
+  std::map<uint32_t, int> core_vote;  // owner identity -> bit 1: a request from a core caller, bit 2: from another function
+  if (report->core_evidence) {
+    for (const kz_app_owner& o : owners) {
+      if (o.thread >= threads.size() || o.level == KZ_OWNER_LEVEL_UNDETERMINED || o.owner_key == KZ_NONE32 || o.creation_event >= events.size()) continue;
+      const kz_raw_ev& rq = events[o.creation_event];
+      if (rq.site >= sites.size() || sites[rq.site].decoder != KZ_DECODER_OWNER_REQUEST || (rq.flags & KZ_RAW_FLAG_TRUNC) != 0) continue;
+      const int slot = return_slot(rq.site);
+      uint64_t link = 0;
+      if (slot < 0 || !link_address(maps, threads[o.thread].pid, rq.a[slot], &link)) continue;
+      const SymbolEntry* sym = opt.symbols->find(link);
+      if (sym == nullptr) continue;
+      report->identities[o.thread].request_caller = sym->name;
+      core_vote[o.owner_key] |= opt.core_request_callers.count(sym->name) != 0 ? 1 : 2;
+    }
   }
   for (const kz_app_owner& o : owners) {
     if (o.thread >= threads.size()) continue;
@@ -210,12 +238,47 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
     ti.key = key;
     out->owner_levels[a] = o.level;
     out->owners[a] = {key};
+    out->owner_ids[a] = o.owner_key;
     ++report->owners_determined;
+    const auto cv = core_vote.find(o.owner_key);
+    if (cv != core_vote.end() && (cv->second == 1 || cv->second == 2)) {
+      ti.core = cv->second == 1 ? 1 : 0;
+      out->owner_core[a] = cv->second == 1;
+      ++(cv->second == 1 ? report->owners_core : report->owners_not_core);
+    }
+  }
+  for (const kz_app_owner& o : owners)
+    if (o.thread < threads.size()) report->identities[o.thread].creator_thread = o.creator_thread;
+
+  // ---- spawn out-parameters bound by the id (header, "spawn out") ----
+  std::map<uint32_t, uint32_t> assigned_by_create;  // RAW_EVENTS index of a spawn-create event -> the id
+  for (const kz_thread& t : threads)
+    if ((t.flags & KZ_THREAD_FLAG_ID_MATCHED) != 0 && (t.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) != 0 && t.creator_event != KZ_NONE32)
+      assigned_by_create[t.creator_event] = t.announced_id;
+  std::map<uint64_t, uint32_t> bound_at_return;  // RAW_EVENTS index of a spawn-return event -> the id
+  {
+    std::map<uint32_t, std::vector<std::pair<uint64_t, uint64_t>>> open;  // tid -> (create index, return address)
+    for (size_t i = 0; i < events.size(); ++i) {
+      const kz_raw_ev& e = events[i];
+      if (e.site >= sites.size() || (e.flags & KZ_RAW_FLAG_TRUNC) != 0) continue;
+      if (sites[e.site].decoder == KZ_DECODER_SPAWN_CREATE) {
+        open[e.tid].push_back({i, e.a[kSlotReturnAddress]});
+      } else if (sites[e.site].decoder == KZ_DECODER_SPAWN_RETURN) {
+        std::vector<std::pair<uint64_t, uint64_t>>& st = open[e.tid];
+        size_t k = st.size();
+        while (k > 0 && st[k - 1].second != e.a[kSlotReturnAddress]) --k;
+        if (k == 0) continue;
+        const auto as = assigned_by_create.find(static_cast<uint32_t>(st[k - 1].first));
+        if (as != assigned_by_create.end()) bound_at_return[i] = as->second;
+        st.resize(k - 1);
+      }
+    }
   }
   report->owners_undetermined = threads.size() - report->owners_confirmed - report->owners_inferred;
 
   // ---- the events ----
-  for (const kz_raw_ev& e : events) {
+  for (size_t ei = 0; ei < events.size(); ++ei) {
+    const kz_raw_ev& e = events[ei];
     if (e.site >= site_map.size() || site_map[e.site].kind == MapKind::None) {
       ++report->unmapped_events;
       continue;
@@ -254,6 +317,20 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
         if (m.kind == MapKind::Return && prm.role == "out") te.values["out." + prm.name] = v;
       }
     }
+    if (m.kind == MapKind::Return) {
+      const phi::OpDecl& op = p.ops[static_cast<size_t>(m.op)];
+      for (const phi::HbRuleDecl& rule : p.rules) {
+        if (rule.tmpl != phi::RuleTemplate::Spawn || rule.create_op != op.name) continue;
+        bool has_out = false;
+        for (const phi::OpParam& prm : op.params) has_out = has_out || (prm.role == "out" && prm.name == rule.create_out);
+        if (!has_out) continue;
+        ++report->spawn_returns;
+        const auto b = bound_at_return.find(ei);
+        if (b == bound_at_return.end() || unreadable) continue;
+        te.values["out." + rule.create_out] = static_cast<int64_t>(b->second);
+        ++report->spawn_outs_bound;
+      }
+    }
     out->add(std::move(te));
     ++report->events;
   }
@@ -282,6 +359,7 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   const bool flagged = !meta.empty() && (meta.front().flags & KZ_RUN_FLAG_LOSS_PRESENT) != 0;
   report->loss_present = flagged || !losses.empty() || meta.empty();
   for (const kz_loss& l : losses) {
+    if (l.source != KZ_LOSS_SOURCE_PERF_THROTTLE) report->loss_cpus.push_back({l.cpu, l.count});
     eval::LossInterval li;
     if (l.source == KZ_LOSS_SOURCE_PERF_THROTTLE) {
       li.begin = first_at_or_after(events, l.t_ns);
@@ -344,12 +422,21 @@ std::string report_text(const RealTraceReport& r) {
       std::snprintf(key, sizeof key, "0x%x", ti.owner_id);
       out += "identity " + ti.actor + ": creator " + (ti.creator.empty() ? std::string("-") : ti.creator) + ", owner " + (ti.level <= 2 ? kLevel[ti.level] : "?") +
              (ti.owner_id == KZ_NONE32 ? std::string() : std::string(" id ") + key) + (ti.key_resolved ? " record " + std::to_string(ti.key) : std::string()) +
-             (ti.app_name.empty() ? std::string() : " app '" + ti.app_name + "'") + ", evidence " + flags_text("KZ_OWNER_EVIDENCE", ti.evidence) + "\n";
+             (ti.app_name.empty() ? std::string() : " app '" + ti.app_name + "'") + ", evidence " + flags_text("KZ_OWNER_EVIDENCE", ti.evidence) +
+             (ti.request_caller.empty() ? std::string() : ", requested from " + ti.request_caller) + (ti.core == 1 ? ", core service" : ti.core == 0 ? ", not a core service" : "") + "\n";
     }
   }
+  out += "spawn returns " + std::to_string(r.spawn_returns) + ", out-parameter bound by the id " + std::to_string(r.spawn_outs_bound) + "\n";
+  out += std::string("core status of owners: ") +
+         (r.core_evidence ? "core " + std::to_string(r.owners_core) + ", not core " + std::to_string(r.owners_not_core) + ", not established " +
+                                std::to_string(r.threads - r.owners_core - r.owners_not_core)
+                          : std::string("not established (no basis symbols or no core request caller given)")) +
+         "\n";
   out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies)" : "not shown to be the process start (start state unknown)") + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
+  for (const auto& lc : r.loss_cpus)
+    out += "loss report: CPU ring " + std::to_string(lc.first) + ", " + std::to_string(lc.second) + " record(s); the task whose events were lost is not established\n";
   out += "writer and alias coverage, lifetimes, order between actors: not established by a run container\n";
   return out;
 }

@@ -1029,6 +1029,8 @@ flags KZ_SUMMARY_FLAG
   0x8 ACCEPT "accept"
   0x10 REAL_RECORD "real-record"
   0x20 OUTCOME_NARROWED "outcome-narrowed"
+  0x40 RELATION_INFERRED "relation-inferred"
+  0x80 CORE_STATUS_UNKNOWN "core-status-unknown"
 flags KZ_ADEQ
   0x1 WRITERS_COVERED "writers-covered"
   0x2 ALIASES_COVERED "aliases-covered"
@@ -1867,4 +1869,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=dfe0cc6f22dc7a621530a4d31427d5f3cf9034338e6ca5b17c23f9e257664fbd
+fingerprint=b1f9bda4af3182d3c61ce8d345e1a5e0dedda122140cbdf5ed3cb3439a9943e7

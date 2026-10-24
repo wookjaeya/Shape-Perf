@@ -116,7 +116,8 @@ ctest 의 시험 이름과 라벨 (K0 토대의 32개 [M]; 관측기 시험은 �
 | unit | `test_core_eval` | 평가기의 구체 의미(모든 구성)와 추상 domain 의 삼치 논리·구간·상태 집합 |
 | property | `test_property_eval_agreement` | 생성한 식·상태·추상화에서 추상 결과가 구체 결과를 포함함(고정 시드, 약 96,000 평가). 일부러 틀린 추상화가 위반을 내는지도 확인. 잘못 만들어진 소유자(다른 종류·키 폭)를 섞은 상태 포함 |
 | unit | `test_core_replay` | 효과 종류별 재생, 단언한 보호 조건이 거짓인 지점의 보고(반박·불일치)와 `filter`, 규칙 템플릿 4개의 간선, 발생의 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 죽지 않고 결정적임 |
-| unit | `test_core_realrecord` | 실제 기록 재생 모드(`docs/phi_reference.md` §7.6): 초기 상태 기본값 없음, ADR-055 의 쓰기 조건, 행위자 사이 순서, D2 요약(`PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`), 반환 코드에 의한 고정과 분석 입력 오류, 파생 기록(사건 손실·지점 제거·늦은 시작)이 더 결정적이지 않음 |
+| unit | `test_core_realrecord` | 실제 기록 재생 모드(`docs/phi_reference.md` §7.6): 초기 상태 기본값 없음, ADR-055 의 쓰기 조건, 행위자 사이 순서, D2 요약(`PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`), 반환 코드에 의한 고정과 분석 입력 오류, 파생 기록(사건 손실·지점 제거·늦은 시작)이 더 결정적이지 않음, 실행 관계(같은 task·같은 앱·다른 앱·코어·생성 관계·`inferred`·미정), P1 대안(반환 코드 고정 끄기) |
+| unit | `test_trace_replay_out` (`tests/cfs-free`) | `kz replay --out` 출력 컨테이너의 왕복: 부모·basis, 요약·모델 id·적합성·정체성 인덱스, ACTOR_OWNERS 복사, 같은 입력 같은 바이트, 정규 dump(`docs/schema.md` §11) |
 | unit | `test_realrecord_derived` (`tests/cfs-free`) | S1-R2 개발 실행 컨테이너의 실제 기록 재생과 파생 기록 71개(`docs/observer.md` §3.4) |
 | golden | `phi_golden_*` (17개) | 실제 프로필의 정규 text·해시·통계, 합성 trace 12개로 만든 재생 결과 15개(규칙마다; 보호 조건의 반박, CleanUpApp 의 RESERVED 창 포함) |
 | unit | `phi_profile_check`, `phi_profile_provenance`, `test_phi_cli` | `kz-phi check`, 인용 98개를 고정된 번들에서 다시 읽어 대조하고 source 4개의 개정 고정을 확인(번들이 없으면 건너뜀; 커밋되지 않은 수정은 확인하지 않음), CLI 출력·종료 코드 |

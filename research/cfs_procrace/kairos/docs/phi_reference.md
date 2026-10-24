@@ -363,7 +363,25 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 **상태.** 모든 설명에서 같은 상태만 결정한다(L-STATUS 는 그대로: 고정된 거짓 조건이 나오면 그 지점에서 결정). 반환 때 설명들이 허용하는 상태가 둘 이상이면 `UNDETERMINED` 이고 그 목록(`possible`)과 사유를 남긴다. 이것은 여섯 상태에 더한 상태가 아니라 "상태 미확정"의 표시다(SPEC §1.10: 모호한 관측값은 상태를 미확정으로 둔다; `NOT_READY_UNJUDGED` 를 빈 정보의 공통값으로 쓰지 않는다). 기록 끝까지 결정되지 않으면 `OPEN` 이다.
 
-**요약 뷰.** 모든 발생에 `kz::summarize_observation`(SPEC §1.10, D2; `docs/schema.md` §10)으로 요약을 계산한다. 모델 trace 에서도 계산하지만 결과 text 에는 실제 기록일 때만 쓴다. `READY` → `NO_VIOLATION_IN_CHECKED_PREFIX`; `TOLERATED` 는 재생이 만들지 않는다; `VIOLATING` → `OBSERVED_VIOLATION`(모든 설명에서 위반일 때만 결정되므로); `NOT_READY_UNJUDGED` → `INCONCLUSIVE(caller_requirement_absent)`; `PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`; `NOT_EVALUATED` → `INCONCLUSIVE(not_evaluated)`; `UNDETERMINED` → `INCONCLUSIVE(사유)`. 발생마다 그 조건이 읽은 것에 대해 기록이 세운 적합성(`adequacy`, KZ_ADEQ)과 정체성(실행 task, 생성 실행자 `creator`, 소유 앱과 근거 수준, 연산의 `stamp` 매개변수로 전달된 식별자)을 함께 쓴다. 실행 관계(SPEC §1.1)는 아직 계산하지 않는다(`ownership-undetermined` 로 둔다) [I: W2 의 task→앱 매핑 뒤].
+**요약 뷰.** 모든 발생에 `kz::summarize_observation`(SPEC §1.10, D2; `docs/schema.md` §10)으로 요약을 계산한다. 모델 trace 에서도 계산하지만 결과 text 에는 실제 기록일 때만 쓴다. `READY` → `NO_VIOLATION_IN_CHECKED_PREFIX`; `TOLERATED` 는 재생이 만들지 않는다; `VIOLATING` → `OBSERVED_VIOLATION`(모든 설명에서 위반일 때만 결정되므로); `NOT_READY_UNJUDGED` → `INCONCLUSIVE(caller_requirement_absent)`; `PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`; `NOT_EVALUATED` → `INCONCLUSIVE(not_evaluated)`; `UNDETERMINED` → `INCONCLUSIVE(사유)`. 발생마다 그 조건이 읽은 것에 대해 기록이 세운 적합성(`adequacy`, KZ_ADEQ)과 정체성(실행 task, 생성 실행자 `creator`, 소유 앱과 근거 수준, 연산의 `stamp` 매개변수로 전달된 식별자)을 함께 쓴다.
+
+**실행 관계(SPEC §1.1, §1.10 항목 10; 2026-10-24 W2 잔여)** [D][M: `test_core_realrecord` `test_execution_relation`]. 발생마다 사용의 실행 task 와 **그 발생의 키 자원을 등록·게시한 행위자** 사이의 관계를 계산한다(`Occurrence::relation`, 요약의 `relation`). 등록·게시는 기록에서 지점이 관측되어 적용되었을 수 있는 효과 중 키의 종류에 대한 자원 하나짜리 효과(`lifecycle`·`raise`·`settag`; 종류 전체를 지우는 `all` 효과는 자원을 지목하지 않으므로 제외)이다. 그 대상은 **쓴 행위자 자신의 정체성으로** 읽는다: `owner(exec)` = 그 행위자의 `app_owner` 레코드 키, `id(owner(exec))` = 기록이 준 소유 앱의 id 값(`owner_id`, 없으면 재생 상태의 id). 이 읽기는 행위자를 지목하는 데만 쓰고 재생 상태를 고정하지 않는다(관측 판정은 더 결정적이 되지 않는다). 판정 규칙:
+
+| 경우 | 관계 |
+|---|---|
+| 사용 쪽 소유 앱이 `confirmed`·`inferred` 가 아님 | `ownership-undetermined` |
+| 키 종류에 대해 대상이 세워지지 않은 쓰기가 있음(쓴 행위자의 소유 앱 미정, 값 미기록, `filter` 가 열린 채) | `ownership-undetermined` |
+| 기록 안에 키의 등록·게시가 없음 | `ownership-undetermined`(사유를 적는다. 위반 여부와 따로 보고) |
+| 상대 행위자의 소유 앱이 `confirmed`·`inferred` 가 아님 | `ownership-undetermined` |
+| 같은 task, 또는 같은 소유 앱의 다른 task | `intra-application`(대조군; "same task" / "same application") |
+| 한쪽이 다른 쪽의 생성 실행자 | `creation-framework-new-application` |
+| 소유 앱이 다르고 한쪽이 코어 서비스(`owner_core yes`) | `core-application` |
+| 소유 앱이 다르고 둘 다 코어 서비스가 아님 | `inter-application` |
+| 소유 앱이 다르고 코어 여부가 세워지지 않음 | `inter-application` + 플래그 `core-status-unknown` |
+
+상대가 여럿이면: 하나라도 미정이면 미정, 모두 같은 앱이면 `intra-application`, 아니면 `inter-application` → `core-application` → 생성 관계 순으로 처음 나타나는 것. 쓴 소유 앱 수준 중 가장 약한 것이 `relation_level` 이고, 그것이 `inferred` 이면 요약에 `relation-inferred` 를 붙인다. 관계는 행위자 사이의 것이며 사건 순서를 읽지 않는다(병합 순서는 실행 순서가 아니다, SPEC §5.8). 모델 trace 에서는 계산하지 않는다. 결과 text 에 `relation <값> owners <수준>: <사유>` 줄이 붙는다.
+
+**P1 대안(반환 코드 고정 끄기)** [D]. `Options::outcome_narrowing`(기본 `true`, 현행)을 끄면 위 O4 의 고정을 하지 않는다: 기록이 열어 둔 조건은 열린 채 남고, 모든 설명에서 고정된 조건과 코드가 어긋나는 경우의 분석 입력 오류 검사는 그대로이다. PI 결정 P1(`STATUS_W0W3_20261024.md` §2) 전까지 현행을 유지하며, `kz replay --outcome-narrowing off` 로 대안을, `--compare-narrowing` 으로 두 읽기의 개수를 나란히 본다 [M: `test_outcome_narrowing_alternative`].
 
 **trace 머리말(실제 기록만).**
 
@@ -375,6 +393,8 @@ adequacy loc <위치> [start=...] [writers=...] [aliases=...]
 observed <지점>                     기록 전체에서 붙어 있고 활성인 지점(lp_name, 사이트, 종료 지점)
 owner <행위자> <키...>              (모델과 같은 줄) 소유 앱의 키
 owner_level <행위자> confirmed|inferred|undetermined   없으면 undetermined: 소유자는 모름(owner_any)
+owner_id <행위자> <값>              소유 앱의 id 값(생성 요청이 넘긴 값): 등록·게시 행위자 지목에만 씀
+owner_core <행위자> yes|no          소유 앱이 코어 서비스인지(기록이 세운 경우만)
 creator <행위자> <생성 행위자>
 order established|merged            기본 merged: 서로 다른 행위자의 사건 순서는 확립되지 않음
 loss begin / loss end               다음 사건부터 / 다음 사건 앞까지 사건이 빠졌을 수 있음
@@ -384,7 +404,7 @@ loss begin / loss end               다음 사건부터 / 다음 사건 앞까�
 
 **결과 text 의 추가(실제 기록만).** 머리의 `record real`; 발생마다 `possible {…}`, 조건 줄의 `unknown`, `passage-unknown`, `contradicted`, `reasons {…}`, 그리고 `summary`, `adequacy`, `identity` 줄; 끝에 `real record knowledge`(종류·위치마다 `fixed` 또는 `open {사유}`, 세운 적합성, 모순 여부, 손실 수, `partial`). `final state` 는 기록된 효과의 재생이며 `fixed` 인 것에 대해서만 뜻이 있다.
 
-**한계 [I].** 손실은 기록 전체에 대한 것으로만 다룬다(어느 task 의 것인지 모름). 일관된 상태 포획(state capture)으로 열린 위치를 다시 고정하는 일, 효과 지점의 시각 구간(EV-04)을 사건 단위보다 세밀하게 다루는 일, 실행 관계 계산은 하지 않는다. 소유자가 `inferred` 인 결과의 판정은 A-CLK-PO 에 기댄다.
+**한계 [I].** 손실은 기록 전체에 대한 것으로만 다룬다(어느 task 의 것인지 모름: 커널의 손실 보고는 CPU ring 만 말하고, 사건에는 CPU 가 없으며 백엔드는 문맥 전환을 기록하지 않는다). 일관된 상태 포획(state capture)으로 열린 위치를 다시 고정하는 일, 효과 지점의 시각 구간(EV-04)을 사건 단위보다 세밀하게 다루는 일은 하지 않는다. 실행 관계의 상대는 키 자원의 등록·게시 행위자뿐이다(조건이 읽은 다른 자원·위치의 writer, 전달된 값을 저장한 행위자는 포획 지점이 `cell` 을 주지 않는 한 지목하지 않는다). 소유자가 `inferred` 인 결과의 판정은 A-CLK-PO 에 기댄다.
 
 ## 8. 검사기 규칙
 

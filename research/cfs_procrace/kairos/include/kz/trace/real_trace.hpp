@@ -35,11 +35,29 @@
 //               id the rule rejects or a table size not given: no owner line, so the replay reads the
 //               owner as unknown (ownership_undetermined), never as a guess and never as "no owner".  The
 //               creating executor is the thread that forked the thread (FORK, ptid).
+//               The identity value itself is given as well (Trace::owner_ids): it names the resource an
+//               effect targets by the writer's identity (`id(owner(exec))`) for the execution relation only.
+//   core        whether an owning application is a core service (the execution relation core-application,
+//               SPEC 1.1): established only with the basis symbols and the calling functions the caller names
+//               (`core_request_callers`, each from its reference: SPEC 3.3 "Creation events used for app_owner"
+//               names the function of the core-object loop).  An owner whose OWNER_REQUEST was made
+//               from one of them is a core service, one whose request was made from another resolved function
+//               is not; a child task shares its creator's owner.  Anything else (no symbols, no names, a
+//               return address without a symbol, both kinds of request for one owner): not established.
+//   spawn out   the out-parameter of a spawn rule's create operation (`create OP out NAME`) is set on its
+//               return only where the identity join bound the call to a thread by the id (ID_MATCHED: the id
+//               the call assigned, read at the SPAWN_ID site inside it, equals the id the child announced; the
+//               profile's provenance of that site says the out-parameter receives that id on success).  A
+//               link by FORK time alone binds nothing.
+//   loss        (see above) a loss is attributed to the whole record: a kernel loss report names the CPU
+//               ring (`kz_loss.cpu`), but the events carry no CPU and the backend records no context
+//               switches, so which task's events were lost is not established.
 //   constants   a run container carries no value of a `ref eval` constant: the caller supplies them.
 #pragma once
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -47,16 +65,23 @@
 #include "kz/core/eval_trace.hpp"
 #include "kz/core/phi.hpp"
 #include "kz/core/status.hpp"
+#include "kz/trace/identity_symbols.hpp"
 
 namespace kz::trace {
 
 struct RealTraceOptions {
   std::map<std::string, int64_t> consts;  // values of `ref eval` constants (table sizes), by name
+  // Core status of owners (see "core" above): the basis symbols of the traced binary (not owned) and the
+  // calling functions of a core application's creation request.  Both needed; otherwise not established.
+  const SymbolIndex* symbols = nullptr;
+  std::set<std::string> core_request_callers;
 };
 
 // One thread's identities as the container states them (for the report).
 struct ThreadIdentity {
   std::string actor;
+  uint32_t tid = 0, generation = 0;
+  uint32_t creator_thread = KZ_NONE32;  // THREADS index of the creating executor, or KZ_NONE32
   std::string creator;     // the creating executor (FORK parent), empty if not recorded
   uint8_t level = KZ_OWNER_LEVEL_UNDETERMINED;
   uint32_t evidence = 0;   // set KZ_OWNER_EVIDENCE
@@ -65,6 +90,8 @@ struct ThreadIdentity {
   int64_t key = 0;         // record key in the owner kind (when resolved)
   std::string app_name;
   uint32_t thread_flags = 0;
+  int8_t core = -1;              // the owning application is a core service: 1 yes, 0 no, -1 not established
+  std::string request_caller;    // the function that made the OWNER_REQUEST, where resolved
 };
 
 struct RealTraceReport {
@@ -83,6 +110,11 @@ struct RealTraceReport {
   bool loss_present = false;
   uint64_t loss_intervals = 0;
   bool starts_at_exec = false;
+  uint64_t spawn_returns = 0;      // returns of a spawn rule's create operation
+  uint64_t spawn_outs_bound = 0;   // of those, with the out-parameter bound by the id (ID_MATCHED)
+  uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
+  bool core_evidence = false;      // symbols and core request callers were given
+  std::vector<std::pair<uint32_t, uint64_t>> loss_cpus;  // per kernel loss report: (CPU ring, count)
 };
 
 // Normalized parameter / role name: lower case, without '_'.

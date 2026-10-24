@@ -1,7 +1,8 @@
 // kz replay -- the real-record replay of a run container (SPEC 4.8, ADR-055; docs/observer.md section 13).
 //
 //   kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...
-//             [--predicate RULE=EXPR]... [--emit-trace]
+//             [--predicate RULE=EXPR]... [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off]
+//             [--compare-narrowing] [--out <file.kz>] [--emit-trace]
 //
 // Builds the real-record trace of the container (kz/trace/real_trace.hpp) and replays it with the profile
 // in the real-record mode of kz/core/eval_trace.hpp: a resource the record does not fix is unknown, a result
@@ -11,19 +12,33 @@
 // container: give them with --const, each from its reference (CONDITIONS_POLICY); the replay refuses a
 // profile whose table size is missing.  The output analyses the record it is given; whether that record is
 // a development run or an experiment run is stated by the record's own conditions, not here.
+//
+// The execution relation of every occurrence is computed from the identities (real_trace.hpp, eval_trace.hpp
+// Occurrence::relation).  Whether an owner is a core service is established only with --basis (the run's
+// parent, for the symbols) and --core-request-caller (each name from its reference); without them a pair of
+// different applications is inter-application with the flag core-status-unknown.  --outcome-narrowing off
+// replays with the alternative of the pending PI decision P1 (the returned code fixes nothing the record
+// leaves open); --compare-narrowing prints the counts of both readings side by side (the main output stays
+// the selected one).  --out writes the summaries, model ids, adequacy, identities and app_owner records of
+// the selected reading to a container (kz/trace/replay_container.hpp) that kz-dump reads.
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <map>
 #include <string>
 #include <vector>
 
 #include "command.hpp"
 #include "kz/core/container.hpp"
 #include "kz/core/eval_trace.hpp"
+#include "kz/core/identity.hpp"
 #include "kz/core/phi.hpp"
+#include "kz/core/registry.hpp"
+#include "kz/trace/identity_symbols.hpp"
 #include "kz/trace/real_trace.hpp"
+#include "kz/trace/replay_container.hpp"
 
 namespace {
 
@@ -32,12 +47,47 @@ namespace fs = std::filesystem;
 void usage(FILE* f) {
   std::fprintf(f,
                "usage: kz replay <run.kzt> --profile <dir|file> [--profile ...] [--const NAME=VALUE]... [--version COMPONENT=VERSION]...\n"
-               "                 [--predicate RULE=EXPR]... [--emit-trace]\n"
+               "                 [--predicate RULE=EXPR]... [--basis B --core-request-caller FUNC...] [--outcome-narrowing on|off]\n"
+               "                 [--compare-narrowing] [--out FILE.kz] [--emit-trace]\n"
                "  --profile P         the profile (a directory stands for its *.kzp files, in name order)\n"
                "  --const NAME=VALUE  the value of a `ref eval` constant (a table size), from its reference\n"
                "  --version C=V       the version of a component, for the guards of rules and effects\n"
                "  --predicate R=E     the awaited predicate of an observation rule that takes it from the code\n"
+               "  --basis B           the run's basis container (its parent): symbols for the core status of owners\n"
+               "  --core-request-caller F  a function whose creation requests start core applications, from its reference\n"
+               "  --outcome-narrowing on|off  whether the returned code fixes conditions the record leaves open (P1; default on)\n"
+               "  --compare-narrowing also replay with the other setting and print both counts side by side\n"
+               "  --out FILE          write the summary view records of the selected reading to a container\n"
                "  --emit-trace        print the real-record trace instead of replaying it\n");
+}
+
+std::string enum_name(const char* en, uint64_t v) {
+  const kz::EnumDesc* d = kz::find_enum(en);
+  const char* t = d != nullptr ? kz::enum_display(*d, v) : nullptr;
+  return t != nullptr ? t : "#" + std::to_string(v);
+}
+
+// Counts of the summary view: observation, relation, relation x observation, outcome-narrowed.
+std::string counts_text(const kz::eval::Result& r, const char* title) {
+  std::map<std::string, uint64_t> obs, rel, cross;
+  uint64_t narrowed = 0, inferred = 0, core_unknown = 0;
+  for (const kz::eval::Occurrence& o : r.occurrences) {
+    const bool err = (o.summary.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) != 0;
+    const std::string ob = err ? std::string("analysis-input-error") : enum_name("KZ_OBS", o.summary.observation);
+    const std::string re = enum_name("KZ_EXEC_RELATION", o.summary.relation);
+    ++obs[ob];
+    ++rel[re];
+    ++cross[re + " / " + ob];
+    if ((o.summary.flags & KZ_SUMMARY_FLAG_OUTCOME_NARROWED) != 0) ++narrowed;
+    if ((o.summary.flags & KZ_SUMMARY_FLAG_RELATION_INFERRED) != 0) ++inferred;
+    if ((o.summary.flags & KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN) != 0) ++core_unknown;
+  }
+  std::string out = std::string("summary counts (") + title + "): occurrences " + std::to_string(r.occurrences.size()) + ", outcome-narrowed " + std::to_string(narrowed) +
+                    ", relation-inferred " + std::to_string(inferred) + ", core-status-unknown " + std::to_string(core_unknown) + (r.partial ? ", partial" : "") + "\n";
+  for (const auto& kv : obs) out += "  observation " + kv.first + " " + std::to_string(kv.second) + "\n";
+  for (const auto& kv : rel) out += "  relation " + kv.first + " " + std::to_string(kv.second) + "\n";
+  for (const auto& kv : cross) out += "  relation/observation " + kv.first + " " + std::to_string(kv.second) + "\n";
+  return out;
 }
 
 bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceText>* out) {
@@ -67,9 +117,9 @@ bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceTe
 }
 
 int run(int argc, char** argv) {
-  std::string path;
-  std::vector<std::string> profile_args, consts, versions, predicates;
-  bool emit = false;
+  std::string path, basis_path, out_path, narrowing = "on";
+  std::vector<std::string> profile_args, consts, versions, predicates, core_callers;
+  bool emit = false, compare = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto value = [&](std::vector<std::string>* dst) {
@@ -92,6 +142,14 @@ int run(int argc, char** argv) {
       if (!value(&versions)) return 1;
     } else if (a == "--predicate") {
       if (!value(&predicates)) return 1;
+    } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing") {
+      std::vector<std::string> v;
+      if (!value(&v)) return 1;
+      (a == "--basis" ? basis_path : a == "--out" ? out_path : narrowing) = v.front();
+    } else if (a == "--core-request-caller") {
+      if (!value(&core_callers)) return 1;
+    } else if (a == "--compare-narrowing") {
+      compare = true;
     } else if (a == "--emit-trace") {
       emit = true;
     } else if (!a.empty() && a[0] == '-') {
@@ -104,7 +162,7 @@ int run(int argc, char** argv) {
       return 1;
     }
   }
-  if (path.empty() || profile_args.empty()) {
+  if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!core_callers.empty() && basis_path.empty())) {
     usage(stderr);
     return 1;
   }
@@ -141,6 +199,22 @@ int run(int argc, char** argv) {
       return 1;
     }
     ropt.consts[kv.substr(0, eq)] = v;
+  }
+  // The core status of owners: the basis symbols and the named calling functions (real_trace.hpp, "core").
+  kz::trace::SymbolIndex symbols;
+  if (!basis_path.empty()) {
+    kz::Container basis;
+    s = kz::Container::read_file(basis_path, &basis);
+    if (s.ok()) s = basis.verify_content();
+    if (s.ok() && basis.header().artifact_kind != KZ_ARTIFACT_BASIS) s = kz::Status::error(kz::Err::Invalid, "not a basis container");
+    if (s.ok()) s = c.verify_parent(basis);
+    if (s.ok()) s = kz::trace::load_symbols(basis, &symbols);
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz replay: --basis %s: %s\n", basis_path.c_str(), s.describe().c_str());
+      return 2;
+    }
+    ropt.symbols = &symbols;
+    ropt.core_request_callers.insert(core_callers.begin(), core_callers.end());
   }
   // The constants are given to the adapter as well: the owner kind's table size maps an owner identity
   // to its record key (real_trace.hpp, "owners").
@@ -182,6 +256,7 @@ int run(int argc, char** argv) {
     }
     options.versions[v.substr(0, eq)] = v.substr(eq + 1);
   }
+  options.outcome_narrowing = narrowing == "on";
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {
@@ -189,9 +264,50 @@ int run(int argc, char** argv) {
     return 2;
   }
   std::printf("kz replay %s (real record)\nartifact_sha256 %s\n", path.c_str(), kz::to_hex(c.artifact_hash()).c_str());
+  std::printf("outcome narrowing %s%s\n", narrowing.c_str(), narrowing == "on" ? " (current behaviour; PI decision P1 pending)" : " (the alternative of PI decision P1)");
   std::fputs(kz::trace::report_text(report).c_str(), stdout);
   std::printf("\n");
   std::fputs(kz::eval::dump_result(p, trace, result).c_str(), stdout);
+  std::printf("\n");
+  std::fputs(counts_text(result, narrowing == "on" ? "outcome narrowing on" : "outcome narrowing off").c_str(), stdout);
+  if (compare) {
+    kz::eval::Options other = options;
+    other.outcome_narrowing = !options.outcome_narrowing;
+    kz::eval::Result alt;
+    s = kz::eval::replay(p, trace, other, &alt);
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz replay: %s\n", s.describe().c_str());
+      return 2;
+    }
+    std::fputs(counts_text(alt, other.outcome_narrowing ? "outcome narrowing on" : "outcome narrowing off").c_str(), stdout);
+    uint64_t differ = 0;
+    for (size_t i = 0; i < result.occurrences.size() && i < alt.occurrences.size(); ++i) {
+      const kz_summary& a = result.occurrences[i].summary;
+      const kz_summary& b = alt.occurrences[i].summary;
+      if (a.observation != b.observation || a.obs_reasons != b.obs_reasons || a.status != b.status || a.status_flags != b.status_flags) ++differ;
+    }
+    std::printf("occurrences whose observation summary differs between the two readings: %llu\n", static_cast<unsigned long long>(differ));
+  }
+  if (!out_path.empty()) {
+    kz::trace::ReplayContainerInput in;
+    in.run = &c;
+    in.profile_sha256 = kz::phi::profile_hash(p);
+    in.tool_sha256 = KZ_THIS_TOOL_HASH("kz");
+    in.basis.push_back({"replay.mode", "real-record"});
+    in.basis.push_back({"replay.outcome_narrowing", narrowing});
+    for (const auto& kv : ropt.consts) in.basis.push_back({"replay.const." + kv.first, std::to_string(kv.second)});
+    for (const auto& kv : options.versions) in.basis.push_back({"replay.version." + kv.first, kv.second});
+    for (const std::string& pr : predicates) in.basis.push_back({"replay.predicate", pr});
+    for (const std::string& f : core_callers) in.basis.push_back({"replay.core_request_caller", f});
+    kz::Bytes bytes;
+    s = kz::trace::write_replay_container(in, trace, result, report, &bytes);
+    if (s.ok()) s = kz::write_whole_file(out_path, bytes);
+    if (!s.ok()) {
+      std::fprintf(stderr, "kz replay: --out %s: %s\n", out_path.c_str(), s.describe().c_str());
+      return 2;
+    }
+    std::printf("wrote %s artifact_sha256 %s\n", out_path.c_str(), kz::to_hex(kz::sha256(bytes.data(), bytes.size())).c_str());
+  }
   return 0;
 }
 

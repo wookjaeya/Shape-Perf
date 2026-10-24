@@ -112,6 +112,14 @@ struct Trace {
   std::map<std::string, Adequacy> loc_adequacy;           // by location name
   std::set<std::string> observed_points;                  // points attached and active over the whole record
   std::map<std::string, uint8_t> owner_levels;            // actor -> KZ_OWNER_LEVEL; absent: undetermined
+  // actor -> the identity value of its owning application in the id space of the owner kind (the value the
+  // creation request passed, ACTOR_OWNERS).  Used only to name the actor of a registration or publication
+  // (`id(owner(exec))`, the execution relation); it never fixes the replayed state.  Absent: not recorded.
+  std::map<std::string, uint32_t> owner_ids;
+  // actor -> whether its owning application is a core service (true) or not (false), as the record
+  // establishes it (the creation request's calling function, SPEC 3.3 "Creation events used for
+  // app_owner").  Absent: not established.
+  std::map<std::string, bool> owner_core;
   std::map<std::string, std::string> creators;            // actor -> the actor that created it (creating executor)
   // The order of the events of different actors is established (HB edges or a reliable observed order,
   // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
@@ -216,6 +224,15 @@ struct Occurrence {
   std::string passed_role;          // the operation's `stamp` parameter, if any
   bool has_passed = false;
   int64_t passed = 0;
+  // The execution relation (SPEC 1.1 "Execution relations", 1.10 item 10; real records only): between the
+  // executing task of the use and the actors of the registrations and publications of the occurrence's key
+  // resource in the record (the effects on the key's kind whose target, read with the writer's own
+  // identity, is the key).  Only `confirmed` and `inferred` owners are evidence; anything else leaves it
+  // ownership-undetermined.  Also stored in `summary.relation` (with relation-inferred, core-status-unknown).
+  uint8_t relation = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  uint8_t relation_level = KZ_OWNER_LEVEL_UNDETERMINED;  // the weakest owner level the relation used
+  std::vector<std::string> counterparts;  // the actors of the registrations / publications, sorted
+  std::string relation_note;              // which pair decided it, or why it is undetermined
 };
 
 struct ReplayFinding {
@@ -242,6 +259,11 @@ struct Options {
   // The version of each component, for the guards of rules and effects.  A guard on a component
   // that is not listed does not hold: the rule or effect is not applied and the replay says so.
   std::map<std::string, std::string> versions;
+  // Real records, P1 of STATUS_W0W3_20261024 (O4-real, a pending PI decision): whether the returned code
+  // fixes a conjunct the record leaves open (`outcome-narrowed`, the current behaviour).  false is the
+  // alternative: the code fixes nothing, and is still checked against what every explanation fixes (a
+  // disagreement stays an analysis input error).
+  bool outcome_narrowing = true;
 };
 
 // What the real-record replay established for one kind or location (printed with the result).
@@ -296,6 +318,8 @@ std::string dump_result(const phi::Profile& p, const Trace& trace, const Result&
 //            [lifetime=known|unknown]
 //   observed <point>                         a point attached and active over the whole record
 //   owner_level <actor> confirmed|inferred|undetermined
+//   owner_id <actor> <value>                 the identity value of the actor's owning application
+//   owner_core <actor> yes|no                whether that application is a core service
 //   creator <actor> <creating actor>
 //   order established|merged                 default merged: the order of different actors' events is not established
 //   loss begin | loss end                    events may be missing from the next event on, up to the next event

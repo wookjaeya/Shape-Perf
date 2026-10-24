@@ -13,7 +13,11 @@
 //     explanation fixes is an analysis input error (an empty explanation set), never a violation;
 //   - the merged order of different actors' events is not the execution order (SPEC 5.8);
 //   - derived records (an event lost, a point dropped, a late start) are never more decisive;
-//   - an undetermined owner, an unobserved point, the text form.
+//   - an undetermined owner, an unobserved point, the text form;
+//   - the execution relation (SPEC 1.1) between the use and the registrations of its key: same task, same
+//     application, different applications (core status established or not), the creating executor, an
+//     inferred owner, an undetermined owner on either side, no registration, the identity value of an owner;
+//   - the alternative of the pending PI decision P1 (no outcome narrowing).
 
 #include <string>
 #include <vector>
@@ -73,14 +77,14 @@ struct Run {
   }
 };
 
-Run replay(const Profile& p, const std::string& text) {
+Run replay(const Profile& p, const std::string& text, const kz::eval::Options& options = kz::eval::Options()) {
   Run r;
   const kz::Status ps = kz::eval::parse_trace_text(text, &r.trace);
   if (!ps.ok()) {
     std::fprintf(stderr, "trace does not parse: %s\n", ps.describe().c_str());
     ++kztest::state().failures;
   }
-  const kz::Status s = kz::eval::replay(p, r.trace, kz::eval::Options(), &r.result);
+  const kz::Status s = kz::eval::replay(p, r.trace, options, &r.result);
   KZ_CHECK(s.ok());
   r.dump = kz::eval::dump_result(p, r.trace, r.result);
   return r;
@@ -316,13 +320,122 @@ void test_text_form() {
   KZ_CHECK(!kz::eval::parse_trace_text("record real\nloss end\n", &t).ok());
   KZ_CHECK(!kz::eval::parse_trace_text("record real\nadequacy loc Box.id lifetime=known\n", &t).ok());
   KZ_CHECK(!kz::eval::parse_trace_text("record real\nowner_level W sure\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nowner_id W x\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nowner_id W 0x100000000\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nowner_core W maybe\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("owner_core W yes\n", &t).ok());
   // the text form reads back to the same trace
-  const std::string text = preamble() + "creator W T0\n" + kSetup + kRegister + "loss begin\n" + send(kOk) + "loss end\nW send call arg.Who=0x1002\n";
+  const std::string text = preamble() + "creator W T0\nowner_id W 0x1002\nowner_core W no\n" + kSetup + kRegister + "loss begin\n" + send(kOk) +
+                           "loss end\nW send call arg.Who=0x1002\n";
   const Run a = replay(p, text);
   const Run b = replay(p, kz::eval::trace_text(a.trace));
   KZ_CHECK_EQ(a.dump, b.dump);
   KZ_CHECK_EQ(kz::eval::trace_text(a.trace), kz::eval::trace_text(b.trace));
   KZ_CHECK_EQ(a.trace.losses.size(), static_cast<size_t>(1));
+  KZ_CHECK(b.trace.owner_ids.count("W") == 1 && b.trace.owner_ids.at("W") == 0x1002u);
+  KZ_CHECK(b.trace.owner_core.count("W") == 1 && !b.trace.owner_core.at("W"));
+}
+
+// A send of the registered identity 0x1002 by `actor`.
+std::string send_by(const std::string& actor, const char* result) {
+  return actor + " send.who_valid pt arg.Who=0x1002\n" + actor + " send call arg.Who=0x1002\n" + actor + " send.who_reg pt\n" + actor + " send ret result=" + result + "\n";
+}
+
+void check_relation(const Run& r, uint8_t want, const std::string& note, const char* what) {
+  const bool ok = r.occ().relation == want && r.occ().summary.relation == want && r.occ().relation_note.find(note) != std::string::npos;
+  KZ_CHECK(ok);
+  if (!ok) std::fprintf(stderr, "%s: relation %u (%s), wanted %u (%s)\n%s\n", what, r.occ().relation, r.occ().relation_note.c_str(), want, note.c_str(), r.dump.c_str());
+}
+
+// The execution relation (SPEC 1.1 "Execution relations", 1.10 item 10, ADR-056): between the executing task
+// of the use and the actors whose effects registered the occurrence's key, with their app_owner.
+void test_execution_relation() {
+  const Profile p = load(kzmini::files());
+  const uint16_t inferred = KZ_SUMMARY_FLAG_RELATION_INFERRED, core_unknown = KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN;
+  // same task: W registers its own slot and sends with its own identity
+  const Run same = replay(p, preamble() + kSetup + kRegister + send(kOk));
+  check_relation(same, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "same task");
+  KZ_CHECK(same.occ().counterparts == std::vector<std::string>{"W"});
+  KZ_CHECK_EQ(static_cast<int>(same.occ().relation_level), static_cast<int>(KZ_OWNER_LEVEL_CONFIRMED));
+  KZ_CHECK((same.occ().summary.flags & (inferred | core_unknown)) == 0);
+  KZ_CHECK(same.dump.find("relation intra-application owners confirmed: same task (W)") != std::string::npos);
+  // same application, another task: V belongs to the application W registered
+  const std::string v = "owner V 2\nowner_level V confirmed\n";
+  const Run app = replay(p, preamble() + v + kSetup + kRegister + send_by("V", kOk));
+  check_relation(app, KZ_EXEC_RELATION_INTRA_APPLICATION, "same application", "same application");
+  check_summary(app, "NO_VIOLATION_IN_CHECKED_PREFIX", "same application");
+  // different applications: X belongs to slot 3 and sends with W's identity
+  const std::string x = "owner X 3\nowner_level X confirmed\n";
+  const Run inter = replay(p, preamble() + x + kSetup + kRegister + send_by("X", kOk));
+  check_relation(inter, KZ_EXEC_RELATION_INTER_APPLICATION, "core status not established", "different applications");
+  KZ_CHECK((inter.occ().summary.flags & core_unknown) != 0);
+  const Run core = replay(p, preamble() + x + "owner_core W yes\n" + kSetup + kRegister + send_by("X", kOk));
+  check_relation(core, KZ_EXEC_RELATION_CORE_APPLICATION, "core service", "a core service");
+  KZ_CHECK((core.occ().summary.flags & core_unknown) == 0);
+  const Run neither = replay(p, preamble() + x + "owner_core W no\nowner_core X no\n" + kSetup + kRegister + send_by("X", kOk));
+  check_relation(neither, KZ_EXEC_RELATION_INTER_APPLICATION, "neither a core service", "neither core");
+  KZ_CHECK((neither.occ().summary.flags & core_unknown) == 0);
+  // the creating executor: W created X
+  const Run created = replay(p, preamble() + x + "creator X W\n" + kSetup + kRegister + send_by("X", kOk));
+  check_relation(created, KZ_EXEC_RELATION_CREATION_FRAMEWORK, "one created the other", "creator");
+  // an inferred owner is evidence, and the summary carries the level
+  const Run inf = replay(p, preamble() + "owner X 3\nowner_level X inferred\n" + kSetup + kRegister + send_by("X", kOk));
+  check_relation(inf, KZ_EXEC_RELATION_INTER_APPLICATION, "different applications", "inferred owner");
+  KZ_CHECK_EQ(static_cast<int>(inf.occ().relation_level), static_cast<int>(KZ_OWNER_LEVEL_INFERRED));
+  KZ_CHECK((inf.occ().summary.flags & inferred) != 0);
+  // undetermined stays undetermined: the user's owner, a registrar's owner, no registration at all
+  const Run user = replay(p, preamble() + "owner X 3\n" + kSetup + kRegister + send_by("X", kOk));
+  check_relation(user, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of the executing task X is undetermined", "user undetermined");
+  KZ_CHECK((user.occ().summary.flags & inferred) == 0);
+  const Run writer = replay(p, preamble() + kSetup + kRegister + "Y sign_in call\nY sign_in.set_reg pt\nY sign_in ret result=0\n" + send(kOk));
+  check_relation(writer, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "a write of reg by Y whose target the record does not establish", "registrar undetermined");
+  const Run none = replay(p, preamble() + kSetup + send(kNotReadyB));
+  check_relation(none, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "no registration or publication of reg[0x1002]", "never registered");
+  check_summary(none, "OBSERVED_VIOLATION", "never registered");  // the violation and the undetermined relation are reported apart
+  // The collector's merged order leaves the slot's identity open, so the registration's target is not fixed by
+  // the state; the identity value the record gives for W's owner names it.  The state stays open: the
+  // relation is computed, the observation is not made more decisive.
+  const std::string merged = preamble("start=known writers=covered aliases=covered lifetime=known", true, true, true, false);
+  const Run open = replay(p, merged + kSetup + kRegister + send(kBadArg));
+  check_relation(open, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "whose target the record does not establish", "merged order, no identity value");
+  const Run named = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg));
+  check_relation(named, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "merged order, identity value");
+  check_status(named, OccStatus::Undetermined, "merged order, identity value");
+  KZ_CHECK_EQ(named.summary(), open.summary());
+  // a model trace computes no relation and prints none
+  const Run model = replay(p, std::string(kSetup) + kRegister + send(kOk));
+  KZ_CHECK_EQ(static_cast<int>(model.occ().relation), static_cast<int>(KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED));
+  KZ_CHECK(model.dump.find("relation") == std::string::npos);
+}
+
+// P1 of STATUS_W0W3_20261024 (pending PI decision): the returned code fixes what the record leaves open
+// (current behaviour).  The alternative fixes nothing by the code; a code that contradicts what every
+// explanation fixes is still an analysis input error.
+void test_outcome_narrowing_alternative() {
+  const Profile p = load(kzmini::files());
+  kz::eval::Options off;
+  off.outcome_narrowing = false;
+  const std::string reg_unknown = "start=unknown writers=covered aliases=covered lifetime=known";
+  const Run on = replay(p, preamble(reg_unknown) + kSetup + send(kNotReadyB));
+  const Run alt = replay(p, preamble(reg_unknown) + kSetup + send(kNotReadyB), off);
+  check_summary(on, "OBSERVED_VIOLATION", "narrowing on");
+  check_status(alt, OccStatus::Undetermined, "narrowing off");
+  KZ_CHECK(!alt.occ().outcome_narrowed);
+  KZ_CHECK((alt.occ().summary.flags & KZ_SUMMARY_FLAG_OUTCOME_NARROWED) == 0);
+  KZ_CHECK(alt.occ().summary.observation == KZ_OBS_INCONCLUSIVE);
+  KZ_CHECK((alt.occ().reasons & KZ_WITHHOLD_START_STATE_UNKNOWN) != 0);
+  // ready by the code: narrowed to READY, or left open
+  const Run on_ok = replay(p, preamble(reg_unknown) + kSetup + send(kOk));
+  const Run alt_ok = replay(p, preamble(reg_unknown) + kSetup + send(kOk), off);
+  check_summary(on_ok, "NO_VIOLATION_IN_CHECKED_PREFIX", "ready by the code, narrowing on");
+  KZ_CHECK(alt_ok.occ().summary.observation == KZ_OBS_INCONCLUSIVE);
+  KZ_CHECK(kz::validate_summary(alt_ok.occ().summary).empty());
+  // what the record fixes is unchanged, and so is an input error
+  const Run fixed = replay(p, preamble() + kSetup + kRegister + send(kOk), off);
+  check_summary(fixed, "NO_VIOLATION_IN_CHECKED_PREFIX", "fixed by recorded writes, narrowing off");
+  const Run contra = replay(p, preamble() + kSetup + kRegister + send(kNotReadyB), off);
+  KZ_CHECK(contra.occ().input_error);
+  KZ_CHECK(contra.occ().summary.observation == KZ_OBS_NONE);
 }
 
 // Derived records (masterplan 2026-10-24 section 9.1, priority 4) of records whose registry is fixed by
@@ -415,6 +528,8 @@ int main() {
   test_horizon_open_and_caller_requirement();
   test_unobserved_point_and_owner();
   test_text_form();
+  test_execution_relation();
+  test_outcome_narrowing_alternative();
   test_derived_records();
   return kztest::finish("test_core_realrecord");
 }

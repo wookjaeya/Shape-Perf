@@ -401,13 +401,25 @@ class Replayer {
   std::vector<bool> kind_contra_, loc_contra_;        // the record contradicted the replayed state
   std::map<ResId, std::set<std::string>> res_writers_;  // the actors whose recorded writes set a resource
   std::map<int32_t, std::set<std::string>> loc_writers_;
+  // The registrations and publications in the record (the execution relation, SPEC 1.1): every effect on a
+  // resource that may have been applied, with its target read with the writer's own identity.
+  struct Publication {
+    int32_t kind = -1;
+    std::vector<int64_t> key;
+    bool exact = false;   // the target is established
+    bool maybe = false;   // the effect may not have been applied (a `filter` guard the record leaves open)
+    std::string actor;
+  };
+  std::vector<Publication> pubs_;
+  void note_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool maybe);
+  void relate(Occurrence* o);
   size_t next_loss_ = 0;
   void prepare_real();
   void apply_losses(uint64_t position);
   void untrack_kind(int32_t kind, uint32_t why);
   void untrack_loc(int32_t loc, uint32_t why);
   void contradict(int32_t kind, int32_t loc, uint64_t event, const std::string& what);
-  RealEval evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args);
+  RealEval evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args, bool identity = false);
   void apply_effect_real(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args);
   void update_intervals(uint64_t at);
   void join_interval(IntervalRead* acc, const RealEval& r);
@@ -709,7 +721,10 @@ bool Replayer::overlaps_loss(uint64_t from, uint64_t to) const {
 
 // Evaluates `e` at `ev` over the explanations of the real record: the abstract domain over the replayed
 // state of what the record fixes; everything else is open (unknown), and so is a value the event lacks.
-RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args) {
+// With `identity`, the id of the executing actor's owner record is the identity value the record gives for
+// its app_owner (Trace::owner_ids), whatever the replayed state says: this names the resource an effect
+// targets by the writer's identity (the execution relation) and is never used to fix the state.
+RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* lp, const TraceEvent& ev, const ArgMap* frame_args, bool identity) {
   constexpr int64_t kLo = std::numeric_limits<int64_t>::min(), kHi = std::numeric_limits<int64_t>::max();
   RealEval out;
   std::vector<std::string> names;
@@ -811,6 +826,20 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     for (const auto& kv : loc_writers_)
       if (foreign(kv.second)) order_open_locs.insert(kv.first);
+  }
+  if (identity && !a.owners.empty()) {
+    const auto oid = t_.owner_ids.find(ev.actor);
+    if (oid != t_.owner_ids.end()) {
+      AbstractRes& r = a.res[a.owners.front()];
+      if (r.states == 0) {
+        const KindDecl& k = p_.kinds[static_cast<size_t>(a.owners.front().kind)];
+        r.states = k.states.size() >= 64 ? ~0ull : ((1ull << k.states.size()) - 1);
+        for (size_t ti = 0; ti < k.tags.size(); ++ti)
+          r.tags[static_cast<int32_t>(ti)] = k.tags[ti].values.size() >= 64 ? ~0ull : ((1ull << k.tags[ti].values.size()) - 1);
+      }
+      r.has_id = true;
+      r.id = {static_cast<int64_t>(oid->second), static_cast<int64_t>(oid->second)};
+    }
   }
   a.open_locs = true;
   for (size_t li = 0; li < loc_reasons_.size(); ++li) {
@@ -1765,6 +1794,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
     }
     if (g.v.tri == Tri::Maybe && eff.filter) {
       // a branch that may or may not have been taken
+      note_publication(op, eff, ev, frame_args, true);
       untrack_kind(tkind, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       untrack_loc(tloc, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       if (eff.kind == EffectKind::StoreOut && tloc < 0)
@@ -1772,6 +1802,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       return;
     }
   }
+  note_publication(op, eff, ev, frame_args, false);
   auto note_shutdown = [&](int32_t kind, int32_t to) {
     if (p_.scope.present && kind == p_.scope.kind_index && request_ordinal_ >= 0 && to >= request_ordinal_ && !r_.shutdown_requested) {
       r_.shutdown_requested = true;
@@ -1980,9 +2011,11 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
       chk = OutcomeCheck::Unmapped;
       finding(ev.id, op.name + " returned " + hex_or_dec(static_cast<int64_t>(u32(ev.result))) + ", which its outcome list does not map");
     } else if (hit->cls == OutcomeClass::Ready) {
+      // P1 (a pending PI decision): with o_.outcome_narrowing false the code fixes nothing it leaves open.
       for (ConjunctResult& c : f->conj) {
         if (c.evaluated && !c.holds) {
           if (c.passage_unknown) {  // false wherever it is passed: it was not passed
+            if (!o_.outcome_narrowing) continue;
             c.evaluated = false;
             c.passage_unknown = false;
             c.source = LpSource::Outcome;
@@ -1992,7 +2025,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.contradicted = true;
             contra = true;
           }
-        } else if (c.unknown) {
+        } else if (c.unknown && o_.outcome_narrowing) {
           c.unknown = false;
           c.evaluated = true;
           c.holds = true;
@@ -2016,15 +2049,16 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
           finding(ev.id, op.name + " returned " + hit->code + " (not ready: " + hit->conjunct + "), and in every explanation of the real record that conjunct is " +
                              (not_passed ? "not reached" : "true") + ": analysis input error");
         } else {
-          if (!(c.evaluated && !c.holds && !c.passage_unknown)) {
+          const bool fixed_false = c.evaluated && !c.holds && !c.passage_unknown;
+          if (!fixed_false && o_.outcome_narrowing) {
             c.source = LpSource::Outcome;
             c.event = ev.id;
             narrowed = true;
+            c.evaluated = true;
+            c.holds = false;
+            c.unknown = false;
+            c.passage_unknown = false;
           }
-          c.evaluated = true;
-          c.holds = false;
-          c.unknown = false;
-          c.passage_unknown = false;
           chk = OutcomeCheck::Agrees;
         }
       }
@@ -2084,6 +2118,127 @@ void Replayer::decide_real(Frame* f, size_t k, const TraceEvent& ev) {
   decide(&o, OccStatus::Undetermined, DecidedAt::Return, ev.id);
 }
 
+// A registration or publication (SPEC 1.1 "Execution relations"): an effect on one resource (not a reset of
+// every resource of a kind, which names none) that may have been applied, with its target read with the
+// writer's own identity.  The target is established only where the expression and the writer's app_owner
+// fix it (an owner that is not confirmed or inferred leaves a target that reads `owner(exec)` open).
+void Replayer::note_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool maybe) {
+  if (!eff.res || !eff.all_kind.empty()) return;
+  if (eff.kind != EffectKind::Set && eff.kind != EffectKind::Raise && eff.kind != EffectKind::SetTag) return;
+  Publication pb;
+  pb.kind = eff.res->sort.kind_index;
+  pb.actor = ev.actor;
+  pb.maybe = maybe;
+  const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args, true);
+  pb.exact = !r.v.must_be_undefined && exact_key(r.v, &pb.key);
+  if (r.v.kind >= 0) pb.kind = r.v.kind;
+  pubs_.push_back(std::move(pb));
+}
+
+// The execution relation of one occurrence (SPEC 1.1, 1.10 item 10, ADR-056).  The actors involved are the
+// executing task of the use and the actors of the registrations and publications of the occurrence's key in
+// the record.  Each pair: either owner not confirmed or inferred -> ownership undetermined; the same task or
+// the same owning application -> intra-application; one created the other (the creating executor) ->
+// creation framework - new application; otherwise core-application where the record shows that one owner is
+// a core service, else inter-application (core-status-unknown when the record does not show it for both).
+// Several pairs: undetermined if any is, intra-application only if every pair is; otherwise the first of
+// inter-application, core-application, creation framework that occurs.  Nothing here reads the order of the
+// events (the relation is between actors, not an order between their events).
+void Replayer::relate(Occurrence* o) {
+  o->relation = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  o->relation_level = KZ_OWNER_LEVEL_UNDETERMINED;
+  o->counterparts.clear();
+  auto level_of = [&](const std::string& a) -> uint8_t {
+    const auto it = t_.owner_levels.find(a);
+    if (it == t_.owner_levels.end() || it->second == KZ_OWNER_LEVEL_UNDETERMINED) return KZ_OWNER_LEVEL_UNDETERMINED;
+    return t_.owners.count(a) != 0 ? it->second : static_cast<uint8_t>(KZ_OWNER_LEVEL_UNDETERMINED);
+  };
+  const phi::RspecDecl* rs = nullptr;
+  for (const phi::RspecDecl& r : p_.rspecs)
+    if (r.name == o->rspec) rs = &r;
+  if (rs == nullptr || !rs->key) {
+    o->relation_note = "the readiness specification has no key: no registration or publication to relate the use to";
+    return;
+  }
+  if (o->key.empty()) {
+    o->relation_note = "the record does not fix the key of the occurrence";
+    return;
+  }
+  const int32_t kk = rs->key->sort.kind_index;
+  const std::string kname = kk >= 0 ? p_.kinds[static_cast<size_t>(kk)].name : std::string("?");
+  std::set<std::string> cps, open_writers;
+  for (const Publication& pb : pubs_) {
+    if (pb.kind != kk) continue;
+    if (!pb.exact) open_writers.insert(pb.actor);
+    else if (pb.key == o->key) (pb.maybe ? open_writers : cps).insert(pb.actor);
+  }
+  for (const std::string& a : cps) open_writers.erase(a);
+  o->counterparts.assign(cps.begin(), cps.end());
+  const uint8_t lu = level_of(o->actor);
+  if (lu == KZ_OWNER_LEVEL_UNDETERMINED) {
+    o->relation_note = "the owner of the executing task " + o->actor + " is undetermined";
+    return;
+  }
+  if (!open_writers.empty()) {
+    o->relation_note = "a write of " + kname + " by " + *open_writers.begin() + " whose target the record does not establish (its owner is undetermined or a value is not recorded)";
+    return;
+  }
+  if (cps.empty()) {
+    o->relation_note = "no registration or publication of " + kname + key_text(o->key) + " in the record";
+    return;
+  }
+  uint8_t level = lu;
+  bool any_inter = false, any_inter_known = false, any_core = false, any_creation = false, all_intra = true;
+  std::string intra_note;
+  for (const std::string& c : cps) {
+    const uint8_t lc = level_of(c);
+    if (lc == KZ_OWNER_LEVEL_UNDETERMINED) {
+      o->relation_note = "the owner of " + c + ", which wrote " + kname + key_text(o->key) + ", is undetermined";
+      return;
+    }
+    level = std::min(level, lc);
+    if (c == o->actor) {
+      intra_note = intra_note.empty() || intra_note == "same task" ? "same task" : "same application";
+      continue;
+    }
+    if (t_.owners.at(c) == t_.owners.at(o->actor)) {
+      intra_note = "same application";
+      continue;
+    }
+    all_intra = false;
+    const auto cu = t_.creators.find(o->actor), cc = t_.creators.find(c);
+    if ((cu != t_.creators.end() && cu->second == c) || (cc != t_.creators.end() && cc->second == o->actor)) {
+      any_creation = true;
+      continue;
+    }
+    const auto ku = t_.owner_core.find(o->actor), kc = t_.owner_core.find(c);
+    const bool u_core = ku != t_.owner_core.end() && ku->second, c_core = kc != t_.owner_core.end() && kc->second;
+    if (u_core || c_core) {
+      any_core = true;
+    } else {
+      any_inter = true;
+      if (ku != t_.owner_core.end() && kc != t_.owner_core.end()) any_inter_known = true;
+    }
+  }
+  std::string who;
+  for (const std::string& c : cps) who += (who.empty() ? "" : ",") + c;
+  o->relation_level = level;
+  if (all_intra) {
+    o->relation = KZ_EXEC_RELATION_INTRA_APPLICATION;
+    o->relation_note = intra_note + " (" + who + ")";
+  } else if (any_inter) {
+    o->relation = KZ_EXEC_RELATION_INTER_APPLICATION;
+    o->relation_note = std::string(any_inter_known ? "different applications, neither a core service" : "different applications; core status not established") + " (" + who + ")";
+    if (!any_inter_known && !any_core) o->summary.flags |= KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN;
+  } else if (any_core) {
+    o->relation = KZ_EXEC_RELATION_CORE_APPLICATION;
+    o->relation_note = "different applications, a core service among them (" + who + ")";
+  } else if (any_creation) {
+    o->relation = KZ_EXEC_RELATION_CREATION_FRAMEWORK;
+    o->relation_note = "one created the other (" + who + ")";
+  }
+}
+
 // The summary view of every occurrence (SPEC 1.10, D2), computed last; for a real record also the
 // adequacy of each occurrence and what the replay established per kind and location.
 void Replayer::finish() {
@@ -2125,6 +2280,9 @@ void Replayer::finish() {
       o.summary.flags |= KZ_SUMMARY_FLAG_REAL_RECORD;
       if (o.outcome_narrowed) o.summary.flags |= KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
       if (r_.partial) o.summary.flags |= KZ_SUMMARY_FLAG_PARTIAL;
+      relate(&o);
+      o.summary.relation = o.relation;
+      if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED && o.relation_level == KZ_OWNER_LEVEL_INFERRED) o.summary.flags |= KZ_SUMMARY_FLAG_RELATION_INFERRED;
     }
   }
   if (!real_) return;
@@ -2280,6 +2438,9 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       if (o.has_owner_key) out += " " + key_text(o.owner_key);
       if (!o.passed_role.empty()) out += " passed " + o.passed_role + "=" + (o.has_passed ? hex_or_dec(o.passed) : std::string("(not recorded)"));
       out += "\n";
+      out += "  relation " + enum_text_of("KZ_EXEC_RELATION", o.relation);
+      if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED) out += " owners " + enum_text_of("KZ_OWNER_LEVEL", o.relation_level);
+      out += ": " + o.relation_note + "\n";
     }
   }
   out += "\nfindings " + std::to_string(r.findings.size()) + "\n";
@@ -2386,7 +2547,8 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       out->record = tok[1] == "real" ? RecordKind::Real : RecordKind::Model;
       continue;
     }
-    if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order") {
+    if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "owner_id" || tok[0] == "owner_core" ||
+        tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order") {
       if (out->record != RecordKind::Real) return line_error(line_no, "'" + tok[0] + "' belongs to a real record: 'record real' must come first");
       if (tok[0] == "start_evidence") {
         static const char* names[] = {"none", "init", "state-capture", "declared"};
@@ -2427,6 +2589,13 @@ Status parse_trace_text(const std::string& text, Trace* out) {
         else if (tok[2] == "confirmed") lv = KZ_OWNER_LEVEL_CONFIRMED;
         else return line_error(line_no, "expected: owner_level ACTOR confirmed|inferred|undetermined");
         out->owner_levels[tok[1]] = lv;
+      } else if (tok[0] == "owner_id") {
+        int64_t v = 0;
+        if (tok.size() != 3 || !parse_int(tok[2], &v) || v < 0 || v > 0xffffffffll) return line_error(line_no, "expected: owner_id ACTOR VALUE (a 32-bit identity value)");
+        out->owner_ids[tok[1]] = static_cast<uint32_t>(v);
+      } else if (tok[0] == "owner_core") {
+        if (tok.size() != 3 || (tok[2] != "yes" && tok[2] != "no")) return line_error(line_no, "expected: owner_core ACTOR yes|no");
+        out->owner_core[tok[1]] = tok[2] == "yes";
       } else if (tok[0] == "creator") {
         if (tok.size() != 3) return line_error(line_no, "expected: creator ACTOR CREATING_ACTOR");
         out->creators[tok[1]] = tok[2];
@@ -2507,6 +2676,8 @@ std::string trace_text(const Trace& t) {
       static const char* lv[] = {"undetermined", "inferred", "confirmed"};
       out += "owner_level " + kv.first + " " + (kv.second < 3 ? lv[kv.second] : "undetermined") + "\n";
     }
+    for (const auto& kv : t.owner_ids) out += "owner_id " + kv.first + " " + num(static_cast<int64_t>(kv.second)) + "\n";
+    for (const auto& kv : t.owner_core) out += "owner_core " + kv.first + (kv.second ? " yes" : " no") + "\n";
     for (const auto& kv : t.creators) out += "creator " + kv.first + " " + kv.second + "\n";
   }
   for (const auto& kv : t.ref_consts) out += "const " + kv.first + " " + num(kv.second) + "\n";

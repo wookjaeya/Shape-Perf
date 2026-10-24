@@ -51,7 +51,7 @@ text (.kzp) ──parse──▶ Profile ──normalize──▶ ──check─
 
 ```
 file     = "phi" INT ";" { decl } ;                 (* INT 는 1 이어야 한다 *)
-decl     = profile | source | const | context | scope | kind | loc | bind | site
+decl     = profile | source | const | context | scope | kind | loc | bind | site | role
          | op | init | hb | rspec | trusted | prov ;
 common   = "prov" NAME { "," NAME } | "guard" NAME cmp STR | "note" STR ;
 
@@ -73,6 +73,7 @@ kinditem = ( "states" NAME { "<" NAME } | "initial" NAME | "scope" NAME | "table
 loc      = "loc" NAME "{" { ( "struct" STR | "field" STR | "holds" sort | common ) ";" } "}" ;
 bind     = "bind" "field" STR STR "as" expr { common } ";" ;
 site     = "site" NAME "=" pattern { common } ";" ;
+role     = "role" NAME "{" { ( "op" NAME | "site" NAME | "purpose" NAME | common ) ";" } "}" ;
 pattern  = "fn" "(" STR ")" "." ( "call" "(" STR { "," argpred } ")" | "store" "(" NAME ")" | "load" "(" NAME ")"
                               | "memset" "(" NAME ")" | "loop" "(" "poll" ")" | "return" )
            [ "nth" INT ] [ "macro" ( "yes" | "no" | "any" ) ] ;
@@ -108,7 +109,7 @@ rspec    = "rspec" NAME "{" { ( "use" "op" NAME | "key" expr | "requires" expr
                             | "allowed" "{" { allowedentry ";" } "}" } "}" ;
 allowedentry = ( "documented_drop" STR | "returned_and_tested" "codes" "{" names "}" [ "continuation" STR ]
                | "retry_until_ready" "codes" "{" names "}" "bound" NAME | "fallback" NAME
-               | "defer_by_design" STR | "exit" NAME STR ) [ "conflicts_appreq" ] [ "prov" names ] ;
+               | "defer_by_design" STR | "exit" NAME STR ) [ "conflicts_appreq" ] [ "conflicts_caller" ] [ "prov" names ] ;
 
 trusted  = "trusted" NAME "{" { ( "class" NAME | "statement" STR | "refutable_by" names | common ) ";" } "}" ;
 prov     = "prov" NAME "{" { ( "tier" NAME | "kind" NAME | "side" NAME | "file" STR | "lines" INT [ INT ]
@@ -249,6 +250,19 @@ rspec NAME {
 
 **caller 쪽 기록이 될 수 있는 tier** (QT-4, QT-9) [M: `test_core_phi_check`, `test_core_phi_allowed`]: `side caller` 는 호출자에게 하는 말을 *인용한 본문*에만 붙는다: `contract-backed`(API 문서), `requirement-derived`(응용·임무 요구; 이 빌드의 어휘에는 아직 없음, §10), `admitted`(사용 코드의 주석이 처리를 인정함, SPEC §3.9 "side caller, code_admission"), `issue-derived`(유지보수자가 이슈·커밋에서 한 말). `code-derived`(코드 패턴은 도구의 고정 규칙, side `rule`), `researcher`, `unreferenced` 기록에 `side caller` 를 붙이면 검사기 오류다. 그래서 손으로 넣은 기록은 `appreq` 가 될 수 없고(QT-9: 연구자가 쓴 appreq 로 발생을 readiness violation 으로 만들지 않는다), 판정하는 Allowed 항목도 만들 수 없다(QT-4: 연구자 규칙 하나는 수용을 확정하지 않는다). `derive_caller_allowed` 도 검사되지 않은 프로필에서 그런 기록을 만나면 `rule` 로 읽고 appreq 를 미지정으로 본다.
 
+**caller 항목끼리의 충돌** (2026-10-24, C1 P3 대안): `conflicts_caller` 는 저자가 기록한 표시이다. 같은 not-ready 결과에 양립하지 않는 계속을 받아들이는 caller 항목이 둘이면(SPEC 1.6 step 3, QT-5) 그 항목들에 붙인다. `derive_caller_allowed` 는 `conflicts_appreq` 와 같이 `unspecified_by_reference` 와 충돌 표시를 낸다. 양립 여부를 계산하지는 않는다(프로필에 그 개념이 없다).
+
+### 5.7a role: 호출 문맥의 역할 (SPEC rev 1.3 보충 2026-10-24, §1.6 "Call contexts")
+
+```
+site cf_lookup_call = fn("CF_CFDP_InitEngine").call("OS_CountSemGetIdByName") prov ...;
+role cf-dependent-lookup { op OS_CountSemGetIdByName; site cf_lookup_call; purpose dependent_use; prov ...; }
+```
+
+역할은 한 연산의 호출 문맥이 무엇을 위한 호출인지를 출처와 함께 선언한다. `site` 는 선언된 호출 패턴(소스 결합)이고, 바이너리 결합은 관측 계획이 한다. `purpose` 어휘는 `dependent_use`(준비 요구가 붙는 의존적 사용)와 `existence_probe`(not-found 결과가 호출자 자신의 생성 조건인 존재 확인)이다. 검사기 [M: `test_core_phi_check` 10건]: 연산·사이트가 있음, 사이트가 그 연산 심볼의 호출 패턴, 사이트당 역할 하나, 그리고 호출을 사양에서 빼는 역할(`dependent_use` 가 아닌 것)은 tier 가 researcher·unreferenced 가 아닌 기록을 하나 이상 인용해야 한다(손으로 넣은 기록만으로 문맥을 빼지 못한다). 앱 이름 어휘는 없다.
+
+재생 의미 [M: golden `replay_c1_*`]: 역할의 사이트 사건은 그 호출이 반환된 바로 뒤, 같은 행위자에서 온다(호출자 안 after-call 지점). 그때 그 호출의 발생에 `context` 가 붙고, `existence_probe` 이면 그 호출이 시작한 발생은 사례가 아니다: 발생 목록에서 빠지고(서수도 세지 않음) `role facts` 절에 `role_fact … not an instance of <rspec>` 로 남는다. 바로 앞 사건이 그 연산의 반환이 아니면 발견 사항이고 아무것도 묶지 않는다(발생은 그대로 사례). 역할 사이트가 관측되지 않은 호출은 사례로 남는다(빼기에는 기록된 역할이 필요하다).
+
 ### 5.8 trusted, context, scope
 
 `trusted NAME { class declared_trusted|assumption; statement "..."; refutable_by O9; }` 는 신뢰 원장 (iii)부에 올라갈 항목이다: **반박될 수 있을 뿐 증명된 것이 아니다**. `context { owner_kind K; }` 는 `owner(exec)` 의 종류다. `scope { kind K; request S; teardown T; }` 는 기본 범위(SHUTDOWN_REQ 이전)를 정의한다: 종류 K 의 상태가 `request` 이상이 되는 효과가 SHUTDOWN_REQ 지점이다.
@@ -298,7 +312,7 @@ T_SB CFE_EVS_SendEventWithAppID call arg.AppID=0x110002
 T_SB CFE_EVS_SendEventWithAppID ret result=0
 ```
 
-정수는 10진·16진·음수, `@NAME` 은 텍스트, `result=` 는 결과. 오류는 `trace line N: ...`.
+정수는 10진·16진·음수, `@NAME` 은 텍스트, `result=` 는 결과. 오류는 `trace line N: ...`. sort `Str` 매개변수는 텍스트로 준다(`arg.sem_name=@BP0_tsem`): 식은 그 문자열의 handle(`str_handle`)을 읽는다(2026-10-24).
 
 ### 7.2 알고리즘
 

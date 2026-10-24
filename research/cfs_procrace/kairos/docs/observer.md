@@ -25,8 +25,8 @@
 ## 3. 사용법
 
 ```
-kz anchor <binary> <profile.kzp> -o <basis.kz> [--source-root DIR] [--root NAME=DIR]... [--binary-path PATH]
-kz observe <basis.kz> <profile.kzp> -o <run.kzt> [옵션] -- <명령> [인자...]
+kz anchor <binary> <profile.kzp> -o <basis.kz> [--source-root DIR] [--root NAME=DIR]... [--binary-path PATH] [--bin NAME]
+kz observe <basis.kz> <profile.kzp> -o <run.kzt> [--basis <basis2.kz>]... [옵션] -- <명령> [인자...]
 kz hits <run.kzt> [--site 라벨 --before 라벨] [--group-slot 역할] [--group-return-slot 역할] [--basis basis.kz --group-caller]
 ```
 
@@ -106,6 +106,12 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 **선택 사항(2026-10-24, W2 잔여)** [D]. `--outcome-narrowing off` 는 PI 결정 P1 의 대안(반환 코드가 열린 조건을 고정하지 않음)으로 재생한다. 기본은 `on`(현행)이다. `--compare-narrowing` 은 다른 쪽으로도 재생해 두 읽기의 요약 개수(관측, 관계, 관계×관측)를 나란히 쓰고, 요약이 달라진 발생 수를 적는다. 본 출력은 선택한 쪽이다. 출력 끝에는 항상 `summary counts` 가 붙는다. `--out` 은 선택한 쪽의 요약·모델 id·적합성·정체성과 ACTOR_OWNERS 를 컨테이너에 쓴다(`docs/schema.md` §11). 발생마다 `relation` 줄이 붙는다(`docs/phi_reference.md` §7.6).
 
 **S1-R2 개발 실행 컨테이너에 적용한 결과** [M] (개발 기록이며 본 실험 결과가 아니다; `env/logs/s1r2_p1.kzt`, 상수 `CFE_PLATFORM_ES_MAX_APPLICATIONS` 는 고정 소스의 추출 golden `tests/static/data/core_cpu1.golden:44` 의 값): 발생 271개 중 `OBSERVED_VIOLATION` 24개(전달된 id 인자 0, 인자만으로 결정; 소유 앱 `undetermined`), `INCONCLUSIVE` 247개(사유 `resource_or_lifetime_unmatched`, `effect_point_ambiguous`, `effect_unsupported`, `not_evaluated`: 등록 writer 와 등록 조건의 지점이 계획에 없음), `NO_VIOLATION_IN_CHECKED_PREFIX` 0개, 입력 오류 0개. SPEC App. A.1 의 기대 결과와 같은 갈래이다. 같은 컨테이너의 파생 기록 71개(사이트 하나 제거, 손실을 선언한 사건 묶음 삭제, 흩어진 삭제(선언·무선언), 늦은 시작)에서 원래보다 결정적인 결과는 0개였다(`test_realrecord_derived`). 이 개수는 분석기의 불완전 정보 처리 시험이며 프로그램에 대한 증거가 아니다.
+
+### 3.5 여러 파일의 계획 (2026-10-24, C1) [M]
+
+프로세스가 적재하는 공유 객체(cFS 앱 `.so`)도 같은 방식으로 관측한다. 계획에 `binary` 를 여러 번 쓰면(첫째가 실행 파일) 사이트마다 `bin=<이름>` 으로 파일을 고른다. 파일마다 basis 가 하나이고(`kz anchor --bin`, 기본은 파일 이름이 같은 선언), `kz observe` 는 첫 basis(주 파일)와 `--basis` 들을 이름으로 맞춘다. 파일마다 한 번 열어 해시·build-id·대상 바이트를 basis 와 대조하고 그 기술자로 uprobe 를 건다. uprobe 는 inode 에 등록되므로 나중에 `dlopen` 으로 매핑되는 파일도 매핑 때 걸린다. 해석기는 파일마다 적재 편향을 따로 구하고(진입·점 표본과 그 파일의 MMAP2), 컨테이너의 SITES 는 사이트마다 그 파일의 inode·경로·build-id 를, FILE_HASHES 는 모든 파일을 싣는다. 진입·복귀 짝은 (파일, 기호)로 맺는다. 한 파일 계획의 basis·plan hash·컨테이너는 바뀌지 않는다(`test_probe_golden`). 시험: `test_probe_profile`, `test_probe_basis`(두 파일 계획, 선 표 없는 파일). C1 실행: `docs/c1_smoke_observe.md`.
+
+**선 표 없는 빌드**: DWARF 가 없으면 선 사이트를 풀 수 없다. `point func=<함수> after-call=<호출 대상>` 은 함수 안에서 그 호출 대상(기호 또는 PLT 스텁)으로 가는 `call rel32` 를 찾는다. 후보가 없거나 둘 이상이면(명령 경계를 모르므로 고르지 않는다) 거부하고, 반환 지점이 함수 안 분기의 목적지이면 거부한다(W2 규칙과 같음). basis 는 선 사이트가 있는 파일에만 선 표를 요구한다.
 
 ## 4. 관측 프로필 (`kzp-observe 1`)
 

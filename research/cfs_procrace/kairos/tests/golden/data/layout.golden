@@ -1061,6 +1061,7 @@ flags KZ_OWNER_EVIDENCE
   0x20 ID_UNVERIFIED "id-unverified"
   0x40 RAW_THREAD "raw-thread"
   0x80 ANALYSED_TABLE_EXCLUDED "analysed-table-excluded"
+  0x100 CREATOR_OWNER "creator-owner"
 flags KZ_IDENTITY_FLAG
   0x1 EXEC_KNOWN "exec-known"
   0x2 CREATOR_KNOWN "creator-known"
@@ -1102,6 +1103,10 @@ enum KZ_DECODER
   0x2 SPAWN_CREATE "spawn-create"
   0x3 SPAWN_RETURN "spawn-return"
   0x4 THREAD_ENTRY "thread-entry"
+  0x5 OWNER_REQUEST "owner-request"
+  0x6 CHILD_REQUEST "child-request"
+  0x7 REQUEST_RETURN "request-return"
+  0x8 SPAWN_ID "spawn-id"
 enum KZ_SLOT_SRC
   0x0 NONE "none"
   0x1 REG "reg"
@@ -1161,6 +1166,8 @@ flags KZ_THREAD_FLAG
   0x200 ENTRY_UNMATCHED "entry-unmatched"
   0x400 MATCH_BY_TIME "match-by-time"
   0x800 ID_UNVERIFIED "id-unverified"
+  0x1000 ID_MATCHED "id-matched"
+  0x2000 ID_MISMATCH "id-mismatch"
 enum KZ_SYMBOL_BIND
   0x0 LOCAL "local"
   0x1 GLOBAL "global"
@@ -1169,6 +1176,7 @@ enum KZ_TARGET_KIND
   0x0 NONE "none"
   0x1 FUNC_ENTRY "func-entry"
   0x2 AFTER_CALL "after-call"
+  0x3 LINE_START "line-start"
 enum KZ_ARG_KIND
   0x0 NONE "none"
   0x1 CONST "const"
@@ -1859,4 +1867,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=153899a4b8154a87aff6d7273c3ed301899d3bc685b1b67e1064fb35d1b7add1
+fingerprint=dfe0cc6f22dc7a621530a4d31427d5f3cf9034338e6ca5b17c23f9e257664fbd

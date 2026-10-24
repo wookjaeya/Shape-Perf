@@ -331,11 +331,15 @@ enum kz_raw_section_id {
 /*
  * app_owner of one thread incarnation (SPEC 1.2 "Creating application", 5.7, ADR-056; 32 bytes).
  * `thread` and `creator_thread` are THREADS indices (the executing task and the creating executor);
- * `creation_event` the RAW_EVENTS index of the creation request or creating call; `owner_key` the key
- * of the owning application's record in the profile's owner kind (KZ_NONE32: not established, also
- * when only the name is known); `level` KZ_OWNER_LEVEL and `evidence` KZ_OWNER_EVIDENCE.  The owner
- * is never taken from a table whose ordering is analysed (EV-03).  A thread without a record here
- * has an undetermined owner.
+ * `creation_event` the RAW_EVENTS index of the creation request or creating call; `owner_key` the
+ * identity of the owning application as the creation evidence states it: the value in the id space
+ * of the profile's owner kind that the creation request passed (OWNER_REQUEST a[2]), or, for a
+ * CHILD_REQUEST, the creating task's own app_owner.  KZ_NONE32: not established, also when only the
+ * name is known.  The replay maps it to the owner kind's record key with the kind's id rule (W2,
+ * 2026-10-24; the observer knows no framework rule).  `level` KZ_OWNER_LEVEL and `evidence`
+ * KZ_OWNER_EVIDENCE; `app_name` is the kernel name of the task the request started (display only,
+ * never a key).  The owner is never taken from a table whose ordering is analysed (EV-03).  A thread
+ * without a record here has an undetermined owner.
  */
 #define KZ_APP_OWNER_FIELDS(X, T)                                                    \
   X(T, uint32_t, thread, )                                                           \
@@ -410,11 +414,27 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  *   SPAWN_RETURN  creator side, RET:   a[3] "return_address" (the sample ip); a[0] status
  *   THREAD_ENTRY  child side, ENTRY:   a[0] the id the thread announces (any role, at most
  *                 4 bytes)
+ * The four below carry the creation-side evidence of app_owner (SPEC 1.2 "Creating application",
+ * 5.7 items 2 and 4, ADR-056; W2 2026-10-24).  They name what a value is in a creation, never which
+ * framework function carries it; the profile binds them:
+ *   OWNER_REQUEST   creator side, ENTRY: a request to start a task for an application named by an
+ *                   argument: a[2] "owner_id" (at most 4 bytes; the identity of the application the
+ *                   task will belong to), a[3] "return_address"
+ *   CHILD_REQUEST   creator side, ENTRY: a request to start a task for the application of the
+ *                   requesting task itself (a child task): a[3] "return_address".  A request nested
+ *                   in it on the same thread is not read for the owner (its owner argument is
+ *                   the creator's own lookup)
+ *   REQUEST_RETURN  creator side, RET: the return of either request: a[3] "return_address"
+ *   SPAWN_ID        creator side, ENTRY inside an open SPAWN_CREATE call of the same thread: a[0]
+ *                   the id the spawn assigns to the new thread and passes to it (any role, at most
+ *                   4 bytes): the value the child announces at THREAD_ENTRY
  */
 #define KZ_ENUM_DECODER(ITEM, P)                                                     \
   ITEM(P, NONE, 0, "none") ITEM(P, GENERIC, 1, "generic")                            \
   ITEM(P, SPAWN_CREATE, 2, "spawn-create") ITEM(P, SPAWN_RETURN, 3, "spawn-return")  \
-  ITEM(P, THREAD_ENTRY, 4, "thread-entry")
+  ITEM(P, THREAD_ENTRY, 4, "thread-entry") ITEM(P, OWNER_REQUEST, 5, "owner-request") \
+  ITEM(P, CHILD_REQUEST, 6, "child-request") ITEM(P, REQUEST_RETURN, 7, "request-return") \
+  ITEM(P, SPAWN_ID, 8, "spawn-id")
 
 #define KZ_ENUM_SLOT_SRC(ITEM, P)                                                    \
   ITEM(P, NONE, 0, "none") ITEM(P, REG, 1, "reg") ITEM(P, STACK, 2, "stack")         \
@@ -466,8 +486,13 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  *   MATCH_BY_TIME    the creator link (matched or ambiguous) rests on timestamp containment only.
  *   ID_UNVERIFIED    the announced id was recorded but not compared with a creator-side value:
  *                    the id the spawn call assigns is an out-parameter that the perf-sample
- *                    backend cannot read (it cannot dereference memory).  Deferred to a backend
- *                    that reads it at the spawn return.
+ *                    backend cannot read (it cannot dereference memory).  A plan with a SPAWN_ID
+ *                    site reads the same value where the spawn passes it to the new thread.
+ *   ID_MATCHED       the announced id equals the id the creator side assigned inside the spawn
+ *                    call whose interval holds the thread's FORK (SPAWN_ID): the creator link no
+ *                    longer rests on time alone; MATCH_BY_TIME and ID_UNVERIFIED are cleared.
+ *   ID_MISMATCH      a creator-side id was read for the call that the FORK time matched, and it
+ *                    differs from the id the thread announced: the link is not established.
  */
 #define KZ_ENUM_THREAD_FLAGS(ITEM, P) /* set */                                      \
   ITEM(P, FORK_SEEN, 0x1, "fork-seen") ITEM(P, COMM_SEEN, 0x2, "comm-seen")          \
@@ -477,13 +502,17 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
   ITEM(P, NAME_AFTER_FIRST_EVENT, 0x40, "name-after-first-event")                    \
   ITEM(P, TID_REUSED, 0x80, "tid-reused") ITEM(P, EXIT_SEEN, 0x100, "exit-seen")     \
   ITEM(P, ENTRY_UNMATCHED, 0x200, "entry-unmatched")                                \
-  ITEM(P, MATCH_BY_TIME, 0x400, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x800, "id-unverified")
+  ITEM(P, MATCH_BY_TIME, 0x400, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x800, "id-unverified") \
+  ITEM(P, ID_MATCHED, 0x1000, "id-matched") ITEM(P, ID_MISMATCH, 0x2000, "id-mismatch")
 
 #define KZ_ENUM_SYMBOL_BIND(ITEM, P) \
   ITEM(P, LOCAL, 0, "local") ITEM(P, GLOBAL, 1, "global") ITEM(P, WEAK, 2, "weak")
 
+/* LINE_START: the first instruction of a source line's code, before the statement executes (a store
+ * without a call on its line, e.g. an effect written as an assignment). */
 #define KZ_ENUM_TARGET_KIND(ITEM, P) \
-  ITEM(P, NONE, 0, "none") ITEM(P, FUNC_ENTRY, 1, "func-entry") ITEM(P, AFTER_CALL, 2, "after-call")
+  ITEM(P, NONE, 0, "none") ITEM(P, FUNC_ENTRY, 1, "func-entry") ITEM(P, AFTER_CALL, 2, "after-call") \
+  ITEM(P, LINE_START, 3, "line-start")
 
 #define KZ_RAW_ENUMS(D)                           \
   D(KZ_PHASE, KZ_ENUM_PHASE, 0)                   \

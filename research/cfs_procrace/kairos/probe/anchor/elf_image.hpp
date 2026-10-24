@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "kz/core/container.hpp"
@@ -66,6 +67,9 @@ class ElfImage {
   std::vector<const ElfFunction*> find_functions(std::string_view name) const;
   // The function symbol containing vaddr, or null.
   const ElfFunction* function_at(uint64_t vaddr) const;
+  // The address of the PLT stub through which the file calls the shared-library function `name`
+  // (e.g. memset), or 0 if the file has none.  Stubs are not function symbols of the file.
+  uint64_t plt_stub(std::string_view name) const;
 
  private:
   Bytes bytes_;
@@ -73,6 +77,7 @@ class ElfImage {
   std::string build_id_;
   std::vector<ElfSegment> segments_;
   std::vector<ElfFunction> functions_;
+  std::vector<std::pair<std::string, uint64_t>> plt_;  // shared-library function -> its PLT stub address
   struct Sec {
     std::string name;
     uint64_t offset = 0, size = 0;

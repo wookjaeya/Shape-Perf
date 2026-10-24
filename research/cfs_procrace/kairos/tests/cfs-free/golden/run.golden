@@ -1,11 +1,11 @@
 kz-dump 1
-container abi=1 kind=run size=2864
+container abi=1 kind=run size=2976
 basis_sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
 profile_sha256=1b92e0e511b97a41704a8c80a7b45b55f670f320189a080f416a7d2450e8c5e8
 tool_sha256=6270daf2ba43960aa8613e2de3454804a903b33cea853e35fc8fa3ccde1f881c
 parents=1
   parent[0] kind=basis role=0 sha256=63698f33925b5648fad4a57af3deba6dc79d1699a499f09c1c96f08bdd704945
-sections=13
+sections=14
 section STRINGS type=1 version=1 record=kz_byte record_size=1 count=294 crc32=0x330fcc4f
 section BASIS type=2 version=1 record=kz_basis_item record_size=28 count=3 crc32=0xe6352aa9
   BASIS[0] name="observer.backend" value="perf-sample (unit-test value)" policy=unset prov=none deviation=none
@@ -54,5 +54,8 @@ section THREADS type=52 version=1 record=kz_thread record_size=88 count=2 crc32=
   THREADS[1] pid=100 tid=101 generation=0 ptid=100 announced_id=256 flags={fork-seen,comm-seen,entry-seen,spawn-matched,exit-seen,match-by-time,id-unverified} creator_event=0 first_event=3 t_fork=900 t_exit=2000 t_name=950 entry_fn=0x7000000010c0 priority=11 n_events=1 name="TASK_A" entry_symbol="g"
 section MAPS type=53 version=1 record=kz_map_ev record_size=88 count=1 crc32=0xc127dd69
   MAPS[0] t_ns=550 addr=0x700000000000 len=12288 pgoff=0x0 ino=4242 bias=0x700000000000 pid=100 tid=100 dev_major=254 dev_minor=0 prot=5 flags=2 bias_known=1 path="/synthetic/synthetic.bin"
-artifact_sha256=d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7
-artifact_sha256 d800b71b123daf93e2f61b1c35a17acbf17ea09f6ee78aff9d02127a0e1e7bc7
+section ACTOR_OWNERS type=56 version=1 record=kz_app_owner record_size=32 count=2 crc32=0xb4b2473d
+  ACTOR_OWNERS[0] thread=0 creator_thread=none creation_event=none owner_key=none level=undetermined evidence={raw-thread} app_name=""
+  ACTOR_OWNERS[1] thread=1 creator_thread=0 creation_event=0 owner_key=1114115 level=inferred evidence={creation-request,fork-in-creating-call,match-by-time,id-unverified} app_name="TASK_A"
+artifact_sha256=41f68d8a07bab1722c0aa9bf3c0440fad2c8a5d1d1780d8188640df2ea3322b3
+artifact_sha256 41f68d8a07bab1722c0aa9bf3c0440fad2c8a5d1d1780d8188640df2ea3322b3

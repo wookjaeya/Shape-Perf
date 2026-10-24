@@ -761,12 +761,15 @@ KZ_CORE_RECORDS(KZ_RECORD)
 /* The evidence app_owner rests on (SPEC 5.7 items 1-4).  match-by-time: the creator link rests on the
  * containment of the fork record in the creating call alone (one thread's clock, A-CLK-PO);
  * id-unverified: the announced id was not compared with a creator-side value; analysed-table-excluded:
- * the task-application table was not used because its ordering is analysed (EV-03). */
+ * the task-application table was not used because its ordering is analysed (EV-03); creator-owner: a child
+ * task's owner is its creating task's own app_owner (the request names no application), and the level is
+ * at most the creating task's level. */
 #define KZ_ENUM_OWNER_EVIDENCE(ITEM, P) /* set */                                       \
   ITEM(P, CREATION_REQUEST, 0x1, "creation-request") ITEM(P, FORK_IN_CALL, 0x2, "fork-in-creating-call") \
   ITEM(P, ANNOUNCED_ID, 0x4, "announced-id") ITEM(P, ES_RECORDS, 0x8, "es-records")        \
   ITEM(P, MATCH_BY_TIME, 0x10, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x20, "id-unverified") \
-  ITEM(P, RAW_THREAD, 0x40, "raw-thread") ITEM(P, ANALYSED_TABLE_EXCLUDED, 0x80, "analysed-table-excluded")
+  ITEM(P, RAW_THREAD, 0x40, "raw-thread") ITEM(P, ANALYSED_TABLE_EXCLUDED, 0x80, "analysed-table-excluded") \
+  ITEM(P, CREATOR_OWNER, 0x100, "creator-owner")
 
 #define KZ_ENUM_IDENTITY_FLAGS(ITEM, P) /* set */                                       \
   ITEM(P, EXEC_KNOWN, 0x1, "exec-known") ITEM(P, CREATOR_KNOWN, 0x2, "creator-known")      \

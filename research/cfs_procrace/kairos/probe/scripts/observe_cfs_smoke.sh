@@ -2,8 +2,17 @@
 # observe_cfs_smoke.sh -- one observation of the unmodified cFS by `kz observe` (sub-gate S1-R2
 # functional check: three runs, one at a time, ordinals 0, 1, 2).
 #
-#   observe_cfs_smoke.sh <tag> <kz-executable> <run-ordinal>     e.g. s1r2_p2 /path/to/kz 1
+#   observe_cfs_smoke.sh <tag> <kz-executable> <run-ordinal> [--out-dir DIR] [--purpose functional-check|pilot]
+#                                                                   e.g. s1r2_p2 /path/to/kz 1
 #   observe_cfs_smoke.sh --xcheck <kz> <basis.kz> <profile.kzp> <out>   (the anchor cross-check alone)
+#
+#   --out-dir DIR   where every output goes (default env/logs, as for s1r2_p1).  W2 (2026-10-24): runs
+#                   are kept outside the repository and apart from earlier development records.
+#   --purpose P     what the run is, written into its conditions file: functional-check (default: the
+#                   S1-R2 three-run functional check of docs/observer_smoke_run.md section 9) or pilot (a
+#                   pilot/dev run: not a run of the fixed main set, whose repetition count no reference
+#                   fixes and the PI decides, D14).  Options are arguments, never environment variables:
+#                   the script's environment reaches cFS.
 #
 # Must be started as root with CFS_NORMAL_USER set (the rule of env/run_cfs.sh).  Only ONE cFS run may
 # be active on the host; run_cfs.sh refuses to start if another instance exists.  This script changes
@@ -68,19 +77,34 @@ if [ "${1:-}" = "--xcheck" ]; then
     exit $?
 fi
 
-TAG="${1:?usage: $0 <tag> <kz-executable> <run-ordinal>}"
+TAG="${1:?usage: $0 <tag> <kz-executable> <run-ordinal> [--out-dir DIR] [--purpose functional-check|pilot]}"
 KZ_BIN="${2:?usage: $0 <tag> <kz-executable> <run-ordinal>}"
 ORDINAL="${3:?usage: $0 <tag> <kz-executable> <run-ordinal>}"
 case "${ORDINAL}" in ''|*[!0-9]*) echo "run-ordinal must be a number" >&2; exit 64;; esac
+shift 3
+OUT_DIR=""
+PURPOSE="functional-check"
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --out-dir) OUT_DIR="${2:?--out-dir needs a directory}"; shift 2 ;;
+        --purpose) PURPOSE="${2:?--purpose needs a value}"; shift 2 ;;
+        *) echo "unknown argument: $1" >&2; exit 64 ;;
+    esac
+done
+case "${PURPOSE}" in functional-check|pilot) ;; *) echo "--purpose is functional-check or pilot" >&2; exit 64 ;; esac
 KZ_BIN="$(readlink -f "${KZ_BIN}")"
 [ -x "${KZ_BIN}" ] || { echo "not an executable: ${KZ_BIN}" >&2; exit 64; }
 ENV_DIR="$(cd "${KAIROS}/../env" && pwd)"
 REPO="$(cd "${KAIROS}/.." && pwd)"
 LOGS="${ENV_DIR}/logs"
+if [ -n "${OUT_DIR}" ]; then
+    mkdir -p "${OUT_DIR}"
+    LOGS="$(cd "${OUT_DIR}" && pwd)"
+fi
 CFS_DIR="${CFS_DIR:-/home/user/work/procrace/cfs_ref/cFS}"
 EXE_DIR="${CFS_DIR}/build-native_std/exe/cpu1"
 BUILD_ROOT="${KZ_BUILD_ROOT:-/home/user/work/kairos-build}"
-REF_META="${LOGS}/r2_g1_gdb_operational_esrestart.log.meta"   # the reference runs' environment names (g1 = g2 = g3)
+REF_META="${ENV_DIR}/logs/r2_g1_gdb_operational_esrestart.log.meta"   # the reference runs' environment names (g1 = g2 = g3)
 : "${CFS_NORMAL_USER:?set CFS_NORMAL_USER (env/ENV.md E1)}"
 [ "$(id -u)" = 0 ] || { echo "must run as root (the observer is root: D1)" >&2; exit 2; }
 for f in driver.txt persist_before.txt persist_after.txt basis.kz conditions.tsv kzt kzt.record.txt hits.txt source.diff anchor_xcheck.txt; do
@@ -106,7 +130,7 @@ mkdir -p "${COPY_DIR}"
 cp -p "${KZ_BIN}" "${COPY_DIR}/kz"
 
 {
-    echo "observe_cfs_smoke.sh tag=${TAG} run_ordinal=${ORDINAL} start_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+    echo "observe_cfs_smoke.sh tag=${TAG} run_ordinal=${ORDINAL} purpose=${PURPOSE} out_dir=${LOGS} start_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
     echo "kz=${KZ_BIN} sha256=$(sha256sum "${KZ_BIN}" | cut -c1-64)"
     echo "kz.copy=${COPY_DIR}/kz sha256=$(sha256sum "${COPY_DIR}/kz" | cut -c1-64) (outside the repository; the tool hash in the container identifies its sources)"
     echo "kz.source: repository commit ${COMMIT}; uncommitted changes of kairos/ in ${TAG}_source.diff sha256=$(sha256sum "${LOGS}/${TAG}_source.diff" | cut -c1-64)"
@@ -149,12 +173,17 @@ N_USED="$(printf '%s\n' "${USED_NAMES}" | grep -c .)"
     echo "item${T}observer.user${T}root (PI decision D1: the observer runs as root, cFS as the normal user)${T}from-reference"
     echo "item${T}observer.method${T}kz observe, perf-sample backend, fidelity F0 (uprobes by file and offset; the file on disk is not modified)${T}deviation"
     echo "item${T}observer.proc_capture${T}full (kz observe default; the same as s1r2_p1): /proc reads of the running target are counted in PERTURBATION proc-capture${T}unspecified_by_reference"
-    echo "item${T}run.count${T}3 (S1-R2 functional check: s1r2_p1 was ordinal 0; this run is ordinal ${ORDINAL})${T}deviation"
+    if [ "${PURPOSE}" = pilot ]; then
+        echo "item${T}run.purpose${T}pilot/dev run of the plan in ${PROFILE##*/} (not a run of the fixed main run set; masterplan 2026-10-24 section 3.4, SPEC rev 1.3 ADR-057)${T}unset"
+        echo "item${T}run.count${T}this run alone (ordinal ${ORDINAL}); the repetition count of the main run set is not fixed by the references and is the PI's decision (D14)${T}unspecified_by_reference"
+    else
+        echo "item${T}run.count${T}3 (S1-R2 functional check: s1r2_p1 was ordinal 0; this run is ordinal ${ORDINAL})${T}deviation"
+    fi
     echo "item${T}run.stratum${T}not established: RUNMETA stratum none (core-cpu1 is read before the run; see the deviation)${T}deviation"
     echo "item${T}persist.before${T}${TAG}_persist_before.txt sha256 $(sha256sum "${LOGS}/${TAG}_persist_before.txt" | cut -c1-64)${T}unset"
     echo "item${T}host.kernel_vs_reference${T}$(uname -r) (reference runs: 6.18.44-fc-v80, env/logs/r2_g1_gdb_operational_esrestart.log.meta)${T}deviation"
     echo "deviation${T}observer.method${T}gdb -batch breakpoints under RUN_CFS_WRAP, all-stop (env/run_r2_gdb.sh)${T}kz observe perf-sample uprobes, no stop of the process${T}these runs exercise the new observer (sub-gate S1-R2)${T}the two methods perturb the run differently (gdb stops the process at every hit, uprobes do not); no equivalence of the two observations is claimed${T}no"
-    echo "deviation${T}run.count${T}not fixed by the references: PI decision D14 decides N per purpose at S1 and freezes it before the main experiment${T}3 runs, one at a time (ordinals 0, 1, 2; this run ${ORDINAL})${T}the functional check uses the count of the reference gdb runs r2_g1..r2_g3 (3), as the task rule says${T}no frequency, spread or overhead is claimed from three runs; they show whether the observer's counts agree run by run${T}no"
+    [ "${PURPOSE}" = pilot ] || echo "deviation${T}run.count${T}not fixed by the references: PI decision D14 decides N per purpose at S1 and freezes it before the main experiment${T}3 runs, one at a time (ordinals 0, 1, 2; this run ${ORDINAL})${T}the functional check uses the count of the reference gdb runs r2_g1..r2_g3 (3), as the task rule says${T}no frequency, spread or overhead is claimed from three runs; they show whether the observer's counts agree run by run${T}no"
     echo "deviation${T}host.kernel_vs_reference${T}6.18.44-fc-v80 (reference runs, 2026-10-08)${T}$(uname -r)${T}the VM kernel changed since the reference runs; group A is not re-measured yet (PI decision D11)${T}timing and scheduling may differ from the reference runs; not quantified${T}no"
     echo "deviation${T}run.stratum${T}cold = the first run after a VM boot, file cache not warmed (env/BASELINE_MEASURE.md)${T}not established, RUNMETA stratum none: core-cpu1 is read before the run by sha256sum, kz anchor and the observer's own hash, and the cache state is neither measured nor controlled${T}the procedure must read the binary to anchor and verify the probes before attaching${T}the executable's pages are in the cache; the startup order and duration may differ from a cold boot${T}yes"
 } > "${LOGS}/${TAG}_conditions.tsv"

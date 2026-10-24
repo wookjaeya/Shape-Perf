@@ -216,3 +216,32 @@ L-DPOR, L-DEAD, L-REF, L-PRED, L-LOOP, L2, L3: 인증서 경로가 진행 결과
 - SPEC A.1의 기대(경로 줄 번호, 표의 항목)는 App. A.1에 쓰인 대로 옮겼다. 이번 단계에서 모든 줄 번호를 다시 읽은 것은 아니다. 이번에 다시 읽은 것은 `cfe_evs.c`의 거부 분기(L185–L188, L204)이다 [F]. 나머지는 SPEC의 인용을 그대로 쓴다 [U: 이번 단계 재확인 안 함].
 - R2에 병합된 수정이 없어 대조 구성(P-R2CTRL = (c2)를 1차로 채택)은 아직 없다. 이 표는 수정 전 구성 하나의 인증서만 다룬다. 순서 근거가 바뀐 구성에서 판정이 철회되는지는 V2의 일이며 이 표의 범위가 아니다. 철회되었다는 사실만으로 전체 안전성을 인정하지 않는다 (결정문 §3.1).
 - SPEC에 남은 CORD 인용과 '버전 테이블이 없을 때의 부팅당 횟수'는 이 표에서 쓰지 않았다 (§8).
+
+## 12. 관측점 추적표 (X-03, C-24; W2 2026-10-24)
+
+`kairos/profiles/cfs-v7.0.1/observe/sites.kzp` 의 사이트가 어느 소스 줄에서 무엇을 관측하고, Φ 의 어느 효과·조건을 뒷받침하는지 적는다. 줄 번호는 R2 바이너리(`build-native_std/exe/cpu1/core-cpu1`, SHA-256 `0edb1ae2…7799`)를 빌드한 고정 트리 `/home/user/work/procrace/cfs_ref/cFS`(cFS `088b2fa8`, cFE `c5fb2b4d`, OSAL `d2d877a6`)에서 다시 읽었다. 인용 33개의 해시가 `kz anchor --source-root` 에서 모두 일치했고, 같은 줄을 인용하는 `01_prov.kzp` 의 해시와도 같다. 그래서 프로필의 줄은 옮겨지지 않았다 [F]. **정정**: 작업 지시의 "`cfe_es_api.c:803`" 은 `cfe_es_start.c:803`(핵심 앱 예약, `es_start_reserve`)이다. SPEC §2.3 표와 App. A.1 이 인용하는 줄과 같다.
+
+| 사이트 (번호) | 소스 줄 | 프로브 위치 [M: `kz anchor`, `--xcheck`] | 관측하는 효과·사건 | 뒷받침하는 것 |
+|---|---|---|---|---|
+| `evs.send.entry/ret` (0, 1) | `cfe_evs.c:169-214` | 함수 진입(+4), 복귀 | K-ID 사용의 호출과 반환(인자 `AppID` = `stamp`, 결과 코드) | `id_valid: valid(arg.AppID)` (capture: 인자), 결과 대응 O4 |
+| `CFE_EVS_SendEventWithAppID.slot_registered` (12) | `cfe_evs.c:190` (`EVS_AppDataIsMatch` 호출) | 호출 직후, discriminator 행 시작 `0x29d02` | 등록 검사 LP 의 통과(반환값 `is_match` 는 기록만) | `slot_registered: state(evs.reg(arg.AppID)) = REG` 의 LP 통과 여부 |
+| `evs.register.entry/ret` (8, 9) | `cfe_evs.c:42-111` | 함수 진입, 복귀 | `CFE_EVS_Register` 호출 틀 | 아래 두 효과의 호출 문맥 |
+| `CFE_EVS_Register.clear_slot` (10) | `cfe_evs.c:56` (`memset`) | `memset@plt` 호출 직후 `0x298c4` | `clear_slot: evs.reg(id(owner(exec))) -> UNREG` | `slot_registered` 의 writer |
+| `CFE_EVS_Register.register` (11) | `cfe_evs.c:106` (`EVS_AppDataSetUsed`) | **줄 시작** `0x29a38` (호출 직후 지점은 반환 경로들의 합류점이라 `kz anchor` 가 거부) | `register: evs.reg(id(owner(exec))) -> REG` | `slot_registered` 의 writer |
+| `es.wait.entry/ret` (13, 14) | `cfe_es_api.c:514-576` | 함수 진입, 복귀 | `CFE_ES_WaitForSystemState` 호출 | 올림의 호출 문맥 |
+| `CFE_ES_WaitForSystemState.raise_state` (15) | `cfe_es_api.c:573` (저장, 줄에 호출 없음) | **줄 시작** `0x1ae79` (저장 가지를 탈 때만) | `raise_state: es.appstate(owner(exec)) raise lp.required`. 올리는 값은 읽지 않는다(저장 명령의 레지스터, ABI 위치 아님) | 인증서 경로 T-OBS 의 raise_ES/raise_EVS 와 o_ES/o_EVS 술어(AppState ≥ RUNNING). K-ID 조건은 아님 |
+| `CFE_ES_Main.reset_records`, `reset_states` (16, 17) | `cfe_es_start.c:82` (`memset(&CFE_ES_Global…)`) | `memset@plt` 호출 직후 `0x24bbf` (한 주소에 두 사이트) | `reset_records`(모든 `es.app` → FREE), `reset_states`(모든 `es.appstate` → UNDEFINED) | 인증서의 EarlyInit memset(ONCE-PWB); `es.app` writer |
+| `CFE_ES_CreateObjects.reserve_core` (18) | `cfe_es_start.c:803` | `CFE_ES_AppRecordSetUsed` 호출 직후 `0x25928` | `reserve_core: es.app(lp.slot) -> RESERVED`. `lp.slot` 은 읽지 않는다 | 인증서의 반증자 f_ES/f_EVS; `es.app` writer |
+| `CFE_ES_CreateObjects.publish_core` (19) | `cfe_es_start.c:818` | 호출 직후 `0x259b2` | `publish_core: es.app(lp.slot) -> LIVE id lp.pending_id` (값 읽지 않음) | `es.app` writer → `id(owner(exec))` |
+| `core_clear` (20) | `cfe_es_start.c:823` (`memset`) | **줄 시작** `0x259c3` (호출 직후 지점은 성공 가지와의 합류점) | `clear_core`, `clear_core_state`, `clear_core_type` (`lp.slot` 읽지 않음) | 인증서의 OWN-NOPATH 대상; `es.app` writer |
+| `sb.appid.store` (2) | `cfe_sb_task.c:138` | 호출 직후(142 줄) | SB 의 `CFE_ES_GetAppID` 반환(저장 시각의 상한). 라벨이 Φ 지점 이름이 아니어서 재생에는 대응되지 않는다 | L-DERIVE 의 셀 writer `x` (개수 비교용) |
+| `es.start_task.entry/ret` (21, 22) | `cfe_es_apps.c:649-670`, 넘기는 쪽 `cfe_es_start.c:810-814`, `cfe_es_apps.c:849-854` | 함수 진입(`r8` = `ParentAppId`), 복귀 | 생성 요청과 그것이 지정한 앱 | `app_owner` (생성 요청), K-ID 의 `owner(exec)` 키 |
+| `es.child_task.entry/ret` (23, 24) | `cfe_es_api.c:1202-1208`, `:1255-1290` | 함수 진입, 복귀 | 자식 task 요청(앱 = 요청한 task 의 앱). 안에 겹친 `ParentAppId` 는 App 표 조회값이라 쓰지 않음 | `app_owner` (`creator-owner`, EV-03) |
+| `osal.task_create.id` (25) | `os-impl-tasks.c:457-462`, `:596-625`; 같은 값이 출력 인자에 쓰임 `osapi-idmap.c:838-873` | `OS_Posix_InternalTaskCreate_Impl` 진입(`r9` 하위 4바이트) | 생성 호출이 배정한 OSAL id | 자식의 `OS_TaskEntryPoint(task_id)`(사이트 7)와 대조 → `confirmed` |
+
+**포괄의 빈 곳** [F/I]. 이 표로 상태를 읽는 조건이 바로 풀리지는 않는다.
+- **`evs.reg` writer.** 정적 추출은 core-cpu1 안 `EVS_AppData_t.AppID` 의 writer 를 4개로 센다(`kairos/tests/static/data/core_cpu1.golden:162`: direct 2, data function 2) [F]. 소스로 보면 `cfe_evs.c:56` memset, `:106` SetUsed, `cfe_evs_task.c:63` EarlyInit memset, `cfe_evs_task.c:194` CleanUpApp 의 SetFree 이다 [I: grep 대응]. Φ 는 앞의 두 개만 효과로 모델링한다. 그래서 `writers=covered` 를 세울 근거가 없다.
+- **`es.app` writer.** AppCreate(`cfe_es_apps.c:821/869/893`)와 CleanUpApp(`:1498/:1632`)에는 사이트가 없다.
+- **효과 값.** `lp.slot`, `lp.pending_id`, `lp.required` 를 S1 백엔드가 읽지 못한다. 그래서 효과의 대상이 정해지지 않는다.
+- **행위자 사이 순서.** 다른 thread 가 쓴 등록을 읽는 사용에는 행위자 사이 순서가 필요하다. 재생은 병합 순서를 실행 순서로 쓰지 않는다(W1). 그래서 등록 조건의 값은 보류된다(`effect_unsupported`, `resource_or_lifetime_unmatched`). SPEC App. A.1 의 "registry LP 와 register 효과를 계획에 넣으면 READY" 는 writer 포괄과 순서가 세워진 뒤의 기대로 읽는다.
+- **실행 결과.** 이 표로 처음 돈 실행은 pilot/dev 기록이다(`kairos/docs/r2_pilot_v153.md`).

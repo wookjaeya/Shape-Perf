@@ -12,10 +12,15 @@
 //   site <label> <entry|ret|point> <target> [decoder=<name>] [prov=<id>] [s0=<slot> .. s3=<slot>]
 //
 //   target:  func=<symbol> [in=<file suffix>]                 for entry and ret
-//            at=<file suffix>:<line> after-call=<symbol>      for point
+//            at=<file suffix>:<line> after-call=<symbol>      for point: the instruction after the call
+//                                                             that ends the line's code (a PLT stub
+//                                                             of the symbol counts as the symbol)
+//            at=<file suffix>:<line> line-start               for point: the first instruction of the
+//                                                             line's code, before the statement runs
 //   slot:    <src>:<width>:<role>      src = a register name | stack+<byte offset> | ip
 //            width = u8 | u16 | u32 | u64
-//   decoder: generic (default) | spawn-create | spawn-return | thread-entry
+//   decoder: generic (default) | spawn-create | spawn-return | thread-entry | owner-request |
+//            child-request | request-return | spawn-id   (kz_raw.h, KZ_DECODER)
 //
 // Tiers and kinds are the names of the schema (contract-backed, admitted, code-derived,
 // issue-derived, researcher, unreferenced; api_doc, requirement, code_admission, code_pattern,
@@ -58,6 +63,7 @@ struct ProfileSite {
   std::string at_file;            // point
   uint32_t at_line = 0;
   std::string after_call;
+  bool line_start = false;        // point: the first instruction of the line (KZ_TARGET_KIND_LINE_START)
   uint16_t decoder = KZ_DECODER_GENERIC;
   int prov = -1;                  // index into Profile::provs, or -1
   std::vector<kz::trace::SlotSpec> slots;

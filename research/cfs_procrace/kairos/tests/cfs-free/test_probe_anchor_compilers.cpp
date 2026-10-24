@@ -155,6 +155,41 @@ void check_binary(const std::string& bin, const std::string& source, const char*
   KZ_CHECK(before != nullptr);
   KZ_CHECK_EQ(before->line, static_cast<uint32_t>(publish_line));
 
+  // W2: a call through the PLT stub of a shared-library function, a store without a call (line-start),
+  // and a call whose return site joins the path that skips it (refused as after-call, fine as line-start).
+  size_t memset_line = 0, store_line = 0, join_line = 0;
+  for (size_t i = 0; i < src.size(); ++i) {
+    if (src[i].find("memset(t, 0, n);") != std::string::npos) memset_line = i + 1;
+    if (src[i].find("g_identity = 0x110004u;") != std::string::npos) store_line = i + 1;
+    if (src[i].find("tp_get_identity(&g_join_identity);") != std::string::npos) join_line = i + 1;
+  }
+  KZ_CHECK(memset_line != 0 && store_line != 0 && join_line != 0);
+  KZ_CHECK(elf.plt_stub("memset") != 0);
+  KZ_CHECK_EQ(elf.plt_stub("tp_send"), uint64_t(0));  // a function of the file has no stub
+  ResolvedTarget m, m2;
+  KZ_CHECK_OK(resolve_after_call(elf, lines, "target_prog.c", static_cast<uint32_t>(memset_line), "memset", &m));
+  KZ_CHECK_OK(resolve_after_call(elf, lines, "target_prog.c", static_cast<uint32_t>(memset_line), "memset@plt", &m2));
+  KZ_CHECK_EQ(m.vaddr, m2.vaddr);
+  KZ_CHECK_EQ(m.func, std::string("tp_clear"));
+  {
+    uint8_t c5[5];
+    KZ_CHECK(elf.read_vaddr(m.vaddr - 5, 5, c5));
+    KZ_CHECK_EQ(c5[0], uint8_t(0xe8));
+    int32_t r;
+    std::memcpy(&r, c5 + 1, 4);
+    KZ_CHECK_EQ(static_cast<uint64_t>(static_cast<int64_t>(m.vaddr) + r), elf.plt_stub("memset"));
+  }
+  ResolvedTarget ls;
+  KZ_CHECK_OK(resolve_line_start(elf, lines, "target_prog.c", static_cast<uint32_t>(store_line), &ls));
+  KZ_CHECK_EQ(ls.kind, uint16_t(KZ_TARGET_KIND_LINE_START));
+  KZ_CHECK_EQ(ls.func, std::string("tp_clear"));
+  KZ_CHECK(lines.row_at(ls.vaddr) != nullptr && lines.row_at(ls.vaddr)->line == static_cast<uint32_t>(store_line));
+  KZ_CHECK(lines.row_at(ls.vaddr - 1) != nullptr && lines.row_at(ls.vaddr - 1)->line != static_cast<uint32_t>(store_line));
+  KZ_CHECK_ERR(resolve_after_call(elf, lines, "target_prog.c", static_cast<uint32_t>(join_line), "tp_get_identity", &t), kz::Err::Invalid);
+  KZ_CHECK_OK(resolve_line_start(elf, lines, "target_prog.c", static_cast<uint32_t>(join_line), &ls));
+  KZ_CHECK_EQ(ls.func, std::string("tp_join"));
+  KZ_CHECK_ERR(resolve_line_start(elf, lines, "target_prog.c", 100000u, &ls), kz::Err::Invalid);
+
   // The same name twice is not a thing in this program, but a name that is not there is refused, and so is a line without that call.
   KZ_CHECK_ERR(resolve_entry(elf, lines, "tp_nosuch", "", &t), kz::Err::Invalid);
   KZ_CHECK_ERR(resolve_after_call(elf, lines, "target_prog.c", static_cast<uint32_t>(publish_line), "tp_send", &t), kz::Err::Invalid);

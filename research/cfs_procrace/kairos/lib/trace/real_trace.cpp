@@ -2,7 +2,10 @@
 
 #include "kz/trace/real_trace.hpp"
 
+#include "kz/core/registry.hpp"
+
 #include <algorithm>
+#include <cstdio>
 #include <cctype>
 #include <map>
 #include <set>
@@ -33,6 +36,28 @@ uint64_t first_after(const std::vector<kz_raw_ev>& ev, uint64_t t) {
 
 }  // namespace
 
+bool owner_record_key(const phi::Profile& p, const std::map<std::string, int64_t>& consts, uint32_t id, int64_t* key) {
+  if (!p.context.present || p.context.owner_kind_index < 0) return false;
+  const phi::KindDecl& k = p.kinds[static_cast<size_t>(p.context.owner_kind_index)];
+  if (!k.ids.present || k.params.size() != 1 || k.table.empty()) return false;
+  const int32_t ci = p.find_const(k.table);
+  if (ci < 0) return false;
+  const phi::ConstDecl& c = p.consts[static_cast<size_t>(ci)];
+  int64_t n = -1;
+  if (c.value == phi::ConstDecl::Value::Int) {
+    n = c.ival;
+  } else if (c.value == phi::ConstDecl::Value::RefEval) {
+    const auto it = consts.find(c.name);
+    if (it != consts.end()) n = it->second;
+  }
+  if (n <= 0) return false;
+  // valid(x): (x - base) mod 2^32 <= serial_max; the record is (x - base) mod 2^32 modulo the table size.
+  const uint32_t serial = id - static_cast<uint32_t>(k.ids.base);
+  if (static_cast<int64_t>(serial) > k.ids.serial_max) return false;
+  *key = static_cast<int64_t>(serial % static_cast<uint64_t>(n));
+  return true;
+}
+
 std::string role_key(const std::string& name) {
   std::string out;
   for (char c : name)
@@ -41,6 +66,10 @@ std::string role_key(const std::string& name) {
 }
 
 Status real_trace_from_run(const Container& run, const phi::Profile& p, eval::Trace* out, RealTraceReport* report) {
+  return real_trace_from_run(run, p, RealTraceOptions(), out, report);
+}
+
+Status real_trace_from_run(const Container& run, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report) {
   *out = eval::Trace();
   *report = RealTraceReport();
   out->record = eval::RecordKind::Real;
@@ -153,13 +182,37 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, eval::Tr
     if ((threads[i].flags & KZ_THREAD_FLAG_FORK_SEEN) == 0 || threads[i].ptid == KZ_NONE32) continue;
     out->creators[thread_names[i]] = actor_of(threads[i].ptid, threads[i].t_fork);
   }
+  report->identities.resize(threads.size());
+  for (size_t i = 0; i < threads.size(); ++i) {
+    ThreadIdentity& ti = report->identities[i];
+    ti.actor = thread_names[i];
+    ti.thread_flags = threads[i].flags;
+    const auto cr = out->creators.find(thread_names[i]);
+    if (cr != out->creators.end()) ti.creator = cr->second;
+  }
   for (const kz_app_owner& o : owners) {
     if (o.thread >= threads.size()) continue;
     const std::string& a = thread_names[o.thread];
+    ThreadIdentity& ti = report->identities[o.thread];
+    ti.level = o.level;
+    ti.evidence = o.evidence;
+    ti.owner_id = o.owner_key;
+    run.string(o.app_name, &ti.app_name);
+    if (o.level == KZ_OWNER_LEVEL_CONFIRMED) ++report->owners_confirmed;
+    else if (o.level == KZ_OWNER_LEVEL_INFERRED) ++report->owners_inferred;
+    if (o.level == KZ_OWNER_LEVEL_UNDETERMINED || o.owner_key == KZ_NONE32) continue;
+    int64_t key = 0;
+    if (!owner_record_key(p, opt.consts, o.owner_key, &key)) {
+      ++report->owners_unresolved;  // kept undetermined for the replay: never "no owner"
+      continue;
+    }
+    ti.key_resolved = true;
+    ti.key = key;
     out->owner_levels[a] = o.level;
-    if (o.level != KZ_OWNER_LEVEL_UNDETERMINED) ++report->owners_determined;
-    if (o.level != KZ_OWNER_LEVEL_UNDETERMINED && o.owner_key != KZ_NONE32) out->owners[a] = {static_cast<int64_t>(o.owner_key)};
+    out->owners[a] = {key};
+    ++report->owners_determined;
   }
+  report->owners_undetermined = threads.size() - report->owners_confirmed - report->owners_inferred;
 
   // ---- the events ----
   for (const kz_raw_ev& e : events) {
@@ -274,6 +327,26 @@ std::string report_text(const RealTraceReport& r) {
   for (const std::string& s : r.sites) out += "site " + s + "\n";
   out += "threads " + std::to_string(r.threads) + ", owners determined " + std::to_string(r.owners_determined) +
          (r.owner_section ? "" : " (the container has no ACTOR_OWNERS section: every owner is undetermined)") + "\n";
+  if (r.owner_section) {
+    out += "app_owner levels: confirmed " + std::to_string(r.owners_confirmed) + ", inferred " + std::to_string(r.owners_inferred) + ", undetermined " +
+           std::to_string(r.owners_undetermined) + "; ids not mapped to a record key " + std::to_string(r.owners_unresolved) + "\n";
+    auto flags_text = [](const char* en, uint32_t v) {
+      const EnumDesc* d = find_enum(en);
+      std::string t;
+      if (d != nullptr)
+        for (size_t i = 0; i < d->nitems; ++i)
+          if ((v & static_cast<uint32_t>(d->items[i].value)) != 0) t += (t.empty() ? "" : ",") + std::string(d->items[i].display);
+      return t.empty() ? std::string("-") : t;
+    };
+    static const char* const kLevel[] = {"undetermined", "inferred", "confirmed"};
+    for (const ThreadIdentity& ti : r.identities) {
+      char key[32];
+      std::snprintf(key, sizeof key, "0x%x", ti.owner_id);
+      out += "identity " + ti.actor + ": creator " + (ti.creator.empty() ? std::string("-") : ti.creator) + ", owner " + (ti.level <= 2 ? kLevel[ti.level] : "?") +
+             (ti.owner_id == KZ_NONE32 ? std::string() : std::string(" id ") + key) + (ti.key_resolved ? " record " + std::to_string(ti.key) : std::string()) +
+             (ti.app_name.empty() ? std::string() : " app '" + ti.app_name + "'") + ", evidence " + flags_text("KZ_OWNER_EVIDENCE", ti.evidence) + "\n";
+    }
+  }
   out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies)" : "not shown to be the process start (start state unknown)") + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";

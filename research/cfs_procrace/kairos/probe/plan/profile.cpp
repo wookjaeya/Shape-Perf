@@ -77,8 +77,10 @@ const Names kKinds[] = {{"none", KZ_PROV_KIND_NONE}, {"api_doc", KZ_PROV_KIND_AP
                         {"code_admission", KZ_PROV_KIND_CODE_ADMISSION}, {"code_pattern", KZ_PROV_KIND_CODE_PATTERN},
                         {"issue", KZ_PROV_KIND_ISSUE}, {"researcher", KZ_PROV_KIND_RESEARCHER}};
 const Names kSides[] = {{"n/a", KZ_PROV_SIDE_NA}, {"supplier", KZ_PROV_SIDE_SUPPLIER}, {"caller", KZ_PROV_SIDE_CALLER}, {"rule", KZ_PROV_SIDE_RULE}};
-const Names kDecoders[] = {{"generic", KZ_DECODER_GENERIC}, {"spawn-create", KZ_DECODER_SPAWN_CREATE},
-                           {"spawn-return", KZ_DECODER_SPAWN_RETURN}, {"thread-entry", KZ_DECODER_THREAD_ENTRY}};
+const Names kDecoders[] = {{"generic", KZ_DECODER_GENERIC},           {"spawn-create", KZ_DECODER_SPAWN_CREATE},
+                           {"spawn-return", KZ_DECODER_SPAWN_RETURN},  {"thread-entry", KZ_DECODER_THREAD_ENTRY},
+                           {"owner-request", KZ_DECODER_OWNER_REQUEST}, {"child-request", KZ_DECODER_CHILD_REQUEST},
+                           {"request-return", KZ_DECODER_REQUEST_RETURN}, {"spawn-id", KZ_DECODER_SPAWN_ID}};
 const Names kRegs[] = {{"rax", KZ_REG_RAX}, {"rbx", KZ_REG_RBX}, {"rcx", KZ_REG_RCX}, {"rdx", KZ_REG_RDX}, {"rsi", KZ_REG_RSI},
                        {"rdi", KZ_REG_RDI}, {"rbp", KZ_REG_RBP}, {"rsp", KZ_REG_RSP}, {"r8", KZ_REG_R8}, {"r9", KZ_REG_R9},
                        {"r10", KZ_REG_R10}, {"r11", KZ_REG_R11}, {"r12", KZ_REG_R12}, {"r13", KZ_REG_R13}, {"r14", KZ_REG_R14},
@@ -208,6 +210,7 @@ Status parse_profile(std::string_view text, Profile* out) {
           if (colon == std::string::npos || !parse_uint(v.substr(colon + 1), &s.at_line) || s.at_line == 0) return err(lineno, "at=<file suffix>:<line>");
           s.at_file = v.substr(0, colon);
         } else if (k == "after-call") s.after_call = v;
+        else if (k.empty() && v == "line-start") s.line_start = true;
         else if (k == "decoder") { if (!lookup(kDecoders, v, &x)) return err(lineno, "unknown decoder '" + v + "'"); s.decoder = static_cast<uint16_t>(x); }
         else if (k == "prov") {
           auto it = prov_index.find(v);
@@ -223,9 +226,10 @@ Status parse_profile(std::string_view text, Profile* out) {
         } else return err(lineno, "unknown site key '" + k + "'");
       }
       if (s.kind == KZ_SITE_KIND_POINT_PROBE) {
-        if (s.at_file.empty() || s.after_call.empty() || !s.func.empty()) return err(lineno, "a point site is at=<file>:<line> after-call=<symbol>");
+        if (s.at_file.empty() || s.after_call.empty() == !s.line_start || !s.func.empty())
+          return err(lineno, "a point site is at=<file>:<line> with after-call=<symbol> or line-start");
       } else {
-        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty()) return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
+        if (s.func.empty() || !s.at_file.empty() || !s.after_call.empty() || s.line_start) return err(lineno, "an entry or ret site is func=<symbol> [in=<file suffix>]");
       }
       out->sites.push_back(std::move(s));
     } else {

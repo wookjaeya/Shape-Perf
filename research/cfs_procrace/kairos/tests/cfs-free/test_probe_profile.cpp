@@ -131,6 +131,38 @@ void test_errors() {
   KZ_CHECK(bad(h + "site e entry func=f s0=rdi:u32:x" + ra + "\nsite r ret func=f s0=rax:u32:status\n"));
   KZ_CHECK(bad(h + "site e entry func=f s0=rdi:u32:x s3=stack+0:u32:return_address\nsite r ret func=f s3=ip:u64:return_address\n"));  // key not 8 bytes
   KZ_CHECK_OK(parse((h + "site e entry func=f s0=rdi:u32:x\nsite r ret func=g s0=rax:u32:status\n").c_str()));
+  // line-start points (W2): at=<file>:<line> with line-start instead of after-call, never both
+  {
+    Profile p;
+    KZ_CHECK_OK(parse((h + "site s point at=x.c:7 line-start\n").c_str(), &p));
+    KZ_CHECK(p.sites[0].line_start);
+    KZ_CHECK(p.sites[0].after_call.empty());
+    KZ_CHECK_EQ(p.sites[0].at_line, 7u);
+  }
+  KZ_CHECK(bad(h + "site s point at=x.c:7 line-start after-call=g\n"));
+  KZ_CHECK(bad(h + "site s point at=x.c:7\n"));
+  KZ_CHECK(bad(h + "site s entry func=f line-start\n"));
+  // creation-side decoders (W2): the request names the owner at slot 2, the returns and the spawn id carry their keys
+  {
+    Profile p;
+    KZ_CHECK_OK(parse((h + "site q entry func=st decoder=owner-request s2=r8:u32:owner_id" + ra + "\n" +
+                       "site qr ret func=st decoder=request-return s0=rax:u32:status s3=ip:u64:return_address\n" +
+                       "site c entry func=ct decoder=child-request" + ra + "\n" +
+                       "site cr ret func=ct decoder=request-return s3=ip:u64:return_address\n" +
+                       "site i entry func=impl decoder=spawn-id s0=r9:u32:task_id" + ra + "\n").c_str(), &p));
+    KZ_CHECK_EQ(p.sites[0].decoder, uint16_t(KZ_DECODER_OWNER_REQUEST));
+    KZ_CHECK_EQ(p.sites[1].decoder, uint16_t(KZ_DECODER_REQUEST_RETURN));
+    KZ_CHECK_EQ(p.sites[2].decoder, uint16_t(KZ_DECODER_CHILD_REQUEST));
+    KZ_CHECK_EQ(p.sites[4].decoder, uint16_t(KZ_DECODER_SPAWN_ID));
+  }
+  KZ_CHECK(bad(h + "site q entry func=st decoder=owner-request s1=r8:u32:owner_id" + ra + "\n"));     // owner not at slot 2
+  KZ_CHECK(bad(h + "site q entry func=st decoder=owner-request s2=r8:u64:owner_id" + ra + "\n"));     // wider than an id
+  KZ_CHECK(bad(h + "site q entry func=st decoder=owner-request s2=r8:u32:app" + ra + "\n"));          // wrong role
+  KZ_CHECK(bad(h + "site q ret func=st decoder=owner-request s2=r8:u32:owner_id s3=ip:u64:return_address\n"));  // not an entry
+  KZ_CHECK(bad(h + "site c entry func=ct decoder=child-request\n"));                                  // no return address
+  KZ_CHECK(bad(h + "site r entry func=ct decoder=request-return" + ra + "\n"));                       // not a return
+  KZ_CHECK(bad(h + "site i entry func=impl decoder=spawn-id s1=r9:u32:task_id\n"));                  // slot 0 missing
+  KZ_CHECK(bad(h + "site i entry func=impl decoder=spawn-id s0=r9:u64:task_id\n"));                  // wider than an id
   // an error names its line
   const kz::Status s = parse((h + "\n\nsite a entry func=f nonsense=1\n").c_str());
   KZ_CHECK(s.message.find("line 4") != std::string::npos);

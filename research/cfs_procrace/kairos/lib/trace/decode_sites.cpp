@@ -31,7 +31,7 @@ Status check_site(const SiteSpec& s) {
                                 : s.kind == KZ_SITE_KIND_POINT_PROBE ? KZ_SITE_PHASE_POINT
                                                                      : KZ_SITE_PHASE_RET;
   if (s.phases != expect_phase) return Status::error(Err::Invalid, who + ": phases do not match the kind");
-  if (s.decoder > KZ_DECODER_THREAD_ENTRY) return Status::error(Err::Invalid, who + ": unknown decoder");
+  if (s.decoder > KZ_DECODER_SPAWN_ID) return Status::error(Err::Invalid, who + ": unknown decoder");
   if (s.slots.size() > 4) return Status::error(Err::Invalid, who + ": more than four slots");
   bool used[4] = {false, false, false, false};
   for (const SlotSpec& sl : s.slots) {
@@ -77,6 +77,23 @@ Status check_site(const SiteSpec& s) {
       break;
     case KZ_DECODER_THREAD_ENTRY:
       if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": a thread-entry site is an entry site");
+      if (!(st = need(0, nullptr, 4)).ok()) return st;
+      break;
+    case KZ_DECODER_OWNER_REQUEST:
+      if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": an owner-request site is an entry site");
+      if (!(st = need(2, kRoleOwnerId, 4)).ok()) return st;
+      if (!(st = need(kSlotReturnAddress, kRoleReturnAddress, 8)).ok()) return st;
+      break;
+    case KZ_DECODER_CHILD_REQUEST:
+      if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": a child-request site is an entry site");
+      if (!(st = need(kSlotReturnAddress, kRoleReturnAddress, 8)).ok()) return st;
+      break;
+    case KZ_DECODER_REQUEST_RETURN:
+      if (s.kind != KZ_SITE_KIND_RET_PROBE) return Status::error(Err::Invalid, who + ": a request-return site is a return site");
+      if (!(st = need(kSlotReturnAddress, kRoleReturnAddress, 8)).ok()) return st;
+      break;
+    case KZ_DECODER_SPAWN_ID:
+      if (s.kind != KZ_SITE_KIND_ENTRY_PROBE) return Status::error(Err::Invalid, who + ": a spawn-id site is an entry site");
       if (!(st = need(0, nullptr, 4)).ok()) return st;
       break;
     default:

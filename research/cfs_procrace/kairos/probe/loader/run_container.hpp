@@ -37,6 +37,7 @@ struct RunInputs {
   Digest exe_sha256 = {};
   kz::trace::DecodedRun decoded;
   std::vector<kz::trace::ThreadRecord> threads;
+  std::vector<kz::trace::OwnerRecord> owners;  // app_owner per thread (ACTOR_OWNERS); empty: the section is not written
   SessionStats session;
   RunRecord record;
   uint32_t run_ordinal = 0;

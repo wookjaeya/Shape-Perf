@@ -168,6 +168,22 @@ int main(int argc, char** argv) {
   // an earlier container (schema revision 1): no owner section, every owner undetermined
   KZ_CHECK(!report.owner_section);
   KZ_CHECK(base.owner_levels.empty());
+  KZ_CHECK_EQ(report.owners_undetermined, report.threads);
+  // W2: an owner identity (the value a creation request passed) maps to the owner kind's record by the
+  // kind's id rule (10_kinds.kzp es.app: ids base CFE_ES_APPID_BASE, serial_max CFE_RESOURCEID_MAX, table
+  // CFE_PLATFORM_ES_MAX_APPLICATIONS): (id - base) mod 2^32, if valid, modulo the table size.  Without the
+  // table size, or for an id outside the id space, there is no key (never "no owner").
+  {
+    std::map<std::string, int64_t> consts{{"CFE_PLATFORM_ES_MAX_APPLICATIONS", n_apps}};
+    int64_t key = -1;
+    const uint32_t base_id = static_cast<uint32_t>(p.kinds[static_cast<size_t>(p.context.owner_kind_index)].ids.base);
+    KZ_CHECK(kz::trace::owner_record_key(p, consts, base_id, &key) && key == 0);
+    KZ_CHECK(kz::trace::owner_record_key(p, consts, base_id + 3, &key) && key == 3);
+    KZ_CHECK(kz::trace::owner_record_key(p, consts, base_id + static_cast<uint32_t>(n_apps) + 1, &key) && key == 1);
+    KZ_CHECK(!kz::trace::owner_record_key(p, consts, 0, &key));            // CFE_ES_APPID_UNDEFINED is not a valid id
+    KZ_CHECK(!kz::trace::owner_record_key(p, consts, base_id - 1, &key));  // below the id space
+    KZ_CHECK(!kz::trace::owner_record_key(p, {}, base_id, &key));          // the table size is not given
+  }
   KZ_CHECK(base.record == kz::eval::RecordKind::Real && !base.order_established);
 
   Result r0;

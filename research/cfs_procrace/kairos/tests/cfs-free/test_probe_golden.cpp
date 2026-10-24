@@ -250,6 +250,18 @@ void test_run() {
   task.name = "TASK_A";
   task.entry_symbol = "g";
   in.threads = {main_thread, task};
+  // app_owner per thread (ACTOR_OWNERS, W2): the main thread was made by no request; the task by a request
+  // naming application 0x110003, linked by FORK time alone (inferred).
+  kz::trace::OwnerRecord own_main, own_task;
+  std::memset(&own_main.rec, 0, sizeof own_main.rec);
+  own_main.rec.thread = 0; own_main.rec.creator_thread = KZ_NONE32; own_main.rec.creation_event = KZ_NONE32; own_main.rec.owner_key = KZ_NONE32;
+  own_main.rec.level = KZ_OWNER_LEVEL_UNDETERMINED; own_main.rec.evidence = KZ_OWNER_EVIDENCE_RAW_THREAD;
+  own_task.rec = own_main.rec;
+  own_task.rec.thread = 1; own_task.rec.creator_thread = 0; own_task.rec.creation_event = 0; own_task.rec.owner_key = 0x110003;
+  own_task.rec.level = KZ_OWNER_LEVEL_INFERRED;
+  own_task.rec.evidence = KZ_OWNER_EVIDENCE_CREATION_REQUEST | KZ_OWNER_EVIDENCE_FORK_IN_CALL | KZ_OWNER_EVIDENCE_MATCH_BY_TIME | KZ_OWNER_EVIDENCE_ID_UNVERIFIED;
+  own_task.app_name = "TASK_A";
+  in.owners = {own_main, own_task};
 
   in.record.add("observer.backend", "perf-sample (unit-test value)");
   in.record.add("cfs.user", "unit-test-user", KZ_POLICY_FROM_REFERENCE);
@@ -282,6 +294,28 @@ void test_run() {
     KZ_CHECK((meta[0].flags & KZ_RUN_FLAG_LOSS_PRESENT) != 0);  // loss records exist: the run says so
     KZ_CHECK_EQ(meta[0].backend, uint8_t(KZ_BACKEND_PERF_SAMPLE));
     KZ_CHECK_EQ(meta[0].fidelity, uint8_t(KZ_FIDELITY_F0));
+  }
+
+  std::vector<kz_app_owner> owners;
+  KZ_CHECK_OK(c.read_section(KZ_SEC_ACTOR_OWNERS, &owners));
+  KZ_CHECK_EQ(owners.size(), size_t(2));
+  if (owners.size() == 2) {
+    KZ_CHECK_EQ(owners[1].owner_key, 0x110003u);
+    KZ_CHECK_EQ(owners[1].level, uint8_t(KZ_OWNER_LEVEL_INFERRED));
+    std::string name;
+    KZ_CHECK(c.string(owners[1].app_name, &name));
+    KZ_CHECK_EQ(name, std::string("TASK_A"));
+    KZ_CHECK_EQ(owners[0].owner_key, KZ_NONE32);
+  }
+  // A run without owners (every container before W2) has no ACTOR_OWNERS section.
+  {
+    kz::probe::RunInputs none = in;
+    none.owners.clear();
+    kz::Bytes nb;
+    KZ_CHECK_OK(kz::probe::write_run_container(none, &nb));
+    kz::Container nc;
+    KZ_CHECK_OK(kz::Container::parse(nb, &nc));
+    KZ_CHECK(nc.find_section(KZ_SEC_ACTOR_OWNERS) == nullptr);
   }
 
   // The same inputs give the same bytes (nothing of wall-clock time is in the file); a different

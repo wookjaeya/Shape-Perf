@@ -126,13 +126,7 @@ int run(int argc, char** argv) {
     std::fprintf(stderr, "kz replay: %s: %s\n", path.c_str(), s.describe().c_str());
     return 2;
   }
-  kz::eval::Trace trace;
-  kz::trace::RealTraceReport report;
-  s = kz::trace::real_trace_from_run(c, p, &trace, &report);
-  if (!s.ok()) {
-    std::fprintf(stderr, "kz replay: %s\n", s.describe().c_str());
-    return 2;
-  }
+  kz::trace::RealTraceOptions ropt;
   for (const std::string& kv : consts) {
     const size_t eq = kv.find('=');
     if (eq == std::string::npos || eq == 0) {
@@ -146,8 +140,18 @@ int run(int argc, char** argv) {
       std::fprintf(stderr, "kz replay: --const %s: the value is not an integer\n", kv.c_str());
       return 1;
     }
-    trace.ref_consts[kv.substr(0, eq)] = v;
+    ropt.consts[kv.substr(0, eq)] = v;
   }
+  // The constants are given to the adapter as well: the owner kind's table size maps an owner identity
+  // to its record key (real_trace.hpp, "owners").
+  kz::eval::Trace trace;
+  kz::trace::RealTraceReport report;
+  s = kz::trace::real_trace_from_run(c, p, ropt, &trace, &report);
+  if (!s.ok()) {
+    std::fprintf(stderr, "kz replay: %s\n", s.describe().c_str());
+    return 2;
+  }
+  for (const auto& kv : ropt.consts) trace.ref_consts[kv.first] = kv.second;
   if (emit) {
     std::fputs(kz::eval::trace_text(trace).c_str(), stdout);
     return 0;

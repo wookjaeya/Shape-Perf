@@ -26,14 +26,20 @@
 //               say when the lost records were written) up to the report; a loss without a record (stream
 //               errors) the whole record.  A container without RUNMETA has no loss evidence: the whole
 //               record is treated as lossy, never as loss-free.
-//   owners      ACTOR_OWNERS (schema revision 2) gives each thread's app_owner level and key; a thread
-//               without a record there, and every thread of an earlier container, has an undetermined
-//               owner: no owner line, so the replay reads it as unknown (ownership_undetermined), never
-//               as a guess.  The creating executor is the thread that forked the thread (FORK, ptid).
+//   owners      ACTOR_OWNERS (schema revision 2) gives each thread's app_owner level and the identity of
+//               the owning application in the id space of the profile's owner kind (the value the
+//               creation request passed).  The adapter maps it to the owner kind's record key with the
+//               kind's id rule: valid iff (id - base) mod 2^32 <= serial_max, key = (id - base) mod 2^32
+//               modulo the table size (the profile's `ids` block and `table`; the size is a `ref eval`
+//               constant the caller gives).  A thread without a record there, a record without a key, an
+//               id the rule rejects or a table size not given: no owner line, so the replay reads the
+//               owner as unknown (ownership_undetermined), never as a guess and never as "no owner".  The
+//               creating executor is the thread that forked the thread (FORK, ptid).
 //   constants   a run container carries no value of a `ref eval` constant: the caller supplies them.
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -44,6 +50,23 @@
 
 namespace kz::trace {
 
+struct RealTraceOptions {
+  std::map<std::string, int64_t> consts;  // values of `ref eval` constants (table sizes), by name
+};
+
+// One thread's identities as the container states them (for the report).
+struct ThreadIdentity {
+  std::string actor;
+  std::string creator;     // the creating executor (FORK parent), empty if not recorded
+  uint8_t level = KZ_OWNER_LEVEL_UNDETERMINED;
+  uint32_t evidence = 0;   // set KZ_OWNER_EVIDENCE
+  uint32_t owner_id = KZ_NONE32;  // identity value of the owning application, or KZ_NONE32
+  bool key_resolved = false;
+  int64_t key = 0;         // record key in the owner kind (when resolved)
+  std::string app_name;
+  uint32_t thread_flags = 0;
+};
+
 struct RealTraceReport {
   uint64_t raw_events = 0;
   uint64_t events = 0;             // trace events made
@@ -51,8 +74,11 @@ struct RealTraceReport {
   uint64_t unreadable_events = 0;  // events with TRUNC: kept without slot values
   std::vector<std::string> sites;  // per site: "<label>: call|return of OP", "<label>: point NAME" or "<label>: not mapped"
   uint64_t threads = 0;
-  uint64_t owners_determined = 0;  // threads whose owner level is inferred or confirmed
+  uint64_t owners_determined = 0;  // threads whose owner level is inferred or confirmed and whose key the replay uses
+  uint64_t owners_confirmed = 0, owners_inferred = 0, owners_undetermined = 0;  // levels as the container states them
+  uint64_t owners_unresolved = 0;  // inferred/confirmed with an id the adapter could not map to a record key
   bool owner_section = false;      // the container has ACTOR_OWNERS
+  std::vector<ThreadIdentity> identities;  // per thread (THREADS order)
   bool runmeta = false;
   bool loss_present = false;
   uint64_t loss_intervals = 0;
@@ -62,7 +88,13 @@ struct RealTraceReport {
 // Normalized parameter / role name: lower case, without '_'.
 std::string role_key(const std::string& name);
 
+// The record key in the profile's owner kind of an application identity `id` (the owners rule above):
+// false if the profile has no owner kind with an id space and a table, the table size is not given, or
+// the id is not valid in the id space.
+bool owner_record_key(const phi::Profile& p, const std::map<std::string, int64_t>& consts, uint32_t id, int64_t* key);
+
 Status real_trace_from_run(const Container& run, const phi::Profile& p, eval::Trace* out, RealTraceReport* report);
+Status real_trace_from_run(const Container& run, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report);
 
 // The text of a report (one item per line).
 std::string report_text(const RealTraceReport& r);

@@ -52,6 +52,7 @@ struct PerfNeeds {
 inline constexpr const char* kRoleReturnAddress = "return_address";
 inline constexpr const char* kRoleEntryFn = "entry_fn";
 inline constexpr const char* kRolePriority = "priority";
+inline constexpr const char* kRoleOwnerId = "owner_id";  // OWNER_REQUEST a[2]: the application the started task belongs to
 inline constexpr uint8_t kSlotReturnAddress = 3;  // a[3] at a paired ENTRY and RET site, and at the spawn sites
 
 // The slot declared at position `slot`, or nullptr.

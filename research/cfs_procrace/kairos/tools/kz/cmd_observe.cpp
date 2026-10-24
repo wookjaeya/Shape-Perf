@@ -360,8 +360,9 @@ int run(int argc, char** argv) {
   jin.bias_known = decoded.bias_known;
   jin.load_bias = decoded.load_bias;
   std::vector<kz::trace::ThreadRecord> threads;
+  std::vector<kz::trace::OwnerRecord> owners;
   kz::trace::JoinStats jstats;
-  const Status join_status = kz::trace::join_identities(jin, &threads, &jstats);
+  const Status join_status = kz::trace::join_identities(jin, &threads, &jstats, &owners);
   kz::trace::MatchStats mstats;
   const std::vector<kz::trace::CallPair> pairs = kz::trace::match_calls(decoded.events, sites, &mstats);
   (void)pairs;
@@ -504,7 +505,15 @@ int run(int argc, char** argv) {
   add("identity.matched_by_time", num(jstats.matched_by_time) +
                                       " (the creator link of these records is FORK-time containment in the creator's call: one thread's timestamps, under A-CLK-PO)");
   add("identity.ids_unverified", num(jstats.ids_unverified) +
-                                     " (announced ids not compared with the creator side: the spawn call's out-parameter is not readable by this backend)");
+                                     " (announced ids not compared with the creator side: no spawn-id site of the plan read the id the spawn call assigned)");
+  add("identity.ids_matched", num(jstats.ids_matched) + " (announced id equal to the id the spawn call assigned: the creator link rests on the id)");
+  add("identity.ids_mismatched", num(jstats.ids_mismatched));
+  add("identity.spawn_ids_outside_create", num(jstats.spawn_ids_outside_create));
+  add("identity.spawn_ids_unreadable", num(jstats.spawn_ids_unreadable) + ", repeated in one call " + num(jstats.spawn_ids_repeated));
+  add("identity.requests", num(jstats.requests) + " (creation requests; unreadable " + num(jstats.requests_unreadable) + ", without return " + num(jstats.requests_without_return) +
+                               ", returns without request " + num(jstats.request_returns_without_request) + ")");
+  add("identity.app_owner", "confirmed " + num(jstats.owners_confirmed) + ", inferred " + num(jstats.owners_inferred) + ", undetermined " + num(jstats.owners_undetermined) +
+                                " (from the creation side only: request argument or creator's owner, spawn-assigned id against the announced id; no framework lookup)");
 
   uint64_t boot_ns = 0;
   {
@@ -531,6 +540,7 @@ int run(int argc, char** argv) {
   ri.exe_sha256 = kz::sha256(binary.data(), binary.size());
   ri.decoded = decoded;
   ri.threads = threads;
+  ri.owners = owners;
   ri.session = sstats;
   ri.record = record;
   ri.run_ordinal = opt.run_ordinal;
@@ -568,11 +578,19 @@ int run(int argc, char** argv) {
     o << "exit status of kz observe " << code << "\n\n";
     o << record.text();
     o << "\nthreads (identity join):\n";
-    for (const kz::trace::ThreadRecord& t : threads) {
+    for (size_t ti = 0; ti < threads.size(); ++ti) {
+      const kz::trace::ThreadRecord& t = threads[ti];
       o << "  pid " << t.rec.pid << " tid " << t.rec.tid << " gen " << t.rec.generation << " name '" << t.name << "' creator tid "
         << (t.rec.ptid == KZ_NONE32 ? std::string("-") : std::to_string(t.rec.ptid)) << " announced id "
         << (t.rec.announced_id == KZ_NONE32 ? std::string("-") : hex64(t.rec.announced_id)) << " entry " << (t.entry_symbol.empty() ? "-" : t.entry_symbol) << " events " << t.rec.n_events << " flags 0x"
-        << std::hex << t.rec.flags << std::dec << "\n";
+        << std::hex << t.rec.flags << std::dec;
+      if (ti < owners.size()) {
+        const kz_app_owner& ow = owners[ti].rec;
+        static const char* const kLevel[] = {"undetermined", "inferred", "confirmed"};
+        o << " app_owner " << (ow.level <= 2 ? kLevel[ow.level] : "?") << " key " << (ow.owner_key == KZ_NONE32 ? std::string("-") : hex64(ow.owner_key)) << " evidence 0x" << std::hex << ow.evidence
+          << std::dec << (owners[ti].app_name.empty() ? std::string() : " name '" + owners[ti].app_name + "'");
+      }
+      o << "\n";
     }
     if (!opt.record.empty()) {
       std::ofstream f(opt.record);

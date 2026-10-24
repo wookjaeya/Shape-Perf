@@ -24,6 +24,20 @@
 //                       id is UNVERIFIED (flag ID_UNVERIFIED).  Checking it is deferred to a
 //                       backend that reads memory at the spawn return.
 //
+// Creation side (W2, 2026-10-24; SPEC 1.2 "Creating application", 5.7 items 2 and 4, ADR-056), when
+// the plan has the sites:
+//   creation request    an OWNER_REQUEST (the application is an argument) or CHILD_REQUEST (the
+//                       application is the requester's own) open on the creator thread when the
+//                       spawn call begins; the outermost open one decides;
+//   assigned id         a SPAWN_ID event inside the spawn call: the id the call assigns and passes to
+//                       the new thread.  Equal to the id the child announces: ID_MATCHED, the link
+//                       rests on the id (time no longer the only key); different: ID_MISMATCH, no link.
+// From these the join derives app_owner per thread (OwnerRecord): `confirmed` when the link is by id,
+// `inferred` when it is by FORK time alone (match-by-time, id-unverified), `undetermined` otherwise
+// (no request, an ambiguous or contradicted link, a thread created without a probed spawn call, a
+// child whose creator's owner is undetermined).  The owner key is the value the request passed, in
+// the id space of the profile's owner kind; nothing is looked up in a framework table (EV-03).
+//
 // Events with TRUNC set are never used as keys or ids (kz_raw.h): they are counted
 // (creates_unreadable, returns_unreadable, entries_unreadable).  A spawn site whose slots do not
 // declare what the decoder reads is refused (check_site).
@@ -69,6 +83,24 @@ struct JoinStats {
   uint64_t entries_unreadable = 0;      // thread-entry events with TRUNC: no id recorded
   uint64_t matched_by_time = 0;         // records whose creator link rests on timestamp containment
   uint64_t ids_unverified = 0;          // records with an announced id that nothing was compared with
+  // Creation side (W2).
+  uint64_t ids_matched = 0;             // threads whose announced id equals the id their spawn call assigned
+  uint64_t ids_mismatched = 0;          // creator-side ids that contradict the thread the FORK time gave
+  uint64_t spawn_ids_outside_create = 0;  // SPAWN_ID events with no spawn call open on their thread
+  uint64_t spawn_ids_unreadable = 0;
+  uint64_t spawn_ids_repeated = 0;      // spawn calls with more than one SPAWN_ID event (none of them used)
+  uint64_t requests = 0;                // creation requests seen
+  uint64_t requests_unreadable = 0;
+  uint64_t requests_without_return = 0;
+  uint64_t request_returns_without_request = 0;
+  uint64_t owners_confirmed = 0, owners_inferred = 0, owners_undetermined = 0;
+};
+
+// app_owner of one thread (the record of section ACTOR_OWNERS; kz_raw.h).  rec.app_name is not set:
+// the string is written when the container is built.
+struct OwnerRecord {
+  kz_app_owner rec;
+  std::string app_name;
 };
 
 struct JoinInput {
@@ -80,7 +112,8 @@ struct JoinInput {
   uint64_t load_bias = 0;
 };
 
-// One record per thread incarnation, ordered by (pid, tid, generation).
-Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, JoinStats* stats);
+// One record per thread incarnation, ordered by (pid, tid, generation).  With `owners`, also one
+// app_owner record per thread, in the same order (owners[i].rec.thread == i).
+Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, JoinStats* stats, std::vector<OwnerRecord>* owners = nullptr);
 
 }  // namespace kz::trace

@@ -106,6 +106,13 @@ Status write_run_container(const RunInputs& in, Bytes* out) {
     threads.push_back(k);
   }
   if (!threads.empty() && !(s = w.add_section(KZ_SEC_THREADS, threads)).ok()) return s;
+  std::vector<kz_app_owner> owners;
+  for (const kz::trace::OwnerRecord& o : in.owners) {
+    kz_app_owner k = o.rec;
+    k.app_name = w.intern(o.app_name);
+    owners.push_back(k);
+  }
+  if (!owners.empty() && !(s = w.add_section(KZ_SEC_ACTOR_OWNERS, owners)).ok()) return s;
   if (!in.decoded.loss.empty() && !(s = w.add_section(KZ_SEC_LOSS, in.decoded.loss)).ok()) return s;
 
   // Run metadata.

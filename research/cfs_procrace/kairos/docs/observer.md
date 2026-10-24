@@ -94,7 +94,7 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 | 시작 상태 | 첫 사건보다 이르거나 같은 MAPS(대상 파일의 첫 실행 mapping)가 있으면 프로세스 시작부터의 기록: `start_evidence init`, 모든 종류·위치 `start=known` | INIT, IN-03 |
 | writer·별칭 포괄, 수명 | **세우지 않는다**(계획의 추적표와 닫힘이 필요: SPEC §4.7, §4.1). 그래서 기록된 쓰기는 어떤 종류도 고정하지 않는다 | ADR-055 |
 | 손실 | RUNMETA `loss-present`·LOSS 를 손실 구간으로: throttle 은 그 시작부터, lost-records 보고는 기록 처음부터(언제 버려졌는지 커널이 말하지 않음) 보고 시각까지, 기록 없는 손실은 전체. RUNMETA 가 없으면 손실 증거가 없는 것이므로 전체를 손실로 본다 | §7 |
-| 소유 앱 | ACTOR_OWNERS(스키마 개정 2)의 수준·키. 레코드가 없는 thread 와 이전 컨테이너의 모든 thread 는 `undetermined`(줄을 쓰지 않음 → 재생은 소유자를 모름으로 보고 `ownership_undetermined`). 추측하지 않는다 | ADR-056 |
+| 소유 앱 | ACTOR_OWNERS(스키마 개정 2)의 수준과 앱 id. 앱 id 는 소유 kind 의 id 규칙과 표 크기(`--const`)로 레코드 키가 된다(W2). 레코드가 없는 thread, 이전 컨테이너의 모든 thread, 키가 없거나 id 규칙이 거부하는 기록은 `undetermined`(줄을 쓰지 않음 → 재생은 소유자를 모름으로 보고 `ownership_undetermined`; "소유자 없음"으로 읽지 않는다). 보고에 thread 마다 생성 실행자·수준·id·근거를 적는다 | ADR-056 |
 | 상수 | 컨테이너에 `ref eval` 상수의 값이 없다: `--const` 로, 각각 출처에서 가져온 값을 준다(CONDITIONS_POLICY). 없으면 재생이 표 크기를 요구하며 거부한다 | — |
 
 **S1-R2 개발 실행 컨테이너에 적용한 결과** [M] (개발 기록이며 본 실험 결과가 아니다; `env/logs/s1r2_p1.kzt`, 상수 `CFE_PLATFORM_ES_MAX_APPLICATIONS` 는 고정 소스의 추출 golden `tests/static/data/core_cpu1.golden:44` 의 값): 발생 271개 중 `OBSERVED_VIOLATION` 24개(전달된 id 인자 0, 인자만으로 결정; 소유 앱 `undetermined`), `INCONCLUSIVE` 247개(사유 `resource_or_lifetime_unmatched`, `effect_point_ambiguous`, `effect_unsupported`, `not_evaluated`: 등록 writer 와 등록 조건의 지점이 계획에 없음), `NO_VIOLATION_IN_CHECKED_PREFIX` 0개, 입력 오류 0개. SPEC App. A.1 의 기대 결과와 같은 갈래이다. 같은 컨테이너의 파생 기록 71개(사이트 하나 제거, 손실을 선언한 사건 묶음 삭제, 흩어진 삭제(선언·무선언), 늦은 시작)에서 원래보다 결정적인 결과는 0개였다(`test_realrecord_derived`). 이 개수는 분석기의 불완전 정보 처리 시험이며 프로그램에 대한 증거가 아니다.
@@ -107,8 +107,9 @@ kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]
 kzp-observe 1
 binary <이름>
 prov <id> tier=<층> kind=<종류> [side=<면>] file="<경로>" lines=A-B cite="<문구>" [authored="<문구>"] [root=<이름>] [sha256=<64 hex>]
-site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파일 접미어>:<줄> after-call=<기호>
-     [decoder=generic|spawn-create|spawn-return|thread-entry] [prov=<id>] [s0..s3=<원천>:<너비>:<역할>]
+site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파일 접미어>:<줄> (after-call=<기호> | line-start)
+     [decoder=generic|spawn-create|spawn-return|thread-entry|owner-request|child-request|request-return|spawn-id]
+     [prov=<id>] [s0..s3=<원천>:<너비>:<역할>]
 ```
 
 슬롯의 원천은 레지스터 이름, `stack+<바이트>`, `ip` 이다. 사이트는 최대 네 값(`a[0..3]`)을 낸다. `generic` 사이트는 역할(role)로 읽는다. 엔진이 **위치로** 읽는 곳은 두 군데이고, 계획 검사(`check_site`, `check_plan`; 프로필을 읽을 때와 `make_plan` 에서 둘 다)가 그 위치에 요구한 역할이 선언되지 않은 계획을 **거부**한다(0 으로 해석하지 않는다) [D][M]:
@@ -118,17 +119,22 @@ site <라벨> <entry|ret|point> func=<기호> [in=<파일 접미어>] | at=<파�
 | `decoder=spawn-create` (진입) | `s1` 역할 `entry_fn`, `s2` 역할 `priority`(4바이트 이하), `s3` 역할 `return_address`(8바이트). `s0`(이름 포인터)은 읽지 않는다 |
 | `decoder=spawn-return` (복귀) | `s3` 역할 `return_address` |
 | `decoder=thread-entry` (진입) | `s0`(알린 id, 역할 자유, 4바이트 이하) |
+| `decoder=owner-request` (진입) | `s2` 역할 `owner_id`(4바이트 이하), `s3` 역할 `return_address` |
+| `decoder=child-request` (진입) | `s3` 역할 `return_address` |
+| `decoder=request-return` (복귀) | `s3` 역할 `return_address` |
+| `decoder=spawn-id` (진입) | `s0`(배정된 id, 역할 자유, 4바이트 이하) |
 | 진입·복귀 짝(같은 `func=` 의 entry 와 ret) | 두 사이트 모두 `s3` 역할 `return_address`(8바이트) — 진입 사이트에서는 스택 꼭대기의 단어, 복귀 사이트에서는 표본의 명령 포인터 |
 
 역할 이름 `entry_fn`, `priority`, `return_address` 는 값이 무엇인지를 말할 뿐 프레임워크의 이름이 아니다(`decode_sites.hpp`). 이 프로필 형식은 준비 상태 명세용 프로필 언어(Φ, `profiles/cfs-v7.0.1/*.kzp` 의 `phi 1;` 파일)가 **아니다**. 같은 사실을 검사기는 Φ 로, 프로브는 이 파일로 따로 갖고 있다. 둘을 하나로 합치는 일은 하지 않았다 [I].
 
-cFS v7.0.1 의 계획은 `profiles/cfs-v7.0.1/observe/sites.kzp` 이다. 사이트 여덟 개: 이벤트 전송 함수의 진입·복귀, SB task 의 AppId 저장 직후, 시작 동기화 함수의 진입·복귀, task 생성의 진입·복귀, 새 task 의 첫 함수(진입). 인용한 줄과 해시는 파일 안에 있고, 이번 실행에서 모두 원문과 일치했다(8개 검증) [M]. SPEC §9.3 S1-R2 에 이 사이트들이 속한다는 진술은 `researcher` 층으로 기록했고, SPEC 이 개정 중이므로 해시하지 않았다.
+cFS v7.0.1 의 계획은 `profiles/cfs-v7.0.1/observe/sites.kzp` 이다. **W2(2026-10-24)에 26개로 늘었다**: 0–7 은 아래의 s1r2_p1 계획 그대로(번호 유지), 8–20 은 X-03 등록·writer 지점(EVS 등록의 지우기·게시, 전송 함수의 등록 검사 지점, AppState 올림 `cfe_es_api.c:573`, ES 전역 memset `cfe_es_start.c:82`, 예약 `:803`, 게시 `:818`, 실패 지우기 `:823`), 21–25 는 `app_owner` 생성 측 근거(§9). 지점 사이트의 라벨은 Φ 프로필의 지점 이름(`OP.LABEL` 또는 공유 사이트 이름)이어서 `kz replay` 가 그대로 대응시킨다. 사이트와 줄·효과·조건의 추적표는 `plan/proof_status_R2.md` §12, 인용 33개는 고정 트리에서 모두 해시가 일치했다(`kz anchor`) [M]. 처음 계획의 사이트 여덟 개: 이벤트 전송 함수의 진입·복귀, SB task 의 AppId 저장 직후, 시작 동기화 함수의 진입·복귀, task 생성의 진입·복귀, 새 task 의 첫 함수(진입). 인용한 줄과 해시는 파일 안에 있고, 이번 실행에서 모두 원문과 일치했다(8개 검증) [M]. SPEC §9.3 S1-R2 에 이 사이트들이 속한다는 진술은 `researcher` 층으로 기록했고, SPEC 이 개정 중이므로 해시하지 않았다.
 
 ## 5. 앵커
 
 - **함수 진입**: 함수가 `endbr64` 로 시작하면 그 4바이트 뒤, 아니면 첫 바이트. gcc `-O0` 의 함수는 `endbr64; push %rbp; mov %rsp,%rbp` 로 시작하므로 프로브는 `push %rbp`(진입+4)에 놓인다. 거기서는 인자 레지스터가 그대로이고 스택 꼭대기가 반환 주소이다. 복귀 프로브는 같은 주소를 쓴다(uretprobe).
 - **비용 부류**: 진입+4 의 `push %rbp` 는 `emulated`(커널이 명령을 직접 흉내 낸다)로 분류한다. 이 분류는 SPEC 이 인용하는 측정 [R07 §4.7]에 근거한 **표시**이다. 이번 구현은 어떤 비용도 새로 재지 않았다. 나머지는 `unknown`.
-- **소스 줄 직후** (`point ... after-call=`): 줄의 기계어를 DWARF 줄 표에서 구한 뒤, 줄의 **마지막 명령이 지정한 함수로의 `call rel32`** 일 때만 그 다음 명령을 앵커로 삼는다. 호출이 마지막 명령이 아니거나, 같은 줄에 조건에 맞는 호출이 둘 이상이면 거부한다. 추측하지 않는다 [D].
+- **소스 줄 직후** (`point ... after-call=`): 줄의 기계어를 DWARF 줄 표에서 구한 뒤, 줄의 **마지막 명령이 지정한 함수로의 `call rel32`** 일 때만 그 다음 명령을 앵커로 삼는다. 호출이 마지막 명령이 아니거나, 같은 줄에 조건에 맞는 호출이 둘 이상이면 거부한다. 추측하지 않는다 [D]. W2 보강: (a) 줄 표의 행 경계(예: gcc 가 조건 안 호출 뒤에 시작하는 discriminator 행)도 명령 경계로 인정한다, (b) 공유 라이브러리 함수(`memset`)의 호출은 PLT 스텁 호출로 찾는다(`.rela.plt` 와 `.plt.sec`), (c) 반환 지점이 함수 안의 직접 분기 대상이면(여러 경로의 합류: 호출하지 않은 경로에서도 발화) 거부한다. 분기 검사는 함수의 모든 바이트 위치를 jmp/jcc 로 읽으므로 직접 분기를 놓치지 않고, 잘못 읽은 바이트는 좋은 사이트를 거부할 수만 있다(보수적). 간접 점프는 보지 못한다.
+- **줄 시작** (`point ... line-start`, W2): 줄의 기계어가 한 함수 안의 연속된 한 덩어리일 때 그 첫 명령. 문장이 실행되기 **직전**에 발화한다. 호출이 없는 저장(`cfe_es_api.c:573`)과, 반환 지점이 합류점이라 (c)로 거부된 호출 줄(`cfe_evs.c:106`, `cfe_es_start.c:823`)에 쓴다. 저장되는 값은 레지스터에 있지만 ABI 가 정한 위치가 아니므로 읽지 않는다.
 - 자체 ELF/DWARF 읽기를 쓴 이유: `tools/kz` 와 `libkz-core` 는 LLVM 을 링크할 수 없고, 필요한 것은 줄 표와 기호 표뿐이다. 읽기 코드는 gcc/clang 이 만든 DWARF 4·5 파일에서 `addr2line` 과 비교했고 [M], 합성 ELF 로 DWARF 2–5, 64비트 형식, 두 번역 단위, 시퀀스 순서, 거부 사례를 시험한다.
 - 실제 cFS 바이너리의 앵커 여덟 개: 2026-10-15 의 작업 세션에서 `objdump -d` 와 `addr2line` 으로 보았으나 **그 출력은 저장하지 않았다**. 그래서 이것은 재현할 수 있는 증거가 아니다 [I]. 간접 근거만 남아 있다: basis 에 기록된 프로브 주소의 첫 바이트가 진입 사이트 다섯 곳 모두 `55 48 89 e5`(`push %rbp; mov %rsp,%rbp`)이고 함수 안 거리가 4(=`endbr64` 다음), 줄 사이트의 대상은 `addr2line` 기준 142 줄로 기준 gdb 실행의 `SB_PUB` 중단점(`cfe_sb_task.c:142`)과 같은 줄이며, 반환 주소로 찾은 호출 함수가 기준과 같았다(`observer_smoke_run.md` §5). 이제 `probe/scripts/observe_cfs_smoke.sh` 가 실행 **뒤에** 같은 basis 의 사이트마다 `addr2line -f -i -a` 와 `objdump -d --disassemble=<함수>` 의 해당 줄 앞뒤를 `<tag>_anchor_xcheck.txt` 로 남기고, 같은 단계(`--xcheck`)를 시험 `probe_anchor_xcheck_script` 가 목적 제작 프로그램에서 확인한다 [M]. cFS 바이너리에 대한 저장된 교차 확인은 다음 실행에서 처음 생긴다.
 
@@ -166,6 +172,13 @@ cFS v7.0.1 의 계획은 `profiles/cfs-v7.0.1/observe/sites.kzp` 이다. 사이�
 1. **생성 관계**: 커널의 FORK 기록이 새 thread 와 만든 thread(`ptid`)를 말한다(`fork-seen`).
 2. **생성자 쪽 구간 — 유일한 매칭 열쇠**: task 생성 함수의 진입 사건과 복귀 사건 사이(같은 thread)에 그 FORK 가 시간상 **포함**되면 그 호출이 그 thread 를 만들었다고 본다. 비교하는 시각은 **한 thread 의 것**(생성자의 프로브 사건과, 커널이 그 생성자 thread 에 대해 쓴 FORK 기록)이므로, 이 매칭은 시계 가정 **A-CLK-PO**(SPEC 5.4) 아래에서 성립한다. 그래서 매칭되었거나 모호한 기록에는 `match-by-time` 이 함께 켜진다. thread 사이의 순서는 쓰지 않는다. 한 FORK 를 두 구간이 주장할 수 있거나 한 구간에 후보가 둘이면 **모호**로 보고하고 누구에게도 배정하지 않는다.
 3. **자식 쪽**: 새 thread 가 첫 함수에서 알리는 id(`announced_id`), 그리고 thread 가 스스로 정한 커널 이름(COMM). 둘 다 tid 로 붙여 기록할 뿐 생성자 쪽과 **대조하지 않는다**. SPEC 5.7 항목 2 는 생성 함수의 출력 인자(배정된 OSAL id)를 생성자 쪽 증거로 든다. perf-sample 은 포인터가 가리키는 메모리를 읽지 못하므로 이 값을 얻지 못하고, 그래서 알린 id 는 **검증되지 않음**(`id-unverified`)으로 표시된다. 출력 인자와의 대조는 메모리를 읽을 수 있는 백엔드(eBPF; 생성 함수의 복귀에서 `*task_id` 를 읽는다)로 미룬다 [I].
+
+**생성 측 근거와 `app_owner` (W2, 2026-10-24; SPEC §1.2 "Creating application", §5.7 항목 2·4, ADR-056)** [D][M-시험]. 계획에 아래 사이트가 있으면 결합이 두 가지를 더 쓴다(`include/kz/trace/identity_join.hpp`).
+
+- **생성 요청**: `owner-request`(요청이 앱을 인자로 지정: `s2` 역할 `owner_id`) 또는 `child-request`(요청한 task 자신의 앱), 그 복귀 `request-return`. 생성 호출이 시작될 때 생성자 thread 에 열려 있는 **가장 바깥** 요청이 앱을 정한다. `child-request` 안에 겹친 `owner-request` 의 인자는 쓰지 않는다(cFS 에서는 생성자가 App 표를 조회한 값이다; EV-03). 자식 task 의 소유 앱은 생성자 task 자신의 `app_owner` 이고 수준은 그보다 높지 않다(`creator-owner`).
+- **배정된 id**: `spawn-id` 사이트(생성 호출 안, 같은 thread)가 생성 호출이 새 thread 에 넘기는 id 를 읽는다. cFS v7.0.1 에서는 `OS_Posix_InternalTaskCreate_Impl` 의 6번째 인자(`r9`)이고, 이 값은 `OS_TaskCreate` 출력 인자에 쓰이는 값과 같다(`osapi-idmap.c:838-873`, `os-shared-idmap.h:335-338`, `os-impl-tasks.c:596-625`). 자식이 알린 id 와 같으면 `id-matched`(생성 연결이 시각이 아니라 id 에 기댐; `match-by-time`·`id-unverified` 를 끈다), 다르면 `id-mismatch`(연결 없음).
+
+수준: id 로 연결되고 요청이 앱을 지정하면 `confirmed`, FORK 시각 포함만으로 연결되면 `inferred`(`match-by-time`, `id-unverified`), 그 밖(요청 없음, 모호·모순, 프로브된 생성 호출 없이 만든 thread `raw-thread`, 소유자 미확정인 생성자의 자식)은 `undetermined`. 키는 요청이 넘긴 앱 id 값(소유 kind 의 id 공간)이고, 재생 어댑터가 kind 의 id 규칙(`(id - base) mod 2^32`, 유효하면 표 크기로 나눈 나머지)으로 레코드 키를 만든다(`real_trace.hpp`). 결과는 `kz observe` 가 ACTOR_OWNERS 에 thread 마다 하나씩 쓴다. 프레임워크 조회는 하지 않는다. 시험: `test_trace_identity` 의 세 수준·자식 task·id 모순·TRUNC 요청, `test_probe_golden` 의 ACTOR_OWNERS 기록, `test_realrecord_derived` 의 id→레코드 키.
 
 TRUNC 가 켜진 생성·복귀·진입 사건은 열쇠나 id 로 쓰지 않고 `identity.creates_unreadable`, `returns_unreadable`, `entries_unreadable` 로 센다. 복귀를 읽지 못한 생성 호출은 열린 채 남으므로 그 안의 FORK 는 배정되지 않고 모호로 보고된다 [M]. 디코더가 읽는 슬롯을 선언하지 않은 사이트가 들어오면 결합 자체가 오류로 끝난다(§4).
 

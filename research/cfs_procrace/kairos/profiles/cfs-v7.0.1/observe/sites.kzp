@@ -21,6 +21,19 @@
 #
 # Nothing here selects a condition of the experiment.  Which sites exist is the plan; the number of
 # runs, the stop method and the user are the caller's (docs/observer.md).
+#
+# Sites 0-7 are the plan of the S1-R2 development run s1r2_p1 (unchanged, so that their ids stay).
+# Sites 8-20 (X-03, REV13 change table C-24, W2 2026-10-24) observe the R2 registration and writer
+# effects: EVS registration (clear and publish of the slot), the registry linearization point of
+# the send function, the AppState raise, and the App-record writers of the core start (memset of
+# the ES global, reserve, publish, failure clear).  Sites 21-25 carry the creation-side evidence of
+# app_owner (SPEC 1.2 "Creating application", 5.7 items 2 and 4, ADR-056): the start-task request
+# with the application it names, the child-task request, and the id the spawn call assigns where it
+# passes it to the new thread.  The point sites are named after the linearization points of the
+# phi profile (OP.LABEL, or the shared site), so that `kz replay` maps them; plan/proof_status_R2.md
+# section 12 is the trace table (site -> source line -> effect -> conjunct).  Every line below was
+# re-read in the tree the R2 binary was built from (cFS 088b2fa8, build-native_std; the hashes are
+# those of 01_prov.kzp where both cite the same lines).
 kzp-observe 1
 binary core-cpu1
 
@@ -63,3 +76,65 @@ site es.sync.ret   ret   func=CFE_ES_MainTaskSyncDelay prov=es_sync_def s0=rax:u
 site osal.task_create.entry entry func=OS_TaskCreate decoder=spawn-create prov=os_create_sig s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r9:u32:priority s3=stack+0:u64:return_address
 site osal.task_create.ret   ret   func=OS_TaskCreate decoder=spawn-return prov=os_create_sig s0=rax:u32:status s3=ip:u64:return_address
 site osal.task_entry        entry func=OS_TaskEntryPoint decoder=thread-entry prov=os_entry_def s0=rdi:u32:task_id s3=stack+0:u64:return_address
+
+# ---- X-03: registration and writer effects (W2) --------------------------------------------------
+
+prov evs_register_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=42-111 cite="CFE_EVS_Register: the caller's slot is found by its own AppID, cleared (memset), filled, then published by EVS_AppDataSetUsed; returns a status" sha256=fd114a9c99e4c494f344ce1556a7793c24cbc486acf5d807768989a255851ba4
+prov evs_reg_memset tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=56-56 cite="memset(AppDataPtr, 0, sizeof(EVS_AppData_t)): the slot's AppID becomes 0 (unregistered)" sha256=530ae464148c9cf04d9a7e768afe38132d5e458e3f0d922c0043cefdd1b459d5
+prov evs_reg_publish tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=106-106 cite="EVS_AppDataSetUsed(AppDataPtr, AppID): the slot is published (registered)" sha256=1ac5045232ef7f06b036927192dcbcd63efc5aca5045474d1ea54f2c3b34a256
+prov evs_setused_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_utils.h" lines=134-137 cite="EVS_AppDataSetUsed stores the AppID into the slot" sha256=c8082b6d41956219e84f94b0db94dff2a5cafab4da68b284d30b0ca58f58aeba
+prov evs_send_ismatch tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs.c" lines=185-194 cite="the send function looks the slot up by AppID and, if the AppID is legal, tests EVS_AppDataIsMatch: the registry check" sha256=8cdf5d5177a0cb2cf4bcd29916ebe0ca7d60e360ee51e3034247a2a67028f15c
+prov evs_ismatch_def tier=code-derived kind=code_pattern file="cfe/modules/evs/fsw/src/cfe_evs_utils.h" lines=164-167 cite="EVS_AppDataIsMatch reads the slot's AppID and compares it with the given one; the result is a bool" sha256=3c44baf17a538b4cc2d94a8e5d891e4ea4c8d8166e2282f9b4b4a90db0be361d
+prov es_wait_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=514-576 cite="CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds): under the ES lock the caller's AppState is raised to the level of its type and the requested state" sha256=0b5c87b0b606b003740a6c7221eae54475469548d4c1055b7df966078a077052
+prov es_wait_raise tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=571-574 cite="if (AppRecPtr->AppState < RequiredAppState) AppRecPtr->AppState = RequiredAppState: the store of line 573 has no call on its line" sha256=14f9399df11b2fbc9de57f3ab748c944f7d647a5af467d1368f0471516ff56a6
+prov es_main_memset tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=82-82 cite="memset(&CFE_ES_Global, 0, ...): every App record free, every AppState undefined" sha256=a99fd434cae6051efd0cec4ff53b5898f5b918bc448f6ab03e0f96e8dd1e269f
+prov es_core_reserve tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=803-803 cite="CFE_ES_AppRecordSetUsed(AppRecPtr, CFE_RESOURCEID_RESERVED): the core App record is reserved" sha256=a71084d65ee3a47f72d884e4524fc475ff14bad3a08d9187777984029566cd7f
+prov es_core_publish tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=816-818 cite="on success the record is published with CFE_ES_AppRecordSetUsed(AppRecPtr, PendingAppId)" sha256=d4fccccadf82f13ca421dfa045d656e61e054bcabc584caa2d1c94286defe771
+prov es_core_clear tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=821-824 cite="on failure the record is cleared with memset(AppRecPtr, 0, ...)" sha256=6903d7db9935050fc65d64c2cfb7d77a7e296fd0ea0851a50ff86bda8603705a
+
+# The send function's call and return are sites 0 and 1; the registry check lies between them.
+site evs.register.entry entry func=CFE_EVS_Register prov=evs_register_def s3=stack+0:u64:return_address
+site evs.register.ret   ret   func=CFE_EVS_Register prov=evs_register_def s0=rax:u32:status s3=ip:u64:return_address
+site CFE_EVS_Register.clear_slot point at=cfe_evs.c:56 after-call=memset prov=evs_reg_memset s0=rax:u64:slot_ptr
+# The return site after EVS_AppDataSetUsed is the join of the function's return paths (kz anchor
+# refuses it): the point is the start of the line, before the call.
+site CFE_EVS_Register.register   point at=cfe_evs.c:106 line-start prov=evs_reg_publish
+site CFE_EVS_SendEventWithAppID.slot_registered point at=cfe_evs.c:190 after-call=EVS_AppDataIsMatch prov=evs_send_ismatch s0=rax:u8:is_match
+site es.wait.entry entry func=CFE_ES_WaitForSystemState prov=es_wait_def s0=rdi:u32:min_system_state s1=rsi:u32:timeout_milliseconds s3=stack+0:u64:return_address
+site es.wait.ret   ret   func=CFE_ES_WaitForSystemState prov=es_wait_def s0=rax:u32:status s3=ip:u64:return_address
+# Before the store of line 573 (the branch that raises is taken).  The raised level is a register at
+# the store, not an argument: this backend does not read it.
+site CFE_ES_WaitForSystemState.raise_state point at=cfe_es_api.c:573 line-start prov=es_wait_raise
+# One memset, two effects of the phi profile (records and states): two sites at one address.
+site CFE_ES_Main.reset_records point at=cfe_es_start.c:82 after-call=memset prov=es_main_memset s0=rax:u64:dest
+site CFE_ES_Main.reset_states  point at=cfe_es_start.c:82 after-call=memset prov=es_main_memset s0=rax:u64:dest
+site CFE_ES_CreateObjects.reserve_core point at=cfe_es_start.c:803 after-call=CFE_ES_AppRecordSetUsed prov=es_core_reserve
+site CFE_ES_CreateObjects.publish_core point at=cfe_es_start.c:818 after-call=CFE_ES_AppRecordSetUsed prov=es_core_publish
+site core_clear point at=cfe_es_start.c:823 line-start prov=es_core_clear
+
+# ---- creation-side evidence of app_owner (W2) ----------------------------------------------------
+
+prov es_startapptask_def tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=649-670 cite="CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId) makes the one OS_TaskCreate call of the task" sha256=0a0feec4798f1c0c2a65acc62e61d36cf5767edf059797128c9aaa63b981b5a5
+prov es_taskrecord_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=694-694 cite="TaskRecPtr->AppId = ParentAppId: the task belongs to the application the request named" sha256=4d52e89ba819471d63cbe981b034d113262933379e15b77a2a32a2591f0cf85f
+prov es_core_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=810-814 cite="the core start passes the AppId it reserved (PendingAppId) as ParentAppId" sha256=eba07006985ab60b0e7ddb73c23e25f5f7c716ae1a3e976e35a59efa6d5ae1b7
+prov es_appcreate_starttask tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_apps.c" lines=849-854 cite="CFE_ES_AppCreate passes the AppId it reserved (PendingResourceId) as ParentAppId" sha256=9f2aa6ba6dae3501cf857465b06c621514f1a12d19f5f6ee15651dfaf259c750
+prov es_childtask_sig tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1202-1208 cite="CFE_ES_CreateChildTask(TaskIdPtr, TaskName, FunctionPtr, StackPtr, StackSize, Priority, Flags): no application argument" sha256=23239ec1f7fb685aaf7271041021df084eb07837d96a0604b183737870402769
+prov es_childtask_owner tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_api.c" lines=1255-1290 cite="the parent application is the caller's own (an App-record lookup by context, refused from a child task); it is passed to CFE_ES_StartAppTask as ParentAppId" sha256=01f1c6088bb55beb4bf0f0842c2da639941680b9558a838abcd25b9c70806904
+prov osal_taskcreate_calls_impl tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-task.c" lines=187-208 cite="OS_TaskCreate allocates the id (token), calls OS_TaskCreate_Impl, then writes the out-parameter with OS_ObjectIdFinalizeNew" sha256=020caf4d766afa1306653da53e4eeba72aac20df2cb4dda667cacaa1cf081161
+prov osal_finalize_new tier=code-derived kind=code_pattern file="osal/src/os/shared/src/osapi-idmap.c" lines=838-873 cite="on success the out-parameter receives token->obj_id" sha256=66f78878acd5a44ed44215c8626b515195b78fb81ff100e2afab0c1fc7546b1b
+prov osal_fromtoken tier=code-derived kind=code_pattern file="osal/src/os/shared/inc/os-shared-idmap.h" lines=335-338 cite="OS_ObjectIdFromToken returns token->obj_id" sha256=7dd953e33c9ec911ab87f5c5bd7d8b67c37899ada8f8f270358e03712f3cc4a3
+prov osal_taskcreate_impl_arg tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=596-625 cite="OS_TaskCreate_Impl zeroes the argument wrapper, sets arg.id = OS_ObjectIdFromToken(token) and passes it as entry_arg (the 6th argument) to OS_Posix_InternalTaskCreate_Impl" sha256=e4207c03e0d02fe196445eac43c994d12563b849fd71a2e871ee2085b287183b
+prov osal_internal_create_sig tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=457-462 cite="OS_Posix_InternalTaskCreate_Impl(pthr, priority, stackptr, stacksz, entry, entry_arg)" sha256=ff4bf2daa09886fb9c8cda76fff3a610c54288b5835c53048b31b490d37b3a1c
+prov osal_wrapper tier=code-derived kind=code_pattern file="osal/src/os/shared/inc/os-shared-globaldefs.h" lines=71-77 cite="OS_VoidPtrValueWrapper_t: a union of a pointer and the osal_id_t (the id is the low 4 bytes of the zeroed pointer)" sha256=86e9edbb8c8f6795f7a9326d85419259e3b4350b0f1285dda0bc7fd7c4658534
+prov osal_pthread_entry tier=code-derived kind=code_pattern file="osal/src/os/posix/src/os-impl-tasks.c" lines=131-140 cite="the new thread receives the same argument and calls OS_TaskEntryPoint(local_arg.id): the id site 7 reads" sha256=884ef27008c1905e4fabdd0059603124ecf33b796331c0a1ebef6b14edd8305a
+
+# The request names the application (core start and AppCreate pass the AppId they reserved).
+site es.start_task.entry entry func=CFE_ES_StartAppTask decoder=owner-request prov=es_startapptask_def s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s2=r8:u32:owner_id s3=stack+0:u64:return_address
+site es.start_task.ret   ret   func=CFE_ES_StartAppTask decoder=request-return prov=es_startapptask_def s0=rax:u32:status s3=ip:u64:return_address
+# A child task belongs to the caller's application: the join takes the creating task's own app_owner,
+# not the ParentAppId of the start-task request nested in it (that is a lookup in the App table).
+site es.child_task.entry entry func=CFE_ES_CreateChildTask decoder=child-request prov=es_childtask_owner s0=rsi:u64:name_ptr s1=rdx:u64:entry_fn s3=stack+0:u64:return_address
+site es.child_task.ret   ret   func=CFE_ES_CreateChildTask decoder=request-return prov=es_childtask_sig s0=rax:u32:status s3=ip:u64:return_address
+# The id OS_TaskCreate assigns (the value of its out-parameter), read where the spawn passes it to the
+# new thread: entry_arg is the 6th argument (r9); its low 4 bytes are the id.
+site osal.task_create.id entry func=OS_Posix_InternalTaskCreate_Impl decoder=spawn-id prov=osal_taskcreate_impl_arg s0=r9:u32:task_id s1=r8:u64:entry_fn s3=stack+0:u64:return_address

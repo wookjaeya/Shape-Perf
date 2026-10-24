@@ -126,8 +126,9 @@ Status build_basis(const Bytes& binary, const Profile& profile, const BasisOptio
   for (uint32_t i = 0; i < profile.sites.size(); ++i) {
     const ProfileSite& ps = profile.sites[i];
     anchor::ResolvedTarget t;
-    Status r = ps.kind == KZ_SITE_KIND_POINT_PROBE ? anchor::resolve_after_call(elf, lines, ps.at_file, ps.at_line, ps.after_call, &t)
-                                                  : anchor::resolve_entry(elf, lines, ps.func, ps.in_suffix, &t);
+    Status r = ps.kind != KZ_SITE_KIND_POINT_PROBE ? anchor::resolve_entry(elf, lines, ps.func, ps.in_suffix, &t)
+               : ps.line_start                       ? anchor::resolve_line_start(elf, lines, ps.at_file, ps.at_line, &t)
+                                                     : anchor::resolve_after_call(elf, lines, ps.at_file, ps.at_line, ps.after_call, &t);
     if (!r.ok()) return Status::error(r.code, site_error(ps, r));
     kz_target k;
     std::memset(&k, 0, sizeof k);
@@ -251,7 +252,7 @@ Status make_plan(const Profile& profile, const LoadedBasis& basis, std::vector<k
     const kz_target& t = basis.targets[i];
     if (t.id != i || basis.target_labels[i] != ps.label)
       return Status::error(Err::Invalid, "target " + std::to_string(i) + " is '" + basis.target_labels[i] + "' but the profile's site " + std::to_string(i) + " is '" + ps.label + "'");
-    const uint16_t want_kind = ps.kind == KZ_SITE_KIND_POINT_PROBE ? KZ_TARGET_KIND_AFTER_CALL : KZ_TARGET_KIND_FUNC_ENTRY;
+    const uint16_t want_kind = ps.kind != KZ_SITE_KIND_POINT_PROBE ? KZ_TARGET_KIND_FUNC_ENTRY : ps.line_start ? KZ_TARGET_KIND_LINE_START : KZ_TARGET_KIND_AFTER_CALL;
     if (t.kind != want_kind) return Status::error(Err::Invalid, "target '" + ps.label + "' has the wrong kind for the site");
     kz::trace::SiteSpec spec;
     spec.site = i;

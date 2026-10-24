@@ -144,3 +144,22 @@ int main(int argc, char** argv) {
   fprintf(stderr, "usage: target_prog basic | burst N | threads T N | exit CODE\n");
   return 64;
 }
+
+/*
+ * Anchor cases of W2 (2026-10-24), appended so that the line numbers above stay: a call of a
+ * shared-library function through its PLT stub (memset), a store that has no call on its line, and
+ * a call whose return site is also the target of the branch that skips it (a join of two paths).
+ * They are not called: the anchor test only resolves them.
+ */
+__attribute__((noinline)) void tp_clear(struct tp_task* t, size_t n) {
+  memset(t, 0, n);
+  g_identity = 0x110004u;
+}
+
+static unsigned g_join_identity;
+
+__attribute__((noinline)) int tp_join(int c) {
+  if (c != 0)
+    tp_get_identity(&g_join_identity);
+  return 0;
+}

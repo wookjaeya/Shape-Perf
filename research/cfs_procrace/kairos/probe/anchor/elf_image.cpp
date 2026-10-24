@@ -142,7 +142,52 @@ Status ElfImage::parse(Bytes bytes, ElfImage* out) {
     if (a.vaddr != c.vaddr) return a.vaddr < c.vaddr;
     return a.name < c.name;
   });
+
+  // PLT stubs: the call of a function of a shared library (e.g. memset) is a call of its stub.  The
+  // x86-64 lazy-binding layout: the k-th relocation of .rela.plt belongs to the k-th 16-byte entry
+  // of .plt.sec when the file has one (IBT), otherwise to entry k + 1 of .plt (entry 0 is the
+  // resolver).  This is the layout the static linker writes; a file in another layout gets no stubs,
+  // and a call through it is then refused by name (never guessed).
+  {
+    int rela = -1, plt = -1, plt_sec = -1;
+    for (uint32_t i = 0; i < shdr.size(); ++i) {
+      const std::string& nm = out->sections_[i].name;
+      if (nm == ".rela.plt" && shdr[i].sh_type == SHT_RELA) rela = static_cast<int>(i);
+      else if (nm == ".plt") plt = static_cast<int>(i);
+      else if (nm == ".plt.sec") plt_sec = static_cast<int>(i);
+    }
+    if (rela >= 0 && (plt_sec >= 0 || plt >= 0)) {
+      const Elf64_Shdr& rs = shdr[static_cast<size_t>(rela)];
+      const bool ok_layout = rs.sh_entsize == sizeof(Elf64_Rela) && rs.sh_link < shdr.size() && shdr[rs.sh_link].sh_entsize == sizeof(Elf64_Sym) &&
+                             shdr[rs.sh_link].sh_link < shdr.size();
+      if (ok_layout) {
+        const Elf64_Shdr& dynsym = shdr[rs.sh_link];
+        const Elf64_Shdr& dynstr = shdr[dynsym.sh_link];
+        const Elf64_Shdr& stubs = shdr[static_cast<size_t>(plt_sec >= 0 ? plt_sec : plt)];
+        const uint64_t first = plt_sec >= 0 ? 0 : 1;
+        const uint64_t n = rs.sh_size / sizeof(Elf64_Rela);
+        for (uint64_t k = 0; k < n; ++k) {
+          Elf64_Rela r;
+          if (!read_struct(b, rs.sh_offset + k * sizeof r, &r)) return bad("PLT relocation outside the file");
+          const uint64_t symi = ELF64_R_SYM(r.r_info);
+          Elf64_Sym sym;
+          if (symi == 0 || !read_struct(b, dynsym.sh_offset + symi * sizeof sym, &sym)) continue;
+          std::string name;
+          if (!c_string_in(b, dynstr.sh_offset, dynstr.sh_size, sym.st_name, &name) || name.empty()) continue;
+          const uint64_t off = (k + first) * 16;
+          if (off + 16 > stubs.sh_size) continue;
+          out->plt_.push_back({name, stubs.sh_addr + off});
+        }
+      }
+    }
+  }
   return Status::success();
+}
+
+uint64_t ElfImage::plt_stub(std::string_view name) const {
+  for (const auto& p : plt_)
+    if (p.first == name) return p.second;
+  return 0;
 }
 
 bool ElfImage::vaddr_to_offset(uint64_t vaddr, uint64_t* offset) const {

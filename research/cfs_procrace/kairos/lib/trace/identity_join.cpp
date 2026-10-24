@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <unordered_map>
 
@@ -30,15 +31,31 @@ struct Interval {
   uint64_t t_begin = 0, t_end = 0;
   uint64_t entry_fn = 0;
   uint32_t priority = 0;
+  bool has_id = false;      // a SPAWN_ID event inside the call gave the id the spawn assigned
+  bool id_unreadable = false;
+  uint32_t assigned_id = 0;
+  int32_t request = -1;     // the outermost creation request open on the creator thread at the call, or -1
+};
+
+// A creation request (OWNER_REQUEST or CHILD_REQUEST) on one thread, from its entry to its return.
+struct Request {
+  uint32_t tid = 0;
+  uint32_t event = 0;
+  bool child = false;
+  bool owner_readable = false;
+  uint32_t owner_id = 0;    // OWNER_REQUEST a[2]
+  uint64_t ret_addr = 0;
+  bool nested_owner_request = false;  // an OWNER_REQUEST ran inside this CHILD_REQUEST (its argument is not read)
 };
 
 }  // namespace
 
-Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, JoinStats* stats) {
+Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, JoinStats* stats, std::vector<OwnerRecord>* owners) {
   JoinStats local;
   JoinStats& st = stats != nullptr ? *stats : local;
   st = JoinStats();
   out->clear();
+  if (owners != nullptr) owners->clear();
   if (in.events == nullptr || in.sites == nullptr || in.side == nullptr)
     return Status::error(Err::Invalid, "join_identities: events, sites and side events are required");
   const std::vector<kz_raw_ev>& events = *in.events;
@@ -124,9 +141,12 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     return pick;
   };
 
-  // 2. Raw events: first event, counts, child-side announcements, creator-side intervals.
+  // 2. Raw events: first event, counts, child-side announcements, creator-side intervals, creation
+  //    requests and the ids the spawn calls assign.
   std::unordered_map<uint32_t, std::vector<Interval>> open_creates;  // creator tid -> stack of open creates
   std::vector<Interval> intervals;
+  std::vector<Request> requests;
+  std::unordered_map<uint32_t, std::vector<uint32_t>> open_requests;  // tid -> stack of indices into requests
   std::vector<uint32_t> synthetic_pid_tids;
   for (uint32_t i = 0; i < events.size(); ++i) {
     const kz_raw_ev& ev = events[i];
@@ -169,6 +189,10 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
         iv.t_begin = ev.t_ns;
         iv.entry_fn = ev.a[1];
         iv.priority = static_cast<uint32_t>(ev.a[2] & 0xffffffffu);
+        {
+          const auto rq = open_requests.find(ev.tid);
+          if (rq != open_requests.end() && !rq->second.empty()) iv.request = static_cast<int32_t>(rq->second.front());
+        }
         // the return address of this call identifies its return event
         open_creates[ev.tid].push_back(iv);
         // stash the return address in t_end until the return is seen
@@ -205,10 +229,78 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
         intervals.push_back(iv);
         break;
       }
+      case KZ_DECODER_SPAWN_ID: {
+        // The id the spawn call assigns, read where the call passes it to the new thread: it belongs
+        // to the innermost spawn call open on this thread.  Outside one (a thread the framework starts
+        // by other means) it says nothing about a spawn call.
+        std::vector<Interval>& stack = open_creates[ev.tid];
+        if (stack.empty()) {
+          ++st.spawn_ids_outside_create;
+          break;
+        }
+        Interval& iv = stack.back();
+        if (iv.has_id || iv.id_unreadable) {
+          ++st.spawn_ids_repeated;  // a second id in one call: neither is used
+          iv.has_id = false;
+          iv.id_unreadable = true;
+          break;
+        }
+        if (unreadable) {
+          iv.id_unreadable = true;
+          ++st.spawn_ids_unreadable;
+          break;
+        }
+        iv.has_id = true;
+        iv.assigned_id = static_cast<uint32_t>(ev.a[0] & 0xffffffffu);
+        break;
+      }
+      case KZ_DECODER_OWNER_REQUEST:
+      case KZ_DECODER_CHILD_REQUEST: {
+        if (unreadable) {
+          // Its return address (and owner) may be a zero of a slot the kernel did not copy: it could
+          // not be closed by its return, so it opens nothing (a spawn call inside it names no owner).
+          ++st.requests_unreadable;
+          break;
+        }
+        Request rq;
+        rq.tid = ev.tid;
+        rq.event = i;
+        rq.child = site.decoder == KZ_DECODER_CHILD_REQUEST;
+        rq.ret_addr = ev.a[kSlotReturnAddress];
+        if (!rq.child) {
+          rq.owner_readable = true;
+          rq.owner_id = static_cast<uint32_t>(ev.a[2] & 0xffffffffu);
+        }
+        std::vector<uint32_t>& rs = open_requests[ev.tid];
+        if (!rq.child)
+          for (uint32_t r : rs)
+            if (requests[r].child) requests[r].nested_owner_request = true;
+        rs.push_back(static_cast<uint32_t>(requests.size()));
+        requests.push_back(rq);
+        ++st.requests;
+        break;
+      }
+      case KZ_DECODER_REQUEST_RETURN: {
+        if (unreadable) {
+          ++st.requests_unreadable;
+          break;
+        }
+        std::vector<uint32_t>& rs = open_requests[ev.tid];
+        size_t k = rs.size();
+        while (k > 0 && requests[rs[k - 1]].ret_addr != ev.a[kSlotReturnAddress]) --k;
+        if (k == 0) {
+          ++st.request_returns_without_request;
+          break;
+        }
+        st.requests_without_return += rs.size() - k;  // requests opened after it never returned through a probe
+        rs.resize(k - 1);
+        break;
+      }
       default:
         break;
     }
   }
+  for (const auto& kv : open_requests) st.requests_without_return += kv.second.size();
   // Creates still open at the end of the trace.
   {
     std::vector<uint32_t> tids;
@@ -230,6 +322,7 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     return a.create_event < b.create_event;
   });
   std::vector<bool> claimed(inc.size(), false);
+  std::unordered_map<uint32_t, uint32_t> time_match;  // create_event -> incarnation matched by FORK time
   for (const Interval& iv : intervals) {
     std::vector<uint32_t> cands;
     for (uint32_t idx = 0; idx < inc.size(); ++idx) {
@@ -259,6 +352,51 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     c.creator_event = iv.create_event;
     c.entry_fn = iv.entry_fn;
     c.priority = iv.priority;
+    time_match[iv.create_event] = cands[0];
+  }
+
+  // 3b. The id the spawn call assigned against the id the child announced (SPEC 5.7 items 2-3).  A
+  //     thread of the creator whose announced id equals it, forked inside the call, is the call's
+  //     child by id: the link no longer rests on time alone.  An id that contradicts the time match
+  //     leaves the link unestablished.  Nothing is decided by the id alone when two threads announce it.
+  std::unordered_map<uint32_t, const Interval*> by_event;
+  for (const Interval& iv : intervals) by_event[iv.create_event] = &iv;
+  for (const Interval& iv : intervals) {
+    if (!iv.has_id) continue;
+    std::vector<uint32_t> cands;
+    for (uint32_t idx = 0; idx < inc.size(); ++idx) {
+      const Incarnation& c = inc[idx];
+      if (!c.has_fork || c.ptid != iv.creator_tid || (c.flags & KZ_THREAD_FLAG_ENTRY_SEEN) == 0) continue;
+      if (c.announced != iv.assigned_id || c.t_fork < iv.t_begin || c.t_fork > iv.t_end) continue;
+      cands.push_back(idx);
+    }
+    const auto tm = time_match.find(iv.create_event);
+    if (tm != time_match.end()) {
+      Incarnation& c = inc[tm->second];
+      if ((c.flags & KZ_THREAD_FLAG_ENTRY_SEEN) != 0 && c.announced != iv.assigned_id) {
+        // The thread the FORK time gave this call announced another id.
+        c.flags |= KZ_THREAD_FLAG_ID_MISMATCH;
+        c.flags &= ~static_cast<uint32_t>(KZ_THREAD_FLAG_SPAWN_MATCHED);
+        c.creator_event = KZ_NONE32;
+        ++st.ids_mismatched;
+        continue;
+      }
+    }
+    if (cands.size() != 1) continue;
+    Incarnation& c = inc[cands[0]];
+    if ((c.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) != 0 && c.creator_event != iv.create_event) {
+      c.flags |= KZ_THREAD_FLAG_ID_MISMATCH;  // matched by time to another call
+      c.flags &= ~static_cast<uint32_t>(KZ_THREAD_FLAG_SPAWN_MATCHED);
+      c.creator_event = KZ_NONE32;
+      ++st.ids_mismatched;
+      continue;
+    }
+    c.flags |= KZ_THREAD_FLAG_SPAWN_MATCHED | KZ_THREAD_FLAG_ID_MATCHED;
+    c.flags &= ~static_cast<uint32_t>(KZ_THREAD_FLAG_SPAWN_AMBIGUOUS | KZ_THREAD_FLAG_MATCH_BY_TIME | KZ_THREAD_FLAG_ID_UNVERIFIED);
+    c.creator_event = iv.create_event;
+    c.entry_fn = iv.entry_fn;
+    c.priority = iv.priority;
+    ++st.ids_matched;
   }
 
   // 4. Finish the records.
@@ -269,6 +407,8 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     if (inc[a].tid != inc[b].tid) return inc[a].tid < inc[b].tid;
     return inc[a].generation < inc[b].generation;
   });
+  std::vector<uint32_t> out_index(inc.size(), KZ_NONE32);
+  for (uint32_t k = 0; k < order.size(); ++k) out_index[order[k]] = k;
   for (uint32_t idx : order) {
     Incarnation& n = inc[idx];
     if ((n.flags & KZ_THREAD_FLAG_COMM_SEEN) == 0) {
@@ -310,6 +450,79 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     }
     out->push_back(std::move(tr));
     ++st.threads;
+  }
+
+  // 5. app_owner (SPEC 1.2 "Creating application", 5.7, ADR-056): from the creation side only.  The
+  //    outermost creation request open on the creator thread when the spawn call began says which
+  //    application the new task belongs to: an OWNER_REQUEST by its argument, a CHILD_REQUEST by the
+  //    creating task's own app_owner.  The level is `confirmed` only when the child's announced id
+  //    equals the id the spawn call assigned (ID_MATCHED); a link by FORK time alone is `inferred`
+  //    (match-by-time, id-unverified).  Nothing is looked up in the process or in a framework table.
+  std::vector<OwnerRecord> own(inc.size());
+  std::vector<bool> done(inc.size(), false);
+  std::vector<uint32_t> by_fork(inc.size());
+  for (uint32_t i = 0; i < by_fork.size(); ++i) by_fork[i] = i;
+  std::stable_sort(by_fork.begin(), by_fork.end(), [&](uint32_t a, uint32_t b) { return inc[a].t_fork < inc[b].t_fork; });
+  // Recursive: a child's owner is read from its creator's (a cycle cannot occur in kernel records; a
+  // record already being computed is returned as it stands, i.e. undetermined).
+  std::function<OwnerRecord&(uint32_t)> owner_of = [&](uint32_t idx) -> OwnerRecord& {
+    OwnerRecord& o = own[idx];
+    if (done[idx]) return o;
+    done[idx] = true;
+    const Incarnation& n = inc[idx];
+    std::memset(&o.rec, 0, sizeof o.rec);
+    o.rec.thread = out_index[idx];
+    o.rec.creator_thread = KZ_NONE32;
+    o.rec.creation_event = KZ_NONE32;
+    o.rec.owner_key = KZ_NONE32;
+    o.rec.level = KZ_OWNER_LEVEL_UNDETERMINED;
+    o.rec.evidence = 0;
+    if (n.has_fork && n.ptid != KZ_NONE32) {
+      Incarnation* cr = incarnation_at(n.ptid, n.t_fork);
+      if (cr != nullptr) o.rec.creator_thread = out_index[static_cast<size_t>(cr - inc.data())];
+    }
+    if ((n.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) == 0) {
+      if ((n.flags & KZ_THREAD_FLAG_SPAWN_AMBIGUOUS) != 0) o.rec.evidence |= KZ_OWNER_EVIDENCE_MATCH_BY_TIME;
+      else if (n.has_fork && (n.flags & KZ_THREAD_FLAG_ID_MISMATCH) == 0) o.rec.evidence |= KZ_OWNER_EVIDENCE_RAW_THREAD;  // created without a probed spawn call
+      return o;
+    }
+    const auto ivp = by_event.find(n.creator_event);
+    const Interval* iv = ivp != by_event.end() ? ivp->second : nullptr;
+    const bool by_id = (n.flags & KZ_THREAD_FLAG_ID_MATCHED) != 0;
+    if (iv != nullptr && n.t_fork >= iv->t_begin && n.t_fork <= iv->t_end) o.rec.evidence |= KZ_OWNER_EVIDENCE_FORK_IN_CALL;
+    o.rec.evidence |= by_id ? KZ_OWNER_EVIDENCE_ANNOUNCED_ID : (KZ_OWNER_EVIDENCE_MATCH_BY_TIME | KZ_OWNER_EVIDENCE_ID_UNVERIFIED);
+    o.rec.creation_event = n.creator_event;
+    if (iv == nullptr || iv->request < 0) return o;  // a spawn call outside any creation request: the application is not named
+    const Request& rq = requests[static_cast<size_t>(iv->request)];
+    o.rec.creation_event = rq.event;
+    o.rec.evidence |= KZ_OWNER_EVIDENCE_CREATION_REQUEST;
+    const uint8_t link = by_id ? KZ_OWNER_LEVEL_CONFIRMED : KZ_OWNER_LEVEL_INFERRED;
+    if (!rq.child) {
+      if (!rq.owner_readable) return o;
+      o.rec.owner_key = rq.owner_id;
+      o.rec.level = link;
+      o.app_name = n.name;
+      return o;
+    }
+    // A child task: the application of the task that asked for it.
+    o.rec.evidence |= KZ_OWNER_EVIDENCE_CREATOR_OWNER;
+    if (rq.nested_owner_request) o.rec.evidence |= KZ_OWNER_EVIDENCE_ANALYSED_TABLE_EXCLUDED;
+    Incarnation* cr = n.has_fork ? incarnation_at(n.ptid, n.t_fork) : nullptr;
+    if (cr == nullptr || cr == &n) return o;
+    const OwnerRecord& co = owner_of(static_cast<uint32_t>(cr - inc.data()));
+    if (co.rec.level == KZ_OWNER_LEVEL_UNDETERMINED || co.rec.owner_key == KZ_NONE32) return o;
+    o.rec.owner_key = co.rec.owner_key;
+    o.rec.level = std::min<uint8_t>(link, co.rec.level);
+    o.app_name = co.app_name;
+    return o;
+  };
+  for (uint32_t idx : by_fork) owner_of(idx);
+  for (uint32_t idx : order) {
+    const OwnerRecord& o = own[idx];
+    if (o.rec.level == KZ_OWNER_LEVEL_CONFIRMED) ++st.owners_confirmed;
+    else if (o.rec.level == KZ_OWNER_LEVEL_INFERRED) ++st.owners_inferred;
+    else ++st.owners_undetermined;
+    if (owners != nullptr) owners->push_back(o);
   }
   return Status::success();
 }

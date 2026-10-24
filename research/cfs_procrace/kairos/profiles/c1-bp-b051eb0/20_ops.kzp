@@ -5,8 +5,8 @@ phi 1;
 # 1.2: the definition is the object at the lookup's linearization point, the table search).  The returned
 # codes are the documented ones: OS_ERR_NAME_NOT_FOUND is the not-ready outcome.  OS_ERR_INCORRECT_OBJ_STATE
 # (the RESERVED window, A5) and OS_ERROR are not documented for this API and are not mapped.  The name is
-# a string in memory; an observer that reads registers only does not have it (a slot holds the pointer and
-# is not named like the parameter).
+# a string in memory: the observation plan reads it with a probe-event fetch argument (a string slot named
+# like the parameter; observe/sites-*.kzp, 2026-10-24).
 op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
   bind symbol "OS_CountSemGetIdByName";
   conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;

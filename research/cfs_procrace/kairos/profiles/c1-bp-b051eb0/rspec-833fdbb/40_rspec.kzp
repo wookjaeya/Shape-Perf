@@ -6,8 +6,9 @@
 # (cf_cfdp.c L993-L999, code_admission, side caller; the same text as 15a871e L1272-L1278 that SPEC 2.3
 # cites).  An earlier not-ready attempt followed by a READY attempt of the same loop is TOLERATED; all 25
 # attempts not ready are VIOLATING (the exhaustion is rejected: no caller record accepts the exit).  The
-# replay of this tool does not run the horizon monitor yet: such attempts stay PENDING
-# (INCONCLUSIVE(horizon-open)) and are never counted as TOLERATED (docs/phi_reference.md 7.5).
+# replay runs this entry's horizon monitor (2026-10-24, docs/phi_reference.md 7.5) with the bound's value
+# from 05_consts.kzp of cf-833fdbb/; a run the record ends before ACCEPT or REJECT stays PENDING
+# (INCONCLUSIVE(horizon-open)), never TOLERATED.
 phi 1;
 
 rspec K-REG.osal-countsem-lookup {

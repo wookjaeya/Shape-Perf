@@ -153,5 +153,7 @@
 | C-52 한국어 미러 01–10 | **적용** | `7477dec`…`33b9541` | 05–10은 rev 1.2 미반영분까지 함께 반영 |
 | C-48′ 그림 파일 | **적용** | `ff9f0a0` | D0–D4, D6–D9 `.mmd` 갱신·재렌더링(mermaid-cli 11.17.0). D5, D10은 변경 불필요. 문서 안 그림 23개가 원본과 일치(스크립트 확인) |
 | X-04–X-07 문서 | **적용** | `763a4ea` | C1 계획, proof_status_R2, observer_smoke_run(165→167 등), MIDREVIEW, C2 세 구성 |
-| X-01 스키마, X-02 재생 엔진, X-03 `sites.kzp` | **미적용** | — | 코드·관측 프로필 변경이라 구현 단계에서 한다 |
+| X-01 스키마 | **적용** (2026-10-24, W1) | `79f827e` | 스키마 개정 2: 새 섹션만(SUMMARIES, MODEL_IDS, OBS_ADEQUACY, IDENTITIES, ACTOR_OWNERS), 기존 레이아웃·섹션 버전 그대로라 이전 컨테이너는 쓴 그대로 읽힘(`kairos/docs/schema.md` §10). `test_core_vocab` 갱신 |
+| X-02 재생 엔진 | **적용** (2026-10-24, W1) | `0bf8d6a`, `a5bf24f`, `fde25a7` | 실제 기록 모드(명시 선택; 모델 trace 와 golden 은 그대로), 미관측 = 미지, ADR-055 쓰기 조건, 행위자 사이 병합 순서 불신, D2 요약, 설명 집합 공집합 = 입력 오류, `.kzt` 어댑터 `kz replay`, 파생 기록 시험(`kairos/docs/phi_reference.md` §7.6, `observer.md` §3.4) |
+| X-03 `sites.kzp` | **미적용** | — | W2 |
 | 추가 정정(표에 없던 것) | **적용** | `763a4ea`, `d4f0b3e`, `08c37f7`, `33b9541` | SPEC의 C2 "2 × 2" 잔여 표현 전부를 세 구성으로, §3.9 QT-5 문구, §2.5 의무 적용 범위 메모, Architecture README rev 1.3, 깨진 링크·ADR 개수 |

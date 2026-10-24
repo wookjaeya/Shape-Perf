@@ -302,3 +302,93 @@ kz replay v153_pilot2.kzt --profile research/cfs_procrace/kairos/profiles/cfs-v7
 - 245 의 위반 없음은 여전히 반환 코드 고정(P1)에 기댄다. 정적 닫힘으로 별칭 포괄은 섰지만 writer 포괄은 서지 않는다: 관측되지 않은 writer 가 있고(위 목록), 그중 EVS·SB 의 EarlyInit 지우기와 CleanUpApp 의 SetFree 는 Φ 효과가 아니다. 수명(`lifetime-known`)은 실행 컨테이너가 세우지 않는다.
 - 위치의 writer 는 관측된 것만 상대가 된다. SB EarlyInit 지우기(`cfe_sb_init.c:50`, 시작 thread `core-cpu1` 이 실행; 소유 앱 미정)를 관측하면 위반 24 의 관계가 `ownership-undetermined` 로 바뀔 수 있다 [I]. **PI 확인(결정하지 않음)**: 위치에 무효 id 를 쓰는 지우기(EarlyInit memset, `CFE_ES_GetAppID` 실패 가지 저장)를 관계의 상대("actors involved")에 넣는가. SPEC §1.1 은 "Every result names the relation between the actors involved" 라고만 하고 여러 writer 가 있는 위치에서 누가 관여자인지 정하지 않는다. `plan/proof_status_R2.md` F-4 는 S3a writer 분류에서 이 둘을 중립으로 적지만 그것은 인증서의 writer 구간 분류이지 관계 규칙이 아니다. 현행: 종류의 등록과 같은 규칙(관측된 쓰기는 값과 무관하게 모두 상대)이고 대안은 고르지 않았다.
 - 손실의 task 귀속, rx·C1 쪽은 이 절의 범위 밖이다.
+
+## 9. 세 번째 pilot 관측 v153_pilot3: 상태 기반 판정 (R2 상태 기반, 2026-10-24) [M]
+
+- **지위: pilot/dev 실행 한 번.** 본 실험 결과가 아니고 pilot1·2 와 합치지 않는다. 반복 수는 PI 결정 P8(D14)이다.
+- 목적: 반환 코드 고정(P1)에만 기대던 위반 없음 판정을, 출처가 허락하는 곳에서 계산된 상태 위에 세운다. 막던 것은 `evs.reg` 의 writer 포괄과 수명이었다(§8.8).
+
+### 9.1 바꾼 것 (commit `0acdda2`, 보완 `cd4412e`·`6004cb4`)
+
+| 항목 | 내용 | 근거 [F] |
+|---|---|---|
+| Φ 효과 | `CFE_EVS_EarlyInit.clear_registry`: `lifecycle all evs.reg -> UNREG`(EVS 전역 memset, 슬롯 AppID 전부 0). `CFE_EVS_CleanUpApp.free_slot`: `evs.reg(arg.Id) -> UNREG`, 단언 보호 조건 `state = REG`(일치할 때만 SetFree). SB EarlyInit memset 은 이미 효과(`clear_global`)였다 | `cfe_evs_task.c:63`, `cfe_evs_task.h:116`, `cfe_evs_task.c:186-197`, `cfe_evs_utils.h:148-151` (인용 8개 추가, `verify-prov` 106개 일치) |
+| 관측점 30–34 | `CFE_EVS_EarlyInit.clear_registry`(`cfe_evs_task.c:63` memset 직후 `0x2a7bc`), `CFE_SB_EarlyInit.clear_global`(`cfe_sb_init.c:50` 직후 `0x318fa`), `evs.cleanup.entry/ret`(`rdi` = Id), `CFE_EVS_CleanUpApp.free_slot`(`cfe_evs_task.c:194` 의 `call EVS_AppDataSetFree` 자체 `0x2ab47`; 호출 직후는 반환 경로 합류점) | 인용 40개 해시가 R2 빌드 트리에서 일치(`kz anchor --source-root`), `--xcheck` 에서 다섯 주소의 명령·줄 확인 |
+| 시작 상태 | 어댑터가 종류마다 `start=known` 을 선언하던 것을 없앴다. 위치는 프로필 INIT 사실(`sb_identity_image`)이 있을 때만, 종류는 **관측된 전체 초기화 효과**에서부터 안다(IN-03, OB-05) | — |
+| 수명 | scope `process` 이고, 프로필에서 그 종류를 초기 상태로 되돌리는 효과(수명 끝)의 지점이 모두 관측되고, 기록이 프로세스 시작부터일 때 `lifetime=known` | 프로필의 생명주기 |
+| 행위자 사이 순서 | 첫 재생의 HB 간선(프로그램 순서, `R2-P-TASK` 24개)으로 vector clock 을 만들고, 기록 **전체**의 쓰기(병합 순서상 뒤에 온 것 포함)가 읽기와 HB 로 순서가 정해질 때만 다른 행위자가 쓴 값을 고정한다. 쓰기 집합이 더 늘지 않을 때까지 재생을 되풀이한다 | SPEC §4.8 "order" |
+| 효과 대상의 소유 앱 정체성 | `confirmed` 소유 앱의 생성 요청 id(`owner_id`)로 `id(owner(exec))` 를 읽어 효과 대상을 정한다(기본 켬, `--owner-identity-targets off` 로 이전 읽기). 그 상태를 읽은 조건에 `owner-identity` 를 적는다 | `cfe_evs.c:51-53`, `cfe_evs_utils.c:71-104`, `cfe_es_resource.c:308-341`, `cfe_es_api.c:752-756`, `cfe_es_apps.c:694-703`; 작업 기록에서 App 레코드로 가는 걸음은 신뢰 항목 A-OWNER |
+| P10 대안 | `kz replay --clearing-writes excluded`: 키 자원을 초기 상태로 되돌리는 쓰기, 포획 위치에 유효하지 않은 id 를 저장하는 쓰기를 관계 상대에서 뺀다. 기본은 현행(`counted`) | STATUS §2a P10 |
+
+### 9.2 명령과 §8.1 과 다른 점
+
+kz 는 commit `0acdda2` 빌드(SHA-256 `40b97162…82d5`, 사본 `runs/v153_pilot3/kz`), `v153_pilot3_source.diff` 빈 파일. 재생 표는 relation 사유 문구만 고친 `6004cb4` 빌드(`2bd38ab3…a980`, 사본 `runs/v153_pilot3_replay/kz`)로 다시 돌린 것이다(개수는 `0acdda2` 재생과 같음 [M]).
+
+```sh
+CFS_NORMAL_USER=ubuntu research/cfs_procrace/kairos/probe/scripts/observe_cfs_smoke.sh v153_pilot3 \
+    /home/user/work/kairos-build/tools/kz/kz 2 --out-dir /home/user/work/procrace/r2_runs/v153_pilot3 --purpose pilot
+# 정적 닫힘: §8.1 의 kz-static basis/extract 그대로(k1r3-llvm 재빌드, 파일 SHA-256 e3a45562…74ff), 새 프로필
+kz replay v153_pilot3.kzt --profile .../cfs-v7.0.1 --const CFE_PLATFORM_ES_MAX_APPLICATIONS=32 --basis v153_pilot3_basis.kz \
+    --core-request-caller CFE_ES_CreateObjects --facts v153_pilot3_facts.kz --static-basis v153_pilot3_static_basis.kz \
+    --outcome-narrowing on|off --clearing-writes counted|excluded --out ...   # 네 조합
+```
+
+계획 35 사이트(`d514c953…d9af`), 프로필 해시 `a32262be…defe`. 나머지 조건(바이너리 `0edb1ae2…7799`, 사용자 `ubuntu`, 관측기 root, `operational`, `ci-es-restart-poweron`, 층 `none`, ring, 커널 v153, 환경 이름 153개 `cfs.environment` deviation, 실행 직전 상태의 형태)은 §8.1 과 같다. 시작 2026-10-24T20:29:47Z, OPERATIONAL 1628 ms, 재시작 명령 종료 0, `POWERON`.
+
+### 9.3 관측
+
+사건 1271, 사이트 35, thread 27, **손실 0**. `app_owner` confirmed 24 / undetermined 3. 새 지점: EVS EarlyInit 1, SB EarlyInit 1(둘 다 시작 thread `core-cpu1`), CleanUpApp 0(진입·지점 모두 붙었고 이 실행에서 불리지 않음). 전송 269, 사이트 2 앞 24 = ES 20 + EVS 4(호출 함수·event id 묶음은 §8.2 와 같다).
+
+### 9.4 재생: 판정 근거별 개수
+
+`evs.reg` 는 이 기록에서 **fixed**: ADR-055 일곱 항목이 모두 섰다(writer 4/4·별칭 포괄은 정적 닫힘, 시작 상태 "from `CFE_EVS_EarlyInit.clear_registry` #2", 수명, 프로브, 손실 없음). `CFE_SB_Global.AppId` 는 정적 writer 3/3 이 관측되나 open {`effect_unsupported`}: 프로필의 `CFE_ES_GetAppID.store_ok`/`store_fail`(out 포인터 저장 = 모든 위치의 writer)이 관측되지 않는다. 판정은 이 위치를 읽지 않는다(값 조건은 인자 포획).
+
+| 발생 부류 | 수 | P1 현행(고정 켬) | P1 대안(끔) | 근거 |
+|---|---|---|---|---|
+| 위반(ES 20, EVS 4; AppID 0) | 24 | `OBSERVED_VIOLATION` | 같음 | **상태 기반**(값 조건을 인자에서 포획) |
+| `CFE_SB` 가 자기 AppID 로 보낸 것 | 5 | `NO_VIOLATION_IN_CHECKED_PREFIX` | **같음** | **상태 기반**: `evs.reg[0x110003]` 의 쓰기(EarlyInit 지우기 `core-cpu1` → 생성 간선 → SB 의 지우기·등록)가 모두 사용보다 HB 앞. `owner-identity`(등록 대상 = SB 의 confirmed 생성 id) |
+| 다른 task 가 SB·TBL 의 AppID 로 보낸 것 | 240 | `NO_VIOLATION_IN_CHECKED_PREFIX` (outcome-narrowed) | `INCONCLUSIVE(explanation_ambiguous)` | **반환 코드 고정**. 등록(SB·TBL task)과 사용 task 사이에 HB 경로가 없다: 코어 task 에서 시작 thread 로 가는 간선은 R19(CORE-SERIAL)뿐인데, 그 규칙은 버전 가드(`cfe >= 6.4.2`)를 평가할 버전이 주어지지 않았고 대기 술어가 읽는 `es.app`·`es.appstate` 를 이 기록이 고정하지 않는다(AppCreate·CleanUpApp writer 미관측, `lp.slot`·`lp.required` 미판독) |
+
+요약: 상태 기반 29(그중 소유 앱 정체성에 기대는 것 5), 반환 코드 고정 240(현행) / 보류 240(대안), 입력 오류 0, `partial` 아님. pilot2 의 245 중 5가 상태 기반으로 옮겨 갔다. `--owner-identity-targets off`(P1 대안과 함께)로 다시 재생하면 등록의 대상이 `es.app` 의 id(이 기록이 고정하지 않음)에 걸려 `evs.reg` 가 처음 등록부터 열리고, 245 모두 `INCONCLUSIVE` 로 pilot2 와 같은 쪽이 된다(`replay_6004cb4/v153_pilot3_replay_p1off_noidentity.txt`, `26c16aca…4785`).
+
+### 9.5 실행 관계: P10 두 읽기 [M]
+
+| 부류 | P10 현행(지우기도 상대) | P10 대안(지우기 제외) |
+|---|---|---|
+| 위반 24 | `ownership-undetermined`: 포획 위치 `CFE_SB_Global.AppId` 를 SB EarlyInit memset 으로 쓴 `core-cpu1` 의 소유 앱이 미정 | `core-application`(상대 `CFE_SB`; "1 clearing write(s) not counted") |
+| SB 자기 전송 5 | `ownership-undetermined`(같은 사유) | `intra-application`(same task) |
+| 포획 있는 다른 task 전송 173 | `ownership-undetermined` | `core-application` |
+| 포획 없는 전송 67(TBL AppID 28 등) | `core-application` | `core-application` |
+
+§8.8 의 예측(지우기를 관측하면 위반 24 의 관계가 `ownership-undetermined` 로 바뀔 수 있다)이 현행 읽기에서 실제로 나왔다. 관측 요약 개수는 P10 에 따라 바뀌지 않는다.
+
+### 9.6 기대 결과표(동결)와의 대조
+
+| 행 | 기대 | 이번 | 판단 |
+|---|---|---|---|
+| E-14 | VIOLATING → `OBSERVED_VIOLATION`, `CFE_EVS_APP_ILLEGAL_APP_ID`, 실행 task 의 앱이 미정이면 앱 간 결과로 세지 않음 | 24, 결과 일치, 실행 task 소유 앱 confirmed. 관계: P10 현행 미정(상대 쪽 소유 앱 미정) / 대안 core-application | 판정 일치. 앱 간 결과로 셀지는 P10 에 달렸다 |
+| E-15 | VIOLATING 아님. 등록 효과가 계획에 있으면 READY → `NO_VIOLATION_IN_CHECKED_PREFIX` | 245 모두 VIOLATING 아님. 5는 상태로 READY(두 P1 읽기), 240은 현행 반환 코드 고정 READY / 대안 `INCONCLUSIVE(explanation_ambiguous)` | 5는 P1 과 무관하게 일치. 240의 일치는 여전히 P1 에 기댄다 |
+
+### 9.7 산출물과 SHA-256
+
+`/home/user/work/procrace/r2_runs/v153_pilot3/` (저장소 밖, 5.9 MB). 재생 표는 `replay_6004cb4/`.
+
+| 파일 | SHA-256 |
+|---|---|
+| `v153_pilot3.kzt` | `242117fb695aa12d8a8fe3be7baab26f06d62b0d15c4fd7f082d022cfcdbad71` |
+| `v153_pilot3.kzt.record.txt` / `_basis.kz` | `34470295…76cb` / `a4f1f2a398b7550273b9eb8da2cfe199ef9e7e5d7b583d31bca107aafeff303a` |
+| `v153_pilot3_anchor_xcheck.txt` / `_conditions.tsv` / `_driver.txt` / `_hits.txt` | `32f58162…4c4c` / `109cd854…4080` / `bea88731…75bd` / `951a31b4…5c41` |
+| `v153_pilot3_perf_operational_esrestart.log` / `.meta` | `f16d712f…4651` / `c9fbf526…effe` |
+| `v153_pilot3_persist_before.txt` / `_after.txt` | `283b9027…26a` / `63c71697…a92` |
+| `v153_pilot3_static_basis.kz` / `_facts.kz` | `6e158a90ddb59adbc20445cff24fe67aa9e2f0d64e5f667c77bcfb789885db44` / `f056423be1b137db3250ffd7631e0bcca60110c7a682eb8f0bdbcdb2ff5df860` |
+| `replay_6004cb4/v153_pilot3_replay{,_p1off,_p10alt,_p1off_p10alt}.txt` | `76a5d7f7…7c58` / `870e1163…f259` / `1698fb2c…2e1a` / `01bb21a1…49a9` |
+| 같은 이름의 `.kz` | `046787fd…cf34` / `c8ba4a8b…ba64` / `85c12abf…38d` / `b8148353…42a0` |
+| `v153_pilot3_source.diff`, `*.err` | `e3b0c442…b855` (빈 파일) |
+
+### 9.8 남은 것과 PI 확인
+
+- 240의 상태 기반 판정에는 등록 task 와 사용 task 사이의 순서가 필요하다. 출처가 주는 길은 R19(코어 직렬화)이며, 실제 기록에서 쓰려면 (a) 버전 가드를 평가할 cFE 버전의 근거, (b) 대기 술어(`cfe_es_start.c:878-890`), (c) `es.appstate` 고정(`RunLoop`·`ExitApp`·`RunAppTableScan`·AppCreate 지점과 올림 값 판독)이 있어야 한다. 코어 앱마다의 동기화(`cfe_es_start.c:835`)가 외부 앱 생성(`CFE_ES_StartApplications`)보다 앞이므로, R19 가 서면 외부 앱의 사용도 코어 등록 뒤로 순서가 선다 [I].
+- `CFE_SB_Global.AppId` 고정에는 `CFE_ES_GetAppID` 의 out 포인터 저장 위치를 기록에 남기는 일(주소 → 프로필 위치)이 필요하다. 판정에는 영향이 없다.
+- 상태 기반 5는 소유 앱 정체성 읽기(기본 켬)와 A-OWNER 에 기댄다. 이 읽기는 PI 결정 항목이 아니라 인용한 코드 사슬의 적용이지만 선택 가능하게 두었다.
+- **P1**: 240이 여전히 반환 코드 고정에 기댄다. 레퍼런스가 정하지 않는 이유는 §7 과 같다(MP §3.1 대 G3).
+- **P10**: 위반 24의 관계가 읽기에 따라 미정 / core-application 으로 갈린다. SPEC §1.1 은 "actors involved" 만 말하고 여러 writer 가 있는 위치에서 지우기를 쓴 행위자가 관여자인지 정하지 않는다.

@@ -113,6 +113,10 @@ struct Trace {
   std::set<std::string> observed_points;                  // points attached and active over the whole record
   std::map<std::string, uint8_t> owner_levels;            // actor -> KZ_OWNER_LEVEL; absent: undetermined
   std::map<std::string, std::string> creators;            // actor -> the actor that created it (creating executor)
+  // The order of the events of different actors is established (HB edges or a reliable observed order,
+  // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
+  // (SPEC 5.8), so a value another actor wrote may be any value of the interleavings.
+  bool order_established = false;
   std::vector<LossInterval> losses;
   uint64_t add(TraceEvent e) {
     e.id = events.size();
@@ -293,6 +297,7 @@ std::string dump_result(const phi::Profile& p, const Trace& trace, const Result&
 //   observed <point>                         a point attached and active over the whole record
 //   owner_level <actor> confirmed|inferred|undetermined
 //   creator <actor> <creating actor>
+//   order established|merged                 default merged: the order of different actors' events is not established
 //   loss begin | loss end                    events may be missing from the next event on, up to the next event
 Status parse_trace_text(const std::string& text, Trace* out);
 

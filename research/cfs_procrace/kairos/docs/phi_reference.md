@@ -349,11 +349,13 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 
 ### 7.6 실제 기록 재생 모드 (SPEC rev 1.3 §4.8, ADR-055, 변경표 X-02, 2026-10-24) [D][M]
 
-§7.1–§7.5 와 §6 의 구체화 규칙 (2)(나열되지 않은 자원은 초기 상태, 위치는 0 또는 INIT 값)는 **완전한 모델 trace**(합성 trace, golden, INIT)의 규약이다. 실제 실행 기록은 사건의 일부만 담으므로 이 규약을 쓰지 않는다(OB-01, OB-05). 두 모드는 **명시적으로만** 고른다: trace 의 첫머리 `record real` 줄, `kz-phi replay --real-record`, 또는 `kz replay`(실행 컨테이너 어댑터, `docs/observer.md` §13). 아무것도 고르지 않으면 모델 trace 이고 그 결과 text 는 바뀌지 않았다 [M: `phi_golden_*` 17개, `test_core_replay` 그대로 통과].
+§7.1–§7.5 와 §6 의 구체화 규칙 (2)(나열되지 않은 자원은 초기 상태, 위치는 0 또는 INIT 값)는 **완전한 모델 trace**(합성 trace, golden, INIT)의 규약이다. 실제 실행 기록은 사건의 일부만 담으므로 이 규약을 쓰지 않는다(OB-01, OB-05). 두 모드는 **명시적으로만** 고른다: trace 의 첫머리 `record real` 줄, `kz-phi replay --real-record`, 또는 `kz replay`(실행 컨테이너 어댑터, `docs/observer.md` §3.4). 아무것도 고르지 않으면 모델 trace 이고 그 결과 text 는 바뀌지 않았다 [M: `phi_golden_*` 17개, `test_core_replay` 그대로 통과].
 
 **평가.** 실제 기록에서는 조건(conjunct), 효과의 자원·값·보호 조건, rspec 의 키, 관측 규칙의 predicate 를 §6 의 **추상 domain** 으로 평가한다. 추상 상태는 "기록과 양립하는 모든 설명"을 나타낸다: 기록이 고정한 종류·위치만 재생 상태 그대로 정확히 나열하고, 나머지 종류는 `open_kinds`(나열되지 않은 자원은 아무 상태·태그·id), 나머지 위치는 `open_locs`(아무 값), 소유자를 기록이 말하지 않은 행위자는 `owner_any`(owner 종류의 아무 기록 또는 정의 안 됨)로 둔다(`eval.hpp` `AbstractState`). 사건에 없는 인자·결과도 아무 값이다. 결과가 참/거짓이면 모든 설명에서 그렇다는 뜻이고, "모름"이면 판정을 보류한다. 이 포함 관계는 의무 L-OBS(SPEC §6.2, `unproved`)이고, 시험은 추상 domain 의 성질 시험을 열린 추상화까지 넓힌 것이다(아래) — 증명이 아니다.
 
 **기록된 쓰기가 상태를 고정하는 조건(ADR-055).** 종류 또는 위치마다 기록이 다음을 모두 세울 때만 기록된 효과가 그것을 고정한다: 시작 상태를 앎(`start=known`), writer 포괄(`writers=covered`), 별칭 포괄(`aliases=covered`), 수명을 앎(`lifetime=known`, 종류만), 그리고 **프로필에서 그것을 쓰는 모든 효과의 지점이 관측됨**(`observed <지점>`; 포인터를 통한 `store *P` 는 모든 위치의 writer 로 센다). 하나라도 없으면 처음부터 끝까지 열려 있다(초기 상태로 두지 않는다). 손실이 보고되면(`loss begin`) 그 위치부터 기록 끝까지 모든 종류·위치가 열린다(커널은 어느 기록이 버려졌는지 말하지 않는다). 기록이 고정한 종류에서도 효과의 대상 자원·값이 고정되지 않거나(예: 소유자 미확정인 행위자의 `owner(exec)`), `filter` 보호 조건이 "모름"이면 그 대상 종류·위치는 그때부터 열린다. 단언한 보호 조건(`when`)이 "모름"이면 그 지점이 실행되었다는 기록이 곧 보호 조건이 참이라는 뜻이므로 적용하고, 모든 설명에서 거짓이면 §7.3 의 보고에 더해 대상이 **모순**(아래)으로 표시된다.
+
+**순서.** 수집기의 병합 순서(시각, CPU, 도착)는 서로 다른 행위자 사이의 실행 순서가 아니다(SPEC §5.8, §4.8 "order"). 그래서 기록이 고정한 종류에서도 **읽는 행위자가 아닌 행위자가 기록 안에서 쓴** 자원·위치는 그 읽기에서 아무 값이나 될 수 있다(사유 `explanation_ambiguous`). 같은 행위자의 쓰기만 있으면 프로그램 순서가 정한다. 기록이 행위자 사이의 순서가 확립되었다고 선언하면(`order established`: HB 간선이나 믿을 수 있는 관측 순서) 이 규칙을 쓰지 않는다. 관측기 어댑터는 이것을 선언하지 않는다.
 
 **지점 통과.** 관측되는(`observed`) 지점의 조건은 그 사건에서 평가하고, 반환까지 그 사건이 없으면 통과하지 않은 것이다(모델과 같음; 단 호출 구간이 손실과 겹치면 통과 여부 `passage-unknown`, 사유 `loss`). 관측되지 않는 지점의 조건은 **호출 구간 전체**(호출에서 반환까지의 모든 상태)에서 읽은 값의 합(join)이고(`interval`), 통과 여부는 모른다(`passage-unknown`, 사유 `effect_point_ambiguous`, EV-04).
 
@@ -374,6 +376,7 @@ observed <지점>                     기록 전체에서 붙어 있고 활성�
 owner <행위자> <키...>              (모델과 같은 줄) 소유 앱의 키
 owner_level <행위자> confirmed|inferred|undetermined   없으면 undetermined: 소유자는 모름(owner_any)
 creator <행위자> <생성 행위자>
+order established|merged            기본 merged: 서로 다른 행위자의 사건 순서는 확립되지 않음
 loss begin / loss end               다음 사건부터 / 다음 사건 앞까지 사건이 빠졌을 수 있음
 ```
 
@@ -461,7 +464,7 @@ loss begin / loss end               다음 사건부터 / 다음 사건 앞까�
 | `test_core_eval` | 모든 구성의 구체 의미; 추상 domain 의 삼치 논리·구간·상태 집합 |
 | `test_property_eval_agreement` | 추상 결과가 구체 결과를 포함함(§6); 잘못 만들어진 소유자(다른 종류·다른 키 폭)를 섞은 상태 포함 — round 4 이전의 `owner_of` 로 돌리면 넓힌 추상화에서 위반 92개로 실패한다. 2026-10-24: 실제 기록처럼 연 추상화(`open_kinds`, `open_locs`, `owner_any`, §7.6) 48,000 평가에서 위반 0 |
 | `test_core_replay` | 효과, 단언한 보호 조건의 반박·불일치 보고(`guard_failures`)와 `filter` 의 가지 선택, HB 템플릿 4개, 상태 기계, 범위·종료, 가드·버전, trace text, 무작위 trace 400개에서 재생이 죽지 않고 두 번 돌려도 같은 결과(총함수) |
-| `test_core_realrecord` | §7.6: 모든 적합성을 선언한 실제 기록은 모델 trace 와 같은 결과; 시작 상태를 모르면 초기 상태로 두지 않음(모델은 VIOLATING, 실제 기록은 UNDETERMINED → `INCONCLUSIVE(start_state_unknown)`); writer 미포괄·writer 지점 미관측·수명 미상·손실이면 기록된 쓰기가 고정하지 않음; 결정 뒤의 손실은 결정을 바꾸지 않음; `PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`, `NOT_READY_UNJUDGED` → `INCONCLUSIVE(caller_requirement_absent)`, `NOT_EVALUATED` → `INCONCLUSIVE(not_evaluated)`; 반환 코드에 의한 고정과 분석 입력 오류(`Qv`·`Qn` 모두 UNSAT); 관측되지 않는 지점(호출 구간), 소유자 미확정; 머리말 text 의 왕복 |
+| `test_core_realrecord` | §7.6: 모든 적합성을 선언한 실제 기록은 모델 trace 와 같은 결과; 시작 상태를 모르면 초기 상태로 두지 않음(모델은 VIOLATING, 실제 기록은 UNDETERMINED → `INCONCLUSIVE(start_state_unknown)`); writer 미포괄·writer 지점 미관측·수명 미상·손실·(순서 미확립 시) 다른 행위자의 쓰기이면 기록된 쓰기가 고정하지 않음; 결정 뒤의 손실은 결정을 바꾸지 않음; `PENDING`·`OPEN` → `INCONCLUSIVE(horizon-open)`, `NOT_READY_UNJUDGED` → `INCONCLUSIVE(caller_requirement_absent)`, `NOT_EVALUATED` → `INCONCLUSIVE(not_evaluated)`; 반환 코드에 의한 고정과 분석 입력 오류(`Qv`·`Qn` 모두 UNSAT); 관측되지 않는 지점(호출 구간), 소유자 미확정; 머리말 text 의 왕복 |
 | `phi_golden_*` (17개) | 실제 프로필의 정규 text, 해시·통계, 합성 trace 12개로 만든 재생 결과 15개(predicate 유무·버전을 바꾼 변형 포함; `kid_outcomes`, `effects_core`, `effects_external`(보호 조건의 반박·불일치 5개), `cleanup_window`(정리 중 RESERVED 창) 포함) |
 | `phi_profile_check`, `phi_profile_provenance`, `test_phi_cli` | `kz-phi` 가 라이브러리와 같은 출력을 냄, 종료 코드 |
 

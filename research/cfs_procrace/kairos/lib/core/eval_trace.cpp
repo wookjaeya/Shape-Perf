@@ -226,6 +226,8 @@ struct PollWatch {
 // executing actor.  The reasons and the adequacy of a result are those of what it read.
 struct Reads {
   std::set<int32_t> kinds;
+  std::set<ResId> res;       // resources read by an exact key
+  std::set<int32_t> boxes;   // kinds read over a box of keys
   std::set<int32_t> locs;
   bool owner = false;
 };
@@ -236,15 +238,15 @@ class RecordingDomain : public AbstractDomain {
  public:
   RecordingDomain(const Profile& p, const AbstractState& s, Reads* reads) : AbstractDomain(p, s), p_(p), reads_(reads) {}
   AVal state_of(const AVal& res) const {
-    reads_->kinds.insert(res.kind);
+    note(res);
     return AbstractDomain::state_of(res);
   }
   AVal tag_of(const AVal& res, int32_t tag) const {
-    reads_->kinds.insert(res.kind);
+    note(res);
     return AbstractDomain::tag_of(res, tag);
   }
   AVal id_of(const AVal& res) const {
-    reads_->kinds.insert(res.kind);
+    note(res);
     return AbstractDomain::id_of(res);
   }
   AVal value_of(const AVal& loc) const {
@@ -260,6 +262,18 @@ class RecordingDomain : public AbstractDomain {
  private:
   const Profile& p_;
   Reads* reads_;
+  void note(const AVal& res) const {
+    reads_->kinds.insert(res.kind);
+    if (res.must_be_undefined) return;
+    std::vector<int64_t> key;
+    bool exact = !res.may_be_undefined;
+    for (const auto& iv : res.key) {
+      if (iv.first != iv.second) exact = false;
+      key.push_back(iv.first);
+    }
+    if (exact) reads_->res.insert(ResId{res.kind, key});
+    else reads_->boxes.insert(res.kind);
+  }
 };
 
 constexpr uint32_t kAllAdequacy = KZ_ADEQ_WRITERS_COVERED | KZ_ADEQ_ALIASES_COVERED | KZ_ADEQ_START_STATE_KNOWN | KZ_ADEQ_LIFETIME_KNOWN |
@@ -385,6 +399,8 @@ class Replayer {
   std::vector<uint32_t> kind_reasons_, loc_reasons_;  // KZ_WITHHOLD: why recorded writes do not fix it (0: they do)
   std::vector<uint32_t> kind_adeq_, loc_adeq_;        // KZ_ADEQ: what the record establishes
   std::vector<bool> kind_contra_, loc_contra_;        // the record contradicted the replayed state
+  std::map<ResId, std::set<std::string>> res_writers_;  // the actors whose recorded writes set a resource
+  std::map<int32_t, std::set<std::string>> loc_writers_;
   size_t next_loss_ = 0;
   void prepare_real();
   void apply_losses(uint64_t position);
@@ -767,9 +783,38 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (fixed(kv.first)) entry(kv.first);
   for (const auto& kv : st_.tags)
     if (fixed(kv.first.first)) entry(kv.first.first).tags[kv.first.second] = 1ull << kv.second;
+  // Order (SPEC 4.8, 5.8): the merged order of a record is not the execution order of different actors.
+  // A resource or location that an actor other than the reader wrote in the record may hold any of the
+  // values of the interleavings, unless the record declares the order of its events established.
+  auto foreign = [&](const std::set<std::string>& writers) {
+    for (const std::string& w : writers)
+      if (w != ev.actor) return true;
+    return false;
+  };
+  std::set<ResId> order_open;
+  std::set<int32_t> order_open_kinds, order_open_locs;
+  if (!t_.order_established) {
+    for (const auto& kv : res_writers_) {
+      if (!fixed(kv.first) || !foreign(kv.second)) continue;
+      const KindDecl& k = p_.kinds[static_cast<size_t>(kv.first.kind)];
+      AbstractRes any;
+      any.states = k.states.size() >= 64 ? ~0ull : ((1ull << k.states.size()) - 1);
+      for (size_t ti = 0; ti < k.tags.size(); ++ti)
+        any.tags[static_cast<int32_t>(ti)] = k.tags[ti].values.size() >= 64 ? ~0ull : ((1ull << k.tags[ti].values.size()) - 1);
+      if (k.ids.present) {
+        any.has_id = true;
+        any.id = {0, 0xFFFFFFFFll};
+      }
+      a.res[kv.first] = any;
+      order_open.insert(kv.first);
+      order_open_kinds.insert(kv.first.kind);
+    }
+    for (const auto& kv : loc_writers_)
+      if (foreign(kv.second)) order_open_locs.insert(kv.first);
+  }
   a.open_locs = true;
   for (size_t li = 0; li < loc_reasons_.size(); ++li) {
-    if (loc_reasons_[li] != 0) continue;
+    if (loc_reasons_[li] != 0 || order_open_locs.count(static_cast<int32_t>(li)) != 0) continue;
     const auto lv2 = st_.loc_values.find(static_cast<int32_t>(li));
     const int64_t v = lv2 != st_.loc_values.end() ? lv2->second : 0;
     a.locs[static_cast<int32_t>(li)] = {v, v};
@@ -784,7 +829,12 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     out.adequacy &= kind_adeq_[static_cast<size_t>(k)];
     out.contradicted = out.contradicted || kind_contra_[static_cast<size_t>(k)];
   }
+  for (const ResId& id : reads.res)
+    if (order_open.count(id) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+  for (int32_t k : reads.boxes)
+    if (order_open_kinds.count(k) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
   for (int32_t l : reads.locs) {
+    if (order_open_locs.count(l) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     out.reasons |= loc_reasons_[static_cast<size_t>(l)];
     out.adequacy &= loc_adeq_[static_cast<size_t>(l)];
     out.contradicted = out.contradicted || loc_contra_[static_cast<size_t>(l)];
@@ -1733,14 +1783,19 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
     const auto rec = ev.values.find("value");
     const RealEval v = evaluate_real(*eff.value, op, &eff.lp, ev, frame_args);
     int64_t computed = 0;
-    const bool fixed = v.v.tri == Tri::Maybe && exact_value(v.v, &computed);
+    const bool fixed = exact_value(v.v, &computed);
     if (rec != ev.values.end()) {
       if (fixed && computed != rec->second) contradict(-1, li, ev.id, what + ": the record says the stored value is " + hex_or_dec(rec->second) + ", the profile computes " + hex_or_dec(computed));
       st_.loc_values[li] = rec->second;
+      loc_writers_[li].insert(ev.actor);
       return;
     }
-    if (fixed) st_.loc_values[li] = computed;
-    else untrack_loc(li, v.reasons);
+    if (fixed) {
+      st_.loc_values[li] = computed;
+      loc_writers_[li].insert(ev.actor);
+    } else {
+      untrack_loc(li, v.reasons);
+    }
   };
   switch (eff.kind) {
     case EffectKind::Set: {
@@ -1754,6 +1809,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
           const ResId id{ki, key};
           st_.state[id] = to;
           note_write(id, ev);
+          res_writers_[id].insert(ev.actor);
         }
         note_shutdown(ki, to);
         return;
@@ -1773,10 +1829,11 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       const ResId id{r.v.kind, key};
       st_.state[id] = to;
       note_write(id, ev);
+          res_writers_[id].insert(ev.actor);
       if (eff.with_id) {
         const RealEval idv = evaluate_real(*eff.with_id, op, &eff.lp, ev, frame_args);
         int64_t v = 0;
-        if (exact_value(idv.v, &v)) st_.ids[id] = id_value(v);
+        if (exact_value(idv.v, &v)) st_.ids[id] = id_value(v);  // (the writer is noted with the state above)
         else untrack_kind(tkind, idv.reasons);
       }
       note_shutdown(r.v.kind, to);
@@ -1806,6 +1863,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       if (lv > now) {
         st_.state[id] = static_cast<int32_t>(lv);
         note_write(id, ev);
+          res_writers_[id].insert(ev.actor);
       }
       return;
     }
@@ -1826,6 +1884,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
         for (size_t vi = 0; vi < k.tags[ti].values.size(); ++vi)
           if (k.tags[ti].values[vi] == eff.tag_value) st_.tags[std::make_pair(ResId{r.v.kind, key}, static_cast<int32_t>(ti))] = static_cast<int32_t>(vi);
       }
+      res_writers_[ResId{r.v.kind, key}].insert(ev.actor);
       return;
     }
     case EffectKind::StoreOut: {
@@ -2327,7 +2386,7 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       out->record = tok[1] == "real" ? RecordKind::Real : RecordKind::Model;
       continue;
     }
-    if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "creator" || tok[0] == "loss") {
+    if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order") {
       if (out->record != RecordKind::Real) return line_error(line_no, "'" + tok[0] + "' belongs to a real record: 'record real' must come first");
       if (tok[0] == "start_evidence") {
         static const char* names[] = {"none", "init", "state-capture", "declared"};
@@ -2354,6 +2413,9 @@ Status parse_trace_text(const std::string& text, Trace* out) {
           else return line_error(line_no, "adequacy: '" + t + "' is not start=known|unknown, writers=covered|uncovered, aliases=covered|uncovered or (a kind) lifetime=known|unknown");
         }
         (tok[1] == "kind" ? out->kind_adequacy : out->loc_adequacy)[tok[2]] = a;
+      } else if (tok[0] == "order") {
+        if (tok.size() != 2 || (tok[1] != "established" && tok[1] != "merged")) return line_error(line_no, "expected: order established|merged");
+        out->order_established = tok[1] == "established";
       } else if (tok[0] == "observed") {
         if (tok.size() != 2) return line_error(line_no, "expected: observed POINT");
         out->observed_points.insert(tok[1]);
@@ -2431,6 +2493,7 @@ std::string trace_text(const Trace& t) {
     static const char* evidence[] = {"none", "init", "state-capture", "declared"};
     out += "record real\n";
     out += std::string("start_evidence ") + (t.start_evidence < 4 ? evidence[t.start_evidence] : "none") + "\n";
+    out += std::string("order ") + (t.order_established ? "established" : "merged") + "\n";
     auto adequacy = [&](const char* what, const std::string& name, const Adequacy& a, bool kind) {
       out += std::string("adequacy ") + what + " " + name + (a.start_known ? " start=known" : " start=unknown") + (a.writers_covered ? " writers=covered" : " writers=uncovered") +
              (a.aliases_covered ? " aliases=covered" : " aliases=uncovered");

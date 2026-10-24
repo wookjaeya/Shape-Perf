@@ -11,6 +11,8 @@
 //     INCONCLUSIVE(caller_requirement_absent), NOT_EVALUATED INCONCLUSIVE(not_evaluated);
 //   - the returned code fixes what the record leaves open (O4), and a code that contradicts what every
 //     explanation fixes is an analysis input error (an empty explanation set), never a violation;
+//   - the merged order of different actors' events is not the execution order (SPEC 5.8);
+//   - derived records (an event lost, a point dropped, a late start) are never more decisive;
 //   - an undetermined owner, an unobserved point, the text form.
 
 #include <string>
@@ -106,8 +108,9 @@ bool possible(const Run& r, OccStatus s) {
 
 // Everything the record must establish for the kinds slot and reg (ADR-055), and the points it observes.
 std::string preamble(const std::string& reg = "start=known writers=covered aliases=covered lifetime=known", bool observe_set_reg = true,
-                     bool observe_who_reg = true, bool owner = true) {
+                     bool observe_who_reg = true, bool owner = true, bool order = true) {
   std::string t = "record real\nstart_evidence init\n";
+  if (order) t += "order established\n";
   t += "adequacy kind slot start=known writers=covered aliases=covered lifetime=known\n";
   t += "adequacy kind reg " + reg + "\n";
   for (const char* pt : {"reset_all.zero_slots", "create_all.reserve", "create_all.typeit", "create_all.typeext", "create_all.publish", "clear_site", "free_up.free",
@@ -205,6 +208,11 @@ void test_recorded_writes_need_adequacy() {
   // full adequacy: the recorded registration fixes the slot
   const Run full = replay(p, preamble() + kSetup + kRegister + send(kBadArg));
   check_status(full, OccStatus::Ready, "full adequacy, error code");
+  // the same, but the order of the two actors' events is the collector's merged order (SPEC 5.8): the
+  // identity T0 published may not have been written yet when W registered, so the slot is not fixed
+  const Run merged = replay(p, preamble("start=known writers=covered aliases=covered lifetime=known", true, true, true, false) + kSetup + kRegister + send(kBadArg));
+  check_status(merged, OccStatus::Undetermined, "merged order");
+  KZ_CHECK((merged.occ().reasons & KZ_WITHHOLD_EXPLANATION_AMBIGUOUS) != 0);
   // a loss reported before the call: recorded writes fix nothing from there on
   const Run lost = replay(p, preamble() + kSetup + kRegister + "loss begin\nloss end\n" + send(kBadArg));
   check_status(lost, OccStatus::Undetermined, "loss before the call");
@@ -317,6 +325,86 @@ void test_text_form() {
   KZ_CHECK_EQ(a.trace.losses.size(), static_cast<size_t>(1));
 }
 
+// Derived records (masterplan 2026-10-24 section 9.1, priority 4) of records whose registry is fixed by
+// recorded writes: every single event lost (declared), every observed point dropped from the plan, every
+// late start.  No derived record may be more decisive than its original; some must be weaker.
+struct Derived {
+  Trace trace;
+  std::vector<uint64_t> orig;
+};
+
+Derived derive(const Trace& t, const std::vector<bool>& keep) {
+  Derived d;
+  d.trace = t;
+  d.trace.events.clear();
+  d.trace.losses.clear();
+  for (size_t i = 0; i < t.events.size(); ++i)
+    if (keep[i]) {
+      d.trace.add(t.events[i]);
+      d.orig.push_back(i);
+    }
+  return d;
+}
+
+bool definite(uint8_t obs) { return obs == KZ_OBS_OBSERVED_VIOLATION || obs == KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX; }
+
+void compare(const Profile& p, const Result& base, const Derived& d, long* weaker, long* stronger) {
+  Result r;
+  KZ_CHECK(kz::eval::replay(p, d.trace, kz::eval::Options(), &r).ok());
+  for (const Occurrence& o : r.occurrences) {
+    const Occurrence* b = nullptr;
+    for (const Occurrence& x : base.occurrences)
+      if (x.call == d.orig[o.call]) b = &x;
+    KZ_CHECK(b != nullptr);
+    if (b == nullptr) continue;
+    if (definite(o.summary.observation) && o.summary.observation != b->summary.observation) ++*stronger;
+    if (definite(b->summary.observation) && !definite(o.summary.observation)) ++*weaker;
+  }
+}
+
+void test_derived_records() {
+  const Profile p = load(kzmini::files());
+  long weaker = 0, stronger = 0, records = 0;
+  for (const std::string& text : {preamble() + kSetup + kRegister + send(kBadArg), preamble() + kSetup + send(kBadArg)}) {
+    Run base = replay(p, text);
+    KZ_CHECK(definite(base.occ().summary.observation));  // READY / VIOLATING from the fixed registry
+    const Trace& t = base.trace;
+    const size_t n = t.events.size();
+    for (size_t i = 0; i < n; ++i) {  // one event lost, the loss declared
+      std::vector<bool> keep(n, true);
+      keep[i] = false;
+      Derived d = derive(t, keep);
+      kz::eval::LossInterval l;
+      l.begin = i;
+      l.end = i;  // events may be missing just before position i of the derived record
+      d.trace.losses.push_back(l);
+      compare(p, base.result, d, &weaker, &stronger);
+      ++records;
+    }
+    for (const std::string& pt : t.observed_points) {  // an observed point dropped from the plan
+      std::vector<bool> keep(n, true);
+      for (size_t i = 0; i < n; ++i)
+        if (t.events[i].site == pt) keep[i] = false;
+      Derived d = derive(t, keep);
+      d.trace.observed_points.erase(pt);
+      compare(p, base.result, d, &weaker, &stronger);
+      ++records;
+    }
+    for (size_t cut = 1; cut < n; ++cut) {  // a late start: the start state is not evidenced
+      std::vector<bool> keep(n, true);
+      for (size_t i = 0; i < cut; ++i) keep[i] = false;
+      Derived d = derive(t, keep);
+      d.trace.start_evidence = KZ_START_EVIDENCE_NONE;
+      for (auto& kv : d.trace.kind_adequacy) kv.second.start_known = false;
+      compare(p, base.result, d, &weaker, &stronger);
+      ++records;
+    }
+  }
+  std::printf("derived records of the mini records: %ld, weaker %ld, more decisive %ld\n", records, weaker, stronger);
+  KZ_CHECK_EQ(stronger, 0L);
+  KZ_CHECK(weaker > 0);
+}
+
 }  // namespace
 
 int main() {
@@ -327,5 +415,6 @@ int main() {
   test_horizon_open_and_caller_requirement();
   test_unobserved_point_and_owner();
   test_text_form();
+  test_derived_records();
   return kztest::finish("test_core_realrecord");
 }

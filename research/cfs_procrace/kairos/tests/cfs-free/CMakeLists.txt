@@ -10,6 +10,13 @@ foreach(kz_file IN LISTS kz_trace_tests)
   kz_add_unit_test(${kz_name} SOURCES ${kz_file} LIBS kz-trace kz-testsupport)
 endforeach()
 
+# Derived records of the S1-R2 development run container (read in place from env/logs, not copied):
+# the real-record replay must not become more decisive when information is removed.  Exits 77
+# (skipped) when the container is not present.
+kz_add_unit_test(test_realrecord_derived SOURCES test_realrecord_derived.cpp LIBS kz-trace kz-testsupport
+  ARGS ${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1 ${CMAKE_SOURCE_DIR}/../env/logs/s1r2_p1.kzt ${CMAKE_SOURCE_DIR}/tests/static/data/core_cpu1.golden)
+set_tests_properties(test_realrecord_derived PROPERTIES SKIP_RETURN_CODE 77)
+
 # The purpose-built target program.  Every function starts `endbr64; push %rbp; mov %rsp,%rbp`
 # (frame pointers, control-flow protection) like the framework's functions at -O0, whatever the
 # sanitizer flags of the build.

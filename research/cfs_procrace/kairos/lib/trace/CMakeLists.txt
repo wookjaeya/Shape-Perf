@@ -7,7 +7,8 @@ add_library(kz-trace STATIC
   decode_perf.cpp
   decode_sites.cpp
   identity_join.cpp
-  identity_symbols.cpp)
+  identity_symbols.cpp
+  real_trace.cpp)
 target_include_directories(kz-trace PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_compile_features(kz-trace PUBLIC cxx_std_17)
 target_compile_options(kz-trace PRIVATE -fno-exceptions)

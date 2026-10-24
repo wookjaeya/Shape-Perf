@@ -77,6 +77,28 @@ kz hits <run.kzt> [--site 라벨 --before 라벨] [--group-slot 역할] [--group
 
 **"앞섬"의 뜻** [D]: 한 시계(`CLOCK_MONOTONIC`)의 병합 순서, 즉 **한 시계의 증거**이다. 서로 다른 thread 사이의 happens-before 가 아니며(SPEC 5.8: 시각에서 HB 간선을 만들지 않는다) 검사기는 이것으로 HB 를 만들지 않는다. 또 사건의 시각은 **프로브가 발화한 시각**이지 그 사이트가 대표하는 프로그램 효과의 시각이 아니다. 호출 직후에 놓인 점 사이트(`after-call`)는 호출이 끝난 뒤에 발화하므로, "T 보다 앞섬"은 "T 의 호출에서 돌아오기보다 앞섬"이고 T 가 대표하는 효과(예: 호출 안에서의 저장)의 시각에 대해서는 **상한**만 준다. `kz hits` 의 출력도 이 두 가지를 적는다.
 
+### 3.4 `kz replay` (실제 기록 재생, 2026-10-24, 변경표 X-02) [D][M]
+
+```
+kz replay <run.kzt> --profile <dir|file> [--const NAME=VALUE]... [--version C=V]... [--predicate R=E]... [--emit-trace]
+```
+
+실행 컨테이너를 Φ 프로필의 **실제 기록 trace** 로 바꾸고(`include/kz/trace/real_trace.hpp`), 재생 엔진의 실제 기록 모드(`docs/phi_reference.md` §7.6)로 재생해 발생마다 상태, 요약 뷰(`OBSERVED_VIOLATION` / `NO_VIOLATION_IN_CHECKED_PREFIX` / `INCONCLUSIVE(사유)`), 적합성, 정체성을 낸다. `--emit-trace` 는 재생 대신 trace text 를 낸다(`kz-phi replay` 로 다시 읽힌다). 어댑터가 세우는 것과 세우지 않는 것:
+
+| 항목 | 어댑터 | 근거 |
+|---|---|---|
+| 사건 | 연산이 묶는 기호의 ENTRY 사이트 → 호출, RET 사이트 → 반환, 이름이 프로필의 지점 이름(`OP.LABEL`, 사이트, 종료 지점)과 같은 POINT 사이트 → 지점. 슬롯 역할이 연산 매개변수 이름과 같으면(대소문자·`_` 무시) `arg.`(반환에서는 `out.`), 반환의 역할 `status`/`result` 는 결과, 지점에서는 지점 값 `lp.`/`value`. TRUNC 사건은 값 없이. 나머지 사이트의 사건은 세기만 한다 | 계획과 프로필의 이름(프레임워크 지식은 둘에만 있다) |
+| 순서 | 컨테이너의 병합 순서. **행위자 사이 순서가 확립되었다고 선언하지 않는다**(재생은 다른 행위자가 쓴 값을 모름으로 둔다) | SPEC §5.8 |
+| 행위자 | thread 생애마다 하나(커널 이름; 겹치면 tid·세대를 붙임; 이름 없으면 `tid<N>`). 생성 실행자 = FORK 의 부모 thread | THREADS |
+| 관측 지점 | 대응된 POINT 사이트의 이름 | SITES |
+| 시작 상태 | 첫 사건보다 이르거나 같은 MAPS(대상 파일의 첫 실행 mapping)가 있으면 프로세스 시작부터의 기록: `start_evidence init`, 모든 종류·위치 `start=known` | INIT, IN-03 |
+| writer·별칭 포괄, 수명 | **세우지 않는다**(계획의 추적표와 닫힘이 필요: SPEC §4.7, §4.1). 그래서 기록된 쓰기는 어떤 종류도 고정하지 않는다 | ADR-055 |
+| 손실 | RUNMETA `loss-present`·LOSS 를 손실 구간으로: throttle 은 그 시작부터, lost-records 보고는 기록 처음부터(언제 버려졌는지 커널이 말하지 않음) 보고 시각까지, 기록 없는 손실은 전체. RUNMETA 가 없으면 손실 증거가 없는 것이므로 전체를 손실로 본다 | §7 |
+| 소유 앱 | ACTOR_OWNERS(스키마 개정 2)의 수준·키. 레코드가 없는 thread 와 이전 컨테이너의 모든 thread 는 `undetermined`(줄을 쓰지 않음 → 재생은 소유자를 모름으로 보고 `ownership_undetermined`). 추측하지 않는다 | ADR-056 |
+| 상수 | 컨테이너에 `ref eval` 상수의 값이 없다: `--const` 로, 각각 출처에서 가져온 값을 준다(CONDITIONS_POLICY). 없으면 재생이 표 크기를 요구하며 거부한다 | — |
+
+**S1-R2 개발 실행 컨테이너에 적용한 결과** [M] (개발 기록이며 본 실험 결과가 아니다; `env/logs/s1r2_p1.kzt`, 상수 `CFE_PLATFORM_ES_MAX_APPLICATIONS` 는 고정 소스의 추출 golden `tests/static/data/core_cpu1.golden:44` 의 값): 발생 271개 중 `OBSERVED_VIOLATION` 24개(전달된 id 인자 0, 인자만으로 결정; 소유 앱 `undetermined`), `INCONCLUSIVE` 247개(사유 `resource_or_lifetime_unmatched`, `effect_point_ambiguous`, `effect_unsupported`, `not_evaluated`: 등록 writer 와 등록 조건의 지점이 계획에 없음), `NO_VIOLATION_IN_CHECKED_PREFIX` 0개, 입력 오류 0개. SPEC App. A.1 의 기대 결과와 같은 갈래이다. 같은 컨테이너의 파생 기록 71개(사이트 하나 제거, 손실을 선언한 사건 묶음 삭제, 흩어진 삭제(선언·무선언), 늦은 시작)에서 원래보다 결정적인 결과는 0개였다(`test_realrecord_derived`). 이 개수는 분석기의 불완전 정보 처리 시험이며 프로그램에 대한 증거가 아니다.
+
 ## 4. 관측 프로필 (`kzp-observe 1`)
 
 관측기가 프레임워크에 대해 아는 것은 이 파일이 전부이고, 항목마다 근거(파일, 줄, 본문 해시)가 있다. 문법은 `probe/plan/profile.hpp` 머리말에 있다.
@@ -235,6 +257,7 @@ observe_cfs_smoke.sh --xcheck ...   # 실행 뒤: 앵커의 addr2line·objdump �
 | `test_probe_basis` | basis 만들기·읽기, 결정성, 출처 해시, 바이너리 검증의 거부 사례 |
 | `test_probe_record` | 조건 파일, `/proc` 읽기(읽은 수, `full`/`status` 모드), CPU 목록, 대상 실행 |
 | `test_probe_golden` | basis 와 실행 컨테이너의 정규 dump 와 artifact 해시(합성 입력; `tests/cfs-free/golden/`), PERTURBATION 의 복귀 행·`proc-capture` 행, 트랩 계수 규칙 |
+| `test_realrecord_derived` | `env/logs/s1r2_p1.kzt`(제자리에서 읽음, 복사하지 않음)의 실제 기록 재생: 원래 기록의 요약(위반 24, 위반 없음 0, 입력 오류 0, 소유자 모두 `undetermined`)과 파생 기록 71개가 원래보다 결정적이지 않음. 컨테이너가 없으면 77(건너뜀) |
 | `test_probe_observe` | **통합**: 목적 제작 C 프로그램에 실제 uprobe 를 붙임 — 인자, 반환 주소 귀속, thread 정체성, 호출 짝, 손실 0; 1쪽 ring 의 손실 계수; 동시 thread; 같은 바이트의 다른 경로; 바뀐 바이트·잘린 파일·다른 프로필·basis 아님의 거부; 종료 코드; `--check`. root 가 아니면 77 로 끝나 **건너뜀**으로 보고된다(통과로 세지 않는다) |
 
 환경: 이 VM(`Linux 6.18.44-fc-v114`, 4 vCPU, root)에서 gcc 13(일반, ASan+UBSan)과 clang 18(일반, UBSan trap) 네 빌드로 전체를 돌렸다. 2026-10-16 의 검토 반영은 `k2rv-gcc`(gcc 13, RelWithDebInfo; 새로 구성)와 `k2-clang`, `k2-gcc-asan`, `k2-clang-ubsan`(증분 빌드)에서 돌렸다. 네 빌드 모두 74개 가운데 73개 통과, 실패 1개는 `lint_case-ids` 로 다른 작업이 고치고 있는 `lib/llvm/ast_fn.cpp` 의 사례 식별자 때문이다(K2 파일이 아니다). 디스크가 가득 차서 `k2-gcc` 는 지웠다. `test_probe_observe` 는 관찰마다 프로브를 닫는 시간(§6) 때문에 약 20 초 걸린다.

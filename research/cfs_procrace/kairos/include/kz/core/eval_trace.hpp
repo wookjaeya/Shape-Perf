@@ -272,7 +272,7 @@ struct Occurrence {
   bool key_known = false;                 // the key was evaluated (real records: fixed in every explanation)
   // The horizon monitor of a deciding Allowed entry (SPEC 1.6 "Horizon monitors"), where one ran on this
   // occurrence: its verdict and why (ACCEPT / REJECT / OPEN / not countable), with the events it used.
-  // Only retry_until_ready is implemented.  `accepted` is the ACCEPT that makes the status TOLERATED; the
+  // retry_until_ready and exit(code, src) are implemented.  `accepted` is the ACCEPT that makes the status TOLERATED; the
   // entry that accepted rests on a caller record (the caller-level Allowed reads only such entries).
   std::string monitor;
   bool accepted = false;

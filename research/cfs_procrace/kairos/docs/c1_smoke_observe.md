@@ -243,3 +243,99 @@ smoke1(§2–§3)과 같은 것: CI L133–L200 의 시작·정지 단계, 사�
   - **P1**: E-04·E-05 의 일치는 현행(반환 코드 고정)에서만이다. 레퍼런스가 정하지 않는 이유: MP §3.1 은 반환값으로 증명되면 보류하지 말라는 쪽이고 G3 은 계산된 상태와 코드 일치를 둘 다 요구한다. 대안은 `--outcome-narrowing off` 로 고를 수 있다.
   - **P3**: 대안을 고르면 post 첫 시도가 QT-5 충돌로 NOT_READY_UNJUDGED 가 된다(E-05 의 P3 대안 갈래와 일치). 레퍼런스가 정하지 않는 이유: `cfs_cf.dox` L212–L214 는 종료를 서술할 뿐 받아들인다는 말이 없고, 수정 전부터 있었으며 수정이 고치지 않았다(G5). 현행 유지.
   - **P4**: 두 후보 결과가 같다. **P7**: tx 만. **P8**: 반복 수는 PI 가 정한다.
+
+## 9. smoke3: 반환 코드 고정 대신 계산된 상태로 판정 (C1 상태 기반, 2026-10-24)
+
+- **지위: build-smoke/pilot.** 빌드마다 1회, tx 만 관측했다(P7 미결정). W4 실험도 본 실험 결과도 아니다. 빈도·재현성·관측 비용은 주장하지 않는다(P8).
+- 목적: READY·TOLERATED·위반 없음이 반환 코드 고정(P1)에만 기대지 않도록, 출처가 허락하는 곳에서 계산된 상태 위에 세운다. ADR-055 의 일곱 조건(writer·별칭 포괄, 시작 상태, 수명, 프로브 부착·활성, 손실 없음)을 `osal.countsem` 에 대해 하나씩 세웠다.
+- 산출물: 저장소 밖 `/home/user/work/procrace/c1_runs/smoke3/<cfg>_<cand>/`(파일 목록과 SHA-256 은 각 `driver.txt` 끝; 스크립트 밖에서 돌린 P10 대안 재생은 `extra/`). 저장소 밖 11 MB, 디스크 여유 7.8 GB. 기대 결과표(`plan/expected_results_C1_R2.md`)는 고치지 않았다.
+
+### 9.1 세운 것 (도구·프로필 commit `5b82047`)
+
+| 조건 | 무엇으로 | 근거 [F] (두 번들 후보에서 바이트가 같다: OSAL `f34759d`/`b44f4ce`, cFE `6cccb3f`/`fef4a0d`, PSP `bd4a2ea` 둘 다 [M: `cmp`, `verify-prov` 8조합 85–91 인용 일치]) |
+|---|---|---|
+| **시작 상태 "이름 없음"** | 관측된 지우기 두 개: `OS_ObjectIdInit.clear_table`(`lifecycle all osal.countsem -> ABSENT`), `OS_CountSemAPI_Init.clear_names`(같은 효과). 지점은 `OS_API_Init` 안 두 호출의 복귀(둘 다 인라인 `rep stos`) | `osapi-idmap.c` L118–L123(표 전체 memset), `osapi-common.c` L116–L138(한 번만, 객체가 생기기 전), `osapi-countsem.c` L71–L75, `osapi-common.c` L161–L163. 이름이 있다는 것은 정의된 id 와 일치하는 이름이 함께 있다는 뜻이다: `osapi-idmap.c` L538–L568, L269–L272, `osapi-idmap.h` L148–L151 |
+| **수명** | scope `process`; 종류를 초기 상태로 되돌리는 효과 셋(위 둘, `OS_CountSemDelete.retire`)의 지점이 모두 관측됨. 생성은 BP 의 `OS_CountSemCreate`(세대 0; id `0x30002`, `0x30003`) | 삭제: `osapi-countsem.c` L118–L133, `osapi-idmap.c` L871–L896 |
+| **writer·별칭 포괄** | D5 결합 닫힘(`plan/C1_build_manifest.md` §8.5)을 C1 프로필로 다시 추출(`kz-static --profile` 여러 개, 아래). OSAL 세 필드 writer-set-complete(18·6·3, A-TYPE 0) → 별칭 포괄. **키 분리** `bind field … via`: writer 27 중 15 는 다른 객체 종류의 레코드(분리), 12 는 `OS_ObjectIdInit`·`OS_CountSemAPI_Init`·`OS_CountSemCreate`·`OS_CountSemDelete` 의 관측된 효과가 대신한다 → writer 포괄 | `r_countsem_type_slices`(02_researcher): 카운팅 세마포어 레코드는 `OS_COUNTSEM_BASE` 조각(`osapi-idmap.c` L95)이고, 쓰는 모드의 countsem 토큰은 생성(L94, EXCLUSIVE)과 삭제(L123)만 만든다; Give·Take·TimedWait 는 NONE, GetInfo 는 GLOBAL(`osapi-countsem.c` L141–L196, L223–L249); 다른 EXCLUSIVE 토큰은 모두 다른 종류(파일·줄 목록은 그 기록) |
+| **행위자 사이 순서** | (1) RF(SPEC §3.16 행 RF, §3.17 "Outcome-implied reads-from", 층 O): 성공한 조회의 조건 지점 ← 같은 이름·같은 id 의 생성 효과 지점. (2) SCOPE(SPEC §4.5, §1.6 "Teardown decides no default-scope occurrence", §3.16 행 SR): TEARDOWN 지점 뒤(같은 main thread)의 쓰기는 default scope 읽기의 순서에서 뺀다 | `r_reads_from_lookup`: 조회는 이름이 맞은 레코드의 `active_id` 를 돌려주고(`osapi-idmap.c` L962–L984, L538–L568), 그 값은 생성의 `OS_ObjectIdFinalizeNew` 가 레코드에 쓰고 out 으로 돌려준 값이며(L828–L864), 같은 슬롯의 다음 객체는 다른 id(L587–L655). TEARDOWN = `OS_Application_Run` 의 `OS_DeleteAllObjects` 호출(`cfe_psp_start.c` L467–L487), 요청 = `CFE_PSP_Restart` 의 저장(`cfe_psp_support.c` L93–L94) |
+| **exit monitor** | SPEC §1.6 `exit(code, src)`: 사용 행위자가 종료 연산을 그 code 로 부르면 ACCEPT(TOLERATED), 다른 code 면 REJECT, 프로세스 종료 단계·TEARDOWN 은 결정하지 않음, code 가 기록되지 않으면 보류. `CFE_ES_ExitApp` 을 `terminal` 로 선언, code = 유일한 매개변수 `ExitStatus` | `cfe_es_api.c` L427–L447: 외부 앱의 호출은 돌아오지 않는다(STOPPED 뒤 무한 대기). 코어 앱 가지는 모형에 없다 |
+
+**전제 정정 [M].** "닫힘 안에 삭제 없음"은 *응용* 에 대해서만 맞다(§1, `r_countsem_by_name`). `OS_CountSemDelete` 는 `CFE_ES_CleanupObjectCallback`(`cfe_es_apps.c` L1583, 앱 자원 정리)과 `OS_CleanUpObject`(`osapi-common.c` L322, 종료 시 `OS_DeleteAllObjects`)에서 닿는다. 그래서 삭제를 효과로 넣었고, 이름이 기록되지 않으므로 그 사건부터 종류는 기록으로 고정되지 않는다. 이번 실행의 삭제 셋은 모두 TEARDOWN 지점 뒤(SCH_LAB, BP0, BP1)였다.
+
+도구 변경(같은 commit): Φ `bind field … via "F", …`(키 분리 선언; 정규형은 정렬), hb 템플릿 `reads_from { use OP.C; outcome K; publish OP.E; match P; }`, 재생의 RF 간선·SCOPE 제외·exit monitor(거부가 모든 판정 항목에서 나와야 VIOLATING), 정적 닫힘 어댑터의 `via` 규칙, `kz replay --reads-from-edges on|off`(비교용, PI 결정 아님), `kz-static basis|extract` 의 `--profile` 반복. 시험: `test_core_state_order`(68 검사), `test_trace_key_separation`(31), C1 golden 갱신(프로필 변경), `test_core_monitor` 문구 하나. ctest 111/111(k1r3-llvm 132/132), tracefs 시험은 건너뜀. R2 v153_pilot3 를 새 kz 로 다시 재생해도 개수가 같다(위반 24, 상태 기반 29, 고정 240) [M].
+
+### 9.2 명령과 smoke2 와 다른 점 [M]
+
+```sh
+# 소스 보기에 PSP 추가(저장소 밖)
+for cfg in pre post; do for cand in 1df262a 1b0b338; do ln -sfn $B/bundle_$cand/psp $R/${cfg}_$cand/psp; done; done
+# 닫힘을 C1 프로필로(빌드마다, 현행 rspec 과 P3 대안; 사본 스크립트 c1_build/kz_run_c1.sh, recipe 는 kz_run.sh 의 closure.kzb 그대로)
+c1_build/kz_run_c1.sh <pre|post> <cand> [altP3]      # -> c1_build/kz/<cfg>_<cand>/c1prof[_altP3]/closure.{basis,facts}.kz
+# tracefs(운영자가 마운트)
+mount -t tracefs nodev /home/user/work/procrace/c1_runs/tracefs_smoke3
+for b in "pre 1df262a" "post 1df262a" "pre 1b0b338" "post 1b0b338"; do set -- $b
+  kairos/probe/scripts/observe_c1_smoke.sh $1 $2 /home/user/work/kairos-build/tools/kz/kz --out-dir /home/user/work/procrace/c1_runs/smoke3 \
+      --tracefs /home/user/work/procrace/c1_runs/tracefs_smoke3 --closure /home/user/work/procrace/c1_build/kz/$1_$2; done
+# 스크립트 밖: P10 대안(--clearing-writes excluded, 같은 프로필·닫힘) -> <run>/extra/replay_p10alt.txt
+```
+
+smoke2(§8.2)와 같은 것: CI L133–L200 시작·정지, 사용자 `ubuntu`, tx 만, 층 `none`, `--const CFE_PLATFORM_ES_MAX_APPLICATIONS=32`, 관측 파일 해시 = 빌드 산출물(네 빌드). 다른 것:
+
+1. **도구**: 저장소 `5b82047`, `source.diff` 빈 파일, `kz` sha256 `18cf6bd4…`(빌드 `/home/user/work/kairos-build`). 실행 뒤 바뀐 것은 이 문서와 같은 commit 의 헤더 주석 한 줄뿐이다(판정 코드 변경 없음). tracefs 는 실행 뒤 해제했다.
+2. **계획**: core-tx 사이트 7 개 추가 — 지우기 지점 둘, `OS_CountSemDelete` 진입·복귀와 `retire`(`FinalizeDelete` 호출 복귀, 상태), 요청(`pthread_kill` 직후), TEARDOWN(`OS_TaskDelay` 복귀 = `OS_DeleteAllObjects` 호출 주소). 281a941 33 개(sha256 `d375d853…`), 833fdbb 34 개(`4f145790…`). `anchor_xcheck.txt`: 네 빌드 모두 "address not found" 0.
+3. **재생 입력**: `--basis`(실행의 core-tx basis) + `--facts`/`--static-basis`(C1 프로필 닫힘; 프로필 해시가 같아야 받으므로 rspec 변형마다 하나). 코어 여부는 smoke2 처럼 세우지 않았다(`--core-request-caller` 없음). 프로필 해시(공통+cf+bundle+rspec / P3 대안): 281a941/A `90f5c2f6…`/`a87482a0…`, /B `98e0c30b…`/`190a0e67…`, 833fdbb/A `73ccdb7d…`/`fcc24323…`, /B `e1412500…`/`dad5b6b8…`.
+4. **재생 다섯 + 하나**: 현행(`--compare-narrowing`), P3 대안, P1 대안, P3+P1 대안, RF 간선 뺌(비교용); 스크립트 밖 P10 대안.
+5. 시작(UTC): 21:30:11, 21:30:34, 21:30:58, 21:31:22. run.kzt sha256: pre/A `b23790a3…`, post/A `34567f02…`, pre/B `26aee163…`, post/B `cf31570b…`.
+
+### 9.3 결과 [M]
+
+네 실행 모두 손실 보고 0, throttle 0, thread 18, app_owner confirmed 15 / undetermined 3, tx·rx 5 s 안에 OPERATIONAL, ES POWERON 정지, 종료 코드 0. 사건 pre 148 / post 158. 지우기 둘은 기록의 #0·#1(main thread `core-tx`), 요청은 `CFE_ES` 가 #77(pre)/#85(post), TEARDOWN 은 `core-tx` 가 #78/#86, 삭제 셋은 그 뒤. CF 조회·BP 생성의 이름·id 와 결과는 smoke2(§8.3)와 같다(post: 생성 id = 조회 id `0x30002`, `0x30003`). cFS 후보 A·B 의 판정이 모두 같다.
+
+`osal.countsem` 의 적합성: CF 의 모든 읽기에서 일곱 항목이 다 섰다(`writers-covered, aliases-covered, start-state-known, lifetime-known, probes-attached, probes-active, loss-free`; 시작 상태 "from `OS_ObjectIdInit.clear_table` #0"). 기록 끝의 종류 상태는 `open {effect_unsupported}` 이다: TEARDOWN 뒤 이름 없는 삭제부터 열린다. RF 간선은 post 에서 둘(`#56 → #76`, `#64 → #80`: BP 의 게시 → CF 둘째 `BP0_tsem` 조회와 `BP1_tsem` 조회의 조건 지점), pre 에서는 없다(성공한 CF 조회 없음). SCOPE 로 뺀 쓰기는 실행마다 3(삭제 셋).
+
+**발생별 판정**(A·B 같음; {narrowed} = 반환 코드 고정에 기댐):
+
+| 빌드 | 발생 | 현행 (P1 현행, P3 현행) | P1 대안 | P3 대안 | P3+P1 대안 | RF 간선 뺌 |
+|---|---|---|---|---|---|---|
+| pre | (CF, `BP0_tsem`, 1) `-17` | NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` {narrowed} | UNDETERMINED {NOT_READY_UNJUDGED, READY} → `INCONCLUSIVE(caller_requirement_absent, explanation_ambiguous)` | **TOLERATED**(exit ACCEPT at #52: `CFE_ES_ExitApp(3)`) → `NO_VIOLATION…` {narrowed} | UNDETERMINED {PENDING, READY} → `INCONCLUSIVE(horizon-open, explanation_ambiguous)` | 현행과 같음 |
+| post | (CF, `BP0_tsem`, 1) `-17` | TOLERATED(retry ACCEPT at #76) → `NO_VIOLATION…` {narrowed} | UNDETERMINED {PENDING, READY} → `INCONCLUSIVE(horizon-open, explanation_ambiguous)` | NOT_READY_UNJUDGED(QT-5 충돌 명시) {narrowed} | UNDETERMINED → `INCONCLUSIVE(caller_requirement_absent, explanation_ambiguous)` | TOLERATED {narrowed} |
+| post | (CF, `BP0_tsem`, 2) `0` | **READY → `NO_VIOLATION…`(상태 기반)** | **같음** | 같음 | 같음 | READY {narrowed} |
+| post | (CF, `BP1_tsem`, 1) `0` | **READY → `NO_VIOLATION…`(상태 기반)** | **같음** | 같음 | 같음 | READY {narrowed} |
+
+**발생 부류별 근거:**
+
+- **성공한 CF 조회(post 2개): 상태 기반**, P1 두 읽기 모두. 시작 상태(관측된 지우기) → BP 의 생성(RF 로 조건 지점보다 HB 앞) → 조건 지점의 상태 LIVE. 반환 코드는 상태와 맞는지 확인할 뿐이다(O4(a)). 이 판정은 RF 간선(층 O, 성공 결과와 두 id 의 같음에 기댐)에 기댄다: RF 를 빼면 다시 반환 코드 고정(위 표 마지막 열).
+- **재시도의 첫 시도(post, TOLERATED): 미준비 부분은 반환 코드 고정**, ACCEPT 를 준 둘째 시도는 상태 기반. 실패한 조회를 BP 의 생성보다 앞에 두는 HB 간선이 기록에 없다(CF 와 BP 는 서로 동기화하지 않는다). 그런 순서는 SPEC §4.8 "Trace analysis" 단계 4 의 "outcome-decided"(Φ 의 outcome 지도가 정하는 순서)이며, 바로 P1 의 물음이다.
+- **수정 전 실패(pre): 반환 코드 고정**, 같은 이유. P3 대안에서는 exit monitor 가 이제 결정한다(ACCEPT, TOLERATED) — "monitor 가 없어 PENDING"(§8.3)은 더 이상 아니다. P3+P1 대안에서는 미준비 자체가 정해지지 않아 보류.
+- **BP 존재 확인(2회씩): 발생 아님**(역할 `bp-existence-probe`), smoke2 와 같다.
+- 기록 전체에 생성이 없는 경우라면 실패한 조회도 상태로 미준비가 정해진다(단위 시험 `test_core_state_order`); C1 실행에서는 BP 가 매번 나중에 생성하므로 해당하지 않는다.
+
+**실행 관계(P10 두 읽기)**: 현행(지우기도 상대)에서는 CF 의 모든 발생이 `ownership-undetermined` 이다: "a write of osal.countsem by core-tx whose target the record does not establish" — TEARDOWN 뒤 main thread(`core-tx`, 소유 앱 미정)의 이름 없는 삭제가 상대에 든다. smoke2 는 삭제를 관측하지 않아 `inter-application` 이었다. P10 대안(`--clearing-writes excluded`)에서는 `inter-application`("3 clearing write(s) not counted"), 코어 여부는 세우지 않음. 관측 판정 개수는 P10 에 따라 바뀌지 않는다.
+
+### 9.4 기대 결과표와 대조 (E-01–E-15, 표는 고치지 않았다)
+
+| 행 | 기대 | smoke3: 현행 / P1 대안 / P3 대안 | 판단 |
+|---|---|---|---|
+| E-01, E-02 | pre A1 / 해당 없음 | 나오지 않음(pre 4회 모두 A3) | 해당 없음 |
+| E-03 (pre A3) | NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`, 종료 | 현행 같음 {narrowed}; P1 대안 `INCONCLUSIVE(caller_requirement_absent, explanation_ambiguous)`(UNDETERMINED); P3 대안 TOLERATED → `NO_VIOLATION…`(STATUS P3 의 "문서만 → TOLERATED" 갈래) | **일치**(현행). P1 대안도 요약은 INCONCLUSIVE 이나 상태는 미확정. 일치는 반환 코드 고정에 기댄다 |
+| E-04 (post A1, `BP1_tsem`) | READY → `NO_VIOLATION…` | READY → `NO_VIOLATION…`, **상태 기반**, 세 읽기 모두 | **일치, P1 과 무관**(RF 에 기댐) |
+| E-05 (post A2, `BP0_tsem`, m = 2) | (CF,1) TOLERATED, (CF,2) READY → `NO_VIOLATION…`; P3 대안 (CF,1) NOT_READY_UNJUDGED, 충돌 명시 | 현행 일치: (CF,2) 상태 기반, (CF,1) {narrowed}. P1 대안: (CF,2) 일치, (CF,1) `INCONCLUSIVE`. P3 대안 일치 | (CF,2) 는 P1 과 무관하게 일치, (CF,1) 의 일치는 여전히 P1 에 기댄다 |
+| E-06, E-07, E-08, E-10, E-12 | 소진·provider 없음·RESERVED·P-E·다른 생성자 | 나오지 않음 | 해당 없음 |
+| E-09 (pre, 채널 1) | 발생 없음 | CF 조회는 `BP0_tsem` 1회뿐 | **일치** |
+| E-11 (BP 첫 기동) | 발생·요약 없음, `-17` 뒤 생성 | 역할 사실 2, 발생 0, 생성 `0` 2회 | **일치** |
+| E-13–E-15 | K-C1-neg, R2 | 대상 아님 | 해당 없음 |
+
+### 9.5 남은 것과 PI 확인
+
+- 실패한 조회의 미준비(E-03, E-05 의 (CF,1))를 상태로 세우려면 그 조회를 생성보다 앞에 두는 순서가 필요하다. 출처가 주는 길은 반환 코드뿐이다(outcome-decided). P1 이 정한다.
+- RF 는 층 O 의 관측 간선이며 성공 결과와 두 기록된 id 의 같음에 기댄다. PI 결정 항목은 아니지만 P1 과 가까우므로 `--reads-from-edges off` 로 그 의존을 나란히 보였다(표 마지막 열).
+- 키 분리(`via`)는 researcher 기록 하나(`r_countsem_type_slices`)와 인용한 OSAL 코드에 기댄다. 추출기가 key status(MUST/MAY/NO_KEY, SPEC §4.2 단계 8)를 계산하지 않으므로 선언으로 둔 것이다. 간접 호출 대상인 writer 는 분리하지 않는다.
+- default scope 의 분류는 결정 사건과 요청 지점의 병합 순서로 한다(기존 규칙). SCOPE 제외는 그 분류 위의 진술이다.
+- 삭제의 이름은 읽지 않았다(인자가 id). 그래서 TEARDOWN 뒤 종류가 열린다 — default scope 의 판정에는 영향이 없다.
+- CF 의 `CF_Channel_t.sem_id`·`CF_ChannelConfig_t.sem_name` 은 여전히 DISABLED(CF 자체 cast, P9 미결정)이며 C1 조건의 support location 이 아니다(bind 하지 않음).
+- 소진 경로(E-06)의 실제 관측, rx 관측(P7), 반복 수(P8), 코어 여부, #184 의 BP 먼저 시작 변형.
+- **PI 관련(결정하지 않음, 현행 유지·대안 선택 가능):**
+  - **P1**: E-04 와 E-05 (CF,2) 는 이제 P1 과 무관하게 READY 이다. E-03 과 E-05 (CF,1) 는 여전히 반환 코드 고정에 기댄다. 레퍼런스가 정하지 않는 이유: MP §3.1 은 반환값으로 증명되면 보류하지 말라는 쪽이고, G3 은 계산된 상태와 코드 일치를 둘 다 요구한다. SPEC §4.8 단계 4 는 그런 순서를 "outcome-decided"로 따로 부르고 O4 의 검사력 계산에서 뺄 뿐, 판정에 쓸지는 말하지 않는다.
+  - **P3**: P3 대안의 수정 전 실패가 이제 exit monitor 로 TOLERATED 가 된다(문서만 묶은 갈래). 레퍼런스가 정하지 않는 이유는 §8.5 와 같다(`cfs_cf.dox` L212–L214 는 종료를 서술할 뿐 받아들인다고 하지 않는다).
+  - **P10**: TEARDOWN 뒤 이름 없는 삭제를 쓴 main thread 를 상대에 넣으면 CF 발생의 관계가 미정, 빼면 `inter-application`. SPEC §1.1 은 "actors involved" 만 말하고, 순서상 사용 뒤(그리고 다른 scope)의 지우기 writer 가 관여자인지 정하지 않는다.
+  - **P4**: 두 후보 결과가 같다. **P7**: tx 만. **P8**: 반복 수는 PI 가 정한다. **P9**: CF 필드 DISABLED 를 그대로 보고.

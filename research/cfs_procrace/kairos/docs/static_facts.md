@@ -47,6 +47,8 @@ $B/tools/kz-static/kz-static reach facts.kz --root CFE_ES_TaskMain --loc CFE_SB_
 
 **무엇을 찾는가는 데이터다** [D]. 추출 대상 필드(`loc`, `bind`, store pattern), 역할이 있는 인자(`op` 의 매개변수 역할), 종료 연산(`terminal`), spawn 연산(`hb` 의 spawn 템플릿), poll 함수는 프로필에서 온다. 프로필 문법(Φ)에 아직 **지연(delay) 연산과 잠금 연산을 선언하는 수단이 없어서**, 이 넷(`OS_TaskDelay`, `CFE_ES_LockSharedData`, `CFE_ES_UnlockSharedData`, 그리고 프로필의 spawn 템플릿이 아닌 `CFE_ES_CreateChildTask`)은 명령줄로 준다. 명령줄 항목과 C 라이브러리 데이터 함수 표(12개)는 사람이 넣은 입력이라 facts 컨테이너의 BASIS 항목에 정책 `declared-assumption`, 출처 계층 `researcher` 로 기록되고 요약에 "hand-entered inputs" 로 센다. 엔진 코드(`lib/`, `include/`)에는 cFS 이름이 없다(lint `lint_case-ids` 와 별도 grep 으로 확인 [M]).
 
+`--profile` 은 되풀이할 수 있다(2026-10-24): 공통 디렉터리와 변형 디렉터리로 된 프로필(예: `profiles/c1-bp-b051eb0/` + `cf-…` + `bundle-…` + `rspec-…`)을 `kz replay --profile` 과 같은 순서로 읽는다. facts 의 프로필 해시가 재생 프로필의 해시와 같아야 `kz replay --facts` 가 받으므로, C1 의 닫힘은 rspec 변형마다 추출한다(`docs/c1_smoke_observe.md` §9.2).
+
 ## 3. basis 컨테이너(SPEC §1.7)
 
 `kz-static basis` 는 artifact 종류 BASIS 의 KZ 컨테이너를 쓴다. 이 컨테이너의 artifact 해시가 B 의 해시이고, `extract --basis` 로 만든 facts 컨테이너는 헤더의 basis 해시와 부모 목록에 그것을 싣는다.

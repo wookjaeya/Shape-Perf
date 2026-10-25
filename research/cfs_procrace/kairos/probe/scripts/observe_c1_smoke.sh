@@ -156,6 +156,7 @@ echo "kz observe exit=$RC end_utc=$(date -u +%FT%T.%3NZ)" >> "$D"
 #    writer and alias coverage from the static closure (the run's basis names the binary), two more readings (P3
 #    alternative with P1 off; the current reading without the reads-from edges, to compare).
 CONSTS="--const CFE_PLATFORM_ES_MAX_APPLICATIONS=32"   # bpxfer_defs/default_platform_cfg.h L491, evaluated with the build's compile command
+CONSTS="$CONSTS --const OS_MAX_API_NAME=20"   # generated osconfig.h L163 (plan/C1_build_manifest.md §6); needed by the narrow conditions
 CUR=(); ALT=()
 if [ -n "$CLOSURE" ]; then
   CUR=(--basis "$RUN/basis_core-tx.kz" --facts "$CLOSURE/c1prof/closure.facts.kz" --static-basis "$CLOSURE/c1prof/closure.basis.kz")

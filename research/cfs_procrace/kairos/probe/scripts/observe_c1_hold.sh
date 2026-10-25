@@ -147,7 +147,7 @@ echo "timeout+kz hold exit=$RC (124 = pilot safeguard fired -> INCONCLUSIVE) end
 
 # counts and the replay (current reading; the Integrate agent re-replays with the new rules)
 if [ -e "$RUN/run.kzt" ]; then
-  CONSTS="--const CFE_PLATFORM_ES_MAX_APPLICATIONS=32"
+  CONSTS="--const CFE_PLATFORM_ES_MAX_APPLICATIONS=32 --const OS_MAX_API_NAME=20"   # OS_MAX_API_NAME: generated osconfig.h L163 (plan/C1_build_manifest.md §6)
   "$KZ_BIN" hits "$RUN/run.kzt" > "$RUN/hits.txt" 2>&1 || true
   CUR=()
   if [ -n "$CLOSURE" ] && [ -f "$CLOSURE/c1prof/closure.facts.kz" ]; then

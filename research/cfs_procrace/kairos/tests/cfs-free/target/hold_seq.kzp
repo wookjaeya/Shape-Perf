@@ -1,0 +1,18 @@
+# hold_seq.kzp -- the observation profile of hold_seq_prog.c, used by the `kz hold` sequence test
+# (re-armed released threads, occurrence <n>, several points on one address).  Unit-test values: not a
+# framework profile and not a research condition (CONDITIONS_POLICY).  The name argument is the second
+# argument (rsi), read as a string from the stopped thread's memory.
+kzp-observe 1
+binary hold_seq_prog
+
+prov sq_create  tier=researcher kind=researcher file="tests/cfs-free/target/hold_seq_prog.c" lines=39-52 cite="seq_create(id_out, name, initial): name is the second argument" authored="hold sequence test"
+prov sq_lookup  tier=researcher kind=researcher file="tests/cfs-free/target/hold_seq_prog.c" lines=54-63 cite="seq_lookup(id_out, name)" authored="hold sequence test"
+prov sq_created tier=researcher kind=researcher file="tests/cfs-free/target/hold_seq_prog.c" lines=65-65 cite="seq_provider_created(index): the provider's event after a creation" authored="hold sequence test"
+prov sq_retry   tier=researcher kind=researcher file="tests/cfs-free/target/hold_seq_prog.c" lines=68-68 cite="seq_consumer_retry(key, attempt): after each failed lookup" authored="hold sequence test"
+prov sq_done    tier=researcher kind=researcher file="tests/cfs-free/target/hold_seq_prog.c" lines=71-74 cite="seq_consumer_done(...): both loops ended" authored="hold sequence test"
+
+site obj.create.entry       entry func=seq_create prov=sq_create s0=rdi:u64:id_out_ptr s1=+0(rsi):string:name s3=stack+0:u64:return_address
+site obj.lookup.entry       entry func=seq_lookup prov=sq_lookup s0=rdi:u64:id_out_ptr s1=+0(rsi):string:name s3=stack+0:u64:return_address
+site provider.created.entry entry func=seq_provider_created prov=sq_created s0=rdi:u32:index s3=stack+0:u64:return_address
+site consumer.retry.entry   entry func=seq_consumer_retry prov=sq_retry s0=rdi:u32:key s1=rsi:u32:attempt s3=stack+0:u64:return_address
+site consumer.done.entry    entry func=seq_consumer_done prov=sq_done s0=rdi:u32:found0 s3=stack+0:u64:return_address

@@ -95,3 +95,10 @@ kz predict <run.kzt> --profile $P --profile $P/cf-<REV> --profile $P/bundle-<CAN
 - 보류 기구의 한계(공학 항목, 결정 아님): 풀린 스레드의 디버그 레지스터를 즉시 다시 무장하지 않아(`supervisor.cpp` L384–L385) pre W2·post W10 전체 계획은 실현 불가로 점검된다. 정확한 순번(m≥3)의 해제에는 `occurrence <n>` 같은 어휘가 필요하다.
 - **P11(대기 중)**: 확인 실행 재생에서 보류기의 정지·해제 순서를 HB로 쓰는가. 읽기 A(쓴다): W1·W10/W2-2의 미준비 25개와 W2의 미준비가 개입 순서로 서고 P1과 무관해진다. 읽기 B(안 쓴다): 단계 B처럼 미준비는 ON(반환 코드 좁힘, P1 조건부), READY 후보(W3·W13)는 RF(RD)에 기댄다. 이 문서는 정하지 않는다.
 - **새 PI 결정 요청 P12: 예측 전에 한 제어 실행(단계 B·C)을 같은 순서의 후보(post W1, pre W3)의 확인으로 셀 수 있는가.** SPEC §4.13은 후보의 지향 확인(directed confirmation)과 CF-01–CF-04만 정하고, 확인 실행이 예측 뒤에 그 후보의 계획으로 돌아야 하는지는 말하지 않는다. RV §11 D는 "후보를 실제 실행으로 확인"이라고만 적는다. 단계 C의 해제(`BP1_tsem` 생성 진입)는 W3의 해제(BP_CLA_OUT 생성 진입)와 다르다. 권고 [I]: 세지 않고, 예측 계획으로 새로 돌린다.
+
+## 8. 보류 계획 어휘 개정과 다시 만든 계획 (predict2, confirm2, 2026-10-25) [M]
+
+- 보류 기구 개정(`docs/c1_hold_runs.md` §8): 풀린 스레드 무장 유지(§1 의 "L384–L385, 다음 정지에서만 다시 무장" 은 이제 해당 없음), `occurrence <n>`, 한 주소의 여러 점(주소 넷 이하), 보류된 hit 의 해제는 재개 때, `unless-released`. 계획 점검은 같은 의미로 탐색한다(`lib/predict/explore.cpp`; 게이트는 가시 단계의 before-hit 에만). 범위 절단(종료 요청이 먼저 옴) 실행의 보류는 정체로 세지 않는다.
+- 합성(`lib/predict/predict.cpp`): 첫 hit 가 아닌 지점은 그 표지의 몇 번째 hit 인지(occurrence)로 쓴다. 키의 생성이 k 번째와 k+1 번째 사용 사이(0 < k < 모든 사용)이면, 공급자를 생성에서 잡고 k 번째 사용 뒤(k+1 번째 사용 전)에 푸는 것에 더해 **소비자를 k+1 번째 사용에서 잡고 생성 뒤에 푸는 쪽**을 더한다(이전 노트 "the use after it is left to the scheduler" 는 없어진다; 더한 쪽은 필요 목록 끝에 붙여 이전 번호를 지킨다). 해제는 그 창에서 첫 hit 표지를 먼저 고르고(이전 계획을 그대로 지킴), 계획이 주소 넷을 넘으면 모든 해제를 가장 가까운 hit 로 다시 고른다(계획 노트에 적힘). 모든 게이트에 `unless-released`.
+- 결과(`/home/user/work/procrace/c1_runs/predict2/`, `run_predict.sh`; 같은 smoke3 tx 기록·입력, 현행 모드만): 후보는 predict1 과 같다(pre 3, post 13; 기각 0). **모든 새 후보의 전체 계획이 모델에서 "강제, 정체 없음"** 이다(pre W2·W3, post W1–W8·W10–W13). 그래서 키 하나씩의 계획(`W<n>-<k>`)은 만들지 않았다. pre W2·post W10·post W1 의 제어점은 predict1 과 같고 `unless-released` 만 더해졌다. A·B 두 후보의 계획은 주석만 다르다.
+- 이 점검은 시간 없는 모델의 것이다. 실제 실행에서 해제가 게이트보다 먼저 오는지는 시간에 달려 있고(그래서 `unless-released`), 확인은 실행으로만 한다(`plan/results_pilot_20261025.md` §5.6).

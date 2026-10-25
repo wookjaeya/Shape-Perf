@@ -148,7 +148,17 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
   if (config.argv.empty()) return Status::error(Err::Invalid, "kz hold: no command to run");
   const size_t np = config.points.size();
   if (np == 0) return Status::error(Err::Invalid, "kz hold: the hold plan has no gate");
-  if (np > 4) return Status::error(Err::Invalid, "kz hold: more than four distinct control addresses do not fit in DR0..DR3");
+  {
+    // one debug-register slot per distinct address (binary + file offset); points may share one
+    std::vector<std::pair<std::string, uint64_t>> distinct;
+    for (const ControlPoint& cp : config.points) {
+      bool seen = false;
+      for (const auto& d : distinct) seen = seen || (d.first == cp.binary && d.second == cp.file_offset);
+      if (!seen) distinct.push_back({cp.binary, cp.file_offset});
+    }
+    if (distinct.size() > 4) return Status::error(Err::Invalid, "kz hold: more than four distinct control addresses do not fit in DR0..DR3");
+  }
+  report->point_hits.assign(np, 0);
 
   std::vector<char*> argv;
   for (const std::string& a : config.argv) argv.push_back(const_cast<char*>(a.c_str()));
@@ -179,8 +189,10 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
   std::unordered_map<pid_t, DrState> drs;
   // The thread currently held for each gate label (0 = none).
   std::unordered_map<std::string, pid_t> held_for_gate;
-  // occurrence bookkeeping: which gate/release labels already acted (for occurrence=first).
-  std::unordered_set<std::string> acted;
+  // Per point: whether it already acted (first / n-th: it acts once).
+  std::vector<bool> acted(np, false);
+  // Per held thread: the release points of the hit at which it was held (they act when it is resumed).
+  std::unordered_map<pid_t, std::vector<size_t>> deferred;
   size_t total_holds = 0;
 
   auto proc_of = [&](pid_t tid) -> pid_t {
@@ -228,11 +240,12 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
     ps.all_resolved = all;
   };
 
-  // Which config point (if any) sits at run-time address `rip` in process `pid`.
-  auto point_at = [&](pid_t pid, uint64_t rip) -> int {
+  // The config points (in plan order) that sit at run-time address `rip` in process `pid`.
+  auto points_at = [&](pid_t pid, uint64_t rip) -> std::vector<size_t> {
+    std::vector<size_t> out;
     const ProcState& ps = proc[pid];
-    for (size_t i = 0; i < ps.addr.size(); ++i) if (ps.addr[i] != 0 && ps.addr[i] == rip) return (int)i;
-    return -1;
+    for (size_t i = 0; i < ps.addr.size(); ++i) if (ps.addr[i] != 0 && ps.addr[i] == rip) out.push_back(i);
+    return out;
   };
 
   // Is `ra` inside a mapping of `binary` in process `pid`?
@@ -241,14 +254,19 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
     return false;
   };
 
-  // Arm the debug registers of thread `tid` for process `pid` (idempotent).
+  // Arm the debug registers of thread `tid` for process `pid` (idempotent): one slot per distinct
+  // resolved address.
   auto arm_thread = [&](pid_t tid, pid_t pid) {
     ProcState& ps = proc[pid];
     if (!ps.relevant) return;
-    // Build the desired slot set from the resolved addresses (only the ones currently mapped).
     DrState desired;
     int n = 0;
-    for (size_t i = 0; i < np && n < 4; ++i) if (ps.addr.size() > i && ps.addr[i] != 0) desired.slot[n++] = ps.addr[i];
+    for (size_t i = 0; i < np && n < 4; ++i) {
+      if (ps.addr.size() <= i || ps.addr[i] == 0) continue;
+      bool dup = false;
+      for (int s2 = 0; s2 < n; ++s2) dup = dup || desired.slot[s2] == ps.addr[i];
+      if (!dup) desired.slot[n++] = ps.addr[i];
+    }
     uint64_t dr7 = 0;
     for (int s = 0; s < n; ++s) dr7 |= (1ull << (s * 2));  // Ls enable, RW=00 (exec), LEN=00
     desired.dr7 = dr7;
@@ -277,6 +295,70 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
       if (ptrace(PTRACE_GETREGS, tid, 0, &r) == 0) { r.eflags |= (1u << 16); /* RF */ ptrace(PTRACE_SETREGS, tid, 0, &r); }
     }
     ptrace(PTRACE_CONT, tid, 0, (void*)(long)sig);
+  };
+
+  // Count a qualifying hit of point i; true if the point acts on it (first / n-th once, each always).
+  auto count_hit = [&](size_t i) -> bool {
+    const ControlPoint& cp = config.points[i];
+    const uint64_t h = ++report->point_hits[i];
+    if (cp.occurrence_each) return true;
+    if (acted[i] || h != (uint64_t)(cp.occurrence_nth == 0 ? 1 : cp.occurrence_nth)) return false;
+    acted[i] = true;
+    return true;
+  };
+
+  // A release point acts (its hit by thread `by`): resume the thread its gate holds, if any.  The
+  // resumed threads are queued; their deferred releases act before they continue.
+  std::vector<pid_t> to_resume;
+  auto fire = [&](size_t i, pid_t by, bool was_deferred) {
+    const ControlPoint& cp = config.points[i];
+    FireEvent fe;
+    fe.release_label = cp.label;
+    fe.gate_label = cp.releases;
+    fe.tid = (int)by;
+    fe.hit = report->point_hits[i];
+    fe.t_ns = mono_ns();
+    fe.deferred = was_deferred;
+    auto it = held_for_gate.find(cp.releases);
+    if (it != held_for_gate.end() && it->second != 0) {
+      const pid_t held = it->second;
+      it->second = 0;
+      fe.resumed_tid = (int)held;
+      for (HoldEvent& he : report->holds) if (he.tid == (int)held && he.gate_label == cp.releases && !he.released) { he.released = true; he.t_release_ns = fe.t_ns; he.release_label = cp.label; break; }
+      if (config.verbose) std::fprintf(stderr, "[hold] RELEASE %s (hit %" PRIu64 ") resumes gate %s tid=%d\n", cp.label.c_str(), fe.hit, cp.releases.c_str(), (int)held);
+      to_resume.push_back(held);
+    } else {
+      // the gate holds no thread now: an unless-released gate that has not acted is satisfied (the order it
+      // enforces already holds); any other gate is left as it is (the release is consumed)
+      for (size_t g = 0; g < np; ++g) {
+        const ControlPoint& gp = config.points[g];
+        if (gp.is_release || gp.label != cp.releases || !gp.unless_released || acted[g]) continue;
+        acted[g] = true;
+        fe.satisfied = true;
+      }
+      if (config.verbose)
+        std::fprintf(stderr, "[hold] RELEASE %s (hit %" PRIu64 ") acts while gate %s holds no thread (%s)\n", cp.label.c_str(), fe.hit, cp.releases.c_str(),
+                     fe.satisfied ? "the gate is satisfied" : "consumed");
+    }
+    report->fires.push_back(fe);
+  };
+
+  // Resume the queued threads: the releases of the hit at which each was held act first (it passes
+  // that address now), then it continues past the gate instruction with its debug registers armed.
+  auto drain_resumes = [&]() {
+    while (!to_resume.empty()) {
+      const pid_t h = to_resume.front();
+      to_resume.erase(to_resume.begin());
+      auto d = deferred.find(h);
+      if (d != deferred.end()) {
+        std::vector<size_t> rel = std::move(d->second);
+        deferred.erase(d);
+        for (size_t i : rel) if (count_hit(i)) fire(i, h, true);
+      }
+      const pid_t hp = proc_of(h);
+      if (proc[hp].relevant) arm_thread(h, hp);  // (they stayed armed; idempotent)
+      cont(h, 0, true);  // the resume flag steps over the gate instruction once
+    }
   };
 
   if (config.verbose) std::fprintf(stderr, "[hold] seized pid=%d, options set; letting it exec\n", (int)child);
@@ -332,67 +414,68 @@ Status run_hold(const HoldConfig& config, HoldReport* report) {
       // A trap: either our hardware breakpoint, or a spurious one.
       user_regs_struct r;
       if (ptrace(PTRACE_GETREGS, w, 0, &r) != 0) { cont(w, 0, false); continue; }
-      const int pi = ps.relevant ? point_at(pid, (uint64_t)r.rip) : -1;
-      if (pi < 0) { cont(w, 0, false); continue; }
-      const ControlPoint& cp = config.points[pi];
-      // Evaluate the condition.
-      bool ok = true;
-      std::string name;
-      if (cp.match_name && cp.name_reg >= 0) {
-        uint64_t base = (uint64_t)reg_field(r, cp.name_reg);
-        name = peek_string(w, base + cp.name_off);
-        if (name != cp.name_text) ok = false;
+      const std::vector<size_t> pts = ps.relevant ? points_at(pid, (uint64_t)r.rip) : std::vector<size_t>();
+      if (pts.empty()) { cont(w, 0, false); continue; }
+      // Evaluate the conditions of every point at this address.
+      std::vector<bool> ok(pts.size(), true);
+      std::vector<std::string> names(pts.size());
+      bool maps_fresh = false;
+      bool any_gate = false, any_release = false;
+      for (size_t k = 0; k < pts.size(); ++k) {
+        const ControlPoint& cp = config.points[pts[k]];
+        (cp.is_release ? any_release : any_gate) = true;
+        if (cp.match_name && cp.name_reg >= 0) {
+          uint64_t base = (uint64_t)reg_field(r, cp.name_reg);
+          names[k] = peek_string(w, base + cp.name_off);
+          if (names[k] != cp.name_text) ok[k] = false;
+        }
+        if (ok[k] && cp.match_caller) {
+          uint64_t ra = peek_word(w, (uint64_t)r.rsp);  // entry: top of stack is the return address
+          // The caller's module (e.g. cf.so) may be mapped after the control-point binaries, so the
+          // resolved-addresses snapshot can predate it; read the maps fresh for this test.
+          if (!maps_fresh) { read_maps(pid, &ps.maps); maps_fresh = true; }
+          if (!caller_in(pid, ra, cp.caller_binary)) ok[k] = false;
+        }
       }
-      if (ok && cp.match_caller) {
-        uint64_t ra = peek_word(w, (uint64_t)r.rsp);  // entry: top of stack is the return address
-        // The caller's module (e.g. cf.so) may be mapped after the control-point binaries, so the
-        // resolved-addresses snapshot can predate it; read the maps fresh for this test.
-        read_maps(pid, &ps.maps);
-        if (!caller_in(pid, ra, cp.caller_binary)) ok = false;
-      }
-      if (!cp.is_release) {
-        report->gate_traps++;
-        const bool first_only = !cp.occurrence_each;
-        if (ok && !(first_only && acted.count("gate:" + cp.label))) {
-          if (first_only) acted.insert("gate:" + cp.label);
-          // Hold this thread: leave it stopped, clear its gate DR so a later release can step past.
-          held_for_gate[cp.label] = w;
-          HoldEvent he;
-          he.gate_label = cp.label;
-          he.tid = (int)w;
-          he.name = name;
-          he.t_hold_ns = mono_ns();
-          report->holds.push_back(he);
-          total_holds++;
-          if (config.verbose) std::fprintf(stderr, "[hold] GATE %s held tid=%d name=%s t=%" PRIu64 "\n", cp.label.c_str(), (int)w, name.c_str(), he.t_hold_ns);
-          // do NOT continue this thread; it is held.
+      if (any_gate) report->gate_traps++;
+      if (any_release) report->release_traps++;
+      // Gates first: the first one that acts holds the thread.
+      bool held = false;
+      std::string held_by;
+      for (size_t k = 0; k < pts.size(); ++k) {
+        const ControlPoint& cp = config.points[pts[k]];
+        if (cp.is_release || !ok[k]) continue;
+        if (!count_hit(pts[k])) continue;
+        if (held) {
+          report->notes.push_back("gate " + cp.label + " acted on hit " + std::to_string(report->point_hits[pts[k]]) + " of tid " + std::to_string((int)w) +
+                                  ", which gate " + held_by + " already holds at the same address: consumed without a hold");
           continue;
         }
-        // not held: step over the breakpoint and run on.
-        cont(w, 0, true);
-        continue;
-      } else {
-        report->release_traps++;
-        const bool first_only = !cp.occurrence_each;
-        bool fire = ok && !(first_only && acted.count("rel:" + cp.label));
-        if (fire) {
-          if (first_only) acted.insert("rel:" + cp.label);
-          auto it = held_for_gate.find(cp.releases);
-          if (it != held_for_gate.end() && it->second != 0) {
-            pid_t held = it->second;
-            // Resume the held thread: disable its gate breakpoints and continue it.
-            ptrace(PTRACE_POKEUSER, held, (void*)kDr7Off, (void*)0ull);
-            drs[held].set = false;
-            for (HoldEvent& he : report->holds) if (he.tid == (int)held && he.gate_label == cp.releases && !he.released) { he.released = true; he.t_release_ns = mono_ns(); he.release_label = cp.label; break; }
-            if (config.verbose) std::fprintf(stderr, "[hold] RELEASE %s resumes gate %s tid=%d\n", cp.label.c_str(), cp.releases.c_str(), (int)held);
-            cont(held, 0, true);
-            it->second = 0;
-          }
-        }
-        // the releasing thread steps over its own breakpoint and runs on.
-        cont(w, 0, true);
-        continue;
+        held = true;
+        held_by = cp.label;
+        // Hold this thread: leave it stopped (its debug registers stay armed).
+        held_for_gate[cp.label] = w;
+        HoldEvent he;
+        he.gate_label = cp.label;
+        he.tid = (int)w;
+        he.name = names[k];
+        he.hit = report->point_hits[pts[k]];
+        he.t_hold_ns = mono_ns();
+        report->holds.push_back(he);
+        total_holds++;
+        if (config.verbose) std::fprintf(stderr, "[hold] GATE %s (hit %" PRIu64 ") held tid=%d name=%s t=%" PRIu64 "\n", cp.label.c_str(), he.hit, (int)w, names[k].c_str(), he.t_hold_ns);
       }
+      // Then the releases: those of a held thread's hit act when it is resumed.
+      for (size_t k = 0; k < pts.size(); ++k) {
+        const ControlPoint& cp = config.points[pts[k]];
+        if (!cp.is_release || !ok[k]) continue;
+        if (held) { deferred[w].push_back(pts[k]); continue; }
+        if (count_hit(pts[k])) fire(pts[k], w, false);
+      }
+      drain_resumes();
+      // A thread that is not held steps over its own breakpoint and runs on.
+      if (!held) cont(w, 0, true);
+      continue;
     }
 
     // A plain group stop or signal-delivery stop.

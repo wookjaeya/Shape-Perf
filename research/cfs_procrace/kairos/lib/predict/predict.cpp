@@ -246,7 +246,7 @@ std::string judged_list(const std::vector<Judged>& js, bool monitor) {
 std::string plan_verdict(const PlanResult& pr) {
   if (pr.never) return "NOT REALIZABLE as declared: no execution under the plan completes with every gate held and released (a run that reaches a gate whose release is never reached stalls)";
   std::string v = pr.forces ? "every execution under the plan that does not stall is in the candidate's class" : "the plan leaves part of the class to the scheduler (" + std::to_string(pr.realized.size()) + " classes realized)";
-  v += pr.stall ? "; a STALL is possible (a release reached before its gate holds, or a release that only a released thread reaches): such a run ends by the harness safeguard and is INCONCLUSIVE" : "; no stall";
+  v += pr.stall ? "; a STALL is possible (a release that acts before a gate that is not unless-released holds, or a release whose hit needs a held actor's progress): such a run holds an actor to the end" : "; no stall";
   return v;
 }
 
@@ -270,38 +270,55 @@ bool same_marker(const ControlPoint& a, const HitInst& h) {
   return a.site == h.site && a.caller == h.caller && a.name_role == h.name_role && a.name_text == h.name_text;
 }
 
-// Whether the marker of hit (step, hit) of path W is reached there for the first time in W.
-bool first_hit(const std::vector<Step>& w, size_t step, size_t hit) {
+// The occurrence of hit (step, hit) of path W among the hits of its marker in W (1 = the first).
+uint32_t occurrence_in(const std::vector<Step>& w, size_t step, size_t hit) {
   const ControlPoint cp = cp_of(w[step].hits[hit]);
+  uint32_t n = 0;
   for (size_t s = 0; s < w.size(); ++s)
     for (size_t h = 0; h < w[s].hits.size(); ++h) {
-      if (s == step && h == hit) return true;
-      if (same_marker(cp, w[s].hits[h])) return false;
+      if (same_marker(cp, w[s].hits[h])) ++n;
+      if (s == step && h == hit) return n;
     }
-  return false;
+  return n;
 }
 
+// The gate of step `step`: one of its visible instruction's own before-hits, the first reached marker if there is
+// one, else the first of them with its occurrence (kzp-hold `occurrence <n>`).
 bool gate_before(const std::vector<Step>& w, size_t step, ControlPoint* cp) {
   for (size_t h = w[step].n_pre; h < w[step].n_before; ++h)
-    if (first_hit(w, step, h)) {
+    if (occurrence_in(w, step, h) == 1) {
       *cp = cp_of(w[step].hits[h]);
+      cp->occurrence = 1;
       return true;
     }
+  if (w[step].n_before > w[step].n_pre) {
+    *cp = cp_of(w[step].hits[w[step].n_pre]);
+    cp->occurrence = occurrence_in(w, step, w[step].n_pre);
+    return true;
+  }
   return false;
 }
 
-bool release_after(const std::vector<Step>& w, size_t step, ControlPoint* cp, size_t* at) {
+// The release after step `step`: a hit of the same actor after the step's linearization point and before step `limit`
+// (the actor's next step that must come after the enforced order; w.size(): none).  Unless `nearest`, the earliest
+// marker reached there for the first time is preferred (the plans of the first-hit vocabulary stay as they were);
+// otherwise, or when there is none, the earliest hit with its occurrence.
+bool release_after(const std::vector<Step>& w, size_t step, size_t limit, bool nearest, ControlPoint* cp, size_t* at) {
   const int32_t actor = w[step].actor;
-  for (size_t s = step; s < w.size(); ++s) {
-    if (w[s].actor != actor) continue;
-    for (size_t h = s == step ? w[s].n_before : 0; h < w[s].hits.size(); ++h)
-      if (first_hit(w, s, h)) {
+  bool have = false;
+  for (int pass = nearest ? 1 : 0; pass < 2 && !have; ++pass)
+    for (size_t s = step; s < w.size() && s < limit && !have; ++s) {
+      if (w[s].actor != actor) continue;
+      for (size_t h = s == step ? w[s].n_before : 0; h < w[s].hits.size() && !have; ++h) {
+        const uint32_t occ = occurrence_in(w, s, h);
+        if (pass == 0 && occ != 1) continue;
         *cp = cp_of(w[s].hits[h]);
+        cp->occurrence = occ;
         *at = s;
-        return true;
+        have = true;
       }
-  }
-  return false;
+    }
+  return have;
 }
 
 std::string provs_of(const PredictInput& in, const Instr& ins) {
@@ -310,8 +327,16 @@ std::string provs_of(const PredictInput& in, const Instr& ins) {
   return s;
 }
 
-// The plan of the needs of execution w (only < 0: all of them; else only that one); n_needs/whats/prefixes: the needs.
-Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only, std::vector<std::string>* whats, std::vector<std::string>* prefixes) {
+// The plan of the needs of execution w (only < 0: all of them; else only that one); whats/prefixes: the needs.
+// Per consumer and key, with k = the uses before the creation:
+//   k = 0          hold the consumer before its first use, release after the creation (merged per consumer);
+//   k = all uses   hold the provider at its creation, release after the consumer's last use;
+//   0 < k < all    hold the provider at its creation, release after use k (before use k+1); and, as a further need
+//                  listed after all others, hold the consumer at use k+1, release after the creation.
+// A gate or release that is not the first hit of its marker carries its occurrence (kzp-hold `occurrence <n>`).
+// `nearest`: every release is the nearest hit after its step (else a first-reached marker is preferred).
+Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only, std::vector<std::string>* whats, std::vector<std::string>* prefixes,
+                bool nearest = false) {
   const Model& m = *in.model;
   Plan plan;
   struct Need {
@@ -320,16 +345,23 @@ Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only
     const Instr* gate_ins;
     std::string gate_key;
     size_t after_step;  // the release is after this step of w
+    size_t limit;       // ... and before this step of w (w.size(): no bound)
     std::string what;
     std::string prefix; // the class segment of the key it enforces
   };
-  std::vector<Need> needs;
+  std::vector<Need> needs, later;
   struct AMerge {
     bool any = false;
     size_t gate_step = 0, create_step = 0;
     int32_t provider = -1;
     std::string what;
     std::string prefix;
+  };
+  // the provider's next step on the resource after step s (the release window of a provider-side release)
+  auto next_on = [&](size_t s, int32_t actor, int32_t ri) -> size_t {
+    for (size_t t = s + 1; t < w.size(); ++t)
+      if (w[t].actor == actor && w[t].res == ri && w[t].index >= 0) return t;
+    return w.size();
   };
   std::vector<AMerge> amerge(m.actors.size());
   for (size_t ri = 0; ri < m.resources.size(); ++ri) {
@@ -372,10 +404,12 @@ Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only
         plan.notes.push_back(who + ": no creation in the model; nothing to hold");
       } else {
         const bool all = k == uses.size();
-        needs.push_back(Need{provider, cp < w.size() ? cp : std::string::npos, create_ins, key, uses[k - 1],
-                             who + (all ? ": the creation after the last use (" + std::to_string(k) + " uses)" : ": the creation after use " + std::to_string(k) + " (the use after it is left to the scheduler)"),
+        needs.push_back(Need{provider, cp < w.size() ? cp : std::string::npos, create_ins, key, uses[k - 1], all ? w.size() : uses[k],
+                             who + (all ? ": the creation after the last use (" + std::to_string(k) + " uses)" : ": the creation after use " + std::to_string(k) + " (before use " + std::to_string(k + 1) + ")"),
                              who + ":"});
-        if (!all) plan.notes.push_back(who + ": the order of use " + std::to_string(k + 1) + " after the creation is not enforced: the hold vocabulary acts on the first qualifying hit only");
+        if (!all && cp < w.size())
+          later.push_back(Need{static_cast<int32_t>(ci), uses[k], nullptr, std::string(), cp, next_on(cp, w[cp].actor, static_cast<int32_t>(ri)),
+                               who + ": use " + std::to_string(k + 1) + " after the creation", who + ":"});
       }
     }
   }
@@ -385,12 +419,15 @@ Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only
         plan.notes.push_back(amerge[ci].what + ": no creation in the execution");
         continue;
       }
-      needs.push_back(Need{static_cast<int32_t>(ci), amerge[ci].gate_step, nullptr, std::string(), amerge[ci].create_step, amerge[ci].what, amerge[ci].prefix});
+      const size_t cs = amerge[ci].create_step;
+      needs.push_back(Need{static_cast<int32_t>(ci), amerge[ci].gate_step, nullptr, std::string(), cs, next_on(cs, w[cs].actor, w[cs].res), amerge[ci].what, amerge[ci].prefix});
     }
+  needs.insert(needs.end(), later.begin(), later.end());
   if (whats != nullptr)
     for (const Need& nd : needs) whats->push_back(nd.what);
   if (prefixes != nullptr)
     for (const Need& nd : needs) prefixes->push_back(nd.prefix);
+  auto occ_text = [](uint32_t o) { return o <= 1 ? std::string() : " (hit " + std::to_string(o) + " of its marker)"; };
   uint32_t n = 0;
   for (const Need& nd : needs) {
     ++n;
@@ -401,16 +438,18 @@ Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only
     if (nd.gate_step != std::string::npos) {
       ok = gate_before(w, nd.gate_step, &g);
       const Step& gs = w[nd.gate_step];
-      gate_desc = step_text(m, gs) + "; " + provs_of(in, m.actors[static_cast<size_t>(gs.actor)].prog[static_cast<size_t>(gs.pc)]);
+      gate_desc = step_text(m, gs) + occ_text(g.occurrence) + "; " + provs_of(in, m.actors[static_cast<size_t>(gs.actor)].prog[static_cast<size_t>(gs.pc)]);
     } else if (nd.gate_ins != nullptr) {
+      // a step not reached in the execution: its marker is not hit in w, so it is its first hit there
       for (const SiteHit& h : nd.gate_ins->hits) {
         if (!h.before) continue;
         HitInst hi{h.site, true, h.caller, h.name_role, h.name_role.empty() ? std::string() : nd.gate_key};
         bool seen = false;
-        for (const Step& s : w)
-          for (const HitInst& x : s.hits) seen = seen || same_marker(cp_of(hi), x);
+        for (const Step& s2 : w)
+          for (const HitInst& x : s2.hits) seen = seen || same_marker(cp_of(hi), x);
         if (!seen) {
           g = cp_of(hi);
+          g.occurrence = 1;
           ok = true;
           break;
         }
@@ -418,37 +457,38 @@ Plan synthesize(const PredictInput& in, const std::vector<Step>& w, int32_t only
       gate_desc = m.actors[static_cast<size_t>(nd.gate_actor)].name + ": " + nd.gate_ins->opname + "(" + nd.gate_key + ") (not reached in the execution); " + provs_of(in, *nd.gate_ins);
     }
     if (!ok) {
-      plan.notes.push_back(nd.what + ": no hold point reaches only this step first (no gate)");
+      plan.notes.push_back(nd.what + ": no hold point at this step (no gate)");
       continue;
     }
     size_t rel_at = 0;
-    if (!release_after(w, nd.after_step, &r, &rel_at)) {
-      plan.notes.push_back(nd.what + ": no event after the step is reached there first (no release)");
+    if (!release_after(w, nd.after_step, nd.limit, nearest, &r, &rel_at)) {
+      plan.notes.push_back(nd.what + ": no event of the actor between the step and the step that must follow (no release)");
       continue;
     }
     const Step& rs = w[rel_at];
     g.label = "G" + std::to_string(n) + "_" + m.actors[static_cast<size_t>(nd.gate_actor)].name;
     g.actor = nd.gate_actor;
+    g.unless_released = true;  // a release that acts first satisfies the gate (no hold to the end of the run)
     g.why = nd.what + " -- holds " + gate_desc;
     r.label = "R" + std::to_string(n);
     r.release = true;
     r.releases = g.label;
     r.actor = rs.actor;
-    r.why = "first reached after " + step_text(m, w[nd.after_step]) + " (at " + (rs.pc >= 0 ? step_text(m, rs) : std::string("?")) + "); " +
-            (rs.pc >= 0 ? provs_of(in, m.actors[static_cast<size_t>(rs.actor)].prog[static_cast<size_t>(rs.pc)]) : std::string());
+    r.why = std::string(r.occurrence <= 1 ? "first reached" : "reached") + " after " + step_text(m, w[nd.after_step]) + " (at " + (rs.pc >= 0 ? step_text(m, rs) : std::string("?")) + ")" +
+            occ_text(r.occurrence) + "; " + (rs.pc >= 0 ? provs_of(in, m.actors[static_cast<size_t>(rs.actor)].prog[static_cast<size_t>(rs.pc)]) : std::string());
     plan.points.push_back(g);
     plan.points.push_back(r);
   }
-  // kzp-hold 1 and the debug registers: one control point per address, at most four addresses
+  // the debug registers: at most four distinct addresses (sites); points may share one (kz hold evaluates every point
+  // of an address)
   std::set<std::string> sites;
-  bool clash = false;
-  for (const ControlPoint& cp : plan.points) clash = !sites.insert(cp.site).second || clash;
-  if (clash) {
-    plan.notes.push_back("two control points on one site: the supervisor acts on one point per address; no plan");
+  for (const ControlPoint& cp : plan.points) sites.insert(cp.site);
+  if (sites.size() > 4) {
+    if (!nearest) return synthesize(in, w, only, nullptr, nullptr, true);
+    plan.notes.push_back("more than four sites, also with the nearest releases: more than the four debug registers of a thread; no plan");
     plan.points.clear();
-  } else if (sites.size() > 4) {
-    plan.notes.push_back("more than four sites: more than the four debug registers of a thread; no plan");
-    plan.points.clear();
+  } else if (nearest) {
+    plan.notes.push_back("the releases are the nearest hits after their steps (with the first-reached markers preferred the plan needed more than four sites)");
   }
   plan.any = !plan.points.empty();
   return plan;
@@ -652,7 +692,8 @@ Status predict(const PredictInput& in, PredictReport* out) {
         for (const std::string& seg : c.segments) forced[seg] = true;
         std::map<std::string, std::set<std::string>> gate_out;  // gate -> its outcomes in completed executions
         for (const ClassInfo& pc : pr.classes) {
-          if (pc.stall) res->stall = true;
+          // a held actor at a scope cut (the shutdown request came first) is outside the default scope, not a stall
+          if (pc.stall && !pc.cut) res->stall = true;
           if (pc.cut || pc.stall) continue;
           std::vector<std::string> segs;
           bool used = true;  // every gate is released or never reached
@@ -682,7 +723,7 @@ Status predict(const PredictInput& in, PredictReport* out) {
           std::string t;
           for (const std::string& x : outs) t += (t.empty() ? "" : ", ") + x;
           res->gates.push_back(cp.label + " in the completed executions: " + (t.empty() ? std::string("none") : t));
-          some_gate_never_released = some_gate_never_released || outs.count("released") == 0;
+          some_gate_never_released = some_gate_never_released || (outs.count("released") == 0 && outs.count("satisfied") == 0);
         }
         res->never = res->realized.empty() || some_gate_never_released;
         res->forces = all_same && !res->never;
@@ -723,7 +764,8 @@ Status predict(const PredictInput& in, PredictReport* out) {
   for (Witness& w : out->witnesses)
     for (PlanResult& pr : w.plans) {
       std::string sig;
-      for (const ControlPoint& cp : pr.plan.points) sig += (cp.release ? "R " : "G ") + cp.site + "|" + cp.caller + "|" + cp.name_text + "|" + std::to_string(cp.actor) + ";";
+      for (const ControlPoint& cp : pr.plan.points)
+        sig += (cp.release ? "R " : "G ") + cp.site + "|" + cp.caller + "|" + cp.name_text + "|" + std::to_string(cp.occurrence) + "|" + std::to_string(cp.actor) + ";";
       for (const auto& kv : seen)
         if (kv.first == sig) {
           pr.same_as = kv.second;
@@ -789,7 +831,7 @@ std::string report_text(const PredictInput& in, const PredictReport& r) {
       o += "  hold plan " + pr.name + ".kzh (" + pr.scope + ")" + (pr.same_as.empty() ? std::string() : " -- the same control points as " + pr.same_as + ".kzh") + "\n";
       for (const ControlPoint& cp : pr.plan.points)
         o += "    " + std::string(cp.release ? "release " : "gate ") + cp.label + " " + cp.site + (cp.caller.empty() ? "" : " caller-in " + cp.caller) +
-             (cp.name_text.empty() ? "" : " name " + cp.name_role + " \"" + cp.name_text + "\"") + ": " + cp.why + "\n";
+             (cp.name_text.empty() ? "" : " name " + cp.name_role + " \"" + cp.name_text + "\"") + (cp.occurrence <= 1 ? "" : " occurrence " + std::to_string(cp.occurrence)) + ": " + cp.why + "\n";
       o += "    plan check in the model" + std::string(pr.checked ? "" : " (INCOMPLETE: state cap)") + ": " + plan_verdict(pr) + "\n";
       for (const std::string& g : pr.gates) o += "      " + g + "\n";
       for (const std::string& seg : pr.forced) o += "      forced: " + seg + "\n";
@@ -839,10 +881,11 @@ std::string plan_text(const PredictInput& in, const Witness& w, size_t k, const 
     if (!cp.caller.empty()) cond += " when caller-in " + cp.caller;
     return cond;
   };
+  auto occ_of = [](const ControlPoint& cp) { return cp.occurrence <= 1 ? std::string(" occurrence first") : " occurrence " + std::to_string(cp.occurrence); };
   for (const ControlPoint& cp : pr.plan.points)
-    if (!cp.release) o += "gate " + cp.label + " site=" + cp.site + cond_of(cp) + " occurrence first\n";
+    if (!cp.release) o += "gate " + cp.label + " site=" + cp.site + cond_of(cp) + occ_of(cp) + (cp.unless_released ? " unless-released" : "") + "\n";
   for (const ControlPoint& cp : pr.plan.points)
-    if (cp.release) o += "release " + cp.label + " site=" + cp.site + " releases " + cp.releases + cond_of(cp) + " occurrence first\n";
+    if (cp.release) o += "release " + cp.label + " site=" + cp.site + " releases " + cp.releases + cond_of(cp) + occ_of(cp) + "\n";
   return o;
 }
 

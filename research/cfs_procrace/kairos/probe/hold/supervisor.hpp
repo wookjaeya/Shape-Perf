@@ -14,6 +14,16 @@
 // as the perturbation of the run (the holder cost and the ptrace interaction that SPEC 4.13 lists
 // as unmeasured).
 //
+// Occurrences (hold_plan.hpp): each point counts its qualifying hits (address reached, conditions
+// met, any thread); `first` acts on hit 1, `<n>` on hit n, `each` on every hit.  Several points may
+// share one address (one debug-register slot per distinct address, at most four): at a hit the gates
+// of that address are evaluated first, then its releases; when a gate holds the thread, the releases
+// of that hit act when the thread is resumed.  A resumed thread keeps its debug registers armed (it
+// steps over the gate instruction with the resume flag), so its later hits act on other gates and
+// releases at once; before 2026-10-25 (confirm2) the released thread's DR7 was cleared and it acted
+// on nothing until its next ptrace stop.  A gate marked unless-released is satisfied (holds nothing
+// more) when one of its releases acts while it holds no thread.
+//
 // The addresses are given per declared binary as a file offset; the supervisor turns each into a
 // run-time address from /proc/<pid>/maps when the binary is mapped (the shared objects cf.so and
 // bp.so are mapped by the loader before the app task runs).  A process is relevant only if it maps
@@ -39,6 +49,8 @@ struct ControlPoint {
   bool is_release = false;
   std::string releases;     // (release only) the gate label it resumes
   bool occurrence_each = false;
+  uint32_t occurrence_nth = 1;  // the qualifying hit that acts (1 = first); unused with occurrence_each
+  bool unless_released = false; // (gate only) a release of it that acted before its hit satisfies it: no hold
   // name condition: the NUL-terminated string at [reg + off] must equal name_text
   bool match_name = false;
   int name_reg = -1;        // KZ_REG index 0..15
@@ -61,10 +73,23 @@ struct HoldEvent {
   std::string gate_label;
   int tid = 0;
   std::string name;         // the name argument read at the gate (if any)
+  uint64_t hit = 0;         // the gate's qualifying hit that held it (1 = first)
   uint64_t t_hold_ns = 0;   // CLOCK_MONOTONIC when the thread was held
   uint64_t t_release_ns = 0;// when it was resumed (0 if never released)
   std::string release_label;// which release resumed it
   bool released = false;
+};
+
+// One release that acted (its n-th qualifying hit): whom it resumed, or that its gate held no thread.
+struct FireEvent {
+  std::string release_label;
+  std::string gate_label;   // the gate it releases
+  int tid = 0;              // the thread whose hit fired it
+  uint64_t hit = 0;         // its qualifying hit (1 = first)
+  uint64_t t_ns = 0;
+  int resumed_tid = 0;      // the thread resumed (0: the gate held none at that moment; the release is consumed)
+  bool satisfied = false;   // resumed none, and the gate is unless-released: it is satisfied (it will not hold)
+  bool deferred = false;    // the hit's thread was held at a gate of the same address; it acted on the resume
 };
 
 struct HoldReport {
@@ -84,6 +109,8 @@ struct HoldReport {
   uint64_t relevant_procs = 0;     // processes that mapped the primary binary (and were armed)
   uint64_t armings = 0;            // debug-register (re)arm operations
   std::vector<HoldEvent> holds;
+  std::vector<FireEvent> fires;    // the releases that acted, in order
+  std::vector<uint64_t> point_hits;  // per config point: its qualifying hits in the run
   std::vector<std::string> notes;  // per-run notes (e.g. a binary never mapped)
 };
 

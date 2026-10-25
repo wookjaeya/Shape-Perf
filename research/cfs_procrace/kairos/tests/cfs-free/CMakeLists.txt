@@ -128,3 +128,19 @@ add_dependencies(test_hold_ptrace hold_prog kz)
 # Needs the right to PTRACE_SEIZE and to write the debug registers; where the kernel refuses, the
 # test exits 77 (reported as skipped, never as passed).
 set_tests_properties(test_hold_ptrace PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 120)
+
+# The sequence program and its kz hold test: a thread resumed from a gate fires a later release (its debug
+# registers stay armed), `occurrence <n>` acts on the n-th qualifying hit, two gates share one address, a release on
+# a held hit acts on the resume, and an unless-released gate is satisfied by a release that comes first.
+add_executable(hold_seq_prog target/hold_seq_prog.c)
+target_compile_options(hold_seq_prog PRIVATE -g -O0 -fno-omit-frame-pointer -fcf-protection=full)
+set_target_properties(hold_seq_prog PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(hold_seq_prog PRIVATE Threads::Threads)
+kz_add_unit_test(test_hold_sequence SOURCES test_hold_sequence.cpp LIBS kz-testsupport
+  ARGS $<TARGET_FILE:hold_seq_prog> ${CMAKE_CURRENT_SOURCE_DIR}/target/hold_seq.kzp ${CMAKE_CURRENT_SOURCE_DIR}/target/hold_rearm.kzh
+       ${CMAKE_CURRENT_SOURCE_DIR}/target/hold_nth.kzh $<TARGET_FILE:kz> ${CMAKE_CURRENT_BINARY_DIR}
+       ${CMAKE_CURRENT_SOURCE_DIR}/target/hold_defer.kzh)
+add_dependencies(test_hold_sequence hold_seq_prog kz)
+set_tests_properties(test_hold_sequence PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 120)
+# The kzp-hold 1 parser: occurrence first|each|<n>, unless-released.
+kz_add_unit_test(test_hold_plan SOURCES test_hold_plan.cpp LIBS kz-hold kz-testsupport)

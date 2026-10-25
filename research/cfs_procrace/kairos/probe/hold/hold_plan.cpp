@@ -43,10 +43,29 @@ Status err(size_t line, const std::string& m) {
   return Status::error(Err::Invalid, "hold plan line " + std::to_string(line) + ": " + m);
 }
 
+// A decimal 1..1000000 (no sign, no leading zero).
+bool parse_nth(const std::string& tok, uint32_t* n) {
+  if (tok.empty() || tok.size() > 7 || tok[0] == '0') return false;
+  uint32_t v = 0;
+  for (char c : tok) {
+    if (c < '0' || c > '9') return false;
+    v = v * 10 + static_cast<uint32_t>(c - '0');
+  }
+  if (v < 1 || v > 1000000) return false;
+  *n = v;
+  return true;
+}
+
 // Parses "when name <role> "text"" / "when caller-in <bin>" (either or both), consuming tokens from
-// `t` starting at `i`; also "occurrence first|each".  Fills cond and occurrence.
-Status parse_tail(const std::vector<std::string>& t, size_t i, size_t ln, HoldCond* cond, bool* each) {
+// `t` starting at `i`; also "occurrence first|each|<n>".  Fills cond and occurrence.
+Status parse_tail(const std::vector<std::string>& t, size_t i, size_t ln, HoldCond* cond, bool* each, uint32_t* nth, bool* unless_released) {
   while (i < t.size()) {
+    if (t[i] == "unless-released") {
+      if (unless_released == nullptr) return err(ln, "unless-released is a form of a gate, not of a release");
+      *unless_released = true;
+      ++i;
+      continue;
+    }
     if (t[i] == "when") {
       ++i;
       if (i >= t.size()) return err(ln, "when needs a condition");
@@ -65,10 +84,12 @@ Status parse_tail(const std::vector<std::string>& t, size_t i, size_t ln, HoldCo
         return err(ln, "unknown condition '" + t[i] + "'");
       }
     } else if (t[i] == "occurrence") {
-      if (i + 1 >= t.size()) return err(ln, "occurrence needs first or each");
-      if (t[i + 1] == "first") *each = false;
-      else if (t[i + 1] == "each") *each = true;
-      else return err(ln, "occurrence is first or each");
+      if (i + 1 >= t.size()) return err(ln, "occurrence needs first, each or a number n >= 1");
+      uint32_t n = 0;
+      if (t[i + 1] == "first") { *each = false; *nth = 1; }
+      else if (t[i + 1] == "each") { *each = true; *nth = 1; }
+      else if (parse_nth(t[i + 1], &n)) { *each = false; *nth = n; }
+      else return err(ln, "occurrence is first, each or a decimal n in 1..1000000 (got '" + t[i + 1] + "')");
       i += 2;
     } else {
       return err(ln, "unexpected token '" + t[i] + "'");
@@ -85,6 +106,12 @@ bool kv(const std::string& tok, const std::string& key, std::string* val) {
 }
 
 }  // namespace
+
+std::string occurrence_text(bool each, uint32_t nth) {
+  if (each) return "each";
+  if (nth <= 1) return "first";
+  return std::to_string(nth);
+}
 
 Status parse_hold_plan(std::string_view text, HoldPlan* out) {
   *out = HoldPlan();
@@ -108,7 +135,8 @@ Status parse_hold_plan(std::string_view text, HoldPlan* out) {
       GateDecl g;
       g.label = t[1];
       if (!kv(t[2], "site", &g.site_label)) return err(ln, "gate needs site=<label>");
-      Status s = parse_tail(t, 3, ln, &g.cond, &g.occurrence_each);
+      Status s = parse_tail(t, 3, ln, &g.cond, &g.occurrence_each, &g.occurrence_nth, &g.unless_released);
+      if (s.ok() && g.unless_released && g.occurrence_each) return err(ln, "unless-released does not combine with occurrence each");
       if (!s.ok()) return s;
       out->gates.push_back(std::move(g));
     } else if (t[0] == "release") {
@@ -118,7 +146,7 @@ Status parse_hold_plan(std::string_view text, HoldPlan* out) {
       if (!kv(t[2], "site", &r.site_label)) return err(ln, "release needs site=<label>");
       if (t[3] != "releases") return err(ln, "release needs 'releases <gate-label>'");
       r.releases = t[4];
-      Status s = parse_tail(t, 5, ln, &r.cond, &r.occurrence_each);
+      Status s = parse_tail(t, 5, ln, &r.cond, &r.occurrence_each, &r.occurrence_nth, nullptr);
       if (!s.ok()) return s;
       out->releases.push_back(std::move(r));
     } else {

@@ -11,7 +11,12 @@
 //   - dropping the edge while keeping the record's result (success) yields an order that the replay rejects
 //     (a success before the creation disagrees with the state): no infeasible candidate is accepted;
 //   - the hold plan of the failing order holds B at its creation and releases it after A's failed lookup, and the plan check
-//     shows that every completed execution under it is that order (a stall when the release comes first);
+//     shows that every completed execution under it is that order (an unless-released gate: no stall when the release
+//     comes first);
+//   - two keys: the plan that holds A before its first lookup until B's first creation and B at its second creation until
+//     A's exit is checked as forcing that order (A, resumed from its gate, fires the later release: kz hold keeps a
+//     resumed thread armed); with a retry loop, the order "creation between the 2nd and the 3rd lookup" gets a release
+//     at the 2nd hit of the lookup's after-call point and a gate at the 3rd hit of the lookup entry (occurrence <n>);
 //   - resolution refuses an unknown citation, a key not shorter than the mapping's length bound, a use whose call
 //     context has no role; the state cap is reported.
 
@@ -43,6 +48,8 @@ const NOT_FOUND = -17 prov doc_sup;
 const QUIT_ERR = 3 prov code_a;
 const MAXN = 20 prov code_a;
 const KEY0 = "S0" prov code_a;
+const KEY1 = "S1" prov code_a;
+const MAXR = 3 prov code_a;
 const LONGKEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" prov code_a;
 
 kind sem(name: Str) { states ABSENT < LIVE; initial ABSENT; scope process; prov code_a; }
@@ -245,12 +252,13 @@ void test_anchor_and_prediction() {
       }
       KZ_CHECK(gate_b && release_a);
       KZ_CHECK(pr.checked && pr.forces && !pr.never);
-      KZ_CHECK(pr.stall);  // A may exit before B reaches its gate: B is then held for good
+      // A may fail and exit before B reaches its gate: the release then satisfies the unless-released gate (no stall)
+      KZ_CHECK(!pr.stall);
       PredictInput in;
       in.profile = &p;
       in.model = &m;
       const std::string text = kz::predict::plan_text(in, *bad, 0, "unit record");
-      KZ_CHECK(has(text, "kzp-hold 1\ngate G1_B site=create.entry when name name \"S0\" when caller-in b.so occurrence first\n"));
+      KZ_CHECK(has(text, "kzp-hold 1\ngate G1_B site=create.entry when name name \"S0\" when caller-in b.so occurrence first unless-released\n"));
       KZ_CHECK(has(text, "release R1 site=user_call releases G1_B occurrence first\n"));
     }
   }
@@ -280,6 +288,160 @@ void test_anchor_and_prediction() {
   // a state cap is reported and leaves the search incomplete
   const PredictReport c = run(p, m, r, kz::predict::EdgeMode::Variable, kz::predict::OutcomeMode::Rederive, 3);
   KZ_CHECK(!c.anchored || c.search.cap_reached);
+}
+
+// Two keys: A looks up S0 then S1 (a failure: the exit); B creates S0 then S1.
+const char* const kModel2 = R"KZ(kzp-predict 1
+resource s0 kind sem key KEY0
+resource s1 kind sem key KEY1
+actor M start prov code_a
+actor A prov code_a
+actor B prov code_a
+program M
+  clear wipe.clear sem ABSENT prov code_a
+  spawn spawn A prov code_a
+  spawn spawn B prov code_a
+  finish
+end
+program A
+  use lookup s0 role-site user_call prov code_a
+    hit lookup.entry before caller a.so name name
+    hit user_call after
+  unless-result OK fail prov code_a
+  use lookup s1 role-site user_call prov code_a
+    hit lookup.entry before caller a.so name name
+    hit user_call after
+  unless-result OK fail prov code_a
+  mark "ready"
+  finish
+  label fail
+  exit quit QUIT_ERR prov code_a
+    hit quit.entry before caller a.so
+end
+program B
+  create create s0 effect publish role-site prov_call taken TAKEN prov code_a
+    hit create.entry before caller b.so name name
+    hit prov_call after
+  create create s1 effect publish role-site prov_call taken TAKEN prov code_a
+    hit create.entry before caller b.so name name
+    hit prov_call after
+  finish
+end
+)KZ";
+
+// A retry loop: A looks S0 up at most MAXR times, with a delay event after each failure.
+const char* const kModel3 = R"KZ(kzp-predict 1
+resource s0 kind sem key KEY0
+actor M start prov code_a
+actor A prov code_a
+actor B prov code_a
+program M
+  clear wipe.clear sem ABSENT prov code_a
+  spawn spawn A prov code_a
+  spawn spawn B prov code_a
+  finish
+end
+program A
+  counter j reset prov code_a
+  label try0
+  use lookup s0 role-site user_call prov code_a
+    hit lookup.entry before caller a.so name name
+    hit user_call after
+  unless-result NOT_FOUND done0 prov code_a
+  event delay pt prov code_a
+    hit delay after
+  counter j inc prov code_a
+  if-below j MAXR try0 prov code_a
+  label done0
+  unless-result OK fail prov code_a
+  mark "ready"
+  finish
+  label fail
+  exit quit QUIT_ERR prov code_a
+    hit quit.entry before caller a.so
+end
+program B
+  create create s0 effect publish role-site prov_call taken TAKEN prov code_a
+    hit create.entry before caller b.so name name
+    hit prov_call after
+  finish
+end
+)KZ";
+
+const Witness* with_key(const PredictReport& r, const std::vector<std::string>& parts) {
+  for (const Witness& w : r.witnesses) {
+    bool all = w.accepted && !w.observed;
+    for (const std::string& p : parts) all = all && has(w.cls.key, p);
+    if (all) return &w;
+  }
+  return nullptr;
+}
+
+void test_plans_rearm_and_occurrence() {
+  const kz::phi::Profile p = load_profile();
+  {
+    Model m;
+    std::vector<std::string> errors;
+    KZ_CHECK(load_model(p, kModel2, &m, &errors));
+    for (const std::string& e : errors) std::fprintf(stderr, "%s\n", e.c_str());
+    const std::string create1 = "B create call arg.name=@S1\nB create.publish pt lp.status=0\nB create ret out.id=0x30003 result=0\nB prov_call pt\n";
+    const std::string lookup1 = "A lookup call arg.name=@S1\nA lookup.exists pt arg.name=@S1\nA lookup ret out.id=0x30003 result=0\nA user_call pt\n";
+    const Rec r = record(p, std::string(kHead) + kCreate + create1 + kLookupOk + lookup1);
+    const PredictReport v = run(p, m, r, kz::predict::EdgeMode::Variable, kz::predict::OutcomeMode::Rederive);
+    KZ_CHECK(v.anchored);
+    // the order "S0 found, S1 not yet created": its plan holds A before S0 until B's first creation and B at the
+    // creation of S1 until A's exit; A, resumed from its gate, fires that exit release
+    const Witness* w = with_key(v, {"A/s0: 0x1 | uses before creation 0", "A/s1: -17x1 | uses before creation 1", "A=x"});
+    KZ_CHECK(w != nullptr);
+    if (w != nullptr) {
+      KZ_CHECK(!w->plans.empty());
+      if (!w->plans.empty()) {
+        const kz::predict::PlanResult& pr = w->plans[0];
+        KZ_CHECK(pr.plan.points.size() == 4);
+        bool gate_a = false, gate_b = false, rel_exit = false;
+        for (const kz::predict::ControlPoint& cp : pr.plan.points) {
+          gate_a = gate_a || (!cp.release && cp.site == "lookup.entry" && cp.name_text == "S0" && cp.actor == 1);
+          gate_b = gate_b || (!cp.release && cp.site == "create.entry" && cp.name_text == "S1" && cp.actor == 2);
+          rel_exit = rel_exit || (cp.release && cp.site == "quit.entry" && cp.actor == 1);
+        }
+        KZ_CHECK(gate_a && gate_b && rel_exit);
+        // realizable and forcing under the kz hold semantics of a resumed thread that stays armed
+        KZ_CHECK(pr.checked && pr.forces && !pr.never);
+      }
+    }
+  }
+  {
+    Model m;
+    std::vector<std::string> errors;
+    KZ_CHECK(load_model(p, kModel3, &m, &errors));
+    for (const std::string& e : errors) std::fprintf(stderr, "%s\n", e.c_str());
+    const Rec r = record(p, std::string(kHead) + kCreate + kLookupOk);
+    const PredictReport v = run(p, m, r, kz::predict::EdgeMode::Variable, kz::predict::OutcomeMode::Rederive);
+    KZ_CHECK(v.anchored);
+    // two failed lookups, then the creation, then the third lookup succeeds (counts 2: the representative)
+    const Witness* w = with_key(v, {"A/s0: -17xn 0x1 | uses before creation n", "A=f"});
+    KZ_CHECK(w != nullptr);
+    if (w != nullptr && !w->plans.empty()) {
+      const kz::predict::PlanResult& pr = w->plans[0];
+      bool rel2 = false, gate3 = false, gate_b = false;
+      for (const kz::predict::ControlPoint& cp : pr.plan.points) {
+        rel2 = rel2 || (cp.release && cp.site == "user_call" && cp.occurrence == 2);
+        gate3 = gate3 || (!cp.release && cp.site == "lookup.entry" && cp.name_text == "S0" && cp.occurrence == 3);
+        gate_b = gate_b || (!cp.release && cp.site == "create.entry" && cp.occurrence == 1);
+      }
+      KZ_CHECK(rel2 && gate3 && gate_b);
+      KZ_CHECK(pr.checked && pr.forces && !pr.never);
+      PredictInput in;
+      in.profile = &p;
+      in.model = &m;
+      const std::string text = kz::predict::plan_text(in, *w, 0, "unit record");
+      KZ_CHECK(has(text, "site=lookup.entry when name name \"S0\" when caller-in a.so occurrence 3 unless-released\n"));
+      KZ_CHECK(has(text, "site=user_call releases G1_B occurrence 2\n"));
+      // the plan parses as kzp-hold 1 (the text after the comments)
+    } else {
+      KZ_CHECK(false);
+    }
+  }
 }
 
 void test_anchor_refusals() {
@@ -334,5 +496,6 @@ int main() {
   test_anchor_and_prediction();
   test_anchor_refusals();
   test_resolution();
+  test_plans_rearm_and_occurrence();
   return kztest::finish("test_predict_model");
 }

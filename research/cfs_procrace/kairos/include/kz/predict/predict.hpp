@@ -83,6 +83,8 @@ struct ControlPoint {
   bool release = false;
   std::string releases;  // release: the gate label
   std::string site, caller, name_role, name_text;
+  uint32_t occurrence = 1;  // the qualifying hit of its marker it acts on (kzp-hold `occurrence <n>`; 1 = first)
+  bool unless_released = false;  // (gate) kzp-hold `unless-released`: a release that acts before its hit satisfies it
   int32_t actor = -1;    // the model actor whose step it is
   std::string why;       // the step it stands for and its citations
 };
@@ -92,9 +94,14 @@ struct Plan {
   std::vector<std::string> notes;
 };
 
-// A plan and what it does in the model under the supervisor's semantics (kz hold: a gate holds the first qualifying hit;
-// a release acts on its first qualifying hit, also when its gate does not hold yet; a released thread's debug registers are
-// cleared, so its later hits act on nothing; probe/hold/supervisor.cpp).
+// A plan and what it does in the model under the supervisor's semantics (kz hold, probe/hold/supervisor.cpp): each point
+// counts the qualifying hits of its marker (by any actor) and acts on the one its occurrence names; a gate holds the actor
+// there (the first gate that acts on a hit; another one acting on the same hit is consumed); a release acts on its hit
+// also when its gate does not hold an actor then (it is then consumed, and an unless-released gate is satisfied: it
+// holds nothing afterwards); the releases of a hit at which an actor is held
+// act when it is resumed; a resumed actor stays armed, so its later hits act like any other actor's.  The model has
+// gates only at the before-hits of visible steps (where kz predict places them).  Before confirm2 (2026-10-25) a released
+// actor's later hits acted on nothing (its debug registers were cleared) and only the first hit could act.
 struct PlanResult {
   std::string name;   // the file stem: W<n> (every order of the candidate) or W<n>-<k> (the order of one key)
   std::string scope;  // what it enforces

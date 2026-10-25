@@ -82,3 +82,19 @@ umount /home/user/work/procrace/c1_runs/tracefs_hold1
 - 단계 D(예측)는 아직 하지 않는다(과제 지시).
 - 관측 영향 비율의 분모(`C1B-U18`, SPEC §4.13 "the code-derived separation")는 레퍼런스가 정하지 않아 미정 — 비율을 계산하지 않았다. 보류 없는 기준 실행과의 내부 사건 비교는 파일럿 측정 대상(PV-7, PV-8).
 - 단계 C 해제의 "BP1_tsem 생성 진입 = BP0_tsem 생성 반환" 대체 표현은 순차 루프 출처(`bp_flow.c` L124–142)에 근거한 연구자 해석 [I]; 레퍼런스가 "생성 반환" 사건을 이름으로 직접 거를 지점을 정하지는 않는다(새 PI 항목이 아니라 표현 선택, 출처로 정당화됨).
+
+## 8. 보류 계획 형식·의미 개정 (kzp-hold 1, confirm2, 2026-10-25) [M]
+
+§1–§7 의 실행(hold1)과 confirm1 은 개정 전 의미로 돌았다. 아래는 그 뒤의 `kz hold`·`kz predict` 에만 적용된다. 디버그 레지스터 실행 중단점 설계는 그대로이고 텍스트는 수정하지 않는다(int3 대체 없음).
+
+```
+gate    <label> site=<site> [when <cond>] [occurrence first|each|<n>] [unless-released]
+release <label> site=<site> releases <gate> [when <cond>] [occurrence first|each|<n>]
+```
+
+- **재무장(L384–L385 결함 수정).** 이전에는 해제한 스레드의 DR7 을 0 으로 지워, 그 스레드가 다음 ptrace 정지까지 어떤 게이트·해제에도 작용하지 못했다(pre W2·post W10 전체 계획이 실현 불가였던 이유). 이제 디버그 레지스터를 무장한 채 resume flag(RF)로 게이트 명령만 한 번 넘긴다. 풀린 스레드의 뒤 hit 는 다른 스레드의 hit 와 똑같이 작용하고, 이미 작용한 게이트(first·n)는 그 스레드를 다시 잡지 않는다.
+- **`occurrence <n>`**(1–1000000, `first` = 1). 점마다 자격 hit(주소 도달 + 조건 충족, 어느 스레드든, 실행 시작부터)를 세어 n 번째 하나에만 작용한다. 재시도 m ≥ 2 의 특정 시도(예: CF 의 3번째 `BP0_tsem` 조회 진입, 2번째 조회 반환)를 고르는 데 쓴다.
+- **한 주소의 여러 점.** 슬롯은 서로 다른 주소마다 하나(넷 이하)이고, 그 주소의 점을 모두 평가한다: 게이트 먼저(계획 순서; 처음 작용하는 게이트가 잡고, 같은 hit 에 작용하는 다른 게이트는 보류 없이 소비), 다음 해제. 그 hit 에서 스레드가 잡히면 그 hit 의 해제는 스레드가 재개될 때 작용한다(`deferred`).
+- **`unless-released`**(게이트만, `each` 와 함께 쓰지 않음). 게이트가 스레드를 잡고 있지 않을 때 그 해제가 작용하면 게이트는 충족(satisfied)되어 이후 잡지 않는다: 게이트가 강제하려는 순서(게이트 단계가 해제 사건 뒤)가 이미 성립했기 때문이다. 없으면 이전처럼 해제는 소비되고 게이트는 나중 hit 를 끝까지 잡는다(confirm1 의 pre `W2-1`, post `W5-2`·`W6-1` 정체가 이것이다). `kz predict` 는 이제 모든 게이트에 이것을 쓴다.
+- **기록(`hold.kzr`).** 제어점 줄에 `occurrence=`·`unless-released`·`qualifying_hits=`, 보류 줄에 `hit=`, 새 `fire` 줄(해제마다 쏜 스레드·hit·재개한 스레드, 또는 `resumed=none satisfied=yes|consumed=yes`, `deferred=yes`).
+- **시험** [M]. `tests/cfs-free/test_hold_sequence.cpp` + `target/hold_seq_prog.c`(공급자·소비자 두 스레드, 두 키, 재시도·지연 인자; 단위 시험 값): (1) `hold_rearm.kzh` — 소비자를 첫 조회에서 잡았다가 공급자의 첫 생성 사건에서 풀고, 공급자를 둘째 생성에서 잡아 **풀린 소비자**의 종료 사건으로 푼다. 개정 전 의미(재개 때 DR7 지움)로 잠시 되돌려 돌리면 실행이 끝나지 않았다(25 s 에서 중단; 되돌린 코드는 커밋하지 않음). (2) `hold_nth.kzh` — 해제 `occurrence 3`(소비자의 3번째 실패 사건)이 공급자를 풀고(소비자의 첫 세 조회는 반드시 실패), 같은 주소의 이름 조건 없는 게이트 `occurrence 2` 가 둘째 생성만 잡는다. (3) `hold_defer.kzh` — 보류된 hit 의 해제가 재개 때 작용(`deferred=yes`)하고, 그때 잡은 것이 없는 `unless-released` 게이트가 충족된다(`satisfied=yes`, 공급자는 끝까지 잡히지 않음). 문법: `tests/cfs-free/test_hold_plan.cpp`. ctest: 기본 빌드 115 중 114 통과 + tracefs 시험 1 건너뜀, LLVM 빌드 136 중 135 + 1 건너뜀.

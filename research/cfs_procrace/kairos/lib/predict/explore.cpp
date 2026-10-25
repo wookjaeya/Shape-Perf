@@ -43,10 +43,11 @@ struct Sys {
   uint32_t seq = 0, tasks = 0;
   bool cut = false, torn = false, invalid = false;
   int32_t torn_actor = -1;
-  std::vector<uint8_t> gate;  // 0 armed, 1 holding, 2 done
+  std::vector<uint8_t> gate;  // 0 armed, 1 holding, 2 done (released, or consumed on a held hit), 3 satisfied (unless-released)
   std::vector<int32_t> holder;
   std::vector<uint8_t> fired;
-  std::vector<uint8_t> disarmed;  // per actor: released from a gate; the supervisor cleared its debug registers
+  std::vector<uint32_t> count;     // per plan point: its qualifying hits so far (capped at its occurrence)
+  std::vector<int32_t> resume_hit; // per actor: held at that before-hit of its next step (its gates were evaluated); -1 none
 };
 
 void put(std::string* k, int64_t v) {
@@ -87,7 +88,8 @@ std::string key_of(const Sys& s) {
   for (uint8_t g : s.gate) put(&k, g);
   for (int32_t h : s.holder) put(&k, h);
   for (uint8_t f : s.fired) put(&k, f);
-  for (uint8_t d : s.disarmed) put(&k, d);
+  for (uint32_t c : s.count) put(&k, c);
+  for (int32_t r : s.resume_hit) put(&k, r);
   return k;
 }
 
@@ -142,23 +144,31 @@ std::vector<HitInst> hits_of(const Instr& in, const std::string& key, bool befor
   return out;
 }
 
+// The releases of a plan at the hits an actor passes (kz hold, probe/hold/supervisor.cpp): each release counts its
+// qualifying hits (by any actor, also one resumed from a gate: its debug registers stay armed) and acts on the one its
+// occurrence names, also when its gate does not hold an actor then (the release is then consumed, and an unless-released
+// gate that has not acted is satisfied: it holds nothing afterwards).
 void fire(Ex& x, Sys* s, const std::vector<HitInst>& hits, int32_t ai) {
-  if (x.o.plan == nullptr || s->disarmed[static_cast<size_t>(ai)] != 0) return;
+  (void)ai;
+  if (x.o.plan == nullptr) return;
   const std::vector<ControlPoint>& pts = x.o.plan->points;
-  for (size_t i = 0; i < pts.size(); ++i) {
-    if (!pts[i].release || s->fired[i] != 0) continue;
-    bool match = false;
-    for (const HitInst& h : hits) match = match || hit_matches(pts[i], h);
-    if (!match) continue;
-    s->fired[i] = 1;  // the first qualifying hit acts (occurrence first), whether or not the gate holds yet
-    const int32_t g = x.gate_of_release[i];
-    if (g >= 0 && s->gate[static_cast<size_t>(g)] == 1) {
-      const size_t h = static_cast<size_t>(s->holder[static_cast<size_t>(g)]);
-      s->a[h].st = kActive;
-      s->disarmed[h] = 1;
-      s->gate[static_cast<size_t>(g)] = 2;
+  for (const HitInst& h : hits)
+    for (size_t i = 0; i < pts.size(); ++i) {
+      if (!pts[i].release || s->fired[i] != 0) continue;
+      if (!hit_matches(pts[i], h)) continue;
+      const uint32_t occ = pts[i].occurrence == 0 ? 1 : pts[i].occurrence;
+      if (s->count[i] < occ) ++s->count[i];
+      if (s->count[i] < occ) continue;
+      s->fired[i] = 1;
+      const int32_t g = x.gate_of_release[i];
+      if (g >= 0 && s->gate[static_cast<size_t>(g)] == 1) {
+        const size_t hd = static_cast<size_t>(s->holder[static_cast<size_t>(g)]);
+        s->a[hd].st = kActive;  // it resumes at the hit where it was held (resume_hit)
+        s->gate[static_cast<size_t>(g)] = 2;
+      } else if (g >= 0 && s->gate[static_cast<size_t>(g)] == 0 && pts[static_cast<size_t>(g)].unless_released) {
+        s->gate[static_cast<size_t>(g)] = 3;  // satisfied: the order it enforces already holds; it holds nothing
+      }
     }
-  }
 }
 
 // One transition of actor `ai`: its local instructions, at most one visible instruction (or a hold at a gate),
@@ -227,26 +237,43 @@ bool run_step(Ex& x, const Sys& s, int32_t ai, Sys* out, Step* st) {
         }
         const int32_t ri = in.res_index >= 0 ? in.res_index : del;
         const std::string key = ri >= 0 ? x.m.resources[static_cast<size_t>(ri)].key_text : std::string();
-        // a gate of the plan holds the thread at the step's entry
-        if (x.o.plan != nullptr && ns.disarmed[static_cast<size_t>(ai)] == 0) {
-          const std::vector<HitInst> bh = hits_of(in, key, true);
-          const std::vector<ControlPoint>& pts = x.o.plan->points;
-          for (size_t gi = 0; gi < pts.size(); ++gi) {
-            if (pts[gi].release || ns.gate[gi] != 0) continue;
-            bool match = false;
-            for (const HitInst& h : bh) match = match || hit_matches(pts[gi], h);
-            if (!match) continue;
-            ns.gate[gi] = 1;
-            ns.holder[gi] = ai;
-            A.st = kHeld;
-            st->held = true;
-            st->marks.push_back("held at " + pts[gi].label);
-            *out = std::move(ns);
-            return true;
-          }
-        }
         std::vector<HitInst> before = hits_of(in, key, true), after = hits_of(in, key, false);
-        fire(x, &ns, before, ai);
+        // the gates and releases of a plan at the step's before-hits, hit by hit: each gate counts its qualifying hits
+        // and holds the actor at the one its occurrence names (the first gate that acts holds; another one acting on
+        // the same hit is consumed); the releases of a hit act when the actor passes it, i.e. after a hold there, on
+        // its resume (kz hold's deferred releases)
+        if (x.o.plan != nullptr) {
+          const std::vector<ControlPoint>& pts = x.o.plan->points;
+          const int32_t from = ns.resume_hit[static_cast<size_t>(ai)];
+          for (size_t hi = from >= 0 ? static_cast<size_t>(from) : 0; hi < before.size(); ++hi) {
+            if (!(from >= 0 && hi == static_cast<size_t>(from))) {
+              int32_t holding = -1;
+              for (size_t gi = 0; gi < pts.size(); ++gi) {
+                if (pts[gi].release || ns.gate[gi] != 0 || !hit_matches(pts[gi], before[hi])) continue;
+                const uint32_t occ = pts[gi].occurrence == 0 ? 1 : pts[gi].occurrence;
+                if (ns.count[gi] < occ) ++ns.count[gi];
+                if (ns.count[gi] < occ) continue;
+                if (holding < 0) {
+                  ns.gate[gi] = 1;
+                  ns.holder[gi] = ai;
+                  holding = static_cast<int32_t>(gi);
+                } else {
+                  ns.gate[gi] = 2;  // acted on a hit another gate holds: consumed
+                }
+              }
+              if (holding >= 0) {
+                ns.resume_hit[static_cast<size_t>(ai)] = static_cast<int32_t>(hi);
+                A.st = kHeld;
+                st->held = true;
+                st->marks.push_back("held at " + pts[static_cast<size_t>(holding)].label);
+                *out = std::move(ns);
+                return true;
+              }
+            }
+            fire(x, &ns, std::vector<HitInst>{before[hi]}, ai);
+          }
+          ns.resume_hit[static_cast<size_t>(ai)] = -1;
+        }
         Tuple t;
         st->index = k;
         st->res = ri;
@@ -548,7 +575,8 @@ void terminal(Ex& x, const Sys& s) {
   if (x.o.plan != nullptr) {
     std::string ps = "plan:";
     for (size_t g = 0; g < x.o.plan->points.size(); ++g)
-      if (!x.o.plan->points[g].release) ps += " " + x.o.plan->points[g].label + "=" + (s.gate[g] == 0 ? "unreached" : s.gate[g] == 1 ? "holding" : "released");
+      if (!x.o.plan->points[g].release)
+        ps += " " + x.o.plan->points[g].label + "=" + (s.gate[g] == 0 ? "unreached" : s.gate[g] == 1 ? "holding" : s.gate[g] == 3 ? "satisfied" : "released");
     ci.segments.push_back(ps);
   }
   if (s.cut) ci.segments.push_back("cut by the shutdown request");
@@ -628,12 +656,13 @@ Status explore(const phi::Profile& p, const Model& m, const ExploreOptions& o, E
   s.runs.resize(m.actors.size() * m.resources.size());
   s.before.assign(m.actors.size() * m.resources.size(), 0);
   s.created.assign(m.resources.size(), 0);
-  s.disarmed.assign(m.actors.size(), 0);
+  s.resume_hit.assign(m.actors.size(), -1);
   if (o.plan != nullptr) {
     const size_t n = o.plan->points.size();
     s.gate.assign(n, 0);
     s.holder.assign(n, -1);
     s.fired.assign(n, 0);
+    s.count.assign(n, 0);
     x.gate_of_release.assign(n, -1);
     for (size_t i = 0; i < n; ++i) {
       if (!o.plan->points[i].release) continue;

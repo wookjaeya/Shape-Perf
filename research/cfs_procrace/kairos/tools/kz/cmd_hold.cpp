@@ -164,7 +164,7 @@ int run(int argc, char** argv) {
   cfg.primary_binary = profile.binaries.empty() ? std::string() : run_basename[profile.binaries[0]];
   cfg.argv = opt.command;
   auto add_point = [&](const std::string& label, const std::string& site_label, bool is_release, const std::string& releases,
-                       const kz::hold::HoldCond& cond, bool each) -> bool {
+                       const kz::hold::HoldCond& cond, bool each, uint32_t nth, bool unless_released) -> bool {
     int si = find_site(sites, site_label);
     if (si < 0) { std::fprintf(stderr, "kz hold: the profile has no site '%s' (named by %s)\n", site_label.c_str(), label.c_str()); return false; }
     const kz::trace::SiteSpec& ss = sites[si];
@@ -176,13 +176,15 @@ int run(int argc, char** argv) {
     cp.is_release = is_release;
     cp.releases = releases;
     cp.occurrence_each = each;
+    cp.occurrence_nth = nth;
+    cp.unless_released = unless_released;
     std::string err;
     if (!set_cond(ss, cond, &cp, &err)) { std::fprintf(stderr, "kz hold: %s\n", err.c_str()); return false; }
     cfg.points.push_back(std::move(cp));
     return true;
   };
-  for (const kz::hold::GateDecl& g : plan.gates) if (!add_point(g.label, g.site_label, false, "", g.cond, g.occurrence_each)) return 2;
-  for (const kz::hold::ReleaseDecl& r : plan.releases) if (!add_point(r.label, r.site_label, true, r.releases, r.cond, r.occurrence_each)) return 2;
+  for (const kz::hold::GateDecl& g : plan.gates) if (!add_point(g.label, g.site_label, false, "", g.cond, g.occurrence_each, g.occurrence_nth, g.unless_released)) return 2;
+  for (const kz::hold::ReleaseDecl& r : plan.releases) if (!add_point(r.label, r.site_label, true, r.releases, r.cond, r.occurrence_each, r.occurrence_nth, false)) return 2;
 
   kz::hold::HoldReport rep;
   s = kz::hold::run_hold(cfg, &rep);
@@ -201,13 +203,17 @@ int run(int argc, char** argv) {
   o << "wall_ns=" << (rep.t_end_ns - rep.t_start_ns) << "\n";
   if (rep.child_exited) o << "child_exit=" << rep.child_exit_code << "\n";
   else if (rep.child_term_signal) o << "child_signal=" << rep.child_term_signal << "\n";
-  o << "# control points (gate/release -> binary:file_offset, link-time vaddr):\n";
-  for (const kz::hold::ControlPoint& cp : cfg.points) {
+  o << "# control points (gate/release -> binary:file_offset, link-time vaddr; qualifying_hits = the hits that met the\n"
+       "# conditions, by any thread; the point acts on the one its occurrence names):\n";
+  for (size_t i = 0; i < cfg.points.size(); ++i) {
+    const kz::hold::ControlPoint& cp = cfg.points[i];
     o << (cp.is_release ? "release " : "gate    ") << cp.label << " " << cp.binary << ":" << hex(cp.file_offset) << " vaddr=" << hex(cp.vaddr);
     if (cp.match_name) o << " name[reg" << cp.name_reg << "+" << cp.name_off << "]==\"" << cp.name_text << "\"";
     if (cp.match_caller) o << " caller-in=" << cp.caller_binary;
     if (cp.is_release) o << " releases=" << cp.releases;
-    o << (cp.occurrence_each ? " occurrence=each" : " occurrence=first") << "\n";
+    o << " occurrence=" << kz::hold::occurrence_text(cp.occurrence_each, cp.occurrence_nth);
+    if (cp.unless_released) o << " unless-released";
+    o << " qualifying_hits=" << (i < rep.point_hits.size() ? rep.point_hits[i] : 0) << "\n";
   }
   o << "# perturbation (holder cost and the ptrace interaction, SPEC 4.13):\n";
   o << "total_stops=" << rep.total_stops << " threads_attached=" << rep.threads_attached
@@ -215,10 +221,19 @@ int run(int argc, char** argv) {
     << " gate_traps=" << rep.gate_traps << " release_traps=" << rep.release_traps << " armings=" << rep.armings << "\n";
   o << "# holds (" << rep.holds.size() << "):\n";
   for (const kz::hold::HoldEvent& he : rep.holds) {
-    o << "hold gate=" << he.gate_label << " tid=" << he.tid << " name=\"" << he.name << "\""
+    o << "hold gate=" << he.gate_label << " tid=" << he.tid << " name=\"" << he.name << "\"" << " hit=" << he.hit
       << " held_ns=" << he.t_hold_ns;
     if (he.released) o << " released_by=" << he.release_label << " release_ns=" << he.t_release_ns << " hold_duration_ns=" << (he.t_release_ns - he.t_hold_ns);
     else o << " released=no";
+    o << "\n";
+  }
+  o << "# releases that acted (" << rep.fires.size() << "; resumed=none: the gate held no thread then -- satisfied=yes: an unless-released gate\n"
+       "# that will not hold; consumed=yes: the gate may still hold its hit later):\n";
+  for (const kz::hold::FireEvent& fe : rep.fires) {
+    o << "fire release=" << fe.release_label << " gate=" << fe.gate_label << " tid=" << fe.tid << " hit=" << fe.hit << " t_ns=" << fe.t_ns;
+    if (fe.resumed_tid != 0) o << " resumed=" << fe.resumed_tid;
+    else o << " resumed=none" << (fe.satisfied ? " satisfied=yes" : " consumed=yes");
+    if (fe.deferred) o << " deferred=yes";
     o << "\n";
   }
   for (const std::string& n : rep.notes) o << "note: " << n << "\n";

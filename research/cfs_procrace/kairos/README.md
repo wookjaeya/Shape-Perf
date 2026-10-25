@@ -38,6 +38,8 @@ kairos/
   tests/static/              (K4a) 고정 C 프로그램의 golden(7 개, `clobber.c` 는 읽기만), core-cpu1 golden, 단위 시험
   profiles/cfs-v7.0.1/basis/ (K4a) basis recipe(core-cpu1.kzb): link 명령, 생성 파일, 표, 시작 스크립트 규칙
   docs/static_facts.md       (K4a) 정적 추출층의 사용법, 사실의 뜻, core-cpu1 결과, 한계
+  lib/predict/               (단계 D) kz predict: 모델(kzp-predict 1)·앵커·명시적 탐색·후보 재판정·보류 계획 (docs/predict.md)
+  tests/predict/             (단계 D) 작은 프로필·모델의 예측 시험
 ```
 
 Architecture/08_roadmap.md §2 의 나머지 폴더(`lib/static`, `lib/proofcheck` 등)는 해당 구성요소가 만들 때 같이 생긴다. **빈 틀은 만들지 않았다.** 구성요소는 자기 폴더에 `CMakeLists.txt` 를 두면 최상위가 자동으로 추가한다. 단위 시험은 `kz_add_unit_test()` 로 등록한다(이름은 `test_<구성요소>_*.cpp`; `test_core_*` 는 libkz-core 몫).
@@ -192,7 +194,8 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 | 관측기 perf-sample 백엔드(F0), 앵커 해석, loader | `probe/` | 구현(K2), 시험 통과 [M]. 실제 cFS 에 한 번 붙여 보았다(`docs/observer_smoke_run.md`). **S1-R2 기능 확인은 미완(N=1/3)**: 남은 두 실행은 cFS 를 돌릴 수 있는 단계가 고친 스크립트(`observe_cfs_smoke.sh <tag> <kz> <ordinal>`)로 한다. s1r2_p1 을 쓴 도구의 원본은 되찾을 수 없다(같은 문서 §8). BPF 백엔드, 프로브 비용 측정, 앱 `.so` inode 등록, 생성 함수 출력 인자와 알린 id 의 대조는 **미구현**(V1b/S1) |
 | trace 해석: 병합, 손실, 정체성 결합, 호출 짝짓기 | `lib/trace/` | 구현(K2), 시험 통과 [M]. 정체성 결합의 생성자 연결은 FORK 시각 포함 하나에 기댄다(A-CLK-PO; `match-by-time`), 알린 id 는 검증되지 않음(`id-unverified`). HB 간선과 사건 판정은 **미구현** |
 | CLI `kz anchor`, `kz observe`, `kz hits` | `tools/kz/` | 구현(K2), 시험 통과 [M]. `kz-static` 은 K4a 행 참조. 사용법: `docs/observer.md` |
-| conform, predict, explore, confirm, baselines, gate | `lib/*`, `gate/` | **미구현** (R2 경로 밖) |
+| predict (최소, 2026-10-25) | `lib/predict/`, `include/kz/predict/`, `tools/kz/cmd_predict.cpp`, `profiles/c1-bp-b051eb0/predict/*.kzm` | 구현(검증한 C1 범위만), 시험 통과 [M]: 행위자 프로그램 모델(`kzp-predict 1`), 기록 앵커, 명시적 상태 탐색(축소 없음, SMT 없음), 관측 종속 간선의 변수 처리와 두 ablation, 후보의 재생 재판정·기각, kzp-hold 1 계획 합성과 supervisor 의미의 점검(`docs/predict.md`). A-COMM 검사·외삽·explorer(σ_R1)·다른 사례는 **미구현** |
+| conform, explore, confirm, baselines, gate | `lib/*`, `gate/` | **미구현** (R2 경로 밖) |
 | 스키마의 EVENTS, EDGES, INSTANCES, TEMPLATES 등 | — | id 만 예약, 레코드 **미정의** (`docs/schema.md` §3) |
 
 ## 5. 알려진 제한 [M]

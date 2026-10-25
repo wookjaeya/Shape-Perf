@@ -113,3 +113,18 @@ add_test(NAME probe_anchor_xcheck_script
       ${CMAKE_SOURCE_DIR}/probe/scripts/observe_cfs_smoke.sh ${CMAKE_CURRENT_BINARY_DIR}
   VERBATIM)
 set_tests_properties(probe_anchor_xcheck_script PROPERTIES LABELS "unit" SKIP_RETURN_CODE 77)
+
+# The hold program and the kz hold integration test (SPEC 4.13 F0): a two-thread program, built like
+# the framework's functions, that the test gates and releases with real ptrace + debug registers.
+add_executable(hold_prog target/hold_prog.c)
+target_compile_options(hold_prog PRIVATE -g -O0 -fno-omit-frame-pointer -fcf-protection=full)
+set_target_properties(hold_prog PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(hold_prog PRIVATE Threads::Threads)
+
+kz_add_unit_test(test_hold_ptrace SOURCES test_hold_ptrace.cpp LIBS kz-testsupport
+  ARGS $<TARGET_FILE:hold_prog> ${CMAKE_CURRENT_SOURCE_DIR}/target/hold.kzp ${CMAKE_CURRENT_SOURCE_DIR}/target/hold.kzh
+       $<TARGET_FILE:kz> ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(test_hold_ptrace hold_prog kz)
+# Needs the right to PTRACE_SEIZE and to write the debug registers; where the kernel refuses, the
+# test exits 77 (reported as skipped, never as passed).
+set_tests_properties(test_hold_ptrace PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 120)

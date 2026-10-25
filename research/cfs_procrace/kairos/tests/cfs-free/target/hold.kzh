@@ -1,0 +1,7 @@
+# hold.kzh -- the control plan of the hold test (format kzp-hold 1).  It gates the provider thread
+# right before it creates the object named "OBJ0" (a name-matched gate at hp_obj_create's entry) and
+# releases it when the consumer thread reaches hp_consumer_done (the observed event).  Unit-test
+# values, not a research condition.
+kzp-hold 1
+gate G_create site=obj.create.entry when name name "OBJ0" occurrence first
+release R_done site=consumer.done.entry releases G_create occurrence first

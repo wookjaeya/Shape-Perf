@@ -207,7 +207,25 @@ void print_op(Out* o, const OpDecl& d) {
       t += " documented " + quote_string(oc.documented);
       if (!oc.doc_prov.empty()) t += " prov " + sorted_join(oc.doc_prov, ", ");
     }
-    o->line(1, t + ";");
+    if (!oc.narrow.present) {
+      o->line(1, t + ";");
+      continue;
+    }
+    const NarrowDecl& n = oc.narrow;
+    o->line(1, t + " narrow {");
+    o->line(2, "api " + quote_string(n.api) + ";");
+    std::string revs;
+    for (const std::string& r : n.revs) revs += (revs.empty() ? "" : ", ") + quote_string(r);
+    o->line(2, "source " + n.source + " rev " + revs + ";");
+    o->line(2, "branch " + quote_string(n.branch) + ";");
+    o->line(2, "context " + (n.context_any ? std::string("any") : sorted_join(n.contexts, ", ")) + ";");
+    for (const NarrowCaptured& c : n.captured)
+      o->line(2, "captured " + c.param + (c.text ? " text" : "") + (c.length_below.empty() ? std::string() : " length < " + c.length_below) + ";");
+    if (n.requires_) o->line(2, "requires " + expr_text(*n.requires_) + ";");
+    o->line(2, "holds_at " + n.holds_at + ";");
+    if (!n.prov.empty()) o->line(2, "prov " + sorted_join(n.prov, ", ") + ";");
+    if (!n.note.empty()) o->line(2, "note " + quote_string(n.note) + ";");
+    o->line(1, "};");
   }
   if (d.terminal.present) {
     std::string t = "terminal";
@@ -306,6 +324,7 @@ std::string canonical_text(const Profile& p) {
   if (p.context.present) {
     o.line(0, "context {");
     o.line(1, "owner_kind " + p.context.owner_kind + ";");
+    if (p.context.initial_thread_not_app) o.line(1, "initial_thread not_app prov " + sorted_join(p.context.not_app_prov, ", ") + ";");
     if (!p.context.prov.empty()) o.line(1, "prov " + sorted_join(p.context.prov, ", ") + ";");
     o.line(0, "}");
   }

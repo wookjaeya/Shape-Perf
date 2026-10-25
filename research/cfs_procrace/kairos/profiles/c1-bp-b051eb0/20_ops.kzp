@@ -10,8 +10,39 @@ phi 1;
 op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
   bind symbol "OS_CountSemGetIdByName";
   conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
-  outcome OS_SUCCESS: ready;
-  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname;
+  # The applicability conditions of the two mappings that may fix `exists` (P1, adopted conditionally 2026-10-25,
+  # PI_DECISIONS_RESOLVED_20261025.md; review section 5.2, N02 L962-984).  Read at both OSAL revisions of the bundle
+  # candidates (the cited files are byte-identical in them).  The codes come from one code path only when the name is
+  # a string: OS_CHECK_POINTER(sem_name) returns OS_INVALID_POINTER for NULL (osapi-countsem.c L210), but it is a
+  # BUGCHECK that a build may compile out (osapi-macros.h L35-L43, OSAL_CONFIG_BUGCHECK_DISABLE), and then a NULL name
+  # reaches OS_ObjectIdFindByName, whose ARGCHECK(name) returns OS_ERR_NAME_NOT_FOUND without a search (L971).  So the
+  # record must carry the name as a text (the kernel read a string at the call: not NULL), and it must be shorter
+  # than OS_MAX_API_NAME (LENGTHCHECK, L972: a longer name gives OS_ERR_NAME_TOO_LONG, so a code of the search with
+  # such a name contradicts the code and fixes nothing).  The object type is fixed by the API (LOCAL_OBJID_TYPE =
+  # OS_OBJECT_TYPE_OS_COUNTSEM, osapi-countsem.c L53-L57, L212); the search runs under the type's global lock
+  # (OS_LOCK_MODE_GLOBAL, L974), so the state the code implies is that at the search, inside the call, never after
+  # its return.  The implication is the API's own: it does not depend on the caller (context any).  The name is the
+  # text the call received at its entry; the record does not observe the caller's string during the call (the CF
+  # field that holds it is not a condition of the judgement, PI decision P9).
+  outcome OS_SUCCESS: ready narrow {
+    api "OS_CountSemGetIdByName";
+    source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+    branch "both pointers not NULL; OS_ObjectIdFindByName: ARGCHECK and LENGTHCHECK passed, OS_ObjectIdGetByName under the global lock: OS_ObjectIdFindNextMatch found a counting semaphore record with a defined active_id and the name, and OS_ObjectIdConvertToken accepted it (a valid id equal to the record's)";
+    context any;
+    captured sem_name text length < OS_MAX_API_NAME;
+    holds_at return;
+    prov osal_countsem_getidbyname_def, osal_countsem_type, osal_find_by_name, osal_find_by_name_checks, osal_get_by_name, osal_get_by_search, osal_find_next_match, osal_name_match, osal_id_defined, osal_convert_token_valid, osal_convert_token_global, osal_argcheck_macros;
+  };
+  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname
+    narrow {
+      api "OS_CountSemGetIdByName";
+      source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+      branch "name not NULL (so not the ARGCHECK of a NULL name, which returns the same code without a search) and shorter than OS_MAX_API_NAME; OS_ObjectIdFindNextMatch over the counting semaphore records found none with a defined active_id and the name";
+      context any;
+      captured sem_name text length < OS_MAX_API_NAME;
+      holds_at return;
+      prov osal_countsem_getidbyname_def, osal_countsem_type, osal_check_pointer, osal_bugcheck_off, osal_find_by_name, osal_find_by_name_checks, osal_argcheck_macros, osal_get_by_name, osal_get_by_search, osal_find_next_match, osal_name_match, osal_id_defined;
+    };
   outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
   outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
   prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;

@@ -589,8 +589,14 @@ struct Parser {
         P_TRY(expect_ident(&c.owner_kind, "a kind name"));
       } else if (kw == "prov") {
         P_TRY(parse_name_list(&c.prov, "the name of a provenance record"));
+      } else if (kw == "initial_thread") {
+        P_TRY(expect_kw("not_app", "after 'initial_thread'"));
+        c.initial_thread_not_app = true;
+        c.not_app_loc = kloc;
+        P_TRY(expect_kw("prov", "after 'initial_thread not_app'"));
+        P_TRY(parse_name_list(&c.not_app_prov, "the name of a provenance record"));
       } else {
-        return fail_at(kloc, "unknown item '" + kw + "' in context (expected owner_kind or prov)");
+        return fail_at(kloc, "unknown item '" + kw + "' in context (expected owner_kind, initial_thread or prov)");
       }
       P_TRY(expect_semi("after the context item"));
     }
@@ -875,6 +881,11 @@ struct Parser {
           P_TRY(expect_str(&o.documented, "the documented result as a string"));
           if (accept_kw("prov")) P_TRY(parse_name_list(&o.doc_prov, "the name of a provenance record"));
         }
+        if (is_kw("narrow")) {
+          o.narrow.loc = cur().loc;
+          advance();
+          P_TRY(parse_narrow(&o.narrow));
+        }
         d.outcomes.push_back(std::move(o));
       } else if (kw == "terminal") {
         d.terminal.present = true;
@@ -888,6 +899,58 @@ struct Parser {
       P_TRY(expect_semi("after the operation item"));
     }
     prof->ops.push_back(std::move(d));
+    return true;
+  }
+
+  // The applicability conditions of an outcome mapping (phi_ast.hpp NarrowDecl; P1 conditional, 2026-10-25).
+  bool parse_narrow(NarrowDecl* n) {
+    n->present = true;
+    P_TRY(expect(Tok::LBrace, "after 'narrow'"));
+    while (!accept(Tok::RBrace)) {
+      std::string kw;
+      const SrcLoc kloc = cur().loc;
+      P_TRY(expect_ident(&kw, "an item of the narrowing conditions"));
+      if (kw == "api") {
+        P_TRY(expect_str(&n->api, "the API symbol as a string"));
+      } else if (kw == "source") {
+        P_TRY(expect_ident(&n->source, "the name of a declared source"));
+        P_TRY(expect_kw("rev", "after the source name"));
+        while (true) {
+          std::string r;
+          P_TRY(expect_str(&r, "a revision as a string"));
+          n->revs.push_back(std::move(r));
+          if (!accept(Tok::Comma)) break;
+        }
+      } else if (kw == "branch") {
+        P_TRY(expect_str(&n->branch, "the code path as a string"));
+      } else if (kw == "context") {
+        if (accept_kw("any")) n->context_any = true;
+        else P_TRY(parse_name_list(&n->contexts, "the name of a role, or 'any'"));
+      } else if (kw == "captured") {
+        NarrowCaptured c;
+        c.loc = kloc;
+        P_TRY(expect_ident(&c.param, "the name of a parameter"));
+        if (accept_kw("text")) {
+          c.text = true;
+          if (accept_kw("length")) {
+            P_TRY(expect(Tok::Lt, "after 'length'"));
+            P_TRY(expect_ident(&c.length_below, "an integer constant"));
+          }
+        }
+        n->captured.push_back(std::move(c));
+      } else if (kw == "requires") {
+        P_TRY(parse_expr(&n->requires_));
+      } else if (kw == "holds_at") {
+        P_TRY(expect_ident(&n->holds_at, "'return'"));
+      } else if (kw == "prov") {
+        P_TRY(parse_name_list(&n->prov, "the name of a provenance record"));
+      } else if (kw == "note") {
+        P_TRY(expect_str(&n->note, "a note as a string"));
+      } else {
+        return fail_at(kloc, "unknown item '" + kw + "' in narrow (expected api, source, branch, context, captured, requires, holds_at, prov or note)");
+      }
+      P_TRY(expect_semi("after the narrowing condition"));
+    }
     return true;
   }
 

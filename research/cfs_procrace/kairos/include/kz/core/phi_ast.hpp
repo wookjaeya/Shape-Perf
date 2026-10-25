@@ -312,6 +312,49 @@ struct EffectDecl {
 };
 
 enum class OutcomeClass : uint8_t { Ready, NotReady, Error };
+
+// The applicability conditions of an outcome mapping that a real-record replay may use to fix a condition the
+// record leaves open (P1, conditionally adopted 2026-10-25: PI_DECISIONS_RESOLVED_20261025.md, review section 5.2).
+// The mapping fixes a conjunct only where every condition holds in the record; otherwise the code fixes nothing.
+//   narrow {
+//     api "SYMBOL";                         the API whose code the implication was read for (= the bound symbol)
+//     source COMPONENT rev "SHA", ...;      the revisions of that source at which it was read
+//     branch "TEXT";                        the code path that returns this code (with the citations below)
+//     context any | context ROLE, ...;      the call contexts (roles of the operation) in which it applies
+//     captured PARAM [text [length < CONST]];  an argument the record must carry (a text: the string the call
+//                                           received, shorter than CONST); one clause per argument
+//     requires EXPR;                        optional: a condition on the arguments, true in every explanation
+//     holds_at return;                      the implied state is that of this call's conjunct point, before
+//                                           its return; it is never carried past the return
+//     prov NAME, ...;                       the code or API texts the implication rests on
+//     note "TEXT";
+//   }
+struct NarrowCaptured {
+  std::string param;         // a parameter of the operation that is not `out`
+  bool text = false;         // the record carries it as a text
+  std::string length_below;  // text: its length is below this integer constant (or `ref eval` constant)
+  int32_t length_const = -1;  // resolved
+  SrcLoc loc;
+};
+
+struct NarrowDecl {
+  bool present = false;
+  SrcLoc loc;
+  std::string api;
+  std::string source;
+  std::vector<std::string> revs;
+  int32_t source_index = -1;  // resolved
+  std::string branch;
+  bool context_any = false;
+  std::vector<std::string> contexts;  // role names
+  std::vector<NarrowCaptured> captured;
+  ExprPtr requires_;
+  std::string holds_at;  // "return"
+  std::vector<std::string> prov;
+  std::vector<int32_t> prov_idx;
+  std::string note;
+};
+
 struct OutcomeDecl {
   std::string code;  // a constant
   SrcLoc loc;
@@ -322,6 +365,7 @@ struct OutcomeDecl {
   std::vector<int32_t> doc_prov_idx;
   int32_t code_const = -1;  // resolved
   int32_t conjunct_index = -1;
+  NarrowDecl narrow;  // absent: the code is checked against the replay but fixes nothing (P1 conditional)
 };
 
 struct TerminalDecl {
@@ -434,6 +478,14 @@ struct ContextDecl {
   int32_t owner_kind_index = -1;
   std::vector<std::string> prov;
   std::vector<int32_t> prov_idx;
+  // `initial_thread not_app prov ...;` (P10, 2026-10-25): the profile's sources show that the initial thread of the
+  // process (the one that runs main) is never the task of an application (SPEC 1.2 T_raw: a thread without a task
+  // record of the framework).  A record adapter then states it for the actor whose thread id is the process id;
+  // the execution relation names it "not an application" instead of "owner undetermined".
+  bool initial_thread_not_app = false;
+  SrcLoc not_app_loc;
+  std::vector<std::string> not_app_prov;
+  std::vector<int32_t> not_app_prov_idx;
 };
 
 struct ScopeDecl {

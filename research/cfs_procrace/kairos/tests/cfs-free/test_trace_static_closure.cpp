@@ -49,7 +49,8 @@ kz::phi::Profile load() {
 // Sites: 0 send entry, 1 send return, 2 the capture point send.who_valid at one call site, 3 the publication
 // site box_pub (src/task.c:12), 4 create_all.reserve (src/create.c:30).  X reads Box.id (value 0) and sends it;
 // W publishes Box.id; T0 reserves slot 2.
-Container make_run() {
+// pid: the process id of every thread (10: X is the initial thread, tid 10; 12: T0 is).
+Container make_run(uint32_t pid = 10) {
   kz::ContainerWriter w(KZ_ARTIFACT_RUN);
   w.set_basis_hash(kz::sha256(std::string("unit-test basis")));
   struct S {
@@ -97,7 +98,7 @@ Container make_run() {
   const char* names[] = {"X", "W", "T0"};
   for (uint32_t i = 0; i < 3; ++i) {
     kz_thread t = zero<kz_thread>();
-    t.pid = 10;
+    t.pid = pid;
     t.tid = 10 + i;
     t.ptid = KZ_NONE32;
     t.announced_id = KZ_NONE32;
@@ -127,7 +128,7 @@ Container make_run() {
   add(300, 11, 3, KZ_PHASE_POINT, 0, 0, 0, 0);            // W: the publication site of Box.id
   std::vector<kz_map_ev> maps(1, zero<kz_map_ev>());
   maps[0].t_ns = 50;
-  maps[0].pid = 10;
+  maps[0].pid = pid;
   maps[0].path = w.intern("/w/prog");
   std::vector<kz_runmeta> meta(1, zero<kz_runmeta>());
   meta[0].kernel = w.intern("");
@@ -302,9 +303,12 @@ void test_adapter_closure_relation_container() {
   const kz::eval::Occurrence& o = r.occurrences[0];
   KZ_CHECK_EQ(o.summary.observation, static_cast<uint8_t>(KZ_OBS_OBSERVED_VIOLATION));
   KZ_CHECK_EQ(o.relation, static_cast<uint8_t>(KZ_EXEC_RELATION_INTER_APPLICATION));
+  if (o.relation != KZ_EXEC_RELATION_INTER_APPLICATION) std::fprintf(stderr, "%s\n", kz::eval::dump_result(p, t, r).c_str());
   KZ_CHECK((o.summary.flags & KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN) != 0);
   KZ_CHECK(o.counterparts == std::vector<std::string>{"W"});
-  KZ_CHECK(o.relation_note.find("the passed value was read from Box.id, written by W") != std::string::npos);
+  // the P10 rule (2026-10-25): W's store into the captured location is a provider (a late one, its value not recorded)
+  KZ_CHECK(o.relation_note.find("provider(s) W") != std::string::npos);
+  KZ_CHECK(o.relation_items.size() == 1 && o.relation_items[0].kind == kz::eval::RelationItemKind::Provider && o.relation_items[0].what.find("a store into Box.id") == 0);
   KZ_CHECK(has(o.probes, "box_pub") && has(o.probes, "send.who_valid") && has(o.probes, "call send") && has(o.probes, "return send"));
   KZ_CHECK(has(o.unobserved, "Box.id: Box_t.id writer memset at src/init.c:5 in init_box (init_box has no direct call in the closure)"));
   KZ_CHECK(has(o.unobserved, "reg: static closure not given"));
@@ -343,7 +347,48 @@ void test_adapter_closure_relation_container() {
 
 }  // namespace
 
+// P10 (2026-10-25): where the profile's context declares `initial_thread not_app`, the adapter states that the thread
+// whose id is the process id is not an application's task (Trace::not_app), unless the record states a determined
+// owner for it (kept, and reported).
+void test_initial_thread_not_app() {
+  std::vector<kz::phi::SourceText> f = kzmini::files();
+  const std::string from = "context { owner_kind slot; prov code_a; }";
+  const size_t at = f[1].text.find(from);
+  KZ_CHECK(at != std::string::npos);
+  if (at == std::string::npos) return;
+  f[1].text.replace(at, from.size(), "context { owner_kind slot; initial_thread not_app prov code_a; prov code_a; }");
+  kz::phi::Profile p;
+  std::vector<kz::phi::Diag> diags;
+  KZ_CHECK_OK(kz::phi::load_profile(f, &p, &diags));
+  // the clause is in the normal form, which reads back to the same profile
+  const std::string nf = kz::phi::canonical_text(p);
+  KZ_CHECK(nf.find("initial_thread not_app prov code_a;") != std::string::npos);
+  kz::phi::Profile again;
+  KZ_CHECK_OK(kz::phi::load_profile({kz::phi::SourceText{"nf.kzp", nf}}, &again, &diags));
+  KZ_CHECK(kz::phi::profile_hash(again) == kz::phi::profile_hash(p));
+  kz::trace::RealTraceOptions opt;
+  opt.consts["TABLE"] = 4;
+  kz::trace::RealTraceReport rep;
+  kz::eval::Trace t;
+  KZ_CHECK_OK(kz::trace::real_trace_from_run(make_run(12), p, opt, &t, &rep));
+  KZ_CHECK(t.not_app.count("T0") == 1 && t.not_app.count("X") == 0 && t.not_app.count("W") == 0);
+  if (t.not_app.count("T0") == 1) KZ_CHECK(t.not_app.at("T0").find("the initial thread of process 12 (thread id = process id); profile context initial_thread not_app: code_a") == 0);
+  KZ_CHECK(kz::trace::report_text(rep).find("not an application's task: T0: the initial thread of process 12") != std::string::npos);
+  // X is the initial thread but the record states a confirmed owner: kept as the record states it
+  kz::trace::RealTraceReport rep2;
+  kz::eval::Trace t2;
+  KZ_CHECK_OK(kz::trace::real_trace_from_run(make_run(10), p, opt, &t2, &rep2));
+  KZ_CHECK(t2.not_app.empty());
+  KZ_CHECK(kz::trace::report_text(rep2).find("X: the initial thread, but the record states a determined owner") != std::string::npos);
+  // without the declaration nothing is stated
+  kz::trace::RealTraceReport rep3;
+  kz::eval::Trace t3;
+  KZ_CHECK_OK(kz::trace::real_trace_from_run(make_run(12), load(), opt, &t3, &rep3));
+  KZ_CHECK(t3.not_app.empty());
+}
+
 int main() {
   test_adapter_closure_relation_container();
+  test_initial_thread_not_app();
   return kztest::finish("test_trace_static_closure");
 }

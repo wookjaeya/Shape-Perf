@@ -378,7 +378,10 @@ std::vector<SymbolClaim> symbol_claims(const Profile& p) {
     std::vector<int32_t> whole = op.prov_idx;
     for (const ConjunctDecl& cj : op.conjuncts) add_all(&whole, cj.prov_idx);
     for (const EffectDecl& e : op.effects) add_all(&whole, e.prov_idx);
-    for (const OutcomeDecl& oc : op.outcomes) add_all(&whole, oc.doc_prov_idx);
+    for (const OutcomeDecl& oc : op.outcomes) {
+      add_all(&whole, oc.doc_prov_idx);
+      add_all(&whole, oc.narrow.prov_idx);
+    }
     c.add("op " + op.name, "bind symbol", op.symbol, whole);
     c.pattern(op.terminal.after, "op " + op.name + " terminal", op.prov_idx);
     for (const ConjunctDecl& cj : op.conjuncts)

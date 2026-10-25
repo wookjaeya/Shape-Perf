@@ -259,6 +259,7 @@ class Checker {
   void check_pattern(const Pattern& pat, const std::string& what);
   void check_lp(LpSpec* lp, const std::string& what);
   ExprEnv op_env(const OpDecl& op, bool result, const LpSpec* lp);
+  void check_narrow(const OpDecl& op, OutcomeDecl* oc, const std::string& owhat);
   int32_t find_state(const KindDecl& k, const std::string& s) const {
     for (size_t i = 0; i < k.states.size(); ++i)
       if (k.states[i] == s) return static_cast<int32_t>(i);
@@ -789,6 +790,12 @@ void Checker::check_context_scope() {
     if (c.owner_kind_index < 0) err(c.loc, "context: owner_kind '" + c.owner_kind + "' is not a declared kind");
     resolve_provs(c.loc, c.prov, &c.prov_idx, "context");
     need_provenance(c.loc, c.prov, "the context");
+    if (c.initial_thread_not_app) {
+      resolve_provs(c.not_app_loc, c.not_app_prov, &c.not_app_prov_idx, "context, initial_thread not_app");
+      bool sourced = false;
+      for (int32_t pi : c.not_app_prov_idx) sourced = sourced || p_.provs[static_cast<size_t>(pi)].tier == "code-derived";
+      if (!sourced) err(c.not_app_loc, "context, initial_thread not_app: cites no code text (a record of tier code-derived)");
+    }
   }
   if (p_.scope.present) {
     ScopeDecl& s = p_.scope;
@@ -920,6 +927,58 @@ bool mentions_arg(const Expr& e) {
 }
 
 }  // namespace
+
+// The applicability conditions of an outcome mapping (phi_ast.hpp NarrowDecl; P1 conditional, 2026-10-25).  Every
+// item is required except `captured`, `requires` and `note`; the implication rests on a cited code or API text.
+void Checker::check_narrow(const OpDecl& op, OutcomeDecl* oc, const std::string& owhat) {
+  NarrowDecl& n = oc->narrow;
+  const std::string what = owhat + ", narrow";
+  if (oc->cls == OutcomeClass::Error) err(n.loc, what + ": an error outcome fixes no condition; narrowing conditions belong to a ready or not_ready outcome");
+  if (n.api.empty()) err(n.loc, what + ": names no API (api \"SYMBOL\";)");
+  else if (op.symbol.empty() || n.api != op.symbol) err(n.loc, what + ": api '" + n.api + "' is not the symbol the operation binds ('" + op.symbol + "')");
+  n.source_index = n.source.empty() ? -1 : p_.find_source(n.source);
+  if (n.source.empty() || n.revs.empty()) err(n.loc, what + ": names no source revision (source COMPONENT rev \"SHA\", ...;)");
+  else if (n.source_index < 0) err(n.loc, what + ": '" + n.source + "' is not a declared source");
+  if (n.branch.empty()) err(n.loc, what + ": names no code path (branch \"...\";)");
+  if (!n.context_any && n.contexts.empty()) err(n.loc, what + ": names no call context (context any; or context ROLE, ...;)");
+  for (const std::string& rn : n.contexts) {
+    const RoleDecl* role = nullptr;
+    for (const RoleDecl& r : p_.roles)
+      if (r.name == rn) role = &r;
+    if (role == nullptr) err(n.loc, what + ": context '" + rn + "' is not a declared role");
+    else if (role->op != op.name) err(n.loc, what + ": the role '" + rn + "' is a role of '" + role->op + "', not of '" + op.name + "'");
+  }
+  for (NarrowCaptured& c : n.captured) {
+    const OpParam* prm = nullptr;
+    for (const OpParam& x : op.params)
+      if (x.name == c.param) prm = &x;
+    if (prm == nullptr || prm->role == "out") {
+      err(c.loc, what + ": captured '" + c.param + "' is not a parameter of the operation that the call receives");
+      continue;
+    }
+    if (c.text && !(prm->has_sort && prm->sort.resolved.kind == SortKind::Str)) err(c.loc, what + ": captured '" + c.param + "' text: the parameter is not of sort Str");
+    c.length_const = -1;
+    if (!c.length_below.empty()) {
+      c.length_const = p_.find_const(c.length_below);
+      if (c.length_const < 0) err(c.loc, what + ": the length bound '" + c.length_below + "' is not a declared constant");
+      else if (p_.consts[static_cast<size_t>(c.length_const)].value != ConstDecl::Value::Int &&
+               p_.consts[static_cast<size_t>(c.length_const)].value != ConstDecl::Value::RefEval)
+        err(c.loc, what + ": the length bound '" + c.length_below + "' is not an integer or `ref eval` constant");
+    }
+  }
+  if (n.requires_) {
+    ExprEnv env = op_env(op, false, nullptr);
+    expect_bool(n.requires_.get(), &env);
+  }
+  if (n.holds_at != "return") err(n.loc, what + ": holds_at must be 'return' (the implied state is that of this call's conjunct point, never carried past the return), found '" + n.holds_at + "'");
+  resolve_provs(n.loc, n.prov, &n.prov_idx, what);
+  bool sourced = false;
+  for (int32_t pi : n.prov_idx) {
+    const std::string& t = p_.provs[static_cast<size_t>(pi)].tier;
+    if (t == "code-derived" || t == "contract-backed") sourced = true;
+  }
+  if (!sourced) err(n.loc, what + ": the implication cites no code or API text (a record of tier code-derived or contract-backed)");
+}
 
 void Checker::check_ops() {
   static const char* const roles[] = {"", "out", "stamp", "key", "id", "buffer", "msg"};
@@ -1078,6 +1137,7 @@ void Checker::check_ops() {
         if (oc.conjunct_index < 0) err(oc.loc, owhat + ": not_ready(" + oc.conjunct + ") names no conjunct of the operation");
       }
       resolve_provs(oc.loc, oc.doc_prov, &oc.doc_prov_idx, owhat);
+      if (oc.narrow.present) check_narrow(op, &oc, owhat);
       if (!oc.documented.empty()) {
         if (oc.doc_prov.empty()) err(oc.loc, owhat + ": a documented result cites the text that documents it (prov ...)");
         for (int32_t pi : oc.doc_prov_idx)

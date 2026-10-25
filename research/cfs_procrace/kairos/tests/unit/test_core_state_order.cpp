@@ -16,7 +16,18 @@
 //   - exit(code): ACCEPT at a terminal call with that code (TOLERATED), REJECT with another code (VIOLATING for the
 //     only deciding entry), OPEN when the record ends, no decision at a process-terminal step or at the teardown, a
 //     terminal call without its code withheld; with no creation anywhere in a fully covered record the failed lookup's
-//     not-ready state is computed (not outcome-narrowed).
+//     not-ready state is computed (not outcome-narrowed);
+//   - P1 conditional (2026-10-25): a mapping fixes the conjunct only where its applicability conditions hold -- the
+//     profile's source revision among the mapping's, the call context's role, the name recorded as a text and shorter
+//     than the length bound (a `ref eval` bound the record does not give fixes nothing), `requires`; otherwise the code
+//     says nothing (inapplicable: no narrowing, no disagreement), and a code that fixed a conjunct is not counted as
+//     an agreement (narrowed);
+//   - the basis of a result (direct capture, state-order, return-derived order, outcome-narrowed) and the declared
+//     assumptions (reads-from edges, `via` key separation of the static closure, a role); a code that agrees with a
+//     state ordered by a reads_from edge is not an independent agreement;
+//   - the P10 rule of the execution relation: the provider the use read from (reads_from), a late provider, the
+//     clearing at the start as an affecting write, the teardown delete excluded by scope, an actor confirmed not to
+//     be an application (core-application) apart from an undetermined owner, an unconfirmed influence kept apart.
 
 #include <string>
 #include <vector>
@@ -58,8 +69,9 @@ bind field "Rec_t" "id" as state(sem(name)) via "wipe", "destroy", "create" prov
 op lookup(out id, key name: Str) {
   bind symbol "lookup";
   conjunct exists: state(sem(arg.name)) = LIVE lp at fn("lookup").call("find") prov code_a;
-  outcome OK: ready;
-  outcome NOT_FOUND: not_ready(exists) documented "not found" prov doc_sup;
+  outcome OK: ready narrow { api "lookup"; source main rev "abcdef0"; branch "found"; context any; captured name text; holds_at return; prov code_a; };
+  outcome NOT_FOUND: not_ready(exists) documented "not found" prov doc_sup
+    narrow { api "lookup"; source main rev "abcdef0"; branch "the search found no record"; context any; captured name text; holds_at return; prov code_a; };
   prov code_a;
 }
 op create(out id, name: Str) {
@@ -283,6 +295,141 @@ void test_exit_monitor() {
   KZ_CHECK(model.occ(0).status == OccStatus::Tolerated);
 }
 
+// P1 conditional: the applicability conditions of the lookup's mappings (unit-test values).
+void test_narrowing_conditions() {
+  const std::string body = std::string(kStart) + lookup("-17", nullptr) + create("0x30002");
+  const Profile p = load(std::string(kProv) + kKinds + kScope + rspec("unspecified_by_reference;"));
+  const Run base = replay(p, std::string(kHeader) + body);
+  expect(base, 0, OccStatus::NotReadyUnjudged, "INCONCLUSIVE(caller_requirement_absent)", true, "conditions hold");
+  KZ_CHECK(base.occ(0).outcome == kz::eval::OutcomeCheck::Narrowed);
+  KZ_CHECK(has(base.occ(0).narrowing, "NOT_FOUND under api lookup, main abcdef0, context any, name text \"S0\""));
+  KZ_CHECK(has(base.dump, "outcome narrowed (the code fixed a condition: not an independent check)"));
+  // the profile instance is at another revision of the source: the code says nothing (no narrowing, no disagreement)
+  std::string other_rev = std::string(kProv);
+  const std::string pin = "rev \"abcdef0\"";
+  other_rev.replace(other_rev.find(pin), pin.size(), "rev \"abcdef9\"");
+  const Profile q = load(other_rev + kKinds + kScope + rspec("unspecified_by_reference;"));
+  const Run rev = replay(q, std::string(kHeader) + body);
+  KZ_CHECK(rev.occ(0).status == OccStatus::Undetermined && !rev.occ(0).outcome_narrowed);
+  KZ_CHECK(rev.occ(0).outcome == kz::eval::OutcomeCheck::Inapplicable);
+  KZ_CHECK(has(rev.occ(0).narrowing, "the profile's source main is at abcdef9, not a revision the implication was read at"));
+  KZ_CHECK(!rev.occ(0).input_error);
+  // a length bound: the name must be shorter
+  auto with_length = [&](const std::string& bound_decl, const std::string& bound) {
+    std::string k = kKinds;
+    for (size_t at = k.find("captured name text;"); at != std::string::npos; at = k.find("captured name text;", at + 1))
+      k.replace(at, std::string("captured name text;").size(), "captured name text length < " + bound + ";");
+    return load(std::string(kProv) + bound_decl + k + kScope + rspec("unspecified_by_reference;"));
+  };
+  const Run fits = replay(with_length("const LEN = 3 prov code_a;\n", "LEN"), std::string(kHeader) + body);
+  KZ_CHECK(fits.occ(0).outcome_narrowed && has(fits.occ(0).narrowing, "length 2 < LEN = 3"));
+  const Run too_long = replay(with_length("const LEN = 2 prov code_a;\n", "LEN"), std::string(kHeader) + body);
+  KZ_CHECK(!too_long.occ(0).outcome_narrowed && has(too_long.occ(0).narrowing, "has 2 characters, not fewer than LEN = 2"));
+  const Profile refp = with_length("const LENR = ref eval \"LENR\" in \"src/sem.c\" prov code_a;\n", "LENR");
+  const Run unknown = replay(refp, std::string(kHeader) + body);
+  KZ_CHECK(!unknown.occ(0).outcome_narrowed && has(unknown.occ(0).narrowing, "a `ref eval` constant the record does not give"));
+  const Run given = replay(refp, std::string(kHeader) + "const LENR 20\n" + body);
+  KZ_CHECK(given.occ(0).outcome_narrowed);
+  // a call context: the mapping applies only in the role it names (the role's site follows the return)
+  std::string k = kKinds;
+  for (size_t at = k.find("context any;"); at != std::string::npos; at = k.find("context any;", at + 1)) k.replace(at, 12, "context dep;");
+  const std::string role = "site a_use = fn(\"user\").call(\"lookup\") prov code_a;\nrole dep { op lookup; site a_use; purpose dependent_use; prov code_a; }\n";
+  const Profile rp = load(std::string(kProv) + k + role + kScope + rspec("unspecified_by_reference;"));
+  const std::string in_role = std::string(kStart) + "A lookup call arg.name=@S0\nA lookup.exists pt\nA lookup ret result=-17\nA a_use pt\n" + create("0x30002");
+  const Run bound = replay(rp, std::string(kHeader) + in_role);
+  KZ_CHECK(bound.occ(0).outcome_narrowed && bound.occ(0).context == "dep");
+  KZ_CHECK((bound.occ(0).assumptions & KZ_SUMMARY_FLAG_ASSUMES_ROLE) != 0 && (bound.occ(0).summary.flags & KZ_SUMMARY_FLAG_ASSUMES_ROLE) != 0);
+  const Run unbound = replay(rp, std::string(kHeader) + body);
+  KZ_CHECK(!unbound.occ(0).outcome_narrowed && has(unbound.occ(0).narrowing, "the call context is not bound to a role"));
+  // a code that disagrees with a conjunct fixed in every explanation is still an analysis input error (conditions hold)
+  const Run contra = replay(p, std::string(kHeader) + kStart + lookup("0", nullptr));
+  KZ_CHECK(contra.occ(0).input_error && contra.occ(0).outcome == kz::eval::OutcomeCheck::Disagrees);
+  // ... and says nothing where the conditions do not hold
+  const Run contra_q = replay(q, std::string(kHeader) + kStart + lookup("0", nullptr));
+  KZ_CHECK(!contra_q.occ(0).input_error && contra_q.occ(0).outcome == kz::eval::OutcomeCheck::Inapplicable);
+  expect(contra_q, 0, OccStatus::NotReadyUnjudged, "INCONCLUSIVE(caller_requirement_absent)", false, "computed state, mapping inapplicable");
+}
+
+// The basis of the results and the declared assumptions; the P10 rule of the execution relation.
+void test_basis_and_relation() {
+  const Profile p = load(std::string(kProv) + kKinds + kScope + rspec("unspecified_by_reference;"));
+  const std::string owners = "owner A 1\nowner_level A confirmed\nowner B 2\nowner_level B confirmed\n";
+  const std::string closure = "closure kind sem writers=3 covered=3 separated=1 Rec_t.id writer-set-complete\n";
+  const std::string ok_body = kStart + create("0x30002") + lookup("0", "0x30002") + kTeardown;
+  const Run r = replay(p, std::string(kHeader) + closure + owners + "not_app M the initial thread (unit test)\n" + ok_body);
+  expect(r, 0, OccStatus::Ready, "NO_VIOLATION_IN_CHECKED_PREFIX", false, "basis: reads-from");
+  const Occurrence& o = r.occ(0);
+  KZ_CHECK((o.basis & KZ_SUMMARY_FLAG_BASIS_STATE_ORDER) != 0 && (o.basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0);
+  KZ_CHECK((o.basis & (KZ_SUMMARY_FLAG_BASIS_DIRECT_CAPTURE | KZ_SUMMARY_FLAG_OUTCOME_NARROWED)) == 0);
+  KZ_CHECK((o.summary.flags & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0);
+  KZ_CHECK(o.outcome == kz::eval::OutcomeCheck::AgreesReturnDerived);
+  KZ_CHECK((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION) != 0 && o.via_names == std::vector<std::string>{"sem"});
+  KZ_CHECK(has(r.dump, "  basis state-order (observed state, synchronization and creation order, identity), return-derived-order"));
+  KZ_CHECK(has(r.dump, "  assumptions via key separation (sem), reads-from edges (RF)"));
+  // the relation: the provider it read from (B), the clearing at the start (M, not an application), the teardown
+  // delete left out by scope; the relation is that of the provider pair
+  KZ_CHECK_EQ(o.relation, static_cast<uint8_t>(KZ_EXEC_RELATION_INTER_APPLICATION));
+  KZ_CHECK(o.counterparts == std::vector<std::string>{"B"});
+  size_t prov = 0, aff = 0, exc = 0, unc = 0;
+  for (const kz::eval::RelationItem& it : o.relation_items) {
+    if (it.kind == kz::eval::RelationItemKind::Provider) {
+      ++prov;
+      KZ_CHECK(it.actor == "B" && it.read_from);
+    }
+    if (it.kind == kz::eval::RelationItemKind::Affecting) {
+      ++aff;
+      KZ_CHECK(it.actor == "M" && it.pair == KZ_EXEC_RELATION_CORE_APPLICATION && has(it.pair_note, "M is not an application's task"));
+    }
+    if (it.kind == kz::eval::RelationItemKind::Excluded) {
+      ++exc;
+      KZ_CHECK(it.actor == "M" && has(it.what, "at or after the TEARDOWN point"));
+    }
+    if (it.kind == kz::eval::RelationItemKind::Unconfirmed) ++unc;
+  }
+  KZ_CHECK(prov == 1 && aff == 1 && exc == 1 && unc == 0);
+  KZ_CHECK((o.summary.flags & KZ_SUMMARY_FLAG_UNCONFIRMED_INFLUENCE) == 0);
+  KZ_CHECK(has(r.dump, "    provider read-from B #"));
+  // without the reads_from edge the state is not ordered: the code fixes it (outcome-narrowed basis only)
+  const Run norf = replay(p, std::string(kHeader) + owners + ok_body, true, false);
+  KZ_CHECK(norf.occ(0).basis == KZ_SUMMARY_FLAG_OUTCOME_NARROWED && norf.occ(0).outcome == kz::eval::OutcomeCheck::Narrowed);
+  // a failed lookup and a late provider: the provider is the dependency itself (not excluded for coming after the use)
+  const std::string late = kStart + lookup("-17", nullptr) + create("0x30002");
+  const Run lp = replay(p, std::string(kHeader) + owners + late);
+  KZ_CHECK_EQ(lp.occ(0).relation, static_cast<uint8_t>(KZ_EXEC_RELATION_INTER_APPLICATION));
+  KZ_CHECK(lp.occ(0).counterparts == std::vector<std::string>{"B"} && has(lp.dump, "a late provider"));
+  // no provider in the record: the clearing writer decides; an actor confirmed not to be an application is a core
+  // execution path (core-application), an undetermined owner stays undetermined
+  const std::string none = std::string(kStart) + lookup("-17", nullptr);
+  const Run core = replay(p, std::string(kHeader) + owners + "not_app M the initial thread (unit test)\n" + none);
+  KZ_CHECK_EQ(core.occ(0).relation, static_cast<uint8_t>(KZ_EXEC_RELATION_CORE_APPLICATION));
+  KZ_CHECK((core.occ(0).summary.flags & KZ_SUMMARY_FLAG_NOT_APP_ACTOR) != 0);
+  KZ_CHECK(has(core.occ(0).relation_note, "no provider in the record; clearing writer(s) before the decision M"));
+  const Run undet = replay(p, std::string(kHeader) + owners + none);
+  KZ_CHECK_EQ(undet.occ(0).relation, static_cast<uint8_t>(KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED));
+  KZ_CHECK(has(undet.occ(0).relation_note, "the owner of M is undetermined"));
+  // a delete whose target the record does not give, in the default scope: an unconfirmed influence, kept apart; the
+  // provider relation stands
+  const std::string del = kStart + create("0x30002") + lookup("0", "0x30002") + "M destroy call arg.id=0x30002\nM destroy.gone pt\nM destroy ret result=0\n";
+  const Run un = replay(p, std::string(kHeader) + owners + del);
+  KZ_CHECK_EQ(un.occ(0).relation, static_cast<uint8_t>(KZ_EXEC_RELATION_INTER_APPLICATION));
+  KZ_CHECK((un.occ(0).summary.flags & KZ_SUMMARY_FLAG_UNCONFIRMED_INFLUENCE) != 0);
+  // the earlier readings stay available for sensitivity: all writes counted makes the same record undetermined
+  Run legacy;
+  KZ_CHECK(kz::eval::parse_trace_text(std::string(kHeader) + owners + del, &legacy.trace).ok());
+  kz::eval::Options all;
+  all.relation_rule = kz::eval::Options::RelationRule::AllWrites;
+  KZ_CHECK(kz::eval::replay(p, legacy.trace, all, &legacy.result).ok());
+  KZ_CHECK_EQ(legacy.occ(0).relation, static_cast<uint8_t>(KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED));
+  KZ_CHECK(legacy.occ(0).relation_items.empty());
+  // the text form keeps not_app and the separated count
+  const Run back = replay(p, kz::eval::trace_text(r.trace));
+  KZ_CHECK_EQ(back.dump, r.dump);
+  KZ_CHECK(r.trace.not_app.count("M") == 1 && r.trace.kind_closure.at("sem").separated == 1u);
+  Trace t;
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nclosure kind sem writers=2 covered=1 separated=2 x\n", &t).ok());
+  KZ_CHECK(!kz::eval::parse_trace_text("record real\nnot_app M\n", &t).ok());
+}
+
 }  // namespace
 
 int main() {
@@ -290,5 +437,7 @@ int main() {
   test_reads_from_state();
   test_scope_teardown();
   test_exit_monitor();
+  test_narrowing_conditions();
+  test_basis_and_relation();
   return kztest::finish("test_core_state_order");
 }

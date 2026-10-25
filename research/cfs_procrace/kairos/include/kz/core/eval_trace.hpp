@@ -108,6 +108,9 @@ struct StaticClosure {
   std::string status;                   // per bound field: "<Type.field> writer-set-complete|DISABLED|not in the closure", ';'-joined
   uint32_t writers = 0;                 // static writers of the bound fields
   uint32_t covered = 0;                 // of those, at a point the plan observes and the profile maps to a write of it
+  // of the covered ones, those counted as writes of another key by a researcher's `bind ... via` declaration (key
+  // separation from cited code, not a pointer analysis): a result that rests on this coverage uses that declaration
+  uint32_t separated = 0;
   std::vector<std::string> unobserved;  // the static writer and alias locations the plan does not observe
 };
 
@@ -140,6 +143,10 @@ struct Trace {
   // app_owner").  Absent: not established.
   std::map<std::string, bool> owner_core;
   std::map<std::string, std::string> creators;            // actor -> the actor that created it (creating executor)
+  // actor -> how the record establishes that the actor is not the task of any application (P10, 2026-10-25: the
+  // initial thread of the process where the profile's context declares `initial_thread not_app`).  Such an actor
+  // is a core execution path (SPEC 1.1, 1.2 T_raw), never "owner undetermined"; no application name is given to it.
+  std::map<std::string, std::string> not_app;
   // The order of the events of different actors is established (HB edges or a reliable observed order,
   // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
   // (SPEC 5.8), so a value another actor wrote may be any value of the interleavings.
@@ -214,14 +221,51 @@ struct ConjunctResult {
   // Real records: the value read a resource whose replayed state was set by an effect whose operand only the
   // writer's own identity fixed (Options::owner_identity_targets).
   bool owner_identity = false;
+  // Real records, what a fixed value rests on (the basis of Occurrence::basis): it read replayed state (a kind, a
+  // location or the owner record), not only the recorded arguments; the order of a write it read from another
+  // actor rests on a reads_from edge (an order derived from a returned code); a kind or location it read is
+  // fixed by a writer coverage that counts writes as other keys by a `bind ... via` declaration.
+  bool state_read = false;
+  bool rf_order = false;
+  bool via = false;
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
 const char* decided_at_text(DecidedAt d);
 
-// O4(a): the returned code agrees with the readiness the replay computed.
-enum class OutcomeCheck : uint8_t { NotChecked, Agrees, Disagrees, Unmapped };
+// O4(a): the returned code agrees with the readiness the replay computed.  Real records (P1 conditional, 2026-10-25):
+//   Narrowed            the code fixed a conjunct the record left open; its agreement is not a check (the result
+//                       used the code: never counted as independently confirmed by it)
+//   AgreesReturnDerived the code agrees, but the state that agrees rests on an order derived from a returned code
+//                       (a reads_from edge): not an independent check either
+//   Inapplicable        the mapping's applicability conditions do not hold in the record: the code says nothing here
+//                       (no narrowing, no disagreement)
+//   Consistent          no disagreement, but the record leaves the condition the code speaks of open and the code did
+//                       not fix it (narrowing off, or a mapping without conditions): no check either
+enum class OutcomeCheck : uint8_t { NotChecked, Agrees, Disagrees, Unmapped, Narrowed, AgreesReturnDerived, Inapplicable, Consistent };
 const char* outcome_check_text(OutcomeCheck c);
+
+// The execution relation of one occurrence under the P10 rule (2026-10-25, review section 6.3): every write of the
+// occurrence's object (its key resource, or a location a captured value was read from), one item each.
+enum class RelationItemKind : uint8_t {
+  Provider,     // (a) a publication of the same object in the occurrence's scope (a late one included); read_from: the
+                //     reads_from rule matched it (same object and generation)
+  Affecting,    // (b) a clearing write (initialization, delete, invalid store) before the decision: the value read
+  Excluded,     // (c) after the occurrence, in another scope or of another generation: left out with the reason
+  Unconfirmed,  // (d) a write the record does not link to the object (target or value not established, or it may not
+                //     have been applied): an unconfirmed influence, kept apart from the confirmed relations
+};
+const char* relation_item_text(RelationItemKind k);
+
+struct RelationItem {
+  RelationItemKind kind = RelationItemKind::Unconfirmed;
+  std::string actor;
+  uint64_t event = 0;
+  std::string what;           // what the write was
+  bool read_from = false;     // Provider: the reads_from rule matched it
+  uint8_t pair = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;  // the relation of the use's actor and this actor
+  std::string pair_note;      // why (owners, "not an application", ...)
+};
 
 struct Occurrence {
   std::string rspec;
@@ -265,6 +309,22 @@ struct Occurrence {
   uint8_t relation_level = KZ_OWNER_LEVEL_UNDETERMINED;  // the weakest owner level the relation used
   std::vector<std::string> counterparts;  // the actors of the registrations / publications, sorted
   std::string relation_note;              // which pair decided it, or why it is undetermined
+  std::vector<RelationItem> relation_items;  // P10 rule: every write of the object, classified (empty for the other rules)
+  // Real records: the basis of the result (review section 5.3; PI decision P1 conditional, stage A), as KZ_SUMMARY_FLAG
+  // bits, more than one possible: basis-direct-capture (a fixed conjunct read only recorded argument values),
+  // basis-state-order (one read replayed state: observed effects, the order of synchronization and creation, identity
+  // assumptions), basis-return-derived-order (that state's order rests on a reads_from edge), outcome-narrowed (the
+  // returned code fixed a conjunct).  Also in summary.flags.
+  uint16_t basis = 0;
+  // Real records: the declared assumptions the result used, as KZ_SUMMARY_FLAG bits: assumes-via-key-separation (a
+  // kind or location read is fixed by a coverage with `via` separation; via_names says which), assumes-owner-
+  // identity-targets (A-OWNER: a writer's creation identity fixed an effect operand), assumes-role (a declared role
+  // of the call context made the call an instance); reads_from edges are basis-return-derived-order.
+  uint16_t assumptions = 0;
+  std::vector<std::string> via_names;
+  // Real records: how the returned code's mapping was used (P1 conditional): the conditions that held and what the
+  // code fixed, or why the mapping does not apply / fixes nothing.  Empty when no mapping was hit.
+  std::string narrowing;
   // The role of the call context (SPEC 1.6 "Call contexts"): the profile role whose site event followed
   // the return of this call on the same actor; empty when no role site was seen for it.
   std::string context;
@@ -328,10 +388,11 @@ struct Options {
   // The version of each component, for the guards of rules and effects.  A guard on a component
   // that is not listed does not hold: the rule or effect is not applied and the replay says so.
   std::map<std::string, std::string> versions;
-  // Real records, P1 of STATUS_W0W3_20261024 (O4-real, a pending PI decision): whether the returned code
-  // fixes a conjunct the record leaves open (`outcome-narrowed`, the current behaviour).  false is the
-  // alternative: the code fixes nothing, and is still checked against what every explanation fixes (a
-  // disagreement stays an analysis input error).
+  // Real records, P1 (conditionally adopted 2026-10-25, PI_DECISIONS_RESOLVED_20261025.md): whether the returned code
+  // fixes a conjunct the record leaves open.  It does so only through a mapping that declares its applicability
+  // conditions (phi_ast.hpp NarrowDecl) and only where every one holds in the record; the result says so
+  // (outcome-narrowed) and its agreement with the code is not counted as a check.  false: the code fixes nothing,
+  // and is still checked against what every explanation fixes (a disagreement stays an analysis input error).
   bool outcome_narrowing = true;
   // Real records: whether the identity value the record gives for a `confirmed` app_owner (Trace::owner_ids, the
   // value its creation request passed) fixes `id(owner(exec))` in the target, id or value of an effect of that
@@ -339,11 +400,11 @@ struct Options {
   // effect set say so (ConjunctResult::owner_identity).  false: the effect's operand stays open (the reading
   // before 2026-10-24, in which the identity named only the actors of the execution relation).
   bool owner_identity_targets = true;
-  // Real records, P10 of STATUS_W0W3_20261024 section 2a (a pending PI decision): whether a clearing write (an
-  // effect that returns the key resource to its kind's initial state, or a store of a known value that is not a
-  // valid identity into a captured location) makes its actor one of the actors of the execution relation.
-  // true is the current behaviour (every observed write counts); false is the alternative.
-  bool relation_clearing_writes = true;
+  // Real records: the rule that picks the actors of the execution relation.  Occurrence (P10, decided 2026-10-25,
+  // review section 6.3): per object, generation, role and scope (RelationItem).  AllWrites and NonClearing are the
+  // two earlier readings (every observed write counts; clearing writes do not), kept for sensitivity only.
+  enum class RelationRule : uint8_t { Occurrence, AllWrites, NonClearing };
+  RelationRule relation_rule = RelationRule::Occurrence;
   // Whether the edges of `reads_from` rules are made (SPEC 3.16 row RF, stratum O: a successful use reads from the
   // publication of the same resource and generation; with `match`, the out values of both are equal).  true: the
   // rules of the profile apply (2026-10-24); false: their edges are left out (a reading to compare with, not a PI
@@ -413,7 +474,8 @@ std::string dump_result(const phi::Profile& p, const Trace& trace, const Result&
 //   creator <actor> <creating actor>
 //   order established|merged                 default merged: the order of different actors' events is not established
 //   loss begin | loss end                    events may be missing from the next event on, up to the next event
-//   closure kind|loc <name> writers=<n> covered=<m> <status ...>   what the static closure says (StaticClosure)
+//   closure kind|loc <name> writers=<n> covered=<m> [separated=<k>] <status ...>   what the static closure says (StaticClosure)
+//   not_app <actor> <evidence ...>           the actor is not an application's task (Trace::not_app)
 //   unobserved kind|loc <name> <text ...>    one static writer or alias location the plan does not observe
 Status parse_trace_text(const std::string& text, Trace* out);
 

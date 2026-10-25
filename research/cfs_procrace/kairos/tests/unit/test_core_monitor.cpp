@@ -55,8 +55,9 @@ kind sem(name: Str) { states ABSENT < LIVE; initial ABSENT; scope process; prov 
 op lookup(out id, key name: Str) {
   bind symbol "lookup";
   conjunct exists: state(sem(arg.name)) = LIVE lp at fn("lookup").call("find") prov code_a;
-  outcome OK: ready;
-  outcome NOT_FOUND: not_ready(exists) documented "not found" prov doc_sup;
+  outcome OK: ready narrow { api "lookup"; source main rev "abcdef0"; branch "found"; context any; captured name text; holds_at return; prov code_a; };
+  outcome NOT_FOUND: not_ready(exists) documented "not found" prov doc_sup
+    narrow { api "lookup"; source main rev "abcdef0"; branch "the search found no record"; context any; captured name text; holds_at return; prov code_a; };
   outcome BAD_PTR: error documented "bad pointer" prov doc_sup;
   prov code_a;
 }
@@ -211,11 +212,13 @@ void test_record_ends_mid_retry() {
 
 void test_not_countable() {
   const Profile p = load(std::string(kHead) + rspec(kRetry));
-  // the name is not recorded: the key is not fixed, the attempts cannot be counted
+  // the name is not recorded: the key is not fixed, and the codes fix nothing (P1 conditional: the mappings require
+  // the name captured as a text), so the attempts stay undetermined before any monitor counts them
   const Run nokey = replay(p, kReal + attempt("C", nullptr, "-17") + attempt("C", nullptr, "0"));
   KZ_CHECK(nokey.occ(0).status == OccStatus::Undetermined);
-  KZ_CHECK(has(nokey.summary(0), "explanation_ambiguous"));
-  KZ_CHECK(has(nokey.occ(0).monitor, "is not fixed"));
+  KZ_CHECK(nokey.occ(0).outcome == kz::eval::OutcomeCheck::Inapplicable);
+  KZ_CHECK(has(nokey.occ(0).narrowing, "carries no text of name"));
+  KZ_CHECK(!nokey.occ(0).outcome_narrowed);
   // a reported loss over the attempts: some may be missing
   const Run lossy = replay(p, kReal + attempt("C", "S0", "-17") + "loss begin\n" + create("S0") + "loss end\n" + attempt("C", "S0", "0"));
   KZ_CHECK(lossy.occ(0).status == OccStatus::Undetermined);

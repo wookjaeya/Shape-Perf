@@ -96,6 +96,20 @@ const char* outcome_check_text(OutcomeCheck c) {
     case OutcomeCheck::Agrees: return "agrees";
     case OutcomeCheck::Disagrees: return "disagrees";
     case OutcomeCheck::Unmapped: return "unmapped";
+    case OutcomeCheck::Narrowed: return "narrowed (the code fixed a condition: not an independent check)";
+    case OutcomeCheck::AgreesReturnDerived: return "agrees (the state rests on an order derived from a returned code: not an independent check)";
+    case OutcomeCheck::Inapplicable: return "inapplicable (the mapping's conditions do not hold: the code says nothing here)";
+    case OutcomeCheck::Consistent: return "consistent (the record leaves the condition open and the code did not fix it: no check)";
+  }
+  return "?";
+}
+
+const char* relation_item_text(RelationItemKind k) {
+  switch (k) {
+    case RelationItemKind::Provider: return "provider";
+    case RelationItemKind::Affecting: return "affecting";
+    case RelationItemKind::Excluded: return "excluded";
+    case RelationItemKind::Unconfirmed: return "unconfirmed";
   }
   return "?";
 }
@@ -327,6 +341,10 @@ struct RealEval {
   uint32_t adequacy = kAllAdequacy;   // KZ_ADEQ: what the record establishes for what it read
   bool contradicted = false;
   bool owner_identity = false;        // it read a resource whose state an identity-resolved effect set
+  bool state_read = false;            // it read replayed state (a kind, a location, the owner record)
+  bool rf_order = false;              // a write it read is ordered with it only by a reads_from edge
+  bool via = false;                   // a kind or location it read is fixed by a coverage with `via` separation
+  std::vector<std::string> via_names;
 };
 
 bool exact_key(const AVal& r, std::vector<int64_t>* key) {
@@ -354,6 +372,7 @@ struct IntervalRead {
   uint32_t reasons = 0;
   uint32_t adequacy = kAllAdequacy;
   bool contradicted = false;
+  bool state_read = false, rf_order = false, via = false, owner_identity = false;
 };
 
 struct Frame {
@@ -456,6 +475,10 @@ struct HbOrder {
 
 struct Prior {
   HbOrder hb;
+  // the same order without the edges of reads_from rules (built only where the pass made some): a read that is
+  // ordered only with them rests on an order derived from a returned code (ConjunctResult::rf_order)
+  bool has_no_rf = false;
+  HbOrder hb_no_rf;
   WriteLog writes;
   // The first pass's scope points (kNoEvent: not in the record): the SHUTDOWN_REQ and TEARDOWN points.
   uint64_t request = ~static_cast<uint64_t>(0);
@@ -512,13 +535,23 @@ class Replayer {
   // After run() on a real record: the writes this pass applied, and the order of its edges (false, with the
   // reason, where the edges cannot stand for the order of different actors).
   const WriteLog& writes() const { return log_; }
-  bool order_of_edges(HbOrder* out, std::string* why) const {
+  // without_rf: the order of the same edges less those of reads_from rules (false, nothing built, where there is none).
+  bool order_of_edges(HbOrder* out, std::string* why, bool without_rf = false) const {
     if (any_handler_) {
       *why = "an actor began a new handler (program order is not one chain per actor)";
       return false;
     }
     const uint64_t limit = r_.terminated ? r_.terminal_event + 1 : t_.events.size();
-    return build_hb_order(t_, r_.edges, limit, out, why);
+    if (!without_rf) return build_hb_order(t_, r_.edges, limit, out, why);
+    std::vector<HbEdge> kept;
+    bool any_rf = false;
+    for (const HbEdge& e : r_.edges) {
+      const int32_t ri = p_.find_rule(e.rule);
+      if (ri >= 0 && p_.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom) any_rf = true;
+      else kept.push_back(e);
+    }
+    if (!any_rf) return false;
+    return build_hb_order(t_, kept, limit, out, why);
   }
 
  private:
@@ -595,7 +628,8 @@ class Replayer {
   std::vector<std::string> kind_start_, loc_start_;  // the observed effect that fixed the start state, where one did
   bool identity_of(const std::string& actor) const;
   RealEval effect_operand(const Expr& e, const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool resource, bool* by_identity);
-  bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader) const;
+  bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed = nullptr) const;
+  bool ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, std::vector<uint64_t>* left_out) const;
   bool clearing_value(int32_t loc, int64_t v) const;
   void fix_start_kind(int32_t kind, const std::string& what, uint64_t event);
   void fix_start_loc(int32_t loc, const std::string& what, uint64_t event);
@@ -607,7 +641,10 @@ class Replayer {
     bool exact = false;   // the target is established
     bool maybe = false;   // the effect may not have been applied (a `filter` guard the record leaves open)
     bool clearing = false;  // it returns the resource to its kind's initial state (P10)
+    bool kind_wide = false;  // an effect on every resource of the kind (a reset of a table; names no one resource)
     std::string actor;
+    uint64_t event = 0;
+    std::string what;     // OP.effect
   };
   std::vector<Publication> pubs_;
   // The writes of a location in the record (the execution relation of a captured value, SPEC 1.1): a store
@@ -618,6 +655,8 @@ class Replayer {
     bool maybe = false;   // the effect may not have been applied (a `filter` the record leaves open)
     std::string actor;
     bool clearing = false;  // the value stored is known and is not a valid identity of the kind the location holds (P10)
+    uint64_t event = 0;
+    bool value_known = false;  // the value stored is fixed by the record or the profile
   };
   std::vector<LocWrite> loc_writes_;
   // A site of the profile whose call passes the address of a location's field (`arg[i] is addr(T.F)`, `bind
@@ -630,6 +669,11 @@ class Replayer {
   void observation_lists(Occurrence* o);
   void note_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool maybe);
   void relate(Occurrence* o);
+  void relate_legacy(Occurrence* o, bool count_clearing);
+  void relate_occurrence(Occurrence* o);
+  uint8_t pair_relation(const std::string& use, const std::string& other, uint8_t* level, std::string* note, bool* core_unknown) const;
+  std::map<uint64_t, uint64_t> rf_read_from_;  // the return of a successful use -> the publication event the reads_from rule matched
+  bool narrowing_applies(const OpDecl& op, const phi::OutcomeDecl& oc, const Frame& f, const TraceEvent& ev, std::string* text);
   size_t next_loss_ = 0;
   void prepare_real();
   void apply_losses(uint64_t position);
@@ -969,12 +1013,11 @@ void Replayer::contradict(int32_t kind, int32_t loc, uint64_t event, const std::
 // that the record places in the default scope (merged before the SHUTDOWN_REQ point, if observed, and before the
 // TEARDOWN point, and not happening after the TEARDOWN point) such a write is left out; the result is a statement of
 // the default scope (the scope of an occurrence is decided by the merged order of its decision and the request).
-bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader) const {
-  if (prior_ == nullptr) return false;
-  const HbOrder& hb = prior_->hb;
+bool Replayer::ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader,
+                          std::vector<uint64_t>* left_out) const {
   const uint64_t td = prior_->teardown;
   const bool default_scope_read = td != kNoEvent && at < td && !(prior_->request != kNoEvent && prior_->request < at) && !hb.before(td, at);
-  std::vector<uint64_t> before, left_out;
+  std::vector<uint64_t> before;
   auto one = [&](uint64_t w) {
     if (w == at) return true;  // the event's own effects (program order)
     if (w >= t_.events.size()) return false;
@@ -987,7 +1030,7 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
       return true;
     }
     if (default_scope_read && w > at && (w == td || hb.before(td, w))) {
-      left_out.push_back(w);
+      left_out->push_back(w);
       return true;
     }
     return w > at && hb.before(at, w);
@@ -1002,6 +1045,21 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
   for (size_t i = 0; i + 1 < before.size(); ++i) {
     const uint64_t x = before[i], y = before[i + 1];
     if (t_.events[static_cast<size_t>(x)].actor != t_.events[static_cast<size_t>(y)].actor && !hb.before(x, y)) return false;
+  }
+  return true;
+}
+
+// rf_needed (optional): the writes are ordered with the read only with the edges of reads_from rules (the order of
+// the previous pass without them does not order them), i.e. the value read rests on an order derived from a
+// returned code (review section 5.3).
+bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed) const {
+  if (rf_needed != nullptr) *rf_needed = false;
+  if (prior_ == nullptr) return false;
+  std::vector<uint64_t> left_out;
+  if (!ordered_in(prior_->hb, writes, more, at, reader, &left_out)) return false;
+  if (rf_needed != nullptr && prior_->has_no_rf) {
+    std::vector<uint64_t> ignored;
+    *rf_needed = !ordered_in(prior_->hb_no_rf, writes, more, at, reader, &ignored);
   }
   scope_left_out_.insert(left_out.begin(), left_out.end());
   return true;
@@ -1171,8 +1229,8 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     return any;
   };
-  std::set<ResId> order_open;
-  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole;
+  std::set<ResId> order_open, rf_res;
+  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole, rf_kinds, rf_locs;
   auto open_whole_kind = [&](int32_t kind) {
     // a write that may have hit any resource of the kind: every resource of it is open at this read
     a.open_kinds.insert(kind);
@@ -1185,18 +1243,27 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     return kind >= 0 && static_cast<size_t>(kind) < kind_reasons_.size() && kind_reasons_[static_cast<size_t>(kind)] == 0 && p_.kinds[static_cast<size_t>(kind)].derived.empty();
   };
   if (!t_.order_established && prior_ != nullptr) {
+    bool rf = false;
     for (const auto& kv : prior_->writes.res) {
       if (!fixed(kv.first)) continue;
       const auto wide = prior_->writes.kind_wide.find(kv.first.kind);
-      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor)) continue;
+      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor, &rf)) {
+        if (rf) rf_res.insert(kv.first);
+        continue;
+      }
       a.res[kv.first] = any_res(kv.first.kind);
       order_open.insert(kv.first);
       order_open_kinds.insert(kv.first.kind);
     }
-    for (const auto& kv : prior_->writes.kind_wide)
-      if (kind_fixed(kv.first) && !ordered_at(kv.second, nullptr, ev.id, ev.actor)) open_whole_kind(kv.first);
-    for (const auto& kv : prior_->writes.loc)
-      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor)) order_open_locs.insert(kv.first);
+    for (const auto& kv : prior_->writes.kind_wide) {
+      if (!kind_fixed(kv.first)) continue;
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf)) open_whole_kind(kv.first);
+      else if (rf) rf_kinds.insert(kv.first);
+    }
+    for (const auto& kv : prior_->writes.loc) {
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf)) order_open_locs.insert(kv.first);
+      else if (rf) rf_locs.insert(kv.first);
+    }
   } else if (!t_.order_established) {
     for (const auto& kv : res_writers_) {
       if (!fixed(kv.first) || !foreign(kv.second)) continue;
@@ -1234,25 +1301,46 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
   RecordingDomain dom(p_, a, &reads);
   Evaluator<RecordingDomain> evaluator(p_, dom);
   out.v = evaluator.eval(e);
+  // a kind or location fixed by a writer coverage that counts writes as other keys by a `via` declaration
+  auto via_of = [&](const std::map<std::string, StaticClosure>& m, const std::string& name) {
+    const auto it = m.find(name);
+    if (it == m.end() || it->second.separated == 0) return;
+    out.via = true;
+    out.via_names.push_back(name);
+  };
   for (int32_t k : reads.kinds) {
     if (k < 0 || static_cast<size_t>(k) >= kind_reasons_.size()) continue;
     out.reasons |= kind_reasons_[static_cast<size_t>(k)];
     out.adequacy &= kind_adeq_[static_cast<size_t>(k)];
     out.contradicted = out.contradicted || kind_contra_[static_cast<size_t>(k)];
+    if (p_.kinds[static_cast<size_t>(k)].derived.empty()) out.state_read = true;
+    if (kind_reasons_[static_cast<size_t>(k)] == 0) via_of(t_.kind_closure, p_.kinds[static_cast<size_t>(k)].name);
+    if (rf_kinds.count(k) != 0) out.rf_order = true;
   }
   for (const ResId& id : reads.res) {
     if (order_open.count(id) != 0 || order_open_whole.count(id.kind) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     else if (identity_res_.count(id) != 0 && fixed(id)) out.owner_identity = true;
+    if (rf_res.count(id) != 0 || rf_kinds.count(id.kind) != 0) out.rf_order = true;
   }
-  for (int32_t k : reads.boxes)
+  for (int32_t k : reads.boxes) {
     if (order_open_kinds.count(k) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+    if (rf_kinds.count(k) != 0) out.rf_order = true;
+    for (const ResId& id : rf_res)
+      if (id.kind == k) out.rf_order = true;
+  }
   for (int32_t l : reads.locs) {
     if (order_open_locs.count(l) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     out.reasons |= loc_reasons_[static_cast<size_t>(l)];
     out.adequacy &= loc_adeq_[static_cast<size_t>(l)];
     out.contradicted = out.contradicted || loc_contra_[static_cast<size_t>(l)];
+    out.state_read = true;
+    if (loc_reasons_[static_cast<size_t>(l)] == 0) via_of(t_.loc_closure, p_.locs[static_cast<size_t>(l)].name);
+    if (rf_locs.count(l) != 0) out.rf_order = true;
   }
+  if (reads.owner) out.state_read = true;
   if (reads.owner && owner_open) out.reasons |= KZ_WITHHOLD_OWNERSHIP_UNDETERMINED;
+  std::sort(out.via_names.begin(), out.via_names.end());
+  out.via_names.erase(std::unique(out.via_names.begin(), out.via_names.end()), out.via_names.end());
   return out;
 }
 
@@ -1267,6 +1355,10 @@ void Replayer::join_interval(IntervalRead* acc, const RealEval& r) {
   acc->reasons |= r.reasons;
   acc->adequacy &= r.adequacy;
   acc->contradicted = acc->contradicted || r.contradicted;
+  acc->state_read = acc->state_read || r.state_read;
+  acc->rf_order = acc->rf_order || r.rf_order;
+  acc->via = acc->via || r.via;
+  acc->owner_identity = acc->owner_identity || r.owner_identity;
 }
 
 // The conjuncts read over a call (their point is not observed) see every state the call can see.
@@ -1589,6 +1681,9 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
     res.adequacy = r.adequacy;
     res.contradicted = r.contradicted;
     res.owner_identity = r.owner_identity;
+    res.state_read = r.state_read;
+    res.rf_order = r.rf_order;
+    res.via = r.via;
     if (r.v.tri == Tri::Maybe) {
       res.unknown = true;
     } else {
@@ -1966,13 +2061,14 @@ void Replayer::on_point(const TraceEvent& ev) {
   const auto pub = pub_site_loc_.find(ev.site);
   if (real_ && pub != pub_site_loc_.end()) {
     const int32_t li = pub->second;
-    loc_writes_.push_back(LocWrite{li, false, ev.actor});
+    loc_writes_.push_back(LocWrite{li, false, ev.actor, false, ev.id});
     const auto v = ev.values.find("value");
     if (v != ev.values.end()) {
       st_.loc_values[li] = v->second;
       loc_writers_[li].insert(ev.actor);
       log_.loc[li].insert(ev.id);
       loc_writes_.back().clearing = clearing_value(li, v->second);
+      loc_writes_.back().value_known = true;
     } else {
       untrack_loc(li, KZ_WITHHOLD_EFFECT_UNSUPPORTED);
     }
@@ -2014,6 +2110,10 @@ void Replayer::on_point(const TraceEvent& ev) {
       res.reasons = r.reasons;
       res.adequacy = r.adequacy;
       res.contradicted = res.contradicted || r.contradicted;
+      res.owner_identity = r.owner_identity;
+      res.state_read = r.state_read;
+      res.rf_order = r.rf_order;
+      res.via = r.via;
       if (r.v.tri == Tri::Maybe) {
         res.unknown = true;
       } else {
@@ -2271,7 +2371,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
     if (g.v.tri == Tri::Maybe && eff.filter) {
       // a branch that may or may not have been taken
       note_publication(op, eff, ev, frame_args, true);
-      if (eff.kind == EffectKind::StoreLoc || eff.kind == EffectKind::StoreOut) loc_writes_.push_back(LocWrite{tloc, true, ev.actor});
+      if (eff.kind == EffectKind::StoreLoc || eff.kind == EffectKind::StoreOut) loc_writes_.push_back(LocWrite{tloc, true, ev.actor, false, ev.id});
       untrack_kind(tkind, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       untrack_loc(tloc, g.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
       if (eff.kind == EffectKind::StoreOut && tloc < 0)
@@ -2312,7 +2412,10 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
     st_.loc_values[li] = value;
     loc_writers_[li].insert(ev.actor);
     log_.loc[li].insert(ev.id);
-    if (!loc_writes_.empty() && loc_writes_.back().loc == li && loc_writes_.back().actor == ev.actor) loc_writes_.back().clearing = clearing_value(li, value);
+    if (!loc_writes_.empty() && loc_writes_.back().loc == li && loc_writes_.back().actor == ev.actor) {
+      loc_writes_.back().clearing = clearing_value(li, value);
+      loc_writes_.back().value_known = true;
+    }
     if (!by_identity) fix_start_loc(li, op.name + "." + eff.label, ev.id);
   };
   auto wrote = [&](const ResId& id, bool by_identity) {
@@ -2442,7 +2545,7 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
       const auto where = ev.texts.find("out." + eff.target);
       if (where == ev.texts.end()) {
         // the record does not say where the pointer pointed: any location may have been written
-        loc_writes_.push_back(LocWrite{-1, false, ev.actor});
+        loc_writes_.push_back(LocWrite{-1, false, ev.actor, false, ev.id});
         for (size_t li = 0; li < loc_reasons_.size(); ++li) untrack_loc(static_cast<int32_t>(li), KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS);
         return;
       }
@@ -2450,13 +2553,13 @@ void Replayer::apply_effect_real(const OpDecl& op, const EffectDecl& eff, const 
         finding(ev.id, what + ": '" + where->second + "' is not a location of the profile");
         return;
       }
-      loc_writes_.push_back(LocWrite{tloc, false, ev.actor});
+      loc_writes_.push_back(LocWrite{tloc, false, ev.actor, false, ev.id});
       stored(tloc);
       return;
     }
     case EffectKind::StoreLoc:
       if (tloc >= 0) {
-        loc_writes_.push_back(LocWrite{tloc, false, ev.actor});
+        loc_writes_.push_back(LocWrite{tloc, false, ev.actor, false, ev.id});
         stored(tloc);
       }
       return;
@@ -2483,6 +2586,10 @@ void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
     c.reasons = in.reasons | KZ_WITHHOLD_EFFECT_POINT_AMBIGUOUS;
     c.adequacy = in.adequacy;
     c.contradicted = in.contradicted;
+    c.state_read = in.state_read;
+    c.rf_order = in.rf_order;
+    c.via = in.via;
+    c.owner_identity = in.owner_identity;
     if (!in.any || in.tri == Tri::Maybe) {
       c.unknown = true;
     } else {
@@ -2514,14 +2621,95 @@ void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
   for (size_t k = 0; k < f->occs.size(); ++k) decide_real(f, k, ev);
 }
 
-// O4(a) for a real record.  The returned code is observed, and the outcome list says what it means for
-// the conjuncts: `not_ready(L)` means L was reached and false, `ready` that no reached conjunct is false.
-// So the code fixes a conjunct the record left open (the explanations that disagree with the code are
-// not explanations of the record), and a code that disagrees with a conjunct fixed in every explanation
-// leaves no explanation at all: an analysis input error, never a violation and never no violation.
+// The applicability conditions of the mapping `oc` (phi_ast.hpp NarrowDecl; P1 conditional, 2026-10-25) in the record:
+// true where every one holds; `text` says which held, or the first that does not.  Nothing here reads the replayed
+// state except `requires` (over the arguments).
+bool Replayer::narrowing_applies(const OpDecl& op, const phi::OutcomeDecl& oc, const Frame& f, const TraceEvent& ev, std::string* text) {
+  const phi::NarrowDecl& n = oc.narrow;
+  if (!n.present) {
+    *text = "the mapping of " + oc.code + " declares no applicability conditions: the code fixes nothing (P1 conditional)";
+    return false;
+  }
+  auto no = [&](const std::string& why) {
+    *text = "the mapping of " + oc.code + " does not apply: " + why;
+    return false;
+  };
+  if (n.api != op.symbol) return no("api " + n.api + " is not the bound symbol " + op.symbol);
+  // the source revision of the profile instance (the bundle directory chosen) among those the implication was read at
+  const phi::SourceDecl* src = n.source_index >= 0 && static_cast<size_t>(n.source_index) < p_.sources.size() ? &p_.sources[static_cast<size_t>(n.source_index)] : nullptr;
+  if (src == nullptr) return no("the source " + n.source + " is not declared");
+  if (std::find(n.revs.begin(), n.revs.end(), src->rev) == n.revs.end()) return no("the profile's source " + n.source + " is at " + src->rev + ", not a revision the implication was read at");
+  // the call context: the role whose site is the actor's next event after this return (the binding of on_role_point)
+  std::string ctx;
+  for (uint64_t e = ev.id + 1; e < t_.events.size(); ++e) {
+    const TraceEvent& nx = t_.events[static_cast<size_t>(e)];
+    if (nx.actor != ev.actor) continue;
+    if (nx.phase == Phase::Point) {
+      const auto ro = role_of_site_.find(nx.site);
+      if (ro != role_of_site_.end() && p_.roles[ro->second].op == op.name) ctx = p_.roles[ro->second].name;
+    }
+    break;
+  }
+  if (!n.context_any && std::find(n.contexts.begin(), n.contexts.end(), ctx) == n.contexts.end())
+    return no(ctx.empty() ? std::string("the call context is not bound to a role") : "the call context is the role " + ctx + ", not one of the mapping's");
+  // the arguments the record must carry
+  std::string held = "api " + n.api + ", " + n.source + " " + src->rev.substr(0, 12) + ", context " + (n.context_any ? std::string("any") : ctx);
+  const TraceEvent& call = t_.events[static_cast<size_t>(f.call)];
+  for (const phi::NarrowCaptured& c : n.captured) {
+    const std::string name = "arg." + c.param;
+    if (c.text) {
+      const auto tx = call.texts.find(name);
+      if (tx == call.texts.end()) return no("the record carries no text of " + c.param + " at the call (a NULL pointer or an unread string)");
+      std::string len_text;
+      if (c.length_const >= 0) {
+        const phi::ConstDecl& k = p_.consts[static_cast<size_t>(c.length_const)];
+        int64_t bound = 0;
+        if (k.value == phi::ConstDecl::Value::Int) {
+          bound = k.ival;
+        } else {
+          const auto rc = t_.ref_consts.find(k.name);
+          if (rc == t_.ref_consts.end()) return no("the length bound " + k.name + " is a `ref eval` constant the record does not give (--const " + k.name + "=N, from its reference)");
+          bound = rc->second;
+        }
+        if (static_cast<int64_t>(tx->second.size()) >= bound)
+          return no("the text of " + c.param + " has " + std::to_string(tx->second.size()) + " characters, not fewer than " + k.name + " = " + std::to_string(bound));
+        len_text = ", length " + std::to_string(tx->second.size()) + " < " + k.name + " = " + std::to_string(bound);
+      }
+      held += ", " + c.param + " text \"" + tx->second + "\"" + len_text;
+      continue;
+    }
+    bool have = f.args.count(name) != 0 || call.values.count(name) != 0;
+    for (const ConjunctResult& cr : f.conj)
+      if (!have && cr.source == LpSource::Capture && cr.event < t_.events.size()) have = t_.events[static_cast<size_t>(cr.event)].values.count(name) != 0;
+    if (!have) return no("the record carries no value of " + c.param);
+    held += ", " + c.param + " recorded";
+  }
+  if (n.requires_) {
+    TraceEvent probe;  // the arguments are those of the call
+    probe.id = ev.id;
+    probe.actor = ev.actor;
+    probe.site = op.name;
+    const RealEval r = evaluate_real(*n.requires_, op, nullptr, probe, &f.args);
+    if (r.v.tri != Tri::True) return no("requires " + phi::expr_text(*n.requires_) + (r.v.tri == Tri::False ? " is false" : " is not fixed by the record"));
+    held += ", requires " + phi::expr_text(*n.requires_);
+  }
+  *text = oc.code + " under " + held + "; holds at the call's conjunct point, before its return";
+  return true;
+}
+
+// O4(a) for a real record.  The returned code is observed, and the outcome list says what it means for the
+// conjuncts: `not_ready(L)` means L was reached and false, `ready` that no reached conjunct is false.  P1 (adopted
+// conditionally 2026-10-25): the code fixes a conjunct the record left open only through a mapping whose
+// applicability conditions (narrow { ... }) all hold in the record (narrowing_applies), and the agreement of a
+// conjunct it fixed is not a check (OutcomeCheck::Narrowed).  A code that disagrees with a conjunct fixed in every
+// explanation leaves no explanation at all: an analysis input error, never a violation and never no violation; where
+// the mapping declares conditions and one does not hold, the code says nothing (Inapplicable): no narrowing, no
+// disagreement, never a forced agreement.  A mapping without conditions is still checked against what every
+// explanation fixes but fixes nothing.
 void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
   OutcomeCheck chk = OutcomeCheck::NotChecked;
   bool narrowed = false, contra = false;
+  std::string note;
   if (!op.outcomes.empty() && ev.has_result) {
     const phi::OutcomeDecl* hit = nullptr;
     for (const phi::OutcomeDecl& oc : op.outcomes) {
@@ -2532,34 +2720,45 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
         break;
       }
     }
+    const bool conditioned = hit != nullptr && hit->narrow.present;
+    const bool applies = hit != nullptr && hit->cls != OutcomeClass::Error && narrowing_applies(op, *hit, *f, ev, &note);
+    const bool may_narrow = applies && o_.outcome_narrowing;
     if (hit == nullptr) {
       chk = OutcomeCheck::Unmapped;
       finding(ev.id, op.name + " returned " + hex_or_dec(static_cast<int64_t>(u32(ev.result))) + ", which its outcome list does not map");
+    } else if (hit->cls == OutcomeClass::Error) {
+      // an error outcome makes no statement about readiness
+    } else if (conditioned && !applies) {
+      chk = OutcomeCheck::Inapplicable;
+      finding(ev.id, op.name + ": " + note);
     } else if (hit->cls == OutcomeClass::Ready) {
-      // P1 (a pending PI decision): with o_.outcome_narrowing false the code fixes nothing it leaves open.
       for (ConjunctResult& c : f->conj) {
         if (c.evaluated && !c.holds) {
           if (c.passage_unknown) {  // false wherever it is passed: it was not passed
-            if (!o_.outcome_narrowing) continue;
+            if (!may_narrow) continue;
             c.evaluated = false;
             c.passage_unknown = false;
             c.source = LpSource::Outcome;
             c.event = ev.id;
+            c.state_read = c.rf_order = c.via = c.owner_identity = false;
             narrowed = true;
           } else {
             c.contradicted = true;
             contra = true;
           }
-        } else if (c.unknown && o_.outcome_narrowing) {
+        } else if (c.unknown && may_narrow) {
           c.unknown = false;
           c.evaluated = true;
           c.holds = true;
           c.source = LpSource::Outcome;
           c.event = ev.id;
+          c.state_read = c.rf_order = c.via = c.owner_identity = false;
           narrowed = true;
         }
       }
-      chk = contra ? OutcomeCheck::Disagrees : OutcomeCheck::Agrees;
+      bool open_left = false;
+      for (const ConjunctResult& c : f->conj) open_left = open_left || c.unknown || c.passage_unknown;
+      chk = contra ? OutcomeCheck::Disagrees : narrowed ? OutcomeCheck::Narrowed : open_left ? OutcomeCheck::Consistent : OutcomeCheck::Agrees;
       if (contra) finding(ev.id, op.name + " returned " + hit->code + " (ready), and a conjunct of the call is false in every explanation of the real record: analysis input error");
     } else if (hit->cls == OutcomeClass::NotReady) {
       if (hit->conjunct_index < 0 || static_cast<size_t>(hit->conjunct_index) >= f->conj.size()) {
@@ -2575,7 +2774,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
                              (not_passed ? "not reached" : "true") + ": analysis input error");
         } else {
           const bool fixed_false = c.evaluated && !c.holds && !c.passage_unknown;
-          if (!fixed_false && o_.outcome_narrowing) {
+          if (!fixed_false && may_narrow) {
             c.source = LpSource::Outcome;
             c.event = ev.id;
             narrowed = true;
@@ -2583,15 +2782,22 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.holds = false;
             c.unknown = false;
             c.passage_unknown = false;
+            c.state_read = c.rf_order = c.via = c.owner_identity = false;
           }
-          chk = OutcomeCheck::Agrees;
+          chk = narrowed ? OutcomeCheck::Narrowed : fixed_false ? OutcomeCheck::Agrees : OutcomeCheck::Consistent;
         }
       }
+    }
+    if (hit != nullptr && hit->cls != OutcomeClass::Error) {
+      if (applies && !o_.outcome_narrowing) note += " (narrowing off: the code fixes nothing)";
+      else if (applies && !narrowed) note += " (nothing left open for it to fix)";
+      else if (narrowed) note += ": it fixed what the record left open";
     }
   }
   for (size_t idx : f->occs) {
     Occurrence& o = r_.occurrences[idx];
     o.outcome = chk;
+    o.narrowing = note;
     if (narrowed) o.outcome_narrowed = true;
     if (contra) o.input_error = true;
   }
@@ -2648,12 +2854,29 @@ void Replayer::decide_real(Frame* f, size_t k, const TraceEvent& ev) {
 // writer's own identity.  The target is established only where the expression and the writer's app_owner
 // fix it (an owner that is not confirmed or inferred leaves a target that reads `owner(exec)` open).
 void Replayer::note_publication(const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool maybe) {
+  if (eff.kind == EffectKind::Set && !eff.all_kind.empty()) {
+    // a reset of every resource of a kind: no one resource is named (the earlier rules skip it), but it writes the
+    // occurrence's object too (the P10 rule: an initialization the value read may come from)
+    Publication pb;
+    pb.kind = p_.find_kind(eff.all_kind);
+    if (pb.kind < 0) return;
+    pb.kind_wide = true;
+    pb.maybe = maybe;
+    pb.actor = ev.actor;
+    pb.event = ev.id;
+    pb.what = op.name + "." + eff.label;
+    pb.clearing = state_ordinal(p_.kinds[static_cast<size_t>(pb.kind)], eff.to_state) == p_.kinds[static_cast<size_t>(pb.kind)].initial_ordinal;
+    pubs_.push_back(std::move(pb));
+    return;
+  }
   if (!eff.res || !eff.all_kind.empty()) return;
   if (eff.kind != EffectKind::Set && eff.kind != EffectKind::Raise && eff.kind != EffectKind::SetTag) return;
   Publication pb;
   pb.kind = eff.res->sort.kind_index;
   pb.actor = ev.actor;
   pb.maybe = maybe;
+  pb.event = ev.id;
+  pb.what = op.name + "." + eff.label;
   const RealEval r = evaluate_real(*eff.res, op, &eff.lp, ev, frame_args, true);
   pb.exact = !r.v.must_be_undefined && exact_key(r.v, &pb.key);
   if (r.v.kind >= 0) pb.kind = r.v.kind;
@@ -2672,6 +2895,16 @@ void Replayer::note_publication(const OpDecl& op, const EffectDecl& eff, const T
 // inter-application, core-application, creation framework that occurs.  Nothing here reads the order of the
 // events (the relation is between actors, not an order between their events).
 void Replayer::relate(Occurrence* o) {
+  switch (o_.relation_rule) {
+    case Options::RelationRule::Occurrence: relate_occurrence(o); return;
+    case Options::RelationRule::AllWrites: relate_legacy(o, true); return;
+    case Options::RelationRule::NonClearing: relate_legacy(o, false); return;
+  }
+}
+
+// The two readings before the P10 decision (2026-10-25), kept for sensitivity only: every observed write of the key
+// (count_clearing) or every one but the clearing writes makes its actor an actor of the relation.
+void Replayer::relate_legacy(Occurrence* o, bool count_clearing) {
   o->relation = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
   o->relation_level = KZ_OWNER_LEVEL_UNDETERMINED;
   o->counterparts.clear();
@@ -2697,10 +2930,9 @@ void Replayer::relate(Occurrence* o) {
   // P10 (STATUS_W0W3_20261024 section 2a, a pending PI decision): whether a clearing write (one that returns the
   // key resource to its kind's initial state, or stores a value that is not a valid identity into a captured
   // location) makes its actor an actor involved.  Current: yes, every observed write counts.
-  const bool count_clearing = o_.relation_clearing_writes;
   size_t clearing_skipped = 0;
   for (const Publication& pb : pubs_) {
-    if (pb.kind != kk) continue;
+    if (pb.kind != kk || pb.kind_wide) continue;  // a reset of the whole kind names no resource (these readings)
     if (!count_clearing && pb.clearing) {
       if (!pb.exact || pb.key == o->key) ++clearing_skipped;  // only those that could have been counted
       continue;
@@ -2805,6 +3037,227 @@ void Replayer::relate(Occurrence* o) {
   }
 }
 
+// The relation of the use's actor and one other actor (SPEC 1.1 "Execution relations").  An actor the record
+// establishes is not an application's task (Trace::not_app: the initial thread, SPEC 1.2 T_raw) is a core execution
+// path: with an application's task it is core-application; it is never "owner undetermined" and gets no application
+// name.  Otherwise the owners decide as before: not confirmed or inferred -> ownership undetermined; the same task or
+// owning application -> intra-application; one created the other -> creation framework; a core service among them ->
+// core-application; else inter-application (core_unknown where the record does not show the core status of both).
+uint8_t Replayer::pair_relation(const std::string& use, const std::string& other, uint8_t* level, std::string* note, bool* core_unknown) const {
+  auto level_of = [&](const std::string& a) -> uint8_t {
+    if (t_.not_app.count(a) != 0) return KZ_OWNER_LEVEL_CONFIRMED;
+    const auto it = t_.owner_levels.find(a);
+    if (it == t_.owner_levels.end() || it->second == KZ_OWNER_LEVEL_UNDETERMINED) return KZ_OWNER_LEVEL_UNDETERMINED;
+    return t_.owners.count(a) != 0 ? it->second : static_cast<uint8_t>(KZ_OWNER_LEVEL_UNDETERMINED);
+  };
+  *core_unknown = false;
+  const uint8_t lu = level_of(use), lc = level_of(other);
+  *level = std::min(lu, lc);
+  if (lu == KZ_OWNER_LEVEL_UNDETERMINED) {
+    *note = "the owner of the executing task " + use + " is undetermined";
+    return KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  }
+  if (lc == KZ_OWNER_LEVEL_UNDETERMINED) {
+    *note = "the owner of " + other + " is undetermined";
+    return KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  }
+  if (other == use) {
+    *note = "same task";
+    return KZ_EXEC_RELATION_INTRA_APPLICATION;
+  }
+  const auto nu = t_.not_app.find(use), nc = t_.not_app.find(other);
+  if (nu != t_.not_app.end() || nc != t_.not_app.end()) {
+    const auto& na = nc != t_.not_app.end() ? *nc : *nu;
+    *note = na.first + " is not an application's task (" + na.second + "): a core execution path";
+    return KZ_EXEC_RELATION_CORE_APPLICATION;
+  }
+  if (t_.owners.at(other) == t_.owners.at(use)) {
+    *note = "same application";
+    return KZ_EXEC_RELATION_INTRA_APPLICATION;
+  }
+  const auto cu = t_.creators.find(use), cc = t_.creators.find(other);
+  if ((cu != t_.creators.end() && cu->second == other) || (cc != t_.creators.end() && cc->second == use)) {
+    *note = "one created the other";
+    return KZ_EXEC_RELATION_CREATION_FRAMEWORK;
+  }
+  const auto ku = t_.owner_core.find(use), kc = t_.owner_core.find(other);
+  if ((ku != t_.owner_core.end() && ku->second) || (kc != t_.owner_core.end() && kc->second)) {
+    *note = "different applications, a core service among them";
+    return KZ_EXEC_RELATION_CORE_APPLICATION;
+  }
+  *core_unknown = ku == t_.owner_core.end() || kc == t_.owner_core.end();
+  *note = *core_unknown ? "different applications; core status not established" : "different applications, neither a core service";
+  return KZ_EXEC_RELATION_INTER_APPLICATION;
+}
+
+// The execution relation of one occurrence under the P10 rule (decided 2026-10-25, PI_DECISIONS_RESOLVED_20261025.md;
+// review section 6.3).  Every write of the occurrence's object -- its key resource (a publication or registration, a
+// reset of the whole kind) and a location a value the use passes was captured from -- is one item:
+//   (c) excluded   at or after the TEARDOWN point and after the decision of a default-scope occurrence (SCOPE: the
+//                  teardown decides no default-scope occurrence), a later publication of another generation than the
+//                  one the use read from (reads_from), or a clearing write after the decision (it did not set the
+//                  value read); recorded with the reason, never a counterpart;
+//   (d) unconfirmed a write whose target or value the record does not establish, or that may not have been applied:
+//                  an unconfirmed influence, kept apart and never erasing a confirmed relation (flag
+//                  relation-unconfirmed-influence);
+//   (a) provider   a publication of the object (not a clearing write; a store into the captured location whose value
+//                  the record does not establish is linked by its target and counted here, saying so) in the
+//                  occurrence's scope, before the decision or after it (a late provider is the dependency itself: no
+//                  "writes after the use" rule); the one the reads_from rule matched is marked read-from (same object
+//                  and generation);
+//   (b) affecting  a clearing write (initialization, delete, an invalid identity stored) before the decision: the value
+//                  read may come from it, so it is kept even though it clears.
+// The relation is that of the use's actor with the providers, or, where there is none, with the affecting writers;
+// every item carries its own pair relation.  Nothing here is a statement about the order of the events beyond the
+// merged order of the decision, the TEARDOWN point and the reads_from match.
+void Replayer::relate_occurrence(Occurrence* o) {
+  o->relation = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  o->relation_level = KZ_OWNER_LEVEL_UNDETERMINED;
+  o->counterparts.clear();
+  o->relation_items.clear();
+  const phi::RspecDecl* rs = nullptr;
+  for (const phi::RspecDecl& r : p_.rspecs)
+    if (r.name == o->rspec) rs = &r;
+  if (rs == nullptr || !rs->key) {
+    o->relation_note = "the readiness specification has no key: no registration or publication to relate the use to";
+    return;
+  }
+  if (o->key.empty()) {
+    o->relation_note = "the record does not fix the key of the occurrence";
+    return;
+  }
+  const int32_t kk = rs->key->sort.kind_index;
+  const std::string kname = kk >= 0 ? p_.kinds[static_cast<size_t>(kk)].name : std::string("?");
+  const uint64_t rp = o->decided_at != DecidedAt::None ? o->decision : (o->returned ? o->ret : o->call);
+  const uint64_t td = r_.teardown_started ? r_.teardown_event : kNoEvent;
+  auto after_teardown = [&](uint64_t w, const std::string& actor) {
+    if (!o->in_scope || td == kNoEvent || w <= rp || w < td || td >= t_.events.size()) return false;
+    if (w == td || t_.events[static_cast<size_t>(td)].actor == actor) return true;  // the point itself, or program order after it
+    return prior_ != nullptr && prior_->hb.before(td, w);
+  };
+  const std::string td_text = td == kNoEvent ? std::string() : "#" + std::to_string(td);
+  const auto rf = o->returned ? rf_read_from_.find(o->ret) : rf_read_from_.end();
+  const bool has_rf = rf != rf_read_from_.end();
+  auto add = [&](RelationItemKind k, const std::string& actor, uint64_t event, const std::string& what, bool read_from) {
+    RelationItem it;
+    it.kind = k;
+    it.actor = actor;
+    it.event = event;
+    it.what = what;
+    it.read_from = read_from;
+    o->relation_items.push_back(std::move(it));
+  };
+  for (const Publication& pb : pubs_) {
+    if (pb.kind != kk) continue;
+    if (pb.exact && !pb.kind_wide && pb.key != o->key) continue;  // another object
+    const std::string what = pb.what + (pb.kind_wide ? " (every resource of " + kname + ")" : pb.exact ? " on " + kname + key_text(pb.key) : " on " + kname);
+    if (after_teardown(pb.event, pb.actor)) {
+      add(RelationItemKind::Excluded, pb.actor, pb.event, what + ": at or after the TEARDOWN point " + td_text + ", after the decision of a default-scope occurrence (SCOPE)", false);
+    } else if (pb.maybe) {
+      add(RelationItemKind::Unconfirmed, pb.actor, pb.event, what + ": may not have been applied (a filter the record leaves open)", false);
+    } else if (!pb.exact && !pb.kind_wide) {
+      add(RelationItemKind::Unconfirmed, pb.actor, pb.event, what + ": the record does not establish its target", false);
+    } else if (!pb.clearing) {
+      if (has_rf && pb.event != rf->second)
+        add(RelationItemKind::Excluded, pb.actor, pb.event, what + ": the use read from #" + std::to_string(rf->second) + " (reads_from: same object and id), this is another generation", false);
+      else
+        add(RelationItemKind::Provider, pb.actor, pb.event, what + (pb.event < rp ? std::string() : std::string(" (after the decision: a late provider)")), has_rf);
+    } else if (pb.event < rp) {
+      add(RelationItemKind::Affecting, pb.actor, pb.event, what + ": a clearing write before the decision (the value read may come from it)", false);
+    } else {
+      add(RelationItemKind::Excluded, pb.actor, pb.event, what + ": a clearing write after the decision (it did not set the value read)", false);
+    }
+  }
+  // the locations a value the use passes was captured from
+  std::set<int32_t> cells;
+  for (const ConjunctResult& c : o->conjuncts) {
+    if (c.source != LpSource::Capture || c.cell.empty()) continue;
+    const int32_t li = p_.find_loc(c.cell);
+    if (li >= 0) cells.insert(li);
+  }
+  std::set<uint64_t> seen_any;  // a store through an unnamed pointer is listed once
+  for (int32_t li : cells) {
+    const std::string lname = p_.locs[static_cast<size_t>(li)].name;
+    for (const LocWrite& lw : loc_writes_) {
+      if (lw.loc != li && lw.loc != -1) continue;
+      if (lw.loc == -1 && !seen_any.insert(lw.event).second) continue;
+      const std::string what = lw.loc == -1 ? "a store through a pointer the record does not name (any location, " + lname + " included)" : "a store into " + lname + " (the captured location)";
+      if (after_teardown(lw.event, lw.actor)) add(RelationItemKind::Excluded, lw.actor, lw.event, what + ": at or after the TEARDOWN point " + td_text + ", after the decision of a default-scope occurrence (SCOPE)", false);
+      else if (lw.loc == -1 || lw.maybe) add(RelationItemKind::Unconfirmed, lw.actor, lw.event, what + (lw.maybe ? ": may not have been applied" : ""), false);
+      else if (!lw.clearing)  // a valid identity, or a value the record does not establish: the same object, so linked
+        add(RelationItemKind::Provider, lw.actor, lw.event,
+            what + (lw.value_known ? std::string() : std::string(" (the record does not establish the value stored)")) + (lw.event < rp ? std::string() : std::string(" (after the decision: a late provider)")),
+            false);
+      else if (lw.event < rp) add(RelationItemKind::Affecting, lw.actor, lw.event, what + ": an invalid identity stored before the decision (the value read may come from it)", false);
+      else add(RelationItemKind::Excluded, lw.actor, lw.event, what + ": an invalid identity stored after the decision (it did not set the value read)", false);
+    }
+  }
+  std::stable_sort(o->relation_items.begin(), o->relation_items.end(), [](const RelationItem& a, const RelationItem& b) { return a.event < b.event; });
+  std::set<std::string> providers, affecting;
+  bool unconfirmed = false;
+  for (RelationItem& it : o->relation_items) {
+    uint8_t lv = 0;
+    bool cu = false;
+    it.pair = pair_relation(o->actor, it.actor, &lv, &it.pair_note, &cu);
+    if (it.kind == RelationItemKind::Provider) providers.insert(it.actor);
+    if (it.kind == RelationItemKind::Affecting) affecting.insert(it.actor);
+    if (it.kind == RelationItemKind::Unconfirmed) unconfirmed = true;
+  }
+  if (unconfirmed) o->summary.flags |= KZ_SUMMARY_FLAG_UNCONFIRMED_INFLUENCE;
+  const bool by_provider = !providers.empty();
+  const std::set<std::string>& chosen = by_provider ? providers : affecting;
+  o->counterparts.assign(chosen.begin(), chosen.end());
+  const std::string extra = unconfirmed ? "; an unconfirmed influence is listed apart" : std::string();
+  if (chosen.empty()) {
+    o->relation_note = "no publication or clearing write of " + kname + key_text(o->key) + (cells.empty() ? std::string() : " or of the captured location") +
+                       " before the decision or in its scope" + extra;
+    return;
+  }
+  uint8_t level = KZ_OWNER_LEVEL_CONFIRMED;
+  bool any_undet = false, any_inter = false, any_core = false, any_creation = false, all_intra = true, core_unknown = false, not_app = t_.not_app.count(o->actor) != 0;
+  std::string undet_note;
+  for (const std::string& c : chosen) {
+    uint8_t lv = 0;
+    bool cu = false;
+    std::string note;
+    const uint8_t r = pair_relation(o->actor, c, &lv, &note, &cu);
+    not_app = not_app || t_.not_app.count(c) != 0;
+    if (r == KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED) {
+      any_undet = true;
+      if (undet_note.empty()) undet_note = note;
+      continue;
+    }
+    level = std::min(level, lv);
+    if (r != KZ_EXEC_RELATION_INTRA_APPLICATION) all_intra = false;
+    if (r == KZ_EXEC_RELATION_INTER_APPLICATION) {
+      any_inter = true;
+      core_unknown = core_unknown || cu;
+    }
+    if (r == KZ_EXEC_RELATION_CORE_APPLICATION) any_core = true;
+    if (r == KZ_EXEC_RELATION_CREATION_FRAMEWORK) any_creation = true;
+  }
+  if (not_app) o->summary.flags |= KZ_SUMMARY_FLAG_NOT_APP_ACTOR;
+  std::string who;
+  for (const std::string& c : chosen) who += (who.empty() ? "" : ",") + c;
+  const std::string basis = by_provider ? "provider(s) " + who : "no provider in the record; clearing writer(s) before the decision " + who;
+  if (any_undet) {
+    o->relation_note = basis + ": " + undet_note + extra;
+    return;
+  }
+  o->relation_level = level;
+  if (all_intra) {
+    o->relation = KZ_EXEC_RELATION_INTRA_APPLICATION;
+  } else if (any_inter) {
+    o->relation = KZ_EXEC_RELATION_INTER_APPLICATION;
+    if (core_unknown && !any_core) o->summary.flags |= KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN;
+  } else if (any_core) {
+    o->relation = KZ_EXEC_RELATION_CORE_APPLICATION;
+  } else if (any_creation) {
+    o->relation = KZ_EXEC_RELATION_CREATION_FRAMEWORK;
+  }
+  o->relation_note = basis + extra;
+}
+
 // ---- horizon monitors (SPEC 1.6 "Horizon monitors") ---------------------------------------------
 //
 // retry_until_ready(codes, bound): the monitored actor is the using actor; ACCEPT when a later attempt of
@@ -2814,7 +3267,10 @@ void Replayer::relate(Occurrence* o) {
 // call context, on one key and one generation of the key resource.  The run ends at a READY attempt, at an
 // attempt whose outcome is not in `codes`, or at the bound-th attempt whose outcome is in `codes` (the
 // exhaustion path: the loop makes at most `bound` attempts).  The loop's own entry is not an event of the
-// trace, so two loops of one actor on one key and generation with nothing between them read as one run.
+// trace, so two loops of one actor on one key and generation with nothing between them read as one run.  That
+// reading is valid only where the record shows one loop instance per actor, call context, key and generation -- the
+// initialization window the current case profile observes (docs/phi_reference.md); a re-enable command, a restart or
+// several calls of the looping function need an observed iteration boundary, which is not implemented.
 // The bound is the value of the entry's constant: an integer of the profile (with its provenance) or the
 // value the trace gives for a `ref eval` constant; the tool has no number of its own.
 // A generation boundary is an effect that returns a resource of the key's kind to the kind's initial
@@ -3128,6 +3584,41 @@ void Replayer::finish() {
       }
       o.adequacy = any ? adeq : 0;
       if (o.input_error) r_.partial = true;
+      // the basis of the result and the declared assumptions it used (review sections 5.3, 8.2, 8.3): per fixed
+      // conjunct, a value from the recorded arguments only, or from replayed state (and then: whether its order rests
+      // on a reads_from edge, a `via` key separation, a writer's creation identity); a conjunct the code fixed.
+      std::set<std::string> via_names;
+      for (const ConjunctResult& c : o.conjuncts) {
+        if (!c.evaluated || c.source == LpSource::Outcome) continue;
+        if (!c.state_read) {
+          o.basis |= KZ_SUMMARY_FLAG_BASIS_DIRECT_CAPTURE;
+          continue;
+        }
+        o.basis |= KZ_SUMMARY_FLAG_BASIS_STATE_ORDER;
+        if (c.rf_order) o.basis |= KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER;
+        if (c.owner_identity) o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY;
+        if (!c.via) continue;
+        o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION;
+        const OpDecl& op = p_.ops[rspec_info_[static_cast<size_t>(p_.find_rspec(o.rspec))].op];
+        for (const phi::ConjunctDecl& cd : op.conjuncts) {
+          if (cd.label != c.label || !cd.expr) continue;
+          std::set<int32_t> ks, ls;
+          collect_reads(p_, *cd.expr, &ks, &ls);
+          for (int32_t k : ks) {
+            const auto it = t_.kind_closure.find(p_.kinds[static_cast<size_t>(k)].name);
+            if (it != t_.kind_closure.end() && it->second.separated != 0) via_names.insert(it->first);
+          }
+          for (int32_t l : ls) {
+            const auto it = t_.loc_closure.find(p_.locs[static_cast<size_t>(l)].name);
+            if (it != t_.loc_closure.end() && it->second.separated != 0) via_names.insert(it->first);
+          }
+        }
+      }
+      if (o.outcome_narrowed) o.basis |= KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
+      if (!o.context.empty()) o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_ROLE;
+      o.via_names.assign(via_names.begin(), via_names.end());
+      // a code that agrees with a state whose order rests on a returned code is not an independent check
+      if (o.outcome == OutcomeCheck::Agrees && (o.basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0) o.outcome = OutcomeCheck::AgreesReturnDerived;
     }
   }
   for (Occurrence& o : r_.occurrences) {
@@ -3154,6 +3645,7 @@ void Replayer::finish() {
       o.summary.flags |= KZ_SUMMARY_FLAG_REAL_RECORD;
       if (o.outcome_narrowed) o.summary.flags |= KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
       if (r_.partial) o.summary.flags |= KZ_SUMMARY_FLAG_PARTIAL;
+      o.summary.flags |= o.basis | o.assumptions;
       relate(&o);
       o.summary.relation = o.relation;
       if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED && o.relation_level == KZ_OWNER_LEVEL_INFERRED) o.summary.flags |= KZ_SUMMARY_FLAG_RELATION_INFERRED;
@@ -3346,6 +3838,7 @@ void Replayer::reads_from_edges() {
       continue;
     }
     const RfPub& pb = *cand.front();
+    rf_read_from_[u.ret] = pb.event;  // the publication the use read from (the P10 rule names it)
     if (pb.actor == u.actor) continue;  // program order
     if (pb.event >= u.lp) {
       finding(u.ret, what + " matches the publication #" + std::to_string(pb.event) + ", which the record merges after the read: no edge");
@@ -3406,9 +3899,19 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
     out->findings.push_back(ReplayFinding{kNoEvent, "real record: the order of different actors is not read from the happens-before edges (" + why + "): a value another actor wrote stays open"});
     return s;
   }
+  {
+    std::string ignored;
+    prior.has_no_rf = first.order_of_edges(&prior.hb_no_rf, &ignored, true);
+  }
   prior.writes = first.writes();
   if (out->shutdown_requested) prior.request = out->shutdown_event;
   if (out->teardown_started) prior.teardown = out->teardown_event;
+  // At most four more passes (a bound of this implementation, not a fixpoint computation): each reads the order of
+  // the first pass's edges over the union of the writes logged so far; the first pass whose writes are among those
+  // is taken.  If none settles within the bound, the first pass's result stands with a finding (the values other
+  // actors wrote stay open).  This is no proof of convergence and no greatest fixpoint: the edges are those of the
+  // first pass only, so a rule whose edges depend on the decided state (an HB-producing rule such as R19 once its
+  // predicate is fixed by the record) needs a check that the edges used suffice, not only that the writes settled.
   for (int pass = 0; pass < 4; ++pass) {
     Result next;
     Replayer again(p, trace, options, &next, &prior);
@@ -3467,6 +3970,33 @@ std::string enum_text_of(const char* name, uint64_t v) {
   const EnumDesc* en = find_enum(name);
   const char* d = en != nullptr ? enum_display(*en, v) : nullptr;
   return d != nullptr ? d : "?";
+}
+
+// The basis of a result (Occurrence::basis), in the vocabulary of review section 5.3.
+std::string basis_text(uint16_t b) {
+  std::string out;
+  auto one = [&](uint16_t bit, const char* name) {
+    if ((b & bit) != 0) out += (out.empty() ? "" : ", ") + std::string(name);
+  };
+  one(KZ_SUMMARY_FLAG_BASIS_DIRECT_CAPTURE, "direct-capture (recorded argument values only)");
+  one(KZ_SUMMARY_FLAG_BASIS_STATE_ORDER, "state-order (observed state, synchronization and creation order, identity)");
+  one(KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER, "return-derived-order (state replay with a reads_from edge from a returned code and equal ids)");
+  one(KZ_SUMMARY_FLAG_OUTCOME_NARROWED, "outcome-narrowed (the returned code fixed a condition)");
+  return out.empty() ? "-" : out;
+}
+
+std::string assumptions_text(const Occurrence& o) {
+  std::string out;
+  auto add = [&](const std::string& x) { out += (out.empty() ? "" : ", ") + x; };
+  if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION) != 0) {
+    std::string v;
+    for (const std::string& n : o.via_names) v += (v.empty() ? "" : ",") + n;
+    add("via key separation (" + v + ")");
+  }
+  if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY) != 0) add("owner identity targets (A-OWNER)");
+  if ((o.basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0) add("reads-from edges (RF)");
+  if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_ROLE) != 0) add("role " + o.context);
+  return out.empty() ? "-" : out;
 }
 
 std::string describe(const Trace& t, uint64_t id) {
@@ -3530,8 +4060,11 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       if (!outs.empty()) out += "  out" + outs + "\n";
     }
     if (real) {
+      if (!o.narrowing.empty()) out += "  narrowing " + o.narrowing + "\n";
       if (!o.allowed_note.empty()) out += "  allowed " + o.allowed_note + "\n";
       out += "  summary " + render_observation(o.summary) + " flags " + set_text("KZ_SUMMARY_FLAG", o.summary.flags) + "\n";
+      out += "  basis " + basis_text(o.basis) + "\n";
+      out += "  assumptions " + assumptions_text(o) + "\n";
       out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";
       out += "  identity exec " + o.actor + " creator " + (o.creator.empty() ? std::string("(not recorded)") : o.creator) + " owner " + enum_text_of("KZ_OWNER_LEVEL", o.owner_level);
       if (o.has_owner_key) out += " " + key_text(o.owner_key);
@@ -3540,6 +4073,9 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       out += "  relation " + enum_text_of("KZ_EXEC_RELATION", o.relation);
       if (o.relation != KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED) out += " owners " + enum_text_of("KZ_OWNER_LEVEL", o.relation_level);
       out += ": " + o.relation_note + "\n";
+      for (const RelationItem& it : o.relation_items)
+        out += std::string("    ") + relation_item_text(it.kind) + (it.read_from ? " read-from" : "") + " " + it.actor + " #" + std::to_string(it.event) + " " + it.what + " -- " +
+               enum_text_of("KZ_EXEC_RELATION", it.pair) + ": " + it.pair_note + "\n";
       std::string pr, un;
       for (const std::string& x : o.probes) pr += (pr.empty() ? "" : ", ") + x;
       for (const std::string& x : o.unobserved) un += (un.empty() ? "" : "; ") + x;
@@ -3678,7 +4214,7 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       continue;
     }
     if (tok[0] == "start_evidence" || tok[0] == "adequacy" || tok[0] == "observed" || tok[0] == "owner_level" || tok[0] == "owner_id" || tok[0] == "owner_core" ||
-        tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order" || tok[0] == "closure" || tok[0] == "unobserved") {
+        tok[0] == "creator" || tok[0] == "loss" || tok[0] == "order" || tok[0] == "closure" || tok[0] == "unobserved" || tok[0] == "not_app") {
       if (out->record != RecordKind::Real) return line_error(line_no, "'" + tok[0] + "' belongs to a real record: 'record real' must come first");
       if (tok[0] == "start_evidence") {
         static const char* names[] = {"none", "init", "state-capture", "declared"};
@@ -3717,6 +4253,12 @@ Status parse_trace_text(const std::string& text, Trace* out) {
           c.writers = static_cast<uint32_t>(w);
           c.covered = static_cast<uint32_t>(cv);
           i = 5;
+          int64_t sep = 0;
+          if (i < tok.size() && tok[i].rfind("separated=", 0) == 0) {
+            if (!parse_int(tok[i].substr(10), &sep) || sep < 0 || sep > cv) return line_error(line_no, "closure: separated=K needs 0 <= K <= covered");
+            c.separated = static_cast<uint32_t>(sep);
+            ++i;
+          }
         }
         std::string rest;
         for (; i < tok.size(); ++i) rest += (rest.empty() ? "" : " ") + tok[i];
@@ -3746,6 +4288,11 @@ Status parse_trace_text(const std::string& text, Trace* out) {
       } else if (tok[0] == "creator") {
         if (tok.size() != 3) return line_error(line_no, "expected: creator ACTOR CREATING_ACTOR");
         out->creators[tok[1]] = tok[2];
+      } else if (tok[0] == "not_app") {
+        if (tok.size() < 3) return line_error(line_no, "expected: not_app ACTOR EVIDENCE ...");
+        std::string ev;
+        for (size_t i = 2; i < tok.size(); ++i) ev += (ev.empty() ? "" : " ") + tok[i];
+        out->not_app[tok[1]] = ev;
       } else {  // loss
         if (tok.size() != 2 || (tok[1] != "begin" && tok[1] != "end")) return line_error(line_no, "expected: loss begin|end");
         const bool open = !out->losses.empty() && out->losses.back().end == kNoEvent;
@@ -3821,8 +4368,8 @@ std::string trace_text(const Trace& t) {
     for (const std::string& pt : t.observed_points) out += "observed " + pt + "\n";
     auto closure = [&](const char* what, const std::map<std::string, StaticClosure>& m) {
       for (const auto& kv : m) {
-        out += std::string("closure ") + what + " " + kv.first + " writers=" + std::to_string(kv.second.writers) + " covered=" + std::to_string(kv.second.covered) + " " +
-               (kv.second.status.empty() ? std::string("-") : kv.second.status) + "\n";
+        out += std::string("closure ") + what + " " + kv.first + " writers=" + std::to_string(kv.second.writers) + " covered=" + std::to_string(kv.second.covered) +
+               (kv.second.separated != 0 ? " separated=" + std::to_string(kv.second.separated) : std::string()) + " " + (kv.second.status.empty() ? std::string("-") : kv.second.status) + "\n";
         for (const std::string& u : kv.second.unobserved) out += std::string("unobserved ") + what + " " + kv.first + " " + u + "\n";
       }
     };
@@ -3835,6 +4382,7 @@ std::string trace_text(const Trace& t) {
     for (const auto& kv : t.owner_ids) out += "owner_id " + kv.first + " " + num(static_cast<int64_t>(kv.second)) + "\n";
     for (const auto& kv : t.owner_core) out += "owner_core " + kv.first + (kv.second ? " yes" : " no") + "\n";
     for (const auto& kv : t.creators) out += "creator " + kv.first + " " + kv.second + "\n";
+    for (const auto& kv : t.not_app) out += "not_app " + kv.first + " " + kv.second + "\n";
   }
   for (const auto& kv : t.ref_consts) out += "const " + kv.first + " " + num(kv.second) + "\n";
   for (const auto& kv : t.owners) {

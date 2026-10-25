@@ -288,6 +288,25 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   }
   for (const kz_app_owner& o : owners)
     if (o.thread < threads.size()) report->identities[o.thread].creator_thread = o.creator_thread;
+  // The initial thread of the process (P10, 2026-10-25): where the profile's context declares `initial_thread not_app`
+  // (its sources show that the thread that runs main is never a task of the framework, so never an application's task; SPEC 1.2
+  // T_raw), the thread whose id is the process id (the thread-group leader: gettid(2) equals getpid(2) for it), seen
+  // as the first incarnation of that id, is stated not to be an application's task.  A thread for which the record
+  // states a determined owner keeps it (the declaration and the record would disagree: reported, not resolved).
+  if (p.context.present && p.context.initial_thread_not_app) {
+    std::string cites;
+    for (const std::string& n : p.context.not_app_prov) cites += (cites.empty() ? "" : ", ") + n;
+    for (size_t i = 0; i < threads.size(); ++i) {
+      if (threads[i].tid != threads[i].pid || threads[i].generation != 0) continue;
+      const std::string& a = thread_names[i];
+      if (out->owner_levels.count(a) != 0) {
+        report->not_app_lines.push_back(a + ": the initial thread, but the record states a determined owner: kept as the record states it (not resolved)");
+        continue;
+      }
+      out->not_app[a] = "the initial thread of process " + std::to_string(threads[i].pid) + " (thread id = process id); profile context initial_thread not_app: " + cites;
+      report->not_app_lines.push_back(a + ": " + out->not_app[a]);
+    }
+  }
 
   // ---- spawn out-parameters bound by the id (header, "spawn out") ----
   std::map<uint32_t, uint32_t> assigned_by_create;  // RAW_EVENTS index of a spawn-create event -> the id
@@ -572,6 +591,7 @@ std::string report_text(const RealTraceReport& r) {
                                 std::to_string(r.threads - r.owners_core - r.owners_not_core)
                           : std::string("not established (no basis symbols or no core request caller given)")) +
          "\n";
+  for (const std::string& l : r.not_app_lines) out += "not an application's task: " + l + "\n";
   out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies; a kind's start state comes from an observed effect on all of it)" : "not shown to be the process start (start state unknown)") + "\n";
   for (const std::string& l : r.lifetime_lines) out += l + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +

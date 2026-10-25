@@ -16,12 +16,52 @@ op CFE_EVS_SendEventWithAppID(EventID, EventType, stamp AppID: Id<es.app>, Spec)
   # AppId that CFE_ES_AppID_ToIndex rejects, which CFE_ResourceId_ToIndex does when Id - base > MAX.
   conjunct id_valid: valid(arg.AppID) lp capture prov evs_utils_getbyid, es_appid_toindex_fn, resid_toindex_fn;
   conjunct slot_registered: state(evs.reg(arg.AppID)) = REG lp at fn("CFE_EVS_SendEventWithAppID").call("EVS_AppDataIsMatch") prov evs_send_check, evs_utils_ismatch;
-  outcome CFE_SUCCESS: ready;
-  outcome CFE_EVS_APP_ILLEGAL_APP_ID: not_ready(id_valid) documented "retval CFE_EVS_APP_ILLEGAL_APP_ID of CFE_EVS_SendEventWithAppID; the code returns it before it builds any event packet" prov evs_h_retval;
-  outcome CFE_EVS_APP_NOT_REGISTERED: not_ready(slot_registered) documented "retval CFE_EVS_APP_NOT_REGISTERED of CFE_EVS_SendEventWithAppID" prov evs_h_retval;
+  # The applicability conditions of the mappings that may fix a conjunct (P1, adopted conditionally 2026-10-25,
+  # PI_DECISIONS_RESOLVED_20261025.md; review section 5.2).  Read at the pinned cFE (cfe_evs.c L169-L214): a NULL Spec
+  # returns CFE_EVS_INVALID_PARAMETER first (L180-L183), so each code below comes from one path; the checks read the
+  # slot of the AppID the call received, without a lock (L185-L194), so the state a code implies is that at the
+  # check, inside the call, never after its return.  The record must carry the AppID (the capture site or the call).
+  # The implication is the API's own (context any).
+  outcome CFE_SUCCESS: ready narrow {
+    api "CFE_EVS_SendEventWithAppID";
+    source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+    branch "Spec not NULL; EVS_GetAppDataByID(AppID) not NULL (CFE_ES_AppID_ToIndex succeeded); EVS_AppDataIsMatch (the slot holds AppID); then the event is filtered (Status stays CFE_SUCCESS) or a squelch token sends it";
+    context any;
+    captured AppID;
+    holds_at return;
+    prov evs_send_fn, evs_send_check, evs_send_tail, evs_utils_getbyid, evs_utils_ismatch;
+  };
+  outcome CFE_EVS_APP_ILLEGAL_APP_ID: not_ready(id_valid) documented "retval CFE_EVS_APP_ILLEGAL_APP_ID of CFE_EVS_SendEventWithAppID; the code returns it before it builds any event packet" prov evs_h_retval
+    narrow {
+      api "CFE_EVS_SendEventWithAppID";
+      source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+      branch "Spec not NULL; EVS_GetAppDataByID(AppID) is NULL: CFE_ES_AppID_ToIndex rejected the AppID (CFE_ResourceId_ToIndex: Id - base above the maximum serial)";
+      context any;
+      captured AppID;
+      holds_at return;
+      prov evs_send_fn, evs_send_check, evs_utils_getbyid, es_appid_toindex_fn, resid_toindex_fn;
+    };
+  outcome CFE_EVS_APP_NOT_REGISTERED: not_ready(slot_registered) documented "retval CFE_EVS_APP_NOT_REGISTERED of CFE_EVS_SendEventWithAppID" prov evs_h_retval
+    narrow {
+      api "CFE_EVS_SendEventWithAppID";
+      source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+      branch "Spec not NULL; a slot for AppID exists but EVS_AppDataIsMatch is false; EVS_NotRegistered always returns CFE_EVS_APP_NOT_REGISTERED";
+      context any;
+      captured AppID;
+      holds_at return;
+      prov evs_send_fn, evs_send_check, evs_utils_getbyid, evs_utils_ismatch, evs_notregistered;
+    };
   outcome CFE_EVS_INVALID_PARAMETER: error;
   # Returned after both conjuncts held: the event was rate-limited (cfe_evs.c:207-210).  Not documented in cfe_evs.h.
-  outcome CFE_EVS_APP_SQUELCHED: ready;
+  outcome CFE_EVS_APP_SQUELCHED: ready narrow {
+    api "CFE_EVS_SendEventWithAppID";
+    source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+    branch "Spec not NULL; both checks passed; the event is not filtered and no squelch token is left";
+    context any;
+    captured AppID;
+    holds_at return;
+    prov evs_send_fn, evs_send_check, evs_send_squelch, evs_send_tail;
+  };
   prov evs_send_fn, evs_send_check, evs_send_squelch, evs_utils_getbyid, evs_utils_ismatch, sb_api_event_site;
 }
 

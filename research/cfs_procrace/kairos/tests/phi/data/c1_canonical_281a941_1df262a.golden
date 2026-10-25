@@ -289,6 +289,38 @@ prov osal_api_init_countsem {
   sha256 "94804c9235d0cae3690daf7e8ebed06ed9937c89aad0332ae56b4c887677bb85";
   note "OS_API_Init calls OS_CountSemAPI_Init for the counting semaphore type (after OS_ObjectIdInit)";
 }
+prov osal_argcheck_macros {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-macros.h";
+  lines 122 137;
+  sha256 "7fdcf54f4baec29dc09f32daf95536d9663f5ffdbcf7e26c5c953e1028391876";
+  note "ARGCHECK returns the code when the condition fails; LENGTHCHECK(str, len, code) fails when no NUL is among the first len bytes (a name of len characters or more)";
+}
+prov osal_bsp_main {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/bsp/generic-linux/src/bsp_start.c";
+  lines 233 244;
+  sha256 "7612dcb874b357bed263cd353ffefd86275cf300347408c1cb263526fb282f9b";
+  note "main() of the process (the initial thread) calls OS_Application_Startup, then OS_Application_Run, the background task";
+}
+prov osal_bugcheck_off {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/inc/osapi-macros.h";
+  lines 35 43;
+  sha256 "1f1d6471dfacf8d2c97e485500549290b69ee5f6c97251bdeb8c0f3927b3eece";
+  note "with OSAL_CONFIG_BUGCHECK_DISABLE, BUGCHECK (and so OS_CHECK_POINTER) is empty: a NULL name then reaches OS_ObjectIdFindByName";
+}
+prov osal_check_pointer {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/inc/os-shared-globaldefs.h";
+  lines 107 107;
+  sha256 "669449673990259c7fd64715fd24d5563fbf6a629d5cee0fdc3f21a13fe58113";
+  note "OS_CHECK_POINTER(ptr) is BUGCHECK((ptr) != NULL, OS_INVALID_POINTER)";
+}
 prov osal_cleanup_object {
   tier code-derived;
   kind code_pattern;
@@ -305,6 +337,14 @@ prov osal_convert_token_exclusive {
   sha256 "86304b2e8b3f3117065057a3781b6608585df20bcf6d433482cf7b480c3768b7";
   note "OS_ObjectIdConvertToken writes active_id (RESERVED) only in EXCLUSIVE lock mode";
 }
+prov osal_convert_token_global {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 445 452;
+  sha256 "c560a89f327d2687ebd6cbb03728fb72ec47bfe51ad373db647c5631e842ef62";
+  note "OS_ObjectIdConvertToken: for a lock mode other than EXCLUSIVE an id equal to the record's active_id is OS_SUCCESS";
+}
 prov osal_convert_token_restore {
   tier code-derived;
   kind code_pattern;
@@ -312,6 +352,14 @@ prov osal_convert_token_restore {
   lines 512 519;
   sha256 "53eccaa81903b5313b57359f2aeef8306604be86bd196ff47c6ddae783cb0f6d";
   note "on failure in EXCLUSIVE mode OS_ObjectIdConvertToken restores the record's id from the token";
+}
+prov osal_convert_token_valid {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 392 398;
+  sha256 "d9bdd88c313a7b90f16f84c0b6cec228a248430f806b5a927f0844a58ad4cde0";
+  note "OS_ObjectIdConvertToken: an id that is not valid (a RESERVED record) gives OS_ERR_INCORRECT_OBJ_STATE";
 }
 prov osal_countsem_api_init {
   tier code-derived;
@@ -507,6 +555,14 @@ prov osal_find_by_name {
   sha256 "be753d8be2645a7ff0e1ba952c82c9ccaddb512e70669b215ad8967af18e3b7b";
   note "OS_ObjectIdFindByName: OS_ObjectIdGetByName; on success the out-parameter receives the id";
 }
+prov osal_find_by_name_checks {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 966 972;
+  sha256 "f7cf352b47bf332b2672a196fa9bfd37f8071479240aa6fdca0843198bf50118";
+  note "OS_ObjectIdFindByName: calling it with a NULL name is allowed; ARGCHECK(name, OS_ERR_NAME_NOT_FOUND) returns OS_ERR_NAME_NOT_FOUND for a NULL name before any search; LENGTHCHECK(name, OS_MAX_API_NAME, OS_ERR_NAME_TOO_LONG)";
+}
 prov osal_find_next_free {
   tier code-derived;
   kind code_pattern;
@@ -522,6 +578,22 @@ prov osal_find_next_match {
   lines 538 568;
   sha256 "62b956c4dfc61ff0d8bd05ee70425c2f35132518d04d9d53f50e8ada10f9a439";
   note "OS_ObjectIdFindNextMatch: the search runs over the records of the token's object type only; a record counts only if its active_id is defined; on a match the token's obj_id is the record's active_id, else OS_ERR_NAME_NOT_FOUND";
+}
+prov osal_get_by_name {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 948 951;
+  sha256 "b300d4ad1ffab9b8d80913a9fce1856a892747604a931dbe7e5f6e253da10391";
+  note "OS_ObjectIdGetByName: the search with OS_ObjectNameMatch and the name";
+}
+prov osal_get_by_search {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-idmap.c";
+  lines 910 934;
+  sha256 "8c1b6e74ecf1ee80632a35fde7486090fbc143d2046c09e8f383480e32c120f9";
+  note "OS_ObjectIdGetBySearch: OS_ObjectIdFindNextMatch under the global lock of the type; on a match OS_ObjectIdConvertToken decides the code, otherwise the search's OS_ERR_NAME_NOT_FOUND is returned";
 }
 prov osal_id_defined {
   tier code-derived;
@@ -539,6 +611,22 @@ prov osal_index_mask_shift {
   sha256 "9f0362ed60ecc258f5da6601b9d66619b3b17e21b96633ed651a164a52e92987";
   note "OS_OBJECT_INDEX_MASK 0xFFFF, OS_OBJECT_TYPE_SHIFT 16";
 }
+prov osal_max_api_name_def {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/osconfig.h.in";
+  lines 156 163;
+  sha256 "db9da0ffc5c6264fa85bbfb450c89c8737cddaedcb78a9985b145e7df46fd606";
+  note "OS_MAX_API_NAME is OSAL_CONFIG_MAX_API_NAME and includes the terminating NUL";
+}
+prov osal_max_api_name_option {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/default_config.cmake";
+  lines 289 292;
+  sha256 "c1612cc413df6dfa9a7a45bdaec3078717908f6cfa4afdf3e4be736c05483367";
+  note "OSAL_CONFIG_MAX_API_NAME defaults to 20 (a cache value a build may override: the replay takes OS_MAX_API_NAME from --const, plan/C1_build_manifest.md section 6)";
+}
 prov osal_name_match {
   tier code-derived;
   kind code_pattern;
@@ -554,6 +642,14 @@ prov osal_objectid_init {
   lines 118 123;
   sha256 "a2a838996c06fdb7b9ae15ddeb5c2fa326758e44c1faa74b4a351c6d77f5be71";
   note "OS_ObjectIdInit: memset of the whole OS_common_table (every record of every object type: active_id, name_entry and creator zero) and of the per-type state";
+}
+prov osal_pthread_create {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/src/os-impl-tasks.c";
+  lines 543 543;
+  sha256 "bf6685d59f473ba13bb5b8823e878acbde11552b164869cac52762b10b84b16e";
+  note "OS_Posix_InternalTaskCreate_Impl: every task is a new thread made by pthread_create";
 }
 prov osal_pthread_entry {
   tier code-derived;
@@ -578,6 +674,14 @@ prov osal_task_entry_def {
   lines 124 140;
   sha256 "3bf9fc898ea14c151819ca508d616e6e48416577f41095624c1340eb7535e5ce";
   note "OS_TaskEntryPoint(task_id) runs first in the new task";
+}
+prov osal_task_register {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 95 98;
+  sha256 "d4ce090611e22482643068551c52233ed7277107516228583927a6a349131de9";
+  note "OS_TaskPrepare: OS_TaskRegister_Impl(task_id) in the new task (the only other call, in osapi-timebase.c, runs in the timebase helper thread)";
 }
 prov osal_transaction_finish {
   tier code-derived;
@@ -741,10 +845,12 @@ const OS_ERR_NAME_TOO_LONG = -13 prov osal_err_name_too_long;
 const OS_ERR_NO_FREE_IDS = -14 prov osal_err_no_free_ids;
 const OS_INVALID_POINTER = -2 prov osal_err_invalid_pointer;
 const OS_INVALID_SEM_VALUE = -20 prov osal_err_invalid_sem_value;
+const OS_MAX_API_NAME = ref eval "OS_MAX_API_NAME" in "osal/src/os/shared/src/osapi-idmap.c" prov osal_find_by_name_checks, osal_max_api_name_def, osal_max_api_name_option;
 const OS_SEM_FAILURE = -6 prov osal_err_sem_failure;
 const OS_SUCCESS = 0 prov osal_err_success;
 context {
   owner_kind es.app;
+  initial_thread not_app prov osal_bsp_main, osal_pthread_create, osal_pthread_entry, osal_task_entry_def, osal_task_register;
   prov es_start_table_loop;
 }
 scope {
@@ -852,10 +958,26 @@ op OS_CountSemDelete(sem_id) {
 op OS_CountSemGetIdByName(out sem_id, key sem_name: Str) {
   bind symbol "OS_CountSemGetIdByName";
   conjunct exists: state(osal.countsem(arg.sem_name)) = LIVE lp at fn("OS_CountSemGetIdByName").call("OS_ObjectIdFindByName") prov osal_countsem_getidbyname_def, osal_find_by_name;
-  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname;
+  outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists) documented "retval OS_ERR_NAME_NOT_FOUND of OS_CountSemGetIdByName: the name was not found in the table" prov osal_countsem_h_getidbyname narrow {
+    api "OS_CountSemGetIdByName";
+    source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+    branch "name not NULL (so not the ARGCHECK of a NULL name, which returns the same code without a search) and shorter than OS_MAX_API_NAME; OS_ObjectIdFindNextMatch over the counting semaphore records found none with a defined active_id and the name";
+    context any;
+    captured sem_name text length < OS_MAX_API_NAME;
+    holds_at return;
+    prov osal_argcheck_macros, osal_bugcheck_off, osal_check_pointer, osal_countsem_getidbyname_def, osal_countsem_type, osal_find_by_name, osal_find_by_name_checks, osal_find_next_match, osal_get_by_name, osal_get_by_search, osal_id_defined, osal_name_match;
+  };
   outcome OS_ERR_NAME_TOO_LONG: error documented "retval OS_ERR_NAME_TOO_LONG of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
   outcome OS_INVALID_POINTER: error documented "retval OS_INVALID_POINTER of OS_CountSemGetIdByName" prov osal_countsem_h_getidbyname;
-  outcome OS_SUCCESS: ready;
+  outcome OS_SUCCESS: ready narrow {
+    api "OS_CountSemGetIdByName";
+    source osal rev "b44f4ce74a309ff93c985539ee8816a2fe92ed23", "f34759d6d6f7087e81afda94eccf7554e013cbe6";
+    branch "both pointers not NULL; OS_ObjectIdFindByName: ARGCHECK and LENGTHCHECK passed, OS_ObjectIdGetByName under the global lock: OS_ObjectIdFindNextMatch found a counting semaphore record with a defined active_id and the name, and OS_ObjectIdConvertToken accepted it (a valid id equal to the record's)";
+    context any;
+    captured sem_name text length < OS_MAX_API_NAME;
+    holds_at return;
+    prov osal_argcheck_macros, osal_convert_token_global, osal_convert_token_valid, osal_countsem_getidbyname_def, osal_countsem_type, osal_find_by_name, osal_find_by_name_checks, osal_find_next_match, osal_get_by_name, osal_get_by_search, osal_id_defined, osal_name_match;
+  };
   prov osal_countsem_getidbyname_def, osal_countsem_h_getidbyname;
 }
 op OS_ObjectIdInit() {

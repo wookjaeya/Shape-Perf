@@ -220,7 +220,7 @@ void test_round_trip() {
   const std::string dump = kz::dump_container(c);
   KZ_CHECK(dump.find("kind=verdicts") != std::string::npos);
   KZ_CHECK(dump.find("relation=inter-application") != std::string::npos);
-  const bool flags_shown = dump.find("flags={real-record,outcome-narrowed,relation-inferred,core-status-unknown}") != std::string::npos;
+  const bool flags_shown = dump.find("flags={real-record,outcome-narrowed,relation-inferred,core-status-unknown,basis-direct-capture}") != std::string::npos;
   KZ_CHECK(flags_shown);
   if (!flags_shown) std::fprintf(stderr, "%s\n", dump.c_str());
   KZ_CHECK(dump.find("exec_name=\"X\"") != std::string::npos);

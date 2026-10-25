@@ -352,13 +352,22 @@ void check_relation(const Run& r, uint8_t want, const std::string& note, const c
   if (!ok) std::fprintf(stderr, "%s: relation %u (%s), wanted %u (%s)\n%s\n", what, r.occ().relation, r.occ().relation_note.c_str(), want, note.c_str(), r.dump.c_str());
 }
 
+// The earlier reading of the execution relation (every observed write of the key counts), kept for sensitivity
+// since the P10 decision of 2026-10-25; the tests below that name it check that reading.
+kz::eval::Options all_writes() {
+  kz::eval::Options o;
+  o.relation_rule = kz::eval::Options::RelationRule::AllWrites;
+  return o;
+}
+
 // The execution relation (SPEC 1.1 "Execution relations", 1.10 item 10, ADR-056): between the executing task
-// of the use and the actors whose effects registered the occurrence's key, with their app_owner.
+// of the use and the actors whose effects registered the occurrence's key, with their app_owner (the reading
+// before P10, all writes counted).
 void test_execution_relation() {
   const Profile p = load(kzmini::files());
   const uint16_t inferred = KZ_SUMMARY_FLAG_RELATION_INFERRED, core_unknown = KZ_SUMMARY_FLAG_CORE_STATUS_UNKNOWN;
   // same task: W registers its own slot and sends with its own identity
-  const Run same = replay(p, preamble() + kSetup + kRegister + send(kOk));
+  const Run same = replay(p, preamble() + kSetup + kRegister + send(kOk), all_writes());
   check_relation(same, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "same task");
   KZ_CHECK(same.occ().counterparts == std::vector<std::string>{"W"});
   KZ_CHECK_EQ(static_cast<int>(same.occ().relation_level), static_cast<int>(KZ_OWNER_LEVEL_CONFIRMED));
@@ -366,35 +375,35 @@ void test_execution_relation() {
   KZ_CHECK(same.dump.find("relation intra-application owners confirmed: same task (W)") != std::string::npos);
   // same application, another task: V belongs to the application W registered
   const std::string v = "owner V 2\nowner_level V confirmed\n";
-  const Run app = replay(p, preamble() + v + kSetup + kRegister + send_by("V", kOk));
+  const Run app = replay(p, preamble() + v + kSetup + kRegister + send_by("V", kOk), all_writes());
   check_relation(app, KZ_EXEC_RELATION_INTRA_APPLICATION, "same application", "same application");
   check_summary(app, "NO_VIOLATION_IN_CHECKED_PREFIX", "same application");
   // different applications: X belongs to slot 3 and sends with W's identity
   const std::string x = "owner X 3\nowner_level X confirmed\n";
-  const Run inter = replay(p, preamble() + x + kSetup + kRegister + send_by("X", kOk));
+  const Run inter = replay(p, preamble() + x + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(inter, KZ_EXEC_RELATION_INTER_APPLICATION, "core status not established", "different applications");
   KZ_CHECK((inter.occ().summary.flags & core_unknown) != 0);
-  const Run core = replay(p, preamble() + x + "owner_core W yes\n" + kSetup + kRegister + send_by("X", kOk));
+  const Run core = replay(p, preamble() + x + "owner_core W yes\n" + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(core, KZ_EXEC_RELATION_CORE_APPLICATION, "core service", "a core service");
   KZ_CHECK((core.occ().summary.flags & core_unknown) == 0);
-  const Run neither = replay(p, preamble() + x + "owner_core W no\nowner_core X no\n" + kSetup + kRegister + send_by("X", kOk));
+  const Run neither = replay(p, preamble() + x + "owner_core W no\nowner_core X no\n" + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(neither, KZ_EXEC_RELATION_INTER_APPLICATION, "neither a core service", "neither core");
   KZ_CHECK((neither.occ().summary.flags & core_unknown) == 0);
   // the creating executor: W created X
-  const Run created = replay(p, preamble() + x + "creator X W\n" + kSetup + kRegister + send_by("X", kOk));
+  const Run created = replay(p, preamble() + x + "creator X W\n" + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(created, KZ_EXEC_RELATION_CREATION_FRAMEWORK, "one created the other", "creator");
   // an inferred owner is evidence, and the summary carries the level
-  const Run inf = replay(p, preamble() + "owner X 3\nowner_level X inferred\n" + kSetup + kRegister + send_by("X", kOk));
+  const Run inf = replay(p, preamble() + "owner X 3\nowner_level X inferred\n" + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(inf, KZ_EXEC_RELATION_INTER_APPLICATION, "different applications", "inferred owner");
   KZ_CHECK_EQ(static_cast<int>(inf.occ().relation_level), static_cast<int>(KZ_OWNER_LEVEL_INFERRED));
   KZ_CHECK((inf.occ().summary.flags & inferred) != 0);
   // undetermined stays undetermined: the user's owner, a registrar's owner, no registration at all
-  const Run user = replay(p, preamble() + "owner X 3\n" + kSetup + kRegister + send_by("X", kOk));
+  const Run user = replay(p, preamble() + "owner X 3\n" + kSetup + kRegister + send_by("X", kOk), all_writes());
   check_relation(user, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of the executing task X is undetermined", "user undetermined");
   KZ_CHECK((user.occ().summary.flags & inferred) == 0);
-  const Run writer = replay(p, preamble() + kSetup + kRegister + "Y sign_in call\nY sign_in.set_reg pt\nY sign_in ret result=0\n" + send(kOk));
+  const Run writer = replay(p, preamble() + kSetup + kRegister + "Y sign_in call\nY sign_in.set_reg pt\nY sign_in ret result=0\n" + send(kOk), all_writes());
   check_relation(writer, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "a write of reg by Y whose target the record does not establish", "registrar undetermined");
-  const Run none = replay(p, preamble() + kSetup + send(kNotReadyB));
+  const Run none = replay(p, preamble() + kSetup + send(kNotReadyB), all_writes());
   check_relation(none, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "no registration or publication of reg[0x1002]", "never registered");
   check_summary(none, "OBSERVED_VIOLATION", "never registered");  // the violation and the undetermined relation are reported apart
   // The collector's merged order leaves the slot's identity open (T0 wrote it, and no edge orders T0 with W), so
@@ -405,15 +414,16 @@ void test_execution_relation() {
   // the option the state stays open (the reading before): the relation is computed, the observation is not made
   // more decisive.
   const std::string merged = preamble("start=known writers=covered aliases=covered lifetime=known", true, true, true, false);
-  const Run open = replay(p, merged + kSetup + kRegister + send(kBadArg));
+  const Run open = replay(p, merged + kSetup + kRegister + send(kBadArg), all_writes());
   check_relation(open, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "whose target the record does not establish", "merged order, no identity value");
-  const Run named = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg));
+  const Run named = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg), all_writes());
   check_relation(named, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "merged order, identity value");
   check_status(named, OccStatus::Ready, "merged order, identity value");
   KZ_CHECK(named.dump.find("owner-identity") != std::string::npos);
   KZ_CHECK((named.occ().summary.flags & KZ_SUMMARY_FLAG_OUTCOME_NARROWED) == 0);
   kz::eval::Options no_identity;
   no_identity.owner_identity_targets = false;
+  no_identity.relation_rule = kz::eval::Options::RelationRule::AllWrites;
   const Run named_off = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg), no_identity);
   check_relation(named_off, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task", "merged order, identity value, option off");
   check_status(named_off, OccStatus::Undetermined, "merged order, identity value, option off");
@@ -421,10 +431,10 @@ void test_execution_relation() {
   KZ_CHECK(named_off.dump.find("owner-identity") == std::string::npos);
   // an inferred owner's identity value fixes nothing
   const Run inferred_id = replay(p, preamble("start=known writers=covered aliases=covered lifetime=known", true, true, false, false) + "owner_level W inferred\nowner_id W 0x1002\n" +
-                                        kSetup + kRegister + send(kBadArg));
+                                        kSetup + kRegister + send(kBadArg), all_writes());
   check_status(inferred_id, OccStatus::Undetermined, "merged order, inferred owner's identity value");
   // a model trace computes no relation and prints none
-  const Run model = replay(p, std::string(kSetup) + kRegister + send(kOk));
+  const Run model = replay(p, std::string(kSetup) + kRegister + send(kOk), all_writes());
   KZ_CHECK_EQ(static_cast<int>(model.occ().relation), static_cast<int>(KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED));
   KZ_CHECK(model.dump.find("relation") == std::string::npos);
 }
@@ -552,7 +562,7 @@ void test_captured_location_relation() {
   // X passes the value 0 it read from Box.id; W publishes Box.id (after X's use in the merged order, which is
   // not the execution order and is not read by the relation); nobody registers reg[0]
   const std::string cap = "X send.who_valid pt arg.Who=0 value=0 cell=@Box.id\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
-  const Run r = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\n");
+  const Run r = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\n", all_writes());
   check_summary(r, "OBSERVED_VIOLATION", "captured, published");
   check_relation(r, KZ_EXEC_RELATION_CORE_APPLICATION, "no registration or publication of reg[0] in the record; the passed value was read from Box.id, written by W",
                  "captured, published");
@@ -561,33 +571,33 @@ void test_captured_location_relation() {
   for (const kz::eval::ConjunctResult& c : r.occ().conjuncts) cell_kept = cell_kept || (c.label == "who_valid" && c.cell == "Box.id");
   KZ_CHECK(cell_kept);
   // the same use without the location: no actor is named
-  const Run nocell = replay(p, preamble() + x + kSetup + "X send.who_valid pt arg.Who=0\nX send call arg.Who=0\nX send ret result=0xc0000001\n" + "W box_pub pt\n");
+  const Run nocell = replay(p, preamble() + x + kSetup + "X send.who_valid pt arg.Who=0\nX send call arg.Who=0\nX send ret result=0xc0000001\n" + "W box_pub pt\n", all_writes());
   check_relation(nocell, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "no registration or publication of reg[0] in the record", "no cell");
   KZ_CHECK(nocell.occ().relation_note.find("Box.id") == std::string::npos);
   // a location nobody wrote in the record
-  const Run unwritten = replay(p, preamble() + x + kSetup + cap);
+  const Run unwritten = replay(p, preamble() + x + kSetup + cap, all_writes());
   check_relation(unwritten, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "Box.id, which no recorded write targets", "no write");
   // the writer's owner is undetermined
-  const Run y = replay(p, preamble() + x + kSetup + cap + "Y box_pub pt\n");
+  const Run y = replay(p, preamble() + x + kSetup + cap + "Y box_pub pt\n", all_writes());
   check_relation(y, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of Y, which wrote the captured location, is undetermined", "writer undetermined");
   // a store through a pointer whose location the record does not name may have written any location (an actor
   // already named needs nothing more: its actor set is the same either way)
-  const Run anyloc = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nZ get_id call\nZ get_id.store_ok pt\nZ get_id ret result=0\n");
+  const Run anyloc = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nZ get_id call\nZ get_id.store_ok pt\nZ get_id ret result=0\n", all_writes());
   check_relation(anyloc, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "a write of reg or of a captured location by Z whose target the record does not establish",
                  "unnamed location");
-  const Run named = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nW get_id call\nW get_id.store_ok pt\nW get_id ret result=0\n");
+  const Run named = replay(p, preamble() + x + kSetup + cap + "W box_pub pt\nW get_id call\nW get_id.store_ok pt\nW get_id ret result=0\n", all_writes());
   check_relation(named, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W", "unnamed location by a named writer");
   // a store effect into the location counts like the publication site; the same application is intra
-  const Run store = replay(p, preamble() + x + kSetup + cap + "W init_box call\nW init_box.clear_box pt\nW init_box ret\n");
+  const Run store = replay(p, preamble() + x + kSetup + cap + "W init_box call\nW init_box.clear_box pt\nW init_box ret\n", all_writes());
   check_relation(store, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W", "store effect");
-  const Run self = replay(p, preamble() + x + kSetup + cap + "X box_pub pt\n");
+  const Run self = replay(p, preamble() + x + kSetup + cap + "X box_pub pt\n", all_writes());
   check_relation(self, KZ_EXEC_RELATION_INTRA_APPLICATION, "same task (X)", "own publication");
   // the publication site changes the replayed location: with a value it fixes it (a fixed Box.id), without one
   // the location is open from there on
   const std::string box = "adequacy loc Box.id start=known writers=covered aliases=covered\nobserved init_box.clear_box\nobserved get_id.store_ok\nobserved get_id.store_bad\n";
-  const Run fixed = replay(p, preamble() + box + x + kSetup + "W box_pub pt value=0x1002\n" + cap);
+  const Run fixed = replay(p, preamble() + box + x + kSetup + "W box_pub pt value=0x1002\n" + cap, all_writes());
   KZ_CHECK(fixed.finding("the value loaded from Box.id is 0, the replay of the recorded effects has 0x1002"));
-  const Run open = replay(p, preamble() + box + x + kSetup + "W box_pub pt\n" + cap);
+  const Run open = replay(p, preamble() + box + x + kSetup + "W box_pub pt\n" + cap, all_writes());
   KZ_CHECK(!open.finding("the value loaded from Box.id"));
   KZ_CHECK(open.dump.find("loc Box.id open {effect_unsupported}") != std::string::npos);
 }
@@ -675,17 +685,17 @@ void test_state_from_effects() {
   const std::string x = "owner X 3\nowner_level X confirmed\nowner_core W yes\n";
   const std::string cap = "X send.who_valid pt arg.Who=0 value=0 cell=@Box.id\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
   const std::string writes = "T9 init_box call\nT9 init_box.clear_box pt\nT9 init_box ret\nW box_pub pt\n";
-  const Run counted = replay(p, preamble() + x + kSetup + writes + cap);
-  check_relation(counted, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "P10 current");
+  const Run counted = replay(p, preamble() + x + kSetup + writes + cap, all_writes());
+  check_relation(counted, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "P10 reading: all writes");
   kz::eval::Options alt;
-  alt.relation_clearing_writes = false;
+  alt.relation_rule = kz::eval::Options::RelationRule::NonClearing;
   const Run excluded = replay(p, preamble() + x + kSetup + writes + cap, alt);
   check_relation(excluded, KZ_EXEC_RELATION_CORE_APPLICATION, "1 clearing write(s) not counted (P10 alternative)", "P10 alternative");
   KZ_CHECK(excluded.occ().counterparts == std::vector<std::string>{"W"});
   KZ_CHECK_EQ(excluded.summary(), counted.summary());  // the observation does not depend on P10
   // a writer of the captured location only is named as such, also where the key is registered
   const std::string cap2 = "X send.who_valid pt arg.Who=0x1002 value=0x1002 cell=@Box.id\nX send call arg.Who=0x1002\nX send.who_reg pt\nX send ret result=0\n";
-  const Run both = replay(p, preamble() + x + kSetup + kRegister + writes + cap2);
+  const Run both = replay(p, preamble() + x + kSetup + kRegister + writes + cap2, all_writes());
   check_relation(both, KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED, "the owner of T9, which wrote the captured location, is undetermined", "key registered, location cleared by T9");
   // the alternative counts only the clearing writes that could have been counted: T9's store, not another key's clear
   const std::string y1 = "owner Y 1\nowner_level Y confirmed\nowner_id Y 0x1001\n";
@@ -693,7 +703,60 @@ void test_state_from_effects() {
   check_relation(both_alt, KZ_EXEC_RELATION_CORE_APPLICATION, "written by W; 1 clearing write(s) not counted (P10 alternative)", "P10 alternative, key registered");
 }
 
+// The basis of a result (review section 5.3) and the applicability conditions of a mapping (P1 conditional,
+// 2026-10-25) on the mini profile: unit-test values.
+void test_basis_and_mapping_conditions() {
+  const Profile p = load(kzmini::files());
+  const uint16_t capture = KZ_SUMMARY_FLAG_BASIS_DIRECT_CAPTURE, state = KZ_SUMMARY_FLAG_BASIS_STATE_ORDER, narrowed = KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
+  // a violation decided by the captured value alone; the code agrees independently of it
+  const std::string bad = "X send.who_valid pt arg.Who=0\nX send call arg.Who=0\nX send ret result=0xc0000001\n";
+  const Run v = replay(p, preamble() + "owner X 3\nowner_level X confirmed\n" + kSetup + bad);
+  check_summary(v, "OBSERVED_VIOLATION", "direct capture");
+  KZ_CHECK(v.occ().basis == capture && (v.occ().summary.flags & capture) != 0);
+  KZ_CHECK(v.occ().outcome == kz::eval::OutcomeCheck::Agrees);
+  KZ_CHECK(v.dump.find("  basis direct-capture (recorded argument values only)") != std::string::npos);
+  // the registered identity: the capture and the replayed state
+  const Run s = replay(p, preamble() + kSetup + kRegister + send(kOk));
+  KZ_CHECK(s.occ().basis == (capture | state) && s.occ().outcome == kz::eval::OutcomeCheck::Agrees);
+  KZ_CHECK(s.dump.find("  assumptions -") != std::string::npos);
+  // the registry's start state unknown: the code fixes the registry conjunct
+  const Run n = replay(p, preamble("start=unknown writers=covered aliases=covered lifetime=known") + kSetup + send(kOk));
+  KZ_CHECK(n.occ().basis == (capture | narrowed) && n.occ().outcome == kz::eval::OutcomeCheck::Narrowed);
+  KZ_CHECK(n.occ().narrowing.find("OK under api send, main abcdef0, context any, Who recorded") == 0);
+  // the registration's target fixed by the writer's identity (A-OWNER): a declared assumption of the result
+  const std::string merged = preamble("start=known writers=covered aliases=covered lifetime=known", true, true, true, false);
+  const Run id = replay(p, merged + "owner_id W 0x1002\n" + kSetup + kRegister + send(kBadArg));
+  check_status(id, OccStatus::Ready, "owner identity");
+  KZ_CHECK((id.occ().assumptions & KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY) != 0 && (id.occ().summary.flags & KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY) != 0);
+  KZ_CHECK(id.dump.find("  assumptions owner identity targets (A-OWNER)") != std::string::npos);
+  // a mapping that declares no conditions fixes nothing; it is still checked against what every explanation fixes
+  const Profile bare = load_edited("outcome OK: ready narrow { api \"send\"; source main rev \"abcdef0\"; branch \"both checks passed\"; context any; captured Who; holds_at return; prov code_a; };",
+                                   "outcome OK: ready;");
+  const Run nb = replay(bare, preamble("start=unknown writers=covered aliases=covered lifetime=known") + kSetup + send(kOk));
+  KZ_CHECK(!nb.occ().outcome_narrowed && nb.occ().status == OccStatus::Undetermined);
+  KZ_CHECK(nb.occ().narrowing.find("declares no applicability conditions: the code fixes nothing") != std::string::npos);
+  KZ_CHECK(nb.occ().outcome == kz::eval::OutcomeCheck::Consistent);  // no disagreement, but nothing was checked
+  kz::eval::Options off;
+  off.outcome_narrowing = false;
+  const Run noff = replay(p, preamble("start=unknown writers=covered aliases=covered lifetime=known") + kSetup + send(kOk), off);
+  KZ_CHECK(noff.occ().outcome == kz::eval::OutcomeCheck::Consistent && noff.occ().narrowing.find("(narrowing off: the code fixes nothing)") != std::string::npos);
+  const Run cb = replay(bare, preamble() + kSetup + send(kOk));  // never registered, and the code says ready
+  KZ_CHECK(cb.occ().input_error);
+  // `requires` false in the record: the mapping does not apply
+  const Profile req = load_edited("context any; captured Who; holds_at return; prov code_a; };\n  outcome NOT_READY_A",
+                                  "context any; captured Who; requires arg.Who = 0x1003; holds_at return; prov code_a; };\n  outcome NOT_READY_A");
+  const Run rq = replay(req, preamble("start=unknown writers=covered aliases=covered lifetime=known") + kSetup + send(kOk));
+  KZ_CHECK(!rq.occ().outcome_narrowed && rq.occ().outcome == kz::eval::OutcomeCheck::Inapplicable);
+  KZ_CHECK(rq.occ().narrowing.find("does not apply: requires ") != std::string::npos && rq.occ().narrowing.find(" is false") != std::string::npos);
+  if (rq.occ().narrowing.find(" is false") == std::string::npos) std::fprintf(stderr, "%s\n", rq.occ().narrowing.c_str());
+  // the argument the mapping needs is not recorded: no narrowing
+  const Run noarg = replay(p, preamble("start=unknown writers=covered aliases=covered lifetime=known") + kSetup +
+                                  "W send call\nW send.who_reg pt\nW send ret result=0\n");
+  KZ_CHECK(!noarg.occ().outcome_narrowed && noarg.occ().narrowing.find("carries no value of Who") != std::string::npos);
+}
+
 int main() {
+  test_basis_and_mapping_conditions();
   test_full_adequacy_agrees_with_model();
   test_no_initial_state_default();
   test_recorded_writes_need_adequacy();

@@ -887,3 +887,62 @@ prov evs_utils_context {
   sha256 "b532e09db5187781ee9f039849cbb55629a331e2779e54a6c8e66e58ebe26f44";
   note "EVS_GetCurrentContext: success only if CFE_ES_GetAppID succeeded; the slot and the AppID it returns are those of that AppID";
 }
+
+# ---- 2026-10-25 (PI decisions P1 conditional, P10; PI_DECISIONS_RESOLVED_20261025.md): the code paths behind the
+# applicability conditions of the outcome mappings of CFE_EVS_SendEventWithAppID (20_ops.kzp `narrow`), and the
+# initial thread that is never an application's task (10_kinds.kzp context).  Lines of the pinned tree, each sha256
+# that of `sed -n 'A,Bp' FILE | sha256sum`.
+
+prov evs_notregistered {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs_utils.c";
+  lines 153 182;
+  sha256 "d80c837b934a979c4fcae860b4bbc94ee398220ca3e0fe46ecd385c71aca34d5";
+  note "EVS_NotRegistered: sends at most one not-registered event per application and always returns CFE_EVS_APP_NOT_REGISTERED";
+}
+
+prov evs_send_tail {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/modules/evs/fsw/src/cfe_evs.c";
+  lines 195 212;
+  sha256 "f0da45e606217cee403d3b722d3e2983c392539cbb4731c76d8bf807d95e5d9e";
+  note "after both checks passed: a filtered event leaves Status CFE_SUCCESS; otherwise a squelch token sends the packets (CFE_SUCCESS) or the status is CFE_EVS_APP_SQUELCHED";
+}
+
+prov osal_bsp_main {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/bsp/generic-linux/src/bsp_start.c";
+  lines 233 244;
+  sha256 "7612dcb874b357bed263cd353ffefd86275cf300347408c1cb263526fb282f9b";
+  note "main() of the process (the initial thread) calls OS_Application_Startup, then OS_Application_Run, the background task";
+}
+
+prov osal_task_entry {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 114 138;
+  sha256 "cd8ac0378b7160c6998e8080f324fdbb62e1c5dd27a19e33f8a81195279f14a2";
+  note "OS_TaskEntryPoint: the entry point for all OSAL tasks, called after a task is spawned, the first thing to run in the context of the task itself; it registers the task (OS_TaskPrepare)";
+}
+
+prov osal_task_register {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/shared/src/osapi-task.c";
+  lines 95 98;
+  sha256 "d4ce090611e22482643068551c52233ed7277107516228583927a6a349131de9";
+  note "OS_TaskPrepare: OS_TaskRegister_Impl(task_id) in the new task (the only other call, in osapi-timebase.c, runs in the timebase helper thread)";
+}
+
+prov osal_pthread_entry {
+  tier code-derived;
+  kind code_pattern;
+  file "osal/src/os/posix/src/os-impl-tasks.c";
+  lines 131 140;
+  sha256 "884ef27008c1905e4fabdd0059603124ecf33b796331c0a1ebef6b14edd8305a";
+  note "OS_PthreadTaskEntry: the start routine of the new thread calls OS_TaskEntryPoint";
+}

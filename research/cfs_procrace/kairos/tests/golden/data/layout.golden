@@ -1051,6 +1051,14 @@ flags KZ_SUMMARY_FLAG
   0x20 OUTCOME_NARROWED "outcome-narrowed"
   0x40 RELATION_INFERRED "relation-inferred"
   0x80 CORE_STATUS_UNKNOWN "core-status-unknown"
+  0x100 BASIS_DIRECT_CAPTURE "basis-direct-capture"
+  0x200 BASIS_STATE_ORDER "basis-state-order"
+  0x400 BASIS_RETURN_DERIVED_ORDER "basis-return-derived-order"
+  0x800 ASSUMES_VIA_SEPARATION "assumes-via-key-separation"
+  0x1000 ASSUMES_OWNER_IDENTITY "assumes-owner-identity-targets"
+  0x2000 ASSUMES_ROLE "assumes-role"
+  0x4000 UNCONFIRMED_INFLUENCE "relation-unconfirmed-influence"
+  0x8000 NOT_APP_ACTOR "relation-not-app-actor"
 flags KZ_ADEQ
   0x1 WRITERS_COVERED "writers-covered"
   0x2 ALIASES_COVERED "aliases-covered"
@@ -1906,4 +1914,4 @@ format kz_trust.refutes idx 0
 format kz_trust.bound bound 0
 format kz_obligation.obligation enum KZ_OBL
 format kz_obligation.status enum KZ_TRUST_STATUS
-fingerprint=97f0c4f0d1fdef6e7a4f928cd43017b70b284eaaa78c086a2dbdeda726a8260b
+fingerprint=973654088bd4555f6e609ec1da6a11c73359b6644413322b9ec07b58817f840b

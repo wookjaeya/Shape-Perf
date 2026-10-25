@@ -1,20 +1,20 @@
 profile "c1-bp-b051eb0"
 revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
-hash e1412500910358908e00d1cb72ee04e32c2c2d659148c553e2ad4ef2e00634a4
+hash e5a7568090dbd84bf3eb0b591ef0148dfe488319934b65635d3a2507f6ad37e5
 
-provenance records: 96
-entries with provenance: 57
+provenance records: 109
+entries with provenance: 58
 by strongest cited tier (the best part of the entry):
   contract-backed: 4
   admitted: 1
-  code-derived: 51
+  code-derived: 52
   issue-derived: 0
   researcher: 1
   unreferenced: 0
 by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
   contract-backed: 0
   admitted: 1
-  code-derived: 48
+  code-derived: 49
   issue-derived: 0
   researcher: 8
   unreferenced: 0

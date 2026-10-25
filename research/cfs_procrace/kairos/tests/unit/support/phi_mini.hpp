@@ -131,9 +131,11 @@ op send(Info, stamp Who: Id<slot>, Spec) {
   bind symbol "send";
   conjunct who_valid: valid(arg.Who) lp capture;
   conjunct who_reg: state(reg(arg.Who)) = REG lp at fn("send").call("is_match");
-  outcome OK: ready;
-  outcome NOT_READY_A: not_ready(who_valid) documented "retval NOT_READY_A of send" prov doc_sup;
-  outcome NOT_READY_B: not_ready(who_reg) documented "retval NOT_READY_B of send" prov doc_sup;
+  outcome OK: ready narrow { api "send"; source main rev "abcdef0"; branch "both checks passed"; context any; captured Who; holds_at return; prov code_a; };
+  outcome NOT_READY_A: not_ready(who_valid) documented "retval NOT_READY_A of send" prov doc_sup
+    narrow { api "send"; source main rev "abcdef0"; branch "the id check failed"; context any; captured Who; holds_at return; prov code_a; };
+  outcome NOT_READY_B: not_ready(who_reg) documented "retval NOT_READY_B of send" prov doc_sup
+    narrow { api "send"; source main rev "abcdef0"; branch "the registration check failed"; context any; captured Who; holds_at return; prov code_a; };
   outcome BAD_ARG: error;
   prov code_a, doc_sup;
 }

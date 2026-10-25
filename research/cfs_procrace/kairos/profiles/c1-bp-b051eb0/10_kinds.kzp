@@ -5,6 +5,12 @@ phi 1;
 # the identity space and the table are needed to map an owner to its record key.
 context {
   owner_kind es.app;
+  # The initial thread of the process (P10, 2026-10-25): main() runs OS_Application_Startup and then
+  # OS_Application_Run on it; every OSAL task is a new thread (pthread_create) that registers itself in its own
+  # context (OS_TaskEntryPoint, OS_TaskPrepare), and the initial thread never does: it has no OSAL task record, so it
+  # is no application's task (SPEC 1.2 T_raw, "the PSP main thread").  The record adapter states it for the thread
+  # whose id is the process id; no application name is given to it.
+  initial_thread not_app prov osal_bsp_main, osal_task_entry_def, osal_task_register, osal_pthread_entry, osal_pthread_create;
   prov es_start_table_loop;
 }
 

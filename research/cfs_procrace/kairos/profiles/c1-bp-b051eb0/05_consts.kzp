@@ -13,6 +13,12 @@ const OS_ERR_NAME_TAKEN = -15 prov osal_err_name_taken;
 const OS_ERR_NAME_NOT_FOUND = -17 prov osal_err_name_not_found;
 const OS_INVALID_SEM_VALUE = -20 prov osal_err_invalid_sem_value;
 
+# The length bound of OSAL names (2026-10-25, the applicability conditions of the lookup's outcome mappings,
+# 20_ops.kzp): a build configuration value, resolved in the translation unit that checks it.  The replay takes it
+# from --const OS_MAX_API_NAME=N, from its reference (the four C1 builds: 20, plan/C1_build_manifest.md section 6,
+# the generated osconfig.h); without it the mappings fix nothing.
+const OS_MAX_API_NAME = ref eval "OS_MAX_API_NAME" in "osal/src/os/shared/src/osapi-idmap.c" prov osal_find_by_name_checks, osal_max_api_name_def, osal_max_api_name_option;
+
 # The semaphore names as built: the CF table of the public BP build and BP's defaults agree
 # (plan/C1_build_manifest.md 6: the installed .tbl bytes, bp.so strings).
 const CF_CHANNEL_0_SEM_NAME = "BP0_tsem" prov bp_semcfg_names, bp_cfg_tx_ch0_name, bp_cfg_rx_ch0_name;

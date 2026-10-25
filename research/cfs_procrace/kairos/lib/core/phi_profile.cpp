@@ -140,7 +140,13 @@ bool normalize_profile(Profile* p, std::vector<Diag>* diags) {
         diags->push_back(std::move(d));
         ok = false;
       }
-    for (OutcomeDecl& oc : o.outcomes) sort_unique_strings(&oc.doc_prov);
+    for (OutcomeDecl& oc : o.outcomes) {
+      sort_unique_strings(&oc.doc_prov);
+      sort_unique_strings(&oc.narrow.revs);
+      sort_unique_strings(&oc.narrow.contexts);
+      sort_unique_strings(&oc.narrow.prov);
+      std::stable_sort(oc.narrow.captured.begin(), oc.narrow.captured.end(), [](const NarrowCaptured& a, const NarrowCaptured& b) { return a.param < b.param; });
+    }
   }
   for (RspecDecl& r : p->rspecs) {
     sort_entry(&r);
@@ -151,6 +157,7 @@ bool normalize_profile(Profile* p, std::vector<Diag>* diags) {
     }
   }
   sort_unique_strings(&p->context.prov);
+  sort_unique_strings(&p->context.not_app_prov);
   sort_unique_strings(&p->scope.prov);
   return ok;
 }

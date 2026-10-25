@@ -316,6 +316,7 @@ Status apply_static_closure(const Container& facts, const phi::Profile& p, const
     for (const std::string& x : a.status) out->status += (out->status.empty() ? "" : "; ") + x;
     out->writers = a.writers;
     out->covered = a.covered;
+    out->separated = a.separated;
     out->unobserved = a.unobserved;
     adq->aliases_covered = a.all_complete;
     adq->writers_covered = a.all_complete && a.covered == a.writers;

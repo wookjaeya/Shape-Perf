@@ -736,13 +736,29 @@ KZ_CORE_RECORDS(KZ_RECORD)
  * of the owners it used; absent on a determined relation: every owner it used is `confirmed`).
  * core-status-unknown: the relation is inter-application because the owners differ, but the record did
  * not establish for both owners whether they are core services, so core-application is not excluded
- * (2026-10-24, enum values only). */
+ * (2026-10-24, enum values only).
+ * 2026-10-25 (enum values only; review section 5.3, 8.2, 6.3; PI decisions P1, P10): the basis of the result, more
+ * than one possible -- basis-direct-capture (a fixed condition read only recorded argument values), basis-state-order
+ * (one read replayed state: observed effects, synchronization and creation order, identity), basis-return-derived-order
+ * (that state's order rests on a reads_from edge, an order derived from a returned code), and outcome-narrowed (the
+ * returned code fixed a condition); the declared assumptions it used -- assumes-via-key-separation (`bind ... via`),
+ * assumes-owner-identity-targets (A-OWNER), assumes-role (a role of the call context); and of the execution relation
+ * (P10 rule) -- relation-unconfirmed-influence (a write the record does not link to the object, kept apart) and
+ * relation-not-app-actor (an actor confirmed not to be an application's task: the initial thread). */
 #define KZ_ENUM_SUMMARY_FLAGS(ITEM, P) /* set */                                        \
   ITEM(P, INPUT_ERROR, 0x1, "analysis-input-error") ITEM(P, PARTIAL, 0x2, "partial")       \
   ITEM(P, CALLER_RECORD, 0x4, "caller-record") ITEM(P, ACCEPT, 0x8, "accept")              \
   ITEM(P, REAL_RECORD, 0x10, "real-record") ITEM(P, OUTCOME_NARROWED, 0x20, "outcome-narrowed") \
   ITEM(P, RELATION_INFERRED, 0x40, "relation-inferred")                                  \
-  ITEM(P, CORE_STATUS_UNKNOWN, 0x80, "core-status-unknown")
+  ITEM(P, CORE_STATUS_UNKNOWN, 0x80, "core-status-unknown")                              \
+  ITEM(P, BASIS_DIRECT_CAPTURE, 0x100, "basis-direct-capture")                           \
+  ITEM(P, BASIS_STATE_ORDER, 0x200, "basis-state-order")                                 \
+  ITEM(P, BASIS_RETURN_DERIVED_ORDER, 0x400, "basis-return-derived-order")               \
+  ITEM(P, ASSUMES_VIA_SEPARATION, 0x800, "assumes-via-key-separation")                   \
+  ITEM(P, ASSUMES_OWNER_IDENTITY, 0x1000, "assumes-owner-identity-targets")              \
+  ITEM(P, ASSUMES_ROLE, 0x2000, "assumes-role")                                          \
+  ITEM(P, UNCONFIRMED_INFLUENCE, 0x4000, "relation-unconfirmed-influence")               \
+  ITEM(P, NOT_APP_ACTOR, 0x8000, "relation-not-app-actor")
 
 /* What a record establishes for the resources and locations a condition reads (ADR-055). */
 #define KZ_ENUM_ADEQ(ITEM, P) /* set */                                                 \

@@ -152,6 +152,7 @@ struct RealTraceReport {
   bool closure_given = false;
   std::vector<std::string> closure_lines;  // per kind and location: what the static closure established
   std::vector<std::string> lifetime_lines;  // per kind: whether the lifetime is established, and why not
+  std::vector<std::string> not_app_lines;   // the actors stated not to be an application's task, and why (Trace::not_app)
 };
 
 // Normalized parameter / role name: lower case, without '_'.

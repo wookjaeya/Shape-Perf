@@ -155,3 +155,72 @@ refuted 0: 계획이 강제한 부분이 예측과 다른 결과를 낸 실행�
 - **P11(대기, 정하지 않음)**: 위 §5.2 의 두 읽기. 이 라운드에서 P11 이 바꾸는 것은 확인된 미준비(인스턴스마다 post W1 25 개, W6 25 개)와 보류로 순서가 선 READY 의 근거 종류이며, 실현 여부는 바꾸지 않는다.
 - **P12(대기)**: 예측 전 제어 실행을 확인으로 셀지. 이번에는 과제 지시대로 **제어점이 같은 경우에만** 재사용했다(post W1 ← 단계 B). 단계 C 는 해제 지점이 달라 pre W3 를 다시 돌렸다.
 - **새 PI 결정 요청 P13: 게이트가 끝까지 해제되지 않은 실행(보류된 스레드가 하네스 정지까지 멈춤)에서, 후보의 결정 사건이 모두 해제 예정 지점보다 앞에 있으면 그 앞부분을 실현으로 셀 수 있는가.** 해당: pre `W2`(W2 의 CF 앞부분), post `W10`(W10 의 CF 앞부분), post `W6-1`·`W3`·`W12`(다른 후보의 묶음). 레퍼런스가 정하지 않는 이유: SPEC §4.13 은 감시 한도가 발동하면 `inconclusive(await-timeout)`, 재현 실패·시간 한도는 `NOT_CONFIRMED`(CF-03)라고만 하고, 감시 한도 없이 해제만 빠진 채 정상 정지로 끝난 실행은 말하지 않는다. `C1_basis_plan.md` §9.2 R-d 는 해제 사건을 정하지만 그것이 발동하지 않은 경우를 다루지 않고, 결정 기록 §2 B 의 "하네스가 끝내 반복이 열린 채 종료된 실행은 세지 않는다"는 반복이 닫힌(CF 가 스스로 종료한) 이 경우에 맞지 않는다. 또 예측 trace 는 해제 뒤 BP 의 늦은 생성까지 포함하는데 실제 실행에는 그것이 없다. 권고 [I]: 세지 않고 따로 두며, 보류기 재무장을 고친 뒤 같은 계획으로 다시 돌린다.
+
+### 5.6 confirm2 — 보류기 재무장 수정·`occurrence <n>` 뒤의 확인 (2026-10-25)
+
+- 지위: §5 와 같은 라벨·세는 법(인스턴스마다, 라벨끼리 더하지 않음, 후보 수는 결과가 아님, 실행 하나는 가능성의 증거이지 빈도·재현성의 증거가 아님 P8) [D]. 위 §5.0–§5.5 는 confirm1 당시 기록이며 고치지 않았다. 이 절의 행은 그 행들을 대신하지 않고 **새 실행의 행**이다.
+- 도구 개정(`e2a86af`, `kairos/docs/c1_hold_runs.md` §8): (1) 풀린 스레드의 디버그 레지스터를 지우지 않음(§5.1·§5.5 의 L384–L385 원인 제거), (2) `occurrence <n>`(n 번째 자격 hit), (3) 한 주소에 여러 점(주소 넷 이하), (4) 보류된 hit 의 해제는 재개 때, (5) 게이트 형식 `unless-released`(해제가 먼저 오면 게이트 충족, 이후 보류 없음). (3)·(5) 는 과제가 명시한 것 밖이다: 재시도 계획은 같은 조회 진입에 게이트 둘(`BP0_tsem`·`BP1_tsem`)이 필요하고, 소비자 쪽 게이트의 해제(BP 생성)는 CF 의 100 ms 지연 동안 먼저 와서, 이전 의미로는 confirm1 의 pre `W2-1`·post `W5-2`·`W6-1` 처럼 끝까지 보류된다. 값·앱 로직·자원 이름·텍스트는 바꾸지 않았다. 계획은 `kz predict` 로 다시 만들었다(predict2, `kairos/docs/predict.md` §8: 모든 새 후보의 전체 계획이 모델 점검에서 "강제, 정체 없음").
+
+#### 5.6.0 조건 [M]
+
+| 항목 | 값 |
+|---|---|
+| 실행 | 새 **36**, 모두 controlled(계획 9 × A-tx·A-rx·B-tx·B-rx). (a) post W1: **자기 예측 계획** `predict1/post_<cand>/cur/W1.kzh`(sha256 `135f296c…`, 처음 실행; confirm1 은 단계 B 를 재사용) — controlled (P-C1HOLD). (b) pre W2·post W10 전체 계획: confirm1 이 돌린 **같은 파일** `predict1/…/W2.kzh`(`5a5144c5…`)·`W10.kzh`(`c8d8685a…`) — researcher. (c) 재시도 가족: predict2 의 `W5`(confirm1 `W5-2` 의 후보), `W6`·`W7`·`W8`(confirm1 `W6-1` 의 가족), `W11`·`W12`(confirm1 `W10-2` 의 가족), 모두 `occurrence <n>` + `unless-released` — researcher(CF 를 잡는 게이트가 있음). 자연 쪽 짝은 smoke3 tx·confirm1 rx 기록(§5.3)이며 새로 돌리지 않았다 |
+| 도구 | `kz` sha256 `91a75940…`, 저장소 `e2a86af`(36개 `driver.txt` 모두 미커밋 차이 없음). ctest 기본 빌드 115 중 114 통과 + tracefs 시험 1 건너뜀, LLVM 빌드(k1r3-llvm) 136 중 135 + 1 건너뜀. 스크립트 `kairos/probe/scripts/observe_c1_hold.sh`(변경 없음), 드라이버 `confirm2/scripts/run_confirm.sh` |
+| 안전·정상화 | pilot safeguard `timeout 150 s`(researcher choice) 발동 0/36. 36/36 POWER ON 시작·"Exiting cFE with POWERON Reset status" 종료, SysV 세그먼트 잔존 0 → 정상화 부팅 불필요. `debugregs_ok=yes` 36/36, 자식 종료 0 36/36 |
+| 섭동 | ptrace 정지 1446–1804/실행. 보류 길이(인스턴스 4개 범위): W1 G1_BP 2.49–2.50 s; W2 G2_CF 13–18 ms, G1_BP 0.1–0.4 ms; W10 G2_CF 12–15 ms, G1_BP 2.52–2.55 s; W5 G1_BP 86–90 ms; W6 G2_BP 2.50–2.51 s; W7 G2_BP 186–190 ms; W8 G2_BP 83–89 ms; W11 G2_CF 12–15 ms, G1_BP 101 ms; W12 G2_CF 11–16 ms, G1_BP 0.0–0.4 ms. 해제 기록(`fire`): 소비 0, 재개 때 작용(deferred) 0, **충족된 게이트**: W5 2, W6 2, W7 3, W8 3, W11 1, W12 1(실행마다) |
+| 재생 | 모든 실행이 끝난 뒤 한 번에(실행과 겹친 재생 없음): `confirm2/scripts/replays.sh` = confirm1 과 같은 상수·닫힘(`c1prof_i1025`, rx 는 `_rx`)·읽기(현행, P1 끔, RF 끔, RF·P1 끔, A-OWNER 끔, counted/excluded) + `--emit-trace` + `classify.awk`(confirm1 판을 hit 번호·충족 게이트를 읽도록 넓힘; confirm1 실행 4개에서 이전 판과 출력 같음). 36 × 9 단계 모두 종료 0 |
+| 산출물(저장소 밖, 69 MB) | `/home/user/work/procrace/c1_runs/confirm2/`(실행 디렉터리, `summary.txt`, `run_confirm.log`, `replay_exits.txt`, `scripts/`), 계획 `/home/user/work/procrace/c1_runs/predict2/` |
+
+#### 5.6.1 후보별 확인 (새 행)
+
+한 행의 네 인스턴스는 실현 묶음·판정·근거(네 읽기)가 모두 같다(실행끼리 비교해 다름 0 [M]). "충족" = `unless-released` 게이트가 해제를 먼저 받아 잡지 않음: 그 순서는 보류가 아니라 스케줄러가 냈다. 판정은 각 계획 주석의 모델 재판정(횟수 포함)과 36/36 같다.
+
+| 후보 | 모델 묶음 → 재판정 | 계획 · 점검(predict2) | 라벨 | 실행된 보류 | 실현? A-tx·A-rx·B-tx·B-rx | 비고 | 기대표 |
+|---|---|---|---|---|---|---|---|
+| post W1 | BP0 `-17xn`, CF=x → (CF,BP0,1–25) VIOLATING → `OBSERVED_VIOLATION` | predict1 `W1.kzh`(G(`BP0_tsem`) + CF `ExitApp`) · 강제 | P-C1HOLD | BP 보류 → CF 종료에서 해제 | **예 ×4** | `timeout-exercised`. 예측 계획 자체로 처음 확인(P12 와 무관한 수, §5.6.3) | E-06(U-C1-3) 일치 |
+| **pre W2** | BP0 `0x1`, BP1 `-17x1`, CF=x → (CF,BP0,1) READY; (CF,BP1,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` | predict1 `W2.kzh`(confirm1 과 같은 파일; 당시 점검 "실현 불가") · 같은 제어점 + `unless-released` 가 강제 | researcher | CF 보류 → BP0 생성 반환에서 해제; BP 를 `BP1_tsem` 생성에서 보류 → **풀린 CF 의** `ExitApp` 에서 해제 | **예 ×4** | 풀린 스레드가 뒤 해제를 쏨 = 재무장 수정의 실제 확인. confirm1 의 W2 실행 4개(G1_BP 미해제)와 같은 계획. BP1 결정 순서를 이제 보류가 냄(confirm1 `W2-2` 는 스케줄러) | E-01(U-C1-1)·E-03(U-C1-2) 일치 |
+| **post W10** | BP0 `0x1`, BP1 `-17xn`, CF=x → READY; (CF,BP1,1–25) VIOLATING → `OBSERVED_VIOLATION` | predict1 `W10.kzh`(같은 파일, 당시 "실현 불가") · 강제 | researcher | 같은 모양; BP 보류 2.5 s 동안 CF 의 `BP1_tsem` 25회 실패 | **예 ×4** | `timeout-exercised`. confirm1 에는 깨끗한 실현이 없었다 | E-04(U-C1-3)·E-06(U-C1-4) 일치 |
+| **post W5** | BP0 `-17xn 0x1`(대표 m = 3), BP1 `0x1` → (CF,BP0,1–2) TOLERATED, (…,3) READY, (CF,BP1,1) READY | G1_BP(BP0 생성) ← `cf_lookup_call` **occurrence 2**; G3_CF(BP0 조회 **occurrence 3**) ← `bp_create_call`; G2_CF(BP1 조회) ← `bp_create_call` **occurrence 2** · 강제 | researcher | BP 보류 → CF 의 2번째 조회 반환에서 해제; G2·G3 충족 | **예 ×4**(m = 3) | **BP0 의 m = 3 처음 실현.** 3번째 조회가 생성 뒤인 것과 BP1 순서는 스케줄러 | E-05(U-C1-3, m = 3)·E-04(U-C1-4) 일치 |
+| post W6 | BP0 `-17x1 0x1`, BP1 `-17xn` → BP0 TOLERATED·READY; (CF,BP1,1–25) VIOLATING | G1_BP ← `cf_lookup_call`; G3_CF(BP0 조회 occurrence 2) ← `bp_create_call`; G2_BP(BP1 생성) ← `cf_lookup_call` **occurrence 27** · 강제 | researcher | BP 를 BP1 생성에서 보류 → CF 의 27번째 조회(BP1 25번째) 반환에서 해제; G1·G3 충족 | 예 ×4 | `timeout-exercised`. BP0 m = 2 는 자연 순서(두 게이트 충족). confirm1 `W2-2`(P-C1HOLD)와 같은 묶음, 해제 지점은 다름 | E-05·E-06(U-C1-4) 일치 |
+| **post W7** | BP0 `-17x1 0x1`, BP1 `-17xn 0x1`(대표 m = 3) | W6 의 G1·G3 + G2_BP ← `cf_lookup_call` **occurrence 4**, G4_CF(BP1 조회 occurrence 3) ← `bp_create_call` occurrence 2 · 강제 | researcher | BP 를 BP1 생성에서 보류 → CF 의 BP1 2번째 조회 반환에서 해제; 셋 충족 | **예 ×4**(BP1 m = 3) | **BP1 의 m = 3 처음 실현** | E-05(U-C1-3·4) 일치 |
+| **post W8** | 두 키 모두 `-17x1 0x1` | W7 과 같은 모양, G2_BP ← occurrence 3, G4_CF occurrence 2 · 강제 | researcher | 같음(BP1 1번째 조회 반환에서 해제); 셋 충족 | **예 ×4** | 두 키 모두 재시도 성공(m = 2) 처음 | E-05 일치 |
+| **post W11** | BP0 `0x1`, BP1 `-17xn 0x1`(대표 m = 3) | G2_CF(BP0 조회) ← `bp_create_call`; G1_BP(BP1 생성) ← `cf_lookup_call` occurrence 3; G3_CF(BP1 조회 occurrence 3) ← `bp_create_call` occurrence 2 · 강제 | researcher | CF 보류 → BP0 생성에서 해제; BP 보류 → CF 의 BP1 2번째 조회 반환에서 해제; G3 충족 | **예 ×4**(BP1 m = 3) | confirm1 `W10-2` 가족에서 실현 안 된 후보 | E-04·E-05(U-C1-4) 일치 |
+| **post W12** | BP0 `0x1`, BP1 `-17x1 0x1` → READY; (CF,BP1,1) TOLERATED, (…,2) READY | W11 과 같은 모양, G1_BP ← `cf_lookup_call` occurrence 2, G3_CF occurrence 2 · 강제 | researcher | 같음(BP1 1번째 조회 반환에서 해제); G3 충족 | **예 ×4** | confirm1 은 rx 2/2(스케줄러가 냄), 이번에는 tx 포함 4/4 이고 BP1 첫 실패 순서를 보류가 냄 | E-04·E-05(U-C1-4) 일치 |
+
+refuted 0, 실현 안 됨 0, 끝까지 해제되지 않은 게이트 0/36. 모델 점검 "강제, 정체 없음" 9/9 → 실제 36/36 실현. 다만 W5–W12 의 "강제" 에는 실제로는 작용하지 않은(충족된) 게이트가 포함된다: 모델은 그 게이트가 다른 시간에서 순서를 지킬 것이라고 말할 뿐, 이번 실행에서 그 순서를 낸 것은 스케줄러다 [I].
+
+#### 5.6.2 판정과 P11 두 읽기 [M]
+
+근거 약어는 §1(SO, RD, ON). 읽기 A 는 §5.0 의 정의를 hit 번호로 넓혀 계산했다(`classify.awk`; 해제된 보류마다 간선 하나, 충족된 게이트는 간선 없음).
+
+| 계획 · 라벨 | 읽기 B(현행): 판정 · 근거 | 읽기 A(P11) | P1 끔(B) |
+|---|---|---|---|
+| W1 · P-C1HOLD | (CF,BP0,1–25) VIOLATING → `OBSERVED_VIOLATION` · ON ×25 | 25 모두 "보류가 생성을 뒤로 놓음" → SO | 25 → `INCONCLUSIVE(horizon-open, explanation_ambiguous)` |
+| W2 · researcher | BP0 READY · SO+RD; BP1 NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` · ON | BP0 "보류가 생성을 앞에" → SO; **BP1 "보류가 생성을 뒤로" → SO**(confirm1 에서는 두 읽기 모두 ON) | BP1 → `INCONCLUSIVE(caller_requirement_absent, explanation_ambiguous)` |
+| W10 · researcher | BP0 READY · SO+RD; (CF,BP1,1–25) VIOLATING · ON ×25 | BP0 SO; BP1 25 SO | BP1 25 → INCONCLUSIVE(horizon-open, …) |
+| W5 · researcher | BP0 1–2 TOLERATED · ON, 3 READY · SO+RD; BP1 READY · SO+RD | BP0 1–2 SO; BP0 3·BP1 1 은 간선 없음(게이트 충족) → B 와 같음 | TOLERATED 2 → INCONCLUSIVE |
+| W6 · researcher | BP0 1 TOLERATED · ON, 2 READY · SO+RD; BP1 1–25 VIOLATING · ON ×25 | BP1 25 SO; BP0 간선 없음(G1·G3 충족) → ON·SO+RD | BP0 1·BP1 25 → INCONCLUSIVE |
+| W7 · researcher | BP0 TOLERATED · ON, READY · SO+RD; BP1 1–2 TOLERATED · ON, 3 READY · SO+RD | BP1 1–2 SO; 나머지 간선 없음 | TOLERATED 3 → INCONCLUSIVE |
+| W8 · researcher | 두 키 TOLERATED · ON, READY · SO+RD | BP1 1 SO; 나머지 간선 없음 | TOLERATED 2 → INCONCLUSIVE |
+| W11 · researcher | BP0 READY · SO+RD; BP1 1–2 TOLERATED · ON, 3 READY · SO+RD | BP0 SO; BP1 1–2 SO; BP1 3 간선 없음 | TOLERATED 2 → INCONCLUSIVE |
+| W12 · researcher | BP0 READY · SO+RD; BP1 1 TOLERATED · ON, 2 READY · SO+RD | BP0 SO; BP1 1 SO; BP1 2 간선 없음 | TOLERATED 1 → INCONCLUSIVE |
+
+RF 끔이면 READY 의 근거가 모두 ON, RF·P1 끔이면 모든 발생이 INCONCLUSIVE 다(confirm1 과 같은 양상). 읽기의 차이 [I]: 읽기 B 에서는 미준비·TOLERATED 가 모두 ON(P1), READY 는 RD(RF)에 기댄다. 읽기 A 에서는 보류가 실제로 순서를 정한 발생 — W1·W10·W6 의 소진 25 개씩, pre W2 의 (CF,BP1,1), W5 의 BP0 두 실패, W7·W11 의 BP1 두 실패, W8·W12 의 BP1 한 실패, W2·W10·W11·W12 의 BP0 READY — 이 반환값과 무관한 SO 로 선다. 충족된 게이트가 지키려던 발생(W6–W8 의 BP0 TOLERATED·READY, W5 의 BP0 3번째·BP1, W7·W8·W11·W12 의 BP1 마지막 READY)은 두 읽기 모두 ON·RD 로 남는다.
+
+#### 5.6.3 P12·P13·timeout-exercised
+
+- **P12(대기)**, post W1 의 확인 수(인스턴스마다): 예측 전 실행을 세지 않으면 confirm2 **1**(A-tx·A-rx·B-tx·B-rx 각 1, 예측 계획 `W1.kzh`); 세면 + 단계 B 1 = **2**. 여덟 실행의 판정은 같다(VIOLATING ×25, ON / 읽기 A SO). 이로써 post W1 의 확인은 P12 결정과 무관하게 최소 1 이 된다. pre W3·post W13 은 confirm1 에서 이미 예측 계획으로 실현되어 P12 와 무관하다.
+- **P13(대기)**: confirm2 에 끝까지 해제되지 않은 게이트는 0/36 이라 이번 수에 영향이 없다. confirm1 의 P13 해당 실행(pre W2 ×4·post W10 ×4 의 CF 앞부분, W6-1·W3·W12 의 다른 묶음)은 여전히 따로 두고 실현으로 세지 않는다. pre W2·post W10 은 같은 계획 파일로 이번에 깨끗이 실현되어, 그 실현은 P13 에 기대지 않는다.
+- **timeout-exercised**(CF-04, T-16; 보류 중 CF 의 재시도가 상한까지 소진): W1, W10, W6 — 각 인스턴스 4, 모두 따로 둔다. 이 VIOLATING 은 채택한 요구·허용 모델의 판정이고 PR #342 의 의도적 상한과 함께 읽는다(§3 (4)).
+
+#### 5.6.4 이 결과가 보여 주는 것과 보여 주지 않는 것 — H3
+
+**보여 주는 것.** (1) confirm1 이 "실현 불가" 로 점검·실행된 pre W2·post W10 전체 계획이 **같은 파일 그대로** 4/4 실현됐다. 실패 원인이 프로그램이나 모델이 아니라 보류기(L384–L385)였다는 confirm1 의 진단이 실제 실행으로 확인됐다. (2) **재시도 시도를 고르는 계획**(`occurrence <n>`)으로 confirm1 이 시험하지 못한 묶음이 실현됐다: BP0 m = 3(W5), BP1 m = 3(W7·W11), 두 키 모두 m = 2(W8), BP0 첫 성공 + BP1 m = 2 의 tx(W12). 계획의 시도 번호(occurrence 2·3·4·27)는 모델이 대표 실행에서 기계적으로 셌고, 실제 결과의 횟수까지 모델 재판정과 같았다. 이것은 단계 B·C 의 손 설계 보류 두 모양(G(name)+CF 종료, CF 보류+BP 사건)을 넘어선다. (3) 판정 독립성의 일부: 읽기 A 를 쓰면 pre (CF,BP1,1) NOT_READY_UNJUDGED 가 처음으로 보류 순서(SO)에 선다(confirm1 에서는 두 읽기 모두 ON). (4) 모델 점검이 9 계획 모두에서 실제 결과를 맞혔다(36/36, refuted 0).
+
+**보여 주지 않는 것.** (1) 자연 가능성·빈도: 모두 controlled 이다(P8). m = 3 은 자연 기록(m = 2)과 다른 시도의 결과이지 같은 순번의 좋은/나쁜 짝이 아니다(둘 다 위반 아님). (2) m = 4…24: 계획마다 한 m(모델 대표의 가장 작은 횟수)만 시험했다. (3) 읽기 B 의 독립성: 미준비·TOLERATED 는 여전히 ON(P1), READY 는 RD 다. (4) 충족된 게이트가 있는 계획(W5–W12)에서 그 부분의 순서는 스케줄러가 냈다. 모델의 "강제" 는 그 게이트가 다른 시간에서 순서를 지킨다는 뜻이지 이번 실행에서 보류가 그 순서를 만들었다는 뜻이 아니다. (5) 실현은 보류기 개정 다섯 가지 중 (3) 한 주소 여러 점·(5) `unless-released` 에도 기댄다(재개 때 해제는 이번 실행에서 쓰이지 않음). 도구 개정이며 프로그램 변경은 아니다. (6) 새 실패 기전은 없다: 모두 같은 "늦은 provider" 순서를 시도·키별로 본 것이다. (7) 기존 process-level 방법 대비 가치, 다른 사례(C2·C3·C5)는 평가하지 않았다(RV §12).
+
+#### 5.6.5 남은 것
+
+- P11·P12·P13 대기(새 PI 결정 요청 없음). 읽기 A 를 kz 에 넣는 일은 P11 뒤.
+- 결정 없이: m = 4…24 계획(같은 어휘로 만들 수 있음), BP-first 구성(#184 2022-08-02), 관측 영향 비율의 분모(C1B-U18). 기대 결과표는 고치지 않았다: 나온 행은 모두 판정 일치(E-01, E-03(U-C1-2), E-04, E-05(U-C1-3·4, m = 2·3), E-06(U-C1-3·4)).

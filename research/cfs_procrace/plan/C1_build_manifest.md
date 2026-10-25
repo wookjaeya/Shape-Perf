@@ -10,7 +10,7 @@
 ## 0. 요약
 
 1. **D22 순서의 첫 단계 P0을 P-REC로 수행했다**(계획 §8.0·§8.5, Q-5의 (a) = 계획이 문자 그대로의 적용으로 읽은 쪽). 공개 통합 구성(BP CI가 가리킨 스택)을 BP의 `.github/buildconfig` 그대로 조립했다. cFS 번들은 CI 창의 후보 둘(`1df262a`, `1b0b338`)을 모두 빌드했다. 결과: 2 후보 × 수정 전후 = **4개 빌드 모두 조립·설치·기동(OPERATIONAL)** [M].
-2. **원문 그대로의 첫 빌드는 실패했다.** 실패 지점은 OSAL `os-impl-filesys.c:171`의 `snprintf`에 대한 gcc 13.3의 `-Werror=restrict` 하나뿐이다(§4.1). 계획 §8.5의 분류로는 (b) 이 호스트의 도구 차이로 본다 [I]. 최소 이식은 `CFLAGS=-Wno-error=restrict` 하나이며 진단 수준만 바꾼다. 자원 이름·생성/조회 순서·재시도 설정·우선순위는 바뀌지 않았다(§6에서 산출물로 대조 [M]). 그래서 멈추지 않고 진행했다. 이 이탈의 수용은 PI 확인 사항이다(§10 PI-2).
+2. **원문 그대로의 첫 빌드는 실패했다.** 실패 지점은 OSAL `os-impl-filesys.c:171`의 `snprintf`에 대한 gcc 13.3의 `-Werror=restrict` 하나뿐이다(§4.1). 계획 §8.5의 분류로는 (b) 이 호스트의 도구 차이로 본다 [I]. 최소 이식은 `CFLAGS=-Wno-error=restrict` 하나이며 진단 수준만 바꾼다. 자원 이름·생성/조회 순서·재시도 설정·우선순위는 바뀌지 않았다(§6에서 산출물로 대조 [M]). 그래서 멈추지 않고 진행했다. 이 이탈은 명시한 빌드 이탈로 수용됐다(P5, 2026-10-25, `Architecture/spec/PI_DECISIONS_RESOLVED_20261025.md` §1) [D]. 표현: "실험 대상 소스와 설정을 수정하지 않고, 기록한 경고 강등을 적용해 공개 구성을 빌드했다". 그 경고가 오탐이라는 것은 보이지 않았고(§4.1 [U]), 과거 컴파일러·실행 환경과 같다고 주장하지 않는다.
 3. **유효 설정**(산출물에서 읽음 [M]): 이름 `BP0_tsem`·`BP1_tsem`(CF 표 `.tbl` 바이트, BP `.so`의 기본값, BP 이벤트 문구 모두 일치). CF 재시도: 수정 전 없음, 수정 후 `CF_STARTUP_SEM_MAX_RETRIES`=25·`CF_STARTUP_SEM_TASK_DELAY`=100(빌드 명령으로 매크로 평가). 시작 순서는 스크립트 L1–L7 그대로(CF 다음 BP), 설정 우선순위 CF 65·BP 55.
 4. **build-smoke 관측**(빌드마다 1회, tx·rx 두 인스턴스): 수정 전 4개 인스턴스 모두 CF 이벤트 30 "failed to get sem id for name BP0_tsem, error=-17"(`OS_ERR_NAME_NOT_FOUND`) 후 CF 종료, 그 뒤 BP가 두 semaphore를 "Created". 수정 후 4개 인스턴스 모두 BP "Created" 두 줄과 CF 이벤트 20 "CF Initialized". 스케줄러는 모든 스레드 `SCHED_OTHER`(nice 0): OSAL이 `SCHED_RR`을 고르지만 `setschedparam`이 `EPERM`. affinity는 기본값(0–3) 그대로이며 이 작업은 아무것도 설정하지 않았다. 수정 전 실패 시도의 판정 라벨은 rev 1.3 그대로 NOT_READY_UNJUDGED이며, 이 smoke는 판정 출력이 아니다.
 5. **앱 포함 정적 범위(D5)**: 기존 `kz-static`(k1r3-llvm)으로 링크 단위마다 basis·extract를 돌렸다(core-tx, cf.so, bp.so, bplib.so). CF·BP의 semaphore 호출 지점 전부와 OSAL 쪽 이름·id writer가 각 단위의 사실에 들어왔다. 그러나 **코어와 앱 `.so`를 하나의 닫힌 프로그램으로 묶는 기능이 없어서**(recipe의 `link`가 하나뿐, app-unit probe 미구현) CF·BP 쪽 id 필드는 단위 안에서 DISABLED이다. 빠진 것을 §8.4에 적었다. **후속(§8.5)**: recipe `module`로 코어와 스크립트가 적재하는 `.so` 6개를 한 닫힘으로 묶었다. 닫힘 조건은 CF·BP 모두 충족, `BP_Throttle_t.Sem`은 writer-set-complete, CF 두 필드는 CF 자체의 cast로 DISABLED가 남는다.
@@ -99,7 +99,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DSIMULATION=native -DCMAKE_INSTALL_PREFIX=/exe
 
 | ID | 이탈 | 레퍼런스 | 사용 값 | 이유 | 의미 영향 |
 |---|---|---|---|---|---|
-| DV-P1 | 진단 강등 `CFLAGS=-Wno-error=restrict`(arch·mission 빌드의 `CMAKE_C_FLAGS`에 들어감 [M: 캐시]) | CI L127(플래그 없음), cFE 샘플의 `-Werror` | 위 값 | §4.1. 경고 하나를 오류에서 경고로만 바꾼다. 다른 `-W` 옵션, 최적화, 정의는 그대로 | 코드 생성에 영향 없음 [I: 경고 옵션]. 자원 이름·순서·재시도·우선순위 불변 [M: §6]. 대안(러너 시기의 gcc로 빌드)은 레퍼런스가 컴파일러 판을 정하지 않아 고르지 않았다 → PI-2 |
+| DV-P1 | 진단 강등 `CFLAGS=-Wno-error=restrict`(arch·mission 빌드의 `CMAKE_C_FLAGS`에 들어감 [M: 캐시]) | CI L127(플래그 없음), cFE 샘플의 `-Werror` | 위 값 | §4.1. 경고 하나를 오류에서 경고로만 바꾼다. 다른 `-W` 옵션, 최적화, 정의는 그대로 | 경고 옵션이며 최적화·정의는 그대로다 [I]. 경고가 오탐인지는 보이지 않았고, 과거 컴파일러와 같다는 주장이나 의미 변화가 전혀 없다는 주장으로 넓히지 않는다(P5 결정 2026-10-25). 자원 이름·순서·재시도·우선순위 불변 [M: §6]. 대안(러너 시기의 gcc로 빌드)은 레퍼런스가 컴파일러 판을 정하지 않아 고르지 않았다 → PI-2 |
 | DV-P2 | `CMAKE_EXPORT_COMPILE_COMMANDS=ON`(환경변수, CMake ≥ 3.17이 모든 하위 빌드의 캐시 기본값으로 읽음) | 없음 | ON | W3 산출물(compile DB)과 정적 분석 입력 | 컴파일 명령 불변(JSON 파일만 씀) |
 | DV-P3 | 작업 공간 경로(§3) | CI 작업 공간 | `c1_build/…` | 저장소 밖, 수정 전후를 별도 트리로 | 경로가 `__FILE__` 문자열로 산출물에 들어감: `bplib.so`의 수정 전후 차이는 이 경로 문자열뿐 [M: `strings` 비교] |
 | DV-P4 | 소스 획득: `actions/checkout@v3` 대신 고정 SHA의 `git worktree`. PSP는 병합 대신 병합 결과 SHA `bd4a2ea`를 직접 체크아웃 | setup-cfs `action.yml` L18–L31, CI L54–L71 | §1의 SHA | 움직이는 참조를 고정 SHA로 | 트리 동일 [I: fast-forward]. 번들 버전 문자열이 `git:draco-rc3-45-g1df262a-dirty`(psp gitlink 불일치)로 찍히며 CI의 병합 뒤에도 같았을 것이다 [I] |
@@ -272,7 +272,7 @@ countsem API 호출자(닫힘 안 전부): BP `bp_flow.c:126` GetIdByName, `:132
 ## 10. 남은 것과 PI 결정
 
 - **PI-1 (cFS 번들 후보)**: `1df262a`와 `1b0b338` 중 W4의 기준(또는 둘 다). 레퍼런스가 정하지 않는 이유: CI는 실행 시점의 `nasa/cFS@main`을 쓰고(CI L6–L13) 주간 캐시를 재사용할 수 있으며(L76–L100), 실행 기록·로그가 없다(C1B-U02). 두 후보는 cFE·OSAL만 다르고 이번 smoke에서 같은 결과를 보였다.
-- **PI-2 (DV-P1 수용)**: gcc 13.3에서 `-Wno-error=restrict` 하나로 진단을 강등한 빌드를 P0의 "그대로 구성됨"으로 볼지, 러너 시기의 컴파일러를 따로 구하라고 할지. 레퍼런스가 정하지 않는 이유: `runs-on: ubuntu-22.04`(L51)는 갱신되는 이미지이고 그때의 컴파일러 판은 어디에도 기록되지 않았다. 의미 영향(이름·순서·재시도·우선순위)은 없음을 §6에서 대조했다.
+- **PI-2 (DV-P1 수용)**: gcc 13.3에서 `-Wno-error=restrict` 하나로 진단을 강등한 빌드를 P0의 "그대로 구성됨"으로 볼지, 러너 시기의 컴파일러를 따로 구하라고 할지. 레퍼런스가 정하지 않는 이유: `runs-on: ubuntu-22.04`(L51)는 갱신되는 이미지이고 그때의 컴파일러 판은 어디에도 기록되지 않았다. 의미 영향(이름·순서·재시도·우선순위)은 없음을 §6에서 대조했다. **결정(2026-10-25, P5) [D]:** 명시한 빌드 이탈로 수용. 표현은 "실험 대상 소스와 설정을 수정하지 않고, 기록한 경고 강등을 적용해 공개 구성을 빌드했다"로 한다. 경고가 오탐이라는 입증이 아니며 과거 컴파일러와의 동등성을 주장하지 않는다. 원 CI 이미지 복원은 선행 조건이 아니다(RV §9.1).
 - **PI-3 (Q-5의 후속)**: P0은 조립·기동됐다. 계획 §8.0에 따라 ENV 이식(B0–B8)은 비교용 파생이며 할지 말지는 PI가 정한다. 그 경우 Q-1·Q-2·Q-4가 다시 필요하다.
 - **PI-4 (인스턴스, Q-3)**: P-REC는 CI대로 tx·rx를 함께 띄운다. W4에서 한 인스턴스만 관측할지 둘 다 관측할지는 레퍼런스가 정하지 않는다(C1B-U10).
 - 열린 기술 항목: D5의 남은 부분(§8.4 2–4; 결합 닫힘 자체는 §8.5), 수정 후 첫 조회 실패·재시도 여부의 관측(§7, W4의 관측기 몫), OSAL·ES 내부 우선순위 기록값 [U], G-REBIND(`833fdbb`의 `caller` 기록 다시 묶기, 계획 §9.3)는 W4 첫 출력 전 선행 조건으로 그대로 남는다.

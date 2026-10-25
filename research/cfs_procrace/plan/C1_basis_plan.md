@@ -586,6 +586,8 @@ A2(먼저 실패, 이후 재시도로 성공)를 보류로 만들자는 제안�
 
 PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 해제 규칙·표시·감시 한도를 새로 정한다(§12 Q-9). 그 전에는 §9.4 PV-6이 비어 있다.
 
+> **2026-10-25 결정 [D]** (`Architecture/spec/PI_DECISIONS_RESOLVED_20261025.md` §2 C, RV §11 단계 C): Q-9와 같은 성격의 "제어된 정상 경로"는 **P-C1HOLD의 범위 확장이 아니라 P-C1HOLD 밖의 연구자 개입**으로 받아들인다. 그런 실행은 라벨 `controlled (researcher intervention, outside P-C1HOLD)`로 따로 세고, 자연 실행(natural pilot)·build-smoke·`controlled (P-C1HOLD)` 결과와 섞지 않는다. 값·앱 로직·자원 이름은 바꾸지 않는다. 해제 규칙·감시 한도는 이 결정이 정하지 않으므로 `unspecified_by_reference`로 남고, 하네스 정지만을 위한 안전장치가 필요하면 "pilot safeguard (researcher choice)"로 표시하며 그것이 발동한 실행은 INCONCLUSIVE다(`CONDITIONS_POLICY.md`). 위 R-c의 한계(A2를 보장하지 않음)는 그대로다.
+
 ### 9.3 A1–A5와 관측 사건의 대응
 
 로드맵 §8.3의 다섯 구간(그 표는 `[제안]`이다. 구간의 결정된 분류는 명세 App. A.4 step 6 "Outcome partition" [D]이다). 판정의 세 층(QT-3)을 열로 분리했다: **관측 사건 열**(층 3), **OSAL 반환**(층 1: 문서화된 API 의미), **readiness precondition과 시도 분류**(층 2: 호출자 요구, §1.2의 정의).
@@ -694,6 +696,24 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 
 **P3(Q-12)에 관련된 새 증거(결정하지 않음).** (a) G6: 두 판 모두 CF 자신의 문서가 이 실패를 ERROR로 분류하고 "semaphore needs to exist before engine is initialized"라고 적는다. 받아들임은 아니다. (b) `281a941` → `833fdbb`가 문서를 바꾸지 않았으므로, P3에서 G5를 받아들임 기록으로 묶으면 `281a941`만이 아니라 `833fdbb`의 두 경로도 결론 4로 바뀐다. (c) `281a941`에는 `OS_ERR_NAME_NOT_FOUND`에 대한 작성자의 주석·시험이 없다(G4). (d) CF 기능 요구에는 순서나 처리 요구가 없다(G10).
 
+### 9.9 P9: 현재 C1 판정이 실제로 읽는 상태·값 (2026-10-25)
+
+결정 P9(`Architecture/spec/PI_DECISIONS_RESOLVED_20261025.md` §1): CF `sem_id`·`sem_name`의 writer 완전성은 현재 판정이 그 필드를 읽지 않는 한 필수 조건이 아니다. 아래는 `kairos/profiles/c1-bp-b051eb0`(`10_kinds.kzp`, `20_ops.kzp`, `30_hb.kzp`, `05_consts.kzp`, `cf-833fdbb/01_prov.kzp`)과 `kairos/docs/c1_smoke_observe.md` §9.1·§9.3에서 옮긴 목록이다 [M]. 판정 규칙이 바뀌면 다시 적는다.
+
+| 읽는 것 | 무엇으로 | 근거 종류(단계 A) |
+|---|---|---|
+| OSAL 객체 표 항목: `OS_common_record_t.active_id`, `OS_common_record_t.name_entry`, `OS_count_sem_internal_record_t.obj_name` = 종류 `osal.countsem(name)`의 상태 | `bind field … via "OS_ObjectIdInit", "OS_CountSemAPI_Init", "OS_CountSemCreate", "OS_CountSemDelete"`(`10_kinds.kzp` L44–L46), writer 27 중 15는 다른 종류로 분리(연구자 기록 `r_countsem_type_slices`) | 관측 상태 + `via` 신뢰 가정 |
+| 시작 상태 "이름 없음" | 관측한 지우기 `OS_ObjectIdInit.clear_table`, `OS_CountSemAPI_Init.clear_names`(`c1_smoke_observe.md` §9.1) | 관측 상태 |
+| 수명 | `OS_CountSemDelete.retire`(`20_ops.kzp` L84)와 SCOPE(TEARDOWN 뒤 쓰기 제외) | 관측 상태 + 순서 |
+| CF 조회의 포획 이름 `arg.sem_name`과 out `sem_id` | `OS_CountSemGetIdByName(out sem_id, key sem_name)`(`20_ops.kzp` L10–L12) 호출에서 포획(CF 쪽 인자식은 `config_table->chan[i].sem_name`, `cf-833fdbb/01_prov.kzp` L20) | 직접 포획 값 |
+| BP 생성의 포획 이름·out id와 `operation_status` | `OS_CountSemCreate`의 `publish` 효과(`20_ops.kzp` L24) | 직접 포획 값 |
+| 성공 조회 ← 같은 이름·id 생성의 순서 | RF `match sem_id`(`30_hb.kzp` L38) | 반환값·동일 id에서 유도(RF) |
+| 실패 조회의 미준비 순서 | `OS_ERR_NAME_NOT_FOUND`(`05_consts.kzp` L13) outcome 지도 | 반환값으로 좁힘(P1 조건부) |
+| 허용 처리 | 재시도 상한(프로필 상수, `cf_platform_cfg.h` L338 @`833fdbb`), `CFE_ES_ExitApp`의 code(`05_consts.kzp` L21) | 관측 호출 + 출처 상수 |
+
+- **읽지 않는 것.** CF 자료 구조의 `sem_id`(`CF_Channel_t`)·`sem_name` 필드의 *상태*는 판정 근거로 쓰지 않는다. 조회 인자는 호출 시점에 포획한 값으로만 쓴다. 두 필드는 D5 닫힘에서 `DISABLED`(`cf_cmd.c:734`, `cf_app.c:114`의 cast)이며 지원했다고 세지 않는다.
+- **승계하지 않음.** 이 목록은 현재 관측 판정에 한정한다. 예측(단계 D)·다른 실행·다른 호출 문맥(예: 조회 뒤 `OS_CountSemTimedWait(c->sem_id, 0)`, `01_prov.kzp` L228)이 저장된 `sem_id` 필드에 다시 기대는지는 그때 따로 확인한다 [U].
+
 ## 10. `unspecified_by_reference`로 남는 조건 (검증 항목 8)
 
 값을 고르지 않았다. 필요하면 PI 결정으로 올린다.
@@ -758,7 +778,7 @@ PI가 "제어된 A2"를 P-C1HOLD의 범위 확장으로 받아들이면 그때 �
 | Q-6 | (철회) 명세 §4.13의 감시 한도 문구 정정 | — | PI 질문이 아니다. 커밋된 명세 rev 1.2 @`6be8935`의 §4.13 "Watchdog"과 App. A.4 step 5에서 문구가 이미 결정문 §3.3에 맞게 고쳐져 해소됐다(§9.6) [M]. ID는 유지한다 |
 | Q-7 | `bd4a2ea`가 창에서의 PSP 브랜치 팁이라는 [I]를 어떻게 다룰지 | 후보로만 사용 | 후보로만 사용 |
 | Q-8 | #184 댓글 접근 | `add_repo`(동의 필요) / 사용자가 댓글을 붙여 줌 | 시도하지 않음 |
-| Q-9 | "제어된 A2"(첫 `NAME_NOT_FOUND`에서 provider를 푸는 규칙 R-c)를 P-C1HOLD의 범위 확장으로 받아들일지(§9.2.1) | 받아들임(해제 규칙·표시·감시 한도를 새로 정함) / 받아들이지 않음(A2는 자연 실행에서만) | 정하지 않음. 결정문 §3.3의 해제 사건은 재시도 종료와 최종 초기화 결과뿐이므로 이 문서는 "받아들이지 않음"을 기본으로 쓴다. R-c는 A2를 보장하지도 않는다 |
+| Q-9 | "제어된 A2"(첫 `NAME_NOT_FOUND`에서 provider를 푸는 규칙 R-c)를 P-C1HOLD의 범위 확장으로 받아들일지(§9.2.1) | 받아들임(해제 규칙·표시·감시 한도를 새로 정함) / 받아들이지 않음(A2는 자연 실행에서만) | 정하지 않음. 결정문 §3.3의 해제 사건은 재시도 종료와 최종 초기화 결과뿐이므로 이 문서는 "받아들이지 않음"을 기본으로 쓴다. R-c는 A2를 보장하지도 않는다. **(2026-10-25)** P-C1HOLD 범위 확장으로는 받아들이지 않고, P-C1HOLD 밖의 연구자 개입으로 따로 표시해 쓴다(§9.2.1 끝 주석) |
 | Q-10 | 명세 §4.13 "Release"의 일반 규칙 중 "다른 쪽이 막힌 경우"의 해제를 C1의 P-C1HOLD에 쓸지(§9.2 R-d) | 씀(무엇을 "막힘"으로 볼지, 그 판정 사건과 표시를 새로 정함) / 쓰지 않음(해제는 C-4·C-6과 C-6을 함의하는 C-7뿐, 막힘은 감시 한도로 `inconclusive(await-timeout)`) | 정하지 않음. Q-9와 같은 이유로 이 문서는 "쓰지 않음"을 기본으로 쓴다: CF가 막혔다는 것은 결정된 두 해제 사건의 어느 쪽도 아니다 |
 | Q-11 | BP 자신의 조회 호출 지점(P-1, `bp_flow.c` L126)의 층 2 기대 상태(§9.3, C1B-U23) | (a) CF의 `caller` 기록이 κ 전체에 적용 → VIOLATING 가능 / (b) 호출 템플릿별 → NOT_READY_UNJUDGED / (c) "조회 후 없으면 생성"을 범위 밖으로 두는 규칙을 명세에 더함(이유 기록) | 정하지 않음. anchor audit가 먼저 판단하고, 명세가 정하지 못하면 PI 결정이다. 정해지기 전에는 BP 지점의 분류를 출력하지 않으며 CF의 집계와 섞지 않는다. C1 기대 결과표 동결 전에 필요하다. **2026-10-24:** SPEC rev 1.3 보충의 호출 문맥 규칙(마스터플랜 반영, MASTERPLAN_ADOPTION §2)으로 (c)의 일반형이 정해졌다. 패턴 제외가 아니라 출처로 정당화된 역할만 요구를 받는다. BP 지점은 요구 없음(§9.7 (b)). 남은 일은 프로필 선언과 anchor이다 |
 | Q-12 | `281a941`의 수정 전 처리에 `caller` 기록이 있는지: CF 문서 `cfs_cf.dox` L212–L214의 종료 서술을 `exit` 받아들임으로 읽을지, 이슈 #184 본문("shouldn't be a hard error")을 그 판의 요구로 묶을지(§9.7 "판단할 수 없는 것" 1) | (a) 둘 다 묶지 않음 → NOT_READY_UNJUDGED 유지 / (b) 문서만 받아들임으로 묶음 → TOLERATED 가능 / (c) 둘 다 묶음 → 충돌, QT-5로 보류(NOT_READY_UNJUDGED, 요약 같음) | 정하지 않음. 출처는 종료를 서술할 뿐 받아들임 여부를 말하지 않는다. 결정 전까지 rev 1.3의 라벨(a)을 쓰고 바꾸지 않는다(마스터플랜 §5.2) |

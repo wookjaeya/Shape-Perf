@@ -7,7 +7,16 @@
 # profiles/c1-bp-b051eb0/hold/hold-cf<REV>.kzh; the observation plan is observe/sites-cf<REV>.kzp.
 #
 #   observe_c1_hold.sh <cfg pre|post> <cand 1df262a|1b0b338> <inst tx|rx> <kz> --out-dir DIR --tracefs DIR [--closure DIR]
+#                      [--plan FILE.kzh --label TEXT --tag NAME | --no-hold]
 #   observe_c1_hold.sh --one <run dir> <inst> <meta>     (internal: start one instance, wait, stop)
+#
+# Confirmation of prediction candidates (stage D, 2026-10-25; docs/predict.md section 7): --plan takes a
+# hold plan that `kz predict` wrote for a witness (instead of hold/hold-cf<REV>.kzh); --label is the
+# run's label, which the plan's form decides and the caller states (controlled (P-C1HOLD) for G(name)
+# + CF's exit, controlled (researcher intervention) otherwise; PI_DECISIONS_RESOLVED_20261025 section 2);
+# --tag names the run directory <tag>_<cfg>_<cand>_<inst>.  --no-hold runs the same one-instance
+# start/stop under kz observe without kz hold (label natural build-smoke; run directory N_...), so that
+# an instance has a natural record under the execution conditions of its controlled records.
 #
 # One instance per run (PI decision P7: tx and rx are separate records; never merged).  The gate and
 # the release are hardware execution breakpoints in the debug registers; the text is never modified.
@@ -58,9 +67,20 @@ if [ "${1:-}" = "--one" ]; then
 fi
 
 CFG="${1:?usage: $0 <pre|post> <1df262a|1b0b338> <tx|rx> <kz> --out-dir DIR --tracefs DIR}"; CAND="${2:?cand}"; INST="${3:?inst}"; KZ_BIN="${4:?kz}"; shift 4
-OUT=""; TRACEFS=""; CLOSURE=""
-while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; --tracefs) TRACEFS="${2:?}"; shift 2 ;; --closure) CLOSURE="${2:?}"; shift 2 ;; *) echo "unknown arg: $1" >&2; exit 64 ;; esac; done
+OUT=""; TRACEFS=""; CLOSURE=""; XPLAN=""; XLABEL=""; TAG=""; NOHOLD=0
+while [ $# -gt 0 ]; do case "$1" in --out-dir) OUT="${2:?}"; shift 2 ;; --tracefs) TRACEFS="${2:?}"; shift 2 ;; --closure) CLOSURE="${2:?}"; shift 2 ;;
+  --plan) XPLAN="${2:?}"; shift 2 ;; --label) XLABEL="${2:?}"; shift 2 ;; --tag) TAG="${2:?}"; shift 2 ;; --no-hold) NOHOLD=1; shift ;;
+  *) echo "unknown arg: $1" >&2; exit 64 ;; esac; done
 case "$CFG" in pre) REV=281a941; STAGE="C (controlled, researcher intervention, outside P-C1HOLD)" ;; post) REV=833fdbb; STAGE="B (E-06, controlled per P-C1HOLD)" ;; *) echo "cfg pre|post" >&2; exit 64 ;; esac
+LABEL=controlled
+if [ "$NOHOLD" = 1 ]; then
+  [ -z "$XPLAN" ] || { echo "--no-hold takes no --plan" >&2; exit 64; }
+  STAGE="N (natural build-smoke, no hold)"; LABEL="natural build-smoke"; TAG="${TAG:-N}"
+elif [ -n "$XPLAN" ]; then
+  [ -f "$XPLAN" ] && [ -n "$XLABEL" ] && [ -n "$TAG" ] || { echo "--plan needs an existing FILE, --label and --tag" >&2; exit 64; }
+  STAGE="$TAG (witness plan, $XLABEL)"; LABEL="$XLABEL"
+fi
+TAG="${TAG:-${STAGE:0:1}}"
 case "$CAND" in 1df262a|1b0b338) ;; *) echo "cand 1df262a|1b0b338" >&2; exit 64 ;; esac
 case "$INST" in tx|rx) ;; *) echo "inst tx|rx" >&2; exit 64 ;; esac
 [ -n "$OUT" ] || { echo "--out-dir required (runs kept outside the repository)" >&2; exit 64; }
@@ -73,11 +93,12 @@ KAIROS="$(cd "$HERE/../.." && pwd)"; REPO="$(cd "$KAIROS/.." && pwd)"
 PROF="$KAIROS/profiles/c1-bp-b051eb0"
 PLAN="$PROF/observe/sites-cf$REV.kzp"
 HPLAN="$PROF/hold/hold-cf$REV.kzh"
+[ -z "$XPLAN" ] || HPLAN="$(readlink -f "$XPLAN")"
 VIEW="$PROV_ROOTS/${CFG}_$CAND"
 B="$C1/$CFG/$CAND"
 KZ_BIN="$(readlink -f "$KZ_BIN")"; [ -x "$KZ_BIN" ] || { echo "not executable: $KZ_BIN" >&2; exit 64; }
 mkdir -p "$OUT"; OUT="$(cd "$OUT" && pwd)"
-RUN="$OUT/${STAGE:0:1}_${CFG}_${CAND}_${INST}"
+RUN="$OUT/${TAG}_${CFG}_${CAND}_${INST}"
 [ ! -e "$RUN" ] || { echo "refusing to overwrite $RUN" >&2; exit 2; }
 for v in "$VIEW/cf" "$VIEW/bp" "$VIEW/cfe" "$VIEW/osal"; do [ -d "$v" ] || { echo "source view missing: $v" >&2; exit 2; }; done
 if [ -n "$(port_owner $PORT)" ]; then echo "UDP $PORT busy; not starting" >&2; exit 3; fi
@@ -90,11 +111,11 @@ STALE="$(find "$KAIROS/include" "$KAIROS/lib/core" "$KAIROS/lib/trace" "$KAIROS/
 [ -z "$STALE" ] || { printf 'kz is older than its sources (rebuild it first):\n%s\n' "$STALE" >&2; exit 2; }
 git -C "$REPO" diff --no-ext-diff --binary HEAD -- kairos > "$RUN/source.diff"
 {
-  echo "observe_c1_hold.sh cfg=$CFG cand=$CAND inst=$INST stage=$STAGE label=controlled start_utc=$(date -u +%FT%T.%3NZ)"
+  echo "observe_c1_hold.sh cfg=$CFG cand=$CAND inst=$INST stage=$STAGE label=$LABEL start_utc=$(date -u +%FT%T.%3NZ)"
   echo "kz=$KZ_BIN sha256=$(sha256sum "$KZ_BIN" | cut -c1-64)"
   echo "kz.source: commit $(git -C "$REPO" rev-parse HEAD); uncommitted kairos/ diff sha256=$(sha256sum "$RUN/source.diff" | cut -c1-64)"
   echo "observe plan=$PLAN sha256=$(sha256sum "$PLAN" | cut -c1-64)"
-  echo "hold plan=$HPLAN sha256=$(sha256sum "$HPLAN" | cut -c1-64)"
+  if [ "$NOHOLD" = 1 ]; then echo "hold plan=none (no kz hold)"; else echo "hold plan=$HPLAN sha256=$(sha256sum "$HPLAN" | cut -c1-64)"; fi
   echo "source view=$VIEW (cf $(git -C "$VIEW/cf" rev-parse HEAD), bp $(git -C "$VIEW/bp" rev-parse HEAD), cfe $(git -C "$VIEW/cfe" rev-parse HEAD), osal $(git -C "$VIEW/osal" rev-parse HEAD))"
 } > "$D"
 
@@ -115,33 +136,47 @@ for f in core-$INST cf/cf.so cf/bp.so; do echo "file $INST/$f sha256=$(sha256sum
 # conditions declared by the caller
 TB=$'\t'
 {
-  echo "# conditions of C1 hold run $CFG/$CAND/$INST (stage $STAGE); label controlled; one run"
-  echo "item${TB}run.purpose${TB}controlled hold run (stage $STAGE): $PLAN + hold plan $HPLAN${TB}unset"
-  echo "item${TB}run.label${TB}controlled${TB}from-reference"
+  echo "# conditions of C1 hold run $CFG/$CAND/$INST (stage $STAGE); label $LABEL; one run"
+  if [ "$NOHOLD" = 1 ]; then
+    echo "item${TB}run.purpose${TB}natural one-instance record (stage $STAGE): $PLAN, no hold; the natural counterpart of this instance's controlled records${TB}unset"
+    echo "item${TB}run.label${TB}natural (build-smoke)${TB}from-reference"
+  else
+    echo "item${TB}run.purpose${TB}controlled hold run (stage $STAGE): $PLAN + hold plan $HPLAN${TB}unset"
+    echo "item${TB}run.label${TB}controlled ($LABEL)${TB}from-reference"
+  fi
   echo "item${TB}run.count${TB}this run alone; repetition counts are the PI's (P8, D14)${TB}unspecified_by_reference"
   echo "item${TB}cfs.build${TB}$B (W3), unmodified files${TB}from-reference"
   echo "item${TB}cfs.user${TB}$U (setpriv; cFS README L107)${TB}from-reference"
   echo "item${TB}observer.user${TB}root (D1); supervisor root (ptrace)${TB}from-reference"
   echo "item${TB}observer.instances${TB}$INST only (P7: tx and rx are separate records)${TB}from-reference"
-  echo "item${TB}hold.gate_release${TB}from $HPLAN (debug-register execution breakpoints; text not modified)${TB}from-reference"
+  if [ "$NOHOLD" = 0 ]; then
+    echo "item${TB}hold.gate_release${TB}from $HPLAN (debug-register execution breakpoints; text not modified)${TB}from-reference"
+  fi
   echo "item${TB}hold.safeguard${TB}whole run wrapped in timeout ${SAFEGUARD_S}s (pilot safeguard, researcher choice); a run it ends is INCONCLUSIVE${TB}deviation"
   echo "item${TB}run.stratum${TB}not established (files read by tar/sha256sum/kz anchor before the run)${TB}deviation"
-  echo "deviation${TB}control.method${TB}W3 build-smoke and smoke1-3 ran without a hold${TB}kz hold wraps kz observe; a debug-register breakpoint holds one thread at the gate and releases on an event${TB}stage $STAGE needs the controlled order${TB}ptrace stops on the whole tree, one held thread; holder cost and ptrace x uprobe interaction recorded in hold.kzr${TB}yes"
-  echo "deviation${TB}observer.instances${TB}the W3 smoke started tx and rx together${TB}this run starts $INST only${TB}P7 separate records; the gate must select one instance's thread${TB}the other instance is not run in this record${TB}yes"
+  if [ "$NOHOLD" = 0 ]; then
+    echo "deviation${TB}control.method${TB}W3 build-smoke and smoke1-3 ran without a hold${TB}kz hold wraps kz observe; a debug-register breakpoint holds one thread at the gate and releases on an event${TB}stage $STAGE needs the controlled order${TB}ptrace stops on the whole tree, one held thread; holder cost and ptrace x uprobe interaction recorded in hold.kzr${TB}yes"
+    echo "deviation${TB}observer.instances${TB}the W3 smoke started tx and rx together${TB}this run starts $INST only${TB}P7 separate records; the gate must select one instance's thread${TB}the other instance is not run in this record${TB}yes"
+  else
+    echo "deviation${TB}observer.instances${TB}the W3 smoke started tx and rx together and smoke1-3 probed tx only${TB}this run starts and probes $INST only, with the start/stop of the hold runs (one instance, 8 s, CI restart, 5 s)${TB}P7 separate records; the natural record shares the execution conditions of this instance's controlled records except the hold${TB}the other instance is not run in this record; not the CI two-instance start${TB}yes"
+  fi
   echo "item${TB}observer.tracefs${TB}$TRACEFS (operator-mounted)${TB}unspecified_by_reference"
 } > "$RUN/conditions.tsv"
 
 # the run: kz hold wraps kz observe wraps one instance (wrapped in the pilot-safeguard timeout)
 M="$RUN/hold.meta"
-{ echo "stage=$STAGE cfg=$CFG cand=$CAND inst=$INST label=controlled"; echo "kernel=$(uname -r)"; echo "nproc=$(nproc)"; } > "$M"
-timeout "${SAFEGUARD_S}" "$KZ_BIN" hold "$RUN/basis_core.kz" "$PLAN" "$HPLAN" \
-    --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz" \
-    --binary core-tx="$T/core-$INST" --binary cf.so="$T/cf/cf.so" --binary bp.so="$T/cf/bp.so" \
-    -o "$RUN/hold.kzr" --verbose -- \
-    "$KZ_BIN" observe "$RUN/basis_core.kz" "$PLAN" --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz" \
-        --binary "$T/core-$INST" -o "$RUN/run.kzt" --record "$RUN/run.kzt.record.txt" --conditions "$RUN/conditions.tsv" \
-        --stratum none --run-ordinal 0 --tracefs "$TRACEFS" \
-        -- "$SELF" --one "$RUN" "$INST" "$M" >> "$D" 2>&1
+{ echo "stage=$STAGE cfg=$CFG cand=$CAND inst=$INST label=$LABEL"; echo "kernel=$(uname -r)"; echo "nproc=$(nproc)"; } > "$M"
+OBS=("$KZ_BIN" observe "$RUN/basis_core.kz" "$PLAN" --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz"
+     --binary "$T/core-$INST" -o "$RUN/run.kzt" --record "$RUN/run.kzt.record.txt" --conditions "$RUN/conditions.tsv"
+     --stratum none --run-ordinal 0 --tracefs "$TRACEFS" -- "$SELF" --one "$RUN" "$INST" "$M")
+if [ "$NOHOLD" = 1 ]; then
+  timeout "${SAFEGUARD_S}" "${OBS[@]}" >> "$D" 2>&1
+else
+  timeout "${SAFEGUARD_S}" "$KZ_BIN" hold "$RUN/basis_core.kz" "$PLAN" "$HPLAN" \
+      --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz" \
+      --binary core-tx="$T/core-$INST" --binary cf.so="$T/cf/cf.so" --binary bp.so="$T/cf/bp.so" \
+      -o "$RUN/hold.kzr" --verbose -- "${OBS[@]}" >> "$D" 2>&1
+fi
 RC=$?
 echo "timeout+kz hold exit=$RC (124 = pilot safeguard fired -> INCONCLUSIVE) end_utc=$(date -u +%FT%T.%3NZ)" >> "$D"
 

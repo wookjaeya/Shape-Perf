@@ -3,6 +3,7 @@
 - 지위: **파일럿 결과**다. 본 실험(W4) 결과가 아니다. 실행 라벨은 넷이고(natural pilot / build-smoke / controlled (P-C1HOLD) / controlled (researcher intervention, outside P-C1HOLD)), 행마다 하나만 쓰며 라벨이 다른 수를 더하지 않는다. 빈도·재현성·포괄성은 주장하지 않는다(P8) [D].
 - 규칙: 저장소 `71ec15f`(P1 조건부 좁힘, 근거 종류·신뢰 가정, P10 발생별 관계; `kairos/docs/phi_reference.md` §5.5·§7.6). 결정: `Architecture/spec/PI_DECISIONS_RESOLVED_20261025.md`(이하 결정 기록) [D]. 검토: `Kairos_W0W3_Git_Review_20261025.md`(이하 RV).
 - 이번에 한 일: **새 실행은 없다.** 저장된 기록 13개(R2 1, smoke3 4, hold1 8)를 HEAD 의 kz 로 다시 재생했다 [M]. 기대 결과표(`plan/expected_results_C1_R2.md`)는 고치지 않았다.
+- 추가(같은 날, 단계 D): `kz predict`(`774e7c9`, `kairos/docs/predict.md`)의 후보를 실제 실행으로 확인했다 — 새 실행 56개(controlled 52, rx 자연 4)와 단계 B 재사용 4. 결과는 **§5**. §1 표의 "예측·확인" 열은 예측 전의 값이며 §5 가 대신한다.
 
 ## 0. 재생 조건 [M]
 
@@ -73,3 +74,84 @@
 - **다음 단계 D**(결정 기록 §2 D): 검증한 C1 범위(`osal.countsem` 두 키, CF 의존 조회 / BP 존재 확인, 두 판 × 두 후보 × 두 인스턴스)에서 명시적 탐색으로 한정 예측을 하고, 후보를 실제 실행으로 확인한다. RF 처럼 관측 실행에 종속된 간선과, 다른 실행에서도 유지할 동기화 제약을 구분한다(RV §5.3, §11 단계 D).
 - 결정 없이 할 수 있는 것: rx 자연 기록(smoke 를 rx 로 한 번씩), `observe_c1_smoke.sh`·`observe_c1_hold.sh` 의 재생 상수에 `OS_MAX_API_NAME=20` 추가(지금은 빠져 있어 그 스크립트의 재생은 C1 매핑을 좁히지 않는다), 단계 B·C 런 노트의 재생 절을 이 문서로 연결, R19 관측(R2 240).
 - **새 PI 결정 요청 P11: 확인 실행의 재생에서 보류기의 정지·해제 사건을 순서 근거로 쓸 수 있는가.** 보류기는 게이트 trap 으로 BP 를 세우고, CF 가 해제 사건(`CFE_ES_ExitApp` 진입 trap)에 닿은 뒤에야 BP 를 재개한다. 이 순서를 HB 로 쓰면 단계 B 의 미준비 25개는 반환 코드(ON)가 아니라 개입이 만든 순서로 서고, P1 과 무관해진다. 레퍼런스가 정하지 않는 이유: SPEC rev 1.3 §3.16 의 HB 규칙 표(R1–R19, SR, P-*, RF)에는 하네스가 만든 간선의 행이 없다. §4.13 "Oracles" 는 확인 trace 를 같은 준비 명세로 다시 평가한다고만 하고, 보류 기록을 그 trace 의 순서에 넣는지 말하지 않는다. `Architecture/spec/PI_DECISIONS_RESOLVED_20261015.md` §3.3(P-C1HOLD)은 보류·해제 사건만 정한다. 권고: 단계 D 의 확인 판정 근거가 이것에 달려 있으므로 D 의 확인 실행 전에 정한다. 쓴다면 controlled 실행에만 별도 근거 종류로 표시하고, 자연 실행이나 예측에 승계하지 않는다.
+
+## 5. 단계 D — 예측 후보의 확인 실행 (confirm1, 2026-10-25)
+
+- 지위: 실행 라벨은 셋이다 — **controlled (P-C1HOLD)**(G(name) 보류 + CF 종료에서 해제, `C1_basis_plan.md` §9.2 R-d), **controlled (researcher intervention, outside P-C1HOLD)**(그 밖의 모든 계획: CF 보류, R-c 형태의 해제 등; 결정 기록 §2 C), **natural build-smoke**(rx 자연 기록). 행마다 하나만 쓰고 라벨끼리 더하지 않는다. 예측 후보(prediction candidate)의 수는 결과가 아니다(RV §11 D) [D]. 수는 **인스턴스마다**(A-tx · A-rx · B-tx · B-rx, A = `1df262a`, B = `1b0b338`)이며, tx 와 rx 는 같은 경로의 두 인스턴스이지 버그 둘이 아니다(P7). 실행 하나는 그 실행 가능성의 증거이고 빈도·재현성의 증거가 아니다(P8).
+- 판정 기준(SPEC rev 1.3 §4.13 "Labels", CF-01–CF-04, T-16) [D]: **realized** = 확인 trace 를 같은 준비 명세로 다시 판정해 후보 묶음(CF 의 키별 결과 열과 CF 의 끝)과 그 판정이 나왔다. 충돌만으로는 아무것도 확인하지 않는다(CF-01). 다른 키·호출·경로의 결과는 따로 적는다(CF-02). **refuted** = 계획이 강제한 순서가 실현됐는데 결과가 예측과 다르다. **실현 안 됨** = `NOT_CONFIRMED(reason)` 이며 불가능의 증거가 아니다(CF-03). 재시도 소진(시간 기반 전이)을 보류가 만든 실행은 `timeout-exercised` 로 따로 둔다(CF-04, T-16).
+
+### 5.0 조건 [M]
+
+| 항목 | 값 |
+|---|---|
+| 실행 | 새 실행 **56**: natural build-smoke rx 4(`N_<cfg>_<cand>_rx`), controlled 52(계획 13개 × 4 인스턴스, `<계획>_<cfg>_<cand>_<inst>`). 재사용 4: 단계 B(`hold1/B_post_*`)를 post W1 의 확인으로(§5.1 W1 행). 같은 제어점의 계획은 한 번만 돌렸다: post `W2-2` = `W6-2` = `W10-1`, `W6-1` = `W7` = `W7-1` = `W8` = `W8-1`, `W10-2` = `W11` = `W11-2` = `W12-2`, `W3` = `W4`(predict 보고의 "the same control points") |
+| 도구 | `kz` sha256 `ac91e349…`(predict1 과 같은 빌드), 저장소 `6087129`(미커밋 차이 없음: 56개 `driver.txt`). 스크립트: `kairos/probe/scripts/observe_c1_hold.sh` 에 `--plan FILE --label TEXT --tag NAME`(예측 계획과 그 라벨)과 `--no-hold`(같은 한 인스턴스 시작·정지를 kz hold 없이) 추가(`6087129`). 계획 파일은 빌드마다 그 빌드의 것(`predict1/<cfg>_<cand>/cur/*.kzh`; 두 후보의 계획은 주석만 다르다) |
+| 안전·정상화 | pilot safeguard `timeout 150 s`(researcher choice) 발동 0/56. 56/56 이 POWER ON 으로 시작하고 "Exiting cFE with POWERON Reset status" 로 끝났으며, 실행 뒤 SysV 세그먼트가 남지 않아 정상화 부팅(§4.13 "Normalization")은 필요 없었다(`run_confirm.log`). 보류 52/52 `debugregs_ok=yes`, 자식 종료 0 |
+| 섭동 | 보류 실행마다 ptrace 정지 1417–2170. 보류 길이: CF 보류 11.5–15.8 ms(CF 를 잡은 모든 계획), BP 의 `BP1_tsem` 생성 보류 84–88 ms(W12-1)·2.60–2.65 s(post W2-2), 나머지는 해제되지 않음(§5.2). **이탈**: 분석용 `kz replay` 세 번(각 2 s 미만)이 실행 3개(`N_post_1df262a_rx`, `W2-2_pre_1df262a_tx`, `W2-1_pre_1df262a_rx`)와 시간이 겹쳤다. 세 실행의 판정은 같은 계획의 다른 인스턴스와 같다 |
+| 재생 | `confirm1/scripts/replays.sh`: §0 과 같은 상수·닫힘(`c1prof_i1025`, rx 는 `_rx`)·읽기(현행, P1 끔, RF 끔, RF·P1 끔, A-OWNER 끔, counted/excluded) + `--emit-trace` + `classify.awk`(실현 묶음, 실행된 보류, P11 읽기 A). 60개(56 + 재사용 4) 모두 종료 0 → `<run>/replay_c1025/`, 재사용은 `confirm1/reuse_B/` |
+| 산출물(저장소 밖, 106 MB) | `/home/user/work/procrace/c1_runs/confirm1/`: 실행 디렉터리(`driver.txt`·`conditions.tsv`·`hold.kzr`·`hold.meta`·`run.kzt`·`cf_console.txt`·`inst/`), `summary.txt`(실행마다 보류·묶음·판정 4 읽기), `run_confirm.log`, `scripts/`. 시험 실행 하나는 커밋 전 스크립트로 돌아 `trial/` 로 옮겼고 세지 않는다 |
+
+**P11 의 두 읽기** [I]. 읽기 B(현행) = `kz replay` 그대로: 보류 기록은 재생 입력이 아니다. 읽기 A = 보류기의 정지·해제 순서를 HB 로 쓴다: 해제된 보류마다 간선 *R_prev → H_gate* 하나(H = 보류된 스레드, H_gate = 게이트에서 막힌 그 호출의 첫 사건, R = 해제한 스레드, R_prev = 해제 지점 직전의 R 의 사건). 해제 trap 은 해제 지점 명령보다 먼저이므로 R 의 그 지점 사건 자체는 쓰지 않는다: 같은 주소의 uprobe 사건이 풀린 스레드의 사건보다 **뒤에** 기록되기도 한다(단계 B: BP 의 생성 #178–179 가 CF 의 `CFE_ES_ExitApp` 사건 #180 보다 앞). 이 간선으로 미준비 조회 → (CF 순서) → 해제 → BP 의 생성이 서면 "보류가 생성을 뒤로 놓음", 생성 → (BP 순서) → 해제 → CF 의 조회가 서면 "보류가 생성을 앞에 놓음"으로 적는다. 읽기 A 는 kz 에 구현하지 않았고(P11 대기) 저장소 밖 `classify.awk` 로 계산했다. 어느 읽기를 쓸지는 정하지 않는다.
+
+### 5.1 후보별 예측·확인
+
+모델 범위는 `kairos/docs/predict.md` §3(시간 없는 교차, 콘 = core-tx·CFE_ES·CF·BP, 두 키, 첫 hit 만 다루는 kzp-hold 1)과 각 계획의 모델 점검(predict 보고 "plan check")이다. "강제" = 정체하지 않는 모든 실행이 그 묶음, "일부" = 계획이 일부 키를 스케줄러에 맡김, "실현 불가" = 선언한 대로 끝나는 실행이 없음. "정체 가능" = 해제가 게이트보다 먼저 오거나 풀린 스레드만 닿는 해제가 있으면 막힌다는 경고. 묶음 표기는 predict 의 것(`-17xn` = 실패 2회 이상, `0x1` = 성공 1회, `CF=x` 종료, `CF=f` "CF Initialized").
+
+| 후보 | 모델 묶음 → 모델 재판정 | 모델 범위(계획 · 점검) | 개입(라벨 · 계획) | 실현? A-tx·A-rx·B-tx·B-rx | 원인 · 비고 | 기대표 |
+|---|---|---|---|---|---|---|
+| pre W1(관측 묶음) | BP0 `-17x1`, CF=x → NOT_READY_UNJUDGED | 계획 없음 | natural: smoke3 tx, **N rx** | 자연 기록(A·B 각 tx 1·rx 1) | 후보가 아니다. W2-1 실행 4개도 이 묶음(아래) | E-03 일치 |
+| **pre W2**(새) | BP0 `0x1`, **BP1 `-17x1`**, CF=x → (CF,BP0,1) READY; **(CF,BP1,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`** | `W2` 실현 불가(supervisor L384–L385). `W2-2` 일부(BP0 만 강제), `W2-1` 일부(끝 CF=x 만 강제), 둘 다 정체 가능 | researcher: `W2-2`(CF 를 BP0 조회 진입에서 보류, BP0 생성 반환에서 해제). P-C1HOLD: `W2-1`(G(BP1) + CF 종료). researcher: `W2` | **`W2-2`: 예 · 예 · 예 · 예.** `W2-1`: 아니오 ×4. `W2`: CF 앞부분만 ×4(보류 미해제, 따로 둠) | 실현됐으나 **BP1 의 결정 순서(CF 의 BP1 조회가 BP 의 BP1 생성보다 앞)는 계획이 강제하지 않았다**: 해제 뒤 스케줄러가 4/4 그렇게 냈다. `W2-1`: 스케줄러가 CF 의 BP0 조회를 먼저 내 CF 가 종료했고, 그 해제(R1)가 BP 가 G(BP1)에 닿기 전에 소비되어 BP 가 정지까지 보류됨 — 제어(정체 가능 경고대로; `C1_basis_plan.md` §9.2 가 미리 적은 "채널 0 이 자연 순서로 실패하면 도달하지 않음"). `W2`: 점검대로 G1_BP 미해제(CF 가 풀린 뒤 디버그 레지스터가 지워져 CF 종료 해제가 발동 안 함) — 제어 | E-03(U-C1-2) 일치; E-09(`W2-1`) 일치 |
+| **pre W3** | 두 키 `0x1`, CF=f → 둘 다 READY | `W3` 강제, 정체 가능 | researcher: `W3`(CF 를 BP0 조회 진입에서 보류, BP 의 `CFE_ES_CreateChildTask` 진입에서 해제) | **예 ×4** | 단계 C(예측 전, 해제 지점 다름)는 같은 묶음을 실현했으나 같은 계획이 아니어서 재사용하지 않고 다시 돌렸다(P12) | E-01(U-C1-1·2) 일치 |
+| **post W1**(E-06) | BP0 `-17xn`, CF=x → (CF,BP0,1–25) VIOLATING → `OBSERVED_VIOLATION` | `W1` 강제 | P-C1HOLD: **단계 B 재사용**(같은 게이트 주소·이름 조건·해제; `W1.kzh` 의 추가 조건 `caller-in bp.so` 는 B 네 실행의 보류 스레드가 BP 여서 충족, `hold.meta`) | **예 ×4**(재사용; `timeout-exercised`) | 다시 돌리지 않았다. P12 가 "예측 전 실행은 세지 않음"이면 이번 라운드 확인은 없다(`W1.kzh` 4회 필요). 같은 묶음이 `W6-1`·post `W3` 실행 8개에도 나왔으나 보류가 해제되지 않은 실행이라 W1 의 확인으로 세지 않는다 | E-06(U-C1-3) 일치 |
+| post W2 | BP0 `-17xn 0x1`, BP1 `-17xn` | `W2-2` 일부(끝 CF=x 만 강제; BP1 소진은 BP0 가 성공할 때만), 정체 가능 | P-C1HOLD: `W2-2` | 아니오 ×4 | 제어: BP0 를 스케줄러에 맡겨 BP0 가 자연 기록처럼 m = 2 → W6 묶음. m ≥ 3 은 BP 가 지연 두 번 이상 늦어야 하는데, 모델은 시간이 없고 그 늦음을 만드는 계획이 없다 | — |
+| post W3, W4 | BP0 `-17xn 0x1` + BP1 `-17xn 0x1` / `-17x1 0x1` | `W3`(=`W4`) 실현 불가 | researcher: `W3` | 아니오 ×4 | 제어: 해제(CF 의 BP1 조회)가 보류된 BP 의 진행에 달려 있어 올 수 없다 → BP 정지까지 보류, CF 는 BP0 소진(W1 묶음, 따로 둠). 점검이 실행 전에 알린 결과 그대로 | — |
+| post W5 | BP0 `-17xn 0x1`, BP1 `0x1` | `W5-2` 일부, 정체 가능 | researcher: `W5-2`(CF 를 BP1 조회 진입에서 보류, BP 의 child task 생성에서 해제) | 아니오 ×4 | 제어: BP 의 child task 생성(해제)이 CF 의 BP1 조회보다 먼저 와서 소비됨 → CF 가 정지까지 보류, (CF,BP1) 도달 안 함(`NOT_CONFIRMED(not reached)`). BP0 는 m = 2 | — |
+| **post W6**(새) | BP0 `-17x1 0x1`, **BP1 `-17xn`**, CF=x → (CF,BP1,1–25) VIOLATING → `OBSERVED_VIOLATION` | `W6-2`(=`W2-2`) 일부(끝 CF=x 만 강제; BP0 는 스케줄러), 정체 가능 | P-C1HOLD: `W2-2`(G(`BP1_tsem`) + CF 종료) | **예 ×4**(`timeout-exercised`) | BP0 의 m = 2 는 스케줄러가 냈다(자연 기록과 같은 쪽). `C1_basis_plan.md` §9.2 가 BP1 의 A3 를 얻는 별도 실행으로 적어 둔 바로 그 보류다 | E-06(U-C1-4) 일치 |
+| post W7, W8 | BP0 `-17x1 0x1` + BP1 `-17xn 0x1` / `-17x1 0x1` | `W6-1`(=`W7`=`W8`) 일부, 정체 가능 | researcher: `W6-1`(G(BP0) + CF 의 첫 조회 반환에서 해제 = §9.2.1 R-c 형태) | 아니오 ×4 | 제어: 해제(CF 의 첫 조회 반환)가 BP 가 G(BP0)에 닿기 전에 소비됨 → BP 정지까지 보류, CF 가 BP0 소진(W1 묶음, 따로 둠) | — |
+| post W9(관측 묶음) | BP0 `-17x1 0x1`, BP1 `0x1` | 계획 없음 | natural: smoke3 tx, **N rx** | 자연 기록 | 후보가 아니다. `W12-1` 실행 4개도 이 묶음 | E-05·E-04 일치 |
+| post W10(새) | BP0 `0x1`, BP1 `-17xn`, CF=x → (CF,BP1,1–25) VIOLATING | `W10` 실현 불가. `W10-1`(=`W2-2`), `W10-2` 일부 | researcher: `W10`, `W10-2`. P-C1HOLD: `W2-2` | 깨끗한 실현 없음. `W10`: CF 앞부분만 ×4(G1_BP 미해제, 따로 둠). `W2-2` → W6, `W10-2` → W13/W12 | 제어: 전체 계획은 풀린 CF 가 BP 를 풀어야 하는데 CF 의 디버그 레지스터가 지워져 있다(L384–L385; 점검대로). 부분 계획은 다른 키를 스케줄러에 맡긴다 | — |
+| post W11 | BP0 `0x1`, BP1 `-17xn 0x1` | `W11`(=`W10-2`) 일부 | researcher: `W10-2` | 아니오 ×4 | 제어: BP1 을 스케줄러에 맡김(tx 는 첫 시도 성공, rx 는 m = 2) | — |
+| **post W12**(새) | BP0 `0x1`, BP1 `-17x1 0x1`, CF=f → (CF,BP1,1) TOLERATED, (…,2) READY | `W12` 실현 불가. `W12-2`(=`W10-2`) 일부, `W12-1` 일부 | researcher: `W10-2`, `W12-1`, `W12` | **`W10-2`: 아니오 · 예 · 아니오 · 예**(rx 만). `W12-1`: 아니오 ×4. `W12`: 아니오 ×4 | BP1 의 m = 2 는 계획이 강제하지 않았다(해제 뒤 경합; tx 는 두 후보 모두 첫 시도 성공). `W12-1`: 해제 `cf_retry_delay` 의 첫 hit 가 BP0 루프의 지연이어서 BP1 이 CF 의 첫 BP1 조회 전에 생성됨 → W9 — 제어(시도·키를 고르는 해제 어휘가 kzp-hold 1 에 없음). `W12`: G1_BP 미해제로 BP1 소진 → W10 묶음(CF-02: W12 의 결과가 아님) | E-05(U-C1-4) 일치 |
+| **post W13** | 두 키 `0x1`, CF=f → 둘 다 READY | `W13` 강제, 정체 가능 | researcher: `W13`(pre W3 와 같은 제어점) | **예 ×4** | `W10-2` 의 tx 2개도 이 묶음 | E-04(U-C1-3·4) 일치 |
+
+refuted 0: 계획이 강제한 부분이 예측과 다른 결과를 낸 실행은 없다. 모델 점검과 실제 제어의 대응 [M]: "강제" 계획(pre W3, post W13, post W1 = 단계 B) 12/12 실현; "실현 불가" 계획(pre W2, post W3, W10, W12) 16/16 에서 해제되지 않은 게이트(점검이 말한 정체); "일부" 계획 28 실행 중 정체 12(pre W2-1, post W5-2, W6-1: 모두 해제가 게이트보다 먼저 소비됨, "정체 가능" 경고가 붙은 계획), 끝까지 간 16 에서 강제한 부분은 모두 예측대로. 실현되지 않은 원인은 모두 **제어**(부분 계획, 해제 선소비, 풀린 스레드의 재무장 없음, 첫 hit 만 쓰는 해제)였다. 모델(상태 의미)이나 빠진 제약 때문에 후보가 틀렸다고 보인 경우는 없다. 다만 m ≥ 3 재시도 후보(post W2–W5, W7, W11)는 시험되지 않았을 뿐이고, 시간이 그 순서를 배제하는지는 모른다 [U].
+
+### 5.2 실행 묶음별 판정과 P11 두 읽기 [M]
+
+판정·근거는 `replay_c1025/occ_*.txt`. 한 줄의 네 인스턴스는 발생 줄이 서로 같다(`W10-2` 만 tx 와 rx 가 다르다). 근거 약어는 §1(SO, RD, ON).
+
+| 계획 · 라벨 | 실행된 보류 | 실현 묶음(4 인스턴스) | 읽기 B(현행): 판정 · 근거 | 읽기 A | P1 끔(B) |
+|---|---|---|---|---|---|
+| pre `W3` · researcher | CF 보류 → BP 의 child task 진입에서 해제 | W3 ×4 | READY 2 · SO+RD | 두 키 모두 "보류가 생성을 앞에 놓음" → SO, RF·P1 과 무관 | 같음(RF·P1 끄면 INCONCLUSIVE) |
+| pre `W2-2` · researcher | CF 보류 → BP0 생성 반환에서 해제 | W2 ×4 | BP0 READY · SO+RD; **BP1 NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` · ON** | BP0 → SO(보류). **BP1 은 간선 없음 → B 와 같음(ON)** | BP1 → `INCONCLUSIVE(caller_requirement_absent, explanation_ambiguous)` |
+| pre `W2-1` · P-C1HOLD | G(BP1) 보류, 해제 선소비 → 정지까지 보류 | W1(관측 묶음) ×4 | BP0 NOT_READY_UNJUDGED · ON | 간선 없음 | INCONCLUSIVE |
+| pre `W2` · researcher | CF 보류·해제, G(BP1) 미해제 | W2 의 CF 앞부분 ×4 | BP0 READY · SO+RD; BP1 NOT_READY_UNJUDGED · **SO**(기록에 BP1 생성이 없다) | BP0 → SO(보류) | BP1 같음 — 그러나 그 상태는 해제되지 않은 보류가 만든 것이다 |
+| 단계 B 재사용 · P-C1HOLD | G(BP0) → CF 종료에서 해제 | W1 ×4 | (CF,BP0,1–25) VIOLATING → `OBSERVED_VIOLATION` · ON ×25 | 25 모두 "보류가 생성을 뒤로 놓음" → SO, P1 과 무관 | 25 모두 `INCONCLUSIVE(horizon-open, explanation_ambiguous)` |
+| post `W13` · researcher | CF 보류 → child task 진입에서 해제 | W13 ×4 | READY 2 · SO+RD | 두 키 SO(보류) | 같음 |
+| post `W2-2` · P-C1HOLD | G(BP1) → CF 종료에서 해제(2.6 s) | W6 ×4 | BP0 TOLERATED · ON, READY · SO+RD; **(CF,BP1,1–25) VIOLATING → `OBSERVED_VIOLATION` · ON ×25** | BP1 25 → SO(보류); BP0 간선 없음 | BP1 25 → `INCONCLUSIVE(horizon-open, explanation_ambiguous)` |
+| post `W10-2` · researcher | CF 보류 → BP0 생성 반환에서 해제 | tx: W13 ×2, rx: W12 ×2 | BP0 READY · SO+RD; BP1 READY · SO+RD(tx) / TOLERATED · ON, READY · SO+RD(rx) | BP0 → SO(보류); BP1 간선 없음 | rx 의 TOLERATED → INCONCLUSIVE |
+| post `W12-1` · researcher | G(BP1) → CF 의 첫 재시도 지연 뒤 해제(85 ms) | W9 ×4 | TOLERATED · ON, READY 2 · SO+RD | 간선이 판정에 닿지 않음 | TOLERATED → INCONCLUSIVE |
+| post `W5-2` · researcher | 해제 선소비 → CF 정지까지 보류 | (CF,BP1) 도달 안 함 ×4 | BP0 TOLERATED · ON, READY · SO+RD | — | — |
+| post `W6-1`, `W3` · researcher | 해제 선소비 / 올 수 없는 해제 → BP 정지까지 보류 | W1 묶음 ×4 + ×4(따로 둠) | (CF,BP0,1–25) VIOLATING · SO(생성 없음) | 같음 | 같음 |
+| post `W10`, `W12` · researcher | CF 보류·해제, G(BP1) 미해제 | W10 묶음 ×4 + ×4(따로 둠) | BP0 READY · SO+RD; (CF,BP1,1–25) VIOLATING · SO(생성 없음) | BP0 → SO(보류) | BP1 같음 |
+
+읽기의 차이 [I]: 읽기 B 에서는 확인된 미준비 판정(post W1·W6 의 25, pre W2 의 BP1)이 모두 ON 이라 P1 을 끄면 불확정이 되고, 확인된 READY 는 RF(RD)에 기댄다. 읽기 A 에서는 보류가 강제한 순서에 놓인 판정 — post W1 의 미준비 25 개와 W6 의 25 개(인스턴스마다)와 pre W3·post W13·pre W2(BP0)·W10-2(BP0) 의 READY — 이 반환값과 무관한 상태 근거(SO)로 선다. **pre W2 의 BP1 미준비와 W12 의 BP1 TOLERATED 는 두 읽기 모두 ON 이다**: 그 순서는 보류가 아니라 해제 뒤 스케줄러가 냈다. 해제되지 않은 보류 실행에서는 생성이 기록에 아예 없어 두 읽기 모두 SO 이지만, 그 상태는 정지까지 풀리지 않은 보류의 산물이다.
+
+### 5.3 rx 자연 기록 (natural build-smoke) [M]
+
+`N_<cfg>_<cand>_rx` 4개: rx 하나만, 보류 실행과 같은 시작·정지(8 s, CI 재시작 명령, 5 s)로, kz hold 없이 관측했다. CI 의 두 인스턴스 동시 시작과 다른 점은 각 `conditions.tsv` 의 deviation 에 적었다. pre(A·B): (CF,`BP0_tsem`,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` · ON, 이벤트 30, 종료(= pre W1). post(A·B): (CF,`BP0_tsem`,1) TOLERATED · ON, (…,2) READY · SO+RD, (CF,`BP1_tsem`,1) READY · SO+RD, "CF Initialized"(= post W9). tx 의 smoke3 와 같은 판정이다. 이로써 **rx 도 같은 빌드·키·순번에 자연 쪽 기록을 갖는다**(P7): pre (CF,BP0,1) 자연 나쁨 ↔ 제어 좋음(단계 C rx, W3 rx), post (CF,BP0,1) 자연 TOLERATED ↔ 제어 VIOLATING(단계 B rx), post (CF,BP1,1) 자연 READY ↔ 제어 VIOLATING(W6 rx). 짝의 한쪽은 여전히 언제나 controlled 다.
+
+### 5.4 이 결과가 보여 주는 것과 보여 주지 않는 것 — H3
+
+**보여 주는 것.** (1) 예측이 낸 후보 가운데 여섯이 실제 프로그램에서 그 계획(또는 같은 제어점의 계획)으로 실현됐다: pre W2·W3, post W6·W12(rx 만)·W13, 그리고 단계 B 재사용으로 post W1. 어긋난(refuted) 후보는 없다. (2) **`BP1_tsem` 키에서 처음으로 반대쪽이 나왔다**: pre (CF,BP1,1) NOT_READY_UNJUDGED(W2, 인스턴스 4) — 자연 pre 실행은 채널 0 에서 끝나 이 키에 닿지 않는다 — 와 post (CF,BP1,1–25) VIOLATING(W6, 인스턴스 4, `timeout-exercised`). 이제 두 판 × 두 키의 순번 1 마다 좋은 기록과 나쁜 기록이 모두 있다(controlled 의미; 한쪽은 언제나 제어 실행). (3) 계획 점검이 실제 보류 기구의 결과를 실행 전에 맞혔다: 강제 12/12 실현, 실현 불가 16/16 정체, 실제 정체 12 는 모두 "정체 가능" 경고가 붙은 계획. 실현 실패의 원인을 모델이 아닌 제어(부분 계획, 해제 선소비, L384–L385, 첫 hit 해제)로 나눌 수 있었다.
+
+**단순 관측 판정 대비 증가분(H3), 정직하게.** smoke3 의 네 기록을 관측 판정만 하면 빌드·키마다 한쪽(pre BP0 나쁨; post BP0 TOLERATED/READY, BP1 READY)만 있고 pre BP1 은 발생 자체가 없다. 예측+확인이 더한 것은 위 (2)의 `BP1_tsem` 두 결과, post 의 첫 시도 성공(W13)과 BP0 첫 성공 + BP1 재시도(W12), 그리고 (3)의 제어 결과 예고다. **단계 B·C 의 손 설계 보류를 넘어서는 부분은 작다.** 실현된 계획은 모두 B(G(name) + CF 종료)와 C(CF 를 조회 진입에서 보류, BP 사건에서 해제)의 두 모양 그대로이거나 해제 지점만 옮긴 것이다. post W6 의 G(`BP1_tsem`) 보류는 `C1_basis_plan.md` §9.2 가 BP1 의 A3 를 얻는 별도 실행으로 이미 적어 둔 것이고, pre 에서 그것이 "도달하지 않음"으로 끝난다는 것도 같은 절이 미리 적었다(W2-1 이 그대로였다). 손 계획에 없던 것은 pre BP1 의 A3 를 얻는 길(W2-2: BP0 가 생길 때까지만 CF 를 잡음)과 W12 인데, 둘 다 **결정 순서를 계획이 강제하지 않았고** 해제 뒤 스케줄러가 냈다(W12 는 rx 2/2, tx 0/2). 따라서 이 두 결과는 그 순서가 가능하다는 증거이지 예측이 그 순서를 만들어 낸다는 증거가 아니다. 새 실패 기전은 없다: BP1 의 결과는 같은 "늦은 provider" 순서를 둘째 키에서 본 것이다.
+
+**보여 주지 않는 것.** (1) 자연 가능성·빈도: 새로 실현된 순서는 모두 controlled 실행에서 나왔다(P8). (2) m ≥ 3 재시도 후보(post W2–W5, W7, W11)와 깨끗한 post W10: 실현하지 못했고 불가능하다는 증거도 아니다(CF-03). 모델에 시간이 없고 kzp-hold 1 에 시도·키를 고르는 해제가 없다. (3) 판정의 독립성: 읽기 B 에서 확인된 미준비는 모두 반환 코드 좁힘(ON, P1)이고 READY 는 RF 에 기댄다. 읽기 A 를 쓰더라도 pre W2 의 BP1 미준비는 ON 으로 남는다. 모델의 재판정 자체도 P1 매핑으로 결과를 계산한다. (4) E-06 류 VIOLATING(W1·W6)은 채택한 요구·허용 모델의 판정이고, 보류가 만든 소진이며(`timeout-exercised`), PR #342 가 상한을 의도적으로 두었다는 사실과 함께 읽는다. (5) 기존 process-level 방법 대비 가치, 다른 사례(C2·C3·C5)는 여전히 평가하지 않았다(RV §12).
+
+### 5.5 남은 것과 PI 결정
+
+- 남은 것(결정 없이): kz hold 가 풀린 스레드를 다음 정지까지 다시 무장하지 않는 점(`probe/hold/supervisor.cpp` L384–L385)을 고치면 pre W2·post W10 전체 계획을 다시 시험할 수 있다. 시도·키를 고르는 해제(`occurrence <n>` 또는 해제 조건에 키)를 kzp-hold 에 더하면 m ≥ 3 후보와 W12-1 을 시험할 수 있다. 읽기 A 를 kz 에 넣는 일은 P11 결정 뒤로 둔다. 기대 결과표는 고치지 않았다(나온 행은 모두 판정 일치: E-01, E-03(U-C1-2), E-04, E-05(U-C1-4), E-06(U-C1-3·4), E-09).
+- **P11(대기, 정하지 않음)**: 위 §5.2 의 두 읽기. 이 라운드에서 P11 이 바꾸는 것은 확인된 미준비(인스턴스마다 post W1 25 개, W6 25 개)와 보류로 순서가 선 READY 의 근거 종류이며, 실현 여부는 바꾸지 않는다.
+- **P12(대기)**: 예측 전 제어 실행을 확인으로 셀지. 이번에는 과제 지시대로 **제어점이 같은 경우에만** 재사용했다(post W1 ← 단계 B). 단계 C 는 해제 지점이 달라 pre W3 를 다시 돌렸다.
+- **새 PI 결정 요청 P13: 게이트가 끝까지 해제되지 않은 실행(보류된 스레드가 하네스 정지까지 멈춤)에서, 후보의 결정 사건이 모두 해제 예정 지점보다 앞에 있으면 그 앞부분을 실현으로 셀 수 있는가.** 해당: pre `W2`(W2 의 CF 앞부분), post `W10`(W10 의 CF 앞부분), post `W6-1`·`W3`·`W12`(다른 후보의 묶음). 레퍼런스가 정하지 않는 이유: SPEC §4.13 은 감시 한도가 발동하면 `inconclusive(await-timeout)`, 재현 실패·시간 한도는 `NOT_CONFIRMED`(CF-03)라고만 하고, 감시 한도 없이 해제만 빠진 채 정상 정지로 끝난 실행은 말하지 않는다. `C1_basis_plan.md` §9.2 R-d 는 해제 사건을 정하지만 그것이 발동하지 않은 경우를 다루지 않고, 결정 기록 §2 B 의 "하네스가 끝내 반복이 열린 채 종료된 실행은 세지 않는다"는 반복이 닫힌(CF 가 스스로 종료한) 이 경우에 맞지 않는다. 또 예측 trace 는 해제 뒤 BP 의 늦은 생성까지 포함하는데 실제 실행에는 그것이 없다. 권고 [I]: 세지 않고 따로 두며, 보류기 재무장을 고친 뒤 같은 계획으로 다시 돌린다.

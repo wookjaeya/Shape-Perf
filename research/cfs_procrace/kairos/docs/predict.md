@@ -91,6 +91,7 @@ kz predict <run.kzt> --profile $P --profile $P/cf-<REV> --profile $P/bundle-<CAN
 ## 7. 남은 것과 PI 결정
 
 - 확인 실행(Confirm): 위 표의 계획. 우선순위 [I]: post `W2-2.kzh`(`BP1` 소진, 새 후보), pre `W3.kzh`·post `W13.kzh`(READY 순서, 더 늦은 해제), post `W1.kzh`(E-06 재확인), pre `W2-2.kzh`(`BP1` NOT_READY_UNJUDGED를 노리나 `BP1` 순서는 스케줄러에 남음). 인스턴스마다 따로(tx·rx, P7), 결과는 controlled 라벨로만.
+  - **(2026-10-25 실행됨)** confirm1: 결과는 `plan/results_pilot_20261025.md` §5. 실현: pre W2·W3, post W6·W12(rx 만)·W13 + 단계 B 재사용 post W1; refuted 0; 실현 안 됨은 모두 제어 원인(부분 계획, 해제 선소비, L384–L385, 첫 hit 해제). 새 PI 결정 요청 P13(해제되지 않은 보류 실행의 앞부분) [M].
 - 보류 기구의 한계(공학 항목, 결정 아님): 풀린 스레드의 디버그 레지스터를 즉시 다시 무장하지 않아(`supervisor.cpp` L384–L385) pre W2·post W10 전체 계획은 실현 불가로 점검된다. 정확한 순번(m≥3)의 해제에는 `occurrence <n>` 같은 어휘가 필요하다.
 - **P11(대기 중)**: 확인 실행 재생에서 보류기의 정지·해제 순서를 HB로 쓰는가. 읽기 A(쓴다): W1·W10/W2-2의 미준비 25개와 W2의 미준비가 개입 순서로 서고 P1과 무관해진다. 읽기 B(안 쓴다): 단계 B처럼 미준비는 ON(반환 코드 좁힘, P1 조건부), READY 후보(W3·W13)는 RF(RD)에 기댄다. 이 문서는 정하지 않는다.
 - **새 PI 결정 요청 P12: 예측 전에 한 제어 실행(단계 B·C)을 같은 순서의 후보(post W1, pre W3)의 확인으로 셀 수 있는가.** SPEC §4.13은 후보의 지향 확인(directed confirmation)과 CF-01–CF-04만 정하고, 확인 실행이 예측 뒤에 그 후보의 계획으로 돌아야 하는지는 말하지 않는다. RV §11 D는 "후보를 실제 실행으로 확인"이라고만 적는다. 단계 C의 해제(`BP1_tsem` 생성 진입)는 W3의 해제(BP_CLA_OUT 생성 진입)와 다르다. 권고 [I]: 세지 않고, 예측 계획으로 새로 돌린다.

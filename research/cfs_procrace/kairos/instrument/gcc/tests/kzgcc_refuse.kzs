@@ -1,0 +1,5 @@
+# kzgcc_refuse.kzs -- a manifest that names a runtime function: the plugin must refuse the unit (unit test).
+kzs-sites 1
+source unit rev=0000000000000000000000000000000000000000 ref="runtime/src/kz_rt.c"
+module 1 name=runtime source=unit
+site 1 label=rt.obs.entry op=rt phase=before tu=src/kz_rt.c func=kz_rt_obs

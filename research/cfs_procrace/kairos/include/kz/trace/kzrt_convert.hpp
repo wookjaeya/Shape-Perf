@@ -1,5 +1,5 @@
 // kzrt_convert.hpp -- a kzrt-dump stream (the instrumented family's raw evidence, runtime/include/kz_rt_format.h)
-// with its site manifests ("kzs-sites 1", event_semantics.md section 3) -> the neutral event layer
+// with its site manifests ("kzs-sites 1" or "2", event_semantics.md section 3) -> the neutral event layer
 // (neutral.hpp), so that `kz replay` reads an instrumented run as it reads an F0 run.
 //
 // What the conversion states (docs/schema.md section 12.4):
@@ -13,7 +13,12 @@
 //             same-cell) is joined to it: its events are the run actor's (the aseq continues); any other
 //             provisional actor stays one (kzrt-provisional); every event without a cell (actor 0) is an actor
 //             of its own (unresolved), so no program order is invented.  The runtime records no creator, owner
-//             or name: they stay undetermined (the identity join over manifest roles is not done here).
+//             or name; where the manifests declare identity reads (kzs-sites 2 `identity`), the identity join of
+//             identity_rule.hpp (join_actor_identities) ties an announced id to the one spawn call that assigned
+//             it and derives app_owner with the rule F0 uses (owner_from_request): creator, creator_event,
+//             spawn_return, announced_id, join_flags, owner_* (confirmed or undetermined), request_func, and the
+//             run flag owners-recorded; its counts are a conversion note.  Without identity reads they stay
+//             undetermined.  NSITES `decoder` is the identity read's KZ_DECODER.
 //   events    per actor in aseq order; the container order is the events without a clock (bootstrap) in buffer
 //             order, then a merge by time that keeps every actor's aseq order (NOT an order between actors).
 //             Values: a slot whose valid bit is set; a validated string where the runtime copied one.  `link`

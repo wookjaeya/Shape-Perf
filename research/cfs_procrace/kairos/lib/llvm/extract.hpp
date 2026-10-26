@@ -36,4 +36,12 @@ std::string normalized_flags(const std::vector<std::string>& command_line);
 // The same as a list: the recorded command without the compiler, the output and the input.
 std::vector<std::string> flag_list(const std::vector<std::string>& command_line);
 
+// A build-compiler plugin option of a recorded command (-fplugin=<file>, -fplugin-arg-<name>-<key>[=<value>]): the
+// commands of a derived, instrumented build carry them (SPEC 1.7 B').  The basis records them as the commands ran;
+// the front end is given every command without them (front_end_command), since it cannot load a plugin of the build
+// compiler.  That the program it reads is unchanged holds for a plugin that changes neither preprocessing nor parsing
+// (the basis states this as a deviation; kzgcc registers passes and observing callbacks only).
+bool is_compiler_plugin_option(const std::string& arg);
+std::vector<std::string> front_end_command(const std::vector<std::string>& command_line);
+
 }  // namespace kzs

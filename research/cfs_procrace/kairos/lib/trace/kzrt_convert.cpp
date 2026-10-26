@@ -9,6 +9,7 @@
 #include <set>
 #include <tuple>
 
+#include "kz/trace/identity_rule.hpp"
 #include "kz_rt_decode.h"
 #include "kz_rt_manifest.hpp"
 
@@ -130,6 +131,18 @@ uint8_t nloss_kind(uint32_t k) {
   }
 }
 
+// KZ_DECODER of a manifest identity read (kzs-sites 2; the same reader names as F0's plan).
+uint16_t decoder_code(const std::string& d) {
+  if (d == "spawn-create") return KZ_DECODER_SPAWN_CREATE;
+  if (d == "spawn-return") return KZ_DECODER_SPAWN_RETURN;
+  if (d == "thread-entry") return KZ_DECODER_THREAD_ENTRY;
+  if (d == "owner-request") return KZ_DECODER_OWNER_REQUEST;
+  if (d == "child-request") return KZ_DECODER_CHILD_REQUEST;
+  if (d == "request-return") return KZ_DECODER_REQUEST_RETURN;
+  if (d == "spawn-id") return KZ_DECODER_SPAWN_ID;
+  return KZ_DECODER_NONE;
+}
+
 // Losses that leave the recorded events whole: no interval (kzrt_convert.hpp, "losses").
 bool no_interval(uint8_t kind) {
   return kind == KZ_NLOSS_CTL_SKIPPED || kind == KZ_NLOSS_CTL_NOCOND || kind == KZ_NLOSS_ACTOR_TABLE || kind == KZ_NLOSS_UNRESOLVED ||
@@ -216,7 +229,7 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
     ns.op = s->op;
     ns.source = s->tu;
     ns.r.line = s->src_line;
-    ns.r.decoder = KZ_DECODER_NONE;
+    ns.r.decoder = s->has_identity ? decoder_code(s->identity.decoder) : static_cast<uint16_t>(KZ_DECODER_NONE);
     ns.r.bind = KZ_NONE32;
     ns.r.raw = zeroed<kz_ref>();
     uint32_t nb = 0, observed = 0;
@@ -405,6 +418,32 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
     n.events.push_back(ne);
   }
   for (size_t i = n.events.size(); i-- > 0;) n.actors[n.events[i].actor].r.first_event = static_cast<uint32_t>(i);
+
+  // ---- identity: the join over the manifest's identity reads (identity_rule.hpp), when it declares any ----
+  {
+    std::vector<IdentityRead> reads(n.sites.size());
+    bool any = false;
+    for (const auto& si : site_index) {
+      const kzrt::Site* s = m.site(si.first);
+      if (s == nullptr || !s->has_identity) continue;
+      IdentityRead& r = reads[si.second];
+      r.decoder = decoder_code(s->identity.decoder);
+      r.id_slot = s->identity.id_slot;
+      r.owner_slot = s->identity.owner_slot;
+      r.status_slot = s->identity.status_slot;
+      r.ok = static_cast<uint64_t>(s->identity.ok);
+      const kzrt::Value* sv = s->identity.status_slot >= 0 ? s->value(static_cast<uint32_t>(s->identity.status_slot)) : nullptr;
+      if (sv != nullptr) r.status_width = type_width(sv->type);
+      if (!s->callee.empty()) r.request_func = s->func;  // bound at the call: the calling function is the site's func
+      any = any || r.decoder != KZ_DECODER_NONE;
+    }
+    if (any) {
+      ActorJoinStats js;
+      const Status j = join_actor_identities(reads, &n, &js);
+      if (!j.ok()) return j;
+      notes.push_back(actor_join_text(js));
+    }
+  }
 
   // ---- losses ----
   bool lossy = !complete;

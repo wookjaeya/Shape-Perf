@@ -123,6 +123,8 @@ Clang 경로에서 관찰된 비용:
 
 단계 D의 결손이 아닌 것: LTO의 링크 단계 확인(C1·R2 기준 플래그에 LTO가 없음, gcc §2.2) [F], 교차 툴체인(단계 H), 라이선스(배포 결정, §7).
 
+진행(2026-10-26, D1·D5): 1번은 manifest 판 2(`kzs-sites 2`의 `identity`, `kairos/docs/event_semantics.md` §3)와 `kz convert --kzrt`의 결합(`kairos/docs/schema.md` §12.3.1)으로 갖췄다. 단계 C의 GCC 파일럿 dump에서 C1 15개·R2 24개 task의 소유 앱이 `confirmed`이고 F0 결합과 같다 [M]. 4번은 `kz-static`이 파생 compile DB를 받게 했고(plugin 옵션은 기록하고 front end에서 뺌), C1에서 B 사본과 B′의 facts가 생성 표 해시 하나 외에 같음을 보였다. 기준 facts를 객체 바이트 비교로 재사용하지 않고 파생 빌드마다 B′를 뽑기로 했다(`kairos/docs/static_facts.md` §7a) [M][D]. 남은 것: 단계 C 파일럿 dump에는 그 빌드의 B′가 없다(빌드 트리 삭제) — D7 실행부터 붙인다.
+
 ## 5. 단계 D–F 계획
 
 시간표는 정하지 않는다(IR §15 머리말). 단계의 통과는 논문 기여의 확정을 뜻하지 않는다. 모든 실행은 pilot/dev 실행이다. 반복 수는 목적별로 본 실험 전에 정하며(SPEC §8.7 D14, IR §13.5), 이 문서에서 정하지 않는다. 기존 실험의 반복 수(예: confirm2의 인스턴스 4개)를 승계하지 않는다.

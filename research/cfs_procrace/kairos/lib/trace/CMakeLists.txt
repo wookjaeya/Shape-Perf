@@ -8,6 +8,7 @@ add_library(kz-trace STATIC
   decode_perf.cpp
   decode_sites.cpp
   identity_join.cpp
+  identity_rule.cpp
   identity_symbols.cpp
   kzrt_convert.cpp
   neutral.cpp

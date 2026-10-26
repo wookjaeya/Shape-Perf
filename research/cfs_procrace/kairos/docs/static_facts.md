@@ -228,6 +228,30 @@ INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped
 
 golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌드> -R static_golden` 후 `tests/static/data/` 의 diff 를 읽는다.
 
+## 7a. 파생(계측) 빌드의 basis B′ (2026-10-26, 선택 문서 §4의 4, SPEC §1.7 "A configuration variant is a new basis B′") [D][M]
+
+**무엇을 바꿨나** [D]. 파생 빌드의 compile DB에는 빌드 컴파일러의 plugin 옵션(`-fplugin=<file>`, `-fplugin-arg-<name>-<key>[=<v>]`)이 있다. Clang은 GCC plugin을 적재하지 못해 그 명령을 읽지 못한다(`clang -fplugin=…/kzgcc.so`: "unable to load plugin … undefined symbol: _Z24gt_ggc_mx_lang_tree_nodePv") [M]. 그래서:
+
+- **기록**: basis의 TU 표는 명령을 실행된 그대로 둔다(옵션 포함; TU 명령 해시도). plugin 옵션이 있는 빌드에만 다음 항목이 붙는다(없는 빌드의 basis는 예전과 같음): `instrumentation.units_with_compiler_plugin`, `instrumentation.compiler_plugin_options[k]`(서로 다른 옵션 묶음마다, 단위 수), `instrumentation.plugin_file`(경로·sha256, FILE_HASHES에도), `front_end.arguments_removed`. 모두 정책 `deviation`이고 deviation 레코드 하나("build-compiler plugin in the recorded commands", 피할 수 있음 = no)를 가리킨다. 그 효과 문장은 "front end는 옵션을 뺀 명령으로 읽는다. 그것이 빌드 컴파일러가 구문 분석한 프로그램이라는 것은 전처리·구문 분석을 바꾸지 않는 plugin에서만 성립한다(kzgcc는 pass 셋과 단위 시작·끝·함수 구문 분석 끝 callback만 등록하고, 마지막 것은 런타임 함수 정의를 보고 계측을 거부할 뿐이다; pragma·attribute·매크로를 더하는 callback은 없다, `instrument/gcc/kzgcc.cpp` `plugin_init`·`finish_parse_function`). 다른 plugin이면 확인되지 않았다. 빌드된 객체에는 plugin이 넣은 것이 있고 facts는 그것을 기술하지 않는다"이다.
+- **읽기**: front end(`extract_units`, 상수 평가)에는 옵션을 뺀 명령을 준다(`front_end_command`, `lib/llvm/ast_run.cpp`).
+- **link 구성원**: 어느 compile 명령도 만들지 않는 link 구성원(예: 빌드 밖에서 link한 계측 런타임)을 `link.members_without_command`로 적는다(프로그램 안에 있으나 facts를 읽지 않음). 예전에는 경고로만 나왔다.
+- 시험: `test_static_cli`의 합성 프로그램에 plugin 옵션을 붙인 compile DB로 basis·extract를 하고, 항목·deviation, 상수 평가, facts 섹션이 옵션 없는 명령의 facts와 같음(머리의 basis 해시·부모와 basis를 이름 붙이는 note만 다름), compile 명령 없는 link 구성원 기록을 본다 [M].
+
+**C1에서 B와 B′ 비교** (파일럿·개발, 주 결과 아님; 산출물 `/home/user/work/instr/gcc/d1_basis/`, 저장소 밖, `sha256.txt`) [M].
+
+- 절차: 단계 C와 같은 스크립트(`instrument/gcc/scripts/build_c1.sh prepare|build`)로 C1 post 1df262a의 사본을 새 작업 공간에 만들고, 기준 빌드(`ref`)와 파생 빌드(`instr`, plugin sha256 `4bfcb12b…`, manifest `8dbdd2e8…`, 단계 C와 같은 파일)를 **같은 경로**에서 차례로 빌드했다(경로 문자열 차이 D1을 없애려고; 단계 C 방식). 각 변형이 그 경로에 있을 때 `/home/user/work/procrace/integ_20261025/closures.sh`의 c1 post 1df262a tx와 같은 프로필·recipe·extract 인자로 `kz-static basis`·`extract`를 돌렸다(`closure_c1.sh wref|derived`). 원래 기준 트리(`c1_build/post/1df262a`)도 같은 인자로 읽어 비교에 썼다(쓰지 않음).
+- 객체: 261개 중 253개 바이트 동일. 다른 8개 = 계측 단위 6개(binding 파일이 있는 `cfe_es_api.c`, `cfe_es_apps.c`, `osapi-task.c`, `os-impl-tasks.c`, `cf_cfdp.c`, `bp_flow.c`) + `cfe_build_env_table.c.o` 2개(tx, rx; 빌드 시각 문자열, 단계 C의 D4 — 기준 빌드 둘 사이에서도 다름). 단계 C의 같은 비교(`c1/objects_{ref,instr}.sha256`)는 6개였다(두 빌드가 같은 시각 문자열).
+- facts(B 사본 대 B′): **섹션 내용이 같다.** 다른 것은 머리의 basis 해시·부모, basis를 이름 붙이는 note(`extract.units_from`), FILE_HASHES의 `cfe_build_env_table.c` 해시 하나(D4)뿐이다(`facts_wref_vs_derived.diff` 14줄). writer·A-TYPE 줄(위치 7개)은 원래 기준 트리의 facts와도 같다. 원래 트리와의 바이트 대조는 절대 경로(빌드 디렉터리의 생성 파일, 정렬 순서)가 달라 의미가 없다.
+- basis(B 사본 대 B′): TU 177개의 flags(plugin 옵션), link 입력 +3(`libkzrt-posix.a`, `libkzrt.a`의 whole-archive 구성원과 시작 객체 `kz_rt_posix_auto.c.o`; `link.members_without_command = 3`), 실행 파일 export 1101 → 1119, cf.so·bp.so의 미정의 기호 +4(hook 함수, core-tx에 묶임), 단위 사이 참조 196 → 204, binary·모듈 해시, compile DB·link.txt·생성 표 해시, 위 instrumentation 항목. 런타임은 스레드를 만들지 않는다(`runtime/src`에 `pthread_create`·`OS_TaskCreate` 없음) [F].
+
+**"계측 단위 밖의 객체가 바이트 동일할 때만 기준 facts를 재사용한다"는 규칙의 판단** [I, 위 [M]에 근거]:
+
+1. 재사용의 근거가 되지 못한다. facts는 front end의 입력(소스 해시, plugin 옵션을 뺀 단위별 명령, front end가 읽은 생성 파일, 상수, 시작 스크립트, 모듈 닫힘·단위 집합)의 함수이고 객체는 그 뒤의 산출물이다. (a) 계측 단위 6개는 객체가 다르지만 facts는 같다(plugin은 구문 분석 뒤 GIMPLE에서만 코드를 바꾼다). (b) 기준 빌드 둘 사이에서도 `cfe_build_env_table.c.o`가 다르다(빌드 시각). (c) R2(`-g`)에서는 객체 1,335개가 **모두** 원시 바이트로 다르다(DWARF producer 문자열에 plugin 옵션), `--strip-debug` 뒤에도 276개가 다르다(계측 단위 8 + D4 1 + gcov stamp가 빌드마다 다른 단위 시험 coverage 객체 267, `docs/instr_candidate_gcc.md` §3). 바이트 동일 규칙은 R2에서 재사용을 모두 막는다.
+2. 객체 동일성이 알려 주는 것은 계측하지 않은 단위의 **코드 생성**이 같다는 것뿐이고, 이는 F0식 바이너리 위치(파일 오프셋)에 해당한다. 소스 수준 facts의 조건이 아니다.
+3. facts가 다루지 않는 차이는 객체 규칙과 무관하게 남는다: 런타임 구성원과 hook 호출(+8 참조). facts에 없으므로 B′의 facts가 B와 같아도 "실행 파일 전체"를 기술하지 않는다.
+4. 그래서 **결정 [D]**: 기준 facts를 객체 비교로 재사용하지 않는다. 파생 빌드마다 그 compile DB로 B′와 facts를 직접 뽑는다(C1 tx: basis+extract 약 6 s). 기준 facts와의 대조는 위처럼 기록한다(같은 경로 사본 기준). 실행 기록의 부모 basis는 **그 실행을 만든 빌드**의 B′여야 한다: 단계 C의 파일럿 dump는 그 빌드 트리가 지워져 B′를 줄 수 없다(같은 스크립트로 다시 빌드해도 `cfe_build_env_table.c` 때문에 실행 파일 해시가 다르다: 단계 C `21f82eca…`, 이번 `4a17b154…`). D7의 실행은 빌드 직후 B′를 뽑고 같은 실행 파일로 돈다.
+5. 열린 것 [U]: R2 파생 빌드의 B′ 추출은 이번에 하지 않았다(빌드 트리가 없음; 같은 코드 경로이며 `-fplugin-arg-kzgcc-skip-coverage`도 plugin 옵션으로 기록·제거된다).
+
 ## 8. 한계와 남은 일
 
 **writer 집합 완전성(`writer-set-complete`)이 기대는 가정** [D]. 상태 `writer-set-complete` 는 §4.1 의 검사(형 있는 writer 수집, A-TYPE 의 cast·escape·union·untyped·unknown-effect)가 아무것도 찾지 못했다는 뜻이고, 다음 가정 위에서만 writer 집합이 완전하다. 증명된 성질이 아니다.

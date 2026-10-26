@@ -139,6 +139,16 @@ std::vector<std::string> flag_list(const std::vector<std::string>& cl) {
   return out;
 }
 
+bool is_compiler_plugin_option(const std::string& a) { return a.rfind("-fplugin=", 0) == 0 || a.rfind("-fplugin-arg-", 0) == 0; }
+
+std::vector<std::string> front_end_command(const std::vector<std::string>& cl) {
+  std::vector<std::string> out;
+  out.reserve(cl.size());
+  for (size_t i = 0; i < cl.size(); ++i)
+    if (i == 0 || !is_compiler_plugin_option(cl[i])) out.push_back(cl[i]);
+  return out;
+}
+
 std::string normalized_flags(const std::vector<std::string>& cl) {
   std::string out;
   for (const std::string& f : flag_list(cl)) out += (out.empty() ? "" : " ") + f;
@@ -150,7 +160,7 @@ bool extract_units(const std::vector<UnitCommand>& units, const ExtractSpec& spe
   if (!options.resource_dir.empty()) adapt.push_back("-resource-dir=" + options.resource_dir);
   adapt.insert(adapt.end(), options.extra_args.begin(), options.extra_args.end());
   for (const UnitCommand& u : units) {
-    tooling::CompileCommand cmd(u.directory, u.source, u.command_line, u.object);
+    tooling::CompileCommand cmd(u.directory, u.source, front_end_command(u.command_line), u.object);
     SingleUnitDb db(cmd);
     tooling::ClangTool tool(db, std::vector<std::string>{u.source});
     tool.appendArgumentsAdjuster(tooling::getInsertArgumentAdjuster(adapt, tooling::ArgumentInsertPosition::END));

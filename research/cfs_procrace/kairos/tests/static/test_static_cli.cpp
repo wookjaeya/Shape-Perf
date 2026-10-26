@@ -207,6 +207,68 @@ startup_script {
   KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=1"));
   KZ_CHECK(has(out, "Item.stack in TBL static-initializer value=40"));
 
+  // ---- a derived (instrumented) build of the same program (SPEC 1.7 B'): its recorded commands carry the build
+  // compiler's plugin options.  The basis records them (TU flags, a deviation, the plugin file's hash); the front end
+  // reads the units without them; the facts are those of the reference commands, under the derived basis.
+  {
+    write(D / "fake_plugin.so", "a file standing for a build-compiler plugin; never loaded\n");
+    const std::string plug = " -fplugin=" + (D / "fake_plugin.so").string() + " -fplugin-arg-fake-manifest=" + (D / "recipe.kzb").string() + " -fplugin-arg-fake-quiet";
+    write(D / "compile_commands_derived.json",
+          "[\n{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99" + plug + " -c " + a_c + " -o obj/a.o\", \"file\": \"" + a_c + "\"},\n" +
+              "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99" + plug + " -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"},\n" +
+              "{\"directory\": \"" + D.string() + "\", \"command\": \"" + cc + " -std=c99 -DVARIANT=1 -c " + b_c + " -o obj/b.o\", \"file\": \"" + b_c + "\"}\n]\n");
+    const std::string basis_d = (D / "basis_derived.kz").string(), facts_d = (D / "facts_derived.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands_derived.json").string()) + " --build-dir " +
+                        q(D.string()) + " --bundle-root " + q(D.string()) + " --recipe " + q((D / "recipe.kzb").string()) + " --text -o " + q(basis_d),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "instrumentation.units_with_compiler_plugin = 2 of 2 units, 1 distinct option set(s)  (deviation)"));
+    KZ_CHECK(has(out, "-fplugin-arg-fake-quiet  (2 units)"));
+    KZ_CHECK(has(out, "instrumentation.plugin_file = fake_plugin.so sha256 "));
+    KZ_CHECK(has(out, "front_end.arguments_removed"));
+    KZ_CHECK(has(out, "const.FX_LIMIT = 40   [evaluated in src/basis_unit_b.c]"));  // the constants are read without the plugin options
+    KZ_CHECK(!has(out, "link.members_without_command"));
+    KZ_CHECK(read(basis_d) != read(basis1));
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q((D / "profile").string()) + " --basis " + q(basis_d) + " -o " + q(facts_d) + " --target Item.stack", &out), 0);
+    kz::Container fd;
+    KZ_CHECK_OK(kz::Container::read_file(facts_d, &fd));
+    KZ_CHECK_OK(fd.verify_content());
+    // the facts sections are those of the reference commands; only the header (basis hash, parents) and the note that
+    // names the basis ("extract.units_from basis <first 16 hex digits>", in STRINGS) differ
+    kz::Container bd;
+    KZ_CHECK_OK(kz::Container::read_file(basis_d, &bd));
+    const std::string href = kz::to_hex(basis_c.artifact_hash()).substr(0, 16), hder = kz::to_hex(bd.artifact_hash()).substr(0, 16);
+    size_t compared = 0, differing = 0;
+    for (const kz_section_entry& e : facts_c.section_table()) {
+      size_t na = 0, nb = 0;
+      const uint8_t* pa = facts_c.section_data(e.type, &na);
+      const uint8_t* pb = fd.section_data(e.type, &nb);
+      ++compared;
+      std::string a(reinterpret_cast<const char*>(pa), na), b(pb == nullptr ? "" : std::string(reinterpret_cast<const char*>(pb), nb));
+      if (e.type == KZ_SEC_STRINGS) {
+        const size_t at = a.find(href);
+        if (at != std::string::npos) a.replace(at, href.size(), hder);
+      }
+      if (pb == nullptr || a != b) {
+        std::printf("derived facts: section %u differs\n", e.type);
+        ++differing;
+      }
+    }
+    KZ_CHECK(compared > 0);
+    KZ_CHECK_EQ(differing, static_cast<size_t>(0));
+    KZ_CHECK_EQ(fd.section_table().size(), facts_c.section_table().size());
+    KZ_CHECK(fd.basis_hash() != facts_c.basis_hash());
+    // a link member that no compile command produces (an instrumentation runtime linked from outside the build) is recorded
+    KZ_CHECK_EQ(run(q(cc) + " -std=c99 -c " + q((fs::path(objects) / "basis_unit_a.c").string()) + " -DKZ_OUTSIDE=1 -o " + q((D / "obj/outside.o").string()), &out), 0);
+    write(D / "link_outside.txt", cc + " -o prog obj/a.o obj/b.o obj/outside.o -lm\n");
+    KZ_CHECK_EQ(run(q(tool) + " basis --profile " + q((D / "profile").string()) + " --compile-db " + q((D / "compile_commands_derived.json").string()) + " --build-dir " +
+                        q(D.string()) + " --bundle-root " + q(D.string()) + " --recipe " + q((D / "recipe.kzb").string()) + " --link " + q((D / "link_outside.txt").string()) +
+                        " --text -o " + q((D / "basis_outside.kz").string()),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "link.members_without_command = 1: obj/outside.o (named on the link command)"));
+  }
+
   // ---- a closure: the executable linked with the modules its startup script loads ------------------
   // The application stores an id through the executable's API (an out pointer); without the
   // executable's body the field would be DISABLED (address escape), in the closure it has a writer.

@@ -24,6 +24,9 @@ set_tests_properties(test_trace_neutral_real PROPERTIES SKIP_RETURN_CODE 77 LABE
 # An instrumented run: a kzrt-dump written by the runtime in this test (POSIX adapter, two threads), converted to the
 # neutral layer with a unit-test manifest and replayed on the mini profile.
 kz_add_unit_test(test_neutral_kzrt SOURCES test_neutral_kzrt.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
+# The identity join of an instrumented run (kzs-sites 2 identity reads): a dump written here with real threads, tasks
+# tied to their creating calls by the id alone, owners by the rule F0 uses.
+kz_add_unit_test(test_kzrt_identity SOURCES test_kzrt_identity.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
 
 # The purpose-built target program.  Every function starts `endbr64; push %rbp; mov %rsp,%rbp`
 # (frame pointers, control-flow protection) like the framework's functions at -O0, whatever the

@@ -1,6 +1,8 @@
 // identity_join.cpp -- see include/kz/trace/identity_join.hpp.
 #include "kz/trace/identity_join.hpp"
 
+#include "kz/trace/identity_rule.hpp"
+
 #include <algorithm>
 #include <cstring>
 #include <functional>
@@ -495,25 +497,28 @@ Status join_identities(const JoinInput& in, std::vector<ThreadRecord>* out, Join
     if (iv == nullptr || iv->request < 0) return o;  // a spawn call outside any creation request: the application is not named
     const Request& rq = requests[static_cast<size_t>(iv->request)];
     o.rec.creation_event = rq.event;
-    o.rec.evidence |= KZ_OWNER_EVIDENCE_CREATION_REQUEST;
-    const uint8_t link = by_id ? KZ_OWNER_LEVEL_CONFIRMED : KZ_OWNER_LEVEL_INFERRED;
-    if (!rq.child) {
-      if (!rq.owner_readable) return o;
-      o.rec.owner_key = rq.owner_id;
-      o.rec.level = link;
-      o.app_name = n.name;
-      return o;
+    // The rule both families use (identity_rule.hpp): the request names the application, a child request through
+    // the creating task's own owner.
+    CreationRequest cq;
+    cq.child = rq.child;
+    cq.owner_readable = rq.owner_readable;
+    cq.owner_id = rq.owner_id;
+    cq.nested_owner_request = rq.nested_owner_request;
+    const OwnerRecord* co = nullptr;
+    if (rq.child) {
+      Incarnation* cr = n.has_fork ? incarnation_at(n.ptid, n.t_fork) : nullptr;
+      if (cr != nullptr && cr != &n) co = &owner_of(static_cast<uint32_t>(cr - inc.data()));
     }
-    // A child task: the application of the task that asked for it.
-    o.rec.evidence |= KZ_OWNER_EVIDENCE_CREATOR_OWNER;
-    if (rq.nested_owner_request) o.rec.evidence |= KZ_OWNER_EVIDENCE_ANALYSED_TABLE_EXCLUDED;
-    Incarnation* cr = n.has_fork ? incarnation_at(n.ptid, n.t_fork) : nullptr;
-    if (cr == nullptr || cr == &n) return o;
-    const OwnerRecord& co = owner_of(static_cast<uint32_t>(cr - inc.data()));
-    if (co.rec.level == KZ_OWNER_LEVEL_UNDETERMINED || co.rec.owner_key == KZ_NONE32) return o;
-    o.rec.owner_key = co.rec.owner_key;
-    o.rec.level = std::min<uint8_t>(link, co.rec.level);
-    o.app_name = co.app_name;
+    OwnerDecision od;
+    od.evidence = o.rec.evidence;
+    OwnerDecision cd;
+    if (co != nullptr) cd.owner_key = co->rec.owner_key, cd.level = co->rec.level, cd.evidence = co->rec.evidence;
+    const OwnerSource src = owner_from_request(cq, by_id ? KZ_OWNER_LEVEL_CONFIRMED : KZ_OWNER_LEVEL_INFERRED, co != nullptr ? &cd : nullptr, &od);
+    o.rec.owner_key = od.owner_key;
+    o.rec.level = od.level;
+    o.rec.evidence = od.evidence;
+    if (src == OwnerSource::Request) o.app_name = n.name;
+    else if (src == OwnerSource::Creator) o.app_name = co->app_name;
     return o;
   };
   for (uint32_t idx : by_fork) owner_of(idx);

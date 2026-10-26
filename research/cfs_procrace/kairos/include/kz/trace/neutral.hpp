@@ -8,7 +8,8 @@
 //                       and the loss intervals.  The rules are the ones the replay applied to the F0 sections
 //                       directly before revision 3 (real_trace.hpp), moved here unchanged.
 //   neutral_from_kzrt   a kzrt-dump stream (runtime/include/kz_rt_format.h) with its site manifests
-//                       ("kzs-sites 1") -> the neutral layer (kzrt_convert.cpp).
+//                       ("kzs-sites 1" or "2") -> the neutral layer (kzrt_convert.cpp; its identity join:
+//                       identity_rule.hpp).
 //   read_neutral        the neutral sections of a container; neutral_of_run reads them when present and
 //                       otherwise converts the F0 sections in memory (a container written before revision 3
 //                       is read as it was written).

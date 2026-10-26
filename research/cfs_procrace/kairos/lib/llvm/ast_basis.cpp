@@ -94,7 +94,7 @@ kz::Status evaluate_constants(const UnitCommand& unit, const ReadOptions& option
     if (queries[i].is_string) code += "static const char *const kz_eval_" + std::to_string(i) + " = (" + queries[i].name + ");\n";
     else code += "static const long long kz_eval_" + std::to_string(i) + " = (long long)(" + queries[i].name + ");\n";
   }
-  std::vector<std::string> args = flag_list(unit.command_line);
+  std::vector<std::string> args = flag_list(front_end_command(unit.command_line));
   for (const char* a : {"-Wno-unknown-warning-option", "-Wno-error", "-w"}) args.push_back(a);
   if (!options.resource_dir.empty()) args.push_back("-resource-dir=" + options.resource_dir);
   args.insert(args.end(), options.extra_args.begin(), options.extra_args.end());

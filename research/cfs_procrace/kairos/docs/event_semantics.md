@@ -23,7 +23,7 @@
 |---|---|---|---|---|---|
 | 2.1 | 실행·cFS 인스턴스 | 같은 이름을 다른 실행·tx/rx 사이에 섞지 않음 | 실행 컨테이너 1개 = 인스턴스 1개, `RUNMETA`·실행 스크립트 태그 | RUN `run_id`, `instance_id`(하네스가 줌; 0 = 주지 않음) | 다른 실행과 합치지 않음 |
 | 2.2 | 실행 actor + 세대 | native TID·OSAL id 재사용 구별 | `tid` + `THREADS.generation` | 런타임 actor id(실행 안에서 재사용 안 함), native key(Linux TID)+세대, 부트스트랩의 임시 id(§2.12) | 미확정 = `?`(actor 0) 또는 임시 `P<n>`. 결코 "앱 없음" 아님 |
-| 2.3 | 생성자 / 소유 앱 / 서비스 대상 앱 | 실행자와 인자로 넘긴 AppID를 섞지 않음 | `IDENTITIES` 네 범주, `ACTOR_OWNERS`(level, evidence) | 런타임은 actor만 준다. 생성 요청·배정 id·알린 id·전달 AppID는 manifest `value role=`로 표시한 **관측 값**이고, 호스트가 F0와 같은 결합 규칙으로 범주를 만든다 | `undetermined`. 런타임은 `CFE_ES_GetAppID`·`OS_TaskGetId`를 hook 안에서 부르지 않는다(PD26 §4) |
+| 2.3 | 생성자 / 소유 앱 / 서비스 대상 앱 | 실행자와 인자로 넘긴 AppID를 섞지 않음 | `IDENTITIES` 네 범주, `ACTOR_OWNERS`(level, evidence) | 런타임은 actor만 준다. 생성 요청·배정 id·알린 id·전달 AppID는 manifest `identity`(§3, 판 2)가 슬롯을 지정한 **관측 값**이고, 호스트가 F0와 같은 소유 앱 규칙으로 범주를 만든다(id로만 묶음, `schema.md` §12.3) | `undetermined`. 런타임은 `CFE_ES_GetAppID`·`OS_TaskGetId`를 hook 안에서 부르지 않는다(PD26 §4) |
 | 2.4 | 논리 site / binding | 같은 의미 지점을 백엔드별 위치로 연결 | 계획 사이트 label = 논리 site, 파일 오프셋 = binding | `site`(논리) + `bind`(binding) 상수 둘 다 hook 인자. `pc`(hook의 반환 주소)는 인라인·복제를 가르는 원시 근거 | 동등성은 `equiv … confirmed`가 있을 때만(§3) |
 | 2.5 | 연산·phase·호출 인스턴스 | 호출 전·효과·반환·종료 구별 | 진입/복귀 사이트, `a[3]` 반환 주소로 LIFO 짝짓기 | manifest `op=`, `phase=before|effect|after|exit|point`; 호출 인스턴스 = `link`(같은 actor의 before 레코드 aseq) | 짝 없는 after는 짝 없음으로 셈 |
 | 2.6 | 자원 종류·키·생명주기 | 주소·이름·핸들 재사용과 namespace 구별 | Φ 프로필의 kind·bind·via, 관측 슬롯 역할 | manifest `value role=`(키·이름·id) + Φ 프로필. 런타임은 값만 기록 | 생명주기 미관측이면 `lifetime-known` 부재 |
@@ -46,7 +46,7 @@
 
 근거가 **아닌** 것: 서로 다른 actor의 시각, 런타임 내부 순서(버퍼 순서, 공유 버퍼 예약 순서, actor id 배정 순서, 제어 잠금, `ctl_seq`). `ctl_seq`는 제어 결정의 순서이며 "제어 개입" 근거의 재료로만 쓴다(IR §11.4, PD26 §4).
 
-## 3. 논리 site manifest `kzs-sites 1` (IR §9.3, SPEC rev 1.4 §5.12) [D][M]
+## 3. 논리 site manifest `kzs-sites 1` / `kzs-sites 2` (IR §9.3, SPEC rev 1.4 §5.12) [D][M]
 
 텍스트, 줄 단위(`#` 주석, 공백 구분, 따옴표 안은 공백 허용). JSON이 아니며 도구 핵심의 C/C++ 규칙 안에 있다. 파서: `runtime/tools/manifest/kz_rt_manifest.{hpp,cpp}`(호스트 C++; 세 후보가 그대로 쓸 수 있다). 논리 site(프로필에서 연구자가 씀)와 백엔드의 binding 목록(컴파일러 연결부가 씀)은 **같은 형식의 다른 파일**로 두고 한 Manifest로 합쳐 읽는다.
 
@@ -62,14 +62,29 @@ control <site-id> ctx=task|lock-held|isr|osal-internal|terminating|unsupported [
 bind <id> site=<site-id> backend=<name> module=<module-id> at=<location text>
      status=bound|inlined|duplicated|removed|unsupported [vals=<mask>] [reason=<text>]
 equiv <site-id> backends=<a>,<b> status=unconfirmed|confirmed [ref=<text>]
+identity <site-id> decoder=<reader> [id=<slot>] [owner=<slot>] [status=<slot> ok=<integer>] [ref=<text>]   # 판 2만
 ```
+
+**판 2 `kzs-sites 2` (2026-10-26, 정체성 읽기)** [D][M]. 판 2 = 판 1 + `identity` 문. 파서는 두 판을 다 읽고(파일마다 머리줄), 판 1 파일에 `identity`가 있으면 거부한다. 여러 파일을 한 Manifest로 읽으므로 정체성 읽기는 논리 site 파일과 다른 파일(판 2)에 둘 수 있다(예: `instrument/gcc/sites/{c1_post_1df262a,r2_v701}.identity.kzs`가 각 manifest의 site 1–8에 붙음). `identity`는 F0 계획의 `decoder=`(`kz_raw.h` KZ_DECODER)와 **같은 이름·같은 의미**이고, 값 슬롯은 이름·역할에서 찾지 않고 **번호로 명시**한다. 슬롯은 그 site에 먼저 선언된 `value`여야 하고 4바이트 이하 정수(u8–u32, s8–s32)다. site당 하나.
+
+| reader | site phase | 슬롯 | 의미 (F0 decoder와 같음) |
+|---|---|---|---|
+| `spawn-create` | before | — | task를 만드는 호출의 시작(생성 호출 구간을 연다) |
+| `spawn-return` | after | 선택: `id=` + `status=` + `ok=` | 그 호출의 반환. `id`는 호출 뒤 읽은 배정 id(`from=out<k>` 또는 `ret`). 실패한 호출은 out 매개변수를 그대로 두므로 `status` 슬롯 값이 `ok`(성공 값, 10진 또는 0x, 슬롯 폭으로 비교)일 때만 쓴다 |
+| `spawn-id` | before / point / effect | `id=` 필수 | 같은 actor에 열린 spawn-create 호출 안에서, 호출이 새 task에 넘기는 id |
+| `thread-entry` | before | `id=` 필수 | 자식 쪽: task가 시작에서 알린 id |
+| `owner-request` | before | `owner=` 필수 | 인자로 지정한 앱을 위한 task 생성 요청: 그 앱의 식별 값(예: `ParentAppId`) |
+| `child-request` | before | — | 요청한 task 자신의 앱을 위한 생성 요청 |
+| `request-return` | after | — | 두 요청의 반환 |
+
+닫는 레코드(spawn-return, request-return)는 사건의 `link`(같은 호출 인스턴스를 연 레코드의 aseq)로 여는 레코드와 짝짓는다. 그래서 binding은 정체성 여는 site의 레코드를 link로 줘야 한다(kzgcc는 같은 호출·함수의 첫 before site를 link로 준다: 여는 site를 그 호출의 before 중 처음에 둔다). 결합 규칙은 §2.3과 `include/kz/trace/identity_rule.hpp`(F0와 같은 소유 앱 규칙 `owner_from_request`)이며 `schema.md` §12.3에 적었다.
 
 - id는 십진 1..2147483647, 종류별 유일. `label`은 유일하며 kzp-observe 사이트 label·`.kzh`의 `site=`와 같은 이름을 쓴다. **site id와 bind id가 hook 호출의 컴파일 시점 상수**다. bind id 배정은 연결부가 하며 실행 전체에서 유일해야 한다. 규칙은 다음 항목이다 [D].
 - **binding id 규칙** [D]: `bind = (module << 16) | (site << 4) | n`. module은 1..32767(결과가 2147483647 이하), site는 1..4095, n은 한 번역 단위 안에서 그 site의 binding 순번 0..14이고, n = 15는 그 단위에 binding이 없는 site의 선언된 빈틈 줄(`status=unsupported`)이다. 한 단위에서 한 site의 binding이 15개를 넘으면 넘는 것은 `unsupported`(이유 기록)로 둔다. 한 module 안에서 site는 한 번역 단위(`site tu=`)에만 묶이므로 id가 겹치지 않고, 겹치면 binding 합치기(`instrument/gcc/scripts/merge_binds.sh`)가 거부한다. GCC 후보(`instrument/gcc/kzgcc.cpp` L263, L366–L378, L743)와 LLVM 후보(`instrument/llvm/kzllvm.cpp` L210, L467–L480, L837)가 이 규칙을 쓴다 [F]. 두 연결부는 module ≤ 32767·site ≤ 4095를 아직 검사하지 않는다 [F: grep]. 지금 manifest의 범위는 module 1–3, site ≤ 46이다(`instrument/gcc/sites/*.kzs`) [F]. Clang 변환 후보는 `(module << 16) | 순번`을 썼다(`instrument/clang/kz_instr_clang.cpp` L314) [F]. 단계 C 비교 증거로 그대로 둔다. 런타임과 호스트 도구는 bind id를 해석하지 않는다(상수로 기록만). binding의 module·site는 manifest의 `bind` 줄에서만 읽고 id의 비트에서 거꾸로 읽지 않는다.
 - IR §9.3의 항목 대응: source revision·번역 단위·함수/호출 문맥 = `source`·`site tu/func/callee`; 전·후·효과 = `phase`; 인자·값·자원 키의 근거 = `value … ref=`; 백엔드가 고른 위치 = `bind at=`; 최적화로 사라짐·복제·인라인 = `bind status=removed|duplicated|inlined`(같은 bind id가 여러 위치에 있으면 `pc`가 가른다); 지원 못한 지점과 이유 = `status=unsupported reason=`.
 - `string=validated`는 `type=ptr`, `bound`, `ref`(원 코드가 그 지점 전에 포인터를 검증한 곳, 또는 그 메모리가 크기를 아는 배열이라는 근거)를 요구한다. 없으면 포인터 값만 기록한다(검증 전 `strlen` 금지, PD26 §4). `kz-rt-dump --manifest`는 validated가 아닌 슬롯에서 복사된 문자열, binding이 선언하지 않은 `valid` 비트, `removed|unsupported` binding의 사건, 등록되지 않은 module을 보고한다 [M: `rt_dump_tool`, `rt_dump_tool_strict`].
 - 동등성: 두 백엔드의 binding이 같은 효과를 관측함이 근거(`ref`)로 확인되기 전에는 `equiv … unconfirmed`(= "동일 의미 확인 전")다. 이름이 같다고 동등하지 않다.
-- 예시 파일: `runtime/tests/data/sites_example.kzs`(단위 시험용 일반 이름). C1·R2의 실제 manifest는 단계 C(후보 비교)에서 실제 소스 위치·근거와 함께 만든다 [I].
+- 예시 파일: `runtime/tests/data/sites_example.kzs`(단위 시험용 일반 이름). C1·R2의 실제 manifest는 단계 C(후보 비교)에서 실제 소스 위치·근거와 함께 만든다 [I]. 판 2의 받는 것·거부하는 것은 `runtime/tests/test_rt_manifest.cpp`(정체성 읽기 8개 수용, 18개 거부) [M].
 
 ## 4. `kzp-hold 1` 제어 의미 (현행 구현의 명세화; IR §9.4, SPEC rev 1.4 §4.13) [F][D]
 
@@ -298,7 +313,7 @@ cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt
 ## 10. 남은 것 [U]
 
 - `.kzh` + manifest → `kz_rt_point[]` 호스트 변환기(`name` → validated 슬롯, `caller-in` → 호출 측 binding 집합; 변환할 수 없는 조건은 계획 거부)와, 계획을 대상에 넣는 길(직렬화된 계획 형식). 지금은 C 배열 API뿐이다.
-- ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). 남은 것: 계측 기록의 정체성 결합(생성자·소유 앱) — manifest(`kzs-sites 1`)에 site의 정체성 읽기(F0 `decoder`에 해당)를 적는 문법이 없어 변환이 정하지 않는다 [U].
+- ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). ~~남은 것: 계측 기록의 정체성 결합(생성자·소유 앱)~~ → 2026-10-26 `kzs-sites 2`의 `identity`(§3)와 `kz convert --kzrt`의 결합(`schema.md` §12.3)으로 구현했다 [M].
 - ~~같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2)~~ → 0.2.0의 `kz_rt_early_mode`와 시작 객체의 `.preinit_array`(§8.2). 남은 것: hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
 - 0.2.0에서 남은 것: 변환기가 RUNX(창의 모드·원천, pool 수요)와 MODULE `registrations`를 중립 층에 옮기는 일(지금은 RUN `mode`만 읽음, §8.2). 파생 빌드 스크립트가 `kzrt-build-info` 객체를 링크하는 일(단계 D6). 두 연결부의 binding id 범위 검사(§3). 시그널·강제 종료 경로의 dump(단계 F3).
 - OSAL adapter의 target 실행과 OSAL 객체 소비의 실측, 두 번째 OS.

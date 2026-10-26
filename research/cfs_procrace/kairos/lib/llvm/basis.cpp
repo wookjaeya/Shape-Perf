@@ -163,6 +163,7 @@ class Builder {
   kz::Status generated_and_tables(const Recipe& recipe);
   kz::Status startup(const Recipe& recipe);
   kz::Status modules(const Recipe& recipe);
+  kz::Status instrumentation();
   size_t record_tus(size_t from);
   std::string map_virtual(const Recipe::Startup& st, const std::string& name) const;
 
@@ -188,6 +189,7 @@ class Builder {
   std::vector<CdbEntry> cdb_;
   std::map<std::string, size_t> by_object_;           // object -> compile database entry
   std::vector<std::string> core_objects_;             // the members the executable's link takes in
+  std::vector<std::string> without_command_;          // link members no compile command produces (recorded)
   struct ScriptEntry {
     size_t index = 0;
     std::string kind;                 // "library", "app" or "other"
@@ -307,6 +309,7 @@ kz::Status Builder::program(const Recipe& recipe) {
     if (it == by_object.end()) {
       ++rep_->unmatched_objects;
       rep_->warnings.push_back("no compile command produces " + c.first + " (" + c.second + ")");
+      without_command_.push_back(rel_to(c.first, in_.bundle_root) + " (" + c.second + ")");
       continue;
     }
     if (!seen.insert(c.first).second) continue;
@@ -804,6 +807,7 @@ kz::Status Builder::modules(const Recipe& recipe) {
       if (it == by_object_.end()) {
         ++rep_->unmatched_objects;
         rep_->warnings.push_back("no compile command produces " + m.object + " (module " + fname + ")");
+        without_command_.push_back(rel_to(m.object, in_.bundle_root) + " (module " + fname + ")");
         continue;
       }
       if (unit_member_.count(m.object) != 0) continue;
@@ -927,6 +931,51 @@ kz::Status Builder::modules(const Recipe& recipe) {
   return kz::Status::success();
 }
 
+// A derived build (SPEC 1.7 B'): the build compiler's plugin options in the recorded commands, and the link members no
+// compile command produces (e.g. an instrumentation runtime linked from outside the build).  Nothing is written for a
+// build without them, so the basis of a reference build is unchanged.
+kz::Status Builder::instrumentation() {
+  if (!without_command_.empty()) {
+    std::string v;
+    for (const std::string& m : without_command_) v += (v.empty() ? "" : "; ") + m;
+    item("link.members_without_command", std::to_string(without_command_.size()) + ": " + v + " (in the program; no facts are read from them)");
+  }
+  std::map<std::string, size_t> sets;  // a unit's plugin options, as recorded -> units
+  std::set<std::string> plugin_files;
+  size_t with = 0;
+  for (const UnitCommand& u : units_) {
+    std::string opts;
+    for (size_t k = 1; k < u.command_line.size(); ++k) {
+      const std::string& a = u.command_line[k];
+      if (!is_compiler_plugin_option(a)) continue;
+      opts += (opts.empty() ? "" : " ") + a;
+      if (a.rfind("-fplugin=", 0) == 0) plugin_files.insert(abs_in(u.directory, a.substr(9)));
+    }
+    if (opts.empty()) continue;
+    ++with;
+    ++sets[opts];
+  }
+  if (with == 0) return kz::Status::success();
+  const std::string used = std::to_string(with) + " of " + std::to_string(units_.size()) + " units, " + std::to_string(sets.size()) + " distinct option set(s)";
+  const uint32_t dev = add_deviation(
+      "build-compiler plugin in the recorded commands", "commands without a compiler plugin (the reference configuration)", used,
+      "a derived configuration: an instrumented build of the same sources (SPEC 1.7 B'; every difference from the reference build is recorded)",
+      "the basis records the commands as they ran; the front end reads every unit without the plugin options (it cannot load a plugin of the build compiler). "
+      "That this is the program the build compiler parsed holds for a plugin that changes neither preprocessing nor parsing (kzgcc registers passes and "
+      "observing callbacks only, no pragma, attribute or macro: instrument/gcc/kzgcc.cpp plugin_init); for another plugin it is not established. The built objects contain what the plugin inserted, which the facts do not describe",
+      KZ_AVOIDABLE_NO);
+  item("instrumentation.units_with_compiler_plugin", used, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+  size_t k = 0;
+  for (const auto& kv : sets) item("instrumentation.compiler_plugin_options[" + std::to_string(k++) + "]", kv.first + "  (" + std::to_string(kv.second) + " units)", KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+  for (const std::string& f : plugin_files) {
+    std::error_code ec;
+    if (fs::is_regular_file(f, ec)) add_file(f);
+    item("instrumentation.plugin_file", rel_to(f, in_.bundle_root) + " sha256 " + file_sha(f), KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+  }
+  item("front_end.arguments_removed", "-fplugin=... and -fplugin-arg-... of the recorded commands", KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+  return kz::Status::success();
+}
+
 kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   w_.set_profile_hash(in_.profile_hash);
   w_.set_tool_hash(in_.tool_hash);
@@ -950,6 +999,7 @@ kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   if (!(s = generated_and_tables(recipe)).ok()) return s;
   if (!(s = startup(recipe)).ok()) return s;
   if (!(s = modules(recipe)).ok()) return s;
+  if (!(s = instrumentation()).ok()) return s;
   for (const Recipe::Declared& d : recipe.declared) {
     const uint32_t prov = add_prov(KZ_TIER_RESEARCHER, KZ_PROV_KIND_RESEARCHER, KZ_PROV_SIDE_NA, "", 0, 0, "recipe " + in_.recipe_path, d.authored, nullptr);
     item(d.name, d.value, KZ_POLICY_DECLARED, prov);

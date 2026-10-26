@@ -1,6 +1,7 @@
-// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp.
+// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp ("kzs-sites 1" and "kzs-sites 2").
 #include "kz_rt_manifest.hpp"
 
+#include <cerrno>
 #include <cstdlib>
 #include <set>
 
@@ -130,6 +131,10 @@ const Module* Manifest::module(uint32_t id) const {
   return it == module_index.end() ? nullptr : &modules[it->second];
 }
 
+bool identity_decoder_known(const std::string& name) {
+  return one_of(name, {"spawn-create", "spawn-return", "spawn-id", "thread-entry", "owner-request", "child-request", "request-return"});
+}
+
 uint32_t ctx_code(const std::string& w) {
   if (w == "task") return KZ_RT_CTX_TASK;
   if (w == "lock-held") return KZ_RT_CTX_LOCK_HELD;
@@ -156,6 +161,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
   static const uint32_t kMaxId = 2147483647u;
   int ln = 0;
   bool header = false;
+  uint32_t version = 0;
   std::vector<std::string> t;
   auto fail = [&](const std::string& msg) {
     *error = name + ":" + std::to_string(ln) + ": " + msg;
@@ -175,8 +181,10 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       continue;
     }
     if (!header) {
-      if (t.size() != 2 || t[0] != "kzs-sites" || t[1] != "1") return fail("the first statement must be 'kzs-sites 1'");
+      if (t.size() != 2 || t[0] != "kzs-sites" || (t[1] != "1" && t[1] != "2")) return fail("the first statement must be 'kzs-sites 1' or 'kzs-sites 2'");
       header = true;
+      version = t[1] == "2" ? 2u : 1u;
+      if (version > m->version) m->version = version;
       continue;
     }
     const std::string& kw = t[0];
@@ -310,6 +318,80 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       if (e.status == "confirmed" && e.ref.empty()) return fail("status=confirmed needs ref= (the evidence)");
       e.line = ln;
       m->equivs.push_back(e);
+    } else if (kw == "identity") {
+      if (version < 2) return fail("identity needs 'kzs-sites 2'");
+      uint32_t sid = 0;
+      if (t.size() < 2 || !parse_u32(t[1], 1, kMaxId, &sid)) return fail("identity <site-id> decoder=...");
+      auto it = m->site_index.find(sid);
+      if (it == m->site_index.end()) return fail("identity of an undeclared site " + t[1]);
+      Site& s = m->sites[it->second];
+      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"decoder", "id", "owner", "status", "ok", "ref"}, &bad)) return fail(bad);
+      if (s.has_identity) return fail("identity of site " + t[1] + " declared twice");
+      Identity idn;
+      idn.decoder = get(kv, "decoder");
+      idn.ref = get(kv, "ref");
+      if (!identity_decoder_known(idn.decoder))
+        return fail("decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return");
+      const bool opening = one_of(idn.decoder, {"spawn-create", "thread-entry", "owner-request", "child-request"});
+      const bool closing = one_of(idn.decoder, {"spawn-return", "request-return"});
+      if (opening && s.phase != "before") return fail("decoder=" + idn.decoder + " needs a site of phase=before");
+      if (closing && s.phase != "after") return fail("decoder=" + idn.decoder + " needs a site of phase=after");
+      if (idn.decoder == "spawn-id" && !one_of(s.phase, {"before", "point", "effect"})) return fail("decoder=spawn-id needs a site of phase=before|point|effect");
+      const bool takes_id = one_of(idn.decoder, {"spawn-return", "spawn-id", "thread-entry"});
+      const bool needs_id = idn.decoder == "spawn-id" || idn.decoder == "thread-entry";
+      const bool takes_owner = idn.decoder == "owner-request";
+      // the slot: a declared integer value of at most 4 bytes (the readers keep 4 bytes, as F0's decoders)
+      auto slot_of = [&](const std::string& key, int* out, bool any_integer = false) -> bool {
+        uint32_t k = 0;
+        if (!parse_u32(get(kv, key), 0, KZ_RT_MAX_VALS - 1u, &k)) {
+          bad = key + "=<slot 0..7>";
+          return false;
+        }
+        const Value* v = s.value(k);
+        if (v == nullptr) {
+          bad = key + "=" + get(kv, key) + ": site " + t[1] + " declares no value in that slot (declare the value first)";
+          return false;
+        }
+        if (any_integer ? v->type == "ptr" : !one_of(v->type, {"u8", "u16", "u32", "s8", "s16", "s32"})) {
+          bad = key + "=" + get(kv, key) + ": the slot is " + v->type + (any_integer ? ", a status is an integer" : ", an identity is an integer of at most 4 bytes");
+          return false;
+        }
+        if (!any_integer && idn.decoder == "spawn-return" && v->from != "ret" && v->from.rfind("out", 0) != 0) {
+          bad = "id= of a spawn-return is the id the call assigned: from=out<k> or ret, not " + v->from;
+          return false;
+        }
+        *out = static_cast<int>(k);
+        return true;
+      };
+      if (kv.count("id") != 0) {
+        if (!takes_id) return fail("decoder=" + idn.decoder + " takes no id=");
+        if (!slot_of("id", &idn.id_slot)) return fail(bad);
+      } else if (needs_id) {
+        return fail("decoder=" + idn.decoder + " needs id=<slot>");
+      }
+      if (kv.count("status") != 0 || kv.count("ok") != 0) {
+        if (idn.decoder != "spawn-return" || kv.count("id") == 0) return fail("status= and ok= belong to the id= of a spawn-return");
+      }
+      if (idn.decoder == "spawn-return" && kv.count("id") != 0) {
+        if (kv.count("status") == 0 || kv.count("ok") == 0)
+          return fail("the id= of a spawn-return needs status=<slot> ok=<value of success> (a failed call leaves the out parameter as it was)");
+        if (!slot_of("status", &idn.status_slot, true)) return fail(bad);
+        const std::string okv = get(kv, "ok");
+        char* end = nullptr;
+        errno = 0;
+        const long long x = std::strtoll(okv.c_str(), &end, 0);
+        if (okv.empty() || end == nullptr || *end != 0 || errno != 0) return fail("ok=<integer>");
+        idn.ok = x;
+      }
+      if (kv.count("owner") != 0) {
+        if (!takes_owner) return fail("decoder=" + idn.decoder + " takes no owner=");
+        if (!slot_of("owner", &idn.owner_slot)) return fail(bad);
+      } else if (takes_owner) {
+        return fail("decoder=owner-request needs owner=<slot>");
+      }
+      idn.line = ln;
+      s.identity = idn;
+      s.has_identity = true;
     } else {
       return fail("unknown statement '" + kw + "'");
     }
@@ -317,7 +399,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
   }
   if (!header) {
     ln = 1;
-    return fail("empty manifest (no 'kzs-sites 1')");
+    return fail("empty manifest (no 'kzs-sites 1' or 'kzs-sites 2')");
   }
   return true;
 }

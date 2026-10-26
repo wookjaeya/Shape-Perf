@@ -221,6 +221,6 @@ $G/compare_c1.sh <kz-dump of c1_runs/smoke3/post_1df262a/run.kzt> /home/user/wor
 - 열린 것 [U]
   - 실제 dump에서 `kz-rt-dump --manifest`, `kz convert`, `kz replay`의 확인(D3/D7·D8).
   - `equiv` 확정(단계 E).
-  - 함수 진입에 묶은 요청의 호출 함수(`request_func`)는 정해지지 않는다(F0 `return_address`의 짝이 없음).
+  - ~~함수 진입에 묶은 요청의 호출 함수(`request_func`)는 정해지지 않는다(F0 `return_address`의 짝이 없음).~~ → 2026-10-26: R2 manifest가 `CFE_ES_StartAppTask` 요청을 세 호출 쪽(`CFE_ES_CreateObjects`, `CFE_ES_AppCreate`, `CFE_ES_CreateChildTask`)의 call/return 짝 `es.start_task.entry@<caller>`/`.ret@<caller>`로 묶는다. 요청 함수는 site의 `func`다. 다시 빌드했고(`/home/user/work/instr/gcc/d4/r2`, binding 39/39 bound, hookcheck ok 39), 실행에서 core 여부가 F0와 같다(core 8, not core 16). 결과는 `plan/results_instr_pilot_20261026.md` §8에 있다 [M].
   - B′ 추출.
 - 새 PI 결정: 없다. 위치·슬롯 선택은 프로필 LP와 원 코드 문장을 인용해 정한 도구 binding이다.

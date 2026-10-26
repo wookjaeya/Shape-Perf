@@ -187,7 +187,11 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
   }
   std::map<std::pair<uint32_t, uint8_t>, std::string> role_of;
   std::set<std::pair<uint32_t, uint8_t>> string_slot;
+  // slots that hold the stored value of a store statement (the instrumented family's `from=operand0`, kzs-sites 2
+  // place=store or a store through a parameter: the operand the original code stored, not a later read)
+  std::set<std::pair<uint32_t, uint8_t>> store_operand;
   for (const NSlot& sl : n.slots) {
+    if (sl.from == "operand0") store_operand.insert({sl.r.site, sl.r.slot});
     role_of[{sl.r.site, sl.r.slot}] = sl.role;
     if (sl.r.kind == KZ_NVAL_TEXT) string_slot.insert({sl.r.site, sl.r.slot});
   }
@@ -300,7 +304,9 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
         report->not_app_lines.push_back(an + ": the initial thread, but the record states a determined owner: kept as the record states it (not resolved)");
         continue;
       }
-      const std::string why = a.r.binding == KZ_NBIND_LINUX_TID ? "thread id = process id" : "the backend's initial-thread record";
+      // F0's thread-group leader, or an instrumented run's actor whose Linux TID the record shows equal to the process id
+      const bool tid_pid = a.r.binding == KZ_NBIND_LINUX_TID || (a.r.native_kind == KZ_NKEY_LINUX_TID && a.r.process != KZ_NONE32 && a.r.native_key == a.r.process);
+      const std::string why = tid_pid ? "thread id = process id" : "the backend's initial-thread record";
       out->not_app[an] = "the initial thread of process " + std::to_string(a.r.process) + " (" + why + "); profile context initial_thread not_app: " + cites;
       report->not_app_lines.push_back(an + ": " + out->not_app[an]);
     }
@@ -319,6 +325,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     int32_t op;
     std::map<std::string, int64_t> outs;
     uint64_t call = eval::kNoEvent;  // the call's trace event
+    std::map<std::string, std::string> stored;  // outs that are the operand of a store inside the call: where
   };
   std::map<std::string, std::vector<OpenOp>> open_ops;
   for (size_t ei = 0; ei < events.size(); ++ei) {
@@ -340,6 +347,12 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
               if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) {
                 st.back().outs["out." + prm.name] = static_cast<int64_t>(v->r.v);
                 ++report->out_values_from_points;
+                if (store_operand.count({e.site, k}) != 0) {
+                  st.back().stored["out." + prm.name] = sites[e.site].label + " #" + std::to_string(ei) + ": the operand of the store";
+                  ++report->out_values_stored;
+                } else {
+                  st.back().stored.erase("out." + prm.name);  // a later value of another kind: no longer the store's
+                }
               }
           }
         }
@@ -414,14 +427,18 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     {
       std::vector<OpenOp>& st = open_ops[te.actor];
       if (m.kind == MapKind::Call) {
-        st.push_back(OpenOp{m.op, {}, static_cast<uint64_t>(out->events.size())});
+        st.push_back(OpenOp{m.op, {}, static_cast<uint64_t>(out->events.size()), {}});
       } else if (m.kind == MapKind::Return) {
         size_t k = st.size();
         while (k > 0 && st[k - 1].op != m.op) --k;
         if (k > 0) {
           if (!unreadable)
             for (const auto& ov : st[k - 1].outs)
-              if (te.values.count(ov.first) == 0) te.values[ov.first] = ov.second;
+              if (te.values.count(ov.first) == 0) {
+                te.values[ov.first] = ov.second;
+                const auto so = st[k - 1].stored.find(ov.first);
+                if (so != st[k - 1].stored.end()) te.texts["store." + ov.first] = so->second;  // a direct capture of the store
+              }
           st.resize(k - 1);
         }
       }
@@ -597,7 +614,8 @@ std::string report_text(const RealTraceReport& r) {
   }
   out += "spawn returns " + std::to_string(r.spawn_returns) + ", out-parameter bound by the id " + std::to_string(r.spawn_outs_bound) + "\n";
   if (r.string_values != 0 || r.out_values_from_points != 0)
-    out += "string values (fetch slots) " + std::to_string(r.string_values) + ", out values from points inside a call " + std::to_string(r.out_values_from_points) + "\n";
+    out += "string values (fetch slots) " + std::to_string(r.string_values) + ", out values from points inside a call " + std::to_string(r.out_values_from_points) +
+           (r.out_values_stored != 0 ? " (" + std::to_string(r.out_values_stored) + " of them the operand of a store)" : std::string()) + "\n";
   if (r.args_from_points != 0)
     out += "arguments from linearization points inside the call " + std::to_string(r.args_from_points) + " (the call event lacked them)\n";
   out += std::string("core status of owners: ") +

@@ -162,6 +162,7 @@ struct RealTraceReport {
   uint64_t spawn_outs_bound = 0;   // of those, with the out-parameter bound by the id (ID_MATCHED)
   uint64_t string_values = 0;      // slot values taken as text (string fetch slots, EVENT_STRINGS)
   uint64_t out_values_from_points = 0;  // out values set on a return from a point inside the call
+  uint64_t out_values_stored = 0;       // ... of them the operand of a store (slot from=operand0): texts "store.out.X
   uint64_t args_from_points = 0;   // call arguments taken from a linearization point inside the call (header, "arguments")
   uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
   bool core_evidence = false;      // symbols and core request callers were given

@@ -1261,6 +1261,14 @@ void Checker::check_rules() {
             if (!out) err(r.loc, what + ": 'match " + r.match + "' is not an out parameter of '" + p_.ops[static_cast<size_t>(oi)].name + "'");
           }
         }
+        if (!r.stored_out.empty()) {
+          // the store stands for the outcome only for the out value the generation is matched by, from cited code
+          if (r.stored_out != r.match) err(r.stored_out_loc, what + ": 'stored_out " + r.stored_out + "' names another out parameter than 'match'");
+          resolve_provs(r.stored_out_loc, r.stored_out_prov, &r.stored_out_prov_idx, what + ", stored_out");
+          bool sourced = false;
+          for (int32_t qi : r.stored_out_prov_idx) sourced = sourced || p_.provs[static_cast<size_t>(qi)].tier == "code-derived";
+          if (!sourced) err(r.stored_out_loc, what + ", stored_out: cites no code text (a record of tier code-derived)");
+        }
         break;
       }
     }

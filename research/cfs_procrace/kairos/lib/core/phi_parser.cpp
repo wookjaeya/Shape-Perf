@@ -1173,6 +1173,11 @@ struct Parser {
         P_TRY(expect_ident(&d->use_outcome, "a result constant of the use"));
       } else if (d->tmpl == RuleTemplate::ReadsFrom && kw == "match") {
         P_TRY(expect_ident(&d->match, "an out parameter of both operations"));
+      } else if (d->tmpl == RuleTemplate::ReadsFrom && kw == "stored_out") {
+        d->stored_out_loc = kloc;
+        P_TRY(expect_ident(&d->stored_out, "the out parameter of the use that only the successful path stores"));
+        P_TRY(expect_kw("prov", "after 'stored_out NAME'"));
+        P_TRY(parse_name_list(&d->stored_out_prov, "the name of a provenance record"));
       } else {
         return fail_at(kloc, "unknown item '" + kw + "' in template " + t);
       }

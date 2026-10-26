@@ -218,7 +218,7 @@ void test_convert_and_replay(const std::vector<uint8_t>& dump) {
     KZ_CHECK_EQ(t3.not_app.size(), static_cast<size_t>(1));
     if (t3.not_app.size() == 1) {
       KZ_CHECK_EQ(t3.not_app.begin()->first, t.events[1].actor);  // the main thread's actor
-      KZ_CHECK(t3.not_app.begin()->second.find("the initial thread of process " + std::to_string(getpid()) + " (the backend's initial-thread record)") == 0);
+      KZ_CHECK(t3.not_app.begin()->second.find("the initial thread of process " + std::to_string(getpid()) + " (thread id = process id)") == 0);
     }
   }
 }

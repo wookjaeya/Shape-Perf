@@ -182,6 +182,9 @@ struct HbEdge {
   // not justified by them.  Consumers that need a justified edge (O3, MustBefore) must not take it
   // as one.  Structural edges (program order, task creation, phase) are not marked.
   bool minimal = false;
+  // A reads_from edge whose use the record shows successful by the store of its out value on the success path
+  // (`stored_out`, a direct capture of the store operand inside the call), not only by its returned code.
+  bool by_store = false;
   bool operator<(const HbEdge& o) const {
     if (to != o.to) return to < o.to;
     if (from != o.from) return from < o.from;
@@ -227,6 +230,10 @@ struct ConjunctResult {
   // fixed by a writer coverage that counts writes as other keys by a `bind ... via` declaration.
   bool state_read = false;
   bool rf_order = false;
+  // rf_order, and the reads_from edges it rests on include one whose use only its returned code shows successful
+  // (without that edge's kind the read is not ordered); false with rf_order: the edges it needs are shown by the
+  // success-path store of the out value (HbEdge::by_store), not by a returned code.
+  bool rd_order = false;
   bool via = false;
 };
 
@@ -316,6 +323,10 @@ struct Occurrence {
   // assumptions), basis-return-derived-order (that state's order rests on a reads_from edge), outcome-narrowed (the
   // returned code fixed a conjunct).  Also in summary.flags.
   uint16_t basis = 0;
+  // Real records, in memory and in the text only (the 16 bits of summary.flags are all taken, schema revision 3): the
+  // order of a state it read rests on reads_from edges whose uses the record shows successful by the store of their
+  // out value on the success path (`stored_out`), not by a returned code; basis-return-derived-order is then not set.
+  bool basis_store_order = false;
   // Real records: the declared assumptions the result used, as KZ_SUMMARY_FLAG bits: assumes-via-key-separation (a
   // kind or location read is fixed by a coverage with `via` separation; via_names says which), assumes-owner-
   // identity-targets (A-OWNER: a writer's creation identity fixed an effect operand), assumes-role (a declared role
@@ -410,6 +421,10 @@ struct Options {
   // rules of the profile apply (2026-10-24); false: their edges are left out (a reading to compare with, not a PI
   // decision).
   bool reads_from_edges = true;
+  // Whether the use of a reads_from rule may be shown successful by its returned code (`outcome`).  true: as the rule
+  // says; false: only by the store of its out value on the success path (`stored_out`, a direct capture), so no edge
+  // rests on a returned code (a reading to compare with, kz replay --reads-from-outcome off, 2026-10-26).
+  bool reads_from_outcome = true;
 };
 
 // What the real-record replay established for one kind or location (printed with the result).

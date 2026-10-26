@@ -4,11 +4,12 @@
 //       an F0 run container: every section unchanged (the backend raw evidence), the neutral layer beside it, the
 //       input as a parent (role 1).  `kz replay` then reads the layer (the replay of a container without it converts
 //       the same way in memory, so both readings agree).
-//   kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.kz>] --out <file.kzt>
+//   kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.kz>] [--process PID] --out <file.kzt>
 //       an instrumented run: a kzrt-dump stream with its site manifests (the logical sites, then the backend's
 //       binding list) -> a run container with the neutral layer only (kz/trace/kzrt_convert.hpp); the dump and the
 //       manifests are named in FILE_HASHES and BASIS.  --basis makes a basis container of the instrumented build its
-//       parent.  What the conversion cannot state is printed as notes and kept as BASIS items convert.note.
+//       parent.  --process gives the process id the harness recorded, for a dump that does not record its own
+//       (kzrt-dump 1.1): the initial thread is then the run actor whose thread id is that id.  What the conversion cannot state is printed as notes and kept as BASIS items convert.note.
 //
 // Neither form sets a research condition.  The output names what it read; whether the record is a development or an
 // experiment run is stated by the record's own conditions.
@@ -28,10 +29,11 @@ namespace {
 void usage(FILE* f) {
   std::fprintf(f,
                "usage: kz convert <run.kzt> --out FILE.kzt\n"
-               "       kz convert --kzrt DUMP --manifest KZS [--manifest KZS]... [--basis BASIS.kz] --out FILE.kzt\n"
+               "       kz convert --kzrt DUMP --manifest KZS [--manifest KZS]... [--basis BASIS.kz] [--process PID] --out FILE.kzt\n"
                "  <run.kzt>       an F0 run container: kept unchanged, the neutral event layer added (schema revision 3)\n"
                "  --kzrt DUMP     a kzrt-dump stream of an instrumented run, with its site manifests (kzs-sites 1)\n"
                "  --basis B       (with --kzrt) the basis container of the instrumented build, made the parent\n"
+               "  --process PID   (with --kzrt) the process id the harness recorded (a dump without RUNX process)\n"
                "  --out FILE      the run container to write\n");
 }
 
@@ -49,7 +51,7 @@ void print_layer(const kz::trace::NeutralRun& n) {
 }
 
 int run(int argc, char** argv) {
-  std::string in, dump, out, basis_path;
+  std::string in, dump, out, basis_path, process;
   std::vector<std::string> manifests;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -70,6 +72,8 @@ int run(int argc, char** argv) {
       if (!value(&dump)) return 1;
     } else if (a == "--basis") {
       if (!value(&basis_path)) return 1;
+    } else if (a == "--process") {
+      if (!value(&process)) return 1;
     } else if (a == "--manifest") {
       std::string m;
       if (!value(&m)) return 1;
@@ -84,7 +88,8 @@ int run(int argc, char** argv) {
       return 1;
     }
   }
-  if (out.empty() || in.empty() == dump.empty() || (!dump.empty() && manifests.empty()) || (dump.empty() && (!manifests.empty() || !basis_path.empty()))) {
+  if (out.empty() || in.empty() == dump.empty() || (!dump.empty() && manifests.empty()) || (dump.empty() && (!manifests.empty() || !basis_path.empty() || !process.empty())) ||
+      (!process.empty() && process.find_first_not_of("0123456789") != std::string::npos)) {
     usage(stderr);
     return 1;
   }
@@ -106,6 +111,7 @@ int run(int argc, char** argv) {
     kz::trace::KzrtConvertInput ki;
     ki.dump_name = dump;
     ki.tool_sha256 = KZ_THIS_TOOL_HASH("kz");
+    if (!process.empty()) ki.harness_process = std::stoull(process);
     s = kz::read_whole_file(dump, &ki.dump);
     for (const std::string& m : manifests) {
       kz::Bytes t;

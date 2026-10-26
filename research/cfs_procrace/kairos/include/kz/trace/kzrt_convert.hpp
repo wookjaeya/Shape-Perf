@@ -22,6 +22,8 @@
 //             (RUNX 1.2, kz_rt_process from the start-up code that runs in it): the one run actor with the recorded
 //             native key gets flag initial and the process id (P10 `initial_thread not_app` then applies to it as
 //             to F0's thread-group leader); none or several with that key, or a dump without it: not stated (a note).
+//             A dump without it (1.1) may be given the process id the harness recorded (harness_process): the one
+//             run actor whose Linux TID equals it (thread id = process id), with that evidence named.
 //   events    per actor in aseq order; the container order is the events without a clock (bootstrap) in buffer
 //             order, then a merge by time that keeps every actor's aseq order (NOT an order between actors).
 //             Values: a slot whose valid bit is set; a validated string where the runtime copied one.  `link`
@@ -50,6 +52,11 @@ struct KzrtConvertInput {
   std::string dump_name;                                    // recorded in FILE_HASHES
   std::vector<std::pair<std::string, std::string>> manifests;  // (name, text), read into one manifest in order
   const Container* basis = nullptr;  // optional basis container of the instrumented build (becomes the parent)
+  // optional: the process id that the harness recorded for the process that wrote the dump (e.g. the start step's
+  // `$!`), for a dump without RUNX process (kzrt-dump 1.1).  The initial thread is then the one run actor whose Linux
+  // TID equals it (thread id = process id: the thread-group leader, as F0); a dump that records its process wins
+  // (a disagreement is a note).  0 = none.
+  uint64_t harness_process = 0;
   Digest tool_sha256{};
 };
 

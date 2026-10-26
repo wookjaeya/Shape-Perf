@@ -141,6 +141,7 @@ C1: 두 계열의 근거 종류가 발생마다 같다. 미준비·TOLERATED는 
 ## 7. 남은 것과 PI 결정
 
 - 도구(결정 아님):
+  - (2026-10-26, §8) 아래 첫째·둘째·넷째는 처리했다. 셋째(SB 저장 AppID)는 연결하지 않았고, 그 이유는 §8.2의 3에 있다.
   - 초기 스레드 표시: 런타임 RUN에 pid를 넣거나, adapter가 process-initial을 표시한다(C-4).
   - R2 생성 요청의 호출 쪽 binding: `CFE_ES_CreateObjects`·`CFE_ES_AppCreate` 안의 `CFE_ES_StartAppTask` 호출(R-2). manifest를 바꾸면 다시 빌드한다.
   - SB 저장 AppID를 위치 효과로 읽는 프로필 대응(§4).
@@ -151,3 +152,96 @@ C1: 두 계열의 근거 종류가 발생마다 같다. 미준비·TOLERATED는 
   - §5의 재생 규칙은 도구 해석 규칙이다. 이미 LP 점의 매개변수 슬롯을 `arg.NAME`으로 읽는 대응을 호출 사건까지 잇는 것이고, F0 결과를 바꾸지 않는다. PI는 뒤집을 수 있다.
   - B′ 사용은 `static_facts.md` §7a의 결정을 적용한 것이다.
   - R2 시작 상태는 새 질문이 아니다. 레퍼런스(README L102–L114, run_cfs.sh, SPEC §1.7)는 S0를 기록하라고 할 뿐, 새 exe 디렉터리가 어느 Init에서 시작할지는 정하지 않는다.
+
+## 8. 단계 D 잔여 수정: 초기 스레드, R2 생성 요청의 호출 쪽 binding, 직접 포획 값 (2026-10-26) [M][F][D]
+
+- 지위: pilot/dev. 새 부팅은 R2 G-I **1회**뿐이다(§0과 같은 절차). C1은 §0의 8개 기록을 다시 변환·재생했다. 제어·gate 코드는 바꾸지 않았다.
+- 산출물(저장소 밖): `/home/user/work/instr/gcc/d4/`.
+  - `r2/`: 새 파생 빌드와 실행 `run1/`, 그리고 §0 기록의 재재생 `d3run1_replay/`. 빌드 트리는 B′와 해시를 남긴 뒤 지웠다. `core-cpu1`(sha256 `3695a7a1…`)과 binding·기록 파일은 남겼다.
+  - `c1/<cfg>_<cand>_<inst>/replay/`: C1 8개 기록의 재재생.
+  - `bprime/`: 현 프로필로 다시 뽑은 B′.
+  - `f0check/`: F0 smoke3·confirm1 자연 rx·pilot3의 재재생. 닫힘은 현 프로필로 다시 뽑아 `f0facts/`에 두었다.
+  - `sha256.txt`.
+- 새 읽기 `nocode`: `--outcome-narrowing off --reads-from-outcome off`. 반환 코드를 조건 고정에도, RF 사용의 성공 근거에도 쓰지 않는다. `replay_gi.sh`가 이 읽기를 더한다.
+
+### 8.1 항목별 전후
+
+| 항목 | 전(§1–§4, d3) | 후(d4) | F0 |
+|---|---|---|---|
+| 1 초기 스레드 | C1·R2 `owner undetermined`. 지우는 쓰기·TEARDOWN 뒤 삭제의 관계 부분 줄이 `ownership-undetermined`(C1 post 15줄, pre 5줄) | C1 8개: `not an application's task … (thread id = process id)`. 관계 부분 줄(actor 이름·사건 번호 정규화)이 F0와 **diff 0**. R2 새 실행: 같은 줄(process 18120). R2 §0 기록: 그대로(근거 없음, 아래) | `core-tx`·`core-rx`·`core-cpu1` 같은 줄(thread id = process id) |
+| 2 R2 core 여부 | core 0, not core 0, not established 25. 관계 `inter-application` 284, `core-status-unknown` 284 | 새 실행: core 8, not core 16, not established 1(초기 스레드). 관계 `core-application` 267 + `intra-application` 5, `core-status-unknown` 0. identity 줄 `requested from CFE_ES_CreateObjects`(core 8)·`CFE_ES_AppCreate`(16) | core 8, not core 16, not established 3. `core-application` 264 + intra 5 |
+| 2 R2 판정 | 위반 24 · SB 5 · 다른 task 260 | 위반 24 (DC) · SB 5 (DC+SO, A-OWNER) · 다른 task 243 (DC+ON). (소유 앱, 요약, 근거, 관계)별 묶음이 F0와 같고, task별 전송 수만 ±1–2 다르다(TO_LAB 111 대 112 등). P1 끔: 24 · 5 · 243 INCONCLUSIVE | 24 · 5 · 240 |
+| 3 C1 RF 근거 | post의 READY 2개(BP0 ordinal 2, BP1): `state-order + return-derived-order`, 결과 `agrees (… derived from a returned code: not an independent check)`. `rfoff_p1off`에서 INCONCLUSIVE | 같은 2개(post 4개 기록 각각): `state-order + store-derived-order`, 결과 `agrees`(독립 확인). `nocode`에서 **NO_VIOLATION으로 선다**. RF 간선 2개에 `(use shown by the success-path store of its out value)` | 같은 2개는 `return-derived-order`이다. `nocode`에서 3개 모두 INCONCLUSIVE(`rfoff_p1off`와 같음) |
+| 3 그 밖의 판정 | — | C1 post BP0 ordinal 1(TOLERATED)과 pre 4개(NOT_READY_UNJUDGED)는 여전히 ON(P1)이다. `nocode`에서 INCONCLUSIVE. R2는 위반 24와 SB 5가 원래부터 반환 코드 없이 선다. 다른 task 243은 ON이다 | 같음 |
+
+- F0 불변 [M].
+  - smoke3 4개와 confirm1 자연 rx 4개를 7개 읽기로, pilot3은 cur·p1off로 다시 재생했다.
+  - 출력이 이전 기록(`replay_i1025`, `replay_c1025`)과 같다. 다른 것은 B2의 `record layer` 머리 줄 하나다. C1 프로필 해시(`stored_out` 한 줄)는 비교에서 뺐다.
+- C1의 `rfoff`·`rfoff_p1off`는 G-I와 F0가 diff 0이다. 그 밖의 읽기에서 다른 것은 위 READY 2개의 근거 줄과 결과 줄뿐이다.
+
+### 8.2 바꾼 것
+
+1. **초기 스레드** (`kairos/runtime`, 0.2.1, dump 1.2; 커밋 `97a24d8`). 상세는 `kairos/docs/event_semantics.md` §8.6.
+   - F0가 아는 방법: perf 기록의 스레드 표에서 tid = pid이고 그 id의 첫 incarnation인 스레드를 초기 스레드로 본다(`lib/trace/neutral.cpp` L226–L229). 그 actor에 `initial` 표시를 붙이면 프로필 `initial_thread not_app`이 적용된다(`real_trace.cpp` L286–L309).
+   - 계측 계열: POSIX 시작 객체의 생성자가 `kz_rt_process(getpid, gettid, tid, constructor|tid-is-pid)`를 부르고, RUNX 끝에 기록한다. glibc는 실행 파일의 생성자를 main 전에 초기 스레드에서 돈다.
+   - 변환: 그 key를 가진 run actor가 정확히 하나일 때만 `initial`과 process id를 준다.
+   - 1.1 dump(§0의 9개)용으로 `kz convert --kzrt … --process <pid>`를 더했다. 하네스가 기록한 pid(run.meta `tx_pid`/`rx_pid`, 시작 단계의 `$!`이고 같은 파일의 스레드 목록에서 그 TID가 `core-tx`)를 받는다. 이때 근거는 "the process id the harness recorded"로 노트와 BASIS `convert.harness_process`에 남는다.
+   - R2 §0 기록에는 이런 하네스 기록이 없어 그대로 두었다(만들어 넣지 않음).
+2. **R2 생성 요청** (`profiles/cfs-v7.0.1/instr/sites.kzs`).
+   - `es.start_task.entry/.ret`를 `CFE_ES_StartAppTask`의 세 호출 쪽 call/return 짝(label `@<caller>`)으로 바꿨다: `CFE_ES_CreateObjects`(cfe_es_start.c:810–814), `CFE_ES_AppCreate`(cfe_es_apps.c:848–854), `CFE_ES_CreateChildTask`(cfe_es_api.c:1290, child 요청 안). 고정 cFE의 grep으로 각 함수에 호출이 하나뿐임을 확인했다.
+   - 정체성 결합은 site의 `func`를 요청 함수로 쓴다(`kzrt_convert.cpp`의 `request_func`, `identity_rule.hpp`). F0가 반환 주소와 basis 기호로 얻는 것과 같은 이름이다. `--core-request-caller CFE_ES_CreateObjects`는 F0와 같다.
+   - 다시 빌드했다(`derive_r2.sh`, `d4/r2`). binding 39개가 모두 bound이고, 링크 뒤 hook이 39개(hookcheck ok 39)다. 바뀐 객체는 계측 단위 11개, D4 1개, coverage 267개(§0과 같음)다. `core-cpu1` sha256 `3695a7a1…`, manifest `897c7510…`.
+   - 런타임은 커밋 `97a24d8`의 트리를 따로 꺼내 빌드했다(`d4/src_97a24d8`). 작업 트리에는 다른 작업의 진행 중 변경이 있었다.
+   - 실행: §0과 같은 절차와 같은 S0(새 설치: EEPROM.DAT·키 파일 없음)이다. OPERATIONAL 1,652 ms, 손실 0, actor 25, chunk 40, 최대 actor 수요 36,432 B. `kz-rt-dump` 검사가 통과했다.
+3. **직접 포획 값** (IR §13.4).
+   - **C1 out id** — 프로필 `30_hb.kzp`의 RF 규칙에 `stored_out sem_id prov osal_find_by_name, osal_countsem_getidbyname_def`를 더했다.
+     - 근거 코드: `OS_CountSemGetIdByName`은 단 한 번의 `OS_ObjectIdFindByName` 반환 코드를 그대로 돌려준다(osapi-countsem.c L204–L215). `OS_ObjectIdFindByName`은 `*object_id = token.obj_id`(osapi-idmap.c L978)를 `if (return_code == OS_SUCCESS)`(L976) 안에서만 쓰고, 그 return_code를 돌려준다(L983). ARGCHECK·LENGTHCHECK 출구(L972–L973)는 저장하지 않는다. 두 번들의 파일이 같다(cmp).
+     - G-I `.found`는 바로 그 store의 operand다(`place=store`, `from=operand0`). 그래서 열린 조회 호출 안에 그 store가 있으면 성공 경로이고, id도 직접 주어진다.
+     - 재생은 이 경우 RF 사용을 반환 코드 없이 세운다. 그 store가 있는데 다른 코드가 돌아오면 코드와 모순이므로 간선을 만들지 않고 finding을 낸다.
+     - 근거 종류는 `store-derived-order`로 따로 표시하고 `return-derived-order`는 붙이지 않는다. 코드의 일치는 독립 확인으로 센다.
+     - 생성 쪽 id(`.created`)는 store operand가 아니다. `OS_NotifyEvent(…, token->obj_id)`(idmap.c L854)의 인자이며 `operation_status == OS_SUCCESS`(L852) 안에 있다. 이것은 match의 값으로만 쓴다. out 저장 `*outid = final_id`(L860)와 같은 값임은 L841(`final_id = token->obj_id`)과 L850(`TransactionFinish`는 `const final_id`를 받고 token은 `lock_mode`만 씀, L1046–L1099)에서 나온다.
+     - 공개 쪽 적용은 원래부터 반환 코드가 아니라 `lp.status`(FinalizeNew 호출 인자) 필터에 기댄다.
+     - F0는 id를 해제 시점 token 메모리에서 읽는다(store operand가 아님). 그래서 F0의 판정은 바뀌지 않는다.
+   - **R2 SB가 저장한 AppID** (`sb_publication.out_app_id` = 0x110003) — 연결하지 않았다.
+     - 이 값은 store operand가 아니다. `CFE_ES_GetAppID`가 돌아온 뒤 SB task가 `CFE_SB_Global.AppId`를 읽은 값이다(`from=out0`, event_semantics §8.1). store 자체(`*AppIdPtr = …`, cfe_es_api.c의 `CFE_ES_GetAppID`)는 피호출 쪽이라 manifest에 없다(§4).
+     - 요구조건 `K-ID.send-with-appid`가 읽는 것은 SB API 호출 지점에서 같은 문장으로 적재된 인자(cfe_sb_api.c:277, 1185, cfe_sb_priv.c:786)다. 이 인자는 이미 직접 포획(DC)이다. 저장 값은 provider 줄("the record does not establish the value stored")의 설명에만 쓰인다.
+     - 다시 읽은 공유 값을 저장 값으로 쓰지 않는다(PD26 §4 값 규칙). 그래서 그 줄은 그대로다.
+4. 재생 출력(`kz replay`): 머리 줄 `out values from points inside a call N (k of them the operand of a store)`, RF 간선 표시, 근거 `store-derived-order`, 가정 `reads-from edges (RF, uses shown by the success-path store)`, 옵션 `--reads-from-outcome on|off`.
+   - container의 `summary.flags`는 16비트가 모두 차 있다(schema rev 3). 그래서 `store-derived-order`는 텍스트와 메모리에만 있다. container에는 `basis-state-order`만 남고 `basis-return-derived-order`는 없다.
+5. 시험.
+   - 새 사례:
+     - `test_core_state_order`의 `test_reads_from_store`(165 checks): store 간선, 근거, 독립 일치, `nocode`, 모순 finding, 절 없음, 검사 두 개.
+     - `test_neutral_kzrt`: main 스레드 actor 하나만 initial이고, P10 프로필에서 `not_app (thread id = process id)`.
+     - `rt_auto`·`rt_auto_dump`: 생성자 기록, 두 번째 호출 거부, RUNX 출력.
+     - C1 golden 8개를 갱신했다(해시와 `stored_out` 한 줄).
+   - 기본 빌드 179개 중 178개, LLVM 빌드 201개 중 200개가 통과했다. 둘 다 tracefs 시험 1개는 건너뛰었다. 같은 작업 트리에 있는 다른 작업의 시험도 이 수에 들어 있다.
+
+### 8.3 반환 코드 없이 서는 판정 (정밀히)
+
+- **선다**:
+  - C1 post 4개 기록(번들 2 × tx·rx)에서 각 2개, 모두 8개: (CF,BP0) ordinal 2와 (CF,BP1) READY → NO_VIOLATION. 근거는 SO(spawn·program order)와 store가 보인 RF(같은 id)다. 가정은 B′ 닫힘의 `via` 키 분리(osal.countsem)와 호출 문맥 역할(`cf-dependent-lookup`)이다.
+  - R2 위반 24(DC).
+  - R2 SB 5. 근거는 DC+SO이고 A-OWNER를 가정한다. A-OWNER 자체는 반환 코드가 아니다.
+- **아직 반환 코드에 기댄다**:
+  - C1 post BP0 ordinal 1(TOLERATED)과 pre 4개(미준비)는 실패한 조회라 store가 없다. 실패는 반환 코드로만 안다. 가지 안의 store가 없다는 것을 실패의 근거로 쓰지 않았다(관측 부재를 값으로 읽지 않음, ADR-055).
+  - R2 다른 task 243은 SB task의 등록(`register`)과 다른 task의 사용 사이에 순서 근거가 없어 ON에 기댄다.
+- **F0**: C1에서 반환 코드 없이 서는 판정은 없다(`nocode` = `rfoff_p1off`). R2는 G-I와 같다(24·5).
+- ADR-055 조건은 그대로다.
+  - RF는 여전히 같은 자원, 정확히 하나의 공개, 같은 id, 다른 actor, 병합 순서상 앞을 요구한다.
+  - store 근거는 cited code 기록(`code-derived`)이 있을 때만 쓴다(검사 오류). store가 열린 호출 안의 store operand일 때만 쓴다.
+  - 시작 상태·작성자·별칭·수명 adequacy는 바꾸지 않았다.
+
+### 8.4 남은 것과 PI 결정
+
+- 도구(결정 아님):
+  - R2 SB 5의 A-OWNER: `register`의 `app_id`(`EVS_AppDataSetUsed(AppDataPtr, AppID)`의 인자 = slot에 저장되는 값, cfe_evs_utils.h:134–137)는 store operand다. 요구조건이 `state(evs.reg(arg.AppID))`로 그 값을 읽는다. 효과의 자원 키를 기록 값으로 대조하는 재생 규칙이 있으면 A-OWNER를 대신할 수 있다. 아직 없다.
+  - SB 저장 AppID의 store operand: 피호출 쪽 store site와 호출자 필터가 필요하다.
+  - `store-derived-order`의 container 비트: schema 개정 때 넓힌다.
+  - C1 실행의 RUNX 1.2: 파생 C1 빌드를 0.2.1 런타임으로 다시 링크할 때 생긴다. 지금은 하네스 pid로 대신했다.
+  - `kz hits`의 중립 층 읽기.
+- 기존 대기(바뀌지 않음): 파생 실행의 R2 시작 상태(새 R2 실행도 새 설치에서 시작했고 기록만 했다), 군 비교의 반복 수, kzgcc 라이선스, 공개 범위.
+- **새 PI 결정: 없음.** 각 후보가 결정이 아닌 이유는 다음과 같다.
+  - `stored_out`은 도구의 증거 규칙이다. SPEC 3.16 row RF의 "성공한 사용"을 다른 근거(코드가 성공 경로에만 두는 store의 operand)로 보이는 것이다. 근거 코드를 인용하고 조건을 줄이지 않는다. 기본 읽기에 넣었고, `--reads-from-outcome`·`--reads-from-edges`로 PI가 뒤집을 수 있다.
+  - 하네스 pid 사용은 기록의 해석이다. pid는 실행 기록(run.meta)에 이미 있고 F0와 같은 tid = pid 규칙을 쓴다.
+  - 호출 쪽 binding은 F0 site와 같은 의미의 위치 선택이다. `equiv … unconfirmed`로 남겼다.
+  - 레퍼런스(CONDITIONS_POLICY, SPEC §1.7)가 정하는 연구 조건은 건드리지 않았다.

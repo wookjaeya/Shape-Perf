@@ -365,6 +365,23 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
       notes.push_back("initial thread of process " + std::to_string(c.runx.process) + " (" + ev + "): " + std::to_string(with_key.size()) +
                       " run actors have its key; not stated" + (with_key.size() == 1 ? " (the start-up code names no evidence)" : ""));
     }
+    if (in.harness_process != 0 && in.harness_process != c.runx.process)
+      notes.push_back("the harness names process " + std::to_string(in.harness_process) + ", the dump records " + std::to_string(c.runx.process) + ": the dump's record is used");
+  } else if (in.harness_process != 0) {
+    // the process id of the harness record (a 1.1 dump): the run actor whose Linux TID is the process id
+    std::vector<uint32_t> with_key;
+    for (const kz_rt_dec_actor& a : c.actors)
+      if (a.key_kind == KZ_RT_KEY_LINUX_TID && a.native_key == in.harness_process && a.key_generation == 0) with_key.push_back(actor_of[a.actor]);
+    if (with_key.size() == 1) {
+      NActor& a = n.actors[with_key[0]];
+      a.r.flags |= KZ_NACTOR_FLAG_INITIAL;
+      a.r.process = static_cast<uint32_t>(in.harness_process);
+      notes.push_back("initial thread: run actor " + std::to_string(a.r.backend_id) + " of process " + std::to_string(in.harness_process) +
+                      " (the process id the harness recorded, thread id = process id; the dump does not record its process)");
+    } else {
+      notes.push_back("initial thread of process " + std::to_string(in.harness_process) + " (the harness record): " + std::to_string(with_key.size()) +
+                      " run actors have that thread id; not stated");
+    }
   } else {
     notes.push_back("initial thread: not recorded (no RUNX process, kzrt-dump 1.1 or kz_rt_process not called)");
   }
@@ -631,6 +648,7 @@ Status convert_kzrt_container(const KzrtConvertInput& in, KzrtConvertResult* out
     item("convert.manifest", mf.first + " " + to_hex(sha256(mf.second)));
     file(mf.first, mf.second.data(), mf.second.size());
   }
+  if (in.harness_process != 0) item("convert.harness_process", std::to_string(in.harness_process));
   for (const std::string& note : out->notes) item("convert.note", note);
   s = w.add_section(KZ_SEC_BASIS, items);
   if (s.ok()) s = w.add_section(KZ_SEC_FILE_HASHES, files);

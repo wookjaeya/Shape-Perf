@@ -27,6 +27,15 @@ hb R2-P-TASK {
 # Outcome-implied reads-from (SPEC 3.16 row RF, 3.17): a successful lookup of a name read from the creation of that
 # name.  Matched by the name (the resource) and by the id: the out id of the lookup equals the out id the creation
 # returned (r_reads_from_lookup).  Stratum O: it holds in the observed execution; it orders no failed lookup.
+# `stored_out sem_id` (2026-10-26, stage D leftovers): the out id of the lookup is written only on the path that
+# returns OS_SUCCESS.  OS_CountSemGetIdByName returns the code of its one OS_ObjectIdFindByName call unchanged
+# (osapi-countsem.c L204-L215, osal_countsem_getidbyname_def); OS_ObjectIdFindByName stores `*object_id =
+# token.obj_id` (osapi-idmap.c L978) only inside `if (return_code == OS_SUCCESS)` (L976) and returns that
+# return_code (L983); its other exits (ARGCHECK, LENGTHCHECK, L972-L973) store nothing (osal_find_by_name).  So where
+# the record captured that store's operand inside the lookup (the instrumented family: site
+# osal.countsem_lookup.found, place=store, from=operand0), the store shows the success and gives the id directly; the
+# returned code is not needed.  F0 reads the id from the token at the release (not the store operand): its uses still
+# rest on the returned code.
 hb RF {
   title "outcome-implied reads-from: a successful lookup reads from the creation of the same name and id";
   stratum O;
@@ -36,6 +45,7 @@ hb RF {
     outcome OS_SUCCESS;
     publish OS_CountSemCreate.publish;
     match sem_id;
+    stored_out sem_id prov osal_find_by_name, osal_countsem_getidbyname_def;
   }
   prov osal_find_by_name, osal_find_next_match, osal_finalize_new, osal_find_next_free, osal_countsem_finalize, r_reads_from_lookup;
 }

@@ -264,7 +264,8 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 
 ### 12.7 남은 것 [U]
 
-- ~~계측 기록의 정체성 결합~~ → §12.3.1(`kzs-sites 2`). 남은 것: 계측 계열의 초기 스레드(P10 `initial_thread not_app`)를 런타임이 표시하지 않아 `process-initial`이 없다. 호출 쪽 out id(`spawn-return id=`)를 쓰는 manifest는 아직 없다(지금은 F0처럼 spawn-id).
+- ~~계측 기록의 정체성 결합~~ → §12.3.1(`kzs-sites 2`). ~~계측 계열의 초기 스레드~~ → 2026-10-26: RUNX 1.2 `process`(`event_semantics.md` §8.6)의 key를 가진 run actor 하나에 `initial`·`process`를 준다. 1.1 dump에는 `kz convert --kzrt … --process PID`(하네스가 기록한 pid, Linux TID = pid인 run actor 하나, BASIS `convert.harness_process`)를 쓴다. 둘 다 아니면 노트 "initial thread: not recorded"다. 재생 문구는 그 actor의 TID가 pid이면 F0와 같은 "thread id = process id"다. 호출 쪽 out id(`spawn-return id=`)를 쓰는 manifest는 아직 없다(지금은 F0처럼 spawn-id).
+- (2026-10-26) 열린 호출 안의 점이 준 out 값 중 그 슬롯이 store의 operand인 것(`from=operand0`)은 반환 사건에 text `store.out.X`(site label·사건 번호)로도 표시된다. 머리 줄은 `out values from points inside a call N (k of them the operand of a store)`이다. 프로필 RF 규칙의 `stored_out`만 이 표시를 읽는다(`phi_reference.md` 표 RF).
 - NCTL은 기록만 하고 재생이 쓰지 않는다(P11의 "제어 개입" 근거는 다음 단계). F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다.
 - `kz hits` 등 F0 섹션을 직접 읽는 다른 명령은 그대로다(계측 기록에는 F0 섹션이 없다).
 - adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다.

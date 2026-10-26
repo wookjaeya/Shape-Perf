@@ -3,7 +3,11 @@
 # env/build_cfs.sh), build native_std (-O0 -g).
 # Stage D: every site of the F0 plan observe/sites.kzp (35) has a counterpart here with the same label, and an
 # `equiv ... backends=f0,gcc-plugin status=unconfirmed` line that names the F0 site and how the two positions relate
-# (IR section 9.3: a common name is not an equivalence; it is confirmed only with evidence, stage E).
+# (IR section 9.3: a common name is not an equivalence; it is confirmed only with evidence, stage E).  Exception
+# (stage D leftovers, 2026-10-26): the F0 pair es.start_task.entry/.ret (the entry and return of CFE_ES_StartAppTask,
+# whose requesting function F0 resolves from the return address, slot return_address) has one call-side pair per
+# caller here, labelled es.start_task.entry@<caller>/.ret@<caller>: the request is bound at the call, so the requesting
+# function is the site's func (identity_rule.hpp, request_func), as the return address names it for F0.
 #
 # Positions follow the profile's linearization points (20_ops.kzp `lp at`) at the source statement: call(X) is the
 # call of X (after-call where the profile's effect is done by X or reads its result, at-call where it reads the
@@ -25,16 +29,41 @@ source osal rev=d2d877a69cff47452bcca274b309147d48e6c16f ref="env/build_cfs.sh P
 module 1 name=core-cpu1 source=cfs-bundle
 
 # ---- creation-side identity (F0 sites 21-25 and 5-7; the stage C sites 1-8 and their D1 identity reads) ----------
-site 1 label=es.start_task.entry op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask line=649 ref="cfe/modules/es/fsw/src/cfe_es_apps.c:649-670"
+# The creation request CFE_ES_StartAppTask(TaskIdPtr, TaskName, EntryFunc, Params, ParentAppId), bound at each of its
+# three calls (grep of the pinned cFE: one call in each of these functions, so no line= is needed): the core start
+# CFE_ES_CreateObjects (cfe_es_start.c:810-814), the application start CFE_ES_AppCreate (cfe_es_apps.c:848-854) and the
+# child task creation CFE_ES_CreateChildTask (cfe_es_api.c:1290, nested in the child request of site 3, as in F0).  The
+# opening site of each call is its only phase=before site, so the return's link names it (kzgcc, event_semantics.md 3).
+site 1 label=es.start_task.entry@CFE_ES_CreateObjects op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_start.c:810-814"
 value 1 0 role=name_ptr from=arg1 type=ptr
 value 1 1 role=entry_fn from=arg2 type=ptr
-value 1 2 role=owner_id from=arg4 type=u32 ref="cfe_es_apps.c:696 TaskRecPtr->AppId = ParentAppId"
-identity 1 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId)"
-equiv 1 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe; same function entry, slot return_address not read"
-site 2 label=es.start_task.ret op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:649"
+value 1 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 1 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); the core start: the requesting function names the core service (kz replay --core-request-caller CFE_ES_CreateObjects, from SPEC 3.3)"
+equiv 1 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_CreateObjects (cfe/modules/es/fsw/src/cfe_es_start.c:810-814), the requesting function is the site's func"
+site 2 label=es.start_task.ret@CFE_ES_CreateObjects op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_CreateObjects callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_start.c:810-814"
 value 2 0 role=status from=ret type=s32
 identity 2 decoder=request-return ref="es_startapptask_def"
-equiv 2 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: the joined return"
+equiv 2 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_CreateObjects"
+site 38 label=es.start_task.entry@CFE_ES_AppCreate op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_AppCreate callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:848-854"
+value 38 0 role=name_ptr from=arg1 type=ptr
+value 38 1 role=entry_fn from=arg2 type=ptr
+value 38 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 38 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); the start of an application from the startup script or a command"
+equiv 38 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_AppCreate (cfe/modules/es/fsw/src/cfe_es_apps.c:848-854), the requesting function is the site's func"
+site 39 label=es.start_task.ret@CFE_ES_AppCreate op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_AppCreate callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:848-854"
+value 39 0 role=status from=ret type=s32
+identity 39 decoder=request-return ref="es_startapptask_def"
+equiv 39 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_AppCreate"
+site 40 label=es.start_task.entry@CFE_ES_CreateChildTask op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1290"
+value 40 0 role=name_ptr from=arg1 type=ptr
+value 40 1 role=entry_fn from=arg2 type=ptr
+value 40 2 role=owner_id from=arg4 type=u32 ref="the argument ParentAppId (cfe_es_apps.c:653; L696 TaskRecPtr->AppId = ParentAppId)"
+identity 40 decoder=owner-request owner=2 ref="es_startapptask_def: cfe_es_apps.c:649-670 (ParentAppId; L696 TaskRecPtr->AppId = ParentAppId); inside the child request of site 3 (es_childtask_owner: the owner is the caller's own application, this argument is not used)"
+equiv 40 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:141 entry probe of CFE_ES_StartAppTask with return_address (the caller); GCC: the call in CFE_ES_CreateChildTask (cfe/modules/es/fsw/src/cfe_es_api.c:1290), the requesting function is the site's func"
+site 41 label=es.start_task.ret@CFE_ES_CreateChildTask op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask callee=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1290"
+value 41 0 role=status from=ret type=s32
+identity 41 decoder=request-return ref="es_startapptask_def"
+equiv 41 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:142 return probe; GCC: right after the call in CFE_ES_CreateChildTask"
 site 3 label=es.child_task.entry op=es.child_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask line=1202 ref="cfe/modules/es/fsw/src/cfe_es_api.c:1202-1208, owner 1255-1290"
 value 3 0 role=name_ptr from=arg1 type=ptr
 value 3 1 role=entry_fn from=arg2 type=ptr

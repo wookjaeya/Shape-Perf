@@ -343,6 +343,7 @@ struct RealEval {
   bool owner_identity = false;        // it read a resource whose state an identity-resolved effect set
   bool state_read = false;            // it read replayed state (a kind, a location, the owner record)
   bool rf_order = false;              // a write it read is ordered with it only by a reads_from edge
+  bool rd_order = false;              // ... and only with one whose use only its returned code shows successful
   bool via = false;                   // a kind or location it read is fixed by a coverage with `via` separation
   std::vector<std::string> via_names;
 };
@@ -372,7 +373,7 @@ struct IntervalRead {
   uint32_t reasons = 0;
   uint32_t adequacy = kAllAdequacy;
   bool contradicted = false;
-  bool state_read = false, rf_order = false, via = false, owner_identity = false;
+  bool state_read = false, rf_order = false, rd_order = false, via = false, owner_identity = false;
 };
 
 struct Frame {
@@ -479,6 +480,10 @@ struct Prior {
   // ordered only with them rests on an order derived from a returned code (ConjunctResult::rf_order)
   bool has_no_rf = false;
   HbOrder hb_no_rf;
+  // the same order without the reads_from edges that only a returned code supports (HbEdge::by_store false): a read
+  // ordered with the edges but not with this order rests on a returned code (ConjunctResult::rd_order)
+  bool has_no_rd = false;
+  HbOrder hb_no_rd;
   WriteLog writes;
   // The first pass's scope points (kNoEvent: not in the record): the SHUTDOWN_REQ and TEARDOWN points.
   uint64_t request = ~static_cast<uint64_t>(0);
@@ -535,8 +540,9 @@ class Replayer {
   // After run() on a real record: the writes this pass applied, and the order of its edges (false, with the
   // reason, where the edges cannot stand for the order of different actors).
   const WriteLog& writes() const { return log_; }
-  // without_rf: the order of the same edges less those of reads_from rules (false, nothing built, where there is none).
-  bool order_of_edges(HbOrder* out, std::string* why, bool without_rf = false) const {
+  // without_rf: the order of the same edges less those of reads_from rules (false, nothing built, where there is none);
+  // returned_only: less only the reads_from edges that no success-path store supports (HbEdge::by_store).
+  bool order_of_edges(HbOrder* out, std::string* why, bool without_rf = false, bool returned_only = false) const {
     if (any_handler_) {
       *why = "an actor began a new handler (program order is not one chain per actor)";
       return false;
@@ -547,7 +553,7 @@ class Replayer {
     bool any_rf = false;
     for (const HbEdge& e : r_.edges) {
       const int32_t ri = p_.find_rule(e.rule);
-      if (ri >= 0 && p_.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom) any_rf = true;
+      if (ri >= 0 && p_.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom && !(returned_only && e.by_store)) any_rf = true;
       else kept.push_back(e);
     }
     if (!any_rf) return false;
@@ -603,6 +609,7 @@ class Replayer {
     std::string actor;
     bool has_value = false;
     int64_t value = 0;
+    bool by_store = false;  // shown successful by the store of its out value on the success path (stored_out)
   };
   std::vector<RfPub> rf_pubs_;
   std::vector<RfUse> rf_uses_;
@@ -628,7 +635,8 @@ class Replayer {
   std::vector<std::string> kind_start_, loc_start_;  // the observed effect that fixed the start state, where one did
   bool identity_of(const std::string& actor) const;
   RealEval effect_operand(const Expr& e, const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool resource, bool* by_identity);
-  bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed = nullptr) const;
+  bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed = nullptr,
+                  bool* rd_needed = nullptr) const;
   bool ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, std::vector<uint64_t>* left_out) const;
   bool clearing_value(int32_t loc, int64_t v) const;
   void fix_start_kind(int32_t kind, const std::string& what, uint64_t event);
@@ -1050,16 +1058,20 @@ bool Replayer::ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, c
 }
 
 // rf_needed (optional): the writes are ordered with the read only with the edges of reads_from rules (the order of
-// the previous pass without them does not order them), i.e. the value read rests on an order derived from a
-// returned code (review section 5.3).
-bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed) const {
+// the previous pass without them does not order them), i.e. the value read rests on a reads_from edge (review
+// section 5.3).  rd_needed (optional): and not without the edges that only a returned code supports, i.e. it rests on
+// an order derived from a returned code (false where the edges it needs are all shown by a success-path store).
+bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed,
+                          bool* rd_needed) const {
   if (rf_needed != nullptr) *rf_needed = false;
+  if (rd_needed != nullptr) *rd_needed = false;
   if (prior_ == nullptr) return false;
   std::vector<uint64_t> left_out;
   if (!ordered_in(prior_->hb, writes, more, at, reader, &left_out)) return false;
   if (rf_needed != nullptr && prior_->has_no_rf) {
     std::vector<uint64_t> ignored;
     *rf_needed = !ordered_in(prior_->hb_no_rf, writes, more, at, reader, &ignored);
+    if (*rf_needed && rd_needed != nullptr) *rd_needed = prior_->has_no_rd && !ordered_in(prior_->hb_no_rd, writes, more, at, reader, &ignored);
   }
   scope_left_out_.insert(left_out.begin(), left_out.end());
   return true;
@@ -1229,8 +1241,8 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     return any;
   };
-  std::set<ResId> order_open, rf_res;
-  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole, rf_kinds, rf_locs;
+  std::set<ResId> order_open, rf_res, rd_res;
+  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole, rf_kinds, rf_locs, rd_kinds, rd_locs;
   auto open_whole_kind = [&](int32_t kind) {
     // a write that may have hit any resource of the kind: every resource of it is open at this read
     a.open_kinds.insert(kind);
@@ -1243,12 +1255,13 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     return kind >= 0 && static_cast<size_t>(kind) < kind_reasons_.size() && kind_reasons_[static_cast<size_t>(kind)] == 0 && p_.kinds[static_cast<size_t>(kind)].derived.empty();
   };
   if (!t_.order_established && prior_ != nullptr) {
-    bool rf = false;
+    bool rf = false, rd = false;
     for (const auto& kv : prior_->writes.res) {
       if (!fixed(kv.first)) continue;
       const auto wide = prior_->writes.kind_wide.find(kv.first.kind);
-      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor, &rf)) {
+      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor, &rf, &rd)) {
         if (rf) rf_res.insert(kv.first);
+        if (rd) rd_res.insert(kv.first);
         continue;
       }
       a.res[kv.first] = any_res(kv.first.kind);
@@ -1257,12 +1270,18 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     for (const auto& kv : prior_->writes.kind_wide) {
       if (!kind_fixed(kv.first)) continue;
-      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf)) open_whole_kind(kv.first);
-      else if (rf) rf_kinds.insert(kv.first);
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd)) open_whole_kind(kv.first);
+      else if (rf) {
+        rf_kinds.insert(kv.first);
+        if (rd) rd_kinds.insert(kv.first);
+      }
     }
     for (const auto& kv : prior_->writes.loc) {
-      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf)) order_open_locs.insert(kv.first);
-      else if (rf) rf_locs.insert(kv.first);
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd)) order_open_locs.insert(kv.first);
+      else if (rf) {
+        rf_locs.insert(kv.first);
+        if (rd) rd_locs.insert(kv.first);
+      }
     }
   } else if (!t_.order_established) {
     for (const auto& kv : res_writers_) {
@@ -1316,17 +1335,22 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (p_.kinds[static_cast<size_t>(k)].derived.empty()) out.state_read = true;
     if (kind_reasons_[static_cast<size_t>(k)] == 0) via_of(t_.kind_closure, p_.kinds[static_cast<size_t>(k)].name);
     if (rf_kinds.count(k) != 0) out.rf_order = true;
+    if (rd_kinds.count(k) != 0) out.rd_order = true;
   }
   for (const ResId& id : reads.res) {
     if (order_open.count(id) != 0 || order_open_whole.count(id.kind) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     else if (identity_res_.count(id) != 0 && fixed(id)) out.owner_identity = true;
     if (rf_res.count(id) != 0 || rf_kinds.count(id.kind) != 0) out.rf_order = true;
+    if (rd_res.count(id) != 0 || rd_kinds.count(id.kind) != 0) out.rd_order = true;
   }
   for (int32_t k : reads.boxes) {
     if (order_open_kinds.count(k) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     if (rf_kinds.count(k) != 0) out.rf_order = true;
+    if (rd_kinds.count(k) != 0) out.rd_order = true;
     for (const ResId& id : rf_res)
       if (id.kind == k) out.rf_order = true;
+    for (const ResId& id : rd_res)
+      if (id.kind == k) out.rd_order = true;
   }
   for (int32_t l : reads.locs) {
     if (order_open_locs.count(l) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
@@ -1336,6 +1360,7 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     out.state_read = true;
     if (loc_reasons_[static_cast<size_t>(l)] == 0) via_of(t_.loc_closure, p_.locs[static_cast<size_t>(l)].name);
     if (rf_locs.count(l) != 0) out.rf_order = true;
+    if (rd_locs.count(l) != 0) out.rd_order = true;
   }
   if (reads.owner) out.state_read = true;
   if (reads.owner && owner_open) out.reasons |= KZ_WITHHOLD_OWNERSHIP_UNDETERMINED;
@@ -1357,6 +1382,7 @@ void Replayer::join_interval(IntervalRead* acc, const RealEval& r) {
   acc->contradicted = acc->contradicted || r.contradicted;
   acc->state_read = acc->state_read || r.state_read;
   acc->rf_order = acc->rf_order || r.rf_order;
+  acc->rd_order = acc->rd_order || r.rd_order;
   acc->via = acc->via || r.via;
   acc->owner_identity = acc->owner_identity || r.owner_identity;
 }
@@ -1683,6 +1709,7 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
     res.owner_identity = r.owner_identity;
     res.state_read = r.state_read;
     res.rf_order = r.rf_order;
+    res.rd_order = r.rd_order;
     res.via = r.via;
     if (r.v.tri == Tri::Maybe) {
       res.unknown = true;
@@ -2113,6 +2140,7 @@ void Replayer::on_point(const TraceEvent& ev) {
       res.owner_identity = r.owner_identity;
       res.state_read = r.state_read;
       res.rf_order = r.rf_order;
+      res.rd_order = r.rd_order;
       res.via = r.via;
       if (r.v.tri == Tri::Maybe) {
         res.unknown = true;
@@ -2588,6 +2616,7 @@ void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
     c.contradicted = in.contradicted;
     c.state_read = in.state_read;
     c.rf_order = in.rf_order;
+    c.rd_order = in.rd_order;
     c.via = in.via;
     c.owner_identity = in.owner_identity;
     if (!in.any || in.tri == Tri::Maybe) {
@@ -2740,7 +2769,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.passage_unknown = false;
             c.source = LpSource::Outcome;
             c.event = ev.id;
-            c.state_read = c.rf_order = c.via = c.owner_identity = false;
+            c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
             narrowed = true;
           } else {
             c.contradicted = true;
@@ -2752,7 +2781,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
           c.holds = true;
           c.source = LpSource::Outcome;
           c.event = ev.id;
-          c.state_read = c.rf_order = c.via = c.owner_identity = false;
+          c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
           narrowed = true;
         }
       }
@@ -2782,7 +2811,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.holds = false;
             c.unknown = false;
             c.passage_unknown = false;
-            c.state_read = c.rf_order = c.via = c.owner_identity = false;
+            c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
           }
           chk = narrowed ? OutcomeCheck::Narrowed : fixed_false ? OutcomeCheck::Agrees : OutcomeCheck::Consistent;
         }
@@ -3595,7 +3624,8 @@ void Replayer::finish() {
           continue;
         }
         o.basis |= KZ_SUMMARY_FLAG_BASIS_STATE_ORDER;
-        if (c.rf_order) o.basis |= KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER;
+        if (c.rf_order && c.rd_order) o.basis |= KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER;
+        else if (c.rf_order) o.basis_store_order = true;  // the edges it needs: success-path stores, no returned code
         if (c.owner_identity) o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY;
         if (!c.via) continue;
         o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION;
@@ -3762,9 +3792,20 @@ void Replayer::note_rf_use(const OpDecl& op, const Frame& f, const TraceEvent& e
           pb.value = v->second;
         }
     }
-    if (rule.use_op != op.name || !ev.has_result) continue;
+    if (rule.use_op != op.name) continue;
+    // Shown successful by the returned code (`outcome`), or by the store of the out value on the success path where
+    // the rule cites code for it (`stored_out`) and the record captured the store's operand inside the call (a direct
+    // capture: texts "store.out.X").  A store of the success path with another returned code contradicts the code.
     const int32_t ci = p_.find_const(rule.use_outcome);
-    if (ci < 0 || u32(p_.consts[static_cast<size_t>(ci)].ival) != u32(ev.result)) continue;
+    const bool ok_code = ev.has_result && ci >= 0 && u32(p_.consts[static_cast<size_t>(ci)].ival) == u32(ev.result);
+    const bool stored = !rule.stored_out.empty() && ev.texts.count("store.out." + rule.stored_out) != 0 && ev.values.count("out." + rule.stored_out) != 0;
+    if (stored && ev.has_result && !ok_code) {
+      finding(ev.id, "rule " + rule.name + ": the use #" + std::to_string(ev.id) + " stored out." + rule.stored_out + " on the path of " + rule.use_outcome +
+                         " (" + ev.texts.at("store.out." + rule.stored_out) + ") but returned " + std::to_string(ev.result) + ": the record contradicts the cited code, no edge");
+      continue;
+    }
+    const bool by_outcome = ok_code && o_.reads_from_outcome;
+    if (!by_outcome && !stored) continue;
     const int32_t pi = p_.find_op(rule.pub_op);
     const EffectDecl* eff = nullptr;
     if (pi >= 0)
@@ -3796,6 +3837,7 @@ void Replayer::note_rf_use(const OpDecl& op, const Frame& f, const TraceEvent& e
       u.res = ResId{r.kind, r.key};
     }
     u.lp = cidx < f.conj.size() && f.conj[cidx].source == LpSource::Point ? f.conj[cidx].event : f.call;
+    u.by_store = stored;
     const auto v = rule.match.empty() ? ev.values.end() : ev.values.find("out." + rule.match);
     if (v != ev.values.end()) {
       u.has_value = true;
@@ -3845,6 +3887,7 @@ void Replayer::reads_from_edges() {
       continue;
     }
     add_edge(pb.event, u.lp, rule);
+    r_.edges.back().by_store = u.by_store;
   }
 }
 
@@ -3902,6 +3945,7 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
   {
     std::string ignored;
     prior.has_no_rf = first.order_of_edges(&prior.hb_no_rf, &ignored, true);
+    prior.has_no_rd = first.order_of_edges(&prior.hb_no_rd, &ignored, true, true);
   }
   prior.writes = first.writes();
   if (out->shutdown_requested) prior.request = out->shutdown_event;
@@ -3995,6 +4039,7 @@ std::string assumptions_text(const Occurrence& o) {
   }
   if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY) != 0) add("owner identity targets (A-OWNER)");
   if ((o.basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0) add("reads-from edges (RF)");
+  if (o.basis_store_order) add("reads-from edges (RF, uses shown by the success-path store)");
   if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_ROLE) != 0) add("role " + o.context);
   return out.empty() ? "-" : out;
 }
@@ -4020,7 +4065,7 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
   out += "\nedges " + std::to_string(r.edges.size()) + "\n";
   for (const HbEdge& e : r.edges)
     out += "edge " + e.rule + " " + phi::stratum_text(e.stratum) + " " + phi::robust_text(e.robust) + (e.minimal ? " minimal" : "") + " #" + std::to_string(e.from) + " -> #" +
-           std::to_string(e.to) + "\n";
+           std::to_string(e.to) + (e.by_store ? " (use shown by the success-path store of its out value)" : "") + "\n";
   out += "\noccurrences " + std::to_string(r.occurrences.size()) + "\n";
   for (const Occurrence& o : r.occurrences) {
     out += "occurrence " + o.rspec + " actor " + o.actor + " ordinal " + std::to_string(o.ordinal) + " key " + key_text(o.key) + " call #" + std::to_string(o.call);
@@ -4063,7 +4108,10 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       if (!o.narrowing.empty()) out += "  narrowing " + o.narrowing + "\n";
       if (!o.allowed_note.empty()) out += "  allowed " + o.allowed_note + "\n";
       out += "  summary " + render_observation(o.summary) + " flags " + set_text("KZ_SUMMARY_FLAG", o.summary.flags) + "\n";
-      out += "  basis " + basis_text(o.basis) + "\n";
+      out += "  basis " + basis_text(o.basis);
+      if (o.basis_store_order)
+        out += std::string(o.basis == 0 ? "" : ", ") + "store-derived-order (state replay with a reads_from edge whose use the record shows successful by the store of its out value on the success path, and equal ids)";
+      out += "\n";
       out += "  assumptions " + assumptions_text(o) + "\n";
       out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";
       out += "  identity exec " + o.actor + " creator " + (o.creator.empty() ? std::string("(not recorded)") : o.creator) + " owner " + enum_text_of("KZ_OWNER_LEVEL", o.owner_level);

@@ -4,6 +4,7 @@
 //             [--predicate RULE=EXPR]... [--basis <basis.kz> --core-request-caller FUNC...] [--outcome-narrowing on|off]
 //             [--compare-narrowing] [--facts <facts.kz> --static-basis <basis.kz>] [--out <file.kz>] [--emit-trace]
 //             [--clearing-writes counted|excluded] [--owner-identity-targets on|off] [--reads-from-edges on|off]
+//             [--reads-from-outcome on|off]
 //
 // Builds the real-record trace of the container (kz/trace/real_trace.hpp) and replays it with the profile
 // in the real-record mode of kz/core/eval_trace.hpp: a resource the record does not fix is unknown, a result
@@ -33,7 +34,10 @@
 // selects one of the two earlier readings instead (every observed write counts / clearing writes do not), for
 // sensitivity only.  --owner-identity-targets off keeps the effect operands that only the writer's confirmed creation
 // identity fixes open (the reading before 2026-10-24; default on).  --reads-from-edges off leaves out the edges of the
-// profile's reads_from rules (SPEC 3.16 row RF; default on), to compare.  The counts end with the basis of every
+// profile's reads_from rules (SPEC 3.16 row RF; default on), to compare.  --reads-from-outcome off lets a use of such a
+// rule be shown successful only by the store of its out value on the success path (`stored_out`, a direct capture of
+// the store operand), never by its returned code (default on), to show which results stand without any returned code.
+// The counts end with the basis of every
 // occurrence (an occurrence may carry more than one), the declared assumptions, and the outcome checks, where a code
 // that fixed a condition or agrees with a return-derived state is not counted as an independent agreement.
 //
@@ -70,6 +74,7 @@ void usage(FILE* f) {
                "                 [--predicate RULE=EXPR]... [--basis B --core-request-caller FUNC...] [--outcome-narrowing on|off]\n"
                "                 [--compare-narrowing] [--facts F --static-basis S] [--out FILE.kz] [--emit-trace]\n"
                "                 [--clearing-writes counted|excluded] [--owner-identity-targets on|off] [--reads-from-edges on|off]\n"
+               "                 [--reads-from-outcome on|off]\n"
                "  --profile P         the profile (a directory stands for its *.kzp files, in name order)\n"
                "  --const NAME=VALUE  the value of a `ref eval` constant (a table size), from its reference\n"
                "  --version C=V       the version of a component, for the guards of rules and effects\n"
@@ -85,7 +90,9 @@ void usage(FILE* f) {
                "  --emit-trace        print the real-record trace instead of replaying it\n"
                "  --clearing-writes counted|excluded  an earlier relation reading, for sensitivity only (default: the P10 rule per occurrence)\n"
                "  --owner-identity-targets on|off  whether a confirmed owner's identity fixes the operands of its effects (default on)\n"
-               "  --reads-from-edges on|off  whether the reads_from rules of the profile make edges (SPEC 3.16 row RF; default on)\n");
+               "  --reads-from-edges on|off  whether the reads_from rules of the profile make edges (SPEC 3.16 row RF; default on)\n"
+               "  --reads-from-outcome on|off  whether a use's returned code may show it successful for those rules (off: only\n"
+               "                     the success-path store of its out value, stored_out; default on)\n");
 }
 
 std::string enum_name(const char* en, uint64_t v) {
@@ -132,6 +139,10 @@ std::string counts_text(const kz::eval::Result& r, const char* title) {
         ++basis[b.second];
         combo += (combo.empty() ? "" : "+") + std::string(b.second);
       }
+    if (o.basis_store_order) {  // in memory only (summary.flags has no bit for it): reads_from by a success-path store
+      ++basis["store-derived-order"];
+      combo += (combo.empty() ? "" : "+") + std::string("store-derived-order");
+    }
     ++basis["combination " + (combo.empty() ? std::string("none") : combo) + " / " + ob];
     static const std::pair<uint16_t, const char*> kAssumed[] = {{KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION, "via key separation"},
                                                                 {KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY, "owner identity targets (A-OWNER)"},
@@ -182,7 +193,7 @@ bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceTe
 }
 
 int run(int argc, char** argv) {
-  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path, clearing, identity = "on", reads_from = "on";
+  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path, clearing, identity = "on", reads_from = "on", rf_outcome = "on";
   std::vector<std::string> profile_args, consts, versions, predicates, core_callers;
   bool emit = false, compare = false;
   for (int i = 1; i < argc; ++i) {
@@ -208,7 +219,7 @@ int run(int argc, char** argv) {
     } else if (a == "--predicate") {
       if (!value(&predicates)) return 1;
     } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing" || a == "--facts" || a == "--static-basis" || a == "--clearing-writes" ||
-               a == "--owner-identity-targets" || a == "--reads-from-edges") {
+               a == "--owner-identity-targets" || a == "--reads-from-edges" || a == "--reads-from-outcome") {
       std::vector<std::string> v;
       if (!value(&v)) return 1;
       (a == "--basis"                    ? basis_path
@@ -218,6 +229,7 @@ int run(int argc, char** argv) {
        : a == "--clearing-writes"        ? clearing
        : a == "--owner-identity-targets" ? identity
        : a == "--reads-from-edges"       ? reads_from
+       : a == "--reads-from-outcome"     ? rf_outcome
                                          : narrowing) = v.front();
     } else if (a == "--core-request-caller") {
       if (!value(&core_callers)) return 1;
@@ -236,7 +248,7 @@ int run(int argc, char** argv) {
     }
   }
   if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!clearing.empty() && clearing != "counted" && clearing != "excluded") ||
-      (identity != "on" && identity != "off") || (reads_from != "on" && reads_from != "off") || (!core_callers.empty() && basis_path.empty()) ||
+      (identity != "on" && identity != "off") || (reads_from != "on" && reads_from != "off") || (rf_outcome != "on" && rf_outcome != "off") || (!core_callers.empty() && basis_path.empty()) ||
       (facts_path.empty() != static_basis_path.empty()) || (!facts_path.empty() && basis_path.empty())) {
     usage(stderr);
     return 1;
@@ -370,6 +382,7 @@ int run(int argc, char** argv) {
                                                  : kz::eval::Options::RelationRule::NonClearing;
   options.owner_identity_targets = identity == "on";
   options.reads_from_edges = reads_from == "on";
+  options.reads_from_outcome = rf_outcome == "on";
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {
@@ -388,6 +401,8 @@ int run(int argc, char** argv) {
   std::printf("owner identity targets %s%s\n", identity.c_str(), identity == "on" ? " (a confirmed owner's creation identity fixes the operands of its effects)" : " (effect operands stay open where the state does not fix them)");
   if (rf_rules || reads_from == "off")
     std::printf("reads-from edges %s%s\n", reads_from.c_str(), reads_from == "on" ? " (the profile's reads_from rules make edges, SPEC 3.16 row RF)" : " (the edges of reads_from rules are left out)");
+  if (rf_outcome == "off")
+    std::printf("reads-from uses by returned code off (a use counts only where the record has the success-path store of its out value, stored_out)\n");
   if (!facts_path.empty()) std::printf("static closure %s artifact_sha256 %s (basis %s)\n", facts_path.c_str(), kz::to_hex(facts.artifact_hash()).c_str(), kz::to_hex(static_basis.artifact_hash()).c_str());
   std::fputs(kz::trace::report_text(report).c_str(), stdout);
   std::printf("\n");
@@ -422,6 +437,7 @@ int run(int argc, char** argv) {
     in.basis.push_back({"replay.relation_rule", clearing.empty() ? std::string("P10-occurrence") : "sensitivity-clearing-writes-" + clearing});
     in.basis.push_back({"replay.owner_identity_targets", identity});
     if (rf_rules || reads_from == "off") in.basis.push_back({"replay.reads_from_edges", reads_from});
+    if (rf_outcome == "off") in.basis.push_back({"replay.reads_from_outcome", rf_outcome});
     for (const auto& kv : ropt.consts) in.basis.push_back({"replay.const." + kv.first, std::to_string(kv.second)});
     for (const auto& kv : options.versions) in.basis.push_back({"replay.version." + kv.first, kv.second});
     for (const std::string& pr : predicates) in.basis.push_back({"replay.predicate", pr});

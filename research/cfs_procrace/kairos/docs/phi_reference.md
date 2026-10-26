@@ -104,7 +104,8 @@ template = "template" ( "program_order" "{" [ "looper" ( "yes" | "no" ) ";" ] "}
                       | "observe" "{" "poll" STR "called_at" pattern ";" "exit_outcome" NAME ";"
                                       "predicate" ( "from_code" | expr ) ";" [ "else_terminal" STR ";" ]
                                       "watch" names ";" "}"
-                      | "reads_from" "{" "use" NAME ";" "outcome" NAME ";" "publish" NAME ";" [ "match" NAME ";" ] "}" ) ;
+                      | "reads_from" "{" "use" NAME ";" "outcome" NAME ";" "publish" NAME ";" [ "match" NAME ";" ]
+                                     [ "stored_out" NAME "prov" names ";" ] "}" ) ;
                                                        (* use OP.CONJUNCT, publish OP.EFFECT: 한 식별자, 마지막 '.' 뒤가 레이블 *)
 
 rspec    = "rspec" NAME "{" { ( "use" "op" NAME | "key" expr | "requires" expr
@@ -348,7 +349,7 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 | `program_order` | 한 행위자의 연속한 사건 쌍. `looper yes` 이면 새 핸들러를 시작하는 사건(`mark handler_begin`)으로 들어가는 간선은 없다 |
 | `spawn { create OP out P; entry OP2; }` | 생성 호출 `OP` 의 **호출 사건** → 자식의 `OP2` 호출 사건. 짝은 값으로 맞춘다: `ret` 의 `out.P` 와 진입 호출의 `arg.P`. 호출 시각이 진입 이전이면 되고(자식이 `OP` 가 반환하기 전에 돌 수 있다), 같은 값의 id 가 다시 쓰이면 호출 순서대로 다음 진입과 짝이 된다. 진입이 자기 행위자의 첫 사건이 아니면 발견 사항 |
 | `phase { from X phase F; }` | 행위자 A 의 `X`(단계 F: `call`/`return`/`point`) 사건 e 마다, A 가 e **이후에** 만든 자식의 *첫 사건* 으로 가는 간선 |
-| `reads_from { use OP.C; outcome K; publish OP2.E; match P; }` (2026-10-24, SPEC §3.16 행 RF; 층 O 만) | 결과가 `K`(ready outcome)인 `OP` 반환마다, 그 호출의 조건 `C` 의 지점 사건(지나지 않았으면 호출 사건)으로, 같은 자원(조건의 `state(R)` 중 효과의 종류인 것, 호출 인자로 읽음; 고정되어야 함)에 적용된 `OP2.E`(자원 하나짜리 lifecycle 효과)의 지점 사건에서 간선. 세대: `match P` 이면 두 호출의 `out.P` 가 모두 기록되고 같아야 하며 그 값의 게시가 하나뿐이어야 한다; 없으면 그 자원의 게시가 기록에 하나뿐이고 그 뒤 읽기 전에 종류 전체 쓰기가 없어야 한다. 다른 행위자의 게시만, 병합 순서상 읽기 앞의 것만(아니면 발견 사항). 실패한 사용은 간선을 만들지 않는다. `Options::reads_from_edges`(`kz replay --reads-from-edges off`)로 뺄 수 있다(비교용) |
+| `reads_from { use OP.C; outcome K; publish OP2.E; match P; }` (2026-10-24, SPEC §3.16 행 RF; 층 O 만) | 결과가 `K`(ready outcome)인 `OP` 반환마다, 그 호출의 조건 `C` 의 지점 사건(지나지 않았으면 호출 사건)으로, 같은 자원(조건의 `state(R)` 중 효과의 종류인 것, 호출 인자로 읽음; 고정되어야 함)에 적용된 `OP2.E`(자원 하나짜리 lifecycle 효과)의 지점 사건에서 간선. 세대: `match P` 이면 두 호출의 `out.P` 가 모두 기록되고 같아야 하며 그 값의 게시가 하나뿐이어야 한다; 없으면 그 자원의 게시가 기록에 하나뿐이고 그 뒤 읽기 전에 종류 전체 쓰기가 없어야 한다. 다른 행위자의 게시만, 병합 순서상 읽기 앞의 것만(아니면 발견 사항). 실패한 사용은 간선을 만들지 않는다. `Options::reads_from_edges`(`kz replay --reads-from-edges off`)로 뺄 수 있다(비교용). **`stored_out P prov …`(2026-10-26)**: 인용한 코드(`code-derived` 기록 하나 이상, 아니면 검사 오류; `P` = `match`)가 사용의 out 값 `P` 를 결과 `K` 의 경로에서만 저장한다는 선언. 기록이 그 store 의 operand 를 호출 안에서 포획했으면(계측 계열 `from=operand0`, trace 의 text `store.out.P`) 반환 코드 없이 그 store 가 성공을 보이고 간선이 `by_store` 가 된다. 그 store 가 있는데 다른 코드가 돌아왔으면 코드와 모순: 간선 없이 발견 사항. `Options::reads_from_outcome`(`--reads-from-outcome off`)이면 store 로 보인 사용만 간선을 만든다(반환 코드를 쓰지 않는 읽기 `nocode` = 이것 + P1 끔) |
 | `observe { poll W ... exit_outcome C; predicate ...; else_terminal T; watch K1, K2; }` | `W` 의 `ret` 이 결과 `C` 이고 predicate 가 그 시점의 재생 상태에서 참이면, `K1`, `K2` 종류의 자원에 대한 **마지막 쓰기**(상태 변경 효과; 다른 행위자의 것만)에서 이 `ret` 로 간선. 결과가 `C` 가 아니면 같은 행위자의 *다음 호출*이 `T` 여야 한다(아니면 발견 사항). predicate 가 거짓이면 발견 사항을 내고 간선은 없다. predicate 는 `predicate from_code` 이면 호출자가 `Options::predicates` 로 준다(추출기의 몫); 없으면 간선은 없다 |
 
 규칙의 `guard` 는 `Options::versions` 로 평가한다. 버전이 없거나 만족되지 않으면 **규칙을 적용하지 않고** 발견 사항을 남긴다(간선을 빼는 쪽이 보수적이다). 버전 비교는 점으로 나뉜 숫자 비교다(`6.4.10 > 6.4.9`, 모자란 성분은 0).
@@ -432,7 +433,8 @@ T_SB CFE_EVS_SendEventWithAppID ret result=0
 |---|---|---|---|
 | 직접 포획 값 | `basis-direct-capture` | 조건이 기록된 인자 값만 읽음(상태를 읽지 않음) | R2 의 AppID 0 전달 24 |
 | 관측 상태·동기화/생성 순서·정체성 | `basis-state-order` | 조건이 재생 상태(종류·위치·owner 레코드)를 읽음 | R2 SB 자기 전송 5(정체성 가정과 함께) |
-| 반환값·같은 id 에서 유도한 순서를 포함한 상태 재생 | `basis-return-derived-order` | 그 상태가 읽은 다른 행위자의 쓰기가 reads_from 간선으로만 순서가 정해짐(첫 재생의 간선에서 reads_from 간선을 뺀 순서로는 정해지지 않음) | C1 의 성공 조회 |
+| 반환값·같은 id 에서 유도한 순서를 포함한 상태 재생 | `basis-return-derived-order` | 그 상태가 읽은 다른 행위자의 쓰기가 reads_from 간선으로만 순서가 정해짐(첫 재생의 간선에서 reads_from 간선을 뺀 순서로는 정해지지 않음), 그리고 store 로 보이지 않은 간선을 빼면 정해지지 않음 | C1 의 성공 조회(F0) |
+| 성공 경로 store 와 같은 id 에서 유도한 순서를 포함한 상태 재생 (2026-10-26) | text `store-derived-order`(메모리 `Occurrence::basis_store_order`; `summary.flags` 16비트가 다 차서 container 에는 `basis-state-order` 만) | 필요한 reads_from 간선이 모두 `stored_out` 의 store 로 보인 것(반환 코드를 빼도 정해짐). 그 상태와 일치하는 코드는 독립 일치(`agrees`) | C1 의 성공 조회(G-I) |
 | 반환값으로 직접 좁힘 | `outcome-narrowed` | 코드가 조건을 고정함(위 P1) | R2 240, C1 실패 시도의 미준비 |
 
 가정: `assumes-via-key-separation`(읽은 종류·위치의 writer 포괄이 연구자의 `bind … via` 키 분리 선언으로 센 writer 를 포함: 정적 닫힘의 `separated` > 0; 어느 것인지 `via key separation (…)`), `assumes-owner-identity-targets`(A-OWNER: 쓴 행위자의 생성 요청 id 가 효과의 대상을 정함, 조건의 `owner-identity`), `assumes-role`(호출 문맥의 역할 선언이 그 호출을 사례로 만듦), 그리고 reads_from 간선은 `basis-return-derived-order` 로 드러난다(text 의 `reads-from edges (RF)`). `kz replay` 의 개수 끝에 근거별·조합별(관측 요약과 함께) 수, 가정별 수, 결과 검사별 수(`narrowed`·`agrees … not an independent check` 는 독립 일치로 세지 않음)가 붙는다. RF 는 **관측 실행의 근거**이다: 다른 순서를 예측할 때 그 간선을 그대로 유지할지는 W5 의 제약 문제로 남는다(검토 §5.3) [I].

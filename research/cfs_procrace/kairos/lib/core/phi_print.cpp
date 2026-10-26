@@ -262,6 +262,7 @@ void print_rule(Out* o, const HbRuleDecl& r) {
       o->line(2, "outcome " + r.use_outcome + ";");
       o->line(2, "publish " + r.pub_op + "." + r.pub_effect + ";");
       if (!r.match.empty()) o->line(2, "match " + r.match + ";");
+      if (!r.stored_out.empty()) o->line(2, "stored_out " + r.stored_out + " prov " + sorted_join(r.stored_out_prov, ", ") + ";");
       break;
   }
   o->line(1, "}");

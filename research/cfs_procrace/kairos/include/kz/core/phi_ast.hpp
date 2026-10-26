@@ -422,6 +422,15 @@ struct HbRuleDecl : EntryBase {
   // `pub_effect` of `pub_op` on the same resource and generation; with `match`, also the value of the out
   // parameter `match` of both operations is the same (the record carries both).
   std::string use_op, use_conjunct, use_outcome, pub_op, pub_effect, match;
+  // ReadsFrom, optional (2026-10-26): `stored_out NAME prov ...;` -- the cited code (at least one code-derived record)
+  // writes the use's out parameter NAME (= `match`) only on the path on which the use returns `use_outcome`.  Where
+  // the record carries that out value as the operand of the store itself, captured inside the use's call (a direct
+  // capture; TraceEvent texts "store.out.NAME"), the store stands for the outcome: the use qualifies without its
+  // returned code.  A use with that store and another returned code contradicts the cited code (no edge, a finding).
+  std::string stored_out;
+  SrcLoc stored_out_loc;
+  std::vector<std::string> stored_out_prov;
+  std::vector<int32_t> stored_out_prov_idx;
 };
 
 // ---- readiness specifications -------------------------------------------------------------

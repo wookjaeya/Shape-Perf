@@ -1021,6 +1021,7 @@ hb RF {
     outcome OS_SUCCESS;
     publish OS_CountSemCreate.publish;
     match sem_id;
+    stored_out sem_id prov osal_countsem_getidbyname_def, osal_find_by_name;
   }
   prov osal_countsem_finalize, osal_finalize_new, osal_find_by_name, osal_find_next_free, osal_find_next_match, r_reads_from_lookup;
 }

@@ -25,6 +25,11 @@
 //   - the basis of a result (direct capture, state-order, return-derived order, outcome-narrowed) and the declared
 //     assumptions (reads-from edges, `via` key separation of the static closure, a role); a code that agrees with a
 //     state ordered by a reads_from edge is not an independent agreement;
+//   - `stored_out` (2026-10-26): where the rule cites code that stores the out value only on the ready path and the
+//     record captured that store's operand inside the call (texts "store.out.X"), the use is shown successful by the
+//     store: the edge is marked, the basis is store-derived-order (not return-derived), the code that agrees is an
+//     independent check, and with --reads-from-outcome off only such uses make edges; a store of the ready path with
+//     another code is a contradiction (no edge, a finding); the clause names the matched out value and cites code;
 //   - the P10 rule of the execution relation: the provider the use read from (reads_from), a late provider, the
 //     clearing at the start as an affecting write, the teardown delete excluded by scope, an actor confirmed not to
 //     be an application (core-application) apart from an undetermined owner, an unconfirmed influence kept apart.
@@ -432,9 +437,65 @@ void test_basis_and_relation() {
 
 }  // namespace
 
+void test_reads_from_store() {
+  std::string kinds = kKinds;
+  const std::string rf = "template reads_from { use lookup.exists; outcome OK; publish create.publish; match id; }";
+  kinds.replace(kinds.find(rf), rf.size(), "template reads_from { use lookup.exists; outcome OK; publish create.publish; match id; stored_out id prov code_a; }");
+  const Profile p = load(std::string(kProv) + kinds + kScope + rspec("unspecified_by_reference;"));
+  KZ_CHECK(has(kz::phi::canonical_text(p), "stored_out id prov code_a;"));
+  KZ_CHECK(kz::phi::profile_hash(load(kz::phi::canonical_text(p))) == kz::phi::profile_hash(p));
+  auto run = [&](const Profile& prof, const std::string& body, bool narrowing, bool by_code) {
+    Run r;
+    KZ_CHECK(kz::eval::parse_trace_text(std::string(kHeader) + body, &r.trace).ok());
+    kz::eval::Options o;
+    o.outcome_narrowing = narrowing;
+    o.reads_from_outcome = by_code;
+    KZ_CHECK(kz::eval::replay(prof, r.trace, o, &r.result).ok());
+    r.dump = kz::eval::dump_result(prof, r.trace, r.result);
+    return r;
+  };
+  const std::string stored = std::string(kStart) + create("0x30002") + "A lookup call arg.name=@S0\nA lookup.exists pt\nA lookup ret out.id=0x30002 store.out.id=@found result=0\n";
+  const std::string plain = std::string(kStart) + create("0x30002") + lookup("0", "0x30002");
+  // the store shows the success: the edge is the store's, the basis is not return-derived, the code agrees independently
+  const Run r = run(p, stored, true, true);
+  KZ_CHECK(r.result.edges.size() >= 1);
+  bool by_store = false;
+  for (const kz::eval::HbEdge& e : r.result.edges) by_store = by_store || (e.rule == "RF" && e.by_store);
+  KZ_CHECK(by_store);
+  expect(r, 0, OccStatus::Ready, "NO_VIOLATION_IN_CHECKED_PREFIX", false, "reads-from by the store");
+  KZ_CHECK(r.occ(0).basis_store_order && (r.occ(0).basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) == 0);
+  KZ_CHECK(r.occ(0).outcome == kz::eval::OutcomeCheck::Agrees);
+  KZ_CHECK(has(r.dump, "(use shown by the success-path store of its out value)") && has(r.dump, "store-derived-order"));
+  // no returned code at all (P1 off, uses by code off): the store's edge stands, a use without the store makes none
+  const Run nocode = run(p, stored, false, false);
+  expect(nocode, 0, OccStatus::Ready, "NO_VIOLATION_IN_CHECKED_PREFIX", false, "no returned code, the store");
+  const Run nocode_plain = run(p, plain, false, false);
+  KZ_CHECK(!nocode_plain.edge("RF") && nocode_plain.occ(0).status == OccStatus::Undetermined);
+  // the same use without the store: the edge rests on the code (return-derived), as before
+  const Run code = run(p, plain, true, true);
+  KZ_CHECK(code.edge("RF") && !code.occ(0).basis_store_order && (code.occ(0).basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0);
+  KZ_CHECK(code.occ(0).outcome == kz::eval::OutcomeCheck::AgreesReturnDerived);
+  // a store of the ready path with another code contradicts the cited code: no edge, a finding
+  const std::string contra = std::string(kStart) + create("0x30002") + "A lookup call arg.name=@S0\nA lookup.exists pt\nA lookup ret out.id=0x30002 store.out.id=@found result=-17\n";
+  const Run bad = run(p, contra, true, true);
+  KZ_CHECK(!bad.edge("RF") && bad.finding("the record contradicts the cited code"));
+  // without the clause the store text is not read
+  const Profile q = load(std::string(kProv) + kKinds + kScope + rspec("unspecified_by_reference;"));
+  const Run without = run(q, stored, false, false);
+  KZ_CHECK(!without.edge("RF"));
+  // the checks: the matched out value, code text
+  std::string d;
+  std::string k2 = kKinds;
+  k2.replace(k2.find(rf), rf.size(), "template reads_from { use lookup.exists; outcome OK; publish create.publish; match id; stored_out name prov doc_sup; }");
+  load(std::string(kProv) + k2, false, &d);
+  KZ_CHECK(has(d, "'stored_out name' names another out parameter than 'match'"));
+  KZ_CHECK(has(d, "stored_out: cites no code text"));
+}
+
 int main() {
   test_language();
   test_reads_from_state();
+  test_reads_from_store();
   test_scope_teardown();
   test_exit_monitor();
   test_narrowing_conditions();

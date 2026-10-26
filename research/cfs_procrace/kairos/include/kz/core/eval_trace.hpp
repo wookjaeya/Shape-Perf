@@ -121,6 +121,8 @@ struct LossInterval {
   uint64_t end = kNoEvent;
 };
 
+struct HbEdge;  // below (Trace::control_edges)
+
 struct Trace {
   std::vector<TraceEvent> events;
   std::map<std::string, int64_t> ref_consts;              // value of a `ref eval` constant, by name
@@ -147,6 +149,12 @@ struct Trace {
   // initial thread of the process where the profile's context declares `initial_thread not_app`).  Such an actor
   // is a core execution path (SPEC 1.1, 1.2 T_raw), never "owner undetermined"; no application name is given to it.
   std::map<std::string, std::string> not_app;
+  // The realized control of a controlled run (P11, decided 2026-10-26: PI_DECISIONS_RESOLVED_20261026.md section 3): one
+  // edge per release that resumed a held thread, from the releasing hit's event (the last event of that actor at or before
+  // it) to the held thread's first event after its gate (real_trace.cpp, from the NCTL records).  An order that holds only
+  // in this run because the controller made it: a basis kind of its own (control-order), never a synchronization of the
+  // program.  Used only with Options::control_order.  `rule` names the gate and the release.
+  std::vector<HbEdge> control_edges;
   // The order of the events of different actors is established (HB edges or a reliable observed order,
   // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
   // (SPEC 5.8), so a value another actor wrote may be any value of the interleavings.
@@ -235,6 +243,9 @@ struct ConjunctResult {
   // success-path store of the out value (HbEdge::by_store), not by a returned code.
   bool rd_order = false;
   bool via = false;
+  // Real records of a controlled run: the order of a write it read from another actor rests on the run's realized
+  // control (Trace::control_edges; not the program's synchronization, P11).
+  bool ctl_order = false;
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
@@ -332,6 +343,10 @@ struct Occurrence {
   // identity-targets (A-OWNER: a writer's creation identity fixed an effect operand), assumes-role (a declared role
   // of the call context made the call an instance); reads_from edges are basis-return-derived-order.
   uint16_t assumptions = 0;
+  // Real records of a controlled run (P11): a fixed conjunct read replayed state whose order rests on the run's realized
+  // control (ConjunctResult::ctl_order): the basis kind control-order, apart from the program's synchronization.  Not a
+  // KZ_SUMMARY_FLAG bit (the 16 bits are taken): printed with the basis.
+  bool control_order = false;
   std::vector<std::string> via_names;
   // Real records: how the returned code's mapping was used (P1 conditional): the conditions that held and what the
   // code fixed, or why the mapping does not apply / fixes nothing.  Empty when no mapping was hit.
@@ -425,6 +440,10 @@ struct Options {
   // says; false: only by the store of its out value on the success path (`stored_out`, a direct capture), so no edge
   // rests on a returned code (a reading to compare with, kz replay --reads-from-outcome off, 2026-10-26).
   bool reads_from_outcome = true;
+  // Real records of a controlled run (P11, decided 2026-10-26): whether the run's realized control (Trace::control_edges)
+  // orders the events of different actors, as a basis kind of its own (control-order).  true: the decided reading;
+  // false: the order of the program's synchronization only (the reading kept as sensitivity).
+  bool control_order = true;
 };
 
 // What the real-record replay established for one kind or location (printed with the result).

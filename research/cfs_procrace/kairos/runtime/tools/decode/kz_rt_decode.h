@@ -61,6 +61,11 @@ typedef struct kz_rt_dec_point {
   uint32_t index, kind, label, site, releases, occurrence, flags, hits, acted, satisfied, held_actor, holds;
 } kz_rt_dec_point;
 
+typedef struct kz_rt_dec_plan { /* PLAN (kzrt 0.3.0): the plan bytes point into the decoded stream */
+  uint32_t status, flags, nbytes, given;
+  const unsigned char *bytes;
+} kz_rt_dec_plan;
+
 typedef struct kz_rt_dec_buf {
   uint32_t owner, nbytes, cap;
 } kz_rt_dec_buf;
@@ -99,6 +104,7 @@ typedef struct kz_rt_dec_item {
     kz_rt_dec_actor actor;
     kz_rt_dec_loss loss;
     kz_rt_dec_point point;
+    kz_rt_dec_plan plan;
     kz_rt_dec_buf buf;
     kz_rt_dec_event event;
     kz_rt_dec_ctl ctl;

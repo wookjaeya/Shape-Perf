@@ -975,6 +975,9 @@ KZ_RT_API void kz_rt_caps_get(kz_rt_caps *out) {
   out->distinct_sites = KZ_RT_MAX_POINTS;
 }
 
+/* kz_rt_plan.c: the PLAN record's content (0 = nothing to record) */
+__attribute__((visibility("hidden"))) uint32_t kz_rt__plan_record(const unsigned char **bytes, uint32_t *kept, uint32_t *given, uint32_t *flags);
+
 typedef struct sink {
   kz_rt_write_fn w;
   void *ctx;
@@ -1229,6 +1232,24 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
       emit(&o, b, KZ_RT_POINT_SIZE);
     }
     ctl_unlock(ad);
+  }
+  /* PLAN (kzrt 0.3.0): the serialized plan the run was given and what became of it (kz_rt_plan.c) */
+  {
+    const unsigned char *pb = NULL;
+    uint32_t kept = 0, given = 0, pf = 0;
+    const uint32_t st = kz_rt__plan_record(&pb, &kept, &given, &pf);
+    if (st != 0) {
+      const uint32_t padded = pad4(kept);
+      unsigned char z[4] = {0, 0, 0, 0};
+      rec_header(b, KZ_RT_PLAN_REC_FIXED + padded, KZ_RT_REC_PLAN, 0);
+      put32(b + 8, st);
+      put32(b + 12, pf);
+      put32(b + 16, kept);
+      put32(b + 20, given);
+      emit(&o, b, KZ_RT_PLAN_REC_FIXED);
+      emit(&o, pb, kept);
+      emit(&o, z, padded - kept);
+    }
   }
   /* BUF: the shared buffer, then each actor's */
   {

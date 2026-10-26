@@ -344,6 +344,7 @@ struct RealEval {
   bool state_read = false;            // it read replayed state (a kind, a location, the owner record)
   bool rf_order = false;              // a write it read is ordered with it only by a reads_from edge
   bool rd_order = false;              // ... and only with one whose use only its returned code shows successful
+  bool ctl_order = false;             // a write it read is ordered with it by the run's realized control (P11)
   bool via = false;                   // a kind or location it read is fixed by a coverage with `via` separation
   std::vector<std::string> via_names;
 };
@@ -373,7 +374,7 @@ struct IntervalRead {
   uint32_t reasons = 0;
   uint32_t adequacy = kAllAdequacy;
   bool contradicted = false;
-  bool state_read = false, rf_order = false, rd_order = false, via = false, owner_identity = false;
+  bool state_read = false, rf_order = false, rd_order = false, via = false, owner_identity = false, ctl_order = false;
 };
 
 struct Frame {
@@ -484,6 +485,11 @@ struct Prior {
   // ordered with the edges but not with this order rests on a returned code (ConjunctResult::rd_order)
   bool has_no_rd = false;
   HbOrder hb_no_rd;
+  // Where the run has control edges (Options::control_order and Trace::control_edges, P11): the order without them
+  // (hb_no_ctl), and without them and the reads_from edges (hb_natural, built only where both kinds exist), so that a
+  // read ordered only with the control edges is told apart (ConjunctResult::ctl_order).  hb_no_rf and hb_no_rd keep them.
+  bool has_ctl = false, has_rf = false;
+  HbOrder hb_no_ctl, hb_natural;
   WriteLog writes;
   // The first pass's scope points (kNoEvent: not in the record): the SHUTDOWN_REQ and TEARDOWN points.
   uint64_t request = ~static_cast<uint64_t>(0);
@@ -548,12 +554,37 @@ class Replayer {
       return false;
     }
     const uint64_t limit = r_.terminated ? r_.terminal_event + 1 : t_.events.size();
-    if (!without_rf) return build_hb_order(t_, r_.edges, limit, out, why);
+    const bool ctl = control_edges_used();  // the run's control edges are part of every order here (P11)
+    if (!without_rf) {
+      if (!ctl) return build_hb_order(t_, r_.edges, limit, out, why);
+      std::vector<HbEdge> all = r_.edges;
+      all.insert(all.end(), t_.control_edges.begin(), t_.control_edges.end());
+      return build_hb_order(t_, all, limit, out, why);
+    }
     std::vector<HbEdge> kept;
     bool any_rf = false;
     for (const HbEdge& e : r_.edges) {
       const int32_t ri = p_.find_rule(e.rule);
       if (ri >= 0 && p_.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom && !(returned_only && e.by_store)) any_rf = true;
+      else kept.push_back(e);
+    }
+    if (!any_rf) return false;
+    if (ctl) kept.insert(kept.end(), t_.control_edges.begin(), t_.control_edges.end());
+    return build_hb_order(t_, kept, limit, out, why);
+  }
+  // The run's realized control orders events (Options::control_order and control edges in the trace; P11).
+  bool control_edges_used() const { return o_.control_order && !t_.control_edges.empty(); }
+  // The orders without the run's control edges (false, nothing built, where there is none): with every edge of the pass,
+  // or (without_rf) less the edges of reads_from rules too (false where there is none of them either).
+  bool order_without_control(HbOrder* out, std::string* why, bool without_rf) const {
+    if (any_handler_ || !control_edges_used()) return false;
+    const uint64_t limit = r_.terminated ? r_.terminal_event + 1 : t_.events.size();
+    if (!without_rf) return build_hb_order(t_, r_.edges, limit, out, why);
+    std::vector<HbEdge> kept;
+    bool any_rf = false;
+    for (const HbEdge& e : r_.edges) {
+      const int32_t ri = p_.find_rule(e.rule);
+      if (ri >= 0 && p_.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom) any_rf = true;
       else kept.push_back(e);
     }
     if (!any_rf) return false;
@@ -636,7 +667,7 @@ class Replayer {
   bool identity_of(const std::string& actor) const;
   RealEval effect_operand(const Expr& e, const OpDecl& op, const EffectDecl& eff, const TraceEvent& ev, const ArgMap* frame_args, bool resource, bool* by_identity);
   bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed = nullptr,
-                  bool* rd_needed = nullptr) const;
+                  bool* rd_needed = nullptr, bool* ctl_needed = nullptr) const;
   bool ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, std::vector<uint64_t>* left_out) const;
   bool clearing_value(int32_t loc, int64_t v) const;
   void fix_start_kind(int32_t kind, const std::string& what, uint64_t event);
@@ -1061,10 +1092,15 @@ bool Replayer::ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, c
 // the previous pass without them does not order them), i.e. the value read rests on a reads_from edge (review
 // section 5.3).  rd_needed (optional): and not without the edges that only a returned code supports, i.e. it rests on
 // an order derived from a returned code (false where the edges it needs are all shown by a success-path store).
+// ctl_needed (optional; P11): the writes are not ordered with the read by the program's own edges, and the run's control
+// edges order them (or are needed with the reads_from edges): the value read rests on the realized control.  Where both
+// the control edges alone and the reads_from edges alone order them, the control is named (it is the order the
+// controlled run made) and the reads_from edges are not needed (rf_needed false: hb_no_rf keeps the control edges).
 bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed,
-                          bool* rd_needed) const {
+                          bool* rd_needed, bool* ctl_needed) const {
   if (rf_needed != nullptr) *rf_needed = false;
   if (rd_needed != nullptr) *rd_needed = false;
+  if (ctl_needed != nullptr) *ctl_needed = false;
   if (prior_ == nullptr) return false;
   std::vector<uint64_t> left_out;
   if (!ordered_in(prior_->hb, writes, more, at, reader, &left_out)) return false;
@@ -1072,6 +1108,15 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
     std::vector<uint64_t> ignored;
     *rf_needed = !ordered_in(prior_->hb_no_rf, writes, more, at, reader, &ignored);
     if (*rf_needed && rd_needed != nullptr) *rd_needed = prior_->has_no_rd && !ordered_in(prior_->hb_no_rd, writes, more, at, reader, &ignored);
+  }
+  if (ctl_needed != nullptr && prior_->has_ctl) {
+    std::vector<uint64_t> ignored;
+    const HbOrder& natural = prior_->has_rf ? prior_->hb_natural : prior_->hb_no_ctl;
+    if (!ordered_in(natural, writes, more, at, reader, &ignored)) {
+      const bool by_ctl = !prior_->has_rf || ordered_in(prior_->hb_no_rf, writes, more, at, reader, &ignored);
+      const bool by_rf = prior_->has_rf && ordered_in(prior_->hb_no_ctl, writes, more, at, reader, &ignored);
+      *ctl_needed = by_ctl || !by_rf;
+    }
   }
   scope_left_out_.insert(left_out.begin(), left_out.end());
   return true;
@@ -1241,8 +1286,8 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     return any;
   };
-  std::set<ResId> order_open, rf_res, rd_res;
-  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole, rf_kinds, rf_locs, rd_kinds, rd_locs;
+  std::set<ResId> order_open, rf_res, rd_res, ctl_res;
+  std::set<int32_t> order_open_kinds, order_open_locs, order_open_whole, rf_kinds, rf_locs, rd_kinds, rd_locs, ctl_kinds, ctl_locs;
   auto open_whole_kind = [&](int32_t kind) {
     // a write that may have hit any resource of the kind: every resource of it is open at this read
     a.open_kinds.insert(kind);
@@ -1255,13 +1300,14 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     return kind >= 0 && static_cast<size_t>(kind) < kind_reasons_.size() && kind_reasons_[static_cast<size_t>(kind)] == 0 && p_.kinds[static_cast<size_t>(kind)].derived.empty();
   };
   if (!t_.order_established && prior_ != nullptr) {
-    bool rf = false, rd = false;
+    bool rf = false, rd = false, ctl = false;
     for (const auto& kv : prior_->writes.res) {
       if (!fixed(kv.first)) continue;
       const auto wide = prior_->writes.kind_wide.find(kv.first.kind);
-      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor, &rf, &rd)) {
+      if (ordered_at(kv.second, wide != prior_->writes.kind_wide.end() ? &wide->second : nullptr, ev.id, ev.actor, &rf, &rd, &ctl)) {
         if (rf) rf_res.insert(kv.first);
         if (rd) rd_res.insert(kv.first);
+        if (ctl) ctl_res.insert(kv.first);
         continue;
       }
       a.res[kv.first] = any_res(kv.first.kind);
@@ -1270,15 +1316,23 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     }
     for (const auto& kv : prior_->writes.kind_wide) {
       if (!kind_fixed(kv.first)) continue;
-      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd)) open_whole_kind(kv.first);
-      else if (rf) {
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd, &ctl)) {
+        open_whole_kind(kv.first);
+        continue;
+      }
+      if (ctl) ctl_kinds.insert(kv.first);
+      if (rf) {
         rf_kinds.insert(kv.first);
         if (rd) rd_kinds.insert(kv.first);
       }
     }
     for (const auto& kv : prior_->writes.loc) {
-      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd)) order_open_locs.insert(kv.first);
-      else if (rf) {
+      if (!ordered_at(kv.second, nullptr, ev.id, ev.actor, &rf, &rd, &ctl)) {
+        order_open_locs.insert(kv.first);
+        continue;
+      }
+      if (ctl) ctl_locs.insert(kv.first);
+      if (rf) {
         rf_locs.insert(kv.first);
         if (rd) rd_locs.insert(kv.first);
       }
@@ -1336,12 +1390,14 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (kind_reasons_[static_cast<size_t>(k)] == 0) via_of(t_.kind_closure, p_.kinds[static_cast<size_t>(k)].name);
     if (rf_kinds.count(k) != 0) out.rf_order = true;
     if (rd_kinds.count(k) != 0) out.rd_order = true;
+    if (ctl_kinds.count(k) != 0) out.ctl_order = true;
   }
   for (const ResId& id : reads.res) {
     if (order_open.count(id) != 0 || order_open_whole.count(id.kind) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
     else if (identity_res_.count(id) != 0 && fixed(id)) out.owner_identity = true;
     if (rf_res.count(id) != 0 || rf_kinds.count(id.kind) != 0) out.rf_order = true;
     if (rd_res.count(id) != 0 || rd_kinds.count(id.kind) != 0) out.rd_order = true;
+    if (ctl_res.count(id) != 0 || ctl_kinds.count(id.kind) != 0) out.ctl_order = true;
   }
   for (int32_t k : reads.boxes) {
     if (order_open_kinds.count(k) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
@@ -1351,6 +1407,9 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
       if (id.kind == k) out.rf_order = true;
     for (const ResId& id : rd_res)
       if (id.kind == k) out.rd_order = true;
+    if (ctl_kinds.count(k) != 0) out.ctl_order = true;
+    for (const ResId& id : ctl_res)
+      if (id.kind == k) out.ctl_order = true;
   }
   for (int32_t l : reads.locs) {
     if (order_open_locs.count(l) != 0) out.reasons |= KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
@@ -1361,6 +1420,7 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (loc_reasons_[static_cast<size_t>(l)] == 0) via_of(t_.loc_closure, p_.locs[static_cast<size_t>(l)].name);
     if (rf_locs.count(l) != 0) out.rf_order = true;
     if (rd_locs.count(l) != 0) out.rd_order = true;
+    if (ctl_locs.count(l) != 0) out.ctl_order = true;
   }
   if (reads.owner) out.state_read = true;
   if (reads.owner && owner_open) out.reasons |= KZ_WITHHOLD_OWNERSHIP_UNDETERMINED;
@@ -1383,6 +1443,7 @@ void Replayer::join_interval(IntervalRead* acc, const RealEval& r) {
   acc->state_read = acc->state_read || r.state_read;
   acc->rf_order = acc->rf_order || r.rf_order;
   acc->rd_order = acc->rd_order || r.rd_order;
+  acc->ctl_order = acc->ctl_order || r.ctl_order;
   acc->via = acc->via || r.via;
   acc->owner_identity = acc->owner_identity || r.owner_identity;
 }
@@ -1710,6 +1771,7 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
     res.state_read = r.state_read;
     res.rf_order = r.rf_order;
     res.rd_order = r.rd_order;
+    res.ctl_order = r.ctl_order;
     res.via = r.via;
     if (r.v.tri == Tri::Maybe) {
       res.unknown = true;
@@ -2141,6 +2203,7 @@ void Replayer::on_point(const TraceEvent& ev) {
       res.state_read = r.state_read;
       res.rf_order = r.rf_order;
       res.rd_order = r.rd_order;
+      res.ctl_order = r.ctl_order;
       res.via = r.via;
       if (r.v.tri == Tri::Maybe) {
         res.unknown = true;
@@ -2617,6 +2680,7 @@ void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
     c.state_read = in.state_read;
     c.rf_order = in.rf_order;
     c.rd_order = in.rd_order;
+    c.ctl_order = in.ctl_order;
     c.via = in.via;
     c.owner_identity = in.owner_identity;
     if (!in.any || in.tri == Tri::Maybe) {
@@ -2769,7 +2833,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.passage_unknown = false;
             c.source = LpSource::Outcome;
             c.event = ev.id;
-            c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
+            c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
             narrowed = true;
           } else {
             c.contradicted = true;
@@ -2781,7 +2845,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
           c.holds = true;
           c.source = LpSource::Outcome;
           c.event = ev.id;
-          c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
+          c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
           narrowed = true;
         }
       }
@@ -2811,7 +2875,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.holds = false;
             c.unknown = false;
             c.passage_unknown = false;
-            c.state_read = c.rf_order = c.rd_order = c.via = c.owner_identity = false;
+            c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
           }
           chk = narrowed ? OutcomeCheck::Narrowed : fixed_false ? OutcomeCheck::Agrees : OutcomeCheck::Consistent;
         }
@@ -3626,6 +3690,7 @@ void Replayer::finish() {
         o.basis |= KZ_SUMMARY_FLAG_BASIS_STATE_ORDER;
         if (c.rf_order && c.rd_order) o.basis |= KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER;
         else if (c.rf_order) o.basis_store_order = true;  // the edges it needs: success-path stores, no returned code
+        if (c.ctl_order) o.control_order = true;           // P11: the run's realized control orders it
         if (c.owner_identity) o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY;
         if (!c.via) continue;
         o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION;
@@ -3946,6 +4011,10 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
     std::string ignored;
     prior.has_no_rf = first.order_of_edges(&prior.hb_no_rf, &ignored, true);
     prior.has_no_rd = first.order_of_edges(&prior.hb_no_rd, &ignored, true, true);
+    // the run's realized control (P11): the orders without the control edges, and without them and the reads_from edges
+    prior.has_ctl = first.order_without_control(&prior.hb_no_ctl, &ignored, false);
+    prior.has_rf = prior.has_no_rf;
+    if (prior.has_ctl && prior.has_rf) prior.has_ctl = first.order_without_control(&prior.hb_natural, &ignored, true);
   }
   prior.writes = first.writes();
   if (out->shutdown_requested) prior.request = out->shutdown_event;
@@ -4111,6 +4180,8 @@ std::string dump_result(const Profile& p, const Trace& trace, const Result& r) {
       out += "  basis " + basis_text(o.basis);
       if (o.basis_store_order)
         out += std::string(o.basis == 0 ? "" : ", ") + "store-derived-order (state replay with a reads_from edge whose use the record shows successful by the store of its out value on the success path, and equal ids)";
+      if (o.control_order)
+        out += std::string(o.basis == 0 && !o.basis_store_order ? "" : ", ") + "control-order (the order of a write read rests on this controlled run's realized holds and releases, P11)";
       out += "\n";
       out += "  assumptions " + assumptions_text(o) + "\n";
       out += "  adequacy " + set_text("KZ_ADEQ", o.adequacy) + "\n";
@@ -4312,6 +4383,15 @@ Status parse_trace_text(const std::string& text, Trace* out) {
         for (; i < tok.size(); ++i) rest += (rest.empty() ? "" : " ") + tok[i];
         if (tok[0] == "closure") c.status = rest;
         else c.unobserved.push_back(rest);
+      } else if (tok[0] == "control") {
+        int64_t from = 0, to = 0;
+        if (tok.size() != 4 || !parse_int(tok[1], &from) || !parse_int(tok[2], &to) || from < 0 || to < 0)
+          return line_error(line_no, "expected: control FROM TO LABEL");
+        HbEdge e;
+        e.from = static_cast<uint64_t>(from);
+        e.to = static_cast<uint64_t>(to);
+        e.rule = tok[3];
+        out->control_edges.push_back(e);
       } else if (tok[0] == "order") {
         if (tok.size() != 2 || (tok[1] != "established" && tok[1] != "merged")) return line_error(line_no, "expected: order established|merged");
         out->order_established = tok[1] == "established";
@@ -4405,6 +4485,7 @@ std::string trace_text(const Trace& t) {
     out += "record real\n";
     out += std::string("start_evidence ") + (t.start_evidence < 4 ? evidence[t.start_evidence] : "none") + "\n";
     out += std::string("order ") + (t.order_established ? "established" : "merged") + "\n";
+    for (const HbEdge& e : t.control_edges) out += "control " + std::to_string(e.from) + " " + std::to_string(e.to) + " " + e.rule + "\n";
     auto adequacy = [&](const char* what, const std::string& name, const Adequacy& a, bool kind) {
       out += std::string("adequacy ") + what + " " + name + (a.start_known ? " start=known" : " start=unknown") + (a.writers_covered ? " writers=covered" : " writers=uncovered") +
              (a.aliases_covered ? " aliases=covered" : " aliases=uncovered");

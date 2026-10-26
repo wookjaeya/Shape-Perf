@@ -328,6 +328,8 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     std::map<std::string, std::string> stored;  // outs that are the operand of a store inside the call: where
   };
   std::map<std::string, std::vector<OpenOp>> open_ops;
+  // per neutral event: the first and last trace event made from it (the control edges, below)
+  std::vector<uint64_t> first_tid(events.size(), eval::kNoEvent), last_tid(events.size(), eval::kNoEvent);
   for (size_t ei = 0; ei < events.size(); ++ei) {
     const kz_nevent& e = events[ei];
     const bool unreadable = (e.flags & KZ_NEV_FLAG_NO_VALUES) != 0;
@@ -417,6 +419,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
       }
       return te;
     };
+    first_tid[ei] = out->events.size();
     // a point at the call site precedes the call it observes
     if (m.kind == MapKind::Call && !m.point_also.empty()) {
       out->add(make(MapKind::Point, m.point_also, false));
@@ -482,6 +485,68 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     if (m.kind == MapKind::Return && !m.point_also.empty()) {
       out->add(make(MapKind::Point, m.point_also, false));
       ++report->events;
+    }
+    last_tid[ei] = out->events.size() - 1;
+  }
+
+  // ---- the realized control of a controlled run (P11, decided 2026-10-26; header, "control") ----
+  // A release that resumed a held thread orders the releasing hit before the held thread's continuation: the edge goes
+  // from the last trace event of the hit's actor at or before the hit (the hit's own event, or the one before it where
+  // its site is not mapped) to the held thread's first trace event after its gate hit (the gate's observation record is
+  // written before the wait; the held thread does nothing between).  The gate hold it ended is that thread's latest hold
+  // of the release's gate before the release (ctl_seq, the controller's order).  A deferred release (the hit of a held
+  // thread, acted on when it was resumed) orders that hit the same way.  No edge from a satisfied or consumed release, a
+  // timeout, a refusal: the order of those runs came from the scheduler.  An edge that would go back in the merged order
+  // is not made (reported): the order of edges would then not stand.
+  report->control_records = n.ctl.size();
+  if (!n.ctl.empty()) {
+    std::vector<std::vector<size_t>> by_actor(actors.size());
+    for (size_t ei = 0; ei < events.size(); ++ei)
+      if (first_tid[ei] != eval::kNoEvent && events[ei].actor < actors.size()) by_actor[events[ei].actor].push_back(ei);
+    auto first_after = [&](uint32_t a, uint32_t ev) -> uint64_t {
+      if (a >= actors.size() || ev >= events.size()) return eval::kNoEvent;
+      for (size_t x : by_actor[a])
+        if (events[x].aseq > events[ev].aseq) return first_tid[x];
+      return eval::kNoEvent;
+    };
+    auto last_at_or_before = [&](uint32_t a, uint32_t ev) -> uint64_t {
+      uint64_t r = eval::kNoEvent;
+      if (a >= actors.size() || ev >= events.size()) return r;
+      for (size_t x : by_actor[a])
+        if (events[x].aseq <= events[ev].aseq) r = last_tid[x];
+      return r;
+    };
+    for (const kz_nctl& c : n.ctl) {
+      if (c.what != KZ_NCTL_WHAT_FIRE || c.reason != KZ_NCTL_REASON_RESUMED) continue;
+      ++report->control_resumes;
+      const std::string what = "gate" + std::to_string(c.gate) + "/release" + std::to_string(c.point) + ((c.cflags & KZ_NCTL_FLAG_DEFERRED) != 0 ? "/deferred" : "");
+      const kz_nctl* hold = nullptr;
+      for (const kz_nctl& h : n.ctl)
+        if (h.what == KZ_NCTL_WHAT_GATE_HOLD && h.actor == c.other && h.gate == c.gate && h.ctl_seq < c.ctl_seq && (hold == nullptr || h.ctl_seq > hold->ctl_seq)) hold = &h;
+      const uint32_t hitter = c.subject != KZ_NONE32 ? c.subject : c.actor;
+      if (hold == nullptr || hold->event == KZ_NONE32 || c.event == KZ_NONE32) {
+        report->control_lines.push_back(what + ": no edge (the hold or the release hit has no observation event in the record)");
+        continue;
+      }
+      const uint64_t from = last_at_or_before(hitter, c.event), to = first_after(c.other, hold->event);
+      if (from == eval::kNoEvent || to == eval::kNoEvent) {
+        report->control_lines.push_back(what + ": no edge (no mapped event of the releasing actor at or before its hit, or of the held actor after its gate)");
+        continue;
+      }
+      if (from >= to) {
+        report->control_lines.push_back(what + ": no edge (#" + std::to_string(from) + " is not before #" + std::to_string(to) + " in the merged order)");
+        continue;
+      }
+      eval::HbEdge edge;
+      edge.from = from;
+      edge.to = to;
+      edge.rule = "control:" + what;
+      out->control_edges.push_back(edge);
+      ++report->control_edges;
+      const eval::TraceEvent& fe = out->events[static_cast<size_t>(from)];
+      const eval::TraceEvent& tv = out->events[static_cast<size_t>(to)];
+      report->control_lines.push_back(what + ": #" + std::to_string(from) + " " + fe.actor + " " + fe.site + " " + eval::phase_text(fe.phase) + " -> #" +
+                                      std::to_string(to) + " " + tv.actor + " " + tv.site + " " + eval::phase_text(tv.phase));
     }
   }
 
@@ -631,6 +696,10 @@ std::string report_text(const RealTraceReport& r) {
               : "at the first execution mapping of the traced file (INIT applies; a kind's start state comes from an observed effect on all of it)") +
          "\n";
   for (const std::string& l : r.lifetime_lines) out += l + "\n";
+  if (r.control_records != 0)
+    out += "realized control: records " + std::to_string(r.control_records) + ", releases that resumed a held thread " + std::to_string(r.control_resumes) +
+           ", control edges " + std::to_string(r.control_edges) + " (P11: an order of this controlled run, a basis kind of its own)\n";
+  for (const std::string& l : r.control_lines) out += "control " + l + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
   for (const auto& lc : r.loss_cpus)

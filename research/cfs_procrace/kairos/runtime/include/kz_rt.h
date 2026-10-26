@@ -46,9 +46,10 @@ extern "C" {
 /* ---- versions -------------------------------------------------------------------------- */
 #define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter (0.2.0 only adds calls) */
 #define KZ_RT_FORMAT_MAJOR 1u       /* dump format "kzrt-dump"; a reader accepts only its major */
-#define KZ_RT_FORMAT_MINOR 2u       /* added record types or fields at the end of a record (1.1: RUNX,
-                                       MODULE registrations, ACTOR demand and chunks; 1.2: RUNX process) */
-#define KZ_RT_RUNTIME_VERSION "kzrt 0.2.1"
+#define KZ_RT_FORMAT_MINOR 3u       /* added record types or fields at the end of a record (1.1: RUNX,
+                                       MODULE registrations, ACTOR demand and chunks; 1.2: RUNX process;
+                                       1.3: the PLAN record) */
+#define KZ_RT_RUNTIME_VERSION "kzrt 0.3.0"
 
 /* ---- static sizes (override with -D when building the runtime; recorded in the dump) ---- */
 /* Tool capacities, not research conditions (event_semantics.md 8.3, 8.9: how the defaults were derived

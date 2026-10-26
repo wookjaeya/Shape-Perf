@@ -326,9 +326,68 @@ cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt
 
 ## 10. 남은 것 [U]
 
-- `.kzh` + manifest → `kz_rt_point[]` 호스트 변환기(`name` → validated 슬롯, `caller-in` → 호출 측 binding 집합; 변환할 수 없는 조건은 계획 거부)와, 계획을 대상에 넣는 길(직렬화된 계획 형식). 지금은 C 배열 API뿐이다.
+- ~~`.kzh` + manifest → `kz_rt_point[]` 호스트 변환기와 계획을 대상에 넣는 길~~ → 2026-10-26 단계 F: `kz rtplan`과 직렬화 계획 `kzrt-plan` 1.0, `KZ_RT_PLAN`(§11).
 - ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). ~~남은 것: 계측 기록의 정체성 결합(생성자·소유 앱)~~ → 2026-10-26 `kzs-sites 2`의 `identity`(§3)와 `kz convert --kzrt`의 결합(`schema.md` §12.3)으로 구현했다 [M].
 - ~~같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2)~~ → 0.2.0의 `kz_rt_early_mode`와 시작 객체의 `.preinit_array`(§8.2). 남은 것: hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
 - 0.2.0에서 남은 것: 변환기가 RUNX(창의 모드·원천, pool 수요)와 MODULE `registrations`를 중립 층에 옮기는 일(지금은 RUN `mode`만 읽음, §8.2). 파생 빌드 스크립트가 `kzrt-build-info` 객체를 링크하는 일(단계 D6). 두 연결부의 binding id 범위 검사(§3). 시그널·강제 종료 경로의 dump(단계 F3).
-- OSAL adapter의 target 실행과 OSAL 객체 소비의 실측, 두 번째 OS.
+- ~~OSAL adapter의 target 실행~~ → 2026-10-26 `rt_osal_gate`(C1 기준 OSAL로 링크, §11.5). 남은 것: cFS 실행 안에서 OSAL 초기화 뒤 OSAL adapter로 바꾸는 연결부와 그때의 OSAL 객체 소비 실측, 두 번째 OS.
 - 컴파일러 연결부 세 후보는 이 ABI에 맞춰 시제품을 만든다(단계 C). 런타임을 고칠 필요가 생기면 ABI 판을 올리고 이 문서에 적는다.
+
+## 11. 계획 적재와 변환 (단계 F, 2026-10-26; 런타임 0.3.0, dump 1.3) [D][M]
+
+### 11.1 직렬화 계획 `kzrt-plan` 1.0 (`include/kz_rt_format.h`)
+
+모든 필드는 little-endian이다. 대상의 struct 배치와 무관하다.
+
+```
+헤더 120 B: "KZRTPLAN" u16 major=1 u16 minor=0 u32 n_points u32 total_bytes u32 flags
+            sha256 manifest(@24) sha256 source .kzh(@56) sha256 binding 목록(@88)
+점 172 B:   kind label site releases occurrence flags bind_n bind[8] str_slot str_len str[64]
+            val_slot rsv u64 val u64 timeout_ns name[16]
+끝:         u32 crc32(앞 전체)
+```
+
+- 상한: `KZ_RT_PLAN_MAX_BYTES` = 120 + 64 × 172 + 4 B.
+- `kz_rt_plan_load(bytes, n)`는 다음 순서로 확인한다: 크기, 형식(magic·major·점 크기), crc, build identity(`kz_rt_build_info`)의 manifest sha256과 계획의 manifest sha256이 같은지. 그다음 `kz_rt_plan`으로 싣는다.
+- build identity가 없으면 `no-build` 플래그를 남기고 싣는다(manifest 대조 없음).
+- 상태: `loaded`, `none`, `ignored`, `read-error`, `size`, `format`, `crc`, `manifest`, `points`, `state`. 실패하면 계획 없이 진행한다. 게이트가 없으면 control 모드도 기록만 한다.
+- POSIX 시작 객체: `KZ_RT_MODE=control`이면 `KZ_RT_PLAN` 파일을 읽어 싣는다. 없으면 `none`이다. 다른 모드에서 `KZ_RT_PLAN`이 있으면 `ignored`다.
+- dump 1.3의 PLAN 레코드(0x0008, POINT 뒤)는 상태, 플래그(`manifest-checked`, `no-build`, `truncated`), 실은 바이트 수, 받은 바이트 수와 실은 바이트를 담는다. 그래서 dump만으로 어떤 계획이 돌았는지 안다.
+- `kz-rt-dump`는 `plan status=… sha256=…` 줄과 점마다 `plan point …` 줄을 낸다. 상태가 `loaded`·`none`이 아니면 검사 실패다. `--plan FILE`이면 바이트를 대조한다.
+- 1.2 reader는 PLAN을 모르는 type으로 건너뛴다(minor 개정).
+
+### 11.2 변환기 `kz rtplan` (`probe/hold/rt_plan.{hpp,cpp}`)
+
+입력은 `.kzh`(kzp-hold 1), 논리 manifest(`kzs-sites 2`, `control <site> ctx=`), 빌드가 낸 binding 목록이다. 점 순서는 게이트 먼저(계획 순서), 다음 해제다(H3).
+
+- 사이트 label → site. F0 계획의 사이트 이름이 manifest의 label이나 op/phase와 대응해야 한다.
+- `caller-in <모듈>` 함수 진입 → 그 모듈에서 그 callee를 부르는 `place=at-call` site의 binding.
+  - 쓸 수 있는 binding(bound·inlined·duplicated)만 넣는다.
+  - 그런 site가 없거나 둘 이상이면 거부한다.
+- `name <role> "<text>"` → 그 역할의 `string=validated` 슬롯과의 비교. 문자열은 상한보다 짧아야 한다.
+- 평가 site에는 `control` 줄이 있어야 한다. 게이트의 ctx가 task가 아니면 기록한다. 런타임은 그 문맥에서 잡지 않고 `gate-refused`로 남긴다.
+- label은 15 B 이하. `timeout_ns`는 0이다(F0 holder에 시간 제한이 없음).
+- 출력: `--out`(계획), `--record`(점마다 대응과 F0 대비 차이 목록: position, name, release, context, each gate busy, timeout 가운데 해당하는 것).
+- 변환할 수 없는 조건(레지스터·오프셋, binding이 없는 site, 상한을 넘는 문자열 등)은 계획 전체를 거부한다.
+
+### 11.3 kzp-hold 1과의 차이 (판 표기)
+
+§4의 표에 더해, 변환된 계획에서 평가 위치가 달라지는 것은 둘이다. 둘 다 계획마다 `--record`에 남는다.
+- position: 호출 쪽 binding, 호출 명령 직전.
+- release: 해제 site의 관측 레코드 뒤.
+
+H1–H6 의미는 같다. 차이가 생기면 `kzrt-plan`의 minor를 올리고 여기에 적는다.
+
+### 11.4 C1 실행 (pilot/dev)
+
+C1 9개 계획 × 4 인스턴스의 결과와 F0 confirm2 대조는 `plan/results_instr_gate_20261026.md`에 있다. 실현된 보류·해제는 36/36이 F0와 같다. 제어 순서 근거(P11)는 `schema.md` §12.7에 있다.
+
+### 11.5 OSAL adapter 시험 (`runtime/tests/test_rt_osal.c`)
+
+target OSAL 빌드의 `libosal.a`·`libosal_bsp.a`(generic-linux BSP의 main → `OS_Application_Startup`)로 링크한다.
+1. `OS_API_Init` 전에 런타임을 control 모드로 세우고 부트스트랩 버퍼에 기록한다. adapter는 없고 OSAL 객체도 건드리지 않는다.
+2. 초기화가 성공한 뒤 `kz_rt_osal_adapter(1)`을 attach한다. 객체는 OSAL 표에서 가져온다(mutex 2, 게이트당 binsem 1).
+3. 한 OSAL task가 게이트에서 잡히고, 다른 task의 해제로 재개한다.
+4. dump의 RESOURCE는 origin `target-table`(mutex 2, binsem 1)이고 CTL은 hold 1·fire 1·resume 1이다.
+
+CMake에 `KZ_RT_OSAL_INCLUDE_DIRS`·`KZ_RT_OSAL_LIBS`를 줄 때만 빌드한다. C1 기준 OSAL(`f34759d`)로 통과했다 [M].

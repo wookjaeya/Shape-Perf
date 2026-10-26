@@ -1,0 +1,35 @@
+# kzgcc_hold_seq.kzs -- the sites of tests/cfs-free/target/hold_seq_prog.c for the cooperative-gate test of stage F
+# (run_hold_test.sh): the labels of the F0 observation profile tests/cfs-free/target/hold_seq.kzp, so that the F0
+# kz hold test plans (hold_rearm, hold_nth, hold_defer .kzh) convert unchanged with kz rtplan, plus a call-side site for
+# a caller-in plan.  Unit-test values: not a framework manifest and not research conditions (CONDITIONS_POLICY).
+kzs-sites 2
+source unit rev=0000000000000000000000000000000000000000 ref="tests/cfs-free/target/hold_seq_prog.c"
+module 1 name=hold_seq_prog source=unit
+
+# The names: every caller of seq_create passes a string literal (L82, L84); lookup_loop passes its name parameter,
+# which consumer_thread gives as a literal (L103-L104).  A literal is a valid NUL-terminated array, so the pointers are
+# valid before the entries (the unit test's own validation statement).
+site 1 label=obj.create.entry op=obj.create phase=before tu=target/hold_seq_prog.c func=seq_create line=39 ref="hold_seq_prog.c:39"
+value 1 0 role=id_out_ptr from=arg0 type=ptr
+value 1 1 role=name from=arg1 type=ptr string=validated bound=32 ref="hold_seq_prog.c:82,84 string literals"
+value 1 2 role=initial from=arg2 type=u32
+control 1 ctx=task ref="unit test: the provider thread before seq_create takes its lock"
+site 2 label=obj.lookup.entry op=obj.lookup phase=before tu=target/hold_seq_prog.c func=seq_lookup line=54 ref="hold_seq_prog.c:54"
+value 2 0 role=id_out_ptr from=arg0 type=ptr
+value 2 1 role=name from=arg1 type=ptr string=validated bound=32 ref="hold_seq_prog.c:92 the name of lookup_loop, literals at 103-104"
+control 2 ctx=task ref="unit test: the consumer thread before seq_lookup takes its lock"
+site 3 label=provider.created.entry op=provider.created phase=before tu=target/hold_seq_prog.c func=seq_provider_created line=65 ref="hold_seq_prog.c:65"
+value 3 0 role=index from=arg0 type=s32
+control 3 ctx=task ref="unit test: the provider thread, no lock"
+site 4 label=consumer.retry.entry op=consumer.retry phase=before tu=target/hold_seq_prog.c func=seq_consumer_retry line=68 ref="hold_seq_prog.c:68"
+value 4 0 role=key from=arg0 type=s32
+value 4 1 role=attempt from=arg1 type=s32
+control 4 ctx=task ref="unit test: the consumer thread, no lock"
+# the consumer's last call before its thread ends: a gate here is refused (ctx=terminating), a release acts
+site 5 label=consumer.done.entry op=consumer.done phase=before tu=target/hold_seq_prog.c func=seq_consumer_done line=71 ref="hold_seq_prog.c:71"
+value 5 0 role=found0 from=arg0 type=s32
+control 5 ctx=terminating ref="unit test: the consumer's last call before its thread returns"
+# the provider's calls of seq_create (the call-side site of obj.create.entry for caller-in hold_seq_prog)
+site 6 label=provider.create_call.before op=obj.create phase=point tu=target/hold_seq_prog.c func=provider_thread callee=seq_create place=at-call ref="hold_seq_prog.c:82,84"
+value 6 1 role=name from=arg1 type=ptr string=validated bound=32 ref="hold_seq_prog.c:82,84 string literals"
+control 6 ctx=task ref="unit test: the provider thread, no lock"

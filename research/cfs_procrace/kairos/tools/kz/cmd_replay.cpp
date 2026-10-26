@@ -74,7 +74,7 @@ void usage(FILE* f) {
                "                 [--predicate RULE=EXPR]... [--basis B --core-request-caller FUNC...] [--outcome-narrowing on|off]\n"
                "                 [--compare-narrowing] [--facts F --static-basis S] [--out FILE.kz] [--emit-trace]\n"
                "                 [--clearing-writes counted|excluded] [--owner-identity-targets on|off] [--reads-from-edges on|off]\n"
-               "                 [--reads-from-outcome on|off]\n"
+               "                 [--reads-from-outcome on|off] [--control-order on|off]\n"
                "  --profile P         the profile (a directory stands for its *.kzp files, in name order)\n"
                "  --const NAME=VALUE  the value of a `ref eval` constant (a table size), from its reference\n"
                "  --version C=V       the version of a component, for the guards of rules and effects\n"
@@ -92,7 +92,9 @@ void usage(FILE* f) {
                "  --owner-identity-targets on|off  whether a confirmed owner's identity fixes the operands of its effects (default on)\n"
                "  --reads-from-edges on|off  whether the reads_from rules of the profile make edges (SPEC 3.16 row RF; default on)\n"
                "  --reads-from-outcome on|off  whether a use's returned code may show it successful for those rules (off: only\n"
-               "                     the success-path store of its out value, stored_out; default on)\n");
+               "                     the success-path store of its out value, stored_out; default on)\n"
+               "  --control-order on|off  whether a controlled run's realized holds and releases (NCTL) order events, as the basis kind\n"
+               "                     control-order (P11 decided 2026-10-26; default on; off = the sensitivity reading)\n");
 }
 
 std::string enum_name(const char* en, uint64_t v) {
@@ -142,6 +144,10 @@ std::string counts_text(const kz::eval::Result& r, const char* title) {
     if (o.basis_store_order) {  // in memory only (summary.flags has no bit for it): reads_from by a success-path store
       ++basis["store-derived-order"];
       combo += (combo.empty() ? "" : "+") + std::string("store-derived-order");
+    }
+    if (o.control_order) {  // P11, in memory only: the realized control of a controlled run, a basis kind of its own
+      ++basis["control-order"];
+      combo += (combo.empty() ? "" : "+") + std::string("control-order");
     }
     ++basis["combination " + (combo.empty() ? std::string("none") : combo) + " / " + ob];
     static const std::pair<uint16_t, const char*> kAssumed[] = {{KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION, "via key separation"},
@@ -193,7 +199,7 @@ bool collect(const std::vector<std::string>& args, std::vector<kz::phi::SourceTe
 }
 
 int run(int argc, char** argv) {
-  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path, clearing, identity = "on", reads_from = "on", rf_outcome = "on";
+  std::string path, basis_path, out_path, narrowing = "on", facts_path, static_basis_path, clearing, identity = "on", reads_from = "on", rf_outcome = "on", control = "on";
   std::vector<std::string> profile_args, consts, versions, predicates, core_callers;
   bool emit = false, compare = false;
   for (int i = 1; i < argc; ++i) {
@@ -219,7 +225,8 @@ int run(int argc, char** argv) {
     } else if (a == "--predicate") {
       if (!value(&predicates)) return 1;
     } else if (a == "--basis" || a == "--out" || a == "--outcome-narrowing" || a == "--facts" || a == "--static-basis" || a == "--clearing-writes" ||
-               a == "--owner-identity-targets" || a == "--reads-from-edges" || a == "--reads-from-outcome") {
+               a == "--owner-identity-targets" || a == "--reads-from-edges" || a == "--reads-from-outcome" ||
+               a == "--control-order") {
       std::vector<std::string> v;
       if (!value(&v)) return 1;
       (a == "--basis"                    ? basis_path
@@ -230,6 +237,7 @@ int run(int argc, char** argv) {
        : a == "--owner-identity-targets" ? identity
        : a == "--reads-from-edges"       ? reads_from
        : a == "--reads-from-outcome"     ? rf_outcome
+       : a == "--control-order"          ? control
                                          : narrowing) = v.front();
     } else if (a == "--core-request-caller") {
       if (!value(&core_callers)) return 1;
@@ -248,7 +256,8 @@ int run(int argc, char** argv) {
     }
   }
   if (path.empty() || profile_args.empty() || (narrowing != "on" && narrowing != "off") || (!clearing.empty() && clearing != "counted" && clearing != "excluded") ||
-      (identity != "on" && identity != "off") || (reads_from != "on" && reads_from != "off") || (rf_outcome != "on" && rf_outcome != "off") || (!core_callers.empty() && basis_path.empty()) ||
+      (identity != "on" && identity != "off") || (reads_from != "on" && reads_from != "off") || (rf_outcome != "on" && rf_outcome != "off") ||
+      (control != "on" && control != "off") || (!core_callers.empty() && basis_path.empty()) ||
       (facts_path.empty() != static_basis_path.empty()) || (!facts_path.empty() && basis_path.empty())) {
     usage(stderr);
     return 1;
@@ -383,6 +392,7 @@ int run(int argc, char** argv) {
   options.owner_identity_targets = identity == "on";
   options.reads_from_edges = reads_from == "on";
   options.reads_from_outcome = rf_outcome == "on";
+  options.control_order = control == "on";
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {
@@ -403,6 +413,14 @@ int run(int argc, char** argv) {
     std::printf("reads-from edges %s%s\n", reads_from.c_str(), reads_from == "on" ? " (the profile's reads_from rules make edges, SPEC 3.16 row RF)" : " (the edges of reads_from rules are left out)");
   if (rf_outcome == "off")
     std::printf("reads-from uses by returned code off (a use counts only where the record has the success-path store of its out value, stored_out)\n");
+  if (!trace.control_edges.empty() || control == "off") {
+    std::printf("control order %s%s; control edges %zu\n", control.c_str(),
+                control == "on" ? " (P11 decided 2026-10-26: this controlled run's realized holds and releases order events, a basis kind of its own: control-order)"
+                                : " (the program's synchronization only; the run's realized control is not an order: the reading kept as sensitivity)",
+                trace.control_edges.size());
+    for (const kz::eval::HbEdge& e : trace.control_edges)
+      std::printf("control edge #%llu -> #%llu %s\n", static_cast<unsigned long long>(e.from), static_cast<unsigned long long>(e.to), e.rule.c_str());
+  }
   if (!facts_path.empty()) std::printf("static closure %s artifact_sha256 %s (basis %s)\n", facts_path.c_str(), kz::to_hex(facts.artifact_hash()).c_str(), kz::to_hex(static_basis.artifact_hash()).c_str());
   std::fputs(kz::trace::report_text(report).c_str(), stdout);
   std::printf("\n");
@@ -438,6 +456,7 @@ int run(int argc, char** argv) {
     in.basis.push_back({"replay.owner_identity_targets", identity});
     if (rf_rules || reads_from == "off") in.basis.push_back({"replay.reads_from_edges", reads_from});
     if (rf_outcome == "off") in.basis.push_back({"replay.reads_from_outcome", rf_outcome});
+    if (!trace.control_edges.empty() || control == "off") in.basis.push_back({"replay.control_order", control});
     for (const auto& kv : ropt.consts) in.basis.push_back({"replay.const." + kv.first, std::to_string(kv.second)});
     for (const auto& kv : options.versions) in.basis.push_back({"replay.version." + kv.first, kv.second});
     for (const std::string& pr : predicates) in.basis.push_back({"replay.predicate", pr});

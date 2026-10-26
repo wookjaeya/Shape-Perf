@@ -35,7 +35,7 @@ target_compile_definitions(test_rt_serial PRIVATE KZRT_TEST_MANIFEST_SHA="${kzrt
 
 # A small pool (4 chunks) for the pool-exhaustion case: the core built again with other size macros
 # (a build parameter; the test sees the same macros).  Unit-test sizes, not research conditions.
-add_library(kzrt-pool4 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/../src/kz_rt.c)
+add_library(kzrt-pool4 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/../src/kz_rt.c ${CMAKE_CURRENT_SOURCE_DIR}/../src/kz_rt_plan.c)
 target_include_directories(kzrt-pool4 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_compile_definitions(kzrt-pool4 PUBLIC KZ_RT_POOL_BYTES=16384u KZ_RT_CHUNK_BYTES=4096u)
 target_compile_options(kzrt-pool4 PRIVATE -ffreestanding -fno-stack-protector "$<$<C_COMPILER_ID:GNU>:-fno-tree-loop-distribute-patterns>")
@@ -146,6 +146,48 @@ set_tests_properties(rt_mode_api_latch_dump PROPERTIES FIXTURES_REQUIRED rt_mode
 kzrt_case(rt_mode_api_late_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_mode_api_late.kzrt)
 set_tests_properties(rt_mode_api_late_dump PROPERTIES FIXTURES_REQUIRED rt_mode_api_late_dump
   PASS_REGULAR_EXPRESSION "check mode window=record source=early \\(hooks ran under the static default before the early mode\\).*check ok")
+
+# The serialized plan (kzrt 0.3.0): kz_rt_plan_load's checks with and without a build identity, and the start-up
+# object's KZ_RT_PLAN in control mode (loaded, checked, kept in the dump) and in record mode (ignored: a check failure).
+kzrt_test(test_rt_plan SOURCES test_rt_plan.c LIBS kzrt-build-info-test ${kzrt_test_libs})
+target_compile_definitions(test_rt_plan PRIVATE KZRT_TEST_MANIFEST_SHA="${kzrt_example_sha}")
+kzrt_test(test_rt_plan_nb SOURCES test_rt_plan.c LIBS ${kzrt_test_libs})
+target_compile_definitions(test_rt_plan_nb PRIVATE KZRT_TEST_MANIFEST_SHA="${kzrt_example_sha}")
+foreach(s ok mismatch crc format size points twice)
+  kzrt_case(rt_plan_${s} test_rt_plan ${s})
+endforeach()
+kzrt_case(rt_plan_nobuild test_rt_plan_nb nobuild)
+kzrt_case(rt_plan_write test_rt_plan write ${CMAKE_CURRENT_BINARY_DIR}/rt_plan.kzrtp)
+set_tests_properties(rt_plan_write PROPERTIES FIXTURES_SETUP rt_plan_file)
+foreach(m control record none)
+  kzrt_case(rt_auto_plan_${m} test_rt_auto_bi)
+  set_tests_properties(rt_auto_plan_${m} PROPERTIES FIXTURES_REQUIRED rt_plan_file FIXTURES_SETUP rt_auto_plan_${m}_dump)
+endforeach()
+set_tests_properties(rt_auto_plan_control PROPERTIES ENVIRONMENT
+  "KZ_RT_DUMP=${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_control.kzrt;KZ_RT_MODE=control;KZ_RT_PLAN=${CMAKE_CURRENT_BINARY_DIR}/rt_plan.kzrtp")
+set_tests_properties(rt_auto_plan_record PROPERTIES ENVIRONMENT
+  "KZ_RT_DUMP=${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_record.kzrt;KZ_RT_MODE=record;KZ_RT_PLAN=${CMAKE_CURRENT_BINARY_DIR}/rt_plan.kzrtp")
+set_tests_properties(rt_auto_plan_none PROPERTIES ENVIRONMENT "KZ_RT_DUMP=${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_none.kzrt;KZ_RT_MODE=control")
+kzrt_case(rt_auto_plan_control_dump kz-rt-dump --plan ${CMAKE_CURRENT_BINARY_DIR}/rt_plan.kzrtp ${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_control.kzrt)
+set_tests_properties(rt_auto_plan_control_dump PROPERTIES FIXTURES_REQUIRED "rt_auto_plan_control_dump;rt_plan_file"
+  PASS_REGULAR_EXPRESSION "point 0 gate label=1 site=10 releases=- occurrence=first flags=0x1 hits=0 .*plan status=loaded flags=manifest-checked bytes=468 given=468 sha256=[0-9a-f]+\nplan file major=1 minor=0 points=2 manifest=${kzrt_example_sha} .*plan point 0 gate name=P0 label=1 site=10 releases=- occurrence=first flags=unless-released binds=any str=- val=- timeout_ns=0\nplan point 1 release name=P1 label=2 site=20 releases=0 .*check plan status=loaded\ncheck plan [0-9a-f]+ = [^\n]*rt_plan\\.kzrtp.*check ok")
+kzrt_case(rt_auto_plan_record_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_record.kzrt)
+set_tests_properties(rt_auto_plan_record_dump PROPERTIES FIXTURES_REQUIRED rt_auto_plan_record_dump
+  PASS_REGULAR_EXPRESSION "plan status=ignored flags=- bytes=0 given=0 sha256=-.*check FAIL PLAN: ignored \\(a plan was given and not loaded\\).*check FAILED \\(1 failure\\)")
+kzrt_case(rt_auto_plan_none_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_none.kzrt)
+set_tests_properties(rt_auto_plan_none_dump PROPERTIES FIXTURES_REQUIRED rt_auto_plan_none_dump
+  PASS_REGULAR_EXPRESSION "runx window_mode=control .*plan status=none flags=- bytes=0 .*check plan status=none.*check ok")
+
+# The OSAL adapter where OSAL is initialized (stage F): only with a target OSAL build (KZ_RT_OSAL_INCLUDE_DIRS and
+# KZ_RT_OSAL_LIBS, e.g. the C1 reference build's osal/libosal.a and libosal_bsp.a; its BSP main calls the test's
+# OS_Application_Startup).  Needs the OSAL's POSIX implementation (pthread, rt).
+if(KZ_RT_OSAL_INCLUDE_DIRS AND KZ_RT_OSAL_LIBS)
+  add_executable(test_rt_osal test_rt_osal.c)
+  target_include_directories(test_rt_osal PRIVATE ${KZ_RT_OSAL_INCLUDE_DIRS})
+  target_link_libraries(test_rt_osal PRIVATE kzrt-osal kzrt kzrt-decode -Wl,--start-group ${KZ_RT_OSAL_LIBS} -Wl,--end-group Threads::Threads rt dl)
+  set_target_properties(test_rt_osal PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON C_EXTENSIONS OFF)
+  kzrt_case(rt_osal_gate test_rt_osal)
+endif()
 
 # The core references no library symbol (freestanding claim of kz_rt.h).
 if(NOT KZ_SANITIZE AND CMAKE_NM)

@@ -19,6 +19,9 @@
 # Line numbers are those of the files at the revisions below.  The cited OSAL, cFE and PSP files are byte-identical in
 # the two bundle candidates (cmp, 2026-10-26): module 1 (core of 1df262a) and module 4 (core of 1b0b338) have the same
 # sites; the build chooses the module (kzgcc default-module=), so binding ids of the two bundles differ.
+# Stage F (cooperative gate, docs/event_semantics.md section 11): a control line at every site the C1 hold plans gate
+# or release at (the gates 34, 44; the releases 35, 45 and 37, the GCC-only call of CFE_ES_ExitApp in CF), so that
+# kz_rt_ctl is called there right after the observation hook; kz rtplan maps the plans' F0 labels onto them.
 # Nothing here is a research condition.
 kzs-sites 2
 source cfs-bundle-1df262a rev=1df262a64a09f128357482d8f2e06b0fdfe84d37 ref="plan/C1_build_manifest.md section 1 (candidate A); cfe 6cccb3f5, osal f34759d6, psp bd4a2ea2"
@@ -176,10 +179,19 @@ control 34 ctx=task ref="CF main task in CF_Init; no lock is held at cf_cfdp.c:1
 site 35 label=cf_lookup_call op=osal.countsem_lookup phase=point tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=1003 place=after-call ref="cf/fsw/src/cf_cfdp.c:1003-1007"
 value 35 0 role=status from=ret type=s32 ref="osal/src/os/inc/osapi-countsem.h:147-162 the documented results"
 value 35 1 role=sem_id from=out0 type=u32 ref="CF_AppData.engine.channels[i].sem_id, CF's own table"
+control 35 ctx=task ref="CF main task in CF_CFDP_InitEngine right after the lookup returns; no lock is held at cf_cfdp.c:1003" note="release site of the C1 hold plans (stage F: kz_rt_ctl right after the observation hook)"
 equiv 35 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites-cf833fdbb.kzp:90 after-call; same call (line verified by GCC, function-scoped in F0)"
 site 36 label=cf_retry_delay op=osal.task_delay phase=point tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_TaskDelay line=1011 place=after-call ref="cf/fsw/src/cf_cfdp.c:1000-1012"
 value 36 0 role=status from=ret type=s32
 equiv 36 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites-cf833fdbb.kzp:92 after-call; same call"
+
+# GCC only (stage F): right before CF's call of CFE_ES_ExitApp, the release point of the plans that name
+# es.exit_app.entry with caller-in cf.so (F0: the entry of CFE_ES_ExitApp with the return address in cf.so).
+# cf_app.c:366 is the only call of CFE_ES_ExitApp in cf (fsw/src, grep 2026-10-26).  The task is exiting: a gate
+# here is refused (ctx=terminating), a release acts.
+site 37 label=cf_exit_app_call.before op=es.exit_app phase=point tu=cf/fsw/src/cf_app.c func=CF_AppMain callee=CFE_ES_ExitApp line=366 place=at-call ref="cf/fsw/src/cf_app.c:366"
+value 37 0 role=exit_status from=arg0 type=u32 ref="cf_app.c:366 CF_AppData.run_status"
+control 37 ctx=terminating ref="CF main task at the end of CF_AppMain, right before CFE_ES_ExitApp (cf_app.c:366)" note="release site of the C1 hold plans (es.exit_app.entry caller-in cf.so)"
 
 # ---- bp.so: the provider (initialize_throttling, static, called only from BP_FlowInit) --------------------
 site 40 label=bp.flow_init.entry op=bp.flow_init phase=before tu=bp/fsw/src/bp_flow.c func=BP_FlowInit line=519 ref="bp/fsw/src/bp_flow.c:519-524"
@@ -203,4 +215,5 @@ control 44 ctx=task ref="BP main task in BP_FlowInit; no lock is held at bp_flow
 site 45 label=bp_create_call op=osal.countsem_create phase=point tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemCreate line=132 place=after-call ref="bp/fsw/src/bp_flow.c:132-134"
 value 45 0 role=status from=ret type=s32
 value 45 1 role=sem_id from=out0 type=u32
+control 45 ctx=task ref="BP main task in initialize_throttling right after OS_CountSemCreate returns; no lock is held at bp_flow.c:132" note="release site of the C1 hold plans (stage F: kz_rt_ctl right after the observation hook)"
 equiv 45 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites-cf833fdbb.kzp:102 after-call in BP_FlowInit; GCC: after the call in initialize_throttling (bound as inlined)"

@@ -155,3 +155,5 @@ add_dependencies(test_hold_sequence hold_seq_prog kz)
 set_tests_properties(test_hold_sequence PROPERTIES LABELS "unit;integration" SKIP_RETURN_CODE 77 TIMEOUT 120)
 # The kzp-hold 1 parser: occurrence first|each|<n>, unless-released.
 kz_add_unit_test(test_hold_plan SOURCES test_hold_plan.cpp LIBS kz-hold kz-testsupport)
+# The cooperative gate's host converter (kz rtplan): kzp-hold 1 -> kzrt-plan 1 for one build's manifest and bindings.
+kz_add_unit_test(test_rt_plan_convert SOURCES test_rt_plan_convert.cpp LIBS kz-hold kz-testsupport)

@@ -1,6 +1,6 @@
 // kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 or 1) and check it against site manifests.
 //
-//   kz-rt-dump [--manifest <kzs-sites file>]... [--events-only] <dump-file>
+//   kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>
 //
 // Output: one line per record, in stream order (and buffer order inside each BUF); an event line has
 // the hook's return address (pc=, the code copy of the binding that ran) and its actor's native key
@@ -11,7 +11,9 @@
 // conflicts with the binary's build info, a module registered with two manifests, or a RUN manifest
 // that differs from a module's fail); and, with manifests, the manifest sha256s of the run against the
 // given files, every event's site/binding, its valid mask against the binding's vals, string copies
-// only at string=validated slots, and manifest modules that never registered.
+// only at string=validated slots, and manifest modules that never registered.  The PLAN record (kzrt 0.3.0) is printed
+// with its points (decoded from the plan bytes the run kept); a refused plan, a plan given outside control mode or
+// a plan file that could not be read fails, and --plan compares the kept bytes with the given plan file.
 // Exit status: 0 = read and checks passed, 1 = a check failed, 2 = usage or format error.
 #include <cinttypes>
 #include <cstdio>
@@ -182,6 +184,67 @@ std::string quoted(const unsigned char* p, size_t n) {
   return s + "\"";
 }
 
+const char* plan_status_name(uint32_t s) {
+  switch (s) {
+    case KZ_RT_PLANST_LOADED: return "loaded";
+    case KZ_RT_PLANST_NONE: return "none";
+    case KZ_RT_PLANST_IGNORED: return "ignored";
+    case KZ_RT_PLANST_READ_ERROR: return "read-error";
+    case KZ_RT_PLANST_SIZE: return "refused-size";
+    case KZ_RT_PLANST_FORMAT: return "refused-format";
+    case KZ_RT_PLANST_CRC: return "refused-crc";
+    case KZ_RT_PLANST_MANIFEST: return "refused-manifest";
+    case KZ_RT_PLANST_POINTS: return "refused-points";
+    case KZ_RT_PLANST_STATE: return "refused-state";
+    default: return "?";
+  }
+}
+
+uint32_t le32(const unsigned char* p) { return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24); }
+uint64_t le64(const unsigned char* p) { return (uint64_t)le32(p) | ((uint64_t)le32(p + 4) << 32); }
+
+std::string hex_bytes(const unsigned char* p, size_t n) {
+  static const char* d = "0123456789abcdef";
+  std::string s;
+  for (size_t i = 0; i < n; ++i) {
+    s += d[p[i] >> 4];
+    s += d[p[i] & 15];
+  }
+  return s;
+}
+
+// The points of a "kzrt-plan 1" byte string (kz_rt_format.h), one line each; false where it is not one.
+bool print_plan_points(const std::string& b) {
+  const unsigned char* p = reinterpret_cast<const unsigned char*>(b.data());
+  if (b.size() < KZ_RT_PLAN_HEADER_BYTES + KZ_RT_PLAN_TRAILER_BYTES || std::memcmp(p, KZ_RT_PLAN_MAGIC, 8) != 0) return false;
+  const uint32_t np = le32(p + 12);
+  if (b.size() != KZ_RT_PLAN_HEADER_BYTES + (size_t)np * KZ_RT_PLAN_POINT_BYTES + KZ_RT_PLAN_TRAILER_BYTES) return false;
+  std::printf("plan file major=%u minor=%u points=%u manifest=%s source=%s binds=%s\n", (unsigned)(p[8] | (p[9] << 8)), (unsigned)(p[10] | (p[11] << 8)), np,
+              hex_bytes(p + 24, 32).c_str(), hex_bytes(p + 56, 32).c_str(), hex_bytes(p + 88, 32).c_str());
+  for (uint32_t i = 0; i < np; ++i) {
+    const unsigned char* q = p + KZ_RT_PLAN_HEADER_BYTES + (size_t)i * KZ_RT_PLAN_POINT_BYTES;
+    char name[KZ_RT_PLAN_NAME_BYTES + 1];
+    std::memcpy(name, q + 156, KZ_RT_PLAN_NAME_BYTES);
+    name[KZ_RT_PLAN_NAME_BYTES] = 0;
+    const uint32_t kind = le32(q), occ = le32(q + 16), fl = le32(q + 20), nb = le32(q + 24);
+    std::string binds;
+    for (uint32_t j = 0; j < nb && j < KZ_RT_POINT_BINDS; ++j) binds += (j ? "," : "") + std::to_string(le32(q + 28 + 4 * j));
+    std::string flags;
+    if ((fl & KZ_RT_PT_UNLESS_RELEASED) != 0) flags += "unless-released";
+    if ((fl & KZ_RT_PT_ALLOW_LOCK_HELD) != 0) flags += std::string(flags.empty() ? "" : ",") + "allow-lock-held";
+    if ((fl & KZ_RT_PT_ALLOW_OSAL_INTERNAL) != 0) flags += std::string(flags.empty() ? "" : ",") + "allow-osal-internal";
+    const int32_t ss = (int32_t)le32(q + 60), vs = (int32_t)le32(q + 132);
+    const uint32_t sl = le32(q + 64);
+    std::printf("plan point %u %s name=%s label=%u site=%u releases=%s occurrence=%s flags=%s binds=%s str=%s val=%s timeout_ns=%" PRIu64 "\n", i,
+                kind == KZ_RT_POINT_GATE ? "gate" : kind == KZ_RT_POINT_RELEASE ? "release" : "?", name, le32(q + 4), le32(q + 8),
+                kind == KZ_RT_POINT_RELEASE ? std::to_string(le32(q + 12)).c_str() : "-",
+                occ == 0 ? "each" : occ == 1 ? "first" : std::to_string(occ).c_str(), flags.empty() ? "-" : flags.c_str(), binds.empty() ? "any" : binds.c_str(),
+                ss >= 0 ? ("slot" + std::to_string(ss) + "=" + quoted(q + 68, sl > KZ_RT_STR_MAX ? KZ_RT_STR_MAX : sl)).c_str() : "-",
+                vs >= 0 ? ("slot" + std::to_string(vs) + "=" + std::to_string(le64(q + 140))).c_str() : "-", le64(q + 148));
+  }
+  return true;
+}
+
 struct State {
   const kzrt::Manifest* m = nullptr;
   bool events_only = false;
@@ -192,6 +255,9 @@ struct State {
   std::set<uint32_t> modules_seen;
   std::map<uint32_t, std::set<std::string>> module_shas;  // module -> manifest sha256s (hex) it registered with
   bool have_run = false, have_runx = false;
+  bool have_plan = false;
+  uint32_t plan_status = 0;
+  std::string plan_bytes;
   kz_rt_dec_run run{};
   kz_rt_dec_runx runx{};
 
@@ -311,6 +377,22 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
       }
       break;
     }
+    case KZ_RT_REC_PLAN: {
+      const kz_rt_dec_plan& q = it->u.plan;
+      st->have_plan = true;
+      st->plan_status = q.status;
+      st->plan_bytes.assign(reinterpret_cast<const char*>(q.bytes), q.nbytes);
+      if (meta) {
+        std::string fl;
+        if ((q.flags & KZ_RT_PLANF_CHECKED) != 0) fl += "manifest-checked";
+        if ((q.flags & KZ_RT_PLANF_NO_BUILD) != 0) fl += std::string(fl.empty() ? "" : ",") + "no-build-identity";
+        if ((q.flags & KZ_RT_PLANF_TRUNCATED) != 0) fl += std::string(fl.empty() ? "" : ",") + "truncated";
+        std::printf("plan status=%s flags=%s bytes=%u given=%u sha256=%s\n", plan_status_name(q.status), fl.empty() ? "-" : fl.c_str(), q.nbytes, q.given,
+                    q.nbytes != 0 ? kz::to_hex(kz::sha256(st->plan_bytes)).c_str() : "-");
+        if (q.nbytes != 0 && !print_plan_points(st->plan_bytes)) std::printf("plan bytes: not a kzrt-plan 1 file\n");
+      }
+      break;
+    }
     case KZ_RT_REC_BUF:
       if (meta)
         std::printf("buf owner=%s bytes=%u cap=%u\n", it->u.buf.owner == 0 ? "shared" : actor_name(it->u.buf.owner).c_str(), it->u.buf.nbytes, it->u.buf.cap);
@@ -375,23 +457,25 @@ bool read_file(const std::string& path, std::string* out) {
 
 int main(int argc, char** argv) {
   std::vector<std::string> manifests;
-  std::string dump;
+  std::string dump, plan_file;
   bool events_only = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--manifest" && i + 1 < argc)
       manifests.push_back(argv[++i]);
+    else if (a == "--plan" && i + 1 < argc)
+      plan_file = argv[++i];
     else if (a == "--events-only")
       events_only = true;
     else if (!a.empty() && a[0] != '-' && dump.empty())
       dump = a;
     else {
-      std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--events-only] <dump-file>\n");
+      std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>\n");
       return 2;
     }
   }
   if (dump.empty()) {
-    std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--events-only] <dump-file>\n");
+    std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>\n");
     return 2;
   }
   kzrt::Manifest m;
@@ -475,6 +559,25 @@ int main(int argc, char** argv) {
     if ((st.runx.flags & KZ_RT_RX_BUILD_INFO_BAD) != 0) st.fail("RUNX: the binary's build info has a manifest sha256 that is not 64 hex digits");
     if ((st.runx.flags & KZ_RT_RX_TAG_CONFLICT) != 0)
       st.fail("RUNX: the harness gave a backend, compiler, target or manifest that differs from the binary's build info");
+  }
+  // the plan (kzrt 0.3.0)
+  if (st.have_plan) {
+    std::printf("check plan status=%s\n", plan_status_name(st.plan_status));
+    if (st.plan_status != KZ_RT_PLANST_LOADED && st.plan_status != KZ_RT_PLANST_NONE)
+      st.fail(std::string("PLAN: ") + plan_status_name(st.plan_status) + " (a plan was given and not loaded)");
+  } else if (st.have_runx && st.runx.window_mode == KZ_RT_MODE_CONTROL) {
+    std::printf("check plan: control window without a PLAN record (the harness neither loaded nor noted a plan)\n");
+  }
+  if (!plan_file.empty()) {
+    std::string pb;
+    if (!read_file(plan_file, &pb)) {
+      std::fprintf(stderr, "kz-rt-dump: cannot read %s\n", plan_file.c_str());
+      return 2;
+    }
+    if (!st.have_plan || st.plan_bytes != pb)
+      st.fail("PLAN: the run's plan bytes are not those of " + plan_file + (st.have_plan ? "" : " (no PLAN record)"));
+    else
+      std::printf("check plan %s = %s\n", kz::to_hex(kz::sha256(pb)).c_str(), plan_file.c_str());
   }
   for (const auto& ms : st.module_shas)
     if (ms.second.size() > 1) st.fail("module " + std::to_string(ms.first) + " registered with " + std::to_string(ms.second.size()) + " different manifests");

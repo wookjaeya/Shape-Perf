@@ -214,6 +214,17 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       q->holds = g32(b + 52);
       return 1;
     }
+    case KZ_RT_REC_PLAN: {
+      kz_rt_dec_plan *q = &it->u.plan;
+      if (size < KZ_RT_PLAN_REC_FIXED) return 0;
+      q->status = g32(b + 8);
+      q->flags = g32(b + 12);
+      q->nbytes = g32(b + 16);
+      q->given = g32(b + 20);
+      if (q->nbytes > size - KZ_RT_PLAN_REC_FIXED) return 0;
+      q->bytes = b + KZ_RT_PLAN_REC_FIXED;
+      return 1;
+    }
     default:
       return -1;
   }

@@ -1,4 +1,4 @@
-# Kairos instrumentation runtime (kzrt 0.2.0: hook ABI 1, dump format 1.1): kairos/docs/event_semantics.md.
+# Kairos instrumentation runtime (kzrt 0.3.0: hook ABI 1, dump format 1.3, plan format kzrt-plan 1): kairos/docs/event_semantics.md.
 #
 # Targets
 #   kzrt           static C99 core: hooks, bootstrap buffer and the actors' chunk pool, control (kzp-hold 1),
@@ -26,6 +26,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 set(KZ_RT_OSAL_INCLUDE_DIRS "" CACHE STRING "OSAL public include dirs (osapi.h and the generated osconfig.h) for kzrt-osal; empty = not built")
+set(KZ_RT_OSAL_LIBS "" CACHE STRING "a target OSAL build's libraries (libosal.a;libosal_bsp.a) for the test rt_osal_gate (the OSAL adapter after OS_API_Init); empty = no test")
 set(KZ_RT_DEFINES "" CACHE STRING "Size macros for the target-side libraries, e.g. KZ_RT_POOL_BYTES=8388608 (tool capacities, recorded in the dump)")
 get_filename_component(KZ_RT_KAIROS "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 # The build identity (kz_rt.h, event_semantics.md 8.5): given by the instrumented build, recorded as given.
@@ -44,7 +45,7 @@ function(kzrt_settings target)
 endfunction()
 
 # Target-side libraries: C99, position independent (the cFS core executable is a PIE).
-add_library(kzrt STATIC src/kz_rt.c)
+add_library(kzrt STATIC src/kz_rt.c src/kz_rt_plan.c)
 target_include_directories(kzrt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 if(KZ_RT_DEFINES)
   target_compile_definitions(kzrt PUBLIC ${KZ_RT_DEFINES})

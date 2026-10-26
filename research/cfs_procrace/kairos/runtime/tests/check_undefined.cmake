@@ -1,13 +1,26 @@
 # cmake -DNM=<nm> -DLIB=<libkzrt.a> -P check_undefined.cmake
 # Fails if the runtime core archive references any undefined symbol (it calls no library function).
-# _GLOBAL_OFFSET_TABLE_ is defined by the linker for position-independent code, not by a library.
+# _GLOBAL_OFFSET_TABLE_ is defined by the linker for position-independent code, not by a library.  A reference of
+# one member of the archive to a symbol another member defines (kz_rt.c <-> kz_rt_plan.c) is not a library symbol.
 execute_process(COMMAND ${NM} -u ${LIB} OUTPUT_VARIABLE out RESULT_VARIABLE rc)
 if(NOT rc EQUAL 0)
   message(FATAL_ERROR "nm failed on ${LIB}")
 endif()
+execute_process(COMMAND ${NM} --defined-only ${LIB} OUTPUT_VARIABLE defs RESULT_VARIABLE rc2)
+if(NOT rc2 EQUAL 0)
+  message(FATAL_ERROR "nm --defined-only failed on ${LIB}")
+endif()
 string(REGEX MATCHALL "[ \t]+U [^\n]+" undefined "${out}")
 list(FILTER undefined EXCLUDE REGEX "U _GLOBAL_OFFSET_TABLE_$")
-if(undefined)
-  message(FATAL_ERROR "the runtime core references undefined symbols:${undefined}")
+set(left "")
+foreach(u IN LISTS undefined)
+  string(REGEX REPLACE "^[ \t]+U " "" sym "${u}")
+  string(REGEX MATCH "[0-9a-fA-F]+ [A-Za-z] ${sym}\n" hit "${defs}\n")
+  if(NOT hit)
+    list(APPEND left "${u}")
+  endif()
+endforeach()
+if(left)
+  message(FATAL_ERROR "the runtime core references undefined symbols:${left}")
 endif()
 message(STATUS "no undefined symbols in ${LIB}")

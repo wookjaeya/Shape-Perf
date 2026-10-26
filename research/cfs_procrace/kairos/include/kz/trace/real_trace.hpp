@@ -177,6 +177,10 @@ struct RealTraceReport {
   uint8_t backend = KZ_NBACKEND_NONE;
   uint8_t start = KZ_NSTART_NONE;  // KZ_NSTART: why the record covers the process start
   std::vector<std::string> loss_lines;  // loss records of a backend other than F0 (neutral.hpp loss_text)
+  // The realized control of a controlled run (NCTL; P11, header "control"): the releases that resumed a held thread,
+  // the control edges made from them (Trace::control_edges), and per release why no edge was made where none was.
+  uint64_t control_records = 0, control_resumes = 0, control_edges = 0;
+  std::vector<std::string> control_lines;
 };
 
 // Normalized parameter / role name: lower case, without '_'.

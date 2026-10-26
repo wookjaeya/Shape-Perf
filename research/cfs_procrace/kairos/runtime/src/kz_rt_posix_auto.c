@@ -22,11 +22,16 @@
  *   KZ_RT_INSTANCE      decimal instance id       (unset = 0)
  *   KZ_RT_ACTOR_QUOTA   decimal per-actor quota of committed bytes (unset = 0 = none: only the pool,
  *                       a build parameter, limits); a run parameter of the tool, recorded in RUNX
+ *   KZ_RT_PLAN          path of a serialized plan ("kzrt-plan 1", written by kz rtplan for this build); read
+ *                       only in control mode, after attach and init, before main (kz_rt_plan_load: checked
+ *                       against the build identity's manifest).  Control mode without it: every gate is
+ *                       inactive (PLAN record status none).  Given in another mode: not read (status ignored,
+ *                       a kz-rt-dump check failure, so a G-I run is not taken for a G-I-H run)
  * The build identity (backend, compiler, target, manifest sha256) is not configured here: the runtime
- * takes it from kz_rt_build_info when the build links the build-identity object (kzrt-build-info).
- * Plans are not read here (kz_rt_plan is called by a harness; in control mode without a plan every
- * gate is inactive). */
+ * takes it from kz_rt_build_info when the build links the build-identity object (kzrt-build-info). */
 #define _GNU_SOURCE 1
+#include <errno.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
@@ -35,6 +40,30 @@
 #include "kz_rt_posix.h"
 
 static char g_dump_path[4096];
+
+/* The plan file into a static buffer (one byte more than a plan may have, so that a longer file is seen). */
+static void load_plan(const char *path) {
+  static unsigned char buf[KZ_RT_PLAN_MAX_BYTES + 1u];
+  size_t n = 0;
+  int fd = open(path, O_RDONLY | O_CLOEXEC);
+  if (fd < 0) {
+    kz_rt_plan_note(KZ_RT_PLANST_READ_ERROR);
+    return;
+  }
+  while (n < sizeof buf) {
+    ssize_t r = read(fd, buf + n, sizeof buf - n);
+    if (r < 0 && errno == EINTR) continue;
+    if (r < 0) {
+      (void)close(fd);
+      kz_rt_plan_note(KZ_RT_PLANST_READ_ERROR);
+      return;
+    }
+    if (r == 0) break;
+    n += (size_t)r;
+  }
+  (void)close(fd);
+  (void)kz_rt_plan_load(buf, n);
+}
 
 static uint64_t env_u64(const char *name) {
   const char *s = getenv(name);
@@ -100,6 +129,15 @@ __attribute__((constructor)) static void kz_rt_auto_start(void) {
   }
   (void)kz_rt_attach(kz_rt_posix_adapter());
   (void)kz_rt_init(&c);
+  {
+    const char *plan = getenv("KZ_RT_PLAN");
+    if (c.mode == KZ_RT_MODE_CONTROL) {
+      if (plan != NULL && plan[0] != 0) load_plan(plan);
+      else kz_rt_plan_note(KZ_RT_PLANST_NONE);
+    } else if (plan != NULL && plan[0] != 0) {
+      kz_rt_plan_note(KZ_RT_PLANST_IGNORED);
+    }
+  }
   if (dump != NULL && strlen(dump) < sizeof g_dump_path) {
     memcpy(g_dump_path, dump, strlen(dump) + 1);
     (void)atexit(kz_rt_auto_exit);

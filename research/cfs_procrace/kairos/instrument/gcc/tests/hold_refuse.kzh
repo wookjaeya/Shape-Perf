@@ -1,0 +1,6 @@
+# hold_refuse.kzh -- a release that acts before its gate (kzp-hold 1 H5, consumed: not unless-released) and a gate at a
+# context that cannot hold (the manifest's ctx=terminating at seq_consumer_done): the runtime refuses the hold and
+# records it (gate-refused, reason context) instead of skipping it.  Unit-test values.
+kzp-hold 1
+gate G_end site=consumer.done.entry occurrence first
+release R_end site=provider.created.entry releases G_end occurrence first

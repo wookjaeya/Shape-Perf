@@ -1,4 +1,4 @@
-/* kz_rt_format.h -- the dump format "kzrt-dump" 1.2 (byte layout; shared by the runtime and the
+/* kz_rt_format.h -- the dump format "kzrt-dump" 1.3 (byte layout; shared by the runtime and the
  * host decoder).  Every multi-byte field is little-endian and written byte by byte, so the bytes
  * do not depend on the target's byte order, alignment or struct layout.
  *
@@ -6,11 +6,12 @@
  *   file header (16 bytes): "KZRTDUMP", u16 major, u16 minor, u32 dump_flags
  *   records, each: u32 size (bytes of the whole record, a multiple of 4), u16 type, u16 sub,
  *                  then the body.  A reader skips a record type it does not know (by size).
- *   order: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END
+ *   order: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, PLAN?, BUF*, END
  *   END: u64 bytes (stream bytes before END), u32 crc32 (IEEE, of those bytes).
  *   1.1 added (minor: a 1.0 reader skips or ignores them): the RUNX record, MODULE registrations,
  *   the ACTOR demand and chunk fields.  A 1.1 reader reads a 1.0 stream (missing fields = not recorded).
  *   1.2 added the process and its initial thread at the end of RUNX (a 1.1 RUNX has none: not recorded).
+ *   1.3 added the PLAN record (the serialized control plan the run was given, after the POINT records).
  *
  * A BUF record's body is u32 owner (0 = the bootstrap/shared buffer, else a run actor id),
  * u32 nbytes, u32 cap, u32 rsv, then nbytes of buffer records (EVENT, CTL, AEXIT) exactly as the

@@ -1,4 +1,4 @@
-/* kz_rt_format.h -- the dump format "kzrt-dump" 1.1 (byte layout; shared by the runtime and the
+/* kz_rt_format.h -- the dump format "kzrt-dump" 1.2 (byte layout; shared by the runtime and the
  * host decoder).  Every multi-byte field is little-endian and written byte by byte, so the bytes
  * do not depend on the target's byte order, alignment or struct layout.
  *
@@ -10,6 +10,7 @@
  *   END: u64 bytes (stream bytes before END), u32 crc32 (IEEE, of those bytes).
  *   1.1 added (minor: a 1.0 reader skips or ignores them): the RUNX record, MODULE registrations,
  *   the ACTOR demand and chunk fields.  A 1.1 reader reads a 1.0 stream (missing fields = not recorded).
+ *   1.2 added the process and its initial thread at the end of RUNX (a 1.1 RUNX has none: not recorded).
  *
  * A BUF record's body is u32 owner (0 = the bootstrap/shared buffer, else a run actor id),
  * u32 nbytes, u32 cap, u32 rsv, then nbytes of buffer records (EVENT, CTL, AEXIT) exactly as the
@@ -61,8 +62,12 @@
  *  12 u32 mode_source (KZ_RT_MODE_SRC_*), 16 u32 flags (KZ_RT_RX_*), 20 u32 pool_bytes, 24 u32 chunk_bytes,
  *  28 u32 chunks_used (taken from the pool), 32 u32 pool_dropped (records dropped because the pool was
  *  empty), 36 u32 actor_quota (configured, 0 = none), 40 u32 boot_bytes_used, 44 u32 boot_bytes_dropped,
- *  48 u32 max_modules, 52 u32 max_notes; size 56 */
-#define KZ_RT_RUNX_SIZE 56u
+ *  48 u32 max_modules, 52 u32 max_notes; size 56 (1.1)
+ *  1.2: 56 u64 process (the process id kz_rt_process was given; 0 = not recorded), 64 u64 initial_key (the native
+ *  key of the thread that called kz_rt_process: the process's initial thread), 72 u32 initial_kind (KZ_RT_KEY_*),
+ *  76 u32 process_evidence (KZ_RT_PROC_* of kz_rt.h: how the caller knows that thread is the initial one); size 80 */
+#define KZ_RT_RUNX_SIZE_1_1 56u
+#define KZ_RT_RUNX_SIZE 80u
 #define KZ_RT_RX_BUILD_INFO 1u        /* the binary carries kz_rt_build_info: RUN backend/compiler/target/manifest are its values */
 #define KZ_RT_RX_TAG_CONFLICT 2u      /* the harness gave a backend/compiler/target/manifest that differs from the build info */
 #define KZ_RT_RX_HOOKS_BEFORE_EARLY 4u /* kz_rt_early_mode came after hooks had run (under the static default RECORD) */
@@ -141,5 +146,32 @@
 
 /* AEXIT: 8 u32 actor, 12 u32 aseq, 16 u64 t; size 24 */
 #define KZ_RT_AEXIT_SIZE 24u
+
+/* ---- the control plan (kzrt 0.3.0) ---------------------------------------------------------------
+ * PLAN (stream record, after the POINT records; a reader that does not know it skips it by size):
+ *   8 u32 status (KZ_RT_PLANST_* of kz_rt.h), 12 u32 flags (KZ_RT_PLANF_*), 16 u32 nbytes (plan bytes kept),
+ *  20 u32 given (bytes the harness gave), 24 the plan bytes exactly as given (a "kzrt-plan 1" file), padded to 4.
+ *  Written when kz_rt_plan_load or kz_rt_plan_note was called (in control mode the POSIX start-up object always
+ *  calls one of them). */
+#define KZ_RT_REC_PLAN 0x0008u
+#define KZ_RT_PLAN_REC_FIXED 24u
+
+/* The serialized plan "kzrt-plan 1" (written by the host converter, kz rtplan; read by kz_rt_plan_load).  All
+ * fields little-endian, byte by byte.
+ *   header: 0 "KZRTPLAN", 8 u16 major=1, 10 u16 minor=0, 12 u32 n_points, 16 u32 total_bytes (the whole file),
+ *          20 u32 flags (0), 24 u8[32] manifest_sha256 (the logical site manifest the build's binding read: the build
+ *          identity's), 56 u8[32] source_sha256 (the .kzh text), 88 u8[32] binds_sha256 (the build's binding list)
+ *   points (n_points, plan order; each KZ_RT_PLAN_POINT_BYTES): 0 u32 kind, 4 u32 label, 8 u32 site, 12 u32 releases,
+ *          16 u32 occurrence, 20 u32 flags, 24 u32 bind_n, 28 u32 bind[8], 60 s32 str_slot, 64 u32 str_len,
+ *          68 u8[64] str, 132 s32 val_slot, 136 u32 rsv, 140 u64 val, 148 u64 timeout_ns, 156 u8[16] name (the .kzh
+ *          label, NUL padded; for people only)  -- the fields of kz_rt_point
+ *   trailer: u32 crc32 (IEEE) of every byte before it */
+#define KZ_RT_PLAN_MAGIC "KZRTPLAN"
+#define KZ_RT_PLAN_MAJOR 1u
+#define KZ_RT_PLAN_MINOR 0u
+#define KZ_RT_PLAN_HEADER_BYTES 120u
+#define KZ_RT_PLAN_POINT_BYTES 172u
+#define KZ_RT_PLAN_NAME_BYTES 16u
+#define KZ_RT_PLAN_TRAILER_BYTES 4u
 
 #endif /* KZ_RT_FORMAT_H */

@@ -44,8 +44,9 @@ struct Ev {
 };
 
 struct Collected {
-  bool have_run = false;
+  bool have_run = false, have_runx = false;
   kz_rt_dec_run run{};
+  kz_rt_dec_runx runx{};
   std::vector<kz_rt_dec_module> modules;
   std::vector<kz_rt_dec_actor> actors;
   std::vector<kz_rt_dec_loss> losses;
@@ -62,6 +63,10 @@ int collect(void* ctx, const kz_rt_dec_item* it) {
     case KZ_RT_REC_RUN:
       c.have_run = true;
       c.run = it->u.run;
+      break;
+    case KZ_RT_REC_RUNX:
+      c.have_runx = true;
+      c.runx = it->u.runx;
       break;
     case KZ_RT_REC_MODULE: c.modules.push_back(it->u.module); break;
     case KZ_RT_REC_ACTOR: c.actors.push_back(it->u.actor); break;
@@ -339,6 +344,30 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
   }
   for (const kz_rt_dec_point& q : c.points)
     if (q.held_actor != 0 && actor_of.count(q.held_actor) != 0) n.actors[actor_of[q.held_actor]].r.flags |= KZ_NACTOR_FLAG_HELD_AT_END;
+  // the process's initial thread (RUNX 1.2, kz_rt_process): the run actor whose native key is the key the start-up code
+  // recorded for its own thread, where exactly one run actor has it (the backend's initial-thread record; F0 takes the
+  // thread whose id is the process id, neutral.cpp).  Linux: the start-up object compares the thread id with the
+  // process id, and the thread-group leader's id is not reused while the process lives, so one actor at most has it.
+  if (c.have_runx && c.runx.process != 0) {
+    std::vector<uint32_t> with_key;
+    for (const kz_rt_dec_actor& a : c.actors)
+      if (a.key_kind == c.runx.initial_kind && a.native_key == c.runx.initial_key && a.key_kind != KZ_RT_KEY_NONE) with_key.push_back(actor_of[a.actor]);
+    const bool tid_pid = (c.runx.process_evidence & KZ_RT_PROC_TID_IS_PID) != 0;
+    const bool ctor = (c.runx.process_evidence & KZ_RT_PROC_CONSTRUCTOR) != 0;
+    const std::string ev = std::string(ctor ? "recorded by a constructor of the executable" : "recorded by the start-up code") +
+                           (tid_pid ? ", thread id = process id" : "");
+    if (with_key.size() == 1 && (ctor || tid_pid)) {
+      NActor& a = n.actors[with_key[0]];
+      a.r.flags |= KZ_NACTOR_FLAG_INITIAL;
+      a.r.process = static_cast<uint32_t>(c.runx.process);
+      notes.push_back("initial thread: run actor " + std::to_string(a.r.backend_id) + " of process " + std::to_string(c.runx.process) + " (" + ev + ")");
+    } else {
+      notes.push_back("initial thread of process " + std::to_string(c.runx.process) + " (" + ev + "): " + std::to_string(with_key.size()) +
+                      " run actors have its key; not stated" + (with_key.size() == 1 ? " (the start-up code names no evidence)" : ""));
+    }
+  } else {
+    notes.push_back("initial thread: not recorded (no RUNX process, kzrt-dump 1.1 or kz_rt_process not called)");
+  }
 
   // ---- the order: per actor by aseq; unclocked (bootstrap) heads first in buffer order, then by time ----
   std::vector<std::vector<size_t>> per_actor(n.actors.size());

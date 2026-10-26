@@ -65,6 +65,13 @@ const char* key_kind_name(uint32_t k) {
   }
 }
 
+std::string proc_evidence(uint32_t f) {
+  std::string s;
+  if ((f & KZ_RT_PROC_CONSTRUCTOR) != 0) s += "constructor";
+  if ((f & KZ_RT_PROC_TID_IS_PID) != 0) s += std::string(s.empty() ? "" : ",") + "tid-is-pid";
+  return s.empty() ? "-" : s;
+}
+
 std::string runx_flags(uint32_t f) {
   static const std::pair<uint32_t, const char*> names[] = {{KZ_RT_RX_BUILD_INFO, "build-info"},
                                                            {KZ_RT_RX_TAG_CONFLICT, "tag-conflict"},
@@ -252,6 +259,11 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
         std::printf("runx pool_bytes=%u chunk_bytes=%u chunks_used=%u pool_dropped=%u actor_quota=%u boot_bytes_used=%u boot_bytes_dropped=%u max_modules=%u max_notes=%u\n",
                     x.pool_bytes, x.chunk_bytes, x.chunks_used, x.pool_dropped, x.actor_quota, x.boot_bytes_used, x.boot_bytes_dropped, x.max_modules,
                     x.max_notes);
+        if (x.process != 0)
+          std::printf("runx process=%" PRIu64 " initial=%s:%" PRIu64 " evidence=%s\n", x.process, key_kind_name(x.initial_kind), x.initial_key,
+                      proc_evidence(x.process_evidence).c_str());
+        else
+          std::printf("runx process=- (not recorded)\n");
       }
       break;
     }

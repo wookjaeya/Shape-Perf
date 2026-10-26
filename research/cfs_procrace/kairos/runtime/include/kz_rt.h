@@ -46,9 +46,9 @@ extern "C" {
 /* ---- versions -------------------------------------------------------------------------- */
 #define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter (0.2.0 only adds calls) */
 #define KZ_RT_FORMAT_MAJOR 1u       /* dump format "kzrt-dump"; a reader accepts only its major */
-#define KZ_RT_FORMAT_MINOR 1u       /* added record types or fields at the end of a record (1.1: RUNX,
-                                       MODULE registrations, ACTOR demand and chunks) */
-#define KZ_RT_RUNTIME_VERSION "kzrt 0.2.0"
+#define KZ_RT_FORMAT_MINOR 2u       /* added record types or fields at the end of a record (1.1: RUNX,
+                                       MODULE registrations, ACTOR demand and chunks; 1.2: RUNX process) */
+#define KZ_RT_RUNTIME_VERSION "kzrt 0.2.1"
 
 /* ---- static sizes (override with -D when building the runtime; recorded in the dump) ---- */
 /* Tool capacities, not research conditions (event_semantics.md 8.3, 8.9: how the defaults were derived
@@ -304,6 +304,17 @@ KZ_RT_API int kz_rt_plan(const kz_rt_point *points, uint32_t n); /* once, before
 KZ_RT_API void kz_rt_stop(void);                           /* ends the observation window */
 KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *ctx); /* the whole state, format 1.0 */
 KZ_RT_API void kz_rt_caps_get(kz_rt_caps *out);
+enum { /* kz_rt_process evidence (RUNX process_evidence) */
+  KZ_RT_PROC_CONSTRUCTOR = 1u << 0, /* called from a constructor of the executable (glibc runs them in the initial thread, before main) */
+  KZ_RT_PROC_TID_IS_PID = 1u << 1   /* the calling thread's Linux TID equals the process id (gettid(2) = getpid(2): the thread-group leader) */
+};
+/* The process this runtime records and its initial thread (the thread that runs main), for the host's reading of
+ * "the initial thread is not an application's task" (profile context `initial_thread not_app`, P10).  Called once,
+ * by start-up code that runs in that thread (the POSIX start-up object's constructor): process = the process id,
+ * initial_key/key_kind = the calling thread's native key as the adapter states it (KZ_RT_KEY_*), evidence =
+ * KZ_RT_PROC_* bits (above): how the caller knows the thread is the initial one.  Written to RUNX (1.2).
+ * Touches only the runtime's own memory; a second call is refused (KZ_RT_ESTATE). */
+KZ_RT_API int kz_rt_process(uint64_t process, uint64_t initial_key, uint32_t key_kind, uint32_t evidence);
 KZ_RT_API int kz_rt_ctl_state(uint32_t point, kz_rt_point_state *out);
 
 /* ---- notes -------------------------------------------------------------------------------- */
@@ -336,6 +347,38 @@ KZ_RT_API uint32_t kz_rt_obs_str(uint32_t site, uint32_t bind, uint32_t link, ui
  * before, same thread), in context class ctx (KZ_RT_CTX_*, a manifest constant).  May block
  * (a gate holds) only in a holdable context.  Never called from inside an observation hook. */
 KZ_RT_API int kz_rt_ctl(uint32_t site, uint32_t bind, uint32_t ev, uint32_t ctx);
+
+/* ---- serialized plans (control ABI 1, added in kzrt 0.3.0) ----------------------------------- */
+/* A plan the host converted from a .kzh plan and the build's site manifest and binding list ("kz rtplan",
+ * format "kzrt-plan 1" in kz_rt_format.h), given to the target as bytes (a file the POSIX start-up object
+ * reads from KZ_RT_PLAN, or memory a BSP provides).  kz_rt_plan_load checks the bytes (magic, version, size,
+ * crc32, the points as kz_rt_plan does) and the plan's manifest sha256 against the build identity
+ * (kz_rt_build_info) when the binary carries one: a plan converted for another build is refused, never
+ * loaded half.  Once per process, before the first control hit.  Whatever the outcome, the bytes (up to
+ * KZ_RT_PLAN_MAX_BYTES) and the status are kept and written to the dump (PLAN record), so the record names
+ * the plan the run had.  kz_rt_plan_note records a harness outcome without bytes (no plan in control mode,
+ * a plan given in another mode, a read error).  Neither blocks or reads target memory. */
+/* the largest plan: header + KZ_RT_MAX_POINTS points + trailer (KZ_RT_PLAN_* of kz_rt_format.h) */
+#define KZ_RT_PLAN_MAX_BYTES (120u + KZ_RT_MAX_POINTS * 172u + 4u)
+enum { /* PLAN record status */
+  KZ_RT_PLANST_LOADED = 1,      /* the plan was loaded (kz_rt_plan) */
+  KZ_RT_PLANST_NONE = 2,        /* control mode without a plan: every gate inactive (harness note) */
+  KZ_RT_PLANST_IGNORED = 3,     /* a plan was given but the mode is not control: not loaded (harness note) */
+  KZ_RT_PLANST_READ_ERROR = 4,  /* the harness could not read the plan (harness note) */
+  KZ_RT_PLANST_SIZE = 5,        /* refused: shorter than a header or longer than KZ_RT_PLAN_MAX_BYTES */
+  KZ_RT_PLANST_FORMAT = 6,      /* refused: magic, major, total size or point count */
+  KZ_RT_PLANST_CRC = 7,         /* refused: crc32 */
+  KZ_RT_PLANST_MANIFEST = 8,    /* refused: converted for another manifest than the build identity's */
+  KZ_RT_PLANST_POINTS = 9,      /* refused by kz_rt_plan (KZ_RT_EINVAL: a point is not valid) */
+  KZ_RT_PLANST_STATE = 10       /* refused: a plan was already set (kz_rt_plan called before) */
+};
+enum { /* PLAN record flags */
+  KZ_RT_PLANF_CHECKED = 1u << 0,   /* the plan's manifest sha256 was compared with the build identity's */
+  KZ_RT_PLANF_NO_BUILD = 1u << 1,  /* the binary has no build identity: the manifest was not compared */
+  KZ_RT_PLANF_TRUNCATED = 1u << 2  /* more bytes were given than the dump keeps */
+};
+KZ_RT_API int kz_rt_plan_load(const void *bytes, size_t n); /* KZ_RT_OK, or EINVAL / ESTATE (status in the dump) */
+KZ_RT_API void kz_rt_plan_note(uint32_t status);            /* KZ_RT_PLANST_NONE / IGNORED / READ_ERROR */
 
 #ifdef __cplusplus
 }

@@ -238,7 +238,7 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 
 **모듈 등록** [D][M]. `kz_rt_module`은 (module, sha256) 쌍마다 MODULE 항목 하나를 두고, 같은 쌍의 다음 호출은 `registrations`만 센다. 단계 C에서 단위마다 생성자를 둔 연결부는 C1 tx 6번(core 4, cf 1, bp 1), R2 8번을 따로 등록했다(최대 32에서 `module-table` 손실). 이제는 module 수만큼 항목이 생긴다(시험 `rt_mode_api_latch`: 3번 → `registrations=3`). 서로 다른 스레드의 첫 등록이 겹치면 같은 쌍이 두 항목이 될 수 있고 reader가 더한다. 같은 module의 다른 sha256은 따로 남는다(검사 실패).
 
-### 8.6 dump 형식 `kzrt-dump` 1.1 (`include/kz_rt_format.h`)
+### 8.6 dump 형식 `kzrt-dump` 1.2 (`include/kz_rt_format.h`; 1.1까지의 설명 포함)
 
 모든 필드 little-endian, 바이트 단위 직렬화(대상의 byte order·정렬·struct 배치와 무관). 레코드는 **쓸 때** 직렬화되므로 버퍼 메모리를 그대로 떠도(디버거·JTAG) 같은 형식이다. 파일 시스템을 요구하지 않는다(`kz_rt_dump`는 바이트 콜백; POSIX는 `kz_rt_posix_dump_file/fd`).
 
@@ -248,6 +248,7 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 순서: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END(u64 bytes, u32 crc32)
 RUNX(1.1): window_mode mode_source flags pool_bytes chunk_bytes chunks_used pool_dropped actor_quota
            boot_bytes_used boot_bytes_dropped max_modules max_notes
+     (1.2) + u64 process u64 initial_key u32 initial_kind u32 process_evidence   (0 = 기록 안 됨)
 MODULE: module actor u64 t sha256[32] + (1.1) registrations
 ACTOR:  … buf_bytes(확정) + (1.1) dropped_bytes chunks overflow_quota overflow_pool
 BUF: u32 owner(0 = 공유 버퍼, 그 밖 = run actor) u32 nbytes u32 cap u32 rsv + 버퍼 레코드(EVENT 0x0101, CTL 0x0102, AEXIT 0x0103, PAD 0x0100)
@@ -256,7 +257,9 @@ EVENT: actor aseq site bind link valid u64 t u64 pc u16 nvals u16 str_len u8 str
 CTL:   actor aseq site bind ev ctl_seq u64 t point hit subject other gate u16 reason u16 ctx   (sub = what)
 ```
 
-reader는 major가 같을 때만 읽고 minor는 무시한다(레코드 끝에 필드를 더하거나 새 type을 더하는 것이 minor). 바이트 배치를 바꾸면 major를 올린다 [D]. 1.1은 minor 개정이다(새 레코드 RUNX, MODULE·ACTOR 끝의 필드). 1.0 reader는 RUNX를 건너뛰고 늘어난 필드를 무시한다. 1.1 reader는 1.0 스트림도 읽는다(없는 필드는 기록 안 됨, MODULE `registrations` = 1). 단계 C의 1.0 dump 7개를 새 `kz-rt-dump`로 읽어 모두 통과했다 [M]. hook ABI는 1 그대로다(호출 추가만, 배치·기존 호출의 인자 변경 없음). 호스트 reader `tools/decode/kz_rt_decode.{h,c}`(C), 도구 `kz-rt-dump [--manifest <kzs>]... [--events-only] <dump>`: 레코드마다 한 줄, 그다음 검사(actor별 aseq 빈틈 대 센 overflow, 용량·수요(`check capacity`), 모드 원천(`check mode`), build identity와 manifest sha256, manifest 대조, 미등록 module). 사건 줄에는 `pc=`(hook의 반환 주소: 어느 코드 사본이 돌았나. `duplicated` binding을 가르는 근거)와 `key=`(그 actor의 native key, 예 `tid:12345`; 임시·미확정 actor는 `-`)가 붙는다. 단계 C에서 이것을 대신한 `instrument/gcc/tools/kzgcc_events.c`(TSV)는 후보의 대조 스크립트용으로 그대로 둔다. 종료 코드 0 = 통과, 1 = 검사 실패, 2 = 사용법·형식 오류 [M].
+reader는 major가 같을 때만 읽고 minor는 무시한다(레코드 끝에 필드를 더하거나 새 type을 더하는 것이 minor). 바이트 배치를 바꾸면 major를 올린다 [D]. 1.1은 minor 개정이다(새 레코드 RUNX, MODULE·ACTOR 끝의 필드). 1.0 reader는 RUNX를 건너뛰고 늘어난 필드를 무시한다. 1.1 reader는 1.0 스트림도 읽는다(없는 필드는 기록 안 됨, MODULE `registrations` = 1). 단계 C의 1.0 dump 7개를 새 `kz-rt-dump`로 읽어 모두 통과했다 [M].
+
+**1.2 (런타임 0.2.1, 2026-10-26 단계 D 잔여) 프로세스와 초기 스레드** [D][M]. `kz_rt_process(process, initial_key, key_kind, evidence)`는 초기 스레드(main을 도는 스레드)에서 도는 시작 코드가 한 번 부른다(두 번째는 `KZ_RT_ESTATE`). POSIX 시작 객체의 생성자가 `getpid()`, 자기 `gettid()`(adapter의 native key와 같은 `tid`), 근거 비트 `constructor`(glibc는 실행 파일의 생성자를 main 전에 초기 스레드에서 돈다)와 `tid-is-pid`(thread id = process id: 스레드 그룹 리더)를 준다. 런타임은 자기 메모리에만 쓰고 RUNX 끝에 적는다(32-bit 공개 표지 뒤에 읽음). 변환(`kz convert --kzrt`)은 그 key를 가진 run actor가 **정확히 하나**일 때만 그 actor에 중립 층 `initial` 표시와 process id를 준다. F0는 같은 사실을 perf 기록의 스레드 표에서 얻는다(tid = pid이고 그 id의 첫 incarnation, `lib/trace/neutral.cpp` L226–L229). 그래서 프로필의 `initial_thread not_app`(P10)이 두 계열에 같은 방식으로 적용된다(`real_trace.cpp` L286–L307). 1.1 dump(단계 D의 9개)에는 이 필드가 없어 변환 노트가 "not recorded"이고 초기 스레드는 계속 `owner undetermined`다. `kz-rt-dump`는 `runx process=… initial=tid:… evidence=…`를 출력한다. 시험: `rt_auto`(생성자 기록 뒤 두 번째 호출 거부)·`rt_auto_dump`(RUNX 출력), `test_neutral_kzrt`(main 스레드 actor 하나만 initial, P10 프로필에서 `not_app`) [M]. fork 뒤 exec 없는 자식은 부모의 기록을 물려받는다(cFS는 fork하지 않음) [I]. hook ABI는 1 그대로다(호출 추가만, 배치·기존 호출의 인자 변경 없음). 호스트 reader `tools/decode/kz_rt_decode.{h,c}`(C), 도구 `kz-rt-dump [--manifest <kzs>]... [--events-only] <dump>`: 레코드마다 한 줄, 그다음 검사(actor별 aseq 빈틈 대 센 overflow, 용량·수요(`check capacity`), 모드 원천(`check mode`), build identity와 manifest sha256, manifest 대조, 미등록 module). 사건 줄에는 `pc=`(hook의 반환 주소: 어느 코드 사본이 돌았나. `duplicated` binding을 가르는 근거)와 `key=`(그 actor의 native key, 예 `tid:12345`; 임시·미확정 actor는 `-`)가 붙는다. 단계 C에서 이것을 대신한 `instrument/gcc/tools/kzgcc_events.c`(TSV)는 후보의 대조 스크립트용으로 그대로 둔다. 종료 코드 0 = 통과, 1 = 검사 실패, 2 = 사용법·형식 오류 [M].
 
 ### 8.7 빌드와 링크
 

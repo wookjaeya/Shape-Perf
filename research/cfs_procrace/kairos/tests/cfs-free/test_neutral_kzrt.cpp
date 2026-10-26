@@ -10,10 +10,14 @@
 //   - the replay's trace from the container equals the one from the layer in memory, and the occurrences are found;
 //   - a point of the operation inside its open call (a conjunct's `lp at`) gives the call an argument the call event
 //     lacks, and leaves an argument the call carries itself as it is (real_trace.hpp, "arguments");
+//   - the start-up record of the process (RUNX 1.2, kz_rt_process from the main thread) makes the main thread's run
+//     actor the initial thread, which a profile with `initial_thread not_app` (P10) states is not an application's task;
 //   - a truncated stream is converted with its loss (the whole record) and without start evidence; a stream that is
 //     not a kzrt-dump is refused.
 
 #include <pthread.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #include <cstdint>
 #include <cstdio>
@@ -81,6 +85,11 @@ std::vector<uint8_t> record() {
   cfg.backend = "hand";
   KZ_CHECK_EQ(kz_rt_init(&cfg), KZ_RT_OK);
   KZ_CHECK_EQ(kz_rt_attach(kz_rt_posix_adapter()), KZ_RT_OK);
+  // this thread is the process's initial thread (main runs in it; the thread-group leader: tid = pid)
+  const uint64_t pid = static_cast<uint64_t>(getpid()), tid = static_cast<uint64_t>(syscall(SYS_gettid));
+  KZ_CHECK_EQ(tid, pid);
+  KZ_CHECK_EQ(kz_rt_process(pid, tid, KZ_RT_KEY_LINUX_TID, KZ_RT_PROC_TID_IS_PID), KZ_RT_OK);
+  KZ_CHECK_EQ(kz_rt_process(pid, tid, KZ_RT_KEY_LINUX_TID, KZ_RT_PROC_TID_IS_PID), KZ_RT_ESTATE);
   const uint32_t c = kz_rt_obs(1, 101, 0, 0x3u, 5, 0x1002, 0, 0);  // send(Info = 5, Who = 0x1002)
   kz_rt_obs(5, 501, 0, 0x3u, 9, 99, 0, 0);                         // inside the call: Spec = 9 (not at the call), Info = 99
   kz_rt_obs(2, 201, c, 0x1u, 0xc0000001u, 0, 0, 0);                // NOT_READY_A
@@ -186,6 +195,32 @@ void test_convert_and_replay(const std::vector<uint8_t>& dump) {
   kz::eval::Result res;
   KZ_CHECK_OK(kz::eval::replay(p, t, kz::eval::Options(), &res));
   KZ_CHECK_EQ(res.occurrences.size(), static_cast<size_t>(2));
+  // the initial thread: the main thread's run actor only, with the process id
+  size_t initial = 0;
+  for (const kz::trace::NActor& a : n.actors) initial += (a.r.flags & KZ_NACTOR_FLAG_INITIAL) != 0 ? 1 : 0;
+  KZ_CHECK_EQ(initial, static_cast<size_t>(1));
+  KZ_CHECK((n.actors[main_actor].r.flags & KZ_NACTOR_FLAG_INITIAL) != 0);
+  KZ_CHECK_EQ(n.actors[main_actor].r.process, static_cast<uint32_t>(getpid()));
+  KZ_CHECK(has_note(r.notes, "initial thread: run actor 1 of process " + std::to_string(getpid()) + " (recorded by the start-up code, thread id = process id)"));
+  KZ_CHECK(t.not_app.empty());  // the mini profile declares nothing about the initial thread
+  {
+    std::vector<kz::phi::SourceText> f = kzmini::files();
+    const std::string from = "context { owner_kind slot; prov code_a; }";
+    const size_t at = f[1].text.find(from);
+    KZ_CHECK(at != std::string::npos);
+    if (at == std::string::npos) return;
+    f[1].text.replace(at, from.size(), "context { owner_kind slot; initial_thread not_app prov code_a; prov code_a; }");
+    kz::phi::Profile p10;
+    KZ_CHECK_OK(kz::phi::load_profile(f, &p10, &diags));
+    kz::eval::Trace t3;
+    kz::trace::RealTraceReport rep3;
+    KZ_CHECK_OK(kz::trace::real_trace_from_neutral(n, p10, opt, &t3, &rep3));
+    KZ_CHECK_EQ(t3.not_app.size(), static_cast<size_t>(1));
+    if (t3.not_app.size() == 1) {
+      KZ_CHECK_EQ(t3.not_app.begin()->first, t.events[1].actor);  // the main thread's actor
+      KZ_CHECK(t3.not_app.begin()->second.find("the initial thread of process " + std::to_string(getpid()) + " (the backend's initial-thread record)") == 0);
+    }
+  }
 }
 
 void test_truncated(const std::vector<uint8_t>& dump) {

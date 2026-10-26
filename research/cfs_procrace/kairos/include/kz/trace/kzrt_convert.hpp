@@ -18,7 +18,10 @@
 //             it and derives app_owner with the rule F0 uses (owner_from_request): creator, creator_event,
 //             spawn_return, announced_id, join_flags, owner_* (confirmed or undetermined), request_func, and the
 //             run flag owners-recorded; its counts are a conversion note.  Without identity reads they stay
-//             undetermined.  NSITES `decoder` is the identity read's KZ_DECODER.
+//             undetermined.  NSITES `decoder` is the identity read's KZ_DECODER.  The process's initial thread
+//             (RUNX 1.2, kz_rt_process from the start-up code that runs in it): the one run actor with the recorded
+//             native key gets flag initial and the process id (P10 `initial_thread not_app` then applies to it as
+//             to F0's thread-group leader); none or several with that key, or a dump without it: not stated (a note).
 //   events    per actor in aseq order; the container order is the events without a clock (bootstrap) in buffer
 //             order, then a merge by time that keeps every actor's aseq order (NOT an order between actors).
 //             Values: a slot whose valid bit is set; a validated string where the runtime copied one.  `link`

@@ -127,7 +127,7 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
     }
     case KZ_RT_REC_RUNX: {
       kz_rt_dec_runx *x = &it->u.runx;
-      if (size < KZ_RT_RUNX_SIZE) return 0;
+      if (size < KZ_RT_RUNX_SIZE_1_1) return 0;
       x->window_mode = g32(b + 8);
       x->mode_source = g32(b + 12);
       x->flags = g32(b + 16);
@@ -140,6 +140,14 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       x->boot_bytes_dropped = g32(b + 44);
       x->max_modules = g32(b + 48);
       x->max_notes = g32(b + 52);
+      x->process = x->initial_key = 0;
+      x->initial_kind = x->process_evidence = 0;
+      if (size >= KZ_RT_RUNX_SIZE) {
+        x->process = g64(b + 56);
+        x->initial_key = g64(b + 64);
+        x->initial_kind = g32(b + 72);
+        x->process_evidence = g32(b + 76);
+      }
       return 1;
     }
     case KZ_RT_REC_MODULE:

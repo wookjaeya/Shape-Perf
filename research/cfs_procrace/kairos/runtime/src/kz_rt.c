@@ -137,6 +137,8 @@ static struct {
   uint32_t notes_next;
   module_entry modules[KZ_RT_MAX_MODULES];
   uint32_t modules_next;
+  uint32_t proc_once, proc_set, proc_kind, proc_evidence; /* kz_rt_process (RUNX 1.2) */
+  uint64_t proc_id, proc_key;
 } g;
 
 /* An actor's bound: its quota, else the pool. */
@@ -543,6 +545,17 @@ KZ_RT_API int kz_rt_init(const kz_rt_config *cfg) {
     g.mode_source = KZ_RT_MODE_SRC_INIT;
     ST(&g_mode, cfg->mode);
   }
+  return KZ_RT_OK;
+}
+
+KZ_RT_API int kz_rt_process(uint64_t process, uint64_t initial_key, uint32_t key_kind, uint32_t evidence) {
+  if (process == 0) return KZ_RT_EINVAL;
+  if (__atomic_exchange_n(&g.proc_once, 1u, __ATOMIC_ACQ_REL) != 0) return KZ_RT_ESTATE;
+  g.proc_key = initial_key;
+  g.proc_kind = key_kind;
+  g.proc_evidence = evidence;
+  g.proc_id = process;
+  ST(&g.proc_set, 1u); /* published last (32-bit flag): the dump reads the fields only after it */
   return KZ_RT_OK;
 }
 
@@ -1113,6 +1126,14 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
     put32(b + 44, LDR(&g.boot_dropped));
     put32(b + 48, KZ_RT_MAX_MODULES);
     put32(b + 52, KZ_RT_MAX_NOTES);
+    {
+      if (LD(&g.proc_set) != 0) { /* 1.2: the process and its initial thread (kz_rt_process) */
+        put64(b + 56, g.proc_id);
+        put64(b + 64, g.proc_key);
+        put32(b + 72, g.proc_kind);
+        put32(b + 76, g.proc_evidence);
+      }
+    }
     emit(&o, b, KZ_RT_RUNX_SIZE);
   }
   /* MODULE */

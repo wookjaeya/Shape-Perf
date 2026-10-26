@@ -27,6 +27,9 @@ typedef struct kz_rt_dec_run {
 typedef struct kz_rt_dec_runx { /* 1.1 */
   uint32_t window_mode, mode_source, flags, pool_bytes, chunk_bytes, chunks_used, pool_dropped, actor_quota, boot_bytes_used,
       boot_bytes_dropped, max_modules, max_notes;
+  /* 1.2 (0 = not recorded: a 1.1 RUNX, or kz_rt_process was not called) */
+  uint64_t process, initial_key;
+  uint32_t initial_kind, process_evidence;
 } kz_rt_dec_runx;
 
 typedef struct kz_rt_dec_module {

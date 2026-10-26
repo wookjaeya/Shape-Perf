@@ -8,7 +8,10 @@
  *      G-I (record) and G-I-H (control) of the review section 13.1 (event_semantics.md 8.2).  It only
  *      reads the environment array and writes the runtime's own memory.
  *   2. A constructor (before main) attaches the POSIX adapter and calls kz_rt_init with the same mode,
- *      and an atexit handler stops the observation window and writes the dump.
+ *      and an atexit handler stops the observation window and writes the dump.  The constructor also
+ *      records the process id and its own thread as the process's initial thread (kz_rt_process, RUNX
+ *      1.2): glibc runs the executable's constructors in the initial thread before main, and the thread
+ *      id is compared with the process id (gettid(2) = getpid(2) only for the thread-group leader).
  *
  * Configuration comes from the environment, so a run that uses it adds these names to the target's
  * environment (record them as a difference from the reference run's environment):
@@ -26,6 +29,8 @@
 #define _GNU_SOURCE 1
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #include "kz_rt_posix.h"
 
@@ -89,6 +94,10 @@ __attribute__((constructor)) static void kz_rt_auto_start(void) {
   c.instance_id = (uint32_t)env_u64("KZ_RT_INSTANCE");
   c.actor_buf_bytes = (uint32_t)env_u64("KZ_RT_ACTOR_QUOTA");
   (void)kz_rt_early_mode(c.mode, note); /* without .preinit_array (or when it did not run): here */
+  {
+    const uint64_t pid = (uint64_t)getpid(), tid = (uint64_t)syscall(SYS_gettid);
+    (void)kz_rt_process(pid, tid, KZ_RT_KEY_LINUX_TID, KZ_RT_PROC_CONSTRUCTOR | (tid == pid ? KZ_RT_PROC_TID_IS_PID : 0u));
+  }
   (void)kz_rt_attach(kz_rt_posix_adapter());
   (void)kz_rt_init(&c);
   if (dump != NULL && strlen(dump) < sizeof g_dump_path) {

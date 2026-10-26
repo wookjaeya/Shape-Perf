@@ -84,7 +84,7 @@ set_tests_properties(rt_auto PROPERTIES FIXTURES_SETUP rt_auto_dump
   ENVIRONMENT "KZ_RT_DUMP=${CMAKE_CURRENT_BINARY_DIR}/rt_auto.kzrt;KZ_RT_MODE=record;KZ_RT_RUN_ID=42;KZ_RT_INSTANCE=1")
 kzrt_case(rt_auto_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_auto.kzrt)
 set_tests_properties(rt_auto_dump PROPERTIES FIXTURES_REQUIRED rt_auto_dump
-  PASS_REGULAR_EXPRESSION "run abi=1 mode=stopped run_id=42 instance=1 .*runx window_mode=record mode_source=early flags=-.*ev actor=1 aseq=3 .*check ok")
+  PASS_REGULAR_EXPRESSION "run abi=1 mode=stopped run_id=42 instance=1 .*runx window_mode=record mode_source=early flags=-.*runx process=[0-9]+ initial=tid:[0-9]+ evidence=constructor,tid-is-pid.*ev actor=1 aseq=3 .*check ok")
 # ... and with the build-identity object linked: the RUN record names the binary's backend, compiler,
 # target and manifest (whether kz-rt-dump finds that manifest among given files: rt_dump_tool, rt_mode_api_latch_dump).
 kzrt_case(rt_auto_bi test_rt_auto_bi)

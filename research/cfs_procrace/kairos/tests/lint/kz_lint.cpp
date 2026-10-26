@@ -15,7 +15,8 @@
 //   banned-files   no Python and no JSON files in the tool core
 //   no-llvm        libkz-core, tools/kz, lib/proofcheck, include/ and the core tests do not
 //                  use LLVM or Clang (headers, CMake names and paths, in any case); kz_use_llvm
-//                  appears only in lib/llvm, tools/kz-static and its definition in
+//                  appears only in lib/llvm, tools/kz-static, instrument/clang (the Clang source-transform
+//                  connector, SPEC rev 1.4 section 4.1) and its definition in
 //                  cmake/KzSettings.cmake
 //   no-generated   no generated code and no code that generates code (markers, templates,
 //                  configure_file, file(WRITE|APPEND|CONFIGURE|GENERATE) of a source file,
@@ -518,11 +519,11 @@ Violations rule_no_llvm(const fs::path& root) {
   for (const fs::path& f : files_under(root, {""})) {
     if (!is_cmake(f)) continue;
     const std::string r = rel(root, f);
-    if (contains_dir(r, "lib/llvm") || contains_dir(r, "tools/kz-static") || r == "cmake/KzSettings.cmake") continue;
+    if (contains_dir(r, "lib/llvm") || contains_dir(r, "tools/kz-static") || contains_dir(r, "instrument/clang") || r == "cmake/KzSettings.cmake") continue;
     std::string text;
     if (!read_file(f, &text)) continue;
     for (const Token& t : identifiers(text, Lang::CMake))
-      if (t.text == "kz_use_llvm") v.push_back(Violation{r, t.line, "kz_use_llvm is allowed only in lib/llvm and tools/kz-static"});
+      if (t.text == "kz_use_llvm") v.push_back(Violation{r, t.line, "kz_use_llvm is allowed only in lib/llvm, tools/kz-static and instrument/clang"});
   }
   return dedupe(v);
 }
@@ -716,6 +717,7 @@ int selftest(const fs::path& data) {
       {"no-llvm", true, {"kz_use_llvm in a probe", {{"probe/x/CMakeLists.txt", "kz_use_llvm(probe)\n"}}}},
       {"no-llvm", false, {"LLVM in the analysis tools is fine", {{"lib/llvm/a.cpp", "#include <llvm/Support/Casting.h>\n"}, {"tools/kz-static/CMakeLists.txt", "kz_use_llvm(kz-static)\n"}, {"lib/llvm/CMakeLists.txt", "kz_use_llvm(kz-llvm)\n"}}}},
       {"no-llvm", false, {"the definition of kz_use_llvm", {{"cmake/KzSettings.cmake", "function(kz_use_llvm target)\nendfunction()\n"}}}},
+      {"no-llvm", false, {"the Clang source-transform connector", {{"instrument/clang/CMakeLists.txt", "kz_use_llvm(kz-instr-clang)\n"}}}},
       {"no-llvm", false, {"the compiler id and a comment", {{"lib/core/CMakeLists.txt", "if(CMAKE_CXX_COMPILER_ID STREQUAL \"Clang\")\nendif()\n# no LLVM, no clangTooling, no mlir\n"}}}},
       {"no-llvm", false, {"a bpf compiler variable", {{"tests/unit/CMakeLists.txt", "find_program(KZ_BPF_CLANG clang)\nadd_test(NAME t COMMAND ${KZ_BPF_CLANG} -target bpf -c x.c)\n"}}}},
       {"no-llvm", false, {"a clang compiler is not a dependency", {{"tests/unit/CMakeLists.txt", "find_program(KZ_BPF_CLANG clang)\n# LLVM is not used here\n"}}}},

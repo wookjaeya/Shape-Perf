@@ -1,0 +1,18 @@
+kzs-sites 1
+# bindings of clang-src-0.1 for the logical sites of /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/clang/sites/r2_cfs_v701.kzs (kz-instr-clang)
+bind 65537 site=63 backend=clang-src-0.1 module=1 at="cfe_es_api.c:1202:14 CFE_ES_CreateChildTask callee-entry" status=bound vals=0x3
+bind 65538 site=64 backend=clang-src-0.1 module=1 at="cfe_es_api.c:1202:14 CFE_ES_CreateChildTask callee-returns 1/1" status=bound vals=0x3
+bind 65539 site=61 backend=clang-src-0.1 module=1 at="cfe_es_apps.c:649:7 CFE_ES_StartAppTask callee-entry" status=bound vals=0x7
+bind 65540 site=62 backend=clang-src-0.1 module=1 at="cfe_es_apps.c:649:7 CFE_ES_StartAppTask callee-returns 1/1" status=bound vals=0x3
+bind 65541 site=57 backend=clang-src-0.1 module=1 at="cfe_evs.c:169:14 CFE_EVS_SendEventWithAppID callee-entry" status=bound vals=0x7
+bind 65542 site=58 backend=clang-src-0.1 module=1 at="cfe_evs.c:169:14 CFE_EVS_SendEventWithAppID callee-returns 2/2" status=bound vals=0x1
+bind 65543 site=50 backend=clang-src-0.1 module=1 at="cfe_sb_api.c:275:9 CFE_SB_CreatePipe->CFE_EVS_SendEventWithAppID call-site-taps before" status=bound vals=0x5
+bind 65544 site=51 backend=clang-src-0.1 module=1 at="cfe_sb_api.c:275:9 CFE_SB_CreatePipe->CFE_EVS_SendEventWithAppID call-site-taps after" status=bound vals=0x1
+bind 65545 site=52 backend=clang-src-0.1 module=1 at="cfe_sb_api.c:1183:9 CFE_SB_SubscribeFull->CFE_EVS_SendEventWithAppID call-site-taps before" status=bound vals=0x5
+bind 65546 site=53 backend=clang-src-0.1 module=1 at="cfe_sb_api.c:1183:9 CFE_SB_SubscribeFull->CFE_EVS_SendEventWithAppID call-site-taps after" status=bound vals=0x1
+bind 65547 site=54 backend=clang-src-0.1 module=1 at="cfe_sb_priv.c:786:9 CFE_SB_MessageTxn_ReportSingleEvent->CFE_EVS_SendEventWithAppID call-site-taps before" status=bound vals=0x5
+bind 65548 site=55 backend=clang-src-0.1 module=1 at="cfe_sb_priv.c:786:9 CFE_SB_MessageTxn_ReportSingleEvent->CFE_EVS_SendEventWithAppID call-site-taps after" status=bound vals=0x1
+bind 65549 site=56 backend=clang-src-0.1 module=1 at="cfe_sb_task.c:138:5 CFE_SB_AppInit->CFE_ES_GetAppID call-site-wrapper after" status=bound vals=0x3
+bind 65550 site=65 backend=clang-src-0.1 module=1 at="osapi-task.c:164:7 OS_TaskCreate callee-entry" status=bound vals=0x7
+bind 65551 site=66 backend=clang-src-0.1 module=1 at="osapi-task.c:164:7 OS_TaskCreate callee-returns 1/6" status=bound vals=0x7 reason="5 return path(s) inside macro expansions are not instrumented"
+bind 65552 site=67 backend=clang-src-0.1 module=1 at="osapi-task.c:124:6 OS_TaskEntryPoint callee-entry" status=bound vals=0x1

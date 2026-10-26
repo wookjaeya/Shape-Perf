@@ -1,0 +1,68 @@
+kz-instr-clang report (backend clang-src-0.1)
+sites /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/clang/sites/r2_cfs_v701.kzs
+
+unit cfe/modules/es/fsw/src/cfe_es_api.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o: same text
+group callee CFE_ES_CreateChildTask (sites 63 64)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cfe_es_api.c:1202:14 callee binds 65537/65538
+  module 1 registers itself from this unit (a constructor at the end of the file)
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/es/fsw/src/cfe_es_api.c
+
+unit cfe/modules/es/fsw/src/cfe_es_apps.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o: same text
+group callee CFE_ES_StartAppTask (sites 61 62)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cfe_es_apps.c:649:7 callee binds 65539/65540
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/es/fsw/src/cfe_es_apps.c
+
+unit cfe/modules/evs/fsw/src/cfe_evs.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/evs -> evs/CMakeFiles/evs.dir/fsw/src/cfe_evs.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/evs -> evs/CMakeFiles/evs.dir/fsw/src/cfe_evs.c.o: same text
+group callee CFE_EVS_SendEventWithAppID (sites 57 58)
+  callee returns: 2 path(s) instrumented, 0 uninstrumented
+  bound cfe_evs.c:169:14 callee binds 65541/65542
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/evs/fsw/src/cfe_evs.c
+
+unit cfe/modules/sb/fsw/src/cfe_sb_api.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_api.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_api.c.o: same text
+group call-site CFE_SB_CreatePipe -> CFE_EVS_SendEventWithAppID line 275 (sites 50 51)
+  census CFE_EVS_SendEventWithAppID in this unit: 34 call(s) whose callee name is 34 file text, 0 in a macro argument, 0 in a macro body
+  bound cfe_sb_api.c:275:9 call-site taps binds 65543/65544 (one before record per captured argument)
+group call-site CFE_SB_SubscribeFull -> CFE_EVS_SendEventWithAppID line 1183 (sites 52 53)
+  bound cfe_sb_api.c:1183:9 call-site taps binds 65545/65546 (one before record per captured argument)
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/sb/fsw/src/cfe_sb_api.c
+
+unit cfe/modules/sb/fsw/src/cfe_sb_priv.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_priv.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_priv.c.o: same text
+group call-site CFE_SB_MessageTxn_ReportSingleEvent -> CFE_EVS_SendEventWithAppID line 786 (sites 54 55)
+  census CFE_EVS_SendEventWithAppID in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound cfe_sb_priv.c:786:9 call-site taps binds 65547/65548 (one before record per captured argument)
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/sb/fsw/src/cfe_sb_priv.c
+
+unit cfe/modules/sb/fsw/src/cfe_sb_task.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/sb -> sb/CMakeFiles/sb.dir/fsw/src/cfe_sb_task.c.o: same text
+group call-site CFE_SB_AppInit -> CFE_ES_GetAppID line 138 (sites 56)
+  census CFE_ES_GetAppID in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound cfe_sb_task.c:138:5 call-site wrapper kz_w65549 binds -/65549
+  wrote /home/user/work/instr/clang/r2/cFS/cfe/modules/sb/fsw/src/cfe_sb_task.c
+
+unit osal/src/os/shared/src/osapi-task.c
+  command /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu1/osal -> osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o (module 1)
+  also /home/user/work/procrace/cfs_ref/cFS/build-native_std/native/default_cpu2/osal -> osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o: same text
+group callee OS_TaskCreate (sites 65 66)
+  uninstrumented return path osapi-task.c:181:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:182:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:183:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:183:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via LENGTHCHECK via ARGCHECK)
+  uninstrumented return path osapi-task.c:184:5: the return is in a macro expansion (OS_CHECK_SIZE via ARGCHECK)
+  callee returns: 1 path(s) instrumented, 5 uninstrumented
+  bound osapi-task.c:164:7 callee binds 65550/65551
+group callee OS_TaskEntryPoint (sites 67)
+  bound osapi-task.c:124:6 callee binds 65552/-
+  wrote /home/user/work/instr/clang/r2/cFS/osal/src/os/shared/src/osapi-task.c

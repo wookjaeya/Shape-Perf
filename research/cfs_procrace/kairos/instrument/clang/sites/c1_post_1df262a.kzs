@@ -1,0 +1,108 @@
+# c1_post_1df262a.kzs -- logical sites of case C1 for the stage C connector comparison (kzs-sites 1;
+# docs/event_semantics.md section 3, docs/instr_candidate_clang.md).  Build: plan/C1_build_manifest.md, post-fix CF
+# 833fdbb + BP b051eb0 in the cFS bundle candidate 1df262a (cFE 6cccb3f, OSAL f34759d, PSP bd4a2ea).  Paths are
+# those of the C1 source view (cf/, bp/, cfe/, osal/); every ref is a line at the revision of its source.
+# The meaning of each site is that of the F0 plan kairos/profiles/c1-bp-b051eb0/observe/sites-cf833fdbb.kzp; a
+# label is reused only where the point is the same (a function's entry or return, a call's before or after).
+# Values are what the instruction used (an argument or a return value) or, for out<k>, the pointee read by the
+# same thread right after the return.  Not a research condition; the sites are the plan of a pilot comparison.
+kzs-sites 1
+source cfs-1df262a rev=1df262a64a09f128357482d8f2e06b0fdfe84d37 ref="plan/C1_build_manifest.md section 1: cFE 6cccb3f5, OSAL f34759d6, PSP bd4a2ea2"
+source cf-833fdbb rev=833fdbb27a26f15f2429e79392e7eb73d61abdea ref="nasa/CF, plan/C1_build_manifest.md section 1"
+source bp-b051eb0 rev=b051eb0d12bfe76c0230215c2ff851cfaa553ce4 ref="nasa/bp, plan/C1_build_manifest.md section 1"
+module 1 name=core source=cfs-1df262a
+module 2 name=cf.so source=cf-833fdbb
+module 3 name=bp.so source=bp-b051eb0
+
+# ---- CF: the dependent lookup in its caller, the retry delay, the init status, the exit -----------------------
+site 10 label=cf.lookup.call.before op=osal.countsem.lookup phase=before tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=1003 ref="cf/fsw/src/cf_cfdp.c:1003-1004"
+value 10 0 role=sem_id_ptr from=arg0 type=ptr
+value 10 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="cf/fsw/src/cf_tbldefs.h:74 char sem_name[OS_MAX_API_NAME] (an array of the table); OS_MAX_API_NAME 20 (build osal_public_api/inc/osconfig.h:163)"
+site 11 label=cf_lookup_call op=osal.countsem.lookup phase=after tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_CountSemGetIdByName line=1003 ref="cf/fsw/src/cf_cfdp.c:1003-1004"
+value 11 0 role=status from=ret type=s32
+value 11 1 role=sem_id from=out0 type=u32
+site 12 label=cf_retry_delay op=osal.task.delay phase=after tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine callee=OS_TaskDelay line=1011 ref="cf/fsw/src/cf_cfdp.c:1000-1012"
+value 12 0 role=status from=ret type=s32
+site 13 label=cf.init_engine.ret op=cf.init_engine phase=after tu=cf/fsw/src/cf_cfdp.c func=CF_CFDP_InitEngine ref="cf/fsw/src/cf_cfdp.c:952, 1053"
+value 13 0 role=status from=ret type=s32
+site 14 label=cf.init.ret op=cf.init phase=after tu=cf/fsw/src/cf_app.c func=CF_Init ref="cf/fsw/src/cf_app.c:206, 266"
+value 14 0 role=status from=ret type=s32
+site 15 label=cf.exit_app.call op=es.exit_app phase=before tu=cf/fsw/src/cf_app.c func=CF_AppMain callee=CFE_ES_ExitApp line=366 ref="cf/fsw/src/cf_app.c:366"
+value 15 0 role=exit_status from=arg0 type=u32
+
+# ---- BP: the existence probe and the creation in initialize_throttling (static, called only from BP_FlowInit) ----
+site 20 label=bp.probe.call.before op=osal.countsem.lookup phase=before tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemGetIdByName line=126 ref="bp/fsw/src/bp_flow.c:126"
+value 20 0 role=sem_id_ptr from=arg0 type=ptr
+value 20 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="bp/fsw/src/bp_flow.h:56 const char Name[BP_SEM_NAME_SIZE], :43 BP_SEM_NAME_SIZE is OS_MAX_API_NAME (20)"
+site 21 label=bp_existence_probe_call op=osal.countsem.lookup phase=after tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemGetIdByName line=126 ref="bp/fsw/src/bp_flow.c:126-127"
+value 21 0 role=status from=ret type=s32
+value 21 1 role=sem_id from=out0 type=u32
+site 22 label=bp.create.call.before op=osal.countsem.create phase=before tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemCreate line=132 ref="bp/fsw/src/bp_flow.c:132-133"
+value 22 0 role=sem_id_ptr from=arg0 type=ptr
+value 22 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="bp/fsw/src/bp_flow.h:56, :43 (as site 20)"
+value 22 2 role=sem_initial_value from=arg2 type=u32
+site 23 label=bp_create_call op=osal.countsem.create phase=after tu=bp/fsw/src/bp_flow.c func=initialize_throttling callee=OS_CountSemCreate line=132 ref="bp/fsw/src/bp_flow.c:132-133"
+value 23 0 role=status from=ret type=s32
+value 23 1 role=sem_id from=out0 type=u32
+site 24 label=bp.flow_init.ret op=bp.flow_init phase=after tu=bp/fsw/src/bp_flow.c func=BP_FlowInit ref="bp/fsw/src/bp_flow.c:519-542"
+value 24 0 role=status from=ret type=s32
+
+# ---- OSAL: the semaphore API at the callee (every caller) and its inner effect points -------------------------
+# At the entry the name pointer is not yet validated (OS_CHECK_POINTER follows): pointer only.
+site 30 label=osal.countsem_lookup.entry op=osal.countsem.lookup phase=before tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemGetIdByName ref="osal/src/os/shared/src/osapi-countsem.c:204-215"
+value 30 0 role=sem_id_ptr from=arg0 type=ptr
+value 30 2 role=sem_name_ptr from=arg1 type=ptr
+site 31 label=osal.countsem_lookup.ret op=osal.countsem.lookup phase=after tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemGetIdByName ref="osal/src/os/inc/osapi-countsem.h:147-162"
+value 31 0 role=status from=ret type=s32
+value 31 1 role=sem_id from=out0 type=u32
+# The lookup's precondition point: the call of OS_ObjectIdFindByName, after OS_CHECK_POINTER(sem_name).
+site 32 label=OS_CountSemGetIdByName.exists op=osal.countsem.lookup phase=before tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemGetIdByName callee=OS_ObjectIdFindByName line=212 ref="osal/src/os/shared/src/osapi-countsem.c:212"
+value 32 0 role=idtype from=arg0 type=u32
+value 32 1 role=sem_name from=arg1 type=ptr string=validated bound=20 ref="osapi-countsem.c:210 OS_CHECK_POINTER(sem_name) before the call; osapi-idmap.c:973 LENGTHCHECK in the callee reads at most OS_MAX_API_NAME (20) bytes of it"
+site 33 label=osal.countsem_lookup.find_ret op=osal.countsem.lookup phase=after tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemGetIdByName callee=OS_ObjectIdFindByName line=212 ref="osal/src/os/shared/src/osapi-countsem.c:212"
+value 33 0 role=status from=ret type=s32
+value 33 1 role=sem_id from=out2 type=u32
+# The store of the found id (every object type's lookup by name passes here).
+site 34 label=OS_ObjectIdFindByName.store_id op=osal.object.lookup phase=effect tu=osal/src/os/shared/src/osapi-idmap.c func=OS_ObjectIdFindByName line=978 ref="osal/src/os/shared/src/osapi-idmap.c:978 *object_id = token.obj_id"
+value 34 0 role=object_id from=operand0 type=u32
+site 35 label=osal.countsem_create.entry op=osal.countsem.create phase=before tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate ref="osal/src/os/shared/src/osapi-countsem.c:83-109"
+value 35 0 role=sem_id_ptr from=arg0 type=ptr
+value 35 2 role=sem_name_ptr from=arg1 type=ptr
+value 35 3 role=sem_initial_value from=arg2 type=u32
+site 36 label=osal.countsem_create.ret op=osal.countsem.create phase=after tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate ref="osal/src/os/shared/src/osapi-countsem.c:83-109"
+value 36 0 role=status from=ret type=s32
+value 36 1 role=sem_id from=out0 type=u32
+# The creation's publication: the call of OS_ObjectIdFinalizeNew (the table entry becomes visible and the table
+# is unlocked inside it), with the status it finalizes and, after it, the id it wrote through the out parameter.
+site 37 label=OS_CountSemCreate.publish op=osal.countsem.create phase=before tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate callee=OS_ObjectIdFinalizeNew line=106 ref="osal/src/os/shared/src/osapi-countsem.c:106"
+value 37 0 role=operation_status from=arg0 type=s32
+site 38 label=osal.countsem_create.finalize_ret op=osal.countsem.create phase=after tu=osal/src/os/shared/src/osapi-countsem.c func=OS_CountSemCreate callee=OS_ObjectIdFinalizeNew line=106 ref="osal/src/os/shared/src/osapi-idmap.c:828-862"
+value 38 0 role=status from=ret type=s32
+value 38 1 role=sem_id from=out2 type=u32
+
+# ---- creation-side identity: start-app request, child-task request, assigned task id, task entry; ES exit -----
+site 40 label=es.exit_app.entry op=es.exit_app phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_ExitApp ref="cfe/modules/es/fsw/src/cfe_es_api.c:340"
+value 40 0 role=exit_status from=arg0 type=u32
+site 41 label=es.start_task.entry op=es.start_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:576-591, 619"
+value 41 0 role=name_ptr from=arg1 type=ptr
+value 41 1 role=entry_fn from=arg2 type=ptr
+value 41 2 role=owner_id from=arg4 type=u32
+site 42 label=es.start_task.ret op=es.start_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_apps.c func=CFE_ES_StartAppTask ref="cfe/modules/es/fsw/src/cfe_es_apps.c:576"
+value 42 0 role=status from=ret type=s32
+value 42 1 role=task_id from=out0 type=u32
+site 43 label=es.child_task.entry op=es.child_task phase=before tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1247-1249, 1302-1329"
+value 43 0 role=name_ptr from=arg1 type=ptr
+value 43 1 role=entry_fn from=arg2 type=ptr
+site 44 label=es.child_task.ret op=es.child_task phase=after tu=cfe/modules/es/fsw/src/cfe_es_api.c func=CFE_ES_CreateChildTask ref="cfe/modules/es/fsw/src/cfe_es_api.c:1247"
+value 44 0 role=status from=ret type=s32
+value 44 1 role=task_id from=out0 type=u32
+site 45 label=osal.task_create.entry op=osal.task.create phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate ref="osal/src/os/shared/src/osapi-task.c:164-200"
+value 45 0 role=name_ptr from=arg1 type=ptr
+value 45 1 role=entry_fn from=arg2 type=ptr
+value 45 2 role=priority from=arg5 type=u8
+site 46 label=osal.task_create.ret op=osal.task.create phase=after tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskCreate ref="osal/src/os/shared/src/osapi-task.c:199 OS_ObjectIdFinalizeNew(return_code, &token, task_id)"
+value 46 0 role=status from=ret type=s32
+value 46 1 role=task_id from=out0 type=u32
+value 46 2 role=task_name from=arg1 type=ptr string=validated bound=20 ref="osal/src/os/shared/src/osapi-task.c:178 OS_CHECK_APINAME(task_name) (non-null, shorter than OS_MAX_API_NAME 20) precedes the one instrumented return (osapi-task.c:202); the copy reads the caller's buffer right after the return"
+site 47 label=osal.task_entry op=osal.task.entry phase=before tu=osal/src/os/shared/src/osapi-task.c func=OS_TaskEntryPoint ref="osal/src/os/shared/src/osapi-task.c:124-140"
+value 47 0 role=task_id from=arg0 type=u32

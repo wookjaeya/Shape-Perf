@@ -43,10 +43,10 @@ enable_testing()
 # exist.  lib/core comes first because every other component links it.
 add_subdirectory(lib/core)
 
-set(KZ_LLVM_COMPONENT_DIRS lib/llvm tools/kz-static)
+set(KZ_LLVM_COMPONENT_DIRS lib/llvm tools/kz-static instrument/clang)
 file(GLOB kz_component_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
      "lib/*/CMakeLists.txt" "probe/*/CMakeLists.txt" "tools/*/CMakeLists.txt" "gate/CMakeLists.txt"
-     "runtime/CMakeLists.txt")
+     "runtime/CMakeLists.txt" "instrument/clang/CMakeLists.txt")
 list(SORT kz_component_files)
 foreach(kz_file IN LISTS kz_component_files)
   get_filename_component(kz_dir "${kz_file}" DIRECTORY)

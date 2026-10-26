@@ -1,0 +1,50 @@
+# compare_build.sh /home/user/work/procrace/c1_build/post/1df262a/build -> /home/user/work/instr/clang/c1/post/1df262a/build
+## compile commands (paths mapped; the derived commands without: -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include)
+./compile_commands.json: 4 commands, identical after removing the added flag (4 commands carry it)
+./native/default/compile_commands.json: 285 commands, identical after removing the added flag (271 commands carry it)
+## objects
+differs: ./native/default/apps/bp/CMakeFiles/bp.dir/fsw/src/bp_flow.c.o
+differs: ./native/default/apps/cf/CMakeFiles/cf.dir/fsw/src/cf_app.c.o
+differs: ./native/default/apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp.c.o
+differs: ./native/default/es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o
+differs: ./native/default/es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o
+differs: ./native/default/osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o
+differs: ./native/default/osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-idmap.c.o
+differs: ./native/default/osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o
+objects: identical 238, path/version/time strings only 19, other differences 8, absent 0
+## link commands (paths mapped)
+./native/default/apps/bp/CMakeFiles/bp.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/bplib/CMakeFiles/bplib.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/cf/CMakeFiles/cf.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/cfe_assert/CMakeFiles/cfe_assert.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/ci_lab/CMakeFiles/ci_lab.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/sch_lab/CMakeFiles/sch_lab.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/apps/to_lab/CMakeFiles/to_lab.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./native/default/rx/CMakeFiles/core-rx.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+  > -Wl,--whole-archive
+  > /home/user/work/instr/clang/rt/libkzrt-posix.a
+  > /home/user/work/instr/clang/rt/libkzrt.a
+  > -Wl,--no-whole-archive
+  > /home/user/work/instr/clang/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o
+./native/default/tx/CMakeFiles/core-tx.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+  > -Wl,--whole-archive
+  > /home/user/work/instr/clang/rt/libkzrt-posix.a
+  > /home/user/work/instr/clang/rt/libkzrt.a
+  > -Wl,--no-whole-archive
+  > /home/user/work/instr/clang/rt/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o
+./tools/cFS-GroundSystem/Subsystems/cmdUtil/CMakeFiles/cmdUtil.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./tools/elf2cfetbl/CMakeFiles/elf2cfetbl.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+./tools/tblCRCTool/CMakeFiles/cfe_ts_crc.dir/link.txt:
+  > -I/home/user/Shape-Perf/research/cfs_procrace/kairos/runtime/include
+(and 19 objects that differ only in path, version or build-time strings; list in the work tree /home/user/work/instr/clang/c1/build_diff.txt)

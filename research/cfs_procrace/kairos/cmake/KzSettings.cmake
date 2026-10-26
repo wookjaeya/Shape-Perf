@@ -43,7 +43,7 @@ endfunction()
 
 # kz_use_llvm(<target>): the ONLY way LLVM reaches a target.  Applies the include paths,
 # definitions and the exception / RTTI settings of the pinned LLVM build.  Allowed only in
-# lib/llvm and tools/kz-static: lint_no-llvm rejects the name in any other CMake file of the
+# lib/llvm, tools/kz-static and instrument/clang: lint_no-llvm rejects the name in any other CMake file of the
 # tree (and rejects every LLVM, Clang and MLIR name in the CMake files and headers of libkz-core,
 # tools/kz, tools/kz-dump, lib/proofcheck, include/ and the core tests).
 function(kz_use_llvm target)

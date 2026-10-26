@@ -14,7 +14,7 @@
 - 제약(모든 탐색 순서에서 유지): 행위자 안의 프로그램 순서, 생성(생성된 task는 그 생성 단계 뒤에만 실행; R2-P-TASK), 프로그램의 대기(종료 요청이 있어야 teardown), 기록의 stratum S 간선(행위자 사이).
 - 변수(관측 실행에 종속, 순서마다 다시 계산): 기록의 stratum O 간선(RF: 성공 조회와 생성의 reads-from), 결과만이 정하는 순서(실패 조회 → 그 뒤의 생성). 예측 탐색에 제약으로 넣지 않는다. 탐색한 순서마다 결과를 상태에서 계산하므로 RF는 그 순서에서 다시 유도된다.
 
-**앵커.** 기록의 콘 단계(행위자별 호출·키·결과)를, 기록의 행위자 간 간선 전부(S와 O)를 지키는 모델 실행 하나로 재현해야 예측을 한다. 재현하지 못하거나, 모델 밖 행위자가 콘의 키를 쓰면 예측을 하지 않는다. 앵커 실행의 모델 재생 판정은 기록의 관측 판정과 같아야 한다(아래 §4에서 넷 모두 같음 [M]).
+**앵커.** 기록의 콘 단계(행위자별 호출·키·결과)를, 기록의 행위자 간 간선 전부(S와 O)를 지키는 모델 실행 하나로 재현해야 예측을 한다. 재현하지 못하거나, 모델 밖 행위자가 콘의 키를 쓰면 예측을 하지 않는다. 앵커 실행의 모델 재생 판정과 기록의 관측 판정은 탐색 전에 발생(occurrence)·사실 단위로 비교하고, 기록이 확정한 사실과 모델이 어긋나면(모순) 예측을 하지 않는다(**§9 적합성 검사**, 2026-10-26). 2026-10-25판은 두 판정을 계산해 출력만 했고 비교로 탐색을 막지 않았다(IR §2.3 지적; 그때 §4의 "넷 모두 같음"은 출력 문자열을 사람이 대조한 것이다) [M].
 
 **탐색.** 가시 단계(선형화 시점의 원자 단계) 하나가 전이 하나다. 방문 상태 집합을 쓰는 깊이 우선 탐색이며 부분순서 축소가 없다(SPEC rev 1.3 "Engine": 기준 비교용 명시적 탐색). 종단 실행은 인스턴스 행위자(역할 `dependent_use`의 사용을 가진 행위자)의 결과 이력으로 묶는다(키마다 결과의 연속 구간, 횟수는 1/여럿으로 추상, "생성 전 사용 수", 끝 상태). 각 묶음의 대표(횟수가 가장 작은 실행)와 가장 큰 실행을 **같은 프로필의 재생**(`eval::replay`, model record)으로 다시 판정한다: 관측 판정과 같은 준비 명세·결과 매핑·감시(monitor)·범위. 재생이 conjunct 지점의 상태와 어긋나는 결과, guard 실패, 입력 오류를 찾으면 그 후보를 **기각**한다.
 
@@ -33,7 +33,7 @@ kz predict <run.kzt> --profile $P --profile $P/cf-<REV> --profile $P/bundle-<CAN
 #  --max-states N: 방문 상태 상한(연구자 선택, 기본 2,000,000, 출력에 적힘). --bind M=R: 모델 행위자 M = 기록 행위자 R
 ```
 
-기록 재생은 `kz replay`와 같은 입력·옵션으로 한다(결과 표 `plan/results_pilot_20261025.md` §0과 같은 상수·닫힘). 출력 디렉터리: `predict.txt`(보고), `anchor.trace`, `W<n>.trace`(후보의 모델 trace: `kz-phi replay --trace`로 독립 재판정 가능 [M]), `W<n>[-k].kzh`(계획; `kz hold`의 파서로 다시 읽고 관측 프로필의 사이트·종류를 확인함). `--prov-root`는 모델 파일의 `cite` 13개를 고정 번들에서 다시 읽는다(네 구성 모두 13/13 일치 [M]). 시험: `tests/predict/test_predict_model.cpp`(작은 프로필·모델; 62 검사).
+기록 재생은 `kz replay`와 같은 입력·옵션으로 한다(결과 표 `plan/results_pilot_20261025.md` §0과 같은 상수·닫힘). 출력 디렉터리: `predict.txt`(보고), `anchor.trace`, `W<n>.trace`(후보의 모델 trace: `kz-phi replay --trace`로 독립 재판정 가능 [M]), `W<n>[-k].kzh`(계획; `kz hold`의 파서로 다시 읽고 관측 프로필의 사이트·종류를 확인함). `--prov-root`는 모델 파일의 `cite` 13개를 고정 번들에서 다시 읽는다(네 구성 모두 13/13 일치 [M]). 시험: `tests/predict/test_predict_model.cpp`(작은 프로필·모델; 126 검사, §9의 세 분류 포함). 종료 상태: 0 완료(앵커 없음 포함), 1 사용법, 2 입력·분석 오류, 3 인용·계획 문제, **4 적합성 검사의 모순(탐색 안 함)**.
 
 ## 3. 경계 — 레퍼런스가 정하지 않는 연구자 선택과 탐색하지 않은 것 [D]
 
@@ -102,3 +102,33 @@ kz predict <run.kzt> --profile $P --profile $P/cf-<REV> --profile $P/bundle-<CAN
 - 합성(`lib/predict/predict.cpp`): 첫 hit 가 아닌 지점은 그 표지의 몇 번째 hit 인지(occurrence)로 쓴다. 키의 생성이 k 번째와 k+1 번째 사용 사이(0 < k < 모든 사용)이면, 공급자를 생성에서 잡고 k 번째 사용 뒤(k+1 번째 사용 전)에 푸는 것에 더해 **소비자를 k+1 번째 사용에서 잡고 생성 뒤에 푸는 쪽**을 더한다(이전 노트 "the use after it is left to the scheduler" 는 없어진다; 더한 쪽은 필요 목록 끝에 붙여 이전 번호를 지킨다). 해제는 그 창에서 첫 hit 표지를 먼저 고르고(이전 계획을 그대로 지킴), 계획이 주소 넷을 넘으면 모든 해제를 가장 가까운 hit 로 다시 고른다(계획 노트에 적힘). 모든 게이트에 `unless-released`.
 - 결과(`/home/user/work/procrace/c1_runs/predict2/`, `run_predict.sh`; 같은 smoke3 tx 기록·입력, 현행 모드만): 후보는 predict1 과 같다(pre 3, post 13; 기각 0). **모든 새 후보의 전체 계획이 모델에서 "강제, 정체 없음"** 이다(pre W2·W3, post W1–W8·W10–W13). 그래서 키 하나씩의 계획(`W<n>-<k>`)은 만들지 않았다. pre W2·post W10·post W1 의 제어점은 predict1 과 같고 `unless-released` 만 더해졌다. A·B 두 후보의 계획은 주석만 다르다.
 - 이 점검은 시간 없는 모델의 것이다. 실제 실행에서 해제가 게이트보다 먼저 오는지는 시간에 달려 있고(그래서 `unless-released`), 확인은 실행으로만 한다(`plan/results_pilot_20261025.md` §5.6).
+
+## 9. 앵커 적합성 검사 (2026-10-26, IR §2.3·§16) [D][M]
+
+- 근거: IR §2.3("실제 기록의 불완전성과 모델 가정 때문에 생긴 차이인지, 모델이 기록과 모순되는지를 구분하는 검사"), §16 행 "anchor와 실제 기록의 모순을 허용한 채 탐색했는가", 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md` §1 첫 행("고친다") [D].
+- 구현: `lib/predict/predict.cpp` `check_fitness`·`fitness_text`, 결과 구조체 `PredictReport::fitness`(`include/kz/predict/predict.hpp` `Fitness`·`FitItem`·`FitClass`). 앵커의 모델 trace를 같은 프로필·옵션으로 재생한 직후, 탐색 전에 돈다.
+- 비교 단위: 발생(rspec, 행위자, 키 텍스트, 순번)마다 사실별로 — 존재, 상태, conjunct(이름별), 반환 코드(32비트 레지스터 값은 부호 있는 코드로 읽음), 범위(default/teardown), 관측 요약(`render_observation`과 그 이유 집합). **문자열 동등성으로 비교하지 않는다.** 콘 밖 행위자·키의 기록 발생은 비교하지 않고 센다(`not compared`).
+- 분류와 처리 [D]:
+
+| 분류 | 조건(기록 쪽 → 모델 쪽) | 처리 |
+|---|---|---|
+| **모순** (contradiction) | 기록이 확정한 사실과 모델이 다름: 최종 상태(READY·TOLERATED·VIOLATING·NOT_READY_UNJUDGED·NOT_EVALUATED)가 다름; UNDETERMINED인데 모델 상태가 기록의 설명 집합(`possible`) 밖; 기록이 고정한 conjunct 값이 다르거나 모델이 평가하지 않음; 반환 코드가 다르거나 모델에 없음; 범위가 다름; 결정된 관측 요약이 다름; 기록에 있는 발생이 앵커 재생에 없음; 앵커 재생에만 있는 발생(기록에 손실 없음); 기록 쪽 분석 입력 오류(설명 집합이 빔); 앵커 재생 자체의 결과 불일치·입력 오류·guard 실패 | **예측 거부**(탐색 안 함), 보고 + 종료 4 |
+| **추가 모델 가정** (assumption) | 기록이 열어 둔 것을 모델이 정함: UNDETERMINED → `possible` 안의 상태(설명 집합의 PENDING은 모델의 horizon monitor가 TOLERATED·VIOLATING으로 정한 경우 포함); OPEN·PENDING → 결정; 기록이 고정하지 못한 conjunct(unknown·passage unknown·미평가) → 모델 값; 반환 없는 호출 → 모델 코드. 또 **기록이 반환 코드로만(P1 좁힘, `outcome`) 고정한 conjunct**: 모델은 상태로 정하지만 앵커가 같은 코드를 따르므로 독립 일치가 아니다 | 허용, 가정으로 나열 |
+| **정보 부족** (gap) | 기록이 불완전: 보고된 손실 구간, 발생의 `unobserved`(관측하지 않은 조건 지점·writer·정적 닫힘 없음), 반환 없는 호출, 기록만 보류하는 이유(INCONCLUSIVE의 이유 중 모델 재생에 없는 것), 둘 다 결정하지 못함, 손실이 있을 때 앵커에만 있는 발생. 모델 재생이 기록이 결정한 것을 보류하는 경우도 여기에 적는다(후보 판정이 기록보다 약해질 뿐 기록과 어긋나지는 않는다) | 허용, 나열 |
+
+- 양쪽이 같은 이유로 보류하는 것은 차이가 아니다(예: `caller_requirement_absent`는 완전한 모델 trace에서도 나오므로 기록의 불완전성에서 오지 않는다). 일치한 사실은 발생마다 `agree` 줄로 적는다.
+- 위 분류 경계(PENDING의 monitor 결정을 가정으로, P1 좁힘 conjunct를 가정으로, 모델 쪽 보류를 정보 부족으로)는 레퍼런스가 정하지 않는 도구 설계 선택이다 [D]. 모순 쪽으로 보수적으로 둔 것: 앵커에만 있는 발생(손실 없음), 기록이 고정한 conjunct를 모델이 평가하지 않음.
+- 시험(`tests/predict/test_predict_model.cpp` `test_fitness_classes` 와 `test_anchor_and_prediction`): 손으로 만든 판정으로 세 분류 각각(모순: 상태·conjunct·코드·존재·설명 집합 밖·입력 오류; 가정: UNDETERMINED·P1 좁힘·PENDING의 monitor 결정·미결정; 정보 부족: 손실·미관측·손실 중 앵커에만 있는 발생), 같은 이유의 보류와 콘 밖 발생은 차이 아님; 작은 모델의 실제 재생으로 일치(정적 닫힘 없음 → 정보 부족 1), 기록 결과를 바꾼 모순 → 탐색 안 함, 조건 지점을 관측하지 않은 기록 → 가정·정보 부족과 함께 예측 진행 [M].
+
+**smoke3 tx 넷 재실행** (`/home/user/work/procrace/c1_runs/predict3/`, `run_predict.sh`; predict2와 같은 기록·입력·kz 빌드 HEAD+이 변경; `cur` = P1 좁힘 켬, `p1off` = 끔; 개발 실행이며 결과가 아니다) [M]:
+
+| 기록 | 모드 | 비교 발생 | 모순 | 가정 | 정보 부족 | 내용 |
+|---|---|---|---|---|---|---|
+| pre A·B | cur | 1 | **0** | 1 | 0 | (CF,`BP0_tsem`,1)의 conjunct `exists`: 기록은 반환 코드(P1 좁힘)로만 fails, 모델은 상태로 fails(독립 일치 아님). 상태·코드·범위·관측(`INCONCLUSIVE(caller_requirement_absent)` 양쪽 같음) 일치 |
+| post A·B | cur | 3 | **0** | 1 | 0 | (CF,`BP0_tsem`,1) conjunct `exists`가 위와 같음. (…,2)·(CF,`BP1_tsem`,1)은 모든 사실 일치(관측 지점에서 holds) |
+| pre A·B | p1off | 1 | **0** | 2 | 1 | 상태: 기록 UNDETERMINED {NOT_READY_UNJUDGED, READY} → 모델 NOT_READY_UNJUDGED; conjunct: 기록 unknown(`explanation_ambiguous`) → 모델 fails; 정보 부족: 기록만 `explanation_ambiguous`로 보류 |
+| post A·B | p1off | 3 | **0** | 2 | 1 | (CF,`BP0_tsem`,1) 상태: 기록 UNDETERMINED {PENDING, READY} → 모델 PENDING, monitor가 TOLERATED로 정함(2번째 시도 READY); conjunct 위와 같음; 정보 부족: 기록 `INCONCLUSIVE(horizon-open,explanation_ambiguous)`, 모델 NO_VIOLATION_IN_CHECKED_PREFIX |
+
+- 넷 모두 모순 없음 → 예측 진행. `cur`의 후보·계획·trace는 predict2와 바이트 단위로 같다(`predict.txt`는 적합성 줄만 늘었다; `*.kzh`·`*.trace` 동일 [M]). `p1off`의 묶음 수는 predict1 `p1off`와 같다(pre 8, post 26).
+- 처음 구현은 설명 집합의 PENDING을 모델의 TOLERATED와 맞추지 못해 post `p1off`를 모순으로 거부했다(TOLERATED는 PENDING의 monitor 결정인데 집합에는 PENDING만 있음). 분류를 위 표처럼 고친 뒤 재실행했다 [M].
+- 해석 [I]: 현행 모드에서 앵커가 기록에 **더하는** 것은 실패한 첫 조회 시점의 상태 하나뿐이고, 그것은 P1 좁힘이 반환 코드에서 읽은 것과 같은 값이다. 따라서 이 기록들의 실패 쪽 후보 판정은 P1(조건부 채택)에 기대며, 그 기대는 이제 각 `predict.txt`에 가정으로 적힌다.

@@ -18,6 +18,10 @@
 // constraints (the failing order an RF edge forbids is then lost), `keep` keeps the record's results and
 // branches while dropping those orders (the candidates are then re-judged and the infeasible ones rejected).
 //
+// Before the search, the record's judgement and the model replay of the anchor are compared occurrence by occurrence
+// (check_fitness below): a contradiction refuses the prediction; an assumption of the model and a gap of the record
+// are listed with it.
+//
 // Every class of executions found is re-judged by the profile's replay (eval::replay, model record): the
 // same readiness specification, outcome mapping, horizon monitors and scope as the observation judgement.
 // A candidate whose replay finds a result that disagrees with the state at its conjunct point, a guard
@@ -197,6 +201,50 @@ struct Witness {
   eval::Trace trace;
 };
 
+// ---- the fitness of the anchor for the record (IR 2.3, 16; docs/predict.md section 1 "Fitness") ----------------
+//
+// The record's own judgement (its real-record replay) and the model replay of the anchor are compared occurrence by
+// occurrence (rspec, actor, key text, ordinal) and fact by fact: presence, status, each conjunct, the returned code,
+// the scope and the observation.  Never as text: two judgements that print alike may rest on different facts, and two
+// that print differently may not contradict each other.  A difference is one of
+//   Contradiction  the record establishes the fact (a final status, a conjunct it fixes, a returned code, an
+//                  occurrence it has, an analysis input error) and the model's differs, or the model replay of the
+//                  anchor is itself inconsistent with the profile (a disagreeing outcome, a guard failure): the
+//                  prediction is refused (no search) and the contradiction reported;
+//   Assumption     the record leaves the fact open (an undetermined or undecided status, a conjunct it does not fix,
+//                  a call without a return) or fixes it only through its returned code under P1 (outcome-narrowed),
+//                  and the model fixes it: allowed, listed as an assumption of the model;
+//   Gap            the record is incomplete there (a reported loss, a point it does not observe, a call without a
+//                  return, reasons it withholds for that the model replay does not share), or the model replay
+//                  withholds what the record decides: allowed, listed.
+// The record's occurrences outside the cone (an actor or a key the model does not have) are not compared; they are
+// counted.  Reasons both sides withhold for (e.g. caller_requirement_absent, which a complete model trace gives too)
+// are not a difference.
+enum class FitClass : uint8_t { Contradiction, Assumption, Gap };
+const char* fit_class_text(FitClass c);
+
+struct FitItem {
+  FitClass cls = FitClass::Gap;
+  std::string occurrence;  // "<actor> <key> #<ordinal>"; empty: the record or the anchor as a whole
+  std::string fact;        // presence, status, conjunct <label>, result, scope, observation, loss, guard
+  std::string what;
+};
+
+struct Fitness {
+  bool checked = false;                    // the comparison ran (the model reproduces the record)
+  uint32_t compared = 0;                   // occurrence pairs compared
+  std::vector<std::string> agreed;         // per compared pair: the facts on which both sides agree
+  std::vector<std::string> not_compared;   // the record's occurrences outside the cone
+  std::vector<FitItem> items;              // every difference, in occurrence order
+  bool contradiction = false;              // some item is a contradiction: no prediction
+  uint32_t count(FitClass c) const;
+};
+
+// The comparison above.  `record` / `record_result`: the real record and its replay; `anchor` / `anchor_result`: the
+// model trace of the anchor and its replay (same profile and options).
+Fitness check_fitness(const Model& m, const eval::Trace& record, const eval::Result& record_result, const eval::Trace& anchor, const eval::Result& anchor_result);
+std::string fitness_text(const Fitness& f);
+
 struct PredictReport {
   bool anchored = false;
   std::string anchor_note;
@@ -204,6 +252,7 @@ struct PredictReport {
   std::string anchor_key;
   std::vector<Judged> observed;        // the record's own judgement
   std::vector<Judged> anchor_judged;   // the replay of the anchor's model trace
+  Fitness fitness;                     // the two compared; a contradiction refuses the prediction (no search)
   std::vector<std::string> outside;    // record steps outside the cone, with the reason
   std::vector<std::vector<Tuple>> record_tuples;
   std::vector<EdgeInfo> edges;

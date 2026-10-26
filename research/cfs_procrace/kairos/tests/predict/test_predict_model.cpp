@@ -18,7 +18,13 @@
 //     resumed thread armed); with a retry loop, the order "creation between the 2nd and the 3rd lookup" gets a release
 //     at the 2nd hit of the lookup's after-call point and a gate at the 3rd hit of the lookup entry (occurrence <n>);
 //   - resolution refuses an unknown citation, a key not shorter than the mapping's length bound, a use whose call
-//     context has no role; the state cap is reported.
+//     context has no role; the state cap is reported;
+//   - the fitness of the anchor (IR 2.3, 16): the record's judgement and the model replay of the anchor compared per
+//     occurrence and fact: a contradiction (a status, conjunct, code or occurrence the record establishes and the
+//     model does not reproduce) refuses the prediction; an assumption (the model fixes what the record leaves open,
+//     or what the record fixes only through its returned code) and a gap (a loss, an unobserved point, a call without
+//     return, reasons the record withholds for alone) are listed and the prediction proceeds; shared reasons and
+//     occurrences outside the cone are no difference.
 
 #include <string>
 #include <vector>
@@ -265,6 +271,41 @@ void test_anchor_and_prediction() {
   const std::string rt = kz::predict::report_text(PredictInput{&p, &m, &r.trace, &r.result, {{"MAXN", 20}}, kz::eval::Options(), 100000}, v);
   KZ_CHECK(has(rt, "VARIABLE (re-derived per order) RF"));
   KZ_CHECK(has(rt, "CONSTRAINT (kept in every order) SP"));
+  // the fitness of the anchor: the record (READY at its observed point) and the model replay agree on every fact; the
+  // record names what it lacks (no static closure was given): a gap
+  KZ_CHECK(v.fitness.checked && !v.fitness.contradiction && v.fitness.compared == 1 && v.fitness.items.size() == 1);
+  KZ_CHECK(has(rt, "contradictions 0, assumptions 0, gaps 1") && has(rt, "agree A S0 #1: status, conjunct exists, result, scope, observation"));
+  KZ_CHECK(has(rt, "gap A S0 #1 observation: the record does not observe: sem: static closure not given"));
+
+  // a record result that establishes another status than the model replay of the anchor: a contradiction, no search
+  {
+    Rec bad_rec = r;
+    bad_rec.result.occurrences[0].status = kz::eval::OccStatus::NotReadyUnjudged;
+    const PredictReport x = run(p, m, bad_rec, kz::predict::EdgeMode::Variable, kz::predict::OutcomeMode::Rederive);
+    KZ_CHECK(x.anchored && x.fitness.contradiction);
+    KZ_CHECK(x.fitness.count(kz::predict::FitClass::Contradiction) == 1 && x.search.states == 0 && x.witnesses.empty());
+    const std::string xt = kz::predict::report_text(PredictInput{&p, &m, &bad_rec.trace, &bad_rec.result, {{"MAXN", 20}}, kz::eval::Options(), 100000}, x);
+    KZ_CHECK(has(xt, "CONTRADICTION A S0 #1 status: the record establishes NOT_READY_UNJUDGED; the model replay gives READY"));
+    KZ_CHECK(has(xt, "no prediction: the anchor contradicts the record") && !has(xt, "\nsearch: "));
+  }
+  // a record that does not observe the lookup's conjunct point: it leaves the status open (READY or NOT_EVALUATED: the
+  // passage of the point is not observed) and the model fixes it, an assumption; the unobserved point and the
+  // INCONCLUSIVE observation are gaps of the record; the prediction proceeds
+  {
+    std::string head = kHead;
+    head.replace(head.find("observed lookup.exists\n"), 23, "");
+    const Rec r3 = record(p, head + kCreate + "A lookup call arg.name=@S0\nA lookup ret out.id=0x30002 result=0\nA user_call pt\n");
+    const PredictReport y = run(p, m, r3, kz::predict::EdgeMode::Variable, kz::predict::OutcomeMode::Rederive);
+    KZ_CHECK(y.anchored && y.fitness.checked && !y.fitness.contradiction);
+    KZ_CHECK(y.fitness.count(kz::predict::FitClass::Assumption) >= 1 && y.fitness.count(kz::predict::FitClass::Gap) >= 1);
+    bool fixed = false, unobserved = false;
+    for (const kz::predict::FitItem& it : y.fitness.items) {
+      fixed = fixed || (it.cls == kz::predict::FitClass::Assumption && it.fact == "status" && has(it.what, "the model fixes READY"));
+      unobserved = unobserved || (it.cls == kz::predict::FitClass::Gap && has(it.what, "does not observe") && has(it.what, "lookup.exists"));
+    }
+    KZ_CHECK(fixed && unobserved);
+    KZ_CHECK(!y.witnesses.empty());
+  }
 
   // fixing the observed-run-dependent orders as constraints loses the failing order
   const PredictReport f = run(p, m, r, kz::predict::EdgeMode::Fixed, kz::predict::OutcomeMode::Rederive);
@@ -490,9 +531,161 @@ void test_resolution() {
   refused("kzp-predict 1\nactor M start prov code_a\nprogram M\n  hit x before\n  finish\nend\n", "hit: must follow");
 }
 
+// check_fitness on hand-made judgements: one class each.
+kz::eval::Occurrence occ(kz::eval::OccStatus st, bool holds, int64_t result) {
+  kz::eval::Occurrence o;
+  o.rspec = "K";
+  o.actor = "A";
+  o.call = 0;
+  o.returned = true;
+  o.ret = 1;
+  o.ordinal = 1;
+  o.status = st;
+  o.decided_at = kz::eval::DecidedAt::Point;
+  kz::eval::ConjunctResult c;
+  c.label = "exists";
+  c.source = kz::eval::LpSource::Point;
+  c.evaluated = true;
+  c.holds = holds;
+  o.conjuncts.push_back(c);
+  o.has_result = true;
+  o.result = result;
+  o.summary.observation = st == kz::eval::OccStatus::Violating ? KZ_OBS_OBSERVED_VIOLATION
+                          : st == kz::eval::OccStatus::NotReadyUnjudged ? KZ_OBS_INCONCLUSIVE
+                                                                       : KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX;
+  if (st == kz::eval::OccStatus::NotReadyUnjudged) o.summary.obs_reasons = KZ_WITHHOLD_CALLER_REQUIREMENT_ABSENT;
+  return o;
+}
+
+bool has_item(const kz::predict::Fitness& f, kz::predict::FitClass c, const std::string& fact, const std::string& frag = std::string()) {
+  for (const kz::predict::FitItem& it : f.items)
+    if (it.cls == c && it.fact == fact && has(it.what, frag)) return true;
+  return false;
+}
+
+void test_fitness_classes() {
+  using kz::eval::OccStatus;
+  using kz::predict::FitClass;
+  Model m;
+  m.actors.resize(1);
+  m.actors[0].name = m.actors[0].record = "A";
+  m.resources.resize(1);
+  m.resources[0].name = "s0";
+  m.resources[0].key_text = "S0";
+  kz::eval::Trace rt, at;
+  KZ_CHECK(kz::eval::parse_trace_text("record real\nA lookup call arg.name=@S0\nA lookup ret result=0\nC lookup call arg.name=@S9\nC lookup ret result=0\n", &rt).ok());
+  KZ_CHECK(kz::eval::parse_trace_text("A lookup call arg.name=@S0\nA lookup ret result=0\n", &at).ok());
+  auto fit = [&](const kz::eval::Occurrence& ro, const std::vector<kz::eval::Occurrence>& mo) {
+    kz::eval::Result rr, ar;
+    rr.occurrences.push_back(ro);
+    ar.occurrences = mo;
+    return kz::predict::check_fitness(m, rt, rr, at, ar);
+  };
+  // agreement on every fact; the same withholding on both sides is no difference
+  {
+    const kz::predict::Fitness f = fit(occ(OccStatus::Ready, true, 0), {occ(OccStatus::Ready, true, 0)});
+    KZ_CHECK(f.checked && f.compared == 1 && f.items.empty() && !f.contradiction);
+    const kz::predict::Fitness g = fit(occ(OccStatus::NotReadyUnjudged, false, -17), {occ(OccStatus::NotReadyUnjudged, false, -17)});
+    KZ_CHECK(g.items.empty() && g.agreed.size() == 1 && has(g.agreed[0], "observation (INCONCLUSIVE(caller_requirement_absent) on both sides)"));
+    // a record occurrence of an actor outside the model is not compared
+    kz::eval::Result rr, ar;
+    kz::eval::Occurrence c = occ(OccStatus::Ready, true, 0);
+    c.actor = "C";
+    c.call = 2;
+    rr.occurrences.push_back(c);
+    const kz::predict::Fitness h = kz::predict::check_fitness(m, rt, rr, at, ar);
+    KZ_CHECK(h.compared == 0 && h.items.empty() && h.not_compared.size() == 1 && !h.contradiction);
+  }
+  // (a) contradiction: a final status, a conjunct and a code the record establishes; an occurrence only one side has
+  {
+    const kz::predict::Fitness f = fit(occ(OccStatus::Ready, true, 0), {occ(OccStatus::NotReadyUnjudged, false, -17)});
+    KZ_CHECK(f.contradiction);
+    KZ_CHECK(has_item(f, FitClass::Contradiction, "status", "establishes READY"));
+    KZ_CHECK(has_item(f, FitClass::Contradiction, "conjunct exists"));
+    KZ_CHECK(has_item(f, FitClass::Contradiction, "result", "returns 0; the model replay -17"));
+    // the model replay withholds (caller_requirement_absent) what the record decides: listed as a gap
+    KZ_CHECK(has_item(f, FitClass::Gap, "observation", "the model replay withholds"));
+    // the record's 32-bit register value of a negative code is that code (no difference)
+    const kz::predict::Fitness u = fit(occ(OccStatus::NotReadyUnjudged, false, 0xffffffefLL), {occ(OccStatus::NotReadyUnjudged, false, -17)});
+    KZ_CHECK(!u.contradiction && u.items.empty());
+    const kz::predict::Fitness r = fit(occ(OccStatus::Ready, true, 0), {});
+    KZ_CHECK(r.contradiction && has_item(r, FitClass::Contradiction, "presence", "the model replay of the anchor has none"));
+    kz::eval::Result rr, ar;
+    ar.occurrences.push_back(occ(OccStatus::Ready, true, 0));
+    const kz::predict::Fitness a = kz::predict::check_fitness(m, rt, rr, at, ar);
+    KZ_CHECK(a.contradiction && has_item(a, FitClass::Contradiction, "presence", "no loss reported"));
+    // undetermined, but the model's status is not among the record's explanations
+    kz::eval::Occurrence ud = occ(OccStatus::Undetermined, true, 0);
+    ud.possible = {OccStatus::Ready};
+    const kz::predict::Fitness d = fit(ud, {occ(OccStatus::Violating, false, 0)});
+    KZ_CHECK(d.contradiction && has_item(d, FitClass::Contradiction, "status", "not among them"));
+    // a record that contradicts the profile (analysis input error)
+    kz::eval::Occurrence ie = occ(OccStatus::Ready, true, 0);
+    ie.input_error = true;
+    KZ_CHECK(has_item(fit(ie, {occ(OccStatus::Ready, true, 0)}), FitClass::Contradiction, "status", "analysis input error"));
+  }
+  // (b) assumption: the model fixes what the record leaves open, or what the record fixes only through its code
+  {
+    kz::eval::Occurrence ud = occ(OccStatus::Undetermined, true, -17);
+    ud.possible = {OccStatus::NotReadyUnjudged, OccStatus::Ready};
+    ud.reasons = KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+    ud.conjuncts[0].evaluated = false;
+    ud.conjuncts[0].unknown = true;
+    ud.conjuncts[0].source = kz::eval::LpSource::Interval;
+    ud.conjuncts[0].reasons = KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+    ud.summary.observation = KZ_OBS_INCONCLUSIVE;
+    ud.summary.obs_reasons = KZ_WITHHOLD_CALLER_REQUIREMENT_ABSENT | KZ_WITHHOLD_EXPLANATION_AMBIGUOUS;
+    const kz::predict::Fitness f = fit(ud, {occ(OccStatus::NotReadyUnjudged, false, -17)});
+    KZ_CHECK(!f.contradiction);
+    KZ_CHECK(has_item(f, FitClass::Assumption, "status", "the model fixes NOT_READY_UNJUDGED"));
+    KZ_CHECK(has_item(f, FitClass::Assumption, "conjunct exists", "the record leaves it open"));
+    // the reason the record withholds for alone is a gap
+    KZ_CHECK(has_item(f, FitClass::Gap, "observation", "withholds also for {explanation_ambiguous}"));
+    // the conjunct fixed only through the returned code (P1 narrowing)
+    kz::eval::Occurrence nw = occ(OccStatus::NotReadyUnjudged, false, -17);
+    nw.conjuncts[0].source = kz::eval::LpSource::Outcome;
+    const kz::predict::Fitness g = fit(nw, {occ(OccStatus::NotReadyUnjudged, false, -17)});
+    KZ_CHECK(!g.contradiction && g.items.size() == 1 && has_item(g, FitClass::Assumption, "conjunct exists", "not an independent agreement"));
+    // a PENDING explanation that the model's horizon monitor decides
+    kz::eval::Occurrence pd = occ(OccStatus::Undetermined, false, -17);
+    pd.possible = {OccStatus::Pending, OccStatus::Ready};
+    const kz::predict::Fitness h = fit(pd, {occ(OccStatus::Tolerated, false, -17)});
+    KZ_CHECK(!h.contradiction && has_item(h, FitClass::Assumption, "status", "its horizon monitor decides it TOLERATED"));
+    // an occurrence the record does not decide
+    kz::eval::Occurrence op = occ(OccStatus::Open, true, 0);
+    op.conjuncts[0].evaluated = false;
+    op.conjuncts[0].source = kz::eval::LpSource::NotPassed;
+    op.has_result = false;
+    op.returned = false;
+    const kz::predict::Fitness k = fit(op, {occ(OccStatus::Ready, true, 0)});
+    KZ_CHECK(!k.contradiction && has_item(k, FitClass::Assumption, "status", "does not decide") && has_item(k, FitClass::Assumption, "result", "no returned code"));
+    KZ_CHECK(has_item(k, FitClass::Gap, "presence", "does not return in the record"));
+  }
+  // (c) gap: a loss, an unobserved point, an occurrence the record may have lost
+  {
+    kz::eval::Trace lt = rt;
+    lt.losses.push_back(kz::eval::LossInterval{1, kz::eval::kNoEvent});
+    kz::eval::Occurrence lo = occ(OccStatus::Ready, true, 0);
+    lo.unobserved = {"lookup.exists"};
+    kz::eval::Result rr, ar;
+    rr.occurrences.push_back(lo);
+    ar.occurrences.push_back(occ(OccStatus::Ready, true, 0));
+    kz::eval::Occurrence second = occ(OccStatus::Ready, true, 0);
+    second.ordinal = 2;
+    ar.occurrences.push_back(second);
+    const kz::predict::Fitness f = kz::predict::check_fitness(m, lt, rr, at, ar);
+    KZ_CHECK(!f.contradiction && f.count(FitClass::Contradiction) == 0);
+    KZ_CHECK(has_item(f, FitClass::Gap, "loss", "events may be missing from #1 to its end"));
+    KZ_CHECK(has_item(f, FitClass::Gap, "observation", "does not observe: lookup.exists"));
+    KZ_CHECK(has_item(f, FitClass::Gap, "presence", "may be among the missing events"));
+    KZ_CHECK(has(kz::predict::fitness_text(f), "-> no contradiction: the prediction proceeds"));
+  }
+}
+
 }  // namespace
 
 int main() {
+  test_fitness_classes();
   test_anchor_and_prediction();
   test_anchor_refusals();
   test_resolution();

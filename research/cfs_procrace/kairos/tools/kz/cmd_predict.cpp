@@ -20,6 +20,11 @@
 // under the pinned bundle; --observe-profile checks that the plan's sites exist in the observation profile with a
 // kind the hold can use.  --out-dir writes predict.txt, anchor.trace, W<n>.trace (the model trace of each
 // candidate, for `kz-phi replay --trace`) and W<n>.kzh (the plans).
+//
+// Before the search the record's judgement and the model replay of the anchor are compared per occurrence and fact
+// (contradiction / assumption of the model / gap of the record); a contradiction refuses the prediction.  Exit status:
+// 0 done (also when the model is not anchored), 1 usage, 2 an input or analysis error, 3 a citation or plan problem,
+// 4 the fitness check found a contradiction (no search).
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
@@ -280,6 +285,7 @@ int run(int argc, char** argv) {
     have_observe = true;
   }
   int status = cite_problems.empty() ? 0 : 3;
+  if (rep.fitness.contradiction) status = 4;  // the anchor contradicts the record: no prediction (docs/predict.md)
   if (!out_dir.empty()) {
     std::error_code ec;
     fs::create_directories(out_dir, ec);

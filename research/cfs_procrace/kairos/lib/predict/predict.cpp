@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <set>
 
+#include "kz/core/registry.hpp"
 #include "kz/core/verdict.hpp"
 #include "kz/predict/predict.hpp"
 
@@ -507,7 +508,228 @@ int32_t pos_of(const std::vector<Step>& w, int32_t actor, int32_t index) {
   return -1;
 }
 
+// ---- the fitness of the anchor (check_fitness) -----------------------------------------------------
+
+std::string withhold_text(uint32_t bits) {
+  const EnumDesc* en = find_enum("KZ_WITHHOLD");
+  std::string r;
+  if (en != nullptr)
+    for (size_t i = 0; i < en->nitems; ++i)
+      if ((bits & en->items[i].value) != 0) r += (r.empty() ? "" : ",") + std::string(en->items[i].display);
+  return "{" + r + "}";
+}
+
+// A status the occurrence's judgement reached (OPEN, PENDING and an undetermined status are not decisions).
+bool decided(eval::OccStatus s) { return s != eval::OccStatus::Open && s != eval::OccStatus::Pending && s != eval::OccStatus::Undetermined; }
+
+// A status the record carries as an unsigned 32-bit register value is the signed code of the API.
+int64_t signed_code(int64_t v) { return (v >= 0x80000000LL && v <= 0xffffffffLL) ? v - 0x100000000LL : v; }
+
+std::string occ_key(const eval::Trace& t, const eval::Occurrence& o) { return o.call < t.events.size() ? first_text(t.events[o.call]) : std::string(); }
+
+std::string occ_name(const eval::Trace& t, const eval::Occurrence& o) { return o.actor + " " + occ_key(t, o) + " #" + std::to_string(o.ordinal); }
+
+std::string conj_value(const eval::ConjunctResult& c) {
+  if (c.evaluated) return std::string(c.holds ? "holds" : "fails") + " (" + eval::lp_source_text(c.source) + " #" + std::to_string(c.event) + ")";
+  if (c.unknown || c.passage_unknown)
+    return std::string(c.passage_unknown ? "passage unknown" : "unknown") + (c.reasons != 0 ? " " + withhold_text(c.reasons) : std::string());
+  return "not evaluated";
+}
+
+bool is_inconclusive(const eval::Occurrence& o) { return (o.summary.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) == 0 && o.summary.observation == KZ_OBS_INCONCLUSIVE; }
+
+// One record occurrence against its anchor occurrence.
+void compare_occurrence(const eval::Trace& rt, const eval::Occurrence& o, const eval::Occurrence& a, Fitness* f) {
+  const std::string name = occ_name(rt, o);
+  std::vector<std::string> agree;
+  auto item = [&](FitClass c, const std::string& fact, const std::string& what) {
+    f->items.push_back(FitItem{c, name, fact, what});
+    if (c == FitClass::Contradiction) f->contradiction = true;
+  };
+  const std::string rs = eval::occ_status_text(o.status), as = eval::occ_status_text(a.status);
+  // the status
+  if (o.input_error) item(FitClass::Contradiction, "status", "the record contradicts the profile here (analysis input error: its explanation set is empty); the model replay gives " + as);
+  if (a.input_error) item(FitClass::Contradiction, "status", "the model replay of the anchor has an analysis input error here");
+  if (a.outcome == eval::OutcomeCheck::Disagrees) item(FitClass::Contradiction, "status", "the model replay of the anchor finds a result that disagrees with the state at the conjunct point");
+  if (!o.input_error) {
+    if (decided(o.status)) {
+      if (a.status != o.status) item(FitClass::Contradiction, "status", "the record establishes " + rs + "; the model replay gives " + as);
+      else agree.push_back("status");
+    } else if (o.status == eval::OccStatus::Undetermined) {
+      std::string allowed;
+      bool in = false, by_monitor = false;
+      for (eval::OccStatus s : o.possible) {
+        allowed += (allowed.empty() ? "" : ",") + std::string(eval::occ_status_text(s));
+        in = in || s == a.status;
+        // PENDING is a not-ready attempt whose horizon monitor has not decided: the monitor decides it TOLERATED or VIOLATING
+        by_monitor = by_monitor || (s == eval::OccStatus::Pending && (a.status == eval::OccStatus::Tolerated || a.status == eval::OccStatus::Violating));
+      }
+      const std::string why = "the record allows {" + allowed + "}" + (o.reasons != 0 ? " (withheld " + withhold_text(o.reasons) + ")" : std::string());
+      if (!decided(a.status)) item(FitClass::Gap, "status", "neither side decides: " + why + ", the model replay gives " + as);
+      else if (in) item(FitClass::Assumption, "status", why + "; the model fixes " + as);
+      else if (by_monitor)
+        item(FitClass::Assumption, "status", why + "; the model fixes PENDING and its horizon monitor decides it " + as + (a.monitor.empty() ? std::string() : " (" + a.monitor + ")"));
+      else item(FitClass::Contradiction, "status", why + "; the model replay gives " + as + ", which is not among them");
+    } else if (decided(a.status)) {
+      item(FitClass::Assumption, "status", "the record does not decide this occurrence (" + rs + (o.reasons != 0 ? ", withheld " + withhold_text(o.reasons) : std::string()) + "); the model replay decides " + as);
+    } else if (a.status == o.status) {
+      agree.push_back("status (" + rs + " on both sides)");
+    } else {
+      item(FitClass::Gap, "status", "neither side decides (the record " + rs + ", the model replay " + as + ")");
+    }
+  }
+  // the conjuncts, by label
+  for (const eval::ConjunctResult& rc : o.conjuncts) {
+    const eval::ConjunctResult* mc = nullptr;
+    for (const eval::ConjunctResult& x : a.conjuncts)
+      if (x.label == rc.label) mc = &x;
+    const std::string fact = "conjunct " + rc.label;
+    if (rc.contradicted && !o.input_error) item(FitClass::Contradiction, fact, "the record contradicts the profile at this conjunct (an empty explanation set)");
+    if (rc.contradicted) continue;
+    const bool m_eval = mc != nullptr && mc->evaluated;
+    const std::string mv = mc != nullptr ? conj_value(*mc) : std::string("absent");
+    if (rc.evaluated && m_eval) {
+      if (rc.holds != mc->holds) item(FitClass::Contradiction, fact, "the record fixes it: " + conj_value(rc) + "; the model replay: " + mv);
+      else if (rc.source == eval::LpSource::Outcome)
+        item(FitClass::Assumption, fact,
+             "the record fixes it only through the returned code (" + conj_value(rc) + ", P1 outcome narrowing" + (o.narrowing.empty() ? std::string() : ": " + o.narrowing) +
+                 "); the model fixes it from its state (" + mv + "), which the anchor's followed code makes agree: not an independent agreement");
+      else
+        agree.push_back(fact);
+    } else if (rc.evaluated) {
+      item(FitClass::Contradiction, fact, "the record fixes it: " + conj_value(rc) + "; the model replay of the anchor does not (" + mv + ")");
+    } else if (m_eval) {
+      item(FitClass::Assumption, fact, "the record leaves it open (" + conj_value(rc) + "); the model fixes it: " + mv);
+    } else if (rc.unknown || rc.passage_unknown) {
+      item(FitClass::Gap, fact, "neither side fixes it (the record: " + conj_value(rc) + "; the model replay: " + mv + ")");
+    }
+  }
+  // the returned code
+  if (o.has_result && a.has_result) {
+    if (signed_code(o.result) != signed_code(a.result))
+      item(FitClass::Contradiction, "result", "the record returns " + std::to_string(signed_code(o.result)) + "; the model replay " + std::to_string(signed_code(a.result)));
+    else
+      agree.push_back("result");
+  } else if (o.has_result) {
+    item(FitClass::Contradiction, "result", "the record returns " + std::to_string(signed_code(o.result)) + "; the model replay of the anchor has no returned code");
+  } else if (a.has_result) {
+    item(FitClass::Assumption, "result", "the record has no returned code; the model returns " + std::to_string(signed_code(a.result)));
+  }
+  if (!o.returned) item(FitClass::Gap, "presence", "the call does not return in the record (call #" + std::to_string(o.call) + ")");
+  // the scope of the decision
+  if (decided(o.status) && decided(a.status)) {
+    if (o.in_scope != a.in_scope)
+      item(FitClass::Contradiction, "scope", std::string("the record decides it in the ") + (o.in_scope ? "default" : "teardown") + " scope; the model replay in the " + (a.in_scope ? "default" : "teardown") + " scope");
+    else
+      agree.push_back("scope");
+  }
+  // the observation summary
+  if ((o.summary.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) == 0 && (a.summary.flags & KZ_SUMMARY_FLAG_INPUT_ERROR) == 0) {
+    const std::string ro = render_observation(o.summary), ao = render_observation(a.summary);
+    if (is_inconclusive(o) && is_inconclusive(a)) {
+      const uint32_t only_r = o.summary.obs_reasons & ~a.summary.obs_reasons, only_m = a.summary.obs_reasons & ~o.summary.obs_reasons;
+      if (only_r != 0) item(FitClass::Gap, "observation", "the record withholds also for " + withhold_text(only_r) + ", the model replay not (the record " + ro + ", the model replay " + ao + ")");
+      if (only_m != 0) item(FitClass::Gap, "observation", "the model replay withholds also for " + withhold_text(only_m) + " (the record " + ro + ", the model replay " + ao + ")");
+      if (only_r == 0 && only_m == 0) agree.push_back("observation (" + ro + " on both sides)");
+    } else if (is_inconclusive(o)) {
+      item(FitClass::Gap, "observation", "the record's observation is " + ro + "; the model replay's is " + ao);
+    } else if (is_inconclusive(a)) {
+      item(FitClass::Gap, "observation", "the model replay withholds (" + ao + ") what the record decides (" + ro + ")");
+    } else if (o.summary.observation != a.summary.observation) {
+      if (o.summary.observation != KZ_OBS_NONE) item(FitClass::Contradiction, "observation", "the record's observation is " + ro + "; the model replay's is " + ao);
+    } else {
+      agree.push_back("observation");
+    }
+  }
+  // what the record does not observe for this occurrence
+  if (!o.unobserved.empty()) {
+    std::string u;
+    for (const std::string& x : o.unobserved) u += (u.empty() ? "" : ", ") + x;
+    item(FitClass::Gap, "observation", "the record does not observe: " + u);
+  }
+  std::string ag;
+  for (const std::string& x : agree) ag += (ag.empty() ? "" : ", ") + x;
+  f->agreed.push_back(name + ": " + (ag.empty() ? std::string("nothing") : ag));
+}
+
 }  // namespace
+
+const char* fit_class_text(FitClass c) {
+  switch (c) {
+    case FitClass::Contradiction: return "CONTRADICTION";
+    case FitClass::Assumption: return "assumption";
+    case FitClass::Gap: return "gap";
+  }
+  return "?";
+}
+
+uint32_t Fitness::count(FitClass c) const {
+  uint32_t n = 0;
+  for (const FitItem& it : items) n += it.cls == c ? 1 : 0;
+  return n;
+}
+
+Fitness check_fitness(const Model& m, const eval::Trace& rt, const eval::Result& rr, const eval::Trace& at, const eval::Result& ar) {
+  Fitness f;
+  f.checked = true;
+  std::set<std::string> actors, keys;
+  for (const Actor& a : m.actors) actors.insert(a.record);
+  for (const Resource& r : m.resources)
+    if (!r.key_text.empty()) keys.insert(r.key_text);
+  // the record as a whole: its losses; the anchor as a whole: its guard failures
+  for (const eval::LossInterval& l : rt.losses)
+    f.items.push_back(FitItem{FitClass::Gap, std::string(), "loss",
+                              "the record reports a loss: events may be missing from #" + std::to_string(l.begin) + (l.end == eval::kNoEvent ? std::string(" to its end") : " to #" + std::to_string(l.end))});
+  for (const eval::GuardFailure& g : ar.guard_failures) {
+    f.items.push_back(FitItem{FitClass::Contradiction, std::string(), "guard", "the model replay of the anchor fails the guard of " + g.op + "." + g.effect + " at #" + std::to_string(g.event)});
+    f.contradiction = true;
+  }
+  std::vector<bool> paired(ar.occurrences.size(), false);
+  for (const eval::Occurrence& o : rr.occurrences) {
+    const std::string key = occ_key(rt, o);
+    if (actors.count(o.actor) == 0 || keys.count(key) == 0) {
+      f.not_compared.push_back(occ_name(rt, o) + " (" + o.rspec + ")" + (actors.count(o.actor) == 0 ? ": an actor outside the model" : ": a key outside the cone"));
+      continue;
+    }
+    size_t k = ar.occurrences.size();
+    for (size_t i = 0; i < ar.occurrences.size() && k == ar.occurrences.size(); ++i) {
+      const eval::Occurrence& a = ar.occurrences[i];
+      if (!paired[i] && a.rspec == o.rspec && a.actor == o.actor && a.ordinal == o.ordinal && occ_key(at, a) == key) k = i;
+    }
+    if (k == ar.occurrences.size()) {
+      f.items.push_back(FitItem{FitClass::Contradiction, occ_name(rt, o), "presence",
+                                "the record has this occurrence of " + o.rspec + " (call #" + std::to_string(o.call) + "); the model replay of the anchor has none"});
+      f.contradiction = true;
+      continue;
+    }
+    paired[k] = true;
+    ++f.compared;
+    compare_occurrence(rt, o, ar.occurrences[k], &f);
+  }
+  for (size_t i = 0; i < ar.occurrences.size(); ++i) {
+    if (paired[i]) continue;
+    const eval::Occurrence& a = ar.occurrences[i];
+    if (!rt.losses.empty()) {
+      f.items.push_back(FitItem{FitClass::Gap, occ_name(at, a), "presence", "the model replay of the anchor has this occurrence of " + a.rspec + ", the record not; the record reports a loss, so its call may be among the missing events"});
+    } else {
+      f.items.push_back(FitItem{FitClass::Contradiction, occ_name(at, a), "presence", "the model replay of the anchor has this occurrence of " + a.rspec + "; the record (no loss reported) has none"});
+      f.contradiction = true;
+    }
+  }
+  return f;
+}
+
+std::string fitness_text(const Fitness& f) {
+  std::string o = "fitness of the anchor for the record (per occurrence and fact, not text equality): compared " + std::to_string(f.compared) + " occurrence(s); contradictions " +
+                  std::to_string(f.count(FitClass::Contradiction)) + ", assumptions " + std::to_string(f.count(FitClass::Assumption)) + ", gaps " + std::to_string(f.count(FitClass::Gap)) +
+                  "; record occurrences outside the cone (not compared) " + std::to_string(f.not_compared.size()) + "\n";
+  for (const std::string& a : f.agreed) o += "    agree " + a + "\n";
+  for (const FitItem& it : f.items) o += "    " + std::string(fit_class_text(it.cls)) + " " + (it.occurrence.empty() ? std::string("(record)") : it.occurrence) + " " + it.fact + ": " + it.what + "\n";
+  for (const std::string& n : f.not_compared) o += "    not compared " + n + "\n";
+  o += f.contradiction ? "  -> CONTRADICTION: the model contradicts the record; no prediction (the search is not run)\n"
+                       : "  -> no contradiction: the prediction proceeds; the assumptions and gaps above hold for every candidate below\n";
+  return o;
+}
 
 Status predict(const PredictInput& in, PredictReport* out) {
   *out = PredictReport();
@@ -572,6 +794,12 @@ Status predict(const PredictInput& in, PredictReport* out) {
     s = eval::replay(p, at, in.replay_options, &arr);
     if (!s.ok()) return s;
     out->anchor_judged = judge(at, arr);
+    // the fitness of the anchor for the record: a contradiction refuses the prediction (IR 2.3, 16)
+    out->fitness = check_fitness(m, *in.record, *in.record_result, at, arr);
+    if (out->fitness.contradiction) {
+      out->anchor_note += "; the fitness check finds a contradiction between the model and the record: no prediction";
+      return Status::success();
+    }
   }
   // the orders the record's outcomes alone decide: a failed instance use before the creation of its resource
   for (size_t i = 0; i < out->anchor.size(); ++i) {
@@ -806,6 +1034,11 @@ std::string report_text(const PredictInput& in, const PredictReport& r) {
   }
   o += "  class " + r.anchor_key + "\n";
   o += "  model replay of the anchor:\n" + judged_list(r.anchor_judged, false);
+  o += "  " + fitness_text(r.fitness);
+  if (r.fitness.contradiction) {
+    o += "no prediction: the anchor contradicts the record (the fitness check above)\n";
+    return o;
+  }
   o += "\nsearch: states " + std::to_string(r.search.states) + ", transitions " + std::to_string(r.search.transitions) + ", terminal states " + std::to_string(r.search.terminals) +
        (r.search.cap_reached ? ", STATE CAP REACHED: the search is incomplete" : ", complete within the bounds above") + "\n";
   o += "  classes " + std::to_string(r.search.classes.size()) + ": scope-cut " + std::to_string(r.cut_classes) + " (" + std::to_string(r.cut_terminals) + " terminal states; no default-scope witness), candidates " +

@@ -37,7 +37,13 @@
  *   kz_raw.h    (observer records, initial, owned by K2)
  *   kz_facts.h  (extraction and skeleton records, initial, owned by K4a)
  *   kz_cert.h   (certificate and trust-ledger records, initial, owned by K4b)
+ *   kz_neutral.h (the neutral event layer of a run container, schema revision 3)
  * They are not usable alone.
+ *
+ * Schema revision 3 (SPEC rev 1.4 2.3, decision record 2026-10-26 2 item 5): the neutral event layer is
+ * NEW sections (100-107, kz_neutral.h); no earlier record or section version changed, so every container
+ * written before is read as it was written.  The records of sections 100-119 are stored by the explicit
+ * little-endian codec (kz/core/record_codec.hpp), not by copying host structs.
  */
 #ifndef KZ_SCHEMA_KZ_SCHEMA_H
 #define KZ_SCHEMA_KZ_SCHEMA_H
@@ -51,9 +57,10 @@
 #endif
 
 #define KZ_ABI_VERSION 1u
-/* Revision of the record set (docs/schema.md section 10).  Revision 2 adds sections only; it is part
- * of the layout text, hence of the schema fingerprint and of every tool hash. */
-#define KZ_SCHEMA_REVISION 2u
+/* Revision of the record set (docs/schema.md sections 10, 12).  Revisions 2 and 3 add sections only; it
+ * is part of the layout text, hence of the schema fingerprint and of every tool hash.  Revision 3 adds the
+ * neutral event layer (kz_neutral.h). */
+#define KZ_SCHEMA_REVISION 3u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu
@@ -165,6 +172,7 @@ typedef struct kz_record_desc {
  *   40-59  observation (kz_raw.h)
  *   60-79  certificate and ledger (kz_cert.h)
  *   80-99  witnesses and verdicts (this file)
+ *  100-119 neutral event layer (kz_neutral.h; serialized field by field)
  * Ids reserved for SPEC 2.3 section types whose records are not defined yet (no
  * record, no registry entry; define them in the owning header when they are needed):
  *   22 TEMPLATES   25 SKEL_EXPL   27 PROVENANCE_MSG   30 RESOURCES
@@ -956,15 +964,16 @@ KZ_CORE_ENUMS(KZ_DEFINE_ENUM_ENTRY)
 #include "kz/schema/kz_raw.h"
 #include "kz/schema/kz_facts.h"
 #include "kz/schema/kz_cert.h"
+#include "kz/schema/kz_neutral.h"
 
 /* Everything the registry in lib/core is built from. */
 #define KZ_ALL_RECORDS(R) \
-  KZ_CORE_RECORDS(R) KZ_RAW_RECORDS(R) KZ_FACTS_RECORDS(R) KZ_CERT_RECORDS(R)
-#define KZ_ALL_ENUMS(D) KZ_CORE_ENUMS(D) KZ_RAW_ENUMS(D) KZ_FACTS_ENUMS(D) KZ_CERT_ENUMS(D)
+  KZ_CORE_RECORDS(R) KZ_RAW_RECORDS(R) KZ_FACTS_RECORDS(R) KZ_CERT_RECORDS(R) KZ_NEUTRAL_RECORDS(R)
+#define KZ_ALL_ENUMS(D) KZ_CORE_ENUMS(D) KZ_RAW_ENUMS(D) KZ_FACTS_ENUMS(D) KZ_CERT_ENUMS(D) KZ_NEUTRAL_ENUMS(D)
 #define KZ_ALL_FORMATS(F) \
-  KZ_CORE_FORMATS(F) KZ_RAW_FORMATS(F) KZ_FACTS_FORMATS(F) KZ_CERT_FORMATS(F)
+  KZ_CORE_FORMATS(F) KZ_RAW_FORMATS(F) KZ_FACTS_FORMATS(F) KZ_CERT_FORMATS(F) KZ_NEUTRAL_FORMATS(F)
 #define KZ_ALL_SECTIONS(S) \
-  KZ_CORE_SECTIONS(S) KZ_RAW_SECTIONS(S) KZ_FACTS_SECTIONS(S) KZ_CERT_SECTIONS(S)
+  KZ_CORE_SECTIONS(S) KZ_RAW_SECTIONS(S) KZ_FACTS_SECTIONS(S) KZ_CERT_SECTIONS(S) KZ_NEUTRAL_SECTIONS(S)
 
 /* The ids in the section lists and in the enumerators must agree. */
 #define KZ_SECTION_ID_CHECK(NAME, id, record, version) \

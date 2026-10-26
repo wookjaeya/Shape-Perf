@@ -14,6 +14,10 @@
 // profile whose table size is missing.  The output analyses the record it is given; whether that record is
 // a development run or an experiment run is stated by the record's own conditions, not here.
 //
+// The record is read through the neutral event layer (schema revision 3, kz/trace/neutral.hpp): the container's neutral
+// sections (`kz convert`, an F0 run or an instrumented run's kzrt-dump), or its F0 sections converted in memory with the
+// same rules; the output names which.
+//
 // The execution relation of every occurrence is computed from the identities (real_trace.hpp, eval_trace.hpp
 // Occurrence::relation).  Whether an owner is a core service is established only with --basis (the run's
 // parent, for the symbols) and --core-request-caller (each name from its reference); without them a pair of
@@ -373,6 +377,8 @@ int run(int argc, char** argv) {
     return 2;
   }
   std::printf("kz replay %s (real record)\nartifact_sha256 %s\n", path.c_str(), kz::to_hex(c.artifact_hash()).c_str());
+  std::printf("record layer: %s\n", report.neutral_sections ? "the container's neutral event sections (schema revision 3)"
+                                                             : "the container's F0 sections, converted in memory to the neutral event layer");
   std::printf("outcome narrowing %s%s\n", narrowing.c_str(),
               narrowing == "on" ? " (P1 adopted conditionally 2026-10-25: only through a mapping whose applicability conditions hold in the record)" : " (the code fixes nothing the record leaves open)");
   if (clearing.empty())

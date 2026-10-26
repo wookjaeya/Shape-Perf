@@ -6,6 +6,7 @@
 
 #include "kz/core/container.hpp"
 #include "kz/core/crc32.hpp"
+#include "kz/core/record_codec.hpp"
 #include "string_pool.hpp"
 
 namespace kz {
@@ -153,8 +154,9 @@ const uint8_t* Container::section_data(uint32_t type, size_t* size) const {
   return bytes_.data() + e->offset;
 }
 
-void Container::copy_section(const kz_section_entry& e, void* dst) const {
-  std::memcpy(dst, bytes_.data() + e.offset, static_cast<size_t>(e.size));
+void Container::copy_section(const kz_section_entry& e, const kz_record_desc& rec, void* dst) const {
+  if (section_is_serialized(e.type)) decode_records(rec, bytes_.data() + e.offset, static_cast<size_t>(e.count), dst);
+  else std::memcpy(dst, bytes_.data() + e.offset, static_cast<size_t>(e.size));
 }
 
 bool Container::string(const kz_str& s, std::string* out) const {

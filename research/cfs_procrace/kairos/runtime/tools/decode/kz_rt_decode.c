@@ -220,6 +220,7 @@ int kz_rt_decode(const unsigned char *p, size_t n, kz_rt_dec_fn fn, void *ctx, k
       it.u.end.bytes = g64(p + off + 8);
       it.u.end.crc32 = g32(p + off + 16);
       it.u.end.crc_ok = it.u.end.bytes == off && it.u.end.crc32 == (crc ^ 0xFFFFFFFFu);
+      it.offset = off;
       st->end_seen = 1;
       st->crc_ok = it.u.end.crc_ok;
       st->records++;
@@ -238,6 +239,7 @@ int kz_rt_decode(const unsigned char *p, size_t n, kz_rt_dec_fn fn, void *ctx, k
       it.u.buf.owner = g32(p + off + 8);
       it.u.buf.nbytes = nb;
       it.u.buf.cap = g32(p + off + 16);
+      it.offset = off;
       st->records++;
       if (fn != NULL && fn(ctx, &it) != 0) return KZ_RT_DEC_STOPPED;
       {
@@ -264,6 +266,7 @@ int kz_rt_decode(const unsigned char *p, size_t n, kz_rt_dec_fn fn, void *ctx, k
             if (r < 0) {
               st->unknown++;
             } else {
+              it.offset = off + KZ_RT_BUF_FIXED + boff;
               st->records++;
               if (fn != NULL && fn(ctx, &it) != 0) return KZ_RT_DEC_STOPPED;
             }
@@ -279,6 +282,7 @@ int kz_rt_decode(const unsigned char *p, size_t n, kz_rt_dec_fn fn, void *ctx, k
     if (r < 0) {
       st->unknown++;
     } else {
+      it.offset = off;
       st->records++;
       if (fn != NULL && fn(ctx, &it) != 0) return KZ_RT_DEC_STOPPED;
     }

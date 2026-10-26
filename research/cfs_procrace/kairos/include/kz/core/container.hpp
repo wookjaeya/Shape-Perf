@@ -153,7 +153,7 @@ class Container {
     const kz_section_entry* e = find_section(section_type);
     if (e == nullptr) return Status::success();  // absent section: no records
     out->resize(static_cast<size_t>(e->count));
-    if (e->count > 0) copy_section(*e, out->data());
+    if (e->count > 0) copy_section(*e, *info->record, out->data());
     return Status::success();
   }
 
@@ -186,7 +186,9 @@ class Container {
     for (size_t i = 0; i < 32; ++i) d[i] = a[i];
     return d;
   }
-  void copy_section(const kz_section_entry& e, void* dst) const;
+  // Copies a section's records into host structs: the neutral layer's sections through the explicit
+  // little-endian codec, the earlier sections as the byte copy they always were (record_codec.hpp).
+  void copy_section(const kz_section_entry& e, const kz_record_desc& rec, void* dst) const;
 
   Bytes bytes_;
   kz_header header_{};

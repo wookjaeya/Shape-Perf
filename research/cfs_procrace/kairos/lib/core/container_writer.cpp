@@ -8,6 +8,7 @@
 #include "kz/core/container.hpp"
 #include "kz/core/crc32.hpp"
 #include "kz/core/dump.hpp"
+#include "kz/core/record_codec.hpp"
 #include "string_pool.hpp"
 
 namespace kz {
@@ -90,7 +91,10 @@ Status ContainerWriter::add_section_raw(uint32_t section_type, const void* recor
   s.count = count;
   s.record_size = record_size;
   s.data.resize(count * record_size);
-  if (count > 0) std::memcpy(s.data.data(), records, count * record_size);
+  // The neutral layer's sections are stored by the explicit little-endian codec; the earlier sections
+  // keep the byte copy of their (little-endian, padding-free) structs, as before (record_codec.hpp).
+  if (count > 0 && section_is_serialized(section_type)) encode_records(*info->record, records, count, s.data.data());
+  else if (count > 0) std::memcpy(s.data.data(), records, count * record_size);
   sections_.push_back(std::move(s));
   return Status::success();
 }
@@ -116,8 +120,9 @@ Status ContainerWriter::finish(Bytes* out) const {
         if (fd.kind != KZ_FK_STR) continue;
         for (uint32_t k = 0; k < fd.count; ++k) {
           const size_t at = i * rec.size + fd.offset + static_cast<size_t>(k) * fd.elem_size;
-          kz_str ref;
-          std::memcpy(&ref, work[si].data.data() + at, sizeof(ref));
+          kz_str ref;  // stored form: offset, then length, little-endian
+          ref.off = load_le32(work[si].data.data() + at);
+          ref.len = load_le32(work[si].data.data() + at + 4);
           std::string text;
           if (!resolve_string(provisional.data(), provisional.size(), ref, &text)) {
             if (check_reserved_)
@@ -138,10 +143,8 @@ Status ContainerWriter::finish(Bytes* out) const {
   strings.count = strings.data.size();
   strings.record_size = 1;
   for (const Site& site : sites) {
-    kz_str ref;
-    ref.off = canonical.find(*site.text)->second;
-    ref.len = static_cast<uint32_t>(site.text->size());
-    std::memcpy(work[site.section].data.data() + site.byte, &ref, sizeof(ref));
+    store_le32(work[site.section].data.data() + site.byte, canonical.find(*site.text)->second);
+    store_le32(work[site.section].data.data() + site.byte + 4, static_cast<uint32_t>(site.text->size()));
   }
   // The string pool is a section like the others, written first (lowest id).
   std::vector<const Section*> order;

@@ -2,7 +2,15 @@
 //
 // The observer records probe events; the replay (kz/core/eval_trace.hpp) reads a trace of calls,
 // returns and points of a profile.  This adapter maps one to the other and states only what the
-// container establishes (SPEC 4.8 "Explanation set", ADR-055, ADR-056; docs/observer.md section 13):
+// container establishes (SPEC 4.8 "Explanation set", ADR-055, ADR-056; docs/observer.md section 13).
+//
+// Neutral layer (schema revision 3, docs/schema.md section 12): the adapter reads the run through the neutral
+// event layer (neutral.hpp) only: the container's neutral sections, or, for a container without them (every F0
+// record written before), its F0 sections converted in memory by neutral_from_f0.  The F0-specific rules below
+// (tids and the incarnation alive at an event, FORK, MAPS, the decoders' fixed positions, kernel loss reports) are
+// rules of that conversion; the replay sees actors with a creation generation and a backend binding, logical
+// sites, observed values and loss intervals.  An instrumented run (kzrt-dump) is converted to the same layer
+// (kzrt_convert.hpp).  The items:
 //
 //   events      an ENTRY site on the symbol an operation binds is a Call of it, a RET site a Return, a
 //               POINT site whose label is a point name of the profile (an `OP.LABEL` linearization point,
@@ -85,6 +93,7 @@
 #include "kz/core/phi.hpp"
 #include "kz/core/status.hpp"
 #include "kz/trace/identity_symbols.hpp"
+#include "kz/trace/neutral.hpp"
 #include "kz/trace/static_closure.hpp"
 
 namespace kz::trace {
@@ -102,15 +111,18 @@ struct RealTraceOptions {
 // How the adapter maps one site of the run container: kind 0 not mapped, 1 call of `name` (an operation),
 // 2 return of it, 3 the point or site `name`.
 struct SiteMapEntry {
-  uint32_t site = 0;
+  uint32_t site = 0;  // index in `section`: the backend's site record (F0 SITES) where there is one, else NSITES
   uint8_t kind = 0;
   std::string name;
+  uint32_t section = KZ_SEC_SITES;
 };
 
 // One thread's identities as the container states them (for the report).
 struct ThreadIdentity {
   std::string actor;
-  uint32_t tid = 0, generation = 0;
+  uint32_t actor_index = KZ_NONE32;  // NACTORS index (neutral layer)
+  uint8_t binding = KZ_NBIND_UNRESOLVED;  // KZ_NBIND: what the actor is bound to in its backend
+  uint32_t tid = 0, generation = 0;  // the binding's native key (F0: the kernel tid) and the creation generation
   uint32_t creator_thread = KZ_NONE32;  // THREADS index of the creating executor, or KZ_NONE32
   std::string creator;     // the creating executor (FORK parent), empty if not recorded
   uint8_t level = KZ_OWNER_LEVEL_UNDETERMINED;
@@ -153,6 +165,10 @@ struct RealTraceReport {
   std::vector<std::string> closure_lines;  // per kind and location: what the static closure established
   std::vector<std::string> lifetime_lines;  // per kind: whether the lifetime is established, and why not
   std::vector<std::string> not_app_lines;   // the actors stated not to be an application's task, and why (Trace::not_app)
+  bool neutral_sections = false;   // read from the container's neutral sections (else its F0 sections, converted in memory)
+  uint8_t backend = KZ_NBACKEND_NONE;
+  uint8_t start = KZ_NSTART_NONE;  // KZ_NSTART: why the record covers the process start
+  std::vector<std::string> loss_lines;  // loss records of a backend other than F0 (neutral.hpp loss_text)
 };
 
 // Normalized parameter / role name: lower case, without '_'.
@@ -165,6 +181,9 @@ bool owner_record_key(const phi::Profile& p, const std::map<std::string, int64_t
 
 Status real_trace_from_run(const Container& run, const phi::Profile& p, eval::Trace* out, RealTraceReport* report);
 Status real_trace_from_run(const Container& run, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report);
+// The same from a neutral layer in memory (neutral.hpp): real_trace_from_run reads the container's neutral sections,
+// or converts its F0 sections in memory, and calls this.
+Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report);
 
 // The text of a report (one item per line).
 std::string report_text(const RealTraceReport& r);

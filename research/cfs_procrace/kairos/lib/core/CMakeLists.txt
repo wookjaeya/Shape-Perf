@@ -6,6 +6,7 @@ add_library(kz-core STATIC
   crc32.cpp
   dump.cpp
   identity.cpp
+  record_codec.cpp
   registry.cpp
   schema_tables.cpp
   sha256.cpp

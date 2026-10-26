@@ -6,7 +6,7 @@
 
 ## 1. 컨테이너 형식 [D]
 
-모든 산출물은 하나의 KZ 컨테이너다. 모든 값은 little-endian이고(다른 바이트 순서의 호스트는 `kz_schema.h` 가 컴파일을 거부한다), 모든 영역은 8바이트 경계에 놓이며, 빈틈(padding)은 0이다.
+모든 산출물은 하나의 KZ 컨테이너다. 모든 값은 little-endian이고(다른 바이트 순서의 호스트는 `kz_schema.h` 가 컴파일을 거부한다), 모든 영역은 8바이트 경계에 놓이며, 빈틈(padding)은 0이다. 섹션 100–119(중립 사건 층)의 레코드는 struct 바이트를 복사하지 않고 필드 목록에서 한 필드씩 little-endian으로 쓰고 읽는다(§12.1).
 
 ```
 kz_header                 160 바이트
@@ -50,6 +50,7 @@ kz_section_entry[n]       section type이 엄격하게 증가하는 순서
 | 40–59 | `kz_raw.h` (K2, 개정 2; 2026-10-16 열거 값 추가, 레이아웃 그대로; 스키마 개정 2 에서 섹션 추가) | SITES : kz_site (96, v2), RAW_EVENTS : kz_raw_ev (64), STACKS : kz_stack_frame (24), LOSS : kz_loss (40, v2), RUNMETA : kz_runmeta (152), PERTURBATION : kz_perturbation (32), SITE_SLOTS : kz_site_slot (20), SIDE_EVENTS : kz_side_ev (40), THREADS : kz_thread (88), MAPS : kz_map_ev (88), SYMBOLS : kz_symbol (40), TARGETS : kz_target (80), ACTOR_OWNERS : kz_app_owner (32; 개정 2) |
 | 60–79 | `kz_cert.h` (초기, K4b) | CERTIFICATES : kz_cert (136), CERT_STEPS : kz_cert_step (36), TRUST_LEDGERS : kz_trust_ledger (224), TRUST : kz_trust (60), OBLIGATIONS : kz_obligation (64) |
 | 80–99 | `kz_schema.h` (K0; 스키마 개정 2 에서 섹션 추가) | WITNESSES : kz_witness (112), VERDICTS : kz_verdict (112), VERDICT_CELLS : kz_verdict_cell (472), BOUNDS : kz_bound (192), SUMMARIES : kz_summary (44; 개정 2), MODEL_IDS : kz_model_id (44; 개정 2), OBS_ADEQUACY : kz_obs_adequacy (88; 개정 2), IDENTITIES : kz_identity (68; 개정 2) |
+| 100–119 | `kz_neutral.h` (스키마 개정 3, 2026-10-26; §12. **필드 단위 little-endian 직렬화**) | NRUN : kz_nrun (168), NSITES : kz_nsite (104), NSLOTS : kz_nslot (64), NEVENTS : kz_nevent (88), NVALUES : kz_nvalue (24), NACTORS : kz_nactor (184), NLOSS : kz_nloss (72), NCTL : kz_nctl (64) |
 
 컨테이너 자체의 구조 레코드: `kz_header` (160), `kz_parent` (40), `kz_section_entry` (48), `kz_str` (8).
 
@@ -182,3 +183,76 @@ SPEC rev 1.3 의 "Formats added in revision 1.3"(ADR-054–ADR-056, C-17)을 구
 | BASIS | 호출자가 준 재생 입력: `replay.mode`, `replay.outcome_narrowing`(P1 의 현행 `on` / 대안 `off`), `replay.const.<이름>`, `replay.version.<성분>`, `replay.predicate`, `replay.core_request_caller`, `replay.facts.sha256`·`replay.static_basis.sha256`(정적 닫힘을 줬을 때). policy 는 `unset` 이다. 값만 기록하며 그 출처는 호출자가 밝힌다(이 writer 는 확인하지 않는다) |
 
 `kz-dump` 가 이 컨테이너를 다른 컨테이너와 같은 정규 dump 로 읽는다 [M: v153 pilot 재생 출력, `test_trace_replay_out` 의 dump 검사].
+
+## 12. 스키마 개정 3: 중립 사건 층 (SPEC rev 1.4 §2.3, 2026-10-26) [D][M]
+
+- 근거: SPEC rev 1.4 §2.3 "Formats in revision 1.4", 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2 항목 5, 검토 문서(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`, IR) §9.1–§9.2. 연구 조건은 정하지 않았다. 아래 수·이름은 단위 시험 값이거나 파일럿 기록의 값이다.
+
+**무엇을 바꿨나** [D]. 실행 컨테이너에 **새 섹션 100–107**(중립 사건 층, `include/kz/schema/kz_neutral.h`)을 더했다. 개정 2와 같은 방식이다: 기존 레코드의 배치·섹션 버전·필드 이름은 하나도 바꾸지 않았고, `KZ_SCHEMA_REVISION` = 3 이 `layout_text()` 첫 줄(`kz-layout abi=1 revision=3`)에 들어가 schema fingerprint와 모든 tool hash가 바뀐다. 새 열거형의 값 0은 모두 가장 보수적이다(`unknown`/`none`/`unresolved`/`undetermined`). 필드의 의미는 `docs/event_semantics.md` §2(공통 사건 정보), §5(실제 제어 기록), §8.4(손실 종류)를 따른다.
+
+**원시 근거와의 관계** [D]. F0의 기존 섹션(RAW_EVENTS, SITES, SITE_SLOTS, SLOT_FETCHES, THREADS, ACTOR_OWNERS, LOSS, RUNMETA, MAPS, SIDE_EVENTS …)은 **백엔드 확장 정보로 그대로** 둔다. 중립 레코드는 원시 근거를 `raw`(이 컨테이너 안의 레코드를 가리키는 `kz_ref`) 또는 `raw_off`(NRUN `raw_sha256`이 가리키는 원시 스트림 — kzrt-dump — 안의 바이트 위치)로 참조한다. 공통 해석(재생·예측)은 원시 근거를 읽지 않는다. 그래서 감사는 가능하고 해석은 백엔드에 묶이지 않는다.
+
+| 섹션 (id) | 레코드 | 내용 |
+|---|---|---|
+| NRUN (100) | `kz_nrun` 168 B, 1개 | 실행 계열(`backend` F0/kzrt)과 그 안의 백엔드 이름, 시계(`clock`: CLOCK_MONOTONIC / adapter의 시계 / 없음), 시작 근거(`start_evidence`: `exec-mapping` = F0 기록이 대상 파일의 첫 실행 mapping부터, `bootstrap-buffer` = kzrt가 첫 hook부터 정적 버퍼에 손실 없이), `flags`(`loss-evidence` 백엔드가 손실을 보고함, `loss-present`, `owners-recorded`, `complete`, `control-recorded`, `stopped`), `run_id`·`instance_id`, 판 태그(runtime, adapter, compiler, target), manifest와 원시 스트림의 sha256, F0 RUNMETA 참조 |
+| NSITES (101) | `kz_nsite` 104 B | 논리 site: 백엔드의 site id, 재생이 읽는 종류(`call`/`return`/`point`), manifest phase, `label`, `op`, `symbol`(호출이면 그 함수, 점이면 들어 있는 함수), `source`·`line`, 백엔드가 묶은 곳 `at`, binding이 하나면 그 id, `flags`(`attached` 기록 내내 관측, `partial-binding`, `call-site` 호출 측에서 본 호출/반환), F0 `decoder`, SITES 참조 |
+| NSLOTS (102) | `kz_nslot` 64 B | site의 값 슬롯: 역할(`role`), 종류(`int`/`text`/`pointer`), 너비, 부호, 출처(`from`: kzrt `arg<k>`·`ret`·`out<k>`, F0 `reg`·`stack`·`mem`·`str`…), SITE_SLOTS 참조 |
+| NEVENTS (103) | `kz_nevent` 88 B | 중립 사건: `actor`(NACTORS 색인), `aseq`(actor 내부 순서; `aseq-target` = 대상이 사건 시점에 붙여 빈틈이 손실 증거, 없으면 F0 `tseq`처럼 해석기가 붙임), `site`, `bind`, `link`(같은 호출 인스턴스를 연 사건), 값 범위(`first_value`, `nvals`), `flags`(`clock`, `no-values`=F0 TRUNC, `boot`, `pc`), `t`, `raw`/`raw_off`. 섹션의 순서는 병합 순서이며 actor 사이 순서가 **아니다** |
+| NVALUES (104) | `kz_nvalue` 24 B | 관측된 값만(미관측 값은 레코드가 없다 — 0으로 채우지 않음): 사건, 슬롯, 종류, 값(문자열이면 길이), 문자열, `text-truncated` |
+| NACTORS (105) | `kz_nactor` 184 B | actor = 실행 안에서 재사용하지 않는 실행 문맥 하나 + 생성 세대 + 백엔드 binding(`linux-tid` F0 정체성 결합의 thread incarnation, `kzrt-actor`, `kzrt-provisional`, `unresolved`)과 그 native key·종류·`backend_id`·process. 정체성 네 범주를 섞지 않는다: 실행자(이 레코드), 생성 실행자 `creator`, 소유 앱 `owner_*`(수준, 근거, 생성 요청이 넘긴 식별 값, 생성 요청 사건, 요청한 코드의 link-time 주소 또는 binding이 이름 붙인 함수), 알린 id. `join_flags` = 정체성 결합의 근거(KZ_THREAD_FLAG), `spawn_return` = 이 actor를 만든 호출의 반환(id로 묶였을 때만), `boot_link` = 이 actor에 합친 임시 actor, `flags`(`join-record`, `process-initial`, `owner-recorded`, `request-addr-known`, `exited`, `held-at-end`), THREADS·ACTOR_OWNERS 참조 |
+| NLOSS (106) | `kz_nloss` 72 B | 손실: 종류(F0의 `records-lost`·`throttle`·`ring-reserve-fail`·`tseq-gap`, 기록 없는 `flagged-without-record`, 손실 근거 자체가 없는 `no-loss-evidence`, kzrt의 13종, `truncated-stream`), 영향을 줄 수 있는 사건 구간 `begin`–`end`(`end` none = 기록 끝까지), 귀속 actor, 센 곳(`cpu-ring`/`actor-buffer`/`boot-buffer`/`key`), LOSS 참조 |
+| NCTL (107) | `kz_nctl` 64 B | 실제 제어 기록(계획과 별개): 무엇(`gate-hold` … `timeout`), 사유, `deferred`, 문맥 class, 쓴 actor·hit의 actor·상대 actor, hit의 관측 사건, site, `ctl_seq`(제어기의 순서이며 프로그램 순서가 아님), 점·hit·게이트, `raw_off` |
+
+### 12.1 바이트 순서 [D][M]
+
+- `include/kz/core/record_codec.hpp`(`lib/core/record_codec.cpp`): 레코드의 **저장 형식은 필드 목록이 정한다** — 필드 목록 offset에, 정수 원소마다 little-endian, `kz_ref`는 해시 32 B + section + index, `kz_str`는 off + len. `encode_records`/`decode_records`는 원소를 자기 형으로 읽어 shift로 쓰므로 호스트의 byte order·struct 배치와 무관하다.
+- 컨테이너 계층은 섹션 100–119(`section_is_serialized`)를 이 codec으로 쓰고 읽는다(`ContainerWriter::add_section_raw`, `Container::copy_section`). writer가 STRINGS 정규화 때 `kz_str`를 다시 쓰는 부분도 저장 바이트를 명시적 little-endian으로 읽고 쓴다. **기존 섹션은 예전처럼 struct 바이트 복사로 읽고 쓴다**(little-endian 호스트, padding 없는 레코드에서는 둘이 같은 바이트다). `kz_schema.h`의 big-endian 호스트 거부는 그대로다(SPEC rev 1.4 §2.3 "Byte order").
+- 시험: 등록된 모든 레코드에서 codec 출력 = struct 바이트(이 호스트), decode∘encode = 항등; `kz_nevent` 하나의 저장 바이트를 손으로 쓴 little-endian 바이트와 대조 [M: `test_trace_neutral`]. 기존 golden 컨테이너의 바이트는 바뀌지 않았다 [M: golden 시험 통과, `layout.golden`·`records.golden`만 갱신].
+
+### 12.2 F0 → 중립 (`kz::trace::neutral_from_f0`, `include/kz/trace/neutral.hpp`) [D][M]
+
+개정 2까지 재생 어댑터(`real_trace.cpp`)가 F0 섹션에 직접 적용하던 규칙을 **그대로** 변환으로 옮겼다. 이제 커널 tid는 정체성이 아니라 binding의 native key다(IR §9.1).
+
+- actor: THREADS의 thread incarnation 하나당 하나(색인 = THREADS 색인, `join-record`), 그다음 사건·생성 관계가 가리키지만 THREADS 레코드가 없는 tid마다 하나(`join-record` 없음). 사건의 actor는 그 시각에 살아 있던 incarnation(같은 tid의, FORK 시각이 그 사건보다 늦지 않은 가장 큰 세대 — 예전 규칙 그대로)이다. 생성 실행자 = FORK의 ptid가 그 FORK 시각에 가리킨 actor. `process-initial` = tid = pid 이고 세대 0.
+- 소유 앱: ACTOR_OWNERS(thread당 하나; 둘이면 변환이 거부)를 actor에 옮기고, 생성 요청 사건(OWNER_REQUEST decoder, TRUNC 아님)의 return_address 슬롯 값을 MAPS의 적재 편향으로 link-time 주소로 바꿔 `request_addr`로 둔다(코어 여부는 재생이 basis 기호로 정한다 — 예전과 같다).
+- `spawn_return`: spawn-create/spawn-return decoder 사건을 같은 tid에서 반환 주소로 짝지은 반환이, id 일치(ID_MATCHED + SPAWN_MATCHED)로 묶인 thread의 생성 사건과 짝이면 그 thread의 actor에 둔다(예전 `bound_at_return`).
+- `link`(새 정보, 재생은 쓰지 않음): 같은 actor·같은 함수의 진입/복귀 사이트가 둘 다 return_address 슬롯을 가질 때, 복귀를 같은 반환 주소의 열린 진입에 묶는다.
+- 값: 역할이 선언된 슬롯만; 문자열 슬롯은 EVENT_STRINGS에 문자열이 있을 때만(없으면 값 없음 = 미관측); TRUNC 사건은 값 없음(`no-values`). `aseq` = `tseq`(`aseq-target` 아님).
+- 손실: throttle = 시작 시각 이후 첫 사건부터 끝 시각 뒤 첫 사건 전까지(끝나지 않았으면 기록 끝까지), 그 밖의 커널 보고 = 처음부터 보고 시각 뒤 첫 사건 전까지, RUNMETA `loss-present`인데 LOSS가 없으면 `flagged-without-record` 전체, RUNMETA가 없으면 `no-loss-evidence` 전체.
+
+### 12.3 kzrt-dump → 중립 (`kz::trace::neutral_from_kzrt`, `include/kz/trace/kzrt_convert.hpp`) [D][M]
+
+규칙은 헤더 주석에 적었다. 요점: manifest site → NSITES(`before`/`after`는 `callee`의 호출/반환, `call-site`; callee가 없으면 `func`의 진입/복귀; 나머지는 점), binding이 모두 bound·inlined·duplicated일 때만 `attached`; ACTOR 레코드 → `kzrt-actor`; 같은 셀 근거(`boot_link`, `same-cell`)의 임시 actor는 그 run actor에 합침(aseq가 이어진다); 다른 임시 actor는 `kzrt-provisional`; 셀 없는 사건(actor 0)은 사건마다 actor 하나(`unresolved`, 없는 프로그램 순서를 만들지 않음); 사건 순서 = 시계 없는 사건(부트스트랩)을 버퍼 순서로 먼저, 그다음 각 actor의 aseq 순서를 지키는 시각 병합; 값 = valid 비트가 선 슬롯, 문자열은 `string=validated`이고 런타임이 복사했을 때만; 손실 = actor 버퍼의 overflow·partial은 그 actor의 첫 aseq 빈틈(CTL·AEXIT 레코드의 aseq도 셈)부터 끝까지, preinit·부트스트랩 partial·excluded·unloaded·reentry·note-table·설명되지 않은 빈틈·잘린 스트림은 전체, ctl-skipped·ctl-nocond·actor-table·unresolved·module-table·after-stop은 보고만 하고 구간이 아님(사건이 기록되었거나 관측 창 밖); 시작 근거 `bootstrap-buffer` = 완전한 스트림 + init + record/control 모드 + preinit·부트스트랩 partial·reentry 손실 없음. 정체성: 런타임은 생성자·소유 앱·이름을 기록하지 않으므로 **결정하지 않음**으로 둔다(§12.7).
+
+호스트 reader(`runtime/tools/decode`)의 항목에 스트림 안 바이트 위치 `offset`을 더했다(`raw_off`의 근거; dump 형식은 그대로) [M].
+
+### 12.4 재생은 중립 층만 읽는다 (`real_trace.hpp`) [D][M]
+
+- `real_trace_from_run` = `neutral_of_run`(컨테이너에 NRUN이 있으면 중립 섹션, 없으면 F0 섹션을 메모리에서 변환) + `real_trace_from_neutral`. 그래서 **개정 3 이전의 모든 실행 컨테이너는 쓴 그대로 읽힌다**: 같은 규칙이 메모리에서 돌 뿐이다.
+- actor 이름(`actor_names`): 백엔드 이름, 없으면 `<접두>` + key(`tid`/`a`/`P`/`?`); join-record actor 사이에 겹치는 이름은 `.<접두><key>`, 세대가 0이 아니면 `.g<n>` — F0에서는 예전 이름과 같다.
+- `ThreadIdentity`에 `actor_index`·`binding`을 더했다. `tid`는 binding의 native key이며 F0에서는 예전처럼 커널 tid다(기존 필드의 뜻을 바꾸지 않음).
+- 새로 읽는 것: 점은 `attached`일 때만 관측된 점; `call-site` 호출/반환의 label이 프로필의 점이면 그 점도 된다(F0는 두 probe로 보는 것을 한 hook으로 본 경우; 반환 뒤·호출 앞에 둔다); 보고만 하는 손실 종류는 구간을 만들지 않는다.
+- `kz replay` 출력에 `record layer:` 한 줄(중립 섹션을 읽었는지, F0 섹션을 메모리에서 변환했는지)을 더했고, kzrt 기록이면 시작 문장과 손실 줄(`loss record: …`)이 달라진다. 재생 출력 컨테이너의 `probes` 목록은 부모에 SITES가 있으면 예전처럼 SITES를, 없으면(계측 기록) NSITES를 가리킨다.
+
+### 12.5 `kz convert` [D][M]
+
+```
+kz convert <run.kzt> --out <file.kzt>          # F0: 모든 섹션 그대로 + 중립 층, 입력을 부모(kind run, role 1)로
+kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.kz>] --out <file.kzt>
+                                               # 계측 기록: 중립 층만 + BASIS(convert.*) + FILE_HASHES(dump, manifest)
+```
+
+이미 중립 층이 있는 컨테이너는 다시 변환하지 않는다. 같은 입력은 같은 바이트를 낸다 [M].
+
+### 12.6 확인 [M]
+
+- 단위 시험(값은 단위 시험 값): `test_trace_neutral`(codec; 합성 F0 기록에서 actor·세대·생성자·초기 thread·link·id로 묶인 반환·관측 값·손실 구간; 변환 컨테이너의 F0 섹션 보존·재읽기 동일·재변환 거부·결정성·정규 dump; 원본과 변환본의 재생 trace·보고·판정 동일), `test_trace_neutral_real`(저장소의 `env/logs/s1r2_p1.kzt`에서 같은 동일성), `test_neutral_kzrt`(이 시험 안에서 POSIX 런타임이 두 스레드로 쓴 dump: 임시 actor 합침, aseq 순서, link, call-site 매핑, removed binding, 선언되지 않은 site, 재생과 발생 2개, 잘린 스트림의 손실, 형식 오류 거부). 기본 빌드 139개 중 138 통과 + tracefs 1 건너뜀, LLVM 빌드 161개 중 160 통과 + 같은 1 건너뜀.
+- 실제 기록(파일럿·개발 자료, 주 결과 아님): R2 `v153_pilot3`, C1 `smoke3/pre_1df262a`를 `kz convert`로 바꾸고, 2026-10-25 재생 스크립트(`/home/user/work/procrace/integ_20261025/replays.sh`)의 `cur` 읽기와 같은 인수로 (a) 변경 전 kz(HEAD `e7f297a`로 빌드)가 원본을, (b) 새 kz가 원본(메모리 변환)을, (c) 새 kz가 변환본(중립 섹션)을 재생했다. 출력은 머리 줄(경로, artifact hash, `record layer`, `wrote`)을 빼면 셋이 같고, `--emit-trace`의 trace는 (a)와 (c)가 바이트까지 같으며(R2 1353줄, C1 171줄), `--out` 컨테이너는 부모 run hash·tool hash·그 hash가 든 REF_LISTS의 CRC를 빼면 같다. 변환 층: R2 사건 1271·actor 28·값 3061, C1 사건 148·actor 19·값 378, 둘 다 손실 0, 시작 `exec-mapping`. 산출물·스크립트: `/home/user/work/procrace/neutral_b2/{run_equiv.sh,final/}`(저장소 밖, `final/sha256.txt`).
+- 계측 기록(파일럿, 주 결과 아님): GCC plugin 후보의 C1 기동 dump(`/home/user/work/instr/gcc/c1/run1/dump/tx.kzrt`, sha256 `61586c46…`, `docs/instr_candidate_gcc.md`)와 그 manifest 둘을 변환해 C1 post 프로필(cf-833fdbb, bundle-1df262a, rspec-833fdbb)로 재생했다: site 16, 사건 117, actor 16, 손실 0, 시작 `bootstrap-buffer`; CF 조회 발생 3개(BP0 1·2회, BP1 1회)가 모두 `INCONCLUSIVE`, 관계 `ownership-undetermined`. 같은 키에서 F0 smoke3 post가 TOLERATED/READY를 낸 것과 다른 까닭은 근거의 부족이다: 정적 닫힘을 주지 않았고(계측 빌드의 basis가 없음), manifest에 OSAL 내부 효과점(생성의 publish 등)이 없으며, 계측 기록의 정체성 결합이 없어 `OS_TaskCreate`의 out id와 소유 앱이 비어 있다. 순서가 달라서가 아니다. 이것은 "변환된 계측 기록을 `kz replay`가 읽는다"의 확인이지 판정 대조가 아니다.
+
+### 12.7 남은 것 [U]
+
+- 계측 기록의 정체성 결합(생성 실행자, 생성 호출의 반환과 id, 소유 앱): manifest `kzs-sites 1`에 site의 정체성 읽기(F0 plan의 `decoder=`에 해당)를 적는 문법이 없다. 이름이나 역할에서 추측하지 않고, manifest 문법을 정할 때 넣는다.
+- NCTL은 기록만 하고 재생이 쓰지 않는다(P11의 "제어 개입" 근거는 다음 단계). F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다.
+- `kz hits` 등 F0 섹션을 직접 읽는 다른 명령은 그대로다(계측 기록에는 F0 섹션이 없다).
+- adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다.

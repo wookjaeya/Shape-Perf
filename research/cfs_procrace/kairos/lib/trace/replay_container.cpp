@@ -97,14 +97,15 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
   std::vector<kz_summary> summaries;
   std::vector<kz_obs_adequacy> adequacy;
   std::vector<kz_identity> identities;
-  // REF_LISTS: the probe lists of OBS_ADEQUACY, each a run of references to the parent's SITES ended by a null
-  // reference; equal lists are written once.
+  // REF_LISTS: the probe lists of OBS_ADEQUACY, each a run of references to the parent's SITES (NSITES for a run
+  // without F0 sites, an instrumented run) ended by a null reference; equal lists are written once.
   std::vector<kz_ref> ref_lists;
   std::map<std::vector<uint32_t>, uint32_t> list_at;
   auto probe_list = [&](const eval::Occurrence& o) {
     kz_ref r = zeroed<kz_ref>();
     if (in.run == nullptr) return r;
     std::set<uint32_t> ids;
+    uint32_t section = KZ_SEC_SITES;  // the backend's site records (F0 SITES), or the neutral sites without them
     for (const std::string& name : o.probes) {
       uint8_t kind = 3;
       std::string n = name;
@@ -116,7 +117,10 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
         n = name.substr(7);
       }
       for (const SiteMapEntry& e : report.site_map)
-        if (e.kind == kind && e.name == n) ids.insert(e.site);
+        if (e.kind == kind && e.name == n) {
+          ids.insert(e.site);
+          section = e.section;
+        }
     }
     if (ids.empty()) return r;
     const std::vector<uint32_t> key(ids.begin(), ids.end());
@@ -127,7 +131,7 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
       for (uint32_t id : key) {
         kz_ref e = zeroed<kz_ref>();
         std::memcpy(e.artifact_sha256, run_hash.data(), run_hash.size());
-        e.section = KZ_SEC_SITES;
+        e.section = section;
         e.index = id;
         ref_lists.push_back(e);
       }

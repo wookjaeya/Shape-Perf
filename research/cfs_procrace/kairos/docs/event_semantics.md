@@ -238,7 +238,7 @@ cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt
 ## 10. 남은 것 [U]
 
 - `.kzh` + manifest → `kz_rt_point[]` 호스트 변환기(`name` → validated 슬롯, `caller-in` → 호출 측 binding 집합; 변환할 수 없는 조건은 계획 거부)와, 계획을 대상에 넣는 길(직렬화된 계획 형식). 지금은 C 배열 API뿐이다.
-- dump → `.kzt` 변환(중립 사건 + 원시 근거 참조). schema 개정 번호와 필드는 그 변경에서 정한다(SPEC rev 1.4 열린 항목).
+- ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). 남은 것: 계측 기록의 정체성 결합(생성자·소유 앱) — manifest(`kzs-sites 1`)에 site의 정체성 읽기(F0 `decoder`에 해당)를 적는 문법이 없어 변환이 정하지 않는다 [U].
 - 같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2), hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
 - OSAL adapter의 target 실행과 OSAL 객체 소비의 실측, 두 번째 OS.
 - 컴파일러 연결부 세 후보는 이 ABI에 맞춰 시제품을 만든다(단계 C). 런타임을 고칠 필요가 생기면 ABI 판을 올리고 이 문서에 적는다.

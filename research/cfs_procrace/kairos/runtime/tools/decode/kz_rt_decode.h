@@ -77,7 +77,8 @@ typedef struct kz_rt_dec_end {
 } kz_rt_dec_end;
 
 typedef struct kz_rt_dec_item {
-  uint32_t type; /* KZ_RT_REC_* */
+  uint32_t type;   /* KZ_RT_REC_* */
+  uint64_t offset; /* byte offset of the record in the stream (a buffer record: inside its BUF) */
   union {
     kz_rt_dec_run run;
     kz_rt_dec_module module;

@@ -92,6 +92,9 @@ void check_known_sizes() {
       {"kz_obs_adequacy", 88},   // observation adequacy record (ADR-055)
       {"kz_identity", 68},       // the four identities of an actor at an event (1.2, ADR-056)
       {"kz_app_owner", 32},      // app_owner of a thread incarnation (ADR-056)
+      // schema revision 3 (SPEC rev 1.4 2.3, decision record 2026-10-26): the neutral event layer, new sections only
+      {"kz_nrun", 168},  {"kz_nsite", 104}, {"kz_nslot", 64}, {"kz_nevent", 88},
+      {"kz_nvalue", 24}, {"kz_nactor", 184}, {"kz_nloss", 72}, {"kz_nctl", 64},
   };
   for (const Known& k : known) {
     const kz_record_desc* rec = kz::find_record(k.name);

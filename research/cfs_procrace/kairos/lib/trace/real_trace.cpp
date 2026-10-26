@@ -1,9 +1,11 @@
-// real_trace.cpp -- the real-record trace of a run container (see real_trace.hpp).
+// real_trace.cpp -- the real-record trace of a run container, read through the neutral event layer
+// (see real_trace.hpp and neutral.hpp).
 
 #include "kz/trace/real_trace.hpp"
 
 #include "kz/core/registry.hpp"
 #include "kz/trace/decode_sites.hpp"
+#include "kz/trace/neutral.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -21,19 +23,14 @@ struct SiteMap {
   MapKind kind = MapKind::None;
   int32_t op = -1;
   std::string name;  // the operation, or the point
+  // A call or return observed at the call site (an instrumented binding of a call; NSITE flag call-site) whose label
+  // names a point of the profile is that point as well: F0 observes the two with two probes (the callee's entry or
+  // return, and the point at the call), a call-site binding with one hook.  The point follows a return and precedes a call.
+  std::string point_also;
 };
 
-uint64_t first_at_or_after(const std::vector<kz_raw_ev>& ev, uint64_t t) {
-  for (size_t i = 0; i < ev.size(); ++i)
-    if (ev[i].t_ns >= t) return i;
-  return ev.size();
-}
-
-uint64_t first_after(const std::vector<kz_raw_ev>& ev, uint64_t t) {
-  for (size_t i = 0; i < ev.size(); ++i)
-    if (ev[i].t_ns > t) return i;
-  return ev.size();
-}
+// The value slots of a neutral event (kzrt: up to KZ_RT_MAX_VALS = 8; F0: a[0..3]).
+constexpr uint8_t kMaxSlots = 8;
 
 }  // namespace
 
@@ -76,36 +73,35 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   out->record = eval::RecordKind::Real;
   if (!p.checked) return Status::error(Err::Invalid, "the profile has not been checked");
   if (run.header().artifact_kind != KZ_ARTIFACT_RUN) return Status::error(Err::Invalid, "not a run container");
-
-  std::vector<kz_raw_ev> events;
-  std::vector<kz_site> sites;
-  std::vector<kz_site_slot> slots;
-  std::vector<kz_thread> threads;
-  std::vector<kz_map_ev> maps;
-  std::vector<kz_runmeta> meta;
-  std::vector<kz_loss> losses;
-  std::vector<kz_app_owner> owners;
-  Status s = run.read_section(KZ_SEC_RAW_EVENTS, &events);
-  if (s.ok()) s = run.read_section(KZ_SEC_SITES, &sites);
-  if (s.ok()) s = run.read_section(KZ_SEC_SITE_SLOTS, &slots);
-  if (s.ok()) s = run.read_section(KZ_SEC_THREADS, &threads);
-  if (s.ok()) s = run.read_section(KZ_SEC_MAPS, &maps);
-  if (s.ok()) s = run.read_section(KZ_SEC_RUNMETA, &meta);
-  if (s.ok()) s = run.read_section(KZ_SEC_LOSS, &losses);
-  if (s.ok()) s = run.read_section(KZ_SEC_ACTOR_OWNERS, &owners);
-  std::vector<kz_ev_str> strings;  // the texts of string slots (containers with fetch slots only)
-  if (s.ok() && run.find_section(KZ_SEC_EVENT_STRINGS) != nullptr) s = run.read_section(KZ_SEC_EVENT_STRINGS, &strings);
+  NeutralRun n;
+  bool from_sections = false;
+  Status s = neutral_of_run(run, &n, &from_sections);
   if (!s.ok()) return s;
-  std::map<std::pair<uint32_t, uint8_t>, std::string> text_of;
-  for (const kz_ev_str& e : strings) {
-    std::string t;
-    if (!run.string(e.text, &t)) return Status::error(Err::BadRef, "EVENT_STRINGS: a string does not resolve");
-    text_of[{e.event, e.slot}] = t;
-  }
+  s = real_trace_from_neutral(n, p, opt, out, report);
+  report->neutral_sections = from_sections;
+  return s;
+}
+
+Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const RealTraceOptions& opt, eval::Trace* out, RealTraceReport* report) {
+  *out = eval::Trace();
+  *report = RealTraceReport();
+  out->record = eval::RecordKind::Real;
+  if (!p.checked) return Status::error(Err::Invalid, "the profile has not been checked");
+  Status s = check_neutral(n);
+  if (!s.ok()) return s;
+  const std::vector<kz_nevent>& events = n.events;
+  const std::vector<NSite>& sites = n.sites;
+  const std::vector<NActor>& actors = n.actors;
   report->raw_events = events.size();
-  report->threads = threads.size();
-  report->owner_section = run.find_section(KZ_SEC_ACTOR_OWNERS) != nullptr;
-  report->runmeta = !meta.empty();
+  report->owner_section = (n.run.r.flags & KZ_NRUN_FLAG_OWNERS_RECORDED) != 0;
+  report->runmeta = (n.run.r.flags & KZ_NRUN_FLAG_LOSS_EVIDENCE) != 0;
+  report->backend = n.run.r.backend;
+  report->start = n.run.r.start_evidence;
+  // the actors that the backend's identity records give (the report's threads, in their order)
+  std::vector<uint32_t> joined;
+  for (size_t i = 0; i < actors.size(); ++i)
+    if ((actors[i].r.flags & KZ_NACTOR_FLAG_JOIN_RECORD) != 0) joined.push_back(static_cast<uint32_t>(i));
+  report->threads = joined.size();
 
   // ---- the point names of the profile, with the values each point carries ----
   std::map<std::string, std::map<std::string, std::string>> point_names;  // point -> role key -> value name
@@ -129,54 +125,82 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       if (c.lp.kind == phi::LpKind::Capture) capture_points.insert(eval::lp_name(op, c.label, c.lp));
 
   // ---- the sites ----
+  auto profile_point = [&](const std::string& label) -> std::string {
+    if (point_names.count(label) != 0) return label;
+    const size_t at = label.find('@');
+    if (at != std::string::npos && capture_points.count(label.substr(0, at)) != 0) return label.substr(0, at);  // header, "capture sites"
+    return std::string();
+  };
   std::vector<SiteMap> site_map(sites.size());
-  std::vector<std::string> labels(sites.size());
   for (size_t i = 0; i < sites.size(); ++i) {
-    if (sites[i].site != i) return Status::error(Err::Invalid, "the site table is not indexed by site id");
-    std::string symbol;
-    run.string(sites[i].symbol, &symbol);
-    run.string(sites[i].label, &labels[i]);
+    const NSite& ns = sites[i];
+    const std::string& label = ns.label;
+    const bool attached = (ns.r.flags & KZ_NSITE_FLAG_ATTACHED) != 0;
     SiteMap& m = site_map[i];
-    if (sites[i].kind == KZ_SITE_KIND_ENTRY_PROBE || sites[i].kind == KZ_SITE_KIND_RET_PROBE) {
+    if (ns.r.kind == KZ_NSITE_KIND_CALL || ns.r.kind == KZ_NSITE_KIND_RETURN) {
       for (size_t oi = 0; oi < p.ops.size(); ++oi)
-        if (!p.ops[oi].symbol.empty() && p.ops[oi].symbol == symbol) {
-          m.kind = sites[i].kind == KZ_SITE_KIND_ENTRY_PROBE ? MapKind::Call : MapKind::Return;
+        if (!p.ops[oi].symbol.empty() && p.ops[oi].symbol == ns.symbol) {
+          m.kind = ns.r.kind == KZ_NSITE_KIND_CALL ? MapKind::Call : MapKind::Return;
           m.op = static_cast<int32_t>(oi);
           m.name = p.ops[oi].name;
         }
-    } else if (sites[i].kind == KZ_SITE_KIND_POINT_PROBE && point_names.count(labels[i]) != 0) {
-      m.kind = MapKind::Point;
-      m.name = labels[i];
-      out->observed_points.insert(labels[i]);
-    } else if (sites[i].kind == KZ_SITE_KIND_POINT_PROBE && labels[i].find('@') != std::string::npos &&
-               capture_points.count(labels[i].substr(0, labels[i].find('@'))) != 0) {
-      // one of several call sites of a capture point (header, "capture sites")
-      m.kind = MapKind::Point;
-      m.name = labels[i].substr(0, labels[i].find('@'));
-      out->observed_points.insert(m.name);
+      if ((ns.r.flags & KZ_NSITE_FLAG_CALL_SITE) != 0) {
+        const std::string pt = profile_point(label);
+        if (!pt.empty() && m.kind == MapKind::None) {
+          m.kind = MapKind::Point;
+          m.name = pt;
+        } else if (!pt.empty()) {
+          m.point_also = pt;
+        }
+        if (!pt.empty() && attached) out->observed_points.insert(pt);
+      }
+    } else if (ns.r.kind == KZ_NSITE_KIND_POINT) {
+      const std::string pt = profile_point(label);
+      if (!pt.empty()) {
+        m.kind = MapKind::Point;
+        m.name = pt;
+        if (attached) out->observed_points.insert(pt);
+      }
     }
-    report->site_map.push_back(SiteMapEntry{static_cast<uint32_t>(i), static_cast<uint8_t>(m.kind == MapKind::Call ? 1 : m.kind == MapKind::Return ? 2 : m.kind == MapKind::Point ? 3 : 0), m.name});
+    // the probe list of a result names the backend's site record where there is one (F0 SITES), else the neutral site
+    auto entry = [&](uint8_t kind, const std::string& name) {
+      SiteMapEntry e{static_cast<uint32_t>(i), kind, name};
+      e.section = KZ_SEC_NSITES;
+      if (ns.r.raw.section == KZ_SEC_SITES) {
+        e.section = KZ_SEC_SITES;
+        e.site = ns.r.raw.index;
+      }
+      report->site_map.push_back(e);
+    };
+    entry(static_cast<uint8_t>(m.kind == MapKind::Call ? 1 : m.kind == MapKind::Return ? 2 : m.kind == MapKind::Point ? 3 : 0), m.name);
+    if (!m.point_also.empty()) entry(3, m.point_also);
+    const std::string also = m.point_also.empty() ? std::string() : " and point " + m.point_also + " (at the call site)";
+    const std::string unattached = attached ? std::string() : " (not observed for the whole record: a binding is removed or unsupported)";
     switch (m.kind) {
-      case MapKind::Call: report->sites.push_back(labels[i] + ": call of " + m.name); break;
-      case MapKind::Return: report->sites.push_back(labels[i] + ": return of " + m.name); break;
-      case MapKind::Point: report->sites.push_back(labels[i] + ": point " + m.name); break;
-      case MapKind::None: report->sites.push_back(labels[i] + ": not mapped"); break;
+      case MapKind::Call: report->sites.push_back(label + ": call of " + m.name + also + unattached); break;
+      case MapKind::Return: report->sites.push_back(label + ": return of " + m.name + also + unattached); break;
+      case MapKind::Point: report->sites.push_back(label + ": point " + m.name + unattached); break;
+      case MapKind::None: report->sites.push_back(label + ": not mapped"); break;
     }
   }
   std::map<std::pair<uint32_t, uint8_t>, std::string> role_of;
   std::set<std::pair<uint32_t, uint8_t>> string_slot;
-  for (const kz_site_slot& sl : slots) {
-    std::string r;
-    run.string(sl.role, &r);
-    role_of[{sl.site, sl.slot}] = r;
-    if (sl.src == KZ_SLOT_SRC_STR) string_slot.insert({sl.site, sl.slot});
+  for (const NSlot& sl : n.slots) {
+    role_of[{sl.r.site, sl.r.slot}] = sl.role;
+    if (sl.r.kind == KZ_NVAL_TEXT) string_slot.insert({sl.r.site, sl.r.slot});
   }
+  // the observed values of an event, by slot
+  auto value_of = [&](const kz_nevent& e, uint8_t slot) -> const NValue* {
+    for (uint32_t k = 0; k < e.nvals; ++k)
+      if (n.values[e.first_value + k].r.slot == slot) return &n.values[e.first_value + k];
+    return nullptr;
+  };
   // A point site that names no point of the profile but whose slot role names an `out` parameter of an
   // operation: inside a call of that operation it gives the value the call stores through the parameter
   // (out.NAME on that call's return; header, "out values").
   for (size_t i = 0; i < sites.size(); ++i) {
-    if (site_map[i].kind != MapKind::None || sites[i].kind != KZ_SITE_KIND_POINT_PROBE) continue;
-    for (uint8_t k = 0; k < 4; ++k) {
+    if (site_map[i].kind != MapKind::None || sites[i].r.kind != KZ_NSITE_KIND_POINT) continue;
+    for (uint8_t k = 0; k < kMaxSlots; ++k) {
       const auto r = role_of.find({static_cast<uint32_t>(i), k});
       if (r == role_of.end()) continue;
       std::string ops, param;
@@ -186,153 +210,105 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
             ops += (ops.empty() ? "" : ", ") + op.name;
             param = prm.name;
           }
-      if (!ops.empty()) report->sites[i] = labels[i] + ": out value " + param + " of the actor's innermost open call (if it is one of " + ops + ")";
+      if (!ops.empty()) report->sites[i] = sites[i].label + ": out value " + param + " of the actor's innermost open call (if it is one of " + ops + ")";
     }
   }
 
-  // ---- the actors: one per thread incarnation ----
-  std::vector<std::string> thread_names(threads.size());
-  std::map<std::string, int> base_count;
-  auto base_name = [&](size_t i) {
-    std::string n;
-    run.string(threads[i].name, &n);
-    return n.empty() ? "tid" + std::to_string(threads[i].tid) : n;
-  };
-  for (size_t i = 0; i < threads.size(); ++i) ++base_count[base_name(i)];
-  for (size_t i = 0; i < threads.size(); ++i) {
-    std::string n = base_name(i);
-    if (base_count[n] > 1 && n.rfind("tid", 0) != 0) n += ".tid" + std::to_string(threads[i].tid);
-    if (threads[i].generation != 0) n += ".g" + std::to_string(threads[i].generation);
-    thread_names[i] = n;
-  }
-  // the incarnation of `tid` alive at time t: the latest generation forked no later than t
-  auto incarnation = [&](uint32_t tid, uint64_t t) -> int64_t {
-    int64_t best = -1;
-    for (size_t i = 0; i < threads.size(); ++i) {
-      if (threads[i].tid != tid) continue;
-      if (best < 0 || (threads[i].t_fork <= t && threads[i].generation >= threads[static_cast<size_t>(best)].generation)) best = static_cast<int64_t>(i);
-    }
-    return best;
-  };
-  auto actor_of = [&](uint32_t tid, uint64_t t) {
-    const int64_t i = incarnation(tid, t);
-    return i >= 0 ? thread_names[static_cast<size_t>(i)] : "tid" + std::to_string(tid);
-  };
-  for (size_t i = 0; i < threads.size(); ++i) {
-    if ((threads[i].flags & KZ_THREAD_FLAG_FORK_SEEN) == 0 || threads[i].ptid == KZ_NONE32) continue;
-    out->creators[thread_names[i]] = actor_of(threads[i].ptid, threads[i].t_fork);
-  }
-  report->identities.resize(threads.size());
-  for (size_t i = 0; i < threads.size(); ++i) {
-    ThreadIdentity& ti = report->identities[i];
-    ti.actor = thread_names[i];
-    ti.tid = threads[i].tid;
-    ti.generation = threads[i].generation;
-    ti.thread_flags = threads[i].flags;
-    const auto cr = out->creators.find(thread_names[i]);
+  // ---- the actors (neutral.hpp actor_names) ----
+  const std::vector<std::string> names = actor_names(n);
+  for (const NActor& a : actors)
+    if (a.r.creator != KZ_NONE32) out->creators[names[&a - actors.data()]] = names[a.r.creator];
+  report->identities.resize(joined.size());
+  std::vector<int64_t> ident_of(actors.size(), -1);  // actor -> index in report->identities
+  for (size_t j = 0; j < joined.size(); ++j) {
+    const NActor& a = actors[joined[j]];
+    ThreadIdentity& ti = report->identities[j];
+    ident_of[joined[j]] = static_cast<int64_t>(j);
+    ti.actor = names[joined[j]];
+    ti.actor_index = joined[j];
+    ti.binding = a.r.binding;
+    ti.tid = static_cast<uint32_t>(a.r.native_key);
+    ti.generation = a.r.generation;
+    ti.thread_flags = a.r.join_flags;
+    const auto cr = out->creators.find(ti.actor);
     if (cr != out->creators.end()) ti.creator = cr->second;
   }
-  // the slot of a site that holds the return address (role return_address), or -1
-  auto return_slot = [&](uint32_t site) {
-    for (uint8_t k = 0; k < 4; ++k) {
-      const auto r = role_of.find({site, k});
-      if (r != role_of.end() && r->second == kRoleReturnAddress) return static_cast<int>(k);
-    }
-    return -1;
-  };
   // Core status of owners (header, "core"): per owner identity, from its OWNER_REQUESTs' calling functions.
   report->core_evidence = opt.symbols != nullptr && !opt.core_request_callers.empty();
   std::map<uint32_t, int> core_vote;  // owner identity -> bit 1: a request from a core caller, bit 2: from another function
   if (report->core_evidence) {
-    for (const kz_app_owner& o : owners) {
-      if (o.thread >= threads.size() || o.level == KZ_OWNER_LEVEL_UNDETERMINED || o.owner_key == KZ_NONE32 || o.creation_event >= events.size()) continue;
-      const kz_raw_ev& rq = events[o.creation_event];
-      if (rq.site >= sites.size() || sites[rq.site].decoder != KZ_DECODER_OWNER_REQUEST || (rq.flags & KZ_RAW_FLAG_TRUNC) != 0) continue;
-      const int slot = return_slot(rq.site);
-      uint64_t link = 0;
-      if (slot < 0 || !link_address(maps, threads[o.thread].pid, rq.a[slot], &link)) continue;
-      const SymbolEntry* sym = opt.symbols->find(link);
-      if (sym == nullptr) continue;
-      report->identities[o.thread].request_caller = sym->name;
-      core_vote[o.owner_key] |= opt.core_request_callers.count(sym->name) != 0 ? 1 : 2;
+    for (size_t i = 0; i < actors.size(); ++i) {
+      const NActor& a = actors[i];
+      if (ident_of[i] < 0 || (a.r.flags & KZ_NACTOR_FLAG_OWNER_RECORDED) == 0 || a.r.owner_level == KZ_OWNER_LEVEL_UNDETERMINED || a.r.owner_id == KZ_NONE32) continue;
+      std::string caller = a.request_func;  // named by the backend's binding, or resolved from the calling code's address
+      if (caller.empty() && (a.r.flags & KZ_NACTOR_FLAG_REQUEST_ADDR) != 0) {
+        const SymbolEntry* sym = opt.symbols->find(a.r.request_addr);
+        if (sym != nullptr) caller = sym->name;
+      }
+      if (caller.empty()) continue;
+      report->identities[static_cast<size_t>(ident_of[i])].request_caller = caller;
+      core_vote[a.r.owner_id] |= opt.core_request_callers.count(caller) != 0 ? 1 : 2;
     }
   }
-  for (const kz_app_owner& o : owners) {
-    if (o.thread >= threads.size()) continue;
-    const std::string& a = thread_names[o.thread];
-    ThreadIdentity& ti = report->identities[o.thread];
-    ti.level = o.level;
-    ti.evidence = o.evidence;
-    ti.owner_id = o.owner_key;
-    run.string(o.app_name, &ti.app_name);
-    if (o.level == KZ_OWNER_LEVEL_CONFIRMED) ++report->owners_confirmed;
-    else if (o.level == KZ_OWNER_LEVEL_INFERRED) ++report->owners_inferred;
-    if (o.level == KZ_OWNER_LEVEL_UNDETERMINED || o.owner_key == KZ_NONE32) continue;
+  for (size_t i = 0; i < actors.size(); ++i) {
+    const NActor& a = actors[i];
+    if (ident_of[i] < 0 || (a.r.flags & KZ_NACTOR_FLAG_OWNER_RECORDED) == 0) continue;
+    const std::string& an = names[i];
+    ThreadIdentity& ti = report->identities[static_cast<size_t>(ident_of[i])];
+    ti.level = a.r.owner_level;
+    ti.evidence = a.r.owner_evidence;
+    ti.owner_id = a.r.owner_id;
+    ti.app_name = a.owner_app;
+    ti.creator_thread = a.r.owner_creator != KZ_NONE32 && ident_of[a.r.owner_creator] >= 0 ? static_cast<uint32_t>(ident_of[a.r.owner_creator]) : KZ_NONE32;
+    if (a.r.owner_level == KZ_OWNER_LEVEL_CONFIRMED) ++report->owners_confirmed;
+    else if (a.r.owner_level == KZ_OWNER_LEVEL_INFERRED) ++report->owners_inferred;
+    if (a.r.owner_level == KZ_OWNER_LEVEL_UNDETERMINED || a.r.owner_id == KZ_NONE32) continue;
     int64_t key = 0;
-    if (!owner_record_key(p, opt.consts, o.owner_key, &key)) {
+    if (!owner_record_key(p, opt.consts, a.r.owner_id, &key)) {
       ++report->owners_unresolved;  // kept undetermined for the replay: never "no owner"
       continue;
     }
     ti.key_resolved = true;
     ti.key = key;
-    out->owner_levels[a] = o.level;
-    out->owners[a] = {key};
-    out->owner_ids[a] = o.owner_key;
+    out->owner_levels[an] = a.r.owner_level;
+    out->owners[an] = {key};
+    out->owner_ids[an] = a.r.owner_id;
     ++report->owners_determined;
-    const auto cv = core_vote.find(o.owner_key);
+    const auto cv = core_vote.find(a.r.owner_id);
     if (cv != core_vote.end() && (cv->second == 1 || cv->second == 2)) {
       ti.core = cv->second == 1 ? 1 : 0;
-      out->owner_core[a] = cv->second == 1;
+      out->owner_core[an] = cv->second == 1;
       ++(cv->second == 1 ? report->owners_core : report->owners_not_core);
     }
   }
-  for (const kz_app_owner& o : owners)
-    if (o.thread < threads.size()) report->identities[o.thread].creator_thread = o.creator_thread;
   // The initial thread of the process (P10, 2026-10-25): where the profile's context declares `initial_thread not_app`
   // (its sources show that the thread that runs main is never a task of the framework, so never an application's task; SPEC 1.2
-  // T_raw), the thread whose id is the process id (the thread-group leader: gettid(2) equals getpid(2) for it), seen
-  // as the first incarnation of that id, is stated not to be an application's task.  A thread for which the record
-  // states a determined owner keeps it (the declaration and the record would disagree: reported, not resolved).
+  // T_raw), the actor the backend establishes as the process's initial thread (F0: the thread whose id is the process id, the
+  // thread-group leader: gettid(2) equals getpid(2) for it, seen as the first incarnation of that id) is stated not to be an
+  // application's task.  A thread for which the record states a determined owner keeps it (the declaration and the record would
+  // disagree: reported, not resolved).
   if (p.context.present && p.context.initial_thread_not_app) {
     std::string cites;
-    for (const std::string& n : p.context.not_app_prov) cites += (cites.empty() ? "" : ", ") + n;
-    for (size_t i = 0; i < threads.size(); ++i) {
-      if (threads[i].tid != threads[i].pid || threads[i].generation != 0) continue;
-      const std::string& a = thread_names[i];
-      if (out->owner_levels.count(a) != 0) {
-        report->not_app_lines.push_back(a + ": the initial thread, but the record states a determined owner: kept as the record states it (not resolved)");
+    for (const std::string& c : p.context.not_app_prov) cites += (cites.empty() ? "" : ", ") + c;
+    for (uint32_t i : joined) {
+      const NActor& a = actors[i];
+      if ((a.r.flags & KZ_NACTOR_FLAG_INITIAL) == 0) continue;
+      const std::string& an = names[i];
+      if (out->owner_levels.count(an) != 0) {
+        report->not_app_lines.push_back(an + ": the initial thread, but the record states a determined owner: kept as the record states it (not resolved)");
         continue;
       }
-      out->not_app[a] = "the initial thread of process " + std::to_string(threads[i].pid) + " (thread id = process id); profile context initial_thread not_app: " + cites;
-      report->not_app_lines.push_back(a + ": " + out->not_app[a]);
+      const std::string why = a.r.binding == KZ_NBIND_LINUX_TID ? "thread id = process id" : "the backend's initial-thread record";
+      out->not_app[an] = "the initial thread of process " + std::to_string(a.r.process) + " (" + why + "); profile context initial_thread not_app: " + cites;
+      report->not_app_lines.push_back(an + ": " + out->not_app[an]);
     }
   }
 
   // ---- spawn out-parameters bound by the id (header, "spawn out") ----
-  std::map<uint32_t, uint32_t> assigned_by_create;  // RAW_EVENTS index of a spawn-create event -> the id
-  for (const kz_thread& t : threads)
-    if ((t.flags & KZ_THREAD_FLAG_ID_MATCHED) != 0 && (t.flags & KZ_THREAD_FLAG_SPAWN_MATCHED) != 0 && t.creator_event != KZ_NONE32)
-      assigned_by_create[t.creator_event] = t.announced_id;
-  std::map<uint64_t, uint32_t> bound_at_return;  // RAW_EVENTS index of a spawn-return event -> the id
-  {
-    std::map<uint32_t, std::vector<std::pair<uint64_t, uint64_t>>> open;  // tid -> (create index, return address)
-    for (size_t i = 0; i < events.size(); ++i) {
-      const kz_raw_ev& e = events[i];
-      if (e.site >= sites.size() || (e.flags & KZ_RAW_FLAG_TRUNC) != 0) continue;
-      if (sites[e.site].decoder == KZ_DECODER_SPAWN_CREATE) {
-        open[e.tid].push_back({i, e.a[kSlotReturnAddress]});
-      } else if (sites[e.site].decoder == KZ_DECODER_SPAWN_RETURN) {
-        std::vector<std::pair<uint64_t, uint64_t>>& st = open[e.tid];
-        size_t k = st.size();
-        while (k > 0 && st[k - 1].second != e.a[kSlotReturnAddress]) --k;
-        if (k == 0) continue;
-        const auto as = assigned_by_create.find(static_cast<uint32_t>(st[k - 1].first));
-        if (as != assigned_by_create.end()) bound_at_return[i] = as->second;
-        st.resize(k - 1);
-      }
-    }
-  }
-  report->owners_undetermined = threads.size() - report->owners_confirmed - report->owners_inferred;
+  std::map<uint64_t, uint32_t> bound_at_return;  // NEVENTS index of the creating call's return -> the id
+  for (const NActor& a : actors)
+    if (a.r.spawn_return != KZ_NONE32) bound_at_return[a.r.spawn_return] = a.r.announced_id;
+  report->owners_undetermined = report->threads - report->owners_confirmed - report->owners_inferred;
 
   // ---- the events ----
   // the open calls of each actor in the trace being built (operation index), with the out values that
@@ -343,20 +319,23 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   };
   std::map<std::string, std::vector<OpenOp>> open_ops;
   for (size_t ei = 0; ei < events.size(); ++ei) {
-    const kz_raw_ev& e = events[ei];
-    if (e.site >= site_map.size() || site_map[e.site].kind == MapKind::None) {
+    const kz_nevent& e = events[ei];
+    const bool unreadable = (e.flags & KZ_NEV_FLAG_NO_VALUES) != 0;
+    if (e.site == KZ_NONE32 || site_map[e.site].kind == MapKind::None) {
       ++report->unmapped_events;
       // an out value from a point inside the actor's innermost open call
-      if (e.site < sites.size() && sites[e.site].kind == KZ_SITE_KIND_POINT_PROBE && (e.flags & KZ_RAW_FLAG_TRUNC) == 0) {
-        std::vector<OpenOp>& st = open_ops[actor_of(e.tid, e.t_ns)];
+      if (e.site != KZ_NONE32 && sites[e.site].r.kind == KZ_NSITE_KIND_POINT && !unreadable) {
+        std::vector<OpenOp>& st = open_ops[names[e.actor]];
         if (!st.empty()) {
           const phi::OpDecl& op = p.ops[static_cast<size_t>(st.back().op)];
-          for (uint8_t k = 0; k < 4; ++k) {
+          for (uint8_t k = 0; k < kMaxSlots; ++k) {
             const auto r = role_of.find({e.site, k});
             if (r == role_of.end() || string_slot.count({e.site, k}) != 0) continue;
+            const NValue* v = value_of(e, k);
+            if (v == nullptr || v->r.kind == KZ_NVAL_TEXT) continue;
             for (const phi::OpParam& prm : op.params)
               if (prm.role == "out" && role_key(prm.name) == role_key(r->second)) {
-                st.back().outs["out." + prm.name] = static_cast<int64_t>(e.a[k]);
+                st.back().outs["out." + prm.name] = static_cast<int64_t>(v->r.v);
                 ++report->out_values_from_points;
               }
           }
@@ -365,59 +344,69 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       continue;
     }
     const SiteMap& m = site_map[e.site];
-    eval::TraceEvent te;
-    te.actor = actor_of(e.tid, e.t_ns);
-    te.site = m.name;
-    te.phase = m.kind == MapKind::Call ? eval::Phase::Call : m.kind == MapKind::Return ? eval::Phase::Return : eval::Phase::Point;
-    const bool unreadable = (e.flags & KZ_RAW_FLAG_TRUNC) != 0;
     if (unreadable) ++report->unreadable_events;
-    for (uint8_t k = 0; k < 4 && !unreadable; ++k) {
-      const auto r = role_of.find({e.site, k});
-      if (r == role_of.end()) continue;
-      const std::string key = role_key(r->second);
-      const int64_t v = static_cast<int64_t>(e.a[k]);
-      // a string slot gives a text (a Str parameter or value), never its length as a number
-      const bool is_text = string_slot.count({e.site, k}) != 0;
-      const auto tx = text_of.find({static_cast<uint32_t>(ei), k});
-      if (is_text && tx == text_of.end()) continue;  // the kernel gave no string: the value stays unknown
-      if (is_text) ++report->string_values;
-      if (m.kind == MapKind::Point) {
-        if (key == "value") {
-          if (!is_text) te.values["value"] = v;
-          continue;
-        }
-        // `value(L)`: the value loaded from the location L (header, "cells")
-        const std::string& raw = r->second;
-        if (raw.size() > 7 && raw.compare(0, 6, "value(") == 0 && raw.back() == ')') {
-          if (!is_text) {
-            te.values["value"] = v;
-            te.texts["cell"] = raw.substr(6, raw.size() - 7);
-            ++report->cell_values;
+    // The trace event of a site read as `kind` (the operation's call or return, or the point `point`).
+    auto make = [&](MapKind kind, const std::string& point, bool counted) {
+      eval::TraceEvent te;
+      te.actor = names[e.actor];
+      te.site = kind == MapKind::Point ? point : m.name;
+      te.phase = kind == MapKind::Call ? eval::Phase::Call : kind == MapKind::Return ? eval::Phase::Return : eval::Phase::Point;
+      for (uint8_t k = 0; k < kMaxSlots && !unreadable; ++k) {
+        const auto r = role_of.find({e.site, k});
+        if (r == role_of.end()) continue;
+        const NValue* val = value_of(e, k);
+        if (val == nullptr) continue;  // not observed: the value stays unknown (never 0)
+        const std::string key = role_key(r->second);
+        const int64_t v = static_cast<int64_t>(val->r.v);
+        // a string slot gives a text (a Str parameter or value), never its length as a number
+        const bool is_text = string_slot.count({e.site, k}) != 0;
+        if (is_text && val->r.kind != KZ_NVAL_TEXT) continue;  // no text was taken: the value stays unknown
+        if (is_text && counted) ++report->string_values;
+        if (kind == MapKind::Point) {
+          if (key == "value") {
+            if (!is_text) te.values["value"] = v;
+            continue;
+          }
+          // `value(L)`: the value loaded from the location L (header, "cells")
+          const std::string& raw = r->second;
+          if (raw.size() > 7 && raw.compare(0, 6, "value(") == 0 && raw.back() == ')') {
+            if (!is_text) {
+              te.values["value"] = v;
+              te.texts["cell"] = raw.substr(6, raw.size() - 7);
+              if (counted) ++report->cell_values;
+            }
+            continue;
+          }
+          const auto& pn = point_names[point];
+          const auto it = pn.find(key);
+          if (it != pn.end()) {
+            if (is_text) te.texts[it->second] = val->text;
+            else te.values[it->second] = v;
           }
           continue;
         }
-        const auto& names = point_names[m.name];
-        const auto it = names.find(key);
-        if (it != names.end()) {
-          if (is_text) te.texts[it->second] = tx->second;
-          else te.values[it->second] = v;
+        const phi::OpDecl& op = p.ops[static_cast<size_t>(m.op)];
+        if (kind == MapKind::Return && (key == "status" || key == "result")) {
+          te.has_result = true;
+          te.result = v;
+          continue;
         }
-        continue;
+        for (const phi::OpParam& prm : op.params) {
+          if (role_key(prm.name) != key) continue;
+          const std::string name = (kind == MapKind::Call ? "arg." : "out.") + prm.name;
+          if ((kind == MapKind::Call) != (prm.role != "out")) continue;
+          if (is_text) te.texts[name] = val->text;
+          else te.values[name] = v;
+        }
       }
-      const phi::OpDecl& op = p.ops[static_cast<size_t>(m.op)];
-      if (m.kind == MapKind::Return && (key == "status" || key == "result")) {
-        te.has_result = true;
-        te.result = v;
-        continue;
-      }
-      for (const phi::OpParam& prm : op.params) {
-        if (role_key(prm.name) != key) continue;
-        const std::string name = (m.kind == MapKind::Call ? "arg." : "out.") + prm.name;
-        if ((m.kind == MapKind::Call) != (prm.role != "out")) continue;
-        if (is_text) te.texts[name] = tx->second;
-        else te.values[name] = v;
-      }
+      return te;
+    };
+    // a point at the call site precedes the call it observes
+    if (m.kind == MapKind::Call && !m.point_also.empty()) {
+      out->add(make(MapKind::Point, m.point_also, false));
+      ++report->events;
     }
+    eval::TraceEvent te = make(m.kind, m.name, true);
     // the open calls of the actor (out values from points inside them go to their return)
     {
       std::vector<OpenOp>& st = open_ops[te.actor];
@@ -450,12 +439,15 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
     }
     out->add(std::move(te));
     ++report->events;
+    // a point at the call site follows the return it observes
+    if (m.kind == MapKind::Return && !m.point_also.empty()) {
+      out->add(make(MapKind::Point, m.point_also, false));
+      ++report->events;
+    }
   }
 
   // ---- the start of the record ----
-  if (!events.empty())
-    for (const kz_map_ev& mp : maps)
-      if (mp.t_ns <= events.front().t_ns) report->starts_at_exec = true;
+  report->starts_at_exec = n.run.r.start_evidence != KZ_NSTART_NONE;
   // Start state (IN-03, OB-05; 2026-10-24): what the record covers from the process start is the program entry,
   // so a location with an INIT fact of the profile (`init NAME: loc L = ...`, with its citation) has a known
   // start state.  A kind's start state is not declared here: the replay takes it from an observed effect that
@@ -471,14 +463,14 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
       eval::Adequacy a;
       bool ends_observed = k.scope.empty() || k.scope == "process";
       for (const phi::OpDecl& op : p.ops)
-        for (const phi::EffectDecl& e : op.effects) {
-          if (e.kind != phi::EffectKind::Set || e.to_state != k.initial) continue;
-          const int32_t ki = !e.all_kind.empty() ? p.find_kind(e.all_kind) : (e.res ? e.res->sort.kind_index : -1);
+        for (const phi::EffectDecl& ef : op.effects) {
+          if (ef.kind != phi::EffectKind::Set || ef.to_state != k.initial) continue;
+          const int32_t ki = !ef.all_kind.empty() ? p.find_kind(ef.all_kind) : (ef.res ? ef.res->sort.kind_index : -1);
           if (ki < 0 || p.kinds[static_cast<size_t>(ki)].name != k.name) continue;
-          const std::string pt = e.lp.kind == phi::LpKind::None ? std::string() : eval::lp_name(op, e.label, e.lp);
+          const std::string pt = ef.lp.kind == phi::LpKind::None ? std::string() : eval::lp_name(op, ef.label, ef.lp);
           if (pt.empty() || out->observed_points.count(pt) == 0) {
             ends_observed = false;
-            report->lifetime_lines.push_back("kind " + k.name + ": lifetime not established: the end of a lifetime " + op.name + "." + e.label + " is not observed");
+            report->lifetime_lines.push_back("kind " + k.name + ": lifetime not established: the end of a lifetime " + op.name + "." + ef.label + " is not observed");
           }
         }
       a.lifetime_known = ends_observed;
@@ -497,11 +489,12 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   if (opt.facts != nullptr) {
     std::vector<ObservedSite> obs;
     for (size_t i = 0; i < sites.size(); ++i) {
-      if (site_map[i].kind != MapKind::Point) continue;
+      const std::string& pt = site_map[i].kind == MapKind::Point ? site_map[i].name : site_map[i].point_also;
+      if (pt.empty()) continue;
       ObservedSite o;
-      o.point = site_map[i].name;
-      run.string(sites[i].source, &o.file);
-      o.line = sites[i].line;
+      o.point = pt;
+      o.file = sites[i].source;
+      o.line = sites[i].r.line;
       obs.push_back(std::move(o));
     }
     ClosureReport cr;
@@ -512,31 +505,28 @@ Status real_trace_from_run(const Container& run, const phi::Profile& p, const Re
   }
 
   // ---- losses ----
+  // A loss of the control path only (the controller could not evaluate a hit) leaves the observation whole: reported,
+  // not an interval.  Every other loss is an interval of the events it may affect.
   std::vector<eval::LossInterval> lv;
-  const bool flagged = !meta.empty() && (meta.front().flags & KZ_RUN_FLAG_LOSS_PRESENT) != 0;
-  report->loss_present = flagged || !losses.empty() || meta.empty();
-  for (const kz_loss& l : losses) {
-    if (l.source != KZ_LOSS_SOURCE_PERF_THROTTLE) report->loss_cpus.push_back({l.cpu, l.count});
+  report->loss_present = (n.run.r.flags & KZ_NRUN_FLAG_LOSS_PRESENT) != 0;
+  for (const kz_nloss& l : n.losses) {
+    if (l.unit_kind == KZ_NLOSS_UNIT_CPU_RING && l.kind != KZ_NLOSS_THROTTLE) report->loss_cpus.push_back({l.unit, l.count});
+    else if (n.run.r.backend != KZ_NBACKEND_F0) report->loss_lines.push_back(loss_text(l));
+    if (l.kind == KZ_NLOSS_CTL_SKIPPED || l.kind == KZ_NLOSS_CTL_NOCOND) continue;
     eval::LossInterval li;
-    if (l.source == KZ_LOSS_SOURCE_PERF_THROTTLE) {
-      li.begin = first_at_or_after(events, l.t_ns);
-      li.end = l.tseq_first == 1 ? eval::kNoEvent : first_after(events, l.t_ns + l.count);
-    } else {
-      li.begin = 0;
-      li.end = first_after(events, l.t_ns);
-    }
+    li.begin = l.begin;
+    li.end = l.end == KZ_NONE32 ? eval::kNoEvent : l.end;
     lv.push_back(li);
   }
-  if ((flagged && losses.empty()) || meta.empty()) lv.push_back(eval::LossInterval{0, eval::kNoEvent});
-  // positions in the trace (only mapped events are kept): the first kept event at or after a raw position
+  // positions in the trace (only mapped events are kept): the first kept event at or after a neutral position
   std::vector<uint64_t> kept_before(events.size() + 1, 0);
   {
-    uint64_t n = 0;
+    uint64_t k = 0;
     for (size_t i = 0; i < events.size(); ++i) {
-      kept_before[i] = n;
-      if (events[i].site < site_map.size() && site_map[events[i].site].kind != MapKind::None) ++n;
+      kept_before[i] = k;
+      if (events[i].site != KZ_NONE32 && site_map[events[i].site].kind != MapKind::None) k += site_map[events[i].site].point_also.empty() ? 1 : 2;
     }
-    kept_before[events.size()] = n;
+    kept_before[events.size()] = k;
   }
   for (eval::LossInterval& li : lv) {
     li.begin = kept_before[std::min<uint64_t>(li.begin, events.size())];
@@ -592,12 +582,18 @@ std::string report_text(const RealTraceReport& r) {
                           : std::string("not established (no basis symbols or no core request caller given)")) +
          "\n";
   for (const std::string& l : r.not_app_lines) out += "not an application's task: " + l + "\n";
-  out += std::string("start ") + (r.starts_at_exec ? "at the first execution mapping of the traced file (INIT applies; a kind's start state comes from an observed effect on all of it)" : "not shown to be the process start (start state unknown)") + "\n";
+  out += std::string("start ") +
+         (!r.starts_at_exec ? "not shown to be the process start (start state unknown)"
+          : r.start == KZ_NSTART_BOOTSTRAP
+              ? "at the first instrumented hook (the runtime's static bootstrap buffer, no pre-init loss; INIT applies; a kind's start state comes from an observed effect on all of it)"
+              : "at the first execution mapping of the traced file (INIT applies; a kind's start state comes from an observed effect on all of it)") +
+         "\n";
   for (const std::string& l : r.lifetime_lines) out += l + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
   for (const auto& lc : r.loss_cpus)
     out += "loss report: CPU ring " + std::to_string(lc.first) + ", " + std::to_string(lc.second) + " record(s); the task whose events were lost is not established\n";
+  for (const std::string& l : r.loss_lines) out += "loss record: " + l + "\n";
   if (r.cell_values != 0) out += "values loaded from a named location (value(L) slots) " + std::to_string(r.cell_values) + "\n";
   if (r.closure_given) {
     for (const std::string& l : r.closure_lines) out += l + "\n";

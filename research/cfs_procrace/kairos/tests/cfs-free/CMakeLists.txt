@@ -17,6 +17,14 @@ kz_add_unit_test(test_realrecord_derived SOURCES test_realrecord_derived.cpp LIB
   ARGS ${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1 ${CMAKE_SOURCE_DIR}/../env/logs/s1r2_p1.kzt ${CMAKE_SOURCE_DIR}/tests/static/data/core_cpu1.golden)
 set_tests_properties(test_realrecord_derived PROPERTIES SKIP_RETURN_CODE 77)
 
+# The neutral event layer (schema revision 3) on the same real record: the replay of its converted container (neutral
+# sections) equals the replay of the record as written (F0 sections converted in memory).  Exits 77 when absent.
+add_test(NAME test_trace_neutral_real COMMAND test_trace_neutral ${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1 ${CMAKE_SOURCE_DIR}/../env/logs/s1r2_p1.kzt)
+set_tests_properties(test_trace_neutral_real PROPERTIES SKIP_RETURN_CODE 77 LABELS unit)
+# An instrumented run: a kzrt-dump written by the runtime in this test (POSIX adapter, two threads), converted to the
+# neutral layer with a unit-test manifest and replayed on the mini profile.
+kz_add_unit_test(test_neutral_kzrt SOURCES test_neutral_kzrt.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
+
 # The purpose-built target program.  Every function starts `endbr64; push %rbp; mov %rsp,%rbp`
 # (frame pointers, control-flow protection) like the framework's functions at -O0, whatever the
 # sanitizer flags of the build.

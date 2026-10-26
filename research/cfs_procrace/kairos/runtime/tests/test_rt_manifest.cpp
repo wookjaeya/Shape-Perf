@@ -1,5 +1,6 @@
 // test_rt_manifest <data-dir> -- the "kzs-sites 1" / "kzs-sites 2" parser accepts the example and rejects what
-// the format forbids (each with its line); version 2 adds identity reads, which a version 1 file cannot have.
+// the format forbids (each with its line); version 2 adds identity reads, the place of a point or effect site and
+// parameter values, which a version 1 file cannot have.
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -125,7 +126,29 @@ int main(int argc, char** argv) {
     CHECK(rejects(ret + "identity 2 decoder=spawn-return status=0 ok=0\n", "belong to the id=", "2"));
     CHECK(rejects(base + "identity 1 decoder=thread-entry id=3 status=0 ok=0\n", "belong to the id=", "2"));
   }
-  std::printf("manifest: example accepted (%zu sites, %zu bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected\n",
+  // version 2: the statement a point or effect site is bound to (place=), and the parameter values (from=param<k>)
+  {
+    kzrt::Manifest mp;
+    const char* placed =
+        "kzs-sites 2\nsource s rev=abc\nmodule 1 name=m source=s\n"
+        "site 1 label=p.at op=o phase=point tu=t.c func=f callee=g line=12 place=at-call\nvalue 1 0 role=name from=param1 type=ptr string=validated bound=20 ref=\"checked at t.c:10\"\n"
+        "site 2 label=p.after op=o phase=effect tu=t.c func=f callee=memset place=after-call\nvalue 2 0 role=dest from=arg0 type=ptr\n"
+        "site 3 label=p.line op=o phase=point tu=t.c func=f line=14 place=line-start\n"
+        "site 4 label=p.store op=o phase=effect tu=t.c func=f line=15 place=store\nvalue 4 0 role=required from=operand0 type=u32\nvalue 4 1 role=addr from=operand1 type=ptr\n"
+        "site 5 label=p.id op=o phase=point tu=t.c func=impl callee=go place=at-call\nvalue 5 0 role=task_id from=arg4 type=u32\nidentity 5 decoder=spawn-id id=0\n";
+    if (!kzrt::parse_manifest(placed, "placed", &mp, &err)) std::fprintf(stderr, "%s\n", err.c_str());
+    CHECK(mp.site(1)->place == "at-call" && mp.site(1)->value(0)->from == "param1" && mp.site(2)->place == "after-call" && mp.site(2)->src_line == 0);
+    CHECK(mp.site(3)->place == "line-start" && mp.site(4)->place == "store" && mp.site(5)->has_identity && mp.site(5)->place == "at-call");
+    CHECK(rejects("site 2 label=b op=o phase=point tu=t.c func=f callee=g place=at-call\n", "kzs-sites 2"));
+    CHECK(rejects("value 1 0 role=r from=param0 type=u32\n", "kzs-sites 2"));
+    CHECK(rejects("site 2 label=b op=o phase=point tu=t.c func=f callee=g place=around\n", "place is", "2"));
+    CHECK(rejects("site 2 label=b op=o phase=before tu=t.c func=f callee=g place=at-call\n", "phase=point|effect|exit", "2"));
+    CHECK(rejects("site 2 label=b op=o phase=point tu=t.c func=f place=after-call\n", "needs callee=", "2"));
+    CHECK(rejects("site 2 label=b op=o phase=effect tu=t.c func=f callee=g line=3 place=store\n", "takes no callee=", "2"));
+    CHECK(rejects("site 2 label=b op=o phase=point tu=t.c func=f place=line-start\n", "needs line=", "2"));
+  }
+  std::printf("manifest: example accepted (%zu sites, %zu bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected; "
+              "5 placed sites accepted, 7 rejected\n",
               m.sites.size(), m.binds.size());
   return 0;
 }

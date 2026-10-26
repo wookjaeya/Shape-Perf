@@ -125,6 +125,12 @@ Clang 경로에서 관찰된 비용:
 
 진행(2026-10-26, D1·D5): 1번은 manifest 판 2(`kzs-sites 2`의 `identity`, `kairos/docs/event_semantics.md` §3)와 `kz convert --kzrt`의 결합(`kairos/docs/schema.md` §12.3.1)으로 갖췄다. 단계 C의 GCC 파일럿 dump에서 C1 15개·R2 24개 task의 소유 앱이 `confirmed`이고 F0 결합과 같다 [M]. 4번은 `kz-static`이 파생 compile DB를 받게 했고(plugin 옵션은 기록하고 front end에서 뺌), C1에서 B 사본과 B′의 facts가 생성 표 해시 하나 외에 같음을 보였다. 기준 facts를 객체 바이트 비교로 재사용하지 않고 파생 빌드마다 B′를 뽑기로 했다(`kairos/docs/static_facts.md` §7a) [M][D]. 남은 것: 단계 C 파일럿 dump에는 그 빌드의 B′가 없다(빌드 트리 삭제) — D7 실행부터 붙인다.
 
+진행(2026-10-26, D2·D3·D6): 2·3·7번은 다음으로 갖췄다(`kairos/docs/instr_candidate_gcc.md` §11).
+- `profiles/c1-bp-b051eb0/instr/sites-cf{833fdbb,281a941}.kzs`와 `profiles/cfs-v7.0.1/instr/sites.kzs`를 두었다. F0 계획의 site 34·33·35개가 모두 같은 label의 짝과 `equiv … unconfirmed`를 가진다.
+- plugin 0.2에 판 2 `place=`(at-call, after-call, line-start, store)와 `from=param<k>`를 더했다. `cfe_es_api.c:573` 같은 필드 store와 EarlyInit memset 호출을 이것으로 묶는다.
+- C1 네 빌드와 R2를 파생 빌드했다. 모든 site가 bound·inlined이고, 바뀐 객체는 계측 단위와 빌드 시각 객체뿐이며, 링크 뒤 hook 검사가 일치한다 [M].
+- 남은 것: 부팅과 dump 검사(D3/D7), B′, `equiv` 확정(단계 E).
+
 ## 5. 단계 D–F 계획
 
 시간표는 정하지 않는다(IR §15 머리말). 단계의 통과는 논문 기여의 확정을 뜻하지 않는다. 모든 실행은 pilot/dev 실행이다. 반복 수는 목적별로 본 실험 전에 정하며(SPEC §8.7 D14, IR §13.5), 이 문서에서 정하지 않는다. 기존 실험의 반복 수(예: confirm2의 인스턴스 4개)를 승계하지 않는다.

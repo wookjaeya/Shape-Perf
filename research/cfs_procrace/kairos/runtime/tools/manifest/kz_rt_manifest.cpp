@@ -218,7 +218,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
     } else if (kw == "site") {
       Site s;
       if (t.size() < 2 || !parse_u32(t[1], 1, kMaxId, &s.id)) return fail("site <id 1..2147483647>");
-      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"label", "op", "phase", "tu", "func", "callee", "line", "ref"}, &bad)) return fail(bad);
+      if (!attrs(t, 2, &kv, &bad) || !only(kv, {"label", "op", "phase", "tu", "func", "callee", "line", "place", "ref"}, &bad)) return fail(bad);
       s.label = get(kv, "label");
       s.op = get(kv, "op");
       s.phase = get(kv, "phase");
@@ -229,6 +229,17 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       if (s.label.empty() || s.op.empty() || s.tu.empty() || s.func.empty()) return fail("site needs label=, op=, phase=, tu= and func=");
       if (!one_of(s.phase, {"before", "effect", "after", "exit", "point"})) return fail("phase is before|effect|after|exit|point");
       if (kv.count("line") != 0 && !parse_u32(get(kv, "line"), 1, kMaxId, &s.src_line)) return fail("line=<n>");
+      if (kv.count("place") != 0) {
+        // version 2: the statement a point or effect site is bound to (event_semantics.md section 3)
+        s.place = get(kv, "place");
+        if (version < 2) return fail("place= needs 'kzs-sites 2'");
+        if (!one_of(s.place, {"at-call", "after-call", "line-start", "store"})) return fail("place is at-call|after-call|line-start|store");
+        if (!one_of(s.phase, {"point", "effect", "exit"})) return fail("place= needs phase=point|effect|exit");
+        const bool at_call = s.place == "at-call" || s.place == "after-call";
+        if (at_call && s.callee.empty()) return fail("place=" + s.place + " needs callee=");
+        if (!at_call && !s.callee.empty()) return fail("place=" + s.place + " takes no callee=");
+        if (!at_call && s.src_line == 0) return fail("place=" + s.place + " needs line=");
+      }
       if (m->site_index.count(s.id) != 0) return fail("site id " + t[1] + " declared twice");
       if (m->label_index.count(s.label) != 0) return fail("site label '" + s.label + "' declared twice");
       s.line = ln;
@@ -250,9 +261,11 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       v.ref = get(kv, "ref");
       if (v.role.empty() || v.from.empty() || v.type.empty()) return fail("value needs role=, from= and type=");
       if (!one_of(v.type, {"u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64", "ptr"})) return fail("type is u8..u64, s8..s64 or ptr");
+      const bool from_param = v.from.size() > 5 && v.from.rfind("param", 0) == 0;
       const bool from_ok = v.from == "ret" || (v.from.size() > 3 && (v.from.rfind("arg", 0) == 0 || v.from.rfind("out", 0) == 0)) ||
-                           (v.from.size() > 7 && v.from.rfind("operand", 0) == 0);
-      if (!from_ok) return fail("from is arg<k>, ret, out<k> or operand<k>");
+                           (v.from.size() > 7 && v.from.rfind("operand", 0) == 0) || from_param;
+      if (!from_ok) return fail("from is arg<k>, ret, out<k>, operand<k> or param<k>");
+      if (from_param && version < 2) return fail("from=param<k> needs 'kzs-sites 2'");
       if (kv.count("string") != 0) {
         v.string_mode = get(kv, "string");
         if (!one_of(v.string_mode, {"pointer-only", "validated"})) return fail("string is pointer-only|validated");

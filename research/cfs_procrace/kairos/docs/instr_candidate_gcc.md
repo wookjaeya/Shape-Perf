@@ -178,3 +178,49 @@ $G/compare_c1.sh <kz-dump of c1_runs/smoke3/post_1df262a/run.kzt> /home/user/wor
 ```
 
 산출물 해시(저장소 밖): C1 계측 `core-tx` `21f82eca…`, `cf.so` `c99e8300…`, `bp.so` `6e83e6b7…`, dump `61586c46…`; R2 계측 `core-cpu1` `967a1f00…`, dump `0af58a06…`; plugin `4bfcb12b…`; manifest C1 `8dbdd2e8…`, R2 `a4a92b90…`. 큰 빌드 트리는 기록을 남긴 뒤 지웠다.
+
+## 11. 단계 D2: site 형태, F0 동등 manifest, 파생 빌드 다섯 (2026-10-26)
+
+- 범위: 선택 문서(`plan/instrumentation_selection_20261026.md`) §4의 2·3·7, §5.2의 D2·D3·D6. 부팅은 하지 않았다(D3 몫). 연구 조건을 새로 정하지 않았다. 파생 실행의 시작 상태는 PI 결정 대기 그대로다(선택 문서 §7의 2).
+- **plugin 0.2** (`kzgcc.cpp`) [D][M]
+  - 판 2 `place=at-call|after-call|line-start|store`와 `from=param<k>`를 더했다(형식: `event_semantics.md` §3).
+  - `store`는 그 줄의 store 문장을 무엇을 저장하든 묶는다(지역 포인터를 통한 필드, 전역 객체의 필드, 포인터 대상). `operand1`은 주소 계산이고 다시 읽지 않는다. bit-field와 주소를 잡지 않은 지역 객체는 그 값이 `unsupported`다.
+  - `after-call`은 `from=ret`일 때만 결과에 SSA 이름을 붙인다(0.1은 결과가 있는 모든 호출에 붙였다).
+  - binding id 범위(site ≤ 4095, module ≤ 32767)를 적재 때 검사한다.
+  - `memset`은 삽입 시점(`ssa` 직후)에 `-O0/-O2/-O3` 모두 호출로 남는다 [M: 시험]. 선택 문서 §4의 3에서 [U]였던 항목이다.
+  - 시험 9개 통과: 기존 6개, `kzgcc_shapes_{O0,O2,O3}`(필드·전역 store의 값·주소, 한 memset 뒤의 두 site, 매개변수 문자열, after-call 결과, line-start 순서, place 없는 점의 빈틈). 단계 C manifest(판 1)도 0.2로 같은 binding을 낸다(기존 시험).
+- **manifest** (`profiles/c1-bp-b051eb0/instr/sites-cf{833fdbb,281a941}.kzs`, `profiles/cfs-v7.0.1/instr/sites.kzs`, 판 2, 정체성 읽기 포함) [F][D]
+  - F0 계획의 site 34·33·35개가 **모두** 같은 label의 짝을 가진다. 짝마다 `equiv … backends=f0,gcc-plugin status=unconfirmed`를 두고, F0 위치와의 관계를 `ref`에 적었다. `unsupported`는 0이다. GCC 전용 site는 C1의 `.before` 셋(호출 쪽 이름, F 단계 gate 둘)이다.
+  - 위치는 프로필의 LP 문장을 따른다. F0와 위치가 다른 곳은 다음과 같다.
+    - `clear_table`·`clear_names`: F0는 `OS_API_Init` 안 호출의 반환, GCC는 그 안의 memset 뒤.
+    - `request_shutdown`: F0는 L94 `pthread_kill` 반환, GCC는 L93 store 뒤.
+    - `teardown`: F0는 `OS_TaskDelay` 반환, GCC는 `OS_DeleteAllObjects` 호출 앞.
+    - R2 `register`·`free_slot`·`raise_state`·`core_clear`: F0는 줄 시작이나 호출 앞, GCC는 호출·store 뒤.
+    - `.exists`·`.publish`·`.created`: F0는 꼬리 점프로 닿는 진입, GCC는 호출 앞.
+  - 슬롯이 다른 곳은 다음과 같다.
+    - F0 `return_address`는 모두 없다. 진입·반환은 `link`로 묶는다.
+    - 진입의 세마포어 이름은 검증 전 포인터라 포인터만 둔다. 텍스트는 검증 뒤의 `.exists`와 `.publish`(`param1`)에서 읽는다.
+    - 새로 얻는 값: `raise_state`의 `required`, `publish_core`의 `pending_id`, `register`의 `app_id`, `sb_publication`의 `out_app_id`.
+  - 범위가 넓은 곳: `.found`(`OS_ObjectIdFindByName`의 store)와 `.created`(`OS_ObjectIdFinalizeNew`의 `OS_NotifyEvent` 호출)는 모든 객체 종류에서 기록된다. 재생은 열린 조회·생성 호출 안의 것만 쓴다(`schema.md` §12.4의 out 값 규칙) [I, 실제 dump로는 미확인].
+  - 단계 C manifest와 다른 점: 호출 쪽 site는 호출/반환이 아니라 점이다. 그래서 같은 함수의 진입 site와 함께 있어도 한 호출을 두 번 세지 않는다. `CFE_ES_GetAppID.store`는 뺐다(§4의 6). 단계 C 파일(`sites/*.kzs`)은 그 dump의 근거로 그대로 둔다.
+- **파생 빌드** (`scripts/derive_c1.sh`, `derive_r2.sh`, `build_runtime.sh`, `hookcheck.sh`). 같은 경로의 기준 빌드와 객체를 바이트로 비교했다 [M]
+
+| 구성 | 객체 | 달라진 객체 | binding | 링크 뒤 hook(obs+ctl) | hookcheck |
+|---|---|---|---|---|---|
+| C1 post 1df262a | 261 | 계측 단위 11 | 37 (bound 33, inlined 4) | tx 39 = rx 39 | ok 37 |
+| C1 post 1b0b338 | 261 | 계측 단위 11 | 37 (33, 4) | 39 = 39 | ok 37 |
+| C1 pre 1df262a | 261 | 계측 단위 11 + `cfe_build_env_table.c.o` 2 (D4) | 36 (32, 4) | 38 = 38 | ok 36 |
+| C1 pre 1b0b338 | 261 | 계측 단위 11 | 36 (32, 4) | 38 = 38 | ok 36 |
+| R2 | 1,335 (cpu1) | 원시 바이트는 전부(`-g` producer). strip-debug 뒤 계측 단위 11 + D4 1 + coverage 267(빌드마다 다름, 단계 C와 같은 수) | 35 (bound 35) | 35 | ok 35 |
+
+  - 차이 대장은 단계 C의 D1–D4와 같다. D3에 build identity 객체 `kz_rt_build_info.c.o`를 더했다(backend `kzgcc 0.2 (gcc-plugin)`, compiler·target·manifest sha256, D1-runtime의 경로).
+  - C1 core의 module은 번들마다 다르다(1df262a = 1, 1b0b338 = 4). 그래서 두 번들의 binding id가 섞이지 않는다.
+  - 경고는 기준과 같다(C1의 DV-P1 `-Wrestrict` 하나, R2는 0).
+  - 크기: C1 post 1df262a `core-tx` text 417,562 → 448,538 B, bss 1,245,440 → 5,547,824 B. R2 `core-cpu1` text 519,663 → 551,760 B, bss 1,249,200 → 5,551,584 B(런타임 pool 4 MiB).
+  - 산출물(저장소 밖, `/home/user/work/instr/gcc/d2/`, `sha256.txt`): 계측 빌드 트리와 exe 다섯은 D3·B′(D5 규칙: 빌드마다 B′)를 위해 남겼다. 같은 경로의 기준 빌드 트리는 해시를 남긴 뒤 지웠다.
+- 열린 것 [U]
+  - 실제 dump에서 `kz-rt-dump --manifest`, `kz convert`, `kz replay`의 확인(D3/D7·D8).
+  - `equiv` 확정(단계 E).
+  - 함수 진입에 묶은 요청의 호출 함수(`request_func`)는 정해지지 않는다(F0 `return_address`의 짝이 없음).
+  - B′ 추출.
+- 새 PI 결정: 없다. 위치·슬롯 선택은 프로필 LP와 원 코드 문장을 인용해 정한 도구 binding이다.

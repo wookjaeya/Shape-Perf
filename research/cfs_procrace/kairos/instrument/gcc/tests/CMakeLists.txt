@@ -12,3 +12,8 @@ add_test(NAME kzgcc_untouched_unit
 add_test(NAME kzgcc_refuses_runtime
   COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh refuse ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
           $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/refuse)
+foreach(opt O0 O2 O3)
+  add_test(NAME kzgcc_shapes_${opt}
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh shapes-${opt} ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
+            $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/shapes_${opt})
+endforeach()

@@ -55,8 +55,8 @@ kzs-sites 1
 source <name> rev=<revision> [ref=<text>]
 module <id> name=<text> source=<source-name>
 site <id> label=<label> op=<operation> phase=before|effect|after|exit|point tu=<path> func=<function>
-     [callee=<function>] [line=<n>] [ref=<file:line at the revision>]
-value <site-id> <slot 0..7> role=<role> from=arg<k>|ret|out<k>|operand<k> type=u8..u64|s8..s64|ptr
+     [callee=<function>] [line=<n>] [place=at-call|after-call|line-start|store] [ref=<file:line at the revision>]   # place= 판 2만
+value <site-id> <slot 0..7> role=<role> from=arg<k>|ret|out<k>|operand<k>|param<k> type=u8..u64|s8..s64|ptr     # param<k> 판 2만
      [string=pointer-only|validated] [bound=<1..64>] [ref=<text>]
 control <site-id> ctx=task|lock-held|isr|osal-internal|terminating|unsupported [ref=<text>] [note=<text>]
 bind <id> site=<site-id> backend=<name> module=<module-id> at=<location text>
@@ -77,10 +77,21 @@ identity <site-id> decoder=<reader> [id=<slot>] [owner=<slot>] [status=<slot> ok
 | `child-request` | before | — | 요청한 task 자신의 앱을 위한 생성 요청 |
 | `request-return` | after | — | 두 요청의 반환 |
 
+**판 2의 점 위치 `place=`와 매개변수 값 `from=param<k>` (2026-10-26, D2)** [D][M]. F0 계획의 점(`at-call`·`after-call`·`line-start`, 꼬리 점프로 닿는 점, 줄의 store)을 계측 계열에서 **점으로** 적기 위한 것이다. 판 1의 `phase=before|after` + `callee`는 호출 쪽에서 본 그 함수의 호출·반환이라(변환이 `call-site` 호출/반환으로 읽음), 같은 함수의 진입 site와 함께 두면 재생이 한 호출을 두 번 본다. `place=`가 있는 site는 `phase=point|effect|exit`이고 언제나 점이다(`func` 안의 문장에 묶임).
+
+| place | 필요 | 묶는 곳 | 값 |
+|---|---|---|---|
+| `at-call` | `callee=` | `callee` 호출 바로 앞(`line=`이면 그 줄의 호출만) | `arg<k>` = 그 호출의 인자 operand |
+| `after-call` | `callee=` | 그 호출 바로 뒤 | `ret`(필요할 때만 결과에 SSA 이름을 붙임), `out<k>`, `arg<k>` |
+| `line-start` | `line=`, callee 없음 | 기본 블록 안에서 그 줄 문장이 시작될 때마다 그 앞 | `param<k>` |
+| `store` | `line=`, callee 없음 | 그 줄의 store 문장(필드·전역·포인터 대상 무엇이든) 바로 뒤 | `operand0` = 저장한 값, `operand1` = 저장한 주소(주소 계산만, 다시 읽지 않음) |
+
+`from=param<k>`는 `func`가 받은 매개변수 k의 값(SSA 기본 정의)이다. 메모리에서 다시 읽지 않는다. 주소가 잡힌 매개변수처럼 레지스터 값이 아니면 그 binding은 `unsupported`(이유)다. `place=` 없는 `phase=point|exit`, callee가 있는 `phase=effect`는 묶을 곳이 없어 선언된 빈틈(이유 "needs place=")이 된다. 판 1 파일은 두 키를 쓸 수 없다(파서가 거부). 변환(`kz convert --kzrt`)은 바뀌지 않았다: 점은 그 label이 프로필의 점이면 그 점이다. 구현 `instrument/gcc/kzgcc.cpp` L444–L700, 시험 `kzgcc_shapes_{O0,O2,O3}`, 파서 시험 `rt_manifest`(배치 site 5개 수용, 7개 거부) [M]. 적용한 manifest: `profiles/c1-bp-b051eb0/instr/sites-cf{833fdbb,281a941}.kzs`, `profiles/cfs-v7.0.1/instr/sites.kzs`(`docs/instr_candidate_gcc.md` §11).
+
 닫는 레코드(spawn-return, request-return)는 사건의 `link`(같은 호출 인스턴스를 연 레코드의 aseq)로 여는 레코드와 짝짓는다. 그래서 binding은 정체성 여는 site의 레코드를 link로 줘야 한다(kzgcc는 같은 호출·함수의 첫 before site를 link로 준다: 여는 site를 그 호출의 before 중 처음에 둔다). 결합 규칙은 §2.3과 `include/kz/trace/identity_rule.hpp`(F0와 같은 소유 앱 규칙 `owner_from_request`)이며 `schema.md` §12.3에 적었다.
 
 - id는 십진 1..2147483647, 종류별 유일. `label`은 유일하며 kzp-observe 사이트 label·`.kzh`의 `site=`와 같은 이름을 쓴다. **site id와 bind id가 hook 호출의 컴파일 시점 상수**다. bind id 배정은 연결부가 하며 실행 전체에서 유일해야 한다. 규칙은 다음 항목이다 [D].
-- **binding id 규칙** [D]: `bind = (module << 16) | (site << 4) | n`. module은 1..32767(결과가 2147483647 이하), site는 1..4095, n은 한 번역 단위 안에서 그 site의 binding 순번 0..14이고, n = 15는 그 단위에 binding이 없는 site의 선언된 빈틈 줄(`status=unsupported`)이다. 한 단위에서 한 site의 binding이 15개를 넘으면 넘는 것은 `unsupported`(이유 기록)로 둔다. 한 module 안에서 site는 한 번역 단위(`site tu=`)에만 묶이므로 id가 겹치지 않고, 겹치면 binding 합치기(`instrument/gcc/scripts/merge_binds.sh`)가 거부한다. GCC 후보(`instrument/gcc/kzgcc.cpp` L263, L366–L378, L743)와 LLVM 후보(`instrument/llvm/kzllvm.cpp` L210, L467–L480, L837)가 이 규칙을 쓴다 [F]. 두 연결부는 module ≤ 32767·site ≤ 4095를 아직 검사하지 않는다 [F: grep]. 지금 manifest의 범위는 module 1–3, site ≤ 46이다(`instrument/gcc/sites/*.kzs`) [F]. Clang 변환 후보는 `(module << 16) | 순번`을 썼다(`instrument/clang/kz_instr_clang.cpp` L314) [F]. 단계 C 비교 증거로 그대로 둔다. 런타임과 호스트 도구는 bind id를 해석하지 않는다(상수로 기록만). binding의 module·site는 manifest의 `bind` 줄에서만 읽고 id의 비트에서 거꾸로 읽지 않는다.
+- **binding id 규칙** [D]: `bind = (module << 16) | (site << 4) | n`. module은 1..32767(결과가 2147483647 이하), site는 1..4095, n은 한 번역 단위 안에서 그 site의 binding 순번 0..14이고, n = 15는 그 단위에 binding이 없는 site의 선언된 빈틈 줄(`status=unsupported`)이다. 한 단위에서 한 site의 binding이 15개를 넘으면 넘는 것은 `unsupported`(이유 기록)로 둔다. 한 module 안에서 site는 한 번역 단위(`site tu=`)에만 묶이므로 id가 겹치지 않고, 겹치면 binding 합치기(`instrument/gcc/scripts/merge_binds.sh`)가 거부한다. GCC 연결부(`instrument/gcc/kzgcc.cpp` L294, L412–L428, L841)와 LLVM 후보(`instrument/llvm/kzllvm.cpp` L210, L467–L480, L837)가 이 규칙을 쓴다 [F]. kzgcc 0.2는 site ≤ 4095·module ≤ 32767을 적재 때 검사하고 넘으면 거부한다(L917–L932). LLVM 후보는 검사하지 않는다 [F: grep]. 지금 manifest의 범위는 module 1–4, site ≤ 46이다(`instrument/gcc/sites/*.kzs`, `profiles/*/instr/*.kzs`) [F]. Clang 변환 후보는 `(module << 16) | 순번`을 썼다(`instrument/clang/kz_instr_clang.cpp` L314) [F]. 단계 C 비교 증거로 그대로 둔다. 런타임과 호스트 도구는 bind id를 해석하지 않는다(상수로 기록만). binding의 module·site는 manifest의 `bind` 줄에서만 읽고 id의 비트에서 거꾸로 읽지 않는다.
 - IR §9.3의 항목 대응: source revision·번역 단위·함수/호출 문맥 = `source`·`site tu/func/callee`; 전·후·효과 = `phase`; 인자·값·자원 키의 근거 = `value … ref=`; 백엔드가 고른 위치 = `bind at=`; 최적화로 사라짐·복제·인라인 = `bind status=removed|duplicated|inlined`(같은 bind id가 여러 위치에 있으면 `pc`가 가른다); 지원 못한 지점과 이유 = `status=unsupported reason=`.
 - `string=validated`는 `type=ptr`, `bound`, `ref`(원 코드가 그 지점 전에 포인터를 검증한 곳, 또는 그 메모리가 크기를 아는 배열이라는 근거)를 요구한다. 없으면 포인터 값만 기록한다(검증 전 `strlen` 금지, PD26 §4). `kz-rt-dump --manifest`는 validated가 아닌 슬롯에서 복사된 문자열, binding이 선언하지 않은 `valid` 비트, `removed|unsupported` binding의 사건, 등록되지 않은 module을 보고한다 [M: `rt_dump_tool`, `rt_dump_tool_strict`].
 - 동등성: 두 백엔드의 binding이 같은 효과를 관측함이 근거(`ref`)로 확인되기 전에는 `equiv … unconfirmed`(= "동일 의미 확인 전")다. 이름이 같다고 동등하지 않다.

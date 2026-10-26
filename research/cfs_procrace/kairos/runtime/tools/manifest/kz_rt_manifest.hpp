@@ -11,8 +11,8 @@
 //   source <name> rev=<revision> [ref=<text>]
 //   module <id> name=<text> source=<source-name>
 //   site <id> label=<label> op=<operation> phase=before|effect|after|exit|point tu=<path> func=<function>
-//        [callee=<function>] [line=<n>] [ref=<file:line at the source revision>]
-//   value <site-id> <slot 0..7> role=<role> from=arg<k>|ret|out<k>|operand<k> type=u8|u16|u32|u64|s8|s16|s32|s64|ptr
+//        [callee=<function>] [line=<n>] [place=at-call|after-call|line-start|store] [ref=<file:line at the source revision>]
+//   value <site-id> <slot 0..7> role=<role> from=arg<k>|ret|out<k>|operand<k>|param<k> type=u8|u16|u32|u64|s8|s16|s32|s64|ptr
 //        [string=pointer-only|validated] [bound=<1..64>] [ref=<text>]
 //   control <site-id> ctx=task|lock-held|isr|osal-internal|terminating|unsupported [ref=<text>] [note=<text>]
 //   bind <id> site=<site-id> backend=<name> module=<module-id> at=<location text>
@@ -26,6 +26,19 @@
 // without it a pointer value is recorded as a pointer only.  status=removed|unsupported needs a reason
 // (no hook is inserted there; the point is a declared coverage gap).  vals (default: every declared slot)
 // may name only declared slots; it is the valid mask the binding passes to the hook.
+//
+// place (kzs-sites 2): the statement a point, effect or exit site is bound to, in func= (never a call or return of
+// the site's own function, so the event is a point, not the call of an operation):
+//   at-call     right before each call of callee= (line= restricts it to the calls on that line); arg<k> are the call's
+//               argument operands
+//   after-call  right after each such call; ret is its result, out<k> = *arg<k> read right after it, arg<k> as above
+//   line-start  before the first statement of each run of statements of line= in a basic block (needs line=)
+//   store       right after each store statement of line= (a field, global or pointer target; needs line=):
+//               operand0 = the stored value, operand1 = the address stored to
+// Without place, phase=before|after are the entry/returns of func (no callee) or the call/return of callee at its call
+// site, and phase=effect without callee is a store through a pointer parameter of func (kzs-sites 1 meaning).
+// from=param<k> (kzs-sites 2): the value parameter k of func= received at its entry (the parameter's value, not its
+// memory read again), at any binding of the site.
 //
 // identity (kzs-sites 2): what the site's event says about task identity, with the meaning of the F0 plan's
 // `decoder=` (kz_raw.h KZ_DECODER; the reader names are the same), for the host's identity join
@@ -88,6 +101,7 @@ struct Identity {
 struct Site {
   uint32_t id = 0;
   std::string label, op, phase, tu, func, callee, ref;
+  std::string place;  // kzs-sites 2: at-call | after-call | line-start | store, or empty
   uint32_t src_line = 0;
   std::vector<Value> values;
   bool has_control = false;

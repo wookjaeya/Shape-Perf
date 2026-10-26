@@ -1,7 +1,7 @@
-// kzgcc.cpp -- compiler binding candidate "GCC GIMPLE plugin" of the Kairos instrumentation family
-// (stage C fitness prototype; kairos/docs/instr_candidate_gcc.md).
+// kzgcc.cpp -- compiler binding "GCC GIMPLE plugin" of the Kairos instrumentation family (stage C fitness
+// prototype, chosen as the main implementation; stage D site shapes: kairos/docs/instr_candidate_gcc.md section 11).
 //
-// The plugin reads a logical site manifest ("kzs-sites 1", kairos/docs/event_semantics.md section 3,
+// The plugin reads a logical site manifest ("kzs-sites 1" or "2", kairos/docs/event_semantics.md section 3,
 // parsed by the runtime's own host parser) and, in the translation units the manifest names, inserts
 // calls of the runtime's observation hooks (kz_rt_obs, kz_rt_obs_str; hook ABI 1, kz_rt.h) and of the
 // control hook kz_rt_ctl at
@@ -10,6 +10,13 @@
 //   - the entry of <func> (phase=before, no callee: the parameters) and its returns (phase=after: ret)
 //   - a store through a pointer parameter in <func> (phase=effect, no callee: operand0 = stored value,
 //                                              operand1 = the address; line=<n> restricts it to that line)
+//   - kzs-sites 2 points and effects (place=, never a call/return of an operation):
+//       place=at-call / after-call  right before / after each call of <callee> (line=<n>: on that line)
+//       place=line-start            before the first statement of each run of line <n> in a basic block
+//       place=store                 right after each store statement of line <n>, whatever it stores to (a
+//                                   field through a local pointer, a global, a pointer target): operand0 = the
+//                                   stored value, operand1 = the address (computed, never loaded)
+//     and from=param<k>: the value parameter k of <func> received (its SSA default definition).
 // Values are the GIMPLE operands the original statement uses (SSA names or invariants), converted to
 // 64 bits per the manifest type: nothing is evaluated twice, no shared variable is re-read (except the
 // out<k> read the manifest declares), no store is changed.  A string is copied only at a slot the
@@ -54,6 +61,8 @@
 #include "fold-const.h"
 #include "diagnostic-core.h"
 #include "tree-cfg.h"
+#include "gimplify.h"
+#include "gimplify-me.h"
 #include "toplev.h"
 #include "ggc.h"
 #include "gtype-desc.h"
@@ -77,7 +86,7 @@ int plugin_is_GPL_compatible;
 namespace {
 
 const char* const kPluginName = "kzgcc";
-const char* const kVersion = "kzgcc 0.1";
+const char* const kVersion = "kzgcc 0.2";
 const char* const kBackend = "gcc-plugin";
 
 // ---- plugin state (one translation unit per cc1 process) -----------------------------------------
@@ -255,10 +264,32 @@ std::string string_evidence(tree op) {
 // ---- hook construction ------------------------------------------------------------------------------
 struct Operands {      // where the slot values come from at one binding
   std::vector<tree> arg;  // call arguments or parameters (GIMPLE values or decls)
+  std::vector<tree> param;  // the function's parameter values (SSA default definitions; NULL_TREE: not a register)
   tree ret = NULL_TREE;   // call result / return value
-  tree operand0 = NULL_TREE, operand1 = NULL_TREE;  // store: value, address
+  tree operand0 = NULL_TREE, operand1 = NULL_TREE;  // store: value, address (when given directly)
+  tree store_lhs = NULL_TREE;  // store: the stored-to reference (operand1 is its address, computed on demand)
   gcall* call = NULL;     // for out<k>
 };
+
+// The address a store statement stores to, as a GIMPLE value (statements into *seq; no memory is read: an
+// address computation only).  NULL_TREE with *why where it has none.
+tree store_address(tree lhs, gimple_seq* seq, std::string* why) {
+  if (TREE_CODE(lhs) == COMPONENT_REF && DECL_BIT_FIELD(TREE_OPERAND(lhs, 1))) {
+    *why = "the store is to a bit-field (it has no address)";
+    return NULL_TREE;
+  }
+  tree base = get_base_address(lhs);
+  if (base != NULL_TREE && DECL_P(base) && !is_global_var(base) && !TREE_ADDRESSABLE(base)) {
+    *why = "the store is to a local object whose address the code never takes";
+    return NULL_TREE;
+  }
+  tree a = build_fold_addr_expr(lhs);
+  if (is_gimple_val(a)) return a;
+  gimple_seq addr = NULL;  // force_gimple_operand sets the sequence it is given: a fresh one, appended
+  a = force_gimple_operand(a, &addr, true, NULL_TREE);
+  gimple_seq_add_seq(seq, addr);
+  return a;
+}
 
 uint32_t bind_id(uint32_t module, uint32_t site, uint32_t n) { return (module << 16) | (site << 4) | n; }
 
@@ -318,6 +349,21 @@ tree build_obs(const kzrt::Site& s, uint32_t bind, tree link, const Operands& op
       op = ops.operand0;
     } else if (f == "operand1") {
       op = ops.operand1;
+      if (op == NULL_TREE && ops.store_lhs != NULL_TREE) {
+        op = store_address(ops.store_lhs, &local, why);
+        if (op == NULL_TREE) return NULL_TREE;
+      }
+    } else if (f.compare(0, 5, "param") == 0) {
+      size_t k = (size_t)std::atoi(f.c_str() + 5);
+      if (k >= ops.param.size()) {
+        *why = "parameter " + std::to_string(k) + " does not exist";
+        return NULL_TREE;
+      }
+      op = ops.param[k];
+      if (op == NULL_TREE) {
+        *why = "parameter " + std::to_string(k) + " is not a register value (its memory would be read again)";
+        return NULL_TREE;
+      }
     }
     if (op == NULL_TREE) {
       *why = "value source " + f + " does not exist here";
@@ -392,6 +438,48 @@ std::string where(gimple* st, const char* func) {
 void insert_after(gimple_stmt_iterator* gsi, gimple_seq seq) { gsi_insert_seq_after(gsi, seq, GSI_CONTINUE_LINKING); }
 
 // ---- the insertion pass -------------------------------------------------------------------------------
+// The binding shape of a site (event_semantics.md section 3).
+enum class Shape { Entry, Return, CallBefore, CallAfter, AtCall, AfterCall, LineStart, Store, ParamStore, None };
+
+Shape shape_of(const kzrt::Site& s) {
+  if (!s.place.empty()) {
+    if (s.place == "at-call") return Shape::AtCall;
+    if (s.place == "after-call") return Shape::AfterCall;
+    if (s.place == "line-start") return Shape::LineStart;
+    if (s.place == "store") return Shape::Store;
+    return Shape::None;
+  }
+  if (s.phase == "before") return s.callee.empty() ? Shape::Entry : Shape::CallBefore;
+  if (s.phase == "after") return s.callee.empty() ? Shape::Return : Shape::CallAfter;
+  if (s.phase == "effect" && s.callee.empty()) return Shape::ParamStore;
+  return Shape::None;  // a point or exit without a place: nothing to bind it to
+}
+
+// Why a site of this unit got no binding (the declared gap of the binding file).
+std::string gap_reason(const kzrt::Site& s) {
+  if (kzg.refused) return "unit refused";
+  if (shape_of(s) == Shape::None) return "phase=" + s.phase + (s.callee.empty() ? "" : " with callee=") + " needs place= (kzs-sites 2)";
+  switch (shape_of(s)) {
+    case Shape::Store: return "no store statement on line " + std::to_string(s.src_line) + " of the function (a call with a memory result is not a store site)";
+    case Shape::LineStart: return "no statement on line " + std::to_string(s.src_line) + " of the function";
+    default: return "no matching function, call or store in the unit";
+  }
+}
+
+// Builds the hook (and control) for site s at one binding into *seq; false with the binding marked unsupported.
+bool bind_one(const kzrt::Site& s, BindRec& b, tree link, const Operands& ops, gimple_seq* seq, location_t loc, tree* aseq_out) {
+  std::string why;
+  tree aseq = build_obs(s, b.id, link, ops, seq, &b.vals, &b.notes, &why, loc);
+  if (aseq == NULL_TREE) {
+    b.status = "unsupported";
+    b.reason = why;
+    return false;
+  }
+  if (s.has_control) add_ctl(s, b.id, aseq, seq, loc);
+  if (aseq_out != NULL) *aseq_out = aseq;
+  return true;
+}
+
 unsigned instrument_function(function* fun) {
   tree fndecl = fun->decl;
   const char* fname = fn_name(fndecl);
@@ -403,32 +491,60 @@ unsigned instrument_function(function* fun) {
   if (kzg.refused) return 0;
   std::vector<const kzrt::Site*> here;
   for (const kzrt::Site* s : kzg.sites)
-    if (s->func == fname) here.push_back(s);
+    if (s->func == fname && shape_of(*s) != Shape::None) here.push_back(s);
   if (here.empty()) return 0;
   make_decls();
   bool changed = false;
   location_t floc = DECL_SOURCE_LOCATION(fndecl);
 
-  // parameters
-  std::vector<tree> params;
+  // parameters: at the entry their decls or default definitions (arg<k> of an entry site, as before); elsewhere
+  // only register values (param<k>: the value received, never the parameter's memory read again)
+  std::vector<tree> params, param_vals;
   for (tree p = DECL_ARGUMENTS(fndecl); p; p = DECL_CHAIN(p)) {
     tree v = p;
     if (is_gimple_reg(p)) v = get_or_create_ssa_default_def(fun, p);
     params.push_back(v);
+    param_vals.push_back(is_gimple_reg(p) ? v : NULL_TREE);
   }
 
-  // 1. calls (before / after) and stores, collected first, then rewritten
+  // 0. the statements, collected first, then rewritten
   std::vector<gimple*> calls, stores, returns;
+  std::vector<std::pair<const kzrt::Site*, gimple*>> line_starts;
   basic_block bb;
   FOR_EACH_BB_FN(bb, fun) {
+    std::map<const kzrt::Site*, int> prev;  // per line-start site: the line of the previous statement in this block
     for (gimple_stmt_iterator gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
       gimple* st = gsi_stmt(gsi);
+      if (is_gimple_debug(st) || gimple_code(st) == GIMPLE_LABEL) continue;
       if (is_gimple_call(st)) calls.push_back(st);
       else if (gimple_code(st) == GIMPLE_RETURN) returns.push_back(st);
-      else if (is_gimple_assign(st) && gimple_store_p(st)) stores.push_back(st);
+      else if (is_gimple_assign(st) && gimple_store_p(st) && !gimple_clobber_p(st)) stores.push_back(st);
+      const int ln = stmt_line(st);
+      if (ln == 0) continue;  // a statement without a location does not end a run of a line
+      for (const kzrt::Site* s : here) {
+        if (shape_of(*s) != Shape::LineStart) continue;
+        auto it = prev.find(s);
+        if (ln == (int)s->src_line && (it == prev.end() || it->second != ln)) line_starts.push_back({s, st});
+        prev[s] = ln;
+      }
     }
   }
 
+  // 1. line starts (first, so that they precede the hooks of the line's own statements)
+  for (const auto& ls : line_starts) {
+    const kzrt::Site& s = *ls.first;
+    BindRec& b = new_bind(s, "line-start", where(ls.second, fname) + " line start");
+    if (b.status != "bound") continue;
+    Operands ops;
+    ops.param = param_vals;
+    gimple_seq seq = NULL;
+    if (!bind_one(s, b, build_int_cst(uint32_type_node, 0), ops, &seq, gimple_location(ls.second), NULL)) continue;
+    gimple_stmt_iterator gsi = gsi_for_stmt(ls.second);
+    gsi_insert_seq_before(&gsi, seq, GSI_SAME_STMT);
+    changed = true;
+  }
+
+  // 2. calls: the call/return of the callee at its call site (phase=before/after) and points at it (at-call/after-call)
   for (gimple* st : calls) {
     gcall* call = as_a<gcall*>(st);
     tree callee = gimple_call_fndecl(call);
@@ -437,46 +553,46 @@ unsigned instrument_function(function* fun) {
       if (s->callee.empty()) continue;
       if (callee == NULL_TREE || s->callee != fn_name(callee)) continue;
       if (s->src_line != 0 && (uint32_t)stmt_line(call) != s->src_line) continue;
-      if (s->phase == "before") before.push_back(s);
-      else if (s->phase == "after") after.push_back(s);
+      const Shape sh = shape_of(*s);
+      if (sh == Shape::CallBefore || sh == Shape::AtCall) before.push_back(s);
+      else if (sh == Shape::CallAfter || sh == Shape::AfterCall) after.push_back(s);
     }
     if (before.empty() && after.empty()) continue;
     const std::string at = where(call, fname) + " call " + fn_name(callee);
     location_t loc = gimple_location(call);
     Operands ops;
     for (unsigned i = 0; i < gimple_call_num_args(call); ++i) ops.arg.push_back(gimple_call_arg(call, i));
+    ops.param = param_vals;
     ops.call = call;
-    tree link = build_int_cst(uint32_type_node, 0);
+    tree link = build_int_cst(uint32_type_node, 0);  // the first phase=before record of the call (points never link)
     for (const kzrt::Site* s : before) {
-      BindRec& b = new_bind(*s, "call-before", at);
+      const bool point = shape_of(*s) == Shape::AtCall;
+      BindRec& b = new_bind(*s, point ? "at-call" : "call-before", at);
       if (b.status != "bound") continue;
       gimple_seq seq = NULL;
-      std::string why;
-      tree aseq = build_obs(*s, b.id, build_int_cst(uint32_type_node, 0), ops, &seq, &b.vals, &b.notes, &why, loc);
-      if (aseq == NULL_TREE) {
-        b.status = "unsupported";
-        b.reason = why;
-        continue;
-      }
-      if (s->has_control) add_ctl(*s, b.id, aseq, &seq, loc);
+      tree aseq = NULL_TREE;
+      if (!bind_one(*s, b, build_int_cst(uint32_type_node, 0), ops, &seq, loc, &aseq)) continue;
       gimple_stmt_iterator gsi = gsi_for_stmt(call);
       gsi_insert_seq_before(&gsi, seq, GSI_SAME_STMT);
-      if (integer_zerop(link)) link = aseq;
+      if (!point && integer_zerop(link)) link = aseq;
       changed = true;
     }
     if (after.empty()) continue;
     if (stmt_ends_bb_p(call)) {
       for (const kzrt::Site* s : after) {
-        BindRec& b = new_bind(*s, "call-after", at);
+        BindRec& b = new_bind(*s, shape_of(*s) == Shape::AfterCall ? "after-call" : "call-after", at);
         b.status = "unsupported";
         b.reason = "the call ends its basic block (noreturn, returns-twice or abnormal edge)";
       }
       continue;
     }
-    // the result: an SSA name; give the call one when its result is unused or goes to memory
+    // the result: an SSA name, given to the call only where a site reads it (from=ret) and the call has none
+    bool needs_ret = false;
+    for (const kzrt::Site* s : after)
+      for (const kzrt::Value& v : s->values) needs_ret = needs_ret || v.from == "ret";
     tree rtype = TREE_TYPE(TREE_TYPE(callee));
     gimple_seq pre = NULL;
-    if (!VOID_TYPE_P(rtype) && is_gimple_reg_type(rtype)) {
+    if (needs_ret && !VOID_TYPE_P(rtype) && is_gimple_reg_type(rtype)) {
       tree lhs = gimple_call_lhs(call);
       if (lhs == NULL_TREE) {
         tree t = make_ssa_name(rtype);
@@ -497,17 +613,10 @@ unsigned instrument_function(function* fun) {
     }
     gimple_seq seq = pre;
     for (const kzrt::Site* s : after) {
-      BindRec& b = new_bind(*s, "call-after", at);
+      const bool point = shape_of(*s) == Shape::AfterCall;
+      BindRec& b = new_bind(*s, point ? "after-call" : "call-after", at);
       if (b.status != "bound") continue;
-      std::string why;
-      tree aseq = build_obs(*s, b.id, link, ops, &seq, &b.vals, &b.notes, &why, loc);
-      if (aseq == NULL_TREE) {
-        b.status = "unsupported";
-        b.reason = why;
-        continue;
-      }
-      if (s->has_control) add_ctl(*s, b.id, aseq, &seq, loc);
-      changed = true;
+      if (bind_one(*s, b, point ? build_int_cst(uint32_type_node, 0) : link, ops, &seq, loc, NULL)) changed = true;
     }
     if (seq != NULL) {
       gimple_stmt_iterator gsi = gsi_for_stmt(call);
@@ -516,62 +625,57 @@ unsigned instrument_function(function* fun) {
     }
   }
 
-  // 2. stores through a pointer parameter (phase=effect, no callee)
+  // 3. stores: through a pointer parameter (phase=effect without place) or any store of a line (place=store)
   for (gimple* st : stores) {
     tree lhs = gimple_assign_lhs(st);
-    if (TREE_CODE(lhs) != MEM_REF) continue;
-    tree base = TREE_OPERAND(lhs, 0);
     tree parm = NULL_TREE;
-    if (TREE_CODE(base) == SSA_NAME && SSA_NAME_VAR(base) && TREE_CODE(SSA_NAME_VAR(base)) == PARM_DECL && SSA_NAME_IS_DEFAULT_DEF(base))
-      parm = SSA_NAME_VAR(base);
-    if (parm == NULL_TREE) continue;
+    if (TREE_CODE(lhs) == MEM_REF) {
+      tree base = TREE_OPERAND(lhs, 0);
+      if (TREE_CODE(base) == SSA_NAME && SSA_NAME_VAR(base) && TREE_CODE(SSA_NAME_VAR(base)) == PARM_DECL && SSA_NAME_IS_DEFAULT_DEF(base))
+        parm = SSA_NAME_VAR(base);
+    }
     for (const kzrt::Site* s : here) {
-      if (s->phase != "effect" || !s->callee.empty()) continue;
+      const Shape sh = shape_of(*s);
+      if (sh != Shape::Store && !(sh == Shape::ParamStore && parm != NULL_TREE)) continue;
       if (s->src_line != 0 && (uint32_t)stmt_line(st) != s->src_line) continue;
-      BindRec& b = new_bind(*s, "store", where(st, fname) + " store *" + std::string(IDENTIFIER_POINTER(DECL_NAME(parm))));
+      const std::string what = parm != NULL_TREE ? " store *" + std::string(IDENTIFIER_POINTER(DECL_NAME(parm))) : " store";
+      BindRec& b = new_bind(*s, "store", where(st, fname) + what);
       if (b.status != "bound") continue;
-      Operands ops;
-      ops.operand0 = gimple_assign_rhs1(st);
-      ops.operand1 = build_fold_addr_expr(lhs);
-      if (!is_gimple_val(ops.operand1)) ops.operand1 = base;
-      gimple_seq seq = NULL;
-      std::string why;
-      tree aseq = build_obs(*s, b.id, build_int_cst(uint32_type_node, 0), ops, &seq, &b.vals, &b.notes, &why, gimple_location(st));
-      if (aseq == NULL_TREE) {
+      if (stmt_ends_bb_p(st)) {
         b.status = "unsupported";
-        b.reason = why;
+        b.reason = "the store ends its basic block (it may throw)";
         continue;
       }
-      if (s->has_control) add_ctl(*s, b.id, aseq, &seq, gimple_location(st));
+      Operands ops;
+      ops.operand0 = gimple_assign_rhs1(st);
+      ops.store_lhs = lhs;
+      ops.param = param_vals;
+      gimple_seq seq = NULL;
+      if (!bind_one(*s, b, build_int_cst(uint32_type_node, 0), ops, &seq, gimple_location(st), NULL)) continue;
       gimple_stmt_iterator gsi = gsi_for_stmt(st);
       insert_after(&gsi, seq);
       changed = true;
     }
   }
 
-  // 3. entry (phase=before, no callee) and returns (phase=after, no callee)
+  // 4. entry (phase=before, no callee) and returns (phase=after, no callee)
   tree entry_aseq = build_int_cst(uint32_type_node, 0);
   for (const kzrt::Site* s : here) {
-    if (s->phase != "before" || !s->callee.empty()) continue;
+    if (shape_of(*s) != Shape::Entry) continue;
     BindRec& b = new_bind(*s, "entry", std::string("entry of ") + fname);
     if (b.status != "bound") continue;
     Operands ops;
     ops.arg = params;
+    ops.param = param_vals;
     gimple_seq seq = NULL;
-    std::string why;
-    tree aseq = build_obs(*s, b.id, build_int_cst(uint32_type_node, 0), ops, &seq, &b.vals, &b.notes, &why, floc);
-    if (aseq == NULL_TREE) {
-      b.status = "unsupported";
-      b.reason = why;
-      continue;
-    }
-    if (s->has_control) add_ctl(*s, b.id, aseq, &seq, floc);
+    tree aseq = NULL_TREE;
+    if (!bind_one(*s, b, build_int_cst(uint32_type_node, 0), ops, &seq, floc, &aseq)) continue;
     gsi_insert_seq_on_edge_immediate(single_succ_edge(ENTRY_BLOCK_PTR_FOR_FN(fun)), seq);
     if (integer_zerop(entry_aseq)) entry_aseq = aseq;
     changed = true;
   }
   for (const kzrt::Site* s : here) {
-    if (s->phase != "after" || !s->callee.empty()) continue;
+    if (shape_of(*s) != Shape::Return) continue;
     if (returns.empty()) {
       BindRec& b = new_bind(*s, "return", std::string("returns of ") + fname);
       b.status = "unsupported";
@@ -584,16 +688,10 @@ unsigned instrument_function(function* fun) {
       if (b.status != "bound") continue;
       Operands ops;
       ops.arg = params;
+      ops.param = param_vals;
       ops.ret = gimple_return_retval(r);
       gimple_seq seq = NULL;
-      std::string why;
-      tree aseq = build_obs(*s, b.id, entry_aseq, ops, &seq, &b.vals, &b.notes, &why, gimple_location(st));
-      if (aseq == NULL_TREE) {
-        b.status = "unsupported";
-        b.reason = why;
-        continue;
-      }
-      if (s->has_control) add_ctl(*s, b.id, aseq, &seq, gimple_location(st));
+      if (!bind_one(*s, b, entry_aseq, ops, &seq, gimple_location(st), NULL)) continue;
       gimple_stmt_iterator gsi = gsi_for_stmt(st);
       gsi_insert_seq_before(&gsi, seq, GSI_SAME_STMT);
       changed = true;
@@ -742,7 +840,7 @@ void finish_unit(void*, void*) {
     if (kzg.matched.count(s->id)) continue;
     uint32_t id = bind_id(kzg.module, s->id, 15);
     o << "bind " << id << " site=" << s->id << " backend=" << kBackend << " module=" << kzg.module << " at=\"" << kzg.tu << " " << s->func
-      << "\" status=unsupported reason=\"" << (kzg.refused ? "unit refused" : "no matching function, call or store in the unit") << "\"\n";
+      << "\" status=unsupported reason=\"" << gap_reason(*s) << "\"\n";
   }
 }
 
@@ -815,6 +913,21 @@ int plugin_init(struct plugin_name_args* info, struct plugin_gcc_version* versio
   }
   if (!kzrt::parse_manifest(text, kzg.manifest_path, &kzg.m, &err)) {
     error("kzgcc: %s", err.c_str());
+    return 1;
+  }
+  // the binding id scheme (module << 16) | (site << 4) | n (event_semantics.md section 3): module 1..32767, site 1..4095
+  for (const kzrt::Site& st : kzg.m.sites)
+    if (st.id > 4095) {
+      error("kzgcc: %s: site %u is outside the binding id range (1 to 4095)", kzg.manifest_path.c_str(), st.id);
+      return 1;
+    }
+  for (const auto& md : modules)
+    if (md.first < 1 || md.first > 32767) {
+      error("kzgcc: module %u is outside the binding id range (1 to 32767)", md.first);
+      return 1;
+    }
+  if (kzg.module < 1 || kzg.module > 32767) {
+    error("kzgcc: default-module %u is outside the binding id range (1 to 32767)", kzg.module);
     return 1;
   }
   kzg.manifest_sha = kz::sha256(text);

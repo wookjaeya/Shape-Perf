@@ -1,4 +1,5 @@
-/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1.
+/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1 (minor 0 and 1;
+ * a field a 1.0 stream does not have reads as 0, and a MODULE's registrations as 1).
  * Reads the explicit little-endian bytes field by field (independent of the host's layout) and
  * hands each record to a callback, in stream order and, inside a BUF, in buffer order. */
 #ifndef KZ_RT_DECODE_H
@@ -23,10 +24,16 @@ typedef struct kz_rt_dec_run {
       target[KZ_RT_TAG_MAX + 1];
 } kz_rt_dec_run;
 
+typedef struct kz_rt_dec_runx { /* 1.1 */
+  uint32_t window_mode, mode_source, flags, pool_bytes, chunk_bytes, chunks_used, pool_dropped, actor_quota, boot_bytes_used,
+      boot_bytes_dropped, max_modules, max_notes;
+} kz_rt_dec_runx;
+
 typedef struct kz_rt_dec_module {
   uint32_t module, actor;
   uint64_t t;
   unsigned char manifest_sha256[32];
+  uint32_t registrations; /* 1.1; 1 in a 1.0 stream */
 } kz_rt_dec_module;
 
 typedef struct kz_rt_dec_resource {
@@ -38,6 +45,8 @@ typedef struct kz_rt_dec_resource {
 typedef struct kz_rt_dec_actor {
   uint32_t actor, flags, boot_link, link_evidence, key_kind, key_generation, first_aseq, last_aseq, recorded, overflow, partial, buf_bytes;
   uint64_t native_key;
+  uint32_t has_demand; /* 1.1 fields present */
+  uint32_t dropped_bytes, chunks, overflow_quota, overflow_pool;
 } kz_rt_dec_actor;
 
 typedef struct kz_rt_dec_loss {
@@ -81,6 +90,7 @@ typedef struct kz_rt_dec_item {
   uint64_t offset; /* byte offset of the record in the stream (a buffer record: inside its BUF) */
   union {
     kz_rt_dec_run run;
+    kz_rt_dec_runx runx;
     kz_rt_dec_module module;
     kz_rt_dec_resource resource;
     kz_rt_dec_actor actor;

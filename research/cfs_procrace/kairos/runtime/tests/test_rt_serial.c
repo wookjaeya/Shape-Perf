@@ -43,6 +43,14 @@ int main(int argc, char **argv) {
   size_t j, ev = 0;
   const kz_rt_dec_run *run = NULL;
   for (i = 0; i < 32; ++i) sha[i] = (unsigned char)(0xA0u + i); /* not a pattern the byte-order check looks for */
+#ifdef KZRT_TEST_MANIFEST_SHA
+  /* the sha256 of the example manifest (set by the build), so that kz-rt-dump --manifest finds it */
+  for (i = 0; i < 32; ++i) {
+    unsigned v = 0;
+    CHECK(sscanf(&KZRT_TEST_MANIFEST_SHA[2 * i], "%2x", &v) == 1);
+    sha[i] = (unsigned char)v;
+  }
+#endif
   cfg.run_id = 0x1122334455667788ull;
   cfg.instance_id = 2;
   cfg.manifest_sha256 = sha;

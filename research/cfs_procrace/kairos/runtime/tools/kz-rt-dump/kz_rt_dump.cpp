@@ -1,12 +1,18 @@
-// kz-rt-dump -- print a "kzrt-dump" file (format major 1) and check it against site manifests.
+// kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 or 1) and check it against site manifests.
 //
 //   kz-rt-dump [--manifest <kzs-sites file>]... [--events-only] <dump-file>
 //
-// Output: one line per record, in stream order (and buffer order inside each BUF), then a check
+// Output: one line per record, in stream order (and buffer order inside each BUF); an event line has
+// the hook's return address (pc=, the code copy of the binding that ran) and its actor's native key
+// (key=<kind>:<value>, from the ACTOR record; "-" for a provisional or unresolved actor).  Then a check
 // section: per-actor sequence gaps (records the actor attempted but the dump lacks) next to the
-// counted losses, and, with manifests, every event's site/binding, its valid mask against the
-// binding's vals, string copies only at string=validated slots, and manifest modules that never
-// registered.  Exit status: 0 = read and checks passed, 1 = a check failed, 2 = usage or format error.
+// counted losses; the run's capacity (pool, chunks, per-actor demand = committed + dropped bytes);
+// the run's mode source and build identity (a mode name that was not valid, a harness value that
+// conflicts with the binary's build info, a module registered with two manifests, or a RUN manifest
+// that differs from a module's fail); and, with manifests, the manifest sha256s of the run against the
+// given files, every event's site/binding, its valid mask against the binding's vals, string copies
+// only at string=validated slots, and manifest modules that never registered.
+// Exit status: 0 = read and checks passed, 1 = a check failed, 2 = usage or format error.
 #include <cinttypes>
 #include <cstdio>
 #include <cstring>
@@ -17,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "kz/core/sha256.hpp"
 #include "kz_rt_decode.h"
 #include "kz_rt_manifest.hpp"
 
@@ -36,6 +43,40 @@ const char* mode_name(uint32_t m) {
     case KZ_RT_MODE_STOPPED: return "stopped";
     default: return "?";
   }
+}
+
+const char* source_name(uint32_t s) {
+  switch (s) {
+    case KZ_RT_MODE_SRC_STATIC: return "static-default";
+    case KZ_RT_MODE_SRC_EARLY: return "early";
+    case KZ_RT_MODE_SRC_INIT: return "init";
+    default: return "?";
+  }
+}
+
+const char* key_kind_name(uint32_t k) {
+  switch (k) {
+    case KZ_RT_KEY_NONE: return "none";
+    case KZ_RT_KEY_LINUX_TID: return "tid";
+    case KZ_RT_KEY_PTHREAD: return "pthread";
+    case KZ_RT_KEY_OSAL_ID: return "osal";
+    case KZ_RT_KEY_OTHER: return "other";
+    default: return "?";
+  }
+}
+
+std::string runx_flags(uint32_t f) {
+  static const std::pair<uint32_t, const char*> names[] = {{KZ_RT_RX_BUILD_INFO, "build-info"},
+                                                           {KZ_RT_RX_TAG_CONFLICT, "tag-conflict"},
+                                                           {KZ_RT_RX_HOOKS_BEFORE_EARLY, "hooks-before-early"},
+                                                           {KZ_RT_RX_MODE_DEFAULTED, "mode-defaulted"},
+                                                           {KZ_RT_RX_MODE_INVALID, "mode-invalid"},
+                                                           {KZ_RT_RX_INIT_REFUSED, "init-refused"},
+                                                           {KZ_RT_RX_BUILD_INFO_BAD, "build-info-bad"}};
+  std::string s;
+  for (const auto& n : names)
+    if ((f & n.first) != 0) s += (s.empty() ? "" : ",") + std::string(n.second);
+  return s.empty() ? "-" : s;
 }
 
 const char* loss_name(uint32_t k) {
@@ -142,6 +183,10 @@ struct State {
   std::map<uint32_t, kz_rt_dec_actor> actors;
   std::map<uint32_t, uint64_t> overflow;            // actor -> counted overflow
   std::set<uint32_t> modules_seen;
+  std::map<uint32_t, std::set<std::string>> module_shas;  // module -> manifest sha256s (hex) it registered with
+  bool have_run = false, have_runx = false;
+  kz_rt_dec_run run{};
+  kz_rt_dec_runx runx{};
 
   void fail(const std::string& msg) {
     std::printf("check FAIL %s\n", msg.c_str());
@@ -185,6 +230,8 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
   switch (it->type) {
     case KZ_RT_REC_RUN: {
       const kz_rt_dec_run& r = it->u.run;
+      st->have_run = true;
+      st->run = r;
       if (meta) {
         std::printf("run abi=%u mode=%s run_id=%" PRIu64 " instance=%u phase=0x%x adapter=\"%s\" adapter_caps=0x%x clock=%u runtime=\"%s\"\n", r.abi,
                     mode_name(r.mode), r.run_id, r.instance_id, r.phase, r.adapter, r.adapter_caps, r.clock_id, r.runtime);
@@ -196,11 +243,24 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
       }
       break;
     }
+    case KZ_RT_REC_RUNX: {
+      const kz_rt_dec_runx& x = it->u.runx;
+      st->have_runx = true;
+      st->runx = x;
+      if (meta) {
+        std::printf("runx window_mode=%s mode_source=%s flags=%s\n", mode_name(x.window_mode), source_name(x.mode_source), runx_flags(x.flags).c_str());
+        std::printf("runx pool_bytes=%u chunk_bytes=%u chunks_used=%u pool_dropped=%u actor_quota=%u boot_bytes_used=%u boot_bytes_dropped=%u max_modules=%u max_notes=%u\n",
+                    x.pool_bytes, x.chunk_bytes, x.chunks_used, x.pool_dropped, x.actor_quota, x.boot_bytes_used, x.boot_bytes_dropped, x.max_modules,
+                    x.max_notes);
+      }
+      break;
+    }
     case KZ_RT_REC_MODULE:
       st->modules_seen.insert(it->u.module.module);
+      st->module_shas[it->u.module.module].insert(hex(it->u.module.manifest_sha256, 32));
       if (meta)
-        std::printf("module %u actor=%s t=%" PRIu64 " manifest_sha256=%s\n", it->u.module.module, actor_name(it->u.module.actor).c_str(), it->u.module.t,
-                    hex(it->u.module.manifest_sha256, 32).c_str());
+        std::printf("module %u actor=%s t=%" PRIu64 " registrations=%u manifest_sha256=%s\n", it->u.module.module, actor_name(it->u.module.actor).c_str(),
+                    it->u.module.t, it->u.module.registrations, hex(it->u.module.manifest_sha256, 32).c_str());
       break;
     case KZ_RT_REC_RESOURCE:
       if (meta)
@@ -210,12 +270,16 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
     case KZ_RT_REC_ACTOR: {
       const kz_rt_dec_actor& a = it->u.actor;
       st->actors[a.actor] = a;
-      if (meta)
-        std::printf("actor %s boot_link=%s evidence=%s key=%u:%" PRIu64 " gen=%u aseq=%u..%u recorded=%u overflow=%u partial=%u buf_bytes=%u flags=%s%s\n",
+      if (meta) {
+        std::printf("actor %s boot_link=%s evidence=%s key=%s:%" PRIu64 " gen=%u aseq=%u..%u recorded=%u overflow=%u partial=%u buf_bytes=%u flags=%s%s",
                     actor_name(a.actor).c_str(), a.boot_link != 0 ? actor_name(a.boot_link).c_str() : "-",
-                    a.link_evidence == KZ_RT_LINK_SAME_CELL ? "same-cell" : "-", a.key_kind, a.native_key, a.key_generation, a.first_aseq, a.last_aseq,
-                    a.recorded, a.overflow, a.partial, a.buf_bytes, (a.flags & KZ_RT_AF_EXITED) != 0 ? "exited" : "-",
+                    a.link_evidence == KZ_RT_LINK_SAME_CELL ? "same-cell" : "-", key_kind_name(a.key_kind), a.native_key, a.key_generation, a.first_aseq,
+                    a.last_aseq, a.recorded, a.overflow, a.partial, a.buf_bytes, (a.flags & KZ_RT_AF_EXITED) != 0 ? "exited" : "-",
                     (a.flags & KZ_RT_AF_HELD) != 0 ? ",held" : "");
+        if (a.has_demand)
+          std::printf(" dropped_bytes=%u chunks=%u overflow_quota=%u overflow_pool=%u", a.dropped_bytes, a.chunks, a.overflow_quota, a.overflow_pool);
+        std::printf("\n");
+      }
       break;
     }
     case KZ_RT_REC_LOSS:
@@ -250,8 +314,14 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
           std::snprintf(b, sizeof b, "%s-", i == 0 ? "" : ",");
         vals += b;
       }
-      std::printf("ev actor=%s aseq=%u site=%s bind=%u link=%u t=%" PRIu64 " v=[%s]%s%s flags=%s\n", actor_name(e.actor).c_str(), e.aseq,
-                  st->site_text(e.site).c_str(), e.bind, e.link, e.t, vals.c_str(), (e.flags & KZ_RT_EF_STR) != 0 ? " str=" : "",
+      char pc[24] = "-";
+      if ((e.flags & KZ_RT_EF_PC) != 0) std::snprintf(pc, sizeof pc, "0x%" PRIx64, e.pc);
+      std::string key = "-";  // the native key of a run actor (ACTOR records come before the buffers)
+      const auto ai = st->actors.find(e.actor);
+      if (ai != st->actors.end() && ai->second.key_kind != KZ_RT_KEY_NONE)
+        key = std::string(key_kind_name(ai->second.key_kind)) + ":" + std::to_string(ai->second.native_key);
+      std::printf("ev actor=%s aseq=%u site=%s bind=%u link=%u t=%" PRIu64 " pc=%s key=%s v=[%s]%s%s flags=%s\n", actor_name(e.actor).c_str(), e.aseq,
+                  st->site_text(e.site).c_str(), e.bind, e.link, e.t, pc, key.c_str(), vals.c_str(), (e.flags & KZ_RT_EF_STR) != 0 ? " str=" : "",
                   (e.flags & KZ_RT_EF_STR) != 0 ? quoted(e.str, e.str_len).c_str() : "", event_flags(e.flags).c_str());
       st->aseqs[e.actor].push_back(e.aseq);
       check_event(st, e);
@@ -313,12 +383,14 @@ int main(int argc, char** argv) {
     return 2;
   }
   kzrt::Manifest m;
+  std::map<std::string, std::string> manifest_sha;  // sha256 (hex) of the file's bytes -> path
   for (const std::string& path : manifests) {
     std::string text, err;
     if (!read_file(path, &text)) {
       std::fprintf(stderr, "kz-rt-dump: cannot read %s\n", path.c_str());
       return 2;
     }
+    manifest_sha.emplace(kz::to_hex(kz::sha256(text)), path);
     if (!kzrt::parse_manifest(text, path, &m, &err)) {
       std::fprintf(stderr, "kz-rt-dump: %s\n", err.c_str());
       return 2;
@@ -361,6 +433,60 @@ int main(int argc, char** argv) {
     std::printf("check actor %s aseq %u..%u missing=%" PRIu64 " overflow_counted=%" PRIu64 "%s\n", actor_name(a).c_str(), lo, hi, missing, counted,
                 (a & KZ_RT_ACTOR_PROVISIONAL) != 0 ? " (provisional)" : "");
     if ((a & KZ_RT_ACTOR_PROVISIONAL) == 0 && missing != counted) st.fail("actor " + actor_name(a) + ": sequence gaps differ from the counted overflow");
+  }
+  // capacity: the pool and each actor's demand (committed + dropped bytes), the numbers a capacity
+  // choice is derived from (event_semantics.md 8.9)
+  {
+    uint64_t committed = 0, dropped = 0, max_demand = 0;
+    uint32_t max_actor = 0;
+    for (const auto& a : st.actors) {
+      const uint64_t d = static_cast<uint64_t>(a.second.buf_bytes) + a.second.dropped_bytes;
+      committed += a.second.buf_bytes;
+      dropped += a.second.dropped_bytes;
+      if (d > max_demand) max_demand = d, max_actor = a.first;
+    }
+    if (st.have_runx)
+      std::printf("check capacity pool_bytes=%u chunk_bytes=%u chunks_used=%u actors=%zu committed=%" PRIu64 " dropped=%" PRIu64
+                  " max_actor_demand=%" PRIu64 " (actor %s) pool_dropped=%u boot_bytes_used=%u boot_bytes_dropped=%u\n",
+                  st.runx.pool_bytes, st.runx.chunk_bytes, st.runx.chunks_used, st.actors.size(), committed, dropped, max_demand,
+                  max_actor != 0 ? actor_name(max_actor).c_str() : "-", st.runx.pool_dropped, st.runx.boot_bytes_used, st.runx.boot_bytes_dropped);
+    else
+      std::printf("check capacity (format 1.0: no RUNX) actors=%zu committed=%" PRIu64 " max_actor_bytes=%" PRIu64 " (actor %s)\n", st.actors.size(),
+                  committed, max_demand, max_actor != 0 ? actor_name(max_actor).c_str() : "-");
+  }
+  // mode source and build identity
+  if (st.have_runx) {
+    std::printf("check mode window=%s source=%s%s\n", mode_name(st.runx.window_mode), source_name(st.runx.mode_source),
+                (st.runx.flags & KZ_RT_RX_HOOKS_BEFORE_EARLY) != 0 ? " (hooks ran under the static default before the early mode)" : "");
+    if ((st.runx.flags & KZ_RT_RX_MODE_INVALID) != 0) st.fail("RUNX: the run named a mode that is not off, record or control (the static default record ran)");
+    if ((st.runx.flags & KZ_RT_RX_INIT_REFUSED) != 0) st.fail("RUNX: kz_rt_init named another mode than the latched early mode and was refused");
+    if ((st.runx.flags & KZ_RT_RX_BUILD_INFO_BAD) != 0) st.fail("RUNX: the binary's build info has a manifest sha256 that is not 64 hex digits");
+    if ((st.runx.flags & KZ_RT_RX_TAG_CONFLICT) != 0)
+      st.fail("RUNX: the harness gave a backend, compiler, target or manifest that differs from the binary's build info");
+  }
+  for (const auto& ms : st.module_shas)
+    if (ms.second.size() > 1) st.fail("module " + std::to_string(ms.first) + " registered with " + std::to_string(ms.second.size()) + " different manifests");
+  if (st.have_run) {
+    const std::string rsha = hex(st.run.manifest_sha256, 32);
+    for (const auto& ms : st.module_shas)
+      for (const std::string& h : ms.second)
+        if (rsha != "none" && h != "none" && h != rsha)
+          st.fail("module " + std::to_string(ms.first) + " names manifest " + h + ", the RUN record " + rsha);
+    if (!manifests.empty()) {
+      std::set<std::string> named;
+      if (rsha != "none") named.insert(rsha);
+      for (const auto& ms : st.module_shas)
+        for (const std::string& h : ms.second)
+          if (h != "none") named.insert(h);
+      for (const std::string& h : named) {
+        const auto f = manifest_sha.find(h);
+        if (f != manifest_sha.end())
+          std::printf("check manifest %s = %s\n", h.c_str(), f->second.c_str());
+        else
+          st.fail("the run names manifest " + h + ", which is none of the given files: the binding checks used other manifests than the build");
+      }
+      if (named.empty()) std::printf("check manifest: the run names none (no build info, unregistered or sha-less modules)\n");
+    }
   }
   if (st.m != nullptr)
     for (const kzrt::Module& md : st.m->modules)

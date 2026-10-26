@@ -44,17 +44,25 @@ extern "C" {
 #endif
 
 /* ---- versions -------------------------------------------------------------------------- */
-#define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter */
+#define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter (0.2.0 only adds calls) */
 #define KZ_RT_FORMAT_MAJOR 1u       /* dump format "kzrt-dump"; a reader accepts only its major */
-#define KZ_RT_FORMAT_MINOR 0u       /* added record types or fields at the end of a record */
-#define KZ_RT_RUNTIME_VERSION "kzrt 0.1.0"
+#define KZ_RT_FORMAT_MINOR 1u       /* added record types or fields at the end of a record (1.1: RUNX,
+                                       MODULE registrations, ACTOR demand and chunks) */
+#define KZ_RT_RUNTIME_VERSION "kzrt 0.2.0"
 
 /* ---- static sizes (override with -D when building the runtime; recorded in the dump) ---- */
+/* Tool capacities, not research conditions (event_semantics.md 8.3, 8.9: how the defaults were derived
+ * from the stage C pilot dumps).  Run actors keep their records in chunks of one static pool: each chunk
+ * has one writer (its actor), records never span chunks, and a full pool or a reached per-actor quota
+ * drops the record without waiting (LOSS overflow, aseq gap, dropped bytes in the ACTOR record). */
 #ifndef KZ_RT_MAX_ACTORS
-#define KZ_RT_MAX_ACTORS 64u        /* run actors with their own buffer */
+#define KZ_RT_MAX_ACTORS 64u        /* run actors with their own chunks */
 #endif
-#ifndef KZ_RT_ACTOR_BUF_BYTES
-#define KZ_RT_ACTOR_BUF_BYTES 65536u
+#ifndef KZ_RT_POOL_BYTES
+#define KZ_RT_POOL_BYTES (KZ_RT_MAX_ACTORS * 65536u) /* the run actors' records (all actors together) */
+#endif
+#ifndef KZ_RT_CHUNK_BYTES
+#define KZ_RT_CHUNK_BYTES 4096u     /* unit of the pool an actor takes (>= the largest record, 184 B) */
 #endif
 #ifndef KZ_RT_BOOT_BUF_BYTES
 #define KZ_RT_BOOT_BUF_BYTES 65536u /* shared buffer before attach, and for unresolved actors */
@@ -80,11 +88,25 @@ extern "C" {
 #define KZ_RT_ACTOR_PROVISIONAL 0x80000000u
 
 /* ---- modes (same binary; G-I0 / G-I / G-I-H of the review section 13.1) ----------------- */
+/* The mode word is read by every hook.  Its sources, earliest first: kz_rt_early_mode (latches the
+ * mode for the whole process; the POSIX start-up object calls it from .preinit_array, before any
+ * constructor), kz_rt_init (when no early mode was given), and the static default RECORD (hooks
+ * before either).  The dump's RUNX record says which source set it and whether hooks ran before. */
 enum {
-  KZ_RT_MODE_OFF = 0,     /* hooks return at once (records before kz_rt_init stay in the boot buffer) */
+  KZ_RT_MODE_OFF = 0,     /* hooks return at once, nothing is counted; kz_rt_stop keeps it OFF */
   KZ_RT_MODE_RECORD = 1,  /* observation hooks record; kz_rt_ctl returns at once.  The static default */
   KZ_RT_MODE_CONTROL = 2, /* observation hooks record; kz_rt_ctl evaluates the plan */
-  KZ_RT_MODE_STOPPED = 3  /* after kz_rt_stop: hooks only count (loss kind after-stop) */
+  KZ_RT_MODE_STOPPED = 3  /* after kz_rt_stop of a RECORD/CONTROL window: hooks only count (after-stop) */
+};
+enum { /* mode sources (RUNX mode_source) */
+  KZ_RT_MODE_SRC_STATIC = 0, /* no setup call yet: the static default RECORD */
+  KZ_RT_MODE_SRC_EARLY = 1,  /* kz_rt_early_mode */
+  KZ_RT_MODE_SRC_INIT = 2    /* kz_rt_init */
+};
+enum { /* notes of kz_rt_early_mode (RUNX flags) */
+  KZ_RT_EARLY_GIVEN = 0,          /* the mode was named explicitly */
+  KZ_RT_EARLY_DEFAULTED = 1u << 0,/* no mode was named: the caller used its documented default */
+  KZ_RT_EARLY_INVALID = 1u << 1   /* the named mode was not valid: the caller kept the static default */
 };
 
 /* ---- holdable-context classes (manifest "control ctx=", event_semantics.md section 7) --- */
@@ -101,7 +123,7 @@ enum {
 
 /* ---- loss and coverage kinds (dump LOSS records) ---------------------------------------- */
 enum {
-  KZ_RT_LOSS_OVERFLOW = 1,     /* actor buffer full: record dropped (its aseq was used: a gap) */
+  KZ_RT_LOSS_OVERFLOW = 1,     /* actor quota reached or pool empty: record dropped (its aseq was used: a gap) */
   KZ_RT_LOSS_PARTIAL = 2,      /* a record was being written when the dump read the buffer */
   KZ_RT_LOSS_PREINIT = 3,      /* bootstrap buffer full: an event before attach was not recorded */
   KZ_RT_LOSS_EXCLUDED = 4,     /* noted: code not instrumented (kz_rt_note_loss; key = module/site) */
@@ -193,7 +215,7 @@ typedef struct kz_rt_config {
   uint32_t mode;              /* KZ_RT_MODE_OFF / RECORD / CONTROL */
   uint64_t run_id;            /* given by the harness (0 = not given) */
   uint32_t instance_id;       /* the cFS instance of this process in the run (0 = not given) */
-  uint32_t actor_buf_bytes;   /* per-actor capacity, <= KZ_RT_ACTOR_BUF_BYTES (0 = the maximum) */
+  uint32_t actor_buf_bytes;   /* per-actor quota of committed bytes (0 = none: only the pool limits) */
   const uint8_t *manifest_sha256; /* 32 bytes: the site manifest the binding used (NULL = none) */
   const char *backend;        /* binding identity, e.g. "gcc-plugin 0.1" (bounded copy) */
   const char *compiler;       /* e.g. the compiler's version string */
@@ -242,7 +264,8 @@ enum { KZ_RT_OK = 0, KZ_RT_EINVAL = -1, KZ_RT_ESTATE = -2, KZ_RT_EABI = -3, KZ_R
 /* Capability descriptor (event_semantics.md section 6), also written to the dump's RUN record. */
 typedef struct kz_rt_caps {
   uint32_t abi, format_major, format_minor;
-  uint32_t max_actors, actor_buf_bytes, boot_buf_bytes, max_points, max_vals, str_max, max_modules;
+  uint32_t max_actors, actor_buf_bytes /* per-actor bound: the quota, else the pool */, boot_buf_bytes, max_points, max_vals, str_max,
+      max_modules;
   uint32_t adapter_caps;        /* 0 before attach */
   uint32_t holdable_ctx_mask;   /* bit c = a gate can hold in context class c (with this adapter) */
   uint32_t gates_per_actor;     /* gates that can hold one actor at a time (1) */
@@ -252,7 +275,29 @@ typedef struct kz_rt_caps {
 /* Byte sink of kz_rt_dump: returns 0 on success. */
 typedef int (*kz_rt_write_fn)(void *ctx, const void *bytes, size_t n);
 
+/* ---- build identity (event_semantics.md 8.5) ---------------------------------------------- */
+/* What the binary was built with: the binding's identity, the compiler, the target and the sha256 of
+ * the site manifest the binding read.  Defined once, in the object of the fixed source
+ * src/kz_rt_build_info.c that the instrumented build compiles with -D values (CMake target
+ * kzrt-build-info) and links into the executable as an object (not an archive member: the runtime's
+ * reference is weak and would not pull it).  Without it the RUN tags are the harness's kz_rt_config
+ * values ("" = not given).  With it, the RUN tags are its values, and a harness value that differs is
+ * recorded as a conflict (RUNX flag), never silently preferred.  The symbol is
+ * "const kz_rt_build kz_rt_build_info"; only the runtime core declares it (weakly, kz_rt.c). */
+typedef struct kz_rt_build {
+  uint32_t abi;                    /* KZ_RT_ABI_VERSION */
+  const char *backend;             /* e.g. "kzgcc 0.1 (gcc-plugin)" (<= KZ_RT_TAG_MAX bytes are kept) */
+  const char *compiler;            /* e.g. the first line of "gcc --version" */
+  const char *target;              /* e.g. "gcc -dumpmachine" */
+  const char *manifest_sha256_hex; /* 64 hex digits: sha256 of the manifest file's bytes; NULL = none */
+  const char *origin;              /* how the values were given (the source file and its -D names) */
+} kz_rt_build;
+
 /* ---- setup and lifecycle ----------------------------------------------------------------- */
+/* Sets the mode word before anything else and latches it: kz_rt_init must then name the same mode
+ * (else KZ_RT_EINVAL and nothing is set).  Once, before kz_rt_init; note = KZ_RT_EARLY_* bits.
+ * Touches only the runtime's own memory (callable from .preinit_array or a BSP's first code). */
+KZ_RT_API int kz_rt_early_mode(uint32_t mode, uint32_t note);
 KZ_RT_API int kz_rt_init(const kz_rt_config *cfg);         /* once; before or after attach */
 KZ_RT_API int kz_rt_attach(const kz_rt_adapter *adapter);  /* once; ends the bootstrap phase */
 KZ_RT_API int kz_rt_plan(const kz_rt_point *points, uint32_t n); /* once, before the first control hit */
@@ -262,7 +307,9 @@ KZ_RT_API void kz_rt_caps_get(kz_rt_caps *out);
 KZ_RT_API int kz_rt_ctl_state(uint32_t point, kz_rt_point_state *out);
 
 /* ---- notes -------------------------------------------------------------------------------- */
-KZ_RT_API void kz_rt_module(uint32_t module, const uint8_t *manifest_sha256); /* an instrumented module runs */
+/* An instrumented module runs.  One MODULE entry per (module, manifest sha256): further calls with the
+ * same pair only count (MODULE registrations); the same module with another sha256 is a new entry. */
+KZ_RT_API void kz_rt_module(uint32_t module, const uint8_t *manifest_sha256);
 KZ_RT_API void kz_rt_note_loss(uint32_t kind, uint32_t key, uint32_t count);  /* EXCLUDED, UNLOADED, ... */
 KZ_RT_API void kz_rt_actor_exit(void);  /* the calling thread ends (its actor id is never reused) */
 

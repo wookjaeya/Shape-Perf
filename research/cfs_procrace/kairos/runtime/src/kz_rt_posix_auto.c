@@ -1,15 +1,28 @@
 /* kz_rt_posix_auto.c -- optional start-up object for a POSIX target that should not be edited:
- * linked as an object file (CMake target kzrt-posix-auto, an OBJECT library), its constructor runs
- * before main, calls kz_rt_init and attaches the POSIX adapter, and an atexit handler stops the
- * observation window and writes the dump.  Configuration comes from the environment, so a run
- * that uses it adds these names to the target's environment (record them as a difference from
- * the reference run's environment):
- *   KZ_RT_MODE      off | record | control   (default record)
- *   KZ_RT_DUMP      dump file path            (unset = no dump at exit)
- *   KZ_RT_RUN_ID    decimal run id            (unset = 0)
- *   KZ_RT_INSTANCE  decimal instance id       (unset = 0)
- * Events before this constructor (other constructors) are in the bootstrap buffer under the
- * static default mode.  Plans are not read here (kz_rt_plan is called by a harness). */
+ * linked as an object file into the executable (CMake target kzrt-posix-auto, an OBJECT library).
+ *
+ *   1. A .preinit_array entry (ELF executables; glibc runs it before any constructor, also before the
+ *      initializers of the shared libraries the executable needs) reads KZ_RT_MODE from the process
+ *      environment it is given and calls kz_rt_early_mode: the mode of the whole process is fixed
+ *      before the first hook can run.  This is the same-binary switch of the groups G-I0 (off),
+ *      G-I (record) and G-I-H (control) of the review section 13.1 (event_semantics.md 8.2).  It only
+ *      reads the environment array and writes the runtime's own memory.
+ *   2. A constructor (before main) attaches the POSIX adapter and calls kz_rt_init with the same mode,
+ *      and an atexit handler stops the observation window and writes the dump.
+ *
+ * Configuration comes from the environment, so a run that uses it adds these names to the target's
+ * environment (record them as a difference from the reference run's environment):
+ *   KZ_RT_MODE          off | record | control   (unset = record, recorded as defaulted; any other
+ *                                                 text = record, recorded as invalid: kz-rt-dump fails)
+ *   KZ_RT_DUMP          dump file path            (unset = no dump at exit)
+ *   KZ_RT_RUN_ID        decimal run id            (unset = 0)
+ *   KZ_RT_INSTANCE      decimal instance id       (unset = 0)
+ *   KZ_RT_ACTOR_QUOTA   decimal per-actor quota of committed bytes (unset = 0 = none: only the pool,
+ *                       a build parameter, limits); a run parameter of the tool, recorded in RUNX
+ * The build identity (backend, compiler, target, manifest sha256) is not configured here: the runtime
+ * takes it from kz_rt_build_info when the build links the build-identity object (kzrt-build-info).
+ * Plans are not read here (kz_rt_plan is called by a harness; in control mode without a plan every
+ * gate is inactive). */
 #define _GNU_SOURCE 1
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +36,43 @@ static uint64_t env_u64(const char *name) {
   return s != NULL ? (uint64_t)strtoull(s, NULL, 10) : 0u;
 }
 
+/* The mode named by s (NULL = unset); *note gets the KZ_RT_EARLY_* bits. */
+static uint32_t parse_mode(const char *s, uint32_t *note) {
+  *note = KZ_RT_EARLY_GIVEN;
+  if (s == NULL) {
+    *note = KZ_RT_EARLY_DEFAULTED;
+    return KZ_RT_MODE_RECORD;
+  }
+  if (strcmp(s, "off") == 0) return KZ_RT_MODE_OFF;
+  if (strcmp(s, "record") == 0) return KZ_RT_MODE_RECORD;
+  if (strcmp(s, "control") == 0) return KZ_RT_MODE_CONTROL;
+  *note = KZ_RT_EARLY_INVALID;
+  return KZ_RT_MODE_RECORD;
+}
+
+#if defined(__ELF__) && !defined(KZ_RT_AUTO_NO_PREINIT)
+extern char **environ;
+
+/* glibc passes (argc, argv, envp) to .preinit_array functions.  Only string comparison by hand: no
+ * library call is needed this early. */
+static void kz_rt_auto_preinit(int argc, char **argv, char **envp) {
+  static const char key[] = "KZ_RT_MODE=";
+  char **e = envp != NULL ? envp : environ;
+  const char *value = NULL;
+  uint32_t note, mode;
+  (void)argc;
+  (void)argv;
+  for (; e != NULL && *e != NULL && value == NULL; ++e) {
+    size_t i = 0;
+    while (key[i] != 0 && (*e)[i] == key[i]) ++i;
+    if (key[i] == 0) value = *e + i;
+  }
+  mode = parse_mode(value, &note);
+  (void)kz_rt_early_mode(mode, note);
+}
+__attribute__((used, section(".preinit_array"))) static void (*const kz_rt_auto_preinit_entry)(int, char **, char **) = kz_rt_auto_preinit;
+#endif
+
 static void kz_rt_auto_exit(void) {
   kz_rt_stop();
   if (g_dump_path[0] != 0) (void)kz_rt_posix_dump_file(g_dump_path);
@@ -30,14 +80,15 @@ static void kz_rt_auto_exit(void) {
 
 __attribute__((constructor)) static void kz_rt_auto_start(void) {
   kz_rt_config c;
-  const char *mode = getenv("KZ_RT_MODE"), *dump = getenv("KZ_RT_DUMP");
+  const char *dump = getenv("KZ_RT_DUMP");
+  uint32_t note;
   memset(&c, 0, sizeof c);
   c.abi = KZ_RT_ABI_VERSION;
-  c.mode = KZ_RT_MODE_RECORD;
-  if (mode != NULL && strcmp(mode, "off") == 0) c.mode = KZ_RT_MODE_OFF;
-  if (mode != NULL && strcmp(mode, "control") == 0) c.mode = KZ_RT_MODE_CONTROL;
+  c.mode = parse_mode(getenv("KZ_RT_MODE"), &note);
   c.run_id = env_u64("KZ_RT_RUN_ID");
   c.instance_id = (uint32_t)env_u64("KZ_RT_INSTANCE");
+  c.actor_buf_bytes = (uint32_t)env_u64("KZ_RT_ACTOR_QUOTA");
+  (void)kz_rt_early_mode(c.mode, note); /* without .preinit_array (or when it did not run): here */
   (void)kz_rt_attach(kz_rt_posix_adapter());
   (void)kz_rt_init(&c);
   if (dump != NULL && strlen(dump) < sizeof g_dump_path) {

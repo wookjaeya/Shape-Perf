@@ -125,12 +125,30 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
         return 0;
       return 1;
     }
+    case KZ_RT_REC_RUNX: {
+      kz_rt_dec_runx *x = &it->u.runx;
+      if (size < KZ_RT_RUNX_SIZE) return 0;
+      x->window_mode = g32(b + 8);
+      x->mode_source = g32(b + 12);
+      x->flags = g32(b + 16);
+      x->pool_bytes = g32(b + 20);
+      x->chunk_bytes = g32(b + 24);
+      x->chunks_used = g32(b + 28);
+      x->pool_dropped = g32(b + 32);
+      x->actor_quota = g32(b + 36);
+      x->boot_bytes_used = g32(b + 40);
+      x->boot_bytes_dropped = g32(b + 44);
+      x->max_modules = g32(b + 48);
+      x->max_notes = g32(b + 52);
+      return 1;
+    }
     case KZ_RT_REC_MODULE:
-      if (size < KZ_RT_MODULE_SIZE) return 0;
+      if (size < KZ_RT_MODULE_SIZE_1_0) return 0;
       it->u.module.module = g32(b + 8);
       it->u.module.actor = g32(b + 12);
       it->u.module.t = g64(b + 16);
       memcpy(it->u.module.manifest_sha256, b + 24, 32);
+      it->u.module.registrations = size >= KZ_RT_MODULE_SIZE ? g32(b + 56) : 1u;
       return 1;
     case KZ_RT_REC_RESOURCE:
       if (size < KZ_RT_RESOURCE_FIXED) return 0;
@@ -141,7 +159,7 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       return text(b, size, &off, it->u.resource.what);
     case KZ_RT_REC_ACTOR: {
       kz_rt_dec_actor *a = &it->u.actor;
-      if (size < KZ_RT_ACTOR_SIZE) return 0;
+      if (size < KZ_RT_ACTOR_SIZE_1_0) return 0;
       a->actor = g32(b + 8);
       a->flags = g32(b + 12);
       a->boot_link = g32(b + 16);
@@ -155,6 +173,13 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       a->overflow = g32(b + 52);
       a->partial = g32(b + 56);
       a->buf_bytes = g32(b + 60);
+      if (size >= KZ_RT_ACTOR_SIZE) {
+        a->has_demand = 1;
+        a->dropped_bytes = g32(b + 64);
+        a->chunks = g32(b + 68);
+        a->overflow_quota = g32(b + 72);
+        a->overflow_pool = g32(b + 76);
+      }
       return 1;
     }
     case KZ_RT_REC_LOSS:

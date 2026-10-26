@@ -1,7 +1,7 @@
 # 사건·제어 공통 의미와 계측 런타임 ABI (2026-10-26)
 
 - 범위: 두 실행 계열(F0, 계측 계열)이 함께 쓰는 **사건 의미, 논리 site manifest, `kzp-hold 1` 제어 의미, 실제 제어 기록, 백엔드 capability, 보류 가능한 문맥**과, 계측 계열의 공통 C 런타임(`kairos/runtime/`, hook ABI 1, dump 형식 1.0). 근거: 검토 문서(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`, 이하 IR) §8, §9, §11, §13.2–13.3, 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(이하 PD26) §2.5, §4(구속), SPEC rev 1.4 §2.3 "neutral event", §4.13 "Common gate and release semantics"·"Cooperative gate", §5.12.
-- 표기: **[F]** 코드·문서에서 확인한 사실, **[M]** 이번에 빌드·실행해 확인, **[D]** 설계 결정, **[I]** 계획·추정, **[U]** 미정. 코드 인용은 커밋 `88bdea9` 기준이다.
+- 표기: **[F]** 코드·문서에서 확인한 사실, **[M]** 이번에 빌드·실행해 확인, **[D]** 설계 결정, **[I]** 계획·추정, **[U]** 미정. 코드 인용은 커밋 `88bdea9` 기준이다. §3의 binding id 규칙과 §8.2–§8.9는 런타임 0.2.0(dump 형식 1.1, 2026-10-26 단계 D 런타임 개정: 세 후보 문서 §8 "B1 런타임에 필요한 변경"과 `plan/instrumentation_selection_20261026.md` §4 항목 5·6) 기준이다.
 - 지위: 설계와 단위 시험뿐이다. cFS를 계측해 돌리지 않았고 연구 조건을 정하지 않았다. 시험의 값(버퍼 크기, 시간 제한, 이름)은 단위 시험 값이며 실험 조건이 아니다. 런타임의 크기 상수는 도구 용량이고, 실행마다 dump의 RUN 레코드에 기록되며 넘친 것은 손실로 센다(§2.11).
 - 이 문서는 schema 개정 번호·필드 위치를 `.kzt`에 배정하지 않는다(SPEC rev 1.4 "Open after revision 1.4"). 런타임 dump 형식은 `.kzt`가 아니라 호스트에서 `.kzt`로 바꿀 **백엔드 원시 근거**다.
 
@@ -33,7 +33,7 @@
 | 2.10 | 순서 근거의 출처 | 아래 네 종류를 구별 | 요약 플래그 `basis-*`, P11 | 아래 표 | 근거 없으면 순서 없음 |
 | 2.11 | 손실·미계측·관측 구간 | 기록 부재를 사건 부재로 읽지 않음 | `LOSS`(커널 보고만: `perf-record-lost` 상한, throttle), `OBS_ADEQUACY` | LOSS 레코드 13종(§2.11), 관측 구간 = RUN `t_init/t_attach/t_stop/t_dump` + 부트스트랩 구간, manifest의 `removed|unsupported` binding과 미등록 module | 손실 0 = "센 손실 없음", 증명 아님 |
 | 2.12 | 초기화 전 사건 | 대상의 등록 절차 이전부터 관측(IR §11.1) | uprobe를 실행 전 inode로 등록 → 시작부터 | 정적 부트스트랩 버퍼 + 스레드별 임시 id(§8.3) | — |
-| 2.13 | 버전 | 같은 기록을 같은 의미로 재해석 | `RUNMETA`, tool hash, profile sha256 | RUN: 런타임 판(`kzrt 0.1.0`), ABI 1, 형식 1.0, adapter 이름·caps, `backend`/`compiler`/`target` 태그, manifest sha256. 프로필은 호스트 변환 때 묶음(F0의 `profile_sha256`과 같음) | 태그가 비면 "주지 않음" |
+| 2.13 | 버전 | 같은 기록을 같은 의미로 재해석 | `RUNMETA`, tool hash, profile sha256 | RUN: 런타임 판(`kzrt 0.2.0`), ABI 1, 형식 1.1, adapter 이름·caps, `backend`/`compiler`/`target` 태그, manifest sha256(실행 파일에 build identity 객체가 있으면 그 값, §8.5). RUNX: 모드 원천·창의 모드·용량(§8.2, §8.3). 프로필은 호스트 변환 때 묶음(F0의 `profile_sha256`과 같음) | 태그가 비면 "주지 않음" |
 
 **순서 근거의 네 종류 (2.10)** [D]. 판정·재생이 쓰는 순서 간선은 출처를 하나씩 단다.
 
@@ -64,7 +64,8 @@ bind <id> site=<site-id> backend=<name> module=<module-id> at=<location text>
 equiv <site-id> backends=<a>,<b> status=unconfirmed|confirmed [ref=<text>]
 ```
 
-- id는 십진 1..2147483647, 종류별 유일. `label`은 유일하며 kzp-observe 사이트 label·`.kzh`의 `site=`와 같은 이름을 쓴다. **site id와 bind id가 hook 호출의 컴파일 시점 상수**다. bind id 배정은 연결부가 하며 실행 전체에서 유일해야 한다(권고: `(module id << 16) | k`) [D].
+- id는 십진 1..2147483647, 종류별 유일. `label`은 유일하며 kzp-observe 사이트 label·`.kzh`의 `site=`와 같은 이름을 쓴다. **site id와 bind id가 hook 호출의 컴파일 시점 상수**다. bind id 배정은 연결부가 하며 실행 전체에서 유일해야 한다. 규칙은 다음 항목이다 [D].
+- **binding id 규칙** [D]: `bind = (module << 16) | (site << 4) | n`. module은 1..32767(결과가 2147483647 이하), site는 1..4095, n은 한 번역 단위 안에서 그 site의 binding 순번 0..14이고, n = 15는 그 단위에 binding이 없는 site의 선언된 빈틈 줄(`status=unsupported`)이다. 한 단위에서 한 site의 binding이 15개를 넘으면 넘는 것은 `unsupported`(이유 기록)로 둔다. 한 module 안에서 site는 한 번역 단위(`site tu=`)에만 묶이므로 id가 겹치지 않고, 겹치면 binding 합치기(`instrument/gcc/scripts/merge_binds.sh`)가 거부한다. GCC 후보(`instrument/gcc/kzgcc.cpp` L263, L366–L378, L743)와 LLVM 후보(`instrument/llvm/kzllvm.cpp` L210, L467–L480, L837)가 이 규칙을 쓴다 [F]. 두 연결부는 module ≤ 32767·site ≤ 4095를 아직 검사하지 않는다 [F: grep]. 지금 manifest의 범위는 module 1–3, site ≤ 46이다(`instrument/gcc/sites/*.kzs`) [F]. Clang 변환 후보는 `(module << 16) | 순번`을 썼다(`instrument/clang/kz_instr_clang.cpp` L314) [F]. 단계 C 비교 증거로 그대로 둔다. 런타임과 호스트 도구는 bind id를 해석하지 않는다(상수로 기록만). binding의 module·site는 manifest의 `bind` 줄에서만 읽고 id의 비트에서 거꾸로 읽지 않는다.
 - IR §9.3의 항목 대응: source revision·번역 단위·함수/호출 문맥 = `source`·`site tu/func/callee`; 전·후·효과 = `phase`; 인자·값·자원 키의 근거 = `value … ref=`; 백엔드가 고른 위치 = `bind at=`; 최적화로 사라짐·복제·인라인 = `bind status=removed|duplicated|inlined`(같은 bind id가 여러 위치에 있으면 `pc`가 가른다); 지원 못한 지점과 이유 = `status=unsupported reason=`.
 - `string=validated`는 `type=ptr`, `bound`, `ref`(원 코드가 그 지점 전에 포인터를 검증한 곳, 또는 그 메모리가 크기를 아는 배열이라는 근거)를 요구한다. 없으면 포인터 값만 기록한다(검증 전 `strlen` 금지, PD26 §4). `kz-rt-dump --manifest`는 validated가 아닌 슬롯에서 복사된 문자열, binding이 선언하지 않은 `valid` 비트, `removed|unsupported` binding의 사건, 등록되지 않은 module을 보고한다 [M: `rt_dump_tool`, `rt_dump_tool_strict`].
 - 동등성: 두 백엔드의 binding이 같은 효과를 관측함이 근거(`ref`)로 확인되기 전에는 `equiv … unconfirmed`(= "동일 의미 확인 전")다. 이름이 같다고 동등하지 않다.
@@ -114,7 +115,7 @@ F0 `kz hold`가 2026-10-25(confirm2)부터 구현한 의미를 그대로 규범�
 | 보류 가능한 문맥 | 사용자 공간 어디든(ptrace 정지) — 안전성은 배치 규칙으로 | `holdable_ctx_mask`: task; lock-held·osal-internal은 점 플래그가 허용할 때만(osal-internal은 잠금이 private일 때만); ISR·terminating·unsupported 불가 |
 | 대기 primitive | ptrace 정지 | adapter `hold_wait`: POSIX = pthread 조건 변수(실제 대기, 시간 제한 지원), OSAL 골격 = 이진 세마포어(컴파일만), 없음 = 기록만 하는 no-op(`no-wait`) |
 | 값 | 사이트당 슬롯 4(`a[0..3]`, 레지스터·스택·fetch), 문자열은 kernel fetch | 사건당 64비트 값 ≤ 8, 검증된 문자열 ≤ 64 B, `pc` |
-| 버퍼·손실 | perf ring, 커널 보고 손실만 | actor당 버퍼(기본 64 KiB, `actor_buf_bytes`로 줄일 수 있음), 부트스트랩 64 KiB, 손실 13종, 넘침은 기다리지 않고 버림 |
+| 버퍼·손실 | perf ring, 커널 보고 손실만 | run actor가 함께 쓰는 정적 pool(기본 4 MiB = 64 × 64 KiB, 4 KiB chunk; 빌드 파라미터 `KZ_RT_POOL_BYTES`·`KZ_RT_CHUNK_BYTES`), actor당 할당량(실행 파라미터 `actor_buf_bytes`, 0 = 없음), 부트스트랩 64 KiB, 손실 13종. 넘침은 기다리지 않고 버리며 버린 바이트와 사유를 센다(§8.3, §8.9) |
 | 초기화 전 | 실행 전 inode 등록 | 정적 부트스트랩 버퍼 + 임시 id |
 | 계획 기능 | kzp-hold 1 전체 | kzp-hold 1 전체 + `timeout_ns`, 값 조건; `name`은 validated 슬롯에서만, `caller-in`은 호출 측 binding으로만 |
 
@@ -162,18 +163,35 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 
 ### 8.2 모드 (같은 빌드의 G-I0 / G-I / G-I-H, IR §13.1)
 
-`KZ_RT_MODE_OFF`(hook 즉시 반환), `RECORD`(관측만, `kz_rt_ctl` 즉시 반환 — **정적 기본값**), `CONTROL`(계획 평가). `kz_rt_stop` 뒤에는 세기만 한다(`after-stop`). 주의 [U]: 기본값이 RECORD이므로 `kz_rt_init(OFF)` 전의 사건은 OFF 실행에서도 부트스트랩 버퍼에 남는다. POSIX 시작 객체(§8.5)를 쓰면 그 구간은 main 전 생성자까지로 줄지만(환경 이름 하나가 더해짐), 대상 일반의 "처음부터 끄는" 모드 원천은 아직 정하지 않았다.
+`KZ_RT_MODE_OFF`(hook 즉시 반환, 아무것도 세지 않음), `RECORD`(관측만, `kz_rt_ctl` 즉시 반환), `CONTROL`(계획 평가; 계획이 없으면 모든 게이트가 비활성). `kz_rt_stop` 뒤 RECORD·CONTROL 창은 `STOPPED`(세기만, `after-stop`)가 되고, OFF는 OFF로 남는다(RUN `mode=off`). 창의 모드는 RUNX `window_mode`에 남는다 [D][M].
+
+모드 단어의 원천은 셋이다. 이른 것부터 적는다. RUNX `mode_source`가 그 실행의 원천을 적는다 [D].
+
+| 원천 (`mode_source`) | 언제 | 규칙 |
+|---|---|---|
+| `kz_rt_early_mode(mode, note)` (`early`) | 첫 hook보다 먼저. POSIX 시작 객체는 `.preinit_array`에서 부른다(§8.5) | 모드를 프로세스 전체에 고정한다. 뒤의 `kz_rt_init`이 다른 모드를 주면 거부하고(`KZ_RT_EINVAL`, 아무것도 설정하지 않음) RUNX `init-refused`를 남긴다. 그보다 먼저 hook이 돌았으면(부트스트랩 바이트·손실, 미확정·재진입 hook, run actor) `hooks-before-early`를 남긴다. 대상 메모리를 읽지 않고 런타임 자신의 메모리만 쓴다 |
+| `kz_rt_init` (`init`) | early가 없을 때 | 그 전의 hook은 정적 기본값 RECORD로 부트스트랩 버퍼에 남는다(0.1.0 동작) |
+| 정적 기본값 RECORD (`static-default`) | 설정 호출 전 | — |
+
+같은 바이너리 전환 [M]: 시작 객체를 링크한 실행 파일 하나를 `KZ_RT_MODE=off|record|control`만 바꿔 돌린다(시험 `rt_mode_*`). 우선순위가 가장 높은 생성자(`constructor(101)`: 시작 객체의 생성자보다 먼저 도는 계측 코드의 대역)의 hook도 `off`에서는 기록되지 않는다(`buf owner=shared bytes=0`, 사건 0). `record`·`control`에서는 그 hook이 부트스트랩 버퍼에 `P1`로 남고, main의 hook은 같은 셀로 이어진 run actor 1에 남는다. 이름이 없으면 record로 하고 `mode-defaulted`를 남긴다. 틀린 이름(시험은 `of`)이면 정적 기본값 record로 두고 `mode-invalid`를 남기며, 이것은 `kz-rt-dump` 검사 실패다. G-I0를 의도한 실행이 기록 실행으로 잘못 붙는 것을 막는다.
+
+남는 차이와 읽는 법 [F][I]:
+- OFF에서도 hook 호출 자체(인자 계산, 호출, 반환)와 모듈 등록 생성자(`kz_rt_module`, MODULE 레코드)는 남는다. 이것이 G-I0가 재는 "남은 hook·분기 비용"이다(SPEC §8.6). 런타임 정적 메모리(§8.3)도 모든 G-I*에 같다.
+- OFF의 dump는 사건이 없었다는 기록이 아니라 **기록하지 않았다**는 기록이다(RUN `mode=off`, RUNX `window_mode=off`). 변환기(`lib/trace/kzrt_convert.cpp`)는 RUN `mode`가 off이면 시작 근거(부트스트랩부터 전부)를 주지 않는다 [F]. RUNX를 읽어 창의 모드·원천을 중립 층에 옮기는 것은 변환기의 열린 항목이다(§10).
+- `.preinit_array`는 ELF 실행 파일에만 있고, glibc가 (argc, argv, envp)로 부른다. 그 진입점이 돌지 않는 C 라이브러리(예: musl)에서는 생성자가 `kz_rt_early_mode`를 부르고, 그보다 먼저 돈 hook은 `hooks-before-early`로 드러난다. 생성자가 없는 RTOS에서는 BSP의 첫 코드가 `kz_rt_early_mode`를 부를 수 있다 [U: RTOS 실행 안 함].
+- G-I-H의 계획을 대상에 넣는 길(직렬화된 계획을 `control` 모드의 시작 객체가 읽음)은 단계 F1이다. 지금 `control` 모드의 시작 객체는 계획 없이 돈다(게이트 비활성).
 
 ### 8.3 부트스트랩과 actor
 
 - attach 전: 모든 사건은 정적 부트스트랩 버퍼(다중 작성자, 원자적 예약 + size 단어를 마지막에 release로 써서 확정)에 들어간다. actor는 스레드별 임시 id `P<n>`(컴파일러 TLS 셀; 없으면 actor 0 = 미확정, 공유 순번)이고 시계가 없다. 가득 차면 기다리지 않고 `preinit` 손실로 센다 [M: `rt_bootstrap`].
 - attach 뒤: 스레드의 다음 사건에서 run actor 슬롯과 자기 버퍼를 받는다. 같은 셀에 임시 id가 있었으면 ACTOR `boot_link = P<n>`, 근거 `same-cell`이며, aseq는 이어진다(그 actor의 범위는 `first_aseq`부터). 새 스레드는 링크 없이 1부터 [M].
+- **기록 공간(0.2.0)** [D][M]: run actor는 정적 pool 하나(`KZ_RT_POOL_BYTES`, 기본 `KZ_RT_MAX_ACTORS × 65536` = 4 MiB. 0.1.0의 actor별 64 KiB 버퍼 64개와 같은 크기)를 `KZ_RT_CHUNK_BYTES`(기본 4 KiB) chunk로 나눠 쓴다. chunk는 처음 받은 actor만 쓰고(작성자 하나), 레코드는 chunk를 넘지 않는다(chunk 끝의 남는 공간 < 가장 큰 레코드 184 B). chunk를 얻는 일은 pool 계수기의 원자적 덧셈 하나다(잠금·대기 없음). 이 덧셈의 순서도 런타임 내부 순서이며 HB가 아니다(§2.10). actor는 chunk마다 확정 길이와 다음 chunk 연결을 release로 공개한다. dump는 연결을 먼저 acquire로 읽고 길이를 읽는다. 다음 chunk가 있는 chunk는 완결이므로 dump는 actor마다 빈틈 없는 앞부분을 읽는다(`rt_pool_dumps`: 작성자 4 × 3,000 레코드 동안 dump를 반복, ThreadSanitizer 통과). 실행 파라미터 `actor_buf_bytes`(시작 객체: `KZ_RT_ACTOR_QUOTA`)는 actor당 확정 바이트 할당량이다(0 = 없음: pool만 제한). pool이 비거나 할당량에 닿으면 그 레코드를 기다리지 않고 버리고 `overflow`로 센다. 사유(`overflow_quota` / `overflow_pool`)와 버린 바이트(`dropped_bytes`)는 ACTOR에, 합계는 RUNX(`pool_dropped`, `chunks_used`)에 남는다. 그래서 actor의 수요(`buf_bytes + dropped_bytes`)가 기록에서 바로 나온다(§8.9). 한 actor가 pool을 다 쓰면 다른 actor의 기록이 버려질 수 있다. 이것도 actor별 손실로 센다(`rt_pool_empty`).
 - 런타임은 정체성을 대상의 표에서 조회하지 않는다. OSAL task id·앱 id는 manifest 역할이 붙은 관측 값으로만 들어오고, 호스트 결합에서 근거와 함께 연결된다. 슬롯이 모자라면 `actor-table`을 세고 임시 id로 공유 버퍼에 남긴다.
 - 재진입: 스레드가 hook 안에 있을 때 다시 들어오면(signal handler, adapter가 계측 코드를 부른 경우) 기록하지 않고 `reentry`로 센다. per-actor 버퍼는 스레드 셀에 묶이므로 CPU 이동과 무관하고, dump는 확정된 앞부분만 읽으며 쓰는 중이던 레코드는 `partial`로 센다 [M: `rt_loss`]. RTOS의 ISR은 adapter가 ISR용 셀을 주지 않으면 `self_cell`이 NULL을 돌려 미확정 actor로 남아야 한다(OSAL 골격은 아직 ISR을 가르지 않는다) [U].
 
 ### 8.4 손실 종류 (LOSS `kind`)
 
-`overflow`(actor 버퍼 가득; aseq 빈틈과 같은 수), `partial`, `preinit`, `excluded`·`unloaded`(연결부·adapter가 `kz_rt_note_loss`로 알림; manifest의 `removed|unsupported` binding과 미등록 module은 호스트가 따로 보고), `reentry`, `actor-table`, `unresolved`, `ctl-skipped`, `ctl-nocond`, `module-table`, `after-stop`, `note-table`. 가득 찬 버퍼 때문에 기다리는 경로는 없다(기다리게 하면 그것도 제어 효과이므로).
+`overflow`(actor 할당량 도달 또는 pool 소진; aseq 빈틈과 같은 수. 사유와 버린 바이트는 ACTOR, §8.3), `partial`, `preinit`(버린 바이트는 RUNX `boot_bytes_dropped`), `excluded`·`unloaded`(연결부·adapter가 `kz_rt_note_loss`로 알림; manifest의 `removed|unsupported` binding과 미등록 module은 호스트가 따로 보고), `reentry`, `actor-table`, `unresolved`, `ctl-skipped`, `ctl-nocond`, `module-table`, `after-stop`, `note-table`. 가득 찬 버퍼 때문에 기다리는 경로는 없다(기다리게 하면 그것도 제어 효과이므로).
 
 ### 8.5 adapter 인터페이스와 두 adapter
 
@@ -182,23 +200,37 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 | adapter | 상태 | 정체성·시계 | 제어 | 대상 객체 소비 |
 |---|---|---|---|---|
 | POSIX `kz_rt_posix_adapter()` | 동작 [M] | TLS 셀, Linux TID, CLOCK_MONOTONIC | private pthread mutex, actor별 mutex+cond로 실제 대기(시간 제한) | 없음(RESOURCE: private mutex 65, cond 64). OSAL 초기화 전에도 attach 가능 |
-| POSIX 시작 객체 `kzrt-posix-auto`(OBJECT 라이브러리) | 동작 [M] | 생성자가 main 전에 attach + init, 종료 시 stop + dump. 설정은 환경 이름 `KZ_RT_MODE`(off/record/control), `KZ_RT_DUMP`, `KZ_RT_RUN_ID`, `KZ_RT_INSTANCE` → 대상 환경에 더해지므로 기준 실행과의 차이로 기록 | 계획은 읽지 않음(하네스가 `kz_rt_plan`) | 위와 같음. 정상 `exit` 경로에서만 dump(시그널로 죽으면 없음) [U: cFS 종료 경로에서 확인 안 함] |
+| POSIX 시작 객체 `kzrt-posix-auto`(OBJECT 라이브러리) | 동작 [M] | `.preinit_array` 진입점이 `KZ_RT_MODE`로 `kz_rt_early_mode`를 부르고(§8.2), 생성자가 main 전에 attach + init, 종료 시 stop + dump. 설정은 환경 이름 `KZ_RT_MODE`(off/record/control), `KZ_RT_DUMP`, `KZ_RT_RUN_ID`, `KZ_RT_INSTANCE`, `KZ_RT_ACTOR_QUOTA` → 대상 환경에 더해지므로 기준 실행과의 차이로 기록. build identity는 환경으로 받지 않는다(아래) | 계획은 읽지 않음(하네스가 `kz_rt_plan`; 계획 주입은 단계 F1) | 위와 같음. 정상 `exit` 경로에서만 dump(시그널로 죽으면 없음) [U: cFS 종료 경로에서 확인 안 함] |
 | OSAL `kz_rt_osal_adapter(wait_sems)` | 골격: C1 기준 OSAL `f34759d` 헤더(+ C1 빌드의 생성 `osconfig.h`)로 gcc·clang 컴파일만 [M], target 실행 안 함 | TLS 셀, `OS_GetLocalTime` | OSAL mutex 2(제어·대기표), 이진 세마포어 `wait_sems`개(= 계획의 게이트 수, 하네스가 줌) | RESOURCE origin `target-table`: mutex 2 + binsem `wait_sems` — C1 빌드의 `OS_MAX_MUTEXES 20`, `OS_MAX_BIN_SEMAPHORES 20`(`pre/1df262a/build/osal_public_api/inc/osconfig.h` L72, L65)에서 빠짐. `OS_API_Init` 성공 뒤에만 |
 
-### 8.6 dump 형식 `kzrt-dump` 1.0 (`include/kz_rt_format.h`)
+**build identity(RUN `backend`·`compiler`·`target`·`manifest_sha256`)** [D][M]. 단계 C의 세 후보 dump에서 이 넷이 비어 있었다(`instr_candidate_gcc.md` §8 항목 2, `instr_candidate_clang.md` §8 항목 1·2, `instr_candidate_llvm.md` §8 항목 2). 이것은 실행의 속성이 아니라 바이너리의 속성이므로 빌드 때 넣는다.
+- 경로: 고정 소스 `runtime/src/kz_rt_build_info.c`를 파생 빌드가 대상 컴파일러로 `-D` 값과 함께 컴파일하고, 그 객체를 실행 파일에 링크한다. CMake로는 런타임 단독 빌드의 캐시 변수 `KZ_RT_BUILD_BACKEND`(필수)·`KZ_RT_BUILD_COMPILER`·`KZ_RT_BUILD_TARGET`·`KZ_RT_BUILD_MANIFEST`가 OBJECT 라이브러리 `kzrt-build-info`를 만든다(함수 `kzrt_build_info()`). 객체로 링크해야 한다. 런타임의 참조가 weak라 archive 안에 두면 끌려오지 않는다.
+- manifest sha256은 그 manifest 파일 바이트의 SHA-256이다(CMake가 구성 때 계산). 연결부가 `kz_rt_module`에 넘기는 값(kzgcc: manifest 텍스트의 SHA-256)과 정의가 같다. 그러므로 `KZ_RT_BUILD_MANIFEST`에는 연결부의 `manifest=`와 같은 파일을 준다. `KZ_RT_BUILD_COMPILER`가 없으면 그 객체를 컴파일한 컴파일러의 `__VERSION__`을 적고(`__VERSION__ 13.3.0`), 값의 출처를 구조체 `origin`에 남긴다.
+- 저장소 규칙(lint `no-generated`: 생성 코드와 코드를 생성하는 코드를 두지 않음) 때문에 소스를 쓰는 생성 도구 대신 고정 소스 + `-D`를 택했다. plugin이 정의를 내보내는 길은 택하지 않았다. plugin은 번역 단위마다 돌기 때문에 실행 파일 전체에 정의 하나를 보장하지 못하고(적재 모듈 `.so`에도 들어감), target 이름을 따로 받아야 한다 [I].
+- 런타임 핵심은 `kz_rt_build_info`를 weak로 참조한다(라이브러리 기호가 아님, `rt_no_library_symbols` 통과). 있으면 dump의 RUN 태그를 그 값으로 쓴다. 하네스가 `kz_rt_config`로 다른 값을 주면 바이너리의 값을 유지하고 RUNX `tag-conflict`를 남긴다(검사 실패). sha256이 16진 64자리가 아니면 `build-info-bad`다(검사 실패, 길이는 컴파일 때 검사).
+- `kz-rt-dump --manifest`는 RUN과 MODULE이 가리키는 sha256을 준 파일들의 sha256과 대조하고, 어느 것에도 없으면 실패한다(바인딩 검사가 빌드와 다른 manifest로 이루어졌다는 뜻). 같은 module이 두 manifest로 등록되었거나 RUN과 MODULE의 sha256이 다르면 역시 실패다 [M: `rt_auto_bi_dump`, `rt_auto_bad_dump`, `rt_mode_api_latch_dump`, `rt_dump_tool`, `rt_dump_tool_strict`]. 단계 C의 GCC dump 2개는 저장소의 manifest(`instrument/gcc/sites/c1_post_1df262a.kzs` `8dbdd2e8…`, `r2_v701.kzs` `a4a92b90…`)와 맞았다 [M].
+
+**모듈 등록** [D][M]. `kz_rt_module`은 (module, sha256) 쌍마다 MODULE 항목 하나를 두고, 같은 쌍의 다음 호출은 `registrations`만 센다. 단계 C에서 단위마다 생성자를 둔 연결부는 C1 tx 6번(core 4, cf 1, bp 1), R2 8번을 따로 등록했다(최대 32에서 `module-table` 손실). 이제는 module 수만큼 항목이 생긴다(시험 `rt_mode_api_latch`: 3번 → `registrations=3`). 서로 다른 스레드의 첫 등록이 겹치면 같은 쌍이 두 항목이 될 수 있고 reader가 더한다. 같은 module의 다른 sha256은 따로 남는다(검사 실패).
+
+### 8.6 dump 형식 `kzrt-dump` 1.1 (`include/kz_rt_format.h`)
 
 모든 필드 little-endian, 바이트 단위 직렬화(대상의 byte order·정렬·struct 배치와 무관). 레코드는 **쓸 때** 직렬화되므로 버퍼 메모리를 그대로 떠도(디버거·JTAG) 같은 형식이다. 파일 시스템을 요구하지 않는다(`kz_rt_dump`는 바이트 콜백; POSIX는 `kz_rt_posix_dump_file/fd`).
 
 ```
-"KZRTDUMP" u16 major=1 u16 minor=0 u32 dump_flags(1 = stopped)
+"KZRTDUMP" u16 major=1 u16 minor=1 u32 dump_flags(1 = stopped)
 레코드: u32 size(4의 배수, 전체) u16 type u16 sub, 본문      (모르는 type은 size로 건너뜀)
-순서: RUN, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END(u64 bytes, u32 crc32)
+순서: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END(u64 bytes, u32 crc32)
+RUNX(1.1): window_mode mode_source flags pool_bytes chunk_bytes chunks_used pool_dropped actor_quota
+           boot_bytes_used boot_bytes_dropped max_modules max_notes
+MODULE: module actor u64 t sha256[32] + (1.1) registrations
+ACTOR:  … buf_bytes(확정) + (1.1) dropped_bytes chunks overflow_quota overflow_pool
 BUF: u32 owner(0 = 공유 버퍼, 그 밖 = run actor) u32 nbytes u32 cap u32 rsv + 버퍼 레코드(EVENT 0x0101, CTL 0x0102, AEXIT 0x0103, PAD 0x0100)
+     (actor의 BUF는 그 actor chunk들의 확정 레코드를 순서대로 이은 것; cap = 할당량, 없으면 pool)
 EVENT: actor aseq site bind link valid u64 t u64 pc u16 nvals u16 str_len u8 str_slot + u64 v[nvals] + str(4 정렬)
 CTL:   actor aseq site bind ev ctl_seq u64 t point hit subject other gate u16 reason u16 ctx   (sub = what)
 ```
 
-reader는 major가 같을 때만 읽고 minor는 무시한다(레코드 끝에 필드를 더하거나 새 type을 더하는 것이 minor). 바이트 배치를 바꾸면 major를 올린다 [D]. 호스트 reader `tools/decode/kz_rt_decode.{h,c}`(C), 도구 `kz-rt-dump [--manifest <kzs>]... [--events-only] <dump>`: 레코드마다 한 줄, 그다음 검사(actor별 aseq 빈틈 대 센 overflow, manifest 대조, 미등록 module). 종료 코드 0 = 통과, 1 = 검사 실패, 2 = 사용법·형식 오류 [M].
+reader는 major가 같을 때만 읽고 minor는 무시한다(레코드 끝에 필드를 더하거나 새 type을 더하는 것이 minor). 바이트 배치를 바꾸면 major를 올린다 [D]. 1.1은 minor 개정이다(새 레코드 RUNX, MODULE·ACTOR 끝의 필드). 1.0 reader는 RUNX를 건너뛰고 늘어난 필드를 무시한다. 1.1 reader는 1.0 스트림도 읽는다(없는 필드는 기록 안 됨, MODULE `registrations` = 1). 단계 C의 1.0 dump 7개를 새 `kz-rt-dump`로 읽어 모두 통과했다 [M]. hook ABI는 1 그대로다(호출 추가만, 배치·기존 호출의 인자 변경 없음). 호스트 reader `tools/decode/kz_rt_decode.{h,c}`(C), 도구 `kz-rt-dump [--manifest <kzs>]... [--events-only] <dump>`: 레코드마다 한 줄, 그다음 검사(actor별 aseq 빈틈 대 센 overflow, 용량·수요(`check capacity`), 모드 원천(`check mode`), build identity와 manifest sha256, manifest 대조, 미등록 module). 사건 줄에는 `pc=`(hook의 반환 주소: 어느 코드 사본이 돌았나. `duplicated` binding을 가르는 근거)와 `key=`(그 actor의 native key, 예 `tid:12345`; 임시·미확정 actor는 `-`)가 붙는다. 단계 C에서 이것을 대신한 `instrument/gcc/tools/kzgcc_events.c`(TSV)는 후보의 대조 스크립트용으로 그대로 둔다. 종료 코드 0 = 통과, 1 = 검사 실패, 2 = 사용법·형식 오류 [M].
 
 ### 8.7 빌드와 링크
 
@@ -210,15 +242,43 @@ cmake -S kairos/runtime -B <dir> [-DCMAKE_C_COMPILER=<cc>] [-DKZ_RT_OSAL_INCLUDE
 cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt-decode.a, libkzrt-manifest.a, kz-rt-dump
 # 대상 링크: 실행 파일에  -I kairos/runtime/include  …  libkzrt-posix.a libkzrt.a -lpthread   (또는 libkzrt-osal.a libkzrt.a)
 #            소스를 고치지 않는 POSIX 실행: kz_rt_posix_auto.c.o 도 링크 (CMake: target_link_libraries(<exe> PRIVATE kzrt-posix-auto))
-# 하네스: kz_rt_init(&cfg) → kz_rt_attach(kz_rt_posix_adapter()) [→ kz_rt_plan(...)] … kz_rt_stop(); kz_rt_posix_dump_file(path)
+# 하네스: [kz_rt_early_mode(m, note) →] kz_rt_init(&cfg) → kz_rt_attach(kz_rt_posix_adapter()) [→ kz_rt_plan(...)] … kz_rt_stop(); kz_rt_posix_dump_file(path)
+# 파생 빌드의 build identity(§8.5): 런타임 단독 빌드에 값을 주고 객체를 링크
+#   cmake -S kairos/runtime -B <dir> -DCMAKE_C_COMPILER=<대상 cc> -DKZ_RT_BUILD_BACKEND="<연결부와 판>" \
+#         -DKZ_RT_BUILD_COMPILER="<cc --version 첫 줄>" -DKZ_RT_BUILD_TARGET="<cc -dumpmachine>" -DKZ_RT_BUILD_MANIFEST=<연결부가 읽은 manifest>
+#   링크: <dir>/CMakeFiles/kzrt-build-info.dir/src/kz_rt_build_info.c.o  (kz_rt_posix_auto.c.o와 같은 방식)
+# 용량(빌드 파라미터, §8.9): -DKZ_RT_DEFINES="KZ_RT_POOL_BYTES=<bytes>;KZ_RT_CHUNK_BYTES=<bytes>"  (RUNX에 남음)
 ```
 
 - `kzrt`는 C99, `-ffreestanding -fno-stack-protector`(gcc는 `-fno-tree-loop-distribute-patterns`), PIC, TLS는 initial-exec. 라이브러리 기호를 참조하지 않음을 `rt_no_library_symbols`가 확인한다(`_GLOBAL_OFFSET_TABLE_`은 링커가 정의) [M]. 이 플래그들은 계측 부분(런타임 TU)의 것이며 대상 소스의 플래그가 아니다. 파생 빌드에서는 기준 빌드와 다른 점으로 모두 기록한다(CONDITIONS_POLICY).
-- 크기 상수(`KZ_RT_MAX_ACTORS` 등)는 `-D`로 바꿀 수 있고 RUN 레코드에 남는다.
+- 크기 상수(`KZ_RT_MAX_ACTORS`, `KZ_RT_POOL_BYTES`, `KZ_RT_CHUNK_BYTES`, `KZ_RT_BOOT_BUF_BYTES` 등)는 `-D`(CMake `KZ_RT_DEFINES`)로 바꿀 수 있고 RUN·RUNX 레코드에 남는다. 도구 용량이며 연구 조건이 아니다. 파생 빌드에서는 기준 빌드와의 차이 대장에 런타임 판과 함께 적는다.
 
 ### 8.8 시험 [M]
 
 `ctest -L runtime` 21개: `rt_bootstrap`(init·attach 전 기록, 스레드별 임시 id, 같은 셀 링크, attach 뒤 새 스레드, preinit 손실), `rt_order`(4 스레드 동시, actor별 버퍼와 연속 aseq, 전역 순번 없음), `rt_loss`(overflow와 빈틈, 기록 중 dump의 partial, reentry, excluded·unloaded 알림, after-stop, 잘린 스트림), `rt_serial`(전 필드 왕복, little-endian 바이트 확인, 문자열 상한·잘림, valid 비트 없으면 복사 안 함, 모르는 type 건너뜀, 다른 major 거부, CRC), `rt_gate_*` 7개(관측 hook은 게이트 site에서도 막히지 않음; 보류→해제→재개와 `ctl_seq` 순서; RECORD 모드; 문맥 거부·소비, lock-held 허용; ISR 미평가; 대기 없는 adapter의 no-op; 시간 제한과 그 hit의 deferred 해제; attach 전 계획(spin 잠금)), `rt_holdsem_*` 4개(`tests/cfs-free/target/hold_{rearm,nth,defer}.kzh`의 의미를 두 스레드로: 재무장, 값 조건 + n번째, deferred + unless-released 충족, busy), `rt_manifest`(예시 수용, 잘못된 입력 17종 거부), `rt_dump_tool`·`rt_dump_tool_strict`, `rt_auto`·`rt_auto_dump`(시작 객체: setup 호출 없는 프로그램의 종료 시 dump), `rt_no_library_symbols`. 별도로 scratch 빌드에서 gcc ThreadSanitizer, gcc AddressSanitizer+UBSan(각각 nm 검사를 뺀 20개 반복), clang 18(21개)이 모두 통과했다. Kairos 기본 빌드 136개 중 135 통과 + tracefs 시험 1 건너뜀, LLVM 빌드 157개 중 156 + 1 건너뜀 [M].
+
+0.2.0 개정(2026-10-26)으로 `ctest -L runtime`은 44개다. 더한 것: `rt_pool_{big,quota,dumps}`(actor 하나가 88,000 B를 22 chunk에 손실 없이 기록; 할당량 1,000 B에서 11개 보존·19개(1,672 B) `overflow_quota`; 작성자 4 × 3,000 레코드 동안 반복한 dump가 모두 actor별 빈틈 없는 앞부분), `rt_pool_empty`(+`_dump`, 4 chunk pool로 다시 빌드한 핵심: 소진 때 actor 2가 14개(1,232 B)를 `overflow_pool`로 잃고 RUNX `pool_dropped=14`), `rt_mode_{off,record,control,unset,bogus}`(+`_dump`, 한 실행 파일, §8.2), `rt_mode_api_{latch,late}`(+`_dump`, early 고정·init 거부·OFF 유지, build identity 우선과 충돌 기록, 모듈 중복 제거, early 전 hook 기록), `rt_auto_bi`·`rt_auto_bad`(+`_dump`, build identity 객체와 그 기본값·잘못된 sha256). 기존 `rt_dump_tool`은 `pc=`·`key=`와 manifest sha256 일치를, `rt_dump_tool_strict`는 불일치 실패를 함께 확인한다. 별도 scratch 빌드에서 gcc ThreadSanitizer와 gcc AddressSanitizer+UBSan(각각 nm 검사를 뺀 43개), clang 18(44개)이 모두 통과했다. GCC plugin 시험 6개(`instrument/gcc`, 런타임을 단독 빌드로 링크)도 0.2.0으로 통과했다. Kairos 기본 빌드 163개 중 162 통과 + tracefs 시험 1 건너뜀, LLVM 빌드 185개 중 184 + 1 건너뜀 [M]. (이 수에는 같은 작업 트리의 다른 진행 중 변경의 시험도 들어 있다.)
+
+### 8.9 용량 선택의 도출 (도구 용량, 연구 조건 아님) [M][D]
+
+단계 C pilot 부팅의 dump 7개(각 후보 C1·R2 1회, 1.0 형식)에서 수요를 읽었다. 크기는 레코드 크기(사건 56 B + 값 8 B × n + 문자열)의 합이고, 4 KiB chunk 수는 같은 레코드를 actor별로 chunk에 넣는 모의 배치다(레코드는 chunk를 넘지 않음). 창은 각 실행의 `t_stop − t_init`이며 기준 절차(C1 smoke 단계, R2 `env/run_cfs.sh operational ci-es-restart-poweron`)가 정한 것이다.
+
+| 기록 (dump sha256 앞 8자리) | 창 | 사건이 있는 actor | 확정 바이트 합 | 가장 큰 actor | 부트스트랩 | 4 KiB chunk |
+|---|---|---|---|---|---|---|
+| GCC C1 tx (`61586c46`) | 5,681 ms | 16 | 10,352 | 4,576 | 0 | 17 |
+| GCC R2 cpu1 (`0af58a06`) | 2,181 ms | 25 | 214,808 | 53,856 | 0 | 69 |
+| LLVM C1 tx (`c2e25583`) | 5,680 ms | 16 | 10,352 | 4,576 | 0 | 17 |
+| LLVM R2 cpu1 (`bec07d1a`) | 2,184 ms | 25 | 225,456 | **64,152** | 0 | 72 |
+| Clang C1 tx (`bf0b5ba8`) | 6,180 ms | 16 | 12,480 | 3,604 | 0 | 16 |
+| Clang C1 rx (`dc36298c`) | 6,130 ms | 16 | 12,480 | 3,604 | 0 | 16 |
+| Clang R2 (`9bfb6f0a`) | 2,191 ms | 25 | 114,404 | 38,896 | 0 | 42 |
+
+도출:
+1. 0.1.0의 한계는 총량이 아니라 actor 사이의 배분이었다. actor 하나의 상한 65,536 B에 LLVM R2의 actor 12가 64,152 B(97.9%)로 닿았지만, 한 프로세스 전체는 최대 225,456 B로 정적 버퍼 합 4,194,304 B의 5.4%였다. 가장 큰 actor가 프로세스 합의 25–44%를 차지했다. GCC R2의 그 actor는 612개 중 316개가 피호출 쪽 site `CFE_ES_GetAppID.store`였다(selection §4 항목 6).
+2. 그래서 크기를 새로 고르지 않고 배분만 바꿨다 [D]. pool = 0.1.0 정적 버퍼의 합(64 × 65,536 = 4,194,304 B)이다. bss는 0.1.0과 같고(chunk 표 2 × 1,024 × 4 B = 8 KiB가 더해짐) 같은 바이너리이므로 모든 G-I*에 같다. 관측 수요에 4 KiB 배치를 모의하면 최대 72 chunk(294,912 B, pool의 7.0%, chunk 끝 공간 포함)다. 할당량을 주지 않으면 actor 하나의 상한은 pool 전체다.
+3. chunk 4 KiB [D]: 가장 큰 레코드(184 B)를 담아야 하고, 그때 chunk당 버리는 공간은 4.5% 미만이다. chunk가 작을수록 actor의 최소 점유는 줄고 pool 계수기의 원자적 덧셈은 잦아진다. 관측 기록에서 최소 점유는 25 actor × 4 KiB = 100 KiB, 덧셈은 88 B 레코드 46개마다 한 번이다.
+4. 연구 조건이 아니다 [D]. 창의 길이와 site 집합은 이 선택이 정하지 않는다. 단계 D에서 site가 F0 계획 수준(34·35개, selection §4 항목 2)으로 늘면 수요가 커질 수 있다 [I]. 그 수요는 dump에 남는다(`buf_bytes + dropped_bytes`, RUNX `pool_dropped`, `kz-rt-dump`의 `check capacity`). pool이 모자란 실행은 손실로 드러나고, 다음 빌드의 `KZ_RT_POOL_BYTES`는 그 기록의 수요에서 다시 도출한다. G-I0·G-I·G-I-H는 같은 바이너리라 함께 바뀐다. 추정으로 여유 배수를 정하지 않았다.
+5. 부트스트랩 64 KiB는 바꾸지 않았다. 일곱 기록 모두 0 B였다. 시작 객체가 main 전에 attach하고, 모듈 등록은 사건이 아니다.
 
 ## 9. 사건·제어 비교의 단위 (IR §13.2–13.3) [D]
 
@@ -239,6 +299,7 @@ cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt
 
 - `.kzh` + manifest → `kz_rt_point[]` 호스트 변환기(`name` → validated 슬롯, `caller-in` → 호출 측 binding 집합; 변환할 수 없는 조건은 계획 거부)와, 계획을 대상에 넣는 길(직렬화된 계획 형식). 지금은 C 배열 API뿐이다.
 - ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). 남은 것: 계측 기록의 정체성 결합(생성자·소유 앱) — manifest(`kzs-sites 1`)에 site의 정체성 읽기(F0 `decoder`에 해당)를 적는 문법이 없어 변환이 정하지 않는다 [U].
-- 같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2), hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
+- ~~같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2)~~ → 0.2.0의 `kz_rt_early_mode`와 시작 객체의 `.preinit_array`(§8.2). 남은 것: hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
+- 0.2.0에서 남은 것: 변환기가 RUNX(창의 모드·원천, pool 수요)와 MODULE `registrations`를 중립 층에 옮기는 일(지금은 RUN `mode`만 읽음, §8.2). 파생 빌드 스크립트가 `kzrt-build-info` 객체를 링크하는 일(단계 D6). 두 연결부의 binding id 범위 검사(§3). 시그널·강제 종료 경로의 dump(단계 F3).
 - OSAL adapter의 target 실행과 OSAL 객체 소비의 실측, 두 번째 OS.
 - 컴파일러 연결부 세 후보는 이 ABI에 맞춰 시제품을 만든다(단계 C). 런타임을 고칠 필요가 생기면 ABI 판을 올리고 이 문서에 적는다.

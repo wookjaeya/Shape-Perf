@@ -1,4 +1,4 @@
-/* kz_rt_format.h -- the dump format "kzrt-dump" 1.0 (byte layout; shared by the runtime and the
+/* kz_rt_format.h -- the dump format "kzrt-dump" 1.1 (byte layout; shared by the runtime and the
  * host decoder).  Every multi-byte field is little-endian and written byte by byte, so the bytes
  * do not depend on the target's byte order, alignment or struct layout.
  *
@@ -6,12 +6,14 @@
  *   file header (16 bytes): "KZRTDUMP", u16 major, u16 minor, u32 dump_flags
  *   records, each: u32 size (bytes of the whole record, a multiple of 4), u16 type, u16 sub,
  *                  then the body.  A reader skips a record type it does not know (by size).
- *   order: RUN, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END
+ *   order: RUN, RUNX, MODULE*, RESOURCE*, ACTOR*, LOSS*, POINT*, BUF*, END
  *   END: u64 bytes (stream bytes before END), u32 crc32 (IEEE, of those bytes).
+ *   1.1 added (minor: a 1.0 reader skips or ignores them): the RUNX record, MODULE registrations,
+ *   the ACTOR demand and chunk fields.  A 1.1 reader reads a 1.0 stream (missing fields = not recorded).
  *
  * A BUF record's body is u32 owner (0 = the bootstrap/shared buffer, else a run actor id),
  * u32 nbytes, u32 cap, u32 rsv, then nbytes of buffer records (EVENT, CTL, AEXIT) exactly as the
- * runtime wrote them in memory.  Inside a buffer, a record whose size word is 0 was reserved but
+ * runtime wrote them in memory (an actor's chunks one after the other; a record never spans chunks).  Inside a buffer, a record whose size word is 0 was reserved but
  * not committed (bootstrap buffer only): the reader stops there and counts a partial record.
  *
  * Offsets below are from the start of the record (the size word).
@@ -24,7 +26,7 @@
 #define KZ_RT_REC_HEADER_BYTES 8u
 
 /* dump_flags */
-#define KZ_RT_DUMP_STOPPED 1u   /* kz_rt_stop was called before the dump */
+#define KZ_RT_DUMP_STOPPED 1u   /* kz_rt_stop was called before the dump (also in mode OFF, which it keeps) */
 
 /* stream record types */
 #define KZ_RT_REC_RUN 0x0001u
@@ -33,6 +35,7 @@
 #define KZ_RT_REC_ACTOR 0x0004u
 #define KZ_RT_REC_LOSS 0x0005u
 #define KZ_RT_REC_POINT 0x0006u
+#define KZ_RT_REC_RUNX 0x0007u   /* 1.1: mode source and capacity of the run */
 #define KZ_RT_REC_BUF 0x0010u
 #define KZ_RT_REC_END 0x00FFu
 /* buffer record types */
@@ -54,14 +57,32 @@
 #define KZ_RT_PHASE_PLAN 4u     /* a plan was loaded */
 #define KZ_RT_PHASE_STOP 8u
 
-/* MODULE: 8 u32 module, 12 u32 actor (who registered it), 16 u64 t, 24 u8[32] manifest_sha256; size 56 */
-#define KZ_RT_MODULE_SIZE 56u
+/* RUNX (1.1, sub = 0): 8 u32 window_mode (the mode of the observation window: the mode before kz_rt_stop),
+ *  12 u32 mode_source (KZ_RT_MODE_SRC_*), 16 u32 flags (KZ_RT_RX_*), 20 u32 pool_bytes, 24 u32 chunk_bytes,
+ *  28 u32 chunks_used (taken from the pool), 32 u32 pool_dropped (records dropped because the pool was
+ *  empty), 36 u32 actor_quota (configured, 0 = none), 40 u32 boot_bytes_used, 44 u32 boot_bytes_dropped,
+ *  48 u32 max_modules, 52 u32 max_notes; size 56 */
+#define KZ_RT_RUNX_SIZE 56u
+#define KZ_RT_RX_BUILD_INFO 1u        /* the binary carries kz_rt_build_info: RUN backend/compiler/target/manifest are its values */
+#define KZ_RT_RX_TAG_CONFLICT 2u      /* the harness gave a backend/compiler/target/manifest that differs from the build info */
+#define KZ_RT_RX_HOOKS_BEFORE_EARLY 4u /* kz_rt_early_mode came after hooks had run (under the static default RECORD) */
+#define KZ_RT_RX_MODE_DEFAULTED 8u    /* early mode: no mode was named (KZ_RT_EARLY_DEFAULTED) */
+#define KZ_RT_RX_MODE_INVALID 16u     /* early mode: the named mode was not valid (KZ_RT_EARLY_INVALID) */
+#define KZ_RT_RX_INIT_REFUSED 32u     /* kz_rt_init named another mode than the latched early mode and was refused */
+#define KZ_RT_RX_BUILD_INFO_BAD 64u   /* the build info's manifest sha256 is not 64 hex digits (taken as not given) */
+/* MODULE: 8 u32 module, 12 u32 actor (who registered it first), 16 u64 t (first), 24 u8[32] manifest_sha256,
+ *  56 u32 registrations (1.1: kz_rt_module calls with this pair), 60 u32 rsv; size 64 (1.0: 56) */
+#define KZ_RT_MODULE_SIZE_1_0 56u
+#define KZ_RT_MODULE_SIZE 64u
 /* RESOURCE: 8 u32 kind, 12 u32 origin, 16 u64 count, 24 u16 len + text, padded */
 #define KZ_RT_RESOURCE_FIXED 24u
 /* ACTOR: 8 u32 actor, 12 u32 flags, 16 u32 boot_link (provisional id, 0 = none), 20 u32 link_evidence,
  *  24 u64 native_key, 32 u32 key_kind, 36 u32 key_generation, 40 u32 first_aseq, 44 u32 last_aseq,
- *  48 u32 recorded, 52 u32 overflow, 56 u32 partial, 60 u32 buf_bytes; size 64 */
-#define KZ_RT_ACTOR_SIZE 64u
+ *  48 u32 recorded, 52 u32 overflow, 56 u32 partial, 60 u32 buf_bytes (committed),
+ *  1.1: 64 u32 dropped_bytes (bytes of the overflow records: demand = buf_bytes + dropped_bytes),
+ *  68 u32 chunks, 72 u32 overflow_quota, 76 u32 overflow_pool (overflow = their sum); size 80 (1.0: 64) */
+#define KZ_RT_ACTOR_SIZE_1_0 64u
+#define KZ_RT_ACTOR_SIZE 80u
 #define KZ_RT_AF_EXITED 1u      /* ACTOR flags: kz_rt_actor_exit was called */
 #define KZ_RT_AF_HELD 2u        /* held at a gate when dumped */
 #define KZ_RT_LINK_NONE 0u      /* link_evidence */
@@ -73,7 +94,8 @@
  *  36 u32 hits, 40 u32 acted, 44 u32 satisfied, 48 u32 held_actor (unreleased at the dump if non-zero),
  *  52 u32 holds; size 56 */
 #define KZ_RT_POINT_SIZE 56u
-/* BUF: 8 u32 owner, 12 u32 nbytes, 16 u32 cap, 20 u32 rsv; then nbytes; size 24 + nbytes */
+/* BUF: 8 u32 owner, 12 u32 nbytes, 16 u32 cap (bootstrap: its size; actor: its bound, the quota or the pool),
+ *  20 u32 rsv; then nbytes; size 24 + nbytes.  An actor's BUF holds its chunks' committed records in order. */
 #define KZ_RT_BUF_FIXED 24u
 /* END: 8 u64 bytes, 16 u32 crc32, 20 u32 rsv; size 24 */
 #define KZ_RT_END_SIZE 24u

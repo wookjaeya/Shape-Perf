@@ -1,0 +1,34 @@
+# Unit-test site manifest (kzs-sites 1) for the dump of test_rt_serial.  Generic names; not a cFS
+# manifest.  The values are unit-test values, not research conditions.
+kzs-sites 1
+source unit rev=0000000000000000000000000000000000000000 ref="runtime/tests/test_rt_serial.c"
+module 5 name=test_rt_serial source=unit
+module 6 name=never_loaded.so source=unit
+
+site 10 label=obj.use.before op=obj.use phase=before tu=tests/test_rt_serial.c func=main callee=obj_use ref="test_rt_serial.c"
+value 10 0 role=key from=arg0 type=u64
+value 10 1 role=delta from=arg1 type=s64
+value 10 2 role=name_ptr from=arg2 type=ptr string=pointer-only
+control 10 ctx=task ref="unit test"
+
+site 11 label=obj.lookup.before op=obj.lookup phase=before tu=tests/test_rt_serial.c func=main callee=obj_lookup
+value 11 0 role=name from=arg0 type=ptr string=validated bound=16 ref="unit test: the caller passes a literal"
+value 11 1 role=len from=arg1 type=u32
+
+site 12 label=obj.batch.after op=obj.batch phase=after tu=tests/test_rt_serial.c func=main
+value 12 0 role=r0 from=ret type=u32
+value 12 1 role=o1 from=out1 type=u32
+value 12 2 role=o2 from=out2 type=u32
+value 12 3 role=o3 from=out3 type=u32
+value 12 4 role=o4 from=out4 type=u32
+value 12 5 role=o5 from=out5 type=u32
+value 12 6 role=o6 from=out6 type=u32
+value 12 7 role=o7 from=out7 type=u32
+
+site 13 label=obj.inline.effect op=obj.store phase=effect tu=tests/test_rt_serial.c func=helper
+
+bind 1001 site=10 backend=hand module=5 at="test_rt_serial.c main" status=bound vals=0x7
+bind 1101 site=11 backend=hand module=5 at="test_rt_serial.c main" status=bound vals=0x3
+bind 1201 site=12 backend=hand module=5 at="test_rt_serial.c main" status=bound
+bind 1301 site=13 backend=hand module=5 at="test_rt_serial.c helper" status=removed reason="inlined away before the hook pass (unit-test example)"
+equiv 10 backends=hand,f0 status=unconfirmed

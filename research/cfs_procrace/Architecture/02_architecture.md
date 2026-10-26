@@ -2,7 +2,9 @@
 
 이 문서는 Kairos(도구 접두어 `kz`)가 어떤 구성요소로 이루어지는지, 구성요소들이 어떤 typed 산출물을 주고받는지, 계층들이 서로를 어떻게 검사하는지를 설명한다. spec을 읽지 않은 연구자가 전체 구조를 한 번에 파악하는 것이 목적이다. 정의와 근거의 세부는 각 문장이 가리키는 spec 절에 있다.
 
-상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)(revision 1.4: 2026-10-26 PI 결정 반영, spec §0.13. revision 1.3: 2026-10-22 PI 결정 D1–D5 반영, spec §0.12. revision 1.2: 2026-10-15 PI 결정, 용어 결정 T1, CORD 인용 정리 반영, spec §0.9–§0.11. revision 1.1: 외부 검토 EXT-20261012 반영, spec §0.7)
+
+> **rev 1.4 반영 (2026-10-26).** SPEC revision 1.4(spec §0.13, ADR-059; 결정 기록 [spec/PI_DECISIONS_RESOLVED_20261026.md](spec/PI_DECISIONS_RESOLVED_20261026.md), 이하 [PD26]) 가운데 이 문서가 풀어 쓰는 절의 변경을 짧게 옮겼다: 분석기 하나에 실행 계열 둘(F0와 계측 계열, [§5.4](#54-계측-계열의-구성요소-개정-14)), 원칙 4·7([§4](#4-설계-원칙-여덟-가지)), 중립 사건과 backend 원시 근거([§7.6](#76-중립-사건과-backend-원시-근거-개정-14)), JSON 경계([§7.5](#75-python과-json을-쓰지-않는-이유)), 기술 결정([§10](#10-기술-결정)). 모두 결정 [D]이고 실행 결과가 아니다. 그림 D1·D2는 F0만 그린 판이다([diagrams/README.md](diagrams/README.md)).
 
 > **rev 1.3 반영 (2026-10-22).** 이 문서는 SPEC revision 1.3(spec §0.12; 변경표 `plan/REV13_CHANGE_TABLE.md`; 결정 기록 `spec/PI_DECISIONS_RESOLVED_20261022.md`) 가운데 이 문서가 풀어 쓰는 절의 변경을 반영했다. 반영한 변경표 행: C-01, C-03, C-05, C-10, C-13, C-15, C-16, C-17, C-18, C-19, C-21, C-22, C-23, C-24, C-25, C-26, C-27, C-28, C-29, C-30, C-31, C-32, C-36, C-41, C-42, C-43, C-46, C-48, C-49, C-50, C-51(C-52는 이 반영 자체다). 이 변경은 결정 [D]이고 결과가 아니다. 이 판을 위해 만들거나 실행한 것은 없고, 연구 조건도 정하지 않았다. **우선 규칙**(spec §0.12 "Precedence", ADR-053): revision 1.0–1.2를 위해 쓴 문장 가운데 certificate, explorer, 진행(progress) 결과, loop를 Kairos의 첫 산출물·필수 산출물·정의적 산출물로 부르는 것은 ADR-053에 따라 읽는다. 이 경로들은 쓰인 그대로 정의되어 있고 그 주장이 필요할 때 쓰며, 관측 기반 판정·한정 예측·제어 실행 확인의 전제 조건이 아니다. 아래에서 그런 문장 옆에는 "rev 1.3" 표시를 붙였다. 그림 D2의 코드 블록 세 개는 spec §12의 revision 1.3 지시(C-48)에 맞춰 고쳤다.
 
@@ -214,10 +216,10 @@ spec §2.1은 원칙 여덟 개를 설계 결정 [D]으로 둔다.
 | 1 | 형식 핵심은 하나 | 모든 구성요소는 `libkz-core`를 통해 KEM type을 읽고 쓴다. event, 자원, edge, predicate, verdict를 따로 정의한 구성요소가 없다. Φ predicate의 evaluator는 하나다. 의도한 예외는 하나다: `kz proofcheck`는 코드에서 뽑은 대기 조건을 다시 유도하고 `Pred_code ⇒ C`를 자기 symbolic 절차로 판단한다. 검사기의 다른 Φ 평가(INIT 단계, T-OBS의 falsifier 조건)는 `libkz-core`의 evaluator를 부르므로, 그 evaluator는 검사기의 trusted base에 들고 그 단계는 trust ledger에 "via T5"로 표시된다 | 정적·trace·model 계층이 같은 뜻을 쓰므로 계층 간 검사 O1–O10이 가능하다(ADR-002) |
 | 2 | profile은 코드가 아니라 데이터 | framework 지식은 provenance가 붙은 versioned Φ 파일에 있다. engine은 framework에 중립이다. lint가 engine 코드 안의 사례 식별자(예: `CFE_SB_Global`, `sem_name`, `C1`)를 막는다(spec §7.2, §9.2). 앱 고유 protocol은 따로 app-profile 계층에 두고 작성 비용을 잰다 | engine이 특정 사례에 맞춰지는 것을 막는다. 다른 cFS revision에는 Φ만 바꿔 쓴다는 것이 가설 H-V다(spec §3.17, §7.6; ADR-003) |
 | 3 | 증명을 지닌 판정 | **certificate**는 규칙 instance, writer 항목(transition status와 key status 포함), once 사실, `derives` 사실, 코드에서 추출한 predicate의 목록이고, 항목마다 코드 위치를 단다. **검사기** `kz proofcheck`는 `kz-static static`과 분석 코드를 공유하지 않고, 두 쪽 모두 `libkz-core`를 link한다. 검사기는 각 추론 단계를 trusted base에 상대적으로 다시 검증한다: 추출 사실, skeleton, closure 목록, Φ, `libkz-core`, 그리고 reach에는 run과 prefix-probe 산출물. 그 추론은 `libkz-core`의 evaluator나 rule engine을 부르는 단계만 빼고 producer와 독립이고, 그 단계는 ledger에 표시한다. **trust ledger**는 certificate와 판정마다 다시 검증한 단계, 추출 사실, 신뢰 항목, 관측으로 반박될 수 있는 항목을 나누어 적는다(spec §4.5.1). **증명 상태**: certificate와 certificate 기반 판정 칸은 쓴 lemma의 증명 상태 가운데 가장 약한 것을 가지고(`proved`, `depends-on-stated-assumption`, `unproved`), 보고서가 진술 옆에 보인다(spec §6.2). **시험**: certificate 변이 시험이 검사기를 시험하고, program mutant(spec §8.5)가 분석을 시험한다 | 판정마다 다시 확인할 수 있는 증명이 붙고, 무엇을 믿었는지와 어느 lemma가 아직 증명되지 않았는지가 드러난다(ADR-006, ADR-041, ADR-045) |
-| 4 | 관측이 먼저, 제어는 나중 | 기본은 수정하지 않은 gcc 바이너리의 F0 관측이다([R07 §7]). 제어는 확인에만 쓰고, hold는 모두 기록한다 | 바이너리와 실행 조건을 바꾸지 않는다. "시간만 바뀐다"고는 주장하지 않고, 관측 영향을 기준 실행과 견주어 점검한다(spec §5.1, §8.6). 흔든 양은 실행마다 기록한다(spec §4.13 perturbation accounting) |
+| 4 | 관측이 먼저, 제어는 나중 | 기본은 수정하지 않은 gcc 바이너리의 F0 관측이다([R07 §7]). 제어는 확인에만 쓰고, hold는 모두 기록한다. *개정 1.4(ADR-013, ADR-059):* F0은 기준 빌드의 기본 경로다. 계측 빌드의 관측·제어(spec §5.12)도 허용하며, 그것은 다른 실행 계열이고 결과에 계열을 적는다. "관측이 먼저, 제어는 나중"과 "hold는 모두 기록"은 두 계열 모두에 적용된다 | 바이너리와 실행 조건을 바꾸지 않는다. "시간만 바뀐다"고는 주장하지 않고, 관측 영향을 기준 실행과 견주어 점검한다(spec §5.1, §8.6). 흔든 양은 실행마다 기록한다(spec §4.13 perturbation accounting) |
 | 5 | 계층이 서로 검사 | 의무 O1–O10 ([§9](#9-계층-간-일관성-의무-o1-o10과-cc)) | "model이 맞는지 어떻게 아는가"에 답한다(ADR-021) |
 | 6 | 정직한 unknown | 빈틈은 모두 `unknown(reason)`이 된다 | "경보 없음"을 "안전"으로, 진행 결과가 없음을 "live"로 읽지 못하게 한다(spec §0.1) |
-| 7 | 설치 없는 핵심 | 핵심 기능은 새 패키지 없이 돈다: perf-PMU uprobe, 손으로 쓴 helper prototype과 glibc `<elf.h>` ELF reader를 쓰는 raw `bpf()`, SMT는 첫 구현의 조건이 아니어서 명시적 탐색을 쓰고(P-Z3), MLIR은 쓰지 않는다(D6). 설치는 모두 PI 결정이다 | thin MVC와 S4–S6에는 설치가 필요 없다([PI_DECISIONS.md](spec/PI_DECISIONS.md) "Tool installs") |
+| 7 | 설치 없는 핵심 | 핵심 기능은 새 패키지 없이 돈다: perf-PMU uprobe, 손으로 쓴 helper prototype과 glibc `<elf.h>` ELF reader를 쓰는 raw `bpf()`, SMT는 첫 구현의 조건이 아니어서 명시적 탐색을 쓰고(P-Z3), MLIR은 쓰지 않는다(D6). 설치는 모두 PI 결정이다. *개정 1.4:* MLIR은 spec §2.6의 조건을 채우는 분석 용도가 채택될 때까지 쓰지 않는다(D6 재검토). 계측 계열의 컴파일러 연결부에 필요한 GCC plugin header(gcc 13.3.0용 `gcc-13-plugin-dev`)는 P-LIBBPF 규칙에 따라 설치하고 환경 변경으로 기록한다([PD26] §1) | thin MVC와 S4–S6에는 설치가 필요 없다([PI_DECISIONS.md](spec/PI_DECISIONS.md) "Tool installs") |
 | 8 | 결정적 분석 | 분석 예산은 모두 결정적인 **work unit** 수(확장한 상태, 실행한 transition, 탐색 node, fixpoint 갱신)이고 탐색 순서도 결정적이다. 벽시계 시간과 최대 메모리는 비용으로만 기록한다([X3-M10] 반영). 상한의 값은 이 문서에 없다. 각 단계의 파일럿 뒤에 동결하고, 초과는 `unknown(budget)`으로 보고한다(PI 결정 D15) | 저장된 trace에서 다시 돌리면 판정 저장소가 byte 단위로 같아야 하고, 이것 자체가 시험이다(spec §4.14; ADR-034) |
 
 **rev 1.3과 원칙 3** (ADR-053; spec §4.5.1 "Results without a certificate"; C-22, C-23). 원칙 3의 certificate와 검사기는 그대로 정의되어 있지만, revision 1.3부터 보편 순서 주장이 필요할 때 쓰는 선택 경로다. 그래서 "판정마다 다시 확인할 수 있는 증명이 붙는다"는 certificate를 발행한 판정에만 해당한다. 나머지 판정에도 trust ledger는 언제나 붙는다. 모든 관측 기반 판정, 예측, 실행 확인, 정적 증명은 네 부분 ledger를 가진다: (i) 검사기가 실제로 다시 확인한 관계와 계산, (ii) 출처에서 믿은 코드·문서·모형 사실, (iii) 실행·관측·요약 가정(관측 기반 판정이면 A-OBS와 L-OBS, spec §6.1, §6.2), (iv) 증명되지 않은 의무와 지원하지 않는 경로. certificate가 없으면 (i)은 비어 있을 수 있고 나머지는 언제나 있다. ledger는 요약 뷰, 상태, 세 판단, 근거 등급, 모형 식별자(spec §1.8), 관측 적합성 기록([§7.2](#72-x-macro-schema)), 예측이면 값·경로 보존 검사(spec §4.9)에 이어진다. 어떤 결과도 무조건적인 탐지로 보이지 않는다.
@@ -344,6 +346,18 @@ flowchart TD
 - **ptrace / debug register**: ptrace는 디버거가 쓰는 OS 기능이고, debug register(DR0–DR3)는 x86 CPU의 하드웨어 breakpoint 레지스터로 thread당 4개다. `kz hold`는 코드를 고치지 않고 debug register breakpoint로 한 thread만 멈춘다(spec §4.13).
 - **`--wrap`**: 링커 옵션으로 함수 호출을 감싸는 함수(`__wrap_*`)로 돌린다. 앱을 다시 link해야 하므로 F1이다(spec §5.1).
 - **A-COMM**: 예측한 witness마다 cone(후보에 관련된 actor와 객체의 닫힌 집합, spec §4.10) 안의 관측되지 않은 공유 읽기가 관측되었거나, 상수이거나, 유지된 outcome으로 덮이는지 보는 검사다. 실패하면 witness는 `predicted-modelled`(model 기반)로 표시된다(spec §4.9, §13).
+
+### 5.4 계측 계열의 구성요소 (개정 1.4)
+
+spec §2.2 "The instrumented family's components", §5.12; ADR-059; [PD26] §2 항목 2–3. 설계 결정 [D]이고, spec은 구현 상태를 보고하지 않는다. 시제품 실행은 모두 pilot·개발 실행이다.
+
+| 부분 | 하는 일 | 후보·규칙 |
+|---|---|---|
+| 컴파일러 연결부 | 파생 빌드의 선택한 위치에 런타임 호출을 넣는다 | GCC GIMPLE plugin(첫 후보), Clang AST 소스 변환 → gcc 빌드, 얇은 LLVM pass. LLVM Instrumentor는 로컬 LLVM(`1053047a`)에 `Instrumentor.h`가 없어 상류 소스 검토로만 다룬다([PD26] §1). IR §15.1의 일곱 질문으로 주 구현 하나를 고르고, 세 완성품을 만들지 않는다 |
+| 공통 C 런타임 | 대상 안에서 사건을 기록하고 gate를 평가한다. 관측 API와 제어 API를 나눈다 | 런타임 자신은 계측하지 않는다. 필수 조건은 [PD26] §4(spec §5.12) |
+| OS 연결부 | task·시계·buffer·대기 | OSAL로 되는 부분과 OS/BSP별 부분을 나눈다 |
+
+대상에는 런타임과 연결부만 두고, 재생·예측·보고는 호스트에서 위 구성요소로 한다. 위 표의 `gate`(F1 `--wrap`)는 다른 갈래이고 여전히 후순위다(D3).
 
 ---
 
@@ -534,7 +548,7 @@ readiness K-ID.send-with-appid {
 
 ### 7.5 Python과 JSON을 쓰지 않는 이유
 
-spec은 도구 안에서 Python과 JSON을 쓰지 않는다고 정한다(spec §2.6; ADR-001). 모든 구성요소는 C++17이고, BPF 프로그램과 gate 객체만 C다. JSON은 CMake가 만드는 입력 `compile_commands.json`으로만 등장한다. spec이 드는 근거는 다음과 같다.
+spec은 도구 안에서 Python과 JSON을 쓰지 않는다고 정한다(spec §2.6; ADR-001). 모든 구성요소는 C++17이고, BPF 프로그램과 gate 객체만 C다. JSON은 CMake가 만드는 입력 `compile_commands.json`으로만 등장한다. **개정 1.4**([PD26] §5; ADR-001 개정): 도구 핵심은 C/C++를 유지한다. LLVM Instrumentor처럼 JSON 설정을 쓰는 외부 도구를 계측 계열에 채택하면, 그 설정은 그 도구가 파생 변형을 빌드하는 빌드 설정 경계에만 두고 분석기의 입력 형식으로 들이지 않는다. spec이 드는 근거는 다음과 같다.
 
 | 근거 | 내용 | 출처 |
 |---|---|---|
@@ -545,6 +559,18 @@ spec은 도구 안에서 Python과 JSON을 쓰지 않는다고 정한다(spec §
 | byte 단위 재현 | 모든 분석은 저장된 산출물의 순수 함수이므로, 저장된 trace에서 다시 돌리면 판정 저장소가 byte 단위로 같아야 한다 | spec §4.14 |
 
 사람이 읽을 때는 `kz dump`가 정규화된 한 줄 한 record 텍스트를 만들고, `kz report`가 Markdown/CSV view를 만든다. 저장소 자체는 binary이고 typed로 남는다(spec §2.2).
+
+### 7.6 중립 사건과 backend 원시 근거 (개정 1.4)
+
+spec §2.3 "Formats in revision 1.4", §5.5–§5.7; [PD26] §2 항목 5; IR §9. 현재 `.kzt`·`.kzh`의 byte layout을 두 실행 계열의 공통 경계로 그대로 고정하지 않는다. 사건·정체성·손실·제어 의미를 먼저 정하고, 이전 container를 계속 읽는 버전 변경으로 형식을 바꾼다.
+
+- **지금 F0에 묶인 것 [F]**(`kz_raw.h`, `78ff6ee`): `tid`는 kernel thread ID, `tseq`는 병합한 기록에서 decoder가 thread마다 부여한다. `SITES`에는 file offset·inode·device, `SITE_SLOTS`·`SLOT_FETCHES`에는 register·stack·offset 포획이 있다. 손실 출처(`ring-reserve-fail`, `perf-record-lost`, `tseq-gap`, `perf-throttle`)도 Linux 관측기의 것이다. `.kzh`(`kzp-hold 1`)는 사건·조건·gate·해제만 적고 register·offset·DR 슬롯은 그 아래에서 해석된다. 그래서 할 일은 "계획의 논리 조건과 F0의 물리 해석을 분리"하는 것이다([PD26] §1).
+- **중립 사건의 정보**(배치가 아니라 의미 목록): 실행·cFS 인스턴스 ID, 실행 actor ID와 생성 세대, 생성자·소유 앱·전달 AppID(따로 둔다), 논리 site ID와 backend binding ID, 연산·phase·호출 인스턴스, 자원 종류·키·생명주기, 인자·실제 사용 값·반환값과 유효성(미관측은 0이 아니다), actor 안 사건 순서, 시간과 시계 조건(근거로만, HB edge가 아니다), 순서 근거의 종류(원 프로그램 동기화, 값 연결, 조건부 추론, 제어 개입), 손실·미계측·관측 구간, compiler·target·runtime·profile 버전.
+- **backend 원시 근거**(perf record, register fetch 식, DR 배치, 런타임 buffer record)는 중립 사건이 참조하는 확장 정보로 남긴다. 공통 해석은 이것에 기대지 않지만 지우지 않는다.
+- **초기 정체성**: 정체성이 정해지기 전의 사건은 임시 actor로 두고 뒤의 근거로 연결한다. 모르는 정체성을 "앱 없음"이나 AppID 0으로 채우지 않는다.
+- **손실 종류**: buffer overflow, 부분 기록, 초기화 전 누락, 계측 제외 코드, 미적재 모듈을 F0 출처와 구별한다.
+- **byte order**: 저장 byte order를 대상 메모리 배치와 분리해 명시적으로 직렬화하거나 호스트에서 변환한다. container는 little-endian으로 남고, 지금 header는 big-endian host를 compile 때 거부한다(`kz_schema.h` L16, L48–L49) [F]. 기존 little-endian 파일을 읽는 경로는 유지한다.
+- 제어 실현 기록은 계획과 따로 둔다(spec §4.13). 버전 번호·필드 위치·enum 값은 schema 변경 때 정한다(`kairos/docs/schema.md` §7).
 
 ---
 
@@ -840,12 +866,13 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 
 | 결정 | 내용 | 근거 | 기록 |
 |---|---|---|---|
-| Clang/LLVM은 분석 전용 | Clang은 macro 출처, 상수 평가, 소스 위치, S3a가 필요로 하는 명시적 field 정체를 준다. link unit 전체의 IR은 archive 의미를 지킨 call graph를 준다. DWARF와 MC는 모든 사실을 실제로 실행되는 gcc 바이너리에 묶는다. **Clang은 실행되는 바이너리를 빌드하지 않는다.** Clang parse에 쓰는 진단 전용 flag 조정 두 개(`-Wno-unknown-warning-option`, `-Wno-error`)는 분석 전용 변환으로 B에 기록한다 | spec §2.6, §4.1 step 2 | [D] ADR-023 |
-| 실행되는 것은 gcc 바이너리 | gcc 13.3.0, `-O0 -g`([R06 K1]). 다시 compile한 객체는 build tree의 객체와 byte 단위로 같다([R07 §3.5]). 다른 컴파일러로 빌드한 실행(F3)은 하지 않는다 | spec §2.6, §5.1 | [F] |
-| MLIR은 쓰지 않는다 | MLIR 단계(S8)와 G-MLIR gate는 이 로드맵에서 제외되었다(PI 결정 D6, 2026-10-15). 구성요소는 평범한 C++17과 C이고, MLIR dialect, ODS, TableGen을 계획하지 않는다. 그 단계를 필수나 선택 단계로 되살리지 않는다. S8 번호는 다시 쓰지 않는다 | spec §2.6, §9.3 | [D] ADR-051(ADR-018을 대체) |
+| Clang/LLVM은 분석 전용 | Clang은 macro 출처, 상수 평가, 소스 위치, S3a가 필요로 하는 명시적 field 정체를 준다. link unit 전체의 IR은 archive 의미를 지킨 call graph를 준다. DWARF와 MC는 모든 사실을 실제로 실행되는 gcc 바이너리에 묶는다. **Clang은 실행되는 바이너리를 빌드하지 않는다.** *개정 1.4(ADR-023 개정):* Clang은 **기준** 바이너리를 빌드하지 않는다. 계측 변형은 Clang 소스 변환 결과를 gcc로 빌드하거나(spec §4.1), 자기 비계측 기준(L-A, spec §8.6)을 둔 별도 구성으로 Clang/LLVM이 빌드할 수 있다. Clang parse에 쓰는 진단 전용 flag 조정 두 개(`-Wno-unknown-warning-option`, `-Wno-error`)는 분석 전용 변환으로 B에 기록한다 | spec §2.6, §4.1 step 2 | [D] ADR-023 |
+| 실행되는 것은 gcc 바이너리 | gcc 13.3.0, `-O0 -g`([R06 K1]). 다시 compile한 객체는 build tree의 객체와 byte 단위로 같다([R07 §3.5]). 다른 컴파일러로 빌드한 실행(F3)은 하지 않는다 *(개정 1.4에서 대체: 기준 실험은 그대로 gcc다. GCC plugin 빌드도 gcc 빌드다. Clang/LLVM 빌드는 자기 비계측 기준을 둔 별도 구성으로만 허용하고 기준 빌드의 결과와 합치지 않는다. 계측 빌드는 파생 구성이고, 기준 빌드와의 차이를 모두 deviation으로 적는다)* | spec §2.6, §5.1 | [F] |
+| MLIR은 쓰지 않는다 | MLIR 단계(S8)와 G-MLIR gate는 이 로드맵에서 제외되었다(PI 결정 D6, 2026-10-15). 구성요소는 평범한 C++17과 C이고, MLIR dialect, ODS, TableGen을 계획하지 않는다. 그 단계를 필수나 선택 단계로 되살리지 않는다. S8 번호는 다시 쓰지 않는다. *개정 1.4에서 일부 대체(D6 재검토, ADR-051 개정):* 단계와 gate는 여전히 없다. MLIR은 네 가지 구체적 개선(수작업 `.kzm` 일부를 실제 코드에서 재현 가능하게 추출, 자원 효과·task 생성·호출 문맥의 중복 처리 감소, 기존 분석이 미확정으로 남긴 실제 경로를 근거와 함께 좁힘, source→model→hook 대응 누락 검출) 가운데 하나가 보일 때만 조건부 분석 용도로 들인다. 내부 자료구조를 MLIR 연산으로 다시 쓴 것만으로는 기여가 아니고, 관측·제어·계측 계열의 선행 조건도 아니다 | spec §2.6, §9.3 | [D] ADR-051(ADR-018을 대체) |
 | SMT solver는 첫 구현의 조건이 아니다 | SMT solver(정수 같은 이론이 들어간 논리식이 만족 가능한지 푸는 프로그램, 예: Z3)를 쓰지 않는다. `kz predict`는 명시적 상태 탐색으로 lock 순서를 뒤집는다. 명세의 예측·탐색 질문을 현재 구현으로 다룰 수 없는 구체적 이유가 확인될 때만 도입을 검토하고, 그때 SMT-LIB2 emitter는 교차 검사용이다(P-Z3, 2026-10-15). **rev 1.3**(spec §4.9; C-28): 필요성은 같은 작은 모형에서 보여야 한다(상태 폭발, 명시적 탐색이 표현하지 못하는 제약, 탐색 비용). 들인다면 encoding은 적어도 사건 위치와 순서 변수, 유한 상태·수명·버전별 값 영역(C 정수 폭이 중요하면 bit-vector), 값 출처에 묶인 읽기·분기·결과, lock 소유·재귀·해제 대응, 지원하는 의미론 안의 queue·counter·timeout을 덮고, solver의 version·build·설정·encoding revision·입력 hash를 결과의 근거에 넣는다. SAT 모형은 재생해 조건을 다시 평가하고, unknown과 한도 도달은 `INCONCLUSIVE`다. solver의 사용은 기여로 주장하지 않는다 | spec §2.6, §4.9 | [D] ADR-016; PI 결정 P-Z3 |
 | eBPF userland | perf-PMU uprobe와 attach cookie, 자체 raw `bpf()` loader, 손으로 쓴 helper prototype, glibc `<elf.h>`로 BPF ELF parse. libbpf는 기존 환경에서 먼저 진행하는 동안 쓰지 않는다. 로더가 연구의 별도 대형 과제가 되지 않게 하고, 필요한 기능이 모자란 것이 확인되면 유지되는 공개 라이브러리를 검토하며 환경 변경을 기록한다(P-LIBBPF, 2026-10-15). perf-sample backend가 설치 없는 초기(bring-up) 경로다. tracefs dynamic event는 선택 사항이고(P-TRACEFS는 열려 있다), 쓰게 되면 spec §5.4의 규칙(전용 instance, 명시적 CPU 간 clock, 종료 시 event 삭제, host 상태 변경 기록)을 따른다 | spec §2.6, §5.3, §5.4 | [D] ADR-013, ADR-036; PI 결정 P-LIBBPF, P-TRACEFS |
-| 도구 안에 Python·JSON 없음 | 모든 구성요소는 C/C++다. 기존 harness `env/run_cfs.sh`가 계속 실행을 맡고, Kairos는 root 쪽 observer hook 하나를 더한다 | spec §2.6; [R07 §9 항목 1] | [D] ADR-001; PI 결정 D1 |
+| 도구 안에 Python·JSON 없음 | 모든 구성요소는 C/C++다. 기존 harness `env/run_cfs.sh`가 계속 실행을 맡고, Kairos는 root 쪽 observer hook 하나를 더한다. *개정 1.4:* 외부 도구의 JSON 설정은 빌드 설정 경계에만 둔다([§7.5](#75-python과-json을-쓰지-않는-이유)) | spec §2.6; [R07 §9 항목 1] | [D] ADR-001; PI 결정 D1 |
+| 계측 실행 계열 (개정 1.4) | 컴파일러 연결부·공통 C 런타임·OS 연결부는 C/C++(런타임과 연결부는 대상용 C)이고 런타임은 계측하지 않는다. 계측 빌드는 같은 소스·설정·flag에 계측만 다른 파생 구성이다 | spec §2.6, §5.1, §5.12 | [D] ADR-059; [PD26] §2, §4 |
 | 설치 없는 핵심 | thin MVC(S0+S1+S2+S3a)와 S4–S6에는 아무것도 설치하지 않는다. 고정된 LLVM 23 build(Clang LibTooling, IR, DWARF, MC), system clang-18(BPF backend), gcc 13.3, kernel 기능이 이미 있다([R07 §2]) | spec §2.1 원칙 7 | [PI_DECISIONS.md](spec/PI_DECISIONS.md) "Tool installs" |
 
 **ADR 번호.** 위 표는 spec §11에서 내용이 맞는 ADR 번호를 적었다. spec §2.6 본문이 eBPF userland 항목에서 가리키는 ADR-038은 §11의 내용(triage)과 맞지 않는다. 대조표는 [10_decisions_adr.md §1.12](10_decisions_adr.md#112-spec-안의-adr-번호-불일치)에 있다.

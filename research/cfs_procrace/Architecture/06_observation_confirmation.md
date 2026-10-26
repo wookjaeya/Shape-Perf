@@ -1,7 +1,7 @@
 # 06 관측과 확인: 수정하지 않은 gcc 바이너리에서 기록하고, witness를 실제로 일으키는 법
 
 이 문서는 Kairos가 실제 cFS 프로세스에서 사건을 기록하는 방법(관측, `kz observe`)과, 분석이 찾은 실행 예(witness)를 실제 바이너리에서 다시 일으키는 방법(확인, `kz hold`·`kz gate`)을 설명한다.
-어떤 메커니즘을 왜 골랐는지, 무엇이 측정되었고 무엇이 아직 측정 전인지, 관측 자체가 결과를 흐리지 않게 하는 규칙이 무엇인지를 spec을 읽지 않은 연구자가 15–25분 안에 파악하는 것이 목적이다. spec에 없는 설계 요소·수치·인용은 더하지 않는다. 기준은 spec 개정 1.3이다. 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md); spec §0.9–§0.11, ADR-045–ADR-052)을, 개정 1.3은 2026-10-22의 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md); spec §0.12, ADR-053–ADR-058; 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md))을 반영했다. 바뀐 곳은 §0.4에 모았다.
+어떤 메커니즘을 왜 골랐는지, 무엇이 측정되었고 무엇이 아직 측정 전인지, 관측 자체가 결과를 흐리지 않게 하는 규칙이 무엇인지를 spec을 읽지 않은 연구자가 15–25분 안에 파악하는 것이 목적이다. spec에 없는 설계 요소·수치·인용은 더하지 않는다. 기준은 spec 개정 1.3이고, 개정 1.4(2026-10-26: 실행 계열 둘과 공통 제어 의미)의 변경은 §0.4 표와 §2.4, §12.13에 짧게 옮겼다. 개정 1.2는 2026-10-15의 PI 결정(결정문 [spec/PI_DECISIONS_RESOLVED_20261015.md](spec/PI_DECISIONS_RESOLVED_20261015.md); spec §0.9–§0.11, ADR-045–ADR-052)을, 개정 1.3은 2026-10-22의 PI 결정 D1–D5(결정문 [spec/PI_DECISIONS_RESOLVED_20261022.md](spec/PI_DECISIONS_RESOLVED_20261022.md); spec §0.12, ADR-053–ADR-058; 변경표 [../plan/REV13_CHANGE_TABLE.md](../plan/REV13_CHANGE_TABLE.md))을 반영했다. 바뀐 곳은 §0.4에 모았다.
 
 상태: 설계 문서 — 구현·측정 전. 규범 원문: [spec/SPEC_FINAL.md](spec/SPEC_FINAL.md)
 
@@ -104,6 +104,11 @@
 | 1.3 | probe plan의 손 보강 규칙(여섯 단계 점검)과 OB-04 | §0.2, §3.8 | §4.7 [C-24] |
 | 1.3 | hold의 재사용 조건과 확인 규칙 CF-01–CF-04 | §12.12 | §4.13 [C-31] |
 | 1.3 | 2026-10-22 결정 D1: 관측 판정 + 한정 예측 + 실행 확인이 필수 경로이고, certificate·explorer·progress·loop는 선택 경로다 | §0.2 | §0.12, ADR-053 |
+| 1.4 | 2026-10-26 결정([spec/PI_DECISIONS_RESOLVED_20261026.md](spec/PI_DECISIONS_RESOLVED_20261026.md), 이하 [PD26]) §2: 분석기 하나에 실행 계열 둘. F0은 재계측 빌드 없이 기준 빌드를 다루는 경로로 유지하고, 계측 계열(컴파일러 연결부 + 공통 C 런타임 + OS별 연결부)을 허용한다. "재계측 없이 기준 바이너리에서 관측"은 F0만의 주장이다 | §2.1, §2.2, §2.3, §2.4, §14 | §0.13, §5.1, §5.12, §6.5, ADR-013, ADR-059 |
+| 1.4 | 계측 빌드는 파생 구성이다(같은 소스·설정·flag, 계측만 다름, 차이는 모두 deviation). GCC 기준 실험은 그대로이고, Clang/LLVM 빌드는 자기 비계측 기준 L-A를 둔 별도 구성으로만 쓴다 | §2.1, §2.2 | §4.1, §5.1, ADR-023 |
+| 1.4 | 중립 사건과 backend 원시 근거, 초기 정체성(임시 actor), 손실 종류, 명시적 byte order. 런타임은 프로세스 안에서 조회하지 않고 다시 읽은 값을 기록하지 않는다 | §5, §6, §7.1, §9.1 | §2.3, §5.5–§5.7, §5.9, §5.12 |
+| 1.4 | `kzp-hold 1`의 gate·해제 의미를 공통 의미로 두고 ptrace·debug register는 F0의 구현으로 둔다. 협력적 런타임 gate, 보류 가능 문맥, 제어 실현 기록, P11–P13(2026-10-26 결정) | §12.2, §12.5, §12.7, §12.13 | §4.13, ADR-020 |
+| 1.4 | 관측 영향 원칙을 컴파일러 차이·계측 코드·기록·런타임 자원 소비로 넓힌 실험군 G-A … L-I-H(기존 A–W 이름은 그대로) | §10.6 | §8.6, ADR-049 |
 
 ---
 
@@ -213,8 +218,10 @@ flowchart TD
 |---|---|---|
 | **F0** | 기준 바이너리를 같은 cFS 사용자가 같은 명령으로 실행하고, 별도의 root 프로세스가 그 프로세스에 hook을 건다. "시간만 바뀐다"고 하지 않는다. 관측기의 trap, CPU 사용, scheduling, hold는 점검할 영향이다(PI 결정 D1; spec §5.1, §8.6) | 본 관측과 기본 확인(`kz hold`) |
 | **F1** | 같은 소스와 컴파일러. link 옵션이나 code generation 옵션이 바뀐다 | `kz gate`, F1 arm을 나중에 더할 때만(PI 결정 D3: 나중; deviation) |
-| **F2** | 같은 컴파일러. 계측 지점의 소스를 고쳐 쓴다 | 계획 없음 |
-| **F3** | 다른 컴파일러(clang)로 실행 바이너리를 만든다 | 하지 않음 |
+| **F2** | 같은 컴파일러. 계측 지점의 소스를 고쳐 쓴다 | 계획 없음 *(개정 1.4에서 대체: Clang AST 소스 변환 → gcc 빌드가 계측 계열의 후보 연결부다, §2.4)* |
+| **F3** | 다른 컴파일러(clang)로 실행 바이너리를 만든다 | 하지 않음 *(개정 1.4에서 대체: 자기 비계측 Clang 기준 L-A를 둔 별도 구성으로만 허용하고, 기준 빌드가 되지 않는다, §2.4)* |
+
+*개정 1.4* [I]: GCC plugin 계측 빌드는 같은 소스·컴파일러에서 code generation이 바뀌므로 F1, Clang 소스 변환 후 gcc 빌드는 F2, Clang/LLVM 빌드는 F3에 든다(spec §5.1).
 
 ### 2.2 메커니즘별 역할과 비용
 
@@ -229,8 +236,9 @@ flowchart TD
 | ptrace + debug register 실행 breakpoint | F0 | 확인 hold(`kz hold`) | #DB trap ≈34 µs [M]; gdb breakpoint ≈203 µs [M]; 전용 holder는 **측정 전** | Yama(ptrace 제한 모듈) 없음. root가 uid 1000 프로세스에 붙을 수 있다 |
 | sched/syscall tracepoint | F0 | clone 교차 확인; §8.3 분석이 필요로 하는 곳에서, 밝힌 조건 아래의 system call 관측(`baselines/availability.md`의 결정 A10은 열려 있다) | 측정 전 | 이 kernel에 있다 |
 | `ld --wrap` gate | F1 + deviation | PCT와 여러 지점 스케줄, **F1 arm을 나중에 더할 때만(PI 결정 D3: 나중)**; perturbation 실험군 W | handoff 1.1 µs(같은 CPU) / 10.5 µs(다른 CPU) [M] | 앱을 다시 link한다. 같은 TU 안의 호출을 놓친다 |
-| 소스 probe | F2 | 계획 없음 | — | API 호출 지점의 12.4%가 macro 전개 안에 있다([R07 §4.6]) |
-| Clang으로 빌드한 실행 | F3 | 하지 않음 | — | — |
+| GCC GIMPLE plugin이 공통 런타임을 부름 (개정 1.4) | F1 + deviation | 계측 계열의 첫 후보 연결부(§2.4) | 측정 전 | GCC 판, plugin 빌드, pass 위치, 최적화·LTO 설정을 기록 |
+| 소스 probe | F2 | 계획 없음 *(개정 1.4에서 대체: Clang 소스 변환 → gcc 빌드가 후보 연결부)* | — | API 호출 지점의 12.4%가 macro 전개 안에 있다([R07 §4.6]) |
+| Clang으로 빌드한 실행 | F3 | 하지 않음 *(개정 1.4에서 대체: 자기 비계측 기준 L-A를 둔 별도 구성으로만)* | — | — |
 | `LD_PRELOAD` / `LD_AUDIT` | — | **기각**: PIE 실행 파일 안에서 정의된 symbol을 가로챌 수 없고, `run_cfs.sh:154–158`이 거부한다 | — | [R07 §4.3] |
 | gdb | F0 | **참고 관측만**(R2 기록. ASLR을 끈 채 실행했다, [R2g]) | OPERATIONAL까지 +0.6 ~ +1.1 s [M]([R2g §1]) | — |
 
@@ -240,7 +248,7 @@ flowchart TD
 
 ### 2.3 왜 이렇게 골랐나
 
-**F0이 가장 높은 충실도다.** perf-PMU uprobe, eBPF, watchpoint, ptrace는 바이너리, build, 환경, 실행 사용자를 바꾸지 않는다. 그래도 관측이 실행에 주는 영향(trap에 의한 timing, CPU 경쟁, scheduling)은 남고, 그것은 "시간만 바뀐다"고 가정하지 않고 점검한다(D1; §9.2). 이것이 이 머신에서 쓸 수 있는 가장 충실한 선택이다([R07 §4.7] 추론; spec §2.1 원칙 4, ADR-013).
+**F0이 가장 높은 충실도다.** perf-PMU uprobe, eBPF, watchpoint, ptrace는 바이너리, build, 환경, 실행 사용자를 바꾸지 않는다. 그래도 관측이 실행에 주는 영향(trap에 의한 timing, CPU 경쟁, scheduling)은 남고, 그것은 "시간만 바뀐다"고 가정하지 않고 점검한다(D1; §9.2). 이것이 이 머신에서 쓸 수 있는 가장 충실한 선택이다([R07 §4.7] 추론; spec §2.1 원칙 4, ADR-013). *개정 1.4:* "가장 충실"은 [R07 §7] 등급 안의 말이다. F0은 같은 기준 빌드 산출물을 쓰는 경로이고, 강한 비교점이지만 무섭동 정답은 아니다(spec §6.5). 두 관측기가 같은 잘못된 의미 대응을 공유하면 결과가 같아도 둘 다 틀릴 수 있다.
 
 **비용 절벽이 있다.** 이 KVM/Firecracker guest에서는 debug exception(#DB) 경로가 비싸고, int3와 명령 에뮬레이션은 싸다([R07 §4.7] 추론). 같은 함수 entry라도 어느 명령에 거느냐에 따라 0.57 µs와 31.7 µs로 갈린다 [M]. 그래서 probe 위치를 명령 단위로 고르고(§3), 모든 계획 지점의 명령 등급을 검사한다(§3.5).
 
@@ -249,6 +257,26 @@ flowchart TD
 **gdb는 기준 기록일 뿐이다.** R2의 per-use 기록은 gdb로 만들었다([R2g]). Kairos는 자기 recorder로 그 집합을 다시 관측해야 하고, 그것이 S1의 출구 조건이다(§11.2).
 
 **관측기는 root다.** observer는 README 방식의 `ubuntu` 프로세스 옆에서 root로 돈다. uprobe PMU에는 `CAP_PERFMON`이나 `CAP_SYS_ADMIN`이 필요하다는 것이 [R07]의 추론이다(PI_DECISIONS D1, [R07] L355). 이를 위해 `env/run_cfs.sh`에 root 쪽 hook을 새로 두어야 하고, 이것이 PI 결정 D1이다(2026-10-15 승인, 설명 정정; spec §5.1; [R07 §9 항목 1]). 자세한 것은 §2.2 끝과 §13.
+
+### 2.4 두 실행 계열과 주장 범위 (개정 1.4)
+
+[D] (spec §5.12, §6.5; ADR-059; [PD26] §2, §4; IR §8, §12, §15.1). spec은 계측 계열을 설계로만 정하고 구현 상태를 보고하지 않는다. 시제품 실행은 pilot·개발 실행이다.
+
+| 흐름 | 공통 | F0 | 계측 계열 |
+|---|---|---|---|
+| 입력 | 소스·구성·프로필·버전·실행 계획 | 기존 GCC 기준 빌드 | 같은 기준 소스·설정에서 만든 계측 변형 |
+| 관측점 | 의미 있는 site, phase, 인자·필드, 근거 | ELF/DWARF·파일 offset·register binding | 소스/GIMPLE/LLVM 위치와 hook binding |
+| 관측 | 사건 저장 규약(spec §2.3) | Linux uprobe/perf | 대상 안의 C 런타임 |
+| 제어 | gate·해제·조건·순번의 의미(§12.13) | ptrace·하드웨어 중단점 | 허용 문맥의 협력적 gate |
+| OS별 기능 | capability 표시 | Linux 구현 | OSAL 공통 기능 + 필요한 OS/BSP 구현 |
+| 분석 | 같은 프로필·재생·예측·보고 | 공통 | 공통 |
+
+- **컴파일러 연결부 고르기**: GCC plugin(첫 후보), Clang 소스 변환 → gcc 빌드, 얇은 LLVM pass를 같은 C1·R2 관측점에서 일곱 질문(빌드 가능, 부작용 없는 값·반환·공개 지점 전달, 위치 대응 설명, 초기화 전 관측, 미계측 경로 확인, 같은 런타임 연결, 추가 작업량)의 증거로 비교한다. 가중 점수를 쓰지 않고, 세 완성품을 만들지 않는다. 어느 쪽을 골라도 F0 GCC 기준 실행은 비교 경로로 남는다.
+- **논리 site와 binding**: source 줄 하나를 site ID로 쓰지 않는다. 번역 단위·함수·호출 문맥, 연산의 전·후·효과 지점, 관측 값의 근거, backend가 고른 위치, 최적화로 사라지거나 복제·인라인된 경우, 지원하지 못한 지점과 이유를 적는다. 두 backend의 위치가 같은 효과를 보는지 확인되기 전에는 "동일 의미 확인 전"이다.
+- **런타임 필수 조건**([PD26] §4): 초기화 전 관측(정적 메모리, 임시 actor, 조회 없음), 제어 자원 계상(OSAL 객체를 쓰면 계상, OSAL 내부·초기화 전에는 private primitive나 비차단 관측만), 원 명령이 실제로 쓴 값 기록(공유 변수 재읽기, 검증 전 포인터의 `strlen`, store의 atomic 변환 금지, 값 교체 기능 끔), 런타임 순번·lock을 원 프로그램 HB에 넣지 않음, 보류 문맥 명시(§12.13), 손실 종류 구별(§6).
+- **주장 범위**(spec §6.5): "재계측 없이 기준 실행 파일을 관측"은 F0과 실제로 쓴 기준 빌드에 한정한다. 계측 빌드에서의 확인은 경로·컴파일러·런타임·제어 계획을 적는다. "원 실행에 영향 없음", "계측 빌드에서 확인했으니 원 빌드에서도 자연 발생", "어떤 OS에서도 동작"은 주장하지 않는다(spec §6.4 항목 63–66).
+- **계측 때문에 사라진 순서도 결과다**: F0에서 보인 순서가 계측 경로에서 안 보이면 (1) 사건을 놓쳤는지, (2) 관측점의 의미가 달라졌는지, (3) 컴파일러가 다른 코드를 만들었는지, (4) 런타임이 새 동기화·대기를 만들었는지, (5) 실행 시간 변화로 다른 스케줄이 나왔는지, (6) 그 빌드·OS에서 경로 자체가 실행되지 않는지를 먼저 가른다. "계측 backend가 더 안전해서 해결됐다"나 "기록이 없으니 버그가 없었다"로 결론내지 않는다.
+- **진행 순서**([PD26] §2 항목 7): C1·R2 관측 대조 → 대표 confirm2 제어 대조 → 다른 사례·두 번째 OS → C3 조건 검증. 두 번째 OS 이식 검증과 C3 역사적 재현은 따로 보고한다.
 
 ---
 
@@ -468,6 +496,8 @@ RUNMETA의 B hash, plan hash, cold/warm 층이 **pool key**다. σ_E 빈도는 p
 4. 그 구간에 근거가 기대는 판정은 모두 `unknown(loss)`가 된다(spec §4.8 step 1).
 5. buffer 크기는 calibration 실행의 최고 수위(high-water mark)에서 정하고 기록한다([B §5.2]).
 
+**개정 1.4**(spec §5.6; [PD26] §4): 계측 계열은 buffer overflow, 부분 기록, 초기화 전 누락, 계측 제외 코드, 미적재 모듈을 구별하고, 손실 기록에서 F0의 출처(`ring-reserve-fail`, `perf-record-lost`, `tseq-gap`, `perf-throttle`)와 섞지 않는다. 가득 찬 buffer 때문에 런타임이 앱을 기다리게 하면 그것은 손실이 아니라 제어 효과로 기록한다.
+
 이것은 가정 **A6**(계획한 지점의 관측 완전성, 손실은 계산함)의 실행 방식이다(spec §6.1).
 
 **왜 중요한가: SB 구독 전 송신의 예** [I, 규칙 적용]. SB는 route_lookup 시점에 route가 있는지만 본다. 구독이 늦으면 transmit은 성공 코드를 돌려주므로 송신자는 모르게 message가 사라진다. SB는 그것을 counter와 event로 기록한다(spec §3.9 "Subscribe-before-send"). 이런 준비 상태 명세를 판정하려면 subscribe와 route_lookup 사이의 사건이 필요하다. 그 구간에 손실이 있으면 "subscribe가 없었다"고 읽지 않고 `unknown(loss)`로 둔다. 손실을 부재로 읽으면 일어나지 않았을 수도 있는 순서를 근거로 판정하게 된다.
@@ -484,6 +514,8 @@ RUNMETA의 B hash, plan hash, cold/warm 층이 **pool key**다. σ_E 빈도는 p
 
 - 계측이 OSAL 이름 조회를 부르면, 찾으려는 F1 lock 누수(RESERVED 상태의 이름 조회가 type lock을 쥔 채 돌아오는 경로)를 스스로 일으킬 수 있다([R01 §6.3]; spec §3.2).
 - 계측이 일찍 `GetAppID`를 부르면, 그 호출 자체가 App-record 구간(task는 있으나 App record가 아직 최종이 아닌 구간)에 걸린다([v0.1] §8.4; spec §3.3).
+
+**개정 1.4**(spec §5.7; [PD26] §4): 이 규칙은 프로세스 안에서 도는 계측 런타임에도 그대로다. 첫 기록은 정적 메모리와 최소 primitive로 하고, 정체성이 정해지기 전에는 임시 actor를 두었다가 뒤의 근거로 잇는다. root/bootstrap 문맥과 앱 task를 구별하고, OSAL이 필요한 전송·제어 기능은 OSAL 준비 뒤의 별도 시점에 켠다. `CFE_ES_GetAppID` 등으로 대상의 불완전한 표를 다시 쓰지 않고, 모르는 정체성을 "앱 없음"이나 AppID 0으로 채우지 않는다. C5·C3가 분석하는 등록·공개 절차가 끝나기 전부터 관측해야 하기 때문이다.
 
 ### 7.2 사건마다 identity 필드 넷
 
@@ -571,7 +603,7 @@ protocol key로 부족한 곳에서는 timestamp 창을 **맞춤의 근거**로 
 
 ### 9.1 eBPF는 프로세스 안의 위험을 구조적으로 없앤다
 
-eBPF는 kernel 문맥에서 돈다. OSAL API를 부르지 않고, 사용자 lock을 잡지 않고, 출력하지 않고, record 중간에 취소될 수 없다. 그래서 프로세스 안 계측이 가진 위험([R01 §6.3])이 구조적으로 사라진다(spec §5.9).
+eBPF는 kernel 문맥에서 돈다. OSAL API를 부르지 않고, 사용자 lock을 잡지 않고, 출력하지 않고, record 중간에 취소될 수 없다. 그래서 프로세스 안 계측이 가진 위험([R01 §6.3])이 구조적으로 사라진다(spec §5.9). *개정 1.4:* 이것은 F0에만 해당한다. 계측 런타임은 대상 프로세스 안에서 돌므로 그 위험이 돌아오고, spec §5.12의 규칙(관측 hook은 막지 않고 lock을 잡지 않고 계측된 코드를 부르지 않음, OSAL 준비 전에는 private primitive, 런타임 자원 계상)으로 다룬다(§2.4).
 
 ### 9.2 남는 것은 관측기가 실행에 주는 영향: OSAL RESERVED 구간
 
@@ -649,7 +681,7 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 
 관측이 실행을 얼마나 바꾸는지는 실험군을 나누어 잰다(관측 영향 점검; PI 결정 D1, D11; spec §8.6). 실험군 A(수정 없는 바이너리, observer 없음, S1 때 쓰는 kernel에서 다시 측정), B(빈 BPF 프로그램을 단 uprobe), C′(최소 R2 plan), C(전체 plan), D(C + hold, hold plan별로 같은 plan hash의 C와 비교), W(F1 `--wrap` build, F1 arm을 더할 때만; D3는 미뤄졌다)가 각각 기준, trap 비용, 좁은 plan의 비용, 기록 비용, 제어 효과, code layout 효과를 가른다. 측정량은 계측 없이도 보이는 것(A를 B, C′, C와 비교)과 recorder만 보는 것(C′, C, D 비교)으로 나누고, cold와 warm 층은 합치지 않는다. σ_E 빈도는 `σ_E(plan P)`로 표시한다. 비교 항목은 record 손실, 사건 짝짓기 실패(반환 없는 요청, task 없는 사건), 부팅과 OPERATIONAL까지의 시간, 외부에서 보이는 기능 결과(console 줄, 정지 때 읽은 counter, 넘친 pipe)이고, 관측하지 않은 기준 실행에 대응물이 없는 내부 사건에는 "영향 없음"이라는 결론을 내지 않는다(spec §8.6).
 
-실험군 표, 측정량의 목록, 통제(교차 실행, cold/warm 분리)는 평가 계획 쪽 [07_evaluation.md §7](07_evaluation.md#7-오버헤드와-perturbation-실험-spec-86)에 한 곳으로 모았다.
+실험군 표, 측정량의 목록, 통제(교차 실행, cold/warm 분리)는 평가 계획 쪽 [07_evaluation.md §7](07_evaluation.md#7-오버헤드와-perturbation-실험-spec-86)에 한 곳으로 모았다. 개정 1.4가 더한 실행 계열 실험군 G-A, G-F0, G-F0-H, G-I0, G-I, G-I-H, L-A, L-I0/L-I, L-I-H(기존 A–W 이름은 그대로)도 같은 곳 §7.7에 있다.
 
 ---
 
@@ -716,7 +748,7 @@ site validator(§3.5)는 이 표로 지점의 비용을 찾는다.
 | 1 | A의 **program lock 집합이 비어 있다**. 관측된 lock 사건과 정적 lockset으로 확인한다(ES lock, SB lock, TBL lock, `CFE_ES_DeleteChildTask`의 lock과 delete 사이 구간 포함) | lock을 쥔 thread를 멈추면 그 lock을 기다리는 thread가 모두 멈춘다 |
 | 2 | timebase callback(`handler_mutex`를 쥠), binsem 내부 구간(내부 2 s `timedlock`, [R01 §6.3]), signal handler 안이 **아니고**, `OS_TaskPrepare` 등록 **전도 아니다** | 1 Hz chain, binsem의 내부 시간 제한, signal 처리를 멈추면 다른 결과가 섞인다 |
 | 3 | OSAL **RESERVED 구간 안이 아니다**. **후속 OSAL 결함 후보 실험**만 예외다(spec App. A.4 step 5; P-C1HOLD, 2026-10-15). 그 실험은 C1 검증의 일부가 아니고 다섯 사례에 세지 않는다 | RESERVED 구간의 정지는 다른 thread의 제한된 대기 시도를 소모해 F7이나 lock 누수 경로를 열 수 있다(§9.2). 그 경로를 일부러 여는 실험은 따로 표시한다 |
-| 4 | 공동 debug register 할당기(§3.5)에 A의 빈 slot이 있다 | gate는 debug register 하나를 쓴다 |
+| 4 | 공동 debug register 할당기(§3.5)에 A의 빈 slot이 있다 | gate는 debug register 하나를 쓴다. *개정 1.4:* F0에만 해당한다. 협력적 gate는 자기 backend의 capability 한계를 따른다(§12.13) |
 
 맞는 지점이 없으면 규칙을 대칭으로 적용한다. B를 그 사건을 가능하게 하는 사건 전에 멈춘다.
 
@@ -755,6 +787,11 @@ watchdog이 터지면 결과는 `inconclusive(await-timeout)`이다. hold가 만
 - controller가 witness 스케줄이나 PCT를 강제한다. PCT(probabilistic concurrency testing)는 무작위 우선순위로 스케줄을 고르는 방법이다. 버그의 깊이 d는 그것을 드러내는 데 필요한 최소 순서 제약 수다([R05 §2.1]). PCT는 실행마다 깊이 d의 버그를 적어도 `1/(n·k^(d−1))`의 확률로 찾는다([V-abs; mechanism P]). [R05 §2.1]에 따르면 n은 thread 수, k는 step 수다. Kairos는 n과 k를 실행마다 재고, gate 지점에 상대적으로 말한다. d는 1부터 PI가 정한 실행 예산 안에서 늘린다(deviation).
 - `--wrap`은 같은 TU 안의 호출 88곳을 놓친다([R07 §4.2]). 이것은 link 옵션 deviation이다.
 
+**협력적 gate**(계측 계열; 개정 1.4; spec §4.13 Mechanisms; ADR-020, ADR-059).
+
+- gate의 binding에 넣은 제어 hook이 런타임을 부르고, 런타임이 공통 의미(§12.13)를 평가해 OS 연결부의 대기 primitive로 task를 멈춘다. 허용 문맥에서만 멈춘다.
+- 비용은 측정 전이다. F1 `--wrap` 갈래가 아니다(D3 재검토: OS 이식성과 F0 제어 한계라는 구체적 이유로 더했고, PCT는 자동으로 더하지 않는다).
+
 ### 12.6 oracle
 
 `kz trace`가 확인 trace를 **같은 준비 상태 명세로** 다시 평가한다(spec §4.13 Oracles). 대상 사용은 그 LP에서 not-ready 상태와 예측한 결과를 보여야 하고, harm은 Allowed를 따른다.
@@ -779,6 +816,7 @@ deadlock과 lock 누수(K-LOCKBAL)의 oracle은 **wait-for 사실**이다. timeo
 | `realized` + naturalness `held-F0` / `gated-F1` / `timeout-exercised` | 순서와 결과가 일어났다. 구성한 스케줄이면 flag `derived`(원 사례 결과와 따로 둔다, [R06 S10]; [LED] X5) |
 | `refuted` | 순서는 일어났는데 결과가 좋았다. witness를 만든 모형이나 요약이 그 prefix에서 틀렸다. witness를 거두고 O6으로 보고하며, `exh` witness였으면 탐색한 bound가 `contested`가 된다(spec §4.12 item 5). rule은 정지하지 않는다. progress witness는 prefix가 실현된 뒤 witnessing actor가 진행할 때만 반박된다. prefix를 실현하지 못한 hold는 아무것도 반박하지 않는다 |
 | `inconclusive` | 결정하지 못했다(예: watchdog) |
+| (개정 1.4) 협력적 gate로 보류한 실행 | `held-F0`와 따로 표시하고 실행 계열·컴파일러 연결부·런타임 mode·plan hash를 함께 적는다. label 이름은 schema 변경 때 정한다(spec §1.10, §4.13) |
 
 hold나 gate로 얻은 realized witness는 σ_E class를 만들지 않는다. 그런 칸은 `σ_E(held)`다. σ_E의 `schedule-dependent`는 **같은 발생 ordinal**에서 자연 bad witness와 자연 good witness가 서로 다른 두 실행에 있어야 한다. 다른 ordinal의 자연 witness는 `ordinal-split(σ_E)`를 줄 뿐이고, 한 실행에서도 나올 수 있다(spec §1.10, §4.12 항목 4). spec은 확인에 대해 이만큼을 보장한다(G6): `realized` 판정은 선언한 제어 아래 B의 gcc 바이너리에서 재현되었고, readiness oracle(준비 상태 명세의 oracle)을 확인 trace에서 평가했으며, naturalness label과 perturbation 비율을 단다. realized 보고는 recorder의 oracle에 상대적으로 false alarm을 포함하지 않는다(spec §6.3 보장 G6).
 
@@ -895,6 +933,40 @@ spec App. A.2 step 5의 계획을 위 규칙에 대입한다. 실행한 적은 �
 | **CF-03** | 재현 실패나 시간 한도는 `NOT_CONFIRMED(reason)`이다(도달하지 못함, 제어 실패, 상태 불일치). 실현 불가능의 증명이 결코 아니다 |
 | **CF-04** | 제어가 새 timeout이나 입력 차이를 만들어야 나오는 결과는 후보의 위반과 따로 둔다. 코드 변경이 필요한 결과는 mutant나 재구성 실험이다. 모형은 같은 실행 조건을 갖추고 예측과 어긋나는 관측으로만 반박된다(§12.7의 `refuted` label) |
 
+### 12.13 공통 제어 의미와 협력적 gate (개정 1.4)
+
+[D] (spec §4.13 "Common gate and release semantics" 이하; ADR-020; [PD26] §2 항목 5, §3, §4; IR §9.4, §9.5, §11.5).
+
+**공통 의미.** 보류 계획의 의미는 2026-10-25에 구현한 `kzp-hold 1`이다([../kairos/docs/c1_hold_runs.md](../kairos/docs/c1_hold_runs.md) §8) [F]. 모든 backend가 이 의미를 그대로 구현하거나, 바꾸면 계획 형식 버전과 변환을 밝힌다.
+1. `occurrence first|each|<n>`: 점마다 **어느 thread의** 자격 hit(위치 도달 + 조건 충족)든 실행 시작부터 세어 n번째에만 작용한다. "task별 n번째"로 바꾸면 같은 계획이 아니다.
+2. 한 위치의 여러 점: gate를 먼저(계획 순서), 다음 해제를 평가한다.
+3. 보류된 hit의 해제는 재개 때 작용한다(`deferred`).
+4. `unless-released`: gate가 아무것도 잡지 않았을 때 해제가 오면 gate는 충족되어 이후 잡지 않는다.
+5. 해제 뒤에도 뒤의 관측·제어 지점은 계속 동작한다(풀린 thread는 무장된 채이고, 이미 작용한 gate는 다시 잡지 않는다).
+6. 조건은 관측 site와 그 slot·호출자(`name`, `caller-in`)로 적는다. register·offset·slot 번호는 계획에 없다.
+
+**F0 구현과 capability.** ptrace·debug register holder는 이 의미의 x86 Linux 구현이다. 주소 넷(DR0–DR3)은 F0의 capability이고 계획 의미가 아니다. backend마다 actor별 gate 수, buffer 용량, 보류 가능 문맥, 실현하는 계획 기능을 capability로 보고한다.
+
+**보류 가능 문맥**(gate마다 명시, 런타임이 hit에서 확인):
+
+| 문맥 | 처리 |
+|---|---|
+| 일반 task, 해제 경로가 진행 가능 | 제어 후보 |
+| 해제에 필요한 lock을 보유 | 정체 위험을 적고 다른 지점 우선(§12.2 조건 1) |
+| interrupt/exception 문맥 | task semaphore 대기를 쓰지 않음. 전용 지원이 없으면 미지원 |
+| scheduler/OSAL 등록 내부 | 대기 primitive의 재진입·초기화 조건 먼저 확인. OSAL 준비 전에는 private primitive나 비차단 관측만 |
+| 종료·삭제 중인 task | 미완료 계획과 수명 종료를 구별 |
+| 미지원 지점 | 조용히 건너뛰지 않음. 기록하고 계획 실현 범위를 낮춤 |
+
+관측 callback은 막지 않고, gate는 허용 문맥을 가진 별도 제어 hook이다. 런타임의 task·세마포어·큐가 대상 OSAL 객체 표를 쓰면 자원 사용으로 계상한다. compiler hook은 실행이 그 위치에 닿을 때만 작동하므로, 계측되지 않은 구간과 임의의 interrupt 시점은 제어하지 않는다.
+
+**제어 실현 기록.** 계획과 따로, 제어 실행마다 gate 도달(actor·site·자원·순번), 보류 확정, 해제 도달(촉발한 실제 사건), 해제 선도달(충족 또는 소비), 재개(어느 actor가 어느 지점 뒤로 진행), 보류 실패·미지원(이유와 이후 실행의 지위), 종료까지 미해제(계획 미완료, 대상 실패와 구별)를 남긴다. 논리 gate의 존재, 실제 보류, 스케줄러가 스스로 만든 순서를 합치지 않는다. F0의 `hold.kzr`(`fire`, `deferred=yes`, `satisfied=yes`, `consumed=yes`)가 F0 형태의 이 기록이다.
+
+**확인의 집계**(P11–P13, 2026-10-26 결정, [PD26] §3).
+- **P11**: 실제 보류·해제 사건은 **그 제어 실행에 한정한 순서 근거**이고, 원 프로그램의 동기화와 다른 근거 종류로 적는다. 보류만으로 관련 값의 부재가 입증되지 않는다. 시작 상태·다른 writer·자원 세대·실제 제어 위치가 함께 맞아야 한다.
+- **P12**: 예측 전의 개발 실행은 예측 뒤의 확인 실행과 구별하고 확인으로 세지 않는다. confirm2의 W1 독립 실행은 확인으로 인정한다.
+- **P13**: 미해제 gate가 남은 실행은 후보 전체의 확인으로 세지 않고, 관측된 앞부분과 미완료 원인을 기록한다.
+
 ---
 
 ## 13. CONDITIONS_POLICY와의 관계
@@ -933,6 +1005,7 @@ spec App. A.2 step 5의 계획을 위 규칙에 대입한다. 실행한 적은 �
 - **소속 앱.** actor의 `app_owner`가 `undetermined`인 instance의 결과를 앱 사이 결과로 내지 않는다(항목 61, 개정 1.3). 현재 observer의 `inferred`(`match-by-time`, `id-unverified`) 매핑을 `confirmed`로 쓰지 않는다(§7.5).
 - **비행 환경 대표성.** Linux `SCHED_OTHER`, permissive 모드에서 잰 timing과 overhead는 비행 환경을 대표하지 않는다(항목 17).
 - **도구의 새로움.** PCT, delay injection 같은 기존 기법의 새로움을 주장하지 않는다(항목 18). 관측 수단인 uprobe, eBPF, ptrace도 기존 Linux 기능이다.
+- **실행 계열 (개정 1.4).** 어느 계열의 관측·제어도 원 실행에 영향이 없다고 하지 않는다. 계측 빌드에서 확인한 순서가 기준 빌드에서도 자연히 일어난다거나, 런타임·제어 조건을 뺀 자연 빈도를 주장하지 않는다. 구현·검증한 연결부 밖의 OS에서 동작한다고 하지 않는다. F0과 계측 backend가 같은 결과를 낸 것만으로 판정 규칙이 검증되었다고 하지 않는다(spec §6.4 항목 63–66, §6.5). 컴파일러 이름은 기여가 아니다.
 
 ---
 

@@ -4,6 +4,8 @@ Kairos 설계(규범 원문: [`../spec/SPEC_FINAL.md`](../spec/SPEC_FINAL.md), r
 
 상태: 설계 문서다. 구현·실행·측정한 것은 없다. 그림은 spec rev 1.3(2026-10-22; spec §0.12, 변경표 `../../plan/REV13_CHANGE_TABLE.md`)에 맞췄고, 2026-10-22에 다시 렌더링했다(아래 "spec rev 1.3 반영"). 그림 안의 비용 값 중 `[M]` 표시는 spec이 인용한 기존 측정값([R07 §4.7])이고, 나머지 수치와 줄 번호는 spec의 코드 인용이다. 그림은 spec에 없는 설계 요소를 더하지 않는다.
 
+> **spec rev 1.4(2026-10-26)로 낡은 그림:** D0, D1, D2 개요, D2 상세 2, D3 개요, D3 상세 2, D6 상세(naturalness 값), D7은 F0(perf uprobe·eBPF 관측, ptrace·debug register hold)만 관측·제어 경로로 그린 판이라 rev 1.4의 실행 계열 둘(F0와 계측 계열, 공통 gate·해제 의미, 협력적 gate; spec §2.2, §4.13, §5.12, ADR-059)을 보이지 않는다. 다시 렌더링하지 않았다.
+
 ## 읽는 법 (범례)
 
 | 모양·선 | 뜻 |

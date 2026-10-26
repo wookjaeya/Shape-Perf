@@ -80,6 +80,12 @@
 //               parameter of the operation of the actor's innermost open call, gives that parameter's value
 //               (out.NAME) on the call's return, unless the return carries it itself: the value the call
 //               stores through the parameter, read inside the call before it returns.
+//   arguments   a slot of a linearization point (a conjunct's or an effect's `lp at`) whose role names a non-out
+//               parameter of that point's operation gives arg.NAME at the point; when the actor's innermost open
+//               call is of that operation and its call event lacks arg.NAME, the call event takes it.  This is how
+//               a backend that reads an argument only after the callee checked it (a name at a pointer, read
+//               where the callee passes it on; event_semantics.md 3, PD26 section 4) gives the call its key.  A
+//               call event that carries the argument itself keeps its own value.
 #pragma once
 
 #include <cstdint>
@@ -156,6 +162,7 @@ struct RealTraceReport {
   uint64_t spawn_outs_bound = 0;   // of those, with the out-parameter bound by the id (ID_MATCHED)
   uint64_t string_values = 0;      // slot values taken as text (string fetch slots, EVENT_STRINGS)
   uint64_t out_values_from_points = 0;  // out values set on a return from a point inside the call
+  uint64_t args_from_points = 0;   // call arguments taken from a linearization point inside the call (header, "arguments")
   uint64_t owners_core = 0, owners_not_core = 0;  // threads whose owner's core status is established
   bool core_evidence = false;      // symbols and core request callers were given
   std::vector<std::pair<uint32_t, uint64_t>> loss_cpus;  // per kernel loss report: (CPU ring, count)

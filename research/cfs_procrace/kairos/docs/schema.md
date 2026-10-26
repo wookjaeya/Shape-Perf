@@ -243,6 +243,7 @@ SPEC rev 1.3 의 "Formats added in revision 1.3"(ADR-054–ADR-056, C-17)을 구
 - actor 이름(`actor_names`): 백엔드 이름, 없으면 `<접두>` + key(`tid`/`a`/`P`/`?`); join-record actor 사이에 겹치는 이름은 `.<접두><key>`, 세대가 0이 아니면 `.g<n>` — F0에서는 예전 이름과 같다.
 - `ThreadIdentity`에 `actor_index`·`binding`을 더했다. `tid`는 binding의 native key이며 F0에서는 예전처럼 커널 tid다(기존 필드의 뜻을 바꾸지 않음).
 - 새로 읽는 것: 점은 `attached`일 때만 관측된 점; `call-site` 호출/반환의 label이 프로필의 점이면 그 점도 된다(F0는 두 probe로 보는 것을 한 hook으로 본 경우; 반환 뒤·호출 앞에 둔다); 보고만 하는 손실 종류는 구간을 만들지 않는다.
+- 호출 안 선형화 점의 인수(2026-10-26, D3 실행에서 추가) [D][M]: 연산의 conjunct·effect `lp at` 점 사건이 그 연산의 non-out 매개변수 값(역할 이름이 같은 슬롯)을 가지고, 같은 actor의 가장 안쪽 열린 호출이 그 연산이며, 호출 사건에 그 `arg.NAME`이 없으면 호출 사건이 그 값을 받는다. 호출 사건이 스스로 가진 값은 바꾸지 않는다. 출력 머리에 `arguments from linearization points inside the call N`이 붙는다(0이면 줄 없음). 이유: GCC manifest는 검증 전 포인터를 읽지 않으므로(PD26 §4) 세마포어 이름을 함수 진입이 아니라 검증 뒤의 `.exists`·`.publish`에서 읽는다(`instr_candidate_gcc.md` §11). 이 규칙이 없으면 C1의 조회·생성 호출에 키가 없어 모든 발생이 `INCONCLUSIVE(effect_unsupported,horizon-open)`였다. F0 기록 9개(smoke3 4, confirm1 자연 rx 4, R2 pilot3)의 재생 출력은 이 규칙 전후로 같다(머리의 `record layer` 줄 외 diff 0) [M]. 시험: `test_neutral_kzrt`(호출에 없는 인수를 받고, 호출이 가진 인수는 그대로).
 - `kz replay` 출력에 `record layer:` 한 줄(중립 섹션을 읽었는지, F0 섹션을 메모리에서 변환했는지)을 더했고, kzrt 기록이면 시작 문장과 손실 줄(`loss record: …`)이 달라진다. 재생 출력 컨테이너의 `probes` 목록은 부모에 SITES가 있으면 예전처럼 SITES를, 없으면(계측 기록) NSITES를 가리킨다.
 
 ### 12.5 `kz convert` [D][M]

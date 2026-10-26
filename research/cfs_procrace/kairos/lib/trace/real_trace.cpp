@@ -105,10 +105,12 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
 
   // ---- the point names of the profile, with the values each point carries ----
   std::map<std::string, std::map<std::string, std::string>> point_names;  // point -> role key -> value name
+  std::map<std::string, int32_t> point_op;  // a linearization point -> the operation whose conjunct or effect it is
   for (const phi::OpDecl& op : p.ops) {
     auto add = [&](const std::string& label, const phi::LpSpec& lp) {
       if (lp.kind == phi::LpKind::None) return;
       const std::string name = eval::lp_name(op, label, lp);
+      point_op.emplace(name, static_cast<int32_t>(&op - p.ops.data()));
       std::map<std::string, std::string>& m = point_names[name];
       for (const phi::OpParam& v : lp.values) m[role_key(v.name)] = "lp." + v.name;
       for (const phi::OpParam& prm : op.params)
@@ -316,6 +318,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
   struct OpenOp {
     int32_t op;
     std::map<std::string, int64_t> outs;
+    uint64_t call = eval::kNoEvent;  // the call's trace event
   };
   std::map<std::string, std::vector<OpenOp>> open_ops;
   for (size_t ei = 0; ei < events.size(); ++ei) {
@@ -411,7 +414,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     {
       std::vector<OpenOp>& st = open_ops[te.actor];
       if (m.kind == MapKind::Call) {
-        st.push_back(OpenOp{m.op, {}});
+        st.push_back(OpenOp{m.op, {}, static_cast<uint64_t>(out->events.size())});
       } else if (m.kind == MapKind::Return) {
         size_t k = st.size();
         while (k > 0 && st[k - 1].op != m.op) --k;
@@ -435,6 +438,25 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
         if (b == bound_at_return.end() || unreadable) continue;
         te.values["out." + rule.create_out] = static_cast<int64_t>(b->second);
         ++report->spawn_outs_bound;
+      }
+    }
+    // An argument from a linearization point of the operation of the actor's innermost open call (header,
+    // "arguments"): the call event takes the point's value of a parameter the call event lacks.
+    if (m.kind == MapKind::Point && !unreadable) {
+      const auto po = point_op.find(m.name);
+      std::vector<OpenOp>& st = open_ops[te.actor];
+      if (po != point_op.end() && !st.empty() && st.back().op == po->second && st.back().call < out->events.size()) {
+        eval::TraceEvent& call = out->events[static_cast<size_t>(st.back().call)];
+        for (const auto& t : te.texts)
+          if (t.first.compare(0, 4, "arg.") == 0 && call.texts.count(t.first) == 0 && call.values.count(t.first) == 0) {
+            call.texts[t.first] = t.second;
+            ++report->args_from_points;
+          }
+        for (const auto& v : te.values)
+          if (v.first.compare(0, 4, "arg.") == 0 && call.texts.count(v.first) == 0 && call.values.count(v.first) == 0) {
+            call.values[v.first] = v.second;
+            ++report->args_from_points;
+          }
       }
     }
     out->add(std::move(te));
@@ -576,6 +598,8 @@ std::string report_text(const RealTraceReport& r) {
   out += "spawn returns " + std::to_string(r.spawn_returns) + ", out-parameter bound by the id " + std::to_string(r.spawn_outs_bound) + "\n";
   if (r.string_values != 0 || r.out_values_from_points != 0)
     out += "string values (fetch slots) " + std::to_string(r.string_values) + ", out values from points inside a call " + std::to_string(r.out_values_from_points) + "\n";
+  if (r.args_from_points != 0)
+    out += "arguments from linearization points inside the call " + std::to_string(r.args_from_points) + " (the call event lacked them)\n";
   out += std::string("core status of owners: ") +
          (r.core_evidence ? "core " + std::to_string(r.owners_core) + ", not core " + std::to_string(r.owners_not_core) + ", not established " +
                                 std::to_string(r.threads - r.owners_core - r.owners_not_core)

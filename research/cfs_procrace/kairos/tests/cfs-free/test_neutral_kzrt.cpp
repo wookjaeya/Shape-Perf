@@ -8,6 +8,8 @@
 //   - a call-site binding is a call/return of its callee, and a manifest point whose label names a profile point is
 //     that point; a site whose only binding is removed is not an observed point; an undeclared site is a placeholder;
 //   - the replay's trace from the container equals the one from the layer in memory, and the occurrences are found;
+//   - a point of the operation inside its open call (a conjunct's `lp at`) gives the call an argument the call event
+//     lacks, and leaves an argument the call carries itself as it is (real_trace.hpp, "arguments");
 //   - a truncated stream is converted with its loss (the whole record) and without start evidence; a stream that is
 //     not a kzrt-dump is refused.
 
@@ -45,10 +47,14 @@ const char* const kManifest =
     "value 3 0 role=Who from=operand0 type=u32\n"
     "site 4 label=gone op=other phase=point tu=t.c func=caller line=20\n"
     "value 4 0 role=x from=arg0 type=u32\n"
+    "site 5 label=send.who_reg op=send phase=point tu=t.c func=send line=30\n"
+    "value 5 0 role=Spec from=arg0 type=u32\n"
+    "value 5 1 role=Info from=arg1 type=u32\n"
     "bind 101 site=1 backend=hand module=1 at=\"t.c:10\" status=bound\n"
     "bind 201 site=2 backend=hand module=1 at=\"t.c:10\" status=bound\n"
     "bind 301 site=3 backend=hand module=1 at=\"t.c:9\" status=bound\n"
-    "bind 401 site=4 backend=hand module=1 at=\"t.c:20\" status=removed reason=\"unit test: inlined away\"\n";
+    "bind 401 site=4 backend=hand module=1 at=\"t.c:20\" status=removed reason=\"unit test: inlined away\"\n"
+    "bind 501 site=5 backend=hand module=1 at=\"t.c:30\" status=bound\n";
 
 int sink(void* ctx, const void* bytes, size_t n) {
   std::vector<uint8_t>* v = static_cast<std::vector<uint8_t>*>(ctx);
@@ -76,6 +82,7 @@ std::vector<uint8_t> record() {
   KZ_CHECK_EQ(kz_rt_init(&cfg), KZ_RT_OK);
   KZ_CHECK_EQ(kz_rt_attach(kz_rt_posix_adapter()), KZ_RT_OK);
   const uint32_t c = kz_rt_obs(1, 101, 0, 0x3u, 5, 0x1002, 0, 0);  // send(Info = 5, Who = 0x1002)
+  kz_rt_obs(5, 501, 0, 0x3u, 9, 99, 0, 0);                         // inside the call: Spec = 9 (not at the call), Info = 99
   kz_rt_obs(2, 201, c, 0x1u, 0xc0000001u, 0, 0, 0);                // NOT_READY_A
   kz_rt_obs(4, 401, 0, 0x1u, 1, 0, 0, 0);                          // at a binding the manifest says was removed
   kz_rt_obs(9, 901, 0, 0, 0, 0, 0, 0);                             // a site the manifest does not declare
@@ -112,15 +119,15 @@ void test_convert_and_replay(const std::vector<uint8_t>& dump) {
   KZ_CHECK((n.run.r.flags & KZ_NRUN_FLAG_COMPLETE) != 0 && (n.run.r.flags & KZ_NRUN_FLAG_LOSS_PRESENT) == 0);
   KZ_CHECK(has_note(r.notes, "binding 401 is declared removed but has events"));
   KZ_CHECK(has_note(r.notes, "site 9 is recorded but not declared"));
-  // sites: four declared, one placeholder
-  KZ_CHECK_EQ(n.sites.size(), static_cast<size_t>(5));
+  // sites: five declared, one placeholder
+  KZ_CHECK_EQ(n.sites.size(), static_cast<size_t>(6));
   KZ_CHECK_EQ(n.sites[0].r.kind, KZ_NSITE_KIND_CALL);
   KZ_CHECK_EQ(n.sites[0].symbol, std::string("send"));
   KZ_CHECK((n.sites[0].r.flags & (KZ_NSITE_FLAG_CALL_SITE | KZ_NSITE_FLAG_ATTACHED)) == (KZ_NSITE_FLAG_CALL_SITE | KZ_NSITE_FLAG_ATTACHED));
   KZ_CHECK_EQ(n.sites[1].r.kind, KZ_NSITE_KIND_RETURN);
   KZ_CHECK_EQ(n.sites[2].r.kind, KZ_NSITE_KIND_POINT);
   KZ_CHECK((n.sites[3].r.flags & KZ_NSITE_FLAG_ATTACHED) == 0);
-  KZ_CHECK_EQ(n.sites[4].label, std::string("site9"));
+  KZ_CHECK_EQ(n.sites[5].label, std::string("site9"));
   // actors: two run actors, the provisional one joined to the first
   size_t run_actors = 0;
   uint32_t main_actor = KZ_NONE32, prov = KZ_NONE32;
@@ -131,7 +138,7 @@ void test_convert_and_replay(const std::vector<uint8_t>& dump) {
   KZ_CHECK_EQ(run_actors, static_cast<size_t>(2));
   KZ_CHECK(main_actor != KZ_NONE32 && prov != KZ_NONE32 && n.actors[prov].r.binding == KZ_NBIND_KZRT_PROVISIONAL);
   KZ_CHECK_EQ(n.actors[main_actor].r.native_kind, KZ_NKEY_LINUX_TID);
-  KZ_CHECK_EQ(n.events.size(), static_cast<size_t>(8));
+  KZ_CHECK_EQ(n.events.size(), static_cast<size_t>(9));
   KZ_CHECK_EQ(n.events[0].actor, main_actor);  // the bootstrap event first, under the run actor
   KZ_CHECK((n.events[0].flags & KZ_NEV_FLAG_BOOT) != 0 && (n.events[0].flags & KZ_NEV_FLAG_CLOCK) == 0);
   std::vector<uint32_t> last(n.actors.size(), 0);
@@ -162,12 +169,18 @@ void test_convert_and_replay(const std::vector<uint8_t>& dump) {
   KZ_CHECK(rep.neutral_sections);
   KZ_CHECK_EQ(rep.start, KZ_NSTART_BOOTSTRAP);
   KZ_CHECK_EQ(rep.threads, 2u);
-  KZ_CHECK_EQ(rep.events, 6u);  // two captures, two calls, two returns; the removed binding's site and the placeholder are not mapped
+  KZ_CHECK_EQ(rep.events, 7u);  // two captures, two calls, one point inside a call, two returns; the removed binding's site and the placeholder are not mapped
   KZ_CHECK(t.observed_points.count("send.who_valid") != 0);
   KZ_CHECK_EQ(t.start_evidence, KZ_START_EVIDENCE_INIT);
   KZ_CHECK_EQ(t.events[1].site, std::string("send"));
   KZ_CHECK(t.events[1].phase == kz::eval::Phase::Call && t.events[1].values.count("arg.Who") != 0 && t.events[1].values.at("arg.Who") == 0x1002);
-  KZ_CHECK(t.events[2].phase == kz::eval::Phase::Return && t.events[2].has_result && t.events[2].result == static_cast<int64_t>(0xc0000001u));
+  KZ_CHECK(t.events[3].phase == kz::eval::Phase::Return && t.events[3].has_result && t.events[3].result == static_cast<int64_t>(0xc0000001u));
+  // the point inside the call: the call takes Spec from it and keeps its own Info
+  KZ_CHECK(t.events[2].phase == kz::eval::Phase::Point && t.events[2].site == "send.who_reg");
+  KZ_CHECK(t.events[1].values.count("arg.Spec") != 0 && t.events[1].values.at("arg.Spec") == 9);
+  KZ_CHECK(t.events[1].values.count("arg.Info") != 0 && t.events[1].values.at("arg.Info") == 5);
+  KZ_CHECK_EQ(rep.args_from_points, 1u);
+  KZ_CHECK(t.events[5].phase == kz::eval::Phase::Call && t.events[5].values.count("arg.Spec") == 0);  // no point inside the worker's call
   KZ_CHECK_EQ(t.events[0].actor, t.events[1].actor);  // the bootstrap capture and the call: one actor
   t.ref_consts["TABLE"] = 4;  // as kz replay does with --const
   kz::eval::Result res;

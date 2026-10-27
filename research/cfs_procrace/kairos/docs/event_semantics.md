@@ -240,7 +240,7 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 
 ### 8.6 dump 형식 `kzrt-dump` 1.2 (`include/kz_rt_format.h`; 1.1까지의 설명 포함)
 
-모든 필드 little-endian, 바이트 단위 직렬화(대상의 byte order·정렬·struct 배치와 무관). 레코드는 **쓸 때** 직렬화되므로 버퍼 메모리를 그대로 떠도(디버거·JTAG) 같은 형식이다. 파일 시스템을 요구하지 않는다(`kz_rt_dump`는 바이트 콜백; POSIX는 `kz_rt_posix_dump_file/fd`).
+모든 필드 little-endian, 바이트 단위 직렬화(대상의 byte order·정렬·struct 배치와 무관). 레코드는 **쓸 때** 직렬화되므로 버퍼 메모리를 그대로 떠도 같은 형식이다. 출력은 바이트 콜백으로 낸다(`kz_rt_dump`; POSIX는 `kz_rt_posix_dump_file/fd`).
 
 ```
 "KZRTDUMP" u16 major=1 u16 minor=1 u32 dump_flags(1 = stopped)

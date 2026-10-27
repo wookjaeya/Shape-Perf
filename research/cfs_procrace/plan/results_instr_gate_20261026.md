@@ -1,7 +1,7 @@
 # 협조 게이트 G-I-H 제어 실행과 F0 confirm2 대조 — C1 파생 빌드, 계획 9개 × 4 인스턴스 (단계 F, 2026-10-26)
 
 - 지위: **제어 실행이며 pilot/dev**다. 본 실험 결과가 아니다. 계획·구성·인스턴스마다 부팅 1회다. 빈도·재현성은 주장하지 않는다(P8). 반복 횟수는 PI 결정 대기다(단계 E).
-- 범위: IR(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`) §15 단계 F의 협조 게이트, §13.3의 제어 비교 단위, PD26(`Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`) §3의 P11–P13.
+- 범위: IR §15 단계 F의 협조 게이트, §13.3의 제어 비교 단위, PD26(`Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`) §3의 P11–P13. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다.
 - 표기: [F] 코드·문서에서 확인, [M] 실행·재생으로 확인, [I] 추론, [D] 설계 결정, [U] 미확인.
 - 대조 기록(F0): confirm2 36회(`/home/user/work/procrace/c1_runs/confirm2/<W>_<cfg>_<cand>_<inst>`). 계획은 confirm2와 같은 파일이다. W1·W2·W10은 `predict1/<cfg>_<cand>/cur/<W>.kzh`, 나머지는 `predict2/…`. 결과는 `plan/results_pilot_20261025.md` §5.6이다.
 - 연구 조건은 새로 정하지 않았다(CONDITIONS_POLICY). 계측 빌드는 파생 구성이다. 차이는 §0과 각 빌드 기록(`build_instr.record`, D1–D4)에 있다.

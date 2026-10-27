@@ -1,6 +1,6 @@
 # 외부 검토용 최소 자료 목록 (2026-10-26)
 
-- 근거: IR(`Kairos_OS_Independent_Instrumentation_Review_20261026.md`) §15 단계 A "대표 raw 기록·profile·binary manifest 확보", 앞선 검토(`Kairos_W0W3_Git_Review_20261025.md`) §10.3, 현황 `STATUS_20261026.md` §6 항목 6. 결정: `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md` §2 [D].
+- 근거: IR §15 단계 A "대표 raw 기록·profile·binary manifest 확보", 앞선 검토(`Kairos_W0W3_Git_Review_20261025.md`) §10.3, 현황 `STATUS_20261026.md` §6 항목 6. 결정: `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md` §2 [D]. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다.
 - 지위: **자료 목록**이다. 새 실행이 아니고 결과도 아니다. 모든 기록은 pilot·build-smoke·제어 실행이며 본 실험 결과가 아니다(P8). 수는 `plan/results_pilot_20261025.md` 의 것을 그대로 쓴다.
 - 기록은 **저장소에 복사하지 않았다.** 경로는 모두 저장소 밖(`/home/user/work/procrace/…`)이다. sha256 은 2026-10-26 에 이 문서를 쓰며 직접 계산했다 [M]. 저장소 경로는 `research/cfs_procrace/` 기준이다.
 - 고른 기록 다섯(IR §15 A, 과제 지정): R2 `v153_pilot3`, C1 smoke3 의 수정 전·후 자연 실행 각 1(`pre_1df262a`, `post_1df262a`, tx), 단계 B 보류 실행 1(`hold1/B_post_1df262a_tx`), confirm2 실행 1(`confirm2/W5_post_1df262a_tx`). 같은 묶음의 다른 인스턴스 중에서 후보 A(`1df262a`)·tx 를 골랐고, confirm2 는 m = 3 재시도를 처음 실현한 W5 를 골랐다(결과표 §5.6.1) — 연구자 선택이며 대표성 주장은 아니다 [D].

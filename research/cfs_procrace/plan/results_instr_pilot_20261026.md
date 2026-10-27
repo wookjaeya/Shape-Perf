@@ -1,7 +1,7 @@
 # 계측 계열 G-I pilot 실행과 F0 대조 — C1 네 빌드 × tx·rx, R2 (단계 D, 2026-10-26)
 
 - 지위: **pilot/dev 실행**이다. 본 실험 결과가 아니다. 구성마다 인스턴스마다 부팅 1회이며 빈도·재현성은 주장하지 않는다(P8). 군 비교(단계 E: G-A·G-F0·G-I0·G-I)는 하지 않았다. 파생 실행의 시작 상태가 PI 결정 대기이기 때문이다(`plan/instrumentation_selection_20261026.md` §7 항목 2).
-- 범위: 선택 문서 §5.2의 D7(G-I 실행)·D8(변환·재생·대조). IR(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`) §13.2의 여섯 단위, §12.2의 여섯 원인, §13.4의 독립 근거. PD26(`Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`) §4.
+- 범위: 선택 문서 §5.2의 D7(G-I 실행)·D8(변환·재생·대조). IR §13.2의 여섯 단위, §12.2의 여섯 원인, §13.4의 독립 근거. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다. PD26(`Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`) §4.
 - 표기: [F] 코드·문서에서 확인, [M] 실행·재생으로 확인, [I] 추론, [D] 설계 결정, [U] 미확인.
 - 대조 기록(F0, 같은 구성): C1 tx = smoke3(`c1_runs/smoke3/<cfg>_<cand>`, `replay_i1025/`), C1 rx = confirm1 자연 rx(`c1_runs/confirm1/N_<cfg>_<cand>_rx`, `replay_c1025/`), R2 = `r2_runs/v153_pilot3`(`replay_i1025/`). 판정은 `plan/results_pilot_20261025.md` §1·§5.3의 값이다.
 - 연구 조건은 새로 정하지 않았다(CONDITIONS_POLICY). 계측 빌드는 파생 구성이고 차이는 아래 §0과 각 빌드 기록(`build_instr.record`, D1–D4)에 있다.
@@ -123,7 +123,7 @@ C1: 두 계열의 근거 종류가 발생마다 같다. 미준비·TOLERATED는 
 
 **보여 주는 것.**
 1. 선택 문서 §5.2의 진행 근거가 이 범위에서 충족됐다. F0가 판정한 키에서 계측 기록의 재생이 근거 부족(`ownership-undetermined`, 정적 닫힘 없음, 효과점 없음)으로 INCONCLUSIVE가 되지 않는다. C1 8개 인스턴스의 판정·근거·민감도가 F0와 같다. R2의 위반 24(ES 20 + EVS 4)와 SB 5도 같다.
-2. 이것을 OS 호출 경로·관측기 없이, 같은 소스의 파생 빌드에서 얻었다. 결과는 IR §12.1의 둘째 행 범위("계측한 빌드에서 확인", 경로 kzgcc 0.2 + kzrt 0.2.0 + 위 manifest, 계획 없음)다.
+2. 이것을 F0의 uprobe·tracefs 관측 없이, 같은 소스의 파생 빌드에서 얻었다. 결과는 IR §12.1의 둘째 행 범위("계측한 빌드에서 확인", 경로 kzgcc 0.2 + kzrt 0.2.0 + 위 manifest, 계획 없음)다.
 3. SPEC §5.12 / IR §16의 무효화 검사를 통과했다.
    - 미관측 actor를 AppID 0으로 채우지 않았다(초기 스레드 `undetermined`).
    - 다시 읽은 값이 없다(SSA·operand, 검증 뒤 텍스트).

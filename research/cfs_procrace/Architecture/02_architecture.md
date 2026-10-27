@@ -355,9 +355,9 @@ spec §2.2 "The instrumented family's components", §5.12; ADR-059; [PD26] §2 �
 |---|---|---|
 | 컴파일러 연결부 | 파생 빌드의 선택한 위치에 런타임 호출을 넣는다 | GCC GIMPLE plugin(첫 후보), Clang AST 소스 변환 → gcc 빌드, 얇은 LLVM pass. LLVM Instrumentor는 로컬 LLVM(`1053047a`)에 `Instrumentor.h`가 없어 상류 소스 검토로만 다룬다([PD26] §1). IR §15.1의 일곱 질문으로 주 구현 하나를 고르고, 세 완성품을 만들지 않는다 |
 | 공통 C 런타임 | 대상 안에서 사건을 기록하고 gate를 평가한다. 관측 API와 제어 API를 나눈다 | 런타임 자신은 계측하지 않는다. 필수 조건은 [PD26] §4(spec §5.12) |
-| OS 연결부 | task·시계·buffer·대기 | OSAL로 되는 부분과 OS/BSP별 부분을 나눈다 |
+| 기본 primitive adapter | 런타임에 정체성·시계·잠금·대기 primitive를 준다 | — |
 
-대상에는 런타임과 연결부만 두고, 재생·예측·보고는 호스트에서 위 구성요소로 한다. 위 표의 `gate`(F1 `--wrap`)는 다른 갈래이고 여전히 후순위다(D3).
+대상에는 런타임과 adapter만 두고, 재생·예측·보고는 호스트에서 위 구성요소로 한다. 위 표의 `gate`(F1 `--wrap`)는 다른 갈래이고 여전히 후순위다(D3).
 
 ---
 
@@ -564,7 +564,7 @@ spec은 도구 안에서 Python과 JSON을 쓰지 않는다고 정한다(spec §
 
 spec §2.3 "Formats in revision 1.4", §5.5–§5.7; [PD26] §2 항목 5; IR §9. 현재 `.kzt`·`.kzh`의 byte layout을 두 실행 계열의 공통 경계로 그대로 고정하지 않는다. 사건·정체성·손실·제어 의미를 먼저 정하고, 이전 container를 계속 읽는 버전 변경으로 형식을 바꾼다.
 
-- **지금 F0에 묶인 것 [F]**(`kz_raw.h`, `78ff6ee`): `tid`는 kernel thread ID, `tseq`는 병합한 기록에서 decoder가 thread마다 부여한다. `SITES`에는 file offset·inode·device, `SITE_SLOTS`·`SLOT_FETCHES`에는 register·stack·offset 포획이 있다. 손실 출처(`ring-reserve-fail`, `perf-record-lost`, `tseq-gap`, `perf-throttle`)도 Linux 관측기의 것이다. `.kzh`(`kzp-hold 1`)는 사건·조건·gate·해제만 적고 register·offset·DR 슬롯은 그 아래에서 해석된다. 그래서 할 일은 "계획의 논리 조건과 F0의 물리 해석을 분리"하는 것이다([PD26] §1).
+- **지금 F0에 묶인 것 [F]**(`kz_raw.h`, `78ff6ee`): `tid`는 kernel thread ID, `tseq`는 병합한 기록에서 decoder가 thread마다 부여한다. `SITES`에는 file offset·inode·device, `SITE_SLOTS`·`SLOT_FETCHES`에는 register·stack·offset 포획이 있다. 손실 출처(`ring-reserve-fail`, `perf-record-lost`, `tseq-gap`, `perf-throttle`)도 F0의 perf·eBPF 관측기의 것이다. `.kzh`(`kzp-hold 1`)는 사건·조건·gate·해제만 적고 register·offset·DR 슬롯은 그 아래에서 해석된다. 그래서 할 일은 "계획의 논리 조건과 F0의 물리 해석을 분리"하는 것이다([PD26] §1).
 - **중립 사건의 정보**(배치가 아니라 의미 목록): 실행·cFS 인스턴스 ID, 실행 actor ID와 생성 세대, 생성자·소유 앱·전달 AppID(따로 둔다), 논리 site ID와 backend binding ID, 연산·phase·호출 인스턴스, 자원 종류·키·생명주기, 인자·실제 사용 값·반환값과 유효성(미관측은 0이 아니다), actor 안 사건 순서, 시간과 시계 조건(근거로만, HB edge가 아니다), 순서 근거의 종류(원 프로그램 동기화, 값 연결, 조건부 추론, 제어 개입), 손실·미계측·관측 구간, compiler·target·runtime·profile 버전.
 - **backend 원시 근거**(perf record, register fetch 식, DR 배치, 런타임 buffer record)는 중립 사건이 참조하는 확장 정보로 남긴다. 공통 해석은 이것에 기대지 않지만 지우지 않는다.
 - **초기 정체성**: 정체성이 정해지기 전의 사건은 임시 actor로 두고 뒤의 근거로 연결한다. 모르는 정체성을 "앱 없음"이나 AppID 0으로 채우지 않는다.
@@ -872,7 +872,7 @@ spec §2.6의 기술 결정을 정리한다. 각 결정의 배경과 대안은 s
 | SMT solver는 첫 구현의 조건이 아니다 | SMT solver(정수 같은 이론이 들어간 논리식이 만족 가능한지 푸는 프로그램, 예: Z3)를 쓰지 않는다. `kz predict`는 명시적 상태 탐색으로 lock 순서를 뒤집는다. 명세의 예측·탐색 질문을 현재 구현으로 다룰 수 없는 구체적 이유가 확인될 때만 도입을 검토하고, 그때 SMT-LIB2 emitter는 교차 검사용이다(P-Z3, 2026-10-15). **rev 1.3**(spec §4.9; C-28): 필요성은 같은 작은 모형에서 보여야 한다(상태 폭발, 명시적 탐색이 표현하지 못하는 제약, 탐색 비용). 들인다면 encoding은 적어도 사건 위치와 순서 변수, 유한 상태·수명·버전별 값 영역(C 정수 폭이 중요하면 bit-vector), 값 출처에 묶인 읽기·분기·결과, lock 소유·재귀·해제 대응, 지원하는 의미론 안의 queue·counter·timeout을 덮고, solver의 version·build·설정·encoding revision·입력 hash를 결과의 근거에 넣는다. SAT 모형은 재생해 조건을 다시 평가하고, unknown과 한도 도달은 `INCONCLUSIVE`다. solver의 사용은 기여로 주장하지 않는다 | spec §2.6, §4.9 | [D] ADR-016; PI 결정 P-Z3 |
 | eBPF userland | perf-PMU uprobe와 attach cookie, 자체 raw `bpf()` loader, 손으로 쓴 helper prototype, glibc `<elf.h>`로 BPF ELF parse. libbpf는 기존 환경에서 먼저 진행하는 동안 쓰지 않는다. 로더가 연구의 별도 대형 과제가 되지 않게 하고, 필요한 기능이 모자란 것이 확인되면 유지되는 공개 라이브러리를 검토하며 환경 변경을 기록한다(P-LIBBPF, 2026-10-15). perf-sample backend가 설치 없는 초기(bring-up) 경로다. tracefs dynamic event는 선택 사항이고(P-TRACEFS는 열려 있다), 쓰게 되면 spec §5.4의 규칙(전용 instance, 명시적 CPU 간 clock, 종료 시 event 삭제, host 상태 변경 기록)을 따른다 | spec §2.6, §5.3, §5.4 | [D] ADR-013, ADR-036; PI 결정 P-LIBBPF, P-TRACEFS |
 | 도구 안에 Python·JSON 없음 | 모든 구성요소는 C/C++다. 기존 harness `env/run_cfs.sh`가 계속 실행을 맡고, Kairos는 root 쪽 observer hook 하나를 더한다. *개정 1.4:* 외부 도구의 JSON 설정은 빌드 설정 경계에만 둔다([§7.5](#75-python과-json을-쓰지-않는-이유)) | spec §2.6; [R07 §9 항목 1] | [D] ADR-001; PI 결정 D1 |
-| 계측 실행 계열 (개정 1.4) | 컴파일러 연결부·공통 C 런타임·OS 연결부는 C/C++(런타임과 연결부는 대상용 C)이고 런타임은 계측하지 않는다. 계측 빌드는 같은 소스·설정·flag에 계측만 다른 파생 구성이다 | spec §2.6, §5.1, §5.12 | [D] ADR-059; [PD26] §2, §4 |
+| 계측 실행 계열 (개정 1.4) | 컴파일러 연결부·공통 C 런타임·adapter는 C/C++(런타임과 adapter는 파생 빌드에 링크하는 C)이고 런타임은 계측하지 않는다. 계측 빌드는 같은 소스·설정·flag에 계측만 다른 파생 구성이다 | spec §2.6, §5.1, §5.12 | [D] ADR-059; [PD26] §2, §4 |
 | 설치 없는 핵심 | thin MVC(S0+S1+S2+S3a)와 S4–S6에는 아무것도 설치하지 않는다. 고정된 LLVM 23 build(Clang LibTooling, IR, DWARF, MC), system clang-18(BPF backend), gcc 13.3, kernel 기능이 이미 있다([R07 §2]) | spec §2.1 원칙 7 | [PI_DECISIONS.md](spec/PI_DECISIONS.md) "Tool installs" |
 
 **ADR 번호.** 위 표는 spec §11에서 내용이 맞는 ADR 번호를 적었다. spec §2.6 본문이 eBPF userland 항목에서 가리키는 ADR-038은 §11의 내용(triage)과 맞지 않는다. 대조표는 [10_decisions_adr.md §1.12](10_decisions_adr.md#112-spec-안의-adr-번호-불일치)에 있다.

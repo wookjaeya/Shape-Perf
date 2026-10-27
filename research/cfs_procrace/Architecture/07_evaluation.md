@@ -937,7 +937,7 @@ spec이 적은 위협과, 그 위협에 대해 설계가 두는 장치를 함께
 | 모형 충실도 | O1, O2, O6, O8 |
 | probe 교란 | §7의 실험군, witness별 perturbation 비율 |
 | (개정 1.4) 계측 빌드의 컴파일러 차이, 계측 코드, 기록, 런타임 자원 소비 | §7.7의 G-*·L-* 실험군, 같은 빌드의 runtime mode 비교, 컴파일러별 비계측 기준 L-A |
-| (개정 1.4) F0과 계측 backend가 같은 잘못된 의미 대응을 공유 | 소스·API 의미와 실제 포획 값의 독립 점검(spec §6.4 항목 66) |
+| (개정 1.4) F0과 계측 backend가 같은 잘못된 의미 대응을 공유 | 소스·API 의미와 실제 포획 값의 독립 점검(spec §6.4 항목 65) |
 | kernel 표류와 공유 host | 실험군 A 재측정, 교차 실행, cold/warm 층 분리, 분석은 work unit 예산(spec §10.2) |
 | 실행 사이에 남는 유지 상태 | normalization boot |
 | `DECLARED_TRUSTED` 항목(검증하지 못하고 신뢰한 항목) | certificate마다 나열, O9 |

@@ -1,6 +1,6 @@
 # 컴파일러 연결부 후보 1: GCC GIMPLE plugin의 제한된 적합성 확인 (단계 C, 2026-10-26)
 
-- 범위: IR(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`) §5·§5.1, §13.2, §15 단계 C, §15.1의 일곱 질문을 **GCC 13.3 GIMPLE plugin 한 후보**에 대해 증거로 답한다. 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2.3(세 후보 비교 후 하나를 고름), §4(런타임·계측 필수 조건, 구속)를 따른다. 런타임과 ABI는 B1(`kairos/runtime/`, 커밋 `a335519`, `docs/event_semantics.md`)을 **고치지 않고** 썼다.
+- 범위: IR §5·§5.1, §13.2, §15 단계 C, §15.1의 일곱 질문을 **GCC 13.3 GIMPLE plugin 한 후보**에 대해 증거로 답한다. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다. 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2.3(세 후보 비교 후 하나를 고름), §4(런타임·계측 필수 조건, 구속)를 따른다. 런타임과 ABI는 B1(`kairos/runtime/`, 커밋 `a335519`, `docs/event_semantics.md`)을 **고치지 않고** 썼다.
 - 표기: **[F]** 코드·문서에서 확인, **[M]** 이번에 빌드·실행해 확인, **[I]** 추론, **[D]** 설계 결정, **[U]** 미확인.
 - 지위: 시제품과 **pilot/dev 부팅 각 1회**(C1 tx, R2)다. 본 실험 결과가 아니며 반복 횟수·빈도·비용을 주장하지 않는다. 계측 빌드는 기준 빌드의 **파생 구성**이고 차이는 §3에 모두 적었다(CONDITIONS_POLICY). 연구 조건을 새로 고르지 않았다.
 - 산출물(저장소): `kairos/instrument/gcc/` — plugin `kzgcc.cpp`, 논리 site manifest `sites/{c1_post_1df262a,r2_v701}.kzs`, 빌드·실행·대조 스크립트 `scripts/`, 단위 시험 `tests/`, dump 이벤트 출력 도구 `tools/kzgcc_events.c`. 빌드 트리·실행 기록(저장소 밖): `/home/user/work/instr/gcc/{plugin-build,runtime-build,c1,r2,env}`.
@@ -11,7 +11,7 @@
 2. **시제품**: `kzgcc` plugin은 manifest의 논리 site를 읽어, 그 site를 가진 번역 단위에만 B1 hook 호출을 넣는다(호출 전·후, 함수 진입·반환, 포인터 인자를 통한 store). 삽입은 `ssa` 직후(최적화 전), 확인은 `optimized` 직후다. 단위마다 `kzs-sites 1` binding 파일을 쓰고 `bound / inlined / duplicated / removed / unsupported`를 판정한다. 런타임 TU는 거부한다. 단위 시험 6개 통과(-O0/-O2/-O3/-O2 LTO, 무관 단위 불변, 런타임 거부) [M].
 3. **빌드**: C1(Release `-O3`, PIE + `.so`)·R2(debug `-O0 -g`, 단위 시험 포함)를 기준 명령 그대로 빌드했다. 바뀐 객체는 계측한 번역 단위뿐이다(C1: 261개 중 6개, 나머지는 바이트 동일. R2: §3.3) [M].
 4. **대조(IR §13.2)**: C1 tx 부팅의 정체성 표(OSAL task id 17개, 소유 앱 id, 생성 task)와 CF·BP 세마포어 조회·생성 순서(이름, 반환 코드, id)가 F0 smoke3 기록과 **같다**. R2는 §5.2 [M].
-5. **판단(§6)**: 일곱 질문에 대해 이 후보는 C1·R2의 목표 지점을 모두 연결했고, 값은 원 명령의 operand로 전달됐으며, 위치 대응은 plugin 보고·바이너리 검사·실행 pc로 세 번 확인된다. 남은 위험은 GCC 내부 API의 판 고정, 교차 컴파일러의 plugin 지원, 라이선스 선언, `-g` producer 문자열, LTO에서의 확인 지연이다(§7). 세 후보 비교와 선택은 다른 후보의 결과와 함께 한다(PD26 §2.3) [D].
+5. **판단(§6)**: 일곱 질문에 대해 이 후보는 C1·R2의 목표 지점을 모두 연결했고, 값은 원 명령의 operand로 전달됐으며, 위치 대응은 plugin 보고·바이너리 검사·실행 pc로 세 번 확인된다. 남은 위험은 GCC 내부 API의 판 고정, 라이선스 선언, `-g` producer 문자열, LTO에서의 확인 지연이다(§7). 세 후보 비교와 선택은 다른 후보의 결과와 함께 한다(PD26 §2.3) [D].
 
 ## 1. 환경 변경 (PD26 §1 표 마지막 행)
 
@@ -122,13 +122,13 @@
 
 | # | 질문 | 답과 근거 |
 |---|---|---|
-| 1 | 현재 공개 cFS 구성과 필요한 target을 빌드하는가 | **예(호스트 x86-64 Linux, gcc 13.3.0)**. C1 Release(`-O3`, PIE + `.so` 적재 모듈)와 R2 debug(`-O0 -g`, 단위 시험 포함)를 기준 명령으로 빌드했고 경고 0, 바뀐 객체는 계측 단위뿐이다(§3) [M]. 다른 target(RTEMS·VxWorks 교차 GCC)은 plugin 지원(`--enable-plugin`, 같은 판의 plugin 헤더)이 있어야 하며 확인하지 않았다 [U]. |
+| 1 | 현재 공개 cFS 구성과 필요한 target을 빌드하는가 | **예(호스트 x86-64 Linux, gcc 13.3.0)**. C1 Release(`-O3`, PIE + `.so` 적재 모듈)와 R2 debug(`-O0 -g`, 단위 시험 포함)를 기준 명령으로 빌드했고 경고 0, 바뀐 객체는 계측 단위뿐이다(§3) [M]. |
 | 2 | 실제 값·반환·공개 지점을 부작용 없이 전달하는가 | **예, 범위 안에서**. hook 인자는 원 문장의 GIMPLE operand이고, 재평가·store 변경·값 교체가 없다. 결과를 버리던 호출에 결과 이름을 붙이는 것과 hook 호출 추가가 코드에 생기는 변화다(명령 수 증가, §3.3). C1·R2의 이름·반환·id·AppID·저장 값이 F0와 같다(§5). out 값은 호출 직후 같은 스레드의 읽기이며 실패 시에는 이전 내용이다(§5.1). 부작용 없음을 실행 비용 면에서 재지는 않았다 [U]. |
 | 3 | source 위치와 실행 지점의 대응을 설명하는가 | **예**. binding 파일(원 줄·원 함수 → 최종 함수·개수), 링크된 파일의 hook 호출 검사, 실행 시 pc가 서로 맞았다. inlining(BP)이 그대로 보고됐다. 한계: 합쳐진 return에는 줄이 없고(`:0`), RTL 단계의 복제는 plugin이 아니라 링크 뒤 검사가 본다 [M]. |
-| 4 | 초기화 전 관측을 지원하는가 | **예(런타임이 제공)**. hook은 OSAL·cFE에 의존하지 않으므로 OSAL 초기화 중의 task 생성(timebase 등 `0xc0001`, `0x80001`, OS task 전)도 기록됐고, 시작 객체보다 먼저 도는 모듈 생성자의 등록은 attach 전 부트스트랩 경로로 들어갔다(`module 1 actor=?`) [M]. 생성자가 없는 RTOS에서는 하네스가 init/attach를 불러야 한다(B1 열린 항목) [U]. |
+| 4 | 초기화 전 관측을 지원하는가 | **예(런타임이 제공)**. hook은 OSAL·cFE에 의존하지 않으므로 OSAL 초기화 중의 task 생성(timebase 등 `0xc0001`, `0x80001`, OS task 전)도 기록됐고, 시작 객체보다 먼저 도는 모듈 생성자의 등록은 attach 전 부트스트랩 경로로 들어갔다(`module 1 actor=?`) [M]. |
 | 5 | 필요한 미계측 경로를 확인할 수 있는가 | **예, 컴파일 단위 수준까지**. 연결되지 않은 site는 `unsupported`(이유)로, 최적화로 사라진 hook은 `removed`로, 계측하지 않은 coverage 단위는 목록으로 남는다(§2.2, §4). 호출 쪽 site는 다른 호출자를 보지 않음을 manifest가 명시한다(SCH_LAB 예). plugin 없이 미리 빌드된 라이브러리(예: `/usr/local`의 tinycbor)와 간접 호출은 보이지 않으므로 피호출 쪽 binding이 필요하다 [F][M]. |
 | 6 | 같은 runtime에 연결되는가 | **예**. B1 런타임(hook ABI 1, POSIX adapter, 시작 객체)을 수정 없이 링크했고, dump는 `kz-rt-dump --manifest` 검사를 통과했다. `.so` 모듈은 실행 파일이 내보낸 기호로 hook을 부른다(`nm -D`: `cf.so`·`bp.so`는 `U kz_rt_obs`, `core-tx`는 `T`) [M]. |
-| 7 | 연구를 지연시키는 추가 frontend·ABI·모델 작업 | **작다**: frontend 작업 없음(GCC가 그대로 빌드), ABI 모델 없음(값은 operand), 새 형식 없음(`kzs-sites 1`). 대신 GCC 판마다 plugin을 다시 빌드·확인해야 하고(내부 API), 교차 툴체인마다 plugin 헤더가 필요하다. 시제품 크기: plugin 850줄(C++), 스크립트 8개, 시험 6개 [M]. |
+| 7 | 연구를 지연시키는 추가 frontend·ABI·모델 작업 | **작다**: frontend 작업 없음(GCC가 그대로 빌드), ABI 모델 없음(값은 operand), 새 형식 없음(`kzs-sites 1`). 대신 GCC 판마다 plugin을 다시 빌드·확인해야 한다(내부 API). 시제품 크기: plugin 850줄(C++), 스크립트 8개, 시험 6개 [M]. |
 
 IR §15.1의 규칙("GCC plugin이 요구를 충족하면 주 구현으로 진행")에 비추면 이 후보는 C1·R2의 목표 지점에서 요구를 충족했다. 다만 주 구현의 선택은 세 후보의 같은 대조가 끝난 뒤 PI가 한다(PD26 §2.3) [D].
 
@@ -137,12 +137,11 @@ IR §15.1의 규칙("GCC plugin이 요구를 충족하면 주 구현으로 진�
 | 위험 | 내용 | 대응·상태 |
 |---|---|---|
 | GCC 판 고정 | 내부 API·pass 이름(`ssa`, `optimized`, `*free_lang_data`)이 판마다 바뀔 수 있다. 판 검사로 다른 GCC에서는 적재를 거부한다 | 판마다 단위 시험 6개로 확인 [D] |
-| 교차 툴체인 | RTEMS(RSB)·VxWorks GCC의 plugin 지원과 헤더 배포는 미확인 | 두 번째 OS 단계(IR §15 H)에서 확인 [U] |
 | 라이선스 | GCC는 `plugin_is_GPL_compatible`을 선언한 plugin만 적재한다. 저장소에는 LICENSE가 없다 | PI 결정 필요(§9) [U] |
 | `-g` 빌드 | DWARF producer 문자열에 plugin 옵션이 들어가 모든 단위의 디버그 정보가 다르다. 코드·데이터는 같다 | 차이로 기록. `-gno-record-gcc-switches`는 기준 플래그를 바꾸므로 쓰지 않음 [D] |
 | LTO | 비-fat LTO에서는 plugin의 확인이 컴파일 단계에서 끝나지 않는다(계측 자체는 남음) | `check=deferred-to-lto-link` 표시; lto1 단계 확인은 미구현 [U] |
 | 최적화 교란 | hook이 매개변수·결과를 사용하므로 IPA 결정(매개변수 제거, 분할, store 합치기)과 레지스터 배치가 달라질 수 있다 | 객체·명령 수 차이로만 확인, 실행 비용 미측정 [U] |
-| 정적 메모리 | 런타임 bss 약 4.3 MB(B1 상수) | RTOS에서는 `-D`로 줄여야 함(B1 문서 §8.7) [I] |
+| 정적 메모리 | 런타임 bss 약 4.3 MB(B1 상수) | 크기 상수는 `-D`로 바꿀 수 있음(B1 문서 §8.7) [I] |
 | 피호출 쪽 store | 공용 함수의 store(`CFE_ES_GetAppID`)는 모든 호출자를 기록한다(1,519건) | 버퍼 넘침은 `overflow`로 셈; 필요한 호출자만 호출 쪽 site로 [I] |
 | cFE 빌드 주입 | arch 빌드 cache를 configure 뒤에 다시 설정하는 방식은 cFE CMake 구조에 기댄다 | 소스·설정은 바뀌지 않음; 다른 빌드 체계에서는 다시 정해야 함 [I] |
 
@@ -156,7 +155,7 @@ IR §15.1의 규칙("GCC plugin이 요구를 충족하면 주 구현으로 진�
 ## 9. 열린 항목과 PI 결정
 
 - **PI 결정 필요(새)**: `kzgcc.cpp`의 배포 라이선스. GCC는 GPL 호환을 선언한 plugin만 적재하므로 시제품은 그 선언을 담고 있다. 저장소에는 LICENSE가 없고, 어느 레퍼런스도 이 연구 도구의 라이선스를 정하지 않는다(법적·배포 선택). 시제품을 외부에 배포하기 전에 정해야 한다.
-- 미실시: G-I0/G-I(같은 바이너리의 mode off/record) 비교와 hook 비용, 제어 hook의 실제 보류(이번 manifest의 `control` 두 곳은 RECORD 모드라 평가되지 않음), dump → `.kzt` 변환과 `kz replay` 판정, OSAL 내부 점의 binding, 교차 툴체인, lto1 단계 확인.
+- 미실시: G-I0/G-I(같은 바이너리의 mode off/record) 비교와 hook 비용, 제어 hook의 실제 보류(이번 manifest의 `control` 두 곳은 RECORD 모드라 평가되지 않음), dump → `.kzt` 변환과 `kz replay` 판정, OSAL 내부 점의 binding, lto1 단계 확인.
 - 세 후보 비교: Clang 소스 변환 → GCC, LLVM 전용 pass의 같은 대조 결과와 함께 IR §15.1의 세 줄로 고른다(PD26 §2.3).
 
 ## 10. 재현

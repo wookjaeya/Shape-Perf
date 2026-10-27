@@ -186,7 +186,7 @@ SPEC rev 1.3 의 "Formats added in revision 1.3"(ADR-054–ADR-056, C-17)을 구
 
 ## 12. 스키마 개정 3: 중립 사건 층 (SPEC rev 1.4 §2.3, 2026-10-26) [D][M]
 
-- 근거: SPEC rev 1.4 §2.3 "Formats in revision 1.4", 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2 항목 5, 검토 문서(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`, IR) §9.1–§9.2. 연구 조건은 정하지 않았다. 아래 수·이름은 단위 시험 값이거나 파일럿 기록의 값이다.
+- 근거: SPEC rev 1.4 §2.3 "Formats in revision 1.4", 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2 항목 5, IR §9.1–§9.2(IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)). 연구 조건은 정하지 않았다. 아래 수·이름은 단위 시험 값이거나 파일럿 기록의 값이다.
 
 **무엇을 바꿨나** [D]. 실행 컨테이너에 **새 섹션 100–107**(중립 사건 층, `include/kz/schema/kz_neutral.h`)을 더했다. 개정 2와 같은 방식이다: 기존 레코드의 배치·섹션 버전·필드 이름은 하나도 바꾸지 않았고, `KZ_SCHEMA_REVISION` = 3 이 `layout_text()` 첫 줄(`kz-layout abi=1 revision=3`)에 들어가 schema fingerprint와 모든 tool hash가 바뀐다. 새 열거형의 값 0은 모두 가장 보수적이다(`unknown`/`none`/`unresolved`/`undetermined`). 필드의 의미는 `docs/event_semantics.md` §2(공통 사건 정보), §5(실제 제어 기록), §8.4(손실 종류)를 따른다.
 

@@ -1,8 +1,8 @@
 # 사건·제어 공통 의미와 계측 런타임 ABI (2026-10-26)
 
-- 범위: 두 실행 계열(F0, 계측 계열)이 함께 쓰는 **사건 의미, 논리 site manifest, `kzp-hold 1` 제어 의미, 실제 제어 기록, 백엔드 capability, 보류 가능한 문맥**과, 계측 계열의 공통 C 런타임(`kairos/runtime/`, hook ABI 1, dump 형식 1.0). 근거: 검토 문서(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`, 이하 IR) §8, §9, §11, §13.2–13.3, 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(이하 PD26) §2.5, §4(구속), SPEC rev 1.4 §2.3 "neutral event", §4.13 "Common gate and release semantics"·"Cooperative gate", §5.12.
+- 범위: 두 실행 계열(F0, 계측 계열)이 함께 쓰는 **사건 의미, 논리 site manifest, `kzp-hold 1` 제어 의미, 실제 제어 기록, 백엔드 capability, 보류 가능한 문맥**과, 계측 계열의 공통 C 런타임(`kairos/runtime/`, hook ABI 1, dump 형식 1.0). 근거: IR §8, §9, §11, §13.2–13.3, 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(이하 PD26) §2.5, §4(구속), SPEC rev 1.4 §2.3 "neutral event", §4.13 "Common gate and release semantics"·"Cooperative gate", §5.12. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다.
 - 표기: **[F]** 코드·문서에서 확인한 사실, **[M]** 이번에 빌드·실행해 확인, **[D]** 설계 결정, **[I]** 계획·추정, **[U]** 미정. 코드 인용은 커밋 `88bdea9` 기준이다. §3의 binding id 규칙과 §8.2–§8.9는 런타임 0.2.0(dump 형식 1.1, 2026-10-26 단계 D 런타임 개정: 세 후보 문서 §8 "B1 런타임에 필요한 변경"과 `plan/instrumentation_selection_20261026.md` §4 항목 5·6) 기준이다.
-- 지위: 설계와 단위 시험뿐이다. cFS를 계측해 돌리지 않았고 연구 조건을 정하지 않았다. 시험의 값(버퍼 크기, 시간 제한, 이름)은 단위 시험 값이며 실험 조건이 아니다. 런타임의 크기 상수는 도구 용량이고, 실행마다 dump의 RUN 레코드에 기록되며 넘친 것은 손실로 센다(§2.11).
+- 지위: B1(런타임 0.1.0, 커밋 `a335519`)으로 처음 쓸 때는 설계와 단위 시험뿐이었고 cFS를 계측해 돌리지 않았다. 지금(런타임 0.3.0)은 단계 D(C1 네 빌드 × tx·rx와 R2의 G-I 실행, 변환·재생·F0 대조, `plan/results_instr_pilot_20261026.md`)와 단계 F(직렬화 계획 적재, C1 계획 9개 × 4 인스턴스의 G-I-H 실행, `plan/results_instr_gate_20261026.md`, §11)를 마쳤다. 둘 다 pilot/dev 실행이다. 이 문서는 연구 조건을 정하지 않는다. 시험의 값(버퍼 크기, 시간 제한, 이름)은 단위 시험 값이며 실험 조건이 아니다. 런타임의 크기 상수는 도구 용량이고, 실행마다 dump의 RUN 레코드에 기록되며 넘친 것은 손실로 센다(§2.11).
 - 이 문서는 schema 개정 번호·필드 위치를 `.kzt`에 배정하지 않는다(SPEC rev 1.4 "Open after revision 1.4"). 런타임 dump 형식은 `.kzt`가 아니라 호스트에서 `.kzt`로 바꿀 **백엔드 원시 근거**다.
 
 ## 1. 경계: 공통 의미 / 백엔드 binding / 원시 근거 [D]
@@ -204,8 +204,8 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 남는 차이와 읽는 법 [F][I]:
 - OFF에서도 hook 호출 자체(인자 계산, 호출, 반환)와 모듈 등록 생성자(`kz_rt_module`, MODULE 레코드)는 남는다. 이것이 G-I0가 재는 "남은 hook·분기 비용"이다(SPEC §8.6). 런타임 정적 메모리(§8.3)도 모든 G-I*에 같다.
 - OFF의 dump는 사건이 없었다는 기록이 아니라 **기록하지 않았다**는 기록이다(RUN `mode=off`, RUNX `window_mode=off`). 변환기(`lib/trace/kzrt_convert.cpp`)는 RUN `mode`가 off이면 시작 근거(부트스트랩부터 전부)를 주지 않는다 [F]. RUNX를 읽어 창의 모드·원천을 중립 층에 옮기는 것은 변환기의 열린 항목이다(§10).
-- `.preinit_array`는 ELF 실행 파일에만 있고, glibc가 (argc, argv, envp)로 부른다. 그 진입점이 돌지 않는 C 라이브러리(예: musl)에서는 생성자가 `kz_rt_early_mode`를 부르고, 그보다 먼저 돈 hook은 `hooks-before-early`로 드러난다. 생성자가 없는 RTOS에서는 BSP의 첫 코드가 `kz_rt_early_mode`를 부를 수 있다 [U: RTOS 실행 안 함].
-- G-I-H의 계획을 대상에 넣는 길(직렬화된 계획을 `control` 모드의 시작 객체가 읽음)은 단계 F1이다. 지금 `control` 모드의 시작 객체는 계획 없이 돈다(게이트 비활성).
+- `.preinit_array`는 ELF 실행 파일에만 있고, glibc가 (argc, argv, envp)로 부른다. 그 진입점이 돌지 않는 C 라이브러리(예: musl)에서는 생성자가 `kz_rt_early_mode`를 부르고, 그보다 먼저 돈 hook은 `hooks-before-early`로 드러난다.
+- G-I-H의 계획을 대상에 넣는 길(직렬화된 계획을 `control` 모드의 시작 객체가 읽음)은 단계 F1이다. 0.2.0까지 `control` 모드의 시작 객체는 계획 없이 돌았다(게이트 비활성). 0.3.0은 `KZ_RT_PLAN`을 읽는다(§11.1).
 
 ### 8.3 부트스트랩과 actor
 
@@ -213,7 +213,7 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 - attach 뒤: 스레드의 다음 사건에서 run actor 슬롯과 자기 버퍼를 받는다. 같은 셀에 임시 id가 있었으면 ACTOR `boot_link = P<n>`, 근거 `same-cell`이며, aseq는 이어진다(그 actor의 범위는 `first_aseq`부터). 새 스레드는 링크 없이 1부터 [M].
 - **기록 공간(0.2.0)** [D][M]: run actor는 정적 pool 하나(`KZ_RT_POOL_BYTES`, 기본 `KZ_RT_MAX_ACTORS × 65536` = 4 MiB. 0.1.0의 actor별 64 KiB 버퍼 64개와 같은 크기)를 `KZ_RT_CHUNK_BYTES`(기본 4 KiB) chunk로 나눠 쓴다. chunk는 처음 받은 actor만 쓰고(작성자 하나), 레코드는 chunk를 넘지 않는다(chunk 끝의 남는 공간 < 가장 큰 레코드 184 B). chunk를 얻는 일은 pool 계수기의 원자적 덧셈 하나다(잠금·대기 없음). 이 덧셈의 순서도 런타임 내부 순서이며 HB가 아니다(§2.10). actor는 chunk마다 확정 길이와 다음 chunk 연결을 release로 공개한다. dump는 연결을 먼저 acquire로 읽고 길이를 읽는다. 다음 chunk가 있는 chunk는 완결이므로 dump는 actor마다 빈틈 없는 앞부분을 읽는다(`rt_pool_dumps`: 작성자 4 × 3,000 레코드 동안 dump를 반복, ThreadSanitizer 통과). 실행 파라미터 `actor_buf_bytes`(시작 객체: `KZ_RT_ACTOR_QUOTA`)는 actor당 확정 바이트 할당량이다(0 = 없음: pool만 제한). pool이 비거나 할당량에 닿으면 그 레코드를 기다리지 않고 버리고 `overflow`로 센다. 사유(`overflow_quota` / `overflow_pool`)와 버린 바이트(`dropped_bytes`)는 ACTOR에, 합계는 RUNX(`pool_dropped`, `chunks_used`)에 남는다. 그래서 actor의 수요(`buf_bytes + dropped_bytes`)가 기록에서 바로 나온다(§8.9). 한 actor가 pool을 다 쓰면 다른 actor의 기록이 버려질 수 있다. 이것도 actor별 손실로 센다(`rt_pool_empty`).
 - 런타임은 정체성을 대상의 표에서 조회하지 않는다. OSAL task id·앱 id는 manifest 역할이 붙은 관측 값으로만 들어오고, 호스트 결합에서 근거와 함께 연결된다. 슬롯이 모자라면 `actor-table`을 세고 임시 id로 공유 버퍼에 남긴다.
-- 재진입: 스레드가 hook 안에 있을 때 다시 들어오면(signal handler, adapter가 계측 코드를 부른 경우) 기록하지 않고 `reentry`로 센다. per-actor 버퍼는 스레드 셀에 묶이므로 CPU 이동과 무관하고, dump는 확정된 앞부분만 읽으며 쓰는 중이던 레코드는 `partial`로 센다 [M: `rt_loss`]. RTOS의 ISR은 adapter가 ISR용 셀을 주지 않으면 `self_cell`이 NULL을 돌려 미확정 actor로 남아야 한다(OSAL 골격은 아직 ISR을 가르지 않는다) [U].
+- 재진입: 스레드가 hook 안에 있을 때 다시 들어오면(signal handler, adapter가 계측 코드를 부른 경우) 기록하지 않고 `reentry`로 센다. per-actor 버퍼는 스레드 셀에 묶이므로 CPU 이동과 무관하고, dump는 확정된 앞부분만 읽으며 쓰는 중이던 레코드는 `partial`로 센다 [M: `rt_loss`]. ISR은 adapter가 ISR용 셀을 주지 않으면 `self_cell`이 NULL을 돌려 미확정 actor로 남아야 한다(OSAL 골격은 아직 ISR을 가르지 않는다) [U].
 
 ### 8.4 손실 종류 (LOSS `kind`)
 
@@ -226,8 +226,8 @@ void kz_rt_actor_exit(void);                       kz_rt_cell *kz_rt_tls_cell(vo
 | adapter | 상태 | 정체성·시계 | 제어 | 대상 객체 소비 |
 |---|---|---|---|---|
 | POSIX `kz_rt_posix_adapter()` | 동작 [M] | TLS 셀, Linux TID, CLOCK_MONOTONIC | private pthread mutex, actor별 mutex+cond로 실제 대기(시간 제한) | 없음(RESOURCE: private mutex 65, cond 64). OSAL 초기화 전에도 attach 가능 |
-| POSIX 시작 객체 `kzrt-posix-auto`(OBJECT 라이브러리) | 동작 [M] | `.preinit_array` 진입점이 `KZ_RT_MODE`로 `kz_rt_early_mode`를 부르고(§8.2), 생성자가 main 전에 attach + init, 종료 시 stop + dump. 설정은 환경 이름 `KZ_RT_MODE`(off/record/control), `KZ_RT_DUMP`, `KZ_RT_RUN_ID`, `KZ_RT_INSTANCE`, `KZ_RT_ACTOR_QUOTA` → 대상 환경에 더해지므로 기준 실행과의 차이로 기록. build identity는 환경으로 받지 않는다(아래) | 계획은 읽지 않음(하네스가 `kz_rt_plan`; 계획 주입은 단계 F1) | 위와 같음. 정상 `exit` 경로에서만 dump(시그널로 죽으면 없음) [U: cFS 종료 경로에서 확인 안 함] |
-| OSAL `kz_rt_osal_adapter(wait_sems)` | 골격: C1 기준 OSAL `f34759d` 헤더(+ C1 빌드의 생성 `osconfig.h`)로 gcc·clang 컴파일만 [M], target 실행 안 함 | TLS 셀, `OS_GetLocalTime` | OSAL mutex 2(제어·대기표), 이진 세마포어 `wait_sems`개(= 계획의 게이트 수, 하네스가 줌) | RESOURCE origin `target-table`: mutex 2 + binsem `wait_sems` — C1 빌드의 `OS_MAX_MUTEXES 20`, `OS_MAX_BIN_SEMAPHORES 20`(`pre/1df262a/build/osal_public_api/inc/osconfig.h` L72, L65)에서 빠짐. `OS_API_Init` 성공 뒤에만 |
+| POSIX 시작 객체 `kzrt-posix-auto`(OBJECT 라이브러리) | 동작 [M] | `.preinit_array` 진입점이 `KZ_RT_MODE`로 `kz_rt_early_mode`를 부르고(§8.2), 생성자가 main 전에 attach + init, 종료 시 stop + dump. 설정은 환경 이름 `KZ_RT_MODE`(off/record/control), `KZ_RT_DUMP`, `KZ_RT_RUN_ID`, `KZ_RT_INSTANCE`, `KZ_RT_ACTOR_QUOTA` → 대상 환경에 더해지므로 기준 실행과의 차이로 기록. build identity는 환경으로 받지 않는다(아래) | 0.2.0: 계획은 읽지 않음(하네스가 `kz_rt_plan`; 계획 주입은 단계 F1). 0.3.0: `control` 모드에서 `KZ_RT_PLAN`을 읽음(§11.1) | 위와 같음. 정상 `exit` 경로에서만 dump(시그널로 죽으면 없음) [U: cFS 종료 경로에서 확인 안 함] |
+| OSAL `kz_rt_osal_adapter(wait_sems)` | 골격: C1 기준 OSAL `f34759d` 헤더(+ C1 빌드의 생성 `osconfig.h`)로 gcc·clang 컴파일만 [M], target 실행 안 함(0.2.0; 0.3.0의 실행 시험은 §11.5) | TLS 셀, `OS_GetLocalTime` | OSAL mutex 2(제어·대기표), 이진 세마포어 `wait_sems`개(= 계획의 게이트 수, 하네스가 줌) | RESOURCE origin `target-table`: mutex 2 + binsem `wait_sems` — C1 빌드의 `OS_MAX_MUTEXES 20`, `OS_MAX_BIN_SEMAPHORES 20`(`pre/1df262a/build/osal_public_api/inc/osconfig.h` L72, L65)에서 빠짐. `OS_API_Init` 성공 뒤에만 |
 
 **build identity(RUN `backend`·`compiler`·`target`·`manifest_sha256`)** [D][M]. 단계 C의 세 후보 dump에서 이 넷이 비어 있었다(`instr_candidate_gcc.md` §8 항목 2, `instr_candidate_clang.md` §8 항목 1·2, `instr_candidate_llvm.md` §8 항목 2). 이것은 실행의 속성이 아니라 바이너리의 속성이므로 빌드 때 넣는다.
 - 경로: 고정 소스 `runtime/src/kz_rt_build_info.c`를 파생 빌드가 대상 컴파일러로 `-D` 값과 함께 컴파일하고, 그 객체를 실행 파일에 링크한다. CMake로는 런타임 단독 빌드의 캐시 변수 `KZ_RT_BUILD_BACKEND`(필수)·`KZ_RT_BUILD_COMPILER`·`KZ_RT_BUILD_TARGET`·`KZ_RT_BUILD_MANIFEST`가 OBJECT 라이브러리 `kzrt-build-info`를 만든다(함수 `kzrt_build_info()`). 객체로 링크해야 한다. 런타임의 참조가 weak라 archive 안에 두면 끌려오지 않는다.
@@ -266,7 +266,7 @@ reader는 major가 같을 때만 읽고 minor는 무시한다(레코드 끝에 �
 ```
 # Kairos 트리 안 (최상위 CMakeLists.txt가 runtime/을 더함; kz에는 링크하지 않음)
 cmake --build /home/user/work/kairos-build && ctest --test-dir /home/user/work/kairos-build -L runtime
-# 단독 (교차 컴파일러·대상 플래그를 줄 때)
+# 단독 (컴파일러·플래그를 따로 줄 때)
 cmake -S kairos/runtime -B <dir> [-DCMAKE_C_COMPILER=<cc>] [-DKZ_RT_OSAL_INCLUDE_DIRS="<osal>/src/os/inc;<build>/osal_public_api/inc"]
 cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt-decode.a, libkzrt-manifest.a, kz-rt-dump
 # 대상 링크: 실행 파일에  -I kairos/runtime/include  …  libkzrt-posix.a libkzrt.a -lpthread   (또는 libkzrt-osal.a libkzrt.a)
@@ -330,7 +330,7 @@ cmake --build <dir>      # libkzrt.a, libkzrt-posix.a, [libkzrt-osal.a], libkzrt
 - ~~dump → `.kzt` 변환(중립 사건 + 원시 근거 참조)~~ → 2026-10-26 스키마 개정 3(중립 사건 층, 섹션 100–107)과 `kz convert --kzrt`로 구현했다(`docs/schema.md` §12). 호스트 reader의 항목에 스트림 안 위치(`kz_rt_dec_item.offset`)를 더했다(형식 변경 없음). ~~남은 것: 계측 기록의 정체성 결합(생성자·소유 앱)~~ → 2026-10-26 `kzs-sites 2`의 `identity`(§3)와 `kz convert --kzrt`의 결합(`schema.md` §12.3)으로 구현했다 [M].
 - ~~같은 바이너리로 init 이전부터 끄는 모드 원천(§8.2)~~ → 0.2.0의 `kz_rt_early_mode`와 시작 객체의 `.preinit_array`(§8.2). 남은 것: hook별 비용 계수, ISR 셀(§8.3), `each` 게이트 busy의 형식 판 정리(§4).
 - 0.2.0에서 남은 것: 변환기가 RUNX(창의 모드·원천, pool 수요)와 MODULE `registrations`를 중립 층에 옮기는 일(지금은 RUN `mode`만 읽음, §8.2). 파생 빌드 스크립트가 `kzrt-build-info` 객체를 링크하는 일(단계 D6). 두 연결부의 binding id 범위 검사(§3). 시그널·강제 종료 경로의 dump(단계 F3).
-- ~~OSAL adapter의 target 실행~~ → 2026-10-26 `rt_osal_gate`(C1 기준 OSAL로 링크, §11.5). 남은 것: cFS 실행 안에서 OSAL 초기화 뒤 OSAL adapter로 바꾸는 연결부와 그때의 OSAL 객체 소비 실측, 두 번째 OS.
+- ~~OSAL adapter의 target 실행~~ → 2026-10-26 `rt_osal_gate`(C1 기준 OSAL로 링크, §11.5). 남은 것: cFS 실행 안에서 OSAL 초기화 뒤 OSAL adapter로 바꾸는 연결부와 그때의 OSAL 객체 소비 실측.
 - 컴파일러 연결부 세 후보는 이 ABI에 맞춰 시제품을 만든다(단계 C). 런타임을 고칠 필요가 생기면 ABI 판을 올리고 이 문서에 적는다.
 
 ## 11. 계획 적재와 변환 (단계 F, 2026-10-26; 런타임 0.3.0, dump 1.3) [D][M]

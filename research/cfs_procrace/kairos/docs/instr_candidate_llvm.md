@@ -1,6 +1,6 @@
 # 컴파일러 연결부 후보 3: LLVM 새 pass manager plugin의 제한된 적합성 확인 (단계 C, 2026-10-26)
 
-- 범위: IR(사용자 업로드 `Kairos_OS_Independent_Instrumentation_Review_20261026.md`) §5·§5.3, §13.1(L-A/L-I), §13.2, §15 단계 C, §15.1의 일곱 질문을 **고정 LLVM 빌드(`/home/user/work/llvm-project/build`, 커밋 `1053047a`)의 clang에 적재하는 pass plugin 한 후보**에 대해 증거로 답한다. 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2.3, §4(구속), SPEC rev 1.4 ADR-023(Clang 빌드는 자기 비계측 기준선 L-A를 둔 별도 구성으로만)을 따른다. 런타임·ABI는 B1(`kairos/runtime/`, 커밋 `a335519`, `docs/event_semantics.md`)을 **고치지 않고** 썼고, 논리 site는 GCC 후보와 **같은 manifest 파일**(`instrument/gcc/sites/{c1_post_1df262a,r2_v701}.kzs`, sha256 `8dbdd2e8…`, `a4a92b90…`)이다.
+- 범위: IR §5·§5.3, §13.1(L-A/L-I), §13.2, §15 단계 C, §15.1의 일곱 질문을 **고정 LLVM 빌드(`/home/user/work/llvm-project/build`, 커밋 `1053047a`)의 clang에 적재하는 pass plugin 한 후보**에 대해 증거로 답한다. IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)다. 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2.3, §4(구속), SPEC rev 1.4 ADR-023(Clang 빌드는 자기 비계측 기준선 L-A를 둔 별도 구성으로만)을 따른다. 런타임·ABI는 B1(`kairos/runtime/`, 커밋 `a335519`, `docs/event_semantics.md`)을 **고치지 않고** 썼고, 논리 site는 GCC 후보와 **같은 manifest 파일**(`instrument/gcc/sites/{c1_post_1df262a,r2_v701}.kzs`, sha256 `8dbdd2e8…`, `a4a92b90…`)이다.
 - 표기: **[F]** 코드·문서에서 확인, **[M]** 이번에 빌드·실행해 확인, **[I]** 추론, **[D]** 설계 결정, **[U]** 미확인.
 - 지위: 시제품과 **pilot/dev 부팅**(C1 tx·R2 각 L-I 1회, 컴파일러 차이 확인용 L-A 각 1회)이다. 본 실험 결과가 아니며 반복 횟수·빈도·비용을 주장하지 않는다. Clang 빌드는 기준 빌드의 **파생 구성**이고 차이는 §3.1에 모두 적었다(CONDITIONS_POLICY). 연구 조건을 새로 고르지 않았다.
 - LLVM Instrumentor: 로컬 LLVM에 없다(PD26 §1). **사용하지 않았고**, IR이 인용한 상류 커밋 `8da87cd5…`의 소스 두 파일만 읽었다(§9).
@@ -219,10 +219,10 @@ binding 파일은 단위마다 plugin이 쓴 것을 GCC 후보의 `merge_binds.s
 
 | # | 질문 | 답과 근거 |
 |---|---|---|
-| 1 | 현재 공개 cFS 구성과 필요한 target을 빌드하는가 | **예(호스트 x86-64 Linux)**. 단 cFS 빌드 체계의 Clang 대응이 필요하다(T1–T4, §3.1). T3이 없으면 C1 cFE의 GNU 전용 `--whole-archive` 분기 때문에 앱 5개가 적재되지 않는다. T4는 고정 LLVM 빌드에 없는 compiler-rt profile runtime을 요구한다. 번역 뒤 compile·link 명령은 기준과 같고, L-A·L-I가 모두 부팅한다 [M]. 다른 target: clang 자체는 다중 target이지만 이 고정 빌드는 `LLVM_TARGETS_TO_BUILD=host`뿐이다. RTEMS·VxWorks용 target header·library·ABI는 따로 필요하다(IR §13.5) [F][U] |
+| 1 | 현재 공개 cFS 구성과 필요한 target을 빌드하는가 | **예(호스트 x86-64 Linux)**. 단 cFS 빌드 체계의 Clang 대응이 필요하다(T1–T4, §3.1). T3이 없으면 C1 cFE의 GNU 전용 `--whole-archive` 분기 때문에 앱 5개가 적재되지 않는다. T4는 고정 LLVM 빌드에 없는 compiler-rt profile runtime을 요구한다. 번역 뒤 compile·link 명령은 기준과 같고, L-A·L-I가 모두 부팅한다 [M] |
 | 2 | 실제 값·반환·공개 지점을 부작용 없이 전달하는가 | **예, 범위 안에서**. hook 인자는 원 명령의 IR operand이고, 반환은 `call`의 결과 값 그대로다. 재평가·store 변경·값 교체가 없다. 코드에 생기는 변화는 hook 호출, manifest가 선언한 `out` load, 그리고 그에 따른 최적화 판단 변화다(`CF_CFDP_InitEngine` 458 → 328 명령). 값은 F0와 같다(§5). 부작용 없음을 비용 면에서 재지는 않았다 [U] |
 | 3 | source 위치와 실행 지점의 대응을 설명하는가 | **예, 디버그 위치가 있을 때**. R2에서는 `line=`이 디버그 위치로 확인됐고, inline·사본이 binding 파일·링크 뒤 검사·실행 pc로 세 번 맞았다. 디버그 정보가 없는 C1 Release에서는 `line=`을 컴파일러가 확인하지 못하므로 유일 호출일 때만 연결한다(표시함). `-gline-tables-only`를 더하면 확인할 수 있지만 기준 플래그를 바꾸므로 쓰지 않았다 [M][D] |
-| 4 | 초기화 전 관측을 지원하는가 | **예(런타임이 제공)**. hook은 OSAL·cFE에 의존하지 않는다. OSAL 초기화 중 생성된 task(`0x80001`, `0xc0001`)도 기록됐다. 모듈 생성자(`llvm.global_ctors`)의 등록은 부트스트랩 경로로 들어갔다(`module 1 actor=?`). 생성자가 없는 RTOS에서는 하네스가 init/attach를 불러야 한다(B1 열린 항목) [M][U] |
+| 4 | 초기화 전 관측을 지원하는가 | **예(런타임이 제공)**. hook은 OSAL·cFE에 의존하지 않는다. OSAL 초기화 중 생성된 task(`0x80001`, `0xc0001`)도 기록됐다. 모듈 생성자(`llvm.global_ctors`)의 등록은 부트스트랩 경로로 들어갔다(`module 1 actor=?`) [M] |
 | 5 | 필요한 미계측 경로를 확인할 수 있는가 | **예, 번역 단위 수준까지**. 연결 안 된 site는 `unsupported`(이유)로, 사라진 hook은 `removed`로 남고, 건너뛴 coverage 단위는 목록으로 남는다. 호출 쪽 site가 다른 호출자를 보지 않는다는 점은 manifest가 명시한다. 이 clang으로 빌드하지 않은 코드(gcc로 빌드한 런타임과 `/usr/local` tinycbor, cpu2·host 도구)와 간접 호출은 보이지 않는다 [F][M] |
 | 6 | 같은 runtime에 연결되는가 | **예**. B1 런타임을 수정 없이 링크했고, 런타임 파일은 GCC 후보와 바이트가 같다. dump는 `kz-rt-dump --manifest` 검사를 통과했다. clang으로 빌드한 대상과 gcc로 빌드한 런타임이 같은 C ABI로 연결된다 [M] |
 | 7 | 연구를 지연시키는 추가 frontend·ABI·모델 작업 | frontend 작업은 없다. 대신 다음이 생긴다. (a) **cFS 빌드 체계 번역**(T1–T4)을 구성마다 다시 찾아야 한다(C1·R2에서 경고 종류·GNU 분기가 다름). (b) **L-A 기준선이 의무**다(SPEC rev 1.4 ADR-023, IR §16 "Clang/GCC 차이와 계측 차이를 한 변수로 묶었는가"). F0·GCC 기록과의 비교에는 컴파일러 차이가 늘 함께 들어간다(명령 수 2배 차이 등, §3.3). (c) IR이 ABI를 낮춘 형태라서 인자 번호·구조체 값의 대응을 확인하는 일이 남는다. (d) LLVM 판 고정이 필요하다(C++ API·헤더 위치가 판마다 바뀜: 이 판에서 `PassPlugin.h`가 `llvm/Plugins/`로 옮겨짐). 시제품 크기: plugin 881줄(C++), 스크립트 9개, 시험 7개 [M] |
@@ -239,7 +239,6 @@ IR §15.1의 규칙("LLVM의 관측 범위와 개발 자산이 실질적 이점�
 | 디버그 정보 없는 위치 확인 | `-O3` Release에서 `line=` 미확인 | 유일 호출만 연결하고 표시. 근본 대응은 기준 플래그 변경이라 하지 않음 [D] |
 | ABI 낮춤 | `sret`/`byval`은 거부. 구조체를 정수 하나로 합친 것은 IR에서 가려내지 못함 | 목표 site는 스칼라·포인터만. 일반화하려면 clang 측 정보(디버그 형, frontend)가 필요 [I] |
 | LLVM 판 고정 | plugin은 그 빌드의 C++ API에 묶인다 | 판마다 단위 시험 7개로 확인 [D] |
-| 교차 target | 고정 빌드는 host target뿐이다 | 두 번째 OS 단계(IR §15 H)에서 별도 LLVM 빌드가 필요 [U] |
 | 정적 메모리·버퍼 | 런타임 bss 약 4.3 MB(B1 상수). R2의 피호출 쪽 store로 actor 버퍼가 98%까지 참 | 넘치면 `overflow`로 셈. 필요한 호출자만 호출 쪽 site로 [I] |
 | 진단 소음 | 링크 단계의 `-mllvm` 미사용 경고(C1 45, R2 960) | 무해. 링크 플래그와 컴파일 플래그를 나누면 없어짐 [I] |
 | 라이선스 | LLVM은 plugin에 라이선스 선언을 요구하지 않는다(GCC와 다름) | 저장소 LICENSE는 여전히 미정(GCC 후보 §9의 열린 항목) [F] |
@@ -278,7 +277,6 @@ GCC 후보 §8의 1–4가 그대로 해당한다. 이 후보에서 더 보인 �
   - dump → `.kzt` 변환과 `kz replay` 판정
   - OSAL 내부 점의 binding
   - LTO
-  - 교차 target
 - 세 후보 비교: GCC plugin(`instr_candidate_gcc.md`), Clang 소스 변환 → GCC(다른 작업), 이 문서를 IR §15.1의 세 줄로 비교해 고른다(PD26 §2.3).
 
 ## 11. 재현

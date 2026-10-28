@@ -268,7 +268,7 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 
 - ~~계측 기록의 정체성 결합~~ → §12.3.1(`kzs-sites 2`). ~~계측 계열의 초기 스레드~~ → 2026-10-26: RUNX 1.2 `process`(`event_semantics.md` §8.6)의 key를 가진 run actor 하나에 `initial`·`process`를 준다. 1.1 dump에는 `kz convert --kzrt … --process PID`(하네스가 기록한 pid, Linux TID = pid인 run actor 하나, BASIS `convert.harness_process`)를 쓴다. 둘 다 아니면 노트 "initial thread: not recorded"다. 재생 문구는 그 actor의 TID가 pid이면 F0와 같은 "thread id = process id"다. 호출 쪽 out id(`spawn-return id=`)를 쓰는 manifest는 아직 없다(지금은 F0처럼 spawn-id).
 - (2026-10-26) 열린 호출 안의 점이 준 out 값 중 그 슬롯이 store의 operand인 것(`from=operand0`)은 반환 사건에 text `store.out.X`(site label·사건 번호)로도 표시된다. 머리 줄은 `out values from points inside a call N (k of them the operand of a store)`이다. 프로필 RF 규칙의 `stored_out`만 이 표시를 읽는다(`phi_reference.md` 표 RF).
-- ~~NCTL은 기록만 하고 재생이 쓰지 않는다~~ → 2026-10-26 단계 F(P11 결정, PD26 §3): 재생이 NCTL `fire`(사유 `resumed`)마다 제어 간선 하나를 세운다. 시작은 해제 hit의 actor가 그 hit의 관측 사건이나 그 앞에 낸 마지막 사건, 끝은 잡혔던 actor가 같은 게이트의 마지막 `gate-hold` 뒤에 낸 첫 사건이다. 역방향이거나 사건이 없으면 간선을 세우지 않고 그 이유를 적는다. 프로그램 간선만으로 서지 않는 순서가 이 간선으로 서면 근거 종류는 `control-order`다(RF는 그 간선으로도 서지 않을 때만 쓴다). `kz replay --control-order on|off`(기본 on, off = 민감도 읽기 B), BASIS `replay.control_order`, 출력 `realized control:` 줄과 trace의 `control FROM TO LABEL` 줄. 결과는 `plan/results_instr_gate_20261026.md` §3이다. F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다. 그래서 F0 기록에는 이 근거가 없다(P11 읽기 A는 confirm2 `classify.awk`가 따로 계산함).
+- ~~NCTL은 기록만 하고 재생이 쓰지 않는다~~ → 2026-10-26 단계 F(P11 결정, PD26 §3): 재생이 NCTL `fire`(사유 `resumed`)마다 제어 간선 하나를 세운다. 시작은 해제 hit의 actor가 그 hit의 관측 사건이나 그 앞에 낸 마지막 사건, 끝은 잡혔던 actor가 같은 게이트의 마지막 `gate-hold` 뒤에 낸 첫 사건이다. 역방향이거나 사건이 없으면 간선을 세우지 않고 그 이유를 적는다. 프로그램 간선만으로 서지 않는 순서가 이 간선으로 서면 근거 종류는 `control-order`다(RF는 그 간선으로도 서지 않을 때만 쓴다). `kz replay --control-order on|off`(기본 on, off = 민감도 읽기 B), BASIS `replay.control_order`, 출력 `realized control:` 줄과 trace의 `control FROM TO LABEL` 줄. 결과는 `plan/results_instr_gate_20261026.md` §3이다. ~~F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다. 그래서 F0 기록에는 이 근거가 없다(P11 읽기 A는 confirm2 `classify.awk`가 따로 계산함).~~ → 2026-10-28: `kz convert <run.kzt> --hold <hold.kzr>`가 F0 보류 기록을 NCTL로 옮긴다(§13.1, `docs/replay_output.md` §6).
 - `kz hits` 등 F0 섹션을 직접 읽는 다른 명령은 그대로다(계측 기록에는 F0 섹션이 없다).
 - adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다.
 
@@ -287,3 +287,9 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - NCTL 플래그 두 개를 더했다(KZ_NCTL_FLAG): `observed-after-control`(0x2, hit의 관측 사건이 제어가 작용한 뒤에 기록됨), `no-observation-event`(0x4, 기록에 그 hit의 관측 사건이 없음, `event` = none). 쓰는 곳은 F0 보류 기록의 변환이다(§13.1).
 - 읽는 법, 발생 키, `kz occ show|diff`, 이전 컨테이너의 뜻은 `docs/replay_output.md`에 있다.
 - 시험(도구 시험 값): `test_trace_occ_basis`(RF의 두 종류, 제어 순서와 그 간선, 읽기 스위치, 이전 컨테이너 읽기, 키의 경로 무관성, 판정 차이와 근거 차이의 분리) [M].
+
+### 13.1 F0 보류 기록 → NCTL (`kz convert <run.kzt> --hold <hold.kzr>`, `include/kz/trace/hold_nctl.hpp`) [D][M]
+
+- F0 변환(§12.2) 뒤에 hold.kzr의 보류·재개·해제를 NCTL로 더하고 NRUN `control-recorded`를 세운다. BASIS `convert.hold`·`convert.hold.sha256`·`convert.hold.note`, FILE_HASHES에 hold.kzr. 나머지 F0 섹션과 부모는 `kz convert`와 같다.
+- 관측 사건은 trap 뒤 그 actor의 첫 사건이고 점의 site에 있어야 한다. 아니면 `event` = none, `no-observation-event`, 이유는 note. 찾으면 `observed-after-control`. 재생은 그 플래그가 있을 때 간선 시작을 해제 hit 관측의 앞 사건으로, 끝을 게이트 관측 사건 자체로 둔다.
+- 규칙과 confirm2 36회 결과는 `docs/replay_output.md` §6. 시험(도구 시험 값): `test_trace_hold_nctl`(기록 해석, 사실별 대응, 사건 없음의 다섯 경우, 컨테이너 보존, 재생의 제어 간선 끝점) [M].

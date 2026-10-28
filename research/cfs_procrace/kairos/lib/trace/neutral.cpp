@@ -605,9 +605,9 @@ Status add_neutral_sections(const NeutralRun& n, ContainerWriter* w) {
   return s;
 }
 
-Status copy_sections(const Container& src, ContainerWriter* w) {
+Status copy_sections(const Container& src, ContainerWriter* w, const std::vector<uint32_t>& except) {
   for (const kz_section_entry& e : src.section_table()) {
-    if (e.type == KZ_SEC_STRINGS) continue;
+    if (e.type == KZ_SEC_STRINGS || std::find(except.begin(), except.end(), e.type) != except.end()) continue;
     const SectionInfo* info = find_section(e.type);
     if (info == nullptr || info->record == nullptr) return Status::error(Err::BadSection, "section " + std::to_string(e.type) + " is not registered");
     const kz_record_desc& rec = *info->record;

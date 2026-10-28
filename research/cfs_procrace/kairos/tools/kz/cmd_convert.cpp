@@ -1,9 +1,12 @@
 // kz convert -- writes a run container with the neutral event layer (schema revision 3, docs/schema.md section 12).
 //
-//   kz convert <run.kzt> --out <file.kzt>
+//   kz convert <run.kzt> [--hold <hold.kzr>] --out <file.kzt>
 //       an F0 run container: every section unchanged (the backend raw evidence), the neutral layer beside it, the
 //       input as a parent (role 1).  `kz replay` then reads the layer (the replay of a container without it converts
-//       the same way in memory, so both readings agree).
+//       the same way in memory, so both readings agree).  --hold gives the hold record of the run (`kz hold -o`): its
+//       holds, resumes and releases become the layer's realized control records NCTL, each mapped to the observation
+//       event of its hit or kept without one with the reason (kz/trace/hold_nctl.hpp); the record is named in BASIS
+//       (convert.hold, convert.hold.sha256, convert.hold.note) and FILE_HASHES.
 //   kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.kz>] [--process PID] --out <file.kzt>
 //       an instrumented run: a kzrt-dump stream with its site manifests (the logical sites, then the backend's
 //       binding list) -> a run container with the neutral layer only (kz/trace/kzrt_convert.hpp); the dump and the
@@ -21,6 +24,7 @@
 #include "kz/core/container.hpp"
 #include "kz/core/identity.hpp"
 #include "kz/core/registry.hpp"
+#include "kz/trace/hold_nctl.hpp"
 #include "kz/trace/kzrt_convert.hpp"
 #include "kz/trace/neutral.hpp"
 
@@ -28,9 +32,10 @@ namespace {
 
 void usage(FILE* f) {
   std::fprintf(f,
-               "usage: kz convert <run.kzt> --out FILE.kzt\n"
+               "usage: kz convert <run.kzt> [--hold HOLD.kzr] --out FILE.kzt\n"
                "       kz convert --kzrt DUMP --manifest KZS [--manifest KZS]... [--basis BASIS.kz] [--process PID] --out FILE.kzt\n"
                "  <run.kzt>       an F0 run container: kept unchanged, the neutral event layer added (schema revision 3)\n"
+               "  --hold H        (F0) the run's hold record: its holds and releases as the realized control records (NCTL)\n"
                "  --kzrt DUMP     a kzrt-dump stream of an instrumented run, with its site manifests (kzs-sites 1)\n"
                "  --basis B       (with --kzrt) the basis container of the instrumented build, made the parent\n"
                "  --process PID   (with --kzrt) the process id the harness recorded (a dump without RUNX process)\n"
@@ -51,7 +56,7 @@ void print_layer(const kz::trace::NeutralRun& n) {
 }
 
 int run(int argc, char** argv) {
-  std::string in, dump, out, basis_path, process;
+  std::string in, dump, out, basis_path, process, hold;
   std::vector<std::string> manifests;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -74,6 +79,8 @@ int run(int argc, char** argv) {
       if (!value(&basis_path)) return 1;
     } else if (a == "--process") {
       if (!value(&process)) return 1;
+    } else if (a == "--hold") {
+      if (!value(&hold)) return 1;
     } else if (a == "--manifest") {
       std::string m;
       if (!value(&m)) return 1;
@@ -88,7 +95,7 @@ int run(int argc, char** argv) {
       return 1;
     }
   }
-  if (out.empty() || in.empty() == dump.empty() || (!dump.empty() && manifests.empty()) || (dump.empty() && (!manifests.empty() || !basis_path.empty() || !process.empty())) ||
+  if (out.empty() || in.empty() == dump.empty() || (!dump.empty() && manifests.empty()) || (dump.empty() && (!manifests.empty() || !basis_path.empty() || !process.empty())) || (!hold.empty() && in.empty()) ||
       (!process.empty() && process.find_first_not_of("0123456789") != std::string::npos)) {
     usage(stderr);
     return 1;
@@ -100,13 +107,24 @@ int run(int argc, char** argv) {
     s = kz::Container::read_file(in, &c);
     if (s.ok()) s = c.verify_content();
     kz::trace::NeutralRun layer;
-    if (s.ok()) s = kz::trace::convert_f0_container(c, KZ_THIS_TOOL_HASH("kz"), &bytes, &layer);
+    std::vector<std::string> notes;
+    std::string hold_text;
+    if (s.ok() && !hold.empty()) {
+      kz::Bytes hb;
+      s = kz::read_whole_file(hold, &hb);
+      hold_text.assign(hb.begin(), hb.end());
+    }
+    if (s.ok())
+      s = hold.empty() ? kz::trace::convert_f0_container(c, KZ_THIS_TOOL_HASH("kz"), &bytes, &layer)
+                       : kz::trace::convert_f0_container_with_hold(c, hold, hold_text, KZ_THIS_TOOL_HASH("kz"), &bytes, &layer, &notes);
     if (!s.ok()) {
       std::fprintf(stderr, "kz convert: %s: %s\n", in.c_str(), s.describe().c_str());
       return 2;
     }
     std::printf("kz convert %s (F0 run container)\nartifact_sha256 %s\n", in.c_str(), kz::to_hex(c.artifact_hash()).c_str());
+    if (!hold.empty()) std::printf("hold record %s sha256 %s\n", hold.c_str(), kz::to_hex(kz::sha256(hold_text)).c_str());
     print_layer(layer);
+    for (const std::string& note : notes) std::printf("hold: %s\n", note.c_str());
   } else {
     kz::trace::KzrtConvertInput ki;
     ki.dump_name = dump;

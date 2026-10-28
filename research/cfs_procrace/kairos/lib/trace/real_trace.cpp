@@ -516,6 +516,23 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
         if (events[x].aseq <= events[ev].aseq) r = last_tid[x];
       return r;
     };
+    // A hit whose observation was recorded after the control acted on it (KZ_NCTL_FLAG_OBS_AFTER, F0's hold: the trap
+    // stops the thread before the instruction its probe observes): the release acted before its hit's observation, so
+    // the edge starts at the releasing actor's last event before it; the held thread's gate observation is its first
+    // event after its resume, so the edge ends at that observation itself.
+    auto first_at_or_after = [&](uint32_t a, uint32_t ev) -> uint64_t {
+      if (a >= actors.size() || ev >= events.size()) return eval::kNoEvent;
+      for (size_t x : by_actor[a])
+        if (events[x].aseq >= events[ev].aseq) return first_tid[x];
+      return eval::kNoEvent;
+    };
+    auto last_before = [&](uint32_t a, uint32_t ev) -> uint64_t {
+      uint64_t r = eval::kNoEvent;
+      if (a >= actors.size() || ev >= events.size()) return r;
+      for (size_t x : by_actor[a])
+        if (events[x].aseq < events[ev].aseq) r = last_tid[x];
+      return r;
+    };
     for (const kz_nctl& c : n.ctl) {
       if (c.what != KZ_NCTL_WHAT_FIRE || c.reason != KZ_NCTL_REASON_RESUMED) continue;
       ++report->control_resumes;
@@ -528,9 +545,10 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
         report->control_lines.push_back(what + ": no edge (the hold or the release hit has no observation event in the record)");
         continue;
       }
-      const uint64_t from = last_at_or_before(hitter, c.event), to = first_after(c.other, hold->event);
+      const uint64_t from = (c.cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0 ? last_before(hitter, c.event) : last_at_or_before(hitter, c.event);
+      const uint64_t to = (hold->cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0 ? first_at_or_after(c.other, hold->event) : first_after(c.other, hold->event);
       if (from == eval::kNoEvent || to == eval::kNoEvent) {
-        report->control_lines.push_back(what + ": no edge (no mapped event of the releasing actor at or before its hit, or of the held actor after its gate)");
+        report->control_lines.push_back(what + ": no edge (no mapped event of the releasing actor at or before its hit (before it, where the hit was observed after the control), or of the held actor after its gate)");
         continue;
       }
       if (from >= to) {

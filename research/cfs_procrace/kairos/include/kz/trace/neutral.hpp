@@ -83,8 +83,9 @@ bool has_neutral_sections(const Container& run);
 
 Status add_neutral_sections(const NeutralRun& n, ContainerWriter* w);
 
-// Copies every section of `src` into `w` (strings re-interned), unchanged otherwise.
-Status copy_sections(const Container& src, ContainerWriter* w);
+// Copies every section of `src` into `w` (strings re-interned), unchanged otherwise; the sections in `except` are left
+// out (the caller writes them).
+Status copy_sections(const Container& src, ContainerWriter* w, const std::vector<uint32_t>& except = {});
 
 // The converted container of an F0 run container (refused if it already has the neutral layer).
 Status convert_f0_container(const Container& run, const Digest& tool_sha256, Bytes* out, NeutralRun* layer);

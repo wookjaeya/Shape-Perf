@@ -7,6 +7,7 @@ add_library(kz-trace STATIC
   decode_match.cpp
   decode_perf.cpp
   decode_sites.cpp
+  hold_nctl.cpp
   identity_join.cpp
   identity_rule.cpp
   identity_symbols.cpp

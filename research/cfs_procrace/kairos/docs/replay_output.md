@@ -64,3 +64,58 @@ kz occ diff <a.kz> <b.kz>        # 차이가 있으면 종료 코드 3
 - show는 SUMMARIES에서 판정·요약 뷰와 `summary.flags`의 근거·가정만 낸다. 행마다 "store-derived-order, control-order, edges not recorded"를 붙인다. 빈 근거로 채우지 않는다.
 - 키가 없으므로 diff는 위치로 짝짓고 `summary.flags` 범위만 비교한다고 머리에 적는다.
 - 확인: 기존 golden 컨테이너 dump는 바뀌지 않았다(`layout.golden`, `records.golden`만 갱신) [M].
+
+## 6. F0 보류 기록을 공통 제어 입력으로 (`kz convert <run.kzt> --hold <hold.kzr>`, `lib/trace/hold_nctl.cpp`) [D][M]
+
+### 6.1 무엇을 하나
+
+- F0 `kz hold`의 실행 기록 `hold.kzr`에 실제로 한 보류·재개·해제 선도달이 있다(`tools/kz/cmd_hold.cpp`). 이것을 그 실행 컨테이너의 중립 제어 레코드 NCTL로 옮긴다. G-I-H 기록이 재생에 들어가는 길과 같은 길이다(`schema.md` §12.7).
+- 기록의 사실마다:
+  - 보류 줄 → NCTL `gate-hold`(잡힌 스레드의 actor). 해제됐으면 `resume`도(상대 = 해제한 actor).
+  - fire 줄 → NCTL `fire`. 사유 `resumed`/`satisfied`/`consumed`, `deferred`는 기록 그대로.
+  - 점 번호: 게이트 먼저, 다음 해제, 각각 기록 순서. `kz rtplan`이 런타임 점에 주는 번호와 같다. 그래서 제어 간선 규칙 이름(`control:gate<g>/release<p>`)이 두 경로에서 같다.
+  - `site`: 관측기가 그 점의 바이너리·파일 offset에 둔 진입·점 probe(SITES). 반환 probe는 진입과 offset이 같지만 반환을 관측하므로 쓰지 않는다.
+  - 문맥 class: `undeclared`(F0는 문맥을 검사하지 않는다, `event_semantics.md` §4).
+  - `ctl_seq`: supervisor 기록의 시각 순서(같은 시각이면 gate-hold, fire, resume). 제어기의 순서이며 프로그램 순서가 아니다.
+  - `t`: supervisor의 CLOCK_MONOTONIC. `raw_off`: 그 줄의 hold.kzr 안 byte 위치(BASIS `convert.hold.sha256`).
+- BASIS에 `convert.hold`, `convert.hold.sha256`, 사실마다 `convert.hold.note`를 남기고, FILE_HASHES에 hold.kzr를 넣는다. 원래 F0 섹션은 그대로이고 입력이 부모(role 1)다.
+
+### 6.2 관측 사건 대응 (사건을 만들지 않음)
+
+- F0 보류는 점 주소의 명령이 실행되기 전에 debug register trap으로 스레드를 세운다(`probe/hold/supervisor.cpp`). 같은 주소의 uprobe는 그 명령에서 기록되므로, 그 hit의 관측 사건은 trap 뒤 그 스레드의 첫 사건이다 [F].
+- 보류: 잡힌 actor에서 시각이 `held_ns` 뒤인 첫 사건. 그 actor는 `held_ns`와 `release_ns` 사이에 사건이 없어야 한다(서 있었음). 그 사건이 게이트 site여야 한다.
+- fire: hit을 낸 actor에서 시각이 `t_ns` 뒤인 첫 사건. 해제 site여야 한다.
+- 시각은 actor의 사건 가운데 어느 것이 그 hit인지 고르는 데만 쓴다. 두 시각은 같은 CLOCK_MONOTONIC이다(관측기는 perf `use_clockid`, `probe/loader/perf_session.cpp`) [F]. 순서는 제어가 만든 것이고 시계의 것이 아니다.
+- 다음이면 사건 없이 둔다(`event` none, 플래그 `no-observation-event`, 이유는 note): 주소에 probe 없음, trap 뒤 사건 없음, 보류 구간 안의 사건, 첫 사건이 다른 site. 스레드 id에 actor가 없거나 여럿이면 변환하지 않고 note를 남긴다.
+- 사건을 찾은 레코드는 플래그 `observed-after-control`(kz_neutral.h)을 단다. 재생(`real_trace.cpp`)은 이때 제어 간선을 다음처럼 둔다.
+  - 시작: 해제한 actor가 해제 hit의 관측 사건 **앞**에 낸 마지막 사건(해제는 그 관측보다 먼저 작용했다).
+  - 끝: 잡혔던 actor의 게이트 관측 사건 **자체**(재개 뒤 첫 사건이다).
+  - 계측 경로는 게이트 관측 레코드를 대기 전에 쓰고 해제를 관측 레코드 뒤에 평가하므로 그 플래그가 없다. 그래서 간선은 예전 그대로다(그 hit 사건부터, 게이트 뒤 첫 사건까지).
+- 의미는 kzp-hold 1과 P11 그대로다. 제어 순서는 이 제어 실행에서만 유효한 별도 근거 종류다. 보류만으로 값의 부재가 입증되지 않는다. 시작 상태, 다른 writer, 자원 세대, 관측된 제어 위치가 함께 맞아야 한다(재생은 상태 순서의 다른 조건을 그대로 요구한다).
+
+### 6.3 confirm2 36회에 적용 (제어 실행, pilot/dev) [M]
+
+- 같은 제어 사실을 두 경로에 준 비교다. 경로의 우열 주장이 아니다. 실행은 새로 하지 않았다.
+- 입력: `/home/user/work/procrace/c1_runs/confirm2/<W>_<cfg>_<cand>_<inst>/{run.kzt,hold.kzr}`(36회, 계획 9개 × 4 인스턴스). G-I-H는 단계 F의 변환 기록 `/home/user/work/instr/gcc/f1/gih/<run>/replay/run.kzt`와 B′.
+- 읽기: 단계 F의 재생 인수(`replay_gih.sh f0`·`gih`, 프로필 스냅숏 `97a24d8`, 닫힘 `c1prof_i1025[_rx]`). 같은 kz로 두 경로를 읽었다. 스크립트 `instrument/gcc/scripts/f0ctl_confirm2.sh`, 집계 `f0ctl_summary.sh`. 산출물 `/home/user/work/instr/gcc/f0ctl/`(실행마다 `sha256.txt`).
+- 대응: hold.kzr 사실 152개(보류 52, fire 100 = 재개 52 + 선도달 48)가 모두 관측 사건에 대응했다. 사건 없음 0, 변환하지 않음 0.
+- 실제 제어 줄(`control_cmp.sh`)은 36/36 G-I-H와 같다(단계 F와 같은 결과).
+- 제어 순서를 끈 F0 읽기(ctloff, ctloff_p1off)는 단계 F의 F0 재생(`f1/f0re/<run>/{cur,p1off}.kz`)과 36/36 같다(판정·`summary.flags` 근거). NCTL을 더해도 끄면 예전과 같다.
+- `kz occ diff`(F0+보류 기록 대 G-I-H): cur·p1off·ctloff_p1off 세 읽기 모두 36/36에서 판정 차이 0, 근거 차이 0(근거 종류·가정·결과 검사·간선 규칙 포함), 한쪽에만 있는 발생 0.
+- `results_instr_gate_20261026.md` §3의 86(인스턴스당, P1을 끄고 제어 순서도 쓰지 않는 F0 읽기에서 `INCONCLUSIVE(horizon-open)`인 호출)과 그 가운데 제어 순서를 켠 P1 끔 읽기가 판정한 수:
+
+| 계획 | 보류 해소 대상(인스턴스당) | F0 + hold.kzr 판정 | G-I-H 판정 |
+|---|---|---|---|
+| W1 | 25 | 25 | 25 |
+| W2 | 0 | 0 | 0 |
+| W10 | 25 | 25 | 25 |
+| W5 | 2 | 2 | 2 |
+| W6 | 26 | 25 | 25 |
+| W7 | 3 | 2 | 2 |
+| W8 | 2 | 1 | 1 |
+| W11 | 2 | 2 | 2 |
+| W12 | 1 | 1 | 1 |
+| 합 | 86 | 83 | 83 |
+
+- 네 인스턴스가 모두 같다. 남은 3개(W6·W7·W8의 BP0 첫 실패)는 두 경로 모두 그 게이트가 `satisfied`라 제어 간선이 없다.
+- 해석 [I]: 단계 F의 "83/86"은 제어 근거를 판정에 연결한 효과다. 같은 제어 사실을 F0에도 주면 F0도 같은 83을 같은 근거(상태 순서 + 제어 순서, 같은 간선 규칙)로 판정한다. 이 비교에서 두 경로의 판정 차이는 수집·제어 기구에서 생기지 않았다. 이것은 이 36회 제어 실행에 한정된다. 자연 실행이나 다른 계획으로 넓히지 않는다. G-I-H 36회는 경로 대조로만 보고한다(H3에 더하지 않음, PI 결정 2026-10-28).

@@ -1,0 +1,109 @@
+# sites-642.draft.kzs -- DRAFT logical sites of case C5 (nasa/cFE #72) for the instrumented family (kzs-sites 2,
+# kairos/docs/event_semantics.md section 3) on the fixed release cFE 6.4.2 with OSAL 4.1.1 (posix) and the pc-linux
+# PSP 1.2.0.0, built as the release readme says (research/cfs_procrace/plan/c5_execution_basis_20261028.md section 2).
+# DRAFT: not used by any run.  Checked only by a single-unit compile with kzgcc 0.2 (that plan, section 6.3).  There is
+# no F0 counterpart yet (the plan's section 7), so no equiv line.
+#
+# Same labels and site ids as sites-641.draft.kzs so the two versions compare label by label.  Sites 3 and 6 (the
+# unlock before OS_TaskCreate and the re-lock after it) have no statement in 6.4.2: the fix removed them (6.4.1 ->
+# 6.4.2 diff, cases/C5.md F9), so the ids are left out on purpose.  Paths are relative to cFE-6.4.2-OSS-release/
+# (sha256 c64ed2aa...) with osal-4.1.1-release moved to osal/ (sha256 8f0f2b23...).  OSAL, cfe_sb_api.c and sample_app.c
+# are byte-identical to the 6.4.1 tree, and EVS_GetAppID (cfe_evs_utils.c L122-L140) has the same lines (the file differs
+# only from L615, the C3 guard); so those sites repeat the 6.4.1 lines.
+# Nothing here is a research condition.
+kzs-sites 2
+source cfe rev=cFE-6.4.2-OSS-release ref="SourceForge coreflightexec cFE-6.4.2-OSS-release.tar.gz sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f"
+source osal rev=osal-4.1.1-release ref="SourceForge osal osal-4.1.1-release.tar.gz sha256 8f0f2b23d8226256fdb8543bf9fcb560b38434411dc12cb4f7f35b9c19e61d46"
+module 1 name=core-linux.bin source=cfe
+module 2 name=sample_app.so source=cfe
+
+# ---- creator: CFE_ES_AppCreate (cfe_es_apps.c:426-714); one critical section L571-L669 across OS_TaskCreate -------
+site 1 label=es.app_create.entry op=es.app_create phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate line=426 ref="cfe_es_apps.c:426-432"
+value 1 0 role=name_ptr from=arg3 type=ptr ref="AppName (L429)"
+value 1 1 role=priority from=arg4 type=u32 ref="Priority (L430)"
+site 2 label=es.app_create.ret op=es.app_create phase=after tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:512,532,542,636,679,693,705,711"
+value 2 0 role=status from=ret type=s32
+site 4 label=es.app_create.task_create op=es.task_create_call phase=point place=at-call callee=OS_TaskCreate line=619 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:619-625 (inside the lock taken at L571)"
+value 4 0 role=id_ptr from=arg0 type=ptr ref="&CFE_ES_Global.AppTable[i].TaskInfo.MainTaskId"
+value 4 1 role=entry_fn from=arg2 type=ptr ref="(void*)StartAddr"
+value 4 2 role=priority from=arg5 type=u32
+site 5 label=es.app_create.task_create.ret op=es.task_create_call phase=point place=after-call callee=OS_TaskCreate line=619 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:619, 628"
+value 5 0 role=status from=ret type=s32
+value 5 1 role=task_id from=out0 type=u32 ref="MainTaskId as OSAL wrote it (osapi.c:690); valid only when status is OS_SUCCESS"
+site 7 label=es.app_create.pub_used op=es.task_publish phase=point place=store line=652 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:652 TaskTable[TaskId].RecordUsed = TRUE (not executed when the entry was already used, L646-L649)"
+value 7 0 role=value from=operand0 type=u32
+value 7 1 role=addr from=operand1 type=ptr
+site 8 label=es.app_create.pub_appid op=es.task_publish phase=point place=store line=654 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:654 TaskTable[TaskId].AppId = i"
+value 8 0 role=app_id from=operand0 type=u32
+site 9 label=es.app_create.pub_taskid op=es.task_publish phase=point place=store line=655 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:655 TaskTable[TaskId].TaskId = TaskId"
+value 9 0 role=task_id from=operand0 type=u32
+site 10 label=es.app_create.pub_unlock op=es.shared_unlock phase=point place=at-call callee=CFE_ES_UnlockSharedData line=669 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:669"
+value 10 0 role=line from=arg1 type=s32
+# The point that corresponds to the 6.4.1 hold point lies inside the critical section here, so a hold there would
+# keep the lock that the new task's GetAppID needs (C5 A6).  Declared lock-held: the runtime refuses it unless a plan
+# point says ALLOW_LOCK_HELD (event_semantics.md section 7).  Draft: no plan uses it.
+control 5 ctx=lock-held ref="cfe_es_apps.c:571 lock, 669 unlock" note="C5 A6: the fixed code holds the lock here"
+
+# ---- the ES shared-data lock itself (cfe_es_api.c:1849-1899) ------------------------------------------------------
+site 11 label=es.lock.taken op=es.shared_lock phase=point place=after-call callee=OS_MutSemTake tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_LockSharedData ref="cfe_es_api.c:1855"
+value 11 0 role=status from=ret type=s32
+value 11 1 role=line from=param1 type=s32 ref="LineNumber (L1849)"
+site 12 label=es.lock.give op=es.shared_unlock phase=point place=at-call callee=OS_MutSemGive tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_UnlockSharedData ref="cfe_es_api.c:1888"
+value 12 0 role=line from=param1 type=s32 ref="LineNumber (L1883)"
+
+# ---- OSAL task creation (same file as 6.4.1) -----------------------------------------------------------------------
+site 13 label=osal.task_create.entry op=osal.task_create phase=before tu=osal/src/os/posix/osapi.c func=OS_TaskCreate line=480 ref="osapi.c:480-482"
+value 13 0 role=name_ptr from=arg1 type=ptr
+value 13 1 role=entry_fn from=arg2 type=ptr
+identity 13 decoder=spawn-create ref="osapi.c:480-707 (one function; the new thread starts at pthread_create L645)"
+site 14 label=osal.task_create.pthread op=osal.task_create phase=point place=at-call callee=pthread_create line=645 tu=osal/src/os/posix/osapi.c func=OS_TaskCreate ref="osapi.c:645-648 (the new thread may run from here)"
+value 14 0 role=id_cell from=arg0 type=ptr ref="&OS_task_table[possible_taskid].id"
+value 14 1 role=entry_fn from=arg2 type=ptr
+value 14 2 role=name from=param1 type=ptr string=validated bound=20 ref="osapi.c:497 NULL check, 504 strlen(task_name) < OS_MAX_API_NAME (osconfig.h OS_MAX_API_NAME 20)"
+site 15 label=osal.task_create.pthread.ret op=osal.task_create phase=point place=after-call callee=pthread_create line=645 tu=osal/src/os/posix/osapi.c func=OS_TaskCreate ref="osapi.c:645-649"
+value 15 0 role=status from=ret type=s32
+value 15 1 role=thread from=out0 type=u32 ref="the pthread_t stored in OS_task_table[i].id (4 bytes on this target)"
+site 16 label=osal.task_create.id op=osal.task_create phase=point place=store line=690 tu=osal/src/os/posix/osapi.c func=OS_TaskCreate ref="osapi.c:690 *task_id = possible_taskid"
+value 16 0 role=task_id from=operand0 type=u32
+identity 16 decoder=spawn-id id=0 ref="osapi.c:690"
+site 17 label=osal.task_create.ret op=osal.task_create phase=after tu=osal/src/os/posix/osapi.c func=OS_TaskCreate ref="osapi.c:480-707"
+value 17 0 role=status from=ret type=s32
+identity 17 decoder=spawn-return ref="osapi.c:480-707"
+
+# ---- new task: registration in OSAL and in ES -----------------------------------------------------------------------
+site 18 label=es.register_app.entry op=es.register_app phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_RegisterApp line=706 ref="cfe_es_api.c:706-740"
+site 19 label=osal.task_register.self op=osal.task_register phase=point place=after-call callee=pthread_self line=916 tu=osal/src/os/posix/osapi.c func=OS_TaskRegister ref="osapi.c:916"
+value 19 0 role=thread from=ret type=u32 ref="pthread_self() of the task (compare with site 15 slot 1)"
+site 20 label=osal.task_register.announce op=osal.task_register phase=before callee=pthread_setspecific tu=osal/src/os/posix/osapi.c func=OS_TaskRegister ref="osapi.c:938 pthread_setspecific(thread_key, (void *)task_id)"
+value 20 0 role=task_id from=arg1 type=u32 ref="the index found at L921-L928"
+identity 20 decoder=thread-entry id=0 ref="osapi.c:906-948 (the task's own registration; not its first event)"
+site 21 label=osal.task_register.ret op=osal.task_register phase=after tu=osal/src/os/posix/osapi.c func=OS_TaskRegister ref="osapi.c:932 OS_ERR_INVALID_ID, 944 OS_ERROR, 947 OS_SUCCESS"
+value 21 0 role=status from=ret type=s32
+site 22 label=es.register_app.ret op=es.register_app phase=after tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_RegisterApp ref="cfe_es_api.c:706-740 (CFE_ES_ERR_APP_REGISTER L727)"
+value 22 0 role=status from=ret type=s32
+
+# ---- the use: CFE_ES_GetAppID (cfe_es_api.c:785-810) and the lockless lookup (L1812-L1832) ------------------------
+site 23 label=es.get_app_id.entry op=es.get_app_id phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppID line=785 ref="cfe_es_api.c:785"
+value 23 0 role=out_ptr from=arg0 type=ptr
+site 24 label=es.get_app_id.task op=es.get_app_id phase=point place=after-call callee=OS_TaskGetId line=795 tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppID ref="cfe_es_api.c:795 (under the lock taken at L790)"
+value 24 0 role=task_id from=ret type=u32
+site 25 label=es.get_app_id.store_ok op=es.get_app_id phase=point place=store line=802 tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppID ref="cfe_es_api.c:800-803"
+value 25 0 role=app_id from=operand0 type=u32
+site 26 label=es.get_app_id.ret op=es.get_app_id phase=after tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppID ref="cfe_es_api.c:787 initial CFE_ES_ERR_APPID, 808 return"
+value 26 0 role=status from=ret type=s32
+site 27 label=es.get_app_id_int.task op=es.get_app_id_int phase=point place=after-call callee=OS_TaskGetId line=1820 tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppIDInternal ref="cfe_es_api.c:1820"
+value 27 0 role=task_id from=ret type=u32
+site 28 label=es.get_app_id_int.store_ok op=es.get_app_id_int phase=point place=store line=1827 tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppIDInternal ref="cfe_es_api.c:1825-1828"
+value 28 0 role=app_id from=operand0 type=u32
+site 29 label=es.get_app_id_int.ret op=es.get_app_id_int phase=after tu=cfe/fsw/cfe-core/src/es/cfe_es_api.c func=CFE_ES_GetAppIDInternal ref="cfe_es_api.c:1814, 1830"
+value 29 0 role=status from=ret type=s32
+
+# ---- derived outcomes (same lines as 6.4.1) -----------------------------------------------------------------------
+site 30 label=sb.create_pipe.get_app_id op=sb.create_pipe phase=point place=after-call callee=CFE_ES_GetAppID line=224 tu=cfe/fsw/cfe-core/src/sb/cfe_sb_api.c func=CFE_SB_CreatePipe ref="cfe_sb_api.c:173 AppId = 0xFFFFFFFF, 224 status ignored, 237 stored"
+value 30 0 role=status from=ret type=s32
+value 30 1 role=app_id from=out0 type=u32
+site 31 label=evs.get_app_id.ret op=evs.get_app_id phase=after tu=cfe/fsw/cfe-core/src/evs/cfe_evs_utils.c func=EVS_GetAppID ref="cfe_evs_utils.c:122-140"
+value 31 0 role=status from=ret type=s32
+
+# ---- the victim candidate's first event (module 2) ----------------------------------------------------------------
+site 32 label=app.sample.main.entry op=app.main phase=before tu=apps/sample_app/fsw/src/sample_app.c func=SAMPLE_AppMain line=40 ref="sample_app.c:40 (cfe_es_startup.scr L2)"

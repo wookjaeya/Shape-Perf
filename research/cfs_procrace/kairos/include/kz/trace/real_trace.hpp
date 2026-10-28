@@ -21,6 +21,11 @@
 //               with TRUNC set keeps no slot value.  Events of other sites are counted, not replayed.
 //               The order is the container's merged order (time, CPU, arrival); the trace does NOT
 //               declare it established, so the replay never takes it as the order of different actors.
+//   order       (2026-10-28) the merged order is then made a linear extension of the record's known order
+//               (eval::linearize_real_trace: program order, the run's control edges, the rules' edges and matches of a
+//               first pass), the merged order breaking the ties; a record whose merged order already is one is unchanged.
+//               An edge (a control edge included) is refused only where it contradicts that order (report "order" and
+//               "control" lines).
 //   actors      one per thread incarnation (THREADS): the kernel name, made unique with the tid and the
 //               generation where needed; "tid<N>" for a thread without a name.
 //   observed    the labels of the point sites that map: they were attached for the whole record.
@@ -112,6 +117,8 @@ struct RealTraceOptions {
   std::set<std::string> core_request_callers;
   // The static closure (header, "closure"): a FACTS container of the traced binary (not owned), or null.
   const Container* facts = nullptr;
+  // The versions of components (the guards of rules), for the first pass of the linearization (header, "order").
+  std::map<std::string, std::string> versions;
 };
 
 // How the adapter maps one site of the run container: kind 0 not mapped, 1 call of `name` (an operation),
@@ -181,6 +188,9 @@ struct RealTraceReport {
   // the control edges made from them (Trace::control_edges), and per release why no edge was made where none was.
   uint64_t control_records = 0, control_resumes = 0, control_edges = 0;
   std::vector<std::string> control_lines;
+  // The linearization of the merged order (header, "order"): the events it moved and what it says (empty: nothing to say).
+  uint64_t order_moved = 0;
+  std::vector<std::string> order_lines;
 };
 
 // Normalized parameter / role name: lower case, without '_'.

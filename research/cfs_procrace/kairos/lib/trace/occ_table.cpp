@@ -286,8 +286,12 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
       verdicts += "  " + key + ": A " + verdict_text(x) + " | B " + verdict_text(y) + "\n";
     }
     std::string d;
-    if (x.basis != y.basis) d += " basis A " + flags_text("KZ_OCC_BASIS", x.basis) + " B " + flags_text("KZ_OCC_BASIS", y.basis) + ";";
-    if (x.assumptions != y.assumptions) d += " assumptions A " + flags_text("KZ_OCC_ASSUME", x.assumptions) + " B " + flags_text("KZ_OCC_ASSUME", y.assumptions) + ";";
+    // by position (a side without OCC_BASIS): both sides read from summary.flags, so that a kind only OCC_BASIS can hold
+    // is not taken for a difference
+    const uint32_t xb = keyed ? x.basis : basis_of_flags(x.summary_flags), yb = keyed ? y.basis : basis_of_flags(y.summary_flags);
+    const uint32_t xa = keyed ? x.assumptions : assumptions_of_flags(x.summary_flags), ya = keyed ? y.assumptions : assumptions_of_flags(y.summary_flags);
+    if (xb != yb) d += " basis A " + flags_text("KZ_OCC_BASIS", xb) + " B " + flags_text("KZ_OCC_BASIS", yb) + ";";
+    if (xa != ya) d += " assumptions A " + flags_text("KZ_OCC_ASSUME", xa) + " B " + flags_text("KZ_OCC_ASSUME", ya) + ";";
     if (keyed) {
       if (x.outcome != y.outcome) d += " outcome A " + enum_text("KZ_OUTCOME_CHECK", x.outcome) + " B " + enum_text("KZ_OUTCOME_CHECK", y.outcome) + ";";
       if (x.via != y.via) d += " via A {" + x.via + "} B {" + y.via + "};";

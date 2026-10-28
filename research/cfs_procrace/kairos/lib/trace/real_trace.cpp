@@ -496,9 +496,15 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
   // written before the wait; the held thread does nothing between).  The gate hold it ended is that thread's latest hold
   // of the release's gate before the release (ctl_seq, the controller's order).  A deferred release (the hit of a held
   // thread, acted on when it was resumed) orders that hit the same way.  No edge from a satisfied or consumed release, a
-  // timeout, a refusal: the order of those runs came from the scheduler.  An edge that would go back in the merged order
-  // is not made (reported): the order of edges would then not stand.
+  // timeout, a refusal: the order of those runs came from the scheduler.  The merged order does not decide whether an edge
+  // is made: the trace is linearized after it is built (eval::linearize_real_trace, below), and an edge is refused only
+  // where it contradicts program order and the edges taken before it (reported).
   report->control_records = n.ctl.size();
+  struct ControlPending {
+    std::string what;     // the release's name, or the full line where no edge was made
+    uint32_t edge;        // index in out->control_edges, or KZ_NONE32
+  };
+  std::vector<ControlPending> control_pending;
   if (!n.ctl.empty()) {
     std::vector<std::vector<size_t>> by_actor(actors.size());
     for (size_t ei = 0; ei < events.size(); ++ei)
@@ -542,30 +548,26 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
         if (h.what == KZ_NCTL_WHAT_GATE_HOLD && h.actor == c.other && h.gate == c.gate && h.ctl_seq < c.ctl_seq && (hold == nullptr || h.ctl_seq > hold->ctl_seq)) hold = &h;
       const uint32_t hitter = c.subject != KZ_NONE32 ? c.subject : c.actor;
       if (hold == nullptr || hold->event == KZ_NONE32 || c.event == KZ_NONE32) {
-        report->control_lines.push_back(what + ": no edge (the hold or the release hit has no observation event in the record)");
+        control_pending.push_back({what + ": no edge (the hold or the release hit has no observation event in the record)", KZ_NONE32});
         continue;
       }
       const uint64_t from = (c.cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0 ? last_before(hitter, c.event) : last_at_or_before(hitter, c.event);
       const uint64_t to = (hold->cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0 ? first_at_or_after(c.other, hold->event) : first_after(c.other, hold->event);
       if (from == eval::kNoEvent || to == eval::kNoEvent) {
-        report->control_lines.push_back(what + ": no edge (no mapped event of the releasing actor at or before its hit (before it, where the hit was observed after the control), or of the held actor after its gate)");
+        control_pending.push_back(
+            {what + ": no edge (no mapped event of the releasing actor at or before its hit (before it, where the hit was observed after the control), or of the held actor after its gate)",
+             KZ_NONE32});
         continue;
       }
-      if (from >= to) {
-        report->control_lines.push_back(what + ": no edge (#" + std::to_string(from) + " is not before #" + std::to_string(to) + " in the merged order)");
-        continue;
-      }
+      // the merged order is not consulted here: an edge whose start the merged order puts after its end is placed by the
+      // linearization below, and refused only where it contradicts the order already established
       eval::HbEdge edge;
       edge.from = from;
       edge.to = to;
       edge.rule = "control:" + what;
       edge.source = 2;
+      control_pending.push_back({what, static_cast<uint32_t>(out->control_edges.size())});
       out->control_edges.push_back(edge);
-      ++report->control_edges;
-      const eval::TraceEvent& fe = out->events[static_cast<size_t>(from)];
-      const eval::TraceEvent& tv = out->events[static_cast<size_t>(to)];
-      report->control_lines.push_back(what + ": #" + std::to_string(from) + " " + fe.actor + " " + fe.site + " " + eval::phase_text(fe.phase) + " -> #" +
-                                      std::to_string(to) + " " + tv.actor + " " + tv.site + " " + eval::phase_text(tv.phase));
     }
   }
 
@@ -665,6 +667,51 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
     out->losses.push_back(li);
   }
   report->loss_intervals = out->losses.size();
+
+  // ---- the merged order as a linear extension of the known order (eval_trace.hpp linearize_real_trace) ----
+  {
+    eval::Options eo;
+    eo.versions = opt.versions;
+    const std::map<std::string, int64_t> saved = out->ref_consts;
+    for (const auto& kv : opt.consts) out->ref_consts[kv.first] = kv.second;  // the first pass needs the table sizes
+    eval::LinearizeReport lr;
+    s = eval::linearize_real_trace(p, eo, out, &lr);
+    out->ref_consts = saved;
+    if (!s.ok()) return s;
+    report->order_moved = lr.moved;
+    report->order_lines = lr.lines;
+    std::vector<uint32_t> kept_at;  // index in the control edges given -> index in out->control_edges, or KZ_NONE32
+    {
+      size_t r = 0;
+      uint32_t k = 0;
+      const size_t given = out->control_edges.size() + lr.refused_control.size();
+      for (size_t i = 0; i < given; ++i) {
+        if (r < lr.refused_control.size() && lr.refused_control[r] == i) {
+          ++r;
+          kept_at.push_back(KZ_NONE32);
+          continue;
+        }
+        kept_at.push_back(k++);
+      }
+    }
+    for (const ControlPending& c : control_pending) {
+      if (c.edge == KZ_NONE32) {
+        report->control_lines.push_back(c.what);
+        continue;
+      }
+      const uint32_t k = c.edge < kept_at.size() ? kept_at[c.edge] : KZ_NONE32;
+      if (k == KZ_NONE32) {
+        report->control_lines.push_back(c.what + ": no edge (it contradicts program order and the control edges before it)");
+        continue;
+      }
+      ++report->control_edges;
+      const eval::HbEdge& e = out->control_edges[k];
+      const eval::TraceEvent& fe = out->events[static_cast<size_t>(e.from)];
+      const eval::TraceEvent& tv = out->events[static_cast<size_t>(e.to)];
+      report->control_lines.push_back(c.what + ": #" + std::to_string(e.from) + " " + fe.actor + " " + fe.site + " " + eval::phase_text(fe.phase) + " -> #" +
+                                      std::to_string(e.to) + " " + tv.actor + " " + tv.site + " " + eval::phase_text(tv.phase));
+    }
+  }
   return Status::success();
 }
 
@@ -719,6 +766,7 @@ std::string report_text(const RealTraceReport& r) {
     out += "realized control: records " + std::to_string(r.control_records) + ", releases that resumed a held thread " + std::to_string(r.control_resumes) +
            ", control edges " + std::to_string(r.control_edges) + " (P11: an order of this controlled run, a basis kind of its own)\n";
   for (const std::string& l : r.control_lines) out += "control " + l + "\n";
+  for (const std::string& l : r.order_lines) out += "order " + l + "\n";
   out += std::string("loss ") + (r.loss_present ? "reported" : "none reported") + (r.runmeta ? "" : " (no RUNMETA: loss evidence absent, the record is treated as lossy)") +
          ", loss intervals " + std::to_string(r.loss_intervals) + "\n";
   for (const auto& lc : r.loss_cpus)

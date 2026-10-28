@@ -155,7 +155,9 @@ struct Trace {
   // in this run because the controller made it: a basis kind of its own (control-order), never a synchronization of the
   // program.  Used only with Options::control_order.  `rule` names the gate and the release.
   std::vector<HbEdge> control_edges;
-  // The events of the merged order moved to make it a linear extension of the record's known order (0: none).
+  // linearize_real_trace (below) moved events of the merged order (that many), to make it a linear extension of the
+  // record's known order; the event positions are those of the linearized trace.
+  bool linearized = false;
   uint64_t reordered = 0;
   // The order of the events of different actors is established (HB edges or a reliable observed order,
   // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
@@ -494,6 +496,33 @@ struct Result {
 // (not checked, a table without a size); everything the trace does wrong is a finding.
 Status replay(const phi::Profile& p, const Trace& trace, const Options& options, Result* out);
 
+// The merged order of a real record is a representation of the record, never its order (SPEC 5.8): any interleaving
+// that keeps each actor's events in program order represents the same record as long as no known order is broken.
+// The replay reads its trace in that representation, so an edge whose start the representation puts after its end
+// cannot be used (an order of edges must go forward in it).  This makes the representation a linear extension of the
+// record's known order before the replay reads it:
+//   known order  program order (each actor's events as the trace has them), the edges of the profile's rules of a first
+//                pass, the run's realized control (Trace::control_edges), and the uses of reads_from rules and the task
+//                creations of spawn rules that the first pass matched but found merged before their publication or
+//                creating call;
+//   tie-breaker  the merged order itself (the clock and the backend's decode order): among events the known order leaves
+//                unordered the earlier merged one comes first, so a representation that already is a linear extension
+//                is left unchanged;
+//   refused      an edge whose end already precedes its start in the known order taken so far (program order and the
+//                rules' edges first, then the control edges and the matches in their order): it contradicts that order.
+//                A refused control edge is removed from Trace::control_edges; a refused match stays refused by the
+//                replay with its finding.
+// One round (the first pass's edges and matches).  A model trace or a record whose order is established is unchanged.
+// The positions of the loss intervals are kept as intervals covering every event they covered.  A first pass that
+// cannot run (an unusable profile or trace) leaves the trace unchanged and says so; the replay then reports the same.
+struct LinearizeReport {
+  uint64_t moved = 0;                   // events whose position changed
+  std::vector<uint64_t> position;       // old position -> new position (empty: nothing moved)
+  std::vector<size_t> refused_control;  // indices, in the control edges given, of the control edges refused
+  std::vector<HbEdge> matches;          // the reads_from and spawn matches the first pass found merged backwards
+  std::vector<std::string> lines;       // what moved, what was refused and why
+};
+Status linearize_real_trace(const phi::Profile& p, const Options& options, Trace* trace, LinearizeReport* report);
 
 // Parses and resolves the awaited predicate of the observation rule `rule` from text.  It is resolved
 // with the non-out parameters of the poll operation, in order (the layout Options::predicates wants).

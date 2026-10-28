@@ -270,7 +270,7 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - (2026-10-26) 열린 호출 안의 점이 준 out 값 중 그 슬롯이 store의 operand인 것(`from=operand0`)은 반환 사건에 text `store.out.X`(site label·사건 번호)로도 표시된다. 머리 줄은 `out values from points inside a call N (k of them the operand of a store)`이다. 프로필 RF 규칙의 `stored_out`만 이 표시를 읽는다(`phi_reference.md` 표 RF).
 - ~~NCTL은 기록만 하고 재생이 쓰지 않는다~~ → 2026-10-26 단계 F(P11 결정, PD26 §3): 재생이 NCTL `fire`(사유 `resumed`)마다 제어 간선 하나를 세운다. 시작은 해제 hit의 actor가 그 hit의 관측 사건이나 그 앞에 낸 마지막 사건, 끝은 잡혔던 actor가 같은 게이트의 마지막 `gate-hold` 뒤에 낸 첫 사건이다. 역방향이거나 사건이 없으면 간선을 세우지 않고 그 이유를 적는다. 프로그램 간선만으로 서지 않는 순서가 이 간선으로 서면 근거 종류는 `control-order`다(RF는 그 간선으로도 서지 않을 때만 쓴다). `kz replay --control-order on|off`(기본 on, off = 민감도 읽기 B), BASIS `replay.control_order`, 출력 `realized control:` 줄과 trace의 `control FROM TO LABEL` 줄. 결과는 `plan/results_instr_gate_20261026.md` §3이다. ~~F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다. 그래서 F0 기록에는 이 근거가 없다(P11 읽기 A는 confirm2 `classify.awk`가 따로 계산함).~~ → 2026-10-28: `kz convert <run.kzt> --hold <hold.kzr>`가 F0 보류 기록을 NCTL로 옮긴다(§13.1, `docs/replay_output.md` §6).
 - `kz hits` 등 F0 섹션을 직접 읽는 다른 명령은 그대로다(계측 기록에는 F0 섹션이 없다).
-- adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다.
+- adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다. → 2026-10-28: 재생은 병합 순서를 알려진 순서의 선형 확장으로 만든 뒤 읽는다(§13.2). 간선은 그 순서와 모순일 때만 거부한다.
 
 ## 13. 스키마 개정 4: 재생 출력의 발생별 근거 (2026-10-28) [D][M]
 
@@ -293,3 +293,9 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - F0 변환(§12.2) 뒤에 hold.kzr의 보류·재개·해제를 NCTL로 더하고 NRUN `control-recorded`를 세운다. BASIS `convert.hold`·`convert.hold.sha256`·`convert.hold.note`, FILE_HASHES에 hold.kzr. 나머지 F0 섹션과 부모는 `kz convert`와 같다.
 - 관측 사건은 trap 뒤 그 actor의 첫 사건이고 점의 site에 있어야 한다. 아니면 `event` = none, `no-observation-event`, 이유는 note. 찾으면 `observed-after-control`. 재생은 그 플래그가 있을 때 간선 시작을 해제 hit 관측의 앞 사건으로, 끝을 게이트 관측 사건 자체로 둔다.
 - 규칙과 confirm2 36회 결과는 `docs/replay_output.md` §6. 시험(도구 시험 값): `test_trace_hold_nctl`(기록 해석, 사실별 대응, 사건 없음의 다섯 경우, 컨테이너 보존, 재생의 제어 간선 끝점) [M].
+
+### 13.2 병합 순서의 선형화 (`eval::linearize_real_trace`) [D][M]
+
+- 형식 변경은 없다(REPLAY_READ `reordered`만 기록). 어댑터가 trace를 만든 뒤, 사건 순서를 프로그램 순서·제어 간선·첫 패스의 규칙 간선과 뒤로 병합된 reads_from·spawn 짝의 선형 확장으로 만든다. 병합 순서는 동률 해소로만 쓴다. 이미 선형 확장이면 그대로다.
+- 제어 간선은 병합 위치로 거부하지 않고, 알려진 순서와 모순일 때만 거부한다(이유를 적음).
+- 고치기 전후의 도구 시험과 남은 병합 순서 사용은 `docs/replay_output.md` §7. 시험: `test_trace_merge_order` [M].

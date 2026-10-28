@@ -347,6 +347,10 @@ int run(int argc, char** argv) {
   }
   // The constants are given to the adapter as well: the owner kind's table size maps an owner identity
   // to its record key (real_trace.hpp, "owners").
+  for (const std::string& v : versions) {
+    const size_t eq = v.find('=');
+    if (eq != std::string::npos) ropt.versions[v.substr(0, eq)] = v.substr(eq + 1);  // the guards of the linearization's first pass
+  }
   kz::eval::Trace trace;
   kz::trace::RealTraceReport report;
   s = kz::trace::real_trace_from_run(c, p, ropt, &trace, &report);

@@ -43,7 +43,7 @@ mkdir "$OUT/inst" "$OUT/dump" && chown $U:$U "$OUT/inst" "$OUT/dump"
 AS=(setpriv --reuid="$(id -u $U)" --regid="$(id -g $U)" --init-groups --)
 ( cd "$OUT/inst" && "${AS[@]}" tar -xf ../cfs.tar && for n in $INSTS; do "${AS[@]}" mkdir -p "./$n/storage"; done )
 rm -f "$OUT/cfs.tar"
-{ echo "label=pilot/dev boot of the stage D derived (kzgcc) C1 build $CFG/$CAND, group G-I (record), instance $INST recorded (not a main-experiment result)"
+{ echo "label=pilot/dev boot of the derived (kzgcc) C1 build $W ($CFG/$CAND), group G-I (record), instance $INST recorded (not a main-experiment result)"
   echo "kernel=$(uname -r) nproc=$(nproc) run_user=$U ($(id $U)) mqueue.msg_max=$(cat /proc/sys/fs/mqueue/msg_max)"
   for n in $INSTS; do for f in $n/core-$n $n/cf/cf.so $n/cf/bp.so; do echo "file $f sha256=$(sha256sum "$OUT/inst/$f" | cut -c1-64) (build $(sha256sum "$W/ws/exe/$f" | cut -c1-64))"; done; done
   echo "manifest $SITES sha256=$(sha256sum "$SITES" | cut -c1-64)"

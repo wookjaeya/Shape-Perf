@@ -103,6 +103,8 @@ kz occ diff <a.kz> <b.kz>        # 차이가 있으면 종료 코드 3
 
 ### 6.3 confirm2 36회에 적용 (제어 실행, pilot/dev) [M]
 
+> 2026-10-28 주: 아래의 "근거 차이 0"은 프로필 스냅숏 `97a24d8`의 결과다. 현재 프로필로는 판정 차이가 여전히 0이고, 성공 조회의 근거 종류가 F0 RD 대 계측 ST로 다르다(`plan/results_w4w5_20261028.md` §1.3, §4.3).
+
 - 같은 제어 사실을 두 경로에 준 비교다. 경로의 우열 주장이 아니다. 실행은 새로 하지 않았다.
 - 입력: `/home/user/work/procrace/c1_runs/confirm2/<W>_<cfg>_<cand>_<inst>/{run.kzt,hold.kzr}`(36회, 계획 9개 × 4 인스턴스). G-I-H는 단계 F의 변환 기록 `/home/user/work/instr/gcc/f1/gih/<run>/replay/run.kzt`와 B′.
 - 읽기: 단계 F의 재생 인수(`replay_gih.sh f0`·`gih`, 프로필 스냅숏 `97a24d8`, 닫힘 `c1prof_i1025[_rx]`). 같은 kz로 두 경로를 읽었다. 스크립트 `instrument/gcc/scripts/f0ctl_confirm2.sh`, 집계 `f0ctl_summary.sh`. 산출물 `/home/user/work/instr/gcc/f0ctl/`(실행마다 `sha256.txt`).

@@ -182,7 +182,7 @@ N_USED="$(printf '%s\n' "${USED_NAMES}" | grep -c .)"
     echo "item${T}cfs.user${T}${CFS_NORMAL_USER} (run_cfs.sh drops to it with setpriv; README: run as a normal user)${T}from-reference"
     echo "item${T}cfs.binary${T}build-native_std/exe/cpu1/core-cpu1, unmodified${T}from-reference"
     if [ "${START}" = poweron ]; then
-        echo "item${T}start_state${T}R2 common Power-On start: EEPROM.DAT and key files absent (created by the PSP), no SysV shm of the run user, /dev/shm/osal:RAM absent or empty (${TAG}_prior_state/)${T}PI decision 2026-10-28 Q3 (resulting state from-reference, plan/r2_start_poweron_20261028.md)"
+        echo "item${T}start_state${T}R2 common Power-On start (PI decision 2026-10-28 Q3, plan/r2_start_poweron_20261028.md): EEPROM.DAT and key files absent and created by the PSP (cfe_psp_eeprom_mmap_file.c L55 L62, cfe_psp_memory.c L611-615), no SysV shm of the run user, /dev/shm/osal:RAM absent or empty (${TAG}_prior_state/)${T}from-reference"
         echo "deviation${T}cfs.args${T}README L112: ./core-cpu1 with no options${T}./core-cpu1 --reset PO (run_cfs.sh v6 RUN_CFS_ARGS)${T}PI decision 2026-10-28 Q3: Power-On specified explicitly${T}the reset type no longer depends on a boot record left in SysV shm (cfe_psp_start.c L408-434); POWERON either way when no shm exists${T}no"
     fi
     echo "item${T}cfs.working_directory${T}${EXE_DIR} (README L111)${T}from-reference"
@@ -253,6 +253,6 @@ set -e
 
 {
     echo "artifacts (sha256):"
-    for f in "${LOGS}/${TAG}"*; do [ "${f}" = "${DRIVER}" ] || echo "  $(sha256sum "${f}" | cut -c1-64)  ${f##*/}"; done
+    for f in "${LOGS}/${TAG}"*; do if [ -f "${f}" ] && [ "${f}" != "${DRIVER}" ]; then echo "  $(sha256sum "${f}" | cut -c1-64)  ${f##*/}"; fi; done
 } >> "${DRIVER}"
 exit "${RC}"

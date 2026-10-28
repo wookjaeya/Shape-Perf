@@ -40,7 +40,7 @@ M="$OUT/run.meta"; TB=$'\t'
   echo "item${TB}cfs.build${TB}$W/cFS (derive_r2.sh instr; differences D1-D4 in $W/build_instr.record)${TB}deviation"
   echo "item${TB}cfs.start_stop${TB}env/run_cfs.sh operational ci-es-restart-poweron (as observe_cfs_smoke.sh)${TB}from-reference"
   if [ "$START" = poweron ]; then
-    echo "item${TB}start_state${TB}R2 common Power-On start: EEPROM.DAT and key files absent (created by the PSP), no SysV shm of the run user, /dev/shm/osal:RAM absent or empty (prior_state/)${TB}PI decision 2026-10-28 Q3 (resulting state from-reference, plan/r2_start_poweron_20261028.md)"
+    echo "item${TB}start_state${TB}R2 common Power-On start (PI decision 2026-10-28 Q3, plan/r2_start_poweron_20261028.md): EEPROM.DAT and key files absent and created by the PSP (cfe_psp_eeprom_mmap_file.c L55 L62, cfe_psp_memory.c L611-615), no SysV shm of the run user, /dev/shm/osal:RAM absent or empty (prior_state/)${TB}from-reference"
     echo "deviation${TB}cfs.args${TB}README L112: ./core-cpu1 with no options${TB}./core-cpu1 --reset PO (run_cfs.sh v6 RUN_CFS_ARGS)${TB}PI decision 2026-10-28 Q3: Power-On specified explicitly${TB}the reset type no longer depends on a boot record left in SysV shm (cfe_psp_start.c L408-434)${TB}no"
   else
     echo "item${TB}start_state${TB}the exe directory as it is (persist_before.txt); fresh install of the derived build${TB}unspecified_by_reference"

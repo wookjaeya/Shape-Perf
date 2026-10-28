@@ -448,6 +448,7 @@ int run(int argc, char** argv) {
   if (!out_path.empty()) {
     kz::trace::ReplayContainerInput in;
     in.run = &c;
+    in.options = &options;
     in.profile_sha256 = kz::phi::profile_hash(p);
     in.tool_sha256 = KZ_THIS_TOOL_HASH("kz");
     in.basis.push_back({"replay.mode", "real-record"});

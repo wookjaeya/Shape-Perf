@@ -155,6 +155,8 @@ struct Trace {
   // in this run because the controller made it: a basis kind of its own (control-order), never a synchronization of the
   // program.  Used only with Options::control_order.  `rule` names the gate and the release.
   std::vector<HbEdge> control_edges;
+  // The events of the merged order moved to make it a linear extension of the record's known order (0: none).
+  uint64_t reordered = 0;
   // The order of the events of different actors is established (HB edges or a reliable observed order,
   // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
   // (SPEC 5.8), so a value another actor wrote may be any value of the interleavings.
@@ -193,6 +195,9 @@ struct HbEdge {
   // A reads_from edge whose use the record shows successful by the store of its out value on the success path
   // (`stored_out`, a direct capture of the store operand inside the call), not only by its returned code.
   bool by_store = false;
+  // Where the edge comes from: 0 a rule of the profile, 1 a reads_from rule (RF), 2 the run's realized control
+  // (Trace::control_edges).  Informational (the per-occurrence basis of the output container); not compared.
+  uint8_t source = 0;
   bool operator<(const HbEdge& o) const {
     if (to != o.to) return to < o.to;
     if (from != o.from) return from < o.from;
@@ -246,6 +251,10 @@ struct ConjunctResult {
   // Real records of a controlled run: the order of a write it read from another actor rests on the run's realized
   // control (Trace::control_edges; not the program's synchronization, P11).
   bool ctl_order = false;
+  // Real records: the edges between actors on an order it read (indices into Result::order_edges, sorted): every edge
+  // on a happens-before path between the read and a write of another actor of what it read that the read is ordered
+  // with, in the order of the previous pass.  Empty where it read no such write.
+  std::vector<uint32_t> support;
 };
 
 enum class DecidedAt : uint8_t { None, Call, Point, Return };
@@ -347,6 +356,9 @@ struct Occurrence {
   // control (ConjunctResult::ctl_order): the basis kind control-order, apart from the program's synchronization.  Not a
   // KZ_SUMMARY_FLAG bit (the 16 bits are taken): printed with the basis.
   bool control_order = false;
+  // Real records: the edges between actors the result rests on (indices into Result::order_edges, sorted): those of
+  // the fixed conjuncts that read replayed state (ConjunctResult::support).
+  std::vector<uint32_t> support;
   std::vector<std::string> via_names;
   // Real records: how the returned code's mapping was used (P1 conditional): the conditions that held and what the
   // code fixed, or why the mapping does not apply / fixes nothing.  Empty when no mapping was hit.
@@ -462,6 +474,9 @@ struct Result {
   bool partial = false;                // real records: an input error somewhere (SPEC 1.10)
   std::vector<Knowledge> knowledge;    // real records: per kind and location, in profile order
   std::vector<HbEdge> edges;
+  // Real records whose order was read from the edges: the edges of that order (the previous pass's edges and the run's
+  // control edges), which ConjunctResult::support and Occurrence::support index.
+  std::vector<HbEdge> order_edges;
   std::vector<Occurrence> occurrences;
   std::vector<ReplayFinding> findings;
   std::vector<GuardFailure> guard_failures;  // in the order of the events (also listed as findings)
@@ -478,6 +493,7 @@ struct Result {
 // Replays `trace` with a checked profile.  Status Invalid only for an unusable profile or trace
 // (not checked, a table without a size); everything the trace does wrong is a finding.
 Status replay(const phi::Profile& p, const Trace& trace, const Options& options, Result* out);
+
 
 // Parses and resolves the awaited predicate of the observation rule `rule` from text.  It is resolved
 // with the non-out parameters of the poll operation, in order (the layout Options::predicates wants).

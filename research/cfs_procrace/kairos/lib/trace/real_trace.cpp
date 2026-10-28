@@ -541,6 +541,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
       edge.from = from;
       edge.to = to;
       edge.rule = "control:" + what;
+      edge.source = 2;
       out->control_edges.push_back(edge);
       ++report->control_edges;
       const eval::TraceEvent& fe = out->events[static_cast<size_t>(from)];

@@ -12,6 +12,7 @@ add_library(kz-trace STATIC
   identity_symbols.cpp
   kzrt_convert.cpp
   neutral.cpp
+  occ_table.cpp
   real_trace.cpp
   replay_container.cpp
   static_closure.cpp)

@@ -23,9 +23,18 @@
 //   ACTOR_OWNERS  copied from the run container; its `thread`, `creator_thread` and `creation_event` are
 //                 indices into the parent run container's THREADS and RAW_EVENTS;
 //   BASIS         the inputs of the replay the caller gave (constants, versions, options), policy `unset`:
-//                 the container records the value, the caller's reference is not checked here.
+//                 the container records the value, the caller's reference is not checked here;
+//   OCC_BASIS     (schema revision 4, kz_replay.h) one per occurrence, in the order of SUMMARIES: the verdict and summary
+//                 view, every basis kind (store-derived-order and control-order too, which summary.flags has no room
+//                 for), the declared assumptions, the outcome check, the path-independent key (rspec, operation, call
+//                 context, owning application, resource key, text arguments, ordinal) and its run of OCC_EDGES;
+//   OCC_EDGES     the edges between actors the occurrence's result rests on (eval::Occurrence::support into
+//                 eval::Result::order_edges): rule, kind, endpoints in the replayed trace;
+//   REPLAY_READ   one record: every option of the reading (ReplayContainerInput::options; unset without it), the
+//                 control edges of the trace and the events its linearization moved.
 // Nothing here is a verdict about the program beyond the replay result it copies; the container holds no
-// time and no host information, so the same inputs give the same bytes.
+// time and no host information, so the same inputs give the same bytes.  docs/replay_output.md describes the reading
+// of these sections and of a container written before them.
 #pragma once
 
 #include <string>
@@ -45,6 +54,7 @@ struct ReplayContainerInput {
   Digest profile_sha256{};         // the profile that interpreted the record
   Digest tool_sha256{};
   std::vector<std::pair<std::string, std::string>> basis;  // replay inputs, name -> value
+  const eval::Options* options = nullptr;  // the reading in force (REPLAY_READ); null: recorded as unset
 };
 
 // `report` gives the thread identities (tid, generation, creating executor, owner evidence); a report

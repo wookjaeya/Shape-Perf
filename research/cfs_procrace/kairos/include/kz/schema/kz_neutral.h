@@ -226,7 +226,9 @@ enum kz_neutral_section_id {
 /*
  * A realized control record (event_semantics.md 5): what the controller did, apart from the plan.
  * Actors are NACTORS indices; `event` is the observation event of the hit; `ctl_seq` is the order of
- * control decisions (the controller's order, never a program order).
+ * control decisions (the controller's order, never a program order).  `t` is the controller's clock (kzrt: the
+ * runtime's; F0 converted with a hold record: the hold supervisor's CLOCK_MONOTONIC), evidence only.  `raw_off` is
+ * the record's byte offset in the raw stream: kzrt the dump, F0 the hold record (BASIS convert.hold.sha256).
  */
 #define KZ_NCTL_FIELDS(X, T)                                                         \
   X(T, uint64_t, t, )                                                                \
@@ -348,7 +350,15 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, CONSUMED, 3, "consumed") ITEM(P, NO_WAIT, 4, "no-wait") ITEM(P, PRE_ATTACH, 5, "pre-attach") \
   ITEM(P, CONTEXT, 6, "context") ITEM(P, NO_SLOT, 7, "no-slot")
 
-#define KZ_ENUM_NCTL_FLAGS(ITEM, P) /* set */ ITEM(P, DEFERRED, 0x1, "deferred")
+/* DEFERRED: a release of a held thread's hit, acted on when it was resumed (kzp-hold 1 H4).  OBS_AFTER (revision 4): the
+ * hit's observation event was recorded after the control acted on it -- F0's hold traps before the instruction its
+ * probe observes, so a held thread's gate observation follows its resume and a release hit's observation follows the
+ * release; the runtime writes the gate observation before the wait and evaluates a release after its observation
+ * record, so its records have no such flag.  NO_OBS (revision 4): the record has no observation event of this hit
+ * (`event` is KZ_NONE32); why is a note of the conversion. */
+#define KZ_ENUM_NCTL_FLAGS(ITEM, P) /* set */                                         \
+  ITEM(P, DEFERRED, 0x1, "deferred") ITEM(P, OBS_AFTER, 0x2, "observed-after-control") \
+  ITEM(P, NO_OBS, 0x4, "no-observation-event")
 
 /* The holdable context classes (event_semantics.md section 7; values equal to the runtime's).  REGISTRATION_INTERNAL
  * is the class of a point inside the scheduler or the OS abstraction layer's object registration code. */

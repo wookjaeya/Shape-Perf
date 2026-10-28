@@ -3,6 +3,7 @@
 #include "kz/trace/replay_container.hpp"
 
 #include <algorithm>
+#include <cstdio>
 #include <cstring>
 #include <map>
 #include <set>
@@ -183,6 +184,98 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
     adequacy.push_back(a);
   }
 
+  // OCC_BASIS and OCC_EDGES (schema revision 4): the per-occurrence basis, its key and the edges it rests on.
+  std::vector<kz_occ_basis> occ;
+  std::vector<kz_occ_edge> occ_edges;
+  auto hex_join = [](const std::vector<int64_t>& v) {
+    std::string text;
+    char buf[24];
+    for (int64_t x : v) {
+      std::snprintf(buf, sizeof buf, "0x%llx", static_cast<unsigned long long>(x));
+      text += (text.empty() ? "" : ",") + std::string(buf);
+    }
+    return text;
+  };
+  for (size_t i = 0; i < result.occurrences.size(); ++i) {
+    const eval::Occurrence& o = result.occurrences[i];
+    kz_occ_basis b = zeroed<kz_occ_basis>();
+    b.summary = static_cast<uint32_t>(i);
+    b.ordinal = static_cast<uint32_t>(o.ordinal);
+    b.call = static_cast<uint32_t>(o.call);
+    b.decision = o.decided_at != eval::DecidedAt::None ? static_cast<uint32_t>(o.decision) : KZ_NONE32;
+    static const std::pair<uint16_t, uint32_t> kBasis[] = {{KZ_SUMMARY_FLAG_BASIS_DIRECT_CAPTURE, KZ_OCC_BASIS_DIRECT_CAPTURE},
+                                                           {KZ_SUMMARY_FLAG_BASIS_STATE_ORDER, KZ_OCC_BASIS_STATE_ORDER},
+                                                           {KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER, KZ_OCC_BASIS_RETURN_DERIVED_ORDER},
+                                                           {KZ_SUMMARY_FLAG_OUTCOME_NARROWED, KZ_OCC_BASIS_OUTCOME_NARROWED}};
+    for (const auto& k : kBasis)
+      if ((o.basis & k.first) != 0) b.basis |= k.second;
+    if (o.basis_store_order) b.basis |= KZ_OCC_BASIS_STORE_DERIVED_ORDER;
+    if (o.control_order) b.basis |= KZ_OCC_BASIS_CONTROL_ORDER;
+    if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_VIA_SEPARATION) != 0) b.assumptions |= KZ_OCC_ASSUME_VIA_KEY_SEPARATION;
+    if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_OWNER_IDENTITY) != 0) b.assumptions |= KZ_OCC_ASSUME_OWNER_IDENTITY_TARGETS;
+    if ((o.assumptions & KZ_SUMMARY_FLAG_ASSUMES_ROLE) != 0) b.assumptions |= KZ_OCC_ASSUME_ROLE;
+    if ((o.basis & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0 || o.basis_store_order) b.assumptions |= KZ_OCC_ASSUME_READS_FROM;
+    b.obs_reasons = o.summary.obs_reasons;
+    b.status = o.summary.status;
+    b.status_flags = o.summary.status_flags;
+    b.observation = o.summary.observation;
+    b.outcome = static_cast<uint8_t>(o.outcome);
+    b.relation = o.summary.relation;
+    b.owner_key = KZ_NONE32;
+    const auto lv = trace.owner_levels.find(o.actor);
+    const auto ok = trace.owners.find(o.actor);
+    if (lv != trace.owner_levels.end() && lv->second != KZ_OWNER_LEVEL_UNDETERMINED && ok != trace.owners.end() && ok->second.size() == 1) {
+      b.owner_level = lv->second;
+      b.owner_key = static_cast<uint32_t>(ok->second.front());
+    }
+    const auto ti = by_actor.find(o.actor);
+    b.owner_app = w.intern(ti != by_actor.end() ? report.identities[ti->second].app_name : std::string());
+    b.rspec = w.intern(o.rspec);
+    b.op = w.intern(o.call < trace.events.size() ? trace.events[static_cast<size_t>(o.call)].site : std::string());
+    b.context = w.intern(o.context);
+    b.resource = w.intern(o.key_known ? hex_join(o.key) : std::string());
+    std::string name;
+    if (o.call < trace.events.size())
+      for (const auto& t : trace.events[static_cast<size_t>(o.call)].texts)
+        if (t.first.compare(0, 4, "arg.") == 0) name += (name.empty() ? "" : ";") + t.first.substr(4) + "=" + t.second;
+    b.name = w.intern(name);
+    std::string via;
+    for (const std::string& v : o.via_names) via += (via.empty() ? "" : ";") + v;
+    b.via = w.intern(via);
+    b.first_edge = static_cast<uint32_t>(occ_edges.size());
+    for (uint32_t ei : o.support) {
+      if (ei >= result.order_edges.size()) continue;
+      const eval::HbEdge& e = result.order_edges[ei];
+      kz_occ_edge x = zeroed<kz_occ_edge>();
+      x.occurrence = static_cast<uint32_t>(i);
+      x.from = static_cast<uint32_t>(e.from);
+      x.to = static_cast<uint32_t>(e.to);
+      x.kind = e.source == 2 ? KZ_OCC_EDGE_KIND_CONTROL : e.source == 1 ? KZ_OCC_EDGE_KIND_READS_FROM : KZ_OCC_EDGE_KIND_RULE;
+      if (e.by_store) x.flags |= KZ_OCC_EDGE_FLAG_BY_STORE;
+      x.rule = w.intern(e.rule);
+      occ_edges.push_back(x);
+    }
+    b.n_edges = static_cast<uint32_t>(occ_edges.size()) - b.first_edge;
+    occ.push_back(b);
+  }
+  // REPLAY_READ: the reading in force.
+  kz_replay_read rd = zeroed<kz_replay_read>();
+  rd.format = 1;
+  rd.control_edges = static_cast<uint32_t>(trace.control_edges.size());
+  rd.reordered = static_cast<uint32_t>(trace.reordered);
+  if (in.options != nullptr) {
+    auto sw = [](bool on) { return static_cast<uint8_t>(on ? KZ_READ_SWITCH_ON : KZ_READ_SWITCH_OFF); };
+    rd.outcome_narrowing = sw(in.options->outcome_narrowing);
+    rd.owner_identity_targets = sw(in.options->owner_identity_targets);
+    rd.reads_from_edges = sw(in.options->reads_from_edges);
+    rd.reads_from_outcome = sw(in.options->reads_from_outcome);
+    rd.control_order = sw(in.options->control_order);
+    rd.relation_rule = in.options->relation_rule == eval::Options::RelationRule::Occurrence  ? KZ_RELATION_RULE_P10_OCCURRENCE
+                       : in.options->relation_rule == eval::Options::RelationRule::AllWrites ? KZ_RELATION_RULE_CLEARING_COUNTED
+                                                                                             : KZ_RELATION_RULE_CLEARING_EXCLUDED;
+  }
+  std::vector<kz_replay_read> reading{rd};
+
   // ACTOR_OWNERS, copied from the run container (indices into the parent's sections).
   std::vector<kz_app_owner> owners;
   if (in.run != nullptr) {
@@ -202,6 +295,9 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
   if (s.ok()) s = w.add_section(KZ_SEC_OBS_ADEQUACY, adequacy);
   if (s.ok()) s = w.add_section(KZ_SEC_IDENTITIES, identities);
   if (s.ok() && in.run != nullptr && in.run->find_section(KZ_SEC_ACTOR_OWNERS) != nullptr) s = w.add_section(KZ_SEC_ACTOR_OWNERS, owners);
+  if (s.ok()) s = w.add_section(KZ_SEC_OCC_BASIS, occ);
+  if (s.ok()) s = w.add_section(KZ_SEC_OCC_EDGES, occ_edges);
+  if (s.ok()) s = w.add_section(KZ_SEC_REPLAY_READ, reading);
   if (!s.ok()) return s;
   return w.finish(out);
 }

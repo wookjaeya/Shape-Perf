@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=3
+kz-layout abi=1 revision=4
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -891,6 +891,50 @@ record kz_nctl size=64 fields=17
   cflags offset=51 size=1 count=1 kind=u8
   rsv0 offset=52 size=4 count=1 kind=u32
   raw_off offset=56 size=8 count=1 kind=u64
+record kz_occ_basis size=104 fields=24
+  summary offset=0 size=4 count=1 kind=u32
+  ordinal offset=4 size=4 count=1 kind=u32
+  call offset=8 size=4 count=1 kind=u32
+  decision offset=12 size=4 count=1 kind=u32
+  basis offset=16 size=4 count=1 kind=u32
+  assumptions offset=20 size=4 count=1 kind=u32
+  first_edge offset=24 size=4 count=1 kind=u32
+  n_edges offset=28 size=4 count=1 kind=u32
+  owner_key offset=32 size=4 count=1 kind=u32
+  obs_reasons offset=36 size=4 count=1 kind=u32
+  status offset=40 size=1 count=1 kind=u8
+  status_flags offset=41 size=1 count=1 kind=u8
+  observation offset=42 size=1 count=1 kind=u8
+  outcome offset=43 size=1 count=1 kind=u8
+  owner_level offset=44 size=1 count=1 kind=u8
+  relation offset=45 size=1 count=1 kind=u8
+  rsv0 offset=46 size=2 count=1 kind=u16
+  rspec offset=48 size=8 count=1 kind=str
+  op offset=56 size=8 count=1 kind=str
+  context offset=64 size=8 count=1 kind=str
+  resource offset=72 size=8 count=1 kind=str
+  name offset=80 size=8 count=1 kind=str
+  owner_app offset=88 size=8 count=1 kind=str
+  via offset=96 size=8 count=1 kind=str
+record kz_occ_edge size=24 fields=7
+  occurrence offset=0 size=4 count=1 kind=u32
+  from offset=4 size=4 count=1 kind=u32
+  to offset=8 size=4 count=1 kind=u32
+  kind offset=12 size=1 count=1 kind=u8
+  flags offset=13 size=1 count=1 kind=u8
+  rsv0 offset=14 size=2 count=1 kind=u16
+  rule offset=16 size=8 count=1 kind=str
+record kz_replay_read size=20 fields=10
+  format offset=0 size=4 count=1 kind=u32
+  control_edges offset=4 size=4 count=1 kind=u32
+  reordered offset=8 size=4 count=1 kind=u32
+  outcome_narrowing offset=12 size=1 count=1 kind=u8
+  owner_identity_targets offset=13 size=1 count=1 kind=u8
+  reads_from_edges offset=14 size=1 count=1 kind=u8
+  reads_from_outcome offset=15 size=1 count=1 kind=u8
+  control_order offset=16 size=1 count=1 kind=u8
+  relation_rule offset=17 size=1 count=1 kind=u8
+  rsv0 offset=18 size=2 count=1 kind=u16
 enum KZ_ARTIFACT
   0x0 NONE "none"
   0x1 BASIS "basis"
@@ -1824,6 +1868,8 @@ enum KZ_NCTL_REASON
   0x7 NO_SLOT "no-slot"
 flags KZ_NCTL_FLAG
   0x1 DEFERRED "deferred"
+  0x2 OBS_AFTER "observed-after-control"
+  0x4 NO_OBS "no-observation-event"
 enum KZ_NCTX
   0x0 UNDECLARED "undeclared"
   0x1 TASK "task"
@@ -1832,6 +1878,43 @@ enum KZ_NCTX
   0x4 REGISTRATION_INTERNAL "registration-internal"
   0x5 TERMINATING "terminating"
   0x6 UNSUPPORTED "unsupported"
+flags KZ_OCC_BASIS
+  0x1 DIRECT_CAPTURE "direct-capture"
+  0x2 STATE_ORDER "state-order"
+  0x4 RETURN_DERIVED_ORDER "return-derived-order"
+  0x8 OUTCOME_NARROWED "outcome-narrowed"
+  0x10 STORE_DERIVED_ORDER "store-derived-order"
+  0x20 CONTROL_ORDER "control-order"
+flags KZ_OCC_ASSUME
+  0x1 VIA_KEY_SEPARATION "via-key-separation"
+  0x2 OWNER_IDENTITY_TARGETS "owner-identity-targets"
+  0x4 READS_FROM "reads-from-edges"
+  0x8 ROLE "role"
+enum KZ_OUTCOME_CHECK
+  0x0 NOT_CHECKED "not-checked"
+  0x1 AGREES "agrees"
+  0x2 DISAGREES "disagrees"
+  0x3 UNMAPPED "unmapped"
+  0x4 NARROWED "narrowed"
+  0x5 AGREES_RETURN_DERIVED "agrees-return-derived"
+  0x6 INAPPLICABLE "inapplicable"
+  0x7 CONSISTENT "consistent"
+enum KZ_OCC_EDGE_KIND
+  0x0 UNKNOWN "unknown"
+  0x1 RULE "rule"
+  0x2 READS_FROM "reads-from"
+  0x3 CONTROL "control"
+flags KZ_OCC_EDGE_FLAG
+  0x1 BY_STORE "by-store"
+enum KZ_READ_SWITCH
+  0x0 UNSET "unset"
+  0x1 OFF "off"
+  0x2 ON "on"
+enum KZ_RELATION_RULE
+  0x0 UNSET "unset"
+  0x1 P10_OCCURRENCE "P10-occurrence"
+  0x2 CLEARING_COUNTED "sensitivity-clearing-writes-counted"
+  0x3 CLEARING_EXCLUDED "sensitivity-clearing-writes-excluded"
 section STRINGS type=1 record=kz_byte version=1
 section BASIS type=2 record=kz_basis_item version=1
 section FILE_HASHES type=3 record=kz_file_hash version=1
@@ -1901,6 +1984,9 @@ section NVALUES type=104 record=kz_nvalue version=1
 section NACTORS type=105 record=kz_nactor version=1
 section NLOSS type=106 record=kz_nloss version=1
 section NCTL type=107 record=kz_nctl version=1
+section OCC_BASIS type=108 record=kz_occ_basis version=1
+section OCC_EDGES type=109 record=kz_occ_edge version=1
+section REPLAY_READ type=110 record=kz_replay_read version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2216,4 +2302,29 @@ format kz_nctl.reason enum KZ_NCTL_REASON
 format kz_nctl.ctx enum KZ_NCTX
 format kz_nctl.cflags flags KZ_NCTL_FLAG
 format kz_nctl.raw_off hex 0
-fingerprint=2bb610fd0d72da09c6ef36cc7cf683193bb55cac629d856900006a144f0f5f04
+format kz_occ_basis.summary idx 0
+format kz_occ_basis.call idx 0
+format kz_occ_basis.decision idx 0
+format kz_occ_basis.basis flags KZ_OCC_BASIS
+format kz_occ_basis.assumptions flags KZ_OCC_ASSUME
+format kz_occ_basis.first_edge idx 0
+format kz_occ_basis.owner_key idx 0
+format kz_occ_basis.obs_reasons flags KZ_WITHHOLD
+format kz_occ_basis.status enum KZ_OCC
+format kz_occ_basis.status_flags flags KZ_STATUS_FLAG
+format kz_occ_basis.observation enum KZ_OBS
+format kz_occ_basis.outcome enum KZ_OUTCOME_CHECK
+format kz_occ_basis.owner_level enum KZ_OWNER_LEVEL
+format kz_occ_basis.relation enum KZ_EXEC_RELATION
+format kz_occ_edge.occurrence idx 0
+format kz_occ_edge.from idx 0
+format kz_occ_edge.to idx 0
+format kz_occ_edge.kind enum KZ_OCC_EDGE_KIND
+format kz_occ_edge.flags flags KZ_OCC_EDGE_FLAG
+format kz_replay_read.outcome_narrowing enum KZ_READ_SWITCH
+format kz_replay_read.owner_identity_targets enum KZ_READ_SWITCH
+format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
+format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
+format kz_replay_read.control_order enum KZ_READ_SWITCH
+format kz_replay_read.relation_rule enum KZ_RELATION_RULE
+fingerprint=f62975b585224512d5e9bc908091bad04b74656f26eec469d94f7266ebbc27b4

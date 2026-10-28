@@ -347,6 +347,7 @@ struct RealEval {
   bool ctl_order = false;             // a write it read is ordered with it by the run's realized control (P11)
   bool via = false;                   // a kind or location it read is fixed by a coverage with `via` separation
   std::vector<std::string> via_names;
+  std::set<uint32_t> support;         // the edges on the orders it read (ConjunctResult::support)
 };
 
 bool exact_key(const AVal& r, std::vector<int64_t>* key) {
@@ -375,6 +376,7 @@ struct IntervalRead {
   uint32_t adequacy = kAllAdequacy;
   bool contradicted = false;
   bool state_read = false, rf_order = false, rd_order = false, via = false, owner_identity = false, ctl_order = false;
+  std::set<uint32_t> support;
 };
 
 struct Frame {
@@ -490,6 +492,7 @@ struct Prior {
   // read ordered only with the control edges is told apart (ConjunctResult::ctl_order).  hb_no_rf and hb_no_rd keep them.
   bool has_ctl = false, has_rf = false;
   HbOrder hb_no_ctl, hb_natural;
+  std::vector<HbEdge> hb_edges;  // the edges hb was built from (Result::order_edges)
   WriteLog writes;
   // The first pass's scope points (kNoEvent: not in the record): the SHUTDOWN_REQ and TEARDOWN points.
   uint64_t request = ~static_cast<uint64_t>(0);
@@ -548,7 +551,7 @@ class Replayer {
   const WriteLog& writes() const { return log_; }
   // without_rf: the order of the same edges less those of reads_from rules (false, nothing built, where there is none);
   // returned_only: less only the reads_from edges that no success-path store supports (HbEdge::by_store).
-  bool order_of_edges(HbOrder* out, std::string* why, bool without_rf = false, bool returned_only = false) const {
+  bool order_of_edges(HbOrder* out, std::string* why, bool without_rf = false, bool returned_only = false, std::vector<HbEdge>* used = nullptr) const {
     if (any_handler_) {
       *why = "an actor began a new handler (program order is not one chain per actor)";
       return false;
@@ -556,9 +559,9 @@ class Replayer {
     const uint64_t limit = r_.terminated ? r_.terminal_event + 1 : t_.events.size();
     const bool ctl = control_edges_used();  // the run's control edges are part of every order here (P11)
     if (!without_rf) {
-      if (!ctl) return build_hb_order(t_, r_.edges, limit, out, why);
       std::vector<HbEdge> all = r_.edges;
-      all.insert(all.end(), t_.control_edges.begin(), t_.control_edges.end());
+      if (ctl) all.insert(all.end(), t_.control_edges.begin(), t_.control_edges.end());
+      if (used != nullptr) *used = all;
       return build_hb_order(t_, all, limit, out, why);
     }
     std::vector<HbEdge> kept;
@@ -669,6 +672,7 @@ class Replayer {
   bool ordered_at(const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, bool* rf_needed = nullptr,
                   bool* rd_needed = nullptr, bool* ctl_needed = nullptr) const;
   bool ordered_in(const HbOrder& hb, const std::set<uint64_t>& writes, const std::set<uint64_t>* more, uint64_t at, const std::string& reader, std::vector<uint64_t>* left_out) const;
+  void support_of(const std::set<uint64_t>& writes, uint64_t at, const std::string& reader, std::set<uint32_t>* out) const;
   bool clearing_value(int32_t loc, int64_t v) const;
   void fix_start_kind(int32_t kind, const std::string& what, uint64_t event);
   void fix_start_loc(int32_t loc, const std::string& what, uint64_t event);
@@ -1122,6 +1126,39 @@ bool Replayer::ordered_at(const std::set<uint64_t>& writes, const std::set<uint6
   return true;
 }
 
+// The edges between actors on the orders a read at `at` by `reader` rests on: for each write of another actor that the
+// previous pass's order puts before the read (or after it), the edges of one happens-before path from the write to the
+// read (or from the read to the write).  The path is found backwards from its end: on the chain of the current actor,
+// the earliest edge into it at or before the current event whose start follows the path's start (the edge closest to
+// the path's start), until the path's start actor is reached (program order).  Indices into Prior::hb_edges (Result::order_edges).
+void Replayer::support_of(const std::set<uint64_t>& writes, uint64_t at, const std::string& reader, std::set<uint32_t>* out) const {
+  const HbOrder& hb = prior_->hb;
+  const size_t n = hb.vc.size();
+  if (at >= n) return;
+  auto leq = [&](uint64_t a, uint64_t b) { return a == b || hb.before(a, b); };
+  auto actor = [&](uint64_t e) -> const std::string& { return t_.events[static_cast<size_t>(e)].actor; };
+  // one path from `from` to `to` (from happens before to, different actors)
+  auto path = [&](uint64_t from, uint64_t to) {
+    uint64_t cur = to;
+    for (size_t steps = 0; actor(cur) != actor(from) && steps <= prior_->hb_edges.size(); ++steps) {
+      size_t best = prior_->hb_edges.size();
+      for (size_t i = 0; i < prior_->hb_edges.size(); ++i) {
+        const HbEdge& e = prior_->hb_edges[i];
+        if (e.from >= n || e.to >= n || e.to > cur || actor(e.to) != actor(cur) || actor(e.from) == actor(e.to) || !leq(from, e.from)) continue;
+        if (best == prior_->hb_edges.size() || e.to < prior_->hb_edges[best].to) best = i;
+      }
+      if (best == prior_->hb_edges.size()) return;  // not reached: no path through these edges (not expected)
+      out->insert(static_cast<uint32_t>(best));
+      cur = prior_->hb_edges[best].from;
+    }
+  };
+  for (uint64_t w : writes) {
+    if (w >= n || actor(w) == reader) continue;
+    if (w < at && hb.before(w, at)) path(w, at);
+    else if (w > at && hb.before(at, w)) path(at, w);
+  }
+}
+
 // Whether the identity value the record gives for the actor's app_owner may fix the target of its effects
 // (Options::owner_identity_targets): only for a `confirmed` owner whose identity value is recorded.
 bool Replayer::identity_of(const std::string& actor) const {
@@ -1422,6 +1459,31 @@ RealEval Replayer::evaluate_real(const Expr& e, const OpDecl& op, const LpSpec* 
     if (rd_locs.count(l) != 0) out.rd_order = true;
     if (ctl_locs.count(l) != 0) out.ctl_order = true;
   }
+  // The edges on the orders it read (ConjunctResult::support): for every write of another actor of what it read that the
+  // read is ordered with in the previous pass's order, the edges on a path between the two.
+  if (!t_.order_established && prior_ != nullptr && !prior_->hb_edges.empty()) {
+    for (const ResId& id : reads.res) {
+      if (order_open.count(id) != 0 || order_open_whole.count(id.kind) != 0) continue;
+      const auto w = prior_->writes.res.find(id);
+      if (w != prior_->writes.res.end()) support_of(w->second, ev.id, ev.actor, &out.support);
+      const auto wide = prior_->writes.kind_wide.find(id.kind);
+      if (wide != prior_->writes.kind_wide.end()) support_of(wide->second, ev.id, ev.actor, &out.support);
+    }
+    std::set<int32_t> kinds(reads.kinds.begin(), reads.kinds.end());
+    kinds.insert(reads.boxes.begin(), reads.boxes.end());
+    for (int32_t k : kinds) {
+      if (order_open_kinds.count(k) != 0) continue;
+      const auto wide = prior_->writes.kind_wide.find(k);
+      if (wide != prior_->writes.kind_wide.end()) support_of(wide->second, ev.id, ev.actor, &out.support);
+      for (const auto& kv : prior_->writes.res)
+        if (kv.first.kind == k && order_open.count(kv.first) == 0) support_of(kv.second, ev.id, ev.actor, &out.support);
+    }
+    for (int32_t l : reads.locs) {
+      if (order_open_locs.count(l) != 0) continue;
+      const auto w = prior_->writes.loc.find(l);
+      if (w != prior_->writes.loc.end()) support_of(w->second, ev.id, ev.actor, &out.support);
+    }
+  }
   if (reads.owner) out.state_read = true;
   if (reads.owner && owner_open) out.reasons |= KZ_WITHHOLD_OWNERSHIP_UNDETERMINED;
   std::sort(out.via_names.begin(), out.via_names.end());
@@ -1444,6 +1506,7 @@ void Replayer::join_interval(IntervalRead* acc, const RealEval& r) {
   acc->rf_order = acc->rf_order || r.rf_order;
   acc->rd_order = acc->rd_order || r.rd_order;
   acc->ctl_order = acc->ctl_order || r.ctl_order;
+  acc->support.insert(r.support.begin(), r.support.end());
   acc->via = acc->via || r.via;
   acc->owner_identity = acc->owner_identity || r.owner_identity;
 }
@@ -1772,6 +1835,7 @@ void Replayer::eval_conjunct(Frame* f, size_t ci, LpSource source, const TraceEv
     res.rf_order = r.rf_order;
     res.rd_order = r.rd_order;
     res.ctl_order = r.ctl_order;
+    res.support.assign(r.support.begin(), r.support.end());
     res.via = r.via;
     if (r.v.tri == Tri::Maybe) {
       res.unknown = true;
@@ -2204,6 +2268,7 @@ void Replayer::on_point(const TraceEvent& ev) {
       res.rf_order = r.rf_order;
       res.rd_order = r.rd_order;
       res.ctl_order = r.ctl_order;
+      res.support.assign(r.support.begin(), r.support.end());
       res.via = r.via;
       if (r.v.tri == Tri::Maybe) {
         res.unknown = true;
@@ -2681,6 +2746,7 @@ void Replayer::return_real(const OpDecl& op, Frame* f, const TraceEvent& ev) {
     c.rf_order = in.rf_order;
     c.rd_order = in.rd_order;
     c.ctl_order = in.ctl_order;
+    c.support.assign(in.support.begin(), in.support.end());
     c.via = in.via;
     c.owner_identity = in.owner_identity;
     if (!in.any || in.tri == Tri::Maybe) {
@@ -2834,6 +2900,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.source = LpSource::Outcome;
             c.event = ev.id;
             c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
+            c.support.clear();
             narrowed = true;
           } else {
             c.contradicted = true;
@@ -2846,6 +2913,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
           c.source = LpSource::Outcome;
           c.event = ev.id;
           c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
+          c.support.clear();
           narrowed = true;
         }
       }
@@ -2876,6 +2944,7 @@ void Replayer::check_outcome_real(const OpDecl& op, Frame* f, const TraceEvent& 
             c.unknown = false;
             c.passage_unknown = false;
             c.state_read = c.rf_order = c.rd_order = c.ctl_order = c.via = c.owner_identity = false;
+            c.support.clear();
           }
           chk = narrowed ? OutcomeCheck::Narrowed : fixed_false ? OutcomeCheck::Agrees : OutcomeCheck::Consistent;
         }
@@ -3688,6 +3757,7 @@ void Replayer::finish() {
           continue;
         }
         o.basis |= KZ_SUMMARY_FLAG_BASIS_STATE_ORDER;
+        o.support.insert(o.support.end(), c.support.begin(), c.support.end());
         if (c.rf_order && c.rd_order) o.basis |= KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER;
         else if (c.rf_order) o.basis_store_order = true;  // the edges it needs: success-path stores, no returned code
         if (c.ctl_order) o.control_order = true;           // P11: the run's realized control orders it
@@ -3709,6 +3779,8 @@ void Replayer::finish() {
           }
         }
       }
+      std::sort(o.support.begin(), o.support.end());
+      o.support.erase(std::unique(o.support.begin(), o.support.end()), o.support.end());
       if (o.outcome_narrowed) o.basis |= KZ_SUMMARY_FLAG_OUTCOME_NARROWED;
       if (!o.context.empty()) o.assumptions |= KZ_SUMMARY_FLAG_ASSUMES_ROLE;
       o.via_names.assign(via_names.begin(), via_names.end());
@@ -3953,6 +4025,7 @@ void Replayer::reads_from_edges() {
     }
     add_edge(pb.event, u.lp, rule);
     r_.edges.back().by_store = u.by_store;
+    r_.edges.back().source = 1;
   }
 }
 
@@ -4003,7 +4076,7 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
   // happens-before edges of the first pass (SPEC 4.8 "order"), over the writes of the whole record.
   Prior prior;
   std::string why;
-  if (!first.order_of_edges(&prior.hb, &why)) {
+  if (!first.order_of_edges(&prior.hb, &why, false, false, &prior.hb_edges)) {
     out->findings.push_back(ReplayFinding{kNoEvent, "real record: the order of different actors is not read from the happens-before edges (" + why + "): a value another actor wrote stays open"});
     return s;
   }
@@ -4031,6 +4104,7 @@ Status replay(const Profile& p, const Trace& trace, const Options& options, Resu
     s = again.run();
     if (!s.ok()) return s;
     if (again.writes().covered_by(prior.writes)) {
+      next.order_edges = prior.hb_edges;
       next.findings.push_back(ReplayFinding{kNoEvent, "real record: the order of different actors is read from the happens-before edges of the record (" + std::to_string(prior.hb.edges) +
                                                           " between actors) over every write of the record; the merged order is not used"});
       *out = std::move(next);

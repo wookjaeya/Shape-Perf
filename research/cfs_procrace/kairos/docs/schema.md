@@ -184,6 +184,8 @@ SPEC rev 1.3 의 "Formats added in revision 1.3"(ADR-054–ADR-056, C-17)을 구
 
 `kz-dump` 가 이 컨테이너를 다른 컨테이너와 같은 정규 dump 로 읽는다 [M: v153 pilot 재생 출력, `test_trace_replay_out` 의 dump 검사].
 
+2026-10-28(개정 4)부터 발생별 근거 섹션 OCC_BASIS·OCC_EDGES와 읽기 레코드 REPLAY_READ 가 더해진다(§13, `docs/replay_output.md`). SUMMARIES 는 그대로다.
+
 ## 12. 스키마 개정 3: 중립 사건 층 (SPEC rev 1.4 §2.3, 2026-10-26) [D][M]
 
 - 근거: SPEC rev 1.4 §2.3 "Formats in revision 1.4", 결정 기록 `Architecture/spec/PI_DECISIONS_RESOLVED_20261026.md`(PD26) §2 항목 5, IR §9.1–§9.2(IR은 2026-10-26 계측 아키텍처 검토(사용자 업로드)). 연구 조건은 정하지 않았다. 아래 수·이름은 단위 시험 값이거나 파일럿 기록의 값이다.
@@ -269,3 +271,19 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - ~~NCTL은 기록만 하고 재생이 쓰지 않는다~~ → 2026-10-26 단계 F(P11 결정, PD26 §3): 재생이 NCTL `fire`(사유 `resumed`)마다 제어 간선 하나를 세운다. 시작은 해제 hit의 actor가 그 hit의 관측 사건이나 그 앞에 낸 마지막 사건, 끝은 잡혔던 actor가 같은 게이트의 마지막 `gate-hold` 뒤에 낸 첫 사건이다. 역방향이거나 사건이 없으면 간선을 세우지 않고 그 이유를 적는다. 프로그램 간선만으로 서지 않는 순서가 이 간선으로 서면 근거 종류는 `control-order`다(RF는 그 간선으로도 서지 않을 때만 쓴다). `kz replay --control-order on|off`(기본 on, off = 민감도 읽기 B), BASIS `replay.control_order`, 출력 `realized control:` 줄과 trace의 `control FROM TO LABEL` 줄. 결과는 `plan/results_instr_gate_20261026.md` §3이다. F0의 `hold.kzr`는 실행 컨테이너 밖에 있어 NCTL로 옮기지 않았다. 그래서 F0 기록에는 이 근거가 없다(P11 읽기 A는 confirm2 `classify.awk`가 따로 계산함).
 - `kz hits` 등 F0 섹션을 직접 읽는 다른 명령은 그대로다(계측 기록에는 F0 섹션이 없다).
 - adapter 시계(`adapter-clock`)의 병합 순서는 actor 내부 aseq 순서만 지킨다.
+
+## 13. 스키마 개정 4: 재생 출력의 발생별 근거 (2026-10-28) [D][M]
+
+- 근거: `plan/results_instr_pilot_20261026.md` §8.2 항목 4(`summary.flags`에 자리가 없어 `store-derived-order`가 텍스트·메모리에만 남음), `STATUS_20261027.md` §6 "근거 종류 보존", PI 결정 2026-10-28(`Architecture/spec/PI_DECISIONS_RESOLVED_20261028.md`). 연구 조건은 정하지 않았다.
+- 방식: 개정 2·3과 같다. 기존 레코드의 배치·섹션 버전·필드 이름은 바꾸지 않았다. `KZ_SCHEMA_REVISION` = 4가 `layout_text()` 첫 줄에 들어가 schema fingerprint와 모든 tool hash가 바뀐다. 이전 컨테이너는 쓴 그대로 읽힌다 [M: golden 컨테이너 dump 불변, `layout.golden`·`records.golden`만 갱신].
+
+| 섹션 (id) | 레코드 | 내용 |
+|---|---|---|
+| OCC_BASIS (108) | `kz_occ_basis` 104 B | 발생마다(SUMMARIES 순서): 판정과 요약 뷰, 근거 종류 전체(KZ_OCC_BASIS: `store-derived-order`, `control-order` 포함), 선언 가정(KZ_OCC_ASSUME), 결과 검사(KZ_OUTCOME_CHECK), 경로 무관 발생 키(rspec, 연산, 호출 문맥 역할, 소유 앱 키·수준·이름, 키 값, 텍스트 인자, 순번), via 이름, 간선 구간 |
+| OCC_EDGES (109) | `kz_occ_edge` 24 B | 판정이 기댄 actor 사이 간선(경로 하나): 규칙, 종류(KZ_OCC_EDGE_KIND rule / reads-from / control), `by-store`, 위치 |
+| REPLAY_READ (110) | `kz_replay_read` 24 B | 읽기 스위치 전부(KZ_READ_SWITCH, KZ_RELATION_RULE), 제어 간선 수, 선형화가 옮긴 사건 수 |
+
+- 세 섹션은 100–119 범위라 명시적 little-endian codec으로 쓰고 읽는다(§12.1).
+- NCTL 플래그 두 개를 더했다(KZ_NCTL_FLAG): `observed-after-control`(0x2, hit의 관측 사건이 제어가 작용한 뒤에 기록됨), `no-observation-event`(0x4, 기록에 그 hit의 관측 사건이 없음, `event` = none). 쓰는 곳은 F0 보류 기록의 변환이다(§13.1).
+- 읽는 법, 발생 키, `kz occ show|diff`, 이전 컨테이너의 뜻은 `docs/replay_output.md`에 있다.
+- 시험(도구 시험 값): `test_trace_occ_basis`(RF의 두 종류, 제어 순서와 그 간선, 읽기 스위치, 이전 컨테이너 읽기, 키의 경로 무관성, 판정 차이와 근거 차이의 분리) [M].

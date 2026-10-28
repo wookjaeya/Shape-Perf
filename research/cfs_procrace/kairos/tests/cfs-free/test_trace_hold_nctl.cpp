@@ -12,7 +12,14 @@
 //     with the reason as a note;
 //   - the converted container keeps every F0 section, names the record in BASIS and FILE_HASHES, and the replay makes the
 //     control edge from the releasing actor's last mapped event before the release hit's observation to the held actor's
-//     gate observation itself.
+//     gate observation itself;
+//   - the writer's free-text lines (debugregs_error=<message>, child_signal=, a path with a space) parse, and a record
+//     with debugregs_ok=no converts with its note;
+//   - end to end through the replay: a satisfied and a consumed release make no control edge; a deferred release (the
+//     held thread's own hit of a release at its gate's address, acted on when it was resumed) makes the chain's second
+//     edge from that thread's last event before its trap to the second held thread's gate observation; a reused thread
+//     id maps each fact to the incarnation that was trapped, also one whose first event is its gate observation; two
+//     holds of one thread at an `each` gate each get their own observation, resume (with its own releaser) and edge.
 
 #include <cstdio>
 #include <cstring>
@@ -43,8 +50,18 @@ bool has(const std::string& text, const std::string& fragment) { return text.fin
 
 // sites at /w/prog: 0 lookup entry (0x1000), 1 lookup return (0x1000), 2 create entry (0x1100), 3 create return (0x1100),
 // 4 point create.publish (0x1180), 5 point after_lookup (0x1040, no point of the profile), 6 point lookup.exists (0x1020)
-// threads: 10 M (pid 10), 11 A (the consumer), 12 B (the provider).  `extra_b_at`: an event of B at that time (0: none).
-Container make_run(uint64_t extra_b_at = 0) {
+enum { kLookup = 0, kLookupRet = 1, kCreate = 2, kCreateRet = 3, kPublish = 4, kAfterLookup = 5, kExists = 6 };
+struct Ev {
+  uint64_t t;
+  uint32_t tid, site;
+};
+struct Thr {
+  uint32_t tid, generation;
+  uint64_t t_fork;
+  const char* name;
+};
+// An F0 run container of these events (in this order, the merged order; tseq per thread id) and thread incarnations.
+Container build_run(const std::vector<Ev>& evs, const std::vector<Thr>& thr) {
   kz::ContainerWriter w(KZ_ARTIFACT_RUN);
   w.set_basis_hash(kz::sha256(std::string("unit-test basis")));
   std::vector<kz_site> sites;
@@ -69,37 +86,27 @@ Container make_run(uint64_t extra_b_at = 0) {
   site(KZ_SITE_KIND_POINT_PROBE, "lookup", "lookup.exists", 0x1020);
   std::vector<kz_raw_ev> ev;
   std::vector<uint32_t> tseq(16, 0);
-  auto add = [&](uint64_t t, uint32_t tid, uint32_t s, uint16_t phase) {
+  for (const Ev& x : evs) {
     kz_raw_ev e = zero<kz_raw_ev>();
-    e.t_ns = t;
-    e.tid = tid;
-    e.tseq = tseq[tid - 10]++;
-    e.site = s;
-    e.phase = phase;
+    e.t_ns = x.t;
+    e.tid = x.tid;
+    e.tseq = tseq[x.tid - 10]++;
+    e.site = x.site;
+    e.phase = x.site == kLookup || x.site == kCreate ? KZ_PHASE_ENTRY : x.site == kLookupRet || x.site == kCreateRet ? KZ_PHASE_RET : KZ_PHASE_POINT;
     ev.push_back(e);
-  };
-  add(100, 11, 0, KZ_PHASE_ENTRY);  // 0 A lookup
-  add(110, 11, 6, KZ_PHASE_POINT);  // 1 A lookup.exists
-  add(120, 11, 1, KZ_PHASE_RET);    // 2 A lookup returns
-  add(130, 11, 5, KZ_PHASE_POINT);  // 3 A after_lookup (the release's first qualifying hit; it acts on the second)
-  if (extra_b_at != 0) add(extra_b_at, 12, 4, KZ_PHASE_POINT);  // B, inside its hold (a disagreeing record)
-  add(200, 11, 0, KZ_PHASE_ENTRY);  // A lookup again
-  add(210, 11, 6, KZ_PHASE_POINT);
-  add(220, 11, 1, KZ_PHASE_RET);    // A's last mapped event before the release
-  add(226, 12, 2, KZ_PHASE_ENTRY);  // B's create entry: its gate hit, observed after the resume
-  add(227, 11, 5, KZ_PHASE_POINT);  // A's after_lookup: the release hit, observed after the release acted
-  add(230, 12, 4, KZ_PHASE_POINT);  // B create.publish
-  add(240, 12, 3, KZ_PHASE_RET);    // B create returns
+  }
   std::vector<kz_thread> threads;
-  for (uint32_t tid : {10u, 11u, 12u}) {
+  for (const Thr& x : thr) {
     kz_thread t = zero<kz_thread>();
     t.pid = 10;
-    t.tid = tid;
+    t.tid = x.tid;
+    t.generation = x.generation;
+    t.t_fork = x.t_fork;
     t.ptid = KZ_NONE32;
     t.creator_event = KZ_NONE32;
     t.first_event = KZ_NONE32;
     t.announced_id = KZ_NONE32;
-    t.name = w.intern(tid == 10 ? "M" : tid == 11 ? "A" : "B");
+    t.name = w.intern(x.name);
     threads.push_back(t);
   }
   std::vector<kz_runmeta> meta(1, zero<kz_runmeta>());
@@ -128,6 +135,30 @@ Container make_run(uint64_t extra_b_at = 0) {
   KZ_CHECK_OK(c.verify_content());
   return c;
 }
+
+const std::vector<Thr> kThreads{{10, 0, 0, "M"}, {11, 0, 0, "A"}, {12, 0, 0, "B"}};
+
+// threads: 10 M (pid 10), 11 A (the consumer), 12 B (the provider).  `extra_b_at`: an event of B at that time (0: none).
+Container make_run(uint64_t extra_b_at = 0) {
+  std::vector<Ev> e{{100, 11, kLookup},       // 0 A lookup
+                    {110, 11, kExists},       // 1 A lookup.exists
+                    {120, 11, kLookupRet},    // 2 A lookup returns
+                    {130, 11, kAfterLookup}}; // 3 A after_lookup (the release's first qualifying hit; it acts on the second)
+  if (extra_b_at != 0) e.push_back({extra_b_at, 12, kPublish});  // B, inside its hold (a disagreeing record)
+  for (const Ev& x : std::vector<Ev>{{200, 11, kLookup},         // A lookup again
+                                     {210, 11, kExists},
+                                     {220, 11, kLookupRet},      // A's last mapped event before the release
+                                     {226, 12, kCreate},         // B's create entry: its gate hit, observed after the resume
+                                     {227, 11, kAfterLookup},    // A's after_lookup: the release hit, observed after the release acted
+                                     {230, 12, kPublish},        // B create.publish
+                                     {240, 12, kCreateRet}})     // B create returns
+    e.push_back(x);
+  return build_run(e, kThreads);
+}
+
+const char* const kRecordHead =
+    "# kz hold run record (label: controlled; SPEC 4.13 F0)\n"
+    "command: kz observe unit test\n";
 
 std::string record(const std::string& gate_where, uint64_t fire_t, uint32_t fire_tid = 11) {
   return "# kz hold run record (label: controlled; SPEC 4.13 F0)\n"
@@ -289,6 +320,215 @@ void test_container_and_replay() {
   KZ_CHECK(rep.control_records == 3 && rep.control_resumes == 1 && rep.control_edges == 1);
 }
 
+
+// The writer's lines of one key are text to the end of the line (tools/kz/cmd_hold.cpp): a debug-register error message, a
+// child's signal, a path with a space.  A record whose control did not run as planned converts with its note.
+void test_parse_free_text() {
+  const std::string text = std::string(kRecordHead) +
+                           "primary_binary=/w/a dir/prog\nchild_pid=10\ndebugregs_ok=no\ndebugregs_error=PTRACE_POKEUSER dr7: Operation not permitted (errno 1)\n"
+                           "wall_ns=1000\nchild_signal=9\n"
+                           "gate    G1 prog:0x1100 vaddr=0x1100 occurrence=first qualifying_hits=0\n"
+                           "release R1 prog:0x1040 vaddr=0x1040 releases=G1 occurrence=2 qualifying_hits=0\n"
+                           "total_stops=0 threads_attached=1 clone_attaches=0 relevant_procs=1 gate_traps=0 release_traps=0 armings=0\n";
+  kz::trace::HoldRecord h;
+  KZ_CHECK_OK(kz::trace::parse_hold_record(text, &h));
+  KZ_CHECK(!h.debugregs_ok && h.debugregs_error == "PTRACE_POKEUSER dr7: Operation not permitted (errno 1)" && h.points.size() == 2);
+  kz::trace::NeutralRun n;
+  KZ_CHECK_OK(kz::trace::neutral_from_f0(make_run(), &n));
+  std::vector<std::string> notes;
+  KZ_CHECK_OK(kz::trace::add_hold_control(h, &n, &notes));
+  KZ_CHECK(n.ctl.empty() && notes.size() == 1 &&
+           has(notes[0], "debugregs_ok=no (PTRACE_POKEUSER dr7: Operation not permitted (errno 1)): its control did not run as planned"));
+  // an unknown line of one key with a space is still refused
+  KZ_CHECK(!kz::trace::parse_hold_record(text + "other_key=a b\n", &h).ok());
+}
+
+struct Converted {
+  kz::trace::NeutralRun n;
+  std::vector<std::string> notes;
+  kz::eval::Trace t;
+  kz::trace::RealTraceReport rep;
+};
+
+// The run converted with the record, written, and read by the replay (as kz convert --hold and kz replay do).
+Converted end_to_end(const Container& run, const std::string& text) {
+  Converted x;
+  kz::Bytes bytes;
+  KZ_CHECK_OK(kz::trace::convert_f0_container_with_hold(run, "hold.kzr", text, kz::sha256(std::string("unit-test tool")), &bytes, &x.n, &x.notes));
+  Container c;
+  KZ_CHECK_OK(Container::parse(bytes, &c));
+  const kz::phi::Profile p = kzstate::load();
+  KZ_CHECK_OK(kz::trace::real_trace_from_run(c, p, &x.t, &x.rep));
+  return x;
+}
+
+const kz_nctl* ctl_of(const kz::trace::NeutralRun& n, uint8_t what, int k = 0) {
+  for (const kz_nctl& c : n.ctl)
+    if (c.what == what && k-- == 0) return &c;
+  return nullptr;
+}
+
+std::string edge_text(const kz::eval::Trace& t, size_t i) {
+  if (i >= t.control_edges.size()) return "none";
+  const kz::eval::TraceEvent& f = t.events[static_cast<size_t>(t.control_edges[i].from)];
+  const kz::eval::TraceEvent& e = t.events[static_cast<size_t>(t.control_edges[i].to)];
+  return f.actor + " " + f.site + " " + kz::eval::phase_text(f.phase) + " -> " + e.actor + " " + e.site + " " + kz::eval::phase_text(e.phase) + " " + t.control_edges[i].rule;
+}
+
+// A release that acts while its gate holds no thread: satisfied (an unless-released gate) or consumed; no control edge.
+void test_satisfied_consumed() {
+  const std::string text = std::string(kRecordHead) + "debugregs_ok=yes\n" +
+                           "gate    G1 prog:0x1100 vaddr=0x1100 occurrence=first unless-released qualifying_hits=0\n"
+                           "release R1 prog:0x1040 vaddr=0x1040 releases=G1 occurrence=each qualifying_hits=2\n"
+                           "fire release=R1 gate=G1 tid=11 hit=1 t_ns=125 resumed=none consumed=yes\n"
+                           "fire release=R1 gate=G1 tid=11 hit=2 t_ns=225 resumed=none satisfied=yes\n";
+  const Converted x = end_to_end(make_run(), text);
+  KZ_CHECK_EQ(x.n.ctl.size(), static_cast<size_t>(2));
+  const kz_nctl* consumed = ctl_of(x.n, KZ_NCTL_WHAT_FIRE, 0);
+  const kz_nctl* satisfied = ctl_of(x.n, KZ_NCTL_WHAT_FIRE, 1);
+  KZ_CHECK(consumed != nullptr && satisfied != nullptr);
+  if (consumed == nullptr || satisfied == nullptr) return;
+  KZ_CHECK(consumed->reason == KZ_NCTL_REASON_CONSUMED && consumed->event == 3 && consumed->other == KZ_NONE32 && (consumed->cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0);
+  KZ_CHECK(satisfied->reason == KZ_NCTL_REASON_SATISFIED && satisfied->event == 8 && satisfied->other == KZ_NONE32);
+  KZ_CHECK(ctl_of(x.n, KZ_NCTL_WHAT_GATE_HOLD) == nullptr && ctl_of(x.n, KZ_NCTL_WHAT_RESUME) == nullptr);
+  KZ_CHECK(x.t.control_edges.empty());
+  KZ_CHECK(x.rep.control_records == 2 && x.rep.control_resumes == 0 && x.rep.control_edges == 0);
+}
+
+// A deferred release chain: C is held at G2; B traps at G1, whose address is also the release R2 of G2, so B's hit of R2 is
+// deferred; A's R1 resumes B, and B's deferred R2 then resumes C.
+void test_deferred_chain() {
+  const std::vector<Thr> thr{{10, 0, 0, "M"}, {11, 0, 0, "A"}, {12, 0, 0, "B"}, {13, 0, 0, "C"}};
+  const Container run = build_run({{100, 11, kLookup},
+                                   {110, 11, kExists},
+                                   {120, 11, kLookupRet},
+                                   {130, 11, kAfterLookup},
+                                   {140, 13, kLookup},      // C's last event before its trap at G2 (lookup.exists)
+                                   {147, 12, kLookup},      // B's last event before its trap at G1 (create entry)
+                                   {200, 11, kLookup},
+                                   {210, 11, kExists},
+                                   {220, 11, kLookupRet},   // A's last event before its release hit
+                                   {226, 12, kCreate},      // B's gate observation and its (deferred) R2 hit
+                                   {227, 11, kAfterLookup}, // A's R1 hit
+                                   {230, 12, kPublish},
+                                   {240, 12, kCreateRet},
+                                   {260, 13, kExists},      // C's gate observation
+                                   {270, 13, kLookupRet}},
+                                  thr);
+  const std::string text = std::string(kRecordHead) + "debugregs_ok=yes\n" +
+                           "gate    G1 prog:0x1100 vaddr=0x1100 occurrence=first qualifying_hits=1\n"
+                           "gate    G2 prog:0x1020 vaddr=0x1020 occurrence=first qualifying_hits=1\n"
+                           "release R1 prog:0x1040 vaddr=0x1040 releases=G1 occurrence=2 qualifying_hits=2\n"
+                           "release R2 prog:0x1100 vaddr=0x1100 releases=G2 occurrence=first qualifying_hits=1\n"
+                           "hold gate=G2 tid=13 name=\"\" hit=1 held_ns=145 released_by=R2 release_ns=225 hold_duration_ns=80\n"
+                           "hold gate=G1 tid=12 name=\"\" hit=1 held_ns=150 released_by=R1 release_ns=225 hold_duration_ns=75\n"
+                           "fire release=R1 gate=G1 tid=11 hit=2 t_ns=225 resumed=12\n"
+                           "fire release=R2 gate=G2 tid=12 hit=1 t_ns=225 resumed=13 deferred=yes\n";
+  const Converted x = end_to_end(run, text);
+  KZ_CHECK_EQ(x.n.ctl.size(), static_cast<size_t>(6));
+  const kz_nctl* deferred = ctl_of(x.n, KZ_NCTL_WHAT_FIRE, 1);
+  KZ_CHECK(deferred != nullptr);
+  if (deferred != nullptr) {
+    KZ_CHECK((deferred->cflags & KZ_NCTL_FLAG_DEFERRED) != 0 && (deferred->cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0);
+    KZ_CHECK(deferred->actor == 2 && deferred->other == 3 && deferred->event == 9 && deferred->point == 3 && deferred->gate == 1);
+  }
+  const kz_nctl* resume_c = ctl_of(x.n, KZ_NCTL_WHAT_RESUME, 0);
+  KZ_CHECK(resume_c != nullptr && resume_c->actor == 3 && resume_c->other == 2);  // C, resumed by B
+  KZ_CHECK_EQ(x.t.control_edges.size(), static_cast<size_t>(2));
+  // the first edge: A's last event before its hit -> B's gate observation; the second: B's last event before its trap ->
+  // C's gate observation
+  KZ_CHECK_EQ(edge_text(x.t, 0), std::string("A lookup ret -> B create call control:gate0/release2"));
+  KZ_CHECK_EQ(edge_text(x.t, 1), std::string("B lookup call -> C lookup.exists pt control:gate1/release3/deferred"));
+  KZ_CHECK(x.rep.control_resumes == 2 && x.rep.control_edges == 2);
+}
+
+// A reused thread id: B (tid 12) ran and ended; a later thread with the same id is held at the gate, and its first event
+// is its gate observation.  Every fact maps to the later incarnation.
+void test_reused_tid() {
+  const std::vector<Thr> thr{{10, 0, 0, "M"}, {11, 0, 0, "A"}, {12, 0, 0, "B"}, {12, 1, 140, "B"}};
+  const Container run = build_run({{50, 12, kLookup},
+                                   {60, 12, kLookupRet},   // the first incarnation's last event
+                                   {100, 11, kLookup},
+                                   {110, 11, kExists},
+                                   {120, 11, kLookupRet},
+                                   {130, 11, kAfterLookup},
+                                   {200, 11, kLookup},
+                                   {210, 11, kExists},
+                                   {220, 11, kLookupRet},
+                                   {226, 12, kCreate},     // the second incarnation's first event: its gate observation
+                                   {227, 11, kAfterLookup},
+                                   {230, 12, kPublish},
+                                   {240, 12, kCreateRet}},
+                                  thr);
+  const Converted x = end_to_end(run, record("prog:0x1100", 225));
+  KZ_CHECK_EQ(x.n.actors.size(), static_cast<size_t>(4));
+  KZ_CHECK(x.n.actors[3].r.native_key == 12 && x.n.actors[3].r.generation == 1);
+  const kz_nctl* hold = ctl_of(x.n, KZ_NCTL_WHAT_GATE_HOLD);
+  const kz_nctl* fire = ctl_of(x.n, KZ_NCTL_WHAT_FIRE);
+  const kz_nctl* resume = ctl_of(x.n, KZ_NCTL_WHAT_RESUME);
+  KZ_CHECK(hold != nullptr && fire != nullptr && resume != nullptr);
+  if (hold == nullptr || fire == nullptr || resume == nullptr) return;
+  KZ_CHECK(hold->actor == 3 && hold->event == 9 && (hold->cflags & KZ_NCTL_FLAG_OBS_AFTER) != 0);
+  KZ_CHECK(fire->actor == 1 && fire->other == 3 && resume->actor == 3 && resume->other == 1);
+  KZ_CHECK((x.n.actors[2].r.flags & KZ_NACTOR_FLAG_HELD_AT_END) == 0);
+  KZ_CHECK_EQ(x.t.control_edges.size(), static_cast<size_t>(1));
+  if (x.t.control_edges.size() == 1) {
+    const kz::eval::TraceEvent& to = x.t.events[static_cast<size_t>(x.t.control_edges[0].to)];
+    KZ_CHECK(to.site == "create" && to.phase == kz::eval::Phase::Call && to.actor != x.t.events[0].actor);  // not the first incarnation
+  }
+  // an unreleased hold of the later incarnation, before any of its events: the latest incarnation that existed then
+  const std::string unreleased = std::string(kRecordHead) + "debugregs_ok=yes\n" +
+                                 "gate    G1 prog:0x1100 vaddr=0x1100 occurrence=first qualifying_hits=1\n"
+                                 "release R1 prog:0x1040 vaddr=0x1040 releases=G1 occurrence=2 qualifying_hits=0\n"
+                                 "hold gate=G1 tid=12 name=\"\" hit=1 held_ns=70 released=no\n";
+  const Converted y = end_to_end(run, unreleased);
+  const kz_nctl* h2 = ctl_of(y.n, KZ_NCTL_WHAT_GATE_HOLD);
+  KZ_CHECK(h2 != nullptr && h2->actor == 2 && (y.n.actors[2].r.flags & KZ_NACTOR_FLAG_HELD_AT_END) != 0);
+}
+
+// Two holds of one thread at an `each` gate, released by two threads: each hold its own observation, resume and edge.
+void test_each_gate_twice() {
+  const Container run = build_run({{100, 11, kLookup},
+                                   {120, 11, kLookupRet},
+                                   {200, 11, kLookup},
+                                   {210, 11, kExists},
+                                   {220, 11, kLookupRet},   // A's last event before its release hit
+                                   {226, 12, kCreate},      // B's first gate observation
+                                   {227, 11, kAfterLookup}, // A's release hit
+                                   {230, 12, kPublish},
+                                   {240, 12, kCreateRet},
+                                   {300, 10, kLookup},
+                                   {310, 10, kExists},
+                                   {320, 10, kLookupRet},   // M's last event before its release hit
+                                   {326, 12, kCreate},      // B's second gate observation
+                                   {327, 10, kAfterLookup}, // M's release hit
+                                   {330, 12, kPublish},
+                                   {340, 12, kCreateRet}},
+                                  kThreads);
+  const std::string text = std::string(kRecordHead) + "debugregs_ok=yes\n" +
+                           "gate    G1 prog:0x1100 vaddr=0x1100 occurrence=each qualifying_hits=2\n"
+                           "release R1 prog:0x1040 vaddr=0x1040 releases=G1 occurrence=each qualifying_hits=2\n"
+                           "hold gate=G1 tid=12 name=\"\" hit=1 held_ns=150 released_by=R1 release_ns=225 hold_duration_ns=75\n"
+                           "hold gate=G1 tid=12 name=\"\" hit=2 held_ns=250 released_by=R1 release_ns=325 hold_duration_ns=75\n"
+                           "fire release=R1 gate=G1 tid=11 hit=1 t_ns=225 resumed=12\n"
+                           "fire release=R1 gate=G1 tid=10 hit=2 t_ns=325 resumed=12\n";
+  const Converted x = end_to_end(run, text);
+  KZ_CHECK_EQ(x.n.ctl.size(), static_cast<size_t>(6));
+  const kz_nctl* h1 = ctl_of(x.n, KZ_NCTL_WHAT_GATE_HOLD, 0);
+  const kz_nctl* h2 = ctl_of(x.n, KZ_NCTL_WHAT_GATE_HOLD, 1);
+  const kz_nctl* r1 = ctl_of(x.n, KZ_NCTL_WHAT_RESUME, 0);
+  const kz_nctl* r2 = ctl_of(x.n, KZ_NCTL_WHAT_RESUME, 1);
+  KZ_CHECK(h1 != nullptr && h2 != nullptr && r1 != nullptr && r2 != nullptr);
+  if (h1 == nullptr || h2 == nullptr || r1 == nullptr || r2 == nullptr) return;
+  KZ_CHECK(h1->hit == 1 && h1->event == 5 && h2->hit == 2 && h2->event == 12);
+  KZ_CHECK(r1->other == 1 && r2->other == 0);  // A resumed the first hold, M the second
+  KZ_CHECK(h1->ctl_seq < r1->ctl_seq && r1->ctl_seq < h2->ctl_seq && h2->ctl_seq < r2->ctl_seq);
+  KZ_CHECK_EQ(x.t.control_edges.size(), static_cast<size_t>(2));
+  KZ_CHECK_EQ(edge_text(x.t, 0), std::string("A lookup ret -> B create call control:gate0/release1"));
+  KZ_CHECK_EQ(edge_text(x.t, 1), std::string("M lookup ret -> B create call control:gate0/release1"));
+  if (x.t.control_edges.size() == 2) KZ_CHECK(x.t.control_edges[0].to < x.t.control_edges[1].to);  // B's first and second create calls
+}
+
 }  // namespace
 
 int main() {
@@ -296,5 +536,10 @@ int main() {
   test_mapping();
   test_no_observation();
   test_container_and_replay();
+  test_parse_free_text();
+  test_satisfied_consumed();
+  test_deferred_chain();
+  test_reused_tid();
+  test_each_gate_twice();
   return kztest::finish("test_trace_hold_nctl");
 }

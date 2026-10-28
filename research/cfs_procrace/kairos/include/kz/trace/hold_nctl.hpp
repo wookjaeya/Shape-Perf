@@ -22,8 +22,11 @@
 // with time after held_ns; the actor has no event between held_ns and release_ns (it was stopped); that event is at the
 // gate's site.  For a fire: the hitting actor's first event with time after t_ns, at the release's site.  The time
 // only names which of the actor's events is the hit's; the order the control makes is the release's, not the clock's.
+// The actor of a thread id (a reused id has several incarnations, which do not overlap): the incarnation whose events
+// span the fact's time; else, for a thread that ran on after it, the one whose first event is the earliest after it,
+// and for a hold never released the one whose first event is the latest at or before it.
 // Where any of this does not hold (no site at the address, no such event, another site, an event inside the hold, a
-// thread id with no actor or with several), the record keeps `event` none with flag no-observation-event and the
+// thread id with no actor or with no fitting incarnation), the record keeps `event` none with flag no-observation-event and the
 // reason is a note: no event is invented.  Every record whose event was found has flag observed-after-control: the
 // replay then starts a control edge at the releasing actor's last event before the release hit's observation, and ends
 // it at the held actor's gate observation itself (real_trace.cpp).
@@ -67,12 +70,15 @@ struct FireFact {
 };
 struct HoldRecord {
   bool debugregs_ok = false;
+  std::string debugregs_error;  // the writer's message where debugregs_ok=no
   std::vector<HoldPoint> points;  // as listed
   std::vector<HoldFact> holds;
   std::vector<FireFact> fires;
 };
 
-// Parses a hold.kzr text (tools/kz/cmd_hold.cpp writes it).  Invalid for a line it does not understand.
+// Parses a hold.kzr text (tools/kz/cmd_hold.cpp writes it).  The writer's lines of one key (primary_binary, child_pid,
+// debugregs_ok, debugregs_error, wall_ns, child_exit, child_signal) are read as text to the end of the line.  Invalid
+// for a line it does not understand.
 Status parse_hold_record(const std::string& text, HoldRecord* out);
 
 // Adds the NCTL records of `h` to the F0 layer `n` (neutral_from_f0 of the hold run's container) and sets NRUN

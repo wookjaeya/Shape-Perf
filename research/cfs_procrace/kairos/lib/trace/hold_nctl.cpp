@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <map>
 #include <tuple>
 
@@ -79,9 +80,18 @@ Status parse_hold_record(const std::string& text, HoldRecord* out) {
       continue;
     }
     if (line.empty() || line[0] == '#' || line.rfind("command:", 0) == 0 || line.rfind("note:", 0) == 0) continue;
-    if (line.rfind("debugregs_ok=", 0) == 0) {
-      out->debugregs_ok = line == "debugregs_ok=yes";
-      continue;
+    // the writer's lines of one key (tools/kz/cmd_hold.cpp, before the control points): the value is text to the end of
+    // the line (a path, the debug-register error message, a number)
+    {
+      static const char* const kOneKey[] = {"primary_binary", "child_pid", "debugregs_ok", "debugregs_error", "wall_ns", "child_exit", "child_signal"};
+      const size_t eq = line.find('=');
+      const std::string key = eq == std::string::npos ? std::string() : line.substr(0, eq);
+      if (std::find(std::begin(kOneKey), std::end(kOneKey), key) != std::end(kOneKey)) {
+        const std::string value = line.substr(eq + 1);
+        if (key == "debugregs_ok") out->debugregs_ok = value == "yes";
+        if (key == "debugregs_error") out->debugregs_error = value;
+        continue;
+      }
     }
     if (line.rfind("gate ", 0) == 0 || line.rfind("release ", 0) == 0) {
       HoldPoint hp;
@@ -189,9 +199,14 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
     if (n->events[i].actor < n->actors.size()) by_actor[n->events[i].actor].push_back(static_cast<uint32_t>(i));
   for (std::vector<uint32_t>& v : by_actor)
     std::stable_sort(v.begin(), v.end(), [&](uint32_t a, uint32_t b) { return n->events[a].aseq < n->events[b].aseq; });
-  // the actor of a thread id at a time: the actor bound to that Linux thread whose events span the time, else the one whose
-  // first event is the latest before it; none if no actor has that id
-  auto actor_of = [&](uint32_t tid, uint64_t t, std::string* why) -> uint32_t {
+  // the actor of a thread id at a time `t`, among the incarnations of that Linux thread (the kernel reuses an id only after
+  // its thread ended, so they do not overlap): the one whose events span the time (an event at or before it and one
+  // after it).  Otherwise the time lies before an incarnation's first event or after its last: a thread that ran on after
+  // the fact (`continues`: a release's hitter, a resumed thread, a released hold) has its next event after it, so it is the
+  // incarnation whose first event is the earliest after the time (the one that first appears then; it may have been
+  // created before the fact); a hold never released is the incarnation whose first event is the latest at or before it.
+  // None if no actor has that id or none fits.
+  auto actor_of = [&](uint32_t tid, uint64_t t, bool continues, std::string* why) -> uint32_t {
     std::vector<uint32_t> cand;
     for (size_t i = 0; i < n->actors.size(); ++i)
       if (n->actors[i].r.binding == KZ_NBIND_LINUX_TID && n->actors[i].r.native_key == tid) cand.push_back(static_cast<uint32_t>(i));
@@ -200,17 +215,17 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
       return KZ_NONE32;
     }
     if (cand.size() == 1) return cand.front();
-    uint32_t best = KZ_NONE32;
-    uint64_t best_first = 0;
+    uint32_t spans = KZ_NONE32, before = KZ_NONE32, after = KZ_NONE32;
     for (uint32_t a : cand) {
       if (by_actor[a].empty()) continue;
-      const uint64_t first = n->events[by_actor[a].front()].t;
-      if (first <= t && (best == KZ_NONE32 || first >= best_first)) {
-        best = a;
-        best_first = first;
-      }
+      const uint64_t first = n->events[by_actor[a].front()].t, last = n->events[by_actor[a].back()].t;
+      if (first <= t && last > t) spans = a;
+      if (first <= t && (before == KZ_NONE32 || first >= n->events[by_actor[before].front()].t)) before = a;
+      if (first > t && (after == KZ_NONE32 || first < n->events[by_actor[after].front()].t)) after = a;
     }
-    if (best == KZ_NONE32) *why = "thread " + std::to_string(tid) + " names " + std::to_string(cand.size()) + " actors, none with an event before the fact";
+    const uint32_t best = spans != KZ_NONE32 ? spans : continues ? after : before;
+    if (best == KZ_NONE32)
+      *why = "thread " + std::to_string(tid) + " names " + std::to_string(cand.size()) + " actors, none with an event " + (continues ? "after" : "at or before") + " the fact";
     return best;
   };
   // the hit's observation event: the actor's first event after `t` (and none before `until`, the end of a hold), at one of `sites`
@@ -257,12 +272,14 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
     if (event != KZ_NONE32) return n->events[event].site;
     return s.size() == 1 ? s.front() : KZ_NONE32;
   };
-  std::map<std::string, uint32_t> resumer;  // "<gate> <held tid>" -> the actor of the release that resumed it
+  // the release that resumed a hold: the fire of its gate that resumed its thread at its release time (the supervisor gives
+  // the hold the fire's time), so that each hold of a thread at an `each` gate has its own releaser
+  std::map<std::tuple<std::string, uint32_t, uint64_t>, uint32_t> resumer;  // (gate, held tid, time) -> the releasing actor
   for (const FireFact& f : h.fires) {
     if (f.resumed == 0) continue;
     std::string why;
-    const uint32_t a = actor_of(f.tid, f.t_ns, &why);
-    if (a != KZ_NONE32) resumer[f.gate + " " + std::to_string(f.resumed)] = a;
+    const uint32_t a = actor_of(f.tid, f.t_ns, true, &why);
+    if (a != KZ_NONE32) resumer[std::make_tuple(f.gate, f.resumed, f.t_ns)] = a;
   }
   for (const HoldFact& hf : h.holds) {
     const auto pi = point.find(hf.gate);
@@ -272,7 +289,7 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
       continue;
     }
     std::string why;
-    const uint32_t a = actor_of(hf.tid, hf.held_ns, &why);
+    const uint32_t a = actor_of(hf.tid, hf.held_ns, hf.released, &why);
     if (a == KZ_NONE32) {
       notes->push_back(what + ": " + why + ": not converted");
       continue;
@@ -299,7 +316,7 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
     kz_nctl r = c;
     r.what = KZ_NCTL_WHAT_RESUME;
     r.t = hf.release_ns;
-    const auto rs = resumer.find(hf.gate + " " + std::to_string(hf.tid));
+    const auto rs = resumer.find(std::make_tuple(hf.gate, hf.tid, hf.release_ns));
     r.other = rs != resumer.end() ? rs->second : KZ_NONE32;
     recs.push_back({r, 2});
   }
@@ -311,7 +328,7 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
       continue;
     }
     std::string why;
-    const uint32_t a = actor_of(f.tid, f.t_ns, &why);
+    const uint32_t a = actor_of(f.tid, f.t_ns, true, &why);
     if (a == KZ_NONE32) {
       notes->push_back(what + ": " + why + ": not converted");
       continue;
@@ -325,7 +342,7 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
     c.subject = a;
     if (f.resumed != 0) {
       std::string w2;
-      c.other = actor_of(f.resumed, f.t_ns, &w2);
+      c.other = actor_of(f.resumed, f.t_ns, true, &w2);
       if (c.other == KZ_NONE32) notes->push_back(what + ": the resumed thread: " + w2);
     }
     c.event = ev;
@@ -344,7 +361,8 @@ Status add_hold_control(const HoldRecord& h, NeutralRun* n, std::vector<std::str
     recs[i].c.ctl_seq = static_cast<uint32_t>(i + 1);
     n->ctl.push_back(recs[i].c);
   }
-  if (!h.debugregs_ok) notes->push_back("the hold record says debugregs_ok=no: its control did not run as planned");
+  if (!h.debugregs_ok)
+    notes->push_back("the hold record says debugregs_ok=no" + (h.debugregs_error.empty() ? std::string() : " (" + h.debugregs_error + ")") + ": its control did not run as planned");
   if (!n->ctl.empty()) n->run.r.flags |= KZ_NRUN_FLAG_CONTROL_RECORDED;
   return check_neutral(*n);
 }

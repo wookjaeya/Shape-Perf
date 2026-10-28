@@ -70,17 +70,24 @@
 # RUN_CFS_WRAP is removed from the environment before launch. With RUN_CFS_WRAP unset or empty, v4 behaves exactly
 # as v3.
 #
+# Optional core-cpu1 arguments (v6; CONDITIONS.md H-11): if RUN_CFS_ARGS is set, its words are passed to ./core-cpu1.
+# The only use is the R2 common Power-On start (PI decision 2026-10-28, plan/r2_start_poweron_20261028.md):
+# RUN_CFS_ARGS="--reset PO" (psp/fsw/pc-linux/src/cfe_psp_start.c L136, L270-282, L408-434; usage L528-530). README L112
+# runs ./core-cpu1 with no options, so a non-empty RUN_CFS_ARGS is a recorded deviation. RUN_CFS_ARGS is removed from
+# the environment before launch. With RUN_CFS_ARGS unset or empty, v6 behaves exactly as v5 apart from the
+# version string.
+#
 # Script history: v1 (2026-10-08T01:29Z) produced logs/run01_*, run02_* and the audit's run03; it polled the log
 # every 50 ms and had SIGINT as its only stop. v2 (after the audit): STOP argument, event-based detection,
 # isolation check, process credentials/limits/environment in the .meta; produced run04-run07. v3 (2026-10-08,
 # measurement M1): optional RUN_CFS_HOOK only. v4 (2026-10-08, case R2): optional RUN_CFS_WRAP only. v5 (this file,
 # 2026-10-08, CORD R2): records cfs_dir, and "bundle=" no longer resolves git upward from a CFS_DIR that has no .git
 # (it says "not a git clone"). For the default CFS_DIR (the ENV clone) v5 writes the same .meta lines as v4 plus the
-# one cfs_dir= line.
+# one cfs_dir= line. v6 (2026-10-28, R2 common Power-On start): optional RUN_CFS_ARGS only.
 
 set -euo pipefail
 
-SCRIPT_VERSION="v5"
+SCRIPT_VERSION="v6"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib_record.sh
 . "${SCRIPT_DIR}/lib_record.sh"
@@ -104,6 +111,10 @@ WRAP_STR="${RUN_CFS_WRAP:-}"
 export -n RUN_CFS_WRAP 2>/dev/null || true       # never part of core-cpu1's environment
 WRAP=()
 [ -z "${WRAP_STR}" ] || read -r -a WRAP <<< "${WRAP_STR}"
+ARGS_STR="${RUN_CFS_ARGS:-}"
+export -n RUN_CFS_ARGS 2>/dev/null || true       # never part of core-cpu1's environment
+CFS_ARGS=()
+[ -z "${ARGS_STR}" ] || read -r -a CFS_ARGS <<< "${ARGS_STR}"
 mkdir -p "$(dirname "${LOG_FILE}")"
 LOG_FILE="$(cd "$(dirname "${LOG_FILE}")" && pwd)/$(basename "${LOG_FILE}")"   # absolute: the script cd's to EXE_DIR
 META="${LOG_FILE}.meta"
@@ -172,7 +183,7 @@ trap cleanup EXIT
     echo "ref.CFE_PLATFORM_CORE_MAX_STARTUP_MSEC=${CORE_MAX_STARTUP_MSEC}"
     echo "ref.CFE_PLATFORM_ES_APP_KILL_TIMEOUT=${APP_KILL_TIMEOUT} ref.CFE_PLATFORM_ES_APP_SCAN_RATE=${APP_SCAN_RATE}"
     echo "cwd=${EXE_DIR}"
-    echo "command=./core-cpu1"
+    echo "command=./core-cpu1${ARGS_STR:+ ${ARGS_STR}}"
     echo "launcher=setsid ${LAUNCH[*]}"
     echo "run_user=${RUN_USER} ($(id "${RUN_USER}"))"
     echo "cfs_dir=${CFS_DIR}"
@@ -205,7 +216,7 @@ cd "${EXE_DIR}"
 : > "${LOG_FILE}"
 FIFO="${PRIV}/console.fifo"; mkfifo "${FIFO}"
 T0_US="$(now_us)"
-setsid "${LAUNCH[@]}" "${WRAP[@]}" ./core-cpu1 < /dev/null > "${LOG_FILE}" 2>&1 &
+setsid "${LAUNCH[@]}" "${WRAP[@]}" ./core-cpu1 "${CFS_ARGS[@]}" < /dev/null > "${LOG_FILE}" 2>&1 &
 PID=$!
 tail -n +1 --pid="${PID}" -f -- "${LOG_FILE}" > "${FIFO}" 2>/dev/null &
 TAILPID=$!

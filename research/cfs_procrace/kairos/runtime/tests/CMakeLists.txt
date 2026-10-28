@@ -186,6 +186,9 @@ set_tests_properties(rt_auto_plan_none_dump PROPERTIES FIXTURES_REQUIRED rt_auto
 kzrt_test(test_rt_end SOURCES test_rt_end.c LIBS kzrt-posix-auto kzrt-posix kzrt kzrt-decode)
 foreach(c kill segv abort term term-kill normal)
   kzrt_case(rt_end_${c} test_rt_end ${c} ${CMAKE_CURRENT_BINARY_DIR} $<TARGET_FILE:kz-rt-dump>)
+  # the dumps stay (rt_end_<case>.rec.kzrt, and rt_end_normal.kzrt of the exit handler): the host converter's test
+  # reads them when this tree is built inside kairos (tests/cfs-free test_kzrt_recovered)
+  set_tests_properties(rt_end_${c} PROPERTIES FIXTURES_SETUP rt_end_${c}_dump)
 endforeach()
 set_tests_properties(rt_end_segv PROPERTIES PASS_REGULAR_EXPRESSION
   "runx end=recovered end_flags=signal end_value=11 store=file.*loss partial actor=[0-9]+ key=0 count=1\nloss abnormal-end actor=- key=0 count=1.*check end recovered from the store: a prefix.*check ok.*segv: recovered dump checked")

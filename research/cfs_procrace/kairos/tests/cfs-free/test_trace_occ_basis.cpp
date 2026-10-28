@@ -9,7 +9,11 @@
 //   - a container without the new sections (written before revision 4) still reads: the rows come from SUMMARIES, the
 //     basis from summary.flags, and the rest is not recorded (never an empty basis);
 //   - kz occ diff: the same record read twice compares equal, also with other actor names (the key is path independent);
-//     two readings (control order on and off) give one verdict difference and one basis difference, listed apart.
+//     two readings (control order on and off) give one verdict difference and one basis difference, listed apart;
+//   - keys (revision 5): two tasks of one application with the same key are told apart by the task's place where both
+//     containers record it; where they are not, the shared key is listed as ambiguous and not paired (a difference); an
+//     occurrence whose key value one side fixed and the other did not is matched by its text arguments and said apart;
+//     different text arguments stay one side only.
 
 #include <cstdio>
 #include <cstring>
@@ -106,7 +110,7 @@ void test_return_derived() {
   KZ_CHECK_OK(r.c.read_section(KZ_SEC_SUMMARIES, &sums));
   KZ_CHECK(sums.size() == 1 && (sums[0].flags & KZ_SUMMARY_FLAG_BASIS_RETURN_DERIVED_ORDER) != 0);
   const kz_replay_read& rd = r.table.reading;
-  KZ_CHECK(rd.format == 1 && rd.outcome_narrowing == KZ_READ_SWITCH_ON && rd.control_order == KZ_READ_SWITCH_ON && rd.reads_from_outcome == KZ_READ_SWITCH_ON &&
+  KZ_CHECK(rd.format == 2 && r.table.task_recorded && rd.outcome_narrowing == KZ_READ_SWITCH_ON && rd.control_order == KZ_READ_SWITCH_ON && rd.reads_from_outcome == KZ_READ_SWITCH_ON &&
            rd.relation_rule == KZ_RELATION_RULE_P10_OCCURRENCE && rd.control_edges == 0);
   const std::string text = kz::trace::occ_table_text(r.table);
   KZ_CHECK(has(text, "basis {state-order,return-derived-order}") && has(text, "RF[reads-from]#") && has(text, "outcome agrees-return-derived"));
@@ -202,6 +206,61 @@ void test_old_container() {
   KZ_CHECK(has(d, "matching: by position") && n.matched == 1 && n.verdict == 0 && n.basis == 0);
 }
 
+
+// Rows of a table written with revision 5 (built directly: the comparison is what is tested).
+kz::trace::OccRow row(uint32_t index, uint16_t task, const std::string& resource, const std::string& name, uint32_t ordinal, uint8_t status) {
+  kz::trace::OccRow r;
+  r.index = index;
+  r.recorded = true;
+  r.task_recorded = true;
+  r.rspec = "K-LOOKUP";
+  r.op = "lookup";
+  r.owner_key = 9;
+  r.owner_level = KZ_OWNER_LEVEL_CONFIRMED;
+  r.task = task;
+  r.resource = resource;
+  r.name = name;
+  r.ordinal = ordinal;
+  r.status = status;
+  r.observation = KZ_OBS_NO_VIOLATION_IN_CHECKED_PREFIX;
+  return r;
+}
+kz::trace::OccTable table(const std::vector<kz::trace::OccRow>& rows, bool task_recorded = true) {
+  kz::trace::OccTable t;
+  t.recorded = true;
+  t.task_recorded = task_recorded;
+  t.rows = rows;
+  for (kz::trace::OccRow& r : t.rows) r.task_recorded = task_recorded;
+  return t;
+}
+
+void test_keys() {
+  // two tasks of application 9 look up the same name: the task's place tells them apart, in either container order
+  const kz::trace::OccTable a = table({row(0, 1, "0x30002", "name=S0", 1, KZ_OCC_READY), row(1, 2, "0x30002", "name=S0", 1, KZ_OCC_NOT_READY_UNJUDGED)});
+  const kz::trace::OccTable b = table({row(0, 2, "0x30002", "name=S0", 1, KZ_OCC_NOT_READY_UNJUDGED), row(1, 1, "0x30002", "name=S0", 1, KZ_OCC_READY)});
+  kz::trace::OccDiffCounts n;
+  std::string d = kz::trace::occ_diff_text(a, b, &n);
+  KZ_CHECK(n.matched == 2 && n.verdict == 0 && n.ambiguous == 0 && !n.any());
+  KZ_CHECK(has(kz::trace::occ_key(a.rows[1]), "| app[9]#2 |"));
+  // the same rows where a container does not record the task: one shared key, listed and not paired by order
+  const kz::trace::OccTable b4 = table(b.rows, false);
+  d = kz::trace::occ_diff_text(a, b4, &n);
+  KZ_CHECK(n.matched == 0 && n.ambiguous == 1 && n.ambiguous_rows == 4 && n.verdict == 0 && n.only_a == 0 && n.only_b == 0 && n.any());
+  KZ_CHECK(has(d, "task in the key: not used (B does not record it)"));
+  KZ_CHECK(has(d, "ambiguous keys (shared by more than one occurrence of a side; which is which is not established, none paired): 1"));
+  KZ_CHECK(has(d, "K-LOOKUP | lookup | app[9] | 0x30002 | 1: A#0 READY") && has(d, "B#1 READY"));
+  // the key value fixed on one side only: matched by the text arguments, said apart
+  const kz::trace::OccTable c = table({row(0, 1, "0x30002", "name=S0", 1, KZ_OCC_READY)});
+  const kz::trace::OccTable e = table({row(0, 1, "", "name=S0", 3, KZ_OCC_READY)});
+  d = kz::trace::occ_diff_text(c, e, &n);
+  KZ_CHECK(n.matched == 1 && n.key_differs == 1 && n.only_a == 0 && n.only_b == 0 && n.any());
+  KZ_CHECK(has(d, "matched by the text arguments (the key value is fixed on one side only): 1") && has(d, "(key value fixed in A only)"));
+  // other text arguments: not the same resource, one side only each
+  const kz::trace::OccTable f = table({row(0, 1, "", "name=S1", 1, KZ_OCC_READY)});
+  kz::trace::occ_diff_text(c, f, &n);
+  KZ_CHECK(n.matched == 0 && n.key_differs == 0 && n.only_a == 1 && n.only_b == 1);
+}
+
 }  // namespace
 
 int main() {
@@ -209,5 +268,6 @@ int main() {
   test_store_derived();
   test_control_order();
   test_old_container();
+  test_keys();
   return kztest::finish("test_trace_occ_basis");
 }

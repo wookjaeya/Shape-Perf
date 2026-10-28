@@ -32,9 +32,18 @@
 //             gap (or its last event) to the end; preinit, partial bootstrap, excluded, unloaded, reentry,
 //             note-table, an unexplained aseq gap and a truncated stream (no END, bad CRC): the whole record;
 //             control losses (ctl-skipped, ctl-nocond), actor-table, unresolved, module-table and after-stop are
-//             reported but are no interval (the events are recorded, or lie outside the observation window).
+//             reported but are no interval (the events are recorded, or lie outside the observation window); so is
+//             abnormal-end (a recovered dump: every actor's records are a gap-free prefix, event_semantics.md 12.3),
+//             which still sets loss-present.  An actor that was inside a hook when the process ended is the runtime's
+//             partial loss of that actor: from its last event to the end, as any partial of an actor's buffer.
+//   end       (dump 1.4) the file header's recovered flag or RUNX end_kind recovered: run flag recovered (never complete),
+//             dumped where the process had completed its own dump first (no abnormal-end), end_kind signal / exit /
+//             unstated with end_value from RUNX end_flags and end_value (what the harness gave); a dump of the running
+//             process: end_kind in-process.  A dump before 1.4: not recorded.  A recovered dump of an unfinished process
+//             without LOSS abnormal-end is given one (a note).  The ending is a conversion note.
 //   start     bootstrap-buffer evidence iff the runtime was initialized in record or control mode and no
-//             pre-init or bootstrap partial loss was counted, in a complete stream.
+//             pre-init or bootstrap partial loss was counted, in a whole stream (a recovered one too: the end does not
+//             change the start).
 //   control   CTL records -> NCTL (actors, the hit's observation event, site); POINT held_actor -> held-at-end.
 #pragma once
 

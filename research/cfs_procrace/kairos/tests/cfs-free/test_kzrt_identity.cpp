@@ -12,7 +12,8 @@
 //   - a call that reports failure: its out parameter is not used (it keeps its old content);
 //   - two tasks announce the same id: ambiguous, no tie;
 //   - without identity reads (the version 1 file alone) nothing is joined and the run has no owner records;
-//   - the replay reads the owners from the layer (confirmed 2) and the identity notes are in the container.
+//   - the replay reads the owners from the layer (confirmed 2) and the identity notes are in the container, and gives
+//     the two tasks of one application their places in it (the first task 1, its child 2).
 
 #include <pthread.h>
 
@@ -238,6 +239,29 @@ void test_join(const std::vector<uint8_t>& dump) {
   KZ_CHECK(rep.owner_section);
   KZ_CHECK_EQ(rep.owners_confirmed, 2u);
   KZ_CHECK_EQ(rep.owners_inferred, 0u);
+  // the task's place in its application (the occurrence key's task), where the application ids resolve to records (the
+  // mini profile's ids start at another base here): the first task (the main thread's request), then its child (the
+  // first task's request); the other actors have no determined owner
+  {
+    std::vector<kz::phi::SourceText> f = kzmini::files();
+    const std::string from = "const BASE = 0x1000 prov code_a;";
+    bool replaced = false;
+    for (kz::phi::SourceText& st : f) {
+      const size_t at = st.text.find(from);
+      if (at == std::string::npos) continue;
+      st.text.replace(at, from.size(), "const BASE = 0x110000 prov code_a;");
+      replaced = true;
+    }
+    KZ_CHECK(replaced);
+    kz::phi::Profile pb;
+    KZ_CHECK_OK(kz::phi::load_profile(f, &pb, &diags));
+    kz::eval::Trace tb;
+    kz::trace::RealTraceReport rb;
+    KZ_CHECK_OK(kz::trace::real_trace_from_run(cont, pb, opt, &tb, &rb));
+    KZ_CHECK_EQ(rb.owners_determined, 2u);
+    for (const kz::trace::ThreadIdentity& ti : rb.identities)
+      KZ_CHECK_EQ(ti.task_ordinal, ti.actor_index == t1 ? 1u : ti.actor_index == t3 ? 2u : 0u);
+  }
 
   // the same dump with the version 1 file alone: no identity read, no join
   in.manifests.pop_back();

@@ -27,6 +27,12 @@ kz_add_unit_test(test_neutral_kzrt SOURCES test_neutral_kzrt.cpp LIBS kz-trace k
 # The identity join of an instrumented run (kzs-sites 2 identity reads): a dump written here with real threads, tasks
 # tied to their creating calls by the id alone, owners by the rule F0 uses.
 kz_add_unit_test(test_kzrt_identity SOURCES test_kzrt_identity.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
+# A recovered run (kzrt 0.4.0, event_semantics.md section 12): the dumps the runtime's rt_end tests leave (SIGKILL, SIGSEGV
+# inside a hook, a normal exit and its recovery), converted and read by the replay.
+if(TARGET test_rt_end)
+  kz_add_unit_test(test_kzrt_recovered SOURCES test_kzrt_recovered.cpp LIBS kz-trace kz-testsupport ARGS ${CMAKE_BINARY_DIR}/runtime/tests)
+  set_tests_properties(test_kzrt_recovered PROPERTIES FIXTURES_REQUIRED "rt_end_kill_dump;rt_end_segv_dump;rt_end_normal_dump")
+endif()
 
 # The purpose-built target program.  Every function starts `endbr64; push %rbp; mov %rsp,%rbp`
 # (frame pointers, control-flow protection) like the framework's functions at -O0, whatever the

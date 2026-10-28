@@ -152,6 +152,12 @@ struct ThreadIdentity {
   uint32_t thread_flags = 0;
   int8_t core = -1;              // the owning application is a core service: 1 yes, 0 no, -1 not established
   std::string request_caller;    // the function that made the OWNER_REQUEST, where resolved
+  // The task's place among the tasks of its owning application (record key) in creation order, from 1; 0 = not
+  // established.  Creation order is the order of creation paths: the rank of the task's creation request among the
+  // requests its requesting actor made for the application (that actor's program order), after the requesting actor's
+  // own path where it is a task of the same application.  Path independent: no actor name, thread id, time or merged
+  // order enters it (replay_container.hpp: OCC_BASIS `task`).
+  uint32_t task_ordinal = 0;
 };
 
 struct RealTraceReport {
@@ -189,6 +195,7 @@ struct RealTraceReport {
   uint8_t backend = KZ_NBACKEND_NONE;
   uint8_t start = KZ_NSTART_NONE;  // KZ_NSTART: why the record covers the process start
   std::vector<std::string> loss_lines;  // loss records of a backend other than F0 (neutral.hpp loss_text)
+  std::string end;                       // how the record says the run ended (neutral.hpp run_end_text), empty if it does not
   // The realized control of a controlled run (NCTL; P11, header "control"): the releases that resumed a held thread,
   // the control edges made from them (Trace::control_edges), and per release why no edge was made where none was.
   uint64_t control_records = 0, control_resumes = 0, control_edges = 0;

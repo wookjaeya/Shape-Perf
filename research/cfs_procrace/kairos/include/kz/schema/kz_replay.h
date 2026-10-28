@@ -56,6 +56,9 @@ enum kz_replay_section_id { KZ_SEC_OCC_BASIS = 108, KZ_SEC_OCC_EDGES = 109, KZ_S
  * empty where not fixed), `name` (the text arguments of the call, `;`-separated, e.g. the name looked up) and
  * `ordinal` (the k-th occurrence the executing task began with that key, from 1).  `via` names the kinds and
  * locations whose writer coverage rests on a `bind ... via` declaration, `;`-separated.
+ * `task` (schema revision 5; was reserved): the executing task's place among the tasks of its owning application in
+ * creation order, from 1, where the record establishes it (real_trace.hpp ThreadIdentity::task_ordinal); 0 = not
+ * established, and in every container written before (REPLAY_READ format 1).
  */
 #define KZ_OCC_BASIS_FIELDS(X, T)                                                    \
   X(T, uint32_t, summary, )      /* SUMMARIES index */                               \
@@ -74,7 +77,7 @@ enum kz_replay_section_id { KZ_SEC_OCC_BASIS = 108, KZ_SEC_OCC_EDGES = 109, KZ_S
   X(T, uint8_t, outcome, )       /* KZ_OUTCOME_CHECK */                              \
   X(T, uint8_t, owner_level, )   /* KZ_OWNER_LEVEL */                                \
   X(T, uint8_t, relation, )      /* KZ_EXEC_RELATION */                              \
-  X(T, uint16_t, rsv0, )                                                             \
+  X(T, uint16_t, task, )         /* the task's place in its application, 0 = not established (revision 5) */ \
   X(T, kz_str, rspec, )                                                              \
   X(T, kz_str, op, )                                                                 \
   X(T, kz_str, context, )                                                            \
@@ -95,7 +98,7 @@ enum kz_replay_section_id { KZ_SEC_OCC_BASIS = 108, KZ_SEC_OCC_EDGES = 109, KZ_S
 
 /* The reading of the replay (one record).  Every switch is recorded, default or not (KZ_READ_SWITCH). */
 #define KZ_REPLAY_READ_FIELDS(X, T)                                                  \
-  X(T, uint32_t, format, )        /* 1: this layout of OCC_BASIS / OCC_EDGES */      \
+  X(T, uint32_t, format, )        /* 1: OCC_BASIS / OCC_EDGES of revision 4; 2: OCC_BASIS `task` filled (revision 5) */ \
   X(T, uint32_t, control_edges, ) /* control edges of the replayed trace */          \
   X(T, uint32_t, reordered, )     /* events the trace's linearization moved */       \
   X(T, uint8_t, outcome_narrowing, )      /* KZ_READ_SWITCH (P1) */                  \

@@ -62,10 +62,12 @@
 #endif
 
 #define KZ_ABI_VERSION 1u
-/* Revision of the record set (docs/schema.md sections 10, 12, 13).  Revisions 2 to 4 add sections only; it
+/* Revision of the record set (docs/schema.md sections 10, 12, 13, 14).  Revisions 2 to 4 add sections only; it
  * is part of the layout text, hence of the schema fingerprint and of every tool hash.  Revision 3 adds the
- * neutral event layer (kz_neutral.h), revision 4 the per-occurrence basis of a replay (kz_replay.h). */
-#define KZ_SCHEMA_REVISION 4u
+ * neutral event layer (kz_neutral.h), revision 4 the per-occurrence basis of a replay (kz_replay.h).  Revision 5
+ * names three reserved fields (NRUN end_kind and end_value, OCC_BASIS task: zero in every earlier container, which
+ * reads as "not recorded") and adds enumeration values; no record size, offset or section version changes. */
+#define KZ_SCHEMA_REVISION 5u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu

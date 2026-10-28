@@ -230,6 +230,9 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
     }
     const auto ti = by_actor.find(o.actor);
     b.owner_app = w.intern(ti != by_actor.end() ? report.identities[ti->second].app_name : std::string());
+    // the task's place in its application (revision 5), with the owner it is a place in
+    if (b.owner_key != KZ_NONE32 && ti != by_actor.end() && report.identities[ti->second].task_ordinal <= 0xFFFFu)
+      b.task = static_cast<uint16_t>(report.identities[ti->second].task_ordinal);
     b.rspec = w.intern(o.rspec);
     b.op = w.intern(o.call < trace.events.size() ? trace.events[static_cast<size_t>(o.call)].site : std::string());
     b.context = w.intern(o.context);
@@ -260,7 +263,7 @@ Status write_replay_container(const ReplayContainerInput& in, const eval::Trace&
   }
   // REPLAY_READ: the reading in force.
   kz_replay_read rd = zeroed<kz_replay_read>();
-  rd.format = 1;
+  rd.format = 2;  // OCC_BASIS task filled (schema revision 5)
   rd.control_edges = static_cast<uint32_t>(trace.control_edges.size());
   rd.reordered = static_cast<uint32_t>(trace.reordered);
   if (in.options != nullptr) {

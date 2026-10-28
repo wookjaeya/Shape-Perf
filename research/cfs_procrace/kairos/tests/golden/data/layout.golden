@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=4
+kz-layout abi=1 revision=5
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -777,11 +777,11 @@ record kz_nrun size=168 fields=16
   backend offset=0 size=1 count=1 kind=u8
   clock offset=1 size=1 count=1 kind=u8
   start_evidence offset=2 size=1 count=1 kind=u8
-  rsv0 offset=3 size=1 count=1 kind=u8
+  end_kind offset=3 size=1 count=1 kind=u8
   flags offset=4 size=4 count=1 kind=u32
   run_id offset=8 size=8 count=1 kind=u64
   instance_id offset=16 size=4 count=1 kind=u32
-  rsv1 offset=20 size=4 count=1 kind=u32
+  end_value offset=20 size=4 count=1 kind=u32
   manifest_sha256 offset=24 size=1 count=32 kind=u8
   raw_sha256 offset=56 size=1 count=32 kind=u8
   backend_name offset=88 size=8 count=1 kind=str
@@ -908,7 +908,7 @@ record kz_occ_basis size=104 fields=24
   outcome offset=43 size=1 count=1 kind=u8
   owner_level offset=44 size=1 count=1 kind=u8
   relation offset=45 size=1 count=1 kind=u8
-  rsv0 offset=46 size=2 count=1 kind=u16
+  task offset=46 size=2 count=1 kind=u16
   rspec offset=48 size=8 count=1 kind=str
   op offset=56 size=8 count=1 kind=str
   context offset=64 size=8 count=1 kind=str
@@ -1771,6 +1771,14 @@ flags KZ_NRUN_FLAG
   0x8 COMPLETE "complete"
   0x10 CONTROL_RECORDED "control-recorded"
   0x20 STOPPED "stopped"
+  0x40 RECOVERED "recovered"
+  0x80 DUMPED "dumped"
+enum KZ_NEND
+  0x0 NOT_RECORDED "not-recorded"
+  0x1 IN_PROCESS "in-process"
+  0x2 SIGNAL "signal"
+  0x3 EXIT "exit"
+  0x4 UNSTATED "unstated"
 enum KZ_NSITE_KIND
   0x0 UNKNOWN "unknown"
   0x1 CALL "call"
@@ -1842,6 +1850,7 @@ enum KZ_NLOSS
   0x12 AFTER_STOP "after-stop"
   0x13 NOTE_TABLE "note-table"
   0x14 TRUNCATED_STREAM "truncated-stream"
+  0x15 ABNORMAL_END "abnormal-end"
 enum KZ_NLOSS_UNIT
   0x0 NONE "none"
   0x1 CPU_RING "cpu-ring"
@@ -2254,6 +2263,7 @@ format kz_obligation.status enum KZ_TRUST_STATUS
 format kz_nrun.backend enum KZ_NBACKEND
 format kz_nrun.clock enum KZ_NCLOCK
 format kz_nrun.start_evidence enum KZ_NSTART
+format kz_nrun.end_kind enum KZ_NEND
 format kz_nrun.flags flags KZ_NRUN_FLAG
 format kz_nrun.run_id hex 0
 format kz_nsite.kind enum KZ_NSITE_KIND
@@ -2327,4 +2337,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=f62975b585224512d5e9bc908091bad04b74656f26eec469d94f7266ebbc27b4
+fingerprint=93b668308f63f7c147860b718f27f02de193a8b278bee43fc3d8335f6bc3ba25

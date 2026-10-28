@@ -132,6 +132,7 @@ uint8_t nloss_kind(uint32_t k) {
     case KZ_RT_LOSS_MODULE_TABLE: return KZ_NLOSS_MODULE_TABLE;
     case KZ_RT_LOSS_AFTER_STOP: return KZ_NLOSS_AFTER_STOP;
     case KZ_RT_LOSS_NOTE_TABLE: return KZ_NLOSS_NOTE_TABLE;
+    case KZ_RT_LOSS_ABNORMAL_END: return KZ_NLOSS_ABNORMAL_END;
     default: return KZ_NLOSS_UNKNOWN;
   }
 }
@@ -148,10 +149,21 @@ uint16_t decoder_code(const std::string& d) {
   return KZ_DECODER_NONE;
 }
 
-// Losses that leave the recorded events whole: no interval (kzrt_convert.hpp, "losses").
+// Losses that leave the recorded events whole: no interval (kzrt_convert.hpp, "losses").  An abnormal end loses what
+// came after every actor's gap-free prefix (event_semantics.md 12.3), not a record inside it.
 bool no_interval(uint8_t kind) {
   return kind == KZ_NLOSS_CTL_SKIPPED || kind == KZ_NLOSS_CTL_NOCOND || kind == KZ_NLOSS_ACTOR_TABLE || kind == KZ_NLOSS_UNRESOLVED ||
-         kind == KZ_NLOSS_MODULE_TABLE || kind == KZ_NLOSS_AFTER_STOP;
+         kind == KZ_NLOSS_MODULE_TABLE || kind == KZ_NLOSS_AFTER_STOP || kind == KZ_NLOSS_ABNORMAL_END;
+}
+
+// RUNX store_flags as text (kz_rt.h KZ_RT_STOREF_*, the refusal reason in bits 8..15).
+std::string store_text(uint32_t f) {
+  if ((f & KZ_RT_STOREF_REFUSED) != 0) {
+    static const char* const why[] = {"?", "align", "open", "size", "write", "map"};
+    const uint32_t r = KZ_RT_STOREF_REASON(f);
+    return std::string("store refused (") + (r < 6 ? why[r] : "?") + ")";
+  }
+  return (f & KZ_RT_STOREF_FILE) != 0 ? "store file" : "store memory";
 }
 
 }  // namespace
@@ -196,7 +208,33 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
   const Digest dump_sha = sha256(in.dump.data(), in.dump.size());
   std::memcpy(nr.r.raw_sha256, dump_sha.data(), 32);
   nr.r.flags = KZ_NRUN_FLAG_LOSS_EVIDENCE;  // the runtime counts its own losses (event_semantics.md 8.4)
-  if (complete) nr.r.flags |= KZ_NRUN_FLAG_COMPLETE;
+  // how the run ended (dump 1.4, event_semantics.md 12.2): the dump of the running process, or a dump recovered from its
+  // store after it ended (the file header's flag and RUNX end_kind say it; either is taken).  A recovered record is
+  // never `complete`, even when the stream is whole: it holds what the store held when the process ended.
+  const bool hdr_recovered = (st.dump_flags & KZ_RT_DUMP_RECOVERED) != 0;
+  const bool runx_recovered = c.have_runx && c.runx.end_kind == KZ_RT_END_RECOVERED;
+  const bool recovered = hdr_recovered || runx_recovered;
+  const bool dumped = recovered && c.have_runx && (c.runx.end_flags & KZ_RT_ENDF_DUMPED) != 0;
+  if (hdr_recovered != runx_recovered)
+    notes.push_back(std::string("the dump header ") + (hdr_recovered ? "says" : "does not say") + " recovered, RUNX end_kind " + std::to_string(c.have_runx ? c.runx.end_kind : 0) +
+                    ": taken as recovered");
+  if (recovered) {
+    nr.r.flags |= KZ_NRUN_FLAG_RECOVERED;
+    if (dumped) nr.r.flags |= KZ_NRUN_FLAG_DUMPED;
+    const uint32_t ef = c.have_runx ? c.runx.end_flags : 0;
+    nr.r.end_kind = (ef & KZ_RT_ENDF_SIGNAL) != 0 ? KZ_NEND_SIGNAL : (ef & KZ_RT_ENDF_EXIT) != 0 ? KZ_NEND_EXIT : KZ_NEND_UNSTATED;
+    nr.r.end_value = nr.r.end_kind != KZ_NEND_UNSTATED ? c.runx.end_value : 0;
+    notes.push_back("end: recovered from the store after the process ended" +
+                    (nr.r.end_kind == KZ_NEND_SIGNAL ? " (signal " + std::to_string(nr.r.end_value) + ")"
+                     : nr.r.end_kind == KZ_NEND_EXIT ? " (exit status " + std::to_string(nr.r.end_value) + ")"
+                                                     : std::string(" (the harness gave no signal or exit status)")) +
+                    ", " + store_text(c.have_runx ? c.runx.store_flags : 0) +
+                    (dumped ? ": the process had completed its own dump, which holds the same records" : ": the records are the prefix the store held (abnormal-end)"));
+  } else if (c.have_runx && c.runx.end_kind == KZ_RT_END_IN_PROCESS) {
+    nr.r.end_kind = KZ_NEND_IN_PROCESS;
+    notes.push_back("end: the process's own dump, " + store_text(c.runx.store_flags));
+  }
+  if (complete && !recovered) nr.r.flags |= KZ_NRUN_FLAG_COMPLETE;
   if ((st.dump_flags & KZ_RT_DUMP_STOPPED) != 0) nr.r.flags |= KZ_NRUN_FLAG_STOPPED;
   if (!c.ctls.empty()) nr.r.flags |= KZ_NRUN_FLAG_CONTROL_RECORDED;
   nr.r.raw_meta = zeroed<kz_ref>();
@@ -519,7 +557,7 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
     kz_nloss nl = nloss_init();
     nl.kind = nloss_kind(l.kind);
     nl.count = l.count;
-    if (l.count != 0 && !no_interval(nl.kind)) lossy = true;
+    if (l.count != 0 && (!no_interval(nl.kind) || nl.kind == KZ_NLOSS_ABNORMAL_END)) lossy = true;  // an abnormal end: a prefix
     if (no_interval(nl.kind)) {
       nl.begin = nl.end = ne_total;  // reported; the recorded events are whole (or the loss lies after the window)
     } else if ((nl.kind == KZ_NLOSS_OVERFLOW || nl.kind == KZ_NLOSS_PARTIAL) && l.actor != 0 && actor_of.count(l.actor) != 0 && record_of.count(l.actor) != 0) {
@@ -554,6 +592,22 @@ Status neutral_from_kzrt(const KzrtConvertInput& in, KzrtConvertResult* out) {
       nl.unit = a.actor;
       const uint32_t gap = first_gap(a, idx);
       nl.begin = after_last(idx, gap != 0 ? gap : 0xFFFFFFFFu);
+      n.losses.push_back(nl);
+      lossy = true;
+    }
+  }
+  // a recovered dump says whether it is a prefix: abnormal-end unless the process had completed its own dump
+  {
+    bool abnormal = false;
+    for (const kz_nloss& l : n.losses) abnormal = abnormal || l.kind == KZ_NLOSS_ABNORMAL_END;
+    if (abnormal && !recovered) notes.push_back("LOSS abnormal-end in a dump that does not say it was recovered");
+    if (abnormal && dumped) notes.push_back("LOSS abnormal-end in a recovered dump whose process had completed its own dump: kept as a prefix");
+    if (recovered && !dumped && !abnormal) {
+      notes.push_back("a recovered dump without LOSS abnormal-end although its process had not completed its own dump: taken as a prefix");
+      kz_nloss nl = nloss_init();
+      nl.kind = KZ_NLOSS_ABNORMAL_END;
+      nl.count = 1;
+      nl.begin = nl.end = ne_total;
       n.losses.push_back(nl);
       lossy = true;
     }

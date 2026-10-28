@@ -10,11 +10,15 @@
 // The occurrence key (path independent: it names no actor, thread id or event position):
 //   rspec | op | owner | resource | ordinal
 // owner = "app[<record key>]" where the record establishes the owning application of the executing task (inferred or
-// confirmed), else "app:undetermined"; resource = the occurrence's key values (hex), or "name:<text arguments>" where
-// the key was not fixed; ordinal = the k-th occurrence the executing task began with that key.  Two tasks of one
-// application with the same resource and rspec would share a key: the comparison then pairs them in the order of the
-// containers and says so.  The comparison first matches by the key, then the occurrences left by the key without the
-// owner (the owners then differ, and the comparison says so).
+// confirmed), followed by "#<task>" where the container records the task's place in that application (schema revision
+// 5, REPLAY_READ format 2: OCC_BASIS task, real_trace.hpp ThreadIdentity::task_ordinal), else "app:undetermined";
+// resource = the occurrence's key values (hex), or "name:<text arguments>" where the key was not fixed; ordinal = the
+// k-th occurrence the executing task began with that key.  The comparison uses the task only when both containers
+// record it.  It matches by the key, then the occurrences left by the key without the owner (the owners then differ),
+// then the occurrences left whose key value one side fixed and the other did not, by their text arguments in place of
+// the key value, where exactly one occurrence of each side has them (the key differs; said apart).  A key that more
+// than one occurrence of a side shares, while the other side has it too, is never paired by order: the group is
+// listed as ambiguous.  Every difference, an ambiguous group included, makes `kz occ diff` exit 3.
 #pragma once
 
 #include <cstdint>
@@ -41,11 +45,14 @@ struct OccRow {
   uint32_t call = KZ_NONE32, decision = KZ_NONE32;
   uint8_t status = 0, status_flags = 0, observation = 0, outcome = 0, owner_level = 0, relation = 0;
   uint16_t summary_flags = 0;
+  uint16_t task = 0;           // OCC_BASIS task (0 = not established)
+  bool task_recorded = false;  // the container records it (REPLAY_READ format 2)
   std::vector<OccEdge> edges;
 };
 
 struct OccTable {
   bool recorded = false;   // the container has OCC_BASIS (schema revision 4)
+  bool task_recorded = false;  // its OCC_BASIS has the task's place in its application (REPLAY_READ format 2, revision 5)
   bool has_reading = false;
   kz_replay_read reading{};
   std::vector<std::pair<std::string, std::string>> basis;  // the BASIS items (replay inputs)
@@ -54,17 +61,22 @@ struct OccTable {
 
 Status read_occ_table(const Container& c, OccTable* out);
 
-std::string occ_key(const OccRow& r, bool with_owner = true);
+// The row's key; with_task: the task's place where the row's container records it.
+std::string occ_key(const OccRow& r, bool with_owner = true, bool with_task = true);
 // One line per occurrence after a head that names the reading.
 std::string occ_table_text(const OccTable& t);
 
 struct OccDiffCounts {
-  uint64_t matched = 0, only_a = 0, only_b = 0, verdict = 0, basis = 0, owner_differs = 0, ambiguous = 0;
+  // ambiguous: the groups of a shared key (their occurrences are not paired); key_differs: pairs matched by the text
+  // arguments, the key value fixed on one side only
+  uint64_t matched = 0, only_a = 0, only_b = 0, verdict = 0, basis = 0, owner_differs = 0, ambiguous = 0, ambiguous_rows = 0, key_differs = 0;
+  bool any() const { return verdict != 0 || basis != 0 || only_a != 0 || only_b != 0 || owner_differs != 0 || ambiguous != 0 || key_differs != 0; }
 };
 // The comparison of two tables by the occurrence key: the verdict differences (status, its flags, the summary view
 // and its reasons) and the basis differences (basis kinds, declared assumptions, outcome check, the rules of the
-// edges) are listed apart; then the occurrences of one side only.  Without OCC_BASIS on either side the rows are
-// paired by their position and only the verdict and the basis of summary.flags are compared (said in the head).
+// edges) are listed apart; then the ambiguous groups, the pairs whose key differs, the occurrences of one side only.
+// Without OCC_BASIS on either side the rows are paired by their position and only the verdict and the basis of
+// summary.flags are compared (said in the head).
 std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* counts);
 
 }  // namespace kz::trace

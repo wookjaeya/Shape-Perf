@@ -111,6 +111,7 @@ Status read_occ_table(const Container& c, OccTable* out) {
     if (!reading.empty()) {
       out->has_reading = true;
       out->reading = reading.front();
+      out->task_recorded = out->reading.format >= 2;
     }
   }
   auto str = [&](const kz_str& v) {
@@ -149,6 +150,8 @@ Status read_occ_table(const Container& c, OccTable* out) {
       r.owner_app = str(b.owner_app);
       r.via = str(b.via);
       r.ordinal = b.ordinal;
+      r.task = b.task;
+      r.task_recorded = out->task_recorded;
       r.owner_key = b.owner_key;
       r.owner_level = b.owner_level;
       r.basis = b.basis;
@@ -169,16 +172,19 @@ Status read_occ_table(const Container& c, OccTable* out) {
   return Status::success();
 }
 
-std::string occ_key(const OccRow& r, bool with_owner) {
+std::string occ_key(const OccRow& r, bool with_owner, bool with_task) {
   if (!r.recorded) return "#" + std::to_string(r.index);
-  std::string owner = r.owner_key != KZ_NONE32 && r.owner_level != KZ_OWNER_LEVEL_UNDETERMINED ? "app[" + std::to_string(r.owner_key) + "]" : "app:undetermined";
+  const bool owned = r.owner_key != KZ_NONE32 && r.owner_level != KZ_OWNER_LEVEL_UNDETERMINED;
+  std::string owner = owned ? "app[" + std::to_string(r.owner_key) + "]" : "app:undetermined";
+  if (owned && with_task && r.task_recorded && r.task != 0) owner += "#" + std::to_string(r.task);
   return r.rspec + " | " + r.op + (with_owner ? " | " + owner : std::string()) + " | " + (r.resource.empty() ? "name:" + r.name : r.resource) + " | " +
          std::to_string(r.ordinal);
 }
 
 std::string occ_table_text(const OccTable& t) {
   std::string out = "occurrences " + std::to_string(t.rows.size()) + "; per-occurrence basis " +
-                    (t.recorded ? std::string("recorded (OCC_BASIS, schema revision 4)") : std::string("not recorded (a container written before schema revision 4: SUMMARIES only)")) + "\n";
+                    (t.recorded ? std::string("recorded (OCC_BASIS, schema revision 4)") : std::string("not recorded (a container written before schema revision 4: SUMMARIES only)")) +
+                    (t.recorded ? (t.task_recorded ? "; task in the owner: recorded (app[<key>]#<task>)" : "; task in the owner: not recorded (REPLAY_READ format 1)") : "") + "\n";
   if (t.has_reading) {
     const kz_replay_read& r = t.reading;
     out += "reading: outcome-narrowing " + enum_text("KZ_READ_SWITCH", r.outcome_narrowing) + ", owner-identity-targets " + enum_text("KZ_READ_SWITCH", r.owner_identity_targets) +
@@ -206,10 +212,16 @@ std::string occ_table_text(const OccTable& t) {
 
 std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* counts) {
   OccDiffCounts n;
-  std::string head, verdicts, bases, only, owners;
+  std::string head, verdicts, bases, only, owners, ambiguous, keys;
   const bool keyed = a.recorded && b.recorded;
-  head += std::string("matching: ") + (keyed ? "by the occurrence key (rspec | op | owner | resource | ordinal), then without the owner"
-                                             : "by position (a side has no OCC_BASIS: no key; the basis of summary.flags only)") + "\n";
+  const bool with_task = a.task_recorded && b.task_recorded;  // the task's place, where both containers record it
+  head += std::string("matching: ") +
+          (keyed ? std::string("by the occurrence key (rspec | op | owner") + (with_task ? "#task" : "") +
+                       " | resource | ordinal), then without the owner, then by the text arguments where one side fixed the key value; a key shared by several "
+                       "occurrences of a side is not paired"
+                 : std::string("by position (a side has no OCC_BASIS: no key; the basis of summary.flags only)")) +
+          "\n";
+  if (keyed && !with_task) head += "task in the key: not used (" + std::string(a.task_recorded ? "B" : b.task_recorded ? "A" : "neither container") + " does not record it)\n";
   if (a.has_reading && b.has_reading) {
     const kz_replay_read& x = a.reading;
     const kz_replay_read& y = b.reading;
@@ -227,46 +239,65 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
   // pairs of rows
   std::vector<std::pair<const OccRow*, const OccRow*>> pairs;
   std::vector<const OccRow*> left_a, left_b;
-  std::set<const OccRow*> owner_differs;
+  std::set<const OccRow*> owner_differs, key_differs;
   if (!keyed) {
     const size_t m = std::min(a.rows.size(), b.rows.size());
     for (size_t i = 0; i < m; ++i) pairs.push_back({&a.rows[i], &b.rows[i]});
     for (size_t i = m; i < a.rows.size(); ++i) left_a.push_back(&a.rows[i]);
     for (size_t i = m; i < b.rows.size(); ++i) left_b.push_back(&b.rows[i]);
   } else {
-    for (int pass = 0; pass < 2; ++pass) {
-      const bool with_owner = pass == 0;
-      std::map<std::string, std::vector<const OccRow*>> by_key;
-      std::vector<const OccRow*> rest_a = pass == 0 ? std::vector<const OccRow*>() : left_a;
-      if (pass == 0)
-        for (const OccRow& r : a.rows) rest_a.push_back(&r);
-      std::vector<const OccRow*> rest_b = pass == 0 ? std::vector<const OccRow*>() : left_b;
-      if (pass == 0)
-        for (const OccRow& r : b.rows) rest_b.push_back(&r);
-      for (const OccRow* r : rest_b) by_key[occ_key(*r, with_owner)].push_back(r);
-      std::map<std::string, size_t> seen_a;
-      for (const OccRow* r : rest_a) ++seen_a[occ_key(*r, with_owner)];
-      for (const auto& kv : seen_a)
-        if (kv.second > 1 || by_key[kv.first].size() > 1) ++n.ambiguous;
-      std::map<std::string, size_t> used;
-      std::vector<const OccRow*> next_a;
-      std::set<const OccRow*> taken_b;
-      for (const OccRow* r : rest_a) {
-        const std::string k = occ_key(*r, with_owner);
-        auto it = by_key.find(k);
-        size_t& u = used[k];
-        if (it == by_key.end() || u >= it->second.size()) {
-          next_a.push_back(r);
+    for (const OccRow& r : a.rows) left_a.push_back(&r);
+    for (const OccRow& r : b.rows) left_b.push_back(&r);
+    // pass 0: the key; 1: without the owner; 2: the text arguments in place of the key value, the value fixed on one side
+    for (int pass = 0; pass < 3; ++pass) {
+      auto key = [&](const OccRow& r) -> std::string {
+        if (pass < 2) return occ_key(r, pass == 0, with_task);
+        if (r.name.empty()) return std::string();
+        OccRow x = r;  // the key without its value and ordinal: those depend on whether the value was fixed
+        x.resource.clear();
+        x.ordinal = 0;
+        return occ_key(x, true, with_task);
+      };
+      std::map<std::string, std::pair<std::vector<const OccRow*>, std::vector<const OccRow*>>> groups;
+      for (const OccRow* r : left_a)
+        if (!key(*r).empty()) groups[key(*r)].first.push_back(r);
+      for (const OccRow* r : left_b)
+        if (!key(*r).empty()) groups[key(*r)].second.push_back(r);
+      std::set<const OccRow*> taken;
+      for (const auto& kv : groups) {
+        const std::vector<const OccRow*>& ga = kv.second.first;
+        const std::vector<const OccRow*>& gb = kv.second.second;
+        if (ga.empty() || gb.empty()) continue;  // nothing to pair here: left for the next pass
+        if (pass == 2) {  // only one occurrence each, and the key value fixed on exactly one side
+          if (ga.size() != 1 || gb.size() != 1 || ga[0]->resource.empty() == gb[0]->resource.empty()) continue;
+          pairs.push_back({ga[0], gb[0]});
+          key_differs.insert(ga[0]);
+          taken.insert(ga[0]);
+          taken.insert(gb[0]);
           continue;
         }
-        const OccRow* q = it->second[u++];
-        taken_b.insert(q);
-        pairs.push_back({r, q});
-        if (!with_owner) owner_differs.insert(r);
+        if (ga.size() == 1 && gb.size() == 1) {
+          pairs.push_back({ga[0], gb[0]});
+          if (pass == 1) owner_differs.insert(ga[0]);
+          taken.insert(ga[0]);
+          taken.insert(gb[0]);
+          continue;
+        }
+        // a key several occurrences of a side share: which is which is not established, so none is paired
+        ++n.ambiguous;
+        n.ambiguous_rows += ga.size() + gb.size();
+        ambiguous += "  " + kv.first + (pass == 1 ? " (without the owner)" : "") + ":";
+        for (const OccRow* r : ga) ambiguous += " A#" + std::to_string(r->index) + " " + verdict_text(*r) + ";";
+        for (const OccRow* r : gb) ambiguous += " B#" + std::to_string(r->index) + " " + verdict_text(*r) + ";";
+        ambiguous += "\n";
+        for (const OccRow* r : ga) taken.insert(r);
+        for (const OccRow* r : gb) taken.insert(r);
       }
-      std::vector<const OccRow*> next_b;
-      for (const OccRow* r : rest_b)
-        if (taken_b.count(r) == 0) next_b.push_back(r);
+      std::vector<const OccRow*> next_a, next_b;
+      for (const OccRow* r : left_a)
+        if (taken.count(r) == 0) next_a.push_back(r);
+      for (const OccRow* r : left_b)
+        if (taken.count(r) == 0) next_b.push_back(r);
       left_a = next_a;
       left_b = next_b;
     }
@@ -275,7 +306,11 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     const OccRow& x = *pr.first;
     const OccRow& y = *pr.second;
     ++n.matched;
-    const std::string key = occ_key(x);
+    const std::string key = occ_key(x, true, with_task);
+    if (key_differs.count(&x) != 0) {
+      ++n.key_differs;
+      keys += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (key value fixed in " + (x.resource.empty() ? "B" : "A") + " only)\n";
+    }
     if (owner_differs.count(&x) != 0) {
       ++n.owner_differs;
       owners += "  owner differs: " + key + " (A owner " + std::to_string(x.owner_key) + " " + enum_text("KZ_OWNER_LEVEL", x.owner_level) + ", B owner " +
@@ -306,18 +341,23 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
   }
   for (const OccRow* r : left_a) {
     ++n.only_a;
-    only += "  only in A: " + occ_key(*r) + " " + verdict_text(*r) + "\n";
+    only += "  only in A: " + occ_key(*r, true, with_task) + " " + verdict_text(*r) + "\n";
   }
   for (const OccRow* r : left_b) {
     ++n.only_b;
-    only += "  only in B: " + occ_key(*r) + " " + verdict_text(*r) + "\n";
+    only += "  only in B: " + occ_key(*r, true, with_task) + " " + verdict_text(*r) + "\n";
   }
   std::string out = head + "occurrences A " + std::to_string(a.rows.size()) + ", B " + std::to_string(b.rows.size()) + "; matched " + std::to_string(n.matched) +
-                    ", only in A " + std::to_string(n.only_a) + ", only in B " + std::to_string(n.only_b) + (n.ambiguous != 0 ? ", keys shared by more than one occurrence " + std::to_string(n.ambiguous) + " (paired in container order)" : "") +
-                    (n.owner_differs != 0 ? ", matched without the owner " + std::to_string(n.owner_differs) : "") + "\n";
+                    ", only in A " + std::to_string(n.only_a) + ", only in B " + std::to_string(n.only_b) +
+                    (n.ambiguous != 0 ? ", ambiguous keys " + std::to_string(n.ambiguous) + " (" + std::to_string(n.ambiguous_rows) + " occurrences, not paired)" : "") +
+                    (n.owner_differs != 0 ? ", matched without the owner " + std::to_string(n.owner_differs) : "") +
+                    (n.key_differs != 0 ? ", matched by the text arguments " + std::to_string(n.key_differs) : "") + "\n";
   out += "verdict differences (status, summary view): " + std::to_string(n.verdict) + "\n" + verdicts;
   out += "basis differences (basis kinds, assumptions, outcome check, edge rules): " + std::to_string(n.basis) + "\n" + bases;
   if (!owners.empty()) out += "matched without the owner (the owning application differs or is not established on one side): " + std::to_string(n.owner_differs) + "\n" + owners;
+  if (!keys.empty()) out += "matched by the text arguments (the key value is fixed on one side only): " + std::to_string(n.key_differs) + "\n" + keys;
+  if (!ambiguous.empty())
+    out += "ambiguous keys (shared by more than one occurrence of a side; which is which is not established, none paired): " + std::to_string(n.ambiguous) + "\n" + ambiguous;
   out += only;
   if (counts != nullptr) *counts = n;
   return out;

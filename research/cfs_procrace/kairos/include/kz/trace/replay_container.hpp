@@ -27,11 +27,12 @@
 //   OCC_BASIS     (schema revision 4, kz_replay.h) one per occurrence, in the order of SUMMARIES: the verdict and summary
 //                 view, every basis kind (store-derived-order and control-order too, which summary.flags has no room
 //                 for), the declared assumptions, the outcome check, the path-independent key (rspec, operation, call
-//                 context, owning application, resource key, text arguments, ordinal) and its run of OCC_EDGES;
+//                 context, owning application and, since revision 5, the task's place in it (ThreadIdentity::task_ordinal),
+//                 resource key, text arguments, ordinal) and its run of OCC_EDGES;
 //   OCC_EDGES     the edges between actors the occurrence's result rests on (eval::Occurrence::support into
 //                 eval::Result::order_edges): rule, kind, endpoints in the replayed trace;
 //   REPLAY_READ   one record: every option of the reading (ReplayContainerInput::options; unset without it), the
-//                 control edges of the trace and the events its linearization moved.
+//                 control edges of the trace and the events its linearization moved; format 2 (OCC_BASIS task filled).
 // Nothing here is a verdict about the program beyond the replay result it copies; the container holds no
 // time and no host information, so the same inputs give the same bytes.  docs/replay_output.md describes the reading
 // of these sections and of a container written before them.

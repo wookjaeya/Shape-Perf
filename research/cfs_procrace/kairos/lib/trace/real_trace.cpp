@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cctype>
+#include <functional>
 #include <map>
 #include <set>
 
@@ -287,6 +288,61 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
       ++(cv->second == 1 ? report->owners_core : report->owners_not_core);
     }
   }
+  // The task's place in its application (ThreadIdentity::task_ordinal; the occurrence key's task, docs/replay_output.md
+  // section 3).  Path independent: it reads the creation requests only in the program order of the actor that made them.
+  // A task's creation path is the rank of its creation request among the requests its requesting actor made for the same
+  // application, after that actor's own path where the requesting actor is a task of the same application.  The
+  // application's tasks in the order of their paths are 1, 2, ...; a task without a recorded request, on a cycle, or with
+  // the path of another task (one request, two tasks) gets 0 (not established).
+  {
+    auto app_of = [&](uint32_t a) -> const ThreadIdentity* {
+      if (a >= actors.size() || ident_of[a] < 0) return nullptr;
+      const ThreadIdentity& t = report->identities[static_cast<size_t>(ident_of[a])];
+      return t.key_resolved ? &t : nullptr;
+    };
+    auto requester = [&](uint32_t a) -> uint32_t {
+      const uint32_t r = actors[a].r.owner_request;
+      return r < events.size() ? events[r].actor : KZ_NONE32;
+    };
+    std::vector<std::vector<uint32_t>> path(actors.size());
+    std::vector<int> state(actors.size(), 0);  // 0 not computed, 1 in progress, 2 established, 3 not established
+    std::function<bool(uint32_t)> path_of = [&](uint32_t a) -> bool {
+      if (state[a] != 0) return state[a] == 2;  // done, or in progress (a cycle: not established)
+      state[a] = 1;
+      const ThreadIdentity* t = app_of(a);
+      const uint32_t q = t != nullptr ? requester(a) : KZ_NONE32;
+      bool ok = q != KZ_NONE32;
+      if (ok) {
+        const uint32_t ra = events[actors[a].r.owner_request].aseq;
+        uint32_t rank = 1;
+        for (uint32_t b = 0; b < actors.size(); ++b) {
+          const ThreadIdentity* u = b != a ? app_of(b) : nullptr;
+          if (u == nullptr || u->key != t->key || requester(b) != q) continue;
+          if (events[actors[b].r.owner_request].aseq < ra) ++rank;
+        }
+        const ThreadIdentity* qa = app_of(q);
+        if (q != a && qa != nullptr && qa->key == t->key) {
+          ok = path_of(q);
+          if (ok) path[a] = path[q];
+        }
+        path[a].push_back(rank);
+      }
+      state[a] = ok ? 2 : 3;
+      return ok;
+    };
+    std::map<int64_t, std::vector<uint32_t>> tasks;  // application record key -> its tasks with an established path
+    for (uint32_t a = 0; a < actors.size(); ++a)
+      if (app_of(a) != nullptr && path_of(a)) tasks[app_of(a)->key].push_back(a);
+    for (auto& kv : tasks) {
+      std::vector<uint32_t>& v = kv.second;
+      std::stable_sort(v.begin(), v.end(), [&](uint32_t x, uint32_t y) { return path[x] < path[y]; });
+      for (size_t k = 0; k < v.size(); ++k) {
+        const bool tied = (k > 0 && path[v[k - 1]] == path[v[k]]) || (k + 1 < v.size() && path[v[k + 1]] == path[v[k]]);
+        report->identities[static_cast<size_t>(ident_of[v[k]])].task_ordinal = tied ? 0 : static_cast<uint32_t>(k + 1);
+      }
+    }
+  }
+
   // The initial thread of the process (P10, 2026-10-25): where the profile's context declares `initial_thread not_app`
   // (its sources show that the thread that runs main is never a task of the framework, so never an application's task; SPEC 1.2
   // T_raw), the actor the backend establishes as the process's initial thread (F0: the thread whose id is the process id, the
@@ -631,13 +687,16 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
 
   // ---- losses ----
   // A loss of the control path only (the controller could not evaluate a hit) leaves the observation whole: reported,
-  // not an interval.  Every other loss is an interval of the events it may affect.
+  // not an interval.  So does the abnormal end of a recovered record: every actor's records are a gap-free prefix, and
+  // the replay reads its end as the end of the record (an actor's record being written is its own partial loss).  Every
+  // other loss is an interval of the events it may affect.
   std::vector<eval::LossInterval> lv;
   report->loss_present = (n.run.r.flags & KZ_NRUN_FLAG_LOSS_PRESENT) != 0;
+  report->end = run_end_text(n);
   for (const kz_nloss& l : n.losses) {
     if (l.unit_kind == KZ_NLOSS_UNIT_CPU_RING && l.kind != KZ_NLOSS_THROTTLE) report->loss_cpus.push_back({l.unit, l.count});
     else if (n.run.r.backend != KZ_NBACKEND_F0) report->loss_lines.push_back(loss_text(l));
-    if (l.kind == KZ_NLOSS_CTL_SKIPPED || l.kind == KZ_NLOSS_CTL_NOCOND) continue;
+    if (l.kind == KZ_NLOSS_CTL_SKIPPED || l.kind == KZ_NLOSS_CTL_NOCOND || l.kind == KZ_NLOSS_ABNORMAL_END) continue;
     eval::LossInterval li;
     li.begin = l.begin;
     li.end = l.end == KZ_NONE32 ? eval::kNoEvent : l.end;
@@ -773,6 +832,7 @@ std::string report_text(const RealTraceReport& r) {
   for (const auto& lc : r.loss_cpus)
     out += "loss report: CPU ring " + std::to_string(lc.first) + ", " + std::to_string(lc.second) + " record(s); the task whose events were lost is not established\n";
   for (const std::string& l : r.loss_lines) out += "loss record: " + l + "\n";
+  if (!r.end.empty()) out += "record end: " + r.end + "\n";
   if (r.cell_values != 0) out += "values loaded from a named location (value(L) slots) " + std::to_string(r.cell_values) + "\n";
   if (r.closure_given) {
     for (const std::string& l : r.closure_lines) out += l + "\n";

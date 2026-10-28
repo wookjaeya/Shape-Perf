@@ -53,6 +53,8 @@ void print_layer(const kz::trace::NeutralRun& n) {
   const char* start = st != nullptr ? kz::enum_display(*st, n.run.r.start_evidence) : nullptr;
   std::printf("run: backend %s, flags {%s}, start evidence %s\n", n.run.backend_name.c_str(), flags.c_str(), start != nullptr ? start : "?");
   for (const kz_nloss& l : n.losses) std::printf("loss: %s\n", kz::trace::loss_text(l).c_str());
+  const std::string end = kz::trace::run_end_text(n);
+  if (!end.empty()) std::printf("end: %s\n", end.c_str());
 }
 
 int run(int argc, char** argv) {

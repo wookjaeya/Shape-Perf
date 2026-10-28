@@ -74,16 +74,21 @@ enum kz_neutral_section_id {
  * are the versions of event_semantics.md 2.13 (empty = not given).  `raw_sha256` is the sha256 of a raw
  * stream that is not in this container (kzrt-dump), zero if the raw evidence is in this container;
  * `manifest_sha256` the site manifest the runtime was given (zero = none); `raw_meta` the F0 RUNMETA.
+ * `end_kind` / `end_value` (schema revision 5; were reserved, zero in every container written before): how the record
+ * says the run ended (KZ_NEND; kzrt-dump 1.4 RUNX end_kind / end_flags / end_value, event_semantics.md section 12):
+ * not recorded (F0, a dump before 1.4), the process's own dump, or a dump recovered from the runtime's store after the
+ * process ended with the signal or exit status the harness gave (`end_value`).  Flags `recovered` and `dumped` say
+ * the same of the dump itself (its header bit; the process had completed its own dump first).
  */
 #define KZ_NRUN_FIELDS(X, T)                                                         \
   X(T, uint8_t, backend, )        /* KZ_NBACKEND */                                  \
   X(T, uint8_t, clock, )          /* KZ_NCLOCK */                                    \
   X(T, uint8_t, start_evidence, ) /* KZ_NSTART */                                    \
-  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint8_t, end_kind, )       /* KZ_NEND (revision 5) */                        \
   X(T, uint32_t, flags, )         /* KZ_NRUN_FLAG */                                 \
   X(T, uint64_t, run_id, )        /* the harness's run id (kzrt RUN), 0 = not given */ \
   X(T, uint32_t, instance_id, )   /* instance of a multi-instance run, 0 = not given */ \
-  X(T, uint32_t, rsv1, )                                                             \
+  X(T, uint32_t, end_value, )     /* the signal or exit status of KZ_NEND_SIGNAL / EXIT, else 0 */ \
   X(T, uint8_t, manifest_sha256, [32])                                               \
   X(T, uint8_t, raw_sha256, [32])                                                    \
   X(T, kz_str, backend_name, )                                                       \
@@ -278,10 +283,20 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, NONE, 0, "none") ITEM(P, EXEC_MAPPING, 1, "exec-mapping")                   \
   ITEM(P, BOOTSTRAP, 2, "bootstrap-buffer")
 
+/* RECOVERED (revision 5): a kzrt dump made from the runtime's store after the process ended (dump flag recovered), never
+ * `complete`; DUMPED (revision 5): recovered after the process had completed its own dump, which holds the same records. */
 #define KZ_ENUM_NRUN_FLAGS(ITEM, P) /* set */                                         \
   ITEM(P, LOSS_EVIDENCE, 0x1, "loss-evidence") ITEM(P, LOSS_PRESENT, 0x2, "loss-present") \
   ITEM(P, OWNERS_RECORDED, 0x4, "owners-recorded") ITEM(P, COMPLETE, 0x8, "complete")  \
-  ITEM(P, CONTROL_RECORDED, 0x10, "control-recorded") ITEM(P, STOPPED, 0x20, "stopped")
+  ITEM(P, CONTROL_RECORDED, 0x10, "control-recorded") ITEM(P, STOPPED, 0x20, "stopped") \
+  ITEM(P, RECOVERED, 0x40, "recovered") ITEM(P, DUMPED, 0x80, "dumped")
+
+/* How the record says the run ended (revision 5, NRUN end_kind).  IN_PROCESS: the process wrote the dump itself (it had
+ * not ended then).  SIGNAL / EXIT: a dump recovered from the store after the process ended, by the signal or with the
+ * exit status (NRUN end_value) the harness gave; UNSTATED: recovered, the harness gave neither. */
+#define KZ_ENUM_NEND(ITEM, P)                                                          \
+  ITEM(P, NOT_RECORDED, 0, "not-recorded") ITEM(P, IN_PROCESS, 1, "in-process")       \
+  ITEM(P, SIGNAL, 2, "signal") ITEM(P, EXIT, 3, "exit") ITEM(P, UNSTATED, 4, "unstated")
 
 #define KZ_ENUM_NSITE_KIND(ITEM, P)                                                    \
   ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, CALL, 1, "call") ITEM(P, RETURN, 2, "return") \
@@ -323,6 +338,10 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, REQUEST_ADDR, 0x8, "request-addr-known") ITEM(P, EXITED, 0x10, "exited")  \
   ITEM(P, HELD_AT_END, 0x20, "held-at-end")
 
+/* ABNORMAL_END (revision 5): the kzrt dump was recovered from the store after the process ended without its own dump: the
+ * records are the prefix the store held, each actor's gap free, and what the actors did after their last record is not
+ * known.  No interval inside the events (begin = end = the event count); a record an actor was writing when the process
+ * ended is the actor's own partial loss. */
 #define KZ_ENUM_NLOSS(ITEM, P)                                                         \
   ITEM(P, UNKNOWN, 0, "unknown") ITEM(P, NO_EVIDENCE, 1, "no-loss-evidence")          \
   ITEM(P, FLAGGED, 2, "flagged-without-record") ITEM(P, RECORDS_LOST, 3, "records-lost") \
@@ -334,7 +353,7 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, UNRESOLVED, 14, "unresolved") ITEM(P, CTL_SKIPPED, 15, "ctl-skipped")       \
   ITEM(P, CTL_NOCOND, 16, "ctl-nocond") ITEM(P, MODULE_TABLE, 17, "module-table")     \
   ITEM(P, AFTER_STOP, 18, "after-stop") ITEM(P, NOTE_TABLE, 19, "note-table")         \
-  ITEM(P, TRUNCATED_STREAM, 20, "truncated-stream")
+  ITEM(P, TRUNCATED_STREAM, 20, "truncated-stream") ITEM(P, ABNORMAL_END, 21, "abnormal-end")
 
 #define KZ_ENUM_NLOSS_UNIT(ITEM, P)                                                    \
   ITEM(P, NONE, 0, "none") ITEM(P, CPU_RING, 1, "cpu-ring") ITEM(P, ACTOR_BUFFER, 2, "actor-buffer") \
@@ -372,6 +391,7 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   D(KZ_NCLOCK, KZ_ENUM_NCLOCK, 0)               \
   D(KZ_NSTART, KZ_ENUM_NSTART, 0)               \
   D(KZ_NRUN_FLAG, KZ_ENUM_NRUN_FLAGS, 1)        \
+  D(KZ_NEND, KZ_ENUM_NEND, 0)                   \
   D(KZ_NSITE_KIND, KZ_ENUM_NSITE_KIND, 0)       \
   D(KZ_NPHASE, KZ_ENUM_NPHASE, 0)               \
   D(KZ_NSITE_FLAG, KZ_ENUM_NSITE_FLAGS, 1)      \
@@ -395,6 +415,7 @@ KZ_NEUTRAL_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_nrun, backend, ENUM, KZ_NBACKEND)              \
   F(kz_nrun, clock, ENUM, KZ_NCLOCK)                  \
   F(kz_nrun, start_evidence, ENUM, KZ_NSTART)         \
+  F(kz_nrun, end_kind, ENUM, KZ_NEND)                 \
   F(kz_nrun, flags, FLAGS, KZ_NRUN_FLAG)              \
   F(kz_nrun, run_id, HEX, 0)                          \
   F(kz_nsite, kind, ENUM, KZ_NSITE_KIND)              \

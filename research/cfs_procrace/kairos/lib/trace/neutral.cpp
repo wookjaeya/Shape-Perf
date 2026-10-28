@@ -430,6 +430,7 @@ Status check_neutral(const NeutralRun& n) {
       return bad("NACTORS[" + std::to_string(i) + "] event index out of range");
     if (a.binding > KZ_NBIND_KZRT_PROVISIONAL || a.owner_level > KZ_OWNER_LEVEL_CONFIRMED) return bad("NACTORS[" + std::to_string(i) + "] enum out of range");
   }
+  if (n.run.r.end_kind > KZ_NEND_UNSTATED) return bad("NRUN end_kind out of range");
   for (size_t i = 0; i < n.losses.size(); ++i) {
     const kz_nloss& l = n.losses[i];
     if (l.begin > ne || (l.end != KZ_NONE32 && (l.end > ne || l.end < l.begin)) || !idx_ok(l.actor, na)) return bad("NLOSS[" + std::to_string(i) + "] interval out of range");
@@ -479,6 +480,19 @@ std::string loss_text(const kz_nloss& l) {
   t += ", events " + std::to_string(l.begin) + ".." + (l.end == KZ_NONE32 ? std::string("end") : std::to_string(l.end));
   if (l.actor != KZ_NONE32) t += ", actor " + std::to_string(l.actor);
   return t;
+}
+
+std::string run_end_text(const NeutralRun& n) {
+  const kz_nrun& r = n.run.r;
+  if (r.end_kind == KZ_NEND_NOT_RECORDED) return std::string();
+  if (r.end_kind == KZ_NEND_IN_PROCESS) return "the process's own dump (in-process)";
+  std::string t = "recovered from the runtime's store after the process ended";
+  if (r.end_kind == KZ_NEND_SIGNAL) t += " (signal " + std::to_string(r.end_value) + ")";
+  else if (r.end_kind == KZ_NEND_EXIT) t += " (exit status " + std::to_string(r.end_value) + ")";
+  else t += " (the harness gave no signal or exit status)";
+  if ((r.flags & KZ_NRUN_FLAG_DUMPED) != 0) return t + "; the process had completed its own dump first, which holds the same records";
+  return t + ": every actor's records are the gap-free prefix the store held, and what the actors did after their last record is not known "
+             "(abnormal-end: no loss interval inside the record; a record an actor was writing is that actor's partial loss)";
 }
 
 // ---------------------------------------------------------------------------------------------------------

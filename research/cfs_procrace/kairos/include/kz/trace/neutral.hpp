@@ -98,5 +98,8 @@ std::vector<std::string> actor_names(const NeutralRun& n);
 
 // One-line text of a loss record (reports).
 std::string loss_text(const kz_nloss& l);
+// How the record says the run ended (NRUN end_kind, end_value, flags recovered / dumped; schema revision 5), for
+// reports; empty where the record does not say (F0, a kzrt-dump before 1.4).
+std::string run_end_text(const NeutralRun& n);
 
 }  // namespace kz::trace

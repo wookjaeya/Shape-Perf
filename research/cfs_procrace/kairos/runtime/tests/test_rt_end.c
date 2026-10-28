@@ -153,7 +153,7 @@ static char s_self[] = "/proc/self/exe", s_child[] = "child", s_recover[] = "--r
             s_exit[] = "--exit-status";
 
 static int harness(char *c, const char *dir, char *tool) {
-  char store[4096], dump[4096], rec[4096], fdtext[16], sig[16], cut[4096];
+  char store[4096], dump[4096], rec[4096], fdtext[16], sig[16], cut[4096], refused[4096];
   int pfd[2], st, abnormal = strcmp(c, "normal") != 0, stall = strcmp(c, "term") == 0 || strcmp(c, "term-kill") == 0;
   pid_t p;
   membuf m = {0}, m2 = {0};
@@ -259,21 +259,23 @@ static int harness(char *c, const char *dir, char *tool) {
       ++b;
     }
     CHECK(a == it.n && b == it2.n);
-    { /* a cut file and a store of another build are refused, and nothing is written */
+    { /* a cut file and a store of another build are refused, and nothing is written (the recovered dump above is kept:
+         the host converter's test reads it, kairos tests/cfs-free/test_kzrt_recovered.cpp) */
       FILE *f;
-      char *const args[] = {tool, s_recover, cut, s_out, rec, NULL};
+      char *const args[] = {tool, s_recover, cut, s_out, refused, NULL};
       snprintf(cut, sizeof cut, "%s/rt_end_cut.store", dir);
-      (void)unlink(rec);
+      snprintf(refused, sizeof refused, "%s/rt_end_refused.kzrt", dir);
+      (void)unlink(refused);
       CHECK(read_all(store, &m2));
       f = fopen(cut, "wb");
       CHECK(f != NULL && fwrite(m2.p, 1, m2.n / 2u, f) == m2.n / 2u);
       fclose(f);
-      CHECK(run(args) == 2 && stat(rec, &sb) == -1);
+      CHECK(run(args) == 2 && stat(refused, &sb) == -1);
       m2.p[40] ^= 0x01; /* pool_bytes of the header */
       f = fopen(cut, "wb");
       CHECK(f != NULL && fwrite(m2.p, 1, m2.n, f) == m2.n);
       fclose(f);
-      CHECK(run(args) == 2 && stat(rec, &sb) == -1);
+      CHECK(run(args) == 2 && stat(refused, &sb) == -1);
       (void)unlink(cut);
     }
   }

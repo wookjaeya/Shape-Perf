@@ -351,18 +351,6 @@ int run(int argc, char** argv) {
     const size_t eq = v.find('=');
     if (eq != std::string::npos) ropt.versions[v.substr(0, eq)] = v.substr(eq + 1);  // the guards of the linearization's first pass
   }
-  kz::eval::Trace trace;
-  kz::trace::RealTraceReport report;
-  s = kz::trace::real_trace_from_run(c, p, ropt, &trace, &report);
-  if (!s.ok()) {
-    std::fprintf(stderr, "kz replay: %s\n", s.describe().c_str());
-    return 2;
-  }
-  for (const auto& kv : ropt.consts) trace.ref_consts[kv.first] = kv.second;
-  if (emit) {
-    std::fputs(kz::eval::trace_text(trace).c_str(), stdout);
-    return 0;
-  }
   kz::eval::Options options;
   std::vector<kz::phi::ExprPtr> owned;
   for (const std::string& pr : predicates) {
@@ -397,6 +385,19 @@ int run(int argc, char** argv) {
   options.reads_from_edges = reads_from == "on";
   options.reads_from_outcome = rf_outcome == "on";
   options.control_order = control == "on";
+  ropt.reading = &options;  // the linearization reads as this replay does (real_trace.hpp, "order")
+  kz::eval::Trace trace;
+  kz::trace::RealTraceReport report;
+  s = kz::trace::real_trace_from_run(c, p, ropt, &trace, &report);
+  if (!s.ok()) {
+    std::fprintf(stderr, "kz replay: %s\n", s.describe().c_str());
+    return 2;
+  }
+  for (const auto& kv : ropt.consts) trace.ref_consts[kv.first] = kv.second;
+  if (emit) {
+    std::fputs(kz::eval::trace_text(trace).c_str(), stdout);
+    return 0;
+  }
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {

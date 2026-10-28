@@ -24,8 +24,10 @@
 //   order       (2026-10-28) the merged order is then made a linear extension of the record's known order
 //               (eval::linearize_real_trace: program order, the run's control edges, the rules' edges and matches of a
 //               first pass), the merged order breaking the ties; a record whose merged order already is one is unchanged.
-//               An edge (a control edge included) is refused only where it contradicts that order (report "order" and
-//               "control" lines).
+//               An edge (a control edge included) is refused only where it contradicts program order and the rules'
+//               edges, or lies on a cycle with other order facts of the record (report "order" and "control" lines).
+//               The linearization reads with the replay's reading options (RealTraceOptions::reading): a reading
+//               without control order, reads-from edges or uses by returned code is not shaped by them.
 //   actors      one per thread incarnation (THREADS): the kernel name, made unique with the tid and the
 //               generation where needed; "tid<N>" for a thread without a name.
 //   observed    the labels of the point sites that map: they were attached for the whole record.
@@ -119,6 +121,9 @@ struct RealTraceOptions {
   const Container* facts = nullptr;
   // The versions of components (the guards of rules), for the first pass of the linearization (header, "order").
   std::map<std::string, std::string> versions;
+  // The reading of the replay that will read the trace (its switches, predicates and versions; not owned), for the
+  // linearization (header, "order"); null: the default reading with `versions`.
+  const eval::Options* reading = nullptr;
 };
 
 // How the adapter maps one site of the run container: kind 0 not mapped, 1 call of `name` (an operation),

@@ -208,6 +208,9 @@ int run(int argc, char** argv) {
     }
     ropt.facts = &facts;
   }
+  kz::eval::Options options;
+  options.outcome_narrowing = narrowing == "on";
+  ropt.reading = &options;  // the linearization reads as the replay below does (real_trace.hpp, "order")
   kz::eval::Trace trace;
   kz::trace::RealTraceReport report;
   s = kz::trace::real_trace_from_run(c, p, ropt, &trace, &report);
@@ -216,8 +219,6 @@ int run(int argc, char** argv) {
     return 2;
   }
   for (const auto& kv : ropt.consts) trace.ref_consts[kv.first] = kv.second;
-  kz::eval::Options options;
-  options.outcome_narrowing = narrowing == "on";
   kz::eval::Result result;
   s = kz::eval::replay(p, trace, options, &result);
   if (!s.ok()) {

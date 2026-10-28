@@ -100,7 +100,7 @@ kz occ diff <a.kz> <b.kz>        # 차이가 있으면 종료 코드 3
 - 읽기: 단계 F의 재생 인수(`replay_gih.sh f0`·`gih`, 프로필 스냅숏 `97a24d8`, 닫힘 `c1prof_i1025[_rx]`). 같은 kz로 두 경로를 읽었다. 스크립트 `instrument/gcc/scripts/f0ctl_confirm2.sh`, 집계 `f0ctl_summary.sh`. 산출물 `/home/user/work/instr/gcc/f0ctl/`(실행마다 `sha256.txt`).
 - 대응: hold.kzr 사실 152개(보류 52, fire 100 = 재개 52 + 선도달 48)가 모두 관측 사건에 대응했다. 사건 없음 0, 변환하지 않음 0.
 - 실제 제어 줄(`control_cmp.sh`)은 36/36 G-I-H와 같다(단계 F와 같은 결과).
-- 제어 순서를 끈 F0 읽기(ctloff, ctloff_p1off)는 단계 F의 F0 재생(`f1/f0re/<run>/{cur,p1off}.kz`)과 36/36 같다(판정·`summary.flags` 근거). NCTL을 더해도 끄면 예전과 같다.
+- 제어 순서를 끈 F0 읽기(ctloff, ctloff_p1off)는 단계 F의 F0 재생(`f1/f0re/<run>/{cur,p1off}.kz`)과 36/36 같다(판정·`summary.flags` 근거). NCTL을 더해도 끄면 예전과 같다. 2026-10-28 검토 뒤에는 이것이 규칙으로 보장된다. 제어 순서를 끈 읽기는 제어 간선으로 사건을 옮기지 않는다(§7.3 읽기 선택). 그 전에는 이 기록들에서 옮긴 사건이 0이라서 같았을 뿐이다.
 - `kz occ diff`(F0+보류 기록 대 G-I-H): cur·p1off·ctloff_p1off 세 읽기 모두 36/36에서 판정 차이 0, 근거 차이 0(근거 종류·가정·결과 검사·간선 규칙 포함), 한쪽에만 있는 발생 0.
 - `results_instr_gate_20261026.md` §3의 86(인스턴스당, P1을 끄고 제어 순서도 쓰지 않는 F0 읽기에서 `INCONCLUSIVE(horizon-open)`인 호출)과 그 가운데 제어 순서를 켠 P1 끔 읽기가 판정한 수:
 
@@ -144,14 +144,33 @@ kz occ diff <a.kz> <b.kz>        # 차이가 있으면 종료 코드 3
 ### 7.3 고친 것: 알려진 순서의 선형 확장 [D]
 
 - 재생 전에 trace의 사건 순서를 기록의 알려진 순서의 선형 확장으로 만든다. 시계는 동률 해소로만 쓴다.
-  - 알려진 순서: 프로그램 순서(actor마다 trace 순서), 첫 패스의 규칙 간선, 실행의 제어 간선, 첫 패스가 찾았지만 뒤로 병합된 reads_from·spawn 짝.
+  - 바탕: 프로그램 순서(actor마다 trace 순서)와 첫 패스의 규칙 간선. reads_from·spawn 짝은 바탕에 넣지 않는다.
+  - 후보: 실행의 제어 간선, 첫 패스가 찾은 reads_from·spawn 짝 전부. 짝은 병합 순서상 앞으로 가든 뒤로 가든 같게 다룬다.
   - 동률 해소: 알려진 순서가 정하지 않는 사건 사이에서는 병합 순서가 앞선 것이 먼저다(Kahn, 최소 위치 우선). 그래서 이미 선형 확장인 병합 순서는 그대로다.
-  - 거부: 간선의 끝이 그때까지 받은 순서(프로그램 순서와 규칙 간선 먼저, 다음 제어 간선과 짝을 순서대로)에서 이미 시작보다 앞서면, 그 간선은 그 순서와 모순이므로 받지 않는다. 거부된 제어 간선은 trace에서 빼고 `control … no edge (it contradicts …)`, `order … refused` 줄로 적는다. 거부된 짝은 재생이 예전처럼 finding으로 남긴다.
-- 한 번만 한다(첫 패스의 간선과 짝). 손실 구간은 그 구간에 있던 사건을 모두 덮는 구간으로 옮긴다. 모델 trace와 순서가 선언된 기록은 그대로다.
-- 위치: `eval::linearize_real_trace`(`include/kz/core/eval_trace.hpp`). 어댑터(`real_trace_from_neutral`)가 trace를 만든 뒤 부른다. 그래서 `kz replay`, `--emit-trace`, `kz predict`가 같은 trace를 읽는다. 첫 패스의 버전 가드는 `RealTraceOptions::versions`(`kz replay --version`)로 준다.
+- 거부(2026-10-28 검토 반영) [D]:
+  - 후보 하나가 바탕과 모순이면(끝이 바탕에서 이미 시작보다 앞섬) 거부한다.
+  - 남은 후보를 모두 넣었을 때 순환 위에 있는 후보는 모두 거부한다(강연결 성분). 기록의 순서 사실끼리 모순이라는 뜻이다. 어느 것이 먼저 왔는지, 병합 순서상 어느 방향인지는 결정에 쓰지 않는다. 그래서 표현이 달라도 같은 간선이 거부된다.
+  - 이유: 제어 사실과 값의 근거(RF)가 모순이면 어느 쪽도 다른 쪽을 이기지 않는다. 보류 하나만으로 값의 부재가 증명되지 않는다(P11, `event_semantics.md` kzp-hold 1). 반대로 값이 맞는다고 실제 제어 사실을 버리지도 않는다. 둘 다 받지 않으면 판정은 보류 쪽으로 간다.
+  - 거부된 제어 간선은 trace에서 빼고 `order control edge … refused: …`, `control … no edge (…)` 줄로 적는다. 거부된 짝은 `Trace::refused_matches`에 남고, 재생은 그 짝에 간선을 만들지 않으며 finding으로 적는다.
+  - 서로 모순인 제어 간선 둘: 개정 전에는 뒤의 것(ctl_seq)만 거부했다. 지금은 둘 다 거부한다.
+- 읽기 선택(2026-10-28 검토 반영) [D]: 선형화는 그 trace를 읽을 재생의 읽기 선택으로 한다(`RealTraceOptions::reading`; `kz replay`, `kz predict`가 넘김).
+  - 제어 순서를 끈 읽기(`--control-order off`)에서는 제어 간선을 후보로 받지 않는다. 그래서 P11 민감도 읽기는 NCTL이 없는 같은 기록의 읽기와 같다.
+  - reads-from 간선을 끈 읽기에서는 RF 짝을 받지 않는다. 반환 코드 사용을 끈 읽기(`--reads-from-outcome off`)에서는 저장으로 보인 사용만 받는다. 첫 패스가 같은 선택으로 읽기 때문이다.
+  - `--predicate`가 필요한 관측 규칙(R19 CORE-SERIAL 등)의 간선도 첫 패스에 들어간다.
+  - 개정 전에는 어댑터가 기본 읽기로 선형화했다. 꺼진 근거가 사건 위치를 바꿀 수 있었다.
+- 손실 구간(2026-10-28 검토 반영) [D]: 재생은 구간의 시작부터 기록된 쓰기가 아무것도 정하지 않는다고 읽는다(`Replayer::apply_losses`). 그래서 옮긴 뒤에도 그 절단을 지킨다.
+  - 새 시작 = 옛 시작 이후 사건들의 새 위치 중 가장 앞.
+  - 새 끝(닫힌 구간) = 옛 끝 이전 사건들의 새 위치 중 가장 뒤 + 1.
+  - 그래서 구간은 전에 덮던 것을 모두 덮고, 손실 뒤에 있던 사건은 손실 앞으로 가지 않는다. 개정 전 규칙("덮던 사건의 최소~최대")은 손실 뒤의 읽기를 구간 앞에 둘 수 있었고, 그 읽기가 `loss` 사유를 잃었다.
+- 한 번만 한다(첫 패스의 간선과 짝). 모델 trace와 순서가 선언된 기록은 그대로다.
+- 위치: `eval::linearize_real_trace`(`include/kz/core/eval_trace.hpp`). 어댑터(`real_trace_from_neutral`)가 trace를 만든 뒤 부른다. `kz replay`, `--emit-trace`, `kz predict`가 같은 규칙으로 읽는다. 읽기 선택이 없으면 기본 읽기와 `RealTraceOptions::versions`를 쓴다.
 - 출력: 사건을 옮기면 report에 `order merged order linearized: N of M events moved …` 줄이 붙고, REPLAY_READ `reordered`에 그 수가 남는다. 옮기지 않으면 출력은 예전과 같다.
-- 고친 뒤 7.2의 모든 표현이 시계 순서 표현과 같은 간선(규칙, actor, actor 안 위치)과 같은 판정·근거를 낸다. 서로 모순인 제어 간선 둘이면 뒤의 것(ctl_seq)을 이유와 함께 거부한다 [M].
-- 보존 기록: R2 v153_pilot3, C1 smoke3 post_1df262a, confirm2 W6_post_1df262a_tx, 그 G-I-H 짝의 재생 출력이 고치기 전 kz(HEAD로 따로 빌드)와 같다(`wrote` 줄의 해시만 다름). `--emit-trace`도 같다. 옮긴 사건은 0이다 [M].
+- 시험(`test_trace_merge_order`, 도구 시험 값) [M]:
+  - 7.2의 모든 표현이 시계 순서 표현과 같은 간선(규칙, actor, actor 안 위치)과 같은 판정·근거를 낸다.
+  - 모순(검토 사례): 성공한 조회가 B의 생성을 읽고(RF), 제어 간선이 조회 반환 → B의 생성 호출이다. 생성이 먼저 병합되든 조회가 먼저 병합되든 두 간선이 모두 거부되고 같은 판정이 나온다. P1을 끄면 READY도 NOT_READY도 아니다. 개정 전에는 표현에 따라 READY(상태 순서 + RF)와 NOT_READY_UNJUDGED(상태 순서 + 제어 순서)로 갈렸다.
+  - 손실: 뒤로 가는 제어 간선이 있는 기록과 뒤로 가는 RF 짝이 있는 기록 모두, 손실 뒤의 읽기가 `loss` 사유를 지킨다. 옛 시작 이후 사건은 모두 새 시작 이후에 있다.
+  - 읽기: 제어 순서를 끈 읽기는 제어 간선이 있든 없든 같다(사건 0개 이동). RF를 끈 읽기는 뒤로 병합된 RF 짝 때문에 사건을 옮기지 않는다. 어댑터: 제어 순서를 끈 읽기의 trace는 NCTL을 뺀 층의 trace와 같다.
+- 보존 기록 [M]: 개정 전 kz(9d7eccb 빌드)와 개정 후 kz로 같은 명령을 돌렸다. R2 v153_pilot3, C1 smoke3 post_1df262a, confirm2 F0(`kz convert --hold` 결과) 36회와 그 G-I-H 짝 36회다. 읽기는 cur, p1off, ctloff+p1off, rfoff, rfoff+p1off, `--emit-trace`다. 출력 텍스트는 모두 같다(`wrote` 줄 제외). `--out` 컨테이너도 `kz occ diff`로 판정 차이 0, 근거 차이 0이다. 이 기록들에서는 뒤로 가는 후보가 없어서 옮긴 사건이 0이고 거부도 없다. 그래서 §6.3의 수(F0 + hold.kzr 83/86, G-I-H 83/86)는 그대로다.
 
 ### 7.4 남은 병합 순서 사용 [U]
 

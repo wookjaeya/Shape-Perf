@@ -583,6 +583,12 @@ class Replayer {
   // merged after the use that read from it, a task's entry merged before the call that created it) are collected here
   // instead of being left out.
   void collect_order_candidates(std::vector<HbEdge>* out) { candidates_ = out; }
+  // linearize_real_trace refused this match (Trace::refused_matches): no edge is made for it.
+  bool refused_match(uint64_t from, uint64_t to, const std::string& rule) const {
+    for (const HbEdge& e : t_.refused_matches)
+      if (e.from == from && e.to == to && e.rule == rule) return true;
+    return false;
+  }
   // The orders without the run's control edges (false, nothing built, where there is none): with every edge of the pass,
   // or (without_rf) less the edges of reads_from rules too (false where there is none of them either).
   bool order_without_control(HbOrder* out, std::string* why, bool without_rf) const {
@@ -4026,6 +4032,11 @@ void Replayer::reads_from_edges() {
     const RfPub& pb = *cand.front();
     rf_read_from_[u.ret] = pb.event;  // the publication the use read from (the P10 rule names it)
     if (pb.actor == u.actor) continue;  // program order
+    if (refused_match(pb.event, u.lp, rule.name)) {
+      finding(u.ret, what + " matches the publication #" + std::to_string(pb.event) +
+                         ", but the edge contradicts program order, the rules' edges or the run's control, or lies on a cycle with other order facts of the record (linearization, order lines): no edge");
+      continue;
+    }
     if (pb.event >= u.lp) {
       if (candidates_ != nullptr) {
         HbEdge e{pb.event, u.lp, rule.name, rule.stratum, rule.robust, false};
@@ -4059,9 +4070,14 @@ void Replayer::final_edges() {
         const EntryRec& e = entries_[j];
         if (used[j] || e.rule != ri || !e.has_value || e.value != c.value || e.event <= c.call) continue;
         used[j] = true;
+        matched = true;
+        if (refused_match(c.call, e.event, rule.name)) {
+          finding(e.event, "rule " + rule.name + ": the entry #" + std::to_string(e.event) + " matches the creating call #" + std::to_string(c.call) +
+                               ", but the edge contradicts program order, the rules' edges or the run's control, or lies on a cycle with other order facts of the record (linearization, order lines): no edge");
+          break;
+        }
         add_edge(c.call, e.event, rule);
         spawns.push_back(SpawnRec{c.actor, e.actor, c.call, e.event});
-        matched = true;
         break;
       }
       if (matched || candidates_ == nullptr) continue;
@@ -4661,14 +4677,15 @@ Status linearize_real_trace(const Profile& p, const Options& options, Trace* t, 
     }
   }
   t->linearized = true;
-  // the known order so far: program order (each actor's events as the trace has them) and the first pass's edges (which
-  // go forward in the merged order: their rules match only forward)
-  std::vector<std::vector<uint64_t>> succ(n);
-  std::vector<uint32_t> indeg(n, 0);
-  auto link = [&](uint64_t a, uint64_t b) {
-    succ[static_cast<size_t>(a)].push_back(b);
-    ++indeg[static_cast<size_t>(b)];
+  auto is_match = [&](const HbEdge& e) {
+    const int32_t ri = p.find_rule(e.rule);
+    return ri >= 0 && (p.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::ReadsFrom || p.rules[static_cast<size_t>(ri)].tmpl == RuleTemplate::Spawn);
   };
+  auto cross = [&](const HbEdge& e) { return e.from < n && e.to < n && t->events[static_cast<size_t>(e.from)].actor != t->events[static_cast<size_t>(e.to)].actor; };
+  // the base: program order (each actor's events as the trace has them) and the first pass's rule edges other than the
+  // matches (they go forward in the merged order: their rules match only forward)
+  std::vector<std::vector<uint64_t>> succ(n);
+  auto link = [&](uint64_t a, uint64_t b) { succ[static_cast<size_t>(a)].push_back(b); };
   {
     std::map<std::string, uint64_t> last;
     for (size_t i = 0; i < n; ++i) {
@@ -4678,7 +4695,21 @@ Status linearize_real_trace(const Profile& p, const Options& options, Trace* t, 
     }
   }
   for (const HbEdge& e : first.edges)
-    if (e.from < e.to && e.to < n && t->events[static_cast<size_t>(e.from)].actor != t->events[static_cast<size_t>(e.to)].actor) link(e.from, e.to);
+    if (e.from < e.to && cross(e) && !is_match(e)) link(e.from, e.to);
+  // the candidates: the run's control edges (in the reading that uses them), then every match, forward and backward
+  struct Cand {
+    HbEdge e;
+    bool control = false;
+    size_t index = 0;  // control: index in the control edges given
+    bool refused = false;
+    std::string why;
+  };
+  std::vector<Cand> cands;
+  if (options.control_order)
+    for (size_t i = 0; i < t->control_edges.size(); ++i) cands.push_back(Cand{t->control_edges[i], true, i, false, std::string()});
+  for (const HbEdge& e : first.edges)
+    if (cross(e) && is_match(e)) cands.push_back(Cand{e, false, 0, false, std::string()});
+  for (const HbEdge& m : matches) cands.push_back(Cand{m, false, 0, false, std::string()});
   auto reaches = [&](uint64_t from, uint64_t target) {
     std::vector<char> seen(n, 0);
     std::vector<uint64_t> stack{from};
@@ -4695,42 +4726,107 @@ Status linearize_real_trace(const Profile& p, const Options& options, Trace* t, 
     }
     return false;
   };
-  bool backward = false;  // an edge taken goes back in the merged order: from then on every edge is checked
-  auto take = [&](const HbEdge& e, std::string* why) {
-    if (e.from >= n || e.to >= n || e.from == e.to) {
-      *why = "an end is not an event of the trace";
-      return false;
-    }
-    if ((backward || e.from > e.to) && reaches(e.to, e.from)) {
-      *why = "#" + std::to_string(e.to) + " already precedes #" + std::to_string(e.from) + " in program order and the edges taken before it";
-      return false;
-    }
-    backward = backward || e.from > e.to;
-    link(e.from, e.to);
-    return true;
+  auto name = [](const Cand& c) {
+    return std::string(c.control ? "control edge " : "rule ") + c.e.rule + (c.control ? " #" : " match #") + std::to_string(c.e.from) + " -> #" + std::to_string(c.e.to);
   };
+  // each candidate against the base alone (a forward one cannot contradict it: the base goes forward)
+  bool any_backward = false;
+  for (Cand& c : cands) {
+    if (c.e.from >= n || c.e.to >= n || c.e.from == c.e.to) {
+      c.refused = true;
+      c.why = "an end is not an event of the trace";
+    } else if (c.e.from > c.e.to && reaches(c.e.to, c.e.from)) {
+      c.refused = true;
+      c.why = "#" + std::to_string(c.e.to) + " already precedes #" + std::to_string(c.e.from) + " in program order and the rules' edges";
+    }
+    any_backward = any_backward || (!c.refused && c.e.from > c.e.to);
+  }
+  // the candidates left, together: every one on a cycle of the base and the others is refused (strongly connected
+  // components, Tarjan; without a backward candidate every edge goes forward and there is no cycle)
+  if (any_backward) {
+    std::vector<std::vector<uint64_t>> g = succ;
+    for (const Cand& c : cands)
+      if (!c.refused) g[static_cast<size_t>(c.e.from)].push_back(c.e.to);
+    std::vector<int64_t> index(n, -1), low(n, 0), comp(n, -1);
+    std::vector<char> on(n, 0);
+    std::vector<uint64_t> stk;
+    int64_t counter = 0, ncomp = 0;
+    struct Frame {
+      uint64_t v;
+      size_t next;
+    };
+    for (size_t s0 = 0; s0 < n; ++s0) {
+      if (index[s0] >= 0) continue;
+      std::vector<Frame> call{Frame{s0, 0}};
+      index[s0] = low[s0] = counter++;
+      stk.push_back(s0);
+      on[s0] = 1;
+      while (!call.empty()) {
+        const uint64_t v = call.back().v;
+        if (call.back().next < g[static_cast<size_t>(v)].size()) {
+          const uint64_t w = g[static_cast<size_t>(v)][call.back().next++];
+          if (index[static_cast<size_t>(w)] < 0) {
+            index[static_cast<size_t>(w)] = low[static_cast<size_t>(w)] = counter++;
+            stk.push_back(w);
+            on[static_cast<size_t>(w)] = 1;
+            call.push_back(Frame{w, 0});
+          } else if (on[static_cast<size_t>(w)] != 0) {
+            low[static_cast<size_t>(v)] = std::min(low[static_cast<size_t>(v)], index[static_cast<size_t>(w)]);
+          }
+          continue;
+        }
+        if (low[static_cast<size_t>(v)] == index[static_cast<size_t>(v)]) {
+          uint64_t x = 0;
+          do {
+            x = stk.back();
+            stk.pop_back();
+            on[static_cast<size_t>(x)] = 0;
+            comp[static_cast<size_t>(x)] = ncomp;
+          } while (x != v);
+          ++ncomp;
+        }
+        call.pop_back();
+        if (!call.empty()) low[static_cast<size_t>(call.back().v)] = std::min(low[static_cast<size_t>(call.back().v)], low[static_cast<size_t>(v)]);
+      }
+    }
+    std::vector<size_t> cyc;
+    for (size_t i = 0; i < cands.size(); ++i)
+      if (!cands[i].refused && comp[static_cast<size_t>(cands[i].e.from)] == comp[static_cast<size_t>(cands[i].e.to)]) cyc.push_back(i);
+    for (size_t i : cyc) {
+      std::string others;
+      for (size_t j : cyc)
+        if (j != i && comp[static_cast<size_t>(cands[j].e.from)] == comp[static_cast<size_t>(cands[i].e.from)]) others += (others.empty() ? "" : ", ") + name(cands[j]);
+      cands[i].refused = true;
+      cands[i].why = "it lies on a cycle with " + (others.empty() ? std::string("program order and the rules' edges") : others) +
+                     ": the record's order facts contradict each other, and every edge of the cycle is refused";
+    }
+  }
   std::vector<HbEdge> kept;
-  for (size_t i = 0; i < t->control_edges.size(); ++i) {
-    const HbEdge& e = t->control_edges[i];
-    std::string why;
-    if (take(e, &why)) {
-      kept.push_back(e);
+  bool backward = false;  // an edge taken goes back in the merged order
+  for (const Cand& c : cands) {
+    if (c.control) {
+      if (c.refused) {
+        rep->refused_control.push_back(c.index);
+        rep->lines.push_back(name(c) + " refused: " + c.why);
+        continue;
+      }
+      kept.push_back(c.e);
+    } else if (c.refused) {
+      t->refused_matches.push_back(c.e);
+      rep->lines.push_back(name(c) + " refused: " + c.why);
       continue;
+    } else if (c.e.from > c.e.to) {
+      rep->matches.push_back(c.e);
     }
-    rep->refused_control.push_back(i);
-    rep->lines.push_back("control edge " + e.rule + " #" + std::to_string(e.from) + " -> #" + std::to_string(e.to) + " refused: it contradicts the order already established (" + why + ")");
+    backward = backward || c.e.from > c.e.to;
+    link(c.e.from, c.e.to);
   }
-  for (const HbEdge& m : matches) {
-    std::string why;
-    if (take(m, &why)) {
-      rep->matches.push_back(m);
-      continue;
-    }
-    rep->lines.push_back("rule " + m.rule + " match #" + std::to_string(m.from) + " -> #" + std::to_string(m.to) + " not placed: it contradicts the order already established (" + why + ")");
-  }
-  t->control_edges = kept;
+  if (options.control_order) t->control_edges = kept;  // a reading without control order leaves them as given (unused)
   if (!backward) return Status::success();  // every edge goes forward: the merged order already is a linear extension
   // Kahn's order, the earliest merged position first among the events the known order leaves free
+  std::vector<uint32_t> indeg(n, 0);
+  for (size_t i = 0; i < n; ++i)
+    for (uint64_t y : succ[i]) ++indeg[static_cast<size_t>(y)];
   std::priority_queue<uint64_t, std::vector<uint64_t>, std::greater<uint64_t>> ready;
   for (size_t i = 0; i < n; ++i)
     if (indeg[i] == 0) ready.push(i);
@@ -4760,21 +4856,25 @@ Status linearize_real_trace(const Profile& p, const Options& options, Trace* t, 
     events.back().id = k;
   }
   t->events = std::move(events);
-  for (HbEdge& e : t->control_edges) {
-    e.from = rep->position[static_cast<size_t>(e.from)];
-    e.to = rep->position[static_cast<size_t>(e.to)];
-  }
-  // a loss interval covers every event it covered (and those placed between them)
+  auto remap = [&](std::vector<HbEdge>* v) {
+    for (HbEdge& e : *v)
+      if (e.from < n && e.to < n) {
+        e.from = rep->position[static_cast<size_t>(e.from)];
+        e.to = rep->position[static_cast<size_t>(e.to)];
+      }
+  };
+  remap(&t->control_edges);
+  remap(&t->refused_matches);
+  // a loss interval keeps the cut the replay reads (apply_losses: from its begin on, recorded writes fix nothing): the new
+  // begin is the earliest new position of an event at or after the old begin, the new end one past the latest new position
+  // of an event before the old end
+  std::vector<uint64_t> after(n + 1, n), before(n + 1, 0);  // min new position at or after i; one past the max before i
+  for (size_t i = n; i-- > 0;) after[i] = std::min(after[i + 1], rep->position[i]);
+  for (size_t i = 0; i < n; ++i) before[i + 1] = std::max(before[i], rep->position[i] + 1);
   for (LossInterval& l : t->losses) {
-    const uint64_t end = l.end == kNoEvent ? n : std::min<uint64_t>(l.end, n);
-    if (l.begin >= end) continue;
-    uint64_t lo = n, hi = 0;
-    for (uint64_t i = l.begin; i < end; ++i) {
-      lo = std::min(lo, rep->position[static_cast<size_t>(i)]);
-      hi = std::max(hi, rep->position[static_cast<size_t>(i)]);
-    }
-    l.begin = lo;
-    if (l.end != kNoEvent) l.end = hi + 1;
+    const uint64_t old_end = l.end;
+    l.begin = after[static_cast<size_t>(std::min<uint64_t>(l.begin, n))];
+    if (old_end != kNoEvent) l.end = std::max(before[static_cast<size_t>(std::min<uint64_t>(old_end, n))], l.begin);
   }
   std::sort(t->losses.begin(), t->losses.end(), [](const LossInterval& a, const LossInterval& b) { return a.begin < b.begin; });
   t->reordered = rep->moved;

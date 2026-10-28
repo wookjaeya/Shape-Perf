@@ -498,7 +498,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
   // thread, acted on when it was resumed) orders that hit the same way.  No edge from a satisfied or consumed release, a
   // timeout, a refusal: the order of those runs came from the scheduler.  The merged order does not decide whether an edge
   // is made: the trace is linearized after it is built (eval::linearize_real_trace, below), and an edge is refused only
-  // where it contradicts program order and the edges taken before it (reported).
+  // where it contradicts program order and the rules' edges, or lies on a cycle with other order facts (reported).
   report->control_records = n.ctl.size();
   struct ControlPending {
     std::string what;     // the release's name, or the full line where no edge was made
@@ -670,8 +670,9 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
 
   // ---- the merged order as a linear extension of the known order (eval_trace.hpp linearize_real_trace) ----
   {
-    eval::Options eo;
-    eo.versions = opt.versions;
+    eval::Options eo;  // the reading of the replay (a reading without control order is not shaped by it)
+    if (opt.reading != nullptr) eo = *opt.reading;
+    else eo.versions = opt.versions;
     const std::map<std::string, int64_t> saved = out->ref_consts;
     for (const auto& kv : opt.consts) out->ref_consts[kv.first] = kv.second;  // the first pass needs the table sizes
     eval::LinearizeReport lr;
@@ -701,7 +702,7 @@ Status real_trace_from_neutral(const NeutralRun& n, const phi::Profile& p, const
       }
       const uint32_t k = c.edge < kept_at.size() ? kept_at[c.edge] : KZ_NONE32;
       if (k == KZ_NONE32) {
-        report->control_lines.push_back(c.what + ": no edge (it contradicts program order and the control edges before it)");
+        report->control_lines.push_back(c.what + ": no edge (it contradicts program order and the rules' edges, or lies on a cycle with other order facts of the record: order lines)");
         continue;
       }
       ++report->control_edges;

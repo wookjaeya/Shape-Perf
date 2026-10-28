@@ -10,9 +10,17 @@
 //                position in the actor) and the same result (READY on state-order + return-derived-order);
 //   control      a failed lookup ordered before the provider's creation by a control edge (P1 off): the representations
 //                put the creation first; the same control edge and NOT_READY on state-order + control-order;
+//   conflict     a successful lookup that reads from the provider's creation, and a control edge that orders the lookup
+//                before that creation (an inconsistent record): whichever direction the merged order gives either edge,
+//                both are refused (they lie on one cycle), with the same edges and the same withheld result;
+//   loss         a loss interval before a read that the linearization moves (a backward control edge, a backward
+//                reads_from match): the read stays after the loss's begin and keeps the loss reason;
+//   reading      a reading without control order of a record with a control edge is that of the record without it (no
+//                event moved by the control edge); a reading without reads-from edges is not shaped by an RF match;
 //   adapter      a kzrt-like neutral layer with a gate-hold and its release (NCTL): with the actors' events merged in
 //                clock order, actor by actor, or the held actor first, the adapter makes the same control edge; two control
-//                edges that contradict program order together: the later one is refused, with the reason.
+//                edges that contradict program order together: both are refused, each with the reason; a reading without
+//                control order gives the trace of the layer without NCTL.
 
 #include <algorithm>
 #include <cstdio>
@@ -156,8 +164,9 @@ void test_control() {
   Options ctloff = o;
   ctloff.control_order = false;
   same(replay(p, head + merge(s, "MMMMM A B AAA BBB"), ctloff, ctl), replay(p, head + merge(s, "MMMMM BBBB AAAA"), ctloff, ctl), "control order off");
-  // a control edge that program order contradicts (B's create return -> A's entry, while A's lookup return -> B's create
-  // call): the later one is refused, with the reason, and the first one stands
+  // two control edges that contradict program order together (B's create return -> A's entry, while A's lookup return ->
+  // B's create call): both are refused, each with the reason naming the other (the record's order facts contradict each
+  // other; which one came first decides nothing)
   Trace t;
   KZ_CHECK_OK(kz::eval::parse_trace_text(head + merge(s, "MMMMM A B AAA BBB"), &t));
   HbEdge e1, e2;
@@ -170,10 +179,143 @@ void test_control() {
   t.control_edges = {e1, e2};
   kz::eval::LinearizeReport lr;
   KZ_CHECK_OK(kz::eval::linearize_real_trace(p, o, &t, &lr));
-  KZ_CHECK(lr.refused_control.size() == 1 && lr.refused_control[0] == 1 && t.control_edges.size() == 1 && t.control_edges[0].rule == "control:gate0/release1");
-  bool said = false;
-  for (const std::string& l : lr.lines) said = said || (has(l, "control:gate2/release3") && has(l, "contradicts"));
-  KZ_CHECK(said);
+  KZ_CHECK(lr.refused_control.size() == 2 && t.control_edges.empty());
+  int said = 0;
+  for (const std::string& l : lr.lines)
+    said += (has(l, "control edge control:gate2/release3") && has(l, "cycle with control edge control:gate0/release1")) ||
+            (has(l, "control edge control:gate0/release1") && has(l, "cycle with control edge control:gate2/release3"));
+  KZ_CHECK_EQ(said, 2);
+  // the same two edges given in the other order: the same refusal
+  Trace u;
+  KZ_CHECK_OK(kz::eval::parse_trace_text(head + merge(s, "MMMMM A B AAA BBB"), &u));
+  u.control_edges = {e2, e1};
+  KZ_CHECK_OK(kz::eval::linearize_real_trace(p, o, &u, &lr));
+  KZ_CHECK(lr.refused_control.size() == 2 && u.control_edges.empty());
+}
+
+// A successful lookup reading from B's creation (RF) and a control edge from the lookup's return to B's create call: the
+// record contradicts itself.  B's creation merged first (the RF match forward, the control edge backward) or the lookup
+// merged first (the RF match backward, the control edge forward): both edges refused, the same withheld result.
+void test_conflict() {
+  const kz::phi::Profile p = kzstate::load();
+  const auto s = scripts("0");
+  const std::string head = kzstate::kHeader;
+  const std::vector<std::tuple<std::string, int, std::string, int>> ctl{{"A", 3, "B", 1}};
+  for (bool p1 : {false, true}) {
+    Options o;
+    o.outcome_narrowing = p1;
+    const Seen creation_first = replay(p, head + merge(s, "MMMMM A B BBB AAA"), o, ctl);
+    const Seen lookup_first = replay(p, head + merge(s, "MMMMM A B AAA BBB"), o, ctl);
+    same(creation_first, lookup_first, p1 ? "conflict, P1 on" : "conflict, P1 off");
+    for (const Seen* v : {&creation_first, &lookup_first}) {
+      for (const std::string& e : v->edges) KZ_CHECK(e.rfind("RF ", 0) != 0 && e.rfind("control:", 0) != 0);
+      int refused = 0;
+      for (const std::string& l : v->lines) refused += has(l, "refused: it lies on a cycle with");
+      KZ_CHECK_EQ(refused, 2);
+      if (!p1) KZ_CHECK(!has(v->results, " READY ") && !has(v->results, " NOT_READY"));
+    }
+  }
+}
+
+uint32_t reasons_of(const Result& r, const std::string& actor) {
+  for (const kz::eval::Occurrence& oc : r.occurrences)
+    if (oc.actor == actor) return oc.summary.obs_reasons;
+  KZ_CHECK(false);
+  return 0;
+}
+
+// Every event at or after a loss's begin stays at or after it, and every event before its end stays before it.
+void check_cut(const Trace& before, const Trace& after, const kz::eval::LinearizeReport& lr) {
+  KZ_CHECK(lr.moved > 0 && before.losses.size() == after.losses.size());
+  for (size_t j = 0; j < before.losses.size() && j < after.losses.size(); ++j)
+    for (size_t i = 0; i < before.events.size(); ++i) {
+      if (i >= before.losses[j].begin) KZ_CHECK(lr.position[i] >= after.losses[j].begin);
+      if (before.losses[j].end != kz::eval::kNoEvent && i < before.losses[j].end) KZ_CHECK(lr.position[i] < after.losses[j].end);
+    }
+}
+
+void test_loss() {
+  const kz::phi::Profile p = kzstate::load();
+  const std::string head = kzstate::kHeader;
+  // a control edge backward: B's create call lost, then A's failed lookup, and the control edge from the lookup's return
+  // to the create call; A's lookup followed the loss in the record
+  {
+    const std::string text = head + kzstate::m_start() + kzstate::b_entry() + "loss begin\nB create call arg.name=@S0\nloss end\n" + kzstate::a_entry() +
+                             kzstate::a_lookup("-17", nullptr) + "B create.publish pt lp.status=0\nB create ret out.id=0x30002 result=0\n";
+    Options o;
+    o.outcome_narrowing = false;
+    Trace t;
+    KZ_CHECK_OK(kz::eval::parse_trace_text(text, &t));
+    const Trace given = t;
+    HbEdge e;
+    e.from = find(t, "A", 3);
+    e.to = find(t, "B", 1);
+    e.rule = "control:gate0/release1";
+    e.source = 2;
+    t.control_edges.push_back(e);
+    kz::eval::LinearizeReport lr;
+    KZ_CHECK_OK(kz::eval::linearize_real_trace(p, o, &t, &lr));
+    check_cut(given, t, lr);
+    Result r;
+    KZ_CHECK_OK(kz::eval::replay(p, t, o, &r));
+    KZ_CHECK((reasons_of(r, "A") & KZ_WITHHOLD_LOSS) != 0);
+  }
+  // a reads_from match backward: C (a third task) looks up another name after the loss of A's lookup point, then B
+  // creates the semaphore A's lookup read from; the linearization delays A's lookup point after B's creation
+  {
+    const std::string text = head + kzstate::m_start() + "M spawn call\nM spawn ret out.tid=3 result=0\n" + kzstate::a_entry() + kzstate::b_entry() +
+                             "C entry call arg.tid=3\nA lookup call arg.name=@S0\nloss begin\nA lookup.exists pt\nloss end\n"
+                             "C lookup call arg.name=@S1\nC lookup.exists pt\nC lookup ret result=-17\n" +
+                             kzstate::b_create("0x30002") + "A lookup ret out.id=0x30002 result=0\n";
+    Options o;
+    o.outcome_narrowing = false;  // C's failed lookup is read from the state (P1 on would narrow it by its returned code)
+    Trace t;
+    KZ_CHECK_OK(kz::eval::parse_trace_text(text, &t));
+    const Trace given = t;
+    kz::eval::LinearizeReport lr;
+    KZ_CHECK_OK(kz::eval::linearize_real_trace(p, o, &t, &lr));
+    KZ_CHECK_EQ(lr.matches.size(), static_cast<size_t>(1));
+    check_cut(given, t, lr);
+    Result r;
+    KZ_CHECK_OK(kz::eval::replay(p, t, o, &r));
+    KZ_CHECK((reasons_of(r, "C") & KZ_WITHHOLD_LOSS) != 0);
+  }
+}
+
+// A reading leaves out a kind of order: the linearization is not shaped by it.
+void test_reading() {
+  const kz::phi::Profile p = kzstate::load();
+  const std::string head = kzstate::kHeader;
+  auto without_control = [](Seen v) {
+    std::set<std::string> kept;
+    for (const std::string& e : v.edges)
+      if (e.rfind("control:", 0) != 0) kept.insert(e);
+    v.edges = kept;
+    return v;
+  };
+  // control order off: a record with a backward control edge reads as the record without it (P1 off and on)
+  for (const char* result : {"-17", "0"}) {
+    const auto s = scripts(result);
+    for (bool p1 : {false, true}) {
+      Options off;
+      off.outcome_narrowing = p1;
+      off.control_order = false;
+      const std::string text = head + merge(s, "MMMMM A B BBB AAA");
+      const Seen with = replay(p, text, off, {{"A", 3, "B", 1}});
+      const Seen without = replay(p, text, off);
+      KZ_CHECK_EQ(with.moved, static_cast<uint64_t>(0));
+      same(without_control(with), without, "control order off, with and without the control edge");
+    }
+  }
+  // reads-from edges off: the lookup merged before the creation it read from moves nothing
+  {
+    const auto s = scripts("0");
+    Options off;
+    off.reads_from_edges = false;
+    const Seen v = replay(p, head + merge(s, "MMMMM A B AAA BBB"), off);
+    KZ_CHECK_EQ(v.moved, static_cast<uint64_t>(0));
+    for (const std::string& e : v.edges) KZ_CHECK(e.rfind("RF ", 0) != 0);
+  }
 }
 
 // ---- the adapter: a kzrt-like neutral layer with a gate-hold and its release ----------------------------------------
@@ -292,14 +434,18 @@ struct AdapterSeen {
   std::vector<std::string> edges;
   std::vector<std::string> lines;
 };
-AdapterSeen adapt(const kz::trace::NeutralRun& n) {
+AdapterSeen adapt(const kz::trace::NeutralRun& n, const Options* reading = nullptr, std::string* events = nullptr) {
   AdapterSeen out;
   const kz::phi::Profile p = kzstate::load();
   Trace t;
   kz::trace::RealTraceReport rep;
-  KZ_CHECK_OK(kz::trace::real_trace_from_neutral(n, p, kz::trace::RealTraceOptions(), &t, &rep));
+  kz::trace::RealTraceOptions opt;
+  opt.reading = reading;
+  KZ_CHECK_OK(kz::trace::real_trace_from_neutral(n, p, opt, &t, &rep));
   for (const HbEdge& e : t.control_edges) out.edges.push_back(e.rule + " " + at(t, e.from) + " -> " + at(t, e.to));
   out.lines = rep.control_lines;
+  if (events != nullptr)
+    for (const kz::eval::TraceEvent& e : t.events) *events += e.actor + " " + e.site + " " + kz::eval::phase_text(e.phase) + "\n";
   return out;
 }
 
@@ -315,12 +461,25 @@ void test_adapter() {
   KZ_CHECK(ba.edges == clock.edges);
   if (ba.edges != clock.edges)
     for (const std::string& l : ba.lines) std::fprintf(stderr, "B then A: %s\n", l.c_str());
-  // two control edges that contradict program order together: the later one (by ctl_seq) is refused, with the reason
+  // two control edges that contradict program order together: both are refused, each with the reason
   const AdapterSeen cyc = adapt(layer({{1, 0}, {0, 0}, {0, 1}, {0, 2}, {1, 1}, {1, 2}}, true, true));
-  KZ_CHECK(cyc.edges.size() == 1 && !cyc.edges.empty() && cyc.edges[0] == "control:gate0/release1 A#1 -> B#0");
-  bool refused = false;
-  for (const std::string& l : cyc.lines) refused = refused || (has(l, "gate2/release3") && has(l, "contradicts"));
-  KZ_CHECK(refused);
+  KZ_CHECK(cyc.edges.empty());
+  int refused = 0;
+  for (const std::string& l : cyc.lines) refused += (has(l, "gate2/release3") || has(l, "gate0/release1")) && has(l, "no edge (it contradicts");
+  KZ_CHECK_EQ(refused, 2);
+  // control order off: the layer whose control edge goes backward (B then A) gives the trace of the layer without NCTL
+  Options off;
+  off.control_order = false;
+  std::string with, without;
+  adapt(layer({{1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 1}, {0, 2}}, false), &off, &with);
+  kz::trace::NeutralRun bare = layer({{1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 1}, {0, 2}}, false);
+  bare.ctl.clear();
+  bare.run.r.flags &= ~static_cast<uint32_t>(KZ_NRUN_FLAG_CONTROL_RECORDED);
+  adapt(bare, &off, &without);
+  KZ_CHECK(!with.empty() && with == without);
+  std::string on;
+  adapt(layer({{1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 1}, {0, 2}}, false), nullptr, &on);
+  KZ_CHECK(on != with);  // control order on: the control edge moved the events
 }
 
 }  // namespace
@@ -328,6 +487,9 @@ void test_adapter() {
 int main() {
   test_reads_from_and_spawn();
   test_control();
+  test_conflict();
+  test_loss();
+  test_reading();
   test_adapter();
   return kztest::finish("test_trace_merge_order");
 }

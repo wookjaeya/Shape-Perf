@@ -13,6 +13,11 @@
 #                   pilot/dev run: not a run of the fixed main set, whose repetition count no reference
 #                   fixes and the PI decides, D14).  Options are arguments, never environment variables:
 #                   the script's environment reaches cFS.
+#   --start poweron the R2 common Power-On start (PI decision 2026-10-28; plan/r2_start_poweron_20261028.md):
+#                   before step 1, env/tools/start_state_poweron.sh moves EEPROM.DAT and the key files out of the
+#                   exe directory into <out>/<tag>_prior_state and refuses if SysV shm of the run user or a
+#                   non-empty /dev/shm/osal:RAM exists; run_cfs.sh v6 then gets RUN_CFS_ARGS="--reset PO" (it is
+#                   removed from core-cpu1's environment).  Default: the exe directory as it is (earlier runs).
 #
 # Must be started as root with CFS_NORMAL_USER set (the rule of env/run_cfs.sh).  Only ONE cFS run may
 # be active on the host; run_cfs.sh refuses to start if another instance exists.  This script changes
@@ -77,21 +82,24 @@ if [ "${1:-}" = "--xcheck" ]; then
     exit $?
 fi
 
-TAG="${1:?usage: $0 <tag> <kz-executable> <run-ordinal> [--out-dir DIR] [--purpose functional-check|pilot]}"
+TAG="${1:?usage: $0 <tag> <kz-executable> <run-ordinal> [--out-dir DIR] [--purpose functional-check|pilot] [--start poweron]}"
 KZ_BIN="${2:?usage: $0 <tag> <kz-executable> <run-ordinal>}"
 ORDINAL="${3:?usage: $0 <tag> <kz-executable> <run-ordinal>}"
 case "${ORDINAL}" in ''|*[!0-9]*) echo "run-ordinal must be a number" >&2; exit 64;; esac
 shift 3
 OUT_DIR=""
 PURPOSE="functional-check"
+START="as-is"
 while [ $# -gt 0 ]; do
     case "$1" in
         --out-dir) OUT_DIR="${2:?--out-dir needs a directory}"; shift 2 ;;
+        --start) START="${2:?--start needs a value}"; shift 2 ;;
         --purpose) PURPOSE="${2:?--purpose needs a value}"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 64 ;;
     esac
 done
 case "${PURPOSE}" in functional-check|pilot) ;; *) echo "--purpose is functional-check or pilot" >&2; exit 64 ;; esac
+case "${START}" in as-is|poweron) ;; *) echo "--start is poweron" >&2; exit 64 ;; esac
 KZ_BIN="$(readlink -f "${KZ_BIN}")"
 [ -x "${KZ_BIN}" ] || { echo "not an executable: ${KZ_BIN}" >&2; exit 64; }
 ENV_DIR="$(cd "${KAIROS}/../env" && pwd)"
@@ -141,7 +149,13 @@ cp -p "${KZ_BIN}" "${COPY_DIR}/kz"
     echo "core-cpu1 sha256=$(sha256sum "${EXE_DIR}/core-cpu1" | cut -c1-64)"
 } > "${DRIVER}"
 
-# 1. persisted state before
+# 1. persisted state before (with --start poweron: after the start-state preparation)
+CFS_ARGS_RUN=""
+if [ "${START}" = poweron ]; then
+    "${ENV_DIR}/tools/start_state_poweron.sh" "${EXE_DIR}" "${LOGS}/${TAG}_prior_state" "${CFS_NORMAL_USER}" >> "${DRIVER}" 2>&1 \
+        || { echo "start state refused (${LOGS}/${TAG}_prior_state)" >&2; exit 9; }
+    CFS_ARGS_RUN="--reset PO"
+fi
 "${ENV_DIR}/tools/persist_snapshot.sh" "before ${TAG}" "${EXE_DIR}" > "${LOGS}/${TAG}_persist_before.txt" 2>&1
 
 # 2. basis
@@ -167,6 +181,10 @@ N_USED="$(printf '%s\n' "${USED_NAMES}" | grep -c .)"
     echo "item${T}cfs.stop${T}ci-es-restart-poweron (the bundle CI's ES restart command, RestartType 2; PI decision D3 on the stop method is open)${T}from-reference"
     echo "item${T}cfs.user${T}${CFS_NORMAL_USER} (run_cfs.sh drops to it with setpriv; README: run as a normal user)${T}from-reference"
     echo "item${T}cfs.binary${T}build-native_std/exe/cpu1/core-cpu1, unmodified${T}from-reference"
+    if [ "${START}" = poweron ]; then
+        echo "item${T}start_state${T}R2 common Power-On start: EEPROM.DAT and key files absent (created by the PSP), no SysV shm of the run user, /dev/shm/osal:RAM absent or empty (${TAG}_prior_state/)${T}PI decision 2026-10-28 Q3 (resulting state from-reference, plan/r2_start_poweron_20261028.md)"
+        echo "deviation${T}cfs.args${T}README L112: ./core-cpu1 with no options${T}./core-cpu1 --reset PO (run_cfs.sh v6 RUN_CFS_ARGS)${T}PI decision 2026-10-28 Q3: Power-On specified explicitly${T}the reset type no longer depends on a boot record left in SysV shm (cfe_psp_start.c L408-434); POWERON either way when no shm exists${T}no"
+    fi
     echo "item${T}cfs.working_directory${T}${EXE_DIR} (README L111)${T}from-reference"
     if [ -z "${ONLY_REF}" ] && [ -z "${ONLY_USED}" ]; then
         echo "item${T}cfs.environment${T}the same ${N_USED} variable names as the reference runs (${REF_META##*/}); values are not compared${T}from-reference"
@@ -194,7 +212,7 @@ N_USED="$(printf '%s\n' "${USED_NAMES}" | grep -c .)"
 
 # 4. the observation (KZ is not in the environment; nothing else is added to it)
 set +e
-env -u KZ CFS_NORMAL_USER="${CFS_NORMAL_USER}" "${KZ_BIN}" observe "${LOGS}/${TAG}_basis.kz" "${PROFILE}" \
+env -u KZ CFS_NORMAL_USER="${CFS_NORMAL_USER}" RUN_CFS_ARGS="${CFS_ARGS_RUN}" "${KZ_BIN}" observe "${LOGS}/${TAG}_basis.kz" "${PROFILE}" \
     -o "${LOGS}/${TAG}.kzt" --record "${LOGS}/${TAG}.kzt.record.txt" --conditions "${LOGS}/${TAG}_conditions.tsv" --stratum none --run-ordinal "${ORDINAL}" \
     -- "${ENV_DIR}/run_cfs.sh" operational ci-es-restart-poweron "${CFS_LOG}" >> "${DRIVER}" 2>&1
 RC=$?

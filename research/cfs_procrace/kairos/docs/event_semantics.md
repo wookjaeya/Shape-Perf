@@ -9,7 +9,7 @@
 | 계획 적재 | `control` 모드의 시작 객체가 `KZ_RT_PLAN`의 직렬화 계획을 build identity와 대조해 싣는다(0.3.0) | §11 |
 | 제어 기록 | CTL·POINT·PLAN 레코드(§5, §11). 변환은 중립 층 NCTL로 옮기고, 재생이 그 `fire`로 제어 간선을 세운다 | `docs/schema.md` §12(NCTL), §12.7 |
 | 비정상 종료 기록 회수 | 0.4.0: `KZ_RT_STORE` 파일이 저장소를 받치면 SIGKILL·치명 시그널·abort·정체 뒤 강제 종료에도 관찰된 앞부분을 `kz-rt-dump --recover`로 dump로 만든다. dump는 정상 dump인지 회수 앞부분인지 적는다. 단위 시험만 했다. cFS 실행에서는 아직 쓰지 않았다 | §12 |
-| 변환기 | `kz convert --kzrt`는 1.4 dump를 읽는다. RUNX 1.4 필드와 LOSS `abnormal-end`를 중립 층에 옮기는 일은 남았다(§12.6) | `lib/trace/kzrt_convert.cpp` |
+| 변환기 | `kz convert --kzrt`는 1.4 dump를 읽고, 회수 표시·실행의 끝(RUNX 1.4)과 LOSS `abnormal-end`를 중립 층에 옮긴다(스키마 개정 5). F0 `hold.kzr`는 `kz convert --hold`가 NCTL로 옮긴다 | `lib/trace/kzrt_convert.cpp`, `lib/trace/hold_nctl.cpp`, §5, §12.7 |
 
 이전 판의 지위(그 판에서만 맞음): B1(런타임 0.1.0, 커밋 `a335519`, 2026-10-26)은 설계와 단위 시험뿐이었고 cFS를 계측해 돌리지 않았다. 0.2.0(단계 D 개정)의 시작 객체는 계획을 읽지 않았다. 0.3.0(단계 F)은 계획을 싣고, dump는 정상 `exit` 경로에서만 남았다.
 
@@ -143,6 +143,13 @@ F0 `kz hold`가 2026-10-25(confirm2)부터 구현한 의미를 그대로 규범�
 | 종료까지 미해제 | 보류 줄 `released=false` | POINT `held_actor ≠ 0`(덤프 시 미해제), ACTOR 플래그 `held` → P13: 후보 전체 확인으로 세지 않고 앞부분과 미완료 원인만 기록 |
 
 모든 CTL 레코드는 `ctl_seq`(제어 결정 순서)를 가진다. 논리 게이트의 존재, 실제 보류, 스케줄러가 스스로 낸 순서는 합치지 않는다: 게이트가 작용하지 않은 실행의 순서는 `natural`이고, 제어가 만든 순서만 "제어 개입" 근거다(§2.10).
+
+**F0 보류 기록의 변환 (2026-10-28)** [D][M]. F0 `hold.kzr`는 `kz convert --hold`가 NCTL로 옮긴다(`kz/trace/hold_nctl.hpp`, `schema.md` §13.1, `docs/replay_output.md` §6).
+- hit의 관측 사건은 trap 뒤 그 actor의 첫 사건이다. 레코드에 플래그 `observed-after-control`을 단다.
+- 그런 사건이 없으면 `event` = 없음, 플래그 `no-observation-event`이고, 이유를 note로 남긴다.
+- 단계 F의 "F0 기록에는 제어 순서 근거가 없다"는 문장(`schema.md` §12.7)은 변환한 기록에는 더 이상 맞지 않는다. 변환하지 않은 F0 기록에는 여전히 맞다.
+
+**제어 간선과 선형화 (2026-10-28)** [D]. RF·spawn 짝이나 다른 제어 간선과 함께 순환 위에 있는 제어 간선은 그것들과 함께 거부한다(병합 순서의 선형화, `schema.md` §13.2, `docs/replay_output.md` §7.3). 제어 순서를 끈 읽기는 NCTL로 사건 순서를 바꾸지 않는다.
 
 ## 6. 백엔드 capability descriptor (IR §9.4) [F][M]
 
@@ -395,7 +402,7 @@ H1–H6 의미는 같다. 차이가 생기면 `kzrt-plan`의 minor를 올리고 
 
 ### 11.4 C1 실행 (pilot/dev)
 
-C1 9개 계획 × 4 인스턴스의 결과와 F0 confirm2 대조는 `plan/results_instr_gate_20261026.md`에 있다. 실현된 보류·해제는 36/36이 F0와 같다. 제어 순서 근거(P11)는 `schema.md` §12.7에 있다.
+C1 9개 계획 × 4 인스턴스의 결과와 F0 confirm2 대조는 `plan/results_instr_gate_20261026.md`에 있다. 실현된 보류·해제는 36/36이 F0와 같다. 제어 순서 근거(P11)는 `schema.md` §12.7에 있다. 2026-10-28부터는 F0 기록도 `hold.kzr`를 변환하면 같은 근거를 가진다(§5, `docs/replay_output.md` §6.3).
 
 ### 11.5 OSAL adapter 시험 (`runtime/tests/test_rt_osal.c`)
 
@@ -479,10 +486,19 @@ CMake에 `KZ_RT_OSAL_INCLUDE_DIRS`·`KZ_RT_OSAL_LIBS`를 줄 때만 빌드한다
 
 ### 12.6 남은 것 [U]
 
-- **변환기(`lib/trace/kzrt_convert.cpp`, 이 작업 밖).** 지금 변환기는 1.4 dump를 읽지만 RUNX 1.4 필드를 옮기지 않는다. LOSS kind 14는 모르는 kind로 `unknown`이 되고, 구간은 처음(0)부터 전체다. 그래서 회수 dump는 언제나 손실 있음(`loss-present`)이다. 보수적이지만 앞부분의 판정을 막을 수 있다. 필요한 변경:
-  1. 중립 손실 종류 `abnormal-end`(`KZ_ENUM_NLOSS`, 다음 값 21)를 더하고 `nloss_kind`가 kind 14를 그것으로 옮긴다. 구간은 모든 사건 뒤(begin = end = 사건 수)다. actor마다 빈틈 없는 앞부분이기 때문이다.
-  2. 실행 플래그 `recovered`(`KZ_ENUM_NRUN_FLAGS`, 다음 비트 0x40)를 더하고 파일 머리 `dump_flags` 비트 2에서 준다.
-  3. 회수 dump는 `complete`로 두지 않는다. `abnormal-end`가 있으면 `loss-present`도 둔다.
+- ~~**변환기(`lib/trace/kzrt_convert.cpp`, 이 작업 밖).** 지금 변환기는 1.4 dump를 읽지만 RUNX 1.4 필드를 옮기지 않는다. LOSS kind 14는 모르는 kind로 `unknown`이 되고, 구간은 처음(0)부터 전체다. 그래서 회수 dump는 언제나 손실 있음(`loss-present`)이다. 보수적이지만 앞부분의 판정을 막을 수 있다.~~ → 2026-10-28 스키마 개정 5로 구현했다(§12.7, `schema.md` §14.1). 적어 둔 세 변경(손실 종류 `abnormal-end` 21, 실행 플래그 `recovered` 0x40, 회수 dump에 `complete` 없음)에 더해, 실행의 끝(`end_kind`·`end_value`)과 플래그 `dumped`(0x80)를 옮긴다.
 - **cFS 실행에서의 확인.** C1·R2·C5 빌드에서 `KZ_RT_STORE`를 준 실행과 정체·강제 종료 실행을 아직 하지 않았다. cFS 프로세스가 비정상으로 끝나는 경로(PSP의 처리)에서의 회수는 그때 확인한다.
 - OSAL adapter의 자원은 attach 때 값으로 회수된다. attach 뒤에 바뀌면 회수 dump의 RESOURCE는 그 바뀜을 담지 않는다.
 
+### 12.7 회수 기록을 읽는 법 (변환·재생, 2026-10-28, 스키마 개정 5) [D][M]
+
+- **표시.** 변환한 기록의 NRUN이 회수를 말한다.
+  - 플래그 `recovered`: 머리의 회수 비트, 또는 RUNX `end_kind` recovered. 둘이 다르면 note를 남기고 회수로 본다. 이 기록에는 `complete`를 두지 않는다.
+  - `end_kind`: `signal`·`exit`(하네스가 준 시그널·종료 코드가 `end_value`), `unstated`(하네스가 아무것도 주지 않음). 프로세스 안의 dump는 `in-process`, 1.3 이하는 `not-recorded`다.
+  - 플래그 `dumped`: 프로세스가 자기 dump를 끝낸 뒤의 회수다. 그 dump와 같은 기록이다. 분석은 프로세스의 dump를 쓴다(§12.2).
+- **앞부분은 잃은 것이 아니다.** `abnormal-end`(중립 kind 21)는 사건 안의 구간이 없다(`begin` = `end` = 사건 수). 이유는 §12.3이다. actor마다 확정 길이까지의 레코드는 빈틈 없는 앞부분이다. 재생은 이 손실로 구간을 만들지 않는다. 그래서 앞부분의 쓰기와 순서는 정상 dump와 같게 읽힌다. `loss-present`는 둔다. 보고 줄 `loss reported`와 `loss record: abnormal-end …`가 남는다.
+- **끝 뒤는 모른다.** 기록의 끝은 앞부분의 끝이다. 각 actor가 마지막 기록 뒤에 한 일은 기록 밖이다. 정상 dump의 관측 창 끝과 같이 읽는다. 끝까지 정해지지 않은 발생은 열린 채 남는다(horizon).
+- **쓰던 레코드.** 끝날 때 hook 안에 있던 actor(ACTOR `partial` 1)는 런타임이 LOSS `partial`(그 actor, count 1)을 쓴다. 변환은 다른 partial처럼 그 actor의 마지막 사건 뒤부터 기록 끝까지의 구간으로 옮긴다. 그 구간부터 기록된 쓰기는 아무것도 정하지 않는다(재생 규칙 그대로).
+- **재생 출력.** `record end: recovered from the runtime's store after the process ended (signal N): …` 한 줄이 붙는다. 프로세스 안의 1.4 dump는 `record end: the process's own dump (in-process)`다. 끝이 기록되지 않은 기록(F0, 1.3 이하)에는 줄이 없다. 그래서 보존 기록의 출력은 바뀌지 않는다.
+- **시험.** `tests/cfs-free/test_kzrt_recovered.cpp`(도구 시험 값). 이 문서 §12.5의 `rt_end_kill`·`rt_end_segv`·`rt_end_normal`이 남긴 dump를 읽는다. 회수 dump `rt_end_normal.rec.kzrt`를 남기도록 `test_rt_end.c`의 거부 시험 출력 경로를 따로 두었다(검사 내용은 같음). 결과는 `schema.md` §14.1에 적었다 [M].
+- **남은 것** [U]: cFS 실행의 회수 기록은 아직 없다(§12.6).

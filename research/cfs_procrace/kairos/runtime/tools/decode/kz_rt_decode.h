@@ -1,5 +1,5 @@
-/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1 (minor 0 and 1;
- * a field a 1.0 stream does not have reads as 0, and a MODULE's registrations as 1).
+/* kz_rt_decode.h -- host-side reader of the "kzrt-dump" format (kz_rt_format.h), major 1 (minor 0 to 4;
+ * a field an older stream does not have reads as 0, and a 1.0 MODULE's registrations as 1).
  * Reads the explicit little-endian bytes field by field (independent of the host's layout) and
  * hands each record to a callback, in stream order and, inside a BUF, in buffer order. */
 #ifndef KZ_RT_DECODE_H
@@ -30,6 +30,9 @@ typedef struct kz_rt_dec_runx { /* 1.1 */
   /* 1.2 (0 = not recorded: a 1.1 RUNX, or kz_rt_process was not called) */
   uint64_t process, initial_key;
   uint32_t initial_kind, process_evidence;
+  /* 1.4 (0 = not recorded: a RUNX before 1.4): how the run ended (KZ_RT_END_*, KZ_RT_ENDF_*, the signal or exit
+   * status the harness gave) and what backed the store (KZ_RT_STOREF_*, reason in bits 8..15) */
+  uint32_t end_kind, end_flags, end_value, store_flags;
 } kz_rt_dec_runx;
 
 typedef struct kz_rt_dec_module {

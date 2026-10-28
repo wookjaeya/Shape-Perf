@@ -1,4 +1,4 @@
-/* kz_rt_format.h -- the dump format "kzrt-dump" 1.3 (byte layout; shared by the runtime and the
+/* kz_rt_format.h -- the dump format "kzrt-dump" 1.4 (byte layout; shared by the runtime and the
  * host decoder).  Every multi-byte field is little-endian and written byte by byte, so the bytes
  * do not depend on the target's byte order, alignment or struct layout.
  *
@@ -12,6 +12,8 @@
  *   the ACTOR demand and chunk fields.  A 1.1 reader reads a 1.0 stream (missing fields = not recorded).
  *   1.2 added the process and its initial thread at the end of RUNX (a 1.1 RUNX has none: not recorded).
  *   1.3 added the PLAN record (the serialized control plan the run was given, after the POINT records).
+ *   1.4 added how the run ended and where the store was, at the end of RUNX (a 1.3 RUNX has none: not recorded), the
+ *   dump flag RECOVERED and the LOSS kind abnormal-end (a dump made from a store file after the process ended).
  *
  * A BUF record's body is u32 owner (0 = the bootstrap/shared buffer, else a run actor id),
  * u32 nbytes, u32 cap, u32 rsv, then nbytes of buffer records (EVENT, CTL, AEXIT) exactly as the
@@ -29,6 +31,7 @@
 
 /* dump_flags */
 #define KZ_RT_DUMP_STOPPED 1u   /* kz_rt_stop was called before the dump (also in mode OFF, which it keeps) */
+#define KZ_RT_DUMP_RECOVERED 2u /* made from a store image after its process ended (kz_rt_store_recover), not by the process */
 
 /* stream record types */
 #define KZ_RT_REC_RUN 0x0001u
@@ -66,9 +69,13 @@
  *  48 u32 max_modules, 52 u32 max_notes; size 56 (1.1)
  *  1.2: 56 u64 process (the process id kz_rt_process was given; 0 = not recorded), 64 u64 initial_key (the native
  *  key of the thread that called kz_rt_process: the process's initial thread), 72 u32 initial_kind (KZ_RT_KEY_*),
- *  76 u32 process_evidence (KZ_RT_PROC_* of kz_rt.h: how the caller knows that thread is the initial one); size 80 */
+ *  76 u32 process_evidence (KZ_RT_PROC_* of kz_rt.h: how the caller knows that thread is the initial one); size 80
+ *  1.4: 80 u32 end_kind (KZ_RT_END_* of kz_rt.h: an in-process dump, or a dump recovered from the store), 84 u32 end_flags
+ *  (KZ_RT_ENDF_*), 88 u32 end_value (the signal or exit status the harness gave; 0 = none), 92 u32 store_flags
+ *  (KZ_RT_STOREF_* and the refusal reason in bits 8..15: whether a file backed the store); size 96 */
 #define KZ_RT_RUNX_SIZE_1_1 56u
-#define KZ_RT_RUNX_SIZE 80u
+#define KZ_RT_RUNX_SIZE_1_2 80u
+#define KZ_RT_RUNX_SIZE 96u
 #define KZ_RT_RX_BUILD_INFO 1u        /* the binary carries kz_rt_build_info: RUN backend/compiler/target/manifest are its values */
 #define KZ_RT_RX_TAG_CONFLICT 2u      /* the harness gave a backend/compiler/target/manifest that differs from the build info */
 #define KZ_RT_RX_HOOKS_BEFORE_EARLY 4u /* kz_rt_early_mode came after hooks had run (under the static default RECORD) */
@@ -174,5 +181,22 @@
 #define KZ_RT_PLAN_POINT_BYTES 172u
 #define KZ_RT_PLAN_NAME_BYTES 16u
 #define KZ_RT_PLAN_TRAILER_BYTES 4u
+
+/* ---- the store (kzrt 0.4.0) ------------------------------------------------------------------------
+ * The runtime's state is one object (kz_rt.h, "the record store"), which a file may back.  The file is that object's
+ * bytes: a header, then the runtime's own structs in the target's layout (records inside the buffers are serialized as
+ * above).  Only the header has a fixed byte layout; the rest is read by a runtime whose header is the same bytes
+ * (kz_rt_store_recover), which then writes an ordinary dump.  Header (little-endian, written byte by byte):
+ *    0 "KZRTSTOR", 8 u16 major=1, 10 u16 minor=0, 12 u32 head_bytes, 16 u32 store_bytes (the whole object), 20 u32 align
+ *   (KZ_RT_STORE_ALIGN), 24 u32 abi, 28 u32 pointer bytes, 32 u8[4] the target's bytes of the word 0x01020304 (its byte
+ *   order), 36 u32 max_actors, 40 u32 pool_bytes, 44 u32 chunk_bytes, 48 u32 boot_buf_bytes, 52 u32 max_points,
+ *   56 u32 max_modules, 60 u32 max_notes, 64 u32 plan_max_bytes, 68 u32 layout (crc32 of the sizes and offsets of the
+ *   store's parts as compiled), 72 u32 offset of the pool, 76 u32 offset of the bootstrap buffer, 80 u8[48] the runtime
+ *   version text (KZ_RT_RUNTIME_VERSION, NUL padded); size 128 */
+#define KZ_RT_STORE_MAGIC "KZRTSTOR"
+#define KZ_RT_STORE_MAJOR 1u
+#define KZ_RT_STORE_MINOR 0u
+#define KZ_RT_STORE_HEAD_BYTES 128u
+#define KZ_RT_STORE_VERSION_BYTES 48u
 
 #endif /* KZ_RT_FORMAT_H */

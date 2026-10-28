@@ -1,6 +1,13 @@
-// kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 or 1) and check it against site manifests.
+// kz-rt-dump -- print a "kzrt-dump" file (format major 1, minor 0 to 4) and check it against site manifests.
 //
 //   kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>
+//   kz-rt-dump --recover <store file> --out <dump-file> [--signal <n> | --exit-status <n>] [the options above]
+//
+// --recover (kzrt 0.4.0, event_semantics.md section 12) makes the dump of a store file whose process has ended (the
+// file KZ_RT_STORE named): the store header must be this tool's runtime's (same runtime version, build parameters and
+// struct layout; otherwise the differing fields are printed and nothing is written), the dump is written to --out,
+// marked as recovered, with what the harness says of the ending (--signal: the signal that ended the process,
+// --exit-status: its exit status), and then printed and checked like any dump.
 //
 // Output: one line per record, in stream order (and buffer order inside each BUF); an event line has
 // the hook's return address (pc=, the code copy of the binding that ran) and its actor's native key
@@ -17,6 +24,7 @@
 // Exit status: 0 = read and checks passed, 1 = a check failed, 2 = usage or format error.
 #include <cinttypes>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <map>
@@ -26,6 +34,7 @@
 #include <vector>
 
 #include "kz/core/sha256.hpp"
+#include "kz_rt.h"
 #include "kz_rt_decode.h"
 #include "kz_rt_manifest.hpp"
 
@@ -103,8 +112,41 @@ const char* loss_name(uint32_t k) {
     case KZ_RT_LOSS_MODULE_TABLE: return "module-table";
     case KZ_RT_LOSS_AFTER_STOP: return "after-stop";
     case KZ_RT_LOSS_NOTE_TABLE: return "note-table";
+    case KZ_RT_LOSS_ABNORMAL_END: return "abnormal-end";
     default: return "?";
   }
+}
+
+const char* end_name(uint32_t e) {
+  switch (e) {
+    case KZ_RT_END_IN_PROCESS: return "in-process";
+    case KZ_RT_END_RECOVERED: return "recovered";
+    default: return "?";
+  }
+}
+
+std::string end_flags_text(uint32_t f) {
+  std::string s;
+  if ((f & KZ_RT_ENDF_DUMPED) != 0) s += "dumped";
+  if ((f & KZ_RT_ENDF_SIGNAL) != 0) s += std::string(s.empty() ? "" : ",") + "signal";
+  if ((f & KZ_RT_ENDF_EXIT) != 0) s += std::string(s.empty() ? "" : ",") + "exit";
+  return s.empty() ? "-" : s;
+}
+
+const char* store_reason(uint32_t r) {
+  switch (r) {
+    case KZ_RT_STORE_R_ALIGN: return "align";
+    case KZ_RT_STORE_R_OPEN: return "open";
+    case KZ_RT_STORE_R_SIZE: return "size";
+    case KZ_RT_STORE_R_WRITE: return "write";
+    case KZ_RT_STORE_R_MAP: return "map";
+    default: return "?";
+  }
+}
+
+std::string store_text(uint32_t f) {
+  if ((f & KZ_RT_STOREF_REFUSED) != 0) return std::string("refused(") + store_reason(KZ_RT_STOREF_REASON(f)) + ")";
+  return (f & KZ_RT_STOREF_FILE) != 0 ? "file" : "memory";
 }
 
 const char* what_name(uint32_t w) {
@@ -252,6 +294,7 @@ struct State {
   std::map<uint32_t, std::vector<uint32_t>> aseqs;  // actor -> aseqs seen (events, ctl, aexit)
   std::map<uint32_t, kz_rt_dec_actor> actors;
   std::map<uint32_t, uint64_t> overflow;            // actor -> counted overflow
+  uint64_t abnormal_end = 0;                        // LOSS abnormal-end (a recovered prefix)
   std::set<uint32_t> modules_seen;
   std::map<uint32_t, std::set<std::string>> module_shas;  // module -> manifest sha256s (hex) it registered with
   bool have_run = false, have_runx = false;
@@ -330,6 +373,11 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
                       proc_evidence(x.process_evidence).c_str());
         else
           std::printf("runx process=- (not recorded)\n");
+        if (x.end_kind != KZ_RT_END_NONE)
+          std::printf("runx end=%s end_flags=%s end_value=%u store=%s\n", end_name(x.end_kind), end_flags_text(x.end_flags).c_str(), x.end_value,
+                      store_text(x.store_flags).c_str());
+        else
+          std::printf("runx end=- store=- (not recorded)\n");
       }
       break;
     }
@@ -362,6 +410,7 @@ int on_item(void* ctx, const kz_rt_dec_item* it) {
     }
     case KZ_RT_REC_LOSS:
       if (it->u.loss.kind == KZ_RT_LOSS_OVERFLOW) st->overflow[it->u.loss.actor] += it->u.loss.count;
+      if (it->u.loss.kind == KZ_RT_LOSS_ABNORMAL_END) st->abnormal_end += it->u.loss.count;
       if (meta)
         std::printf("loss %s actor=%s key=%u count=%" PRIu64 "\n", loss_name(it->u.loss.kind), it->u.loss.actor != 0 ? actor_name(it->u.loss.actor).c_str() : "-",
                     it->u.loss.key, it->u.loss.count);
@@ -453,11 +502,87 @@ bool read_file(const std::string& path, std::string* out) {
   return true;
 }
 
+int file_write(void* ctx, const void* bytes, size_t n) { return std::fwrite(bytes, 1, n, static_cast<std::FILE*>(ctx)) == n ? 0 : 1; }
+
+// The dump of a store file (kz_rt_format.h "the store") into out; 0 = written, 2 = refused or failed (printed).
+int recover_store(const std::string& path, const std::string& out, uint32_t end_flags, uint32_t end_value) {
+  std::string img;
+  if (!read_file(path, &img)) {
+    std::fprintf(stderr, "kz-rt-dump: cannot read %s\n", path.c_str());
+    return 2;
+  }
+  const unsigned char* h = reinterpret_cast<const unsigned char*>(img.data());
+  if (img.size() < KZ_RT_STORE_HEAD_BYTES || std::memcmp(h, KZ_RT_STORE_MAGIC, 8) != 0) {
+    std::printf("recover %s: not a kzrt store (%zu bytes)\n", path.c_str(), img.size());
+    return 2;
+  }
+  unsigned char mine[KZ_RT_STORE_HEAD_BYTES];
+  kz_rt_store_head(mine);
+  struct Field {
+    const char* name;
+    uint32_t off, bytes;  // bytes: 2, 4 (number), 0 (the version text), 1 (4 raw bytes)
+  };
+  static const Field fields[] = {{"major", 8, 2},          {"minor", 10, 2},         {"head_bytes", 12, 4},  {"store_bytes", 16, 4},
+                                 {"align", 20, 4},         {"abi", 24, 4},           {"pointer_bytes", 28, 4}, {"byte_order", 32, 1},
+                                 {"max_actors", 36, 4},    {"pool_bytes", 40, 4},    {"chunk_bytes", 44, 4}, {"boot_buf_bytes", 48, 4},
+                                 {"max_points", 52, 4},    {"max_modules", 56, 4},   {"max_notes", 60, 4},   {"plan_max_bytes", 64, 4},
+                                 {"layout", 68, 4},        {"pool_offset", 72, 4},   {"boot_offset", 76, 4}, {"runtime", 80, 0}};
+  auto text = [](const unsigned char* p, const Field& f) -> std::string {
+    if (f.bytes == 0) {
+      const std::string t(reinterpret_cast<const char*>(p + f.off), KZ_RT_STORE_VERSION_BYTES);
+      return "\"" + t.substr(0, t.find('\0')) + "\"";
+    }
+    if (f.bytes == 1) return hex_bytes(p + f.off, 4);
+    const uint32_t v = f.bytes == 2 ? (uint32_t)(p[f.off] | (p[f.off + 1] << 8)) : le32(p + f.off);
+    char b[16];
+    std::snprintf(b, sizeof b, f.off == 68 ? "%08x" : "%u", v);
+    return b;
+  };
+  std::printf("recover store=%s bytes=%zu", path.c_str(), img.size());
+  for (const Field& f : fields)
+    if (f.off == 80 || f.off == 16 || f.off == 40 || f.off == 44 || f.off == 36 || f.off == 68) std::printf(" %s=%s", f.name, text(h, f).c_str());
+  std::printf("\n");
+  int differ = 0;
+  for (const Field& f : fields) {
+    const size_t n = f.bytes == 0 ? KZ_RT_STORE_VERSION_BYTES : f.bytes == 1 ? 4u : f.bytes;
+    if (std::memcmp(h + f.off, mine + f.off, n) != 0) {
+      std::printf("recover: the store has %s=%s, this tool's runtime %s=%s\n", f.name, text(h, f).c_str(), f.name, text(mine, f).c_str());
+      ++differ;
+    }
+  }
+  if (differ != 0 || std::memcmp(h, mine, KZ_RT_STORE_HEAD_BYTES) != 0) {
+    std::printf("recover refused: the store was written by another runtime version, build parameters or struct layout (recover it with the "
+                "kz-rt-dump of the target's runtime build)\n");
+    return 2;
+  }
+  if (img.size() != le32(mine + 16)) {
+    std::printf("recover refused: the file has %zu bytes, the store %u\n", img.size(), le32(mine + 16));
+    return 2;
+  }
+  std::FILE* f = std::fopen(out.c_str(), "wb");
+  if (f == nullptr) {
+    std::fprintf(stderr, "kz-rt-dump: cannot write %s\n", out.c_str());
+    return 2;
+  }
+  int rc = kz_rt_store_recover(img.data(), img.size(), end_flags, end_value, file_write, f);
+  if (std::fclose(f) != 0 && rc == KZ_RT_OK) rc = KZ_RT_EWRITE;
+  if (rc != KZ_RT_OK) {
+    std::printf("recover failed: kz_rt_store_recover returned %d\n", rc);
+    return 2;
+  }
+  std::printf("recover wrote %s\n", out.c_str());
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
+  static const char* const usage =
+      "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>\n"
+      "       kz-rt-dump --recover <store file> --out <dump-file> [--signal <n> | --exit-status <n>] [--manifest ...] [--plan ...] [--events-only]\n";
   std::vector<std::string> manifests;
-  std::string dump, plan_file;
+  std::string dump, plan_file, recover_from, out_path;
+  uint32_t end_flags = 0, end_value = 0;
   bool events_only = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -467,15 +592,30 @@ int main(int argc, char** argv) {
       plan_file = argv[++i];
     else if (a == "--events-only")
       events_only = true;
-    else if (!a.empty() && a[0] != '-' && dump.empty())
+    else if (a == "--recover" && i + 1 < argc)
+      recover_from = argv[++i];
+    else if (a == "--out" && i + 1 < argc)
+      out_path = argv[++i];
+    else if ((a == "--signal" || a == "--exit-status") && i + 1 < argc && end_flags == 0) {
+      end_flags = a == "--signal" ? KZ_RT_ENDF_SIGNAL : KZ_RT_ENDF_EXIT;
+      end_value = static_cast<uint32_t>(std::strtoul(argv[++i], nullptr, 10));
+    } else if (!a.empty() && a[0] != '-' && dump.empty())
       dump = a;
     else {
-      std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>\n");
+      std::fprintf(stderr, "%s", usage);
       return 2;
     }
   }
-  if (dump.empty()) {
-    std::fprintf(stderr, "usage: kz-rt-dump [--manifest <kzs-sites file>]... [--plan <kzrt-plan file>] [--events-only] <dump-file>\n");
+  if (!recover_from.empty()) {
+    if (out_path.empty() || !dump.empty()) {
+      std::fprintf(stderr, "%s", usage);
+      return 2;
+    }
+    if (recover_store(recover_from, out_path, end_flags, end_value) != 0) return 2;
+    dump = out_path;
+  }
+  if (dump.empty() || (recover_from.empty() && (!out_path.empty() || end_flags != 0))) {
+    std::fprintf(stderr, "%s", usage);
     return 2;
   }
   kzrt::Manifest m;
@@ -559,6 +699,26 @@ int main(int argc, char** argv) {
     if ((st.runx.flags & KZ_RT_RX_BUILD_INFO_BAD) != 0) st.fail("RUNX: the binary's build info has a manifest sha256 that is not 64 hex digits");
     if ((st.runx.flags & KZ_RT_RX_TAG_CONFLICT) != 0)
       st.fail("RUNX: the harness gave a backend, compiler, target or manifest that differs from the binary's build info");
+  }
+  // how the run ended and what backed the store (kzrt 0.4.0)
+  if (st.have_runx && st.runx.end_kind != KZ_RT_END_NONE) {
+    const kz_rt_dec_runx& x = st.runx;
+    std::string given;
+    if ((x.end_flags & KZ_RT_ENDF_SIGNAL) != 0) given = "; the harness gives signal " + std::to_string(x.end_value);
+    if ((x.end_flags & KZ_RT_ENDF_EXIT) != 0) given = "; the harness gives exit status " + std::to_string(x.end_value);
+    if (x.end_kind == KZ_RT_END_RECOVERED)
+      std::printf("check end recovered from the store: %s%s\n",
+                  (x.end_flags & KZ_RT_ENDF_DUMPED) != 0 ? "the process had completed its own dump after kz_rt_stop (that dump has these records)"
+                                                         : "a prefix (the process ended without its own dump; what the actors did after their last record is not known)",
+                  given.c_str());
+    else
+      std::printf("check end in-process dump (store %s)\n", store_text(x.store_flags).c_str());
+    if (x.end_kind == KZ_RT_END_RECOVERED && (ds.dump_flags & KZ_RT_DUMP_RECOVERED) == 0) st.fail("RUNX says recovered, the file header does not");
+    if (x.end_kind == KZ_RT_END_RECOVERED && (x.end_flags & KZ_RT_ENDF_DUMPED) == 0 && st.abnormal_end == 0)
+      st.fail("a recovered prefix without the LOSS abnormal-end record");
+    if ((x.store_flags & KZ_RT_STOREF_REFUSED) != 0)
+      st.fail(std::string("RUNX: a store file was named and refused (") + store_reason(KZ_RT_STOREF_REASON(x.store_flags)) +
+              "): the store stayed in process memory, so an abnormal end of this run would leave no record");
   }
   // the plan (kzrt 0.3.0)
   if (st.have_plan) {

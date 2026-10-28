@@ -142,11 +142,18 @@ static int stream_record(const unsigned char *b, uint32_t size, uint32_t type, k
       x->max_notes = g32(b + 52);
       x->process = x->initial_key = 0;
       x->initial_kind = x->process_evidence = 0;
-      if (size >= KZ_RT_RUNX_SIZE) {
+      x->end_kind = x->end_flags = x->end_value = x->store_flags = 0;
+      if (size >= KZ_RT_RUNX_SIZE_1_2) {
         x->process = g64(b + 56);
         x->initial_key = g64(b + 64);
         x->initial_kind = g32(b + 72);
         x->process_evidence = g32(b + 76);
+      }
+      if (size >= KZ_RT_RUNX_SIZE) {
+        x->end_kind = g32(b + 80);
+        x->end_flags = g32(b + 84);
+        x->end_value = g32(b + 88);
+        x->store_flags = g32(b + 92);
       }
       return 1;
     }

@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <sys/mman.h>
 #include <sys/syscall.h>
 #include <time.h>
 #include <unistd.h>
@@ -147,4 +148,58 @@ KZ_RT_API int kz_rt_posix_dump_file(const char *path) {
   r = kz_rt_posix_dump_fd(fd);
   if (close(fd) != 0 && r == KZ_RT_OK) r = KZ_RT_EWRITE;
   return r;
+}
+
+/* ---- the store file (kzrt 0.4.0) ------------------------------------------------------------------------- */
+static int page_is_zero(const unsigned char *p, size_t n) {
+  size_t i;
+  for (i = 0; i < n; ++i)
+    if (p[i] != 0) return 0;
+  return 1;
+}
+
+static int pwrite_all(int fd, const unsigned char *p, size_t n, off_t off) {
+  while (n > 0) {
+    ssize_t w = pwrite(fd, p, n, off);
+    if (w < 0 && errno == EINTR) continue;
+    if (w <= 0) return 1;
+    p += w;
+    off += w;
+    n -= (size_t)w;
+  }
+  return 0;
+}
+
+/* A refused store file: noted, and the file emptied, so that a later recovery does not take it for a store. */
+static int store_refused(uint32_t reason, int fd, int rc) {
+  kz_rt_store_note(KZ_RT_STOREF_REFUSED | (reason << 8));
+  if (fd >= 0) {
+    if (ftruncate(fd, 0) != 0) {
+      /* nothing more to do: the size check of kz-rt-dump --recover refuses a file that is not a whole store */
+    }
+    (void)close(fd);
+  }
+  return rc;
+}
+
+KZ_RT_API int kz_rt_posix_store_file(const char *path) {
+  size_t n = 0, off;
+  unsigned char *base;
+  long pg;
+  int fd;
+  if (path == NULL || path[0] == 0) return KZ_RT_EINVAL;
+  base = (unsigned char *)kz_rt_store_region(&n);
+  pg = sysconf(_SC_PAGESIZE);
+  if (pg <= 0 || (uintptr_t)base % (uintptr_t)pg != 0 || n % (size_t)pg != 0) return store_refused(KZ_RT_STORE_R_ALIGN, -1, KZ_RT_EINVAL);
+  fd = open(path, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+  if (fd < 0) return store_refused(KZ_RT_STORE_R_OPEN, -1, KZ_RT_EWRITE);
+  if (ftruncate(fd, (off_t)n) != 0) return store_refused(KZ_RT_STORE_R_SIZE, fd, KZ_RT_EWRITE);
+  kz_rt_store_note(KZ_RT_STOREF_FILE); /* before the copy, so that the file says so too */
+  /* the store's current bytes; pages still zero are not written (the sized file reads them as zero) */
+  for (off = 0; off < n; off += (size_t)pg)
+    if (!page_is_zero(base + off, (size_t)pg) && pwrite_all(fd, base + off, (size_t)pg, (off_t)off) != 0)
+      return store_refused(KZ_RT_STORE_R_WRITE, fd, KZ_RT_EWRITE);
+  if (mmap(base, n, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, fd, 0) == MAP_FAILED) return store_refused(KZ_RT_STORE_R_MAP, fd, KZ_RT_EWRITE);
+  (void)close(fd); /* the mapping keeps the file */
+  return KZ_RT_OK;
 }

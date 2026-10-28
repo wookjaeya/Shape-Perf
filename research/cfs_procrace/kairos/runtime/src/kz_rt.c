@@ -13,12 +13,19 @@
  *   - control state is changed only under the control lock (the adapter's, or the runtime's own
  *     spin lock, fixed when the plan is loaded); observation hooks never take it;
  *   - none of these runtime orders is an order of the target program (event_semantics.md 2.10).
+ *
+ * All the state a dump is made from is one zero-initialized static object, the store (kz_rt.h, "the record store";
+ * event_semantics.md section 12).  A file may be put under it (a shared mapping at the same address), so that the
+ * records outlive the process; kz_rt_store_recover makes the dump of such a file in another process.  Pointers in
+ * the store (the adapter) are never read from a recovered image: what the dump needs of the adapter and of the build
+ * identity is copied into the store as values.
  */
 #include <stddef.h>
 #include <stdint.h>
 
 #include "kz_rt.h"
 #include "kz_rt_format.h"
+#include "kz_rt_internal.h"
 
 #ifndef KZ_RT_HAVE_TLS
 #if defined(__GNUC__) || defined(__clang__)
@@ -35,6 +42,9 @@
 #error "a chunk must hold the largest record (184 bytes) and the pool at least one chunk"
 #endif
 #define POOL_CHUNKS (KZ_RT_POOL_BYTES / KZ_RT_CHUNK_BYTES)
+#if KZ_RT_STORE_ALIGN < 64u || (KZ_RT_STORE_ALIGN & (KZ_RT_STORE_ALIGN - 1u)) != 0
+#error "KZ_RT_STORE_ALIGN must be a power of two of at least 64"
+#endif
 
 #define LD(p) __atomic_load_n((p), __ATOMIC_ACQUIRE)
 #define LDR(p) __atomic_load_n((p), __ATOMIC_RELAXED)
@@ -97,12 +107,6 @@ typedef struct actor_slot {
   uint32_t def_site, def_bind, def_ev;
 } actor_slot;
 
-static uint32_t g_pool[KZ_RT_POOL_BYTES / 4u];
-static uint32_t g_chunk_next[POOL_CHUNKS]; /* the next chunk (index + 1) of the same actor; 0 = none yet */
-static uint32_t g_chunk_used[POOL_CHUNKS]; /* committed bytes of the chunk (whole records) */
-static actor_slot g_actor[KZ_RT_MAX_ACTORS];
-static uint32_t g_boot_buf[KZ_RT_BOOT_BUF_BYTES / 4u];
-
 typedef struct note_entry {
   uint32_t used, kind, key, rsv;
   uint64_t count;
@@ -112,13 +116,15 @@ typedef struct module_entry {
   uint64_t t;
   unsigned char sha[32];
 } module_entry;
+typedef struct res_entry { /* an adapter resource, as values (kzrt 0.4.0) */
+  uint32_t kind, origin, len, rsv;
+  uint64_t count;
+  char what[KZ_RT_TAG_MAX + 1];
+} res_entry;
 
-/* The mode word: the static default records from the first hook, before any setup call. */
-static uint32_t g_mode = KZ_RT_MODE_RECORD;
-
-static struct {
+typedef struct run_state {
   uint32_t phase; /* KZ_RT_PHASE_* */
-  const kz_rt_adapter *ad;
+  const kz_rt_adapter *ad; /* never read from a recovered image */
   uint32_t init_once, attach_once, early_once;
   uint32_t early_set, early_mode;   /* the latched mode of kz_rt_early_mode */
   uint32_t mode_source, window_mode, rx_flags;
@@ -139,7 +145,70 @@ static struct {
   uint32_t modules_next;
   uint32_t proc_once, proc_set, proc_kind, proc_evidence; /* kz_rt_process (RUNX 1.2) */
   uint64_t proc_id, proc_key;
-} g;
+  /* kzrt 0.4.0: the store's setup and history, and the values a dump of a store image needs */
+  uint32_t store_flags;             /* KZ_RT_STOREF_* (kz_rt_store_note) */
+  uint32_t dumps, dumped_stopped;   /* in-process dumps completed; 1 = one of them began after kz_rt_stop */
+  uint32_t ad_set, ad_caps, ad_mask, ad_name_len, nres; /* the adapter at attach (ad_set = 1: published) */
+  char ad_name[KZ_RT_TAG_MAX + 1];
+  res_entry res[8];
+  uint32_t bi_state;                /* build identity: 0 = not read yet, 1 = reading, 2 = read */
+  uint32_t bi_have;                 /* the binary carries kz_rt_build_info */
+  int32_t bi_man;                   /* build_manifest of it: 1 = valid, 0 = none, -1 = malformed */
+  uint32_t bi_len[3];
+  char bi_tags[3][KZ_RT_TAG_MAX + 1];
+  unsigned char bi_manifest[32];
+} run_state;
+
+typedef struct ctl_state {
+  uint32_t loaded, plan_once;
+  uint32_t n;
+  uint32_t adapter_lock; /* fixed at kz_rt_plan: 1 = the adapter's lock, 0 = the spin lock */
+  uint32_t spin;
+  uint32_t ctl_seq;
+  kz_rt_point pt[KZ_RT_MAX_POINTS];
+  uint32_t hits[KZ_RT_MAX_POINTS], acted[KZ_RT_MAX_POINTS], satisfied[KZ_RT_MAX_POINTS];
+  uint32_t held[KZ_RT_MAX_POINTS], holds[KZ_RT_MAX_POINTS];
+  uint32_t queue[KZ_RT_MAX_POINTS + 1];
+  uint32_t qn;
+} ctl_state;
+
+typedef struct store {
+  unsigned char head[KZ_RT_STORE_HEAD_BYTES]; /* kz_rt_format.h "the store" (written by kz_rt_store_region) */
+  /* The mode word XOR KZ_RT_MODE_RECORD: the zero-initialized store reads as the static default RECORD (the store
+   * needs no initialized data and stays in .bss); every hook reads it (mode_get). */
+  uint32_t mode_x;
+  uint32_t rsv;
+  run_state run;
+  ctl_state ctl;
+  kz_rt__plan_mem plan;
+  actor_slot actor[KZ_RT_MAX_ACTORS];
+  uint32_t chunk_next[POOL_CHUNKS]; /* the next chunk (index + 1) of the same actor; 0 = none yet */
+  uint32_t chunk_used[POOL_CHUNKS]; /* committed bytes of the chunk (whole records) */
+  uint32_t boot_buf[KZ_RT_BOOT_BUF_BYTES / 4u];
+  uint32_t pool[KZ_RT_POOL_BYTES / 4u];
+} store;
+
+#define STORE_BYTES ((uint32_t)(((sizeof(store) + KZ_RT_STORE_ALIGN - 1u) / KZ_RT_STORE_ALIGN) * KZ_RT_STORE_ALIGN))
+static union {
+  store s;
+  unsigned char bytes[STORE_BYTES]; /* whole KZ_RT_STORE_ALIGN units: a mapping covers nothing else */
+} g_store __attribute__((aligned(KZ_RT_STORE_ALIGN)));
+
+#define g (g_store.s.run)
+#define k (g_store.s.ctl)
+#define g_pool (g_store.s.pool)
+#define g_chunk_next (g_store.s.chunk_next)
+#define g_chunk_used (g_store.s.chunk_used)
+#define g_actor (g_store.s.actor)
+#define g_boot_buf (g_store.s.boot_buf)
+
+/* Process-local, outside the store: this process makes a dump of a recovered image (kz_rt_store_recover). */
+static uint32_t g_recovered, g_recover_once, g_end_flags, g_end_value;
+
+static uint32_t mode_get(void) { return LDR(&g_store.s.mode_x) ^ (uint32_t)KZ_RT_MODE_RECORD; }
+static void mode_set(uint32_t m) { ST(&g_store.s.mode_x, m ^ (uint32_t)KZ_RT_MODE_RECORD); }
+
+KZ_RT_HIDDEN kz_rt__plan_mem *kz_rt__plan_mem_get(void) { return &g_store.s.plan; }
 
 /* An actor's bound: its quota, else the pool. */
 static uint32_t actor_bound(void) {
@@ -181,19 +250,6 @@ static int build_manifest(const kz_rt_build *bi, unsigned char out[32]) {
   }
   return h[64] == 0 ? 1 : -1;
 }
-
-static struct {
-  uint32_t loaded, plan_once;
-  uint32_t n;
-  uint32_t adapter_lock; /* fixed at kz_rt_plan: 1 = the adapter's lock, 0 = the spin lock */
-  uint32_t spin;
-  uint32_t ctl_seq;
-  kz_rt_point pt[KZ_RT_MAX_POINTS];
-  uint32_t hits[KZ_RT_MAX_POINTS], acted[KZ_RT_MAX_POINTS], satisfied[KZ_RT_MAX_POINTS];
-  uint32_t held[KZ_RT_MAX_POINTS], holds[KZ_RT_MAX_POINTS];
-  uint32_t queue[KZ_RT_MAX_POINTS + 1];
-  uint32_t qn;
-} k;
 
 #if KZ_RT_HAVE_TLS
 /* initial-exec: the runtime is linked into the executable (not loaded later), so the cell needs
@@ -375,7 +431,7 @@ static uint32_t unresolved_event(uint32_t site, uint32_t bind, uint32_t link, ui
 
 static uint32_t obs_common(uint32_t site, uint32_t bind, uint32_t link, uint32_t valid, uint32_t n, const uint64_t *v, uint32_t str_slot,
                            uint32_t str_bound, uint64_t pc) {
-  const uint32_t mode = LDR(&g_mode);
+  const uint32_t mode = mode_get();
   const kz_rt_adapter *ad;
   kz_rt_cell *c;
   actor_slot *s;
@@ -496,18 +552,83 @@ static int hooks_ran(void) {
          LDR(&g.loss[KZ_RT_LOSS_UNRESOLVED]) != 0 || LDR(&g.loss[KZ_RT_LOSS_REENTRY]) != 0;
 }
 
+/* The build identity as values in the store: a dump of a recovered image is written by another program, which cannot
+ * read the target's kz_rt_build_info.  Once (the object is constant); a second caller waits until the first has
+ * copied it (setup calls and dumps only, never a hook). */
+static void capture_build(void) {
+  const kz_rt_build *bi;
+  uint32_t i, expect = 0;
+  if (!__atomic_compare_exchange_n(&g.bi_state, &expect, 1u, 0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) {
+    while (LD(&g.bi_state) != 2u) {
+    }
+    return;
+  }
+  bi = build_info();
+  g.bi_have = bi != NULL ? 1u : 0u;
+  g.bi_man = build_manifest(bi, g.bi_manifest);
+  if (g.bi_man != 1) zero(g.bi_manifest, 32u);
+  for (i = 0; i < 3u; ++i) {
+    const char *t = bi == NULL ? NULL : i == 0 ? bi->backend : i == 1 ? bi->compiler : bi->target;
+    uint32_t n = 0;
+    if (t != NULL)
+      while (n < KZ_RT_TAG_MAX && t[n] != 0) {
+        g.bi_tags[i][n] = t[n];
+        ++n;
+      }
+    g.bi_tags[i][n] = 0;
+    g.bi_len[i] = n;
+  }
+  ST(&g.bi_state, 2u);
+}
+
+static uint32_t holdable_mask(const kz_rt_adapter *ad);
+
+/* What a dump needs of the adapter (name, caps, the contexts it can hold in, the resources it took), as values in
+ * the store: a recovered image's adapter pointer is never followed. */
+static void capture_adapter(const kz_rt_adapter *ad) {
+  kz_rt_resource r[8];
+  const char *name = ad->name != NULL ? ad->name : "";
+  uint32_t i, n = 0, nr;
+  while (n < KZ_RT_TAG_MAX && name[n] != 0) {
+    g.ad_name[n] = name[n];
+    ++n;
+  }
+  g.ad_name[n] = 0;
+  g.ad_name_len = n;
+  g.ad_caps = ad->caps;
+  g.ad_mask = holdable_mask(ad);
+  nr = ad->resources != NULL ? ad->resources(ad->ctx, r, 8u) : 0u;
+  if (nr > 8u) nr = 8u;
+  for (i = 0; i < nr; ++i) {
+    uint32_t tl = 0;
+    g.res[i].kind = r[i].kind;
+    g.res[i].origin = r[i].origin;
+    g.res[i].count = r[i].count;
+    if (r[i].what != NULL)
+      while (tl < KZ_RT_TAG_MAX && r[i].what[tl] != 0) {
+        g.res[i].what[tl] = r[i].what[tl];
+        ++tl;
+      }
+    g.res[i].what[tl] = 0;
+    g.res[i].len = tl;
+  }
+  g.nres = nr;
+  ST(&g.ad_set, 1u);
+}
+
 KZ_RT_API int kz_rt_early_mode(uint32_t mode, uint32_t note) {
   uint32_t f = 0;
   if (mode != KZ_RT_MODE_OFF && mode != KZ_RT_MODE_RECORD && mode != KZ_RT_MODE_CONTROL) return KZ_RT_EINVAL;
   if (LD(&g.init_once) != 0) return KZ_RT_ESTATE;
   if (__atomic_exchange_n(&g.early_once, 1u, __ATOMIC_ACQ_REL) != 0) return KZ_RT_ESTATE;
+  capture_build();
   if (hooks_ran()) f |= KZ_RT_RX_HOOKS_BEFORE_EARLY;
   if ((note & KZ_RT_EARLY_DEFAULTED) != 0) f |= KZ_RT_RX_MODE_DEFAULTED;
   if ((note & KZ_RT_EARLY_INVALID) != 0) f |= KZ_RT_RX_MODE_INVALID;
   (void)__atomic_fetch_or(&g.rx_flags, f, __ATOMIC_RELAXED);
   g.early_mode = mode;
   g.mode_source = KZ_RT_MODE_SRC_EARLY;
-  ST(&g_mode, mode);
+  mode_set(mode);
   ST(&g.early_set, 1u);
   return KZ_RT_OK;
 }
@@ -523,6 +644,7 @@ KZ_RT_API int kz_rt_init(const kz_rt_config *cfg) {
     return KZ_RT_EINVAL; /* one mode per process: the latched early mode */
   }
   if (__atomic_exchange_n(&g.init_once, 1u, __ATOMIC_ACQ_REL) != 0) return KZ_RT_ESTATE;
+  capture_build();
   g.run_id = cfg->run_id;
   g.instance_id = cfg->instance_id;
   STR_(&g.actor_quota, cfg->actor_buf_bytes & ~3u);
@@ -543,7 +665,7 @@ KZ_RT_API int kz_rt_init(const kz_rt_config *cfg) {
   (void)__atomic_fetch_or(&g.phase, KZ_RT_PHASE_INIT, __ATOMIC_ACQ_REL);
   if (LD(&g.early_set) == 0) {
     g.mode_source = KZ_RT_MODE_SRC_INIT;
-    ST(&g_mode, cfg->mode);
+    mode_set(cfg->mode);
   }
   return KZ_RT_OK;
 }
@@ -566,6 +688,7 @@ KZ_RT_API int kz_rt_attach(const kz_rt_adapter *ad) {
   if (ad->now_ns != NULL && (ad->caps & KZ_RT_CAP_CLOCK) != 0) {
     g.t_attach = ad->now_ns(ad->ctx, &g.clock_id);
   }
+  capture_adapter(ad);
   ST(&g.ad, ad);
   (void)__atomic_fetch_or(&g.phase, KZ_RT_PHASE_ATTACH, __ATOMIC_ACQ_REL);
   return KZ_RT_OK;
@@ -575,12 +698,12 @@ KZ_RT_API int kz_rt_attach(const kz_rt_adapter *ad) {
  * OFF (its hooks never count).  The window's mode is kept for the dump (RUNX window_mode). */
 KZ_RT_API void kz_rt_stop(void) {
   uint32_t ef = 0;
-  const uint32_t m = LDR(&g_mode);
+  const uint32_t m = mode_get();
   g.t_stop = now(LD(&g.ad), &ef);
   (void)__atomic_fetch_or(&g.phase, KZ_RT_PHASE_STOP, __ATOMIC_ACQ_REL);
   if (m == KZ_RT_MODE_RECORD || m == KZ_RT_MODE_CONTROL) {
     g.window_mode = m;
-    ST(&g_mode, (uint32_t)KZ_RT_MODE_STOPPED);
+    mode_set((uint32_t)KZ_RT_MODE_STOPPED);
   }
 }
 
@@ -644,7 +767,7 @@ KZ_RT_API void kz_rt_actor_exit(void) {
   unsigned char rec[KZ_RT_AEXIT_SIZE];
   uint32_t ef = 0;
   uint64_t t;
-  if (LDR(&g_mode) == KZ_RT_MODE_OFF || c == NULL || c->depth != 0 || c->actor == 0) return;
+  if (mode_get() == KZ_RT_MODE_OFF || c == NULL || c->depth != 0 || c->actor == 0) return;
   s = (c->actor & KZ_RT_ACTOR_PROVISIONAL) == 0 ? &g_actor[c->actor - 1u] : NULL;
   t = now(ad, &ef);
   put32(rec, KZ_RT_AEXIT_SIZE);
@@ -835,7 +958,7 @@ static uint32_t hold_refusal(uint32_t i, uint32_t ctx, const actor_slot *s, cons
 }
 
 KZ_RT_API int kz_rt_ctl(uint32_t site, uint32_t bind, uint32_t ev, uint32_t ctx) {
-  const uint32_t mode = LDR(&g_mode);
+  const uint32_t mode = mode_get();
   const kz_rt_adapter *ad;
   kz_rt_cell *c;
   actor_slot *s;
@@ -975,8 +1098,6 @@ KZ_RT_API void kz_rt_caps_get(kz_rt_caps *out) {
   out->distinct_sites = KZ_RT_MAX_POINTS;
 }
 
-/* kz_rt_plan.c: the PLAN record's content (0 = nothing to record) */
-__attribute__((visibility("hidden"))) uint32_t kz_rt__plan_record(const unsigned char **bytes, uint32_t *kept, uint32_t *given, uint32_t *flags);
 
 typedef struct sink {
   kz_rt_write_fn w;
@@ -1039,24 +1160,20 @@ static uint32_t boot_extent(uint32_t *partial) {
   return off;
 }
 
-static uint32_t text_len(const char *s) {
-  uint32_t n = 0;
-  if (s != NULL)
-    while (n < KZ_RT_TAG_MAX && s[n] != 0) ++n;
-  return n;
-}
-
 KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
-  const kz_rt_adapter *ad = LD(&g.ad);
-  const kz_rt_build *bi = build_info();
+  /* a recovered image (kz_rt_store_recover): its adapter belongs to the ended process; the store's copies stand in */
+  const uint32_t recovered = LD(&g_recovered);
+  const kz_rt_adapter *ad = recovered ? NULL : LD(&g.ad);
   unsigned char b[KZ_RT_RUN_FIXED + 5u * (2u + KZ_RT_TAG_MAX + 1u) + 64u];
   sink o;
-  uint32_t i, n, off, ef = 0, partial_boot, nact;
+  uint32_t i, n, off, ef = 0, partial_boot, nact, stopped;
   const char *rt = KZ_RT_RUNTIME_VERSION;
-  const char *adn = ad != NULL && ad->name != NULL ? ad->name : "";
-  const uint32_t mode = LDR(&g_mode);
+  const char *adn = recovered ? g.ad_name : ad != NULL && ad->name != NULL ? ad->name : "";
+  const uint32_t mode = mode_get();
   uint32_t rtl = 0, adl = 0;
   if (write == NULL) return KZ_RT_EINVAL;
+  if (!recovered) capture_build();
+  stopped = (LD(&g.phase) & KZ_RT_PHASE_STOP) != 0;
   o.w = write;
   o.ctx = wctx;
   o.bytes = 0;
@@ -1066,7 +1183,7 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
   cpy(b, (const unsigned char *)KZ_RT_MAGIC, 8u);
   put16(b + 8, KZ_RT_FORMAT_MAJOR);
   put16(b + 10, KZ_RT_FORMAT_MINOR);
-  put32(b + 12, (LD(&g.phase) & KZ_RT_PHASE_STOP) != 0 ? KZ_RT_DUMP_STOPPED : 0u);
+  put32(b + 12, (stopped ? KZ_RT_DUMP_STOPPED : 0u) | (recovered ? KZ_RT_DUMP_RECOVERED : 0u));
   emit(&o, b, KZ_RT_FILE_HEADER_BYTES);
   /* RUN */
   while (rt[rtl] != 0 && rtl < KZ_RT_TAG_MAX) ++rtl;
@@ -1083,31 +1200,21 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
   put32(b + 44, KZ_RT_MAX_POINTS);
   put32(b + 48, KZ_RT_MAX_VALS);
   put32(b + 52, KZ_RT_STR_MAX);
-  put32(b + 56, ad != NULL ? ad->caps : 0u);
+  put32(b + 56, recovered ? g.ad_caps : ad != NULL ? ad->caps : 0u);
   put32(b + 60, g.clock_id);
   put64(b + 64, g.t_init);
   put64(b + 72, g.t_attach);
   put64(b + 80, g.t_stop);
   put64(b + 88, now(ad, &ef));
-  /* build identity: the binary's values where it has them, else the harness's */
-  {
-    unsigned char bm[32];
-    const int have_bm = build_manifest(bi, bm);
-    if (have_bm < 0) (void)__atomic_fetch_or(&g.rx_flags, KZ_RT_RX_BUILD_INFO_BAD, __ATOMIC_RELAXED);
-    cpy(b + 96, have_bm == 1 ? bm : g.manifest, 32u);
-  }
-  put32(b + 128, holdable_mask(ad));
+  /* build identity: the binary's values where it has them (copied into the store, capture_build), else the harness's */
+  if (g.bi_man < 0) (void)__atomic_fetch_or(&g.rx_flags, KZ_RT_RX_BUILD_INFO_BAD, __ATOMIC_RELAXED);
+  cpy(b + 96, g.bi_man == 1 ? g.bi_manifest : g.manifest, 32u);
+  put32(b + 128, recovered ? g.ad_mask : holdable_mask(ad));
   off = KZ_RT_RUN_FIXED;
   off += put_text(b + off, rt, rtl);
   off += put_text(b + off, adn, adl);
-  {
-    const char *bt[3];
-    bt[0] = bi != NULL ? bi->backend : NULL;
-    bt[1] = bi != NULL ? bi->compiler : NULL;
-    bt[2] = bi != NULL ? bi->target : NULL;
-    for (i = 0; i < 3u; ++i)
-      off += tag_given(bt[i]) ? put_text(b + off, bt[i], text_len(bt[i])) : put_text(b + off, g.tags[i], g.tag_len[i]);
-  }
+  for (i = 0; i < 3u; ++i)
+    off += g.bi_len[i] != 0 ? put_text(b + off, g.bi_tags[i], g.bi_len[i]) : put_text(b + off, g.tags[i], g.tag_len[i]);
   off = pad4(off);
   rec_header(b, off, KZ_RT_REC_RUN, 0);
   emit(&o, b, off);
@@ -1119,7 +1226,7 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
     rec_header(b, KZ_RT_RUNX_SIZE, KZ_RT_REC_RUNX, 0);
     put32(b + 8, mode == KZ_RT_MODE_STOPPED ? g.window_mode : mode);
     put32(b + 12, g.mode_source);
-    put32(b + 16, LDR(&g.rx_flags) | (bi != NULL ? KZ_RT_RX_BUILD_INFO : 0u));
+    put32(b + 16, LDR(&g.rx_flags) | (g.bi_have != 0 ? KZ_RT_RX_BUILD_INFO : 0u));
     put32(b + 20, KZ_RT_POOL_BYTES);
     put32(b + 24, KZ_RT_CHUNK_BYTES);
     put32(b + 28, taken < POOL_CHUNKS ? taken : POOL_CHUNKS);
@@ -1137,6 +1244,11 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
         put32(b + 76, g.proc_evidence);
       }
     }
+    /* 1.4: how the run ended (this dump: in the process, or from its store after it ended) and what backed the store */
+    put32(b + 80, recovered ? KZ_RT_END_RECOVERED : KZ_RT_END_IN_PROCESS);
+    put32(b + 84, recovered ? g_end_flags | (LD(&g.dumped_stopped) != 0 ? KZ_RT_ENDF_DUMPED : 0u) : 0u);
+    put32(b + 88, recovered ? g_end_value : 0u);
+    put32(b + 92, LD(&g.store_flags));
     emit(&o, b, KZ_RT_RUNX_SIZE);
   }
   /* MODULE */
@@ -1154,10 +1266,20 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
     put32(b + 60, 0);
     emit(&o, b, KZ_RT_MODULE_SIZE);
   }
-  /* RESOURCE */
-  if (ad != NULL && ad->resources != NULL) {
+  /* RESOURCE (a recovered image: what the adapter had taken when it was attached) */
+  {
     kz_rt_resource r[8];
-    const uint32_t nr = ad->resources(ad->ctx, r, 8u);
+    uint32_t nr = 0;
+    if (recovered) {
+      for (nr = 0; nr < g.nres && nr < 8u; ++nr) {
+        r[nr].kind = g.res[nr].kind;
+        r[nr].origin = g.res[nr].origin;
+        r[nr].count = g.res[nr].count;
+        r[nr].what = g.res[nr].what;
+      }
+    } else if (ad != NULL && ad->resources != NULL) {
+      nr = ad->resources(ad->ctx, r, 8u);
+    }
     for (i = 0; i < nr && i < 8u; ++i) {
       uint32_t tl = 0;
       if (r[i].what != NULL)
@@ -1212,9 +1334,11 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
   if (n > KZ_RT_MAX_NOTES) n = KZ_RT_MAX_NOTES;
   for (i = 0; i < n; ++i)
     if (LD(&g.notes[i].used) != 0) emit_loss(&o, g.notes[i].kind, 0, g.notes[i].key, LDR(&g.notes[i].count));
+  /* a recovered image whose process did not complete its own dump after kz_rt_stop: the records are a prefix */
+  if (recovered && LD(&g.dumped_stopped) == 0) emit_loss(&o, KZ_RT_LOSS_ABNORMAL_END, 0, 0, 1u);
   /* POINT */
   if (LD(&k.loaded) != 0) {
-    ctl_lock(ad);
+    if (!recovered) ctl_lock(ad);
     for (i = 0; i < k.n; ++i) {
       rec_header(b, KZ_RT_POINT_SIZE, KZ_RT_REC_POINT, 0);
       put32(b + 8, i);
@@ -1231,7 +1355,7 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
       put32(b + 52, k.holds[i]);
       emit(&o, b, KZ_RT_POINT_SIZE);
     }
-    ctl_unlock(ad);
+    if (!recovered) ctl_unlock(ad);
   }
   /* PLAN (kzrt 0.3.0): the serialized plan the run was given and what became of it (kz_rt_plan.c) */
   {
@@ -1304,5 +1428,100 @@ KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *wctx) {
     o.crc = 0; /* END is not covered */
     emit(&o, b, KZ_RT_END_SIZE);
   }
+  /* the store's history: a later recovery of a store file knows the process wrote its own dump (RUNX end_flags) */
+  if (!recovered && !o.err) {
+    (void)ADD(&g.dumps, 1u);
+    if (stopped) ST(&g.dumped_stopped, 1u);
+  }
   return o.err ? KZ_RT_EWRITE : KZ_RT_OK;
+}
+
+/* ---- the store (kzrt 0.4.0) ------------------------------------------------------------------------------ */
+static uint32_t crc32_add(uint32_t crc, const unsigned char *p, uint32_t n) {
+  uint32_t i, j;
+  for (i = 0; i < n; ++i) {
+    crc ^= p[i];
+    for (j = 0; j < 8u; ++j) crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1u)));
+  }
+  return crc;
+}
+
+/* The crc32 of the sizes and offsets of the store's parts as this runtime was compiled: two runtimes with the same
+ * version and build parameters but another struct layout give different values. */
+static uint32_t store_layout(void) {
+  static const uint32_t v[] = {(uint32_t)sizeof(store), (uint32_t)sizeof(actor_slot), (uint32_t)sizeof(run_state), (uint32_t)sizeof(ctl_state),
+                               (uint32_t)sizeof(kz_rt_point), (uint32_t)sizeof(kz_rt__plan_mem), (uint32_t)sizeof(note_entry),
+                               (uint32_t)sizeof(module_entry), (uint32_t)sizeof(res_entry), (uint32_t)offsetof(store, mode_x),
+                               (uint32_t)offsetof(store, run), (uint32_t)offsetof(store, ctl), (uint32_t)offsetof(store, plan),
+                               (uint32_t)offsetof(store, actor), (uint32_t)offsetof(store, chunk_next), (uint32_t)offsetof(store, chunk_used),
+                               (uint32_t)offsetof(store, boot_buf), (uint32_t)offsetof(store, pool), (uint32_t)offsetof(run_state, ad),
+                               (uint32_t)offsetof(run_state, run_id), (uint32_t)offsetof(run_state, loss), (uint32_t)offsetof(run_state, modules),
+                               (uint32_t)offsetof(run_state, proc_id), (uint32_t)offsetof(run_state, res), (uint32_t)offsetof(run_state, bi_manifest),
+                               (uint32_t)offsetof(actor_slot, native_key), (uint32_t)offsetof(actor_slot, def_ev), (uint32_t)offsetof(ctl_state, pt),
+                               (uint32_t)offsetof(kz_rt_point, val), (uint32_t)offsetof(kz_rt_point, timeout_ns)};
+  unsigned char w[4];
+  uint32_t i, crc = 0xFFFFFFFFu;
+  for (i = 0; i < (uint32_t)(sizeof v / sizeof v[0]); ++i) {
+    put32(w, v[i]);
+    crc = crc32_add(crc, w, 4u);
+  }
+  return crc ^ 0xFFFFFFFFu;
+}
+
+static void store_head(unsigned char *h) {
+  static const char rt[] = KZ_RT_RUNTIME_VERSION;
+  const uint32_t order = 0x01020304u;
+  uint32_t i;
+  zero(h, KZ_RT_STORE_HEAD_BYTES);
+  cpy(h, (const unsigned char *)KZ_RT_STORE_MAGIC, 8u);
+  put16(h + 8, KZ_RT_STORE_MAJOR);
+  put16(h + 10, KZ_RT_STORE_MINOR);
+  put32(h + 12, KZ_RT_STORE_HEAD_BYTES);
+  put32(h + 16, STORE_BYTES);
+  put32(h + 20, KZ_RT_STORE_ALIGN);
+  put32(h + 24, KZ_RT_ABI_VERSION);
+  put32(h + 28, (uint32_t)sizeof(void *));
+  cpy(h + 32, (const unsigned char *)&order, 4u);
+  put32(h + 36, KZ_RT_MAX_ACTORS);
+  put32(h + 40, KZ_RT_POOL_BYTES);
+  put32(h + 44, KZ_RT_CHUNK_BYTES);
+  put32(h + 48, KZ_RT_BOOT_BUF_BYTES);
+  put32(h + 52, KZ_RT_MAX_POINTS);
+  put32(h + 56, KZ_RT_MAX_MODULES);
+  put32(h + 60, KZ_RT_MAX_NOTES);
+  put32(h + 64, KZ_RT_PLAN_MAX_BYTES);
+  put32(h + 68, store_layout());
+  put32(h + 72, (uint32_t)offsetof(store, pool));
+  put32(h + 76, (uint32_t)offsetof(store, boot_buf));
+  for (i = 0; i + 1u < KZ_RT_STORE_VERSION_BYTES && rt[i] != 0; ++i) h[80u + i] = (unsigned char)rt[i];
+}
+
+KZ_RT_API void *kz_rt_store_region(size_t *bytes) {
+  store_head(g_store.s.head);
+  capture_build();
+  if (bytes != NULL) *bytes = STORE_BYTES;
+  return &g_store;
+}
+
+KZ_RT_API void kz_rt_store_note(uint32_t flags) { ST(&g.store_flags, flags); }
+
+KZ_RT_API void kz_rt_store_head(unsigned char *out) {
+  if (out != NULL) store_head(out);
+}
+
+KZ_RT_API int kz_rt_store_recover(const void *image, size_t n, uint32_t end_flags, uint32_t end_value, kz_rt_write_fn write, void *wctx) {
+  unsigned char h[KZ_RT_STORE_HEAD_BYTES];
+  if (image == NULL || write == NULL) return KZ_RT_EINVAL;
+  store_head(h);
+  if (n != STORE_BYTES || !bytes_eq((const unsigned char *)image, h, KZ_RT_STORE_HEAD_BYTES)) return KZ_RT_ESTORE;
+  /* only in a process whose own runtime never ran: the image replaces the whole store */
+  if (hooks_ran() || LD(&g.init_once) != 0 || LD(&g.attach_once) != 0 || LD(&g.early_once) != 0 || LD(&g.dumps) != 0 ||
+      LD(&k.plan_once) != 0 || __atomic_exchange_n(&g_recover_once, 1u, __ATOMIC_ACQ_REL) != 0)
+    return KZ_RT_ESTATE;
+  cpy(g_store.bytes, (const unsigned char *)image, STORE_BYTES);
+  g.ad = NULL; /* the ended process's adapter */
+  g_end_flags = end_flags & (KZ_RT_ENDF_SIGNAL | KZ_RT_ENDF_EXIT);
+  g_end_value = end_value;
+  ST(&g_recovered, 1u);
+  return kz_rt_dump(write, wctx);
 }

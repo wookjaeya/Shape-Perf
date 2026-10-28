@@ -22,7 +22,8 @@
  *     actor id; an unknown identity stays unknown (never actor 0 = "no application");
  *   - every record is serialized little-endian byte by byte when it is written, so a buffer is
  *     readable on the host whatever the target's byte order and struct layout;
- *   - all memory is static (no allocation); sizes are the KZ_RT_* macros below.
+ *   - all memory is static (no allocation); sizes are the KZ_RT_* macros below.  Since kzrt 0.4.0 the state
+ *     a dump is made from is one object (the store, end of this header), which a file may back.
  *
  * The runtime itself must not be instrumented, and it is linked once per process (into the
  * executable; loaded modules call it through the dynamic symbol table).
@@ -46,10 +47,10 @@ extern "C" {
 /* ---- versions -------------------------------------------------------------------------- */
 #define KZ_RT_ABI_VERSION 1u        /* hooks, control points, config, adapter (0.2.0 only adds calls) */
 #define KZ_RT_FORMAT_MAJOR 1u       /* dump format "kzrt-dump"; a reader accepts only its major */
-#define KZ_RT_FORMAT_MINOR 3u       /* added record types or fields at the end of a record (1.1: RUNX,
+#define KZ_RT_FORMAT_MINOR 4u       /* added record types or fields at the end of a record (1.1: RUNX,
                                        MODULE registrations, ACTOR demand and chunks; 1.2: RUNX process;
-                                       1.3: the PLAN record) */
-#define KZ_RT_RUNTIME_VERSION "kzrt 0.3.0"
+                                       1.3: the PLAN record; 1.4: RUNX end and store, the recovered dump) */
+#define KZ_RT_RUNTIME_VERSION "kzrt 0.4.0"
 
 /* ---- static sizes (override with -D when building the runtime; recorded in the dump) ---- */
 /* Tool capacities, not research conditions (event_semantics.md 8.3, 8.9: how the defaults were derived
@@ -81,6 +82,10 @@ extern "C" {
 #define KZ_RT_STR_MAX 64u           /* bytes of a validated string copy (and of a string condition) */
 #define KZ_RT_TAG_MAX 63u           /* bytes of a config tag string */
 #define KZ_RT_POINT_BINDS 8u        /* binding filter of one control point */
+#ifndef KZ_RT_STORE_ALIGN
+#define KZ_RT_STORE_ALIGN 4096u     /* alignment and size unit of the store (below): a multiple of the page size
+                                       for a file to be mapped over it (checked when it is mapped) */
+#endif
 
 /* ---- actor ids ------------------------------------------------------------------------- */
 /* 0 = unresolved (no per-thread cell in this context); 1..KZ_RT_MAX_ACTORS = run actors;
@@ -136,7 +141,10 @@ enum {
   KZ_RT_LOSS_CTL_NOCOND = 10,  /* control conditions not evaluable (the hit's values were not cached) */
   KZ_RT_LOSS_MODULE_TABLE = 11,/* kz_rt_module calls beyond KZ_RT_MAX_MODULES */
   KZ_RT_LOSS_AFTER_STOP = 12,  /* hook calls after kz_rt_stop (outside the observation window) */
-  KZ_RT_LOSS_NOTE_TABLE = 13   /* kz_rt_note_loss calls beyond KZ_RT_MAX_NOTES */
+  KZ_RT_LOSS_NOTE_TABLE = 13,  /* kz_rt_note_loss calls beyond KZ_RT_MAX_NOTES */
+  KZ_RT_LOSS_ABNORMAL_END = 14 /* recovered dump only (count 1): the process ended without its own dump after
+                                  kz_rt_stop; the records are the prefix the store held when it ended, and what
+                                  the actors did after their last record is not known */
 };
 
 /* ---- the per-thread cell ---------------------------------------------------------------- */
@@ -260,7 +268,7 @@ typedef struct kz_rt_point_state { /* kz_rt_ctl_state */
 enum { KZ_RT_CTL_PASS = 0, KZ_RT_CTL_RESUMED = 1, KZ_RT_CTL_TIMEOUT = 2, KZ_RT_CTL_REFUSED = 3 };
 
 /* error codes of the setup calls */
-enum { KZ_RT_OK = 0, KZ_RT_EINVAL = -1, KZ_RT_ESTATE = -2, KZ_RT_EABI = -3, KZ_RT_EWRITE = -4 };
+enum { KZ_RT_OK = 0, KZ_RT_EINVAL = -1, KZ_RT_ESTATE = -2, KZ_RT_EABI = -3, KZ_RT_EWRITE = -4, KZ_RT_ESTORE = -5 };
 
 /* Capability descriptor (event_semantics.md section 6), also written to the dump's RUN record. */
 typedef struct kz_rt_caps {
@@ -303,7 +311,7 @@ KZ_RT_API int kz_rt_init(const kz_rt_config *cfg);         /* once; before or af
 KZ_RT_API int kz_rt_attach(const kz_rt_adapter *adapter);  /* once; ends the bootstrap phase */
 KZ_RT_API int kz_rt_plan(const kz_rt_point *points, uint32_t n); /* once, before the first control hit */
 KZ_RT_API void kz_rt_stop(void);                           /* ends the observation window */
-KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *ctx); /* the whole state, format 1.0 */
+KZ_RT_API int kz_rt_dump(kz_rt_write_fn write, void *ctx); /* the whole state (format KZ_RT_FORMAT_MAJOR.MINOR) */
 KZ_RT_API void kz_rt_caps_get(kz_rt_caps *out);
 enum { /* kz_rt_process evidence (RUNX process_evidence) */
   KZ_RT_PROC_CONSTRUCTOR = 1u << 0, /* called from a constructor of the executable (glibc runs them in the initial thread, before main) */
@@ -380,6 +388,53 @@ enum { /* PLAN record flags */
 };
 KZ_RT_API int kz_rt_plan_load(const void *bytes, size_t n); /* KZ_RT_OK, or EINVAL / ESTATE (status in the dump) */
 KZ_RT_API void kz_rt_plan_note(uint32_t status);            /* KZ_RT_PLANST_NONE / IGNORED / READ_ERROR */
+
+/* ---- the record store and the recovered dump (kzrt 0.4.0, event_semantics.md section 12) ---------------- */
+/* Everything a dump is made from (the actors' records and chunks, the bootstrap buffer, the actor table, the
+ * counters, the modules, the plan and its state, the mode word) is one static object, the store: zero-initialized,
+ * aligned to KZ_RT_STORE_ALIGN and a whole number of KZ_RT_STORE_ALIGN units.  Its first bytes are a header that
+ * names the runtime and the build parameters it was compiled with (kz_rt_format.h, "the store").  Start-up code may
+ * put a file under it (kz_rt_posix_store_file: copy, then a shared mapping at the same address), so that the
+ * records outlive the process: after any ending (a fatal signal, abort, SIGKILL, _exit, a crash inside a hook) a
+ * host tool makes the dump of the observed prefix from the file (kz-rt-dump --recover, which calls
+ * kz_rt_store_recover).  The hooks are unchanged: they write the same addresses; nothing waits or registers. */
+enum { /* RUNX store_flags (kz_rt_store_note) */
+  KZ_RT_STOREF_FILE = 1u << 0,   /* the store is a shared mapping of a file (it outlives the process) */
+  KZ_RT_STOREF_REFUSED = 1u << 1 /* a file was named and could not be put under the store (reason in bits 8..15):
+                                    the store stayed in process memory, so an abnormal end leaves no record */
+};
+enum { /* why a store file was refused (store_flags bits 8..15) */
+  KZ_RT_STORE_R_ALIGN = 1, /* the store's address or size is not a multiple of the page size */
+  KZ_RT_STORE_R_OPEN = 2,  /* the file could not be created */
+  KZ_RT_STORE_R_SIZE = 3,  /* the file could not be sized */
+  KZ_RT_STORE_R_WRITE = 4, /* the store's current bytes could not be written to the file */
+  KZ_RT_STORE_R_MAP = 5    /* the shared mapping failed */
+};
+#define KZ_RT_STOREF_REASON(f) (((f) >> 8) & 0xFFu)
+enum { /* how the run ended (RUNX end_kind) */
+  KZ_RT_END_NONE = 0,       /* not recorded (format <= 1.3) */
+  KZ_RT_END_IN_PROCESS = 1, /* kz_rt_dump in the running process (the harness, or the start-up object's exit handler) */
+  KZ_RT_END_RECOVERED = 2   /* kz_rt_store_recover: made from the store after the process ended */
+};
+enum { /* RUNX end_flags (recovered dumps) */
+  KZ_RT_ENDF_DUMPED = 1u << 0, /* the process had completed its own dump after kz_rt_stop: that dump holds these records */
+  KZ_RT_ENDF_SIGNAL = 1u << 1, /* end_value is the signal that ended the process, as the harness gave it */
+  KZ_RT_ENDF_EXIT = 1u << 2    /* end_value is the process's exit status, as the harness gave it */
+};
+/* The store's address and size in bytes; writes its header first.  Touches only the runtime's own memory. */
+KZ_RT_API void *kz_rt_store_region(size_t *bytes);
+/* Records how the store was set up (KZ_RT_STOREF_* | reason << 8), for the dump (RUNX store_flags). */
+KZ_RT_API void kz_rt_store_note(uint32_t flags);
+/* This build's store header (KZ_RT_STORE_HEAD_BYTES of kz_rt_format.h): an image is recovered only by a runtime
+ * whose header is the same bytes (same runtime version, build parameters and struct layout). */
+KZ_RT_API void kz_rt_store_head(unsigned char *out);
+/* In a process whose runtime has not run (no hook, setup call or dump: a host tool), takes a store image (the bytes of
+ * a store file after its process ended) and writes its dump: what an in-process dump would have written at the
+ * moment the process ended, marked as recovered (dump flag KZ_RT_DUMP_RECOVERED, RUNX end_kind KZ_RT_END_RECOVERED,
+ * and LOSS abnormal-end unless the process had completed its own dump after kz_rt_stop).  end_flags / end_value:
+ * what the harness knows of the ending (KZ_RT_ENDF_SIGNAL or KZ_RT_ENDF_EXIT).  KZ_RT_ESTORE: not a store of this
+ * build (size or header differ); KZ_RT_ESTATE: this process's runtime has run (or an image was recovered already). */
+KZ_RT_API int kz_rt_store_recover(const void *image, size_t n, uint32_t end_flags, uint32_t end_value, kz_rt_write_fn write, void *ctx);
 
 #ifdef __cplusplus
 }

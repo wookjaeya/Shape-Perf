@@ -2,10 +2,12 @@
  * linked as an object file into the executable (CMake target kzrt-posix-auto, an OBJECT library).
  *
  *   1. A .preinit_array entry (ELF executables; glibc runs it before any constructor, also before the
- *      initializers of the shared libraries the executable needs) reads KZ_RT_MODE from the process
- *      environment it is given and calls kz_rt_early_mode: the mode of the whole process is fixed
+ *      initializers of the shared libraries the executable needs) reads KZ_RT_STORE and KZ_RT_MODE from the
+ *      process environment it is given.  With KZ_RT_STORE it first puts that file under the runtime's store
+ *      (kz_rt_posix_store_file: system calls only), so the records of the whole run outlive the process
+ *      (event_semantics.md section 12).  Then it calls kz_rt_early_mode: the mode of the whole process is fixed
  *      before the first hook can run.  This is the same-binary switch of the groups G-I0 (off),
- *      G-I (record) and G-I-H (control) of the review section 13.1 (event_semantics.md 8.2).  It only
+ *      G-I (record) and G-I-H (control) of the review section 13.1 (event_semantics.md 8.2).  Otherwise it only
  *      reads the environment array and writes the runtime's own memory.
  *   2. A constructor (before main) attaches the POSIX adapter and calls kz_rt_init with the same mode,
  *      and an atexit handler stops the observation window and writes the dump.  The constructor also
@@ -22,6 +24,13 @@
  *   KZ_RT_INSTANCE      decimal instance id       (unset = 0)
  *   KZ_RT_ACTOR_QUOTA   decimal per-actor quota of committed bytes (unset = 0 = none: only the pool,
  *                       a build parameter, limits); a run parameter of the tool, recorded in RUNX
+ *   KZ_RT_STORE         path of a store file (unset or empty = none: the store stays in process memory, as
+ *                       before kzrt 0.4.0).  Created or truncated, sized to the store (bytes: kz_rt_store_region)
+ *                       and mapped over it before any constructor; put it on a memory file system (e.g. /dev/shm)
+ *                       so that the hooks' writes cost what process memory costs.  After the process ends, however
+ *                       it ends, kz-rt-dump --recover makes the dump of the file (a recovered prefix unless the exit
+ *                       handler's dump was completed).  A file that cannot be mapped is recorded (RUNX store refused,
+ *                       a kz-rt-dump check failure) and emptied.  The harness removes the file when it is done with it
  *   KZ_RT_PLAN          path of a serialized plan ("kzrt-plan 1", written by kz rtplan for this build); read
  *                       only in control mode, after attach and init, before main (kz_rt_plan_load: checked
  *                       against the build identity's manifest).  Control mode without it: every gate is
@@ -40,6 +49,7 @@
 #include "kz_rt_posix.h"
 
 static char g_dump_path[4096];
+static int g_store_tried; /* KZ_RT_STORE was looked at (by the .preinit_array entry, else by the constructor) */
 
 /* The plan file into a static buffer (one byte more than a plan may have, so that a longer file is seen). */
 static void load_plan(const char *path) {
@@ -87,20 +97,26 @@ static uint32_t parse_mode(const char *s, uint32_t *note) {
 #if defined(__ELF__) && !defined(KZ_RT_AUTO_NO_PREINIT)
 extern char **environ;
 
-/* glibc passes (argc, argv, envp) to .preinit_array functions.  Only string comparison by hand: no
- * library call is needed this early. */
+/* The value of the environment entry "<key>..." in e, or NULL (string comparison by hand this early). */
+static const char *env_entry(char **e, const char *key) {
+  for (; e != NULL && *e != NULL; ++e) {
+    size_t i = 0;
+    while (key[i] != 0 && (*e)[i] == key[i]) ++i;
+    if (key[i] == 0) return *e + i;
+  }
+  return NULL;
+}
+
+/* glibc passes (argc, argv, envp) to .preinit_array functions.  No library call but the store file's system
+ * calls (only when KZ_RT_STORE is given). */
 static void kz_rt_auto_preinit(int argc, char **argv, char **envp) {
-  static const char key[] = "KZ_RT_MODE=";
   char **e = envp != NULL ? envp : environ;
-  const char *value = NULL;
+  const char *value = env_entry(e, "KZ_RT_MODE="), *store = env_entry(e, "KZ_RT_STORE=");
   uint32_t note, mode;
   (void)argc;
   (void)argv;
-  for (; e != NULL && *e != NULL && value == NULL; ++e) {
-    size_t i = 0;
-    while (key[i] != 0 && (*e)[i] == key[i]) ++i;
-    if (key[i] == 0) value = *e + i;
-  }
+  g_store_tried = 1;
+  if (store != NULL && store[0] != 0) (void)kz_rt_posix_store_file(store); /* before anything is recorded */
   mode = parse_mode(value, &note);
   (void)kz_rt_early_mode(mode, note);
 }
@@ -116,6 +132,11 @@ __attribute__((constructor)) static void kz_rt_auto_start(void) {
   kz_rt_config c;
   const char *dump = getenv("KZ_RT_DUMP");
   uint32_t note;
+  if (!g_store_tried) { /* without .preinit_array (or when it did not run): here, before attach */
+    const char *store = getenv("KZ_RT_STORE");
+    g_store_tried = 1;
+    if (store != NULL && store[0] != 0) (void)kz_rt_posix_store_file(store);
+  }
   memset(&c, 0, sizeof c);
   c.abi = KZ_RT_ABI_VERSION;
   c.mode = parse_mode(getenv("KZ_RT_MODE"), &note);

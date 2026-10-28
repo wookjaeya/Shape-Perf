@@ -1,15 +1,16 @@
-# Kairos instrumentation runtime (kzrt 0.3.0: hook ABI 1, dump format 1.3, plan format kzrt-plan 1): kairos/docs/event_semantics.md.
+# Kairos instrumentation runtime (kzrt 0.4.0: hook ABI 1, dump format 1.4, plan format kzrt-plan 1, store 1): kairos/docs/event_semantics.md.
 #
 # Targets
 #   kzrt           static C99 core: hooks, bootstrap buffer and the actors' chunk pool, control (kzp-hold 1),
 #                  serialization.  No library calls; built -ffreestanding.  Link it once per process
 #                  (into the executable; loaded modules reach it through the dynamic symbol table).
-#   kzrt-posix     static POSIX adapter (Linux host): TLS cell, gettid, CLOCK_MONOTONIC, pthread wait.
+#   kzrt-posix     static POSIX adapter (Linux host): TLS cell, gettid, CLOCK_MONOTONIC, pthread wait, store file.
 #   kzrt-posix-auto  optional object: the mode from KZ_RT_MODE before any constructor (.preinit_array), init +
 #                  attach before main from KZ_RT_* environment names, dump at exit.
 #   kzrt-osal      static OSAL adapter skeleton; only with -DKZ_RT_OSAL_INCLUDE_DIRS="<osal>/src/os/inc;<build>/osal_public_api/inc"
 #   kzrt-decode    host reader of the dump format (C), kzrt-manifest host parser of "kzs-sites 1" (C++)
-#   kz-rt-dump     host tool: prints a dump and checks it against manifests
+#   kz-rt-dump     host tool: prints a dump and checks it against manifests; --recover makes the dump of a store file
+#                  (links the core: it recovers the stores of its own runtime build only)
 #   kzrt-build-info  OBJECT library (only when KZ_RT_BUILD_BACKEND is set): the build identity of an instrumented
 #                  build, the fixed source src/kz_rt_build_info.c compiled with the KZ_RT_BUILD_* values below
 # Build parameters of the target-side libraries (tool capacities, recorded in every dump): -DKZ_RT_POOL_BYTES,
@@ -93,7 +94,9 @@ kzrt_settings(kzrt-manifest)
 # the runtime still builds on its own.
 add_executable(kz-rt-dump tools/kz-rt-dump/kz_rt_dump.cpp ${KZ_RT_KAIROS}/lib/core/sha256.cpp)
 target_include_directories(kz-rt-dump PRIVATE ${KZ_RT_KAIROS}/include)
-target_link_libraries(kz-rt-dump PRIVATE kzrt-decode kzrt-manifest)
+# The core is linked for --recover (kz_rt_store_recover makes the dump of a store file): a store is recovered only by
+# the runtime build it was written with (same version and KZ_RT_DEFINES; the store header is compared).
+target_link_libraries(kz-rt-dump PRIVATE kzrt-decode kzrt-manifest kzrt)
 kzrt_settings(kz-rt-dump)
 
 # kzrt_build_info(<target> BACKEND <text> [COMPILER <text>] [TARGET <text>] [MANIFEST <file>]): an OBJECT

@@ -12,9 +12,16 @@
 
 #include "kz_rt.h"
 #include "kz_rt_format.h"
+#include "kz_rt_internal.h"
 
-static unsigned char g_bytes[KZ_RT_PLAN_MAX_BYTES];
-static uint32_t g_once, g_set, g_status, g_flags, g_kept, g_given;
+/* The plan's bytes and outcome are the store's (kz_rt_internal.h): a dump recovered from a store file has them too. */
+#define g_bytes (pm->bytes)
+#define g_once (pm->once)
+#define g_set (pm->set)
+#define g_status (pm->status)
+#define g_flags (pm->flags)
+#define g_kept (pm->kept)
+#define g_given (pm->given)
 
 static uint32_t g16(const unsigned char *p) { return (uint32_t)p[0] | ((uint32_t)p[1] << 8); }
 static uint32_t g32(const unsigned char *p) { return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24); }
@@ -62,12 +69,14 @@ static int build_sha(unsigned char out[32]) {
 
 /* Records the outcome (the first call only; the bytes were copied by the caller). */
 static void settle(uint32_t status, uint32_t flags) {
+  kz_rt__plan_mem *const pm = kz_rt__plan_mem_get();
   g_status = status;
   g_flags = flags;
   __atomic_store_n(&g_set, 1u, __ATOMIC_RELEASE);
 }
 
 KZ_RT_API void kz_rt_plan_note(uint32_t status) {
+  kz_rt__plan_mem *const pm = kz_rt__plan_mem_get();
   if (status != KZ_RT_PLANST_NONE && status != KZ_RT_PLANST_IGNORED && status != KZ_RT_PLANST_READ_ERROR) return;
   if (__atomic_exchange_n(&g_once, 1u, __ATOMIC_ACQ_REL) != 0) return;
   g_kept = g_given = 0;
@@ -75,6 +84,7 @@ KZ_RT_API void kz_rt_plan_note(uint32_t status) {
 }
 
 KZ_RT_API int kz_rt_plan_load(const void *bytes, size_t n) {
+  kz_rt__plan_mem *const pm = kz_rt__plan_mem_get();
   const unsigned char *b = (const unsigned char *)bytes;
   kz_rt_point pts[KZ_RT_MAX_POINTS];
   unsigned char sha[32];
@@ -147,8 +157,8 @@ KZ_RT_API int kz_rt_plan_load(const void *bytes, size_t n) {
 }
 
 /* For the dump (kz_rt.c): the PLAN record's content; 0 = nothing to record. */
-__attribute__((visibility("hidden"))) uint32_t kz_rt__plan_record(const unsigned char **bytes, uint32_t *kept, uint32_t *given, uint32_t *flags);
-__attribute__((visibility("hidden"))) uint32_t kz_rt__plan_record(const unsigned char **bytes, uint32_t *kept, uint32_t *given, uint32_t *flags) {
+KZ_RT_HIDDEN uint32_t kz_rt__plan_record(const unsigned char **bytes, uint32_t *kept, uint32_t *given, uint32_t *flags) {
+  kz_rt__plan_mem *const pm = kz_rt__plan_mem_get();
   if (__atomic_load_n(&g_set, __ATOMIC_ACQUIRE) == 0) return 0;
   *bytes = g_bytes;
   *kept = g_kept;

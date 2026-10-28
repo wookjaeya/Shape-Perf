@@ -84,7 +84,7 @@ set_tests_properties(rt_auto PROPERTIES FIXTURES_SETUP rt_auto_dump
   ENVIRONMENT "KZ_RT_DUMP=${CMAKE_CURRENT_BINARY_DIR}/rt_auto.kzrt;KZ_RT_MODE=record;KZ_RT_RUN_ID=42;KZ_RT_INSTANCE=1")
 kzrt_case(rt_auto_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_auto.kzrt)
 set_tests_properties(rt_auto_dump PROPERTIES FIXTURES_REQUIRED rt_auto_dump
-  PASS_REGULAR_EXPRESSION "run abi=1 mode=stopped run_id=42 instance=1 .*runx window_mode=record mode_source=early flags=-.*runx process=[0-9]+ initial=tid:[0-9]+ evidence=constructor,tid-is-pid.*ev actor=1 aseq=3 .*check ok")
+  PASS_REGULAR_EXPRESSION "run abi=1 mode=stopped run_id=42 instance=1 .*runx window_mode=record mode_source=early flags=-.*runx process=[0-9]+ initial=tid:[0-9]+ evidence=constructor,tid-is-pid\nrunx end=in-process end_flags=- end_value=0 store=memory.*ev actor=1 aseq=3 .*check end in-process dump \\(store memory\\).*check ok")
 # ... and with the build-identity object linked: the RUN record names the binary's backend, compiler,
 # target and manifest (whether kz-rt-dump finds that manifest among given files: rt_dump_tool, rt_mode_api_latch_dump).
 kzrt_case(rt_auto_bi test_rt_auto_bi)
@@ -177,6 +177,24 @@ set_tests_properties(rt_auto_plan_record_dump PROPERTIES FIXTURES_REQUIRED rt_au
 kzrt_case(rt_auto_plan_none_dump kz-rt-dump ${CMAKE_CURRENT_BINARY_DIR}/rt_auto_plan_none.kzrt)
 set_tests_properties(rt_auto_plan_none_dump PROPERTIES FIXTURES_REQUIRED rt_auto_plan_none_dump
   PASS_REGULAR_EXPRESSION "runx window_mode=control .*plan status=none flags=- bytes=0 .*check plan status=none.*check ok")
+
+# Records that outlive the process (kzrt 0.4.0, event_semantics.md section 12): the target (the test program run again
+# as a child, with the start-up object and KZ_RT_STORE) ends by SIGKILL, by SIGSEGV inside a hook, by abort, by SIGTERM
+# after a stall, by SIGKILL after a stall whose SIGTERM it ignores, or normally; kz-rt-dump --recover makes the dump of
+# its store file and the program checks it (for the normal exit also that the exit handler's dump has the same records,
+# and that a cut file and a store of another build are refused).
+kzrt_test(test_rt_end SOURCES test_rt_end.c LIBS kzrt-posix-auto kzrt-posix kzrt kzrt-decode)
+foreach(c kill segv abort term term-kill normal)
+  kzrt_case(rt_end_${c} test_rt_end ${c} ${CMAKE_CURRENT_BINARY_DIR} $<TARGET_FILE:kz-rt-dump>)
+endforeach()
+set_tests_properties(rt_end_segv PROPERTIES PASS_REGULAR_EXPRESSION
+  "runx end=recovered end_flags=signal end_value=11 store=file.*loss partial actor=[0-9]+ key=0 count=1\nloss abnormal-end actor=- key=0 count=1.*check end recovered from the store: a prefix.*check ok.*segv: recovered dump checked")
+set_tests_properties(rt_end_term-kill PROPERTIES PASS_REGULAR_EXPRESSION
+  "runx end=recovered end_flags=signal end_value=9 store=file.*loss abnormal-end actor=- key=0 count=1.*check ok.*term-kill: the target ended with signal 9.*term-kill: recovered dump checked")
+set_tests_properties(rt_end_normal PROPERTIES PASS_REGULAR_EXPRESSION
+  "runx end=recovered end_flags=dumped,exit end_value=0 store=file.*check end recovered from the store: the process had completed its own dump.*check ok.*recover refused: the file has [0-9]+ bytes.*recover: the store has pool_bytes=.*normal: recovered dump checked")
+kzrt_case(rt_end_notstore kz-rt-dump --recover ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt --out ${CMAKE_CURRENT_BINARY_DIR}/rt_end_notstore.kzrt)
+set_tests_properties(rt_end_notstore PROPERTIES PASS_REGULAR_EXPRESSION "not a kzrt store")
 
 # The OSAL adapter where OSAL is initialized (stage F): only with a target OSAL build (KZ_RT_OSAL_INCLUDE_DIRS and
 # KZ_RT_OSAL_LIBS, e.g. the C1 reference build's osal/libosal.a and libosal_bsp.a; its BSP main calls the test's

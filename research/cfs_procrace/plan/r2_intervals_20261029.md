@@ -11,8 +11,8 @@
 | 항목 | 내용 |
 |---|---|
 | 구간 | **I0 초기화**: ES 주 task가 OPERATIONAL에 들기 전. **I1 운용**: 그 뒤, 명령 재시작 전. **I2 종료**: 명령 재시작 뒤, 기록 끝(프로세스 종료)까지 (§1) |
-| 새 관측 site | 셋. `es.main.operational`(cfe_es_start.c L233–L234), `es.restart_cmd.reset_cfe`(cfe_es_task.c L664), `sb.sub_reporting.set`(cfe_sb_task.c L1224–L1227). F0 계획 site 35–37, 계측 manifest site 42–44. 같은 label, 같은 위치(§2) |
-| 더하지 않은 것 | 프로세스 종료(기록 끝이 경계다), TO_LAB 구독 루프의 시작·끝(시작은 이미 관측된다. 끝은 `to_lab.so`에 있어 두 경로에 새 binary/module이 필요하다), 프로필 SCOPE의 LP 두 곳(더하면 재생 판정이 바뀐다). 모두 §6에 lead·PI 몫으로 적었다 |
+| 새 관측 site | 셋. `es.main.operational`(cfe_es_start.c L233–L234), `es.restart_cmd.reset_cfe`(cfe_es_task.c L664), `sb.sub_reporting.set`(cfe_sb_task.c L1224–L1227). F0 계획 site 35–37, 계측 manifest site 42–44. 같은 label, 같은 위치(§2). 그리고 후속 지시로 프로필 SCOPE의 LP 둘(`CFE_PSP_Restart.request_shutdown` PSP L87, `OS_Application_Run.teardown` L507): F0 site 38–39, 계측 site 45–46(§6 항목 1) |
+| 더하지 않은 것 | 프로세스 종료(기록 끝이 경계다), TO_LAB 구독 루프의 시작·끝(시작은 이미 관측된다. 끝은 `to_lab.so`에 있어 두 경로에 새 binary/module이 필요하다). §6에 lead·PI 몫으로 적었다 |
 | 확인 [M] | F0: `kz anchor` 38 targets, 인용 43개 hash 일치. `kz observe --check` 38 sites, 셋 모두 주소에 묶임. 계측: manifest parser 수용. 파생 R2 빌드 binding **42개 모두 bound**, hook 42, hookcheck ok 42(§5) |
 | 배정 규칙 | 확립된 순서만 쓴다. 프로그램 순서(po), 시작 동기화(sync), OPERATIONAL 대기의 성공 반환(rf). 그 밖은 **기록 시각만(time)**으로 표시한다. time은 happens-before가 아니다(§3) |
 | 스크립트 | `kairos/instrument/gcc/scripts/r2_intervals_tag.sh`(발생마다 구간·근거, 구간별 부류 수), `r2_intervals_selftest.sh`(두 경로 도구 시험, 통과) (§4) |
@@ -52,7 +52,7 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
 | 프로세스 끝 | `osal/src/bsp/generic-linux/src/bsp_start.c` L244–L247 | `OS_Application_Run()`이 돌아오면 `main`이 돌아온다 |
 
 - `CFE_ES_ResetCFE`의 다른 호출: `cfe_es_api.c` L352(`CFE_ES_ExitApp` L292 안, 코어 앱 초기화 오류), HS `hs_monitors.c` L138·L290. 명령 경로가 아니다. 새 site는 이것들을 표시하지 않는다(§6 항목 3).
-- 프로필의 SCOPE: `profiles/cfs-v7.0.1/10_kinds.kzp` L22–L29는 "기본 범위는 종료 요청에서 끝난다(SPEC 1.6)"라고 선언한다. 요청 LP는 `CFE_PSP_Restart.request_shutdown`(PSP L87 저장, `20_ops.kzp` L238–L243), teardown LP는 `OS_Application_Run.teardown`(L507 호출, `20_ops.kzp` L245–L249)이다. **R2 관측 계획은 이 두 LP를 관측하지 않는다.** 그래서 지금 R2 기록의 재생에서는 `shutdown_request no`이고 모든 발생이 `scope default`다 [M: `s1r2_p1` 재생과 §4.2 도구 시험 재생]. 명령 재시작 뒤의 사용도 기본 범위로 판정된다.
+- 프로필의 SCOPE: `profiles/cfs-v7.0.1/10_kinds.kzp` L22–L29는 "기본 범위는 종료 요청에서 끝난다(SPEC 1.6)"라고 선언한다. 요청 LP는 `CFE_PSP_Restart.request_shutdown`(PSP L87 저장, `20_ops.kzp` L238–L243), teardown LP는 `OS_Application_Run.teardown`(L507 호출, `20_ops.kzp` L245–L249)이다. **2026-10-29 전의 R2 관측 계획은 이 두 LP를 관측하지 않았다.** 그래서 그 계획의 R2 기록을 재생하면 `shutdown_request no`이고, 명령 재시작 뒤의 사용을 포함해 모든 발생이 `scope default`다 [M: `s1r2_p1` 재생]. 계획과 프로필 사이의 빈틈이었다. 두 LP를 더한 것은 §6 항목 1이다.
 
 ### 1.3 프로세스 종료
 
@@ -127,7 +127,7 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
   - 시작 스크립트 뒤에 명령으로 만든 앱. 동기화 때 레코드가 없었다.
   - 이런 발생은 time이다.
 - 구독 보고: EID 22 발생은 구독한 task가 플래그를 ENABLE로 읽은 뒤다(§1.4). ENABLE을 쓰는 것은 `state=1`인 setter뿐이다. 그래서 setter(켜기) → EID 22는 값에 의한 reads-from이다. 스크립트는 이것을 배정에 쓰지 않는다. setter 자체(SB task)의 B1과의 관계는 time이기 때문이다. 대신 각 EID 22에 앞선 켜기가 기록 시각으로 있는지 센다. 없으면 기록 시각을 그대로 믿을 수 없다는 신호다.
-- SCOPE와의 관계(CR §8.2): 재생의 SCOPE는 발생의 결정과 종료 요청의 **병합 순서**로 정한다(`kairos/docs/replay_output.md` §7.4, `lib/core/eval_trace.cpp` L1890). 다른 actor 사이에서 그것은 기록 시각과 표현의 순서다. 이 문서의 time 근거와 같은 약함이다. 스크립트는 발생마다 재생의 `scope default|teardown`을 함께 적어, 구간과 SCOPE를 나란히 보게 한다. 지금 R2 계획에서는 요청 LP가 관측되지 않아 SCOPE가 아예 걸리지 않는다(§1.2).
+- SCOPE와의 관계(CR §8.2): 재생의 SCOPE는 발생의 결정과 종료 요청의 **병합 순서**로 정한다(`kairos/docs/replay_output.md` §7.4, `lib/core/eval_trace.cpp` L1890). 다른 actor 사이에서 그것은 기록 시각과 표현의 순서다. 이 문서의 time 근거와 같은 약함이다. 스크립트는 발생마다 재생의 `scope default|teardown`을 함께 적어, 구간과 SCOPE를 나란히 보게 한다. 2026-10-29 전의 계획에서는 요청 LP가 관측되지 않아 SCOPE가 아예 걸리지 않았다(§1.2). 두 LP를 더한 뒤 재생의 SCOPE가 무엇에 기대는지는 §6 항목 1이다.
 
 ## 4. 스크립트
 
@@ -200,7 +200,7 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
 | R5(SB 자기 전송)의 구간 | 근거표 R5 | `cfe_sb_task.c` L138–L242, L93 | 같음 |
 | R6·R7(다른 task, SB·TBL AppID) **I0만** | 근거표 R6·R7은 I0 근거만 있고, [기록]의 수는 나뉘지 않았다 | R-R2-g(근거표 §3.2), §3 sync·time | 수를 I0의 established와 time으로 나눠 적을 열이 필요하다 |
 | **R8-I1** 다른 task 사용, OPERATIONAL 뒤·재시작 전(TO_LAB EID 10·22·25, 앱의 NO_SUBS EID 14, SBN EID 25 등) | 없음(R8 미정) | 요구: `cfe_evs.h` L168–L172(시점을 가리지 않음). SB id 셀의 writer: L50 memset·L138뿐(정적 닫힘 `kairos/tests/static/data/core_cpu1.golden` L161–L162). 등록 해제: `CFE_EVS_CleanUpApp`(`cfe_evs_task.c` L178–L198)뿐이고, `CFE_ES_CleanUpApp`(`cfe_es_apps.c` L1407, 요청 L1249)에서 module 표(`cfe_evs_objtab.c` L37)를 거쳐 닿는다. 기록에서는 `evs.cleanup.*` site로 그 id의 해제가 있었는지 본다. 보고 켜기: §1.4 | R2 이슈(S-R2-1)는 시작만 다룬다. 이 행의 기대는 코드(추론) 등급이 된다 |
-| **R8-I2** 명령 재시작 뒤의 사용 | 없음 | PSP 종료 경로(§1.2 표), `OS_DeleteAllObjects`(`osal/src/os/shared/src/osapi-common.c` L357). 프로필 SCOPE(10_kinds.kzp L22–L29, SPEC 1.6, 모형 등급) | §6 항목 1의 결정에 달린다. 출처(이슈)는 이 구간을 다루지 않는다 |
+| **R8-I2** 명령 재시작 뒤의 사용 | 없음 | PSP 종료 경로(§1.2 표), `OS_DeleteAllObjects`(`osal/src/os/shared/src/osapi-common.c` L357). 프로필 SCOPE(10_kinds.kzp L22–L29, SPEC 1.6, 모형 등급) | 두 LP를 관측하면 재생은 요청 뒤에 결정된 발생을 `scope teardown`으로 적는다(§6 항목 1). 다른 actor의 발생은 그 배정이 병합 순서(기록 시각)에만 기댄다. 출처(이슈)는 이 구간을 다루지 않는다 |
 | 배정 근거 열 | 없음 | §3 | time으로 배정된 발생을 행에 넣을지(§6 항목 4) |
 | N-R2-3(OPERATIONAL 뒤 사용을 정상 대조로) | "쓰지 않는다, 구간 분리 전" | R8-I1의 행 | 행이 생긴 뒤에만 |
 | E-15(동결) | I0·I1·I2를 함께 묶는다 | — | 동결 표의 개정 절차(그 문서 §5, P-F1GATE)를 따른다. [기록] 실행들은 이미 결과를 본 것이다 |

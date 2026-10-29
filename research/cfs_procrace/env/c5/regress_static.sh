@@ -4,8 +4,10 @@
 # into <out>; the containers are compared as kz-dump text.  For the kz-static changes of 2026-10-29 (recipe relocatable,
 # the constant evaluation in the command's directory, ELF32, front_end_diagnostic), which must leave a C1 basis and its
 # facts as they were.  A tool's own identity differs between the two builds by construction (its source identity and
-# schema fingerprint go into the tool hash), so the lines that carry it, and the artifact hashes that cover it, are
-# listed apart; every other line must be equal.  Tool check only.  Default closures: pre_1df262a post_1df262a.
+# schema fingerprint go into the tool hash), and so do the artifact hashes that cover it and the basis hash the facts
+# name.  Those lines alone are masked (MASK: each pattern anchored to the one line format that carries such a value);
+# every other line must be equal, and the masked comparison says so by a count of 0.  The containers are also compared
+# as bytes.  Tool check only.  Default closures: pre_1df262a post_1df262a.
 set -uo pipefail
 OLD=${1:?usage: regress_static.sh <old kz build> <new kz build> <out> [<cfg>_<cand>...]}; NEW=${2:?new}; O=${3:?out}; shift 3
 R="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -20,9 +22,15 @@ for b in "$OLD" "$NEW"; do log "kz-static $(sha256sum "$b/tools/kz-static/kz-sta
 TG=(--target OS_common_record_t.name_entry --target OS_common_record_t.active_id --target OS_count_sem_internal_record_t.obj_name
     --target CF_Channel_t.sem_id --target CF_ChannelConfig_t.sem_name --target BP_Throttle_t.Name --target BP_Throttle_t.Sem)
 OPS=(--delay-op OS_TaskDelay --lock-op CFE_ES_LockSharedData --unlock-op CFE_ES_UnlockSharedData --spawn-op CFE_ES_CreateChildTask)
-# identity: the tool hash, the build identity string (and so the STRINGS section's crc), the artifact hashes, and the
-# basis hash the facts name (parent, basis_sha256, extract.units_from, the first line of each log)
-ident='tool_sha256|tool_hash|artifact_sha256|basis_sha256|fingerprint|parent|sha256=|kz-core|source=|build_identity|section STRINGS |extract.units_from|^[<>] (basis|facts) [0-9a-f]{64}$'
+# identity: the tool hash, the build identity string (its schema fingerprint and source identity; and so the STRINGS
+# section's crc, whose strings are printed in the records that use them), the artifact hashes, and the basis hash the
+# facts name (basis_sha256, parent, extract.units_from, the first line of each log)
+MASK=(-e 's/^(tool_sha256|artifact_sha256|basis_sha256)=[0-9a-f]{64}$/\1=H/'
+      -e 's/^(  parent\[[0-9]+\] kind=[a-z]+ role=[0-9]+ sha256=)[0-9a-f]{64}$/\1H/'
+      -e 's/^(  BASIS\[[0-9]+\] name="(front_end|extract)\.build_identity" value="kz-core abi=[0-9]+ schema=)[0-9a-f]{64} source=[0-9a-f]{64} /\1H source=H /'
+      -e 's/^(section STRINGS type=[0-9]+ version=[0-9]+ record=kz_byte record_size=1 count=[0-9]+ crc32=0x)[0-9a-f]{1,8}$/\1H/'
+      -e 's/^(  BASIS\[[0-9]+\] name="extract\.units_from" value="basis )[0-9a-f]{16}" /\1H" /'
+      -e 's/^(basis|facts) [0-9a-f]{64}$/\1 H/')
 LIST=("$@"); [ ${#LIST[@]} -gt 0 ] || LIST=(pre_1df262a post_1df262a)
 for cc in "${LIST[@]}"; do
   for x in $cc; do
@@ -41,10 +49,16 @@ for cc in "${LIST[@]}"; do
       a="$O/$x.old.$k"; c="$O/$x.new.$k"
       sed -E "s#\.(old|new)\.#.W.#g" "$a" > "$O/.a"; sed -E "s#\.(old|new)\.#.W.#g" "$c" > "$O/.b"
       if cmp -s "$O/.a" "$O/.b"; then log "  $k: identical ($(wc -l < "$O/.a") lines)"; continue; fi
-      d=$(diff "$O/.a" "$O/.b" | grep -E '^[<>]' | grep -vcE "$ident")
-      log "  $k: $(wc -l < "$O/.a") lines, differs in $(diff "$O/.a" "$O/.b" | grep -cE '^[<>]') lines, of which $d not identity or hash lines"
       diff "$O/.a" "$O/.b" > "$O/$x.$k.diff"
+      sed -E "${MASK[@]}" "$O/.a" > "$O/.am"; sed -E "${MASK[@]}" "$O/.b" > "$O/.bm"
+      d=$(diff "$O/.am" "$O/.bm" | grep -cE '^[<>]')
+      log "  $k: $(wc -l < "$O/.a") lines, $(grep -cE '^[<>]' "$O/$x.$k.diff") differ; with the identity lines masked: $d differ"
+      [ "$d" = 0 ] || diff "$O/.am" "$O/.bm" > "$O/$x.$k.masked.diff"
+    done
+    for k in basis facts; do
+      r=$(cmp -l "$O/$x.old.$k.kz" "$O/$x.new.$k.kz" 2>/dev/null | wc -l)
+      log "  $k.kz bytes: sizes $(stat -c%s "$O/$x.old.$k.kz") / $(stat -c%s "$O/$x.new.$k.kz"); $r bytes differ"
     done
   done
 done
-rm -f "$O/.a" "$O/.b"
+rm -f "$O/.a" "$O/.b" "$O/.am" "$O/.bm"

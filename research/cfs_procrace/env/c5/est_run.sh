@@ -4,6 +4,9 @@
 # (plan/c5_execution_basis_20261028.md section 10.5; PI decision D7 of PI_DECISIONS_RESOLVED_20261029.md section 3a).
 # Tool check: no research condition, no case, no run of the target.
 #   1  the inputs (est_inputs.sh: compile database and link command files from the build log)
+#   1a the probe (est_probe.sh) of every unit, before any lowering, with the driver of the LLVM build kz-static is
+#      linked with (its front end: LLVM_DIR in the CMakeCache.txt of the kz-static build) and with clang-18 (the
+#      compiler D7 names; the system clang 18.1.3 of env/REBUILD_20261029.md): which units are rejected, and why
 #   2  kz-static basis with kairos/profiles/c5-cfe-6.4.x/basis/core-linux.kzb and the header profile est-64<V>; then
 #      kz-static extract on that basis
 #   3  the facts D7 asks for: the pthread_create call of OS_TaskCreate (osapi.c:645-648, the diagnostic at 647) and the
@@ -27,12 +30,20 @@ log() { echo "$*" | tee -a "$REC"; }
 log "# est_run.sh $V $(date -u +%FT%TZ): tree $T; kz-static sha256 $(sha256sum "$K" | cut -c1-64) ($("$K" --identity 2>&1 | head -1))"
 log "recipe core-linux.kzb sha256 $(sha256sum "$P/core-linux.kzb" | cut -c1-64); profile est-64$V/00_profile.kzp sha256 $(sha256sum "$P/est-64$V/00_profile.kzp" | cut -c1-64)"
 sed 's/^/inputs: /' "$E/est_inputs.record" | head -3 >> "$REC"
+FE_LLVM=$(sed -n 's#^LLVM_DIR:PATH=\(.*\)/lib/cmake/llvm$#\1#p' "$(dirname "$K")/../../CMakeCache.txt")
+for p in "llvm:$FE_LLVM/bin/clang" "clang18:$(command -v clang-18)"; do
+  n=${p%%:*}; cl=${p#*:}
+  if [ ! -x "$cl" ]; then log "probe $n: no compiler ($cl)"; continue; fi
+  "$HERE/est_probe.sh" "$E/compile_commands.json" "$T" "$cl" "$E/probe_$n.txt"
+  log "probe $n ($cl: $("$cl" --version | head -1)): $(sed -n 's/^# summary: //p' "$E/probe_$n.txt"); $(sed -n 's/^# summary by diagnostic: //p' "$E/probe_$n.txt")"
+  grep -B1 '^  ' "$E/probe_$n.txt" | grep -v '^--$' | sed 's/^/  /' >> "$REC"
+done
 basis() { # <recipe> <out>
   "$K" basis --profile "$P/est-64$V" --compile-db "$E/compile_commands.json" --build-dir "$T/build/cpu1" --bundle-root "$T" --recipe "$1" --text -o "$2"
 }
 basis "$P/core-linux.kzb" "$E/basis.kz" > "$E/basis.txt" 2>&1
 log "basis rc=$?: $(sed -n 's/^  translation units *//p' "$E/basis.txt") units; $(grep -c '^  warning' "$E/basis.txt") warnings"
-grep -E '^(link\.(command|members_in_program|relocatable|members_without_command)|units\.count|front_end\.unit_diagnostic|const\.|startup\.(file|script|entries)|target\.elf|binary\.type|closure\.(modules|duplicate_definitions|name_binding)|instrumentation\.)' "$E/basis.txt" | sed 's/^/  /' >> "$REC"
+grep -E '^(link\.(command|members_in_program|relocatable|members_without_command)|units\.count|front_end\.(unit_diagnostic|lowered|arguments_added)|front_end =|const\.|startup\.(file|script|entries)|target\.elf|binary\.type|closure\.(modules|duplicate_definitions|name_binding)|instrumentation\.)' "$E/basis.txt" | sed 's/^/  /' >> "$REC"
 "$K" extract --profile "$P/est-64$V" --basis "$E/basis.kz" -o "$E/facts.kz" > "$E/extract.txt" 2>&1
 log "extract rc=$?: $(sed -n 's/^  translation units *//p' "$E/extract.txt") units, functions $(sed -n 's/^  functions *//p' "$E/extract.txt"), call sites $(sed -n 's/^  call sites *//p' "$E/extract.txt")"
 for c in pthread_create signal; do

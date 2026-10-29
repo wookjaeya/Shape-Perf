@@ -168,7 +168,18 @@ kz::Status archive_members(const std::string& archive, std::vector<std::string>*
   return kz::Status::error(kz::Err::Io, "no `ar` command for " + archive + " among the link files under " + cmake_files.string());
 }
 
-kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
+kz::Status relocatable_plan_check(const LinkPlan& plan, const std::string& object) {
+  const std::string obj = normalize_path(object);
+  bool r = false;
+  for (const std::string& o : plan.ignored) r = r || o == "-r" || o == "--relocatable" || o == "-Wl,-r" || o == "-Wl,--relocatable";
+  if (!r) return kz::Status::error(kz::Err::Invalid, "the link command of " + obj + " is not a relocatable link (no -r)");
+  if (plan.output != obj) return kz::Status::error(kz::Err::Invalid, "the relocatable link writes " + (plan.output.empty() ? std::string("no named file") : plan.output) + ", not " + obj);
+  for (const LinkInput& in : plan.inputs)
+    if (in.kind != LinkInput::Object) return kz::Status::error(kz::Err::Invalid, "the relocatable link of " + obj + " takes in an archive (" + in.as_written + "), which is not read");
+  return kz::Status::success();
+}
+
+kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out, const RelocatableLinks* relocatable) {
   out->members.clear();
   out->elf = ElfTarget();
   std::set<std::string> defined, undefined;
@@ -181,6 +192,24 @@ kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
       if (defined.count(u) == 0) undefined.insert(u);
   };
   for (const LinkInput& in : plan.inputs) {
+    const auto rl = relocatable == nullptr ? RelocatableLinks::const_iterator() : relocatable->find(in.path);
+    if (in.kind == LinkInput::Object && relocatable != nullptr && rl != relocatable->end()) {
+      // the objects the relocatable link took in, in its order (a relocatable link of relocatable objects is not read)
+      for (const LinkInput& sub : rl->second.inputs) {
+        if (relocatable->count(sub.path) != 0) return kz::Status::error(kz::Err::Invalid, "the relocatable link of " + in.path + " takes in another relocatable object, " + sub.path);
+        ObjectSymbols syms;
+        kz::Status s = read_object_symbols(sub.path, &syms);
+        if (s.ok()) s = out->elf.add(sub.path, syms.elf);
+        if (!s.ok()) return s;
+        absorb(syms);
+        LinkMember m;
+        m.object = sub.path;
+        m.archive = in.path;
+        m.mode = LinkMember::Relocatable;
+        out->members.push_back(m);
+      }
+      continue;
+    }
     if (in.kind == LinkInput::Object) {
       ObjectSymbols syms;
       kz::Status s = read_object_symbols(in.path, &syms);

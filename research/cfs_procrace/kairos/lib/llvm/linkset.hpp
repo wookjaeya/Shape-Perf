@@ -9,8 +9,15 @@
 // from the object files themselves.
 //
 // Libraries given as -l options are not part of the program under analysis and are ignored.
+//
+// An object named on the command may itself be the output of a relocatable link (`ld -r`, a build
+// that combines the objects of a subsystem into one before the final link).  Given the plan of that
+// link (RelocatableLinks), the object is in as the objects that link took in, each read as a named
+// object would be; without it the object is a named object of its own (a build without relocatable
+// links is resolved as before).
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,7 +54,7 @@ std::string join_command(const std::vector<std::string>& tokens);
 struct LinkMember {
   std::string object;    // absolute path of the object file
   std::string archive;   // absolute path of the archive, empty for an object named directly
-  enum Mode { Named, Whole, Pulled, NotPulled } mode = Named;
+  enum Mode { Named, Whole, Pulled, NotPulled, Relocatable } mode = Named;  // Relocatable: `archive` is the relocatable object
   std::string pulled_for;  // Pulled: a symbol it defines that was needed
 };
 
@@ -58,11 +65,19 @@ struct LinkSet {
   size_t included() const;
 };
 
+// The plans of relocatable links by their output (absolute, normalized), each checked by
+// relocatable_plan_check.
+using RelocatableLinks = std::map<std::string, LinkPlan>;
+
+// A link command that is a relocatable link writing `object`: `-r` (or --relocatable, -Wl,-r,
+// -Wl,--relocatable) among its options, its -o is `object`, and it takes in only object files.
+kz::Status relocatable_plan_check(const LinkPlan& plan, const std::string& object);
+
 // Resolves the plan against the files on disk.  Reads the archives' member lists from the
 // `ar` commands under the archive's directory and the symbols of the member objects.  Every object
 // read (named, or a member of an archive, pulled or not) must have the same ELF class, byte order and
 // machine: a mix is an error.
-kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out);
+kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out, const RelocatableLinks* relocatable = nullptr);
 
 // The members listed in the `ar` command that builds `archive` (found among the CMake link
 // files under its directory); paths are absolute.

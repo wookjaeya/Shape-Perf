@@ -7,8 +7,13 @@
 // are C99 without headers.  And the recipe's front_end_diagnostic (PI decision 2026-10-29 on section 10.5 item 6): one
 // unit that the front end rejects by default (incompatible-function-pointer-types) and the build compiler compiles is
 // read with -Wno-error=<that name> for that unit only, recorded as a deviation; without the statement it is not read;
-// a statement for no unit, or a name that is not one diagnostic, is an error.  Tool tests: every value is a unit-test
-// value, not a research condition.
+// a statement for no unit, or a name that is not one diagnostic, is an error.  And the recipe's relocatable (a link
+// command that takes in the output of a relocatable link, `ld -r`, as a classic make build of the core does): the
+// objects of that link are the program's units (one of them compiled with a relative -I, whose constants are evaluated
+// as in the command's directory); without the statement the core has none; a command that is not relocatable, or a
+// statement for an object no link takes in, is an error.  And a script line that names its module by the whole virtual
+// path (recipe module_file ... full_path): the module is in the closure without the path and extension constants.
+// Tool tests: every value is a unit-test value, not a research condition.
 //
 //   test_static_elf32 <kz-static> <c-compiler> <objects-dir> <profile-dir> <work-dir>
 // Exits 77 when the compiler cannot build and link -m32 programs.
@@ -224,10 +229,12 @@ int main(int argc, char** argv) {
       "typedef struct { int sem; } Throttle;\nThrottle thr[2];\nint sem_create(int *sem_id);\n"
       "int app_main(void) {\n  int i;\n  for (i = 0; i < 2; ++i)\n    if (sem_create(&thr[i].sem) != 0) return i;\n  return 0;\n}\n";
   auto closure = [&](const fs::path& C, const std::string& abi_core, const std::string& abi_app, const std::string& app = std::string(),
-                     const std::string& recipe_extra = std::string()) {
+                     const std::string& recipe_extra = std::string(), bool partial = false, bool full_path = false) {
     for (const char* d : {"src", "obj", "cf", "mods/myapp", "profile"}) fs::create_directories(C / d);
+    const std::string defines = "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n";
+    if (partial) write(C / "hdr/start.h", defines);  // and the core is compiled with a relative -Ihdr, as classic make does
     write(C / "src/core_main.c",
-          "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n"
+          (partial ? std::string("#include \"start.h\"\n") : defines) +
           "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
           "const char *startup_file(void) { return STARTUP_FILE; }\nint main(void) { return 0; }\n");
     write(C / "src/core_api.c", "typedef struct { int obj_id; } Rec;\nRec rec_table[2];\nint sem_create(int *sem_id) { rec_table[0].obj_id = 7; *sem_id = rec_table[0].obj_id; return 0; }\n");
@@ -236,22 +243,29 @@ int main(int argc, char** argv) {
     for (const char* n : {"core_main", "core_api", "app"}) {
       const std::string src = (C / "src" / (std::string(n) + ".c")).string();
       const std::string abi = std::string(n) == "app" ? abi_app : abi_core;
-      const std::string cmd = cc + abi + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
+      const std::string cmd = cc + abi + (partial && std::string(n) == "core_main" ? " -Ihdr" : "") + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
       KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + cmd, &out), 0);
       cdb += std::string(cdb.size() > 2 ? ",\n" : "") + "{\"directory\": \"" + C.string() + "\", \"command\": \"" + cmd + "\", \"file\": \"" + src + "\"}";
     }
     write(C / "compile_commands.json", cdb + "\n]\n");
-    write(C / "link_core.txt", cc + abi_core + " -rdynamic -o core obj/core_main.o obj/core_api.o\n");
+    if (partial) {  // the core's objects combined by a relocatable link first, as a classic make build does
+      write(C / "obj/core.o.link.txt", "ld -melf_i386 -o core.o -r core_main.o core_api.o\n");
+      KZ_CHECK_EQ(run("cd " + q((C / "obj").string()) + " && " + read(C / "obj/core.o.link.txt"), &out), 0);
+      write(C / "link_core.txt", cc + abi_core + " -rdynamic -o core obj/core.o\n");
+    } else {
+      write(C / "link_core.txt", cc + abi_core + " -rdynamic -o core obj/core_main.o obj/core_api.o\n");
+    }
     write(C / "mods/myapp/link.txt", cc + abi_app + " -shared -o myapp.so ../../obj/app.o\n");
     KZ_CHECK_EQ(run("cd " + q(C.string()) + " && " + read(C / "link_core.txt"), &out), 0);
     KZ_CHECK_EQ(run("cd " + q((C / "mods/myapp").string()) + " && " + read(C / "mods/myapp/link.txt"), &out), 0);
     fs::copy_file(C / "mods/myapp/myapp.so", C / "cf/myapp.so");
-    write(C / "cf/start.scr", "APP, myapp, app_main, MY_APP, 50;\n");
-    write(C / "recipe.kzb", R"(kzb 1;
+    // the script names the module by a name (the mount and extension constants complete it) or by its whole path
+    write(C / "cf/start.scr", full_path ? "APP, /cf/myapp.so, app_main, MY_APP, 50;\n" : "APP, myapp, app_main, MY_APP, 50;\n");
+    write(C / "recipe.kzb", std::string(R"(kzb 1;
 name "closure32";
 link "link_core.txt";
 binary "core";
-module "myapp" link "mods/myapp/link.txt";
+)") + (full_path ? "module \"/cf/myapp.so\"" : "module \"myapp\"") + R"( link "mods/myapp/link.txt";
 startup_script {
   reset POWERON;
   rule POWERON nonvolatile;
@@ -259,9 +273,8 @@ startup_script {
   mount "/cf" "cf";
   entry library "LIB" global;
   entry app "APP" local;
-  module_file field 1 path const "NONVOL_MOUNT" extension const "MODULE_EXT" in "src/core_main.c";
-}
-)" + recipe_extra);
+)" + (full_path ? "  module_file field 1 full_path;\n" : "  module_file field 1 path const \"NONVOL_MOUNT\" extension const \"MODULE_EXT\" in \"src/core_main.c\";\n") +
+                                       "}\n" + recipe_extra);
     for (const fs::directory_entry& e : fs::directory_iterator(profile))
       if (e.path().extension() == ".kzp") fs::copy_file(e.path(), C / "profile" / e.path().filename());
     const int rc = run(q(tool) + " basis --profile " + q((C / "profile").string()) + " --compile-db " + q((C / "compile_commands.json").string()) + " --build-dir " +
@@ -335,6 +348,63 @@ startup_script {
   KZ_CHECK(closure(work / "fp_blanket", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"-Wno-error\" reference \"x\";\n") != 0);
   KZ_CHECK(has(out, "is not a diagnostic name"));
   KZ_CHECK(closure(work / "fp_noref", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-types\";\n") != 0);
+
+  // ---- a link command that takes in the output of a relocatable link (recipe relocatable) -----------------------------
+  const std::string rel = "relocatable \"obj/core.o\" link \"obj/core.o.link.txt\";\n";
+  KZ_CHECK_EQ(closure(work / "rel_with", " -m32", " -m32", std::string(), rel, true), 0);
+  KZ_CHECK(has(out, "translation units          3"));
+  KZ_CHECK(has(out, "link.relocatable[obj/core.o] = obj/core.o.link.txt: 2 objects"));
+  // the constants of a unit compiled with a relative -I are evaluated as in the command's directory, and the header that
+  // defines them is named in the bundle (no unreadable file)
+  KZ_CHECK(has(out, "const.STARTUP_FILE = \"/cf/start.scr\""));
+  KZ_CHECK(!has(out, "cannot read"));
+  {  // the core's units are the relocatable link's objects (TUS member)
+    kz::Container b;
+    KZ_CHECK_OK(kz::Container::read_file((work / "rel_with/basis.kz").string(), &b));
+    std::vector<kz_tu> tus;
+    KZ_CHECK_OK(b.read_section(KZ_SEC_TUS, &tus));
+    size_t rel_members = 0;
+    for (const kz_tu& t : tus) {
+      std::string member;
+      b.string(t.member, &member);
+      if (member == "member of core.o (relocatable link)") ++rel_members;
+    }
+    KZ_CHECK_EQ(rel_members, size_t(2));
+  }
+  KZ_CHECK(has(out, "module[myapp].bound[core] = sem_create"));
+  KZ_CHECK(has(out, "target.elf = ELF32 little-endian EM_386 (3), pointer 4 bytes"));
+  // without the statement the relocatable object is a named object no compile command produces: the core has no unit
+  KZ_CHECK_EQ(closure(work / "rel_without", " -m32", " -m32", std::string(), std::string(), true), 0);
+  KZ_CHECK(has(out, "no compile command produces") && has(out, "obj/core.o"));
+  KZ_CHECK(!has(out, "link.relocatable"));
+  // a command that is not a relocatable link, and a relocatable object no link takes in: errors
+  {
+    const fs::path C = work / "rel_notr";
+    KZ_CHECK_EQ(closure(C, " -m32", " -m32", std::string(), std::string(), true), 0);
+    write(C / "obj/other.link.txt", "ld -melf_i386 -o core.o core_main.o core_api.o\n");
+    write(C / "recipe.kzb", read(C / "recipe.kzb") + "relocatable \"obj/core.o\" link \"obj/other.link.txt\";\n");
+    KZ_CHECK(run(q(tool) + " basis --profile " + q((C / "profile").string()) + " --compile-db " + q((C / "compile_commands.json").string()) + " --build-dir " + q(C.string()) +
+                     " --bundle-root " + q(C.string()) + " --recipe " + q((C / "recipe.kzb").string()) + " -o " + q((C / "b2.kz").string()),
+                 &out) != 0);
+    KZ_CHECK(has(out, "is not a relocatable link"));
+  }
+  {  // the relocatable object exists, but the core's link names its objects directly
+    const fs::path C = work / "rel_unused";
+    KZ_CHECK_EQ(closure(C, " -m32", " -m32"), 0);
+    write(C / "obj/core.o.link.txt", "ld -melf_i386 -o core.o -r core_main.o core_api.o\n");
+    KZ_CHECK_EQ(run("cd " + q((C / "obj").string()) + " && " + read(C / "obj/core.o.link.txt"), &out), 0);
+    write(C / "recipe.kzb", read(C / "recipe.kzb") + rel);
+    KZ_CHECK(run(q(tool) + " basis --profile " + q((C / "profile").string()) + " --compile-db " + q((C / "compile_commands.json").string()) + " --build-dir " + q(C.string()) +
+                     " --bundle-root " + q(C.string()) + " --recipe " + q((C / "recipe.kzb").string()) + " -o " + q((C / "b2.kz").string()),
+                 &out) != 0);
+    KZ_CHECK(has(out, "no link command takes it in"));
+  }
+
+  // ---- a script line that names its module by the whole virtual path (module_file field 1 full_path) --------------------
+  KZ_CHECK_EQ(closure(work / "full_path", " -m32", " -m32", std::string(), rel, true, true), 0);
+  KZ_CHECK(has(out, "modules in the closure     1 (units 1)"));
+  KZ_CHECK(has(out, "module[/cf/myapp.so].bound[core] = sem_create"));
+  KZ_CHECK(!has(out, "const.NONVOL_MOUNT") && !has(out, "const.MODULE_EXT"));
 
   fs::remove_all(work);
   return kztest::finish("test_static_elf32");

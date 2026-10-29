@@ -106,6 +106,13 @@ class Parser {
           if (o.name == m.name) return fail("the module `" + m.name + "` is named twice");
         if (!word("link") || !str(&m.link) || !semi()) return err_;
         r->modules.push_back(m);
+      } else if (kw == "relocatable") {
+        Recipe::Relocatable x;
+        if (!str(&x.object)) return err_;
+        for (const Recipe::Relocatable& o : r->relocatables)
+          if (o.object == x.object) return fail("the relocatable object `" + x.object + "` is named twice");
+        if (!word("link") || !str(&x.link) || !semi()) return err_;
+        r->relocatables.push_back(x);
       } else if (kw == "front_end_diagnostic") {
         Recipe::FrontEndDiagnostic d;
         if (!str(&d.unit) || !str(&d.name) || !word("reference") || !str(&d.reference) || !semi()) return err_;
@@ -240,9 +247,15 @@ class Parser {
         }
       } else if (kw == "module_file") {
         Recipe::Startup::ModuleFile& mf = r->startup.module_file;
-        if (!word("field") || !num(&mf.field) || !word("path") || !word("const") || !str(&mf.path_const) || !word("extension") || !word("const") || !str(&mf.ext_const) ||
-            !word("in") || !str(&mf.source) || !semi())
+        if (!word("field") || !num(&mf.field)) return false;
+        if (cur_.kind == Tok::Word && cur_.text == "full_path") {  // the field is the file's whole virtual path
+          advance();
+          mf.full_path = true;
+          if (!semi()) return false;
+        } else if (!word("path") || !word("const") || !str(&mf.path_const) || !word("extension") || !word("const") || !str(&mf.ext_const) || !word("in") ||
+                   !str(&mf.source) || !semi()) {
           return false;
+        }
         if (mf.field == 0) {
           fail("the file-name field of a script line is not field 0 (the entry word)");
           return false;

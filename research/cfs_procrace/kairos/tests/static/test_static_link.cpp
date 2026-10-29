@@ -140,6 +140,38 @@ int main(int argc, char** argv) {
     KZ_CHECK_EQ(set.included(), size_t(1));
   }
 
+  // an object that a relocatable link wrote: with that link's plan, the program takes in its objects (the object itself is
+  // not read: here it does not even exist); the plan must be a relocatable link of objects that writes that object
+  {
+    const std::string sub = (dir / "sub.o").string();
+    LinkPlan rp;
+    KZ_CHECK_OK(parse_link_command("ld -o sub.o -r " + whole_o + " " + used_o + "\n", dir.string(), &rp));
+    KZ_CHECK_OK(relocatable_plan_check(rp, sub));
+    KZ_CHECK(!relocatable_plan_check(rp, (dir / "other.o").string()).ok());
+    LinkPlan not_r, with_archive;
+    KZ_CHECK_OK(parse_link_command("ld -o sub.o " + whole_o + "\n", dir.string(), &not_r));
+    KZ_CHECK(!relocatable_plan_check(not_r, sub).ok());
+    KZ_CHECK_OK(parse_link_command("ld -r -o sub.o " + (libdir / "libw.a").string() + "\n", dir.string(), &with_archive));
+    KZ_CHECK(!relocatable_plan_check(with_archive, sub).ok());
+    RelocatableLinks rl;
+    rl[normalize_path(sub)] = rp;
+    LinkPlan plan;
+    KZ_CHECK_OK(parse_link_command("cc " + main_o + " sub.o\n", dir.string(), &plan));
+    LinkSet set;
+    KZ_CHECK_OK(resolve_link_set(plan, &set, &rl));
+    KZ_CHECK_EQ(set.members.size(), size_t(3));
+    KZ_CHECK_EQ(set.included(), size_t(3));
+    const LinkMember* w = find(set, fs::path(whole_o).filename().string());
+    KZ_CHECK(w != nullptr && w->mode == LinkMember::Relocatable && w->archive == normalize_path(sub));
+    KZ_CHECK(!resolve_link_set(plan, &set).ok());  // without the plan, sub.o is a named object, and it does not exist
+    // a relocatable link that takes in another relocatable object is not read
+    LinkPlan nested;
+    KZ_CHECK_OK(parse_link_command("ld -r -o top.o sub.o\n", dir.string(), &nested));
+    rl[normalize_path((dir / "top.o").string())] = nested;
+    KZ_CHECK_OK(parse_link_command("cc top.o\n", dir.string(), &plan));
+    KZ_CHECK(!resolve_link_set(plan, &set, &rl).ok());
+  }
+
   // an object that does not exist is an error, not a silent omission
   {
     LinkPlan plan;

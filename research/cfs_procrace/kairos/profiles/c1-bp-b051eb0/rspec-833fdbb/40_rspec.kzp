@@ -9,6 +9,8 @@
 # replay runs this entry's horizon monitor (2026-10-24, docs/phi_reference.md 7.5) with the bound's value
 # from 05_consts.kzp of cf-833fdbb/; a run the record ends before ACCEPT or REJECT stays PENDING
 # (INCONCLUSIVE(horizon-open)), never TOLERATED.
+# 2026-10-29 (PI decision D8): appreq is CF's own requirement record cf_events_sem_eid, as at 281a941; the
+# caller-level entry below still decides, so the readings above are unchanged.
 phi 1;
 
 rspec K-REG.osal-countsem-lookup {
@@ -16,7 +18,7 @@ rspec K-REG.osal-countsem-lookup {
   key osal.countsem(arg.sem_name);
   requires state(osal.countsem(arg.sem_name)) = LIVE;
   oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
-  appreq unspecified_by_reference;
+  appreq cf_events_sem_eid;
   allowed {
     retry_until_ready codes { OS_ERR_NAME_NOT_FOUND } bound CF_STARTUP_SEM_MAX_RETRIES prov cf_cfdp_startup_admission;
   }

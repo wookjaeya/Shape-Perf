@@ -50,6 +50,15 @@
 - 결과는 "원 소스 기반 현대 호스트 파생 구성, root·실시간 우선순위"로 보고한다. 원 플랫폼(VxWorks)과 같은 스케줄이라고 쓰지 않는다.
 - 일반 사용자 구성은 이번 결정으로 실행하지 않는다.
 
+## 3a. 추가 결정 (2026-10-29, "둘 다 권고대로 진행해")
+
+| ID | 항목 | 결정 | 적용 |
+|---|---|---|---|
+| D7 | C5 정적 분석(E-ST)에서 clang 18이 기본 오류로 멈추는 두 곳(`osapi.c:647`, `cfe_psp_start.c:270`, `plan/c5_execution_basis_20261028.md` §10.5 항목 6) | **분석 전용으로 그 진단만 경고로 낮춘다** | 근거는 실제 빌드에 쓴 gcc 13.3이 두 파일을 오류 없이 컴파일한다는 사실이다. 낮추는 것은 그 두 줄이 내는 진단 이름에 한정한다(일괄 `-Wno-error`·`-w`는 쓰지 않는다). 분석 전용 이탈로 기록하며, gcc가 만드는 실행 파일에는 영향이 없다. 다른 번역 단위가 실패하면 목록을 늘리지 않고 보고한다. 낮춘 뒤 `osapi.c:647`의 `pthread_create` 호출이 AST 사실로 실제로 나오는지 확인한다 |
+| D8 | C1 수정 전 단일 실패의 판정 기준(`plan/expected_judgement_basis_C1_R2.md` R-C1-e) | **CF 자신의 요구 기록을 `appreq`로 둔다** | 기록은 `cf_events_sem_eid`(`cf/fsw/src/cf_events.h` L148–L158, contract-backed, side caller: "the semaphore needs to exist before the engine is initialized")이다. 수정 전(`281a941`)에는 그 실패를 받아들이는 caller 기록이 없다. P3(2026-10-25)에 따라 종료를 허용 처리로 묶지 않으므로 `allowed none`이다. 그래서 SPEC §1.6 단계 (1)(`phi_reference.md` §5.7 표 첫 행)에 따라 수정 전 단일 실패는 VIOLATING이다. 최종 결과(이벤트 30, CF 종료)는 따로 보고한다. 수정 후(`833fdbb`) rspec에도 같은 `appreq`를 둔다. 그쪽은 caller 항목 `retry_until_ready`가 판정하므로 결과가 달라지지 않아야 하고, 재생으로 확인한다. P3 결정 표의 "`NOT_READY_UNJUDGED`" 문구는 `appreq`를 기록하지 않은 상태를 전제로 한 것이어서 이 결정으로 대체된다. 동결 기대표 E-03을 개정 기록과 함께 바꾼다. W6 기록의 재생보다 먼저 정했다 |
+
+D8에 대해 Claude는 앞서 명시적 권고를 내지 않았다. "권고대로"는 기대 판정 근거표가 출처에 가장 가깝다고 정리한 읽기로 적용했다: (i) CF 자신의 요구 글을 기록하고, (ii) P3를 유지한다. #184 본문 "shouldn't be a hard error"도 실패를 받아들이지 않는 쪽이다. PI가 다르게 읽었다면 바꾼다.
+
 ## 4. 작업 순서 (IP §7을 §2로 고쳐 적용)
 
 0. 보존 경로: `records/` 형식, 묶음·검증 도구, 원격 clone 검증 절차(A2).

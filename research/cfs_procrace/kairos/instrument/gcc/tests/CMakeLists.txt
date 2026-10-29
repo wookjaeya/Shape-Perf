@@ -17,6 +17,12 @@ foreach(opt O0 O2 O3)
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh shapes-${opt} ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
             $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/shapes_${opt})
 endforeach()
+# kzgcc 0.3: the owner-publish / owner-check stores (kzs-sites 3) linked to their function's entry record.
+foreach(opt O0 O2)
+  add_test(NAME kzgcc_owner_${opt}
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_target_test.sh owner-${opt} ${KZGCC_GCC} $<TARGET_FILE:kzgcc> ${KZGCC_RT}
+            $<TARGET_FILE:kzgcc-events> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/owner_${opt})
+endforeach()
 # The cooperative gate (stage F) end to end: hold_seq_prog.c with kzgcc_hold_seq.kzs, plans converted by kz rtplan and
 # loaded by the start-up object in control mode, one kzp-hold 1 rule per plan (run_hold_test.sh).  Needs the kz
 # executable of the Kairos build (KZGCC_KZ); skipped (77) without it.

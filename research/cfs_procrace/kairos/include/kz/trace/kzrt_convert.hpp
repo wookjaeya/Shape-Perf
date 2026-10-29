@@ -1,5 +1,5 @@
 // kzrt_convert.hpp -- a kzrt-dump stream (the instrumented family's raw evidence, runtime/include/kz_rt_format.h)
-// with its site manifests ("kzs-sites 1" or "2", event_semantics.md section 3) -> the neutral event layer
+// with its site manifests ("kzs-sites 1", "2" or "3", event_semantics.md section 3) -> the neutral event layer
 // (neutral.hpp), so that `kz replay` reads an instrumented run as it reads an F0 run.
 //
 // What the conversion states (docs/schema.md section 12.4):
@@ -17,7 +17,9 @@
 //             identity_rule.hpp (join_actor_identities) ties an announced id to the one spawn call that assigned
 //             it and derives app_owner with the rule F0 uses (owner_from_request): creator, creator_event,
 //             spawn_return, announced_id, join_flags, owner_* (confirmed or undetermined), request_func, and the
-//             run flag owners-recorded; its counts are a conversion note.  Without identity reads they stay
+//             run flag owners-recorded; its counts are a conversion note.  An app request (kzs-sites 3) names the owner
+//             by the value it published after the spawn, and the events of that are the NOWNER records (schema
+//             revision 6; the section only where there is one).  Without identity reads they stay
 //             undetermined.  NSITES `decoder` is the identity read's KZ_DECODER.  The process's initial thread
 //             (RUNX 1.2, kz_rt_process from the start-up code that runs in it): the one run actor with the recorded
 //             native key gets flag initial and the process id (P10 `initial_thread not_app` then applies to it as

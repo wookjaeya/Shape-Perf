@@ -106,6 +106,17 @@ class Parser {
           if (o.name == m.name) return fail("the module `" + m.name + "` is named twice");
         if (!word("link") || !str(&m.link) || !semi()) return err_;
         r->modules.push_back(m);
+      } else if (kw == "front_end_diagnostic") {
+        Recipe::FrontEndDiagnostic d;
+        if (!str(&d.unit) || !str(&d.name) || !word("reference") || !str(&d.reference) || !semi()) return err_;
+        if (d.unit.empty()) return fail("front_end_diagnostic names no unit");
+        bool name_ok = !d.name.empty() && d.name.front() != '-';
+        for (char c : d.name) name_ok = name_ok && ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-');
+        if (!name_ok) return fail("front_end_diagnostic: `" + d.name + "` is not a diagnostic name (letters, digits and '-', the <name> of -W<name>)");
+        if (d.reference.empty()) return fail("front_end_diagnostic needs a reference (the build compiler's log or command)");
+        for (const Recipe::FrontEndDiagnostic& o : r->front_end_diagnostics)
+          if (o.unit == d.unit && o.name == d.name) return fail("front_end_diagnostic `" + d.name + "` of `" + d.unit + "` is named twice");
+        r->front_end_diagnostics.push_back(d);
       } else if (kw == "startup_script") {
         if (!startup(r)) return err_;
       } else {

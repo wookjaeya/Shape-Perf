@@ -170,6 +170,7 @@ kz::Status archive_members(const std::string& archive, std::vector<std::string>*
 
 kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
   out->members.clear();
+  out->elf = ElfTarget();
   std::set<std::string> defined, undefined;
   auto absorb = [&](const ObjectSymbols& syms) {
     for (const std::string& d : syms.defined) {
@@ -183,6 +184,7 @@ kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
     if (in.kind == LinkInput::Object) {
       ObjectSymbols syms;
       kz::Status s = read_object_symbols(in.path, &syms);
+      if (s.ok()) s = out->elf.add(in.path, syms.elf);
       if (!s.ok()) return s;
       absorb(syms);
       LinkMember m;
@@ -199,6 +201,7 @@ kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
       for (const std::string& o : objs) {
         ObjectSymbols syms;
         s = read_object_symbols(o, &syms);
+        if (s.ok()) s = out->elf.add(o, syms.elf);
         if (!s.ok()) return s;
         absorb(syms);
         LinkMember m;
@@ -213,6 +216,7 @@ kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out) {
     std::vector<ObjectSymbols> syms(objs.size());
     for (size_t i = 0; i < objs.size(); ++i) {
       s = read_object_symbols(objs[i], &syms[i]);
+      if (s.ok()) s = out->elf.add(objs[i], syms[i].elf);
       if (!s.ok()) return s;
     }
     std::vector<int> state(objs.size(), 0);  // 0 not pulled, 1 pulled

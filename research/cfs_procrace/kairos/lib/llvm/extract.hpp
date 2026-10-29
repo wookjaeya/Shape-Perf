@@ -24,6 +24,10 @@ struct UnitCommand {
   std::string source;                     // absolute path of the main file
   std::string object;                     // the object file it produces (for the report)
   std::vector<std::string> command_line;  // argv of the recorded command
+  // Front-end arguments of this unit only, for the analysis (the basis recipe's front_end_diagnostic: -Wno-error=<name>
+  // for a diagnostic the front end raises as an error by default and the build compiler does not), appended after the
+  // arguments every unit gets.  Never part of the recorded command.
+  std::vector<std::string> analysis_args;
 };
 
 // Reads the units one after the other, in the order given, into `model`.  Stops at the first

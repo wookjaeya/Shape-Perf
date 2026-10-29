@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "elf_info.hpp"
 #include "kz/core/status.hpp"
 
 namespace kzs {
@@ -53,11 +54,14 @@ struct LinkMember {
 struct LinkSet {
   std::vector<LinkMember> members;  // in link order; NotPulled members are listed but not in the program
   size_t archives = 0;
+  ElfTarget elf;                    // the ELF identity every object read shares (elf_info.hpp)
   size_t included() const;
 };
 
 // Resolves the plan against the files on disk.  Reads the archives' member lists from the
-// `ar` commands under the archive's directory and the symbols of the member objects.
+// `ar` commands under the archive's directory and the symbols of the member objects.  Every object
+// read (named, or a member of an archive, pulled or not) must have the same ELF class, byte order and
+// machine: a mix is an error.
 kz::Status resolve_link_set(const LinkPlan& plan, LinkSet* out);
 
 // The members listed in the `ar` command that builds `archive` (found among the CMake link

@@ -14,6 +14,8 @@
 //   table "SYMBOL" in "path/to/generated.c";    # the initializer of a global table is recorded
 //   declared "name" "value" authored "text";    # a hand-entered fact (tier researcher)
 //   module "NAME" link "path/to/link.txt";      # a unit the startup script loads at run time
+//   front_end_diagnostic "path/of/unit.c" "diagnostic-name" reference "text";
+//                                               # this unit only: -Wno-error=<diagnostic-name> for the front end
 //   startup_script {
 //     reset POWERON;                            # the reset type the basis is evaluated for
 //     rule PROCESSOR volatile nonvolatile;      # files tried in order for a reset type
@@ -31,6 +33,13 @@
 // field of the script line that loads it.  The basis links such a unit with the executable (SPEC
 // 4.1 step 6) only when the selected script loads it; the scope words and `module_file` are then
 // required, and so is `binary` (the executable's exported symbols are read from it).
+//
+// A `front_end_diagnostic` (2026-10-29, PI decision on E-ST of research/cfs_procrace/plan/c5_execution_basis_20261028.md
+// section 10.5 item 6) names one unit of the program (its source path relative to the bundle root, as the basis records
+// it) and one Clang diagnostic by its exact name (letters, digits and '-': the name of -W<name>; never a blanket
+// -Wno-error or -w): the front end gets -Wno-error=<name> for that unit only.  `reference` cites why: the build
+// compiler compiles the unit without an error (its build log or command).  A statement that names no unit of the
+// program is an error.
 //
 // Comments run from '#' to the end of the line.
 #pragma once
@@ -63,6 +72,13 @@ struct Recipe {
     std::string name, link;
   };
   std::vector<Module> modules;
+  // front_end_diagnostic "unit.c" "name" reference "text": for that unit only, the front end reports the named diagnostic,
+  // which it raises as an error by default, as a warning (-Wno-error=<name>), because the build compiler compiles the
+  // unit (the reference: its build log or command).  Analysis only; the basis records it as a deviation.
+  struct FrontEndDiagnostic {
+    std::string unit, name, reference;
+  };
+  std::vector<FrontEndDiagnostic> front_end_diagnostics;
   struct Startup {
     bool present = false;
     std::string reset;

@@ -27,7 +27,9 @@
  *   - values with their validity: a value that was not observed has no NVALUES record (never 0);
  *   - loss records (NLOSS) with their kind, where they were counted, and the event interval they may
  *     affect (KZ_NONE32 end = up to the end of the record);
- *   - realized control records (NCTL), apart from the plan.
+ *   - realized control records (NCTL), apart from the plan;
+ *   - (schema revision 6) owners a creation request named only after the spawn (NOWNER): at which events the owner
+ *     was established; a run without such an owner has no NOWNER section, so its container is written as before.
  *
  * Byte order: the records of this layer are written and read by the explicit little-endian codec of
  * kz/core/record_codec.hpp (field by field from the field lists below), never by copying host structs;
@@ -50,7 +52,8 @@ enum kz_neutral_section_id {
   KZ_SEC_NVALUES = 104,
   KZ_SEC_NACTORS = 105,
   KZ_SEC_NLOSS = 106,
-  KZ_SEC_NCTL = 107
+  KZ_SEC_NCTL = 107,
+  KZ_SEC_NOWNER = 111 /* schema revision 6 (108-110 are kz_replay.h) */
 };
 
 /* The range of section ids whose records the container layer serializes field by field. */
@@ -65,7 +68,8 @@ enum kz_neutral_section_id {
   S(NVALUES, 104, kz_nvalue, 1)      \
   S(NACTORS, 105, kz_nactor, 1)      \
   S(NLOSS, 106, kz_nloss, 1)         \
-  S(NCTL, 107, kz_nctl, 1)
+  S(NCTL, 107, kz_nctl, 1)           \
+  S(NOWNER, 111, kz_nowner, 1)
 
 /*
  * The run (one record).  `backend` is the execution family, `backend_name` the backend inside it
@@ -254,6 +258,30 @@ enum kz_neutral_section_id {
   X(T, uint32_t, rsv0, )                                                             \
   X(T, uint64_t, raw_off, )  /* offset in the raw stream, or KZ_NONE64 */
 
+/*
+ * An owner named after the spawn (schema revision 6; the instrumented family, kzs-sites 3 `app-request`,
+ * kz/trace/identity_rule.hpp): one record per actor tied by the id to a spawn call whose creation request (the
+ * outermost one open on the creating actor when the call began) is an app-request, i.e. a request that creates the
+ * application and hands its value back only after the task exists.  It says at which events the owner was
+ * established: `request` the app-request record (the actor's owner_request), `publish` the owner-publish record of
+ * the same request instance whose value `owner_id` is (paired by its link), `request_return` the record that closed
+ * the request, `check` the first owner-check record compared (KZ_NONE32 where there is none of each); `flags`
+ * (KZ_NOWNER_FLAG) what was found and `level` the owner level the actor got (KZ_OWNER_LEVEL).  The tie itself
+ * (creator, creator_event, spawn_return) is the actor's.  None of these events orders anything: the order of the
+ * task's uses and the publication is the replay's business.  The section is written only when it has a record.
+ */
+#define KZ_NOWNER_FIELDS(X, T)                                                       \
+  X(T, uint32_t, actor, )          /* NACTORS index */                               \
+  X(T, uint32_t, request, )        /* NEVENTS index of the app-request record */     \
+  X(T, uint32_t, publish, )        /* NEVENTS index of the owner-publish record, or KZ_NONE32 */ \
+  X(T, uint32_t, request_return, ) /* NEVENTS index of the request-return record, or KZ_NONE32 */ \
+  X(T, uint32_t, check, )          /* NEVENTS index of the first owner-check record, or KZ_NONE32 */ \
+  X(T, uint32_t, owner_id, )       /* the value published, or KZ_NONE32 */           \
+  X(T, uint32_t, flags, )          /* KZ_NOWNER_FLAG */                              \
+  X(T, uint8_t, level, )           /* KZ_OWNER_LEVEL the actor got */                \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, rsv1, )
+
 #define KZ_NEUTRAL_RECORDS(R)          \
   R(kz_nrun, KZ_NRUN_FIELDS)           \
   R(kz_nsite, KZ_NSITE_FIELDS)         \
@@ -262,7 +290,8 @@ enum kz_neutral_section_id {
   R(kz_nvalue, KZ_NVALUE_FIELDS)       \
   R(kz_nactor, KZ_NACTOR_FIELDS)       \
   R(kz_nloss, KZ_NLOSS_FIELDS)         \
-  R(kz_nctl, KZ_NCTL_FIELDS)
+  R(kz_nctl, KZ_NCTL_FIELDS)           \
+  R(kz_nowner, KZ_NOWNER_FIELDS)
 
 KZ_NEUTRAL_RECORDS(KZ_RECORD)
 
@@ -386,6 +415,16 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   ITEM(P, ISR, 3, "isr") ITEM(P, REGISTRATION_INTERNAL, 4, "registration-internal")  \
   ITEM(P, TERMINATING, 5, "terminating") ITEM(P, UNSUPPORTED, 6, "unsupported")
 
+/* NOWNER flags (revision 6).  PUBLISHED: one value was published in the request instance; PUBLISH_CONFLICT: two
+ * different values were (none is used); RETURNED: a request-return record closed the request; STATUS_OK / STATUS_NOT_OK:
+ * its declared status slot held the value of success / did not (or was not observed); CHECK_AGREED: every owner-check
+ * value equals the published one; CHECK_DIFFERS: one does not (the owner is withdrawn). */
+#define KZ_ENUM_NOWNER_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, PUBLISHED, 0x1, "published") ITEM(P, PUBLISH_CONFLICT, 0x2, "publish-conflict") \
+  ITEM(P, RETURNED, 0x4, "returned") ITEM(P, STATUS_OK, 0x8, "status-ok")            \
+  ITEM(P, STATUS_NOT_OK, 0x10, "status-not-ok") ITEM(P, CHECK_AGREED, 0x20, "check-agreed") \
+  ITEM(P, CHECK_DIFFERS, 0x40, "check-differs")
+
 #define KZ_NEUTRAL_ENUMS(D)                     \
   D(KZ_NBACKEND, KZ_ENUM_NBACKEND, 0)           \
   D(KZ_NCLOCK, KZ_ENUM_NCLOCK, 0)               \
@@ -407,7 +446,8 @@ KZ_NEUTRAL_RECORDS(KZ_RECORD)
   D(KZ_NCTL_WHAT, KZ_ENUM_NCTL_WHAT, 0)         \
   D(KZ_NCTL_REASON, KZ_ENUM_NCTL_REASON, 0)     \
   D(KZ_NCTL_FLAG, KZ_ENUM_NCTL_FLAGS, 1)        \
-  D(KZ_NCTX, KZ_ENUM_NCTX, 0)
+  D(KZ_NCTX, KZ_ENUM_NCTX, 0)                   \
+  D(KZ_NOWNER_FLAG, KZ_ENUM_NOWNER_FLAGS, 1)
 
 KZ_NEUTRAL_ENUMS(KZ_DEFINE_ENUM_ENTRY)
 
@@ -463,6 +503,14 @@ KZ_NEUTRAL_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_nctl, reason, ENUM, KZ_NCTL_REASON)            \
   F(kz_nctl, ctx, ENUM, KZ_NCTX)                      \
   F(kz_nctl, cflags, FLAGS, KZ_NCTL_FLAG)             \
-  F(kz_nctl, raw_off, HEX, 0)
+  F(kz_nctl, raw_off, HEX, 0)                         \
+  F(kz_nowner, actor, IDX, 0)                         \
+  F(kz_nowner, request, IDX, 0)                       \
+  F(kz_nowner, publish, IDX, 0)                       \
+  F(kz_nowner, request_return, IDX, 0)                \
+  F(kz_nowner, check, IDX, 0)                         \
+  F(kz_nowner, owner_id, IDX, 0)                      \
+  F(kz_nowner, flags, FLAGS, KZ_NOWNER_FLAG)          \
+  F(kz_nowner, level, ENUM, KZ_OWNER_LEVEL)
 
 #endif /* KZ_SCHEMA_KZ_NEUTRAL_H */

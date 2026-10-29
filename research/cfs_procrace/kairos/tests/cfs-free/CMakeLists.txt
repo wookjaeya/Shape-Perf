@@ -31,6 +31,9 @@ kz_add_unit_test(test_neutral_kzrt SOURCES test_neutral_kzrt.cpp LIBS kz-trace k
 # The identity join of an instrumented run (kzs-sites 2 identity reads): a dump written here with real threads, tasks
 # tied to their creating calls by the id alone, owners by the rule F0 uses.
 kz_add_unit_test(test_kzrt_identity SOURCES test_kzrt_identity.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
+# ... and of a request that names its application only after the task exists (kzs-sites 3 app-request, owner-publish,
+# owner-check, request-return status; schema revision 6 NOWNER).
+kz_add_unit_test(test_kzrt_app_request SOURCES test_kzrt_app_request.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)
 # A recovered run (kzrt 0.4.0, event_semantics.md section 12): the dumps the runtime's rt_end tests leave (SIGKILL, SIGSEGV
 # inside a hook, a normal exit and its recovery), converted and read by the replay.
 if(TARGET test_rt_end)

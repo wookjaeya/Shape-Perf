@@ -1,4 +1,4 @@
-// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp ("kzs-sites 1" and "kzs-sites 2").
+// kz_rt_manifest.cpp -- see kz_rt_manifest.hpp ("kzs-sites 1", "kzs-sites 2" and "kzs-sites 3").
 #include "kz_rt_manifest.hpp"
 
 #include <cerrno>
@@ -131,9 +131,13 @@ const Module* Manifest::module(uint32_t id) const {
   return it == module_index.end() ? nullptr : &modules[it->second];
 }
 
-bool identity_decoder_known(const std::string& name) {
-  return one_of(name, {"spawn-create", "spawn-return", "spawn-id", "thread-entry", "owner-request", "child-request", "request-return"});
+uint32_t identity_decoder_version(const std::string& name) {
+  if (one_of(name, {"spawn-create", "spawn-return", "spawn-id", "thread-entry", "owner-request", "child-request", "request-return"})) return 2;
+  if (one_of(name, {"app-request", "owner-publish", "owner-check"})) return 3;
+  return 0;
 }
+
+bool identity_decoder_known(const std::string& name) { return identity_decoder_version(name) != 0; }
 
 uint32_t ctx_code(const std::string& w) {
   if (w == "task") return KZ_RT_CTX_TASK;
@@ -181,9 +185,10 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       continue;
     }
     if (!header) {
-      if (t.size() != 2 || t[0] != "kzs-sites" || (t[1] != "1" && t[1] != "2")) return fail("the first statement must be 'kzs-sites 1' or 'kzs-sites 2'");
+      if (t.size() != 2 || t[0] != "kzs-sites" || (t[1] != "1" && t[1] != "2" && t[1] != "3"))
+        return fail("the first statement must be 'kzs-sites 1', 'kzs-sites 2' or 'kzs-sites 3'");
       header = true;
-      version = t[1] == "2" ? 2u : 1u;
+      version = t[1] == "3" ? 3u : t[1] == "2" ? 2u : 1u;
       if (version > m->version) m->version = version;
       continue;
     }
@@ -344,15 +349,20 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
       idn.decoder = get(kv, "decoder");
       idn.ref = get(kv, "ref");
       if (!identity_decoder_known(idn.decoder))
-        return fail("decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return");
-      const bool opening = one_of(idn.decoder, {"spawn-create", "thread-entry", "owner-request", "child-request"});
+        return fail("decoder is spawn-create|spawn-return|spawn-id|thread-entry|owner-request|child-request|request-return"
+                    "|app-request|owner-publish|owner-check");
+      if (identity_decoder_version(idn.decoder) > version) return fail("decoder=" + idn.decoder + " needs 'kzs-sites 3'");
+      const bool opening = one_of(idn.decoder, {"spawn-create", "thread-entry", "owner-request", "child-request", "app-request"});
       const bool closing = one_of(idn.decoder, {"spawn-return", "request-return"});
+      const bool published = one_of(idn.decoder, {"owner-publish", "owner-check"});
       if (opening && s.phase != "before") return fail("decoder=" + idn.decoder + " needs a site of phase=before");
       if (closing && s.phase != "after") return fail("decoder=" + idn.decoder + " needs a site of phase=after");
       if (idn.decoder == "spawn-id" && !one_of(s.phase, {"before", "point", "effect"})) return fail("decoder=spawn-id needs a site of phase=before|point|effect");
+      if (published && !one_of(s.phase, {"point", "effect"})) return fail("decoder=" + idn.decoder + " needs a site of phase=point|effect");
       const bool takes_id = one_of(idn.decoder, {"spawn-return", "spawn-id", "thread-entry"});
       const bool needs_id = idn.decoder == "spawn-id" || idn.decoder == "thread-entry";
-      const bool takes_owner = idn.decoder == "owner-request";
+      const bool takes_owner = idn.decoder == "owner-request" || published;
+      const bool takes_status = idn.decoder == "spawn-return" || (idn.decoder == "request-return" && version >= 3);
       // the slot: a declared integer value of at most 4 bytes (the readers keep 4 bytes, as F0's decoders)
       auto slot_of = [&](const std::string& key, int* out, bool any_integer = false) -> bool {
         uint32_t k = 0;
@@ -383,9 +393,13 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
         return fail("decoder=" + idn.decoder + " needs id=<slot>");
       }
       if (kv.count("status") != 0 || kv.count("ok") != 0) {
-        if (idn.decoder != "spawn-return" || kv.count("id") == 0) return fail("status= and ok= belong to the id= of a spawn-return");
+        if (!takes_status || (idn.decoder == "spawn-return" && kv.count("id") == 0))
+          return fail(version >= 3 ? "status= and ok= belong to the id= of a spawn-return or to a request-return"
+                                   : "status= and ok= belong to the id= of a spawn-return");
       }
-      if (idn.decoder == "spawn-return" && kv.count("id") != 0) {
+      if (idn.decoder == "request-return" && (kv.count("status") != 0) != (kv.count("ok") != 0))
+        return fail("a request-return takes status=<slot> and ok=<value of success> together");
+      if ((idn.decoder == "spawn-return" && kv.count("id") != 0) || (idn.decoder == "request-return" && kv.count("status") != 0)) {
         if (kv.count("status") == 0 || kv.count("ok") == 0)
           return fail("the id= of a spawn-return needs status=<slot> ok=<value of success> (a failed call leaves the out parameter as it was)");
         if (!slot_of("status", &idn.status_slot, true)) return fail(bad);
@@ -400,7 +414,7 @@ bool parse_manifest(std::string_view text, const std::string& name, Manifest* m,
         if (!takes_owner) return fail("decoder=" + idn.decoder + " takes no owner=");
         if (!slot_of("owner", &idn.owner_slot)) return fail(bad);
       } else if (takes_owner) {
-        return fail("decoder=owner-request needs owner=<slot>");
+        return fail("decoder=" + idn.decoder + " needs owner=<slot>");
       }
       idn.line = ln;
       s.identity = idn;

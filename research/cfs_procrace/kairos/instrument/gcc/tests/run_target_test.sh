@@ -5,6 +5,8 @@
 #   mode refuse           a manifest naming a runtime function: the runtime unit is refused, not changed
 #   mode shapes-O0|O2|O3  build kzgcc_shapes.c with kzgcc_shapes.kzs (kzs-sites 2 place= shapes, from=param<k>), run
 #                         it, check the stored values and addresses, the call points, the line start and the gap
+#   mode owner-O0|O2      build kzgcc_owner.c with kzgcc_owner.kzs (kzs-sites 3): the owner-publish and owner-check
+#                         stores name the function's entry record as their link (kzgcc 0.3); at a call: unsupported
 # Unit test of the plugin; the values are unit-test values.
 set -uo pipefail
 MODE=$1 CC=$2 PLUGIN=$3 RT=$4 EVENTS=$5 T=$6 W=$7
@@ -63,6 +65,32 @@ case "$MODE" in
     awk -F'\t' '$1=="ev" && $4>=1 && $4<=7 && $6!=0 {bad=1} END {exit bad}' "$W/events.tsv" || fail "a point has a link"
     for s in 1 2 3 4 5 6 7 8; do grep -E "^bind [0-9]+ site=$s .*status=(bound|inlined)" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
     grep -q 'site=9 .*status=unsupported reason="phase=point with callee= needs place=' "$B" || fail "site without place not declared a gap"
+    echo "ok: $MODE"; exit 0 ;;
+  owner-*)
+    OPT=-${MODE#owner-}
+    SP=(-fplugin="$PLUGIN" -fplugin-arg-kzgcc-manifest="$T/kzgcc_owner.kzs" -fplugin-arg-kzgcc-out="$W/binds")
+    ( cd "$T" && "$CC" $OPT -c kzgcc_owner.c -o "$W/o.o" "${SP[@]}" ) 2> "$W/cc.err" || { cat "$W/cc.err"; fail "compile"; }
+    [ -s "$W/cc.err" ] && { cat "$W/cc.err"; fail "compiler diagnostics"; }
+    "$CC" $OPT "$W/o.o" -o "$W/o" -Wl,--whole-archive "$RT/libkzrt-posix.a" "$RT/libkzrt.a" -Wl,--no-whole-archive \
+        "$RT/CMakeFiles/kzrt-posix-auto.dir/src/kz_rt_posix_auto.c.o" -lpthread || fail "link"
+    KZ_RT_DUMP="$W/dump.bin" "$W/o" > "$W/out.txt" || fail "target exit"
+    grep -q "^owner 0 2 -1 0$" "$W/out.txt" || fail "target output: $(cat "$W/out.txt")"
+    B=$(ls "$W"/binds/*.kzs); [ -n "$B" ] || fail "no binding file"
+    "$RT/kz-rt-dump" --manifest "$T/kzgcc_owner.kzs" --manifest "$B" "$W/dump.bin" > "$W/dump.txt" || { tail -5 "$W/dump.txt"; fail "kz-rt-dump check"; }
+    "$EVENTS" "$W/dump.bin" > "$W/events.tsv" || fail "kzgcc-events"
+    for s in 1 2 3 4; do grep -E "^bind [0-9]+ site=$s .*status=(bound|inlined)" "$B" > /dev/null || fail "site $s not bound: $(grep "site=$s " "$B")"; done
+    grep -q 'site=5 .*status=unsupported reason="an owner-publish or owner-check point is linked to its function.s entry record only at a store' "$B" ||
+      fail "owner-check at a call not declared unsupported: $(grep 'site=5 ' "$B")"
+    grep -q 'link=entry' "$B" || fail "no link=entry note"
+    # two calls: two entry and two return records; the first call publishes (2) and checks (2), the second fails first
+    awk -F'\t' '$1=="ev" {n[$4]++} END { if (n[1] != 2 || n[2] != 2 || n[3] != 1 || n[4] != 1 || n[5] != 0) exit 1 }' "$W/events.tsv" ||
+      fail "event counts: $(awk -F'\t' '$1=="ev" {print $4}' "$W/events.tsv" | sort | uniq -c | paste -sd' ')"
+    # the publish and the check name the entry record of their own call (the first one); the returns name theirs
+    awk -F'\t' '$1=="ev" && $4==1 {e[++k]=$3} $1=="ev" && ($4==3 || $4==4) && $6 != e[1] {bad=1} $1=="ev" && $4==2 {r[++j]=$6}
+      END { if (bad || k != 2 || r[1] != e[1] || r[2] != e[2]) exit 1 }' "$W/events.tsv" || fail "links: $(awk -F'\t' '$1=="ev" {print $4, $3, $6}' "$W/events.tsv" | paste -sd';')"
+    ev() { awk -F'\t' -v s="$1" '$1=="ev" && $4==s' "$W/events.tsv"; }
+    ev 3 | awk -F'\t' '$9=="0x2"' | grep -q . || fail "publish value 2 expected: $(ev 3)"
+    ev 4 | awk -F'\t' '$9=="0x2"' | grep -q . || fail "check value 2 expected: $(ev 4)"
     echo "ok: $MODE"; exit 0 ;;
 esac
 OPT=-${MODE%-lto}; LTO=(); [ "$MODE" = O2-lto ] && LTO=(-flto)

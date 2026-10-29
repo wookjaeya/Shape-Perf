@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=5
+kz-layout abi=1 revision=6
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -891,6 +891,17 @@ record kz_nctl size=64 fields=17
   cflags offset=51 size=1 count=1 kind=u8
   rsv0 offset=52 size=4 count=1 kind=u32
   raw_off offset=56 size=8 count=1 kind=u64
+record kz_nowner size=32 fields=10
+  actor offset=0 size=4 count=1 kind=u32
+  request offset=4 size=4 count=1 kind=u32
+  publish offset=8 size=4 count=1 kind=u32
+  request_return offset=12 size=4 count=1 kind=u32
+  check offset=16 size=4 count=1 kind=u32
+  owner_id offset=20 size=4 count=1 kind=u32
+  flags offset=24 size=4 count=1 kind=u32
+  level offset=28 size=1 count=1 kind=u8
+  rsv0 offset=29 size=1 count=1 kind=u8
+  rsv1 offset=30 size=2 count=1 kind=u16
 record kz_occ_basis size=104 fields=24
   summary offset=0 size=4 count=1 kind=u32
   ordinal offset=4 size=4 count=1 kind=u32
@@ -1254,6 +1265,7 @@ flags KZ_OWNER_EVIDENCE
   0x40 RAW_THREAD "raw-thread"
   0x80 ANALYSED_TABLE_EXCLUDED "analysed-table-excluded"
   0x100 CREATOR_OWNER "creator-owner"
+  0x200 OWNER_AT_PUBLISH "owner-at-publish"
 flags KZ_IDENTITY_FLAG
   0x1 EXEC_KNOWN "exec-known"
   0x2 CREATOR_KNOWN "creator-known"
@@ -1299,6 +1311,9 @@ enum KZ_DECODER
   0x6 CHILD_REQUEST "child-request"
   0x7 REQUEST_RETURN "request-return"
   0x8 SPAWN_ID "spawn-id"
+  0x9 APP_REQUEST "app-request"
+  0xa OWNER_PUBLISH "owner-publish"
+  0xb OWNER_CHECK "owner-check"
 enum KZ_SLOT_SRC
   0x0 NONE "none"
   0x1 REG "reg"
@@ -1887,6 +1902,14 @@ enum KZ_NCTX
   0x4 REGISTRATION_INTERNAL "registration-internal"
   0x5 TERMINATING "terminating"
   0x6 UNSUPPORTED "unsupported"
+flags KZ_NOWNER_FLAG
+  0x1 PUBLISHED "published"
+  0x2 PUBLISH_CONFLICT "publish-conflict"
+  0x4 RETURNED "returned"
+  0x8 STATUS_OK "status-ok"
+  0x10 STATUS_NOT_OK "status-not-ok"
+  0x20 CHECK_AGREED "check-agreed"
+  0x40 CHECK_DIFFERS "check-differs"
 flags KZ_OCC_BASIS
   0x1 DIRECT_CAPTURE "direct-capture"
   0x2 STATE_ORDER "state-order"
@@ -1996,6 +2019,7 @@ section NCTL type=107 record=kz_nctl version=1
 section OCC_BASIS type=108 record=kz_occ_basis version=1
 section OCC_EDGES type=109 record=kz_occ_edge version=1
 section REPLAY_READ type=110 record=kz_replay_read version=1
+section NOWNER type=111 record=kz_nowner version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2312,6 +2336,14 @@ format kz_nctl.reason enum KZ_NCTL_REASON
 format kz_nctl.ctx enum KZ_NCTX
 format kz_nctl.cflags flags KZ_NCTL_FLAG
 format kz_nctl.raw_off hex 0
+format kz_nowner.actor idx 0
+format kz_nowner.request idx 0
+format kz_nowner.publish idx 0
+format kz_nowner.request_return idx 0
+format kz_nowner.check idx 0
+format kz_nowner.owner_id idx 0
+format kz_nowner.flags flags KZ_NOWNER_FLAG
+format kz_nowner.level enum KZ_OWNER_LEVEL
 format kz_occ_basis.summary idx 0
 format kz_occ_basis.call idx 0
 format kz_occ_basis.decision idx 0
@@ -2337,4 +2369,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=93b668308f63f7c147860b718f27f02de193a8b278bee43fc3d8335f6bc3ba25
+fingerprint=5e7ad824e5e96b4a3182880ae841b316979c2ba270449cfd755005ddd41efa37

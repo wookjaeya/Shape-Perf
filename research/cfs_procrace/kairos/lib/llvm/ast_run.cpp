@@ -163,7 +163,9 @@ bool extract_units(const std::vector<UnitCommand>& units, const ExtractSpec& spe
     tooling::CompileCommand cmd(u.directory, u.source, front_end_command(u.command_line), u.object);
     SingleUnitDb db(cmd);
     tooling::ClangTool tool(db, std::vector<std::string>{u.source});
-    tool.appendArgumentsAdjuster(tooling::getInsertArgumentAdjuster(adapt, tooling::ArgumentInsertPosition::END));
+    std::vector<std::string> unit_adapt = adapt;  // and this unit's own analysis arguments (UnitCommand::analysis_args)
+    unit_adapt.insert(unit_adapt.end(), u.analysis_args.begin(), u.analysis_args.end());
+    tool.appendArgumentsAdjuster(tooling::getInsertArgumentAdjuster(unit_adapt, tooling::ArgumentInsertPosition::END));
     tool.setPrintErrorMessage(false);
     ErrorCounter diags;
     tool.setDiagnosticConsumer(&diags);

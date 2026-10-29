@@ -164,6 +164,7 @@ class Builder {
   kz::Status startup(const Recipe& recipe);
   kz::Status modules(const Recipe& recipe);
   kz::Status instrumentation();
+  void unit_diagnostics(const Recipe& recipe, size_t from);
   size_t record_tus(size_t from);
   std::string map_virtual(const Recipe::Startup& st, const std::string& name) const;
 
@@ -189,6 +190,8 @@ class Builder {
   std::vector<CdbEntry> cdb_;
   std::map<std::string, size_t> by_object_;           // object -> compile database entry
   std::vector<std::string> core_objects_;             // the members the executable's link takes in
+  ElfTarget elf_target_;                              // the ELF identity of every file read (one program: one class and machine)
+  std::vector<bool> diag_matched_;                    // recipe front_end_diagnostic -> it named a unit of the program
   std::vector<std::string> without_command_;          // link members no compile command produces (recorded)
   struct ScriptEntry {
     size_t index = 0;
@@ -265,6 +268,7 @@ kz::Status Builder::program(const Recipe& recipe) {
     if (!s.ok()) return s;
     LinkSet set;
     s = resolve_link_set(plan, &set);
+    if (s.ok() && set.elf.known()) s = elf_target_.add(set.elf.first_path(), set.elf.id());
     if (!s.ok()) return s;
     rep_->link_inputs = plan.inputs.size();
     rep_->link_members = set.members.size();
@@ -375,6 +379,8 @@ kz::Status Builder::front_end(const Recipe& recipe) {
     const std::string bin = abs_in(in_.build_dir, recipe.binary);
     kz::Status s = read_elf_notes(bin, &notes);
     if (s.ok()) {
+      const kz::Status e = elf_target_.add(bin, notes.elf);
+      if (!e.ok()) return e;
       add_file(bin);
       comment.clear();
       for (const std::string& c : notes.comments) comment += (comment.empty() ? "" : "; ") + c;
@@ -687,6 +693,7 @@ kz::Status Builder::modules(const Recipe& recipe) {
   if (why_not.empty()) {
     kz::Status s = read_dynamic_symbols(exe, &exports);
     if (!s.ok()) why_not = "the executable's exported symbols are not readable: " + s.message;
+    else if (!(s = elf_target_.add(exe, exports.elf)).ok()) return s;
   }
   if (!why_not.empty()) {
     item("closure", "the executable only: " + why_not, KZ_POLICY_UNSPECIFIED);
@@ -744,6 +751,8 @@ kz::Status Builder::modules(const Recipe& recipe) {
       std::string why = "outside the closure: the recipe names no link command for it";
       ObjectSymbols ds;
       if (exists && read_dynamic_symbols(mapped, &ds).ok()) {
+        const kz::Status es = elf_target_.add(mapped, ds.elf);  // loaded into the same process
+        if (!es.ok()) return es;
         l.exports = ds.defined;
         why += "; the " + std::to_string(ds.defined.size()) + " symbols it exports are read from the loaded file, for the binding only";
       }
@@ -780,6 +789,7 @@ kz::Status Builder::modules(const Recipe& recipe) {
       not_linked(s.message);
       continue;
     }
+    if (set.elf.known() && !(s = elf_target_.add(set.elf.first_path(), set.elf.id())).ok()) return s;
     add_file(link_file);
     item(key + ".link.command", rel_to(link_file, in_.bundle_root));
     const std::string out_sha = plan.output.empty() ? "unreadable" : file_sha(plan.output), loaded_sha = file_sha(mapped);
@@ -834,6 +844,7 @@ kz::Status Builder::modules(const Recipe& recipe) {
     ObjectSymbols loaded;
     kz::Status ls = read_dynamic_symbols(mapped, &loaded);
     if (!ls.ok()) rep_->warnings.push_back("module " + fname + ": " + ls.message);
+    else if (!(s = elf_target_.add(mapped, loaded.elf)).ok()) return s;
     Probe p;
     p.name = fname;
     std::map<std::string, std::set<std::string>> by_provider;
@@ -934,6 +945,31 @@ kz::Status Builder::modules(const Recipe& recipe) {
 // A derived build (SPEC 1.7 B'): the build compiler's plugin options in the recorded commands, and the link members no
 // compile command produces (e.g. an instrumentation runtime linked from outside the build).  Nothing is written for a
 // build without them, so the basis of a reference build is unchanged.
+// The recipe's front_end_diagnostic statements for the units from `from` on (recipe.hpp): -Wno-error=<name> for that unit
+// only, each recorded as an analysis-only deviation with the build compiler's reference.
+void Builder::unit_diagnostics(const Recipe& recipe, size_t from) {
+  diag_matched_.resize(recipe.front_end_diagnostics.size(), false);
+  for (size_t ui = from; ui < units_.size(); ++ui) {
+    UnitCommand& u = units_[ui];
+    const std::string rel = rel_to(u.source, in_.bundle_root);
+    for (size_t k = 0; k < recipe.front_end_diagnostics.size(); ++k) {
+      const Recipe::FrontEndDiagnostic& d = recipe.front_end_diagnostics[k];
+      if (d.unit != rel) continue;
+      diag_matched_[k] = true;
+      const std::string arg = "-Wno-error=" + d.name;
+      u.analysis_args.push_back(arg);
+      const uint32_t dev = add_deviation(
+          "front-end diagnostic " + d.name + " of " + rel, "the recorded command, which the build compiler compiles without an error (" + d.reference + ")",
+          arg + " added to this unit's command for the front end only",
+          "the front end raises " + d.name + " as an error by default and would not read the unit; the build compiler accepts it (the reference)",
+          "analysis only: the front end reports this one diagnostic of this one unit as a warning (and -w then suppresses it) instead of rejecting the unit; "
+          "the recorded command, the executable the build compiler builds, the other units and the other diagnostics are unchanged",
+          KZ_AVOIDABLE_NO);
+      item("front_end.unit_diagnostic[" + rel + "][" + d.name + "]", arg, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+    }
+  }
+}
+
 kz::Status Builder::instrumentation() {
   if (!without_command_.empty()) {
     std::string v;
@@ -994,11 +1030,24 @@ kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   kz::Status s = revisions(profile);
   if (!s.ok()) return s;
   if (!(s = program(recipe)).ok()) return s;
+  unit_diagnostics(recipe, 0);  // the executable's units (before the constants are evaluated in them)
   if (!(s = front_end(recipe)).ok()) return s;
   if (!(s = constants(profile, recipe)).ok()) return s;
   if (!(s = generated_and_tables(recipe)).ok()) return s;
   if (!(s = startup(recipe)).ok()) return s;
+  const size_t core_units = units_.size();
   if (!(s = modules(recipe)).ok()) return s;
+  unit_diagnostics(recipe, core_units);  // the modules' units
+  for (size_t k = 0; k < recipe.front_end_diagnostics.size(); ++k)
+    if (k >= diag_matched_.size() || !diag_matched_[k])
+      return kz::Status::error(kz::Err::Invalid, "recipe front_end_diagnostic `" + recipe.front_end_diagnostics[k].name + "` names " + recipe.front_end_diagnostics[k].unit +
+                                                     ", which is no unit of the program");
+  // the target's ELF identity, where it is not the ELF64 one every basis before 2026-10-29 had (so such a basis is written
+  // as before; a reader takes a basis without the item as ELF64 little-endian): for the correspondence of the build with
+  // the runtime and its recovery tool (pointer size and byte order, PI decision D5 of 2026-10-29)
+  if (elf_target_.known() && elf_target_.id().pointer_bytes() != 8)
+    item("target.elf", elf_target_.id().text() + ", pointer " + std::to_string(elf_target_.id().pointer_bytes()) +
+                           " bytes: every object, archive member, executable and module this basis read (the first: " + rel_to(elf_target_.first_path(), in_.bundle_root) + ")");
   if (!(s = instrumentation()).ok()) return s;
   for (const Recipe::Declared& d : recipe.declared) {
     const uint32_t prov = add_prov(KZ_TIER_RESEARCHER, KZ_PROV_KIND_RESEARCHER, KZ_PROV_SIDE_NA, "", 0, 0, "recipe " + in_.recipe_path, d.authored, nullptr);
@@ -1036,10 +1085,19 @@ kz::Status units_from_basis(const kz::Container& basis, std::vector<UnitCommand>
   std::vector<kz_basis_item> items;
   if (!(s = basis.read_section(KZ_SEC_BASIS, &items)).ok()) return s;
   std::string root;
+  std::map<std::string, std::vector<std::string>> unit_args;  // front_end.unit_diagnostic[<unit>][<name>] = -Wno-error=<name>
   for (const kz_basis_item& b : items) {
     std::string name;
     basis.string(b.name, &name);
     if (name == "bundle.root") basis.string(b.value, &root);
+    static const std::string kDiag = "front_end.unit_diagnostic[";
+    if (name.rfind(kDiag, 0) == 0) {
+      const size_t end = name.find("][", kDiag.size());
+      std::string value;
+      basis.string(b.value, &value);
+      if (end == std::string::npos || value.rfind("-Wno-error=", 0) != 0) return kz::Status::error(kz::Err::Invalid, "basis item " + name + " is not a unit diagnostic");
+      unit_args[name.substr(kDiag.size(), end - kDiag.size())].push_back(value);
+    }
   }
   if (bundle_root != nullptr) *bundle_root = root;
   for (const kz_tu& t : tus) {
@@ -1071,8 +1129,14 @@ kz::Status units_from_basis(const kz::Container& basis, std::vector<UnitCommand>
     h.update("\0", 1);
     const kz::Digest d = h.finish();
     if (std::memcmp(d.data(), t.command_sha256, 32) != 0) return kz::Status::error(kz::Err::Invalid, "the command of unit " + source + " does not match its recorded hash");
+    auto ua = unit_args.find(source);
+    if (ua != unit_args.end()) {
+      u.analysis_args = ua->second;
+      unit_args.erase(ua);
+    }
     units->push_back(u);
   }
+  if (!unit_args.empty()) return kz::Status::error(kz::Err::Invalid, "basis item front_end.unit_diagnostic names " + unit_args.begin()->first + ", which is no unit of the basis");
   return kz::Status::success();
 }
 

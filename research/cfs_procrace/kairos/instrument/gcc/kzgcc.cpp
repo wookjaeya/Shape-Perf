@@ -17,6 +17,11 @@
 //                                   field through a local pointer, a global, a pointer target): operand0 = the
 //                                   stored value, operand1 = the address (computed, never loaded)
 //     and from=param<k>: the value parameter k of <func> received (its SSA default definition).
+// Links: a return record names the function's entry record (the first entry site bound in the function), a call's
+// after record names its before record; points have no link, except (kzgcc 0.3, kzs-sites 3) a point whose identity
+// read is owner-publish or owner-check: bound at a store, it names the function's entry record too (the identity join
+// pairs it with the app-request of the same function instance by that link); bound at a call or a line start it is
+// declared unsupported.  For a manifest without these readers the output is that of kzgcc 0.2.
 // Values are the GIMPLE operands the original statement uses (SSA names or invariants), converted to
 // 64 bits per the manifest type: nothing is evaluated twice, no shared variable is re-read (except the
 // out<k> read the manifest declares), no store is changed.  A string is copied only at a slot the
@@ -86,7 +91,7 @@ int plugin_is_GPL_compatible;
 namespace {
 
 const char* const kPluginName = "kzgcc";
-const char* const kVersion = "kzgcc 0.2";
+const char* const kVersion = "kzgcc 0.3";
 const char* const kBackend = "gcc-plugin";
 
 // ---- plugin state (one translation unit per cc1 process) -----------------------------------------
@@ -466,6 +471,13 @@ std::string gap_reason(const kzrt::Site& s) {
   }
 }
 
+// A point that the identity join pairs with its function instance's app-request (kzs-sites 3): its record names the
+// function's entry record as its link.
+bool links_entry(const kzrt::Site& s) {
+  return s.has_identity && (s.identity.decoder == "owner-publish" || s.identity.decoder == "owner-check");
+}
+const char* const kLinkOnlyAtStore = "an owner-publish or owner-check point is linked to its function's entry record only at a store (place=store)";
+
 // Builds the hook (and control) for site s at one binding into *seq; false with the binding marked unsupported.
 bool bind_one(const kzrt::Site& s, BindRec& b, tree link, const Operands& ops, gimple_seq* seq, location_t loc, tree* aseq_out) {
   std::string why;
@@ -535,6 +547,11 @@ unsigned instrument_function(function* fun) {
     const kzrt::Site& s = *ls.first;
     BindRec& b = new_bind(s, "line-start", where(ls.second, fname) + " line start");
     if (b.status != "bound") continue;
+    if (links_entry(s)) {
+      b.status = "unsupported";
+      b.reason = kLinkOnlyAtStore;
+      continue;
+    }
     Operands ops;
     ops.param = param_vals;
     gimple_seq seq = NULL;
@@ -569,6 +586,11 @@ unsigned instrument_function(function* fun) {
       const bool point = shape_of(*s) == Shape::AtCall;
       BindRec& b = new_bind(*s, point ? "at-call" : "call-before", at);
       if (b.status != "bound") continue;
+      if (links_entry(*s)) {
+        b.status = "unsupported";
+        b.reason = kLinkOnlyAtStore;
+        continue;
+      }
       gimple_seq seq = NULL;
       tree aseq = NULL_TREE;
       if (!bind_one(*s, b, build_int_cst(uint32_type_node, 0), ops, &seq, loc, &aseq)) continue;
@@ -589,7 +611,8 @@ unsigned instrument_function(function* fun) {
     // the result: an SSA name, given to the call only where a site reads it (from=ret) and the call has none
     bool needs_ret = false;
     for (const kzrt::Site* s : after)
-      for (const kzrt::Value& v : s->values) needs_ret = needs_ret || v.from == "ret";
+      if (!links_entry(*s))
+        for (const kzrt::Value& v : s->values) needs_ret = needs_ret || v.from == "ret";
     tree rtype = TREE_TYPE(TREE_TYPE(callee));
     gimple_seq pre = NULL;
     if (needs_ret && !VOID_TYPE_P(rtype) && is_gimple_reg_type(rtype)) {
@@ -616,6 +639,11 @@ unsigned instrument_function(function* fun) {
       const bool point = shape_of(*s) == Shape::AfterCall;
       BindRec& b = new_bind(*s, point ? "after-call" : "call-after", at);
       if (b.status != "bound") continue;
+      if (links_entry(*s)) {
+        b.status = "unsupported";
+        b.reason = kLinkOnlyAtStore;
+        continue;
+      }
       if (bind_one(*s, b, point ? build_int_cst(uint32_type_node, 0) : link, ops, &seq, loc, NULL)) changed = true;
     }
     if (seq != NULL) {
@@ -625,7 +653,14 @@ unsigned instrument_function(function* fun) {
     }
   }
 
-  // 3. stores: through a pointer parameter (phase=effect without place) or any store of a line (place=store)
+  // 3. stores: through a pointer parameter (phase=effect without place) or any store of a line (place=store); a store
+  // site linked to the entry record (links_entry) is bound after the entry (step 5), when that record is known
+  struct Deferred {
+    gimple* st;
+    const kzrt::Site* s;
+    std::string what;
+  };
+  std::vector<Deferred> deferred;
   for (gimple* st : stores) {
     tree lhs = gimple_assign_lhs(st);
     tree parm = NULL_TREE;
@@ -639,6 +674,10 @@ unsigned instrument_function(function* fun) {
       if (sh != Shape::Store && !(sh == Shape::ParamStore && parm != NULL_TREE)) continue;
       if (s->src_line != 0 && (uint32_t)stmt_line(st) != s->src_line) continue;
       const std::string what = parm != NULL_TREE ? " store *" + std::string(IDENTIFIER_POINTER(DECL_NAME(parm))) : " store";
+      if (links_entry(*s)) {
+        deferred.push_back({st, s, what});
+        continue;
+      }
       BindRec& b = new_bind(*s, "store", where(st, fname) + what);
       if (b.status != "bound") continue;
       if (stmt_ends_bb_p(st)) {
@@ -696,6 +735,27 @@ unsigned instrument_function(function* fun) {
       gsi_insert_seq_before(&gsi, seq, GSI_SAME_STMT);
       changed = true;
     }
+  }
+  // 5. the stores of step 3 whose record names the function's entry record (owner-publish, owner-check)
+  for (const Deferred& d : deferred) {
+    BindRec& b = new_bind(*d.s, "store", where(d.st, fname) + d.what);
+    if (b.status != "bound") continue;
+    if (stmt_ends_bb_p(d.st)) {
+      b.status = "unsupported";
+      b.reason = "the store ends its basic block (it may throw)";
+      continue;
+    }
+    if (integer_zerop(entry_aseq)) b.notes += " link=none(no entry site bound in the function)";
+    else b.notes += " link=entry";
+    Operands ops;
+    ops.operand0 = gimple_assign_rhs1(d.st);
+    ops.store_lhs = gimple_assign_lhs(d.st);
+    ops.param = param_vals;
+    gimple_seq seq = NULL;
+    if (!bind_one(*d.s, b, entry_aseq, ops, &seq, gimple_location(d.st), NULL)) continue;
+    gimple_stmt_iterator gsi = gsi_for_stmt(d.st);
+    insert_after(&gsi, seq);
+    changed = true;
   }
   if (!changed) return 0;
   mark_virtual_operands_for_renaming(fun);

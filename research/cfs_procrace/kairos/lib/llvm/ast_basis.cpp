@@ -98,6 +98,7 @@ kz::Status evaluate_constants(const UnitCommand& unit, const ReadOptions& option
   for (const char* a : {"-Wno-unknown-warning-option", "-Wno-error", "-w"}) args.push_back(a);
   if (!options.resource_dir.empty()) args.push_back("-resource-dir=" + options.resource_dir);
   args.insert(args.end(), options.extra_args.begin(), options.extra_args.end());
+  args.insert(args.end(), unit.analysis_args.begin(), unit.analysis_args.end());
   ErrorCollector diags;
   std::unique_ptr<ASTUnit> ast = tooling::buildASTFromCodeWithArgs(code, args, unit.source, "kz-static", std::make_shared<PCHContainerOperations>(),
                                                                    tooling::getClangStripDependencyFileAdjuster(), tooling::FileContentMappings(), &diags);

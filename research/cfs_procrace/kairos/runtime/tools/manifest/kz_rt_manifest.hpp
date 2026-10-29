@@ -1,13 +1,13 @@
-// kz_rt_manifest.hpp -- the site manifest "kzs-sites 2" (also reads "kzs-sites 1"; host side; event_semantics.md
-// section 3).
+// kz_rt_manifest.hpp -- the site manifest "kzs-sites 3" (also reads "kzs-sites 1" and "2"; host side;
+// event_semantics.md section 3).
 //
 // One text format, line oriented ('#' starts a comment outside quotes; tokens are separated by white
 // space; a double-quoted part of a token may contain white space and '#'; the quotes are removed).
 // Several files may be read into one Manifest (the logical sites written from the profile, then a
 // backend's binding list, then identity reads); every file starts with the header line, and each file may
-// have either version.
+// have any version.  Version 3 adds only identity readers (below); a file of version 1 or 2 reads as before.
 //
-//   kzs-sites 1|2
+//   kzs-sites 1|2|3
 //   source <name> rev=<revision> [ref=<text>]
 //   module <id> name=<text> source=<source-name>
 //   site <id> label=<label> op=<operation> phase=before|effect|after|exit|point tu=<path> func=<function>
@@ -19,7 +19,7 @@
 //        status=bound|inlined|duplicated|removed|unsupported [vals=<mask>] [reason=<text>]
 //   equiv <site-id> backends=<a>,<b> status=unconfirmed|confirmed [ref=<text>]
 //   identity <site-id> decoder=<reader> [id=<slot>] [owner=<slot>] [status=<slot> ok=<integer>] [ref=<text>]
-//                                                                                         (version 2 only)
+//                                                                                         (version 2 and later)
 //
 // Ids are decimal 1..2147483647, unique per statement kind; a site label is unique.  string=validated
 // needs type=ptr, a bound and a ref (where the original code validated the pointer before this point);
@@ -55,10 +55,21 @@
 //   owner-request   phase=before  a request to start a task for an application named by an argument:
 //                                 owner= the identity of that application (e.g. the parent application id)
 //   child-request   phase=before  a request to start a task for the requesting task's own application (no slot)
-//   request-return  phase=after   the return of either request (no slot)
+//   request-return  phase=after   the return of any request (no slot; version 3: [status= ok=] the request's status
+//                                 and the value of success, as for spawn-return; used for an app-request only)
+// Version 3 (2026-10-29, E-ID1 of research/cfs_procrace/plan/c5_execution_basis_20261028.md section 10.4): a request
+// that creates an application and hands its identity value back only after the task is created:
+//   app-request     phase=before  a request that creates the application whose value it publishes later (no slot)
+//   owner-publish   phase=point|effect  owner= the application's value as the open app-request hands it to its
+//                                 caller (e.g. the store into the caller's out parameter); never a table whose
+//                                 ordering is analysed
+//   owner-check     phase=point|effect  owner= another value of the same request instance that must agree with
+//                                 the published one (a cross-check only: it never names an owner, a disagreement
+//                                 withdraws it)
 // A closing record (spawn-return, request-return) is paired with its opening record by the event's `link`
 // (the aseq of the opening record of the same call instance): the binding must give the opening identity
-// site's record as the link.
+// site's record as the link.  An owner-publish or owner-check record is paired with its app-request the same way:
+// the binding must give the record that opened the function instance (the app-request site's) as the link.
 #pragma once
 
 #include <cstdint>
@@ -89,11 +100,13 @@ struct Value {
   int line = 0;
 };
 
-// An identity read (kzs-sites 2).  Slots are -1 where not given.
+// An identity read (kzs-sites 2; app-request, owner-publish, owner-check and request-return status kzs-sites 3).
+// Slots are -1 where not given.
 struct Identity {
   std::string decoder;  // spawn-create | spawn-return | spawn-id | thread-entry | owner-request | child-request | request-return
+                        // | app-request | owner-publish | owner-check
   int id_slot = -1, owner_slot = -1, status_slot = -1;
-  int64_t ok = 0;  // spawn-return: the status value of success (with status_slot)
+  int64_t ok = 0;  // spawn-return, request-return: the status value of success (with status_slot)
   std::string ref;
   int line = 0;
 };
@@ -128,7 +141,7 @@ struct Equiv {
 };
 
 struct Manifest {
-  uint32_t version = 0;  // the highest header version of the files read (1 or 2)
+  uint32_t version = 0;  // the highest header version of the files read (1, 2 or 3)
   std::vector<Source> sources;
   std::vector<Module> modules;
   std::vector<Site> sites;
@@ -146,8 +159,10 @@ struct Manifest {
 // Adds one file's statements to *m.  On error returns false and sets *error to "<name>:<line>: <message>".
 bool parse_manifest(std::string_view text, const std::string& name, Manifest* m, std::string* error);
 
-// True for the reader names of an identity statement.
+// True for the reader names of an identity statement (of any version).
 bool identity_decoder_known(const std::string& name);
+// The first header version that has the reader (2 or 3; 0 if unknown).
+uint32_t identity_decoder_version(const std::string& name);
 
 // KZ_RT_CTX_* for a ctx= word; 0 if unknown.
 uint32_t ctx_code(const std::string& word);

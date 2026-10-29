@@ -106,6 +106,35 @@ class Parser {
           if (o.name == m.name) return fail("the module `" + m.name + "` is named twice");
         if (!word("link") || !str(&m.link) || !semi()) return err_;
         r->modules.push_back(m);
+      } else if (kw == "relocatable") {
+        Recipe::Relocatable x;
+        if (!str(&x.object)) return err_;
+        for (const Recipe::Relocatable& o : r->relocatables)
+          if (o.object == x.object) return fail("the relocatable object `" + x.object + "` is named twice");
+        if (!word("link") || !str(&x.link) || !semi()) return err_;
+        r->relocatables.push_back(x);
+      } else if (kw == "front_end_diagnostic") {
+        Recipe::FrontEndDiagnostic d;
+        if (!str(&d.unit) || !str(&d.name)) return err_;
+        while (cur_.kind == Tok::Word && cur_.text == "at") {
+          advance();
+          Recipe::FrontEndDiagnostic::At a;
+          if (!str(&a.file) || !num(&a.line)) return err_;
+          if (a.file.empty() || a.line == 0) return fail("front_end_diagnostic: `at` needs a file and a line (from 1)");
+          for (const Recipe::FrontEndDiagnostic::At& o : d.at)
+            if (o.file == a.file && o.line == a.line) return fail("front_end_diagnostic: " + a.file + ":" + std::to_string(a.line) + " is cited twice");
+          d.at.push_back(a);
+        }
+        if (d.at.empty()) return fail("front_end_diagnostic needs `at \"file\" <line>` for each line where the diagnostic is raised");
+        if (!word("reference") || !str(&d.reference) || !semi()) return err_;
+        if (d.unit.empty()) return fail("front_end_diagnostic names no unit");
+        bool name_ok = !d.name.empty() && d.name.front() != '-';
+        for (char c : d.name) name_ok = name_ok && ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-');
+        if (!name_ok) return fail("front_end_diagnostic: `" + d.name + "` is not a diagnostic name (letters, digits and '-', the <name> of -W<name>)");
+        if (d.reference.empty()) return fail("front_end_diagnostic needs a reference (the build compiler's log or command)");
+        for (const Recipe::FrontEndDiagnostic& o : r->front_end_diagnostics)
+          if (o.unit == d.unit && o.name == d.name) return fail("front_end_diagnostic `" + d.name + "` of `" + d.unit + "` is named twice");
+        r->front_end_diagnostics.push_back(d);
       } else if (kw == "startup_script") {
         if (!startup(r)) return err_;
       } else {
@@ -229,9 +258,15 @@ class Parser {
         }
       } else if (kw == "module_file") {
         Recipe::Startup::ModuleFile& mf = r->startup.module_file;
-        if (!word("field") || !num(&mf.field) || !word("path") || !word("const") || !str(&mf.path_const) || !word("extension") || !word("const") || !str(&mf.ext_const) ||
-            !word("in") || !str(&mf.source) || !semi())
+        if (!word("field") || !num(&mf.field)) return false;
+        if (cur_.kind == Tok::Word && cur_.text == "full_path") {  // the field is the file's whole virtual path
+          advance();
+          mf.full_path = true;
+          if (!semi()) return false;
+        } else if (!word("path") || !word("const") || !str(&mf.path_const) || !word("extension") || !word("const") || !str(&mf.ext_const) || !word("in") ||
+                   !str(&mf.source) || !semi()) {
           return false;
+        }
         if (mf.field == 0) {
           fail("the file-name field of a script line is not field 0 (the entry word)");
           return false;

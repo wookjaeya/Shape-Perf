@@ -439,6 +439,12 @@ Status check_neutral(const NeutralRun& n) {
     const kz_nctl& c = n.ctl[i];
     if (c.actor >= na || !idx_ok(c.subject, na) || !idx_ok(c.other, na) || !idx_ok(c.event, ne) || !idx_ok(c.site, ns)) return bad("NCTL[" + std::to_string(i) + "] index out of range");
   }
+  for (size_t i = 0; i < n.owners.size(); ++i) {
+    const kz_nowner& o = n.owners[i];
+    if (o.actor >= na || o.request >= ne || !idx_ok(o.publish, ne) || !idx_ok(o.request_return, ne) || !idx_ok(o.check, ne))
+      return bad("NOWNER[" + std::to_string(i) + "] index out of range");
+    if (o.level > KZ_OWNER_LEVEL_CONFIRMED) return bad("NOWNER[" + std::to_string(i) + "] enum out of range");
+  }
   return Status::success();
 }
 
@@ -516,6 +522,7 @@ Status read_neutral(const Container& run, NeutralRun* out) {
   if (s.ok()) s = run.read_section(KZ_SEC_NACTORS, &actors);
   if (s.ok()) s = run.read_section(KZ_SEC_NLOSS, &out->losses);
   if (s.ok()) s = run.read_section(KZ_SEC_NCTL, &out->ctl);
+  if (s.ok() && run.find_section(KZ_SEC_NOWNER) != nullptr) s = run.read_section(KZ_SEC_NOWNER, &out->owners);  // revision 6, optional
   if (!s.ok()) return s;
   if (nrun.size() != 1) return Status::error(Err::Invalid, "neutral layer: NRUN must hold one record");
   bool strings_ok = true;
@@ -616,6 +623,7 @@ Status add_neutral_sections(const NeutralRun& n, ContainerWriter* w) {
   if (s.ok()) s = w->add_section(KZ_SEC_NACTORS, actors);
   if (s.ok()) s = w->add_section(KZ_SEC_NLOSS, n.losses);
   if (s.ok()) s = w->add_section(KZ_SEC_NCTL, n.ctl);
+  if (s.ok() && !n.owners.empty()) s = w->add_section(KZ_SEC_NOWNER, n.owners);  // only with an owner named after the spawn
   return s;
 }
 

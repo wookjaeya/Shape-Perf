@@ -1,6 +1,7 @@
-// test_rt_manifest <data-dir> -- the "kzs-sites 1" / "kzs-sites 2" parser accepts the example and rejects what
-// the format forbids (each with its line); version 2 adds identity reads, the place of a point or effect site and
-// parameter values, which a version 1 file cannot have.
+// test_rt_manifest <data-dir> -- the "kzs-sites 1" / "kzs-sites 2" / "kzs-sites 3" parser accepts the example and
+// rejects what the format forbids (each with its line); version 2 adds identity reads, the place of a point or effect
+// site and parameter values, which a version 1 file cannot have; version 3 adds the readers of a request that
+// publishes its application after the spawn (app-request, owner-publish, owner-check, request-return status).
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -77,7 +78,7 @@ int main(int argc, char** argv) {
   {
     kzrt::Manifest m2;
     CHECK(!kzrt::parse_manifest("site 1 label=a\n", "nohdr", &m2, &err) && err.find("kzs-sites 1") != std::string::npos);
-    CHECK(!kzrt::parse_manifest("kzs-sites 3\n", "v3", &m2, &err) && err.find("kzs-sites 2") != std::string::npos);
+    CHECK(!kzrt::parse_manifest("kzs-sites 4\n", "v4", &m2, &err) && err.find("kzs-sites 3") != std::string::npos);
   }
   CHECK(m.version == 1u);
 
@@ -147,8 +148,41 @@ int main(int argc, char** argv) {
     CHECK(rejects("site 2 label=b op=o phase=effect tu=t.c func=f callee=g line=3 place=store\n", "takes no callee=", "2"));
     CHECK(rejects("site 2 label=b op=o phase=point tu=t.c func=f place=line-start\n", "needs line=", "2"));
   }
+  // version 3: a request that creates an application and publishes its value after the spawn (app-request,
+  // owner-publish, owner-check) and the status of a request-return; none of them in a version 2 file
+  {
+    kzrt::Manifest m3;
+    const char* v3 =
+        "kzs-sites 3\nsource s rev=abc\nmodule 1 name=m source=s\n"
+        "site 1 label=app op=app phase=before tu=t.c func=create_app\n"
+        "site 2 label=app.ret op=app phase=after tu=t.c func=create_app\nvalue 2 0 role=status from=ret type=s32\n"
+        "site 3 label=app.out op=app phase=point tu=t.c func=create_app line=40 place=store\nvalue 3 0 role=app_id from=operand0 type=u32\n"
+        "site 4 label=app.table op=pub phase=point tu=t.c func=create_app line=38 place=store\nvalue 4 0 role=app_id from=operand0 type=u32\n"
+        "identity 1 decoder=app-request ref=\"unit test\"\nidentity 2 decoder=request-return status=0 ok=0\n"
+        "identity 3 decoder=owner-publish owner=0\nidentity 4 decoder=owner-check owner=0\n";
+    if (!kzrt::parse_manifest(v3, "v3", &m3, &err)) std::fprintf(stderr, "%s\n", err.c_str());
+    CHECK(m3.version == 3u);
+    CHECK(m3.site(1)->identity.decoder == "app-request" && m3.site(1)->identity.owner_slot == -1 && m3.site(1)->identity.status_slot == -1);
+    CHECK(m3.site(2)->identity.decoder == "request-return" && m3.site(2)->identity.status_slot == 0 && m3.site(2)->identity.ok == 0);
+    CHECK(m3.site(3)->identity.owner_slot == 0 && m3.site(4)->identity.decoder == "owner-check" && m3.site(4)->identity.owner_slot == 0);
+    const std::string pt = "site 2 label=p op=o phase=point tu=t.c func=f line=9 place=store\nvalue 2 0 role=v from=operand0 type=u32\nvalue 2 1 role=a from=operand1 type=ptr\n"
+                           "site 3 label=r op=o phase=after tu=t.c func=f\nvalue 3 0 role=status from=ret type=s32\n";
+    CHECK(rejects("identity 1 decoder=app-request\n", "needs 'kzs-sites 3'", "2"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-publish owner=0\n", "needs 'kzs-sites 3'", "2"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-check owner=0\n", "needs 'kzs-sites 3'", "2"));
+    CHECK(rejects(pt + "identity 3 decoder=request-return status=0 ok=0\n", "belong to the id= of a spawn-return", "2"));
+    CHECK(rejects(pt + "identity 2 decoder=app-request\n", "phase=before", "3"));
+    CHECK(rejects(pt + "identity 3 decoder=owner-publish owner=0\n", "phase=point|effect", "3"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-publish\n", "needs owner=", "3"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-check owner=1\n", "integer of at most 4 bytes", "3"));
+    CHECK(rejects(pt + "identity 1 decoder=app-request owner=0\n", "takes no owner=", "3"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-publish owner=0 id=0\n", "takes no id=", "3"));
+    CHECK(rejects(pt + "identity 3 decoder=request-return status=0\n", "together", "3"));
+    CHECK(rejects(pt + "identity 3 decoder=request-return ok=0\n", "together", "3"));
+    CHECK(rejects(pt + "identity 2 decoder=owner-publish owner=0 status=0 ok=0\n", "or to a request-return", "3"));
+  }
   std::printf("manifest: example accepted (%zu sites, %zu bindings), 18 malformed inputs rejected; version 2: 8 identity reads accepted, 18 rejected; "
-              "5 placed sites accepted, 7 rejected\n",
+              "5 placed sites accepted, 7 rejected; version 3: 4 identity reads accepted, 13 rejected\n",
               m.sites.size(), m.binds.size());
   return 0;
 }

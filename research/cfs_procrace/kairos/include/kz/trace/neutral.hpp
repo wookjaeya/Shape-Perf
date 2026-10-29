@@ -62,6 +62,7 @@ struct NeutralRun {
   std::vector<NActor> actors;
   std::vector<kz_nloss> losses;
   std::vector<kz_nctl> ctl;
+  std::vector<kz_nowner> owners;  // schema revision 6; the section is written only when not empty
 };
 
 // A zeroed record with every index field that means "none" set to KZ_NONE32 (the neutral layer's defaults).

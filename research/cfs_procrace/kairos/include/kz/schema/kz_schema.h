@@ -66,8 +66,12 @@
  * is part of the layout text, hence of the schema fingerprint and of every tool hash.  Revision 3 adds the
  * neutral event layer (kz_neutral.h), revision 4 the per-occurrence basis of a replay (kz_replay.h).  Revision 5
  * names three reserved fields (NRUN end_kind and end_value, OCC_BASIS task: zero in every earlier container, which
- * reads as "not recorded") and adds enumeration values; no record size, offset or section version changes. */
-#define KZ_SCHEMA_REVISION 5u
+ * reads as "not recorded") and adds enumeration values; no record size, offset or section version changes.  Revision 6
+ * (2026-10-29) adds enumeration values (KZ_DECODER app-request, owner-publish, owner-check; KZ_OWNER_EVIDENCE
+ * owner-at-publish) and one NEW section, NOWNER (kz_neutral.h), written only when a run has an owner that a creation
+ * request named after the spawn; no earlier record or section version changes, so every container written before is
+ * read as it was written, and a run without such an owner is written as before. */
+#define KZ_SCHEMA_REVISION 6u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu
@@ -802,13 +806,15 @@ KZ_CORE_RECORDS(KZ_RECORD)
  * id-unverified: the announced id was not compared with a creator-side value; analysed-table-excluded:
  * the task-application table was not used because its ordering is analysed (EV-03); creator-owner: a child
  * task's owner is its creating task's own app_owner (the request names no application), and the level is
- * at most the creating task's level. */
+ * at most the creating task's level; owner-at-publish (schema revision 6): the request created the application and
+ * named it only after the spawn, inside the same request instance (an app-request and its owner-publish record,
+ * kz_neutral.h NOWNER). */
 #define KZ_ENUM_OWNER_EVIDENCE(ITEM, P) /* set */                                       \
   ITEM(P, CREATION_REQUEST, 0x1, "creation-request") ITEM(P, FORK_IN_CALL, 0x2, "fork-in-creating-call") \
   ITEM(P, ANNOUNCED_ID, 0x4, "announced-id") ITEM(P, ES_RECORDS, 0x8, "es-records")        \
   ITEM(P, MATCH_BY_TIME, 0x10, "match-by-time") ITEM(P, ID_UNVERIFIED, 0x20, "id-unverified") \
   ITEM(P, RAW_THREAD, 0x40, "raw-thread") ITEM(P, ANALYSED_TABLE_EXCLUDED, 0x80, "analysed-table-excluded") \
-  ITEM(P, CREATOR_OWNER, 0x100, "creator-owner")
+  ITEM(P, CREATOR_OWNER, 0x100, "creator-owner") ITEM(P, OWNER_AT_PUBLISH, 0x200, "owner-at-publish")
 
 #define KZ_ENUM_IDENTITY_FLAGS(ITEM, P) /* set */                                       \
   ITEM(P, EXEC_KNOWN, 0x1, "exec-known") ITEM(P, CREATOR_KNOWN, 0x2, "creator-known")      \

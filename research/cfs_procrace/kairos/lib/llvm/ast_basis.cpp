@@ -98,9 +98,18 @@ kz::Status evaluate_constants(const UnitCommand& unit, const ReadOptions& option
   for (const char* a : {"-Wno-unknown-warning-option", "-Wno-error", "-w"}) args.push_back(a);
   if (!options.resource_dir.empty()) args.push_back("-resource-dir=" + options.resource_dir);
   args.insert(args.end(), options.extra_args.begin(), options.extra_args.end());
+  args.insert(args.end(), unit.analysis_args.begin(), unit.analysis_args.end());
+  // relative paths of the command (e.g. -I../../inc of a classic make build) as in the directory the command ran in, as
+  // the extraction reads the unit (ClangTool with the command's directory).  The driver applies -working-directory to
+  // the real file system, which changes the process's directory; it is restored after the parse (as ClangTool does), so
+  // the caller's relative paths keep their meaning.
+  if (!unit.directory.empty()) args.push_back("-working-directory=" + unit.directory);
+  std::error_code cwd_ec;
+  const fs::path cwd = fs::current_path(cwd_ec);
   ErrorCollector diags;
   std::unique_ptr<ASTUnit> ast = tooling::buildASTFromCodeWithArgs(code, args, unit.source, "kz-static", std::make_shared<PCHContainerOperations>(),
                                                                    tooling::getClangStripDependencyFileAdjuster(), tooling::FileContentMappings(), &diags);
+  if (!cwd_ec) fs::current_path(cwd, cwd_ec);
   if (!ast) return kz::Status::error(kz::Err::Invalid, "cannot parse " + unit.source);
   ASTContext& ctx = ast->getASTContext();
   Preprocessor& pp = ast->getPreprocessor();
@@ -142,7 +151,11 @@ kz::Status evaluate_constants(const UnitCommand& unit, const ReadOptions& option
       const MacroDefinition md = pp.getMacroDefinition(ii);
       if (const MacroInfo* mi = md.getMacroInfo()) {
         const SourceLocation dl = sm.getExpansionLoc(mi->getDefinitionLoc());
-        if (auto fe = sm.getFileEntryRefForID(sm.getFileID(dl))) r.macro_file = rel(std::string(fe->getName()), options.root);
+        if (auto fe = sm.getFileEntryRefForID(sm.getFileID(dl))) {
+          std::string name(fe->getName());  // a header found through a relative -I is named relative to the command's directory
+          if (!name.empty() && name[0] != '/' && !unit.directory.empty()) name = unit.directory + "/" + name;
+          r.macro_file = rel(name, options.root);
+        }
         r.macro_line = sm.getExpansionLineNumber(dl);
         std::string body;
         for (const Token& t : mi->tokens()) {

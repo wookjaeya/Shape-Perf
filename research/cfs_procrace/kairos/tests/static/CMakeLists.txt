@@ -83,6 +83,14 @@ kz_add_unit_test(test_static_link SOURCES test_static_link.cpp LIBS kz-llvm kz-t
 # the objects are arguments, not sources: building the test must build them too
 add_dependencies(test_static_link kz_static_main_obj kz_static_whole_member kz_static_lazy_used kz_static_lazy_unused)
 
+# ELF32 little-endian i386 (E-ST, the reading part): objects, a shared object and an executable built at test time with
+# -m32, damaged headers, one ELF identity per program, and the basis of a small 32-bit closure.  Skipped (77) where the
+# compiler cannot build -m32 programs.
+kz_add_unit_test(test_static_elf32 SOURCES test_static_elf32.cpp LIBS kz-llvm kz-testsupport LABEL static
+  ARGS $<TARGET_FILE:kz-static> ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_CURRENT_BINARY_DIR}/work_elf32)
+set_tests_properties(test_static_elf32 PROPERTIES SKIP_RETURN_CODE 77)
+add_dependencies(test_static_elf32 kz-static)
+
 kz_add_unit_test(test_static_cli SOURCES test_static_cli.cpp LIBS kz-core kz-testsupport LABEL static
   ARGS $<TARGET_FILE:kz-static> ${kz_fixture_dir} ${CMAKE_CURRENT_SOURCE_DIR}/objects ${kz_fixture_profile} ${CMAKE_C_COMPILER} ${CMAKE_CURRENT_BINARY_DIR})
 add_dependencies(test_static_cli kz-static)

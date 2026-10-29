@@ -8,7 +8,9 @@
 //
 //   owner_from_request    the creation request open on the creating actor when the spawn call began names the
 //                         application: an owner request by its owner argument, a child request by the creating
-//                         task's own app_owner (at most that task's level).  The level of the tie is `confirmed`
+//                         task's own app_owner (at most that task's level), an app request (schema revision 6) by
+//                         the value it published after the spawn, where the join established that value (below;
+//                         evidence owner-at-publish).  The level of the tie is `confirmed`
 //                         when it rests on the id (the id the task announced equals the id the call assigned) and
 //                         `inferred` when it rests on the fork time alone.  identity_join.cpp (F0) and
 //                         join_actor_identities (below) both call it.
@@ -28,6 +30,16 @@
 //                         the call fails); it must agree with the call's spawn-id (a disagreement: no id);
 //       owner-request / child-request / request-return   open and close creation requests the same way (by link);
 //                         an owner request whose owner value was not observed names no application;
+//       app-request       (kzs-sites 3) opens a creation request that creates the application and hands its value
+//                         back only after the task exists (its slot is chosen inside the call);
+//       owner-publish     (kzs-sites 3) inside the app request its `link` names (the record that opened the same
+//                         function instance, on the same actor, still open): the value the request hands back.  No
+//                         link, a link to another actor's record or to a closed request: not used (counted).  An
+//                         unreadable value, or two different values in one instance: that request names nothing;
+//       owner-check       (kzs-sites 3) the same pairing: another value of the instance that must equal the
+//                         published one; it never names an owner, a disagreement withdraws it;
+//       request-return    of an app request: with a status slot (kzs-sites 3) the request names its value only
+//                         where the status holds the value of success;
 //       thread-entry      the id the actor announces (the first one; a later one is counted, not used).
 //   The tie: an actor that announced id X is the task of the one spawn call that assigned X, when exactly one call
 //   assigned X and exactly one actor announced it (and the two are different actors).  Then: creator = the calling
@@ -37,6 +49,14 @@
 //   records between actors.  An actor without a tie has an undetermined owner (never "no owner", never 0).
 //   The request's calling function is known where the request site is bound at the call (manifest `callee`): it is
 //   the site's `func` (NActor.request_func).
+//   An app request names the owner of the actor tied to its spawn call only when all of these hold: exactly one value
+//   was published in the instance (readable, linked), a request-return closed the instance, its status (where the
+//   manifest declares one) holds the value of success, and every owner-check value equals the published one.  The
+//   level is then the tie's; otherwise the owner is undetermined and the tie (creator, creator_event, spawn_return)
+//   stays.  What was found is written per tied actor (NeutralRun::owners, kz_neutral.h NOWNER: the request, publish,
+//   return and check events).  Never used: names (application, task, start-up script), times, the order of records
+//   between actors, the order of the start-up script, the values the task reads from the tables, or a value written
+//   to a table whose ordering is analysed (such a store can only be an owner-check).
 #pragma once
 
 #include <cstdint>
@@ -52,9 +72,11 @@ namespace kz::trace {
 // The creation request open on the creating actor when the spawn call began (the outermost one).
 struct CreationRequest {
   bool child = false;                 // a child request (the requester's own application), else an owner request
-  bool owner_readable = false;        // an owner request whose owner argument was observed
-  uint32_t owner_id = KZ_NONE32;      // that argument
+  bool owner_readable = false;        // an owner request whose owner argument was observed (app request: whose value
+                                      // the join established, see the header)
+  uint32_t owner_id = KZ_NONE32;      // that argument (app request: that value)
   bool nested_owner_request = false;  // an owner request ran inside this child request (its argument is not read)
+  bool app = false;                   // an app request (schema revision 6): the owner is the value published after the spawn
 };
 
 // An owner as the rule states it: the identity value, the level (KZ_OWNER_LEVEL) and the evidence (KZ_OWNER_EVIDENCE).
@@ -76,7 +98,7 @@ OwnerSource owner_from_request(const CreationRequest& rq, uint8_t tie_level, con
 struct IdentityRead {
   uint16_t decoder = KZ_DECODER_NONE;  // KZ_DECODER_*
   int id_slot = -1, owner_slot = -1;   // value slots (-1: none)
-  int status_slot = -1;                // spawn-return: the call's status slot, with `ok` the value of success
+  int status_slot = -1;                // spawn-return, request-return: the status slot, with `ok` the value of success
   uint64_t ok = 0;
   uint8_t status_width = 8;            // bytes compared
   std::string request_func;            // the calling function where the site is bound at the call, else empty
@@ -92,15 +114,20 @@ struct ActorJoinStats {
   uint64_t requests = 0, requests_without_return = 0, request_returns_without_request = 0;
   uint64_t ids_matched = 0, ambiguous_ids = 0, entries_unmatched = 0;
   uint64_t owners_confirmed = 0, owners_undetermined = 0;
+  // app requests (schema revision 6; counted in `requests` too)
+  uint64_t app_requests = 0, publishes = 0, publishes_unlinked = 0, publishes_unreadable = 0, publish_conflicts = 0;
+  uint64_t checks = 0, checks_unlinked = 0, checks_unreadable = 0, checks_differing = 0;
+  uint64_t app_returns_not_ok = 0, owners_at_publish = 0, owners_at_publish_withheld = 0;
 };
 
 // The join described above.  `reads` has one entry per NSITES index (decoder none where the site has no identity
 // read).  Writes the actors' creator, creator_event, spawn_return, announced_id, join_flags, owner_* and
-// request_func, the flag owner-recorded on every actor of the run (kzrt-actor, kzrt-provisional), and the run flag
-// owners-recorded.  Unresolved actors (an event without a cell) take no part.
+// request_func, the flag owner-recorded on every actor of the run (kzrt-actor, kzrt-provisional), the run flag
+// owners-recorded, and one NeutralRun::owners record per actor tied to a spawn call of an app request.  Unresolved
+// actors (an event without a cell) take no part.
 Status join_actor_identities(const std::vector<IdentityRead>& reads, NeutralRun* n, ActorJoinStats* stats);
 
-// One line of counts, for the conversion notes.
+// One line of counts, for the conversion notes (the app-request counts are added only where the run has any).
 std::string actor_join_text(const ActorJoinStats& s);
 
 }  // namespace kz::trace

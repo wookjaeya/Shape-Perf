@@ -137,8 +137,12 @@ uint8_t nloss_kind(uint32_t k) {
   }
 }
 
-// KZ_DECODER of a manifest identity read (kzs-sites 2; the same reader names as F0's plan).
+// KZ_DECODER of a manifest identity read (kzs-sites 2; the same reader names as F0's plan; kzs-sites 3 adds app-request,
+// owner-publish and owner-check, readers of this family only).
 uint16_t decoder_code(const std::string& d) {
+  if (d == "app-request") return KZ_DECODER_APP_REQUEST;
+  if (d == "owner-publish") return KZ_DECODER_OWNER_PUBLISH;
+  if (d == "owner-check") return KZ_DECODER_OWNER_CHECK;
   if (d == "spawn-create") return KZ_DECODER_SPAWN_CREATE;
   if (d == "spawn-return") return KZ_DECODER_SPAWN_RETURN;
   if (d == "thread-entry") return KZ_DECODER_THREAD_ENTRY;

@@ -1,0 +1,11 @@
+# 00_profile.kzp -- the profile header that kz-static needs to build the static basis of the cFE 6.4.1 reference build
+# (E-ST, research/cfs_procrace/plan/c5_execution_basis_20261028.md section 10.5).  DRAFT, header only: no kinds,
+# operations, rules or requirements; it is not the Phi profile of C5 (that plan, section 10.3), and nothing is judged
+# with it.  It declares no source: a source needs a commit (`rev`), and the trees come from release tarballs without
+# version-control metadata; every source file the basis reads is hashed instead (FILE_HASHES), and the tarballs
+# are cFE-6.4.1-OSS-release.tar.gz sha256
+# ec26e33b4ab40b9616ccdbc984c5a00a790a7d05b260f2628c3335a29c23e98f and osal-4.1.1-release.tar.gz sha256
+# 8f0f2b23d8226256fdb8543bf9fcb560b38434411dc12cb4f7f35b9c19e61d46 (that plan, section 1.2).
+phi 1;
+
+profile "c5-cfe-6.4.1-est" revision "cFE-6.4.1-OSS-release with osal-4.1.1-release (release tarballs)";

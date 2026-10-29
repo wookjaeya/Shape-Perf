@@ -485,13 +485,19 @@ KZ_STATIC_ASSERT(kz_raw_ev_is_64_bytes, sizeof(kz_raw_ev) == 64u);
  *   SPAWN_ID        creator side, ENTRY inside an open SPAWN_CREATE call of the same thread: a[0]
  *                   the id the spawn assigns to the new thread and passes to it (any role, at most
  *                   4 bytes): the value the child announces at THREAD_ENTRY
+ * Schema revision 6 adds three readers of the instrumented family only (a site manifest of kzs-sites 3; an F0
+ * plan site with one of them is refused as an unknown decoder): APP_REQUEST, a request that creates the
+ * application whose value it publishes after the spawn; OWNER_PUBLISH, that value as the open request hands it to
+ * its caller; OWNER_CHECK, another value of the same request instance that must agree with it
+ * (kz/trace/identity_rule.hpp).
  */
 #define KZ_ENUM_DECODER(ITEM, P)                                                     \
   ITEM(P, NONE, 0, "none") ITEM(P, GENERIC, 1, "generic")                            \
   ITEM(P, SPAWN_CREATE, 2, "spawn-create") ITEM(P, SPAWN_RETURN, 3, "spawn-return")  \
   ITEM(P, THREAD_ENTRY, 4, "thread-entry") ITEM(P, OWNER_REQUEST, 5, "owner-request") \
   ITEM(P, CHILD_REQUEST, 6, "child-request") ITEM(P, REQUEST_RETURN, 7, "request-return") \
-  ITEM(P, SPAWN_ID, 8, "spawn-id")
+  ITEM(P, SPAWN_ID, 8, "spawn-id") ITEM(P, APP_REQUEST, 9, "app-request")           \
+  ITEM(P, OWNER_PUBLISH, 10, "owner-publish") ITEM(P, OWNER_CHECK, 11, "owner-check")
 
 #define KZ_ENUM_SLOT_SRC(ITEM, P)                                                    \
   ITEM(P, NONE, 0, "none") ITEM(P, REG, 1, "reg") ITEM(P, STACK, 2, "stack")         \

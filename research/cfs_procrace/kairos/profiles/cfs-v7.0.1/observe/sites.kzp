@@ -188,3 +188,25 @@ site CFE_SB_EarlyInit.clear_global point at=cfe_sb_init.c:50 after-call=memset p
 site evs.cleanup.entry entry func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rdi:u32:id s3=stack+0:u64:return_address
 site evs.cleanup.ret   ret   func=CFE_EVS_CleanUpApp prov=evs_cleanup_def s0=rax:u32:status s3=ip:u64:return_address
 site CFE_EVS_CleanUpApp.free_slot point at=cfe_evs_task.c:194 at-call=EVS_AppDataSetFree prov=evs_cleanup_setfree
+
+# ---- R2 interval boundaries (2026-10-29, plan/r2_intervals_20261029.md) ----------------------------------------------
+#
+# The initialization of the R2 question ends where the ES main task enters OPERATIONAL (cfe_es_start.c:233-234, after
+# the RUNNING startup sync of L224); the shutdown begins where the ES task acts on the commanded restart
+# (cfe_es_task.c:664, the call of CFE_ES_ResetCFE, which does not return); subscription reporting, which decides
+# whether a subscription emits EID 22 (cfe_sb_task.c:659), is set by one function only (cfe_sb_task.c:1224-1227,
+# called by the enable and disable commands at L296 and L308).  The process exit is the end of the record; it needs
+# no site.  Sites 35-37 are not linearization points of the phi profile (their labels are not OP.LABEL): `kz replay`
+# leaves them unmapped and its judgements do not change.  The lines above this block keep their numbers, which the
+# equiv refs of instr/sites.kzs cite.
+prov es_main_operational tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_start.c" lines=233-234 cite="CFE_ES_WriteToSysLog(\"%s: CFE_ES_Main entering OPERATIONAL state\") then CFE_ES_Global.SystemState = CFE_ES_SystemState_OPERATIONAL: the console line, then the only store of OPERATIONAL" sha256=69e78ab4e87a60bb0c91adb9ebd24d323ce0bf2282e1166755565e420c305390
+prov es_restartcmd_reset tier=code-derived kind=code_pattern file="cfe/modules/es/fsw/src/cfe_es_task.c" lines=651-664 cite="CFE_ES_RestartCmd: a RestartType that is PROCESSOR or POWERON is passed to CFE_ES_ResetCFE, which does not return; any other is counted as a command error" sha256=782826d705b445116b24b86940dbb6ebd3743b9d3074dd994b3ae53f26713302
+prov sb_set_subreporting tier=code-derived kind=code_pattern file="cfe/modules/sb/fsw/src/cfe_sb_task.c" lines=1224-1227 cite="CFE_SB_SetSubscriptionReporting(uint32 state): CFE_SB_Global.SubscriptionReporting = state, the one store of the flag after its EarlyInit value" sha256=09e5ade503ba377b5d364037950e71af78b11cc89e85e9c21018aa58648cb1de
+
+# Right after the call of L233 (the OPERATIONAL line has been written to the system log and handed to OS_printf); the
+# store of L234 is the next statement, with no call between.
+site es.main.operational point at=cfe_es_start.c:233 after-call=CFE_ES_WriteToSysLog prov=es_main_operational
+# At the call of L664: the restart type the command passes (rdi).
+site es.restart_cmd.reset_cfe point at=cfe_es_task.c:664 at-call=CFE_ES_ResetCFE prov=es_restartcmd_reset s0=rdi:u32:reset_type
+# Entry of the setter: the state it stores (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72).
+site sb.sub_reporting.set entry func=CFE_SB_SetSubscriptionReporting prov=sb_set_subreporting s0=rdi:u32:state s3=stack+0:u64:return_address

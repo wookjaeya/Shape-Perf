@@ -7,8 +7,8 @@
 //     the dynamic loader and what it asks the loader for (SPEC 4.1 step 6, the app-unit probe);
 //   * the compiler identification strings (.comment) and the build-id of a linked binary.
 //
-// Classes: ELF64 and (2026-10-29, E-ST of research/cfs_procrace/plan/c5_execution_basis_20261028.md section 10.5)
-// ELF32, both little-endian; the same three reads with the class's own headers, the same bounds checks.  Every read
+// Classes: ELF64 and (2026-10-29, a 32-bit target: E-ST of the instrumented-family plan) ELF32, both
+// little-endian; the same three reads with the class's own headers, the same bounds checks.  Every read
 // also gives the file's identity (class, byte order, machine); the files of one basis must all have the same one
 // (ElfTarget), a mix is an error.
 //

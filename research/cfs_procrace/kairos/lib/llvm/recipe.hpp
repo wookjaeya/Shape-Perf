@@ -34,11 +34,11 @@
 // 4.1 step 6) only when the selected script loads it; the scope words and `module_file` are then
 // required, and so is `binary` (the executable's exported symbols are read from it).
 //
-// A `front_end_diagnostic` (2026-10-29, PI decision on E-ST of research/cfs_procrace/plan/c5_execution_basis_20261028.md
-// section 10.5 item 6) names one unit of the program (its source path relative to the bundle root, as the basis records
-// it) and one Clang diagnostic by its exact name (letters, digits and '-': the name of -W<name>; never a blanket
-// -Wno-error or -w): the front end gets -Wno-error=<name> for that unit only.  `reference` cites why: the build
-// compiler compiles the unit without an error (its build log or command).  A statement that names no unit of the
+// A `front_end_diagnostic` (2026-10-29, a PI decision on the front end's default errors, E-ST) names one unit
+// of the program (its source path relative to the bundle root, as the basis records it) and one Clang
+// diagnostic by its exact name (letters, digits and '-': the name of -W<name>; never a blanket -Wno-error or
+// -w): the front end gets -Wno-error=<name> for that unit only.  `reference` cites why: the build compiler
+// compiles the unit without an error (its build log or command).  A statement that names no unit of the
 // program is an error.
 //
 // Comments run from '#' to the end of the line.

@@ -7,11 +7,14 @@
 //       before schema revision 4 has no OCC_BASIS: what SUMMARIES holds is shown and the rest is said not recorded.
 //   kz occ diff <a.kz> <b.kz>
 //       the two containers' occurrences matched by the path-independent occurrence key (rspec, operation, owning
-//       application and the task's place in it, resource, ordinal; then without the owner; then by the text arguments
-//       where one side fixed the key value), the reading differences, the verdict differences and the basis differences
-//       listed apart, the keys several occurrences of a side share (listed, never paired by order), and the occurrences
-//       of one side only.  Exit 0 with no difference, 3 with one (an ambiguous key, a differing owner or key value
-//       included).
+//       application and the task's place in it, resource, ordinal); then without the owner, only where one side's owner
+//       (or the task's place in it) is not established and the role, the via names and the text arguments agree -- two
+//       established owners that differ are never paired; then by the text arguments where one side fixed the key value.
+//       The reading differences, the verdict and basis differences of the full-key pairs, the pairs of the other rules,
+//       the uncertain candidates (tied by the ordinal alone), the keys several occurrences of a side share (never paired
+//       by order), the candidates whose owners differ and the occurrences of one side only are listed apart.  Exit 0
+//       with no difference, 4 where the pairing of some occurrences is not established (an ambiguous key, an uncertain
+//       candidate), else 3 with any difference (occ_table.hpp occ_diff_status; the head line "result:" says which).
 //
 // Neither form sets a research condition: it reads what the replay wrote.  Which records are compared, and under which
 // reading, is the caller's statement.
@@ -29,8 +32,9 @@ void usage(FILE* f) {
                "usage: kz occ show <verdicts.kz>\n"
                "       kz occ diff <a.kz> <b.kz>\n"
                "  show   the per-occurrence table: key, verdict, summary view, basis kinds, assumptions, outcome check, edges\n"
-               "  diff   matched by the occurrence key; verdict and basis differences listed apart, a shared key listed\n"
-               "         and not paired (exit 3 if any difference or ambiguous key)\n");
+               "  diff   matched by the occurrence key; verdict and basis differences listed apart; without the owner only where\n"
+               "         one side's owner is not established; a shared key or an uncertain candidate listed and not paired\n"
+               "         (exit 4 if a pairing is not established, else 3 if any difference, else 0)\n");
 }
 
 bool load(const std::string& path, kz::Container* c, kz::trace::OccTable* t) {
@@ -66,7 +70,7 @@ int run(int argc, char** argv) {
                 tb.recorded ? "recorded" : "not recorded");
     kz::trace::OccDiffCounts n;
     std::fputs(kz::trace::occ_diff_text(ta, tb, &n).c_str(), stdout);
-    return n.any() ? 3 : 0;
+    return kz::trace::occ_diff_status(n);
   }
   usage(stderr);
   return 1;

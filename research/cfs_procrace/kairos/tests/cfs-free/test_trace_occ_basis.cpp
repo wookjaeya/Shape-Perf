@@ -166,8 +166,8 @@ void test_control_order() {
   // the comparison: one verdict difference and one basis difference, listed apart; the same container: none
   kz::trace::OccDiffCounts n;
   const std::string d = kz::trace::occ_diff_text(a.table, b.table, &n);
-  KZ_CHECK(n.matched == 1 && n.verdict == 1 && n.basis == 1 && n.only_a == 0 && n.only_b == 0);
-  KZ_CHECK(has(d, "reading differs: control-order A on, B off"));
+  KZ_CHECK(n.matched == 1 && n.verdict == 1 && n.basis == 1 && n.only_a == 0 && n.only_b == 0 && kz::trace::occ_diff_status(n) == 3);
+  KZ_CHECK(has(d, "reading differs: control-order A on, B off") && has(d, "result: exit 3 (differences)"));
   KZ_CHECK(has(d, "verdict differences (status, summary view): 1") && has(d, "basis differences (basis kinds, assumptions, outcome check, edge rules): 1"));
   kz::trace::occ_diff_text(a.table, a.table, &n);
   KZ_CHECK(n.matched == 1 && n.verdict == 0 && n.basis == 0);
@@ -179,7 +179,7 @@ void test_control_order() {
   KZ_CHECK_OK(kz::eval::parse_trace_text(renamed, &t2));
   const Out c = run(p, renamed, on, {{at(t2, "a13", "lookup", 1), at(t2, "a14", "create")}});
   kz::trace::occ_diff_text(a.table, c.table, &n);
-  KZ_CHECK(n.matched == 1 && n.verdict == 0 && n.basis == 0 && n.owner_differs == 0);
+  KZ_CHECK(n.matched == 1 && n.by_key == 1 && n.verdict == 0 && n.basis == 0 && n.owner_unestablished == 0 && kz::trace::occ_diff_status(n) == 0);
 }
 
 // A container written before revision 4 (SUMMARIES only): read, the rest said not recorded.
@@ -246,6 +246,7 @@ void test_keys() {
   const kz::trace::OccTable b4 = table(b.rows, false);
   d = kz::trace::occ_diff_text(a, b4, &n);
   KZ_CHECK(n.matched == 0 && n.ambiguous == 1 && n.ambiguous_rows == 4 && n.verdict == 0 && n.only_a == 0 && n.only_b == 0 && n.any());
+  KZ_CHECK(kz::trace::occ_diff_status(n) == 4 && has(d, "result: exit 4 (the pairing of some occurrences is not established: ambiguous keys 1, uncertain 0)"));
   KZ_CHECK(has(d, "task in the key: not used (B does not record it)"));
   KZ_CHECK(has(d, "ambiguous keys (shared by more than one occurrence of a side; which is which is not established, none paired): 1"));
   KZ_CHECK(has(d, "K-LOOKUP | lookup | app[9] | 0x30002 | 1: A#0 READY") && has(d, "B#1 READY"));

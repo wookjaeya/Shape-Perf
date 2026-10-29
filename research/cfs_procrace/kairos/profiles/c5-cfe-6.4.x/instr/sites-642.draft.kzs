@@ -18,6 +18,14 @@ module 1 name=core-linux.bin source=cfe
 module 2 name=sample_app.so source=cfe
 
 # ---- creator: CFE_ES_AppCreate (cfe_es_apps.c:426-714); one critical section L571-L669 across OS_TaskCreate -------
+# E-ID1 draft (2026-10-29; plan/c5_execution_basis_20261028.md section 10.4).  Comments only: these readers are not
+# in kzs-sites 2 and the parser would refuse them.  The owner value is read where the request hands the new slot to
+# its caller (L660), not from the analysed TaskTable store (L654, site 8), which is kept as a cross-check only.
+#   identity 1 decoder=app-request ref="cfe_es_apps.c:426 (the request creates the application it names later)"
+#   site 33 label=es.app_create.owner_out op=es.app_create phase=point place=store line=660 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:660 *ApplicationIdPtr = i"
+#   value 33 0 role=app_id from=operand0 type=u32
+#   identity 33 decoder=owner-publish owner=0 ref="cfe_es_apps.c:660"
+#   identity 2 decoder=request-return status=0 ok=0 ref="CFE_SUCCESS"
 site 1 label=es.app_create.entry op=es.app_create phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate line=426 ref="cfe_es_apps.c:426-432"
 value 1 0 role=name_ptr from=arg3 type=ptr ref="AppName (L429)"
 value 1 1 role=priority from=arg4 type=u32 ref="Priority (L430)"

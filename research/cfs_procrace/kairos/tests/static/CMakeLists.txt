@@ -50,6 +50,17 @@ foreach(kz_name IN LISTS kz_golden_fixtures)
 endforeach()
 
 # The core executable of the pinned bundle: basis, extract, numbers.
+# Three lines of data/core_cpu1.golden come from the bundle build the golden was made from, not from the
+# tool: binary.sha256, binary.build_id and generated.build_env_table.sha256.  The generated table holds the
+# build date (BUILDDATE), and the date also changes the executable and its GNU ld build id, so a rebuild of
+# the bundle from the same pinned sources changes these three lines and no other.  Regenerated on 2026-10-29
+# from the rebuilt bundle (env/REBUILD_20261029.md sections 2.2 and 5.2); only these three lines changed:
+#   binary.sha256                     0edb1ae28780160ebee95adf8861fc76fe7119a30434e9cd8698cb505bc97799 (BUILDDATE 202610080115)
+#                                  -> c10d7dd1ad0b83106d3e0ebdb90a13a617c34ab2ea073f3bd360f0358b04be44 (BUILDDATE 202610290151)
+#   binary.build_id                   be6d04f1f80d421efea50cc9f47db848b2a52941 -> 7b87b2a417ca18b8cf874ed4bb1a6972e851585e
+#   generated.build_env_table.sha256  ebac47dd2849b67c... -> 126f83723941c3eb...
+# The rebuilt build with only the date string set back to 202610080115 gives the old table hash and, relinked,
+# the old executable (REBUILD section 2.2); the other 563 lines are the same for both builds.
 add_test(NAME static_golden_core_cpu1
   COMMAND static_golden core $<TARGET_FILE:kz-static> ${KZ_PROFILE_DIR} ${KZ_PROFILE_DIR}/basis/core-cpu1.kzb ${KZ_BUNDLE_ROOT}
           ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_core)

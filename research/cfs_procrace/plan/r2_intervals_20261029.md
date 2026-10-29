@@ -13,7 +13,7 @@
 | 구간 | **I0 초기화**: ES 주 task가 OPERATIONAL에 들기 전. **I1 운용**: 그 뒤, 명령 재시작 전. **I2 종료**: 명령 재시작 뒤, 기록 끝(프로세스 종료)까지 (§1) |
 | 새 관측 site | 셋. `es.main.operational`(cfe_es_start.c L233–L234), `es.restart_cmd.reset_cfe`(cfe_es_task.c L664), `sb.sub_reporting.set`(cfe_sb_task.c L1224–L1227). F0 계획 site 35–37, 계측 manifest site 42–44. 같은 label, 같은 위치(§2). 그리고 후속 지시로 프로필 SCOPE의 LP 둘(`CFE_PSP_Restart.request_shutdown` PSP L87, `OS_Application_Run.teardown` L507): F0 site 38–39, 계측 site 45–46(§6 항목 1) |
 | 더하지 않은 것 | 프로세스 종료(기록 끝이 경계다), TO_LAB 구독 루프의 시작·끝(시작은 이미 관측된다. 끝은 `to_lab.so`에 있어 두 경로에 새 binary/module이 필요하다). §6에 lead·PI 몫으로 적었다 |
-| 확인 [M] | F0: `kz anchor` 38 targets, 인용 43개 hash 일치. `kz observe --check` 38 sites, 셋 모두 주소에 묶임. 계측: manifest parser 수용. 파생 R2 빌드 binding **42개 모두 bound**, hook 42, hookcheck ok 42(§5) |
+| 확인 [M] | F0: `kz anchor` 38 targets, 인용 43개 hash 일치. `kz observe --check` 38 sites, 셋 모두 주소에 묶임. 계측: manifest parser 수용. 파생 R2 빌드 binding **42개 모두 bound**, hook 42, hookcheck ok 42(§5). 후속 판(SCOPE LP 둘 더함): F0 40 targets·인용 45개, 계측 binding **44개 모두 bound**, hook 44, hookcheck ok 44(§5.1; 빌드 도중 컨테이너 재시작이 있었고 다시 돌렸다) |
 | 배정 규칙 | 확립된 순서만 쓴다. 프로그램 순서(po), 시작 동기화(sync), OPERATIONAL 대기의 성공 반환(rf). 그 밖은 **기록 시각만(time)**으로 표시한다. time은 happens-before가 아니다(§3) |
 | 스크립트 | `kairos/instrument/gcc/scripts/r2_intervals_tag.sh`(발생마다 구간·근거, 구간별 부류 수), `r2_intervals_selftest.sh`(두 경로 도구 시험, 통과) (§4) |
 | 지금 기록으로 말할 수 있는 것 | 없다. 보존 기록은 없어졌고, 남은 F0 기록 `s1r2_p1`은 새 site 전의 계획이라 271개 발생 모두 "미정"이다(§4.3) |
@@ -88,23 +88,25 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
 | `es.main.operational` | cfe_es_start.c L233–L234 | site 35, L208. `point at=cfe_es_start.c:233 after-call=CFE_ES_WriteToSysLog`, 값 없음 | site 42, L212. `place=after-call callee=CFE_ES_WriteToSysLog line=233`, 값 없음 | 같은 호출 바로 뒤. F0 주소 `0x24e22`는 L234의 저장 명령(`movl $0x5, CFE_ES_Global+0x18`)이고 probe는 그 실행 전에 걸린다 [M: objdump]. 둘 다 "L233 줄을 넘긴 뒤, L234 저장 전"이다 |
 | `es.restart_cmd.reset_cfe` | cfe_es_task.c L651–L664 | site 36, L210. `point at=cfe_es_task.c:664 at-call=CFE_ES_ResetCFE s0=rdi:u32:reset_type` | site 43, L214. `place=at-call callee=CFE_ES_ResetCFE line=664`, `value 0 reset_type from=arg0 u32` | 같은 호출. F0 주소 `0x272f5`는 `call CFE_ES_ResetCFE`이고 바로 앞이 `mov %eax,%edi`다 [M]. 이 호출은 `CFE_ES_RestartCmd` 안의 하나뿐이다 |
 | `sb.sub_reporting.set` | cfe_sb_task.c L1224–L1227 | site 37, L212. `entry func=CFE_SB_SetSubscriptionReporting s0=rdi:u32:state` | site 44, L217. `phase=before func=CFE_SB_SetSubscriptionReporting line=1224`, `value 0 state from=arg0 u32` | 같은 함수 진입. 진입과 L1226 저장 사이에 다른 문장이 없다 |
+| `CFE_PSP_Restart.request_shutdown` (후속, §6 항목 1) | cfe_psp_support.c L87; 프로필 `20_ops.kzp` L240 | site 38, L225. `point at=cfe_psp_support.c:87 line-start`, 값 없음 | site 45, L228. `phase=effect func=CFE_PSP_Restart line=87 place=store`, 값 없음 | 프로필 LP `store(CFE_PSP_IdleTaskState_t.ShutdownReq)`. F0 주소 `0x5c21b`는 L87의 `movb $0x1, CFE_PSP_IdleTaskState+0x8`이고 probe는 그 실행 전이다(줄에 호출이 없어 `CFE_ES_WaitForSystemState.raise_state`와 같은 근사). GCC는 저장 바로 뒤다. 그 사이에 관측 사건은 없다(다음 문장 L88 `pthread_kill`) |
+| `OS_Application_Run.teardown` (후속) | cfe_psp_start.c L488–L507; 프로필 `20_ops.kzp` L247 | site 39, L226. `point at=cfe_psp_start.c:507 after-call=OS_DeleteAllObjects` | site 46, L231. `phase=effect func=OS_Application_Run callee=OS_DeleteAllObjects line=507 place=after-call` | 프로필 LP `call("OS_DeleteAllObjects")`, 효과는 그 함수가 한다(after-call, 계측 manifest 머리말의 규칙). 같은 호출 바로 뒤. F0 주소 `0x5be67`은 L508의 `nop`이다 [M: objdump] |
 
 - 각 site에 인용 줄과 sha256을 붙였다(F0 `prov es_main_operational` `69e78ab4…`, `es_restartcmd_reset` `782826d7…`, `sb_set_subreporting` `09e5ade5…`; `sed -n 'A,Bp' | sha256sum`, 기존 줄 L82의 값 `a99fd434…`로 방법을 확인함) [M].
 - 계측 쪽 `equiv … status=unconfirmed`. 이름이 같다고 같은 의미가 확인된 것은 아니다(`kairos/docs/event_semantics.md` §3). 위치 관계는 `ref`에 적었다.
-- 두 파일 모두 **끝에만 더했다**. 기존 줄 번호가 그대로라서, 계측 manifest의 `equiv` ref가 인용하는 F0 계획 줄(L74–L190)이 바뀌지 않는다. 계측 manifest 머리 주석의 "(35)"만 "(35; 38 with the interval sites 42-44 at the end)"로 고쳤다(줄 수 같음).
-- 셋 다 프로필의 LP가 아니다(label이 OP.LABEL이 아니다). 재생은 이 사건들을 "events of unmapped sites"로 세고 버린다. 점 site의 out 값 경로(`lib/trace/real_trace.cpp` L390–L415)에도 걸리지 않는다. 둘째 site의 값 역할 `reset_type`은 어느 연산의 out 매개변수도 아니고, 그 지점에서 열린 프로필 연산 호출도 없다 [F]. 도구 시험 [M]: 같은 합성 일정에서 세 사건만 뺀 기록과 넣은 기록의 재생을 `kz occ diff`하면 발생 10 대 10, 키 짝 10, 판정 차이 0, `result: exit 0`이다.
-- 관측 부담: F0 probe 셋. 한 실행에서 각각 한 번(OPERATIONAL, 재시작), setter는 켜기·끄기 명령 수만큼 걸린다. 다른 site의 횟수와 비교하면 작다. 측정하지 않았다 [U].
+- 두 파일 모두 **끝에만 더했다**(후속 두 site도 끝에 더했다. 계측 manifest에는 `source psp rev=c4b3b0b6…`(번들 고정 판)도 끝에 더했다). 기존 줄 번호가 그대로라서, 계측 manifest의 `equiv` ref가 인용하는 F0 계획 줄(L74–L190)이 바뀌지 않는다. 계측 manifest 머리 주석의 "(35)"만 "(35; 38 with the interval sites 42-44 at the end)"로 고쳤다(줄 수 같음).
+- 처음 셋(35–37 / 42–44)은 프로필의 LP가 아니다(label이 OP.LABEL이 아니다). 후속 둘(38–39 / 45–46)은 LP이고 재생이 묶는다(§6 항목 1). 재생은 이 사건들을 "events of unmapped sites"로 세고 버린다. 점 site의 out 값 경로(`lib/trace/real_trace.cpp` L390–L415)에도 걸리지 않는다. 둘째 site의 값 역할 `reset_type`은 어느 연산의 out 매개변수도 아니고, 그 지점에서 열린 프로필 연산 호출도 없다 [F]. 도구 시험 [M]: 같은 합성 일정에서 세 사건만 뺀 기록과 넣은 기록의 재생을 `kz occ diff`하면 발생 10 대 10, 키 짝 10, 판정 차이 0, `result: exit 0`이다.
+- 관측 부담: F0 probe 셋(후속 둘을 더하면 다섯; 요청과 teardown은 한 실행에 한 번씩). 한 실행에서 각각 한 번(OPERATIONAL, 재시작), setter는 켜기·끄기 명령 수만큼 걸린다. 다른 site의 횟수와 비교하면 작다. 측정하지 않았다 [U].
 
 확인 [M]:
 
 | 확인 | 명령 | 결과 |
 |---|---|---|
-| F0 계획 묶기 | `kz anchor <ENV core-cpu1> observe/sites.kzp -o basis.kz --source-root <ENV 트리>` | 종료 0. 38 targets, 함수 기호 1788. 인용 43개가 선언한 hash와 같다. hash 없는 1개는 `spec_s1r2`(원래 그렇다) |
-| F0 계획 점검 | `kz observe basis.kz observe/sites.kzp -o … --check -- /bin/true` | 종료 0. "hash, size, build-id and the bytes at 38 targets match". site 35 `CFE_ES_Main` `0x24e22`, site 36 `CFE_ES_RestartCmd` `0x272f5`, site 37 `CFE_SB_SetSubscriptionReporting` `0x35b36` |
+| F0 계획 묶기 | `kz anchor <ENV core-cpu1> observe/sites.kzp -o basis.kz --source-root <ENV 트리>` | 종료 0. 38 targets, 함수 기호 1788. 인용 43개가 선언한 hash와 같다. hash 없는 1개는 `spec_s1r2`(원래 그렇다). 후속 두 site를 더한 판: 40 targets, 인용 45개 일치(PSP 인용 둘은 `01_prov.kzp`의 `psp_restart_req` `94bc76fe…`·`psp_teardown` `5005392f…`와 같은 줄·hash) |
+| F0 계획 점검 | `kz observe basis.kz observe/sites.kzp -o … --check -- /bin/true` | 종료 0. "hash, size, build-id and the bytes at 38 targets match". site 35 `CFE_ES_Main` `0x24e22`, site 36 `CFE_ES_RestartCmd` `0x272f5`, site 37 `CFE_SB_SetSubscriptionReporting` `0x35b36`. 후속 판: 40 targets 일치, site 38 `CFE_PSP_Restart` `0x5c21b`, site 39 `OS_Application_Run` `0x5be67` |
 | 계측 manifest 읽기 | `kz-rt-dump --manifest instr/sites.kzs /dev/null` | manifest 오류 없음(dump magic 오류만). 대조: phase가 틀린 줄을 더한 사본은 `sites.kzs:220: phase is …`로 거부 |
-| 계측 binding | §5의 파생 빌드 | site 42·43·44가 bind `66208`(after-call), `66224`(at-call), `66240`(entry), 모두 `status=bound` |
+| 계측 binding | §5의 파생 빌드 | site 42·43·44가 bind `66208`(after-call), `66224`(at-call), `66240`(entry), 모두 `status=bound`. 후속: site 45 → `66256`(store), 46 → `66272`(after-call), bound |
 
-파일 sha256 [M]: `observe/sites.kzp` `2adf247e…`(위 두 확인은 이 판으로 다시 했다), `instr/sites.kzs` `7a2bfe0e…`(이전 `897c7510…`).
+파일 sha256 [M]: `observe/sites.kzp` `426d3e01…`, `instr/sites.kzs` `f55a8079…`(후속 두 site까지 넣은 판. 셋 site만의 판은 `2adf247e…` / `7a2bfe0e…`, 그 전 `897c7510…`).
 
 ## 3. 구간 배정 규칙 — 순서를 만들어 내지 않는다 [D][F][I]
 
@@ -138,7 +140,7 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
 - 코어 앱 여부(sync 규칙의 CORE_READY 대기): 재생 텍스트의 identity 줄(`core service` / `not a core service` / `requested from F`)을 먼저 쓰고, 없으면 계측 binding이 적은 요청 함수(NACTORS `request_func`)를 쓴다. F0 기록은 요청 함수를 반환 주소로만 가지므로, 재생을 `--basis`와 `--core-request-caller CFE_ES_CreateObjects`로 돌린 텍스트(`w4w5_r2.sh`와 같음)에서만 코어 여부가 선다. 없으면 코어 task의 초기화 사용은 time으로 남는다(약해질 뿐 틀리지는 않는다).
 - 부류: `appid0`(전달 AppID 0), `self`(실행 task의 소유 앱 id = 전달 AppID; SB 자기 전송은 `self`이고 AppID `0x110003`), `other`(다른 task의 사용), `owner-unknown`.
 - 출력:
-  - `occ.tsv`: 발생마다 actor, 소유, AppID, EventID, 부류, 기록 사건, aseq, 시각, B1·B2 관계와 근거, 구간, 배정 근거, established, 재생의 상태·요약·scope.
+  - `occ.tsv`: 발생마다 actor, 소유, AppID, EventID, 부류, 기록 사건, aseq, 시각, B1·B2 관계와 근거, 구간, 배정 근거, established, 재생의 상태·요약·scope, 그리고 프로필의 종료 요청(`CFE_PSP_Restart.request_shutdown`)에 대한 관계와 근거(요청 actor 안이면 po, 아니면 time).
   - `boundaries.tsv`
   - `intervals.txt`: 구간 × 부류(established와 time/none), × 배정 근거, × 요약 뷰, × AppID·EventID, actor별 구간 분포(TO_LAB 루프의 분포가 여기 나온다), 재생 scope 대 구간, EID 22 점검.
   - `sha256.txt`
@@ -151,8 +153,9 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
   - §5의 런타임과 binding 목록을 쓰는 작은 C 프로그램이 합성 일정을 기록한다. 일정은 코어 시작(ES, SB), 시작 대기가 있는 앱 하나와 없는 앱 하나, 주 task의 RUNNING 동기화 셋, OPERATIONAL, 보고 켜기, 명령 재시작, 그리고 경계 앞뒤의 호출 10개다. 단계는 조건 변수로 하나씩 돈다.
   - `kz-rt-dump` 점검 `check ok (0 failures)`. 변환에서 소유 confirmed 4, undetermined 1(초기 스레드).
   - 재생 뒤 10개 발생의 구간·근거가 기대표와 모두 같다: init sync 4, init time 1, operational rf/time 2, operational time/time 1, shutdown po 1, shutdown time 1. EID 22 점검 1/1.
+  - 후속(§6 항목 1): ES task가 재시작 뒤 `CFE_PSP_Restart.request_shutdown`을, 주 task가 끝에 `OS_Application_Run.teardown`을 기록한다. 일정 둘을 돌린다. `base`(ES의 재시작·요청 단계 16, TO_LAB의 마지막 호출 단계 17)와 `swap`(두 단계를 맞바꿈)이다. 발생마다 재생의 scope와 요청에 대한 관계·근거도 기대표와 대조한다. 둘 다 10/10 일치.
 - F0 경로: 남은 F0 기록 `env/logs/s1r2_p1.kzt`(2026-10-15, 계획 site 0–7)와 그 basis를 쓴다. 발생 271개가 모두 기록 사건과 이어진다(문제 0). 경계 site가 없는 계획이라 하나도 배정되지 않는다.
-- 결과: `selftest passed`(2026-10-29, scratch).
+- 결과: `selftest passed`(2026-10-29, scratch; 후속 판도 통과).
 
 ### 4.3 지금 있는 기록에 대해
 
@@ -182,9 +185,49 @@ ES 주 task(`CFE_ES_Main`, 프로세스의 초기 스레드)의 프로그램 순
 | 새 site bind | 42 → `66208` after-call, 43 → `66224` at-call, 44 → `66240` entry, module 1 | — |
 | 산출물 | 계측 `core-cpu1` `2d12febde06cbd71dcef187c763362f77c6165c5dbd04249e977a7979fffcdb3`. 같은 경로 기준 빌드 `2644bb49…`(날짜가 다름). `binds_instr.kzs` `6791ec09…` | `dfebff9f…` / `64a7158f…` |
 
+### 5.1 후속 재빌드: 종료 범위 LP 두 site (2026-10-29 05:43–05:57 UTC) [M]
+
+- manifest `7a2bfe0e…` → `f55a8079…`(site 45·46, `source psp`). 같은 절차를 다시 밟았다. 각 단계 앞에서 `/home/user/work/.campaign_running`이 없는지 확인하고, 있으면 기다리게 했다. 위 42-site 빌드는 `/home/user/work/instr/gcc/d4/superseded_20261029_sites42/`로 옮겼다(지우지 않음).
+- `build_runtime.sh`(05:43:49) 종료 0. build identity 객체 `265a78f1…`, 라이브러리·`kz-rt-dump`는 위와 같다. `prepare` 종료 0. `build ref`(05:43:53, 237 s) 종료 0.
+- **컨테이너 재시작**: 05:49Z쯤 `build instr` 도중 컨테이너가 다시 시작되었고, 그 빌드와 그것을 돌리던 작업이 끊겼다.
+  - 끊긴 instr 변형은 지우지 않고 `/home/user/work/instr/gcc/d4/superseded_20261029_restart_partial/`로 옮겼다. 거기에 README가 있다. 옮긴 사람은 lead다.
+  - 그 디렉터리에는 끊긴 `build-native_std`, `binds_instr/`, `build_instr.*`가 있다. 재시작 직후의 첫 재개 시도 기록도 있다. 그 시도의 `build instr`는 "refusing: build-native_std exists"로 거부되었다. 그 상태에서 돈 `check`는 binding 4개, hookcheck `missing=4`로 실패했다.
+  - ref 변형(같은 경로 객체 hash `objects_ref.sha256`)은 그대로 두었다.
+- 재개(lead, scratch `rebuild_r2c.sh`): `derive_r2.sh build … instr`(05:52:29, 284 s) 종료 0, 경고 0, 객체(cpu1) 1335. 이어서 `check`(05:57:25) 종료 0. 기록: `d4/r2.instr.resume.log`, `d4/r2.check.resume.log`.
+
+| 항목 | 결과 | 42-site 빌드 |
+|---|---|---|
+| binding | **44개, 44 bound** | 42 |
+| 링크 뒤 hook(`core-cpu1`) | 44 | 42 |
+| hookcheck | `rc=0 summary: ok=44` | ok=42 |
+| strip-debug 뒤 다른 객체 | 282 = 계측 단위 14(`cfe_psp_support.c`, `cfe_psp_start.c` 더함) + D4 1 + coverage 267. "UNEXPECTED" 0 | 280 |
+| coverage 단위 | 11 | 11 |
+| 새 site bind | 45 → `66256`(store, `cfe_psp_support.c:87`), 46 → `66272`(after-call, `cfe_psp_start.c:507`), module 1 | — |
+| 산출물 | 계측 `core-cpu1` `e1921179e54835836bd2f2a9ff958a8e21f5acc8e319143645fde097bccbe737`. `binds_instr.kzs` `46ecdd0b…`. plugin `56a96b79…`(같음) | `2d12febd…` |
+
 ## 6. 레퍼런스로 정하지 못한 것 — lead·PI 몫 [U]
 
-1. **SCOPE LP의 관측.** 프로필은 기본 범위가 종료 요청(PSP L87)에서 끝난다고 선언한다. 그런데 계획은 그 LP와 teardown LP(L507)를 관측하지 않는다(§1.2). 그 위치에 LP 이름(`CFE_PSP_Restart.request_shutdown`, `OS_Application_Run.teardown`)으로 site를 더하는 것은 계획의 이름 규칙에 맞다(`observe/sites.kzp` 머리말 "named after the linearization points … so that `kz replay` maps them"). 그러나 더하면 재생이 SCOPE를 적용한다. 그러면 병합 순서로 재시작 뒤 발생이 teardown 쪽으로 가고(CR §8.2), 캠페인의 판정이 바뀐다. 분석 설정을 바꾸는 일이라 더하지 않았다.
+1. **SCOPE LP의 관측 — 2026-10-29 후속 지시로 더함.**
+   - 지시(lead): 분석 의미의 레퍼런스는 `profiles/cfs-v7.0.1/10_kinds.kzp` L22–L29다. 이 블록은 모든 기본 범위를 종료 요청에서 끝낸다(prov `psp_restart_req`, `psp_teardown`). R2 계획이 그 지점을 관측하지 않은 것은 계획과 프로필 사이의 빈틈이다. 새 규칙이 아니다. 기록에 그 지점이 실리려면 실행 때 관측해야 한다.
+   - 한 것: 계획의 이름 규칙대로 두 site를 두 경로 끝에 더했다(§2 표: F0 site 38·39, 계측 site 45·46). 확인은 `kz anchor` 40 targets·인용 45개, `kz observe --check` 40 sites(§2)이다. 파생 빌드는 binding 44, hook 44, hookcheck ok 44(§5.1)이다. 엔진 옵션은 더하지 않았다. `lib`·`include`·`tools`·`tests`도 고치지 않았다.
+   - 재생이 이제 하는 일. 합성 도구 시험(§4.2 `base`·`swap`)에서 [M], 엔진 소스로 [F]:
+     - 요청: 종류 `es.shutdown`이 SHUTDOWN_REQ에 이르는 첫 효과의 trace 위치다(`lib/core/eval_trace.cpp` L2377–L2381). 출력은 `shutdown_request yes at #43 a2 CFE_PSP_Restart.request_shutdown`이다.
+     - 범위: 발생마다 결정할 때 `in_scope = !(shutdown_requested && shutdown_event < decision)`(같은 파일 L1886–L1891)다. **trace 위치의 비교이고 순서 근거를 보지 않는다.** trace 위치는 선형화한 병합 순서다(`replay_output.md` §7.3). 한 actor 안에서는 프로그램 순서를 지킨다. actor 사이에서는 변환의 병합(시계, 시각, decode 순서, actor)을 따르고, 알려진 순서 간선이 요구할 때만 옮긴다.
+     - 요청한 actor(ES task `a2`) 안의 발생: 요청 뒤의 호출은 `decided at … #44 scope teardown`이다. 근거는 **프로그램 순서**다. 시각과 무관하게 선다.
+     - 다른 actor(TO_LAB 꼴 `a4`)의 발생: `base`에서는 요청보다 기록 시각이 뒤라 `scope teardown`이다. `swap`에서는 같은 호출이 두 단계만 맞바뀌어 요청보다 앞에 기록되었고, `scope default`다. 근거는 **병합 위치, 곧 기록 시각뿐**이다. 그 actor와 요청 사이에 기록된 순서 간선이 없다. happens-before가 아니다(CR §8.2).
+     - 판정은 바뀌지 않았다. 같은 `base` 일정에서 두 지점만 뺀 기록과 비교했다. `kz occ diff` 종료 0, 판정 차이 0, 근거 차이 0, 요약 같음(INCONCLUSIVE(not_evaluated) 8, OBSERVED_VIOLATION 2).
+     - 이 엔진에서 범위가 하는 일은 다음뿐이다(`in_scope`의 쓰임: L1890, L3309, L3688, L4263) [F]. teardown 범위 발생 자신의 상태는 바꾸지 않는다.
+       - 발생의 `scope` 표시. 텍스트 출력에만 있다. `--out` 컨테이너(SUMMARIES, OCC_BASIS …)에는 범위가 없으므로 `kz occ diff`는 범위 차이를 보지 못한다 [M: kz-dump].
+       - 기본 범위 발생에 대해 TEARDOWN 지점과 그 뒤의 쓰기를 읽기 순서에서 뺀다(L1066–L1090, 위치와 HB).
+       - 같은 쓰기를 실행 관계에서 뺀다(L3307–L3312: 그 지점, 그 actor의 프로그램 순서 뒤, 또는 HB 뒤).
+       - 종료 monitor: TEARDOWN 뒤의 어떤 사건도 기본 범위 발생을 결정하지 않는다(L3688).
+     - 실제 R2에서는 `CFE_PSP_Restart`가 ES task에서 돌아오지 않는다(`cfe_psp_support.c` L99–L107). 그래서 teardown 범위가 될 R2 발생은 거의 다른 actor(TO_LAB 등)의 것이다. 그 범위는 기록 시각으로만 정해진다. `r2_intervals_tag.sh`는 발생마다 재생의 scope와, 요청에 대한 관계·근거(po 또는 time)를 나란히 적는다(§4.1).
+     - 두 경로의 위치: F0는 L87 저장 전, GCC는 저장 뒤다. 그 사이에 그 actor의 관측 사건은 없다. teardown은 두 경로 모두 `OS_DeleteAllObjects` 호출 바로 뒤다.
+   - 민감도 읽기(범위를 적용하지 않는 읽기):
+     - **기존 옵션이 없다.** `kz replay --help`의 선택지(`--outcome-narrowing`, `--compare-narrowing`, `--clearing-writes`, `--owner-identity-targets`, `--reads-from-edges`, `--reads-from-outcome`, `--control-order`) 가운데 범위를 끄는 것은 없다.
+     - `--clearing-writes counted|excluded`는 이전의 관계 읽기(`relate_legacy`)를 고른다. 그 읽기의 관계에는 TEARDOWN 제외가 없다. 그러나 범위 표시와 읽기 순서의 제외는 그대로다 [M: `base`를 `--clearing-writes counted`로 읽어도 `shutdown_request yes`, `scope teardown` 2].
+     - 범위 없는 읽기는 두 지점이 없는 기록(이전 계획의 기록)이나 `scope` 블록을 뺀 프로필로만 된다. 후자는 프로필 변경이라 하지 않았다.
+
 2. **TO_LAB 루프의 끝.** L520의 이벤트, 또는 `TO_LAB_UpdateSubscriptionsFromTable`(L458)의 진입·반환이 끝을 표시한다. 그 코드는 `to_lab.so`에 있다. F0 계획에 둘째 binary(`binary to_lab.so`, `kz anchor --bin`, 실행 때 `--basis` 하나 더)를, 계측 manifest에 module 하나를 더해야 한다. 캠페인 스크립트와 basis 만들기에 미치는 변경이라 하지 않았다. 지금은 TO_LAB 사건의 actor별 분포로 루프의 위치를 읽는다(§4.1).
 3. **명령 경로가 아닌 재시작.** HS(`hs_monitors.c` L138·L290)나 코어 앱 오류(`cfe_es_api.c` L352)의 `CFE_ES_ResetCFE`, 그리고 하네스의 SIGINT 대체(`env/run_cfs.sh` L314)는 B2를 남기지 않는다. 그때는 `after-operational`로 남는다. 이 경로들도 경계로 볼지는 정하지 않았다.
 4. **time 근거의 쓰임.** time으로 배정한 발생을 구간별 기대 판정에 넣을지, 따로 보고할지는 정하지 않았다(§7).

@@ -457,6 +457,22 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
   - 검사기: `lib/core/phi_check.cpp` L333(`lp.` 이름 인식), L868–L877(`op_env`가 점의 `values`를 `lp.NAME`으로 환경에 넣음), L1003(conjunct 검사가 그 환경을 씀).
   - 평가기: `lib/core/eval_trace.cpp` L1251, L1596.
   - 문서: `kairos/docs/phi_reference.md` L167(이름 `lp.NAME`), L223(`values`).
+- **2026-10-29 메모 2 (Φ 프로필 작성)** [M][F][D-제안]:
+  - 위치: `kairos/profiles/c5-cfe-6.4.x/`의 공통 파일 8개(`00_profile`, `01_prov`, `02_researcher`, `05_consts`, `10_kinds`, `20_ops`, `30_hb`, `40_rspec`)와 판 디렉터리 `cfe-6.4.1/`·`cfe-6.4.2/`(각 `00_source`, `01_prov`). C1 프로필처럼 공통 디렉터리에 판 디렉터리 하나를 더해 인스턴스를 만든다. `instr/`·`basis/`는 바꾸지 않았다.
+  - 내용: 종류 `es.task(t)`(FREE < LIVE), 연산 `CFE_ES_GetAppID`·`CFE_ES_GetAppIDInternal`(조건 `registered`, `CFE_SUCCESS`·`CFE_ES_ERR_APPID` 매핑에 `narrow`), `CFE_ES_AppCreate`(L652/L655의 `publish`), 다른 writer(`CFE_ES_Main` 초기화, `CreateObjects`, `CreateChildTask`, 해제 셋), `OS_TaskCreate`. hb는 R1과 phase 규칙 R2-P-TASK. 역할 `sb-create-pipe-dependent-lookup`. rspec `K-SELF.es-task`, `K-SELF.es-task-internal`. Φ 사이트 이름은 manifest의 label과 같게 했다(`es.get_app_id.task`, `es.get_app_id_int.task`, `es.app_create.pub_taskid`, `sb.create_pipe.get_app_id`).
+  - 검사 [M] (merged 빌드 `/home/user/work/merge-check/kz-llvm`의 `kz-phi`, sha256 `c8ed043c823ffdf4e7b5b142b724da1ea85dcec8860e6d25d22d591802a0da4c`; `kz`에는 `phi` 명령이 없다):
+    - `kz-phi check`: 두 인스턴스 모두 오류 0, 경고 2(두 rspec에 oracle 함수 없음: 검사가 조회 안에 들어 있다). 출처 기록 49, 출처가 있는 주장 30, 손으로 넣은 것 1(hb R1), declared-trusted 0.
+    - `kz-phi verify-prov --root <pristine 트리>`(`/home/user/work/c5tools/build/64<V>/pristine/cFE-6.4.<V>-OSS-release`): 인용 42개 해시 일치, 문제 0. 식별자 20개 확인. source pin 2개는 `unverifiable`(git 메타데이터 없음).
+    - profile hash: 6.4.1 `38a6db1bcdb849c9677628fa61af8d6047a979e0363c85dc827c285c04126c2e`, 6.4.2 `d92989a03cb21effe4f5224adf27ea906b0f70a72894bb8dbbc9ea8ccbb95303`.
+  - **위 메모의 정정** [F][M]: `lp.NAME`을 읽을 수 있는 것은 연산의 조건식(conjunct)뿐이다. rspec의 `key`·`requires`는 호출의 매개변수만으로 풀린다(`lib/core/phi_check.cpp` L1288 `op_env(op, false, nullptr)`). 시험 프로필에서 `kz-phi check`가 "unknown parameter 'lp.task_id'"를 냈다.
+    - 그래서 프로필은 두 조회에 C에 없는 매개변수 `task_id`를 두었다(researcher 기록 `r_task_id_param`). 점 사이트(site 24·27)의 슬롯 role `task_id`가 그 점 사건의 `arg.task_id`로 실린다(`lib/trace/real_trace.cpp` L117). 조건은 그 값으로 점에서 평가된다.
+    - 남는 영향: 발생의 키는 호출 사건에서 정해진다(`lib/core/eval_trace.cpp` L1764–L1772). 키가 비어 per-key 서수와 실행 관계가 서지 않는다(관계 `ownership-undetermined`). 상태와 반환 코드 좁힘에는 영향이 없다.
+    - 엔진 항목 제안 **E-KEY**(판정 알고리즘 밖): 호출 안의 점이 키 인자를 주면 그 점에서 발생의 키를 정한다. `lib/` 변경이라 이 작업에서 하지 않았다. 리드 확인이 필요하다.
+  - **tarball의 source revision** [D-제안]: `source`는 7–40자리 16진 rev를 요구하고, tarball 트리에는 commit이 없다. tarball sha256의 앞 40자리를 rev로 적었다(cfe 6.4.1 `ec26e33b…a7d05`, 6.4.2 `c64ed2aa…7b49374e`, osal `8f0f2b23…3843441`; 전체 해시는 각 선언의 주석). commit이 아니고, verify-prov는 `unverifiable`로 적는다. 인용은 각자의 해시로 검사된다. 이 표현을 쓸지 리드 확인이 필요하다.
+  - **선언하지 않은 것** [F][I]: `context`(소유 앱 종류)는 없다. 6.4.x의 AppId는 AppTable 색인(L651 `AppId = i`)이고 undefined·reserved 값이 없어 `ids`를 레퍼런스로 채울 수 없다(`unspecified_by_reference`). E-ID1의 owner는 기록의 identity 줄에만 남는다. 잠금 HB 규칙은 없다(템플릿에 잠금이 없음). 그래서 6.4.2의 구조적 순서도 반환 코드 좁힘으로만 선다. reads_from(`stored_out`) 규칙도 두지 않았다. 키가 점에서만 정해져 규칙의 자원이 호출 인자로 고정되지 않기 때문이다(E-KEY 뒤에 다시 본다). `scope`(6.4.x의 종료 경로)도 이 부분집합에 없다.
+  - **appreq** [D-제안]: 두 rspec 모두 `appreq unspecified_by_reference`, Allowed `unspecified_by_reference`다. 이슈 본문·VDD는 프레임워크 결함의 서술이고, `cfe_es.h`는 공급자 쪽 결과 코드이며, 앱은 반환값을 주석 없이 버린다. 연구자가 만든 appreq는 넣지 않았다(QT-9). C5의 appreq를 둘지는 PI 결정 항목이다(C1의 D8과 같은 종류).
+  - 합성 trace 도구 시험 [M] (사례 수에 넣지 않음, C5 기록 아님): `kz-phi replay`에 손으로 쓴 real-record trace를 주어 연결만 확인했다. 실패 코드는 NOT_READY_UNJUDGED, 성공 코드는 READY였고 둘 다 `outcome-narrowed`였다. 키는 `[]`, 관계는 `ownership-undetermined`였다. `plan/expected_results_C5.md`의 라벨은 SPEC 규칙과 코드 읽기에서 적었다. 이 시험의 출력에서 가져오지 않았다.
+  - 동결 기대표: `plan/expected_results_C5.md`(별도 커밋, C5 재생 전).
 
 ### 10.4 E-ID1: 생성 뒤에 정해지는 소유 앱의 결합 — 초안 명세 (2026-10-29; 같은 날 구현, 절 끝 메모) [D-초안][F][I]
 

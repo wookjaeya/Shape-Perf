@@ -1,0 +1,248 @@
+# 01_prov.kzp -- the cFE 6.4.2 citations of profile c5-cfe-6.4.x: the ES files, whose lines differ between the
+# releases.  Same names in cfe-6.4.1/ and cfe-6.4.2/ where the role is the same; a note names the release where the
+# text differs (the lock scope of CFE_ES_AppCreate, the fix of Trac #41).  Paths, hashes: as in ../01_prov.kzp.
+phi 1;
+
+prov es_global_tasktable {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_global.h";
+  lines 184 184;
+  sha256 "804392e201a10964eb187b56a5793f80ebef7df69ffffacc6cfa05ec251e09f0";
+  note "CFE_ES_TaskRecord_t TaskTable[OS_MAX_TASKS]: the task-registration table, indexed by the OSAL task id";
+}
+
+prov es_taskrecord_struct {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.h";
+  lines 184 197;
+  sha256 "e8a6e906eeb81d24210453f6ea066654f74682529e09f5828416cf416025ce3b";
+  note "CFE_ES_TaskRecord_t: RecordUsed, AppId, TaskId, TaskName (and the execution counter)";
+}
+
+prov es_main_tasktable_init {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_start.c";
+  lines 214 221;
+  sha256 "85f7fd1fb1bf2fd45655a8ddfd764696036f38c4c20591ef882f4e166d0b9e96";
+  note "CFE_ES_Main: for every i below OS_MAX_TASKS, TaskTable[i].RecordUsed = FALSE (L218-L221), before CFE_ES_CreateObjects creates any task";
+}
+
+prov es_main_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_start.c";
+  lines 166 166;
+  sha256 "f9f6264db9455379866853768fef84ec6d75cc17db6e4e4fe2ffce5ae7611b0c";
+  note "void CFE_ES_Main(StartType, StartSubtype, ModeId, StartFilePath)";
+}
+
+prov es_createobjects_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_start.c";
+  lines 781 781;
+  sha256 "70a82534adc7ea57c0d441b24b598edd515a3243d564cb3c271c09bf628d7976";
+  note "void CFE_ES_CreateObjects(void): creates the core application tasks";
+}
+
+prov es_createobjects_section {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_start.c";
+  lines 816 913;
+  sha256 "5220c6a125761516f784bf79c3adaa29d9bd1554154dbc8cb2828b86b667a516";
+  note "CFE_ES_CreateObjects, one core application: lock L816, OS_TaskCreate L855, TaskTable registration L890-L902 (RecordUsed L897, AppId L899, TaskId L900), unlock L913: the lock is held across creation and registration";
+}
+
+prov es_createobjects_taskid_store {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_start.c";
+  lines 900 900;
+  sha256 "34f1586741a0e31145b8306d035fb5a676700ca0b6c2242ee2cc2b72bb485972";
+  note "TaskTable[MainTaskId].TaskId = MainTaskId in CFE_ES_CreateObjects";
+}
+
+prov es_appcreate_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 426 432;
+  sha256 "e8842d8aba2196e7172a9b69097d7201909c1b9846a46efb6c415712902a4921";
+  note "CFE_ES_AppCreate(ApplicationIdPtr, FileName, EntryPoint, AppName, Priority, StackSize, ExceptionAction)";
+}
+
+prov es_appcreate_locking {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 571 669;
+  sha256 "3c0c5d368fcd634b1a7269b66d82b5b03b4efac367421c52038000f4a7186e35";
+  note "6.4.2: the ES shared-data lock is taken at L571 and held across OS_TaskCreate (L619) and the TaskTable registration to the unlock at L669 (the failure path of OS_TaskCreate unlocks at L634)";
+}
+
+prov es_appcreate_task_create {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 619 625;
+  sha256 "3f850ffee17a6d00a929d4308c4179db9dc44b53aeb8b5596bb5f42ed94091d0";
+  note "6.4.2: OS_TaskCreate of the main task with the application's entry (L619-L625), inside the section locked at L571";
+}
+
+prov es_appcreate_registration {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 644 669;
+  sha256 "0dd8ec3cb246779e4c8929a26e7a926a2efc7703f847de0db7280d4125802f09";
+  note "6.4.2: after OS_TaskCreate succeeded, still under the lock taken at L571: TaskId = MainTaskId (L644), the TaskTable entry is registered (RecordUsed L652 unless already used, AppId = i L654, TaskId L655, TaskName L656-L658), *ApplicationIdPtr = i (L660), counters, unlock (L669)";
+}
+
+prov es_appcreate_stale {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 646 653;
+  sha256 "6c96772209e7efbb1e3789c7210c425a58ea7a304e047c8519c5a14699544183";
+  note "6.4.2: an entry already RecordUsed at task creation is reported to the system log and not set again (L646-L649); otherwise RecordUsed = TRUE (L652)";
+}
+
+prov es_appcreate_taskid_store {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 655 655;
+  sha256 "e82b8d356ad3736e9c2678debfd160f332e9059ca218df7fb8e8a358f552fd94";
+  note "6.4.2: TaskTable[TaskId].TaskId = TaskId, the store of the registration that carries the key";
+}
+
+prov es_registerapp_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 706 740;
+  sha256 "6cd9c03e891289c74bcafbeb16cca89db150b3637e698efc1cf6785981a8d2cb";
+  note "6.4.2 CFE_ES_RegisterApp: under the ES lock (L710), OS_TaskRegister (L715); it reads no TaskTable entry";
+}
+
+prov es_getappid_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 785 810;
+  sha256 "df773de40675e1d2d25a2cd16a2a06b9e83448eca5a04c7695fb416c252b6336";
+  note "6.4.2 CFE_ES_GetAppID: Result = CFE_ES_ERR_APPID (L787); lock (L790); TaskId = OS_TaskGetId() (L795); if TaskTable[TaskId].RecordUsed == TRUE (L800): *AppIdPtr = TaskTable[TaskId].AppId, Result = CFE_SUCCESS (L802-L803); no else; unlock (L806); return Result";
+}
+
+prov es_getappid_task {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 795 795;
+  sha256 "568be68379c16adfe684ca2955b7533143ff3bcf9f1bad337963c96dc5aa5385";
+  note "6.4.2: TaskId = OS_TaskGetId(), under the lock taken at L790; the only call of OS_TaskGetId in CFE_ES_GetAppID";
+}
+
+prov es_getappidint_fn {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1812 1832;
+  sha256 "5654e1217237508a74f7467713b32677b797b79d60f6976f9ece38449430d1a8";
+  note "6.4.2 CFE_ES_GetAppIDInternal: the same lookup without a lock of its own (its callers hold the ES lock): Result = CFE_ES_ERR_APPID, TaskId = OS_TaskGetId() (L1820), RecordUsed == TRUE gives *AppIdPtr and CFE_SUCCESS (L1825-L1828)";
+}
+
+prov es_getappidint_task {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1820 1820;
+  sha256 "568be68379c16adfe684ca2955b7533143ff3bcf9f1bad337963c96dc5aa5385";
+  note "6.4.2: TaskId = OS_TaskGetId() in CFE_ES_GetAppIDInternal, its only call";
+}
+
+prov es_childtask_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 971 977;
+  sha256 "7911a6bcd28b9fb5c1b3ff89e6ed3c414055684b9051bef0a430cc96fd47b64f";
+  note "CFE_ES_CreateChildTask(TaskIdPtr, TaskName, FunctionPtr, StackPtr, StackSize, Priority, Flags)";
+}
+
+prov es_childtask_section {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1015 1084;
+  sha256 "4ad12e2bcbf2caad669e04a93eb1e8b17347749fcb7e294772101f5c87dd855e";
+  note "CFE_ES_CreateChildTask: lock L1015, OS_TaskCreate L1047, registration of the child's entry L1055-L1059 (RecordUsed, AppId, TaskId), unlock L1084";
+}
+
+prov es_childtask_taskid_store {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1057 1057;
+  sha256 "329750583320ac5e7f4d81f9da50f49b2ce570f5bf0765a1a3c20200541a1a66";
+  note "TaskTable[*TaskIdPtr].TaskId = *TaskIdPtr in CFE_ES_CreateChildTask";
+}
+
+prov es_deletechild_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1160 1160;
+  sha256 "8024d5d40d79113d3e84ac5bf7c19c9d92b32c39279f4f902c8c6bc2ddf6f1de";
+  note "int32 CFE_ES_DeleteChildTask(uint32 TaskId)";
+}
+
+prov es_deletechild_clear {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1206 1213;
+  sha256 "e13e0c6b92aa9ccbbc7af60301088c10b45776910f299c9cc2530a89c8f182b5";
+  note "CFE_ES_DeleteChildTask: after OS_TaskDelete succeeded, TaskTable[TaskId].RecordUsed = FALSE (L1212)";
+}
+
+prov es_exitchild_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1269 1269;
+  sha256 "295acb3283654e917ea9793f8cad5b8fa2a708c97e8329f0c0e650c2056d7247";
+  note "void CFE_ES_ExitChildTask(void)";
+}
+
+prov es_exitchild_clear {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_api.c";
+  lines 1284 1294;
+  sha256 "bba5cb4266af70b6e6dba10974d30d55b25086f4cd925dac2104014a40501cbd";
+  note "CFE_ES_ExitChildTask: for a calling task that is not its application's main task, TaskTable[TaskId].RecordUsed = FALSE (L1293)";
+}
+
+prov es_cleanuptask_sig {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 1299 1299;
+  sha256 "64b974b3c513b9b6fbe0d75403c37118900ff3becf70edbe8db05bd4c3a26256";
+  note "int32 CFE_ES_CleanupTaskResources(uint32 TaskId)";
+}
+
+prov es_cleanuptask_clear {
+  tier code-derived;
+  kind code_pattern;
+  file "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  lines 1493 1497;
+  sha256 "0c37ac413496010efd31e47e642ccac17af527dbe7a5629979a818808e769d12";
+  note "CFE_ES_CleanupTaskResources: TaskTable[TaskId].RecordUsed = FALSE (L1496)";
+}
+

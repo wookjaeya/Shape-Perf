@@ -1,0 +1,55 @@
+# 02_researcher.kzp -- the hand-entered records (tier researcher) and the issue texts of profile c5-cfe-6.4.x.
+#
+# A researcher record stands for a modelling choice no cited text states by itself; it never decides a status (it
+# cannot be caller-side, QT-4/QT-9).  The issue records quote only a few words; the full texts are in cases/C5.md
+# (F1, F13).  Neither issue record is the appreq of a readiness specification here (40_rspec.kzp).
+phi 1;
+
+prov r_axiom_program_order {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-29, C5 profile, from SPEC_FINAL 1.9 and 3.16 row R1 (as cfs-v7.0.1 and c1-bp-b051eb0); cases inspected: C5";
+  note "Program order inside one actor is an axiom of the model (A3, A4), not a cited text.";
+}
+
+prov r_es_task_kind {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-29, C5 profile, from plan/c5_execution_basis_20261028.md 4, 5.1, 5.2 and cases/C5.md 4.1, 4.2, 7; cases inspected: C5";
+  note "es.task(t) is the ES task-registration entry CFE_ES_Global.TaskTable[t], keyed by the OSAL task id t (an index into OS_task_table, the value OS_TaskGetId returns). Two states: FREE (RecordUsed not TRUE) and LIVE (RecordUsed TRUE), the test the lookups make. The registration by the creator writes RecordUsed, AppId, TaskId and TaskName in one section under the ES shared-data lock; for a reader under the same lock the section is one step, and its linearization point is the store of TaskId, the store that carries the key. RecordUsed is not set again when the entry is already used at creation (the stale-entry branch), but the entry is LIVE after the section either way. The AppId stored in the entry is not modelled: the owning application is not read from the analysed table (E-ID1, plan section 10.4). The releases (delete or exit of a child task, cleanup of a task) and the CFE_ES_Main loop that sets every entry FREE are the other writers; generations are not modelled.";
+}
+
+prov r_task_id_param {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-29, C5 profile, from plan/c5_execution_basis_20261028.md 5.2 and 10.3 and the kz-phi checker (lib/core/phi_check.cpp check_rspecs: a readiness specification's key and requires are resolved with the call's parameters only); cases inspected: C5";
+  note "CFE_ES_GetAppID and CFE_ES_GetAppIDInternal take no task id: each reads the calling task's own id inside the call (OS_TaskGetId, under the ES lock for GetAppID, under the caller's lock for the internal one). The operations declare task_id as a parameter that stands for that value; it is not a C parameter. The record carries it at the point after OS_TaskGetId returns (sites es.get_app_id.task and es.get_app_id_int.task, slot role task_id), where the readiness precondition is evaluated. A readiness specification can name its key only through a parameter: its key and requires do not read the values of a point (lp.NAME). So the key of an occurrence is not known at the call event, only at the point; the status does not depend on that, the per-key ordinal and the execution relation do (reported to the lead as an engine item, plan section 10.3, 2026-10-29 note 2).";
+}
+
+prov r_init_loop_lp {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-29, C5 profile, from the cited CFE_ES_Main loop (es_main_tasktable_init); cases inspected: C5";
+  note "CFE_ES_Main sets RecordUsed = FALSE for every entry in a loop on the initial thread before CFE_ES_CreateObjects creates any task, so no reader runs during the loop. The effect clear_task_table puts the whole kind in FREE at the loop's store; the pattern names that store (the only TaskTable RecordUsed store in CFE_ES_Main).";
+}
+
+prov r_role_binding {
+  tier researcher;
+  kind researcher;
+  authored "2026-10-29, C5 profile, from SPEC rev 1.3 amendment 1.6 Call contexts (as c1-bp-b051eb0); cases inspected: C5";
+  note "A role binds a call context to a declared site: the site event follows the return of the call on the same actor (an after-call point in the caller). The binding of a site to a binary is stated in the site manifest (instr/sites-64*.draft.kzs, the label of the site), not here.";
+}
+
+prov issue_72_body {
+  tier issue-derived;
+  kind issue;
+  cite "nasa/cFE issue #72 body (skliper, 2019-09-30): 'This unlock-relock opens up an opportunity for the child thread to read the shared table data before it is fully populated. ... CFE_ES_GetAppID() (which many tasks call very early in their init procedures) will fail, which can have a serious snowball effect.'";
+  note "cases/C5.md F1. Cited for the readiness precondition (the order the issue names) and for the role of the calls (a dependent use); not an appreq and not an Allowed entry: it describes the framework's defect, not what the calling code must achieve or accept.";
+}
+
+prov vdd_642_trac41 {
+  tier issue-derived;
+  kind issue;
+  cite "cFE 6.4.2 Version Description Document (SF-6.4.2:cfe/docs/cFE 6.4.2.0 Version Description Document.pdf, sha256 6f2d0c3db98391eea974472b6de775fe6655b50084ea2bffe3fc50cc873616a2), Table 1.2-2 item 2, Trac #41: the issue text and 'The unlock-relock code has been removed and updated to be the same as other areas where tasks are spawned.'";
+  note "cases/C5.md F13: the official restatement of the order and of the fix; a PDF, cited by table and item, not by lines.";
+}

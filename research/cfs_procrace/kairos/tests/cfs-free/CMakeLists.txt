@@ -9,6 +9,10 @@ foreach(kz_file IN LISTS kz_trace_tests)
   get_filename_component(kz_name "${kz_file}" NAME_WE)
   kz_add_unit_test(${kz_name} SOURCES ${kz_file} LIBS kz-trace kz-testsupport)
 endforeach()
+# kz occ diff as a command: the exit status of the process (test_trace_occ_basis with the kz binary and a directory).
+add_test(NAME test_trace_occ_basis_cli COMMAND test_trace_occ_basis $<TARGET_FILE:kz> ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(test_trace_occ_basis_cli PROPERTIES LABELS unit)
+add_dependencies(test_trace_occ_basis kz)
 
 # Derived records of the S1-R2 development run container (read in place from env/logs, not copied):
 # the real-record replay must not become more decisive when information is removed.  Exits 77

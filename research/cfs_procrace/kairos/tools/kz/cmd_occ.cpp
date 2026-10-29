@@ -7,14 +7,16 @@
 //       before schema revision 4 has no OCC_BASIS: what SUMMARIES holds is shown and the rest is said not recorded.
 //   kz occ diff <a.kz> <b.kz>
 //       the two containers' occurrences matched by the path-independent occurrence key (rspec, operation, owning
-//       application and the task's place in it, resource, ordinal); then without the owner, only where one side's owner
-//       (or the task's place in it) is not established and the role, the via names and the text arguments agree -- two
-//       established owners that differ are never paired; then by the text arguments where one side fixed the key value.
-//       The reading differences, the verdict and basis differences of the full-key pairs, the pairs of the other rules,
-//       the uncertain candidates (tied by the ordinal alone), the keys several occurrences of a side share (never paired
-//       by order), the candidates whose owners differ and the occurrences of one side only are listed apart.  Exit 0
-//       with no difference, 4 where the pairing of some occurrences is not established (an ambiguous key, an uncertain
-//       candidate), else 3 with any difference (occ_table.hpp occ_diff_status; the head line "result:" says which).
+//       application and the task's place in it, resource, ordinal) where both owners are established and their names
+//       do not differ; then without the owner, only where one side's owner (or the task's place in it) is not
+//       established, or neither side's, and the role, the via names, the text arguments and the owners' names agree --
+//       two established owners that differ are never paired; then by the text arguments where one side fixed the key
+//       value.  The reading differences, the verdict and basis differences of the full-key pairs, the pairs of the other
+//       rules, the uncertain candidates (tied by the ordinal alone), the keys several occurrences of a side share (never
+//       paired by order), the candidates whose owners differ and the occurrences of one side only are listed apart.
+//       Exit 0 with no difference, 4 where the pairing of some occurrences is not established (an ambiguous key, an
+//       uncertain candidate), else 3 with any difference (occ_table.hpp occ_diff_status; the head line "result:" says
+//       which; a reading difference is shown, not counted).
 //
 // Neither form sets a research condition: it reads what the replay wrote.  Which records are compared, and under which
 // reading, is the caller's statement.
@@ -33,8 +35,8 @@ void usage(FILE* f) {
                "       kz occ diff <a.kz> <b.kz>\n"
                "  show   the per-occurrence table: key, verdict, summary view, basis kinds, assumptions, outcome check, edges\n"
                "  diff   matched by the occurrence key; verdict and basis differences listed apart; without the owner only where\n"
-               "         one side's owner is not established; a shared key or an uncertain candidate listed and not paired\n"
-               "         (exit 4 if a pairing is not established, else 3 if any difference, else 0)\n");
+               "         one side's owner (or neither side's) is not established; a shared key or an uncertain candidate listed and\n"
+               "         not paired (exit 4 if a pairing is not established, else 3 if any difference, else 0; the reading not counted)\n");
 }
 
 bool load(const std::string& path, kz::Container* c, kz::trace::OccTable* t) {

@@ -13,9 +13,15 @@
 //   - keys (revision 5): two tasks of one application with the same key are told apart by the task's place where both
 //     containers record it; where they are not, the shared key is listed as ambiguous and not paired (a difference); an
 //     occurrence whose key value one side fixed and the other did not is matched by its text arguments and said apart;
-//     different text arguments stay one side only.
+//     different text arguments stay one side only;
+//   - kz occ diff as a command (with the kz binary and a directory as arguments, test test_trace_occ_basis_cli): the
+//     process exits 0 for a record against itself, 3 where the owners differ, 4 where a key two occurrences share is
+//     not paired (cmd_occ.cpp returns occ_diff_status).
+
+#include <sys/wait.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -248,7 +254,8 @@ void test_keys() {
   KZ_CHECK(n.matched == 0 && n.ambiguous == 1 && n.ambiguous_rows == 4 && n.verdict == 0 && n.only_a == 0 && n.only_b == 0 && n.any());
   KZ_CHECK(kz::trace::occ_diff_status(n) == 4 && has(d, "result: exit 4 (the pairing of some occurrences is not established: ambiguous keys 1, uncertain 0)"));
   KZ_CHECK(has(d, "task in the key: not used (B does not record it)"));
-  KZ_CHECK(has(d, "ambiguous keys (shared by more than one occurrence of a side; which is which is not established, none paired): 1"));
+  KZ_CHECK(has(d, "ambiguous keys (shared by more than one occurrence of a side, or more than one candidate of a row; which is which is not established, none "
+                  "paired): 1"));
   KZ_CHECK(has(d, "K-LOOKUP | lookup | app[9] | 0x30002 | 1: A#0 READY") && has(d, "B#1 READY"));
   // the key value fixed on one side only: matched by the text arguments, said apart
   const kz::trace::OccTable c = table({row(0, 1, "0x30002", "name=S0", 1, KZ_OCC_READY)});
@@ -262,9 +269,45 @@ void test_keys() {
   KZ_CHECK(n.matched == 0 && n.key_differs == 0 && n.only_a == 1 && n.only_b == 1);
 }
 
+std::string write_kz(const std::string& dir, const char* name, const kz::Bytes& bytes) {
+  const std::string path = dir + "/" + name;
+  std::FILE* f = std::fopen(path.c_str(), "wb");
+  KZ_CHECK(f != nullptr);
+  if (f != nullptr) {
+    KZ_CHECK(std::fwrite(bytes.data(), 1, bytes.size(), f) == bytes.size());
+    std::fclose(f);
+  }
+  return path;
+}
+
+int occ_diff_exit(const std::string& kz, const std::string& x, const std::string& y) {
+  const int rc = std::system((kz + " occ diff " + x + " " + y + " >/dev/null").c_str());
+  return rc != -1 && WIFEXITED(rc) ? WEXITSTATUS(rc) : -1;
+}
+
+void test_cli(const std::string& kz, const std::string& dir) {
+  using namespace kzstate;
+  const kz::phi::Profile p = load();
+  const std::string body = m_start() + a_entry() + b_entry() + b_create("0x30002") + a_lookup("0", "0x30002");
+  const std::string b_lookup = "B lookup call arg.name=@S0\nB lookup.exists pt\nB lookup ret out.id=0x30002 result=0\n";
+  const Out x = run(p, owned(body), Options());
+  const Out y = run(p, std::string(kHeader) + "owner A 6\nowner_level A confirmed\n" + body, Options());
+  // A and B both of application 9, the task's place not established (no report): one key, two occurrences
+  const Out z = run(p, owned(std::string("owner B 9\nowner_level B confirmed\n") + body + b_lookup), Options());
+  KZ_CHECK(x.table.rows.size() == 1 && y.table.rows.size() == 1 && z.table.rows.size() == 2);
+  const std::string fx = write_kz(dir, "occ_cli_x.kz", x.bytes), fy = write_kz(dir, "occ_cli_y.kz", y.bytes), fz = write_kz(dir, "occ_cli_z.kz", z.bytes);
+  KZ_CHECK_EQ(occ_diff_exit(kz, fx, fx), 0);
+  KZ_CHECK_EQ(occ_diff_exit(kz, fx, fy), 3);
+  KZ_CHECK_EQ(occ_diff_exit(kz, fz, fz), 4);
+}
+
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  if (argc == 3) {  // test_trace_occ_basis_cli
+    test_cli(argv[1], argv[2]);
+    return kztest::finish("test_trace_occ_basis_cli");
+  }
   test_return_derived();
   test_store_derived();
   test_control_order();

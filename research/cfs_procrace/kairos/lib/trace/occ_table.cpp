@@ -81,37 +81,62 @@ std::string basis_text(const OccRow& r) {
 }
 
 
-// The owning application of the executing task is established (inferred or confirmed) where the record names one.
+// The owning application of the executing task is established (inferred or confirmed) where the record gives its record
+// key.  Not established: undetermined, or no record key -- the writer gives a key only where the level is inferred or
+// confirmed and the owner's id maps to a record key (replay_container.cpp, real_trace.cpp owners_unresolved), so an
+// owner the record names whose id did not map reads as undetermined here too.
 bool owner_established(const OccRow& r) { return r.owner_key != KZ_NONE32 && r.owner_level != KZ_OWNER_LEVEL_UNDETERMINED; }
 
+// The owner as the comparison saw it, with the name the record gives (display only: kz_raw.h ACTOR_OWNERS app_name).
 std::string owner_text(const OccRow& r, bool with_task) {
-  if (!owner_established(r)) return "owner not established (" + enum_text("KZ_OWNER_LEVEL", r.owner_level) + (r.owner_key == KZ_NONE32 ? ", none recorded)" : ")");
+  const std::string name = r.owner_app.empty() ? std::string() : " (" + r.owner_app + ")";
+  if (!owner_established(r)) return "owner not established (" + enum_text("KZ_OWNER_LEVEL", r.owner_level) + (r.owner_key == KZ_NONE32 ? ", no record key)" : ")") + name;
   std::string s = "owner " + std::to_string(r.owner_key) + " " + enum_text("KZ_OWNER_LEVEL", r.owner_level);
   if (with_task) s += r.task != 0 ? " task " + std::to_string(r.task) : " task not established";
-  if (!r.owner_app.empty()) s += " (" + r.owner_app + ")";
-  return s;
+  return s + name;
 }
 
-// Two rows of one key without the owner (the second pass): how their owners stand.  open: the owning application is not
-// established on one side (undetermined, or none recorded); task_open: the same application on both sides, the task's
-// place in it established on one side only; differ: both established and different -- the application, or the task's
-// place where both containers record it.  Rows whose owners differ are never the same occurrence.
-enum class OwnerRel { open, task_open, differ };
+// Two rows of one key without the owner (the second pass): how their owners stand.  same: both established, the same
+// record key and task place (or the task not used); open: established on one side only; neither: established on
+// neither side; task_open: the same record key, the task's place established on one side only; task_differ: the same
+// record key, both task places established and different -- a place is a rank among the creation requests the record
+// has (real_trace.cpp task_ordinal), so a request missing on one side renumbers the later tasks: not established as
+// different tasks; differ: both established, different record keys.  Only differ is never the same occurrence.
+enum class OwnerRel { same, open, neither, task_open, task_differ, differ };
 OwnerRel owner_relation(const OccRow& x, const OccRow& y, bool with_task) {
-  if (!owner_established(x) || !owner_established(y)) return OwnerRel::open;
+  const bool ex = owner_established(x), ey = owner_established(y);
+  if (!ex && !ey) return OwnerRel::neither;
+  if (!ex || !ey) return OwnerRel::open;
   if (x.owner_key != y.owner_key) return OwnerRel::differ;
-  if (with_task && x.task != 0 && y.task != 0 && x.task != y.task) return OwnerRel::differ;
-  return OwnerRel::task_open;
+  if (!with_task || x.task == y.task) return OwnerRel::same;
+  return x.task != 0 && y.task != 0 ? OwnerRel::task_differ : OwnerRel::task_open;
 }
 
-// What the record says of the call beyond the key without the owner: the role, the via names, the text arguments.
-// Where one of them differs, an equal ordinal (the k-th occurrence of its task) does not make the two one call.
+// The names the record gives the two owners, where both give one and they differ.  A name is display only, never a key
+// (kz_raw.h ACTOR_OWNERS app_name): it does not establish two owners as different, but two names that differ do not let
+// a key or an ordinal make the two one occurrence.
+std::string names_differ(const OccRow& x, const OccRow& y) {
+  if (x.owner_app.empty() || y.owner_app.empty() || x.owner_app == y.owner_app) return std::string();
+  return " owner name A {" + x.owner_app + "} B {" + y.owner_app + "};";
+}
+
+// What the record says of the call beyond the key without the owner: the role, the via names, the text arguments, and
+// the owner's name.  Where one of them differs, an equal ordinal (the k-th occurrence of its task) does not make the
+// two one call.  (In a full-key pair the role and the via names are basis fields, compared after pairing.)
 std::string descriptors_differ(const OccRow& x, const OccRow& y) {
   std::string d;
   if (x.context != y.context) d += " role A {" + x.context + "} B {" + y.context + "};";
   if (x.via != y.via) d += " via A {" + x.via + "} B {" + y.via + "};";
   if (x.name != y.name) d += " args A {" + x.name + "} B {" + y.name + "};";
-  return d;
+  return d + names_differ(x, y);
+}
+
+bool reading_differs(const OccTable& a, const OccTable& b) {
+  if (!a.has_reading || !b.has_reading) return false;
+  const kz_replay_read& x = a.reading;
+  const kz_replay_read& y = b.reading;
+  return x.outcome_narrowing != y.outcome_narrowing || x.owner_identity_targets != y.owner_identity_targets || x.reads_from_edges != y.reads_from_edges ||
+         x.reads_from_outcome != y.reads_from_outcome || x.control_order != y.control_order || x.relation_rule != y.relation_rule;
 }
 
 }  // namespace
@@ -248,14 +273,15 @@ int occ_diff_status(const OccDiffCounts& n) { return n.ambiguous != 0 || n.uncer
 
 std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* counts) {
   OccDiffCounts n;
-  std::string head, verdicts, bases, only, owners, ambiguous, uncertain, conflicts_text, keys;
+  std::string head, verdicts, bases, only, owners, neither, ambiguous, uncertain, conflicts_text, keys;
   const bool keyed = a.recorded && b.recorded;
   const bool with_task = a.task_recorded && b.task_recorded;  // the task's place, where both containers record it
   head += std::string("matching: ") +
           (keyed ? std::string("by the occurrence key (rspec | op | owner") + (with_task ? "#task" : "") +
-                       " | resource | ordinal); then without the owner, only where the owner (or the task's place in it) is not established on one "
-                       "side -- never two established owners that differ -- and only where the role, the via names and the text arguments agree; then "
-                       "by the text arguments where one side fixed the key value; a key shared by several occurrences of a side is not paired"
+                       " | resource | ordinal) where both owners are established; then without the owner, where the owner (or the task's place in it) "
+                       "is not established on one side or on neither -- never two established owners that differ -- and only where the role, the via "
+                       "names, the text arguments and the owners' names agree; then by the text arguments where one side fixed the key value; a key "
+                       "shared by several occurrences of a side, or a row with more than one candidate, is not paired"
                  : std::string("by position (a side has no OCC_BASIS: no key; the basis of summary.flags only)")) +
           "\n";
   if (keyed && !with_task) head += "task in the key: not used (" + std::string(a.task_recorded ? "B" : b.task_recorded ? "A" : "neither container") + " does not record it)\n";
@@ -273,7 +299,8 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     sw("relation", x.relation_rule, y.relation_rule, "KZ_RELATION_RULE");
     head += "control edges A " + std::to_string(x.control_edges) + ", B " + std::to_string(y.control_edges) + "\n";
   }
-  // pairs of rows, with the rule that made each: the key (0), the key without the owner (1), the text arguments (2)
+  // pairs of rows, with the rule that made each: the key or the position (0), the key without the owner (1), the text
+  // arguments (2)
   struct Pair {
     const OccRow* x;
     const OccRow* y;
@@ -285,12 +312,35 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     const OccRow* y;
     std::string key;
   };
+  struct Held {  // a candidate (or a component of candidates) of the second pass not paired: final after the third pass
+    std::string key;
+    std::vector<const OccRow*> ra, rb;
+    std::string why;
+  };
   std::vector<Pair> pairs;
   std::vector<Conflict> conflicts;
+  std::vector<Held> unsure, components;
+  std::set<const OccRow*> held, amb_rows, unc_rows;  // rows listed as ambiguous or uncertain (not one side only)
   std::vector<const OccRow*> left_a, left_b;
+  auto list_uncertain = [&](const std::string& key, const char* rule, const OccRow* x, const OccRow* y, const std::string& why) {
+    ++n.uncertain;
+    uncertain += "  " + key + " (" + rule + "): A#" + std::to_string(x->index) + " " + owner_text(*x, with_task) + ", B#" + std::to_string(y->index) + " " +
+                 owner_text(*y, with_task) + ";" + why + " A " + verdict_text(*x) + " | B " + verdict_text(*y) + "\n";
+    for (const OccRow* r : {x, y}) held.insert(r), unc_rows.insert(r);
+  };
+  auto list_ambiguous = [&](const std::string& key, const char* rule, const std::vector<const OccRow*>& ra, const std::vector<const OccRow*>& rb, bool show_owners,
+                            const std::string& note) {
+    ++n.ambiguous;
+    ambiguous += "  " + key + (rule != nullptr ? std::string(" (") + rule + ")" : std::string()) + ":";
+    for (const OccRow* r : ra) ambiguous += " A#" + std::to_string(r->index) + " " + verdict_text(*r) + (show_owners ? " " + owner_text(*r, with_task) : std::string()) + ";";
+    for (const OccRow* r : rb) ambiguous += " B#" + std::to_string(r->index) + " " + verdict_text(*r) + (show_owners ? " " + owner_text(*r, with_task) : std::string()) + ";";
+    ambiguous += note + "\n";
+    for (const std::vector<const OccRow*>* v : {&ra, &rb})
+      for (const OccRow* r : *v) held.insert(r), amb_rows.insert(r);
+  };
   if (!keyed) {
     const size_t m = std::min(a.rows.size(), b.rows.size());
-    for (size_t i = 0; i < m; ++i) pairs.push_back({&a.rows[i], &b.rows[i], 0, OwnerRel::open});
+    for (size_t i = 0; i < m; ++i) pairs.push_back({&a.rows[i], &b.rows[i], 0, OwnerRel::same});
     for (size_t i = m; i < a.rows.size(); ++i) left_a.push_back(&a.rows[i]);
     for (size_t i = m; i < b.rows.size(); ++i) left_b.push_back(&b.rows[i]);
   } else {
@@ -298,7 +348,8 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     for (const OccRow& r : b.rows) left_b.push_back(&r);
     for (int pass = 0; pass < 3; ++pass) {
       auto key = [&](const OccRow& r) -> std::string {
-        if (pass < 2) return occ_key(r, pass == 0, with_task);
+        if (pass == 0) return owner_established(r) ? occ_key(r, true, with_task) : std::string();  // "app:undetermined" names no owner: the second pass
+        if (pass == 1) return occ_key(r, false, with_task);
         if (r.name.empty()) return std::string();
         OccRow x = r;  // the key without its value and ordinal: those depend on whether the value was fixed
         x.resource.clear();
@@ -315,16 +366,34 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
         const std::vector<const OccRow*>& ga = kv.second.first;
         const std::vector<const OccRow*>& gb = kv.second.second;
         if (ga.empty() || gb.empty()) continue;  // nothing to pair here: left for the next pass
-        if (pass == 2) {  // only one occurrence each, and the key value fixed on exactly one side
-          if (ga.size() != 1 || gb.size() != 1 || ga[0]->resource.empty() == gb[0]->resource.empty()) continue;
-          pairs.push_back({ga[0], gb[0], 2, OwnerRel::open});
-          taken.insert(ga[0]);
-          taken.insert(gb[0]);
+        if (pass == 2) {
+          // the candidates: one row each, the key value fixed on exactly one side
+          std::vector<const OccRow*> ca, cb;
+          for (const OccRow* x : ga)
+            for (const OccRow* y : gb)
+              if (x->resource.empty() != y->resource.empty()) {
+                if (std::find(ca.begin(), ca.end(), x) == ca.end()) ca.push_back(x);
+                if (std::find(cb.begin(), cb.end(), y) == cb.end()) cb.push_back(y);
+              }
+          if (ca.empty()) continue;
+          if (ga.size() == 1 && gb.size() == 1) {
+            const std::string d = names_differ(*ga[0], *gb[0]);
+            if (d.empty()) pairs.push_back({ga[0], gb[0], 2, owner_relation(*ga[0], *gb[0], with_task)});
+            else list_uncertain(kv.first, "by the text arguments", ga[0], gb[0], d);
+            taken.insert(ga[0]);
+            taken.insert(gb[0]);
+            continue;
+          }
+          // more than one occurrence of a side has these text arguments: which is which is not established
+          list_ambiguous(kv.first, "by the text arguments", ca, cb, false, std::string());
+          for (const OccRow* r : ca) taken.insert(r);
+          for (const OccRow* r : cb) taken.insert(r);
           continue;
         }
         if (pass == 1) {
           // the candidates: a row of each side whose owners do not contradict each other.  The rows they connect form
           // components; a component of one row each is a pair where nothing else the record says of the call differs.
+          // A candidate not paired here stays for the third pass and is listed only where it is still not paired then.
           const size_t na = ga.size(), nb = gb.size();
           std::vector<size_t> root(na + nb);
           for (size_t i = 0; i < root.size(); ++i) root[i] = i;
@@ -338,61 +407,51 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
             for (size_t j = 0; j < nb; ++j) {
               const OwnerRel r = owner_relation(*ga[i], *gb[j], with_task);
               if (r == OwnerRel::differ) {
-                conflicts.push_back({ga[i], gb[j], kv.first});  // left for the next pass; said apart if neither is paired
+                conflicts.push_back({ga[i], gb[j], kv.first});  // said apart if neither row is paired or listed otherwise
                 continue;
               }
               rel[{i, j}] = r;
               linked[i] = linked[na + j] = true;
               root[find(i)] = find(na + j);
             }
-          std::map<size_t, std::pair<std::vector<size_t>, std::vector<size_t>>> comps;
+          std::map<size_t, std::pair<std::vector<const OccRow*>, std::vector<const OccRow*>>> comps;
+          std::map<size_t, std::pair<size_t, size_t>> first;  // a component's rows (by group index) where it has one each
           for (size_t i = 0; i < na; ++i)
-            if (linked[i]) comps[find(i)].first.push_back(i);
+            if (linked[i]) comps[find(i)].first.push_back(ga[i]), first[find(i)].first = i;
           for (size_t j = 0; j < nb; ++j)
-            if (linked[na + j]) comps[find(na + j)].second.push_back(j);
+            if (linked[na + j]) comps[find(na + j)].second.push_back(gb[j]), first[find(na + j)].second = j;
           for (const auto& c : comps) {
-            const std::vector<size_t>& ca = c.second.first;
-            const std::vector<size_t>& cb = c.second.second;
-            if (ca.size() == 1 && cb.size() == 1) {
-              const OccRow* x = ga[ca[0]];
-              const OccRow* y = gb[cb[0]];
-              const std::string d = descriptors_differ(*x, *y);
-              if (d.empty()) {
-                pairs.push_back({x, y, 1, rel[{ca[0], cb[0]}]});
-              } else {  // only the ordinal ties them: kept uncertain, not paired
-                ++n.uncertain;
-                n.uncertain_rows += 2;
-                uncertain += "  " + kv.first + " (without the owner): A#" + std::to_string(x->index) + " " + owner_text(*x, with_task) + ", B#" + std::to_string(y->index) +
-                             " " + owner_text(*y, with_task) + ";" + d + " A " + verdict_text(*x) + " | B " + verdict_text(*y) + "\n";
-              }
-              taken.insert(x);
-              taken.insert(y);
+            const std::vector<const OccRow*>& ca = c.second.first;
+            const std::vector<const OccRow*>& cb = c.second.second;
+            if (ca.size() != 1 || cb.size() != 1) {
+              components.push_back({kv.first, ca, cb, std::string()});
               continue;
             }
-            ++n.ambiguous;
-            n.ambiguous_rows += ca.size() + cb.size();
-            ambiguous += "  " + kv.first + " (without the owner):";
-            for (size_t i : ca) ambiguous += " A#" + std::to_string(ga[i]->index) + " " + verdict_text(*ga[i]) + " " + owner_text(*ga[i], with_task) + ";";
-            for (size_t j : cb) ambiguous += " B#" + std::to_string(gb[j]->index) + " " + verdict_text(*gb[j]) + " " + owner_text(*gb[j], with_task) + ";";
-            ambiguous += "\n";
-            for (size_t i : ca) taken.insert(ga[i]);
-            for (size_t j : cb) taken.insert(gb[j]);
+            const OccRow* x = ca[0];
+            const OccRow* y = cb[0];
+            const OwnerRel r = rel[first[c.first]];
+            std::string d = descriptors_differ(*x, *y);
+            if (r == OwnerRel::task_differ) d += " task's place in application " + std::to_string(x->owner_key) + " A " + std::to_string(x->task) + " B " + std::to_string(y->task) + ";";
+            if (!d.empty()) {  // only the ordinal ties them: kept uncertain, not paired
+              unsure.push_back({kv.first, {x}, {y}, d});
+              continue;
+            }
+            pairs.push_back({x, y, r == OwnerRel::same ? 0 : 1, r});
+            taken.insert(x);
+            taken.insert(y);
           }
           continue;
         }
         if (ga.size() == 1 && gb.size() == 1) {
-          pairs.push_back({ga[0], gb[0], 0, OwnerRel::open});
+          // the names the record gives differ: not paired here; the second pass lists the candidate as uncertain
+          if (!names_differ(*ga[0], *gb[0]).empty()) continue;
+          pairs.push_back({ga[0], gb[0], 0, OwnerRel::same});
           taken.insert(ga[0]);
           taken.insert(gb[0]);
           continue;
         }
         // a key several occurrences of a side share: which is which is not established, so none is paired
-        ++n.ambiguous;
-        n.ambiguous_rows += ga.size() + gb.size();
-        ambiguous += "  " + kv.first + ":";
-        for (const OccRow* r : ga) ambiguous += " A#" + std::to_string(r->index) + " " + verdict_text(*r) + ";";
-        for (const OccRow* r : gb) ambiguous += " B#" + std::to_string(r->index) + " " + verdict_text(*r) + ";";
-        ambiguous += "\n";
+        list_ambiguous(kv.first, nullptr, ga, gb, false, std::string());
         for (const OccRow* r : ga) taken.insert(r);
         for (const OccRow* r : gb) taken.insert(r);
       }
@@ -404,8 +463,25 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
       left_a = next_a;
       left_b = next_b;
     }
+    // the candidates the second pass did not pair, where the third pass did not pair their rows either
+    std::set<const OccRow*> paired;
+    for (const Pair& pr : pairs) paired.insert(pr.x), paired.insert(pr.y);
+    for (const Held& h : unsure)
+      if (paired.count(h.ra[0]) == 0 && paired.count(h.rb[0]) == 0) list_uncertain(h.key, "without the owner", h.ra[0], h.rb[0], h.why);
+    for (const Held& h : components) {
+      std::vector<const OccRow*> ra, rb;
+      for (const OccRow* r : h.ra)
+        if (paired.count(r) == 0) ra.push_back(r);
+      for (const OccRow* r : h.rb)
+        if (paired.count(r) == 0) rb.push_back(r);
+      if (ra.empty() || rb.empty()) continue;  // the rows left have no candidate: one side only
+      list_ambiguous(h.key, "without the owner", ra, rb, true,
+                     ra.size() + rb.size() < h.ra.size() + h.rb.size() ? " (other rows of this group paired by the text arguments)" : "");
+    }
   }
-  uint64_t owner_verdict = 0, owner_basis = 0, key_verdict = 0, key_basis = 0;
+  n.ambiguous_rows = amb_rows.size();
+  n.uncertain_rows = unc_rows.size();
+  uint64_t owner_verdict = 0, owner_basis = 0, neither_verdict = 0, neither_basis = 0, key_verdict = 0, key_basis = 0;
   for (const Pair& pr : pairs) {
     const OccRow& x = *pr.x;
     const OccRow& y = *pr.y;
@@ -444,27 +520,40 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     if (!v.empty()) ++n.verdict_other;
     if (!d.empty()) ++n.basis_other;
     const std::string cmp = std::string(v.empty() ? "verdict same" : "verdict " + v) + (d.empty() ? "; basis same" : ";" + d);
-    if (pr.pass == 1) {
+    const std::string sides = "A " + owner_text(x, with_task) + ", B " + owner_text(y, with_task);
+    if (pr.pass == 1 && pr.rel == OwnerRel::neither) {
+      ++n.owner_neither;
+      neither_verdict += v.empty() ? 0 : 1;
+      neither_basis += d.empty() ? 0 : 1;
+      neither += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (" + sides + "): " + cmp + "\n";
+    } else if (pr.pass == 1) {
       ++n.owner_unestablished;
       owner_verdict += v.empty() ? 0 : 1;
       owner_basis += d.empty() ? 0 : 1;
       const std::string why = pr.rel == OwnerRel::task_open ? "the task's place in application " + std::to_string(x.owner_key) + " established in " + (x.task != 0 ? "A" : "B") + " only"
-                                                           : "the owner established in " + std::string(owner_established(x) ? "A" : owner_established(y) ? "B" : "neither") + " only";
-      owners += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (" + why + "; A " + owner_text(x, with_task) + ", B " + owner_text(y, with_task) + "): " + cmp + "\n";
+                                                            : "the owner established in " + std::string(owner_established(x) ? "A" : "B") + " only";
+      owners += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (" + why + "; " + sides + "): " + cmp + "\n";
     } else {
       ++n.key_differs;
       key_verdict += v.empty() ? 0 : 1;
       key_basis += d.empty() ? 0 : 1;
-      keys += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (key value fixed in " + (x.resource.empty() ? "B" : "A") + " only): " + cmp + "\n";
+      keys += "  " + key + " ~ B " + occ_key(y, true, with_task) + " (key value fixed in " + (x.resource.empty() ? "B" : "A") + " only" +
+              (pr.rel == OwnerRel::neither ? "; neither side's owner established: " + sides : std::string()) + "): " + cmp + "\n";
     }
   }
-  // the candidates of the second pass whose owners differ, where neither row was paired by another rule
-  const std::set<const OccRow*> left(left_a.begin(), left_a.end()), left_bs(left_b.begin(), left_b.end());
-  std::map<const OccRow*, std::string> refused;  // per row left: the candidates refused for their owner
+  // the rows of one side only: not paired and not listed as ambiguous or uncertain
+  std::vector<const OccRow*> only_a, only_b;
+  for (const OccRow* r : left_a)
+    if (held.count(r) == 0) only_a.push_back(r);
+  for (const OccRow* r : left_b)
+    if (held.count(r) == 0) only_b.push_back(r);
+  // the candidates of the second pass whose owners differ, where neither row was paired or listed otherwise
+  const std::set<const OccRow*> alone_a(only_a.begin(), only_a.end()), alone_b(only_b.begin(), only_b.end());
+  std::map<const OccRow*, std::string> refused;  // per row of one side only: the candidates refused for their owner
   for (const Conflict& c : conflicts) {
-    if (left.count(c.x) != 0) refused[c.x] += " B#" + std::to_string(c.y->index);
-    if (left_bs.count(c.y) != 0) refused[c.y] += " A#" + std::to_string(c.x->index);
-    if (left.count(c.x) == 0 || left_bs.count(c.y) == 0) continue;
+    if (alone_a.count(c.x) != 0) refused[c.x] += " B#" + std::to_string(c.y->index);
+    if (alone_b.count(c.y) != 0) refused[c.y] += " A#" + std::to_string(c.x->index);
+    if (alone_a.count(c.x) == 0 || alone_b.count(c.y) == 0) continue;
     ++n.owner_conflict;
     conflicts_text += "  " + c.key + " (without the owner): A#" + std::to_string(c.x->index) + " " + owner_text(*c.x, with_task) + " " + verdict_text(*c.x) + "; B#" +
                       std::to_string(c.y->index) + " " + owner_text(*c.y, with_task) + " " + verdict_text(*c.y) + "\n";
@@ -474,11 +563,11 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
     return std::string("  only in ") + side + ": " + occ_key(*r, true, with_task) + " " + verdict_text(*r) +
            (it != refused.end() ? " (not paired with" + it->second + ": the owners differ)" : "") + "\n";
   };
-  for (const OccRow* r : left_a) {
+  for (const OccRow* r : only_a) {
     ++n.only_a;
     only += only_line("A", r);
   }
-  for (const OccRow* r : left_b) {
+  for (const OccRow* r : only_b) {
     ++n.only_b;
     only += only_line("B", r);
   }
@@ -489,35 +578,42 @@ std::string occ_diff_text(const OccTable& a, const OccTable& b, OccDiffCounts* c
                     (n.uncertain != 0 ? ", uncertain " + std::to_string(n.uncertain) + " (" + std::to_string(n.uncertain_rows) + " occurrences, not paired)" : "") +
                     (n.owner_conflict != 0 ? ", owners differ " + std::to_string(n.owner_conflict) + " (not paired)" : "") +
                     (n.owner_unestablished != 0 ? ", matched with one side's owner not established " + std::to_string(n.owner_unestablished) : "") +
+                    (n.owner_neither != 0 ? ", matched with neither side's owner established " + std::to_string(n.owner_neither) : "") +
                     (n.key_differs != 0 ? ", matched by the text arguments " + std::to_string(n.key_differs) : "") + "\n";
   if (keyed)
     out += "pairs: by the full key " + std::to_string(n.by_key) + ", with one side's owner not established " + std::to_string(n.owner_unestablished) +
-           ", by the text arguments " + std::to_string(n.key_differs) +
-           "; the verdict and basis differences below count the pairs of the full key, the other pairs are compared in their own sections; edge rules "
-           "are compared per occurrence by rule name, kind, by-store and count, not by their endpoints\n";
+           ", with neither side's owner established " + std::to_string(n.owner_neither) + ", by the text arguments " + std::to_string(n.key_differs) +
+           "; the verdict and basis differences below count the pairs of the full key (both owners established), the other pairs are compared in "
+           "their own sections; edge rules are compared per occurrence by rule name, kind, by-store and count, not by their endpoints\n";
   out += "result: exit " + std::to_string(status) +
          (status == 4   ? " (the pairing of some occurrences is not established: ambiguous keys " + std::to_string(n.ambiguous) + ", uncertain " + std::to_string(n.uncertain) + ")"
           : status == 3 ? std::string(" (differences)")
                         : std::string(" (no difference)")) +
-         "\n";
+         (reading_differs(a, b) ? "; the reading differs (above), which the exit status does not count" : "") + "\n";
   out += "verdict differences (status, summary view): " + std::to_string(n.verdict) + "\n" + verdicts;
   out += "basis differences (basis kinds, assumptions, outcome check, edge rules): " + std::to_string(n.basis) + "\n" + bases;
   if (!owners.empty())
-    out += "matched with one side's owner not established (the key without the owner, the role, the via names and the text arguments equal; not a full-key "
-           "match): " +
+    out += "matched with one side's owner not established (the key without the owner, the role, the via names, the text arguments and the owners' names "
+           "equal; not a full-key match): " +
            std::to_string(n.owner_unestablished) + "; verdict differences " + std::to_string(owner_verdict) + ", basis differences " + std::to_string(owner_basis) + "\n" + owners;
+  if (!neither.empty())
+    out += "matched with neither side's owner established (the key without the owner, the role, the via names, the text arguments and the owners' names "
+           "equal; no owner ties them): " +
+           std::to_string(n.owner_neither) + "; verdict differences " + std::to_string(neither_verdict) + ", basis differences " + std::to_string(neither_basis) + "\n" + neither;
   if (!keys.empty())
     out += "matched by the text arguments (the key value is fixed on one side only): " + std::to_string(n.key_differs) + "; verdict differences " + std::to_string(key_verdict) +
            ", basis differences " + std::to_string(key_basis) + "\n" + keys;
   if (!uncertain.empty())
-    out += "uncertain (the key without the owner and the ordinal equal, one side's owner not established, but the role, the via names or the text arguments "
+    out += "uncertain (a candidate the owners do not rule out, but the role, the via names, the text arguments, the owners' names or the task's places "
            "differ; not paired): " +
            std::to_string(n.uncertain) + "\n" + uncertain;
   if (!ambiguous.empty())
-    out += "ambiguous keys (shared by more than one occurrence of a side; which is which is not established, none paired): " + std::to_string(n.ambiguous) + "\n" + ambiguous;
+    out += "ambiguous keys (shared by more than one occurrence of a side, or more than one candidate of a row; which is which is not established, none "
+           "paired): " +
+           std::to_string(n.ambiguous) + "\n" + ambiguous;
   if (!conflicts_text.empty())
-    out += "owners differ (the key without the owner equal, the owning applications or the task's places established on both sides and different; not the same "
-           "occurrence, not paired, listed again below as one side only): " +
+    out += "owners differ (the key without the owner equal, the owning applications established on both sides and different; not the same occurrence, "
+           "not paired, listed again below as one side only): " +
            std::to_string(n.owner_conflict) + "\n" + conflicts_text;
   out += only;
   if (counts != nullptr) *counts = n;

@@ -20,6 +20,8 @@
 #         the wait loop read SystemState >= OPERATIONAL, whose only store is cfe_es_start.c:234 (cfe_es_api.c:585)
 #   time  by recorded time only (the record's clock): an order of the record, never happens-before
 #   none  no recorded time, equal times, or the boundary is not in the record
+# Next to the replay's scope (default | teardown), each occurrence's relation to the profile's shutdown request
+# (CFE_PSP_Restart.request_shutdown, the first one) is given with its basis: po in the requesting actor, else time.
 # Writes <out>/neutral.dump (kz-dump of the neutral layer), <out>/occ.tsv, <out>/boundaries.tsv, <out>/intervals.txt and
 # <out>/sha256.txt.  Exit 0, or 2 when an input cannot be read or an occurrence cannot be matched to its record event.
 set -uo pipefail
@@ -104,6 +106,8 @@ for ei in sorted(events): per_actor[events[ei]['actor']].append(ei)
 def evs(lab): return [ei for ei in sorted(events) if label(ei) == lab]
 
 B1, B2, SR = evs('es.main.operational'), evs('es.restart_cmd.reset_cfe'), evs('sb.sub_reporting.set')
+# the profile's scope points (10_kinds.kzp scope; the replay maps them by these labels)
+REQ, TD = evs('CFE_PSP_Restart.request_shutdown'), evs('OS_Application_Run.teardown')
 b1 = B1[0] if len(B1) == 1 else None
 b2 = B2[0] if len(B2) == 1 else None
 main = events[b1]['actor'] if b1 is not None else None
@@ -176,6 +180,12 @@ def rel_b1(ei):
     if a in running_raise and q < running_raise[a] and polled(a): return ('before', 'sync')
     return by_time(ei, b1)
 
+def rel_req(ei):   # to the first shutdown request: po in the requesting actor, else recorded time
+    if not REQ: return ('?', 'none')
+    r = REQ[0]; a, q = events[ei]['actor'], events[ei]['aseq']
+    if a == events[r]['actor']: return ('before' if q < events[r]['aseq'] else 'after', 'po')
+    return by_time(ei, r)
+
 def rel_b2(ei):
     if b2 is None: return ('?', 'none')
     a, q = events[ei]['actor'], events[ei]['aseq']
@@ -240,16 +250,17 @@ for i, o in enumerate(occs):
     iv, basis, est = interval(r1, r2)
     rows.append([i, o['actor'], '%#x' % owner if owner is not None else 'none', '%#x' % appid, val(ei, 'event_id'), cls, ei,
                  events[ei]['aseq'], events[ei]['t'] if events[ei]['clock'] else '-', r1[0], r1[1], r2[0], r2[1], iv, basis, est,
-                 o['status'], o['summary'], o['scope']])
+                 o['status'], o['summary'], o['scope']] + list(rel_req(ei)))
 hdr = ['occ', 'actor', 'owner', 'app_id', 'event_id', 'class', 'nevent', 'aseq', 't_ns', 'vs_operational', 'basis1',
-       'vs_restart', 'basis2', 'interval', 'assigned_by', 'established', 'status', 'summary', 'replay_scope']
+       'vs_restart', 'basis2', 'interval', 'assigned_by', 'established', 'status', 'summary', 'replay_scope', 'vs_request', 'basis_req']
 with open(O + '/occ.tsv', 'w') as f:
     f.write('\t'.join(hdr) + '\n')
     for r in rows: f.write('\t'.join(str(x) for x in r) + '\n')
 
 with open(O + '/boundaries.tsv', 'w') as f:
     f.write('boundary\tnevent\tactor\taseq\tt_ns\tvalue\n')
-    for nm, lst, role in (('operational', B1, None), ('restart', B2, 'reset_type'), ('sub_reporting', SR, 'state')):
+    for nm, lst, role in (('operational', B1, None), ('restart', B2, 'reset_type'), ('sub_reporting', SR, 'state'),
+                         ('shutdown_request', REQ, None), ('teardown', TD, None)):
         for ei in lst:
             f.write('%s\t%d\t%s\t%d\t%s\t%s\n' % (nm, ei, aname[events[ei]['actor']], events[ei]['aseq'],
                     events[ei]['t'] if events[ei]['clock'] else '-', val(ei, role) if role else '-'))
@@ -257,7 +268,8 @@ with open(O + '/boundaries.tsv', 'w') as f:
 out = []
 P = out.append
 P('r2_intervals_tag: record %s, replay %s' % (dump, rep))
-P('boundaries: es.main.operational %d, es.restart_cmd.reset_cfe %d, sb.sub_reporting.set %d (boundaries.tsv)' % (len(B1), len(B2), len(SR)))
+P('boundaries: es.main.operational %d, es.restart_cmd.reset_cfe %d, sb.sub_reporting.set %d; scope points '
+  'CFE_PSP_Restart.request_shutdown %d, OS_Application_Run.teardown %d (boundaries.tsv)' % (len(B1), len(B2), len(SR), len(REQ), len(TD)))
 if len(B1) != 1: P('  OPERATIONAL boundary: %s; relations to it are not assigned' % ('not in the record (a plan before sites 35-37 / 42-44)' if not B1 else 'more than one event'))
 if len(B2) > 1: P('  restart boundary: more than one event; relations to it are not assigned')
 if b1 is not None and b2 is not None:
@@ -287,8 +299,8 @@ by_a = collections.defaultdict(C)
 for r in rows: by_a[(r[1], r[2])][r[13] + '[' + r[14] + ']'] += 1
 for k in sorted(by_a): P('  %s (%s): %s' % (k[0], k[1], ', '.join('%s %d' % (x, by_a[k][x]) for x in sorted(by_a[k]))))
 P('\nreplay scope vs interval (the replay decides SCOPE by the merged order of the decision and the shutdown request):')
-c = C((r[18], r[13]) for r in rows)
-for k in sorted(c): P('  scope %s\t%s\t%d' % (k + (c[k],)))
+c = C((r[18], r[13], r[19] + '[' + r[20] + ']') for r in rows)
+for k in sorted(c): P('  scope %s\t%s\tvs request %s\t%d' % (k + (c[k],)))
 e22 = [r for r in rows if r[4] == 22]
 if SR:
     en = [ei for ei in SR if val(ei, 'state') == 1 and events[ei]['clock']]

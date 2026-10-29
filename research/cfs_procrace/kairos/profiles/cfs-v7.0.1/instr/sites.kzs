@@ -1,7 +1,7 @@
 # sites.kzs -- logical sites of profile cfs-v7.0.1 (case R2) for the instrumented family (kzs-sites 2,
 # kairos/docs/event_semantics.md section 3).  Configuration: the ENV tree, cFS bundle v7.0.1 (088b2fa8,
 # env/build_cfs.sh), build native_std (-O0 -g).
-# Stage D: every site of the F0 plan observe/sites.kzp (35; 38 with the interval sites 42-44 at the end) has a counterpart here with the same label, and an
+# Stage D: every site of the F0 plan observe/sites.kzp (35; 40 with the sites 42-46 at the end) has a counterpart here with the same label, and an
 # `equiv ... backends=f0,gcc-plugin status=unconfirmed` line that names the F0 site and how the two positions relate
 # (IR section 9.3: a common name is not an equivalence; it is confirmed only with evidence, stage E).  Exception
 # (stage D leftovers, 2026-10-26): the F0 pair es.start_task.entry/.ret (the entry and return of CFE_ES_StartAppTask,
@@ -217,3 +217,16 @@ equiv 43 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:210 at
 site 44 label=sb.sub_reporting.set op=sb.sub_reporting phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_SetSubscriptionReporting line=1224 ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:1224-1227"
 value 44 0 role=state from=arg0 type=u32 ref="the stored state (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72)"
 equiv 44 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:212 entry probe; same function entry"
+
+# ---- the default scope's end (F0 sites 38-39, 2026-10-29, plan/r2_intervals_20261029.md section 6 item 1) -----------
+# The profile's scope (10_kinds.kzp L22-29) ends at CFE_PSP_Restart.request_shutdown (20_ops.kzp: store of
+# CFE_PSP_IdleTaskState_t.ShutdownReq) and enters teardown at OS_Application_Run.teardown (call of OS_DeleteAllObjects).
+# Labels are those points (OP.LABEL), so the conversion maps them and the replay applies the scope.
+source psp rev=c4b3b0b65b119e106481ad8e20976ae4d7f554e3 ref="env/build_cfs.sh PINNED_SUBMODULES"
+# Profile: fn(CFE_PSP_Restart).store(CFE_PSP_IdleTaskState_t.ShutdownReq): right after the store of L87.  F0 took the
+# start of line 87, before it (the line has no call).
+site 45 label=CFE_PSP_Restart.request_shutdown op=psp.restart phase=effect tu=psp/fsw/pc-linux/src/cfe_psp_support.c func=CFE_PSP_Restart line=87 place=store ref="psp/fsw/pc-linux/src/cfe_psp_support.c:87"
+equiv 45 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:225 line start of L87 (before the store); GCC: right after the store; the next statement (L88 pthread_kill) is not observed"
+# Profile: fn(OS_Application_Run).call(OS_DeleteAllObjects): right after that call (as F0).
+site 46 label=OS_Application_Run.teardown op=psp.app_run phase=effect tu=psp/fsw/pc-linux/src/cfe_psp_start.c func=OS_Application_Run callee=OS_DeleteAllObjects line=507 place=after-call ref="psp/fsw/pc-linux/src/cfe_psp_start.c:488-507"
+equiv 46 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:226 after-call; same call"

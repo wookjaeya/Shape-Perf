@@ -210,3 +210,17 @@ site es.main.operational point at=cfe_es_start.c:233 after-call=CFE_ES_WriteToSy
 site es.restart_cmd.reset_cfe point at=cfe_es_task.c:664 at-call=CFE_ES_ResetCFE prov=es_restartcmd_reset s0=rdi:u32:reset_type
 # Entry of the setter: the state it stores (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72).
 site sb.sub_reporting.set entry func=CFE_SB_SetSubscriptionReporting prov=sb_set_subreporting s0=rdi:u32:state s3=stack+0:u64:return_address
+
+# ---- the default scope's end (2026-10-29, plan/r2_intervals_20261029.md section 6 item 1) ---------------------------
+#
+# The profile ends every default scope at the shutdown request (../10_kinds.kzp L22-29, scope { kind es.shutdown;
+# request SHUTDOWN_REQ; teardown TEARDOWN; }); its two linearization points are CFE_PSP_Restart.request_shutdown, the
+# store of ShutdownReq (cfe_psp_support.c:87; ../20_ops.kzp op CFE_PSP_Restart), and OS_Application_Run.teardown, the
+# call of OS_DeleteAllObjects after the main thread's signal loop ends (cfe_psp_start.c:488-507; op OS_Application_Run).
+# Named after them (OP.LABEL), so `kz replay` maps them and applies the scope.  The hashes are those of ../01_prov.kzp.
+prov psp_restart_req tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_support.c" lines=87-87 cite="CFE_PSP_Restart: CFE_PSP_IdleTaskState.ShutdownReq = true, the request that wakes the main thread to shut down" sha256=94bc76fe35425fda05924a0e43d6dcfd4c7fd154172011bfd944c2ec7b5aa7b4
+prov psp_teardown tier=code-derived kind=code_pattern file="psp/fsw/pc-linux/src/cfe_psp_start.c" lines=488-507 cite="OS_Application_Run: the signal loop ends when ShutdownReq is set, then the main thread prints the shutdown line and calls OS_DeleteAllObjects" sha256=5005392f89e34ed750249d0ca88450f97467563f07a6e34c9fb4a21e95655e13
+
+# The store of L87 has no call on its line: the start of the line, before the store (as the raise of cfe_es_api.c:573).
+site CFE_PSP_Restart.request_shutdown point at=cfe_psp_support.c:87 line-start prov=psp_restart_req
+site OS_Application_Run.teardown point at=cfe_psp_start.c:507 after-call=OS_DeleteAllObjects prov=psp_teardown

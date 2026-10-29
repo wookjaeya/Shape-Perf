@@ -1,18 +1,18 @@
 profile "c1-bp-b051eb0"
 revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
-hash 53b8ce7b8768959ef5771e9f97ef58a6f69631035390dd71dd06b1ae6c3cefd6
+hash e4a84e8f5d762681063b0e15e95ba8b309e09241947b18c8ffe0b670bfa87e64
 
 provenance records: 109
-entries with provenance: 58
+entries with provenance: 59
 by strongest cited tier (the best part of the entry):
-  contract-backed: 4
+  contract-backed: 5
   admitted: 1
   code-derived: 52
   issue-derived: 0
   researcher: 1
   unreferenced: 0
 by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
-  contract-backed: 0
+  contract-backed: 1
   admitted: 1
   code-derived: 49
   issue-derived: 0
@@ -31,8 +31,8 @@ entries citing at least one researcher record: 8
   role cf-dependent-lookup
 declared-trusted: 0
 assumptions: 0
-caller level (SPEC 1.6): 0 specified appreq, 1 Allowed entries, 0 citing a hand-entered record or none
-  rspec K-REG.osal-countsem-lookup appreq unspecified_by_reference
+caller level (SPEC 1.6): 1 specified appreq, 1 Allowed entries, 0 citing a hand-entered record or none
+  rspec K-REG.osal-countsem-lookup appreq cf_events_sem_eid (contract-backed, side caller)
   rspec K-REG.osal-countsem-lookup allowed retry_until_ready#1: cf_cfdp_startup_admission (admitted, side caller)
 
 readiness specifications

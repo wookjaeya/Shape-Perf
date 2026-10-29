@@ -62,7 +62,7 @@ edge R1 S unconditional #25 -> #26
 
 occurrences 1
 occurrence K-REG.osal-countsem-lookup actor CF ordinal 1 key [0x5be5dc6a107c0903] call #2 return #4 context cf-dependent-lookup
-  status NOT_READY_UNJUDGED decided at point #3 scope default
+  status VIOLATING decided at point #3 scope default
   conjunct exists point #3 fails
   result 0xffffffef outcome agrees
 

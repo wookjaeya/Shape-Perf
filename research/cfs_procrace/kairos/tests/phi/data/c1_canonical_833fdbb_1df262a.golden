@@ -1074,7 +1074,7 @@ rspec K-REG.osal-countsem-lookup {
   key osal.countsem(arg.sem_name);
   requires state(osal.countsem(arg.sem_name)) = LIVE;
   oracle fns "OS_ObjectIdFindByName", "OS_ObjectNameMatch";
-  appreq unspecified_by_reference;
+  appreq cf_events_sem_eid;
   allowed {
     retry_until_ready codes {OS_ERR_NAME_NOT_FOUND} bound CF_STARTUP_SEM_MAX_RETRIES prov cf_cfdp_startup_admission;
   }

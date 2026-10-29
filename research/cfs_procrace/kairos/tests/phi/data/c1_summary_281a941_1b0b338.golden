@@ -1,18 +1,18 @@
 profile "c1-bp-b051eb0"
 revision "nasa/bp b051eb0; CF and cFS bundle per variant directory"
-hash 041a1c5e4e6cad4092e098cac87a8bbb257a76d08998a65d2dd07fd6704c9a25
+hash c91c6e51c7ba033c0e27a79d286fa051098bf3f3e0f0b0da0dd7560b2307d3b3
 
 provenance records: 104
-entries with provenance: 54
+entries with provenance: 55
 by strongest cited tier (the best part of the entry):
-  contract-backed: 4
+  contract-backed: 5
   admitted: 0
   code-derived: 49
   issue-derived: 0
   researcher: 1
   unreferenced: 0
 by weakest cited tier (SPEC 1.6: a mixed entry takes the weakest tier of its parts):
-  contract-backed: 0
+  contract-backed: 1
   admitted: 0
   code-derived: 46
   issue-derived: 0
@@ -31,9 +31,9 @@ entries citing at least one researcher record: 8
   role cf-dependent-lookup
 declared-trusted: 0
 assumptions: 0
-caller level (SPEC 1.6): 0 specified appreq, 0 Allowed entries, 0 citing a hand-entered record or none
-  rspec K-REG.osal-countsem-lookup appreq unspecified_by_reference
-  rspec K-REG.osal-countsem-lookup allowed unspecified_by_reference
+caller level (SPEC 1.6): 1 specified appreq, 0 Allowed entries, 0 citing a hand-entered record or none
+  rspec K-REG.osal-countsem-lookup appreq cf_events_sem_eid (contract-backed, side caller)
+  rspec K-REG.osal-countsem-lookup allowed none
 
 readiness specifications
-  K-REG.osal-countsem-lookup: caller-level Allowed unspecified_by_reference (Allowed is unspecified_by_reference)
+  K-REG.osal-countsem-lookup: caller-level Allowed none (Allowed none, and appreq is specified by a caller-side record: no not-ready outcome is acceptable)

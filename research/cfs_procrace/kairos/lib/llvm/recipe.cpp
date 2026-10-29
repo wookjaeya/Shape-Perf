@@ -115,7 +115,18 @@ class Parser {
         r->relocatables.push_back(x);
       } else if (kw == "front_end_diagnostic") {
         Recipe::FrontEndDiagnostic d;
-        if (!str(&d.unit) || !str(&d.name) || !word("reference") || !str(&d.reference) || !semi()) return err_;
+        if (!str(&d.unit) || !str(&d.name)) return err_;
+        while (cur_.kind == Tok::Word && cur_.text == "at") {
+          advance();
+          Recipe::FrontEndDiagnostic::At a;
+          if (!str(&a.file) || !num(&a.line)) return err_;
+          if (a.file.empty() || a.line == 0) return fail("front_end_diagnostic: `at` needs a file and a line (from 1)");
+          for (const Recipe::FrontEndDiagnostic::At& o : d.at)
+            if (o.file == a.file && o.line == a.line) return fail("front_end_diagnostic: " + a.file + ":" + std::to_string(a.line) + " is cited twice");
+          d.at.push_back(a);
+        }
+        if (d.at.empty()) return fail("front_end_diagnostic needs `at \"file\" <line>` for each line where the diagnostic is raised");
+        if (!word("reference") || !str(&d.reference) || !semi()) return err_;
         if (d.unit.empty()) return fail("front_end_diagnostic names no unit");
         bool name_ok = !d.name.empty() && d.name.front() != '-';
         for (char c : d.name) name_ok = name_ok && ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-');

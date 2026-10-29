@@ -164,7 +164,7 @@ class Builder {
   kz::Status startup(const Recipe& recipe);
   kz::Status modules(const Recipe& recipe);
   kz::Status instrumentation();
-  void unit_diagnostics(const Recipe& recipe, size_t from);
+  kz::Status unit_diagnostics(const Recipe& recipe, size_t from);
   kz::Status relocatables(const Recipe& recipe);
   size_t record_tus(size_t from);
   std::string map_virtual(const Recipe::Startup& st, const std::string& name) const;
@@ -979,16 +979,64 @@ kz::Status Builder::relocatables(const Recipe& recipe) {
 }
 
 // The recipe's front_end_diagnostic statements for the units from `from` on (recipe.hpp): -Wno-error=<name> for that unit
-// only, each recorded as an analysis-only deviation with the build compiler's reference.
-void Builder::unit_diagnostics(const Recipe& recipe, size_t from) {
+// only, each recorded as an analysis-only deviation with the build compiler's reference.  What the arguments lower is
+// established, not assumed: the unit is parsed without and with them, warnings reported (read_unit_diagnostics), and the
+// lowered occurrences (an error of the first parse that the second reports as a warning, same diagnostic and place) must
+// be exactly the cited ones: each of the named diagnostic (not another member of a group), each on a cited line, each
+// cited line with one, and no error left.  Each occurrence is recorded (the extraction's -w then suppresses it).
+kz::Status Builder::unit_diagnostics(const Recipe& recipe, size_t from) {
   diag_matched_.resize(recipe.front_end_diagnostics.size(), false);
+  auto where = [](const UnitDiagnostic& d) { return d.file + ":" + std::to_string(d.line) + ":" + std::to_string(d.column); };
   for (size_t ui = from; ui < units_.size(); ++ui) {
     UnitCommand& u = units_[ui];
     const std::string rel = rel_to(u.source, in_.bundle_root);
-    for (size_t k = 0; k < recipe.front_end_diagnostics.size(); ++k) {
+    std::vector<size_t> ks;  // the statements of this unit
+    std::vector<std::string> args;
+    for (size_t k = 0; k < recipe.front_end_diagnostics.size(); ++k)
+      if (recipe.front_end_diagnostics[k].unit == rel) {
+        ks.push_back(k);
+        args.push_back("-Wno-error=" + recipe.front_end_diagnostics[k].name);
+      }
+    if (ks.empty()) continue;
+    const std::string what = "recipe front_end_diagnostic for " + rel + ": ";
+    std::vector<UnitDiagnostic> before, after;
+    std::string err;
+    if (!read_unit_diagnostics(u, in_.read, {}, &before, &err) || !read_unit_diagnostics(u, in_.read, args, &after, &err))
+      return kz::Status::error(kz::Err::Invalid, what + err);
+    std::vector<const UnitDiagnostic*> lowered;
+    for (const UnitDiagnostic& a : after) {
+      if (a.error) return kz::Status::error(kz::Err::Invalid, what + "the front end still rejects the unit: " + where(a) + ": " + a.message);
+      for (const UnitDiagnostic& b : before)
+        if (b.error && b.id == a.id && b.file == a.file && b.line == a.line && b.column == a.column) {
+          lowered.push_back(&a);
+          break;
+        }
+    }
+    for (const UnitDiagnostic* l : lowered) {
+      bool named = false;
+      for (size_t k : ks) named = named || recipe.front_end_diagnostics[k].name == l->option;
+      if (!named)
+        return kz::Status::error(kz::Err::Invalid, what + "it lowers " + (l->option.empty() ? std::string("a diagnostic without a warning option") : l->option) + " at " + where(*l) +
+                                                       ", which no statement of the unit names (a group name lowers its members; name the diagnostic itself)");
+    }
+    for (size_t k : ks) {
       const Recipe::FrontEndDiagnostic& d = recipe.front_end_diagnostics[k];
-      if (d.unit != rel) continue;
       diag_matched_[k] = true;
+      std::string occ;
+      size_t n = 0;
+      for (const UnitDiagnostic* l : lowered) {
+        if (l->option != d.name) continue;
+        bool cited = false;
+        for (const Recipe::FrontEndDiagnostic::At& a : d.at) cited = cited || (a.file == l->file && a.line == l->line);
+        if (!cited) return kz::Status::error(kz::Err::Invalid, what + d.name + " at " + where(*l) + " is on a line the statement does not cite: " + l->message);
+        occ += (occ.empty() ? "" : "; ") + where(*l) + " " + l->message;
+        ++n;
+      }
+      for (const Recipe::FrontEndDiagnostic::At& a : d.at) {
+        bool found = false;
+        for (const UnitDiagnostic* l : lowered) found = found || (l->option == d.name && a.file == l->file && a.line == l->line);
+        if (!found) return kz::Status::error(kz::Err::Invalid, what + "the statement cites " + a.file + ":" + std::to_string(a.line) + ", where the front end raises no " + d.name + " as an error");
+      }
       const std::string arg = "-Wno-error=" + d.name;
       u.analysis_args.push_back(arg);
       const uint32_t dev = add_deviation(
@@ -999,8 +1047,10 @@ void Builder::unit_diagnostics(const Recipe& recipe, size_t from) {
           "the recorded command, the executable the build compiler builds, the other units and the other diagnostics are unchanged",
           KZ_AVOIDABLE_NO);
       item("front_end.unit_diagnostic[" + rel + "][" + d.name + "]", arg, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
+      item("front_end.lowered[" + rel + "][" + d.name + "]", std::to_string(n) + " occurrence(s), each on a cited line: " + occ, KZ_POLICY_DEVIATION, KZ_NONE32, dev);
     }
   }
+  return kz::Status::success();
 }
 
 // A derived build (SPEC 1.7 B'): the build compiler's plugin options in the recorded commands, and the link members no
@@ -1066,14 +1116,14 @@ kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   kz::Status s = revisions(profile);
   if (!s.ok()) return s;
   if (!(s = program(recipe)).ok()) return s;
-  unit_diagnostics(recipe, 0);  // the executable's units (before the constants are evaluated in them)
+  if (!(s = unit_diagnostics(recipe, 0)).ok()) return s;  // the executable's units (before the constants are evaluated in them)
   if (!(s = front_end(recipe)).ok()) return s;
   if (!(s = constants(profile, recipe)).ok()) return s;
   if (!(s = generated_and_tables(recipe)).ok()) return s;
   if (!(s = startup(recipe)).ok()) return s;
   const size_t core_units = units_.size();
   if (!(s = modules(recipe)).ok()) return s;
-  unit_diagnostics(recipe, core_units);  // the modules' units
+  if (!(s = unit_diagnostics(recipe, core_units)).ok()) return s;  // the modules' units
   for (const auto& kv : relocatable_)
     if (relocatable_used_.count(kv.first) == 0)
       return kz::Status::error(kz::Err::Invalid, "recipe relocatable " + rel_to(kv.first, in_.bundle_root) + ": no link command takes it in");

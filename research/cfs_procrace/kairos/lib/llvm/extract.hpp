@@ -34,6 +34,24 @@ struct UnitCommand {
 // unit that does not parse and says which.  The model still has to be finalized (finalize.hpp).
 bool extract_units(const std::vector<UnitCommand>& units, const ExtractSpec& spec, const ReadOptions& options, Model* model, std::string* error);
 
+// One error or warning of the front end in a unit (read_unit_diagnostics).
+struct UnitDiagnostic {
+  bool error = false;          // reported as an error (else as a warning)
+  bool default_error = false;  // controlled by a warning option and an error by default (Clang's DefaultError)
+  unsigned id = 0;             // the front end's diagnostic id (the same in two parses by one front end)
+  std::string option;          // the <name> of the -W<name> that controls it; empty when none does
+  std::string file;            // its expansion location, the path as the extraction records one
+  uint32_t line = 0, column = 0;
+  std::string message;
+};
+
+// The errors and warnings of one unit as extract_units reads it (the same command and arguments, the unit's
+// analysis_args included, then `extra`), except that warnings are reported (no -w) and the number of errors is not
+// limited (-ferror-limit=0): for the basis, which occurrences a recipe front_end_diagnostic lowers, and where.  A unit
+// that does not parse is listed with its errors; false (and `error`) only when the front end did not run on it.
+bool read_unit_diagnostics(const UnitCommand& unit, const ReadOptions& options, const std::vector<std::string>& extra, std::vector<UnitDiagnostic>* out,
+                           std::string* error);
+
 // The text of every `-D`, `-I`, `-std=` ... argument of a recorded command that matters to the
 // meaning of the code, with the compiler, the output and the input removed.  Deterministic.
 std::string normalized_flags(const std::vector<std::string>& command_line);

@@ -6,8 +6,10 @@
 // startup script loads) with its record target.elf; a 64-bit basis of the same program has no such item.  The programs
 // are C99 without headers.  And the recipe's front_end_diagnostic (PI decision 2026-10-29 on section 10.5 item 6): one
 // unit that the front end rejects by default (incompatible-function-pointer-types) and the build compiler compiles is
-// read with -Wno-error=<that name> for that unit only, recorded as a deviation; without the statement it is not read;
-// a statement for no unit, or a name that is not one diagnostic, is an error.  And the recipe's relocatable (a link
+// read with -Wno-error=<that name> for that unit only, recorded as a deviation with the occurrence it lowers; without
+// the statement it is not read; a second unit with the same diagnostic and no statement still stops the extraction; a
+// statement for no unit, a name that is not one diagnostic, a group name, an unknown name, an occurrence on a line the
+// statement does not cite and a cited line without one are errors.  And the recipe's relocatable (a link
 // command that takes in the output of a relocatable link, `ld -r`, as a classic make build of the core does): the
 // objects of that link are the program's units (one of them compiled with a relative -I, whose constants are evaluated
 // as in the command's directory); without the statement the core has none; a command that is not relocatable, or a
@@ -229,7 +231,7 @@ int main(int argc, char** argv) {
       "typedef struct { int sem; } Throttle;\nThrottle thr[2];\nint sem_create(int *sem_id);\n"
       "int app_main(void) {\n  int i;\n  for (i = 0; i < 2; ++i)\n    if (sem_create(&thr[i].sem) != 0) return i;\n  return 0;\n}\n";
   auto closure = [&](const fs::path& C, const std::string& abi_core, const std::string& abi_app, const std::string& app = std::string(),
-                     const std::string& recipe_extra = std::string(), bool partial = false, bool full_path = false) {
+                     const std::string& recipe_extra = std::string(), bool partial = false, bool full_path = false, const std::string& core_api_extra = std::string()) {
     for (const char* d : {"src", "obj", "cf", "mods/myapp", "profile"}) fs::create_directories(C / d);
     const std::string defines = "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n";
     if (partial) write(C / "hdr/start.h", defines);  // and the core is compiled with a relative -Ihdr, as classic make does
@@ -237,7 +239,7 @@ int main(int argc, char** argv) {
           (partial ? std::string("#include \"start.h\"\n") : defines) +
           "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
           "const char *startup_file(void) { return STARTUP_FILE; }\nint main(void) { return 0; }\n");
-    write(C / "src/core_api.c", "typedef struct { int obj_id; } Rec;\nRec rec_table[2];\nint sem_create(int *sem_id) { rec_table[0].obj_id = 7; *sem_id = rec_table[0].obj_id; return 0; }\n");
+    write(C / "src/core_api.c", "typedef struct { int obj_id; } Rec;\nRec rec_table[2];\nint sem_create(int *sem_id) { rec_table[0].obj_id = 7; *sem_id = rec_table[0].obj_id; return 0; }\n" + core_api_extra);
     write(C / "src/app.c", app.empty() ? app_src : app);
     std::string cdb = "[\n";
     for (const char* n : {"core_main", "core_api", "app"}) {
@@ -304,10 +306,11 @@ startup_script {
 
   // ---- a unit the front end rejects by default and the build compiler compiles (recipe front_end_diagnostic) ----------
   // app.c passes a handler of another function type (gcc: a warning; clang: incompatible-function-pointer-types, an error
-  // by default).  Without the statement the extraction stops at the unit; with it, for that unit only, the unit is read,
-  // its call is a fact, and the basis records the deviation.
+  // by default) on its line 12.  Without the statement the extraction stops at the unit; with it, for that unit only, the
+  // unit is read, its call is a fact, and the basis records the deviation and the one occurrence it lowers.
   const std::string fp_app = app_src + "void on_tick(void) {}\nint add_handler(void (*h)(int));\nint app_init(void) { return add_handler(on_tick); }\n";
-  const std::string fed = "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-types\" reference \"unit test: the C compiler of the test compiles src/app.c\";\n";
+  const std::string fed_at = "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-types\" at \"src/app.c\" 12";
+  const std::string fed = fed_at + " reference \"unit test: the C compiler of the test compiles src/app.c\";\n";
   auto extract = [&](const fs::path& C) {
     const int re = run(q(tool) + " extract --profile " + q((C / "profile").string()) + " --basis " + q((C / "basis.kz").string()) + " -o " + q((C / "facts.kz").string()) +
                            " --target Throttle.sem",
@@ -324,6 +327,7 @@ startup_script {
   KZ_CHECK(has(out, "cannot parse") && has(out, "src/app.c") && has(out, "incompatible function pointer"));
   KZ_CHECK_EQ(closure(work / "fp_with", " -m32", " -m32", fp_app, fed), 0);
   KZ_CHECK(has(out, "front_end.unit_diagnostic[src/app.c][incompatible-function-pointer-types] = -Wno-error=incompatible-function-pointer-types  (deviation)"));
+  KZ_CHECK(has(out, "front_end.lowered[src/app.c][incompatible-function-pointer-types] = 1 occurrence(s), each on a cited line: src/app.c:12:41 incompatible function pointer types"));
   KZ_CHECK_EQ(extract(work / "fp_with"), 0);
   KZ_CHECK(has(out, "app_init -> add_handler"));
   KZ_CHECK(has(out, "location Throttle.sem   writers 1 (direct 0, data function 0, out-pointer 1"));
@@ -342,12 +346,37 @@ startup_script {
     }
     KZ_CHECK(found);
   }
+  // the statement is for its unit only: a second unit (core_api.c, line 6) with the same diagnostic and no statement stops
+  // the extraction there; with a statement for each, both are read
+  const std::string fp_core = "int core_handler(void (*h)(int)) { return h != 0; }\nvoid on_core(void) {}\nint core_init(void) { return core_handler(on_core); }\n";
+  KZ_CHECK_EQ(closure(work / "fp_two", " -m32", " -m32", fp_app, fed, false, false, fp_core), 0);
+  KZ_CHECK(has(out, "front_end.lowered[src/app.c]") && !has(out, "front_end.unit_diagnostic[src/core_api.c]"));
+  KZ_CHECK(extract(work / "fp_two") != 0);
+  KZ_CHECK(has(out, "cannot parse") && has(out, "src/core_api.c") && has(out, "incompatible function pointer"));
+  const std::string fed_core = "front_end_diagnostic \"src/core_api.c\" \"incompatible-function-pointer-types\" at \"src/core_api.c\" 6 reference \"x\";\n";
+  KZ_CHECK_EQ(closure(work / "fp_both", " -m32", " -m32", fp_app, fed + fed_core, false, false, fp_core), 0);
+  KZ_CHECK(has(out, "front_end.lowered[src/core_api.c][incompatible-function-pointer-types] = 1 occurrence(s), each on a cited line: src/core_api.c:6:"));
+  KZ_CHECK_EQ(extract(work / "fp_both"), 0);
+  KZ_CHECK(has(out, "app_init -> add_handler"));
   // a statement for a unit the program does not have, and a name that is not one diagnostic: errors
-  KZ_CHECK(closure(work / "fp_nounit", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/none.c\" \"incompatible-function-pointer-types\" reference \"x\";\n") != 0);
+  KZ_CHECK(closure(work / "fp_nounit", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/none.c\" \"incompatible-function-pointer-types\" at \"src/none.c\" 12 reference \"x\";\n") != 0);
   KZ_CHECK(has(out, "which is no unit of the program"));
-  KZ_CHECK(closure(work / "fp_blanket", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"-Wno-error\" reference \"x\";\n") != 0);
+  KZ_CHECK(closure(work / "fp_blanket", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"-Wno-error\" at \"src/app.c\" 12 reference \"x\";\n") != 0);
   KZ_CHECK(has(out, "is not a diagnostic name"));
-  KZ_CHECK(closure(work / "fp_noref", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-types\";\n") != 0);
+  KZ_CHECK(closure(work / "fp_noref", " -m32", " -m32", fp_app, fed_at + ";\n") != 0);
+  KZ_CHECK(closure(work / "fp_noat", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-types\" reference \"x\";\n") != 0);
+  KZ_CHECK(has(out, "needs `at"));
+  // a group that contains the diagnostic lowers it too: refused, the diagnostic itself must be named
+  KZ_CHECK(closure(work / "fp_group", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"incompatible-pointer-types\" at \"src/app.c\" 12 reference \"x\";\n") != 0);
+  KZ_CHECK(has(out, "it lowers incompatible-function-pointer-types at src/app.c:12:41, which no statement of the unit names"));
+  // a name the front end does not know lowers nothing: the unit is still rejected
+  KZ_CHECK(closure(work / "fp_unknown", " -m32", " -m32", fp_app, "front_end_diagnostic \"src/app.c\" \"incompatible-function-pointer-typo\" at \"src/app.c\" 12 reference \"x\";\n") != 0);
+  KZ_CHECK(has(out, "the front end still rejects the unit: src/app.c:12:41"));
+  // a second occurrence (line 13) the statement does not cite, and a cited line without one: errors
+  KZ_CHECK(closure(work / "fp_uncited", " -m32", " -m32", fp_app + "int app_again(void) { return add_handler(on_tick); }\n", fed) != 0);
+  KZ_CHECK(has(out, "incompatible-function-pointer-types at src/app.c:13:42 is on a line the statement does not cite"));
+  KZ_CHECK(closure(work / "fp_noocc", " -m32", " -m32", fp_app, fed_at + " at \"src/app.c\" 5 reference \"x\";\n") != 0);
+  KZ_CHECK(has(out, "the statement cites src/app.c:5, where the front end raises no incompatible-function-pointer-types as an error"));
 
   // ---- a link command that takes in the output of a relocatable link (recipe relocatable) -----------------------------
   const std::string rel = "relocatable \"obj/core.o\" link \"obj/core.o.link.txt\";\n";

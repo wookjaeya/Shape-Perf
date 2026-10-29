@@ -379,7 +379,7 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
 | ID | 이탈 | 레퍼런스 | 사용 값 | 이유 | 영향 |
 |---|---|---|---|---|---|
 | D1 | 작업 경로 | §2.1 (`b641`/`b642`) | `/home/user/work/c5tools/build/64<V>/{b,keep}/cFE-6.4.<V>-OSS-release` | 새 작업 공간 | 경로 문자열과 디버그 정보. 기준(ref)과 파생(instr)은 같은 경로 `b/`라 서로 비교된다 |
-| D3 | `make LOCAL_COPTS="<plugin 인자>"` | 컴파일 규칙의 첫 변수(`cfe/fsw/cfe-core/src/make/make-rules.mak` L17, `app-rules.mak` L21). 단위 Makefile이 빈 값으로 둔다(§8.2) | `-fplugin=<kzgcc.so> -fplugin-arg-kzgcc-manifest=<초안> -fplugin-arg-kzgcc-out=<dir> -fplugin-arg-kzgcc-module=2:<tree>/apps/sample_app/ -fplugin-arg-kzgcc-default-module=1` | 계측 | 기준 로그에서 이 자리가 비어 있음을 확인했다(`-DEXCLUDE_CFE_TBL`이 든 컴파일 줄 0). `make config`는 그대로다 |
+| D3 | `make LOCAL_COPTS="<plugin 인자>"` | 컴파일 규칙의 첫 변수(`cfe/fsw/cfe-core/src/make/make-rules.mak` L17, `app-rules.mak` L21). 단위 Makefile이 빈 값으로 둔다(§8.2) | `-fplugin=<kzgcc.so> -fplugin-arg-kzgcc-manifest=<초안> -fplugin-arg-kzgcc-out=<dir> -fplugin-arg-kzgcc-module=2:<tree>/apps/sample_app/ -fplugin-arg-kzgcc-default-module=1` | 계측 | 이 자리는 모든 단위에서 비어 있었다. 빌드된 Makefile 중 값을 넣을 수 있는 것은 `build/cpu1/cfe/es/Makefile` L26–L30뿐이다(`EXCLUDE_CFE_TBL`이 `TRUE`일 때만 `-DEXCLUDE_CFE_TBL`, 아니면 빈 값). `cfe/{psp,osal,sb,evs,time,tbl}/Makefile`과 앱의 `build/cpu1/<앱>/Makefile` L36은 빈 값을 두고, `cfe/fs/Makefile`은 정하지 않는다. 값을 넣는 `cfe/unit-test/*/Makefile`은 빌드하지 않는다(로그에 `-fprofile-arcs` 0). `EXCLUDE_CFE_TBL`을 정하는 파일은 빌드에 없다. 그래서 기준 로그에서 `-DEXCLUDE_CFE_TBL`이 든 컴파일 줄이 0이라는 것이 확인이 된다(두 판 같음, 2026-10-29 검증 지적 반영). `make config`는 그대로다 |
 | D3′ | `make LIBS="<런타임> -lm -lpthread -ldl -lrt"` | `psp/fsw/pc-linux/make/link-rules.mak` L26 `LIBS =  -lm -lpthread -ldl -lrt`, L36 코어 링크 | 앞에 `-Wl,--whole-archive libkzrt-posix.a libkzrt.a -Wl,--no-whole-archive kz_rt_posix_auto.c.o kz_rt_build_info.c.o`(모두 `-m32`), 뒤는 L26 값 그대로 | 런타임은 코어에 링크한다. 앱 `.so`는 코어가 내보낸 hook을 쓴다(`-Wl,-export-dynamic`, L21) | LIBS를 읽는 규칙은 코어 링크 하나다. 앱 링크(L42)는 그대로다 |
 | D5 | 디버그 정보의 컴파일 옵션 | `build/cpu1/cfe/debug-opts.mak` L4 `-g -O0` | — | gcc가 `DW_AT_producer`에 옵션을 적는데 plugin 인자도 들어간다 | 객체 66개가 모두 다르다. 그래서 `objcopy --strip-debug` 뒤로도 비교한다 |
 
@@ -518,14 +518,28 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
 - 초안과 다른 것:
   - L651 대조를 새 reader `owner-check`로 둔다. 초안 항목 2는 "대조용으로만 기록"이라 적었고 reader를 정하지 않았다. `owner-check`는 owner를 정하지 않는다. 값이 다르면 owner를 철회만 한다.
   - `owner_event`를 neutral actor 레코드에 필드로 더하지 않았다. 새 섹션 NOWNER(`kz_nowner`: actor, request, publish, request_return, check, owner_id, flags, level)로 둔다. 기존 레코드 크기와 섹션 판을 바꾸지 않기 위해서다. 그래서 이전 container를 그대로 읽고, app-request가 없는 실행은 이전과 같은 container를 쓴다.
-  - 항목 2의 [U]는 풀렸다. `kzgcc 0.3`은 owner-publish·owner-check를 `place=store`에서만 묶고, 그 레코드의 link로 함수 진입 레코드를 준다. call·line-start 위치면 `unsupported`로 적는다. 이 reader가 없는 manifest에서는 출력이 0.2와 같다.
+  - 항목 2의 [U]는 풀렸다. `kzgcc 0.3`은 owner-publish·owner-check를 `place=store`에서만 묶고, 그 레코드의 link로 함수 진입 레코드를 준다. call·line-start 위치면 `unsupported`로 적는다. 이 reader가 없는 manifest에서는 객체와 bind 줄이 0.2와 같다. 판 문자열은 다르다(아래 C1/R2 동일성의 plugin 항목).
 - 형식(항목 8): `kzs-sites 3`. 판 2 파일에 새 reader가 있으면 파서가 거부한다. 스키마 개정 6은 `KZ_DECODER` 값 셋, `KZ_OWNER_EVIDENCE`의 `owner-at-publish`, `KZ_NOWNER_FLAG`, 섹션 NOWNER(type 111)를 더한다.
 - 시험(항목 9; 도구 시험이며 사례 수에 넣지 않음): `test_kzrt_app_request` 102 check((a)–(g), 그리고 판 2 identity 파일에서 NOWNER가 없음), `kzgcc_owner_{O0,O2}` 통과, `rt_manifest` 통과.
 - C1/R2 동일성 [M]:
   - golden: `layout.golden`에서는 개정 번호(5→6), 새 레코드 `kz_nowner`, 새 enum·flag 값, 새 섹션 행, fingerprint만 바뀌었다. 모두 더한 것이다. `records.golden`은 seed로 채운 패턴 레코드다(`tests/unit/support/fixtures.cpp` `make_record`). enum 값 수·flag 수·섹션 수가 늘면 같은 seed에서 뽑는 값이 밀린다. 33행이 바뀌었고 `kz_nowner` 2행이 더해졌다. 바뀐 행은 모두 ref, `decoder` enum, `KZ_OWNER_EVIDENCE` 필드가 있는 레코드다. 의미가 바뀐 것이 아니다.
-  - 분석기 출력: `env/c5/regress_eid1.sh`가 a3c1443 빌드(`/home/user/work/kairos-build`)와 이 빌드로 같은 입력을 돌렸다. 입력은 R2 F0 기록 `env/logs/s1r2_p1.kzt`의 replay(표준 출력과 container), convert, 런타임 시험 dump 셋의 convert다. 다른 줄은 도구 정체성·해시 줄뿐이고, NOWNER 섹션은 생기지 않는다(기록 `/home/user/work/c5tools/eid1/regress2/`).
-  - plugin: `env/c5/plugin_same.sh`로 C1 pre/post 1df262a와 R2 파생 빌드의 계측 단위(11·11·12)를 kzgcc 0.2와 0.3으로 다시 컴파일했다. 객체와 bind 줄이 모두 같다.
+  - 분석기 출력: `env/c5/regress_eid1.sh`가 a3c1443 빌드(`/home/user/work/kairos-build`)와 이 빌드로 같은 입력을 돌렸다. 입력은 R2 F0 기록 `env/logs/s1r2_p1.kzt`의 replay(표준 출력과 container), convert, 런타임 시험 dump 셋의 convert다. 다른 줄은 도구 정체성·해시 줄뿐이고, NOWNER 섹션은 생기지 않는다(기록 `/home/user/work/c5tools/eid1/regress2/`). 2026-10-29 검증 지적 뒤 다시 돌린 결과는 아래 "검증 지적 반영" 메모에 있다.
+  - plugin: `env/c5/plugin_same.sh`로 C1 pre/post 1df262a와 R2 파생 빌드의 계측 단위(11·11·12)를 kzgcc 0.2와 0.3으로 다시 컴파일했다. 객체와 bind 줄이 모두 같다. binding 파일의 머리 줄(`# kzgcc 0.3 …`)은 다르다(`plugin_same.sh`는 `bind ` 줄만 비교한다).
 - 초안 manifest(항목 10): 주석을 실제 문장으로 바꿨다. site 1 `app-request`, site 2 `request-return status=0 ok=0`(`CFE_SUCCESS` `(0L)`, `cfe_error.h` L158), 새 site 33(6.4.1 L657, 6.4.2 L660) `owner-publish owner=0`, site 8 `owner-check owner=0`. 두 판 모두 묶였다(§8.4). 실제로 `confirmed`가 되는지는 실행 기록으로만 확인된다 [U].
+
+**2026-10-29 메모 (검증 지적 반영)** [M]:
+- 회귀 입력에 실제 실행을 더했다. 이전 입력(R2 F0 기록, 런타임 시험 dump)에는 실제 cFS의 identity read가 없었다. `env/c5/regress_eid1.sh` 항목 4가 W6 G-I dump 9개를 더한다. R2 `cpu1`, C1 natural tx·rx(pre/post × 1b0b338/1df262a)다.
+  - 각 dump는 그 W6 replay가 쓴 manifest 둘과 B′ basis로 변환한다. 경로는 그 replay의 convert 로그와 `sha256.txt`에서 읽고, 해시로 같은 파일인지 확인한다. 이어 W6 replay의 인자로 읽기 cur를 돌린다(주 checkout `env/r2/replay_w6.sh`, `env/c1/replay_w6.sh`).
+  - 옛 도구가 만든 container 9개는 모두 W6의 것과 sha256이 같다. 곧 W6 기록이 재현된다.
+- 비교 방식을 좁혔다. 이전 스크립트는 정체성 줄을 고정되지 않은 패턴(`source=`, `sha256=`, `parent`)으로 걸렀다. 그래서 진짜 변화가 그 패턴에 걸리면 보이지 않을 수 있었다. 지금은 해시를 담는 줄 형식에만 고정한 패턴으로 그 값만 가린다(`MASK`). 나머지 줄은 모두 같아야 하고, 가린 뒤 다른 줄 수를 적는다. replay가 각 도구가 변환한 실행을 읽을 때는 그 실행의 해시를 같은 이름으로 바꾼 뒤 비교한다. container는 바이트로도 비교해 다른 위치를 적는다.
+- 결과(`/home/user/work/c5tools/eid1/regress3/regress_eid1.record`): 비교 47개 모두 가린 뒤 0줄 다르다. kz container(replay·convert·kzrt convert)는 바이트 121–156(36 B)만 다르다. 변환된 실행을 읽은 W6 replay container는 296 B가 다르다. header 해시들, REF_LISTS 섹션의 crc, 그리고 REF_LISTS 레코드 7개의 부모 해시(32 B씩)다.
+- 바이트 동일성의 정확한 범위 [M]: 새 container는 a3c1443의 것과 바이트로 같지 않다. 남는 차이는 모두 도구 정체성에서 온다. `KZ_SCHEMA_REVISION` 6이 layout fingerprint를 바꾸고, 그 fingerprint와 소스 정체성이 tool hash와 build identity 문자열에 들어간다(`cmake/KzSourceIdentity.cmake`).
+  - kz container: header의 tool hash(32 B)와 header crc(4 B), 곧 바이트 121–156이다.
+  - 변환된 실행을 읽은 replay container: 그에 더해 부모 해시, REF_LISTS의 부모 해시와 그 섹션 crc다.
+  - C1 basis(§10.5 메모): 바이트 121–156, STRINGS 섹션 crc(201–204), `front_end.build_identity` 문자열의 `schema=`·`source=` 64자씩이다. 159–160 B다.
+  - C1 facts: 그에 더해 basis 해시와 parent 레코드, `extract.units_from`의 basis 16자다. 238–240 B다.
+  - 그러므로 records 묶음을 tool hash나 schema fingerprint로 대조하는 검증은 새 tool hash를 예상해야 한다. 리드에게 알린다.
+- plugin 판 문자열 [M]: kzgcc 0.3은 0.2와 객체·bind 줄이 같다. 그러나 binding 파일 머리 줄에 `0.3`을 적는다. `build_runtime.sh`는 plugin 판을 런타임 build identity에 옮긴다(C5 `build_instr.record`: `backend="kzgcc 0.3 (gcc-plugin)"`). 그래서 C1/R2 파생 빌드를 0.3으로 다시 빌드해 돌리면 RUN/NRUN의 backend가 바뀌고, convert·replay 텍스트의 `run: backend kzrt kzgcc 0.2 (gcc-plugin)` 줄도 바뀐다. 기록된 C1/R2 빌드·실행·출력은 0.2의 것이고 이번에 바뀐 것은 없다. C1/R2를 다시 빌드할 때 0.2 plugin을 쓸지는 리드가 정한다 [U].
 
 ### 10.5 E-ST: kz-static의 ELF32 요구 목록 (2026-10-29; 같은 날 구현·실행, 절 끝 메모) [F][I]
 
@@ -572,17 +586,18 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
 - 결정: PD29 §3a D7. 분석 전용으로 `osapi.c:647`과 `cfe_psp_start.c:270`이 내는 진단 이름만 경고로 낮춘다. 근거는 실제 빌드의 gcc 13.3.0이 두 파일을 오류 없이 컴파일한다는 사실이다.
 - 구현 (엔진, 일반형):
   1. 항목 1–4 (ELF32): `lib/llvm/elf_info.{hpp,cpp}`, `linkset`, `basis.cpp`. ELFCLASS32·ELFDATA2LSB를 같은 세 읽기로 읽고, 한 basis 안의 ELF 정체성이 섞이면 오류로 한다. ELF64가 아닐 때만 `target.elf` 항목을 쓴다. 커밋 `b73618d`.
-  2. D7: recipe 문장 `front_end_diagnostic "<단위>" "<진단 이름>" reference "<근거>";`.
+  2. D7: recipe 문장 `front_end_diagnostic "<단위>" "<진단 이름>" at "<파일>" <줄> … reference "<근거>";`(`at`은 검증 지적 뒤 더함, 아래 "검증 지적 반영").
      - 그 단위에만 `-Wno-error=<이름>`을 더한다. basis에는 deviation(`front-end diagnostic <이름> of <단위>`, 근거 포함)과 항목 `front_end.unit_diagnostic[<단위>][<이름>]`을 남긴다. extract는 basis에서 이 인자를 다시 읽는다.
-     - 이름이 아닌 값(`-Wno-error` 등), 근거 없음, 프로그램에 없는 단위는 오류다.
+     - 이름이 아닌 값(`-Wno-error` 등), 근거 없음, `at` 없음, 프로그램에 없는 단위는 오류다.
      - 위치를 recipe로 둔 이유: kz-static의 앞단 설정은 지금 모든 단위에 붙는 `--extra-arg`뿐이다(basis의 `front_end.arguments_added` deviation). 이것으로는 진단 이름을 두 단위에 묶을 수 없다. 그러면 다른 단위가 같은 진단으로 실패해도 조용히 지나가고, D7의 "목록을 늘리지 않는다"를 지킬 수 없다. 단위별 값은 빌드마다 다른 데이터라서 link·module처럼 recipe에 둔다. 인자는 같은 조정 경로로, 모든 단위의 인자 뒤에 붙는다.
-     - 기존 `-Wno-error -w`(모든 단위)는 그대로다. 이 둘은 clang의 기본 오류를 낮추지 않는다. 낮춘 뒤의 경고는 `-w`가 감춘다.
+     - [D-제안] 이것은 지시("kz-static이 앞단 설정을 받는 방식을 따른다")의 문자 그대로가 아니다. 단위별 recipe 문장이라는 새 경로를 둔 설계 선택이다. 리드(필요하면 PI)의 확인이 필요하다(§11 메모).
+     - 기존 `-Wno-error -w`(모든 단위)는 그대로다. 이 둘은 이 작업 전부터 C1을 포함한 모든 단위에 붙는다(SPEC 4.1 단계 2, `lib/llvm/ast_run.cpp`). D7 문구는 "일괄 `-Wno-error`·`-w`는 쓰지 않는다"이다. D7 때문에 더한 것은 없다. 그러나 이 둘은 clang의 기본 오류를 낮추지 않고, 낮춘 뒤의 경고는 `-w`가 extract에서 감춘다. 그래서 basis가 낮춘 자리를 따로 확인하고 적는다(아래). 이 사실은 리드·PI에게 따로 알린다(§11 메모).
   3. classic make 빌드를 읽으려고 더한 것(이 절에 없던 요구):
      - recipe `relocatable "<obj>" link "<file>";`. 코어 링크가 받는 subsystem 객체(`es.o` 등)는 `ld -melf_i386 -o es.o -r …`로 만든다(`make-rules.mak`의 `$(LINKER) -o $(TARGET) -r $(OBJS)`). 그 링크가 받은 객체가 프로그램의 단위가 된다. `-r`이 아니거나, 그 객체를 쓰지 않거나, 아무 링크도 받지 않는 문장은 오류다.
      - `module_file field 1 full_path;`. 6.4.x 시작 스크립트의 둘째 필드는 파일의 전체 가상 경로다(`CFE_ES_ParseFileEntry` L337–L400, `OS_ModuleLoad` L556). 경로·확장자 상수가 없다.
      - 상수 평가가 단위의 디렉터리에서 읽는다(`-working-directory`; extract의 ClangTool과 같다). 6.4.x 명령에는 상대 `-I../../inc`가 있다. clang 드라이버가 이때 프로세스 디렉터리를 바꾸므로 평가 뒤 되돌린다. 매크로 정의 파일도 그 디렉터리 기준으로 적는다.
      - 이 문장이 없는 recipe의 basis는 이전과 같다(아래 C1 동일성). 커밋 `3ab770b`.
-  - 시험: `test_static_elf32` 179 check(ELF32, closure, D7 문장, relocatable, 상대 `-I`, full_path), `test_static_link` 68 check.
+  - 시험: `test_static_elf32` 179 check(ELF32, closure, D7 문장, relocatable, 상대 `-I`, full_path), `test_static_link` 68 check. 검증 지적 뒤 `test_static_elf32`는 233 check다(아래).
 - 입력 준비 (항목 5·9; 엔진 변경 아님): `env/c5/est_inputs.sh`.
   - 빌드 로그의 `## make` 부분에서 `compile_commands.json`(58 항목)을 만든다. 명령은 로그의 줄 그대로이고, 디렉터리는 make의 "Entering directory" 줄이다.
   - 링크마다 명령 파일 하나(`<디렉터리>/<출력>.link.txt`)를 명령이 돈 디렉터리에 쓴다(`keep/` 트리 안). relocatable 8, 실행 파일 1, 앱 5다. kz-static은 명령 파일의 디렉터리를 작업 디렉터리로 본다.
@@ -603,7 +618,7 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
 | `signal` 호출 사실 | `cfe_psp_start.c:270:4 main -> signal`; arg 1 함수 `CFE_PSP_SigintHandler` | 같음 | 같음 |
 | D7 deviation | 2건, 근거는 gcc 빌드 로그의 경고 줄 | 같음 | 같음 |
 
-- 진단 확인 [M]: 58 단위 모두를 kz-static과 같은 LLVM(`1053047a`)의 clang으로, 같은 조정 인자(`-Wno-unknown-warning-option -Wno-error -w`)와 `-fsyntax-only`로 읽었다. 기본 오류는 두 판 모두 정확히 둘이다. `osapi.c:647:34`와 `cfe_psp_start.c:270:19`이고, 둘 다 `[-Wincompatible-function-pointer-types]`다. 다른 단위는 실패하지 않았으므로 목록을 늘릴 일이 없었다. 같은 줄을 gcc 13.3.0은 경고 `-Wincompatible-pointer-types`로만 낸다(빌드 로그).
+- 진단 확인 [M]: 58 단위 모두를 kz-static과 같은 LLVM(`1053047a`)의 clang으로, 같은 조정 인자(`-Wno-unknown-warning-option -Wno-error -w`)와 `-fsyntax-only`로 읽었다(처음 실행의 스크립트와 출력은 남지 않았다. 검증 지적 뒤 `env/c5/est_probe.sh`로 다시 하고 기록했다, 아래). 기본 오류는 두 판 모두 정확히 둘이다. `osapi.c:647:34`와 `cfe_psp_start.c:270:19`이고, 둘 다 `[-Wincompatible-function-pointer-types]`다. 다른 단위는 실패하지 않았으므로 목록을 늘릴 일이 없었다. 같은 줄을 gcc 13.3.0은 경고 `-Wincompatible-pointer-types`로만 낸다(빌드 로그).
 - 대조: 문장 둘을 빼면 extract가 `osapi.c`에서 멈춘다. `osapi.c` 문장만 두면 `cfe_psp_start.c`에서 멈춘다. 두 판 같다.
 - 적어 둘 것: closure에서 이름 둘이 여러 단위에 정의된다(`closure.duplicate_definitions` deviation): `__x86.get_pc_thunk.ax`와 `.bx`. i386 PIC 코드에 컴파일러가 만드는 hidden 함수다. 소스 정의가 없으므로 빠지는 사실은 없다고 본다 [I]. 엔진은 이것을 그대로 deviation으로 적는다.
 - C1 동일성 [M]:
@@ -612,6 +627,24 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
 - 남은 것:
   - 정적 사실로 판정하는 일은 Φ 프로필(§10.3) 뒤다.
   - 큐 메시지 크기(`sizeof(CFE_SB_BufferD_t *)`, QI 항목 4)를 이 앞단으로 평가하려면 profile 상수가 source를 요구한다. tarball 트리에는 commit이 없어 하지 않았다 [U]. 포인터 4 B는 `target.elf`로만 확인했다.
+
+**2026-10-29 메모 (검증 지적 반영)** [M][D]:
+- 앞단: kz-static의 앞단은 clang 23.0.0git(LLVM `1053047a`)이다. D7이 이름으로 든 것은 clang 18이다. 시스템 clang 18.1.3(`env/REBUILD_20261029.md` §1.3에 적힌 판)도 같은 두 오류를 낸다(아래 probe).
+- probe 기록: `env/c5/est_probe.sh <compile_commands.json> <트리> <clang> <출력>`. 단위마다 kz-static이 앞단에 주는 명령(컴파일러·`-o`·`-c`·plugin 인자를 뺀 기록 명령, 모든 단위의 조정 인자)에 `-fsyntax-only -ferror-limit=0`을 붙여 명령의 디렉터리에서 읽는다. recipe는 쓰지 않는다. `est_run.sh` 단계 1a가 두 컴파일러로 돌리고 요약과 오류 줄을 `est.record`에 적는다. 앞단의 드라이버는 kz-static 빌드의 `CMakeCache.txt` `LLVM_DIR`에서, clang 18은 `clang-18`에서 찾는다. 출력은 `build/64<V>/est{,_instr}/probe_{llvm,clang18}.txt`다.
+  - 결과: 두 판 × 기준·파생 × 두 컴파일러 모두 "units 58, units rejected 2, errors 2", 둘 다 `[-Wincompatible-function-pointer-types]`다. `osapi.c:647:34`와 `cfe_psp_start.c:270:19`이고, 각 단위에서 한 번씩이다.
+- 낮춘 자리의 확인(엔진, 일반형): 문장마다 `at "<파일>" <줄>`로 진단이 나는 줄을 든다. basis는 그 단위를 문장 없이 한 번, 문장의 인자를 붙여 한 번 더 읽는다. 둘 다 `-w` 없이, 오류 수 제한 없이 읽는다(`read_unit_diagnostics`, `lib/llvm/ast_run.cpp`). 첫 번째에서 오류였고 두 번째에서 경고가 된 것(같은 진단, 같은 자리)이 낮춘 것이다. 다음은 모두 오류다.
+  - 낮춘 것이 문장의 이름이 아닌 진단이다. 상위 group 이름(`incompatible-pointer-types`)은 그 하위인 `incompatible-function-pointer-types`도 낮추므로 거부된다.
+  - 낮춘 자리가 `at`이 들지 않은 줄에 있다(같은 단위에 같은 진단이 하나 더 생긴 경우).
+  - `at`이 든 줄에서 그 진단이 오류로 나지 않는다.
+  - 인자를 붙인 뒤에도 오류가 남는다. 앞단이 모르는 이름이 그렇다. `-Wno-unknown-warning-option` 때문에 인자가 조용히 무시되기 때문이다.
+  - basis는 낮춘 자리마다 `front_end.lowered[<단위>][<이름>]` 항목을 deviation과 함께 남긴다. 값은 파일:줄:열과 앞단의 메시지다.
+- C5 recipe: 두 문장에 `at "osal/src/os/posix/osapi.c" 647`, `at "psp/fsw/pc-linux/src/cfe_psp_start.c" 270`을 더했다. sha256 `7bd4d55d…`다.
+- 다시 돌린 E-ST(kz-static `3ec20abf…`, 기록 `build/64<V>/est{,_instr}/est.record`; 이전 기록은 `est.record.74e271d`): 네 실행 모두 `front_end.lowered`가 단위마다 "1 occurrence(s), each on a cited line"이다(`osapi.c:647:34`, `cfe_psp_start.c:270:19`). 나머지 기록 줄(basis, extract 수, `pthread_create`·`signal` 호출 사실, deviation 2건, 대조 둘)은 이전 기록과 같다.
+- 시험: `test_static_elf32` 233 check. 더한 것:
+  - 두 단위가 같은 진단을 내고 문장이 한 단위에만 있으면 basis는 되지만 extract가 다른 단위(`src/core_api.c`)에서 멈춘다. 두 단위 모두 문장이 있으면 둘 다 읽힌다.
+  - group 이름, 모르는 이름, `at`이 없는 줄의 둘째 발생, 발생이 없는 `at` 줄, `at` 없음은 오류다.
+  - 낮춘 자리 항목의 값(`src/app.c:12:41 …`)을 확인한다.
+- C1 동일성 다시 확인(`env/c5/regress_static.sh`, 기록 `/home/user/work/c5tools/eid1/regress_static2/`): 정체성 줄 패턴을 그 줄 형식에 고정했다(§10.4 "검증 지적 반영"과 같은 방식). pre/post 1df262a의 basis·facts·두 로그 모두 가린 뒤 0줄 다르다. 바이트로는 basis 160·159 B, facts 240·238 B가 다르다. 위치는 §10.4 "검증 지적 반영"의 바이트 동일성 항목에 적었다.
 
 ## 11. 남은 것과 PI 결정
 
@@ -647,6 +680,10 @@ PD28 §2 항목 6: 순서위반을 판정 단위로 한다. 최종 실패·피�
   - plugin 시험 `kzgcc_target_{O2,O3,O2-lto}`는 두 스레드의 실행 순서에 따라 실패한다(ENV §4.1과 같은 원인; 이번 실행에서는 O3 하나). 시험 파일은 이 작업의 소유가 아니어서 고치지 않았다.
   - `static_golden_core_cpu1`은 ENV §5.2의 3줄 때문에 계속 실패한다. golden은 이 작업의 소유가 아니다.
 - 새 PI 결정 항목: 없음.
+- 2026-10-29 검증 지적 뒤 리드(필요하면 PI)에게 올리는 것 [D-제안]:
+  1. D7을 둔 자리. 지시는 "kz-static이 앞단 설정을 받는 방식을 따른다"였다. 지금 방식인 `--extra-arg`는 모든 단위에 붙어 "목록을 늘리지 않는다"를 지킬 수 없다. 그래서 단위별 recipe 문장 `front_end_diagnostic`을 새로 두었다(§10.5 메모). 이 설계를 받아들일지 확인이 필요하다.
+  2. kz-static은 이 작업 전부터 모든 단위(C1 포함)에 `-Wno-error -w`를 붙인다. D7 문구는 이 둘을 쓰지 않는다고 적는다. D7 때문에 더한 것은 없지만, 이 둘은 계속 모든 단위에 걸린다. 그래서 낮춘 경고는 extract에서 `-w`로 감춰진다. 낮춘 자리는 basis가 `-w` 없이 따로 확인해 적는다(§10.5 "검증 지적 반영").
+  3. C1/R2 출력의 바이트 동일성 범위와 kzgcc 판 문자열(§10.4 "검증 지적 반영"). records 묶음 검증은 새 tool hash를 예상해야 한다. C1/R2 파생 빌드를 다시 만들 때 쓸 plugin 판도 정해야 한다.
 
 **기존 기록과 다른 점**
 
@@ -698,6 +735,6 @@ for V in 1 2; do W=$T/build/64$V
   $R/env/c5/est_run.sh $V $W $T/kz-llvm/tools/kz-static/kz-static instr
 done
 # C1/R2 동일성 (§10.4 메모, §10.5 메모)
-$R/env/c5/regress_eid1.sh /home/user/work/kairos-build $T/kz-llvm $T/eid1/regress2
-$R/env/c5/regress_static.sh /home/user/work/kairos-build/k1r3-llvm $T/kz-llvm $T/eid1/regress_static
+$R/env/c5/regress_eid1.sh /home/user/work/kairos-build $T/kz-llvm $T/eid1/regress3          # 검증 지적 뒤 (이전: regress2)
+$R/env/c5/regress_static.sh /home/user/work/kairos-build/k1r3-llvm $T/kz-llvm $T/eid1/regress_static2   # (이전: regress_static)
 ```

@@ -1,0 +1,66 @@
+# core-linux.kzb -- the basis recipe of the core executable core-linux.bin of a cFE 6.4.1 or 6.4.2 reference build
+# (pc-linux, build/cpu1; research/cfs_procrace/plan/c5_execution_basis_20261028.md section 2.1 and section 10.5 item 9).
+# DRAFT.  Paths are relative to the build directory build/cpu1; the bundle root is the release tree.  The build is
+# classic make: its commands are only in the build log, so env/c5/est_inputs.sh writes the compile database and one
+# link command file per link (in the directory where the command ran) from that log.  The two releases have the same
+# lines for everything cited here (cfe_es_apps.c L1-L400 and L556, the PSP files, osloader.c, cfe_platform_cfg.h L856/L871).
+#
+#   kz-static basis --profile profiles/c5-cfe-6.4.x/basis/est-64<V> --compile-db <est>/compile_commands.json \
+#       --build-dir <tree>/build/cpu1 --bundle-root <tree> --recipe core-linux.kzb -o basis.kz
+kzb 1;
+
+name "core-linux.bin of cFE 6.4.x, pc-linux, build/cpu1 (classic make)";
+
+# psp/fsw/pc-linux/make/link-rules.mak L36: the core links the subsystem objects, each written by a relocatable link
+# (cfe/fsw/cfe-core/src/make/make-rules.mak `$(LINKER) -o $(TARGET) -r $(OBJS)`; LINKER `ld -melf_i386`,
+# compiler-opts.mak).
+link "cfe/link/core-linux.bin.link.txt";
+binary "exe/core-linux.bin";
+relocatable "cfe/psp/psp.o" link "cfe/psp/psp.o.link.txt";
+relocatable "cfe/osal/osal.o" link "cfe/osal/osal.o.link.txt";
+relocatable "cfe/es/es.o" link "cfe/es/es.o.link.txt";
+relocatable "cfe/sb/sb.o" link "cfe/sb/sb.o.link.txt";
+relocatable "cfe/time/time.o" link "cfe/time/time.o.link.txt";
+relocatable "cfe/evs/evs.o" link "cfe/evs/evs.o.link.txt";
+relocatable "cfe/fs/fs.o" link "cfe/fs/fs.o.link.txt";
+relocatable "cfe/tbl/tbl.o" link "cfe/tbl/tbl.o.link.txt";
+
+# The applications the startup script loads (build/cpu1/Makefile THE_APPS; each linked `gcc -m32 -shared`,
+# psp/fsw/pc-linux/make/link-rules.mak L42); the script line names each by its whole path under /cf/apps.
+module "/cf/apps/sample_lib.so" link "sample_lib/sample_lib.so.link.txt";
+module "/cf/apps/sample_app.so" link "sample_app/sample_app.so.link.txt";
+module "/cf/apps/ci_lab.so" link "ci_lab/ci_lab.so.link.txt";
+module "/cf/apps/to_lab.so" link "to_lab/to_lab.so.link.txt";
+module "/cf/apps/sch_lab.so" link "sch_lab/sch_lab.so.link.txt";
+
+# PI decision D7 (research/cfs_procrace/Architecture/spec/PI_DECISIONS_RESOLVED_20261029.md section 3a): for the static
+# analysis only, the one diagnostic the front end raises as an error by default at osapi.c:647 and cfe_psp_start.c:270
+# is reported as a warning in these two units.  The build compiler (gcc 13.3.0) compiles both without an error.
+front_end_diagnostic "osal/src/os/posix/osapi.c" "incompatible-function-pointer-types" reference "gcc 13.3.0 compiles the unit without an error: the build log of derive_c5.sh (keep) has osapi.c:647:34 warning: passing argument 3 of 'pthread_create' from incompatible pointer type [-Wincompatible-pointer-types]; PI decision D7, 2026-10-29";
+front_end_diagnostic "psp/fsw/pc-linux/src/cfe_psp_start.c" "incompatible-function-pointer-types" reference "gcc 13.3.0 compiles the unit without an error: the build log of derive_c5.sh (keep) has cfe_psp_start.c:270:19 warning: passing argument 2 of 'signal' from incompatible pointer type [-Wincompatible-pointer-types]; PI decision D7, 2026-10-29";
+
+# Which startup script is opened (CFE_ES_StartApplications): after a processor reset the volatile file first, then the
+# file the PSP passes in; after a power-on reset only that file.  The PSP passes the non-volatile file name and starts
+# with a power-on reset unless the command line says PR; the readme runs ./core-linux.bin in exe/ without arguments
+# (cfe-OSS-readme.txt 6.4.1 L159-L163, 6.4.2 L161-L165).
+startup_script {
+  reset POWERON;
+  rule PROCESSOR volatile nonvolatile;
+  rule POWERON nonvolatile;
+  file volatile const "CFE_ES_VOLATILE_STARTUP_FILE" in "cfe/fsw/cfe-core/src/es/cfe_es_apps.c";
+  file nonvolatile const "CFE_ES_NONVOL_STARTUP_FILE" in "psp/fsw/pc-linux/src/cfe_psp_start.c";
+  # the PSP volume table maps the virtual /cf to ./cf of the process's working directory, exe/ (readme)
+  mount "/cf" "exe/cf";
+  # the entry words of CFE_ES_ParseFileEntry; OSAL loads every module with RTLD_GLOBAL, so both scopes are global
+  entry library "CFE_LIB" global;
+  entry app "CFE_APP" global;
+  # the second field of a line is the file's whole virtual path (sscanf into FileName, passed to OS_ModuleLoad)
+  module_file field 1 full_path;
+  cite "cfe/fsw/cfe-core/src/es/cfe_es_apps.c" 165 224 note "CFE_ES_StartApplications: the file that is opened for each reset type";
+  cite "psp/fsw/pc-linux/src/cfe_psp_start.c" 244 251 note "the reset type: PROCESSOR only with the argument PR, else POWERON";
+  cite "psp/fsw/pc-linux/src/cfe_psp_start.c" 366 366 note "the PSP passes the non-volatile startup file name to the cFE entry point";
+  cite "psp/fsw/pc-linux/src/cfe_psp_voltab.c" 42 42 note "the volume table maps /cf to ./cf";
+  cite "cfe/fsw/cfe-core/src/es/cfe_es_apps.c" 337 400 note "CFE_ES_ParseFileEntry: the fields of a line, the entry words CFE_APP and CFE_LIB";
+  cite "cfe/fsw/cfe-core/src/es/cfe_es_apps.c" 556 556 note "the application's file is loaded by the path the line names";
+  cite "osal/src/os/posix/osloader.c" 260 260 note "dlopen with RTLD_LAZY | RTLD_GLOBAL";
+}

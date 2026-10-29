@@ -6,21 +6,22 @@
 - 동결 표는 고치지 않았다. 결과를 본 뒤의 개정은 그 실행을 개발 자료로 옮긴다(마스터플랜 §12.4, P-F1GATE). 개정 여부는 PI 몫이다(§6).
 - 표기: [F] 고정 커밋의 소스·문서, 또는 원 이슈·PR에서 읽음(줄 번호는 그 커밋의 파일 기준). [M] 이번에 도구로 얻음. [I] 연구자 추론. [D] 결정. [U] 미확인. [기록] 앞서 보고했고 원 기록이 2026-10-29 컨테이너 교체로 없어진 결과(RA §0.1). [기록]의 수는 다시 확인한 값이 아니다.
 - **근거 등급**(표의 "등급" 열): `직접` = 출처의 글이 그 내용을 말한다. `코드` = 고정 커밋 코드의 동작이다(출처가 그것을 요구로 말하지는 않는다). `추론` = 연구자가 글·코드에서 이은 것이다. `모형` = SPEC rev 1.3의 판정 규칙이 정한 것이다(출처가 아니다). `미정` = 출처가 정하지 않는다. 고르지 않고 그대로 둔다.
-- **기대 판정의 두 층.** (가) 출처 기준 부류: 그 발생에서 요구 의존이 충족됐는가, 허용 처리의 출처가 있는가. 이것이 정답 쪽이다. (나) 기대 요약 라벨: (가)를 SPEC 규칙(READY / TOLERATED / VIOLATING / NOT_READY_UNJUDGED, 요약 `OBSERVED_VIOLATION` / `NO_VIOLATION_IN_CHECKED_PREFIX` / `INCONCLUSIVE(…)`)으로 옮긴 것이다. (나)가 `모형`에 기대면 표시한다. 도구가 관측으로 무엇을 세울 수 있는지는 따로 적는다(§2.4·§3.4의 대조 열).
+- **기대 판정의 두 층.** (가) 출처 기준 부류: 그 발생에서 요구 의존이 충족됐는가, 허용 처리의 출처가 있는가. 이것이 정답 쪽이다. (나) 기대 요약 라벨: (가)를 SPEC 규칙(READY / TOLERATED / VIOLATING / NOT_READY_UNJUDGED, 요약 `OBSERVED_VIOLATION` / `NO_VIOLATION_IN_CHECKED_PREFIX` / `INCONCLUSIVE(…)`)으로 옮긴 것이다. (나)가 `모형`에 기대면 표시한다. 두 사례에 같은 기준을 쓴다: SPEC §1.6 `appreq` 단계 (1)–(4)(`Architecture/spec/SPEC_FINAL.md` L478)가 낸 Allowed는 `모형`이고, "받아들이는 글이 없다"는 부재 판단이다. 이슈·댓글을 그 글이 쓰인 판과 다른 고정 커밋에 묶는 것은 [I]다. 도구가 관측으로 무엇을 세울 수 있는지는 따로 적는다(§2.4·§3.4의 대조 열).
+- **개정(2026-10-29, 검토 반영).** 수정 전 C1 라벨이 열린 물음 둘(`appreq` 기록 여부, P3)에 달린다는 것과 V-C1-7을 더했다(R-C1-e, K2, §2.6, §6). 자연 post nocode 결과의 오기를 고쳤고, 제어 실행의 pre·post를 갈랐다(K1, K3, N-C1-1). `cfs_cf.dox`의 두 역할을 나눴다. R-C1-g에 #184 본문과 댓글 4를 넣었다. R2의 등급을 C1과 같은 기준으로 맞췄고(R1·R2, R-R2-d), ES 사용 수 하한을 7로, R6·R7을 OPERATIONAL 전으로 한정했으며, TBL의 저장·등록 순서, `targets.cmake` 경로, S-R2-10·S-R2-15·S-C1-8의 등급, BP 경로·생성 조건을 고쳤다. 기대 판정을 정하지 않은 곳은 그대로 `미정`이다.
 
 ## 0. 요약
 
-1. **C1.** 요구 의존("CF의 조회 전에 그 이름의 세마포어가 있다")은 출처가 직접 말한다(#184 본문, `cf_events.h` L155–L156, `cfs_cf.dox` L212–L214). 수정 후 앞선 실패의 허용(재시도)도 직접이다(수정 주석 L993–L999, PR #342). 그러나 두 라벨은 출처로 정해지지 않는다.
-   - 수정 전 단일 실패의 허용 여부: `미정`. P3/Q-12가 열려 있다. 지금 라벨 `INCONCLUSIVE(caller_requirement_absent)`는 그 미정을 적은 라벨이다.
-   - 수정 후 25회 소진의 `VIOLATING`: `모형`이다. 소진 뒤 종료를 받아들이는 출처도, 거부한다고 직접 말하는 출처도 없다.
-   - 기록된 Kairos 출력[기록]은 모든 부류에서 동결 표와 라벨이 같다. 다만 이 두 곳의 일치는 같은 모형을 두 번 적용한 결과다(§4 V-C1-1, V-C1-2).
-2. **R2.** 요구(`AppID`는 등록된 앱이나 코어 서비스에 대응해야 한다)는 API 헤더가 caller 쪽에 직접 말한다(`cfe_evs.h` L169–L172 @`c5fb2b4d`). 허용 처리는 없다. 이슈의 분류(bug), CCB의 "Development team will work on this ticket", 분석 댓글이 이 쪽이다.
-   - ES·EVS task의 AppID 0 사용(SB 저장 L138 전)은 `VIOLATING → OBSERVED_VIOLATION`이다. 기록 24개(ES 20, EVS 4)[기록]와 일치하고, 반환 코드 없이 선다.
-   - EVS 4와 SB 자기 전송 5는 코드에서 정확히 셀 수 있다[I]. 기록과 같다. ES 20은 판·빌드 정보 이벤트 수에 달려 출처에서 정해지지 않는다.
+1. **C1.** 요구 의존("CF의 조회 전에 그 이름의 세마포어가 있다")은 출처가 직접 말한다(#184 본문, `cf_events.h` L155–L156; `C1_basis_plan.md` §9.8 G6과 같다). `cfs_cf.dox`는 두 몫으로 나눠 읽는다. L208–L211은 provider와 이름 설정의 전제이고, L212–L214("will terminate")는 결과를 서술하는 문장이자 P3의 받아들임 후보다. 그래서 요구의 출처로 세지 않는다. 수정 후 앞선 실패의 허용(재시도)도 직접이다(수정 주석 L993–L999, PR #342). 그러나 두 라벨은 출처로 정해지지 않는다.
+   - 수정 전 단일 실패의 라벨: `미정`. 열린 물음 둘에 달린다. (i) CF 자신의 요구 글(S-C1-3; S-C1-1은 [I]로 묶임)을 SPEC §1.6의 `appreq`로 기록하는가. (ii) P3/Q-12. 지금 라벨 `INCONCLUSIVE(caller_requirement_absent)`는 (i)·(ii) 모두 "아니오"인 조합의 라벨이다. 프로필이 `appreq unspecified_by_reference`를 골랐기 때문에 나온다. (i)이 "예"이면 VIOLATING이나 충돌 명시가 된다(R-C1-e, §4 V-C1-7).
+   - 수정 후 25회 소진의 `VIOLATING`: `모형`+`추론`이다. 소진 뒤 종료를 받아들이는 출처는 없다. #184 본문의 "shouldn't be a hard error … rather than having CF abort/exit"는 거부 쪽으로 기운다. 이 글은 "Fixes #184"로 `833fdbb`에 묶인다 [I]. 그러나 25회 뒤의 종료가 그 "hard error"에 드는지는 어느 출처도 말하지 않는다(R-C1-g).
+   - 기록된 Kairos 출력[기록]은 모든 부류에서 동결 표와 라벨이 같다. 다만 이 두 곳의 일치는 같은 모형과 같은 프로필 선택을 두 번 적용한 결과다(§4 V-C1-1, V-C1-2, V-C1-7).
+2. **R2.** 요구(`AppID`는 등록된 앱이나 코어 서비스에 대응해야 한다)는 같은 판의 API 헤더가 caller 쪽에 직접 말한다(`cfe_evs.h` L169–L172 @`c5fb2b4d`). 이 글이 `appreq`다. 받아들이는 caller 쪽 글은 찾지 못했다(부재 판단). 그래서 Allowed `none`은 SPEC §1.6 `appreq` 단계 (1)의 결과이고, `VIOLATING`은 `모형`이다. C1 수정 전이 (i) "예"일 때와 같은 단계다. 이슈의 분류(bug), CCB의 "Development team will work on this ticket", 분석 댓글도 같은 쪽이다. 다만 셋은 보고된 판(B, 2025년 main)이나 M/dev에 대해 썼다. 그래서 `c5fb2b4d`에 묶는 것은 [I]다.
+   - ES·EVS task의 AppID 0 사용(SB 저장 L138 전)은 `VIOLATING → OBSERVED_VIOLATION`이다. 미충족은 직접+코드이고, VIOLATING은 모형이다. 기록 24개(ES 20, EVS 4)[기록]와 일치하고, 반환 코드 없이 선다.
+   - EVS 4와 SB 자기 전송 5는 코드에서 정확히 셀 수 있다[I]. 기록과 같다. ES는 7에 모듈 판 이벤트 수를 더한 값이다. 그 수는 고정 빌드의 생성 구성이 정하고, 이 문서는 세지 않았다. 기록 20은 하한 7과 모순되지 않는다.
    - 기본 구성에서 사용이 저장보다 앞서는 순서는 ES의 코어 직렬화가 강제한다[I, 코드]. 스케줄 race가 아니다. Kairos는 "schedule dependence undetermined"로 적는다. 더 약하게 적을 뿐 모순은 아니다.
-   - 다른 task의 사용(SB AppID·TBL AppID)은 출처 기준으로 READY다(코어 직렬화 → `CORE_READY` → 앱 시작). Kairos의 READY는 반환 코드 좁힘에만 기대고, 그것을 끄면 INCONCLUSIVE다[기록]. 출처 기준 부류는 정해지지만 도구는 독립으로 세우지 못한다.
-3. **오경보 대조로 쓸 수 있는 정상·허용 경로**: C1 수정 후의 "첫 실패 → 재시도 성공"(자연 기록 전부), BP1 첫 조회 성공, BP의 존재 확인. R2 SB 자기 전송 5, 다른 task의 사용. [기록]에서 어느 것도 위반으로 나오지 않았다. 다만 BP 존재 확인과 R2 다른 task 사용은 대조의 힘이 약하다. 앞의 것은 프로필의 역할 선언에, 뒤의 것은 반환 코드에 기댄다(§2.5, §3.5).
-4. **자기 검증 위험**(§4): C1 소진의 REJECT, C1 수정 전의 Allowed 미정 표기, BP 역할 선언, R2 SB 자기 전송이 기대는 A-OWNER, R2 코어 직렬화 규칙(R19)이 실제 기록에서 서지 않는 것, 두 사례의 반환 코드 좁힘.
+   - 다른 task가 OPERATIONAL 전에 한 사용(SB AppID·TBL AppID)은 출처 기준으로 READY다(코어 직렬화 → `CORE_READY` → 앱 시작). OPERATIONAL 뒤와 종료 중의 사용은 `미정`이다(R8). [기록]의 수는 구간으로 나뉘지 않았다. 그래서 READY 부류에 드는 수는 정해지지 않는다. Kairos의 READY는 반환 코드 좁힘에만 기대고, 그것을 끄면 INCONCLUSIVE다[기록]. 출처 기준 부류는 정해지지만 도구는 독립으로 세우지 못한다.
+3. **오경보 대조로 쓸 수 있는 정상·허용 경로**: C1 수정 후의 "첫 실패 → 재시도 성공"(자연 기록 전부), BP1 첫 조회 성공, BP의 존재 확인. R2 SB 자기 전송 5, 다른 task의 OPERATIONAL 전 사용. [기록]에서 어느 것도 위반으로 나오지 않았다. 다만 C1 재시도의 TOLERATED도 반환 코드 없이는 서지 않는다(nocode에서 두 경로 모두 INCONCLUSIVE). BP 존재 확인과 R2 다른 task 사용은 대조의 힘이 더 약하다. 앞의 것은 프로필의 역할 선언에, 뒤의 것은 반환 코드에 기댄다(§2.5, §3.5).
+4. **자기 검증 위험**(§4): C1 소진의 REJECT, C1 수정 전의 Allowed 미정 표기와 `appreq` 미지정 선택, BP 역할 선언, R2 SB 자기 전송이 기대는 A-OWNER, R2 코어 직렬화 규칙(R19)이 실제 기록에서 서지 않는 것, 두 사례의 반환 코드 좁힘.
 5. **이슈 접근**: 공개 REST API는 다섯 URL 모두 HTTP 403(세션 proxy의 저장소 단위 차단)이었다. 공개 이슈 페이지는 WebFetch로 읽었다. CF#184의 댓글 앵커 둘과 인용 하나가 새로 나왔다(§1.2).
 
 ## 1. 소스 사본과 이슈 접근 [M]
@@ -53,7 +54,7 @@
 
 CF#184에서 `cases/C1.md` §0a에 없던 것 [F, 모형 경유, 2026-10-29]:
 - 댓글 1 앵커 `issuecomment-1012599851`(jphickey, "Jan 13, 2022"). 돌려준 문구는 "simply starting CF after the I/O app seems to avoid hitting it most of the time"이다. §0a는 같은 댓글에서 "calling this a bug because its a race condition"을 인용했다. 두 문구가 한 댓글에 함께 있는지는 확인하지 않았다 [U].
-- 댓글 4 앵커 `issuecomment-1319058630`(skliper, "Nov 17, 2022").
+- 댓글 4 앵커 `issuecomment-1319058630`(skliper, "Nov 17, 2022"). 글은 §0a 4행에 이미 있다(2026-10-24 읽기): "Just wait until the sem is created? Loop w/ a 1 hz sleep?" 한도 없이 기다리자는 제안이다(R-C1-g).
 - 이 문서는 둘 다 질적 보고로만 쓴다. 조건은 하나도 거기서 가져오지 않았다. 사례 파일 갱신은 그 파일 담당 몫이다.
 
 ## 2. C1 — nasa/CF #184
@@ -64,17 +65,17 @@ CF#184에서 `cases/C1.md` §0a에 없던 것 [F, 모형 경유, 2026-10-29]:
 
 | # | 출처 · 위치 | 말하는 것 | 등급 |
 |---|---|---|---|
-| S-C1-1 | #184 본문(2022-01-13, `2a024d8` 기준). `cases/C1.md` F1(2026-10-08 원문), 2026-10-29 페이지 | "If configured to use a throttle sem, the CF app expects that semaphore to be created before it starts."; "if that fails, CF aborts"; Expected behavior "Should be guaranteed via sync mechanisms, or shouldn't be a hard error (e.g. maybe retry to bind later?)"; 재현 "Start CF before the app that creates the sem (still not guaranteed, but increases the chance the race will be lost)" | 직접 |
-| S-C1-2 | #184 댓글 2 `issuecomment-1202543669`, 3 `…1319057031`, 5 `…1319061815`, 1 `…1012599851` | BP를 먼저 시작해도 "it still hasn't been created by the time CF checks for it so it fails out"; "it hits this race quite often and CF bails out"; 로컬 sleep 패치; CF를 I/O 앱 뒤에 시작하면 대개 피한다 | 직접(보고). 판·구성 미상 |
+| S-C1-1 | #184 본문(2022-01-13, `2a024d8` 기준). `cases/C1.md` F1(2026-10-08 원문), 2026-10-29 페이지 | "If configured to use a throttle sem, the CF app expects that semaphore to be created before it starts."; "if that fails, CF aborts"; provider는 "CI/TO or some other dedicated I/O app"(BP를 말하지 않는다); Expected behavior "Should be guaranteed via sync mechanisms, or shouldn't be a hard error (e.g. maybe retry to bind later?)"; 재현 "Start CF before the app that creates the sem (still not guaranteed, but increases the chance the race will be lost)" | 직접 |
+| S-C1-2 | #184 댓글 2 `issuecomment-1202543669`, 3 `…1319057031`, 4 `…1319058630`, 5 `…1319061815`, 1 `…1012599851` | 댓글 2(2022-08-02): BP를 먼저 시작해도 "it still hasn't been created by the time CF checks for it so it fails out". 댓글 3: "it hits this race quite often and CF bails out". 댓글 4(skliper): "Just wait until the sem is created? Loop w/ a 1 hz sleep?"(한도 없는 대기의 제안). 댓글 5: 로컬 sleep 패치. 댓글 1: CF를 I/O 앱 뒤에 시작하면 대개 피한다 | 직접(보고·제안). 판·구성 미상 |
 | S-C1-3 | `fsw/src/cf_events.h` L148–L158 @`281a941` = @`833fdbb` | 이벤트 30, Type ERROR, Cause "Failure from get semaphore by name call during engine channel initialization, semaphore needs to exist before engine is initialized." | 직접(CF 자신, caller 쪽) |
-| S-C1-4 | `docs/dox_src/cfs_cf.dox` L208–L216, 두 판 같음 [M: diff] | provider는 "TO … or an equivalent application"; 이름은 "must match the name of the semaphore created by TO"; "If a semaphore is expected and not found, the application will terminate during initialization." | 직접(서술) |
+| S-C1-4 | `docs/dox_src/cfs_cf.dox` L208–L216, 두 판 같음 [M: diff] | L208–L211: provider는 "TO … or an equivalent application"; 이름은 "must match the name of the semaphore created by TO"; TO가 만들지 않으면 이름을 비워 둔다. L212–L214: "If a semaphore is expected and not found, the application will terminate during initialization." | L208–L211: 직접(provider와 이름 설정의 전제). L212–L214: 직접(결과의 서술). 요구의 출처로 쓰지 않는다. P3의 받아들임 후보로만 읽는다(R-C1-e (ii)) |
 | S-C1-5 | `281a941` `fsw/src/cf_cfdp.c` L991–L1001, L1029–L1034; `fsw/src/cf_app.c` L252, L330–L338, L366(두 판 같음 [M]) | 이름이 비어 있지 않으면 조회 1회(L993). 실패하면 이벤트 30(L997–L999)과 `break`(L1000). 성공일 때만 엔진 사용(L1029–L1031). `CF_Init` 오류 → `APP_ERROR`(L333) → `CFE_ES_RunLoop`(L338) → `CFE_ES_ExitApp`(L366) | 코드 |
 | S-C1-6 | `833fdbb` `cf_cfdp.c` L993–L999(인정 주석), L1000–L1012(루프), L1014–L1019(최종 실패); `fsw/platform_inc/cf_platform_cfg.h` L329–L338(`CF_STARTUP_SEM_MAX_RETRIES 25`), L340–L349(`CF_STARTUP_SEM_TASK_DELAY 100`, ms) | 주석: "There is a start up race condition because CFE starts all apps at the same time, and if this sem is instantiated by another app, it may not be created yet. Therefore if OSAL returns OS_ERR_NAME_NOT_FOUND, assume this is what is going on, delay a bit and try again." 루프는 `OS_ERR_NAME_NOT_FOUND`일 때만 지연(L1011) 뒤 다시 조회한다. 다른 값이면 즉시 끝낸다(L1006–L1008). 주석 L993–L999의 sha256 `1c487620…9842f`는 `15a871e` L1272–L1278과 같다 [M] | 직접(주석) + 코드 |
 | S-C1-7 | PR #342 본문(`cases/C1.md` F6, 2026-10-08 원문) | "there may be some delay until the other app gets to the point where it creates the sem. This works around the race condition."; "A retry limit is also imposed so CF will not spin here forever."; "Should start up more reliably"; 시험 "check file transfers with BP" | 직접 |
-| S-C1-8 | `833fdbb` `unit-test/cf_cfdp_tests.c` L866–L889 | 이름 외 사유의 실패(`OS_ERROR`)는 즉시 실패. "Max retries … sem was never created at all"은 `OS_ERR_NAME_NOT_FOUND`, 엔진 비활성, 이벤트 30. "Retry … when sem was created late"는 엔진 사용 | 코드(작성자가 기대한 동작의 시험) |
+| S-C1-8 | `833fdbb` `unit-test/cf_cfdp_tests.c` L866–L889 | 이름 외 사유의 실패(`OS_ERROR`)는 즉시 실패. "Max retries … sem was never created at all"은 `OS_ERR_NAME_NOT_FOUND`, 엔진 비활성, 이벤트 30. "Retry … when sem was created late"는 엔진 사용 | 코드(시험이 적은 기대 동작. S-R2-15와 같은 등급) |
 | S-C1-9 | OSAL `src/os/inc/osapi-countsem.h` L150–L162 @`f34759d` = @`b44f4ce` | `OS_ERR_NAME_NOT_FOUND` "if the name was not found in the table". 문서화된 반환값이고, OSAL 문서는 호출 순서를 요구하지 않는다 | 직접(supplier 쪽) |
 | S-C1-10 | OSAL `osapi-countsem.c` L94(AllocateNew), L100(`OS_OBJECT_INIT`), L103(Impl), L106(FinalizeNew); `osapi-idmap.c` L828–L849(`OS_ObjectIdTransactionFinish(token, &final_id)` L849) | 이름은 L100에서 기록에 들어가고, id는 L849에서 확정된다. 그 뒤 반환한다 | 코드 |
-| S-C1-11 | BP `b051eb0`: `fsw/src/bp_flow.c` L121–L144, L519–L524; `fsw/src/bp_app.c` L804–L818; `fsw/custom/bp_semcfg.c` L33–L36, L44, L48; `.github/buildconfig/cfe_es_startup.scr` L6–L7; `tx/tables/cf_def_config.c` L40, L54 | BP는 이름마다 조회(L126)하고, 없으면 같은 이름으로 생성(L132–L133)하고 이벤트 15 "Created semaphore"(L135)를 낸다. 이 일은 첫 `CFE_ES_RunLoop`(L818) 전, `AppInit` 안에서 일어난다. 주석 "The CF task uses semaphores to throttle how many CFDP PDUs it posts". 스크립트 순서는 CF(L6, 65) 다음 BP(L7, 55). CF 표 이름은 `BP0_tsem`·`BP1_tsem` | 코드·설정 |
+| S-C1-11 | BP `b051eb0`: `fsw/src/bp_flow.c` L121–L144, L519–L524; `fsw/src/bp_app.c` L804–L818; `fsw/custom/bp_semcfg.c` L33–L36, L44, L48; `.github/buildconfig/cfe_es_startup.scr` L6–L7; `.github/buildconfig/tx/tables/cf_def_config.c` L40, L54(rx 사본도 같은 줄) | BP는 이름마다 조회(L126)하고, 그 반환이 `CFE_SUCCESS`가 아니면(not-found만이 아니다, L126–L127) 같은 이름으로 생성(L132–L133)하고 이벤트 15 "Created semaphore"(L135)를 낸다. 이 일은 첫 `CFE_ES_RunLoop`(L818) 전, `AppInit` 안에서 일어난다. 주석 "The CF task uses semaphores to throttle how many CFDP PDUs it posts". 스크립트 순서는 CF(L6, 65) 다음 BP(L7, 55). CF 표 이름은 `BP0_tsem`·`BP1_tsem` | 코드·설정 |
 | S-C1-12 | cFE `6cccb3f` = `fef4a0d`: `cfe_es_start.c` L199, L208–L231; `cfe_es_apps.c` L258, L654, L768, L588; `cfe_es_api.c` L497–L499, L513–L515 | ES는 스크립트 줄마다 `ParseFileEntry`(L258) → `AppCreate`(L654) → `StartAppTask`(L768) → `OS_TaskCreate`(L588)를 부르고, 앱 사이에서 기다리지 않는다. 스크립트 뒤의 `LATE_INIT`·`RUNNING` 대기(L208, L223)는 실패하면 "Startup Sync failed"만 적고 OPERATIONAL로 간다(L231). `RunLoop`은 `APP_RUN`이 아니면 바로 false다(L497–L499). CF·BP의 `fsw/`에는 `CFE_ES_WaitForStartupSync`·`WaitForSystemState` 호출이 없다 [M: grep] | 코드 |
 | S-C1-13 | `cf_cmd.c` L1119(두 판) | 엔진 사용 명령이 `CF_CFDP_InitEngine()`을 다시 부른다. 같은 조회 지점을 실행 중에 다시 지난다. #184 본문은 이 경로를 "may be recoverable … (but haven't tested that)"라고 적는다 | 코드 + 직접(미시험 진술) |
 
@@ -82,14 +83,14 @@ CF#184에서 `cases/C1.md` §0a에 없던 것 [F, 모형 경유, 2026-10-29]:
 
 | # | 내용 | 등급 · 근거 |
 |---|---|---|
-| R-C1-a | **요구 의존.** 채널 *i*의 이름이 비어 있지 않으면, CF의 `OS_CountSemGetIdByName(sem_name)` 전에 그 이름의 counting semaphore가 있어야 한다 | **직접**: S-C1-1("expects … created before it starts"), S-C1-3("needs to exist before engine is initialized"), S-C1-4. caller(CF) 쪽 글이다. OSAL 문서(S-C1-9)는 not-found를 정상 반환으로 다루므로 요구의 출처가 아니다 |
+| R-C1-a | **요구 의존.** 채널 *i*의 이름이 비어 있지 않으면, CF의 `OS_CountSemGetIdByName(sem_name)` 전에 그 이름의 counting semaphore가 있어야 한다 | **직접**: S-C1-1("expects … created before it starts"), S-C1-3("needs to exist before engine is initialized"). caller(CF) 쪽 글이다. S-C1-4 L208–L211은 provider와 이름의 전제를 보탠다. L212–L214는 결과를 서술할 뿐이라 요구의 출처로 세지 않는다(R-C1-e (ii)의 후보). OSAL 문서(S-C1-9)는 not-found를 정상 반환으로 다루므로 요구의 출처가 아니다. 이 caller 쪽 글을 `appreq`로 기록할지는 따로 열려 있다(R-C1-e (i)) |
 | R-C1-b | 정밀화: "있다"는 조회가 표를 훑는 시점에 id가 확정됐다(L849)는 뜻이다. 생성 호출의 반환보다 약하다 | **추론**(`plan/C1_basis_plan.md` §1.2). 출처의 글은 "created before"뿐이다. 판정 라벨은 바꾸지 않는다. RESERVED 구간(L100–L849 사이의 조회)은 A5로 범위 밖이다 |
 | R-C1-c | provider는 다른 앱이다. 공개 BP 기준에서는 BP | 직접(S-C1-1 "created by another app", S-C1-4 "TO or an equivalent", S-C1-2 댓글 2 "BP creates the throttle sem"). BP를 provider로 고정한 것은 D22 [D]와 공개 설정(S-C1-11)이다. 원 보고자의 provider와 같다는 근거는 없다 |
 | R-C1-d | 순서를 정하는 장치가 없다. 그래서 두 앱의 상대 순서는 스케줄에 달린다 | **직접**: race라는 말(S-C1-1, S-C1-6 주석). **코드**: CF·BP 모두 시작 동기화가 없고, ES는 앱 사이를 기다리지 않는다(S-C1-12) |
-| R-C1-e | **수정 전 처리의 허용 여부**(단일 실패 → `APP_ERROR` → 종료) | **미정.** 받아들이는 쪽으로 읽을 수 있는 글은 S-C1-4 "will terminate"(서술)다. 거부하는 쪽의 글은 S-C1-1 "shouldn't be a hard error … rather than having CF abort/exit"(`2a024d8`에 대해 썼다. `281a941`과는 수정의 부모라는 점으로만 이어진다 [I])와 S-C1-3의 ERROR 분류다. 어느 쪽을 이 판에 묶을지는 P3/Q-12(미결)다. 둘 다 묶으면 QT-5 충돌이다(`C1_basis_plan.md` §9.7 판단할 수 없는 것 1) |
+| R-C1-e | **수정 전 처리의 라벨**(단일 실패 → `APP_ERROR` → 종료) | **미정. 열린 물음 둘에 달린다.** SPEC §1.6 `appreq` 단계 (1)–(4)(`SPEC_FINAL.md` L478; `kairos/docs/phi_reference.md` §5.7 L250–L254, LP-ALLOW (b1r))로 정해진다. 단계 (1): caller 항목이 없을 때 `appreq`가 지정돼 있으면 Allowed는 `none`(그래서 VIOLATING)이고, 아니면 `unspecified_by_reference`다. 도구에서는 `allowed none`을 적어야 이 `none`이 나온다. `allowed unspecified_by_reference`라고 적으면 `appreq`를 지정해도 unspecified로 남는다(`kairos/lib/core/phi_allowed.cpp` L47–L58; `phi_reference.md` L252) [M: 코드 읽기]. SPEC 단계 (1)의 글과 다르게 동작한다(§6). **(i) CF 자신의 요구를 `appreq`로 기록하는가.** SPEC §1.6은 "an application's own requirement"를 `appreq`에 넣는다. 후보는 S-C1-3(같은 판의 CF 글, 직접)과 S-C1-1(`2a024d8`에 대해 썼다. `281a941`과는 수정의 부모라는 점으로만 이어진다 [I])이다. 프로필은 두 글을 caller 기록으로 갖고 있다(`01_prov.kzp` L185–L193 `cf_events_sem_eid`, `02_researcher.kzp` L45–L51 `issue_184_body`). 그러나 `appreq`로는 쓰지 않았다(`rspec-281a941/40_rspec.kzp` L18). `C1_basis_plan.md` §9.8 G6은 S-C1-3을 `Req`에만 쓰고, 왜 `appreq`가 아닌지 적지 않는다. **(ii) P3/Q-12.** S-C1-4 L212–L214(결과 서술)를 종료를 받아들이는 caller 항목으로 묶는가(G5). **조합별 결과.** (i) 아니오·(ii) 아니오: Allowed `unspecified_by_reference` → NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`(현행). (i) 예·(ii) 아니오: 단계 (1)로 Allowed `none` → VIOLATING → 모든 설명에서 서면 `OBSERVED_VIOLATION`. (i) 예·(ii) 예: 단계 (3). `appreq`가 종료를 배제하면 충돌이고, 그러면 NOT_READY_UNJUDGED에 충돌을 명시한다(QT-5). S-C1-1 "rather than having CF abort/exit"는 종료를 배제한다. S-C1-3만 기록하면 배제 여부는 작성 판단이다(SPEC L478 끝). (i) 아니오·(ii) 예: 단계 (4)로 종료 항목이 판정한다(`rspec-281a941-altP3/40_rspec.kzp` L7). 그때의 재생은 종료 monitor가 없어 PENDING → `INCONCLUSIVE(horizon-open)`이었다 [기록](`kairos/docs/c1_smoke_observe.md` §8.3). 거부 쪽의 글은 S-C1-1과 S-C1-3의 ERROR 분류다. R2의 VIOLATING도 바로 이 단계 (1)에 지정된 `appreq`(`cfe_evs.h` L169–L172)로 선다(R-R2-d) |
 | R-C1-f | **수정 후 앞선 실패의 허용.** `OS_ERR_NAME_NOT_FOUND`이면 지연 뒤 다시 조회한다. 같은 루프의 뒤 시도가 성공하면 앞선 실패는 허용된 처리다 | **직접**: S-C1-6 주석("assume this is what is going on, delay a bit and try again"), S-C1-7("works around the race condition"). 상한 25와 지연 100 ms는 그 판의 값이다(코드) |
-| R-C1-g | **수정 후 소진 뒤 종료**(25회 모두 not-found → 이벤트 30 → 종료) | 받아들인다는 글도, 거부한다고 직접 말하는 글도 없다. S-C1-7 "so CF will not spin here forever"는 한도를 둔 목적이다. S-C1-8의 소진 시험은 provider가 없는 경우만 다룬다. S-C1-3은 ERROR로 분류한다. 그래서 **요구 미충족은 직접+코드로 정해지고, `VIOLATING`(허용 REJECT)은 "받아들이는 출처가 없다"에서 SPEC 규칙이 낸 `모형` 판정**이다(`C1_basis_plan.md` §9.8 결론 3·5(ii)) |
-| R-C1-h | BP의 조회에는 요구가 없다. not-found는 생성 분기의 조건이다 | **코드**: S-C1-11 L126–L133. BP가 사전 존재를 요구한다는 글은 없다(`C1_basis_plan.md` §9.7 (b) [M]). "요구가 없다"는 **추론**이다 |
+| R-C1-g | **수정 후 소진 뒤 종료**(25회 모두 not-found → 이벤트 30 → 종료) | 받아들인다는 글은 없다. 거부 쪽으로 기우는 글은 S-C1-1 "shouldn't be a hard error … rather than having CF abort/exit"다. PR #342가 "Fixes #184"이므로(`cases/C1.md` F6) 이 글은 `833fdbb`에 묶인다 [I]. 수정 전(R-C1-e, 부모라는 점으로만 이어짐)보다 강한 묶음이다(`C1_basis_plan.md` §9.8 G7). 그러나 25회 시도 뒤의 종료가 그 "hard error"에 드는지는 어느 출처도 말하지 않는다. S-C1-7 "so CF will not spin here forever"는 한도를 둔 목적이다. S-C1-2 댓글 4는 한도 없는 대기를 제안했고, 수정은 한도를 골랐다. S-C1-8의 소진 시험은 provider가 없는 경우만 다룬다. S-C1-3은 ERROR로 분류한다. 그래서 **요구 미충족은 직접+코드로 정해진다. `VIOLATING`(허용 REJECT)은 `모형`+`추론`이다.** caller 항목의 감시가 한도 소진에서 REJECT한다는 것은 SPEC 규칙이고, G7을 소진 종료의 거부로 읽는 것은 추론이다(`C1_basis_plan.md` §9.8 결론 3·5(ii)). `appreq`를 기록해도(R-C1-e (i)) 이 라벨은 같다(G7 마지막 열) |
+| R-C1-h | BP의 조회에는 요구가 없다. 성공이 아닌 조회 반환은 모두 생성 분기의 조건이다 | **코드**: S-C1-11 L126–L133. BP가 사전 존재를 요구한다는 글은 없다(`C1_basis_plan.md` §9.7 (b) [M]). "요구가 없다"는 **추론**이다 |
 | R-C1-i | 이벤트 30, `APP_ERROR`, `CFE_ES_ExitApp`은 결과(consequence)다. 발생 판정과 따로 센다 | 코드(S-C1-5, S-C1-6). 마스터플랜 §12.1의 열 분리 [D] |
 
 ### 2.3 실행에서의 대상: task · 상태 · 순서 · 그것을 보이는 사건
@@ -106,12 +107,12 @@ Kairos 열은 모두 [기록]이다. 출처는 `plan/results_pilot_20261025.md` 
 
 | 부류 | 판 | (가) 출처 기준 부류 | (나) 기대 상태 → 요약 | 등급 | 동결 행 | Kairos [기록] | 대조 |
 |---|---|---|---|---|---|---|---|
-| **K1 첫 조회 성공** | pre | 충족(같은 id) | (CF,1) READY → `NO_VIOLATION_IN_CHECKED_PREFIX` | 직접+코드 | E-01 | 자연 실행에서는 나오지 않았다. 자연 기록 32개(보존·새 × F0·G-I × 8) 가운데 pre 16개 모두 `BP0: -17x1`. 연구자 개입 C1-C1·C1-C2는 READY(SO+RD). 제어 W2·W10·W11·W12의 BP0도 READY(SO+CO) | 판정 일치. 자연 실현은 없다 |
-| K1 | post | 충족 | READY → `NO_VIOLATION…` | 직접+코드 | E-04 | 자연 post 기록 16개의 (BP1,1) READY. 근거는 F0 SO+RD, 계측 SO+ST | 일치 |
-| **K2 첫 조회 실패 = 최종 실패** | pre | 미충족(not-found = 표에 그 이름 없음, S-C1-9). 허용 출처 **미정**(R-C1-e) | (CF,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`. 미정을 그대로 적은 라벨이다. 위반으로 세지 않는다 | 미충족: 직접+코드. 라벨: **미정(P3)** | E-03 | 자연 pre 기록 16개 모두 (BP0,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`, 근거 ON. nocode에서는 상태 미정. W2의 (BP1,1)도 NOT_READY_UNJUDGED(SO+CO) | 라벨 일치. 단 (가)의 "미충족"을 자연 실행에서는 반환 코드로만 세운다. 반환 코드 없이는 세우지 못한다(§4 V-C1-6) |
-| **K3 첫 실패 → 재시도 성공** (2 ≤ m ≤ 25) | post | 앞 m−1회 미충족, 허용 **직접**(R-C1-f). m번째 충족 | (CF,1…m−1) TOLERATED, (CF,m) READY → `NO_VIOLATION…`. 좋은 실행 | 직접+코드 | E-05 | 자연 post 기록 16개 모두 `BP0: -17x1 0x1`. (BP0,1) TOLERATED(ON), (BP0,2) READY. 제어 W5·W7·W8·W11·W12의 TOLERATED(SO+CO). nocode: F0는 INCONCLUSIVE, 계측은 TOLERATED(성공 조회의 ST에 간접으로 기댐, `results_w4w5` §4.3) | 일치. **수정 후에도 첫 실패가 자연 실행에서 매번 났다**(IP §6.1 "수정 후에도 초기 실패가 가능"). 위반으로 나오지 않았다 |
+| **K1 첫 조회 성공** | pre | 충족(같은 id) | (CF,1) READY → `NO_VIOLATION_IN_CHECKED_PREFIX` | 직접+코드 | E-01 | 자연 실행에서는 나오지 않았다. 자연 기록 32개(보존·새 × F0·G-I × 8) 가운데 pre 16개 모두 `BP0: -17x1`. 연구자 개입 C1-C1·C1-C2는 READY(SO+RD). 제어 W2(pre)의 (BP0,1)도 READY(SO+CO)(`results_w4w5` §4.2) | 판정 일치. 자연 실현은 없다 |
+| K1 | post | 충족 | READY → `NO_VIOLATION…` | 직접+코드 | E-04 | 자연 post 기록 16개의 (BP1,1) READY. 근거는 F0 SO+RD, 계측 SO+ST. 제어 W10·W11·W12(post, `833fdbb`의 재시도·소진 모양)의 (BP0,1) READY(SO+CO)는 post BP0 키의 제어 증거다(§4.2). 동결 표 §4에 따라 pre의 순번과 섞지 않는다 | 일치 |
+| **K2 첫 조회 실패 = 최종 실패** | pre | 미충족(not-found = 표에 그 이름 없음, S-C1-9). caller 쪽 요구 글은 있다(R-C1-a). 그 글의 `appreq` 기록 여부와 허용 출처가 **미정**이다(R-C1-e (i)·(ii)) | (CF,1)의 라벨은 R-C1-e의 조합에 달린다. 현행 프로필의 조합((i)·(ii) 모두 아니오)에서는 NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`이고 위반으로 세지 않는다. (i) 예·(ii) 아니오이면 VIOLATING → `OBSERVED_VIOLATION`이다. (i)·(ii) 모두 예이면 충돌 명시 NOT_READY_UNJUDGED다. 이유 이름 `caller_requirement_absent`는 "호출자 수준 요구가 기록에 없거나 충돌함"(SPEC L808)을 뜻한다. 출처에 caller 쪽 요구 글이 없다는 뜻이 아니다 | 미충족: 직접+코드. 라벨: **미정(R-C1-e (i)·(ii))** | E-03 | 자연 pre 기록 16개 모두 (BP0,1) NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)`, 근거 ON. nocode에서는 상태 미정. W2의 (BP1,1)도 NOT_READY_UNJUDGED(SO+CO) | 라벨 일치. 단 (가)의 "미충족"을 자연 실행에서는 반환 코드로만 세운다. 반환 코드 없이는 세우지 못한다(§4 V-C1-6) |
+| **K3 첫 실패 → 재시도 성공** (2 ≤ m ≤ 25) | post | 앞 m−1회 미충족, 허용 **직접**(R-C1-f). m번째 충족 | (CF,1…m−1) TOLERATED, (CF,m) READY → `NO_VIOLATION…`. 좋은 실행 | 직접+코드 | E-05 | **자연**(`results_w4w5` §3): post 기록 16개 모두 `BP0: -17x1 0x1`. cur에서 (BP0,1) TOLERATED(ON), (BP0,2) READY. nocode에서 (BP0,1)은 두 경로 모두 INCONCLUSIVE다. F0는 셋 다 INCONCLUSIVE이고, 계측은 (BP0,2)·(BP1,1)만 READY(SO+ST)다. **제어**(§4.2·§4.3): cur에서 실패 시도가 TOLERATED다. W5의 BP0와 W7·W8·W11·W12의 BP1은 SO+CO, W6·W7·W8의 (BP0,1)은 ON이다. nocode에서 W5·W7·W8·W11·W12의 실패 시도 32건은 F0 `INCONCLUSIVE(explanation_ambiguous)`, 계측 TOLERATED이고, 근거는 둘 다 SO+CO다(성공 조회의 ST에 간접으로 기댐). 동결 E-05는 A2를 자연 실행으로 한정한다("자연 실행에서만 … 보류로 만들지 않는다"). 그래서 제어의 TOLERATED는 E-05의 증거가 아니다 | 일치. **수정 후에도 첫 실패가 자연 실행에서 매번 났다**(IP §6.1 "수정 후에도 초기 실패가 가능"). 위반으로 나오지 않았다. 다만 자연 실행의 (BP0,1) 미충족과 허용은 반환 코드 없이 서지 않는다(§4 V-C1-6) |
 | K3 | pre | 해당 없음(단일 조회, S-C1-5) | — | 코드 | E-02 | — | 일치 |
-| **K4 재시도 소진** | post | 25회 모두 미충족. 소진 뒤 종료를 받아들이는 출처 없음, 거부를 직접 말하는 출처도 없음(R-C1-g) | (CF,1…25) VIOLATING → `OBSERVED_VIOLATION`(현행 모형). P3 대안이면 NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` | 미충족: 직접+코드. VIOLATING: **모형** | E-06 | W1(BP0,1–25), W6·W10(BP1,1–25) VIOLATING → `OBSERVED_VIOLATION`, SO+CO. 파일럿 C1-B1은 ON이었다(P1 끔 → `INCONCLUSIVE(horizon-open, …)`). 모두 제어 실행이고 `timeout-exercised`다. 자연 실행에서는 나오지 않았다 | 라벨 일치. 그러나 기대 라벨 자체가 모형 판정이므로 이 일치는 독립 확인이 아니다(§4 V-C1-1). 자연 빈도의 근거도 없다 |
+| **K4 재시도 소진** | post | 25회 모두 미충족. 소진 뒤 종료를 받아들이는 출처 없음. #184 본문은 거부 쪽으로 기울지만, 25회 뒤의 종료가 "hard error"에 드는지는 말하지 않는다(R-C1-g) | (CF,1…25) VIOLATING → `OBSERVED_VIOLATION`(현행 모형). P3 대안이면 NOT_READY_UNJUDGED → `INCONCLUSIVE(caller_requirement_absent)` | 미충족: 직접+코드. VIOLATING: **모형+추론** | E-06 | W1(BP0,1–25), W6·W10(BP1,1–25) VIOLATING → `OBSERVED_VIOLATION`, SO+CO. 파일럿 C1-B1은 ON이었다(P1 끔 → `INCONCLUSIVE(horizon-open, …)`). 모두 제어 실행이고 `timeout-exercised`다. 자연 실행에서는 나오지 않았다 | 라벨 일치. 그러나 기대 라벨 자체가 모형 판정이므로 이 일치는 독립 확인이 아니다(§4 V-C1-1). 자연 빈도의 근거도 없다 |
 | **K5 최종 CF 종료** | pre(K2 뒤), post(K4 뒤) | 결과 | 발생 판정 아님. 이벤트 30, `APP_ERROR`, `CFE_ES_ExitApp`을 결과로 남긴다 | 코드 | E-03·E-06의 결과 열 | 반환 -17, 이벤트 30 "failed to get sem id for name BP0_tsem", `CFE_ES_ExitApp` 1회(C1-N1, C1-B1) | 일치. 판정과 섞지 않았다 |
 | K6 앞 채널 실패로 조회 없음 | 둘 | 발생 없음 | 상태·요약 없음 | 코드 | E-09 | 채널 1 조회 없음(C1-N1, C1-B1) | 일치 |
 | **K7 BP 존재 확인의 not-found** | 둘 | 요구 없음(R-C1-h) | 발생 아님 | 코드+추론 | E-11 | 역할 사실 2, 발생 0. 반환 -17 뒤 생성, 이벤트 15(C1-N5, C1-B2, C1-C3) | 일치. 단 일치의 원인이 프로필의 역할 선언이다(§4 V-C1-3) |
@@ -130,17 +131,17 @@ Kairos 열은 모두 [기록]이다. 출처는 `plan/results_pilot_20261025.md` 
 
 | ID | 경로 | 출처 근거 | [기록]의 결과 | 대조의 힘 |
 |---|---|---|---|---|
-| N-C1-1 | post 자연의 첫 실패 → 재시도 성공(K3) | R-C1-f(직접) | post 자연 기록 16개 모두 위반 없음. cur은 TOLERATED, nocode는 F0 INCONCLUSIVE·계측 TOLERATED | **강함.** 허용 출처가 직접이고, 자연 실행에서 매번 났다. 오경보가 있었다면 VIOLATING으로 나왔을 것이다 |
-| N-C1-2 | post BP1 첫 조회 성공(K1) | R-C1-a | READY | 보통. nocode F0에서는 INCONCLUSIVE(오경보는 아님) |
+| N-C1-1 | post 자연의 첫 실패 → 재시도 성공(K3) | R-C1-f(직접) | post 자연 기록 16개 모두 위반 없음. cur에서 (BP0,1)은 TOLERATED다. nocode에서 (BP0,1)은 두 경로 모두 INCONCLUSIVE다. F0는 셋 다 INCONCLUSIVE이고, 계측은 (BP0,2)·(BP1,1)만 READY(SO+ST)다(`results_w4w5` §3) | **출처 쪽은 강하다.** 허용 출처가 직접이고, 자연 실행에서 매번 났다. 오경보가 있었다면 VIOLATING으로 나왔을 것이다. **도구 쪽 근거는 반환 코드다.** 반환 코드 없이는 이 TOLERATED도 위반도 세우지 못한다(V-C1-6) |
+| N-C1-2 | post BP1 첫 조회 성공(K1) | R-C1-a | READY | 보통. nocode에서 F0는 INCONCLUSIVE(오경보는 아님), 계측은 READY(SO+ST) |
 | N-C1-3 | BP 존재 확인(K7) | R-C1-h(코드+추론) | 발생 아님 | **약함.** 프로필의 역할 선언으로 빠진다. 엔진이 스스로 가린 것이 아니다. 역할 선언 전의 출력은 이 행과 맞지 않았다(동결 E-11 근거 열) |
 | N-C1-4 | pre의 첫 조회 성공(K1, 연구자 개입) | R-C1-a | READY | 보통. 제어 실행이고 자연 경로가 아니다 |
 | N-C1-5 | 이름이 빈 기본 표(K10) | 코드 | 실행 없음 | 아직 없음. 쓰려면 조건 설정이 필요하므로 이 문서는 정하지 않는다 |
 
 ### 2.6 출처로 정할 수 없는 것 (미정으로 둔다)
 
-1. 수정 전 단일 실패의 허용 여부(R-C1-e, P3/Q-12). 라벨 `INCONCLUSIVE(caller_requirement_absent)`는 이 미정을 적은 것이다. 위반 수에 넣지 않는다.
-2. 수정 후 소진의 위반 여부(R-C1-g). PR #342의 "will not spin here forever"를 소진 종료의 받아들임으로 읽을지는 출처가 말하지 않는다. 현행 `VIOLATING`은 모형 판정이고, 동결 E-06의 해석 주의가 이를 적는다.
-3. 원 보고(2022, BP를 먼저 시작)의 판·구성. D22 구성은 그 보고의 재현이 아니다.
+1. 수정 전 단일 실패의 라벨(R-C1-e). (i) CF 자신의 요구 글을 `appreq`로 기록하는가, (ii) P3/Q-12. 현행 라벨 `INCONCLUSIVE(caller_requirement_absent)`는 (i)·(ii) 모두 "아니오"인 조합의 라벨이다. 다른 조합이면 VIOLATING, 충돌 명시 NOT_READY_UNJUDGED, 또는 종료 항목의 판정이 된다. 정해지기 전에는 위반 수에 넣지 않는다. "위반이 아님"의 근거로도 쓰지 않는다.
+2. 수정 후 소진의 위반 여부(R-C1-g). #184 본문의 "hard error"가 25회 뒤의 종료를 덮는지는 출처가 말하지 않는다. PR #342의 "will not spin here forever"를 소진 종료의 받아들임으로 읽을지도 말하지 않는다. 현행 `VIOLATING`은 모형+추론 판정이고, 동결 E-06의 해석 주의가 이를 적는다.
+3. 원 보고의 판·구성. #184 본문(2022-01-13)은 provider를 "CI/TO or some other dedicated I/O app"으로 적는다. 재현 방법으로는 CF를 먼저 시작하라고 적는다. BP는 말하지 않는다. "BP를 먼저 시작"은 댓글 2(2022-08-02)의 보고이고, 그 판·구성은 미상이다. D22 구성은 둘 어느 쪽의 재현도 아니다.
 4. A5(RESERVED 구간), 엔진 재사용 명령 경로(K12), provider 재시작 뒤 id가 바뀌는 "secondary problem"(S-C1-1). 셋 다 기록이 없고 범위 밖이다.
 5. 각 부류의 자연 빈도. 출처는 "not readily reproducible", "quite often"뿐이다. `unspecified_by_reference`다.
 
@@ -155,22 +156,22 @@ Kairos 열은 모두 [기록]이다. 출처는 `plan/results_pilot_20261025.md` 
 
 | # | 출처 · 위치 | 말하는 것 | 등급 |
 |---|---|---|---|
-| S-R2-1 | #2663 본문(2025-08-06, 2026-10-29 페이지) | "When the ES and the EVS tasks initializes, they make various CFE_SB API calls (i.e. CFE_SB_CreatePipe() and CFE_SB_Subscribe()) which in turn call CFE_EVS_SendEventWithAppID() passing in the AppId for the CFE_SB."; "returns a CFE_EVS_APP_ILLEGAL_APP_ID presumably because CFE_SB has not been registered with event services."; "no event outputted nor is the return code set to any variable"; gdb 중단점 `cfe_evs.c#L185`(main); "cFE v6.7", Ubuntu 22.04.5; 라벨 bug | 직접(보고와 보고자의 추정) |
-| S-R2-2 | CCB 댓글 `issuecomment-3255030799`(dzbaker, "Sep 4, 2025") | "CCB 4 September 2025: Tracked internally. Development team will work on this ticket." | 직접(관리자의 수용) |
-| S-R2-3 | 분석 댓글 `issuecomment-5588955819`(philphauler, "Sep 8, 2026") | "The ILLEGAL_APP_ID at startup comes from SB, not from the caller EVS is checking."; "SB attributes pipe-creation events to itself using CFE_SB_Global.AppId, but that field is only filled in CFE_SB_AppInit (cfe_sb_task.c:138) when the SB task runs."; "Whichever core app's init runs before that sees SB call CFE_EVS_SendEventWithAppID with an undefined AppId, which is exactly the error reported here."; 수정 제안 둘(제안일 뿐) | 직접(기여자의 코드 읽기. 관리자의 판단도 실행 결과도 아니다) |
+| S-R2-1 | #2663 본문(2025-08-06, 2026-10-29 페이지) | "When the ES and the EVS tasks initializes, they make various CFE_SB API calls (i.e. CFE_SB_CreatePipe() and CFE_SB_Subscribe()) which in turn call CFE_EVS_SendEventWithAppID() passing in the AppId for the CFE_SB."; "returns a CFE_EVS_APP_ILLEGAL_APP_ID presumably because CFE_SB has not been registered with event services."; "no event outputted nor is the return code set to any variable"; gdb 중단점 `cfe_evs.c#L185`(main); "cFE v6.7", Ubuntu 22.04.5; 라벨 bug | 직접(보고와 보고자의 추정). 보고된 판은 B(2025년 main, `cases/R2.md` §3)다. `c5fb2b4d`에 묶는 것은 [I] |
+| S-R2-2 | CCB 댓글 `issuecomment-3255030799`(dzbaker, "Sep 4, 2025") | "CCB 4 September 2025: Tracked internally. Development team will work on this ticket." | 직접(관리자의 수용). B에 대한 보고를 받아들인 것이다. `c5fb2b4d`에 묶는 것은 [I] |
+| S-R2-3 | 분석 댓글 `issuecomment-5588955819`(philphauler, "Sep 8, 2026") | "The ILLEGAL_APP_ID at startup comes from SB, not from the caller EVS is checking."; "SB attributes pipe-creation events to itself using CFE_SB_Global.AppId, but that field is only filled in CFE_SB_AppInit (cfe_sb_task.c:138) when the SB task runs."; "Whichever core app's init runs before that sees SB call CFE_EVS_SendEventWithAppID with an undefined AppId, which is exactly the error reported here."; 수정 제안 둘(제안일 뿐) | 직접(기여자의 코드 읽기. 관리자의 판단도 실행 결과도 아니다). 줄 번호는 M/dev를 따른다(`cases/R2.md` §0 D4). `c5fb2b4d`에 묶는 것은 [I]다. 이 판에서도 L138이 같은 저장이다(S-R2-8) |
 | S-R2-4 | PR #2820(닫힘, 병합 안 됨) | 사용 지점 fallback 시도. 작성자가 "vacuous"로 닫았다(`cases/R2.md` §1.4) | 직접. 병합된 수정은 없다 |
 | S-R2-5 | `modules/core_api/fsw/inc/cfe_evs.h` L165–L166, L168–L172, L196–L200 @`c5fb2b4d` | "this function should really only be used from within an API in order to preserve the context of an Application's event."; "The Application ID must correspond to a registered application or core service. For messages outside the context of a registered application (for example early in app initialization or if registration fails) #CFE_ES_WriteToSysLog can be used for reporting."; 반환 목록에 `CFE_EVS_APP_ILLEGAL_APP_ID`(L199) | **직접**(caller 쪽 요구) |
 | S-R2-6 | `modules/evs/fsw/src/cfe_evs.c` L169–L214; `cfe_evs_utils.c` L48–L53 | `EVS_GetAppDataByID(AppID)`가 NULL이면 `ILLEGAL_APP_ID`(L185–L189). 슬롯이 그 id가 아니면 `EVS_NotRegistered`(L190–L194). 필터는 그 뒤(L195). id를 index로 바꾸지 못하면 NULL이다(utils L53) | 코드 |
 | S-R2-7 | `cfe_sb_init.c` L50; `cfe_es_api_typedefs.h` L220; `cfe_resourceid_api_typedefs.h` L65 | EarlyInit의 `memset(&CFE_SB_Global, 0, …)`. 0은 `CFE_ES_APPID_UNDEFINED` | 코드 |
 | S-R2-8 | `modules/sb/fsw/src/cfe_sb_task.c` L77, L93, L138, L155, L183, L190, L198, L206, L242 | `CFE_SB_AppInit` 안에서 `CFE_ES_GetAppID(&CFE_SB_Global.AppId)`(L138, 반환 무시) → `CFE_EVS_Register`(L155) → `CreatePipe`(L183) → `Subscribe` 셋(L190, L198, L206) → 시작 이벤트(L242). 그 뒤 `WaitForSystemState(CORE_READY)`(L93) | 코드 |
 | S-R2-9 | `cfe_sb_api.c` L275–L277(`CFE_SB_PIPE_ADDED_EID` 5), L1183(`SUBSCRIPTION_RCVD` 10); `cfe_sb_priv.c` L786, L1086(`SEND_NO_SUBS` 14) | SB API의 이벤트는 호출한 task의 문맥에서 `CFE_SB_Global.AppId`로 보낸다. 구독자가 없는 송신은 NO_SUBS 이벤트를 같은 AppId로 낸다 | 코드 |
-| S-R2-10 | `cfe_sb_task.c` L732–L737 | 다른 task의 문맥에서 실행되므로 "Events should use CFE_EVS_SendEventWithAppID() rather than CFE_EVS_SendEvent() to get proper association with TBL task."(원문 그대로) | 직접(설계 의도: 다른 task 문맥의 이벤트를 코어 서비스에 귀속) |
-| S-R2-11 | `cmake/mission_defaults.cmake` L25–L40; `cmake/sample_defs/targets.cmake` L79–L82 | "For the CFE core, the order of this list is the order in which they will be initialized". 순서는 config, es, evs, fs, sb, tbl, time(L28–L34). sample_defs는 주석 처리된 예만 있고 바꾸지 않는다 [M] | 직접(순서의 의미) + 설정 |
+| S-R2-10 | `cfe_sb_task.c` L732–L737(`CFE_SB_BackgroundFileEventHandler` L721 안, SB의 배경 파일 쓰기 콜백) | "this runs in the context of ES background task (file writer background job)"; "Events should use CFE_EVS_SendEventWithAppID() rather than CFE_EVS_SendEvent() to get proper association with TBL task."(원문 그대로. SB 파일인데 "TBL task"라고 적혀 있어 복사된 글로 보인다 [I]) | 직접은 이 콜백에 대한 국소 서술뿐이다. 다른 task 문맥의 이벤트를 코어 서비스에 귀속한다는 일반 설계 의도로 넓히는 것은 [I] |
+| S-R2-11 | cFE `cmake/mission_defaults.cmake` L25–L40; cFS `088b2fa8` `sample_defs/targets.cmake` L79–L82(빌드가 읽는 최상위 `sample_defs/`: `env/build_cfs.sh` L221–L222, 번들 README L96) | "For the CFE core, the order of this list is the order in which they will be initialized". 순서는 config, es, evs, fs, sb, tbl, time(L28–L34). 번들 `sample_defs/targets.cmake`는 cFE 사본(`cmake/sample_defs/targets.cmake`)과 다르다(앱 목록 L91–L109 등). 그러나 L79–L82는 같고, 두 파일 모두 `MISSION_CORE_MODULES`에는 주석 처리된 예만 있어 바꾸지 않는다 [M: diff, grep] | 직접(순서의 의미) + 설정 |
 | S-R2-12 | `modules/es/fsw/src/cfe_es_start.c` L188, L194, L201, L751–L770, L776–L846 | `CreateObjects`(L188) → `CORE_READY`(L194) → `StartApplications`(L201). Phase 1에서 모든 EarlyInit(L751–L770). Phase 2에서 코어 task마다 예약(L803) → `StartAppTask`(L810) → 확정(L818) → `MainTaskSyncDelay(RUNNING)`(L835)을 하고, 시간 초과면 panic(L845) | 코드 |
 | S-R2-13 | `cfe_es_task.c` L336, L367, L377, L387, L442, L449, L466–L467; `cfe_evs_task.c` L281, L289, L297, L304, L319 | ES: 등록 → 파이프·구독 둘 → 시작 이벤트 둘 → 판·빌드 정보 이벤트. EVS: 등록 → 파이프·구독 둘 → 시작 이벤트 | 코드 |
 | S-R2-14 | `cfe_es_api.c` L738–L765; `cfe_es_apps.c` L559–L596 | `GetAppID`는 문맥의 앱 기록이 없으면 `UNDEFINED`를 저장한다(L759). 새 task는 `STARTUP_SYNC_POLL_MSEC`만큼 지연한 뒤 task 기록만 확인한다(L575–L586) | 코드 |
-| S-R2-15 | `modules/cfe_testcase/src/evs_send_test.c` L89–L90, L94–L95, L99–L100, L106–L108 | 기능 시험이 `CFE_ES_APPID_UNDEFINED`에 대해 `CFE_EVS_APP_ILLEGAL_APP_ID`를 기대한다 | 직접(supplier 쪽: 거부는 설계된 API 동작) |
-| S-R2-16 | `cfe_tbl_task.c` L124, L196; `cfe_tbl_load.c` L938–L940 | TBL은 등록(L124) 뒤 자기 id를 저장한다(L196). 적재 이벤트를 다른 task 문맥에서 `TableTaskAppId`로 보낸다 | 코드 |
+| S-R2-15 | `modules/cfe_testcase/src/evs_send_test.c` L89–L90, L94–L95, L99–L100, L106–L108 | 기능 시험이 `CFE_ES_APPID_UNDEFINED`에 대해 `CFE_EVS_APP_ILLEGAL_APP_ID`를 기대한다 | 코드(시험이 적은 기대 동작. S-C1-8과 같은 등급. supplier 쪽: 거부는 설계된 API 동작) |
+| S-R2-16 | `cfe_tbl_task.c` L119, L124, L196; `cfe_tbl_load.c` L938–L940 | `CFE_TBL_TaskInit` 안에서 먼저 저장하고 다음에 등록한다. 저장은 L119가 부르는 `CFE_TBL_InitData`의 `CFE_ES_GetAppID`(L196)이고, 등록은 `CFE_EVS_Register`(L124)다. 둘 다 `RUNNING` 전이다. 적재 이벤트는 다른 task 문맥에서 `TableTaskAppId`로 보낸다 | 코드 |
 
 ### 3.2 요구 의존과 허용 동작 — 출처가 직접 말하는 것과 연구자 추론
 
@@ -178,11 +179,11 @@ Kairos 열은 모두 [기록]이다. 출처는 `plan/results_pilot_20261025.md` 
 |---|---|---|
 | R-R2-a | **요구.** `CFE_EVS_SendEventWithAppID`의 `AppID`는 등록된 앱이나 코어 서비스에 대응해야 한다. 값이 유효해야 하고, 등록돼 있어야 한다 | **직접**: S-R2-5 L169(caller 쪽 글) |
 | R-R2-b | SB가 귀속하는 이벤트의 `AppID`는 `CFE_SB_Global.AppId`다. 그 값은 L138 전에는 0(UNDEFINED)이다 | 직접(S-R2-1, S-R2-3) + 코드(S-R2-7, S-R2-8, S-R2-9) |
-| R-R2-c | **요구 의존(순서).** L138의 저장과 L155의 등록이, 어느 task에서든 SB가 귀속하는 이벤트를 보내기 전에 있어야 한다 | 직접(S-R2-3, 기여자의 코드 읽기) + 추론(R-R2-a·b에서). 관리자가 이 순서를 요구로 적은 글은 없다. 이슈 본문의 원인 추정("not been registered")은 코드와 다르다. 0은 값 조건에서 걸려 `ILLEGAL_APP_ID`가 된다. 등록만 빠지면 `EVS_NotRegistered`(L190–L194)다 [I, 코드] |
-| R-R2-d | **허용 처리: 없다.** SB가 귀속하는 이벤트를 정의되지 않은 id로 보내거나, 그 거부 반환을 버리는 것을 받아들이는 글은 없다. 헤더는 문맥 밖의 보고에 다른 API(`CFE_ES_WriteToSysLog`)를 가리킨다 | 직접(받아들이는 글 없음 + S-R2-1 라벨 bug + S-R2-2 관리자 수용 + S-R2-3 "exactly the error"). supplier인 EVS의 거부는 설계된 동작이다(S-R2-15). 그래서 결함은 caller(SB 이벤트 경로)의 이른 사용에 있다 [I] |
+| R-R2-c | **요구 의존(순서).** L138의 저장과 L155의 등록이, 어느 task에서든 SB가 귀속하는 이벤트를 보내기 전에 있어야 한다 | 직접(S-R2-3, 기여자의 코드 읽기. `c5fb2b4d`에 묶는 것은 [I]) + 추론(R-R2-a·b에서). 관리자가 이 순서를 요구로 적은 글은 없다. 이슈 본문의 원인 추정("not been registered")은 코드와 다르다. 0은 값 조건에서 걸려 `ILLEGAL_APP_ID`가 된다. 등록만 빠지면 `EVS_NotRegistered`(L190–L194)다 [I, 코드] |
+| R-R2-d | **허용 처리: 없다.** SB가 귀속하는 이벤트를 정의되지 않은 id로 보내거나, 그 거부 반환을 버리는 것을 받아들이는 caller 쪽 글을 찾지 못했다. 헤더는 문맥 밖의 보고에 다른 API(`CFE_ES_WriteToSysLog`)를 가리킨다 | `appreq`는 **직접**이다(같은 판의 헤더 S-R2-5 L169–L172). "받아들이는 글이 없다"는 이 문서가 읽은 출처 안의 부재 판단이다. 그래서 Allowed `none`은 SPEC §1.6 `appreq` 단계 (1)(지정된 `appreq` + caller 항목 없음 → `none`)이 낸 **모형**이다. C1 수정 전에서 (i)이 "예"일 때와 같은 단계다(R-C1-e). 같은 쪽의 글로 S-R2-1의 라벨 bug, S-R2-2의 관리자 수용, S-R2-3 "exactly the error"가 있다. 그러나 셋은 보고된 판(B, 2025년 main)이나 M/dev에 대해 썼다(`cases/R2.md` §3, §0 D4). `c5fb2b4d`에 묶는 것은 [I]다. supplier인 EVS의 거부는 설계된 동작이다(S-R2-6 코드, S-R2-15 시험). 그래서 결함은 caller(SB 이벤트 경로)의 이른 사용에 있다 [I] |
 | R-R2-e | **순서 기전.** 기본 구성에서 ES·EVS task는 SB task가 만들어지기 전에 초기화를 모두 마친다. 그래서 이 사용은 부팅마다 저장 앞에 온다 | **추론(코드)**: S-R2-11(순서), S-R2-12(L835의 직렬화, L845의 panic). 스케줄이 바꿀 수 없는 순서다. `cases/R2.md` §6.1의 "결정적 초기화 의존 결함"과 같다. 출처(이슈·댓글)는 race인지 결정적인지 분류하지 않는다 |
 | R-R2-f | 다른 인터리빙의 가능성 | 코드상 셋뿐이다 [I]. (i) 미션이 코어 순서를 바꾼 구성(S-R2-11 "Missions may add/remove/replace"). 연구자가 만들면 구성 변형이다(`cases/R2.md` A10). (ii) S7 창: SB의 L138이 ES의 L818 확정 전에 돌면 `GetAppID`가 실패해 UNDEFINED가 실행 내내 남는다(S-R2-14). 보고된 적이 없다. (iii) 코어 시작 시간 초과 → panic. 결과가 다르다 |
-| R-R2-g | 저장 뒤의 사용 | SB 자신: 프로그램 순서 L138 → L155 → L183…(코드). SB 뒤에 만드는 코어 task(tbl, time)와 앱(`CORE_READY` L194 → L201 뒤): S-R2-12에 따라 저장·등록 뒤 [I, 코드]. TBL의 id도 같은 구조다(S-R2-16) |
+| R-R2-g | 저장 뒤의 사용 | SB 자신: 프로그램 순서 L138 → L155 → L183…(코드). SB 뒤에 만드는 코어 task(tbl, time)와 앱(`CORE_READY` L194 → L201 뒤): S-R2-12에 따라 저장·등록 뒤 [I, 코드]. TBL의 id도 같은 구조다(S-R2-16: 저장 → 등록, 둘 다 `RUNNING` 전). 이 논거는 시작 구간(OPERATIONAL 전)의 사용만 다룬다. 저장이 사용보다 앞선다는 것은 말하지만, 종료 중에도 등록이 살아 있는지는 다루지 않는다 [U] |
 
 ### 3.3 실행에서의 대상: task · 상태 · 순서 · 그것을 보이는 사건
 
@@ -201,14 +202,14 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 
 | 부류 | (가) 출처 기준 부류 | (나) 기대 상태 → 요약 | 등급 | 동결 행 | Kairos [기록] | 대조 |
 |---|---|---|---|---|---|---|
-| **R1 ES task의 AppID 0 사용**(SB 귀속 이벤트, L138 전) | 미충족: 값 0은 유효하지 않다(R-R2-a·b). 허용 없음(R-R2-d) | VIOLATING → `OBSERVED_VIOLATION` | 직접+코드 | E-14 (U-R2-1) | ES 20. cur·p1off·nocode 모두 `OBSERVED_VIOLATION`. direct-capture만, 결과 `0xc2000003`. 네 기록 같음 | **일치.** 반환 코드 없이 선다 |
-| **R2 EVS task의 AppID 0 사용** | 같음 | 같음 | 직접+코드 | E-14 (U-R2-2) | EVS 4, 같은 판정·근거 | **일치** |
-| 사용 수 | 코드에서 세면 EVS = 파이프 1 + 구독 2 + 시작 이벤트의 NO_SUBS 1 = **4**. ES = 3 + 시작 이벤트 둘의 NO_SUBS + 판·빌드 정보 이벤트마다 NO_SUBS. 성공 경로와 구독자 없음(`CORE_READY` 전)을 전제한다 [I]. EventID는 5, 10, 14 | ES 수는 빌드의 모듈 구성에 달려 출처에서 정해지지 않는다(`cases/R2.md` §5 하한) | 추론(코드) | E-14 근거 열("사용 수는 출처가 정하지 않는다") | EVS 4, ES 20, EventID 5·10·14 | EVS 일치. ES는 하한(≥5)과 모순되지 않는다. 24는 결함 구조 하나에 속한 호출 수이고 독립 버그 수가 아니다(IP §2.2) |
+| **R1 ES task의 AppID 0 사용**(SB 귀속 이벤트, L138 전) | 미충족: 값 0은 유효하지 않다(R-R2-a·b). 허용 없음(R-R2-d) | VIOLATING → `OBSERVED_VIOLATION` | (가) 미충족: 직접+코드. (나) VIOLATING: **모형**(지정된 `appreq` + caller 항목 없음 → `none`, R-R2-d). `appreq` 자체는 직접 | E-14 (U-R2-1) | ES 20. cur·p1off·nocode 모두 `OBSERVED_VIOLATION`. direct-capture만, 결과 `0xc2000003`. 네 기록 같음 | **일치.** 반환 코드 없이 선다 |
+| **R2 EVS task의 AppID 0 사용** | 같음 | 같음 | R1과 같음 | E-14 (U-R2-2) | EVS 4, 같은 판정·근거 | **일치** |
+| 사용 수 | 코드에서 세면 EVS = 파이프 1 + 구독 2 + 시작 이벤트의 NO_SUBS 1 = **4**. ES = 파이프 1 + 구독 2 + 시작 이벤트 둘(L442, L449)의 NO_SUBS 2 + 미션 판 이벤트(L259, 늘 보냄)의 NO_SUBS 1 + 빌드 정보 이벤트(L287, 늘 보냄)의 NO_SUBS 1 = **7**, 여기에 모듈 판 이벤트마다 NO_SUBS 1을 더한다. 모듈 판 이벤트는 L265의 `CFE_Config_IterateAll`이 `MOD_SRCVER_` 키마다 L241에서 보낸다. 전제는 성공 경로, 구독자 없음(`CORE_READY` 전), EVS의 거름·squelch 통과다(ES는 거름 없이 등록한다, L336) [I]. EventID는 5, 10, 14 | ES = 7 + (모듈 판 이벤트 수). 그 수는 고정 빌드의 생성 구성이 정한다. 정할 수 있는 값이지만 이 문서는 세지 않았다(빌드 트리가 없고, 빌드하지 않았다) | 추론(코드) | E-14 근거 열("사용 수는 출처가 정하지 않는다") | EVS 4, ES 20, EventID 5·10·14 | EVS 일치. ES 20은 하한 ≥7과 모순되지 않는다. 20이면 모듈 판 이벤트가 13이어야 한다 [I, 세지 않음]. `cases/R2.md` §5의 하한 ≥5는 무조건 보내는 이벤트 둘(미션 판, 빌드 정보)을 빠뜨렸다. 24는 결함 구조 하나에 속한 호출 수이고 독립 버그 수가 아니다(IP §2.2) |
 | **R3 코어–앱 관계와 귀속** | 실행 task ES/EVS(코어), 전달 AppID는 SB(코어)의 저장 전 값, provider는 SB L138 | 앱 사이 결과는 귀속이 섰을 때만 센다 | 직접(S-R2-1 "ES and the EVS tasks", S-R2-3) + 코드 | U-R2-1·2(소유 앱 기대: `inferred`) | 소유 앱 confirmed(생성 측 근거). 관계 `core-application`, provider CFE_SB(결정 뒤의 늦은 provider). 네 기록 같음 | 일치. 귀속 근거가 기대보다 강했을 뿐 라벨과 무관하다 |
 | **R4 고정 초기화 순서 대 다른 인터리빙** | 기본 구성에서 사용-저장 순서는 강제된다(R-R2-e). 같은 구성에서 같은 순번의 좋은 증거는 나올 수 없다 [I]. 다른 인터리빙은 R-R2-f의 셋뿐이다 | 스케줄 race로 주장하지 않는다. "초기화 순서가 강제한 미충족"으로 적는다 | 추론(코드) | E-14("schedule dependence undetermined") | 순서 의존을 주장하지 않았다. 같은 순번의 좋은 증거 없음. 코어 직렬화 규칙 R19는 실제 기록에서 서지 않았다(`results_pilot` §2 E-15) | 모순 없음. 출처 기준 기대("강제된 순서")가 Kairos("undetermined")보다 강하다. 실행 기록만으로 "강제됨"을 세우지 못하는 것은 도구의 한계로 남는다(§4 V-R2-4) |
 | **R5 SB 자기 전송**(SB task, L138·L155 뒤) | 충족(프로그램 순서, R-R2-g) | READY → `NO_VIOLATION…` | 코드 | E-15 (U-R2-3) | 5. 세 읽기 모두 `NO_VIOLATION…`. DC + SO, 가정 A-OWNER, 간선 `R2-P-TASK`, 같은 앱 | 일치. 코드에서 세면 파이프 1 + 구독 3 + 시작 이벤트의 NO_SUBS 1 = **5**(S-R2-8) [I]. 기록 5와 같다. 근거는 trusted 가정 A-OWNER에 기댄다(§4 V-R2-2) |
-| **R6 다른 task의 SB AppID(0x110003) 사용** | 충족: TBL·TIME은 SB 뒤에 만들어지고, 앱은 `CORE_READY` 뒤에 시작한다(R-R2-g) | READY → `NO_VIOLATION…` | 추론(코드) | E-15: 등록 대상·수명·순서 근거가 없으면 `INCONCLUSIVE(start_state_unknown)` 또는 `(effect_unsupported)` | 보존 F0 212 / 새 F0 211 / 보존 G-I 215 / 새 G-I 150. cur `NO_VIOLATION…`(direct-capture + 반환 코드 좁힘, 독립 아님). p1off = nocode `INCONCLUSIVE(explanation_ambiguous)` | 출처 기준 부류와 cur 라벨은 같다. 그러나 근거가 반환 코드(오라클 자신의 결과)뿐이라 **독립 판정 불가**다. 동결 E-15와는 이유 이름이 다르다. 이미 보고됐다(`results_pilot` §2 E-15) |
-| **R7 다른 task의 TBL AppID(0x110004) 사용** | 충족: TBL 등록 L124 → 저장 L196이 TBL 초기화 안, `RUNNING` 전이다. 사용은 그 뒤다 | READY | 추론(코드) | E-15 | 28개(네 기록 같음). R6과 같은 판정·근거 | R6과 같음 |
+| **R6 다른 task의 SB AppID(0x110003) 사용, OPERATIONAL 전** | 충족: TBL·TIME은 SB 뒤에 만들어지고, 앱은 `CORE_READY` 뒤에 시작한다(R-R2-g). 이 근거는 OPERATIONAL 전의 사용에만 선다. 그 뒤의 사용은 R8이다 | READY → `NO_VIOLATION…` | 추론(코드) | E-15: 등록 대상·수명·순서 근거가 없으면 `INCONCLUSIVE(start_state_unknown)` 또는 `(effect_unsupported)` | "다른 task 사용"의 SB AppID 몫: 보존 F0 212 / 새 F0 211 / 보존 G-I 215 / 새 G-I 150. cur `NO_VIOLATION…`(direct-capture + 반환 코드 좁힘, 독립 아님). p1off = nocode `INCONCLUSIVE(explanation_ambiguous)`. **이 수는 구간으로 나뉘지 않았다.** OPERATIONAL 뒤와 명령 재시작 뒤의 호출(R8)이 섞여 있다. 그래서 R6 부류에 드는 수는 정해지지 않는다 | OPERATIONAL 전 부분에서는 출처 기준 부류와 cur 라벨이 같다. 그러나 근거가 반환 코드(오라클 자신의 결과)뿐이라 **독립 판정 불가**다. 동결 E-15와는 이유 이름이 다르다. 이미 보고됐다(`results_pilot` §2 E-15) |
+| **R7 다른 task의 TBL AppID(0x110004) 사용, OPERATIONAL 전** | 충족: TBL은 `CFE_TBL_TaskInit` 안에서 저장(L119가 부르는 `CFE_TBL_InitData`의 `CFE_ES_GetAppID` L196) → 등록(L124)을 하고, 둘 다 `RUNNING` 전이다. OPERATIONAL 전의 사용은 그 뒤다 | READY | 추론(코드) | E-15 | 28개(네 기록 같음). R6과 같은 판정·근거. 구간으로 나뉘지 않았다 | R6과 같음 |
 | **R8 OPERATIONAL 뒤·종료 중의 사용**(예: 새 F0의 TO_LAB EID 22·25가 명령 재시작 뒤에 기록됨) | R2 출처의 범위 밖이다. 이슈는 시작 구간만 다룬다 | **미정.** 구간을 나누기 전에는 정하지 않는다(IP §7 실행 지침) | 미정 | 없음(E-15가 함께 묶음) | "다른 task 사용"에 섞여 있다(EID 14·22·25가 실행마다 다름) | 판단 불가. 이 호출들을 정상 대조로 세기 전에 구간을 분리해야 한다 |
 | R9 S7 창(SB의 `GetAppID` 실패 → 실행 내내 0) | 코드상 가능, 보고 없음(R-R2-f (ii)) | 일어나면 뒤의 SB 귀속 사용이 모두 R-R2-a를 어긴다. 다만 원인은 다른 순서(ES 확정 L818 대 SB L138)다 | 추론 | 없음 | 일어나지 않았다(다른 task의 AppID가 모두 `0x110003`) | 판단 불가. 실현되지 않았고, 이 창을 만드는 조건을 정하지 않는다(`cases/R2.md` A9, D5) |
 | R10 SB를 먼저 두는 구성 변형 | 구성 변형(R-R2-f (i)) | 만들면 ES·EVS 사용이 READY일 것이다. 원 구성에 race가 있다는 근거는 아니다 | 추론 | 없음 | 실행하지 않았다 | 해당 없음. 조건을 정하지 않는다(`cases/R2.md` A10, 로드맵 §6.4) |
@@ -218,13 +219,13 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 | ID | 경로 | 출처 근거 | [기록]의 결과 | 대조의 힘 |
 |---|---|---|---|---|
 | N-R2-1 | SB 자기 전송 5(R5) | 코드(프로그램 순서) | 위반 없음. DC + SO | 보통. 같은 API·같은 SB 호출 지점에서 위반(R1)과 정상(R5)이 값 하나로 갈린다. 근거가 A-OWNER에 기댄다 |
-| N-R2-2 | 다른 task의 사용(R6·R7) | 추론(코드) | 위반 없음. cur READY, p1off·nocode INCONCLUSIVE | **약함.** 오경보가 나지 않은 것은 맞다. 그러나 READY가 반환 코드 0에서 나오므로, 판정 규칙의 오경보 저항을 독립으로 보이지는 않는다 |
+| N-R2-2 | 다른 task의 OPERATIONAL 전 사용(R6·R7) | 추론(코드) | 위반 없음. cur READY, p1off·nocode INCONCLUSIVE. [기록]의 수는 R8과 섞여 있다 | **약함.** 오경보가 나지 않은 것은 맞다. 그러나 READY가 반환 코드 0에서 나오므로, 판정 규칙의 오경보 저항을 독립으로 보이지는 않는다 |
 | N-R2-3 | OPERATIONAL 뒤의 사용(R8) | 미정 | 위반 없음 | 쓰지 않는다. 구간 분리 전이다 |
 
 ### 3.6 출처로 정할 수 없는 것 (미정으로 둔다)
 
-1. ES 사용 수의 정확한 값(판·빌드 정보 이벤트 수). 하한만 정해진다.
-2. OPERATIONAL 뒤·종료 중의 사용(R8). R2 출처가 다루지 않는다.
+1. ES 사용 수의 정확한 값. 7 + 모듈 판 이벤트 수(L265)다. 모듈 수는 고정 빌드의 생성 구성이 정하고, 이 문서는 세지 않았다. 그래서 여기서는 하한 7만 적는다.
+2. OPERATIONAL 뒤·종료 중의 사용(R8). R2 출처가 다루지 않는다. 그래서 [기록]의 "다른 task 사용" 수 가운데 R6·R7 부류(OPERATIONAL 전)에 드는 수도 정해지지 않는다.
 3. S7 창이 이 환경에서 일어날 수 있는지(R9).
 4. 이슈가 보고한 판 B에서 ES가 이 경로에 닿는지(Q1). R2 기준 밖이다.
 5. 의도된 수정의 의미(SB의 이른 이벤트를 SB에 귀속할지, 버릴지, syslog로 보낼지; `cases/R2.md` Q5). R1·R2의 기대 판정은 R-R2-a(직접)로 서므로 이 미정에 기대지 않는다.
@@ -235,13 +236,14 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 
 | ID | 프로필 위치 | 담은 것 | 출처 상태 | 판정에 미치는 영향 | 위험 |
 |---|---|---|---|---|---|
-| V-C1-1 | `c1-bp-b051eb0/rspec-833fdbb/40_rspec.kzp` L4–L8(주석), L20–L22(`allowed`에 받아들이는 종료 항목 없음) | 25회 소진은 REJECT, 그래서 VIOLATING | 요구 미충족은 직접+코드. REJECT는 **모형**(R-C1-g) | E-06과 Kairos의 일치는 같은 모형을 두 번 쓴 결과다 | 중 |
-| V-C1-2 | `rspec-281a941/40_rspec.kzp` L19 `allowed unspecified_by_reference` | 수정 전 처리의 허용 출처 없음 | **미정**(P3). 거부 쪽의 글(#184 "shouldn't be a hard error")이 있지만 이 판에 묶지 않았다 | E-03과 Kairos의 일치는 구성상 그렇다. 라벨이 출처로 고정된 것이 아니다 | 중(라벨을 결과로 쓸 때) |
+| V-C1-1 | `c1-bp-b051eb0/rspec-833fdbb/40_rspec.kzp` L4–L8(주석), L20–L22(`allowed`에 받아들이는 종료 항목 없음) | 25회 소진은 REJECT, 그래서 VIOLATING | 요구 미충족은 직접+코드. REJECT는 **모형+추론**(R-C1-g: #184의 거부 쪽 글은 "Fixes #184"로 묶이지만, 25회 뒤의 종료를 덮는지는 말하지 않는다) | E-06과 Kairos의 일치는 같은 모형을 두 번 쓴 결과다 | 중 |
+| V-C1-2 | `rspec-281a941/40_rspec.kzp` L19 `allowed unspecified_by_reference` | 수정 전 처리의 허용 출처 없음 | **미정**(P3, R-C1-e (ii)). 거부 쪽의 글(#184 "shouldn't be a hard error")이 있지만 이 판에 묶지 않았다 | V-C1-7과 함께 E-03 라벨을 정한다. 라벨이 출처로 고정된 것이 아니다 | 중(라벨을 결과로 쓸 때) |
+| V-C1-7 | `rspec-281a941/40_rspec.kzp` L18, `rspec-833fdbb/40_rspec.kzp` L19 `appreq unspecified_by_reference` | CF 자신의 요구를 `appreq`로 기록하지 않는다. 같은 글이 caller 기록으로 프로필에 있고 rspec의 `prov` 목록에도 있다(`01_prov.kzp` L185–L193 `cf_events_sem_eid`, `02_researcher.kzp` L45–L51 `issue_184_body`; rspec L22·L25) | **미정**(R-C1-e (i)). SPEC §1.6은 앱 자신의 요구를 `appreq`에 넣는다. 기록하지 않는 근거는 출처에도 `C1_basis_plan.md` §9.8 G6에도 적혀 있지 않다 | `281a941`: E-03의 라벨 `INCONCLUSIVE(caller_requirement_absent)`가 이 선택에서 나온다. 기록하면 VIOLATING(P3 아니오)이나 충돌 명시 NOT_READY_UNJUDGED(P3 예)가 된다. `833fdbb`: caller 항목(재시도)이 판정하므로 현행 라벨은 같다(G7 마지막 열; S-C1-3은 성공 조회 뒤에 엔진을 쓰는 재시도와 맞선다고 읽히지 않는다 [I]). 이유 이름 `caller_requirement_absent`는 기록의 상태이고, 출처의 상태(R-C1-a 직접)가 아니다 | **중–높음**(수정 전 라벨을 결과로 쓸 때) |
 | V-C1-3 | `10_kinds.kzp` L97–L101 `role bp-existence-probe` | BP의 조회를 요구의 사례에서 뺀다 | 코드+추론(R-C1-h). "요구 없음"이라는 글은 없다 | K7·N-C1-3의 "오경보 없음"은 이 선언 때문이다. 엔진이 구분한 것이 아니다 | 낮음–중 |
 | V-C1-4 | `02_researcher.kzp` L17–L22 `r_countsem_by_name`; `40_rspec.kzp` L17 `requires … = LIVE` | 이름 키, 두 상태(ABSENT/LIVE), RESERVED 구간 모형 없음 | 추론(R-C1-b) | A5가 범위 밖이므로 현행 부류에는 영향 없음 | 낮음 |
 | V-C1-5 | `02_researcher.kzp` L31–L36 `r_reads_from_lookup` | 성공 조회의 id → 생성 확정에서 읽음(RF) | 코드(OSAL) 기반의 손 입력 | K1·K3 READY의 SO+RD. nocode F0에서는 INCONCLUSIVE | 낮음 |
 | V-C1-6 | `c1-bp-b051eb0/20_ops.kzp` L36(`outcome OS_ERR_NAME_NOT_FOUND: not_ready(exists)`, 상수는 `05_consts.kzp` L13)의 결과 좁힘(P1) | 실패 시도의 미충족을 반환 코드로 세운다 | 반환값의 뜻은 직접(S-C1-9). 다만 오라클 자신의 결과다 | 자연 실행의 K2·K3 미충족은 반환 코드 없이 서지 않는다(nocode INCONCLUSIVE) | 근거 독립성의 공백 |
-| V-R2-1 | `cfs-v7.0.1/40_rspec.kzp` L21, L23–L24 | `valid && REG`, `appreq evs_h_appid_note`, `allowed none` | **직접**(S-R2-5 L169). `none`은 받아들이는 글이 없음 + 이슈·CCB(R-R2-d) | R1·R2 판정의 출처가 프로필 밖에 있다 | 낮음 |
+| V-R2-1 | `cfs-v7.0.1/40_rspec.kzp` L21, L23–L24 | `valid && REG`, `appreq evs_h_appid_note`, `allowed none` | `requires`와 `appreq`는 **직접**(S-R2-5 L169–L172, 같은 판). `none`은 SPEC 단계 (1)의 **모형**(지정된 `appreq` + 부재 판단). 이슈·CCB·분석 댓글은 같은 쪽이나 `c5fb2b4d`에 묶는 것은 [I](R-R2-d) | R1·R2 판정의 요구 출처가 프로필 밖에 있다. 라벨은 C1 V-C1-7과 같은 단계에 기댄다 | 낮음 |
 | V-R2-2 | `50_trusted.kzp` L16–L21 `A-OWNER`; `02_researcher.kzp` L66–L71 | 등록 슬롯의 대상 = 쓴 task의 생성 id | 코드와 맞다 [I](`CFE_EVS_Register`는 호출 문맥의 앱을 등록한다). 도구가 확인하지 않는 trusted 가정이다 | R5(SB 자기 전송)의 READY. A-OWNER를 끄면 ON(P1 켬) 또는 INCONCLUSIVE(P1 끔)(`results_pilot` §1 R2-3) | 낮음–중 |
 | V-R2-3 | `02_researcher.kzp` L38–L43 `r_evs_reg_key_by_id` | 등록을 정확한 AppId 값으로 키잡음. 세대(재시작)는 모형 없음 | 추론 | 시작 구간 R1–R7에는 영향 없음. 재시작 뒤의 사용에는 맞지 않을 수 있다 | 낮음(범위 밖) |
 | V-R2-4 | `30_hb.kzp` L51–L64 `R19`(guard `cfe >= 6.4.2`, 손 입력 `r_guard_core_serial` L17–L22 "lower bound was NOT re-verified") | 코어 직렬화 HB | 코드(S-R2-12). guard 하한은 확인되지 않았다 | R19가 실제 기록에서 서지 않아, R4의 "강제된 순서"와 R6·R7의 "저장 뒤"를 도구가 세우지 못한다. 그래서 R6·R7은 반환 코드에만 기댄다 | 중(근거 공백. 거짓 요구는 아님) |
@@ -249,7 +251,7 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 | V-R2-6 | `05_consts.kzp` `CFE_ES_APPID_BASE = 0x110000` | SIMPLE id 방식 | 빌드 성질. 값 0의 무효는 두 방식 모두에서 같다(`cases/R2.md` §4) | 영향 없음 | 낮음 |
 
 출처가 직접 뒷받침해 위험으로 세지 않은 프로필 항목:
-- C1 `role cf-dependent-lookup`(`10_kinds.kzp` L86–L90): S-C1-1, S-C1-3, S-C1-4.
+- C1 `role cf-dependent-lookup`(`10_kinds.kzp` L86–L90): S-C1-1, S-C1-3, S-C1-4 L208–L211(provider와 이름의 전제).
 - C1 `retry_until_ready`가 앞선 실패를 받아들이는 부분(`rspec-833fdbb` L21): S-C1-6 주석, S-C1-7. 상한 25: `cf_platform_cfg.h` L338.
 - R2 `requires`(V-R2-1).
 
@@ -259,13 +261,13 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 |---|---|---|
 | E-01, E-04 | 일치(K1) | E-01은 자연 실행에서 실현되지 않았다[기록] |
 | E-02, E-07, E-08, E-09, E-12 | 일치 | — |
-| E-03 | 라벨 일치. 출처 기준으로는 "미충족, 허용 **미정**" | P3가 정해지면 바뀔 수 있다 |
-| E-05 | 일치(허용 출처 직접) | 자연 실행에서 매번 났다[기록]. 오경보 대조로 가장 강하다 |
-| E-06 | 라벨 일치. VIOLATING이 **모형**임을 E-06의 해석 주의(2026-10-25)가 이미 적는다 | — |
+| E-03 | 라벨 일치. 출처 기준으로는 "미충족, 라벨 **미정**"이다(R-C1-e (i)·(ii)) | (i) `appreq` 기록 여부나 (ii) P3가 정해지면 VIOLATING이나 충돌 명시로 바뀔 수 있다(V-C1-7) |
+| E-05 | 일치(허용 출처 직접) | 자연 실행에서 매번 났다[기록]. 출처 쪽 오경보 대조로 가장 강하다. 도구의 TOLERATED는 반환 코드에 기댄다(V-C1-6). 제어 실행의 TOLERATED는 E-05의 증거가 아니다(E-05는 자연 실행으로 한정) |
+| E-06 | 라벨 일치. VIOLATING이 **모형**(+추론)임을 E-06의 해석 주의(2026-10-25)가 이미 적는다 | — |
 | E-10, E-13 | 기록 없음 | — |
 | E-11 | 일치. 원인이 역할 선언이다(V-C1-3) | — |
-| E-14 | 일치. 출처 기준 기대가 순서를 "강제됨"으로 더 강하게 적는다(R4) | 표의 "schedule dependence undetermined"와 모순은 없다 |
-| E-15 | **층이 다르다.** E-15는 관측 조건부 도구 출력을 적는다. 이 문서의 R5–R7은 출처 기준 부류(READY)를 적는다. R8(종료 구간)은 E-15에 행이 없다 | 개정하려면 결과를 본 뒤의 개정이므로 PI가 정한다(§6) |
+| E-14 | 일치. 미충족은 직접+코드, VIOLATING은 모형이다(R-R2-d). 출처 기준 기대가 순서를 "강제됨"으로 더 강하게 적는다(R4) | 표의 "schedule dependence undetermined"와 모순은 없다 |
+| E-15 | **층이 다르다.** E-15는 관측 조건부 도구 출력을 적는다. 이 문서의 R5–R7은 출처 기준 부류(READY)를 적고, R6·R7은 OPERATIONAL 전으로 한정한다. R8(OPERATIONAL 뒤·종료 구간)은 E-15에 행이 없다 | 개정하려면 결과를 본 뒤의 개정이므로 PI가 정한다(§6) |
 
 동결 표의 U-행 정의(실행 task, 생성 실행자, 소유 앱, 전달 AppID, 발생 위치)와 이 문서의 §2.3·§3.3 대상은 같다. 줄 번호는 이번 사본에서 다시 읽은 값과 같다. 단 하나, U-R2-1의 `cfe_evs.c:185–189`는 NULL 분기만 가리키고, 이 문서는 등록 불일치 분기까지 넣어 L185–L194로 적었다.
 
@@ -274,9 +276,9 @@ Kairos 열은 [기록]이다. 출처는 `plan/results_pilot_20261025.md` §1(R2-
 - **하지 않은 것**: cFS 빌드·기동, 실험 조건 설정, 동결 표·사례 파일·프로필·결과 문서의 수정, 판정 라벨의 선택. 출처가 정하지 않는 것은 `미정`으로 두었다.
 - **레퍼런스 이탈**: 조건 이탈은 없다. 방법상의 제한 둘이 있다. (1) 이슈 글은 모형을 거친 WebFetch 추출의 짧은 문구다. 논문에 인용하기 전에 원문 대조가 필요하다. (2) REST API는 이 세션에서 403이다.
 - **PI·책임 연구자가 알거나 정할 것**:
-  1. P3/Q-12(수정 전 단일 실패의 허용)는 출처로 정해지지 않는다. #184 본문에 거부 쪽의 글이 있고, 수정의 부모라는 점으로 `281a941`에 이어진다 [I]. 묶을지는 PI 결정이다. 그때까지 C1 수정 전 결과를 위반으로 쓰지 않는다.
+  1. C1 수정 전 단일 실패의 라벨은 출처로 정해지지 않고, 열린 물음 둘에 달린다(R-C1-e). (i) CF 자신의 요구 글(S-C1-3 `cf_events.h` L155–L156, 같은 판; S-C1-1 #184 본문, [I]로 묶임)을 SPEC §1.6의 `appreq`로 기록하는가. 이것은 새 물음이고, 지금까지 P3에 들어 있지 않았다. (ii) P3/Q-12: `cfs_cf.dox` L212–L214를 종료를 받아들이는 caller 항목으로 묶는가. 조합별 결과: (i) 아니오면 현행 `INCONCLUSIVE(caller_requirement_absent)`(또는 (ii) 예일 때 종료 항목의 판정). (i) 예·(ii) 아니오면 VIOLATING. 둘 다 예면 충돌 명시 NOT_READY_UNJUDGED. R2의 VIOLATING은 같은 단계 (1)에 지정된 `appreq`(`cfe_evs.h` L169–L172)로 선다. 그래서 두 사례를 같은 기준으로 읽으려면 (i)의 결정이 필요하다. 정해질 때까지 C1 수정 전 결과를 위반으로도, "위반 아님"으로도 쓰지 않는다. (i)을 프로필에 적을 때는 `appreq`와 함께 `allowed none`을 적어야 도구가 `none`을 낸다(`kairos/lib/core/phi_allowed.cpp` L47–L58). `allowed unspecified_by_reference`로 두면 SPEC 단계 (1)과 달리 unspecified로 남는다 [M: 코드 읽기]. 이 차이를 도구에서 고칠지는 도구 담당 몫이다.
   2. C1 E-06의 VIOLATING과 Kairos의 일치는 독립 확인이 아니다(V-C1-1). 논문 표현은 "채택한 요구·허용 모형의 판정"으로 한정해야 한다(E-06 해석 주의와 같다).
-  3. R2 E-15는 관측 조건부 출력을 적고, 출처 기준 부류(READY)를 따로 적지 않는다. 또 OPERATIONAL 뒤·종료 구간 행이 없다. 두 층을 나눈 행을 둘지, 종료 구간을 따로 둘지(IP §7)는 PI 몫이다. 결과를 본 뒤의 개정이면 그 실행은 개발 자료로 옮긴다.
+  3. R2 E-15는 관측 조건부 출력을 적고, 출처 기준 부류(READY)를 따로 적지 않는다. 또 OPERATIONAL 뒤·종료 구간 행이 없다. [기록]의 "다른 task 사용" 수는 구간으로 나뉘지 않아, 출처 기준 READY(OPERATIONAL 전)에 드는 수가 정해지지 않는다. 두 층을 나눈 행을 둘지, 종료 구간을 따로 둘지(IP §7)는 PI 몫이다. 결과를 본 뒤의 개정이면 그 실행은 개발 자료로 옮긴다.
   4. R2 다른 task 사용과 C1 BP 존재 확인은 오경보 대조로 약하다(반환 코드, 역할 선언). 오경보 저항을 보이려면 반환 코드 없이 서는 근거(R2: 코어 직렬화 HB R19의 실제 기록 성립)나 역할 선언에 기대지 않는 대조가 필요하다. 이 문서는 그 조건을 정하지 않는다.
-  5. R2 사용 수는 EVS 4, SB 자기 전송 5까지 코드로 정확히 세어진다. ES 20은 출처로 정해지지 않는다. 재검증에서 수를 기대값으로 쓰려면 EVS와 SB만 쓸 수 있다(PD28 Q4: 사건 수의 완전 일치는 요구하지 않는다).
+  5. R2 사용 수는 EVS 4, SB 자기 전송 5까지 코드로 정확히 세어진다. ES는 7 + 모듈 판 이벤트 수다. 모듈 수는 고정 빌드의 생성 구성으로 정할 수 있지만 이 문서는 세지 않았다. 그래서 재검증에서 수를 기대값으로 쓰려면 지금은 EVS와 SB만 쓸 수 있다(PD28 Q4: 사건 수의 완전 일치는 요구하지 않는다). `cases/R2.md` §5의 ES 하한 ≥5는 무조건 보내는 이벤트 둘을 빠뜨렸다. 하한은 ≥7이다. 고치는 일은 그 파일 담당 몫이다.
   6. CF#184 댓글 앵커 둘과 댓글 1의 다른 문구(§1.2)는 `cases/C1.md` §0a에 아직 없다. 그 파일 담당이 반영할 일이다.

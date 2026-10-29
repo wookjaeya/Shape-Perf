@@ -94,7 +94,7 @@ check)
         --out "$O/plan.kzrtp" --record "$O/rtplan.txt" > "$O/rtplan.out" 2>&1; echo "rtplan $CFG $CAND $WN exit=$?" | tee -a "$PR/check.log"
     for INST in tx rx; do
       if [ $INST = tx ]; then RUN=$NAT/f0tx/${CFG}_$CAND; B=$RUN/basis_core-tx.kz; else RUN=$NAT/f0rx/N_${CFG}_${CAND}_rx; B=$RUN/basis_core.kz; fi
-      T=$C1/$CFG/$CAND/exe/$INST   # the build outputs the F0 driver untars (the records' inst/<inst>/cf/ were emptied)
+      T=$C1/$CFG/$CAND/exe/$INST   # the build outputs the F0 driver untars (sha256 as the records' driver.txt)
       "$KZ" hold "$B" $P/observe/sites-cf$r.kzp "$PLAN" --basis "$RUN/basis_cf.so.kz" --basis "$RUN/basis_bp.so.kz" \
           --binary core-tx="$T/core-$INST" --binary cf.so="$T/cf/cf.so" --binary bp.so="$T/cf/bp.so" \
           -o "$O/hold_$INST.kzr" -- /bin/true > "$O/hold_$INST.out" 2>&1; echo "hold-check $CFG $CAND $WN $INST exit=$?" | tee -a "$PR/check.log"

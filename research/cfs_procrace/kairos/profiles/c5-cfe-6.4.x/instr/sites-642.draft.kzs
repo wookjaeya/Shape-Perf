@@ -1,7 +1,8 @@
-# sites-642.draft.kzs -- DRAFT logical sites of case C5 (nasa/cFE #72) for the instrumented family (kzs-sites 2,
+# sites-642.draft.kzs -- DRAFT logical sites of case C5 (nasa/cFE #72) for the instrumented family (kzs-sites 3,
 # kairos/docs/event_semantics.md section 3) on the fixed release cFE 6.4.2 with OSAL 4.1.1 (posix) and the pc-linux
 # PSP 1.2.0.0, built as the release readme says (research/cfs_procrace/plan/c5_execution_basis_20261028.md section 2).
-# DRAFT: not used by any run.  Checked only by a single-unit compile with kzgcc 0.2 (that plan, section 6.3).  There is
+# DRAFT: not used by any run.  Checked by a single-unit compile with kzgcc 0.2 (kzs-sites 2, that plan, section 8.2) and,
+# from 2026-10-29, by the derived builds of that plan's section 8.4 (kzgcc 0.3, kzs-sites 3).  There is
 # no F0 counterpart yet (the plan's section 7), so no equiv line.
 #
 # Same labels and site ids as sites-641.draft.kzs so the two versions compare label by label.  Sites 3 and 6 (the
@@ -11,26 +12,24 @@
 # are byte-identical to the 6.4.1 tree, and EVS_GetAppID (cfe_evs_utils.c L122-L140) has the same lines (the file differs
 # only from L615, the C3 guard); so those sites repeat the 6.4.1 lines.
 # Nothing here is a research condition.
-kzs-sites 2
+kzs-sites 3
 source cfe rev=cFE-6.4.2-OSS-release ref="SourceForge coreflightexec cFE-6.4.2-OSS-release.tar.gz sha256 c64ed2aac910e79a641f49279dfdff3b7b49374e54ed56b595d47e16a3f53a4f"
 source osal rev=osal-4.1.1-release ref="SourceForge osal osal-4.1.1-release.tar.gz sha256 8f0f2b23d8226256fdb8543bf9fcb560b38434411dc12cb4f7f35b9c19e61d46"
 module 1 name=core-linux.bin source=cfe
 module 2 name=sample_app.so source=cfe
 
 # ---- creator: CFE_ES_AppCreate (cfe_es_apps.c:426-714); one critical section L571-L669 across OS_TaskCreate -------
-# E-ID1 draft (2026-10-29; plan/c5_execution_basis_20261028.md section 10.4).  Comments only: these readers are not
-# in kzs-sites 2 and the parser would refuse them.  The owner value is read where the request hands the new slot to
-# its caller (L660), not from the analysed TaskTable store (L654, site 8), which is kept as a cross-check only.
-#   identity 1 decoder=app-request ref="cfe_es_apps.c:426 (the request creates the application it names later)"
-#   site 33 label=es.app_create.owner_out op=es.app_create phase=point place=store line=660 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:660 *ApplicationIdPtr = i"
-#   value 33 0 role=app_id from=operand0 type=u32
-#   identity 33 decoder=owner-publish owner=0 ref="cfe_es_apps.c:660"
-#   identity 2 decoder=request-return status=0 ok=0 ref="CFE_SUCCESS"
+# E-ID1 (plan/c5_execution_basis_20261028.md section 10.4; statements from 2026-10-29, kzs-sites 3, before only as
+# comments).  The owner value is read where the request hands the new slot to its caller (L660, site 33), not from
+# the analysed TaskTable store (L654, site 8), which is a cross-check only (owner-check: it never names the owner, a
+# different value withdraws it).  The request closes at site 2 with CFE_SUCCESS (0) as the value of success.
 site 1 label=es.app_create.entry op=es.app_create phase=before tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate line=426 ref="cfe_es_apps.c:426-432"
 value 1 0 role=name_ptr from=arg3 type=ptr ref="AppName (L429)"
 value 1 1 role=priority from=arg4 type=u32 ref="Priority (L430)"
+identity 1 decoder=app-request ref="cfe_es_apps.c:426 (the request creates the application it names later)"
 site 2 label=es.app_create.ret op=es.app_create phase=after tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:512,532,542,636,679,693,705,711"
 value 2 0 role=status from=ret type=s32
+identity 2 decoder=request-return status=0 ok=0 ref="CFE_SUCCESS (0L), cfe_error.h:158"
 site 4 label=es.app_create.task_create op=es.task_create_call phase=point place=at-call callee=OS_TaskCreate line=619 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:619-625 (inside the lock taken at L571)"
 value 4 0 role=id_ptr from=arg0 type=ptr ref="&CFE_ES_Global.AppTable[i].TaskInfo.MainTaskId"
 value 4 1 role=entry_fn from=arg2 type=ptr ref="(void*)StartAddr"
@@ -43,10 +42,14 @@ value 7 0 role=value from=operand0 type=u32
 value 7 1 role=addr from=operand1 type=ptr
 site 8 label=es.app_create.pub_appid op=es.task_publish phase=point place=store line=654 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:654 TaskTable[TaskId].AppId = i"
 value 8 0 role=app_id from=operand0 type=u32
+identity 8 decoder=owner-check owner=0 ref="cfe_es_apps.c:654 (cross-check of site 33; plan section 10.4 item 2)"
 site 9 label=es.app_create.pub_taskid op=es.task_publish phase=point place=store line=655 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:655 TaskTable[TaskId].TaskId = TaskId"
 value 9 0 role=task_id from=operand0 type=u32
 site 10 label=es.app_create.pub_unlock op=es.shared_unlock phase=point place=at-call callee=CFE_ES_UnlockSharedData line=669 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:669"
 value 10 0 role=line from=arg1 type=s32
+site 33 label=es.app_create.owner_out op=es.app_create phase=point place=store line=660 tu=cfe/fsw/cfe-core/src/es/cfe_es_apps.c func=CFE_ES_AppCreate ref="cfe_es_apps.c:660 *ApplicationIdPtr = i"
+value 33 0 role=app_id from=operand0 type=u32
+identity 33 decoder=owner-publish owner=0 ref="cfe_es_apps.c:660"
 # The point that corresponds to the 6.4.1 hold point lies inside the critical section here, so a hold there would
 # keep the lock that the new task's GetAppID needs (C5 A6).  Declared lock-held: the runtime refuses it unless a plan
 # point says ALLOW_LOCK_HELD (event_semantics.md section 7).  Draft: no plan uses it.

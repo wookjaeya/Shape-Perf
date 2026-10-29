@@ -19,8 +19,10 @@
 # all written into <W>/build_<variant>.record:
 #   D1  work-space path <W>/b instead of the reference's own path (path strings in the objects' debug information)
 #   D3  (instr) `make LOCAL_COPTS="<plugin options>"`: the variable every compile rule puts first
-#       (cfe/fsw/cfe-core/src/make/make-rules.mak L17, app-rules.mak L21) and every unit's Makefile sets empty (CB 8.2;
-#       checked in the reference log: no compile line has anything there); `make config` is unchanged
+#       (cfe/fsw/cfe-core/src/make/make-rules.mak L17, app-rules.mak L21) and every unit's Makefile sets empty (CB 8.2):
+#       build/cpu1/cfe/{psp,osal,sb,evs,time,tbl}/Makefile and build/cpu1/<app>/Makefile L36 set it empty, cfe/fs does not
+#       set it, and cfe/es/Makefile L26-L30 sets -DEXCLUDE_CFE_TBL only when EXCLUDE_CFE_TBL is TRUE, which no file of the
+#       build sets (the reference log has no compile line with -DEXCLUDE_CFE_TBL); `make config` is unchanged
 #   D3' (instr) `make LIBS="<runtime> <the value of psp/fsw/pc-linux/make/link-rules.mak L26>"`: the core link
 #       (link-rules.mak L36 `$(COMPILER) $(DEBUG_FLAGS) -o $(EXE_TARGET) $(CORE_OBJS) $(LDFLAGS) $(LIBS)`) takes the
 #       runtime (whole archives libkzrt-posix.a libkzrt.a, the start object kz_rt_posix_auto.c.o and the build identity

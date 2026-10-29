@@ -1,7 +1,7 @@
 // The identity join of an instrumented run for a creation request that names its application only after the task
 // exists (kz/trace/identity_rule.hpp, kzs-sites 3 `app-request`, `owner-publish`, `owner-check`, `request-return
 // status=`; schema revision 6 NOWNER; research/cfs_procrace/plan/c5_execution_basis_20261028.md section 10.4 item 9).
-// The runtime (kairos/runtime, POSIX adapter) writes a kzrt-dump in this process with real threads; the converter reads
+// The runtime (kairos/runtime) writes a kzrt-dump in this process with real threads; the converter reads
 // it with a version 2 site file and a version 3 identity file.  Tool tests: every name and value is a unit-test value,
 // not a research condition and not a case (CONDITIONS_POLICY).
 //

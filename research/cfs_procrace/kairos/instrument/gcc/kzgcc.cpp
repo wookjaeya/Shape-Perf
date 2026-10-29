@@ -21,7 +21,7 @@
 // after record names its before record; points have no link, except (kzgcc 0.3, kzs-sites 3) a point whose identity
 // read is owner-publish or owner-check: bound at a store, it names the function's entry record too (the identity join
 // pairs it with the app-request of the same function instance by that link); bound at a call or a line start it is
-// declared unsupported.  For a manifest without these readers the output is that of kzgcc 0.2.
+// declared unsupported.  Without these readers the objects and bind lines are kzgcc 0.2's; the version text differs.
 // Values are the GIMPLE operands the original statement uses (SSA names or invariants), converted to
 // 64 bits per the manifest type: nothing is evaluated twice, no shared variable is re-read (except the
 // out<k> read the manifest declares), no store is changed.  A string is copied only at a slot the

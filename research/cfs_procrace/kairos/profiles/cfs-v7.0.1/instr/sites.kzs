@@ -1,7 +1,7 @@
 # sites.kzs -- logical sites of profile cfs-v7.0.1 (case R2) for the instrumented family (kzs-sites 2,
 # kairos/docs/event_semantics.md section 3).  Configuration: the ENV tree, cFS bundle v7.0.1 (088b2fa8,
 # env/build_cfs.sh), build native_std (-O0 -g).
-# Stage D: every site of the F0 plan observe/sites.kzp (35) has a counterpart here with the same label, and an
+# Stage D: every site of the F0 plan observe/sites.kzp (35; 38 with the interval sites 42-44 at the end) has a counterpart here with the same label, and an
 # `equiv ... backends=f0,gcc-plugin status=unconfirmed` line that names the F0 site and how the two positions relate
 # (IR section 9.3: a common name is not an equivalence; it is confirmed only with evidence, stage E).  Exception
 # (stage D leftovers, 2026-10-26): the F0 pair es.start_task.entry/.ret (the entry and return of CFE_ES_StartAppTask,
@@ -203,3 +203,17 @@ equiv 36 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:189 re
 # instruction (at-call) because the instruction after it is the join of the return paths.
 site 37 label=CFE_EVS_CleanUpApp.free_slot op=evs.cleanup phase=effect tu=cfe/modules/evs/fsw/src/cfe_evs_task.c func=CFE_EVS_CleanUpApp callee=EVS_AppDataSetFree line=194 place=after-call ref="cfe/modules/evs/fsw/src/cfe_evs_task.c:192-194"
 equiv 37 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:190 at-call (before the call); GCC: right after the call"
+
+# ---- R2 interval boundaries (F0 sites 35-37, 2026-10-29, plan/r2_intervals_20261029.md) ---------------------------
+# The end of initialization (the OPERATIONAL line and state, cfe_es_start.c:233-234), the commanded restart in the ES
+# command path (cfe_es_task.c:651-664) and the setter of SB subscription reporting (cfe_sb_task.c:1224-1227, called at
+# L296 enable and L308 disable).  Not linearization points of the profile: the conversion keeps them as events of
+# sites the replay does not map.  Same positions as F0: after the same call, at the same call, the same function entry.
+site 42 label=es.main.operational op=es.main phase=point tu=cfe/modules/es/fsw/src/cfe_es_start.c func=CFE_ES_Main callee=CFE_ES_WriteToSysLog line=233 place=after-call ref="cfe/modules/es/fsw/src/cfe_es_start.c:233-234"
+equiv 42 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:208 after-call of L233 (F0 binds the store instruction of L234, before the store); GCC: right after the call; same call, no value"
+site 43 label=es.restart_cmd.reset_cfe op=es.restart_cmd phase=point tu=cfe/modules/es/fsw/src/cfe_es_task.c func=CFE_ES_RestartCmd callee=CFE_ES_ResetCFE line=664 place=at-call ref="cfe/modules/es/fsw/src/cfe_es_task.c:651-664"
+value 43 0 role=reset_type from=arg0 type=u32 ref="the argument cmd->RestartType (cfe_es_task.c:664; CFE_ES_ResetCFE(uint32 ResetType), cfe_es_api.c:65)"
+equiv 43 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:210 at-call; same call; F0 reads the argument register edi"
+site 44 label=sb.sub_reporting.set op=sb.sub_reporting phase=before tu=cfe/modules/sb/fsw/src/cfe_sb_task.c func=CFE_SB_SetSubscriptionReporting line=1224 ref="cfe/modules/sb/fsw/src/cfe_sb_task.c:1224-1227"
+value 44 0 role=state from=arg0 type=u32 ref="the stored state (CFE_SB_ENABLE 1, CFE_SB_DISABLE 0; cfe_sb_priv.h:71-72)"
+equiv 44 backends=f0,gcc-plugin status=unconfirmed ref="observe/sites.kzp:212 entry probe; same function entry"

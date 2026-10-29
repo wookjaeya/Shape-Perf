@@ -192,7 +192,7 @@ site CFE_EVS_CleanUpApp.free_slot point at=cfe_evs_task.c:194 at-call=EVS_AppDat
 # ---- R2 interval boundaries (2026-10-29, plan/r2_intervals_20261029.md) ----------------------------------------------
 #
 # The initialization of the R2 question ends where the ES main task enters OPERATIONAL (cfe_es_start.c:233-234, after
-# the RUNNING startup sync of L224); the shutdown begins where the ES task acts on the commanded restart
+# the RUNNING startup sync of L225); the shutdown begins where the ES task acts on the commanded restart
 # (cfe_es_task.c:664, the call of CFE_ES_ResetCFE, which does not return); subscription reporting, which decides
 # whether a subscription emits EID 22 (cfe_sb_task.c:659), is set by one function only (cfe_sb_task.c:1224-1227,
 # called by the enable and disable commands at L296 and L308).  The process exit is the end of the record; it needs

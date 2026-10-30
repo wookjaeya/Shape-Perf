@@ -1466,7 +1466,8 @@ void finalize_lock_facts(Model* mp, const LockDerivation& d, const FieldStatusTa
   std::map<std::string, std::string> parent;
   for (const LoopFact& l : m.loops) parent[l.key] = l.parent_key;
   auto within = [&](std::string key, const std::string& outer) {
-    for (int guard = 0; !key.empty() && guard < 1000; ++guard) {
+    // the parent chain of a loop has at most as many links as there are loops
+    for (size_t guard = 0; !key.empty() && guard <= m.loops.size(); ++guard) {
       if (key == outer) return true;
       auto it = parent.find(key);
       if (it == parent.end()) return false;

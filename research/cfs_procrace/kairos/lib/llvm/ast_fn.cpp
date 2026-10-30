@@ -4314,7 +4314,7 @@ class FnWalker {
     std::map<const Stmt*, std::vector<std::pair<uint8_t, std::string>>> extra;  // element -> (kind, key) of such events
     std::map<const Stmt*, std::vector<uint32_t>> extra_writes;
     auto element_of = [&](const Stmt* s) -> const Stmt* {
-      for (int guard = 0; s != nullptr && guard < 64; ++guard) {
+      while (s != nullptr) {
         if (ix->at.count(s) != 0) return s;
         s = parent_stmt(s);
       }

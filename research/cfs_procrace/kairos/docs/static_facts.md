@@ -133,8 +133,14 @@ artifact 종류 FACTS. 모든 사실은 (file, line, col) 과 `fh`(같은 컨테
 | RETURNS (124) | `kz_fact_return` | 확장 사실(§5b): return 값. 돌려주는 지역 변수는 그 return 에 닿는 정의마다 한 행, 값과 조건 |
 | RET_CONSTS (125) | `kz_fact_retconst` | 확장 사실(§5b): 함수마다 돌려주는 상수와 그 조건 |
 | LOOP_EXITS (126) | `kz_fact_loopexit` | 확장 사실(§5b): 모든 루프의 탈출식·mod set 과 탈출마다의 조건 |
+| ARGFLOW … GLOBAL_IMAGES (127–130) | | 확장 사실(§5c) |
+| LOCK_OPS (131) | `kz_fact_lockop` | 확장 사실(§5d): P0 mutex 기본 연산에서 래퍼로 유도한 잠금 연산과 그 정체성 |
+| LOCK_IDS (132) | `kz_fact_lockid` | 확장 사실(§5d): LOCKSET 이 잡는 잠금 정체성과 정적 인스턴스 여부 |
+| LOCKSET (133) | `kz_fact_lockset` | 확장 사실(§5d): 모든 호출·읽기·쓰기에서 잡혀 있는 잠금(must) |
+| FIELD_STATUS (134) | `kz_fact_fstatus` | 확장 사실(§5d): 대상에 무관한 두 규칙의 writer 집합 완전성 |
+| AWAIT_L1 (135) | `kz_fact_await` | 확장 사실(§5d): 대상에 무관한 L1 (i)과 LOCKSET 의 L1 (ii) |
 
-schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 섹션 120–122 는 1이고, TERMINALS 에 `conditional` 표시가 있다(revision 5, 스키마 개정 7). 섹션 123–126 은 1이다(revision 6, 스키마 개정 8). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
+schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 섹션 120–122 는 1이고, TERMINALS 에 `conditional` 표시가 있다(revision 5, 스키마 개정 7). 섹션 123–126 은 1이다(revision 6, 스키마 개정 8). 섹션 127–130 은 1이다(revision 7, 스키마 개정 9). 섹션 131–135 는 1이다(revision 8, 스키마 개정 10). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
 
 ### 4.1 writer, A-TYPE, INIT (SPEC §4.2)
 
@@ -266,6 +272,48 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **시험** [M]: `static_golden_argflow`(고정 도구 프로필 + `--extended-facts`), `static_golden_argflow_np`(`--no-profile`; 둘의 새 섹션은 같다), fixture `argflow.c`, `test_static_cli` 의 F4·F6 확인(옵션 없으면 네 섹션이 없음, 있으면 기존 섹션 view·FACT_EXPRS 앞 행 동일, 상한과 이미지 예산의 기록·거부·효과).
 
+## 5d. F5 잠금 집합과 대상에 무관한 규칙 (`LOCK_OPS`, `LOCK_IDS`, `LOCKSET`, `FIELD_STATUS`, `AWAIT_L1`, 2026-10-30, 단계 2a S4) [D][M]
+
+근거: `plan/extraction_design_20261030.md` §3.0 F5, §3.3, §5 R3, §6 T3. 결과는 `plan/step2a_s4_20261030.md`.
+
+**언제 쓰나** [D]. F1–F4·F6(§5b, §5c)과 같은 조건이다: 프로필 없는 추출은 늘, 프로필 추출은 `--extended-facts` 를 줄 때만 쓴다. 옵션 없는 프로필 추출은 이 코드 경로를 타지 않는다. 식 트리는 FACT_EXPRS 에서 개정 7의 행 **뒤에** 번호가 붙는다. FILE_HASHES 에 파일을 더하지 않는다. extract 요약 출력과 P0 표는 바꾸지 않았다(기존 golden 이 둘을 담는다). 이 단계가 바꾸는 기존 규칙은 없다: FACT_LOCS(§4.1의 옛 노출 규칙)와 FACT_LOOPS(§5.2의 옛 L1 (i))는 그대로이고, 새 규칙은 새 섹션에만 쓴다.
+
+**F5 LOCK_OPS: 잠금 연산의 유도** [D].
+- 출발점은 P0 의 mutex 기본 연산이다(`pthread_mutex_lock` 획득, `pthread_mutex_trylock`·`timedlock` 시도 획득, `pthread_mutex_unlock` 해제, `pthread_cond_wait`·`timedwait` 대기: 인자 1의 mutex 를 풀었다가 돌아올 때 다시 잡음). mutex 인자의 위치는 P0 의미 문장이 이미 적은 것이다.
+- 함수마다 본문의 잠금 골격(Clang CFG 의 블록마다 호출·읽기·쓰기·지역 변수 정의·return 을 평가 순서로, 두 갈래 분기의 시험 `x ==/!= 상수`, `x`, `!x`; x 는 지역 변수나 그 블록의 호출 결과)을 걷는 전방 분석이다. 상태는 잡힌 잠금의 집합이고, **잡힌 잠금 집합(과 호출자의 잠금을 푼 집합)마다 상태를 따로 둔다**. 같은 집합끼리는 지역 변수 사실(호출 결과를 담은 변수의 값)을 교차로 합친다. 그래서 "0을 돌려줄 때만 잡고 돌아오는" 연산이 그렇게 보인다.
+- 호출 그래프의 강연결요소를 callee 먼저 처리한다. 자기 요소 안의 호출과 미해결 간접 호출은 모든 잠금을 풀 수 있는 호출로 읽는다(`unknown-release`). 본문 없는 함수 가운데 P0 가 아닌 것은 잠금에 효과가 없다고 본다.
+- 함수 요약: 진입 때 아무 잠금도 없이 분석해, 돌아오는 경로에서 잡힌 잠금 X 를 다음으로 나눈다. 모든 return 에서 잡힘 = EVERY_RETURN. 잡힌 return 이 모두 상수 c 를 돌려주고 나머지 return 은 c 와 다르다고 알려진 값을 돌려줌 = RESULT_CONDITIONAL(`success` c). try 기본 연산에서만 온 것 = TRY. 어느 쪽도 아니면 CONDITIONAL(연산 아님: 호출자는 잡힌 것으로 세지 않는다). 해제도 같은 방식으로 나눈다(호출자가 잡은 잠금을 모든 경로/결과 조건부로 풂). 어떤 경로에서만 푸는 것은 연산이 아니고 호출자의 그 잠금을 지우기만 한다.
+- **선언된 가정** (`assume.lock_acquisition_succeeds`): try 가 아닌 잠금 연산은 성공한다. P0 기본 연산은 0을 돌려준다(POSIX.1-2017 RETURN VALUE; 원문 대조 unverified). 유도된 연산은 잡았을 때 돌려주는 값을 돌려준다. 결과를 시험하는 분기 가운데 실패만 가는 쪽은 **실패 경로**다: 요약에서 빼고, 그 안의 LOCKSET 행은 `failure-path` 로 그 경로에서 잡힌 잠금(실패한 획득은 빠짐)과 함께 낸다. 예: 잠금 래퍼의 오류 분기.
+- **해제의 범위**: 함수가 스스로 잡은 잠금을 같은 정체성으로 풀면 그 함수 안의 짝이다. 호출자의 잠금에는 그 정체성이 정적 인스턴스이거나 고정 주소일 때만 효과가 없다(같은 mutex 의 재귀 획득이거나 다른 mutex 이다). 그렇지 않으면 그 해제는 다른 mutex 일 수 있으므로, 필드 기반 위치를 공유할 수 있는(`may` 가 같거나 어느 쪽이든 모름) 모든 잡힌 잠금을 지운다. `may` 는 이 "지우지 않음"에만 쓰고, 두 연산이 같은 잠금임을 보이는 데는 쓰지 않는다.
+- 조건 대기는 그 전에 잡혀 있던 잠금만 대기 호출부터 다시 잡힌 것으로 한다(그 사이에 풀렸다: 구간이 끊긴다). 잡혀 있다고 알려지지 않은 잠금은 대기 뒤에도 잡힌 것이 아니다.
+- `vocabulary`: EVERY_RETURN·RESULT_CONDITIONAL 의 획득, 그리고 같은 모드의 해제 가운데 어휘의 획득이 잡는 필드 기반 위치의 mutex 를 푸는 것(기본 연산은 늘). 프로필 없는 추출의 둘째 읽기는 첫째 읽기(이제 확장 사실도 읽는다)에서 이것을 유도해 잠금·해제 연산 어휘로 쓴다. 그래서 그 추출의 FACTS `lock-op`/`unlock-op` 표시와 FACT_LOOPS 의 L1 (ii) 판정이 이 연산을 따른다. BASIS `extract.lock_vocabulary` 가 둘째 읽기의 유도가 같은 집합을 냈는지 적는다.
+
+**F5 LOCK_IDS: 잠금 정체성** [D].
+- 잠금 정체성은 그 연산이 보는 함수의 매개변수 위의 식이다: `$k`(매개변수 k), 전역 객체, `x.f`, `x[i]`, `p->f`, `&x`, 위치에서 읽은 값, `?(이유)`(따라가지 못한 부분; 나머지 구조는 남긴다). 호출 인자의 정체성은 derives 의 복사 규칙으로 지역 변수를 따라가 만든다. 호출 지점에서 callee 요약의 정체성에 인자를 대입한다(`p[i]` 와 `p = &x[0]` 이면 `x[i]`).
+- **must 정체성만** [D]: 두 행이 같은 정체성이고 그 상태가 STATIC INSTANCE 일 때만 같은 mutex 를 잡았다고 본다. STATIC INSTANCE = 매개변수도 모르는 부분도 없고, 읽는 모든 값이 전역 객체의 필드이며, 그 필드의 writer 집합이 FIELD_STATUS 의 필드 단위 규칙으로 complete 이고 writer 인스턴스가 없거나 하나이고 그 하나가 한 번만 실행된다(`once`). 그 밖은 NOT_STATIC(이유를 `why` 에), PARAMETER_RELATIVE(호출자가 정한다), UNDECIDABLE 이다. 필드 기반 위치(`may`)가 같아도 같은 잠금이라는 근거가 되지 않는다.
+- **선언된 가정** (`assume.static_instance_read_after_write`): 정적 인스턴스를 읽는 두 잠금 연산은 그 한 writer 인스턴스 뒤에(또는 둘 다 앞에) 읽는다.
+- `type-level-exposed`: 읽는 값의 위치가 형 단위 규칙으로는 complete 가 아니다(형 단위 규칙을 고르는 사용자가 볼 수 있게).
+
+**F5 LOCKSET** [D]. 본문 있는 모든 함수의 모든 호출(FACTS), 읽기(READS), 형 있는 쓰기(FUNC_WRITES 사건의 모든 지점)마다 한 행이다. 그 문장에서 잡혀 있는 잠금을 함수 진입 기준으로 적는다(실패 경로가 아닌 경로들의 교차, must). 호출자가 잡은 잠금은 그 함수를 부르는 호출 행에 있다. `acquired-at` 은 그 잠금을 잡은 호출(어떤 경로에서든)이다. 한 획득 호출 하나에서 열린 구간이면 같은 임계 구역이다. CFG 가 없는 본문은 `no-cfg`, 닿지 않는 문장은 `not-reached` 다.
+
+**FIELD_STATUS: writer 집합 완전성의 대상 무관 규칙 (ED §5 R3 (a))** [D].
+- 행: READS 행이 이름 붙인 레코드 형의 모든 필드(그 형의 모든 필드: 형 단위 규칙에 필요하다).
+- **완전성 pass**: 내장 프로필과 데이터 함수 표만 쓰고, 표적이 정확히 그 필드들인 별도 추출을 한 번 더 돈다(`ExtractSpec::keep_raw_atypes`). 그 결과는 이 섹션에만 쓴다. 그래서 행은 모드와 실행의 대상에 무관하다.
+- A-TYPE 적중을 원인으로 나눈다: 그 필드에 대한 것(필드 주소의 escape, 그 이름의 union 멤버로의 저장)과 형 전체에 대한 것(cast, 형을 담은 union, unknown-effect).
+- `status_field`(필드 단위): 그 필드나 형 전체에 대한 적중이 없으면 complete 다. 형 없는 저장은 그런 노출을 거쳐야만 그 필드에 닿는다. 다른 멤버의 주소에서 넘어가는 포인터 연산은 C 에서 정의되지 않은 동작이다(C11 6.5.6 p8: 멤버는 원소 하나짜리 배열). 이것은 선언된 가정 `assume.no_cross_member_pointer_arithmetic` 이다.
+- `status_type`(형 단위 보수): 위에 더해, 같은 형의 다른 필드에 대한 적중이 있고 형 없는 쓰기 지점이 프로그램에 있으면 DISABLED 다.
+- 옛 규칙(FACT_LOCS: 노출된 형의 모든 **대상**에 untyped write 를 셈)은 어떤 다른 필드가 대상인지에 따라 바뀐다. 두 새 규칙은 그렇지 않다.
+- `n_instances`: writer 인스턴스(직접·데이터 함수 쓰기 지점 하나, out-pointer 호출 하나). `once`: 인스턴스가 없거나(`no-writer-instance`), 하나이고 루프 밖에 있으며 그 함수가 한 번만 실행된다(`one-instance-once`). 한 번만 실행됨 = 주소를 잡히지 않고, spawn 진입이 아니고, 재귀가 아니고, 호출 지점이 없거나(뿌리) 루프 밖의 호출 지점 하나가 그런 함수 안에 있다.
+- 한계 [M]: writer 수집은 기존 기계와 같다. fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`(스칼라 배열 필드의 원소에 대한 저장)은 WRITERS 에도 FIELD_STATUS 에도 writer 로 잡히지 않는다(FUNC_WRITES 에도 없다). 기존 섹션을 바꾸지 않으려고 고치지 않았다. §8 에 남은 일로 적는다.
+
+**AWAIT_L1: 대상에 무관한 L1 (i) (ED §5 R3 (b))** [D].
+- poll 루프마다 한 행이다. 관련 위치 = 술어가 직접 읽는 필드·전역(크기를 아는 배열 cursor 의 base 는 제외, FACT_LOOPS 와 같다) ∪ 술어가 부르는 함수와 그 함수가 부르는 함수들이 읽는 필드·전역(READS; `via` 는 이것만이 주는 것). **추출 대상은 넣지 않는다.**
+- L1 (i)(규칙마다): 관련 필드의 writer(완전성 pass 의 writer 행)가 루프 본문 안에 있거나, 본문이 부르는 함수(직접 호출과 해결된 간접 호출로 닿는 모든 함수)에 있으면 FAILS 다. 아니면, 관련 필드의 writer 집합이 그 규칙으로 complete 가 아니거나, 관련 위치가 전역 변수이거나(이 개정에 변수의 writer 집합 규칙이 없다), 본문이 미해결 간접 호출에 닿으면 UNDECIDED 다. 둘 다 아니면 HOLDS 다.
+- L1 (ii): 술어의 본문 안 읽기와 술어가 부르는 함수의 본문 안 호출이 모두 하나의 획득 호출이 연 잠금 하나를 잡고 있으면(LOCKSET) ONE_LOCK_REGION 이다(`lock` 그 정체성, 정적 인스턴스이면 `lock-static`). 아니면 FACT_LOOPS 의 atomic-read 를 쓰고, 그것도 아니면 FAILS 다.
+- 판정(규칙마다): 술어가 인식되고(FACT_LOOPS) L1 (ii)·L1 (i)이 성립하면 AWAIT, 아니면 STAR_CLOSED(이유). FACT_LOOPS 의 인증 뷰 규칙은 그대로다.
+
+**시험** [M]: `static_golden_lockset`(고정 도구 프로필 + `--extended-facts` + `--delay-op fx_delay`), `static_golden_lockset_np`(`--no-profile`; 둘의 새 섹션은 같다), fixture `lockset.c`, `test_static_cli` 의 F5 확인(옵션 없으면 다섯 섹션이 없음, 있으면 기존 섹션 view 동일, 두 모드 같은 행; 결과 조건부·모든 return·try 연산, 한 번 쓰인 handle(정적 인스턴스)과 두 번 불리는 함수가 쓰는 handle, spawn 앞뒤의 잠금 집합, 실패 경로, 형제 필드 노출, callee 를 거친 술어 읽기의 await, 대상을 바꿔도 FIELD_STATUS·LOCK_IDS·AWAIT_L1 이 같고 옛 FACT_LOCS 는 바뀜).
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).
@@ -345,10 +393,11 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 
 그 밖:
 - **증명하지 않은 것**: await 규칙은 L1 의 **전제**를 추출된 사실 위에서 확인한 것이고 L1 자체는 증명하지 않았다. 인증서에 쓰려면 lemma 의 증명 상태(`unproved` 등)를 붙여야 한다(K4b, PS3).
-- L1 (i) 의 관련 위치 집합은 술어가 직접 읽는 필드와 추출 대상이다. 술어가 부르는 함수가 읽는 비대상 필드는 빠진다(보수적이지 않을 수 있는 지점: 그런 필드가 생기면 추출 대상으로 올려야 한다). `MainTaskSyncDelay` 의 `CFE_ES_AppRecordIsUsed` 는 `AppId` 를 읽고 이 필드는 추출 대상이다. L1 (ii) 쪽은 호출 결과가 있으면 atomic-read 를 거부하고 one-lock-region 은 호출이 잠금 구간 안일 때만 인정한다(§5.2). 호출이 잠금 구간 안이라는 것은 같은 함수 본문 안의 lock/unlock 호출 순서로만 판단한다(callee 안에서 잠금을 푸는 경우는 보지 않는다).
+- L1 (i) 의 관련 위치 집합은 술어가 직접 읽는 필드와 추출 대상이다. 술어가 부르는 함수가 읽는 비대상 필드는 빠진다(보수적이지 않을 수 있는 지점: 그런 필드가 생기면 추출 대상으로 올려야 한다). `MainTaskSyncDelay` 의 `CFE_ES_AppRecordIsUsed` 는 `AppId` 를 읽고 이 필드는 추출 대상이다. L1 (ii) 쪽은 호출 결과가 있으면 atomic-read 를 거부하고 one-lock-region 은 호출이 잠금 구간 안일 때만 인정한다(§5.2). 호출이 잠금 구간 안이라는 것은 같은 함수 본문 안의 lock/unlock 호출 순서로만 판단한다(callee 안에서 잠금을 푸는 경우는 보지 않는다). 대상에 무관한 규칙(술어가 직접·부르는 함수를 거쳐 읽는 필드만, 각 writer 집합의 완전성 요구)은 새 섹션 AWAIT_L1 에 둔다(§5d); FACT_LOOPS 는 그대로다.
 - 호출 그래프의 미해결 간접 호출 7 개는 간선을 더하지 않는다. 그런 호출에 닿는 루프는 `mod-incomplete` 로 결정하지 않는다. writer 집합에 대해서는 정보용이다(§4.1).
 - task-main 매개변수와 간접 대상은 field 기반 may-flow 다(인스턴스 대응 없음).
 - table walk 의 image 확인은 형 있는 쓰기만 본다. const 아닌 고리를 포인터·cast·본문 없는 코드로 바꾸는 쓰기는 배제하지 않으며, 그래서 그 경우는 선언된 가정으로 센다(core-cpu1 은 0 개).
 - 하지 않은 SPEC 단계: §4.1 5(문서 주석), §4.1 6 의 IR 수준 link 와 `-fcallgraph-info` 대조(app-unit probe 는 소스 수준으로 구현, §3.1), `.tbl` 바이트 대조, §4.2 6–8(transition filtering, Φ 대응, key·allocation), §3.17 anchor audit, message provenance(§4.3).
 - 프로필 문법에 지연·잠금 연산과 **데이터 함수 요약**을 선언하는 수단이 없다(K1 에 요청할 항목). 그때까지 지연·잠금은 명령줄 입력, 데이터 함수 표는 엔진의 내장 표이며 둘 다 사람이 넣은 입력으로 센다.
 - core golden 은 지금 프로필의 대상·역할·종료·spawn 선언에 의존한다. 프로필이 바뀌면 다시 만들고 diff 를 검토해야 한다.
+- writer 수집은 스칼라 배열 필드의 원소에 대한 저장(`x.arr[i] = v`)을 writer 로 잡지 않는다(fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`; WRITERS·FUNC_WRITES·FIELD_STATUS 모두) [M]. 기존 섹션을 바꾸므로 단계 2a S4 에서는 고치지 않았다. 그런 필드의 `writer-set-complete` 와 FIELD_STATUS 의 complete 는 이 저장을 세지 않은 값이다.

@@ -4471,9 +4471,17 @@ class FnWalker {
 
 // ---- static initializers: function values stored in tables -------------------------------------------
 
+// The nesting levels of a static initializer read for stored function values (a tool parameter no reference fixes:
+// unspecified_by_reference; the initializers cut there are counted, count.walk_bounds_hit).
+constexpr int kFpInitDepth = 6;
+
 void flow_from_init(TuReader& tu, const std::string& object, QualType t, const Expr* init, int depth) {
-  if (init == nullptr || depth > 6) return;
+  if (init == nullptr) return;
   Model& m = tu.model();
+  if (depth > kFpInitDepth) {
+    ++m.stats.fp_init_depth_cut;
+    return;
+  }
   init = init->IgnoreParens();
   t = t.getCanonicalType();
   const auto* il = dyn_cast<InitListExpr>(init);

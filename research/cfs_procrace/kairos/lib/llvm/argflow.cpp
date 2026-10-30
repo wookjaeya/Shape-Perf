@@ -354,7 +354,8 @@ class Composer {
   std::string chain(uint32_t n, uint32_t s) const {
     std::string out = p_.name(nodes_[n].first) + "#" + std::to_string(nodes_[n].second);
     uint32_t cur = n;
-    for (int guard = 0; guard < 100000; ++guard) {
+    std::set<uint32_t> seen{n};  // a summary chain does not come back to a node; if it did, the text stops there
+    for (;;) {
       auto it = sum_[cur].find(s);
       if (it == sum_[cur].end()) {
         out += " -> ...";
@@ -363,6 +364,10 @@ class Composer {
       if (it->second.edge < 0) break;
       const uint32_t next = edges_[cur][static_cast<size_t>(it->second.edge)].to;
       out += " -> " + p_.name(nodes_[next].first) + "#" + std::to_string(nodes_[next].second);
+      if (!seen.insert(next).second) {
+        out += " (again)";
+        break;
+      }
       cur = next;
     }
     return out;

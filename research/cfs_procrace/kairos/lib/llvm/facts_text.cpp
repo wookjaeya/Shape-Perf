@@ -14,6 +14,9 @@ namespace kzs {
 
 namespace {
 
+// the elements of a PTR_FIELDS read whose static values the text view lists (a print limit of the view only)
+constexpr uint32_t kViewElements = 64;
+
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
@@ -512,8 +515,11 @@ class View {
         if (r.index_root != KZ_NONE32) os << " index=" << expr(r.index_root);
         if (r.idx_n > 0) os << " elements=" << r.elem << "+" << r.idx_step << "k (k<" << r.idx_n << ")";
         os << " " << flags_text("KZ_PTRF_FLAG", r.flags) << "\n";
-        // the static values the resolved elements have (GLOBAL_IMAGES), when the elements are known
-        if (r.write != KZ_NONE32 && r.idx_n > 0 && r.idx_n <= 64) {
+        // the static values the resolved elements have (GLOBAL_IMAGES), when the elements are known; the text view lists
+        // them for at most kViewElements elements (a print limit of this view only: the facts hold every row)
+        if (r.write != KZ_NONE32 && r.idx_n > kViewElements)
+          os << "      static values of the " << r.idx_n << " elements not listed here (the text view lists them for at most " << kViewElements << " elements)\n";
+        if (r.write != KZ_NONE32 && r.idx_n > 0 && r.idx_n <= kViewElements) {
           const std::string obj = str(r.object), rest = str(r.path);
           for (uint32_t k = 0; k < r.idx_n; ++k) {
             const int64_t e = r.elem + static_cast<int64_t>(k) * (r.idx_n > 1 ? r.idx_step : 0);
@@ -599,11 +605,13 @@ class View {
         os << " [";
         uint32_t cur = r.held_root;
         bool first = true;
-        for (int guard = 0; cur != KZ_NONE32 && cur < exprs_.size() && guard < 10000; ++guard) {
+        // a SEQ list: the writer numbers the nodes post-order, so the rest of the list has a smaller index
+        while (cur != KZ_NONE32 && cur < exprs_.size()) {
           const kz_fact_expr& e = exprs_[cur];
           if (e.op != KZ_EXPR_OP_SEQ) break;
           if (e.a != KZ_NONE32 && e.a < exprs_.size()) os << (first ? "" : ", ") << lockid_text(static_cast<uint32_t>(exprs_[e.a].value));
           first = false;
+          if (e.b != KZ_NONE32 && e.b >= cur) break;
           cur = e.b;
         }
         os << "]";
@@ -613,7 +621,7 @@ class View {
         os << " acquired-at=[";
         uint32_t cur = r.opener_root;
         bool first = true;
-        for (int guard = 0; cur != KZ_NONE32 && cur < exprs_.size() && guard < 10000; ++guard) {
+        while (cur != KZ_NONE32 && cur < exprs_.size()) {
           const kz_fact_expr& e = exprs_[cur];
           if (e.op != KZ_EXPR_OP_SEQ) break;
           if (e.a != KZ_NONE32 && e.a < exprs_.size()) {
@@ -622,6 +630,7 @@ class View {
             os << (first ? "" : ", ") << (cit != call_by_site_.end() ? pos(calls_[cit->second].file, calls_[cit->second].line, calls_[cit->second].col) : "site " + std::to_string(site));
           }
           first = false;
+          if (e.b != KZ_NONE32 && e.b >= cur) break;
           cur = e.b;
         }
         os << "]";

@@ -1015,6 +1015,14 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("param.argflow_depth_bound", bound(spec.argflow_depth) + " (calls a composed PARAM_FLOW row passes; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
     item("param.argflow_size_bound", bound(spec.argflow_size) + " (composed PARAM_FLOW rows per parameter; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
     item("param.image_budget", num(opt.image_budget) + " (leaves of the static image of one object; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
+    item("param.walk_bounds",
+         "4096 (nodes of the FACT_INIT walk of one object's initializer; an object whose walk stops gets a row not-a-constant besides the values read), 6 (nesting "
+         "levels of a static initializer read for stored function values, CALL_TARGETS flow); tool parameters no reference fixes",
+         KZ_POLICY_UNSPECIFIED, KZ_NONE32);
+    item("count.walk_bounds_hit",
+         "FACT_INIT walk " + num(m.stats.init_budget_out) + " objects (no leaf read when it stopped: " + num(m.stats.init_budget_out_no_leaf) +
+             "), function-value initializer nesting " + num(m.stats.fp_init_depth_cut) + " initializers cut",
+         KZ_POLICY_UNSET, KZ_NONE32);
     item("count.argflow", num(argflow_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
     item("count.param_flow", num(pflow_rows.size()) + " (depth 0 " + num(fs.direct) + ", composed " + num(fs.composed) + ", open " + num(fs.cut_depth + fs.cut_size) + ")", KZ_POLICY_UNSET,
          KZ_NONE32);

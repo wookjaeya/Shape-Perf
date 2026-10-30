@@ -5,7 +5,7 @@
 //                                             accepts what it must, on trees written on the fly
 //
 // Rules:
-//   case-ids       no case identifier (data/case_identifiers.txt) in include/ and lib/, whether it
+//   case-ids       no case identifier (data/case_identifiers.txt) in include/, lib/ and tools/, whether it
 //                  stands alone or is a component of a longer name (check_R2, r2_x, R2Cert,
 //                  CFE_ES_Main, a file name, a string or a comment); components are split at '_'
 //                  and at camel-case boundaries and compared without regard to case
@@ -334,7 +334,7 @@ Violations rule_case_ids(const fs::path& root, const fs::path& data, bool* usage
     *usage_ok = false;
     return v;
   }
-  for (const fs::path& f : files_under(root, {"include", "lib"})) {
+  for (const fs::path& f : files_under(root, {"include", "lib", "tools"})) {
     std::string text;
     if (!read_file(f, &text) || looks_binary(text)) continue;
     const std::string r = rel(root, f);
@@ -652,6 +652,7 @@ int selftest(const fs::path& data) {
       {"case-ids", true, {"issue number as a word", {{"lib/a.cpp", "int n = 2663;\n"}}}},
       {"case-ids", true, {"framework symbol", {{"lib/a.cpp", "void f() { CFE_ES_Main(); }\n"}}}},
       {"case-ids", true, {"case symbol", {{"include/a.h", "extern int CFE_SB_Global;\n"}}}},
+      {"case-ids", true, {"case symbol in a tool", {{"tools/kz/cmd_a.cpp", "// the threads that cFS creates\n"}}}},
       {"case-ids", true, {"reference commit", {{"lib/a.cpp", "// fixed in 833fdbb\n"}}}},
       {"case-ids", true, {"case id in a file name", {{"lib/C1.cpp", "int x;\n"}}}},
       // a case id inside a longer name, in any case, and the framework's own names

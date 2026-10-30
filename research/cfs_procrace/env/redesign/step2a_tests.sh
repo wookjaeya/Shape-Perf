@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# step2a_tests.sh STEP [OUT] -- redesign step 2a, stage S5 and its fix stage: the completion tests T1-T7 of
+# step2a_tests.sh STEP [OUT] -- redesign step 2a, stage S5 and its fix stages (fix, fix2): the completion tests T1-T7 of
 # plan/extraction_design_20261030.md §6, run with no case input (the two-statement built-in profile, P0, L0 and the
 # build only; no G0), with the rule targets of ED §6 item 2 (R-T1 ∪ R-T2, shared bases) and `kz-static relations`
 # (ED §6 item 3).  Static analysis only: no cFS is booted, no campaign is run.
@@ -13,6 +13,9 @@
 #          s5same    the fix stage against S5: the records of OUT/<build>/NP/facts.kz (step run) compared with those of
 #                    S5/<build>/NP/facts.kz, section by section -> OUT/s5same/ (BASIS, P0_TABLE and the new LOCK_PATHS
 #                    may differ; the other sections are the same when the fix changed no extraction fact)
+#          fixsame   the second fix stage (fix2) against the first: the records of OUT/<build>/NP/facts.kz compared with
+#                    those of FIX1/<build>/NP/facts.kz (the outputs of the first fix stage, kept) -> OUT/fixsame/ (BASIS and
+#                    P0_TABLE differ by the P0 table revision 3 and the walk-bound records; every other section the same)
 #          run       basis --no-profile + extract --no-profile --targets-rule R-T1,R-T2 + show + relations for every build
 #                    below -> OUT/<build>/NP/ (relations.txt is the query's output)
 #          twice     T7: extract again from the same basis and relations again; bytes compared -> OUT/twice.txt
@@ -20,7 +23,7 @@
 #                    ED §2.3 under the rule targets, the candidate burden (rows per build, case rows among them); case
 #                    names are used in the queries of this script only -> OUT/count/
 #          sha       sha256 of every output -> OUT/sha256.txt
-#          all       identity npsame run s5same twice count sha
+#          all       identity npsame run s5same fixsame twice count sha
 #   OUT    default /home/user/work/redesign/step2a/tests
 #
 # Builds (reference builds only), with the inputs of step2a_s1.sh .. step2a_s4.sh:
@@ -33,7 +36,7 @@
 # (PI D7); nothing else of a case enters.  The `identity` step uses the case profiles (V2) only to show that the
 # profile-driven mode is unchanged.
 set -uo pipefail
-STEP=${1:?identity|npsame|run|twice|count|sha|all}
+STEP=${1:?identity|npsame|run|s5same|fixsame|twice|count|sha|all}
 OUT=${2:-/home/user/work/redesign/step2a/tests}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../.." && pwd)"
@@ -44,6 +47,7 @@ KZD=$KZB/kz-dump/kz-dump
 EB=${EB:-/home/user/work/redesign/extract_baseline}
 S4=${S4:-/home/user/work/redesign/step2a/s4}
 S5=${S5:-/home/user/work/redesign/step2a/tests_s5}
+FIX1=${FIX1:-/home/user/work/redesign/step2a/tests_fix1}
 C1=/home/user/work/procrace/c1_build
 REF=/home/user/work/procrace/cfs_ref/cFS
 CT=/home/user/work/c5tools/build
@@ -171,6 +175,17 @@ s5same() {
   done
 }
 
+fixsame() {
+  local D=$OUT/fixsame; mkdir -p "$D"; : > "$D/fixsame.txt"
+  for b in "${BUILDS[@]}"; do
+    mkdir -p "$D/$b"
+    dumpn "$FIX1/$b/NP/facts.kz" > "$D/$b/fix1.dump"
+    dumpn "$OUT/$b/NP/facts.kz" > "$D/$b/fix2.dump"
+    compare_records "$D/$b/fix1.dump" "$D/$b/fix2.dump" | sed "s/^/$b: /" | tee -a "$D/fixsame.txt"
+    rm -f "$D/$b/fix1.dump" "$D/$b/fix2.dump"
+  done
+}
+
 run() {
   : > "$OUT/run.log"
   for b in "${BUILDS[@]}"; do
@@ -194,7 +209,7 @@ twice() {
 
 count() {
   mkdir -p "$OUT/count"
-  python3 -I "$HERE/step2a_tests_count.py" "$OUT" "$EB" "$S5" | tee "$OUT/count/summary.txt"
+  python3 -I "$HERE/step2a_tests_count.py" "$OUT" "$EB" "$S5" "$FIX1" | tee "$OUT/count/summary.txt"
 }
 
 sha() {
@@ -206,10 +221,11 @@ case "$STEP" in
   identity) identity ;;
   npsame) npsame ;;
   s5same) s5same ;;
+  fixsame) fixsame ;;
   run) run ;;
   twice) twice ;;
   count) count ;;
   sha) sha ;;
-  all) identity; npsame; run; s5same; twice; count; sha ;;
+  all) identity; npsame; run; s5same; fixsame; twice; count; sha ;;
   *) echo "unknown step $STEP" >&2; exit 2 ;;
 esac

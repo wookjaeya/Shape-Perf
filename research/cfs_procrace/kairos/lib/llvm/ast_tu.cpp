@@ -517,6 +517,11 @@ struct Leaf {
   int64_t value = 0;
 };
 
+// The nodes the FACT_INIT walk of one object's initializer visits before it stops (a tool parameter no reference
+// fixes: unspecified_by_reference; the stops are counted, count.walk_bounds_hit, and an object whose walk stopped
+// gets a row "not a constant" besides the values read).
+constexpr size_t kInitBudget = 4096;
+
 }  // namespace
 
 void TuReader::read_init_for_targets(const VarDecl* vd) {
@@ -527,7 +532,7 @@ void TuReader::read_init_for_targets(const VarDecl* vd) {
     std::vector<Leaf> leaves;
     std::vector<std::pair<QualType, const Expr*>> stack;
     stack.push_back({vt, vd->hasInit() ? vd->getInit() : nullptr});
-    size_t budget = 4096;
+    size_t budget = kInitBudget;
     while (!stack.empty() && budget > 0) {
       auto [t, init] = stack.back();
       stack.pop_back();
@@ -591,7 +596,14 @@ void TuReader::read_init_for_targets(const VarDecl* vd) {
       bool& explicit_seen = values[l.value];
       explicit_seen |= l.explicit_init;
     }
-    if (leaves.empty()) values[0] = false;
+    // the walk stopped at its bound with parts not read: the values are not all known (a row "not a constant" says so)
+    const bool cut = !stack.empty();
+    if (cut) {
+      ++model_->stats.init_budget_out;
+      if (leaves.empty()) ++model_->stats.init_budget_out_no_leaf;
+      nonconst = true;
+    }
+    if (leaves.empty() && !cut) values[0] = false;
     for (const auto& kv : values) {
       InitFact one = f;
       one.value = kv.first;

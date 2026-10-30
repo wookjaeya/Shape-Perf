@@ -134,9 +134,18 @@ void test_table() {
                         "__pthread_unregister_cancel_restore", "dlmopen", "dlvsym"})
     KZ_CHECK(names.count(n) == 1);
   for (const P0Entry& e : p0_table()) KZ_CHECK(std::string(e.name).compare(0, 15, "pthread_rwlock_") != 0);
-  KZ_CHECK(std::string(p0_table_revision()).find("revision 2") != std::string::npos);
+  KZ_CHECK(std::string(p0_table_revision()).find("revision 3") != std::string::npos);
   KZ_CHECK(std::string(p0_table_scope()).find("read-write locks (pthread_rwlock_*") != std::string::npos);
+  // revision 3: the members a family leaves out and the families the builds call that are no entries are named
+  for (const char* n : {"thread join and detach (pthread_join", "POSIX timers (timer_create", "I/O multiplexing (select", "pthread_mutex_init, pthread_mutex_destroy",
+                        "sem_getvalue", "scheduling (sched_*", "stpcpy, stpncpy, strlcpy and strlcat", "explicit_bzero", "formatted input, which stores through its arguments (sscanf",
+                        "handlers registered for process exit (atexit"})
+    KZ_CHECK(std::string(p0_table_scope()).find(n) != std::string::npos);
+  KZ_CHECK(std::string(p0_table_scope()).find("listed whole: thread creation") == std::string::npos);
   for (const P0Entry& e : p0_table()) {
+    // every thread-creation entry states that the id is stored before the new thread starts (relations path C reads it)
+    if (e.kind == KZ_P0_KIND_THREAD_CREATE) KZ_CHECK(std::string(e.semantics).find("stored before the new thread is started") != std::string::npos);
+    if (std::string(e.name) == "pthread_create") KZ_CHECK(std::string(e.source).find("the patches of a distribution package of glibc 2.39 are not checked") != std::string::npos);
     if (std::string(e.name) == "thrd_create") {
       KZ_CHECK_EQ(e.kind, static_cast<uint8_t>(KZ_P0_KIND_THREAD_CREATE));
       KZ_CHECK_EQ(e.out, 0);

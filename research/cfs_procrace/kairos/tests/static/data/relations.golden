@@ -41,18 +41,18 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 2 (2026-10-30)
+rules relations rules revision 3 (2026-10-30)
 mode profile-driven
   extract.profile = static-fixtures / test data
 p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
 p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
 basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
-layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (profile vocabulary), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); case layer: the profile static-fixtures / test data
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (profile vocabulary), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked); case layer: the profile static-fixtures / test data
 run order: no record given (this revision reads no run record; the column says so in every row)
-actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
 spawn calls resolved through the static image of the table their entry argument is read from: 0
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
-summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 1; feasibility proven-impossible 0, possible 0, undecidable 3
+summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 1; feasibility proven-impossible 0, possible 0, undecidable 3, not graded 0
 [A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Slot.name (record type Slot; tables slots)
       search: A1 search loop relations.c:35:3 in slot_find: key Slot.name strcmp at relations.c:36:31 compared with parameter 0 [name] (search parameter 0)
@@ -71,17 +71,18 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
   A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
       key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
       actors: {main (process)}; result=tested
-      not a pair: probe-create (same function, the creator's key read is under the lookup's result, the same key argument; program order after the lookup): relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
+      not a pair: probe-create (same function, the same key argument, the creator's key read under the lookup's result; the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0): relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
       not a pair: key constants differ: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {} (no root reaches it)
       not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {} (no root reaches it)
       handling: in the loop relations.c:83:3 kind constant-trip trip exact 2 exit (not (lt local:i 2))
       handling: result tested; no return of it and no terminal operation under it found
-      dependency: path A: no creator of this partition in another actor
+      handling: probe-create: on the lookup's failure result the same function creates the same key: relations.c:85:13 -> slot_create (the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0)
+      dependency: path A: no creator left after exclusions (probe-create 1, key constants differ 2, same actor only 0)
       run-order: no record given
       feasibility: undecidable: no pair
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: no creator of the same partition and key in another actor; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
-      layers: B P0 R case:profile(static-fixtures / test data)
+      layers: B P0 R case:profile(static-fixtures / test data) P0-unverified(strcmp)
   A2 lookup relations.c:113:9 in client_main -> slot_find#0 namespace Slot.name partition {} key known
       key: string literal "gamma"
       actors: {} (no root reaches it); result=discarded
@@ -94,7 +95,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
-      layers: B P0 R case:profile(static-fixtures / test data)
+      layers: B P0 R case:profile(static-fixtures / test data) P0-unverified(strcmp)
 [B] 1 (field-argument groups 3; left out: no writer 2, one actor only 0)
   B1 Service.self_id -> notify#0 sites=2 callee-check=yes
       site relations.c:111:3 in client_main [service.self_id] base=global hops=0 result=discarded
@@ -106,8 +107,8 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       handling: discarded 2, used 0, tested 0
       dependency: path B: the shared field Service.self_id is read as argument 0 of notify at 2 sites; its writers run in an undetermined actor; the callee's constant returns depend on the argument
       run-order: no record given
-      feasibility: undecidable: no static order between the reader and the writer actors (not created by one table walk; the process root's order relative to the spawns is not decided)
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: the check is not evaluated: a written value that is not a constant
       layers: B P0 R case:profile(static-fixtures / test data)
-[C] 0 (spawn calls 0, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0)
+[C] 0 (spawn calls 0, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the spawned entries do not reach (rows with no grade): 0)

@@ -786,6 +786,10 @@ struct Model {
   struct Stats {
     uint32_t tus = 0, functions_read = 0, functions_skipped_system = 0, functions_dedup = 0;
     uint32_t calls = 0, parse_errors = 0;
+    // the walks that stopped at a fixed bound (reported with the extended facts): the FACT_INIT walk of one object's
+    // initializer (kInitBudget nodes; the objects, and those with no leaf read when it stopped), and the nesting of a
+    // static initializer read for stored function values (kFpInitDepth levels)
+    uint32_t init_budget_out = 0, init_budget_out_no_leaf = 0, fp_init_depth_cut = 0;
   } stats;
 
   // Filled by finalize(): indices and the numbers of the report.

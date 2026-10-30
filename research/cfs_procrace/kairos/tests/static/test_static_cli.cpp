@@ -846,7 +846,13 @@ startup_script {
     KZ_CHECK(has(a, "feasibility: proven-impossible: lock #0 &table_mutex"));
     KZ_CHECK(has(a, "      run-order: no record given"));
     KZ_CHECK(has(a, "      violation: unconfirmed: RV2 §5.4"));
-    KZ_CHECK(has(a, "      layers: B P0 R\n"));
+    KZ_CHECK(has(a, "      layers: B P0 R P0-unverified(strcmp)\n"));
+    KZ_CHECK(has(a, "      layers: B P0 R (writers: rule targets)\n"));
+    KZ_CHECK(has(a, "P0-unverified(pthread_getspecific, pthread_mutex_lock, pthread_mutex_unlock)"));
+    // the lock-window verdict names a static instance: it rests on what that status rests on
+    KZ_CHECK(has(a, "feasibility: possible: lock window: #0 &table_mutex"));
+    // probe-create: on the polarity of the lookup's failure, and named in the handling column
+    KZ_CHECK(has(a, "      handling: probe-create: on the lookup's failure result the same function creates the same key: "));
     KZ_CHECK(!has(a, "case:profile"));
     // the profile-driven mode with the extended facts: the case layer is named in every row
     KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", X / "prof.kz"), 0);
@@ -857,10 +863,14 @@ startup_script {
     KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts --delay-op fx_none", X / "voc.kz"), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "voc.kz").string()), &out), 0);
     KZ_CHECK(has(out, "hand-entered:command-line(1 items; G0 or other names, not automatic)"));
-    // the P0 tables of revision 2: their scope is recorded and printed
+    // the P0 tables of revision 3: their scope is recorded and printed
     KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "both.kz").string()) + " --section basis --section p0", &out), 0);
-    KZ_CHECK(has(out, "extract.p0_table = P0 table revision 2 (2026-10-30), 72 entries"));
-    KZ_CHECK(has(out, "extract.p0_table_scope = families listed whole: "));
+    KZ_CHECK(has(out, "extract.p0_table = P0 table revision 3 (2026-10-30), 72 entries"));
+    KZ_CHECK(has(out, "extract.p0_table_scope = families of this revision: "));
+    KZ_CHECK(has(out, "thread join and detach (pthread_join"));
+    // the fixed walk bounds are recorded with their hits
+    KZ_CHECK(has(out, "param.walk_bounds = 4096 (nodes of the FACT_INIT walk"));
+    KZ_CHECK(has(out, "count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut"));
     KZ_CHECK(has(out, "[p0] 72"));
     KZ_CHECK(has(out, "  pthread_key_create thread-specific-key-create (thread-specific data) out=0 entry=1"));
     KZ_CHECK(has(out, "  thrd_create thread-create (thread creation) out=0 entry=1 arg=2"));
@@ -888,17 +898,21 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 2 (2026-10-30)"));
+    KZ_CHECK(has(a, "rules relations rules revision 3 (2026-10-30)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
-    KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main]"));
+    KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
+                    "EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]"));
     KZ_CHECK(has(a, "trampolines 1 [tramp_main -> {helper_main (spawn-entry)}]"));
     KZ_CHECK(has(a, "through a direct call 1 [boss_main]"));
     // path C: the write in the loop body, the writes of the branch with the spawn only, the helper's write, the read
     // after the release
     KZ_CHECK(has(a, "field Rec.count; read relpaths.c:65:15 in rec_counted"));
     KZ_CHECK(has(a, "      write after the spawn in set_stage (through the call relpaths.c:113:3): relpaths.c:104:32"));
-    KZ_CHECK(has(a, "      feasibility: possible: the writes after the spawn hold no lock of static identity"));
+    KZ_CHECK(has(a, "      feasibility: possible: a write after the spawn (relpaths.c:104:32) holds no lock, so the read may come before it"));
+    // the read in the child's entry has a row of its own (no caller lock); a call the child does not run gets no grade
+    KZ_CHECK(has(a, "(the read run as the entry of the spawned thread, under no lock of a caller)"));
+    KZ_CHECK(has(a, "      feasibility: not graded: the spawned entries do not reach this call in the static actor sets"));
     KZ_CHECK(has(a, "(not composed: on a path from the entry of ready_unlocked the call relpaths.c:52:3 pthread_mutex_unlock"));
     KZ_CHECK(has(a, "      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition"));
     KZ_CHECK(has(a, "rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending))"));
@@ -915,6 +929,54 @@ startup_script {
     KZ_CHECK(has(out, "rule targets               1 (R-T1 0, R-T2 1, both 0;"));
     KZ_CHECK_EQ(run(q(tool) + " show " + q(dp) + " --section basis", &out), 0);
     KZ_CHECK(has(out, "target.Deep.flag = rule R-T2  (unset)"));
+  }
+
+  // ---- the soundness rules of relations path C (relsound.c; relations rules revision 3) ------------------------------
+  {
+    const fs::path X = work / "relsound";
+    fs::create_directories(X);
+    const std::string rs = (X / "rs.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(fixtures + "/relsound.c") + " --root " + q(fixtures) + " -o " + q(rs) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string a;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rs), &a), 0);
+    // the row of a case, from its head to the next row
+    auto row = [&](const std::string& head) {
+      const size_t at = a.find(head);
+      if (at == std::string::npos) return std::string();
+      const size_t next = a.find("\n  C", at + 1);
+      return a.substr(at, next == std::string::npos ? std::string::npos : next - at);
+    };
+    // the read in the spawned entry with no lock; the locked call the child does not run: no grade
+    KZ_CHECK(has(row("field EntryRec.ready; read relsound.c:28:21 in entry_worker (the read run as the entry"), "feasibility: possible: the read holds no lock (it runs as the entry"));
+    KZ_CHECK(has(row("field EntryRec.ready; read relsound.c:28:21 in entry_worker (via the call relsound.c:34:9 in entry_locked_call; the spawned entries do not reach"),
+                 "feasibility: not graded: "));
+    // through the locked direct call: ruled out; through the function pointer without the lock: possible
+    KZ_CHECK(has(row("field ViaRec.ready; read relsound.c:54:19 in via_read (via the call relsound.c:64:9"), "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(row("field ViaRec.ready; read relsound.c:54:19 in via_read (via the indirect call relsound.c:62:9"), "feasibility: possible: the read holds no lock"));
+    // the record cleared outside the lock after the locked write
+    const std::string clear = row("field ClearRec.ready;");
+    KZ_CHECK(has(clear, "(a write of the whole record ClearRec)"));
+    KZ_CHECK(has(clear, "feasibility: possible: a write after the spawn (relsound.c:105:3) holds no lock"));
+    // the lock released and taken again around the loop
+    KZ_CHECK(has(row("field LoopRec.ready;"), "but its acquisition relsound.c:132:5 is reached again after the spawn on the creator's control-flow graph"));
+    // a lock held across everything whose identity is no static instance
+    KZ_CHECK(has(row("field PtrRec.ready;"), "feasibility: undecidable: lock #"));
+    KZ_CHECK(has(row("field PtrRec.ready;"), "but its identity is no static instance"));
+    // an unresolved call after the unlock
+    KZ_CHECK(has(row("field HookRec.ready;"), "calls after the spawn whose targets are not resolved (they may write HookRec.ready under no known lock): relsound.c:207:3 in hook_spawn"));
+    KZ_CHECK(has(row("field HookRec.ready;"), "feasibility: undecidable: lock #"));
+    // the caller writes the field after the creator returns
+    KZ_CHECK(has(row("field AfterRec.used;"), "but the callers of after_create write AfterRec.used in their own bodies"));
+    // the control: ruled out, with its scope and what it rests on
+    const std::string held = row("field HeldRec.used;");
+    KZ_CHECK(has(held, "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(held, "Scope: one call of held_create (ED §3.3 item 3)"));
+    KZ_CHECK(has(held, "the callers of held_create (main) write it nowhere in their own bodies"));
+    KZ_CHECK(has(held, "P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)"));
+    KZ_CHECK(has(a, "proven-impossible 2, possible 4, undecidable 3, not graded 1"));
   }
 
   fs::remove_all(work);

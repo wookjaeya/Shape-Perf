@@ -21,7 +21,7 @@ extract
   location Task.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
-profile-free mode            built-in profile, 72 P0 entries (P0 table revision 2 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   first pass                 functions with a body 28, control-flow graphs 28, call-graph components 28 (recursive 0)
   delay operations (F8)      must 0 (vocabulary), may 2 (not vocabulary; loops whose own body calls one: 0)
   terminal operations (F8)   must 0, noreturn 2, may 0 (all vocabulary)

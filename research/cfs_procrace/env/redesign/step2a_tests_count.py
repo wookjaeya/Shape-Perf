@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""step2a_tests_count.py OUT EB [S5] -- evidence for the completion tests T1-T7 (plan/extraction_design_20261030.md §6),
-the re-measure of ED §2.3 under the rule targets, and the candidate burden of `kz-static relations`; with S5 (the
-outputs of stage S5, kept when the fix stage re-ran the tests), the rows whose verdicts the fix stage changed.
+"""step2a_tests_count.py OUT EB [S5 [FIX1]] -- evidence for the completion tests T1-T7 (plan/extraction_design_20261030.md
+§6), the re-measure of ED §2.3 under the rule targets, and the candidate burden of `kz-static relations`; with S5 (the
+outputs of stage S5, kept when the fix stage re-ran the tests), the rows whose verdicts the fix stage changed; with FIX1
+(the outputs of the first fix stage, kept when the second re-ran the tests), the rows whose verdicts the second changed.
 
 Reads OUT/<build>/NP/{relations.txt,facts.txt,extract.txt} written by step2a_tests.sh (profile-free extraction with
 --targets-rule R-T1,R-T2; no case input).  The case names below are queries of this evaluation script only: they pick
@@ -15,6 +16,7 @@ import sys
 
 OUT, EB = sys.argv[1], sys.argv[2]
 S5 = sys.argv[3] if len(sys.argv) > 3 else None
+FIX1 = sys.argv[4] if len(sys.argv) > 4 else None
 CD = os.path.join(OUT, 'count')
 os.makedirs(CD, exist_ok=True)
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
@@ -127,6 +129,15 @@ for i, l in show_f(r'^  target\.(CFE_SB_Global_t\.AppId|CFE_ES_AppRecord_t\.AppS
     say('    facts.txt:%d %s' % (i + 1, l.strip()))
 for i, l in show_f(r'in CFE_ES_MainTaskSyncDelay.* relevant=')[:2]:
     say('    facts.txt:%d await row: %s' % (i + 1, l.strip()[:300]))
+# the C1 analogue of the T1 relation (not a test condition): its actors and its feasibility text
+for b in ('c1_pre_tx',):
+    L = REL[b]
+    for (k, rid, s, e) in rows_where(b, 'B', r'CFE_SB_Global_t\.AppId -> CFE_EVS_SendEventWithAppID#2 '):
+        say('  C1 analogue row %s at %s: %s' % (rid, ref(b, s), L[s].strip()))
+        show(b, find_in(L, s, e, r'^      actors: '), 'actors', 900)
+        show(b, find_in(L, s, e, r'^      feasibility: '), 'feasibility', 900)
+    n_img = sum(1 for (k, rid, s, e) in BLK[b] if k == 'B' and find_in(L, s, e, r'^      feasibility: .*no static order derived: the spawn .* starts writer actor'))
+    say('  %s B rows whose feasibility names roots resolved from a static image (no order derived): %d' % (b, n_img))
 
 # ---------------------------------------------------------------- T2
 say('')
@@ -146,7 +157,9 @@ for b in ('c1_pre_tx', 'c1_post_tx'):
             say('  row %s at %s: %s' % (rid, ref(b, s), L[s].strip()[:300]))
             show(b, find_in(L, s, e, r'^      (partition|key): '), 'partition/key', 700)
             show(b, find_in(L, s, e, r'^      creator: .*bp_flow\.c:132'), 'creator BP :132 (same partition)', 300)
-            show(b, find_in(L, s, e, r'not a pair: probe-create'), 'probe-create', 200)
+            show(b, find_in(L, s, e, r'not a pair: probe-create'), 'probe-create', 400)
+            show(b, find_in(L, s, e, r'handling: probe-create: '), 'probe-create in the handling column', 400)
+            show(b, find_in(L, s, e, r'^      dependency: '), 'dependency', 300)
             show(b, find_in(L, s, e, r'not a pair: key constants differ: .*sch_lab'), 'SCH_LAB not paired (key constants differ)', 300)
             show(b, find_in(L, s, e, r'creator: .*sch_lab'), 'SCH_LAB paired as possible (key unresolved)', 300)
             show(b, find_in(L, s, e, r'^      handling: '), 'handling', 700)
@@ -178,6 +191,15 @@ for b in ('c5_641', 'c5_642'):
         for i, l in find_in(L, s, e, r'^      (flip|read subscript): '):
             say('    %s %s' % (ref(b, i), l.strip()[:400]))
     say('  C rows of this spawn and field read in GetAppID / GetAppIDInternal: %d' % len(rows))
+    grades = collections.Counter()
+    for (k, rid, s, e) in rows:
+        f = find_in(L, s, e, r'^      feasibility: ')
+        grades[f[0][1].split(':')[1].strip() if f else '-'] += 1
+    say('  their feasibility grades: %s' % dict(grades))
+    cct = rows_where(b, 'C', r'in CFE_ES_CreateChildTask -> OS_TaskCreate; field CFE_ES_TaskRecord_t\.RecordUsed; read .* in CFE_ES_GetAppID')
+    for (k, rid, s, e) in cct:
+        f = find_in(L, s, e, r'^      feasibility: ')
+        say('  CreateChildTask row %s at %s: %s -> %s' % (rid, ref(b, s), re.sub(r'^.*; read ', 'read ', L[s].strip())[:160], f[0][1].strip()[:120] if f else '-'))
     allr = rows_where(b, 'C', r'in CFE_ES_AppCreate -> OS_TaskCreate; field CFE_ES_AppRecord_t\.RecordUsed; ')
     for (k, rid, s, e) in allr:
         feas = find_in(L, s, e, r'^      feasibility: ')
@@ -210,7 +232,8 @@ t5 = []
 for b in BUILDS:
     L = REL[b]
     lay = collections.Counter()
-    bad = dev = rests = 0
+    bad = dev = rests = unv = 0
+    unv_entries = collections.Counter()
     for (k, rid, s, e) in BLK[b]:
         if k == 'NS':
             continue
@@ -223,14 +246,26 @@ for b in BUILDS:
             dev += 1
         if ' rests-on(' in v:
             rests += 1
-        v = re.sub(r' (basis-deviation|rests-on)\(.*', '', v)
+        m = re.search(r' P0-unverified\(([^)]*)\)', v)
+        if m:
+            unv += 1
+            for x in m.group(1).split(', '):
+                unv_entries[x] += 1
+        v = re.sub(r' (basis-deviation|rests-on|P0-unverified)\(.*', '', v)
         key = re.sub(r' \(writers: rule targets\)', '', v).strip()
         lay[key] += 1
         if 'case:' in v or 'hand-entered' in v:
             bad += 1
     nsdev = sum(1 for l in L if l.startswith('      namespace layers: ') and 'basis-deviation(' in l)
-    say('%s: rows %d, layers %s; rows with a case layer or a hand-entered vocabulary: %d; rows marked basis-deviation %d, rests-on %d; '
-        'namespace blocks marked basis-deviation %d' % (b, sum(lay.values()), dict(lay), bad, dev, rests, nsdev))
+    say('%s: rows %d, layers %s; rows with a case layer or a hand-entered vocabulary: %d; rows marked basis-deviation %d, rests-on %d, P0-unverified %d; '
+        'namespace blocks marked basis-deviation %d' % (b, sum(lay.values()), dict(lay), bad, dev, rests, unv, nsdev))
+    say('    P0-unverified entries named (rows): %s' % dict(sorted(unv_entries.items())))
+    F = FACTS[b]
+    for i, l in enumerate(F):
+        if l.startswith('  count.walk_bounds_hit = ') or l.startswith('  param.walk_bounds = '):
+            say('    facts.txt:%d %s' % (i + 1, l.strip()[:300]))
+    nview = sum(1 for l in F if 'elements not listed here (the text view lists them for at most' in l)
+    say('    text-view element print limit applied: %d PTR_FIELDS rows' % nview)
     t5.append((b, sum(lay.values()), bad))
     hdr = [l for l in L[:12] if l.startswith('mode ') or l.startswith('  extract.') or l.startswith('p0-compare')]
     for l in hdr:
@@ -316,7 +351,7 @@ for b, pats in byprod.items():
             dep = find_in(REL[b], s, e, r'^      dependency: ')
             say('  %s by-product row %s at %s: %s | %s' % (b, rid, ref(b, s), REL[b][s].strip()[:200], dep[0][1].strip() if dep else '-'))
 with open(os.path.join(CD, 'burden.tsv'), 'w') as f:
-    f.write('build\tA\tB\tC\ttotal\tnamespaces\tcase_rows\tflip_static_possible\tfeasibility_proven_impossible\n')
+    f.write('build\tA\tB\tC\ttotal\tnamespaces\tcase_rows\tflip_static_possible\tfeasibility_proven_impossible\tnot_graded\n')
     for b in BUILDS:
         L = REL[b]
         n = collections.Counter(k for (k, rid, s, e) in BLK[b])
@@ -324,9 +359,10 @@ with open(os.path.join(CD, 'burden.tsv'), 'w') as f:
         tot = n['A'] + n['B'] + n['C']
         fp = sum(1 for l in L if l.startswith('      flip: static-possible'))
         pi = sum(1 for l in L if l.startswith('      feasibility: proven-impossible'))
-        say('%s: A %d, B %d, C %d, total %d (namespace blocks %d); case relation rows %d (%.1f%% of the rows); flip static-possible %d; proven-impossible %d' % (
-            b, n['A'], n['B'], n['C'], tot, n['NS'], cr, 100.0 * cr / tot if tot else 0, fp, pi))
-        f.write('%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n' % (b, n['A'], n['B'], n['C'], tot, n['NS'], cr, fp, pi))
+        ng = sum(1 for l in L if l.startswith('      feasibility: not graded'))
+        say('%s: A %d, B %d, C %d, total %d (namespace blocks %d); case relation rows %d (%.1f%% of the rows); flip static-possible %d; proven-impossible %d; not graded %d' % (
+            b, n['A'], n['B'], n['C'], tot, n['NS'], cr, 100.0 * cr / tot if tot else 0, fp, pi, ng))
+        f.write('%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n' % (b, n['A'], n['B'], n['C'], tot, n['NS'], cr, fp, pi, ng))
 
 # ---------------------------------------------------------------- ED §2.3 under the rule targets
 say('')
@@ -390,28 +426,28 @@ with open(os.path.join(CD, 'targets_rule.tsv'), 'w') as f:
         say('    ' + ' | '.join(l.strip() for l in E if 'rule targets' in l))
 
 # ---------------------------------------------------------------- the fix stage against S5
-if S5:
+def heads(lines):
+    out = collections.Counter()
+    grade = {}
+    for (k, rid, s, e) in blocks(lines):
+        if k == 'NS':
+            continue
+        h = re.sub(r'^  [ABC]\d+ ', k + ' ', lines[s]).strip()
+        f = find_in(lines, s, e, r'^      feasibility: ')
+        fl = find_in(lines, s, e, r'^      flip: ')
+        g = (f[0][1].split(':')[1].strip() if f else '-', fl[0][1].split(':')[1].strip() if fl else '-')
+        out[h] += 1
+        grade.setdefault(h, collections.Counter())[g] += 1
+    return out, grade
+
+
+def against(root, label, tsv):
     say('')
-    say('# the rows against S5 (row heads without their number; the feasibility and flip grades)')
-
-    def heads(lines):
-        out = collections.Counter()
-        grade = {}
-        for (k, rid, s, e) in blocks(lines):
-            if k == 'NS':
-                continue
-            h = re.sub(r'^  [ABC]\d+ ', k + ' ', lines[s]).strip()
-            f = find_in(lines, s, e, r'^      feasibility: ')
-            fl = find_in(lines, s, e, r'^      flip: ')
-            g = (f[0][1].split(':')[1].strip() if f else '-', fl[0][1].split(':')[1].strip() if fl else '-')
-            out[h] += 1
-            grade.setdefault(h, collections.Counter())[g] += 1
-        return out, grade
-
-    with open(os.path.join(CD, 'against_s5.tsv'), 'w') as f:
-        f.write('build\tpath\trows_s5\trows_fix\tonly_s5\tonly_fix\tgrade_changed\n')
+    say('# the rows against %s (row heads without their number; the feasibility and flip grades)' % label)
+    with open(os.path.join(CD, tsv), 'w') as f:
+        f.write('build\tpath\trows_old\trows_new\tonly_old\tonly_new\tgrade_changed\n')
         for b in BUILDS:
-            old = load(b, 'relations.txt', S5)
+            old = load(b, 'relations.txt', root)
             o, og = heads(old)
             n, ng = heads(REL[b])
             for k in 'ABC':
@@ -420,13 +456,24 @@ if S5:
                 only_o = sum(c for h, c in ok.items() if h not in nk)
                 only_n = sum(c for h, c in nk.items() if h not in ok)
                 changed = [h for h in ok if h in nk and og[h] != ng[h]]
-                say('%s %s: rows S5 %d, fix %d; only in S5 %d, only in the fix %d; same head, other grades %d' % (b, k, sum(ok.values()), sum(nk.values()), only_o, only_n, len(changed)))
+                say('%s %s: rows %s %d, now %d; only in %s %d, only now %d; same head, other grades %d' % (b, k, label, sum(ok.values()), sum(nk.values()), label, only_o, only_n, len(changed)))
                 f.write('%s\t%s\t%d\t%d\t%d\t%d\t%d\n' % (b, k, sum(ok.values()), sum(nk.values()), only_o, only_n, len(changed)))
-                for h in changed[:40]:
-                    say('    changed: %s | S5 %s -> fix %s' % (h[:230], dict(og[h]), dict(ng[h])))
-            pi_o = sum(1 for l in old if l.startswith('      feasibility: proven-impossible'))
-            pi_n = sum(1 for l in REL[b] if l.startswith('      feasibility: proven-impossible'))
-            say('%s proven-impossible: S5 %d, fix %d' % (b, pi_o, pi_n))
+                for h in changed[:60]:
+                    say('    changed: %s | %s %s -> now %s' % (h[:230], label, dict(og[h]), dict(ng[h])))
+                for h in [h for h in nk if h not in ok][:20]:
+                    say('    new: %s' % h[:230])
+                for h in [h for h in ok if h not in nk][:20]:
+                    say('    gone: %s' % h[:230])
+            for g in ('proven-impossible', 'possible', 'undecidable', 'not graded'):
+                go = sum(1 for l in old if l.startswith('      feasibility: ' + g))
+                gn = sum(1 for l in REL[b] if l.startswith('      feasibility: ' + g))
+                say('%s %s: %s %d, now %d' % (b, g, label, go, gn))
+
+
+if S5:
+    against(S5, 'S5', 'against_s5.tsv')
+if FIX1:
+    against(FIX1, 'fix1', 'against_fix1.tsv')
 
 with open(os.path.join(CD, 'summary.tsv'), 'w') as f:
     f.write('build\trows\trows_with_case_layer\n')

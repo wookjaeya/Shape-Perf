@@ -77,6 +77,7 @@ const std::vector<Case>& cases() {
       {"relations_np", "relations.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
       {"lockpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true},
       {"relpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
+      {"relsound_np", "relsound.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
   };
   return all;
 }

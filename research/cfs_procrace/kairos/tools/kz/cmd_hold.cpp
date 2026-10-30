@@ -8,8 +8,8 @@
 // the slots of every site; the hold plan (kzp-hold 1) names which site is a gate and which is a
 // release, and the condition (the semaphore name at an argument, or the module of the return
 // address) that selects the call.  The command is run as the supervisor's child; it is seized with
-// PTRACE_SEIZE and its whole tree is followed, so the provider/consumer threads that cFS creates
-// after the run starts are gated too.  Hardware execution breakpoints in the debug registers hold
+// PTRACE_SEIZE and its whole tree is followed, so the threads the program creates after the run
+// starts are gated too.  Hardware execution breakpoints in the debug registers hold
 // the gated thread; the text is never modified.  Every hold, its duration and the attach of each
 // thread are written to the record as the run's perturbation.
 //

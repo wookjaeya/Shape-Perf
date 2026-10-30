@@ -12,7 +12,7 @@ extract
   unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
   hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
-profile-free mode            built-in profile, 72 P0 entries (P0 table revision 2 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   first pass                 functions with a body 22, control-flow graphs 22, call-graph components 21 (recursive 1)
   delay operations (F8)      must 2 (vocabulary), may 7 (not vocabulary; loops whose own body calls one: 1)
   terminal operations (F8)   must 3, noreturn 2, may 3 (all vocabulary)
@@ -180,9 +180,9 @@ facts-view 1
 [p0] 72
   pthread_create thread-create (thread creation) out=0 entry=2 arg=3 calls=1 {vocabulary}
       creates a thread that runs arg 2 with the argument arg 3; on success the id of the new thread is stored through arg 0, and it is stored before the new thread is started
-      version POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce
+      version POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked
   thrd_create thread-create (thread creation) out=0 entry=1 arg=2 calls=0 {vocabulary} (not in the program)
-      creates a thread that runs arg 1 with the argument arg 2; on success (thrd_success) the id of the new thread is stored through arg 0
+      creates a thread that runs arg 1 with the argument arg 2; on success (thrd_success) the id of the new thread is stored through arg 0, and it is stored before the new thread is started
       version ISO C11 <threads.h> / glibc 2.39; source unverified
   pthread_mutex_lock mutex-acquire (mutex) calls=1 {vocabulary}
       acquires the mutex arg 0, blocking until it is free

@@ -43,7 +43,7 @@ struct P0Entry {
 // used).  The revision names the table as a whole; it changes whenever an entry does.
 const std::vector<P0Entry>& p0_table();
 const char* p0_table_revision();
-// What the table covers: the families listed whole and the families this revision leaves out, by name.
+// What the table covers: its families, which members are entries, and the families and members this revision leaves out, by name.
 const char* p0_table_scope();
 
 // The comparison families: the byte-string comparison family (string.h, strings.h), whose functions

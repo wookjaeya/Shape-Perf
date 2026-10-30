@@ -54,7 +54,7 @@ std::vector<P0Entry> build() {
                      "it is stored before the new thread is started",
                      kPosix,
                      "glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 "
-                     "and :836); upstream copy sha256 36fd1e6da5cee9ce");
+                     "and :836); upstream copy sha256 36fd1e6da5cee9ce; the patches of a distribution package of glibc 2.39 are not checked");
     e.out = 0;
     e.entry = 2;
     e.arg = 3;
@@ -62,7 +62,8 @@ std::vector<P0Entry> build() {
   }
   {
     P0Entry e = make(KZ_P0_KIND_THREAD_CREATE, "thread creation", "thrd_create",
-                     "creates a thread that runs arg 1 with the argument arg 2; on success (thrd_success) the id of the new thread is stored through arg 0",
+                     "creates a thread that runs arg 1 with the argument arg 2; on success (thrd_success) the id of the new thread is stored through arg 0, and "
+                     "it is stored before the new thread is started",
                      kC11);
     e.out = 0;
     e.entry = 1;
@@ -207,17 +208,29 @@ const std::vector<P0Entry>& p0_table() {
   return table;
 }
 
-const char* p0_table_revision() { return "P0 table revision 2 (2026-10-30)"; }
+const char* p0_table_revision() { return "P0 table revision 3 (2026-10-30)"; }
 
 const char* p0_table_scope() {
-  return "families listed whole: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or "
-         "process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the "
-         "ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Not in this revision: read-write locks "
+  return "families of this revision: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread "
+         "or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the "
+         "ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Of a family the members that take, release, wait, "
+         "signal, sleep, end, name a thread, bind or create a key, push or pop a handler, load or look up, or store memory are entries; a family is "
+         "not listed whole where this list names members left out.  Not in this revision: read-write locks "
          "(pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its "
          "acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread "
          "cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, "
-         "sigwait), dlclose, dlerror and dladdr, and functions a compiler or a fortify wrapper calls without a call in the source "
-         "(__stack_chk_fail, __chk_fail and the *_chk functions)";
+         "sigwait), dlclose, dlerror and dladdr, functions a compiler or a fortify wrapper calls without a call in the source "
+         "(__stack_chk_fail, __chk_fail and the *_chk functions); thread join and detach (pthread_join, pthread_tryjoin_np, "
+         "pthread_timedjoin_np, pthread_detach, thrd_join, thrd_detach); POSIX timers (timer_create, timer_settime, timer_gettime, "
+         "timer_getoverrun, timer_delete; a timer with SIGEV_THREAD notification starts its function on a new thread, which is no actor here); "
+         "I/O multiplexing (select, pselect, poll, ppoll); the initialization, destruction, attribute and query members of the mutex, spin "
+         "lock, semaphore and condition variable families and of thread creation (pthread_mutex_init, pthread_mutex_destroy, "
+         "pthread_mutexattr_*, pthread_spin_init, pthread_spin_destroy, sem_init, sem_destroy, sem_open, sem_close, sem_unlink, "
+         "sem_getvalue, pthread_cond_init, pthread_cond_destroy, pthread_condattr_*, mtx_init, mtx_destroy, cnd_init, cnd_destroy, "
+         "pthread_attr_*); scheduling (sched_*, pthread_setschedparam, pthread_getschedparam, pthread_setschedprio); data functions "
+         "not in this revision (stpcpy, stpncpy, strlcpy and strlcat (glibc 2.38 and later), mempcpy, memccpy, explicit_bzero, and the "
+         "wide-character members); formatted input, which stores through its arguments (sscanf, vsscanf, fscanf, vfscanf, scanf, "
+         "vscanf); handlers registered for process exit (atexit, at_quick_exit, on_exit)";
 }
 
 const std::vector<P0CompareEntry>& p0_compare_table() {

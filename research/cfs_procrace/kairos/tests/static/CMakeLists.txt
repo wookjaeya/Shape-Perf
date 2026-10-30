@@ -5,7 +5,9 @@
 #                    C compiler of the build with -std=c99 -pedantic -Wall -Wextra -Werror, and read by
 #                    kz-static with -std=c99 -pedantic (static_fixture_compile_*, static_golden_*);
 #                    clobber.c is read only (see below); wrappers.c is read in the profile-free mode
-#                    (extract --no-profile, no fixture profile)
+#                    (extract --no-profile, no fixture profile); flowfacts.c is read twice for the extended
+#                    facts F1-F3, with the fixture profile and --extended-facts (flowfacts) and in the
+#                    profile-free mode (flowfacts_np)
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
@@ -30,8 +32,8 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers)
-set(kz_golden_fixtures ${kz_fixtures} clobber)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts)
+set(kz_golden_fixtures ${kz_fixtures} clobber flowfacts_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

@@ -472,6 +472,84 @@ startup_script {
     KZ_CHECK(nfc.find_section(KZ_SEC_P0_TABLE) != nullptr && nfc.find_section(KZ_SEC_OP_DERIV) != nullptr && nfc.find_section(KZ_SEC_SPAWN_WRAP) != nullptr);
   }
 
+  // ---- the extended facts F1-F3 (READS, RETURNS, RET_CONSTS, LOOP_EXITS; kz_facts.h revision 6) ---------
+  // Off in the profile-driven mode unless --extended-facts is given (its facts are then written as before), always
+  // on in the profile-free mode.  With them on, the records of the earlier sections are the same: the string pool is
+  // canonical, so string offsets move with the new strings, but the view and the decoded records do not change, and
+  // the rows the earlier sections use are a prefix of FACT_EXPRS.
+  {
+    const fs::path X = work / "extended";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/flowfacts.c";
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    KZ_CHECK_EQ(ex("--profile " + q(profile), fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile --extended-facts", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));  // implied by --no-profile
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_READS), static_cast<uint32_t>(KZ_SEC_RETURNS), static_cast<uint32_t>(KZ_SEC_RET_CONSTS),
+                               static_cast<uint32_t>(KZ_SEC_LOOP_EXITS)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    KZ_CHECK(has(va, "[loops] ") && !has(va, "[reads]"));
+    std::vector<kz_fact_expr> xa, xb;
+    KZ_CHECK_OK(ca.read_section(KZ_SEC_FACT_EXPRS, &xa));
+    KZ_CHECK_OK(cb.read_section(KZ_SEC_FACT_EXPRS, &xb));
+    KZ_CHECK(xb.size() > xa.size());
+    for (size_t i = 0; i < xa.size() && i < xb.size(); ++i) {
+      std::string na, nb2;
+      ca.string(xa[i].name, &na);
+      cb.string(xb[i].name, &nb2);
+      KZ_CHECK(xa[i].op == xb[i].op && xa[i].flags == xb[i].flags && xa[i].a == xb[i].a && xa[i].b == xb[i].b && xa[i].value == xb[i].value && na == nb2);
+    }
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts = F1 READS, F2 RETURNS and RET_CONSTS, F3 LOOP_EXITS (kz_facts.h revision 6)"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extract.extended_facts") && !has(out, "count.reads"));
+    // what the facts say about the fixture (both modes read the same bodies)
+    std::string vc;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section reads --section returns --section retconsts --section loopexits", &vc), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + " --section reads --section returns --section retconsts --section loopexits", &out), 0);
+    KZ_CHECK_EQ(vc, out);
+    // a validity branch on an indexed record, and an out-store of another field of it
+    KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.used at flowfacts.c:38:65 root=global:fx_store use={branch} {} [fx_store.table[idx].used] index=[local:idx] ctx=(eq field:FxRec.used 1)"));
+    KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.owner at flowfacts.c:39:32 root=global:fx_store use={out-store} {} [fx_store.table[idx].owner] index=[local:idx] ctx=(deref param:out#1)"));
+    // the contents of an array field passed to a call whose result decides a branch
+    KZ_CHECK(has(vc, "use={branch,call-argument} {array-contents} [fx_store.table[i].name]"));
+    // a read through a pointer parameter; a function pointer read as the callee
+    KZ_CHECK(has(vc, "fx_is_used reads field FxRec.used at flowfacts.c:56:44 root=param:r#0 use={return} {through-pointer}"));
+    KZ_CHECK(has(vc, "fx_run_hook reads field FxStore.hook at flowfacts.c:67:19 root=global:fx_store use={callee}"));
+    // the returned local resolved to its reaching definitions; the constants and when each is returned
+    KZ_CHECK(has(vc, "fx_owner_of returns at flowfacts.c:42:3 alt 0/2 const -3 [FX_ERR_ID] {from-definition,redefined-later}"));
+    KZ_CHECK(has(vc, "fx_classify returns -3 [FX_ERR_ID] rows=1 {from-definition,only-constants} when=(lt param:id#0 0)"));
+    KZ_CHECK(has(vc, "fx_classify returns -17 [FX_ERR_NOT_FOUND] rows=1 {from-definition,only-constants} when=(and (not (lt param:id#0 0)) (ge param:id#0 8))"));
+    KZ_CHECK(has(vc, "fx_count_plus returns at flowfacts.c:75:3 alt 0/1 expression (add field:FxStore.count param:k#0) [c + k] {unfolded,from-definition}"));
+    KZ_CHECK(has(vc, "fx_index_of returns at flowfacts.c:123:3 alt 0/1 local local:idx [idx] {}"));  // its address is taken
+    // every loop has its exits, a loop without a delay call included
+    KZ_CHECK(has(vc, "in fx_find_by_name exits=2 {} exit=(or (not (lt local:i 8))"));
+    KZ_CHECK(has(vc, "exit 1 break at flowfacts.c:49:82 {}"));
+    KZ_CHECK(has(vc, "in fx_spin exits=1 {no-exit} exit=0 mods=[global:fx_level]"));
+    KZ_CHECK(has(vc, "exit 0 goto at flowfacts.c:108:35 {}"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

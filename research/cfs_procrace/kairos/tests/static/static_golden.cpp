@@ -42,6 +42,8 @@ struct Case {
 const std::vector<std::string> kFactSections = {"files", "functions", "calls", "derives", "loops", "iters", "order", "init", "consts", "writers", "atype", "locs", "targets", "spawnparams", "image", "terminals", "outcalls", "fwrites"};
 // The profile-free mode adds its three sections.
 const std::vector<std::string> kProfileFreeSections = {"files", "functions", "calls", "loops", "consts", "targets", "spawnparams", "terminals", "fwrites", "p0", "derived", "spawnwrap"};
+// The extended facts F1-F3 (always in the profile-free mode, with --extended-facts in the profile-driven one).
+const std::vector<std::string> kExtendedSections = {"functions", "loops", "reads", "returns", "retconsts", "loopexits"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -56,6 +58,8 @@ const std::vector<Case>& cases() {
        kFactSections},
       {"clobber", "clobber.c", {"--target", "Any.id", "--target", "Far.id"}, kFactSections},
       {"wrappers", "wrappers.c", {}, kProfileFreeSections, true},
+      {"flowfacts", "flowfacts.c", {"--extended-facts"}, kExtendedSections},
+      {"flowfacts_np", "flowfacts.c", {}, kExtendedSections, true},
   };
   return all;
 }

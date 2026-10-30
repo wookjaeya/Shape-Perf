@@ -82,8 +82,12 @@
  * extraction range, ARGFLOW, PARAM_FLOW, PTR_FIELDS and GLOBAL_IMAGES (kz_facts.h, revision 7 of the extraction records:
  * the extended facts F4 and F6), written under the same condition as those of revision 8; no earlier record or section
  * version changes, so every container written before is read as it was written, and a profile-driven extraction
- * without the request is written as before. */
-#define KZ_SCHEMA_REVISION 9u
+ * without the request is written as before.  Revision 10 (2026-10-30) adds five NEW sections in the second extraction
+ * range, LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS and AWAIT_L1 (kz_facts.h, revision 8 of the extraction records: F5 and
+ * the writer-set and L1 (i) rules that do not depend on the targets), written under the same condition as those of
+ * revision 8; no earlier record or section version changes, so every container written before is read as it was
+ * written, and a profile-driven extraction without the request is written as before. */
+#define KZ_SCHEMA_REVISION 10u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu

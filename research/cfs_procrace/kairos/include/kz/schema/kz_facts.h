@@ -50,6 +50,17 @@
  * the reads through such a field resolved to that object, with the program order of the write and
  * the read) and 130 (GLOBAL_IMAGES: the static initial values of the global objects those facts
  * reach).  Their expression roots are in FACT_EXPRS after the roots of revision 6.
+ * Revision 8 (2026-10-30, F5 and the target-independent rules): five NEW sections in the second
+ * extraction range, written with the extended facts (the same condition as revision 6), 131
+ * (LOCK_OPS: the lock operations derived from the mutex primitives of P0 through wrappers, with the
+ * identity of the lock over the parameters), 132 (LOCK_IDS: the lock identities and whether each is
+ * a static instance), 133 (LOCKSET: the locks held at every call, read and write, by a forward
+ * must analysis on each body's control-flow graph), 134 (FIELD_STATUS: the writer-set completeness
+ * of every field of the record types the reads name under two rules that do not depend on the
+ * targets, per field and type-level, from an extraction whose targets are exactly those fields) and
+ * 135 (AWAIT_L1: per poll loop, L1 (i) with the relevant locations the predicate reads, directly and
+ * through the functions it calls, under each rule, and L1 (ii) from LOCKSET).  Their expression roots
+ * are in FACT_EXPRS after the roots of revision 7.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -110,7 +121,12 @@ enum kz_facts_section_id {
   KZ_SEC_ARGFLOW = 127,
   KZ_SEC_PARAM_FLOW = 128,
   KZ_SEC_PTR_FIELDS = 129,
-  KZ_SEC_GLOBAL_IMAGES = 130
+  KZ_SEC_GLOBAL_IMAGES = 130,
+  KZ_SEC_LOCK_OPS = 131,
+  KZ_SEC_LOCK_IDS = 132,
+  KZ_SEC_LOCKSET = 133,
+  KZ_SEC_FIELD_STATUS = 134,
+  KZ_SEC_AWAIT_L1 = 135
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -150,7 +166,12 @@ enum kz_facts_section_id {
   S(ARGFLOW, 127, kz_fact_argflow, 1)          \
   S(PARAM_FLOW, 128, kz_fact_pflow, 1)         \
   S(PTR_FIELDS, 129, kz_fact_ptrfield, 1)      \
-  S(GLOBAL_IMAGES, 130, kz_fact_gimage, 1)
+  S(GLOBAL_IMAGES, 130, kz_fact_gimage, 1)     \
+  S(LOCK_OPS, 131, kz_fact_lockop, 1)          \
+  S(LOCK_IDS, 132, kz_fact_lockid, 1)          \
+  S(LOCKSET, 133, kz_fact_lockset, 1)          \
+  S(FIELD_STATUS, 134, kz_fact_fstatus, 1)     \
+  S(AWAIT_L1, 135, kz_fact_await, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -982,6 +1003,180 @@ enum kz_facts_section_id {
   X(T, kz_str, owner, )                                                              \
   X(T, kz_str, field, )
 
+/*
+ * LOCK_OPS (revision 8, F5).  A lock operation: a mutex primitive of P0_TABLE (`primitive-op`), or a
+ * function derived from those primitives through its calls, bottom-up over the strongly connected
+ * components of the call graph (callees first; a call into the function's own recursive component
+ * is read as one that may release every lock).  Each body is read on its control-flow graph by a
+ * forward analysis whose state is the set of locks held, one state per distinct set (meet within a
+ * set: the facts about the locals that hold call results).  `kind`: ACQUIRE the function returns
+ * holding the lock `ident` that it did not hold on entry; RELEASE it returns without a lock it did
+ * not acquire itself (a release of a lock the caller holds); WAIT it releases the lock and holds it
+ * again (a condition wait).  `mode` of an ACQUIRE: EVERY_RETURN on every path that returns;
+ * RESULT_CONDITIONAL on the paths that return `success`, and the others return a value known to
+ * differ; TRY on the paths of a try or timed acquisition (no assumption of success); CONDITIONAL on
+ * some paths without a result that tells (no operation: the caller does not count it as held).
+ * `assumes-success`: the derivation reads the acquisitions under the declared assumption that an
+ * acquisition which is not a try succeeds (P0: the primitive returns 0; a derived operation returns
+ * its `success`); the branch a failure takes is read as not reached, and the LOCKSET rows in it are
+ * marked `failure-path`.  `ident` is the identity of the lock over the parameters of `fn` ("$k" the
+ * parameter k), `may` the field-based location of the mutex object (never used to prove that two
+ * operations are the same lock; used only to keep a release from releasing a lock of another
+ * location).  `site` is the call in `fn` that leads to the primitive, `next_fn` its callee, `chain`
+ * the path, `depth` its length.  `vocabulary`: an ACQUIRE of mode EVERY_RETURN or RESULT_CONDITIONAL,
+ * or a RELEASE: an operation of this kind is a lock or unlock operation of the profile-free run (its
+ * call and loop facts: KZ_CALL_FLAG lock-op / unlock-op, the L1 (ii) region), derived on its first pass
+ * (BASIS extract.lock_vocabulary says whether that pass gave the same set).  The rows are the same in
+ * both modes.
+ */
+#define KZ_FACT_LOCKOP_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, site, )       /* the call that leads to the primitive, or KZ_NONE32 */ \
+  X(T, uint32_t, next_fn, )                                                          \
+  X(T, uint32_t, depth, )                                                            \
+  X(T, uint8_t, kind, )        /* KZ_LOCKOP_KIND */                                  \
+  X(T, uint8_t, mode, )        /* KZ_LOCKOP_MODE */                                  \
+  X(T, uint16_t, flags, )      /* KZ_LOCKOP_FLAG */                                  \
+  X(T, uint32_t, rsv0, )                                                             \
+  X(T, int64_t, success, )     /* RESULT_CONDITIONAL: the value returned when it holds the lock */ \
+  X(T, kz_str, ident, )                                                              \
+  X(T, kz_str, may, )                                                                \
+  X(T, kz_str, primitive, )                                                          \
+  X(T, kz_str, chain, )
+
+/*
+ * LOCK_IDS (revision 8, F5).  One lock identity that a LOCKSET row holds, as an expression over the
+ * parameters of the function the row is in: `$k` parameter k, `&x` the address of x, `x.f`, `x[i]`,
+ * `p->f`, a global object by name, `?(why)` what the analysis does not follow.  `status`: STATIC
+ * INSTANCE when the expression has no parameter and no unknown part and every value it reads is a
+ * static instance -- a field of a global object (`location`, `object`) whose writer set is complete
+ * under the per-field rule of FIELD_STATUS and has at most one writer instance, an instance that
+ * runs at most once (`writers`; none: the static initial value) -- so that two rows holding this
+ * identity hold one mutex (under the declared assumption that the lock operations read the value
+ * after that write); NOT_STATIC when a value it reads is not one (`why`); PARAMETER_RELATIVE when it
+ * names a parameter (the callers decide); UNDECIDABLE when a part is unknown.  `may` as in LOCK_OPS.
+ * Two rows whose identities differ, or whose identity is not a static instance, are not shown to
+ * hold the same lock: a field-based `may` location shared by them proves nothing.
+ */
+#define KZ_FACT_LOCKID_FIELDS(X, T)                                                  \
+  X(T, uint32_t, writers, )    /* STATIC check: the writer instances of `location` */ \
+  X(T, uint8_t, kind, )        /* KZ_LOCKID_KIND */                                  \
+  X(T, uint8_t, status, )      /* KZ_LOCKID_STATUS */                                \
+  X(T, uint16_t, flags, )      /* KZ_LOCKID_FLAG */                                  \
+  X(T, kz_str, text, )                                                               \
+  X(T, kz_str, may, )                                                                \
+  X(T, kz_str, location, )     /* the field whose value it reads ("Type.field"), or empty */ \
+  X(T, kz_str, object, )                                                             \
+  X(T, kz_str, why, )
+
+/*
+ * LOCKSET (revision 8, F5).  The locks held at one call (`site`), field or global read (`read`, a
+ * READS row) or typed write (`type`, `field`: a FUNC_WRITES event, every site) of a body, relative to
+ * the entry of its function (`fn`; what its callers hold is in the LOCKSET rows of the calls to it):
+ * the intersection over the paths of the forward analysis of LOCK_OPS (must), `n_held` locks,
+ * `held_root` their LOCK_IDS indices (a SEQ of constants in FACT_EXPRS), `opener_root` the calls
+ * that acquired them on some path (a SEQ of call sites).  `failure-path`: the statement is reached
+ * only on a branch an acquisition takes when it fails (the declared assumption of LOCK_OPS reads it
+ * as not reached); the locks are those held on that branch.  `unknown-release`: on some path an
+ * unresolved indirect call or a call into the recursive component was made after an acquisition (read
+ * as releasing every lock).  `no-cfg`: the body has no control-flow graph (nothing is held).
+ */
+#define KZ_FACT_LOCKSET_FIELDS(X, T)                                                 \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, site, )       /* CALL: the call, else KZ_NONE32 */                  \
+  X(T, uint32_t, read, )       /* READ: READS index, else KZ_NONE32 */               \
+  X(T, uint32_t, n_held, )                                                           \
+  X(T, uint32_t, held_root, )  /* FACT_EXPRS: SEQ of LOCK_IDS indices, or KZ_NONE32 */ \
+  X(T, uint32_t, opener_root, ) /* FACT_EXPRS: SEQ of call sites, or KZ_NONE32 */    \
+  X(T, uint32_t, first, )      /* LOCK_IDS index of the first lock held, or KZ_NONE32 */ \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, kind, )        /* KZ_LOCKSET_KIND */                                 \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_LOCKSET_FLAG */                                 \
+  X(T, uint32_t, rsv1, )                                                             \
+  X(T, kz_str, type, )         /* WRITE: the location written */                     \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, file, )
+
+/*
+ * FIELD_STATUS (revision 8, SPEC 4.2 writer-set completeness, rules that do not depend on the
+ * targets).  One row per field (type, field) of every record type a READS row names (all fields of
+ * those types), from an extraction of its own whose targets are exactly those fields, so that the
+ * row of a field is the same whatever targets the run itself has.  The writers (direct, data
+ * function, out-pointer, initial values) and the A-TYPE hits are those of WRITERS / FACT_ATYPE for
+ * that target; a hit is about the field (an address escape of the field, a store through a union
+ * member of its name) or about the type as a whole (a cast, a union that holds the type, an
+ * unknown effect).  `status_field` (per-field rule): complete when no hit is about the field or the
+ * type as a whole -- an untyped store reaches the field only through such an exposure (a pointer to
+ * another member does not reach it: C11 6.5.6 p8, the member is an array of one element);
+ * `status_type` (type-level conservative rule): complete when, besides, no hit is about another
+ * field of the type, or no untyped write site is in the program.  The old rule of FACT_LOCS (an
+ * untyped write counts for every target of a type exposed by any of its targets) depends on which
+ * other fields are targets; neither of these does.  `n_instances`: the writer instances (a direct
+ * or data-function write site, an out-pointer call), `once` whether the field has at most one and
+ * it runs at most once (outside every loop, in a function that is not address-taken, not a spawn
+ * entry, not recursive, and has at most one call site, outside every loop, in such a function).
+ */
+#define KZ_FACT_FSTATUS_FIELDS(X, T)                                                 \
+  X(T, uint32_t, n_writers, )                                                        \
+  X(T, uint32_t, n_direct, )                                                         \
+  X(T, uint32_t, n_data_fn, )                                                        \
+  X(T, uint32_t, n_outptr, )                                                         \
+  X(T, uint32_t, n_init, )                                                           \
+  X(T, uint32_t, n_instances, )                                                      \
+  X(T, uint32_t, own_escape, )                                                       \
+  X(T, uint32_t, own_cast, )                                                         \
+  X(T, uint32_t, own_union, )                                                        \
+  X(T, uint32_t, own_unknown, )                                                      \
+  X(T, uint32_t, sibling_hits, )                                                     \
+  X(T, uint32_t, untyped, )    /* untyped write sites in the program */              \
+  X(T, uint8_t, status_field, ) /* KZ_LOC_STATUS */                                  \
+  X(T, uint8_t, status_type, )  /* KZ_LOC_STATUS */                                  \
+  X(T, uint8_t, once, )        /* KZ_FSTATUS_ONCE */                                 \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_FSTATUS_FLAG */                                 \
+  X(T, uint16_t, rsv1, )                                                             \
+  X(T, kz_str, type, )                                                               \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, writer_fns, )   /* the functions of the writers, "; " */
+
+/*
+ * AWAIT_L1 (revision 8, SPEC 4.3 await, the L1 (i) rule whose relevant locations do not depend on the
+ * targets).  One row per poll loop (`loop`).  The relevant locations (`relevant_root`, a SEQ of loads
+ * in FACT_EXPRS) are the fields and globals its predicate reads directly (the base of a cursor over
+ * an array of known size excluded, as in FACT_LOOPS) and those the functions the predicate calls read,
+ * with the functions they call (READS rows; `via` the ones only those give).  L1 (i) under each
+ * completeness rule of FIELD_STATUS (`l1_mod_field`, `l1_mod_type`): FAILS when a writer of a relevant
+ * field is in the loop body or in a function the body calls (directly or through resolved indirect
+ * calls); else UNDECIDED when a relevant field's writer set is not complete under that rule, a
+ * relevant location is a global variable (no writer-set rule in this revision), or the body reaches
+ * an unresolved indirect call; else HOLDS.  L1 (ii) (`l1_read`): ONE_LOCK_REGION when every read of
+ * the predicate in the body (and every call of a function the predicate calls) holds one lock
+ * acquired at one call (LOCKSET; `lock` its LOCK_IDS row, `lock-static` when that identity is a
+ * static instance); ATOMIC_READ as in FACT_LOOPS; else FAILS.  `cert_field` / `cert_type`: AWAIT when
+ * the predicate is recognised (FACT_LOOPS) and L1 (ii) and L1 (i) hold under that rule, else
+ * STAR_CLOSED (`note_field`, `note_type` why).  The certificate-view rule of FACT_LOOPS is unchanged.
+ */
+#define KZ_FACT_AWAIT_FIELDS(X, T)                                                   \
+  X(T, uint32_t, loop, )       /* the loop site */                                   \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, lock, )       /* LOCK_IDS index, or KZ_NONE32 */                    \
+  X(T, uint32_t, relevant_root, ) /* FACT_EXPRS: SEQ of loads, or KZ_NONE32 */       \
+  X(T, uint32_t, n_relevant, )                                                       \
+  X(T, uint32_t, n_via, )                                                            \
+  X(T, uint8_t, l1_read, )     /* KZ_AWAIT_READ */                                   \
+  X(T, uint8_t, l1_mod_field, ) /* KZ_AWAIT_MOD */                                   \
+  X(T, uint8_t, l1_mod_type, ) /* KZ_AWAIT_MOD */                                    \
+  X(T, uint8_t, cert_field, )  /* KZ_LOOP_CERT */                                    \
+  X(T, uint8_t, cert_type, )   /* KZ_LOOP_CERT */                                    \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_AWAIT_FLAG */                                   \
+  X(T, kz_str, via, )          /* the relevant locations a called function gives, "; " */ \
+  X(T, kz_str, note_field, )                                                         \
+  X(T, kz_str, note_type, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -1019,7 +1214,12 @@ enum kz_facts_section_id {
   R(kz_fact_argflow, KZ_FACT_ARGFLOW_FIELDS)      \
   R(kz_fact_pflow, KZ_FACT_PFLOW_FIELDS)          \
   R(kz_fact_ptrfield, KZ_FACT_PTRFIELD_FIELDS)    \
-  R(kz_fact_gimage, KZ_FACT_GIMAGE_FIELDS)
+  R(kz_fact_gimage, KZ_FACT_GIMAGE_FIELDS)        \
+  R(kz_fact_lockop, KZ_FACT_LOCKOP_FIELDS)        \
+  R(kz_fact_lockid, KZ_FACT_LOCKID_FIELDS)        \
+  R(kz_fact_lockset, KZ_FACT_LOCKSET_FIELDS)      \
+  R(kz_fact_fstatus, KZ_FACT_FSTATUS_FIELDS)      \
+  R(kz_fact_await, KZ_FACT_AWAIT_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -1347,6 +1547,68 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, FIELD_WRITTEN, 0x10, "field-written") ITEM(P, RECORD_WRITTEN, 0x20, "record-written") \
   ITEM(P, FROM_MACRO, 0x40, "from-macro")
 
+/* LOCK_OPS (revision 8). */
+#define KZ_ENUM_LOCKOP_KIND(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, ACQUIRE, 1, "acquire") ITEM(P, RELEASE, 2, "release") ITEM(P, WAIT, 3, "wait")
+
+#define KZ_ENUM_LOCKOP_MODE(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, EVERY_RETURN, 1, "every-return")                  \
+  ITEM(P, RESULT, 2, "result-conditional") ITEM(P, TRY, 3, "try") ITEM(P, CONDITIONAL, 4, "conditional")
+
+#define KZ_ENUM_LOCKOP_FLAGS(ITEM, P) /* set */                                      \
+  ITEM(P, PRIMITIVE, 0x1, "primitive-op") ITEM(P, VOCABULARY, 0x2, "vocabulary")     \
+  ITEM(P, ASSUMES_SUCCESS, 0x4, "assumes-success") ITEM(P, INDIRECT, 0x8, "indirect") \
+  ITEM(P, NO_CFG, 0x10, "no-cfg") ITEM(P, PARAM_IDENT, 0x20, "parameter-identity")   \
+  ITEM(P, UNKNOWN_IDENT, 0x40, "unknown-identity")
+
+/* LOCK_IDS (revision 8). */
+#define KZ_ENUM_LOCKID_KIND(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, CLOSED, 1, "closed") ITEM(P, PARAM, 2, "parameter-relative") \
+  ITEM(P, UNKNOWN, 3, "unknown")
+
+#define KZ_ENUM_LOCKID_STATUS(ITEM, P)                                               \
+  ITEM(P, NONE, 0, "none") ITEM(P, STATIC, 1, "static-instance") ITEM(P, NOT_STATIC, 2, "not-static") \
+  ITEM(P, PARAM, 3, "parameter-relative") ITEM(P, UNDECIDABLE, 4, "undecidable")
+
+/* ADDRESS_OF_GLOBAL: the mutex is at a fixed address (a global object, or an element of a global
+ * array at a static index); READS_VALUE: the identity reads a value (a handle); TYPE_EXPOSED: a value
+ * location's writer set is not complete under the type-level rule of FIELD_STATUS; INITIAL_VALUE: a
+ * value location has no writer instance (its static initial value). */
+#define KZ_ENUM_LOCKID_FLAGS(ITEM, P) /* set */                                      \
+  ITEM(P, ADDRESS_OF_GLOBAL, 0x1, "address-of-global") ITEM(P, READS_VALUE, 0x2, "reads-value") \
+  ITEM(P, TYPE_EXPOSED, 0x4, "type-level-exposed") ITEM(P, INITIAL_VALUE, 0x8, "initial-value")
+
+/* LOCKSET (revision 8). */
+#define KZ_ENUM_LOCKSET_KIND(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, CALL, 1, "call") ITEM(P, READ, 2, "read") ITEM(P, WRITE, 3, "write")
+
+#define KZ_ENUM_LOCKSET_FLAGS(ITEM, P) /* set */                                     \
+  ITEM(P, FAILURE_PATH, 0x1, "failure-path") ITEM(P, UNKNOWN_RELEASE, 0x2, "unknown-release") \
+  ITEM(P, NO_CFG, 0x4, "no-cfg") ITEM(P, NOT_REACHED, 0x8, "not-reached")
+
+/* FIELD_STATUS (revision 8). */
+#define KZ_ENUM_FSTATUS_ONCE(ITEM, P)                                                \
+  ITEM(P, NONE, 0, "unchecked") ITEM(P, NO_WRITER, 1, "no-writer-instance")          \
+  ITEM(P, ONCE, 2, "one-instance-once") ITEM(P, MORE, 3, "not-once")
+
+#define KZ_ENUM_FSTATUS_FLAGS(ITEM, P) /* set */                                     \
+  ITEM(P, SIBLING_EXPOSED, 0x1, "sibling-exposed") ITEM(P, UNTYPED_IN_PROGRAM, 0x2, "untyped-in-program") \
+  ITEM(P, WRITER_IN_LOOP, 0x4, "writer-in-loop") ITEM(P, WRITER_NOT_ONCE, 0x8, "writer-function-not-once") \
+  ITEM(P, SEVERAL_INSTANCES, 0x10, "several-instances")
+
+/* AWAIT_L1 (revision 8). */
+#define KZ_ENUM_AWAIT_READ(ITEM, P)                                                  \
+  ITEM(P, NONE, 0, "none") ITEM(P, ONE_LOCK, 1, "one-lock-region") ITEM(P, ATOMIC, 2, "atomic-read") \
+  ITEM(P, FAILS, 3, "fails")
+
+#define KZ_ENUM_AWAIT_MOD(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, HOLDS, 1, "holds") ITEM(P, FAILS, 2, "fails") ITEM(P, UNDECIDED, 3, "undecided")
+
+#define KZ_ENUM_AWAIT_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, VIA_CALLEE, 0x1, "via-callee") ITEM(P, GLOBAL_VARIABLE, 0x2, "global-variable") \
+  ITEM(P, UNRESOLVED_CALL, 0x4, "unresolved-call") ITEM(P, LOCK_STATIC, 0x8, "lock-static") \
+  ITEM(P, NO_PREDICATE, 0x10, "no-predicate")
+
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
   ITEM(P, ESCAPES, 2, "escapes") ITEM(P, UNSUMMARIZED, 3, "unsummarized")            \
@@ -1441,6 +1703,19 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_PTRF_FLAG, KZ_ENUM_PTRF_FLAGS, 1)       \
   D(KZ_GIMAGE_REACH, KZ_ENUM_GIMAGE_REACH, 1)  \
   D(KZ_GIMAGE_FLAG, KZ_ENUM_GIMAGE_FLAGS, 1)   \
+  D(KZ_LOCKOP_KIND, KZ_ENUM_LOCKOP_KIND, 0)    \
+  D(KZ_LOCKOP_MODE, KZ_ENUM_LOCKOP_MODE, 0)    \
+  D(KZ_LOCKOP_FLAG, KZ_ENUM_LOCKOP_FLAGS, 1)   \
+  D(KZ_LOCKID_KIND, KZ_ENUM_LOCKID_KIND, 0)    \
+  D(KZ_LOCKID_STATUS, KZ_ENUM_LOCKID_STATUS, 0) \
+  D(KZ_LOCKID_FLAG, KZ_ENUM_LOCKID_FLAGS, 1)   \
+  D(KZ_LOCKSET_KIND, KZ_ENUM_LOCKSET_KIND, 0)  \
+  D(KZ_LOCKSET_FLAG, KZ_ENUM_LOCKSET_FLAGS, 1) \
+  D(KZ_FSTATUS_ONCE, KZ_ENUM_FSTATUS_ONCE, 0)  \
+  D(KZ_FSTATUS_FLAG, KZ_ENUM_FSTATUS_FLAGS, 1) \
+  D(KZ_AWAIT_READ, KZ_ENUM_AWAIT_READ, 0)      \
+  D(KZ_AWAIT_MOD, KZ_ENUM_AWAIT_MOD, 0)        \
+  D(KZ_AWAIT_FLAG, KZ_ENUM_AWAIT_FLAGS, 1)     \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -1648,6 +1923,38 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_gimage, fh, IDX, 0)                       \
   F(kz_fact_gimage, kind, ENUM, KZ_IMAGE_KIND)        \
   F(kz_fact_gimage, reach, FLAGS, KZ_GIMAGE_REACH)    \
-  F(kz_fact_gimage, flags, FLAGS, KZ_GIMAGE_FLAG)
+  F(kz_fact_gimage, flags, FLAGS, KZ_GIMAGE_FLAG)     \
+  F(kz_fact_lockop, fn, IDX, 0)                       \
+  F(kz_fact_lockop, site, IDX, 0)                     \
+  F(kz_fact_lockop, next_fn, IDX, 0)                  \
+  F(kz_fact_lockop, kind, ENUM, KZ_LOCKOP_KIND)       \
+  F(kz_fact_lockop, mode, ENUM, KZ_LOCKOP_MODE)       \
+  F(kz_fact_lockop, flags, FLAGS, KZ_LOCKOP_FLAG)     \
+  F(kz_fact_lockid, kind, ENUM, KZ_LOCKID_KIND)       \
+  F(kz_fact_lockid, status, ENUM, KZ_LOCKID_STATUS)   \
+  F(kz_fact_lockid, flags, FLAGS, KZ_LOCKID_FLAG)     \
+  F(kz_fact_lockset, fn, IDX, 0)                      \
+  F(kz_fact_lockset, site, IDX, 0)                    \
+  F(kz_fact_lockset, read, IDX, 0)                    \
+  F(kz_fact_lockset, held_root, IDX, 0)               \
+  F(kz_fact_lockset, opener_root, IDX, 0)             \
+  F(kz_fact_lockset, first, IDX, 0)                   \
+  F(kz_fact_lockset, fh, IDX, 0)                      \
+  F(kz_fact_lockset, kind, ENUM, KZ_LOCKSET_KIND)     \
+  F(kz_fact_lockset, flags, FLAGS, KZ_LOCKSET_FLAG)   \
+  F(kz_fact_fstatus, status_field, ENUM, KZ_LOC_STATUS) \
+  F(kz_fact_fstatus, status_type, ENUM, KZ_LOC_STATUS) \
+  F(kz_fact_fstatus, once, ENUM, KZ_FSTATUS_ONCE)     \
+  F(kz_fact_fstatus, flags, FLAGS, KZ_FSTATUS_FLAG)   \
+  F(kz_fact_await, loop, IDX, 0)                      \
+  F(kz_fact_await, fn, IDX, 0)                        \
+  F(kz_fact_await, lock, IDX, 0)                      \
+  F(kz_fact_await, relevant_root, IDX, 0)             \
+  F(kz_fact_await, l1_read, ENUM, KZ_AWAIT_READ)      \
+  F(kz_fact_await, l1_mod_field, ENUM, KZ_AWAIT_MOD)  \
+  F(kz_fact_await, l1_mod_type, ENUM, KZ_AWAIT_MOD)   \
+  F(kz_fact_await, cert_field, ENUM, KZ_LOOP_CERT)    \
+  F(kz_fact_await, cert_type, ENUM, KZ_LOOP_CERT)     \
+  F(kz_fact_await, flags, FLAGS, KZ_AWAIT_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

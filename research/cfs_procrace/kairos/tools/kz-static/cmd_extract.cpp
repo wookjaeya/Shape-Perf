@@ -254,9 +254,22 @@ int cmd_extract(int argc, char** argv) {
     so.notes.push_back({"extract.p0_table", std::string(kzs::p0_table_revision()) + ", " + std::to_string(kzs::p0_table().size()) + " entries"});
     so.notes.push_back({"extract.derivation_rules", kzs::wrapper_rules_revision()});
     so.notes.push_back({"extract.startup_entries_read", std::to_string(script.size())});
+    so.notes.push_back({"extract.lock_vocabulary", std::to_string(derivation.lock_vocabulary.size()) +
+                                                       " lock and unlock operations F5 derives on the first pass (the P0 mutex primitives the program calls among them) are those of the "
+                                                       "second pass; the derivation on the second pass gives " +
+                                                       std::string(derivation.lock_vocabulary_same ? "the same set (LOCK_OPS `vocabulary`)" : "another set")});
+    so.notes.push_back({"extract.completeness_fields_same", derivation.completeness_same_fields
+                                                                ? "yes: the reads of the second pass name the fields of the first, whose completeness pass FIELD_STATUS reports"
+                                                                : "no: the completeness pass is that of the first pass's fields"});
   } else {
     if (!kzs::extract_units(units, spec, ro, &model, &error)) return fail("extract", error);
     kzs::finalize(&model, spec);
+    // F5 and the target-independent rules come with the extended facts; their completeness pass reads
+    // the units with the built-in profile, whatever the profile and the targets of this run are
+    if (spec.extended_facts) {
+      kzs::ExtractSpec builtin;
+      if (!kzs::builtin_base_spec(&builtin, &error) || !kzs::add_lock_facts(units, builtin, ro, &model, &error)) return fail("extract", error);
+    }
   }
 
   kz::Bytes out;

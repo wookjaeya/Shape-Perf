@@ -39,6 +39,7 @@
 #include "extract.hpp"
 #include "kz/core/container.hpp"
 #include "kz/core/phi.hpp"
+#include "lockset.hpp"
 #include "model.hpp"
 #include "spec.hpp"
 
@@ -83,6 +84,13 @@ struct Derivation {
   // functions that are `may` delay operations: not in the vocabulary (only `must` is); loops whose
   // own body calls one, which would change kind if they were
   uint32_t loops_calling_may_delay = 0;
+  // F5 (first pass): the lock and unlock operations it derived for the second pass's vocabulary (the P0
+  // primitives the program calls among them), and whether the derivation on the second pass gives the same
+  std::set<std::string> lock_vocabulary;
+  bool lock_vocabulary_same = true;
+  // the completeness pass: its targets, and whether the second pass's reads name the same fields
+  uint32_t completeness_targets = 0;
+  bool completeness_same_fields = true;
 };
 
 // Derives the operations from a model read with spec.collect_wrapper_inputs and finalized.
@@ -92,8 +100,22 @@ void apply_derivation(const Derivation& d, ExtractSpec* spec);
 
 // The whole mode over the units: the first pass, the derivation, the second pass.  `base` is the
 // spec of the built-in profile with the data functions and the P0 entries.  `model` receives the
-// finalized second pass with the derived rows, `spec` its vocabulary.
+// finalized second pass with the derived rows, `spec` its vocabulary.  The first pass reads the
+// extended facts too (F5 needs them: the lock operations of the second pass's vocabulary are
+// derived from it, with the completeness pass of FIELD_STATUS), and the second pass gets the rows
+// of F5 and the target-independent rules (kz_facts.h revision 8; lockset.hpp).
 bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSpec& base, const ReadOptions& options, const std::vector<StartupEntry>& script,
                           Model* model, ExtractSpec* spec, Derivation* derivation, std::string* error);
+
+// The spec of the completeness pass: the built-in profile, the data functions, no vocabulary.  The
+// same in both modes, so FIELD_STATUS does not depend on the mode or on the run's targets.
+bool builtin_base_spec(ExtractSpec* out, std::string* error);
+// The completeness pass (lockset.hpp FIELD_STATUS): the units read with `builtin` and, as targets,
+// every field of the record types the reads of `m` name.
+bool completeness_pass(const std::vector<UnitCommand>& units, const ExtractSpec& builtin, const ReadOptions& options, const Model& m, FieldStatusTable* out,
+                       std::string* error);
+// F5 and the target-independent rules for a finalized model read with the extended facts (the
+// profile-driven mode with --extended-facts).
+bool add_lock_facts(const std::vector<UnitCommand>& units, const ExtractSpec& builtin, const ReadOptions& options, Model* m, std::string* error);
 
 }  // namespace kzs

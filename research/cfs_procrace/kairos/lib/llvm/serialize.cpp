@@ -10,6 +10,7 @@
 #include <sstream>
 #include <tuple>
 
+#include "lockset.hpp"
 #include "p0.hpp"
 
 namespace kzs {
@@ -820,6 +821,120 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     }
   }
 
+  // ---- F5 and the target-independent rules (kz_facts.h revision 8): LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS,
+  // AWAIT_L1.  Written with the extended facts, after those of revision 7 (their expression roots come after).
+  std::vector<kz_fact_lockop> lockop_rows;
+  std::vector<kz_fact_lockid> lockid_rows;
+  std::vector<kz_fact_lockset> lockset_rows;
+  std::vector<kz_fact_fstatus> fstatus_rows;
+  std::vector<kz_fact_await> await_rows;
+  if (spec.extended_facts) {
+    std::map<std::string, uint32_t> read_index;
+    for (size_t i = 0; i < m.reads.size(); ++i) read_index[m.reads[i].key()] = static_cast<uint32_t>(i);
+    for (const LockOpFact& f : m.lock_ops) {
+      kz_fact_lockop r = zero<kz_fact_lockop>();
+      r.fn = fn_of(f.func_key);
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.next_fn = fn_of(f.next_key);
+      r.depth = f.depth;
+      r.kind = f.kind;
+      r.mode = f.mode;
+      r.flags = f.flags;
+      r.success = f.success;
+      r.ident = w.intern(f.ident);
+      r.may = w.intern(f.may);
+      r.primitive = w.intern(f.primitive);
+      r.chain = w.intern(f.chain);
+      lockop_rows.push_back(r);
+    }
+    for (const LockIdFact& f : m.lock_ids) {
+      kz_fact_lockid r = zero<kz_fact_lockid>();
+      r.writers = f.writers;
+      r.kind = f.kind;
+      r.status = f.status;
+      r.flags = f.flags;
+      r.text = w.intern(f.text);
+      r.may = w.intern(f.may);
+      r.location = w.intern(f.location);
+      r.object = w.intern(f.object);
+      r.why = w.intern(f.why);
+      lockid_rows.push_back(r);
+    }
+    for (const LockSetFact& f : m.locksets) {
+      kz_fact_lockset r = zero<kz_fact_lockset>();
+      r.fn = fn_of(f.func_key);
+      r.site = f.kind == KZ_LOCKSET_KIND_CALL ? site_of_call(f.ref) : KZ_NONE32;
+      r.read = KZ_NONE32;
+      if (f.kind == KZ_LOCKSET_KIND_READ) {
+        auto it = read_index.find(f.ref);
+        if (it != read_index.end()) r.read = it->second;
+      }
+      r.n_held = static_cast<uint32_t>(f.held.size());
+      r.held_root = exprs.index_of(f.held_expr);
+      r.opener_root = exprs.index_of(f.opener_expr);
+      r.first = f.held.empty() ? KZ_NONE32 : f.held.front();
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.kind = f.kind;
+      r.flags = f.flags;
+      if (f.kind == KZ_LOCKSET_KIND_WRITE && f.write < m.write_sites.size()) {
+        r.type = w.intern(m.write_sites[f.write].type);
+        r.field = w.intern(m.write_sites[f.write].field);
+      } else {
+        r.type = w.intern("");
+        r.field = w.intern("");
+      }
+      r.file = w.intern(f.pos.file);
+      lockset_rows.push_back(r);
+    }
+    for (const FieldStatusFact& f : m.field_status) {
+      kz_fact_fstatus r = zero<kz_fact_fstatus>();
+      r.n_writers = f.n_writers;
+      r.n_direct = f.n_direct;
+      r.n_data_fn = f.n_data_fn;
+      r.n_outptr = f.n_outptr;
+      r.n_init = f.n_init;
+      r.n_instances = f.n_instances;
+      r.own_escape = f.own_escape;
+      r.own_cast = f.own_cast;
+      r.own_union = f.own_union;
+      r.own_unknown = f.own_unknown;
+      r.sibling_hits = f.sibling_hits;
+      r.untyped = f.untyped;
+      r.status_field = f.status_field;
+      r.status_type = f.status_type;
+      r.once = f.once;
+      r.flags = f.flags;
+      r.type = w.intern(f.type);
+      r.field = w.intern(f.field);
+      r.writer_fns = w.intern(f.writer_fns);
+      fstatus_rows.push_back(r);
+    }
+    for (const AwaitFact& f : m.awaits) {
+      kz_fact_await r = zero<kz_fact_await>();
+      auto lit = R.loop_site.find(f.loop_key);
+      r.loop = lit != R.loop_site.end() ? lit->second : KZ_NONE32;
+      r.fn = fn_of(f.func_key);
+      r.lock = f.lock == kNone ? KZ_NONE32 : f.lock;
+      r.relevant_root = exprs.index_of(f.relevant_expr);
+      r.n_relevant = static_cast<uint32_t>(f.relevant.size());
+      r.n_via = static_cast<uint32_t>(f.via_callee.size());
+      r.l1_read = f.l1_read;
+      r.l1_mod_field = f.l1_mod_field;
+      r.l1_mod_type = f.l1_mod_type;
+      r.cert_field = f.cert_field;
+      r.cert_type = f.cert_type;
+      r.flags = f.flags;
+      std::string via;
+      for (const std::string& v : f.via_callee) via += (via.empty() ? "" : "; ") + v;
+      r.via = w.intern(via);
+      r.note_field = w.intern(f.note_field);
+      r.note_type = w.intern(f.note_type);
+      await_rows.push_back(r);
+    }
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -896,6 +1011,31 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("count.ptr_fields", num(ptrfield_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
     item("count.global_images", num(gimage_rows.size()) + " rows of " + num(fs.objects_reached) + " objects (reached outside the closed program: " + num(fs.objects_outside) + ")",
          KZ_POLICY_UNSET, KZ_NONE32);
+    // F5 and the target-independent rules (revision 8)
+    const Model::LockStats& ls = m.lock_stats;
+    item("extract.extended_facts_f5", std::string("F5 LOCK_OPS, LOCK_IDS and LOCKSET, FIELD_STATUS, AWAIT_L1 (kz_facts.h revision 8); ") + lock_rules_revision(), KZ_POLICY_UNSET,
+         KZ_NONE32);
+    item("assume.lock_acquisition_succeeds",
+         "an acquisition that is not a try succeeds: pthread_mutex_lock returns 0 (POSIX.1-2017 / glibc 2.39, RETURN VALUE: zero on success; source unverified), a "
+         "derived acquire operation returns the value it returns when it holds the lock; the branch only a failure takes is a failure path (LOCKSET failure-path)",
+         KZ_POLICY_DECLARED, prov_for("kz-static extract: declared assumption of the F5 lock-set rules, not checked"));
+    item("assume.static_instance_read_after_write",
+         "two lock operations whose identity reads a static instance (LOCK_IDS) read it after its one writer instance, or both before it",
+         KZ_POLICY_DECLARED, prov_for("kz-static extract: declared assumption of the F5 lock-set rules, not checked"));
+    item("assume.no_cross_member_pointer_arithmetic",
+         "FIELD_STATUS status_field: an untyped store through a pointer to one member of a record does not reach another member (C11 6.5.6 p8); status_type does "
+         "not assume it",
+         KZ_POLICY_DECLARED, prov_for("kz-static extract: declared assumption of the per-field completeness rule, not checked"));
+    item("count.lock_ops", num(lockop_rows.size()) + " rows (acquire " + num(ls.acquire_ops) + ", try " + num(ls.try_ops) + ", release " + num(ls.release_ops) + ", wait " +
+                               num(ls.wait_ops) + ")",
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.lock_ids", num(lockid_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.lockset", num(lockset_rows.size()) + " rows (holding a lock " + num(ls.rows_held) + ", on a failure path " + num(ls.rows_failure_path) + "); bodies " +
+                              num(ls.bodies) + ", control-flow graphs " + num(ls.cfg_built) + ", call-graph components " + num(ls.sccs) + " (recursive " +
+                              num(ls.sccs_recursive) + "), functions with a call that cannot be followed " + num(ls.kills_unknown),
+         KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.field_status", num(fstatus_rows.size()) + " fields (targets of the completeness pass " + num(ls.completeness_targets) + ")", KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.await_l1", num(await_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
   }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
 
@@ -917,6 +1057,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     return s;
   if (spec.extended_facts && (!put(KZ_SEC_ARGFLOW, argflow_rows) || !put(KZ_SEC_PARAM_FLOW, pflow_rows) || !put(KZ_SEC_PTR_FIELDS, ptrfield_rows) ||
                               !put(KZ_SEC_GLOBAL_IMAGES, gimage_rows)))
+    return s;
+  if (spec.extended_facts && (!put(KZ_SEC_LOCK_OPS, lockop_rows) || !put(KZ_SEC_LOCK_IDS, lockid_rows) || !put(KZ_SEC_LOCKSET, lockset_rows) ||
+                              !put(KZ_SEC_FIELD_STATUS, fstatus_rows) || !put(KZ_SEC_AWAIT_L1, await_rows)))
     return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;

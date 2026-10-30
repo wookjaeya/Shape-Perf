@@ -244,6 +244,11 @@ struct ATypeFact {
   std::string tu;
   std::string detail;
   std::string call_key;  // the call, if the hit is at one
+  // The field of `type_name` whose own address or storage the hit is about (an address escape, a
+  // store through a union member of that name); empty for a hit about the type as a whole (a cast,
+  // a union that holds the type, an unknown effect).  Not written: the per-field completeness rule
+  // of FIELD_STATUS (kz_facts.h revision 8) reads it from the raw hits.
+  std::string cause_field;
 };
 
 struct WriterFact {
@@ -524,6 +529,115 @@ struct SpawnWrapFact {
   uint16_t flags = 0;
 };
 
+// ---- F5 LOCKSET and the target-independent rules (spec.extended_facts; kz_facts.h revision 8) -------------
+// The identity of a lock as an expression over the parameters of the function it is seen in: lvalues
+// (a global object, a member, an element, a dereference) and values (a parameter, a constant, the address
+// of an lvalue, the value read from an lvalue).  Two lock operations are the same lock only when their
+// identities are the same closed expression and every value it reads is a static instance (lockset.hpp).
+struct LockIdNode;
+using LockId = std::shared_ptr<const LockIdNode>;
+struct LockIdNode {
+  enum Kind : uint8_t { UNKNOWN, PARAM, CONST, GLOBAL, FIELD, INDEX, DEREF, ADDR, LOAD };
+  uint8_t k = UNKNOWN;
+  int64_t v = 0;     // PARAM: the index; CONST: the value
+  std::string name;  // GLOBAL: the object key; FIELD: "Type.field"; UNKNOWN: why
+  LockId a, b;       // FIELD, DEREF, ADDR, LOAD: a; INDEX: a the base, b the subscript
+};
+// The control-flow graph of a body as the lock-set analysis reads it: per block the events in evaluation
+// order, the two successors of a two-way branch with its test, and the return statements.
+struct LockEvent {
+  enum Kind : uint8_t { CALL, READ, WRITE, DEF, RET };
+  uint8_t kind = CALL;
+  std::string key;    // CALL: call key; READ: ReadFact::key(); DEF: the local's tree id
+  uint32_t index = 0; // WRITE: index in Model::write_sites
+  // DEF and RET: the value: 0 unknown, 1 a constant, 2 the result of the call `call`, 3 a local `key`
+  // (RET only), 4 none (RET of a void function)
+  uint8_t vkind = 0;
+  int64_t value = 0;
+  std::string call;
+};
+struct LockTest {
+  // the branch tests `subject` against `value`: 1 subject == value, 2 subject != value; a truth test
+  // `if (x)` is x != 0.  The subject is a local (its tree id) or the result of a call of the block.
+  uint8_t op = 0;  // 0: not a test the analysis reads
+  bool on_call = false;
+  std::string subject;
+  int64_t value = 0;
+};
+struct LockBlock {
+  std::vector<LockEvent> events;
+  std::vector<uint32_t> succ;  // kNone for a successor that cannot be reached
+  bool branch = false;         // two-way: succ[0] when the test holds, succ[1] when it does not
+  bool noreturn = false;       // ends in a call of a function declared not to return
+  LockTest test;
+};
+struct LockCfg {
+  uint32_t entry = 0, exit = 0;
+  std::vector<LockBlock> blocks;
+};
+// A typed write of a body (the FUNC_WRITES events, every site), for the WRITE rows of LOCKSET.
+struct WriteSite {
+  std::string func_key;
+  uint8_t kind = KZ_FWRITE_KIND_NONE;
+  std::string type, field;
+  Pos pos;
+};
+// A row of LOCK_OPS: a function (or a P0 primitive) that is a lock operation.
+struct LockOpFact {
+  std::string func_key, call_key, next_key, chain, primitive;
+  std::string ident;  // the identity of the lock, over the parameters of func_key (text)
+  std::string may;    // the field-based location of the mutex object ("Type.field", "<global>.name"), or empty
+  uint8_t kind = KZ_LOCKOP_KIND_NONE;
+  uint8_t mode = KZ_LOCKOP_MODE_NONE;
+  uint16_t flags = 0;
+  uint32_t depth = 0;
+  int64_t success = 0;  // RESULT_CONDITIONAL: the value returned when the lock is held
+};
+// A row of LOCK_IDS: one identity a LOCKSET row holds.
+struct LockIdFact {
+  std::string text, may, location, object, why;
+  uint8_t kind = KZ_LOCKID_KIND_NONE;
+  uint8_t status = KZ_LOCKID_STATUS_NONE;
+  uint16_t flags = 0;
+  uint32_t writers = 0;  // the writer instances of `location` (STATIC check)
+};
+// A row of LOCKSET: the locks held at one call, read or write.
+struct LockSetFact {
+  std::string func_key, ref;  // ref: call key, ReadFact::key() or the WriteSite index
+  uint8_t kind = KZ_LOCKSET_KIND_NONE;
+  uint16_t flags = 0;
+  Pos pos;
+  std::vector<uint32_t> held;     // LOCK_IDS indices, sorted
+  std::vector<std::string> openers;  // call keys of the acquisitions that hold them (any path)
+  uint32_t write = kNone;         // WRITE: Model::write_sites index
+  ExprRef held_expr = nullptr, opener_expr = nullptr;  // SEQ of constants (filled by finalize_lock_facts)
+};
+// A row of FIELD_STATUS: the writer set of one field under the two target-independent completeness rules.
+struct FieldStatusFact {
+  std::string type, field;
+  uint32_t n_writers = 0, n_direct = 0, n_data_fn = 0, n_outptr = 0, n_init = 0, n_instances = 0;
+  uint32_t own_escape = 0, own_cast = 0, own_union = 0, own_unknown = 0;  // hits about the field or the type as a whole
+  uint32_t sibling_hits = 0;   // hits about another field of the type
+  uint32_t untyped = 0;        // untyped write sites in the program
+  uint8_t status_field = KZ_LOC_STATUS_UNCHECKED, status_type = KZ_LOC_STATUS_UNCHECKED;
+  uint8_t once = 0;            // KZ_FSTATUS_ONCE
+  uint16_t flags = 0;
+  std::string writer_fns;      // the functions of the writers (sorted, "; ")
+};
+// A row of AWAIT_L1: a poll loop under the L1 (i) rule whose relevant locations do not depend on the targets.
+struct AwaitFact {
+  std::string loop_key, func_key;
+  std::vector<std::string> relevant;  // "Type.field" (or "<global>.name"), sorted
+  std::vector<std::string> via_callee; // the relevant locations that come from a function the predicate calls
+  uint8_t l1_read = 0;      // KZ_AWAIT_READ
+  uint8_t l1_mod_field = 0, l1_mod_type = 0;  // KZ_AWAIT_MOD under the two completeness rules
+  uint8_t cert_field = KZ_LOOP_CERT_UNDECIDED, cert_type = KZ_LOOP_CERT_UNDECIDED;
+  uint16_t flags = 0;
+  uint32_t lock = kNone;    // LOCK_IDS index of the lock that covers the test reads
+  std::string note_field, note_type;
+  ExprRef relevant_expr = nullptr;  // SEQ of loads (filled by finalize_lock_facts)
+};
+
 struct Model {
   ExprPool exprs;
 
@@ -584,6 +698,27 @@ struct Model {
     uint64_t left_out = 0;                                            // uses the bounds left out
     uint32_t objects_reached = 0, objects_outside = 0;                // GLOBAL_IMAGES: in / outside the closed program
   } flow_stats;
+
+  // F5 and the target-independent rules (spec.extended_facts): what the walk collects (the lock-set
+  // skeleton of every body, the lock identity of every call argument, every typed write site, the fields
+  // of the record types the reads name), the raw A-TYPE hits of a completeness pass
+  // (spec.keep_raw_atypes), and the rows lockset.cpp writes.
+  std::map<std::string, LockCfg> lock_cfgs;                        // function key -> skeleton
+  std::map<std::string, std::vector<LockId>> call_arg_idents;      // call key -> identity per argument
+  std::vector<WriteSite> write_sites;
+  std::map<std::string, std::vector<std::string>> record_fields;   // owner type -> its fields, in order
+  std::vector<ATypeFact> atypes_raw;                               // before the untyped expansion
+  std::vector<LockOpFact> lock_ops;
+  std::vector<LockIdFact> lock_ids;
+  std::vector<LockSetFact> locksets;
+  std::vector<FieldStatusFact> field_status;
+  std::vector<AwaitFact> awaits;
+  struct LockStats {
+    uint32_t bodies = 0, cfg_built = 0, sccs = 0, sccs_recursive = 0;
+    uint32_t acquire_ops = 0, release_ops = 0, try_ops = 0, wait_ops = 0;
+    uint32_t rows_held = 0, rows_failure_path = 0, kills_unknown = 0;
+    uint32_t fields = 0, completeness_targets = 0;
+  } lock_stats;
 
   // Raw tables for the global phase.
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer

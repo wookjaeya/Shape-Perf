@@ -259,6 +259,7 @@ class FnWalker {
     if (spec_.collect_wrapper_inputs) record_cfg();
     if (ext_) emit_returns();
     if (ext_) finish_flow_facts();
+    if (ext_) record_lock_cfg();
   }
 
  private:
@@ -523,10 +524,11 @@ class FnWalker {
   }
 
   // ---- A-TYPE listing ----
-  void add_atype(uint8_t kind, size_t tgt, const Stmt* at, const std::string& detail, const std::string& call_key = "") {
+  void add_atype(uint8_t kind, size_t tgt, const Stmt* at, const std::string& detail, const std::string& call_key = "", const std::string& cause_field = "") {
     ATypeFact a;
     a.kind = kind;
     a.type_name = spec_.fields[tgt].field.type;
+    a.cause_field = cause_field;
     a.pos = tu_.pos_of(at->getBeginLoc());
     tu_.next_key(a.pos, fkey_ + "#a", &a.ordinal);
     a.func_key = fkey_;
@@ -545,7 +547,10 @@ class FnWalker {
     ev.field = field;
     ev.pos = tu_.pos_of(at->getBeginLoc());
     if (!loops_.empty()) ev.loop_key = m_.loops[loops_.back()->index].key;
-    if (ext_) ext_writes_.push_back(ExtWrite{at, type, field, kind, ev.pos});
+    if (ext_) {
+      ext_writes_.push_back(ExtWrite{at, type, field, kind, ev.pos, static_cast<uint32_t>(m_.write_sites.size())});
+      m_.write_sites.push_back(WriteSite{fkey_, kind, type, field, ev.pos});
+    }
     m_.write_events.push_back(ev);
   }
   // Every record type a value of type `t` holds by value (itself, nested records, array elements).
@@ -1689,7 +1694,14 @@ class FnWalker {
     CallFact cf;
     cf.pos = tu_.pos_of(ce->getBeginLoc());
     const std::string ckey = tu_.next_key(cf.pos, fkey_, &cf.ordinal);
-    if (ext_) ext_call_keys_[ce] = ckey;
+    if (ext_) {
+      ext_call_keys_[ce] = ckey;
+      std::vector<LockId>& ids = m_.call_arg_idents[ckey];
+      for (const Expr* a : ce->arguments()) {
+        std::set<const VarDecl*> seen;
+        ids.push_back(ident_value(a, &seen));
+      }
+    }
     cf.tu = tu_.main_file();
     cf.caller_key = fkey_;
     cf.caller_name = fname_;
@@ -2395,7 +2407,7 @@ class FnWalker {
     if (me == nullptr) return;
     const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
     if (fl == nullptr) return;
-    for (size_t t : tu_.targets_of_field(fl)) add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, uo, std::string("the address of the field is ") + how);
+    for (size_t t : tu_.targets_of_field(fl)) add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, uo, std::string("the address of the field is ") + how, "", spec_.fields[t].field.field);
   }
 
   void note_untyped_store(const Expr* lhs, const Stmt* at) {
@@ -2583,7 +2595,8 @@ class FnWalker {
               if (p != nullptr) how = std::string("used by ") + p->getStmtClassName();
               if (const VarDecl* vd = parent_var(top)) how = "initializer of " + vd->getNameAsString();
               if (arg_at >= 0) how = "passed to " + callee_text(call);
-              add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, use.stmt, std::string(use.partial ? "the address of a part of the field: " : "the address of the field: ") + how);
+              add_atype(KZ_ATYPE_KIND_ADDRESS_ESCAPE, t, use.stmt, std::string(use.partial ? "the address of a part of the field: " : "the address of the field: ") + how, "",
+                        spec_.fields[t].field.field);
             }
             break;
           }
@@ -2592,15 +2605,21 @@ class FnWalker {
       }
       // union member written: another member of the union may be the support type
       if (fl->getParent()->isUnion() && (use.kind == LvalueUse::Assign || use.kind == LvalueUse::IncDec)) {
-        std::set<size_t> exposed;
+        std::set<size_t> exposed, by_name;
         for (const FieldDecl* other : fl->getParent()->fields()) {
           for (size_t t : tu_.owners_contained_in(other->getType())) exposed.insert(t);
           // a sibling member of the target field shares its storage
           if (other != fl)
             for (size_t t = 0; t < spec_.fields.size(); ++t)
-              if (tu_.is_owner_record(fl->getParent(), t) && other->getName() == spec_.fields[t].field.field) exposed.insert(t);
+              if (tu_.is_owner_record(fl->getParent(), t) && other->getName() == spec_.fields[t].field.field) by_name.insert(t);
         }
-        for (size_t t : exposed) add_atype(KZ_ATYPE_KIND_UNION, t, use.stmt, "a store through a member of a union that also holds the type");
+        // the same hits as before (one per target); the cause is the field only for a target that is a member
+        // of the union itself and whose type no member holds as a whole
+        const std::set<size_t> by_type = exposed;
+        for (size_t t : by_name) exposed.insert(t);
+        for (size_t t : exposed)
+          add_atype(KZ_ATYPE_KIND_UNION, t, use.stmt, "a store through a member of a union that also holds the type", "",
+                    by_type.count(t) == 0 ? spec_.fields[t].field.field : std::string());
       }
       // shared loads of loops: a read of the field's value (an lvalue-to-rvalue conversion);
       // `x.f` as the base of another access, or an array that decays, reads nothing
@@ -3026,6 +3045,11 @@ class FnWalker {
       r.kind = KZ_READ_KIND_FIELD;
       r.type = field_type_name(fl);
       r.field = fl->getNameAsString();
+      if (m_.record_fields.count(r.type) == 0) {
+        std::vector<std::string>& names = m_.record_fields[r.type];
+        for (const FieldDecl* f : fl->getParent()->fields())
+          if (!f->getName().empty()) names.push_back(f->getNameAsString());
+      }
       // the root of the access path, and the subscripts on the way
       const Expr* cur = me;
       for (;;) {
@@ -4104,6 +4128,292 @@ class FnWalker {
     }
   }
 
+
+  // ---- F5 (spec.extended_facts): the identity of a call argument as a lock (model.hpp LockIdNode) ----
+  static LockId lnode(uint8_t k, int64_t v, const std::string& name, LockId a = nullptr, LockId b = nullptr) {
+    auto n = std::make_shared<LockIdNode>();
+    n->k = k;
+    n->v = v;
+    n->name = name;
+    n->a = std::move(a);
+    n->b = std::move(b);
+    return n;
+  }
+  static LockId lunknown(const std::string& why) { return lnode(LockIdNode::UNKNOWN, 0, why); }
+  static LockId laddr(LockId lv) {
+    if (lv->k == LockIdNode::UNKNOWN) return lv;
+    if (lv->k == LockIdNode::DEREF) return lv->a;  // &*p is p
+    return lnode(LockIdNode::ADDR, 0, "", lv);
+  }
+  static LockId lderef(LockId v) {
+    if (v->k == LockIdNode::UNKNOWN) return v;
+    if (v->k == LockIdNode::ADDR) return v->a;  // *&x is x
+    return lnode(LockIdNode::DEREF, 0, "", v);
+  }
+  // A parameter that the body never assigns and whose address it never takes.
+  bool param_unmodified(const ParmVarDecl* pv) const {
+    auto it = locals_.find(pv);
+    return it == locals_.end() || (it->second.defs.empty() && !it->second.addr_taken);
+  }
+  // The value of an expression: copies through locals with a single copy definition are followed (the
+  // rule of the derives rows); conversions keep the value or the address.
+  LockId ident_value(const Expr* e, std::set<const VarDecl*>* seen) {
+    if (e == nullptr) return lunknown("no expression");
+    e = e->IgnoreParens();
+    int64_t c = 0;
+    if (!isa<CallExpr>(e) && !e->getType()->isPointerType() && tu_.eval_int(e->IgnoreParenCasts(), &c)) return lnode(LockIdNode::CONST, c, "");
+    if (const auto* ic = dyn_cast<ImplicitCastExpr>(e)) {
+      const Expr* sub = ic->getSubExpr();
+      switch (ic->getCastKind()) {
+        case CK_LValueToRValue: {
+          const Expr* x = sub->IgnoreParens();
+          if (const auto* d = dyn_cast<DeclRefExpr>(x)) {
+            if (const auto* pv = dyn_cast<ParmVarDecl>(d->getDecl()))
+              return param_unmodified(pv) ? lnode(LockIdNode::PARAM, pv->getFunctionScopeIndex(), "") : lunknown("an assigned parameter");
+            if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && !vd->hasGlobalStorage()) {
+              auto it = locals_.find(vd);
+              if (it == locals_.end() || it->second.addr_taken || it->second.defs.size() != 1 || !it->second.defs.front().copy ||
+                  it->second.defs.front().rhs == nullptr || !seen->insert(vd).second)
+                return lunknown("the local " + lid(vd));
+              return ident_value(it->second.defs.front().rhs, seen);
+            }
+          }
+          const LockId lv = ident_lvalue(x, seen);
+          return lv->k == LockIdNode::UNKNOWN ? lv : lnode(LockIdNode::LOAD, 0, "", lv);
+        }
+        case CK_ArrayToPointerDecay: {
+          const LockId lv = ident_lvalue(sub, seen);
+          return lv->k == LockIdNode::UNKNOWN ? lv : laddr(lnode(LockIdNode::INDEX, 0, "", lv, lnode(LockIdNode::CONST, 0, "")));
+        }
+        case CK_FunctionToPointerDecay: return lunknown("a function");
+        default: return ident_value(sub, seen);
+      }
+    }
+    if (const auto* cc = dyn_cast<CStyleCastExpr>(e)) return ident_value(cc->getSubExpr(), seen);
+    if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_AddrOf) return laddr(ident_lvalue(uo->getSubExpr(), seen));
+    if (const auto* call = dyn_cast<CallExpr>(e)) return lunknown("the result of " + callee_text(call));
+    return lunknown("an expression");
+  }
+  LockId ident_lvalue(const Expr* e, std::set<const VarDecl*>* seen) {
+    e = e->IgnoreParens();
+    if (const auto* ic = dyn_cast<ImplicitCastExpr>(e); ic != nullptr && ic->getCastKind() == CK_NoOp) return ident_lvalue(ic->getSubExpr(), seen);
+    if (const auto* d = dyn_cast<DeclRefExpr>(e)) {
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage()) return lnode(LockIdNode::GLOBAL, 0, tu_.object_key(vd));
+      return lunknown("a local object");
+    }
+    if (const auto* me = dyn_cast<MemberExpr>(e)) {
+      const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
+      if (fl == nullptr) return lunknown("a member");
+      const LockId base = me->isArrow() ? lderef(ident_value(me->getBase(), seen)) : ident_lvalue(me->getBase(), seen);
+      if (base->k == LockIdNode::UNKNOWN) return base;
+      return lnode(LockIdNode::FIELD, 0, field_type_name(fl) + "." + fl->getNameAsString(), base);
+    }
+    if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+      const LockId bv = ident_value(as->getBase(), seen);
+      const LockId iv = ident_value(as->getIdx(), seen);
+      if (bv->k == LockIdNode::UNKNOWN) return bv;
+      if (bv->k == LockIdNode::ADDR && bv->a->k == LockIdNode::INDEX && bv->a->b->k == LockIdNode::CONST && bv->a->b->v == 0)
+        return lnode(LockIdNode::INDEX, 0, "", bv->a->a, iv);
+      return lnode(LockIdNode::INDEX, 0, "", lderef(bv), iv);
+    }
+    if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_Deref) return lderef(ident_value(uo->getSubExpr(), seen));
+    return lunknown("an lvalue");
+  }
+
+  // ---- F5: the lock-set skeleton of the body (model.hpp LockCfg) ----
+  // The test a branch makes of a local or of a call result against a constant; `invert` for `!`.
+  LockTest lock_test(const Expr* e, bool invert) {
+    LockTest t;
+    if (e == nullptr) return t;
+    e = e->IgnoreParenCasts();
+    if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_LNot) return lock_test(uo->getSubExpr(), !invert);
+    auto subject = [&](const Expr* x, LockTest* out) {
+      x = x->IgnoreParenCasts();
+      if (const auto* d = dyn_cast<DeclRefExpr>(x))
+        if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && !vd->hasGlobalStorage()) {
+          out->subject = isa<ParmVarDecl>(vd) ? "param:" + vd->getNameAsString() : lid(vd);
+          return true;
+        }
+      if (const auto* call = dyn_cast<CallExpr>(x)) {
+        auto it = ext_call_keys_.find(call);
+        if (it == ext_call_keys_.end()) return false;
+        out->on_call = true;
+        out->subject = it->second;
+        return true;
+      }
+      return false;
+    };
+    if (const auto* bo = dyn_cast<BinaryOperator>(e); bo != nullptr && (bo->getOpcode() == BO_EQ || bo->getOpcode() == BO_NE)) {
+      int64_t c = 0;
+      const Expr* other = nullptr;
+      if (tu_.eval_int(bo->getRHS()->IgnoreParenCasts(), &c)) other = bo->getLHS();
+      else if (tu_.eval_int(bo->getLHS()->IgnoreParenCasts(), &c)) other = bo->getRHS();
+      if (other == nullptr || !subject(other, &t)) return LockTest();
+      t.value = c;
+      t.op = (bo->getOpcode() == BO_EQ) != invert ? 1 : 2;
+      return t;
+    }
+    if (!subject(e, &t)) return LockTest();
+    t.value = 0;
+    t.op = invert ? 1 : 2;  // `x` is x != 0, `!x` is x == 0
+    return t;
+  }
+  // A definition of a local in a CFG element: (local id, value kind, value, call key).
+  bool lock_def(const Stmt* st, LockEvent* ev) {
+    auto value_of = [&](const Expr* rhs) {
+      if (rhs == nullptr) return;
+      const Expr* x = rhs->IgnoreParenCasts();
+      int64_t c = 0;
+      if (const auto* call = dyn_cast<CallExpr>(x)) {
+        auto it = ext_call_keys_.find(call);
+        if (it != ext_call_keys_.end()) {
+          ev->vkind = 2;
+          ev->call = it->second;
+        }
+      } else if (tu_.eval_int(x, &c)) {
+        ev->vkind = 1;
+        ev->value = c;
+      }
+    };
+    ev->kind = LockEvent::DEF;
+    if (const auto* bo = dyn_cast<BinaryOperator>(st)) {
+      if (!bo->isAssignmentOp()) return false;
+      const auto* d = dyn_cast<DeclRefExpr>(bo->getLHS()->IgnoreParenImpCasts());
+      const auto* vd = d != nullptr ? dyn_cast<VarDecl>(d->getDecl()) : nullptr;
+      if (vd == nullptr || vd->hasGlobalStorage()) return false;
+      ev->key = isa<ParmVarDecl>(vd) ? "param:" + vd->getNameAsString() : lid(vd);
+      if (bo->getOpcode() == BO_Assign) value_of(bo->getRHS());
+      return true;
+    }
+    if (const auto* uo = dyn_cast<UnaryOperator>(st)) {
+      if (!uo->isIncrementDecrementOp()) return false;
+      const auto* d = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParenImpCasts());
+      const auto* vd = d != nullptr ? dyn_cast<VarDecl>(d->getDecl()) : nullptr;
+      if (vd == nullptr || vd->hasGlobalStorage()) return false;
+      ev->key = isa<ParmVarDecl>(vd) ? "param:" + vd->getNameAsString() : lid(vd);
+      return true;
+    }
+    if (const auto* ds = dyn_cast<DeclStmt>(st)) {
+      for (const Decl* dd : ds->decls()) {
+        const auto* vd = dyn_cast<VarDecl>(dd);
+        if (vd == nullptr || vd->hasGlobalStorage() || vd->getInit() == nullptr) continue;
+        ev->key = lid(vd);
+        value_of(vd->getInit());
+        return true;
+      }
+    }
+    return false;
+  }
+  static LockEvent lock_event(uint8_t kind, const std::string& key) {
+    LockEvent ev;
+    ev.kind = kind;
+    ev.key = key;
+    return ev;
+  }
+  void record_lock_cfg() {
+    CfgIndex* ix = ext_cfg();
+    if (ix == nullptr) return;  // no control-flow graph: LOCKSET reports the body as such
+    std::map<const Stmt*, std::vector<uint32_t>> writes_at;
+    for (const ExtWrite& w : ext_writes_) writes_at[w.at].push_back(w.site);
+    // a write or a read whose statement is no element of its own is placed at the nearest enclosing element
+    std::map<const Stmt*, std::vector<std::pair<uint8_t, std::string>>> extra;  // element -> (kind, key) of such events
+    std::map<const Stmt*, std::vector<uint32_t>> extra_writes;
+    auto element_of = [&](const Stmt* s) -> const Stmt* {
+      for (int guard = 0; s != nullptr && guard < 64; ++guard) {
+        if (ix->at.count(s) != 0) return s;
+        s = parent_stmt(s);
+      }
+      return nullptr;
+    };
+    for (const auto& kv : read_keys_)
+      if (ix->at.count(kv.first) == 0)
+        if (const Stmt* el = element_of(kv.first)) extra[el].push_back({LockEvent::READ, kv.second});
+    for (const auto& kv : writes_at)
+      if (ix->at.count(kv.first) == 0)
+        if (const Stmt* el = element_of(kv.first)) extra_writes[el].insert(extra_writes[el].end(), kv.second.begin(), kv.second.end());
+    LockCfg g;
+    g.blocks.resize(ix->blocks.size());
+    g.entry = ix->cfg->getEntry().getBlockID();
+    g.exit = ix->cfg->getExit().getBlockID();
+    for (size_t b = 0; b < ix->blocks.size(); ++b) {
+      const CFGBlock* blk = ix->blocks[b];
+      if (blk == nullptr) continue;
+      LockBlock& out = g.blocks[b];
+      out.noreturn = blk->hasNoReturnElement();
+      for (const CFGElement& el : *blk) {
+        const std::optional<CFGStmt> cs = el.getAs<CFGStmt>();
+        if (!cs) continue;
+        const Stmt* st = cs->getStmt();
+        auto eit = extra.find(st);
+        if (eit != extra.end())
+          for (const auto& x : eit->second) out.events.push_back(lock_event(x.first, x.second));
+        if (const auto* call = dyn_cast<CallExpr>(st)) {
+          auto it = ext_call_keys_.find(call);
+          if (it != ext_call_keys_.end()) out.events.push_back(lock_event(LockEvent::CALL, it->second));
+        }
+        if (const auto* ce = dyn_cast<Expr>(st)) {
+          auto it = read_keys_.find(ce);
+          if (it != read_keys_.end()) out.events.push_back(lock_event(LockEvent::READ, it->second));
+        }
+        auto wit = writes_at.find(st);
+        if (wit != writes_at.end())
+          for (uint32_t w : wit->second) {
+            LockEvent ev;
+            ev.kind = LockEvent::WRITE;
+            ev.index = w;
+            out.events.push_back(ev);
+          }
+        auto xit = extra_writes.find(st);
+        if (xit != extra_writes.end())
+          for (uint32_t w : xit->second) {
+            LockEvent ev;
+            ev.kind = LockEvent::WRITE;
+            ev.index = w;
+            out.events.push_back(ev);
+          }
+        LockEvent def;
+        if (lock_def(st, &def)) out.events.push_back(def);
+        if (const auto* rs = dyn_cast<ReturnStmt>(st)) {
+          LockEvent ev;
+          ev.kind = LockEvent::RET;
+          const Expr* v = rs->getRetValue();
+          if (v == nullptr) {
+            ev.vkind = 4;
+          } else {
+            const Expr* x = v->IgnoreParenCasts();
+            int64_t c = 0;
+            if (const auto* call = dyn_cast<CallExpr>(x)) {
+              auto it = ext_call_keys_.find(call);
+              if (it != ext_call_keys_.end()) {
+                ev.vkind = 2;
+                ev.call = it->second;
+              }
+            } else if (tu_.eval_int(x, &c)) {
+              ev.vkind = 1;
+              ev.value = c;
+            } else if (const auto* d = dyn_cast<DeclRefExpr>(x)) {
+              if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && !vd->hasGlobalStorage()) {
+                ev.vkind = 3;
+                ev.key = isa<ParmVarDecl>(vd) ? "param:" + vd->getNameAsString() : lid(vd);
+              }
+            }
+          }
+          out.events.push_back(ev);
+        }
+      }
+      for (const CFGBlock::AdjacentBlock& a : blk->succs()) {
+        const CFGBlock* r = a.getReachableBlock();
+        out.succ.push_back(r != nullptr ? r->getBlockID() : kNone);
+      }
+      const Stmt* term = blk->getTerminatorStmt();
+      if (out.succ.size() == 2 && term != nullptr && !isa<SwitchStmt>(term)) {
+        out.branch = true;
+        out.test = lock_test(blk->getLastCondition(), false);
+      }
+    }
+    m_.lock_cfgs[fkey_] = std::move(g);
+  }
+
   struct Guard {
     const Expr* cond;
     bool polarity;
@@ -4150,6 +4460,7 @@ class FnWalker {
     std::string type, field;
     uint8_t kind = KZ_FWRITE_KIND_NONE;
     Pos pos;
+    uint32_t site = 0;  // in Model::write_sites
   };
   struct PtrWriteAt {
     size_t row = 0;  // in Model::ptr_writes

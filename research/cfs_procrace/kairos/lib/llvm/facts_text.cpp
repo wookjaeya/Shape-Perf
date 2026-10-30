@@ -17,7 +17,7 @@ namespace {
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits"};
 
 class View {
  public:
@@ -48,7 +48,9 @@ class View {
     } added[] = {{"p0", KZ_SEC_P0_TABLE, &View::p0},           {"derived", KZ_SEC_OP_DERIV, &View::derived}, {"spawnwrap", KZ_SEC_SPAWN_WRAP, &View::spawnwrap},
                  {"reads", KZ_SEC_READS, &View::reads},        {"returns", KZ_SEC_RETURNS, &View::returns},  {"retconsts", KZ_SEC_RET_CONSTS, &View::retconsts},
                  {"loopexits", KZ_SEC_LOOP_EXITS, &View::loopexits},  {"argflow", KZ_SEC_ARGFLOW, &View::argflow},     {"paramflow", KZ_SEC_PARAM_FLOW, &View::paramflow},
-                 {"ptrfields", KZ_SEC_PTR_FIELDS, &View::ptrfields},  {"gimages", KZ_SEC_GLOBAL_IMAGES, &View::gimages}};
+                 {"ptrfields", KZ_SEC_PTR_FIELDS, &View::ptrfields},  {"gimages", KZ_SEC_GLOBAL_IMAGES, &View::gimages},
+                 {"lockops", KZ_SEC_LOCK_OPS, &View::lockops},        {"lockids", KZ_SEC_LOCK_IDS, &View::lockids},       {"lockset", KZ_SEC_LOCKSET, &View::lockset},
+                 {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -93,6 +95,11 @@ class View {
     if (!(s = read(KZ_SEC_PARAM_FLOW, &pflow_)).ok()) return s;
     if (!(s = read(KZ_SEC_PTR_FIELDS, &ptrfields_)).ok()) return s;
     if (!(s = read(KZ_SEC_GLOBAL_IMAGES, &gimages_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCK_OPS, &lockops_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCK_IDS, &lockids_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCKSET, &lockset_)).ok()) return s;
+    if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
+    if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -545,6 +552,91 @@ class View {
     }
   }
 
+  // ---- F5 and the target-independent rules (revision 8) ----
+  void lockops(std::ostream& os) {
+    os << "[lockops] " << lockops_.size() << "\n";
+    for (const kz_fact_lockop& r : lockops_) {
+      os << "  " << fn_name(r.fn) << " " << enum_text("KZ_LOCKOP_KIND", r.kind);
+      if (r.kind == KZ_LOCKOP_KIND_ACQUIRE) os << " " << enum_text("KZ_LOCKOP_MODE", r.mode);
+      if (r.mode == KZ_LOCKOP_MODE_RESULT || r.mode == KZ_LOCKOP_MODE_TRY) os << " success=" << r.success;
+      os << " lock " << str(r.ident);
+      const std::string may = str(r.may);
+      if (!may.empty()) os << " may=" << may;
+      os << " " << flags_text("KZ_LOCKOP_FLAG", r.flags);
+      if (r.site != KZ_NONE32) os << " via " << site_text(r.site) << " depth=" << r.depth;
+      os << "\n      chain " << str(r.chain) << "\n";
+    }
+  }
+  std::string lockid_text(uint32_t i) const {
+    if (i == KZ_NONE32) return "-";
+    if (i >= lockids_.size()) return "#" + std::to_string(i) + "?";
+    return "#" + std::to_string(i) + " " + str(lockids_[i].text);
+  }
+  void lockids(std::ostream& os) {
+    os << "[lockids] " << lockids_.size() << "\n";
+    for (size_t i = 0; i < lockids_.size(); ++i) {
+      const kz_fact_lockid& r = lockids_[i];
+      os << "  " << lockid_text(static_cast<uint32_t>(i)) << " " << enum_text("KZ_LOCKID_KIND", r.kind) << " " << enum_text("KZ_LOCKID_STATUS", r.status) << " "
+         << flags_text("KZ_LOCKID_FLAG", r.flags);
+      const std::string may = str(r.may), loc = str(r.location), why = str(r.why);
+      if (!may.empty()) os << " may=" << may;
+      if (!loc.empty()) os << " value-of=" << loc << " object=" << str(r.object) << " writer-instances=" << r.writers;
+      if (!why.empty()) os << " (" << why << ")";
+      os << "\n";
+    }
+  }
+  void lockset(std::ostream& os) {
+    os << "[lockset] " << lockset_.size() << "\n";
+    for (const kz_fact_lockset& r : lockset_) {
+      os << "  " << enum_text("KZ_LOCKSET_KIND", r.kind) << " ";
+      if (r.kind == KZ_LOCKSET_KIND_CALL) os << site_text(r.site);
+      else if (r.kind == KZ_LOCKSET_KIND_READ) os << "read " << idx(r.read) << " at " << pos(r.file, r.line, r.col);
+      else os << str(r.type) << "." << str(r.field) << " at " << pos(r.file, r.line, r.col);
+      os << " in " << fn_name(r.fn) << " held=" << r.n_held;
+      if (r.held_root != KZ_NONE32) {
+        os << " [";
+        uint32_t cur = r.held_root;
+        bool first = true;
+        for (int guard = 0; cur != KZ_NONE32 && cur < exprs_.size() && guard < 10000; ++guard) {
+          const kz_fact_expr& e = exprs_[cur];
+          if (e.op != KZ_EXPR_OP_SEQ) break;
+          if (e.a != KZ_NONE32 && e.a < exprs_.size()) os << (first ? "" : ", ") << lockid_text(static_cast<uint32_t>(exprs_[e.a].value));
+          first = false;
+          cur = e.b;
+        }
+        os << "]";
+      }
+      if (r.opener_root != KZ_NONE32) os << " acquired-at=" << list(r.opener_root);
+      os << " " << flags_text("KZ_LOCKSET_FLAG", r.flags) << "\n";
+    }
+  }
+  void fstatus(std::ostream& os) {
+    os << "[fstatus] " << fstatus_.size() << "\n";
+    for (const kz_fact_fstatus& r : fstatus_) {
+      os << "  " << str(r.type) << "." << str(r.field) << " per-field=" << enum_text("KZ_LOC_STATUS", r.status_field) << " type-level=" << enum_text("KZ_LOC_STATUS", r.status_type)
+         << " writers=" << r.n_writers << " (direct " << r.n_direct << ", data " << r.n_data_fn << ", out-pointer " << r.n_outptr << ", init " << r.n_init << ") instances=" << r.n_instances
+         << " " << enum_text("KZ_FSTATUS_ONCE", r.once) << " hits: escape " << r.own_escape << ", cast " << r.own_cast << ", union " << r.own_union << ", unknown " << r.own_unknown
+         << ", other fields " << r.sibling_hits << "; untyped sites " << r.untyped << " " << flags_text("KZ_FSTATUS_FLAG", r.flags);
+      const std::string w = str(r.writer_fns);
+      if (!w.empty()) os << " by " << w;
+      os << "\n";
+    }
+  }
+  void awaits(std::ostream& os) {
+    os << "[awaits] " << awaits_.size() << "\n";
+    for (const kz_fact_await& r : awaits_) {
+      os << "  loop site " << idx(r.loop) << " in " << fn_name(r.fn) << " relevant=" << (r.relevant_root != KZ_NONE32 ? list(r.relevant_root) : std::string("[]"));
+      const std::string via = str(r.via);
+      if (!via.empty()) os << " via-callee=[" << via << "]";
+      os << " L1(ii)=" << enum_text("KZ_AWAIT_READ", r.l1_read);
+      if (r.lock != KZ_NONE32) os << " lock " << lockid_text(r.lock);
+      os << " L1(i) per-field=" << enum_text("KZ_AWAIT_MOD", r.l1_mod_field) << " type-level=" << enum_text("KZ_AWAIT_MOD", r.l1_mod_type) << " "
+         << flags_text("KZ_AWAIT_FLAG", r.flags) << "\n";
+      os << "      per-field: " << enum_text("KZ_LOOP_CERT", r.cert_field) << ": " << str(r.note_field) << "\n";
+      os << "      type-level: " << enum_text("KZ_LOOP_CERT", r.cert_type) << ": " << str(r.note_type) << "\n";
+    }
+  }
+
   std::string list(uint32_t root) const {
     std::string out = "[";
     bool first = true;
@@ -693,6 +785,11 @@ class View {
   std::vector<kz_fact_pflow> pflow_;
   std::vector<kz_fact_ptrfield> ptrfields_;
   std::vector<kz_fact_gimage> gimages_;
+  std::vector<kz_fact_lockop> lockops_;
+  std::vector<kz_fact_lockid> lockids_;
+  std::vector<kz_fact_lockset> lockset_;
+  std::vector<kz_fact_fstatus> fstatus_;
+  std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;
 };
 

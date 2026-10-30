@@ -18,7 +18,7 @@ struct TextOptions {
   // Section names to print (empty = all): basis files functions calls derives loops iters init
   // consts writers atype locs targets spawnparams image terminals outcalls fwrites, and, when the
   // container has them, p0 derived spawnwrap (the profile-free mode) and reads returns retconsts
-  // loopexits argflow paramflow ptrfields gimages (the extended facts).
+  // loopexits argflow paramflow ptrfields gimages lockops lockids lockset fstatus awaits (the extended facts).
   std::set<std::string> sections;
   // Only the records about this location, "Type.field" (writers, atype, init, locs, outcalls, derives, reads, argflow).
   std::string loc;

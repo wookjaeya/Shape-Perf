@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=9
+kz-layout abi=1 revision=10
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -908,6 +908,87 @@ record kz_fact_gimage size=104 fields=19
   macro offset=80 size=8 count=1 kind=str
   owner offset=88 size=8 count=1 kind=str
   field offset=96 size=8 count=1 kind=str
+record kz_fact_lockop size=64 fields=13
+  fn offset=0 size=4 count=1 kind=u32
+  site offset=4 size=4 count=1 kind=u32
+  next_fn offset=8 size=4 count=1 kind=u32
+  depth offset=12 size=4 count=1 kind=u32
+  kind offset=16 size=1 count=1 kind=u8
+  mode offset=17 size=1 count=1 kind=u8
+  flags offset=18 size=2 count=1 kind=u16
+  rsv0 offset=20 size=4 count=1 kind=u32
+  success offset=24 size=8 count=1 kind=i64
+  ident offset=32 size=8 count=1 kind=str
+  may offset=40 size=8 count=1 kind=str
+  primitive offset=48 size=8 count=1 kind=str
+  chain offset=56 size=8 count=1 kind=str
+record kz_fact_lockid size=48 fields=9
+  writers offset=0 size=4 count=1 kind=u32
+  kind offset=4 size=1 count=1 kind=u8
+  status offset=5 size=1 count=1 kind=u8
+  flags offset=6 size=2 count=1 kind=u16
+  text offset=8 size=8 count=1 kind=str
+  may offset=16 size=8 count=1 kind=str
+  location offset=24 size=8 count=1 kind=str
+  object offset=32 size=8 count=1 kind=str
+  why offset=40 size=8 count=1 kind=str
+record kz_fact_lockset size=72 fields=17
+  fn offset=0 size=4 count=1 kind=u32
+  site offset=4 size=4 count=1 kind=u32
+  read offset=8 size=4 count=1 kind=u32
+  n_held offset=12 size=4 count=1 kind=u32
+  held_root offset=16 size=4 count=1 kind=u32
+  opener_root offset=20 size=4 count=1 kind=u32
+  first offset=24 size=4 count=1 kind=u32
+  line offset=28 size=4 count=1 kind=u32
+  col offset=32 size=4 count=1 kind=u32
+  fh offset=36 size=4 count=1 kind=u32
+  kind offset=40 size=1 count=1 kind=u8
+  rsv0 offset=41 size=1 count=1 kind=u8
+  flags offset=42 size=2 count=1 kind=u16
+  rsv1 offset=44 size=4 count=1 kind=u32
+  type offset=48 size=8 count=1 kind=str
+  field offset=56 size=8 count=1 kind=str
+  file offset=64 size=8 count=1 kind=str
+record kz_fact_fstatus size=80 fields=21
+  n_writers offset=0 size=4 count=1 kind=u32
+  n_direct offset=4 size=4 count=1 kind=u32
+  n_data_fn offset=8 size=4 count=1 kind=u32
+  n_outptr offset=12 size=4 count=1 kind=u32
+  n_init offset=16 size=4 count=1 kind=u32
+  n_instances offset=20 size=4 count=1 kind=u32
+  own_escape offset=24 size=4 count=1 kind=u32
+  own_cast offset=28 size=4 count=1 kind=u32
+  own_union offset=32 size=4 count=1 kind=u32
+  own_unknown offset=36 size=4 count=1 kind=u32
+  sibling_hits offset=40 size=4 count=1 kind=u32
+  untyped offset=44 size=4 count=1 kind=u32
+  status_field offset=48 size=1 count=1 kind=u8
+  status_type offset=49 size=1 count=1 kind=u8
+  once offset=50 size=1 count=1 kind=u8
+  rsv0 offset=51 size=1 count=1 kind=u8
+  flags offset=52 size=2 count=1 kind=u16
+  rsv1 offset=54 size=2 count=1 kind=u16
+  type offset=56 size=8 count=1 kind=str
+  field offset=64 size=8 count=1 kind=str
+  writer_fns offset=72 size=8 count=1 kind=str
+record kz_fact_await size=56 fields=16
+  loop offset=0 size=4 count=1 kind=u32
+  fn offset=4 size=4 count=1 kind=u32
+  lock offset=8 size=4 count=1 kind=u32
+  relevant_root offset=12 size=4 count=1 kind=u32
+  n_relevant offset=16 size=4 count=1 kind=u32
+  n_via offset=20 size=4 count=1 kind=u32
+  l1_read offset=24 size=1 count=1 kind=u8
+  l1_mod_field offset=25 size=1 count=1 kind=u8
+  l1_mod_type offset=26 size=1 count=1 kind=u8
+  cert_field offset=27 size=1 count=1 kind=u8
+  cert_type offset=28 size=1 count=1 kind=u8
+  rsv0 offset=29 size=1 count=1 kind=u8
+  flags offset=30 size=2 count=1 kind=u16
+  via offset=32 size=8 count=1 kind=str
+  note_field offset=40 size=8 count=1 kind=str
+  note_type offset=48 size=8 count=1 kind=str
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1999,6 +2080,78 @@ flags KZ_GIMAGE_FLAG
   0x10 FIELD_WRITTEN "field-written"
   0x20 RECORD_WRITTEN "record-written"
   0x40 FROM_MACRO "from-macro"
+enum KZ_LOCKOP_KIND
+  0x0 NONE "none"
+  0x1 ACQUIRE "acquire"
+  0x2 RELEASE "release"
+  0x3 WAIT "wait"
+enum KZ_LOCKOP_MODE
+  0x0 NONE "none"
+  0x1 EVERY_RETURN "every-return"
+  0x2 RESULT "result-conditional"
+  0x3 TRY "try"
+  0x4 CONDITIONAL "conditional"
+flags KZ_LOCKOP_FLAG
+  0x1 PRIMITIVE "primitive-op"
+  0x2 VOCABULARY "vocabulary"
+  0x4 ASSUMES_SUCCESS "assumes-success"
+  0x8 INDIRECT "indirect"
+  0x10 NO_CFG "no-cfg"
+  0x20 PARAM_IDENT "parameter-identity"
+  0x40 UNKNOWN_IDENT "unknown-identity"
+enum KZ_LOCKID_KIND
+  0x0 NONE "none"
+  0x1 CLOSED "closed"
+  0x2 PARAM "parameter-relative"
+  0x3 UNKNOWN "unknown"
+enum KZ_LOCKID_STATUS
+  0x0 NONE "none"
+  0x1 STATIC "static-instance"
+  0x2 NOT_STATIC "not-static"
+  0x3 PARAM "parameter-relative"
+  0x4 UNDECIDABLE "undecidable"
+flags KZ_LOCKID_FLAG
+  0x1 ADDRESS_OF_GLOBAL "address-of-global"
+  0x2 READS_VALUE "reads-value"
+  0x4 TYPE_EXPOSED "type-level-exposed"
+  0x8 INITIAL_VALUE "initial-value"
+enum KZ_LOCKSET_KIND
+  0x0 NONE "none"
+  0x1 CALL "call"
+  0x2 READ "read"
+  0x3 WRITE "write"
+flags KZ_LOCKSET_FLAG
+  0x1 FAILURE_PATH "failure-path"
+  0x2 UNKNOWN_RELEASE "unknown-release"
+  0x4 NO_CFG "no-cfg"
+  0x8 NOT_REACHED "not-reached"
+enum KZ_FSTATUS_ONCE
+  0x0 NONE "unchecked"
+  0x1 NO_WRITER "no-writer-instance"
+  0x2 ONCE "one-instance-once"
+  0x3 MORE "not-once"
+flags KZ_FSTATUS_FLAG
+  0x1 SIBLING_EXPOSED "sibling-exposed"
+  0x2 UNTYPED_IN_PROGRAM "untyped-in-program"
+  0x4 WRITER_IN_LOOP "writer-in-loop"
+  0x8 WRITER_NOT_ONCE "writer-function-not-once"
+  0x10 SEVERAL_INSTANCES "several-instances"
+enum KZ_AWAIT_READ
+  0x0 NONE "none"
+  0x1 ONE_LOCK "one-lock-region"
+  0x2 ATOMIC "atomic-read"
+  0x3 FAILS "fails"
+enum KZ_AWAIT_MOD
+  0x0 NONE "none"
+  0x1 HOLDS "holds"
+  0x2 FAILS "fails"
+  0x3 UNDECIDED "undecided"
+flags KZ_AWAIT_FLAG
+  0x1 VIA_CALLEE "via-callee"
+  0x2 GLOBAL_VARIABLE "global-variable"
+  0x4 UNRESOLVED_CALL "unresolved-call"
+  0x8 LOCK_STATIC "lock-static"
+  0x10 NO_PREDICATE "no-predicate"
 enum KZ_OUTPTR_SUMMARY
   0x0 NONE "none"
   0x1 STORE_ONLY "store-only"
@@ -2416,6 +2569,11 @@ section ARGFLOW type=127 record=kz_fact_argflow version=1
 section PARAM_FLOW type=128 record=kz_fact_pflow version=1
 section PTR_FIELDS type=129 record=kz_fact_ptrfield version=1
 section GLOBAL_IMAGES type=130 record=kz_fact_gimage version=1
+section LOCK_OPS type=131 record=kz_fact_lockop version=1
+section LOCK_IDS type=132 record=kz_fact_lockid version=1
+section LOCKSET type=133 record=kz_fact_lockset version=1
+section FIELD_STATUS type=134 record=kz_fact_fstatus version=1
+section AWAIT_L1 type=135 record=kz_fact_await version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2748,6 +2906,38 @@ format kz_fact_gimage.fh idx 0
 format kz_fact_gimage.kind enum KZ_IMAGE_KIND
 format kz_fact_gimage.reach flags KZ_GIMAGE_REACH
 format kz_fact_gimage.flags flags KZ_GIMAGE_FLAG
+format kz_fact_lockop.fn idx 0
+format kz_fact_lockop.site idx 0
+format kz_fact_lockop.next_fn idx 0
+format kz_fact_lockop.kind enum KZ_LOCKOP_KIND
+format kz_fact_lockop.mode enum KZ_LOCKOP_MODE
+format kz_fact_lockop.flags flags KZ_LOCKOP_FLAG
+format kz_fact_lockid.kind enum KZ_LOCKID_KIND
+format kz_fact_lockid.status enum KZ_LOCKID_STATUS
+format kz_fact_lockid.flags flags KZ_LOCKID_FLAG
+format kz_fact_lockset.fn idx 0
+format kz_fact_lockset.site idx 0
+format kz_fact_lockset.read idx 0
+format kz_fact_lockset.held_root idx 0
+format kz_fact_lockset.opener_root idx 0
+format kz_fact_lockset.first idx 0
+format kz_fact_lockset.fh idx 0
+format kz_fact_lockset.kind enum KZ_LOCKSET_KIND
+format kz_fact_lockset.flags flags KZ_LOCKSET_FLAG
+format kz_fact_fstatus.status_field enum KZ_LOC_STATUS
+format kz_fact_fstatus.status_type enum KZ_LOC_STATUS
+format kz_fact_fstatus.once enum KZ_FSTATUS_ONCE
+format kz_fact_fstatus.flags flags KZ_FSTATUS_FLAG
+format kz_fact_await.loop idx 0
+format kz_fact_await.fn idx 0
+format kz_fact_await.lock idx 0
+format kz_fact_await.relevant_root idx 0
+format kz_fact_await.l1_read enum KZ_AWAIT_READ
+format kz_fact_await.l1_mod_field enum KZ_AWAIT_MOD
+format kz_fact_await.l1_mod_type enum KZ_AWAIT_MOD
+format kz_fact_await.cert_field enum KZ_LOOP_CERT
+format kz_fact_await.cert_type enum KZ_LOOP_CERT
+format kz_fact_await.flags flags KZ_AWAIT_FLAG
 format kz_cert_step.rule enum KZ_RULE
 format kz_cert_step.profile_entry idx 0
 format kz_cert_step.site_from idx 0
@@ -2855,4 +3045,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=8399b8524ca4c9b48f3b901b0f448271f96924d8ca711a8ab6180791751403df
+fingerprint=499a236729ecd9b1178050ca2b2cb496cc9e23a08a871256757890ce2f62e71d

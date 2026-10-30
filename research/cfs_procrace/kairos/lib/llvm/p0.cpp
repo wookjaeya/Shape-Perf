@@ -24,6 +24,11 @@ P0Entry conditional(P0Entry e) {
   return e;
 }
 
+P0Entry mutex_arg(P0Entry e, int k) {
+  e.mutex = k;
+  return e;
+}
+
 P0Entry data(const char* name, int dest, int src, int fill, bool zero, uint8_t kind, const char* semantics, const char* version = kPosix) {
   P0Entry e = make(KZ_P0_KIND_DATA_FN, "data function", name, semantics, version);
   e.dest = dest;
@@ -51,11 +56,13 @@ std::vector<P0Entry> build() {
     t.push_back(e);
   }
   // mutexes
-  t.push_back(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_lock", "acquires the mutex arg 0, blocking until it is free"));
-  t.push_back(conditional(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_trylock", "acquires the mutex arg 0 if it is free, else returns without it (EBUSY)")));
-  t.push_back(conditional(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_timedlock",
-                               "acquires the mutex arg 0, blocking at most until the absolute time arg 1; may return without it (ETIMEDOUT)")));
-  t.push_back(make(KZ_P0_KIND_MUTEX_RELEASE, "mutex", "pthread_mutex_unlock", "releases the mutex arg 0"));
+  // the mutex argument (`mutex`, not written) is the one the semantics name
+  t.push_back(mutex_arg(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_lock", "acquires the mutex arg 0, blocking until it is free"), 0));
+  t.push_back(mutex_arg(conditional(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_trylock", "acquires the mutex arg 0 if it is free, else returns without it (EBUSY)")), 0));
+  t.push_back(mutex_arg(conditional(make(KZ_P0_KIND_MUTEX_ACQUIRE, "mutex", "pthread_mutex_timedlock",
+                                         "acquires the mutex arg 0, blocking at most until the absolute time arg 1; may return without it (ETIMEDOUT)")),
+                        0));
+  t.push_back(mutex_arg(make(KZ_P0_KIND_MUTEX_RELEASE, "mutex", "pthread_mutex_unlock", "releases the mutex arg 0"), 0));
   // semaphores
   t.push_back(make(KZ_P0_KIND_SEM_WAIT, "semaphore", "sem_wait", "decrements the semaphore arg 0, blocking while it is zero"));
   t.push_back(conditional(make(KZ_P0_KIND_SEM_WAIT, "semaphore", "sem_trywait", "decrements the semaphore arg 0 if it is not zero, else returns without (EAGAIN)")));
@@ -63,10 +70,12 @@ std::vector<P0Entry> build() {
                                "decrements the semaphore arg 0, blocking at most until the absolute time arg 1; may return without (ETIMEDOUT)")));
   t.push_back(make(KZ_P0_KIND_SEM_POST, "semaphore", "sem_post", "increments the semaphore arg 0; one thread blocked on it is woken"));
   // condition variables
-  t.push_back(make(KZ_P0_KIND_COND_WAIT, "condition variable", "pthread_cond_wait",
-                   "releases the mutex arg 1, waits on the condition arg 0, and holds the mutex again when it returns"));
-  t.push_back(conditional(make(KZ_P0_KIND_COND_WAIT, "condition variable", "pthread_cond_timedwait",
-                               "as pthread_cond_wait, waiting at most until the absolute time arg 2 (ETIMEDOUT); holds the mutex arg 1 again when it returns")));
+  t.push_back(mutex_arg(make(KZ_P0_KIND_COND_WAIT, "condition variable", "pthread_cond_wait",
+                             "releases the mutex arg 1, waits on the condition arg 0, and holds the mutex again when it returns"),
+                        1));
+  t.push_back(mutex_arg(conditional(make(KZ_P0_KIND_COND_WAIT, "condition variable", "pthread_cond_timedwait",
+                                         "as pthread_cond_wait, waiting at most until the absolute time arg 2 (ETIMEDOUT); holds the mutex arg 1 again when it returns")),
+                        1));
   t.push_back(make(KZ_P0_KIND_COND_SIGNAL, "condition variable", "pthread_cond_signal", "unblocks at least one thread waiting on the condition arg 0"));
   t.push_back(make(KZ_P0_KIND_COND_SIGNAL, "condition variable", "pthread_cond_broadcast", "unblocks every thread waiting on the condition arg 0"));
   // sleeping

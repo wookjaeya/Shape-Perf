@@ -1074,16 +1074,65 @@ void apply_derivation(const Derivation& d, ExtractSpec* spec) {
   for (const OpDerivFact& r : d.ops) spec->guard_calls.insert(r.call_key);
 }
 
+bool builtin_base_spec(ExtractSpec* out, std::string* error) {
+  kz::phi::Profile profile;
+  const kz::Status ps = load_builtin_profile(&profile);
+  if (!ps.ok()) {
+    *error = "the built-in profile: " + ps.describe();
+    return false;
+  }
+  *out = ExtractSpec();
+  spec_from_profile(profile, out);
+  spec_add_builtin_data_fns(out);
+  return true;
+}
+
+bool completeness_pass(const std::vector<UnitCommand>& units, const ExtractSpec& builtin, const ReadOptions& options, const Model& m, FieldStatusTable* out,
+                       std::string* error) {
+  ExtractSpec spec;
+  spec.data_fns = builtin.data_fns;
+  spec.profile_name = builtin.profile_name;
+  spec.profile_revision = builtin.profile_revision;
+  for (const FieldRef& f : completeness_fields(m)) spec.fields.push_back(TargetField{f, "completeness pass"});
+  spec.keep_raw_atypes = true;
+  Model pass;
+  if (!extract_units(units, spec, options, &pass, error)) return false;
+  finalize(&pass, spec);
+  field_status_from(pass, m, out);
+  return true;
+}
+
+bool add_lock_facts(const std::vector<UnitCommand>& units, const ExtractSpec& builtin, const ReadOptions& options, Model* m, std::string* error) {
+  FieldStatusTable fields;
+  if (!completeness_pass(units, builtin, options, *m, &fields, error)) return false;
+  LockDerivation d;
+  derive_locks(*m, &fields, &d);
+  finalize_lock_facts(m, d, fields, {});
+  return true;
+}
+
 bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSpec& base, const ReadOptions& options, const std::vector<StartupEntry>& script,
                           Model* model, ExtractSpec* spec, Derivation* derivation, std::string* error) {
+  FieldStatusTable fields;
+  std::vector<FieldRef> first_fields;
   {
     ExtractSpec first_spec = base;
     first_spec.collect_wrapper_inputs = true;
-    first_spec.extended_facts = false;  // the derivation does not read them; the second pass writes them
+    first_spec.extended_facts = true;  // F5 reads them (the lock-set skeletons, the argument identities, the reads)
     Model first;
     if (!extract_units(units, first_spec, options, &first, error)) return false;
     finalize(&first, first_spec);
     derive_wrappers(first, script, derivation);
+    if (!completeness_pass(units, base, options, first, &fields, error)) return false;
+    first_fields = completeness_fields(first);
+    LockDerivation ld;
+    derive_locks(first, &fields, &ld);
+    // the derived lock and unlock operations join the P0 primitives in the vocabulary
+    derivation->lock_keys.insert(ld.lock_keys.begin(), ld.lock_keys.end());
+    derivation->unlock_keys.insert(ld.unlock_keys.begin(), ld.unlock_keys.end());
+    derivation->lock_vocabulary.insert(ld.lock_keys.begin(), ld.lock_keys.end());
+    derivation->lock_vocabulary.insert(ld.unlock_keys.begin(), ld.unlock_keys.end());
+    derivation->completeness_targets = fields.targets;
   }
   *spec = base;
   apply_derivation(*derivation, spec);
@@ -1096,6 +1145,13 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
     auto it = model->call_guards.find(r.call_key);
     if (it != model->call_guards.end()) r.guard = it->second;
   }
+  derivation->completeness_same_fields = completeness_fields(*model) == first_fields;
+  LockDerivation ld;
+  derive_locks(*model, &fields, &ld);
+  std::set<std::string> final_vocabulary(ld.lock_keys.begin(), ld.lock_keys.end());
+  final_vocabulary.insert(ld.unlock_keys.begin(), ld.unlock_keys.end());
+  derivation->lock_vocabulary_same = final_vocabulary == derivation->lock_vocabulary;
+  finalize_lock_facts(model, ld, fields, derivation->lock_vocabulary);
   return true;
 }
 

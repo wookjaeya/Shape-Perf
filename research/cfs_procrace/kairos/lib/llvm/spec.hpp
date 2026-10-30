@@ -79,6 +79,10 @@ struct ExtractSpec {
   // of composed rows per parameter.  kNone: no bound.
   uint32_t argflow_depth = kNone;
   uint32_t argflow_size = kNone;
+  // F5 and the target-independent rules (kz_facts.h revision 8) come with them too.  Their completeness
+  // pass is an extraction of its own (the built-in profile, the fields of the record types the reads
+  // name as targets) that keeps the raw A-TYPE hits; nothing else of it is written.
+  bool keep_raw_atypes = false;
 
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;

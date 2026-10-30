@@ -495,6 +495,7 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       a.type_name = oc.loc_type;
       a.loc_field = oc.loc_field;
       a.loc_type = oc.loc_type;
+      a.cause_field = oc.loc_field;
       a.pos = oc.pos;
       a.ordinal = oc.ordinal;
       a.func_key = oc.func_key;
@@ -552,7 +553,8 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     }
   }
 
-  // ---- A-TYPE listing
+  // ---- A-TYPE listing (a completeness pass keeps the hits before the untyped writes are added and expanded)
+  if (spec.keep_raw_atypes) m.atypes_raw = m.atypes;
   std::set<std::string> exposed_types;
   for (const ATypeFact& a : m.atypes)
     if (a.kind == KZ_ATYPE_KIND_CAST || a.kind == KZ_ATYPE_KIND_UNION || a.kind == KZ_ATYPE_KIND_ADDRESS_ESCAPE || a.kind == KZ_ATYPE_KIND_UNKNOWN_EFFECT)

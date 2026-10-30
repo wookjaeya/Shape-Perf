@@ -9,6 +9,8 @@
 #                                                   mode derives from it through wrappers
 #   argflow                                         no Clang types: the whole-program part of the
 #                                                   extended facts F4 and F6
+#   lockset                                         no Clang types: F5 LOCKSET and the writer-set and
+#                                                   L1 (i) rules that do not depend on the targets
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -18,6 +20,7 @@ add_library(kz-llvm STATIC
   wrappers.cpp
   finalize.cpp
   argflow.cpp
+  lockset.cpp
   serialize.cpp
   facts_text.cpp
   facts_query.cpp

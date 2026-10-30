@@ -29,6 +29,7 @@ struct P0Entry {
   int entry = -1;  // thread creation: the function the new thread starts at
   int arg = -1;    // thread creation: the argument it receives
   bool conditional = false;  // the call may return without acquiring / waiting (try, timed)
+  int mutex = -1;            // mutexes and condition waits: the mutex argument the semantics name (not written)
   // data functions: the summary the extraction applies (spec.hpp DataFn)
   int dest = -1, src = -1, fill = -1;
   bool zero_fill = false;

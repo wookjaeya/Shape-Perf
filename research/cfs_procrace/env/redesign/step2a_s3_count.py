@@ -250,7 +250,7 @@ def report(kzd, out, cdir):
         ('c1_pre_tx', 'OS_CountSemCreate#1', 'lib', 'strcmp'),
         ('r2_core', 'CFE_EVS_SendEventWithAppID#2', 'cmp', 'CFE_ResourceId_Equal@cfe/modules/core_api/fsw/inc/cfe_resourceid.h:160'),
         ('r2_core', 'CFE_EVS_SendEventWithAppID#2', 'cmp', '*'),
-        ('c5_641', 'OS_TaskRegister#0', 'cmp', '*'),
+        ('c5_641', 'OS_TaskCreate#2', 'cmp', '*'),
     ]
     lines.append('## queries: the shortest depth at which a parameter reaches a comparison in a function (cmp) or a tested call of a')
     lines.append('## function without a body (lib), per run ("-": not reached within the run\'s bounds)')
@@ -287,13 +287,16 @@ def grep(path, pat, limit=40):
 
 def grep_block(path, pat, follow, limit=40):
     """lines matching pat and the `follow` lines after each"""
-    out, n = [], 0
+    out, n, done = [], 0, set()
     rx = re.compile(pat)
     with open(path, errors='replace') as f:
         lines = f.readlines()
     for i, line in enumerate(lines):
         if rx.search(line):
-            out.extend(l.rstrip('\n') for l in lines[i:i + 1 + follow])
+            for j in range(i, min(len(lines), i + 1 + follow)):
+                if j not in done:  # a line is printed once, also when the next match follows right after it
+                    done.add(j)
+                    out.append(lines[j].rstrip('\n'))
             n += 1
             if n >= limit:
                 break
@@ -339,7 +342,7 @@ def spot(out, b, cdir):
         L += grep(pf, r'^  CFE_ES_GetAppIDInternal#0 d0 ')
         L.append('')
         L.append('## the spawn calls\' entry arguments (ARGFLOW)')
-        L += grep(af, r'arg 2 of .*cfe_es_(apps|start)\.c:\d+:\d+ ')
+        L += grep(af, r'\[\(void ?\*\)StartAddr\]|FuncPtrUnion\.VoidPtr\]')
         L.append('')
         L.append('## the object table the core-task spawn reads (GLOBAL_IMAGES)')
         L += grep(gi, r'^  CFE_ES_ObjectTable\[[0-9]+\]\.FuncPtrUnion', 12)

@@ -398,7 +398,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 두 상한은 BASIS `param.walk_bounds`(unspecified_by_reference)와 `count.walk_bounds_hit` 에 확장 사실과 함께 기록한다. 프로필 추출(옵션 없음)의 BASIS 는 바뀌지 않는다.
 - PARAM_FLOW 사슬 문장의 반복 상한(100000)과 텍스트 보기의 SEQ 걷기 상한(10000)은 방문 집합·후위 번호 조건으로 바꿨다(출력 변화 없음). 텍스트 보기가 PTR_FIELDS 원소의 정적 값을 64 원소까지만 적는 것은 보기의 출력 한계로 두고, 넘으면 그렇다고 적는다.
 
-**시험** [M]: fixture `relsound.c`(entry 읽기, 간접 호출자, 잠금 밖 레코드 전체 쓰기, 루프 안 잠금·해제, 정적 인스턴스가 아닌 잠금, 풀리지 않은 호출, 호출자의 반환 뒤 쓰기, 대조군)와 `static_golden_relsound_np`, `test_static_cli` 의 확인. `test_static_wrappers` 가 P0 표 개정 3의 scope·문장을 본다. lint `case-ids` 는 `tools/` 도 읽는다.
+**시험** [M]: fixture `relsound.c`(entry 읽기, 간접 호출자, 잠금 밖 레코드 전체 쓰기, 루프 안 잠금·해제, 정적 인스턴스가 아닌 잠금, 풀리지 않은 호출, 호출자의 반환 뒤 쓰기, 대조군)와 `static_golden_relsound_np`, `test_static_cli` 의 확인(이미지 필드가 실행 중에도 쓰이는 `relations.c` 변형의 키, entry 표 원소를 지우는 `relpaths.c` 변형의 정적 이미지 entry 포함). `test_static_wrappers` 가 P0 표 개정 3의 scope·문장을 본다. lint `case-ids` 는 `tools/` 도 읽는다.
 
 ## 6. core-cpu1 결과 [M]
 

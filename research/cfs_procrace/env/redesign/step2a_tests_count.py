@@ -214,9 +214,8 @@ for b in BUILDS:
     for l in hdr:
         say('    header: %s' % l[:300])
 F = FACTS['r2_core']
-p0 = [l for l in F if re.match(r'^  p0 ', l) or re.match(r'^  [a-z_]+ \S+ ', l)]
 inp0 = False
-n_p0 = n_unv = n_ver = 0
+n_p0 = n_unv = n_ver = n_tag = 0
 for l in F:
     if l.startswith('[p0]'):
         inp0 = True
@@ -225,11 +224,13 @@ for l in F:
         break
     if inp0 and l.startswith('  ') and not l.startswith('    '):
         n_p0 += 1
-        if 'unverified' in l:
+    if inp0 and l.startswith('      version '):
+        n_tag += 1
+        if l.rstrip().endswith('source unverified'):
             n_unv += 1
-        elif 'glibc 2.39 nptl' in l or 'source=' in l:
+        else:
             n_ver += 1
-say('P0 table rows in r2_core facts: %d (source unverified %d)' % (n_p0, n_unv))
+say('P0 table rows in r2_core facts: %d (version tag %d; source line %d, source unverified %d)' % (n_p0, n_tag, n_ver, n_unv))
 for b in BUILDS:
     E = load(b, 'extract.txt')
     say('%s extract: %s' % (b, ' | '.join(l.strip() for l in E if 'hand-entered inputs' in l or 'rule targets' in l)))

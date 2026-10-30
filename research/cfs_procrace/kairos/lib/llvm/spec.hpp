@@ -68,6 +68,9 @@ struct ExtractSpec {
   std::map<std::string, uint32_t> spawn_entry_param;                   // spawn operation -> the parameter of the entry
   std::map<std::string, std::set<std::string>> spawn_script_entries;   // spawn call key -> entries named by the startup script
   std::set<std::string> guard_calls;                                   // call keys whose guards the derived rows report
+  // --targets-rule (target_rules.hpp): the extraction targets of the second pass chosen by rule from the
+  // first pass ("R-T1", "R-T2" or "R-T1,R-T2"); empty: no targets, as before
+  std::string targets_rule;
 
   // ---- the extended facts F1-F3 (READS, RETURNS, RET_CONSTS, LOOP_EXITS; kz_facts.h revision 6) ----
   // Always on in the profile-free mode (its second pass), on request (--extended-facts) in the

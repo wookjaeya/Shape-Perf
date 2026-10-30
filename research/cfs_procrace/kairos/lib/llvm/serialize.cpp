@@ -965,7 +965,10 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   item("extract.profile", spec.profile_name + " / " + spec.profile_revision, KZ_POLICY_UNSET, KZ_NONE32);
   for (const TargetField& t : spec.fields) {
     const bool from_profile = t.origin.compare(0, 7, "profile") == 0;
-    item("target." + t.field.type + "." + t.field.field, t.origin, from_profile ? KZ_POLICY_FROM_REFERENCE : KZ_POLICY_DECLARED, from_profile ? KZ_NONE32 : prov_for(t.origin));
+    // a target a rule chose (--targets-rule, target_rules.hpp) was entered by nobody: a tool rule, no provenance row
+    const bool by_rule = t.origin.compare(0, 5, "rule ") == 0;
+    item("target." + t.field.type + "." + t.field.field, t.origin, from_profile ? KZ_POLICY_FROM_REFERENCE : by_rule ? KZ_POLICY_UNSET : KZ_POLICY_DECLARED,
+         from_profile || by_rule ? KZ_NONE32 : prov_for(t.origin));
   }
   for (const DeclaredItem& d : spec.declared) item(d.name, d.value, KZ_POLICY_DECLARED, prov_for(d.origin));
   // the assumptions the extraction itself declared (counted in the report)

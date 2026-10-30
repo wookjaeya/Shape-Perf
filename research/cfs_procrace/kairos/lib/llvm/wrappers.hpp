@@ -91,6 +91,8 @@ struct Derivation {
   // the completeness pass: its targets, and whether the second pass's reads name the same fields
   uint32_t completeness_targets = 0;
   bool completeness_same_fields = true;
+  // --targets-rule (target_rules.hpp): the targets the rules chose from the first pass
+  uint32_t rule_t1 = 0, rule_t2 = 0, rule_both = 0, rule_targets = 0, rule_t1_unshared_only = 0, rule_t2_unshared_only = 0;
 };
 
 // Derives the operations from a model read with spec.collect_wrapper_inputs and finalized.

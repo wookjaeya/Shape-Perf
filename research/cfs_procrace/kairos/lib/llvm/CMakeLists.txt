@@ -11,6 +11,8 @@
 #                                                   extended facts F4 and F6
 #   lockset                                         no Clang types: F5 LOCKSET and the writer-set and
 #                                                   L1 (i) rules that do not depend on the targets
+#   target_rules                                    no Clang types: the targets the profile-free mode
+#                                                   chooses by rule (R-T1, R-T2)
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -21,6 +23,7 @@ add_library(kz-llvm STATIC
   finalize.cpp
   argflow.cpp
   lockset.cpp
+  target_rules.cpp
   serialize.cpp
   facts_text.cpp
   facts_query.cpp

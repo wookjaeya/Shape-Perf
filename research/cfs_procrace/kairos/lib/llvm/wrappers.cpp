@@ -10,6 +10,7 @@
 #include "finalize.hpp"
 #include "kz/core/registry.hpp"
 #include "p0.hpp"
+#include "target_rules.hpp"
 
 namespace kzs {
 
@@ -1115,6 +1116,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
                           Model* model, ExtractSpec* spec, Derivation* derivation, std::string* error) {
   FieldStatusTable fields;
   std::vector<FieldRef> first_fields;
+  std::vector<TargetField> rule_fields;
   {
     ExtractSpec first_spec = base;
     first_spec.collect_wrapper_inputs = true;
@@ -1133,9 +1135,24 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
     derivation->lock_vocabulary.insert(ld.lock_keys.begin(), ld.lock_keys.end());
     derivation->lock_vocabulary.insert(ld.unlock_keys.begin(), ld.unlock_keys.end());
     derivation->completeness_targets = fields.targets;
+    if (!base.targets_rule.empty()) {
+      TargetRules rules;
+      if (!parse_target_rules(base.targets_rule, &rules, error)) return false;
+      RuleTargetStats rs;
+      rule_fields = rule_targets(first, rules, &rs);
+      derivation->rule_t1 = rs.t1;
+      derivation->rule_t2 = rs.t2;
+      derivation->rule_both = rs.both;
+      derivation->rule_targets = static_cast<uint32_t>(rule_fields.size());
+      derivation->rule_t1_unshared_only = rs.t1_unshared_only;
+      derivation->rule_t2_unshared_only = rs.t2_unshared_only;
+    }
   }
   *spec = base;
   apply_derivation(*derivation, spec);
+  // the rule targets (none without --targets-rule): the second pass extracts their writer sets
+  for (const TargetField& t : rule_fields)
+    if (!spec->has_field(t.field)) spec->fields.push_back(t);
   if (!extract_units(units, *spec, options, model, error)) return false;
   finalize(model, *spec);
   model->p0_facts = derivation->p0;

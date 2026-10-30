@@ -13,6 +13,7 @@
 #include "kz/core/identity.hpp"
 #include "serialize.hpp"
 #include "spec.hpp"
+#include "target_rules.hpp"
 #include "wrappers.hpp"
 
 namespace kzs_cli {
@@ -100,6 +101,9 @@ std::string derivation_text(const kzs::Derivation& d) {
      << " (callers of a fixed-entry operation left as they are: " << d.fixed_callers_not_followed << ")\n";
   os << "  startup-script entries     spawn calls with a data entry that reach the symbol lookup " << d.script_calls << ", rows " << d.script_rows << " (in the closure "
      << d.script_in_closure << ")\n";
+  if (d.rule_targets != 0 || d.rule_t1_unshared_only != 0 || d.rule_t2_unshared_only != 0)
+    os << "  rule targets               " << d.rule_targets << " (R-T1 " << d.rule_t1 << ", R-T2 " << d.rule_t2 << ", both " << d.rule_both
+       << "; left out, reached only through an unshared base: R-T1 " << d.rule_t1_unshared_only << ", R-T2 " << d.rule_t2_unshared_only << ")\n";
   return os.str();
 }
 
@@ -110,7 +114,7 @@ int cmd_extract(int argc, char** argv) {
   std::string err;
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
-                   "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "-o"},
+                   "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "--targets-rule", "-o"},
                   {"--text", "--verbose", "--no-profile", "--extended-facts"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
@@ -130,6 +134,10 @@ int cmd_extract(int argc, char** argv) {
         std::fprintf(stderr, "kz-static extract: --no-profile takes no vocabulary from the command line (%s)\n", o);
         return 2;
       }
+  }
+  if (args.has("--targets-rule") && !no_profile) {
+    std::fprintf(stderr, "kz-static extract: --targets-rule chooses the targets of the profile-free mode (--no-profile)\n");
+    return 2;
   }
   if (args.has("--basis") && args.has("--source")) {
     std::fprintf(stderr, "kz-static extract: --basis and --source exclude each other\n");
@@ -182,6 +190,14 @@ int cmd_extract(int argc, char** argv) {
     spec.no_profile = true;
     spec.builtin_profile_text = kzs::builtin_profile_text();
     kzs::spec_add_p0_entries(&spec);
+    if (args.has("--targets-rule")) {
+      kzs::TargetRules rules;
+      if (!kzs::parse_target_rules(args.one("--targets-rule"), &rules, &err)) {
+        std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
+        return 2;
+      }
+      spec.targets_rule = rules.text();
+    }
   } else if (!add_cli_vocabulary(args, &spec, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
@@ -258,6 +274,17 @@ int cmd_extract(int argc, char** argv) {
                                                        " lock and unlock operations F5 derives on the first pass (the P0 mutex primitives the program calls among them) are those of the "
                                                        "second pass; the derivation on the second pass gives " +
                                                        std::string(derivation.lock_vocabulary_same ? "the same set (LOCK_OPS `vocabulary`)" : "another set")});
+    if (!spec.targets_rule.empty()) {
+      so.notes.push_back({"extract.targets_rule", spec.targets_rule + " (" + kzs::target_rules_revision() +
+                                                      "): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases "
+                                                      "only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)"});
+      so.notes.push_back({"count.targets_rule", std::to_string(derivation.rule_targets)});
+      so.notes.push_back({"count.targets_rule_t1", std::to_string(derivation.rule_t1)});
+      so.notes.push_back({"count.targets_rule_t2", std::to_string(derivation.rule_t2)});
+      so.notes.push_back({"count.targets_rule_both", std::to_string(derivation.rule_both)});
+      so.notes.push_back({"count.targets_rule_t1_unshared_only", std::to_string(derivation.rule_t1_unshared_only)});
+      so.notes.push_back({"count.targets_rule_t2_unshared_only", std::to_string(derivation.rule_t2_unshared_only)});
+    }
     so.notes.push_back({"extract.completeness_fields_same", derivation.completeness_same_fields
                                                                 ? "yes: the reads of the second pass name the fields of the first, whose completeness pass FIELD_STATUS reports"
                                                                 : "no: the completeness pass is that of the first pass's fields"});

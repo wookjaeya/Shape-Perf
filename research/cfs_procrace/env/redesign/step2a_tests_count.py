@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""step2a_tests_count.py OUT EB [S5 [FIX1]] -- evidence for the completion tests T1-T7 (plan/extraction_design_20261030.md
-§6), the re-measure of ED §2.3 under the rule targets, and the candidate burden of `kz-static relations`; with S5 (the
-outputs of stage S5, kept when the fix stage re-ran the tests), the rows whose verdicts the fix stage changed; with FIX1
-(the outputs of the first fix stage, kept when the second re-ran the tests), the rows whose verdicts the second changed.
+"""step2a_tests_count.py OUT EB [S5 [FIX1 [FIX2]]] -- evidence for the completion tests T1-T7
+(plan/extraction_design_20261030.md §6), the re-measure of ED §2.3 under the rule targets, and the candidate burden of
+`kz-static relations`; with S5 (the outputs of stage S5, kept when the fix stage re-ran the tests), the rows whose
+verdicts the fix stage changed; with FIX1 (the outputs of the first fix stage, kept when the second re-ran the tests),
+the rows whose verdicts the second changed; with FIX2 (the outputs of the second fix stage), those the third changed.
 
 Reads OUT/<build>/NP/{relations.txt,facts.txt,extract.txt} written by step2a_tests.sh (profile-free extraction with
 --targets-rule R-T1,R-T2; no case input).  The case names below are queries of this evaluation script only: they pick
@@ -17,6 +18,7 @@ import sys
 OUT, EB = sys.argv[1], sys.argv[2]
 S5 = sys.argv[3] if len(sys.argv) > 3 else None
 FIX1 = sys.argv[4] if len(sys.argv) > 4 else None
+FIX2 = sys.argv[5] if len(sys.argv) > 5 else None
 CD = os.path.join(OUT, 'count')
 os.makedirs(CD, exist_ok=True)
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
@@ -256,6 +258,20 @@ for b in BUILDS:
         lay[key] += 1
         if 'case:' in v or 'hand-entered' in v:
             bad += 1
+    # rows whose lines name a lock (a lock set that is not empty) and whose P0-unverified names no lock primitive
+    LOCKP = ('pthread_mutex_lock', 'pthread_mutex_unlock', 'pthread_mutex_timedlock', 'pthread_mutex_trylock', 'pthread_cond_wait', 'pthread_cond_timedwait')
+    named_lock = no_prim = 0
+    for (k, rid, s, e) in BLK[b]:
+        if k == 'NS':
+            continue
+        if not find_in(L, s, e, r'(locks \{#|at the call \{#|locks held \{#)'):
+            continue
+        named_lock += 1
+        ls = [l for _, l in find_in(L, s, e, r'^      layers: ')]
+        m = re.search(r' P0-unverified\(([^)]*)\)', ls[0]) if ls else None
+        if not m or not any(p in m.group(1).split(', ') for p in LOCKP):
+            no_prim += 1
+    say('    rows whose lines name a lock: %d; of them without a lock primitive in P0-unverified: %d' % (named_lock, no_prim))
     nsdev = sum(1 for l in L if l.startswith('      namespace layers: ') and 'basis-deviation(' in l)
     say('%s: rows %d, layers %s; rows with a case layer or a hand-entered vocabulary: %d; rows marked basis-deviation %d, rests-on %d, P0-unverified %d; '
         'namespace blocks marked basis-deviation %d' % (b, sum(lay.values()), dict(lay), bad, dev, rests, unv, nsdev))
@@ -351,18 +367,24 @@ for b, pats in byprod.items():
             dep = find_in(REL[b], s, e, r'^      dependency: ')
             say('  %s by-product row %s at %s: %s | %s' % (b, rid, ref(b, s), REL[b][s].strip()[:200], dep[0][1].strip() if dep else '-'))
 with open(os.path.join(CD, 'burden.tsv'), 'w') as f:
-    f.write('build\tA\tB\tC\ttotal\tnamespaces\tcase_rows\tflip_static_possible\tfeasibility_proven_impossible\tnot_graded\n')
+    f.write('build\tA\tB\tC\ttotal\tnamespaces\tcase_rows\tcase_rows_graded\tflip_static_possible\tfeasibility_proven_impossible\tpossible\tundecidable\tnot_graded\n')
     for b in BUILDS:
         L = REL[b]
         n = collections.Counter(k for (k, rid, s, e) in BLK[b])
-        cr = sum(len(rows_where(b, k, p)) for k, p in case_rows[b])
+        crs = [x for k, p in case_rows[b] for x in rows_where(b, k, p)]
+        cr = len(crs)
+        # the case rows that carry a grade (a row `not graded` is no read of the spawn's threads under this revision)
+        crg = sum(1 for (k, rid, s, e) in crs if not find_in(L, s, e, r'^      feasibility: not graded'))
         tot = n['A'] + n['B'] + n['C']
         fp = sum(1 for l in L if l.startswith('      flip: static-possible'))
         pi = sum(1 for l in L if l.startswith('      feasibility: proven-impossible'))
+        po = sum(1 for l in L if l.startswith('      feasibility: possible'))
+        ud = sum(1 for l in L if l.startswith('      feasibility: undecidable'))
         ng = sum(1 for l in L if l.startswith('      feasibility: not graded'))
-        say('%s: A %d, B %d, C %d, total %d (namespace blocks %d); case relation rows %d (%.1f%% of the rows); flip static-possible %d; proven-impossible %d; not graded %d' % (
-            b, n['A'], n['B'], n['C'], tot, n['NS'], cr, 100.0 * cr / tot if tot else 0, fp, pi, ng))
-        f.write('%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n' % (b, n['A'], n['B'], n['C'], tot, n['NS'], cr, fp, pi, ng))
+        say('%s: A %d, B %d, C %d, total %d (namespace blocks %d); case relation rows %d (%.1f%% of the rows), of them graded %d (%.1f%%); flip static-possible %d; '
+            'feasibility proven-impossible %d, possible %d, undecidable %d, not graded %d' % (
+                b, n['A'], n['B'], n['C'], tot, n['NS'], cr, 100.0 * cr / tot if tot else 0, crg, 100.0 * crg / tot if tot else 0, fp, pi, po, ud, ng))
+        f.write('%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n' % (b, n['A'], n['B'], n['C'], tot, n['NS'], cr, crg, fp, pi, po, ud, ng))
 
 # ---------------------------------------------------------------- ED §2.3 under the rule targets
 say('')
@@ -474,6 +496,8 @@ if S5:
     against(S5, 'S5', 'against_s5.tsv')
 if FIX1:
     against(FIX1, 'fix1', 'against_fix1.tsv')
+if FIX2:
+    against(FIX2, 'fix2', 'against_fix2.tsv')
 
 with open(os.path.join(CD, 'summary.tsv'), 'w') as f:
     f.write('build\trows\trows_with_case_layer\n')

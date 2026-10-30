@@ -665,6 +665,120 @@ startup_script {
     KZ_CHECK(has(out, "fx_slots[...] non-constant at argflow.c:38:8 {image-truncated} reach={argument,pointer-field}"));
   }
 
+  // ---- F5 and the target-independent rules (LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS, AWAIT_L1; kz_facts.h revision 8) -
+  // Written with the extended facts: off in the profile-driven mode without --extended-facts, the earlier sections unchanged
+  // with it, the same rows in both modes and whatever the targets.  The old rules of FACT_LOCS and FACT_LOOPS are unchanged.
+  {
+    const fs::path X = work / "lockset";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/lockset.c";
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    const std::string ft = (X / "targets.kz").string(), fs1 = (X / "sibling.kz").string(), fs2 = (X / "alone.kz").string();
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay", fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_LOCK_OPS), static_cast<uint32_t>(KZ_SEC_LOCK_IDS), static_cast<uint32_t>(KZ_SEC_LOCKSET),
+                               static_cast<uint32_t>(KZ_SEC_FIELD_STATUS), static_cast<uint32_t>(KZ_SEC_AWAIT_L1)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    const std::string newer = " --section lockops --section lockids --section lockset --section fstatus --section awaits";
+    std::string vn, vp;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + newer, &vn), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + newer, &vp), 0);
+    KZ_CHECK_EQ(vn, vp);
+    // LOCK_OPS: an operation that holds the lock exactly when it returns 0, one that holds it on every return (under the
+    // declared assumption that an acquisition succeeds), a try, a release; identities over the parameters
+    KZ_CHECK(has(vn, "fx_take acquire result-conditional success=0 lock &fx_mtab[$0].id may=fx_mrec.id {vocabulary,assumes-success,parameter-identity}"));
+    KZ_CHECK(has(vn, "fx_lock_shared acquire every-return lock &fx_mtab[fx_g.mutex].id may=fx_mrec.id {vocabulary,assumes-success}"));
+    KZ_CHECK(has(vn, "chain fx_lock_shared -> fx_take -> pthread_mutex_lock"));
+    KZ_CHECK(has(vn, "fx_try_take acquire try success=0 lock &fx_mtab[$0].id may=fx_mrec.id {parameter-identity}"));
+    KZ_CHECK(has(vn, "fx_unlock_shared release every-return lock &fx_mtab[fx_g.mutex].id"));
+    // LOCK_IDS: a handle written once by an out-pointer call in a function that runs once is a static instance; one
+    // written by a function called twice is not
+    KZ_CHECK(has(vn, "#0 &fx_mtab[fx_g.mutex].id closed static-instance {address-of-global,reads-value} may=fx_mrec.id value-of=fx_shared.mutex object=fx_g writer-instances=1"));
+    KZ_CHECK(has(vn, "#1 &fx_mtab[fx_g.other].id closed not-static {reads-value} may=fx_mrec.id value-of=fx_shared.other object=fx_g writer-instances=1 (fx_shared.other: 1 writer "
+                     "instance(s), not one that runs once)"));
+    // LOCKSET: the spawn between two regions holds nothing, the writes in the second region hold the lock acquired there,
+    // the failure branch of the acquisition holds nothing, a try holds on its success branch
+    KZ_CHECK(has(vn, "call site 12 lockset.c:94:7 in fx_app_create held=0 {}"));
+    KZ_CHECK(has(vn, "write fx_shared.count at lockset.c:97:3 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}"));
+    KZ_CHECK(has(vn, "call site 14 lockset.c:98:9 in fx_app_create held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:95:3] {}"));
+    KZ_CHECK(has(vn, "call site 4 lockset.c:71:11 in fx_lock_shared held=0 {failure-path}"));
+    KZ_CHECK(has(vn, "read read 10 at lockset.c:116:14 in fx_try_reader held=1 [#0 &fx_mtab[fx_g.mutex].id] acquired-at=[lockset.c:115:7] {}"));
+    KZ_CHECK(has(vn, "read read 7 at lockset.c:108:12 in fx_other_reader held=1 [#1 &fx_mtab[fx_g.other].id]"));
+    // FIELD_STATUS: the sibling's escaped address exposes the type only under the type-level rule
+    KZ_CHECK(has(vn, "fx_pair.a per-field=writer-set-complete type-level=DISABLED writers=1 (direct 1, data 0, out-pointer 0, init 1) instances=1 one-instance-once hits: "
+                     "escape 0, cast 0, union 0, unknown 0, other fields 1; untyped sites 1 {sibling-exposed,untyped-in-program} by main"));
+    KZ_CHECK(has(vn, "fx_pair.b per-field=DISABLED type-level=DISABLED"));
+    KZ_CHECK(has(vn, "fx_shared.count per-field=writer-set-complete type-level=writer-set-complete writers=2 (direct 2, data 0, out-pointer 0, init 1) instances=2 not-once"));
+    // AWAIT_L1: the predicate reads a field through the function it calls; the reads hold one lock acquired at one call
+    KZ_CHECK(has(vn, "in fx_wait_state relevant=[field:fx_app.state, field:fx_app.used, field:fx_shared.apps] via-callee=[fx_app.used] L1(ii)=one-lock-region lock #0 "
+                     "&fx_mtab[fx_g.mutex].id L1(i) per-field=holds type-level=holds {via-callee,lock-static}"));
+    KZ_CHECK(has(vn, "in fx_spin_count relevant=[field:fx_shared.count] L1(ii)=one-lock-region lock #0 &fx_mtab[fx_g.mutex].id L1(i) per-field=fails type-level=fails"));
+    KZ_CHECK(has(vn, "star-closed: L1 (i) fails: the body writes fx_shared.count by fx_spin_count at lockset.c:154:5"));
+    // the BASIS records: the assumptions and the counts
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts_f5 = F5 LOCK_OPS, LOCK_IDS and LOCKSET, FIELD_STATUS, AWAIT_L1 (kz_facts.h revision 8)"));
+    KZ_CHECK(has(out, "assume.lock_acquisition_succeeds = an acquisition that is not a try succeeds"));
+    KZ_CHECK(has(out, "assume.no_cross_member_pointer_arithmetic = "));
+    KZ_CHECK(has(out, "count.field_status = 12 fields (targets of the completeness pass 12)"));
+    KZ_CHECK(has(out, "extract.lock_vocabulary = "));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extended_facts_f5") && !has(out, "assume.lock_acquisition_succeeds"));
+    // whatever the targets: with the sibling as a target the old rule of FACT_LOCS disables the field, FIELD_STATUS does not
+    // change; with the field alone the old rule calls it complete
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --delay-op fx_delay --extended-facts --target fx_pair.a --target fx_pair.b --target fx_shared.count", ft), 0);
+    std::string vt;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(ft) + " --section fstatus --section lockids --section awaits", &vt), 0);
+    std::string vf;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section fstatus --section lockids --section awaits", &vf), 0);
+    auto nosite = [](std::string t) {
+      std::string o;
+      for (size_t i = 0; i < t.size();) {
+        if (t.compare(i, 5, "site ") == 0) {
+          size_t j = i + 5;
+          while (j < t.size() && t[j] >= '0' && t[j] <= '9') ++j;
+          if (j > i + 5) {
+            i = j;
+            continue;
+          }
+        }
+        o += t[i++];
+      }
+      return o;
+    };
+    KZ_CHECK_EQ(nosite(vt), nosite(vf));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --target fx_pair.a --target fx_pair.b", fs1), 0);
+    KZ_CHECK(has(out, "location fx_pair.a   writers 1") && has(out, "-> DISABLED"));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --target fx_pair.a", fs2), 0);
+    KZ_CHECK(has(out, "location fx_pair.a   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown "
+                      "effect 0  -> writer-set-complete"));
+    // the profile-free second pass has the derived lock and unlock operations in its vocabulary
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section calls", &out), 0);
+    KZ_CHECK(has(out, "lockset.c:82:3 fx_get_id -> fx_lock_shared direct {intra-tu,lock-op}"));
+    KZ_CHECK(has(out, "lockset.c:84:3 fx_get_id -> fx_unlock_shared direct {intra-tu,unlock-op}"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

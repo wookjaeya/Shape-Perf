@@ -46,6 +46,8 @@ const std::vector<std::string> kProfileFreeSections = {"files", "functions", "ca
 const std::vector<std::string> kExtendedSections = {"functions", "loops", "reads", "returns", "retconsts", "loopexits"};
 // The extended facts F4 and F6 (written with those of F1-F3).
 const std::vector<std::string> kFlowSections = {"functions", "argflow", "paramflow", "ptrfields", "gimages"};
+// F5 and the target-independent rules (written with those of F1-F3).
+const std::vector<std::string> kLockSections = {"functions", "lockops", "lockids", "lockset", "fstatus", "awaits"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -64,6 +66,8 @@ const std::vector<Case>& cases() {
       {"flowfacts_np", "flowfacts.c", {}, kExtendedSections, true},
       {"argflow", "argflow.c", {"--extended-facts"}, kFlowSections},
       {"argflow_np", "argflow.c", {}, kFlowSections, true},
+      {"lockset", "lockset.c", {"--extended-facts", "--delay-op", "fx_delay"}, kLockSections},
+      {"lockset_np", "lockset.c", {}, kLockSections, true},
   };
   return all;
 }

@@ -135,6 +135,7 @@ class Rel {
   }
 
   // ---------------------------------------------------------------- expressions
+  // the text of a tree as `kz-static show` writes it (with its 40-level print limit)
   std::string ex(uint32_t root, int depth = 0) const {
     if (root == kN) return "-";
     if (root >= exprs_.size()) return "expr#" + std::to_string(root) + "?";
@@ -155,13 +156,14 @@ class Rel {
     if (e.b != kN) t += " " + ex(e.b, depth + 1);
     return t + ")";
   }
-  // pre-order visit; f returns false to stop descending
-  void visit(uint32_t root, const std::function<void(const kz_fact_expr&)>& f, int depth = 0) const {
-    if (root == kN || root >= exprs_.size() || depth > 200) return;
+  // pre-order visit of a tree.  The writer numbers the nodes post-order (serialize.cpp ExprTable), so a child
+  // has a smaller index than its parent; a child that does not is not followed, and every walk ends.
+  void visit(uint32_t root, const std::function<void(const kz_fact_expr&)>& f) const {
+    if (root == kN || root >= exprs_.size()) return;
     const kz_fact_expr& e = exprs_[root];
     f(e);
-    visit(e.a, f, depth + 1);
-    visit(e.b, f, depth + 1);
+    if (e.a < root) visit(e.a, f);
+    if (e.b < root) visit(e.b, f);
   }
   bool has_param(uint32_t root, uint32_t k) const {
     bool hit = false;
@@ -200,18 +202,20 @@ class Rel {
   }
   std::vector<uint32_t> seq(uint32_t root) const {
     std::vector<uint32_t> out;
-    for (uint32_t cur = root; cur != kN && cur < exprs_.size() && out.size() < 100000;) {
+    for (uint32_t cur = root; cur != kN && cur < exprs_.size();) {
       const kz_fact_expr& e = exprs_[cur];
       if (e.op != KZ_EXPR_OP_SEQ) break;
-      if (e.a != kN && e.a < exprs_.size()) out.push_back(static_cast<uint32_t>(exprs_[e.a].value));
+      if (e.a != kN && e.a < cur) out.push_back(static_cast<uint32_t>(exprs_[e.a].value));
+      if (e.b != kN && e.b >= cur) break;
       cur = e.b;
     }
     return out;
   }
   // a condition or a value under a substitution; unknown where the facts do not decide it
-  Val eval(uint32_t root, const Subst& s, std::set<std::string>* unknown, int depth = 0) const {
-    if (root == kN || root >= exprs_.size() || depth > 200) return Val{};
+  Val eval(uint32_t root, const Subst& s, std::set<std::string>* unknown) const {
+    if (root == kN || root >= exprs_.size()) return Val{};
     const kz_fact_expr& e = exprs_[root];
+    if ((e.a != kN && e.a >= root) || (e.b != kN && e.b >= root)) return Val{};  // not post-order: not followed (see visit)
     auto un = [&](const std::string& why) {
       if (unknown != nullptr) unknown->insert(why);
       return Val{};
@@ -233,12 +237,12 @@ class Rel {
         return un(enum_text("KZ_EXPR_REF", e.flags) + " " + str(e.name));
       }
       case KZ_EXPR_OP_NOT: {
-        const Val a = eval(e.a, s, unknown, depth + 1);
+        const Val a = eval(e.a, s, unknown);
         return a.known ? known(a.v == 0) : Val{};
       }
       case KZ_EXPR_OP_AND:
       case KZ_EXPR_OP_OR: {
-        const Val a = eval(e.a, s, unknown, depth + 1), b = eval(e.b, s, unknown, depth + 1);
+        const Val a = eval(e.a, s, unknown), b = eval(e.b, s, unknown);
         const bool is_and = e.op == KZ_EXPR_OP_AND;
         if (is_and && ((a.known && a.v == 0) || (b.known && b.v == 0))) return known(0);
         if (!is_and && ((a.known && a.v != 0) || (b.known && b.v != 0))) return known(1);
@@ -251,7 +255,7 @@ class Rel {
       case KZ_EXPR_OP_LE:
       case KZ_EXPR_OP_GT:
       case KZ_EXPR_OP_GE: {
-        const Val a = eval(e.a, s, unknown, depth + 1), b = eval(e.b, s, unknown, depth + 1);
+        const Val a = eval(e.a, s, unknown), b = eval(e.b, s, unknown);
         if (!a.known || !b.known) return Val{};
         switch (e.op) {
           case KZ_EXPR_OP_EQ: return known(a.v == b.v);

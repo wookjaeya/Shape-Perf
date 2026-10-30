@@ -4,11 +4,12 @@
 #   fixtures/        small self-contained C programs, one for each kind of fact; each is compiled by the
 #                    C compiler of the build with -std=c99 -pedantic -Wall -Wextra -Werror, and read by
 #                    kz-static with -std=c99 -pedantic (static_fixture_compile_*, static_golden_*);
-#                    clobber.c is read only (see below)
+#                    clobber.c is read only (see below); wrappers.c is read in the profile-free mode
+#                    (extract --no-profile, no fixture profile)
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
-#                    synthetic program)
+#                    synthetic program, the P0 table and the wrapper derivation of the profile-free mode)
 #   static_golden    the golden driver; `core` runs on the pinned bundle and is skipped (exit 77) where
 #                    the bundle or its build is not there
 #
@@ -29,7 +30,7 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers)
 set(kz_golden_fixtures ${kz_fixtures} clobber)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
@@ -67,7 +68,7 @@ add_test(NAME static_golden_core_cpu1
 set_tests_properties(static_golden_core_cpu1 PROPERTIES LABELS "static;golden;integration" SKIP_RETURN_CODE 77 TIMEOUT 600)
 
 # ---- unit tests ---------------------------------------------------------------------------------------------
-foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll)
+foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll test_static_wrappers)
   kz_add_unit_test(${kz_name} SOURCES ${kz_name}.cpp LIBS kz-llvm kz-testsupport LABEL static)
 endforeach()
 

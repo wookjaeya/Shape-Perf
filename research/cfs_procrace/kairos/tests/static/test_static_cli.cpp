@@ -1,7 +1,7 @@
 // The kz-static command line: usage errors, a unit that does not parse, damaged inputs, and the
 // whole basis -> extract path on a small synthetic program (two units, a link command, a table,
-// a startup script, a source tree with a commit), and a closure of an executable with the
-// modules its startup script loads (recipe `module`).
+// a startup script, a source tree with a commit), a closure of an executable with the
+// modules its startup script loads (recipe `module`), and the profile-free mode on such a closure.
 //
 //   test_static_cli <kz-static> <fixtures-dir> <objects-dir> <profile-dir> <c-compiler> <work-dir>
 #include <sys/wait.h>
@@ -373,6 +373,103 @@ startup_script {
     KZ_CHECK(has(out, "module[myapp].link.output_is_the_loaded_file = no:"));
     KZ_CHECK(has(out, "module myapp not linked: the bytes the link wrote are not the bytes the script loads"));
     KZ_CHECK(has(out, "translation units          3"));
+  }
+
+  // ---- the profile-free mode (basis/extract --no-profile) --------------------------------------------
+  // No profile and no vocabulary: the built-in profile, the P0 table, the build and the startup-script
+  // block of the recipe.  The executable starts a task through a wrapper of pthread_create whose entry
+  // is stored in a global and called by a trampoline; the loader looks the application's entry up by
+  // name (dlsym) and passes it on as an integer converted to a function pointer.
+  {
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --profile " + q(profile) + " --source x.c -o x", &out), 2);
+    KZ_CHECK(has(out, "--profile and --no-profile exclude each other"));
+    for (const char* o : {"--target T.f", "--delay-op f", "--lock-op f", "--unlock-op f", "--spawn-op f", "--terminal-op f", "--poll-fn f"}) {
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source x.c -o x " + o, &out), 2);
+      KZ_CHECK(has(out, "--no-profile takes no vocabulary from the command line"));
+    }
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile --profile " + q(profile) + " --compile-db a --build-dir b --bundle-root c -o x", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile -o x", &out), 2);
+    const fs::path N = work / "noprof";
+    for (const char* d : {"src", "obj", "cf", "mods/myapp"}) fs::create_directories(N / d);
+    write(N / "src/core_main.c",
+          "#define NONVOL_MOUNT \"/cf\"\n#define MODULE_EXT \".so\"\n#define STARTUP_FILE \"/cf/start.scr\"\n"
+          "const char *nonvol_mount(void) { return NONVOL_MOUNT; }\nconst char *module_ext(void) { return MODULE_EXT; }\n"
+          "const char *startup_file(void) { return STARTUP_FILE; }\nint load_app(const char *symbol);\nint main(void) { return load_app(\"app_main\"); }\n");
+    write(N / "src/core_ldr.c",
+          "typedef unsigned long thr_t;\nint pthread_create(thr_t *t, const void *attr, void *(*start)(void *), void *arg);\n"
+          "void *dlsym(void *handle, const char *name);\ntypedef void (*entry_t)(void);\nentry_t task_entry;\n"
+          "static void *trampoline(void *arg) { (void)arg; task_entry(); return 0; }\n"
+          "int task_create(entry_t e) { thr_t t; task_entry = e; return pthread_create(&t, 0, trampoline, 0); }\n"
+          "unsigned long lookup(const char *name) { return (unsigned long)dlsym((void *)0, name); }\n"
+          "int load_app(const char *symbol) { return task_create((entry_t)lookup(symbol)); }\n");
+    write(N / "src/app.c", "void app_main(void) {}\n");
+    std::string cdb = "[\n";
+    for (const char* n : {"core_main", "core_ldr", "app"}) {
+      const std::string src = (N / "src" / (std::string(n) + ".c")).string();
+      const std::string cmd = cc + " -std=c99 -fPIC -c " + src + " -o obj/" + n + ".o";
+      KZ_CHECK_EQ(run("cd " + q(N.string()) + " && " + cmd, &out), 0);
+      cdb += std::string(cdb.size() > 2 ? ",\n" : "") + "{\"directory\": \"" + N.string() + "\", \"command\": \"" + cmd + "\", \"file\": \"" + src + "\"}";
+    }
+    write(N / "compile_commands.json", cdb + "\n]\n");
+    write(N / "link_core.txt", cc + " -rdynamic -o core obj/core_main.o obj/core_ldr.o\n");
+    write(N / "mods/myapp/link.txt", cc + " -shared -o myapp.so ../../obj/app.o\n");
+    KZ_CHECK_EQ(run("cd " + q(N.string()) + " && " + read(N / "link_core.txt"), &out), 0);
+    KZ_CHECK_EQ(run("cd " + q((N / "mods/myapp").string()) + " && " + read(N / "mods/myapp/link.txt"), &out), 0);
+    fs::copy_file(N / "mods/myapp/myapp.so", N / "cf/myapp.so");
+    write(N / "cf/start.scr", "APP, myapp, app_main, MY_APP, 50;\n");
+    write(N / "recipe.kzb", R"(kzb 1;
+name "profile-free closure";
+link "link_core.txt";
+binary "core";
+module "myapp" link "mods/myapp/link.txt";
+startup_script {
+  reset POWERON;
+  rule POWERON nonvolatile;
+  file nonvolatile const "STARTUP_FILE" in "src/core_main.c";
+  mount "/cf" "cf";
+  entry library "LIB" global;
+  entry app "APP" local;
+  module_file field 1 path const "NONVOL_MOUNT" extension const "MODULE_EXT" in "src/core_main.c";
+}
+)");
+    const std::string nb = (N / "basis.kz").string(), nf = (N / "facts.kz").string(), nf2 = (N / "facts2.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " basis --no-profile --compile-db " + q((N / "compile_commands.json").string()) + " --build-dir " + q(N.string()) + " --bundle-root " + q(N.string()) +
+                        " --recipe " + q((N / "recipe.kzb").string()) + " --text -o " + q(nb),
+                    &out),
+                0);
+    KZ_CHECK(has(out, "profile.mode = profile-free (--no-profile): the built-in profile phi 1; profile \"kz-static-builtin-minimal\";"));
+    KZ_CHECK(has(out, "startup.entry[0] = app myapp, app_main, MY_APP, 50"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " -o " + q(nf), &out), 0);
+    KZ_CHECK(has(out, "profile-free mode            built-in profile, "));
+    KZ_CHECK(has(out, "startup-script entries     spawn calls with a data entry that reach the symbol lookup 1, rows 1 (in the closure 1)"));
+    KZ_CHECK(has(out, "spawn operations (F7)      entry-argument 0, called-by-entry 1, fixed-entry 0"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --basis " + q(nb) + " -o " + q(nf2), &out), 0);
+    KZ_CHECK_EQ(read(nf), read(nf2));
+    // the facts carry the built-in profile's hash, as the basis does, and record the mode
+    kz::Container nbc, nfc;
+    KZ_CHECK_OK(kz::Container::read_file(nb, &nbc));
+    KZ_CHECK_OK(kz::Container::read_file(nf, &nfc));
+    KZ_CHECK(nfc.profile_hash() == nbc.profile_hash());
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(nf) + " --section basis --section spawnwrap --section targets --section p0", &out), 0);
+    KZ_CHECK(has(out, "extract.mode = profile-free (--no-profile)"));
+    KZ_CHECK(has(out, "extract.builtin_profile = phi 1; profile \"kz-static-builtin-minimal\"; (profile hash in the header)"));
+    KZ_CHECK(has(out, "p0.pthread_create = thread-create; POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624"));
+    KZ_CHECK(has(out, "task_create called-by-entry param 0 {vocabulary}"));
+    KZ_CHECK(has(out, "load_app script-entry param 0 {}"));
+    KZ_CHECK(has(out, "entry app_main"));
+    KZ_CHECK(has(out, "chain load_app -> lookup -> dlsym"));
+    KZ_CHECK(has(out, "via startup.entry[0] = app myapp, app_main, MY_APP, 50"));
+    KZ_CHECK(has(out, "in load_app spawn-entry -> app_main via "));
+    KZ_CHECK(has(out, "startup-script entries through the symbol lookup of 1"));
+    KZ_CHECK(has(out, "dlsym symbol-lookup (dynamic loading) calls=1 {}"));
+    // a facts container of the profile-driven mode has none of the three sections, and its view shows none
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --basis " + q(nb) + " -o " + q((N / "facts_prof.kz").string()), &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((N / "facts_prof.kz").string()), &out), 0);
+    KZ_CHECK(!has(out, "[p0]") && !has(out, "[derived]") && !has(out, "[spawnwrap]") && !has(out, "extract.mode"));
+    kz::Container pfc;
+    KZ_CHECK_OK(kz::Container::read_file((N / "facts_prof.kz").string(), &pfc));
+    KZ_CHECK(pfc.find_section(KZ_SEC_P0_TABLE) == nullptr && pfc.find_section(KZ_SEC_OP_DERIV) == nullptr && pfc.find_section(KZ_SEC_SPAWN_WRAP) == nullptr);
+    KZ_CHECK(nfc.find_section(KZ_SEC_P0_TABLE) != nullptr && nfc.find_section(KZ_SEC_OP_DERIV) != nullptr && nfc.find_section(KZ_SEC_SPAWN_WRAP) != nullptr);
   }
 
   fs::remove_all(work);

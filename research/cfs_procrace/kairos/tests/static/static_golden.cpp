@@ -35,10 +35,13 @@ struct Case {
   const char* source;
   std::vector<std::string> options;   // extra kz-static options
   std::vector<std::string> sections;  // the sections of the text view
+  bool no_profile = false;            // extract --no-profile instead of the fixture profile
 };
 
 // The sections that carry facts; `basis` (tool hash, counts) is left out, it changes with the tool.
 const std::vector<std::string> kFactSections = {"files", "functions", "calls", "derives", "loops", "iters", "order", "init", "consts", "writers", "atype", "locs", "targets", "spawnparams", "image", "terminals", "outcalls", "fwrites"};
+// The profile-free mode adds its three sections.
+const std::vector<std::string> kProfileFreeSections = {"files", "functions", "calls", "loops", "consts", "targets", "spawnparams", "terminals", "fwrites", "p0", "derived", "spawnwrap"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -52,6 +55,7 @@ const std::vector<Case>& cases() {
                             "--target", "Outp.id", "--target", "Laund.id"},
        kFactSections},
       {"clobber", "clobber.c", {"--target", "Any.id", "--target", "Far.id"}, kFactSections},
+      {"wrappers", "wrappers.c", {}, kProfileFreeSections, true},
   };
   return all;
 }
@@ -142,8 +146,9 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
   std::string options;
   for (const std::string& o : c.options) options += " " + quote(o);
   auto extract = [&](const std::string& out, std::string* log) {
-    return run(quote(tool) + " extract --profile " + quote(profile) + " --source " + quote(fixtures + "/" + c.source) + " --root " + quote(fixtures) + " -o " + quote(out) +
-                   options + " -- -std=c99 -pedantic",
+    const std::string prof = c.no_profile ? std::string(" --no-profile") : " --profile " + quote(profile);
+    return run(quote(tool) + " extract" + prof + " --source " + quote(fixtures + "/" + c.source) + " --root " + quote(fixtures) + " -o " + quote(out) + options +
+                   " -- -std=c99 -pedantic",
                log);
   };
   std::string log1, log2;

@@ -1,0 +1,349 @@
+extract
+  translation units          1
+  functions                  31 (bodies read 22, in system headers skipped 0)
+  call sites                 32
+  indirect calls             1 (resolved 1, unresolved 0)
+  spawn calls                5 (entry resolved 4)
+  loops                      6 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 1, await 0, star-closed 5
+  spawn parameters           2, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  hand-entered inputs        38 (built-in P0 table 38, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 38 P0 entries (P0 table revision 1 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 22, control-flow graphs 22, call-graph components 21 (recursive 1)
+  delay operations (F8)      must 2 (vocabulary), may 7 (not vocabulary; loops whose own body calls one: 1)
+  terminal operations (F8)   must 3, noreturn 2, may 3 (all vocabulary)
+  spawn operations (F7)      entry-argument 2, called-by-entry 1, fixed-entry 2 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 1, rows 0 (in the closure 0)
+facts-view 1
+[files] 1
+  0 wrappers.c eebdb993c162 4028
+[functions] 31
+  fn 0 abort wrappers.c:13 params=0 {builtin}
+  fn 1 dlsym wrappers.c:15 params=2 {}
+  fn 2 exit wrappers.c:12 params=1 {builtin}
+  fn 3 fx_app_create wrappers.c:128-128 params=2 {defined}
+  fn 4 fx_backoff wrappers.c:35-38 params=1 {defined}
+  fn 5 fx_check wrappers.c:80-83 params=1 {defined}
+  fn 6 fx_delay wrappers.c:33-33 params=1 {defined}
+  fn 7 fx_even wrappers.c:97-97 params=1 {defined}
+  fn 8 fx_exit_app wrappers.c:74-77 params=1 {defined}
+  fn 9 fx_load_app wrappers.c:139-142 params=2 {defined}
+  fn 10 fx_lookup wrappers.c:134-137 params=1 {defined}
+  fn 11 fx_odd wrappers.c:93-96 params=1 {defined}
+  fn 12 fx_panic wrappers.c:66-69 params=1 {defined}
+  fn 13 fx_retry wrappers.c:43-51 params=0 {defined}
+  fn 14 fx_serve wrappers.c:86-89 params=0 {defined}
+  fn 15 fx_sleep_impl wrappers.c:22-31 params=1 {defined}
+  fn 16 fx_spin wrappers.c:60-63 params=0 {defined}
+  fn 17 fx_start wrappers.c:131-131 params=0 {defined}
+  fn 18 fx_task_create wrappers.c:119-126 params=2 {defined}
+  fn 19 fx_task_create_impl wrappers.c:117-117 params=1 {defined,static}
+  fn 20 fx_task_exit wrappers.c:71-71 params=0 {defined}
+  fn 21 fx_thread_create wrappers.c:108-108 params=3 {defined}
+  fn 22 fx_trampoline wrappers.c:110-115 params=1 {defined,static,address-taken}
+  fn 23 fx_try wrappers.c:40 params=0 {}
+  fn 24 fx_wait_ready wrappers.c:55-57 params=0 {defined}
+  fn 25 fx_worker wrappers.c:130-130 params=0 {defined,static,address-taken}
+  fn 26 nanosleep wrappers.c:11 params=2 {}
+  fn 27 pthread_create wrappers.c:10 params=4 {}
+  fn 28 pthread_exit wrappers.c:14 params=1 {}
+  fn 29 pthread_mutex_lock wrappers.c:16 params=1 {}
+  fn 30 pthread_mutex_unlock wrappers.c:17 params=1 {}
+[calls] 32
+  site 1 wrappers.c:28:10 fx_sleep_impl -> nanosleep direct {result-used,result-tested,in-loop,delay-op} loop=0 depth=1
+      arg 0:addr-of-object t
+      arg 1:addr-of-object t
+  site 2 wrappers.c:33:36 fx_delay -> fx_sleep_impl direct {intra-tu,result-used,delay-op}
+      arg 0:top ~ms
+  site 3 wrappers.c:36:20 fx_backoff -> fx_delay direct {intra-tu,result-used,delay-op}
+      arg 0:const 10 10u
+  site 5 wrappers.c:46:10 fx_retry -> fx_try direct {result-used,result-tested,in-loop} loop=1 depth=1
+  site 6 wrappers.c:48:5 fx_retry -> fx_delay direct {intra-tu,in-loop,delay-op} loop=1 depth=1
+      arg 0:const 100 100u
+  site 8 wrappers.c:56:25 fx_wait_ready -> fx_delay direct {intra-tu,in-loop,delay-op} loop=2 depth=1
+      arg 0:const 1 1u
+  site 10 wrappers.c:62:15 fx_spin -> fx_try direct {result-used,result-tested,in-loop} loop=3 depth=1
+  site 11 wrappers.c:62:35 fx_spin -> fx_backoff direct {intra-tu,in-loop} loop=3 depth=1
+      arg 0:top ~n
+  site 12 wrappers.c:67:17 fx_panic -> exit direct {terminal-op}
+      arg 0:top ~code
+  site 13 wrappers.c:68:3 fx_panic -> abort direct {terminal-op}
+  site 14 wrappers.c:71:27 fx_task_exit -> pthread_exit direct {terminal-op}
+      arg 0:const 0 (void *)0
+  site 15 wrappers.c:75:20 fx_exit_app -> fx_panic direct {intra-tu,terminal-op}
+      arg 0:top ~status
+  site 17 wrappers.c:76:12 fx_exit_app -> fx_delay direct {intra-tu,in-loop,delay-op} loop=4 depth=1
+      arg 0:const 500 500u
+  site 18 wrappers.c:81:12 fx_check -> fx_task_exit direct {intra-tu,terminal-op}
+  site 20 wrappers.c:88:9 fx_serve -> fx_try direct {result-used,result-tested,in-loop} loop=5 depth=1
+  site 21 wrappers.c:88:23 fx_serve -> fx_panic direct {intra-tu,in-loop,terminal-op} loop=5 depth=1
+      arg 0:const 2 2
+  site 22 wrappers.c:94:14 fx_odd -> fx_panic direct {intra-tu,terminal-op}
+      arg 0:const 3 3
+  site 23 wrappers.c:95:23 fx_odd -> fx_even direct {intra-tu,result-used,result-tested,terminal-op}
+      arg 0:top ~n - 1
+  site 24 wrappers.c:97:42 fx_even -> fx_odd direct {intra-tu,result-used,result-tested,terminal-op}
+      arg 0:top ~n - 1
+  site 25 wrappers.c:108:83 fx_thread_create -> pthread_create direct {result-used,spawn-op}
+      arg 0:top ~id
+      arg 1:const 0 0
+      arg 2:top ~start
+      arg 3:top ~arg
+  site 26 wrappers.c:112:3 fx_trampoline@wrappers.c:110 -> <indirect> indirect {}
+  site 27 wrappers.c:113:3 fx_trampoline@wrappers.c:110 -> fx_task_exit direct {intra-tu,terminal-op}
+  site 28 wrappers.c:117:51 fx_task_create_impl@wrappers.c:117 -> fx_thread_create direct {intra-tu,result-used,spawn-op}
+      arg 0:addr-of-field &fx_tasks[slot].id of fx_task.id
+      arg 1:function fx_trampoline fn=fx_trampoline@wrappers.c:110
+      arg 2:const 0 (void *)0
+  site 29 wrappers.c:121:3 fx_task_create -> pthread_mutex_lock direct {lock-op}
+      arg 0:addr-of-object fx_lock_word
+  site 30 wrappers.c:123:3 fx_task_create -> pthread_mutex_unlock direct {unlock-op}
+      arg 0:addr-of-object fx_lock_word
+  site 31 wrappers.c:124:8 fx_task_create -> fx_task_create_impl direct {intra-tu,result-used}
+      arg 0:top ~slot
+  site 32 wrappers.c:128:58 fx_app_create -> fx_task_create direct {intra-tu,result-used,spawn-op}
+      arg 0:top ~slot
+      arg 1:top ~main_fn
+  site 33 wrappers.c:130:31 fx_worker@wrappers.c:130 -> fx_wait_ready direct {intra-tu}
+  site 34 wrappers.c:131:23 fx_start -> fx_app_create direct {intra-tu,spawn-op}
+      arg 0:const 1 1
+      arg 1:function fx_worker fn=fx_worker@wrappers.c:130
+  site 35 wrappers.c:135:13 fx_lookup -> dlsym direct {result-used}
+      arg 0:const 0 (void *)0
+      arg 1:top ~name
+  site 36 wrappers.c:140:24 fx_load_app -> fx_lookup direct {intra-tu,result-used}
+      arg 0:top ~symbol
+  site 37 wrappers.c:141:10 fx_load_app -> fx_task_create direct {intra-tu,result-used,spawn-op}
+      arg 0:top ~slot
+      arg 1:top ~(fx_entry_t)addr
+[loops] 6
+  loop 0 site 0 wrappers.c:27:3 in fx_sleep_impl depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 1
+      exit (not (and (eq local:rc -1) (ne global:fx_interrupted 0)))
+      mod [local:rc, (call-result nanosleep)]
+      condition-exits (not (and (eq local:rc -1) (ne global:fx_interrupted 0)))
+      rule star-closed {delay-in-body,mod-incomplete}: star-closed, unmodelled-sync: no recognised predicate (the condition reads the local rc, which is not a recognised counter: it is defined at wrappers.c:28:8 otherwise than by one reset to 0 and increments in one inner loop)
+  loop 1 site 4 wrappers.c:45:3 in fx_retry depth=1 count-bounded trip=upper-bound(5) exits=1 calls=2
+      delay-call site 6
+      exit (or (not (lt local:i 5)) (and (lt local:i 5) (ne local:rc -17)))
+      mod [local:i, local:rc, (call-result fx_delay), (call-result fx_try)]
+      condition-exits (or (not (lt local:i 5)) (and (lt local:i 5) (ne local:rc -17)))
+      rule unroll {delay-in-body}: unrolled: 5 iterations from the constant bound, with early exits; delay-paced: the failing outcome of the last attempt is a time-based transition
+  loop 2 site 7 wrappers.c:56:3 in fx_wait_ready depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 8
+      exit (not (eq global:fx_ready 0))
+      mod [(call-result fx_delay)]
+      condition-exits (not (eq global:fx_ready 0))
+      predicate direct-test (not (eq global:fx_ready 0))
+      rule star-closed {delay-in-body,mod-incomplete}: star-closed, unmodelled-sync: L1 (ii) fails: the test reads are not in one critical section of one lock, nor one atomic read
+  loop 3 site 9 wrappers.c:62:3 in fx_spin depth=1 other trip=unknown exits=0 calls=2
+      rule star-closed {}: star-closed: no exact trip count
+  loop 4 site 16 wrappers.c:76:3 in fx_exit_app depth=1 poll trip=unknown exits=0 calls=1
+      delay-call site 17
+      mod [(call-result fx_delay)]
+      rule star-closed {delay-in-body,L1-i}: star-closed, unmodelled-sync: no recognised predicate (the loop has no exit)
+  loop 5 site 19 wrappers.c:87:3 in fx_serve depth=1 other trip=unknown exits=0 calls=2
+      rule star-closed {}: star-closed: no exact trip count
+[consts] 1
+  5 = 5 at wrappers.c:45
+[targets] 6
+  site 25 wrappers.c:108:83 in fx_thread_create spawn-entry -> fx_trampoline@wrappers.c:110 via P:fx_thread_create#1 of 1
+  site 26 wrappers.c:112:3 in fx_trampoline@wrappers.c:110 indirect-call -> fx_worker@wrappers.c:130 via fx_task.entry of 1
+  site 28 wrappers.c:117:51 in fx_task_create_impl@wrappers.c:117 spawn-entry -> fx_trampoline@wrappers.c:110 via F:fx_trampoline@wrappers.c:110 of 1
+  site 32 wrappers.c:128:58 in fx_app_create spawn-entry -> fx_worker@wrappers.c:130 via P:fx_app_create#1 of 1
+  site 34 wrappers.c:131:23 in fx_start spawn-entry -> fx_worker@wrappers.c:130 via F:fx_worker@wrappers.c:130 of 1
+  site 37 wrappers.c:141:10 in fx_load_app spawn-entry -> UNRESOLVED(no-function-flows-to-it) via L:fx_load_app/addr of 0
+[spawnparams] 2
+  fx_app_create param 1 entry-argument: spawn site 32 via P:fx_app_create#1
+  fx_thread_create param 1 entry-argument: spawn site 25 via P:fx_thread_create#1
+[terminals] 10
+  site 12 exit at wrappers.c:67:17 in fx_panic depth=1 {process-terminal} guard=(gt param:code#0 0)
+  site 13 abort at wrappers.c:68:3 in fx_panic depth=0 {process-terminal,unguarded} guard=-
+  site 14 pthread_exit at wrappers.c:71:27 in fx_task_exit depth=0 {unguarded} guard=-
+  site 15 fx_panic at wrappers.c:75:20 in fx_exit_app depth=1 {process-terminal} guard=(eq param:status#0 1)
+  site 18 fx_task_exit at wrappers.c:81:12 in fx_check depth=1 {} guard=(not param:ok#0)
+  site 21 fx_panic at wrappers.c:88:23 in fx_serve depth=1 {process-terminal,in-loop} guard=(lt (call-result fx_try) 0)
+  site 22 fx_panic at wrappers.c:94:14 in fx_odd depth=1 {process-terminal} guard=(lt param:n#0 0)
+  site 23 fx_even at wrappers.c:95:23 in fx_odd depth=1 {process-terminal,conditional} guard=(not (eq param:n#0 0))
+  site 24 fx_odd at wrappers.c:97:42 in fx_even depth=1 {process-terminal,conditional} guard=(not (eq param:n#0 0))
+  site 27 fx_task_exit at wrappers.c:113:3 in fx_trampoline@wrappers.c:110 depth=0 {unguarded} guard=-
+[fwrites] 5
+  fx_sleep_impl field timespec.tv_nsec at wrappers.c:26
+  fx_sleep_impl field timespec.tv_sec at wrappers.c:25
+  fx_task_create address-argument <global>.fx_lock_word at wrappers.c:121
+  fx_task_create field fx_task.entry at wrappers.c:122
+  fx_task_create_impl@wrappers.c:117 address-argument fx_task.id at wrappers.c:117
+[p0] 38
+  pthread_create thread-create (thread creation) out=0 entry=2 arg=3 calls=1 {vocabulary}
+      creates a thread that runs arg 2 with the argument arg 3; on success the id of the new thread is stored through arg 0, and it is stored before the new thread is started
+      version POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce
+  pthread_mutex_lock mutex-acquire (mutex) calls=1 {vocabulary}
+      acquires the mutex arg 0, blocking until it is free
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_mutex_trylock mutex-acquire (mutex) calls=0 {conditional} (not in the program)
+      acquires the mutex arg 0 if it is free, else returns without it (EBUSY)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_mutex_timedlock mutex-acquire (mutex) calls=0 {conditional} (not in the program)
+      acquires the mutex arg 0, blocking at most until the absolute time arg 1; may return without it (ETIMEDOUT)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_mutex_unlock mutex-release (mutex) calls=1 {vocabulary}
+      releases the mutex arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sem_wait semaphore-wait (semaphore) calls=0 {} (not in the program)
+      decrements the semaphore arg 0, blocking while it is zero
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sem_trywait semaphore-wait (semaphore) calls=0 {conditional} (not in the program)
+      decrements the semaphore arg 0 if it is not zero, else returns without (EAGAIN)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sem_timedwait semaphore-wait (semaphore) calls=0 {conditional} (not in the program)
+      decrements the semaphore arg 0, blocking at most until the absolute time arg 1; may return without (ETIMEDOUT)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sem_post semaphore-post (semaphore) calls=0 {} (not in the program)
+      increments the semaphore arg 0; one thread blocked on it is woken
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_cond_wait condition-wait (condition variable) calls=0 {} (not in the program)
+      releases the mutex arg 1, waits on the condition arg 0, and holds the mutex again when it returns
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_cond_timedwait condition-wait (condition variable) calls=0 {conditional} (not in the program)
+      as pthread_cond_wait, waiting at most until the absolute time arg 2 (ETIMEDOUT); holds the mutex arg 1 again when it returns
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_cond_signal condition-signal (condition variable) calls=0 {} (not in the program)
+      unblocks at least one thread waiting on the condition arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_cond_broadcast condition-signal (condition variable) calls=0 {} (not in the program)
+      unblocks every thread waiting on the condition arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  clock_nanosleep sleep (sleep) calls=0 {vocabulary} (not in the program)
+      suspends the calling thread until the time arg 2 has passed on the clock arg 0 (an interval, or an absolute time when arg 1 has TIMER_ABSTIME)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  nanosleep sleep (sleep) calls=1 {vocabulary}
+      suspends the calling thread for the interval arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sleep sleep (sleep) calls=0 {vocabulary} (not in the program)
+      suspends the calling thread for arg 0 seconds
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_exit thread-exit (termination) calls=1 {vocabulary}
+      ends the calling thread; does not return
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  exit process-exit (termination) calls=1 {vocabulary}
+      ends the process after its exit handlers have run; does not return
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  _exit process-exit (termination) calls=0 {vocabulary} (not in the program)
+      ends the process without running exit handlers; does not return
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  _Exit process-exit (termination) calls=0 {vocabulary} (not in the program)
+      ends the process without running exit handlers; does not return
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  abort process-exit (termination) calls=1 {vocabulary}
+      ends the process abnormally (SIGABRT); does not return
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_self thread-self (thread identity) calls=0 {} (not in the program)
+      returns the id of the calling thread
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_getspecific thread-specific-get (thread-specific data) calls=0 {} (not in the program)
+      returns the value the calling thread bound to the key arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_setspecific thread-specific-set (thread-specific data) calls=0 {} (not in the program)
+      binds the value arg 1 to the key arg 0 for the calling thread
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  dlopen dynamic-load (dynamic loading) calls=0 {} (not in the program)
+      loads the object file named by arg 0 and returns a handle of it
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  dlsym symbol-lookup (dynamic loading) calls=1 {}
+      returns the address of the symbol named by arg 1 in the object arg 0 (or in the global scope)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  memset data-function (data function) out=0 calls=0 {} (not in the program)
+      fills arg 2 bytes at arg 0 with the byte arg 1
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  bzero data-function (data function) out=0 calls=0 {} (not in the program)
+      fills arg 1 bytes at arg 0 with zero
+      version glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified
+  memcpy data-function (data function) out=0 calls=0 {} (not in the program)
+      copies arg 2 bytes from arg 1 to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  memmove data-function (data function) out=0 calls=0 {} (not in the program)
+      copies arg 2 bytes from arg 1 to arg 0 (the areas may overlap)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  strcpy data-function (data function) out=0 calls=0 {} (not in the program)
+      copies the string arg 1 with its terminator to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  strncpy data-function (data function) out=0 calls=0 {} (not in the program)
+      copies at most arg 2 bytes of the string arg 1 to arg 0, padding with zero
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  strcat data-function (data function) out=0 calls=0 {} (not in the program)
+      appends the string arg 1 to the string arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  strncat data-function (data function) out=0 calls=0 {} (not in the program)
+      appends at most arg 2 bytes of the string arg 1 to the string arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  sprintf data-function (data function) out=0 calls=0 {} (not in the program)
+      writes the formatted string to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  snprintf data-function (data function) out=0 calls=0 {} (not in the program)
+      writes at most arg 1 bytes of the formatted string to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  vsprintf data-function (data function) out=0 calls=0 {} (not in the program)
+      writes the formatted string to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  vsnprintf data-function (data function) out=0 calls=0 {} (not in the program)
+      writes at most arg 1 bytes of the formatted string to arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+[derived] 19
+  fx_backoff delay may {}: site 3 wrappers.c:36:20 -> fx_delay depth=3 guard=(ne param:busy#0 0)
+      chain fx_backoff -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_check terminal may {vocabulary,thread-terminal}: site 18 wrappers.c:81:12 -> fx_task_exit depth=2 guard=(not param:ok#0)
+      chain fx_check -> fx_task_exit -> pthread_exit
+  fx_delay delay must {vocabulary}: site 2 wrappers.c:33:36 -> fx_sleep_impl depth=2 guard=-
+      chain fx_delay -> fx_sleep_impl -> nanosleep
+  fx_even terminal may {vocabulary,process-terminal}: site 24 wrappers.c:97:42 -> fx_odd depth=3 guard=(not (eq param:n#0 0))
+      chain fx_even -> fx_odd -> fx_panic -> abort
+  fx_exit_app delay may {}: site 17 wrappers.c:76:12 -> fx_delay depth=3 guard=-
+      chain fx_exit_app -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_exit_app terminal noreturn {vocabulary,process-terminal}: site 15 wrappers.c:75:20 -> fx_panic depth=2 guard=(eq param:status#0 1)
+      chain fx_exit_app -> fx_panic -> abort
+  fx_odd terminal may {vocabulary,process-terminal}: site 22 wrappers.c:94:14 -> fx_panic depth=2 guard=(lt param:n#0 0)
+      chain fx_odd -> fx_panic -> abort
+  fx_odd terminal may {vocabulary,process-terminal}: site 23 wrappers.c:95:23 -> fx_even depth=4 guard=(not (eq param:n#0 0))
+      chain fx_odd -> fx_even -> fx_odd -> fx_panic -> abort
+  fx_panic terminal must {vocabulary,process-terminal}: site 12 wrappers.c:67:17 -> exit depth=1 guard=(gt param:code#0 0)
+      chain fx_panic -> exit
+  fx_panic terminal must {vocabulary,process-terminal}: site 13 wrappers.c:68:3 -> abort depth=1 guard=-
+      chain fx_panic -> abort
+  fx_retry delay may {}: site 6 wrappers.c:48:5 -> fx_delay depth=3 guard=(and (lt local:i 5) (not (ne local:rc -17)))
+      chain fx_retry -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_serve terminal noreturn {vocabulary,process-terminal}: site 21 wrappers.c:88:23 -> fx_panic depth=2 guard=(lt (call-result fx_try) 0)
+      chain fx_serve -> fx_panic -> abort
+  fx_sleep_impl delay must {vocabulary}: site 1 wrappers.c:28:10 -> nanosleep depth=1 guard=-
+      chain fx_sleep_impl -> nanosleep
+  fx_spin delay may {}: site 11 wrappers.c:62:35 -> fx_backoff depth=4 guard=(ne (call-result fx_try) 0)
+      chain fx_spin -> fx_backoff -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_task_exit terminal must {vocabulary,thread-terminal}: site 14 wrappers.c:71:27 -> pthread_exit depth=1 guard=-
+      chain fx_task_exit -> pthread_exit
+  fx_trampoline@wrappers.c:110 delay may {indirect}: site 26 wrappers.c:112:3 -> fx_worker@wrappers.c:130 depth=5 guard=-
+      chain fx_trampoline -> fx_worker -> fx_wait_ready -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_trampoline@wrappers.c:110 terminal must {vocabulary,thread-terminal}: site 27 wrappers.c:113:3 -> fx_task_exit depth=2 guard=-
+      chain fx_trampoline -> fx_task_exit -> pthread_exit
+  fx_wait_ready delay may {}: site 8 wrappers.c:56:25 -> fx_delay depth=3 guard=(eq global:fx_ready 0)
+      chain fx_wait_ready -> fx_delay -> fx_sleep_impl -> nanosleep
+  fx_worker@wrappers.c:130 delay may {}: site 33 wrappers.c:130:31 -> fx_wait_ready depth=4 guard=-
+      chain fx_worker -> fx_wait_ready -> fx_delay -> fx_sleep_impl -> nanosleep
+[spawnwrap] 5
+  fx_app_create entry-argument param 1 {vocabulary}: site 32 wrappers.c:128:58 -> fx_task_create depth=4
+      chain fx_app_create -> fx_task_create -> fx_task_create_impl -> fx_thread_create -> pthread_create
+      via P:fx_app_create#1
+  fx_thread_create entry-argument param 1 {vocabulary}: site 25 wrappers.c:108:83 -> pthread_create depth=1
+      chain fx_thread_create -> pthread_create
+      via P:fx_thread_create#1
+  fx_task_create called-by-entry param 1 {vocabulary}: site 31 wrappers.c:124:8 -> fx_task_create_impl@wrappers.c:117 depth=3 entry fx_trampoline@wrappers.c:110 call site 26 wrappers.c:112:3
+      chain fx_task_create -> fx_task_create_impl -> fx_thread_create -> pthread_create
+      via fx_task.entry
+  fx_start fixed-entry {}: site 34 wrappers.c:131:23 -> fx_app_create depth=5 entry fx_worker@wrappers.c:130
+      chain fx_start -> fx_app_create -> fx_task_create -> fx_task_create_impl -> fx_thread_create -> pthread_create
+      via F:fx_worker@wrappers.c:130
+  fx_task_create_impl@wrappers.c:117 fixed-entry {}: site 28 wrappers.c:117:51 -> fx_thread_create depth=2 entry fx_trampoline@wrappers.c:110
+      chain fx_task_create_impl -> fx_thread_create -> pthread_create
+      via F:fx_trampoline@wrappers.c:110

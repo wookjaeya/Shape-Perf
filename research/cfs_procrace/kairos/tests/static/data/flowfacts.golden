@@ -1,7 +1,7 @@
 extract
   translation units          1
-  functions                  15 (bodies read 13, in system headers skipped 0)
-  call sites                 4
+  functions                  17 (bodies read 14, in system headers skipped 0)
+  call sites                 5
   indirect calls             1 (resolved 0, unresolved 1)
   spawn calls                0 (entry resolved 0)
   loops                      4 (table walks resolved 0, failed 0, under a declared assumption 0)
@@ -14,7 +14,7 @@ extract
   hand-entered inputs        12 (built-in data-function table 12, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
-[functions] 15
+[functions] 17
   fn 0 fx_classify flowfacts.c:79-87 params=1 {defined}
   fn 1 fx_count_plus flowfacts.c:72-76 params=1 {defined}
   fn 2 fx_current_level flowfacts.c:59-62 params=0 {defined}
@@ -24,12 +24,14 @@ facts-view 1
   fn 6 fx_index_of flowfacts.c:120-124 params=1 {defined}
   fn 7 fx_is_used flowfacts.c:56-56 params=1 {defined}
   fn 8 fx_lookup_index flowfacts.c:31 params=2 {}
-  fn 9 fx_owner_of flowfacts.c:35-43 params=2 {defined}
-  fn 10 fx_run_hook flowfacts.c:65-68 params=1 {defined}
-  fn 11 fx_scan_until flowfacts.c:105-113 params=1 {defined}
-  fn 12 fx_snapshot flowfacts.c:116-119 params=1 {defined}
-  fn 13 fx_spin flowfacts.c:98-102 params=0 {defined}
-  fn 14 strcmp flowfacts.c:7 params=2 {builtin}
+  fn 9 fx_my_owner flowfacts.c:128-137 params=1 {defined}
+  fn 10 fx_owner_of flowfacts.c:35-43 params=2 {defined}
+  fn 11 fx_run_hook flowfacts.c:65-68 params=1 {defined}
+  fn 12 fx_scan_until flowfacts.c:105-113 params=1 {defined}
+  fn 13 fx_self_index flowfacts.c:127 params=0 {}
+  fn 14 fx_snapshot flowfacts.c:116-119 params=1 {defined}
+  fn 15 fx_spin flowfacts.c:98-102 params=0 {defined}
+  fn 16 strcmp flowfacts.c:7 params=2 {builtin}
 [loops] 4
   loop 0 site 1 flowfacts.c:48:3 in fx_find_by_name depth=1 constant-trip trip=upper-bound(8) exits=1 calls=1
       rule unroll {}: unrolled: 8 iterations from the constant bound, with early exits
@@ -39,7 +41,7 @@ facts-view 1
       rule star-closed {}: star-closed: no exact trip count
   loop 3 site 6 flowfacts.c:107:3 in fx_scan_until depth=1 other trip=unknown exits=1 calls=0
       rule star-closed {}: star-closed: no exact trip count
-[reads] 18
+[reads] 20
   fx_owner_of reads field FxRec.used at flowfacts.c:38:65 root=global:fx_store use={branch} {} [fx_store.table[idx].used] index=[local:idx] ctx=(eq field:FxRec.used 1) guard=(eq (call-result fx_lookup_index (seq param:id#0 (seq (addr local:idx)))) 0)
   fx_owner_of reads field FxRec.owner at flowfacts.c:39:32 root=global:fx_store use={out-store} {} [fx_store.table[idx].owner] index=[local:idx] ctx=(deref param:out#1) guard=(and (eq (call-result fx_lookup_index (seq param:id#0 (seq (addr local:idx)))) 0) (eq field:FxRec.used 1))
   fx_find_by_name reads field FxRec.used at flowfacts.c:49:27 root=global:fx_store use={branch} {} [fx_store.table[i].used] index=[local:i] loop=0 ctx=(ne field:FxRec.used 0) guard=(lt local:i 8)
@@ -58,7 +60,9 @@ facts-view 1
   fx_spin reads global <global>.fx_level at flowfacts.c:100:16 root=global:fx_level use={store} {} [fx_level] loop=2 ctx=global:fx_level guard=1
   fx_scan_until reads global <global>.fx_levels at flowfacts.c:108:9 root=global:fx_levels use={branch} {} [fx_levels[n & 3]] index=[(bitand local:n 3)] loop=3 ctx=(eq (index global:fx_levels (bitand local:n 3)) param:stop#0)
   fx_snapshot reads field FxStore.table at flowfacts.c:117:22 root=global:fx_store use={store} {whole-record} [fx_store.table[i]] index=[param:i#0] ctx=local:r
-[returns] 22
+  fx_my_owner reads field FxRec.used at flowfacts.c:132:28 root=global:fx_store use={branch} {index-unfolded} [fx_store.table[slot].used] index=[(call-result fx_self_index)] ctx=(eq field:FxRec.used 1)
+  fx_my_owner reads field FxRec.owner at flowfacts.c:133:33 root=global:fx_store use={out-store} {index-unfolded} [fx_store.table[slot].owner] index=[(call-result fx_self_index)] ctx=(deref param:out#0) guard=(eq field:FxRec.used 1)
+[returns] 24
   fx_owner_of returns at flowfacts.c:42:3 alt 0/2 const -3 [FX_ERR_ID] {from-definition,redefined-later}
       definition of result at flowfacts.c:36:7 guard=-
       guard=- when=(not (and (eq (call-result fx_lookup_index (seq param:id#0 (seq (addr local:idx)))) 0) (eq field:FxRec.used 1)))
@@ -116,7 +120,13 @@ facts-view 1
       guard=- when=-
   fx_index_of returns at flowfacts.c:123:3 alt 0/1 local local:idx [idx] {}
       guard=- when=-
-[retconsts] 11
+  fx_my_owner returns at flowfacts.c:136:3 alt 0/2 const -3 [FX_ERR_ID] {from-definition,redefined-later}
+      definition of result at flowfacts.c:129:7 guard=-
+      guard=- when=(not (eq field:FxRec.used 1))
+  fx_my_owner returns at flowfacts.c:136:3 alt 1/2 const 0 [FX_OK] {from-definition}
+      definition of result at flowfacts.c:134:12 guard=(eq field:FxRec.used 1)
+      guard=- when=(eq field:FxRec.used 1)
+[retconsts] 13
   fx_classify returns -17 [FX_ERR_NOT_FOUND] rows=1 {from-definition,only-constants} when=(and (not (lt param:id#0 0)) (ge param:id#0 8))
   fx_classify returns -3 [FX_ERR_ID] rows=1 {from-definition,only-constants} when=(lt param:id#0 0)
   fx_classify returns 0 [FX_OK] rows=1 {from-definition,redefined-later,only-constants} when=(and (not (lt param:id#0 0)) (not (and (not (lt param:id#0 0)) (ge param:id#0 8))))
@@ -124,6 +134,8 @@ facts-view 1
   fx_find_by_name returns 0 [0] rows=1 {from-definition,redefined-later,in-loop} when=(and (not (eq local:i 8)) (not (lt local:i 8)))
   fx_first_free returns -17 [FX_ERR_NOT_FOUND] rows=1 {} when=always
   fx_first_free returns 0 [0] rows=1 {from-definition,redefined-later,in-loop} when=(eq field:FxRec.used 0)
+  fx_my_owner returns -3 [FX_ERR_ID] rows=1 {from-definition,redefined-later,only-constants} when=(not (eq field:FxRec.used 1))
+  fx_my_owner returns 0 [FX_OK] rows=1 {from-definition,only-constants} when=(eq field:FxRec.used 1)
   fx_owner_of returns -3 [FX_ERR_ID] rows=1 {from-definition,redefined-later,only-constants} when=(not (and (eq (call-result fx_lookup_index (seq param:id#0 (seq (addr local:idx)))) 0) (eq field:FxRec.used 1)))
   fx_owner_of returns 0 [FX_OK] rows=1 {from-definition,only-constants} when=(and (eq (call-result fx_lookup_index (seq param:id#0 (seq (addr local:idx)))) 0) (eq field:FxRec.used 1))
   fx_run_hook returns -3 [FX_ERR_ID] rows=1 {} when=(eq field:FxStore.hook 0)

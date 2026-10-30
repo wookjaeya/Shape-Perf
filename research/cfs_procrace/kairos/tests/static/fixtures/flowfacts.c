@@ -122,3 +122,16 @@ unsigned fx_index_of(int id) {
   (void)fx_lookup_index(id, &idx);
   return idx;
 }
+
+/* The subscript comes from a call through a local with a single definition: the index is unfolded. */
+int fx_self_index(void);
+int fx_my_owner(int *out) {
+  int result = FX_ERR_ID;
+  int slot;
+  slot = fx_self_index();
+  if (fx_store.table[slot].used == 1) {
+    *out = fx_store.table[slot].owner;
+    result = FX_OK;
+  }
+  return result;
+}

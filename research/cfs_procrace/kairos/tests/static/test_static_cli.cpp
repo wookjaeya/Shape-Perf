@@ -532,6 +532,8 @@ startup_script {
     // a validity branch on an indexed record, and an out-store of another field of it
     KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.used at flowfacts.c:38:65 root=global:fx_store use={branch} {} [fx_store.table[idx].used] index=[local:idx] ctx=(eq field:FxRec.used 1)"));
     KZ_CHECK(has(vc, "fx_owner_of reads field FxRec.owner at flowfacts.c:39:32 root=global:fx_store use={out-store} {} [fx_store.table[idx].owner] index=[local:idx] ctx=(deref param:out#1)"));
+    // the subscript local with a single definition is written as that definition's value
+    KZ_CHECK(has(vc, "fx_my_owner reads field FxRec.used at flowfacts.c:132:28 root=global:fx_store use={branch} {index-unfolded} [fx_store.table[slot].used] index=[(call-result fx_self_index)]"));
     // the contents of an array field passed to a call whose result decides a branch
     KZ_CHECK(has(vc, "use={branch,call-argument} {array-contents} [fx_store.table[i].name]"));
     // a read through a pointer parameter; a function pointer read as the callee

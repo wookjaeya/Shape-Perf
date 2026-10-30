@@ -1793,6 +1793,7 @@ flags KZ_READ_FLAG
   0x2 ARRAY_CONTENTS "array-contents"
   0x4 IN_MACRO "in-macro"
   0x8 RECORD "whole-record"
+  0x10 INDEX_UNFOLDED "index-unfolded"
 enum KZ_RET_VALUE
   0x0 NONE "none"
   0x1 CONST "const"
@@ -2642,4 +2643,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=bae987d0343a65c29f75e21f3e3578b6116d2b7a8faa4d50fca8f6d31a005bf9
+fingerprint=e35f1daacebd44df86c828ad19845626655ed6d3b6b616ab01593df808e5f47e

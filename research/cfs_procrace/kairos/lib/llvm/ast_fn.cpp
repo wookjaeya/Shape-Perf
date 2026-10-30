@@ -3071,7 +3071,10 @@ class FnWalker {
     if (!idx.empty()) {
       std::vector<ExprRef> parts;
       for (size_t i = idx.size(); i > 0; --i) parts.push_back(to_expr(idx[i - 1]));  // root first
-      r.index = pool().list(KZ_EXPR_OP_SEQ, parts);
+      // a subscript that is a local with a single copy definition before the read: its value (as in RETURNS)
+      bool changed = false;
+      r.index = unfold(pool().list(KZ_EXPR_OP_SEQ, parts), ce->getBeginLoc(), &changed);
+      if (changed) r.flags |= KZ_READ_FLAG_INDEX_UNFOLDED;
     }
     // the use: every context the value passes through on its way up to its statement
     const Stmt* cur = ce;

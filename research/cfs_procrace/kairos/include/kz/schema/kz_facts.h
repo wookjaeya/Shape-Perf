@@ -695,7 +695,7 @@ enum kz_facts_section_id {
  * it (FIELD: the owner type and the field; GLOBAL: "<global>" and the object).  The access path is
  * followed to its root (`root_kind`, `root`, `root_param`): `x.a[i].f` has the root x, `p->f` the
  * pointer p (`through-pointer`), `g()->f` the call.  `index_root` lists the subscripts on the path,
- * root first.  `use` is every context the value passes on its way up to the statement: a branch
+ * root first (`index-unfolded`: a subscript local replaced by its single definition, as in RETURNS).  `use` is every context the value passes on its way up to the statement: a branch
  * condition (if / loop / switch / ?: condition, an operand of && or ||; `ctx_root` the innermost
  * such condition), the value of a return statement, the right side of a store through a pointer
  * parameter (`out-store`; `ctx_root` the destination) or of another store or initializer
@@ -1062,10 +1062,13 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, OTHER, 0x100, "other")
 
 /* THROUGH_POINTER: the access path dereferences a pointer (`->`, `*`, a subscript of a pointer);
- * ARRAY_CONTENTS: an array that decays to a pointer; RECORD: a whole record is read (copied). */
+ * ARRAY_CONTENTS: an array that decays to a pointer; RECORD: a whole record is read (copied);
+ * INDEX_UNFOLDED: a subscript local with a single copy definition before the read is written as the
+ * value of that definition (the rule of RETURNS). */
 #define KZ_ENUM_READ_FLAGS(ITEM, P) /* set */                                        \
   ITEM(P, THROUGH_POINTER, 0x1, "through-pointer") ITEM(P, ARRAY_CONTENTS, 0x2, "array-contents") \
-  ITEM(P, IN_MACRO, 0x4, "in-macro") ITEM(P, RECORD, 0x8, "whole-record")
+  ITEM(P, IN_MACRO, 0x4, "in-macro") ITEM(P, RECORD, 0x8, "whole-record")            \
+  ITEM(P, INDEX_UNFOLDED, 0x10, "index-unfolded")
 
 #define KZ_ENUM_RET_VALUE(ITEM, P)                                                   \
   ITEM(P, NONE, 0, "none") ITEM(P, CONST, 1, "const") ITEM(P, FIELD, 2, "field")     \

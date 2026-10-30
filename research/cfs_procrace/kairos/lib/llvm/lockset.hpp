@@ -74,8 +74,9 @@ void field_status_from(const Model& pass, const Model& m, FieldStatusTable* out)
 
 // With the extended facts: the indirect calls whose resolved candidates may not be all the functions they call (a node
 // the function value comes from holds values the flow graph does not follow: a variable or field of a type that is no
-// function pointer, the result of a function without a body, a parameter of an address-taken function, an address
-// passed converted to another pointer type, a field whose FIELD_STATUS row is missing, not complete per field or has a
+// function pointer, the result of a function without a body, a parameter of an address-taken function or of a function
+// without a body, an address passed converted to another pointer type, an address taken or an array decayed elsewhere,
+// a copied pointer to a function pointer, a field whose FIELD_STATUS row is missing, not complete per field or has a
 // writer that is no assignment) get a CALL_TARGETS row with no function and reason incomplete-source.  Returns their
 // number (also Model::Resolved::indirect_incomplete).
 uint32_t mark_incomplete_targets(Model* m, const FieldStatusTable& fields);

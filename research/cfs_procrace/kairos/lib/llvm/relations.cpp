@@ -2520,8 +2520,10 @@ class Rel {
                 "without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the "
                 "call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object "
                 "changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all "
-                "its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose "
-                "address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken "
+                "its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through "
+                "an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field "
+                "not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose "
+                "targets are not resolved calls only address-taken "
                 "functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)";
           text += "; rests on " + on;
         }

@@ -1455,6 +1455,105 @@ class FnWalker {
     if (is_fp_type(t) || is_fp_ptr_type(t)) return;
     m_.flow_open.emplace(node, what + " has the type " + t.getAsString() + ", no function pointer: the stores into it are not followed");
   }
+  // The value of a pointer to a function pointer (a variable or parameter of that type): the flow graph lets its node
+  // stand for what it points at (`*p = f`, `p[i] = f`, a call through `*p`, an unconverted argument of a
+  // function-pointer-pointer parameter of a direct call, both ways).  A copy of the pointer elsewhere (into another
+  // variable, a field, a return value, a converted or indirect-call argument) leaves the stores through the copy
+  // unseen: the node is open (Model::flow_addr_open).  Tests and comparisons of the pointer are no copy.
+  void note_fp_ptr_copy(const DeclRefExpr* dre, const VarDecl* vd) {
+    const Expr* top = dre;
+    bool converted = false;
+    const Stmt* p = parent_stmt(dre);
+    while (p != nullptr && (isa<ParenExpr>(p) || isa<CastExpr>(p))) {
+      if (const auto* ce = dyn_cast<CastExpr>(p)) {
+        const CastKind k = ce->getCastKind();
+        if (k == CK_PointerToBoolean) return;
+        if (k != CK_NoOp && k != CK_LValueToRValue) converted = true;
+      }
+      top = cast<Expr>(p);
+      p = parent_stmt(p);
+    }
+    if (p == nullptr) {
+      if (parent_var(top) == nullptr) return;  // no use of the value (a statement of its own)
+    } else if (const auto* uo = dyn_cast<UnaryOperator>(p)) {
+      if (uo->getOpcode() == UO_Deref || uo->getOpcode() == UO_LNot) return;
+      if (uo->getOpcode() == UO_AddrOf) return;  // `&p`: a pointer to it, not a copy of its value
+    } else if (const auto* bo = dyn_cast<BinaryOperator>(p)) {
+      if (bo->isComparisonOp() || bo->isLogicalOp()) return;
+      if (bo->isAssignmentOp() && bo->getLHS()->IgnoreParenImpCasts() == dre) return;  // a store into the pointer itself (its source is the other side)
+      if (bo->getOpcode() == BO_Comma && bo->getLHS() == top) return;
+    } else if (isa<ArraySubscriptExpr>(p)) {
+      if (cast<ArraySubscriptExpr>(p)->getBase() == top) return;  // `p[i]`: an element it points at
+    } else if (const auto* call = dyn_cast<CallExpr>(p)) {
+      if (call->getCallee() == top) return;
+      const FunctionDecl* callee = call->getDirectCallee();
+      for (unsigned i = 0; i < call->getNumArgs(); ++i)
+        if (call->getArg(i) == top && callee != nullptr && !converted && i < callee->getNumParams() && is_fp_ptr_type(callee->getParamDecl(i)->getType())) return;
+    } else if (isa<IfStmt>(p) || isa<WhileStmt>(p) || isa<DoStmt>(p) || isa<ForStmt>(p) || isa<SwitchStmt>(p)) {
+      return;
+    } else if (const auto* co = dyn_cast<ConditionalOperator>(p)) {
+      if (co->getCond() == top) return;
+    }
+    m_.flow_addr_open.emplace(var_node(vd), "the pointer to a function pointer " + vd->getNameAsString() + " is copied at " + tu_.pos_of(dre->getBeginLoc()).str() +
+                                                (converted ? " (converted to another type)" : "") + ": what is stored through the copy is not followed");
+  }
+  // `&x` where x is a function-pointer variable, field or array element: the flow graph follows a store through that
+  // address only when it is passed unconverted to a function-pointer-pointer parameter of a direct call (edges both
+  // ways; a callee without a body is an open node, mark_incomplete_targets) or passed to a direct call through pointer
+  // conversions only (ARGFLOW address, pointer-conversion: the escape rule of mark_incomplete_targets).  Any other use
+  // (a cast lvalue `*(void **)&x = ...`, a pointer variable that keeps it, an indirect call, a variadic argument, a
+  // conversion to an integer) leaves the stores through it unseen: the node is open (Model::flow_addr_open; read with
+  // the extended facts, relations rules revision 5).
+  void note_fp_address(const UnaryOperator* uo) { note_fp_address_of(uo, uo->getSubExpr(), "its address is taken"); }
+  // An array of function pointers converted to a pointer to its first element (`p = hooks`, an argument): the same as
+  // `&hooks[0]`; a subscript of the array itself (`hooks[i] = f`) is a store the flow graph follows.
+  void note_fp_array_decay(const CastExpr* ce) {
+    const Stmt* p = parent_stmt(ce);
+    if (p != nullptr)
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(p); as != nullptr && as->getBase() == ce) return;
+    note_fp_address_of(ce, ce->getSubExpr(), "it is converted to a pointer to its first element");
+  }
+  void note_fp_address_of(const Expr* addr, const Expr* lv, const char* how) {
+    const Expr* x = lv->IgnoreParens();
+    while (const auto* as = dyn_cast<ArraySubscriptExpr>(x)) x = as->getBase()->IgnoreParenImpCasts();
+    std::string node, what;
+    if (const auto* dre = dyn_cast<DeclRefExpr>(x)) {
+      const auto* vd = dyn_cast<VarDecl>(dre->getDecl());
+      if (vd == nullptr || !is_fp_type(vd->getType())) return;
+      node = var_node(vd);
+      what = "the variable " + vd->getNameAsString();
+    } else if (const auto* me = dyn_cast<MemberExpr>(x)) {
+      const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
+      if (fl == nullptr || !is_fp_type(fl->getType())) return;
+      node = tu_.record_name(fl->getParent()) + "." + fl->getNameAsString();
+      what = "the field " + node;
+    } else {
+      return;
+    }
+    const Expr* top = addr;
+    bool converted = false, not_pointer = false;  // a conversion; one that is no pointer-to-pointer conversion
+    const Stmt* p = parent_stmt(addr);
+    while (p != nullptr && (isa<ParenExpr>(p) || isa<CastExpr>(p))) {
+      if (const auto* ce = dyn_cast<CastExpr>(p); ce != nullptr && ce->getCastKind() != CK_NoOp) {
+        converted = true;
+        if (ce->getCastKind() != CK_BitCast) not_pointer = true;
+      }
+      top = cast<Expr>(p);
+      p = parent_stmt(p);
+    }
+    std::string use = "not as a call argument";
+    if (const auto* call = p != nullptr ? dyn_cast<CallExpr>(p) : nullptr) {
+      const FunctionDecl* callee = call->getDirectCallee();
+      for (unsigned i = 0; i < call->getNumArgs(); ++i) {
+        if (call->getArg(i) != top) continue;
+        if (callee != nullptr && converted && !not_pointer) return;  // ARGFLOW address, pointer-conversion
+        if (callee != nullptr && i < callee->getNumParams() && is_fp_ptr_type(callee->getParamDecl(i)->getType())) return;  // edges both ways
+        use = callee == nullptr ? "as an argument of an indirect call" : "as an argument that is no function-pointer-pointer parameter";
+      }
+    }
+    m_.flow_addr_open.emplace(node, what + ": " + how + " at " + tu_.pos_of(addr->getBeginLoc()).str() + " (" + use + (converted ? ", converted to another type" : "") +
+                                        "): what is stored through it is not followed");
+  }
   // The node an assignment to this lvalue feeds ("" if the target is not followed).
   std::string lvalue_node(const Expr* lv) {
     lv = lv->IgnoreParenImpCasts();
@@ -2483,6 +2582,7 @@ class FnWalker {
       if (const auto* adre = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParens()))
         if (const auto* avd = dyn_cast<VarDecl>(adre->getDecl()); avd != nullptr && avd->hasGlobalStorage())
           note_write(KZ_FWRITE_KIND_OUTARG, "<global>", avd->getNameAsString(), uo);
+      note_fp_address(uo);
     }
     visit(uo->getSubExpr());
   }
@@ -2705,6 +2805,7 @@ class FnWalker {
     if (ext_) note_read(ce);
     const CastKind k = ce->getCastKind();
     const Expr* sub = ce->getSubExpr();
+    if (k == CK_ArrayToPointerDecay && is_fp_type(sub->getType())) note_fp_array_decay(ce);
     const QualType src = sub->getType(), dst = ce->getType();
     // The null pointer constant converts to every pointer type; it refers to no object.
     if ((k == CK_BitCast || k == CK_PointerToIntegral || k == CK_IntegralToPointer) && !is_null_const(sub) && !is_data_arg(ce)) {
@@ -2739,6 +2840,7 @@ class FnWalker {
       tu_.ensure_func(fd).flags |= KZ_FUNC_FLAG_ADDRESS_TAKEN;
       return;
     }
+    if (const auto* fvd = dyn_cast<VarDecl>(dre->getDecl()); fvd != nullptr && is_fp_ptr_type(fvd->getType())) note_fp_ptr_copy(dre, fvd);
     if (const auto* pv = dyn_cast<ParmVarDecl>(dre->getDecl())) {
       if (pv->getType()->isPointerType() && pv->getFunctionScopeIndex() < summary_.params.size()) param_use(dre, pv);
       return;
@@ -4571,6 +4673,41 @@ void flow_from_init(TuReader& tu, const std::string& object, QualType t, const E
   }
 }
 
+// `&x` in a static initializer, x a function-pointer variable, field or array element: the address is kept in the
+// object, and what is stored through it later is not followed (Model::flow_addr_open; FnWalker::note_fp_address)
+void note_init_fp_addresses(TuReader& tu, const std::string& object, const Stmt* init) {
+  std::vector<const Stmt*> stack{init};  // every node of the initializer once (no depth bound)
+  while (!stack.empty()) {
+    const Stmt* s = stack.back();
+    stack.pop_back();
+    if (s == nullptr) continue;
+    const Expr* lv = nullptr;
+    if (const auto* uo = dyn_cast<UnaryOperator>(s); uo != nullptr && uo->getOpcode() == UO_AddrOf) lv = uo->getSubExpr();
+    if (const auto* ic = dyn_cast<ImplicitCastExpr>(s); ic != nullptr && ic->getCastKind() == CK_ArrayToPointerDecay && is_fp_type(ic->getSubExpr()->getType()))
+      lv = ic->getSubExpr();
+    if (lv != nullptr) {
+      const Expr* x = lv->IgnoreParens();
+      while (const auto* as = dyn_cast<ArraySubscriptExpr>(x)) x = as->getBase()->IgnoreParenImpCasts();
+      std::string node, what;
+      if (const auto* dre = dyn_cast<DeclRefExpr>(x)) {
+        if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl()); vd != nullptr && vd->hasGlobalStorage() && is_fp_type(vd->getType())) {
+          node = "G:" + tu.object_key(vd);
+          what = "the variable " + vd->getNameAsString();
+        }
+      } else if (const auto* me = dyn_cast<MemberExpr>(x)) {
+        if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl()); fl != nullptr && is_fp_type(fl->getType())) {
+          node = tu.record_name(fl->getParent()) + "." + fl->getNameAsString();
+          what = "the field " + node;
+        }
+      }
+      if (!node.empty())
+        tu.model().flow_addr_open.emplace(node, what + ": its address is kept in the initializer of " + object + " at " + tu.pos_of(s->getBeginLoc()).str() +
+                                                    ": what is stored through it is not followed");
+    }
+    for (const Stmt* c : s->children()) stack.push_back(c);
+  }
+}
+
 }  // namespace
 
 bool read_function_body(TuReader& tu, const FunctionDecl* fd) {
@@ -4598,6 +4735,7 @@ void collect_global_fp_flows(TuReader& tu, const VarDecl* vd) {
     else oc.emplace(object, is_const);
   }
   if (!vd->hasInit()) return;
+  note_init_fp_addresses(tu, object, vd->getInit());
   if (is_fp_type(vd->getType())) {
     const Expr* s = vd->getInit()->IgnoreParenCasts();
     if (const auto* dre = dyn_cast<DeclRefExpr>(s))

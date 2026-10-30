@@ -679,6 +679,9 @@ struct Model {
   // fp-flow nodes whose stores the flow graph does not follow (a variable or a field whose type is no function pointer:
   // only stores into function-pointer lvalues make edges), with why; read by mark_incomplete_targets (lockset.hpp)
   std::map<std::string, std::string> flow_open;
+  // fp-flow nodes whose address is taken where the flow graph does not follow the stores through it (a cast lvalue, a
+  // pointer variable that keeps it, an indirect call, a static initializer; FnWalker::note_fp_address), with why
+  std::map<std::string, std::string> flow_addr_open;
   // objects of internal linkage, by key ("name@file:line"): the units that define them (read_global), and those used as
   // a lock identity in a unit whose main file is not the file of their definition (one object per unit, one key)
   std::map<std::string, std::set<std::string>> internal_object_units;

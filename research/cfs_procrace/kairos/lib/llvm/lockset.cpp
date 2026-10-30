@@ -657,6 +657,12 @@ void field_status_from(const Model& pass, const Model& m, FieldStatusTable* out)
 //   - it is a parameter of an address-taken function (the arguments of an indirect call make no edge);
 //   - its address is passed to a call converted to another pointer type (ARGFLOW address, pointer-conversion), as for
 //     memcpy into it;
+//   - it is a parameter of a function without a body (a pointer-to-function-pointer parameter: what the callee stores
+//     through it is not read);
+//   - its address is taken, or its array decays to a pointer, anywhere else than an unconverted argument of a
+//     pointer-to-function-pointer parameter of a direct call (a cast lvalue `*(void **)&x = ...`, a pointer variable
+//     that keeps it, a static initializer, an indirect-call or variadic argument), or it is a pointer to a function
+//     pointer whose value is copied (Model::flow_addr_open; these are read after the forms above);
 //   - it is a field whose FIELD_STATUS has no row, is not complete under the per-field rule, or has a writer that is no
 //     assignment (a data function, an out-pointer store, an aggregate assignment, an unknown effect, ...).
 // Each such call gets a CALL_TARGETS row with no function and reason incomplete-source besides its candidates, so that
@@ -689,7 +695,7 @@ uint32_t mark_incomplete_targets(Model* mp, const FieldStatusTable& fields) {
     auto it = m.funcs.find(key);
     return it == m.funcs.end() ? key : it->second.name;
   };
-  auto open_why = [&](const std::string& n) -> std::string {
+  auto open_why1 = [&](const std::string& n) -> std::string {
     auto fo = m.flow_open.find(n);
     if (fo != m.flow_open.end()) return fo->second;
     auto es = escaped.find(n);
@@ -705,6 +711,9 @@ uint32_t mark_incomplete_targets(Model* mp, const FieldStatusTable& fields) {
       auto fit = m.funcs.find(k);
       if (fit != m.funcs.end() && (fit->second.flags & KZ_FUNC_FLAG_ADDRESS_TAKEN) != 0)
         return "a parameter of " + fit->second.name + ", which is address-taken: the arguments of its indirect calls are not followed";
+      // a function-pointer-pointer parameter of a callee without a body: the flow graph joins it both ways with the
+      // node whose address is passed, and what the callee stores through it is not read
+      if (m.processed_functions.count(k) == 0) return "a parameter of " + name_of(k) + ", a function without a body in these units: what it stores through it is not followed";
       return "";
     }
     if (n.compare(0, 2, "G:") == 0 || n.compare(0, 2, "L:") == 0) return "";
@@ -729,6 +738,13 @@ uint32_t mark_incomplete_targets(Model* mp, const FieldStatusTable& fields) {
           return "the field " + n + " has " + k + " at " + w.pos.str() + " in " + name_of(w.func_key) + ": the value it stores is not followed";
         }
     return "";
+  };
+  // the forms above first (their texts as before); then an address taken where the stores through it are not followed
+  auto open_why = [&](const std::string& n) -> std::string {
+    std::string w = open_why1(n);
+    if (!w.empty()) return w;
+    auto ao = m.flow_addr_open.find(n);
+    return ao == m.flow_addr_open.end() ? std::string() : ao->second;
   };
   std::set<std::string> unresolved, resolved;
   for (const TargetFact& t : m.targets) {

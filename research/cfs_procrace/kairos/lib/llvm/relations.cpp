@@ -2,7 +2,7 @@
 //
 // Every rule below reads the facts container only.  Nothing names a framework, a case or a resource
 // type: the program's own facts and the P0 tables are the vocabulary.  The rules are written down in
-// docs/static_facts.md §5e; the revision string names them.
+// docs/static_facts.md §5e (revision 1), §5f (revision 2) and §5g (revision 3); the revision string names them.
 #include "relations.hpp"
 
 #include <algorithm>

@@ -10,7 +10,9 @@
 //   * loop facts, including the exit conditions, mod set and budget of loops with a delay call,
 //     and the exact trip count of counted loops;
 //   * the out-pointer summary of every pointer parameter;
-//   * the edges of the function-pointer flow graph.
+//   * the edges of the function-pointer flow graph;
+//   * with spec.extended_facts (F1-F3), the field and global reads with their use, the return values
+//     resolved through the definitions of the returned local, and the exits of every loop.
 // Nothing here knows a framework: every name comes from the ExtractSpec.
 #include <algorithm>
 #include <functional>
@@ -199,6 +201,7 @@ struct LoopCtx {
   size_t body_guard_base = 0;  // guards_.size() when the body starts (after the loop condition)
   std::vector<ExprRef> triggers;  // per exit (parallel to `exits`): the condition that decides it
   std::vector<Pos> exit_pos;      // per exit: where it is (the loop itself for the loop condition)
+  std::vector<uint8_t> exit_kind; // per exit: KZ_LOOPEXIT_KIND (the loop condition, break, return, goto)
   bool cond_exit = false;         // exits[0] is the negated loop condition
   const VarDecl* budget_var = nullptr;
   // A table walk: the element variable, and the walk found before the body is read.
@@ -225,6 +228,14 @@ struct InnerInfo {
   size_t body_guard_base = 0;
 };
 
+// The control-flow graph of a body as the extended facts read it (RETURNS: reaching definitions):
+// Clang's CFG with every expression an element, and where each statement is in it.
+struct CfgIndex {
+  std::unique_ptr<CFG> cfg;
+  std::vector<const CFGBlock*> blocks;                             // by block id
+  std::map<const Stmt*, std::pair<unsigned, unsigned>> at;          // element -> (block id, index), lookup only
+};
+
 class FnWalker {
  public:
   FnWalker(TuReader& tu, const FunctionDecl* fd)
@@ -239,9 +250,11 @@ class FnWalker {
     LocalPre pre(&locals_, &tested_);
     pre.TraverseStmt(const_cast<Stmt*>(fd_->getBody()));
     assign_local_ids();
+    ext_ = spec_.extended_facts;
     visit(fd_->getBody());
     m_.summaries[fkey_] = summary_;
     if (spec_.collect_wrapper_inputs) record_cfg();
+    if (ext_) emit_returns();
   }
 
  private:
@@ -673,6 +686,7 @@ class FnWalker {
       ctx->exits.push_back(cond_expr(cond, false));
       ctx->triggers.push_back(ctx->exits.back());
       ctx->exit_pos.push_back(lf.pos);
+      ctx->exit_kind.push_back(KZ_LOOPEXIT_KIND_COND);
       ctx->cond_exit = true;
     }
     loops_.push_back(std::move(ctx));
@@ -747,18 +761,40 @@ class FnWalker {
     // trees: for loops that wait, and for table walks
     if (!lc->delay_call.empty() || walk) {
       lf.exit_expr = pool().conj(KZ_EXPR_OP_OR, lc->exits);
-      std::vector<ExprRef> mods;
-      for (const std::string& n : lc->mod_names) {
-        const size_t colon = n.find(':');
-        const std::string cls = n.substr(0, colon), nm = n.substr(colon + 1);
-        mods.push_back(pool().load(cls == "field" ? KZ_EXPR_REF_FIELD : cls == "global" ? KZ_EXPR_REF_GLOBAL : KZ_EXPR_REF_LOCAL, nm));
-      }
-      for (const std::string& n : lc->callees) mods.push_back(pool().call_result(n, nullptr));
-      lf.modset = pool().list(KZ_EXPR_OP_LOCSET, mods);
+      lf.modset = loop_modset(lc);
       lf.budget = build_budget(lc);
     }
     if (lf.kind == KZ_LOOP_KIND_POLL || lf.kind == KZ_LOOP_KIND_COUNT_BOUNDED) extract_predicate(lc, &lf);
     restrict_lock_kind(lc, &lf);
+    // F3 (LOOP_EXITS): the same trees for every loop, and each exit on its own
+    if (ext_) {
+      lf.has_exits = true;
+      lf.exits_as_in_loops = !lc->delay_call.empty() || walk;
+      lf.all_exit = pool().conj(KZ_EXPR_OP_OR, lc->exits);
+      lf.all_modset = loop_modset(lc);
+      for (size_t i = 0; i < lc->exits.size(); ++i) {
+        LoopFact::Exit x;
+        x.kind = i < lc->exit_kind.size() ? lc->exit_kind[i] : static_cast<uint8_t>(KZ_LOOPEXIT_KIND_NONE);
+        x.pos = lc->exit_pos[i];
+        x.when = lc->exits[i];
+        x.trigger = i < lc->triggers.size() ? lc->triggers[i] : nullptr;
+        if (x.when != nullptr && x.when->op == KZ_EXPR_OP_CONST && x.when->a == nullptr && x.when->value == 0) x.flags |= KZ_LOOPEXIT_FLAG_NEVER;
+        if (x.trigger == nullptr) x.flags |= KZ_LOOPEXIT_FLAG_UNCONDITIONAL;
+        lf.exits.push_back(x);
+      }
+    }
+  }
+
+  // The mod set of a loop body: the fields, globals and locals it writes and the functions it calls.
+  ExprRef loop_modset(const LoopCtx* lc) {
+    std::vector<ExprRef> mods;
+    for (const std::string& n : lc->mod_names) {
+      const size_t colon = n.find(':');
+      const std::string cls = n.substr(0, colon), nm = n.substr(colon + 1);
+      mods.push_back(pool().load(cls == "field" ? KZ_EXPR_REF_FIELD : cls == "global" ? KZ_EXPR_REF_GLOBAL : KZ_EXPR_REF_LOCAL, nm));
+    }
+    for (const std::string& n : lc->callees) mods.push_back(pool().call_result(n, nullptr));
+    return pool().list(KZ_EXPR_OP_LOCSET, mods);
   }
 
   // L1 (ii) sees the loads of the loop body.  A call result in the test reads what the callee
@@ -1298,19 +1334,21 @@ class FnWalker {
     lc->bound_text = tu_.source_text(bound_expr->getSourceRange());
   }
 
-  void note_exit(LoopCtx* lc, const Stmt* at) {
+  void note_exit(LoopCtx* lc, const Stmt* at, uint8_t kind) {
     ++lc->n_exits;
     lc->exits.push_back(guard_from(lc->guard_base));
     // what decides this exit: the innermost guard inside the loop (none: an unconditional exit)
     lc->triggers.push_back(guards_.size() > lc->body_guard_base ? cond_expr(guards_.back().cond, guards_.back().polarity) : nullptr);
     lc->exit_pos.push_back(tu_.pos_of(at->getBeginLoc()));
+    lc->exit_kind.push_back(kind);
   }
   void visit_break(const BreakStmt* s) {
     if (breakables_.empty() || breakables_.back() == nullptr) return;  // leaves a switch, not a loop
-    note_exit(breakables_.back(), s);
+    note_exit(breakables_.back(), s, KZ_LOOPEXIT_KIND_BREAK);
   }
   void visit_return(const ReturnStmt* s) {
-    for (auto& lc : loops_) note_exit(lc.get(), s);
+    for (auto& lc : loops_) note_exit(lc.get(), s, KZ_LOOPEXIT_KIND_RETURN);
+    if (ext_ && s->getRetValue() != nullptr) returns_.push_back(PendingReturn{s, guard_from(0), loops_.empty() ? std::string() : m_.loops[loops_.back()->index].key});
     if (const Expr* rv = s->getRetValue()) {
       visit(rv);
       if (is_fp_type(fd_->getReturnType())) add_flow_to("R:" + fkey_, rv);
@@ -1318,7 +1356,7 @@ class FnWalker {
     }
   }
   void visit_goto(const Stmt* s) {
-    for (auto& lc : loops_) note_exit(lc.get(), s);
+    for (auto& lc : loops_) note_exit(lc.get(), s, KZ_LOOPEXIT_KIND_GOTO);
   }
 
   // ---- fp-flow helpers ----
@@ -1627,6 +1665,7 @@ class FnWalker {
     CallFact cf;
     cf.pos = tu_.pos_of(ce->getBeginLoc());
     const std::string ckey = tu_.next_key(cf.pos, fkey_, &cf.ordinal);
+    if (ext_) ext_call_keys_[ce] = ckey;
     cf.tu = tu_.main_file();
     cf.caller_key = fkey_;
     cf.caller_name = fname_;
@@ -2266,6 +2305,7 @@ class FnWalker {
       const Expr* lhs = bo->getLHS();
       if (const auto* ldre = dyn_cast<DeclRefExpr>(lhs->IgnoreParenImpCasts())) {
         if (const auto* lvd = dyn_cast<VarDecl>(ldre->getDecl())) {
+          if (ext_) note_def(bo);
           if (k == BO_Assign) note_local_event(lvd, is_const_value(bo->getRHS(), 0) ? LocalEvent::Reset0 : LocalEvent::Other, bo->getRHS(), bo->getOperatorLoc());
           else if (k == BO_AddAssign && is_const_value(bo->getRHS(), 1)) note_local_event(lvd, LocalEvent::Inc1, nullptr, bo->getOperatorLoc());
           else note_local_event(lvd, LocalEvent::Other, nullptr, bo->getOperatorLoc());
@@ -2350,8 +2390,10 @@ class FnWalker {
     if (uo->isIncrementDecrementOp()) {
       const Expr* sub = uo->getSubExpr();
       if (const auto* sdre = dyn_cast<DeclRefExpr>(sub->IgnoreParenImpCasts())) {
-        if (const auto* svd = dyn_cast<VarDecl>(sdre->getDecl()))
+        if (const auto* svd = dyn_cast<VarDecl>(sdre->getDecl())) {
           note_local_event(svd, uo->isIncrementOp() ? LocalEvent::Inc1 : LocalEvent::Other, nullptr, uo->getOperatorLoc());
+          if (ext_) note_def(uo);
+        }
         note_global_write(sdre, uo);
       } else if (const DeclRefExpr* adre = subscript_root(sub)) {
         note_global_write(adre, uo);  // an element of a global array
@@ -2583,6 +2625,7 @@ class FnWalker {
   }
 
   void visit_cast(const CastExpr* ce) {
+    if (ext_) note_read(ce);
     const CastKind k = ce->getCastKind();
     const Expr* sub = ce->getSubExpr();
     const QualType src = sub->getType(), dst = ce->getType();
@@ -2782,6 +2825,7 @@ class FnWalker {
         note_local_event(vd, init0 != nullptr && is_const_value(init0, 0) ? LocalEvent::Reset0 : LocalEvent::Other, init0, vd->getLocation());
       }
       if (const Expr* init = vd->getInit()) {
+        if (ext_) note_def(vd);
         if (is_fp_type(vd->getType())) {
           const std::string dst = var_node(vd);
           add_flow_to(dst, init);
@@ -2820,6 +2864,576 @@ class FnWalker {
     for (const Stmt* c : il->children()) visit(c);
   }
 
+  // ---- the extended facts F1-F3 (spec.extended_facts; kz_facts.h revision 6) ---------------------------
+
+  // A definition of a variable (an assignment to it, an increment, a declaration with an initializer):
+  // the conditions it executes under, for the RETURNS rows.
+  void note_def(const void* key) {
+    def_guards_[key] = guard_from(0);
+    def_in_loop_[key] = !loops_.empty();
+  }
+  bool before(SourceLocation a, SourceLocation b) const { return sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(a), sm_.getExpansionLoc(b)); }
+  static bool is_const_zero(ExprRef e) { return e != nullptr && e->op == KZ_EXPR_OP_CONST && e->a == nullptr && e->b == nullptr && e->value == 0; }
+  ExprRef negate(ExprRef g) { return g == nullptr ? pool().constant(0) : pool().unary(KZ_EXPR_OP_NOT, g); }
+  // The conjunction of the terms, each split at its `and`s, without repeated conjuncts (the trees are
+  // hash-consed, so a repeated conjunct is the same node); nullptr terms are `true`.
+  void conjuncts(ExprRef e, std::vector<ExprRef>* out) {
+    if (e == nullptr) return;
+    if (e->op == KZ_EXPR_OP_AND) {
+      conjuncts(e->a, out);
+      conjuncts(e->b, out);
+      return;
+    }
+    out->push_back(e);
+  }
+  ExprRef and_unique(const std::vector<ExprRef>& terms) {
+    std::vector<ExprRef> parts, keep;
+    for (ExprRef t : terms) conjuncts(t, &parts);
+    std::set<ExprRef> seen;  // lookup only
+    for (ExprRef p : parts)
+      if (seen.insert(p).second) keep.push_back(p);
+    return pool().conj(KZ_EXPR_OP_AND, keep);
+  }
+
+  // Replaces each local that has a single copy definition (the table of the derives rows: one
+  // definition, a copy, its address not taken, not reading itself) placed before `limit` in the
+  // source by the value of that definition, in turn unfolded before the definition.
+  ExprRef unfold(ExprRef e, SourceLocation limit, std::set<std::string>* active, bool* changed) {
+    if (e == nullptr) return nullptr;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_LOCAL && e->a == nullptr) {
+      auto vit = local_by_id_.find(e->name);
+      if (vit == local_by_id_.end() || active->count(e->name) != 0) return e;
+      auto lit = locals_.find(vit->second);
+      if (lit == locals_.end() || lit->second.addr_taken || lit->second.defs.size() != 1) return e;
+      const DefInfo& d = lit->second.defs.front();
+      if (!d.copy || d.rhs == nullptr || isa<InitListExpr>(d.rhs->IgnoreParens()) || !before(d.loc, limit) || mentions_var(d.rhs, vit->second)) return e;
+      active->insert(e->name);
+      ExprRef v = unfold(to_expr(d.rhs), d.loc, active, changed);
+      active->erase(e->name);
+      *changed = true;
+      return v;
+    }
+    ExprRef a = unfold(e->a, limit, active, changed), b = unfold(e->b, limit, active, changed);
+    if (a == e->a && b == e->b) return e;
+    return pool().make(e->op, e->ref, e->value, e->name, a, b);
+  }
+  ExprRef unfold(ExprRef e, SourceLocation limit, bool* changed) {
+    std::set<std::string> active;
+    return unfold(e, limit, &active, changed);
+  }
+
+  static uint8_t value_kind(ExprRef v) {
+    if (v == nullptr) return KZ_RET_VALUE_EXPR;
+    switch (v->op) {
+      case KZ_EXPR_OP_CONST: return v->a == nullptr ? KZ_RET_VALUE_CONST : KZ_RET_VALUE_EXPR;
+      case KZ_EXPR_OP_CALL_RESULT: return KZ_RET_VALUE_CALL;
+      case KZ_EXPR_OP_ADDR: return KZ_RET_VALUE_ADDR;
+      case KZ_EXPR_OP_LOAD:
+        switch (v->ref) {
+          case KZ_EXPR_REF_FIELD: return KZ_RET_VALUE_FIELD;
+          case KZ_EXPR_REF_GLOBAL: return KZ_RET_VALUE_GLOBAL;
+          case KZ_EXPR_REF_PARAM: return KZ_RET_VALUE_PARAM;
+          case KZ_EXPR_REF_LOCAL: return KZ_RET_VALUE_LOCAL;
+          case KZ_EXPR_REF_STRING: return KZ_RET_VALUE_STRING;
+          case KZ_EXPR_REF_FUNC: return KZ_RET_VALUE_ADDR;
+          default: return KZ_RET_VALUE_EXPR;
+        }
+      default: return KZ_RET_VALUE_EXPR;
+    }
+  }
+  std::string call_key_of(const Expr* e) {
+    if (e == nullptr) return "";
+    const auto* ce = dyn_cast<CallExpr>(e->IgnoreParenCasts());
+    if (ce == nullptr) return "";
+    auto it = ext_call_keys_.find(ce);
+    return it == ext_call_keys_.end() ? std::string() : it->second;
+  }
+
+  // ---- F1 READS ----
+  // A read is an lvalue-to-rvalue conversion (or the decay of an array: its contents are read through
+  // the pointer) of a member access, of a global variable or of an element of a global array.  The
+  // decay of an array that is the base of a subscript is a step of a longer path, not a read.
+  void note_read(const CastExpr* ce) {
+    if (!isa<ImplicitCastExpr>(ce)) return;
+    const CastKind k = ce->getCastKind();
+    bool decay = false;
+    if (k == CK_ArrayToPointerDecay) {
+      const Stmt* p = parent_stmt(ce);
+      const Stmt* cur = ce;
+      while (p != nullptr && isa<ParenExpr>(p)) {
+        cur = p;
+        p = parent_stmt(p);
+      }
+      if (const auto* as = p != nullptr ? dyn_cast<ArraySubscriptExpr>(p) : nullptr; as != nullptr && as->getBase() == cur) return;
+      decay = true;
+    } else if (k != CK_LValueToRValue) {
+      return;
+    }
+    const Expr* lv = ce->getSubExpr()->IgnoreParens();
+    // the location the path names: the subscripts of arrays at its end are stripped (a subscript of a
+    // pointer names no location of its own; the pointer's own read is a row)
+    std::vector<const Expr*> idx;  // leaf first
+    const Expr* named = lv;
+    while (const auto* as = dyn_cast<ArraySubscriptExpr>(named)) {
+      const auto* bc = dyn_cast<ImplicitCastExpr>(as->getBase()->IgnoreParens());
+      if (bc == nullptr || bc->getCastKind() != CK_ArrayToPointerDecay) return;
+      idx.push_back(as->getIdx());
+      named = bc->getSubExpr()->IgnoreParens();
+    }
+    ReadFact r;
+    if (const auto* me = dyn_cast<MemberExpr>(named)) {
+      const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
+      if (fl == nullptr) return;
+      r.kind = KZ_READ_KIND_FIELD;
+      r.type = field_type_name(fl);
+      r.field = fl->getNameAsString();
+      // the root of the access path, and the subscripts on the way
+      const Expr* cur = me;
+      for (;;) {
+        cur = cur->IgnoreParens();
+        if (const auto* m = dyn_cast<MemberExpr>(cur)) {
+          if (m->isArrow()) {
+            r.flags |= KZ_READ_FLAG_THROUGH_POINTER;
+            cur = m->getBase()->IgnoreParenImpCasts();
+          } else {
+            cur = m->getBase();
+          }
+          continue;
+        }
+        if (const auto* as = dyn_cast<ArraySubscriptExpr>(cur)) {
+          idx.push_back(as->getIdx());
+          const Expr* base = as->getBase()->IgnoreParens();
+          const auto* bc = dyn_cast<ImplicitCastExpr>(base);
+          if (bc != nullptr && bc->getCastKind() == CK_ArrayToPointerDecay) {
+            cur = bc->getSubExpr();
+          } else {
+            r.flags |= KZ_READ_FLAG_THROUGH_POINTER;
+            cur = base->IgnoreParenImpCasts();
+          }
+          continue;
+        }
+        if (const auto* uo = dyn_cast<UnaryOperator>(cur)) {
+          if (uo->getOpcode() == UO_Deref) {
+            r.flags |= KZ_READ_FLAG_THROUGH_POINTER;
+            cur = uo->getSubExpr()->IgnoreParenImpCasts();
+            continue;
+          }
+          if (uo->getOpcode() == UO_AddrOf) {
+            cur = uo->getSubExpr();
+            continue;
+          }
+        }
+        if (const auto* c = dyn_cast<CastExpr>(cur)) {
+          cur = c->getSubExpr();
+          continue;
+        }
+        if (const auto* d = dyn_cast<DeclRefExpr>(cur)) {
+          if (const auto* pv = dyn_cast<ParmVarDecl>(d->getDecl())) {
+            r.root_kind = KZ_READ_ROOT_PARAM;
+            r.root = pv->getNameAsString();
+            r.root_param = pv->getFunctionScopeIndex();
+          } else if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+            r.root_kind = vd->hasGlobalStorage() ? KZ_READ_ROOT_GLOBAL : KZ_READ_ROOT_LOCAL;
+            r.root = vd->hasGlobalStorage() ? vd->getNameAsString() : lid(vd);
+          } else {
+            r.root_kind = KZ_READ_ROOT_OTHER;
+            r.root = d->getDecl()->getNameAsString();
+          }
+          break;
+        }
+        if (const auto* call = dyn_cast<CallExpr>(cur)) {
+          r.root_kind = KZ_READ_ROOT_CALL;
+          r.root = callee_text(call);
+          break;
+        }
+        r.root_kind = KZ_READ_ROOT_OTHER;
+        r.root = cur->getStmtClassName();
+        break;
+      }
+    } else if (const auto* dre = dyn_cast<DeclRefExpr>(named)) {
+      const auto* vd = dyn_cast<VarDecl>(dre->getDecl());
+      if (vd == nullptr || !vd->hasGlobalStorage()) return;
+      r.kind = KZ_READ_KIND_GLOBAL;
+      r.type = "<global>";
+      r.field = vd->getNameAsString();
+      r.root_kind = KZ_READ_ROOT_GLOBAL;
+      r.root = r.field;
+    } else {
+      return;
+    }
+    if (decay) r.flags |= KZ_READ_FLAG_ARRAY_CONTENTS;
+    else if (lv->getType()->isRecordType()) r.flags |= KZ_READ_FLAG_RECORD;
+    if (ce->getBeginLoc().isMacroID()) r.flags |= KZ_READ_FLAG_IN_MACRO;
+    if (!idx.empty()) {
+      std::vector<ExprRef> parts;
+      for (size_t i = idx.size(); i > 0; --i) parts.push_back(to_expr(idx[i - 1]));  // root first
+      r.index = pool().list(KZ_EXPR_OP_SEQ, parts);
+    }
+    // the use: every context the value passes through on its way up to its statement
+    const Stmt* cur = ce;
+    for (;;) {
+      const Stmt* p = parent_stmt(cur);
+      if (p == nullptr) {
+        if (const VarDecl* vd = parent_var(cur)) {
+          r.use |= KZ_READ_USE_STORE;
+          if (r.ctx == nullptr) r.ctx = vd->hasGlobalStorage() ? pool().load(KZ_EXPR_REF_GLOBAL, vd->getNameAsString()) : pool().load(KZ_EXPR_REF_LOCAL, lid(vd));
+        }
+        break;
+      }
+      if (isa<ParenExpr>(p) || isa<ImplicitCastExpr>(p)) {
+        cur = p;
+        continue;
+      }
+      if (const auto* cs = dyn_cast<CStyleCastExpr>(p)) {
+        if (cs->getCastKind() == CK_ToVoid) break;
+        cur = p;
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(p)) {
+        if (uo->getOpcode() == UO_Deref) r.use |= KZ_READ_USE_DEREF;
+        if (uo->getOpcode() == UO_Deref || uo->getOpcode() == UO_AddrOf || uo->isIncrementDecrementOp()) break;
+        cur = p;  // !, -, ~, +: the value goes on
+        continue;
+      }
+      if (const auto* bo = dyn_cast<BinaryOperator>(p)) {
+        if (bo->getOpcode() == BO_LAnd || bo->getOpcode() == BO_LOr) {
+          r.use |= KZ_READ_USE_BRANCH;
+          if (r.ctx == nullptr) r.ctx = cond_expr(cast<Expr>(cur), true);
+          cur = p;
+          continue;
+        }
+        if (bo->isAssignmentOp()) {
+          if (bo->getRHS() == cur) {
+            r.use |= is_out_store(bo->getLHS()) ? KZ_READ_USE_OUT_STORE : KZ_READ_USE_STORE;
+            if (r.ctx == nullptr) r.ctx = to_expr(bo->getLHS());
+          }
+          break;
+        }
+        if (bo->getOpcode() == BO_Comma && bo->getLHS() == cur) break;
+        cur = p;
+        continue;
+      }
+      if (const auto* co = dyn_cast<ConditionalOperator>(p)) {
+        if (co->getCond() == cur) {
+          r.use |= KZ_READ_USE_BRANCH;
+          if (r.ctx == nullptr) r.ctx = cond_expr(co->getCond(), true);
+        }
+        cur = p;
+        continue;
+      }
+      if (const auto* call = dyn_cast<CallExpr>(p)) {
+        if (call->getCallee() == cur) {
+          r.use |= KZ_READ_USE_CALLEE;
+          break;
+        }
+        for (unsigned i = 0; i < call->getNumArgs(); ++i)
+          if (call->getArg(i) == cur) {
+            r.use |= KZ_READ_USE_CALL_ARG;
+            if (r.call_key.empty()) {
+              auto it = ext_call_keys_.find(call);
+              if (it != ext_call_keys_.end()) {
+                r.call_key = it->second;
+                r.arg_index = i;
+              }
+            }
+          }
+        cur = p;
+        continue;
+      }
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(p)) {
+        r.use |= as->getIdx() == cur ? KZ_READ_USE_SUBSCRIPT : KZ_READ_USE_DEREF;
+        break;
+      }
+      if (isa<MemberExpr>(p)) {  // the base of `->`
+        r.use |= KZ_READ_USE_DEREF;
+        break;
+      }
+      if (isa<ReturnStmt>(p)) {
+        r.use |= KZ_READ_USE_RETURN;
+        break;
+      }
+      const Expr* cond = nullptr;
+      if (const auto* is = dyn_cast<IfStmt>(p)) cond = is->getCond();
+      else if (const auto* ws = dyn_cast<WhileStmt>(p)) cond = ws->getCond();
+      else if (const auto* ds = dyn_cast<DoStmt>(p)) cond = ds->getCond();
+      else if (const auto* fs = dyn_cast<ForStmt>(p)) cond = fs->getCond();
+      else if (const auto* ss = dyn_cast<SwitchStmt>(p)) cond = ss->getCond();
+      if (cond != nullptr && cond == cur) {
+        r.use |= KZ_READ_USE_BRANCH;
+        if (r.ctx == nullptr) r.ctx = cond_expr(cond, true);
+        break;
+      }
+      if (isa<InitListExpr>(p)) {
+        r.use |= KZ_READ_USE_STORE;
+        break;
+      }
+      if (isa<Expr>(p)) {
+        cur = p;
+        continue;
+      }
+      break;  // a statement: the value is not used
+    }
+    if (r.use == 0) r.use = KZ_READ_USE_OTHER;
+    r.func_key = fkey_;
+    r.pos = tu_.pos_of(named->getExprLoc());
+    tu_.next_key(r.pos, fkey_ + "#r", &r.ordinal);
+    r.text = tu_.source_text(lv->getSourceRange(), 80);
+    r.guard = guard_from(0);
+    if (!loops_.empty()) r.loop_key = m_.loops[loops_.back()->index].key;
+    m_.reads.push_back(r);
+  }
+  // `*p = v`, `p->f = v`, `p[i] = v` (also `p->f.g`, `p->a[i]`) for a pointer parameter p
+  static bool is_out_store(const Expr* lhs) {
+    const Expr* e = lhs->IgnoreParenImpCasts();
+    for (;;) {
+      if (const auto* m = dyn_cast<MemberExpr>(e)) {
+        if (m->isArrow()) {
+          const auto* d = dyn_cast<DeclRefExpr>(m->getBase()->IgnoreParenImpCasts());
+          return d != nullptr && isa<ParmVarDecl>(d->getDecl());
+        }
+        e = m->getBase()->IgnoreParenImpCasts();
+        continue;
+      }
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+        const Expr* b = as->getBase()->IgnoreParenImpCasts();
+        if (const auto* d = dyn_cast<DeclRefExpr>(b); d != nullptr && isa<ParmVarDecl>(d->getDecl())) return true;
+        e = b;
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(e); uo != nullptr && uo->getOpcode() == UO_Deref) {
+        const auto* d = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParenImpCasts());
+        return d != nullptr && isa<ParmVarDecl>(d->getDecl());
+      }
+      return false;
+    }
+  }
+
+  // ---- F2 RETURNS ----
+  CfgIndex* ext_cfg() {
+    if (ext_cfg_tried_) return ext_cfg_.get();
+    ext_cfg_tried_ = true;
+    CFG::BuildOptions bo;
+    bo.setAllAlwaysAdd();
+    std::unique_ptr<CFG> cfg = CFG::buildCFG(fd_, const_cast<Stmt*>(fd_->getBody()), &ctx_, bo);
+    if (!cfg) return nullptr;
+    auto ix = std::make_unique<CfgIndex>();
+    ix->blocks.assign(cfg->getNumBlockIDs(), nullptr);
+    for (const CFGBlock* b : *cfg) {
+      if (b == nullptr || b->getBlockID() >= ix->blocks.size()) continue;
+      ix->blocks[b->getBlockID()] = b;
+      unsigned i = 0;
+      for (const CFGElement& el : *b) {
+        if (const std::optional<CFGStmt> cs = el.getAs<CFGStmt>()) ix->at.emplace(cs->getStmt(), std::make_pair(b->getBlockID(), i));
+        ++i;
+      }
+    }
+    ix->cfg = std::move(cfg);
+    ext_cfg_ = std::move(ix);
+    return ext_cfg_.get();
+  }
+  // A definition of `v` in a CFG element: its key (the assignment or increment; the VarDecl of a
+  // declaration with an initializer), or null.
+  static const void* def_of(const CFGElement& el, const VarDecl* v) {
+    const std::optional<CFGStmt> cs = el.getAs<CFGStmt>();
+    if (!cs) return nullptr;
+    const Stmt* st = cs->getStmt();
+    if (const auto* bo = dyn_cast<BinaryOperator>(st)) {
+      if (!bo->isAssignmentOp()) return nullptr;
+      const auto* d = dyn_cast<DeclRefExpr>(bo->getLHS()->IgnoreParenImpCasts());
+      return d != nullptr && d->getDecl() == v ? bo : nullptr;
+    }
+    if (const auto* uo = dyn_cast<UnaryOperator>(st)) {
+      if (!uo->isIncrementDecrementOp()) return nullptr;
+      const auto* d = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParenImpCasts());
+      return d != nullptr && d->getDecl() == v ? uo : nullptr;
+    }
+    if (const auto* ds = dyn_cast<DeclStmt>(st)) {
+      for (const Decl* d : ds->decls())
+        if (d == v && v->getInit() != nullptr) return v;
+    }
+    return nullptr;
+  }
+  struct DefAt {
+    const void* key = nullptr;
+    unsigned block = 0, index = 0;
+  };
+  // The definitions of `v` that reach the element (block, index) (backward from it until a definition
+  // on every path); `undef` when a path from the entry reaches it without one.
+  std::vector<DefAt> reaching_defs(const CfgIndex& ix, const VarDecl* v, unsigned block, unsigned index, bool* undef) {
+    std::vector<DefAt> out;
+    std::set<const void*> found;
+    std::set<unsigned> visited;
+    std::vector<std::pair<unsigned, unsigned>> work{{block, index}};  // scan the block backwards from `index` (exclusive)
+    *undef = false;
+    while (!work.empty()) {
+      const auto [b, from] = work.back();
+      work.pop_back();
+      const CFGBlock* blk = b < ix.blocks.size() ? ix.blocks[b] : nullptr;
+      if (blk == nullptr) continue;
+      bool hit = false;
+      for (unsigned k = from; k > 0 && !hit; --k) {
+        const void* d = def_of((*blk)[k - 1], v);
+        if (d == nullptr) continue;
+        hit = true;
+        if (found.insert(d).second) out.push_back(DefAt{d, b, k - 1});
+      }
+      if (hit) continue;
+      if (blk == &ix.cfg->getEntry()) {
+        *undef = true;
+        continue;
+      }
+      bool any_pred = false;
+      for (const CFGBlock::AdjacentBlock& a : blk->preds()) {
+        const CFGBlock* pb = a.getReachableBlock();
+        if (pb == nullptr) continue;
+        any_pred = true;
+        if (visited.insert(pb->getBlockID()).second) work.push_back({pb->getBlockID(), static_cast<unsigned>(pb->size())});
+      }
+      (void)any_pred;  // a block without a reachable predecessor is not reached from the entry
+    }
+    return out;
+  }
+  // Is (to) reachable from just after (from) on the CFG?
+  bool reaches(const CfgIndex& ix, const DefAt& from, const DefAt& to) {
+    if (from.block == to.block && to.index > from.index) return true;
+    std::set<unsigned> visited;
+    std::vector<unsigned> work;
+    auto push_succ = [&](unsigned b) {
+      const CFGBlock* blk = b < ix.blocks.size() ? ix.blocks[b] : nullptr;
+      if (blk == nullptr) return;
+      for (const CFGBlock::AdjacentBlock& a : blk->succs())
+        if (const CFGBlock* sb = a.getReachableBlock())
+          if (visited.insert(sb->getBlockID()).second) work.push_back(sb->getBlockID());
+    };
+    push_succ(from.block);
+    while (!work.empty()) {
+      const unsigned b = work.back();
+      work.pop_back();
+      if (b == to.block) return true;
+      push_succ(b);
+    }
+    return false;
+  }
+  // The value a definition stores (null for a compound assignment or an increment).
+  static const Expr* def_value(const void* key, const VarDecl* v) {
+    if (key == v) return v->getInit();
+    if (const auto* bo = dyn_cast<BinaryOperator>(static_cast<const Stmt*>(key))) return bo->getOpcode() == BO_Assign ? bo->getRHS() : nullptr;
+    return nullptr;
+  }
+  // The definition as written.
+  SourceRange def_range(const void* key, const VarDecl* v) const {
+    if (key == v) return v->getSourceRange();
+    return static_cast<const Stmt*>(key)->getSourceRange();
+  }
+  SourceLocation def_loc(const void* key, const VarDecl* v) const {
+    if (key == v) return v->getLocation();
+    const Stmt* st = static_cast<const Stmt*>(key);
+    if (const auto* bo = dyn_cast<BinaryOperator>(st)) return bo->getOperatorLoc();
+    if (const auto* uo = dyn_cast<UnaryOperator>(st)) return uo->getOperatorLoc();
+    return st->getBeginLoc();
+  }
+
+  // After the walk: one RETURNS row per (return statement with a value, alternative).
+  void emit_returns() {
+    for (const PendingReturn& pr : returns_) {
+      const ReturnStmt* s = pr.stmt;
+      const Expr* rv = s->getRetValue();
+      if (rv == nullptr) continue;
+      ReturnFact base;
+      base.func_key = fkey_;
+      base.pos = tu_.pos_of(s->getBeginLoc());
+      tu_.next_key(base.pos, fkey_ + "#ret", &base.ordinal);
+      base.guard = pr.guard;
+      base.loop_key = pr.loop_key;
+      if (!pr.loop_key.empty()) base.flags |= KZ_RET_FLAG_IN_LOOP;
+      if (s->getBeginLoc().isMacroID()) base.flags |= KZ_RET_FLAG_IN_MACRO;
+      const SourceLocation limit = s->getBeginLoc();
+      std::vector<ReturnFact> alts;
+      // a returned local with definitions of its own: the definitions that reach the return
+      const VarDecl* v = nullptr;
+      if (const auto* d = dyn_cast<DeclRefExpr>(rv->IgnoreParenCasts()))
+        if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->isLocalVarDecl() && !vd->isStaticLocal()) v = vd;
+      auto lit = v != nullptr ? locals_.find(v) : locals_.end();
+      const bool resolvable = lit != locals_.end() && !lit->second.addr_taken && !lit->second.defs.empty();
+      bool no_cfg = false;
+      CfgIndex* ix = resolvable ? ext_cfg() : nullptr;
+      if (resolvable && (ix == nullptr || ix->at.count(s) == 0)) no_cfg = true;
+      if (resolvable && !no_cfg) {
+        const std::pair<unsigned, unsigned> at = ix->at.at(s);
+        {
+          bool undef = false;
+          std::vector<DefAt> defs = reaching_defs(*ix, v, at.first, at.second, &undef);
+          std::sort(defs.begin(), defs.end(), [&](const DefAt& a, const DefAt& b) {
+            const SourceLocation la = sm_.getExpansionLoc(def_loc(a.key, v)), lb = sm_.getExpansionLoc(def_loc(b.key, v));
+            if (la != lb) return la.getRawEncoding() < lb.getRawEncoding();
+            return std::tie(a.block, a.index) < std::tie(b.block, b.index);
+          });
+          for (const DefAt& d : defs) {
+            ReturnFact r = base;
+            r.flags |= KZ_RET_FLAG_FROM_DEF;
+            if (undef) r.flags |= KZ_RET_FLAG_UNDEF_PATH;
+            auto il = def_in_loop_.find(d.key);
+            if (il != def_in_loop_.end() && il->second) r.flags |= KZ_RET_FLAG_IN_LOOP;
+            r.local = lid(v);
+            const SourceLocation dl = def_loc(d.key, v);
+            r.def = tu_.pos_of(dl);
+            auto g = def_guards_.find(d.key);
+            r.def_guard = g != def_guards_.end() ? g->second : nullptr;
+            const Expr* rhs = def_value(d.key, v);
+            bool changed = false;
+            if (rhs != nullptr && !isa<InitListExpr>(rhs->IgnoreParens())) {
+              r.value = unfold(to_expr(rhs), dl, &changed);
+              r.text = tu_.source_text(rhs->getSourceRange(), 80);
+              r.call_key = call_key_of(rhs);
+            } else {
+              r.value = pool().top("not a copy");
+              r.text = tu_.source_text(def_range(d.key, v), 80);
+            }
+            std::vector<ExprRef> terms{r.guard, r.def_guard};
+            for (const DefAt& o : defs)
+              if (o.key != d.key && reaches(*ix, d, o)) {
+                r.flags |= KZ_RET_FLAG_REDEFINED;
+                auto og = def_guards_.find(o.key);
+                terms.push_back(negate(og != def_guards_.end() ? og->second : nullptr));
+              }
+            r.cond = unfold(and_unique(terms), limit, &changed);
+            if (changed) r.flags |= KZ_RET_FLAG_UNFOLDED;
+            alts.push_back(r);
+          }
+          if (defs.empty()) {  // no definition reaches it
+            ReturnFact r = base;
+            r.flags |= KZ_RET_FLAG_UNDEF_PATH;
+            r.value = to_expr(rv);
+            r.text = tu_.source_text(rv->getSourceRange(), 80);
+            bool changed = false;
+            r.cond = unfold(and_unique({r.guard}), limit, &changed);
+            if (changed) r.flags |= KZ_RET_FLAG_UNFOLDED;
+            alts.push_back(r);
+          }
+        }
+      }
+      if (alts.empty()) {
+        ReturnFact r = base;
+        if (no_cfg) r.flags |= KZ_RET_FLAG_NO_CFG;
+        bool changed = false;
+        r.value = unfold(to_expr(rv), limit, &changed);
+        r.text = tu_.source_text(rv->getSourceRange(), 80);
+        r.call_key = call_key_of(rv);
+        r.cond = unfold(and_unique({r.guard}), limit, &changed);
+        if (changed) r.flags |= KZ_RET_FLAG_UNFOLDED;
+        alts.push_back(r);
+      }
+      for (size_t i = 0; i < alts.size(); ++i) {
+        ReturnFact& r = alts[i];
+        r.alt = static_cast<uint32_t>(i);
+        r.n_alts = static_cast<uint32_t>(alts.size());
+        r.vkind = value_kind(r.value);
+        if (r.vkind == KZ_RET_VALUE_CONST) r.constant = r.value->value;
+        m_.returns.push_back(r);
+      }
+    }
+  }
+
   struct Guard {
     const Expr* cond;
     bool polarity;
@@ -2847,6 +3461,19 @@ class FnWalker {
   std::map<std::string, const VarDecl*> local_by_id_;
   std::map<const RecordDecl*, std::set<size_t>> reach_cache_;  // lookup only
   std::map<const CallExpr*, std::string> call_exprs_;  // the profile-free mode: call -> key, lookup only
+  // the extended facts F1-F3 (spec.extended_facts)
+  struct PendingReturn {
+    const ReturnStmt* stmt = nullptr;
+    ExprRef guard = nullptr;
+    std::string loop_key;
+  };
+  bool ext_ = false;
+  std::map<const CallExpr*, std::string> ext_call_keys_;  // every call of the body -> its key, lookup only
+  std::map<const void*, ExprRef> def_guards_;             // a definition of a variable -> its guard, lookup only
+  std::map<const void*, bool> def_in_loop_;               // lookup only
+  std::vector<PendingReturn> returns_;                    // in walk order
+  std::unique_ptr<CfgIndex> ext_cfg_;
+  bool ext_cfg_tried_ = false;
 };
 
 // ---- static initializers: function values stored in tables -------------------------------------------

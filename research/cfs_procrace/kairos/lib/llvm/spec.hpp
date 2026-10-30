@@ -69,6 +69,11 @@ struct ExtractSpec {
   std::map<std::string, std::set<std::string>> spawn_script_entries;   // spawn call key -> entries named by the startup script
   std::set<std::string> guard_calls;                                   // call keys whose guards the derived rows report
 
+  // ---- the extended facts F1-F3 (READS, RETURNS, RET_CONSTS, LOOP_EXITS; kz_facts.h revision 6) ----
+  // Always on in the profile-free mode (its second pass), on request (--extended-facts) in the
+  // profile-driven one.  Off, nothing is read for them and the facts are written as before.
+  bool extended_facts = false;
+
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;
 };

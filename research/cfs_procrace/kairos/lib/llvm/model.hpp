@@ -156,6 +156,18 @@ struct LoopFact {
   uint8_t cert = KZ_LOOP_CERT_UNDECIDED;
   uint8_t lflags = 0;
   std::string cert_note;
+  // F3 (LOOP_EXITS, spec.extended_facts): the exits of every loop, whatever its kind.
+  struct Exit {
+    uint8_t kind = KZ_LOOPEXIT_KIND_NONE;
+    Pos pos;
+    ExprRef when = nullptr;     // the guards from the loop down to the exit
+    ExprRef trigger = nullptr;  // the condition that decides it, or null (unconditional)
+    uint16_t flags = 0;
+  };
+  bool has_exits = false;  // filled (extended facts)
+  bool exits_as_in_loops = false;  // exit_expr and modset above are the same trees
+  ExprRef all_exit = nullptr, all_modset = nullptr;
+  std::vector<Exit> exits;
 };
 
 // A call inside a table walk, in the form that finalize evaluates per iteration: its guards
@@ -358,6 +370,47 @@ struct FpArg {
   std::vector<std::string> nodes;  // fp-flow nodes of the argument
   bool from_data = false;          // an integer or a data pointer converted to a function pointer
 };
+// ---- the extended facts F1-F3 (spec.extended_facts; kz_facts.h revision 6) ------------------------------
+// A read of a field or of a global (READS).
+struct ReadFact {
+  std::string func_key;
+  Pos pos;
+  uint32_t ordinal = 0;
+  uint8_t kind = KZ_READ_KIND_NONE;
+  uint8_t root_kind = KZ_READ_ROOT_NONE;
+  uint16_t use = 0;
+  uint32_t flags = 0;
+  uint32_t root_param = kNone;
+  std::string type, field, root, text;
+  std::string loop_key;               // the innermost loop, or empty
+  std::string call_key;               // call-argument: the innermost call
+  uint32_t arg_index = kNone;
+  ExprRef index = nullptr, guard = nullptr, ctx = nullptr;
+};
+// One alternative of a return statement (RETURNS).
+struct ReturnFact {
+  std::string func_key;
+  Pos pos;
+  uint32_t ordinal = 0;
+  uint32_t alt = 0, n_alts = 1;
+  ExprRef value = nullptr, guard = nullptr, def_guard = nullptr, cond = nullptr;
+  std::string call_key, loop_key;
+  uint8_t vkind = KZ_RET_VALUE_NONE;
+  uint16_t flags = 0;
+  int64_t constant = 0;
+  std::string local, text;
+  Pos def;
+};
+// Per function and constant (RET_CONSTS); filled by finalize from the RETURNS rows.
+struct RetConstFact {
+  std::string func_key;
+  int64_t value = 0;
+  std::string text;
+  ExprRef cond = nullptr;  // null: always
+  uint32_t n_rows = 0;
+  uint32_t flags = 0;
+};
+
 // A row of P0_TABLE: the table entry (index into p0_table()) and what this program has of it.
 struct P0Fact {
   size_t entry = 0;
@@ -423,6 +476,11 @@ struct Model {
   std::vector<P0Fact> p0_facts;
   std::vector<OpDerivFact> op_derivs;
   std::vector<SpawnWrapFact> spawn_wraps;
+
+  // The extended facts F1-F3 (spec.extended_facts); LOOP_EXITS is in LoopFact.
+  std::vector<ReadFact> reads;
+  std::vector<ReturnFact> returns;
+  std::vector<RetConstFact> ret_consts;  // filled by finalize
 
   // Raw tables for the global phase.
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer

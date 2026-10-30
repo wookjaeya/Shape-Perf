@@ -31,6 +31,15 @@
  * startup-script entries a spawn with a data-valued entry resolves to through the symbol lookup);
  * terminals have the flag `conditional`.  No earlier record or section version changes, and the
  * profile-driven mode writes none of the new sections, so its facts are written as before.
+ * Revision 6 (2026-10-30, the extended facts F1-F3): four NEW sections in the second extraction
+ * range, 123 (READS: the field and global reads of every body, with their use, the subscripts on
+ * the access path and the guard), 124 (RETURNS: every return value, a returned local resolved to
+ * the definitions that reach the return, each with its value and the condition under which the
+ * function returns it), 125 (RET_CONSTS: per function the constants it returns and when) and 126
+ * (LOOP_EXITS: the exit conditions, every exit and the mod set of every loop, whatever its kind).
+ * They are written by `kz-static extract --no-profile` and, in the profile-driven mode, only with
+ * `--extended-facts`; a profile-driven extraction without that option writes its facts as before.
+ * Their expression roots are in FACT_EXPRS after the roots of the earlier sections.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -83,7 +92,11 @@ enum kz_facts_section_id {
   KZ_SEC_FUNC_WRITES = 39,
   KZ_SEC_P0_TABLE = 120,
   KZ_SEC_OP_DERIV = 121,
-  KZ_SEC_SPAWN_WRAP = 122
+  KZ_SEC_SPAWN_WRAP = 122,
+  KZ_SEC_READS = 123,
+  KZ_SEC_RETURNS = 124,
+  KZ_SEC_RET_CONSTS = 125,
+  KZ_SEC_LOOP_EXITS = 126
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -115,7 +128,11 @@ enum kz_facts_section_id {
   S(FUNC_WRITES, 39, kz_fact_fwrite, 1)        \
   S(P0_TABLE, 120, kz_fact_p0, 1)              \
   S(OP_DERIV, 121, kz_fact_opderiv, 1)         \
-  S(SPAWN_WRAP, 122, kz_fact_spawnw, 1)
+  S(SPAWN_WRAP, 122, kz_fact_spawnw, 1)        \
+  S(READS, 123, kz_fact_read, 1)               \
+  S(RETURNS, 124, kz_fact_return, 1)           \
+  S(RET_CONSTS, 125, kz_fact_retconst, 1)      \
+  S(LOOP_EXITS, 126, kz_fact_loopexit, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -670,6 +687,123 @@ enum kz_facts_section_id {
   X(T, kz_str, chain, )                                                              \
   X(T, kz_str, via, )
 
+/*
+ * READS (revision 6, F1).  A read of a field or of a global object in a function body: an
+ * lvalue-to-rvalue conversion of a member access, of a global variable or of an element of a
+ * global array (KZ_READ_KIND), or an array of that kind that decays to a pointer (the contents are
+ * read through it: `array-contents`).  (type, field) is the abstract location as the writers name
+ * it (FIELD: the owner type and the field; GLOBAL: "<global>" and the object).  The access path is
+ * followed to its root (`root_kind`, `root`, `root_param`): `x.a[i].f` has the root x, `p->f` the
+ * pointer p (`through-pointer`), `g()->f` the call.  `index_root` lists the subscripts on the path,
+ * root first.  `use` is every context the value passes on its way up to the statement: a branch
+ * condition (if / loop / switch / ?: condition, an operand of && or ||; `ctx_root` the innermost
+ * such condition), the value of a return statement, the right side of a store through a pointer
+ * parameter (`out-store`; `ctx_root` the destination) or of another store or initializer
+ * (`store`), a call argument (`site`, `arg_index`: the innermost call), a subscript, a
+ * dereferenced pointer, the callee of an indirect call; `other` when none of them.  The guard is
+ * the writers' (the conditions the read executes under).  `loop` is the innermost loop.
+ */
+#define KZ_FACT_READ_FIELDS(X, T)                                                    \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, loop, )       /* FACT_LOOPS index, or KZ_NONE32 */                  \
+  X(T, uint32_t, site, )       /* call-argument: the call, else KZ_NONE32 */         \
+  X(T, uint32_t, arg_index, )  /* call-argument: the argument, else KZ_NONE32 */     \
+  X(T, uint32_t, index_root, ) /* FACT_EXPRS: SEQ of the subscripts, or KZ_NONE32 */ \
+  X(T, uint32_t, guard_root, ) /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, ctx_root, )   /* FACT_EXPRS: the condition or the destination, or KZ_NONE32 */ \
+  X(T, uint8_t, kind, )        /* KZ_READ_KIND */                                    \
+  X(T, uint8_t, root_kind, )   /* KZ_READ_ROOT */                                    \
+  X(T, uint16_t, use, )        /* KZ_READ_USE */                                     \
+  X(T, uint32_t, flags, )      /* KZ_READ_FLAG */                                    \
+  X(T, uint32_t, root_param, ) /* root_kind param: its index, else KZ_NONE32 */      \
+  X(T, kz_str, type, )                                                               \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, root, )                                                               \
+  X(T, kz_str, text, )         /* the access path as written */                      \
+  X(T, kz_str, file, )                                                               \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint32_t, rsv0, )
+
+/*
+ * RETURNS (revision 6, F2).  One row per (return statement with a value, alternative).  The value
+ * is the return expression with the locals that have a single copy definition before the return
+ * replaced by their value (`unfolded`; the definition table of the derives rows).  A returned local
+ * is resolved to the definitions that reach the return on the control-flow graph of the body
+ * (reaching definitions): one alternative per definition (`from-definition`, `local`, (def_line,
+ * def_col) in def_file), its value the definition's right side; `redefined-later` when another of
+ * those definitions can follow it on a path to the return; `undefined-on-a-path` when a path
+ * reaches the return with no definition.  `guard_root` is the conditions at the return statement,
+ * `def_guard_root` those at the definition, and `cond_root` the condition under which the function
+ * returns this value: the return's guard, the definition's guard and the negations of the guards of
+ * the definitions that can follow it, with single-definition locals unfolded.  The guards are those
+ * of the writers (structured conditions): inside a loop (`in-loop`) they hold per iteration.
+ */
+#define KZ_FACT_RETURN_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, alt, )            /* 0-based alternative of this return statement */ \
+  X(T, uint32_t, n_alts, )                                                           \
+  X(T, uint32_t, value_root, )     /* FACT_EXPRS */                                  \
+  X(T, uint32_t, guard_root, )     /* FACT_EXPRS, or KZ_NONE32 */                    \
+  X(T, uint32_t, def_guard_root, ) /* FACT_EXPRS, or KZ_NONE32 */                    \
+  X(T, uint32_t, cond_root, )      /* FACT_EXPRS, or KZ_NONE32 (always) */           \
+  X(T, uint32_t, site, )           /* call-result: the call returned, else KZ_NONE32 */ \
+  X(T, uint32_t, loop, )           /* FACT_LOOPS index of the innermost loop, or KZ_NONE32 */ \
+  X(T, uint8_t, vkind, )           /* KZ_RET_VALUE */                                \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )          /* KZ_RET_FLAG */                                 \
+  X(T, int64_t, value, )           /* const: the value */                            \
+  X(T, kz_str, local, )            /* from-definition: the local */                  \
+  X(T, kz_str, text, )             /* the value as written */                        \
+  X(T, kz_str, file, )                                                               \
+  X(T, kz_str, def_file, )                                                           \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, def_line, )                                                         \
+  X(T, uint32_t, def_col, )                                                          \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint32_t, rsv1, )
+
+/*
+ * RET_CONSTS (revision 6, F2).  Per function and constant: the function returns `value` when
+ * `cond_root` holds, the disjunction of the conditions of its RETURNS rows of that constant
+ * (KZ_NONE32: always).  `flags` is the union of the rows' flags, and `only-constants` when every
+ * RETURNS row of the function is a constant.  `text` is the constant as the first row writes it.
+ */
+#define KZ_FACT_RETCONST_FIELDS(X, T)                                                \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, n_rows, )                                                           \
+  X(T, uint32_t, cond_root, ) /* FACT_EXPRS, or KZ_NONE32 */                         \
+  X(T, uint32_t, flags, )     /* KZ_RET_FLAG */                                      \
+  X(T, int64_t, value, )                                                             \
+  X(T, kz_str, text, )
+
+/*
+ * LOOP_EXITS (revision 6, F3).  The exits of every loop, whatever its kind and whether it calls a
+ * delay operation (FACT_LOOPS keeps these trees for the loops that wait and the table walks only:
+ * `as-in-loops`).  A LOOP row: `root` the exit conditions (their disjunction), `aux_root` the mod set
+ * of the body (LOCSET: fields, globals and locals written, callees), `n` the number of exits.  One
+ * EXIT row per exit, in the order of the walk (the loop condition first): `root` the conditions under
+ * which it is taken (the guards from the loop down to it), `aux_root` the condition that decides it
+ * (the innermost guard inside the loop, or the negated loop condition; KZ_NONE32: `unconditional`).
+ * The kind and the delay-in-body of the loop stay in FACT_LOOPS.
+ */
+#define KZ_FACT_LOOPEXIT_FIELDS(X, T)                                                \
+  X(T, uint32_t, loop, )     /* FACT_LOOPS index */                                  \
+  X(T, uint32_t, exit, )     /* EXIT: 0-based, LOOP: KZ_NONE32 */                    \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, root, )     /* FACT_EXPRS, or KZ_NONE32 */                          \
+  X(T, uint32_t, aux_root, ) /* FACT_EXPRS, or KZ_NONE32 */                          \
+  X(T, uint32_t, n, )                                                                \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, kind, )      /* KZ_LOOPEXIT_KIND */                                  \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )    /* KZ_LOOPEXIT_FLAG */                                  \
+  X(T, kz_str, file, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -699,7 +833,11 @@ enum kz_facts_section_id {
   R(kz_fact_fwrite, KZ_FACT_FWRITE_FIELDS)        \
   R(kz_fact_p0, KZ_FACT_P0_FIELDS)                \
   R(kz_fact_opderiv, KZ_FACT_OPDERIV_FIELDS)      \
-  R(kz_fact_spawnw, KZ_FACT_SPAWNW_FIELDS)
+  R(kz_fact_spawnw, KZ_FACT_SPAWNW_FIELDS)        \
+  R(kz_fact_read, KZ_FACT_READ_FIELDS)            \
+  R(kz_fact_return, KZ_FACT_RETURN_FIELDS)        \
+  R(kz_fact_retconst, KZ_FACT_RETCONST_FIELDS)    \
+  R(kz_fact_loopexit, KZ_FACT_LOOPEXIT_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -909,6 +1047,51 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 #define KZ_ENUM_SPAWNW_FLAGS(ITEM, P) /* set */ \
   ITEM(P, VOCABULARY, 0x1, "vocabulary") ITEM(P, NOT_IN_CLOSURE, 0x2, "not-in-closure")
 
+#define KZ_ENUM_READ_KIND(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, FIELD, 1, "field") ITEM(P, GLOBAL, 2, "global")
+
+#define KZ_ENUM_READ_ROOT(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, GLOBAL, 1, "global") ITEM(P, PARAM, 2, "param")   \
+  ITEM(P, LOCAL, 3, "local") ITEM(P, CALL, 4, "call-result") ITEM(P, OTHER, 5, "other")
+
+#define KZ_ENUM_READ_USE(ITEM, P) /* set */                                          \
+  ITEM(P, BRANCH, 0x1, "branch") ITEM(P, RETURN, 0x2, "return")                      \
+  ITEM(P, OUT_STORE, 0x4, "out-store") ITEM(P, CALL_ARG, 0x8, "call-argument")       \
+  ITEM(P, SUBSCRIPT, 0x10, "subscript") ITEM(P, STORE, 0x20, "store")                \
+  ITEM(P, DEREF, 0x40, "dereference") ITEM(P, CALLEE, 0x80, "callee")                \
+  ITEM(P, OTHER, 0x100, "other")
+
+/* THROUGH_POINTER: the access path dereferences a pointer (`->`, `*`, a subscript of a pointer);
+ * ARRAY_CONTENTS: an array that decays to a pointer; RECORD: a whole record is read (copied). */
+#define KZ_ENUM_READ_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, THROUGH_POINTER, 0x1, "through-pointer") ITEM(P, ARRAY_CONTENTS, 0x2, "array-contents") \
+  ITEM(P, IN_MACRO, 0x4, "in-macro") ITEM(P, RECORD, 0x8, "whole-record")
+
+#define KZ_ENUM_RET_VALUE(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, CONST, 1, "const") ITEM(P, FIELD, 2, "field")     \
+  ITEM(P, GLOBAL, 3, "global") ITEM(P, CALL, 4, "call-result") ITEM(P, PARAM, 5, "param") \
+  ITEM(P, LOCAL, 6, "local") ITEM(P, ADDR, 7, "address") ITEM(P, STRING, 8, "string") \
+  ITEM(P, EXPR, 9, "expression")
+
+/* NO_CFG: no control-flow graph of the body was built, so a returned local with several definitions
+ * is left as it is; ONLY_CONSTANTS (RET_CONSTS): every return value of the function is a constant. */
+#define KZ_ENUM_RET_FLAGS(ITEM, P) /* set */                                         \
+  ITEM(P, UNFOLDED, 0x1, "unfolded") ITEM(P, FROM_DEF, 0x2, "from-definition")       \
+  ITEM(P, REDEFINED, 0x4, "redefined-later") ITEM(P, UNDEF_PATH, 0x8, "undefined-on-a-path") \
+  ITEM(P, IN_LOOP, 0x10, "in-loop") ITEM(P, IN_MACRO, 0x20, "in-macro")              \
+  ITEM(P, NO_CFG, 0x40, "no-cfg") ITEM(P, ONLY_CONSTANTS, 0x80, "only-constants")
+
+#define KZ_ENUM_LOOPEXIT_KIND(ITEM, P)                                               \
+  ITEM(P, NONE, 0, "none") ITEM(P, LOOP, 1, "loop") ITEM(P, COND, 2, "condition")    \
+  ITEM(P, BREAK, 3, "break") ITEM(P, RETURN, 4, "return") ITEM(P, GOTO, 5, "goto")
+
+/* AS_IN_LOOPS (LOOP): FACT_LOOPS carries the same exit and mod-set trees; NEVER (EXIT): a constant
+ * false condition; UNCONDITIONAL (EXIT): taken whenever it is reached; NO_EXIT (LOOP): no exit can
+ * be taken. */
+#define KZ_ENUM_LOOPEXIT_FLAGS(ITEM, P) /* set */                                    \
+  ITEM(P, AS_IN_LOOPS, 0x1, "as-in-loops") ITEM(P, NEVER, 0x2, "never-taken")        \
+  ITEM(P, UNCONDITIONAL, 0x4, "unconditional") ITEM(P, NO_EXIT, 0x8, "no-exit")
+
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
   ITEM(P, ESCAPES, 2, "escapes") ITEM(P, UNSUMMARIZED, 3, "unsummarized")            \
@@ -985,6 +1168,14 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_OPDERIV_FLAG, KZ_ENUM_OPDERIV_FLAGS, 1) \
   D(KZ_SPAWNW_KIND, KZ_ENUM_SPAWNW_KIND, 0)    \
   D(KZ_SPAWNW_FLAG, KZ_ENUM_SPAWNW_FLAGS, 1)   \
+  D(KZ_READ_KIND, KZ_ENUM_READ_KIND, 0)        \
+  D(KZ_READ_ROOT, KZ_ENUM_READ_ROOT, 0)        \
+  D(KZ_READ_USE, KZ_ENUM_READ_USE, 1)          \
+  D(KZ_READ_FLAG, KZ_ENUM_READ_FLAGS, 1)       \
+  D(KZ_RET_VALUE, KZ_ENUM_RET_VALUE, 0)        \
+  D(KZ_RET_FLAG, KZ_ENUM_RET_FLAGS, 1)         \
+  D(KZ_LOOPEXIT_KIND, KZ_ENUM_LOOPEXIT_KIND, 0) \
+  D(KZ_LOOPEXIT_FLAG, KZ_ENUM_LOOPEXIT_FLAGS, 1) \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -1123,6 +1314,40 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_spawnw, entry_fn, IDX, 0)                 \
   F(kz_fact_spawnw, call_site, IDX, 0)                \
   F(kz_fact_spawnw, kind, ENUM, KZ_SPAWNW_KIND)       \
-  F(kz_fact_spawnw, flags, FLAGS, KZ_SPAWNW_FLAG)
+  F(kz_fact_spawnw, flags, FLAGS, KZ_SPAWNW_FLAG)     \
+  F(kz_fact_read, fn, IDX, 0)                         \
+  F(kz_fact_read, loop, IDX, 0)                       \
+  F(kz_fact_read, site, IDX, 0)                       \
+  F(kz_fact_read, arg_index, IDX, 0)                  \
+  F(kz_fact_read, index_root, IDX, 0)                 \
+  F(kz_fact_read, guard_root, IDX, 0)                 \
+  F(kz_fact_read, ctx_root, IDX, 0)                   \
+  F(kz_fact_read, kind, ENUM, KZ_READ_KIND)           \
+  F(kz_fact_read, root_kind, ENUM, KZ_READ_ROOT)      \
+  F(kz_fact_read, use, FLAGS, KZ_READ_USE)            \
+  F(kz_fact_read, flags, FLAGS, KZ_READ_FLAG)         \
+  F(kz_fact_read, root_param, IDX, 0)                 \
+  F(kz_fact_read, fh, IDX, 0)                         \
+  F(kz_fact_return, fn, IDX, 0)                       \
+  F(kz_fact_return, value_root, IDX, 0)               \
+  F(kz_fact_return, guard_root, IDX, 0)               \
+  F(kz_fact_return, def_guard_root, IDX, 0)           \
+  F(kz_fact_return, cond_root, IDX, 0)                \
+  F(kz_fact_return, site, IDX, 0)                     \
+  F(kz_fact_return, loop, IDX, 0)                     \
+  F(kz_fact_return, vkind, ENUM, KZ_RET_VALUE)        \
+  F(kz_fact_return, flags, FLAGS, KZ_RET_FLAG)        \
+  F(kz_fact_return, fh, IDX, 0)                       \
+  F(kz_fact_retconst, fn, IDX, 0)                     \
+  F(kz_fact_retconst, cond_root, IDX, 0)              \
+  F(kz_fact_retconst, flags, FLAGS, KZ_RET_FLAG)      \
+  F(kz_fact_loopexit, loop, IDX, 0)                   \
+  F(kz_fact_loopexit, exit, IDX, 0)                   \
+  F(kz_fact_loopexit, fn, IDX, 0)                     \
+  F(kz_fact_loopexit, root, IDX, 0)                   \
+  F(kz_fact_loopexit, aux_root, IDX, 0)               \
+  F(kz_fact_loopexit, fh, IDX, 0)                     \
+  F(kz_fact_loopexit, kind, ENUM, KZ_LOOPEXIT_KIND)   \
+  F(kz_fact_loopexit, flags, FLAGS, KZ_LOOPEXIT_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

@@ -88,9 +88,10 @@ int usage() {
       "       kz-static extract (--profile P | --no-profile) (--basis B | --source S... -- <compile flags>) -o OUT\n"
       "                         [--root R] [--target Type.field]... [--delay-op N]... [--lock-op N]... [--unlock-op N]...\n"
       "                         [--spawn-op N]... [--terminal-op N]... [--poll-fn N]... [--resource-dir D] [--extra-arg A]...\n"
-      "                         [--text] [--section S]... [--verbose]\n"
+      "                         [--extended-facts] [--text] [--section S]... [--verbose]\n"
       "                         (--no-profile: the built-in profile and the P0 table only, no vocabulary options;\n"
-      "                         delay, terminal and spawn operations derived through wrappers)\n"
+      "                         delay, terminal and spawn operations derived through wrappers; --extended-facts:\n"
+      "                         the sections READS, RETURNS, RET_CONSTS and LOOP_EXITS, always on with --no-profile)\n"
       "       kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]\n"
       "       kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]\n"
       "       kz-static --identity\n",

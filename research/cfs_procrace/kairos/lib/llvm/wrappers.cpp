@@ -1079,6 +1079,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
   {
     ExtractSpec first_spec = base;
     first_spec.collect_wrapper_inputs = true;
+    first_spec.extended_facts = false;  // the derivation does not read them; the second pass writes them
     Model first;
     if (!extract_units(units, first_spec, options, &first, error)) return false;
     finalize(&first, first_spec);

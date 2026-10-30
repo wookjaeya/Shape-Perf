@@ -27,7 +27,8 @@
 //      loop, target, spawn-parameter and terminal facts follow from them.
 //
 // The facts of the second pass are written with three more sections (P0_TABLE, OP_DERIV,
-// SPAWN_WRAP; kz_facts.h revision 5) and record the built-in profile and the mode.  No Clang types.
+// SPAWN_WRAP; kz_facts.h revision 5) and the extended facts F1-F3 (READS, RETURNS, RET_CONSTS,
+// LOOP_EXITS; revision 6), and record the built-in profile and the mode.  No Clang types.
 #pragma once
 
 #include <map>

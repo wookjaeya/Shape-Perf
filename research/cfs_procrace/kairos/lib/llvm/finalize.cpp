@@ -730,6 +730,53 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     return a.path < b.path;
   });
   std::stable_sort(m.locs.begin(), m.locs.end(), [](const LocFact& a, const LocFact& b) { return std::tie(a.loc_type, a.loc_field) < std::tie(b.loc_type, b.loc_field); });
+
+  // ---- the extended facts F1-F3 (spec.extended_facts; empty otherwise): order, and the constants each
+  // function returns (RET_CONSTS: per function and constant, the disjunction of the conditions of its rows)
+  std::stable_sort(m.reads.begin(), m.reads.end(), [](const ReadFact& a, const ReadFact& b) {
+    if (!(a.pos == b.pos)) return a.pos < b.pos;
+    if (a.func_key != b.func_key) return a.func_key < b.func_key;
+    return a.ordinal < b.ordinal;
+  });
+  std::stable_sort(m.returns.begin(), m.returns.end(), [](const ReturnFact& a, const ReturnFact& b) {
+    if (!(a.pos == b.pos)) return a.pos < b.pos;
+    if (a.func_key != b.func_key) return a.func_key < b.func_key;
+    if (a.ordinal != b.ordinal) return a.ordinal < b.ordinal;
+    return a.alt < b.alt;
+  });
+  {
+    std::map<std::string, bool> only_constants;
+    for (const ReturnFact& r : m.returns) {
+      auto it = only_constants.emplace(r.func_key, true).first;
+      if (r.vkind != KZ_RET_VALUE_CONST) it->second = false;
+    }
+    struct Acc {
+      RetConstFact f;
+      std::vector<ExprRef> conds;
+      std::set<ExprRef> seen;  // lookup only
+      bool always = false;
+    };
+    std::map<std::pair<std::string, int64_t>, Acc> acc;  // ordered by (function key, value)
+    for (const ReturnFact& r : m.returns) {
+      if (r.vkind != KZ_RET_VALUE_CONST) continue;
+      Acc& a = acc[{r.func_key, r.constant}];
+      if (a.f.n_rows == 0) {
+        a.f.func_key = r.func_key;
+        a.f.value = r.constant;
+        a.f.text = r.text;
+      }
+      ++a.f.n_rows;
+      a.f.flags |= r.flags;
+      if (r.cond == nullptr) a.always = true;
+      else if (a.seen.insert(r.cond).second) a.conds.push_back(r.cond);
+    }
+    for (auto& kv : acc) {
+      Acc& a = kv.second;
+      a.f.cond = a.always ? nullptr : m.exprs.conj(KZ_EXPR_OP_OR, a.conds);
+      if (only_constants[a.f.func_key]) a.f.flags |= KZ_RET_FLAG_ONLY_CONSTANTS;
+      m.ret_consts.push_back(a.f);
+    }
+  }
 }
 
 }  // namespace kzs

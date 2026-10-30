@@ -84,6 +84,13 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
   for (const kzs::DeclaredItem& d : spec.declared) (d.origin == kCommandLine ? cli : builtin)++;
   os << "  hand-entered inputs        " << spec.declared.size() << " (built-in " << (spec.no_profile ? "P0 table " : "data-function table ") << builtin << ", command line " << cli << ")\n";
   os << "  declared assumptions       " << m.assumptions.size() << " (static images of table-walk links that are not const)\n";
+  if (spec.extended_facts) {
+    size_t consts = 0, loops = 0;
+    for (const kzs::ReturnFact& r : m.returns) consts += r.vkind == KZ_RET_VALUE_CONST ? 1 : 0;
+    for (const kzs::LoopFact& l : m.loops) loops += l.has_exits ? 1 : 0;
+    os << "  extended facts (F1-F3)     reads " << m.reads.size() << ", return alternatives " << m.returns.size() << " (constant " << consts << "), return constants "
+       << m.ret_consts.size() << ", loops with exits " << loops << "\n";
+  }
   return os.str();
 }
 
@@ -111,7 +118,7 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "-o"},
-                  {"--text", "--verbose", "--no-profile"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile", "--extended-facts"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
@@ -146,6 +153,8 @@ int cmd_extract(int argc, char** argv) {
   kzs::ExtractSpec spec;
   kzs::spec_from_profile(profile, &spec);
   kzs::spec_add_builtin_data_fns(&spec);
+  // the extended facts F1-F3: always in the profile-free mode, on request in the profile-driven one
+  spec.extended_facts = no_profile || args.has("--extended-facts");
   if (no_profile) {
     spec.no_profile = true;
     spec.builtin_profile_text = kzs::builtin_profile_text();

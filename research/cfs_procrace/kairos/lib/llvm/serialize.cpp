@@ -597,6 +597,119 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     });
   }
 
+  // ---- the extended facts F1-F3 (kz_facts.h revision 6): READS, RETURNS, RET_CONSTS, LOOP_EXITS.  Written only when
+  // asked for (spec.extended_facts: the profile-free mode, or --extended-facts), so that an extraction without them is
+  // written as before.  Their expression roots are numbered after those of every section above, so the earlier rows
+  // of FACT_EXPRS keep their indices; they add no file to FILE_HASHES (fh is KZ_NONE32 for a file no other fact names).
+  std::vector<kz_fact_read> read_rows;
+  std::vector<kz_fact_return> return_rows;
+  std::vector<kz_fact_retconst> retconst_rows;
+  std::vector<kz_fact_loopexit> loopexit_rows;
+  if (spec.extended_facts) {
+    auto loop_of = [&](const std::string& key) -> uint32_t {
+      if (key.empty()) return KZ_NONE32;
+      auto it = R.loop_index.find(key);
+      return it == R.loop_index.end() ? KZ_NONE32 : static_cast<uint32_t>(it->second);
+    };
+    for (const ReadFact& f : m.reads) {
+      kz_fact_read r = zero<kz_fact_read>();
+      r.fn = fn_of(f.func_key);
+      r.loop = loop_of(f.loop_key);
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.arg_index = f.call_key.empty() ? KZ_NONE32 : f.arg_index;
+      r.index_root = exprs.index_of(f.index);
+      r.guard_root = exprs.index_of(f.guard);
+      r.ctx_root = exprs.index_of(f.ctx);
+      r.kind = f.kind;
+      r.root_kind = f.root_kind;
+      r.use = f.use;
+      r.flags = f.flags;
+      r.root_param = f.root_param == kNone ? KZ_NONE32 : f.root_param;
+      r.type = w.intern(f.type);
+      r.field = w.intern(f.field);
+      r.root = w.intern(f.root);
+      r.text = w.intern(f.text);
+      r.file = w.intern(f.pos.file);
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      read_rows.push_back(r);
+    }
+    for (const ReturnFact& f : m.returns) {
+      kz_fact_return r = zero<kz_fact_return>();
+      r.fn = fn_of(f.func_key);
+      r.alt = f.alt;
+      r.n_alts = f.n_alts;
+      r.value_root = exprs.index_of(f.value);
+      r.guard_root = exprs.index_of(f.guard);
+      r.def_guard_root = exprs.index_of(f.def_guard);
+      r.cond_root = exprs.index_of(f.cond);
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.loop = loop_of(f.loop_key);
+      r.vkind = f.vkind;
+      r.flags = f.flags;
+      r.value = f.constant;
+      r.local = w.intern(f.local);
+      r.text = w.intern(f.text);
+      r.file = w.intern(f.pos.file);
+      r.def_file = w.intern(f.def.file);
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.def_line = f.def.line;
+      r.def_col = f.def.col;
+      r.fh = fh_of(f.pos.file);
+      return_rows.push_back(r);
+    }
+    for (const RetConstFact& f : m.ret_consts) {
+      kz_fact_retconst r = zero<kz_fact_retconst>();
+      r.fn = fn_of(f.func_key);
+      r.n_rows = f.n_rows;
+      r.cond_root = exprs.index_of(f.cond);
+      r.flags = f.flags;
+      r.value = f.value;
+      r.text = w.intern(f.text);
+      retconst_rows.push_back(r);
+    }
+    for (size_t li = 0; li < m.loops.size(); ++li) {
+      const LoopFact& l = m.loops[li];
+      if (!l.has_exits) continue;
+      kz_fact_loopexit r = zero<kz_fact_loopexit>();
+      r.loop = static_cast<uint32_t>(li);
+      r.exit = KZ_NONE32;
+      r.fn = fn_of(l.func_key);
+      r.root = exprs.index_of(l.all_exit);
+      r.aux_root = exprs.index_of(l.all_modset);
+      r.n = static_cast<uint32_t>(l.exits.size());
+      r.line = l.pos.line;
+      r.col = l.pos.col;
+      r.fh = fh_of(l.pos.file);
+      r.kind = KZ_LOOPEXIT_KIND_LOOP;
+      bool takeable = false;
+      for (const LoopFact::Exit& x : l.exits) takeable |= (x.flags & KZ_LOOPEXIT_FLAG_NEVER) == 0;
+      if (!takeable) r.flags |= KZ_LOOPEXIT_FLAG_NO_EXIT;
+      if (l.exits_as_in_loops) r.flags |= KZ_LOOPEXIT_FLAG_AS_IN_LOOPS;
+      r.file = w.intern(l.pos.file);
+      loopexit_rows.push_back(r);
+      for (size_t i = 0; i < l.exits.size(); ++i) {
+        const LoopFact::Exit& x = l.exits[i];
+        kz_fact_loopexit e = zero<kz_fact_loopexit>();
+        e.loop = static_cast<uint32_t>(li);
+        e.exit = static_cast<uint32_t>(i);
+        e.fn = r.fn;
+        e.root = exprs.index_of(x.when);
+        e.aux_root = exprs.index_of(x.trigger);
+        e.n = 0;
+        e.line = x.pos.line;
+        e.col = x.pos.col;
+        e.fh = fh_of(x.pos.file);
+        e.kind = x.kind;
+        e.flags = x.flags;
+        e.file = w.intern(x.pos.file);
+        loopexit_rows.push_back(e);
+      }
+    }
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -651,6 +764,13 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   item("count.unknown_effect_pointer_passes", num(R.reach_passes_unknown), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.declared_assumptions", num(m.assumptions.size()), KZ_POLICY_UNSET, KZ_NONE32);
   item("count.key_collisions", num(R.key_collisions), KZ_POLICY_UNSET, KZ_NONE32);
+  if (spec.extended_facts) {
+    item("extract.extended_facts", "F1 READS, F2 RETURNS and RET_CONSTS, F3 LOOP_EXITS (kz_facts.h revision 6)", KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.reads", num(read_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.returns", num(return_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.return_constants", num(retconst_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.loop_exit_rows", num(loopexit_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+  }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
 
   // ---- add the sections (the writer sorts them canonically)
@@ -666,6 +786,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (!put(KZ_SEC_STATIC_IMAGE, images) || !put(KZ_SEC_FACT_LOCS, locs) || !put(KZ_SEC_TERMINALS, terminals)) return s;
   if (!put(KZ_SEC_OUTCALLS, outcalls) || !put(KZ_SEC_LOOP_ITERS, iters) || !put(KZ_SEC_SPAWN_PARAMS, spawn_params) || !put(KZ_SEC_FUNC_WRITES, fwrites)) return s;
   if (spec.no_profile && (!put(KZ_SEC_P0_TABLE, p0_rows) || !put(KZ_SEC_OP_DERIV, op_rows) || !put(KZ_SEC_SPAWN_WRAP, spawn_rows))) return s;
+  if (spec.extended_facts && (!put(KZ_SEC_READS, read_rows) || !put(KZ_SEC_RETURNS, return_rows) || !put(KZ_SEC_RET_CONSTS, retconst_rows) ||
+                              !put(KZ_SEC_LOOP_EXITS, loopexit_rows)))
+    return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

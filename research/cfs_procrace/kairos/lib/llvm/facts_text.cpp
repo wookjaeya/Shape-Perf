@@ -16,7 +16,7 @@ namespace {
 
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
-                                 "outcalls", "fwrites", "p0",      "derived",   "spawnwrap"};
+                                 "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits"};
 
 class View {
  public:
@@ -38,13 +38,15 @@ class View {
                  {"outcalls", &View::outcalls},   {"fwrites", &View::fwrites}};
     for (const auto& t : table)
       if (o_.sections.empty() || o_.sections.count(t.name) != 0) (this->*t.fn)(os);
-    // the sections of the profile-free mode, when the container has them (revision 5): a container
-    // without them reads as before
+    // the sections of the profile-free mode (revision 5) and the extended facts (revision 6), when the
+    // container has them: a container without them reads as before
     const struct {
       const char* name;
       uint32_t id;
       void (View::*fn)(std::ostream&);
-    } added[] = {{"p0", KZ_SEC_P0_TABLE, &View::p0}, {"derived", KZ_SEC_OP_DERIV, &View::derived}, {"spawnwrap", KZ_SEC_SPAWN_WRAP, &View::spawnwrap}};
+    } added[] = {{"p0", KZ_SEC_P0_TABLE, &View::p0},           {"derived", KZ_SEC_OP_DERIV, &View::derived}, {"spawnwrap", KZ_SEC_SPAWN_WRAP, &View::spawnwrap},
+                 {"reads", KZ_SEC_READS, &View::reads},        {"returns", KZ_SEC_RETURNS, &View::returns},  {"retconsts", KZ_SEC_RET_CONSTS, &View::retconsts},
+                 {"loopexits", KZ_SEC_LOOP_EXITS, &View::loopexits}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -81,6 +83,10 @@ class View {
     if (!(s = read(KZ_SEC_P0_TABLE, &p0_)).ok()) return s;
     if (!(s = read(KZ_SEC_OP_DERIV, &opderiv_)).ok()) return s;
     if (!(s = read(KZ_SEC_SPAWN_WRAP, &spawnw_)).ok()) return s;
+    if (!(s = read(KZ_SEC_READS, &reads_)).ok()) return s;
+    if (!(s = read(KZ_SEC_RETURNS, &returns_)).ok()) return s;
+    if (!(s = read(KZ_SEC_RET_CONSTS, &retconsts_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOOP_EXITS, &loopexits_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -379,6 +385,56 @@ class View {
     }
   }
 
+  // ---- the extended facts F1-F3 (revision 6) ----
+  void reads(std::ostream& os) {
+    std::vector<const kz_fact_read*> sel;
+    for (const kz_fact_read& r : reads_)
+      if (want_loc(r.type, r.field)) sel.push_back(&r);
+    os << "[reads] " << sel.size() << "\n";
+    for (const kz_fact_read* r : sel) {
+      os << "  " << fn_name(r->fn) << " reads " << enum_text("KZ_READ_KIND", r->kind) << " " << str(r->type) << "." << str(r->field) << " at " << pos(r->file, r->line, r->col)
+         << " root=" << enum_text("KZ_READ_ROOT", r->root_kind) << ":" << str(r->root);
+      if (r->root_param != KZ_NONE32) os << "#" << r->root_param;
+      os << " use=" << flags_text("KZ_READ_USE", r->use) << " " << flags_text("KZ_READ_FLAG", r->flags) << " [" << str(r->text) << "]";
+      if (r->index_root != KZ_NONE32) os << " index=" << list(r->index_root);
+      if (r->site != KZ_NONE32) os << " arg " << r->arg_index << " of " << site_text(r->site);
+      if (r->loop != KZ_NONE32) os << " loop=" << r->loop;
+      if (r->ctx_root != KZ_NONE32) os << " ctx=" << expr(r->ctx_root);
+      if (r->guard_root != KZ_NONE32) os << " guard=" << expr(r->guard_root);
+      os << "\n";
+    }
+  }
+  void returns(std::ostream& os) {
+    os << "[returns] " << returns_.size() << "\n";
+    for (const kz_fact_return& r : returns_) {
+      os << "  " << fn_name(r.fn) << " returns at " << pos(r.file, r.line, r.col) << " alt " << r.alt << "/" << r.n_alts << " " << enum_text("KZ_RET_VALUE", r.vkind) << " "
+         << expr(r.value_root) << " [" << str(r.text) << "] " << flags_text("KZ_RET_FLAG", r.flags);
+      if (r.site != KZ_NONE32) os << " call " << site_text(r.site);
+      if (r.loop != KZ_NONE32) os << " loop=" << r.loop;
+      os << "\n";
+      if (r.def_line != 0) os << "      definition of " << str(r.local) << " at " << pos(r.def_file, r.def_line, r.def_col) << " guard=" << expr(r.def_guard_root) << "\n";
+      os << "      guard=" << expr(r.guard_root) << " when=" << expr(r.cond_root) << "\n";
+    }
+  }
+  void retconsts(std::ostream& os) {
+    os << "[retconsts] " << retconsts_.size() << "\n";
+    for (const kz_fact_retconst& r : retconsts_)
+      os << "  " << fn_name(r.fn) << " returns " << r.value << " [" << str(r.text) << "] rows=" << r.n_rows << " " << flags_text("KZ_RET_FLAG", r.flags)
+         << " when=" << (r.cond_root == KZ_NONE32 ? std::string("always") : expr(r.cond_root)) << "\n";
+  }
+  void loopexits(std::ostream& os) {
+    os << "[loopexits] " << loopexits_.size() << "\n";
+    for (const kz_fact_loopexit& r : loopexits_) {
+      if (r.kind == KZ_LOOPEXIT_KIND_LOOP) {
+        os << "  loop " << r.loop << " " << pos(r.file, r.line, r.col) << " in " << fn_name(r.fn) << " exits=" << r.n << " " << flags_text("KZ_LOOPEXIT_FLAG", r.flags)
+           << " exit=" << expr(r.root) << " mods=" << list(r.aux_root) << "\n";
+      } else {
+        os << "      exit " << r.exit << " " << enum_text("KZ_LOOPEXIT_KIND", r.kind) << " at " << pos(r.file, r.line, r.col) << " " << flags_text("KZ_LOOPEXIT_FLAG", r.flags)
+           << " when=" << expr(r.root) << " by=" << expr(r.aux_root) << "\n";
+      }
+    }
+  }
+
   std::string list(uint32_t root) const {
     std::string out = "[";
     bool first = true;
@@ -519,6 +575,10 @@ class View {
   std::vector<kz_fact_p0> p0_;
   std::vector<kz_fact_opderiv> opderiv_;
   std::vector<kz_fact_spawnw> spawnw_;
+  std::vector<kz_fact_read> reads_;
+  std::vector<kz_fact_return> returns_;
+  std::vector<kz_fact_retconst> retconsts_;
+  std::vector<kz_fact_loopexit> loopexits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;
 };
 

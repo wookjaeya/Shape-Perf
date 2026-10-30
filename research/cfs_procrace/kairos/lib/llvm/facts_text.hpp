@@ -17,9 +17,10 @@ namespace kzs {
 struct TextOptions {
   // Section names to print (empty = all): basis files functions calls derives loops iters init
   // consts writers atype locs targets spawnparams image terminals outcalls fwrites, and, when the
-  // container has them (the profile-free mode), p0 derived spawnwrap.
+  // container has them, p0 derived spawnwrap (the profile-free mode) and reads returns retconsts
+  // loopexits (the extended facts).
   std::set<std::string> sections;
-  // Only the records about this location, "Type.field" (writers, atype, init, locs, outcalls, derives).
+  // Only the records about this location, "Type.field" (writers, atype, init, locs, outcalls, derives, reads).
   std::string loc;
   // Only the calls to this callee (calls, derives, outcalls, targets).
   std::string callee;

@@ -923,6 +923,25 @@ startup_script {
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
                     "EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]"));
+    // the same table with an element cleared at run time: its image is not the run-time value, so the spawn is not
+    // resolved through it and the header says why (relations rules revision 3)
+    {
+      std::string text = read(fs::path(src));
+      const std::string anchor = "void start_table(void) {";
+      KZ_CHECK(text.find(anchor) != std::string::npos);
+      if (text.find(anchor) != std::string::npos)
+        text.insert(text.find(anchor), "void clear_entry(void) { memset(&entry_defs[2], 0, sizeof entry_defs[2]); }\n\n");
+      write(X / "src" / "imgwritten.c", text);
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "src" / "imgwritten.c").string()) + " --root " +
+                          q((X / "src").string()) + " -o " + q((X / "imgwritten.kz").string()) + " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "imgwritten.kz").string()), &w), 0);
+      KZ_CHECK(has(w, "table-image-entry 0"));
+      KZ_CHECK(has(w, "spawn calls resolved through the static image of the table their entry argument is read from: 0"));
+      KZ_CHECK(has(w, "reads EntryUnion.main of entry_defs, whose static image is not taken as its value: a leaf of the image is marked object-written"));
+    }
     KZ_CHECK(has(a, "trampolines 1 [tramp_main -> {helper_main (spawn-entry)}]"));
     KZ_CHECK(has(a, "through a direct call 1 [boss_main]"));
     // path C: the write in the loop body, the writes of the branch with the spawn only, the helper's write, the read

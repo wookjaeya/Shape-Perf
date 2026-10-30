@@ -271,11 +271,11 @@ for b in BUILDS:
         m = re.search(r' P0-unverified\(([^)]*)\)', ls[0]) if ls else None
         if not m or not any(p in m.group(1).split(', ') for p in LOCKP):
             no_prim += 1
-    say('    rows whose lines name a lock: %d; of them without a lock primitive in P0-unverified: %d' % (named_lock, no_prim))
     nsdev = sum(1 for l in L if l.startswith('      namespace layers: ') and 'basis-deviation(' in l)
     say('%s: rows %d, layers %s; rows with a case layer or a hand-entered vocabulary: %d; rows marked basis-deviation %d, rests-on %d, P0-unverified %d; '
         'namespace blocks marked basis-deviation %d' % (b, sum(lay.values()), dict(lay), bad, dev, rests, unv, nsdev))
     say('    P0-unverified entries named (rows): %s' % dict(sorted(unv_entries.items())))
+    say('    rows whose lines name a lock: %d; of them without a lock primitive in P0-unverified: %d' % (named_lock, no_prim))
     F = FACTS[b]
     for i, l in enumerate(F):
         if l.startswith('  count.walk_bounds_hit = ') or l.startswith('  param.walk_bounds = '):
@@ -455,6 +455,9 @@ def heads(lines):
         if k == 'NS':
             continue
         h = re.sub(r'^  [ABC]\d+ ', k + ' ', lines[s]).strip()
+        # the reach phrase of a C context changed wording between revisions (3: "the spawned entries", 4: "the threads this
+        # spawn starts"): the head without it, so that a context is compared with itself
+        h = re.sub(r'; (the spawned entries|the threads this spawn starts) do not reach this call', '', h)
         f = find_in(lines, s, e, r'^      feasibility: ')
         fl = find_in(lines, s, e, r'^      flip: ')
         g = (f[0][1].split(':')[1].strip() if f else '-', fl[0][1].split(':')[1].strip() if fl else '-')

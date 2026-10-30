@@ -480,7 +480,10 @@ enum kz_facts_section_id {
  * The functions an indirect call or a spawn call may reach.  One row per (site, candidate);
  * a site that could not be resolved has one row with fn = KZ_NONE32.  `via` names the path
  * that carried the function value (a field, a variable, a parameter), `n` the number of
- * candidates of the site.
+ * candidates of the site.  With the extended facts, a site whose candidates are resolved but whose
+ * function value may also come through a store the flow graph does not follow has, besides its
+ * candidate rows, a row with fn = KZ_NONE32 and reason `incomplete-source` (`via` names the node
+ * and why; static_facts.md §5i).
  */
 #define KZ_FACT_TARGET_FIELDS(X, T)                                                  \
   X(T, uint32_t, site, )                                                             \
@@ -1298,7 +1301,7 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, NOT_COPY, 2, "not-a-copy") ITEM(P, ADDRESS_TAKEN, 3, "address-taken")      \
   ITEM(P, FROM_PARAM, 4, "from-parameter") ITEM(P, FROM_CALL, 5, "from-call-result") \
   ITEM(P, MULTI_LOC, 6, "several-locations") ITEM(P, NO_DEF, 7, "no-definition")      \
-  ITEM(P, NOT_SHARED, 8, "not-a-shared-location")
+  ITEM(P, NOT_SHARED, 8, "not-a-shared-location") ITEM(P, WALK_BOUND, 9, "walk-bound")
 
 #define KZ_ENUM_EXPR_OP(ITEM, P)                                                     \
   ITEM(P, NONE, 0, "none") ITEM(P, CONST, 1, "const") ITEM(P, LOAD, 2, "load")       \
@@ -1411,7 +1414,8 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 
 #define KZ_ENUM_CALL_TARGET_REASON(ITEM, P)                                               \
   ITEM(P, RESOLVED, 0, "resolved") ITEM(P, NO_FLOW, 1, "no-function-flows-to-it")   \
-  ITEM(P, UNKNOWN_SOURCE, 2, "unknown-source") ITEM(P, CAST_FROM_DATA, 3, "cast-from-data")
+  ITEM(P, UNKNOWN_SOURCE, 2, "unknown-source") ITEM(P, CAST_FROM_DATA, 3, "cast-from-data") \
+  ITEM(P, INCOMPLETE_SOURCE, 4, "incomplete-source")
 
 #define KZ_ENUM_IMAGE_KIND(ITEM, P)                                                  \
   ITEM(P, NONE, 0, "none") ITEM(P, INT, 1, "int") ITEM(P, STRING, 2, "string")       \

@@ -59,6 +59,9 @@ class TuReader {
   const clang::RecordDecl* record_of(clang::QualType t);
   std::string func_key(const clang::FunctionDecl* fd);
   std::string object_key(const clang::VarDecl* vd);
+  // An object of internal linkage named by a lock identity: noted when its definition is not in this unit's main
+  // file (Model::internal_object_outside_main; each unit that defines it has its own object under one key).
+  void note_lock_object(const clang::VarDecl* vd);
   FuncFact& ensure_func(const clang::FunctionDecl* fd);
 
   // ---- targets ----

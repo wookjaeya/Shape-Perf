@@ -98,13 +98,18 @@ const char* ref_name(uint16_t ref) {
   }
 }
 
-void emit(ExprRef e, std::string* out, int depth) {
+// The levels of an expression text (a tool parameter no reference fixes: unspecified_by_reference; BASIS
+// param.walk_bounds; the texts stored in a fact that are cut are counted, count.walk_bounds_hit).
+constexpr int kEmitDepth = 64;
+
+void emit(ExprRef e, std::string* out, int depth, bool* cut) {
   if (e == nullptr) {
     *out += "-";
     return;
   }
-  if (depth > 64) {
+  if (depth > kEmitDepth) {
     *out += "...";
+    if (cut != nullptr) *cut = true;
     return;
   }
   const bool leaf = e->a == nullptr && e->b == nullptr;
@@ -123,20 +128,21 @@ void emit(ExprRef e, std::string* out, int depth) {
   if (e->op == KZ_EXPR_OP_CONST || e->op == KZ_EXPR_OP_FORALL || e->op == KZ_EXPR_OP_CURSOR) *out += " " + std::to_string(e->value);
   if (e->a != nullptr) {
     *out += " ";
-    emit(e->a, out, depth + 1);
+    emit(e->a, out, depth + 1, cut);
   }
   if (e->b != nullptr) {
     *out += " ";
-    emit(e->b, out, depth + 1);
+    emit(e->b, out, depth + 1, cut);
   }
   *out += ")";
 }
 
 }  // namespace
 
-std::string expr_text(ExprRef e) {
+std::string expr_text(ExprRef e, bool* cut) {
   std::string out;
-  emit(e, &out, 0);
+  if (cut != nullptr) *cut = false;
+  emit(e, &out, 0, cut);
   return out;
 }
 

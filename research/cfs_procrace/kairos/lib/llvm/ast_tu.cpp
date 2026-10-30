@@ -148,6 +148,16 @@ std::string TuReader::object_key(const VarDecl* vd) {
   return vd->getNameAsString() + "@" + p.file + ":" + std::to_string(p.line);
 }
 
+void TuReader::note_lock_object(const VarDecl* vd) {
+  if (vd->isExternallyVisible()) return;
+  const VarDecl* def = vd->getDefinition();
+  const SourceLocation loc = sm().getExpansionLoc((def != nullptr ? def : vd)->getLocation());
+  if (sm().isInMainFile(loc)) return;
+  const std::string key = object_key(vd);
+  model_->internal_object_outside_main.emplace(key, "defined in " + pos_of(loc).file + ", which is not the main file of the translation unit " + main_file_ +
+                                                        " that names it");
+}
+
 FuncFact& TuReader::ensure_func(const FunctionDecl* fd) {
   const std::string key = func_key(fd);
   FuncFact& f = model_->funcs[key];
@@ -623,6 +633,8 @@ void TuReader::read_global(const VarDecl* vd) {
   const Pos pos = pos_of(vd->getLocation());
   model_->object_pos.emplace(key, pos);
   model_->object_tu.emplace(key, main_file_);
+  // the units that define an object of internal linkage (one object each, one key)
+  if (!vd->isExternallyVisible()) model_->internal_object_units[key].insert(main_file_ + "#" + std::to_string(model_->stats.tus));
   if (vd->hasInit() && model_->object_images.count(key) == 0) {
     const QualType t = vd->getType().getCanonicalType();
     if (record_of(t) != nullptr || ctx_.getAsArrayType(t) != nullptr) {

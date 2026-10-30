@@ -80,7 +80,8 @@ class ExprPool {
 };
 
 // Pre-order text of a tree, for logs and tests ("(and (eq (load field T.f) 0) ...)").
-std::string expr_text(ExprRef e);
+// The text of an expression; parts deeper than 64 levels are written "..." (`cut` set when one is).
+std::string expr_text(ExprRef e, bool* cut = nullptr);
 
 // ---- facts -----------------------------------------------------------------------------------
 
@@ -675,6 +676,13 @@ struct Model {
 
   std::map<std::string, FuncSummary> summaries;  // function key -> out-pointer summary
   std::vector<FlowEdge> flow;
+  // fp-flow nodes whose stores the flow graph does not follow (a variable or a field whose type is no function pointer:
+  // only stores into function-pointer lvalues make edges), with why; read by mark_incomplete_targets (lockset.hpp)
+  std::map<std::string, std::string> flow_open;
+  // objects of internal linkage, by key ("name@file:line"): the units that define them (read_global), and those used as
+  // a lock identity in a unit whose main file is not the file of their definition (one object per unit, one key)
+  std::map<std::string, std::set<std::string>> internal_object_units;
+  std::map<std::string, std::string> internal_object_outside_main;
   std::vector<IndirectCall> indirect_calls;
   std::vector<std::string> spawn_calls;           // call keys of spawn-operation calls
   std::map<std::string, std::vector<std::string>> spawn_entry_nodes;  // call key -> fp-flow nodes of the entry argument
@@ -802,6 +810,9 @@ struct Model {
     // the expression trees read from the source (FACT_EXPRS): subexpressions deeper than kExprDepth levels, each a
     // node top "too deep" (every mode; reported with the extended facts)
     uint32_t expr_depth_cut = 0;
+    // the copy chains of DERIVES cut at kDeriveDepth copies (reason walk-bound), and the expression texts stored in a
+    // fact (LOOP_ITERS) cut at kEmitDepth levels ("..."): every mode; reported with the extended facts
+    uint32_t derive_depth_cut = 0, text_depth_cut = 0;
   } stats;
 
   // Filled by finalize(): indices and the numbers of the report.
@@ -814,6 +825,7 @@ struct Model {
     uint32_t n_sites = 0;
     uint32_t key_collisions = 0;
     uint32_t indirect_total = 0, indirect_resolved = 0, indirect_unresolved = 0;
+    uint32_t indirect_incomplete = 0;  // resolved, but a source the flow graph does not follow (extended facts)
     uint32_t spawn_total = 0, spawn_resolved = 0;
     uint32_t walks_resolved = 0, walks_failed = 0, walks_assumed = 0;
     uint32_t outptr_store_only = 0, outptr_escapes = 0, outptr_unsummarized = 0, outptr_data_fn = 0;

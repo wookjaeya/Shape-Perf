@@ -11,7 +11,7 @@
 
 namespace kzs {
 
-const char* lock_rules_revision() { return "lock-set rules F5, completeness rules and L1 (i) rule revision 1 (2026-10-30)"; }
+const char* lock_rules_revision() { return "lock-set rules F5, completeness rules and L1 (i) rule revision 2 (2026-10-30)"; }
 
 namespace {
 
@@ -207,13 +207,41 @@ struct Prog {
   std::map<std::string, std::vector<size_t>> calls_of;
   std::set<std::string> spawn_entries;
   std::map<std::string, size_t> p0_by_name;
+  std::set<std::string> compare_names;
+  // the functions with a body a direct call passes as arguments (ARGFLOW src FUNCTION, by name) to a callee without a
+  // body that is no P0 entry and no comparison function: that callee may call them back during the call (the rule of
+  // relations' call_runs); by call key
+  std::map<std::string, std::vector<std::string>> callbacks;
 
   void build() {
     for (size_t i = 0; i < p0_table().size(); ++i) p0_by_name[p0_table()[i].name] = i;
+    for (const P0CompareEntry& e : p0_compare_table()) compare_names.insert(e.name);
     body = m.processed_functions;
     for (size_t i = 0; i < m.calls.size(); ++i) {
       call_index[key_of(m.calls[i])] = i;
       calls_of[m.calls[i].caller_key].push_back(i);
+    }
+    {
+      std::map<std::string, std::vector<std::string>> body_by_name;
+      for (const std::string& k : body) {
+        auto fit = m.funcs.find(k);
+        if (fit != m.funcs.end()) body_by_name[fit->second.name].push_back(k);
+      }
+      for (const ArgFlowFact& a : m.argflows) {
+        if (a.src != KZ_ARGSRC_FUNCTION) continue;
+        auto cit = call_index.find(a.call_key);
+        if (cit == call_index.end()) continue;
+        const CallFact& c = m.calls[cit->second];
+        if (c.callee_key.empty() || body.count(c.callee_key) != 0 || p0_by_name.count(c.callee_key) != 0 || compare_names.count(c.callee_name) != 0) continue;
+        auto bit = body_by_name.find(a.root);
+        if (bit == body_by_name.end()) continue;
+        std::vector<std::string>& v = callbacks[a.call_key];
+        v.insert(v.end(), bit->second.begin(), bit->second.end());
+      }
+      for (auto& kv : callbacks) {
+        std::sort(kv.second.begin(), kv.second.end());
+        kv.second.erase(std::unique(kv.second.begin(), kv.second.end()), kv.second.end());
+      }
     }
     for (const TargetFact& t : m.targets) {
       if (t.kind == KZ_CALL_TARGET_KIND_SPAWN_ENTRY) {
@@ -620,6 +648,136 @@ void field_status_from(const Model& pass, const Model& m, FieldStatusTable* out)
   }
 }
 
+// The indirect calls whose resolved candidates may not be all the functions they call: a node the function value can
+// come from (the call's node, or one with a path of flow edges to it) holds values the flow graph does not follow.  The
+// flow graph has an edge for every store into a function-pointer lvalue it reads (assignment, initializer, argument of
+// a function-pointer parameter, both ways through a pointer-to-function-pointer parameter); a node is open when
+//   - its variable or field has a type that is no function pointer (Model::flow_open: a store into it makes no edge);
+//   - it is the result of a function without a body in these units;
+//   - it is a parameter of an address-taken function (the arguments of an indirect call make no edge);
+//   - its address is passed to a call converted to another pointer type (ARGFLOW address, pointer-conversion), as for
+//     memcpy into it;
+//   - it is a field whose FIELD_STATUS has no row, is not complete under the per-field rule, or has a writer that is no
+//     assignment (a data function, an out-pointer store, an aggregate assignment, an unknown effect, ...).
+// Each such call gets a CALL_TARGETS row with no function and reason incomplete-source besides its candidates, so that
+// every reader of the targets (the lock sets, relations) treats it as a call whose targets are not resolved.  Written
+// with the extended facts only (the profile-driven mode writes its targets as before).  Returns the number of calls.
+uint32_t mark_incomplete_targets(Model* mp, const FieldStatusTable& fields) {
+  Model& m = *mp;
+  std::map<std::string, std::vector<std::string>> preds;
+  for (const FlowEdge& e : m.flow) preds[e.dst].push_back(e.src);
+  for (auto& kv : preds) {
+    std::sort(kv.second.begin(), kv.second.end());
+    kv.second.erase(std::unique(kv.second.begin(), kv.second.end()), kv.second.end());
+  }
+  std::map<std::string, size_t> call_at;
+  for (size_t i = 0; i < m.calls.size(); ++i) call_at[key_of(m.calls[i])] = i;
+  // the nodes whose address leaves as a converted call argument
+  std::map<std::string, std::string> escaped;
+  for (const ArgFlowFact& a : m.argflows) {
+    if (a.src != KZ_ARGSRC_ADDRESS || (a.flags & (KZ_ARGFLOW_FLAG_POINTER_CONVERSION | KZ_ARGFLOW_FLAG_ARRAY_CONTENTS)) == 0) continue;
+    auto cit = call_at.find(a.call_key);
+    const std::string where = cit == call_at.end() ? a.call_key : m.calls[cit->second].pos.str() + " (" + (m.calls[cit->second].callee_name.empty() ? std::string("an indirect call") : m.calls[cit->second].callee_name) + ")";
+    const std::string why = "its address [" + a.text + "] is passed at " + where + " converted to another pointer type: what is stored through it is not followed";
+    std::string node;
+    if (a.type == "<global>" && !a.object.empty()) node = "G:" + a.object;
+    else if (!a.type.empty() && !a.field.empty() && a.type != "<global>") node = a.type + "." + a.field;
+    else if (a.base == KZ_ARGBASE_LOCAL && !a.root.empty()) node = "L:" + a.func_key + "/" + a.root;
+    if (!node.empty()) escaped.emplace(node, why);
+  }
+  auto name_of = [&](const std::string& key) {
+    auto it = m.funcs.find(key);
+    return it == m.funcs.end() ? key : it->second.name;
+  };
+  auto open_why = [&](const std::string& n) -> std::string {
+    auto fo = m.flow_open.find(n);
+    if (fo != m.flow_open.end()) return fo->second;
+    auto es = escaped.find(n);
+    if (es != escaped.end()) return n + ": " + es->second;
+    if (n.compare(0, 2, "F:") == 0 || n.compare(0, 2, "?:") == 0) return "";
+    if (n.compare(0, 2, "R:") == 0) {
+      const std::string k = n.substr(2);
+      if (m.processed_functions.count(k) == 0) return "the result of " + name_of(k) + ", a function without a body in these units";
+      return "";
+    }
+    if (n.compare(0, 2, "P:") == 0) {
+      const std::string k = n.substr(2, n.rfind('#') - 2);
+      auto fit = m.funcs.find(k);
+      if (fit != m.funcs.end() && (fit->second.flags & KZ_FUNC_FLAG_ADDRESS_TAKEN) != 0)
+        return "a parameter of " + fit->second.name + ", which is address-taken: the arguments of its indirect calls are not followed";
+      return "";
+    }
+    if (n.compare(0, 2, "G:") == 0 || n.compare(0, 2, "L:") == 0) return "";
+    const size_t dot = n.rfind('.');
+    if (dot == std::string::npos) return "";
+    const std::string type = n.substr(0, dot), field = n.substr(dot + 1);
+    const FieldStatusFact* fs = fields.find(type, field);
+    if (fs == nullptr) return "FIELD_STATUS has no row of the field " + n + ": its writers are not known";
+    if (fs->status_field != KZ_LOC_STATUS_COMPLETE) return "the writer set of the field " + n + " is not complete under the per-field rule (FIELD_STATUS)";
+    auto wit = fields.writers.find({type, field});
+    if (wit != fields.writers.end())
+      for (const FieldWriter& w : wit->second)
+        if (w.kind != KZ_WRITER_KIND_ASSIGN) {
+          const char* k = "a writer that is no assignment";
+          switch (w.kind) {
+            case KZ_WRITER_KIND_MEMSET: k = "a memset writer"; break;
+            case KZ_WRITER_KIND_MEMCPY: k = "a memcpy writer"; break;
+            case KZ_WRITER_KIND_OUTPTR: k = "an out-pointer writer"; break;
+            case KZ_WRITER_KIND_AGGREGATE: k = "an aggregate-assign writer"; break;
+            default: break;
+          }
+          return "the field " + n + " has " + k + " at " + w.pos.str() + " in " + name_of(w.func_key) + ": the value it stores is not followed";
+        }
+    return "";
+  };
+  std::set<std::string> unresolved, resolved;
+  for (const TargetFact& t : m.targets) {
+    if (t.kind != KZ_CALL_TARGET_KIND_INDIRECT) continue;
+    if (t.fn_key.empty()) unresolved.insert(t.call_key);
+    else resolved.insert(t.call_key);
+  }
+  std::map<std::string, std::pair<std::string, std::string>> mark;  // call key -> (node, why)
+  for (const IndirectCall& ic : m.indirect_calls) {
+    if (resolved.count(ic.call_key) == 0 || unresolved.count(ic.call_key) != 0 || mark.count(ic.call_key) != 0) continue;
+    std::set<std::string> seen{ic.node};
+    std::vector<std::string> stack{ic.node};
+    while (!stack.empty()) {
+      const std::string n = stack.back();
+      stack.pop_back();
+      const std::string why = open_why(n);
+      if (!why.empty()) {
+        // the first open node in the order of the walk; for a stable choice, the least one by name
+        auto& cur = mark[ic.call_key];
+        if (cur.first.empty() || n < cur.first) cur = {n, why};
+        continue;
+      }
+      auto pit = preds.find(n);
+      if (pit == preds.end()) continue;
+      for (const std::string& p : pit->second)
+        if (seen.insert(p).second) stack.push_back(p);
+    }
+  }
+  if (mark.empty()) return 0;
+  std::vector<TargetFact> out;
+  out.reserve(m.targets.size() + mark.size());
+  for (size_t i = 0; i < m.targets.size(); ++i) {
+    out.push_back(m.targets[i]);
+    const TargetFact& t = m.targets[i];
+    const bool last = i + 1 == m.targets.size() || m.targets[i + 1].call_key != t.call_key || m.targets[i + 1].kind != t.kind;
+    auto mk_it = mark.find(t.call_key);
+    if (t.kind == KZ_CALL_TARGET_KIND_INDIRECT && last && mk_it != mark.end()) {
+      TargetFact x = t;
+      x.fn_key.clear();
+      x.reason = KZ_CALL_TARGET_REASON_INCOMPLETE_SOURCE;
+      x.via = t.via + " (" + mk_it->second.second + ")";
+      out.push_back(x);
+    }
+  }
+  m.targets = std::move(out);
+  m.resolved.indirect_incomplete = static_cast<uint32_t>(mark.size());
+  return static_cast<uint32_t>(mark.size());
+}
+
 namespace {
 
 // The static-instance check of an identity (LOCK_IDS).
@@ -637,7 +795,7 @@ std::string root_global(const LockId& lv) {
   return "";
 }
 
-void check_id(const LockId& id, const FieldStatusTable* fields, IdCheck* c, bool value) {
+void check_id(const LockId& id, const FieldStatusTable* fields, IdCheck* c, bool value, const Model* m) {
   if (!id) return;
   auto worse = [&](uint8_t st, const std::string& why) {
     // undecidable > parameter-relative > not-static > static
@@ -652,19 +810,32 @@ void check_id(const LockId& id, const FieldStatusTable* fields, IdCheck* c, bool
   switch (id->k) {
     case N::UNKNOWN: worse(KZ_LOCKID_STATUS_UNDECIDABLE, id->name); return;
     case N::PARAM: worse(KZ_LOCKID_STATUS_PARAM, "parameter " + std::to_string(id->v)); return;
-    case N::CONST:
-    case N::GLOBAL: return;
-    case N::FIELD: check_id(id->a, fields, c, false); return;
-    case N::INDEX:
-      check_id(id->a, fields, c, false);
-      check_id(id->b, fields, c, true);
+    case N::CONST: return;
+    case N::GLOBAL: {
+      // an object of internal linkage has one key ("name@file:line") but one object per translation unit that defines
+      // it (C11 6.2.2p3): defined in a header several units include, or used as a lock where its definition is not in
+      // the unit's main file, the key may name several mutexes
+      if (m == nullptr) return;
+      auto out = m->internal_object_outside_main.find(id->name);
+      auto un = m->internal_object_units.find(id->name);
+      if (out != m->internal_object_outside_main.end())
+        worse(KZ_LOCKID_STATUS_NOT_STATIC, id->name + ": an object of internal linkage " + out->second + ": each translation unit that defines it has its own object, and this key names them all");
+      else if (un != m->internal_object_units.end() && un->second.size() > 1)
+        worse(KZ_LOCKID_STATUS_NOT_STATIC, id->name + ": an object of internal linkage defined in " + std::to_string(un->second.size()) +
+                                               " translation units: each has its own object, and this key names them all");
       return;
-    case N::DEREF: check_id(id->a, fields, c, true); return;
-    case N::ADDR: check_id(id->a, fields, c, false); return;
+    }
+    case N::FIELD: check_id(id->a, fields, c, false, m); return;
+    case N::INDEX:
+      check_id(id->a, fields, c, false, m);
+      check_id(id->b, fields, c, true, m);
+      return;
+    case N::DEREF: check_id(id->a, fields, c, true, m); return;
+    case N::ADDR: check_id(id->a, fields, c, false, m); return;
     case N::LOAD: {
       c->flags |= KZ_LOCKID_FLAG_READS_VALUE;
       const LockId& lv = id->a;
-      check_id(lv, fields, c, false);
+      check_id(lv, fields, c, false, m);
       if (lv->k != N::FIELD || root_global(lv).empty()) {
         worse(KZ_LOCKID_STATUS_NOT_STATIC, lv->k == N::GLOBAL ? "the value of the global variable " + lv->name + " (no writer-set rule for a variable)"
                                                             : "a value that is not a field of a global object: " + lock_id_text(id));
@@ -694,15 +865,15 @@ void check_id(const LockId& id, const FieldStatusTable* fields, IdCheck* c, bool
   (void)value;
 }
 
-IdCheck check(const LockId& id, const FieldStatusTable* fields) {
+IdCheck check(const LockId& id, const FieldStatusTable* fields, const Model* m) {
   IdCheck c;
-  check_id(id, fields, &c, true);
+  check_id(id, fields, &c, true, m);
   if (id && id->k == N::ADDR && c.status == KZ_LOCKID_STATUS_STATIC && (c.flags & KZ_LOCKID_FLAG_READS_VALUE) == 0) c.flags |= KZ_LOCKID_FLAG_ADDRESS_OF_GLOBAL;
   if (id && id->k == N::ADDR && c.status == KZ_LOCKID_STATUS_STATIC) c.flags |= KZ_LOCKID_FLAG_ADDRESS_OF_GLOBAL;
   return c;
 }
 
-bool stable(const LockId& id, const FieldStatusTable* fields) { return check(id, fields).status == KZ_LOCKID_STATUS_STATIC; }
+bool stable(const LockId& id, const FieldStatusTable* fields, const Model* m) { return check(id, fields, m).status == KZ_LOCKID_STATUS_STATIC; }
 
 class Analysis {
  public:
@@ -720,12 +891,19 @@ class Analysis {
       return a < b;
     };
     std::vector<std::string> nodes(p_.body.begin(), p_.body.end());
-    const auto sccs = sccs_of(nodes, p_.cg);
+    // the call graph with the functions a call may call back (Prog::callbacks): their summaries are read at the call
+    std::map<std::string, std::set<std::string>> cg = p_.cg;
+    for (const auto& [ck, fns] : p_.callbacks) {
+      auto cit = p_.call_index.find(ck);
+      if (cit == p_.call_index.end()) continue;
+      for (const std::string& f : fns) cg[p_.m.calls[cit->second].caller_key].insert(f);
+    }
+    const auto sccs = sccs_of(nodes, cg);
     d->stats.bodies = static_cast<uint32_t>(nodes.size());
     d->stats.cfg_built = static_cast<uint32_t>(p_.m.lock_cfgs.size());
     d->stats.sccs = static_cast<uint32_t>(sccs.size());
     for (const auto& scc : sccs) {
-      const bool rec = scc.size() > 1 || (p_.cg.count(scc[0]) != 0 && p_.cg.at(scc[0]).count(scc[0]) != 0);
+      const bool rec = scc.size() > 1 || (cg.count(scc[0]) != 0 && cg.at(scc[0]).count(scc[0]) != 0);
       if (rec) ++d->stats.sccs_recursive;
       cur_scc_ = rec ? std::set<std::string>(scc.begin(), scc.end()) : std::set<std::string>();
       for (const std::string& f : scc) analyse(f, &d->stats);
@@ -788,6 +966,29 @@ class Analysis {
             break;
           default: break;
         }
+      } else if (p_.body.count(t) == 0) {
+        // a callee without a body that is no P0 entry: the functions the call passes to it may run during the call
+        // (premise of path C (b)); their releases and waits may happen here, their acquisitions are not counted
+        auto cb = p_.callbacks.find(ck);
+        if (cb != p_.callbacks.end())
+          for (const std::string& g : cb->second) {
+            if (cur_scc_.count(g) != 0) {
+              x.unknown = true;
+              continue;
+            }
+            auto sit = sum_.find(g);
+            if (sit == sum_.end()) {
+              x.unknown = true;
+              continue;
+            }
+            const Summary& s = sit->second;
+            static const std::vector<LockId> no_args;  // the callee passes its own arguments, not this call's
+            for (const Acq& r : s.rel) x.rel_may.push_back(lock_id_subst(r.id, no_args));
+            for (const LockId& r : s.rel_may) x.rel_may.push_back(lock_id_subst(r, no_args));
+            for (const LockId& r : s.kill) x.rel_may.push_back(lock_id_subst(r, no_args));
+            for (const LockId& r : s.wait) x.wait.push_back(lock_id_subst(r, no_args));
+            x.unknown = x.unknown || s.unknown;
+          }
       } else if (p_.body.count(t) != 0) {
         if (cur_scc_.count(t) != 0) {
           x.unknown = true;
@@ -805,7 +1006,7 @@ class Analysis {
             for (const LockId& r : s.rel_may) x.rel_may.push_back(lock_id_subst(r, args));
             for (const LockId& r : s.kill) {
               const LockId k = lock_id_subst(r, args);
-              if (!stable(k, fields_)) x.kill.push_back(k);
+              if (!stable(k, fields_, &p_.m)) x.kill.push_back(k);
             }
             for (const LockId& r : s.wait) x.wait.push_back(lock_id_subst(r, args));
             x.unknown = s.unknown;
@@ -1316,7 +1517,7 @@ class Analysis {
       f.text = t;
       f.may = lock_id_may(id);
       f.kind = has_kind(id, N::UNKNOWN) ? KZ_LOCKID_KIND_UNKNOWN : has_kind(id, N::PARAM) ? KZ_LOCKID_KIND_PARAM : KZ_LOCKID_KIND_CLOSED;
-      const IdCheck c = check(id, fields_);
+      const IdCheck c = check(id, fields_, &p_.m);
       f.status = c.status;
       f.flags = c.flags;
       f.location = c.location;

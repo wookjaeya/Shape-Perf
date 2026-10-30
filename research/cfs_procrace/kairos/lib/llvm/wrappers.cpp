@@ -1106,6 +1106,7 @@ bool completeness_pass(const std::vector<UnitCommand>& units, const ExtractSpec&
 bool add_lock_facts(const std::vector<UnitCommand>& units, const ExtractSpec& builtin, const ReadOptions& options, Model* m, std::string* error) {
   FieldStatusTable fields;
   if (!completeness_pass(units, builtin, options, *m, &fields, error)) return false;
+  mark_incomplete_targets(m, fields);
   LockDerivation d;
   derive_locks(*m, &fields, &d);
   finalize_lock_facts(m, d, fields, {});
@@ -1127,6 +1128,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
     derive_wrappers(first, script, derivation);
     if (!completeness_pass(units, base, options, first, &fields, error)) return false;
     first_fields = completeness_fields(first);
+    mark_incomplete_targets(&first, fields);
     LockDerivation ld;
     derive_locks(first, &fields, &ld);
     // the derived lock and unlock operations join the P0 primitives in the vocabulary
@@ -1163,6 +1165,7 @@ bool extract_profile_free(const std::vector<UnitCommand>& units, const ExtractSp
     if (it != model->call_guards.end()) r.guard = it->second;
   }
   derivation->completeness_same_fields = completeness_fields(*model) == first_fields;
+  mark_incomplete_targets(model, fields);
   LockDerivation ld;
   derive_locks(*model, &fields, &ld);
   std::set<std::string> final_vocabulary(ld.lock_keys.begin(), ld.lock_keys.end());

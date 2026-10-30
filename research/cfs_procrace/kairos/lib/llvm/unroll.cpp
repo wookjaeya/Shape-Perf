@@ -404,7 +404,9 @@ void unroll_table_walks(Model* mp, const std::map<std::string, std::vector<Image
             } else {
               a.value_kind = KZ_IMAGE_KIND_NONCONST;
             }
-            a.text = expr_text(y);
+            bool cut = false;
+            a.text = expr_text(y, &cut);
+            if (cut) ++m.stats.text_depth_cut;
           }
           if (call != nullptr) {
             auto sit = m.spawn_entry_arg.find(u->call_key);

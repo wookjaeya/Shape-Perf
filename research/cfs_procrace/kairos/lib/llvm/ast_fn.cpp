@@ -1412,6 +1412,7 @@ class FnWalker {
       }
       if (const auto* vd = dyn_cast<VarDecl>(dre->getDecl())) {
         out.push_back(var_node(vd));
+        note_open_node(out.back(), vd->getType(), "the variable " + vd->getNameAsString());
         return out;
       }
     }
@@ -1422,6 +1423,7 @@ class FnWalker {
     if (const auto* me = dyn_cast<MemberExpr>(e)) {
       if (const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl())) {
         out.push_back(tu_.record_name(fl->getParent()) + "." + fl->getNameAsString());
+        note_open_node(out.back(), fl->getType(), "the field " + out.back());
         return out;
       }
     }
@@ -1445,6 +1447,13 @@ class FnWalker {
   }
   void add_flow_to(const std::string& dst, const Expr* rhs) {
     for (const std::string& src : fp_sources(rhs)) m_.flow.push_back(FlowEdge{src, dst});
+  }
+  // A source node of a function value whose type is no function pointer (an integer, a data pointer converted to a
+  // function pointer): stores into it make no edge (only stores into function-pointer lvalues do), so the functions it
+  // may hold are not known from the flow graph (Model::flow_open; read with the extended facts)
+  void note_open_node(const std::string& node, QualType t, const std::string& what) {
+    if (is_fp_type(t) || is_fp_ptr_type(t)) return;
+    m_.flow_open.emplace(node, what + " has the type " + t.getAsString() + ", no function pointer: the stores into it are not followed");
   }
   // The node an assignment to this lvalue feeds ("" if the target is not followed).
   std::string lvalue_node(const Expr* lv) {
@@ -1585,10 +1594,18 @@ class FnWalker {
     uint32_t hops = 0;
     ExprRef chain = nullptr;
   };
+  // The copies a DERIVES chain follows (a tool parameter no reference fixes: unspecified_by_reference; BASIS
+  // param.walk_bounds; a chain cut there has the reason walk-bound and is counted, count.walk_bounds_hit).
+  static constexpr int kDeriveDepth = 8;
   DeriveResult derive(const Expr* e, int depth) {
     DeriveResult r;
-    if (e == nullptr || depth > 8) {
+    if (e == nullptr) {
       r.reason = KZ_DERIVES_REASON_NOT_COPY;
+      return r;
+    }
+    if (depth > kDeriveDepth) {
+      r.reason = KZ_DERIVES_REASON_WALK_BOUND;
+      ++m_.stats.derive_depth_cut;
       return r;
     }
     int64_t c = 0;
@@ -4219,8 +4236,10 @@ class FnWalker {
     e = e->IgnoreParens();
     if (const auto* ic = dyn_cast<ImplicitCastExpr>(e); ic != nullptr && ic->getCastKind() == CK_NoOp) return ident_lvalue(ic->getSubExpr(), seen);
     if (const auto* d = dyn_cast<DeclRefExpr>(e)) {
-      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage())
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage()) {
+        tu_.note_lock_object(vd);
         return lnode(LockIdNode::GLOBAL, 0, tu_.object_key(vd), nullptr, nullptr, lock_rtype(vd->getType()));
+      }
       return lunknown("a local object");
     }
     if (const auto* me = dyn_cast<MemberExpr>(e)) {

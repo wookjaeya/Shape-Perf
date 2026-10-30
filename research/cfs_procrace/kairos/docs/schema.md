@@ -351,3 +351,11 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - **프로필로 하는 추출은 세 섹션을 쓰지 않는다.** 그래서 그 facts의 기존 섹션은 바이트 그대로다 [M: C1 pre tx, R2 core, C5 6.4.1의 V0·V2를 새 도구로 다시 뽑아 kz-dump 비교. 섹션 CRC가 다른 것은 STRINGS뿐이고, 레코드 줄 차이는 build identity 항목과 basis 해시뿐이다. `env/redesign/step2a_s1.sh identity`].
 - golden: `layout.golden`은 새 레코드·열거형·섹션 줄이 더해지고 revision·fingerprint 줄이 바뀌었다. `records.golden`은 새 레코드 줄이 더해지고, 패턴으로 채운 참조(`…/<섹션>#n`)가 가리키는 섹션 이름이 섹션 목록이 늘어난 만큼 밀렸다(개정 4·5 때와 같은 기계적 변화). TERMINALS의 패턴 레코드는 `conditional` 비트를 표시한다. 나머지 golden(`container_*`, `render`, `tool_hash`, `tests/static/data/*.golden`)은 그대로다 [M].
 
+
+## 16. 스키마 개정 8: 확장 사실 F1–F3의 네 섹션 (2026-10-30) [D][M]
+
+- 근거: `plan/extraction_design_20261030.md` §3.0(F1 READS, F2 RETURNS, F3 모든 루프의 탈출식), §6 단계 2a 항목 1. 연구 조건은 정하지 않았다. 아래 수는 단위 시험·고정 도구의 값이다.
+- 방식: 개정 2–7과 같다. 기존 레코드의 배치·섹션 버전·필드 이름은 바꾸지 않았다. 둘째 추출 범위에 이어 붙였다. `KZ_SCHEMA_REVISION` = 8이 `layout_text()` 첫 줄에 들어가 schema fingerprint와 모든 tool hash가 바뀐다. 추출 레코드 개정은 6이다.
+- 새 섹션: READS(123, `kz_fact_read` 96 B), RETURNS(124, `kz_fact_return` 104 B), RET_CONSTS(125, `kz_fact_retconst` 32 B), LOOP_EXITS(126, `kz_fact_loopexit` 48 B), 모두 버전 1. 새 열거형 `KZ_READ_KIND`, `KZ_READ_ROOT`, `KZ_READ_USE`(집합), `KZ_READ_FLAG`(집합), `KZ_RET_VALUE`, `KZ_RET_FLAG`(집합), `KZ_LOOPEXIT_KIND`, `KZ_LOOPEXIT_FLAG`(집합). 값 0은 모두 `none`이거나 빈 집합이다. 식 트리 뿌리는 FACT_EXPRS를 쓰고, 기존 섹션이 쓰는 행 뒤에 번호가 붙는다. 뜻은 `docs/static_facts.md` §5b.
+- **쓰는 때**: 프로필 없는 추출은 늘 쓴다. 프로필 추출은 `kz-static extract --extended-facts`를 줄 때만 쓴다. 옵션 없는 프로필 추출은 이 사실을 읽지도 쓰지도 않아 기존 섹션이 바이트 그대로다 [M: C1 pre tx, R2 core, C5 6.4.1의 V0·V2를 새 도구로 다시 뽑아 kz-dump 비교. 섹션 CRC가 다른 것은 STRINGS뿐이고, 레코드 줄 차이는 build identity 항목과 basis 해시뿐이다. `env/redesign/step2a_s2.sh identity`]. 옵션을 주면 기존 섹션의 레코드가 같다(같은 basis에서 kz-dump 레코드 줄 비교: 19 섹션 동일, FACT_EXPRS는 앞 행이 그대로, BASIS는 항목 다섯이 더해짐). 다만 STRINGS가 정렬된 정규 표라 새 문자열만큼 다른 섹션의 `kz_str` 오프셋과 CRC가 바뀐다.
+- golden: `layout.golden`은 새 레코드·열거형·섹션 줄이 더해지고 revision·fingerprint 줄이 바뀌었다. `records.golden`은 새 레코드 줄이 더해지고, 패턴으로 채운 참조(`…/<섹션>#n`)가 가리키는 섹션 이름이 섹션 목록이 늘어난 만큼 밀렸다(개정 4·5·7 때와 같은 기계적 변화). 새 golden은 `tests/static/data/flowfacts.golden`, `flowfacts_np.golden`이다. 나머지 golden(`container_*`, `render`, `tool_hash`, `tests/static/data/*.golden` 기존 9개)은 그대로다 [M].

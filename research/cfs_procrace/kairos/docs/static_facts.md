@@ -41,8 +41,9 @@ $B/tools/kz-static/kz-static show facts.kz --section loops --section order
 $B/tools/kz-static/kz-static reach facts.kz --root CFE_ES_TaskMain --loc CFE_SB_Global_t.AppId --callee CFE_EVS_SendEventWithAppID
 ```
 
-- `show` 의 section: `basis files functions calls derives loops iters order init consts writers atype locs targets spawnparams image terminals outcalls fwrites`, 컨테이너에 있으면 `p0 derived spawnwrap`(§5a). `--loc Type.field`, `--callee NAME` 으로 거른다.
+- `show` 의 section: `basis files functions calls derives loops iters order init consts writers atype locs targets spawnparams image terminals outcalls fwrites`, 컨테이너에 있으면 `p0 derived spawnwrap`(§5a)와 `reads returns retconsts loopexits`(§5b). `--loc Type.field`, `--callee NAME` 으로 거른다(`--loc` 은 `reads` 에도 걸린다).
 - 프로필 없는 추출(§5a): `basis --no-profile …`, `extract --no-profile --basis basis.kz -o facts.kz`. `--profile` 과 어휘 옵션(`--target`, `--delay-op`, `--lock-op`, `--unlock-op`, `--spawn-op`, `--terminal-op`, `--poll-fn`)은 함께 쓸 수 없다(종료 코드 2).
+- 확장 사실 F1–F3(§5b): 프로필 없는 추출은 늘 쓴다. 프로필 추출은 `extract --extended-facts` 를 줄 때만 쓴다. 주지 않으면 facts 는 예전 그대로다.
 - 종료 코드: 0 정상, 1 분석 실패(번역 단위가 parse 되지 않음, 컨테이너 손상), 2 사용법·입출력 오류.
 - 고정 도구(fixture)처럼 compile DB 없이 읽을 때는 `--source FILE ... -- <컴파일 플래그>` 를 쓴다.
 
@@ -128,8 +129,12 @@ artifact 종류 FACTS. 모든 사실은 (file, line, col) 과 `fh`(같은 컨테
 | P0_TABLE (120) | `kz_fact_p0` | 프로필 없는 추출만: P0 표의 항목(종류, 매개변수 위치, 판 표기, 원문 대조)과 이 프로그램의 호출 수(§5a) |
 | OP_DERIV (121) | `kz_fact_opderiv` | 프로필 없는 추출만: F8 이 유도한 지연·종료 연산. 함수와 그 안의 호출마다 must/noreturn/may, guard, 호출 사슬(§5a) |
 | SPAWN_WRAP (122) | `kz_fact_spawnw` | 프로필 없는 추출만: F7 이 유도한 spawn 연산과 시작 스크립트 진입의 해결(§5a) |
+| READS (123) | `kz_fact_read` | 확장 사실(§5b): 필드·전역 읽기. 용도, 접근 경로의 뿌리와 첨자, guard |
+| RETURNS (124) | `kz_fact_return` | 확장 사실(§5b): return 값. 돌려주는 지역 변수는 그 return 에 닿는 정의마다 한 행, 값과 조건 |
+| RET_CONSTS (125) | `kz_fact_retconst` | 확장 사실(§5b): 함수마다 돌려주는 상수와 그 조건 |
+| LOOP_EXITS (126) | `kz_fact_loopexit` | 확장 사실(§5b): 모든 루프의 탈출식·mod set 과 탈출마다의 조건 |
 
-schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 섹션 120–122 는 1이고, TERMINALS 에 `conditional` 표시가 있다(revision 5, 스키마 개정 7). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
+schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 섹션 120–122 는 1이고, TERMINALS 에 `conditional` 표시가 있다(revision 5, 스키마 개정 7). 섹션 123–126 은 1이다(revision 6, 스키마 개정 8). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
 
 ### 4.1 writer, A-TYPE, INIT (SPEC §4.2)
 
@@ -211,6 +216,30 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **시험** [M]: `static_golden_wrappers`(fixture `wrappers.c`, `data/wrappers.golden`), `test_static_wrappers`(합성 모델 251 확인), `test_static_cli` 의 프로필 없는 닫힘(모듈 하나, 시작 스크립트, `dlsym`).
 
+## 5b. 확장 사실 F1–F3 (`READS`, `RETURNS`, `RET_CONSTS`, `LOOP_EXITS`, 2026-10-30, 단계 2a S2) [D][M]
+
+근거: `plan/extraction_design_20261030.md` §3.0 F1–F3, §6 항목 1. 결과는 `plan/step2a_s2_20261030.md`.
+
+**언제 쓰나** [D]. 프로필 없는 추출(§5a)의 둘째 읽기는 늘 쓴다. 프로필 추출은 `--extended-facts` 를 줄 때만 쓰고, 그 밖에는 이 사실을 읽지도 않는다. 그래서 옵션 없는 프로필 추출의 facts 는 예전과 바이트가 같다(STRINGS 의 build identity 문자열 말고). 옵션을 주면 기존 섹션의 **레코드**는 같지만 바이트는 다를 수 있다: STRINGS 가 정렬된 정규 표이라 새 문자열이 들어오면 다른 섹션의 `kz_str` 오프셋이 옮겨진다. 새 섹션의 식 트리는 FACT_EXPRS 에서 기존 섹션들이 쓰는 행 **뒤에** 번호가 붙어 앞 행의 색인은 그대로다. 새 사실은 FILE_HASHES 에 파일을 더하지 않는다(다른 사실이 이름 붙이지 않은 파일이면 `fh` 는 없음). BASIS 에 `extract.extended_facts` 와 `count.reads`, `count.returns`, `count.return_constants`, `count.loop_exit_rows` 가 남는다.
+
+**F1 READS** [D].
+- 읽기 = 함수 본문에서 멤버 접근, 전역 변수, 전역 배열 원소의 lvalue→rvalue 변환. 배열이 포인터로 바뀌는 것(decay)도 읽기로 센다(`array-contents`: 그 포인터로 내용을 읽는다). 단 첨자의 base 인 배열 decay 는 더 긴 경로의 한 단계라 읽기가 아니다. 지역 변수와 매개변수 자체, 포인터가 가리키는 값(`*p`)은 넣지 않는다.
+- 위치는 writer 와 같은 추상 위치다: 필드는 (소유 형, 필드), 전역은 (`<global>`, 객체 이름). 접근 경로를 뿌리까지 따라가 뿌리 종류(전역, 매개변수, 지역, 호출 결과, 그 밖)와 이름을 적는다. `->`, `*`, 포인터 첨자를 지나면 `through-pointer` 다. 경로의 첨자는 뿌리부터 순서대로 `index_root` 에 둔다. 첨자가 정의 하나인 지역 변수이면 그 정의의 값으로 바꾸고 `index-unfolded` 를 단다(RETURNS 와 같은 규칙).
+- 용도(`use`, 집합): 값이 문장까지 올라가며 지나는 문맥을 모두 단다. 분기 조건(if·루프·switch·`?:` 조건, `&&`·`||` 피연산자; `ctx_root` 는 가장 안쪽 조건), return 값, 포인터 매개변수를 통한 저장의 우변(`out-store`; `ctx_root` 는 목적지), 그 밖의 저장·초기화의 우변(`store`), 호출 인자(가장 안쪽 호출의 site 와 인자 번호), 첨자, 역참조되는 포인터, 간접 호출의 callee. 하나도 없으면 `other`. 예: `if (strcmp(t[i].name, k) == 0)` 의 `name` 은 `call-argument` 이면서 `branch` 다.
+- guard 는 writer 의 `guard_from` 과 같은 식이다. 가장 안쪽 루프의 색인을 함께 적는다.
+
+**F2 RETURNS, RET_CONSTS** [D].
+- 값 있는 return 문마다 행을 낸다. 값은 식 트리(상수, 필드 읽기, 호출 결과, 지역 변수 …)이고, 정의가 하나인 지역 변수(derives 의 정의 표: 정의 하나, 복사, 주소를 잡지 않음, 자기를 읽지 않음, 그 정의가 소스에서 return 보다 앞)는 그 값으로 펼친다(`unfolded`). 펼친 값 안의 지역 변수도 그 정의 앞을 기준으로 다시 펼친다. 순환은 펼치는 중인 이름의 집합으로 끊는다. 숫자 상한은 없다.
+- 돌려주는 값이 지역 변수 v 이고 v 의 주소를 잡지 않았으면, 함수 본문의 Clang CFG(모든 식을 원소로) 위에서 그 return 에 **닿는 v 의 정의**(reaching definitions)를 구해 정의마다 한 행(`alt`)을 낸다(`from-definition`, 정의 위치, 그 정의의 guard). 정의는 v 에 대한 대입·복합 대입·증감, 초기값 있는 선언이다. 값은 정의의 우변(복합 대입·증감은 `top`)이다. 그 정의 뒤에 이 return 에 닿는 다른 정의가 올 수 있으면 `redefined-later` 다. 진입에서 정의 없이 닿는 경로가 있으면 `undefined-on-a-path` 다.
+- `cond_root` = return 의 guard ∧ 정의의 guard ∧ ¬(뒤에 올 수 있는 정의들의 guard)이고, 정의 하나인 지역 변수를 펼친다. "이 조건이면 함수가 이 값을 돌려준다"로 읽는다. guard 는 writer 의 구조적 조건이라 루프 안(`in-loop`: return, 정의, 또는 뒤의 정의가 루프 안)에서는 반복마다의 조건이다. `case` 라벨은 합류점이라 switch 의 case 조건은 guard 에 없다(§4.1 과 같다).
+- RET_CONSTS: 함수와 상수마다 그 값을 돌려주는 RETURNS 행 조건의 논리합(조건 없는 행이 하나라도 있으면 "always"). 모든 RETURNS 행이 상수인 함수에는 `only-constants` 를 단다. 상수 값은 FACT_EXPRS 의 식과 같은 방법으로 평가한다(바깥 cast 를 벗긴 피연산자). 그래서 부호 있는 형으로 바꾼 큰 상수(`((T)0xc2000007)` 꼴)는 부호 없는 수로 적히고, 호출하는 쪽 조건의 같은 상수와 같게 적힌다.
+
+**F3 LOOP_EXITS** [D]. 모든 루프에 탈출식(탈출들의 논리합)과 본문의 mod set(쓰는 필드·전역·지역, 부르는 함수)을 둔다. FACT_LOOPS 는 지연 호출이 있는 루프와 table walk 에만 이 트리를 둔다(`ast_fn.cpp` 의 게이트, 그대로 둔다). 같은 트리이면 LOOP 행에 `as-in-loops` 를 단다. 탈출마다 EXIT 행이 있다: 종류(루프 조건, break, return, goto), 위치, 그 탈출이 실행될 조건(루프부터 그 지점까지의 guard), 그 탈출을 정하는 조건(루프 안의 가장 안쪽 guard 또는 부정된 루프 조건; 없으면 `unconditional`). 상수 거짓 탈출은 `never-taken`, 하나도 취할 수 없으면 LOOP 행이 `no-exit` 다. 루프 종류와 delay-in-body 는 FACT_LOOPS 에 남는다(프로필 없는 추출에서는 F8 이 정한 지연 연산으로).
+
+**도구 매개변수** [D]. 새 규칙에는 숫자 상한이 없다. 식 트리 생성기(`to_expr`)의 기존 깊이 상한 24(레퍼런스가 정하지 않은 값, `unspecified_by_reference`)가 새 사실의 식에도 걸린다. 상한은 트리를 `top("too deep")` 으로 자를 뿐 행을 없애지 않는다. 그래서 행 수는 이 값과 무관하다. 기준 빌드 다섯에서 잘린 노드는 0이었다(`plan/step2a_s2_20261030.md` §3.5). 텍스트 view 는 트리를 40 단계까지만 보여 준다(표시만, 사실은 그대로).
+
+**시험** [M]: `static_golden_flowfacts`(고정 도구 프로필 + `--extended-facts`), `static_golden_flowfacts_np`(`--no-profile`; 둘의 확장 섹션은 같다), fixture `flowfacts.c`, `test_static_cli` 의 확장 사실 확인(옵션 없으면 네 섹션이 없음, 있으면 기존 섹션 view 동일·FACT_EXPRS 앞 행 동일).
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).
@@ -247,7 +276,7 @@ INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped
 | 시험 | 확인하는 것 |
 |---|---|
 | `static_fixture_compile_*` | 고정 도구 C 파일이 빌드 컴파일러로 `-std=c99 -pedantic -Wall -Wextra -Werror` 통과(`clobber.c` 는 일부러 객체 끝을 넘어 쓰므로 컴파일 검사에서 뺀다) |
-| `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
+| `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber,wrappers,flowfacts,flowfacts_np}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
 | `static_golden_core_cpu1` | 고정 번들의 core-cpu1: basis 항목, 요약, SB identity 필드의 INIT·writer·A-TYPE·out 포인터, 함수별 쓰기, poll·walk 루프의 규칙, table walk 순서, spawn 매개변수, image, 간접 대상, derives 39 의 목록·파일별 수·gdb 기록 지점 대조, 도달성. 번들이 없으면 건너뜀(77) |
 | `test_static_unroll` | 부분 평가, 반복 펼치기(taken/skipped/residual, 인자·callee 값, spawn 표시), task-main 매개변수(DIRECT/VIA_ENTRY), 루프 규칙(각 실패 이유와 A-TYPE 상태에 따른 untyped write 처리), table walk image 확인(const 고리, 형 있는 쓰기, 객체 주소, 원소 필드), finalize 의 unknown-effect 결정(본문 없음, 가변 위치, 미해결 간접 호출, 해결된 간접 호출, 데이터 함수) |
 | `test_static_{expr,flow,recipe,gitrev,link,cli}` | 식 pool, 흐름 그래프·table walk, recipe 문법(`module`, 범위 단어, `module_file` 과 그 오류), commit 읽기, link set, CLI(basis→extract 합성 프로그램; 실행 파일 + global 라이브러리 + local 앱 + 닫힘 밖 라이브러리의 닫힘: 앱이 out 포인터로 넘긴 필드가 실행 파일 본문으로 writer-set-complete, 늦게 적재된 라이브러리의 결합 차이 deviation, 적재 파일과 link 출력이 다르면 묶지 않음) |

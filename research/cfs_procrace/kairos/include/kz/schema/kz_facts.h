@@ -1024,7 +1024,9 @@ enum kz_facts_section_id {
  * operations are the same lock; used only to keep a release from releasing a lock of another
  * location).  `site` is the call in `fn` that leads to the primitive, `next_fn` its callee, `chain`
  * the path, `depth` its length.  `vocabulary`: an ACQUIRE of mode EVERY_RETURN or RESULT_CONDITIONAL,
- * or a RELEASE: an operation of this kind is a lock or unlock operation of the profile-free run (its
+ * or a RELEASE of those modes of a mutex whose field-based location an ACQUIRE of the vocabulary
+ * acquires (the primitive always): an operation of this kind is a lock or unlock operation of the
+ * profile-free run (its
  * call and loop facts: KZ_CALL_FLAG lock-op / unlock-op, the L1 (ii) region), derived on its first pass
  * (BASIS extract.lock_vocabulary says whether that pass gave the same set).  The rows are the same in
  * both modes.

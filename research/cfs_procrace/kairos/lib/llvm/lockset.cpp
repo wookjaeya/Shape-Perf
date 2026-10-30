@@ -230,17 +230,18 @@ struct Acq {
 // What a call does to the locks, over the caller's parameters.
 struct Effect {
   std::vector<Acq> acq;
-  std::vector<LockId> rel, kill, wait;
+  std::vector<LockId> rel, rel_may, kill, wait;  // rel: on every path; rel_may: on some path
   bool unknown = false;
   bool has_result = false, result_assumed = false;
   int64_t result = 0;
-  bool empty() const { return acq.empty() && rel.empty() && kill.empty() && wait.empty() && !unknown && !has_result; }
+  bool empty() const { return acq.empty() && rel.empty() && rel_may.empty() && kill.empty() && wait.empty() && !unknown && !has_result; }
 };
 // A function's summary, over its own parameters.
 struct Summary {
   std::vector<Acq> acq;   // EVERY_RETURN, RESULT, TRY
   std::vector<Acq> cond;  // CONDITIONAL: no operation
-  std::vector<LockId> rel, kill, wait;
+  std::vector<Acq> rel;   // releases of the caller's lock: EVERY_RETURN, RESULT (on the paths that return `success`)
+  std::vector<LockId> rel_may, kill, wait;  // rel_may: released on some path only
   bool unknown = false;
   bool has_result = false, result_assumed = false;
   int64_t result = 0;
@@ -263,11 +264,16 @@ struct Entry {
 struct State {
   std::map<std::string, Entry> held;
   std::map<std::string, Val> facts;
+  std::set<std::string> released;  // locks of the caller released on this path
   bool failure = false;
   bool unknown_release = false;
+  // one state per set of locks held and of the caller's locks released, so that the paths of an operation that
+  // returns a value telling them apart stay apart
   std::string key() const {
     std::string k = failure ? "F|" : "S|";
     for (const auto& kv : held) k += kv.first + "|";
+    k += "R|";
+    for (const std::string& r : released) k += r + "|";
     return k;
   }
 };
@@ -295,6 +301,14 @@ bool merge_into(States* dst, const State& s) {
       changed = true;
     } else {
       ++fit;
+    }
+  }
+  for (auto rit = d.released.begin(); rit != d.released.end();) {
+    if (s.released.count(*rit) == 0) {
+      rit = d.released.erase(rit);
+      changed = true;
+    } else {
+      ++rit;
     }
   }
   if (s.unknown_release && !d.unknown_release) d.unknown_release = changed = true;
@@ -352,8 +366,6 @@ LockId lock_id_subst(const LockId& id, const std::vector<LockId>& args) {
   }
   const LockId a = lock_id_subst(id->a, args);
   const LockId b = lock_id_subst(id->b, args);
-  if (a && a->k == N::UNKNOWN) return a;
-  if (b && b->k == N::UNKNOWN) return b;
   switch (id->k) {
     case N::ADDR:
       if (a->k == N::DEREF) return a->a;
@@ -362,8 +374,11 @@ LockId lock_id_subst(const LockId& id, const std::vector<LockId>& args) {
       if (a->k == N::ADDR) return a->a;
       break;
     case N::INDEX:
-      // (&x[0])[i] is x[i]
-      if (a->k == N::DEREF && a->a->k == N::ADDR && a->a->a->k == N::INDEX && a->a->a->b->k == N::CONST && a->a->a->b->v == 0) return mk(N::INDEX, 0, "", a->a->a->a, b);
+      // p[i] with p = &x[0] is x[i]
+      if (id->a && id->a->k == N::DEREF) {
+        const LockId pv = lock_id_subst(id->a->a, args);
+        if (pv->k == N::ADDR && pv->a && pv->a->k == N::INDEX && pv->a->b && pv->a->b->k == N::CONST && pv->a->b->v == 0) return mk(N::INDEX, 0, "", pv->a->a, b);
+      }
       break;
     default: break;
   }
@@ -670,7 +685,8 @@ class Analysis {
               a.text = lock_id_text(a.id);
               x.acq.push_back(a);
             }
-            for (const LockId& r : s.rel) x.rel.push_back(lock_id_subst(r, args));
+            for (const Acq& r : s.rel) x.rel.push_back(lock_id_subst(r.id, args));
+            for (const LockId& r : s.rel_may) x.rel_may.push_back(lock_id_subst(r, args));
             for (const LockId& r : s.kill) {
               const LockId k = lock_id_subst(r, args);
               if (!stable(k, fields_)) x.kill.push_back(k);
@@ -698,7 +714,9 @@ class Analysis {
             break;
           }
       e.acq = keep;
-      e.rel.insert(e.rel.end(), per[i].rel.begin(), per[i].rel.end());
+      // a release only some targets make is a release on some path
+      for (const LockId& r : per[i].rel) e.rel_may.push_back(r);
+      e.rel_may.insert(e.rel_may.end(), per[i].rel_may.begin(), per[i].rel_may.end());
       e.kill.insert(e.kill.end(), per[i].kill.begin(), per[i].kill.end());
       e.wait.insert(e.wait.end(), per[i].wait.begin(), per[i].wait.end());
       e.unknown = e.unknown || per[i].unknown;
@@ -712,7 +730,7 @@ class Analysis {
     std::map<uint32_t, States> in;  // block -> states at its entry
     std::vector<Ret> rets;
     std::map<std::string, EventAcc> events;  // event key -> states
-    std::set<std::string> rel_net, kill, wait;
+    std::set<std::string> rel_net, kill, wait;  // rel_net: releases of the caller's locks on some path
     std::map<std::string, LockId> ids;
     std::map<std::string, std::string> via;
     bool unknown = false;
@@ -855,19 +873,22 @@ class Analysis {
       s->held.clear();
       if (!s->failure) r->unknown = true;
     }
-    for (const LockId& x : e.rel) {
+    auto release = [&](const LockId& x, bool every) {
       const std::string tx = lock_id_text(x);
-      if (!s->failure) {
-        if (s->held.count(tx) != 0) {
-          r->kill.insert(tx);  // a pair of the function's own: the caller decides whether it is one mutex
-        } else {
+      if (s->held.count(tx) != 0) {
+        if (!s->failure) r->kill.insert(tx);  // a pair of the function's own: the caller decides whether it is one mutex
+      } else {
+        if (every) s->released.insert(tx);
+        if (!s->failure) {
           r->rel_net.insert(tx);
           if (r->via.count("R" + tx) == 0) r->via["R" + tx] = ck;
         }
-        r->ids[tx] = x;
       }
+      if (!s->failure) r->ids[tx] = x;
       kill_may(s, x);
-    }
+    };
+    for (const LockId& x : e.rel) release(x, true);
+    for (const LockId& x : e.rel_may) release(x, false);
     for (const LockId& x : e.kill) {
       const std::string tx = lock_id_text(x);
       if (!s->failure) {
@@ -876,18 +897,23 @@ class Analysis {
       }
       kill_may(s, x);
     }
+    // a condition wait holds the mutex again when it returns: a lock held before it is held after it, from
+    // this call on (the mutex was released in between); one not known to be held stays not held
     for (const LockId& x : e.wait) {
       const std::string tx = lock_id_text(x);
-      if (!s->failure && s->held.count(tx) == 0) {
+      const bool own = s->held.count(tx) != 0;
+      if (!s->failure && !own) {
         r->wait.insert(tx);
         r->ids[tx] = x;
         if (r->via.count("W" + tx) == 0) r->via["W" + tx] = ck;
       }
-      kill_may(s, x);
       Entry en;
-      en.id = x;
-      en.openers.insert(ck);
-      s->held[tx] = en;
+      if (own) {
+        en = s->held[tx];
+        en.openers = {ck};
+      }
+      kill_may(s, x);
+      if (own) s->held[tx] = en;
     }
     s->facts.erase("#" + ck);
     bool split = false;
@@ -969,17 +995,42 @@ class Analysis {
     std::map<std::string, LockId> idents;
     for (const Ret* rt : rets)
       for (const auto& kv : rt->st.held) idents[kv.first] = kv.second.id;
-    for (const auto& kv : idents) {
+    // the mode of an operation from the returns on which it holds (EVERY_RETURN: all of them; RESULT: exactly
+    // those that return one constant, the others returning values known to differ; CONDITIONAL: neither)
+    auto classify = [&](const std::function<bool(const Ret*)>& on, Acq* a) {
       std::vector<const Ret*> holding, others;
+      for (const Ret* rt : rets) (on(rt) ? holding : others).push_back(rt);
+      if (others.empty()) {
+        a->mode = KZ_LOCKOP_MODE_EVERY_RETURN;
+        return;
+      }
+      bool ok = !holding.empty();
+      int64_t c = 0;
+      for (size_t i = 0; i < holding.size() && ok; ++i) {
+        if (!holding[i]->known || holding[i]->v.op != 1) ok = false;
+        else if (i == 0) c = holding[i]->v.c;
+        else if (holding[i]->v.c != c) ok = false;
+      }
+      for (const Ret* o : others) {
+        if (!ok) break;
+        if (!o->known) ok = false;
+        else if (o->v.op == 1 && o->v.c == c) ok = false;
+        else if (o->v.op == 2 && o->v.c != c) ok = false;
+      }
+      if (ok) {
+        a->mode = KZ_LOCKOP_MODE_RESULT;
+        a->has_success = true;
+        a->success = c;
+      } else {
+        a->mode = KZ_LOCKOP_MODE_CONDITIONAL;
+      }
+    };
+    for (const auto& kv : idents) {
       bool assumed = false, tried = false;
       std::string opener;
       for (const Ret* rt : rets) {
         auto it = rt->st.held.find(kv.first);
-        if (it == rt->st.held.end()) {
-          others.push_back(rt);
-          continue;
-        }
-        holding.push_back(rt);
+        if (it == rt->st.held.end()) continue;
         assumed = assumed || it->second.assumed;
         tried = tried || it->second.try_;
         if (!it->second.openers.empty() && (opener.empty() || *it->second.openers.begin() < opener)) opener = *it->second.openers.begin();
@@ -988,36 +1039,26 @@ class Analysis {
       a.id = kv.second;
       a.text = kv.first;
       a.assumed = assumed;
-      if (others.empty()) {
-        a.mode = KZ_LOCKOP_MODE_EVERY_RETURN;
-      } else {
-        bool ok = true;
-        int64_t c = 0;
-        for (size_t i = 0; i < holding.size() && ok; ++i) {
-          if (!holding[i]->known || holding[i]->v.op != 1) ok = false;
-          else if (i == 0) c = holding[i]->v.c;
-          else if (holding[i]->v.c != c) ok = false;
-        }
-        for (const Ret* o : others) {
-          if (!ok) break;
-          if (!o->known) ok = false;
-          else if (o->v.op == 1 && o->v.c == c) ok = false;
-          else if (o->v.op == 2 && o->v.c != c) ok = false;
-        }
-        if (ok) {
-          a.mode = (tried && !assumed) ? KZ_LOCKOP_MODE_TRY : KZ_LOCKOP_MODE_RESULT;
-          a.has_success = true;
-          a.success = c;
-        } else {
-          a.mode = KZ_LOCKOP_MODE_CONDITIONAL;
-        }
-      }
+      const std::string text = kv.first;
+      classify([&](const Ret* rt) { return rt->st.held.count(text) != 0; }, &a);
+      if (a.mode == KZ_LOCKOP_MODE_RESULT && tried && !assumed) a.mode = KZ_LOCKOP_MODE_TRY;
       sm.via["A" + a.text] = opener;
       if (a.mode == KZ_LOCKOP_MODE_CONDITIONAL) sm.cond.push_back(a);
       else sm.acq.push_back(a);
     }
+    // releases of the caller's locks, read like the acquisitions (a release that is not a try succeeds too)
+    for (const std::string& t : fin.rel_net) {
+      Acq a;
+      a.id = fin.ids[t];
+      a.text = t;
+      a.assumed = true;
+      classify([&](const Ret* rt) { return rt->st.released.count(t) != 0; }, &a);
+      if (rets.empty()) a.mode = KZ_LOCKOP_MODE_CONDITIONAL;
+      if (a.mode == KZ_LOCKOP_MODE_CONDITIONAL) sm.rel_may.push_back(a.id);
+      else sm.rel.push_back(a);
+    }
     // the value an operation that holds on every return gives back
-    if (!rets.empty() && !sm.acq.empty()) {
+    if (!rets.empty() && (!sm.acq.empty() || !sm.rel.empty())) {
       bool same = true, any_assumed = false;
       int64_t c = 0;
       for (size_t i = 0; i < rets.size() && same; ++i) {
@@ -1026,19 +1067,19 @@ class Analysis {
         else if (rets[i]->v.c != c) same = false;
         if (same && !rets[i]->v.from.empty()) any_assumed = true;
       }
-      for (const Acq& a : sm.acq)
-        if (a.mode == KZ_LOCKOP_MODE_RESULT) {
-          sm.has_result = true;
-          sm.result = a.success;
-          sm.result_assumed = a.assumed;
-        }
+      for (const std::vector<Acq>* ops : {&sm.acq, &sm.rel})
+        for (const Acq& a : *ops)
+          if (a.mode == KZ_LOCKOP_MODE_RESULT && !sm.has_result) {
+            sm.has_result = true;
+            sm.result = a.success;
+            sm.result_assumed = a.assumed;
+          }
       if (!sm.has_result && same) {
         sm.has_result = true;
         sm.result = c;
         sm.result_assumed = any_assumed;
       }
     }
-    for (const std::string& t : fin.rel_net) sm.rel.push_back(fin.ids[t]);
     for (const std::string& t : fin.kill)
       if (fin.rel_net.count(t) == 0) sm.kill.push_back(fin.ids[t]);
     for (const std::string& t : fin.wait) sm.wait.push_back(fin.ids[t]);
@@ -1194,6 +1235,7 @@ class Analysis {
         }
       } else if (pe->kind == KZ_P0_KIND_MUTEX_RELEASE) {
         r.kind = KZ_LOCKOP_KIND_RELEASE;
+        r.mode = KZ_LOCKOP_MODE_EVERY_RETURN;
         d->unlock_keys.insert(t);
         ++d->stats.release_ops;
       } else {
@@ -1289,11 +1331,20 @@ class Analysis {
         if (a.assumed) r.flags |= KZ_LOCKOP_FLAG_ASSUMES_SUCCESS;
         d->ops.push_back(r);
       }
-      for (const LockId& x : s.rel) {
-        LockOpFact r = base(KZ_LOCKOP_KIND_RELEASE, "R" + lock_id_text(x));
-        ident(&r, x);
+      for (const Acq& a : s.rel) {
+        LockOpFact r = base(KZ_LOCKOP_KIND_RELEASE, "R" + a.text);
+        ident(&r, a.id);
+        r.mode = a.mode;
+        r.success = a.has_success ? a.success : 0;
+        r.flags |= KZ_LOCKOP_FLAG_ASSUMES_SUCCESS;
         is_unlock = true;
         ++d->stats.release_ops;
+        d->ops.push_back(r);
+      }
+      for (const LockId& x : s.rel_may) {
+        LockOpFact r = base(KZ_LOCKOP_KIND_RELEASE, "R" + lock_id_text(x));
+        ident(&r, x);
+        r.mode = KZ_LOCKOP_MODE_CONDITIONAL;
         d->ops.push_back(r);
       }
       for (const LockId& x : s.wait) {
@@ -1303,8 +1354,17 @@ class Analysis {
         d->ops.push_back(r);
       }
       if (is_lock) d->lock_keys.insert(f);
-      if (is_unlock) d->unlock_keys.insert(f);
+      (void)is_unlock;
     }
+    // the unlock operations of the vocabulary: a release on every return (or result-conditional) of a mutex of a
+    // location some acquire operation of the vocabulary acquires (field-based; the P0 primitive always)
+    std::set<std::string> acquired_at;
+    for (const LockOpFact& r : d->ops)
+      if (r.kind == KZ_LOCKOP_KIND_ACQUIRE && (r.mode == KZ_LOCKOP_MODE_EVERY_RETURN || r.mode == KZ_LOCKOP_MODE_RESULT) && !r.may.empty()) acquired_at.insert(r.may);
+    for (const LockOpFact& r : d->ops)
+      if (r.kind == KZ_LOCKOP_KIND_RELEASE && (r.flags & KZ_LOCKOP_FLAG_PRIMITIVE) == 0 && (r.mode == KZ_LOCKOP_MODE_EVERY_RETURN || r.mode == KZ_LOCKOP_MODE_RESULT) &&
+          acquired_at.count(r.may) != 0)
+        d->unlock_keys.insert(r.func_key);
     std::stable_sort(d->ops.begin(), d->ops.end(), [](const LockOpFact& a, const LockOpFact& b) {
       return std::tie(a.func_key, a.kind, a.ident, a.mode) < std::tie(b.func_key, b.kind, b.ident, b.mode);
     });
@@ -1370,7 +1430,12 @@ void finalize_lock_facts(Model* mp, const LockDerivation& d, const FieldStatusTa
   // pass's lock and unlock operations) is compared with it for the record
   (void)vocabulary;
   for (LockOpFact& r : m.lock_ops)
-    if ((r.kind == KZ_LOCKOP_KIND_ACQUIRE && (r.mode == KZ_LOCKOP_MODE_EVERY_RETURN || r.mode == KZ_LOCKOP_MODE_RESULT)) || r.kind == KZ_LOCKOP_KIND_RELEASE)
+    if ((r.kind == KZ_LOCKOP_KIND_ACQUIRE && (r.mode == KZ_LOCKOP_MODE_EVERY_RETURN || r.mode == KZ_LOCKOP_MODE_RESULT)) ||
+        (r.kind == KZ_LOCKOP_KIND_RELEASE && (d.lock_keys.count(r.func_key) != 0 || d.unlock_keys.count(r.func_key) != 0) &&
+         (r.mode == KZ_LOCKOP_MODE_EVERY_RETURN || r.mode == KZ_LOCKOP_MODE_RESULT) &&
+         ((r.flags & KZ_LOCKOP_FLAG_PRIMITIVE) != 0 || std::any_of(m.lock_ops.begin(), m.lock_ops.end(), [&](const LockOpFact& a) {
+            return a.kind == KZ_LOCKOP_KIND_ACQUIRE && (a.mode == KZ_LOCKOP_MODE_EVERY_RETURN || a.mode == KZ_LOCKOP_MODE_RESULT) && !a.may.empty() && a.may == r.may;
+          }))))
       r.flags |= KZ_LOCKOP_FLAG_VOCABULARY;
   m.lock_ids = d.ids;
   m.locksets = d.rows;

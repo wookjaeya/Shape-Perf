@@ -557,7 +557,7 @@ class View {
     os << "[lockops] " << lockops_.size() << "\n";
     for (const kz_fact_lockop& r : lockops_) {
       os << "  " << fn_name(r.fn) << " " << enum_text("KZ_LOCKOP_KIND", r.kind);
-      if (r.kind == KZ_LOCKOP_KIND_ACQUIRE) os << " " << enum_text("KZ_LOCKOP_MODE", r.mode);
+      if (r.mode != KZ_LOCKOP_MODE_NONE) os << " " << enum_text("KZ_LOCKOP_MODE", r.mode);
       if (r.mode == KZ_LOCKOP_MODE_RESULT || r.mode == KZ_LOCKOP_MODE_TRY) os << " success=" << r.success;
       os << " lock " << str(r.ident);
       const std::string may = str(r.may);
@@ -606,7 +606,24 @@ class View {
         }
         os << "]";
       }
-      if (r.opener_root != KZ_NONE32) os << " acquired-at=" << list(r.opener_root);
+      if (r.opener_root != KZ_NONE32) {
+        // the acquisitions by position (a site number depends on the other located facts of the container)
+        os << " acquired-at=[";
+        uint32_t cur = r.opener_root;
+        bool first = true;
+        for (int guard = 0; cur != KZ_NONE32 && cur < exprs_.size() && guard < 10000; ++guard) {
+          const kz_fact_expr& e = exprs_[cur];
+          if (e.op != KZ_EXPR_OP_SEQ) break;
+          if (e.a != KZ_NONE32 && e.a < exprs_.size()) {
+            const uint32_t site = static_cast<uint32_t>(exprs_[e.a].value);
+            auto cit = call_by_site_.find(site);
+            os << (first ? "" : ", ") << (cit != call_by_site_.end() ? pos(calls_[cit->second].file, calls_[cit->second].line, calls_[cit->second].col) : "site " + std::to_string(site));
+          }
+          first = false;
+          cur = e.b;
+        }
+        os << "]";
+      }
       os << " " << flags_text("KZ_LOCKSET_FLAG", r.flags) << "\n";
     }
   }
@@ -625,7 +642,9 @@ class View {
   void awaits(std::ostream& os) {
     os << "[awaits] " << awaits_.size() << "\n";
     for (const kz_fact_await& r : awaits_) {
-      os << "  loop site " << idx(r.loop) << " in " << fn_name(r.fn) << " relevant=" << (r.relevant_root != KZ_NONE32 ? list(r.relevant_root) : std::string("[]"));
+      auto lit = loop_by_site_.find(r.loop);
+      os << "  loop site " << idx(r.loop) << (lit != loop_by_site_.end() ? " " + pos(loops_[lit->second].file, loops_[lit->second].line, loops_[lit->second].col) : std::string()) << " in "
+         << fn_name(r.fn) << " relevant=" << (r.relevant_root != KZ_NONE32 ? list(r.relevant_root) : std::string("[]"));
       const std::string via = str(r.via);
       if (!via.empty()) os << " via-callee=[" << via << "]";
       os << " L1(ii)=" << enum_text("KZ_AWAIT_READ", r.l1_read);

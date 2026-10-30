@@ -4140,13 +4140,13 @@ class FnWalker {
     return n;
   }
   static LockId lunknown(const std::string& why) { return lnode(LockIdNode::UNKNOWN, 0, why); }
+  // An unknown part stays a node of its own, so that the rest of the expression (the field the mutex is,
+  // the table it is an element of) is kept.
   static LockId laddr(LockId lv) {
-    if (lv->k == LockIdNode::UNKNOWN) return lv;
     if (lv->k == LockIdNode::DEREF) return lv->a;  // &*p is p
     return lnode(LockIdNode::ADDR, 0, "", lv);
   }
   static LockId lderef(LockId v) {
-    if (v->k == LockIdNode::UNKNOWN) return v;
     if (v->k == LockIdNode::ADDR) return v->a;  // *&x is x
     return lnode(LockIdNode::DEREF, 0, "", v);
   }
@@ -4181,10 +4181,7 @@ class FnWalker {
           const LockId lv = ident_lvalue(x, seen);
           return lv->k == LockIdNode::UNKNOWN ? lv : lnode(LockIdNode::LOAD, 0, "", lv);
         }
-        case CK_ArrayToPointerDecay: {
-          const LockId lv = ident_lvalue(sub, seen);
-          return lv->k == LockIdNode::UNKNOWN ? lv : laddr(lnode(LockIdNode::INDEX, 0, "", lv, lnode(LockIdNode::CONST, 0, "")));
-        }
+        case CK_ArrayToPointerDecay: return laddr(lnode(LockIdNode::INDEX, 0, "", ident_lvalue(sub, seen), lnode(LockIdNode::CONST, 0, "")));
         case CK_FunctionToPointerDecay: return lunknown("a function");
         default: return ident_value(sub, seen);
       }
@@ -4205,13 +4202,11 @@ class FnWalker {
       const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
       if (fl == nullptr) return lunknown("a member");
       const LockId base = me->isArrow() ? lderef(ident_value(me->getBase(), seen)) : ident_lvalue(me->getBase(), seen);
-      if (base->k == LockIdNode::UNKNOWN) return base;
       return lnode(LockIdNode::FIELD, 0, field_type_name(fl) + "." + fl->getNameAsString(), base);
     }
     if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
       const LockId bv = ident_value(as->getBase(), seen);
       const LockId iv = ident_value(as->getIdx(), seen);
-      if (bv->k == LockIdNode::UNKNOWN) return bv;
       if (bv->k == LockIdNode::ADDR && bv->a->k == LockIdNode::INDEX && bv->a->b->k == LockIdNode::CONST && bv->a->b->v == 0)
         return lnode(LockIdNode::INDEX, 0, "", bv->a->a, iv);
       return lnode(LockIdNode::INDEX, 0, "", lderef(bv), iv);

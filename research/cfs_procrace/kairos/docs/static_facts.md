@@ -240,6 +240,32 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **시험** [M]: `static_golden_flowfacts`(고정 도구 프로필 + `--extended-facts`), `static_golden_flowfacts_np`(`--no-profile`; 둘의 확장 섹션은 같다), fixture `flowfacts.c`, `test_static_cli` 의 확장 사실 확인(옵션 없으면 네 섹션이 없음, 있으면 기존 섹션 view 동일·FACT_EXPRS 앞 행 동일).
 
+## 5c. 확장 사실 F4·F6 (`ARGFLOW`, `PARAM_FLOW`, `PTR_FIELDS`, `GLOBAL_IMAGES`, 2026-10-30, 단계 2a S3) [D][M]
+
+근거: `plan/extraction_design_20261030.md` §3.0 F4·F6, §5 R1, §6 항목 1. 결과는 `plan/step2a_s3_20261030.md`.
+
+**언제 쓰나** [D]. F1–F3(§5b)과 같은 조건이다: 프로필 없는 추출은 늘, 프로필 추출은 `--extended-facts` 를 줄 때만 쓴다. 옵션 없는 프로필 추출은 이 사실의 코드 경로를 타지 않는다. 식 트리는 FACT_EXPRS 에서 F1–F3 의 행 **뒤에** 번호가 붙는다. FILE_HASHES 에 파일을 더하지 않는다. BASIS 에 `extract.extended_facts_f4_f6`, 도구 매개변수 세 개(`param.argflow_depth_bound`, `param.argflow_size_bound`, `param.image_budget`, 모두 `unspecified_by_reference`)와 `count.argflow`, `count.param_flow`, `count.param_flow_nodes`, `count.param_flow_cut`, `count.ptr_fields`, `count.global_images` 가 남는다.
+
+**F4 ARGFLOW** [D]. 모든 호출의 모든 인자(역할 없는 인자 포함; DERIVES 는 그대로 역할 인자만)마다 한 행이다.
+- 복사 규칙은 derives 와 같다(정의 하나·복사·주소를 잡지 않는 지역 변수를 따라감). 다만 포인터 형 사이의 변환은 주소를 지키므로 복사로 보고 `pointer-conversion` 을 단다. 정수↔포인터 변환, 좁히는 정수 변환은 복사가 아니다. 숫자 상한은 없다(같은 지역 변수를 두 번 따라가지 않는다).
+- `src` 는 사슬이 끝나는 곳이다: 상수, 문자열, 함수, 필드·전역·전역 배열 원소·역참조 읽기, 주소(`&x`), 매개변수(`param`), 호출 결과(`root` 에 callee), 지역 변수(더 따라가지 못한 이유를 `reason` 에, derives 의 이유와 같다), 그 밖의 식.
+- 위치 읽기와 주소에는 접근 경로의 **base 저장 종류**(`base`)를 단다: 전역 객체, 전역 배열 원소, 지역, 매개변수의 pointee(`param`), 지역 포인터의 pointee, 포인터 필드의 pointee(`root` 는 그 필드, `object` 는 그 경로의 뿌리 전역), 전역 포인터의 pointee, 호출 결과의 pointee. 경로에서 뿌리에 가장 가까운 포인터 역참조가 base 를 정한다(그 뒤에 역참조가 더 있으면 `multi-level`). 정의 하나인 지역 포인터는 그 정의를 따라가 가리키는 곳을 base 로 삼는다(`base-via-local`; 예: `rec = &T[i]; rec->f` 는 전역 배열 원소). `object` 는 base 객체의 전역 키(STATIC_IMAGE·GLOBAL_IMAGES 의 객체 이름)다. 경로의 첨자는 뿌리부터 `index_root` 에, 원천 읽기의 READS 행은 `read` 에 둔다.
+
+**F4 PARAM_FLOW** [D]. 함수 매개변수(`fn`, `param`)마다 그 값(위의 복사 규칙으로 따라간 복사)이 가는 곳이다.
+- 깊이 0: 호출 인자(ARGFLOW 의 매개변수 원천 행; 간접 호출은 해결된 대상마다 한 행에 `indirect`·`may`, 대상을 다 모르면 `unresolved`, 본문 없는 callee 는 `callee-without-body`, 가변 위치는 `variadic`; 그 호출의 결과를 검사하면 `result-tested`), 비교 피연산자와 참·거짓으로 시험되는 조건(`truth-test`, switch 제어식은 `switch`), return 값, 필드·전역·포인터 매개변수를 통한 저장(지역 변수로의 대입은 복사라서 사슬로 따라간다), 첨자, 그리고 그 매개변수를 통한 저장(`out-store`, 기존 out-pointer 요약의 직접 저장).
+- 깊이 d > 0: 본문 있는 함수로의 호출 인자 행을 간선으로 삼아, 호출 그래프의 강연결요소를 callee 먼저(역위상 순서) 처리하며 고정점까지 합성한다. 행은 d 번의 호출을 지나 닿는 깊이 0 사용(그 종류·위치·식·guard, `sink_fn`)이고, 같은 사용에는 가장 짧은 깊이(같으면 must 먼저)만 남긴다. 첫 호출(`site`, `next_fn`, `next_param`)과 경로(`chain`)를 적고, 간접 호출을 지나면 `may` 다. 깊이 d > 0 의 호출 인자 행은 경로의 열린 끝(본문 없음·미해결·가변 위치)이다.
+- 도구 매개변수 두 개: 합성 행이 지나는 호출 수의 상한(`--argflow-depth N`)과 매개변수당 합성 행 수의 상한(`--argflow-size N`). 레퍼런스가 정하지 않는 값이라 기본은 **상한 없음**이다. 상한에 걸려 빠진 사용은 그 매개변수의 OPEN 행(`depth-bound`/`size-bound`, `n` 은 빠진 사용 수)으로 남기고 미해결로 센다.
+
+**F4 PTR_FIELDS (포인터 필드 흐름)** [D].
+- ADDRESS_WRITE: 포인터 필드에 전역 객체의 주소를 쓰는 저장(`p->f = &G`, `G.f = &G2[c]`, decay 되는 전역 배열 `p->f = arr` 은 원소 0). 쓰는 멤버 경로의 뿌리가 전역이면 그 객체(`root`), 아니면 필드 기반(`field-based`). STATIC_INIT: 전역의 정적 초기값이 그 필드에 주소를 넣는 경우(이미지의 주소 잎).
+- 쓰기마다 그 함수의 Clang CFG 지배자 관계로 순서를 정한다: 쓰기가 지배하는 호출과 READS 행, 그리고 쓰기를 지배하는(루프 밖) 같은 필드·같은 형 레코드의 앞선 쓰기(`earlier-writes-overwritten`). 그 밖의 형 있는 쓰기(필드 저장, 레코드 통째 쓰기, 필드 주소의 escape; 함수·위치·종류마다 하나)가 남으면 `n` 과 `other-writes` 다.
+- READ: 접근 경로가 포인터 필드를 지나는 READS 행(뿌리에 가장 가까운 단계). 같은 형·필드의 주소 쓰기 가운데 같은 뿌리이거나 필드 기반인 것이 후보다. RESOLVED = 후보 하나, 같은 뿌리, 쓰기가 읽기보다 프로그램 순서로 앞(`write-before-read`: 같은 함수에서는 쓰기가 읽기를 지배; 다른 함수이면 읽는 함수로 가는 **모든** 호출 경로가 쓰는 함수의, 쓰기가 지배하는 호출을 지난다; 거꾸로 따라가다 호출자 없는 함수, spawn 진입, 미해결 간접 호출이 있을 때 주소를 잡힌 함수에 닿으면 앞이 아니다; 정적 초기값은 늘 앞), 남은 다른 쓰기 0. 후보가 있지만 하나라도 어긋나면 MAY, 후보가 없으면 NEEDS field points-to 다. 첨자가 둘러싼 counted loop(정확한 횟수 또는 상한)의 유도 변수이면 원소 값 `elem` + k·`idx_step`(k < `idx_n`)을 적는다(`index-from-counted-loop`; 상한이면 `loop-may-exit-early`).
+- 형 있는 쓰기만 본다. 형 없는 포인터로의 저장과 본문 없는 코드의 쓰기는 배제하지 않는다(table walk 의 이미지 확인과 같은 한계).
+
+**F6 GLOBAL_IMAGES** [D]. ARGFLOW 의 `object` 와 PTR_FIELDS 의 대상·뿌리가 이름 붙인 전역마다, STATIC_IMAGE 와 같은 이미지 생성기(`flatten_initializer`, 같은 잎·종류·경로)로 만든 정적 초기값이다. table walk 와 무관하다. 스칼라 전역은 잎 하나, 초기값 없이 정의된 객체는 `zero-initialized` 한 행이다. 닫힌 프로그램 밖에 정의된 객체는 행이 없고 수만 센다. 잎이 매크로로 쓰였으면 거기 쓴 가장 바깥 매크로(`macro`)와 값의 첫 토큰이 쓰인 곳(spell 위치, 정의)을 적는다(시스템 헤더의 매크로는 적지 않는다). 잎이 레코드 필드이면 (`owner`, `field`)를 적고, 그 필드를 쓰거나 주소를 잡는 함수가 있으면 `field-written`(필드 기반), 그 형 레코드를 통째로 쓰면 `record-written`, 객체 자체를 쓰거나 주소를 잡으면 `object-written` 이다. 이 표시가 없으면 형 있는 쓰기로는 정적 값이 실행 중 값이다. 이미지 잎 수 상한(기존 4096, `--image-budget N`)은 레퍼런스가 정하지 않는 도구 매개변수다.
+
+**시험** [M]: `static_golden_argflow`(고정 도구 프로필 + `--extended-facts`), `static_golden_argflow_np`(`--no-profile`; 둘의 새 섹션은 같다), fixture `argflow.c`, `test_static_cli` 의 F4·F6 확인(옵션 없으면 네 섹션이 없음, 있으면 기존 섹션 view·FACT_EXPRS 앞 행 동일, 상한과 이미지 예산의 기록·거부·효과).
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).
@@ -276,7 +302,7 @@ INIT: `cfe_sb_task.c:40:17` 의 0 초기화 전역. **A-TYPE 은 0 건**(untyped
 | 시험 | 확인하는 것 |
 |---|---|
 | `static_fixture_compile_*` | 고정 도구 C 파일이 빌드 컴파일러로 `-std=c99 -pedantic -Wall -Wextra -Werror` 통과(`clobber.c` 는 일부러 객체 끝을 넘어 쓰므로 컴파일 검사에서 뺀다) |
-| `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber,wrappers,flowfacts,flowfacts_np}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
+| `static_golden_{writers,outptr,derives,loops,spawn,atype,clobber,wrappers,flowfacts,flowfacts_np,argflow,argflow_np}` | 고정 도구의 facts text view golden, 두 번 실행 바이트 동일, 컨테이너 검증 |
 | `static_golden_core_cpu1` | 고정 번들의 core-cpu1: basis 항목, 요약, SB identity 필드의 INIT·writer·A-TYPE·out 포인터, 함수별 쓰기, poll·walk 루프의 규칙, table walk 순서, spawn 매개변수, image, 간접 대상, derives 39 의 목록·파일별 수·gdb 기록 지점 대조, 도달성. 번들이 없으면 건너뜀(77) |
 | `test_static_unroll` | 부분 평가, 반복 펼치기(taken/skipped/residual, 인자·callee 값, spawn 표시), task-main 매개변수(DIRECT/VIA_ENTRY), 루프 규칙(각 실패 이유와 A-TYPE 상태에 따른 untyped write 처리), table walk image 확인(const 고리, 형 있는 쓰기, 객체 주소, 원소 필드), finalize 의 unknown-effect 결정(본문 없음, 가변 위치, 미해결 간접 호출, 해결된 간접 호출, 데이터 함수) |
 | `test_static_{expr,flow,recipe,gitrev,link,cli}` | 식 pool, 흐름 그래프·table walk, recipe 문법(`module`, 범위 단어, `module_file` 과 그 오류), commit 읽기, link set, CLI(basis→extract 합성 프로그램; 실행 파일 + global 라이브러리 + local 앱 + 닫힘 밖 라이브러리의 닫힘: 앱이 out 포인터로 넘긴 필드가 실행 파일 본문으로 writer-set-complete, 늦게 적재된 라이브러리의 결합 차이 deviation, 적재 파일과 link 출력이 다르면 묶지 않음) |

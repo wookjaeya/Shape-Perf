@@ -122,3 +122,9 @@ int fx_dispatch(int code) {
     default: return 0;
   }
 }
+
+/* a string argument with a NUL byte in it: the text view writes it escaped and goes on */
+int fx_empty_name(void) {
+  int h;
+  return fx_lookup(&h, "\0");
+}

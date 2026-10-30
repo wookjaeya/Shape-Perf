@@ -146,7 +146,8 @@ class View {
     const bool leaf = e.a == KZ_NONE32 && e.b == KZ_NONE32;
     if (leaf && e.op == KZ_EXPR_OP_CONST) return std::to_string(e.value);
     if (leaf && e.op == KZ_EXPR_OP_LOAD) {
-      std::string t = enum_text("KZ_EXPR_REF", e.flags) + ":" + name;
+      // a string with a NUL byte is written escaped: the view is text, and a NUL would end it for a C reader
+      std::string t = enum_text("KZ_EXPR_REF", e.flags) + ":" + (name.find('\0') == std::string::npos ? name : kz::escape_string(name));
       if (e.flags == KZ_EXPR_REF_PARAM) t += "#" + std::to_string(e.value);
       return t;
     }

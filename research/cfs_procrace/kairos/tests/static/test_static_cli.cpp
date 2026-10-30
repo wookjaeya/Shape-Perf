@@ -627,6 +627,9 @@ startup_script {
     KZ_CHECK(has(vn, "1 static-initializer FxGlobal.slots at argflow.c:41:22 root=fx_other -> fx_spares[0] [fx_spares] other-writes=2 {other-writes}"));
     KZ_CHECK(has(vn, "in fx_spare_limit read=12 root=fx_other may candidates=1 write=1 -> fx_spares path=.limit"));
     KZ_CHECK(has(vn, "read FxGlobal.cursor at argflow.c:114:28 in fx_cursor_limit read=14 root=fx_global needs-field-points-to candidates=0 {}"));
+    // a string with a NUL byte: escaped in the view, which goes on to the end (the source text drops the backslash)
+    KZ_CHECK(has(vn, "[\"0\"] <- string root=\"\\x00\" hops=0 {} chain=string:\\x00"));
+    KZ_CHECK(has(vn, "[gimages] "));
     // GLOBAL_IMAGES: the objects reached, a zero-initialized one, the field written elsewhere
     KZ_CHECK(has(vn, "fx_global int 0 at argflow.c:40:10 {zero-initialized,object-written} reach={argument,pointer-field}"));
     KZ_CHECK(has(vn, "fx_slots[0].handle int 0 at argflow.c:38:50 {field-written} reach={argument,pointer-field} field=FxSlot.handle"));

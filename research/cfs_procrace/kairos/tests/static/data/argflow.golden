@@ -1,7 +1,7 @@
 extract
   translation units          1
-  functions                  15 (bodies read 12, in system headers skipped 0)
-  call sites                 11
+  functions                  16 (bodies read 13, in system headers skipped 0)
+  call sites                 12
   indirect calls             2 (resolved 1, unresolved 1)
   spawn calls                0 (entry resolved 0)
   loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
@@ -14,23 +14,24 @@ extract
   hand-entered inputs        12 (built-in data-function table 12, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
 facts-view 1
-[functions] 15
+[functions] 16
   fn 0 fx_create argflow.c:70-76 params=3 {defined}
   fn 1 fx_cursor_limit argflow.c:112-115 params=0 {defined}
   fn 2 fx_dispatch argflow.c:119-124 params=1 {defined}
   fn 3 fx_down argflow.c:81-84 params=1 {defined}
-  fn 4 fx_find argflow.c:51-56 params=2 {defined}
-  fn 5 fx_first_limit argflow.c:106-106 params=0 {defined}
-  fn 6 fx_init argflow.c:96-103 params=0 {defined}
-  fn 7 fx_lookup argflow.c:59-67 params=2 {defined}
-  fn 8 fx_name_match argflow.c:48-48 params=2 {defined,address-taken}
-  fn 9 fx_setup_slots argflow.c:87-93 params=0 {defined,static}
-  fn 10 fx_spare_limit argflow.c:109-109 params=0 {defined}
-  fn 11 fx_unknown_store argflow.c:45 params=1 {}
-  fn 12 fx_up argflow.c:80-80 params=1 {defined}
-  fn 13 memset argflow.c:9 params=3 {builtin}
-  fn 14 strcmp argflow.c:8 params=2 {builtin}
-[argflow] 18
+  fn 4 fx_empty_name argflow.c:127-130 params=0 {defined}
+  fn 5 fx_find argflow.c:51-56 params=2 {defined}
+  fn 6 fx_first_limit argflow.c:106-106 params=0 {defined}
+  fn 7 fx_init argflow.c:96-103 params=0 {defined}
+  fn 8 fx_lookup argflow.c:59-67 params=2 {defined}
+  fn 9 fx_name_match argflow.c:48-48 params=2 {defined,address-taken}
+  fn 10 fx_setup_slots argflow.c:87-93 params=0 {defined,static}
+  fn 11 fx_spare_limit argflow.c:109-109 params=0 {defined}
+  fn 12 fx_unknown_store argflow.c:45 params=1 {}
+  fn 13 fx_up argflow.c:80-80 params=1 {defined}
+  fn 14 memset argflow.c:9 params=3 {builtin}
+  fn 15 strcmp argflow.c:8 params=2 {builtin}
+[argflow] 20
   arg 0 of site 0 argflow.c:48:83 [(const char *)key] <- param root=key param=0 hops=0 {pointer-conversion} chain=param:key#0
   arg 1 of site 0 argflow.c:48:83 [rec->name] <- field FxRec.name root=rec param=1 base=parameter hops=0 {through-pointer} read=1 chain=field:FxRec.name
   arg 0 of site 2 argflow.c:54:9 [key] <- param root=key param=1 hops=0 {} chain=param:key#1
@@ -49,6 +50,8 @@ facts-view 1
   arg 2 of site 9 argflow.c:97:3 [sizeof(fx_global)] <- const 24 hops=0 {} chain=24
   arg 0 of site 11 argflow.c:113:7 [(void **)&fx_global.cursor] <- address FxGlobal.cursor root=fx_global base=global object=fx_global hops=0 {pointer-conversion} chain=(addr field:FxGlobal.cursor)
   arg 0 of site 12 argflow.c:121:20 [code] <- param root=code param=0 hops=0 {} chain=param:code#0
+  arg 0 of site 13 argflow.c:129:10 [&h] <- address root=h base=local hops=0 {} chain=(addr local:h)
+  arg 1 of site 13 argflow.c:129:10 ["0"] <- string root="\x00" hops=0 {} chain=string:\x00
 [paramflow] 19
   fx_create#0 d0 out-store at argflow.c:74:3 {} [pos] guard=(not (ge param:pos#2 4))
   fx_create#1 d0 store at argflow.c:72:3 {} [fx_table[pos].name = name] expr=field:FxRec.name guard=(not (ge param:pos#2 4))

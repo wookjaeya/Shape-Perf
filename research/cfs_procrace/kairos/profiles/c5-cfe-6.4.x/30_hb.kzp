@@ -1,0 +1,29 @@
+# 30_hb.kzp -- happens-before rules of profile c5-cfe-6.4.x: program order and the start of a created task.  No rule
+# orders the creator's registration before the new task's lookup: the ES shared-data lock is the only order the code
+# has for it (6.4.2 holds it across the creation, 6.4.1 does not), and the rule language has no lock template.  The
+# order of a lookup against the registration is therefore read from the lookup's returned code (P1, 20_ops.kzp), not
+# from an edge.
+phi 1;
+
+hb R1 {
+  title "program order";
+  stratum S;
+  robust unconditional;
+  template program_order {
+    looper no;
+  }
+  prov r_axiom_program_order;
+}
+
+# The thread of a task exists only from pthread_create inside OS_TaskCreate: every event of the creator up to its
+# OS_TaskCreate call precedes the first event of the task it creates (a phase rule: OSAL 4.1.1 has no entry wrapper
+# that receives the id, so the spawn template, which pairs the out id with an entry argument, does not apply).
+hb R2-P-TASK {
+  title "task creation: the creating call precedes the first event of every task the creator makes from it on";
+  stratum S;
+  robust unconditional;
+  template phase {
+    from OS_TaskCreate phase call;
+  }
+  prov osal_task_create_sig, osal_pthread_create_cell, osal_task_id_out;
+}

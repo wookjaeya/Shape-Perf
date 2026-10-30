@@ -1,0 +1,7 @@
+[2026-10-08T07:09:23.801Z] [build_cfs.sh v4 existing] existing tree /home/user/work/procrace/cfs_cord/cFS (not a git clone; source identity from the caller's manifest/patch); README L96 layout present; nothing copied
+[2026-10-08T07:09:23.803Z] [build_cfs.sh v4 existing] cord_build_v2_04_prep: make native_std.prep (cwd /home/user/work/procrace/cfs_cord/cFS, user ubuntu)
+[2026-10-08T07:09:31.431Z] [build_cfs.sh v4 existing] cord_build_v2_04_prep: exit 0, wall 7.616498313 s, compiler/CMake warnings 6, compiler/make errors 0
+[2026-10-08T07:09:31.434Z] [build_cfs.sh v4 existing] cord_build_v2_05_install: make native_std.install (cwd /home/user/work/procrace/cfs_cord/cFS, user ubuntu)
+[2026-10-08T07:13:05.104Z] [build_cfs.sh v4 existing] cord_build_v2_05_install: exit 0, wall 213.657451080 s, compiler/CMake warnings 0, compiler/make errors 0
+[2026-10-08T07:13:06.183Z] [build_cfs.sh v4 existing] recorded effective settings of the existing build -> cord_build_v2_07_record.log
+[2026-10-08T07:13:06.185Z] [build_cfs.sh v4 existing] done; executable: /home/user/work/procrace/cfs_cord/cFS/build-native_std/exe/cpu1/core-cpu1 (README L111-112)

@@ -1,0 +1,268 @@
+# 20_ops.kzp -- operations: bindings to symbols, conjuncts with their linearization points,
+# effects, outcome maps and terminal declarations.
+#
+# `lp capture` is the capture point of a value the caller passes (T-DERIVE, SPEC 1.4); `lp at
+# <pattern>` is a point inside the function, found by the AST pattern; `lp site <name>` shares a
+# point between effects.  `values` names what an event at that point carries besides the
+# parameters of the operation (it is how a recorder and this profile agree on event content).
+phi 1;
+
+# ---------------------------------------------------------------------------------------------
+# K-ID: an event request that carries an application identity.
+# ---------------------------------------------------------------------------------------------
+op CFE_EVS_SendEventWithAppID(EventID, EventType, stamp AppID: Id<es.app>, Spec) {
+  bind symbol "CFE_EVS_SendEventWithAppID";
+  # id_valid is the id-space rule of es.app (10_kinds.kzp): EVS_GetAppDataByID answers NULL for an
+  # AppId that CFE_ES_AppID_ToIndex rejects, which CFE_ResourceId_ToIndex does when Id - base > MAX.
+  conjunct id_valid: valid(arg.AppID) lp capture prov evs_utils_getbyid, es_appid_toindex_fn, resid_toindex_fn;
+  conjunct slot_registered: state(evs.reg(arg.AppID)) = REG lp at fn("CFE_EVS_SendEventWithAppID").call("EVS_AppDataIsMatch") prov evs_send_check, evs_utils_ismatch;
+  # The applicability conditions of the mappings that may fix a conjunct (P1, adopted conditionally 2026-10-25,
+  # PI_DECISIONS_RESOLVED_20261025.md; review section 5.2).  Read at the pinned cFE (cfe_evs.c L169-L214): a NULL Spec
+  # returns CFE_EVS_INVALID_PARAMETER first (L180-L183), so each code below comes from one path; the checks read the
+  # slot of the AppID the call received, without a lock (L185-L194), so the state a code implies is that at the
+  # check, inside the call, never after its return.  The record must carry the AppID (the capture site or the call).
+  # The implication is the API's own (context any).
+  outcome CFE_SUCCESS: ready narrow {
+    api "CFE_EVS_SendEventWithAppID";
+    source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+    branch "Spec not NULL; EVS_GetAppDataByID(AppID) not NULL (CFE_ES_AppID_ToIndex succeeded); EVS_AppDataIsMatch (the slot holds AppID); then the event is filtered (Status stays CFE_SUCCESS) or a squelch token sends it";
+    context any;
+    captured AppID;
+    holds_at return;
+    prov evs_send_fn, evs_send_check, evs_send_tail, evs_utils_getbyid, evs_utils_ismatch;
+  };
+  outcome CFE_EVS_APP_ILLEGAL_APP_ID: not_ready(id_valid) documented "retval CFE_EVS_APP_ILLEGAL_APP_ID of CFE_EVS_SendEventWithAppID; the code returns it before it builds any event packet" prov evs_h_retval
+    narrow {
+      api "CFE_EVS_SendEventWithAppID";
+      source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+      branch "Spec not NULL; EVS_GetAppDataByID(AppID) is NULL: CFE_ES_AppID_ToIndex rejected the AppID (CFE_ResourceId_ToIndex: Id - base above the maximum serial)";
+      context any;
+      captured AppID;
+      holds_at return;
+      prov evs_send_fn, evs_send_check, evs_utils_getbyid, es_appid_toindex_fn, resid_toindex_fn;
+    };
+  outcome CFE_EVS_APP_NOT_REGISTERED: not_ready(slot_registered) documented "retval CFE_EVS_APP_NOT_REGISTERED of CFE_EVS_SendEventWithAppID" prov evs_h_retval
+    narrow {
+      api "CFE_EVS_SendEventWithAppID";
+      source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+      branch "Spec not NULL; a slot for AppID exists but EVS_AppDataIsMatch is false; EVS_NotRegistered always returns CFE_EVS_APP_NOT_REGISTERED";
+      context any;
+      captured AppID;
+      holds_at return;
+      prov evs_send_fn, evs_send_check, evs_utils_getbyid, evs_utils_ismatch, evs_notregistered;
+    };
+  outcome CFE_EVS_INVALID_PARAMETER: error;
+  # Returned after both conjuncts held: the event was rate-limited (cfe_evs.c:207-210).  Not documented in cfe_evs.h.
+  outcome CFE_EVS_APP_SQUELCHED: ready narrow {
+    api "CFE_EVS_SendEventWithAppID";
+    source cfe rev "c5fb2b4d540bd55eb6c3707da7dd13eee679d4dd";
+    branch "Spec not NULL; both checks passed; the event is not filtered and no squelch token is left";
+    context any;
+    captured AppID;
+    holds_at return;
+    prov evs_send_fn, evs_send_check, evs_send_squelch, evs_send_tail;
+  };
+  prov evs_send_fn, evs_send_check, evs_send_squelch, evs_utils_getbyid, evs_utils_ismatch, sb_api_event_site;
+}
+
+# Registration with EVS: the slot is cleared, then published (without a lock).  Both points are reached only
+# after EVS_GetCurrentContext succeeded (cfe_evs.c:51-53), so the slot is that of the AppID CFE_ES_GetAppID
+# returned to the caller: the AppId of the App record that the caller's task record names, checked to match
+# (cfe_es_resource.c:308-341, cfe_es_api.c:752-756); the task record's AppId is the ParentAppId of the request
+# that created the task (cfe_es_apps.c:694-703).  That is id(owner(exec)), and for an actor whose app_owner is
+# confirmed it is the identity value of its creation request (the replay's owner identity targets; the step from
+# the task record to the App record is the trusted A-OWNER, 50_trusted.kzp).
+op CFE_EVS_Register(Filters, NumEventFilters, FilterScheme) {
+  bind symbol "CFE_EVS_Register";
+  effect clear_slot: lifecycle evs.reg(id(owner(exec))) -> UNREG lp at fn("CFE_EVS_Register").memset(EVS_AppData_t) prov evs_reg_memset;
+  effect register: lifecycle evs.reg(id(owner(exec))) -> REG lp at fn("CFE_EVS_Register").call("EVS_AppDataSetUsed") prov evs_reg_publish, evs_utils_setused;
+  outcome CFE_SUCCESS: ready;
+  # The other codes the function returns (cfe_evs.c:42-120; the ILLEGAL_APP_ID comes from EVS_GetCurrentContext).
+  outcome CFE_EVS_UNKNOWN_FILTER: error;
+  outcome CFE_ES_BAD_ARGUMENT: error;
+  outcome CFE_EVS_APP_ILLEGAL_APP_ID: error;
+  prov evs_register_fn, evs_reg_memset, evs_reg_publish, evs_register_context, evs_utils_context, es_getappid_ok, es_ctx_lookup, es_apps_taskrecord_fill;
+}
+
+# EarlyInit of EVS clears its whole global object, the registry slots included (cfe_evs_task.h:116): every slot's
+# AppID becomes 0, which is no valid AppId, so no AppId is registered (R2 state-based round, 2026-10-24).  The
+# function is called through the function pointer of the core module table (cfe_es_start.c:762); the point is the
+# memset itself.  An effect on every resource of a kind without a table returns them to the initial state.
+op CFE_EVS_EarlyInit() {
+  bind symbol "CFE_EVS_EarlyInit";
+  effect clear_registry: lifecycle all evs.reg -> UNREG lp at fn("CFE_EVS_EarlyInit").memset(CFE_EVS_Global_t) prov evs_earlyinit_memset, evs_global_appdata;
+  prov evs_earlyinit_fn, evs_earlyinit_memset;
+}
+
+# The cleanup of an application's EVS slot (called by the ES cleanup of the application): the slot of the given
+# AppID is freed only where it is a match for that AppID, by storing CFE_ES_APPID_UNDEFINED (R2 state-based round,
+# 2026-10-24).  The uint32 parameter is the AppId's integer value (CFE_ResourceId_FromInteger, cfe_evs_task.c:184).
+op CFE_EVS_CleanUpApp(Id: Id<es.app>) {
+  bind symbol "CFE_EVS_CleanUpApp";
+  effect free_slot: lifecycle evs.reg(arg.Id) -> UNREG when state(evs.reg(arg.Id)) = REG lp at fn("CFE_EVS_CleanUpApp").call("EVS_AppDataSetFree") prov evs_cleanup_setfree, evs_utils_setfree;
+  prov evs_cleanup_fn, evs_cleanup_setfree;
+}
+
+# ---------------------------------------------------------------------------------------------
+# The identity of the executing application, and the out-pointer store that publishes it.
+# ---------------------------------------------------------------------------------------------
+# store_ok sits at a call the code makes only in the success branch, so its guard is asserted
+# (`when`: a false guard at an observed point is a finding).  store_fail sits at the unlock that both
+# branches reach (r_lp_store_via_unlock), so its guard selects the branch (`filter`).
+op CFE_ES_GetAppID(out AppIdPtr) {
+  bind symbol "CFE_ES_GetAppID";
+  conjunct self_live: state(es.self(exec)) = LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_GetAppRecordByContext");
+  effect store_ok: store *AppIdPtr := id(owner(exec)) when state(es.self(exec)) = LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_AppRecordGetID") prov es_getappid_ok, sb_appinit_getappid;
+  effect store_fail: store *AppIdPtr := CFE_RESOURCEID_UNDEFINED filter state(es.self(exec)) != LIVE lp at fn("CFE_ES_GetAppID").call("CFE_ES_UnlockSharedData") prov es_getappid_fail, r_lp_store_via_unlock;
+  outcome CFE_SUCCESS: ready;
+  outcome CFE_ES_ERR_RESOURCEID_NOT_VALID: not_ready(self_live) documented "retval CFE_ES_ERR_RESOURCEID_NOT_VALID of CFE_ES_GetAppID (cfe_es.h:519); the out parameter is documented as set to the application ID of the caller" prov es_h_getappid_doc;
+  outcome CFE_ES_BAD_ARGUMENT: error documented "retval CFE_ES_BAD_ARGUMENT of CFE_ES_GetAppID (cfe_es.h:520): the out pointer is NULL" prov es_h_getappid_doc;
+  prov es_getappid_fn, es_getappid_ctx, es_ctx_lookup, sb_appinit_getappid;
+}
+
+# EarlyInit of SB clears its global object, the identity cell included.
+op CFE_SB_EarlyInit() {
+  bind symbol "CFE_SB_EarlyInit";
+  effect clear_global: store CFE_SB_Global.AppId := CFE_RESOURCEID_UNDEFINED lp at fn("CFE_SB_EarlyInit").memset(CFE_SB_Global_t) prov sb_earlyinit_memset;
+  prov sb_earlyinit_fn, sb_earlyinit_memset;
+}
+
+# ---------------------------------------------------------------------------------------------
+# The writers of the App record: the AppState and the identity of the record.
+# ---------------------------------------------------------------------------------------------
+
+# ES clears its whole global object first (record table included).
+op CFE_ES_Main(StartType, StartSubtype, ModeId, StartFilePath) {
+  bind symbol "CFE_ES_Main";
+  effect reset_records: lifecycle all es.app -> FREE lp at fn("CFE_ES_Main").memset(CFE_ES_Global_t) prov es_start_main_memset;
+  effect reset_states: lifecycle all es.appstate -> UNDEFINED lp at fn("CFE_ES_Main").memset(CFE_ES_Global_t) prov es_start_main_memset;
+  prov es_main_fn, es_start_main_memset;
+}
+
+# Core application creation: reserve, tag, start the task, publish (or clear on failure).
+op CFE_ES_CreateObjects() {
+  bind symbol "CFE_ES_CreateObjects";
+  effect reserve_core: lifecycle es.app(lp.slot) -> RESERVED id CFE_RESOURCEID_RESERVED lp at fn("CFE_ES_CreateObjects").call("CFE_ES_AppRecordSetUsed", arg[1] == CFE_RESOURCEID_RESERVED) values slot: Int prov es_start_reserve;
+  effect type_core: settag Type of es.app(lp.slot) := CORE lp at fn("CFE_ES_CreateObjects").store(CFE_ES_AppRecord_t.Type) values slot: Int prov es_start_type_core;
+  effect publish_core: lifecycle es.app(lp.slot) -> LIVE id lp.pending_id lp at fn("CFE_ES_CreateObjects").call("CFE_ES_AppRecordSetUsed", arg[1] != CFE_RESOURCEID_RESERVED) values slot: Int, pending_id: Id<es.app> prov es_start_publish, es_start_starttask;
+  effect clear_core: lifecycle es.app(lp.slot) -> FREE id CFE_RESOURCEID_UNDEFINED lp site core_clear values slot: Int prov es_start_clear;
+  effect clear_core_state: lifecycle es.appstate(es.app(lp.slot)) -> UNDEFINED lp site core_clear values slot: Int prov es_start_clear;
+  effect clear_core_type: settag Type of es.app(lp.slot) := UNSET lp site core_clear values slot: Int prov es_start_clear;
+  prov es_createobjects_fn, es_start_taskmain_loop, es_start_earlyinit_loop;
+}
+
+# External application creation (CFE_ES_AppCreate): clear the stale record, tag it, reserve it, then
+# publish the identity (or free the record when the start fails).  The same life cycle as the core
+# creation above; without the tag no effect guarded by Type = EXTERNAL could ever apply.
+op CFE_ES_AppCreate(out ApplicationIdPtr, AppName, Params) {
+  bind symbol "CFE_ES_AppCreate";
+  effect clear_ext_state: lifecycle es.appstate(es.app(lp.slot)) -> UNDEFINED lp site app_create_clear values slot: Int prov es_appcreate_clear;
+  effect clear_ext_type: settag Type of es.app(lp.slot) := UNSET lp site app_create_clear values slot: Int prov es_appcreate_clear;
+  effect type_external: settag Type of es.app(lp.slot) := EXTERNAL lp at fn("CFE_ES_AppCreate").store(CFE_ES_AppRecord_t.Type) values slot: Int prov es_appcreate_type;
+  effect reserve_external: lifecycle es.app(lp.slot) -> RESERVED id CFE_RESOURCEID_RESERVED lp at fn("CFE_ES_AppCreate").call("CFE_ES_AppRecordSetUsed", arg[1] == CFE_RESOURCEID_RESERVED) values slot: Int prov es_appcreate_reserve;
+  effect publish_external: lifecycle es.app(lp.slot) -> LIVE id lp.pending_id lp at fn("CFE_ES_AppCreate").call("CFE_ES_AppRecordSetUsed", arg[1] != CFE_RESOURCEID_RESERVED) values slot: Int, pending_id: Id<es.app> prov es_appcreate_publish;
+  effect free_external: lifecycle es.app(lp.slot) -> FREE id CFE_RESOURCEID_UNDEFINED lp at fn("CFE_ES_AppCreate").call("CFE_ES_AppRecordSetFree") values slot: Int prov es_appcreate_fail;
+  prov es_appcreate_fn;
+}
+
+# The poll of the core serialization: it returns CFE_SUCCESS when every used record has reached
+# the awaited state, and times out otherwise (the caller then panics).
+op CFE_ES_MainTaskSyncDelay(AppStateId, TimeOutMilliseconds) {
+  bind symbol "CFE_ES_MainTaskSyncDelay";
+  outcome CFE_SUCCESS: ready;
+  outcome CFE_ES_OPERATION_TIMED_OUT: error;
+  prov es_start_syncdelay_fn, es_start_table_loop;
+}
+
+# A task declares the state it has reached by waiting for a system state: a monotone raise.
+op CFE_ES_WaitForSystemState(MinSystemState, TimeOutMilliseconds) {
+  bind symbol "CFE_ES_WaitForSystemState";
+  effect raise_state: lifecycle es.appstate(owner(exec)) raise lp.required when state(es.self(exec)) = LIVE lp at fn("CFE_ES_WaitForSystemState").store(CFE_ES_AppRecord_t.AppState) values required: Int prov es_api_wait_fn, es_api_wait_levels;
+  outcome CFE_SUCCESS: ready;
+  outcome CFE_ES_OPERATION_TIMED_OUT: error;
+  prov es_api_wait_fn;
+}
+
+op CFE_ES_RunLoop(RunStatus) {
+  bind symbol "CFE_ES_RunLoop";
+  effect raise_running: lifecycle es.appstate(owner(exec)) raise RUNNING when state(es.self(exec)) = LIVE lp at fn("CFE_ES_RunLoop").store(CFE_ES_AppRecord_t.AppState) prov es_api_runloop_raise;
+  prov es_runloop_fn, es_api_runloop_raise;
+}
+
+# An external application that exits is marked STOPPED; a core application never is.
+op CFE_ES_ExitApp(ExitStatus) {
+  bind symbol "CFE_ES_ExitApp";
+  effect stop_external: lifecycle es.appstate(owner(exec)) -> STOPPED when state(es.self(exec)) = LIVE && tag(owner(exec), Type) != CORE lp at fn("CFE_ES_ExitApp").store(CFE_ES_AppRecord_t.AppState) prov es_api_exitapp_stopped, es_api_exitapp_ctx;
+  prov es_api_exitapp_stopped;
+}
+
+# The background scan moves an external application that was asked to stop from RUNNING to WAITING.
+op CFE_ES_RunAppTableScan(ElapsedTime, Arg) {
+  bind symbol "CFE_ES_RunAppTableScan";
+  effect wait_external: lifecycle es.appstate(es.app(lp.slot)) -> WAITING when state(es.appstate(es.app(lp.slot))) = RUNNING && tag(es.app(lp.slot), Type) = EXTERNAL lp at fn("CFE_ES_RunAppTableScan").store(CFE_ES_AppRecord_t.AppState) values slot: Int prov es_apps_scan_waiting, es_apps_scan_filter;
+  prov es_runapptablescan_fn, es_apps_scan_waiting;
+}
+
+# Cleanup of an application in two steps.  First the record is set to RESERVED (cfe_es_apps.c:1498),
+# then the other resources of the application are freed outside the lock, and at the end the record is
+# freed only if it is still RESERVED (:1632-1635).  Between the two steps the record is not LIVE, so
+# CFE_ES_GetAppRecordByContext fails for the application's tasks.  The cleanup is reached only for an
+# external application whose AppState is above RUNNING (the background scan, :1109-1114).  That is a
+# relational test on one record that the abstract domain cannot exclude, so the guard of `retire` is
+# declared, trusted and refutable by observation.  The guard of `free_record` is the test of the code
+# itself (:1632).
+op CFE_ES_CleanUpApp(AppId) {
+  bind symbol "CFE_ES_CleanUpApp";
+  effect retire: lifecycle es.app(lp.slot) -> RESERVED id CFE_RESOURCEID_RESERVED when state(es.app(lp.slot)) = LIVE && tag(es.app(lp.slot), Type) = EXTERNAL && state(es.appstate(es.app(lp.slot))) > RUNNING lp at fn("CFE_ES_CleanUpApp").call("CFE_ES_AppRecordSetUsed", arg[1] == CFE_RESOURCEID_RESERVED) values slot: Int status declared_trusted refutable_by O3, O4 prov es_apps_cleanup_match, es_apps_cleanup_retire, es_apps_scan_filter, r_cleanup_guard;
+  effect free_record: lifecycle es.app(lp.slot) -> FREE id CFE_RESOURCEID_UNDEFINED when state(es.app(lp.slot)) = RESERVED lp at fn("CFE_ES_CleanUpApp").call("CFE_ES_AppRecordSetFree") values slot: Int prov es_apps_cleanup_free;
+  prov es_cleanupapp_fn, es_apps_cleanup_retire, es_apps_cleanup_free;
+}
+
+# ---------------------------------------------------------------------------------------------
+# Task creation (R2-P-TASK): the child's first event is the OSAL entry point.
+# ---------------------------------------------------------------------------------------------
+op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
+  bind symbol "OS_TaskCreate";
+  prov es_apps_startapptask_create, osal_pthread_create;
+}
+
+op OS_TaskEntryPoint(task_id) {
+  bind symbol "OS_TaskEntryPoint";
+  prov osal_entrypoint;
+}
+
+# ---------------------------------------------------------------------------------------------
+# Shutdown and the terminal operations of pc-linux (T-TERM).  A terminal operation has no
+# successor for its caller; `process_terminal` says that the step ends the whole process.
+# ---------------------------------------------------------------------------------------------
+op CFE_PSP_Restart(resetType) {
+  bind symbol "CFE_PSP_Restart";
+  effect request_shutdown: lifecycle es.shutdown() -> SHUTDOWN_REQ lp at fn("CFE_PSP_Restart").store(CFE_PSP_IdleTaskState_t.ShutdownReq) prov psp_restart_req;
+  terminal process_terminal after fn("CFE_PSP_Restart").call("abort");
+  prov psp_restart_fn, psp_restart_abort;
+}
+
+op OS_Application_Run() {
+  bind symbol "OS_Application_Run";
+  effect teardown: lifecycle es.shutdown() -> TEARDOWN lp at fn("OS_Application_Run").call("OS_DeleteAllObjects") prov psp_teardown;
+  prov psp_app_run_fn, psp_teardown;
+}
+
+op CFE_PSP_Panic(ErrorCode) {
+  bind symbol "CFE_PSP_Panic";
+  terminal process_terminal after fn("CFE_PSP_Panic").call("abort");
+  prov psp_panic_fn;
+}
+
+op abort() {
+  bind symbol "abort";
+  terminal process_terminal;
+  prov r_libc_abort;
+}
+
+# The PSP main thread returns from main after the teardown: the process ends.
+op main(argc, argv) {
+  bind symbol "main";
+  terminal process_terminal after fn("main").return;
+  prov bsp_main_fn, bsp_main_return;
+}

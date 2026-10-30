@@ -1,0 +1,26 @@
+kz-dump 1
+container abi=1 kind=run size=1440
+basis_sha256=7220aaba79daeb87adc748a0136a7f509f6831f7ecdb7e048d39e53d8138079b
+profile_sha256=0000000000000000000000000000000000000000000000000000000000000000
+tool_sha256=2cbe633db216021c4d50a539314d4976889624a10d6bb7c27c984b0aec183a1d
+parents=0
+sections=7
+section STRINGS type=1 version=1 record=kz_byte record_size=1 count=186 crc32=0xeddf2b56
+section DEVIATIONS type=5 version=1 record=kz_deviation record_size=48 count=1 crc32=0xdb4cdb4a
+  DEVIATIONS[0] subject="observer placement" reference_value="" used_value="cpu 3" reason="the reference does not fix a CPU" effect="timing of the observer only" avoidable=unknown prov=none
+section SITES type=40 version=2 record=kz_site record_size=96 count=2 crc32=0xbfcc201b
+  SITES[0] site=0 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x1000 inode=4242 device=1 build_id=0102030405060708090a0b0c0d0e0f1011121314 symbol="example_publish" path="example/bin/example_program" label="" source=""
+  SITES[1] site=1 kind=entry-probe insn_class=emulated decoder=generic phases={ENTRY} line=0 file_offset=0x1040 inode=4242 device=1 build_id=0102030405060708090a0b0c0d0e0f1011121314 symbol="example_consume" path="example/bin/example_program" label="" source=""
+section RAW_EVENTS type=41 version=1 record=kz_raw_ev record_size=64 count=4 crc32=0xd61a91cf
+  RAW_EVENTS[0] t_ns=1000 tid=100 tseq=0 site=0 phase=ENTRY flags={} objseq=0x0 a=[0xdead0000,0x0,0x0,0x0]
+  RAW_EVENTS[1] t_ns=2000 tid=101 tseq=0 site=1 phase=ENTRY flags={} objseq=0x0 a=[0xdead0001,0x0,0x0,0x0]
+  RAW_EVENTS[2] t_ns=3000 tid=100 tseq=1 site=0 phase=ENTRY flags={} objseq=0x0 a=[0xdead0002,0x0,0x0,0x0]
+  RAW_EVENTS[3] t_ns=4000 tid=101 tseq=1 site=1 phase=RET flags={OBJSEQ_VALID} objseq=0x7 a=[0xdead0003,0x0,0x0,0x0]
+section LOSS type=44 version=2 record=kz_loss record_size=40 count=1 crc32=0xbe9d8ab2
+  LOSS[0] source=perf-record-lost cpu=2 site=none tid=0 tseq_first=0 tseq_last=0 count=2 t_ns=0
+section RUNMETA type=45 version=1 record=kz_runmeta record_size=152 count=1 crc32=0xd5de5a6b
+  RUNMETA[0] basis_sha256=7220aaba79daeb87adc748a0136a7f509f6831f7ecdb7e048d39e53d8138079b plan_sha256=0a16b5fa6fd2b9ca1d98dfb88dad4dd7160b481d86027750fd844f0f93aba8ac s0_sha256=4bd383dc2c734c06e11b4426e5f726540f77dc118cda6f9ae919ecc24af7ed98 run_ordinal=1 stratum=warm backend=perf-sample fidelity=F0 flags={loss-present} n_holds=0 kernel="example-kernel 1.2.3" harness="example-harness 0" placement="cpu 3" observer_cpu_ns=5000 boot_ns=1000000
+section PERTURBATION type=46 version=1 record=kz_perturbation record_size=32 count=2 crc32=0xa9520cb6
+  PERTURBATION[0] kind=probe-hits cost_class=emulated site=none count=4 ns=0
+  PERTURBATION[1] kind=observer-cpu cost_class=unknown site=none count=0 ns=5000
+artifact_sha256=f5647679f6ee82e2adc5906145f550765dbe564c4e2bf15a2a544776876b541b

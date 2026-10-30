@@ -1,0 +1,7 @@
+bundle=w6-20261029-c1-runs
+created_utc=2026-10-29T05:44:39.398Z
+repo_commit=845eebc339133a519a9989a26eb1095f09404506
+kernel=6.18.44-fc-v185
+source=/home/user/work/w6/run files=989 bytes=57968250
+tar_xz_bytes=647544 parts=1
+note=W6 C1 campaign (env/campaigns/w6_20261029.sh c1nat c1ctl): 16 natural + 8 F0 controlled (stage B/C plans) runs, 8 G-I-H attempts refused by kz rtplan before boot; raw records, instance trees, logs

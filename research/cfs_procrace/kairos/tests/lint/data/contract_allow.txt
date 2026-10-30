@@ -1,0 +1,4 @@
+# Exact tokens that contain the retired word but are allowed in identifier position.
+# The provenance tier "contract-backed" is a name fixed by the PI (T1); it is written as a
+# value in profiles and never as a C or CMake identifier.
+contract-backed

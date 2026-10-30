@@ -1,0 +1,53 @@
+# core-cpu1.kzb -- the basis recipe of the core executable of the native build (cpu1).
+#
+# `kz-static basis --recipe` reads this file.  Paths are relative to the build directory
+# (the one that holds native/ and exe/).  What it says is about the build of the pinned bundle
+# and nothing else; the tool does not know any of these names.
+#
+#   kz-static basis --profile profiles/cfs-v7.0.1 \
+#       --compile-db <build>/native/default_cpu1/compile_commands.json \
+#       --build-dir <build> --bundle-root <bundle> --recipe core-cpu1.kzb -o basis.kz
+kzb 1;
+
+name "core-cpu1 of the native build, cpu1";
+
+# The link command of the executable.  The members it takes in are the program.
+link "native/default_cpu1/cpu1/CMakeFiles/core-cpu1.dir/link.txt";
+binary "exe/cpu1/core-cpu1";
+
+# Files the build generated.  They are recorded by hash; the tables below are read from them.
+generated "core_module_list" "native/default_cpu1/cpu1/cfe_static_module_list.c";
+generated "module_version_table" "native/default_cpu1/cpu1/cfe_module_version_table.c";
+generated "static_symbol_list" "native/default_cpu1/cpu1/cfe_static_symbol_list.c";
+generated "psp_module_list" "native/default_cpu1/cpu1/cfe_psp_module_list.c";
+generated "build_env_table" "native/default_cpu1/cpu1/cfe_build_env_table.c";
+
+# Tables whose initializer decides the behaviour: the order of the core modules and of their
+# entry points, and the versions the startup reports.
+table "CFE_CORE_MODULE_LIST" in "native/default_cpu1/cpu1/cfe_static_module_list.c";
+table "CFE_CORE_MODULE_OBJTAB" in "native/default_cpu1/cpu1/cfe_static_module_list.c";
+table "CFE_MODULE_VERSION_TABLE" in "native/default_cpu1/cpu1/cfe_module_version_table.c";
+
+# A configuration fact that is to be checked, not an observation.  The number of events of one
+# call site that the gdb record counted depends on the module version table: the record says 24
+# with the table and 11 with a NULL table.  The static facts of this basis do not decide it.
+declared "config.module_version_table.effect_on_observed_uses" "24 observed uses with the generated table, 11 with a NULL table (claim, unchecked)" authored "2026-10-15, K4a (Claude Sonnet 5.5), from results/R2_gdb_v701.md section 6, which cites a separate record; a statement about a gdb run, not an observation of this tool; to be checked by running the build both ways";
+
+# Which startup script is opened.  The rule is that of CFE_ES_StartApplications: after a
+# processor reset the volatile file is tried first, then the file the PSP passes in; after a
+# power-on reset only the file the PSP passes in.  The PSP passes the non-volatile file name
+# (psp/fsw/pc-linux/src/cfe_psp_start.c).  The reset type is a basis input.
+startup_script {
+  reset POWERON;
+  rule PROCESSOR volatile nonvolatile;
+  rule POWERON nonvolatile;
+  file volatile const "CFE_PLATFORM_ES_VOLATILE_STARTUP_FILE" in "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  file nonvolatile const "CFE_PLATFORM_ES_NONVOL_STARTUP_FILE" in "cfe/modules/es/fsw/src/cfe_es_apps.c";
+  # the PSP maps the virtual /cf to the directory ./cf of the working directory of the process
+  mount "/cf" "exe/cpu1/cf";
+  entry library "CFE_LIB";
+  entry app "CFE_APP";
+  cite "cfe/modules/es/fsw/src/cfe_es_apps.c" 111 200 note "CFE_ES_StartApplications: the file that is opened for each reset type";
+  cite "psp/fsw/pc-linux/src/cfe_psp_start.c" 374 383 note "the PSP maps /cf to ./cf";
+  cite "psp/fsw/pc-linux/src/cfe_psp_start.c" 449 449 note "the PSP passes the non-volatile startup file name to the cFE entry point";
+}

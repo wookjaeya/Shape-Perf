@@ -1,0 +1,72 @@
+flowchart TD
+    %% D2 detail (2/2) - observation, concrete and operational interpreters, confirmation, verdicts, loop.
+    %% Source: spec §12 D2 (rev 1.3, C-48); §2.2-2.5, §4.8-4.14.
+    %% Dashed border = optional route (rev 1.3, ADR-053: explore, gate, loop) or gated (explore: S7; gate: later, decision D3).
+    %% Dashed edge = optional-route flow (explore, census, gate, loop) or feedback F1-F4. conform's O8 is an optional route too.
+
+    PK[("plan.kz<br/>(from D2 static detail)")]
+    SK[("skel.kz")]
+    FK[("facts.kz")]
+    CEN[("census.kz")]
+
+    OBS["kz observe (F0)<br/>uprobe + eBPF, perf-sample backend"]
+    RUN[("run-*.kzt")]
+    ADQ[("observation adequacy record<br/>(rev 1.3)")]
+    TRC["kz trace<br/>identity, app_owner, HB (VC, VC_R), per-conjunct LP,<br/>explanation set, routing, chains"]
+    HB[("hb-*.kz")]
+    CNF["kz conform<br/>per-actor acceptance"]
+    PRD["kz predict<br/>explicit-state search first, lock reversal, A-COMM label"]
+    EXP["kz explore<br/>exh / dpor engines (S7)"]
+    WIT[("witness-*.kz")]
+    HPL[("holdplan-*.kz")]
+    HLD["kz hold (F0)<br/>ptrace + debug-register gate"]
+    GAT["kz gate (F1, decision D3: later)"]
+    VER[("verdicts.kz")]
+    REP["kz report<br/>summary view first, full record below"]
+    DMP["kz dump<br/>canonical one-record-per-line text"]
+    LOOP["kz loop (optional route)<br/>orchestrates all; fixed point + run set"]
+    LK[("loop-*.kz")]
+
+    BASK["→ basis / skel<br/>(D2 static detail)"]
+    PROF["Φ revision<br/>(human review)"]
+
+    PK --> OBS --> RUN
+    RUN --> TRC
+    OBS --> ADQ
+    ADQ --> TRC
+    TRC -->|"O3-O5, O9"| HB
+    RUN -->|"O1, O2; O8 from S5 (optional route)"| CNF
+    SK --> CNF
+    HB --> PRD
+    FK -->|"A-COMM read/write sets"| PRD
+    PRD --> WIT
+    SK -.-> EXP
+    CEN -.-> EXP
+    EXP -.->|"O6 vs predict"| WIT
+    WIT --> HPL
+    HPL --> HLD
+    HPL -.-> GAT
+    HLD --> RUN
+    GAT -.-> RUN
+    CEN -.-> VER
+    HB --> VER
+    PRD --> VER
+    EXP -.-> VER
+    VER --> REP
+    VER --> DMP
+    LOOP -.-> LK
+    LOOP -.->|"drives each iteration"| OBS
+
+    TRC -.->|"F1 keys, targets, opened script"| BASK
+    CNF -.->|"F2 model gaps"| BASK
+    HLD -.->|"F3 confirmation runs re-enter trace"| TRC
+    TRC -.->|"F4 obligation failures"| PROF
+
+    classDef comp fill:#eef3fb,stroke:#3b5b92,color:#111
+    classDef art fill:#fff8e6,stroke:#a07a00,color:#111
+    classDef gated fill:#f4f4f4,stroke:#777,stroke-dasharray:5 5,color:#111
+    classDef ref fill:#ffffff,stroke:#999,color:#555
+    class OBS,TRC,CNF,PRD,HLD,REP,DMP comp
+    class PK,SK,FK,CEN,RUN,ADQ,HB,WIT,HPL,VER,LK art
+    class EXP,GAT,LOOP gated
+    class BASK,PROF ref

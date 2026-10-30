@@ -1,0 +1,29 @@
+# descry: web-search leads, 2026-10-08 (session WebSearch tool). STATUS: NOT OPENED.
+# Every page below is unreachable from this container: WebFetch returned EGRESS_BLOCKED for cs.uky.edu, arxiv.org, par.nsf.gov, www.intel.com;
+# curl through the proxy returned 403 for cs.uky.edu (http and https), web.archive.org, dl.acm.org, doi.org, zenodo.org, klee-se.org
+# (see descry_source_probe_20261008.log). Text below is the search tool's paraphrase/snippets. It is a LEAD, not a verified primary-source quote,
+# and descry.md never uses it as the sole basis for a met/not-met requirement row.
+
+## Q1 (standard) "DESCRY Yu Zaman Wang reproducing system-level concurrency failures tool source code Simics KLEE"
+# result pages listed: arxiv.org/pdf/2601.09616 (SysPro), scholars.uky.edu/en/publications/descry-..., par.nsf.gov/servlets/purl/10075449 (NSF PAR copy of DESCRY),
+#   uknowledge.uky.edu/cs_etds/119 (Zaman PhD dissertation, Univ. of Kentucky), scholars.uky.edu project 'CRII: SHF: SimDB'
+# tool summary: "I didn't find a DESCRY repository."
+# tool summary: dissertation uknowledge.uky.edu/cs_etds/119 "presents three research works to reproduce and localize system-level concurrency bugs, and its first framework appears to be DESCRY" (not opened)
+# tool summary: an unrelated project mirrored at gitlink.org.cn/njuseg711/WarningValidation "was implemented based on KLEE 1.2 and used Simics virtual platforms 4.6"
+#   -> NOT DESCRY (different group); recorded only so it is not mistaken for DESCRY later.
+
+## Q2 (extended) "SysPro arXiv 2601.09616 \"Descry\" console logs comparison not available"
+# tool summary of arXiv 2601.09616 (SysPro; co-authors include T. S. Zaman and T. Yu, i.e. DESCRY's first two authors):
+#   the authors "could not run a direct head-to-head comparison with Descry"; "Descry needs console logs to reproduce a bug, and not every bug report includes them";
+#   "The bug reports used in their experiment did not contain separate console logs"; three of Descry's application bugs "come from developer changelogs and have no associated bug reports".
+# -> If confirmed against the paper, this is the authors' own statement that DESCRY's documented input (console/default logs) is a hard precondition.
+#    Not confirmed here (arxiv.org blocked). Relevant to roadmap [P6-a]; the SysPro task should verify it from the opened arXiv text.
+
+## Q3 (standard) "Wind River Simics license academic 2017 ...; Intel Simics Simulator public release free download license"
+# tool summary (pages not opened): windriver.com/blog/academic-simics: "Simics licenses are available for free to qualified academia through the Wind River University program";
+#   intel.com .../simics-simulator.html (Intel Simics Simulator Public Release): available to commercial users developing on Intel products, "Teachers, students, and researchers",
+#   noncommercial hobbyists; "Accept the End-User License Agreement (EULA)"; includes base product, Quick-Start Platform target, simple RISC-V target;
+#   "The download takes about 2 GB of disk space, and the complete installation is around 10 GB"; hosts: 64-bit Linux (min. RHEL 7) or 64-bit Windows.
+# tool summary: "None of the results mention 2017 license terms."
+# -> Context only. The DESCRY paper does not name the Simics edition/version/license (descry_paper_requirements_20261008.log). Whether today's public Simics
+#    could host DESCRY's (unpublished) schedule generator is unknown; even if it could, using it would be an unspecified_by_reference choice, not the documented setup.

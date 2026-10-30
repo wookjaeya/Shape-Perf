@@ -1,0 +1,98 @@
+kz-instr-clang report (backend clang-src-0.1)
+sites /home/user/Shape-Perf/research/cfs_procrace/kairos/instrument/clang/sites/c1_post_1df262a.kzs
+
+unit bp/fsw/src/bp_flow.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/apps/bp -> apps/bp/CMakeFiles/bp.dir/fsw/src/bp_flow.c.o (module 3)
+group call-site initialize_throttling -> OS_CountSemGetIdByName line 126 (sites 20 21)
+  census OS_CountSemGetIdByName in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound bp_flow.c:126:13 call-site wrapper kz_w196609 binds 196609/196610
+group call-site initialize_throttling -> OS_CountSemCreate line 132 (sites 22 23)
+  census OS_CountSemCreate in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound bp_flow.c:132:18 call-site wrapper kz_w196611 binds 196611/196612
+group callee BP_FlowInit (sites 24)
+  callee returns: 2 path(s) instrumented, 0 uninstrumented
+  bound bp_flow.c:519:7 callee binds -/196613
+  module 3 registers itself from this unit (a constructor at the end of the file)
+  wrote /home/user/work/instr/clang/c1/post/src/bp/fsw/src/bp_flow.c
+
+unit cf/fsw/src/cf_app.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/apps/cf -> apps/cf/CMakeFiles/cf.dir/fsw/src/cf_app.c.o (module 2)
+group callee CF_Init (sites 14)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cf_app.c:206:7 callee binds -/131073
+group call-site CF_AppMain -> CFE_ES_ExitApp line 366 (sites 15)
+  census CFE_ES_ExitApp in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound cf_app.c:366:5 call-site wrapper kz_w131074 binds 131074/-
+  module 2 registers itself from this unit (a constructor at the end of the file)
+  wrote /home/user/work/instr/clang/c1/post/src/cf/fsw/src/cf_app.c
+
+unit cf/fsw/src/cf_cfdp.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/apps/cf -> apps/cf/CMakeFiles/cf.dir/fsw/src/cf_cfdp.c.o (module 2)
+group call-site CF_CFDP_InitEngine -> OS_CountSemGetIdByName line 1003 (sites 10 11)
+  census OS_CountSemGetIdByName in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound cf_cfdp.c:1003:23 call-site wrapper kz_w131075 binds 131075/131076
+group call-site CF_CFDP_InitEngine -> OS_TaskDelay line 1011 (sites 12)
+  census OS_TaskDelay in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound cf_cfdp.c:1011:17 call-site wrapper kz_w131077 binds -/131077
+group callee CF_CFDP_InitEngine (sites 13)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cf_cfdp.c:952:7 callee binds -/131078
+  wrote /home/user/work/instr/clang/c1/post/src/cf/fsw/src/cf_cfdp.c
+
+unit cfe/modules/es/fsw/src/cfe_es_api.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_api.c.o (module 1)
+group callee CFE_ES_ExitApp (sites 40)
+  bound cfe_es_api.c:340:6 callee binds 65537/-
+group callee CFE_ES_CreateChildTask (sites 43 44)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cfe_es_api.c:1247:14 callee binds 65538/65539
+  module 1 registers itself from this unit (a constructor at the end of the file)
+  wrote /home/user/work/instr/clang/c1/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_api.c
+
+unit cfe/modules/es/fsw/src/cfe_es_apps.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/es -> es/CMakeFiles/es.dir/fsw/src/cfe_es_apps.c.o (module 1)
+group callee CFE_ES_StartAppTask (sites 41 42)
+  callee returns: 1 path(s) instrumented, 0 uninstrumented
+  bound cfe_es_apps.c:576:7 callee binds 65540/65541
+  wrote /home/user/work/instr/clang/c1/bundle_1df262a/cfe/modules/es/fsw/src/cfe_es_apps.c
+
+unit osal/src/os/shared/src/osapi-countsem.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/osal -> osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-countsem.c.o (module 1)
+group callee OS_CountSemGetIdByName (sites 30 31)
+  uninstrumented return path osapi-countsem.c:209:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-countsem.c:210:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  callee returns: 1 path(s) instrumented, 2 uninstrumented
+  bound osapi-countsem.c:204:7 callee binds 65542/65543
+group call-site OS_CountSemGetIdByName -> OS_ObjectIdFindByName line 212 (sites 32 33)
+  census OS_ObjectIdFindByName in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound osapi-countsem.c:212:19 call-site wrapper kz_w65544 binds 65544/65545
+group callee OS_CountSemCreate (sites 35 36)
+  uninstrumented return path osapi-countsem.c:90:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-countsem.c:91:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-countsem.c:91:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via LENGTHCHECK via ARGCHECK)
+  callee returns: 1 path(s) instrumented, 3 uninstrumented
+  bound osapi-countsem.c:83:7 callee binds 65546/65547
+group call-site OS_CountSemCreate -> OS_ObjectIdFinalizeNew line 106 (sites 37 38)
+  census OS_ObjectIdFinalizeNew in this unit: 1 call(s) whose callee name is 1 file text, 0 in a macro argument, 0 in a macro body
+  bound osapi-countsem.c:106:23 call-site wrapper kz_w65548 binds 65548/65549
+  wrote /home/user/work/instr/clang/c1/bundle_1df262a/osal/src/os/shared/src/osapi-countsem.c
+
+unit osal/src/os/shared/src/osapi-idmap.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/osal -> osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-idmap.c.o (module 1)
+group store OS_ObjectIdFindByName line 978 (site 34)
+  bound osapi-idmap.c:978:20 store tap kz_s65550
+  wrote /home/user/work/instr/clang/c1/bundle_1df262a/osal/src/os/shared/src/osapi-idmap.c
+
+unit osal/src/os/shared/src/osapi-task.c
+  command /home/user/work/procrace/c1_build/post/1df262a/build/native/default/osal -> osal/CMakeFiles/osal.dir/src/os/shared/src/osapi-task.c.o (module 1)
+group callee OS_TaskCreate (sites 45 46)
+  uninstrumented return path osapi-task.c:176:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:177:5: the return is in a macro expansion (OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:178:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via OS_CHECK_POINTER via BUGCHECK)
+  uninstrumented return path osapi-task.c:178:5: the return is in a macro expansion (OS_CHECK_APINAME via OS_CHECK_STRING via LENGTHCHECK via ARGCHECK)
+  uninstrumented return path osapi-task.c:179:5: the return is in a macro expansion (OS_CHECK_SIZE via ARGCHECK)
+  callee returns: 1 path(s) instrumented, 5 uninstrumented
+  bound osapi-task.c:164:7 callee binds 65551/65552
+group callee OS_TaskEntryPoint (sites 47)
+  bound osapi-task.c:124:6 callee binds 65553/-
+  wrote /home/user/work/instr/clang/c1/bundle_1df262a/osal/src/os/shared/src/osapi-task.c

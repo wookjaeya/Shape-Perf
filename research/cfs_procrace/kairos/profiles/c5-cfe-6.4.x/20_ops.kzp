@@ -1,0 +1,120 @@
+# 20_ops.kzp -- operations of profile c5-cfe-6.4.x.
+phi 1;
+
+# ---- the uses: the lookups of the calling task's application -------------------------------------------------------
+# The readiness precondition is that the calling task's entry is registered (cases/C5.md section 7,
+# plan/c5_execution_basis_20261028.md 4 and 5.2).  Its point is the point after OS_TaskGetId returns, under the lock
+# the lookup holds (GetAppID) or its caller holds (GetAppIDInternal); the key task_id is the value that call returned
+# (r_task_id_param).  The returned code fixes the condition (P1, conditional, PI_DECISIONS_RESOLVED_20261025.md): the
+# code returns CFE_SUCCESS only from the branch where TaskTable[TaskId].RecordUsed is TRUE, and CFE_ES_ERR_APPID only
+# where it is not (the initial value; the if has no else).  Both mappings were read in both releases, whose lookups are
+# the same text at other lines.  The implication is the API's own: it does not depend on the caller (context any).
+# CFE_ES_ERR_BUFFER is documented, but no statement of these releases returns it (no NULL test).
+op CFE_ES_GetAppID(out AppIdPtr, task_id: Int) {
+  bind symbol "CFE_ES_GetAppID";
+  conjunct registered: state(es.task(arg.task_id)) = LIVE lp site es.get_app_id.task prov es_getappid_fn, es_getappid_task, osal_task_getid, osal_task_register, r_task_id_param;
+  outcome CFE_SUCCESS: ready narrow {
+    api "CFE_ES_GetAppID";
+    source cfe rev "ec26e33b4ab40b9616ccdbc984c5a00a790a7d05", "c64ed2aac910e79a641f49279dfdff3b7b49374e";
+    branch "under the ES shared-data lock: TaskId = OS_TaskGetId(); TaskTable[TaskId].RecordUsed == TRUE, so *AppIdPtr = TaskTable[TaskId].AppId and Result = CFE_SUCCESS; Result is initialised to CFE_ES_ERR_APPID and set by no other statement";
+    context any;
+    holds_at return;
+    prov es_getappid_fn, es_getappid_task;
+  };
+  outcome CFE_ES_ERR_APPID: not_ready(registered) documented "retcode CFE_ES_ERR_APPID of CFE_ES_GetAppID (cfe_es.h): the given application ID does not reflect a currently active application" prov es_h_getappid_doc
+    narrow {
+      api "CFE_ES_GetAppID";
+      source cfe rev "ec26e33b4ab40b9616ccdbc984c5a00a790a7d05", "c64ed2aac910e79a641f49279dfdff3b7b49374e";
+      branch "under the ES shared-data lock: TaskId = OS_TaskGetId(); TaskTable[TaskId].RecordUsed is not TRUE: the if has no else, Result keeps its initial value CFE_ES_ERR_APPID and *AppIdPtr is not written";
+      context any;
+      holds_at return;
+      prov es_getappid_fn, es_getappid_task, err_h_es_appid;
+    };
+  outcome CFE_ES_ERR_BUFFER: error documented "retcode CFE_ES_ERR_BUFFER of CFE_ES_GetAppID (cfe_es.h); no statement of CFE_ES_GetAppID in these releases returns it" prov es_h_getappid_doc;
+  prov es_getappid_fn, es_h_getappid_doc, issue_72_body, vdd_642_trac41;
+}
+
+op CFE_ES_GetAppIDInternal(out AppIdPtr, task_id: Int) {
+  bind symbol "CFE_ES_GetAppIDInternal";
+  conjunct registered: state(es.task(arg.task_id)) = LIVE lp site es.get_app_id_int.task prov es_getappidint_fn, es_getappidint_task, es_runloop_lookup, osal_task_getid, r_task_id_param;
+  outcome CFE_SUCCESS: ready narrow {
+    api "CFE_ES_GetAppIDInternal";
+    source cfe rev "ec26e33b4ab40b9616ccdbc984c5a00a790a7d05", "c64ed2aac910e79a641f49279dfdff3b7b49374e";
+    branch "TaskId = OS_TaskGetId(); TaskTable[TaskId].RecordUsed == TRUE, so *AppIdPtr = TaskTable[TaskId].AppId and Result = CFE_SUCCESS; Result is initialised to CFE_ES_ERR_APPID and set by no other statement; the function takes no lock, its callers hold the ES lock";
+    context any;
+    holds_at return;
+    prov es_getappidint_fn, es_getappidint_task;
+  };
+  outcome CFE_ES_ERR_APPID: not_ready(registered)
+    narrow {
+      api "CFE_ES_GetAppIDInternal";
+      source cfe rev "ec26e33b4ab40b9616ccdbc984c5a00a790a7d05", "c64ed2aac910e79a641f49279dfdff3b7b49374e";
+      branch "TaskId = OS_TaskGetId(); TaskTable[TaskId].RecordUsed is not TRUE: the if has no else, Result keeps its initial value CFE_ES_ERR_APPID";
+      context any;
+      holds_at return;
+      prov es_getappidint_fn, es_getappidint_task, err_h_es_appid;
+    };
+  prov es_getappidint_fn, es_runloop_lookup;
+}
+
+# ---- the registration of an application's main task (the publication the order is about) -------------------------
+# 6.4.1: the creator releases the ES lock before OS_TaskCreate and takes it again for the registration; 6.4.2 holds it
+# from before OS_TaskCreate to after the registration (es_appcreate_locking, es_appcreate_task_create).  The model is
+# the same in both: the registration section makes the new task's entry LIVE at the store of TaskId (r_es_task_kind).
+# The lock scope is not a rule of this profile (no lock template exists); it is what the expected results and the
+# record are compared against (plan/expected_results_C5.md).
+op CFE_ES_AppCreate(out ApplicationIdPtr, FileName, EntryPoint, AppName, Priority, StackSize, ExceptionAction) {
+  bind symbol "CFE_ES_AppCreate";
+  effect publish: lifecycle es.task(lp.task_id) -> LIVE lp site es.app_create.pub_taskid values task_id: Int prov es_appcreate_taskid_store, es_appcreate_registration, es_appcreate_stale, r_es_task_kind;
+  prov es_appcreate_sig, es_appcreate_locking, es_appcreate_task_create, es_appcreate_registration, startup_script;
+}
+
+# ---- the other writers of the entry: the start, the core applications, child tasks, the releases ----------------
+# No site of the manifests observes these points: in a record their writes are not observed, which the replay reports
+# (writer effects not observed), and the kind stays open.  They are declared so that the profile names every writer of
+# the entry in these releases (grep of RecordUsed stores in es/, cfe_es_start.c, cfe_es_api.c, cfe_es_apps.c).
+op CFE_ES_Main(StartType, StartSubtype, ModeId, StartFilePath) {
+  bind symbol "CFE_ES_Main";
+  effect clear_task_table: lifecycle all es.task -> FREE lp at fn("CFE_ES_Main").store(CFE_ES_TaskRecord_t.RecordUsed) prov es_main_tasktable_init, r_init_loop_lp;
+  prov es_main_sig, es_main_tasktable_init;
+}
+
+# The core applications: the lock is held from before OS_TaskCreate to after the registration (cases/C5.md F7).
+op CFE_ES_CreateObjects() {
+  bind symbol "CFE_ES_CreateObjects";
+  effect publish_core: lifecycle es.task(lp.task_id) -> LIVE lp at fn("CFE_ES_CreateObjects").store(CFE_ES_TaskRecord_t.TaskId) values task_id: Int prov es_createobjects_taskid_store, es_createobjects_section;
+  prov es_createobjects_sig, es_createobjects_section;
+}
+
+op CFE_ES_CreateChildTask(out TaskIdPtr, TaskName, FunctionPtr, StackPtr, StackSize, Priority, Flags) {
+  bind symbol "CFE_ES_CreateChildTask";
+  effect publish_child: lifecycle es.task(lp.task_id) -> LIVE lp at fn("CFE_ES_CreateChildTask").store(CFE_ES_TaskRecord_t.TaskId) values task_id: Int prov es_childtask_taskid_store, es_childtask_section;
+  prov es_childtask_sig, es_childtask_section;
+}
+
+op CFE_ES_DeleteChildTask(TaskId) {
+  bind symbol "CFE_ES_DeleteChildTask";
+  effect release: lifecycle es.task(arg.TaskId) -> FREE lp at fn("CFE_ES_DeleteChildTask").store(CFE_ES_TaskRecord_t.RecordUsed) prov es_deletechild_clear;
+  prov es_deletechild_sig, es_deletechild_clear;
+}
+
+op CFE_ES_ExitChildTask() {
+  bind symbol "CFE_ES_ExitChildTask";
+  effect release: lifecycle es.task(lp.task_id) -> FREE lp at fn("CFE_ES_ExitChildTask").store(CFE_ES_TaskRecord_t.RecordUsed) values task_id: Int prov es_exitchild_clear;
+  prov es_exitchild_sig, es_exitchild_clear;
+}
+
+op CFE_ES_CleanupTaskResources(TaskId) {
+  bind symbol "CFE_ES_CleanupTaskResources";
+  effect release: lifecycle es.task(arg.TaskId) -> FREE lp at fn("CFE_ES_CleanupTaskResources").store(CFE_ES_TaskRecord_t.RecordUsed) prov es_cleanuptask_clear;
+  prov es_cleanuptask_sig, es_cleanuptask_clear;
+}
+
+# ---- task creation (OSAL 4.1.1 posix) ------------------------------------------------------------------------------
+# The new thread is started by pthread_create inside OS_TaskCreate, with the application's entry function and no id
+# argument; the creator receives the id after it (osal_pthread_create_cell, osal_task_id_out).  The task names its id
+# only in OS_TaskRegister; the identity join of the record ties the two (instr/ manifests, identity readers).
+op OS_TaskCreate(out task_id, task_name, function_pointer, stack_pointer, stack_size, priority, flags) {
+  bind symbol "OS_TaskCreate";
+  prov osal_task_create_sig, osal_pthread_create_cell, osal_task_id_out;
+}

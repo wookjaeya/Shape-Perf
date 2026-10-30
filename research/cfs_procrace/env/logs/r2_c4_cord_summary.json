@@ -1,0 +1,189 @@
+{
+ "trace": "r2_c4_cord_trace.jsonl",
+ "meta": [
+  {
+   "meta": 1,
+   "threads": 25,
+   "overflow_threads": 0,
+   "seq": 689
+  }
+ ],
+ "events": 689,
+ "threads_with_events": 25,
+ "edges": {
+  "create": 24,
+  "state": 55
+ },
+ "kinds": {
+  "TCREATE": 24,
+  "TSTART": 24,
+  "TASKNAME": 24,
+  "USE": 516,
+  "NOTE": 24,
+  "SETSTATE": 20,
+  "WAITRET": 55,
+  "PUB": 2
+ },
+ "dropped": [],
+ "pubs": {
+  "sb.appid": {
+   "seq": 89,
+   "task": "CFE_SB",
+   "a": 1114115,
+   "t": 4378019939301
+  },
+  "sb.evsreg": {
+   "seq": 90,
+   "task": "CFE_SB",
+   "a": 0,
+   "t": 4378019941539
+  }
+ },
+ "by_key": {
+  "sb.appid": {
+   "verdicts": {
+    "observed_violation": 24,
+    "same_task": 5,
+    "ordered": 229
+   },
+   "by_task": {
+    "observed_violation|CFE_ES": 20,
+    "observed_violation|CFE_EVS": 4,
+    "ordered|CF": 9,
+    "ordered|CFE_TBL": 4,
+    "ordered|CFE_TIME": 8,
+    "ordered|CI_LAB": 5,
+    "ordered|CS": 9,
+    "ordered|DS": 20,
+    "ordered|FM": 6,
+    "ordered|HK": 10,
+    "ordered|HS": 9,
+    "ordered|LC": 8,
+    "ordered|MD": 7,
+    "ordered|MM": 4,
+    "ordered|SAMPLE_APP": 4,
+    "ordered|SBN": 7,
+    "ordered|SC": 5,
+    "ordered|SCH_LAB": 2,
+    "ordered|TO_LAB": 112,
+    "same_task|CFE_SB": 5
+   }
+  },
+  "sb.evsreg": {
+   "verdicts": {
+    "observed_violation": 24,
+    "same_task": 5,
+    "ordered": 229
+   },
+   "by_task": {
+    "observed_violation|CFE_ES": 20,
+    "observed_violation|CFE_EVS": 4,
+    "ordered|CF": 9,
+    "ordered|CFE_TBL": 4,
+    "ordered|CFE_TIME": 8,
+    "ordered|CI_LAB": 5,
+    "ordered|CS": 9,
+    "ordered|DS": 20,
+    "ordered|FM": 6,
+    "ordered|HK": 10,
+    "ordered|HS": 9,
+    "ordered|LC": 8,
+    "ordered|MD": 7,
+    "ordered|MM": 4,
+    "ordered|SAMPLE_APP": 4,
+    "ordered|SBN": 7,
+    "ordered|SC": 5,
+    "ordered|SCH_LAB": 2,
+    "ordered|TO_LAB": 112,
+    "same_task|CFE_SB": 5
+   }
+  }
+ },
+ "violations": [
+  {
+   "task": "CFE_ES",
+   "sb_function": "CFE_SB_CreatePipe",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 1
+  },
+  {
+   "task": "CFE_ES",
+   "sb_function": "CFE_SB_MessageTxn_ReportSingleEvent",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 17
+  },
+  {
+   "task": "CFE_ES",
+   "sb_function": "CFE_SB_SubscribeFull",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 2
+  },
+  {
+   "task": "CFE_EVS",
+   "sb_function": "CFE_SB_CreatePipe",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 1
+  },
+  {
+   "task": "CFE_EVS",
+   "sb_function": "CFE_SB_MessageTxn_ReportSingleEvent",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 1
+  },
+  {
+   "task": "CFE_EVS",
+   "sb_function": "CFE_SB_SubscribeFull",
+   "appid": 0,
+   "outcome": "evs.illegal_appid",
+   "count": 2
+  }
+ ],
+ "last_violation_to_pub_ms": 100.473019,
+ "between_pubs": 0,
+ "outcomes": {
+  "evs.illegal_appid": 24,
+  "accepted": 234
+ },
+ "notes": {
+  "evs.illegal_appid|0": 24
+ },
+ "ordered_chains": [
+  {
+   "count": 229,
+   "chain": "SETSTATE(es.appstate:CFE_SB=3)@CFE_SB -> WAITRET(es.appstate:CFE_SB)@tid9422 -> TCREATE(task:<X>)@tid9422 -> TSTART(task:<X>)@<X>",
+   "use_tasks": [
+    "CF",
+    "CFE_TBL",
+    "CFE_TIME",
+    "CI_LAB",
+    "CS",
+    "DS",
+    "FM",
+    "HK",
+    "HS",
+    "LC",
+    "MD",
+    "MM",
+    "SAMPLE_APP",
+    "SBN",
+    "SC",
+    "SCH_LAB",
+    "TO_LAB"
+   ]
+  }
+ ],
+ "predicted": [],
+ "verdicts_all": {
+  "sb.appid|observed_violation": 24,
+  "sb.evsreg|observed_violation": 24,
+  "sb.appid|same_task": 5,
+  "sb.evsreg|same_task": 5,
+  "sb.appid|ordered": 229,
+  "sb.evsreg|ordered": 229
+ }
+}

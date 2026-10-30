@@ -1,0 +1,115 @@
+extract
+  translation units          1
+  functions                  20 (bodies read 14, in system headers skipped 0)
+  call sites                 28
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                0 (entry resolved 0)
+  loops                      4 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 4, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[functions] 20
+  fn 0 child_main relations.c:146-150 params=1 {defined,address-taken}
+  fn 1 client_main relations.c:108-115 params=1 {defined,address-taken}
+  fn 2 main relations.c:169-179 params=0 {defined}
+  fn 3 notify relations.c:97-100 params=2 {defined}
+  fn 4 other_main relations.c:117-123 params=1 {defined,address-taken}
+  fn 5 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 6 pthread_getspecific /usr/include/pthread.h:1305 params=1 {}
+  fn 7 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
+  fn 8 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
+  fn 9 service_main relations.c:102-106 params=1 {defined,address-taken}
+  fn 10 slot_create relations.c:44-60 params=2 {defined}
+  fn 11 slot_find relations.c:33-42 params=2 {defined}
+  fn 12 slot_release relations.c:62-64 params=1 {defined}
+  fn 13 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 14 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 15 task_check relations.c:138-144 params=0 {defined}
+  fn 16 task_self relations.c:134-136 params=0 {defined}
+  fn 17 task_spawn relations.c:152-158 params=1 {defined}
+  fn 18 task_spawn_locked relations.c:160-167 params=1 {defined}
+  fn 19 worker_setup relations.c:80-88 params=0 {defined}
+[writers] 0
+[locs] 1
+  Cell.id writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=0 unresolved-indirect=0
+
+# relations
+kz-relations 1
+rules relations rules revision 5 (2026-10-30)
+mode profile-driven
+  extract.profile = static-fixtures / test data
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (profile vocabulary), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked); case layer: the profile static-fixtures / test data
+run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
+actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
+summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 1; feasibility proven-impossible 0, possible 0, undecidable 3, not graded 0
+[A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
+  namespace Slot.name (record type Slot; tables slots)
+      search: A1 search loop relations.c:35:3 in slot_find: key Slot.name strcmp at relations.c:36:31 compared with parameter 0 [name] (search parameter 0)
+      search: A1 search loop relations.c:46:3 in slot_create: key Slot.name strcmp at relations.c:47:31 compared with parameter 0 [name] (search parameter 0)
+      active fields: Slot.used 
+      active test: Slot.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Slot.name: writers 1 from LOCKSET write events (positions only: the field is no extraction target)
+        write at relations.c:53:7 in slot_create value=value not extracted (not a target) (process actor only)
+      lifecycle Slot.used: writers 2 from LOCKSET write events (positions only: the field is no extraction target)
+        write at relations.c:54:7 in slot_create value=value not extracted (not a target) (process actor only)
+        write at relations.c:63:3 in slot_release value=value not extracted (not a target) (process actor only)
+      publication writes of the creator slot_create#0: Slot.name write relations.c:53:7 in slot_create; Slot.used write relations.c:54:7 in slot_create
+      key-parameter functions: lookups slot_find#0; creators slot_create#0
+      uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+      namespace layers: B P0 R case:profile(static-fixtures / test data)
+  A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
+      key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
+      actors: {main (process)}; result=tested
+      not a pair: probe-create (same function, the same key argument, the creator's key read under the lookup's result; the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0): relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
+      not a pair: key constants differ: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {} (no root reaches it)
+      not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {} (no root reaches it)
+      handling: in the loop relations.c:83:3 kind constant-trip trip exact 2 exit (not (lt local:i 2))
+      handling: result tested; no return of it and no terminal operation under it found
+      handling: probe-create: on the lookup's failure result the same function creates the same key: relations.c:85:13 -> slot_create (the creator's key read runs when slot_find returns -17 (no match: slot_find) and not when it returns 0)
+      dependency: path A: no creator left after exclusions (probe-create 1, key constants differ 2, same actor only 0)
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
+      layers: B P0 R case:profile(static-fixtures / test data) P0-unverified(strcmp)
+  A2 lookup relations.c:113:9 in client_main -> slot_find#0 namespace Slot.name partition {} key known
+      key: string literal "gamma"
+      actors: {} (no root reaches it); result=discarded
+      creator: same key: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {} (no root reaches it)
+      not a pair: key constants differ: relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
+      not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {} (no root reaches it)
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
+      layers: B P0 R case:profile(static-fixtures / test data) P0-unverified(strcmp)
+[B] 1 (field-argument groups 3; left out: no writer 2, one actor only 0)
+  B1 Service.self_id -> notify#0 sites=2 callee-check=yes
+      site relations.c:111:3 in client_main [service.self_id] base=global hops=0 result=discarded
+      site relations.c:112:3 in client_main [service.self_id] base=global hops=0 result=discarded
+      field: no INIT row; writers 1 from LOCKSET write events (positions only: the field is no extraction target)
+        write at relations.c:104:3 in service_main value=value not extracted (not a target)
+      actors: readers {} (no root reaches it); writers {} (no root reaches it) (undetermined)
+      callee-check: notify returns -5 [ERR_ILLEGAL] when (eq param:id#0 0)
+      handling: discarded 2, used 0, tested 0
+      dependency: path B: the shared field Service.self_id is read as argument 0 of notify at 2 sites; its writers run in an undetermined actor; the callee's constant returns depend on the argument
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors: they are not created by one unrolled table walk (LOOP_ITERS) nor resolved from one static image, and the process root's order relative to the spawns is not decided
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-undetermined: the check is not evaluated: a written value that is not a constant
+      layers: B P0 R case:profile(static-fixtures / test data)
+[C] 0 (spawn calls 0, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 0, such contexts of a spawn whose threads are not all resolved (undecidable): 0, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 0 (reads taken in only so: 0); contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)

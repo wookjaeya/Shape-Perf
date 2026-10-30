@@ -1,0 +1,77 @@
+# 01_prov.kzp -- the CF 833fdbb citations (the fix of #184).  Same names as in cf-281a941/ where the
+# role is the same; the admission comment, the retry loop and its constants exist only here.
+phi 1;
+
+prov cf_cfdp_lookup {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 991 1021;
+  sha256 "d26540d1c94c3e37017b7d331f92c449c77c3b8d710d2fcc99cb6f9214ce5a5a";
+  note "the dependent lookup at 833fdbb: a non-empty configured name, the admission comment, up to CF_STARTUP_SEM_MAX_RETRIES lookups with OS_TaskDelay between them while the result is OS_ERR_NAME_NOT_FOUND, on final failure event 30 and break";
+}
+
+prov cf_cfdp_lookup_call {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1003 1004;
+  sha256 "a95f17b1027115160fddb7e923de8dc0e65d722cc4886f3f0ddf2aa9e2feb330";
+  note "the call OS_CountSemGetIdByName(&channels[i].sem_id, config_table->chan[i].sem_name) inside the retry loop of CF_CFDP_InitEngine";
+}
+
+prov cf_cfdp_retry_loop {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1000 1012;
+  sha256 "b6e324a138e8a4abe4dcb6262737ba8ca3f5d62d06cc554a519282a38708b40e";
+  note "the retry loop: for j below CF_STARTUP_SEM_MAX_RETRIES, lookup, break unless OS_ERR_NAME_NOT_FOUND, OS_TaskDelay(CF_STARTUP_SEM_TASK_DELAY)";
+}
+
+prov cf_cfdp_fail_event {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1014 1019;
+  sha256 "d0578c3b3250125947587ac34fc2ce9fb3c9576ffaa06e602e95f1e0107d018d";
+  note "after the loop a result other than OS_SUCCESS: event 30 and break";
+}
+
+prov cf_cfdp_initengine_return {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 1048 1053;
+  sha256 "a4e3fd0e9cc9645cbfcf9792669d2159e8b8fa3fe7027037dc8fd75fd3e1f3d3";
+  note "CF_CFDP_InitEngine enables the engine only if ret is CFE_SUCCESS and returns ret";
+}
+
+prov cf_cfdp_startup_admission {
+  tier admitted;
+  kind code_admission;
+  side caller;
+  file "cf/fsw/src/cf_cfdp.c";
+  lines 993 999;
+  sha256 "1c4876202fc2428a8fc1a0f9668118b3cc32a1407c99a5b86c6fee72cee9842f";
+  note "the start-up race admission: if OSAL returns OS_ERR_NAME_NOT_FOUND, assume the providing application has not created it yet, delay and try again (G1; the same text as 15a871e cf_cfdp.c 1272-1278 that SPEC 2.3 cites)";
+}
+
+prov cf_platform_retries {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/platform_inc/cf_platform_cfg.h";
+  lines 329 338;
+  sha256 "8552d436dd08ecfc1d1db977d00b5ef296c17fd0e7125c82714002566590951d";
+  note "CF_STARTUP_SEM_MAX_RETRIES 25: limits the retries to obtain the CF throttle sem";
+}
+
+prov cf_platform_delay {
+  tier code-derived;
+  kind code_pattern;
+  file "cf/fsw/platform_inc/cf_platform_cfg.h";
+  lines 340 349;
+  sha256 "5e4a5938ac11a5395d1f085db8ffba4c97bad5b6507c376f7d117daf56c769ca";
+  note "CF_STARTUP_SEM_TASK_DELAY 100 milliseconds between retries";
+}
+

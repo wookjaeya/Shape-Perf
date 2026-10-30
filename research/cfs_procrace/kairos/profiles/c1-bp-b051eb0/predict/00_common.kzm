@@ -1,0 +1,105 @@
+# 00_common.kzm -- the predict model of profile c1-bp-b051eb0 (format kzp-predict 1; kairos/docs/predict.md): the cone of
+# the verified C1 scope.  Read with one CF revision file (cf-281a941.kzm or cf-833fdbb.kzm) and the profile directories
+# of `kz replay` (this directory, cf-<REV>/, bundle-<CAND>/, rspec-<REV>/); it states no condition of a run.
+#
+# Actors: the initial thread of the process (core-tx: start state, task creation, teardown), the ES main task (the
+# shutdown request: an external input, the harness's restart command), the CF main task (the dependent lookups), the
+# BP main task (the existence probes and the creations).  Resources: the two counting semaphores by name (the table's
+# names) and the shutdown state.  Every other actor and object of the record is outside the cone; kz predict lists
+# them and refuses the prediction if one of them touches a key of the cone.
+#
+# Orders kept as constraints: program order inside each actor (r_axiom_program_order), task creation (R2-P-TASK: a
+# task's first event follows its creating call), the creation order of the startup thread (core apps, then the start
+# script line by line: m_es_core_then_script, m_es_script_line, bp_startup_script; CF before BP), the poll of the
+# startup thread for the shutdown request (psp_teardown).  No source orders CF's and BP's steps against each other:
+# no startup-sync call in CF or BP, ES's global-state waits block only ES, priorities not applied
+# (plan/C1_basis_plan.md section 6.2).  The OSAL object-table locks make each lookup, creation and deletion one atomic
+# step at its linearization point (osal_get_by_name, osal_convert_token_global: the search under the type's global
+# lock; osal_allocate_new, osal_transaction_finish: creation and deletion in EXCLUSIVE transactions); they order no
+# two calls.  Not modelled (not explored): the RESERVED window inside a creation (A5 of P-C1HOLD), other creation
+# failures (no free ids, implementation errors), a deletion other than the teardown's (no application of the closure
+# deletes these names; CF's exit cleans up only the objects CF's task created: m_es_cleanup_task, m_osal_creator,
+# m_osal_foreach_creator; BP does not exit in the cone), the time of any step.
+kzp-predict 1
+
+cite m_es_core_then_script file "cfe/modules/es/fsw/src/cfe_es_start.c" lines 186 199 sha256 "de2e4901a0cc4c7c18c11f97c64920093339bdb956a419435fa930dce10fdd11" note "CFE_ES_Main: CFE_ES_CreateObjects (the core applications, among them ES's main task) before CFE_ES_StartApplications (the start script)"
+cite m_es_script_line file "cfe/modules/es/fsw/src/cfe_es_apps.c" lines 258 258 sha256 "0333c6bdb752da251fd0ec860d06bcd3736c5c8b1a7d7073600d0473707ee435" note "CFE_ES_StartApplications: each line of the start script goes to CFE_ES_ParseFileEntry in turn, on the startup thread"
+cite m_es_cleanup_task file "cfe/modules/es/fsw/src/cfe_es_apps.c" lines 1659 1675 sha256 "728f345f32c5769dbe531691a28e9814d06fd7870c0d11fa64ab0e8a14be1e75" note "CFE_ES_CleanupTaskResources: the OSAL objects that belong to the task (OS_ForEachObject with the task's id) are deleted"
+cite m_osal_creator file "osal/src/os/shared/src/osapi-idmap.c" lines 641 641 sha256 "96cc493a9ebfd5a901e3b025d68599310ac50dde4bb601a110fbb80ae4568d00" note "OS_ObjectIdFindNextFree: a new record's creator is the calling task"
+cite m_osal_foreach_creator file "osal/src/os/shared/src/osapi-idmap.c" lines 216 226 sha256 "76b2380e232f9633b111cde52cdd107938d73d10aa3aa76760857eda5641de10" note "OS_ForEachFilterCreator: only records whose creator is the given task"
+cite m_bp_num_throttles file "bp/fsw/platform_inc/bp_platform_cfg.h" lines 26 29 sha256 "45931c5e94f6198b6b044bfa45c9088c71c8b4179789505c6624787364cbdf01" note "BP_NUM_SEM_THROTTLES 2: one throttle per CFDP channel"
+cite m_bp_flow_then_cla file "bp/fsw/src/bp_app.c" lines 202 212 sha256 "d9638b6088fdd1dd5cf7cbea5e8604435865253dffd3279c12620bbd311ec454" note "AppInit: BP_FlowInit, and on its success BP_CLA_Init (the CLA child tasks)"
+cite m_bp_cla_out_child file "bp/fsw/src/bp_cla_bundle_io.c" lines 155 156 sha256 "e1b33ee2646cc0c2d288513a71e1d98f9e6ad28b9fd6a721fff94c46026ab224" note "BP_CLA_Init creates the child task BP_CLA_OUT with CFE_ES_CreateChildTask, called from bp.so"
+cite m_cf_channel_loop file "cf/fsw/src/cf_cfdp.c" lines 967 967 sha256 "7f07af29ac0ad42057ad7d055edfb68d5219ce580334c121fb6e503503437a6a" note "CF_CFDP_InitEngine: the channels in order, for (i = 0; i < CF_NUM_CHANNELS; ++i)"
+cite m_cf_num_channels file "cf/fsw/platform_inc/cf_platform_cfg.h" lines 104 104 sha256 "148b14c20548bd0f06df4aac0528bb051e9e34ac0525ba4f52ee0dc1f7063d5b" note "CF_NUM_CHANNELS (2)"
+cite m_cf_init_success file "cf/fsw/src/cf_app.c" lines 250 258 sha256 "e4fd72b0cb34d2e26eb205770e0318128ed2cf07eaff45cc77a166b4a994db42" note "CF_Init: CF_CFDP_InitEngine, and on its success the event CF Initialized"
+cite m_cf_runloop file "cf/fsw/src/cf_app.c" lines 336 338 sha256 "3f833213949c3712bd33179109b63a319e7f73ac217fb81319efdc1a599fa1fb" note "CF_AppMain: the main loop runs while CFE_ES_RunLoop(&run_status)"
+cite m_es_runloop_false file "cfe/modules/es/fsw/src/cfe_es_api.c" lines 490 497 sha256 "7f549f021c4d33629150ef2019552d7cfec29a12108e41f7ce757e8a2d1f3d3a" note "CFE_ES_RunLoop: a run status other than APP_RUN returns false at once"
+
+resource s0 kind osal.countsem key CF_CHANNEL_0_SEM_NAME
+resource s1 kind osal.countsem key CF_CHANNEL_1_SEM_NAME
+resource shutdown kind psp.shutdown
+
+actor core-tx start record "core-tx" prov osal_bsp_main, psp_app_run_fn
+actor CFE_ES input record "CFE_ES" prov psp_restart_req
+actor CF record "CF" prov bp_startup_script, cf_app_init_status
+actor BP record "BP" prov bp_startup_script, bp_flowinit_calls_throttle
+
+program core-tx
+  clear OS_ObjectIdInit.clear_table osal.countsem ABSENT prov osal_objectid_init, osal_api_init_call
+  clear OS_CountSemAPI_Init.clear_names osal.countsem ABSENT prov osal_countsem_api_init, osal_api_init_countsem
+  spawn OS_TaskCreate CFE_ES prov m_es_core_then_script, osal_task_create_def
+  spawn OS_TaskCreate CF prov m_es_core_then_script, m_es_script_line, bp_startup_script, osal_task_create_def
+  spawn OS_TaskCreate BP prov m_es_script_line, bp_startup_script, osal_task_create_def
+  await shutdown SHUTDOWN_REQ prov psp_teardown
+  set OS_Application_Run.teardown shutdown TEARDOWN prov psp_teardown, psp_app_run_fn
+  delete-each OS_CountSemDelete osal.countsem effect retire status OS_SUCCESS prov osal_delete_all, osal_cleanup_object, osal_countsem_delete_def, osal_finalize_delete
+  finish
+end
+
+# The restart command reaches ES at a time the record does not bound against CF and BP (an input of the run).
+program CFE_ES
+  mark "the restart command (an input of the run)"
+  set CFE_PSP_Restart.request_shutdown shutdown SHUTDOWN_REQ prov psp_restart_req, psp_restart_fn
+  finish
+end
+
+# initialize_throttling (bp_flow.c L121-L144), called first by BP_FlowInit: for each of the two names, the existence
+# probe; on OS_SUCCESS "Found", else the creation; on OS_SUCCESS "Created", else "Failed"; then the next name.
+program BP
+  event BP_FlowInit call prov bp_flowinit_calls_throttle
+  use OS_CountSemGetIdByName s0 role-site bp_existence_probe_call prov bp_flow_lookup_call, bp_flow_throttle_init, m_bp_num_throttles
+    hit osal.countsem_lookup.entry before caller bp.so name sem_name
+  if-result OS_SUCCESS found0 prov bp_flow_throttle_init
+  create OS_CountSemCreate s0 effect publish role-site bp_create_call taken OS_ERR_NAME_TAKEN prov bp_flow_create_call, bp_flow_throttle_init, osal_allocate_new, osal_countsem_finalize, osal_finalize_new
+    hit osal.countsem_create.entry before caller bp.so name sem_name
+    hit bp_create_call after
+  if-result OS_SUCCESS created0 prov bp_flow_throttle_init
+  mark "event 14 Failed to create semaphore"
+  goto next0 prov bp_flow_throttle_init
+  label created0
+  mark "event 15 Created semaphore"
+  goto next0 prov bp_flow_throttle_init
+  label found0
+  mark "event 15 Found semaphore"
+  label next0
+  use OS_CountSemGetIdByName s1 role-site bp_existence_probe_call prov bp_flow_lookup_call, bp_flow_throttle_init, m_bp_num_throttles
+    hit osal.countsem_lookup.entry before caller bp.so name sem_name
+  if-result OS_SUCCESS found1 prov bp_flow_throttle_init
+  create OS_CountSemCreate s1 effect publish role-site bp_create_call taken OS_ERR_NAME_TAKEN prov bp_flow_create_call, bp_flow_throttle_init, osal_allocate_new, osal_countsem_finalize, osal_finalize_new
+    hit osal.countsem_create.entry before caller bp.so name sem_name
+    hit bp_create_call after
+  if-result OS_SUCCESS created1 prov bp_flow_throttle_init
+  mark "event 14 Failed to create semaphore"
+  goto next1 prov bp_flow_throttle_init
+  label created1
+  mark "event 15 Created semaphore"
+  goto next1 prov bp_flow_throttle_init
+  label found1
+  mark "event 15 Found semaphore"
+  label next1
+  event BP_FlowInit ret prov bp_flowinit_calls_throttle
+  mark "BP_FlowInit returns; on its success BP_CLA_Init creates BP_CLA_OUT (assumed: success, as in every record)"
+  finish prov m_bp_flow_then_cla, m_bp_cla_out_child
+    hit es.child_task.entry before caller bp.so
+end

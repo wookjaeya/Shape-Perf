@@ -1,0 +1,578 @@
+// eval_trace.hpp -- apply a profile to a trace: replay the effects, derive happens-before edges,
+// classify the occurrences of readiness specifications.
+//
+// This is the concrete interpretation of the profile (SPEC 0.2 item 2, "concretely, over traces"):
+// the one evaluator (eval.hpp) over the state that the effects of the trace build up.  The engine
+// is generic: it knows no operation, no kind and no rule by name.  Everything it does comes from
+// the profile it is given, which is how a golden test of "every rule on a synthetic trace" is
+// possible without running anything.
+//
+// What a trace carries (the agreement between a recorder and a profile):
+//   - a Call and a Return event name an operation of the profile; a Return carries `result`;
+//     the values of the parameters are `arg.NAME` on the Call (an `out` parameter carries its
+//     value on the Return, as `out.NAME`);
+//   - a Point event is named after a linearization point (lp_name()) or a site of the profile,
+//     or after the terminal step of an operation (terminal_name()); it carries the values the
+//     profile declares for the point (`lp.NAME`), `arg.NAME` for the parameters it feeds, and
+//     `result` where the point is inside a call that already knows its result;
+//   - a capture point carries `arg.NAME` (the value the call will receive), and, to be
+//     cross-checked against the replay, `cell` (the name of the location) and `value`;
+//   - a point that stores through an out parameter carries `out.NAME`, the name of the location the
+//     pointer designates, and optionally `value`, the value stored;
+//   - the preamble gives the owner record of every actor and the value of every `ref eval`
+//     constant the profile needs (the sizes of the finite tables).
+//
+// What the replay computes:
+//   edges        happens-before edges of the rules (stratum, robustness), sorted;
+//   occurrences  one per call of the operation of a readiness specification, with the status of
+//                SPEC 1.6 under the strict reading (QT-4, Q15).  Of the horizon monitors of the Allowed
+//                entries only `retry_until_ready` is run (SPEC 1.6 "Horizon monitors"; see
+//                Occurrence::monitor): it turns a PENDING attempt into TOLERATED (a later attempt of the
+//                same loop instance is READY within the bound) or VIOLATING (the bound is exhausted, or an
+//                attempt's outcome is outside its codes); an attempt it cannot count stays withheld.  The
+//                monitor of `exit(code, src)` is run too (2026-10-24): ACCEPT when the using actor calls a
+//                terminal operation with that code, REJECT when it calls one with another code.  An
+//                occurrence that another entry would judge stays PENDING and is never TOLERATED;
+//   findings     disagreements between the trace and the profile (an outcome that disagrees with the
+//                computed state, a capture that disagrees with the replayed cell, an event after a
+//                terminal step, a point outside of its call, a poll whose other branch does not end
+//                in the terminal operation, a point whose asserted effect guard is false ...);
+//   guard_failures  the points whose asserted effect guard is false: a refutation of a
+//                declared_trusted guard (with its obligations), a disagreement otherwise.
+// A status is final once decided (L-STATUS).  The replay is one pass over the trace; the edges that
+// pair two events by a value (task creation) are matched when the pass is over.
+//
+// Two kinds of trace, chosen explicitly by the trace (`record real`) or by the caller, never guessed:
+//   Model  a complete model trace (synthetic traces, the golden files, INIT): a resource the trace never
+//          set is in the initial state of its kind and a location holds its INIT value or 0
+//          (docs/phi_reference.md section 6, concretization rule (2)).  Everything below is unchanged
+//          for it.
+//   Real   a real record (SPEC 4.8 "Explanation set", "Replay convention for real records", OB-05,
+//          ADR-055; docs/phi_reference.md section 7.6).  The conditions are evaluated in the abstract
+//          domain over every explanation the record allows: a resource or location the record does not
+//          fix is unknown (no initial-state default) unless its start state is evidenced, and recorded
+//          writes fix a kind or location only while its writers and aliases are covered, its start state
+//          and lifetime are known, every writer's point was observed and no loss was reported.  A result
+//          the explanations disagree on is withheld with its reasons; a decision the trace does not
+//          reach stays OPEN; a record that contradicts the model is an analysis input error.
+#pragma once
+
+#include <cstdint>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "kz/core/eval.hpp"
+#include "kz/core/phi.hpp"
+#include "kz/core/status.hpp"
+#include "kz/schema/kz_schema.h"
+
+namespace kz {
+namespace eval {
+
+enum class Phase : uint8_t { Call, Return, Point };
+const char* phase_text(Phase p);
+
+struct TraceEvent {
+  uint64_t id = 0;        // the position in the trace, assigned by Trace::add
+  std::string actor;      // canonical name of the actor instance
+  std::string site;       // an operation (Call, Return) or a point (Point)
+  Phase phase = Phase::Point;
+  bool has_result = false;
+  int64_t result = 0;     // Return
+  std::map<std::string, int64_t> values;       // "arg.X", "out.X", "lp.X", "value", ...
+  std::map<std::string, std::string> texts;    // "out.X", "cell": names of locations
+};
+
+constexpr uint64_t kNoEvent = ~static_cast<uint64_t>(0);
+
+enum class RecordKind : uint8_t { Model, Real };
+const char* record_kind_text(RecordKind k);
+
+// What a real record establishes for one kind or one location (SPEC 4.8 "Recorded writes alone",
+// ADR-055).  Nothing is established unless the record says so.
+struct Adequacy {
+  bool start_known = false;      // the start state is fixed (INIT at the process start, or a consistent capture)
+  bool writers_covered = false;  // every writer is in the plan (SPEC 4.7, 4.1 "Closure per case")
+  bool aliases_covered = false;  // every alias and external effect is in the plan
+  bool lifetime_known = false;   // the lifetime and identity of every instance is known (kinds; n/a for a location)
+};
+
+// What the static closure says about one kind or location (SPEC 4.1 "Closure per case", 4.2; kz-static's
+// FACT_LOCS and WRITERS for the record fields the profile binds to it), as the adapter matched it with the
+// probe plan of the record.  Informational for the replay: the closure enters the replay only through
+// Adequacy::writers_covered / aliases_covered, which the adapter sets from it (and every other condition of
+// ADR-055 still applies).  Absent: no closure was given.
+struct StaticClosure {
+  std::string status;                   // per bound field: "<Type.field> writer-set-complete|DISABLED|not in the closure", ';'-joined
+  uint32_t writers = 0;                 // static writers of the bound fields
+  uint32_t covered = 0;                 // of those, at a point the plan observes and the profile maps to a write of it
+  // of the covered ones, those counted as writes of another key by a researcher's `bind ... via` declaration (key
+  // separation from cited code, not a pointer analysis): a result that rests on this coverage uses that declaration
+  uint32_t separated = 0;
+  std::vector<std::string> unobserved;  // the static writer and alias locations the plan does not observe
+};
+
+// A loss reported in a real record: events may be missing from position `begin` (the first event that
+// may follow a lost one) up to `end` (exclusive; kNoEvent: up to the end of the record).
+struct LossInterval {
+  uint64_t begin = 0;
+  uint64_t end = kNoEvent;
+};
+
+struct HbEdge;  // below (Trace::control_edges)
+
+struct Trace {
+  std::vector<TraceEvent> events;
+  std::map<std::string, int64_t> ref_consts;              // value of a `ref eval` constant, by name
+  std::map<std::string, std::vector<int64_t>> owners;     // actor -> key of its owner record
+  RecordKind record = RecordKind::Model;
+  // Real records only (all empty for a model trace).
+  uint8_t start_evidence = KZ_START_EVIDENCE_NONE;        // what the record's start is (informational)
+  std::map<std::string, Adequacy> kind_adequacy;          // by kind name; absent: nothing established
+  std::map<std::string, Adequacy> loc_adequacy;           // by location name
+  std::map<std::string, StaticClosure> kind_closure;      // by kind name; absent: no static closure given
+  std::map<std::string, StaticClosure> loc_closure;       // by location name
+  std::set<std::string> observed_points;                  // points attached and active over the whole record
+  std::map<std::string, uint8_t> owner_levels;            // actor -> KZ_OWNER_LEVEL; absent: undetermined
+  // actor -> the identity value of its owning application in the id space of the owner kind (the value the
+  // creation request passed, ACTOR_OWNERS).  Used only to name the actor of a registration or publication
+  // (`id(owner(exec))`, the execution relation); it never fixes the replayed state.  Absent: not recorded.
+  std::map<std::string, uint32_t> owner_ids;
+  // actor -> whether its owning application is a core service (true) or not (false), as the record
+  // establishes it (the creation request's calling function, SPEC 3.3 "Creation events used for
+  // app_owner").  Absent: not established.
+  std::map<std::string, bool> owner_core;
+  std::map<std::string, std::string> creators;            // actor -> the actor that created it (creating executor)
+  // actor -> how the record establishes that the actor is not the task of any application (P10, 2026-10-25: the
+  // initial thread of the process where the profile's context declares `initial_thread not_app`).  Such an actor
+  // is a core execution path (SPEC 1.1, 1.2 T_raw), never "owner undetermined"; no application name is given to it.
+  std::map<std::string, std::string> not_app;
+  // The realized control of a controlled run (P11, decided 2026-10-26: PI_DECISIONS_RESOLVED_20261026.md section 3): one
+  // edge per release that resumed a held thread, from the releasing hit's event (the last event of that actor at or before
+  // it) to the held thread's first event after its gate (real_trace.cpp, from the NCTL records).  An order that holds only
+  // in this run because the controller made it: a basis kind of its own (control-order), never a synchronization of the
+  // program.  Used only with Options::control_order.  `rule` names the gate and the release.
+  std::vector<HbEdge> control_edges;
+  // linearize_real_trace (below) moved events of the merged order (that many), to make it a linear extension of the
+  // record's known order; the event positions are those of the linearized trace.
+  bool linearized = false;
+  uint64_t reordered = 0;
+  // The matches of reads_from and spawn rules linearize_real_trace refused (they contradict program order or the rules'
+  // edges, or lie on a cycle with other order facts of the record): the replay makes no edge for them.
+  std::vector<HbEdge> refused_matches;
+  // The order of the events of different actors is established (HB edges or a reliable observed order,
+  // SPEC 4.8 "order").  Default: it is the collector's merged order, which is never the execution order
+  // (SPEC 5.8), so a value another actor wrote may be any value of the interleavings.
+  bool order_established = false;
+  std::vector<LossInterval> losses;
+  uint64_t add(TraceEvent e) {
+    e.id = events.size();
+    events.push_back(std::move(e));
+    return events.back().id;
+  }
+};
+
+// The name a linearization point has in a trace: "OP.LABEL" for a point inside the operation or a
+// capture point, the name of the site for `lp site NAME`.
+std::string lp_name(const phi::OpDecl& op, const std::string& label, const phi::LpSpec& lp);
+// The name of the point at which the terminal step of an operation with an `after` pattern happens.
+std::string terminal_name(const phi::OpDecl& op);
+// The publication sites of locations: a site of the profile whose call pattern passes the address of a field
+// (`arg[i] is addr(T.F)`) to an `out` parameter of the called operation (the operation that binds the callee's
+// symbol) through which that operation stores (`store *P := ...`), where `bind field T F as value(L)`.  An
+// event at such a site (after the call, in the caller) records that its actor wrote L through that call.
+// Site name -> location index.
+std::map<std::string, int32_t> publication_sites(const phi::Profile& p);
+
+struct HbEdge {
+  uint64_t from = 0, to = 0;
+  std::string rule;
+  phi::Stratum stratum = phi::Stratum::S;
+  phi::Robust robust = phi::Robust::Unconditional;
+  // The edge of an observation rule is read minimally: the write is one the scan that let the poll
+  // exit can have seen (the last writes at the moment the awaited predicate became true), but the
+  // writer-set completeness and the falsifier of SPEC 4.2/4.8 are not implemented, so the edge is
+  // not justified by them.  Consumers that need a justified edge (O3, MustBefore) must not take it
+  // as one.  Structural edges (program order, task creation, phase) are not marked.
+  bool minimal = false;
+  // A reads_from edge whose use the record shows successful by the store of its out value on the success path
+  // (`stored_out`, a direct capture of the store operand inside the call), not only by its returned code.
+  bool by_store = false;
+  // Where the edge comes from: 0 a rule of the profile, 1 a reads_from rule (RF), 2 the run's realized control
+  // (Trace::control_edges).  Informational (the per-occurrence basis of the output container); not compared.
+  uint8_t source = 0;
+  bool operator<(const HbEdge& o) const {
+    if (to != o.to) return to < o.to;
+    if (from != o.from) return from < o.from;
+    return rule < o.rule;
+  }
+  bool operator==(const HbEdge& o) const { return from == o.from && to == o.to && rule == o.rule; }
+};
+
+// Tolerated is produced only by an ACCEPT of the retry_until_ready or the exit monitor; no other monitor is run.
+// Undetermined is not a status: a real record whose explanations allow more than one status (the
+// list is Occurrence::possible).  A model trace never produces it.
+enum class OccStatus : uint8_t { Ready, NotEvaluated, Violating, NotReadyUnjudged, Tolerated, Pending, Open, Undetermined };
+const char* occ_status_text(OccStatus s);
+
+// Interval and Outcome occur in real records only: a conjunct whose linearization point the record
+// does not observe is read over the whole call (every state between the call and the return), and a
+// conjunct can be fixed by the returned code under O4 (the outcome list of the operation).
+enum class LpSource : uint8_t { Capture, Call, Point, NotPassed, Interval, Outcome };
+const char* lp_source_text(LpSource s);
+
+struct ConjunctResult {
+  std::string label;
+  LpSource source = LpSource::NotPassed;
+  uint64_t event = 0;     // the event whose state the conjunct was read at
+  bool evaluated = false; // a value is known (real records: in every explanation)
+  bool holds = false;
+  // Real records only.
+  bool unknown = false;          // reached, but the explanations of the record disagree on the value
+  bool passage_unknown = false;  // whether the linearization point was passed is not observed
+  bool contradicted = false;     // the record contradicts the model here (an empty explanation set)
+  uint32_t reasons = 0;          // set KZ_WITHHOLD: why the value or the passage is unknown
+  uint32_t adequacy = 0;         // set KZ_ADEQ: what the record establishes for what the conjunct read
+  // A capture (real records): the location the value was loaded from, as the capture event names it
+  // (`cell`); empty when the record does not name it.  The execution relation names the actors that wrote
+  // that location (Occurrence::relation).
+  std::string cell;
+  // Real records: the value read a resource whose replayed state was set by an effect whose operand only the
+  // writer's own identity fixed (Options::owner_identity_targets).
+  bool owner_identity = false;
+  // Real records, what a fixed value rests on (the basis of Occurrence::basis): it read replayed state (a kind, a
+  // location or the owner record), not only the recorded arguments; the order of a write it read from another
+  // actor rests on a reads_from edge (an order derived from a returned code); a kind or location it read is
+  // fixed by a writer coverage that counts writes as other keys by a `bind ... via` declaration.
+  bool state_read = false;
+  bool rf_order = false;
+  // rf_order, and the reads_from edges it rests on include one whose use only its returned code shows successful
+  // (without that edge's kind the read is not ordered); false with rf_order: the edges it needs are shown by the
+  // success-path store of the out value (HbEdge::by_store), not by a returned code.
+  bool rd_order = false;
+  bool via = false;
+  // Real records of a controlled run: the order of a write it read from another actor rests on the run's realized
+  // control (Trace::control_edges; not the program's synchronization, P11).
+  bool ctl_order = false;
+  // Real records: the edges between actors on an order it read (indices into Result::order_edges, sorted): every edge
+  // on a happens-before path between the read and a write of another actor of what it read that the read is ordered
+  // with, in the order of the previous pass.  Empty where it read no such write.
+  std::vector<uint32_t> support;
+};
+
+enum class DecidedAt : uint8_t { None, Call, Point, Return };
+const char* decided_at_text(DecidedAt d);
+
+// O4(a): the returned code agrees with the readiness the replay computed.  Real records (P1 conditional, 2026-10-25):
+//   Narrowed            the code fixed a conjunct the record left open; its agreement is not a check (the result
+//                       used the code: never counted as independently confirmed by it)
+//   AgreesReturnDerived the code agrees, but the state that agrees rests on an order derived from a returned code
+//                       (a reads_from edge): not an independent check either
+//   Inapplicable        the mapping's applicability conditions do not hold in the record: the code says nothing here
+//                       (no narrowing, no disagreement)
+//   Consistent          no disagreement, but the record leaves the condition the code speaks of open and the code did
+//                       not fix it (narrowing off, or a mapping without conditions): no check either
+enum class OutcomeCheck : uint8_t { NotChecked, Agrees, Disagrees, Unmapped, Narrowed, AgreesReturnDerived, Inapplicable, Consistent };
+const char* outcome_check_text(OutcomeCheck c);
+
+// The execution relation of one occurrence under the P10 rule (2026-10-25, review section 6.3): every write of the
+// occurrence's object (its key resource, or a location a captured value was read from), one item each.
+enum class RelationItemKind : uint8_t {
+  Provider,     // (a) a publication of the same object in the occurrence's scope (a late one included); read_from: the
+                //     reads_from rule matched it (same object and generation)
+  Affecting,    // (b) a clearing write (initialization, delete, invalid store) before the decision: the value read
+  Excluded,     // (c) after the occurrence, in another scope or of another generation: left out with the reason
+  Unconfirmed,  // (d) a write the record does not link to the object (target or value not established, or it may not
+                //     have been applied): an unconfirmed influence, kept apart from the confirmed relations
+};
+const char* relation_item_text(RelationItemKind k);
+
+struct RelationItem {
+  RelationItemKind kind = RelationItemKind::Unconfirmed;
+  std::string actor;
+  uint64_t event = 0;
+  std::string what;           // what the write was
+  bool read_from = false;     // Provider: the reads_from rule matched it
+  uint8_t pair = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;  // the relation of the use's actor and this actor
+  std::string pair_note;      // why (owners, "not an application", ...)
+};
+
+struct Occurrence {
+  std::string rspec;
+  std::string actor;
+  uint64_t call = 0;
+  bool returned = false;
+  uint64_t ret = 0;
+  std::vector<int64_t> key;
+  int64_t ordinal = 0;            // the k-th occurrence begun by this actor with this key (from 1)
+  OccStatus status = OccStatus::Open;
+  DecidedAt decided_at = DecidedAt::None;
+  uint64_t decision = 0;          // the decision event
+  bool in_scope = true;           // false: decided after the shutdown request (the teardown family)
+  std::vector<ConjunctResult> conjuncts;  // the preconditions of the rspec, in the order of the operation
+  bool has_result = false;
+  int64_t result = 0;
+  OutcomeCheck outcome = OutcomeCheck::NotChecked;
+  // The summary view (SPEC 1.10, ADR-054, D2), computed last for every occurrence.  Printed only for a
+  // real record, so that the text of a model trace is unchanged.
+  kz_summary summary{};
+  // Real records only.
+  std::vector<OccStatus> possible;  // Undetermined: the statuses the explanations allow
+  uint32_t reasons = 0;             // set KZ_WITHHOLD
+  uint32_t adequacy = 0;            // set KZ_ADEQ: what the record establishes for everything the conditions read
+  bool input_error = false;         // the explanation set is empty: never a violation, never no violation
+  bool outcome_narrowed = false;    // a conjunct was fixed by the returned code (O4)
+  // The identities of the executing actor (SPEC 1.2; schema kz_identity), as far as the record states them.
+  std::string creator;              // the creating executor, empty if the record does not state it
+  uint8_t owner_level = KZ_OWNER_LEVEL_UNDETERMINED;
+  bool has_owner_key = false;
+  std::vector<int64_t> owner_key;
+  std::string passed_role;          // the operation's `stamp` parameter, if any
+  bool has_passed = false;
+  int64_t passed = 0;
+  // The execution relation (SPEC 1.1 "Execution relations", 1.10 item 10; real records only): between the
+  // executing task of the use and the actors of the registrations and publications of the occurrence's key
+  // resource in the record (the effects on the key's kind whose target, read with the writer's own
+  // identity, is the key).  Only `confirmed` and `inferred` owners are evidence; anything else leaves it
+  // ownership-undetermined.  Also stored in `summary.relation` (with relation-inferred, core-status-unknown).
+  uint8_t relation = KZ_EXEC_RELATION_OWNERSHIP_UNDETERMINED;
+  uint8_t relation_level = KZ_OWNER_LEVEL_UNDETERMINED;  // the weakest owner level the relation used
+  std::vector<std::string> counterparts;  // the actors of the registrations / publications, sorted
+  std::string relation_note;              // which pair decided it, or why it is undetermined
+  std::vector<RelationItem> relation_items;  // P10 rule: every write of the object, classified (empty for the other rules)
+  // Real records: the basis of the result (review section 5.3; PI decision P1 conditional, stage A), as KZ_SUMMARY_FLAG
+  // bits, more than one possible: basis-direct-capture (a fixed conjunct read only recorded argument values),
+  // basis-state-order (one read replayed state: observed effects, the order of synchronization and creation, identity
+  // assumptions), basis-return-derived-order (that state's order rests on a reads_from edge), outcome-narrowed (the
+  // returned code fixed a conjunct).  Also in summary.flags.
+  uint16_t basis = 0;
+  // Real records, in memory and in the text only (the 16 bits of summary.flags are all taken, schema revision 3): the
+  // order of a state it read rests on reads_from edges whose uses the record shows successful by the store of their
+  // out value on the success path (`stored_out`), not by a returned code; basis-return-derived-order is then not set.
+  bool basis_store_order = false;
+  // Real records: the declared assumptions the result used, as KZ_SUMMARY_FLAG bits: assumes-via-key-separation (a
+  // kind or location read is fixed by a coverage with `via` separation; via_names says which), assumes-owner-
+  // identity-targets (A-OWNER: a writer's creation identity fixed an effect operand), assumes-role (a declared role
+  // of the call context made the call an instance); reads_from edges are basis-return-derived-order.
+  uint16_t assumptions = 0;
+  // Real records of a controlled run (P11): a fixed conjunct read replayed state whose order rests on the run's realized
+  // control (ConjunctResult::ctl_order): the basis kind control-order, apart from the program's synchronization.  Not a
+  // KZ_SUMMARY_FLAG bit (the 16 bits are taken): printed with the basis.
+  bool control_order = false;
+  // Real records: the edges between actors the result rests on (indices into Result::order_edges, sorted): those of
+  // the fixed conjuncts that read replayed state (ConjunctResult::support).
+  std::vector<uint32_t> support;
+  std::vector<std::string> via_names;
+  // Real records: how the returned code's mapping was used (P1 conditional): the conditions that held and what the
+  // code fixed, or why the mapping does not apply / fixes nothing.  Empty when no mapping was hit.
+  std::string narrowing;
+  // The role of the call context (SPEC 1.6 "Call contexts"): the profile role whose site event followed
+  // the return of this call on the same actor; empty when no role site was seen for it.
+  std::string context;
+  bool role_excluded = false;             // internal: the role takes the call out (moved to Result::role_facts)
+  bool key_known = false;                 // the key was evaluated (real records: fixed in every explanation)
+  // The horizon monitor of a deciding Allowed entry (SPEC 1.6 "Horizon monitors"), where one ran on this
+  // occurrence: its verdict and why (ACCEPT / REJECT / OPEN / not countable), with the events it used.
+  // retry_until_ready and exit(code, src) are implemented.  `accepted` is the ACCEPT that makes the status TOLERATED; the
+  // entry that accepted rests on a caller record (the caller-level Allowed reads only such entries).
+  std::string monitor;
+  bool accepted = false;
+  // Real records: why the caller-level Allowed withholds a not-ready occurrence, where it records a conflict
+  // (SPEC 1.6 step 3, QT-5: "the conflict named in the verdict"); empty otherwise.
+  std::string allowed_note;
+  // Real records: the observation the conditions rest on (OBS_ADEQUACY `probes` and `unobserved`).  `probes`
+  // names what the record observes, as "call OP", "return OP" or a point / site name: the operation's call and
+  // return, the points of its conditions (a capture where one was used), the points of the profile's writer
+  // effects of every kind and location the conditions read (a captured location included) and the
+  // publication sites of those locations.  `unobserved` names what is missing: a condition's point the record
+  // does not observe, a writer effect whose point it does not observe ("OP.label"), and the static writer and
+  // alias locations the static closure gives that the plan does not observe ("<kind or loc>: ..."), or
+  // "<kind or loc>: static closure not given".  Both sorted, without duplicates.
+  std::vector<std::string> probes;
+  std::vector<std::string> unobserved;
+};
+
+// A call bound to a declared role of its call context (the role's site event right after the call's
+// return, same actor).  A role whose purpose is not dependent_use carries no readiness precondition: the
+// occurrences its call began are not instances (they are listed here as `excluded`), the call stays a fact.
+struct RoleFact {
+  std::string role, purpose, actor, op;
+  uint64_t point = 0;                     // the role's site event
+  uint64_t ret = 0;                       // the return it follows
+  uint64_t call = kNoEvent;               // the call, where an occurrence names it
+  bool has_result = false;
+  int64_t result = 0;
+  std::vector<std::string> excluded;      // the readiness specifications whose occurrence the role took out
+};
+
+struct ReplayFinding {
+  uint64_t event = kNoEvent;  // the event the finding is about, or kNoEvent
+  std::string what;
+};
+
+// A point event whose effect has an asserted guard (`when`, not `filter`) that is false in the replay.
+// The trace says that the linearization point executed, and the code reaches it only where the guard
+// holds, so either the replayed state is not the state of the run or, for a declared_trusted effect,
+// the trusted guard is refuted by this observation.  The effect is not applied.
+struct GuardFailure {
+  uint64_t event = 0;
+  std::string op, effect;
+  bool trusted = false;                   // the effect is declared_trusted: a refutation
+  std::vector<std::string> refutable_by;  // its obligations (trusted only), sorted
+};
+
+struct Options {
+  // The awaited predicate of an observation rule that takes `predicate from_code` (the extractor's
+  // job, here supplied by the caller), by rule name.  It is resolved with the parameters of the
+  // poll operation, in order, and not owned.
+  std::map<std::string, const phi::Expr*> predicates;
+  // The version of each component, for the guards of rules and effects.  A guard on a component
+  // that is not listed does not hold: the rule or effect is not applied and the replay says so.
+  std::map<std::string, std::string> versions;
+  // Real records, P1 (conditionally adopted 2026-10-25, PI_DECISIONS_RESOLVED_20261025.md): whether the returned code
+  // fixes a conjunct the record leaves open.  It does so only through a mapping that declares its applicability
+  // conditions (phi_ast.hpp NarrowDecl) and only where every one holds in the record; the result says so
+  // (outcome-narrowed) and its agreement with the code is not counted as a check.  false: the code fixes nothing,
+  // and is still checked against what every explanation fixes (a disagreement stays an analysis input error).
+  bool outcome_narrowing = true;
+  // Real records: whether the identity value the record gives for a `confirmed` app_owner (Trace::owner_ids, the
+  // value its creation request passed) fixes `id(owner(exec))` in the target, id or value of an effect of that
+  // actor where the replayed state does not (true, 2026-10-24).  The conditions that read a resource such an
+  // effect set say so (ConjunctResult::owner_identity).  false: the effect's operand stays open (the reading
+  // before 2026-10-24, in which the identity named only the actors of the execution relation).
+  bool owner_identity_targets = true;
+  // Real records: the rule that picks the actors of the execution relation.  Occurrence (P10, decided 2026-10-25,
+  // review section 6.3): per object, generation, role and scope (RelationItem).  AllWrites and NonClearing are the
+  // two earlier readings (every observed write counts; clearing writes do not), kept for sensitivity only.
+  enum class RelationRule : uint8_t { Occurrence, AllWrites, NonClearing };
+  RelationRule relation_rule = RelationRule::Occurrence;
+  // Whether the edges of `reads_from` rules are made (SPEC 3.16 row RF, stratum O: a successful use reads from the
+  // publication of the same resource and generation; with `match`, the out values of both are equal).  true: the
+  // rules of the profile apply (2026-10-24); false: their edges are left out (a reading to compare with, not a PI
+  // decision).
+  bool reads_from_edges = true;
+  // Whether the use of a reads_from rule may be shown successful by its returned code (`outcome`).  true: as the rule
+  // says; false: only by the store of its out value on the success path (`stored_out`, a direct capture), so no edge
+  // rests on a returned code (a reading to compare with, kz replay --reads-from-outcome off, 2026-10-26).
+  bool reads_from_outcome = true;
+  // Real records of a controlled run (P11, decided 2026-10-26): whether the run's realized control (Trace::control_edges)
+  // orders the events of different actors, as a basis kind of its own (control-order).  true: the decided reading;
+  // false: the order of the program's synchronization only (the reading kept as sensitivity).
+  bool control_order = true;
+};
+
+// What the real-record replay established for one kind or location (printed with the result).
+struct Knowledge {
+  std::string name;
+  bool is_loc = false;
+  uint32_t reasons = 0;    // set KZ_WITHHOLD: why recorded writes do not fix it (0: they do)
+  uint32_t adequacy = 0;   // set KZ_ADEQ
+  bool contradicted = false;
+  std::vector<std::string> unobserved_writers;  // the profile's writer effects whose point the record does not observe
+  std::string start;  // the observed effect from which the start state is known, where the record did not declare it
+};
+
+struct Result {
+  RecordKind record = RecordKind::Model;
+  bool partial = false;                // real records: an input error somewhere (SPEC 1.10)
+  std::vector<Knowledge> knowledge;    // real records: per kind and location, in profile order
+  std::vector<HbEdge> edges;
+  // Real records whose order was read from the edges: the edges of that order (the previous pass's edges and the run's
+  // control edges), which ConjunctResult::support and Occurrence::support index.
+  std::vector<HbEdge> order_edges;
+  std::vector<Occurrence> occurrences;
+  std::vector<ReplayFinding> findings;
+  std::vector<GuardFailure> guard_failures;  // in the order of the events (also listed as findings)
+  std::vector<RoleFact> role_facts;          // calls bound to a role of their call context, in event order
+  ConcreteState final_state;
+  bool terminated = false;     // a process-terminal step was replayed
+  uint64_t terminal_event = 0;
+  bool shutdown_requested = false;
+  uint64_t shutdown_event = 0;  // the SHUTDOWN_REQ point
+  bool teardown_started = false;
+  uint64_t teardown_event = 0;  // the TEARDOWN point (the scope kind reaches its teardown state)
+};
+
+// Replays `trace` with a checked profile.  Status Invalid only for an unusable profile or trace
+// (not checked, a table without a size); everything the trace does wrong is a finding.
+Status replay(const phi::Profile& p, const Trace& trace, const Options& options, Result* out);
+
+// The merged order of a real record is a representation of the record, never its order (SPEC 5.8): any interleaving
+// that keeps each actor's events in program order represents the same record as long as no known order is broken.
+// The replay reads its trace in that representation, so an edge whose start the representation puts after its end
+// cannot be used (an order of edges must go forward in it).  This makes the representation a linear extension of the
+// record's known order before the replay reads it, for the reading `options` (the switches and predicates of the replay
+// that will read the trace: a reading that leaves a kind of order out is not shaped by it):
+//   base         program order (each actor's events as the trace has them) and the edges of the profile's rules of a
+//                first pass with `options`, less the matches of reads_from and spawn rules (they go forward in the merged
+//                order: the rules match only forward);
+//   candidates   the run's realized control (Trace::control_edges; only with Options::control_order) and every match of
+//                a reads_from or spawn rule the first pass found, forward and backward in the merged order alike (reads_from
+//                only with Options::reads_from_edges, and only uses by store without Options::reads_from_outcome: the first
+//                pass reads with the same options);
+//   refused      a candidate whose end precedes its start in the base (it contradicts program order or the rules' edges),
+//                and every candidate on a cycle of the base and the other candidates (the record's order facts contradict
+//                each other: none of them is taken, whatever the merged order; P11, a control fact does not outweigh a
+//                value's evidence, nor the reverse).  The decision depends on the sets of edges only, never on the merged
+//                direction or on the order the candidates come in.  A refused control edge is removed from
+//                Trace::control_edges; a refused match goes to Trace::refused_matches and the replay makes no edge for it
+//                (a finding says so);
+//   tie-breaker  the merged order itself (the clock and the backend's decode order): among events the known order leaves
+//                unordered the earlier merged one comes first, so a representation that already is a linear extension
+//                is left unchanged.
+// One round (the first pass's edges and matches).  A model trace or a record whose order is established is unchanged.
+// A loss interval keeps the cut the replay reads (Replayer::apply_losses: from its begin on, recorded writes fix nothing):
+// its new begin is the earliest new position of an event at or after its old begin, its new end (when closed) one past the
+// latest new position of an event before its old end, so it covers at least what it covered and no event that followed a
+// loss is placed before it.  A first pass that cannot run (an unusable profile or trace) leaves the trace unchanged and says
+// so; the replay then reports the same.
+struct LinearizeReport {
+  uint64_t moved = 0;                   // events whose position changed
+  std::vector<uint64_t> position;       // old position -> new position (empty: nothing moved)
+  std::vector<size_t> refused_control;  // indices, in the control edges given, of the control edges refused
+  std::vector<HbEdge> matches;          // the reads_from and spawn matches the first pass found merged backwards, taken
+  std::vector<std::string> lines;       // what moved, what was refused and why
+};
+Status linearize_real_trace(const phi::Profile& p, const Options& options, Trace* trace, LinearizeReport* report);
+
+// Parses and resolves the awaited predicate of the observation rule `rule` from text.  It is resolved
+// with the non-out parameters of the poll operation, in order (the layout Options::predicates wants).
+Status resolve_rule_predicate(const phi::Profile& p, const std::string& rule, const std::string& text, phi::ExprPtr* out, std::vector<phi::Diag>* diags);
+
+// Whether `have` satisfies `have OP want` for dotted numeric versions.
+bool version_satisfies(const std::string& have, phi::CmpOp op, const std::string& want);
+
+// Canonical text of a result (one record per line; the form of the golden files).
+std::string dump_result(const phi::Profile& p, const Trace& trace, const Result& r);
+
+// ---- text form of a trace (tests, tools) ----------------------------------------------------
+//
+//   # comment
+//   const <name> <value>                     the value of a ref eval constant
+//   owner <actor> <key> [<key> ...]          the owner record of an actor
+//   <actor> <site> call|ret|pt [name=value ...]
+//       value: an integer (decimal or 0x...) or @NAME, the name of a location (a text);
+//       `result=N` on a ret
+// A real record (docs/phi_reference.md section 7.6) starts with `record real` and may then say:
+//   start_evidence none|init|state-capture|declared
+//   adequacy kind|loc <name> [start=known|unknown] [writers=covered|uncovered] [aliases=covered|uncovered]
+//            [lifetime=known|unknown]
+//   observed <point>                         a point attached and active over the whole record
+//   owner_level <actor> confirmed|inferred|undetermined
+//   owner_id <actor> <value>                 the identity value of the actor's owning application
+//   owner_core <actor> yes|no                whether that application is a core service
+//   creator <actor> <creating actor>
+//   order established|merged                 default merged: the order of different actors' events is not established
+//   loss begin | loss end                    events may be missing from the next event on, up to the next event
+//   closure kind|loc <name> writers=<n> covered=<m> [separated=<k>] <status ...>   what the static closure says (StaticClosure)
+//   not_app <actor> <evidence ...>           the actor is not an application's task (Trace::not_app)
+//   unobserved kind|loc <name> <text ...>    one static writer or alias location the plan does not observe
+Status parse_trace_text(const std::string& text, Trace* out);
+
+// The text form of a trace (parse_trace_text reads it back); a real record with its preamble.
+std::string trace_text(const Trace& t);
+
+}  // namespace eval
+}  // namespace kz

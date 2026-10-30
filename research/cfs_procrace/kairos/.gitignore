@@ -1,0 +1,21 @@
+# Build trees live outside the repository (/home/user/work/kairos-build/...).  These lines are
+# only a safety net for an in-tree build by mistake; build output is never committed.
+/build/
+/build-*/
+/cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+cmake_install.cmake
+compile_commands.json
+Testing/
+*.o
+*.a
+*.so
+*.obj
+
+# Files the tests and tools may leave in a working directory
+*.actual
+*.tmp
+kz_lint_selftest_*/
+.cache/

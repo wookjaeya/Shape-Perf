@@ -1,0 +1,80 @@
+# trace c1_pre_fail.trace, predicate not supplied, cfe version not given
+replay profile "c1-bp-b051eb0"
+events 27
+terminated no
+shutdown_request no
+
+event table
+  #0 CF CF_Init call
+  #1 CF CF_CFDP_InitEngine call
+  #2 CF OS_CountSemGetIdByName call
+  #3 CF OS_CountSemGetIdByName.exists pt
+  #4 CF OS_CountSemGetIdByName ret
+  #5 CF cf_lookup_call pt
+  #6 CF CF_CFDP_InitEngine ret
+  #7 CF CF_Init ret
+  #8 CF CFE_ES_ExitApp call
+  #9 BP BP_FlowInit call
+  #10 BP OS_CountSemGetIdByName call
+  #11 BP OS_CountSemGetIdByName.exists pt
+  #12 BP OS_CountSemGetIdByName ret
+  #13 BP bp_existence_probe_call pt
+  #14 BP OS_CountSemCreate call
+  #15 BP OS_CountSemCreate.publish pt
+  #16 BP OS_CountSemCreate ret
+  #17 BP bp_create_call pt
+  #18 BP OS_CountSemGetIdByName call
+  #19 BP OS_CountSemGetIdByName.exists pt
+  #20 BP OS_CountSemGetIdByName ret
+  #21 BP bp_existence_probe_call pt
+  #22 BP OS_CountSemCreate call
+  #23 BP OS_CountSemCreate.publish pt
+  #24 BP OS_CountSemCreate ret
+  #25 BP bp_create_call pt
+  #26 BP BP_FlowInit ret
+
+edges 25
+edge R1 S unconditional #0 -> #1
+edge R1 S unconditional #1 -> #2
+edge R1 S unconditional #2 -> #3
+edge R1 S unconditional #3 -> #4
+edge R1 S unconditional #4 -> #5
+edge R1 S unconditional #5 -> #6
+edge R1 S unconditional #6 -> #7
+edge R1 S unconditional #7 -> #8
+edge R1 S unconditional #9 -> #10
+edge R1 S unconditional #10 -> #11
+edge R1 S unconditional #11 -> #12
+edge R1 S unconditional #12 -> #13
+edge R1 S unconditional #13 -> #14
+edge R1 S unconditional #14 -> #15
+edge R1 S unconditional #15 -> #16
+edge R1 S unconditional #16 -> #17
+edge R1 S unconditional #17 -> #18
+edge R1 S unconditional #18 -> #19
+edge R1 S unconditional #19 -> #20
+edge R1 S unconditional #20 -> #21
+edge R1 S unconditional #21 -> #22
+edge R1 S unconditional #22 -> #23
+edge R1 S unconditional #23 -> #24
+edge R1 S unconditional #24 -> #25
+edge R1 S unconditional #25 -> #26
+
+occurrences 1
+occurrence K-REG.osal-countsem-lookup actor CF ordinal 1 key [0x5be5dc6a107c0903] call #2 return #4 context cf-dependent-lookup
+  status VIOLATING decided at point #3 scope default
+  conjunct exists point #3 fails
+  result 0xffffffef outcome agrees
+
+findings 0
+
+role facts 3
+role_fact cf-dependent-lookup purpose dependent_use actor CF OS_CountSemGetIdByName call #2 return #4 result -17 site #5
+role_fact bp-existence-probe purpose existence_probe actor BP OS_CountSemGetIdByName call #10 return #12 result -17 site #13 not an instance of K-REG.osal-countsem-lookup
+role_fact bp-existence-probe purpose existence_probe actor BP OS_CountSemGetIdByName call #18 return #20 result -17 site #21 not an instance of K-REG.osal-countsem-lookup
+
+guard failures 0
+
+final state
+  osal.countsem[0x961e9586b17971e6] = LIVE
+  osal.countsem[0x5be5dc6a107c0903] = LIVE

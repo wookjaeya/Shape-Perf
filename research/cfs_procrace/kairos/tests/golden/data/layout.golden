@@ -2147,6 +2147,7 @@ flags KZ_FSTATUS_FLAG
   0x4 WRITER_IN_LOOP "writer-in-loop"
   0x8 WRITER_NOT_ONCE "writer-function-not-once"
   0x10 SEVERAL_INSTANCES "several-instances"
+  0x20 ARRAY_ELEMENTS "array-element-stores-not-collected"
 enum KZ_AWAIT_READ
   0x0 NONE "none"
   0x1 ONE_LOCK "one-lock-region"
@@ -3065,4 +3066,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=99eed4fc658cdd4e4bd6203c2ba6067ed115d853c2bf9980fab1962434a1a712
+fingerprint=5483476b2a3ddb8f8ea3b24572d46db384dc2bfd206272bbaa5a42467eb928f0

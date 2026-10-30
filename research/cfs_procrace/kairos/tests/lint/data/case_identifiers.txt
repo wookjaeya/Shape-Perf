@@ -1,4 +1,4 @@
-# Case identifiers.  Engine code (include/ and lib/) must not contain any of them: knowledge
+# Case identifiers.  Engine code (include/, lib/ and tools/) must not contain any of them: knowledge
 # about a case or about the framework is data in profiles/<profile>/*.kzp or in a basis
 # record, with provenance.  profiles/ and tests/ may use them.
 #

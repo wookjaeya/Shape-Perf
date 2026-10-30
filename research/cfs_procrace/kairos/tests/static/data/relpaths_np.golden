@@ -92,7 +92,7 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 3 (2026-10-30)
+rules relations rules revision 4 (2026-10-30)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
@@ -105,6 +105,7 @@ p0-compare scope: families listed whole: byte-string comparison (<string.h>, <st
 basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
 layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
 run order: no record given (this revision reads no run record; the column says so in every row)
+functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 0
 actors: roots 10 (process 1, spawn-entry 7, table-walk-entry 0, table-image-entry 2, script-entry 0), trampolines 1 [tramp_main -> {helper_main (spawn-entry)}]; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 1 [boss_main], with a shared access of their own body 0
 spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
@@ -134,7 +135,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       flip: none: no creator of the same partition and key in another actor; search returns: task_find returns -1 [-1], task_find returns 0 [0]
       layers: B P0 R P0-unverified(exit, strcmp)
 [B] 0 (field-argument groups 1; left out: no writer 0, one actor only 1)
-[C] 6 (spawn calls 12, with no resolved entry 0, with no event after them on their control-flow graph 3; fields written after a spawn only in the functions the creator calls, not paired in this revision: 14; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the spawned entries do not reach (rows with no grade): 1)
+[C] 6 (spawn calls 12, with no resolved entry 0, with no event after them on their control-flow graph 3; fields written after a spawn only in the functions the creator calls, not paired in this revision: 14; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 1, such contexts of a spawn whose threads are not all resolved (undecidable): 0; contexts called back from a function without a body: 0; contexts through indirect calls the facts do not resolve: 0)
   C1 spawn relpaths.c:84:5 in spawn_all -> pthread_create; field Rec.count; read relpaths.c:65:15 in rec_counted (via the call relpaths.c:74:9 in worker)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relpaths.c:83:5 key=recs[i] value=0 [0] locks {}
@@ -144,14 +145,14 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       feasibility: possible: the read holds no lock
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: the earlier and the written values give the same constant returns
-      layers: B P0 R
-  C2 spawn relpaths.c:84:5 in spawn_all -> pthread_create; field Rec.count; read relpaths.c:65:15 in rec_counted (via the call relpaths.c:160:9 in helper_main; the spawned entries do not reach this call)
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+  C2 spawn relpaths.c:84:5 in spawn_all -> pthread_create; field Rec.count; read relpaths.c:65:15 in rec_counted (via the call relpaths.c:160:9 in helper_main; the threads this spawn starts do not reach this call)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relpaths.c:83:5 key=recs[i] value=0 [0] locks {}
       read: [recs[i].count] use=branch index=(seq param:i#0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes Rec.count after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: not graded: the spawned entries do not reach this call in the static actor sets, so this context is no read of the child; no grade is given from the locks at the call
+      feasibility: not graded: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, so this context is no read of theirs; no grade is given from the locks at the call
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: none: the earlier and the written values give the same constant returns
       layers: B P0 R
@@ -161,10 +162,10 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       read: [recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:36:3]
       dependency: path C: the creator writes Rec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition across the spawn and every write of Rec.ready after it in this call of spawn_checked, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of spawn_checked (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of Rec.ready, the writes of the whole record Rec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; Rec.ready is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of spawn_checked (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #0 &rec_mutex@relpaths.c:31 (static-instance) a static instance and Rec.ready complete (PI decision pending)
+      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition across the spawn and every write of Rec.ready after it in this call of spawn_checked, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of spawn_checked (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of Rec.ready, the writes of the whole record Rec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; Rec.ready is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of spawn_checked (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (recs[1]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #0 &rec_mutex@relpaths.c:31 (static-instance) a static instance and Rec.ready complete (PI decision pending); and the premises of path C (static_facts §5h): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect and calls back only the functions passed to it in that call, and a function returns twice only by the names of the C library list
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: rec_ready returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]; rec_ready returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]
-      layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
+      layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name)) P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
   C4 spawn relpaths.c:93:10 in spawn_checked -> pthread_create; field Rec.ready; read relpaths.c:53:15 in ready_unlocked (via the call relpaths.c:60:7 in check_ready)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
       write after the spawn: relpaths.c:94:5 key=recs[1] value=1 [1] locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:91:3]
@@ -174,7 +175,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       feasibility: possible: the read holds no lock; the locks held at the call are not counted at the read: on a path from the entry of ready_unlocked the call relpaths.c:52:3 pthread_mutex_unlock releases a lock ready_unlocked does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: ready_unlocked returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]; ready_unlocked returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]
-      layers: B P0 R
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
   C5 spawn relpaths.c:110:8 in spawn_staged -> pthread_create; field Rec.stage; read relpaths.c:45:15 in rec_stage (the read itself)
       spawn: callee pthread_create, entries worker; child actors {worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:109:3]
       write after the spawn: relpaths.c:111:3 key=recs[2] value=1 [1] locks {#0 &rec_mutex@relpaths.c:31 (static-instance)} acquired-at [relpaths.c:109:3]
@@ -185,7 +186,7 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       feasibility: possible: a write after the spawn (relpaths.c:104:32) holds no lock, so the read may come before it
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: rec_stage returns -1 [-1] with the earlier value (INIT 0 (recs)), not with the written value 1 [1]; rec_stage returns 0 [0] not with the earlier value (INIT 0 (recs)), with the written value 1 [1]
-      layers: B P0 R
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)
   C6 spawn relpaths.c:276:9 in main -> spawn_marked; field Marks.started; read relpaths.c:251:13 in watcher_main (the read run as the entry of the spawned thread, under no lock of a caller)
       spawn: callee spawn_marked, entries watcher_main; child actors {watcher_main (spawn-entry)}; creator identity: arg 0 [&marks.started] (spawn_marked stores through it); locks held {}
       write after the spawn by the spawn operation: spawn_marked stores through arg 0 [&marks.started] inside the call at relpaths.c:276:9 (PARAM_FLOW out-store; its order to the thread creation inside the call is not read) locks not known
@@ -195,4 +196,4 @@ summary A 1 (namespaces 1, lookup uses 1, with a creator of the same partition i
       feasibility: possible: the read holds no lock (it runs as the entry of the spawned thread, under no lock of a caller)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: watcher_main returns 0 [0] with the earlier value (INIT 0 (marks)), not with the written value 1 [1]
-      layers: B P0 R
+      layers: B P0 R P0-unverified(pthread_mutex_lock, pthread_mutex_unlock)

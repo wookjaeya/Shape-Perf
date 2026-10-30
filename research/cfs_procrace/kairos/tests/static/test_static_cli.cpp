@@ -552,6 +552,116 @@ startup_script {
     KZ_CHECK(has(vc, "exit 0 goto at flowfacts.c:108:35 {}"));
   }
 
+  // ---- the extended facts F4 and F6 (ARGFLOW, PARAM_FLOW, PTR_FIELDS, GLOBAL_IMAGES; kz_facts.h revision 7) ----------
+  // Written with the facts of revision 6 and after them: off in the profile-driven mode without --extended-facts, the
+  // earlier sections unchanged with it (view and FACT_EXPRS prefix), the same rows in both modes.  The bounds of the
+  // PARAM_FLOW composition and the image budget are tool parameters recorded as unspecified_by_reference.
+  {
+    const fs::path X = work / "argflow";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/argflow.c";
+    auto ex = [&](const std::string& mode, const std::string& dst) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) + " -- -std=c99 -pedantic", &out);
+    };
+    const std::string fa = (X / "plain.kz").string(), fb = (X / "ext.kz").string(), fc = (X / "np.kz").string(), fd = (X / "np2.kz").string();
+    KZ_CHECK_EQ(ex("--profile " + q(profile), fa), 0);
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", fb), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fc), 0);
+    KZ_CHECK_EQ(ex("--no-profile", fd), 0);
+    KZ_CHECK_EQ(read(fc), read(fd));
+    kz::Container ca, cb, cn;
+    KZ_CHECK_OK(kz::Container::read_file(fa, &ca));
+    KZ_CHECK_OK(kz::Container::read_file(fb, &cb));
+    KZ_CHECK_OK(kz::Container::read_file(fc, &cn));
+    KZ_CHECK_OK(cb.verify_content());
+    KZ_CHECK_OK(cn.verify_content());
+    for (const uint32_t sec : {static_cast<uint32_t>(KZ_SEC_ARGFLOW), static_cast<uint32_t>(KZ_SEC_PARAM_FLOW), static_cast<uint32_t>(KZ_SEC_PTR_FIELDS),
+                               static_cast<uint32_t>(KZ_SEC_GLOBAL_IMAGES)}) {
+      KZ_CHECK(ca.find_section(sec) == nullptr);
+      KZ_CHECK(cb.find_section(sec) != nullptr);
+      KZ_CHECK(cn.find_section(sec) != nullptr);
+    }
+    const std::string earlier =
+        " --section files --section functions --section calls --section derives --section loops --section iters --section order --section init --section consts"
+        " --section writers --section atype --section locs --section targets --section spawnparams --section image --section terminals --section outcalls --section fwrites";
+    std::string va, vb;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + earlier, &va), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + earlier, &vb), 0);
+    KZ_CHECK_EQ(va, vb);
+    std::vector<kz_fact_expr> xa, xb;
+    KZ_CHECK_OK(ca.read_section(KZ_SEC_FACT_EXPRS, &xa));
+    KZ_CHECK_OK(cb.read_section(KZ_SEC_FACT_EXPRS, &xb));
+    KZ_CHECK(xb.size() > xa.size());
+    bool prefix = true;
+    for (size_t i = 0; i < xa.size() && i < xb.size(); ++i)
+      prefix = prefix && xa[i].op == xb[i].op && xa[i].flags == xb[i].flags && xa[i].a == xb[i].a && xa[i].b == xb[i].b && xa[i].value == xb[i].value;
+    KZ_CHECK(prefix);
+    const std::string newer = " --section argflow --section paramflow --section ptrfields --section gimages";
+    std::string vn, vp;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + newer, &vn), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fb) + newer, &vp), 0);
+    KZ_CHECK_EQ(vn, vp);
+    // ARGFLOW: the copy through a local, the base of a pointer-field path, the address of a global array element
+    KZ_CHECK(has(vn, "[(const void *)n] <- param root=name param=1 hops=1 {pointer-conversion} chain=(copy n param:name#1)"));
+    KZ_CHECK(has(vn, "[fx_global.slots[index].name] <- field FxSlot.name root=FxGlobal.slots base=pointer-field object=fx_global hops=0 {through-pointer,array-contents} index=[local:index]"));
+    KZ_CHECK(has(vn, "[&fx_table[i]] <- address <global>.fx_table root=fx_table base=global-array-element object=fx_table"));
+    KZ_CHECK(has(vn, "[index] <- local root=index base=local hops=0 {} (multiple-definitions)"));
+    // PARAM_FLOW: uses of depth 0, the composition through an indirect call to a comparison function without a body
+    KZ_CHECK(has(vn, "fx_create#2 d0 comparison at argflow.c:71:7 {} [pos >= FX_NAMES] expr=(ge param:pos#2 4)"));
+    KZ_CHECK(has(vn, "fx_create#1 d0 store at argflow.c:72:3 {} [fx_table[pos].name = name]"));
+    KZ_CHECK(has(vn, "fx_lookup#1 d0 comparison at argflow.c:62:8 {truth-test} [n]"));
+    KZ_CHECK(has(vn, "fx_lookup#0 d0 out-store at argflow.c:65:3"));
+    KZ_CHECK(has(vn, "fx_find#1 d0 call-argument -> fx_name_match#0 at site 2 argflow.c:54:9 {may,indirect,result-tested,in-loop}"));
+    KZ_CHECK(has(vn, "fx_lookup#1 d2 call-argument in fx_name_match at argflow.c:48:83"));
+    KZ_CHECK(has(vn, "chain fx_lookup#1 -> fx_find#1 -> fx_name_match#0"));
+    KZ_CHECK(has(vn, "fx_down#0 d1 comparison in fx_up"));
+    KZ_CHECK(has(vn, "fx_dispatch#0 d0 comparison at argflow.c:120:11 {switch} [code]"));
+    KZ_CHECK(has(vn, "fx_dispatch#0 d0 call-argument -> ?#0 at site 12 argflow.c:121:20 {indirect,unresolved} [code]"));
+    // PTR_FIELDS: the address write after the record is cleared, the reads it resolves, the order, the elements and their values
+    KZ_CHECK(has(vn, "0 address-write FxGlobal.slots at argflow.c:98:3 in fx_init root=fx_global -> fx_slots[0] [fx_slots] other-writes=0 {earlier-writes-overwritten}"));
+    KZ_CHECK(has(vn, "in fx_setup_slots@argflow.c:87 read=3 root=fx_global resolved candidates=1 write=0 -> fx_slots path=.name index=local:index elements=0+1k (k<2) "
+                     "{write-before-read,same-root,index-from-counted-loop}"));
+    KZ_CHECK(has(vn, "fx_slots[0].name = string \"slot_zero\" at argflow.c:38:31 macro FX_SLOT_0_NAME spelled at argflow.c:13:24 {from-macro}"));
+    KZ_CHECK(has(vn, "fx_slots[1].name = string \"slot_one\" at argflow.c:38:55 macro FX_SLOT_1_NAME spelled at argflow.c:15:24 {from-macro}"));
+    KZ_CHECK(has(vn, "in fx_first_limit read=10 root=fx_global may candidates=1 write=0 -> fx_slots path=.limit index=0 elements=0+0k (k<1) {same-root,constant-index}"));
+    KZ_CHECK(has(vn, "1 static-initializer FxGlobal.slots at argflow.c:41:22 root=fx_other -> fx_spares[0] [fx_spares] other-writes=2 {other-writes}"));
+    KZ_CHECK(has(vn, "in fx_spare_limit read=12 root=fx_other may candidates=1 write=1 -> fx_spares path=.limit"));
+    KZ_CHECK(has(vn, "read FxGlobal.cursor at argflow.c:114:28 in fx_cursor_limit read=14 root=fx_global needs-field-points-to candidates=0 {}"));
+    // GLOBAL_IMAGES: the objects reached, a zero-initialized one, the field written elsewhere
+    KZ_CHECK(has(vn, "fx_global int 0 at argflow.c:40:10 {zero-initialized,object-written} reach={argument,pointer-field}"));
+    KZ_CHECK(has(vn, "fx_slots[0].handle int 0 at argflow.c:38:50 {field-written} reach={argument,pointer-field} field=FxSlot.handle"));
+    // the tool parameters: recorded, refused without the extended facts or with a value that is not a number
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fc) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "extract.extended_facts_f4_f6 = F4 ARGFLOW, PARAM_FLOW and PTR_FIELDS, F6 GLOBAL_IMAGES (kz_facts.h revision 7)"));
+    KZ_CHECK(has(out, "param.argflow_depth_bound = none (calls a composed PARAM_FLOW row passes; a tool parameter no reference fixes)  (unspecified_by_reference)"));
+    KZ_CHECK(has(out, "param.argflow_size_bound = none"));
+    KZ_CHECK(has(out, "param.image_budget = 4096"));
+    KZ_CHECK(has(out, "count.param_flow_cut = depth bound 0 parameters, size bound 0 parameters, uses left out 0"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fa) + " --section basis", &out), 0);
+    KZ_CHECK(!has(out, "extended_facts_f4_f6") && !has(out, "param.argflow"));
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --argflow-depth 1", (X / "bad.kz").string()), 2);
+    KZ_CHECK(has(out, "needs the extended facts"));
+    KZ_CHECK_EQ(ex("--no-profile --argflow-depth x", (X / "bad.kz").string()), 2);
+    KZ_CHECK_EQ(ex("--no-profile --image-budget 0", (X / "bad.kz").string()), 2);
+    // a depth bound of 1 cuts the composition of depth 2: an OPEN row, counted
+    const std::string f1 = (X / "d1.kz").string(), f0 = (X / "s0.kz").string(), fi = (X / "img.kz").string();
+    KZ_CHECK_EQ(ex("--no-profile --argflow-depth 1", f1), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(f1) + " --section paramflow --section basis", &out), 0);
+    KZ_CHECK(has(out, "fx_lookup#1 d1 open {depth-bound} left out 1 [uses beyond the depth bound]"));
+    KZ_CHECK(!has(out, "fx_lookup#1 d2 "));
+    KZ_CHECK(has(out, "param.argflow_depth_bound = 1 "));
+    KZ_CHECK(has(out, "count.param_flow_cut = depth bound 1 parameters, size bound 0 parameters, uses left out 1"));
+    // a size bound of 0 keeps no composed row
+    KZ_CHECK_EQ(ex("--no-profile --argflow-size 0", f0), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(f0) + " --section paramflow", &out), 0);
+    KZ_CHECK(has(out, "fx_find#1 d0 open {size-bound} left out 1 [uses beyond the size bound]"));
+    KZ_CHECK(!has(out, " d1 ") && !has(out, " d2 "));
+    // an image budget of 1 leaf truncates the images of the tables
+    KZ_CHECK_EQ(ex("--no-profile --image-budget 1", fi), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fi) + " --section gimages", &out), 0);
+    KZ_CHECK(has(out, "fx_slots[...] non-constant at argflow.c:38:8 {image-truncated} reach={argument,pointer-field}"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

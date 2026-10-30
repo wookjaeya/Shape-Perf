@@ -44,6 +44,8 @@ const std::vector<std::string> kFactSections = {"files", "functions", "calls", "
 const std::vector<std::string> kProfileFreeSections = {"files", "functions", "calls", "loops", "consts", "targets", "spawnparams", "terminals", "fwrites", "p0", "derived", "spawnwrap"};
 // The extended facts F1-F3 (always in the profile-free mode, with --extended-facts in the profile-driven one).
 const std::vector<std::string> kExtendedSections = {"functions", "loops", "reads", "returns", "retconsts", "loopexits"};
+// The extended facts F4 and F6 (written with those of F1-F3).
+const std::vector<std::string> kFlowSections = {"functions", "argflow", "paramflow", "ptrfields", "gimages"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -60,6 +62,8 @@ const std::vector<Case>& cases() {
       {"wrappers", "wrappers.c", {}, kProfileFreeSections, true},
       {"flowfacts", "flowfacts.c", {"--extended-facts"}, kExtendedSections},
       {"flowfacts_np", "flowfacts.c", {}, kExtendedSections, true},
+      {"argflow", "argflow.c", {"--extended-facts"}, kFlowSections},
+      {"argflow_np", "argflow.c", {}, kFlowSections, true},
   };
   return all;
 }

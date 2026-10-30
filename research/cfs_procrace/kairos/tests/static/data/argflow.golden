@@ -1,0 +1,103 @@
+extract
+  translation units          1
+  functions                  15 (bodies read 12, in system headers skipped 0)
+  call sites                 11
+  indirect calls             2 (resolved 1, unresolved 1)
+  spawn calls                0 (entry resolved 0)
+  loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 2, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 0, escaping 0, unsummarized 0
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        12 (built-in data-function table 12, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+facts-view 1
+[functions] 15
+  fn 0 fx_create argflow.c:70-76 params=3 {defined}
+  fn 1 fx_cursor_limit argflow.c:112-115 params=0 {defined}
+  fn 2 fx_dispatch argflow.c:119-124 params=1 {defined}
+  fn 3 fx_down argflow.c:81-84 params=1 {defined}
+  fn 4 fx_find argflow.c:51-56 params=2 {defined}
+  fn 5 fx_first_limit argflow.c:106-106 params=0 {defined}
+  fn 6 fx_init argflow.c:96-103 params=0 {defined}
+  fn 7 fx_lookup argflow.c:59-67 params=2 {defined}
+  fn 8 fx_name_match argflow.c:48-48 params=2 {defined,address-taken}
+  fn 9 fx_setup_slots argflow.c:87-93 params=0 {defined,static}
+  fn 10 fx_spare_limit argflow.c:109-109 params=0 {defined}
+  fn 11 fx_unknown_store argflow.c:45 params=1 {}
+  fn 12 fx_up argflow.c:80-80 params=1 {defined}
+  fn 13 memset argflow.c:9 params=3 {builtin}
+  fn 14 strcmp argflow.c:8 params=2 {builtin}
+[argflow] 18
+  arg 0 of site 0 argflow.c:48:83 [(const char *)key] <- param root=key param=0 hops=0 {pointer-conversion} chain=param:key#0
+  arg 1 of site 0 argflow.c:48:83 [rec->name] <- field FxRec.name root=rec param=1 base=parameter hops=0 {through-pointer} read=1 chain=field:FxRec.name
+  arg 0 of site 2 argflow.c:54:9 [key] <- param root=key param=1 hops=0 {} chain=param:key#1
+  arg 1 of site 2 argflow.c:54:9 [&fx_table[i]] <- address <global>.fx_table root=fx_table base=global-array-element object=fx_table hops=0 {} index=[local:i] chain=(addr (index global:fx_table local:i))
+  arg 0 of site 3 argflow.c:63:9 [fx_name_match] <- function root=fx_name_match hops=0 {} chain=function:fx_name_match
+  arg 1 of site 3 argflow.c:63:9 [(const void *)n] <- param root=name param=1 hops=1 {pointer-conversion} chain=(copy n param:name#1)
+  arg 0 of site 4 argflow.c:80:51 [level + 1] <- expression hops=0 {} (not-a-copy) chain=(add param:level#0 1)
+  arg 0 of site 5 argflow.c:83:10 [level] <- param root=level param=0 hops=0 {} chain=param:level#0
+  arg 0 of site 7 argflow.c:90:9 [&fx_slots[index].handle] <- address FxSlot.handle root=fx_slots base=global-array-element object=fx_slots hops=0 {} index=[local:index] chain=(addr field:FxSlot.handle)
+  arg 1 of site 7 argflow.c:90:9 [fx_global.slots[index].name] <- field FxSlot.name root=FxGlobal.slots base=pointer-field object=fx_global hops=0 {through-pointer,array-contents} index=[local:index] read=3 chain=field:FxSlot.name
+  arg 0 of site 8 argflow.c:91:11 [&fx_global.slots[index].handle] <- address FxSlot.handle root=FxGlobal.slots base=pointer-field object=fx_global hops=0 {through-pointer} index=[local:index] chain=(addr field:FxSlot.handle)
+  arg 1 of site 8 argflow.c:91:11 [fx_global.slots[index].name] <- field FxSlot.name root=FxGlobal.slots base=pointer-field object=fx_global hops=0 {through-pointer,array-contents} index=[local:index] read=6 chain=field:FxSlot.name
+  arg 2 of site 8 argflow.c:91:11 [index] <- local root=index base=local hops=0 {} (multiple-definitions) chain=local:index
+  arg 0 of site 9 argflow.c:97:3 [&fx_global] <- address <global>.fx_global root=fx_global base=global object=fx_global hops=0 {pointer-conversion} chain=(addr global:fx_global)
+  arg 1 of site 9 argflow.c:97:3 [0] <- const 0 hops=0 {null} chain=0
+  arg 2 of site 9 argflow.c:97:3 [sizeof(fx_global)] <- const 24 hops=0 {} chain=24
+  arg 0 of site 11 argflow.c:113:7 [(void **)&fx_global.cursor] <- address FxGlobal.cursor root=fx_global base=global object=fx_global hops=0 {pointer-conversion} chain=(addr field:FxGlobal.cursor)
+  arg 0 of site 12 argflow.c:121:20 [code] <- param root=code param=0 hops=0 {} chain=param:code#0
+[paramflow] 19
+  fx_create#0 d0 out-store at argflow.c:74:3 {} [pos] guard=(not (ge param:pos#2 4))
+  fx_create#1 d0 store at argflow.c:72:3 {} [fx_table[pos].name = name] expr=field:FxRec.name guard=(not (ge param:pos#2 4))
+  fx_create#2 d0 comparison at argflow.c:71:7 {} [pos >= FX_NAMES] expr=(ge param:pos#2 4)
+  fx_create#2 d0 subscript at argflow.c:72:3 {} [fx_table[pos]] expr=(index global:fx_table param:pos#2) guard=(not (ge param:pos#2 4))
+  fx_create#2 d0 subscript at argflow.c:73:3 {} [fx_table[pos]] expr=(index global:fx_table param:pos#2) guard=(not (ge param:pos#2 4))
+  fx_create#2 d0 store at argflow.c:74:3 {through-pointer-parameter} [*out = pos] expr=(deref param:out#0) guard=(not (ge param:pos#2 4))
+  fx_dispatch#0 d0 comparison at argflow.c:120:11 {switch} [code] expr=param:code#0
+  fx_dispatch#0 d0 call-argument -> ?#0 at site 12 argflow.c:121:20 {indirect,unresolved} [code]
+  fx_down#0 d0 comparison at argflow.c:82:7 {} [level == 0] expr=(eq param:level#0 0)
+  fx_down#0 d0 call-argument -> fx_up#0 at site 5 argflow.c:83:10 {} [level] guard=(not (eq param:level#0 0))
+  fx_down#0 d1 comparison in fx_up at argflow.c:80:31 via site 5 argflow.c:83:10 {} [level > 3] expr=(gt param:level#0 3)
+      chain fx_down#0 -> fx_up#0
+  fx_find#1 d0 call-argument -> fx_name_match#0 at site 2 argflow.c:54:9 {may,indirect,result-tested,in-loop} [key] guard=(lt local:i 4)
+  fx_find#1 d1 call-argument in fx_name_match at argflow.c:48:83 via site 2 argflow.c:54:9 (call site 0 argflow.c:48:83 arg 0) {may,callee-without-body,result-tested} [(const char *)key] guard=(ne field:FxRec.active 0)
+      chain fx_find#1 -> fx_name_match#0
+  fx_lookup#0 d0 out-store at argflow.c:65:3 {} [idx] guard=(and (not (not local:n)) (not (lt local:idx 0)))
+  fx_lookup#1 d0 comparison at argflow.c:62:8 {truth-test} [n] expr=(ne local:n 0)
+  fx_lookup#1 d0 call-argument -> fx_find#1 at site 3 argflow.c:63:9 {result-tested} [(const void *)n] guard=(not (not local:n))
+  fx_lookup#1 d2 call-argument in fx_name_match at argflow.c:48:83 via site 3 argflow.c:63:9 (call site 0 argflow.c:48:83 arg 0) {may,callee-without-body,result-tested} [(const char *)key] guard=(ne field:FxRec.active 0)
+      chain fx_lookup#1 -> fx_find#1 -> fx_name_match#0
+  fx_name_match#0 d0 call-argument -> strcmp#0 at site 0 argflow.c:48:83 {callee-without-body,result-tested} [(const char *)key] guard=(ne field:FxRec.active 0)
+  fx_up#0 d0 comparison at argflow.c:80:31 {} [level > 3] expr=(gt param:level#0 3)
+[ptrfields] 7
+  0 address-write FxGlobal.slots at argflow.c:98:3 in fx_init root=fx_global -> fx_slots[0] [fx_slots] other-writes=0 {earlier-writes-overwritten}
+  1 static-initializer FxGlobal.slots at argflow.c:41:22 root=fx_other -> fx_spares[0] [fx_spares] other-writes=2 {other-writes}
+  2 read FxGlobal.slots at argflow.c:90:67 in fx_setup_slots@argflow.c:87 read=3 root=fx_global resolved candidates=1 write=0 -> fx_slots path=.name index=local:index elements=0+1k (k<2) {write-before-read,same-root,index-from-counted-loop}
+      fx_slots[0].name = string "slot_zero" at argflow.c:38:31 macro FX_SLOT_0_NAME spelled at argflow.c:13:24 {from-macro}
+      fx_slots[1].name = string "slot_one" at argflow.c:38:55 macro FX_SLOT_1_NAME spelled at argflow.c:15:24 {from-macro}
+  3 read FxGlobal.slots at argflow.c:91:76 in fx_setup_slots@argflow.c:87 read=6 root=fx_global resolved candidates=1 write=0 -> fx_slots path=.name index=local:index elements=0+1k (k<2) {write-before-read,same-root,index-from-counted-loop}
+      fx_slots[0].name = string "slot_zero" at argflow.c:38:31 macro FX_SLOT_0_NAME spelled at argflow.c:13:24 {from-macro}
+      fx_slots[1].name = string "slot_one" at argflow.c:38:55 macro FX_SLOT_1_NAME spelled at argflow.c:15:24 {from-macro}
+  4 read FxGlobal.slots at argflow.c:106:54 in fx_first_limit read=10 root=fx_global may candidates=1 write=0 -> fx_slots path=.limit index=0 elements=0+0k (k<1) {same-root,constant-index}
+      fx_slots[0].limit = int 3 at argflow.c:38:47 {}
+  5 read FxGlobal.slots at argflow.c:109:51 in fx_spare_limit read=12 root=fx_other may candidates=1 write=1 -> fx_spares path=.limit elements=0+0k (k<1) {write-before-read,same-root,other-writes,constant-index}
+      fx_spares[0].limit = int 1 at argflow.c:39:34 {}
+  6 read FxGlobal.cursor at argflow.c:114:28 in fx_cursor_limit read=14 root=fx_global needs-field-points-to candidates=0 {}
+[gimages] 14
+  fx_global int 0 at argflow.c:40:10 {zero-initialized,object-written} reach={argument,pointer-field}
+  fx_other.slots address fx_spares at argflow.c:41:22 {field-written,record-written} reach={pointer-field} field=FxGlobal.slots
+  fx_other.cursor null at argflow.c:41:33 {field-written,record-written} reach={pointer-field} field=FxGlobal.cursor
+  fx_other.ready int 1 at argflow.c:41:36 {field-written,record-written} reach={pointer-field} field=FxGlobal.ready
+  fx_slots[0].name string "slot_zero" at argflow.c:38:31 macro FX_SLOT_0_NAME spelled at argflow.c:13:24 {from-macro} reach={argument,pointer-field} field=FxSlot.name
+  fx_slots[0].limit int 3 at argflow.c:38:47 {} reach={argument,pointer-field} field=FxSlot.limit
+  fx_slots[0].handle int 0 at argflow.c:38:50 {field-written} reach={argument,pointer-field} field=FxSlot.handle
+  fx_slots[1].name string "slot_one" at argflow.c:38:55 macro FX_SLOT_1_NAME spelled at argflow.c:15:24 {from-macro} reach={argument,pointer-field} field=FxSlot.name
+  fx_slots[1].limit int 5 at argflow.c:38:71 {} reach={argument,pointer-field} field=FxSlot.limit
+  fx_slots[1].handle int 0 at argflow.c:38:74 {field-written} reach={argument,pointer-field} field=FxSlot.handle
+  fx_spares[0].name string "spare" at argflow.c:39:25 {} reach={pointer-field} field=FxSlot.name
+  fx_spares[0].limit int 1 at argflow.c:39:34 {} reach={pointer-field} field=FxSlot.limit
+  fx_spares[0].handle int 0 at argflow.c:39:37 {field-written} reach={pointer-field} field=FxSlot.handle
+  fx_table int 0 at argflow.c:42:7 {zero-initialized} reach={argument}

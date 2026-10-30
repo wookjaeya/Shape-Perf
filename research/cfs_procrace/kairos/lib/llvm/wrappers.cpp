@@ -554,13 +554,11 @@ void op_rows(const Prog& p, const F8& f8, uint8_t kind, Derivation* d) {
     if (pit != parent.end()) c += " -> " + chain(pit->second);
     return chain_memo[n] = c;
   };
+  // the breadth-first parents form a tree rooted at the primitives
   std::function<std::string(const std::string&)> prim_of = [&](const std::string& n) -> std::string {
     std::string cur = n;
-    for (int guard = 0; guard < 100000; ++guard) {
-      auto pit = parent.find(cur);
-      if (pit == parent.end()) break;
-      cur = pit->second;
-    }
+    std::set<std::string> seen{cur};
+    for (auto pit = parent.find(cur); pit != parent.end() && seen.insert(pit->second).second; pit = parent.find(cur)) cur = pit->second;
     return cur;
   };
   for (const auto& kv : steps) {
@@ -900,12 +898,32 @@ class F7 {
     return have_fixed;
   }
 
-  uint32_t depth_of(const std::string& k, int guard = 0) {
+  // The spawn operations from `k` down to the primitive along `next`.  A function whose fixed entry
+  // was later replaced by an entry parameter may point back at a caller; the walk stops at a repeat.
+  uint32_t depth_of(const std::string& k) {
     auto it = depth_.find(k);
     if (it != depth_.end()) return it->second;
-    auto oit = ops_.find(k);
-    if (oit == ops_.end() || oit->second.primitive || guard > 1000) return depth_[k] = 0;
-    return depth_[k] = depth_of(oit->second.next, guard + 1) + 1;
+    std::vector<std::string> path;
+    std::set<std::string> on_path;
+    std::string cur = k;
+    uint32_t below = 0;
+    for (;;) {
+      auto dit = depth_.find(cur);
+      if (dit != depth_.end()) {
+        below = dit->second;
+        break;
+      }
+      auto oit = ops_.find(cur);
+      if (oit == ops_.end() || oit->second.primitive || !on_path.insert(cur).second) {
+        if (on_path.count(cur) == 0) depth_[cur] = 0;
+        below = depth_.count(cur) != 0 ? depth_[cur] : 0;
+        break;
+      }
+      path.push_back(cur);
+      cur = oit->second.next;
+    }
+    for (auto p = path.rbegin(); p != path.rend(); ++p) depth_[*p] = ++below;
+    return depth_[k];
   }
   std::string chain(const std::string& k) {
     auto it = chain_memo_.find(k);
@@ -918,11 +936,8 @@ class F7 {
   }
   std::string primitive_of(const std::string& k) const {
     std::string cur = k;
-    for (int guard = 0; guard < 1000; ++guard) {
-      auto oit = ops_.find(cur);
-      if (oit == ops_.end() || oit->second.primitive) break;
-      cur = oit->second.next;
-    }
+    std::set<std::string> seen{cur};
+    for (auto oit = ops_.find(cur); oit != ops_.end() && !oit->second.primitive && seen.insert(oit->second.next).second; oit = ops_.find(cur)) cur = oit->second.next;
     return cur;
   }
   // The shortest path of direct calls from `f` to a call of a lookup primitive; empty when there is

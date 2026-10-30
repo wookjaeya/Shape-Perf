@@ -41,7 +41,8 @@ $B/tools/kz-static/kz-static show facts.kz --section loops --section order
 $B/tools/kz-static/kz-static reach facts.kz --root CFE_ES_TaskMain --loc CFE_SB_Global_t.AppId --callee CFE_EVS_SendEventWithAppID
 ```
 
-- `show` 의 section: `basis files functions calls derives loops iters order init consts writers atype locs targets spawnparams image terminals outcalls fwrites`. `--loc Type.field`, `--callee NAME` 으로 거른다.
+- `show` 의 section: `basis files functions calls derives loops iters order init consts writers atype locs targets spawnparams image terminals outcalls fwrites`, 컨테이너에 있으면 `p0 derived spawnwrap`(§5a). `--loc Type.field`, `--callee NAME` 으로 거른다.
+- 프로필 없는 추출(§5a): `basis --no-profile …`, `extract --no-profile --basis basis.kz -o facts.kz`. `--profile` 과 어휘 옵션(`--target`, `--delay-op`, `--lock-op`, `--unlock-op`, `--spawn-op`, `--terminal-op`, `--poll-fn`)은 함께 쓸 수 없다(종료 코드 2).
 - 종료 코드: 0 정상, 1 분석 실패(번역 단위가 parse 되지 않음, 컨테이너 손상), 2 사용법·입출력 오류.
 - 고정 도구(fixture)처럼 compile DB 없이 읽을 때는 `--source FILE ... -- <컴파일 플래그>` 를 쓴다.
 
@@ -124,8 +125,11 @@ artifact 종류 FACTS. 모든 사실은 (file, line, col) 과 `fh`(같은 컨테
 | OUTCALLS (35) | `kz_fact_outcall` | 대상 필드의 주소를 넘기는 호출과 callee 요약 |
 | FUNC_WRITES (39) | `kz_fact_fwrite` | 함수 본문이 직접 쓰는 필드(첫 지점). 루프 body 의 전이적 mod set 을 컨테이너에서 다시 계산할 수 있게 둔다 |
 | BASIS, FILE_HASHES, PROVENANCE | — | 추출 매개변수, 수, 손으로 넣은 입력(계층 `researcher`) |
+| P0_TABLE (120) | `kz_fact_p0` | 프로필 없는 추출만: P0 표의 항목(종류, 매개변수 위치, 판 표기, 원문 대조)과 이 프로그램의 호출 수(§5a) |
+| OP_DERIV (121) | `kz_fact_opderiv` | 프로필 없는 추출만: F8 이 유도한 지연·종료 연산. 함수와 그 안의 호출마다 must/noreturn/may, guard, 호출 사슬(§5a) |
+| SPAWN_WRAP (122) | `kz_fact_spawnw` | 프로필 없는 추출만: F7 이 유도한 spawn 연산과 시작 스크립트 진입의 해결(§5a) |
 
-schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
+schema 버전: FACT_LOOPS 와 FACT_EXPRS 는 3, FACT_ATYPE 은 3(`unknown-effect` 종류), FACT_LOCS 는 2(`n_unknown_effect`), 새 섹션 37–39 는 1. writer 에 `partial-write`, 루프에 `static-image-assumed` 표시가 있다(revision 4). 섹션 120–122 는 1이고, TERMINALS 에 `conditional` 표시가 있다(revision 5, 스키마 개정 7). 바뀐 점은 `kz_facts.h` 머리 주석에 있다.
 
 ### 4.1 writer, A-TYPE, INIT (SPEC §4.2)
 
@@ -182,6 +186,30 @@ resolved table walk 의 반복마다 원소 객체의 static image 로 루프 �
 ### 5.4 spawn 사실
 
 spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해결한다. **task-main 매개변수**: spawn 하는 함수 F 의 매개변수 k 가 (DIRECT) 그 spawn 의 entry 인자로 흐르거나, (VIA_ENTRY) 해결된 entry 에서 도달하는 함수의 간접 호출 callee 로 흐르면 기록한다. 이것은 field 기반 **may-flow** 사실이다: 어느 task 가 어느 값을 부르는지(인스턴스 대응)는 정하지 않는다. 그 대응은 SPEC §4.2 8 의 A-OWNER 와 같은 종류의 가정이고 K4b 가 신뢰 원장에 올려야 한다.
+
+## 5a. 프로필 없는 추출 (`--no-profile`, 2026-10-30, 단계 2a S1) [D][M]
+
+근거: `plan/extraction_design_20261030.md` §3.0, §6 항목 1–2. 결과는 `plan/step2a_s1_20261030.md`.
+
+**입력** [D]. 프로필을 읽지 않고 명령줄 어휘도 받지 않는다. 고정된 내장 프로필 `phi 1; profile "kz-static-builtin-minimal";`(로더가 받는 최소 두 문장, 어휘 0)을 쓴다. 나머지는 빌드(basis), P0 표, recipe 의 시작 스크립트 블록(L0, basis 의 `startup.entry[k]`), 아래 규칙에서만 온다. facts 의 BASIS 에 `extract.mode`, `extract.builtin_profile`, `extract.p0_table`, `extract.derivation_rules` 가 남고 머리의 프로필 해시는 내장 프로필의 해시다. basis 에는 `profile.mode` 가 남는다. `kz replay` 의 프로필 해시 결합은 그대로다.
+
+**P0 표** (`lib/llvm/p0.cpp`, 개정 1). API 묶음마다 한 번: 스레드 생성 `pthread_create`(인자 0 에 새 스레드 id, 인자 2 시작 함수, 인자 3 그 인자), mutex `pthread_mutex_lock/trylock/timedlock/unlock`, 세마포어 `sem_wait/trywait/timedwait/post`, 조건 변수 `pthread_cond_wait/timedwait/signal/broadcast`, 잠자기 `clock_nanosleep`·`nanosleep`·`sleep`, 종료 `pthread_exit`(스레드)·`exit`·`_exit`·`_Exit`·`abort`(프로세스), `pthread_self`, `pthread_getspecific/setspecific`, `dlopen`·`dlsym`, 데이터 함수 12개. 항목마다 판 표기(POSIX.1-2017 / glibc 2.39; `bzero` 는 POSIX.1-2017 에 없음)와 원문 대조 줄이 있다. 원문은 upstream glibc 2.39 `nptl/pthread_create.c` 만 대조했다(L624, L755 의 `*newthread = pd` 가 L804·L836 의 `create_thread` 앞). 나머지는 `unverified` 다. try·timed 항목은 `conditional` 이다. 프로그램이 같은 이름의 함수를 정의하면 그 본문을 읽고 항목은 쓰지 않는다(`shadowed`). 데이터 함수 요약은 이 표에서 예전 순서대로 읽는다.
+
+**두 번 읽기** [D]. 첫 읽기는 함수 본문마다 Clang CFG(모든 식을 원소로 둬서 블록 안 호출이 평가 순서)와 직접 호출의 함수 포인터 인자를 더 기록한다. finalize 한 첫 읽기 위에서 유도한다. 둘째 읽기는 유도한 연산을 어휘로 쓴다(함수 key 기준, 내부 연결 함수가 섞이지 않게). 둘째 읽기의 facts 와 세 섹션이 출력이다.
+
+**F8 DELAY-W·TERM-W** [D]. 호출 그래프(직접 호출 + 해결된 간접 대상)의 강연결요소를 callee 먼저(역위상) 풀고, 요소 안에서는 고정점까지 되풀이한다. 블록을 따라가다 돌아오지 않는 호출(callee 가 돌아오지 않음, 선언이 noreturn)에서 그 경로는 멈춘다.
+- returns: 진입에서 출구에 닿는가(처음 참, 내려가기만 함).
+- 종료 must: 출구에 닿지 않고, 닿는 모든 경로가 종료 호출(P0 종료 또는 must 종료 callee; 간접 호출은 해결된 대상이 모두 그럴 때)에서 끝나며, 멈추지 않는 블록끼리 순환이 없다(끝없는 경로도 종료여야 must).
+- 종료 noreturn: must 가 아니고 돌아오지 않으며 어떤 경로가 종료에 닿는다. 종료 may: 돌아오는 경로도 있다.
+- 지연 must: 돌아오는 경로가 있고 돌아오는 모든 경로가 지연 호출을 지난다. 지연 may: 어떤 경로가 지연에 닿는다.
+- 행: (함수, 종류, 그 함수 안에서 거기로 가는 호출)마다 하나. guard 는 둘째 읽기의 그 호출 guard, `chain` 은 너비 우선으로 정한 가장 짧은 사슬(같으면 key 순).
+- **어휘 규칙** [D]: 지연은 must 만(무엇이 기다린다고 말할 수 있는 것만 루프 종류를 정한다). 종료는 must·noreturn·may 모두이고, noreturn·may 의 호출 행에는 `conditional` 을 단다. `process-terminal` 은 사슬이 모두 프로세스 종료로 끝날 때만. mutex 는 P0 의 무조건 획득(`pthread_mutex_lock`)과 해제를 잠금 어휘로 쓴다. 잠금 래퍼 유도(F5)는 S1 에 없다.
+
+**F7 SPAWN-W** [D]. P0 스레드 생성에서 출발해 고정점까지: 함수 F 의 매개변수 k 가 (a) F 안 spawn 호출의 entry 인자로 흐르면 `entry-argument`, (b) 그 spawn 의 entry 에서 닿는 코드의 간접 호출로 흐르면(필드에 저장, 필드 기반) `called-by-entry`. (b)는 F 가 고정 entry spawn 함수를 부르는 경우도 본다: F 안의 spawn 호출이 매개변수에서 오지 않은, 흐름 그래프가 푸는 entry 를 쓰면 F 는 `fixed-entry` 다. fixed-entry 는 한 단계만 쓴다(그 호출자는 그것으로 spawn 연산이 되지 않는다). fixed-entry 함수는 어휘가 아니다. **시작 스크립트 진입**: spawn 호출의 entry 인자가 함수 포인터로 바꾼 데이터(정수·데이터 포인터)이고 흐름 그래프로 풀리지 않으며, 호출한 함수가 **직접 호출만으로** P0 `dlsym` 에 닿으면, basis 의 `startup.entry[k]` 중 종류 `app` 의 둘째 필드(진입 기호)가 그 spawn 의 entry 다(닫힘 밖이면 `not-in-closure`). 이 entry 는 둘째 읽기의 CALL_TARGETS 에도 들어간다.
+
+**숫자 상한 없음** [D]. 유도에는 깊이·크기 상한이 없다(고정점, 순환은 방문 집합으로 끊는다). 규칙 선택(지연 어휘 must 만, 종료 어휘 전부, fixed-entry 한 단계)의 영향은 요약 줄에 센다: may 지연을 부르는 루프 수, 고정 entry 함수의 호출자 중 남긴 것.
+
+**시험** [M]: `static_golden_wrappers`(fixture `wrappers.c`, `data/wrappers.golden`), `test_static_wrappers`(합성 모델 251 확인), `test_static_cli` 의 프로필 없는 닫힘(모듈 하나, 시작 스크립트, `dlsym`).
 
 ## 6. core-cpu1 결과 [M]
 

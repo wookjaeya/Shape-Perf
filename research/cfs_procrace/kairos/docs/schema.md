@@ -51,6 +51,7 @@ kz_section_entry[n]       section type이 엄격하게 증가하는 순서
 | 60–79 | `kz_cert.h` (초기, K4b) | CERTIFICATES : kz_cert (136), CERT_STEPS : kz_cert_step (36), TRUST_LEDGERS : kz_trust_ledger (224), TRUST : kz_trust (60), OBLIGATIONS : kz_obligation (64) |
 | 80–99 | `kz_schema.h` (K0; 스키마 개정 2 에서 섹션 추가) | WITNESSES : kz_witness (112), VERDICTS : kz_verdict (112), VERDICT_CELLS : kz_verdict_cell (472), BOUNDS : kz_bound (192), SUMMARIES : kz_summary (44; 개정 2), MODEL_IDS : kz_model_id (44; 개정 2), OBS_ADEQUACY : kz_obs_adequacy (88; 개정 2), IDENTITIES : kz_identity (68; 개정 2) |
 | 100–119 | `kz_neutral.h` (스키마 개정 3, 2026-10-26; §12. **필드 단위 little-endian 직렬화**) | NRUN : kz_nrun (168), NSITES : kz_nsite (104), NSLOTS : kz_nslot (64), NEVENTS : kz_nevent (88), NVALUES : kz_nvalue (24), NACTORS : kz_nactor (184), NLOSS : kz_nloss (72), NCTL : kz_nctl (64) |
+| 120–139 | `kz_facts.h` 둘째 추출 범위 (스키마 개정 7, 2026-10-30; 추출 레코드 개정 5, §15. 구조체 복사 직렬화) | P0_TABLE : kz_fact_p0 (64), OP_DERIV : kz_fact_opderiv (40), SPAWN_WRAP : kz_fact_spawnw (56) |
 
 컨테이너 자체의 구조 레코드: `kz_header` (160), `kz_parent` (40), `kz_section_entry` (48), `kz_str` (8).
 
@@ -341,3 +342,12 @@ kz convert --kzrt <dump> --manifest <kzs> [--manifest <kzs>]... [--basis <basis.
 - confirm2 `W1_post_1df262a_tx`(F0 + `hold.kzr`): 고치기 전 kz가 변환한 컨테이너를 두 kz가 읽으면 `cur` 텍스트가 `wrote` 줄을 빼고 같다. 각 kz가 스스로 변환하면 `cur`·`p1off`·`ctloff_p1off` 텍스트가 둘째 줄(변환 컨테이너의 artifact hash; tool hash가 다름)과 `wrote` 줄을 빼고 같다. 그 G-I-H 짝(단계 F 변환 기록)의 `cur`·`p1off`도 `wrote` 줄을 빼고 같다.
 - 고친 kz의 `kz occ diff`(F0 + hold.kzr 대 G-I-H, `cur`·`p1off`): 25/25가 맞고 판정·근거 차이 0, 종료 코드 0. 두 경로 모두 키의 소유 앱이 `app[9]#1`이다. 그래서 task 자리가 두 경로에서 같게 정해진다.
 - 변환: confirm2 36회의 `kz convert --hold` 결과와 G-I-H 1.3 dump 하나의 `kz convert --kzrt` 결과가 정규 dump에서 tool hash·artifact hash 줄을 빼고 같다. 그래서 1.4 이전 dump와 F0 기록의 중립 층은 바뀌지 않았다.
+
+## 15. 스키마 개정 7: 프로필 없는 추출의 세 섹션 (2026-10-30) [D][M]
+
+- 근거: `plan/extraction_design_20261030.md` §3.0(P0 표, F7, F8), §6 단계 2a 항목 1–2. 연구 조건은 정하지 않았다. 아래 수는 단위 시험·고정 도구의 값이다.
+- 방식: 개정 2–6과 같다. 기존 레코드의 배치·섹션 버전·필드 이름은 바꾸지 않았다. 추출 범위 10–39가 다 차서 둘째 추출 범위 120–139를 두었다(100–119는 필드 단위 직렬화 범위라 피했다). `KZ_SCHEMA_REVISION` = 7이 `layout_text()` 첫 줄에 들어가 schema fingerprint와 모든 tool hash가 바뀐다.
+- 새 섹션: P0_TABLE(120, `kz_fact_p0` 64 B), OP_DERIV(121, `kz_fact_opderiv` 40 B), SPAWN_WRAP(122, `kz_fact_spawnw` 56 B), 모두 버전 1. 새 열거형 `KZ_P0_KIND`, `KZ_P0_FLAG`, `KZ_OPDERIV_KIND`, `KZ_OPDERIV_MODE`, `KZ_OPDERIV_FLAG`, `KZ_SPAWNW_KIND`, `KZ_SPAWNW_FLAG`. 값 0은 모두 `none`이다. TERMINALS의 flags에 `conditional`(0x8)을 더했다. 뜻은 `docs/static_facts.md` §5a.
+- **프로필로 하는 추출은 세 섹션을 쓰지 않는다.** 그래서 그 facts의 기존 섹션은 바이트 그대로다 [M: C1 pre tx, R2 core, C5 6.4.1의 V0·V2를 새 도구로 다시 뽑아 kz-dump 비교. 섹션 CRC가 다른 것은 STRINGS뿐이고, 레코드 줄 차이는 build identity 항목과 basis 해시뿐이다. `env/redesign/step2a_s1.sh identity`].
+- golden: `layout.golden`은 새 레코드·열거형·섹션 줄이 더해지고 revision·fingerprint 줄이 바뀌었다. `records.golden`은 새 레코드 줄이 더해지고, 패턴으로 채운 참조(`…/<섹션>#n`)가 가리키는 섹션 이름이 섹션 목록이 늘어난 만큼 밀렸다(개정 4·5 때와 같은 기계적 변화). TERMINALS의 패턴 레코드는 `conditional` 비트를 표시한다. 나머지 golden(`container_*`, `render`, `tool_hash`, `tests/static/data/*.golden`)은 그대로다 [M].
+

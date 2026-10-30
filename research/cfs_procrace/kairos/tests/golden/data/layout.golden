@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=7
+kz-layout abi=1 revision=8
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -757,6 +757,73 @@ record kz_fact_spawnw size=56 fields=13
   primitive offset=32 size=8 count=1 kind=str
   chain offset=40 size=8 count=1 kind=str
   via offset=48 size=8 count=1 kind=str
+record kz_fact_read size=96 fields=21
+  fn offset=0 size=4 count=1 kind=u32
+  loop offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  arg_index offset=12 size=4 count=1 kind=u32
+  index_root offset=16 size=4 count=1 kind=u32
+  guard_root offset=20 size=4 count=1 kind=u32
+  ctx_root offset=24 size=4 count=1 kind=u32
+  kind offset=28 size=1 count=1 kind=u8
+  root_kind offset=29 size=1 count=1 kind=u8
+  use offset=30 size=2 count=1 kind=u16
+  flags offset=32 size=4 count=1 kind=u32
+  root_param offset=36 size=4 count=1 kind=u32
+  type offset=40 size=8 count=1 kind=str
+  field offset=48 size=8 count=1 kind=str
+  root offset=56 size=8 count=1 kind=str
+  text offset=64 size=8 count=1 kind=str
+  file offset=72 size=8 count=1 kind=str
+  line offset=80 size=4 count=1 kind=u32
+  col offset=84 size=4 count=1 kind=u32
+  fh offset=88 size=4 count=1 kind=u32
+  rsv0 offset=92 size=4 count=1 kind=u32
+record kz_fact_return size=104 fields=23
+  fn offset=0 size=4 count=1 kind=u32
+  alt offset=4 size=4 count=1 kind=u32
+  n_alts offset=8 size=4 count=1 kind=u32
+  value_root offset=12 size=4 count=1 kind=u32
+  guard_root offset=16 size=4 count=1 kind=u32
+  def_guard_root offset=20 size=4 count=1 kind=u32
+  cond_root offset=24 size=4 count=1 kind=u32
+  site offset=28 size=4 count=1 kind=u32
+  loop offset=32 size=4 count=1 kind=u32
+  vkind offset=36 size=1 count=1 kind=u8
+  rsv0 offset=37 size=1 count=1 kind=u8
+  flags offset=38 size=2 count=1 kind=u16
+  value offset=40 size=8 count=1 kind=i64
+  local offset=48 size=8 count=1 kind=str
+  text offset=56 size=8 count=1 kind=str
+  file offset=64 size=8 count=1 kind=str
+  def_file offset=72 size=8 count=1 kind=str
+  line offset=80 size=4 count=1 kind=u32
+  col offset=84 size=4 count=1 kind=u32
+  def_line offset=88 size=4 count=1 kind=u32
+  def_col offset=92 size=4 count=1 kind=u32
+  fh offset=96 size=4 count=1 kind=u32
+  rsv1 offset=100 size=4 count=1 kind=u32
+record kz_fact_retconst size=32 fields=6
+  fn offset=0 size=4 count=1 kind=u32
+  n_rows offset=4 size=4 count=1 kind=u32
+  cond_root offset=8 size=4 count=1 kind=u32
+  flags offset=12 size=4 count=1 kind=u32
+  value offset=16 size=8 count=1 kind=i64
+  text offset=24 size=8 count=1 kind=str
+record kz_fact_loopexit size=48 fields=13
+  loop offset=0 size=4 count=1 kind=u32
+  exit offset=4 size=4 count=1 kind=u32
+  fn offset=8 size=4 count=1 kind=u32
+  root offset=12 size=4 count=1 kind=u32
+  aux_root offset=16 size=4 count=1 kind=u32
+  n offset=20 size=4 count=1 kind=u32
+  line offset=24 size=4 count=1 kind=u32
+  col offset=28 size=4 count=1 kind=u32
+  fh offset=32 size=4 count=1 kind=u32
+  kind offset=36 size=1 count=1 kind=u8
+  rsv0 offset=37 size=1 count=1 kind=u8
+  flags offset=38 size=2 count=1 kind=u16
+  file offset=40 size=8 count=1 kind=str
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1700,6 +1767,64 @@ enum KZ_SPAWNW_KIND
 flags KZ_SPAWNW_FLAG
   0x1 VOCABULARY "vocabulary"
   0x2 NOT_IN_CLOSURE "not-in-closure"
+enum KZ_READ_KIND
+  0x0 NONE "none"
+  0x1 FIELD "field"
+  0x2 GLOBAL "global"
+enum KZ_READ_ROOT
+  0x0 NONE "none"
+  0x1 GLOBAL "global"
+  0x2 PARAM "param"
+  0x3 LOCAL "local"
+  0x4 CALL "call-result"
+  0x5 OTHER "other"
+flags KZ_READ_USE
+  0x1 BRANCH "branch"
+  0x2 RETURN "return"
+  0x4 OUT_STORE "out-store"
+  0x8 CALL_ARG "call-argument"
+  0x10 SUBSCRIPT "subscript"
+  0x20 STORE "store"
+  0x40 DEREF "dereference"
+  0x80 CALLEE "callee"
+  0x100 OTHER "other"
+flags KZ_READ_FLAG
+  0x1 THROUGH_POINTER "through-pointer"
+  0x2 ARRAY_CONTENTS "array-contents"
+  0x4 IN_MACRO "in-macro"
+  0x8 RECORD "whole-record"
+enum KZ_RET_VALUE
+  0x0 NONE "none"
+  0x1 CONST "const"
+  0x2 FIELD "field"
+  0x3 GLOBAL "global"
+  0x4 CALL "call-result"
+  0x5 PARAM "param"
+  0x6 LOCAL "local"
+  0x7 ADDR "address"
+  0x8 STRING "string"
+  0x9 EXPR "expression"
+flags KZ_RET_FLAG
+  0x1 UNFOLDED "unfolded"
+  0x2 FROM_DEF "from-definition"
+  0x4 REDEFINED "redefined-later"
+  0x8 UNDEF_PATH "undefined-on-a-path"
+  0x10 IN_LOOP "in-loop"
+  0x20 IN_MACRO "in-macro"
+  0x40 NO_CFG "no-cfg"
+  0x80 ONLY_CONSTANTS "only-constants"
+enum KZ_LOOPEXIT_KIND
+  0x0 NONE "none"
+  0x1 LOOP "loop"
+  0x2 COND "condition"
+  0x3 BREAK "break"
+  0x4 RETURN "return"
+  0x5 GOTO "goto"
+flags KZ_LOOPEXIT_FLAG
+  0x1 AS_IN_LOOPS "as-in-loops"
+  0x2 NEVER "never-taken"
+  0x4 UNCONDITIONAL "unconditional"
+  0x8 NO_EXIT "no-exit"
 enum KZ_OUTPTR_SUMMARY
   0x0 NONE "none"
   0x1 STORE_ONLY "store-only"
@@ -2109,6 +2234,10 @@ section NOWNER type=111 record=kz_nowner version=1
 section P0_TABLE type=120 record=kz_fact_p0 version=1
 section OP_DERIV type=121 record=kz_fact_opderiv version=1
 section SPAWN_WRAP type=122 record=kz_fact_spawnw version=1
+section READS type=123 record=kz_fact_read version=1
+section RETURNS type=124 record=kz_fact_return version=1
+section RET_CONSTS type=125 record=kz_fact_retconst version=1
+section LOOP_EXITS type=126 record=kz_fact_loopexit version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2372,6 +2501,40 @@ format kz_fact_spawnw.entry_fn idx 0
 format kz_fact_spawnw.call_site idx 0
 format kz_fact_spawnw.kind enum KZ_SPAWNW_KIND
 format kz_fact_spawnw.flags flags KZ_SPAWNW_FLAG
+format kz_fact_read.fn idx 0
+format kz_fact_read.loop idx 0
+format kz_fact_read.site idx 0
+format kz_fact_read.arg_index idx 0
+format kz_fact_read.index_root idx 0
+format kz_fact_read.guard_root idx 0
+format kz_fact_read.ctx_root idx 0
+format kz_fact_read.kind enum KZ_READ_KIND
+format kz_fact_read.root_kind enum KZ_READ_ROOT
+format kz_fact_read.use flags KZ_READ_USE
+format kz_fact_read.flags flags KZ_READ_FLAG
+format kz_fact_read.root_param idx 0
+format kz_fact_read.fh idx 0
+format kz_fact_return.fn idx 0
+format kz_fact_return.value_root idx 0
+format kz_fact_return.guard_root idx 0
+format kz_fact_return.def_guard_root idx 0
+format kz_fact_return.cond_root idx 0
+format kz_fact_return.site idx 0
+format kz_fact_return.loop idx 0
+format kz_fact_return.vkind enum KZ_RET_VALUE
+format kz_fact_return.flags flags KZ_RET_FLAG
+format kz_fact_return.fh idx 0
+format kz_fact_retconst.fn idx 0
+format kz_fact_retconst.cond_root idx 0
+format kz_fact_retconst.flags flags KZ_RET_FLAG
+format kz_fact_loopexit.loop idx 0
+format kz_fact_loopexit.exit idx 0
+format kz_fact_loopexit.fn idx 0
+format kz_fact_loopexit.root idx 0
+format kz_fact_loopexit.aux_root idx 0
+format kz_fact_loopexit.fh idx 0
+format kz_fact_loopexit.kind enum KZ_LOOPEXIT_KIND
+format kz_fact_loopexit.flags flags KZ_LOOPEXIT_FLAG
 format kz_cert_step.rule enum KZ_RULE
 format kz_cert_step.profile_entry idx 0
 format kz_cert_step.site_from idx 0
@@ -2479,4 +2642,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=979e7e48013f99ea647055920b4ab166659421dbd7a1ff896e3bb32b1700d329
+fingerprint=bae987d0343a65c29f75e21f3e3578b6116d2b7a8faa4d50fca8f6d31a005bf9

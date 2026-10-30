@@ -2874,7 +2874,11 @@ class FnWalker {
   }
   bool before(SourceLocation a, SourceLocation b) const { return sm_.isBeforeInTranslationUnit(sm_.getExpansionLoc(a), sm_.getExpansionLoc(b)); }
   static bool is_const_zero(ExprRef e) { return e != nullptr && e->op == KZ_EXPR_OP_CONST && e->a == nullptr && e->b == nullptr && e->value == 0; }
-  ExprRef negate(ExprRef g) { return g == nullptr ? pool().constant(0) : pool().unary(KZ_EXPR_OP_NOT, g); }
+  ExprRef negate(ExprRef g) {
+    if (g == nullptr) return pool().constant(0);
+    if (g->op == KZ_EXPR_OP_NOT && g->a != nullptr && g->b == nullptr) return g->a;
+    return pool().unary(KZ_EXPR_OP_NOT, g);
+  }
   // The conjunction of the terms, each split at its `and`s, without repeated conjuncts (the trees are
   // hash-consed, so a repeated conjunct is the same node); nullptr terms are `true`.
   void conjuncts(ExprRef e, std::vector<ExprRef>* out) {
@@ -3393,6 +3397,8 @@ class FnWalker {
             for (const DefAt& o : defs)
               if (o.key != d.key && reaches(*ix, d, o)) {
                 r.flags |= KZ_RET_FLAG_REDEFINED;
+                auto ol = def_in_loop_.find(o.key);
+                if (ol != def_in_loop_.end() && ol->second) r.flags |= KZ_RET_FLAG_IN_LOOP;  // its guard holds per iteration
                 auto og = def_guards_.find(o.key);
                 terms.push_back(negate(og != def_guards_.end() ? og->second : nullptr));
               }

@@ -84,13 +84,6 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
   for (const kzs::DeclaredItem& d : spec.declared) (d.origin == kCommandLine ? cli : builtin)++;
   os << "  hand-entered inputs        " << spec.declared.size() << " (built-in " << (spec.no_profile ? "P0 table " : "data-function table ") << builtin << ", command line " << cli << ")\n";
   os << "  declared assumptions       " << m.assumptions.size() << " (static images of table-walk links that are not const)\n";
-  if (spec.extended_facts) {
-    size_t consts = 0, loops = 0;
-    for (const kzs::ReturnFact& r : m.returns) consts += r.vkind == KZ_RET_VALUE_CONST ? 1 : 0;
-    for (const kzs::LoopFact& l : m.loops) loops += l.has_exits ? 1 : 0;
-    os << "  extended facts (F1-F3)     reads " << m.reads.size() << ", return alternatives " << m.returns.size() << " (constant " << consts << "), return constants "
-       << m.ret_consts.size() << ", loops with exits " << loops << "\n";
-  }
   return os.str();
 }
 

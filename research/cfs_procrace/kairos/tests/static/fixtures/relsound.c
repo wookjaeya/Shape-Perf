@@ -979,6 +979,137 @@ int img_create(void) {
   return 0;
 }
 
+/* ---- varhook (revision 5, second round): a global function pointer set with the dlsym idiom, a store through a
+ * cast lvalue of the variable ------------------------------------------------------------------------------- */
+typedef struct { int used; } VarhookRec;
+static VarhookRec varhook_recs[4];
+static pthread_mutex_t varhook_mutex = PTHREAD_MUTEX_INITIALIZER;
+static void varhook_noop(void) { }
+static void (*varhook_fn)(void) = varhook_noop;
+static void *varhook_handle;
+
+void varhook_relock(void) {
+  pthread_mutex_unlock(&varhook_mutex);
+  pthread_mutex_lock(&varhook_mutex);
+}
+
+void varhook_install(void) { *(void **)(&varhook_fn) = dlsym(varhook_handle, "varhook_relock"); }
+
+int varhook_read(void) {
+  int r;
+  pthread_mutex_lock(&varhook_mutex);
+  if (varhook_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&varhook_mutex);
+  return r;
+}
+
+void *varhook_worker(void *arg) {
+  (void)arg;
+  (void)varhook_read();
+  return 0;
+}
+
+int varhook_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&varhook_mutex);
+  pthread_create(&t, 0, varhook_worker, 0);
+  varhook_fn();
+  varhook_recs[0].used = 1;
+  pthread_mutex_unlock(&varhook_mutex);
+  return 0;
+}
+
+/* ---- putcopy (revision 5, second round): a helper with a body copies the pointer to the function pointer it
+ * receives and stores through the copy ---------------------------------------------------------------------- */
+typedef struct { int used; } PutcopyRec;
+static PutcopyRec putcopy_recs[4];
+static pthread_mutex_t putcopy_mutex = PTHREAD_MUTEX_INITIALIZER;
+static void putcopy_noop(void) { }
+static void (*putcopy_fn)(void) = putcopy_noop;
+
+static void putcopy_relock(void) {
+  pthread_mutex_unlock(&putcopy_mutex);
+  pthread_mutex_lock(&putcopy_mutex);
+}
+
+static void putcopy_put(void (**out)(void)) {
+  void (**q)(void) = out;
+  *q = putcopy_relock;
+}
+
+void putcopy_install(void) { putcopy_put(&putcopy_fn); }
+
+int putcopy_read(void) {
+  int r;
+  pthread_mutex_lock(&putcopy_mutex);
+  if (putcopy_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&putcopy_mutex);
+  return r;
+}
+
+void *putcopy_worker(void *arg) {
+  (void)arg;
+  (void)putcopy_read();
+  return 0;
+}
+
+int putcopy_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&putcopy_mutex);
+  pthread_create(&t, 0, putcopy_worker, 0);
+  putcopy_fn();
+  putcopy_recs[0].used = 1;
+  pthread_mutex_unlock(&putcopy_mutex);
+  return 0;
+}
+
+/* ---- arrhook (revision 5, second round): an array of function pointers decays to a pointer that a helper keeps
+ * and stores through ------------------------------------------------------------------------------------------ */
+typedef struct { int used; } ArrhookRec;
+static ArrhookRec arrhook_recs[4];
+static pthread_mutex_t arrhook_mutex = PTHREAD_MUTEX_INITIALIZER;
+static void arrhook_noop(void) { }
+static void (*arrhook_fns[2])(void);
+
+static void arrhook_relock(void) {
+  pthread_mutex_unlock(&arrhook_mutex);
+  pthread_mutex_lock(&arrhook_mutex);
+}
+
+void arrhook_setup(void) { arrhook_fns[0] = arrhook_noop; }
+
+void arrhook_install(void) {
+  void (**p)(void) = arrhook_fns;
+  p[0] = arrhook_relock;
+}
+
+int arrhook_read(void) {
+  int r;
+  pthread_mutex_lock(&arrhook_mutex);
+  if (arrhook_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&arrhook_mutex);
+  return r;
+}
+
+void *arrhook_worker(void *arg) {
+  (void)arg;
+  (void)arrhook_read();
+  return 0;
+}
+
+int arrhook_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&arrhook_mutex);
+  pthread_create(&t, 0, arrhook_worker, 0);
+  arrhook_fns[0]();
+  arrhook_recs[0].used = 1;
+  pthread_mutex_unlock(&arrhook_mutex);
+  return 0;
+}
+
 int main(void) {
   (void)entry_spawn();
   entry_locked_call();
@@ -1018,5 +1149,12 @@ int main(void) {
   (void)unres2_create();
   img_elsewhere();
   (void)img_create();
+  varhook_install();
+  (void)varhook_create();
+  putcopy_install();
+  (void)putcopy_create();
+  arrhook_setup();
+  arrhook_install();
+  (void)arrhook_create();
   return 0;
 }

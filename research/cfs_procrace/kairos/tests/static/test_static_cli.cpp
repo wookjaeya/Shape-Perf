@@ -1068,7 +1068,7 @@ startup_script {
     KZ_CHECK(has(row("field BackRec.used; read relsound.c:450:20 in back_read (through an indirect call whose targets are not resolved (back_read is address-taken)"),
                  "feasibility: undecidable: an indirect call whose targets these facts do not resolve may call back_read"));
     // the creator is address-taken and an indirect call is not resolved: its callers are not all known
-    KZ_CHECK(has(row("field AddrRec.used;"), "but addr_create is address-taken and these facts have 7 indirect call(s) whose targets are not resolved"));
+    KZ_CHECK(has(row("field AddrRec.used;"), "but addr_create is address-taken and these facts have 10 indirect call(s) whose targets are not resolved"));
     // a function that returns twice in the creator
     KZ_CHECK(has(row("field JumpRec.used;"), "_setjmp in jump_create returns twice: a non-local jump back to it runs code"));
     KZ_CHECK(has(a, "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp"));
@@ -1109,13 +1109,24 @@ startup_script {
     KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:967:34 in img_elsewhere;"),
                  "but that set is not complete: the entries of the spawn relsound.c:974:33 are read from a static image: "));
     KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:958:9 in img_main)"), "feasibility: proven-impossible: lock #"));
-    KZ_CHECK(has(a, "proven-impossible 8, possible 15, undecidable 11, not graded 1"));
+    // a global function pointer set through a cast lvalue of the variable, through a copy of the pointer to it, and an
+    // array of function pointers set through the pointer its name decays to
+    KZ_CHECK(has(row("field VarhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1018:3) holds no lock"));
+    KZ_CHECK(has(row("field PutcopyRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1063:3) holds no lock"));
+    KZ_CHECK(has(row("field ArrhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:1108:3) holds no lock"));
+    KZ_CHECK(has(a, "proven-impossible 8, possible 18, undecidable 11, not graded 1"));
     // the targets of the hook calls: resolved, with a row incomplete-source
     KZ_CHECK_EQ(run(q(tool) + " show " + q(rs) + " --section targets --section basis", &out), 0);
     KZ_CHECK(has(out, "in memhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:memhook_fn@relsound.c:762 (G:memhook_fn@relsound.c:762: its address "
                       "[&memhook_fn] is passed at relsound.c:766:3 (memcpy) converted to another pointer type"));
     KZ_CHECK(has(out, "in dlhook_create indirect-call -> UNRESOLVED(incomplete-source) via DlhookOps.hook (the writer set of the field DlhookOps.hook is not complete"));
-    KZ_CHECK(has(out, "count.indirect_calls_incomplete = 2 (resolved, with a CALL_TARGETS row incomplete-source"));
+    KZ_CHECK(has(out, "in varhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:varhook_fn@relsound.c:988 (the variable varhook_fn: its address is "
+                      "taken at relsound.c:996:41 (not as a call argument, converted to another type)"));
+    KZ_CHECK(has(out, "in putcopy_create indirect-call -> UNRESOLVED(incomplete-source) via G:putcopy_fn@relsound.c:1029 (the pointer to a function pointer out "
+                      "is copied at relsound.c:1037:22"));
+    KZ_CHECK(has(out, "in arrhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:arrhook_fns@relsound.c:1074 (the variable arrhook_fns: it is "
+                      "converted to a pointer to its first element at relsound.c:1084:22 (not as a call argument)"));
+    KZ_CHECK(has(out, "count.indirect_calls_incomplete = 5 (resolved, with a CALL_TARGETS row incomplete-source"));
     KZ_CHECK(has(out, "8 (copies of a DERIVES chain; a longer chain is cut with the reason walk-bound"));
     KZ_CHECK(has(out, "64 (levels of an expression text stored in LOOP_ITERS"));
     KZ_CHECK(has(out, "DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut"));

@@ -1,9 +1,9 @@
 extract
   translation units          1
-  functions                  122 (bodies read 110, in system headers skipped 0)
-  call sites                 253
-  indirect calls             9 (resolved 4, unresolved 5)
-  spawn calls                29 (entry resolved 27)
+  functions                  142 (bodies read 130, in system headers skipped 0)
+  call sites                 289
+  indirect calls             12 (resolved 7, unresolved 5)
+  spawn calls                32 (entry resolved 30)
   loops                      2 (table walks resolved 0, failed 0, under a declared assumption 0)
   certificate-view rules     unroll 1, await 0, star-closed 1
   spawn parameters           0, unrolled iteration rows 0
@@ -12,6 +12,7 @@ extract
   unknown-effect passes      2 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
   location AddrRec.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location AfterRec.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location ArrhookRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location BackRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location CbqRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location ClearRec.ready   writers 2 (direct 1, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
@@ -31,6 +32,7 @@ extract
   location OpnRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location PtrCfg.mp   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location PtrRec.ready   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location PutcopyRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location RecurRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location RootRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location UnionLock.a   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 4, cast 0, union 0, unknown effect 0  -> DISABLED
@@ -38,20 +40,21 @@ extract
   location UnionRec.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Unres2Rec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location UnresRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location VarhookRec.used   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location ViaRec.ready   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location WaitRec.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location WaitpRec.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
 profile-free mode            built-in profile, 72 P0 entries (P0 table revision 3 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
-  first pass                 functions with a body 110, control-flow graphs 110, call-graph components 109 (recursive 1)
+  first pass                 functions with a body 130, control-flow graphs 130, call-graph components 129 (recursive 1)
   delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
   terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
-  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 27 (callers of a fixed-entry operation left as they are: 3)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 30 (callers of a fixed-entry operation left as they are: 3)
   startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
-  rule targets               31 (R-T1 6, R-T2 26, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+  rule targets               34 (R-T1 6, R-T2 29, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
 facts-view 1
-[functions] 122
+[functions] 142
   fn 0 _setjmp /usr/include/setjmp.h:45 params=1 {builtin}
   fn 1 addr_create relsound.c:501-508 params=0 {defined,address-taken}
   fn 2 addr_install relsound.c:510-513 params=0 {defined}
@@ -62,123 +65,144 @@ facts-view 1
   fn 7 after_start relsound.c:262-266 params=0 {defined}
   fn 8 after_used relsound.c:238-245 params=0 {defined}
   fn 9 after_worker relsound.c:247-251 params=1 {defined,address-taken}
-  fn 10 back_apply relsound.c:446 params=1 {}
-  fn 11 back_create relsound.c:466-473 params=0 {defined}
-  fn 12 back_install relsound.c:475-478 params=0 {defined}
-  fn 13 back_read relsound.c:449-452 params=0 {defined,address-taken}
-  fn 14 back_worker relsound.c:454-464 params=1 {defined,address-taken}
-  fn 15 cbq_cmp relsound.c:841-845 params=2 {defined,static,address-taken}
-  fn 16 cbq_create relsound.c:862-871 params=0 {defined}
-  fn 17 cbq_read relsound.c:847-854 params=0 {defined}
-  fn 18 cbq_worker relsound.c:856-860 params=1 {defined,address-taken}
-  fn 19 clear_ready relsound.c:101-107 params=1 {defined}
-  fn 20 clear_spawn relsound.c:115-124 params=0 {defined}
-  fn 21 clear_worker relsound.c:109-113 params=1 {defined,address-taken}
-  fn 22 desc_create relsound.c:661-668 params=0 {defined}
-  fn 23 desc_grand relsound.c:646-650 params=1 {defined,address-taken}
-  fn 24 desc_read relsound.c:641-644 params=0 {defined}
-  fn 25 desc_worker relsound.c:652-659 params=1 {defined,address-taken}
-  fn 26 dlhook_create relsound.c:826-834 params=0 {defined}
-  fn 27 dlhook_install relsound.c:809-809 params=0 {defined}
-  fn 28 dlhook_noop relsound.c:800-800 params=0 {defined,static}
-  fn 29 dlhook_read relsound.c:811-818 params=0 {defined}
-  fn 30 dlhook_relock relsound.c:804-807 params=0 {defined}
-  fn 31 dlhook_worker relsound.c:820-824 params=1 {defined,address-taken}
-  fn 32 dlsym /usr/include/dlfcn.h:64 params=2 {}
-  fn 33 elem_create relsound.c:584-592 params=1 {defined}
-  fn 34 elem_ready relsound.c:569-576 params=1 {defined}
-  fn 35 elem_worker relsound.c:578-582 params=1 {defined,address-taken}
-  fn 36 entry_locked_call relsound.c:49-53 params=0 {defined}
-  fn 37 entry_spawn relsound.c:55-63 params=0 {defined}
-  fn 38 entry_worker relsound.c:43-47 params=1 {defined,address-taken}
-  fn 39 first_create relsound.c:397-407 params=0 {defined}
-  fn 40 first_release relsound.c:394-394 params=0 {defined,static}
-  fn 41 first_take relsound.c:395-395 params=0 {defined,static}
-  fn 42 first_used relsound.c:379-386 params=0 {defined}
-  fn 43 first_worker relsound.c:388-392 params=1 {defined,address-taken}
-  fn 44 held_create relsound.c:288-295 params=0 {defined}
-  fn 45 held_used relsound.c:273-280 params=0 {defined}
-  fn 46 held_worker relsound.c:282-286 params=1 {defined,address-taken}
-  fn 47 hook_clear relsound.c:213-213 params=0 {defined,static,address-taken}
-  fn 48 hook_install relsound.c:228-231 params=0 {defined}
-  fn 49 hook_ready relsound.c:199-205 params=1 {defined}
-  fn 50 hook_spawn relsound.c:215-226 params=0 {defined}
-  fn 51 hook_worker relsound.c:207-211 params=1 {defined,address-taken}
-  fn 52 img_create relsound.c:969-980 params=0 {defined}
-  fn 53 img_elsewhere relsound.c:967-967 params=0 {defined}
-  fn 54 img_init relsound.c:963-963 params=0 {defined,static}
-  fn 55 img_main relsound.c:956-961 params=1 {defined}
-  fn 56 img_read relsound.c:951-954 params=0 {defined}
-  fn 57 jump_check relsound.c:545-547 params=0 {defined,static}
-  fn 58 jump_create relsound.c:549-561 params=0 {defined}
-  fn 59 jump_used relsound.c:530-537 params=0 {defined}
-  fn 60 jump_worker relsound.c:539-543 params=1 {defined,address-taken}
-  fn 61 longjmp /usr/include/setjmp.h:54 params=2 {builtin}
-  fn 62 loop_ready relsound.c:131-137 params=1 {defined}
-  fn 63 loop_spawn relsound.c:145-154 params=0 {defined}
-  fn 64 loop_worker relsound.c:139-143 params=1 {defined,address-taken}
-  fn 65 main relsound.c:982-1022 params=0 {defined}
-  fn 66 memcpy /usr/include/string.h:43 params=3 {builtin}
-  fn 67 memhook_create relsound.c:784-792 params=0 {defined}
-  fn 68 memhook_install relsound.c:764-767 params=0 {defined}
-  fn 69 memhook_noop relsound.c:757-757 params=0 {defined,static}
-  fn 70 memhook_read relsound.c:769-776 params=0 {defined}
-  fn 71 memhook_relock relsound.c:758-761 params=0 {defined,static,address-taken}
-  fn 72 memhook_worker relsound.c:778-782 params=1 {defined,address-taken}
-  fn 73 memset /usr/include/string.h:61 params=3 {builtin}
-  fn 74 opn_create relsound.c:694-701 params=0 {defined}
-  fn 75 opn_elsewhere relsound.c:692-692 params=0 {defined}
-  fn 76 opn_read relsound.c:676-679 params=0 {defined}
-  fn 77 opn_worker relsound.c:681-690 params=1 {defined,address-taken}
-  fn 78 pthread_cond_signal /usr/include/pthread.h:1121 params=1 {}
-  fn 79 pthread_cond_wait /usr/include/pthread.h:1133 params=2 {}
-  fn 80 pthread_create /usr/include/pthread.h:202 params=4 {}
-  fn 81 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
-  fn 82 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
-  fn 83 ptr_pick relsound.c:188-191 params=1 {defined}
-  fn 84 ptr_ready relsound.c:164-170 params=1 {defined}
-  fn 85 ptr_spawn relsound.c:178-186 params=0 {defined}
-  fn 86 ptr_worker relsound.c:172-176 params=1 {defined,address-taken}
-  fn 87 qsort /usr/include/stdlib.h:970 params=4 {}
-  fn 88 recur_again relsound.c:740-740 params=0 {defined,static}
-  fn 89 recur_create relsound.c:742-750 params=1 {defined}
-  fn 90 recur_read relsound.c:724-731 params=0 {defined}
-  fn 91 recur_worker relsound.c:733-737 params=1 {defined,address-taken}
-  fn 92 root_also relsound.c:631-634 params=0 {defined}
-  fn 93 root_create relsound.c:622-629 params=0 {defined}
-  fn 94 root_locked relsound.c:604-608 params=0 {defined}
-  fn 95 root_other relsound.c:610-614 params=1 {defined,address-taken}
-  fn 96 root_read relsound.c:599-602 params=0 {defined}
-  fn 97 root_worker relsound.c:616-620 params=1 {defined,address-taken}
-  fn 98 union_create relsound.c:430-440 params=0 {defined}
-  fn 99 union_used relsound.c:415-422 params=0 {defined}
-  fn 100 union_worker relsound.c:424-428 params=1 {defined,address-taken}
-  fn 101 unres2_create relsound.c:930-937 params=0 {defined}
-  fn 102 unres2_install relsound.c:939-942 params=0 {defined}
-  fn 103 unres2_read relsound.c:917-920 params=0 {defined,address-taken}
-  fn 104 unres2_worker relsound.c:922-928 params=1 {defined,address-taken}
-  fn 105 unres_create relsound.c:897-904 params=0 {defined}
-  fn 106 unres_ctx relsound.c:884-884 params=0 {defined,address-taken}
-  fn 107 unres_install relsound.c:906-909 params=0 {defined}
-  fn 108 unres_read relsound.c:879-882 params=0 {defined}
-  fn 109 unres_worker relsound.c:886-895 params=1 {defined,address-taken}
-  fn 110 via_read relsound.c:70-73 params=0 {defined}
-  fn 111 via_spawn relsound.c:86-94 params=0 {defined}
-  fn 112 via_worker relsound.c:77-84 params=1 {defined,address-taken}
-  fn 113 wait_create relsound.c:324-332 params=0 {defined}
-  fn 114 wait_finish relsound.c:319-322 params=0 {defined,static}
-  fn 115 wait_used relsound.c:303-311 params=0 {defined}
-  fn 116 wait_worker relsound.c:313-317 params=1 {defined,address-taken}
-  fn 117 waitp_block relsound.c:356-356 params=1 {defined,static}
-  fn 118 waitp_create relsound.c:363-371 params=0 {defined}
-  fn 119 waitp_finish relsound.c:358-361 params=0 {defined,static}
-  fn 120 waitp_used relsound.c:340-348 params=0 {defined}
-  fn 121 waitp_worker relsound.c:350-354 params=1 {defined,address-taken}
-[writers] 37
+  fn 10 arrhook_create relsound.c:1103-1111 params=0 {defined}
+  fn 11 arrhook_install relsound.c:1083-1086 params=0 {defined}
+  fn 12 arrhook_noop relsound.c:1073-1073 params=0 {defined,static,address-taken}
+  fn 13 arrhook_read relsound.c:1088-1095 params=0 {defined}
+  fn 14 arrhook_relock relsound.c:1076-1079 params=0 {defined,static,address-taken}
+  fn 15 arrhook_setup relsound.c:1081-1081 params=0 {defined}
+  fn 16 arrhook_worker relsound.c:1097-1101 params=1 {defined,address-taken}
+  fn 17 back_apply relsound.c:446 params=1 {}
+  fn 18 back_create relsound.c:466-473 params=0 {defined}
+  fn 19 back_install relsound.c:475-478 params=0 {defined}
+  fn 20 back_read relsound.c:449-452 params=0 {defined,address-taken}
+  fn 21 back_worker relsound.c:454-464 params=1 {defined,address-taken}
+  fn 22 cbq_cmp relsound.c:841-845 params=2 {defined,static,address-taken}
+  fn 23 cbq_create relsound.c:862-871 params=0 {defined}
+  fn 24 cbq_read relsound.c:847-854 params=0 {defined}
+  fn 25 cbq_worker relsound.c:856-860 params=1 {defined,address-taken}
+  fn 26 clear_ready relsound.c:101-107 params=1 {defined}
+  fn 27 clear_spawn relsound.c:115-124 params=0 {defined}
+  fn 28 clear_worker relsound.c:109-113 params=1 {defined,address-taken}
+  fn 29 desc_create relsound.c:661-668 params=0 {defined}
+  fn 30 desc_grand relsound.c:646-650 params=1 {defined,address-taken}
+  fn 31 desc_read relsound.c:641-644 params=0 {defined}
+  fn 32 desc_worker relsound.c:652-659 params=1 {defined,address-taken}
+  fn 33 dlhook_create relsound.c:826-834 params=0 {defined}
+  fn 34 dlhook_install relsound.c:809-809 params=0 {defined}
+  fn 35 dlhook_noop relsound.c:800-800 params=0 {defined,static}
+  fn 36 dlhook_read relsound.c:811-818 params=0 {defined}
+  fn 37 dlhook_relock relsound.c:804-807 params=0 {defined}
+  fn 38 dlhook_worker relsound.c:820-824 params=1 {defined,address-taken}
+  fn 39 dlsym /usr/include/dlfcn.h:64 params=2 {}
+  fn 40 elem_create relsound.c:584-592 params=1 {defined}
+  fn 41 elem_ready relsound.c:569-576 params=1 {defined}
+  fn 42 elem_worker relsound.c:578-582 params=1 {defined,address-taken}
+  fn 43 entry_locked_call relsound.c:49-53 params=0 {defined}
+  fn 44 entry_spawn relsound.c:55-63 params=0 {defined}
+  fn 45 entry_worker relsound.c:43-47 params=1 {defined,address-taken}
+  fn 46 first_create relsound.c:397-407 params=0 {defined}
+  fn 47 first_release relsound.c:394-394 params=0 {defined,static}
+  fn 48 first_take relsound.c:395-395 params=0 {defined,static}
+  fn 49 first_used relsound.c:379-386 params=0 {defined}
+  fn 50 first_worker relsound.c:388-392 params=1 {defined,address-taken}
+  fn 51 held_create relsound.c:288-295 params=0 {defined}
+  fn 52 held_used relsound.c:273-280 params=0 {defined}
+  fn 53 held_worker relsound.c:282-286 params=1 {defined,address-taken}
+  fn 54 hook_clear relsound.c:213-213 params=0 {defined,static,address-taken}
+  fn 55 hook_install relsound.c:228-231 params=0 {defined}
+  fn 56 hook_ready relsound.c:199-205 params=1 {defined}
+  fn 57 hook_spawn relsound.c:215-226 params=0 {defined}
+  fn 58 hook_worker relsound.c:207-211 params=1 {defined,address-taken}
+  fn 59 img_create relsound.c:969-980 params=0 {defined}
+  fn 60 img_elsewhere relsound.c:967-967 params=0 {defined}
+  fn 61 img_init relsound.c:963-963 params=0 {defined,static}
+  fn 62 img_main relsound.c:956-961 params=1 {defined}
+  fn 63 img_read relsound.c:951-954 params=0 {defined}
+  fn 64 jump_check relsound.c:545-547 params=0 {defined,static}
+  fn 65 jump_create relsound.c:549-561 params=0 {defined}
+  fn 66 jump_used relsound.c:530-537 params=0 {defined}
+  fn 67 jump_worker relsound.c:539-543 params=1 {defined,address-taken}
+  fn 68 longjmp /usr/include/setjmp.h:54 params=2 {builtin}
+  fn 69 loop_ready relsound.c:131-137 params=1 {defined}
+  fn 70 loop_spawn relsound.c:145-154 params=0 {defined}
+  fn 71 loop_worker relsound.c:139-143 params=1 {defined,address-taken}
+  fn 72 main relsound.c:1113-1160 params=0 {defined}
+  fn 73 memcpy /usr/include/string.h:43 params=3 {builtin}
+  fn 74 memhook_create relsound.c:784-792 params=0 {defined}
+  fn 75 memhook_install relsound.c:764-767 params=0 {defined}
+  fn 76 memhook_noop relsound.c:757-757 params=0 {defined,static}
+  fn 77 memhook_read relsound.c:769-776 params=0 {defined}
+  fn 78 memhook_relock relsound.c:758-761 params=0 {defined,static,address-taken}
+  fn 79 memhook_worker relsound.c:778-782 params=1 {defined,address-taken}
+  fn 80 memset /usr/include/string.h:61 params=3 {builtin}
+  fn 81 opn_create relsound.c:694-701 params=0 {defined}
+  fn 82 opn_elsewhere relsound.c:692-692 params=0 {defined}
+  fn 83 opn_read relsound.c:676-679 params=0 {defined}
+  fn 84 opn_worker relsound.c:681-690 params=1 {defined,address-taken}
+  fn 85 pthread_cond_signal /usr/include/pthread.h:1121 params=1 {}
+  fn 86 pthread_cond_wait /usr/include/pthread.h:1133 params=2 {}
+  fn 87 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 88 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
+  fn 89 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
+  fn 90 ptr_pick relsound.c:188-191 params=1 {defined}
+  fn 91 ptr_ready relsound.c:164-170 params=1 {defined}
+  fn 92 ptr_spawn relsound.c:178-186 params=0 {defined}
+  fn 93 ptr_worker relsound.c:172-176 params=1 {defined,address-taken}
+  fn 94 putcopy_create relsound.c:1058-1066 params=0 {defined}
+  fn 95 putcopy_install relsound.c:1041-1041 params=0 {defined}
+  fn 96 putcopy_noop relsound.c:1028-1028 params=0 {defined,static}
+  fn 97 putcopy_put relsound.c:1036-1039 params=1 {defined,static}
+  fn 98 putcopy_read relsound.c:1043-1050 params=0 {defined}
+  fn 99 putcopy_relock relsound.c:1031-1034 params=0 {defined,static,address-taken}
+  fn 100 putcopy_worker relsound.c:1052-1056 params=1 {defined,address-taken}
+  fn 101 qsort /usr/include/stdlib.h:970 params=4 {}
+  fn 102 recur_again relsound.c:740-740 params=0 {defined,static}
+  fn 103 recur_create relsound.c:742-750 params=1 {defined}
+  fn 104 recur_read relsound.c:724-731 params=0 {defined}
+  fn 105 recur_worker relsound.c:733-737 params=1 {defined,address-taken}
+  fn 106 root_also relsound.c:631-634 params=0 {defined}
+  fn 107 root_create relsound.c:622-629 params=0 {defined}
+  fn 108 root_locked relsound.c:604-608 params=0 {defined}
+  fn 109 root_other relsound.c:610-614 params=1 {defined,address-taken}
+  fn 110 root_read relsound.c:599-602 params=0 {defined}
+  fn 111 root_worker relsound.c:616-620 params=1 {defined,address-taken}
+  fn 112 union_create relsound.c:430-440 params=0 {defined}
+  fn 113 union_used relsound.c:415-422 params=0 {defined}
+  fn 114 union_worker relsound.c:424-428 params=1 {defined,address-taken}
+  fn 115 unres2_create relsound.c:930-937 params=0 {defined}
+  fn 116 unres2_install relsound.c:939-942 params=0 {defined}
+  fn 117 unres2_read relsound.c:917-920 params=0 {defined,address-taken}
+  fn 118 unres2_worker relsound.c:922-928 params=1 {defined,address-taken}
+  fn 119 unres_create relsound.c:897-904 params=0 {defined}
+  fn 120 unres_ctx relsound.c:884-884 params=0 {defined,address-taken}
+  fn 121 unres_install relsound.c:906-909 params=0 {defined}
+  fn 122 unres_read relsound.c:879-882 params=0 {defined}
+  fn 123 unres_worker relsound.c:886-895 params=1 {defined,address-taken}
+  fn 124 varhook_create relsound.c:1013-1021 params=0 {defined}
+  fn 125 varhook_install relsound.c:996-996 params=0 {defined}
+  fn 126 varhook_noop relsound.c:987-987 params=0 {defined,static}
+  fn 127 varhook_read relsound.c:998-1005 params=0 {defined}
+  fn 128 varhook_relock relsound.c:991-994 params=0 {defined}
+  fn 129 varhook_worker relsound.c:1007-1011 params=1 {defined,address-taken}
+  fn 130 via_read relsound.c:70-73 params=0 {defined}
+  fn 131 via_spawn relsound.c:86-94 params=0 {defined}
+  fn 132 via_worker relsound.c:77-84 params=1 {defined,address-taken}
+  fn 133 wait_create relsound.c:324-332 params=0 {defined}
+  fn 134 wait_finish relsound.c:319-322 params=0 {defined,static}
+  fn 135 wait_used relsound.c:303-311 params=0 {defined}
+  fn 136 wait_worker relsound.c:313-317 params=1 {defined,address-taken}
+  fn 137 waitp_block relsound.c:356-356 params=1 {defined,static}
+  fn 138 waitp_create relsound.c:363-371 params=0 {defined}
+  fn 139 waitp_finish relsound.c:358-361 params=0 {defined,static}
+  fn 140 waitp_used relsound.c:340-348 params=0 {defined}
+  fn 141 waitp_worker relsound.c:350-354 params=1 {defined,address-taken}
+[writers] 40
   AddrRec.used assign at relsound.c:505:3 in addr_create value=const 2 [2] key=addr_recs[0] {} n/a
   AddrRec.used assign at relsound.c:519:3 in addr_run value=const 1 [1] key=addr_recs[0] {} n/a
   AfterRec.used assign at relsound.c:257:3 in after_create value=const 1 [1] key=after_recs[0] {} n/a
   AfterRec.used assign at relsound.c:264:3 in after_start value=const 0 [0] key=after_recs[0] {} n/a
+  ArrhookRec.used assign at relsound.c:1108:3 in arrhook_create value=const 1 [1] key=arrhook_recs[0] {} n/a
   BackRec.used assign at relsound.c:470:3 in back_create value=const 1 [1] key=back_recs[0] {} n/a
   CbqRec.used assign at relsound.c:868:3 in cbq_create value=const 1 [1] key=cbq_recs[0] {} n/a
   ClearRec.ready assign at relsound.c:120:3 in clear_spawn value=const 1 [1] key=clear_recs[1] {} n/a
@@ -201,20 +225,23 @@ facts-view 1
   PtrCfg.mp assign at relsound.c:189:10 in ptr_pick value=top [&ptr_m1] key=ptr_cfg guard=(ne param:k#0 0) {} n/a
   PtrCfg.mp assign at relsound.c:190:8 in ptr_pick value=top [&ptr_m2] key=ptr_cfg guard=(not (ne param:k#0 0)) {} n/a
   PtrRec.ready assign at relsound.c:183:3 in ptr_spawn value=const 1 [1] key=ptr_recs[1] {} n/a
+  PutcopyRec.used assign at relsound.c:1063:3 in putcopy_create value=const 1 [1] key=putcopy_recs[0] {} n/a
   RecurRec.used assign at relsound.c:746:3 in recur_create value=symbolic [depth] key=recur_recs[0] {} n/a
   RootRec.used assign at relsound.c:626:3 in root_create value=const 1 [1] key=root_recs[0] {} n/a
   UnionRec.used assign at relsound.c:434:3 in union_create value=const 1 [1] key=union_recs[0] {} n/a
   UnionRec.used assign at relsound.c:436:3 in union_create value=const 2 [2] key=union_recs[0] {} n/a
   Unres2Rec.used assign at relsound.c:934:3 in unres2_create value=const 1 [1] key=unres2_recs[0] {} n/a
   UnresRec.used assign at relsound.c:901:3 in unres_create value=const 1 [1] key=unres_recs[0] {} n/a
+  VarhookRec.used assign at relsound.c:1018:3 in varhook_create value=const 1 [1] key=varhook_recs[0] {} n/a
   ViaRec.ready assign at relsound.c:91:3 in via_spawn value=const 1 [1] key=via_recs[2] {} n/a
   WaitRec.used assign at relsound.c:321:3 in wait_finish value=const 2 [2] key=wait_recs[0] {} n/a
   WaitRec.used assign at relsound.c:328:3 in wait_create value=const 1 [1] key=wait_recs[0] {} n/a
   WaitpRec.used assign at relsound.c:360:3 in waitp_finish value=const 2 [2] key=waitp_recs[0] {} n/a
   WaitpRec.used assign at relsound.c:367:3 in waitp_create value=const 1 [1] key=waitp_recs[0] {} n/a
-[locs] 31
+[locs] 34
   AddrRec.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   AfterRec.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
+  ArrhookRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   BackRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   CbqRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   ClearRec.ready writer-set-complete writers=2 (direct 1, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
@@ -234,6 +261,7 @@ facts-view 1
   OpnRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   PtrCfg.mp writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   PtrRec.ready writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
+  PutcopyRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   RecurRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   RootRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   UnionLock.a DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=4 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
@@ -241,6 +269,7 @@ facts-view 1
   UnionRec.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   Unres2Rec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   UnresRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
+  VarhookRec.used writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   ViaRec.ready writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   WaitRec.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
   WaitpRec.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=5
@@ -261,16 +290,16 @@ basis deviations copied into these facts: 0 (a row that names a position in a un
 layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); a row whose derivation uses P0 entries not checked against their source names them: P0-unverified(...) (the source check of pthread_create is against the upstream glibc 2.39 copy; the builds link a distribution package of glibc 2.39 whose patches are not checked)
 run order: no record given (this revision reads no run record; the column says so in every row)
 functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp, __setjmp, sigsetjmp, __sigsetjmp, savectx, getcontext, vfork; calls of them in these facts: 1
-actors: roots 29 (process 1, spawn-entry 27, table-walk-entry 0, table-image-entry 1, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 1 [root_worker], with a shared access of their own body 0
+actors: roots 32 (process 1, spawn-entry 30, table-walk-entry 0, table-image-entry 1, script-entry 0), trampolines 0; roots a trampoline stands for through the calls of a derived spawn operation that passes it to its inner spawn: none; calls of such an operation with no resolved entry (their threads are missing from the trampoline's roots: an under-approximation): 0; roots that enter other roots and stay actors: through a direct call 1 [root_worker], with a shared access of their own body 0
 spawn calls resolved through the static image of the table their entry argument is read from: 1 [relsound.c:974:33: img_main; the member ImgFn.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; besides the function leaves of ImgFn.main, the image of img_table has 2 function leaf/leaves of another member of its record (img_table[0].fn.init img_init@relsound.c:963, img_table[2].fn.init img_init@relsound.c:963; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read (so the threads of this spawn are taken as not complete)]
 spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 1 [relsound.c:689:10 in opn_worker -> pthread_create: the entry argument 2 [e] is no field of a global table]
-summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 35 (self-identity reads 0); flip static-possible 32, static-undetermined 3, none 0; feasibility proven-impossible 8, possible 15, undecidable 11, not graded 1
+summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition in another actor 0, key-matched 0) B 0 (with a callee check 0) C 38 (self-identity reads 0); flip static-possible 35, static-undetermined 3, none 0; feasibility proven-impossible 8, possible 18, undecidable 11, not graded 1
 [A] 0 (namespaces 0, key comparisons 0; left out: searches over no global table 0)
 [B] 0 (field-argument groups 0; left out: no writer 0, one actor only 0)
-[C] 35 (spawn calls 29, with no resolved entry 1, with no event after them on their control-flow graph 2; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 1, such contexts of a spawn whose threads are not all resolved (undecidable): 2, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 1 (reads taken in only so: 1); contexts called back from a function without a body: 1; contexts through indirect calls the facts do not resolve: 2)
+[C] 38 (spawn calls 32, with no resolved entry 1, with no event after them on their control-flow graph 2; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: 0; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): 1, such contexts of a spawn whose threads are not all resolved (undecidable): 2, such contexts an indirect call of those threads whose targets are not resolved may reach (undecidable): 1 (reads taken in only so: 1); contexts called back from a function without a body: 1; contexts through indirect calls the facts do not resolve: 2)
   C1 spawn relsound.c:59:8 in entry_spawn -> pthread_create; field EntryRec.ready; read relsound.c:45:21 in entry_worker (the read run as the entry of the spawned thread, under no lock of a caller)
-      spawn: callee pthread_create, entries entry_worker; child actors {entry_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#8 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
-      write after the spawn: relsound.c:60:3 key=entry_recs[1] value=1 [1] locks {#8 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
+      spawn: callee pthread_create, entries entry_worker; child actors {entry_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
+      write after the spawn: relsound.c:60:3 key=entry_recs[1] value=1 [1] locks {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
       read: [entry_recs[1].ready] use=branch index=(seq 1) guard=- locks {}
       dependency: path C: the creator writes EntryRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -279,9 +308,9 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: entry_worker returns 0 [0] with the earlier value (INIT 0 (entry_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C2 spawn relsound.c:59:8 in entry_spawn -> pthread_create; field EntryRec.ready; read relsound.c:45:21 in entry_worker (via the call relsound.c:51:9 in entry_locked_call; the threads this spawn starts do not reach this call)
-      spawn: callee pthread_create, entries entry_worker; child actors {entry_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#8 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
-      write after the spawn: relsound.c:60:3 key=entry_recs[1] value=1 [1] locks {#8 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
-      read: [entry_recs[1].ready] use=branch index=(seq 1) guard=- locks {}; at the call {#8 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:50:3]
+      spawn: callee pthread_create, entries entry_worker; child actors {entry_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
+      write after the spawn: relsound.c:60:3 key=entry_recs[1] value=1 [1] locks {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:58:3]
+      read: [entry_recs[1].ready] use=branch index=(seq 1) guard=- locks {}; at the call {#9 &entry_mutex@relsound.c:41 (static-instance)} acquired-at [relsound.c:50:3]
       dependency: path C: the creator writes EntryRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: not graded: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, so this context is no read of theirs; no grade is given from the locks at the call; their code makes no indirect call whose targets are not resolved
@@ -289,18 +318,18 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: entry_worker returns 0 [0] with the earlier value (INIT 0 (entry_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C3 spawn relsound.c:90:8 in via_spawn -> pthread_create; field ViaRec.ready; read relsound.c:71:19 in via_read (via the call relsound.c:81:9 in via_worker)
-      spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#24 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
-      write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#24 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
-      read: [via_recs[2].ready] use=branch index=(seq 2) guard=- locks {}; at the call {#24 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:80:3]
+      spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
+      write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
+      read: [via_recs[2].ready] use=branch index=(seq 2) guard=- locks {}; at the call {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:80:3]
       dependency: path C: the creator writes ViaRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #24 &via_mutex@relsound.c:68 (static-instance) is held from the same acquisition across the spawn and every write of ViaRec.ready after it in this call of via_spawn, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of via_spawn (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of ViaRec.ready, the writes of the whole record ViaRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; ViaRec.ready is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of via_spawn (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (via_recs[2]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #24 &via_mutex@relsound.c:68 (static-instance) a static instance and ViaRec.ready complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #27 &via_mutex@relsound.c:68 (static-instance) is held from the same acquisition across the spawn and every write of ViaRec.ready after it in this call of via_spawn, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of via_spawn (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of ViaRec.ready, the writes of the whole record ViaRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; ViaRec.ready is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of via_spawn (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (via_recs[2]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #27 &via_mutex@relsound.c:68 (static-instance) a static instance and ViaRec.ready complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: via_read returns 0 [0] not with the earlier value (INIT 0 (via_recs)), with the written value 1 [1]; via_read returns -1 [-1] with the earlier value (INIT 0 (via_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C4 spawn relsound.c:90:8 in via_spawn -> pthread_create; field ViaRec.ready; read relsound.c:71:19 in via_read (via the indirect call relsound.c:79:9 in via_worker)
-      spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#24 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
-      write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#24 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
+      spawn: callee pthread_create, entries via_worker; child actors {via_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
+      write after the spawn: relsound.c:91:3 key=via_recs[2] value=1 [1] locks {#27 &via_mutex@relsound.c:68 (static-instance)} acquired-at [relsound.c:89:3]
       read: [via_recs[2].ready] use=branch index=(seq 2) guard=- locks {}; at the call {}
       dependency: path C: the creator writes ViaRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -309,11 +338,11 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: via_read returns 0 [0] not with the earlier value (INIT 0 (via_recs)), with the written value 1 [1]; via_read returns -1 [-1] with the earlier value (INIT 0 (via_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C5 spawn relsound.c:119:8 in clear_spawn -> pthread_create; field ClearRec.ready; read relsound.c:104:21 in clear_ready (the read itself)
-      spawn: callee pthread_create, entries clear_worker; child actors {clear_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#4 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
-      write after the spawn: relsound.c:120:3 key=clear_recs[1] value=1 [1] locks {#4 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
+      spawn: callee pthread_create, entries clear_worker; child actors {clear_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#5 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
+      write after the spawn: relsound.c:120:3 key=clear_recs[1] value=1 [1] locks {#5 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:118:3]
       write after the spawn: relsound.c:122:3 (a write of the whole record ClearRec) locks {}
       write after the spawn: relsound.c:122:3 (a write of the whole record ClearRec) locks {}
-      read: [clear_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#4 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:103:3]
+      read: [clear_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#5 &clear_mutex@relsound.c:99 (static-instance)} acquired-at [relsound.c:103:3]
       dependency: path C: the creator writes ClearRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:122:3) holds no lock, so the read may come before it
@@ -321,33 +350,33 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: clear_ready returns -1 [-1] with the earlier value (INIT 0 (clear_recs)), not with the written value 1 [1]; clear_ready returns 0 [0] not with the earlier value (INIT 0 (clear_recs)), with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C6 spawn relsound.c:151:5 in loop_spawn -> pthread_create; field LoopRec.ready; read relsound.c:134:20 in loop_ready (the read itself)
-      spawn: callee pthread_create, entries loop_worker; child actors {loop_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#15 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
-      write after the spawn: relsound.c:150:5 key=loop_recs[0] value=symbolic [i] locks {#15 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
-      read: [loop_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#15 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:133:3]
+      spawn: callee pthread_create, entries loop_worker; child actors {loop_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#16 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
+      write after the spawn: relsound.c:150:5 key=loop_recs[0] value=symbolic [i] locks {#16 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:149:5]
+      read: [loop_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#16 &loop_mutex@relsound.c:129 (static-instance)} acquired-at [relsound.c:133:3]
       dependency: path C: the creator writes LoopRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: possible: lock #15 &loop_mutex@relsound.c:129 (static-instance) is held at the spawn and at the writes after it, but its acquisition relsound.c:149:5 is reached again after the spawn on the creator's control-flow graph (LOCK_PATHS after-spawn), so it may be released and taken again between them
+      feasibility: possible: lock #16 &loop_mutex@relsound.c:129 (static-instance) is held at the spawn and at the writes after it, but its acquisition relsound.c:149:5 is reached again after the spawn on the creator's control-flow graph (LOCK_PATHS after-spawn), so it may be released and taken again between them
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a value that is no constant at relsound.c:150:5; no constant value among the writes of LoopRec.ready after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C7 spawn relsound.c:182:8 in ptr_spawn -> pthread_create; field PtrRec.ready; read relsound.c:167:19 in ptr_ready (via the call relsound.c:174:9 in ptr_worker)
-      spawn: callee pthread_create, entries ptr_worker; child actors {ptr_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#27 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
-      write after the spawn: relsound.c:183:3 key=ptr_recs[1] value=1 [1] locks {#27 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
-      read: [ptr_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#27 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:166:3]; at the call {}
+      spawn: callee pthread_create, entries ptr_worker; child actors {ptr_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#30 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
+      write after the spawn: relsound.c:183:3 key=ptr_recs[1] value=1 [1] locks {#30 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:181:3]
+      read: [ptr_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#30 ptr_cfg@relsound.c:162.mp (not-static)} acquired-at [relsound.c:166:3]; at the call {}
       dependency: path C: the creator writes PtrRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: undecidable: lock #27 ptr_cfg@relsound.c:162.mp (not-static) is held from the same acquisition across the spawn and every write after it, and the read holds it, but its identity is no static instance: that the read's lock and the writes' lock are one mutex is not proven (must identity, ED §3.3)
+      feasibility: undecidable: lock #30 ptr_cfg@relsound.c:162.mp (not-static) is held from the same acquisition across the spawn and every write after it, and the read holds it, but its identity is no static instance: that the read's lock and the writes' lock are one mutex is not proven (must identity, ED §3.3)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: ptr_ready returns -1 [-1] with the earlier value (INIT 0 (ptr_recs)), not with the written value 1 [1]; ptr_ready returns 0 [0] not with the earlier value (INIT 0 (ptr_recs)), with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C8 spawn relsound.c:220:8 in hook_spawn -> pthread_create; field HookRec.ready; read relsound.c:202:20 in hook_ready (the read itself)
-      spawn: callee pthread_create, entries hook_worker; child actors {hook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#12 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
-      write after the spawn: relsound.c:221:3 key=hook_recs[1] value=1 [1] locks {#12 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
+      spawn: callee pthread_create, entries hook_worker; child actors {hook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#13 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
+      write after the spawn: relsound.c:221:3 key=hook_recs[1] value=1 [1] locks {#13 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:219:3]
       calls after the spawn whose targets are not resolved (they may write HookRec.ready under no known lock): relsound.c:224:3 in hook_spawn (indirect call, targets not resolved)
-      read: [hook_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#12 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:201:3]
+      read: [hook_recs[i].ready] use=branch index=(seq param:i#0) guard=- locks {#13 &hook_mutex@relsound.c:196 (static-instance)} acquired-at [relsound.c:201:3]
       dependency: path C: the creator writes HookRec.ready after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: undecidable: lock #12 &hook_mutex@relsound.c:196 (static-instance) is held from the same acquisition across the spawn and every write of HookRec.ready after it in this call of hook_spawn, that acquisition is not reached again after the spawn, and the read holds it; but a call after the spawn whose targets are not resolved may write HookRec.ready under no known lock: relsound.c:224:3 in hook_spawn (indirect call, targets not resolved)
+      feasibility: undecidable: lock #13 &hook_mutex@relsound.c:196 (static-instance) is held from the same acquisition across the spawn and every write of HookRec.ready after it in this call of hook_spawn, that acquisition is not reached again after the spawn, and the read holds it; but a call after the spawn whose targets are not resolved may write HookRec.ready under no known lock: relsound.c:224:3 in hook_spawn (indirect call, targets not resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: hook_ready returns -1 [-1] with the earlier value (INIT 0 (hook_recs)), not with the written value 1 [1]; hook_ready returns 0 [0] not with the earlier value (INIT 0 (hook_recs)), with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
@@ -362,20 +391,20 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: after_used returns 0 [0] not with the earlier value (INIT 0 (after_recs)), with the written value 1 [1]; after_used returns 5 [5] with the earlier value (INIT 0 (after_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C10 spawn relsound.c:291:3 in held_create -> pthread_create; field HeldRec.used; read relsound.c:276:20 in held_used (the read itself)
-      spawn: callee pthread_create, entries held_worker; child actors {held_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#11 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
-      write after the spawn: relsound.c:292:3 key=held_recs[0] value=1 [1] locks {#11 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
-      read: [held_recs[0].used] use=branch index=(seq 0) guard=- locks {#11 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:275:3]
+      spawn: callee pthread_create, entries held_worker; child actors {held_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#12 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
+      write after the spawn: relsound.c:292:3 key=held_recs[0] value=1 [1] locks {#12 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:290:3]
+      read: [held_recs[0].used] use=branch index=(seq 0) guard=- locks {#12 &held_mutex@relsound.c:271 (static-instance)} acquired-at [relsound.c:275:3]
       dependency: path C: the creator writes HeldRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #11 &held_mutex@relsound.c:271 (static-instance) is held from the same acquisition across the spawn and every write of HeldRec.used after it in this call of held_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of held_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of HeldRec.used, the writes of the whole record HeldRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; HeldRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of held_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (held_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #11 &held_mutex@relsound.c:271 (static-instance) a static instance and HeldRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #12 &held_mutex@relsound.c:271 (static-instance) is held from the same acquisition across the spawn and every write of HeldRec.used after it in this call of held_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of held_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of HeldRec.used, the writes of the whole record HeldRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; HeldRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of held_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (held_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #12 &held_mutex@relsound.c:271 (static-instance) a static instance and HeldRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: held_used returns 0 [0] not with the earlier value (INIT 0 (held_recs)), with the written value 1 [1]; held_used returns 5 [5] with the earlier value (INIT 0 (held_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C11 spawn relsound.c:327:3 in wait_create -> pthread_create; field WaitRec.used; read relsound.c:306:20 in wait_used (the read itself)
-      spawn: callee pthread_create, entries wait_worker; child actors {wait_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#25 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
-      write after the spawn: relsound.c:328:3 key=wait_recs[0] value=1 [1] locks {#25 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
-      write after the spawn in wait_finish@relsound.c:319 (through the call relsound.c:329:3): relsound.c:321:3 key=wait_recs[0] value=2 [2] locks {}; at the call {#25 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3] (not composed: on a path from the entry of wait_finish@relsound.c:319 the call relsound.c:320:3 pthread_cond_wait releases a lock wait_finish@relsound.c:319 does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here)
-      read: [wait_recs[0].used] use=branch index=(seq 0) guard=- locks {#25 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:305:3]
+      spawn: callee pthread_create, entries wait_worker; child actors {wait_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
+      write after the spawn: relsound.c:328:3 key=wait_recs[0] value=1 [1] locks {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3]
+      write after the spawn in wait_finish@relsound.c:319 (through the call relsound.c:329:3): relsound.c:321:3 key=wait_recs[0] value=2 [2] locks {}; at the call {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:326:3] (not composed: on a path from the entry of wait_finish@relsound.c:319 the call relsound.c:320:3 pthread_cond_wait releases a lock wait_finish@relsound.c:319 does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here)
+      read: [wait_recs[0].used] use=branch index=(seq 0) guard=- locks {#28 &wait_mutex@relsound.c:300 (static-instance)} acquired-at [relsound.c:305:3]
       dependency: path C: the creator writes WaitRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:321:3) holds no lock, so the read may come before it
@@ -383,10 +412,10 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: wait_used returns 0 [0] not with the earlier value (INIT 0 (wait_recs)), with the written value 2 [2]; wait_used returns 5 [5] with the earlier value (INIT 0 (wait_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C12 spawn relsound.c:366:3 in waitp_create -> pthread_create; field WaitpRec.used; read relsound.c:343:21 in waitp_used (the read itself)
-      spawn: callee pthread_create, entries waitp_worker; child actors {waitp_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#26 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
-      write after the spawn: relsound.c:367:3 key=waitp_recs[0] value=1 [1] locks {#26 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
-      write after the spawn in waitp_finish@relsound.c:358 (through the call relsound.c:368:3): relsound.c:360:3 key=waitp_recs[0] value=2 [2] locks {}; at the call {#26 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3] (not composed: on a path from the entry of waitp_finish@relsound.c:358 the call relsound.c:359:3 waitp_block releases a lock waitp_finish@relsound.c:358 does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here)
-      read: [waitp_recs[0].used] use=branch index=(seq 0) guard=- locks {#26 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:342:3]
+      spawn: callee pthread_create, entries waitp_worker; child actors {waitp_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
+      write after the spawn: relsound.c:367:3 key=waitp_recs[0] value=1 [1] locks {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3]
+      write after the spawn in waitp_finish@relsound.c:358 (through the call relsound.c:368:3): relsound.c:360:3 key=waitp_recs[0] value=2 [2] locks {}; at the call {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:365:3] (not composed: on a path from the entry of waitp_finish@relsound.c:358 the call relsound.c:359:3 waitp_block releases a lock waitp_finish@relsound.c:358 does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here)
+      read: [waitp_recs[0].used] use=branch index=(seq 0) guard=- locks {#29 &waitp_mutex@relsound.c:337 (static-instance)} acquired-at [relsound.c:342:3]
       dependency: path C: the creator writes WaitpRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:360:3) holds no lock, so the read may come before it
@@ -394,10 +423,10 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: waitp_used returns 0 [0] not with the earlier value (INIT 0 (waitp_recs)), with the written value 2 [2]; waitp_used returns 5 [5] with the earlier value (INIT 0 (waitp_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C13 spawn relsound.c:400:3 in first_create -> pthread_create; field FirstRec.used; read relsound.c:382:21 in first_used (the read itself)
-      spawn: callee pthread_create, entries first_worker; child actors {first_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#10 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
-      write after the spawn: relsound.c:401:3 key=first_recs[0] value=1 [1] locks {#10 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
+      spawn: callee pthread_create, entries first_worker; child actors {first_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#11 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
+      write after the spawn: relsound.c:401:3 key=first_recs[0] value=1 [1] locks {#11 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:399:3]
       write after the spawn: relsound.c:403:3 key=first_recs[0] value=2 [2] locks {}
-      read: [first_recs[0].used] use=branch index=(seq 0) guard=- locks {#10 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:381:3]
+      read: [first_recs[0].used] use=branch index=(seq 0) guard=- locks {#11 &first_obj@relsound.c:377.lock (static-instance)} acquired-at [relsound.c:381:3]
       dependency: path C: the creator writes FirstRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:403:3) holds no lock, so the read may come before it
@@ -405,10 +434,10 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: first_used returns 0 [0] not with the earlier value (INIT 0 (first_recs)), with the written value 2 [2]; first_used returns 5 [5] with the earlier value (INIT 0 (first_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C14 spawn relsound.c:433:3 in union_create -> pthread_create; field UnionRec.used; read relsound.c:418:21 in union_used (the read itself)
-      spawn: callee pthread_create, entries union_worker; child actors {union_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#20 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
-      write after the spawn: relsound.c:434:3 key=union_recs[0] value=1 [1] locks {#20 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
+      spawn: callee pthread_create, entries union_worker; child actors {union_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#22 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
+      write after the spawn: relsound.c:434:3 key=union_recs[0] value=1 [1] locks {#22 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:432:3]
       write after the spawn: relsound.c:436:3 key=union_recs[0] value=2 [2] locks {}
-      read: [union_recs[0].used] use=branch index=(seq 0) guard=- locks {#20 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:417:3]
+      read: [union_recs[0].used] use=branch index=(seq 0) guard=- locks {#22 &union_lock@relsound.c:413.a (static-instance)} acquired-at [relsound.c:417:3]
       dependency: path C: the creator writes UnionRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:436:3) holds no lock, so the read may come before it
@@ -416,18 +445,18 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: union_used returns 0 [0] not with the earlier value (INIT 0 (union_recs)), with the written value 2 [2]; union_used returns 5 [5] with the earlier value (INIT 0 (union_recs)), not with the written value 2 [2]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C15 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (via the call relsound.c:461:9 in back_worker)
-      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
-      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
-      read: [back_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:460:3]
+      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      read: [back_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:460:3]
       dependency: path C: the creator writes BackRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #2 &back_mutex@relsound.c:445 (static-instance) is held from the same acquisition across the spawn and every write of BackRec.used after it in this call of back_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of back_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of BackRec.used, the writes of the whole record BackRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; BackRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of back_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (back_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #2 &back_mutex@relsound.c:445 (static-instance) a static instance and BackRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #3 &back_mutex@relsound.c:445 (static-instance) is held from the same acquisition across the spawn and every write of BackRec.used after it in this call of back_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of back_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of BackRec.used, the writes of the whole record BackRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; BackRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of back_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (back_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #3 &back_mutex@relsound.c:445 (static-instance) a static instance and BackRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: back_read returns 0 [0] not with the earlier value (INIT 0 (back_recs)), with the written value 1 [1]; back_read returns -1 [-1] with the earlier value (INIT 0 (back_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C16 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (called back from the call relsound.c:457:3 in back_worker of back_apply, a function without a body that receives back_read)
-      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
-      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
       read: [back_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes BackRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -436,8 +465,8 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: back_read returns 0 [0] not with the earlier value (INIT 0 (back_recs)), with the written value 1 [1]; back_read returns -1 [-1] with the earlier value (INIT 0 (back_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C17 spawn relsound.c:469:3 in back_create -> pthread_create; field BackRec.used; read relsound.c:450:20 in back_read (through an indirect call whose targets are not resolved (back_read is address-taken): relsound.c:459:9 in back_worker)
-      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
-      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#2 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      spawn: callee pthread_create, entries back_worker; child actors {back_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
+      write after the spawn: relsound.c:470:3 key=back_recs[0] value=1 [1] locks {#3 &back_mutex@relsound.c:445 (static-instance)} acquired-at [relsound.c:468:3]
       read: [back_recs[0].used] use=branch index=(seq 0) guard=- locks {}
       dependency: path C: the creator writes BackRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -451,43 +480,43 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       read: [addr_recs[0].used] use=branch index=(seq 0) guard=- locks {#0 &addr_mutex@relsound.c:483 (static-instance)} acquired-at [relsound.c:488:3]
       dependency: path C: the creator writes AddrRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: undecidable: lock #0 &addr_mutex@relsound.c:483 (static-instance) is held from the same acquisition across the spawn and every write of AddrRec.used after it in this call of addr_create, that acquisition is not reached again after the spawn, and the read holds it; but addr_create is address-taken and these facts have 7 indirect call(s) whose targets are not resolved, so its callers are not all known (relsound.c:224:3 in hook_spawn; relsound.c:459:9 in back_worker; relsound.c:518:9 in addr_run; relsound.c:788:3 in memhook_create; relsound.c:830:3 in dlhook_create; relsound.c:890:3 in unres_worker; relsound.c:926:9 in unres2_worker): a caller may write AddrRec.used after it returns
+      feasibility: undecidable: lock #0 &addr_mutex@relsound.c:483 (static-instance) is held from the same acquisition across the spawn and every write of AddrRec.used after it in this call of addr_create, that acquisition is not reached again after the spawn, and the read holds it; but addr_create is address-taken and these facts have 10 indirect call(s) whose targets are not resolved, so its callers are not all known (relsound.c:224:3 in hook_spawn; relsound.c:459:9 in back_worker; relsound.c:518:9 in addr_run; relsound.c:788:3 in memhook_create; relsound.c:830:3 in dlhook_create; relsound.c:890:3 in unres_worker; relsound.c:926:9 in unres2_worker; relsound.c:1017:3 in varhook_create; ...): a caller may write AddrRec.used after it returns
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: addr_used returns 0 [0] not with the earlier value (INIT 0 (addr_recs)), with the written value 2 [2]; addr_used returns 5 [5] with the earlier value (INIT 0 (addr_recs)), not with the written value 2 [2]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C19 spawn relsound.c:556:3 in jump_create -> pthread_create; field JumpRec.used; read relsound.c:533:20 in jump_used (the read itself)
-      spawn: callee pthread_create, entries jump_worker; child actors {jump_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#14 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
-      write after the spawn: relsound.c:558:3 key=jump_recs[0] value=1 [1] locks {#14 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
-      read: [jump_recs[0].used] use=branch index=(seq 0) guard=- locks {#14 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:532:3]
+      spawn: callee pthread_create, entries jump_worker; child actors {jump_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#15 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
+      write after the spawn: relsound.c:558:3 key=jump_recs[0] value=1 [1] locks {#15 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:555:3]
+      read: [jump_recs[0].used] use=branch index=(seq 0) guard=- locks {#15 &jump_mutex@relsound.c:525 (static-instance)} acquired-at [relsound.c:532:3]
       dependency: path C: the creator writes JumpRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: undecidable: lock #14 &jump_mutex@relsound.c:525 (static-instance) is held from the same acquisition across the spawn and every write of JumpRec.used after it in this call of jump_create, that acquisition is not reached again after the spawn, and the read holds it; but relsound.c:550:7 _setjmp in jump_create returns twice: a non-local jump back to it runs code in an order and under locks the control-flow graph does not have
+      feasibility: undecidable: lock #15 &jump_mutex@relsound.c:525 (static-instance) is held from the same acquisition across the spawn and every write of JumpRec.used after it in this call of jump_create, that acquisition is not reached again after the spawn, and the read holds it; but relsound.c:550:7 _setjmp in jump_create returns twice: a non-local jump back to it runs code in an order and under locks the control-flow graph does not have
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: jump_used returns 0 [0] not with the earlier value (INIT 0 (jump_recs)), with the written value 1 [1]; jump_used returns 5 [5] with the earlier value (INIT 0 (jump_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C20 spawn relsound.c:587:3 in elem_create -> pthread_create; field ElemRec.flags; read relsound.c:572:16 in elem_ready (the read itself)
-      spawn: callee pthread_create, entries elem_worker; child actors {elem_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#7 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
-      write after the spawn: relsound.c:588:3 key=elem_rec.flags value=top [copy of elem_zero] locks {#7 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
-      read: [elem_rec.flags[k]] use=branch index=(seq param:k#0) guard=- locks {#7 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:571:3]
+      spawn: callee pthread_create, entries elem_worker; child actors {elem_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#8 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
+      write after the spawn: relsound.c:588:3 key=elem_rec.flags value=top [copy of elem_zero] locks {#8 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:586:3]
+      read: [elem_rec.flags[k]] use=branch index=(seq param:k#0) guard=- locks {#8 &elem_mutex@relsound.c:567 (static-instance)} acquired-at [relsound.c:571:3]
       dependency: path C: the creator writes ElemRec.flags after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: undecidable: lock #7 &elem_mutex@relsound.c:567 (static-instance) is held from the same acquisition across the spawn and every write of ElemRec.flags after it in this call of elem_create, that acquisition is not reached again after the spawn, and the read holds it; but the writer set of ElemRec.flags is not complete under the per-field rule (FIELD_STATUS per-field DISABLED; an array field: a store to one of its elements makes no writer row in these facts), so the writes after the spawn are not known to be all its writes
+      feasibility: undecidable: lock #8 &elem_mutex@relsound.c:567 (static-instance) is held from the same acquisition across the spawn and every write of ElemRec.flags after it in this call of elem_create, that acquisition is not reached again after the spawn, and the read holds it; but the writer set of ElemRec.flags is not complete under the per-field rule (FIELD_STATUS per-field DISABLED; an array field: a store to one of its elements makes no writer row in these facts), so the writes after the spawn are not known to be all its writes
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a index expression; a value that is no constant at relsound.c:588:3; no constant value among the writes of ElemRec.flags after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C21 spawn relsound.c:625:3 in root_create -> pthread_create; field RootRec.used; read relsound.c:600:20 in root_read (via the call relsound.c:606:9 in root_locked)
-      spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#19 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
-      write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#19 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
-      read: [root_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#19 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:605:3]
+      spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
+      write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
+      read: [root_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:605:3]
       dependency: path C: the creator writes RootRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #19 &root_mutex@relsound.c:597 (static-instance) is held from the same acquisition across the spawn and every write of RootRec.used after it in this call of root_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of root_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of RootRec.used, the writes of the whole record RootRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; RootRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of root_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (root_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #19 &root_mutex@relsound.c:597 (static-instance) a static instance and RootRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #21 &root_mutex@relsound.c:597 (static-instance) is held from the same acquisition across the spawn and every write of RootRec.used after it in this call of root_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of root_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of RootRec.used, the writes of the whole record RootRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; RootRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of root_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (root_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #21 &root_mutex@relsound.c:597 (static-instance) a static instance and RootRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: root_read returns 0 [0] not with the earlier value (INIT 0 (root_recs)), with the written value 1 [1]; root_read returns -1 [-1] with the earlier value (INIT 0 (root_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C22 spawn relsound.c:625:3 in root_create -> pthread_create; field RootRec.used; read relsound.c:600:20 in root_read (via the call relsound.c:612:9 in root_other)
-      spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#19 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
-      write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#19 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
+      spawn: callee pthread_create, entries root_worker; child actors {root_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
+      write after the spawn: relsound.c:626:3 key=root_recs[0] value=1 [1] locks {#21 &root_mutex@relsound.c:597 (static-instance)} acquired-at [relsound.c:624:3]
       read: [root_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes RootRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -496,8 +525,8 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: root_read returns 0 [0] not with the earlier value (INIT 0 (root_recs)), with the written value 1 [1]; root_read returns -1 [-1] with the earlier value (INIT 0 (root_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C23 spawn relsound.c:664:3 in desc_create -> pthread_create; field DescRec.used; read relsound.c:642:20 in desc_read (via the call relsound.c:648:9 in desc_grand)
-      spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#5 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
-      write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#5 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
+      spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
+      write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
       read: [desc_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes DescRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -506,28 +535,28 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: desc_read returns 0 [0] not with the earlier value (INIT 0 (desc_recs)), with the written value 1 [1]; desc_read returns -1 [-1] with the earlier value (INIT 0 (desc_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C24 spawn relsound.c:664:3 in desc_create -> pthread_create; field DescRec.used; read relsound.c:642:20 in desc_read (via the call relsound.c:656:9 in desc_worker)
-      spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#5 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
-      write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#5 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
-      read: [desc_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#5 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:655:3]
+      spawn: callee pthread_create, entries desc_worker; child actors {desc_worker (spawn-entry)}; threads the child's code starts (descendants) {desc_grand (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
+      write after the spawn: relsound.c:665:3 key=desc_recs[0] value=1 [1] locks {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:663:3]
+      read: [desc_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#6 &desc_mutex@relsound.c:639 (static-instance)} acquired-at [relsound.c:655:3]
       dependency: path C: the creator writes DescRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #5 &desc_mutex@relsound.c:639 (static-instance) is held from the same acquisition across the spawn and every write of DescRec.used after it in this call of desc_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of desc_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of DescRec.used, the writes of the whole record DescRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; DescRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of desc_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (desc_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #5 &desc_mutex@relsound.c:639 (static-instance) a static instance and DescRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #6 &desc_mutex@relsound.c:639 (static-instance) is held from the same acquisition across the spawn and every write of DescRec.used after it in this call of desc_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of desc_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of DescRec.used, the writes of the whole record DescRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; DescRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of desc_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (desc_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #6 &desc_mutex@relsound.c:639 (static-instance) a static instance and DescRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: desc_read returns 0 [0] not with the earlier value (INIT 0 (desc_recs)), with the written value 1 [1]; desc_read returns -1 [-1] with the earlier value (INIT 0 (desc_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C25 spawn relsound.c:697:3 in opn_create -> pthread_create; field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:686:9 in opn_worker)
-      spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#17 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
-      write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#17 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
-      read: [opn_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#17 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:685:3]
+      spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
+      write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
+      read: [opn_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:685:3]
       dependency: path C: the creator writes OpnRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #17 &opn_mutex@relsound.c:673 (static-instance) is held from the same acquisition across the spawn and every write of OpnRec.used after it in this call of opn_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of opn_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of OpnRec.used, the writes of the whole record OpnRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; OpnRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of opn_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (opn_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #17 &opn_mutex@relsound.c:673 (static-instance) a static instance and OpnRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #18 &opn_mutex@relsound.c:673 (static-instance) is held from the same acquisition across the spawn and every write of OpnRec.used after it in this call of opn_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of opn_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of OpnRec.used, the writes of the whole record OpnRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; OpnRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of opn_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (opn_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #18 &opn_mutex@relsound.c:673 (static-instance) a static instance and OpnRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: opn_read returns 0 [0] not with the earlier value (INIT 0 (opn_recs)), with the written value 1 [1]; opn_read returns -1 [-1] with the earlier value (INIT 0 (opn_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C26 spawn relsound.c:697:3 in opn_create -> pthread_create; field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:692:34 in opn_elsewhere; the threads this spawn starts do not reach this call)
-      spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#17 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
-      write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#17 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
+      spawn: callee pthread_create, entries opn_worker; child actors {opn_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
+      write after the spawn: relsound.c:698:3 key=opn_recs[0] value=1 [1] locks {#18 &opn_mutex@relsound.c:673 (static-instance)} acquired-at [relsound.c:696:3]
       read: [opn_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes OpnRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -536,21 +565,21 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: opn_read returns 0 [0] not with the earlier value (INIT 0 (opn_recs)), with the written value 1 [1]; opn_read returns -1 [-1] with the earlier value (INIT 0 (opn_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C27 spawn relsound.c:745:19 in recur_create -> pthread_create; field RecurRec.used; read relsound.c:727:21 in recur_read (the read itself)
-      spawn: callee pthread_create, entries recur_worker; child actors {recur_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#18 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
-      write after the spawn: relsound.c:746:3 key=recur_recs[0] value=symbolic [depth] locks {#18 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
-      write after the spawn in recur_create (through the call relsound.c:748:25): relsound.c:746:3 key=recur_recs[0] value=symbolic [depth] locks {#18 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]; at the call {} (not composed: the write is more than one call below the creator)
-      read: [recur_recs[0].used] use=branch index=(seq 0) guard=- locks {#18 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:726:3]
+      spawn: callee pthread_create, entries recur_worker; child actors {recur_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
+      write after the spawn: relsound.c:746:3 key=recur_recs[0] value=symbolic [depth] locks {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]
+      write after the spawn in recur_create (through the call relsound.c:748:25): relsound.c:746:3 key=recur_recs[0] value=symbolic [depth] locks {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:744:3]; at the call {} (not composed: the write is more than one call below the creator)
+      read: [recur_recs[0].used] use=branch index=(seq 0) guard=- locks {#20 &recur_mutex@relsound.c:722 (static-instance)} acquired-at [relsound.c:726:3]
       dependency: path C: the creator writes RecurRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: possible: lock #18 &recur_mutex@relsound.c:722 (static-instance) is held at the spawn and at the writes after it, but recur_create runs again after the spawn (the call relsound.c:748:25 reaches it): its acquisition relsound.c:744:3 runs again in that nested call, a new acquisition, so the lock may be released and taken again between them
+      feasibility: possible: lock #20 &recur_mutex@relsound.c:722 (static-instance) is held at the spawn and at the writes after it, but recur_create runs again after the spawn (the call relsound.c:748:25 reaches it): its acquisition relsound.c:744:3 runs again in that nested call, a new acquisition, so the lock may be released and taken again between them
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: not evaluated: a value that is no constant at relsound.c:746:3; no constant value among the writes of RecurRec.used after the spawn
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C28 spawn relsound.c:787:3 in memhook_create -> pthread_create; field MemhookRec.used; read relsound.c:772:23 in memhook_read (the read itself)
-      spawn: callee pthread_create, entries memhook_worker; child actors {memhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#16 &memhook_mutex@relsound.c:755 (static-instance)} acquired-at [relsound.c:786:3]
+      spawn: callee pthread_create, entries memhook_worker; child actors {memhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#17 &memhook_mutex@relsound.c:755 (static-instance)} acquired-at [relsound.c:786:3]
       write after the spawn: relsound.c:789:3 key=memhook_recs[0] value=1 [1] locks {} unknown-release
       calls after the spawn whose targets are not resolved (they may write MemhookRec.used under no known lock): relsound.c:788:3 in memhook_create (indirect call, targets resolved but not all: incomplete-source)
-      read: [memhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#16 &memhook_mutex@relsound.c:755 (static-instance)} acquired-at [relsound.c:771:3]
+      read: [memhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#17 &memhook_mutex@relsound.c:755 (static-instance)} acquired-at [relsound.c:771:3]
       dependency: path C: the creator writes MemhookRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:789:3) holds no lock, so the read may come before it
@@ -558,10 +587,10 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: memhook_read returns 0 [0] not with the earlier value (INIT 0 (memhook_recs)), with the written value 1 [1]; memhook_read returns -1 [-1] with the earlier value (INIT 0 (memhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C29 spawn relsound.c:829:3 in dlhook_create -> pthread_create; field DlhookRec.used; read relsound.c:814:22 in dlhook_read (the read itself)
-      spawn: callee pthread_create, entries dlhook_worker; child actors {dlhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#6 &dlhook_mutex@relsound.c:797 (static-instance)} acquired-at [relsound.c:828:3]
+      spawn: callee pthread_create, entries dlhook_worker; child actors {dlhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#7 &dlhook_mutex@relsound.c:797 (static-instance)} acquired-at [relsound.c:828:3]
       write after the spawn: relsound.c:831:3 key=dlhook_recs[0] value=1 [1] locks {} unknown-release
       calls after the spawn whose targets are not resolved (they may write DlhookRec.used under no known lock): relsound.c:830:3 in dlhook_create (indirect call, targets resolved but not all: incomplete-source)
-      read: [dlhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#6 &dlhook_mutex@relsound.c:797 (static-instance)} acquired-at [relsound.c:813:3]
+      read: [dlhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#7 &dlhook_mutex@relsound.c:797 (static-instance)} acquired-at [relsound.c:813:3]
       dependency: path C: the creator writes DlhookRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:831:3) holds no lock, so the read may come before it
@@ -569,9 +598,9 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: dlhook_read returns 0 [0] not with the earlier value (INIT 0 (dlhook_recs)), with the written value 1 [1]; dlhook_read returns -1 [-1] with the earlier value (INIT 0 (dlhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C30 spawn relsound.c:866:3 in cbq_create -> pthread_create; field CbqRec.used; read relsound.c:850:19 in cbq_read (the read itself)
-      spawn: callee pthread_create, entries cbq_worker; child actors {cbq_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#3 &cbq_mutex@relsound.c:839 (static-instance)} acquired-at [relsound.c:865:3]
+      spawn: callee pthread_create, entries cbq_worker; child actors {cbq_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#4 &cbq_mutex@relsound.c:839 (static-instance)} acquired-at [relsound.c:865:3]
       write after the spawn: relsound.c:868:3 key=cbq_recs[0] value=1 [1] locks {}
-      read: [cbq_recs[0].used] use=branch index=(seq 0) guard=- locks {#3 &cbq_mutex@relsound.c:839 (static-instance)} acquired-at [relsound.c:849:3]
+      read: [cbq_recs[0].used] use=branch index=(seq 0) guard=- locks {#4 &cbq_mutex@relsound.c:839 (static-instance)} acquired-at [relsound.c:849:3]
       dependency: path C: the creator writes CbqRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: possible: a write after the spawn (relsound.c:868:3) holds no lock, so the read may come before it
@@ -579,8 +608,8 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: cbq_read returns 0 [0] not with the earlier value (INIT 0 (cbq_recs)), with the written value 1 [1]; cbq_read returns -1 [-1] with the earlier value (INIT 0 (cbq_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C31 spawn relsound.c:900:3 in unres_create -> pthread_create; field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:884:30 in unres_ctx; the threads this spawn starts do not reach this call)
-      spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#23 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
-      write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#23 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
+      spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
+      write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
       read: [unres_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes UnresRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -589,18 +618,18 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: unres_read returns 0 [0] not with the earlier value (INIT 0 (unres_recs)), with the written value 1 [1]; unres_read returns -1 [-1] with the earlier value (INIT 0 (unres_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C32 spawn relsound.c:900:3 in unres_create -> pthread_create; field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:892:9 in unres_worker)
-      spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#23 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
-      write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#23 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
-      read: [unres_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#23 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:891:3]
+      spawn: callee pthread_create, entries unres_worker; child actors {unres_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
+      write after the spawn: relsound.c:901:3 key=unres_recs[0] value=1 [1] locks {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:899:3]
+      read: [unres_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#25 &unres_mutex@relsound.c:876 (static-instance)} acquired-at [relsound.c:891:3]
       dependency: path C: the creator writes UnresRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #23 &unres_mutex@relsound.c:876 (static-instance) is held from the same acquisition across the spawn and every write of UnresRec.used after it in this call of unres_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of unres_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of UnresRec.used, the writes of the whole record UnresRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; UnresRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of unres_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (unres_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #23 &unres_mutex@relsound.c:876 (static-instance) a static instance and UnresRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #25 &unres_mutex@relsound.c:876 (static-instance) is held from the same acquisition across the spawn and every write of UnresRec.used after it in this call of unres_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of unres_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of UnresRec.used, the writes of the whole record UnresRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; UnresRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of unres_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (unres_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #25 &unres_mutex@relsound.c:876 (static-instance) a static instance and UnresRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: unres_read returns 0 [0] not with the earlier value (INIT 0 (unres_recs)), with the written value 1 [1]; unres_read returns -1 [-1] with the earlier value (INIT 0 (unres_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C33 spawn relsound.c:933:3 in unres2_create -> pthread_create; field Unres2Rec.used; read relsound.c:918:22 in unres2_read (through an indirect call whose targets are not resolved (unres2_read is address-taken): relsound.c:926:9 in unres2_worker)
-      spawn: callee pthread_create, entries unres2_worker; child actors {unres2_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#22 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
-      write after the spawn: relsound.c:934:3 key=unres2_recs[0] value=1 [1] locks {#22 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
+      spawn: callee pthread_create, entries unres2_worker; child actors {unres2_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#24 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
+      write after the spawn: relsound.c:934:3 key=unres2_recs[0] value=1 [1] locks {#24 &unres2_mutex@relsound.c:914 (static-instance)} acquired-at [relsound.c:932:3]
       read: [unres2_recs[0].used] use=branch index=(seq 0) guard=- locks {}
       dependency: path C: the creator writes Unres2Rec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
@@ -609,22 +638,55 @@ summary A 0 (namespaces 0, lookup uses 0, with a creator of the same partition i
       flip: static-possible: unres2_read returns 0 [0] not with the earlier value (INIT 0 (unres2_recs)), with the written value 1 [1]; unres2_read returns -1 [-1] with the earlier value (INIT 0 (unres2_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C34 spawn relsound.c:974:33 in img_create -> pthread_create; field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:958:9 in img_main)
-      spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#13 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
-      write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#13 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
-      read: [img_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#13 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:957:3]
+      spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
+      write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
+      read: [img_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:957:3]
       dependency: path C: the creator writes ImgRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #13 &img_mutex@relsound.c:947 (static-instance) is held from the same acquisition across the spawn and every write of ImgRec.used after it in this call of img_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of img_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of ImgRec.used, the writes of the whole record ImgRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; ImgRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of img_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (img_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #13 &img_mutex@relsound.c:947 (static-instance) a static instance and ImgRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (a function value stored through a cast lvalue into a variable whose address does not leave as a converted call argument is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
+      feasibility: proven-impossible: lock #14 &img_mutex@relsound.c:947 (static-instance) is held from the same acquisition across the spawn and every write of ImgRec.used after it in this call of img_create, that acquisition is not reached again after the spawn, and the read holds it: the read cannot fall between them.  Scope: one call of img_create (ED §3.3 item 3), on its control-flow graph from the spawn to its return, loops included (LOCK_PATHS after-spawn); the writes counted are the typed writes of ImgRec.used, the writes of the whole record ImgRec, the data functions that may cover the field, and those of the functions the creator calls after the spawn; ImgRec.used is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of img_create (main) write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read; it concerns the writes of this call: whether their keys (img_recs[0]) name the record of the child this call starts, and not one another call registers, is not decided; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #14 &img_mutex@relsound.c:947 (static-instance) a static instance and ImgRec.used complete (PI decision pending); and the premises of path C (static_facts §5h, §5i): two lock identities name one mutex only as their access paths may overlap (the same global object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function without a body has no lock effect of its own and calls back only the functions passed to it in that call (their lock effect is read at the call), a function returns twice only by the names of the C library list, a mutex is released only by the thread that holds it and its object changes only through the P0 primitives (no unlock by another thread, no plain store over a held mutex), the targets of an indirect call are all its resolved candidates unless the extraction marks it incomplete-source (it marks every store the flow graph does not follow that goes through an address of a function pointer taken, passed, decayed or copied in these units, a node of another type, a function without a body or a field not complete per field; a store by inline assembly or through pointer arithmetic from another object is not seen), and an indirect call whose targets are not resolved calls only address-taken functions (a function whose address a symbol lookup returns at run time is not counted, apart from the startup-script entries resolved)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: img_read returns 0 [0] not with the earlier value (INIT 0 (img_recs)), with the written value 1 [1]; img_read returns -1 [-1] with the earlier value (INIT 0 (img_recs)), not with the written value 1 [1]
       layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending); premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show; functions without a body call back only the functions passed to them; returns-twice calls by name; a mutex is released only by the thread that holds it and its object changes only through the P0 primitives; indirect-call target sets are complete apart from the incomplete-source forms the extraction checks; an unresolved indirect call calls only address-taken functions)) P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
   C35 spawn relsound.c:974:33 in img_create -> pthread_create; field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:967:34 in img_elsewhere; the threads this spawn starts do not reach this call)
-      spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#13 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
-      write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#13 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
+      spawn: callee pthread_create, entries img_main (from the static image of the table the entry argument is read from); child actors {img_main (table-image-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
+      write after the spawn: relsound.c:977:3 key=img_recs[0] value=1 [1] locks {#14 &img_mutex@relsound.c:947 (static-instance)} acquired-at [relsound.c:972:3]
       read: [img_recs[0].used] use=branch index=(seq 0) guard=- locks {}; at the call {}
       dependency: path C: the creator writes ImgRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
       run-order: no record given
       feasibility: undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set is not complete: the entries of the spawn relsound.c:974:33 are read from a static image: besides the function leaves of ImgFn.main, the image of img_table has 2 function leaf/leaves of another member of its record (img_table[0].fn.init img_init@relsound.c:963, img_table[2].fn.init img_init@relsound.c:963; a union member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard, which this revision does not read
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: img_read returns 0 [0] not with the earlier value (INIT 0 (img_recs)), with the written value 1 [1]; img_read returns -1 [-1] with the earlier value (INIT 0 (img_recs)), not with the written value 1 [1]
+      layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+  C36 spawn relsound.c:1016:3 in varhook_create -> pthread_create; field VarhookRec.used; read relsound.c:1001:23 in varhook_read (the read itself)
+      spawn: callee pthread_create, entries varhook_worker; child actors {varhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#26 &varhook_mutex@relsound.c:986 (static-instance)} acquired-at [relsound.c:1015:3]
+      write after the spawn: relsound.c:1018:3 key=varhook_recs[0] value=1 [1] locks {} unknown-release
+      calls after the spawn whose targets are not resolved (they may write VarhookRec.used under no known lock): relsound.c:1017:3 in varhook_create (indirect call, targets resolved but not all: incomplete-source)
+      read: [varhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#26 &varhook_mutex@relsound.c:986 (static-instance)} acquired-at [relsound.c:1000:3]
+      dependency: path C: the creator writes VarhookRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: a write after the spawn (relsound.c:1018:3) holds no lock, so the read may come before it
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: varhook_read returns 0 [0] not with the earlier value (INIT 0 (varhook_recs)), with the written value 1 [1]; varhook_read returns -1 [-1] with the earlier value (INIT 0 (varhook_recs)), not with the written value 1 [1]
+      layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+  C37 spawn relsound.c:1061:3 in putcopy_create -> pthread_create; field PutcopyRec.used; read relsound.c:1046:23 in putcopy_read (the read itself)
+      spawn: callee pthread_create, entries putcopy_worker; child actors {putcopy_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#19 &putcopy_mutex@relsound.c:1027 (static-instance)} acquired-at [relsound.c:1060:3]
+      write after the spawn: relsound.c:1063:3 key=putcopy_recs[0] value=1 [1] locks {} unknown-release
+      calls after the spawn whose targets are not resolved (they may write PutcopyRec.used under no known lock): relsound.c:1062:3 in putcopy_create (indirect call, targets resolved but not all: incomplete-source)
+      read: [putcopy_recs[0].used] use=branch index=(seq 0) guard=- locks {#19 &putcopy_mutex@relsound.c:1027 (static-instance)} acquired-at [relsound.c:1045:3]
+      dependency: path C: the creator writes PutcopyRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: a write after the spawn (relsound.c:1063:3) holds no lock, so the read may come before it
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: putcopy_read returns 0 [0] not with the earlier value (INIT 0 (putcopy_recs)), with the written value 1 [1]; putcopy_read returns -1 [-1] with the earlier value (INIT 0 (putcopy_recs)), not with the written value 1 [1]
+      layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)
+  C38 spawn relsound.c:1106:3 in arrhook_create -> pthread_create; field ArrhookRec.used; read relsound.c:1091:23 in arrhook_read (the read itself)
+      spawn: callee pthread_create, entries arrhook_worker; child actors {arrhook_worker (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#2 &arrhook_mutex@relsound.c:1072 (static-instance)} acquired-at [relsound.c:1105:3]
+      write after the spawn: relsound.c:1108:3 key=arrhook_recs[0] value=1 [1] locks {} unknown-release
+      calls after the spawn whose targets are not resolved (they may write ArrhookRec.used under no known lock): relsound.c:1107:3 in arrhook_create (indirect call, targets resolved but not all: incomplete-source)
+      read: [arrhook_recs[0].used] use=branch index=(seq 0) guard=- locks {#2 &arrhook_mutex@relsound.c:1072 (static-instance)} acquired-at [relsound.c:1090:3]
+      dependency: path C: the creator writes ArrhookRec.used after the spawn; code the spawned entry reaches reads it; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: a write after the spawn (relsound.c:1108:3) holds no lock, so the read may come before it
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: arrhook_read returns 0 [0] not with the earlier value (INIT 0 (arrhook_recs)), with the written value 1 [1]; arrhook_read returns -1 [-1] with the earlier value (INIT 0 (arrhook_recs)), not with the written value 1 [1]
       layers: B P0 R P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)

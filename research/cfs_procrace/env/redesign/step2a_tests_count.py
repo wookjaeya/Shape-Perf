@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""step2a_tests_count.py OUT EB [S5 [FIX1 [FIX2]]] -- evidence for the completion tests T1-T7
+"""step2a_tests_count.py OUT EB [S5 [FIX1 [FIX2 [FIX3]]]] -- evidence for the completion tests T1-T7
 (plan/extraction_design_20261030.md §6), the re-measure of ED §2.3 under the rule targets, and the candidate burden of
 `kz-static relations`; with S5 (the outputs of stage S5, kept when the fix stage re-ran the tests), the rows whose
 verdicts the fix stage changed; with FIX1 (the outputs of the first fix stage, kept when the second re-ran the tests),
-the rows whose verdicts the second changed; with FIX2 (the outputs of the second fix stage), those the third changed.
+the rows whose verdicts the second changed; with FIX2 (the outputs of the second fix stage), those the third changed;
+with FIX3 (the outputs of the first round of the third fix stage), those its second round changed.
 
 Reads OUT/<build>/NP/{relations.txt,facts.txt,extract.txt} written by step2a_tests.sh (profile-free extraction with
 --targets-rule R-T1,R-T2; no case input).  The case names below are queries of this evaluation script only: they pick
@@ -19,6 +20,7 @@ OUT, EB = sys.argv[1], sys.argv[2]
 S5 = sys.argv[3] if len(sys.argv) > 3 else None
 FIX1 = sys.argv[4] if len(sys.argv) > 4 else None
 FIX2 = sys.argv[5] if len(sys.argv) > 5 else None
+FIX3 = sys.argv[6] if len(sys.argv) > 6 else None
 CD = os.path.join(OUT, 'count')
 os.makedirs(CD, exist_ok=True)
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
@@ -501,6 +503,8 @@ if FIX1:
     against(FIX1, 'fix1', 'against_fix1.tsv')
 if FIX2:
     against(FIX2, 'fix2', 'against_fix2.tsv')
+if FIX3:
+    against(FIX3, 'fix3', 'against_fix3.tsv')
 
 with open(os.path.join(CD, 'summary.tsv'), 'w') as f:
     f.write('build\trows\trows_with_case_layer\n')

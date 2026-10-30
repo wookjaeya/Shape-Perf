@@ -20,7 +20,7 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 1 (2026-10-30)"; }
+const char* relations_rules_revision() { return "relations rules revision 2 (2026-10-30)"; }
 
 namespace {
 
@@ -71,6 +71,9 @@ class Rel {
         return kz::Status::error(kz::Err::Invalid,
                                  "the facts have no extended facts (section " + std::to_string(need) +
                                      "): extract them with --no-profile, or with --extended-facts in the profile-driven mode");
+    if (c_.find_section(KZ_SEC_LOCK_PATHS) == nullptr)
+      return kz::Status::error(kz::Err::Invalid,
+                               "the facts have no LOCK_PATHS section (facts schema revision 11, written with the extended facts): extract them again with this kz-static");
     kz::Status s;
     if (!(s = read(KZ_SEC_BASIS, &basis_)).ok()) return s;
     if (!(s = read(KZ_SEC_FUNCS, &funcs_)).ok()) return s;
@@ -98,6 +101,7 @@ class Rel {
     if (!(s = read(KZ_SEC_LOCKSET, &lockset_)).ok()) return s;
     if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
     if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
     return kz::Status::success();
   }
 
@@ -112,13 +116,24 @@ class Rel {
   }
   std::string fname(uint32_t fn) const {
     if (fn == kN || fn >= funcs_.size()) return "-";
+    if (defined(fn)) note_file(str(funcs_[fn].file));
     std::string n = str(funcs_[fn].name);
     if (funcs_[fn].flags & KZ_FUNC_FLAG_STATIC) n += "@" + str(funcs_[fn].file) + ":" + std::to_string(funcs_[fn].line);
     return n;
   }
+  static std::string join(const std::vector<std::string>& v, const char* sep) {
+    std::string t;
+    for (const std::string& x : v) t += (t.empty() ? "" : sep) + x;
+    return t;
+  }
   std::string short_fname(uint32_t fn) const { return fn == kN || fn >= funcs_.size() ? "-" : str(funcs_[fn].name); }
   bool defined(uint32_t fn) const { return fn != kN && fn < funcs_.size() && (funcs_[fn].flags & KZ_FUNC_FLAG_DEFINED) != 0; }
-  static std::string pos(const std::string& file, uint32_t line, uint32_t col) {
+  // a position; the file is noted for the row being written (the basis deviations of its unit)
+  void note_file(const std::string& f) const {
+    if (!f.empty()) row_files_.insert(f);
+  }
+  std::string pos(const std::string& file, uint32_t line, uint32_t col) const {
+    note_file(file);
     std::string p = file + ":" + std::to_string(line);
     if (col != 0) p += ":" + std::to_string(col);
     return p;
@@ -301,6 +316,7 @@ class Rel {
       if (t.kind == KZ_CALL_TARGET_KIND_INDIRECT && defined(t.fn) && caller < funcs_.size()) {
         succ_[caller].push_back({t.fn, true});
         indirect_callers_[t.fn].push_back(it->second);
+        itargets_[t.site].insert(t.fn);
       }
       if (t.kind == KZ_CALL_TARGET_KIND_SPAWN_ENTRY) spawn_entries_[t.site].insert(t.fn);
     }
@@ -345,7 +361,97 @@ class Rel {
     for (size_t i = 0; i < awaits_.size(); ++i) awaits_of_[awaits_[i].fn].push_back(static_cast<uint32_t>(i));
     for (const kz_fact_p0& p : p0_) p0_kind_[str(p.name)] = p.kind;
     for (const P0CompareEntry& e : p0_compare_table()) compare_names_.insert(e.name);
+    for (const kz_fact_lockpath& p : lockpaths_) {
+      if (p.kind == KZ_LOCKPATH_KIND_AFTER_SPAWN) after_spawn_[p.site].insert(p.row);
+      else if (p.kind == KZ_LOCKPATH_KIND_ENTRY_RELEASE && entry_release_.count(p.row) == 0) entry_release_[p.row] = p.site;
+    }
+    // the deviations of the basis the extraction copied (extract.basis_deviation[<item>]); a unit's own deviations
+    // (an item whose name has the unit's file in its first [...]) mark the rows that name a position of that file
+    const std::string dev = "extract.basis_deviation[";
+    for (const auto& [k, v] : basis_map_) {
+      if (k.compare(0, dev.size(), dev) != 0 || k.back() != ']') continue;
+      const std::string item = k.substr(dev.size(), k.size() - dev.size() - 1);
+      deviations_.push_back(item);
+      const size_t a = item.find('['), b = a == std::string::npos ? std::string::npos : item.find(']', a);
+      if (b != std::string::npos) deviation_files_[item.substr(a + 1, b - a - 1)].insert(item);
+    }
+    for (const kz_basis_item& b : basis_)
+      if (b.policy == KZ_POLICY_DECLARED && str(b.name).compare(0, 7, "assume.") == 0) assumptions_.insert(str(b.name));
+    thread_end_code();
     global_address_functions();
+    image_entries();
+  }
+
+  // The code of the program a thread may run after its entry function has returned: the destructors of the
+  // thread-specific keys (P0 key creation with a destructor argument that is not a null constant) and the cleanup
+  // handlers (P0 cleanup push; conservatively every push of the program).
+  void thread_end_code() {
+    for (size_t ci = 0; ci < calls_.size(); ++ci) {
+      const kz_fact_call& c = calls_[ci];
+      if (defined(c.callee_fn)) continue;
+      const std::string callee = str(c.callee);
+      for (const kz_fact_p0& p : p0_) {
+        if (str(p.name) != callee) continue;
+        if (p.kind == KZ_P0_KIND_TSD_KEY_CREATE && p.entry_param != kN) {
+          auto af = argflow_at_.find({c.site, p.entry_param});
+          const bool null = af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_CONST && argflow_[af->second].value == 0;
+          (null ? keys_null_dtor_ : keys_dtor_)
+              .push_back(callee + " at " + call_pos(static_cast<uint32_t>(ci)) + (af != argflow_at_.end() ? " (arg " + std::to_string(p.entry_param) + " [" + str(argflow_[af->second].text) + "])" : ""));
+        }
+        if (p.kind == KZ_P0_KIND_CLEANUP_PUSH) cleanup_pushes_.push_back(callee + " at " + call_pos(static_cast<uint32_t>(ci)));
+      }
+    }
+  }
+
+  // The entries of a spawn call whose entry argument is read from a global table with a static image: the function
+  // leaves of that image at the field the argument reads (GLOBAL_IMAGES), for the spawn calls the facts leave without
+  // a resolved entry.  The entry argument is the P0 entry parameter of a thread-creation primitive, or the parameter a
+  // derived spawn operation passes on (SPAWN_WRAP).  No creation order is read from the image.
+  void image_entries() {
+    std::map<uint32_t, uint32_t> entry_param_of;  // spawn operation (function) -> its entry parameter
+    for (const kz_fact_spawnw& w : spawnw_)
+      if (w.param != kN && (w.kind == KZ_SPAWNW_KIND_ENTRY_ARG || w.kind == KZ_SPAWNW_KIND_CALLED_BY_ENTRY || w.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY) &&
+          entry_param_of.count(w.fn) == 0)
+        entry_param_of[w.fn] = w.param;
+    for (size_t ci = 0; ci < calls_.size(); ++ci) {
+      const kz_fact_call& c = calls_[ci];
+      if ((c.flags & KZ_CALL_FLAG_SPAWN_OP) == 0 || !defined(c.caller_fn)) continue;
+      auto se = spawn_entries_.find(c.site);
+      bool resolved = false;
+      if (se != spawn_entries_.end())
+        for (uint32_t e : se->second)
+          if (defined(e)) resolved = true;
+      if (resolved) continue;
+      uint32_t k = kN;
+      if (defined(c.callee_fn)) {
+        auto it = entry_param_of.find(c.callee_fn);
+        if (it != entry_param_of.end()) k = it->second;
+      } else {
+        for (const kz_fact_p0& p : p0_)
+          if (str(p.name) == str(c.callee) && p.kind == KZ_P0_KIND_THREAD_CREATE) k = p.entry_param;
+      }
+      if (k == kN) continue;
+      auto af = argflow_at_.find({c.site, k});
+      if (af == argflow_at_.end()) continue;
+      const kz_fact_argflow& a = argflow_[af->second];
+      const std::string object = base_name(str(a.object)), field = str(a.field), type = str(a.type);
+      if (a.src != KZ_ARGSRC_FIELD || object.empty() || field.empty() || (a.base != KZ_ARGBASE_GLOBAL && a.base != KZ_ARGBASE_GLOBAL_ELEMENT)) continue;
+      auto git = gimages_of_.find(object);
+      if (git == gimages_of_.end()) continue;
+      std::set<uint32_t> found;
+      for (uint32_t gi : git->second) {
+        const kz_fact_gimage& g = gimages_[gi];
+        if (g.kind != KZ_IMAGE_KIND_FUNC || !defined(g.fn)) continue;
+        const std::string path = str(g.path), owner = str(g.owner), gfield = str(g.field);
+        const size_t dot = path.rfind('.');
+        if (dot == std::string::npos || path.substr(dot + 1) != field) continue;
+        if (!gfield.empty() && (gfield != field || owner != type)) continue;
+        found.insert(g.fn);
+      }
+      if (found.empty()) continue;
+      image_spawn_[c.site] = found;
+      for (uint32_t e : found) spawn_entries_[c.site].insert(e);
+    }
   }
 
   // the functions whose every return value is the address of (a part of) a global object or null
@@ -418,17 +524,34 @@ class Rel {
 
   // ---------------------------------------------------------------- actors (static, may)
   // Roots: the process root (`main`), the resolved entries of spawn calls (CALL_TARGETS spawn-entry, the
-  // unrolled table-walk iterations, the startup-script entries of SPAWN_WRAP).  A root's code is what it
-  // reaches over the call graph (direct calls and resolved indirect targets) without entering another
-  // root.  A root other than the process root that calls into other roots is a trampoline: it is no actor
-  // of its own, and its code belongs to the roots it calls (transitively through other trampolines).
+  // unrolled table-walk iterations, the startup-script entries of SPAWN_WRAP, the function leaves of the static
+  // image a spawn's entry argument is read from).  A root's code is what it reaches over the call graph (direct
+  // calls and resolved indirect targets) without entering another root.  A root other than the process root is a
+  // trampoline -- no actor of its own, its code belongs to the roots it calls (transitively through other
+  // trampolines) -- when it dispatches only: it enters other roots, only through indirect calls, and its own body
+  // reads no field or global through a shared root (READS: a global, or the result of a function that returns
+  // global addresses only) and writes no global object (LOCKSET write rows of `<global>`).  The record-field writes
+  // of its body are not read: a typed write carries no base in these facts.
+  bool own_shared_access(uint32_t r) const {
+    for (const kz_fact_read& rd : reads_)
+      if (rd.fn == r && (rd.root_kind == KZ_READ_ROOT_GLOBAL || (rd.root_kind == KZ_READ_ROOT_CALL && gaf_.count(str(rd.root)) != 0))) return true;
+    auto it = lockset_writes_of_.find(r);
+    if (it != lockset_writes_of_.end())
+      for (uint32_t li : it->second)
+        if (str(lockset_[li].type) == "<global>") return true;
+    return false;
+  }
   void actors() {
     for (uint32_t fn : fn_by_name_["main"])
       if (defined(fn)) root_kind_[fn] = "process";
     for (const auto& [site, entries] : spawn_entries_)
       for (uint32_t e : entries)
-        if (defined(e) && root_kind_.count(e) == 0) root_kind_[e] = script_entries_.count(e) != 0 ? "script-entry" : iter_spawn_.count(site) != 0 ? "table-walk-entry" : "spawn-entry";
-    std::map<uint32_t, std::set<uint32_t>> calls_roots;
+        if (defined(e) && root_kind_.count(e) == 0)
+          root_kind_[e] = script_entries_.count(e) != 0 ? "script-entry"
+                          : iter_spawn_.count(site) != 0 ? "table-walk-entry"
+                          : image_spawn_.count(site) != 0 ? "table-image-entry"
+                                                          : "spawn-entry";
+    std::map<uint32_t, std::set<uint32_t>> calls_roots, calls_roots_direct;
     for (const auto& [r, kind] : root_kind_) {
       std::set<uint32_t>& reach = reach_[r];
       std::vector<uint32_t> stack{r};
@@ -439,14 +562,19 @@ class Rel {
         for (const auto& [y, indirect] : succ_[x]) {
           if (y != r && root_kind_.count(y) != 0) {
             calls_roots[r].insert(y);
+            if (!indirect) calls_roots_direct[r].insert(y);
             continue;
           }
           if (reach.insert(y).second) stack.push_back(y);
         }
       }
     }
-    for (const auto& [r, kind] : root_kind_)
-      if (kind != "process" && !calls_roots[r].empty()) trampolines_.insert(r);
+    for (const auto& [r, kind] : root_kind_) {
+      if (kind == "process" || calls_roots[r].empty()) continue;
+      if (!calls_roots_direct[r].empty()) kept_direct_.insert(r);
+      else if (own_shared_access(r)) kept_shared_.insert(r);
+      else trampolines_.insert(r);
+    }
     // what a trampoline stands for, through other trampolines
     std::function<void(uint32_t, std::set<uint32_t>*, std::set<uint32_t>*)> expand = [&](uint32_t t, std::set<uint32_t>* out, std::set<uint32_t>* seen) {
       if (!seen->insert(t).second) return;
@@ -539,6 +667,25 @@ class Rel {
   }
 
   // ---------------------------------------------------------------- layers
+  // A row starts with begin_row(): the positions and functions it names note their files (row_files_), and its
+  // feasibility verdict notes what it rests on (row_tags_).  The layers column then names, besides the input layers,
+  // the basis deviations of the units of those files (the copies extract.basis_deviation[...] in the facts) and the
+  // declared assumptions and the completeness rule the verdict uses.
+  void begin_row() const {
+    row_files_.clear();
+    row_tags_.clear();
+  }
+  void tag(const std::string& t) const { row_tags_.insert(t); }
+  std::set<std::string> row_deviations() const {
+    std::set<std::string> out;
+    for (const std::string& f : row_files_)
+      for (const auto& [unit, items] : deviation_files_) {
+        const bool same = f == unit || (f.size() > unit.size() && f.compare(f.size() - unit.size(), unit.size(), unit) == 0 && f[f.size() - unit.size() - 1] == '/') ||
+                          (unit.size() > f.size() && unit.compare(unit.size() - f.size(), f.size(), f) == 0 && unit[unit.size() - f.size() - 1] == '/');
+        if (same) out.insert(items.begin(), items.end());
+      }
+    return out;
+  }
   std::string layers_text(bool p0, bool l0, const std::string& extra = "") const {
     std::string t = "B";
     if (p0) t += " P0";
@@ -547,6 +694,25 @@ class Rel {
     if (!profile_free_) t += " case:profile(" + basis_map_.at_or("extract.profile") + ")";
     if (hand_entered_vocabulary_ != 0) t += " hand-entered:command-line(" + std::to_string(hand_entered_vocabulary_) + " items; G0 or other names, not automatic)";
     if (!extra.empty()) t += " " + extra;
+    const std::set<std::string> devs = row_deviations();
+    if (!devs.empty()) {
+      t += " basis-deviation(";
+      bool first = true;
+      for (const std::string& d : devs) {
+        t += (first ? "" : "; ") + d;
+        first = false;
+      }
+      t += ")";
+    }
+    if (!row_tags_.empty()) {
+      t += " rests-on(";
+      bool first = true;
+      for (const std::string& d : row_tags_) {
+        t += (first ? "" : "; ") + d;
+        first = false;
+      }
+      t += ")";
+    }
     return t;
   }
 
@@ -556,13 +722,17 @@ class Rel {
     os << "facts " << kz::to_hex(c_.artifact_hash()) << "\n";
     os << "rules " << relations_rules_revision() << "\n";
     os << "mode " << (profile_free_ ? "profile-free" : "profile-driven") << "\n";
-    for (const char* k : {"extract.builtin_profile", "extract.profile", "extract.p0_table", "extract.derivation_rules", "extract.targets_rule"}) {
+    for (const char* k : {"extract.builtin_profile", "extract.profile", "extract.p0_table", "extract.p0_table_scope", "extract.derivation_rules", "extract.targets_rule"}) {
       auto it = basis_map_.find(k);
       if (it != basis_map_.end()) os << "  " << k << " = " << it->second << "\n";
     }
     os << "p0-compare " << p0_compare_table_revision() << ":";
     for (const P0CompareEntry& e : p0_compare_table()) os << " " << e.name << " (" << e.family << "; " << e.version << "; source " << e.source << ")";
     os << "\n";
+    os << "p0-compare scope: " << p0_compare_table_scope() << "\n";
+    os << "basis deviations copied into these facts: " << deviations_.size();
+    for (const std::string& d : deviations_) os << " [" << d << "]";
+    os << " (a row that names a position in a unit with its own deviation says so in its layers column)\n";
     os << "layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (" << (profile_free_ ? "the P0 tables" : "profile vocabulary")
        << "), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules)";
     if (!profile_free_) os << "; case layer: the profile " << basis_map_.at_or("extract.profile");
@@ -570,8 +740,21 @@ class Rel {
     os << "\n";
     os << "run order: no record given (this revision reads no run record; the column says so in every row)\n";
     os << "actors: roots " << root_kind_.size() << " (process " << count_kind("process") << ", spawn-entry " << count_kind("spawn-entry") << ", table-walk-entry "
-       << count_kind("table-walk-entry") << ", script-entry " << count_kind("script-entry") << "), trampolines " << trampolines_.size();
+       << count_kind("table-walk-entry") << ", table-image-entry " << count_kind("table-image-entry") << ", script-entry " << count_kind("script-entry") << "), trampolines "
+       << trampolines_.size();
     for (uint32_t t : trampolines_) os << " [" << fname(t) << " -> " << actors_text(delegates_.at(t)) << "]";
+    os << "; roots that enter other roots and stay actors: through a direct call " << kept_direct_.size();
+    for (uint32_t t : kept_direct_) os << " [" << fname(t) << "]";
+    os << ", with a shared access of their own body " << kept_shared_.size();
+    for (uint32_t t : kept_shared_) os << " [" << fname(t) << "]";
+    os << "\n";
+    os << "spawn calls resolved through the static image of the table their entry argument is read from: " << image_spawn_.size();
+    for (const auto& [site, es] : image_spawn_) {
+      auto cit = call_by_site_.find(site);
+      os << " [" << (cit != call_by_site_.end() ? call_pos(cit->second) : "site " + std::to_string(site)) << ":";
+      for (uint32_t e : es) os << " " << fname(e);
+      os << "]";
+    }
     os << "\n";
     os << "summary A " << n_a_ << " (namespaces " << n_ns_ << ", lookup uses " << n_a_ << ", with a creator of the same partition in another actor " << n_a_paired_
        << ", key-matched " << n_a_keymatch_ << ") B " << n_b_ << " (with a callee check " << n_b_check_ << ") C " << n_c_ << " (self-identity reads " << n_c_self_
@@ -729,30 +912,28 @@ class Rel {
   };
   std::vector<Check> checks_on_param(uint32_t fn, uint32_t k) const {
     std::vector<Check> out;
-    std::set<std::pair<int64_t, std::string>> seen;
+    std::set<std::pair<int64_t, uint32_t>> seen;
     auto it = returns_of_.find(fn);
     if (it == returns_of_.end()) return out;
     for (uint32_t ri : it->second) {
       const kz_fact_return& r = returns_[ri];
       if (r.vkind != KZ_RET_VALUE_CONST || r.cond_root == kN || !has_param(r.cond_root, k)) continue;
-      const std::string cond = ex(r.cond_root);
-      if (!seen.insert({r.value, cond}).second) continue;
-      out.push_back(Check{r.value, str(r.text), cond, r.cond_root});
+      if (!seen.insert({r.value, r.cond_root}).second) continue;
+      out.push_back(Check{r.value, str(r.text), ex(r.cond_root), r.cond_root});
     }
     return out;
   }
   // a function's constant returns whose condition mentions a field
   std::vector<Check> checks_on_field(uint32_t fn, const std::string& tf) const {
     std::vector<Check> out;
-    std::set<std::pair<int64_t, std::string>> seen;
+    std::set<std::pair<int64_t, uint32_t>> seen;
     auto it = returns_of_.find(fn);
     if (it == returns_of_.end()) return out;
     for (uint32_t ri : it->second) {
       const kz_fact_return& r = returns_[ri];
       if (r.vkind != KZ_RET_VALUE_CONST || r.cond_root == kN || !has_field(r.cond_root, tf)) continue;
-      const std::string cond = ex(r.cond_root);
-      if (!seen.insert({r.value, cond}).second) continue;
-      out.push_back(Check{r.value, str(r.text), cond, r.cond_root});
+      if (!seen.insert({r.value, r.cond_root}).second) continue;
+      out.push_back(Check{r.value, str(r.text), ex(r.cond_root), r.cond_root});
     }
     return out;
   }
@@ -772,6 +953,57 @@ class Rel {
     return t;
   }
 
+  // A terminal operation the derivation reaches only on some paths (OP_DERIV mode may): its terminal calls with their
+  // guards, the guards evaluated with each constant value an argument takes at the call (the other arguments and the
+  // rest of the program unknown), and its loops that have no exit (the call does not return on a path through one).
+  std::string may_terminal(uint32_t fn, const std::map<uint32_t, std::set<int64_t>>& argvals) const {
+    auto it = opderiv_of_.find(fn);
+    if (it == opderiv_of_.end()) return "";
+    std::vector<uint32_t> rows;
+    bool may = false;
+    for (uint32_t i : it->second)
+      if (opderiv_[i].kind == KZ_OPDERIV_KIND_TERMINAL) {
+        rows.push_back(i);
+        if (opderiv_[i].mode == KZ_OPDERIV_MODE_MAY) may = true;
+      }
+    if (!may || rows.empty()) return "";
+    std::string t = "may: the terminal calls of " + fname(fn) + " are guarded:";
+    for (uint32_t i : rows) {
+      auto cit = call_by_site_.find(opderiv_[i].site);
+      t += " " + (cit != call_by_site_.end() ? call_pos(cit->second) : "site " + std::to_string(opderiv_[i].site)) + " -> " + fname(opderiv_[i].next_fn) + " under " + ex(opderiv_[i].guard_root) + ";";
+    }
+    if (argvals.empty()) {
+      t += " not evaluated: no constant argument value is known at this call";
+    } else {
+      bool all_false = true, any_true = false;
+      std::set<std::string> unknown;
+      std::string vals;
+      for (const auto& [a, vs] : argvals)
+        for (int64_t v : vs) {
+          vals += (vals.empty() ? "" : ", ") + std::string("argument ") + std::to_string(a) + " = " + std::to_string(v);
+          Subst sb;
+          sb.params[a] = v;
+          for (uint32_t i : rows) {
+            const Val g = opderiv_[i].guard_root == kN ? known(1) : eval(opderiv_[i].guard_root, sb, &unknown);
+            if (!g.known || g.v != 0) all_false = false;
+            if (g.known && g.v != 0) any_true = true;
+          }
+        }
+      if (all_false) {
+        t += " with " + vals + " every guard is false: no derived terminal call is reached on this path";
+      } else if (any_true) {
+        t += " with " + vals + " a guard holds";
+      } else {
+        std::string u;
+        for (const std::string& x : unknown) u += (u.empty() ? "" : "; ") + x;
+        t += " with " + vals + " not decided: " + u;
+      }
+    }
+    for (const kz_fact_loopexit& l : loopexits_)
+      if (l.fn == fn && l.kind == KZ_LOOPEXIT_KIND_LOOP && (l.flags & KZ_LOOPEXIT_FLAG_NO_EXIT) != 0)
+        t += "; the loop " + pos(str(l.file), l.line, l.col) + " in " + fname(fn) + " has no exit: the call does not return on a path through it (no P0 terminal on that path)";
+    return t;
+  }
   // the chain from a terminal or delay operation down to its P0 primitive (OP_DERIV)
   std::string opderiv_chain(uint32_t fn, uint8_t kind) const {
     auto it = opderiv_of_.find(fn);
@@ -807,6 +1039,7 @@ class Rel {
     uint32_t no_writer = 0, same_actor = 0;
     for (const auto& [key, afs] : groups) {
       const auto& [tf, callee, argi] = key;
+      begin_row();
       std::string wsource;
       const std::vector<WriterRow> ws = writers_of(tf, &wsource);
       if (ws.empty()) {
@@ -959,7 +1192,7 @@ class Rel {
   }
   // a call after the creation call in the same loop iteration that reaches an await loop (AWAIT_L1,
   // per-field rule)
-  std::string await_after(uint32_t spawn_ci) const {
+  std::string await_after(uint32_t spawn_ci) {
     const kz_fact_call& s = calls_[spawn_ci];
     if (s.loop == kN) return "";
     auto cit = calls_of_.find(s.caller_fn);
@@ -978,8 +1211,11 @@ class Rel {
           for (const kz_fact_loop& l : loops_)
             if (l.site == a.loop) where = pos(str(l.file), l.line, l.col);
           (void)lit;
+          tag("per-field completeness rule (PI decision pending)");
+          if (assumptions_.count("assume.no_cross_member_pointer_arithmetic") != 0) tag("assume.no_cross_member_pointer_arithmetic");
           return "The call " + call_pos(ci) + " (" + fname(c.callee_fn) + ") after the creation reaches the await loop " + where + " in " + fname(f) +
-                 " (AWAIT_L1 per-field rule; type-level " + enum_text("KZ_LOOP_CERT", a.cert_type) + "): the creations are serialized by it.";
+                 " (AWAIT_L1 per-field rule, which rests on assume.no_cross_member_pointer_arithmetic and is a PI decision pending; type-level " +
+                 enum_text("KZ_LOOP_CERT", a.cert_type) + "): the creations are serialized by it.";
         }
       }
     }
@@ -987,9 +1223,17 @@ class Rel {
   }
 
   // ---------------------------------------------------------------- path C
+  // a write after a spawn: a LOCKSET write row of the creator (call_row kN), or of a function a call of the creator
+  // after the spawn reaches (call_row that call's LOCKSET row; first_level: in the function the call calls)
+  struct WriteCtx {
+    uint32_t row = kN;
+    uint32_t call_row = kN;
+    bool first_level = false;
+    uint32_t fn = kN;
+  };
   void path_c(std::ostream& os) {
     std::ostringstream rows;
-    uint32_t unresolved = 0, spawn_calls = 0;
+    uint32_t unresolved = 0, spawn_calls = 0, no_paths = 0, callee_only_fields = 0;
     for (const auto& [site, entries] : spawn_entries_) {
       auto cit = call_by_site_.find(site);
       if (cit == call_by_site_.end()) continue;
@@ -1026,17 +1270,49 @@ class Rel {
         for (const kz_fact_p0& p : p0_)
           if (str(p.name) == str(s.callee) && p.out_param != kN) identity = "arg " + std::to_string(p.out_param) + " (P0 " + str(p.name) + " stores the new thread id through it)";
       }
-      // the creator's writes after the spawn call, per field
-      std::map<std::string, std::vector<uint32_t>> after;
-      auto wit = lockset_writes_of_.find(P);
-      if (wit != lockset_writes_of_.end())
-        for (uint32_t li : wit->second) {
+      // the creator's writes after the spawn call, per field: on the creator's control-flow graph (LOCK_PATHS
+      // after-spawn), its own writes and those of the functions its calls after the spawn reach
+      std::map<std::string, std::vector<WriteCtx>> after;
+      std::map<std::string, std::vector<WriteCtx>> after_callee;
+      auto ait = after_spawn_.find(site);
+      if (ait == after_spawn_.end()) ++no_paths;
+      if (ait != after_spawn_.end()) {
+        for (uint32_t li : ait->second) {
           const kz_fact_lockset& w = lockset_[li];
-          const std::string type = str(w.type);
-          if (type.empty() || type == "<global>") continue;
-          if (before(str(s.file), s.line, s.col, str(w.file), w.line, w.col)) after[type + "." + str(w.field)].push_back(li);
+          if (w.kind == KZ_LOCKSET_KIND_WRITE) {
+            const std::string type = str(w.type);
+            if (type.empty() || type == "<global>") continue;
+            after[type + "." + str(w.field)].push_back(WriteCtx{li, kN, false, kN});
+          }
         }
-      for (const auto& [tf, wrows] : after) {
+        for (uint32_t li : ait->second) {
+          const kz_fact_lockset& c = lockset_[li];
+          if (c.kind != KZ_LOCKSET_KIND_CALL || c.site == site) continue;
+          auto cc = call_by_site_.find(c.site);
+          if (cc == call_by_site_.end()) continue;
+          std::set<uint32_t> targets;
+          if (defined(calls_[cc->second].callee_fn)) targets.insert(calls_[cc->second].callee_fn);
+          auto itg = itargets_.find(c.site);
+          if (itg != itargets_.end()) targets.insert(itg->second.begin(), itg->second.end());
+          for (uint32_t g : targets)
+            for (uint32_t h : closure(g)) {
+              auto hw = lockset_writes_of_.find(h);
+              if (hw == lockset_writes_of_.end()) continue;
+              for (uint32_t wi : hw->second) {
+                const kz_fact_lockset& w = lockset_[wi];
+                const std::string type = str(w.type);
+                if (type.empty() || type == "<global>") continue;
+                after_callee[type + "." + str(w.field)].push_back(WriteCtx{wi, li, h == g, h});
+              }
+            }
+        }
+      }
+      for (const auto& [tf, v] : after_callee)
+        if (after.count(tf) == 0) ++callee_only_fields;
+      for (const auto& [tf, own] : after) {
+        std::vector<WriteCtx> wrows = own;
+        auto acit = after_callee.find(tf);
+        if (acit != after_callee.end()) wrows.insert(wrows.end(), acit->second.begin(), acit->second.end());
         auto rit = reads_of_field_.find(tf);
         if (rit == reads_of_field_.end()) continue;
         for (uint32_t ri : rit->second) {
@@ -1075,41 +1351,55 @@ class Rel {
             }
             if (ctxs.empty()) ctxs.push_back(Ctx{"the read itself", urow, kN});
           }
-          // self identity of the read's subscript
-          std::string self;
-          for (const std::string& g : calls_in(u.index_root)) {
-            auto fit = fn_by_name_.find(g);
-            if (fit == fn_by_name_.end()) continue;
-            for (uint32_t gf : fit->second) {
-              std::string ch;
-              auto pk = p0_kind_.find(g);
-              if (pk != p0_kind_.end() && (pk->second == KZ_P0_KIND_THREAD_SELF || pk->second == KZ_P0_KIND_TSD_GET)) ch = g + " (P0 " + enum_text("KZ_P0_KIND", pk->second) + ")";
-              else if (defined(gf)) ch = chain_to_p0(gf, {KZ_P0_KIND_THREAD_SELF, KZ_P0_KIND_TSD_GET});
-              if (!ch.empty()) self = ch;
-            }
-          }
           for (const Ctx& cx : ctxs) {
+            begin_row();
+            // self identity of the read's subscript
+            std::string self;
+            for (const std::string& g : calls_in(u.index_root)) {
+              auto fit = fn_by_name_.find(g);
+              if (fit == fn_by_name_.end()) continue;
+              for (uint32_t gf : fit->second) {
+                std::string ch;
+                auto pk = p0_kind_.find(g);
+                if (pk != p0_kind_.end() && (pk->second == KZ_P0_KIND_THREAD_SELF || pk->second == KZ_P0_KIND_TSD_GET)) ch = g + " (P0 " + enum_text("KZ_P0_KIND", pk->second) + ")";
+                else if (defined(gf)) ch = chain_to_p0(gf, {KZ_P0_KIND_THREAD_SELF, KZ_P0_KIND_TSD_GET});
+                if (!ch.empty()) self = ch;
+              }
+            }
             ++n_c_;
             if (!self.empty()) ++n_c_self_;
             rows << "  C" << n_c_ << " spawn " << call_pos(si) << " in " << fname(P) << " -> " << fname(s.callee_fn == kN ? s.caller_fn : s.callee_fn) << "; field " << tf
                  << "; read " << pos(str(u.file), u.line, u.col) << " in " << fname(u.fn) << " (" << cx.where << ")" << (self.empty() ? "" : " self-identity") << "\n";
             rows << "      spawn: callee " << str(s.callee) << ", entries";
             for (uint32_t e : resolved) rows << " " << fname(e);
+            rows << (image_spawn_.count(site) != 0 ? " (from the static image of the table the entry argument is read from)" : "");
             rows << "; child actors " << actors_text(child) << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held << "\n";
-            for (uint32_t li : wrows) {
-              const kz_fact_lockset& w = lockset_[li];
+            for (const WriteCtx& wc : wrows) {
+              const kz_fact_lockset& w = lockset_[wc.row];
               std::string key;
               auto wr = writers_of_.find(tf);
               if (wr != writers_of_.end())
                 for (uint32_t i : wr->second)
-                  if (writers_[i].fn == P && writers_[i].line == w.line && str(writers_[i].file) == str(w.file))
+                  if (writers_[i].fn == w.fn && writers_[i].line == w.line && str(writers_[i].file) == str(w.file))
                     key = " key=" + str(writers_[i].key) + " value=" + (writers_[i].value_kind == KZ_ARG_KIND_CONST ? std::to_string(writers_[i].value) : enum_text("KZ_ARG_KIND", writers_[i].value_kind)) +
                           " [" + str(writers_[i].value_text) + "]";
-              rows << "      write after the spawn: " << pos(str(w.file), w.line, w.col) << key << " locks " << held_text(li) << "\n";
+              if (wc.call_row == kN) {
+                rows << "      write after the spawn: " << pos(str(w.file), w.line, w.col) << key << " locks " << held_text(wc.row) << "\n";
+              } else {
+                const kz_fact_lockset& c = lockset_[wc.call_row];
+                rows << "      write after the spawn in " << fname(w.fn) << " (through the call " << pos(str(c.file), c.line, c.col) << "): " << pos(str(w.file), w.line, w.col) << key
+                     << " locks " << held_text(wc.row) << "; at the call " << held_text(wc.call_row);
+                if (!wc.first_level) rows << " (not composed: the write is more than one call below the creator)";
+                else if (entry_release_.count(wc.row) != 0) rows << " (not composed: " << release_text(wc.row) << ")";
+                rows << "\n";
+              }
             }
             rows << "      read: [" << str(u.text) << "] use=" << enum_text("KZ_READ_USE", u.use) << " index=" << ex(u.index_root) << " guard=" << ex(u.guard_root)
                  << " locks " << (cx.row == kN ? "{} (no LOCKSET row)" : held_text(cx.row));
-            if (cx.call_row != kN) rows << "; at the call " << held_text(cx.call_row);
+            if (cx.call_row != kN) {
+              rows << "; at the call " << held_text(cx.call_row);
+              if (cx.row != kN && entry_release_.count(cx.row) != 0) rows << " (not composed: " << release_text(cx.row) << ")";
+            }
             rows << "\n";
             if (!self.empty()) rows << "      read subscript: the reader's own identity: " << self << "\n";
             rows << "      dependency: path C: the creator writes " << tf << " after the spawn; code the spawned entry reaches reads it" << (self.empty() ? "" : " at the subscript of its own identity")
@@ -1172,23 +1462,69 @@ class Rel {
         }
       }
     }
-    os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ")\n" << rows.str();
+    os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ", without LOCK_PATHS rows " << no_paths
+       << "; fields written after a spawn only in the functions the creator calls, not paired in this revision: " << callee_only_fields << ")\n"
+       << rows.str();
+  }
+  // the functions a function reaches over the call graph (direct calls and resolved indirect targets), itself included
+  const std::set<uint32_t>& closure(uint32_t g) {
+    auto it = closure_.find(g);
+    if (it != closure_.end()) return it->second;
+    std::set<uint32_t>& seen = closure_[g];
+    std::vector<uint32_t> stack{g};
+    seen.insert(g);
+    while (!stack.empty()) {
+      const uint32_t x = stack.back();
+      stack.pop_back();
+      for (const auto& [y, indirect] : succ_[x])
+        if (seen.insert(y).second) stack.push_back(y);
+    }
+    return seen;
+  }
+  std::string release_text(uint32_t row) const {
+    auto it = entry_release_.find(row);
+    if (it == entry_release_.end()) return "";
+    auto cit = call_by_site_.find(it->second);
+    return "on a path from the entry of " + fname(lockset_[row].fn) + " the call " + (cit != call_by_site_.end() ? call_pos(cit->second) + " " + str(calls_[cit->second].callee) : "site " + std::to_string(it->second)) +
+           " releases a lock " + fname(lockset_[row].fn) + " does not hold, may release one, or has a lock effect not followed (LOCK_PATHS entry-release), so a lock held at the call is not known to be held here";
+  }
+  // the locks a write after the spawn holds, and the acquisitions they come from: its own (relative to its function's
+  // entry), and those held at the creator's call it is under when it is in the function that call calls and no call on
+  // a path from that function's entry releases one (LOCK_PATHS entry-release); a write deeper down holds its own only
+  std::set<uint32_t> ctx_held(const WriteCtx& w) const {
+    std::set<uint32_t> h;
+    for (uint32_t id : held(w.row)) h.insert(id);
+    if (w.call_row != kN && w.first_level && entry_release_.count(w.row) == 0)
+      for (uint32_t id : held(w.call_row)) h.insert(id);
+    return h;
+  }
+  std::set<uint32_t> ctx_openers(const WriteCtx& w) const {
+    std::set<uint32_t> o = openers(w.row);
+    if (w.call_row != kN && w.first_level && entry_release_.count(w.row) == 0) {
+      const std::set<uint32_t> c = openers(w.call_row);
+      o.insert(c.begin(), c.end());
+    }
+    return o;
   }
   // the other order (the read between the spawn and the writes) under the lock sets
-  std::string c_feasibility(uint32_t s_row, const std::vector<uint32_t>& w_rows, uint32_t u_row, uint32_t call_row) {
+  std::string c_feasibility(uint32_t s_row, const std::vector<WriteCtx>& w_rows, uint32_t u_row, uint32_t call_row) {
     std::string grade, text;
     auto fail = [&](uint32_t row) { return row != kN && (lockset_[row].flags & KZ_LOCKSET_FLAG_FAILURE_PATH) != 0; };
     std::set<uint32_t> hu;
     if (u_row != kN)
       for (uint32_t id : held(u_row)) hu.insert(id);
-    if (call_row != kN)
-      for (uint32_t id : held(call_row)) hu.insert(id);
+    bool dropped = false;
+    if (call_row != kN) {
+      if (u_row != kN && entry_release_.count(u_row) != 0) dropped = true;
+      else
+        for (uint32_t id : held(call_row)) hu.insert(id);
+    }
     // the static locks every write after the spawn holds
     std::set<uint32_t> common;
     bool first = true;
-    for (uint32_t wr : w_rows) {
+    for (const WriteCtx& wr : w_rows) {
       std::set<uint32_t> h;
-      for (uint32_t id : held(wr))
+      for (uint32_t id : ctx_held(wr))
         if (static_lock(id)) h.insert(id);
       if (first) common = h;
       else {
@@ -1232,12 +1568,24 @@ class Rel {
         bool same_opener = at_spawn;
         if (at_spawn) {
           const std::set<uint32_t> so = openers(s_row);
-          for (uint32_t wr : w_rows)
-            if (openers(wr) != so) same_opener = false;
+          for (const WriteCtx& wr : w_rows)
+            if (ctx_openers(wr) != so) same_opener = false;
         }
         if (at_spawn && same_opener) {
           grade = "proven-impossible";
           text = "lock " + lock_text(lock) + " is held from the same acquisition across the spawn and every write after it, and the read holds it: the read cannot fall between them";
+          // what the verdict rests on: the declared assumptions of the lock sets and of the static-instance check, and
+          // the completeness rule that check uses (a PI decision)
+          std::string on;
+          for (const char* a : {"assume.lock_acquisition_succeeds", "assume.static_instance_read_after_write", "assume.no_cross_member_pointer_arithmetic"})
+            if (assumptions_.count(a) != 0) {
+              tag(a);
+              on += std::string(on.empty() ? "" : ", ") + a;
+            }
+          tag("per-field completeness rule (PI decision pending)");
+          on += std::string(on.empty() ? "" : ", ") + "the per-field completeness rule of FIELD_STATUS that makes " + lock_text(lock) + " a static instance (PI decision pending)";
+          if (lock < lockids_.size() && (lockids_[lock].flags & KZ_LOCKID_FLAG_TYPE_EXPOSED) != 0) on += "; under the type-level rule it is not one";
+          text += "; rests on " + on;
         } else if (!at_spawn) {
           grade = "possible";
           text = "lock window: " + lock_text(lock) + " is not held at the spawn; the writes after it hold it from a later acquisition, so the read may come before them";
@@ -1247,6 +1595,7 @@ class Rel {
         }
       }
     }
+    if (dropped) text += "; the locks held at the call are not counted at the read: " + release_text(u_row);
     tally_feas(grade);
     return grade + ": " + text;
   }
@@ -1556,6 +1905,7 @@ class Rel {
         continue;
       }
       ++n_ns_;
+      begin_row();
       rows << "  namespace " << key << " (record type " << n.type << "; tables";
       if (n.tables.empty()) rows << " none found";
       for (const std::string& t : n.tables) rows << " " << t;
@@ -1589,7 +1939,11 @@ class Rel {
       for (const std::string& f : watch) {
         std::string src;
         const std::vector<WriterRow> ws = writers_of(f, &src);
-        rows << "      lifecycle " << f << ": writers " << ws.size() << " from " << (src.empty() ? "nothing" : src) << "\n";
+        uint32_t covers = 0;
+        for (const WriterRow& w : ws)
+          if (w.flags & KZ_WRITER_FLAG_COVERS_MORE) ++covers;
+        rows << "      lifecycle " << f << ": writers " << ws.size() << " from " << (src.empty() ? "nothing" : src)
+             << (covers != 0 ? " (" + std::to_string(covers) + " of them write another field with a size that may reach this one: covers-more-than-the-field)" : "") << "\n";
         for (const WriterRow& w : ws) {
           const std::set<uint32_t> as = actor_set(w.fn);
           std::string cls;
@@ -1600,7 +1954,8 @@ class Rel {
           if (w.known && ev != empty.end() && ev->second.count(w.value) != 0)
             cls += init ? " class=initialization (writes the empty value, in a loop or early init of the process actor)" : " class=release (writes the empty value)";
           else if (w.known && uv != in_use.end() && uv->second.count(w.value) != 0) cls += " class=reservation or activation (writes the in-use value)";
-          rows << "        " << w.kind << " at " << w.where << " value=" << w.value_text << (w.guard.empty() || w.guard == "-" ? "" : " guard=" + w.guard) << cls << "\n";
+          rows << "        " << w.kind << " at " << w.where << " value=" << w.value_text << (w.guard.empty() || w.guard == "-" ? "" : " guard=" + w.guard) << cls
+               << ((w.flags & KZ_WRITER_FLAG_COVERS_MORE) ? " covers-more-than-the-field" : "") << "\n";
         }
         for (const kz_fact_argflow& a : argflow_) {
           if (a.src != KZ_ARGSRC_ADDRESS || str(a.type) + "." + str(a.field) != f) continue;
@@ -1610,7 +1965,8 @@ class Rel {
           for (const kz_fact_p0& p : p0_)
             if (str(p.name) == callee && p.out_param == a.arg_index && !defined(calls_[cit->second].callee_fn))
               rows << "        P0 out-pointer: " << callee << " (P0 " << enum_text("KZ_P0_KIND", p.kind) << ") stores through arg " << a.arg_index << " [" << str(a.text) << "] at "
-                   << call_pos(cit->second) << " in " << fname(a.fn) << "\n";
+                   << call_pos(cit->second) << " in " << fname(a.fn)
+                   << " (joined here from ARGFLOW and P0_TABLE: the extraction's writer sets -- WRITERS, FACT_LOCS, FIELD_STATUS -- have no row for this store)\n";
         }
       }
       // the spawn operations that write the table: what runs when the entry they start returns
@@ -1644,11 +2000,19 @@ class Rel {
           if (defined(e)) entry_text += " " + fname(e);
       rows << "      entry path: " << fname(w.fn) << " parameter " << w.param << " is the entry of the spawn " << (cit != call_by_site_.end() ? call_pos(cit->second) : "?") << " (" << prim
            << ", depth " << w.depth << ", chain " << str(w.chain) << ")";
-      if (w.depth == 1 && !prim.empty() && cit != call_by_site_.end() && str(calls_[cit->second].callee) == prim)
+      if (w.depth == 1 && !prim.empty() && cit != call_by_site_.end() && str(calls_[cit->second].callee) == prim) {
         rows << ": the parameter is passed unchanged to the thread-creation primitive, so the new thread starts at the caller's entry (P0 thread creation: the "
-             << "thread runs that function and ends when it returns); no function of this program runs after that entry returns, so the table has no write on that path"
-             << (entry_text.empty() ? "" : " (entries the facts resolve:" + entry_text + ")") << "\n";
-      else
+             << "thread runs that function and ends when it returns)";
+        if (keys_dtor_.empty() && cleanup_pushes_.empty()) {
+          rows << "; no function of this program runs after that entry returns (thread-specific keys created with a null destructor only: "
+               << (keys_null_dtor_.empty() ? std::string("none created") : join(keys_null_dtor_, "; ")) << "; no cleanup handler push in the program), so the table has no write on that path";
+        } else {
+          rows << "; after that entry returns the thread may still run functions of this program (" << (keys_dtor_.empty() ? "" : "thread-specific destructors: " + join(keys_dtor_, "; "))
+               << (keys_dtor_.empty() || cleanup_pushes_.empty() ? "" : "; ") << (cleanup_pushes_.empty() ? "" : "cleanup handler pushes: " + join(cleanup_pushes_, "; "))
+               << "), so no claim about the table on that path is made";
+        }
+        rows << (entry_text.empty() ? "" : " (entries the facts resolve:" + entry_text + ")") << "\n";
+      } else
         rows << ": the thread starts at a function of the program" << (entry_text.empty() ? "" : " (" + entry_text.substr(1) + ")") << "\n";
     }
   }
@@ -1729,10 +2093,16 @@ class Rel {
       rows << "      key-parameter functions: lookups" << (lk.empty() ? " none" : lk) << "; creators" << (cr.empty() ? " none" : cr) << "\n";
     }
     uint32_t lookups = 0, creators = 0;
-    for (const Use& u : uses) (u.creator ? creators : lookups)++;
+    bool ns_l0 = false;
+    for (const Use& u : uses) {
+      (u.creator ? creators : lookups)++;
+      if (uses_script_root(u.actors)) ns_l0 = true;
+    }
     rows << "      uses: lookups " << lookups << ", creators " << creators << " (calls from outside the key-parameter functions; a creator reaches a write of the key)\n";
+    rows << "      namespace layers: " << layers_text(true, ns_l0) << "\n";
     for (const Use& u : uses) {
       if (u.creator) continue;
+      begin_row();
       ++n_a_;
       const kz_fact_call& c = calls_[u.ci];
       rows << "  A" << n_a_ << " lookup " << call_pos(u.ci) << " in " << fname(c.caller_fn) << " -> " << fname(u.callee) << "#" << u.param << " namespace " << n.key << " partition {"
@@ -1882,9 +2252,11 @@ class Rel {
           const bool guarded = has_call(t.guard_root, callee);
           // a field written under the result (or a local of it) and passed to the terminal operation
           std::string via;
+          std::map<uint32_t, std::set<int64_t>> argvals;  // the constant values the terminal call's arguments take on this path
           if (tcall != call_by_site_.end())
             for (uint32_t a = 0; a < calls_[tcall->second].nargs; ++a) {
               auto af = argflow_at_.find({t.site, a});
+              if (af != argflow_at_.end() && argflow_[af->second].src == KZ_ARGSRC_CONST) argvals[a].insert(argflow_[af->second].value);
               if (af == argflow_at_.end() || argflow_[af->second].src != KZ_ARGSRC_FIELD) continue;
               const std::string tf = str(argflow_[af->second].type) + "." + str(argflow_[af->second].field);
               auto wit = writers_of_.find(tf);
@@ -1898,14 +2270,17 @@ class Rel {
                   if (e.op == KZ_EXPR_OP_LOAD && e.flags == KZ_EXPR_REF_LOCAL) local = true;
                 });
                 if (!direct && !(local && (calls_[call].flags & KZ_CALL_FLAG_RESULT_USED))) continue;
+                if (w.value_kind == KZ_ARG_KIND_CONST) argvals[a].insert(w.value);
                 via += std::string(via.empty() ? "" : "; ") + "the field " + tf + " := " + str(w.value_text) + " at " + pos(str(w.file), w.line, w.col) + " under " + ex(w.guard_root) +
                        (direct ? " (the guard tests the result)" : " (the guard tests a local; the result of " + callee + " is used in " + fname(fn) + ": may)") + " is argument " +
                        std::to_string(a) + " of it";
               }
             }
-          if (guarded || !via.empty())
+          if (guarded || !via.empty()) {
+            const std::string may = tcall != call_by_site_.end() ? may_terminal(calls_[tcall->second].callee_fn, argvals) : "";
             path.push_back("terminal " + top + " at " + pos(str(t.file), t.line, t.col) + " in " + fname(fn) + (guarded ? " under the result" : "") + (via.empty() ? "" : ": " + via) +
-                           (chain.empty() ? "" : " (F8 " + chain + ")"));
+                           (chain.empty() ? "" : " (F8 " + chain + (may.empty() ? "" : "; " + may) + ")"));
+          }
         }
       // returned to the callers
       auto rit = returns_of_.find(fn);
@@ -1951,6 +2326,7 @@ class Rel {
   std::vector<kz_fact_lockset> lockset_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
+  std::vector<kz_fact_lockpath> lockpaths_;
 
   struct BasisMap : std::map<std::string, std::string> {
     std::string at_or(const std::string& k) const {
@@ -1982,7 +2358,17 @@ class Rel {
   std::set<std::string> gaf_;
   std::map<uint32_t, std::string> root_kind_;
   std::map<uint32_t, std::set<uint32_t>> reach_, delegates_, actors_of_;
-  std::set<uint32_t> trampolines_;
+  std::set<uint32_t> trampolines_, kept_direct_, kept_shared_;
+  std::map<uint32_t, std::set<uint32_t>> after_spawn_;  // spawn site -> LOCKSET rows after it (LOCK_PATHS)
+  std::map<uint32_t, uint32_t> entry_release_;           // LOCKSET row -> the call site (LOCK_PATHS entry-release)
+  std::map<uint32_t, std::set<uint32_t>> itargets_;      // indirect call site -> resolved targets
+  std::map<uint32_t, std::set<uint32_t>> image_spawn_;   // spawn site -> entries from a static image
+  std::map<uint32_t, std::set<uint32_t>> closure_;
+  std::vector<std::string> deviations_;
+  std::map<std::string, std::set<std::string>> deviation_files_;
+  std::set<std::string> assumptions_;
+  std::vector<std::string> keys_dtor_, keys_null_dtor_, cleanup_pushes_;
+  mutable std::set<std::string> row_files_, row_tags_;
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;
   uint32_t n_flip_possible_ = 0, n_flip_undet_ = 0, n_flip_none_ = 0, n_feas_impossible_ = 0, n_feas_possible_ = 0, n_feas_undecidable_ = 0;

@@ -61,6 +61,13 @@
  * 135 (AWAIT_L1: per poll loop, L1 (i) with the relevant locations the predicate reads, directly and
  * through the functions it calls, under each rule, and L1 (ii) from LOCKSET).  Their expression roots
  * are in FACT_EXPRS after the roots of revision 7.
+ * Revision 9 (2026-10-30, the order and the entry paths of the F5 events): one NEW section in the second
+ * extraction range, written with the extended facts (the same condition as revision 6), 136
+ * (LOCK_PATHS: per LOCKSET event, the spawn calls of its function it follows on the control-flow
+ * graph, and whether a call on some path from the function's entry to it releases a lock, may release
+ * one or has a lock effect the analysis cannot follow); P0_TABLE has four more kinds (thread-specific
+ * key creation and deletion, cleanup handler push and pop).  The section has no expression roots; no
+ * earlier record or section version changes.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -126,7 +133,8 @@ enum kz_facts_section_id {
   KZ_SEC_LOCK_IDS = 132,
   KZ_SEC_LOCKSET = 133,
   KZ_SEC_FIELD_STATUS = 134,
-  KZ_SEC_AWAIT_L1 = 135
+  KZ_SEC_AWAIT_L1 = 135,
+  KZ_SEC_LOCK_PATHS = 136
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -171,7 +179,8 @@ enum kz_facts_section_id {
   S(LOCK_IDS, 132, kz_fact_lockid, 1)          \
   S(LOCKSET, 133, kz_fact_lockset, 1)          \
   S(FIELD_STATUS, 134, kz_fact_fstatus, 1)     \
-  S(AWAIT_L1, 135, kz_fact_await, 1)
+  S(AWAIT_L1, 135, kz_fact_await, 1)          \
+  S(LOCK_PATHS, 136, kz_fact_lockpath, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -646,11 +655,14 @@ enum kz_facts_section_id {
  * positions in the call (KZ_NONE32 where the kind has none).  `fn` is the function of that name in
  * this program (KZ_NONE32 when the program does not mention it); `n_calls` counts its direct calls.
  * A program that defines a function of the same name has its own body read instead (`shadowed`).
+ * Revision 9 of the extraction records: a thread-specific key creation has the destructor the thread
+ * runs at its exit in `entry_param` (the key is written through `out_param`), and a cleanup push the
+ * handler in `entry_param` when the call passes it.
  */
 #define KZ_FACT_P0_FIELDS(X, T)                                                      \
   X(T, uint32_t, fn, )                                                               \
   X(T, uint32_t, out_param, )   /* written through: the new thread id, a data destination */ \
-  X(T, uint32_t, entry_param, ) /* thread creation: the function the new thread starts at */ \
+  X(T, uint32_t, entry_param, ) /* thread creation: the function the new thread starts at; key creation: the destructor */ \
   X(T, uint32_t, arg_param, )   /* thread creation: the argument that function receives */ \
   X(T, uint32_t, n_calls, )                                                          \
   X(T, uint8_t, kind, )         /* KZ_P0_KIND */                                     \
@@ -1179,6 +1191,31 @@ enum kz_facts_section_id {
   X(T, kz_str, note_field, )                                                         \
   X(T, kz_str, note_type, )
 
+/*
+ * LOCK_PATHS (revision 9, F5 event order and entry paths).  One row per (LOCKSET event `row`, fact),
+ * read on the same control-flow graph and the same call effects as LOCKSET:
+ *   AFTER_SPAWN    the event `row` of `fn` is reachable on the control-flow graph of `fn` from the
+ *                  point after the spawn call `site` of `fn` (a call flagged spawn-op), through any
+ *                  branch and any back edge; the spawn call itself is such an event when a loop leads
+ *                  back to it.  No branch is pruned, so the set is an over-approximation of the
+ *                  events that run after the spawn;
+ *   ENTRY_RELEASE  on some path from the entry of `fn` to the event `row`, a call releases a lock that
+ *                  `fn` did not acquire (a release of the caller's lock, on every path or on some), may
+ *                  release a held lock of an identity that is not a static instance (a pair a callee
+ *                  acquires and releases itself), or has a lock effect the analysis cannot follow (an
+ *                  unresolved indirect call, a call into the recursive component); `site` is the first
+ *                  such call by call key.  A lock the caller of `fn` holds at its call is held at the
+ *                  event only when the event has no such row.
+ * `flags` is reserved (zero).
+ */
+#define KZ_FACT_LOCKPATH_FIELDS(X, T)                                                \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, row, )        /* LOCKSET index of the event */                      \
+  X(T, uint32_t, site, )       /* AFTER_SPAWN: the spawn call; ENTRY_RELEASE: the call */ \
+  X(T, uint8_t, kind, )        /* KZ_LOCKPATH_KIND */                                \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -1221,7 +1258,8 @@ enum kz_facts_section_id {
   R(kz_fact_lockid, KZ_FACT_LOCKID_FIELDS)        \
   R(kz_fact_lockset, KZ_FACT_LOCKSET_FIELDS)      \
   R(kz_fact_fstatus, KZ_FACT_FSTATUS_FIELDS)      \
-  R(kz_fact_await, KZ_FACT_AWAIT_FIELDS)
+  R(kz_fact_await, KZ_FACT_AWAIT_FIELDS)          \
+  R(kz_fact_lockpath, KZ_FACT_LOCKPATH_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -1399,7 +1437,9 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, PROCESS_EXIT, 10, "process-exit") ITEM(P, THREAD_SELF, 11, "thread-self")  \
   ITEM(P, TSD_GET, 12, "thread-specific-get") ITEM(P, TSD_SET, 13, "thread-specific-set") \
   ITEM(P, DL_OPEN, 14, "dynamic-load") ITEM(P, DL_SYM, 15, "symbol-lookup")          \
-  ITEM(P, DATA_FN, 16, "data-function")
+  ITEM(P, DATA_FN, 16, "data-function") ITEM(P, TSD_KEY_CREATE, 17, "thread-specific-key-create") \
+  ITEM(P, TSD_KEY_DELETE, 18, "thread-specific-key-delete") ITEM(P, CLEANUP_PUSH, 19, "cleanup-push") \
+  ITEM(P, CLEANUP_POP, 20, "cleanup-pop")
 
 /* CONDITIONAL: the call may return without doing it (try, timed); SHADOWED: the program defines a
  * function of this name; VOCABULARY: the entry is an operation of the profile-free run. */
@@ -1611,6 +1651,10 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, UNRESOLVED_CALL, 0x4, "unresolved-call") ITEM(P, LOCK_STATIC, 0x8, "lock-static") \
   ITEM(P, NO_PREDICATE, 0x10, "no-predicate")
 
+/* LOCK_PATHS (revision 9). */
+#define KZ_ENUM_LOCKPATH_KIND(ITEM, P)                                               \
+  ITEM(P, NONE, 0, "none") ITEM(P, AFTER_SPAWN, 1, "after-spawn") ITEM(P, ENTRY_RELEASE, 2, "entry-release")
+
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
   ITEM(P, ESCAPES, 2, "escapes") ITEM(P, UNSUMMARIZED, 3, "unsummarized")            \
@@ -1718,6 +1762,7 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_AWAIT_READ, KZ_ENUM_AWAIT_READ, 0)      \
   D(KZ_AWAIT_MOD, KZ_ENUM_AWAIT_MOD, 0)        \
   D(KZ_AWAIT_FLAG, KZ_ENUM_AWAIT_FLAGS, 1)     \
+  D(KZ_LOCKPATH_KIND, KZ_ENUM_LOCKPATH_KIND, 0) \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -1957,6 +2002,10 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_await, l1_mod_type, ENUM, KZ_AWAIT_MOD)   \
   F(kz_fact_await, cert_field, ENUM, KZ_LOOP_CERT)    \
   F(kz_fact_await, cert_type, ENUM, KZ_LOOP_CERT)     \
-  F(kz_fact_await, flags, FLAGS, KZ_AWAIT_FLAG)
+  F(kz_fact_await, flags, FLAGS, KZ_AWAIT_FLAG)       \
+  F(kz_fact_lockpath, fn, IDX, 0)                     \
+  F(kz_fact_lockpath, row, IDX, 0)                    \
+  F(kz_fact_lockpath, site, IDX, 0)                   \
+  F(kz_fact_lockpath, kind, ENUM, KZ_LOCKPATH_KIND)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

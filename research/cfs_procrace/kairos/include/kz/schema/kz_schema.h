@@ -86,8 +86,13 @@
  * range, LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS and AWAIT_L1 (kz_facts.h, revision 8 of the extraction records: F5 and
  * the writer-set and L1 (i) rules that do not depend on the targets), written under the same condition as those of
  * revision 8; no earlier record or section version changes, so every container written before is read as it was
- * written, and a profile-driven extraction without the request is written as before. */
-#define KZ_SCHEMA_REVISION 10u
+ * written, and a profile-driven extraction without the request is written as before.  Revision 11 (2026-10-30) adds one
+ * NEW section in the second extraction range, LOCK_PATHS (kz_facts.h, revision 9 of the extraction records: the spawn
+ * calls each F5 event follows on its function's control-flow graph, and the releases on the paths from the function's
+ * entry to it), written under the same condition as those of revision 8, and four P0_TABLE kinds; no earlier record or
+ * section version changes, so every container written before is read as it was written, and a profile-driven
+ * extraction without the request is written as before. */
+#define KZ_SCHEMA_REVISION 11u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu
@@ -201,7 +206,8 @@ typedef struct kz_record_desc {
  *   80-99  witnesses and verdicts (this file)
  *  100-119 serialized field by field: 100-107 the neutral event layer (kz_neutral.h), 108-110 the
  *          per-occurrence basis of a replay output container (kz_replay.h)
- *  120-139 extraction, second range (kz_facts.h, revision 5 of the extraction records: 120-122, revision 6: 123-126)
+ *  120-139 extraction, second range (kz_facts.h, revision 5 of the extraction records: 120-122, revision 6: 123-126,
+ *          revision 7: 127-130, revision 8: 131-135, revision 9: 136)
  * Ids reserved for SPEC 2.3 section types whose records are not defined yet (no
  * record, no registry entry; define them in the owning header when they are needed):
  *   22 TEMPLATES   25 SKEL_EXPL   27 PROVENANCE_MSG   30 RESOURCES

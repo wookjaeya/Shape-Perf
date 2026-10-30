@@ -217,6 +217,9 @@ int cmd_extract(int argc, char** argv) {
   ro.image_budget = image_budget;
   so.image_budget = image_budget;
   std::string root = args.one("--root");
+  // the deviations of the basis (policy deviation), copied into the facts of the runs that write the extended facts
+  // so that `kz-static relations` can name them in the rows that rest on them
+  std::vector<std::pair<std::string, std::string>> basis_deviations;
   if (args.has("--basis")) {
     kz::Container basis;
     kz::Status s = kz::Container::read_file(args.one("--basis"), &basis);
@@ -231,6 +234,15 @@ int cmd_extract(int argc, char** argv) {
     so.basis_hash = basis.artifact_hash();
     if (no_profile) script = kzs::startup_entries_from_basis(basis);
     so.notes.push_back({"extract.units_from", "basis " + kz::to_hex(basis.artifact_hash()).substr(0, 16)});
+    std::vector<kz_basis_item> items;
+    if (basis.read_section(KZ_SEC_BASIS, &items).ok())
+      for (const kz_basis_item& b : items) {
+        if (b.policy != KZ_POLICY_DEVIATION) continue;
+        std::string name, value;
+        basis.string(b.name, &name);
+        basis.string(b.value, &value);
+        basis_deviations.push_back({name, value});
+      }
   } else {
     std::string flags;
     for (const std::string& a : args.after_dashes) flags += (flags.empty() ? "" : " ") + a;
@@ -268,6 +280,7 @@ int cmd_extract(int argc, char** argv) {
                                         "startup-script block of the basis, and the derivation rules"});
     so.notes.push_back({"extract.builtin_profile", text + " (profile hash in the header)"});
     so.notes.push_back({"extract.p0_table", std::string(kzs::p0_table_revision()) + ", " + std::to_string(kzs::p0_table().size()) + " entries"});
+    so.notes.push_back({"extract.p0_table_scope", kzs::p0_table_scope()});
     so.notes.push_back({"extract.derivation_rules", kzs::wrapper_rules_revision()});
     so.notes.push_back({"extract.startup_entries_read", std::to_string(script.size())});
     so.notes.push_back({"extract.lock_vocabulary", std::to_string(derivation.lock_vocabulary.size()) +
@@ -298,6 +311,9 @@ int cmd_extract(int argc, char** argv) {
       if (!kzs::builtin_base_spec(&builtin, &error) || !kzs::add_lock_facts(units, builtin, ro, &model, &error)) return fail("extract", error);
     }
   }
+
+  if (spec.extended_facts)
+    for (const auto& [name, value] : basis_deviations) so.notes.push_back({"extract.basis_deviation[" + name + "]", value});
 
   kz::Bytes out;
   kz::Status s = kzs::serialize_facts(model, spec, so, &out);

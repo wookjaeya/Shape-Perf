@@ -828,6 +828,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   std::vector<kz_fact_lockset> lockset_rows;
   std::vector<kz_fact_fstatus> fstatus_rows;
   std::vector<kz_fact_await> await_rows;
+  std::vector<kz_fact_lockpath> lockpath_rows;
   if (spec.extended_facts) {
     std::map<std::string, uint32_t> read_index;
     for (size_t i = 0; i < m.reads.size(); ++i) read_index[m.reads[i].key()] = static_cast<uint32_t>(i);
@@ -887,6 +888,15 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
       }
       r.file = w.intern(f.pos.file);
       lockset_rows.push_back(r);
+    }
+    // LOCK_PATHS (revision 9 of the extraction records): no expression roots
+    for (const LockPathFact& f : m.lock_paths) {
+      kz_fact_lockpath r = zero<kz_fact_lockpath>();
+      r.fn = fn_of(f.func_key);
+      r.row = f.row;
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.kind = f.kind;
+      lockpath_rows.push_back(r);
     }
     for (const FieldStatusFact& f : m.field_status) {
       kz_fact_fstatus r = zero<kz_fact_fstatus>();
@@ -1019,8 +1029,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("extract.extended_facts_f5", std::string("F5 LOCK_OPS, LOCK_IDS and LOCKSET, FIELD_STATUS, AWAIT_L1 (kz_facts.h revision 8); ") + lock_rules_revision(), KZ_POLICY_UNSET,
          KZ_NONE32);
     item("assume.lock_acquisition_succeeds",
-         "an acquisition that is not a try succeeds: pthread_mutex_lock returns 0 (POSIX.1-2017 / glibc 2.39, RETURN VALUE: zero on success; source unverified), a "
-         "derived acquire operation returns the value it returns when it holds the lock; the branch only a failure takes is a failure path (LOCKSET failure-path)",
+         "an acquisition that is not a try succeeds: an exclusive acquisition of P0 returns 0 (pthread_mutex_lock, pthread_spin_lock: POSIX.1-2017 / glibc 2.39, "
+         "RETURN VALUE: zero on success; mtx_lock: thrd_success, 0 in glibc 2.39 <threads.h>; source unverified), a derived acquire operation returns the value "
+         "it returns when it holds the lock; the branch only a failure takes is a failure path (LOCKSET failure-path)",
          KZ_POLICY_DECLARED, prov_for("kz-static extract: declared assumption of the F5 lock-set rules, not checked"));
     item("assume.static_instance_read_after_write",
          "two lock operations whose identity reads a static instance (LOCK_IDS) read it after its one writer instance, or both before it",
@@ -1038,6 +1049,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
                               num(ls.sccs_recursive) + "), functions with a call that cannot be followed " + num(ls.kills_unknown),
          KZ_POLICY_UNSET, KZ_NONE32);
     item("count.field_status", num(fstatus_rows.size()) + " fields (targets of the completeness pass " + num(ls.completeness_targets) + ")", KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.lock_paths", num(lockpath_rows.size()) + " rows (after a spawn call " + num(ls.after_spawn) + ", of " + num(ls.spawn_calls) + " spawn calls; entry-release " +
+                                 num(ls.entry_release) + "; kz_facts.h revision 9)",
+         KZ_POLICY_UNSET, KZ_NONE32);
     item("count.await_l1", num(await_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
   }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
@@ -1062,7 +1076,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
                               !put(KZ_SEC_GLOBAL_IMAGES, gimage_rows)))
     return s;
   if (spec.extended_facts && (!put(KZ_SEC_LOCK_OPS, lockop_rows) || !put(KZ_SEC_LOCK_IDS, lockid_rows) || !put(KZ_SEC_LOCKSET, lockset_rows) ||
-                              !put(KZ_SEC_FIELD_STATUS, fstatus_rows) || !put(KZ_SEC_AWAIT_L1, await_rows)))
+                              !put(KZ_SEC_FIELD_STATUS, fstatus_rows) || !put(KZ_SEC_AWAIT_L1, await_rows) || !put(KZ_SEC_LOCK_PATHS, lockpath_rows)))
     return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;

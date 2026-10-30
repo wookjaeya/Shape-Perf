@@ -637,6 +637,14 @@ struct AwaitFact {
   std::string note_field, note_type;
   ExprRef relevant_expr = nullptr;  // SEQ of loads (filled by finalize_lock_facts)
 };
+// A row of LOCK_PATHS: an F5 event (`row`, an index of Model::locksets) after a spawn call of its function on
+// the control-flow graph (AFTER_SPAWN), or reached from its function's entry through a call that releases, may
+// release or has a lock effect the analysis cannot follow (ENTRY_RELEASE).  `call_key` is that call.
+struct LockPathFact {
+  uint32_t row = kNone;
+  std::string func_key, call_key;
+  uint8_t kind = KZ_LOCKPATH_KIND_NONE;
+};
 
 struct Model {
   ExprPool exprs;
@@ -713,10 +721,12 @@ struct Model {
   std::vector<LockSetFact> locksets;
   std::vector<FieldStatusFact> field_status;
   std::vector<AwaitFact> awaits;
+  std::vector<LockPathFact> lock_paths;
   struct LockStats {
     uint32_t bodies = 0, cfg_built = 0, sccs = 0, sccs_recursive = 0;
     uint32_t acquire_ops = 0, release_ops = 0, try_ops = 0, wait_ops = 0;
     uint32_t rows_held = 0, rows_failure_path = 0, kills_unknown = 0;
+    uint32_t spawn_calls = 0, after_spawn = 0, entry_release = 0;
     uint32_t fields = 0, completeness_targets = 0;
   } lock_stats;
 

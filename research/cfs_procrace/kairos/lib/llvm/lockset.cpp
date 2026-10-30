@@ -267,6 +267,10 @@ struct State {
   std::set<std::string> released;  // locks of the caller released on this path
   bool failure = false;
   bool unknown_release = false;
+  // the first call (by call key) on a path from the entry that released a lock the function does not hold,
+  // may have released a held lock of an identity that is not a static instance, or could not be followed
+  // (LOCK_PATHS entry-release); merged as the least key over the paths that reach a point
+  std::string touched;
   // one state per set of locks held and of the caller's locks released, so that the paths of an operation that
   // returns a value telling them apart stay apart
   std::string key() const {
@@ -312,6 +316,10 @@ bool merge_into(States* dst, const State& s) {
     }
   }
   if (s.unknown_release && !d.unknown_release) d.unknown_release = changed = true;
+  if (!s.touched.empty() && (d.touched.empty() || s.touched < d.touched)) {
+    d.touched = s.touched;
+    changed = true;
+  }
   return changed;
 }
 
@@ -868,6 +876,13 @@ class Analysis {
   }
 
   void apply(const std::string& ck, const Effect& e, State* s, Run* r) {
+    // a lock the caller holds may not be held after this call: a release of a lock the function does not hold
+    // itself, a release of a lock of an identity that is not a static instance, or an effect not followed
+    bool touches = e.unknown || !e.kill.empty();
+    for (const std::vector<LockId>* v : {&e.rel, &e.rel_may})
+      for (const LockId& x : *v)
+        if (s->held.count(lock_id_text(x)) == 0) touches = true;
+    if (touches && (s->touched.empty() || ck < s->touched)) s->touched = ck;
     if (e.unknown) {
       if (!s->held.empty()) s->unknown_release = true;
       s->held.clear();
@@ -1109,6 +1124,11 @@ class Analysis {
       for (const State& s : eit->second.st) (s.failure ? failed : ok).push_back(&s);
       const std::vector<const State*>& use = ok.empty() ? failed : ok;
       if (ok.empty()) row->flags |= KZ_LOCKSET_FLAG_FAILURE_PATH;
+      for (const State* s : use)
+        if (!s->touched.empty()) {
+          std::string& t = touched_[row];
+          if (t.empty() || s->touched < t) t = s->touched;
+        }
       std::map<std::string, std::set<std::string>> common;
       bool first = true;
       for (const State* s : use) {
@@ -1172,6 +1192,7 @@ class Analysis {
       const std::string ek = (r.kind == KZ_LOCKSET_KIND_CALL ? "C" : r.kind == KZ_LOCKSET_KIND_READ ? "R" : "W") + r.ref;
       row_from(&r, r.func_key, ek);
     }
+    paths(out, d);
     // LOCK_IDS: the identities held anywhere, by text
     std::vector<std::string> texts;
     for (const auto& kv : id_index) texts.push_back(kv.first);
@@ -1203,7 +1224,85 @@ class Analysis {
       if (r.flags & KZ_LOCKSET_FLAG_FAILURE_PATH) ++d->stats.rows_failure_path;
     }
     held_text_.clear();
+    touched_.clear();
     d->rows = std::move(out);
+  }
+
+  // ---- LOCK_PATHS rows ----
+  // ENTRY_RELEASE from the states of the final sweep (touched_); AFTER_SPAWN from the skeleton: the events of the
+  // spawn call's block after it, and every event of a block reachable from that block's successors (the spawn's own
+  // block included when a back edge leads to it).  No branch test prunes a successor.
+  void paths(const std::vector<LockSetFact>& out, LockDerivation* d) {
+    std::map<std::string, uint32_t> row_of;  // function key, event key -> row
+    for (size_t i = 0; i < out.size(); ++i) {
+      const LockSetFact& r = out[i];
+      const std::string ek = (r.kind == KZ_LOCKSET_KIND_CALL ? "C" : r.kind == KZ_LOCKSET_KIND_READ ? "R" : "W") + r.ref;
+      row_of[r.func_key + '\x1f' + ek] = static_cast<uint32_t>(i);
+    }
+    auto event_key = [](const LockEvent& ev) -> std::string {
+      switch (ev.kind) {
+        case LockEvent::CALL: return "C" + ev.key;
+        case LockEvent::READ: return "R" + ev.key;
+        case LockEvent::WRITE: return "W" + std::to_string(ev.index);
+        default: return "";
+      }
+    };
+    for (const auto& [f, g] : p_.m.lock_cfgs) {
+      std::vector<std::pair<uint32_t, uint32_t>> spawns;  // (block, event)
+      for (uint32_t b = 0; b < g.blocks.size(); ++b)
+        for (uint32_t i = 0; i < g.blocks[b].events.size(); ++i) {
+          const LockEvent& ev = g.blocks[b].events[i];
+          if (ev.kind != LockEvent::CALL) continue;
+          auto cit = p_.call_index.find(ev.key);
+          if (cit != p_.call_index.end() && (p_.m.calls[cit->second].flags & KZ_CALL_FLAG_SPAWN_OP) != 0) spawns.push_back({b, i});
+        }
+      for (const auto& [sb, si] : spawns) {
+        ++d->stats.spawn_calls;
+        const std::string spawn_key = g.blocks[sb].events[si].key;
+        std::set<uint32_t> rows;
+        auto add = [&](const LockEvent& ev) {
+          const std::string ek = event_key(ev);
+          if (ek.empty()) return;
+          auto it = row_of.find(f + '\x1f' + ek);
+          if (it != row_of.end()) rows.insert(it->second);
+        };
+        for (uint32_t i = si + 1; i < g.blocks[sb].events.size(); ++i) add(g.blocks[sb].events[i]);
+        std::set<uint32_t> seen;
+        std::vector<uint32_t> work;
+        for (uint32_t x : g.blocks[sb].succ)
+          if (x < g.blocks.size() && seen.insert(x).second) work.push_back(x);
+        while (!work.empty()) {
+          const uint32_t b = work.back();
+          work.pop_back();
+          for (const LockEvent& ev : g.blocks[b].events) add(ev);
+          for (uint32_t x : g.blocks[b].succ)
+            if (x < g.blocks.size() && seen.insert(x).second) work.push_back(x);
+        }
+        for (uint32_t row : rows) {
+          LockPathFact pf;
+          pf.row = row;
+          pf.func_key = f;
+          pf.call_key = spawn_key;
+          pf.kind = KZ_LOCKPATH_KIND_AFTER_SPAWN;
+          d->paths.push_back(pf);
+          ++d->stats.after_spawn;
+        }
+      }
+    }
+    for (size_t i = 0; i < out.size(); ++i) {
+      auto it = touched_.find(&out[i]);
+      if (it == touched_.end()) continue;
+      LockPathFact pf;
+      pf.row = static_cast<uint32_t>(i);
+      pf.func_key = out[i].func_key;
+      pf.call_key = it->second;
+      pf.kind = KZ_LOCKPATH_KIND_ENTRY_RELEASE;
+      d->paths.push_back(pf);
+      ++d->stats.entry_release;
+    }
+    std::sort(d->paths.begin(), d->paths.end(), [](const LockPathFact& a, const LockPathFact& b) {
+      return std::tie(a.row, a.kind, a.call_key) < std::tie(b.row, b.kind, b.call_key);
+    });
   }
 
   // ---- LOCK_OPS rows ----
@@ -1377,6 +1476,7 @@ class Analysis {
   std::map<std::string, Summary> sum_;
   std::map<std::string, std::map<std::string, EventAcc>> runs_;
   std::map<const LockSetFact*, std::vector<std::string>> held_text_;
+  std::map<const LockSetFact*, std::string> touched_;
   std::optional<State> split_;
   std::map<size_t, Effect> effects_;
 };
@@ -1439,6 +1539,7 @@ void finalize_lock_facts(Model* mp, const LockDerivation& d, const FieldStatusTa
       r.flags |= KZ_LOCKOP_FLAG_VOCABULARY;
   m.lock_ids = d.ids;
   m.locksets = d.rows;
+  m.lock_paths = d.paths;
   for (LockSetFact& r : m.locksets) {
     if (!r.held.empty()) {
       std::vector<ExprRef> h;

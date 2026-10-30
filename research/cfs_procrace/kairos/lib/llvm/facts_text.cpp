@@ -17,7 +17,7 @@ namespace {
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
                                  "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
-                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits"};
+                                 "argflow", "paramflow", "ptrfields", "gimages", "lockops", "lockids", "lockset", "fstatus", "awaits", "lockpaths"};
 
 class View {
  public:
@@ -50,7 +50,8 @@ class View {
                  {"loopexits", KZ_SEC_LOOP_EXITS, &View::loopexits},  {"argflow", KZ_SEC_ARGFLOW, &View::argflow},     {"paramflow", KZ_SEC_PARAM_FLOW, &View::paramflow},
                  {"ptrfields", KZ_SEC_PTR_FIELDS, &View::ptrfields},  {"gimages", KZ_SEC_GLOBAL_IMAGES, &View::gimages},
                  {"lockops", KZ_SEC_LOCK_OPS, &View::lockops},        {"lockids", KZ_SEC_LOCK_IDS, &View::lockids},       {"lockset", KZ_SEC_LOCKSET, &View::lockset},
-                 {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits}};
+                 {"fstatus", KZ_SEC_FIELD_STATUS, &View::fstatus},    {"awaits", KZ_SEC_AWAIT_L1, &View::awaits},
+                 {"lockpaths", KZ_SEC_LOCK_PATHS, &View::lockpaths}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -100,6 +101,7 @@ class View {
     if (!(s = read(KZ_SEC_LOCKSET, &lockset_)).ok()) return s;
     if (!(s = read(KZ_SEC_FIELD_STATUS, &fstatus_)).ok()) return s;
     if (!(s = read(KZ_SEC_AWAIT_L1, &awaits_)).ok()) return s;
+    if (!(s = read(KZ_SEC_LOCK_PATHS, &lockpaths_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -627,6 +629,24 @@ class View {
       os << " " << flags_text("KZ_LOCKSET_FLAG", r.flags) << "\n";
     }
   }
+  // LOCK_PATHS: the event as LOCKSET names it (kind, position), the call by position
+  void lockpaths(std::ostream& os) {
+    os << "[lockpaths] " << lockpaths_.size() << "\n";
+    for (const kz_fact_lockpath& r : lockpaths_) {
+      os << "  " << enum_text("KZ_LOCKPATH_KIND", r.kind) << " row " << idx(r.row);
+      if (r.row < lockset_.size()) {
+        const kz_fact_lockset& e = lockset_[r.row];
+        os << " " << enum_text("KZ_LOCKSET_KIND", e.kind) << " ";
+        if (e.kind == KZ_LOCKSET_KIND_WRITE) os << str(e.type) << "." << str(e.field) << " ";
+        os << "at " << pos(e.file, e.line, e.col);
+      }
+      os << " in " << fn_name(r.fn) << (r.kind == KZ_LOCKPATH_KIND_AFTER_SPAWN ? " after the spawn " : " through the call ");
+      auto cit = call_by_site_.find(r.site);
+      if (cit != call_by_site_.end()) os << pos(calls_[cit->second].file, calls_[cit->second].line, calls_[cit->second].col) << " " << str(calls_[cit->second].callee);
+      else os << "site " << idx(r.site);
+      os << "\n";
+    }
+  }
   void fstatus(std::ostream& os) {
     os << "[fstatus] " << fstatus_.size() << "\n";
     for (const kz_fact_fstatus& r : fstatus_) {
@@ -807,6 +827,7 @@ class View {
   std::vector<kz_fact_lockop> lockops_;
   std::vector<kz_fact_lockid> lockids_;
   std::vector<kz_fact_lockset> lockset_;
+  std::vector<kz_fact_lockpath> lockpaths_;
   std::vector<kz_fact_fstatus> fstatus_;
   std::vector<kz_fact_await> awaits_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;

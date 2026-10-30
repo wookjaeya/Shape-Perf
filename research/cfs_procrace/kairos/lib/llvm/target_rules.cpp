@@ -118,11 +118,19 @@ bool shared_base(const ArgFlowFact& a, const std::set<std::string>& global_addre
 
 bool record_field(const std::string& type, const std::string& field) { return !type.empty() && !field.empty() && type != "<global>"; }
 
-void field_loads(ExprRef e, std::set<std::string>* out, int depth = 0) {
-  if (e == nullptr || depth > 200) return;
-  if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_FIELD) out->insert(e->name);
-  field_loads(e->a, out, depth + 1);
-  field_loads(e->b, out, depth + 1);
+// The field loads of a tree, whatever its depth.  The pool shares structurally equal subtrees and builds a node
+// after its children, so the nodes form an acyclic graph: each node is visited once, and the walk ends.
+void field_loads(ExprRef root, std::set<std::string>* out) {
+  std::set<ExprRef> seen;
+  std::vector<ExprRef> stack{root};
+  while (!stack.empty()) {
+    const ExprRef e = stack.back();
+    stack.pop_back();
+    if (e == nullptr || !seen.insert(e).second) continue;
+    if (e->op == KZ_EXPR_OP_LOAD && e->ref == KZ_EXPR_REF_FIELD) out->insert(e->name);
+    stack.push_back(e->a);
+    stack.push_back(e->b);
+  }
 }
 
 }  // namespace

@@ -25,6 +25,9 @@
 //                 releases every lock;
 //   LOCK_IDS      the identities the rows hold and whether each is a static instance;
 //   LOCKSET       the locks held at every call, read and write, relative to the function's entry;
+//   LOCK_PATHS    per LOCKSET event, the spawn calls of its function it follows on the control-flow graph, and
+//                 whether a call on some path from the function's entry to it releases a lock the function does
+//                 not hold, may release one, or has a lock effect the analysis cannot follow;
 //   FIELD_STATUS  the writer-set completeness of every field of the record types the reads name,
 //                 per field and type-level, from a completeness pass (an extraction of its own whose
 //                 targets are exactly those fields; ExtractSpec::keep_raw_atypes);
@@ -76,11 +79,12 @@ struct LockDerivation {
   std::vector<LockOpFact> ops;
   std::vector<LockSetFact> rows;                 // `held` are indices into `ids`
   std::vector<LockIdFact> ids;
+  std::vector<LockPathFact> paths;               // `row` are indices into `rows`
   Model::LockStats stats;
 };
 void derive_locks(const Model& m, const FieldStatusTable* fields, LockDerivation* out);
 
-// Writes the rows of LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS and AWAIT_L1 into the model (finalized,
+// Writes the rows of LOCK_OPS, LOCK_IDS, LOCKSET, LOCK_PATHS, FIELD_STATUS and AWAIT_L1 into the model (finalized,
 // with the extended facts), from its derivation and the completeness pass.  `vocabulary` marks the
 // operations a profile-free second pass had as lock and unlock operations (empty otherwise).
 void finalize_lock_facts(Model* m, const LockDerivation& d, const FieldStatusTable& fields, const std::set<std::string>& vocabulary);

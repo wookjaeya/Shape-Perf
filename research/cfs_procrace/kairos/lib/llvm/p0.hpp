@@ -26,7 +26,7 @@ struct P0Entry {
   const char* family = "";
   const char* name = "";
   int out = -1;    // the parameter written through (the new thread id), -1 if none
-  int entry = -1;  // thread creation: the function the new thread starts at
+  int entry = -1;  // thread creation: the function the new thread starts at; key creation: the destructor
   int arg = -1;    // thread creation: the argument it receives
   bool conditional = false;  // the call may return without acquiring / waiting (try, timed)
   int mutex = -1;            // mutexes and condition waits: the mutex argument the semantics name (not written)
@@ -43,6 +43,8 @@ struct P0Entry {
 // used).  The revision names the table as a whole; it changes whenever an entry does.
 const std::vector<P0Entry>& p0_table();
 const char* p0_table_revision();
+// What the table covers: the families listed whole and the families this revision leaves out, by name.
+const char* p0_table_scope();
 
 // The comparison families: the byte-string comparison family (string.h, strings.h), whose functions
 // return zero exactly when the bytes they compare are equal, and the thread-id comparison family
@@ -60,6 +62,7 @@ struct P0CompareEntry {
 };
 const std::vector<P0CompareEntry>& p0_compare_table();
 const char* p0_compare_table_revision();
+const char* p0_compare_table_scope();
 
 bool p0_is_delay(uint8_t kind);
 bool p0_is_terminal(uint8_t kind);

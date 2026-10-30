@@ -44,16 +44,19 @@ struct P0Entry {
 const std::vector<P0Entry>& p0_table();
 const char* p0_table_revision();
 
-// The byte-string comparison family (string.h, strings.h): the functions that return zero exactly
-// when the bytes they compare are equal.  `kz-static relations` reads a key comparison from a call of
-// one of them; the extraction does not use them, so they are a table of their own (with its own
-// revision) and the P0 table and the facts' P0_TABLE section are as they were.  The two compared
-// operands are args 0 and 1 of every entry.
+// The comparison families: the byte-string comparison family (string.h, strings.h), whose functions
+// return zero exactly when the bytes they compare are equal, and the thread-id comparison family
+// (pthread_equal, non-zero exactly when the two ids are equal).  `kz-static relations` reads a key
+// comparison from a call of one of them; the extraction does not use them, so they are a table of
+// their own (with its own revision) and the P0 table and the facts' P0_TABLE section are as they were.
+// The two compared operands are args 0 and 1 of every entry.
 struct P0CompareEntry {
   const char* name = "";
+  const char* family = "";
   const char* semantics = "";
   const char* version = "";
   const char* source = "";
+  bool equal_is_zero = true;  // the result is zero when the operands are equal (else non-zero)
 };
 const std::vector<P0CompareEntry>& p0_compare_table();
 const char* p0_compare_table_revision();

@@ -1,10 +1,11 @@
-// kz-static show / reach -- reading a BASIS or FACTS container.
+// kz-static show / reach / relations -- reading a BASIS or FACTS container.
 #include <cstdio>
 
 #include "basis.hpp"
 #include "commands.hpp"
 #include "facts_query.hpp"
 #include "facts_text.hpp"
+#include "relations.hpp"
 #include "kz/core/dump.hpp"
 
 namespace kzs_cli {
@@ -66,6 +67,36 @@ int cmd_reach(int argc, char** argv) {
   const kz::Status s = kzs::reach_report(c, q, &text);
   if (!s.ok()) return fail("reach", s.describe());
   std::fputs(text.c_str(), stdout);
+  return 0;
+}
+
+// The relations of a facts container (relations.hpp).  It takes no field, callee or case name: the facts
+// file and the output file only.
+int cmd_relations(int argc, char** argv) {
+  Args args;
+  std::string err;
+  if (!parse_args(argc, argv, 2, {"-o"}, {}, &args, &err) || args.positional.size() != 1) {
+    std::fprintf(stderr, "kz-static relations: %s\n", err.empty() ? "expected one facts file" : err.c_str());
+    return 2;
+  }
+  kz::Container c;
+  if (!open_container("relations", args.positional[0], &c)) return 1;
+  if (c.header().artifact_kind != KZ_ARTIFACT_FACTS) {
+    std::fprintf(stderr, "kz-static relations: %s is not a facts container\n", args.positional[0].c_str());
+    return 2;
+  }
+  std::string text;
+  const kz::Status s = kzs::relations_report(c, kzs::RelationsOptions{}, &text);
+  if (!s.ok()) return fail("relations", s.describe());
+  if (args.has("-o")) {
+    const kz::Status w = kz::write_whole_file(args.one("-o"), kz::Bytes(text.begin(), text.end()));
+    if (!w.ok()) {
+      std::fprintf(stderr, "kz-static relations: %s\n", w.describe().c_str());
+      return 2;
+    }
+  } else {
+    std::fputs(text.c_str(), stdout);
+  }
   return 0;
 }
 

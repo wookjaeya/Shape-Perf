@@ -5,6 +5,7 @@
 #   kz-static extract  read the program's translation units and write the facts (a FACTS container)
 #   kz-static show     print the text view of a BASIS or FACTS container
 #   kz-static reach    which call sites that pass a value derived from a location are reachable from roots
+#   kz-static relations  the relations of paths A/B/C and the outcome-flip signal, without a case input
 #
 # The tool names no Clang type: the Clang side is in lib/llvm.  The default location of Clang's
 # builtin headers (-resource-dir) comes from the pinned build and is a compile definition.

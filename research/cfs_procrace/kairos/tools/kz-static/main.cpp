@@ -4,6 +4,7 @@
 //   kz-static extract (--profile P [--profile P2 ...] | --no-profile) (--basis B | --source S... [-- <compile flags>]) -o OUT [options] [--text]
 //   kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]
 //   kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]
+//   kz-static relations <facts> [-o OUT]
 //   kz-static --identity
 //
 // Exit status: 0 = ok, 1 = the analysis failed (a unit does not parse, a container is damaged),
@@ -100,6 +101,7 @@ int usage() {
       "                         chosen by rule from the first pass, shared bases only)\n"
       "       kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]\n"
       "       kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]\n"
+      "       kz-static relations <facts> [-o OUT]   (paths A/B/C and the outcome-flip signal; no field, callee or case name)\n"
       "       kz-static --identity\n",
       stderr);
   return 2;
@@ -119,5 +121,6 @@ int main(int argc, char** argv) {
   if (cmd == "extract") return kzs_cli::cmd_extract(argc, argv);
   if (cmd == "show") return kzs_cli::cmd_show(argc, argv);
   if (cmd == "reach") return kzs_cli::cmd_reach(argc, argv);
+  if (cmd == "relations") return kzs_cli::cmd_relations(argc, argv);
   return usage();
 }

@@ -126,13 +126,16 @@ const char* p0_table_revision() { return "P0 table revision 1 (2026-10-30)"; }
 
 const std::vector<P0CompareEntry>& p0_compare_table() {
   static const std::vector<P0CompareEntry> table = {
-      {"memcmp", "compares arg 2 bytes at arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
-      {"strcmp", "compares the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
-      {"strcoll", "compares the strings arg 0 and arg 1 in the collation of the locale; returns zero exactly when they collate equal", kPosix, kUnverified},
-      {"strncmp", "compares at most arg 2 bytes of the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
-      {"strcasecmp", "compares the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so", kPosix, kUnverified},
-      {"strncasecmp", "compares at most arg 2 bytes of the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so", kPosix,
-       kUnverified}};
+      {"memcmp", "byte-string comparison", "compares arg 2 bytes at arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified, true},
+      {"strcmp", "byte-string comparison", "compares the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified, true},
+      {"strcoll", "byte-string comparison", "compares the strings arg 0 and arg 1 in the collation of the locale; returns zero exactly when they collate equal", kPosix,
+       kUnverified, true},
+      {"strncmp", "byte-string comparison", "compares at most arg 2 bytes of the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified,
+       true},
+      {"strcasecmp", "byte-string comparison", "compares the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so", kPosix, kUnverified, true},
+      {"strncasecmp", "byte-string comparison", "compares at most arg 2 bytes of the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so",
+       kPosix, kUnverified, true},
+      {"pthread_equal", "thread-id comparison", "compares the thread ids arg 0 and arg 1; returns non-zero exactly when they are equal", kPosix, kUnverified, false}};
   return table;
 }
 

@@ -13,6 +13,8 @@
 #                                                   L1 (i) rules that do not depend on the targets
 #   target_rules                                    no Clang types: the targets the profile-free mode
 #                                                   chooses by rule (R-T1, R-T2)
+#   relations                                       no Clang types: `kz-static relations` (paths A/B/C,
+#                                                   the outcome-flip signal) over a facts container
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -27,6 +29,7 @@ add_library(kz-llvm STATIC
   serialize.cpp
   facts_text.cpp
   facts_query.cpp
+  relations.cpp
   unroll.cpp
   elf_info.cpp
   linkset.cpp

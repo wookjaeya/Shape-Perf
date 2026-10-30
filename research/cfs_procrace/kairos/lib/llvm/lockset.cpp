@@ -267,9 +267,9 @@ struct State {
   std::set<std::string> released;  // locks of the caller released on this path
   bool failure = false;
   bool unknown_release = false;
-  // the first call (by call key) on a path from the entry that released a lock the function does not hold,
+  // the first call (by source position) on a path from the entry that released a lock the function does not hold,
   // may have released a held lock of an identity that is not a static instance, or could not be followed
-  // (LOCK_PATHS entry-release); merged as the least key over the paths that reach a point
+  // (LOCK_PATHS entry-release); merged as the earliest over the paths that reach a point
   std::string touched;
   // one state per set of locks held and of the caller's locks released, so that the paths of an operation that
   // returns a value telling them apart stay apart
@@ -282,6 +282,9 @@ struct State {
   }
 };
 using States = std::map<std::string, State>;
+
+// the order of the witness calls of `touched`: by source position, then by call key (set by the analysis)
+std::function<bool(const std::string&, const std::string&)> g_touched_before = [](const std::string& a, const std::string& b) { return a < b; };
 
 bool merge_into(States* dst, const State& s) {
   const std::string k = s.key();
@@ -316,7 +319,7 @@ bool merge_into(States* dst, const State& s) {
     }
   }
   if (s.unknown_release && !d.unknown_release) d.unknown_release = changed = true;
-  if (!s.touched.empty() && (d.touched.empty() || s.touched < d.touched)) {
+  if (!s.touched.empty() && (d.touched.empty() || g_touched_before(s.touched, d.touched))) {
     d.touched = s.touched;
     changed = true;
   }
@@ -612,6 +615,16 @@ class Analysis {
   Analysis(const Prog& p, const FieldStatusTable* fields) : p_(p), fields_(fields) {}
 
   void run(LockDerivation* d) {
+    g_touched_before = [this](const std::string& a, const std::string& b) {
+      auto ia = p_.call_index.find(a), ib = p_.call_index.find(b);
+      if (ia != p_.call_index.end() && ib != p_.call_index.end()) {
+        const Pos& pa = p_.m.calls[ia->second].pos;
+        const Pos& pb = p_.m.calls[ib->second].pos;
+        if (pa < pb) return true;
+        if (pb < pa) return false;
+      }
+      return a < b;
+    };
     std::vector<std::string> nodes(p_.body.begin(), p_.body.end());
     const auto sccs = sccs_of(nodes, p_.cg);
     d->stats.bodies = static_cast<uint32_t>(nodes.size());
@@ -625,6 +638,7 @@ class Analysis {
     }
     rows(d);
     ops(d);
+    g_touched_before = [](const std::string& a, const std::string& b) { return a < b; };
   }
 
  private:
@@ -882,7 +896,7 @@ class Analysis {
     for (const std::vector<LockId>* v : {&e.rel, &e.rel_may})
       for (const LockId& x : *v)
         if (s->held.count(lock_id_text(x)) == 0) touches = true;
-    if (touches && (s->touched.empty() || ck < s->touched)) s->touched = ck;
+    if (touches && (s->touched.empty() || g_touched_before(ck, s->touched))) s->touched = ck;
     if (e.unknown) {
       if (!s->held.empty()) s->unknown_release = true;
       s->held.clear();
@@ -1127,7 +1141,7 @@ class Analysis {
       for (const State* s : use)
         if (!s->touched.empty()) {
           std::string& t = touched_[row];
-          if (t.empty() || s->touched < t) t = s->touched;
+          if (t.empty() || g_touched_before(s->touched, t)) t = s->touched;
         }
       std::map<std::string, std::set<std::string>> common;
       bool first = true;

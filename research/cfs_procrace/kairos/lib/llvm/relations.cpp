@@ -430,25 +430,47 @@ class Rel {
         for (const kz_fact_p0& p : p0_)
           if (str(p.name) == str(c.callee) && p.kind == KZ_P0_KIND_THREAD_CREATE) k = p.entry_param;
       }
-      if (k == kN) continue;
+      const std::string where = call_pos(static_cast<uint32_t>(ci)) + " in " + fname(c.caller_fn) + " -> " + str(c.callee);
+      if (k == kN) {
+        unresolved_spawns_.push_back(where + ": no entry parameter of the spawn operation is known");
+        continue;
+      }
       auto af = argflow_at_.find({c.site, k});
-      if (af == argflow_at_.end()) continue;
+      if (af == argflow_at_.end()) {
+        unresolved_spawns_.push_back(where + ": no ARGFLOW row of the entry argument " + std::to_string(k));
+        continue;
+      }
       const kz_fact_argflow& a = argflow_[af->second];
       const std::string object = base_name(str(a.object)), field = str(a.field), type = str(a.type);
-      if (a.src != KZ_ARGSRC_FIELD || object.empty() || field.empty() || (a.base != KZ_ARGBASE_GLOBAL && a.base != KZ_ARGBASE_GLOBAL_ELEMENT)) continue;
-      auto git = gimages_of_.find(object);
-      if (git == gimages_of_.end()) continue;
-      std::set<uint32_t> found;
-      for (uint32_t gi : git->second) {
-        const kz_fact_gimage& g = gimages_[gi];
-        if (g.kind != KZ_IMAGE_KIND_FUNC || !defined(g.fn)) continue;
-        const std::string path = str(g.path), owner = str(g.owner), gfield = str(g.field);
-        const size_t dot = path.rfind('.');
-        if (dot == std::string::npos || path.substr(dot + 1) != field) continue;
-        if (!gfield.empty() && (gfield != field || owner != type)) continue;
-        found.insert(g.fn);
+      if (a.src != KZ_ARGSRC_FIELD || object.empty() || field.empty() || (a.base != KZ_ARGBASE_GLOBAL && a.base != KZ_ARGBASE_GLOBAL_ELEMENT)) {
+        unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] is no field of a global table");
+        continue;
       }
-      if (found.empty()) continue;
+      auto git = gimages_of_.find(object);
+      std::set<uint32_t> found;
+      std::set<std::string> others;  // the members of the image leaves of functions whose name is not the field read
+      if (git != gimages_of_.end())
+        for (uint32_t gi : git->second) {
+          const kz_fact_gimage& g = gimages_[gi];
+          if (g.kind != KZ_IMAGE_KIND_FUNC || !defined(g.fn)) continue;
+          const std::string path = str(g.path), owner = str(g.owner), gfield = str(g.field);
+          const size_t dot = path.rfind('.');
+          if (dot == std::string::npos) continue;
+          if (path.substr(dot + 1) != field) {
+            others.insert(path.substr(dot + 1));
+            continue;
+          }
+          if (!gfield.empty() && (gfield != field || owner != type)) continue;
+          found.insert(g.fn);
+        }
+      if (found.empty()) {
+        std::string o;
+        for (const std::string& x : others) o += (o.empty() ? "" : ", ") + x;
+        unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
+                                     ", and the static image has no function leaf of that member" +
+                                     (o.empty() ? "" : " (its function leaves are of " + o + ": a read through another member of a union is not resolved in this revision)"));
+        continue;
+      }
       image_spawn_[c.site] = found;
       for (uint32_t e : found) spawn_entries_[c.site].insert(e);
     }
@@ -756,6 +778,9 @@ class Rel {
       os << "]";
     }
     os << "\n";
+    os << "spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): " << unresolved_spawns_.size();
+    for (const std::string& u : unresolved_spawns_) os << " [" << u << "]";
+    os << "\n";
     os << "summary A " << n_a_ << " (namespaces " << n_ns_ << ", lookup uses " << n_a_ << ", with a creator of the same partition in another actor " << n_a_paired_
        << ", key-matched " << n_a_keymatch_ << ") B " << n_b_ << " (with a callee check " << n_b_check_ << ") C " << n_c_ << " (self-identity reads " << n_c_self_
        << "); flip static-possible " << n_flip_possible_ << ", static-undetermined " << n_flip_undet_ << ", none " << n_flip_none_ << "; feasibility proven-impossible "
@@ -953,21 +978,22 @@ class Rel {
     return t;
   }
 
-  // A terminal operation the derivation reaches only on some paths (OP_DERIV mode may): its terminal calls with their
-  // guards, the guards evaluated with each constant value an argument takes at the call (the other arguments and the
-  // rest of the program unknown), and its loops that have no exit (the call does not return on a path through one).
+  // A terminal operation the derivation reaches only on some paths (OP_DERIV mode may, or noreturn: no path returns,
+  // and some path reaches the primitive): its terminal calls with their guards, the guards evaluated with each
+  // constant value an argument takes at the call (the other arguments and the rest of the program unknown), and its
+  // loops that have no exit (the call does not return on a path through one).
   std::string may_terminal(uint32_t fn, const std::map<uint32_t, std::set<int64_t>>& argvals) const {
     auto it = opderiv_of_.find(fn);
     if (it == opderiv_of_.end()) return "";
     std::vector<uint32_t> rows;
-    bool may = false;
+    uint8_t mode = KZ_OPDERIV_MODE_NONE;
     for (uint32_t i : it->second)
       if (opderiv_[i].kind == KZ_OPDERIV_KIND_TERMINAL) {
         rows.push_back(i);
-        if (opderiv_[i].mode == KZ_OPDERIV_MODE_MAY) may = true;
+        mode = opderiv_[i].mode;
       }
-    if (!may || rows.empty()) return "";
-    std::string t = "may: the terminal calls of " + fname(fn) + " are guarded:";
+    if ((mode != KZ_OPDERIV_MODE_MAY && mode != KZ_OPDERIV_MODE_NORETURN) || rows.empty()) return "";
+    std::string t = enum_text("KZ_OPDERIV_MODE", mode) + ": the terminal calls of " + fname(fn) + " are guarded:";
     for (uint32_t i : rows) {
       auto cit = call_by_site_.find(opderiv_[i].site);
       t += " " + (cit != call_by_site_.end() ? call_pos(cit->second) : "site " + std::to_string(opderiv_[i].site)) + " -> " + fname(opderiv_[i].next_fn) + " under " + ex(opderiv_[i].guard_root) + ";";
@@ -1462,7 +1488,7 @@ class Rel {
         }
       }
     }
-    os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ", without LOCK_PATHS rows " << no_paths
+    os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ", with no event after them on their control-flow graph " << no_paths
        << "; fields written after a spawn only in the functions the creator calls, not paired in this revision: " << callee_only_fields << ")\n"
        << rows.str();
   }
@@ -2367,7 +2393,7 @@ class Rel {
   std::vector<std::string> deviations_;
   std::map<std::string, std::set<std::string>> deviation_files_;
   std::set<std::string> assumptions_;
-  std::vector<std::string> keys_dtor_, keys_null_dtor_, cleanup_pushes_;
+  std::vector<std::string> keys_dtor_, keys_null_dtor_, cleanup_pushes_, unresolved_spawns_;
   mutable std::set<std::string> row_files_, row_tags_;
   std::map<std::string, std::set<int64_t>> in_use_, empty_;
   uint32_t n_a_ = 0, n_ns_ = 0, n_a_paired_ = 0, n_a_keymatch_ = 0, n_b_ = 0, n_b_check_ = 0, n_c_ = 0, n_c_self_ = 0;

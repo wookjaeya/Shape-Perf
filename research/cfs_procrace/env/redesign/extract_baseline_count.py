@@ -10,6 +10,11 @@
 #       loops, writes after a spawn call in the creator (pB_*.tsv, pA_*.tsv, pC_*.tsv)
 #   (3) evaluation lookups that name the known cases (eval_*.txt).  The case names are used here to look at the
 #       output, never to produce it.
+# Added after the verification of 2026-10-30: the variants VP (P0 seeds only), V0w (rule-written recipe) and V3a (V3 +
+# the predicate field AppState); p0_check.tsv; line-level differences between variants (variant_line_diff.tsv/.txt:
+# equal +/- counts against V0 do not mean equal lines); vp_vs_v1.tsv; the observation-point rules over VP
+# (*_VP.tsv) and the manifest coverage without the G0-based rules OP-L/OP-S/OP-T (summary.txt).  V1 and V3 carry the
+# vocabulary G0, which is taken from the case drivers and profiles; what rests on it is not a case-free result.
 import collections
 import os
 import re
@@ -19,12 +24,15 @@ OUT, CD = sys.argv[1], sys.argv[2]
 os.makedirs(CD, exist_ok=True)
 
 BUILDS = ['c1_pre_tx', 'c1_pre_rx', 'c1_post_tx', 'c1_post_rx', 'r2_core', 'r2_all', 'c5_641']
-VARIANTS = ['V0', 'V0r', 'V0p', 'V1', 'V2', 'V3']
+VARIANTS = ['V0', 'V0r', 'V0p', 'V1', 'V2', 'V3', 'VP', 'V0w', 'V3a']
 G0 = ['OS_TaskCreate', 'CFE_ES_CreateChildTask', 'OS_TaskDelay', 'CFE_ES_LockSharedData', 'CFE_ES_UnlockSharedData',
       'CFE_ES_ExitApp', 'CFE_PSP_Restart', 'CFE_PSP_Panic', 'abort']
+# the thread-library and C-library primitives of variant VP (extract_baseline.sh P0OPS)
+P0 = ['pthread_create', 'pthread_mutex_lock', 'pthread_mutex_unlock', 'clock_nanosleep', 'nanosleep', 'pthread_exit', 'exit', 'abort']
 CMP_FNS = {'strcmp', 'strncmp', 'memcmp', 'strcasecmp', 'strncasecmp', 'bcmp'}
 
 RE_SEC = re.compile(r'^\[(\w+)\] (\d+)$')
+RE_ORD_HDR_C = re.compile(r'^  loop \d+ .*\(task-main\)')
 RE_CALL = re.compile(r'^  site (\d+) (\S+):(\d+):(\d+) (\S+) -> (\S+) (direct|indirect|builtin) \{([^}]*)\}(?: loop=(\d+) depth=(\d+))?')
 RE_ARG = re.compile(r'^      arg (\d+):(\S+)(?: (.*))?$')
 RE_LOOP = re.compile(r'^  loop (\d+) site (\d+) (\S+):(\d+):(\d+) in (\S+) depth=(\d+) (\S+) trip=(\S+) exits=(\d+) calls=(\d+)(.*)$')
@@ -273,6 +281,66 @@ for (b, v), F in facts.items():
         rows.append([b, n, 'defined' if defined else ('declared' if ent else 'absent'), (defined or ent or [{'loc': '-'}])[0]['loc'],
                      sum(1 for c in F['calls'] if c['callee'] == n)])
 w('g0_check.tsv', ['build', 'name', 'in-closure', 'location', 'call-sites'], rows)
+rows = []
+for (b, v), F in facts.items():
+    if v != 'VP':
+        continue
+    for n in P0:
+        ent = F['fns'].get(n, [])
+        defined = [e for e in ent if 'defined' in e['flags']]
+        rows.append([b, n, 'defined' if defined else ('declared' if ent else 'absent'), (defined or ent or [{'loc': '-'}])[0]['loc'],
+                     sum(1 for c in F['calls'] if c['callee'] == n), ','.join(sorted(set(c['caller'] for c in F['calls'] if c['callee'] == n)))])
+w('p0_check.tsv', ['build', 'name', 'in-closure', 'location', 'call-sites', 'callers'], rows)
+
+# line-level differences between two variants of the same build (row numbers removed, as above): equal +/- counts
+# against V0 do not mean equal lines.  Sections where the vocabulary or the target set matters.
+LSECS = ['loops', 'terminals', 'order', 'iters', 'targets', 'spawnparams']
+PAIRS = [('V1', 'V2'), ('V1', 'V3'), ('V1', 'VP'), ('V3', 'V3a'), ('V0', 'V0w')]
+say('')
+say('# line-level differences between variants (row numbers removed): lines only in the first / only in the second')
+rows = []
+with open(os.path.join(CD, 'variant_line_diff.txt'), 'w') as o:
+    for b in BUILDS:
+        for x, y in PAIRS:
+            if (b, x) not in facts or (b, y) not in facts:
+                continue
+            parts = []
+            for sec in LSECS:
+                a = norm_lines(facts[(b, x)]['secs'].get(sec, {}).get('lines', []))
+                c = norm_lines(facts[(b, y)]['secs'].get(sec, {}).get('lines', []))
+                ox, oy = a - c, c - a
+                nx, ny = sum(ox.values()), sum(oy.values())
+                rows.append([b, x, y, sec, nx, ny])
+                if nx or ny:
+                    parts.append('%s %d/%d' % (sec, nx, ny))
+                    o.write('## %s %s vs %s [%s]: only in %s %d, only in %s %d\n' % (b, x, y, sec, x, nx, y, ny))
+                    for ln in sorted(ox.elements())[:12]:
+                        o.write('  < %s\n' % ln[:300])
+                    for ln in sorted(oy.elements())[:12]:
+                        o.write('  > %s\n' % ln[:300])
+            say('%-11s %-3s vs %-3s %s' % (b, x, y, '; '.join(parts) if parts else 'no line differs'))
+w('variant_line_diff.tsv', ['build', 'first', 'second', 'section', 'only-in-first', 'only-in-second'], rows)
+
+# what the P0 seeds alone give (VP) next to G0 (V1): operation-dependent facts per build
+say('')
+say('# VP (P0 seeds only) and V1 (G0): loop kinds, delay calls, spawn calls, task-main order, terminal and lock calls')
+rows = []
+for b in BUILDS:
+    for v in ('V1', 'VP'):
+        if (b, v) not in facts:
+            continue
+        F = facts[(b, v)]
+        k = collections.Counter(l['kind'] for l in F['loops'])
+        nsp = sum(1 for c in F['calls'] if 'spawn-op' in c['flags'])
+        ntm = sum(1 for ln in F['secs'].get('order', {}).get('lines', []) if RE_ORD_HDR_C.match(ln))
+        nterm = sum(1 for c in F['calls'] if 'terminal-op' in c['flags'])
+        nlock = sum(1 for c in F['calls'] if 'lock-op' in c['flags'] or 'unlock-op' in c['flags'])
+        lockfns = sorted(set(c['caller'] for c in F['calls'] if 'lock-op' in c['flags']))
+        rows.append([b, v, k['count-bounded'], k['poll'], sum(1 for l in F['loops'] if l['delay']), sum(1 for l in F['loops'] if l['lock']),
+                     nsp, ntm, nterm, nlock, ','.join(lockfns[:8]) + (' ...' if len(lockfns) > 8 else '')])
+        say('%-11s %-2s count-bounded %2d poll %2d with-delay-call %2d with-lock-info %2d; spawn calls %2d; task-main order loops %d; terminal calls %3d; lock/unlock calls %3d (lock callers %d)' % (
+            b, v, k['count-bounded'], k['poll'], rows[-1][4], rows[-1][5], nsp, ntm, nterm, nlock, len(lockfns)))
+w('vp_vs_v1.tsv', ['build', 'variant', 'count-bounded', 'poll', 'with-delay-call', 'with-lock-info', 'spawn-calls', 'task-main-order-loops', 'terminal-calls', 'lock-unlock-calls', 'lock-callers'], rows)
 
 # ---------------------------------------------------------------- (2) rule queries (no case input)
 say('')
@@ -504,140 +572,163 @@ PROFILES = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.
 
 say('')
 say('# static actors (roots) and rule-generated observation points (prototype over the V1/V0p facts; no case input)')
-op_rows, cov_rows, act_rows = [], [], []
-for b in BUILDS:
-    if (b, 'V1') not in facts:
-        continue
-    F = facts[(b, 'V1')]
-    Fsp = [F] + ([facts[(b, 'V0p')]] if (b, 'V0p') in facts else [])
-    A = static_actors(b, F, Fsp)
-    reach, cg, mod = A['reach'], A['cg'], A['mod']
-    rk = collections.Counter(A['roots'].values())
-    n_reached = sum(1 for n in A['defined'] if reach.get(n))
-    n_shared = sum(1 for n in A['defined'] if len(reach.get(n, ())) >= 2)
-    say('%-11s roots %3d (%s); functions with a body %4d, reached %4d, reached from >=2 roots %4d; startup entries %d, entry symbol without a body in the closure %d' % (
-        b, len(A['roots']), ', '.join('%s %d' % kv for kv in sorted(rk.items())), len(A['defined']), n_reached, n_shared, len(A['entries']), len(A['unresolved_entries'])))
-    for r, k in sorted(A['roots'].items()):
-        act_rows.append([b, r, k, mod.get(r, '?'), sum(1 for n in A['defined'] if r in reach.get(n, ()))])
-    ops = collections.OrderedDict()  # (rule, function, site-or-entry) -> note
-    # OP-E / OP-S: actor entries and spawn calls
-    for r, k in A['roots'].items():
-        ops[('OP-E entry/return of an actor root', r, 'entry')] = k
-    for G in Fsp:
-        for c in G['calls']:
-            if 'spawn-op' in c['flags']:
-                ops[('OP-S spawn call before/after', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'spawn'
-    # OP-L: lock and unlock calls (generic vocabulary)
-    for c in F['calls']:
-        if 'lock-op' in c['flags'] or 'unlock-op' in c['flags']:
-            ops[('OP-L lock/unlock call', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'lock'
-    # OP-T: terminal calls (generic vocabulary)
-    for c in F['calls']:
-        if 'terminal-op' in c['flags']:
-            ops[('OP-T terminal call', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'terminal'
-    # OP-A: search loops with a field comparison (strcmp family in the loop, or in a resolved callback of the loop),
-    # the functions of their module within 2 call levels that reach them or write the compared field, called from another module
-    tg_by_site = collections.defaultdict(list)
-    for t in F['targets']:
-        if t['kind'] == 'indirect-call':
-            tg_by_site[t['site']].append(t['target'])
-    cmp_fields_of_fn = collections.defaultdict(set)
-    for c in F['calls']:
-        if c['callee'] in CMP_FNS:
-            for a in c['args'][:2]:
-                fl = field_of_arg(a)
+def obs_points(BASE, SPX, SUF):
+    op_rows, cov_rows, act_rows = [], [], []
+    for b in BUILDS:
+        if (b, BASE) not in facts:
+            continue
+        F = facts[(b, BASE)]
+        Fsp = [F] + [facts[(b, x)] for x in SPX if (b, x) in facts]
+        A = static_actors(b, F, Fsp)
+        reach, cg, mod = A['reach'], A['cg'], A['mod']
+        rk = collections.Counter(A['roots'].values())
+        n_reached = sum(1 for n in A['defined'] if reach.get(n))
+        n_shared = sum(1 for n in A['defined'] if len(reach.get(n, ())) >= 2)
+        say('%-11s roots %3d (%s); functions with a body %4d, reached %4d, reached from >=2 roots %4d; startup entries %d, entry symbol without a body in the closure %d' % (
+            b, len(A['roots']), ', '.join('%s %d' % kv for kv in sorted(rk.items())), len(A['defined']), n_reached, n_shared, len(A['entries']), len(A['unresolved_entries'])))
+        for r, k in sorted(A['roots'].items()):
+            act_rows.append([b, r, k, mod.get(r, '?'), sum(1 for n in A['defined'] if r in reach.get(n, ()))])
+        ops = collections.OrderedDict()  # (rule, function, site-or-entry) -> note
+        # OP-E / OP-S: actor entries and spawn calls
+        for r, k in A['roots'].items():
+            ops[('OP-E entry/return of an actor root', r, 'entry')] = k
+        for G in Fsp:
+            for c in G['calls']:
+                if 'spawn-op' in c['flags']:
+                    ops[('OP-S spawn call before/after', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'spawn'
+        # OP-L: lock and unlock calls (generic vocabulary)
+        for c in F['calls']:
+            if 'lock-op' in c['flags'] or 'unlock-op' in c['flags']:
+                ops[('OP-L lock/unlock call', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'lock'
+        # OP-T: terminal calls (generic vocabulary)
+        for c in F['calls']:
+            if 'terminal-op' in c['flags']:
+                ops[('OP-T terminal call', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'terminal'
+        # OP-A: search loops with a field comparison (strcmp family in the loop, or in a resolved callback of the loop),
+        # the functions of their module within 2 call levels that reach them or write the compared field, called from another module
+        tg_by_site = collections.defaultdict(list)
+        for t in F['targets']:
+            if t['kind'] == 'indirect-call':
+                tg_by_site[t['site']].append(t['target'])
+        cmp_fields_of_fn = collections.defaultdict(set)
+        for c in F['calls']:
+            if c['callee'] in CMP_FNS:
+                for a in c['args'][:2]:
+                    fl = field_of_arg(a)
+                    if fl:
+                        cmp_fields_of_fn[c['caller']].add(fl)
+        search_fns, key_fields = set(), set()
+        for c in F['calls']:
+            if c['loop'] is None:
+                continue
+            if c['callee'] in CMP_FNS:
+                fl = [field_of_arg(a) for a in c['args'][:2] if field_of_arg(a)]
                 if fl:
-                    cmp_fields_of_fn[c['caller']].add(fl)
-    search_fns, key_fields = set(), set()
-    for c in F['calls']:
-        if c['loop'] is None:
-            continue
-        if c['callee'] in CMP_FNS:
-            fl = [field_of_arg(a) for a in c['args'][:2] if field_of_arg(a)]
-            if fl:
-                search_fns.add(c['caller'])
-                key_fields.update(fl)
-        if c['kind'] == 'indirect':
-            for t in tg_by_site.get(c['site'], []):
-                if cmp_fields_of_fn.get(t):
                     search_fns.add(c['caller'])
-                    key_fields.update(cmp_fields_of_fn[t])
-    key_writers = set(x['fn'] for x in F['fwrites'] if x['field'] in key_fields or (x['kind'] == 'record' and x['field'][:-2] in set(k.split('.')[0] for k in key_fields)))
-    # the API side: a function of the same module as a search function or key writer that reaches one within two call
-    # levels (crude: the parameter that reaches the comparison is not traced; that is the new analysis of path A)
-    a_mods = set(mod.get(n) for n in search_fns | key_writers)
-    api = set()
-    for n in A['defined']:
-        if mod.get(n) in a_mods and reach_within(cg, n, search_fns | key_writers, 2):
-            api.add(n)
-    # the same with four call levels (OP-A4, only what depth 2 does not give): the depth is a parameter of the proxy,
-    # and the counts show how much the result depends on it
-    api4 = set(n for n in A['defined'] if n not in api and mod.get(n) in a_mods and reach_within(cg, n, search_fns | key_writers, 4))
-    for c in F['calls']:
-        if mod.get(c['caller']) == mod.get(c['callee']) or mod.get(c['caller']) == '(header)':
-            continue
-        if c['callee'] in api:
-            ops[('OP-A keyed-table API call from another module', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'A'
-        elif c['callee'] in api4:
-            ops[('OP-A4 keyed-table API call from another module (3-4 call levels)', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'A4'
-    for n in search_fns:
-        ops[('OP-A search function entry/return', n, 'entry')] = 'A'
-    for n in key_writers:
-        ops[('OP-A key-field writer entry/return', n, 'entry')] = 'A'
-    # OP-B: a field passed as a call argument with a body write of that field in a function another root reaches
-    wfn = collections.defaultdict(set)
-    for x in F['fwrites']:
-        if x['field'] and x['kind'] in ('field', 'address-argument'):
-            wfn[x['field']].add(x['fn'])
-    n_b_fields = set()
-    for c in F['calls']:
-        for a in c['args']:
-            fl = field_of_arg(a) if a['kind'] == 'symbolic' else None
-            if not fl or fl not in wfn:
+                    key_fields.update(fl)
+            if c['kind'] == 'indirect':
+                for t in tg_by_site.get(c['site'], []):
+                    if cmp_fields_of_fn.get(t):
+                        search_fns.add(c['caller'])
+                        key_fields.update(cmp_fields_of_fn[t])
+        key_writers = set(x['fn'] for x in F['fwrites'] if x['field'] in key_fields or (x['kind'] == 'record' and x['field'][:-2] in set(k.split('.')[0] for k in key_fields)))
+        # the API side: a function of the same module as a search function or key writer that reaches one within two call
+        # levels (crude: the parameter that reaches the comparison is not traced; that is the new analysis of path A)
+        a_mods = set(mod.get(n) for n in search_fns | key_writers)
+        api = set()
+        for n in A['defined']:
+            if mod.get(n) in a_mods and reach_within(cg, n, search_fns | key_writers, 2):
+                api.add(n)
+        # the same with four call levels (OP-A4, only what depth 2 does not give): the depth is a parameter of the proxy,
+        # and the counts show how much the result depends on it
+        api4 = set(n for n in A['defined'] if n not in api and mod.get(n) in a_mods and reach_within(cg, n, search_fns | key_writers, 4))
+        for c in F['calls']:
+            if mod.get(c['caller']) == mod.get(c['callee']) or mod.get(c['caller']) == '(header)':
                 continue
-            rr = reach.get(c['caller'], set())
-            cross = any(r1 != r2 for r1 in rr for wf in wfn[fl] for r2 in reach.get(wf, set()))
-            if cross:
-                ops[('OP-B field->argument call (value at the call)', c['caller'], '%s:%d %s arg %d %s' % (c['file'], c['line'], c['callee'], a['i'], fl))] = 'B'
-                n_b_fields.add(fl)
-    for fl in n_b_fields:
-        for wf in wfn[fl]:
-            ops[('OP-B writer of a field read at such a call', wf, 'write %s' % fl)] = 'B'
-    # OP-C: writes by the creator after its spawn call (first write per field)
-    for G in Fsp[:1]:
-        for c in G['calls']:
-            if 'spawn-op' not in c['flags']:
-                continue
-            for x in G['fwrites']:
-                if x['fn'] == c['caller'] and x['file'] == c['file'] and x['line'] > c['line'] and x['field'] and x['kind'] != 'untyped':
-                    ops[('OP-C creator write after the spawn call', c['caller'], 'write %s at %d' % (x['field'], x['line']))] = 'C'
-    per_rule = collections.Counter(k[0] for k in ops)
-    fns_rule = set(k[1] for k in ops)
-    say('%-11s observation points by rule: %s; functions involved %d; search functions %d, key fields %d, keyed-table API functions %d' % (
-        b, '; '.join('%s %d' % (r.split(' ')[0], n) for r, n in sorted(collections.Counter(k[0].split(' ')[0] for k in ops).items())), len(fns_rule), len(search_fns), len(key_fields), len(api)) + ' (+%d at 3-4 levels)' % len(api4))
-    for k, note in ops.items():
-        op_rows.append([b, k[0], k[1], mod.get(k[1], '?'), k[2]])
-    # comparison with the hand-chosen manifest
-    mf = MANIFESTS.get(b)
-    if mf and os.path.exists(os.path.join(PROFILES, mf)):
-        man = []
-        with open(os.path.join(PROFILES, mf)) as f:
-            for line in f:
-                m = re.match(r'^site (\d+) label=(\S+) .*?func=(\S+)', line)
-                if m:
-                    man.append((m.group(2), m.group(3)))
-        covered = 0
-        for lab, fn in man:
-            rules = sorted(set(k[0].split(' ')[0] for k in ops if k[1] == fn))
-            called_rules = sorted(set(k[0].split(' ')[0] for k in ops if k[2].endswith(' ' + fn) or (' ' + fn + ' arg') in k[2]))
-            st = 'in-rule-set' if rules else ('call-site-in-rule-set' if called_rules else 'not-generated')
-            covered += st != 'not-generated'
-            cov_rows.append([b, mf, lab, fn, st, ','.join(rules) or '-', ','.join(called_rules) or '-', 'reached by ' + ','.join(sorted(reach.get(fn, set()))[:6]) if reach.get(fn) else 'not reached from a root'])
-        cov_no4 = sum(1 for r in cov_rows if r[0] == b and r[4] != 'not-generated' and (set(r[5].split(',')) | set(r[6].split(','))) - {'OP-A4', '-'})
-        say('%-11s hand-chosen manifest %s: %d sites, %d generated by a rule (the function or a call to it; %d without OP-A4), %d not' % (b, mf, len(man), covered, cov_no4, len(man) - covered))
-w('obs_points_rule.tsv', ['build', 'rule', 'function', 'module', 'point'], op_rows)
-w('obs_manifest_coverage.tsv', ['build', 'manifest', 'label', 'function', 'status', 'rules-on-the-function', 'rules-on-calls-to-it', 'static-actors'], cov_rows)
-w('static_roots.tsv', ['build', 'root', 'kind', 'module', 'functions-reached'], act_rows)
+            if c['callee'] in api:
+                ops[('OP-A keyed-table API call from another module', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'A'
+            elif c['callee'] in api4:
+                ops[('OP-A4 keyed-table API call from another module (3-4 call levels)', c['caller'], '%s:%d %s' % (c['file'], c['line'], c['callee']))] = 'A4'
+        for n in search_fns:
+            ops[('OP-A search function entry/return', n, 'entry')] = 'A'
+        for n in key_writers:
+            ops[('OP-A key-field writer entry/return', n, 'entry')] = 'A'
+        # OP-B: a field passed as a call argument with a body write of that field in a function another root reaches
+        wfn = collections.defaultdict(set)
+        for x in F['fwrites']:
+            if x['field'] and x['kind'] in ('field', 'address-argument'):
+                wfn[x['field']].add(x['fn'])
+        n_b_fields = set()
+        for c in F['calls']:
+            for a in c['args']:
+                fl = field_of_arg(a) if a['kind'] == 'symbolic' else None
+                if not fl or fl not in wfn:
+                    continue
+                rr = reach.get(c['caller'], set())
+                cross = any(r1 != r2 for r1 in rr for wf in wfn[fl] for r2 in reach.get(wf, set()))
+                if cross:
+                    ops[('OP-B field->argument call (value at the call)', c['caller'], '%s:%d %s arg %d %s' % (c['file'], c['line'], c['callee'], a['i'], fl))] = 'B'
+                    n_b_fields.add(fl)
+        for fl in n_b_fields:
+            for wf in wfn[fl]:
+                ops[('OP-B writer of a field read at such a call', wf, 'write %s' % fl)] = 'B'
+        # OP-C: writes by the creator after its spawn call (first write per field)
+        for G in Fsp[:1]:
+            for c in G['calls']:
+                if 'spawn-op' not in c['flags']:
+                    continue
+                for x in G['fwrites']:
+                    if x['fn'] == c['caller'] and x['file'] == c['file'] and x['line'] > c['line'] and x['field'] and x['kind'] != 'untyped':
+                        ops[('OP-C creator write after the spawn call', c['caller'], 'write %s at %d' % (x['field'], x['line']))] = 'C'
+        per_rule = collections.Counter(k[0] for k in ops)
+        fns_rule = set(k[1] for k in ops)
+        say('%-11s observation points by rule: %s; functions involved %d; search functions %d, key fields %d, keyed-table API functions %d' % (
+            b, '; '.join('%s %d' % (r.split(' ')[0], n) for r, n in sorted(collections.Counter(k[0].split(' ')[0] for k in ops).items())), len(fns_rule), len(search_fns), len(key_fields), len(api)) + ' (+%d at 3-4 levels)' % len(api4))
+        for k, note in ops.items():
+            op_rows.append([b, k[0], k[1], mod.get(k[1], '?'), k[2]])
+        # comparison with the hand-chosen manifest
+        mf = MANIFESTS.get(b)
+        if mf and os.path.exists(os.path.join(PROFILES, mf)):
+            man = []
+            with open(os.path.join(PROFILES, mf)) as f:
+                for line in f:
+                    m = re.match(r'^site (\d+) label=(\S+) .*?func=(\S+)', line)
+                    if m:
+                        man.append((m.group(2), m.group(3)))
+            covered = 0
+            for lab, fn in man:
+                rules = sorted(set(k[0].split(' ')[0] for k in ops if k[1] == fn))
+                called_rules = sorted(set(k[0].split(' ')[0] for k in ops if k[2].endswith(' ' + fn) or (' ' + fn + ' arg') in k[2]))
+                st = 'in-rule-set' if rules else ('call-site-in-rule-set' if called_rules else 'not-generated')
+                covered += st != 'not-generated'
+                cov_rows.append([b, mf, lab, fn, st, ','.join(rules) or '-', ','.join(called_rules) or '-', 'reached by ' + ','.join(sorted(reach.get(fn, set()))[:6]) if reach.get(fn) else 'not reached from a root'])
+            cov_no4 = sum(1 for r in cov_rows if r[0] == b and r[4] != 'not-generated' and (set(r[5].split(',')) | set(r[6].split(','))) - {'OP-A4', '-'})
+            say('%-11s hand-chosen manifest %s: %d sites, %d generated by a rule (the function or a call to it; %d without OP-A4), %d not' % (b, mf, len(man), covered, cov_no4, len(man) - covered))
+    w('obs_points_rule%s.tsv' % SUF, ['build', 'rule', 'function', 'module', 'point'], op_rows)
+    w('obs_manifest_coverage%s.tsv' % SUF, ['build', 'manifest', 'label', 'function', 'status', 'rules-on-the-function', 'rules-on-calls-to-it', 'static-actors'], cov_rows)
+    w('static_roots%s.tsv' % SUF, ['build', 'root', 'kind', 'module', 'functions-reached'], act_rows)
+
+    return cov_rows
+
+say('(base V1 = G0, spawn roots also from V0p)')
+cov_v1 = obs_points('V1', ['V0p'], '')
+# the same coverage without the rules that rest on G0 names (OP-L lock calls, OP-S spawn calls, OP-T terminal calls)
+say('')
+say('# hand-chosen manifest sites generated without the G0-based rules OP-L, OP-S, OP-T (V1 base, the other rules as above)')
+G0RULES = {'OP-L', 'OP-S', 'OP-T'}
+for b in BUILDS:
+    rr = [r for r in cov_v1 if r[0] == b]
+    if not rr:
+        continue
+    def rules_of(r):
+        return (set(r[5].split(',')) | set(r[6].split(','))) - {'-'}
+    n = sum(1 for r in rr if rules_of(r) - G0RULES)
+    n4 = sum(1 for r in rr if rules_of(r) - G0RULES - {'OP-A4'})
+    only = sorted(set(r[3] for r in rr if rules_of(r) and not (rules_of(r) - G0RULES)))
+    say('%-11s %s: %d sites, %d generated without OP-L/OP-S/OP-T (%d also without OP-A4); covered only by those rules: %s' % (b, rr[0][1], len(rr), n, n4, ', '.join(only) or '-'))
+say('')
+say('# the same observation-point rules over VP (P0 seeds only: no cFE/OSAL name on the command line)')
+obs_points('VP', [], '_VP')
 
 # ---------------------------------------------------------------- (3) evaluation lookups (case names used to look only)
 def dump_calls(F, pred, out, limit=60):
@@ -759,6 +850,51 @@ with open(os.path.join(CD, 'eval_C5.txt'), 'w') as o:
         for x in facts[('c5_641', v)]['writers']:
             if x['loc'] in ('CFE_ES_TaskRecord_t.RecordUsed', 'CFE_ES_TaskRecord_t.AppId', 'OS_task_record_t.id', 'OS_task_record_t.free'):
                 o.write('  writer %s %s %s:%d in %s value=%s\n' % (x['loc'], x['how'], x['file'], x['line'], x['fn'], x['value'][:160]))
+
+# the variants added after the verification of 2026-10-30 (VP: P0 seeds only; V3a: V3 + the predicate field AppState)
+def dump_loops(F, fns, out):
+    for l in F['loops']:
+        if l['fn'] in fns:
+            out.write('  loop %d %s:%d in %s %s trip=%s exits=%d rule=%s {%s} delay=%s\n' % (l['loop'], l['file'], l['line'], l['fn'], l['kind'], l['trip'], l['exits'], l['rule'], l['lflags'], l['delay']))
+
+with open(os.path.join(CD, 'eval_C1.txt'), 'a') as o:
+    for b in ('c1_pre_tx', 'c1_post_tx'):
+        if (b, 'VP') in facts:
+            o.write('## %s VP (P0 seeds only): the loops in CF_CFDP_InitEngine and initialize_throttling, and the loops with a delay call\n' % b)
+            dump_loops(facts[(b, 'VP')], ('CF_CFDP_InitEngine', 'initialize_throttling'), o)
+            for l in facts[(b, 'VP')]['loops']:
+                if l['delay']:
+                    o.write('  delay loop %d %s:%d in %s %s rule=%s\n' % (l['loop'], l['file'], l['line'], l['fn'], l['kind'], l['rule']))
+            o.write('## %s VP: terminal-op calls in CF functions\n' % b)
+            dump_calls(facts[(b, 'VP')], lambda c: 'terminal-op' in c['flags'] and c['caller'].startswith('CF_'), o)
+
+with open(os.path.join(CD, 'eval_R2.txt'), 'a') as o:
+    for v in ('V1', 'V2', 'V3', 'V3a', 'VP'):
+        if ('r2_core', v) not in facts:
+            continue
+        o.write('## r2_core %s: the CFE_ES_MainTaskSyncDelay loops (rule and its reason)\n' % v)
+        sec = facts[('r2_core', v)]['secs']['loops']['lines']
+        for i, line in enumerate(sec):
+            m = RE_LOOP.match(line)
+            if m and base(m.group(6)) == 'CFE_ES_MainTaskSyncDelay':
+                for ln in sec[i:i + 10]:
+                    if ln.startswith('      rule '):
+                        o.write('  loop %s %s:%s %s | %s\n' % (m.group(1), m.group(3), m.group(4), m.group(8), ln.strip()[:400]))
+                        break
+    if ('r2_core', 'VP') in facts:
+        F = facts[('r2_core', 'VP')]
+        o.write('## r2_core VP: spawn sites and the order section\n')
+        dump_calls(F, lambda c: 'spawn-op' in c['flags'], o)
+        for line in F['secs']['order']['lines']:
+            if line.startswith('  loop '):
+                o.write(line + '\n')
+
+with open(os.path.join(CD, 'eval_C5.txt'), 'a') as o:
+    if ('c5_641', 'VP') in facts:
+        F = facts[('c5_641', 'VP')]
+        o.write('## c5_641 VP (P0 seeds only): calls in CFE_ES_AppCreate (lock/unlock, spawn) and the lock/spawn-flagged calls\n')
+        dump_calls(F, lambda c: c['caller'] == 'CFE_ES_AppCreate' and c['callee'] in ('CFE_ES_LockSharedData', 'CFE_ES_UnlockSharedData', 'OS_TaskCreate'), o)
+        dump_calls(F, lambda c: bool(c['flags'] & {'spawn-op', 'lock-op', 'unlock-op'}), o)
 
 with open(os.path.join(CD, 'summary.txt'), 'w') as f:
     f.write('\n'.join(summary) + '\n')

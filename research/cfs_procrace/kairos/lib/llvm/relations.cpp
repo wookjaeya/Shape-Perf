@@ -20,7 +20,7 @@
 
 namespace kzs {
 
-const char* relations_rules_revision() { return "relations rules revision 3 (2026-10-30)"; }
+const char* relations_rules_revision() { return "relations rules revision 4 (2026-10-30)"; }
 
 namespace {
 
@@ -32,6 +32,11 @@ struct Val {
   int64_t v = 0;
 };
 Val known(int64_t v) { return Val{true, v}; }
+
+// The functions of the C library that return twice (ISO C 7.13 setjmp and the names it is spelled as in glibc 2.39,
+// POSIX sigsetjmp, the ucontext getcontext, vfork): a non-local jump (longjmp, siglongjmp, setcontext) or the second
+// return may come back to such a call in an order and under locks the control-flow graph does not have.
+const char* const kReturnsTwice[] = {"setjmp", "_setjmp", "__setjmp", "sigsetjmp", "__sigsetjmp", "savectx", "getcontext", "vfork"};
 
 // Substitution for evaluating a condition: field loads and parameters with a value, call results with a value (by the
 // callee's name; "<indirect>" for an indirect call), calls whose result is known not to be zero (a comparison call that
@@ -426,6 +431,17 @@ class Rel {
     }
     for (const kz_basis_item& b : basis_)
       if (b.policy == KZ_POLICY_DECLARED && str(b.name).compare(0, 7, "assume.") == 0) assumptions_.insert(str(b.name));
+    // the calls that may call a function back: a function passed as an argument to a callee without a body that is no
+    // P0 entry (the rule of call_runs), by the function passed
+    for (size_t ci = 0; ci < calls_.size(); ++ci)
+      for (uint32_t f : callback_args(static_cast<uint32_t>(ci))) callback_callers_[f].push_back(static_cast<uint32_t>(ci));
+    // the calls of a function that returns twice (a non-local jump may come back to them), by caller
+    for (size_t ci = 0; ci < calls_.size(); ++ci) {
+      const kz_fact_call& c = calls_[ci];
+      if (defined(c.callee_fn) || !defined(c.caller_fn)) continue;
+      for (const char* n : kReturnsTwice)
+        if (str(c.callee) == n) returns_twice_[c.caller_fn].push_back(static_cast<uint32_t>(ci));
+    }
     thread_end_code();
     global_address_functions();
     image_entries();
@@ -461,6 +477,23 @@ class Rel {
   // an unknown effect makes it not complete), and no leaf used may be marked as written (object-, field- or
   // record-written: a store to the object, the field or a whole record of its type); otherwise the spawn stays
   // unresolved, with the reason.
+  // Why the static image of a member is not taken as its run-time value ("" when it is): a leaf of the image is marked
+  // written (object-, field- or record-written, GLOBAL_IMAGES), FIELD_STATUS has no row of the member, its writer set
+  // is not complete under both rules, or it has writers at run time.  The rule of the static-image entries and of the
+  // image keys of path A.
+  std::string image_value_why(const std::string& type, const std::string& field, uint16_t written) const {
+    if (written != 0) return "a leaf of the image is marked " + written_flags(written) + " (GLOBAL_IMAGES): the run-time value may differ from the image";
+    auto fsit = fstatus_of_.find(type + "." + field);
+    if (fsit == fstatus_of_.end()) return "FIELD_STATUS has no row of " + type + "." + field + ": that nothing writes it is not known";
+    const kz_fact_fstatus& f = fstatus_[fsit->second];
+    if (f.status_field != KZ_LOC_STATUS_COMPLETE || f.status_type != KZ_LOC_STATUS_COMPLETE)
+      return "the writer set of " + type + "." + field + " is not complete (FIELD_STATUS per-field " + enum_text("KZ_LOC_STATUS", f.status_field) + ", type-level " +
+             enum_text("KZ_LOC_STATUS", f.status_type) + ")";
+    if (f.n_direct + f.n_data_fn + f.n_outptr != 0)
+      return type + "." + field + " has writers at run time (FIELD_STATUS: direct " + std::to_string(f.n_direct) + ", data function " + std::to_string(f.n_data_fn) +
+             ", out-pointer " + std::to_string(f.n_outptr) + ")";
+    return "";
+  }
   void image_entries() {
     std::map<uint32_t, uint32_t> entry_param_of;  // spawn operation (function) -> its entry parameter
     for (const kz_fact_spawnw& w : spawnw_)
@@ -530,21 +563,7 @@ class Rel {
         continue;
       }
       // the image is the run-time value: no write of the member
-      std::string why;
-      auto fsit = fstatus_of_.find(type + "." + field);
-      if (written != 0) {
-        why = "a leaf of the image is marked " + written_flags(written) + " (GLOBAL_IMAGES): the run-time value may differ from the image";
-      } else if (fsit == fstatus_of_.end()) {
-        why = "FIELD_STATUS has no row of " + type + "." + field + ": that nothing writes it is not known";
-      } else {
-        const kz_fact_fstatus& f = fstatus_[fsit->second];
-        if (f.status_field != KZ_LOC_STATUS_COMPLETE || f.status_type != KZ_LOC_STATUS_COMPLETE)
-          why = "the writer set of " + type + "." + field + " is not complete (FIELD_STATUS per-field " + enum_text("KZ_LOC_STATUS", f.status_field) + ", type-level " +
-                enum_text("KZ_LOC_STATUS", f.status_type) + ")";
-        else if (f.n_direct + f.n_data_fn + f.n_outptr != 0)
-          why = type + "." + field + " has writers at run time (FIELD_STATUS: direct " + std::to_string(f.n_direct) + ", data function " + std::to_string(f.n_data_fn) +
-                ", out-pointer " + std::to_string(f.n_outptr) + ")";
-      }
+      const std::string why = image_value_why(type, field, written);
       if (!why.empty()) {
         unresolved_spawns_.push_back(where + ": the entry argument " + std::to_string(k) + " [" + str(a.text) + "] reads " + type + "." + field + " of " + object +
                                      ", whose static image is not taken as its value: " + why);
@@ -743,6 +762,73 @@ class Rel {
     }
     return out;
   }
+  // The threads a spawn call starts: the actors of its resolved entries (a trampoline stands for its roots), and, in
+  // turn, the threads the code of those starts at its own spawn calls (descendants), with the code they all run (the
+  // call graph from their roots, direct calls and resolved indirect targets, not stopping at another root: a root the
+  // code calls runs in the calling thread).  The inner spawn call of a derived spawn operation that passes its own
+  // parameter (SPAWN_WRAP entry-argument, called-by-entry) is read at the operation's calls, which are spawn calls of
+  // their own.  The set is not complete when a trampoline among them stands for threads started at calls with no
+  // resolved entry, or the code makes a spawn call with no resolved entry.
+  struct ChildSet {
+    std::set<uint32_t> roots, descendants, code;
+    std::vector<std::string> incomplete;  // why the set is not known to be complete
+  };
+  const ChildSet& child_set(uint32_t site, const std::set<uint32_t>& resolved) {
+    auto memo = child_sets_.find(site);
+    if (memo != child_sets_.end()) return memo->second;
+    ChildSet cs;
+    std::set<uint32_t> inner;  // the inner spawn calls of derived spawn operations
+    for (const kz_fact_spawnw& w : spawnw_)
+      if (w.kind == KZ_SPAWNW_KIND_ENTRY_ARG || w.kind == KZ_SPAWNW_KIND_CALLED_BY_ENTRY) inner.insert(w.site);
+    auto missing = [&](const std::set<uint32_t>& es) {
+      for (uint32_t e : es) {
+        auto vm = via_op_missing_.find(e);
+        if (trampolines_.count(e) != 0 && vm != via_op_missing_.end() && !vm->second.empty())
+          for (const std::string& m : vm->second) {
+            const std::string t = "the trampoline " + fname(e) + " also runs the threads started at " + m + ", whose entry is not resolved";
+            if (std::find(cs.incomplete.begin(), cs.incomplete.end(), t) == cs.incomplete.end()) cs.incomplete.push_back(t);
+          }
+      }
+    };
+    cs.roots = entry_actors(resolved);
+    missing(resolved);
+    std::set<uint32_t> seen_sites{site};
+    std::vector<uint32_t> stack;
+    auto enter = [&](uint32_t f) {
+      if (defined(f) && cs.code.insert(f).second) stack.push_back(f);
+    };
+    for (uint32_t e : resolved) enter(e);  // a trampoline's own code runs in the thread too
+    for (uint32_t a : cs.roots) enter(a);
+    while (!stack.empty()) {
+      const uint32_t x = stack.back();
+      stack.pop_back();
+      for (const auto& [y, indirect] : succ_[x]) enter(y);
+      for (uint32_t ci : calls_of_.count(x) != 0 ? calls_of_.at(x) : std::vector<uint32_t>{})
+        for (uint32_t y : callback_args(ci)) enter(y);  // a function passed to a callee without a body may be called back
+      auto cit = calls_of_.find(x);
+      if (cit == calls_of_.end()) continue;
+      for (uint32_t ci : cit->second) {
+        const kz_fact_call& c = calls_[ci];
+        if ((c.flags & KZ_CALL_FLAG_SPAWN_OP) == 0 || inner.count(c.site) != 0 || !seen_sites.insert(c.site).second) continue;
+        std::set<uint32_t> es;
+        auto se = spawn_entries_.find(c.site);
+        if (se != spawn_entries_.end())
+          for (uint32_t e : se->second)
+            if (defined(e)) es.insert(e);
+        if (es.empty()) {
+          cs.incomplete.push_back("the spawn call " + call_pos(ci) + " in " + fname(c.caller_fn) + " that this code reaches has no resolved entry");
+          continue;
+        }
+        missing(es);
+        for (uint32_t e : es) enter(e);
+        for (uint32_t a : entry_actors(es)) {
+          if (cs.roots.count(a) == 0) cs.descendants.insert(a);
+          enter(a);
+        }
+      }
+    }
+    return child_sets_[site] = cs;
+  }
   std::string actors_text(const std::set<uint32_t>& as) const {
     if (as.empty()) return "{} (no root reaches it)";
     std::string t = "{";
@@ -892,6 +978,11 @@ class Rel {
     if (hand_entered_vocabulary_ != 0) os << "; hand-entered vocabulary on the command line: " << hand_entered_vocabulary_ << " items";
     os << "\n";
     os << "run order: no record given (this revision reads no run record; the column says so in every row)\n";
+    os << "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): ";
+    for (size_t i = 0; i < sizeof kReturnsTwice / sizeof kReturnsTwice[0]; ++i) os << (i == 0 ? "" : ", ") << kReturnsTwice[i];
+    size_t n_rt = 0;
+    for (const auto& [f, cs] : returns_twice_) n_rt += cs.size();
+    os << "; calls of them in these facts: " << n_rt << "\n";
     os << "actors: roots " << root_kind_.size() << " (process " << count_kind("process") << ", spawn-entry " << count_kind("spawn-entry") << ", table-walk-entry "
        << count_kind("table-walk-entry") << ", table-image-entry " << count_kind("table-image-entry") << ", script-entry " << count_kind("script-entry") << "), trampolines "
        << trampolines_.size();
@@ -1482,6 +1573,8 @@ class Rel {
     uint32_t call_row = kN;  // LOCKSET row of the call, or kN
     bool entry = false;      // the read's function is the entry of a spawned thread (no caller lock)
     bool not_reached = false;  // a call the spawned entries do not reach (no grade)
+    bool callback = false;     // a call of a function without a body that receives the reading function
+    bool unresolved = false;   // indirect calls the facts do not resolve that may call the reading function
   };
   // the facts path C's feasibility reads besides the lock sets
   struct CExtra {
@@ -1491,6 +1584,10 @@ class Rel {
     std::vector<std::string> unknown;   // calls after the spawn that may write anything (unresolved indirect calls)
     std::vector<std::string> callers;   // writes of the field in the creator's callers' own bodies
     std::string callers_names;          // the creator's callers
+    std::string callers_open;           // why the creator's callers are not all known ("" when they are)
+    std::set<uint32_t> after_fns;       // the creator and the functions its calls after the spawn may run
+    uint32_t spawn_ci = kN;             // the spawn call (index into FACTS)
+    uint32_t read_fn = kN, ctx_fn = kN; // the reading function, the function of the call of the context
   };
   void path_c(std::ostream& os) {
     std::ostringstream rows;
@@ -1509,7 +1606,17 @@ class Rel {
         ++unresolved;
         continue;
       }
-      const std::set<uint32_t> child = entry_actors(resolved);
+      const ChildSet& cs = child_set(site, resolved);
+      const std::set<uint32_t>& child = cs.roots;
+      std::set<uint32_t> threads = cs.roots;  // the child and its descendants
+      threads.insert(cs.descendants.begin(), cs.descendants.end());
+      // code the threads of this spawn run: the actors' code (a trampoline's code is its roots'), or the call graph from them
+      auto runs_in = [&](uint32_t fn) {
+        if (cs.code.count(fn) != 0) return true;
+        for (uint32_t a : actor_set(fn))
+          if (threads.count(a) != 0) return true;
+        return false;
+      };
       const uint32_t P = s.caller_fn;
       auto lsit = lockset_call_.find(site);
       const std::string s_held = lsit == lockset_call_.end() ? "{} (no LOCKSET row)" : held_text(lsit->second);
@@ -1539,6 +1646,7 @@ class Rel {
       std::set<std::string> callee_typed;
       std::set<std::string> record_types;  // the record types written whole after the spawn
       std::vector<std::string> unknown;
+      std::set<uint32_t> after_fns{P};  // the creator and the functions its calls after the spawn may run
       auto note_unknown = [&](uint32_t ci, const std::string& via) {
         const std::string t = call_pos(ci) + " in " + fname(calls_[ci].caller_fn) + via + " (" + (calls_[ci].kind == KZ_CALL_KIND_INDIRECT ? "indirect call, targets not resolved" : "?") + ")";
         if (std::find(unknown.begin(), unknown.end(), t) == unknown.end()) unknown.push_back(t);
@@ -1566,6 +1674,7 @@ class Rel {
           if (unresolved_sites_.count(c.site) != 0) note_unknown(cc->second, "");
           for (uint32_t g : call_runs(cc->second))
             for (uint32_t h : closure(g)) {
+              after_fns.insert(h);
               auto hc = calls_of_.find(h);
               if (hc != calls_of_.end())
                 for (uint32_t hci : hc->second)
@@ -1618,10 +1727,27 @@ class Rel {
       for (uint32_t ci : callers_[P]) pcalls.push_back(ci);
       auto pic = indirect_callers_.find(P);
       if (pic != indirect_callers_.end()) pcalls.insert(pcalls.end(), pic->second.begin(), pic->second.end());
+      // a call that passes P to a callee without a body: that callee may call P back during the call, and the function
+      // that makes the call runs on after it returns
+      auto pcb = callback_callers_.find(P);
+      if (pcb != callback_callers_.end()) pcalls.insert(pcalls.end(), pcb->second.begin(), pcb->second.end());
       std::set<uint32_t> pcallers;
       for (uint32_t ci : pcalls) pcallers.insert(calls_[ci].caller_fn);
       std::string pcallers_names;
       for (uint32_t q : pcallers) pcallers_names += (pcallers_names.empty() ? "" : ", ") + fname(q);
+      // the callers are not all known when P's address is taken and an indirect call the facts do not resolve exists
+      std::string pcallers_open;
+      if (P < funcs_.size() && (funcs_[P].flags & KZ_FUNC_FLAG_ADDRESS_TAKEN) != 0 && !unresolved_sites_.empty()) {
+        std::vector<std::string> sites;
+        for (uint32_t u : unresolved_sites_) {
+          auto uc = call_by_site_.find(u);
+          if (uc != call_by_site_.end()) sites.push_back(call_pos(uc->second) + " in " + fname(calls_[uc->second].caller_fn));
+          if (sites.size() == 8) break;
+        }
+        pcallers_open = fname(P) + " is address-taken and these facts have " + std::to_string(unresolved_sites_.size()) +
+                        " indirect call(s) whose targets are not resolved, so its callers are not all known (" + join(sites, "; ") +
+                        (unresolved_sites_.size() > sites.size() ? "; ..." : "") + ")";
+      }
       for (const std::string& tf : own_typed) {
         const std::string owner = owner_type(tf);
         const std::set<std::tuple<uint32_t, std::string, uint32_t, uint32_t>> covers = covers_of(tf);
@@ -1652,6 +1778,9 @@ class Rel {
         x.tf = tf;
         x.unknown = unknown;
         x.callers_names = pcallers_names;
+        x.callers_open = pcallers_open;
+        x.after_fns = after_fns;
+        x.spawn_ci = si;
         for (uint32_t q : pcallers) {
           auto qw = lockset_writes_of_.find(q);
           if (qw != lockset_writes_of_.end())
@@ -1670,13 +1799,13 @@ class Rel {
           const kz_fact_read& u = reads_[ri];
           if ((u.use & (KZ_READ_USE_BRANCH | KZ_READ_USE_RETURN | KZ_READ_USE_OUT_STORE)) == 0) continue;
           const std::set<uint32_t> ua = actor_set(u.fn);
-          bool in_child = false;
-          for (uint32_t a : ua)
-            if (child.count(a) != 0) in_child = true;
-          if (!in_child || u.fn == P) continue;
-          // the contexts of the read in the child: the read itself when it holds a static lock of its own; else the
-          // read run as the entry of a spawned thread (no caller lock), and each direct or indirect call of its
-          // function (a call the spawned entries do not reach gets no grade)
+          if (!runs_in(u.fn) || u.fn == P) continue;
+          // the contexts of the read in the threads of the spawn: the read itself when it holds a static lock of its
+          // own; else the read run as the entry of one of those threads (no caller lock), each direct or resolved indirect
+          // call of its function, each call that passes the function to a callee without a body (it may call it back
+          // under the locks of that call), and, when its address is taken, the indirect calls the facts do not resolve in
+          // code those threads run (no lock known: undecidable).  A call those threads do not reach gets no grade, or
+          // `undecidable` when the set of those threads is not complete.
           std::vector<Ctx> ctxs;
           auto lr = lockset_read_.find(ri);
           const uint32_t urow = lr == lockset_read_.end() ? kN : lr->second;
@@ -1687,21 +1816,44 @@ class Rel {
           if (own_static) {
             ctxs.push_back(Ctx{"the read itself", urow, kN, false, false});
           } else {
-            if (child.count(u.fn) != 0 || resolved.count(u.fn) != 0) ctxs.push_back(Ctx{"the read run as the entry of the spawned thread, under no lock of a caller", urow, kN, true, false});
-            std::vector<std::pair<uint32_t, bool>> calls;  // (call, indirect)
-            for (uint32_t ci : callers_[u.fn]) calls.push_back({ci, false});
+            if (threads.count(u.fn) != 0 || resolved.count(u.fn) != 0)
+              ctxs.push_back(Ctx{"the read run as the entry of the spawned thread, under no lock of a caller", urow, kN, true, false});
+            std::vector<std::pair<uint32_t, int>> calls;  // (call, 0 direct / 1 resolved indirect / 2 a callee without a body it is passed to)
+            for (uint32_t ci : callers_[u.fn]) calls.push_back({ci, 0});
             auto ic = indirect_callers_.find(u.fn);
             if (ic != indirect_callers_.end())
-              for (uint32_t ci : ic->second) calls.push_back({ci, true});
-            for (const auto& [ci, indirect] : calls) {
-              const std::set<uint32_t> ca = actor_set(calls_[ci].caller_fn);
-              bool cc = false;
-              for (uint32_t a : ca)
-                if (child.count(a) != 0) cc = true;
+              for (uint32_t ci : ic->second) calls.push_back({ci, 1});
+            auto cb = callback_callers_.find(u.fn);
+            if (cb != callback_callers_.end())
+              for (uint32_t ci : cb->second) calls.push_back({ci, 2});
+            for (const auto& [ci, how] : calls) {
+              const bool cc = runs_in(calls_[ci].caller_fn);
               auto cr = lockset_call_.find(calls_[ci].site);
-              ctxs.push_back(Ctx{std::string(indirect ? "via the indirect call " : "via the call ") + call_pos(ci) + " in " + fname(calls_[ci].caller_fn) +
-                                     (cc ? "" : "; the spawned entries do not reach this call"),
-                                 urow, cr == lockset_call_.end() ? kN : cr->second, false, !cc});
+              Ctx c{std::string(how == 1 ? "via the indirect call " : how == 2 ? "called back from the call " : "via the call ") + call_pos(ci) + " in " +
+                        fname(calls_[ci].caller_fn) + (how == 2 ? " of " + str(calls_[ci].callee) + ", a function without a body that receives " + fname(u.fn) : "") +
+                        (cc ? "" : "; the threads this spawn starts do not reach this call"),
+                    urow, cr == lockset_call_.end() ? kN : cr->second, false, !cc};
+              c.callback = how == 2;
+              ctxs.push_back(c);
+            }
+            // an indirect call the facts do not resolve, in code these threads run, may call the reading function when its
+            // address is taken: no lock of a caller is known
+            if (u.fn < funcs_.size() && (funcs_[u.fn].flags & KZ_FUNC_FLAG_ADDRESS_TAKEN) != 0) {
+              std::vector<std::string> open;
+              size_t n_open = 0;
+              for (uint32_t us : unresolved_sites_) {
+                auto uc = call_by_site_.find(us);
+                if (uc == call_by_site_.end() || !runs_in(calls_[uc->second].caller_fn)) continue;
+                ++n_open;
+                if (open.size() < 8) open.push_back(call_pos(uc->second) + " in " + fname(calls_[uc->second].caller_fn));
+              }
+              if (n_open != 0) {
+                Ctx c{"through an indirect call whose targets are not resolved (" + fname(u.fn) + " is address-taken): " + join(open, "; ") +
+                          (n_open > open.size() ? "; ... (" + std::to_string(n_open) + " calls)" : ""),
+                      urow, kN, false, false};
+                c.unresolved = true;
+                ctxs.push_back(c);
+              }
             }
             if (ctxs.empty()) ctxs.push_back(Ctx{"the read itself", urow, kN, false, false});
           }
@@ -1728,13 +1880,18 @@ class Rel {
             }
             ++n_c_;
             if (!self.empty()) ++n_c_self_;
-            if (cx.not_reached) ++not_reached_ctx;
+            if (cx.not_reached && cs.incomplete.empty()) ++not_reached_ctx;
+            if (cx.not_reached && !cs.incomplete.empty()) ++n_c_incomplete_ctx_;
+            if (cx.callback) ++n_c_callback_ctx_;
+            if (cx.unresolved) ++n_c_unresolved_ctx_;
             rows << "  C" << n_c_ << " spawn " << call_pos(si) << " in " << fname(P) << " -> " << fname(s.callee_fn == kN ? s.caller_fn : s.callee_fn) << "; field " << tf
                  << "; read " << pos(str(u.file), u.line, u.col) << " in " << fname(u.fn) << " (" << cx.where << ")" << (self.empty() ? "" : " self-identity") << "\n";
             rows << "      spawn: callee " << str(s.callee) << ", entries";
             for (uint32_t e : resolved) rows << " " << fname(e);
             rows << (image_spawn_.count(site) != 0 ? " (from the static image of the table the entry argument is read from)" : "");
-            rows << "; child actors " << actors_text(child) << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held << "\n";
+            rows << "; child actors " << actors_text(child);
+            if (!cs.descendants.empty()) rows << "; threads the child's code starts (descendants) " << actors_text(cs.descendants);
+            rows << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held << "\n";
             for (const WriteCtx& wc : wrows) {
               if (wc.spawn_arg != kN) {
                 auto aa = argflow_at_.find({site, wc.spawn_arg});
@@ -1778,12 +1935,28 @@ class Rel {
                  << "; that the two identities are equal is not decided statically\n";
             rows << "      run-order: no record given\n";
             std::string feas;
-            if (cx.not_reached) {
-              feas = "not graded: the spawned entries do not reach this call in the static actor sets, so this context is no read of the child; no grade is given from the "
-                     "locks at the call";
+            // the lock primitives of P0: a row that names a lock, and every grade the lock sets give, rest on their semantics
+            bool names_lock = s_held.compare(0, 2, "{}") != 0 || (cx.row != kN && !held(cx.row).empty()) || (cx.call_row != kN && !held(cx.call_row).empty());
+            for (const WriteCtx& wc : wrows)
+              if (wc.row != kN && (!held(wc.row).empty() || (wc.call_row != kN && !held(wc.call_row).empty()))) names_lock = true;
+            if (names_lock) note_lock_prims();
+            if (cx.not_reached && !cs.incomplete.empty()) {
+              feas = "undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set is not complete: " +
+                     join(cs.incomplete, "; ");
+              tally_feas("undecidable");
+            } else if (cx.not_reached) {
+              feas = "not graded: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, so this context is "
+                     "no read of theirs; no grade is given from the locks at the call";
               tally_feas("not-graded");
+            } else if (cx.unresolved) {
+              feas = "undecidable: an indirect call whose targets these facts do not resolve may call " + fname(u.fn) + " in code these threads run; the locks held there are not known";
+              note_lock_prims();
+              tally_feas("undecidable");
             } else {
-              feas = c_feasibility(lsit == lockset_call_.end() ? kN : lsit->second, wrows, cx, x);
+              CExtra xc = x;
+              xc.read_fn = u.fn;
+              xc.ctx_fn = cx.call_row != kN ? lockset_[cx.call_row].fn : kN;
+              feas = c_feasibility(lsit == lockset_call_.end() ? kN : lsit->second, wrows, cx, xc);
             }
             rows << "      feasibility: " << feas << "\n";
             rows << "      violation: " << violation_text() << "\n";
@@ -1794,12 +1967,49 @@ class Rel {
               int64_t iv = 0;
               std::string itext;
               const bool has_init = init_value(tf, &iv, &itext);
+              // the values of the writes after the spawn the feasibility column counts (the creator's, its callees', the
+              // record-wide and covering writes, the spawn operation's stores): a constant of a typed write (WRITERS), else
+              // not evaluated
               std::vector<std::pair<int64_t, std::string>> wvals;
-              auto wr = writers_of_.find(tf);
-              if (wr != writers_of_.end())
-                for (uint32_t i : wr->second)
-                  if (writers_[i].fn == P && writers_[i].value_kind == KZ_ARG_KIND_CONST) wvals.push_back({writers_[i].value, str(writers_[i].value_text)});
               std::set<std::string> unknown_vals;
+              const size_t n_unknown_before = unknown_vals.size();
+              auto wr = writers_of_.find(tf);
+              for (const WriteCtx& wc : wrows) {
+                if (wc.spawn_arg != kN) {
+                  // the store of the spawn operation through its argument: the out-pointer writer of the spawn call
+                  bool got = false;
+                  if (wr != writers_of_.end())
+                    for (uint32_t i : wr->second)
+                      if (writers_[i].kind == KZ_WRITER_KIND_OUTPTR && writers_[i].fn == P && writers_[i].line == s.line && str(writers_[i].file) == str(s.file) &&
+                          writers_[i].value_kind == KZ_ARG_KIND_CONST) {
+                        got = true;
+                        if (std::find(wvals.begin(), wvals.end(), std::make_pair(writers_[i].value, str(writers_[i].value_text))) == wvals.end())
+                          wvals.push_back({writers_[i].value, str(writers_[i].value_text)});
+                      }
+                  if (!got) unknown_vals.insert("the store of the spawn operation through arg " + std::to_string(wc.spawn_arg));
+                  continue;
+                }
+                const kz_fact_lockset& w = lockset_[wc.row];
+                const std::string at = pos(str(w.file), w.line, w.col);
+                if (!wc.how.empty()) {
+                  unknown_vals.insert(std::string(wc.how == "record" ? "the write of the whole record" : "the covering write") + " at " + at);
+                  continue;
+                }
+                bool found = false;
+                if (wr != writers_of_.end())
+                  for (uint32_t i : wr->second)
+                    if (writers_[i].fn == w.fn && writers_[i].line == w.line && str(writers_[i].file) == str(w.file)) {
+                      found = true;
+                      if (writers_[i].value_kind == KZ_ARG_KIND_CONST) {
+                        if (std::find(wvals.begin(), wvals.end(), std::make_pair(writers_[i].value, str(writers_[i].value_text))) == wvals.end())
+                          wvals.push_back({writers_[i].value, str(writers_[i].value_text)});
+                      } else {
+                        unknown_vals.insert("a value that is no constant at " + at);
+                      }
+                    }
+                if (!found) unknown_vals.insert("no WRITERS row of the write at " + at + " (not a target)");
+              }
+              const bool write_unknown = unknown_vals.size() != n_unknown_before;
               bool possible = false, any_unknown = false;
               std::string detail;
               for (const Check& ck : checks) {
@@ -1820,7 +2030,8 @@ class Rel {
                 }
                 if (!vi.known || wvals.empty()) any_unknown = true;
               }
-              if (wvals.empty()) unknown_vals.insert("no constant written value of " + tf + " in " + fname(P) + " (not a target, or not a constant)");
+              if (write_unknown) any_unknown = true;
+              if (wvals.empty()) unknown_vals.insert("no constant value among the writes of " + tf + " after the spawn");
               if (possible) {
                 grade = "static-possible";
                 why = detail;
@@ -1836,7 +2047,7 @@ class Rel {
             }
             tally_flip(grade);
             rows << "      flip: " << grade << ": " << why << "\n";
-            rows << "      layers: " << layers_text(true, uses_script_root(child) || uses_script_root(ua)) << "\n";
+            rows << "      layers: " << layers_text(true, uses_script_root(child) || uses_script_root(cs.descendants) || uses_script_root(ua)) << "\n";
           }
         }
       }
@@ -1850,7 +2061,10 @@ class Rel {
     os << "[C] " << n_c_ << " (spawn calls " << spawn_calls << ", with no resolved entry " << unresolved << ", with no event after them on their control-flow graph " << no_paths
        << "; fields written after a spawn only in the functions the creator calls, not paired in this revision: " << callee_only_fields
        << "; record types written whole after a spawn with no typed write of a field of theirs by the creator, not paired: " << record_only_fields
-       << "; read contexts through a call the spawned entries do not reach (rows with no grade): " << not_reached_ctx << ")\n"
+       << "; read contexts through a call the threads of the spawn (the child and the threads its code starts) do not reach (rows with no grade): " << not_reached_ctx
+       << ", such contexts of a spawn whose threads are not all resolved (undecidable): " << n_c_incomplete_ctx_
+       << "; contexts called back from a function without a body: " << n_c_callback_ctx_ << "; contexts through indirect calls the facts do not resolve: "
+       << n_c_unresolved_ctx_ << ")\n"
        << rows.str();
   }
   // the WRITERS rows of a field that are data functions on another field whose size may reach it (covers-more), by place
@@ -1870,16 +2084,25 @@ class Rel {
     if (defined(c.callee_fn)) t.insert(c.callee_fn);
     auto itg = itargets_.find(c.site);
     if (itg != itargets_.end()) t.insert(itg->second.begin(), itg->second.end());
+    const std::set<uint32_t> cb = callback_args(ci);
+    t.insert(cb.begin(), cb.end());
+    return t;
+  }
+  // the defined functions a call passes as arguments to a callee without a body that is no P0 entry (it may call them
+  // back during the call)
+  std::set<uint32_t> callback_args(uint32_t ci) const {
+    std::set<uint32_t> t;
+    const kz_fact_call& c = calls_[ci];
     const std::string callee = str(c.callee);
-    if (!defined(c.callee_fn) && c.kind != KZ_CALL_KIND_INDIRECT && p0_kind_.count(callee) == 0 && compare_names_.count(callee) == 0)
-      for (uint32_t k = 0; k < c.nargs; ++k) {
-        auto af = argflow_at_.find({c.site, k});
-        if (af == argflow_at_.end() || argflow_[af->second].src != KZ_ARGSRC_FUNCTION) continue;
-        auto fit = fn_by_name_.find(base_name(str(argflow_[af->second].root)));
-        if (fit != fn_by_name_.end())
-          for (uint32_t f : fit->second)
-            if (defined(f)) t.insert(f);
-      }
+    if (defined(c.callee_fn) || c.kind == KZ_CALL_KIND_INDIRECT || p0_kind_.count(callee) != 0 || compare_names_.count(callee) != 0) return t;
+    for (uint32_t k = 0; k < c.nargs; ++k) {
+      auto af = argflow_at_.find({c.site, k});
+      if (af == argflow_at_.end() || argflow_[af->second].src != KZ_ARGSRC_FUNCTION) continue;
+      auto fit = fn_by_name_.find(base_name(str(argflow_[af->second].root)));
+      if (fit != fn_by_name_.end())
+        for (uint32_t f : fit->second)
+          if (defined(f)) t.insert(f);
+    }
     return t;
   }
   // the functions a function may run (call_runs, transitively), itself included
@@ -1956,9 +2179,15 @@ class Rel {
   // writer set complete under the per-field rule (so the typed, record-wide and covering writes after the spawn are all
   // its writes, and an untyped store does not reach it under that rule), no call after the spawn whose targets are not
   // resolved, and no write of the field in the creator's callers' own bodies.  Its scope is one call of the creator (ED
-  // §3.3 item 3): what the callers run after it returns is not read beyond their own bodies.
+  // §3.3 item 3): what the callers run after it returns is not read beyond their own bodies.  Revision 4 adds: the
+  // callers include the calls that pass the creator to a function without a body, and they are not all known (so
+  // `undecidable`) when the creator is address-taken and an indirect call is not resolved; no function whose lock sets the
+  // verdict reads calls a function that returns twice; the claim names the keys of the writes it concerns and, for a
+  // derived spawn operation, that a path on which the operation reports failure after its thread started is not covered;
+  // and it names the premises of path C (static_facts §5h).
   std::string c_feasibility(uint32_t s_row, const std::vector<WriteCtx>& w_rows, const Ctx& cx, const CExtra& x) {
     std::string grade, text;
+    note_lock_prims();  // every grade here is read from the lock sets
     const uint32_t u_row = cx.row, call_row = cx.call_row;
     auto fail = [&](uint32_t row) { return row != kN && (lockset_[row].flags & KZ_LOCKSET_FLAG_FAILURE_PATH) != 0; };
     std::set<uint32_t> hu;
@@ -2044,11 +2273,29 @@ class Rel {
         const std::string held_how = "lock " + lock_text(proven) + " is held from the same acquisition across the spawn and every write of " + x.tf + " after it in this call of " +
                                      fname(x.creator) + ", that acquisition is not reached again after the spawn, and the read holds it";
         auto fs = fstatus_of_.find(x.tf);
+        // the functions whose lock sets this verdict reads that call a function returning twice
+        std::vector<std::string> twice;
+        std::set<uint32_t> fns = x.after_fns;
+        fns.insert(x.creator);
+        if (x.read_fn != kN) fns.insert(x.read_fn);
+        if (x.ctx_fn != kN) fns.insert(x.ctx_fn);
+        for (uint32_t f : fns) {
+          auto rt = returns_twice_.find(f);
+          if (rt != returns_twice_.end())
+            for (uint32_t ci : rt->second) twice.push_back(call_pos(ci) + " " + str(calls_[ci].callee) + " in " + fname(f));
+        }
         if (fs == fstatus_of_.end() || fstatus_[fs->second].status_field != KZ_LOC_STATUS_COMPLETE) {
           grade = "undecidable";
           text = held_how + "; but the writer set of " + x.tf + " is not complete under the per-field rule (FIELD_STATUS " +
                  (fs == fstatus_of_.end() ? std::string("has no row") : "per-field " + enum_text("KZ_LOC_STATUS", fstatus_[fs->second].status_field)) +
+                 (fs != fstatus_of_.end() && (fstatus_[fs->second].flags & KZ_FSTATUS_FLAG_ARRAY_ELEMENTS) != 0
+                      ? "; an array field: a store to one of its elements makes no writer row in these facts"
+                      : "") +
                  "), so the writes after the spawn are not known to be all its writes";
+        } else if (!twice.empty()) {
+          grade = "undecidable";
+          text = held_how + "; but " + join(twice, "; ") +
+                 " returns twice: a non-local jump back to it runs code in an order and under locks the control-flow graph does not have";
         } else if (writers_of_.count(x.tf) == 0 && fstatus_[fs->second].n_data_fn != 0) {
           grade = "undecidable";
           text = held_how + "; but " + x.tf + " has " + std::to_string(fstatus_[fs->second].n_data_fn) +
@@ -2059,6 +2306,9 @@ class Rel {
         } else if (!x.callers.empty()) {
           grade = "undecidable";
           text = held_how + "; but the callers of " + fname(x.creator) + " write " + x.tf + " in their own bodies, and their order to its return is not in these facts: " + join(x.callers, "; ");
+        } else if (!x.callers_open.empty()) {
+          grade = "undecidable";
+          text = held_how + "; but " + x.callers_open + ": a caller may write " + x.tf + " after it returns";
         } else {
           grade = "proven-impossible";
           text = held_how + ": the read cannot fall between them.  Scope: one call of " + fname(x.creator) +
@@ -2068,12 +2318,31 @@ class Rel {
                  " is writer-set-complete under the per-field rule (an untyped store does not reach it under that rule); the callers of " + fname(x.creator) + " (" +
                  (x.callers_names.empty() ? std::string("none in these facts") : x.callers_names) +
                  ") write it nowhere in their own bodies; what their callees and their own callers run after it returns is not read";
+          // what the claim is about: the writes of this call, on the paths that run them
+          std::set<std::string> keys;
+          auto wr = writers_of_.find(x.tf);
+          for (const WriteCtx& wc : w_rows)
+            if (wc.row != kN && wc.how.empty() && wr != writers_of_.end())
+              for (uint32_t i : wr->second)
+                if (writers_[i].fn == lockset_[wc.row].fn && writers_[i].line == lockset_[wc.row].line && str(writers_[i].file) == str(lockset_[wc.row].file))
+                  keys.insert(str(writers_[i].key));
+          text += "; it concerns the writes of this call: whether their keys (" + (keys.empty() ? std::string("not in WRITERS") : join(std::vector<std::string>(keys.begin(), keys.end()), "; ")) +
+                  ") name the record of the child this call starts, and not one another call registers, is not decided";
+          if (x.spawn_ci != kN && defined(calls_[x.spawn_ci].callee_fn))
+            text += "; it covers the paths on which those writes run: where the spawn operation " + fname(calls_[x.spawn_ci].callee_fn) +
+                    " reports a failure after its thread has started and the creator skips them, the child may read the earlier value (not read in this revision)";
+          tag("premises of path C (static_facts §5h: lock identities overlap as their access paths show; functions without a body call back only the functions "
+              "passed to them; returns-twice calls by name)");
           std::string on;
           for (const char* a : {"assume.lock_acquisition_succeeds", "assume.static_instance_read_after_write", "assume.no_cross_member_pointer_arithmetic"})
             if (assumptions_.count(a) != 0) on += std::string(on.empty() ? "" : ", ") + a;
           on += std::string(on.empty() ? "" : ", ") + "the per-field completeness rule of FIELD_STATUS that makes " + lock_text(proven) + " a static instance and " + x.tf +
                 " complete (PI decision pending)";
           if (proven < lockids_.size() && (lockids_[proven].flags & KZ_LOCKID_FLAG_TYPE_EXPOSED) != 0) on += "; under the type-level rule the lock is no static instance";
+          on += "; and the premises of path C (static_facts §5h): two lock identities name one mutex only as their access paths may overlap (the same global "
+                "object with one path a prefix of the other or two members of one union, a pointer path aligned on a record type the other path names), a function "
+                "without a body has no lock effect and calls back only the functions passed to it in that call, and a function returns twice only by the names "
+                "of the C library list";
           text += "; rests on " + on;
         }
         note_lock_prims();
@@ -2347,7 +2616,7 @@ class Rel {
         if (p.idx_n != 0) kv.text += ", elements from " + std::to_string(p.elem) + " step " + std::to_string(p.idx_step) + " count " + std::to_string(p.idx_n);
         // the image of the object, at the elements the reader's index takes
         auto git = gimages_of_.find(base_name(object));
-        bool written = false;
+        uint16_t written = 0;
         if (git != gimages_of_.end()) {
           std::set<int64_t> elems;
           if (p.idx_n != 0)
@@ -2367,17 +2636,24 @@ class Rel {
             kv.text += "; image " + base_name(object) + path + " = " + val;
             const std::string macro = str(g.macro);
             if (!macro.empty()) kv.text += " (macro " + macro + ", spelled at " + pos(str(g.spell_file), g.spell_line, g.spell_col) + ")";
-            if (g.flags & (KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN)) {
-              kv.text += " (" + written_flags(g.flags & (KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN)) + ")";
-              written = true;
+            const uint16_t wf = g.flags & (KZ_GIMAGE_FLAG_OBJECT_WRITTEN | KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN);
+            if (wf != 0) {
+              kv.text += " (" + written_flags(wf) + ")";
+              written |= wf;
             }
           }
         }
-        if (written) {
-          // the image is not the run-time value: no exclusion and no flip rests on it
-          kv.status = "unresolved";
-          kv.text += "; unresolved (image, field written at run time)";
-          return kv;
+        // the image is the run-time value only under the rule of the static-image entries; otherwise no exclusion and no
+        // flip rests on it
+        if (!kv.values.empty()) {
+          const std::string why = image_value_why(str(a.type), field, written);
+          if (!why.empty()) {
+            kv.status = "unresolved";
+            kv.text += written & (KZ_GIMAGE_FLAG_FIELD_WRITTEN | KZ_GIMAGE_FLAG_RECORD_WRITTEN) ? "; unresolved (image, field written at run time)"
+                       : written != 0                                                         ? "; unresolved (image, object written at run time)"
+                                                                                                : "; unresolved (image, not taken as the run-time value: " + why + ")";
+            return kv;
+          }
         }
         kv.status = kv.values.empty() ? "unresolved" : "known";
         if (kv.values.empty()) kv.text += "; no image leaf of the field";
@@ -3074,6 +3350,10 @@ class Rel {
   std::set<std::string> p0_unverified_, lock_prims_;
   std::map<uint32_t, std::set<std::string>> script_prim_;  // script entry -> the P0 symbol lookup it is resolved through
   std::map<uint32_t, std::set<uint32_t>> closure_;
+  std::map<uint32_t, std::vector<uint32_t>> callback_callers_;  // function -> calls that pass it to a callee without a body
+  std::map<uint32_t, std::vector<uint32_t>> returns_twice_;     // function -> its calls of a function that returns twice
+  std::map<uint32_t, ChildSet> child_sets_;  // spawn site -> its child set
+  uint32_t n_c_incomplete_ctx_ = 0, n_c_descendant_ctx_ = 0, n_c_callback_ctx_ = 0, n_c_unresolved_ctx_ = 0;
   std::vector<std::string> deviations_;
   std::map<std::string, std::set<std::string>> deviation_files_;
   std::set<std::string> assumptions_;

@@ -50,10 +50,95 @@ bool has_kind(const LockId& id, uint8_t k) {
   return has_kind(id->a, k) || has_kind(id->b, k);
 }
 
+// The access path of an identity `&lv` (ADDR): the root (a global object, or "" for a pointer or anything else) and the
+// steps from it (a FIELD with its name, the record type that declares it and whether that is a union; an INDEX).
+struct PathStep {
+  bool index = false;
+  std::string name, owner, rtype;  // FIELD: "Type.field", the declaring record type, the record type it designates
+  bool union_member = false;
+};
+struct LockPath {
+  bool global = false;
+  std::string root, root_rtype;
+  std::vector<PathStep> steps;
+};
+bool lock_path(const LockId& lv, LockPath* p) {
+  if (!lv) return false;
+  switch (lv->k) {
+    case N::GLOBAL:
+      p->global = true;
+      p->root = lv->name;
+      p->root_rtype = lv->rtype;
+      return true;
+    case N::FIELD: {
+      if (!lock_path(lv->a, p)) return false;
+      PathStep st;
+      st.name = lv->name;
+      st.owner = lv->owner;
+      st.rtype = lv->rtype;
+      st.union_member = lv->v == kLockFieldUnionMember;
+      p->steps.push_back(st);
+      return true;
+    }
+    case N::INDEX: {
+      if (!lock_path(lv->a, p)) return false;
+      PathStep st;
+      st.index = true;
+      p->steps.push_back(st);
+      return true;
+    }
+    default:
+      // a pointer (DEREF of a value) or anything else: the root is unknown, the steps start here
+      p->global = false;
+      p->root.clear();
+      return true;
+  }
+}
+// From step i of x and step j of y on (the same object), whether the two lvalues may share storage: a step past the end
+// of one is a part of the other (the object itself, its first member: a prefix); two members of one union overlap;
+// two different members of a structure do not; subscripts are not compared.
+bool aligned_overlap(const std::vector<PathStep>& x, size_t i, const std::vector<PathStep>& y, size_t j) {
+  for (; i < x.size() && j < y.size(); ++i, ++j) {
+    if (x[i].index && y[j].index) continue;
+    if (x[i].index != y[j].index) return true;
+    if (x[i].name == y[j].name) continue;
+    return x[i].union_member && y[j].union_member && x[i].owner == y[j].owner;
+  }
+  return true;
+}
+// A path through a pointer (root unknown) against another: its first member names the record type T the pointer
+// points to; it may point to any object of type T on the other path (the root object, or the object a step designates
+// or whose member a step names).  A pointer to a record type the other path does not name is taken as another object
+// (the premise of these facts, static_facts §5h).
+bool pointer_overlap(const LockPath& ptr, const LockPath& other) {
+  size_t j = 0;
+  while (j < ptr.steps.size() && ptr.steps[j].index) ++j;
+  if (j == ptr.steps.size()) return true;  // the pointer itself, or its elements: any object
+  const std::string& t = ptr.steps[j].owner;
+  if (t.empty()) return true;
+  std::vector<std::string> obj;  // the record type of the object after k steps of `other`
+  obj.push_back(other.root_rtype);
+  for (const PathStep& st : other.steps) obj.push_back(st.index ? obj.back() : st.rtype);
+  for (size_t k = 0; k <= other.steps.size(); ++k) {
+    const bool here = obj[k] == t || (k < other.steps.size() && !other.steps[k].index && other.steps[k].owner == t);
+    if (here && aligned_overlap(ptr.steps, j, other.steps, k)) return true;
+  }
+  return false;
+}
+// Whether two identities may name one mutex, for the locks a release drops: the same text; an identity that is no
+// address (a parameter, a loaded value: anything); the same field-based location (`may`); or overlapping access paths
+// (the same global object with one path a prefix of the other or two members of one union; a pointer path aligned on the
+// record type it names).  Two different global objects do not overlap.
 bool may_equal(const LockId& x, const std::string& tx, const LockId& y, const std::string& ty) {
   if (tx == ty) return true;
   const std::string mx = lock_id_may(x), my = lock_id_may(y);
-  return mx.empty() || my.empty() || mx == my;
+  if (mx.empty() || my.empty() || mx == my) return true;
+  LockPath px, py;
+  if (!lock_path(x->a, &px) || !lock_path(y->a, &py)) return true;
+  if (px.global && py.global) return px.root == py.root && aligned_overlap(px.steps, 0, py.steps, 0);
+  if (!px.global && pointer_overlap(px, py)) return true;
+  if (!py.global && pointer_overlap(py, px)) return true;
+  return false;
 }
 
 // Strongly connected components of a graph over its nodes, callees first (completion order of Tarjan).
@@ -394,7 +479,10 @@ LockId lock_id_subst(const LockId& id, const std::vector<LockId>& args) {
     default: break;
   }
   if (a == id->a && b == id->b) return id;
-  return mk(id->k, id->v, id->name, a, b);
+  auto n = std::make_shared<LockIdNode>(*id);
+  n->a = a;
+  n->b = b;
+  return n;
 }
 
 std::string lock_id_may(const LockId& id) {
@@ -473,6 +561,12 @@ void field_status_from(const Model& pass, const Model& m, FieldStatusTable* out)
     const uint32_t own = r.own_cast + r.own_union + r.own_escape + r.own_unknown;
     r.status_field = own > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
     r.status_type = (own > 0 || (r.sibling_hits > 0 && untyped > 0)) ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
+    // an array field whose elements are not const: a store to one element makes no writer row (the writer collection
+    // reads typed stores of a field, not of its elements), so its writer set is not known to be complete
+    if (m.array_fields.count(r.type + "." + r.field) != 0) {
+      r.flags |= KZ_FSTATUS_FLAG_ARRAY_ELEMENTS;
+      r.status_field = r.status_type = KZ_LOC_STATUS_DISABLED;
+    }
     out->rows[{r.type, r.field}] = r;
   }
   // writer instances
@@ -896,6 +990,9 @@ class Analysis {
     for (const std::vector<LockId>* v : {&e.rel, &e.rel_may})
       for (const LockId& x : *v)
         if (s->held.count(lock_id_text(x)) == 0) touches = true;
+    // a condition wait on a lock the function does not hold releases the caller's lock while it waits
+    for (const LockId& x : e.wait)
+      if (s->held.count(lock_id_text(x)) == 0) touches = true;
     if (touches && (s->touched.empty() || g_touched_before(ck, s->touched))) s->touched = ck;
     if (e.unknown) {
       if (!s->held.empty()) s->unknown_release = true;

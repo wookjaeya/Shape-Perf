@@ -542,7 +542,13 @@ struct LockIdNode {
   int64_t v = 0;     // PARAM: the index; CONST: the value
   std::string name;  // GLOBAL: the object key; FIELD: "Type.field"; UNKNOWN: why
   LockId a, b;       // FIELD, DEREF, ADDR, LOAD: a; INDEX: a the base, b the subscript
+  // For the overlap of two identities (lockset.cpp): GLOBAL and FIELD: the record type of the object the lvalue
+  // designates (arrays stripped; "" when it is no record); FIELD: `owner` the record type that declares the field, and
+  // `v` 1 when that record is a union (its members share their storage).  Not part of the text of an identity.
+  std::string rtype, owner;
 };
+// The flag of a FIELD node whose owner is a union.
+constexpr int64_t kLockFieldUnionMember = 1;
 // The control-flow graph of a body as the lock-set analysis reads it: per block the events in evaluation
 // order, the two successors of a two-way branch with its test, and the return statements.
 struct LockEvent {
@@ -715,6 +721,9 @@ struct Model {
   std::map<std::string, std::vector<LockId>> call_arg_idents;      // call key -> identity per argument
   std::vector<WriteSite> write_sites;
   std::map<std::string, std::vector<std::string>> record_fields;   // owner type -> its fields, in order
+  // "Type.field" of the fields of those record types whose type is an array of scalars that are not const: a store to
+  // one element (x.f[i] = v) makes no writer row in these facts (FIELD_STATUS does not call such a field complete)
+  std::set<std::string> array_fields;
   std::vector<ATypeFact> atypes_raw;                               // before the untyped expansion
   std::vector<LockOpFact> lock_ops;
   std::vector<LockIdFact> lock_ids;
@@ -790,6 +799,9 @@ struct Model {
     // initializer (kInitBudget nodes; the objects, and those with no leaf read when it stopped), and the nesting of a
     // static initializer read for stored function values (kFpInitDepth levels)
     uint32_t init_budget_out = 0, init_budget_out_no_leaf = 0, fp_init_depth_cut = 0;
+    // the expression trees read from the source (FACT_EXPRS): subexpressions deeper than kExprDepth levels, each a
+    // node top "too deep" (every mode; reported with the extended facts)
+    uint32_t expr_depth_cut = 0;
   } stats;
 
   // Filled by finalize(): indices and the numbers of the report.

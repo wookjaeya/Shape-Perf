@@ -1636,7 +1636,7 @@ KZ_FACTS_RECORDS(KZ_RECORD)
 #define KZ_ENUM_FSTATUS_FLAGS(ITEM, P) /* set */                                     \
   ITEM(P, SIBLING_EXPOSED, 0x1, "sibling-exposed") ITEM(P, UNTYPED_IN_PROGRAM, 0x2, "untyped-in-program") \
   ITEM(P, WRITER_IN_LOOP, 0x4, "writer-in-loop") ITEM(P, WRITER_NOT_ONCE, 0x8, "writer-function-not-once") \
-  ITEM(P, SEVERAL_INSTANCES, 0x10, "several-instances")
+  ITEM(P, SEVERAL_INSTANCES, 0x10, "several-instances") ITEM(P, ARRAY_ELEMENTS, 0x20, "array-element-stores-not-collected")
 
 /* AWAIT_L1 (revision 8). */
 #define KZ_ENUM_AWAIT_READ(ITEM, P)                                                  \

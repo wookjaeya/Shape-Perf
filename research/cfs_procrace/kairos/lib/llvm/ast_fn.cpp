@@ -378,9 +378,15 @@ class FnWalker {
   bool is_null_const(const Expr* e) { return e->isNullPointerConstant(ctx_, Expr::NPC_ValueDependentIsNotNull) != Expr::NPCK_NotNull; }
 
   // ---- expression trees ----
+  // The depth of an expression tree read from the source (a tool parameter no reference fixes: unspecified_by_reference;
+  // BASIS param.walk_bounds, the subexpressions cut there are counted, count.walk_bounds_hit).
+  static constexpr int kExprDepth = 24;
   ExprRef to_expr(const Expr* e, int depth = 0) {
     if (e == nullptr) return pool().top("null");
-    if (depth > 24) return pool().top("too deep");
+    if (depth > kExprDepth) {
+      ++m_.stats.expr_depth_cut;
+      return pool().top("too deep");
+    }
     e = e->IgnoreParens();
     int64_t c = 0;
     if (!isa<CallExpr>(e) && tu_.eval_int(e->IgnoreParenCasts(), &c)) return pool().constant(c);
@@ -3048,7 +3054,16 @@ class FnWalker {
       if (m_.record_fields.count(r.type) == 0) {
         std::vector<std::string>& names = m_.record_fields[r.type];
         for (const FieldDecl* f : fl->getParent()->fields())
-          if (!f->getName().empty()) names.push_back(f->getNameAsString());
+          if (!f->getName().empty()) {
+            names.push_back(f->getNameAsString());
+            // an array of scalars that are not const: a store to one element makes no writer row (a store to a member
+            // of an element of an array of records is a write of that member, an assignment of a whole element a write
+            // of the record)
+            if (ctx_.getAsArrayType(f->getType()) != nullptr) {
+              const QualType et = ctx_.getBaseElementType(f->getType());
+              if (!et.isConstQualified() && !et->isRecordType()) m_.array_fields.insert(r.type + "." + f->getNameAsString());
+            }
+          }
       }
       // the root of the access path, and the subscripts on the way
       const Expr* cur = me;
@@ -4130,14 +4145,23 @@ class FnWalker {
 
 
   // ---- F5 (spec.extended_facts): the identity of a call argument as a lock (model.hpp LockIdNode) ----
-  static LockId lnode(uint8_t k, int64_t v, const std::string& name, LockId a = nullptr, LockId b = nullptr) {
+  static LockId lnode(uint8_t k, int64_t v, const std::string& name, LockId a = nullptr, LockId b = nullptr, const std::string& rtype = "",
+                      const std::string& owner = "") {
     auto n = std::make_shared<LockIdNode>();
     n->k = k;
     n->v = v;
     n->name = name;
     n->a = std::move(a);
     n->b = std::move(b);
+    n->rtype = rtype;
+    n->owner = owner;
     return n;
+  }
+  // The record type of the objects of a type (arrays stripped), or "" when they are no records.
+  std::string lock_rtype(QualType t) {
+    const QualType b = ctx_.getBaseElementType(t).getCanonicalType();
+    const RecordType* rt = b->getAs<RecordType>();
+    return rt == nullptr ? std::string() : tu_.record_name(rt->getDecl());
   }
   static LockId lunknown(const std::string& why) { return lnode(LockIdNode::UNKNOWN, 0, why); }
   // An unknown part stays a node of its own, so that the rest of the expression (the field the mutex is,
@@ -4195,14 +4219,16 @@ class FnWalker {
     e = e->IgnoreParens();
     if (const auto* ic = dyn_cast<ImplicitCastExpr>(e); ic != nullptr && ic->getCastKind() == CK_NoOp) return ident_lvalue(ic->getSubExpr(), seen);
     if (const auto* d = dyn_cast<DeclRefExpr>(e)) {
-      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage()) return lnode(LockIdNode::GLOBAL, 0, tu_.object_key(vd));
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage())
+        return lnode(LockIdNode::GLOBAL, 0, tu_.object_key(vd), nullptr, nullptr, lock_rtype(vd->getType()));
       return lunknown("a local object");
     }
     if (const auto* me = dyn_cast<MemberExpr>(e)) {
       const auto* fl = dyn_cast<FieldDecl>(me->getMemberDecl());
       if (fl == nullptr) return lunknown("a member");
       const LockId base = me->isArrow() ? lderef(ident_value(me->getBase(), seen)) : ident_lvalue(me->getBase(), seen);
-      return lnode(LockIdNode::FIELD, 0, field_type_name(fl) + "." + fl->getNameAsString(), base);
+      return lnode(LockIdNode::FIELD, fl->getParent()->isUnion() ? kLockFieldUnionMember : 0, field_type_name(fl) + "." + fl->getNameAsString(), base, nullptr,
+                   lock_rtype(fl->getType()), tu_.record_name(fl->getParent()));
     }
     if (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
       const LockId bv = ident_value(as->getBase(), seen);

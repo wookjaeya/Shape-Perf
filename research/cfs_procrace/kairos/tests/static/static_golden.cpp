@@ -51,6 +51,8 @@ const std::vector<std::string> kFlowSections = {"functions", "argflow", "paramfl
 const std::vector<std::string> kLockSections = {"functions", "lockops", "lockids", "lockset", "fstatus", "awaits"};
 // `kz-static relations` (with the rule targets in the profile-free mode): the targets and their writers.
 const std::vector<std::string> kRelationSections = {"functions", "writers", "locs"};
+// The order and entry-path facts of the F5 events (LOCK_PATHS, written with those of F1-F3).
+const std::vector<std::string> kPathSections = {"functions", "lockpaths"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -73,6 +75,8 @@ const std::vector<Case>& cases() {
       {"lockset_np", "lockset.c", {}, kLockSections, true},
       {"relations", "relations.c", {"--extended-facts"}, kRelationSections, false, true},
       {"relations_np", "relations.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
+      {"lockpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true},
+      {"relpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
   };
   return all;
 }

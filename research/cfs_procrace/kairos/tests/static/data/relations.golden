@@ -41,13 +41,17 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 1 (2026-10-30)
+rules relations rules revision 2 (2026-10-30)
 mode profile-driven
   extract.profile = static-fixtures / test data
-p0-compare P0 comparison table revision 1 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
 layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (profile vocabulary), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules); case layer: the profile static-fixtures / test data
 run order: no record given (this revision reads no run record; the column says so in every row)
-actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, script-entry 0), trampolines 0
+actors: roots 1 (process 1, spawn-entry 0, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 0 (self-identity reads 0); flip static-possible 1, static-undetermined 1, none 1; feasibility proven-impossible 0, possible 0, undecidable 3
 [A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Slot.name (record type Slot; tables slots)
@@ -63,6 +67,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       publication writes of the creator slot_create#0: Slot.name write relations.c:53:7 in slot_create; Slot.used write relations.c:54:7 in slot_create
       key-parameter functions: lookups slot_find#0; creators slot_create#0
       uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+      namespace layers: B P0 R case:profile(static-fixtures / test data)
   A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
       key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
       actors: {main (process)}; result=tested
@@ -105,4 +110,4 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-undetermined: the check is not evaluated: a written value that is not a constant
       layers: B P0 R case:profile(static-fixtures / test data)
-[C] 0 (spawn calls 0, with no resolved entry 0)
+[C] 0 (spawn calls 0, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 0)

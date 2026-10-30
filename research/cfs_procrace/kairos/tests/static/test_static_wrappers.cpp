@@ -125,6 +125,39 @@ void test_table() {
                         "sem_post", "pthread_cond_wait", "pthread_cond_timedwait", "pthread_cond_signal", "pthread_cond_broadcast", "clock_nanosleep", "nanosleep", "pthread_exit",
                         "exit", "_exit", "abort", "pthread_self", "pthread_getspecific", "pthread_setspecific", "dlopen", "dlsym"})
     KZ_CHECK(names.count(n) == 1);
+  // revision 2: the families listed whole (C11 <threads.h>, the *_clock* members, spin locks, key creation, cleanup
+  // handlers); the read-write locks are left out whole and named in the scope
+  for (const char* n : {"thrd_create", "pthread_mutex_clocklock", "mtx_lock", "mtx_trylock", "mtx_timedlock", "mtx_unlock", "pthread_spin_lock", "pthread_spin_trylock",
+                        "pthread_spin_unlock", "sem_clockwait", "pthread_cond_clockwait", "cnd_wait", "cnd_timedwait", "cnd_signal", "cnd_broadcast", "usleep", "thrd_sleep",
+                        "thrd_exit", "quick_exit", "__assert_fail", "__assert_perror_fail", "thrd_current", "tss_get", "tss_set", "pthread_key_create", "pthread_key_delete",
+                        "tss_create", "tss_delete", "__pthread_register_cancel", "__pthread_register_cancel_defer", "__pthread_unregister_cancel",
+                        "__pthread_unregister_cancel_restore", "dlmopen", "dlvsym"})
+    KZ_CHECK(names.count(n) == 1);
+  for (const P0Entry& e : p0_table()) KZ_CHECK(std::string(e.name).compare(0, 15, "pthread_rwlock_") != 0);
+  KZ_CHECK(std::string(p0_table_revision()).find("revision 2") != std::string::npos);
+  KZ_CHECK(std::string(p0_table_scope()).find("read-write locks (pthread_rwlock_*") != std::string::npos);
+  for (const P0Entry& e : p0_table()) {
+    if (std::string(e.name) == "thrd_create") {
+      KZ_CHECK_EQ(e.kind, static_cast<uint8_t>(KZ_P0_KIND_THREAD_CREATE));
+      KZ_CHECK_EQ(e.out, 0);
+      KZ_CHECK_EQ(e.entry, 1);
+      KZ_CHECK_EQ(e.arg, 2);
+    }
+    if (std::string(e.name) == "pthread_key_create") {
+      KZ_CHECK_EQ(e.kind, static_cast<uint8_t>(KZ_P0_KIND_TSD_KEY_CREATE));
+      KZ_CHECK_EQ(e.out, 0);
+      KZ_CHECK_EQ(e.entry, 1);
+    }
+    if (std::string(e.name) == "cnd_wait") KZ_CHECK_EQ(e.mutex, 1);
+    if (std::string(e.name) == "pthread_mutex_clocklock") KZ_CHECK(e.conditional && e.mutex == 0);
+  }
+  std::set<std::string> cmp;
+  for (const P0CompareEntry& e : p0_compare_table()) KZ_CHECK(cmp.insert(e.name).second);
+  for (const char* n : {"memcmp", "bcmp", "strcmp", "strncmp", "strcoll", "strcoll_l", "strcasecmp", "strncasecmp", "strcasecmp_l", "strncasecmp_l", "strverscmp", "pthread_equal",
+                        "thrd_equal"})
+    KZ_CHECK(cmp.count(n) == 1);
+  KZ_CHECK(std::string(p0_compare_table_revision()).find("revision 2") != std::string::npos);
+  KZ_CHECK(std::string(p0_compare_table_scope()).find("wide-character comparison") != std::string::npos);
   const P0Entry& pc = p0_table()[0];
   KZ_CHECK_EQ(std::string(pc.name), std::string("pthread_create"));
   KZ_CHECK_EQ(pc.out, 0);

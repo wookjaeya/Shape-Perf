@@ -10,9 +10,9 @@ extract
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        1 in the program, 0 of them count for a target
   unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
-  hand-entered inputs        38 (built-in P0 table 38, command line 0)
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
-profile-free mode            built-in profile, 38 P0 entries (P0 table revision 1 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 2 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   first pass                 functions with a body 20, control-flow graphs 20, call-graph components 20 (recursive 0)
   delay operations (F8)      must 1 (vocabulary), may 3 (not vocabulary; loops whose own body calls one: 0)
   terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)

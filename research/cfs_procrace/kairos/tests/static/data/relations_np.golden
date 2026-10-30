@@ -17,9 +17,9 @@ extract
   location TaskRec.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
   location TaskRec.registered   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
   location Worker.handle   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
-  hand-entered inputs        38 (built-in P0 table 38, command line 0)
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
-profile-free mode            built-in profile, 38 P0 entries (P0 table revision 1 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 2 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   first pass                 functions with a body 14, control-flow graphs 14, call-graph components 14 (recursive 0)
   delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
   terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
@@ -68,17 +68,22 @@ facts-view 1
 
 # relations
 kz-relations 1
-rules relations rules revision 1 (2026-10-30)
+rules relations rules revision 2 (2026-10-30)
 mode profile-free
   extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
   extract.profile = kz-static-builtin-minimal / 
-  extract.p0_table = P0 table revision 1 (2026-10-30), 38 entries
+  extract.p0_table = P0 table revision 2 (2026-10-30), 72 entries
+  extract.p0_table_scope = families listed whole: thread creation, mutex and spin lock, semaphore, condition variable, sleep, termination of the calling thread or process, thread identity, thread-specific data, cleanup handlers, dynamic loading (open and symbol lookup), data functions; with the ISO C11 <threads.h> members of those families and the glibc 2.39 *_clock* members.  Not in this revision: read-write locks (pthread_rwlock_*; their shared acquisitions are not read by the lock-set analysis, so the family is left out whole and its acquisitions are no lock operations), barriers (pthread_barrier_*), one-time initialization (pthread_once, call_once), thread cancellation of another thread (pthread_cancel and the cancellation state functions), signals (kill, raise, pthread_kill, sigwait), dlclose, dlerror and dladdr, and functions a compiler or a fortify wrapper calls without a call in the source (__stack_chk_fail, __chk_fail and the *_chk functions)
   extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
-p0-compare P0 comparison table revision 1 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified)
+p0-compare P0 comparison table revision 2 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp_l (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) bcmp (byte-string comparison; glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified) strverscmp (byte-string comparison; glibc 2.39 (GNU); not in POSIX.1-2017; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified) thrd_equal (thread-id comparison; ISO C11 <threads.h> / glibc 2.39; source unverified)
+p0-compare scope: families listed whole: byte-string comparison (<string.h>, <strings.h>, with the locale _l members, bcmp and strverscmp), thread-id comparison (pthread_equal, thrd_equal).  Not in this revision: wide-character comparison (wcscmp, wcsncmp, wcscoll, wcscasecmp, wcsncasecmp, wmemcmp and their _l members) and __memcmpeq (called by a compiler without a call in the source)
+basis deviations copied into these facts: 0 (a row that names a position in a unit with its own deviation says so in its layers column)
 layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules)
 run order: no record given (this revision reads no run record; the column says so in every row)
-actors: roots 5 (process 1, spawn-entry 4, table-walk-entry 0, script-entry 0), trampolines 0
+actors: roots 5 (process 1, spawn-entry 4, table-walk-entry 0, table-image-entry 0, script-entry 0), trampolines 0; roots that enter other roots and stay actors: through a direct call 0, with a shared access of their own body 0
+spawn calls resolved through the static image of the table their entry argument is read from: 0
+spawn calls with no resolved entry (their threads are no actors here; the code only they reach has the actors of its other callers): 0
 summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 2 (self-identity reads 2); flip static-possible 4, static-undetermined 0, none 1; feasibility proven-impossible 1, possible 1, undecidable 3
 [A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
   namespace Slot.name (record type Slot; tables slots)
@@ -94,6 +99,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       publication writes of the creator slot_create#0: Slot.name memcpy relations.c:53:7 in slot_create; Slot.used assign relations.c:54:7 in slot_create := 1
       key-parameter functions: lookups slot_find#0; creators slot_create#0
       uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+      namespace layers: B P0 R
   A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
       key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
       actors: {main (process)}; result=tested
@@ -136,7 +142,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: a written constant and the initial value give different results of the callee check
       layers: B P0 R (writers: rule targets)
-[C] 2 (spawn calls 5, with no resolved entry 0)
+[C] 2 (spawn calls 5, with no resolved entry 0, with no event after them on their control-flow graph 0; fields written after a spawn only in the functions the creator calls, not paired in this revision: 9)
   C1 spawn relations.c:153:12 in task_spawn -> pthread_create; field TaskRec.registered; read relations.c:141:26 in task_check (the read itself) self-identity
       spawn: callee pthread_create, entries child_main; child actors {child_main (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
       write after the spawn: relations.c:155:3 key=tasks[slot] value=1 [1] locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:154:3]
@@ -155,7 +161,7 @@ summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition i
       read subscript: the reader's own identity: task_self -> pthread_getspecific (P0 thread-specific-get)
       dependency: path C: the creator writes TaskRec.registered after the spawn; code the spawned entry reaches reads it at the subscript of its own identity; that the two identities are equal is not decided statically
       run-order: no record given
-      feasibility: proven-impossible: lock #0 &table_mutex@relations.c:30 (static-instance) is held from the same acquisition across the spawn and every write after it, and the read holds it: the read cannot fall between them
+      feasibility: proven-impossible: lock #0 &table_mutex@relations.c:30 (static-instance) is held from the same acquisition across the spawn and every write after it, and the read holds it: the read cannot fall between them; rests on assume.lock_acquisition_succeeds, assume.static_instance_read_after_write, assume.no_cross_member_pointer_arithmetic, the per-field completeness rule of FIELD_STATUS that makes #0 &table_mutex@relations.c:30 (static-instance) a static instance (PI decision pending)
       violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
       flip: static-possible: task_check returns -17 [ERR_NOT_FOUND] with the earlier value (INIT 0 (tasks)), not with the written value 1 [1]; task_check returns 0 [0] not with the earlier value (INIT 0 (tasks)), with the written value 1 [1]
-      layers: B P0 R
+      layers: B P0 R rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending))

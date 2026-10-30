@@ -10,9 +10,9 @@ extract
   out-pointer summaries      store-only 0, escaping 0, unsummarized 0
   untyped write sites        0 in the program, 0 of them count for a target
   unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
-  hand-entered inputs        38 (built-in P0 table 38, command line 0)
+  hand-entered inputs        72 (built-in P0 table 72, command line 0)
   declared assumptions       0 (static images of table-walk links that are not const)
-profile-free mode            built-in profile, 38 P0 entries (P0 table revision 1 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+profile-free mode            built-in profile, 72 P0 entries (P0 table revision 2 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
   first pass                 functions with a body 22, control-flow graphs 22, call-graph components 21 (recursive 1)
   delay operations (F8)      must 2 (vocabulary), may 7 (not vocabulary; loops whose own body calls one: 1)
   terminal operations (F8)   must 3, noreturn 2, may 3 (all vocabulary)
@@ -177,10 +177,13 @@ facts-view 1
   fx_task_create address-argument <global>.fx_lock_word at wrappers.c:121
   fx_task_create field fx_task.entry at wrappers.c:122
   fx_task_create_impl@wrappers.c:117 address-argument fx_task.id at wrappers.c:117
-[p0] 38
+[p0] 72
   pthread_create thread-create (thread creation) out=0 entry=2 arg=3 calls=1 {vocabulary}
       creates a thread that runs arg 2 with the argument arg 3; on success the id of the new thread is stored through arg 0, and it is stored before the new thread is started
       version POSIX.1-2017 / glibc 2.39; source glibc 2.39 nptl/pthread_create.c:624 (__pthread_create_2_1), :755 (*newthread = (pthread_t) pd, before create_thread at :804 and :836); upstream copy sha256 36fd1e6da5cee9ce
+  thrd_create thread-create (thread creation) out=0 entry=1 arg=2 calls=0 {vocabulary} (not in the program)
+      creates a thread that runs arg 1 with the argument arg 2; on success (thrd_success) the id of the new thread is stored through arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
   pthread_mutex_lock mutex-acquire (mutex) calls=1 {vocabulary}
       acquires the mutex arg 0, blocking until it is free
       version POSIX.1-2017 / glibc 2.39; source unverified
@@ -192,6 +195,30 @@ facts-view 1
       version POSIX.1-2017 / glibc 2.39; source unverified
   pthread_mutex_unlock mutex-release (mutex) calls=1 {vocabulary}
       releases the mutex arg 0
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_mutex_clocklock mutex-acquire (mutex) calls=0 {conditional} (not in the program)
+      acquires the mutex arg 0, blocking at most until the absolute time arg 2 on the clock arg 1; may return without it (ETIMEDOUT)
+      version glibc 2.39 (since 2.30); POSIX.1-2024, not in POSIX.1-2017; source unverified
+  mtx_lock mutex-acquire (mutex) calls=0 {vocabulary} (not in the program)
+      acquires the mutex arg 0, blocking until it is free; thrd_success (0 in glibc 2.39) when it holds it
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  mtx_trylock mutex-acquire (mutex) calls=0 {conditional} (not in the program)
+      acquires the mutex arg 0 if it is free, else returns without it (thrd_busy)
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  mtx_timedlock mutex-acquire (mutex) calls=0 {conditional} (not in the program)
+      acquires the mutex arg 0, blocking at most until the absolute time arg 1; may return without it (thrd_timedout)
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  mtx_unlock mutex-release (mutex) calls=0 {vocabulary} (not in the program)
+      releases the mutex arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  pthread_spin_lock mutex-acquire (spin lock) calls=0 {vocabulary} (not in the program)
+      acquires the spin lock arg 0, spinning until it is free; returns 0 when it holds it
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_spin_trylock mutex-acquire (spin lock) calls=0 {conditional} (not in the program)
+      acquires the spin lock arg 0 if it is free, else returns without it (EBUSY)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_spin_unlock mutex-release (spin lock) calls=0 {vocabulary} (not in the program)
+      releases the spin lock arg 0
       version POSIX.1-2017 / glibc 2.39; source unverified
   sem_wait semaphore-wait (semaphore) calls=0 {} (not in the program)
       decrements the semaphore arg 0, blocking while it is zero
@@ -205,6 +232,9 @@ facts-view 1
   sem_post semaphore-post (semaphore) calls=0 {} (not in the program)
       increments the semaphore arg 0; one thread blocked on it is woken
       version POSIX.1-2017 / glibc 2.39; source unverified
+  sem_clockwait semaphore-wait (semaphore) calls=0 {conditional} (not in the program)
+      decrements the semaphore arg 0, blocking at most until the absolute time arg 2 on the clock arg 1; may return without (ETIMEDOUT)
+      version glibc 2.39 (since 2.30); POSIX.1-2024, not in POSIX.1-2017; source unverified
   pthread_cond_wait condition-wait (condition variable) calls=0 {} (not in the program)
       releases the mutex arg 1, waits on the condition arg 0, and holds the mutex again when it returns
       version POSIX.1-2017 / glibc 2.39; source unverified
@@ -217,6 +247,21 @@ facts-view 1
   pthread_cond_broadcast condition-signal (condition variable) calls=0 {} (not in the program)
       unblocks every thread waiting on the condition arg 0
       version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_cond_clockwait condition-wait (condition variable) calls=0 {conditional} (not in the program)
+      as pthread_cond_wait, waiting at most until the absolute time arg 3 on the clock arg 2 (ETIMEDOUT); holds the mutex arg 1 again when it returns
+      version glibc 2.39 (since 2.30); POSIX.1-2024, not in POSIX.1-2017; source unverified
+  cnd_wait condition-wait (condition variable) calls=0 {} (not in the program)
+      releases the mutex arg 1, waits on the condition arg 0, and holds the mutex again when it returns
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  cnd_timedwait condition-wait (condition variable) calls=0 {conditional} (not in the program)
+      as cnd_wait, waiting at most until the absolute time arg 2 (thrd_timedout); holds the mutex arg 1 again when it returns
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  cnd_signal condition-signal (condition variable) calls=0 {} (not in the program)
+      unblocks one thread waiting on the condition arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  cnd_broadcast condition-signal (condition variable) calls=0 {} (not in the program)
+      unblocks every thread waiting on the condition arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
   clock_nanosleep sleep (sleep) calls=0 {vocabulary} (not in the program)
       suspends the calling thread until the time arg 2 has passed on the clock arg 0 (an interval, or an absolute time when arg 1 has TIMER_ABSTIME)
       version POSIX.1-2017 / glibc 2.39; source unverified
@@ -226,6 +271,12 @@ facts-view 1
   sleep sleep (sleep) calls=0 {vocabulary} (not in the program)
       suspends the calling thread for arg 0 seconds
       version POSIX.1-2017 / glibc 2.39; source unverified
+  usleep sleep (sleep) calls=0 {vocabulary} (not in the program)
+      suspends the calling thread for arg 0 microseconds
+      version glibc 2.39; not in POSIX.1-2017 (removed in Issue 7); source unverified
+  thrd_sleep sleep (sleep) calls=0 {vocabulary} (not in the program)
+      suspends the calling thread for the interval arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
   pthread_exit thread-exit (termination) calls=1 {vocabulary}
       ends the calling thread; does not return
       version POSIX.1-2017 / glibc 2.39; source unverified
@@ -241,21 +292,72 @@ facts-view 1
   abort process-exit (termination) calls=1 {vocabulary}
       ends the process abnormally (SIGABRT); does not return
       version POSIX.1-2017 / glibc 2.39; source unverified
+  thrd_exit thread-exit (termination) calls=0 {vocabulary} (not in the program)
+      ends the calling thread; does not return
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  quick_exit process-exit (termination) calls=0 {vocabulary} (not in the program)
+      ends the process after its at_quick_exit handlers have run; does not return
+      version ISO C11 <stdlib.h> / glibc 2.39; POSIX.1-2024, not in POSIX.1-2017; source unverified
+  __assert_fail process-exit (termination) calls=0 {vocabulary} (not in the program)
+      reports a failed assertion and ends the process (abort); does not return
+      version glibc 2.39, the function the assert macro of <assert.h> (ISO C, POSIX.1-2017) expands to; source unverified
+  __assert_perror_fail process-exit (termination) calls=0 {vocabulary} (not in the program)
+      reports a failed assertion with an error number and ends the process (abort); does not return
+      version glibc 2.39, the function the assert_perror macro of <assert.h> (GNU) expands to; source unverified
   pthread_self thread-self (thread identity) calls=0 {} (not in the program)
       returns the id of the calling thread
       version POSIX.1-2017 / glibc 2.39; source unverified
+  thrd_current thread-self (thread identity) calls=0 {} (not in the program)
+      returns the id of the calling thread
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
   pthread_getspecific thread-specific-get (thread-specific data) calls=0 {} (not in the program)
       returns the value the calling thread bound to the key arg 0
       version POSIX.1-2017 / glibc 2.39; source unverified
   pthread_setspecific thread-specific-set (thread-specific data) calls=0 {} (not in the program)
       binds the value arg 1 to the key arg 0 for the calling thread
       version POSIX.1-2017 / glibc 2.39; source unverified
+  tss_get thread-specific-get (thread-specific data) calls=0 {} (not in the program)
+      returns the value the calling thread bound to the key arg 0
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  tss_set thread-specific-set (thread-specific data) calls=0 {} (not in the program)
+      binds the value arg 1 to the key arg 0 for the calling thread
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  pthread_key_create thread-specific-key-create (thread-specific data) out=0 entry=1 calls=0 {} (not in the program)
+      creates a key and stores it through arg 0; arg 1, when not null, is a destructor that every thread which ends with a non-null value bound to the key runs with that value (after its cleanup handlers)
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  pthread_key_delete thread-specific-key-delete (thread-specific data) calls=0 {} (not in the program)
+      deletes the key arg 0; no destructor runs
+      version POSIX.1-2017 / glibc 2.39; source unverified
+  tss_create thread-specific-key-create (thread-specific data) out=0 entry=1 calls=0 {} (not in the program)
+      creates a key and stores it through arg 0; arg 1, when not null, is a destructor that every thread which ends with a non-null value bound to the key runs with that value
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  tss_delete thread-specific-key-delete (thread-specific data) calls=0 {} (not in the program)
+      deletes the key arg 0; no destructor runs
+      version ISO C11 <threads.h> / glibc 2.39; source unverified
+  __pthread_register_cancel cleanup-push (cleanup handler) calls=0 {} (not in the program)
+      pushes the cleanup handler the expansion of pthread_cleanup_push stored in the buffer arg 0
+      version glibc 2.39, the function the POSIX.1-2017 macro pthread_cleanup_push or pthread_cleanup_pop expands to in <pthread.h> when the unit is compiled without exceptions (with exceptions the macros call no function); source unverified
+  __pthread_register_cancel_defer cleanup-push (cleanup handler) calls=0 {} (not in the program)
+      pushes the cleanup handler stored in the buffer arg 0 and makes cancellation deferred (pthread_cleanup_push_defer_np)
+      version glibc 2.39, the function the POSIX.1-2017 macro pthread_cleanup_push or pthread_cleanup_pop expands to in <pthread.h> when the unit is compiled without exceptions (with exceptions the macros call no function); source unverified
+  __pthread_unregister_cancel cleanup-pop (cleanup handler) calls=0 {} (not in the program)
+      pops the cleanup handler of the buffer arg 0 (pthread_cleanup_pop)
+      version glibc 2.39, the function the POSIX.1-2017 macro pthread_cleanup_push or pthread_cleanup_pop expands to in <pthread.h> when the unit is compiled without exceptions (with exceptions the macros call no function); source unverified
+  __pthread_unregister_cancel_restore cleanup-pop (cleanup handler) calls=0 {} (not in the program)
+      pops the cleanup handler of the buffer arg 0 and restores the cancellation type (pthread_cleanup_pop_restore_np)
+      version glibc 2.39, the function the POSIX.1-2017 macro pthread_cleanup_push or pthread_cleanup_pop expands to in <pthread.h> when the unit is compiled without exceptions (with exceptions the macros call no function); source unverified
   dlopen dynamic-load (dynamic loading) calls=0 {} (not in the program)
       loads the object file named by arg 0 and returns a handle of it
       version POSIX.1-2017 / glibc 2.39; source unverified
   dlsym symbol-lookup (dynamic loading) calls=1 {}
       returns the address of the symbol named by arg 1 in the object arg 0 (or in the global scope)
       version POSIX.1-2017 / glibc 2.39; source unverified
+  dlmopen dynamic-load (dynamic loading) calls=0 {} (not in the program)
+      loads the object file named by arg 1 into the namespace arg 0 and returns a handle of it
+      version glibc 2.39 (GNU); not in POSIX.1-2017; source unverified
+  dlvsym symbol-lookup (dynamic loading) calls=0 {} (not in the program)
+      returns the address of the version arg 2 of the symbol named by arg 1 in the object arg 0
+      version glibc 2.39 (GNU); not in POSIX.1-2017; source unverified
   memset data-function (data function) out=0 calls=0 {} (not in the program)
       fills arg 2 bytes at arg 0 with the byte arg 1
       version POSIX.1-2017 / glibc 2.39; source unverified

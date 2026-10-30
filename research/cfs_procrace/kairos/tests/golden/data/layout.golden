@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=10
+kz-layout abi=1 revision=11
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -989,6 +989,13 @@ record kz_fact_await size=56 fields=16
   via offset=32 size=8 count=1 kind=str
   note_field offset=40 size=8 count=1 kind=str
   note_type offset=48 size=8 count=1 kind=str
+record kz_fact_lockpath size=16 fields=6
+  fn offset=0 size=4 count=1 kind=u32
+  row offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  kind offset=12 size=1 count=1 kind=u8
+  rsv0 offset=13 size=1 count=1 kind=u8
+  flags offset=14 size=2 count=1 kind=u16
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1904,6 +1911,10 @@ enum KZ_P0_KIND
   0xe DL_OPEN "dynamic-load"
   0xf DL_SYM "symbol-lookup"
   0x10 DATA_FN "data-function"
+  0x11 TSD_KEY_CREATE "thread-specific-key-create"
+  0x12 TSD_KEY_DELETE "thread-specific-key-delete"
+  0x13 CLEANUP_PUSH "cleanup-push"
+  0x14 CLEANUP_POP "cleanup-pop"
 flags KZ_P0_FLAG
   0x1 CONDITIONAL "conditional"
   0x2 SHADOWED "shadowed"
@@ -2152,6 +2163,10 @@ flags KZ_AWAIT_FLAG
   0x4 UNRESOLVED_CALL "unresolved-call"
   0x8 LOCK_STATIC "lock-static"
   0x10 NO_PREDICATE "no-predicate"
+enum KZ_LOCKPATH_KIND
+  0x0 NONE "none"
+  0x1 AFTER_SPAWN "after-spawn"
+  0x2 ENTRY_RELEASE "entry-release"
 enum KZ_OUTPTR_SUMMARY
   0x0 NONE "none"
   0x1 STORE_ONLY "store-only"
@@ -2574,6 +2589,7 @@ section LOCK_IDS type=132 record=kz_fact_lockid version=1
 section LOCKSET type=133 record=kz_fact_lockset version=1
 section FIELD_STATUS type=134 record=kz_fact_fstatus version=1
 section AWAIT_L1 type=135 record=kz_fact_await version=1
+section LOCK_PATHS type=136 record=kz_fact_lockpath version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2938,6 +2954,10 @@ format kz_fact_await.l1_mod_type enum KZ_AWAIT_MOD
 format kz_fact_await.cert_field enum KZ_LOOP_CERT
 format kz_fact_await.cert_type enum KZ_LOOP_CERT
 format kz_fact_await.flags flags KZ_AWAIT_FLAG
+format kz_fact_lockpath.fn idx 0
+format kz_fact_lockpath.row idx 0
+format kz_fact_lockpath.site idx 0
+format kz_fact_lockpath.kind enum KZ_LOCKPATH_KIND
 format kz_cert_step.rule enum KZ_RULE
 format kz_cert_step.profile_entry idx 0
 format kz_cert_step.site_from idx 0
@@ -3045,4 +3065,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=499a236729ecd9b1178050ca2b2cb496cc9e23a08a871256757890ce2f62e71d
+fingerprint=99eed4fc658cdd4e4bd6203c2ba6067ed115d853c2bf9980fab1962434a1a712

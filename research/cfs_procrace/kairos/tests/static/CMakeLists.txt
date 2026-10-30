@@ -10,7 +10,10 @@
 #                    profile-free mode (flowfacts_np); argflow.c is read the same two ways for the extended
 #                    facts F4 and F6 (argflow, argflow_np), lockset.c for F5 and the target-independent rules
 #                    (lockset, lockset_np), relations.c for `kz-static relations` (relations: the fixture profile
-#                    and --extended-facts; relations_np: --no-profile --targets-rule R-T1,R-T2)
+#                    and --extended-facts; relations_np: --no-profile --targets-rule R-T1,R-T2), relpaths.c for the
+#                    order and entry-path facts LOCK_PATHS and the relations rules that read them (lockpaths_np,
+#                    relpaths_np: --no-profile --targets-rule R-T1,R-T2); deepcond.c (a condition more than 200
+#                    levels deep) is read by test_static_cli only
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
@@ -35,8 +38,9 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations)
-set(kz_golden_fixtures ${kz_fixtures} clobber flowfacts_np argflow_np lockset_np relations_np)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths deepcond)
+set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
+    relations_np lockpaths_np relpaths_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

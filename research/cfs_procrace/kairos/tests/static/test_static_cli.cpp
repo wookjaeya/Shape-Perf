@@ -857,6 +857,62 @@ startup_script {
     KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts --delay-op fx_none", X / "voc.kz"), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "voc.kz").string()), &out), 0);
     KZ_CHECK(has(out, "hand-entered:command-line(1 items; G0 or other names, not automatic)"));
+    // the P0 tables of revision 2: their scope is recorded and printed
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "both.kz").string()) + " --section basis --section p0", &out), 0);
+    KZ_CHECK(has(out, "extract.p0_table = P0 table revision 2 (2026-10-30), 72 entries"));
+    KZ_CHECK(has(out, "extract.p0_table_scope = families listed whole: "));
+    KZ_CHECK(has(out, "[p0] 72"));
+    KZ_CHECK(has(out, "  pthread_key_create thread-specific-key-create (thread-specific data) out=0 entry=1"));
+    KZ_CHECK(has(out, "  thrd_create thread-create (thread creation) out=0 entry=1 arg=2"));
+    KZ_CHECK(!has(out, "\n  pthread_rwlock_"));  // no row of the family (the scope names it)
+    KZ_CHECK(has(a, "p0-compare P0 comparison table revision 2 (2026-10-30): "));
+    KZ_CHECK(has(a, "p0-compare scope: families listed whole: byte-string comparison"));
+  }
+
+  // ---- the order and entry-path facts LOCK_PATHS and the relations rules that read them (relpaths.c) -----------
+  {
+    const fs::path X = work / "relpaths";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relpaths.c", rp = (X / "rp.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q(src) + " --root " + q(fixtures) + " -o " + q(rp) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rp) + " --section lockpaths --section basis", &out), 0);
+    // a write before the spawn in the loop body follows the spawn through the back edge; the write in the branch
+    // without the spawn does not follow it
+    KZ_CHECK(has(out, "after-spawn row ") && has(out, " write Rec.count at relpaths.c:83:5 in spawn_all after the spawn relpaths.c:84:5 pthread_create"));
+    KZ_CHECK(has(out, " write Rec.ready at relpaths.c:94:5 in spawn_checked after the spawn relpaths.c:93:10 pthread_create"));
+    KZ_CHECK(!has(out, "write Rec.ready at relpaths.c:98:"));
+    // the read after the release of the caller's lock
+    KZ_CHECK(has(out, " read at relpaths.c:53:15 in ready_unlocked through the call relpaths.c:52:3 pthread_mutex_unlock"));
+    KZ_CHECK(has(out, "count.lock_paths = "));
+    std::string a, b;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
+    KZ_CHECK_EQ(a, b);
+    KZ_CHECK(has(a, "rules relations rules revision 2 (2026-10-30)"));
+    // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
+    KZ_CHECK(has(a, "table-image-entry 2"));
+    KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main]"));
+    KZ_CHECK(has(a, "trampolines 1 [tramp_main -> {helper_main (spawn-entry)}]"));
+    KZ_CHECK(has(a, "through a direct call 1 [boss_main]"));
+    // path C: the write in the loop body, the writes of the branch with the spawn only, the helper's write, the read
+    // after the release
+    KZ_CHECK(has(a, "field Rec.count; read relpaths.c:65:15 in rec_counted"));
+    KZ_CHECK(has(a, "      write after the spawn in set_stage (through the call relpaths.c:113:3): relpaths.c:104:32"));
+    KZ_CHECK(has(a, "      feasibility: possible: the writes after the spawn hold no lock of static identity"));
+    KZ_CHECK(has(a, "(not composed: on a path from the entry of ready_unlocked the call relpaths.c:52:3 pthread_mutex_unlock"));
+    KZ_CHECK(has(a, "      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition"));
+    KZ_CHECK(has(a, "rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI decision pending))"));
+    KZ_CHECK(!has(a, "write after the spawn: relpaths.c:98:"));
+    // the ends: the destructor of a thread-specific key; the guard of the terminal call with the value passed
+    KZ_CHECK(has(a, "after that entry returns the thread may still run functions of this program (thread-specific destructors: pthread_key_create at relpaths.c:"));
+    KZ_CHECK(has(a, "noreturn: the terminal calls of app_exit are guarded: relpaths.c:224:20 -> exit under (eq param:status#0 9); with argument 0 = 3 every guard is false"));
+    KZ_CHECK(has(a, "the loop relpaths.c:225:3 in app_exit has no exit"));
+    // a condition more than 200 levels deep: R-T2 reads the whole tree
+    const std::string dp = (X / "deep.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T2 --source " + q(fixtures + "/deepcond.c") + " --root " + q(fixtures) + " -o " + q(dp) + " -- -std=c99 -pedantic", &out), 0);
+    KZ_CHECK(has(out, "rule targets               1 (R-T1 0, R-T2 1, both 0;"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(dp) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Deep.flag = rule R-T2  (unset)"));
   }
 
   fs::remove_all(work);

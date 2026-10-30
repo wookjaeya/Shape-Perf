@@ -204,7 +204,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **입력** [D]. 프로필을 읽지 않고 명령줄 어휘도 받지 않는다. 고정된 내장 프로필 `phi 1; profile "kz-static-builtin-minimal";`(로더가 받는 최소 두 문장, 어휘 0)을 쓴다. 나머지는 빌드(basis), P0 표, recipe 의 시작 스크립트 블록(L0, basis 의 `startup.entry[k]`), 아래 규칙에서만 온다. facts 의 BASIS 에 `extract.mode`, `extract.builtin_profile`, `extract.p0_table`, `extract.derivation_rules` 가 남고 머리의 프로필 해시는 내장 프로필의 해시다. basis 에는 `profile.mode` 가 남는다. `kz replay` 의 프로필 해시 결합은 그대로다.
 
-**P0 표** (`lib/llvm/p0.cpp`, 개정 1). API 묶음마다 한 번: 스레드 생성 `pthread_create`(인자 0 에 새 스레드 id, 인자 2 시작 함수, 인자 3 그 인자), mutex `pthread_mutex_lock/trylock/timedlock/unlock`, 세마포어 `sem_wait/trywait/timedwait/post`, 조건 변수 `pthread_cond_wait/timedwait/signal/broadcast`, 잠자기 `clock_nanosleep`·`nanosleep`·`sleep`, 종료 `pthread_exit`(스레드)·`exit`·`_exit`·`_Exit`·`abort`(프로세스), `pthread_self`, `pthread_getspecific/setspecific`, `dlopen`·`dlsym`, 데이터 함수 12개. 항목마다 판 표기(POSIX.1-2017 / glibc 2.39; `bzero` 는 POSIX.1-2017 에 없음)와 원문 대조 줄이 있다. 원문은 upstream glibc 2.39 `nptl/pthread_create.c` 만 대조했다(L624, L755 의 `*newthread = pd` 가 L804·L836 의 `create_thread` 앞). 나머지는 `unverified` 다. try·timed 항목은 `conditional` 이다. 프로그램이 같은 이름의 함수를 정의하면 그 본문을 읽고 항목은 쓰지 않는다(`shadowed`). 데이터 함수 요약은 이 표에서 예전 순서대로 읽는다.
+**P0 표** (`lib/llvm/p0.cpp`, 개정 1; 개정 2는 §5f). API 묶음마다 한 번: 스레드 생성 `pthread_create`(인자 0 에 새 스레드 id, 인자 2 시작 함수, 인자 3 그 인자), mutex `pthread_mutex_lock/trylock/timedlock/unlock`, 세마포어 `sem_wait/trywait/timedwait/post`, 조건 변수 `pthread_cond_wait/timedwait/signal/broadcast`, 잠자기 `clock_nanosleep`·`nanosleep`·`sleep`, 종료 `pthread_exit`(스레드)·`exit`·`_exit`·`_Exit`·`abort`(프로세스), `pthread_self`, `pthread_getspecific/setspecific`, `dlopen`·`dlsym`, 데이터 함수 12개. 항목마다 판 표기(POSIX.1-2017 / glibc 2.39; `bzero` 는 POSIX.1-2017 에 없음)와 원문 대조 줄이 있다. 원문은 upstream glibc 2.39 `nptl/pthread_create.c` 만 대조했다(L624, L755 의 `*newthread = pd` 가 L804·L836 의 `create_thread` 앞). 나머지는 `unverified` 다. try·timed 항목은 `conditional` 이다. 프로그램이 같은 이름의 함수를 정의하면 그 본문을 읽고 항목은 쓰지 않는다(`shadowed`). 데이터 함수 요약은 이 표에서 예전 순서대로 읽는다.
 
 **두 번 읽기** [D]. 첫 읽기는 함수 본문마다 Clang CFG(모든 식을 원소로 둬서 블록 안 호출이 평가 순서)와 직접 호출의 함수 포인터 인자를 더 기록한다. finalize 한 첫 읽기 위에서 유도한다. 둘째 읽기는 유도한 연산을 어휘로 쓴다(함수 key 기준, 내부 연결 함수가 섞이지 않게). 둘째 읽기의 facts 와 세 섹션이 출력이다.
 
@@ -324,9 +324,9 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - R-T2: 함수가 공유 base 로 읽어 반환하거나 포인터 매개변수를 통해 저장하는 필드, 또는 분기 조건에서 읽고 그 함수가 상수를 돌려주는 조건(RETURNS)에도 나오는 필드.
 - 매개변수·지역 변수·다른 호출 결과로만 닿는 필드는 고르지 않는다. 그 수를 extract 요약의 `rule targets` 줄과 BASIS `count.targets_rule_t1_unshared_only`·`_t2_unshared_only` 로 낸다.
 - 규칙 대상은 사람이 넣은 입력이 아니다: BASIS `target.T.f = rule R-T1` 등은 정책 `unset`, 출처 행 없음으로 적는다(명령줄 `--target` 은 지금처럼 `declared-assumption`, 출처 `researcher`). BASIS `extract.targets_rule` 과 `count.targets_rule*` 를 더한다.
-- 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없고 facts schema 개정은 10 그대로다.
+- 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없다(S5 때 facts schema 개정 10; LOCK_PATHS 를 더한 개정 11은 §5f).
 
-**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다.
+**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"; 개정 2에서 바뀐 규칙은 §5f). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다.
 - **머리**: facts 해시, 모드, 내장 프로필·P0 표·유도 규칙·대상 규칙의 판, P0 비교 표의 판과 항목(판 표기, 원문 대조), 입력 계층, 행위자 root 와 트램펄린, 경로별 행 수와 등급별 수.
 - **입력 계층**: 행마다 B(빌드), P0(P0 표: spawn·잠금·지연·종료의 유도와 비교 함수), L0(행이 시작 스크립트 진입 root 에 기댈 때), R(규칙)을 붙인다. 프로필 추출의 facts 이면 `case:profile(<이름>)`, 명령줄 어휘가 있으면 `hand-entered:command-line(<n> items; G0 or other names, not automatic)` 를 모든 행에 붙인다.
 - **P0 비교 표**(`p0_compare_table`, "P0 comparison table revision 1"): 바이트 문자열 비교 묶음(`memcmp`, `strcmp`, `strcoll`, `strncmp`, `strcasecmp`, `strncasecmp`)과 스레드 id 비교 묶음(`pthread_equal`). 추출은 이 표를 쓰지 않으므로 P0 표와 facts 의 P0_TABLE 은 그대로다. 프로그램이 같은 이름의 본문을 정의하면(inline 이 아닌 본문) 그 호출은 비교로 읽지 않는다.
@@ -338,9 +338,34 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - **칸** (ED §3.4): `dependency`(정적 근거), `run-order`(이 판은 실행 기록을 읽지 않는다: 늘 `no record given`), `feasibility`(정적, `proven-impossible` / `possible` / `undecidable` 과 이유), `violation`(RV2 §5.4; 기록이 없으면 `unconfirmed`), `flip`(`static-possible` / `static-undetermined` / `none` 과 이유), `layers`. 한 칸이 다른 칸을 정하지 않는다.
 - **실현 가능성** [D]: C 는 F5 must 정체성으로만 "불가"를 낸다: spawn 과 그 뒤 모든 쓰기가 같은 획득 호출이 연 정적 인스턴스 잠금 L 을 잡고 읽기(또는 그 호출 지점)도 L 을 잡으면 `proven-impossible`. L 이 spawn 에서 잡혀 있지 않고 쓰기만 잡으면 `possible`(잠금 창). 읽기가 잠금을 잡지 않으면 `possible`. 읽기가 잠금 실패 경로에 있으면 `undecidable`. 정적 인스턴스가 아닌 잠금으로는 "불가"를 내지 않는다. B 는 두 행위자가 한 table walk 에서 만들어지면 생성 순서와, 같은 반복에서 생성 뒤 부르는 함수가 닿는 await 루프(AWAIT_L1 필드 단위 규칙)를 적고 `undecidable`(fixed unconfirmed)로 낸다: 사용이 그 행위자의 대기 상태 앞인지 뒤인지는 정적으로 정하지 않는다. A 는 늘 `undecidable` 이다(생성 순서가 초기화 순서를 정하지 않는다).
 - **뒤집힘 신호** [D]: B 는 callee 검사 조건을 인자 = INIT 값과 인자 = 각 상수 writer 값으로 평가해 결과가 다르면 `static-possible`, 평가할 수 없는 부분(호출 결과, 상수가 아닌 값)이 있으면 `static-undetermined`. C 는 읽는 함수의 상수 반환 가운데 그 필드에 기대는 조건을 필드 = INIT 값과 필드 = 생성자의 상수 쓰기 값으로 평가한다. A 는 같은 구획·같은 키의 생성자가 다른 행위자에 있으면 `static-possible`, 키가 풀리지 않으면 `static-undetermined`. 판정이 아니다.
-- 한계 [I]: 실행 기록 입력이 없다. C 의 "뒤"는 소스 위치이고 CFG 순서가 아니다. 행위자는 필드 기반 may 근사다. 구획은 상수 값의 집합 비교다. 지역 변수 경유의 종료 도달은 may 다. A 의 `==` 비교 상대가 정의 하나인 지역 변수여도 facts 가 그 정의를 담지 않으면 풀지 않는다.
+- 한계 [I]: 실행 기록 입력이 없다. C 의 "뒤"는 소스 위치이고 CFG 순서가 아니다(개정 2에서 CFG 도달로 바꿈, §5f). 행위자는 필드 기반 may 근사다. 구획은 상수 값의 집합 비교다. 지역 변수 경유의 종료 도달은 may 다. A 의 `==` 비교 상대가 정의 하나인 지역 변수여도 facts 가 그 정의를 담지 않으면 풀지 않는다.
 
 **시험** [M]: fixture `relations.c`, `static_golden_relations`(고정 도구 프로필 + `--extended-facts`: 모든 행에 사례 계층), `static_golden_relations_np`(`--no-profile --targets-rule R-T1,R-T2`; relations 를 두 번 돌려 같은 바이트), `test_static_cli` 의 확인(옵션 조합, 규칙 대상의 기록, relations 의 사용법·거부·`-o`·결정성·칸·계층).
+
+## 5f. 순서·진입 경로 사실 `LOCK_PATHS`, P0 표 개정 2, relations 규칙 개정 2 (2026-10-30, 단계 2a S5 수정) [D][M]
+
+근거: 단계 2a S5 결과에 대한 검증 지적. 결과는 `plan/step2a_results_20261030.md` §10. facts schema 개정 11(추출 레코드 개정 9, `docs/schema.md` §19).
+
+**LOCK_PATHS** [D]. F1–F6 과 같은 조건으로 쓴다(프로필 없는 추출은 늘, 프로필 추출은 `--extended-facts` 일 때). 식 트리가 없다. LOCKSET 과 같은 잠금 골격·같은 호출 효과에서 구한다.
+- `after-spawn`: spawn-op 호출 S 가 있는 함수에서 S 뒤 같은 블록의 사건과, S 블록의 후속에서 닿는 모든 블록의 사건이다. 되돌아가는 간선으로 S 블록에 다시 닿으면 그 블록의 사건(S 자신 포함)도 들어간다. 분기 시험으로 후속을 자르지 않는다: 과대 근사이고, "뒤"가 많을수록 C 의 "불가"는 줄어든다.
+- `entry-release`: 함수 진입에서 그 사건까지의 어떤 경로에서, (a) 함수가 잡지 않은 잠금을 푸는 호출(모든 경로 또는 일부 경로의 해제), (b) 정적 인스턴스가 아닌 정체성의 잠금을 지울 수 있는 호출(callee 안의 짝), (c) 효과를 따라가지 못하는 호출(미해결 간접 호출, 자기 재귀 요소)이 있다. `site` 는 그런 호출 가운데 소스 위치가 가장 앞선 것이다. 분석 상태에 경로 합집합으로 합치는 표시 하나를 더해 구하며 LOCKSET 행은 바뀌지 않는다. 이 행이 있는 사건에서는 함수의 호출자가 잡은 잠금이 잡혀 있다고 말하지 않는다.
+
+**P0 표 개정 2** (`p0.cpp`) [D]. 개정 1의 묶음을 통째로 채웠다: 스레드 생성 `thrd_create`, mutex `pthread_mutex_clocklock`·`mtx_lock/trylock/timedlock/unlock`, spin lock `pthread_spin_lock/trylock/unlock`(배타 획득이라 mutex 종류), 세마포어 `sem_clockwait`, 조건 변수 `pthread_cond_clockwait`·`cnd_wait/timedwait/signal/broadcast`, 잠자기 `usleep`·`thrd_sleep`, 종료 `thrd_exit`·`quick_exit`·`__assert_fail`·`__assert_perror_fail`(assert 매크로가 부르는 함수), 스레드 id `thrd_current`, thread-specific data `tss_get/set`·`pthread_key_create/delete`·`tss_create/delete`, cleanup handler `__pthread_register_cancel(_defer)`·`__pthread_unregister_cancel(_restore)`(예외 없이 컴파일한 단위에서 `pthread_cleanup_push/pop` 매크로가 부르는 함수), 동적 적재 `dlmopen`·`dlvsym`. 72항목, 항목마다 판 표기(POSIX.1-2017 / glibc 2.39, ISO C11 <threads.h> / glibc 2.39, `*_clock*` 은 glibc 2.39·POSIX.1-2024). 원문 대조는 개정 1과 같다(`pthread_create` 만). 새 종류 넷: `thread-specific-key-create`(`entry_param` = 소멸자), `thread-specific-key-delete`, `cleanup-push`, `cleanup-pop`. 어휘가 아니고 유도에 쓰지 않는다(relations 의 수명 규칙만 읽는다).
+- 이 개정이 담지 않는 묶음은 BASIS `extract.p0_table_scope` 에 이름으로 적는다: 읽기-쓰기 잠금 전체, barrier, one-time initialization, 다른 스레드의 취소, 시그널, `dlclose`·`dlerror`·`dladdr`, 컴파일러나 fortify wrapper 가 원문 호출 없이 부르는 함수. 읽기-쓰기 잠금을 통째로 뺀 까닭: 잠금 집합 분석은 공유 획득을 읽지 않는다. 쓰기 획득만 넣으면 읽기 획득 뒤의 해제가 호출자 잠금의 해제로 읽힌다. 통째로 빼면 그 획득이 잠금 연산이 아니어서 판정이 약해지기만 한다.
+- P0 비교 표 개정 2: 바이트 문자열 비교에 `strcoll_l`·`strcasecmp_l`·`strncasecmp_l`·`bcmp`·`strverscmp`, 스레드 id 비교에 `thrd_equal`. 넓은 문자 비교와 `__memcmpeq` 는 이 개정 밖이다(머리의 `p0-compare scope` 줄).
+- 대상 규칙(§5e)의 R-T2 조건 걷기에서 깊이 상한(200)을 없앴다. 풀은 같은 트리를 한 노드로 두고 노드를 자식 뒤에 만들므로 방문 집합으로 끝난다.
+
+**relations 규칙 개정 2** [D].
+- **C 의 "spawn 뒤"**: LOCK_PATHS `after-spawn` 이다. 생성자가 spawn 뒤에 부르는 함수(직접 호출과 해결된 간접 대상, 그 아래 전부)가 같은 필드를 쓰면 그 쓰기도 실현 가능성에 넣는다. 그 호출이 부른 함수 안의 쓰기는 호출 행의 잠금과 합친다(그 쓰기에 `entry-release` 가 없을 때). 그보다 아래의 쓰기는 제 잠금만 센다. 생성자 본문에서는 쓰지 않고 callee 에서만 쓰는 필드는 이 판에서 짝을 짓지 않고 `[C]` 머리에 수를 낸다.
+- **호출 경유 읽기**: 읽기 행에 `entry-release` 가 있으면 호출 지점의 잠금을 읽기에 더하지 않고 이유를 적는다.
+- **기댄 것**: `proven-impossible` 의 이유에 선언된 가정 셋과 필드 단위 완전성 규칙(PI 결정 대기, 정체성이 `type-level-exposed` 이면 형 단위로는 정적 인스턴스가 아님)을 적고 layers 칸에 `rests-on(...)` 을 붙인다. B 의 await 인정도 필드 단위 규칙과 `assume.no_cross_member_pointer_arithmetic` 을 붙인다.
+- **basis 편차**: 추출이 basis 의 편차 항목을 BASIS `extract.basis_deviation[<항목>]` 으로 복사한다(확장 사실을 쓰는 추출). 행이 이름 붙인 위치·함수의 파일이 단위별 편차 항목의 단위(이름의 첫 `[...]`)이면 layers 칸에 `basis-deviation(...)` 을 붙인다. 이름 공간 블록에는 `namespace layers` 줄이 있다.
+- **행위자**: spawn 의 entry 인자가 정적 이미지가 있는 전역 표의 필드에서 오면 그 멤버의 함수 잎(GLOBAL_IMAGES)이 entry 다(root 종류 `table-image-entry`; 생성 순서는 읽지 않는다). 그 멤버의 잎이 없으면(union 의 다른 멤버로 초기화) 풀지 않고 머리의 `spawn calls with no resolved entry` 줄에 이유를 적는다. 트램펄린은 process 가 아닌 root 가운데 다른 root 에 **간접 호출로만** 들어가고, 제 본문이 공유 root(전역, 전역 주소만 돌려주는 함수의 결과)로 필드·전역을 읽지 않으며 전역 객체를 쓰지 않는 것이다. 형 있는 레코드 필드 쓰기는 facts 에 base 가 없어 보지 않는다. 다른 root 에 들어가지만 행위자로 남는 root 는 머리에 이유별로 적는다.
+- **종료 처리**: 종료 연산이 may 또는 noreturn 이면 그 종료 호출들의 guard 를 적고, 이 호출에서 인자가 갖는 상수 값(guard 아래 쓴 필드의 상수, 상수 인자)으로 평가한다. 그 함수의 탈출 없는 루프도 적는다(그 길로는 돌아오지 않고 P0 종료에도 닿지 않는다).
+- **수명**: entry 경로 규칙은 프로그램에 null 이 아닌 소멸자를 단 thread-specific key 생성(P0 `thread-specific-key-create`)도 cleanup push 도 없을 때만 "그 entry 가 돌아온 뒤 프로그램의 함수가 돌지 않는다"고 쓴다. 있으면 그것들을 적고 주장하지 않는다. P0 out 인자 줄은 relations 가 ARGFLOW 와 P0_TABLE 을 맞춰 만든 것이고 추출의 writer 집합(WRITERS, FACT_LOCS, FIELD_STATUS)에는 없다고 적는다. writer 수에서 covers-more-than-the-field 행을 따로 센다.
+- **검사 중복 제거**: callee 검사와 읽기 함수의 상수 반환은 (값, 조건 트리)로 묶는다. 40단계 한계는 출력에만 쓴다.
+
+**시험** [M]: fixture `relpaths.c`(루프 안 spawn, spawn 없는 분기의 쓰기, spawn 뒤 helper 의 잠금 밖 쓰기, 호출자 잠금을 푼 뒤의 읽기, union 멤버로 초기화한 entry 표, 다른 root 를 직접 부르는 root, 간접 호출만 하는 트램펄린, 소멸자 있는 key, 인자 guard 가 있는 noreturn 종료 연산)와 `deepcond.c`(조건의 깊이 211). `static_golden_lockpaths_np`, `static_golden_relpaths_np`, `test_static_cli`·`test_static_wrappers` 의 확인.
 
 ## 6. core-cpu1 결과 [M]
 

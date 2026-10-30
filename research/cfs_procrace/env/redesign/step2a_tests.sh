@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# step2a_tests.sh STEP [OUT] -- redesign step 2a, stage S5: the completion tests T1-T7 of
+# step2a_tests.sh STEP [OUT] -- redesign step 2a, stage S5 and its fix stage: the completion tests T1-T7 of
 # plan/extraction_design_20261030.md §6, run with no case input (the two-statement built-in profile, P0, L0 and the
 # build only; no G0), with the rule targets of ED §6 item 2 (R-T1 ∪ R-T2, shared bases) and `kz-static relations`
 # (ED §6 item 3).  Static analysis only: no cFS is booted, no campaign is run.
@@ -7,8 +7,12 @@
 #   STEP   identity  the profile-driven mode is unchanged: the V0 and V2 variants of extract_baseline.sh, re-run with this
 #                    kz-static from their recorded arguments (EB/<build>/<variant>/args.txt) for c1_pre_tx, r2_core and
 #                    c5_641; basis and facts compared section by section with the step-2 outputs (kz-dump) -> OUT/identity/
-#          npsame    the profile-free mode without --targets-rule is unchanged: extract --no-profile from the S4 basis of
-#                    every build, its records compared with S4/<build>/NP/facts.kz -> OUT/npsame/
+#          npsame    the profile-free mode without --targets-rule against S4: extract --no-profile from the S4 basis of
+#                    every build, its records compared with S4/<build>/NP/facts.kz -> OUT/npsame/ (after the fix stage:
+#                    BASIS and P0_TABLE differ by the P0 table revision 2, LOCK_PATHS is new; every other section the same)
+#          s5same    the fix stage against S5: the records of OUT/<build>/NP/facts.kz (step run) compared with those of
+#                    S5/<build>/NP/facts.kz, section by section -> OUT/s5same/ (BASIS, P0_TABLE and the new LOCK_PATHS
+#                    may differ; the other sections are the same when the fix changed no extraction fact)
 #          run       basis --no-profile + extract --no-profile --targets-rule R-T1,R-T2 + show + relations for every build
 #                    below -> OUT/<build>/NP/ (relations.txt is the query's output)
 #          twice     T7: extract again from the same basis and relations again; bytes compared -> OUT/twice.txt
@@ -16,7 +20,7 @@
 #                    ED §2.3 under the rule targets, the candidate burden (rows per build, case rows among them); case
 #                    names are used in the queries of this script only -> OUT/count/
 #          sha       sha256 of every output -> OUT/sha256.txt
-#          all       identity npsame run twice count sha
+#          all       identity npsame run s5same twice count sha
 #   OUT    default /home/user/work/redesign/step2a/tests
 #
 # Builds (reference builds only), with the inputs of step2a_s1.sh .. step2a_s4.sh:
@@ -39,6 +43,7 @@ KS=$KZB/kz-static/kz-static
 KZD=$KZB/kz-dump/kz-dump
 EB=${EB:-/home/user/work/redesign/extract_baseline}
 S4=${S4:-/home/user/work/redesign/step2a/s4}
+S5=${S5:-/home/user/work/redesign/step2a/tests_s5}
 C1=/home/user/work/procrace/c1_build
 REF=/home/user/work/procrace/cfs_ref/cFS
 CT=/home/user/work/c5tools/build
@@ -155,6 +160,17 @@ npsame() {
   done
 }
 
+s5same() {
+  local D=$OUT/s5same; mkdir -p "$D"; : > "$D/s5same.txt"
+  for b in "${BUILDS[@]}"; do
+    mkdir -p "$D/$b"
+    dumpn "$S5/$b/NP/facts.kz" > "$D/$b/s5.dump"
+    dumpn "$OUT/$b/NP/facts.kz" > "$D/$b/fix.dump"
+    compare_records "$D/$b/s5.dump" "$D/$b/fix.dump" | sed "s/^/$b: /" | tee -a "$D/s5same.txt"
+    rm -f "$D/$b/s5.dump" "$D/$b/fix.dump"
+  done
+}
+
 run() {
   : > "$OUT/run.log"
   for b in "${BUILDS[@]}"; do
@@ -178,7 +194,7 @@ twice() {
 
 count() {
   mkdir -p "$OUT/count"
-  python3 -I "$HERE/step2a_tests_count.py" "$OUT" "$EB" | tee "$OUT/count/summary.txt"
+  python3 -I "$HERE/step2a_tests_count.py" "$OUT" "$EB" "$S5" | tee "$OUT/count/summary.txt"
 }
 
 sha() {
@@ -189,10 +205,11 @@ sha() {
 case "$STEP" in
   identity) identity ;;
   npsame) npsame ;;
+  s5same) s5same ;;
   run) run ;;
   twice) twice ;;
   count) count ;;
   sha) sha ;;
-  all) identity; npsame; run; twice; count; sha ;;
+  all) identity; npsame; run; s5same; twice; count; sha ;;
   *) echo "unknown step $STEP" >&2; exit 2 ;;
 esac

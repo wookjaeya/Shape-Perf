@@ -30,7 +30,7 @@
  *   desc_*       the child starts a thread whose code reads the field with no lock
  *   opn_*        the child starts a thread at a spawn call whose entry is not resolved; the reading function is also
  *                called where no known thread of the spawn reaches
- * The values are those of the fixture; they are not experiment results. */
+ * and the cases of relations rules revision 5 at the end.  The values are the fixture's; they are no experiment results. */
 #include <pthread.h>
 #include <setjmp.h>
 #include <string.h>
@@ -700,6 +700,285 @@ int opn_create(void) {
   return 0;
 }
 
+/* ---- relations rules revision 5 (with lock-set rules revision 2 and the incomplete-source targets) ----------
+ *   recur_*      after the spawn the creator calls a helper that calls the creator again (mutual recursion): the nested
+ *                call takes the lock again at the same call site and writes the field
+ *   memhook_*    after the spawn the creator calls, under the lock, a global function pointer set through memcpy to a
+ *                function that releases and takes the lock again (the flow graph resolves only its initializer)
+ *   dlhook_*     the same through a member set with the dlsym idiom (a store through a cast lvalue)
+ *   cbq_*        after the spawn the creator calls qsort with a comparison function that releases and takes the lock
+ *                again (a function without a body calls back the function passed to it)
+ *   unres_*      the child calls a function pointer loaded from bytes (not resolved); at run time it is a function
+ *                that calls the reading function with no lock
+ *   unres2_*     the reading function is address-taken and the child reaches it only through such a call
+ *   img_*        the spawn's entry is read from a union member of a static table whose other elements hold a function
+ *                of the other member; the reading function is also called where no known thread reaches */
+#include <dlfcn.h>
+#include <stdlib.h>
+
+/* ---- recur: the creator runs again after the spawn ------------------------------------------------------- */
+typedef struct { int used; } RecurRec;
+static RecurRec recur_recs[4];
+static pthread_mutex_t recur_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+int recur_read(void) {
+  int r;
+  pthread_mutex_lock(&recur_mutex);
+  if (recur_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&recur_mutex);
+  return r;
+}
+
+void *recur_worker(void *arg) {
+  (void)arg;
+  (void)recur_read();
+  return 0;
+}
+
+int recur_create(int depth);
+static int recur_again(void) { return recur_create(1); }
+
+int recur_create(int depth) {
+  pthread_t t;
+  pthread_mutex_lock(&recur_mutex);
+  if (depth == 0) pthread_create(&t, 0, recur_worker, 0);
+  recur_recs[0].used = depth;
+  pthread_mutex_unlock(&recur_mutex);
+  if (depth == 0) (void)recur_again();
+  return 0;
+}
+
+/* ---- memhook: a hook set through memcpy releases the lock ------------------------------------------------ */
+typedef struct { int used; } MemhookRec;
+static MemhookRec memhook_recs[4];
+static pthread_mutex_t memhook_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void memhook_noop(void) { }
+static void memhook_relock(void) {
+  pthread_mutex_unlock(&memhook_mutex);
+  pthread_mutex_lock(&memhook_mutex);
+}
+static void (*memhook_fn)(void) = memhook_noop;
+
+void memhook_install(void) {
+  void (*p)(void) = memhook_relock;
+  memcpy(&memhook_fn, &p, sizeof p);
+}
+
+int memhook_read(void) {
+  int r;
+  pthread_mutex_lock(&memhook_mutex);
+  if (memhook_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&memhook_mutex);
+  return r;
+}
+
+void *memhook_worker(void *arg) {
+  (void)arg;
+  (void)memhook_read();
+  return 0;
+}
+
+int memhook_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&memhook_mutex);
+  pthread_create(&t, 0, memhook_worker, 0);
+  memhook_fn();
+  memhook_recs[0].used = 1;
+  pthread_mutex_unlock(&memhook_mutex);
+  return 0;
+}
+
+/* ---- dlhook: a member set with the dlsym idiom ------------------------------------------------------------ */
+typedef struct { int used; } DlhookRec;
+static DlhookRec dlhook_recs[4];
+static pthread_mutex_t dlhook_mutex = PTHREAD_MUTEX_INITIALIZER;
+typedef struct { void (*hook)(void); int n; } DlhookOps;
+
+static void dlhook_noop(void) { }
+static DlhookOps dlhook_ops = {dlhook_noop, 0};
+static void *dlhook_handle;
+
+void dlhook_relock(void) {
+  pthread_mutex_unlock(&dlhook_mutex);
+  pthread_mutex_lock(&dlhook_mutex);
+}
+
+void dlhook_install(void) { *(void **)(&dlhook_ops.hook) = dlsym(dlhook_handle, "dlhook_relock"); }
+
+int dlhook_read(void) {
+  int r;
+  pthread_mutex_lock(&dlhook_mutex);
+  if (dlhook_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&dlhook_mutex);
+  return r;
+}
+
+void *dlhook_worker(void *arg) {
+  (void)arg;
+  (void)dlhook_read();
+  return 0;
+}
+
+int dlhook_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&dlhook_mutex);
+  pthread_create(&t, 0, dlhook_worker, 0);
+  dlhook_ops.hook();
+  dlhook_recs[0].used = 1;
+  pthread_mutex_unlock(&dlhook_mutex);
+  return 0;
+}
+
+/* ---- cbq: a function without a body calls back a function that releases the lock ------------------------- */
+typedef struct { int used; } CbqRec;
+static CbqRec cbq_recs[4];
+static pthread_mutex_t cbq_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int cbq_cmp(const void *a, const void *b) {
+  pthread_mutex_unlock(&cbq_mutex);
+  pthread_mutex_lock(&cbq_mutex);
+  return *(const int *)a - *(const int *)b;
+}
+
+int cbq_read(void) {
+  int r;
+  pthread_mutex_lock(&cbq_mutex);
+  if (cbq_recs[0].used == 1) r = 0;
+  else r = -1;
+  pthread_mutex_unlock(&cbq_mutex);
+  return r;
+}
+
+void *cbq_worker(void *arg) {
+  (void)arg;
+  (void)cbq_read();
+  return 0;
+}
+
+int cbq_create(void) {
+  pthread_t t;
+  int keys[2] = {2, 1};
+  pthread_mutex_lock(&cbq_mutex);
+  pthread_create(&t, 0, cbq_worker, 0);
+  qsort(keys, 2, sizeof keys[0], cbq_cmp);
+  cbq_recs[0].used = 1;
+  pthread_mutex_unlock(&cbq_mutex);
+  return 0;
+}
+
+/* ---- unres: the child calls a pointer the facts do not resolve; it may run a function that reads unlocked -- */
+typedef struct { int used; } UnresRec;
+static UnresRec unres_recs[4];
+static pthread_mutex_t unres_mutex = PTHREAD_MUTEX_INITIALIZER;
+static unsigned char unres_bytes[sizeof(void (*)(void))];
+
+int unres_read(void) {
+  if (unres_recs[0].used == 1) return 0;
+  return -1;
+}
+
+void unres_ctx(void) { (void)unres_read(); }
+
+void *unres_worker(void *arg) {
+  void (*cb)(void);
+  (void)arg;
+  memcpy(&cb, unres_bytes, sizeof cb);
+  cb();
+  pthread_mutex_lock(&unres_mutex);
+  (void)unres_read();
+  pthread_mutex_unlock(&unres_mutex);
+  return 0;
+}
+
+int unres_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&unres_mutex);
+  pthread_create(&t, 0, unres_worker, 0);
+  unres_recs[0].used = 1;
+  pthread_mutex_unlock(&unres_mutex);
+  return 0;
+}
+
+void unres_install(void) {
+  void (*p)(void) = unres_ctx;
+  memcpy(unres_bytes, &p, sizeof p);
+}
+
+/* ---- unres2: the address-taken reader is reached only through such a call --------------------------------- */
+typedef struct { int used; } Unres2Rec;
+static Unres2Rec unres2_recs[4];
+static pthread_mutex_t unres2_mutex = PTHREAD_MUTEX_INITIALIZER;
+static unsigned char unres2_bytes[sizeof(int (*)(void))];
+
+int unres2_read(void) {
+  if (unres2_recs[0].used == 1) return 0;
+  return -1;
+}
+
+void *unres2_worker(void *arg) {
+  int (*cb)(void);
+  (void)arg;
+  memcpy(&cb, unres2_bytes, sizeof cb);
+  (void)cb();
+  return 0;
+}
+
+int unres2_create(void) {
+  pthread_t t;
+  pthread_mutex_lock(&unres2_mutex);
+  pthread_create(&t, 0, unres2_worker, 0);
+  unres2_recs[0].used = 1;
+  pthread_mutex_unlock(&unres2_mutex);
+  return 0;
+}
+
+void unres2_install(void) {
+  int (*p)(void) = unres2_read;
+  memcpy(unres2_bytes, &p, sizeof p);
+}
+
+/* ---- img: the entry from a union member of a static table ------------------------------------------------- */
+typedef struct { int used; } ImgRec;
+static ImgRec img_recs[4];
+static pthread_mutex_t img_mutex = PTHREAD_MUTEX_INITIALIZER;
+typedef union { void (*init)(void); void *(*main)(void *); } ImgFn;
+typedef struct { int kind; ImgFn fn; } ImgEntry;
+
+int img_read(void) {
+  if (img_recs[0].used == 1) return 0;
+  return -1;
+}
+
+void *img_main(void *arg) {
+  pthread_mutex_lock(&img_mutex);
+  (void)img_read();
+  pthread_mutex_unlock(&img_mutex);
+  return arg;
+}
+
+static void img_init(void) { }
+static const ImgEntry img_table[3] = {{0, {img_init}}, {1, {.main = img_main}}, {0, {img_init}}};
+static int img_count = 3;
+
+void img_elsewhere(void) { (void)img_read(); }
+
+int img_create(void) {
+  pthread_t t;
+  int i;
+  pthread_mutex_lock(&img_mutex);
+  for (i = 0; i < img_count; i++) {
+    if (img_table[i].kind == 1) pthread_create(&t, 0, img_table[i].fn.main, 0);
+    else img_table[i].fn.init();
+  }
+  img_recs[0].used = 1;
+  pthread_mutex_unlock(&img_mutex);
+  return 0;
+}
+
 int main(void) {
   (void)entry_spawn();
   entry_locked_call();
@@ -727,5 +1006,17 @@ int main(void) {
   (void)desc_create();
   opn_elsewhere();
   (void)opn_create();
+  (void)recur_create(0);
+  memhook_install();
+  (void)memhook_create();
+  dlhook_install();
+  (void)dlhook_create();
+  (void)cbq_create();
+  unres_install();
+  (void)unres_create();
+  unres2_install();
+  (void)unres2_create();
+  img_elsewhere();
+  (void)img_create();
   return 0;
 }

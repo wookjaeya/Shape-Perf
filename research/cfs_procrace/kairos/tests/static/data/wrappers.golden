@@ -150,9 +150,10 @@ facts-view 1
       rule star-closed {}: star-closed: no exact trip count
 [consts] 1
   5 = 5 at wrappers.c:45
-[targets] 6
+[targets] 7
   site 25 wrappers.c:108:83 in fx_thread_create spawn-entry -> fx_trampoline@wrappers.c:110 via P:fx_thread_create#1 of 1
   site 26 wrappers.c:112:3 in fx_trampoline@wrappers.c:110 indirect-call -> fx_worker@wrappers.c:130 via fx_task.entry of 1
+  site 26 wrappers.c:112:3 in fx_trampoline@wrappers.c:110 indirect-call -> UNRESOLVED(incomplete-source) via fx_task.entry (the variable addr has the type unsigned long, no function pointer: the stores into it are not followed) of 1
   site 28 wrappers.c:117:51 in fx_task_create_impl@wrappers.c:117 spawn-entry -> fx_trampoline@wrappers.c:110 via F:fx_trampoline@wrappers.c:110 of 1
   site 32 wrappers.c:128:58 in fx_app_create spawn-entry -> fx_worker@wrappers.c:130 via P:fx_app_create#1 of 1
   site 34 wrappers.c:131:23 in fx_start spawn-entry -> fx_worker@wrappers.c:130 via F:fx_worker@wrappers.c:130 of 1

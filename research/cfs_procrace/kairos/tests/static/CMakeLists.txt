@@ -15,7 +15,9 @@
 #                    relpaths_np: --no-profile --targets-rule R-T1,R-T2); relsound.c for the soundness rules of
 #                    relations path C (relsound_np: the read run as the spawned entry, indirect callers, record-wide
 #                    writes, a lock taken again around a loop, a lock that is no static instance, an unresolved call,
-#                    the creator's caller's write, and the control); deepcond.c (a condition more than 200
+#                    the creator's caller's write, and the control; revisions 4 and 5 add their cases: the creator run
+#                    again, hooks whose targets are not complete, a callback of a function without a body, unresolved
+#                    calls of the child, an entry from a union member of a static table); deepcond.c (a condition more than 200
 #                    levels deep) is read by test_static_cli only
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table

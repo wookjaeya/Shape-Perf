@@ -1724,6 +1724,7 @@ enum KZ_DERIVES_REASON
   0x6 MULTI_LOC "several-locations"
   0x7 NO_DEF "no-definition"
   0x8 NOT_SHARED "not-a-shared-location"
+  0x9 WALK_BOUND "walk-bound"
 enum KZ_EXPR_OP
   0x0 NONE "none"
   0x1 CONST "const"
@@ -1875,6 +1876,7 @@ enum KZ_CALL_TARGET_REASON
   0x1 NO_FLOW "no-function-flows-to-it"
   0x2 UNKNOWN_SOURCE "unknown-source"
   0x3 CAST_FROM_DATA "cast-from-data"
+  0x4 INCOMPLETE_SOURCE "incomplete-source"
 enum KZ_IMAGE_KIND
   0x0 NONE "none"
   0x1 INT "int"
@@ -3066,4 +3068,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=5483476b2a3ddb8f8ea3b24572d46db384dc2bfd206272bbaa5a42467eb928f0
+fingerprint=6d1471a2f6a322736a5dc804c552ab01a00e014bad740dd03122da9168bc14b2

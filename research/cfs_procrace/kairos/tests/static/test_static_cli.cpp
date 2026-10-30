@@ -944,11 +944,15 @@ startup_script {
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &a), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q(rp), &b), 0);
     KZ_CHECK_EQ(a, b);
-    KZ_CHECK(has(a, "rules relations rules revision 4 (2026-10-30)"));
+    KZ_CHECK(has(a, "rules relations rules revision 5 (2026-10-30)"));
     // roots: the image entries of the table, the root that calls a root directly, the dispatching trampoline
     KZ_CHECK(has(a, "table-image-entry 2"));
     KZ_CHECK(has(a, "spawn calls resolved through the static image of the table their entry argument is read from: 1 [relpaths.c:154:10: alpha_main beta_main; the member "
-                    "EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written]"));
+                    "EntryUnion.main has a complete writer set with no writer instance under both rules of FIELD_STATUS and no leaf marked written; "));
+    // relations rules revision 5: another member of the union holds a function in one element, so the spawn's threads
+    // rest on its guard
+    KZ_CHECK(has(a, "the image of entry_defs has 1 function leaf/leaves of another member of its record (entry_defs[0].u.call early_init@relpaths.c:141; a union "
+                    "member read gives that value): that the spawn reads only the elements whose main is a function leaf rests on its guard"));
     // the same table with an element cleared at run time: its image is not the run-time value, so the spawn is not
     // resolved through it and the header says why (relations rules revision 3)
     {
@@ -981,7 +985,7 @@ startup_script {
     KZ_CHECK(has(a, "(not composed: on a path from the entry of ready_unlocked the call relpaths.c:52:3 pthread_mutex_unlock"));
     KZ_CHECK(has(a, "      feasibility: proven-impossible: lock #0 &rec_mutex@relpaths.c:31 (static-instance) is held from the same acquisition"));
     KZ_CHECK(has(a, "rests-on(assume.lock_acquisition_succeeds; assume.no_cross_member_pointer_arithmetic; assume.static_instance_read_after_write; per-field completeness rule (PI "
-                    "decision pending); premises of path C (static_facts §5h: "));
+                    "decision pending); premises of path C (static_facts §5h, §5i: "));
     KZ_CHECK(!has(a, "write after the spawn: relpaths.c:98:"));
     // the ends: the destructor of a thread-specific key; the guard of the terminal call with the value passed
     KZ_CHECK(has(a, "after that entry returns the thread may still run functions of this program (thread-specific destructors: pthread_key_create at relpaths.c:"));
@@ -1044,8 +1048,11 @@ startup_script {
     KZ_CHECK(has(held, "P0-unverified(pthread_cond_wait, pthread_mutex_lock, pthread_mutex_unlock)"));
     // relations rules revision 4: what the claim covers and the premises it rests on
     KZ_CHECK(has(held, "it concerns the writes of this call: whether their keys (held_recs[0]) name the record of the child this call starts"));
-    KZ_CHECK(has(held, "and the premises of path C (static_facts §5h)"));
-    KZ_CHECK(has(held, "premises of path C (static_facts §5h: lock identities overlap as their access paths show;"));
+    KZ_CHECK(has(held, "and the premises of path C (static_facts §5h, §5i)"));
+    KZ_CHECK(has(held, "premises of path C (static_facts §5h, §5i: lock identities overlap as their access paths show;"));
+    // relations rules revision 5: the premises the claim still rests on are named
+    KZ_CHECK(has(held, "a mutex is released only by the thread that holds it and its object changes only through the P0 primitives"));
+    KZ_CHECK(has(held, "an indirect call whose targets are not resolved calls only address-taken functions"));
     // a condition wait in a callee on the creator's lock, there and two calls below on a parameter: the write after it
     // holds no lock of the creator (LOCK_PATHS entry-release)
     KZ_CHECK(has(row("field WaitRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:321:3) holds no lock"));
@@ -1061,7 +1068,7 @@ startup_script {
     KZ_CHECK(has(row("field BackRec.used; read relsound.c:450:20 in back_read (through an indirect call whose targets are not resolved (back_read is address-taken)"),
                  "feasibility: undecidable: an indirect call whose targets these facts do not resolve may call back_read"));
     // the creator is address-taken and an indirect call is not resolved: its callers are not all known
-    KZ_CHECK(has(row("field AddrRec.used;"), "but addr_create is address-taken and these facts have 3 indirect call(s) whose targets are not resolved"));
+    KZ_CHECK(has(row("field AddrRec.used;"), "but addr_create is address-taken and these facts have 7 indirect call(s) whose targets are not resolved"));
     // a function that returns twice in the creator
     KZ_CHECK(has(row("field JumpRec.used;"), "_setjmp in jump_create returns twice: a non-local jump back to it runs code"));
     KZ_CHECK(has(a, "functions that return twice (C library; path C gives no proven-impossible over the lock sets of a function that calls one): setjmp, _setjmp"));
@@ -1076,7 +1083,101 @@ startup_script {
     KZ_CHECK(has(row("field OpnRec.used; read relsound.c:677:19 in opn_read (via the call relsound.c:692:34 in opn_elsewhere;"),
                  "feasibility: undecidable: the threads this spawn starts that these facts resolve (the child and its descendants) do not reach this call, but that set "
                  "is not complete: the spawn call relsound.c:689:10 in opn_worker that this code reaches has no resolved entry"));
-    KZ_CHECK(has(a, "proven-impossible 6, possible 11, undecidable 8, not graded 1"));
+    // relations rules revision 5 (lock-set rules revision 2, incomplete-source targets):
+    // the creator runs again after the spawn: its acquisition runs again in the nested call
+    KZ_CHECK(has(row("field RecurRec.used;"), "feasibility: possible: lock #"));
+    KZ_CHECK(has(row("field RecurRec.used;"), "but recur_create runs again after the spawn (the call relsound.c:748:25 reaches it): its acquisition relsound.c:744:3 runs again"));
+    // a hook set through memcpy, and a member set with the dlsym idiom: the call's targets are not complete, so it may
+    // release the lock (the write after it holds none)
+    KZ_CHECK(has(row("field MemhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:789:3) holds no lock"));
+    KZ_CHECK(has(row("field DlhookRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:831:3) holds no lock"));
+    // a function without a body calls back a function that releases the lock: its effect is read at the call
+    KZ_CHECK(has(row("field CbqRec.used;"), "feasibility: possible: a write after the spawn (relsound.c:868:3) holds no lock"));
+    // the child calls a pointer the facts do not resolve: a context it does not reach in the call graph, from an
+    // address-taken function, is undecidable; the locked direct call stays ruled out
+    KZ_CHECK(has(row("field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:884:30 in unres_ctx;"),
+                 "feasibility: undecidable: the threads this spawn starts (the child and the threads its code starts) do not reach this call in the static call graph, but "
+                 "their code makes indirect calls whose targets are not (all) resolved (relsound.c:890:3 in unres_worker (no-function-flows-to-it)), and unres_ctx runs "
+                 "from an address-taken function"));
+    KZ_CHECK(has(row("field UnresRec.used; read relsound.c:880:21 in unres_read (via the call relsound.c:892:9 in unres_worker)"), "feasibility: proven-impossible: lock #"));
+    // the address-taken reader the child reaches only through such a call: a row, undecidable
+    KZ_CHECK(has(row("field Unres2Rec.used; read relsound.c:918:22 in unres2_read (through an indirect call whose targets are not resolved (unres2_read is address-taken)"),
+                 "feasibility: undecidable: an indirect call whose targets these facts do not resolve may call unres2_read"));
+    // the entry from a union member of a static table whose other elements hold a function of the other member: the
+    // threads rest on the spawn's guard, so a context they do not reach is undecidable
+    KZ_CHECK(has(a, "the image of img_table has 2 function leaf/leaves of another member of its record (img_table[0].fn.init img_init@relsound.c:963"));
+    KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:967:34 in img_elsewhere;"),
+                 "but that set is not complete: the entries of the spawn relsound.c:974:33 are read from a static image: "));
+    KZ_CHECK(has(row("field ImgRec.used; read relsound.c:952:19 in img_read (via the call relsound.c:958:9 in img_main)"), "feasibility: proven-impossible: lock #"));
+    KZ_CHECK(has(a, "proven-impossible 8, possible 15, undecidable 11, not graded 1"));
+    // the targets of the hook calls: resolved, with a row incomplete-source
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rs) + " --section targets --section basis", &out), 0);
+    KZ_CHECK(has(out, "in memhook_create indirect-call -> UNRESOLVED(incomplete-source) via G:memhook_fn@relsound.c:762 (G:memhook_fn@relsound.c:762: its address "
+                      "[&memhook_fn] is passed at relsound.c:766:3 (memcpy) converted to another pointer type"));
+    KZ_CHECK(has(out, "in dlhook_create indirect-call -> UNRESOLVED(incomplete-source) via DlhookOps.hook (the writer set of the field DlhookOps.hook is not complete"));
+    KZ_CHECK(has(out, "count.indirect_calls_incomplete = 2 (resolved, with a CALL_TARGETS row incomplete-source"));
+    KZ_CHECK(has(out, "8 (copies of a DERIVES chain; a longer chain is cut with the reason walk-bound"));
+    KZ_CHECK(has(out, "64 (levels of an expression text stored in LOOP_ITERS"));
+    KZ_CHECK(has(out, "DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut"));
+    // the lock sets: the write after qsort holds no lock (the callback's release is applied at the call)
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(rs) + " --section lockset", &out), 0);
+    KZ_CHECK(has(out, "write CbqRec.used at relsound.c:868:3 in cbq_create held=0 {}"));
+  }
+
+  // ---- an object of internal linkage defined in a header two units include (relations rules revision 5) ----------
+  {
+    const fs::path X = work / "units";
+    fs::create_directories(X);
+    write(X / "unit_lock.h",
+          "#include <pthread.h>\nstatic pthread_mutex_t unit_mutex = PTHREAD_MUTEX_INITIALIZER;\ntypedef struct { int used; } URec;\nextern URec urecs[4];\n");
+    write(X / "unit_a.c",
+          "#include \"unit_lock.h\"\nURec urecs[4];\nvoid *u_worker(void *arg);\nint u_create(void) {\n  pthread_t t;\n  pthread_mutex_lock(&unit_mutex);\n"
+          "  pthread_create(&t, 0, u_worker, 0);\n  urecs[0].used = 1;\n  pthread_mutex_unlock(&unit_mutex);\n  return 0;\n}\nint main(void) { return u_create(); }\n");
+    write(X / "unit_b.c",
+          "#include \"unit_lock.h\"\nint u_read(void) {\n  int r;\n  pthread_mutex_lock(&unit_mutex);\n  if (urecs[0].used == 1) r = 0;\n  else r = 5;\n"
+          "  pthread_mutex_unlock(&unit_mutex);\n  return r;\n}\nvoid *u_worker(void *arg) { (void)arg; (void)u_read(); return 0; }\n");
+    const std::string uk = (X / "u.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "unit_a.c").string()) + " --source " + q((X / "unit_b.c").string()) +
+                        " --root " + q(X.string()) + " -o " + q(uk) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(uk) + " --section lockids", &out), 0);
+    KZ_CHECK(has(out, "&unit_mutex@unit_lock.h:2 closed not-static"));
+    KZ_CHECK(has(out, "an object of internal linkage defined in unit_lock.h, which is not the main file of the translation unit"));
+    std::string u;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(uk), &u), 0);
+    KZ_CHECK(has(u, "feasibility: undecidable: lock #0 &unit_mutex@unit_lock.h:2 (not-static) is held from the same acquisition across the spawn and every write after it"));
+    KZ_CHECK(!has(u, "proven-impossible: lock"));
+  }
+
+  // ---- a probe-create in a function two threads run (relations rules revision 5) --------------------------------
+  {
+    const fs::path X = work / "probe2";
+    fs::create_directories(X);
+    write(X / "probe2.c",
+          "#include <pthread.h>\n#include <string.h>\ntypedef struct { int used; char name[16]; } PSlot;\nstatic PSlot pslots[4];\n"
+          "int pslot_find(const char *name, int *out) {\n  int i;\n  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 1 && strcmp(pslots[i].name, name) == 0) {\n"
+          "      *out = i;\n      return 0;\n    }\n  }\n  return -17;\n}\n"
+          "int pslot_create(const char *name, int *out) {\n  int i;\n  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 1 && strcmp(pslots[i].name, name) == 0) return -5;\n  }\n"
+          "  for (i = 0; i < 4; i++) {\n    if (pslots[i].used == 0) {\n      strncpy(pslots[i].name, name, 15);\n      pslots[i].used = 1;\n      *out = i;\n      return 0;\n"
+          "    }\n  }\n  return -17;\n}\n"
+          "typedef struct { const char *name; } PCfg;\nstatic const PCfg pcfg = {\"omega\"};\n"
+          "static void shared_setup(void) {\n  int h = 0;\n  if (pslot_find(pcfg.name, &h) != 0) {\n    (void)pslot_create(pcfg.name, &h);\n  }\n}\n"
+          "void *t1_main(void *arg) {\n  (void)arg;\n  shared_setup();\n  return 0;\n}\n"
+          "void *t2_main(void *arg) {\n  (void)arg;\n  shared_setup();\n  return 0;\n}\n"
+          "int main(void) {\n  pthread_t a, b;\n  pthread_create(&a, 0, t1_main, 0);\n  pthread_create(&b, 0, t2_main, 0);\n  return 0;\n}\n");
+    const std::string pk = (X / "p.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "probe2.c").string()) + " --root " + q(X.string()) + " -o " + q(pk) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    std::string pr;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(pk), &pr), 0);
+    KZ_CHECK(!has(pr, "not a pair: probe-create"));
+    KZ_CHECK(has(pr, "creator: key unresolved (lookup): probe2.c:"));
+    KZ_CHECK(has(pr, "; the function is run by 2 actor(s) {t1_main (spawn-entry), t2_main (spawn-entry)} and the creation by {t1_main (spawn-entry), t2_main (spawn-entry)}: kept "
+                     "as a pair"));
+    KZ_CHECK(has(pr, "dependency: path A: 1 creator(s) of this partition in other actors"));
   }
 
   fs::remove_all(work);

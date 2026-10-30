@@ -304,7 +304,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - `status_type`(형 단위 보수): 위에 더해, 같은 형의 다른 필드에 대한 적중이 있고 형 없는 쓰기 지점이 프로그램에 있으면 DISABLED 다.
 - 옛 규칙(FACT_LOCS: 노출된 형의 모든 **대상**에 untyped write 를 셈)은 어떤 다른 필드가 대상인지에 따라 바뀐다. 두 새 규칙은 그렇지 않다.
 - `n_instances`: writer 인스턴스(직접·데이터 함수 쓰기 지점 하나, out-pointer 호출 하나). `once`: 인스턴스가 없거나(`no-writer-instance`), 하나이고 루프 밖에 있으며 그 함수가 한 번만 실행된다(`one-instance-once`). 한 번만 실행됨 = 주소를 잡히지 않고, spawn 진입이 아니고, 재귀가 아니고, 호출 지점이 없거나(뿌리) 루프 밖의 호출 지점 하나가 그런 함수 안에 있다.
-- 한계 [M]: writer 수집은 기존 기계와 같다. fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`(스칼라 배열 필드의 원소에 대한 저장)은 WRITERS 에도 FIELD_STATUS 에도 writer 로 잡히지 않는다(FUNC_WRITES 에도 없다). 기존 섹션을 바꾸지 않으려고 고치지 않았다. §8 에 남은 일로 적는다.
+- 한계 [M]: writer 수집은 기존 기계와 같다. fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`(스칼라 배열 필드의 원소에 대한 저장)은 WRITERS 에도 FIELD_STATUS 에도 writer 로 잡히지 않는다(FUNC_WRITES 에도 없다). 기존 섹션을 바꾸지 않으려고 고치지 않았다. §8 에 남은 일로 적는다. 셋째 수정(§5h)부터 FIELD_STATUS 는 그런 필드(const 가 아닌 스칼라 배열)를 complete 로 부르지 않는다(두 규칙 DISABLED, flag `array-element-stores-not-collected`).
 
 **AWAIT_L1: 대상에 무관한 L1 (i) (ED §5 R3 (b))** [D].
 - poll 루프마다 한 행이다. 관련 위치 = 술어가 직접 읽는 필드·전역(크기를 아는 배열 cursor 의 base 는 제외, FACT_LOOPS 와 같다) ∪ 술어가 부르는 함수와 그 함수가 부르는 함수들이 읽는 필드·전역(READS; `via` 는 이것만이 주는 것). **추출 대상은 넣지 않는다.**
@@ -519,4 +519,4 @@ golden 을 의도적으로 바꿀 때: `KZ_GOLDEN_UPDATE=1 ctest --test-dir <빌
 - 하지 않은 SPEC 단계: §4.1 5(문서 주석), §4.1 6 의 IR 수준 link 와 `-fcallgraph-info` 대조(app-unit probe 는 소스 수준으로 구현, §3.1), `.tbl` 바이트 대조, §4.2 6–8(transition filtering, Φ 대응, key·allocation), §3.17 anchor audit, message provenance(§4.3).
 - 프로필 문법에 지연·잠금 연산과 **데이터 함수 요약**을 선언하는 수단이 없다(K1 에 요청할 항목). 그때까지 지연·잠금은 명령줄 입력, 데이터 함수 표는 엔진의 내장 표이며 둘 다 사람이 넣은 입력으로 센다.
 - core golden 은 지금 프로필의 대상·역할·종료·spawn 선언에 의존한다. 프로필이 바뀌면 다시 만들고 diff 를 검토해야 한다.
-- writer 수집은 스칼라 배열 필드의 원소에 대한 저장(`x.arr[i] = v`)을 writer 로 잡지 않는다(fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`; WRITERS·FUNC_WRITES·FIELD_STATUS 모두) [M]. 기존 섹션을 바꾸므로 단계 2a S4 에서는 고치지 않았다. 그런 필드의 `writer-set-complete` 와 FIELD_STATUS 의 complete 는 이 저장을 세지 않은 값이다.
+- writer 수집은 스칼라 배열 필드의 원소에 대한 저장(`x.arr[i] = v`)을 writer 로 잡지 않는다(fixture `lockset.c` 의 `fx_g.tasks[slot] = slot`; WRITERS·FUNC_WRITES·FIELD_STATUS 모두) [M]. 기존 섹션을 바꾸므로 단계 2a S4 에서는 고치지 않았다. 옛 FACT_LOCS 의 `writer-set-complete` 는 이 저장을 세지 않은 값이다. FIELD_STATUS 는 셋째 수정(§5h)부터 그런 필드를 두 규칙 모두 DISABLED 로 낸다.

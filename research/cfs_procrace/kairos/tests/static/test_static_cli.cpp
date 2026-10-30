@@ -854,6 +854,26 @@ startup_script {
     // probe-create: on the polarity of the lookup's failure, and named in the handling column
     KZ_CHECK(has(a, "      handling: probe-create: on the lookup's failure result the same function creates the same key: "));
     KZ_CHECK(!has(a, "case:profile"));
+    // a key read from an image whose field is also written at run time: the image is no run-time value, so the key is
+    // unresolved and no exclusion rests on it (relations rules revision 3)
+    {
+      std::string text = read(fs::path(src));
+      const std::string decl = "static const Config configs[2] = {{\"alpha\"}, {\"beta\"}};";
+      KZ_CHECK(text.find(decl) != std::string::npos);
+      if (text.find(decl) != std::string::npos)
+        text.replace(text.find(decl), decl.size(),
+                     "static Config configs[2] = {{\"alpha\"}, {\"beta\"}};\nvoid config_rename(const char *n) { configs[1].name = n; }");
+      write(X / "src" / "relwritten.c", text);
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T1,R-T2 --source " + q((X / "src" / "relwritten.c").string()) + " --root " +
+                          q((X / "src").string()) + " -o " + q((X / "written.kz").string()) + " -- -std=c99 -pedantic",
+                      &out),
+                  0);
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "written.kz").string()), &w), 0);
+      KZ_CHECK(has(w, "image configs[1].name = \"beta\" (field-written)"));
+      KZ_CHECK(has(w, "; unresolved (image, field written at run time)"));
+      KZ_CHECK(!has(a, "field written at run time"));
+    }
     // the profile-driven mode with the extended facts: the case layer is named in every row
     KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", X / "prof.kz"), 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "prof.kz").string()), &out), 0);

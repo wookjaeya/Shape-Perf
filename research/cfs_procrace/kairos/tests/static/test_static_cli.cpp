@@ -779,6 +779,86 @@ startup_script {
     KZ_CHECK(has(out, "lockset.c:84:3 fx_get_id -> fx_unlock_shared direct {intra-tu,unlock-op}"));
   }
 
+  // ---- the rule targets and `kz-static relations` (relations.c) -----------------------------------------
+  {
+    const fs::path X = work / "relations";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/relations.c";
+    auto ex = [&](const std::string& mode, const fs::path& o) {
+      return run(q(tool) + " extract " + mode + " --source " + q(src) + " --root " + q(fixtures) + " -o " + q(o.string()) + " -- -std=c99 -pedantic", &out);
+    };
+    // --targets-rule: the profile-free mode only, and R-T1 / R-T2 only
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --targets-rule R-T1", X / "x.kz"), 2);
+    KZ_CHECK(has(out, "--targets-rule chooses the targets of the profile-free mode"));
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T3", X / "x.kz"), 2);
+    KZ_CHECK(has(out, "--targets-rule expects R-T1, R-T2 or R-T1,R-T2"));
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T2,R-T1", X / "both.kz"), 0);
+    KZ_CHECK(has(out, "rule targets               7 (R-T1 5, R-T2 3, both 1;"));
+    // the rule targets are recorded as rule targets, not as hand-entered inputs
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "both.kz").string()) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Service.self_id = rule R-T1  (unset)"));
+    KZ_CHECK(has(out, "target.TaskRec.registered = rule R-T2  (unset)"));
+    KZ_CHECK(has(out, "extract.targets_rule = R-T1,R-T2 (target rules revision 1)"));
+    KZ_CHECK(!has(out, "declared-assumption)\n  target."));
+    // only R-T1: the field read in a branch only is no target
+    KZ_CHECK_EQ(ex("--no-profile --targets-rule R-T1", X / "t1.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "t1.kz").string()) + " --section basis", &out), 0);
+    KZ_CHECK(has(out, "target.Service.self_id = rule R-T1"));
+    KZ_CHECK(!has(out, "target.TaskRec.registered"));
+    // without the option the profile-free facts have no targets, as before
+    KZ_CHECK_EQ(ex("--no-profile", X / "none.kz"), 0);
+    KZ_CHECK(!has(out, "rule targets"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "none.kz").string()) + " --section writers", &out), 0);
+    KZ_CHECK(has(out, "[writers] 0"));
+
+    // relations: usage and inputs
+    KZ_CHECK_EQ(run(q(tool) + " relations", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " relations a b", &out), 2);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()) + " --loc Slot.name", &out), 2);
+    KZ_CHECK(has(out, "unknown option"));
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((work / "garbage.kz").string()), &out), 1);
+    // facts without the extended facts: refused with the reason
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q(facts), &out), 1);
+    KZ_CHECK(has(out, "the facts have no extended facts"));
+    // -o writes what stdout would show; two runs give the same bytes
+    std::string a, b;
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()), &a), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()) + " -o " + q((X / "rel.txt").string()), &out), 0);
+    KZ_CHECK_EQ(read(X / "rel.txt"), a);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "both.kz").string()), &b), 0);
+    KZ_CHECK_EQ(a, b);
+    // the rows: every column, the layers, no case layer in the profile-free mode
+    KZ_CHECK(has(a, "mode profile-free"));
+    KZ_CHECK(has(a, "  namespace Slot.name (record type Slot; tables slots)"));
+    KZ_CHECK(has(a, "      key-parameter functions: lookups slot_find#0; creators slot_create#0"));
+    KZ_CHECK(has(a, "      active test: Slot.used == 1 is in use"));
+    KZ_CHECK(has(a, "not a pair: probe-create"));
+    KZ_CHECK(has(a, "creator: same key: relations.c:"));
+    KZ_CHECK(has(a, "key: read through the pointer field Worker.cfg -> configs@relations.c:"));
+    KZ_CHECK(has(a, "image configs[0].name = \"alpha\""));
+    KZ_CHECK(has(a, "  B1 Service.self_id -> notify#0 sites=2 callee-check=yes"));
+    KZ_CHECK(has(a, "      callee-check: notify returns -5 [ERR_ILLEGAL] when (eq param:id#0 0)"));
+    KZ_CHECK(has(a, "      handling: discarded 2, used 0, tested 0"));
+    KZ_CHECK(has(a, "      flip: static-possible: a written constant and the initial value give different results of the callee check"));
+    KZ_CHECK(has(a, "in task_spawn -> pthread_create; field TaskRec.registered"));
+    KZ_CHECK(has(a, "read subscript: the reader's own identity: task_self -> pthread_getspecific (P0 thread-specific-get)"));
+    KZ_CHECK(has(a, "feasibility: possible: lock window: #0 &table_mutex"));
+    KZ_CHECK(has(a, "feasibility: proven-impossible: lock #0 &table_mutex"));
+    KZ_CHECK(has(a, "      run-order: no record given"));
+    KZ_CHECK(has(a, "      violation: unconfirmed: RV2 §5.4"));
+    KZ_CHECK(has(a, "      layers: B P0 R\n"));
+    KZ_CHECK(!has(a, "case:profile"));
+    // the profile-driven mode with the extended facts: the case layer is named in every row
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts", X / "prof.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "prof.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "mode profile-driven"));
+    KZ_CHECK(has(out, "case:profile("));
+    // a command-line vocabulary is named as hand-entered (G0 or other names)
+    KZ_CHECK_EQ(ex("--profile " + q(profile) + " --extended-facts --delay-op fx_none", X / "voc.kz"), 0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "voc.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "hand-entered:command-line(1 items; G0 or other names, not automatic)"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

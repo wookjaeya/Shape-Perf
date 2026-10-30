@@ -314,6 +314,34 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **시험** [M]: `static_golden_lockset`(고정 도구 프로필 + `--extended-facts` + `--delay-op fx_delay`), `static_golden_lockset_np`(`--no-profile`; 둘의 새 섹션은 같다), fixture `lockset.c`, `test_static_cli` 의 F5 확인(옵션 없으면 다섯 섹션이 없음, 있으면 기존 섹션 view 동일, 두 모드 같은 행; 결과 조건부·모든 return·try 연산, 한 번 쓰인 handle(정적 인스턴스)과 두 번 불리는 함수가 쓰는 handle, spawn 앞뒤의 잠금 집합, 실패 경로, 형제 필드 노출, callee 를 거친 술어 읽기의 await, 대상을 바꿔도 FIELD_STATUS·LOCK_IDS·AWAIT_L1 이 같고 옛 FACT_LOCS 는 바뀜).
 
+## 5e. 규칙 대상(`--targets-rule`)과 사례 무관 질의 `kz-static relations` (2026-10-30, 단계 2a S5) [D][M]
+
+근거: `plan/extraction_design_20261030.md` §3.1–§3.4, §6 단계 2a 항목 2·3. 결과는 `plan/step2a_results_20261030.md`.
+
+**`extract --no-profile --targets-rule R-T1,R-T2`** [D]. 둘째 읽기의 추출 대상을 첫째 읽기의 확장 사실에서 규칙으로 고른다(`lib/llvm/target_rules.cpp`, "target rules revision 1"). 두 규칙 모두 **공유 base** 의 레코드 필드만 고른다.
+- 공유 base: 전역 객체, 전역 배열 원소, 전역 포인터의 대상, 전역에서 시작하는 접근 경로의 포인터 필드 대상(ARGFLOW `object`), 그리고 모든 반환값이 전역 객체(의 일부)의 주소이거나 null 인 함수의 호출 결과(RETURNS; 그런 호출 결과를 돌려주는 함수도 고정점까지 포함).
+- R-T1: 호출 인자가 읽거나 주소를 넘기는 필드(ARGFLOW 의 원천 `field`·`address`).
+- R-T2: 함수가 공유 base 로 읽어 반환하거나 포인터 매개변수를 통해 저장하는 필드, 또는 분기 조건에서 읽고 그 함수가 상수를 돌려주는 조건(RETURNS)에도 나오는 필드.
+- 매개변수·지역 변수·다른 호출 결과로만 닿는 필드는 고르지 않는다. 그 수를 extract 요약의 `rule targets` 줄과 BASIS `count.targets_rule_t1_unshared_only`·`_t2_unshared_only` 로 낸다.
+- 규칙 대상은 사람이 넣은 입력이 아니다: BASIS `target.T.f = rule R-T1` 등은 정책 `unset`, 출처 행 없음으로 적는다(명령줄 `--target` 은 지금처럼 `declared-assumption`, 출처 `researcher`). BASIS `extract.targets_rule` 과 `count.targets_rule*` 를 더한다.
+- 옵션은 `--no-profile` 과만 쓴다. 옵션이 없으면 프로필 없는 추출은 앞과 같이 대상이 없다. 새 섹션은 없고 facts schema 개정은 10 그대로다.
+
+**`kz-static relations <facts> [-o OUT]`** [D]. facts 컨테이너 하나를 읽어 텍스트를 낸다(`lib/llvm/relations.cpp`, "relations rules revision 1"). 필드·callee·사례 이름을 받지 않는다. 확장 사실(READS … AWAIT_L1)이 없는 facts 는 이유와 함께 거부한다. 같은 컨테이너는 같은 바이트를 낸다.
+- **머리**: facts 해시, 모드, 내장 프로필·P0 표·유도 규칙·대상 규칙의 판, P0 비교 표의 판과 항목(판 표기, 원문 대조), 입력 계층, 행위자 root 와 트램펄린, 경로별 행 수와 등급별 수.
+- **입력 계층**: 행마다 B(빌드), P0(P0 표: spawn·잠금·지연·종료의 유도와 비교 함수), L0(행이 시작 스크립트 진입 root 에 기댈 때), R(규칙)을 붙인다. 프로필 추출의 facts 이면 `case:profile(<이름>)`, 명령줄 어휘가 있으면 `hand-entered:command-line(<n> items; G0 or other names, not automatic)` 를 모든 행에 붙인다.
+- **P0 비교 표**(`p0_compare_table`, "P0 comparison table revision 1"): 바이트 문자열 비교 묶음(`memcmp`, `strcmp`, `strcoll`, `strncmp`, `strcasecmp`, `strncasecmp`)과 스레드 id 비교 묶음(`pthread_equal`). 추출은 이 표를 쓰지 않으므로 P0 표와 facts 의 P0_TABLE 은 그대로다. 프로그램이 같은 이름의 본문을 정의하면(inline 이 아닌 본문) 그 호출은 비교로 읽지 않는다.
+- **정적 행위자**: root = `main`(process), 해결된 spawn entry(CALL_TARGETS spawn-entry, table walk 반복의 task-main, 시작 스크립트 진입). root 의 코드 = 다른 root 에 들어가지 않고 호출 그래프(직접 호출과 해결된 간접 대상)로 닿는 함수. process 가 아닌 root 가 다른 root 를 부르면 트램펄린이다: 행위자가 아니고, 그 코드는 그것이 부르는 root 들(트램펄린을 건너)의 것이다. 필드 기반 may 사실이다.
+- **경로 B**: 원천이 공유 base 필드인 인자(ARGFLOW `field`)를 (필드, 본문 있는 callee, 인자 위치)로 묶는다. 필드의 writer 가 없거나 읽는 쪽과 쓰는 쪽이 한 행위자뿐이면 뺀다(수를 머리에 낸다). 행: 사이트마다 결과 사용(버림·사용·검사), 필드의 INIT 값과 writer(대상이면 WRITERS 의 값·guard, 아니면 LOCKSET 쓰기 위치), 행위자, callee 검사(그 매개변수가 조건에 나오는 callee 의 상수 반환과, 조건 안에서 그 매개변수로 부르는 함수의 RET_CONSTS 한 단계).
+- **경로 C**: 해결된 entry 가 있는 spawn 호출마다, 생성자 함수가 그 호출 **뒤(소스 위치)** 에 쓰는 필드(LOCKSET 쓰기 행)와, spawn 된 entry 의 행위자가 닿는 코드에서 같은 필드를 분기·반환·out 저장으로 읽는 곳(READS)의 짝이다. 생성자가 받는 정체성(spawn 연산의 매개변수 가운데 out-store 가 있는 것, P0 의 out 인자), 쓰기의 첨자(WRITERS key), 읽기의 첨자가 읽는 쪽의 자기 정체성인지(첨자의 호출 결과가 P0 thread-self·thread-specific-get 에 닿는 사슬)를 적는다. 읽기가 정적 인스턴스 잠금을 잡지 않으면 그 함수의 호출 지점마다 따로 행을 낸다(spawn 된 entry 가 닿지 않는 호출이면 그렇게 적는다).
+- **경로 A**: 키 비교 = (a) P0 비교 표 함수의 호출에서 비교되는 두 인자 가운데 하나가 레코드 필드이고 다른 하나가 매개변수(또는 그 대상), (b) 분기 조건의 `==`·`!=` 가 필드와 매개변수(루프 안이면 지역 변수·호출 결과도)를 비교함. 검색 = 그 비교의 루프(A1) 또는 그 비교를 가진 함수를 부르는 간접 호출이 있는 다른 함수의 루프(A2). 검색이 레코드 형을 전역 객체에서 읽지 않으면(전역 표 없음) 뺀다. 이름 공간 = (레코드 형, 키 필드). 활성 필드 = 검색 루프의 탈출 조건이 읽는 같은 형의 다른 필드. 활성 시험 값 = 키 비교가 있는 검색 루프에서 활성 필드를 상수와 `==`(사용 중)·`!=`(빈 칸)로 비교한 값. 키 매개변수 함수 = PARAM_FLOW 로 그 비교에 닿는 (함수, 매개변수). 사용 = 키 매개변수 함수를 바깥에서 부르는 호출. 키 필드 쓰기에 직접 호출로 닿는 함수의 사용은 생성자, 나머지는 조회다. 구획 = 사슬을 따라 처음 상수 인자가 있는 호출의 상수들. 키 값 = 문자열·상수 인자, 또는 포인터 필드 흐름(PTR_FIELDS)과 정적 이미지(GLOBAL_IMAGES)로 닿는 값(매크로와 철자 위치 포함). 조회 행마다 같은 구획의 생성자를 짝으로 내고, 키 상수가 다르면, 한 행위자뿐이면, probe-create(같은 함수에서 조회 결과 아래 같은 키 인자로 생성)이면 짝에서 빼고 그 이유를 적는다. 처리: 조회를 감싼 루프(종류, 횟수, 탈출식, 지연 호출과 F8 사슬), 결과를 돌려주는 함수를 거슬러 오른 사슬, 그 길의 종료 연산(결과 아래이거나, 결과 또는 결과를 쓴 함수의 지역 변수를 시험하는 guard 아래에서 쓴 필드를 인자로 받는 것; 지역 변수 경유는 may).
+- **수명**(경로 A 의 이름 공간 머리): 키·활성 필드의 writer 와 값·guard, 등급(빈 칸 값을 쓰면 release, process 행위자만 닿는 루프·early-init 쓰기이면 initialization, 사용 중 값이면 reservation or activation), P0 out 인자로 쓰는 호출(예: thread-create 의 id), 생성자 매개변수가 thread-creation 기본 연산의 entry 인자로 그대로 가면 "그 entry 가 돌아온 뒤 프로그램의 함수가 돌지 않아 그 길에는 표 쓰기가 없다", 다른 검색이 시험하는 활성 필드를 이 검색이 시험하지 않으면 "no activity check".
+- **칸** (ED §3.4): `dependency`(정적 근거), `run-order`(이 판은 실행 기록을 읽지 않는다: 늘 `no record given`), `feasibility`(정적, `proven-impossible` / `possible` / `undecidable` 과 이유), `violation`(RV2 §5.4; 기록이 없으면 `unconfirmed`), `flip`(`static-possible` / `static-undetermined` / `none` 과 이유), `layers`. 한 칸이 다른 칸을 정하지 않는다.
+- **실현 가능성** [D]: C 는 F5 must 정체성으로만 "불가"를 낸다: spawn 과 그 뒤 모든 쓰기가 같은 획득 호출이 연 정적 인스턴스 잠금 L 을 잡고 읽기(또는 그 호출 지점)도 L 을 잡으면 `proven-impossible`. L 이 spawn 에서 잡혀 있지 않고 쓰기만 잡으면 `possible`(잠금 창). 읽기가 잠금을 잡지 않으면 `possible`. 읽기가 잠금 실패 경로에 있으면 `undecidable`. 정적 인스턴스가 아닌 잠금으로는 "불가"를 내지 않는다. B 는 두 행위자가 한 table walk 에서 만들어지면 생성 순서와, 같은 반복에서 생성 뒤 부르는 함수가 닿는 await 루프(AWAIT_L1 필드 단위 규칙)를 적고 `undecidable`(fixed unconfirmed)로 낸다: 사용이 그 행위자의 대기 상태 앞인지 뒤인지는 정적으로 정하지 않는다. A 는 늘 `undecidable` 이다(생성 순서가 초기화 순서를 정하지 않는다).
+- **뒤집힘 신호** [D]: B 는 callee 검사 조건을 인자 = INIT 값과 인자 = 각 상수 writer 값으로 평가해 결과가 다르면 `static-possible`, 평가할 수 없는 부분(호출 결과, 상수가 아닌 값)이 있으면 `static-undetermined`. C 는 읽는 함수의 상수 반환 가운데 그 필드에 기대는 조건을 필드 = INIT 값과 필드 = 생성자의 상수 쓰기 값으로 평가한다. A 는 같은 구획·같은 키의 생성자가 다른 행위자에 있으면 `static-possible`, 키가 풀리지 않으면 `static-undetermined`. 판정이 아니다.
+- 한계 [I]: 실행 기록 입력이 없다. C 의 "뒤"는 소스 위치이고 CFG 순서가 아니다. 행위자는 필드 기반 may 근사다. 구획은 상수 값의 집합 비교다. 지역 변수 경유의 종료 도달은 may 다. A 의 `==` 비교 상대가 정의 하나인 지역 변수여도 facts 가 그 정의를 담지 않으면 풀지 않는다.
+
+**시험** [M]: fixture `relations.c`, `static_golden_relations`(고정 도구 프로필 + `--extended-facts`: 모든 행에 사례 계층), `static_golden_relations_np`(`--no-profile --targets-rule R-T1,R-T2`; relations 를 두 번 돌려 같은 바이트), `test_static_cli` 의 확인(옵션 조합, 규칙 대상의 기록, relations 의 사용법·거부·`-o`·결정성·칸·계층).
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

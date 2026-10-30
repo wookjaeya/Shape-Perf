@@ -1,0 +1,161 @@
+extract
+  translation units          1
+  functions                  20 (bodies read 14, in system headers skipped 0)
+  call sites                 28
+  indirect calls             0 (resolved 0, unresolved 0)
+  spawn calls                5 (entry resolved 5)
+  loops                      4 (table walks resolved 0, failed 0, under a declared assumption 0)
+  certificate-view rules     unroll 4, await 0, star-closed 0
+  spawn parameters           0, unrolled iteration rows 0
+  out-pointer summaries      store-only 2, escaping 0, unsummarized 2
+  untyped write sites        0 in the program, 0 of them count for a target
+  unknown-effect passes      0 (pointers that reach a target, passed to code without a body, an unresolved call or a variadic position)
+  location Config.name   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Service.self_id   writers 1 (direct 1, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Slot.name   writers 1 (direct 0, data function 1, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Slot.used   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location TaskRec.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 2, cast 0, union 0, unknown effect 0  -> DISABLED
+  location TaskRec.registered   writers 2 (direct 2, data function 0, out-pointer 0, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  location Worker.handle   writers 2 (direct 0, data function 0, out-pointer 2, initial values 1), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> writer-set-complete
+  hand-entered inputs        38 (built-in P0 table 38, command line 0)
+  declared assumptions       0 (static images of table-walk links that are not const)
+profile-free mode            built-in profile, 38 P0 entries (P0 table revision 1 (2026-10-30)), wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  first pass                 functions with a body 14, control-flow graphs 14, call-graph components 14 (recursive 0)
+  delay operations (F8)      must 0 (vocabulary), may 0 (not vocabulary; loops whose own body calls one: 0)
+  terminal operations (F8)   must 0, noreturn 0, may 0 (all vocabulary)
+  spawn operations (F7)      entry-argument 0, called-by-entry 0, fixed-entry 3 (callers of a fixed-entry operation left as they are: 0)
+  startup-script entries     spawn calls with a data entry that reach the symbol lookup 0, rows 0 (in the closure 0)
+  rule targets               7 (R-T1 5, R-T2 3, both 1; left out, reached only through an unshared base: R-T1 0, R-T2 0)
+facts-view 1
+[functions] 20
+  fn 0 child_main relations.c:146-150 params=1 {defined,address-taken}
+  fn 1 client_main relations.c:108-115 params=1 {defined,address-taken}
+  fn 2 main relations.c:169-179 params=0 {defined}
+  fn 3 notify relations.c:97-100 params=2 {defined}
+  fn 4 other_main relations.c:117-123 params=1 {defined,address-taken}
+  fn 5 pthread_create /usr/include/pthread.h:202 params=4 {}
+  fn 6 pthread_getspecific /usr/include/pthread.h:1305 params=1 {}
+  fn 7 pthread_mutex_lock /usr/include/pthread.h:794 params=1 {}
+  fn 8 pthread_mutex_unlock /usr/include/pthread.h:835 params=1 {}
+  fn 9 service_main relations.c:102-106 params=1 {defined,address-taken}
+  fn 10 slot_create relations.c:44-60 params=2 {defined}
+  fn 11 slot_find relations.c:33-42 params=2 {defined}
+  fn 12 slot_release relations.c:62-64 params=1 {defined}
+  fn 13 strcmp /usr/include/string.h:156 params=2 {builtin}
+  fn 14 strncpy /usr/include/string.h:144 params=3 {builtin}
+  fn 15 task_check relations.c:138-144 params=0 {defined}
+  fn 16 task_self relations.c:134-136 params=0 {defined}
+  fn 17 task_spawn relations.c:152-158 params=1 {defined}
+  fn 18 task_spawn_locked relations.c:160-167 params=1 {defined}
+  fn 19 worker_setup relations.c:80-88 params=0 {defined}
+[writers] 8
+  Service.self_id assign at relations.c:104:3 in service_main value=const 7 [7] key=service {} n/a
+  Slot.name memcpy at relations.c:53:7 in slot_create value=top [copy of name] key=slots[i].name guard=(and (lt local:i 4) (eq field:Slot.used 0)) {in-loop} n/a
+  Slot.used assign at relations.c:54:7 in slot_create value=const 1 [1] key=slots[i] guard=(and (lt local:i 4) (eq field:Slot.used 0)) {in-loop} n/a
+  Slot.used assign at relations.c:63:3 in slot_release value=const 0 [0] key=slots[i] {} n/a
+  TaskRec.registered assign at relations.c:155:3 in task_spawn value=const 1 [1] key=tasks[slot] {} n/a
+  TaskRec.registered assign at relations.c:164:3 in task_spawn_locked value=const 1 [1] key=tasks[slot] {} n/a
+  Worker.handle out-pointer at relations.c:84:9 in worker_setup via slot_find relations.c:37 value=symbolic [i] key=*slot_find argument 1 guard=(and (lt local:i 4) (and (eq field:Slot.used 1) (eq (call-result strcmp (seq field:Slot.name (seq param:name#0))) 0))) {} n/a
+  Worker.handle out-pointer at relations.c:85:13 in worker_setup via slot_create relations.c:55 value=symbolic [i] key=*slot_create argument 1 guard=(and (lt local:i 4) (eq field:Slot.used 0)) {} n/a
+[locs] 7
+  Config.name writer-set-complete writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Service.self_id writer-set-complete writers=1 (direct 1, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Slot.name writer-set-complete writers=1 (direct 0, data-fn 1, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Slot.used writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  TaskRec.id DISABLED writers=0 (direct 0, data-fn 0, out-pointer 0) atype: untyped=0 escape=2 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  TaskRec.registered writer-set-complete writers=2 (direct 2, data-fn 0, out-pointer 0) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+  Worker.handle writer-set-complete writers=2 (direct 0, data-fn 0, out-pointer 2) atype: untyped=0 escape=0 cast=0 union=0 unknown-effect=0 init=1 unresolved-indirect=0
+
+# relations
+kz-relations 1
+rules relations rules revision 1 (2026-10-30)
+mode profile-free
+  extract.builtin_profile = phi 1; profile "kz-static-builtin-minimal"; (profile hash in the header)
+  extract.profile = kz-static-builtin-minimal / 
+  extract.p0_table = P0 table revision 1 (2026-10-30), 38 entries
+  extract.derivation_rules = wrapper derivation rules F7/F8 revision 1 (2026-10-30)
+  extract.targets_rule = R-T1,R-T2 (target rules revision 1): the targets of the second pass, chosen from the first pass's ARGFLOW (R-T1) and READS with RETURNS (R-T2), shared bases only (a global object, a global array element, the pointee of a global pointer or of a pointer field reached from a global)
+p0-compare P0 comparison table revision 1 (2026-10-30): memcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcoll (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strcasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) strncasecmp (byte-string comparison; POSIX.1-2017 / glibc 2.39; source unverified) pthread_equal (thread-id comparison; POSIX.1-2017 / glibc 2.39; source unverified)
+layers of these facts: B (build: compile database, link, closure, startup script lines), P0 (the P0 tables), L0 (startup-script loader semantics, when a row rests on a script entry), R (extraction and relation rules)
+run order: no record given (this revision reads no run record; the column says so in every row)
+actors: roots 5 (process 1, spawn-entry 4, table-walk-entry 0, script-entry 0), trampolines 0
+summary A 2 (namespaces 1, lookup uses 2, with a creator of the same partition in another actor 1, key-matched 1) B 1 (with a callee check 1) C 2 (self-identity reads 2); flip static-possible 4, static-undetermined 0, none 1; feasibility proven-impossible 1, possible 1, undecidable 3
+[A] 2 (namespaces 1, key comparisons 2; left out: searches over no global table 0)
+  namespace Slot.name (record type Slot; tables slots)
+      search: A1 search loop relations.c:35:3 in slot_find: key Slot.name strcmp at relations.c:36:31 compared with parameter 0 [name] (search parameter 0)
+      search: A1 search loop relations.c:46:3 in slot_create: key Slot.name strcmp at relations.c:47:31 compared with parameter 0 [name] (search parameter 0)
+      active fields: Slot.used 
+      active test: Slot.used == 1 is in use (a search with the key comparison requires it)
+      lifecycle Slot.name: writers 1 from WRITERS (the field is an extraction target)
+        memcpy at relations.c:53:7 in slot_create value=top [copy of name] guard=(and (lt local:i 4) (eq field:Slot.used 0))
+      lifecycle Slot.used: writers 2 from WRITERS (the field is an extraction target)
+        assign at relations.c:54:7 in slot_create value=1 [1] guard=(and (lt local:i 4) (eq field:Slot.used 0)) class=reservation or activation (writes the in-use value)
+        assign at relations.c:63:3 in slot_release value=0 [0] (process actor only)
+      publication writes of the creator slot_create#0: Slot.name memcpy relations.c:53:7 in slot_create; Slot.used assign relations.c:54:7 in slot_create := 1
+      key-parameter functions: lookups slot_find#0; creators slot_create#0
+      uses: lookups 2, creators 3 (calls from outside the key-parameter functions; a creator reaches a write of the key)
+  A1 lookup relations.c:84:9 in worker_setup -> slot_find#0 namespace Slot.name partition {} key known
+      key: read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta"
+      actors: {main (process)}; result=tested
+      not a pair: probe-create (same function, the creator's key read is under the lookup's result, the same key argument; program order after the lookup): relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
+      not a pair: key constants differ: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {other_main (spawn-entry)}
+      not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {other_main (spawn-entry)}
+      handling: in the loop relations.c:83:3 kind constant-trip trip exact 2 exit (not (lt local:i 2))
+      handling: result tested; no return of it and no terminal operation under it found
+      dependency: path A: no creator of this partition in another actor
+      run-order: no record given
+      feasibility: undecidable: no pair
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: none: no creator of the same partition and key in another actor; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
+      layers: B P0 R
+  A2 lookup relations.c:113:9 in client_main -> slot_find#0 namespace Slot.name partition {} key known
+      key: string literal "gamma"
+      actors: {client_main (spawn-entry)}; result=discarded
+      creator: same key: relations.c:120:9 in other_main -> slot_create key string literal "gamma" actors {other_main (spawn-entry)}
+      not a pair: key constants differ: relations.c:85:13 in worker_setup -> slot_create key read through the pointer field Worker.cfg -> configs@relations.c:70 (PTR_FIELDS resolved), elements from 0 step 1 count 2; image configs[0].name = "alpha"; image configs[1].name = "beta" actors {main (process)}
+      not a pair: key constants differ: relations.c:121:9 in other_main -> slot_create key string literal "delta" actors {other_main (spawn-entry)}
+      handling: result discarded; no return of it and no terminal operation under it found
+      dependency: path A: 1 creator(s) of this partition in other actors
+      run-order: no record given
+      feasibility: undecidable: the facts give no static order between the lookup's actor and the creators' actors (creation order does not fix the order of initialization)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a creator of the same key and partition in another actor: the lookup's failure return becomes success if its publication comes first; search returns: slot_create returns -17 [ERR_NOT_FOUND], slot_create returns -5 [ERR_ILLEGAL], slot_create returns 0 [0], slot_find returns -17 [ERR_NOT_FOUND], slot_find returns 0 [0]
+      layers: B P0 R
+[B] 1 (field-argument groups 3; left out: no writer 2, one actor only 0)
+  B1 Service.self_id -> notify#0 sites=2 callee-check=yes
+      site relations.c:111:3 in client_main [service.self_id] base=global hops=0 result=discarded
+      site relations.c:112:3 in client_main [service.self_id] base=global hops=0 result=discarded
+      field: INIT 0 (service); writers 1 from WRITERS (the field is an extraction target)
+        assign at relations.c:104:3 in service_main value=7 [7]
+      actors: readers {client_main (spawn-entry)}; writers {service_main (spawn-entry)} (inter-actor)
+      callee-check: notify returns -5 [ERR_ILLEGAL] when (eq param:id#0 0)
+      handling: discarded 2, used 0, tested 0
+      dependency: path B: the shared field Service.self_id is read as argument 0 of notify at 2 sites; its writers run in another actor; the callee's constant returns depend on the argument
+      run-order: no record given
+      feasibility: undecidable: no static order between the reader and the writer actors (not created by one table walk; the process root's order relative to the spawns is not decided)
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: a written constant and the initial value give different results of the callee check
+      layers: B P0 R (writers: rule targets)
+[C] 2 (spawn calls 5, with no resolved entry 0)
+  C1 spawn relations.c:153:12 in task_spawn -> pthread_create; field TaskRec.registered; read relations.c:141:26 in task_check (the read itself) self-identity
+      spawn: callee pthread_create, entries child_main; child actors {child_main (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {}
+      write after the spawn: relations.c:155:3 key=tasks[slot] value=1 [1] locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:154:3]
+      read: [tasks[task_self()].registered] use=branch index=(seq (call-result task_self)) guard=- locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:140:3]
+      read subscript: the reader's own identity: task_self -> pthread_getspecific (P0 thread-specific-get)
+      dependency: path C: the creator writes TaskRec.registered after the spawn; code the spawned entry reaches reads it at the subscript of its own identity; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: possible: lock window: #0 &table_mutex@relations.c:30 (static-instance) is not held at the spawn; the writes after it hold it from a later acquisition, so the read may come before them
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: task_check returns -17 [ERR_NOT_FOUND] with the earlier value (INIT 0 (tasks)), not with the written value 1 [1]; task_check returns 0 [0] not with the earlier value (INIT 0 (tasks)), with the written value 1 [1]
+      layers: B P0 R
+  C2 spawn relations.c:163:8 in task_spawn_locked -> pthread_create; field TaskRec.registered; read relations.c:141:26 in task_check (the read itself) self-identity
+      spawn: callee pthread_create, entries child_main; child actors {child_main (spawn-entry)}; creator identity: arg 0 (P0 pthread_create stores the new thread id through it); locks held {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:162:3]
+      write after the spawn: relations.c:164:3 key=tasks[slot] value=1 [1] locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:162:3]
+      read: [tasks[task_self()].registered] use=branch index=(seq (call-result task_self)) guard=- locks {#0 &table_mutex@relations.c:30 (static-instance)} acquired-at [relations.c:140:3]
+      read subscript: the reader's own identity: task_self -> pthread_getspecific (P0 thread-specific-get)
+      dependency: path C: the creator writes TaskRec.registered after the spawn; code the spawned entry reaches reads it at the subscript of its own identity; that the two identities are equal is not decided statically
+      run-order: no record given
+      feasibility: proven-impossible: lock #0 &table_mutex@relations.c:30 (static-instance) is held from the same acquisition across the spawn and every write after it, and the read holds it: the read cannot fall between them
+      violation: unconfirmed: RV2 §5.4 needs an observed failure with a feasible other order, or a realized forced order; no record given
+      flip: static-possible: task_check returns -17 [ERR_NOT_FOUND] with the earlier value (INIT 0 (tasks)), not with the written value 1 [1]; task_check returns 0 [0] not with the earlier value (INIT 0 (tasks)), with the written value 1 [1]
+      layers: B P0 R

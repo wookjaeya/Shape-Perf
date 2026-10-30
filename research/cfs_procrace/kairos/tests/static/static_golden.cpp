@@ -36,6 +36,7 @@ struct Case {
   std::vector<std::string> options;   // extra kz-static options
   std::vector<std::string> sections;  // the sections of the text view
   bool no_profile = false;            // extract --no-profile instead of the fixture profile
+  bool relations = false;             // also `kz-static relations` (twice: the same bytes), after the view
 };
 
 // The sections that carry facts; `basis` (tool hash, counts) is left out, it changes with the tool.
@@ -48,6 +49,8 @@ const std::vector<std::string> kExtendedSections = {"functions", "loops", "reads
 const std::vector<std::string> kFlowSections = {"functions", "argflow", "paramflow", "ptrfields", "gimages"};
 // F5 and the target-independent rules (written with those of F1-F3).
 const std::vector<std::string> kLockSections = {"functions", "lockops", "lockids", "lockset", "fstatus", "awaits"};
+// `kz-static relations` (with the rule targets in the profile-free mode): the targets and their writers.
+const std::vector<std::string> kRelationSections = {"functions", "writers", "locs"};
 
 const std::vector<Case>& cases() {
   static const std::vector<Case> all = {
@@ -68,6 +71,8 @@ const std::vector<Case>& cases() {
       {"argflow_np", "argflow.c", {}, kFlowSections, true},
       {"lockset", "lockset.c", {"--extended-facts", "--delay-op", "fx_delay"}, kLockSections},
       {"lockset_np", "lockset.c", {}, kLockSections, true},
+      {"relations", "relations.c", {"--extended-facts"}, kRelationSections, false, true},
+      {"relations_np", "relations.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
   };
   return all;
 }
@@ -184,7 +189,22 @@ int run_fixture(const Case& c, const std::string& tool, const std::string& fixtu
     std::fprintf(stderr, "show failed:\n%s\n", view.c_str());
     return 1;
   }
-  return compare(c.name, without_first_line(log1) + view, data);
+  if (!c.relations) return compare(c.name, without_first_line(log1) + view, data);
+  // the relations: the same bytes twice; the line with the facts hash (it changes with the tool) is left out
+  std::string r1, r2;
+  if (run(quote(tool) + " relations " + quote(out1), &r1) != 0 || run(quote(tool) + " relations " + quote(out1), &r2) != 0) {
+    std::fprintf(stderr, "relations failed:\n%s\n", r1.c_str());
+    return 1;
+  }
+  if (r1 != r2) {
+    std::fprintf(stderr, "%s: two relations runs give different text\n", c.name);
+    return 1;
+  }
+  std::string rel;
+  std::istringstream lines(r1);
+  for (std::string l; std::getline(lines, l);)
+    if (l.rfind("facts ", 0) != 0) rel += l + "\n";
+  return compare(c.name, without_first_line(log1) + view + "\n# relations\n" + rel, data);
 }
 
 int run_core(const std::string& tool, const std::string& profile, const std::string& recipe, const std::string& bundle, const std::string& data, const std::string& work) {

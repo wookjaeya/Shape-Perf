@@ -16,7 +16,7 @@ namespace {
 
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
-                                 "outcalls", "fwrites"};
+                                 "outcalls", "fwrites", "p0",      "derived",   "spawnwrap"};
 
 class View {
  public:
@@ -38,6 +38,15 @@ class View {
                  {"outcalls", &View::outcalls},   {"fwrites", &View::fwrites}};
     for (const auto& t : table)
       if (o_.sections.empty() || o_.sections.count(t.name) != 0) (this->*t.fn)(os);
+    // the sections of the profile-free mode, when the container has them (revision 5): a container
+    // without them reads as before
+    const struct {
+      const char* name;
+      uint32_t id;
+      void (View::*fn)(std::ostream&);
+    } added[] = {{"p0", KZ_SEC_P0_TABLE, &View::p0}, {"derived", KZ_SEC_OP_DERIV, &View::derived}, {"spawnwrap", KZ_SEC_SPAWN_WRAP, &View::spawnwrap}};
+    for (const auto& t : added)
+      if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
     return kz::Status::success();
   }
@@ -69,6 +78,9 @@ class View {
     if (!(s = read(KZ_SEC_LOOP_ITERS, &iters_)).ok()) return s;
     if (!(s = read(KZ_SEC_SPAWN_PARAMS, &spawn_params_)).ok()) return s;
     if (!(s = read(KZ_SEC_FUNC_WRITES, &fwrites_)).ok()) return s;
+    if (!(s = read(KZ_SEC_P0_TABLE, &p0_)).ok()) return s;
+    if (!(s = read(KZ_SEC_OP_DERIV, &opderiv_)).ok()) return s;
+    if (!(s = read(KZ_SEC_SPAWN_WRAP, &spawnw_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -325,6 +337,48 @@ class View {
       os << " at " << pos(f->file, f->line, 0) << "\n";
     }
   }
+  // ---- the profile-free mode (revision 5) ----
+  std::string site_text(uint32_t site) const {
+    if (site == KZ_NONE32) return "-";
+    std::string t = "site " + std::to_string(site);
+    auto cit = call_by_site_.find(site);
+    if (cit != call_by_site_.end()) t += " " + pos(calls_[cit->second].file, calls_[cit->second].line, calls_[cit->second].col);
+    return t;
+  }
+  void p0(std::ostream& os) {
+    os << "[p0] " << p0_.size() << "\n";
+    for (const kz_fact_p0& e : p0_) {
+      os << "  " << str(e.name) << " " << enum_text("KZ_P0_KIND", e.kind) << " (" << str(e.family) << ")";
+      if (e.out_param != KZ_NONE32) os << " out=" << e.out_param;
+      if (e.entry_param != KZ_NONE32) os << " entry=" << e.entry_param;
+      if (e.arg_param != KZ_NONE32) os << " arg=" << e.arg_param;
+      os << " calls=" << e.n_calls << " " << flags_text("KZ_P0_FLAG", e.flags) << (e.fn != KZ_NONE32 ? "" : " (not in the program)") << "\n";
+      os << "      " << str(e.semantics) << "\n";
+      os << "      version " << str(e.version) << "; source " << str(e.source) << "\n";
+    }
+  }
+  void derived(std::ostream& os) {
+    os << "[derived] " << opderiv_.size() << "\n";
+    for (const kz_fact_opderiv& r : opderiv_) {
+      os << "  " << fn_name(r.fn) << " " << enum_text("KZ_OPDERIV_KIND", r.kind) << " " << enum_text("KZ_OPDERIV_MODE", r.mode) << " " << flags_text("KZ_OPDERIV_FLAG", r.flags)
+         << ": " << site_text(r.site) << " -> " << fn_name(r.next_fn) << " depth=" << r.depth << " guard=" << expr(r.guard_root) << "\n";
+      os << "      chain " << str(r.chain) << "\n";
+    }
+  }
+  void spawnwrap(std::ostream& os) {
+    os << "[spawnwrap] " << spawnw_.size() << "\n";
+    for (const kz_fact_spawnw& r : spawnw_) {
+      os << "  " << fn_name(r.fn) << " " << enum_text("KZ_SPAWNW_KIND", r.kind);
+      if (r.param != KZ_NONE32) os << " param " << r.param;
+      os << " " << flags_text("KZ_SPAWNW_FLAG", r.flags) << ": " << site_text(r.site) << " -> " << fn_name(r.next_fn) << " depth=" << r.depth;
+      if (r.entry_fn != KZ_NONE32 || r.kind == KZ_SPAWNW_KIND_SCRIPT_ENTRY) os << " entry " << fn_name(r.entry_fn);
+      if (r.call_site != KZ_NONE32) os << " call " << site_text(r.call_site);
+      os << "\n      chain " << str(r.chain) << "\n";
+      const std::string via = str(r.via);
+      if (!via.empty()) os << "      via " << via << "\n";
+    }
+  }
+
   std::string list(uint32_t root) const {
     std::string out = "[";
     bool first = true;
@@ -462,6 +516,9 @@ class View {
   std::vector<kz_fact_iter> iters_;
   std::vector<kz_fact_spawn_param> spawn_params_;
   std::vector<kz_fact_fwrite> fwrites_;
+  std::vector<kz_fact_p0> p0_;
+  std::vector<kz_fact_opderiv> opderiv_;
+  std::vector<kz_fact_spawnw> spawnw_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;
 };
 

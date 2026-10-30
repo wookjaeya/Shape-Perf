@@ -70,8 +70,11 @@
  * (2026-10-29) adds enumeration values (KZ_DECODER app-request, owner-publish, owner-check; KZ_OWNER_EVIDENCE
  * owner-at-publish) and one NEW section, NOWNER (kz_neutral.h), written only when a run has an owner that a creation
  * request named after the spawn; no earlier record or section version changes, so every container written before is
- * read as it was written, and a run without such an owner is written as before. */
-#define KZ_SCHEMA_REVISION 6u
+ * read as it was written, and a run without such an owner is written as before.  Revision 7 (2026-10-30) adds three NEW
+ * sections in a second extraction range, P0_TABLE, OP_DERIV and SPAWN_WRAP (kz_facts.h, revision 5 of the extraction
+ * records), and the terminal flag `conditional`; no earlier record or section version changes, and a container the
+ * profile-driven extraction writes holds none of them, so every container written before is read as it was written. */
+#define KZ_SCHEMA_REVISION 7u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu
@@ -185,6 +188,7 @@ typedef struct kz_record_desc {
  *   80-99  witnesses and verdicts (this file)
  *  100-119 serialized field by field: 100-107 the neutral event layer (kz_neutral.h), 108-110 the
  *          per-occurrence basis of a replay output container (kz_replay.h)
+ *  120-139 extraction, second range (kz_facts.h, revision 5 of the extraction records: 120-122)
  * Ids reserved for SPEC 2.3 section types whose records are not defined yet (no
  * record, no registry entry; define them in the owning header when they are needed):
  *   22 TEMPLATES   25 SKEL_EXPL   27 PROVENANCE_MSG   30 RESOURCES

@@ -1145,6 +1145,7 @@ kz::Status Builder::run(const kz::phi::Profile& profile, kz::Bytes* out) {
   }
   // the hand-entered reset type counts as hand-entered too
   if (recipe.startup.present) ++rep_->hand_entered;
+  for (const auto& n : in_.notes) item(n.first, n.second);
 
   // fix the TU file-hash indices now that every file is listed: they were taken from the same table
   kz::Status st = w_.add_section(KZ_SEC_BASIS, items_);

@@ -56,6 +56,19 @@ struct ExtractSpec {
   std::vector<DeclaredItem> declared;  // hand-entered inputs, for the BASIS section and the report
   std::string profile_name, profile_revision;
 
+  // ---- the profile-free mode (kz-static extract --no-profile; wrappers.hpp) ----
+  // Empty in the profile-driven mode, where nothing below changes what is extracted.  The
+  // operations are by function key (the name of a function with external linkage), so that two
+  // functions of one name with internal linkage stay apart; a key of the P0 table is its name.
+  bool no_profile = false;
+  bool collect_wrapper_inputs = false;  // the first pass: control-flow skeletons, function-pointer arguments
+  std::string builtin_profile_text;      // the fixed built-in profile the mode loads, for the record
+  std::set<std::string> delay_keys, terminal_keys, process_terminal_keys, conditional_terminal_keys;
+  std::set<std::string> spawn_keys, lock_keys, unlock_keys;
+  std::map<std::string, uint32_t> spawn_entry_param;                   // spawn operation -> the parameter of the entry
+  std::map<std::string, std::set<std::string>> spawn_script_entries;   // spawn call key -> entries named by the startup script
+  std::set<std::string> guard_calls;                                   // call keys whose guards the derived rows report
+
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;
 };

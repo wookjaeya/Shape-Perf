@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=6
+kz-layout abi=1 revision=7
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -718,6 +718,45 @@ record kz_fact_fwrite size=40 fields=9
   file offset=24 size=8 count=1 kind=str
   line offset=32 size=4 count=1 kind=u32
   fh offset=36 size=4 count=1 kind=u32
+record kz_fact_p0 size=64 fields=13
+  fn offset=0 size=4 count=1 kind=u32
+  out_param offset=4 size=4 count=1 kind=u32
+  entry_param offset=8 size=4 count=1 kind=u32
+  arg_param offset=12 size=4 count=1 kind=u32
+  n_calls offset=16 size=4 count=1 kind=u32
+  kind offset=20 size=1 count=1 kind=u8
+  rsv0 offset=21 size=1 count=1 kind=u8
+  flags offset=22 size=2 count=1 kind=u16
+  name offset=24 size=8 count=1 kind=str
+  family offset=32 size=8 count=1 kind=str
+  semantics offset=40 size=8 count=1 kind=str
+  version offset=48 size=8 count=1 kind=str
+  source offset=56 size=8 count=1 kind=str
+record kz_fact_opderiv size=40 fields=10
+  fn offset=0 size=4 count=1 kind=u32
+  site offset=4 size=4 count=1 kind=u32
+  next_fn offset=8 size=4 count=1 kind=u32
+  guard_root offset=12 size=4 count=1 kind=u32
+  depth offset=16 size=4 count=1 kind=u32
+  kind offset=20 size=1 count=1 kind=u8
+  mode offset=21 size=1 count=1 kind=u8
+  flags offset=22 size=2 count=1 kind=u16
+  primitive offset=24 size=8 count=1 kind=str
+  chain offset=32 size=8 count=1 kind=str
+record kz_fact_spawnw size=56 fields=13
+  fn offset=0 size=4 count=1 kind=u32
+  param offset=4 size=4 count=1 kind=u32
+  site offset=8 size=4 count=1 kind=u32
+  next_fn offset=12 size=4 count=1 kind=u32
+  entry_fn offset=16 size=4 count=1 kind=u32
+  call_site offset=20 size=4 count=1 kind=u32
+  depth offset=24 size=4 count=1 kind=u32
+  kind offset=28 size=1 count=1 kind=u8
+  rsv0 offset=29 size=1 count=1 kind=u8
+  flags offset=30 size=2 count=1 kind=u16
+  primitive offset=32 size=8 count=1 kind=str
+  chain offset=40 size=8 count=1 kind=str
+  via offset=48 size=8 count=1 kind=str
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1614,6 +1653,53 @@ flags KZ_TERMINAL_FLAG
   0x1 PROCESS_TERMINAL "process-terminal"
   0x2 IN_LOOP "in-loop"
   0x4 UNGUARDED "unguarded"
+  0x8 CONDITIONAL "conditional"
+enum KZ_P0_KIND
+  0x0 NONE "none"
+  0x1 THREAD_CREATE "thread-create"
+  0x2 MUTEX_ACQUIRE "mutex-acquire"
+  0x3 MUTEX_RELEASE "mutex-release"
+  0x4 SEM_WAIT "semaphore-wait"
+  0x5 SEM_POST "semaphore-post"
+  0x6 COND_WAIT "condition-wait"
+  0x7 COND_SIGNAL "condition-signal"
+  0x8 SLEEP "sleep"
+  0x9 THREAD_EXIT "thread-exit"
+  0xa PROCESS_EXIT "process-exit"
+  0xb THREAD_SELF "thread-self"
+  0xc TSD_GET "thread-specific-get"
+  0xd TSD_SET "thread-specific-set"
+  0xe DL_OPEN "dynamic-load"
+  0xf DL_SYM "symbol-lookup"
+  0x10 DATA_FN "data-function"
+flags KZ_P0_FLAG
+  0x1 CONDITIONAL "conditional"
+  0x2 SHADOWED "shadowed"
+  0x4 VOCABULARY "vocabulary"
+enum KZ_OPDERIV_KIND
+  0x0 NONE "none"
+  0x1 DELAY "delay"
+  0x2 TERMINAL "terminal"
+enum KZ_OPDERIV_MODE
+  0x0 NONE "none"
+  0x1 MUST "must"
+  0x2 NORETURN "noreturn"
+  0x3 MAY "may"
+flags KZ_OPDERIV_FLAG
+  0x1 VOCABULARY "vocabulary"
+  0x2 PROCESS_TERMINAL "process-terminal"
+  0x4 THREAD_TERMINAL "thread-terminal"
+  0x8 INDIRECT "indirect"
+  0x10 NO_CFG "no-cfg"
+enum KZ_SPAWNW_KIND
+  0x0 NONE "none"
+  0x1 ENTRY_ARG "entry-argument"
+  0x2 CALLED_BY_ENTRY "called-by-entry"
+  0x3 FIXED_ENTRY "fixed-entry"
+  0x4 SCRIPT_ENTRY "script-entry"
+flags KZ_SPAWNW_FLAG
+  0x1 VOCABULARY "vocabulary"
+  0x2 NOT_IN_CLOSURE "not-in-closure"
 enum KZ_OUTPTR_SUMMARY
   0x0 NONE "none"
   0x1 STORE_ONLY "store-only"
@@ -2020,6 +2106,9 @@ section OCC_BASIS type=108 record=kz_occ_basis version=1
 section OCC_EDGES type=109 record=kz_occ_edge version=1
 section REPLAY_READ type=110 record=kz_replay_read version=1
 section NOWNER type=111 record=kz_nowner version=1
+section P0_TABLE type=120 record=kz_fact_p0 version=1
+section OP_DERIV type=121 record=kz_fact_opderiv version=1
+section SPAWN_WRAP type=122 record=kz_fact_spawnw version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2262,6 +2351,27 @@ format kz_fact_outcall.callee_fn idx 0
 format kz_fact_outcall.fh idx 0
 format kz_fact_outcall.summary enum KZ_OUTPTR_SUMMARY
 format kz_tu.fh idx 0
+format kz_fact_p0.fn idx 0
+format kz_fact_p0.out_param idx 0
+format kz_fact_p0.entry_param idx 0
+format kz_fact_p0.arg_param idx 0
+format kz_fact_p0.kind enum KZ_P0_KIND
+format kz_fact_p0.flags flags KZ_P0_FLAG
+format kz_fact_opderiv.fn idx 0
+format kz_fact_opderiv.site idx 0
+format kz_fact_opderiv.next_fn idx 0
+format kz_fact_opderiv.guard_root idx 0
+format kz_fact_opderiv.kind enum KZ_OPDERIV_KIND
+format kz_fact_opderiv.mode enum KZ_OPDERIV_MODE
+format kz_fact_opderiv.flags flags KZ_OPDERIV_FLAG
+format kz_fact_spawnw.fn idx 0
+format kz_fact_spawnw.param idx 0
+format kz_fact_spawnw.site idx 0
+format kz_fact_spawnw.next_fn idx 0
+format kz_fact_spawnw.entry_fn idx 0
+format kz_fact_spawnw.call_site idx 0
+format kz_fact_spawnw.kind enum KZ_SPAWNW_KIND
+format kz_fact_spawnw.flags flags KZ_SPAWNW_FLAG
 format kz_cert_step.rule enum KZ_RULE
 format kz_cert_step.profile_entry idx 0
 format kz_cert_step.site_from idx 0
@@ -2369,4 +2479,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=5e7ad824e5e96b4a3182880ae841b316979c2ba270449cfd755005ddd41efa37
+fingerprint=979e7e48013f99ea647055920b4ab166659421dbd7a1ff896e3bb32b1700d329

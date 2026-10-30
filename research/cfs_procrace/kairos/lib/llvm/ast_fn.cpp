@@ -14,6 +14,8 @@
 // Nothing here knows a framework: every name comes from the ExtractSpec.
 #include <algorithm>
 #include <functional>
+#include <memory>
+#include <optional>
 #include <tuple>
 
 #include "ast_reader.hpp"
@@ -22,6 +24,7 @@
 #include "clang/AST/ParentMapContext.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/AST/Stmt.h"
+#include "clang/Analysis/CFG.h"
 #include "llvm/Support/Casting.h"
 
 namespace kzs {
@@ -238,6 +241,7 @@ class FnWalker {
     assign_local_ids();
     visit(fd_->getBody());
     m_.summaries[fkey_] = summary_;
+    if (spec_.collect_wrapper_inputs) record_cfg();
   }
 
  private:
@@ -275,6 +279,49 @@ class FnWalker {
   std::string lid(const VarDecl* vd) const {
     auto it = local_id_.find(vd);
     return it != local_id_.end() ? it->second : vd->getNameAsString();
+  }
+
+  // ---- the profile-free mode: the control-flow graph of the body (wrappers.hpp) ----
+  // Clang's CFG with every expression a block element, so that each call is one element and the
+  // calls of a block are in evaluation order.  A body the CFG builder does not take is left out:
+  // the derivation then treats the function as one it cannot decide on every path.
+  void record_cfg() {
+    CFG::BuildOptions bo;
+    bo.setAllAlwaysAdd();
+    std::unique_ptr<CFG> cfg = CFG::buildCFG(fd_, const_cast<Stmt*>(fd_->getBody()), &ctx_, bo);
+    if (!cfg) return;
+    FuncCfg fc;
+    fc.blocks.resize(cfg->getNumBlockIDs());
+    fc.entry = cfg->getEntry().getBlockID();
+    fc.exit = cfg->getExit().getBlockID();
+    for (const CFGBlock* b : *cfg) {
+      if (b == nullptr || b->getBlockID() >= fc.blocks.size()) continue;
+      CfgBlock& out = fc.blocks[b->getBlockID()];
+      out.noreturn = b->hasNoReturnElement();
+      for (const CFGElement& el : *b) {
+        const std::optional<CFGStmt> cs = el.getAs<CFGStmt>();
+        if (!cs) continue;
+        const auto* ce = dyn_cast<CallExpr>(cs->getStmt());
+        if (ce == nullptr) continue;
+        auto it = call_exprs_.find(ce);
+        if (it != call_exprs_.end()) out.calls.push_back(it->second);
+      }
+      for (const CFGBlock::AdjacentBlock& a : b->succs())
+        if (const CFGBlock* r = a.getReachableBlock()) out.succ.push_back(r->getBlockID());
+    }
+    m_.cfgs[fkey_] = std::move(fc);
+  }
+  // An argument that is an integer or a data pointer converted to a function pointer (a symbol
+  // address looked up at run time has this shape); a function, or a function pointer passed on, is not.
+  static bool fp_from_data(const Expr* e) {
+    e = e->IgnoreParens();
+    while (const auto* c = dyn_cast<CastExpr>(e)) {
+      const Expr* sub = c->getSubExpr()->IgnoreParens();
+      const QualType st = sub->getType();
+      if (!st.isNull() && !is_fp_type(st)) return true;
+      e = sub;
+    }
+    return false;
   }
 
   // ---- small helpers ----
@@ -1603,11 +1650,30 @@ class FnWalker {
     cf.loop_depth = static_cast<uint16_t>(loops_.size());
     if (!loops_.empty()) cf.loop_key = m_.loops[loops_.back()->index].key;
     const std::string name = cf.callee_name;
-    const bool is_delay = spec_.delay_ops.count(name) != 0;
-    const bool is_terminal = spec_.terminal_ops.count(name) != 0;
-    const bool is_spawn = spec_.spawn_ops.count(name) != 0;
-    const bool is_lock = spec_.lock_ops.count(name) != 0;
-    const bool is_unlock = spec_.unlock_ops.count(name) != 0;
+    // the profile's operations by name; the profile-free mode's by function key (empty otherwise)
+    const std::string& ckk = cf.callee_key;
+    auto by_key = [&](const std::set<std::string>& keys) { return !ckk.empty() && keys.count(ckk) != 0; };
+    const bool is_delay = spec_.delay_ops.count(name) != 0 || by_key(spec_.delay_keys);
+    const bool is_terminal = spec_.terminal_ops.count(name) != 0 || by_key(spec_.terminal_keys);
+    const bool is_spawn = spec_.spawn_ops.count(name) != 0 || by_key(spec_.spawn_keys);
+    const bool is_lock = spec_.lock_ops.count(name) != 0 || by_key(spec_.lock_keys);
+    const bool is_unlock = spec_.unlock_ops.count(name) != 0 || by_key(spec_.unlock_keys);
+    if (spec_.collect_wrapper_inputs) {
+      call_exprs_[ce] = ckey;
+      if (callee != nullptr) {
+        std::vector<FpArg> fa;
+        for (unsigned i = 0; i < ce->getNumArgs() && i < callee->getNumParams(); ++i) {
+          if (!is_fp_type(callee->getParamDecl(i)->getType())) continue;
+          FpArg a;
+          a.index = i;
+          a.nodes = fp_sources(ce->getArg(i));
+          a.from_data = fp_from_data(ce->getArg(i));
+          fa.push_back(a);
+        }
+        if (!fa.empty()) m_.call_fp_args[ckey] = fa;
+      }
+    }
+    if (!spec_.guard_calls.empty() && spec_.guard_calls.count(ckey) != 0) m_.call_guards[ckey] = guard_from(0);
     const bool is_data = is_data_call(callee);
     if (is_delay) cf.flags |= KZ_CALL_FLAG_DELAY_OP;
     if (is_terminal) cf.flags |= KZ_CALL_FLAG_TERMINAL_OP;
@@ -1699,15 +1765,24 @@ class FnWalker {
           if (src.compare(0, 2, "F:") == 0) m_.flow.push_back(FlowEdge{src, "?:passed to an indirect call"});
     }
 
-    // spawn operations: which argument carries the entry function
+    // spawn operations: which argument carries the entry function (a derived operation of the
+    // profile-free mode names it; else the first function-pointer parameter)
     if (is_spawn && callee != nullptr) {
       m_.spawn_calls.push_back(ckey);
       std::vector<std::string> nodes;
-      for (unsigned i = 0; i < ce->getNumArgs() && i < callee->getNumParams(); ++i) {
-        if (!callee->getParamDecl(i)->getType().getCanonicalType()->isFunctionPointerType()) continue;
-        nodes = fp_sources(ce->getArg(i));
-        m_.spawn_entry_arg[ckey] = i;
-        break;
+      auto named = spec_.spawn_entry_param.find(ckk);
+      if (named != spec_.spawn_entry_param.end()) {
+        if (named->second < ce->getNumArgs()) {
+          nodes = fp_sources(ce->getArg(named->second));
+          m_.spawn_entry_arg[ckey] = named->second;
+        }
+      } else {
+        for (unsigned i = 0; i < ce->getNumArgs() && i < callee->getNumParams(); ++i) {
+          if (!callee->getParamDecl(i)->getType().getCanonicalType()->isFunctionPointerType()) continue;
+          nodes = fp_sources(ce->getArg(i));
+          m_.spawn_entry_arg[ckey] = i;
+          break;
+        }
       }
       m_.spawn_entry_nodes[ckey] = nodes;
     }
@@ -1722,7 +1797,8 @@ class FnWalker {
       t.op = name;
       t.guard = guard_from(0);
       t.depth = static_cast<uint32_t>(guards_.size());
-      if (oit != spec_.ops.end() && oit->second.process_terminal) t.flags |= KZ_TERMINAL_FLAG_PROCESS_TERMINAL;
+      if ((oit != spec_.ops.end() && oit->second.process_terminal) || by_key(spec_.process_terminal_keys)) t.flags |= KZ_TERMINAL_FLAG_PROCESS_TERMINAL;
+      if (by_key(spec_.conditional_terminal_keys)) t.flags |= KZ_TERMINAL_FLAG_CONDITIONAL;
       if (!loops_.empty()) t.flags |= KZ_TERMINAL_FLAG_IN_LOOP;
       if (guards_.empty()) t.flags |= KZ_TERMINAL_FLAG_UNGUARDED;
       m_.terminals.push_back(t);
@@ -2770,6 +2846,7 @@ class FnWalker {
   std::map<const VarDecl*, std::string> local_id_;  // lookup only, never iterated to choose
   std::map<std::string, const VarDecl*> local_by_id_;
   std::map<const RecordDecl*, std::set<size_t>> reach_cache_;  // lookup only
+  std::map<const CallExpr*, std::string> call_exprs_;  // the profile-free mode: call -> key, lookup only
 };
 
 // ---- static initializers: function values stored in tables -------------------------------------------

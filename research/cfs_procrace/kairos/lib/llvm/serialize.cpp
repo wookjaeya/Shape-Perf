@@ -10,6 +10,8 @@
 #include <sstream>
 #include <tuple>
 
+#include "p0.hpp"
+
 namespace kzs {
 
 namespace {
@@ -532,6 +534,69 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     }
   }
 
+  // ---- the profile-free mode (kz_facts.h revision 5): P0_TABLE, OP_DERIV, SPAWN_WRAP.  Written only
+  // in that mode, so that a profile-driven extraction writes its facts as before.
+  std::vector<kz_fact_p0> p0_rows;
+  std::vector<kz_fact_opderiv> op_rows;
+  std::vector<kz_fact_spawnw> spawn_rows;
+  if (spec.no_profile) {
+    auto param = [](int p) { return p >= 0 ? static_cast<uint32_t>(p) : KZ_NONE32; };
+    for (const P0Fact& f : m.p0_facts) {
+      if (f.entry >= p0_table().size()) continue;
+      const P0Entry& e = p0_table()[f.entry];
+      kz_fact_p0 r = zero<kz_fact_p0>();
+      r.fn = fn_of(f.fn_key);
+      r.out_param = param(e.out);
+      r.entry_param = param(e.entry);
+      r.arg_param = param(e.arg);
+      r.n_calls = f.n_calls;
+      r.kind = e.kind;
+      r.flags = f.flags;
+      r.name = w.intern(e.name);
+      r.family = w.intern(e.family);
+      r.semantics = w.intern(e.semantics);
+      r.version = w.intern(e.version);
+      r.source = w.intern(e.source);
+      p0_rows.push_back(r);
+    }
+    for (const OpDerivFact& f : m.op_derivs) {
+      kz_fact_opderiv r = zero<kz_fact_opderiv>();
+      r.fn = fn_of(f.func_key);
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.next_fn = fn_of(f.next_key);
+      r.guard_root = exprs.index_of(f.guard);
+      r.depth = f.depth;
+      r.kind = f.kind;
+      r.mode = f.mode;
+      r.flags = f.flags;
+      r.primitive = w.intern(f.primitive);
+      r.chain = w.intern(f.chain);
+      op_rows.push_back(r);
+    }
+    std::sort(op_rows.begin(), op_rows.end(), [](const kz_fact_opderiv& a, const kz_fact_opderiv& b) {
+      return std::tie(a.fn, a.kind, a.site, a.next_fn) < std::tie(b.fn, b.kind, b.site, b.next_fn);
+    });
+    for (const SpawnWrapFact& f : m.spawn_wraps) {
+      kz_fact_spawnw r = zero<kz_fact_spawnw>();
+      r.fn = fn_of(f.func_key);
+      r.param = f.param == kNone ? KZ_NONE32 : f.param;
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.next_fn = fn_of(f.next_key);
+      r.entry_fn = fn_of(f.entry_key);
+      r.call_site = f.icall_key.empty() ? KZ_NONE32 : site_of_call(f.icall_key);
+      r.depth = f.depth;
+      r.kind = f.kind;
+      r.flags = f.flags;
+      r.primitive = w.intern(f.primitive);
+      r.chain = w.intern(f.chain);
+      r.via = w.intern(f.via);
+      spawn_rows.push_back(r);
+    }
+    std::stable_sort(spawn_rows.begin(), spawn_rows.end(), [](const kz_fact_spawnw& a, const kz_fact_spawnw& b) {
+      return std::tie(a.kind, a.fn, a.site, a.param, a.entry_fn) < std::tie(b.kind, b.fn, b.site, b.param, b.entry_fn);
+    });
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -600,6 +665,7 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (!put(KZ_SEC_FACT_ATYPE, atypes) || !put(KZ_SEC_WRITERS, writers) || !put(KZ_SEC_CALL_TARGETS, targets)) return s;
   if (!put(KZ_SEC_STATIC_IMAGE, images) || !put(KZ_SEC_FACT_LOCS, locs) || !put(KZ_SEC_TERMINALS, terminals)) return s;
   if (!put(KZ_SEC_OUTCALLS, outcalls) || !put(KZ_SEC_LOOP_ITERS, iters) || !put(KZ_SEC_SPAWN_PARAMS, spawn_params) || !put(KZ_SEC_FUNC_WRITES, fwrites)) return s;
+  if (spec.no_profile && (!put(KZ_SEC_P0_TABLE, p0_rows) || !put(KZ_SEC_OP_DERIV, op_rows) || !put(KZ_SEC_SPAWN_WRAP, spawn_rows))) return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;
   return w.finish(out);

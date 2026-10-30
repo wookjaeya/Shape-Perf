@@ -328,6 +328,13 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     } else {
       unknown = true;
     }
+    // the profile-free mode: entries the startup script names for an entry that is data (wrappers.hpp)
+    auto sit = spec.spawn_script_entries.find(ck);
+    if (sit != spec.spawn_script_entries.end() && !sit->second.empty()) {
+      fns.insert(sit->second.begin(), sit->second.end());
+      unknown = false;
+      via += (via.empty() ? "" : ",") + std::string("startup-script entries through the symbol lookup");
+    }
     TargetFact t;
     t.call_key = ck;
     t.kind = KZ_CALL_TARGET_KIND_SPAWN_ENTRY;

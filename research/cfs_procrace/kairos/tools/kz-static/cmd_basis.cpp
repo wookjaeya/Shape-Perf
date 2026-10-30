@@ -7,6 +7,7 @@
 #include "kz/core/dump.hpp"
 #include "kz/core/identity.hpp"
 #include "facts_text.hpp"
+#include "wrappers.hpp"
 
 namespace kzs_cli {
 
@@ -15,17 +16,27 @@ int cmd_basis(int argc, char** argv) {
   std::string err;
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--compile-db", "--build-dir", "--bundle-root", "--recipe", "--link", "--resource-dir", "--extra-arg", "-o"},
-                  {"--text", "--verbose"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile"}, &args, &err)) {
     std::fprintf(stderr, "kz-static basis: %s\n", err.c_str());
     return 2;
   }
+  const bool no_profile = args.has("--no-profile");
   for (const char* required : {"--profile", "--compile-db", "--build-dir", "--bundle-root", "-o"})
-    if (!args.has(required)) {
-      std::fprintf(stderr, "kz-static basis: %s is required\n", required);
+    if (!args.has(required) && !(no_profile && std::string(required) == "--profile")) {
+      std::fprintf(stderr, "kz-static basis: %s (or, for --profile, --no-profile) is required\n", required);
       return 2;
     }
+  if (no_profile && args.has("--profile")) {
+    std::fprintf(stderr, "kz-static basis: --profile and --no-profile exclude each other\n");
+    return 2;
+  }
   kz::phi::Profile profile;
-  if (!load_profile(args.many("--profile"), &profile)) return 1;
+  if (no_profile) {
+    const kz::Status ps = kzs::load_builtin_profile(&profile);
+    if (!ps.ok()) return fail("basis", "the built-in profile: " + ps.describe());
+  } else if (!load_profile(args.many("--profile"), &profile)) {
+    return 1;
+  }
 
   kzs::BasisInputs in;
   in.compile_db = args.one("--compile-db");
@@ -48,6 +59,13 @@ int cmd_basis(int argc, char** argv) {
   in.profile_hash = kz::phi::profile_hash(profile);
   in.tool_hash = KZ_THIS_TOOL_HASH("kz-static");
   in.build_identity = kz::build_identity();
+  if (no_profile) {
+    std::string text = kzs::builtin_profile_text();
+    while (!text.empty() && text.back() == '\n') text.pop_back();
+    for (char& ch : text)
+      if (ch == '\n') ch = ' ';
+    in.notes.push_back({"profile.mode", "profile-free (--no-profile): the built-in profile " + text + " (profile hash in the header)"});
+  }
 
   kz::Bytes out;
   kzs::BasisReport rep;

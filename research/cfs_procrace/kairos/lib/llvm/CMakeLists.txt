@@ -4,11 +4,16 @@
 #   model, spec, finalize, serialize, facts_text    no Clang types: the facts model, what to look
 #                                                   for, whole-program resolution, the KZ
 #                                                   container, the text view
+#   p0, wrappers                                    no Clang types: the built-in table of library
+#                                                   primitives and the operations the profile-free
+#                                                   mode derives from it through wrappers
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
   model.cpp
   spec.cpp
+  p0.cpp
+  wrappers.cpp
   finalize.cpp
   serialize.cpp
   facts_text.cpp
@@ -25,7 +30,7 @@ add_library(kz-llvm STATIC
   ast_run.cpp
   ast_basis.cpp)
 target_include_directories(kz-llvm PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(kz-llvm PUBLIC kz-core clangTooling clangFrontend clangAST clangLex clangBasic)
+target_link_libraries(kz-llvm PUBLIC kz-core clangTooling clangFrontend clangAnalysis clangAST clangLex clangBasic)
 kz_use_llvm(kz-llvm)
 kz_apply_settings(kz-llvm)
 

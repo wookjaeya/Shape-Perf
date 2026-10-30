@@ -36,6 +36,8 @@ struct BasisInputs {
   kz::Digest profile_hash = {};
   kz::Digest tool_hash = {};
   std::string build_identity;
+  // further BASIS items (name, value), after the others; none in the profile-driven mode
+  std::vector<std::pair<std::string, std::string>> notes;
 };
 
 struct BasisReport {

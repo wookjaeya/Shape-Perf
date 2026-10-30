@@ -339,6 +339,51 @@ struct IndirectCall {
   std::string node;
 };
 
+// ---- the profile-free mode (wrappers.hpp) -------------------------------------------------------------
+// The control-flow graph of a function body as the wrapper derivation reads it: per block (Clang's
+// block ids), the calls in it in evaluation order, its successors, and whether it ends in a call of a
+// function declared not to return.
+struct CfgBlock {
+  std::vector<std::string> calls;  // call keys
+  std::vector<uint32_t> succ;
+  bool noreturn = false;
+};
+struct FuncCfg {
+  uint32_t entry = 0, exit = 0;
+  std::vector<CfgBlock> blocks;
+};
+// A function-pointer argument of a direct call (a parameter of function-pointer type).
+struct FpArg {
+  uint32_t index = 0;
+  std::vector<std::string> nodes;  // fp-flow nodes of the argument
+  bool from_data = false;          // an integer or a data pointer converted to a function pointer
+};
+// A row of P0_TABLE: the table entry (index into p0_table()) and what this program has of it.
+struct P0Fact {
+  size_t entry = 0;
+  std::string fn_key;  // empty when the program does not mention the name
+  uint32_t n_calls = 0;
+  uint16_t flags = 0;  // KZ_P0_FLAG
+};
+// A row of OP_DERIV (F8).
+struct OpDerivFact {
+  std::string func_key, call_key, next_key;  // next_key empty: the primitive itself is called
+  std::string primitive, chain;
+  uint8_t kind = KZ_OPDERIV_KIND_NONE;
+  uint8_t mode = KZ_OPDERIV_MODE_NONE;
+  uint16_t flags = 0;
+  uint32_t depth = 0;
+  ExprRef guard = nullptr;
+};
+// A row of SPAWN_WRAP (F7).
+struct SpawnWrapFact {
+  std::string func_key, call_key, next_key, entry_key, icall_key;
+  std::string primitive, chain, via;
+  uint32_t param = kNone, depth = 0;
+  uint8_t kind = KZ_SPAWNW_KIND_NONE;
+  uint16_t flags = 0;
+};
+
 struct Model {
   ExprPool exprs;
 
@@ -369,6 +414,15 @@ struct Model {
   std::set<std::string> processed_functions;      // keys whose bodies were read
   std::vector<std::string> files;                 // every file a fact refers to (sorted by serialize)
   std::vector<std::string> main_files;            // the translation units read, in order
+
+  // The profile-free mode: what its first pass reads (spec.collect_wrapper_inputs), the guards of
+  // the calls its rows name (spec.guard_calls), and the derived rows it writes.
+  std::map<std::string, FuncCfg> cfgs;                    // function key -> control-flow graph
+  std::map<std::string, std::vector<FpArg>> call_fp_args;  // direct call key -> function-pointer arguments
+  std::map<std::string, ExprRef> call_guards;              // call key -> the conditions it executes under
+  std::vector<P0Fact> p0_facts;
+  std::vector<OpDerivFact> op_derivs;
+  std::vector<SpawnWrapFact> spawn_wraps;
 
   // Raw tables for the global phase.
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer

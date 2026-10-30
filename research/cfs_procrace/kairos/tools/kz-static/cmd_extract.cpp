@@ -8,10 +8,12 @@
 #include "extract.hpp"
 #include "facts_text.hpp"
 #include "finalize.hpp"
+#include "p0.hpp"
 #include "kz/core/dump.hpp"
 #include "kz/core/identity.hpp"
 #include "serialize.hpp"
 #include "spec.hpp"
+#include "wrappers.hpp"
 
 namespace kzs_cli {
 
@@ -80,8 +82,24 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
   }
   size_t builtin = 0, cli = 0;
   for (const kzs::DeclaredItem& d : spec.declared) (d.origin == kCommandLine ? cli : builtin)++;
-  os << "  hand-entered inputs        " << spec.declared.size() << " (built-in data-function table " << builtin << ", command line " << cli << ")\n";
+  os << "  hand-entered inputs        " << spec.declared.size() << " (built-in " << (spec.no_profile ? "P0 table " : "data-function table ") << builtin << ", command line " << cli << ")\n";
   os << "  declared assumptions       " << m.assumptions.size() << " (static images of table-walk links that are not const)\n";
+  return os.str();
+}
+
+// What the profile-free mode derived (wrappers.hpp), after the summary of its second pass.
+std::string derivation_text(const kzs::Derivation& d) {
+  std::ostringstream os;
+  os << "profile-free mode            built-in profile, " << kzs::p0_table().size() << " P0 entries (" << kzs::p0_table_revision() << "), " << kzs::wrapper_rules_revision() << "\n";
+  os << "  first pass                 functions with a body " << d.functions_with_body << ", control-flow graphs " << d.cfg_built << ", call-graph components " << d.sccs
+     << " (recursive " << d.sccs_recursive << ")\n";
+  os << "  delay operations (F8)      must " << d.delay_must << " (vocabulary), may " << d.delay_may << " (not vocabulary; loops whose own body calls one: " << d.loops_calling_may_delay
+     << ")\n";
+  os << "  terminal operations (F8)   must " << d.term_must << ", noreturn " << d.term_noreturn << ", may " << d.term_may << " (all vocabulary)\n";
+  os << "  spawn operations (F7)      entry-argument " << d.spawn_entry_arg << ", called-by-entry " << d.spawn_called_by_entry << ", fixed-entry " << d.spawn_fixed
+     << " (callers of a fixed-entry operation left as they are: " << d.fixed_callers_not_followed << ")\n";
+  os << "  startup-script entries     spawn calls with a data entry that reach the symbol lookup " << d.script_calls << ", rows " << d.script_rows << " (in the closure "
+     << d.script_in_closure << ")\n";
   return os.str();
 }
 
@@ -93,28 +111,50 @@ int cmd_extract(int argc, char** argv) {
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
                    "--resource-dir", "--extra-arg", "--section", "-o"},
-                  {"--text", "--verbose"}, &args, &err)) {
+                  {"--text", "--verbose", "--no-profile"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
-  if (!args.has("--profile") || !args.has("-o") || (!args.has("--basis") && !args.has("--source"))) {
-    std::fprintf(stderr, "kz-static extract: --profile, -o and one of --basis or --source are required\n");
+  const bool no_profile = args.has("--no-profile");
+  if ((!args.has("--profile") && !no_profile) || !args.has("-o") || (!args.has("--basis") && !args.has("--source"))) {
+    std::fprintf(stderr, "kz-static extract: --profile (or --no-profile), -o and one of --basis or --source are required\n");
     return 2;
+  }
+  if (no_profile) {
+    if (args.has("--profile")) {
+      std::fprintf(stderr, "kz-static extract: --profile and --no-profile exclude each other\n");
+      return 2;
+    }
+    for (const char* o : {"--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn"})
+      if (args.has(o)) {
+        std::fprintf(stderr, "kz-static extract: --no-profile takes no vocabulary from the command line (%s)\n", o);
+        return 2;
+      }
   }
   if (args.has("--basis") && args.has("--source")) {
     std::fprintf(stderr, "kz-static extract: --basis and --source exclude each other\n");
     return 2;
   }
   kz::phi::Profile profile;
-  if (!load_profile(args.many("--profile"), &profile)) return 1;
+  if (no_profile) {
+    const kz::Status ps = kzs::load_builtin_profile(&profile);
+    if (!ps.ok()) return fail("extract", "the built-in profile: " + ps.describe());
+  } else if (!load_profile(args.many("--profile"), &profile)) {
+    return 1;
+  }
 
   kzs::ExtractSpec spec;
   kzs::spec_from_profile(profile, &spec);
   kzs::spec_add_builtin_data_fns(&spec);
-  if (!add_cli_vocabulary(args, &spec, &err)) {
+  if (no_profile) {
+    spec.no_profile = true;
+    spec.builtin_profile_text = kzs::builtin_profile_text();
+    kzs::spec_add_p0_entries(&spec);
+  } else if (!add_cli_vocabulary(args, &spec, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
   }
+  std::vector<kzs::StartupEntry> script;
 
   kzs::SerializeOptions so;
   so.profile_hash = kz::phi::profile_hash(profile);
@@ -139,6 +179,7 @@ int cmd_extract(int argc, char** argv) {
     if (root.empty()) root = basis_root;
     so.has_basis = true;
     so.basis_hash = basis.artifact_hash();
+    if (no_profile) script = kzs::startup_entries_from_basis(basis);
     so.notes.push_back({"extract.units_from", "basis " + kz::to_hex(basis.artifact_hash()).substr(0, 16)});
   } else {
     std::string flags;
@@ -165,8 +206,24 @@ int cmd_extract(int argc, char** argv) {
 
   kzs::Model model;
   std::string error;
-  if (!kzs::extract_units(units, spec, ro, &model, &error)) return fail("extract", error);
-  kzs::finalize(&model, spec);
+  kzs::Derivation derivation;
+  if (no_profile) {
+    kzs::ExtractSpec base = spec;
+    if (!kzs::extract_profile_free(units, base, ro, script, &model, &spec, &derivation, &error)) return fail("extract", error);
+    std::string text = spec.builtin_profile_text;
+    while (!text.empty() && text.back() == '\n') text.pop_back();
+    for (char& ch : text)
+      if (ch == '\n') ch = ' ';
+    so.notes.push_back({"extract.mode", "profile-free (--no-profile): no profile and no command-line vocabulary; the built-in profile, the P0 table, the build and the "
+                                        "startup-script block of the basis, and the derivation rules"});
+    so.notes.push_back({"extract.builtin_profile", text + " (profile hash in the header)"});
+    so.notes.push_back({"extract.p0_table", std::string(kzs::p0_table_revision()) + ", " + std::to_string(kzs::p0_table().size()) + " entries"});
+    so.notes.push_back({"extract.derivation_rules", kzs::wrapper_rules_revision()});
+    so.notes.push_back({"extract.startup_entries_read", std::to_string(script.size())});
+  } else {
+    if (!kzs::extract_units(units, spec, ro, &model, &error)) return fail("extract", error);
+    kzs::finalize(&model, spec);
+  }
 
   kz::Bytes out;
   kz::Status s = kzs::serialize_facts(model, spec, so, &out);
@@ -183,6 +240,7 @@ int cmd_extract(int argc, char** argv) {
 
   std::printf("facts %s\n", kz::to_hex(c.artifact_hash()).c_str());
   std::fputs(summary_text(model, spec, units.size()).c_str(), stdout);
+  if (no_profile) std::fputs(derivation_text(derivation).c_str(), stdout);
   if (args.has("--text")) {
     kzs::TextOptions to;
     for (const std::string& sec : args.many("--section")) to.sections.insert(sec);

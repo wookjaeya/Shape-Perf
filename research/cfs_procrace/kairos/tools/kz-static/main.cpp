@@ -1,7 +1,7 @@
 // kz-static -- the static analysis front end.
 //
-//   kz-static basis   --profile P [--profile P2 ...] --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F] -o OUT [--text]
-//   kz-static extract --profile P [--profile P2 ...] (--basis B | --source S... [-- <compile flags>]) -o OUT [options] [--text]
+//   kz-static basis   (--profile P [--profile P2 ...] | --no-profile) --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F] -o OUT [--text]
+//   kz-static extract (--profile P [--profile P2 ...] | --no-profile) (--basis B | --source S... [-- <compile flags>]) -o OUT [options] [--text]
 //   kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]
 //   kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]
 //   kz-static --identity
@@ -83,12 +83,14 @@ namespace {
 
 int usage() {
   std::fputs(
-      "usage: kz-static basis   --profile P --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F]\n"
+      "usage: kz-static basis   (--profile P | --no-profile) --compile-db F --build-dir D --bundle-root R [--recipe F] [--link F]\n"
       "                         [--resource-dir D] [--extra-arg A]... -o OUT [--text]\n"
-      "       kz-static extract --profile P (--basis B | --source S... -- <compile flags>) -o OUT\n"
+      "       kz-static extract (--profile P | --no-profile) (--basis B | --source S... -- <compile flags>) -o OUT\n"
       "                         [--root R] [--target Type.field]... [--delay-op N]... [--lock-op N]... [--unlock-op N]...\n"
       "                         [--spawn-op N]... [--terminal-op N]... [--poll-fn N]... [--resource-dir D] [--extra-arg A]...\n"
       "                         [--text] [--section S]... [--verbose]\n"
+      "                         (--no-profile: the built-in profile and the P0 table only, no vocabulary options;\n"
+      "                         delay, terminal and spawn operations derived through wrappers)\n"
       "       kz-static show    <container> [--section S]... [--loc Type.field] [--callee NAME] [--full-hashes]\n"
       "       kz-static reach   <facts> --root NAME... --loc Type.field [--callee NAME] [--follow-spawn]\n"
       "       kz-static --identity\n",

@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "p0.hpp"
+
 namespace kzs {
 
 bool parse_field_ref(const std::string& text, FieldRef* out) {
@@ -81,30 +83,18 @@ void spec_from_profile(const kz::phi::Profile& profile, ExtractSpec* spec) {
 void spec_add_builtin_data_fns(ExtractSpec* spec) {
   // Summaries of the C library functions that write through a pointer argument.  They are
   // hand-entered (SPEC 4.2 step 2: "external functions with summaries"), not derived from the
-  // program under analysis; the report counts them.
-  struct Row {
-    const char* name;
-    int dest, src, fill;
-    bool zero;
-    uint8_t kind;
-  };
-  static const Row rows[] = {
-      {"memset", 0, -1, 1, false, KZ_WRITER_KIND_MEMSET},  {"bzero", 0, -1, -1, true, KZ_WRITER_KIND_MEMSET},
-      {"memcpy", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},  {"memmove", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},
-      {"strcpy", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},  {"strncpy", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},
-      {"strcat", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},  {"strncat", 0, 1, -1, false, KZ_WRITER_KIND_MEMCPY},
-      {"sprintf", 0, -1, -1, false, KZ_WRITER_KIND_MEMCPY}, {"snprintf", 0, -1, -1, false, KZ_WRITER_KIND_MEMCPY},
-      {"vsprintf", 0, -1, -1, false, KZ_WRITER_KIND_MEMCPY}, {"vsnprintf", 0, -1, -1, false, KZ_WRITER_KIND_MEMCPY},
-  };
-  for (const Row& r : rows) {
+  // program under analysis; the report counts them.  They are the data-function entries of the
+  // P0 table (p0.hpp), in the order they have always been added.
+  for (const P0Entry& r : p0_table()) {
+    if (r.kind != KZ_P0_KIND_DATA_FN) continue;
     if (spec->data_fns.count(r.name) != 0) continue;
     DataFn d;
     d.name = r.name;
     d.dest = r.dest;
     d.src = r.src;
     d.fill = r.fill;
-    d.zero_fill = r.zero;
-    d.writer_kind = r.kind;
+    d.zero_fill = r.zero_fill;
+    d.writer_kind = r.writer_kind;
     d.origin = "built-in table (hand-entered, tier researcher)";
     spec->data_fns[d.name] = d;
     spec->declared.push_back(DeclaredItem{"data_fn." + d.name, "dest=" + std::to_string(d.dest), d.origin});

@@ -21,7 +21,16 @@
  * call, to a variadic position, or to inline assembly; version 3); FACT_LOCS counts those hits
  * in n_unknown_effect (version 2); writers have the flag `partial-write` (a store to a part of a
  * record- or array-typed target); loops have the flag `static-image-assumed` (a table walk read
- * through a link that is not const, unrolled under a declared assumption).
+ * through a link that is not const, unrolled under a declared assumption).  Revision 5
+ * (2026-10-30, the profile-free mode of `kz-static extract --no-profile`): three NEW sections in a
+ * second extraction range, 120 (P0_TABLE: the built-in table of thread-library and C-library
+ * primitives the mode starts from, one row per entry with its version tag and source check),
+ * 121 (OP_DERIV: the delay and terminal operations derived from those primitives through
+ * wrappers, per function `must` / `noreturn` / `may` with the call that leads there, its guard
+ * and the call chain) and 122 (SPAWN_WRAP: the spawn operations derived the same way, and the
+ * startup-script entries a spawn with a data-valued entry resolves to through the symbol lookup);
+ * terminals have the flag `conditional`.  No earlier record or section version changes, and the
+ * profile-driven mode writes none of the new sections, so its facts are written as before.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -71,7 +80,10 @@ enum kz_facts_section_id {
   KZ_SEC_TUS = 36,
   KZ_SEC_LOOP_ITERS = 37,
   KZ_SEC_SPAWN_PARAMS = 38,
-  KZ_SEC_FUNC_WRITES = 39
+  KZ_SEC_FUNC_WRITES = 39,
+  KZ_SEC_P0_TABLE = 120,
+  KZ_SEC_OP_DERIV = 121,
+  KZ_SEC_SPAWN_WRAP = 122
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -100,7 +112,10 @@ enum kz_facts_section_id {
   S(TUS, 36, kz_tu, 1)                         \
   S(LOOP_ITERS, 37, kz_fact_iter, 1)           \
   S(SPAWN_PARAMS, 38, kz_fact_spawn_param, 1)  \
-  S(FUNC_WRITES, 39, kz_fact_fwrite, 1)
+  S(FUNC_WRITES, 39, kz_fact_fwrite, 1)        \
+  S(P0_TABLE, 120, kz_fact_p0, 1)              \
+  S(OP_DERIV, 121, kz_fact_opderiv, 1)         \
+  S(SPAWN_WRAP, 122, kz_fact_spawnw, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -566,6 +581,95 @@ enum kz_facts_section_id {
   X(T, uint32_t, line, )                                                             \
   X(T, uint32_t, fh, )
 
+/*
+ * P0_TABLE (revision 5).  One entry of the built-in table of thread-library and C-library
+ * primitives that `kz-static extract --no-profile` starts from (tools/kz-static, lib/llvm/p0.cpp).
+ * An entry covers one function of an API family (every mutex primitive, every termination
+ * primitive, ...); `version` names the reference version the semantics are read from and `source`
+ * the line of the upstream source it was checked against, or "unverified".  The parameters are
+ * positions in the call (KZ_NONE32 where the kind has none).  `fn` is the function of that name in
+ * this program (KZ_NONE32 when the program does not mention it); `n_calls` counts its direct calls.
+ * A program that defines a function of the same name has its own body read instead (`shadowed`).
+ */
+#define KZ_FACT_P0_FIELDS(X, T)                                                      \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, out_param, )   /* written through: the new thread id, a data destination */ \
+  X(T, uint32_t, entry_param, ) /* thread creation: the function the new thread starts at */ \
+  X(T, uint32_t, arg_param, )   /* thread creation: the argument that function receives */ \
+  X(T, uint32_t, n_calls, )                                                          \
+  X(T, uint8_t, kind, )         /* KZ_P0_KIND */                                     \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )       /* KZ_P0_FLAG */                                     \
+  X(T, kz_str, name, )                                                               \
+  X(T, kz_str, family, )                                                             \
+  X(T, kz_str, semantics, )                                                          \
+  X(T, kz_str, version, )                                                            \
+  X(T, kz_str, source, )
+
+/*
+ * OP_DERIV (revision 5, F8 DELAY-W / TERM-W).  A function that reaches a delay or a terminal
+ * primitive of P0_TABLE through its calls, derived to a fixed point over the strongly connected
+ * components of the call graph (direct calls and resolved indirect targets), callees first.  One
+ * row per (function, kind, call in the function that leads there): `site` is that call, `next_fn`
+ * its callee (for an indirect call, the target with the shortest chain), `guard_root` the
+ * conditions it executes under in `fn`, `chain` the calls from `fn` to the primitive through
+ * `next_fn` (each step the shortest, ties by name), `depth` their number.  `mode` is the
+ * function's: MUST every path of `fn` reaches the primitive (delay: every path that returns, and
+ * one does; terminal: every path, an endless one included, ends in a terminal call); NORETURN
+ * (terminal) no path returns and some path reaches it; MAY some path does, under the guards of
+ * the rows.  `vocabulary`: the function is an operation of that kind in the profile-free run
+ * (delay: MUST; terminal: every mode), so the call, loop and terminal facts of that run follow
+ * from it.
+ */
+#define KZ_FACT_OPDERIV_FIELDS(X, T)                                                 \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, site, )                                                             \
+  X(T, uint32_t, next_fn, )                                                          \
+  X(T, uint32_t, guard_root, ) /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, depth, )                                                            \
+  X(T, uint8_t, kind, )        /* KZ_OPDERIV_KIND */                                 \
+  X(T, uint8_t, mode, )        /* KZ_OPDERIV_MODE */                                 \
+  X(T, uint16_t, flags, )      /* KZ_OPDERIV_FLAG */                                 \
+  X(T, kz_str, primitive, )                                                          \
+  X(T, kz_str, chain, )
+
+/*
+ * SPAWN_WRAP (revision 5, F7 SPAWN-W).  A spawn operation derived from the thread-creation
+ * primitives of P0_TABLE to a fixed point, or a resolution of a spawn entry:
+ *   ENTRY_ARG     parameter `param` of `fn` flows (function-pointer flow graph) to the entry
+ *                 argument of the spawn call `site` in `fn`;
+ *   CALLED_BY_ENTRY  it flows (stored in a field, field-based) to the indirect call `call_site` in
+ *                 code reachable from `entry_fn`, the entry of the spawn call `site` in `fn`;
+ *   FIXED_ENTRY   `fn` makes the spawn call `site` with an entry that does not come from its
+ *                 parameters and that the flow graph resolves (`entry_fn`, more rows for more).  It
+ *                 serves the CALLED_BY_ENTRY test of the functions that call `fn` (one level: their
+ *                 own callers do not get it), and `fn` is no spawn operation (no `vocabulary`);
+ *   SCRIPT_ENTRY  the entry argument `param` of the spawn call `site` in `fn` is data converted to
+ *                 a function pointer that no function constant reaches, and `fn` reaches the symbol
+ *                 lookup primitive of P0_TABLE through direct calls (`chain`, `call_site` the call
+ *                 of the primitive):
+ *                 `entry_fn` is the entry a line of the startup script names (basis
+ *                 startup.entry[k], second field, of the kind `app`; `via`), or KZ_NONE32 with
+ *                 `not-in-closure` when no function of that name is in the closed program.
+ * `next_fn` is the spawn operation `site` calls, `depth` the spawn operations from `fn` down to the
+ * primitive, `chain` that path.  `vocabulary`: a spawn operation of the profile-free run (the
+ * primitives and the rows with an entry parameter).  This is a may-flow fact like SPAWN_PARAMS.
+ */
+#define KZ_FACT_SPAWNW_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, param, )                                                            \
+  X(T, uint32_t, site, )                                                             \
+  X(T, uint32_t, next_fn, )                                                          \
+  X(T, uint32_t, entry_fn, )                                                         \
+  X(T, uint32_t, call_site, )                                                        \
+  X(T, uint32_t, depth, )                                                            \
+  X(T, uint8_t, kind, )        /* KZ_SPAWNW_KIND */                                  \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_SPAWNW_FLAG */                                  \
+  X(T, kz_str, primitive, )                                                          \
+  X(T, kz_str, chain, )                                                              \
+  X(T, kz_str, via, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -592,7 +696,10 @@ enum kz_facts_section_id {
   R(kz_tu, KZ_TU_FIELDS)                          \
   R(kz_fact_iter, KZ_FACT_ITER_FIELDS)            \
   R(kz_fact_spawn_param, KZ_FACT_SPAWN_PARAM_FIELDS) \
-  R(kz_fact_fwrite, KZ_FACT_FWRITE_FIELDS)
+  R(kz_fact_fwrite, KZ_FACT_FWRITE_FIELDS)        \
+  R(kz_fact_p0, KZ_FACT_P0_FIELDS)                \
+  R(kz_fact_opderiv, KZ_FACT_OPDERIV_FIELDS)      \
+  R(kz_fact_spawnw, KZ_FACT_SPAWNW_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -755,9 +862,52 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, UNCHECKED, 0, "unchecked") ITEM(P, COMPLETE, 1, "writer-set-complete")     \
   ITEM(P, DISABLED, 2, "DISABLED")
 
+/* CONDITIONAL (revision 5): the operation is a derived terminal operation that does not end the
+ * thread or the process on every path (OP_DERIV mode noreturn or may; the rows give the guards). */
 #define KZ_ENUM_TERMINAL_FLAGS(ITEM, P) /* set */                                    \
   ITEM(P, PROCESS_TERMINAL, 0x1, "process-terminal") ITEM(P, IN_LOOP, 0x2, "in-loop") \
-  ITEM(P, UNGUARDED, 0x4, "unguarded")
+  ITEM(P, UNGUARDED, 0x4, "unguarded") ITEM(P, CONDITIONAL, 0x8, "conditional")
+
+#define KZ_ENUM_P0_KIND(ITEM, P)                                                     \
+  ITEM(P, NONE, 0, "none") ITEM(P, THREAD_CREATE, 1, "thread-create")                \
+  ITEM(P, MUTEX_ACQUIRE, 2, "mutex-acquire") ITEM(P, MUTEX_RELEASE, 3, "mutex-release") \
+  ITEM(P, SEM_WAIT, 4, "semaphore-wait") ITEM(P, SEM_POST, 5, "semaphore-post")      \
+  ITEM(P, COND_WAIT, 6, "condition-wait") ITEM(P, COND_SIGNAL, 7, "condition-signal") \
+  ITEM(P, SLEEP, 8, "sleep") ITEM(P, THREAD_EXIT, 9, "thread-exit")                  \
+  ITEM(P, PROCESS_EXIT, 10, "process-exit") ITEM(P, THREAD_SELF, 11, "thread-self")  \
+  ITEM(P, TSD_GET, 12, "thread-specific-get") ITEM(P, TSD_SET, 13, "thread-specific-set") \
+  ITEM(P, DL_OPEN, 14, "dynamic-load") ITEM(P, DL_SYM, 15, "symbol-lookup")          \
+  ITEM(P, DATA_FN, 16, "data-function")
+
+/* CONDITIONAL: the call may return without doing it (try, timed); SHADOWED: the program defines a
+ * function of this name; VOCABULARY: the entry is an operation of the profile-free run. */
+#define KZ_ENUM_P0_FLAGS(ITEM, P) /* set */                                          \
+  ITEM(P, CONDITIONAL, 0x1, "conditional") ITEM(P, SHADOWED, 0x2, "shadowed")        \
+  ITEM(P, VOCABULARY, 0x4, "vocabulary")
+
+#define KZ_ENUM_OPDERIV_KIND(ITEM, P) \
+  ITEM(P, NONE, 0, "none") ITEM(P, DELAY, 1, "delay") ITEM(P, TERMINAL, 2, "terminal")
+
+#define KZ_ENUM_OPDERIV_MODE(ITEM, P)                                                \
+  ITEM(P, NONE, 0, "none") ITEM(P, MUST, 1, "must") ITEM(P, NORETURN, 2, "noreturn") \
+  ITEM(P, MAY, 3, "may")
+
+/* PROCESS_TERMINAL / THREAD_TERMINAL: the terminal chains of the function end at process-exit /
+ * thread-exit primitives (both set: some of each); INDIRECT: the call of the row is an indirect
+ * call with resolved targets; NO_CFG: no control-flow graph of the function was built, so it is
+ * at most `may`. */
+#define KZ_ENUM_OPDERIV_FLAGS(ITEM, P) /* set */                                     \
+  ITEM(P, VOCABULARY, 0x1, "vocabulary") ITEM(P, PROCESS_TERMINAL, 0x2, "process-terminal") \
+  ITEM(P, THREAD_TERMINAL, 0x4, "thread-terminal") ITEM(P, INDIRECT, 0x8, "indirect") \
+  ITEM(P, NO_CFG, 0x10, "no-cfg")
+
+#define KZ_ENUM_SPAWNW_KIND(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, ENTRY_ARG, 1, "entry-argument")                   \
+  ITEM(P, CALLED_BY_ENTRY, 2, "called-by-entry") ITEM(P, FIXED_ENTRY, 3, "fixed-entry") \
+  ITEM(P, SCRIPT_ENTRY, 4, "script-entry")
+
+#define KZ_ENUM_SPAWNW_FLAGS(ITEM, P) /* set */ \
+  ITEM(P, VOCABULARY, 0x1, "vocabulary") ITEM(P, NOT_IN_CLOSURE, 0x2, "not-in-closure")
 
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
@@ -828,6 +978,13 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_IMAGE_KIND, KZ_ENUM_IMAGE_KIND, 0)      \
   D(KZ_LOC_STATUS, KZ_ENUM_LOC_STATUS, 0)      \
   D(KZ_TERMINAL_FLAG, KZ_ENUM_TERMINAL_FLAGS, 1) \
+  D(KZ_P0_KIND, KZ_ENUM_P0_KIND, 0)            \
+  D(KZ_P0_FLAG, KZ_ENUM_P0_FLAGS, 1)           \
+  D(KZ_OPDERIV_KIND, KZ_ENUM_OPDERIV_KIND, 0)  \
+  D(KZ_OPDERIV_MODE, KZ_ENUM_OPDERIV_MODE, 0)  \
+  D(KZ_OPDERIV_FLAG, KZ_ENUM_OPDERIV_FLAGS, 1) \
+  D(KZ_SPAWNW_KIND, KZ_ENUM_SPAWNW_KIND, 0)    \
+  D(KZ_SPAWNW_FLAG, KZ_ENUM_SPAWNW_FLAGS, 1)   \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -945,6 +1102,27 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_outcall, callee_fn, IDX, 0)               \
   F(kz_fact_outcall, fh, IDX, 0)                      \
   F(kz_fact_outcall, summary, ENUM, KZ_OUTPTR_SUMMARY) \
-  F(kz_tu, fh, IDX, 0)
+  F(kz_tu, fh, IDX, 0)                                \
+  F(kz_fact_p0, fn, IDX, 0)                           \
+  F(kz_fact_p0, out_param, IDX, 0)                    \
+  F(kz_fact_p0, entry_param, IDX, 0)                  \
+  F(kz_fact_p0, arg_param, IDX, 0)                    \
+  F(kz_fact_p0, kind, ENUM, KZ_P0_KIND)               \
+  F(kz_fact_p0, flags, FLAGS, KZ_P0_FLAG)             \
+  F(kz_fact_opderiv, fn, IDX, 0)                      \
+  F(kz_fact_opderiv, site, IDX, 0)                    \
+  F(kz_fact_opderiv, next_fn, IDX, 0)                 \
+  F(kz_fact_opderiv, guard_root, IDX, 0)              \
+  F(kz_fact_opderiv, kind, ENUM, KZ_OPDERIV_KIND)     \
+  F(kz_fact_opderiv, mode, ENUM, KZ_OPDERIV_MODE)     \
+  F(kz_fact_opderiv, flags, FLAGS, KZ_OPDERIV_FLAG)   \
+  F(kz_fact_spawnw, fn, IDX, 0)                       \
+  F(kz_fact_spawnw, param, IDX, 0)                    \
+  F(kz_fact_spawnw, site, IDX, 0)                     \
+  F(kz_fact_spawnw, next_fn, IDX, 0)                  \
+  F(kz_fact_spawnw, entry_fn, IDX, 0)                 \
+  F(kz_fact_spawnw, call_site, IDX, 0)                \
+  F(kz_fact_spawnw, kind, ENUM, KZ_SPAWNW_KIND)       \
+  F(kz_fact_spawnw, flags, FLAGS, KZ_SPAWNW_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

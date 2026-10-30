@@ -710,6 +710,116 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     }
   }
 
+  // ---- the extended facts F4 and F6 (kz_facts.h revision 7): ARGFLOW, PARAM_FLOW, PTR_FIELDS, GLOBAL_IMAGES.  Written
+  // with those of revision 6, after them: their expression roots come after every earlier root, and they add no file to
+  // FILE_HASHES.
+  std::vector<kz_fact_argflow> argflow_rows;
+  std::vector<kz_fact_pflow> pflow_rows;
+  std::vector<kz_fact_ptrfield> ptrfield_rows;
+  std::vector<kz_fact_gimage> gimage_rows;
+  if (spec.extended_facts) {
+    std::map<std::string, uint32_t> read_index;  // ReadFact::key -> READS row
+    for (size_t i = 0; i < m.reads.size(); ++i) read_index[m.reads[i].key()] = static_cast<uint32_t>(i);
+    auto read_of = [&](const std::string& key) -> uint32_t {
+      if (key.empty()) return KZ_NONE32;
+      auto it = read_index.find(key);
+      return it == read_index.end() ? KZ_NONE32 : it->second;
+    };
+    for (const ArgFlowFact& f : m.argflows) {
+      kz_fact_argflow r = zero<kz_fact_argflow>();
+      r.site = site_of_call(f.call_key);
+      r.arg_index = f.arg_index;
+      r.fn = fn_of(f.func_key);
+      r.param = f.param == kNone ? KZ_NONE32 : f.param;
+      r.hops = f.hops;
+      r.chain_root = exprs.index_of(f.chain);
+      r.index_root = exprs.index_of(f.index);
+      r.read = read_of(f.read_key);
+      r.src = f.src;
+      r.base = f.base;
+      r.reason = f.reason;
+      r.flags = f.flags;
+      r.value = f.value;
+      r.type = w.intern(f.type);
+      r.field = w.intern(f.field);
+      r.root = w.intern(f.root);
+      r.object = w.intern(f.object);
+      r.text = w.intern(f.text);
+      argflow_rows.push_back(r);
+    }
+    for (const ParamFlowFact& f : m.param_flows) {
+      kz_fact_pflow r = zero<kz_fact_pflow>();
+      r.fn = fn_of(f.func_key);
+      r.param = f.param;
+      r.depth = f.depth;
+      r.site = f.call_key.empty() ? KZ_NONE32 : site_of_call(f.call_key);
+      r.next_fn = fn_of(f.next_key);
+      r.next_param = f.next_param == kNone ? KZ_NONE32 : f.next_param;
+      r.sink_fn = fn_of(f.sink_key);
+      r.sink_site = f.sink_call_key.empty() ? KZ_NONE32 : site_of_call(f.sink_call_key);
+      r.expr_root = exprs.index_of(f.expr);
+      r.guard_root = exprs.index_of(f.guard);
+      r.n = f.n;
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.kind = f.kind;
+      r.flags = f.flags;
+      r.file = w.intern(f.pos.file);
+      r.text = w.intern(f.text);
+      r.chain = w.intern(f.chain);
+      pflow_rows.push_back(r);
+    }
+    for (const PtrFieldFact& f : m.ptr_fields) {
+      kz_fact_ptrfield r = zero<kz_fact_ptrfield>();
+      r.fn = fn_of(f.func_key);
+      r.read = read_of(f.read_key);
+      r.write = f.write < 0 ? KZ_NONE32 : static_cast<uint32_t>(f.write);
+      r.n = f.n;
+      r.index_root = exprs.index_of(f.index);
+      r.guard_root = exprs.index_of(f.guard);
+      r.idx_n = f.idx_n;
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.kind = f.kind;
+      r.status = f.status;
+      r.flags = f.flags;
+      r.elem = f.elem;
+      r.idx_step = f.idx_step;
+      r.type = w.intern(f.type);
+      r.field = w.intern(f.field);
+      r.root = w.intern(f.root);
+      r.object = w.intern(f.object);
+      r.path = w.intern(f.path);
+      r.file = w.intern(f.pos.file);
+      ptrfield_rows.push_back(r);
+    }
+    for (const GlobalImageFact& g : m.global_images) {
+      const ImageFact& f = g.leaf;
+      kz_fact_gimage r = zero<kz_fact_gimage>();
+      r.fn = fn_of(f.fn_key);
+      r.line = f.pos.line;
+      r.col = f.pos.col;
+      r.fh = fh_of(f.pos.file);
+      r.spell_line = f.spell.line;
+      r.spell_col = f.spell.col;
+      r.kind = f.kind;
+      r.reach = g.reach;
+      r.flags = g.flags;
+      r.value = f.value;
+      r.object = w.intern(f.object);
+      r.path = w.intern(f.path);
+      r.text = w.intern(f.text);
+      r.file = w.intern(f.pos.file);
+      r.spell_file = w.intern(f.spell.file);
+      r.macro = w.intern(f.macro);
+      r.owner = w.intern(f.owner);
+      r.field = w.intern(f.field);
+      gimage_rows.push_back(r);
+    }
+  }
+
   // ---- BASIS and PROVENANCE: the extraction parameters, the counts, the hand-entered inputs
   std::vector<kz_prov> provs;
   std::vector<kz_basis_item> basis;
@@ -770,6 +880,22 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("count.returns", num(return_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
     item("count.return_constants", num(retconst_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
     item("count.loop_exit_rows", num(loopexit_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    // F4 and F6 (revision 7), and the tool parameters of their composition
+    const Model::FlowStats& fs = m.flow_stats;
+    auto bound = [&](uint32_t v) { return v == kNone ? std::string("none") : num(v); };
+    item("extract.extended_facts_f4_f6", "F4 ARGFLOW, PARAM_FLOW and PTR_FIELDS, F6 GLOBAL_IMAGES (kz_facts.h revision 7)", KZ_POLICY_UNSET, KZ_NONE32);
+    item("param.argflow_depth_bound", bound(spec.argflow_depth) + " (calls a composed PARAM_FLOW row passes; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
+    item("param.argflow_size_bound", bound(spec.argflow_size) + " (composed PARAM_FLOW rows per parameter; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
+    item("param.image_budget", num(opt.image_budget) + " (leaves of the static image of one object; a tool parameter no reference fixes)", KZ_POLICY_UNSPECIFIED, KZ_NONE32);
+    item("count.argflow", num(argflow_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.param_flow", num(pflow_rows.size()) + " (depth 0 " + num(fs.direct) + ", composed " + num(fs.composed) + ", open " + num(fs.cut_depth + fs.cut_size) + ")", KZ_POLICY_UNSET,
+         KZ_NONE32);
+    item("count.param_flow_nodes", num(fs.nodes) + " parameters, " + num(fs.sccs) + " call-graph components (recursive " + num(fs.sccs_recursive) + ")", KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.param_flow_cut", "depth bound " + num(fs.cut_depth) + " parameters, size bound " + num(fs.cut_size) + " parameters, uses left out " + num(fs.left_out), KZ_POLICY_UNSET,
+         KZ_NONE32);
+    item("count.ptr_fields", num(ptrfield_rows.size()), KZ_POLICY_UNSET, KZ_NONE32);
+    item("count.global_images", num(gimage_rows.size()) + " rows of " + num(fs.objects_reached) + " objects (reached outside the closed program: " + num(fs.objects_outside) + ")",
+         KZ_POLICY_UNSET, KZ_NONE32);
   }
   for (const auto& n : opt.notes) item(n.first, n.second, KZ_POLICY_UNSET, KZ_NONE32);
 
@@ -788,6 +914,9 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
   if (spec.no_profile && (!put(KZ_SEC_P0_TABLE, p0_rows) || !put(KZ_SEC_OP_DERIV, op_rows) || !put(KZ_SEC_SPAWN_WRAP, spawn_rows))) return s;
   if (spec.extended_facts && (!put(KZ_SEC_READS, read_rows) || !put(KZ_SEC_RETURNS, return_rows) || !put(KZ_SEC_RET_CONSTS, retconst_rows) ||
                               !put(KZ_SEC_LOOP_EXITS, loopexit_rows)))
+    return s;
+  if (spec.extended_facts && (!put(KZ_SEC_ARGFLOW, argflow_rows) || !put(KZ_SEC_PARAM_FLOW, pflow_rows) || !put(KZ_SEC_PTR_FIELDS, ptrfield_rows) ||
+                              !put(KZ_SEC_GLOBAL_IMAGES, gimage_rows)))
     return s;
   std::vector<kz_fact_expr> expr_rows = exprs.rows();
   if (!put(KZ_SEC_FACT_EXPRS, expr_rows)) return s;

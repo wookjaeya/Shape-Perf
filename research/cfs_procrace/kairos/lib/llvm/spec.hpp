@@ -73,6 +73,12 @@ struct ExtractSpec {
   // Always on in the profile-free mode (its second pass), on request (--extended-facts) in the
   // profile-driven one.  Off, nothing is read for them and the facts are written as before.
   bool extended_facts = false;
+  // The extended facts F4 and F6 (ARGFLOW, PARAM_FLOW, PTR_FIELDS, GLOBAL_IMAGES; revision 7) come with
+  // them.  The composition of PARAM_FLOW has two bounds that no reference fixes (tool parameters,
+  // recorded as unspecified_by_reference): the number of calls a composed row passes, and the number
+  // of composed rows per parameter.  kNone: no bound.
+  uint32_t argflow_depth = kNone;
+  uint32_t argflow_size = kNone;
 
   bool has_field(const FieldRef& f) const;
   std::set<std::string> field_types() const;

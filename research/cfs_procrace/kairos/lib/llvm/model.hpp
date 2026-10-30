@@ -168,6 +168,10 @@ struct LoopFact {
   bool exits_as_in_loops = false;  // exit_expr and modset above are the same trees
   ExprRef all_exit = nullptr, all_modset = nullptr;
   std::vector<Exit> exits;
+  // F4 (PTR_FIELDS, spec.extended_facts): a counted loop of known trip count, its induction variable
+  // (the local id of the expression trees) and the values it takes: c0 + k * step for k < trip.
+  std::string induction;
+  int64_t c0 = 0, step = 0;
 };
 
 // A call inside a table walk, in the form that finalize evaluates per iteration: its guards
@@ -299,6 +303,10 @@ struct ImageFact {
   std::string fn_key;
   Pos pos;
   std::string tu;
+  // Filled with spec.extended_facts only (F6 GLOBAL_IMAGES; STATIC_IMAGE does not write them): the
+  // record field the leaf is, and the macro its value is written with and where that text is spelled.
+  std::string owner, field, macro;
+  Pos spell;
 };
 
 struct LocFact {
@@ -386,6 +394,16 @@ struct ReadFact {
   std::string call_key;               // call-argument: the innermost call
   uint32_t arg_index = kNone;
   ExprRef index = nullptr, guard = nullptr, ctx = nullptr;
+  // F4 (PTR_FIELDS): the pointer field the access path dereferences nearest to its root, if it is one;
+  // the subscript of that step (null for `->`), the rest of the path from the pointee to the location,
+  // the number of pointer steps on the path, and the global at the root (its object key).
+  std::string ptr_type, ptr_field, ptr_rest, root_object;
+  ExprRef ptr_index = nullptr;
+  std::string ptr_index_local;  // the subscript is this local (its tree id), for the counted-loop values
+  int64_t ptr_index_const = 0;
+  bool ptr_index_is_const = false;
+  uint32_t ptr_steps = 0;
+  std::string key() const { return func_key + "|" + pos.str() + "#" + std::to_string(ordinal); }
 };
 // One alternative of a return statement (RETURNS).
 struct ReturnFact {
@@ -409,6 +427,75 @@ struct RetConstFact {
   ExprRef cond = nullptr;  // null: always
   uint32_t n_rows = 0;
   uint32_t flags = 0;
+};
+
+// ---- the extended facts F4 and F6 (spec.extended_facts; kz_facts.h revision 7) --------------------------------
+// One argument of one call, traced to its source (ARGFLOW).
+struct ArgFlowFact {
+  std::string call_key, func_key;
+  uint32_t arg_index = 0;
+  uint8_t src = KZ_ARGSRC_NONE, base = KZ_ARGBASE_NONE, reason = KZ_DERIVES_REASON_NONE;
+  uint32_t flags = 0;
+  uint32_t param = kNone, hops = 0;
+  int64_t value = 0;
+  std::string type, field, root, object, text;
+  ExprRef chain = nullptr, index = nullptr;
+  ExprRef guard = nullptr;  // the conditions the call executes under (for the PARAM_FLOW rows of the call)
+  std::string read_key;     // the READS row of the source read (ReadFact::key), or empty
+};
+// A use of a copy of a parameter in its function's body other than as a call argument (PARAM_FLOW,
+// depth 0): a comparison, a return, a store, a subscript; and the stores through a pointer parameter.
+struct ParamUse {
+  std::string func_key;
+  uint32_t param = 0;
+  uint8_t kind = KZ_PFLOW_KIND_NONE;
+  uint16_t flags = 0;
+  Pos pos;
+  uint32_t ordinal = 0;
+  ExprRef expr = nullptr, guard = nullptr;
+  std::string text;
+};
+// A row of PARAM_FLOW (filled by finalize_flow_facts).
+struct ParamFlowFact {
+  std::string func_key, call_key, next_key, sink_key, sink_call_key;
+  uint32_t param = 0, next_param = kNone, depth = 0, n = 0;
+  uint8_t kind = KZ_PFLOW_KIND_NONE;
+  uint16_t flags = 0;
+  ExprRef expr = nullptr, guard = nullptr;
+  Pos pos;
+  std::string text, chain;
+};
+// A store to a pointer field whose value is the address of a global object (PTR_FIELDS), with what the
+// writer's control-flow graph says about its order: the calls and the reads of the writer that every
+// path reaches after it, and the positions of the other writes of the field it overwrites.
+struct PtrWriteFact {
+  uint8_t kind = KZ_PTRF_KIND_ADDRESS_WRITE;
+  std::string func_key;  // empty for a static initializer
+  std::string type, field, root, object, text;
+  bool root_global = false, in_loop = false;
+  int64_t elem = 0;
+  Pos pos;
+  uint32_t ordinal = 0;
+  ExprRef guard = nullptr;
+  std::set<std::string> after_calls, after_reads;  // call keys, ReadFact keys
+  std::set<std::string> overwritten;               // Pos::str() of earlier writes of the field in the writer
+};
+// A row of PTR_FIELDS (filled by finalize_flow_facts).
+struct PtrFieldFact {
+  uint8_t kind = KZ_PTRF_KIND_NONE, status = KZ_PTRF_STATUS_NONE;
+  uint16_t flags = 0;
+  std::string func_key, read_key, type, field, root, object, path;
+  int64_t write = -1;  // index of the write row among the PTR_FIELDS rows
+  uint32_t n = 0, idx_n = 0;
+  int64_t elem = 0, idx_step = 0;
+  ExprRef index = nullptr, guard = nullptr;
+  Pos pos;
+};
+// A row of GLOBAL_IMAGES (filled by finalize_flow_facts).
+struct GlobalImageFact {
+  ImageFact leaf;
+  uint8_t reach = 0;
+  uint16_t flags = 0;
 };
 
 // A row of P0_TABLE: the table entry (index into p0_table()) and what this program has of it.
@@ -481,6 +568,22 @@ struct Model {
   std::vector<ReadFact> reads;
   std::vector<ReturnFact> returns;
   std::vector<RetConstFact> ret_consts;  // filled by finalize
+
+  // The extended facts F4 and F6 (spec.extended_facts): what the walk collects, and the rows that
+  // finalize_flow_facts composes from it.
+  std::vector<ArgFlowFact> argflows;
+  std::vector<ParamUse> param_uses;
+  std::vector<PtrWriteFact> ptr_writes;
+  std::map<std::string, ImageFact> object_scalar_images;  // object key -> the initializer of a scalar global
+  std::vector<ParamFlowFact> param_flows;
+  std::vector<PtrFieldFact> ptr_fields;
+  std::vector<GlobalImageFact> global_images;
+  struct FlowStats {
+    uint32_t nodes = 0, sccs = 0, sccs_recursive = 0;
+    uint32_t direct = 0, composed = 0, cut_depth = 0, cut_size = 0;  // rows; cut: OPEN rows
+    uint64_t left_out = 0;                                            // uses the bounds left out
+    uint32_t objects_reached = 0, objects_outside = 0;                // GLOBAL_IMAGES: in / outside the closed program
+  } flow_stats;
 
   // Raw tables for the global phase.
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer

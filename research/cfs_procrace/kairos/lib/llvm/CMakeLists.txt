@@ -7,6 +7,8 @@
 #   p0, wrappers                                    no Clang types: the built-in table of library
 #                                                   primitives and the operations the profile-free
 #                                                   mode derives from it through wrappers
+#   argflow                                         no Clang types: the whole-program part of the
+#                                                   extended facts F4 and F6
 #   ast_*                                           the Clang front end of the extraction
 #   basis_*                                         the analysis basis B (SPEC 1.7)
 add_library(kz-llvm STATIC
@@ -15,6 +17,7 @@ add_library(kz-llvm STATIC
   p0.cpp
   wrappers.cpp
   finalize.cpp
+  argflow.cpp
   serialize.cpp
   facts_text.cpp
   facts_query.cpp

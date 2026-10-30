@@ -78,8 +78,12 @@
  * LOOP_EXITS (kz_facts.h, revision 6 of the extraction records: the extended facts F1-F3), written by the profile-free
  * extraction and, in the profile-driven one, only on request (`kz-static extract --extended-facts`); no earlier record
  * or section version changes, so every container written before is read as it was written, and a profile-driven
- * extraction without that request is written as before. */
-#define KZ_SCHEMA_REVISION 8u
+ * extraction without that request is written as before.  Revision 9 (2026-10-30) adds four NEW sections in the second
+ * extraction range, ARGFLOW, PARAM_FLOW, PTR_FIELDS and GLOBAL_IMAGES (kz_facts.h, revision 7 of the extraction records:
+ * the extended facts F4 and F6), written under the same condition as those of revision 8; no earlier record or section
+ * version changes, so every container written before is read as it was written, and a profile-driven extraction
+ * without the request is written as before. */
+#define KZ_SCHEMA_REVISION 9u
 
 /* Sentinels.  A null kz_ref is all zero bytes; index fields use KZ_NONE32. */
 #define KZ_NONE32 0xFFFFFFFFu

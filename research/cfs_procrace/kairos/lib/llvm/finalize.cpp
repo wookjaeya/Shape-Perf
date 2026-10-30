@@ -6,6 +6,7 @@
 #include <queue>
 #include <tuple>
 
+#include "argflow.hpp"
 #include "unroll.hpp"
 
 namespace kzs {
@@ -777,6 +778,10 @@ void finalize(Model* mp, const ExtractSpec& spec) {
       m.ret_consts.push_back(a.f);
     }
   }
+
+  // ---- the extended facts F4 and F6 (spec.extended_facts; empty otherwise): ARGFLOW, PARAM_FLOW, PTR_FIELDS,
+  // GLOBAL_IMAGES (argflow.hpp)
+  if (spec.extended_facts) finalize_flow_facts(&m, spec);
 }
 
 }  // namespace kzs

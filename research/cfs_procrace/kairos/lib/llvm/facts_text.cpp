@@ -16,7 +16,8 @@ namespace {
 
 const char* const kSections[] = {"basis",   "files",   "functions", "calls",     "derives",  "loops",       "iters",  "order", "init",
                                  "consts",  "writers", "atype",     "locs",      "targets",  "spawnparams", "image",  "terminals",
-                                 "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits"};
+                                 "outcalls", "fwrites", "p0",      "derived",   "spawnwrap", "reads",  "returns", "retconsts", "loopexits",
+                                 "argflow", "paramflow", "ptrfields", "gimages"};
 
 class View {
  public:
@@ -46,7 +47,8 @@ class View {
       void (View::*fn)(std::ostream&);
     } added[] = {{"p0", KZ_SEC_P0_TABLE, &View::p0},           {"derived", KZ_SEC_OP_DERIV, &View::derived}, {"spawnwrap", KZ_SEC_SPAWN_WRAP, &View::spawnwrap},
                  {"reads", KZ_SEC_READS, &View::reads},        {"returns", KZ_SEC_RETURNS, &View::returns},  {"retconsts", KZ_SEC_RET_CONSTS, &View::retconsts},
-                 {"loopexits", KZ_SEC_LOOP_EXITS, &View::loopexits}};
+                 {"loopexits", KZ_SEC_LOOP_EXITS, &View::loopexits},  {"argflow", KZ_SEC_ARGFLOW, &View::argflow},     {"paramflow", KZ_SEC_PARAM_FLOW, &View::paramflow},
+                 {"ptrfields", KZ_SEC_PTR_FIELDS, &View::ptrfields},  {"gimages", KZ_SEC_GLOBAL_IMAGES, &View::gimages}};
     for (const auto& t : added)
       if (c_.find_section(t.id) != nullptr && (o_.sections.empty() || o_.sections.count(t.name) != 0)) (this->*t.fn)(os);
     *out = os.str();
@@ -87,6 +89,10 @@ class View {
     if (!(s = read(KZ_SEC_RETURNS, &returns_)).ok()) return s;
     if (!(s = read(KZ_SEC_RET_CONSTS, &retconsts_)).ok()) return s;
     if (!(s = read(KZ_SEC_LOOP_EXITS, &loopexits_)).ok()) return s;
+    if (!(s = read(KZ_SEC_ARGFLOW, &argflow_)).ok()) return s;
+    if (!(s = read(KZ_SEC_PARAM_FLOW, &pflow_)).ok()) return s;
+    if (!(s = read(KZ_SEC_PTR_FIELDS, &ptrfields_)).ok()) return s;
+    if (!(s = read(KZ_SEC_GLOBAL_IMAGES, &gimages_)).ok()) return s;
     for (size_t i = 0; i < calls_.size(); ++i) call_by_site_[calls_[i].site] = i;
     for (size_t i = 0; i < loops_.size(); ++i) loop_by_site_[loops_[i].site] = i;
     return kz::Status::success();
@@ -435,6 +441,109 @@ class View {
     }
   }
 
+  // ---- the extended facts F4 and F6 (revision 7) ----
+  void argflow(std::ostream& os) {
+    std::vector<const kz_fact_argflow*> sel;
+    for (const kz_fact_argflow& a : argflow_) {
+      auto it = call_by_site_.find(a.site);
+      const std::string callee = it == call_by_site_.end() ? "" : str(calls_[it->second].callee);
+      if (want_callee(callee) && want_loc(a.type, a.field)) sel.push_back(&a);
+    }
+    os << "[argflow] " << sel.size() << "\n";
+    for (const kz_fact_argflow* a : sel) {
+      os << "  arg " << a->arg_index << " of " << site_text(a->site) << " [" << str(a->text) << "] <- " << enum_text("KZ_ARGSRC", a->src);
+      if (a->src == KZ_ARGSRC_CONST) os << " " << a->value;
+      if (!str(a->type).empty()) os << " " << str(a->type) << "." << str(a->field);
+      const std::string root = str(a->root);
+      if (!root.empty()) os << " root=" << (a->src == KZ_ARGSRC_STRING ? quoted(root) : root);
+      if (a->param != KZ_NONE32) os << " param=" << a->param;
+      if (a->base != KZ_ARGBASE_NONE) os << " base=" << enum_text("KZ_ARGBASE", a->base);
+      const std::string obj = str(a->object);
+      if (!obj.empty()) os << " object=" << obj;
+      os << " hops=" << a->hops << " " << flags_text("KZ_ARGFLOW_FLAG", a->flags);
+      if (a->reason != KZ_DERIVES_REASON_NONE) os << " (" << enum_text("KZ_DERIVES_REASON", a->reason) << ")";
+      if (a->index_root != KZ_NONE32) os << " index=" << list(a->index_root);
+      if (a->read != KZ_NONE32) os << " read=" << a->read;
+      os << " chain=" << expr(a->chain_root) << "\n";
+    }
+  }
+  void paramflow(std::ostream& os) {
+    os << "[paramflow] " << pflow_.size() << "\n";
+    for (const kz_fact_pflow& r : pflow_) {
+      os << "  " << fn_name(r.fn) << "#" << r.param << " d" << r.depth << " " << enum_text("KZ_PFLOW_KIND", r.kind);
+      if (r.kind == KZ_PFLOW_KIND_OPEN) {
+        os << " " << flags_text("KZ_PFLOW_FLAG", r.flags) << " left out " << r.n << " [" << str(r.text) << "]\n";
+        continue;
+      }
+      if (r.depth == 0 && r.kind == KZ_PFLOW_KIND_CALL_ARG) {
+        os << " -> " << (r.next_fn != KZ_NONE32 ? fn_name(r.next_fn) : std::string("?")) << "#" << idx(r.next_param) << " at " << site_text(r.site);
+      } else if (r.depth > 0) {
+        os << " in " << fn_name(r.sink_fn) << " at " << pos(r.file, r.line, r.col) << " via " << site_text(r.site);
+        if (r.sink_site != KZ_NONE32) os << " (call " << site_text(r.sink_site) << " arg " << r.n << ")";
+      } else {
+        os << " at " << pos(r.file, r.line, r.col);
+      }
+      os << " " << flags_text("KZ_PFLOW_FLAG", r.flags) << " [" << str(r.text) << "]";
+      if (r.expr_root != KZ_NONE32) os << " expr=" << expr(r.expr_root);
+      if (r.guard_root != KZ_NONE32) os << " guard=" << expr(r.guard_root);
+      os << "\n";
+      const std::string ch = str(r.chain);
+      if (!ch.empty()) os << "      chain " << ch << "\n";
+    }
+  }
+  void ptrfields(std::ostream& os) {
+    os << "[ptrfields] " << ptrfields_.size() << "\n";
+    for (size_t i = 0; i < ptrfields_.size(); ++i) {
+      const kz_fact_ptrfield& r = ptrfields_[i];
+      os << "  " << i << " " << enum_text("KZ_PTRF_KIND", r.kind) << " " << str(r.type) << "." << str(r.field) << " at " << pos(r.file, r.line, r.col);
+      if (r.kind == KZ_PTRF_KIND_READ) {
+        os << " in " << fn_name(r.fn) << " read=" << idx(r.read) << " root=" << str(r.root) << " " << enum_text("KZ_PTRF_STATUS", r.status) << " candidates=" << r.n;
+        if (r.write != KZ_NONE32) os << " write=" << r.write << " -> " << str(r.object) << " path=" << str(r.path);
+        if (r.index_root != KZ_NONE32) os << " index=" << expr(r.index_root);
+        if (r.idx_n > 0) os << " elements=" << r.elem << "+" << r.idx_step << "k (k<" << r.idx_n << ")";
+        os << " " << flags_text("KZ_PTRF_FLAG", r.flags) << "\n";
+        // the static values the resolved elements have (GLOBAL_IMAGES), when the elements are known
+        if (r.write != KZ_NONE32 && r.idx_n > 0 && r.idx_n <= 64) {
+          const std::string obj = str(r.object), rest = str(r.path);
+          for (uint32_t k = 0; k < r.idx_n; ++k) {
+            const int64_t e = r.elem + static_cast<int64_t>(k) * (r.idx_n > 1 ? r.idx_step : 0);
+            const std::string want = "[" + std::to_string(e) + "]" + rest;
+            for (const kz_fact_gimage& g : gimages_)
+              if (str(g.object) == obj && (str(g.path) == want || str(g.path) == rest)) os << "      " << obj << str(g.path) << " = " << image_value(g) << "\n";
+          }
+        }
+      } else {
+        os << (r.fn != KZ_NONE32 ? " in " + fn_name(r.fn) : std::string()) << " root=" << str(r.root) << " -> " << str(r.object) << "[" << r.elem << "] [" << str(r.path) << "] other-writes=" << r.n
+           << " " << flags_text("KZ_PTRF_FLAG", r.flags);
+        if (r.guard_root != KZ_NONE32) os << " guard=" << expr(r.guard_root);
+        os << "\n";
+      }
+    }
+  }
+  std::string image_value(const kz_fact_gimage& g) const {
+    std::string t = enum_text("KZ_IMAGE_KIND", g.kind);
+    switch (g.kind) {
+      case KZ_IMAGE_KIND_INT: t += " " + std::to_string(g.value); break;
+      case KZ_IMAGE_KIND_STRING: t += " " + quoted(str(g.text)); break;
+      case KZ_IMAGE_KIND_ADDR:
+      case KZ_IMAGE_KIND_FUNC: t += " " + str(g.text); break;
+      default: break;
+    }
+    t += " at " + pos(g.file, g.line, g.col);
+    const std::string mac = str(g.macro);
+    if (!mac.empty()) t += " macro " + mac + " spelled at " + pos(g.spell_file, g.spell_line, g.spell_col);
+    return t + " " + flags_text("KZ_GIMAGE_FLAG", g.flags);
+  }
+  void gimages(std::ostream& os) {
+    os << "[gimages] " << gimages_.size() << "\n";
+    for (const kz_fact_gimage& g : gimages_) {
+      os << "  " << str(g.object) << str(g.path) << " " << image_value(g) << " reach=" << flags_text("KZ_GIMAGE_REACH", g.reach);
+      const std::string owner = str(g.owner);
+      if (!owner.empty()) os << " field=" << owner << "." << str(g.field);
+      os << "\n";
+    }
+  }
+
   std::string list(uint32_t root) const {
     std::string out = "[";
     bool first = true;
@@ -579,6 +688,10 @@ class View {
   std::vector<kz_fact_return> returns_;
   std::vector<kz_fact_retconst> retconsts_;
   std::vector<kz_fact_loopexit> loopexits_;
+  std::vector<kz_fact_argflow> argflow_;
+  std::vector<kz_fact_pflow> pflow_;
+  std::vector<kz_fact_ptrfield> ptrfields_;
+  std::vector<kz_fact_gimage> gimages_;
   std::map<uint32_t, size_t> call_by_site_, loop_by_site_;
 };
 

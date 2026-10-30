@@ -40,6 +40,16 @@
  * They are written by `kz-static extract --no-profile` and, in the profile-driven mode, only with
  * `--extended-facts`; a profile-driven extraction without that option writes its facts as before.
  * Their expression roots are in FACT_EXPRS after the roots of the earlier sections.
+ * Revision 7 (2026-10-30, the extended facts F4 and F6): four NEW sections in the second extraction
+ * range, written with the extended facts (the same condition as revision 6), 127 (ARGFLOW: the copy
+ * chain of every call argument, not only of the arguments with a role, with its source and the
+ * storage kind of the base of its access path), 128 (PARAM_FLOW: per function parameter, where its
+ * value goes in the body -- a call argument, a comparison, a return, a store, a subscript, a store
+ * through it -- and the same composed through the calls over the call graph, callees first), 129
+ * (PTR_FIELDS: the writes of a pointer field whose value is the address of a global object, and
+ * the reads through such a field resolved to that object, with the program order of the write and
+ * the read) and 130 (GLOBAL_IMAGES: the static initial values of the global objects those facts
+ * reach).  Their expression roots are in FACT_EXPRS after the roots of revision 6.
  *
  * Source positions.  Every fact carries (file, line, col) as strings and numbers, and `fh`,
  * the index of that file in the FILE_HASHES section of the same artifact.  So a fact is
@@ -96,7 +106,11 @@ enum kz_facts_section_id {
   KZ_SEC_READS = 123,
   KZ_SEC_RETURNS = 124,
   KZ_SEC_RET_CONSTS = 125,
-  KZ_SEC_LOOP_EXITS = 126
+  KZ_SEC_LOOP_EXITS = 126,
+  KZ_SEC_ARGFLOW = 127,
+  KZ_SEC_PARAM_FLOW = 128,
+  KZ_SEC_PTR_FIELDS = 129,
+  KZ_SEC_GLOBAL_IMAGES = 130
 };
 
 #define KZ_FACTS_SECTIONS(S)                   \
@@ -132,7 +146,11 @@ enum kz_facts_section_id {
   S(READS, 123, kz_fact_read, 1)               \
   S(RETURNS, 124, kz_fact_return, 1)           \
   S(RET_CONSTS, 125, kz_fact_retconst, 1)      \
-  S(LOOP_EXITS, 126, kz_fact_loopexit, 1)
+  S(LOOP_EXITS, 126, kz_fact_loopexit, 1)      \
+  S(ARGFLOW, 127, kz_fact_argflow, 1)          \
+  S(PARAM_FLOW, 128, kz_fact_pflow, 1)         \
+  S(PTR_FIELDS, 129, kz_fact_ptrfield, 1)      \
+  S(GLOBAL_IMAGES, 130, kz_fact_gimage, 1)
 
 /* A function: defined in the closed program, or only declared (library, external).  */
 #define KZ_FACT_FUNC_FIELDS(X, T)                                                    \
@@ -804,6 +822,166 @@ enum kz_facts_section_id {
   X(T, uint16_t, flags, )    /* KZ_LOOPEXIT_FLAG */                                  \
   X(T, kz_str, file, )
 
+/*
+ * ARGFLOW (revision 7, F4).  One row per argument of every call (`site`, `arg_index`, `fn` the
+ * caller): where the value comes from in the caller, following copies through locals that have a
+ * single copy definition (the rule of the derives rows, applied to every argument; `hops` copies,
+ * `chain_root` the chain, its innermost node the source).  A copy is a conversion that keeps the
+ * value: lvalue-to-rvalue, a no-op, a widening integer conversion, and a conversion between
+ * pointer types (`pointer-conversion`: the address is kept).  `src` is what the chain ends at; for
+ * a FIELD, GLOBAL, ELEMENT, DEREF or ADDRESS source, (type, field) is the location as the writers
+ * name it and `base` the storage kind of the object at the base of the access path: a global
+ * object, an element of a global array, a local, the pointee of a parameter (`param`), of a local
+ * pointer, of a pointer field (`root` the field, `object` the global at the root of its path), of a
+ * global pointer or of a call result.  A local pointer with a single copy definition is followed
+ * to what it points at (`base-via-local`).  `object` is the global object at the root of the path
+ * (its key in STATIC_IMAGE and GLOBAL_IMAGES).  `index_root` lists the subscripts on the path, root
+ * first.  `read` is the READS row of the source read.  A PARAM source is parameter `param` of the
+ * caller; a CALL source names the callee in `root`.  LOCAL and EXPR sources are not followed
+ * further (`reason`, the derives reasons).
+ */
+#define KZ_FACT_ARGFLOW_FIELDS(X, T)                                                 \
+  X(T, uint32_t, site, )                                                             \
+  X(T, uint32_t, arg_index, )                                                        \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, param, )      /* PARAM source or parameter base: its index, else KZ_NONE32 */ \
+  X(T, uint32_t, hops, )                                                             \
+  X(T, uint32_t, chain_root, ) /* FACT_EXPRS */                                      \
+  X(T, uint32_t, index_root, ) /* FACT_EXPRS: SEQ of the subscripts, or KZ_NONE32 */ \
+  X(T, uint32_t, read, )       /* READS index of the source read, or KZ_NONE32 */    \
+  X(T, uint8_t, src, )         /* KZ_ARGSRC */                                       \
+  X(T, uint8_t, base, )        /* KZ_ARGBASE */                                      \
+  X(T, uint8_t, reason, )      /* KZ_DERIVES_REASON: why a LOCAL or EXPR source stops */ \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint32_t, flags, )      /* KZ_ARGFLOW_FLAG */                                 \
+  X(T, int64_t, value, )       /* CONST: the value */                                \
+  X(T, kz_str, type, )                                                               \
+  X(T, kz_str, field, )                                                              \
+  X(T, kz_str, root, )                                                               \
+  X(T, kz_str, object, )                                                             \
+  X(T, kz_str, text, )         /* the argument as written */
+
+/*
+ * PARAM_FLOW (revision 7, F4).  Per function parameter (`fn`, `param`): where its value goes.  A
+ * row of depth 0 is a use in the body of `fn` of a copy of the parameter (the copy rule of
+ * ARGFLOW): CALL_ARG argument `next_param` of the call `site` to `next_fn` (an indirect call: one
+ * row per resolved target, `indirect` and `may`; `unresolved` when its targets are not all known;
+ * `callee-without-body` when the callee has no body in the closed program; `variadic` in a variadic
+ * position); COMPARISON an operand of a comparison or a condition tested for truth (`expr_root` the
+ * comparison); RETURN the value returned; STORE the value stored to a field, a global or through a
+ * pointer parameter (`expr_root` the destination); SUBSCRIPT a subscript (`expr_root` the access);
+ * OUT_STORE the parameter is a pointer the function stores through (`expr_root` the value stored).
+ * A row of depth d > 0 is a use of depth 0 in `sink_fn` (its kind, position, expressions and guard)
+ * that the parameter reaches through d calls, CALL_ARG rows of functions with a body, composed
+ * bottom-up over the strongly connected components of the call graph (callees first) to a fixed
+ * point with the shortest depth: `site`, `next_fn` and `next_param` are the first call, `chain` the
+ * path, `may` when it passes an indirect call.  CALL_ARG rows of depth > 0 are the open ends of the
+ * path (`callee-without-body`, `unresolved`, `variadic`; `sink_site` the call and `n` the argument).
+ * OPEN rows: the composition of the parameter was cut by a bound (`depth-bound`, `size-bound`;
+ * `n` the uses left out), counted as unresolved.  `guard_root` is the guard at the use in `sink_fn`.
+ */
+#define KZ_FACT_PFLOW_FIELDS(X, T)                                                   \
+  X(T, uint32_t, fn, )                                                               \
+  X(T, uint32_t, param, )                                                            \
+  X(T, uint32_t, depth, )                                                            \
+  X(T, uint32_t, site, )       /* the call of the first step, or KZ_NONE32 */        \
+  X(T, uint32_t, next_fn, )                                                          \
+  X(T, uint32_t, next_param, )                                                       \
+  X(T, uint32_t, sink_fn, )                                                          \
+  X(T, uint32_t, sink_site, )  /* CALL_ARG at depth > 0: the call at the use, else KZ_NONE32 */ \
+  X(T, uint32_t, expr_root, )  /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, guard_root, ) /* FACT_EXPRS, or KZ_NONE32 */                        \
+  X(T, uint32_t, n, )          /* CALL_ARG at depth > 0: the argument; OPEN: the uses left out */ \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, kind, )        /* KZ_PFLOW_KIND */                                   \
+  X(T, uint8_t, rsv0, )                                                              \
+  X(T, uint16_t, flags, )      /* KZ_PFLOW_FLAG */                                   \
+  X(T, kz_str, file, )                                                               \
+  X(T, kz_str, text, )                                                               \
+  X(T, kz_str, chain, )        /* depth > 0: "f#k -> g#j -> ..." */
+
+/*
+ * PTR_FIELDS (revision 7, F4 pointer-field flow).  ADDRESS_WRITE: a store to the pointer field
+ * (type, field) whose value is the address of the global `object` (element `elem`; an array that
+ * decays is element 0) in `fn` (`root` the global at the root of the written member, `guard_root`
+ * its guard, `n` the other typed writes of the field -- stores, whole-record writes, address
+ * escapes, in any function -- that are not overwritten by it: a write in `fn` on every path before
+ * it, outside a loop around it, is overwritten).  STATIC_INIT: the static initializer of `root`
+ * sets the field to that address.  READ: a READS row (`read`, `fn`) whose access path goes through
+ * the pointer field (the step nearest to the root of the path; `multi-level` when more steps
+ * follow), with `path` the rest of the path from the pointee to the location read and `index_root`
+ * the subscript of the step (none for `->`, element 0).  `status`: RESOLVED when exactly one
+ * address write of the same root (or a static initializer) holds the address, it precedes the read
+ * in program order -- the read is in the writer after the write on every path, or every call path
+ * to the reader passes a call of the writer that every path reaches after the write
+ * (`write-before-read`) -- and no other typed write of the field remains (`n` 0 on the write);
+ * MAY when an address write exists but not all of that holds (`n` the candidate writes); NEEDS
+ * field points-to (UNRESOLVED) when no address write of the field is found.  `write` is the
+ * ADDRESS_WRITE or STATIC_INIT row of the (first) candidate.  When the subscript is the induction
+ * variable of an enclosing counted loop of known trip count, its values are `elem` + k * `idx_step`
+ * for k < `idx_n` (`index-from-counted-loop`; `loop-may-exit-early` for an upper bound).  Typed
+ * writes only: stores through untyped pointers and code without a body are not excluded.
+ */
+#define KZ_FACT_PTRFIELD_FIELDS(X, T)                                                \
+  X(T, uint32_t, fn, )         /* the writer or the reader; KZ_NONE32 for a static initializer */ \
+  X(T, uint32_t, read, )       /* READ: READS index, else KZ_NONE32 */               \
+  X(T, uint32_t, write, )      /* READ: the PTR_FIELDS row of the address, else KZ_NONE32 */ \
+  X(T, uint32_t, n, )                                                                \
+  X(T, uint32_t, index_root, ) /* READ: FACT_EXPRS, or KZ_NONE32 */                  \
+  X(T, uint32_t, guard_root, ) /* ADDRESS_WRITE: FACT_EXPRS, or KZ_NONE32 */         \
+  X(T, uint32_t, idx_n, )      /* READ: the number of index values, 0 when unknown */ \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint8_t, kind, )        /* KZ_PTRF_KIND */                                    \
+  X(T, uint8_t, status, )      /* READ: KZ_PTRF_STATUS */                            \
+  X(T, uint16_t, flags, )      /* KZ_PTRF_FLAG */                                    \
+  X(T, uint32_t, rsv0, )                                                             \
+  X(T, int64_t, elem, )        /* writes: the element; READ: the first index value */ \
+  X(T, int64_t, idx_step, )    /* READ */                                            \
+  X(T, kz_str, type, )         /* the owner type of the pointer field */             \
+  X(T, kz_str, field, )        /* the pointer field */                               \
+  X(T, kz_str, root, )                                                               \
+  X(T, kz_str, object, )       /* writes: the object addressed; READ: resolved (first candidate) */ \
+  X(T, kz_str, path, )         /* READ: from the pointee to the location; writes: the value as written */ \
+  X(T, kz_str, file, )
+
+/*
+ * GLOBAL_IMAGES (revision 7, F6).  The static initial value of every global object that ARGFLOW or
+ * PTR_FIELDS reaches (`reach`), whatever table walks there are: one row per leaf of its
+ * initializer as the static-image reader of STATIC_IMAGE flattens it (the same leaves, kinds and
+ * paths), a scalar object as one leaf, an object defined without an initializer as one
+ * `zero-initialized` row.  (file, line, col) is where the value is written; when it comes from a
+ * macro, `macro` names the macro written there and (spell_file, spell_line, spell_col) is where its
+ * text is spelled (the definition).  (owner, field) is the record field the leaf is, when it is
+ * one.  `object-written`: a function stores to the object or takes its address; `field-written`:
+ * a function stores to (owner, field) or takes its address (field-based, any object of the type);
+ * `record-written`: a whole record of type `owner` is written.  Without these the static value is
+ * the value at run time for typed writes; stores through untyped pointers are not excluded.
+ */
+#define KZ_FACT_GIMAGE_FIELDS(X, T)                                                  \
+  X(T, uint32_t, fn, )         /* FUNCTION leaf: the function, else KZ_NONE32 */     \
+  X(T, uint32_t, line, )                                                             \
+  X(T, uint32_t, col, )                                                              \
+  X(T, uint32_t, fh, )                                                               \
+  X(T, uint32_t, spell_line, )                                                       \
+  X(T, uint32_t, spell_col, )                                                        \
+  X(T, uint8_t, kind, )        /* KZ_IMAGE_KIND */                                   \
+  X(T, uint8_t, reach, )       /* KZ_GIMAGE_REACH */                                 \
+  X(T, uint16_t, flags, )      /* KZ_GIMAGE_FLAG */                                  \
+  X(T, uint32_t, rsv0, )                                                             \
+  X(T, int64_t, value, )                                                             \
+  X(T, kz_str, object, )                                                             \
+  X(T, kz_str, path, )                                                               \
+  X(T, kz_str, text, )                                                               \
+  X(T, kz_str, file, )                                                               \
+  X(T, kz_str, spell_file, )                                                         \
+  X(T, kz_str, macro, )                                                              \
+  X(T, kz_str, owner, )                                                              \
+  X(T, kz_str, field, )
+
 #define KZ_FACTS_RECORDS(R)                       \
   R(kz_fact_func, KZ_FACT_FUNC_FIELDS)            \
   R(kz_fact_call, KZ_FACT_CALL_FIELDS)            \
@@ -837,7 +1015,11 @@ enum kz_facts_section_id {
   R(kz_fact_read, KZ_FACT_READ_FIELDS)            \
   R(kz_fact_return, KZ_FACT_RETURN_FIELDS)        \
   R(kz_fact_retconst, KZ_FACT_RETCONST_FIELDS)    \
-  R(kz_fact_loopexit, KZ_FACT_LOOPEXIT_FIELDS)
+  R(kz_fact_loopexit, KZ_FACT_LOOPEXIT_FIELDS)    \
+  R(kz_fact_argflow, KZ_FACT_ARGFLOW_FIELDS)      \
+  R(kz_fact_pflow, KZ_FACT_PFLOW_FIELDS)          \
+  R(kz_fact_ptrfield, KZ_FACT_PTRFIELD_FIELDS)    \
+  R(kz_fact_gimage, KZ_FACT_GIMAGE_FIELDS)
 
 KZ_FACTS_RECORDS(KZ_RECORD)
 
@@ -1095,6 +1277,76 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   ITEM(P, AS_IN_LOOPS, 0x1, "as-in-loops") ITEM(P, NEVER, 0x2, "never-taken")        \
   ITEM(P, UNCONDITIONAL, 0x4, "unconditional") ITEM(P, NO_EXIT, 0x8, "no-exit")
 
+#define KZ_ENUM_ARGSRC(ITEM, P)                                                      \
+  ITEM(P, NONE, 0, "none") ITEM(P, CONST, 1, "const") ITEM(P, STRING, 2, "string")   \
+  ITEM(P, FUNCTION, 3, "function") ITEM(P, FIELD, 4, "field") ITEM(P, GLOBAL, 5, "global") \
+  ITEM(P, ELEMENT, 6, "element") ITEM(P, DEREF, 7, "dereference") ITEM(P, ADDRESS, 8, "address") \
+  ITEM(P, PARAM, 9, "param") ITEM(P, CALL, 10, "call-result") ITEM(P, LOCAL, 11, "local") \
+  ITEM(P, EXPR, 12, "expression")
+
+#define KZ_ENUM_ARGBASE(ITEM, P)                                                     \
+  ITEM(P, NONE, 0, "none") ITEM(P, GLOBAL, 1, "global") ITEM(P, GLOBAL_ELEMENT, 2, "global-array-element") \
+  ITEM(P, LOCAL, 3, "local") ITEM(P, PARAM, 4, "parameter") ITEM(P, LOCAL_POINTER, 5, "local-pointer") \
+  ITEM(P, FIELD_POINTER, 6, "pointer-field") ITEM(P, GLOBAL_POINTER, 7, "global-pointer") \
+  ITEM(P, CALL_RESULT, 8, "call-result") ITEM(P, OTHER, 9, "other")
+
+/* ARRAY_CONTENTS: an array that decays to a pointer (its contents are passed by address);
+ * POINTER_CONVERSION: a conversion between pointer types on the chain (the address is kept);
+ * BASE_VIA_LOCAL: the base pointer is a local followed through its single copy definition;
+ * MULTI_LEVEL: the access path dereferences more than one pointer (the base is the step nearest
+ * to the root). */
+#define KZ_ENUM_ARGFLOW_FLAGS(ITEM, P) /* set */                                     \
+  ITEM(P, THROUGH_POINTER, 0x1, "through-pointer") ITEM(P, ARRAY_CONTENTS, 0x2, "array-contents") \
+  ITEM(P, POINTER_CONVERSION, 0x4, "pointer-conversion") ITEM(P, BASE_VIA_LOCAL, 0x8, "base-via-local") \
+  ITEM(P, IN_MACRO, 0x10, "in-macro") ITEM(P, VARIADIC, 0x20, "variadic")            \
+  ITEM(P, NULLPTR, 0x40, "null") ITEM(P, INDEX_UNFOLDED, 0x80, "index-unfolded")     \
+  ITEM(P, MULTI_LEVEL, 0x100, "multi-level")
+
+#define KZ_ENUM_PFLOW_KIND(ITEM, P)                                                  \
+  ITEM(P, NONE, 0, "none") ITEM(P, CALL_ARG, 1, "call-argument") ITEM(P, COMPARE, 2, "comparison") \
+  ITEM(P, RETURN, 3, "return") ITEM(P, STORE, 4, "store") ITEM(P, SUBSCRIPT, 5, "subscript") \
+  ITEM(P, OUT_STORE, 6, "out-store") ITEM(P, OPEN, 7, "open")
+
+/* RESULT_TESTED (CALL_ARG): the result of the call is tested; THROUGH_POINTER_PARAM (STORE): the
+ * destination is reached through a pointer parameter; TRUTH_TEST, SWITCH (COMPARISON): the value is
+ * a condition tested for truth, the controlling expression of a switch. */
+#define KZ_ENUM_PFLOW_FLAGS(ITEM, P) /* set */                                       \
+  ITEM(P, MAY, 0x1, "may") ITEM(P, INDIRECT, 0x2, "indirect")                        \
+  ITEM(P, NO_BODY, 0x4, "callee-without-body") ITEM(P, UNRESOLVED, 0x8, "unresolved") \
+  ITEM(P, VARIADIC, 0x10, "variadic") ITEM(P, DEPTH_BOUND, 0x20, "depth-bound")      \
+  ITEM(P, SIZE_BOUND, 0x40, "size-bound") ITEM(P, TRUTH_TEST, 0x80, "truth-test")    \
+  ITEM(P, SWITCH, 0x100, "switch") ITEM(P, THROUGH_POINTER_PARAM, 0x200, "through-pointer-parameter") \
+  ITEM(P, RESULT_TESTED, 0x400, "result-tested") ITEM(P, IN_LOOP, 0x800, "in-loop")
+
+#define KZ_ENUM_PTRF_KIND(ITEM, P)                                                   \
+  ITEM(P, NONE, 0, "none") ITEM(P, ADDRESS_WRITE, 1, "address-write")                \
+  ITEM(P, STATIC_INIT, 2, "static-initializer") ITEM(P, READ, 3, "read")
+
+#define KZ_ENUM_PTRF_STATUS(ITEM, P)                                                 \
+  ITEM(P, NONE, 0, "none") ITEM(P, RESOLVED, 1, "resolved") ITEM(P, MAY, 2, "may")   \
+  ITEM(P, UNRESOLVED, 3, "needs-field-points-to")
+
+/* WRITE_BEFORE_READ (READ): the address write precedes the read in program order (see PTR_FIELDS);
+ * SAME_ROOT: the write and the read name the field of the same global; FIELD_BASED: the write's
+ * member is not rooted at a global, so it is matched by the field only; OTHER_WRITES: other typed
+ * writes of the field remain; EARLIER_WRITES_OVERWRITTEN (ADDRESS_WRITE): writes of the field in
+ * the writer before it on every path. */
+#define KZ_ENUM_PTRF_FLAGS(ITEM, P) /* set */                                        \
+  ITEM(P, WRITE_BEFORE_READ, 0x1, "write-before-read") ITEM(P, SAME_ROOT, 0x2, "same-root") \
+  ITEM(P, FIELD_BASED, 0x4, "field-based") ITEM(P, OTHER_WRITES, 0x8, "other-writes") \
+  ITEM(P, IN_LOOP, 0x10, "in-loop") ITEM(P, MULTI_LEVEL, 0x20, "multi-level")        \
+  ITEM(P, INDEX_RANGE, 0x40, "index-from-counted-loop") ITEM(P, INDEX_UPPER_BOUND, 0x80, "loop-may-exit-early") \
+  ITEM(P, EARLIER_OVERWRITTEN, 0x100, "earlier-writes-overwritten") ITEM(P, CONST_INDEX, 0x200, "constant-index")
+
+#define KZ_ENUM_GIMAGE_REACH(ITEM, P) /* set */ \
+  ITEM(P, ARGUMENT, 0x1, "argument") ITEM(P, PTR_FIELD, 0x2, "pointer-field")
+
+#define KZ_ENUM_GIMAGE_FLAGS(ITEM, P) /* set */                                      \
+  ITEM(P, CONST_OBJECT, 0x1, "const-object") ITEM(P, NO_INITIALIZER, 0x2, "zero-initialized") \
+  ITEM(P, TRUNCATED, 0x4, "image-truncated") ITEM(P, OBJECT_WRITTEN, 0x8, "object-written") \
+  ITEM(P, FIELD_WRITTEN, 0x10, "field-written") ITEM(P, RECORD_WRITTEN, 0x20, "record-written") \
+  ITEM(P, FROM_MACRO, 0x40, "from-macro")
+
 #define KZ_ENUM_OUTPTR_SUMMARY(ITEM, P)                                              \
   ITEM(P, NONE, 0, "none") ITEM(P, STORE_ONLY, 1, "store-only")                      \
   ITEM(P, ESCAPES, 2, "escapes") ITEM(P, UNSUMMARIZED, 3, "unsummarized")            \
@@ -1179,6 +1431,16 @@ KZ_FACTS_RECORDS(KZ_RECORD)
   D(KZ_RET_FLAG, KZ_ENUM_RET_FLAGS, 1)         \
   D(KZ_LOOPEXIT_KIND, KZ_ENUM_LOOPEXIT_KIND, 0) \
   D(KZ_LOOPEXIT_FLAG, KZ_ENUM_LOOPEXIT_FLAGS, 1) \
+  D(KZ_ARGSRC, KZ_ENUM_ARGSRC, 0)              \
+  D(KZ_ARGBASE, KZ_ENUM_ARGBASE, 0)            \
+  D(KZ_ARGFLOW_FLAG, KZ_ENUM_ARGFLOW_FLAGS, 1) \
+  D(KZ_PFLOW_KIND, KZ_ENUM_PFLOW_KIND, 0)      \
+  D(KZ_PFLOW_FLAG, KZ_ENUM_PFLOW_FLAGS, 1)     \
+  D(KZ_PTRF_KIND, KZ_ENUM_PTRF_KIND, 0)        \
+  D(KZ_PTRF_STATUS, KZ_ENUM_PTRF_STATUS, 0)    \
+  D(KZ_PTRF_FLAG, KZ_ENUM_PTRF_FLAGS, 1)       \
+  D(KZ_GIMAGE_REACH, KZ_ENUM_GIMAGE_REACH, 1)  \
+  D(KZ_GIMAGE_FLAG, KZ_ENUM_GIMAGE_FLAGS, 1)   \
   D(KZ_OUTPTR_SUMMARY, KZ_ENUM_OUTPTR_SUMMARY, 0) \
   D(KZ_ANCHOR_AUDIT, KZ_ENUM_ANCHOR_AUDIT, 0)  \
   D(KZ_ACTOR_KIND, KZ_ENUM_ACTOR_KIND, 0)      \
@@ -1351,6 +1613,41 @@ KZ_FACTS_ENUMS(KZ_DEFINE_ENUM_ENTRY)
   F(kz_fact_loopexit, aux_root, IDX, 0)               \
   F(kz_fact_loopexit, fh, IDX, 0)                     \
   F(kz_fact_loopexit, kind, ENUM, KZ_LOOPEXIT_KIND)   \
-  F(kz_fact_loopexit, flags, FLAGS, KZ_LOOPEXIT_FLAG)
+  F(kz_fact_loopexit, flags, FLAGS, KZ_LOOPEXIT_FLAG) \
+  F(kz_fact_argflow, site, IDX, 0)                    \
+  F(kz_fact_argflow, fn, IDX, 0)                      \
+  F(kz_fact_argflow, param, IDX, 0)                   \
+  F(kz_fact_argflow, chain_root, IDX, 0)              \
+  F(kz_fact_argflow, index_root, IDX, 0)              \
+  F(kz_fact_argflow, read, IDX, 0)                    \
+  F(kz_fact_argflow, src, ENUM, KZ_ARGSRC)            \
+  F(kz_fact_argflow, base, ENUM, KZ_ARGBASE)          \
+  F(kz_fact_argflow, reason, ENUM, KZ_DERIVES_REASON) \
+  F(kz_fact_argflow, flags, FLAGS, KZ_ARGFLOW_FLAG)   \
+  F(kz_fact_pflow, fn, IDX, 0)                        \
+  F(kz_fact_pflow, site, IDX, 0)                      \
+  F(kz_fact_pflow, next_fn, IDX, 0)                   \
+  F(kz_fact_pflow, next_param, IDX, 0)                \
+  F(kz_fact_pflow, sink_fn, IDX, 0)                   \
+  F(kz_fact_pflow, sink_site, IDX, 0)                 \
+  F(kz_fact_pflow, expr_root, IDX, 0)                 \
+  F(kz_fact_pflow, guard_root, IDX, 0)                \
+  F(kz_fact_pflow, fh, IDX, 0)                        \
+  F(kz_fact_pflow, kind, ENUM, KZ_PFLOW_KIND)         \
+  F(kz_fact_pflow, flags, FLAGS, KZ_PFLOW_FLAG)       \
+  F(kz_fact_ptrfield, fn, IDX, 0)                     \
+  F(kz_fact_ptrfield, read, IDX, 0)                   \
+  F(kz_fact_ptrfield, write, IDX, 0)                  \
+  F(kz_fact_ptrfield, index_root, IDX, 0)             \
+  F(kz_fact_ptrfield, guard_root, IDX, 0)             \
+  F(kz_fact_ptrfield, fh, IDX, 0)                     \
+  F(kz_fact_ptrfield, kind, ENUM, KZ_PTRF_KIND)       \
+  F(kz_fact_ptrfield, status, ENUM, KZ_PTRF_STATUS)   \
+  F(kz_fact_ptrfield, flags, FLAGS, KZ_PTRF_FLAG)     \
+  F(kz_fact_gimage, fn, IDX, 0)                       \
+  F(kz_fact_gimage, fh, IDX, 0)                       \
+  F(kz_fact_gimage, kind, ENUM, KZ_IMAGE_KIND)        \
+  F(kz_fact_gimage, reach, FLAGS, KZ_GIMAGE_REACH)    \
+  F(kz_fact_gimage, flags, FLAGS, KZ_GIMAGE_FLAG)
 
 #endif /* KZ_SCHEMA_KZ_FACTS_H */

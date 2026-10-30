@@ -16,6 +16,9 @@ struct ReadOptions {
   std::string resource_dir;   // Clang's builtin headers (-resource-dir)
   std::vector<std::string> extra_args;  // appended to every command (analysis-only adaptations)
   bool verbose = false;
+  // The leaves of the static image of one global object (STATIC_IMAGE, GLOBAL_IMAGES); the image of a
+  // larger initializer ends in a `<image truncated>` leaf.  A tool parameter no reference fixes.
+  size_t image_budget = 4096;
 };
 
 // One translation unit as the build recorded it.

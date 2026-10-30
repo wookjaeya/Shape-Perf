@@ -12,7 +12,10 @@
 //   * the out-pointer summary of every pointer parameter;
 //   * the edges of the function-pointer flow graph;
 //   * with spec.extended_facts (F1-F3), the field and global reads with their use, the return values
-//     resolved through the definitions of the returned local, and the exits of every loop.
+//     resolved through the definitions of the returned local, and the exits of every loop;
+//   * with spec.extended_facts (F4), the source of every call argument, the uses of copies of the
+//     parameters, and the stores of global addresses to pointer fields with the order the body's
+//     control-flow graph gives them.
 // Nothing here knows a framework: every name comes from the ExtractSpec.
 #include <algorithm>
 #include <functional>
@@ -255,6 +258,7 @@ class FnWalker {
     m_.summaries[fkey_] = summary_;
     if (spec_.collect_wrapper_inputs) record_cfg();
     if (ext_) emit_returns();
+    if (ext_) finish_flow_facts();
   }
 
  private:
@@ -541,6 +545,7 @@ class FnWalker {
     ev.field = field;
     ev.pos = tu_.pos_of(at->getBeginLoc());
     if (!loops_.empty()) ev.loop_key = m_.loops[loops_.back()->index].key;
+    if (ext_) ext_writes_.push_back(ExtWrite{at, type, field, kind, ev.pos});
     m_.write_events.push_back(ev);
   }
   // Every record type a value of type `t` holds by value (itself, nested records, array elements).
@@ -598,6 +603,9 @@ class FnWalker {
       case Stmt::DeclRefExprClass: return visit_declref(cast<DeclRefExpr>(s));
       case Stmt::DeclStmtClass: return visit_declstmt(cast<DeclStmt>(s));
       case Stmt::InitListExprClass: return visit_initlist(cast<InitListExpr>(s));
+      case Stmt::ArraySubscriptExprClass:
+        if (ext_) note_param_subscript(cast<ArraySubscriptExpr>(s));
+        break;
       case Stmt::UnaryExprOrTypeTraitExprClass: return;  // sizeof and alignof do not evaluate their operand
       case Stmt::CompoundStmtClass: return visit_compound(cast<CompoundStmt>(s));
       case Stmt::GCCAsmStmtClass:
@@ -637,6 +645,7 @@ class FnWalker {
   // ---- control constructs ----
   void visit_if(const IfStmt* s) {
     visit(s->getInit());
+    if (ext_) note_param_truth(s->getCond(), 0);
     visit(s->getCond());
     guards_.push_back({s->getCond(), true});
     visit(s->getThen());
@@ -648,6 +657,7 @@ class FnWalker {
     }
   }
   void visit_conditional(const ConditionalOperator* s) {
+    if (ext_) note_param_truth(s->getCond(), 0);
     visit(s->getCond());
     guards_.push_back({s->getCond(), true});
     visit(s->getTrueExpr());
@@ -657,6 +667,7 @@ class FnWalker {
     guards_.pop_back();
   }
   void visit_switch(const SwitchStmt* s) {
+    if (ext_) note_param_truth(s->getCond(), KZ_PFLOW_FLAG_SWITCH);
     visit(s->getCond());
     breakables_.push_back(nullptr);
     visit(s->getBody());
@@ -728,6 +739,11 @@ class FnWalker {
         if (trip_known) {
           lf.trip = trip;
           lf.trip_status = lc->n_exits > 0 ? KZ_TRIP_STATUS_UPPER_BOUND : KZ_TRIP_STATUS_EXACT;
+          if (ext_) {  // F4: the values the induction variable takes (PTR_FIELDS)
+            lf.induction = lid(lc->induction);
+            lf.c0 = lc->c0;
+            lf.step = lc->step;
+          }
           ConstFact cf;
           cf.name = lc->bound_text;
           cf.pos = lf.pos;
@@ -1234,6 +1250,7 @@ class FnWalker {
   void visit_while(const WhileStmt* s) {
     LoopCtx* lc = begin_loop(s, s->getCond(), false, true);
     detect_table_walk(lc, s->getBody());
+    if (ext_) note_param_truth(s->getCond(), 0);
     visit(s->getCond());
     guards_.push_back({s->getCond(), true});
     lc->body_guard_base = guards_.size();
@@ -1246,6 +1263,7 @@ class FnWalker {
     detect_table_walk(lc, s->getBody());
     lc->body_guard_base = guards_.size();
     visit(s->getBody());
+    if (ext_) note_param_truth(s->getCond(), 0);
     visit(s->getCond());
     leave_loop(lc, s->getBody());
   }
@@ -1254,6 +1272,7 @@ class FnWalker {
     LoopCtx* lc = begin_loop(s, s->getCond(), true, true);
     recognise_counted(lc, s);
     detect_table_walk(lc, s->getBody());
+    if (ext_) note_param_truth(s->getCond(), 0);
     if (s->getCond() != nullptr) visit(s->getCond());
     if (s->getCond() != nullptr) guards_.push_back({s->getCond(), true});
     lc->body_guard_base = guards_.size();
@@ -1349,6 +1368,11 @@ class FnWalker {
   void visit_return(const ReturnStmt* s) {
     for (auto& lc : loops_) note_exit(lc.get(), s, KZ_LOOPEXIT_KIND_RETURN);
     if (ext_ && s->getRetValue() != nullptr) returns_.push_back(PendingReturn{s, guard_from(0), loops_.empty() ? std::string() : m_.loops[loops_.back()->index].key});
+    if (ext_ && s->getRetValue() != nullptr) {
+      std::set<const VarDecl*> seen;
+      const Src src = trace_source(s->getRetValue(), &seen);
+      if (src.src == KZ_ARGSRC_PARAM) add_param_use(src.param, KZ_PFLOW_KIND_RETURN, 0, s, to_expr(s->getRetValue()));
+    }
     if (const Expr* rv = s->getRetValue()) {
       visit(rv);
       if (is_fp_type(fd_->getReturnType())) add_flow_to("R:" + fkey_, rv);
@@ -1730,6 +1754,9 @@ class FnWalker {
       if (op != nullptr && i < op->roles.size()) a.role = op->roles[i];
       cf.args.push_back(a);
     }
+
+    // F4 (ARGFLOW): where every argument comes from
+    if (ext_) note_argflows(ce, callee, ckey);
 
     // loop bookkeeping
     for (auto& lc : loops_) {
@@ -2295,6 +2322,10 @@ class FnWalker {
   void visit_binary(const BinaryOperator* bo) {
     const BinaryOperatorKind k = bo->getOpcode();
     if (k == BO_LAnd || k == BO_LOr) {
+      if (ext_) {
+        note_param_truth(bo->getLHS(), 0);
+        note_param_truth(bo->getRHS(), 0);
+      }
       visit(bo->getLHS());
       guards_.push_back({bo->getLHS(), k == BO_LAnd});
       visit(bo->getRHS());
@@ -2326,6 +2357,7 @@ class FnWalker {
         }
       }
       handle_assign_flow(bo);
+      if (ext_ && k == BO_Assign) note_flow_store(bo);
       if (QualType lt = lhs->getType(); lt->isRecordType() || lt->isUnionType()) {
         note_record_write(lt, bo);
         for (size_t t : tu_.owners_contained_in(lt)) {
@@ -2337,6 +2369,7 @@ class FnWalker {
       }
       note_untyped_store(lhs, bo);
     }
+    if (ext_ && bo->isComparisonOp()) note_param_compare(bo);
     visit(bo->getLHS());
     visit(bo->getRHS());
   }
@@ -2408,6 +2441,8 @@ class FnWalker {
           note_mod(sub);
         }
       }
+    } else if (uo->getOpcode() == UO_LNot && ext_) {
+      note_param_truth(uo->getSubExpr(), 0);
     } else if (uo->getOpcode() == UO_AddrOf) {
       // the address of a global object leaves the expression: whoever receives it may write it
       if (const auto* adre = dyn_cast<DeclRefExpr>(uo->getSubExpr()->IgnoreParens()))
@@ -3187,6 +3222,29 @@ class FnWalker {
     r.text = tu_.source_text(lv->getSourceRange(), 80);
     r.guard = guard_from(0);
     if (!loops_.empty()) r.loop_key = m_.loops[loops_.back()->index].key;
+    // F4 (PTR_FIELDS): the pointer field the path goes through nearest to its root, and the key of the row
+    {
+      std::set<const VarDecl*> seen;
+      const PathInfo pi = analyze_path(named, &seen);
+      r.ptr_steps = pi.ptr_steps;
+      if (pi.base == KZ_ARGBASE_GLOBAL || pi.base == KZ_ARGBASE_GLOBAL_ELEMENT || pi.base == KZ_ARGBASE_FIELD_POINTER) r.root_object = pi.object;
+      if (pi.base == KZ_ARGBASE_FIELD_POINTER && !(pi.flags & KZ_ARGFLOW_FLAG_BASE_VIA_LOCAL)) {
+        r.ptr_type = pi.ptr_type;
+        r.ptr_field = pi.ptr_field;
+        r.ptr_rest = pi.rest;
+        if (pi.ptr_index != nullptr) {
+          r.ptr_index = to_expr(pi.ptr_index);
+          int64_t c = 0;
+          if (tu_.eval_int(pi.ptr_index->IgnoreParenCasts(), &c)) {
+            r.ptr_index_is_const = true;
+            r.ptr_index_const = c;
+          } else if (const auto* d = dyn_cast<DeclRefExpr>(pi.ptr_index->IgnoreParenImpCasts())) {
+            if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->isLocalVarDecl() && !vd->isStaticLocal()) r.ptr_index_local = lid(vd);
+          }
+        }
+      }
+    }
+    read_keys_[ce] = r.key();
     m_.reads.push_back(r);
   }
   // `*p = v`, `p->f = v`, `p[i] = v` (also `p->f.g`, `p->a[i]`) for a pointer parameter p
@@ -3443,6 +3501,609 @@ class FnWalker {
     }
   }
 
+  // ---- the extended facts F4 (spec.extended_facts; kz_facts.h revision 7) --------------------------------
+
+  // The access path of an lvalue, from the location back to its root: the storage of the object at its
+  // base, and the pointer step nearest to the root (the pointee of that pointer is the base object).
+  struct PathInfo {
+    uint8_t base = KZ_ARGBASE_NONE;
+    std::string root, object;        // the root as named; the global object key of the base object
+    uint32_t param = kNone;          // a parameter base
+    uint32_t flags = 0;              // KZ_ARGFLOW_FLAG
+    std::vector<const Expr*> idx;    // the subscripts, leaf first
+    uint32_t ptr_steps = 0;
+    const Expr* ptr_expr = nullptr;  // the pointer of the step nearest to the root
+    const Expr* ptr_index = nullptr; // its subscript (null for `->` and `*`)
+    std::string rest;                // the path from its pointee to the location (".f[2].g")
+    std::string ptr_type, ptr_field; // a pointer field (or an array field of pointers)
+  };
+  // What a value is a copy of (ARGFLOW; the copy rule of the derives rows, extended to pointer conversions).
+  struct Src {
+    uint8_t src = KZ_ARGSRC_EXPR, base = KZ_ARGBASE_NONE, reason = KZ_DERIVES_REASON_NONE;
+    uint32_t flags = 0, param = kNone, hops = 0;
+    int64_t value = 0;
+    std::string type, field, root, object;
+    ExprRef chain = nullptr, index = nullptr;
+    const Expr* read = nullptr;  // the conversion that reads the source (a READS row)
+  };
+  std::string step_text(const Expr* index) {
+    int64_t c = 0;
+    if (index != nullptr && tu_.eval_int(index->IgnoreParenCasts(), &c)) return "[" + std::to_string(c) + "]";
+    return "[*]";
+  }
+  PathInfo analyze_path(const Expr* lv, std::set<const VarDecl*>* seen) {
+    PathInfo pi;
+    std::vector<std::string> steps;  // leaf first
+    bool element = false;            // an array element between the root and the first pointer step
+    auto pointer_step = [&](const Expr* p, const Expr* index) {
+      ++pi.ptr_steps;
+      pi.flags |= KZ_ARGFLOW_FLAG_THROUGH_POINTER;
+      pi.ptr_expr = p->IgnoreParenImpCasts();
+      pi.ptr_index = index;
+      pi.rest.clear();
+      for (size_t i = steps.size(); i > 0; --i) pi.rest += steps[i - 1];
+      element = false;
+    };
+    const Expr* cur = lv;
+    for (;;) {
+      cur = cur->IgnoreParens();
+      if (const auto* m = dyn_cast<MemberExpr>(cur)) {
+        steps.push_back("." + m->getMemberDecl()->getNameAsString());
+        if (m->isArrow()) {
+          pointer_step(m->getBase(), nullptr);
+          cur = m->getBase()->IgnoreParenImpCasts();
+        } else {
+          cur = m->getBase();
+        }
+        continue;
+      }
+      if (const auto* as = dyn_cast<ArraySubscriptExpr>(cur)) {
+        pi.idx.push_back(as->getIdx());
+        const Expr* b = as->getBase()->IgnoreParens();
+        const auto* bc = dyn_cast<ImplicitCastExpr>(b);
+        if (bc != nullptr && bc->getCastKind() == CK_ArrayToPointerDecay) {
+          steps.push_back(step_text(as->getIdx()));
+          element = true;
+          cur = bc->getSubExpr();
+        } else {
+          pointer_step(b, as->getIdx());
+          cur = b->IgnoreParenImpCasts();
+        }
+        continue;
+      }
+      if (const auto* uo = dyn_cast<UnaryOperator>(cur)) {
+        if (uo->getOpcode() == UO_Deref) {
+          pointer_step(uo->getSubExpr(), nullptr);
+          cur = uo->getSubExpr()->IgnoreParenImpCasts();
+          continue;
+        }
+        if (uo->getOpcode() == UO_AddrOf) {
+          cur = uo->getSubExpr();
+          continue;
+        }
+      }
+      if (const auto* c = dyn_cast<CastExpr>(cur)) {
+        cur = c->getSubExpr();
+        continue;
+      }
+      break;
+    }
+    // the root
+    bool root_global = false, root_local = false, root_call = false;
+    if (const auto* d = dyn_cast<DeclRefExpr>(cur)) {
+      if (const auto* pv = dyn_cast<ParmVarDecl>(d->getDecl())) {
+        pi.root = pv->getNameAsString();
+        root_local = true;  // a parameter object itself is the function's own copy
+      } else if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+        root_global = vd->hasGlobalStorage();
+        root_local = !root_global;
+        pi.root = root_global ? vd->getNameAsString() : lid(vd);
+        if (root_global) pi.object = tu_.object_key(vd);
+      } else {
+        pi.root = d->getDecl()->getNameAsString();
+      }
+    } else if (const auto* call = dyn_cast<CallExpr>(cur)) {
+      pi.root = callee_text(call);
+      root_call = true;
+    } else {
+      pi.root = cur->getStmtClassName();
+    }
+    if (pi.ptr_steps == 0) {
+      pi.base = root_global ? (element ? KZ_ARGBASE_GLOBAL_ELEMENT : KZ_ARGBASE_GLOBAL) : root_local ? KZ_ARGBASE_LOCAL : root_call ? KZ_ARGBASE_CALL_RESULT : KZ_ARGBASE_OTHER;
+      if (!root_global) pi.object.clear();
+      return pi;
+    }
+    if (pi.ptr_steps > 1) pi.flags |= KZ_ARGFLOW_FLAG_MULTI_LEVEL;
+    // the pointer nearest to the root decides the base: its pointee is the base object
+    const Expr* p = pi.ptr_expr;
+    if (const auto* as = dyn_cast<ArraySubscriptExpr>(p)) {  // an element of an array of pointers
+      const auto* bc = dyn_cast<ImplicitCastExpr>(as->getBase()->IgnoreParens());
+      if (bc != nullptr && bc->getCastKind() == CK_ArrayToPointerDecay) p = bc->getSubExpr()->IgnoreParens();
+    }
+    if (const auto* d = dyn_cast<DeclRefExpr>(p)) {
+      if (const auto* pv = dyn_cast<ParmVarDecl>(d->getDecl())) {
+        pi.base = KZ_ARGBASE_PARAM;
+        pi.param = pv->getFunctionScopeIndex();
+        pi.root = pv->getNameAsString();
+        pi.object.clear();
+        return pi;
+      }
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+        if (vd->hasGlobalStorage()) {
+          pi.base = KZ_ARGBASE_GLOBAL_POINTER;
+          pi.root = vd->getNameAsString();
+          pi.object = tu_.object_key(vd);
+          return pi;
+        }
+        pi.base = KZ_ARGBASE_LOCAL_POINTER;
+        pi.root = lid(vd);
+        pi.object.clear();
+        // a local pointer with a single copy definition: what it points at
+        auto it = locals_.find(vd);
+        if (it != locals_.end() && !it->second.addr_taken && it->second.defs.size() == 1 && it->second.defs.front().copy && it->second.defs.front().rhs != nullptr &&
+            seen->insert(vd).second) {
+          const Src v = trace_source(it->second.defs.front().rhs, seen);
+          bool via = true;
+          if (v.src == KZ_ARGSRC_ADDRESS && (v.base == KZ_ARGBASE_GLOBAL || v.base == KZ_ARGBASE_GLOBAL_ELEMENT)) {
+            pi.base = v.base;
+            pi.object = v.object;
+            pi.root = v.root;
+          } else if (v.src == KZ_ARGSRC_GLOBAL && (v.flags & KZ_ARGFLOW_FLAG_ARRAY_CONTENTS)) {
+            pi.base = KZ_ARGBASE_GLOBAL_ELEMENT;
+            pi.object = v.object;
+            pi.root = v.root;
+          } else if (v.src == KZ_ARGSRC_FIELD) {
+            pi.base = KZ_ARGBASE_FIELD_POINTER;
+            pi.ptr_type = v.type;
+            pi.ptr_field = v.field;
+            pi.object = v.object;
+            pi.root = v.type + "." + v.field;
+          } else if (v.src == KZ_ARGSRC_PARAM) {
+            pi.base = KZ_ARGBASE_PARAM;
+            pi.param = v.param;
+            pi.root = v.root;
+          } else if (v.src == KZ_ARGSRC_CALL) {
+            pi.base = KZ_ARGBASE_CALL_RESULT;
+            pi.root = v.root;
+          } else {
+            via = false;
+          }
+          if (via) pi.flags |= KZ_ARGFLOW_FLAG_BASE_VIA_LOCAL;
+        }
+        return pi;
+      }
+    }
+    if (const auto* m = dyn_cast<MemberExpr>(p)) {
+      if (const auto* fl = dyn_cast<FieldDecl>(m->getMemberDecl())) {
+        pi.base = KZ_ARGBASE_FIELD_POINTER;
+        pi.ptr_type = field_type_name(fl);
+        pi.ptr_field = fl->getNameAsString();
+        if (!root_global) pi.object.clear();
+        return pi;
+      }
+    }
+    if (const auto* call = dyn_cast<CallExpr>(p)) {
+      pi.base = KZ_ARGBASE_CALL_RESULT;
+      pi.root = callee_text(call);
+      pi.object.clear();
+      return pi;
+    }
+    pi.base = KZ_ARGBASE_OTHER;
+    pi.object.clear();
+    return pi;
+  }
+  // The subscripts of a path as a SEQ, root first, the single-definition locals before `at` unfolded.
+  ExprRef path_index(const PathInfo& pi, SourceLocation at, uint32_t* flags) {
+    if (pi.idx.empty()) return nullptr;
+    std::vector<ExprRef> parts;
+    for (size_t i = pi.idx.size(); i > 0; --i) parts.push_back(to_expr(pi.idx[i - 1]));
+    bool changed = false;
+    ExprRef e = unfold(pool().list(KZ_EXPR_OP_SEQ, parts), at, &changed);
+    if (changed) *flags |= KZ_ARGFLOW_FLAG_INDEX_UNFOLDED;
+    return e;
+  }
+  // The location an lvalue names, as the writers name it.
+  void location_of(const Expr* lv, std::string* type, std::string* field) {
+    const Expr* e = lv->IgnoreParens();
+    while (const auto* as = dyn_cast<ArraySubscriptExpr>(e)) {
+      const auto* bc = dyn_cast<ImplicitCastExpr>(as->getBase()->IgnoreParens());
+      if (bc == nullptr || bc->getCastKind() != CK_ArrayToPointerDecay) break;
+      e = bc->getSubExpr()->IgnoreParens();
+    }
+    if (const auto* m = dyn_cast<MemberExpr>(e)) {
+      if (const auto* fl = dyn_cast<FieldDecl>(m->getMemberDecl())) {
+        *type = field_type_name(fl);
+        *field = fl->getNameAsString();
+      }
+      return;
+    }
+    if (const auto* d = dyn_cast<DeclRefExpr>(e)) {
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl()); vd != nullptr && vd->hasGlobalStorage()) {
+        *type = "<global>";
+        *field = vd->getNameAsString();
+      }
+    }
+  }
+  Src trace_source(const Expr* e, std::set<const VarDecl*>* seen) {
+    Src r;
+    if (e == nullptr) {
+      r.reason = KZ_DERIVES_REASON_NOT_COPY;
+      return r;
+    }
+    const Expr* bare = e->IgnoreParenCasts();
+    if (is_null_const(e)) {
+      r.src = KZ_ARGSRC_CONST;
+      r.flags |= KZ_ARGFLOW_FLAG_NULLPTR;
+      r.chain = pool().constant(0);
+      return r;
+    }
+    if (const auto* sl = dyn_cast<StringLiteral>(bare)) {
+      r.src = KZ_ARGSRC_STRING;
+      r.root = sl->getString().str();
+      r.chain = pool().load(KZ_EXPR_REF_STRING, r.root);
+      return r;
+    }
+    int64_t c = 0;
+    if (!isa<CallExpr>(bare) && tu_.eval_int(e, &c)) {
+      r.src = KZ_ARGSRC_CONST;
+      r.value = c;
+      r.chain = pool().constant(c);
+      return r;
+    }
+    // the conversions that keep the value
+    const Expr* s = e;
+    for (;;) {
+      s = s->IgnoreParens();
+      const auto* ce = dyn_cast<CastExpr>(s);
+      if (ce == nullptr) break;
+      const CastKind k = ce->getCastKind();
+      const Expr* sub = ce->getSubExpr();
+      if (k == CK_LValueToRValue) {
+        if (r.read == nullptr) r.read = ce;
+        s = sub;
+        continue;
+      }
+      if (k == CK_ArrayToPointerDecay) {
+        r.flags |= KZ_ARGFLOW_FLAG_ARRAY_CONTENTS;
+        if (r.read == nullptr) r.read = ce;
+        s = sub;
+        continue;
+      }
+      if (k == CK_NoOp || k == CK_FunctionToPointerDecay) {
+        s = sub;
+        continue;
+      }
+      if (k == CK_BitCast && ce->getType()->isPointerType() && sub->getType()->isPointerType()) {
+        r.flags |= KZ_ARGFLOW_FLAG_POINTER_CONVERSION;
+        s = sub;
+        continue;
+      }
+      if (k == CK_IntegralCast && sub->getType()->isIntegerType() && ce->getType()->isIntegerType() && ctx_.getIntWidth(ce->getType()) >= ctx_.getIntWidth(sub->getType())) {
+        s = sub;
+        continue;
+      }
+      r.src = KZ_ARGSRC_EXPR;
+      r.reason = KZ_DERIVES_REASON_NOT_COPY;
+      r.chain = to_expr(e);
+      return r;
+    }
+    if (const auto* d = dyn_cast<DeclRefExpr>(s)) {
+      if (const auto* fd = dyn_cast<FunctionDecl>(d->getDecl())) {
+        r.src = KZ_ARGSRC_FUNCTION;
+        r.root = fd->getNameAsString();
+        r.chain = pool().load(KZ_EXPR_REF_FUNC, r.root);
+        return r;
+      }
+      if (const auto* pv = dyn_cast<ParmVarDecl>(d->getDecl())) {
+        r.src = KZ_ARGSRC_PARAM;
+        r.param = pv->getFunctionScopeIndex();
+        r.root = pv->getNameAsString();
+        r.chain = pool().load(KZ_EXPR_REF_PARAM, r.root, r.param);
+        return r;
+      }
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) {
+        if (vd->hasGlobalStorage()) {
+          r.src = KZ_ARGSRC_GLOBAL;
+          r.base = KZ_ARGBASE_GLOBAL;
+          r.type = "<global>";
+          r.field = r.root = vd->getNameAsString();
+          r.object = tu_.object_key(vd);
+          r.chain = pool().load(KZ_EXPR_REF_GLOBAL, r.root);
+          return r;
+        }
+        r.src = KZ_ARGSRC_LOCAL;
+        r.base = KZ_ARGBASE_LOCAL;
+        r.root = lid(vd);
+        r.chain = pool().load(KZ_EXPR_REF_LOCAL, r.root);
+        if (r.flags & KZ_ARGFLOW_FLAG_ARRAY_CONTENTS) return r;  // a local array: its own storage
+        auto it = locals_.find(vd);
+        if (it == locals_.end() || it->second.defs.empty()) r.reason = KZ_DERIVES_REASON_NO_DEF;
+        else if (it->second.addr_taken) r.reason = KZ_DERIVES_REASON_ADDRESS_TAKEN;
+        else if (it->second.defs.size() > 1) r.reason = KZ_DERIVES_REASON_MULTI_DEF;
+        else if (!it->second.defs.front().copy || it->second.defs.front().rhs == nullptr || isa<InitListExpr>(it->second.defs.front().rhs->IgnoreParens()))
+          r.reason = KZ_DERIVES_REASON_NOT_COPY;
+        else if (!seen->insert(vd).second) r.reason = KZ_DERIVES_REASON_NOT_COPY;  // a copy of itself
+        if (r.reason != KZ_DERIVES_REASON_NONE) return r;
+        Src inner = trace_source(it->second.defs.front().rhs, seen);
+        inner.hops += 1;
+        inner.flags |= r.flags & ~static_cast<uint32_t>(KZ_ARGFLOW_FLAG_ARRAY_CONTENTS);
+        inner.chain = pool().make(KZ_EXPR_OP_COPY, 0, 0, lid(vd), inner.chain, nullptr);
+        return inner;
+      }
+    }
+    if (isa<MemberExpr>(s) || isa<ArraySubscriptExpr>(s) || (isa<UnaryOperator>(s) && cast<UnaryOperator>(s)->getOpcode() == UO_Deref)) {
+      const PathInfo pi = analyze_path(s, seen);
+      if (const auto* m = dyn_cast<MemberExpr>(s)) {
+        r.src = KZ_ARGSRC_FIELD;
+        if (const auto* fl = dyn_cast<FieldDecl>(m->getMemberDecl())) {
+          r.type = field_type_name(fl);
+          r.field = fl->getNameAsString();
+        }
+      } else if (isa<ArraySubscriptExpr>(s) && pi.ptr_steps == 0 && (pi.base == KZ_ARGBASE_GLOBAL || pi.base == KZ_ARGBASE_GLOBAL_ELEMENT)) {
+        r.src = KZ_ARGSRC_ELEMENT;
+        location_of(s, &r.type, &r.field);
+      } else {
+        r.src = KZ_ARGSRC_DEREF;
+        location_of(s, &r.type, &r.field);
+      }
+      r.base = pi.base;
+      r.param = pi.param;
+      r.flags |= pi.flags;
+      r.object = pi.object;
+      r.root = pi.base == KZ_ARGBASE_FIELD_POINTER ? pi.ptr_type + "." + pi.ptr_field : pi.root;
+      r.index = path_index(pi, s->getBeginLoc(), &r.flags);
+      r.chain = to_expr(s);
+      return r;
+    }
+    if (const auto* uo = dyn_cast<UnaryOperator>(s); uo != nullptr && uo->getOpcode() == UO_AddrOf) {
+      const Expr* lv = uo->getSubExpr()->IgnoreParens();
+      if (const auto* d = dyn_cast<DeclRefExpr>(lv); d != nullptr && isa<FunctionDecl>(d->getDecl())) {
+        r.src = KZ_ARGSRC_FUNCTION;
+        r.root = d->getDecl()->getNameAsString();
+        r.chain = pool().load(KZ_EXPR_REF_FUNC, r.root);
+        return r;
+      }
+      const PathInfo pi = analyze_path(lv, seen);
+      r.src = KZ_ARGSRC_ADDRESS;
+      location_of(lv, &r.type, &r.field);
+      r.base = pi.base;
+      r.param = pi.param;
+      r.flags |= pi.flags;
+      r.object = pi.object;
+      r.root = pi.base == KZ_ARGBASE_FIELD_POINTER ? pi.ptr_type + "." + pi.ptr_field : pi.root;
+      r.index = path_index(pi, s->getBeginLoc(), &r.flags);
+      r.chain = to_expr(s);
+      r.read = nullptr;  // an address: nothing is read at the location
+      return r;
+    }
+    if (const auto* call = dyn_cast<CallExpr>(s)) {
+      r.src = KZ_ARGSRC_CALL;
+      r.root = callee_text(call);
+      r.reason = KZ_DERIVES_REASON_FROM_CALL;
+      r.chain = to_expr(s);
+      return r;
+    }
+    r.src = KZ_ARGSRC_EXPR;
+    r.reason = (isa<UnaryOperator>(s) || isa<BinaryOperator>(s) || isa<ConditionalOperator>(s)) ? KZ_DERIVES_REASON_NOT_COPY : KZ_DERIVES_REASON_NOT_SHARED;
+    r.chain = to_expr(s);
+    return r;
+  }
+
+  // ARGFLOW: one row per argument of the call.
+  void note_argflows(const CallExpr* ce, const FunctionDecl* callee, const std::string& ckey) {
+    const ExprRef guard = guard_from(0);
+    for (unsigned i = 0; i < ce->getNumArgs(); ++i) {
+      std::set<const VarDecl*> seen;
+      const Expr* arg = ce->getArg(i);
+      const Src src = trace_source(arg, &seen);
+      ArgFlowFact a;
+      a.call_key = ckey;
+      a.func_key = fkey_;
+      a.arg_index = i;
+      a.src = src.src;
+      a.base = src.base;
+      a.reason = src.reason;
+      a.flags = src.flags;
+      if (callee != nullptr && i >= callee->getNumParams()) a.flags |= KZ_ARGFLOW_FLAG_VARIADIC;
+      if (arg->getBeginLoc().isMacroID()) a.flags |= KZ_ARGFLOW_FLAG_IN_MACRO;
+      a.param = src.param;
+      a.hops = src.hops;
+      a.value = src.value;
+      a.type = src.type;
+      a.field = src.field;
+      a.root = src.root;
+      a.object = src.object;
+      a.text = tu_.source_text(arg->getSourceRange(), 80);
+      a.chain = src.chain;
+      a.index = src.index;
+      a.guard = guard;
+      if (src.read != nullptr) pending_reads_.push_back({m_.argflows.size(), src.read});
+      m_.argflows.push_back(a);
+    }
+  }
+  // PARAM_FLOW uses of depth 0 (the call arguments are the ARGFLOW rows of a PARAM source).
+  void add_param_use(uint32_t param, uint8_t kind, uint16_t flags, const Stmt* at, ExprRef expr) {
+    ParamUse u;
+    u.func_key = fkey_;
+    u.param = param;
+    u.kind = kind;
+    u.flags = flags;
+    if (!loops_.empty()) u.flags |= KZ_PFLOW_FLAG_IN_LOOP;
+    u.pos = tu_.pos_of(at->getBeginLoc());
+    tu_.next_key(u.pos, fkey_ + "#pu", &u.ordinal);
+    u.expr = expr;
+    u.guard = guard_from(0);
+    u.text = tu_.source_text(at->getSourceRange(), 80);
+    m_.param_uses.push_back(u);
+  }
+  void note_param_compare(const BinaryOperator* bo) {
+    std::set<uint32_t> done;
+    for (const Expr* side : {bo->getLHS(), bo->getRHS()}) {
+      std::set<const VarDecl*> seen;
+      const Src src = trace_source(side, &seen);
+      if (src.src == KZ_ARGSRC_PARAM && done.insert(src.param).second) add_param_use(src.param, KZ_PFLOW_KIND_COMPARE, 0, bo, to_expr(bo));
+    }
+  }
+  // A condition that is a copy of a parameter (not a comparison: those are rows of their own).
+  void note_param_truth(const Expr* c, uint16_t flags) {
+    if (c == nullptr) return;
+    const Expr* b = c->IgnoreParenImpCasts();
+    if (const auto* bo = dyn_cast<BinaryOperator>(b); bo != nullptr && (bo->isComparisonOp() || bo->isLogicalOp())) return;
+    if (const auto* uo = dyn_cast<UnaryOperator>(b); uo != nullptr && uo->getOpcode() == UO_LNot) return;
+    std::set<const VarDecl*> seen;
+    const Src src = trace_source(c, &seen);
+    if (src.src != KZ_ARGSRC_PARAM) return;
+    if (flags & KZ_PFLOW_FLAG_SWITCH) add_param_use(src.param, KZ_PFLOW_KIND_COMPARE, flags, c, to_expr(c));
+    else add_param_use(src.param, KZ_PFLOW_KIND_COMPARE, flags | KZ_PFLOW_FLAG_TRUTH_TEST, c, cond_expr(c, true));
+  }
+  void note_param_subscript(const ArraySubscriptExpr* as) {
+    std::set<const VarDecl*> seen;
+    const Src src = trace_source(as->getIdx(), &seen);
+    if (src.src == KZ_ARGSRC_PARAM) add_param_use(src.param, KZ_PFLOW_KIND_SUBSCRIPT, 0, as, to_expr(as));
+  }
+  // `lhs = rhs`: a parameter stored to a location (not to a local: a copy that the tracing follows), and
+  // the address of a global stored to a pointer field (PTR_FIELDS).
+  void note_flow_store(const BinaryOperator* bo) {
+    const Expr* lhs = bo->getLHS()->IgnoreParenImpCasts();
+    std::set<const VarDecl*> seen;
+    const Src rs = trace_source(bo->getRHS(), &seen);
+    bool local_dest = false;
+    if (const auto* d = dyn_cast<DeclRefExpr>(lhs))
+      if (const auto* vd = dyn_cast<VarDecl>(d->getDecl())) local_dest = !vd->hasGlobalStorage();
+    if (rs.src == KZ_ARGSRC_PARAM && !local_dest) add_param_use(rs.param, KZ_PFLOW_KIND_STORE, is_out_store(bo->getLHS()) ? KZ_PFLOW_FLAG_THROUGH_POINTER_PARAM : 0, bo, to_expr(bo->getLHS()));
+    const auto* me = dyn_cast<MemberExpr>(lhs);
+    const auto* fl = me != nullptr ? dyn_cast<FieldDecl>(me->getMemberDecl()) : nullptr;
+    if (fl == nullptr || !fl->getType()->isPointerType() || is_fp_type(fl->getType())) return;
+    // the value: the address of a global object, of an element of a global array, or a global array that decays
+    std::string object;
+    int64_t elem = 0;
+    bool ok = false;
+    if (rs.src == KZ_ARGSRC_GLOBAL && (rs.flags & KZ_ARGFLOW_FLAG_ARRAY_CONTENTS)) {
+      object = rs.object;
+      ok = true;
+    } else if (rs.src == KZ_ARGSRC_ADDRESS && rs.base == KZ_ARGBASE_GLOBAL && rs.type == "<global>") {
+      object = rs.object;
+      ok = true;
+    } else if (rs.src == KZ_ARGSRC_ADDRESS && rs.base == KZ_ARGBASE_GLOBAL_ELEMENT && rs.type == "<global>" && rs.index != nullptr && rs.index->op == KZ_EXPR_OP_SEQ &&
+               rs.index->b == nullptr && rs.index->a != nullptr && rs.index->a->op == KZ_EXPR_OP_CONST && rs.index->a->a == nullptr) {
+      object = rs.object;  // &G[c]
+      elem = rs.index->a->value;
+      ok = true;
+    }
+    if (!ok || object.empty()) return;
+    std::set<const VarDecl*> seen2;
+    const PathInfo wp = analyze_path(me, &seen2);
+    PtrWriteFact w;
+    w.kind = KZ_PTRF_KIND_ADDRESS_WRITE;
+    w.func_key = fkey_;
+    w.type = field_type_name(fl);
+    w.field = fl->getNameAsString();
+    w.root_global = wp.ptr_steps == 0 && (wp.base == KZ_ARGBASE_GLOBAL || wp.base == KZ_ARGBASE_GLOBAL_ELEMENT);
+    w.root = w.root_global ? wp.object : wp.root;
+    w.object = object;
+    w.elem = elem;
+    w.text = tu_.source_text(bo->getRHS()->getSourceRange(), 80);
+    w.in_loop = !loops_.empty();
+    w.pos = tu_.pos_of(bo->getBeginLoc());
+    tu_.next_key(w.pos, fkey_ + "#pw", &w.ordinal);
+    w.guard = guard_from(0);
+    ext_ptr_writes_.push_back(PtrWriteAt{m_.ptr_writes.size(), bo, w.type, w.field, w.in_loop});
+    m_.ptr_writes.push_back(w);
+  }
+
+  // The dominators of the blocks of a body's control-flow graph (blocks not reached from the entry
+  // dominate nothing and are dominated by nothing).
+  struct Dominators {
+    std::vector<std::vector<bool>> dom;  // dom[b][a]: a dominates b
+    std::vector<bool> reach;
+  };
+  Dominators dominators(const CfgIndex& ix) {
+    Dominators d;
+    const size_t n = ix.blocks.size();
+    d.reach.assign(n, false);
+    const unsigned entry = ix.cfg->getEntry().getBlockID();
+    std::vector<unsigned> work{entry};
+    if (entry < n) d.reach[entry] = true;
+    while (!work.empty()) {
+      const unsigned b = work.back();
+      work.pop_back();
+      const CFGBlock* blk = b < n ? ix.blocks[b] : nullptr;
+      if (blk == nullptr) continue;
+      for (const CFGBlock::AdjacentBlock& a : blk->succs())
+        if (const CFGBlock* sb = a.getReachableBlock())
+          if (sb->getBlockID() < n && !d.reach[sb->getBlockID()]) {
+            d.reach[sb->getBlockID()] = true;
+            work.push_back(sb->getBlockID());
+          }
+    }
+    d.dom.assign(n, std::vector<bool>(n, true));
+    if (entry < n) {
+      d.dom[entry].assign(n, false);
+      d.dom[entry][entry] = true;
+    }
+    for (bool changed = true; changed;) {
+      changed = false;
+      for (unsigned b = 0; b < n; ++b) {
+        if (b == entry || !d.reach[b] || ix.blocks[b] == nullptr) continue;
+        std::vector<bool> nd(n, true);
+        bool any = false;
+        for (const CFGBlock::AdjacentBlock& a : ix.blocks[b]->preds()) {
+          const CFGBlock* pb = a.getReachableBlock();
+          if (pb == nullptr || pb->getBlockID() >= n || !d.reach[pb->getBlockID()]) continue;
+          any = true;
+          const std::vector<bool>& pd = d.dom[pb->getBlockID()];
+          for (size_t k = 0; k < n; ++k) nd[k] = nd[k] && pd[k];
+        }
+        if (!any) nd.assign(n, false);
+        nd[b] = true;
+        if (nd != d.dom[b]) {
+          d.dom[b] = std::move(nd);
+          changed = true;
+        }
+      }
+    }
+    return d;
+  }
+  static bool dominates(const Dominators& d, std::pair<unsigned, unsigned> a, std::pair<unsigned, unsigned> b) {
+    if (a.first >= d.reach.size() || b.first >= d.reach.size() || !d.reach[a.first] || !d.reach[b.first]) return false;
+    if (a.first == b.first) return a.second < b.second;
+    return d.dom[b.first][a.first];
+  }
+
+  // After the walk: the READS rows of the ARGFLOW sources, and the order of each address write.
+  void finish_flow_facts() {
+    for (const auto& pr : pending_reads_) {
+      auto it = read_keys_.find(pr.second);
+      if (it != read_keys_.end()) m_.argflows[pr.first].read_key = it->second;
+    }
+    if (ext_ptr_writes_.empty()) return;
+    CfgIndex* ix = ext_cfg();
+    if (ix == nullptr) return;  // no control-flow graph: nothing is known to come after the writes
+    const Dominators dom = dominators(*ix);
+    for (const PtrWriteAt& pw : ext_ptr_writes_) {
+      auto wit = ix->at.find(pw.at);
+      if (wit == ix->at.end()) continue;
+      PtrWriteFact& f = m_.ptr_writes[pw.row];
+      for (const auto& kv : ext_call_keys_) {
+        auto cit = ix->at.find(kv.first);
+        if (cit != ix->at.end() && dominates(dom, wit->second, cit->second)) f.after_calls.insert(kv.second);
+      }
+      for (const auto& kv : read_keys_) {
+        auto rit = ix->at.find(kv.first);
+        if (rit != ix->at.end() && dominates(dom, wit->second, rit->second)) f.after_reads.insert(kv.second);
+      }
+      if (pw.in_loop) continue;  // a later iteration repeats the earlier writes
+      for (const ExtWrite& w : ext_writes_) {
+        if (w.at == pw.at) continue;
+        const bool same = (w.kind == KZ_FWRITE_KIND_FIELD || w.kind == KZ_FWRITE_KIND_OUTARG) ? (w.type == pw.type && w.field == pw.field)
+                                                                                              : (w.kind == KZ_FWRITE_KIND_RECORD && w.type == pw.type);
+        if (!same) continue;
+        auto oit = ix->at.find(w.at);
+        if (oit != ix->at.end() && dominates(dom, oit->second, wit->second)) f.overwritten.insert(w.pos.str());
+      }
+    }
+  }
+
   struct Guard {
     const Expr* cond;
     bool polarity;
@@ -3483,6 +4144,23 @@ class FnWalker {
   std::vector<PendingReturn> returns_;                    // in walk order
   std::unique_ptr<CfgIndex> ext_cfg_;
   bool ext_cfg_tried_ = false;
+  // the extended facts F4 (spec.extended_facts)
+  struct ExtWrite {
+    const Stmt* at = nullptr;
+    std::string type, field;
+    uint8_t kind = KZ_FWRITE_KIND_NONE;
+    Pos pos;
+  };
+  struct PtrWriteAt {
+    size_t row = 0;  // in Model::ptr_writes
+    const Stmt* at = nullptr;
+    std::string type, field;
+    bool in_loop = false;
+  };
+  std::map<const Expr*, std::string> read_keys_;                // the conversion of a READS row -> its key, lookup only
+  std::vector<std::pair<size_t, const Expr*>> pending_reads_;   // an ARGFLOW row (Model::argflows) and its source read
+  std::vector<ExtWrite> ext_writes_;                             // the FUNC_WRITES events of the body, in walk order
+  std::vector<PtrWriteAt> ext_ptr_writes_;
 };
 
 // ---- static initializers: function values stored in tables -------------------------------------------

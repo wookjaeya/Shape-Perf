@@ -110,7 +110,7 @@ int cmd_extract(int argc, char** argv) {
   std::string err;
   if (!parse_args(argc, argv, 2,
                   {"--profile", "--basis", "--source", "--root", "--target", "--delay-op", "--lock-op", "--unlock-op", "--spawn-op", "--terminal-op", "--poll-fn",
-                   "--resource-dir", "--extra-arg", "--section", "-o"},
+                   "--resource-dir", "--extra-arg", "--section", "--argflow-depth", "--argflow-size", "--image-budget", "-o"},
                   {"--text", "--verbose", "--no-profile", "--extended-facts"}, &args, &err)) {
     std::fprintf(stderr, "kz-static extract: %s\n", err.c_str());
     return 2;
@@ -146,8 +146,38 @@ int cmd_extract(int argc, char** argv) {
   kzs::ExtractSpec spec;
   kzs::spec_from_profile(profile, &spec);
   kzs::spec_add_builtin_data_fns(&spec);
-  // the extended facts F1-F3: always in the profile-free mode, on request in the profile-driven one
+  // the extended facts F1-F6: always in the profile-free mode, on request in the profile-driven one
   spec.extended_facts = no_profile || args.has("--extended-facts");
+  // the tool parameters of F4 and F6 (no reference fixes them; recorded as unspecified_by_reference)
+  size_t image_budget = 4096;
+  {
+    auto number = [&](const char* option, bool allow_none, uint64_t min, uint64_t* out) -> bool {
+      const std::string v = args.one(option);
+      if (allow_none && v == "none") {
+        *out = kzs::kNone;
+        return true;
+      }
+      if (v.empty() || v.find_first_not_of("0123456789") != std::string::npos || v.size() > 9) return false;
+      *out = std::stoull(v);
+      return *out >= min;
+    };
+    for (const char* o : {"--argflow-depth", "--argflow-size", "--image-budget"}) {
+      if (!args.has(o)) continue;
+      if (!spec.extended_facts) {
+        std::fprintf(stderr, "kz-static extract: %s needs the extended facts (--extended-facts or --no-profile)\n", o);
+        return 2;
+      }
+      uint64_t v = 0;
+      const bool budget = std::string(o) == "--image-budget";
+      if (!number(o, !budget, budget ? 1 : 0, &v)) {
+        std::fprintf(stderr, "kz-static extract: %s expects %s\n", o, budget ? "a number of at least 1" : "a number or none");
+        return 2;
+      }
+      if (budget) image_budget = static_cast<size_t>(v);
+      else if (std::string(o) == "--argflow-depth") spec.argflow_depth = static_cast<uint32_t>(v);
+      else spec.argflow_size = static_cast<uint32_t>(v);
+    }
+  }
   if (no_profile) {
     spec.no_profile = true;
     spec.builtin_profile_text = kzs::builtin_profile_text();
@@ -168,6 +198,8 @@ int cmd_extract(int argc, char** argv) {
   ro.resource_dir = resource_dir(args);
   ro.extra_args = args.many("--extra-arg");
   ro.verbose = args.has("--verbose");
+  ro.image_budget = image_budget;
+  so.image_budget = image_budget;
   std::string root = args.one("--root");
   if (args.has("--basis")) {
     kz::Container basis;

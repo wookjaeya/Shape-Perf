@@ -353,6 +353,22 @@ void TuReader::init_leaf(const std::string& object_key_, const std::string& path
   }
   f->pos = pos_of(init->getBeginLoc());
   f->text = source_text(init->getSourceRange(), 80);
+  if (spec_.extended_facts && init->getBeginLoc().isMacroID() && !sm().isInSystemHeader(sm().getSpellingLoc(init->getBeginLoc()))) {
+    // F6: the macro written at the initializer (the outermost one) and where the first token of the value is
+    // spelled (a macro of a system header, NULL say, is not recorded)
+    SourceLocation loc = init->getBeginLoc();
+    std::string name;
+    while (loc.isMacroID()) {
+      const llvm::StringRef n = Lexer::getImmediateMacroName(loc, sm(), ctx_.getLangOpts());
+      if (!n.empty()) name = n.str();
+      loc = sm().getImmediateMacroCallerLoc(loc);
+    }
+    f->macro = name;
+    const SourceLocation sp = sm().getSpellingLoc(init->getBeginLoc());
+    f->spell.file = path_of(sm().getFileID(sp));
+    f->spell.line = sm().getSpellingLineNumber(sp);
+    f->spell.col = sm().getSpellingColumnNumber(sp);
+  }
   const Expr* s = init->IgnoreParenCasts();
   if (const auto* sl = dyn_cast<StringLiteral>(s)) {
     f->kind = KZ_IMAGE_KIND_STRING;
@@ -475,7 +491,13 @@ void TuReader::flatten_initializer(const std::string& object_key_, const std::st
       }
       const Expr* sub = idx < il->getNumInits() ? il->getInit(idx) : nullptr;
       ++idx;
+      const size_t before = out->size();
       flatten_initializer(object_key_, path + "." + fd->getNameAsString(), fd->getType(), sub, budget, out, pos);
+      // F6: the record field a leaf is (a scalar, a pointer or a string field: one leaf right here)
+      if (spec_.extended_facts && out->size() == before + 1 && (*out)[before].path == path + "." + fd->getNameAsString()) {
+        (*out)[before].owner = record_name(rd);
+        (*out)[before].field = fd->getNameAsString();
+      }
     }
     return;
   }
@@ -593,9 +615,15 @@ void TuReader::read_global(const VarDecl* vd) {
     const QualType t = vd->getType().getCanonicalType();
     if (record_of(t) != nullptr || ctx_.getAsArrayType(t) != nullptr) {
       std::vector<ImageFact> img;
-      size_t budget = 4096;
+      size_t budget = opt_.image_budget;
       flatten_initializer(key, "", t, vd->getInit(), &budget, &img, pos);
       model_->object_images[key] = std::move(img);
+    } else if (spec_.extended_facts && model_->object_scalar_images.count(key) == 0) {
+      // F6: a scalar global's initializer as one leaf
+      ImageFact f;
+      f.pos = pos;
+      init_leaf(key, "", vd->getInit(), &f);
+      model_->object_scalar_images[key] = f;
     }
   }
   read_init_for_targets(vd);

@@ -1,4 +1,4 @@
-kz-layout abi=1 revision=8
+kz-layout abi=1 revision=9
 record kz_byte size=1 fields=1
   b offset=0 size=1 count=1 kind=u8
 record kz_ref size=40 fields=3
@@ -824,6 +824,90 @@ record kz_fact_loopexit size=48 fields=13
   rsv0 offset=37 size=1 count=1 kind=u8
   flags offset=38 size=2 count=1 kind=u16
   file offset=40 size=8 count=1 kind=str
+record kz_fact_argflow size=88 fields=19
+  site offset=0 size=4 count=1 kind=u32
+  arg_index offset=4 size=4 count=1 kind=u32
+  fn offset=8 size=4 count=1 kind=u32
+  param offset=12 size=4 count=1 kind=u32
+  hops offset=16 size=4 count=1 kind=u32
+  chain_root offset=20 size=4 count=1 kind=u32
+  index_root offset=24 size=4 count=1 kind=u32
+  read offset=28 size=4 count=1 kind=u32
+  src offset=32 size=1 count=1 kind=u8
+  base offset=33 size=1 count=1 kind=u8
+  reason offset=34 size=1 count=1 kind=u8
+  rsv0 offset=35 size=1 count=1 kind=u8
+  flags offset=36 size=4 count=1 kind=u32
+  value offset=40 size=8 count=1 kind=i64
+  type offset=48 size=8 count=1 kind=str
+  field offset=56 size=8 count=1 kind=str
+  root offset=64 size=8 count=1 kind=str
+  object offset=72 size=8 count=1 kind=str
+  text offset=80 size=8 count=1 kind=str
+record kz_fact_pflow size=84 fields=20
+  fn offset=0 size=4 count=1 kind=u32
+  param offset=4 size=4 count=1 kind=u32
+  depth offset=8 size=4 count=1 kind=u32
+  site offset=12 size=4 count=1 kind=u32
+  next_fn offset=16 size=4 count=1 kind=u32
+  next_param offset=20 size=4 count=1 kind=u32
+  sink_fn offset=24 size=4 count=1 kind=u32
+  sink_site offset=28 size=4 count=1 kind=u32
+  expr_root offset=32 size=4 count=1 kind=u32
+  guard_root offset=36 size=4 count=1 kind=u32
+  n offset=40 size=4 count=1 kind=u32
+  line offset=44 size=4 count=1 kind=u32
+  col offset=48 size=4 count=1 kind=u32
+  fh offset=52 size=4 count=1 kind=u32
+  kind offset=56 size=1 count=1 kind=u8
+  rsv0 offset=57 size=1 count=1 kind=u8
+  flags offset=58 size=2 count=1 kind=u16
+  file offset=60 size=8 count=1 kind=str
+  text offset=68 size=8 count=1 kind=str
+  chain offset=76 size=8 count=1 kind=str
+record kz_fact_ptrfield size=112 fields=22
+  fn offset=0 size=4 count=1 kind=u32
+  read offset=4 size=4 count=1 kind=u32
+  write offset=8 size=4 count=1 kind=u32
+  n offset=12 size=4 count=1 kind=u32
+  index_root offset=16 size=4 count=1 kind=u32
+  guard_root offset=20 size=4 count=1 kind=u32
+  idx_n offset=24 size=4 count=1 kind=u32
+  line offset=28 size=4 count=1 kind=u32
+  col offset=32 size=4 count=1 kind=u32
+  fh offset=36 size=4 count=1 kind=u32
+  kind offset=40 size=1 count=1 kind=u8
+  status offset=41 size=1 count=1 kind=u8
+  flags offset=42 size=2 count=1 kind=u16
+  rsv0 offset=44 size=4 count=1 kind=u32
+  elem offset=48 size=8 count=1 kind=i64
+  idx_step offset=56 size=8 count=1 kind=i64
+  type offset=64 size=8 count=1 kind=str
+  field offset=72 size=8 count=1 kind=str
+  root offset=80 size=8 count=1 kind=str
+  object offset=88 size=8 count=1 kind=str
+  path offset=96 size=8 count=1 kind=str
+  file offset=104 size=8 count=1 kind=str
+record kz_fact_gimage size=104 fields=19
+  fn offset=0 size=4 count=1 kind=u32
+  line offset=4 size=4 count=1 kind=u32
+  col offset=8 size=4 count=1 kind=u32
+  fh offset=12 size=4 count=1 kind=u32
+  spell_line offset=16 size=4 count=1 kind=u32
+  spell_col offset=20 size=4 count=1 kind=u32
+  kind offset=24 size=1 count=1 kind=u8
+  reach offset=25 size=1 count=1 kind=u8
+  flags offset=26 size=2 count=1 kind=u16
+  rsv0 offset=28 size=4 count=1 kind=u32
+  value offset=32 size=8 count=1 kind=i64
+  object offset=40 size=8 count=1 kind=str
+  path offset=48 size=8 count=1 kind=str
+  text offset=56 size=8 count=1 kind=str
+  file offset=64 size=8 count=1 kind=str
+  spell_file offset=72 size=8 count=1 kind=str
+  macro offset=80 size=8 count=1 kind=str
+  owner offset=88 size=8 count=1 kind=str
+  field offset=96 size=8 count=1 kind=str
 record kz_cert_step size=36 fields=11
   rule offset=0 size=4 count=1 kind=u32
   from_node offset=4 size=4 count=1 kind=u32
@@ -1826,6 +1910,95 @@ flags KZ_LOOPEXIT_FLAG
   0x2 NEVER "never-taken"
   0x4 UNCONDITIONAL "unconditional"
   0x8 NO_EXIT "no-exit"
+enum KZ_ARGSRC
+  0x0 NONE "none"
+  0x1 CONST "const"
+  0x2 STRING "string"
+  0x3 FUNCTION "function"
+  0x4 FIELD "field"
+  0x5 GLOBAL "global"
+  0x6 ELEMENT "element"
+  0x7 DEREF "dereference"
+  0x8 ADDRESS "address"
+  0x9 PARAM "param"
+  0xa CALL "call-result"
+  0xb LOCAL "local"
+  0xc EXPR "expression"
+enum KZ_ARGBASE
+  0x0 NONE "none"
+  0x1 GLOBAL "global"
+  0x2 GLOBAL_ELEMENT "global-array-element"
+  0x3 LOCAL "local"
+  0x4 PARAM "parameter"
+  0x5 LOCAL_POINTER "local-pointer"
+  0x6 FIELD_POINTER "pointer-field"
+  0x7 GLOBAL_POINTER "global-pointer"
+  0x8 CALL_RESULT "call-result"
+  0x9 OTHER "other"
+flags KZ_ARGFLOW_FLAG
+  0x1 THROUGH_POINTER "through-pointer"
+  0x2 ARRAY_CONTENTS "array-contents"
+  0x4 POINTER_CONVERSION "pointer-conversion"
+  0x8 BASE_VIA_LOCAL "base-via-local"
+  0x10 IN_MACRO "in-macro"
+  0x20 VARIADIC "variadic"
+  0x40 NULLPTR "null"
+  0x80 INDEX_UNFOLDED "index-unfolded"
+  0x100 MULTI_LEVEL "multi-level"
+enum KZ_PFLOW_KIND
+  0x0 NONE "none"
+  0x1 CALL_ARG "call-argument"
+  0x2 COMPARE "comparison"
+  0x3 RETURN "return"
+  0x4 STORE "store"
+  0x5 SUBSCRIPT "subscript"
+  0x6 OUT_STORE "out-store"
+  0x7 OPEN "open"
+flags KZ_PFLOW_FLAG
+  0x1 MAY "may"
+  0x2 INDIRECT "indirect"
+  0x4 NO_BODY "callee-without-body"
+  0x8 UNRESOLVED "unresolved"
+  0x10 VARIADIC "variadic"
+  0x20 DEPTH_BOUND "depth-bound"
+  0x40 SIZE_BOUND "size-bound"
+  0x80 TRUTH_TEST "truth-test"
+  0x100 SWITCH "switch"
+  0x200 THROUGH_POINTER_PARAM "through-pointer-parameter"
+  0x400 RESULT_TESTED "result-tested"
+  0x800 IN_LOOP "in-loop"
+enum KZ_PTRF_KIND
+  0x0 NONE "none"
+  0x1 ADDRESS_WRITE "address-write"
+  0x2 STATIC_INIT "static-initializer"
+  0x3 READ "read"
+enum KZ_PTRF_STATUS
+  0x0 NONE "none"
+  0x1 RESOLVED "resolved"
+  0x2 MAY "may"
+  0x3 UNRESOLVED "needs-field-points-to"
+flags KZ_PTRF_FLAG
+  0x1 WRITE_BEFORE_READ "write-before-read"
+  0x2 SAME_ROOT "same-root"
+  0x4 FIELD_BASED "field-based"
+  0x8 OTHER_WRITES "other-writes"
+  0x10 IN_LOOP "in-loop"
+  0x20 MULTI_LEVEL "multi-level"
+  0x40 INDEX_RANGE "index-from-counted-loop"
+  0x80 INDEX_UPPER_BOUND "loop-may-exit-early"
+  0x100 EARLIER_OVERWRITTEN "earlier-writes-overwritten"
+  0x200 CONST_INDEX "constant-index"
+flags KZ_GIMAGE_REACH
+  0x1 ARGUMENT "argument"
+  0x2 PTR_FIELD "pointer-field"
+flags KZ_GIMAGE_FLAG
+  0x1 CONST_OBJECT "const-object"
+  0x2 NO_INITIALIZER "zero-initialized"
+  0x4 TRUNCATED "image-truncated"
+  0x8 OBJECT_WRITTEN "object-written"
+  0x10 FIELD_WRITTEN "field-written"
+  0x20 RECORD_WRITTEN "record-written"
+  0x40 FROM_MACRO "from-macro"
 enum KZ_OUTPTR_SUMMARY
   0x0 NONE "none"
   0x1 STORE_ONLY "store-only"
@@ -2239,6 +2412,10 @@ section READS type=123 record=kz_fact_read version=1
 section RETURNS type=124 record=kz_fact_return version=1
 section RET_CONSTS type=125 record=kz_fact_retconst version=1
 section LOOP_EXITS type=126 record=kz_fact_loopexit version=1
+section ARGFLOW type=127 record=kz_fact_argflow version=1
+section PARAM_FLOW type=128 record=kz_fact_pflow version=1
+section PTR_FIELDS type=129 record=kz_fact_ptrfield version=1
+section GLOBAL_IMAGES type=130 record=kz_fact_gimage version=1
 format kz_header.artifact_kind enum KZ_ARTIFACT
 format kz_header.header_crc hex 0
 format kz_parent.kind enum KZ_ARTIFACT
@@ -2536,6 +2713,41 @@ format kz_fact_loopexit.aux_root idx 0
 format kz_fact_loopexit.fh idx 0
 format kz_fact_loopexit.kind enum KZ_LOOPEXIT_KIND
 format kz_fact_loopexit.flags flags KZ_LOOPEXIT_FLAG
+format kz_fact_argflow.site idx 0
+format kz_fact_argflow.fn idx 0
+format kz_fact_argflow.param idx 0
+format kz_fact_argflow.chain_root idx 0
+format kz_fact_argflow.index_root idx 0
+format kz_fact_argflow.read idx 0
+format kz_fact_argflow.src enum KZ_ARGSRC
+format kz_fact_argflow.base enum KZ_ARGBASE
+format kz_fact_argflow.reason enum KZ_DERIVES_REASON
+format kz_fact_argflow.flags flags KZ_ARGFLOW_FLAG
+format kz_fact_pflow.fn idx 0
+format kz_fact_pflow.site idx 0
+format kz_fact_pflow.next_fn idx 0
+format kz_fact_pflow.next_param idx 0
+format kz_fact_pflow.sink_fn idx 0
+format kz_fact_pflow.sink_site idx 0
+format kz_fact_pflow.expr_root idx 0
+format kz_fact_pflow.guard_root idx 0
+format kz_fact_pflow.fh idx 0
+format kz_fact_pflow.kind enum KZ_PFLOW_KIND
+format kz_fact_pflow.flags flags KZ_PFLOW_FLAG
+format kz_fact_ptrfield.fn idx 0
+format kz_fact_ptrfield.read idx 0
+format kz_fact_ptrfield.write idx 0
+format kz_fact_ptrfield.index_root idx 0
+format kz_fact_ptrfield.guard_root idx 0
+format kz_fact_ptrfield.fh idx 0
+format kz_fact_ptrfield.kind enum KZ_PTRF_KIND
+format kz_fact_ptrfield.status enum KZ_PTRF_STATUS
+format kz_fact_ptrfield.flags flags KZ_PTRF_FLAG
+format kz_fact_gimage.fn idx 0
+format kz_fact_gimage.fh idx 0
+format kz_fact_gimage.kind enum KZ_IMAGE_KIND
+format kz_fact_gimage.reach flags KZ_GIMAGE_REACH
+format kz_fact_gimage.flags flags KZ_GIMAGE_FLAG
 format kz_cert_step.rule enum KZ_RULE
 format kz_cert_step.profile_entry idx 0
 format kz_cert_step.site_from idx 0
@@ -2643,4 +2855,4 @@ format kz_replay_read.reads_from_edges enum KZ_READ_SWITCH
 format kz_replay_read.reads_from_outcome enum KZ_READ_SWITCH
 format kz_replay_read.control_order enum KZ_READ_SWITCH
 format kz_replay_read.relation_rule enum KZ_RELATION_RULE
-fingerprint=e35f1daacebd44df86c828ad19845626655ed6d3b6b616ab01593df808e5f47e
+fingerprint=8399b8524ca4c9b48f3b901b0f448271f96924d8ca711a8ab6180791751403df

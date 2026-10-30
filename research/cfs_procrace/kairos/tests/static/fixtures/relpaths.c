@@ -12,7 +12,7 @@
  *             root that only dispatches through a function pointer is a trampoline;
  *   ends      a thread-specific key with a destructor (the entry-path rule makes no claim); a terminal
  *             operation reached only under a guard on its argument, called with a value that fails the guard,
- *             with an endless loop on its other path.
+ *             with an endless loop on its other path; a spawn wrapper that stores through its argument after.
  */
 #include <pthread.h>
 #include <stdlib.h>
@@ -239,6 +239,26 @@ void *svc_main(void *arg) {
   return 0;
 }
 
+/* ---- a derived spawn operation that stores through its argument after it created the thread ---------------- */
+typedef struct {
+  int started;
+} Marks;
+
+static Marks marks;
+
+void *watcher_main(void *arg) {
+  (void)arg;
+  if (marks.started == 1) return &marks;
+  return 0;
+}
+
+int spawn_marked(int *flag, void *(*fn)(void *)) {
+  pthread_t t;
+  int rc = pthread_create(&t, 0, fn, 0);
+  *flag = 1;
+  return rc;
+}
+
 int main(void) {
   pthread_t a, b, c;
   pthread_key_create(&task_key, task_key_dtor);
@@ -253,5 +273,6 @@ int main(void) {
   (void)task_create("app", app_main);
   (void)task_create("svc", svc_main);
   task_release(1);
+  (void)spawn_marked(&marks.started, watcher_main);
   return 0;
 }

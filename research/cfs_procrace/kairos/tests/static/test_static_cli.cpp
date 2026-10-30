@@ -907,6 +907,8 @@ startup_script {
     KZ_CHECK(has(a, "after that entry returns the thread may still run functions of this program (thread-specific destructors: pthread_key_create at relpaths.c:"));
     KZ_CHECK(has(a, "noreturn: the terminal calls of app_exit are guarded: relpaths.c:224:20 -> exit under (eq param:status#0 9); with argument 0 = 3 every guard is false"));
     KZ_CHECK(has(a, "the loop relpaths.c:225:3 in app_exit has no exit"));
+    // a derived spawn operation's store through its argument counts after the spawn, under no known lock
+    KZ_CHECK(has(a, "      write after the spawn by the spawn operation: spawn_marked stores through arg 0 [&marks.started] inside the call at relpaths.c:"));
     // a condition more than 200 levels deep: R-T2 reads the whole tree
     const std::string dp = (X / "deep.kz").string();
     KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --targets-rule R-T2 --source " + q(fixtures + "/deepcond.c") + " --root " + q(fixtures) + " -o " + q(dp) + " -- -std=c99 -pedantic", &out), 0);

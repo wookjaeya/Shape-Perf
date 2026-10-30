@@ -1256,6 +1256,7 @@ class Rel {
     uint32_t call_row = kN;
     bool first_level = false;
     uint32_t fn = kN;
+    uint32_t spawn_arg = kN;  // a store the spawn operation makes through this argument (row kN)
   };
   void path_c(std::ostream& os) {
     std::ostringstream rows;
@@ -1333,6 +1334,25 @@ class Rel {
             }
         }
       }
+      // the stores a derived spawn operation makes through its arguments (PARAM_FLOW out-store): inside the call, in an
+      // order to its own thread creation and to its lock operations that the facts do not give, so after the spawn and
+      // under no known lock.  A P0 thread creation stores its out argument before the new thread starts (P0 semantics).
+      if (defined(s.callee_fn))
+        for (uint32_t k = 0; k < s.nargs; ++k) {
+          auto pit = pflow_of_.find({s.callee_fn, k});
+          if (pit == pflow_of_.end()) continue;
+          bool out = false;
+          for (uint32_t pi : pit->second)
+            if (pflow_[pi].kind == KZ_PFLOW_KIND_OUT_STORE) out = true;
+          auto aa = argflow_at_.find({site, k});
+          if (!out || aa == argflow_at_.end() || argflow_[aa->second].src != KZ_ARGSRC_ADDRESS) continue;
+          const std::string type = str(argflow_[aa->second].type), field = str(argflow_[aa->second].field);
+          if (type.empty() || field.empty() || type == "<global>") continue;
+          WriteCtx wc;
+          wc.fn = s.callee_fn;
+          wc.spawn_arg = k;
+          after[type + "." + field].push_back(wc);
+        }
       for (const auto& [tf, v] : after_callee)
         if (after.count(tf) == 0) ++callee_only_fields;
       for (const auto& [tf, own] : after) {
@@ -1401,6 +1421,13 @@ class Rel {
             rows << (image_spawn_.count(site) != 0 ? " (from the static image of the table the entry argument is read from)" : "");
             rows << "; child actors " << actors_text(child) << "; creator identity: " << (identity.empty() ? "none found" : identity) << "; locks held " << s_held << "\n";
             for (const WriteCtx& wc : wrows) {
+              if (wc.spawn_arg != kN) {
+                auto aa = argflow_at_.find({site, wc.spawn_arg});
+                rows << "      write after the spawn by the spawn operation: " << fname(wc.fn) << " stores through arg " << wc.spawn_arg << " ["
+                     << (aa != argflow_at_.end() ? str(argflow_[aa->second].text) : std::string("?")) << "] inside the call at " << call_pos(si)
+                     << " (PARAM_FLOW out-store; its order to the thread creation inside the call is not read) locks not known\n";
+                continue;
+              }
               const kz_fact_lockset& w = lockset_[wc.row];
               std::string key;
               auto wr = writers_of_.find(tf);
@@ -1519,12 +1546,14 @@ class Rel {
   // a path from that function's entry releases one (LOCK_PATHS entry-release); a write deeper down holds its own only
   std::set<uint32_t> ctx_held(const WriteCtx& w) const {
     std::set<uint32_t> h;
+    if (w.spawn_arg != kN) return h;
     for (uint32_t id : held(w.row)) h.insert(id);
     if (w.call_row != kN && w.first_level && entry_release_.count(w.row) == 0)
       for (uint32_t id : held(w.call_row)) h.insert(id);
     return h;
   }
   std::set<uint32_t> ctx_openers(const WriteCtx& w) const {
+    if (w.spawn_arg != kN) return {};
     std::set<uint32_t> o = openers(w.row);
     if (w.call_row != kN && w.first_level && entry_release_.count(w.row) == 0) {
       const std::set<uint32_t> c = openers(w.call_row);

@@ -356,7 +356,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - 대상 규칙(§5e)의 R-T2 조건 걷기에서 깊이 상한(200)을 없앴다. 풀은 같은 트리를 한 노드로 두고 노드를 자식 뒤에 만들므로 방문 집합으로 끝난다.
 
 **relations 규칙 개정 2** [D].
-- **C 의 "spawn 뒤"**: LOCK_PATHS `after-spawn` 이다. 생성자가 spawn 뒤에 부르는 함수(직접 호출과 해결된 간접 대상, 그 아래 전부)가 같은 필드를 쓰면 그 쓰기도 실현 가능성에 넣는다. 그 호출이 부른 함수 안의 쓰기는 호출 행의 잠금과 합친다(그 쓰기에 `entry-release` 가 없을 때). 그보다 아래의 쓰기는 제 잠금만 센다. 생성자 본문에서는 쓰지 않고 callee 에서만 쓰는 필드는 이 판에서 짝을 짓지 않고 `[C]` 머리에 수를 낸다.
+- **C 의 "spawn 뒤"**: LOCK_PATHS `after-spawn` 이다. 생성자가 spawn 뒤에 부르는 함수(직접 호출과 해결된 간접 대상, 그 아래 전부)가 같은 필드를 쓰면 그 쓰기도 실현 가능성에 넣는다. 그 호출이 부른 함수 안의 쓰기는 호출 행의 잠금과 합친다(그 쓰기에 `entry-release` 가 없을 때). 그보다 아래의 쓰기는 제 잠금만 센다. 유도된 spawn 연산(본문 있음)이 인자를 통해 저장하는 것(PARAM_FLOW out-store, 주소 인자)은 그 호출 안에서 제 스레드 생성과의 순서를 facts 가 주지 않으므로 spawn 뒤의 쓰기로, 잠금은 모르는 것으로 센다. P0 스레드 생성의 out 인자는 새 스레드가 시작하기 전에 저장된다(P0 의미)고 보고 세지 않는다. 생성자 본문에서는 쓰지 않고 callee 에서만 쓰는 필드는 이 판에서 짝을 짓지 않고 `[C]` 머리에 수를 낸다.
 - **호출 경유 읽기**: 읽기 행에 `entry-release` 가 있으면 호출 지점의 잠금을 읽기에 더하지 않고 이유를 적는다.
 - **기댄 것**: `proven-impossible` 의 이유에 선언된 가정 셋과 필드 단위 완전성 규칙(PI 결정 대기, 정체성이 `type-level-exposed` 이면 형 단위로는 정적 인스턴스가 아님)을 적고 layers 칸에 `rests-on(...)` 을 붙인다. B 의 await 인정도 필드 단위 규칙과 `assume.no_cross_member_pointer_arithmetic` 을 붙인다.
 - **basis 편차**: 추출이 basis 의 편차 항목을 BASIS `extract.basis_deviation[<항목>]` 으로 복사한다(확장 사실을 쓰는 추출). 행이 이름 붙인 위치·함수의 파일이 단위별 편차 항목의 단위(이름의 첫 `[...]`)이면 layers 칸에 `basis-deviation(...)` 을 붙인다. 이름 공간 블록에는 `namespace layers` 줄이 있다.
@@ -365,7 +365,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - **수명**: entry 경로 규칙은 프로그램에 null 이 아닌 소멸자를 단 thread-specific key 생성(P0 `thread-specific-key-create`)도 cleanup push 도 없을 때만 "그 entry 가 돌아온 뒤 프로그램의 함수가 돌지 않는다"고 쓴다. 있으면 그것들을 적고 주장하지 않는다. P0 out 인자 줄은 relations 가 ARGFLOW 와 P0_TABLE 을 맞춰 만든 것이고 추출의 writer 집합(WRITERS, FACT_LOCS, FIELD_STATUS)에는 없다고 적는다. writer 수에서 covers-more-than-the-field 행을 따로 센다.
 - **검사 중복 제거**: callee 검사와 읽기 함수의 상수 반환은 (값, 조건 트리)로 묶는다. 40단계 한계는 출력에만 쓴다.
 
-**시험** [M]: fixture `relpaths.c`(루프 안 spawn, spawn 없는 분기의 쓰기, spawn 뒤 helper 의 잠금 밖 쓰기, 호출자 잠금을 푼 뒤의 읽기, union 멤버로 초기화한 entry 표, 다른 root 를 직접 부르는 root, 간접 호출만 하는 트램펄린, 소멸자 있는 key, 인자 guard 가 있는 noreturn 종료 연산)와 `deepcond.c`(조건의 깊이 211). `static_golden_lockpaths_np`, `static_golden_relpaths_np`, `test_static_cli`·`test_static_wrappers` 의 확인.
+**시험** [M]: fixture `relpaths.c`(루프 안 spawn, spawn 없는 분기의 쓰기, spawn 뒤 helper 의 잠금 밖 쓰기, 호출자 잠금을 푼 뒤의 읽기, union 멤버로 초기화한 entry 표, 다른 root 를 직접 부르는 root, 간접 호출만 하는 트램펄린, 소멸자 있는 key, 인자 guard 가 있는 noreturn 종료 연산, 인자를 통해 저장하는 spawn wrapper)와 `deepcond.c`(조건의 깊이 211). `static_golden_lockpaths_np`, `static_golden_relpaths_np`, `test_static_cli`·`test_static_wrappers` 의 확인.
 
 ## 6. core-cpu1 결과 [M]
 

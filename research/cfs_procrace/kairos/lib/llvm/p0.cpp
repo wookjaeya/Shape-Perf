@@ -124,6 +124,20 @@ const std::vector<P0Entry>& p0_table() {
 
 const char* p0_table_revision() { return "P0 table revision 1 (2026-10-30)"; }
 
+const std::vector<P0CompareEntry>& p0_compare_table() {
+  static const std::vector<P0CompareEntry> table = {
+      {"memcmp", "compares arg 2 bytes at arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
+      {"strcmp", "compares the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
+      {"strcoll", "compares the strings arg 0 and arg 1 in the collation of the locale; returns zero exactly when they collate equal", kPosix, kUnverified},
+      {"strncmp", "compares at most arg 2 bytes of the strings arg 0 and arg 1; returns zero exactly when they are equal", kPosix, kUnverified},
+      {"strcasecmp", "compares the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so", kPosix, kUnverified},
+      {"strncasecmp", "compares at most arg 2 bytes of the strings arg 0 and arg 1 ignoring case; returns zero exactly when they are equal so", kPosix,
+       kUnverified}};
+  return table;
+}
+
+const char* p0_compare_table_revision() { return "P0 comparison table revision 1 (2026-10-30)"; }
+
 bool p0_is_delay(uint8_t kind) { return kind == KZ_P0_KIND_SLEEP; }
 bool p0_is_terminal(uint8_t kind) { return kind == KZ_P0_KIND_THREAD_EXIT || kind == KZ_P0_KIND_PROCESS_EXIT; }
 bool p0_is_process_terminal(uint8_t kind) { return kind == KZ_P0_KIND_PROCESS_EXIT; }

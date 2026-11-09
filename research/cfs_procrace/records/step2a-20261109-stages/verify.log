@@ -1,0 +1,11 @@
+verify_start 2026-11-09T10:22:11.676Z
+bundle.tar.xz.00: OK
+parts_sha256 OK 1
+xz_t OK
+stream_pipeline_status 0 0 0 (tar stderr lines: 0)
+nothing_written_to_disk OK
+member_types -=869 d=150 
+members_hashed=869 regular_in_listing=869 manifest_lines=869 diff_lines=0
+sorted_member_list_sha256=80b9f614c89c80091a571afce0982fccb58d024bd893f64e49e9fa0c8ee8f6da sorted_manifest_sha256=80b9f614c89c80091a571afce0982fccb58d024bd893f64e49e9fa0c8ee8f6da
+originals_match_manifest OK
+verify_end 2026-11-09T10:22:20.849Z df_free=1123237888

@@ -1,0 +1,11 @@
+bundle=ck-20261109-rv3check
+created_utc=2026-11-09T10:25:29.491Z
+repo_commit=7aabae45352093f0831c83f706207e574afcd1fc
+kernel=6.18.44-fc-v310
+source=/home/user/work/redesign/rv3_check files=97 bytes=19134662
+tar_xz_bytes=16008324 parts=1 tar_xz_sha256=e04b7946d5150a48168cd772a2e4e63f6e405993819e7df8566ee9565b5e276b
+location=/home/user/work/preserve/bundles-20261109/ck-20261109-rv3check (local, not in the repository, not pushed)
+made_with=bundle_local.sh (tar --sort=name --owner=0 --group=0 --numeric-owner | xz -9 -T4 | split -b 45M), started 2026-11-09T10:25:22.495Z
+df_free_before=1084194816 df_free_after_create=1068142592
+credential_pattern_hits=rv3_check/rv4/scan/bundlescan.py
+note=CK: evidence of the RV3 and RV4 analyses incl. gaps/ctest_20261030 (RV3A 6.1 P2, P11), rv4/ and the PV record rv4/pv (RV4 analysis 7.2 steps 0-1); one credential-pattern hit is the pattern text in rv4/scan/bundlescan.py line 8 (no value); local only, not pushed

@@ -387,13 +387,15 @@ These have reference-backed options. Picking one is a decision; it is not `unspe
 
 These conditions might be determined if the text were read.
 
+*Updated 2026-11-09:* the comments of all four GitHub issues below are now read on the public issue pages through a model-mediated extractor, as short verbatim quotes (125 characters or less) with anchors and access dates: C1 §0a (2026-10-24), C3 §1.2.3 (2026-10-29), R2 §1.5 (2026-10-29), C5 §0a (2026-11-09). The full texts were not saved. The rows say what each case file still lists as not retrieved. Work order: `../plan/RV4_REVIEW_ANALYSIS_20261109.md` §2.2.
+
 | Case | Unread reference | What it might settle |
 |---|---|---|
 | C1 | 5 comments of CF #184, incl. `issuecomment-1202543669` [C1-BP] (read 2026-10-24, C1 §0a: start order settled; BP version, names, failure log still unknown) | Provider (BP version), start order ("BP started first"), names, failure log |
 | C2 | Trac #167 (host unreachable); #198 REST timeline | Reporter, EVA CWS details, closing event |
-| C3 | Full text of #73's 14 comments, 4 unidentified; Trac #42 | Platform details, close record, the full fix discussion |
-| C5 | 9 comments of #72 incl. [C5-fix] `536673810`, [C5-context] `536673820`; Trac #41 | Reporter, platform, runtime-load/watchdog context |
-| R2 | 3 elided spans and timestamps of the 2 comments | Verbatim analysis text; whether it addresses Q1 |
+| C3 | *2026-11-09:* the 14 comment blocks are read as short quotes (C3 §1.2.3, 2026-10-29); the 4 earlier unidentified ones are blocks 4, 8, 9 and 11. Still not retrieved: the full text, Trac #42, the Trac #81 attachment (C3 §1.2.3). *2026-10-08:* full text of #73's 14 comments, 4 unidentified; Trac #42 | The outcome of the added race test (Trac #81), the full fix discussion |
+| C5 | *2026-11-09:* the 9 comments are read as short quotes (C5 §0a), incl. [C5-fix] `536673810` and [C5-context] `536673820` (watchdog background, LADEE). Still not retrieved: the full text, the Trac #41 original, the Trac #81 attachment (C5 §0a). *2026-10-08:* 9 comments of #72 incl. [C5-fix] `536673810`, [C5-context] `536673820`; Trac #41 | The Trac #81 test output, the Trac original |
+| R2 | *2026-11-09:* both comments are read as short quotes (R2 §1.5, 2026-10-29); the gaps hid no text. Still open: exact timestamps and edit history (R2 §12 Q2). *2026-10-08:* 3 elided spans and timestamps of the 2 comments | Exact timestamps |
 
 ---
 
@@ -402,6 +404,7 @@ These conditions might be determined if the text were read.
 Per the user's instruction, intermediate conclusions that need a decision are collected here. Each item merges decisions already open in the case files. Nothing is chosen.
 
 **X1. GitHub comment access for nasa/cFE and nasa/CF.**
+- *Updated 2026-11-09.* All four issues are read on the public pages as short extractor quotes (§4.4). The API, `gh api` and raw HTML routes stay blocked (403) in the case files. Issue bodies and comments are already references under the conditions policy (`../CONDITIONS_POLICY.md` item 1 of the reference list: issue body and comments). So the route needs no decision, and option (b) is no longer requested. The question narrows to fidelity: (d) do the extractor's short quotes, with anchor and access date, meet that policy item, or is a verbatim copy needed? This is `../plan/PI_DECISIONS_PENDING_20261030.md` C11. Nothing is chosen. The bullets below are the 2026-10-08 state.
 - Merges C1 D1, C2 D3, C3 D1, C5 D1 and R2 D3.
 - Options:
   - (a) Consent to a credentialed `add_repo` with `access:"push"`. The case files record that it may be refused (C1 §0).

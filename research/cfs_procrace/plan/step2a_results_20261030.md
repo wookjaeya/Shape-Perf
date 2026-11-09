@@ -43,6 +43,13 @@
    - 사례 관계는 후보 가운데 소수다: 행 175–431개 가운데 1–8개(0.3–4.6%), 등급이 있는 것만 세면 1–5개(0.3–2.9%)(§6).
    - "고정된 잘못된 순서"(R2)와 "반대 순서 가능"(C1)은 정적으로 증명되지 않는다. 위반 근거는 실행 기록 없이는 늘 unconfirmed다.
 5. **ED §2.3 재측정** [M] (§3). 공유 base 필터를 건 R-T1 ∪ R-T2의 대상 수는 C1 340, R2 240, C5 259/261이다(V3 R-T1: 841 / 504 / 322). 세 수정 단계에서 바뀌지 않았다. 사례 필드 가운데 R2의 5개(`EVS_AppData_t.AppID`, `CFE_ES_AppRecord_t.AppId`·`AppState`·`Type`, `CFE_PSP_IdleTaskState_t.ShutdownReq`)와 C5 `CFE_ES_TaskRecord_t.TaskId`는 매개변수·지역 포인터로만 닿아 이 필터에서 빠진다.
+6. **정오표: C5 부팅 결과의 owner 오결합** (2026-11-09; RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md`) §6.3 O14, RV4 분석(`plan/RV4_REVIEW_ANALYSIS_20261109.md`) §7.2 3) [F]. 이 문서의 수와 판정은 바뀌지 않는다. 대상은 C5 결과 문서 `plan/results_c5_boot_20261029.md`(이하 C5B)다.
+   - 무효인 것: C5B §0 L29와 §3.2 L182의 "SAMPLE_APP의 스레드는 owner 5(SAMPLE_LIB 요청)로 `confirmed`", 그리고 그 위의 READY 판정이다. PD(`plan/PI_DECISIONS_PENDING_20261030.md`) E6(PD:936)가 정했다: "SAMPLE_APP 스레드 owner와 그 위의 READY 판정이 무효라는 정오표"(RA:30).
+   - 그래서 C5B §0 L25–26의 "6.4.1 발생 68, 6.4.2 발생 67, 전부 READY"를 그대로 인용하지 않는다. 그 수에는 SAMPLE_APP 스레드의 `GetAppID` 발생이 판마다 6개 들어 있다(C5B L215).
+   - 원인(C5B §4.3, RV3A §6.4 L6): SAMPLE_LIB의 스레드가 끝난 뒤 다음 `pthread_create`가 같은 `pthread_t`를 돌려줬다(641 `0xf7b42b40`, 642 `0xf7b83b40`; C5B L238). E-ID1은 id를 배정한 호출 1개와 알린 actor 1개만 검사하고, spawn의 출력 값과 자식의 `pthread_self`를 비교하지 않는다(RV3A §6.4 L6). 그래서 같은 값을 받은 두 spawn을 가르지 못했다. C5B L300도 같은 것을 적는다.
+   - 구분: 무효인 owner `confirmed`는 옛 계측 경로(E-ID1)의 결과다. 이 문서의 2a 결과는 사례 입력 없는 자동 추출이고, C5 기록을 읽지 않았다(§1.2: run-order 칸은 늘 `no record given`). 그래서 이 정오표는 2a의 수를 바꾸지 않는다. 무효인 결과를 2a의 성과로도 근거로도 세지 않는다.
+   - 인용: 인용 가능 사실 목록(RV3A §6.5 E13)에서 이 행들을 뺀다. 두 기록과 relations A1(`T/c5_641/NP/relations.txt:1303`)은 단계 1의 회귀 자료로 쓴다(RV3A §6.4 L6, 기대 "owner 미정"). O2(잘못된 AppId 반환, C5B §4.3)는 기록의 관측이고, 따로 조사할지는 PD C8이다.
+   - C5B 문서와 묶음 `records/c5-20261029-replays`는 이 정오표로 바꾸지 않는다. C5B 안의 정오표 절(RV3A §6.3 O14가 둔 자리)은 따로 한다.
 
 ## 1. 구현 [F][M]
 

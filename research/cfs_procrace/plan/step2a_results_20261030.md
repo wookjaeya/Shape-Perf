@@ -551,3 +551,89 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 **판정 변화**: 없다. T1 PASS(개정 뒤 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6·T7 PASS. "불가"는 0 / 0 / 0 / 6 / 14 그대로이고, `not graded`는 2 / 2 / 1 / 14 / 14 → 1 / 1 / 5 / 14 / 14, `undecidable`은 297 / 297 / 225 / 147 / 147 → 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0 그대로다. 행은 1,480 → 1,553(C1 +20씩, R2 +33). T3 6.4.2의 "불가"는 이제 경로 C의 전제 여섯과 개정 5의 검사(재진입·`incomplete-source`·되부름·내부 연결 잠금 없음)를 통과한 것으로 인용한다.
 
 커밋: `65902ff`(도구: 잠금 집합 개정 2, relations 개정 5), `8a1a3b7`(시험·golden), `741b2d4`(드라이버·계수), `619adfe`(도구: 함수 포인터 주소의 열린 노드), `76bcf6d`(시험·golden), 그리고 이 문서·규칙 문서·schema 문서·PI·STATUS의 커밋(접두 `kz-static 2a/fix3:`). 이 단계는 push 하지 않는다. 문서 커밋 때 원격 끝은 `741b2d4`이다.
+
+## 14. 드라이버 실패 전파와 `all` 재실행 (2026-11-09)
+
+- 성격: 드라이버 점검과 재실행 기록이다. 도구는 바꾸지 않았다(`db172b74`). 아무것도 빌드하지 않았고 cFS를 기동하지 않았다. 이 절은 앞 절의 수와 판정을 바꾸지 않는다.
+- 근거: RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md`) §2.4, RV4 분석(`plan/RV4_REVIEW_ANALYSIS_20261109.md`) §2 #29와 §7.2 4. PI의 11-09 진행 지시("타당한 만큼 수용하고 진행해") 아래의 lead 일이다.
+- 기록: 저장소 `records/step2a-20261109-rv4rerun/`(텍스트만: status, 출력 해시 목록, 비교 표, 명령, df). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_rv4/`(이하 `T_RV4/`)다. 묶음은 없다. CM §5의 "보존됨"이 아니다. 보존 위치는 PI 답(PD D4) 뒤다.
+
+### 14.1 드라이버 수정 (commit `c4fe9db`) [F][M]
+
+- 파일 셋, +738/−134 [M: `git diff --stat b9cf5e7 c4fe9db`]: `env/redesign/step2a_tests.sh`, `env/redesign/step2a_tests_count.py`, 새 `env/redesign/step2a_tests_unit.sh`.
+- **상태 수집**: 파이프라인마다 그 상태를 부르는 셸에서 바로 읽는다(`PIPESTATUS`, `pipe_ok`). 파이프라인 안의 함수에서 FAIL을 올리지 않는다. 명령 치환은 대입에서 rc를 본다. 프로세스 치환은 없다. grep·diff는 rc 2 이상만 실패다.
+- **실패의 전달**: 실패마다 `OUT/status.txt`에 `FAIL <단계>:` 줄이 생긴다. 단계마다 PASS 또는 FAIL을 적는다. 실패한 단계가 있으면 그 단계와 `all`이 rc 1이다. 드라이버가 시작하지 못하면 rc 2다.
+- **`one()`**: basis·extract·show·relations·sha256sum의 rc를 본다. `.txt` 출력이 비었으면 실패다. `run.log` 줄 끝에 `sha256= sizes= verdict=`를 더했다. 앞 칸은 그대로다.
+- **빈 입력과 dump 실패**: kz-dump rc가 0이 아님, 섹션 없는 dump, 머리 `count=`와 레코드 줄 수가 다른 dump(잘림), 비교한 섹션 0은 실패다. 옛 함수는 빈 입력에 `DIFFERENT: none`, rc 0을 냈다(RV4 분석 §8 [M]).
+- **허용은 레코드 단위**: 표 `ALLOW`가 드라이버 안에 있다. 항목은 86개다 [M: 표 줄 셈; identity-basis 1, identity-facts 2, npsame 19, s5same 19, fixsame 16, fix2same 15, fix3same 14]. 드라이버 작성 보고는 87이라 적었다. 항목마다 단계, 섹션, 변경 종류(changed·added·removed), 다섯 빌드의 기대 수, 근거, 레코드 키가 있다. 어느 항목도 이름 붙이지 않은 레코드 변경은 실패다. 기대 수가 하나라도 어긋나도 실패다. 한쪽 dump에만 있는 섹션은 표가 그 머리(HEADER)를 이름 붙일 때만 허용한다.
+  - 표의 수는 11-09에 `db172b74`로 보관 출력에서 잰 것이다(T/ 대 EB·T_S5·T_F1–T_F3; npsame는 S4를 다시 추출) [M, 드라이버 작성 때]. §2a가 수를 준 곳(incomplete-source 44 / 22, FIELD_STATUS 183 / 183 / 147 / 175 / 175, LOCKSET 28 / 47, LOCK_PATHS 9,408 / 9,409 / 5,872 / 2,364 / 2,373과 +75 / +75 / +66 / +29 / +29, `count.lock_ops` 2519 → 2450·1586 → 1547)은 같다.
+  - identity도 레코드 단위 판정을 받는다. show 텍스트 검사를 더했다: `extract.units_from` 한 줄만 다를 수 있다.
+- **RV3A §2.4 ③④⑥**: `twice`는 `NP2/facts.kz`를 남기고 rc와 전체 해시를 `twice_detail.txt`에 적는다. `twice.txt` 줄은 그대로다. `run`은 `run.log`를 비우지 않는다. OUT 없이 돌린 `all`은 새 `step2a/tests_runs/run_<UTC>_<sha8>`에 쓰고 `latest` 링크를 고친다. `all`은 비지 않은 OUT을 거부한다(T/ 보호). `C1`·`REF`·`CT`를 환경에서 바꿀 수 있다. 1–80줄의 번호는 그대로다(records/의 `:63-76` 인용).
+- **계수 스크립트**: 입력이 없거나 비었으면, 또는 `twice.txt` 줄이 same이 아니면 `# problems`를 찍고 exit 1이다.
+- **줄 인용**: RV3A와 RV4 분석이 인용한 드라이버 줄(`:94`, `:99`, `:107-134`, `:174`–`:218`, `:235-240`, `:249`)은 `c4fe9db` 전의 판이다. 그 줄은 옮겨졌다. 그 인용은 `b9cf5e7`의 파일로 읽는다.
+- **하지 않은 것**: RV3A P9(`NP/sha256.txt`에서 출력 해시와 도구·입력 해시를 나누기), P10의 공용 함수.
+
+### 14.2 단위 점검 넷 [M]
+
+`step2a_tests_unit.sh`는 임시 디렉터리에 fixture와 kz-static·kz-dump 대역(셸 스크립트)을 만든다. 컴파일은 없다. 허용표는 거기서만 바꾼다(`STEP2A_ALLOW_TABLE`). 점검마다 결함 없는 대조를 먼저 돌려 rc 0을 본다. 그래서 rc 1은 결함에서 온다. 이 점검은 드라이버를 본다. 탐지 실험이 아니고 그 수에 넣지 않는다(RV4 L178). 11-09 11:00Z에 다시 돌렸다(`unit_new.txt`, `unit_old.txt`). 임시 디렉터리는 스크립트가 지웠다.
+
+| 점검 | 옛 드라이버 `b9cf5e7` (`132a2f97…`) | 새 드라이버 `c4fe9db` (`467a0a6e…`) |
+|---|---|---|
+| 1 필수 비교 실패 → 단계 rc 1 | 대조 0, 결함 0 → FAIL | 대조 0, 결함 1 → PASS (`FAIL s5same: c5_641: per-record comparison … (rc 1)`) |
+| 2 파이프라인 안 kz-dump rc 3 → `all` rc 1 | 0, 0 → FAIL | 0, 1 → PASS (`FAIL fix2same: kz-dump …/fix2/c5_642/NP/facts.kz (rc 3)`; 다른 단계 PASS) |
+| 3 빈 dump, kz-dump 실패 → 단계 rc 1 | 0 0, 0 0 → FAIL | 0 0, 1 1 → PASS (섹션 없는 dump; kz-dump rc 2) |
+| 4 허용 섹션 안 예상 밖 변경 → 단계 rc 1 | 0, 0 → FAIL | 0, 1 → PASS (fix3same c5_641) |
+| 합 | 0 / 4 (rc 1) | 4 / 4 (rc 0) |
+
+- 옛 드라이버는 입력 경로가 고정이다. 그래서 점검 2에서 그 `run`이 실제 컴파일 DB를 해시했다(읽기만).
+- 잘린 dump(머리 `count=`와 다른 레코드 수)의 실패는 코드에 있다 [F]. 그러나 네 점검에 들지 않는다.
+
+### 14.3 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_rv4`. T/에는 쓰지 않았다. 입력 경로는 기본값이다(`status.txt`의 `inputs` 줄).
+- 도구: `KZB=/home/user/work/merge-check/kz-llvm/tools`. kz-static sha256 `db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4`, kz-dump `05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43`. 저장소 `c4fe9db`, `kairos` 아래 미커밋 0줄(`T_RV4/identity/identity.txt` 머리). 드라이버 sha256 `467a0a6e…`, 계수 스크립트 `7d2ab6a8…`. 허용표는 내장(built-in)이다.
+- 시간: 11:00:03Z–11:03:49Z.
+- **rc**: `all` 0, `result all: PASS`. 열 단계(identity, npsame, run, s5same, fixsame, fix2same, fix3same, twice, count, sha) 모두 PASS다. FAIL 줄은 0이다. `run.log` 11줄 모두 basis·extract·show 0, NP 다섯 줄은 relations 0, sha256 0, verdict PASS다. `twice_detail.txt` 다섯 빌드 모두 extract 0, relations 0이다.
+- **공간**(`df -B1 /`): 앞 1,061,470,208 B. 필요는 T/ 163,241,845 B와 새로 남기는 `NP2/facts.kz` 38,807,072 B, 합 약 202 MB로 보았다. 300 MB 하한에 멀어 한 번에 돌렸다(빌드별로 나누지 않음). 2초 표본의 최저는 836,116,480 B(11:02:47Z), 뒤는 857,931,776 B다. `T_RV4/`는 202,111,495 B, 149 파일이다. 같은 디스크를 다른 작업도 쓰므로 df의 차가 모두 이 실행의 몫은 아니다 [I].
+
+### 14.4 출력 비교: T/ 대비 [M]
+
+`T/sha256.txt`의 125 파일을 `T_RV4/`의 같은 경로와 sha256으로 맞췄다(`compare_T.tsv`). 같음 118, 다름 7, 없음 0이다.
+
+| 묶음 | 파일 | 결과 |
+|---|---|---|
+| NP 출력 | `<build>/NP/` facts.kz·basis.kz·facts.txt·basis.txt·extract.txt·relations.txt·relations.log·args.txt (5 × 8) | 40 같음 |
+| T7 둘째 실행 | `<build>/NP2/` extract.txt·relations.txt (5 × 2) | 10 같음 |
+| 판정 입력 | `count/summary.txt`와 tsv 일곱(targets_rule, summary, burden, against_s5, against_fix1–3) | 8 같음 |
+| 프로필 추출 | `identity/<b>/<V>/` basis.kz·facts.kz·basis.txt·facts.txt·extract.txt·args.txt·basis.dump.diff·facts.dump.diff·show.diff (6 × 9) | 54 같음 |
+| npsame 추출 로그 | `npsame/<build>/extract.txt` | 5 같음 |
+| T7 | `twice.txt` | 1 같음 |
+| 비교 텍스트 | npsame·s5same·fixsame·fix2same·fix3same `.txt` | 5 다름: 빌드마다 첫 두 줄(옛 드라이버의 줄)을 모으면 T/ 파일과 바이트 동일하다(25 / 25). 나머지 줄은 레코드 단위 판정이다 |
+| identity | `identity/identity.txt` | 다름: 머리 1–2줄은 날짜와 저장소 commit(`76bcf6d` → `c4fe9db`)만 다르다. T/의 3–73줄이 같은 순서로 모두 있다. 더해진 것은 레코드 단위 판정과 show 텍스트 판정이다 |
+| run.log | `run.log` | 다름: T/ 다섯 줄의 rc가 새 줄과 같다. 시간 칸은 잰 값이라 다르다. 칸 셋과 identity의 `one()` 여섯 줄이 더해졌다 |
+
+- T/ 목록 밖의 빌드별 `sha256.txt` 11개(NP 5, identity 6)도 T/와 바이트 동일하다.
+- `T_RV4/`에만 있는 것은 24개다: `NP2/facts.kz` 5(NP의 facts.kz와 해시 같음), `NP2/relations.log` 5(0 바이트), 빌드별 `sha256.txt` 11, `sha256.txt`, `status.txt`, `twice_detail.txt`.
+- T7: facts `a26d580f…`, `20e2a73f…`, `55021411…`, `1b4f794a…`, `c7bb3c09…`; relations `32fe9b34…`, `78552970…`, `75e6565d…`, `db98c85f…`, `44ad5c55…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). §13과 같고, 둘째 실행과 바이트 동일이다.
+- 레코드 단위 비교 37개(identity 12, 다섯 비교 단계 × 5 빌드)가 모두 PASS다. COUNT 0, UNEXPECTED 0, problem 0이다. show 텍스트 판정 6개도 PASS다. 변경 수(changed / added / removed, c1_pre_tx · c1_post_tx · r2_core · c5_641 · c5_642):
+  - npsame 274/9574/115 · 274/9575/115 · 237/6002/71 · 182/2445/0 · 182/2454/0
+  - s5same 277/9574/115 · 277/9575/115 · 240/6002/71 · 185/2445/0 · 185/2454/0
+  - fixsame 278/171/115 · 278/171/115 · 241/126/71 · 186/38/6 · 186/38/6
+  - fix2same 275/169/115 · 275/169/115 · 238/124/71 · 183/36/6 · 183/36/6
+  - fix3same 92/166/115 · 92/166/115 · 91/121/71 · 8/36/6 · 8/36/6
+  - identity: basis 1/0/0, facts 4/0/0(여섯 경우 모두)
+- T/는 실행 뒤에도 `T/sha256.txt`와 맞는다(`sha256sum -c` rc 0, 빌드별 NP `sha256.txt` 다섯 OK).
+
+### 14.5 판정과 수
+
+- 판정의 입력(`count/summary.txt`와 tsv 일곱)이 T/와 바이트 동일하다 [M]. 판정을 새로 읽지 않았다. 같은 입력이므로 판정도 같다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553. 사례 계층 행 0(`summary.tsv`). 모두 §13과 같다.
+- 등급 이름(`proven-impossible`)과 "불가"의 지위는 B8(PI 대기)을 따른다. 이 재실행은 등급 이름을 바꾸지 않았다.
+
+### 14.6 남는 것
+
+- [U] 정적 이미지의 잘림 표시(RV3A §2.5 ①)와 둘로 나눈 계수(`image_budget_exhausted`, `image_leaves_omitted`; RV4 분석 §2 #6)는 도구 코드를 바꾸고 빌드해야 한다. 빌드 자리(Q12)의 답 뒤다. 지금 출력의 `count.walk_bounds_hit`에는 이미지 예산의 수가 없다 [M: `T_RV4/c1_pre_tx/NP/facts.txt`]. 그래서 이 출력으로는 이미지 걷기가 예산에 걸렸는지, 걸려서 잎을 뺐는지 가르지 못한다. 4096 → 10^6 민감도 결과(RV3A §2.5)는 그대로다.
+- [U] B8 아래의 등급 이름 바꾸기도 빌드가 든다. PI 답 뒤다.
+- [I] 허용표의 수는 같은 도구의 보관 출력에서 잰 것이다. 그래서 이번 PASS는 같은 도구가 같은 출력을 다시 냈다는 뜻이다. 변경이 옳은지는 표가 보이지 않는다. 그 근거는 §2a와 §10–§13의 검토다. 다른 kz-static이면 수가 맞지 않아 비교가 실패한다(의도한 동작).
+- RV3A P9·P10은 하지 않았다(§14.1).
+- 출력 `T_RV4/`(202 MB)는 지우지 않았다. T/와 같은 파일이 118개다. 지울지는 정하지 않는다.

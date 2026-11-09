@@ -1,0 +1,12 @@
+# step2a_tests_unit.sh: driver <scratchpad>/rerun_rv4/unit/old/step2a_tests.sh (sha256 132a2f97fb8db249)
+check 1 required comparison fails -> step rc 1: control rc 0; fault rc 0 -> FAIL
+    bad: (no status.txt; log ends: c5_642: sections only in the second: -; DIFFERENT: none)
+check 2 kz-dump rc 3 inside a pipeline -> all rc 1: control rc 0; fault rc 0 -> FAIL
+    bad: (no status.txt; log ends: sha256 of 125 files -> <tmp>/w2/bad/sha256.t)
+check 3 empty dump, kz-dump failure -> step rc 1: control rc 0 0; fault rc 0 0 -> FAIL
+    bad: (no status.txt; log ends: c5_642: sections only in the second: -; DIFFERENT: none)
+    bad2: (no status.txt; log ends: c5_642: sections only in the second: -; DIFFERENT: none)
+check 4 unexpected change inside an allowed section -> step rc 1: control rc 0; fault rc 0 -> FAIL
+    bad: (no status.txt; log ends: c5_642: sections only in the second: -; DIFFERENT: BASIS (1 of 2 records differ; name="extract.build_identity" value="earlier" policy=unset prov=none deviation=)
+unit checks: 0 of 4 pass
+rc=1

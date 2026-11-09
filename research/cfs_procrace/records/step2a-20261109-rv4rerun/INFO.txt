@@ -1,0 +1,17 @@
+record=step2a-20261109-rv4rerun
+kind=text record of a measurement run; not a bundle; no parts; not preserved in the CONFIG_MANAGEMENT 5 sense
+run=step2a_tests.sh all, 2026-11-09T11:00:03Z to 11:03:49Z (RV4 analysis 7.2 step 4; AR section 14)
+repo_commit=c4fe9db872f37120d85b85e77056bcdccc899bcb (driver c4fe9db; kairos uncommitted lines 0)
+driver_sha256=467a0a6e042f2836146e8b211fc15862788fb11d5d7afdfd99084309b840efdd env/redesign/step2a_tests.sh
+count_sha256=7d2ab6a86206647573392a3c0cc01f65317d9c6d88fcf1c05177c6c8beebc057 env/redesign/step2a_tests_count.py
+kzb=/home/user/work/merge-check/kz-llvm/tools
+kz_static_sha256=db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4
+kz_dump_sha256=05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43
+allowance_table=built-in (STEP2A_ALLOW_TABLE unset)
+outputs=/home/user/work/redesign/step2a/tests_rv4 (outside the repository; 149 files, 202111495 bytes; not in T/)
+outputs_sha256_list=sha256.txt here (136 files; sha256 4ce6b46d97318c0d03e63b00b494df7faf0c6628c66f8218cef012c850911a31)
+status_sha256=f2ecf6e05730e49c20277db98061703646e59b9fe9390dfa889d1cedcd370449 (status.txt here)
+rc=all 0; result all: PASS; ten steps PASS; no FAIL line
+compared_with=/home/user/work/redesign/step2a/tests (T/, 125 files of T/sha256.txt): 118 same, 7 differ (driver texts whose format changed), 0 missing; see compare_T.tsv, oldlines_T.txt
+nothing built; no cFS booted; nothing deleted; not pushed
+files=INFO.txt commands.txt status.txt sha256.txt twice_detail.txt compare_T.tsv oldlines_T.txt unit_new.txt unit_old.txt df.log run_all.sh watch_df.sh compare.py oldlines.py

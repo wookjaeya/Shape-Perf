@@ -1,0 +1,32 @@
+# step2a-20261109-rv4rerun: commands, rc and free space (df -B1 /, bytes available)
+# <scratchpad> is this session's scratchpad directory; the copies of run_all.sh and watch_df.sh here read it from $SCRATCH (the run used the full path)
+
+## space before the run
+du -sb /home/user/work/redesign/step2a/tests      -> 163241845 (T/)
+NP2/facts.kz kept by the new twice (T/ sizes)      -> 10980536 + 10983384 + 7188576 + 4823032 + 4831544 = 38807072
+need about 202048917; free 1061490688 (10:59Z) -> one run of all, no build-by-build split (floor 300 MB)
+
+## the run
+setsid ./run_all.sh            # env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS KZB=/home/user/work/merge-check/kz-llvm/tools \
+                               #   bash $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_rv4
+./watch_df.sh                  # free space every 2 s into df.log; stops the driver below 330000000 (did not trigger)
+rc of all: 0                   # status.txt: result all: PASS
+driver stdout+stderr: <scratchpad>/rerun_rv4/all.log 363965 bytes sha256 c2ded1d3fec4eaa7b5c4b505ac9a7b4435cf14f40020ad82221be3ebbc2f488b (not copied)
+free: before 1061470208 (11:00:02Z), lowest sample 836116480 (11:02:47Z), after 857931776 (11:03:49Z)
+du -sb /home/user/work/redesign/step2a/tests_rv4 -> 202111495; find -type f | wc -l -> 149
+
+## checks after the run
+sha256sum -c --quiet T/sha256.txt                        -> rc 0 (T/ unchanged); T/<build>/NP/sha256.txt -c: 5 OK
+sha256sum -c --quiet tests_rv4/sha256.txt                -> rc 0 (136 files)
+python3 -I compare.py T tests_rv4 compare_T.tsv          -> T files same 118, DIFF 7, MISSING 0; new-only 24; first two lines per build 25 of 25 same
+python3 -I oldlines.py T tests_rv4                       -> oldlines_T.txt
+cmp T/<build>/NP/sha256.txt tests_rv4/<build>/NP/sha256.txt (5) and identity/<b>/<V>/sha256.txt (6) -> all same
+grep verdict lines: npsame s5same fixsame fix2same fix3same 5 PASS each; identity 12 record + 6 show-text PASS; COUNT 0, UNEXPECTED 0, problem 0
+
+## unit checks (step2a_tests_unit.sh; stand-in tools written as shell scripts, nothing compiled)
+TMPDIR=<scratchpad>/rerun_rv4/unit/tmp bash env/redesign/step2a_tests_unit.sh                       -> unit_new.txt, 4 of 4, rc 0
+git show b9cf5e7:./env/redesign/step2a_tests.sh > <scratchpad>/rerun_rv4/unit/old/step2a_tests.sh   (sha256 132a2f97fb8db2491974b1101194abb1b349980ab539609c57971c2ab1a68294)
+git show b9cf5e7:./env/redesign/step2a_tests_count.py > <scratchpad>/rerun_rv4/unit/old/step2a_tests_count.py (sha256 a58167a2db9cd3c4d687dce81330f12bd153b5f72da22c6d0dabe9c55ff9930a)
+TMPDIR=... bash env/redesign/step2a_tests_unit.sh <scratchpad>/rerun_rv4/unit/old/step2a_tests.sh    -> unit_old.txt, 0 of 4, rc 1
+the temporary directories were removed by the script (unit/tmp empty afterwards)
+free around the unit checks (they ran while the driver ran): 1038503936 before, 1038491648 after

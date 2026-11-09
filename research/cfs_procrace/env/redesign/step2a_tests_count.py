@@ -10,6 +10,8 @@ Reads OUT/<build>/NP/{relations.txt,facts.txt,extract.txt} written by step2a_tes
 --targets-rule R-T1,R-T2; no case input).  The case names below are queries of this evaluation script only: they pick
 the rows the tests name out of the tool's output, and never reach the tool.  Every finding names its line in the file
 (relations.txt:L, facts.txt:L), so the results document can cite it.  Writes OUT/count/*.txt and *.tsv.
+Exits 1 (after the whole summary, with a "# problems" part) when an input it reads is missing or empty or a line of
+OUT/twice.txt is not "facts twice: same ...; relations twice: same ..." for each build (RV3A §2.4 item 5).
 """
 import collections
 import os
@@ -25,6 +27,7 @@ CD = os.path.join(OUT, 'count')
 os.makedirs(CD, exist_ok=True)
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
 out_lines = []
+PROBLEMS = []
 
 
 def say(s=''):
@@ -35,7 +38,10 @@ def say(s=''):
 def load(build, name, root=None):
     p = os.path.join(root or OUT, build, 'NP', name)
     if not os.path.exists(p):
+        PROBLEMS.append('%s is missing' % p)
         return []
+    if os.path.getsize(p) == 0:
+        PROBLEMS.append('%s is empty' % p)
     with open(p, encoding='utf-8', errors='replace') as f:
         return f.read().split('\n')
 
@@ -341,9 +347,20 @@ say('  violation column over all rows of all builds: %s' % dict(viol))
 say('')
 say('# T7 determinism')
 tw = os.path.join(OUT, 'twice.txt')
+tw_same = collections.Counter()
 if os.path.exists(tw):
     for l in open(tw):
         say('  ' + l.rstrip())
+        m = re.match(r'(\S+) facts twice: same \([0-9a-f]{16}\); relations twice: same \([0-9a-f]{16}\)$', l.rstrip())
+        if m:
+            tw_same[m.group(1)] += 1
+        else:
+            PROBLEMS.append('twice.txt: not the same: %s' % l.rstrip())
+else:
+    PROBLEMS.append('%s is missing' % tw)
+for b in BUILDS:
+    if tw_same[b] != 1:
+        PROBLEMS.append('twice.txt: %d "same" lines for %s, expected 1' % (tw_same[b], b))
 
 # ---------------------------------------------------------------- the candidate burden
 say('')
@@ -510,3 +527,10 @@ with open(os.path.join(CD, 'summary.tsv'), 'w') as f:
     f.write('build\trows\trows_with_case_layer\n')
     for b, n, bad in t5:
         f.write('%s\t%d\t%d\n' % (b, n, bad))
+
+if PROBLEMS:
+    say('')
+    say('# problems (step2a_tests.sh count fails)')
+    for p in PROBLEMS:
+        say('  ' + p)
+    sys.exit(1)

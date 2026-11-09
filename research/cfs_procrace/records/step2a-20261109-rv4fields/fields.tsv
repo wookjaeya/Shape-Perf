@@ -1,0 +1,299 @@
+# field signatures of the changed records (the "fields" lines of /home/user/work/redesign/step2a/tests_rv4f/*/*.txt; identity: V0, V2 has the same)
+step	build	section	fields	count	key
+npsame	c1_pre_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+npsame	c1_pre_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+npsame	c1_pre_tx	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame	c1_pre_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+npsame	c1_pre_tx	BASIS	value	2	^name="extract\.(build_identity|extended_facts_f5)"
+npsame	c1_pre_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_pre_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_pre_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_pre_tx	HEADER	sections	1	^sections=
+npsame	c1_pre_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+npsame	c1_pre_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+npsame	c1_pre_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+npsame	c1_pre_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+npsame	c1_pre_tx	P0_TABLE	source	1	name="pthread_create"
+npsame	c1_post_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+npsame	c1_post_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+npsame	c1_post_tx	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame	c1_post_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+npsame	c1_post_tx	BASIS	value	2	^name="extract\.(build_identity|extended_facts_f5)"
+npsame	c1_post_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_post_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_post_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+npsame	c1_post_tx	HEADER	sections	1	^sections=
+npsame	c1_post_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+npsame	c1_post_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+npsame	c1_post_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+npsame	c1_post_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+npsame	c1_post_tx	P0_TABLE	source	1	name="pthread_create"
+npsame	r2_core	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame	r2_core	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+npsame	r2_core	BASIS	value	2	^name="extract\.(build_identity|extended_facts_f5)"
+npsame	r2_core	FIELD_STATUS	flags	74	flags=\{[^}]*array-element-stores-not-collected
+npsame	r2_core	FIELD_STATUS	flags,status_field	4	flags=\{[^}]*array-element-stores-not-collected
+npsame	r2_core	FIELD_STATUS	flags,status_field,status_type	69	flags=\{[^}]*array-element-stores-not-collected
+npsame	r2_core	HEADER	sections	1	^sections=
+npsame	r2_core	LOCKSET	first,flags,held_root,n_held,opener_root	39	flags=\{unknown-release\}
+npsame	r2_core	LOCKSET	flags	8	flags=\{unknown-release\}
+npsame	r2_core	LOCK_OPS	chain,depth	34	flags=\{[^}]*unknown-identity
+npsame	r2_core	P0_TABLE	source	1	name="pthread_create"
+npsame	c5_641	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame	c5_641	BASIS	value	2	^name="extract\.(build_identity|extended_facts_f5)"
+npsame	c5_641	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_641	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_641	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_641	HEADER	sections	1	^sections=
+npsame	c5_641	P0_TABLE	source	1	name="pthread_create"
+npsame	c5_642	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame	c5_642	BASIS	value	2	^name="extract\.(build_identity|extended_facts_f5)"
+npsame	c5_642	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_642	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_642	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+npsame	c5_642	HEADER	sections	1	^sections=
+npsame	c5_642	P0_TABLE	source	1	name="pthread_create"
+s5same	c1_pre_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+s5same	c1_pre_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+s5same	c1_pre_tx	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same	c1_pre_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+s5same	c1_pre_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same	c1_pre_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_pre_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_pre_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_pre_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_pre_tx	HEADER	sections	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_pre_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_pre_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+s5same	c1_pre_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+s5same	c1_pre_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+s5same	c1_pre_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+s5same	c1_pre_tx	P0_TABLE	source	1	name="pthread_create"
+s5same	c1_post_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+s5same	c1_post_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+s5same	c1_post_tx	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same	c1_post_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+s5same	c1_post_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same	c1_post_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_post_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_post_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+s5same	c1_post_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_post_tx	HEADER	sections	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_post_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c1_post_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+s5same	c1_post_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+s5same	c1_post_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+s5same	c1_post_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+s5same	c1_post_tx	P0_TABLE	source	1	name="pthread_create"
+s5same	r2_core	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same	r2_core	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+s5same	r2_core	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same	r2_core	FIELD_STATUS	flags	74	flags=\{[^}]*array-element-stores-not-collected
+s5same	r2_core	FIELD_STATUS	flags,status_field	4	flags=\{[^}]*array-element-stores-not-collected
+s5same	r2_core	FIELD_STATUS	flags,status_field,status_type	69	flags=\{[^}]*array-element-stores-not-collected
+s5same	r2_core	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	r2_core	HEADER	sections	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	r2_core	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	r2_core	LOCKSET	first,flags,held_root,n_held,opener_root	39	flags=\{unknown-release\}
+s5same	r2_core	LOCKSET	flags	8	flags=\{unknown-release\}
+s5same	r2_core	LOCK_OPS	chain,depth	34	flags=\{[^}]*unknown-identity
+s5same	r2_core	P0_TABLE	source	1	name="pthread_create"
+s5same	c5_641	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same	c5_641	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same	c5_641	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_641	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_641	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_641	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_641	HEADER	sections	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_641	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_641	P0_TABLE	source	1	name="pthread_create"
+s5same	c5_642	BASIS	value	3	^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same	c5_642	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same	c5_642	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_642	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_642	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+s5same	c5_642	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_642	HEADER	sections	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_642	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same	c5_642	P0_TABLE	source	1	name="pthread_create"
+fixsame	c1_pre_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fixsame	c1_pre_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fixsame	c1_pre_tx	BASIS	value	3	^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame	c1_pre_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fixsame	c1_pre_tx	BASIS	value	1	^name="count\.lock_paths"
+fixsame	c1_pre_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame	c1_pre_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_pre_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_pre_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_pre_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c1_pre_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c1_pre_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fixsame	c1_pre_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fixsame	c1_pre_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fixsame	c1_pre_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fixsame	c1_pre_tx	P0_TABLE	semantics	1	name="(pthread_create|thrd_create)"
+fixsame	c1_pre_tx	P0_TABLE	source	1	name="(pthread_create|thrd_create)"
+fixsame	c1_post_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fixsame	c1_post_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fixsame	c1_post_tx	BASIS	value	3	^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame	c1_post_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fixsame	c1_post_tx	BASIS	value	1	^name="count\.lock_paths"
+fixsame	c1_post_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame	c1_post_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_post_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_post_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c1_post_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c1_post_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c1_post_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fixsame	c1_post_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fixsame	c1_post_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fixsame	c1_post_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fixsame	c1_post_tx	P0_TABLE	semantics	1	name="(pthread_create|thrd_create)"
+fixsame	c1_post_tx	P0_TABLE	source	1	name="(pthread_create|thrd_create)"
+fixsame	r2_core	BASIS	value	3	^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame	r2_core	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fixsame	r2_core	BASIS	value	1	^name="count\.lock_paths"
+fixsame	r2_core	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame	r2_core	FIELD_STATUS	flags	74	flags=\{[^}]*array-element-stores-not-collected
+fixsame	r2_core	FIELD_STATUS	flags,status_field	4	flags=\{[^}]*array-element-stores-not-collected
+fixsame	r2_core	FIELD_STATUS	flags,status_field,status_type	69	flags=\{[^}]*array-element-stores-not-collected
+fixsame	r2_core	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	r2_core	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	r2_core	LOCKSET	first,flags,held_root,n_held,opener_root	39	flags=\{unknown-release\}
+fixsame	r2_core	LOCKSET	flags	8	flags=\{unknown-release\}
+fixsame	r2_core	LOCK_OPS	chain,depth	34	flags=\{[^}]*unknown-identity
+fixsame	r2_core	P0_TABLE	semantics	1	name="(pthread_create|thrd_create)"
+fixsame	r2_core	P0_TABLE	source	1	name="(pthread_create|thrd_create)"
+fixsame	c5_641	BASIS	value	3	^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame	c5_641	BASIS	value	1	^name="count\.lock_paths"
+fixsame	c5_641	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame	c5_641	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_641	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_641	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_641	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c5_641	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c5_641	P0_TABLE	semantics	1	name="(pthread_create|thrd_create)"
+fixsame	c5_641	P0_TABLE	source	1	name="(pthread_create|thrd_create)"
+fixsame	c5_642	BASIS	value	3	^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame	c5_642	BASIS	value	1	^name="count\.lock_paths"
+fixsame	c5_642	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame	c5_642	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_642	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_642	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+fixsame	c5_642	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c5_642	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fixsame	c5_642	P0_TABLE	semantics	1	name="(pthread_create|thrd_create)"
+fixsame	c5_642	P0_TABLE	source	1	name="(pthread_create|thrd_create)"
+fix2same	c1_pre_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fix2same	c1_pre_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fix2same	c1_pre_tx	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same	c1_pre_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix2same	c1_pre_tx	BASIS	value	1	^name="count\.lock_paths"
+fix2same	c1_pre_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same	c1_pre_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_pre_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_pre_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_pre_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c1_pre_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c1_pre_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fix2same	c1_pre_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fix2same	c1_pre_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fix2same	c1_pre_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fix2same	c1_post_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fix2same	c1_post_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fix2same	c1_post_tx	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same	c1_post_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix2same	c1_post_tx	BASIS	value	1	^name="count\.lock_paths"
+fix2same	c1_post_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same	c1_post_tx	FIELD_STATUS	flags	99	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_post_tx	FIELD_STATUS	flags,status_field	12	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_post_tx	FIELD_STATUS	flags,status_field,status_type	72	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c1_post_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c1_post_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c1_post_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fix2same	c1_post_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fix2same	c1_post_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fix2same	c1_post_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fix2same	r2_core	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same	r2_core	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix2same	r2_core	BASIS	value	1	^name="count\.lock_paths"
+fix2same	r2_core	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same	r2_core	FIELD_STATUS	flags	74	flags=\{[^}]*array-element-stores-not-collected
+fix2same	r2_core	FIELD_STATUS	flags,status_field	4	flags=\{[^}]*array-element-stores-not-collected
+fix2same	r2_core	FIELD_STATUS	flags,status_field,status_type	69	flags=\{[^}]*array-element-stores-not-collected
+fix2same	r2_core	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	r2_core	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	r2_core	LOCKSET	first,flags,held_root,n_held,opener_root	39	flags=\{unknown-release\}
+fix2same	r2_core	LOCKSET	flags	8	flags=\{unknown-release\}
+fix2same	r2_core	LOCK_OPS	chain,depth	34	flags=\{[^}]*unknown-identity
+fix2same	c5_641	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same	c5_641	BASIS	value	1	^name="count\.lock_paths"
+fix2same	c5_641	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same	c5_641	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_641	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_641	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_641	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c5_641	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c5_642	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same	c5_642	BASIS	value	1	^name="count\.lock_paths"
+fix2same	c5_642	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same	c5_642	FIELD_STATUS	flags	136	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_642	FIELD_STATUS	flags,status_field	14	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_642	FIELD_STATUS	flags,status_field,status_type	25	flags=\{[^}]*array-element-stores-not-collected
+fix2same	c5_642	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix2same	c5_642	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c1_pre_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fix3same	c1_pre_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fix3same	c1_pre_tx	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same	c1_pre_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix3same	c1_pre_tx	BASIS	value	1	^name="count\.lock_paths"
+fix3same	c1_pre_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same	c1_pre_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c1_pre_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c1_pre_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fix3same	c1_pre_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fix3same	c1_pre_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fix3same	c1_pre_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fix3same	c1_post_tx	AWAIT_L1	flags	1	flags=\{[^}]*unresolved-call
+fix3same	c1_post_tx	AWAIT_L1	flags,l1_mod_field,l1_mod_type	1	flags=\{[^}]*unresolved-call
+fix3same	c1_post_tx	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same	c1_post_tx	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix3same	c1_post_tx	BASIS	value	1	^name="count\.lock_paths"
+fix3same	c1_post_tx	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same	c1_post_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c1_post_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c1_post_tx	LOCKSET	first,flags,held_root,n_held,opener_root	20	flags=\{unknown-release\}
+fix3same	c1_post_tx	LOCKSET	flags	8	flags=\{unknown-release\}
+fix3same	c1_post_tx	LOCK_OPS	chain	5	flags=\{[^}]*unknown-identity
+fix3same	c1_post_tx	LOCK_OPS	chain,depth	47	flags=\{[^}]*unknown-identity
+fix3same	r2_core	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same	r2_core	BASIS	value	2	^name="count\.(lock_ops|lockset)"
+fix3same	r2_core	BASIS	value	1	^name="count\.lock_paths"
+fix3same	r2_core	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same	r2_core	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	r2_core	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	r2_core	LOCKSET	first,flags,held_root,n_held,opener_root	39	flags=\{unknown-release\}
+fix3same	r2_core	LOCKSET	flags	8	flags=\{unknown-release\}
+fix3same	r2_core	LOCK_OPS	chain,depth	34	flags=\{[^}]*unknown-identity
+fix3same	c5_641	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same	c5_641	BASIS	value	1	^name="count\.lock_paths"
+fix3same	c5_641	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same	c5_641	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c5_641	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c5_642	BASIS	value	2	^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same	c5_642	BASIS	value	1	^name="count\.lock_paths"
+fix3same	c5_642	BASIS	value	3	^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same	c5_642	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+fix3same	c5_642	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-basis	c1_pre_tx	BASIS	value	1	^name="front_end\.build_identity"
+identity-facts	c1_pre_tx	BASIS	value	2	^name="extract\.(build_identity|units_from)"
+identity-facts	c1_pre_tx	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-facts	c1_pre_tx	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-basis	r2_core	BASIS	value	1	^name="front_end\.build_identity"
+identity-facts	r2_core	BASIS	value	2	^name="extract\.(build_identity|units_from)"
+identity-facts	r2_core	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-facts	r2_core	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-basis	c5_641	BASIS	value	1	^name="front_end\.build_identity"
+identity-facts	c5_641	BASIS	value	2	^name="extract\.(build_identity|units_from)"
+identity-facts	c5_641	HEADER	basis_sha256	1	^(basis_sha256=|parent\[0\] kind=basis )
+identity-facts	c5_641	HEADER	sha256	1	^(basis_sha256=|parent\[0\] kind=basis )

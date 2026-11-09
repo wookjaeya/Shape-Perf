@@ -1,0 +1,18 @@
+record=step2a-20261109-rv4fields
+kind=측정 실행의 텍스트 기록. 묶음 아님. 조각 없음. CONFIG_MANAGEMENT 5의 "보존됨" 아님
+run=step2a_tests.sh의 비교 여섯 단계(identity npsame s5same fixsame fix2same fix3same)를 하나씩, 2026-11-09T11:39:40Z-11:41:19Z (RV4 분석 7.2 4의 정정 단계; AR 14.7)
+why=허용표가 필드 단위가 됨(fields 열). run, twice, count, sha의 코드는 c4fe9db와 같아 다시 돌리지 않음
+repo_commit=83e718e29f9ade526ab41f2c66225da06339117f (드라이버 파일은 이 commit의 것과 같음; kairos 미커밋 0줄)
+driver_sha256=6e78820c48d2169e2ac963ad1b588a6951a39b01f5b989fb0b1ea6b13d3b08c9 env/redesign/step2a_tests.sh
+unit_sha256=a02e56a8b9195d5e6c0544bf3dd17ddf4b044065f88eb1ac3d29cab50b78d545 env/redesign/step2a_tests_unit.sh
+kzb=/home/user/work/merge-check/kz-llvm/tools
+kz_static_sha256=db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4
+kz_dump_sha256=05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43
+allowance_table=built-in, 116 entries (STEP2A_ALLOW_TABLE unset)
+outputs=/home/user/work/redesign/step2a/tests_rv4f (저장소 밖; 정규 파일 73개, 22,778,166 B; <build>/NP 다섯은 T_RV4 /home/user/work/redesign/step2a/tests_rv4/<build>/NP 로 가는 링크)
+outputs_sha256_list=sha256.txt here (72 files, status.txt 제외; 링크 밖의 파일만)
+rc=여섯 단계 모두 0; 단계마다 PASS; FAIL 줄 0
+compared_with=T_RV4: 65 같음, 7 다름(비교 텍스트 6과 run.log); compare_rv4.tsv
+unit=unit_new.txt, 6 of 6, rc 0
+nothing built; no cFS booted; nothing deleted except this run's scratch files; not pushed
+files=INFO.txt commands.txt status.txt sha256.txt fields.tsv compare_rv4.tsv unit_new.txt df.log

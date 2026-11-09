@@ -110,7 +110,8 @@ outs() {
 drv() {
   local X=$1
   env KZB="$X/bin" EB="$X/eb" S4="$X/s4" S5="$X/s5" FIX1="$X/fix1" FIX2="$X/fix2" FIX3="$X/fix3" C1="$X/c1" \
-    REF="$X/ref" CT="$X/ct" STEP2A_ALLOW_TABLE="$X/table" STEP2A_RUNS="$X/runs" bash "$DRIVER" "$3" "$2" > "$2.log" 2>&1
+    REF="$X/ref" CT="$X/ct" STEP2A_ALLOW_TABLE="$X/table" STEP2A_RUNS="$X/runs" STEP2A_OVERWRITE="${OVW:-}" \
+    bash "$DRIVER" "$3" "$2" > "$2.log" 2>&1
 }
 # why OUT: the first failure the driver recorded (status.txt), or what its log ends with
 why() {
@@ -173,9 +174,9 @@ outs "$X/bad" "$X" && drv "$X" "$X/bad" fix3same; f=$?
 result 5 "allowed record changes a field outside its list -> step rc 1" "$c" "$f" "$X/bad"
 # 6 the driver cannot start
 X=$W/w6; world "$X" || exit 2
-outs "$X/ok" "$X" && echo 'stand-in list' > "$X/ok/sha256.txt" && STEP2A_OVERWRITE=1 drv "$X" "$X/ok" s5same; c=$?
+outs "$X/ok" "$X" && echo 'stand-in list' > "$X/ok/sha256.txt" && OVW=1 drv "$X" "$X/ok" s5same; c=$?
 outs "$X/bad" "$X" && echo 'stand-in list' > "$X/bad/sha256.txt" && drv "$X" "$X/bad" s5same; f=$?
-env KZB="$X/bin" STEP2A_RUNS="$X/runs" bash "$DRIVER" > "$X/nostep.log" 2>&1; f2=$?
+env -u STEP2A_OVERWRITE KZB="$X/bin" STEP2A_RUNS="$X/runs" bash "$DRIVER" > "$X/nostep.log" 2>&1; f2=$?
 FAULT_RC=2 result 6 "no STEP, or OUT holds sha256.txt -> rc 2 (driver does not start)" "$c" "$f $f2" "$X/bad" "$X/nostep"
 echo "unit checks: $((6 - NFAIL)) of 6 pass"
 exit $((NFAIL > 0))

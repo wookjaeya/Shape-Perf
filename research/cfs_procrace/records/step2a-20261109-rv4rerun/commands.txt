@@ -18,7 +18,7 @@ du -sb /home/user/work/redesign/step2a/tests_rv4 -> 202111495; find -type f | wc
 ## checks after the run
 sha256sum -c --quiet T/sha256.txt                        -> rc 0 (T/ unchanged); T/<build>/NP/sha256.txt -c: 5 OK
 sha256sum -c --quiet tests_rv4/sha256.txt                -> rc 0 (136 files)
-python3 -I compare.py T tests_rv4 compare_T.tsv          -> T files same 118, DIFF 7, MISSING 0; new-only 24; first two lines per build 25 of 25 same
+python3 -I compare.py T tests_rv4 compare_T.tsv          -> T files same 118, DIFF 7, MISSING 0; 24 outside the list of T/sha256.txt (printed as "new-only 24"; 12 of them are sha256.txt files that T/ also has, 12 are new; reworded 2026-11-09, AR 14.4); first two lines per build 25 of 25 same
 python3 -I oldlines.py T tests_rv4                       -> oldlines_T.txt
 cmp T/<build>/NP/sha256.txt tests_rv4/<build>/NP/sha256.txt (5) and identity/<b>/<V>/sha256.txt (6) -> all same
 grep verdict lines: npsame s5same fixsame fix2same fix3same 5 PASS each; identity 12 record + 6 show-text PASS; COUNT 0, UNEXPECTED 0, problem 0

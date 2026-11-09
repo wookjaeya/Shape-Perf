@@ -1,4 +1,4 @@
-# T/sha256.txt files: {'same': 118, 'DIFF': 7, 'MISSING': 0}; files only in the new run: 24
+# T/sha256.txt files: {'same': 118, 'DIFF': 7, 'MISSING': 0}; files outside the 125-file list of T/sha256.txt: 24 (12 are sha256.txt files that T/ also has: the 11 per-build ones byte-identical, the top one differs; 12 are new: NP2/facts.kz 5, NP2/relations.log 5, status.txt, twice_detail.txt). Header reworded 2026-11-09 (fix stage); compare.py printed 'files only in the new run: 24'
 same	dde35d0a8a8eb76a	dde35d0a8a8eb76a	377	c1_post_tx/NP/args.txt
 same	e427aaf2a642d16a	e427aaf2a642d16a	125640	c1_post_tx/NP/basis.kz
 same	768033c29458f9b8	768033c29458f9b8	17338	c1_post_tx/NP/basis.txt

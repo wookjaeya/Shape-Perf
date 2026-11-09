@@ -44,7 +44,7 @@
    - "고정된 잘못된 순서"(R2)와 "반대 순서 가능"(C1)은 정적으로 증명되지 않는다. 위반 근거는 실행 기록 없이는 늘 unconfirmed다.
 5. **ED §2.3 재측정** [M] (§3). 공유 base 필터를 건 R-T1 ∪ R-T2의 대상 수는 C1 340, R2 240, C5 259/261이다(V3 R-T1: 841 / 504 / 322). 세 수정 단계에서 바뀌지 않았다. 사례 필드 가운데 R2의 5개(`EVS_AppData_t.AppID`, `CFE_ES_AppRecord_t.AppId`·`AppState`·`Type`, `CFE_PSP_IdleTaskState_t.ShutdownReq`)와 C5 `CFE_ES_TaskRecord_t.TaskId`는 매개변수·지역 포인터로만 닿아 이 필터에서 빠진다.
 6. **정오표: C5 부팅 결과의 owner 오결합** (2026-11-09; RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md`) §6.3 O14, RV4 분석(`plan/RV4_REVIEW_ANALYSIS_20261109.md`) §7.2 3) [F]. 이 문서의 수와 판정은 바뀌지 않는다. 대상은 C5 결과 문서 `plan/results_c5_boot_20261029.md`(이하 C5B)다. 무효인 것: C5B §0 L29와 §3.2 L182의 "SAMPLE_APP의 스레드는 owner 5(SAMPLE_LIB 요청)로 `confirmed`", 그리고 그 위의 READY 판정이다. PD(`plan/PI_DECISIONS_PENDING_20261030.md`) E6 표의 "C5 결과의 owner 오결합" 행(개정 5의 PD:936)이 정했다: "SAMPLE_APP 스레드 owner와 그 위의 READY 판정이 무효라는 정오표"(RA:30). 그래서 C5B §0 L25–26의 "6.4.1 발생 68, 6.4.2 발생 67, 전부 READY"를 그대로 인용하지 않는다. 그 수에는 SAMPLE_APP 스레드의 `GetAppID` 발생이 판마다 6개 들어 있다(C5B L215). 원인(C5B §4.3, RV3A §6.4 L6): SAMPLE_LIB의 스레드가 끝난 뒤 다음 `pthread_create`가 같은 `pthread_t`를 돌려줬다(641 `0xf7b42b40`, 642 `0xf7b83b40`; C5B L238). E-ID1은 id를 배정한 호출 1개와 알린 actor 1개만 검사하고, spawn의 출력 값과 자식의 `pthread_self`를 비교하지 않는다(RV3A §6.4 L6). 그래서 같은 값을 받은 두 spawn을 가르지 못했다. C5B L300도 같은 것을 적는다. 구분: 무효인 owner `confirmed`는 옛 계측 경로(E-ID1)의 결과다. 이 문서의 2a 결과는 사례 입력 없는 자동 추출이고, C5 기록을 읽지 않았다(§1.2: run-order 칸은 늘 `no record given`). 그래서 이 정오표는 2a의 수를 바꾸지 않는다. 무효인 결과를 2a의 성과로도 근거로도 세지 않는다. 인용: 인용 가능 사실 목록(RV3A §6.5 E13)에서 이 행들을 뺀다. 두 기록과 relations A1(`T/c5_641/NP/relations.txt:1303`)은 단계 1의 회귀 자료로 쓴다(RV3A §6.4 L6, 기대 "owner 미정"). O2(잘못된 AppId 반환, C5B §4.3)는 기록의 관측이고, 따로 조사할지는 PD C8이다. C5B 문서와 묶음 `records/c5-20261029-replays`는 이 정오표로 바꾸지 않는다. C5B 안의 정오표 절(RV3A §6.3 O14가 둔 자리)은 따로 한다.
-
+7. **C5 facts 재생성 절차** (2026-11-09; RV3A §6.1 P4) [F]. 2a의 C5 facts(`T/c5_641`, `T/c5_642`)를 다시 내는 길이다. 이 절차를 끝까지 돌려 본 적은 없다 [U]. 입력은 로컬 묶음 `c5-20261109-regen-inputs`다(78 파일, 기록 `records/c5-20261109-regen-inputs/`, 목록 `records/local-20261109/c5-20261109-regen-inputs.list`; push는 PD D4 뒤). ① tarball 셋을 `c5/dl/fetch_log.txt`의 주소에서 받아 `c5/dl/sha256.txt`로 대조한다(cFE 6.4.1 `ec26e33b…`, 6.4.2 `c64ed2aa…`, OSAL 4.1.1 `8f0f2b23…`). tarball 자체는 묶지 않았다. ② `kairos/instrument/gcc/scripts/derive_c5.sh`의 prepare와 keep 빌드로 pristine·keep 트리를 만든다. 트리 해시는 묶음의 `prepare.record`와 `build_keep.record`가 적는다(641 `12c731bc…`). keep 트리(82·80 MB)는 묶지 않았다(RV3A Q2, PD D4). 그래서 같은 트리가 나왔는지는 그 해시로만 본다. ③ compile DB는 묶음의 `c5tools/build/64x/est/compile_commands.json`을 쓴다. 경로가 keep 트리를 가리킨다. `est/est.record`의 해시로 대조한다(641 `414d37da…`). ④ PV의 kz-static `db172b74`(`/home/user/work/preserve/tools-20261109/`)를 풀어 `KZB`로 주고 `env/redesign/step2a_tests.sh run`을 새 OUT에 돌린다(입력은 `:63-65`·`:70-79`). facts를 `T/<build>/NP/sha256.txt`와 대조한다. 레시피는 `EB/inputs/c5_641.kzb`와 `kairos/profiles/c5-cfe-6.4.x/basis/core-linux.kzb`다.
 ## 1. 구현 [F][M]
 
 ### 1.1 규칙 대상 (`--targets-rule`, `lib/llvm/target_rules.cpp`, "target rules revision 1")
@@ -117,7 +117,7 @@
 
 ### 2a. npsame, s5same, fixsame, fix2same, fix3same
 
-C5는 STRINGS 말고 34개 섹션(ARGFLOW … WRITERS, LOCKSET·LOCK_IDS·AWAIT_L1 포함)의 레코드가 S4(옵션 없음)·S5(`--targets-rule`) facts와 같다 [M]. C1·R2는 셋째 수정 둘째 차례에서 CALL_TARGETS·LOCKSET·LOCK_OPS(C1은 AWAIT_L1도)가 더 달라졌다(아래 "셋째 수정 첫째 → 둘째 차례"). 다른 것은 아래다.
+C5는 STRINGS 말고 34개 섹션(ARGFLOW … WRITERS, LOCKSET·LOCK_IDS·AWAIT_L1 포함)의 레코드가 S4(옵션 없음)·S5(`--targets-rule`) facts와 같다 [M]. C1·R2는 셋째 수정 둘째 차례에서 CALL_TARGETS·LOCKSET·LOCK_OPS(C1은 AWAIT_L1도)가 더 달라졌다(아래 "셋째 수정 첫째 → 둘째 차례"). 다른 것은 아래다. 기계 판정 줄(레코드·필드 단위)은 §14.7이 가리킨다(2026-11-09).
 - **BASIS**: 항목 이름으로 비교했다(C1 pre tx; 다른 빌드도 같은 이름들).
   - S5 → 둘째 수정: 더해진 것은 `p0.*` 34개(P0 표 개정 2; `p0.thrd_create` 포함), `extract.p0_table_scope`, `count.lock_paths`, `extract.basis_deviation[…]` 2개(C1·R2) 또는 7개(C5), `param.walk_bounds`, `count.walk_bounds_hit`다. 값이 바뀐 것은 `assume.lock_acquisition_succeeds`(획득 기본 연산이 spin lock·`mtx_lock`까지로 넓어진 문장), `extract.p0_table`(판과 수), `p0.pthread_create`(개정 3), 그리고 매번 바뀌는 `extract.build_identity`, `extract.units_from`이다. 빠진 항목은 없다. (둘째 수정 문서의 이 줄은 더해진 `extract.p0_table_scope`·`p0.thrd_create`를 바뀐 값에도 넣었다: §12 #19.)
   - 수정 단계 → 둘째 수정: 바뀐 것은 `extract.p0_table`, `extract.p0_table_scope`, `p0.pthread_create`, `extract.units_from`, 더해진 것은 `param.walk_bounds`, `count.walk_bounds_hit`다. `p0.thrd_create`는 바뀌지 않았다(값 "thread-create; ISO C11 <threads.h> / glibc 2.39; source unverified"; "시작 전 저장"은 P0_TABLE의 의미 문장에만 있다). (둘째 수정 문서 §0 항목 2는 `p0.thrd_create`를 바뀐 것으로 적었다: §12 #19.)
@@ -175,7 +175,7 @@ C5는 STRINGS 말고 34개 섹션(ARGFLOW … WRITERS, LOCKSET·LOCK_IDS·AWAIT_
 
 ## 4. 완료 시험 T1–T7 (사례 입력 없음) [M]
 
-근거 줄은 `T/<build>/NP/relations.txt`의 줄 번호(rel L)다. 모든 행은 `T/count/summary.txt`에서도 같은 줄 번호로 나온다. 판정과 줄 번호는 셋째 수정 둘째 차례의 출력이다(T1–T4·T6의 rel 줄 번호는 첫째 차례·둘째 수정과 같다: 새 C 행은 C1·R2의 C 절에 들고 C5의 relations는 판·머리·문장 말고 같다 [M]). 아래 "나온 것"은 그 줄의 내용이 앞 단계의 기술과 같은 곳은 그대로 두었다. PI A2 사전 등록 ④·⑤로 읽은 표시는 §5에 따로 적는다.
+근거 줄은 `T/<build>/NP/relations.txt`의 줄 번호(rel L)다. 모든 행은 `T/count/summary.txt`에서도 같은 줄 번호로 나온다. 판정과 줄 번호는 셋째 수정 둘째 차례의 출력이다(T1–T4·T6의 rel 줄 번호는 첫째 차례·둘째 수정과 같다: 새 C 행은 C1·R2의 C 절에 들고 C5의 relations는 판·머리·문장 말고 같다 [M]). 아래 "나온 것"은 그 줄의 내용이 앞 단계의 기술과 같은 곳은 그대로 두었다. PI A2 사전 등록 ④·⑤로 읽은 표시는 §5에 따로 적는다. 기계가 찍은 근거 줄(단계 rc, T7, 계수 스크립트)은 §14.7이 가리킨다(2026-11-09). T1–T7의 판정 자체는 사람이 그 줄을 읽은 것이다.
 
 ### T1 R2 — **PASS** (개정 뒤 통과, "관계를 낸다"의 통과)
 
@@ -562,16 +562,16 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 
 - 파일 셋, +738/−134 [M: `git diff --stat b9cf5e7 c4fe9db`]: `env/redesign/step2a_tests.sh`, `env/redesign/step2a_tests_count.py`, 새 `env/redesign/step2a_tests_unit.sh`.
 - **상태 수집**: 파이프라인마다 그 상태를 부르는 셸에서 바로 읽는다(`PIPESTATUS`, `pipe_ok`). 파이프라인 안의 함수에서 FAIL을 올리지 않는다. 명령 치환은 대입에서 rc를 본다. 프로세스 치환은 없다. grep·diff는 rc 2 이상만 실패다.
-- **실패의 전달**: 실패마다 `OUT/status.txt`에 `FAIL <단계>:` 줄이 생긴다. 단계마다 PASS 또는 FAIL을 적는다. 실패한 단계가 있으면 그 단계와 `all`이 rc 1이다. 드라이버가 시작하지 못하면 rc 2다.
+- **실패의 전달**: 실패마다 `OUT/status.txt`에 `FAIL <단계>:` 줄이 생긴다. 단계마다 PASS 또는 FAIL을 적는다. 실패한 단계가 있으면 그 단계와 `all`이 rc 1이다. 드라이버가 시작하지 못하면 rc 2다. 정정(§14.7): `c4fe9db`에서는 이 약속이 두 곳에서 어긋났다. STEP 없이 부르면 rc 1(`:49`의 `${1:?…}`), 캠페인 표지가 있으면 rc 3(`:66`)이었다 [M]. 같은 줄에서 rc 2로 고쳤다.
 - **`one()`**: basis·extract·show·relations·sha256sum의 rc를 본다. `.txt` 출력이 비었으면 실패다. `run.log` 줄 끝에 `sha256= sizes= verdict=`를 더했다. 앞 칸은 그대로다.
 - **빈 입력과 dump 실패**: kz-dump rc가 0이 아님, 섹션 없는 dump, 머리 `count=`와 레코드 줄 수가 다른 dump(잘림), 비교한 섹션 0은 실패다. 옛 함수는 빈 입력에 `DIFFERENT: none`, rc 0을 냈다(RV4 분석 §8 [M]).
-- **허용은 레코드 단위**: 표 `ALLOW`가 드라이버 안에 있다. 항목은 86개다 [M: 표 줄 셈; identity-basis 1, identity-facts 2, npsame 19, s5same 19, fixsame 16, fix2same 15, fix3same 14]. 드라이버 작성 보고는 87이라 적었다. 항목마다 단계, 섹션, 변경 종류(changed·added·removed), 다섯 빌드의 기대 수, 근거, 레코드 키가 있다. 어느 항목도 이름 붙이지 않은 레코드 변경은 실패다. 기대 수가 하나라도 어긋나도 실패다. 한쪽 dump에만 있는 섹션은 표가 그 머리(HEADER)를 이름 붙일 때만 허용한다.
+- **허용은 레코드 단위**: 표 `ALLOW`가 드라이버 안에 있다. 항목은 86개다 [M: 표 줄 셈; identity-basis 1, identity-facts 2, npsame 19, s5same 19, fixsame 16, fix2same 15, fix3same 14]. 드라이버 작성 보고는 87이라 적었다. 항목마다 단계, 섹션, 변경 종류(changed·added·removed), 다섯 빌드의 기대 수, 근거, 레코드 키가 있다. 어느 항목도 이름 붙이지 않은 레코드 변경은 실패다. 기대 수가 하나라도 어긋나도 실패다. 한쪽 dump에만 있는 섹션은 표가 그 머리(HEADER)를 이름 붙일 때만 허용한다. 정정(§14.7): (1) `c4fe9db`의 허용은 레코드 단위였고 필드 단위가 아니었다. 키는 새 레코드에서만 찾았다. 어느 필드가 바뀌었는지는 보지 않았다. 그래서 키를 가진 레코드는 다른 필드가 바뀌어도 통과했다 [M]. 이제 changed 항목마다 바뀌어도 되는 필드 목록이 있다. (2) 한쪽에만 있는 섹션의 허용은 RV4 분석 §2 #29 (다)("한쪽에만 있는 섹션이 있으면 실패")에서 벗어난다. 예외는 하나다. 정확한 수를 가진 HEADER `added` 항목이 그 머리를 이름 붙일 때만 통과한다. 까닭: LOCK_PATHS는 첫 수정 단계에서 생긴 새 섹션이다. 엄격한 규칙이면 npsame·s5same가 다섯 빌드 모두 실패한다.
   - 표의 수는 11-09에 `db172b74`로 보관 출력에서 잰 것이다(T/ 대 EB·T_S5·T_F1–T_F3; npsame는 S4를 다시 추출) [M, 드라이버 작성 때]. §2a가 수를 준 곳(incomplete-source 44 / 22, FIELD_STATUS 183 / 183 / 147 / 175 / 175, LOCKSET 28 / 47, LOCK_PATHS 9,408 / 9,409 / 5,872 / 2,364 / 2,373과 +75 / +75 / +66 / +29 / +29, `count.lock_ops` 2519 → 2450·1586 → 1547)은 같다.
   - identity도 레코드 단위 판정을 받는다. show 텍스트 검사를 더했다: `extract.units_from` 한 줄만 다를 수 있다.
-- **RV3A §2.4 ③④⑥**: `twice`는 `NP2/facts.kz`를 남기고 rc와 전체 해시를 `twice_detail.txt`에 적는다. `twice.txt` 줄은 그대로다. `run`은 `run.log`를 비우지 않는다. OUT 없이 돌린 `all`은 새 `step2a/tests_runs/run_<UTC>_<sha8>`에 쓰고 `latest` 링크를 고친다. `all`은 비지 않은 OUT을 거부한다(T/ 보호). `C1`·`REF`·`CT`를 환경에서 바꿀 수 있다. 1–80줄의 번호는 그대로다(records/의 `:63-76` 인용).
+- **RV3A §2.4 ③④⑥**: `twice`는 `NP2/facts.kz`를 남기고 rc와 전체 해시를 `twice_detail.txt`에 적는다. `twice.txt` 줄은 그대로다. `run`은 `run.log`를 비우지 않는다. OUT 없이 돌린 `all`은 새 `step2a/tests_runs/run_<UTC>_<sha8>`에 쓰고 `latest` 링크를 고친다. `all`은 비지 않은 OUT을 거부한다. 정정(§14.7): `c4fe9db`에서는 `all`만 막았다. 단일 단계에 OUT=T/를 주면 `status.txt`를 T/에 더하고 그 단계의 출력을 덮었다(예: `count`는 `T/count/*`, `run`은 `T/<build>/NP/*`) [F]. 그래서 T/ 보호는 `all`에만 섰다. 이제 모든 단계가 T/와, 맨 위에 `sha256.txt`가 있는 OUT을 거부한다(`STEP2A_OVERWRITE=1`일 때만 쓴다). `C1`·`REF`·`CT`를 환경에서 바꿀 수 있다. 1–80줄의 번호는 그대로다(records/의 `:63-76` 인용).
 - **계수 스크립트**: 입력이 없거나 비었으면, 또는 `twice.txt` 줄이 same이 아니면 `# problems`를 찍고 exit 1이다.
 - **줄 인용**: RV3A와 RV4 분석이 인용한 드라이버 줄(`:94`, `:99`, `:107-134`, `:174`–`:218`, `:235-240`, `:249`)은 `c4fe9db` 전의 판이다. 그 줄은 옮겨졌다. 그 인용은 `b9cf5e7`의 파일로 읽는다.
-- **하지 않은 것**: RV3A P9(`NP/sha256.txt`에서 출력 해시와 도구·입력 해시를 나누기), P10의 공용 함수.
+- **하지 않은 것**: RV3A P9(`NP/sha256.txt`에서 출력 해시와 도구·입력 해시를 나누기), P10의 공용 함수. RV3A §2.4 끝 항목("§2·§4가 스크립트의 판정 줄을 인용")은 이 판에서 하지 않았다. 정정 단계에서 §14.7이 그 줄을 가리키게 했다(§2·§4의 본문은 줄 번호를 지키려고 한 문장만 더했다).
 
 ### 14.2 단위 점검 넷 [M]
 
@@ -613,7 +613,7 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 | run.log | `run.log` | 다름: T/ 다섯 줄의 rc가 새 줄과 같다. 시간 칸은 잰 값이라 다르다. 칸 셋과 identity의 `one()` 여섯 줄이 더해졌다 |
 
 - T/ 목록 밖의 빌드별 `sha256.txt` 11개(NP 5, identity 6)도 T/와 바이트 동일하다.
-- `T_RV4/`에만 있는 것은 24개다: `NP2/facts.kz` 5(NP의 facts.kz와 해시 같음), `NP2/relations.log` 5(0 바이트), 빌드별 `sha256.txt` 11, `sha256.txt`, `status.txt`, `twice_detail.txt`.
+- `T/sha256.txt`의 125 파일 목록 밖에 있는 `T_RV4/`의 파일은 24개다. 그 가운데 12개는 T/에도 있는 `sha256.txt`다: 빌드별 11개는 T/와 바이트 동일하고, 맨 위 `sha256.txt`는 목록이 달라 다르다. 새로 생긴 것은 12개다: `NP2/facts.kz` 5(NP의 facts.kz와 해시 같음), `NP2/relations.log` 5(0 바이트), `status.txt`, `twice_detail.txt`. T/는 137 파일, `T_RV4/`는 149 파일이다 [M]. (정정, 2026-11-09: 첫 판은 24개 모두를 "`T_RV4/`에만 있는 것"이라 적었다. `compare.py`는 T/에 없는 파일이 아니라 `T/sha256.txt` 목록에 없는 파일을 센다.)
 - T7: facts `a26d580f…`, `20e2a73f…`, `55021411…`, `1b4f794a…`, `c7bb3c09…`; relations `32fe9b34…`, `78552970…`, `75e6565d…`, `db98c85f…`, `44ad5c55…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순). §13과 같고, 둘째 실행과 바이트 동일이다.
 - 레코드 단위 비교 37개(identity 12, 다섯 비교 단계 × 5 빌드)가 모두 PASS다. COUNT 0, UNEXPECTED 0, problem 0이다. show 텍스트 판정 6개도 PASS다. 변경 수(changed / added / removed, c1_pre_tx · c1_post_tx · r2_core · c5_641 · c5_642):
   - npsame 274/9574/115 · 274/9575/115 · 237/6002/71 · 182/2445/0 · 182/2454/0
@@ -634,6 +634,46 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 
 - [U] 정적 이미지의 잘림 표시(RV3A §2.5 ①)와 둘로 나눈 계수(`image_budget_exhausted`, `image_leaves_omitted`; RV4 분석 §2 #6)는 도구 코드를 바꾸고 빌드해야 한다. 빌드 자리(Q12)의 답 뒤다. 지금 출력의 `count.walk_bounds_hit`에는 이미지 예산의 수가 없다 [M: `T_RV4/c1_pre_tx/NP/facts.txt`]. 그래서 이 출력으로는 이미지 걷기가 예산에 걸렸는지, 걸려서 잎을 뺐는지 가르지 못한다. 4096 → 10^6 민감도 결과(RV3A §2.5)는 그대로다.
 - [U] B8 아래의 등급 이름 바꾸기도 빌드가 든다. PI 답 뒤다.
-- [I] 허용표의 수는 같은 도구의 보관 출력에서 잰 것이다. 그래서 이번 PASS는 같은 도구가 같은 출력을 다시 냈다는 뜻이다. 변경이 옳은지는 표가 보이지 않는다. 그 근거는 §2a와 §10–§13의 검토다. 다른 kz-static이면 수가 맞지 않아 비교가 실패한다(의도한 동작).
+- [I] 허용표의 수는 같은 도구의 보관 출력에서 잰 것이다(정정 단계의 필드 목록도 같다, §14.7). 그래서 이번 PASS는 같은 도구가 같은 출력을 다시 냈다는 뜻이다. 변경이 옳은지는 표가 보이지 않는다. 그 근거는 §2a와 §10–§13의 검토다. 다른 kz-static이면 수가 맞지 않아 비교가 실패한다(의도한 동작).
 - RV3A P9·P10은 하지 않았다(§14.1).
 - 출력 `T_RV4/`(202 MB)는 지우지 않았다. T/와 같은 파일이 118개다. 지울지는 정하지 않는다.
+
+### 14.7 정정 단계: 필드 단위 허용, 시작 약속, 판정 줄 (2026-11-09, `83e718e`·`ba00af8`) [M][F]
+
+- 근거: §14에 대한 검증 지적이다. 도구는 그대로다(`db172b74`). 아무것도 빌드하지 않았다. cFS를 기동하지 않았다. 기록: `records/step2a-20261109-rv4fields/`(텍스트만).
+- 드라이버 파일은 다른 작업의 스냅숏 `83e718e`에 먼저 들어갔다. 그 파일이 최종본이다(sha256 `6e78820c…`). 단위 점검과 기록은 `ba00af8`이다.
+- **필드 단위 허용**: 표 `ALLOW`에 `fields` 열을 더했다. changed 레코드는 옛·새 레코드에서 값이 다른 필드가 항목의 목록과 꼭 같을 때만 그 항목에 든다. 필드는 name=value 짝이다. 그 밖의 글자가 다르면 `<text>`다. 같은 정체성 안의 옛·새 레코드는 정렬 순서로 짝짓는다. 그래서 한 키에 필드 서명마다 항목이 하나씩 있다. 항목은 116개다(identity-basis 1, identity-facts 3, npsame 24, s5same 26, fixsame 23, fix2same 21, fix3same 18). 수는 11-09에 같은 도구로 보관 출력에서 쟀다. 비교마다 changed 레코드의 필드 서명을 찍는다(`fields <섹션> changed {…} key …: n`).
+- **시작 약속**: STEP 없음과 캠페인 표지는 rc 2다(`:49`, `:66`, 같은 줄; 1–80줄의 번호는 그대로). 모든 단계가 T/와, 맨 위에 `sha256.txt`가 있는 OUT을 거부한다(`STEP2A_OVERWRITE=1`이면 쓴다).
+- **단위 점검 여섯** [M]: 넷(§14.2)에 둘을 더했다. 5: 허용된 레코드가 목록 밖 필드도 바꿈 → 단계 rc 1. 6: STEP 없음, `sha256.txt`가 있는 OUT → rc 2(대조: 같은 단계에 `STEP2A_OVERWRITE=1` → rc 0). 6 / 6 통과(`unit_new.txt`). 점검 5의 결함은 따로 재현했다: FIELD_STATUS 옛 `status_field=complete flags={}`, 새 `status_field=INCOMPLETE flags={array-element-stores-not-collected}`, 키는 그 flag다. `c4fe9db`의 비교 함수는 PASS·rc 0, 이 판은 `UNEXPECTED FIELDS {flags,status_field}`·rc 1이다.
+- **재실행** [M]: 비교 여섯 단계(identity, npsame, s5same, fixsame, fix2same, fix3same)를 하나씩 새 디렉터리 `/home/user/work/redesign/step2a/tests_rv4f/`에 돌렸다(11:39:40Z–11:41:19Z). 비교 단계의 입력 `<build>/NP`는 `T_RV4/`로 가는 링크다. run·twice·count·sha의 코드는 `c4fe9db`와 같아 다시 돌리지 않았다. 여섯 모두 rc 0, PASS, FAIL 줄 0이다. 레코드 단위 비교 37개(identity 12, 다섯 단계 × 5)와 show 텍스트 6개가 PASS다. changed / added / removed 수는 §14.4와 빌드마다 같다. 옛 드라이버의 첫 두 줄도 `T_RV4/`와 같다. 파일 비교: 같음 65, 다름 7이다. 다른 것은 비교 텍스트 6과 `run.log`다. `run.log`의 identity 여섯 줄은 시간 칸 말고 같다(`T_RV4/`에는 run 다섯 줄이 더 있다). 여유는 851,922,944 → 828,579,840 B다. T/와 `T_RV4/`는 그대로다(`sha256sum -c` rc 0).
+- 잰 필드 서명(c1_pre_tx / c1_post_tx / r2_core / c5_641 / c5_642) [M: `fields.tsv`]:
+
+| 섹션 | 바뀐 필드 | 수 | 단계 |
+|---|---|---|---|
+| FIELD_STATUS | flags | 99 / 99 / 74 / 136 / 136 | npsame, s5same, fixsame, fix2same |
+| FIELD_STATUS | flags, status_field | 12 / 12 / 4 / 14 / 14 | 같음 |
+| FIELD_STATUS | flags, status_field, status_type | 72 / 72 / 69 / 25 / 25 | 같음 |
+| LOCKSET | flags | 8 / 8 / 8 / 0 / 0 | 다섯 비교 단계 |
+| LOCKSET | first, flags, held_root, n_held, opener_root | 20 / 20 / 39 / 0 / 0 | 다섯 비교 단계 |
+| LOCK_OPS | chain | 5 / 5 / 0 / 0 / 0 | 다섯 비교 단계 |
+| LOCK_OPS | chain, depth | 47 / 47 / 34 / 0 / 0 | 다섯 비교 단계 |
+| AWAIT_L1 | flags | 1 / 1 / 0 / 0 / 0 | 다섯 비교 단계 |
+| AWAIT_L1 | flags, l1_mod_field, l1_mod_type | 1 / 1 / 0 / 0 / 0 | 다섯 비교 단계 |
+| P0_TABLE | source | 1 / 1 / 1 / 1 / 1 | npsame, s5same, fixsame |
+| P0_TABLE | semantics | 1 / 1 / 1 / 1 / 1 | fixsame |
+| BASIS | value | 항목마다 | 모든 단계 |
+| HEADER | basis_sha256 / sha256 / sections | 하나씩 | 단계마다 |
+
+- 읽기:
+  - FIELD_STATUS [M: c1_pre_tx, `T_F2` 대 `T_RV4`]: 표시가 붙은 183행은 지금 모두 두 규칙 DISABLED다. 99행은 전에도 둘 다 DISABLED였다. 72행은 둘 다 writer-set-complete에서, 12행은 필드 규칙만 바뀌었다. §2a의 "두 규칙 DISABLED"와 맞는다.
+  - LOCK_OPS [M]: 52행 모두 키의 flag(`unknown-identity`)는 그대로다. 바뀐 것은 사슬(과 깊이)이다. 예: C1 pre `CI_LAB_delete_callback`의 사슬이 `OS_NotifyEvent -> CFE_PSP_OS_EventHandler`를 더 거치지 않는다(depth 10 → 6). 그 간접 호출이 `incomplete-source`가 된 결과로 읽는다 [I]. 첫 판 표의 키는 이 변화를 이름 붙이지 않았다.
+  - LOCKSET: 28행 가운데 20행은 잡힌 잠금의 내용(`n_held`, `held_root` 등)도 바뀐다. §2a의 "그 뒤 사건의 잡힌 잠금이 빠진 것"과 맞는다 [I].
+  - AWAIT_L1과 P0_TABLE은 §2a의 기술(`OS_DeleteAllObjects`의 L1 (i) holds → undecided; `pthread_create`의 원문 줄과 `thrd_create`의 의미)과 맞는다 [I].
+  - 필드 목록은 무엇이 바뀌었는지만 적는다. 그 변경이 옳은지는 §2a와 §10–§13의 검토가 근거다(§14.6).
+- **§2·§4의 기계 판정 줄** (RV3A §2.4 끝 항목). §2·§4의 본문은 줄 번호를 지키려고 고치지 않았다. 그 근거는 다음 줄로 읽는다.
+  - §2 identity 행: `tests_rv4f/identity/identity.txt`의 `verdict:` 줄 12개(레코드·필드 단위)와 `show text verdict:` 줄 6개.
+  - §2 npsame…fix3same 행과 §2a: `tests_rv4f/<단계>/<단계>.txt`의 빌드별 `verdict:` 줄 다섯과 `ok … fields=…` 줄. `T_RV4/`의 같은 파일은 레코드 단위 판정이다.
+  - §2 결정성 행과 §4 T7: `T_RV4/twice.txt`(빌드마다 same), `T_RV4/twice_detail.txt`(rc와 전체 해시), `T_RV4/status.txt`의 `step twice PASS`.
+  - §4 T1–T6의 입력: `T_RV4/status.txt`의 `step count PASS`와 `T_RV4/count/summary.txt`, tsv 일곱(T/와 바이트 동일, §14.4). 계수 스크립트는 PASS·PARTIAL을 찍지 않는다 [F]. 판정은 사람이 그 근거 줄을 읽은 것이다.
+- 줄 인용: 드라이버의 81줄 뒤는 이 정정으로 옮겨졌다. `c4fe9db`의 줄을 인용한 곳(검증 지적의 `:220-308`, `:409-427`, `:652-669`)은 그 판의 파일로 읽는다.
+- 하지 않은 것: `all` 전체의 재실행(코드가 바뀐 단계만 돌렸다), RV3A P9·P10, 이미지 잘림 표시와 둘로 나눈 계수(Q12, 빌드가 든다).

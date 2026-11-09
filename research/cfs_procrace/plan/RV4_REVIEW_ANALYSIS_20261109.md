@@ -476,3 +476,22 @@ curl -sS -L -o <scratch> -w '%{http_code} %{size_download}' '<RV4 L327의 chatgp
 ```
 
 - 같은 날 검사자들이 잰 값(묶음 ELF 수, #184·#73·#2663 앵커 수)은 위와 같은 방식으로 쟀다. 출력은 세션 scratchpad에 있다. §7.2 0에서 CK로 옮긴다. 라이선스 수, xz 크기, H01 링크 응답, 공간, 원격 참조, events는 개정 1에서 위 명령으로 다시 쟀다.
+
+**덧붙임(2026-11-09, 정정 단계): `pthread_mutex_lock` 공식 페이지의 ERRORS 문장** [F, 11-09 접근]. RV3A L205·L208과 설계 초안 §3.2가 태그를 맞추려고 읽었다. 출처: The Open Group Base Specifications Issue 7, 2018 edition(IEEE Std 1003.1-2017), `pubs.opengroup.org/onlinepubs/9699919799/functions/pthread_mutex_lock.html`. 모델이 매개하는 추출기(WebFetch)가 돌려준 원문 인용이다. 충실도의 지위는 C11과 같은 질문이다. 레퍼런스로 인정할지는 A4다.
+
+```
+"The pthread_mutex_lock() and pthread_mutex_trylock() functions shall fail if:"  (순서: EAGAIN, EINVAL, ENOTRECOVERABLE, EOWNERDEAD)
+  [EAGAIN] "The mutex could not be acquired because the maximum number of recursive locks for mutex has been exceeded."
+  [EINVAL] (RPP|TPP 선택 표시 안) "The mutex was created with the protocol attribute having the value PTHREAD_PRIO_PROTECT and the calling thread's priority is higher than the mutex's current priority ceiling."
+  [ENOTRECOVERABLE] "The state protected by the mutex is not recoverable."
+  [EOWNERDEAD] "The mutex is a robust mutex and the process containing the previous owning thread terminated while holding the mutex lock. The mutex lock shall be acquired by the calling thread and it is up to the new owner to make the state consistent."
+"The pthread_mutex_lock() function shall fail if:"
+  [EDEADLK] "The mutex type is PTHREAD_MUTEX_ERRORCHECK and the current thread already owns the mutex."
+"The pthread_mutex_lock() and pthread_mutex_trylock() functions may fail if:"
+  [EOWNERDEAD] "The mutex is a robust mutex and the previous owning thread terminated while holding the mutex lock. The mutex lock shall be acquired by the calling thread and it is up to the new owner to make the state consistent."
+"The pthread_mutex_lock() function may fail if:"
+  [EDEADLK] "A deadlock condition was detected."
+```
+
+- 추출기는 DESCRIPTION에 robust가 아닌 mutex의 소유자가 끝났을 때의 문장이 없다고 답했다. `PTHREAD_MUTEX_STALLED`도 나오지 않는다고 답했다. 이것은 추출기의 요약이다 [U].
+- 읽기 [I]: EOWNERDEAD의 두 문장은 robust mutex를 조건으로 적는다. ENOTRECOVERABLE의 문장은 robust를 말하지 않는다. 그래서 "ENOTRECOVERABLE은 robust에만 묶인다"는 이 문장들로 서지 않는다 [U].

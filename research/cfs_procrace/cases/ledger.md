@@ -385,15 +385,15 @@ These have reference-backed options. Picking one is a decision; it is not `unspe
 
 ### 4.4 A reference exists but was not retrieved
 
-These conditions might be determined if the text were read. *Updated 2026-11-09:* the comments of all four GitHub issues below are now read on the public issue pages through a model-mediated extractor, as short verbatim quotes (125 characters or less) with anchors and access dates: C1 §0a (2026-10-24), C3 §1.2.3 (2026-10-29), R2 §1.5 (2026-10-29), C5 §16 (2026-11-09). The full texts were not saved. The rows say what each case file still lists as not retrieved. Work order: `../plan/RV4_REVIEW_ANALYSIS_20261109.md` §2.2.
+These conditions might be determined if the text were read. *2026-11-09 갱신:* 아래 GitHub 이슈 넷의 댓글은 이제 모두 공개 이슈 페이지에서 모델이 매개하는 추출기로 읽혔다. 짧은 원문 인용(125자 이하)과 접근일이 있다: C1 §0a(2026-10-24), C3 §1.2.3(2026-10-29), R2 §1.5(2026-10-29), C5 §16(2026-11-09). 앵커도 있다. 다만 C1 §0a의 두 인용(1행 jphickey 2022-01-13, 4행 skliper 2022-11-17)은 앵커가 "not captured"다(정정 단계, 같은 날). 원문 전체는 저장하지 않았다. 각 행은 사례 파일이 아직 얻지 못했다고 적는 것을 적는다. 작업 지시: `../plan/RV4_REVIEW_ANALYSIS_20261109.md` §2.2. (정정 단계: 11-09에 더한 글을 한국어로 다시 썼다. 내용은 같다.)
 
 | Case | Unread reference | What it might settle |
 |---|---|---|
 | C1 | 5 comments of CF #184, incl. `issuecomment-1202543669` [C1-BP] (read 2026-10-24, C1 §0a: start order settled; BP version, names, failure log still unknown) | Provider (BP version), start order ("BP started first"), names, failure log |
 | C2 | Trac #167 (host unreachable); #198 REST timeline | Reporter, EVA CWS details, closing event |
-| C3 | *2026-11-09:* the 14 comment blocks are read as short quotes (C3 §1.2.3, 2026-10-29); the 4 earlier unidentified ones are blocks 4, 8, 9 and 11. Still not retrieved: the full text, Trac #42, the Trac #81 attachment (C3 §1.2.3). *2026-10-08:* full text of #73's 14 comments, 4 unidentified; Trac #42 | The outcome of the added race test (Trac #81), the full fix discussion |
-| C5 | *2026-11-09:* the 9 comments are read as short quotes (C5 §16), incl. [C5-fix] `536673810` and [C5-context] `536673820` (watchdog background, LADEE). Still not retrieved: the full text, the Trac #41 original, the Trac #81 attachment (C5 §16). *2026-10-08:* 9 comments of #72 incl. [C5-fix] `536673810`, [C5-context] `536673820`; Trac #41 | The Trac #81 test output, the Trac original |
-| R2 | *2026-11-09:* both comments are read as short quotes (R2 §1.5, 2026-10-29); the gaps hid no text. Still open: exact timestamps and edit history (R2 §12 Q2). *2026-10-08:* 3 elided spans and timestamps of the 2 comments | Exact timestamps |
+| C3 | *2026-11-09:* 댓글 14블록을 짧은 인용으로 읽었다(C3 §1.2.3, 2026-10-29). 앞서 정체를 모르던 넷은 4·8·9·11블록이다. 아직 얻지 못한 것: 원문 전체, Trac #42, Trac #81 첨부(C3 §1.2.3). *2026-10-08:* full text of #73's 14 comments, 4 unidentified; Trac #42 | 더한 경쟁 시험의 결과(Trac #81), 수정 논의 전체 |
+| C5 | *2026-11-09:* 댓글 아홉을 짧은 인용으로 읽었다(C5 §16). [C5-fix] `536673810`과 [C5-context] `536673820`(watchdog 배경, LADEE)을 포함한다. `536673836`은 수정 쪽 시험 플랫폼(MCP750, VxWorks 6.4)을 적는다(정정 단계). 아직 얻지 못한 것: 원문 전체, Trac #41 원본, Trac #81 첨부(C5 §16). *2026-10-08:* 9 comments of #72 incl. [C5-fix] `536673810`, [C5-context] `536673820`; Trac #41 | Trac #81의 시험 출력, Trac 원본 |
+| R2 | *2026-11-09:* 두 댓글을 짧은 인용으로 읽었다(R2 §1.5, 2026-10-29). 생략 자리에 숨은 글은 없었다. 아직 열린 것: 정확한 시각과 편집 이력(R2 §12 Q2). *2026-10-08:* 3 elided spans and timestamps of the 2 comments | 정확한 시각 |
 
 ---
 
@@ -401,7 +401,7 @@ These conditions might be determined if the text were read. *Updated 2026-11-09:
 
 Per the user's instruction, intermediate conclusions that need a decision are collected here. Each item merges decisions already open in the case files. Nothing is chosen.
 
-**X1. GitHub comment access for nasa/cFE and nasa/CF.** *Updated 2026-11-09.* All four issues are read on the public pages as short extractor quotes (§4.4). The API, `gh api` and raw HTML routes stay blocked (403) in the case files. Issue bodies and comments are already references under the conditions policy (`../CONDITIONS_POLICY.md` item 1 of the reference list: issue body and comments). So the route needs no decision, and option (b) is no longer requested. The question narrows to fidelity: (d) do the extractor's short quotes, with anchor and access date, meet that policy item, or is a verbatim copy needed? This is `../plan/PI_DECISIONS_PENDING_20261030.md` C11. Nothing is chosen. The bullets below are the 2026-10-08 state.
+**X1. GitHub comment access for nasa/cFE and nasa/CF.** *2026-11-09 갱신.* 이슈 넷 모두 공개 페이지에서 추출기의 짧은 인용으로 읽혔다(§4.4). 사례 파일에서 API, `gh api`, raw HTML 길은 그대로 막혀 있다(403). issue 본문과 댓글은 조건 정책이 이미 레퍼런스로 인정한다(`../CONDITIONS_POLICY.md` 레퍼런스 목록 항목 1: issue 본문과 댓글). 그래서 길에는 결정이 필요 없고, (b)는 더 요청하지 않는다. 질문은 충실도로 좁혀진다: (d) 앵커·접근일이 있는 추출기의 짧은 인용이 그 정책 항목을 채우는가, 원문 사본이 필요한가? 이것이 `../plan/PI_DECISIONS_PENDING_20261030.md` C11이다. 앵커가 없는 인용(C1 §0a 1·4행)은 인용 전에 다시 읽어야 한다(정정 단계). 아무것도 고르지 않았다. 아래 항목은 2026-10-08의 상태다.
 - Merges C1 D1, C2 D3, C3 D1, C5 D1 and R2 D3.
 - Options:
   - (a) Consent to a credentialed `add_repo` with `access:"push"`. The case files record that it may be refused (C1 §0).

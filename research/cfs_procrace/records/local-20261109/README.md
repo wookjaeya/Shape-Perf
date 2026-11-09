@@ -30,7 +30,7 @@
 - 스크립트: `bundle_local.sh`(이 디렉터리에 사본), 멤버 해시는 `member_sha256.sh`. 원본은 `/home/user/work/preserve/bundles-20261109/bin/`에 있다.
 - tar 인자는 `env/tools/preserve_bundle.sh:44`와 같다(`--sort=name --owner=0 --group=0 --numeric-owner`). xz -9(-T4). 45 MB 조각(:45와 같다).
 - 차이: 파이프에서 바로 조각을 쓴다. 임시 사본(preserve_bundle.sh:44의 `$TMP/bundle.tar.xz`)이 없다. 그래서 만드는 동안의 추가 공간은 c다.
-- 자격 증명 패턴 검사: preserve_bundle.sh:31과 같은 패턴. 걸린 것은 하나다. CK의 `rv3_check/rv4/scan/bundlescan.py` 8줄, 검사 정규식 자체다(값이 아니다; 줄을 보고 확인). 그 파일만 허용 목록에 두고 만들었다.
+- 자격 증명 패턴 검사: preserve_bundle.sh:31과 같은 패턴. 걸린 것은 하나다. CK의 `rv3_check/rv4/scan/bundlescan.py` 8줄, 검사 정규식 자체다(값이 아니다; 줄을 보고 확인). 그 파일만 허용 목록에 두고 만들었다. 정정(11-09, 정정 단계): 이 검사는 자격 증명 정규식 하나뿐이다. `grep -I`라 이진 멤버(.kz facts·basis 등)는 건너뛰었다. 이메일 꼴과 환경 변수 값은 찾지 않았다. 그래서 INFO.txt의 `credential_pattern_hits=none`은 그 정규식과 텍스트 멤버에 대한 것이다. 검증자가 다섯 묶음을 스트림으로 풀어 이진 멤버까지 다시 훑었다: 자격 증명 패턴 3건(모두 `rv3_check/rv4/scan/bundlescan.py`의 패턴 글자), 환경 변수 값 0건, 이메일 꼴 2건. 두 건은 P4의 glibc 사본 `c5/ref/glibc/pthread_create_2.12.c:3`·`pthread_create_2.17.c:3`의 upstream 저자 줄("Contributed by …")이다(우리도 원본 파일에서 줄 수를 다시 셈 [M]; 값은 적지 않는다). push(PD D4 뒤) 전에 RV4 분석 §4.5와 같은 검사(이메일 꼴, `<value not recorded>`, 환경 변수 값, 이진 멤버 포함)를 다섯 묶음에 다시 한다.
 - 원본은 고치거나 지우지 않았다.
 
 ## 3. 검증 방법과 verify_bundle.sh와 다른 점
@@ -95,6 +95,7 @@
 - 도구 바이너리·cFS 실행 파일의 묶음(P1·P3)과 옛 판 셋의 묶음: Q3·보존 위치 뒤. 지금은 PV 사본뿐이다.
 - 지우기: 하지 않았다. scratchpad `rv3/`, `gaps/vb_*`, `rv4/`의 원본은 그대로다(Q2). 이 작업이 만든 임시 파일만 지웠다.
 - 여덟 기존 묶음의 재검증(P8): 이 단계의 일이 아니다.
+- AR §0의 C5 재생성 절차 한 단락(RV3A §6.1 P4의 완료 조건): 이 단계에서 빠졌다. 정정 단계(11-09)에서 AR §0 항목 7로 더했다. 그 절차를 끝까지 돌려 보지는 않았다.
 
 ## 7. 이 디렉터리의 파일
 

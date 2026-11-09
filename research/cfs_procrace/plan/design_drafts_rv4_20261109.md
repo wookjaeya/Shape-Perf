@@ -7,6 +7,7 @@
 - 약칭: RV4(외부 검토서 `Kairos_RV3_Review_Assessment_20261105.md`, "RV4 L n"은 그 줄), RV4A(`plan/RV4_REVIEW_ANALYSIS_20261109.md` 개정 1), RV3A(`plan/RV3_REVIEW_ANALYSIS_20261105.md` 개정 4), PD(`plan/PI_DECISIONS_PENDING_20261030.md` 개정 6), PID(`Architecture/spec/PI_DECISIONS.md`), AR(`plan/step2a_results_20261030.md`), S4(`plan/step2a_s4_20261030.md`), CP(`CONDITIONS_POLICY.md`), T/(`/home/user/work/redesign/step2a/tests/`, 2a 최종 출력), C5S(`/home/user/work/c5tools/build/641/pristine/cFE-6.4.1-OSS-release/`), H01(RV3·RV4가 인용한 이전 검토서; 우리에게 원문이 없다, RV4A §3).
 - 이름 주의: 집계 표는 늘 "RV3A E3"이라 쓴다. PD의 E3(E-15 ② 동결 표)과 다른 항목이다.
 - 이번에 잰 것과 명령은 §4에 적는다. 모두 읽기다.
+- 정정 단계(2026-11-09, 같은 날): 검증 지적으로 §3.2·§3.5 표·§3.8의 표준 문장 태그를 RV3A L205·L208과 맞췄다. 공식 페이지의 ERRORS 문장 넷((s4)–(s7))을 더 읽었다(RV4A §8 덧붙임). 그 문장이 있는 의미는 [F]로 올렸다. 레퍼런스 지위는 그대로 A4다. 머리말의 "표준 본문을 새로 열지 않았다"는 첫 판의 일이다.
 
 ## 0. 요약
 
@@ -211,15 +212,19 @@
   - (s1) 각주: "If the mutex type is PTHREAD_MUTEX_DEFAULT, the behavior of pthread_mutex_lock() may correspond to one of the three other standard mutex types"
   - (s2) EOWNERDEAD: "The mutex lock shall be acquired by the calling thread"
   - (s3) may-fail: "[EDEADLK] A deadlock condition was detected."
+- 더 읽은 문장 (정정 단계, 2026-11-09) [F: RV4A §8 덧붙임, 같은 페이지, 11-09 접근]. RV3A L205·L208과 태그를 맞추려고 읽었다.
+  - (s4) shall-fail EAGAIN: "The mutex could not be acquired because the maximum number of recursive locks for mutex has been exceeded."
+  - (s5) shall-fail EINVAL(우선순위 보호 선택): "The mutex was created with the protocol attribute having the value PTHREAD_PRIO_PROTECT and the calling thread's priority is higher than the mutex's current priority ceiling."
+  - (s6) shall-fail ENOTRECOVERABLE: "The state protected by the mutex is not recoverable."
+  - (s7) EOWNERDEAD의 조건: shall-fail "The mutex is a robust mutex and the process containing the previous owning thread terminated while holding the mutex lock.", may-fail "The mutex is a robust mutex and the previous owning thread terminated while holding the mutex lock."
 - 소유자 아닌 해제의 종류별 표 [F: man7 표, RV3A §2.6]: NORMAL non-robust는 UB, DEFAULT non-robust는 UB†, ERRORCHECK·RECURSIVE·robust는 오류(EPERM) 반환. 공식 페이지와 man7 재수록은 같다(RV4A §2 #10).
-- 지위: 우리가 읽은 문장이다. 레퍼런스로 인정할지는 A4다. CP의 레퍼런스 넷에 표준 본문은 없다 [F: CP:5–10, PD A4]. 그래서 아래 표는 (s1)–(s3)과 man7 표를 [F]로 적되, 판정 근거로는 A4 뒤에만 쓴다.
+- 지위: 우리가 읽은 문장이다. 레퍼런스로 인정할지는 A4다. CP의 레퍼런스 넷에 표준 본문은 없다 [F: CP:5–10, PD A4]. 그래서 아래 표는 (s1)–(s7)과 man7 표를 [F]로 적되, 판정 근거로는 A4 뒤에만 쓴다.
 - **우리가 문장을 갖고 있지 않은 표준 의미는 [U]다.** 이 초안에서 그런 것:
   - 0을 돌려주면 잠금을 얻었다는 것. S4와 facts의 "zero on success"는 우리 요약이다.
   - RECURSIVE의 재귀 획득은 횟수만 늘린다는 것.
-  - EAGAIN이 재귀 횟수 상한의 shall-fail이라는 것.
-  - EINVAL의 조건(PRIO_PROTECT 상한, 초기화되지 않은 객체).
-  - ENOTRECOVERABLE의 조건.
-  - EOWNERDEAD·ENOTRECOVERABLE이 robust mutex에만 묶인다는 것.
+  - EINVAL의 다른 조건(초기화되지 않은 객체). PRIO_PROTECT 상한은 (s5)로 섰다(정정 단계).
+  - ENOTRECOVERABLE이 robust mutex에만 묶인다는 것. (s6)은 robust를 말하지 않는다. EOWNERDEAD는 (s7)로 robust 조건이 섰다(정정 단계).
+  - (정정 단계에서 뺌: EAGAIN의 shall-fail은 (s4), ENOTRECOVERABLE의 조건 문장은 (s6)이다.)
   - 오류를 돌려준 호출이 잠금 상태를 바꾸지 않는다는 것.
   - RV3A·RV4A가 이것들을 적었더라도 원문 문장은 우리에게 없다.
 - 구현: P0 표는 `pthread_mutex_lock`을 "POSIX.1-2017 / glibc 2.39; source unverified"로 적는다 [M: c5_641 facts `[p0]`]. C1·R2 빌드가 링크한 판은 Ubuntu 2.39-0ubuntu8.9다 [F: PD A4]. 이 판에서 RECURSIVE·PRIO_INHERIT mutex가 어떤 값을 어느 경로로 돌려주는지 대조하지 않았다 [U].
@@ -269,11 +274,11 @@
 |---|---|---|---|---|---|
 | (호출 없음) sem_id 범위 밖 또는 `free == TRUE` | — (소스 L3336) | 못 잡음 [F: 잠금 호출 전에 돌아감] | OS_ERR_INVALID_ID (L3336–3339) | 맞음-실패 | -16은 0이 아니라 잡지 않은 돌아옴이다 [M: result-conditional] |
 | 0 | [U] | 잡음. 이미 잡았으면 횟수만 늚 [U] | OS_SUCCESS (else, L3357–3359) | 맞음-획득 | 잡음 [M: success=0] |
-| EINVAL | [U]. PRIO_PROTECT 조건이라는 읽기는 #9 밖이다(L3161) [I: RV3A §2.6] | 못 잡음 [U] | OS_SEM_FAILURE (L3346–3349) | 맞음-실패 | 가정 아래 실패 경로 [I: S4 §1.3] |
+| EINVAL | shall-fail (s5) [F]: PRIO_PROTECT 조건이라 #9 밖이다(L3161) [I: RV3A §2.6] | 못 잡음 [U] | OS_SEM_FAILURE (L3346–3349) | 맞음-실패 | 가정 아래 실패 경로 [I: S4 §1.3] |
 | EDEADLK | may-fail (s3) [F] | 못 잡음 [U] | OS_SUCCESS (L3350–3356, 명시) | 구멍(효과 [U]) | 이 갈래를 가정 아래 실패 경로로 뺀다 [I: S4 §1.3, M: result-conditional]. 래퍼 값 0과 "못 잡음"의 어긋남은 가정이 덮는다 |
-| EAGAIN | [U] | 못 잡음 [U] | OS_SUCCESS (else, L3357–3359) | 구멍(효과 [U]) | 가정 아래 이 값은 오지 않는다. else 갈래를 잡음으로 읽는다. 가정이 덮는다 |
-| EOWNERDEAD | (s2) [F] | 잡음 [F: s2] | OS_SUCCESS (else) | 맞음-획득 | 잡음. #9에서 닿는지: robust 0건 [F: RV4A §8], 닿지 않음 [I] |
-| ENOTRECOVERABLE | [U] | 못 잡음 [U] | OS_SUCCESS (else) | 구멍(닿는다면) | robust 전제로 #9에서 닿지 않음 [I]. 그 전제의 문장이 없다 [U] |
+| EAGAIN | shall-fail (s4) [F] | 못 잡음 [F: s4 "could not be acquired"] | OS_SUCCESS (else, L3357–3359) | 구멍(효과 [U]) | 가정 아래 이 값은 오지 않는다. else 갈래를 잡음으로 읽는다. 가정이 덮는다 |
+| EOWNERDEAD | (s2)·(s7) [F]: robust 조건 | 잡음 [F: s2] | OS_SUCCESS (else) | 맞음-획득 | 잡음. #9에서 닿는지: robust 0건 [F: RV4A §8], 닿지 않음 [I] |
+| ENOTRECOVERABLE | shall-fail (s6) [F] | 못 잡음 [U] | OS_SUCCESS (else) | 구멍(닿는다면) | robust 전제로 #9에서 닿지 않음 [I]. (s6)은 robust를 말하지 않아 그 전제의 문장이 없다 [U] |
 | 그 밖의 값 | [U] | [U] | OS_SUCCESS (else) | 미정 | 가정 아래 오지 않는다 |
 
 - 덮는 가정: 모든 구멍은 `assume.lock_acquisition_succeeds`가 덮는다 [M: c5_641 facts:372 "an acquisition that is not a try succeeds … a derived acquire operation returns the value it returns when it holds the lock; the branch only a failure takes is a failure path"].
@@ -306,12 +311,12 @@
 ### 3.8 EOWNERDEAD 대 EAGAIN·ENOTRECOVERABLE: RV4A가 말하는 것
 
 - RV4A §1 17행과 메모 17: EOWNERDEAD면 잠금을 얻는다. (s2)를 공식 페이지에서 읽었다. RV4 L133과 같다 [F].
-- RV4A §1 19행, §2 #7: `setrobust` 0건은 [M]이다. EOWNERDEAD 배제는 [I]다. 그 추론은 두 전제에 선다. POSIX가 EOWNERDEAD를 robust mutex에만 묶는다는 것([U]: 문장이 없다), 그 mutex가 검색한 소스 밖에서 만들어지지 않는다는 것([I]).
+- RV4A §1 19행, §2 #7: `setrobust` 0건은 [M]이다. EOWNERDEAD 배제는 [I]다. 그 추론은 두 전제에 선다. POSIX가 EOWNERDEAD를 robust mutex에만 묶는다는 것([F]: (s7), 정정 단계; 첫 판은 문장이 없다고 [U]로 적었다), 그 mutex가 검색한 소스 밖에서 만들어지지 않는다는 것([I]).
 - RV4A §1 20행, §2 #9: 래퍼는 EINVAL만 실패로 돌려준다. EDEADLK도 명시적으로 OS_SUCCESS로 바꾼다(L3350–3356). #9에서 잡지 못하고 OS_SUCCESS가 되는 구멍은 둘이다: EAGAIN(shall-fail, 재귀 횟수 상한)과 EDEADLK(may-fail). EOWNERDEAD → OS_SUCCESS는 획득과 맞는다. 실제로 일어났다는 주장은 하지 않는다 [F].
 - ENOTRECOVERABLE: RV3A §2.6의 구멍 목록 "(EAGAIN·EDEADLK·ENOTRECOVERABLE·EINVAL)"에는 있다. RV4A §2 #9는 #9의 구멍으로 세지 않는다. 이유는 적지 않았다 [F]. 우리 읽기: EOWNERDEAD와 같은 robust 전제로 #9에서는 닿지 않는다 [I]. 그 전제의 문장은 없다 [U].
 - 서식에서의 차이 [I]:
   - EOWNERDEAD는 닿는다면 "맞음-획득"이다. 구멍이 아니다. 그 뒤 mutex 상태의 의미는 문장이 없다 [U]. 이 서식은 다루지 않는다.
-  - EAGAIN은 robust와 상관없이 RECURSIVE에서 나올 수 있는 값으로 RV3A·RV4A가 읽었다. 문장은 없다 [U]. 닿기 쉬운지 어려운지는 주장하지 않는다. RV3A 개정 3까지의 "닿기 어렵다 [I]"는 개정 4에서 거뒀다(RV4A §2 #9).
+  - EAGAIN은 robust와 상관없이 RECURSIVE에서 나올 수 있는 값으로 RV3A·RV4A가 읽었다. 문장은 (s4)다 [F](정정 단계; 첫 판은 [U]). 닿기 쉬운지 어려운지는 주장하지 않는다. RV3A 개정 3까지의 "닿기 어렵다 [I]"는 개정 4에서 거뒀다(RV4A §2 #9).
   - EDEADLK는 (s3) 문장이 있다. 그러나 RECURSIVE·PRIO_INHERIT mutex에서 glibc 2.39가 언제 돌려주는지는 대조하지 않았다 [U].
   - EINVAL은 래퍼에서 맞음-실패다. 위 층에서는 구멍이 될 수 있다(§3.6).
 

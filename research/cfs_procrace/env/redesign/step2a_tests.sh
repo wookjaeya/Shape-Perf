@@ -34,7 +34,7 @@
 #                    names are used in the queries of this script only -> OUT/count/
 #          sha       sha256 of every output except status.txt -> OUT/sha256.txt
 #          all       identity npsame run s5same fixsame fix2same fix3same twice count sha; OUT/status.txt; rc 1 if a step fails
-#   OUT    default: all -> new step2a/tests_runs/run_<UTC>_<kz-static sha 8> (+ link latest), other steps -> latest
+#   OUT    default: all -> new step2a/tests_runs/run_<UTC>_<kz-static sha 8> (+ link latest), other steps -> latest; never T/ or an OUT with sha256.txt (STEP2A_OVERWRITE=1)
 #
 # Builds (reference builds only), with the inputs of step2a_s1.sh .. step2a_s4.sh:
 #   c1_pre_tx c1_post_tx   procrace/c1_build/<pre|post>/1df262a, recipe EB/inputs/c1_<cfg>_tx.kzb
@@ -46,7 +46,7 @@
 # (PI D7); nothing else of a case enters.  The `identity` step uses the case profiles (V2) only to show that the
 # profile-driven mode is unchanged.
 set -uo pipefail
-STEP=${1:?identity|npsame|run|s5same|fixsame|fix2same|fix3same|twice|count|sha|all}
+STEP=${1:-}; [ -n "$STEP" ] || { echo "usage: step2a_tests.sh identity|npsame|run|s5same|fixsame|fix2same|fix3same|twice|count|sha|all [OUT]" >&2; exit 2; }
 OUT=${2:-}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$HERE/../.." && pwd)"
@@ -63,7 +63,7 @@ FIX3=${FIX3:-/home/user/work/redesign/step2a/tests_fix3}
 C1=${C1:-/home/user/work/procrace/c1_build}
 REF=${REF:-/home/user/work/procrace/cfs_ref/cFS}
 CT=${CT:-/home/user/work/c5tools/build}
-[ -e /home/user/work/.campaign_running ] && { echo "a campaign is running (/home/user/work/.campaign_running)" >&2; exit 3; }
+[ -e /home/user/work/.campaign_running ] && { echo "a campaign is running (/home/user/work/.campaign_running); the driver does not start" >&2; exit 2; }
 # OUT (made here before; see main at the end), status.txt and the failure rules: after the functions
 RULE=(--targets-rule R-T1,R-T2)
 
@@ -83,16 +83,23 @@ BUILDS=(c1_pre_tx c1_post_tx r2_core c5_641 c5_642)
 # Every status is read in the shell that runs the step, never inside a pipeline or a subshell that loses it: the
 # statuses of a pipeline come from PIPESTATUS right after it (pipe_ok), a command substitution's from its assignment.
 # A failure is a line "FAIL <step>: ..." in OUT/status.txt and on stderr; a step with a failure is FAIL; `all` and a
-# single step exit 1 when a step failed (2: the driver could not start).  Failures:
+# single step exit 1 when a step failed, 2 when the driver could not start (no or an unknown STEP, no tool, a campaign
+# running, OUT not writable, or OUT refused: `all` needs a new or empty OUT, and no step writes into T/ or into an OUT
+# that holds a top-level sha256.txt unless STEP2A_OVERWRITE=1).  Failures:
 #   - a non-zero rc of kz-static, kz-dump, sha256sum, sed, tee, sort, xargs, python3 or a write (grep and diff: 2 or more)
 #   - a .txt output that is missing or empty (the size of each is recorded: run.log, status.txt)
 #   - kz-dump failing, a dump with no section, or a section whose record lines differ from its head's count (cut)
 #   - a comparison (identity, npsame, s5same, fixsame, fix2same, fix3same) that does not meet the table ALLOW below:
 #     the records of the two dumps are compared section by section; a differing record is changed (same identity,
 #     IDENT, other fields), added or removed, and must be named by exactly one entry of the step (section, change,
-#     key); each entry's count for the build must be met exactly.  The allowance is per record, not per section: a
-#     record of an allowed section that no entry names fails, and so does a count that is off by one.  A section in
-#     one dump only fails unless an entry names its head (HEADER).  No compared section fails.
+#     fields, key); each entry's count for the build must be met exactly.  The allowance is per record and, for a
+#     changed record, per field: the fields that differ between its old and new record (name=value pairs; `<text>` for
+#     text outside them) must be exactly the entry's field list, so a record that also changes another field fails.
+#     A record of an allowed section that no entry names fails, and so does a count that is off by one.  A section in
+#     one dump only fails unless a HEADER `added`/`removed` entry names its head with an exact count (an exception to
+#     RV4 analysis §2 #29 (다), which fails every one-sided section: LOCK_PATHS is new since the first fix stage).
+#     No compared section fails.  Each comparison also prints the field signatures of its changed records
+#     ("fields SECTION changed {f,..} key K: n") so that the table can be measured again.
 #   - twice: facts or relations not the same; count: step2a_tests_count.py exits 1 (an input missing or empty, a
 #     twice line not "same")
 # STEP2A_ALLOW_TABLE=FILE replaces the table; only the unit checks (step2a_tests_unit.sh) do that, and status.txt and
@@ -100,7 +107,9 @@ BUILDS=(c1_pre_tx c1_post_tx r2_core c5_641 c5_642)
 # from the kept outputs (T/ against EB, T_S5, T_F1, T_F2, T_F3; npsame: S4 re-extracted by it) [M]; they agree with
 # AR §2a where AR gives a number (incomplete-source 44 / 22, FIELD_STATUS 183 / 183 / 147 / 175 / 175, LOCKSET 28 /
 # 47, LOCK_PATHS 9408 / 9409 / 5872 / 2364 / 2373 and +75 / +75 / +66 / +29 / +29, count.lock_ops 2519 -> 2450 and
-# 1586 -> 1547).  References of the entries (column ref):
+# 1586 -> 1547).  The field lists (column fields) and the split of a changed entry by its field signature were
+# measured the same way on 2026-11-09, after c4fe9db, from the "fields" lines of the comparisons [M]; the field
+# list says which fields a change touches, not that the change is right (AR §14).  References (column ref):
 #   id   profile-driven mode unchanged: build identity, parent basis, units_from (AR §0 item 2)
 #   run  this run's tool, basis and lock-set rule revision (extract.build_identity, units_from, extended_facts_f5)
 #   p0   P0 table revisions 2 and 3 (AR §2a P0_TABLE, BASIS)      dev  basis deviations copied into the facts
@@ -212,99 +221,133 @@ import collections, os, re, sys
 STEP, BUILD, A, B = sys.argv[1:5]
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
 # One line per entry: step, section, change (changed | added | removed), the expected number of records for each of
-# the five builds (- = the build is not in the step: expected 0), the reference (legend in the driver's comment), and
-# the record key: a Python regular expression searched in the record (the new record for changed and added, the old
-# one for removed).  A changed record is an old and a new record with the same identity (IDENT) and other fields.
+# the five builds (- = the build is not in the step: expected 0), the reference (legend in the driver's comment), the
+# fields (changed: the comma list of the fields that differ, exactly; added, removed: -), and the record key: a Python
+# regular expression searched in the record (the new record for changed and added, the old one for removed).  A
+# changed record is an old and a new record with the same identity (IDENT) and other fields; within one identity the
+# old and new records are paired in sorted order.  Its differing fields are the names whose values differ or that
+# one side lacks, and <text> when the text outside the name=value pairs differs.  A changed record is named by an
+# entry only when its differing fields equal the entry's list, so one key may need one entry per field signature.
 # HEADER is the dump head (basis_sha256, parents, sections=) and the section heads without count and crc32.
 # STRINGS is not compared: it is the string table, and every record shows its strings as text.
 ALLOW = r'''
-# step         section      change  c1pre c1post r2  c5_641 c5_642 ref key
-identity-basis BASIS        changed 1    -    1    1    -    id   ^name="front_end\.build_identity"
-identity-facts BASIS        changed 2    -    2    2    -    id   ^name="extract\.(build_identity|units_from)"
-identity-facts HEADER       changed 2    -    2    2    -    id   ^(basis_sha256=|parent\[0\] kind=basis )
-npsame         HEADER       changed 1    1    1    1    1    lp   ^sections=
-npsame         HEADER       added   1    1    1    1    1    lp   ^section LOCK_PATHS type=
-npsame         BASIS        changed 2    2    2    2    2    run  ^name="extract\.(build_identity|extended_facts_f5)"
-npsame         BASIS        changed 3    3    3    3    3    p0   ^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
-npsame         BASIS        changed 2    2    2    0    0    inc  ^name="count\.(lock_ops|lockset)"
-npsame         BASIS        added   34   34   34   34   34   p0   ^name="p0\.
-npsame         BASIS        added   2    2    2    7    7    dev  ^name="extract\.basis_deviation\[
-npsame         BASIS        added   5    5    5    5    5    new  ^name="(extract\.p0_table_scope|count\.lock_paths|param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
-npsame         P0_TABLE     changed 1    1    1    1    1    p0   name="pthread_create"
-npsame         P0_TABLE     added   34   34   34   34   34   p0   name="
-npsame         CALL_TARGETS added   44   44   22   0    0    inc  reason=incomplete-source
-npsame         FIELD_STATUS changed 183  183  147  175  175  arr  flags=\{[^}]*array-element-stores-not-collected
-npsame         LOCKSET      changed 28   28   47   0    0    inc  flags=\{unknown-release\}
-npsame         LOCK_OPS     changed 52   52   34   0    0    inc  flags=\{[^}]*unknown-identity
-npsame         LOCK_OPS     removed 115  115  71   0    0    inc  flags=\{[^}]*unknown-identity
-npsame         LOCK_OPS     added   46   46   32   0    0    inc  flags=\{[^}]*unknown-identity
-npsame         LOCK_PATHS   added   9174 9175 5630 2166 2170 lp   kind=entry-release
-npsame         LOCK_PATHS   added   234  234  242  198  203  lp   kind=after-spawn
-npsame         AWAIT_L1     changed 2    2    0    0    0    inc  flags=\{[^}]*unresolved-call
-s5same         HEADER       changed 3    3    3    3    3    run  ^(basis_sha256=|parent\[0\] kind=basis |sections=)
-s5same         HEADER       added   1    1    1    1    1    lp   ^section LOCK_PATHS type=
-s5same         BASIS        changed 3    3    3    3    3    run  ^name="extract\.(build_identity|units_from|extended_facts_f5)"
-s5same         BASIS        changed 3    3    3    3    3    p0   ^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
-s5same         BASIS        changed 2    2    2    0    0    inc  ^name="count\.(lock_ops|lockset)"
-s5same         BASIS        added   34   34   34   34   34   p0   ^name="p0\.
-s5same         BASIS        added   2    2    2    7    7    dev  ^name="extract\.basis_deviation\[
-s5same         BASIS        added   5    5    5    5    5    new  ^name="(extract\.p0_table_scope|count\.lock_paths|param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
-s5same         P0_TABLE     changed 1    1    1    1    1    p0   name="pthread_create"
-s5same         P0_TABLE     added   34   34   34   34   34   p0   name="
-s5same         CALL_TARGETS added   44   44   22   0    0    inc  reason=incomplete-source
-s5same         FIELD_STATUS changed 183  183  147  175  175  arr  flags=\{[^}]*array-element-stores-not-collected
-s5same         LOCKSET      changed 28   28   47   0    0    inc  flags=\{unknown-release\}
-s5same         LOCK_OPS     changed 52   52   34   0    0    inc  flags=\{[^}]*unknown-identity
-s5same         LOCK_OPS     removed 115  115  71   0    0    inc  flags=\{[^}]*unknown-identity
-s5same         LOCK_OPS     added   46   46   32   0    0    inc  flags=\{[^}]*unknown-identity
-s5same         LOCK_PATHS   added   9174 9175 5630 2166 2170 lp   kind=entry-release
-s5same         LOCK_PATHS   added   234  234  242  198  203  lp   kind=after-spawn
-s5same         AWAIT_L1     changed 2    2    0    0    0    inc  flags=\{[^}]*unresolved-call
-fixsame        HEADER       changed 2    2    2    2    2    run  ^(basis_sha256=|parent\[0\] kind=basis )
-fixsame        BASIS        changed 3    3    3    3    3    run  ^name="extract\.(build_identity|units_from|extended_facts_f5)"
-fixsame        BASIS        changed 3    3    3    3    3    p0   ^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
-fixsame        BASIS        changed 1    1    1    1    1    lp   ^name="count\.lock_paths"
-fixsame        BASIS        changed 2    2    2    0    0    inc  ^name="count\.(lock_ops|lockset)"
-fixsame        BASIS        added   3    3    3    3    3    new  ^name="(param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
-fixsame        P0_TABLE     changed 2    2    2    2    2    p0   name="(pthread_create|thrd_create)"
-fixsame        CALL_TARGETS added   44   44   22   0    0    inc  reason=incomplete-source
-fixsame        FIELD_STATUS changed 183  183  147  175  175  arr  flags=\{[^}]*array-element-stores-not-collected
-fixsame        LOCKSET      changed 28   28   47   0    0    inc  flags=\{unknown-release\}
-fixsame        LOCK_OPS     changed 52   52   34   0    0    inc  flags=\{[^}]*unknown-identity
-fixsame        LOCK_OPS     removed 115  115  71   0    0    inc  flags=\{[^}]*unknown-identity
-fixsame        LOCK_OPS     added   46   46   32   0    0    inc  flags=\{[^}]*unknown-identity
-fixsame        LOCK_PATHS   removed 0    0    0    6    6    lp   kind=entry-release
-fixsame        LOCK_PATHS   added   78   78   69   35   35   lp   kind=entry-release
-fixsame        AWAIT_L1     changed 2    2    0    0    0    inc  flags=\{[^}]*unresolved-call
-fix2same       HEADER       changed 2    2    2    2    2    run  ^(basis_sha256=|parent\[0\] kind=basis )
-fix2same       BASIS        changed 3    3    3    3    3    run  ^name="extract\.(build_identity|units_from|extended_facts_f5)"
-fix2same       BASIS        changed 2    2    2    2    2    wb   ^name="(param\.walk_bounds|count\.walk_bounds_hit)"
-fix2same       BASIS        changed 1    1    1    1    1    lp   ^name="count\.lock_paths"
-fix2same       BASIS        changed 2    2    2    0    0    inc  ^name="count\.(lock_ops|lockset)"
-fix2same       BASIS        added   1    1    1    1    1    inc  ^name="count\.indirect_calls_incomplete"
-fix2same       CALL_TARGETS added   44   44   22   0    0    inc  reason=incomplete-source
-fix2same       FIELD_STATUS changed 183  183  147  175  175  arr  flags=\{[^}]*array-element-stores-not-collected
-fix2same       LOCKSET      changed 28   28   47   0    0    inc  flags=\{unknown-release\}
-fix2same       LOCK_OPS     changed 52   52   34   0    0    inc  flags=\{[^}]*unknown-identity
-fix2same       LOCK_OPS     removed 115  115  71   0    0    inc  flags=\{[^}]*unknown-identity
-fix2same       LOCK_OPS     added   46   46   32   0    0    inc  flags=\{[^}]*unknown-identity
-fix2same       LOCK_PATHS   removed 0    0    0    6    6    lp   kind=entry-release
-fix2same       LOCK_PATHS   added   78   78   69   35   35   lp   kind=entry-release
-fix2same       AWAIT_L1     changed 2    2    0    0    0    inc  flags=\{[^}]*unresolved-call
-fix3same       HEADER       changed 2    2    2    2    2    run  ^(basis_sha256=|parent\[0\] kind=basis )
-fix3same       BASIS        changed 3    3    3    3    3    run  ^name="extract\.(build_identity|units_from|extended_facts_f5)"
-fix3same       BASIS        changed 2    2    2    2    2    wb   ^name="(param\.walk_bounds|count\.walk_bounds_hit)"
-fix3same       BASIS        changed 1    1    1    1    1    lp   ^name="count\.lock_paths"
-fix3same       BASIS        changed 2    2    2    0    0    inc  ^name="count\.(lock_ops|lockset)"
-fix3same       BASIS        added   1    1    1    1    1    inc  ^name="count\.indirect_calls_incomplete"
-fix3same       CALL_TARGETS added   44   44   22   0    0    inc  reason=incomplete-source
-fix3same       LOCKSET      changed 28   28   47   0    0    inc  flags=\{unknown-release\}
-fix3same       LOCK_OPS     changed 52   52   34   0    0    inc  flags=\{[^}]*unknown-identity
-fix3same       LOCK_OPS     removed 115  115  71   0    0    inc  flags=\{[^}]*unknown-identity
-fix3same       LOCK_OPS     added   46   46   32   0    0    inc  flags=\{[^}]*unknown-identity
-fix3same       LOCK_PATHS   removed 0    0    0    6    6    lp   kind=entry-release
-fix3same       LOCK_PATHS   added   75   75   66   35   35   lp   kind=entry-release
-fix3same       AWAIT_L1     changed 2    2    0    0    0    inc  flags=\{[^}]*unresolved-call
+# step         section      change  c1pre c1post r2  c5_641 c5_642 ref fields key
+identity-basis BASIS        changed 1    -    1    1    -    id   value ^name="front_end\.build_identity"
+identity-facts BASIS        changed 2    -    2    2    -    id   value ^name="extract\.(build_identity|units_from)"
+identity-facts HEADER       changed 1    -    1    1    -    id   basis_sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+identity-facts HEADER       changed 1    -    1    1    -    id   sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+npsame         HEADER       changed 1    1    1    1    1    lp   sections ^sections=
+npsame         HEADER       added   1    1    1    1    1    lp   - ^section LOCK_PATHS type=
+npsame         BASIS        changed 2    2    2    2    2    run  value ^name="extract\.(build_identity|extended_facts_f5)"
+npsame         BASIS        changed 3    3    3    3    3    p0   value ^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+npsame         BASIS        changed 2    2    2    0    0    inc  value ^name="count\.(lock_ops|lockset)"
+npsame         BASIS        added   34   34   34   34   34   p0   - ^name="p0\.
+npsame         BASIS        added   2    2    2    7    7    dev  - ^name="extract\.basis_deviation\[
+npsame         BASIS        added   5    5    5    5    5    new  - ^name="(extract\.p0_table_scope|count\.lock_paths|param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
+npsame         P0_TABLE     changed 1    1    1    1    1    p0   source name="pthread_create"
+npsame         P0_TABLE     added   34   34   34   34   34   p0   - name="
+npsame         CALL_TARGETS added   44   44   22   0    0    inc  - reason=incomplete-source
+npsame         FIELD_STATUS changed 99   99   74   136  136  arr  flags flags=\{[^}]*array-element-stores-not-collected
+npsame         FIELD_STATUS changed 12   12   4    14   14   arr  flags,status_field flags=\{[^}]*array-element-stores-not-collected
+npsame         FIELD_STATUS changed 72   72   69   25   25   arr  flags,status_field,status_type flags=\{[^}]*array-element-stores-not-collected
+npsame         LOCKSET      changed 20   20   39   0    0    inc  first,flags,held_root,n_held,opener_root flags=\{unknown-release\}
+npsame         LOCKSET      changed 8    8    8    0    0    inc  flags flags=\{unknown-release\}
+npsame         LOCK_OPS     changed 5    5    0    0    0    inc  chain flags=\{[^}]*unknown-identity
+npsame         LOCK_OPS     changed 47   47   34   0    0    inc  chain,depth flags=\{[^}]*unknown-identity
+npsame         LOCK_OPS     removed 115  115  71   0    0    inc  - flags=\{[^}]*unknown-identity
+npsame         LOCK_OPS     added   46   46   32   0    0    inc  - flags=\{[^}]*unknown-identity
+npsame         LOCK_PATHS   added   9174 9175 5630 2166 2170 lp   - kind=entry-release
+npsame         LOCK_PATHS   added   234  234  242  198  203  lp   - kind=after-spawn
+npsame         AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
+npsame         AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
+s5same         HEADER       changed 1    1    1    1    1    run  basis_sha256 ^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same         HEADER       changed 1    1    1    1    1    run  sections ^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same         HEADER       changed 1    1    1    1    1    run  sha256 ^(basis_sha256=|parent\[0\] kind=basis |sections=)
+s5same         HEADER       added   1    1    1    1    1    lp   - ^section LOCK_PATHS type=
+s5same         BASIS        changed 3    3    3    3    3    run  value ^name="extract\.(build_identity|units_from|extended_facts_f5)"
+s5same         BASIS        changed 3    3    3    3    3    p0   value ^name="(extract\.p0_table|p0\.pthread_create|assume\.lock_acquisition_succeeds)"
+s5same         BASIS        changed 2    2    2    0    0    inc  value ^name="count\.(lock_ops|lockset)"
+s5same         BASIS        added   34   34   34   34   34   p0   - ^name="p0\.
+s5same         BASIS        added   2    2    2    7    7    dev  - ^name="extract\.basis_deviation\[
+s5same         BASIS        added   5    5    5    5    5    new  - ^name="(extract\.p0_table_scope|count\.lock_paths|param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
+s5same         P0_TABLE     changed 1    1    1    1    1    p0   source name="pthread_create"
+s5same         P0_TABLE     added   34   34   34   34   34   p0   - name="
+s5same         CALL_TARGETS added   44   44   22   0    0    inc  - reason=incomplete-source
+s5same         FIELD_STATUS changed 99   99   74   136  136  arr  flags flags=\{[^}]*array-element-stores-not-collected
+s5same         FIELD_STATUS changed 12   12   4    14   14   arr  flags,status_field flags=\{[^}]*array-element-stores-not-collected
+s5same         FIELD_STATUS changed 72   72   69   25   25   arr  flags,status_field,status_type flags=\{[^}]*array-element-stores-not-collected
+s5same         LOCKSET      changed 20   20   39   0    0    inc  first,flags,held_root,n_held,opener_root flags=\{unknown-release\}
+s5same         LOCKSET      changed 8    8    8    0    0    inc  flags flags=\{unknown-release\}
+s5same         LOCK_OPS     changed 5    5    0    0    0    inc  chain flags=\{[^}]*unknown-identity
+s5same         LOCK_OPS     changed 47   47   34   0    0    inc  chain,depth flags=\{[^}]*unknown-identity
+s5same         LOCK_OPS     removed 115  115  71   0    0    inc  - flags=\{[^}]*unknown-identity
+s5same         LOCK_OPS     added   46   46   32   0    0    inc  - flags=\{[^}]*unknown-identity
+s5same         LOCK_PATHS   added   9174 9175 5630 2166 2170 lp   - kind=entry-release
+s5same         LOCK_PATHS   added   234  234  242  198  203  lp   - kind=after-spawn
+s5same         AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
+s5same         AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
+fixsame        HEADER       changed 1    1    1    1    1    run  basis_sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fixsame        HEADER       changed 1    1    1    1    1    run  sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fixsame        BASIS        changed 3    3    3    3    3    run  value ^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fixsame        BASIS        changed 3    3    3    3    3    p0   value ^name="(extract\.p0_table|extract\.p0_table_scope|p0\.pthread_create)"
+fixsame        BASIS        changed 1    1    1    1    1    lp   value ^name="count\.lock_paths"
+fixsame        BASIS        changed 2    2    2    0    0    inc  value ^name="count\.(lock_ops|lockset)"
+fixsame        BASIS        added   3    3    3    3    3    new  - ^name="(param\.walk_bounds|count\.walk_bounds_hit|count\.indirect_calls_incomplete)"
+fixsame        P0_TABLE     changed 1    1    1    1    1    p0   semantics name="(pthread_create|thrd_create)"
+fixsame        P0_TABLE     changed 1    1    1    1    1    p0   source name="(pthread_create|thrd_create)"
+fixsame        CALL_TARGETS added   44   44   22   0    0    inc  - reason=incomplete-source
+fixsame        FIELD_STATUS changed 99   99   74   136  136  arr  flags flags=\{[^}]*array-element-stores-not-collected
+fixsame        FIELD_STATUS changed 12   12   4    14   14   arr  flags,status_field flags=\{[^}]*array-element-stores-not-collected
+fixsame        FIELD_STATUS changed 72   72   69   25   25   arr  flags,status_field,status_type flags=\{[^}]*array-element-stores-not-collected
+fixsame        LOCKSET      changed 20   20   39   0    0    inc  first,flags,held_root,n_held,opener_root flags=\{unknown-release\}
+fixsame        LOCKSET      changed 8    8    8    0    0    inc  flags flags=\{unknown-release\}
+fixsame        LOCK_OPS     changed 5    5    0    0    0    inc  chain flags=\{[^}]*unknown-identity
+fixsame        LOCK_OPS     changed 47   47   34   0    0    inc  chain,depth flags=\{[^}]*unknown-identity
+fixsame        LOCK_OPS     removed 115  115  71   0    0    inc  - flags=\{[^}]*unknown-identity
+fixsame        LOCK_OPS     added   46   46   32   0    0    inc  - flags=\{[^}]*unknown-identity
+fixsame        LOCK_PATHS   removed 0    0    0    6    6    lp   - kind=entry-release
+fixsame        LOCK_PATHS   added   78   78   69   35   35   lp   - kind=entry-release
+fixsame        AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
+fixsame        AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
+fix2same       HEADER       changed 1    1    1    1    1    run  basis_sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fix2same       HEADER       changed 1    1    1    1    1    run  sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fix2same       BASIS        changed 3    3    3    3    3    run  value ^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix2same       BASIS        changed 2    2    2    2    2    wb   value ^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix2same       BASIS        changed 1    1    1    1    1    lp   value ^name="count\.lock_paths"
+fix2same       BASIS        changed 2    2    2    0    0    inc  value ^name="count\.(lock_ops|lockset)"
+fix2same       BASIS        added   1    1    1    1    1    inc  - ^name="count\.indirect_calls_incomplete"
+fix2same       CALL_TARGETS added   44   44   22   0    0    inc  - reason=incomplete-source
+fix2same       FIELD_STATUS changed 99   99   74   136  136  arr  flags flags=\{[^}]*array-element-stores-not-collected
+fix2same       FIELD_STATUS changed 12   12   4    14   14   arr  flags,status_field flags=\{[^}]*array-element-stores-not-collected
+fix2same       FIELD_STATUS changed 72   72   69   25   25   arr  flags,status_field,status_type flags=\{[^}]*array-element-stores-not-collected
+fix2same       LOCKSET      changed 20   20   39   0    0    inc  first,flags,held_root,n_held,opener_root flags=\{unknown-release\}
+fix2same       LOCKSET      changed 8    8    8    0    0    inc  flags flags=\{unknown-release\}
+fix2same       LOCK_OPS     changed 5    5    0    0    0    inc  chain flags=\{[^}]*unknown-identity
+fix2same       LOCK_OPS     changed 47   47   34   0    0    inc  chain,depth flags=\{[^}]*unknown-identity
+fix2same       LOCK_OPS     removed 115  115  71   0    0    inc  - flags=\{[^}]*unknown-identity
+fix2same       LOCK_OPS     added   46   46   32   0    0    inc  - flags=\{[^}]*unknown-identity
+fix2same       LOCK_PATHS   removed 0    0    0    6    6    lp   - kind=entry-release
+fix2same       LOCK_PATHS   added   78   78   69   35   35   lp   - kind=entry-release
+fix2same       AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
+fix2same       AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
+fix3same       HEADER       changed 1    1    1    1    1    run  basis_sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fix3same       HEADER       changed 1    1    1    1    1    run  sha256 ^(basis_sha256=|parent\[0\] kind=basis )
+fix3same       BASIS        changed 3    3    3    3    3    run  value ^name="extract\.(build_identity|units_from|extended_facts_f5)"
+fix3same       BASIS        changed 2    2    2    2    2    wb   value ^name="(param\.walk_bounds|count\.walk_bounds_hit)"
+fix3same       BASIS        changed 1    1    1    1    1    lp   value ^name="count\.lock_paths"
+fix3same       BASIS        changed 2    2    2    0    0    inc  value ^name="count\.(lock_ops|lockset)"
+fix3same       BASIS        added   1    1    1    1    1    inc  - ^name="count\.indirect_calls_incomplete"
+fix3same       CALL_TARGETS added   44   44   22   0    0    inc  - reason=incomplete-source
+fix3same       LOCKSET      changed 20   20   39   0    0    inc  first,flags,held_root,n_held,opener_root flags=\{unknown-release\}
+fix3same       LOCKSET      changed 8    8    8    0    0    inc  flags flags=\{unknown-release\}
+fix3same       LOCK_OPS     changed 5    5    0    0    0    inc  chain flags=\{[^}]*unknown-identity
+fix3same       LOCK_OPS     changed 47   47   34   0    0    inc  chain,depth flags=\{[^}]*unknown-identity
+fix3same       LOCK_OPS     removed 115  115  71   0    0    inc  - flags=\{[^}]*unknown-identity
+fix3same       LOCK_OPS     added   46   46   32   0    0    inc  - flags=\{[^}]*unknown-identity
+fix3same       LOCK_PATHS   removed 0    0    0    6    6    lp   - kind=entry-release
+fix3same       LOCK_PATHS   added   75   75   66   35   35   lp   - kind=entry-release
+fix3same       AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
+fix3same       AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
 '''
 TSRC = 'built-in'
 if os.environ.get('STEP2A_ALLOW_TABLE'):
@@ -315,6 +358,21 @@ IDENT = {'BASIS': ('name',), 'P0_TABLE': ('name',), 'FIELD_STATUS': ('type', 'fi
          'LOCKSET': ('fn', 'site', 'read', 'line', 'col', 'fh', 'kind', 'type', 'field', 'file'),
          'LOCK_OPS': ('fn', 'site', 'kind', 'mode', 'ident', 'may', 'primitive')}
 problems = []
+
+
+def fields_of(rec):
+    d = collections.defaultdict(list)
+    for k, v in FIELD.findall(rec):
+        d[k].append(v)
+    return d, ' '.join(FIELD.sub(' ', rec).split())
+
+
+def differing(old, new):
+    (da, ta), (db, tb) = fields_of(old), fields_of(new)
+    out = sorted(k for k in set(da) | set(db) if da.get(k) != db.get(k))
+    if ta != tb:
+        out.append('<text>')
+    return ','.join(out) or '<none>'
 
 
 def ident(sec, rec):
@@ -383,21 +441,26 @@ entries = []
 for n, line in enumerate(ALLOW.split('\n'), 1):
     if not line.strip() or line.lstrip().startswith('#'):
         continue
-    p = line.split(None, 9)
-    if len(p) < 10 or p[2] not in ('changed', 'added', 'removed'):
-        problems.append('table line %d is not step section change n1..n5 ref key' % n)
+    p = line.split(None, 10)
+    if len(p) < 11 or p[2] not in ('changed', 'added', 'removed'):
+        problems.append('table line %d is not step section change n1..n5 ref fields key' % n)
+        continue
+    if (p[2] == 'changed') != (p[9] != '-') or not re.match(r'^(-|[\w<>]+(,[\w<>]+)*)$', p[9]):
+        problems.append('table line %d: fields %s (changed: a comma list of field names; added, removed: -)' % (n, p[9]))
         continue
     if p[0] != STEP:
         continue
     want = p[3 + BUILDS.index(BUILD)] if BUILD in BUILDS else '-'
     try:
         entries.append({'sec': p[1], 'chg': p[2], 'want': 0 if want == '-' else int(want), 'ref': p[8],
-                        'key': p[9], 'rx': re.compile(p[9]), 'got': 0})
+                        'fields': p[9] if p[9] == '-' else ','.join(sorted(set(p[9].split(',')))),
+                        'key': p[10], 'rx': re.compile(p[10]), 'got': 0})
     except (ValueError, re.error) as e:
         problems.append('table line %d: %s' % (n, e))
 unexpected = collections.Counter()
 examples = collections.defaultdict(list)
 total = collections.Counter()
+sigs = collections.Counter()
 for s in sorted(set(a) | set(b)):
     if s == 'STRINGS':
         continue
@@ -414,28 +477,37 @@ for s in sorted(set(a) | set(b)):
     for k in sorted(set(ri) | set(ai), key=repr):
         x, y = ri.get(k, []), ai.get(k, [])
         m = min(len(x), len(y))
-        recs += [('changed', r) for r in y[:m]] + [('removed', r) for r in x[m:]] + [('added', r) for r in y[m:]]
-    for chg, r in recs:
+        recs += ([('changed', r, o) for o, r in zip(x[:m], y[:m])] + [('removed', r, None) for r in x[m:]] +
+                 [('added', r, None) for r in y[m:]])
+    for chg, r, o in recs:
         total[chg] += 1
-        hit = [e for e in entries if e['sec'] == s and e['chg'] == chg and e['rx'].search(r)]
+        sig = differing(o, r) if chg == 'changed' else '-'
+        keyed = [e for e in entries if e['sec'] == s and e['chg'] == chg and e['rx'].search(r)]
+        if chg == 'changed':
+            sigs[(s, ' | '.join(sorted({e['key'] for e in keyed})) or '-', sig)] += 1
+        hit = [e for e in keyed if e['fields'] == sig]
         if len(hit) == 1:
             hit[0]['got'] += 1
             continue
-        why = 'unexpected' if not hit else 'matched by %d entries' % len(hit)
-        unexpected[(s, chg, why)] += 1
-        if len(examples[(s, chg, why)]) < 3:
-            examples[(s, chg, why)].append(r)
+        why = ('unexpected' if not keyed else 'unexpected fields') if not hit else 'matched by %d entries' % len(hit)
+        unexpected[(s, chg, why, sig)] += 1
+        if len(examples[(s, chg, why, sig)]) < 3:
+            examples[(s, chg, why, sig)].append(r)
 print('per-record table: %s; step %s, build %s; %d entries' % (TSRC, STEP, BUILD, len(entries)))
 for e in entries:
     ok = e['got'] == e['want']
     if not ok:
-        problems.append('%s %s %s: expected %d, found %d' % (e['sec'], e['chg'], e['key'], e['want'], e['got']))
-    print('  %s %s %s [%s] %s: expected %d, found %d' % ('ok' if ok else 'COUNT', e['sec'], e['chg'], e['ref'], e['key'],
-                                                       e['want'], e['got']))
-for (s, chg, why), n in sorted(unexpected.items()):
-    problems.append('%s %s record(s) %s: %d' % (s, chg, why, n))
-    print('  %s %s %s: %d, e.g. %s' % (why.upper() if why == 'unexpected' else why, s, chg, n,
-                                       ' | '.join(re.sub(r'\s+', ' ', x)[:200] for x in examples[(s, chg, why)])))
+        problems.append('%s %s fields=%s %s: expected %d, found %d' % (e['sec'], e['chg'], e['fields'], e['key'],
+                                                                     e['want'], e['got']))
+    print('  %s %s %s [%s] fields=%s %s: expected %d, found %d' % ('ok' if ok else 'COUNT', e['sec'], e['chg'], e['ref'],
+                                                                 e['fields'], e['key'], e['want'], e['got']))
+for (s, k, sig), n in sorted(sigs.items()):
+    print('  fields %s changed {%s} key %s: %d' % (s, sig, k, n))
+for (s, chg, why, sig), n in sorted(unexpected.items()):
+    problems.append('%s %s record(s) %s%s: %d' % (s, chg, why, '' if sig == '-' else ' (fields %s)' % sig, n))
+    print('  %s %s %s%s: %d, e.g. %s' % (why.upper() if why.startswith('unexpected') else why, s, chg,
+                                         '' if sig == '-' else ' {%s}' % sig, n,
+                                         ' | '.join(re.sub(r'\s+', ' ', x)[:200] for x in examples[(s, chg, why, sig)])))
 for s in only_b:
     print('  section only in the second: %s' % s)
 for s in only_a:
@@ -652,6 +724,16 @@ fi
 if [ "$STEP" = all ] && [ -d "$OUT" ]; then
   shopt -s nullglob dotglob; E=("$OUT"/*); shopt -u nullglob dotglob
   [ ${#E[@]} -eq 0 ] || { echo "all writes into a new or empty output directory; $OUT is not empty" >&2; exit 2; }
+fi
+# every step: T/ (the cited 2a output) and any finished output (a top-level sha256.txt) are not written into, unless
+# STEP2A_OVERWRITE=1 (RV4 analysis 7.2 step 4, fix stage)
+FROZEN=/home/user/work/redesign/step2a/tests
+if [ -d "$OUT" ] && [ "${STEP2A_OVERWRITE:-}" != 1 ]; then
+  RO=$(cd "$OUT" && pwd -P) || { echo "cannot resolve $OUT" >&2; exit 2; }
+  RF=$(cd "$FROZEN" 2> /dev/null && pwd -P) || RF=
+  if [ "$RO" = "$RF" ] || [ -e "$OUT/sha256.txt" ]; then
+    echo "refusing: $OUT is T/ or holds a top-level sha256.txt (a finished output); STEP2A_OVERWRITE=1 overrides" >&2; exit 2
+  fi
 fi
 mkdir -p "$OUT" || { echo "cannot make $OUT" >&2; exit 2; }
 STATUS=$OUT/status.txt

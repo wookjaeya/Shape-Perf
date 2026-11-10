@@ -39,6 +39,7 @@ du -sb tests_8b -> 202207238; find -type f | wc -l -> 150; sha256.txt 137 lines 
 (cd T/ && sha256sum -c --quiet sha256.txt) -> rc 0; (cd tests_rv4 && ...) -> rc 0; (cd tests_8b && ...) -> rc 0
 python3 -I compare_8b.py MC/tools/kz-dump/kz-dump compare_8b.tsv tests_8b T/ tests_rv4 -> same 82, same-but-declared 56, DIFF 76 (AR 15.6 reads every DIFF line)
 diff T/count/summary.txt tests_8b/count/summary.txt -> 5 lines (the quote of the count.walk_bounds_hit line, one per build)
+  corrected in the 8b fix stage (AR 15.10, finding 7): the diff gives 10 changed lines in 6 hunks, not 5: the five quotes of the count.walk_bounds_hit line (381, 396, 411, 426, 441) and the five T7 lines (487-491, the facts and relations hashes); tests_rv4 gives the same 10
 diff tests_rv4/identity/<b>/<V>/{facts.dump.diff,show.diff} tests_8b/... -> only the basis hash, the STRINGS crc32 and the units_from value
 
 ## 9. per-object counts (counters.txt)
@@ -48,3 +49,4 @@ for the six identity cases: kz-static extract <EB profile args> --basis tests_8b
   -> rc 0, 'static image of' lines 0, cmp with tests_8b/identity/<b>/<V>/facts.kz: same (6); the copies removed
 free after: 960143360
 free at the end (before the second commit): 959553536 (2026-11-10T07:29:23Z)
+  note (8b fix stage, finding 11): the 8b report gave 1,161,089,024 at the start and 959,332,352 at the end; neither is recorded here or in df_build.log / df_run.log; the recorded values are 1161084928 before the build (07:11:18Z), 1161076736 the watcher's first entry, 961011712 after the run (07:21:41Z) and 959553536 at the end

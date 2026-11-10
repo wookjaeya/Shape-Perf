@@ -1,0 +1,16 @@
+record=step2a-20261110-8bfix
+kind=text record of the fix stage of step 8b: the 13 verifier findings checked, a code change, an in-place rebuild and a measurement run; not a bundle; no parts; not preserved in the CONFIG_MANAGEMENT 5 sense
+work=RV3A 6.7 step 8b, fix stage; PI answer 11-10 Q12 (ga), rebuild in place in MC; AR section 15.10 (15.10.0 the declaration, committed before the build as ea4e406; 15.10.1 the findings)
+build_dir=/home/user/work/merge-check/kz-llvm (MC; no second build directory)
+tool_before=kz-static 7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9 (the 8b tool; tool_source a1cc829a)
+tool_after=kz-static 3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2 (tool_sha256 9b9189d1cc7961ff13418af5fa53800f04f13913bb8e5a75a20e31631481d722, tool_source ae73a609c78665d7cb39e4811d4634b5f594717b0bec466316bdf46706ab1d34, core_source f6e3c7b4 unchanged)
+unchanged=kz b254483e, kz-dump 05623054, kz-rt-dump 4390d4f1, kz-phi 7d34e6e2 (not rebuilt)
+source=6fc275e (code, tests, kairos docs; committed after the tests and before the run); the run's identity.txt: repo 6fc275e, kairos_uncommitted_lines=0
+outputs=/home/user/work/redesign/step2a/tests_8b_fix (outside the repository; 149 files, 202169780 bytes; not in T/, tests_rv4 or tests_8b)
+outputs_sha256_list=sha256.txt here (136 lines; sha256 b87a5a94ae4158da6a4d91f4d7b4c27939f2008dfeb784bb4b3144531b5ecba2)
+status_sha256=7757bbef64b91dfaf181ed77537bf2422efa60fb066b576ce7962d6b882ce826 (status.txt here)
+rc=make 0; ctest 239 tests, 0 failed, 1 skipped (second run; the first run failed one test expectation, fixed); lint 6 of 6; unit checks 6 of 6; all 0 (ten steps PASS, no FAIL line)
+compared_with=tests_8b, T/ (/home/user/work/redesign/step2a/tests) and tests_rv4, every file, nothing masked: compare_8bfix.tsv (AR 15.10.6)
+counts=image_budget_exhausted 0 and image_leaves_omitted 0 in each of the five builds (BASIS as in tests_8b); verdicts and burden.tsv unchanged
+no cFS booted; nothing deleted; not pushed
+files=INFO.txt commands.txt declared_before_build.txt pre_mc.txt post_mc.txt make.log ctest_full.log unit.txt status.txt sha256.txt twice_detail.txt compare_8bfix.py compare_8bfix.tsv fix_checks.txt df_build.log df_run.log

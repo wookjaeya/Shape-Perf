@@ -813,3 +813,47 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 - 하지 않은 것: 소비자 규칙(RV3A §2.5 ③, 잘린 이미지를 UNKNOWN으로), PD A3:173·부록 C:1009·S3:215의 근거 문구 바꾸기(§2.5 ⑤, §6.7 6의 문서 정정), 8c(O2·O8·O9·O12, `legacy-case` 라벨), E1(Q4), B8, B4, CM:42. RV3A §6.6 Q12·PD·STATUS의 상태 줄도 고치지 않았다.
 - `T_8B/`(202 MB)는 지우지 않았다. CM §5의 보존이 아니다. 보존 위치는 PI 답(PD D4) 뒤다.
 - 2a 도구는 MC에 없다. PV `kz-static.db172b74.xz`가 그 사본이다.
+
+## 15.10 수정 단계: 8b 검증 지적과 처리 (2026-11-10)
+
+- 성격: 8b 검증의 지적 13건(차단 2, 비차단 11)을 파일과 출력에 대어 보고 처리한 기록이다. 코드 수정, MC 제자리 재빌드, `all` 재실행을 포함한다. 예산 값(4096), 등급 규칙, 조건 값은 바꾸지 않았다. cFS를 기동하지 않았다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가) 그대로다. 빌드 디렉터리는 MC 하나다.
+- 기록: 저장소 `records/step2a-20261110-8bfix/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8b_fix/`(이하 `T_8BF/`)다. T/, `T_RV4/`, `T_8B/`에는 쓰지 않는다.
+
+### 15.10.0 바뀌어도 되는 것의 선언 (빌드 전에 적고 커밋함) [D]
+
+빌드와 재실행 전에 적었다. 이 선언은 빌드 전에 커밋한다(지적 #12의 처리). 기준은 `T_8B/`다. T/와 `T_RV4/` 대비는 §15.0의 차이에 아래를 더한 것이다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **도구 해시**: kz-static만 바뀐다(`ast_tu.cpp`, `finalize.cpp`). kz·kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않는다 [I: `lib/llvm`을 링크하지 않고 `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않음]. `tests/static/CMakeLists.txt`를 고쳐 MC가 다시 구성(cmake)된다. 도구 identity는 그 파일을 읽지 않는다(`cmake/KzSourceIdentity.cmake`).
+- **golden**: 새 파일 하나 `tests/static/data/imgbudget_np.golden`(imgbudget.c, `--no-profile --image-budget 4`). 그 밖의 golden은 바뀌지 않는다. 까닭: fixture에 덮어쓰는 지정자나 목록 아닌 배열 초기값이 없다(grep), 그리고 고정 도구 golden은 잘린 이미지가 없다. 시험 확인은 더한다(`test_static_flow`, `test_static_cli`). 기존 확인 문자열은 고치지 않는다.
+- **NP 출력**(`T_8BF/<build>/NP`·`NP2` 대 `T_8B/`):
+  - basis.kz: HEADER `tool_sha256`과 파일 해시. 레코드는 같다. basis.txt: `basis <sha256>` 줄(C1·R2는 1째 줄, C5는 5째 줄).
+  - NP2: NP와 같은 규칙이다(같은 실행의 둘째 추출).
+  - facts.kz: HEADER `tool_sha256`·`basis_sha256`·parent `sha256`. BASIS `extract.units_from`(basis 해시 앞 16자). STRINGS 바이트와 그 crc32. 그 밖의 섹션 레코드와 crc32, 컨테이너 크기는 `T_8B/`와 같다 [I: 바뀌는 글의 길이가 같다]. `count.walk_bounds_hit`는 `T_8B/`와 같다(두 계수 0).
+  - facts.txt: `extract.units_from` 한 줄. extract.txt: 1째 줄 `facts <sha256>`. relations.txt: 2째 줄 `facts <sha256>`. relations.log, args.txt: 바이트 동일.
+- **판정 입력**: tsv 일곱 바이트 동일. `count/summary.txt`: T7 줄 다섯(487–491, facts·relations 해시)만 다르다. `count.walk_bounds_hit` 인용 다섯 줄은 `T_8B/`와 같다. T/·`T_RV4/` 대비는 열 줄이다(§15.10.8). `twice`: 같은 실행 안에서 same.
+- **identity**(V0·V2 × C1 pre tx·R2 core·C5 6.4.1): EB 대비 판정은 허용표의 기존 항목만으로 PASS, 변경 수 basis 1/0/0, facts 4/0/0. `T_8B/` 대비: basis.kz HEADER, basis.txt 해시 줄(C1·R2 1째 줄, C5 V0 5째 줄, C5 V2 7째 줄), facts.kz HEADER·BASIS `extract.units_from`·STRINGS, facts.txt `units_from` 줄, extract.txt `facts` 줄(c5_641 V2는 3째 줄, 앞에 경고 두 줄), facts.dump.diff·show.diff의 그 값이 든 줄(`units_from`, STRINGS crc32).
+- **드라이버 비교**(npsame, s5same, fixsame, fix2same, fix3same): 허용표를 고치지 않는다. PASS, 변경 수는 §14.4·§15.5와 같다. npsame/<b>/extract.txt: 1째 줄.
+- **실행 기록**: `run.log`, `status.txt`, `identity/identity.txt`, `identity/kairos.diff`, 디렉터리마다의 `sha256.txt`의 해시 줄.
+- **조건부 1**(지적 #4의 수정이 다섯 빌드에 닿을 때만): 어느 빌드나 identity 경우에 목록·문자열·0 채움이 아닌 배열 초기값이 있으면, 그 배열 자리에 상수 아닌 잎 하나가 STATIC_IMAGE·GLOBAL_IMAGES에 더해진다. BASIS `count.global_images`와 STRINGS도 바뀐다. 이것은 고친 동작이다. 그때 identity가 EB 대비 FAIL이면 그 행을 인용한 허용 블록을 따로 더해 새 디렉터리에 다시 돌린다(기존 항목은 넓히지 않는다). relations가 그 행으로 바뀌면 그대로 적는다.
+- **조건부 2**(지적 #2): table walk의 이유 문장은 그 이미지에 표시 잎이 있을 때만 바뀐다. 다섯 빌드는 표시 잎이 0이므로 바뀌지 않아야 한다.
+
+### 15.10.1 지적별 판단 [M][F]
+
+| # | 지적 | 판단 | 처리 |
+|---|---|---|---|
+| 1 | schema §19의 "옛 독자 규칙"이 relations에서 틀림(차단) | 맞음 [M]. 원소 셋의 표, `--image-budget 5`에서 표시 `table[2].fn...`이 덮는 검사(`relations.cpp:606-608`)에 걸리지 않는다. entry가 `main_a main_b` → `main_b`, table-image-entry 2 → 1, path C 1 → 0. 예산 4(배열 표시)에서는 "1 non-constant leaf covering" 줄이 붙는다. relations는 `KZ_GIMAGE_FLAG_TRUNCATED`를 읽지 않는다(grep). PTR_FIELDS 값 읽기(`:2808`)는 필드가 빈 행을 건너뛴다 [F]. 2a 도구도 같은 relations 출력이라 회귀는 아니다 | 문서만: schema §19 고쳐 씀, SF §5j 소비자 문단 고쳐 씀, RV3A §2.5 ③에 relations를 더함(줄 수 그대로). RV3A §6.7에는 ③의 소비자 목록이 없어 고치지 않았다. relations 코드는 ③ 몫이라 고치지 않았다 |
+| 2 | 표시 잎 위 table walk의 이유가 틀림 | 맞음 [M]: `--image-budget 2`에서 8b 도구는 "no null element ends the table g_cfg.list"를 낸다. `has_prefix_entries`가 `g_cfg.list...`를 중첩 항목으로 본다 | 코드: `finalize.cpp`. 앞부분 조회가 표시 잎을 빼고, 풀리지 않은 walk의 이미지에 표시 잎이 있으면 이유가 잘림을 적는다. 풀리는지는 바뀌지 않는다 |
+| 3 | 이름 없는 멤버의 표시 경로 `s_an....` | 맞음 [M]. 다만 보통 잎도 빈 이름을 쓴다(`s_an..b`, `field=<anonymous>.b`). 이름을 넣으면 잎과 표시의 경로 규칙이 갈린다 | 문서: SF §5j에 빈 이름 규칙을 적음. 시험: `test_static_cli`(C11이라 C99 fixture가 아닌 시험 안 소스) |
+| 4 | DesignatedInitUpdateExpr 배열이 표시 없이 빠짐 | 맞음 [M]: 기본 예산에서 2a·8b 도구 모두 `u_du.s` 행이 없다. 예산과 무관하다 | 코드(따로 항목): 목록·문자열·0 채움이 아닌 배열 초기값은 상수 아닌 잎 하나(레코드와 같음). `image_has_leaf`도 같게. 시험: `test_static_cli` |
+| 5 | ④의 golden 대신 확인 문자열 | 맞음 [F]: 엉뚱한 행이 더 있어도 통과할 수 있다 | golden `imgbudget_np` 추가(잎과 플래그). 계수는 BASIS라 golden에 없고 `test_static_cli`가 본다 |
+| 6 | 결함 없음(쓸기 확인) | 받음. 다시 볼 것 없음 | 없음 |
+| 7 | summary.txt는 다섯 줄이 아니라 열 줄(차단) | 맞음 [M]: `diff`가 10줄 6 덩이. 인용 다섯(381·396·411·426·441)과 T7 다섯(487–491) | §15.6·§15.7·commands.txt를 고침. 셋째 선언 틀림으로 적음. `declared_before_run.txt`는 그대로 |
+| 8 | facts.kz 비교가 가린 차이 | 맞음, 한 곳은 좁힘 [M]. HEADER `tool_sha256`(`5e5d9e4e…` → `add6cb73…`), 컨테이너 크기(10,980,536 → 10,980,752, c1_pre_tx), STRINGS가 바뀐다. 섹션 crc32는 C1·C5에서 37개 가운데 33개, R2에서 35개가 바뀐다. 바뀌지 않은 것은 빈 섹션(crc 0: DERIVES, LOOP_ITERS·STATIC_IMAGE는 C1·C5)과 LOCK_PATHS다. 지적의 "37개 모두"는 넘친다 | §15.6에 비교 수준(복호 레코드, 가린 칸)과 이 차이를 적음. 이번 비교는 가리지 않는다(§15.10.6) |
+| 9 | identity 행과 덮지 않은 파일 | 맞음 [M]: c5_641 V2 extract.txt는 3째 줄. facts.dump.diff의 STRINGS crc32 줄. 덮지 않은 파일: identity basis.txt 6(c5_641 V2는 7째 줄), npsame extract.txt 5, 디렉터리별 sha256.txt. 모두 해시 줄만 다르다 | §15.6에 적음. 이번 비교 스크립트는 출력 디렉터리의 모든 파일을 본다 |
+| 10 | §15.2에 `ast_reader.hpp` 빠짐 | 맞음 [M: `git show --numstat fdea6a8`, +6] | §15.2에 한 줄 |
+| 11 | 보고의 df 값이 기록에 없음 | 맞음 [M]: 1,161,089,024와 959,332,352는 어느 기록에도 없다 | 기록된 값(앞 1,161,084,928, 끝 959,553,536)을 §15.10.8에 적음. 보고는 기록 값을 쓴다 |
+| 12 | 선언이 실행 전이라는 근거가 mtime뿐 | 맞음 [F] | 8b: §15.0에 그 사실을 적음. 이번: 선언을 빌드 전에 커밋하고 그 sha256을 commands.txt 1째 줄에 적음 |
+| 13 | ④와 다름을 적지 않음 | 맞음 [F]. #5와 같은 일 | #5의 golden으로 ④의 잎·플래그를 채움. 계수는 확인 문자열로 둔 까닭을 §15.4에 적음 |
+
+- 버린 지적은 없다. #8은 crc32 수를 좁혀 받았다. #1은 코드를 고치지 않고 문서로 받았다(지적이 권한 대로; relations의 규칙은 ③).

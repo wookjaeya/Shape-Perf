@@ -1,0 +1,3 @@
+# declaration: sha256 of the AR lines from the 16.10 heading to the end, before the build = e37787c240b4070d9f572866858e70626d5e207a56f277a0de8fd70164a54544 (2026-11-10T09:47:30Z; declared_before_build.txt here; committed before the build)
+# step2a-20261110-8cfix: commands, rc and free space (df -B1 /, bytes available)
+start: 2026-11-10T09:47:30Z, free 448839680

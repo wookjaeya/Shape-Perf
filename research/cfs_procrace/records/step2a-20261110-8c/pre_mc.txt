@@ -1,0 +1,33 @@
+# MC tools before the 8c rebuild (2026-11-10T08:37:17Z); they must equal the 8b fix post_mc.txt values
+3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2  tools/kz-static/kz-static
+b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+2026-11-10 08:01:30.054856891 +0000 176688936 tools/kz-static/kz-static
+2026-10-30 16:43:03.281082304 +0000 75503864 tools/kz/kz
+2026-10-30 16:41:39.341084223 +0000 2514528 tools/kz-dump/kz-dump
+2026-10-29 07:31:59.427491407 +0000 3350272 runtime/kz-rt-dump
+2026-10-30 16:41:44.817084098 +0000 28644248 tools/kz-phi/kz-phi
+2026-10-30 12:45:07.497408824 +0000 3961464 tests/lint/kz_lint
+2026-10-29 07:32:41.019493879 +0000 97195536 instrument/clang/kz-instr-clang
+# kz-static --identity (before)
+tool=kz-static
+tool_sha256=9b9189d1cc7961ff13418af5fa53800f04f13913bb8e5a75a20e31631481d722
+tool_source=ae73a609c78665d7cb39e4811d4634b5f594717b0bec466316bdf46706ab1d34
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# kz --identity (before)
+kz: unknown command '--identity'
+
+usage: kz <command> [arguments]
+
+commands:
+# tool identity defines (flags.make)
+kz KZ_TOOL_SOURCE_SHA256=\"8ef6d6d7c09caef38c2f89d184c5ba8f61a215841d19a8abd601a0fb0cfb28b0\"
+kz-phi KZ_TOOL_SOURCE_SHA256=\"7fc3ed73d83e5977112ef6c7a0d75c86de4f2871be72d299260a18b5c56713f8\"
+kz-static KZ_TOOL_SOURCE_SHA256=\"ae73a609c78665d7cb39e4811d4634b5f594717b0bec466316bdf46706ab1d34\"
+kz-dump KZ_TOOL_SOURCE_SHA256=\"cc51ff352881eb7fd56ec3c1d56cb53ff946c86ff51af310436e3850fce2ba2a\"
+# repository
+HEAD=a5d52a2
+uncommitted lines under kairos (git diff -- kairos | wc -l): 0
+# free (df -B1 /): 667750400

@@ -1,0 +1,1 @@
+# declaration: sha256 of the AR lines from the 16 heading to the end, before the build = 8ada6603ecab0b38c8b5270f3605945925c087dbe3faf3398f98fa1b15aefdfa (2026-11-10T08:40:44Z; declared_before_build.txt here; committed before the build)

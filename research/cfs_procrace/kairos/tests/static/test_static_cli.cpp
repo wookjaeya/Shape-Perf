@@ -1367,9 +1367,9 @@ startup_script {
                     &out),
                 0);
     KZ_CHECK(has(out, "location NoSuch_t.nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
-                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is defined in the units read)"));
+                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is found among the file-scope tags and typedef names of the units read)"));
     KZ_CHECK(has(out, "location Slot.nofield   writers 0 "));
-    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is defined in the units read)"));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is found among the file-scope tags and typedef names of the units read)"));
     KZ_CHECK(has(out, "-> unknown-target (the record type Cell has no field nofield in the units read)"));
     KZ_CHECK(!has(out, "nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
                        "writer-set-complete"));
@@ -1380,8 +1380,8 @@ startup_script {
     KZ_CHECK(has(out, "hand-entered inputs        15 (built-in data-function table 12, command line 3)"));
     std::string sv;
     KZ_CHECK_EQ(run(q(tool) + " show " + q(tk) + " --section basis --section locs", &sv), 0);
-    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is defined in the units read; FACT_LOCS status unchecked (not "
-                     "writer-set-complete)  (unset)"));
+    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is found among the file-scope tags and typedef names of the units "
+                     "read; FACT_LOCS status unchecked (not writer-set-complete)  (unset)"));
     KZ_CHECK(has(sv, "unknown_target.Cell.nofield = unknown-target: the record type Cell has no field nofield in the units read; FACT_LOCS status unchecked"));
     KZ_CHECK(!has(sv, "unknown_target.Cell.id"));
     KZ_CHECK(has(sv, "  NoSuch_t.nofield unchecked writers=0"));
@@ -1393,7 +1393,9 @@ startup_script {
     KZ_CHECK(has(sv, "extract.resource_dir = "));
     KZ_CHECK(has(sv, "extract.extra_arg = none  (unset)"));
     KZ_CHECK(!has(sv, "extract.extra_arg[0]"));
-    // a declared command-line target keeps the rule; --resource-dir and --extra-arg are recorded as given
+    // Cell.id is also the profile's target (00_fixture.kzp loc Cell.id): a declared target given again on the command
+    // line keeps the rule.  --extra-arg is recorded as given.  The command-line-only declared target (Cell.aux) and
+    // --resource-dir are checked in the 8c fix block below.
     KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.id --extra-arg -DKZ_8C_A=1 --extra-arg -Wall -o " +
                         q(ok) + " -- -std=c99 -pedantic",
                     &out),
@@ -1406,7 +1408,10 @@ startup_script {
     KZ_CHECK(has(sv, "extract.extra_arg[1] = -Wall  (unset)"));
     KZ_CHECK(!has(sv, "extract.extra_arg = none"));
     KZ_CHECK(!has(sv, "unknown_target."));
-    KZ_CHECK(has(sv, " (the tool's built-in default; no --resource-dir)  (unset)") || has(sv, "extract.resource_dir = none (no resource directory"));
+    // this build has a built-in resource directory (main.cpp KZS_DEFAULT_RESOURCE_DIR): the value is exactly that one
+    KZ_CHECK(has(sv, "\n  extract.resource_dir = /"));
+    KZ_CHECK(has(sv, " (the tool's built-in default; no --resource-dir)  (unset)\n"));
+    KZ_CHECK(!has(sv, "extract.resource_dir = none"));
     // relations counts a command-line target once among the hand-entered vocabulary
     KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.nofield -o " +
                         q((X / "rel.kz").string()) + " -- -std=c99 -pedantic",
@@ -1414,6 +1419,79 @@ startup_script {
                 0);
     KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "rel.kz").string()), &out), 0);
     KZ_CHECK(has(out, "; hand-entered vocabulary on the command line: 1 items\n"));
+  }
+
+  // ---- 8c fix stage: the reason text, a --target the profile also names, a declared target the profile does not
+  // name, a nested tag (a known limit: only file-scope tags are looked up), the resource directory as used
+  {
+    const fs::path X = work / "8cfix";
+    fs::create_directories(X);
+    const std::string wc = fixtures + "/writers.c";
+    std::string out, sv;
+    // a declared command-line target that the profile does not name: Cell.aux of writers.c keeps the rule
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.aux -o " + q((X / "aux.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.aux   writers 2 (direct 1, data function 1, out-pointer 0, initial values 4), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete\n"));
+    KZ_CHECK(!has(out, "unknown-target"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "aux.kz").string()) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "target.Cell.aux = command line  (declared-assumption)"));
+    KZ_CHECK(has(sv, "  Cell.aux writer-set-complete writers="));
+    KZ_CHECK(!has(sv, "unknown_target."));
+    // the resource directory in use: the built-in default, then the same path through --resource-dir and through
+    // --extra-arg -resource-dir= (which comes after the tool's own -resource-dir and is the one used)
+    const std::string key = "\n  extract.resource_dir = ";
+    const size_t at = sv.find(key);
+    KZ_CHECK(at != std::string::npos);
+    const std::string tail = at == std::string::npos ? std::string() : sv.substr(at + key.size());
+    const std::string dir = tail.substr(0, tail.find(" (the tool's built-in default; no --resource-dir)"));
+    KZ_CHECK(!dir.empty() && dir[0] == '/' && dir.find('\n') == std::string::npos);
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --resource-dir " + q(dir) + " -o " +
+                        q((X / "rd.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rd.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = " + dir + " (--resource-dir)  (unset)\n"));
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --extra-arg -resource-dir=" + q(dir) + " -o " +
+                        q((X / "rdx.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rdx.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = " + dir + " (--extra-arg -resource-dir, after and over the tool's: " + dir +
+                         " (the tool's built-in default; no --resource-dir))  (unset)\n"));
+    KZ_CHECK(has(sv, "extract.extra_arg[0] = -resource-dir=" + dir + "  (unset)\n"));
+    // an empty --resource-dir: no resource directory (writers.c needs no system header, so it is read)
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --resource-dir '' -o " + q((X / "rd0.kz").string()) +
+                        " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "rd0.kz").string()) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.resource_dir = none (no resource directory: the front end's own search)  (unset)\n"));
+    // a --target that the profile also names (Cell.id) on a source without Cell: checked like a command-line target;
+    // its record keeps the profile's origin.  A nested tag (Inner, inside Outer) is not looked up: unknown-target.
+    write(X / "other.c", "struct Outer { struct Inner { int ix; } in; };\nstruct Inner g_inner;\nvoid w(void) { g_inner.ix = 9; }\n");
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) +
+                        " --target Cell.id --target Inner.ix -o " + q((X / "other.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.id   writers 0 "));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Cell is found among the file-scope tags and typedef names of the units read)"));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Inner is found among the file-scope tags and typedef names of the units read)"));
+    KZ_CHECK(!has(out, "-> writer-set-complete"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q((X / "other.kz").string()) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "target.Cell.id = profile loc Cell.id  (from-reference)"));
+    KZ_CHECK(has(sv, "unknown_target.Cell.id = unknown-target: no record type Cell is found among"));
+    KZ_CHECK(has(sv, "  Cell.id unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Inner.ix unchecked writers=0"));
+    // without --target the profile's Cell.id keeps the profile rule (the open defect of static_facts.md 5k)
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q((X / "other.c").string()) + " --root " + q(X.string()) + " -o " +
+                        q((X / "other0.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location Cell.id   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> writer-set-complete"));
   }
 
   fs::remove_all(work);

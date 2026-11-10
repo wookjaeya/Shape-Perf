@@ -39,7 +39,13 @@ bool add_cli_vocabulary(const Args& args, kzs::ExtractSpec* spec, std::string* e
       *err = "--target expects Type.field, got " + t;
       return false;
     }
-    if (!spec->has_field(f)) spec->fields.push_back(kzs::TargetField{f, kCommandLine});
+    bool named = false;
+    for (kzs::TargetField& tf : spec->fields)
+      if (tf.field == f) {
+        tf.command_line = true;
+        named = true;
+      }
+    if (!named) spec->fields.push_back(kzs::TargetField{f, kCommandLine, true});
   }
   struct Set {
     const char* option;
@@ -267,9 +273,26 @@ int cmd_extract(int argc, char** argv) {
   }
   ro.root = root;
   so.root = root;
-  // the reading options of the front end (CONFIG_MANAGEMENT 1): the resource directory in use and every extra argument
-  so.notes.push_back({"extract.resource_dir", ro.resource_dir.empty() ? std::string("none (no resource directory: the front end's own search)")
-                                                                      : ro.resource_dir + (args.has("--resource-dir") ? " (--resource-dir)" : " (the tool's built-in default; no --resource-dir)")});
+  // the reading options of the front end (CONFIG_MANAGEMENT 1): the resource directory in use and every extra argument.
+  // The tool adds -resource-dir=<dir> before the extra arguments (ast_run.cpp adaptations), so a -resource-dir among
+  // them comes later and is the one the front end uses (its last one); the value says so.
+  {
+    const std::string own = ro.resource_dir.empty() ? std::string("none (no resource directory: the front end's own search)")
+                                                    : ro.resource_dir + (args.has("--resource-dir") ? " (--resource-dir)" : " (the tool's built-in default; no --resource-dir)");
+    std::string later;
+    bool overridden = false;
+    for (size_t i = 0; i < ro.extra_args.size(); ++i) {
+      const std::string& a = ro.extra_args[i];
+      if (a.compare(0, 14, "-resource-dir=") == 0) {
+        later = a.substr(14);
+        overridden = true;
+      } else if (a == "-resource-dir" && i + 1 < ro.extra_args.size()) {
+        later = ro.extra_args[++i];
+        overridden = true;
+      }
+    }
+    so.notes.push_back({"extract.resource_dir", overridden ? later + " (--extra-arg -resource-dir, after and over the tool's: " + own + ")" : own});
+  }
   if (ro.extra_args.empty()) so.notes.push_back({"extract.extra_arg", "none"});
   for (size_t i = 0; i < ro.extra_args.size(); ++i) so.notes.push_back({"extract.extra_arg[" + std::to_string(i) + "]", ro.extra_args[i]});
 

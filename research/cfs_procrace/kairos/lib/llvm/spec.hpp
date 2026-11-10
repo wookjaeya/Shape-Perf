@@ -20,6 +20,9 @@ namespace kzs {
 struct TargetField {
   FieldRef field;
   std::string origin;  // "profile loc NAME", "profile bind", "profile store pattern", "command line"
+  // A --target that names a target the profile already has: the record keeps the profile's origin, and the
+  // declaration check of a command-line target applies to it too (static_facts.md 5k).
+  bool command_line = false;
 };
 
 // A call whose parameters have roles (stamp / key / id), from an operation of the profile.  The `out` role of a

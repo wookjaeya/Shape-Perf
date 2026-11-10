@@ -504,25 +504,33 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 근거: `plan/RV3_REVIEW_ANALYSIS_20261105.md` §6.3 O2·O12. 결과는 `plan/step2a_results_20261030.md` §16. facts schema 는 개정 11 그대로다(섹션·레코드 배치·열거형 변화 없음).
 
 **없는 명령줄 대상(`unknown-target`)** [D]. 명령줄 `--target T.f` 의 선언을 읽은 단위에서 찾는다. 찾는 규칙은 writer 를 맞추는 규칙과 같다(`TuReader::targets_of_field`: 필드 이름이 같고, 그 필드가 든 레코드나 그것을 감싼 이름 없는 레코드의 태그·typedef 이름에 `T` 가 있음). 레코드 정의만 센다. 앞선 선언(불완전 형)은 세지 않는다.
+- 찾는 이름은 파일 범위의 태그와 typedef 이름뿐이다(`TuReader::collect_typedefs`). 레코드 안에 둔 태그(`struct Outer { struct Inner { int ix; } in; }` 의 `Inner`)와 블록 안의 태그는 보지 않는다. 그래서 그런 `T` 는 선언이 있어도 `unknown-target` 이다. 상태(unchecked)는 안전한 쪽이다. 그 직접 쓰기는 writer 로 잡지 못한다 [M: 8c 수정 단계, C99 소스 둘]. 중첩 태그를 이름 표에 넣으면 writer 를 맞추는 규칙이 바뀐다. 그래서 따로 선언하고 빌드한다. 남는 결함이다.
+- 같은 규칙으로, 이름 없는 레코드 형의 멤버 안 필드도 감싼 레코드의 필드로 본다. `struct Unn { struct { int q; } m; }` 에서 `--target Unn.q` 는 선언이 있다고 보고, `g_unn.m.q = 5` 를 `Unn.q` 의 writer 로 센다 [M]. `Unn` 에는 멤버 `q` 가 없다(경로는 `m.q`). writer 를 맞추는 규칙의 성질이다. 바꾸지 않았다.
 - 어느 단위에도 없으면 FACT_LOCS 상태는 `unchecked` 다. `writer-set-complete` 가 아니다. 수(writers 등)는 0 이다.
-- BASIS 에 `unknown_target.T.f` 한 항목을 둔다(정책 unset). 값은 까닭이다: "no record type T is defined in the units read" 또는 "the record type T has no field f in the units read".
+- BASIS 에 `unknown_target.T.f` 한 항목을 둔다(정책 unset). 값은 까닭이다: "no record type T is found among the file-scope tags and typedef names of the units read" 또는 "the record type T has no field f in the units read". 8c 도구의 앞 글은 "no record type T is defined in the units read" 였다. 중첩 태그에는 틀린 글이라 8c 수정 단계에서 고쳤다.
 - extract 요약 줄은 `-> unknown-target (까닭)` 이다.
+- `--target` 이 프로필 대상과 같으면(예: fixture 프로필의 `loc Cell.id` 와 `--target Cell.id`) 대상 기록은 프로필의 출처 하나다(`target.T.f = profile …`). 8c 도구는 그 대상을 검사하지 않았다. 8c 수정 단계부터 명령줄 대상과 같은 검사를 한다(`TargetField::command_line`). 명령줄에서 다시 준 사실은 BASIS 에 따로 적지 않는다. 실행 기록(드라이버의 `args.txt`)에 남는다. 요약의 "hand-entered inputs" 수에도 들지 않는다. 2a 의 identity C1 pre tx V2 는 `--target` 일곱 가운데 셋이 프로필 대상이다(`OS_common_record_t.name_entry`, `OS_common_record_t.active_id`, `OS_count_sem_internal_record_t.obj_name`). 셋 다 선언이 있다 [M: FACT_LOCS writers 18, 6, 3].
 - 새 열거형 값은 두지 않았다. `layout.golden` 이 열거형을 적는다. 그래서 새 값은 기존 golden 과 schema 개정을 바꾼다.
 - 소비자: `unchecked` 는 complete 가 아니다. 루프 규칙(`unroll.cpp`)과 옛 재생의 정적 닫힘(`lib/trace/static_closure.cpp`)은 complete 만 완전한 것으로 본다.
-- 프로필 대상(`loc`, `bind`, store pattern)과 규칙 대상(`--targets-rule`)에는 적용하지 않는다. 규칙 대상은 프로그램의 필드에서 고르므로 늘 선언이 있다. 프로필 대상에는 같은 결함이 남는다 [M]: fixture 프로필의 `loc Cell.id` 는 `Cell` 이 없는 fixture 다섯(atype, loops, outptr, relations, clobber)의 golden 에 행이 있다. 넷은 `writer-set-complete writers=0` 이다. 고치면 옛 경로 golden 다섯이 바뀐다. 그래서 이 판에서는 고치지 않았다.
+- 프로필에만 있는 대상(`loc`, `bind`, store pattern)과 규칙 대상(`--targets-rule`)에는 적용하지 않는다. 두 곳 모두 같은 결함이 남는다.
+  - 규칙 대상 [M]: 8c 판의 문장 "규칙 대상은 프로그램의 필드에서 고르므로 늘 선언이 있다" 는 틀렸다. 규칙(R-T1, R-T2)은 형 이름을 `field_type_name` 에서 받는다(`lib/llvm/ast_fn.cpp:587-590`). `targets_of_field` 가 아무것도 맞추지 못하면 그 이름은 `record_name(fl->getParent())` 다. 이름 없는 레코드와 중첩 태그 레코드에서는 `<anonymous>` 다. 이름 표의 어느 항목도 `<anonymous>` 가 아니다. 그래서 직접 쓰기는 그런 대상의 writer 로 맞지 않는다. 그래도 상태는 `writer-set-complete` 다(8c 수정 단계 C99 소스: `g_anon.u1 = 3` 과 `g_outer.in.ix = 7` 이 있어도 `<anonymous>.u1`, `<anonymous>.ix` 가 `writer-set-complete writers=0`).
+  - 2a 다섯 빌드의 NP 에 그런 대상이 3 / 3 / 2 / 0 / 0 개 있다(c1_pre_tx, c1_post_tx: `<anonymous>.Data`, `.State`, `.sys_timebase_id`; r2_core: `.Data`, `.sys_timebase_id`). c1_pre_tx 의 `<anonymous>.State` 는 `writer-set-complete writers=0`, escape 0 이다. 그 필드는 이름 없는 구조체 `UnSock_Global` 의 멤버다(`psp/fsw/modules/unsock_intf/unsock_intf.c:81-85`). `:231` 의 memset 이 덮고, `:338` 에서 원소 주소를 받아 `:371`·`:409` 에서 쓴다. 이 대상들은 루프 행과 relations.txt 에 없다(grep 0). 그래서 T1–T7 은 바뀌지 않는다 [M].
+  - 고치는 길은 둘이다. 규칙 대상에도 이 검사를 하거나, 규칙이 `targets_of_field` 가 주는 이름(감싼 이름 있는 레코드)을 고른다. 어느 쪽이든 C1·R2 NP 의 FACT_LOCS 가 바뀐다. 그래서 따로 선언하고 빌드한다. 이 판에서는 고치지 않았다.
+  - 프로필 대상 [M]: fixture 프로필의 `loc Cell.id` 는 `Cell` 이 없는 fixture 의 golden 아홉에 나온다(`Cell` 은 `writers.c`·`derives.c` 에만 있다). `[locs]` 행과 요약 줄이 `writer-set-complete writers=0`: atype, loops, outptr, relations, spawn. 요약 줄만(그 golden 은 `[locs]` 를 싣지 않음): argflow, flowfacts, lockset. clobber 는 DISABLED. 8c 판은 "다섯, 그 가운데 넷" 이라 적었다. spawn 과 요약 줄의 셋을 빠뜨렸다. 고치면 옛 경로 golden 아홉 이상이 바뀐다. 그래서 이 판에서는 고치지 않았다.
 
-**명령줄 대상은 한 번 기록한다** [D]. 전에는 `target.T.f = command line` 과 `target.T.f = extraction target` 두 항목이었다. 이제 앞의 것 하나다(정책 declared-assumption, 출처 계층 researcher). 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). relations 의 "hand-entered vocabulary" 수는 대상을 한 번 센다. 전에는 두 번 셌다.
+**명령줄 대상은 한 번 기록한다** [D]. 전에는 `target.T.f = command line` 과 `target.T.f = extraction target` 두 항목이었다. 이제 앞의 것 하나다(정책 declared-assumption, 출처 계층 researcher). 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). relations 의 "hand-entered vocabulary" 수와 행마다의 layers 칸(`hand-entered:command-line(N items; …)`)은 대상을 한 번 센다. 전에는 두 번 셌다. 2a 출력에서는 보이지 않는다. relations 는 명령줄 대상이 있는 facts(identity)에서 돌지 않는다. 이 변화는 8c 의 빌드 전 선언에 없었다(`plan/step2a_results_20261030.md` §16.10).
 
 **읽기 옵션의 기록** [D]. facts BASIS 에 두 가지를 둔다(정책 unset).
-- `extract.resource_dir`: 단위를 읽을 때 쓴 resource 디렉터리다. `--resource-dir` 가 없으면 도구에 내장된 기본값을 쓴다. 값은 그 경로와 "(the tool's built-in default; no --resource-dir)" 또는 "(--resource-dir)" 다. 둘 다 없으면 "none (…)" 이다.
+- `extract.resource_dir`: 도구가 단위마다 더하는 `-resource-dir=` 의 값이다(`lib/llvm/ast_run.cpp` adaptations). `--resource-dir` 가 없으면 도구에 내장된 기본값이다. 값은 그 경로와 "(the tool's built-in default; no --resource-dir)" 또는 "(--resource-dir)" 다. 둘 다 없으면 "none (…)" 이다. `--resource-dir` 의 상대 경로는 준 그대로 적는다(풀지 않는다). `--resource-dir ""` 이면 resource 디렉터리 없이 읽고 값은 "none (…)" 이다. 그때 시스템 헤더를 쓰는 단위는 읽기가 실패해 facts 가 나오지 않는다 [M: 8c 수정 단계, `writers.c` 는 읽힘, `<stddef.h>` 를 쓰는 소스는 실패].
+- `--extra-arg -resource-dir=X`(또는 `-resource-dir` 와 `X` 두 인자)는 도구의 것보다 뒤에 붙는다. 프런트엔드는 마지막 것을 쓴다 [M: 8c 수정 단계, 가짜 resource 디렉터리의 `stddef.h` 매크로가 읽힘]. 8c 도구는 이때도 내장 기본값을 적었다. 8c 수정 단계부터 값은 `X (--extra-arg -resource-dir, after and over the tool's: <도구의 값>)` 이다. basis 의 단위 분석 인자(`front_end.unit_diagnostic`, 더 뒤에 붙음)는 보지 않는다.
 - `extract.extra_arg[i]`: `--extra-arg` 마다 하나, 준 차례대로. 없으면 `extract.extra_arg = none` 하나다.
-- basis 는 같은 값을 `front_end.arguments_added` 에 이미 적는다. 이제 extract 의 값도 facts 에서 되짚을 수 있다(CONFIG_MANAGEMENT §1).
+- basis 는 basis 를 만들 때의 값을 `front_end.arguments_added` 에 적는다. extract 는 제 읽기 옵션을 그 값과 대조하지 않는다(`lib/llvm/basis.cpp` 의 단위 읽기는 `front_end.unit_diagnostic` 인자만 가져온다). 그래서 두 값은 두 명령에 같은 옵션을 줄 때만 같다. 2a 의 실행은 그렇다(`tests_8c` 의 facts.txt 11개에서 같음) [M]. 이제 extract 의 값도 facts 에서 되짚을 수 있다(CONFIG_MANAGEMENT §1).
 
 **죽은 입력** [D].
 - `OpInfo.out`(프로필 op 매개변수의 `out` 역할)은 지웠다. 채우기만 하고 읽는 곳이 없었다.
 - `poll_fns`(프로필 observe 규칙의 poll 함수, `--poll-fn`)는 옛 경로 전용이고 추출이 소비하지 않는다. 남겨 둔다. `--poll-fn` 은 BASIS 에 사람이 넣은 항목(`op.poll function.<이름>`)으로 기록될 뿐이다. 프로필 observe 규칙의 poll 함수는 프로필 해시에만 든다.
 
-**시험** [M]: `test_static_cli` 의 8c 블록. fixture `writers.c` 에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)이 `unknown-target` 이고, 프로필 대상 `Cell.id` 는 전과 같다. BASIS 의 `unknown_target.*`, 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음과 둘), relations 의 수 1 을 본다.
+**시험** [M]: `test_static_cli` 의 8c 블록. fixture `writers.c` 에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)이 `unknown-target` 이고, 프로필 대상 `Cell.id` 는 전과 같다. BASIS 의 `unknown_target.*`, 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음과 둘), relations 의 수 1 을 본다. 8c 블록의 `--target Cell.id` 는 프로필 대상을 다시 준 경우다. 8c 수정 단계 블록: 프로필에 없는 선언된 명령줄 대상(`Cell.aux`, writer-set-complete), `Cell` 이 없는 소스에서 `--target Cell.id`(unknown-target, 기록은 프로필 출처), 중첩 태그 `Inner.ix`(unknown-target, 남는 결함), `--target` 없는 `Cell.id`(프로필 규칙 그대로, 남는 결함), `extract.resource_dir` 의 네 꼴(내장 기본값, `--resource-dir`, `--extra-arg -resource-dir=`, `--resource-dir ""` 의 none).
 
 ## 6. core-cpu1 결과 [M]
 

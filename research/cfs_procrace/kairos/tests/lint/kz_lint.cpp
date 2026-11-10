@@ -5,9 +5,9 @@
 //                                             accepts what it must, on trees written on the fly
 //
 // Rules:
-//   case-ids       no case identifier (data/case_identifiers.txt) in include/, lib/ and tools/, and in the
-//                  code files (C and C++ sources and headers) of probe/ and instrument/ outside their
-//                  tests/ directories, whether it stands alone or is a component of a longer name
+//   case-ids       no case identifier (data/case_identifiers.txt) in include/, lib/ and tools/, and in
+//                  every text file of probe/ and instrument/ outside their tests/, scripts/, sites/ and
+//                  out/ directories, whether it stands alone or is a component of a longer name
 //                  (check_R2, r2_x, R2Cert, CFE_ES_Main, a file name, a string or a comment); components
 //                  are split at '_' and at camel-case boundaries and compared without regard to case
 //   retired-term  no identifier containing "contract" in code, build files and profiles
@@ -335,12 +335,16 @@ Violations rule_case_ids(const fs::path& root, const fs::path& data, bool* usage
     *usage_ok = false;
     return v;
   }
-  // the engine (include/, lib/, tools/) and, since RV3A 6.3 O9, the code files of probe/ and instrument/ (their
-  // scripts, site manifests, committed transform outputs and tests are inputs or drivers, not engine code)
+  // the engine (include/, lib/, tools/) and, since RV3A 6.3 O9, every text file of probe/ and instrument/ (any
+  // extension: an included .inc or a build file is compiled in too) except under their tests/, scripts/, sites/ and
+  // out/ directories (tests, drivers, site manifests and committed transform outputs are inputs, not engine code)
   std::vector<fs::path> files = files_under(root, {"include", "lib", "tools"});
   for (const fs::path& f : files_under(root, {"probe", "instrument"})) {
-    const std::string r = rel(root, f);
-    if (is_c_like(f) && r.find("/tests/") == std::string::npos) files.push_back(f);
+    const std::string r = "/" + rel(root, f);
+    bool input = false;
+    for (const char* d : {"/tests/", "/scripts/", "/sites/", "/out/"})
+      if (r.find(d) != std::string::npos) input = true;
+    if (!input) files.push_back(f);
   }
   for (const fs::path& f : files) {
     std::string text;
@@ -693,6 +697,13 @@ int selftest(const fs::path& data) {
       {"case-ids", false, {"probe and instrument tests, scripts and manifests are allowed",
                            {{"instrument/gcc/tests/t.c", "void CFE_ES_Main(void);\n"}, {"probe/scripts/run_c1.sh", "echo C1\n"},
                             {"instrument/clang/sites/r2.kzs", "site OS_TaskCreate;\n"}, {"instrument/clang/out/c1/source.diff", "+ CFE_ES_Main\n"}}}},
+      // every text file of probe/ and instrument/ outside those directories, whatever its extension (8c fix stage)
+      {"case-ids", true, {"framework symbol in an included probe file", {{"probe/plan/a.inc", "int x = OS_TaskDelay;\n"}}}},
+      {"case-ids", true, {"framework symbol in a probe .ipp file", {{"probe/plan/a.ipp", "int x = OS_TaskDelay;\n"}}}},
+      {"case-ids", true, {"case id in an instrument build file", {{"instrument/gcc/CMakeLists.txt", "add_definitions(-DKZ_CASE=C1)\n"}}}},
+      {"case-ids", true, {"case id in an instrument .cmake file", {{"instrument/llvm/gates.cmake", "set(KZ_CASE R2)\n"}}}},
+      {"case-ids", false, {"a .cmake file under scripts/ and a test build file are allowed",
+                           {{"instrument/llvm/scripts/gates.cmake", "set(KZ_CASE R2)\n"}, {"probe/hold/tests/CMakeLists.txt", "# C1\n"}}}},
       // ---- the word "contract" in identifiers
       {"retired-term", true, {"identifier in C++", {{"lib/a.hpp", "struct kz_contract {};\n"}}}},
       {"retired-term", true, {"macro name", {{"include/a.h", "#define KZ_CONTRACT_MAX 4\n"}}}},

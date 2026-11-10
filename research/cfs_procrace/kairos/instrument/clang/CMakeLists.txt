@@ -12,7 +12,7 @@ set(kz_instr_resource_dir "${KZ_LLVM_BUILD_DIR}/lib/clang/${LLVM_VERSION_MAJOR}"
 target_compile_definitions(kz-instr-clang PRIVATE "KZI_DEFAULT_RESOURCE_DIR=\"${kz_instr_resource_dir}\"")
 
 # The transform on a small C program (tests/: side effects in arguments, a variadic callee, a macro call site,
-# return paths in macros, a skipped region), then gcc with the C1 reference warning flags, the runtime, one run
+# return paths in macros, a skipped region), then gcc with a case build's reference warning flags, the runtime, one run
 # and kz-rt-dump against the manifests.
 add_test(NAME instr_clang_transform
   COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_transform_test.sh

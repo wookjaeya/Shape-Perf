@@ -33,14 +33,15 @@
 | 이름 | 어댑터에서 | f34759d | d2d877a | 4.1.1 |
 |---|---|---|---|---|
 | `OS_SUCCESS` | 27, 56, 109, 111, 116 | `osapi-error.h:96` (0) | `osapi-error.h:96` (0) | `osapi.h:87` (0) |
-| `osal_id_t` | 13, 14 | `common_types.h:108` (`uint32`) | `common_types.h:108` | 선언 없음(grep 0) |
-| `OS_time_t` | 24 | `osapi-clock.h:44-48` (`int64 ticks`) | `osapi-clock.h:48` | `osapi-os-core.h:95-99` (`uint32 seconds`, `uint32 microsecs`; 필드가 다름) |
+| `osal_id_t` | 13, 14 | 두 갈래: `OSAL_OMIT_DEPRECATED` 이면 `common_types.h:98-101` (`struct { uint32_t v; }`), 아니면 `:108` (`uint32`) (`#ifdef` `:92`) | f34759d와 같은 두 갈래(`:98-101`, `:108`) | 선언 없음(grep 0) |
+| `OS_time_t` | 24 | `osapi-clock.h:45-48` (`int64 ticks`) | `osapi-clock.h:48` | `osapi-os-core.h:95-99` (`uint32 seconds`, `uint32 microsecs`; 필드가 다름) |
 | `OS_API_Init` | `kz_rt_osal.h:5` (주석: 이것이 성공한 뒤에만 씀) | `osapi-common.h:139` | 대조하지 않음 | 대조하지 않음 |
 | `OS_TaskGetId` | `kz_rt_osal.h:16` (주석: 부르지 않는다) | `osapi-task.h:192` | 대조하지 않음 | 대조하지 않음 |
 
 ## 3. 읽기
 
 - f34759d와 d2d877a는 표의 함수 선언이 글자 그대로 같다(시계 둘은 줄만 다름) [M: grep].
+- `osal_id_t`의 뜻은 설정 매크로 `OSAL_OMIT_DEPRECATED`에 달려 있다. 어댑터의 빌드(`runtime/CMakeLists.txt:75-80`)는 이 매크로를 주지 않는다. C1 post `1df262a` 빌드가 만든 `osal_public_api/inc/osconfig.h`에도 없다 [F][M: grep]. 그래서 어댑터가 그 헤더로 컴파일되면 `uint32` 쪽이다 [I]. MC는 어댑터를 빌드하지 않는다(`KZ_RT_OSAL_INCLUDE_DIRS`가 빈 값) [M]. 실제로 쓴 갈래는 [U]다. cFE 빌드의 `OMIT_DEPRECATED`(`cfe/cmake/sample_defs/global_build_options.cmake:19-22`)를 켜면 struct 쪽이다. (8c 수정 단계에서 더함. 8c 판은 `:108` 한 갈래만 적었다.)
 - 4.1.1은 같은 이름의 함수가 `uint32` id를 받는다. `osal_id_t`와 `OS_TimeGetTotalNanoseconds`의 선언이 없다 [M: grep]. 이 어댑터의 소스는 그 판의 헤더와 맞지 않는다 [I]. C5의 항목은 단계 3에서 그 판으로 따로 적는다.
 - `OS_TimeGetTotalNanoseconds`의 `@returns` 글("microseconds")은 함수 이름·`@brief`("nanosecond units")와 다르다. 어댑터는 이름과 `@brief`를 따른다. 본문은 대조하지 않았다 [U].
 - 수: lint 사본으로 센 `kz_rt_osal.c` 56건과 `kz_rt_osal.h` 19건, 합 75건이 이 층이다(`plan/step2a_results_20261030.md` §16). 부르는 함수는 9개다.

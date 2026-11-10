@@ -1427,7 +1427,7 @@ startup_script {
     const fs::path X = work / "8cfix";
     fs::create_directories(X);
     const std::string wc = fixtures + "/writers.c";
-    std::string out, sv;
+    std::string sv;
     // a declared command-line target that the profile does not name: Cell.aux of writers.c keeps the rule
     KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.aux -o " + q((X / "aux.kz").string()) +
                         " -- -std=c99 -pedantic",

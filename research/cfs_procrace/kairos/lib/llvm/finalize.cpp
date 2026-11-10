@@ -150,10 +150,24 @@ const ImageFact* find_entry(const std::vector<ImageFact>& img, const std::string
   return nullptr;
 }
 
+// A marker leaf of the static image: the part of the initializer from there on was not read, the budget being used
+// up (ast_tu.cpp, flatten_initializer; static_facts.md 5j).
+bool is_marker(const ImageFact& f) { return f.kind == KZ_IMAGE_KIND_NONCONST && f.text == "<image truncated>"; }
+
+// The entries nested under `prefix` (`prefix.` or `prefix[`), marker leaves left out: a marker `prefix.m...` or
+// `prefix...` says that part was not read, not that it has entries.
 bool has_prefix_entries(const std::vector<ImageFact>& img, const std::string& prefix) {
   for (const ImageFact& f : img)
-    if (f.path.compare(0, prefix.size() + 1, prefix + ".") == 0 || f.path.compare(0, prefix.size() + 1, prefix + "[") == 0) return true;
+    if (!is_marker(f) && (f.path.compare(0, prefix.size() + 1, prefix + ".") == 0 || f.path.compare(0, prefix.size() + 1, prefix + "[") == 0)) return true;
   return false;
+}
+
+// The marker leaves of an image (their paths), or empty: the walk over that image stopped there.
+std::string marker_paths(const std::vector<ImageFact>& img, const std::string& object) {
+  std::string out;
+  for (const ImageFact& f : img)
+    if (is_marker(f)) out += (out.empty() ? "" : ", ") + object + f.path;
+  return out;
 }
 
 }  // namespace
@@ -190,6 +204,16 @@ bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::ve
       prefix = want;
       continue;
     }
+    // the image of `cur` cut at the image budget: the field may be in the part that was not read
+    const std::string cut = marker_paths(*img, cur);
+    if (!cut.empty()) {
+      if (find_entry(*img, want + "...") != nullptr)
+        *why = "the field " + want + " of " + cur + " was not read: the static image of " + cur + " was cut at the image budget there (" + cut + ")";
+      else
+        *why = "the field " + want + " is not in the static image of " + cur + ", which was cut at the image budget (" + cut +
+               "): the field has no initializer or is in the part that was not read";
+      return false;
+    }
     *why = "the field " + want + " has no initializer in " + cur + " (it is zero or not constant)";
     return false;
   }
@@ -221,7 +245,10 @@ bool resolve_table_walk(const Model& model, const Model::WalkSpec& walk, std::ve
     }
   }
   if (!terminated) {
-    *why = "no null element ends the table " + cur + prefix;
+    // the image of `cur` cut at the image budget: the elements after the cut were not read
+    const std::string cut = marker_paths(*img, cur);
+    *why = "no null element ends the table " + cur + prefix +
+           (cut.empty() ? std::string() : " in its static image, which was cut at the image budget (" + cut + "): the elements after the cut were not read");
     return false;
   }
   *trip = n;

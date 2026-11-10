@@ -440,7 +440,8 @@ bool TuReader::image_has_leaf(QualType t, const Expr* init) {
   const auto* il = init != nullptr ? dyn_cast<InitListExpr>(init) : nullptr;
   if (const ArrayType* at = ctx_.getAsArrayType(t)) {
     if (init != nullptr && isa<StringLiteral>(init->IgnoreParenCasts())) return true;
-    if (il == nullptr) return false;  // zero-filled
+    // zero-filled, or another form (one non-constant leaf, as in flatten_initializer)
+    if (il == nullptr) return init != nullptr && !isa<ImplicitValueInitExpr>(init);
     const QualType et = at->getElementType();
     const auto* cat = dyn_cast<ConstantArrayType>(at);
     const uint64_t n = cat != nullptr ? cat->getSize().getZExtValue() : il->getNumInits();
@@ -508,7 +509,20 @@ void TuReader::flatten_initializer(const std::string& object_key_, const std::st
       --*budget;
       return;
     }
-    if (il == nullptr) return;  // zero-filled
+    if (il == nullptr) {
+      // no initializer or an implicit one: zero-filled.  Another form (a designated initializer that overrides part of
+      // an earlier one, `.s = "abc", .s[1] = 'X'`, is a DesignatedInitUpdateExpr): nothing is known element by
+      // element, so one non-constant leaf, as for a record below (2026-11-10, 8b fix stage)
+      if (init != nullptr && !isa<ImplicitValueInitExpr>(init)) {
+        ImageFact f;
+        f.pos = pos;
+        init_leaf(object_key_, path, init, &f);
+        f.kind = KZ_IMAGE_KIND_NONCONST;
+        out->push_back(f);
+        --*budget;
+      }
+      return;
+    }
     const QualType et = at->getElementType();
     const auto* cat = dyn_cast<ConstantArrayType>(at);
     const uint64_t n = cat != nullptr ? cat->getSize().getZExtValue() : il->getNumInits();

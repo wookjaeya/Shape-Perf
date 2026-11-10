@@ -756,6 +756,78 @@ startup_script {
     const std::string fq = (X / "quiet.kz").string();
     KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fq) + " -- -std=c99 -pedantic", &log), 0);
     KZ_CHECK_EQ(read(fq), read(fdef));
+
+    // 8b fix stage (written here, not in imgbudget.c: an anonymous member is C11, and an overriding designator warns,
+    // so neither fits the C99 -Werror compile of the fixtures).  (a) An anonymous member has an empty name in its
+    // leaves (`an_rec..b`), so its marker is `an_rec.` + `...`.  (b) An array initialized by a form that is not a
+    // list, a string or zero (here an overriding designator) gives one non-constant leaf; it was left out before.
+    // (c) A table walk over an image cut at the budget fails with a reason that names the cut.
+    {
+      const fs::path src2 = X / "src" / "imgforms.c";
+      write(src2,
+            "int img_use(const void *p);\n"
+            "struct AnRec { int a; struct { int b; int c; }; int d; } an_rec = {1, {2, 3}, 4};\n"
+            "struct UpRec { char s[4]; int n; } up_rec = {.s = \"abc\", .s[1] = 'X', .n = 5};\n"
+            "int img_forms(void) { return img_use(&an_rec) + img_use(&up_rec); }\n");
+      auto ex2 = [&](const std::string& opts, const std::string& dst) {
+        return run(q(tool) + " extract --no-profile " + opts + " --verbose --source " + q(src2.string()) + " --root " + q((X / "src").string()) + " -o " + q(dst) +
+                       " -- -std=c11 -Wno-initializer-overrides",
+                   &log);
+      };
+      const std::string f0 = (X / "forms_default.kz").string(), f1 = (X / "forms_b1.kz").string(), f2 = (X / "forms_b2.kz").string();
+      std::string v0, v1, v2;
+      KZ_CHECK_EQ(ex2("", f0), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f0) + " --section gimages --section basis", &v0), 0);
+      KZ_CHECK(has(v0, counts(0, 0)));
+      KZ_CHECK(!row(v0, "an_rec..b int 2 ").empty() && !row(v0, "an_rec.d int 4 ").empty());
+      KZ_CHECK(has(row(v0, "up_rec.s non-constant at "), "field=UpRec.s"));
+      KZ_CHECK(!row(v0, "up_rec.n int 5 ").empty());
+      KZ_CHECK_EQ(ex2("--image-budget 1", f1), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f1) + " --section gimages --section basis", &v1), 0);
+      KZ_CHECK(has(v1, counts(2, 2)));
+      KZ_CHECK(has(row(v1, "an_rec.... non-constant at "), "image-truncated"));
+      KZ_CHECK(has(row(v1, "up_rec.s non-constant at "), "image-truncated"));
+      KZ_CHECK(has(row(v1, "up_rec.n... non-constant at "), "image-truncated"));
+      KZ_CHECK(has(log, "kz-static: static image of up_rec: budget 1 used up, marker leaves 1\n"));
+      KZ_CHECK_EQ(ex2("--image-budget 2", f2), 0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f2) + " --section gimages", &v2), 0);
+      KZ_CHECK(!row(v2, "an_rec..b int 2 ").empty());
+      KZ_CHECK(!row(v2, "an_rec..c... non-constant at ").empty() && !row(v2, "an_rec.d... non-constant at ").empty());
+
+      const fs::path src3 = X / "src" / "imgwalk.c";
+      write(src3,
+            "typedef struct { const char *name; int (*init)(void); } WMod;\n"
+            "typedef struct { int p0; int p1; const WMod *const *list; int tail; } WCfg;\n"
+            "static int w_init(void) { return 0; }\n"
+            "static const WMod w_mod = {\"w\", w_init};\n"
+            "static const WMod *const w_list[3] = {&w_mod};\n"
+            "WCfg w_cfg = {7, 8, w_list, 9};\n"
+            "void w_all(void) {\n"
+            "  unsigned long i;\n"
+            "  const WMod *e;\n"
+            "  for (i = 0;; i++) {\n"
+            "    e = w_cfg.list[i];\n"
+            "    if (e == 0) break;\n"
+            "    (void)e->init();\n"
+            "  }\n"
+            "}\n");
+      const std::string fw = (X / "walk_b2.kz").string(), fwd = (X / "walk_default.kz").string();
+      std::string w;
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --image-budget 2 --source " + q(src3.string()) + " --root " + q((X / "src").string()) + " -o " + q(fw) +
+                          " -- -std=c99 -pedantic",
+                      &log),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(fw) + " --section loops", &w), 0);
+      KZ_CHECK(has(w, "table-walk trip=unknown exits=1 calls=1 table=w_cfg.list (the field .list of w_cfg was not read: the static image of w_cfg was cut at the "
+                      "image budget there (w_cfg.list...))"));
+      KZ_CHECK(!has(w, "no null element"));
+      // the default budget: the walk resolves
+      KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(src3.string()) + " --root " + q((X / "src").string()) + " -o " + q(fwd) + " -- -std=c99 -pedantic",
+                      &log),
+                  0);
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(fwd) + " --section loops", &w), 0);
+      KZ_CHECK(has(w, "table-walk trip=exact(1) exits=1 calls=1 table=w_cfg.list\n"));
+    }
   }
 
   // ---- F5 and the target-independent rules (LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS, AWAIT_L1; kz_facts.h revision 8) -

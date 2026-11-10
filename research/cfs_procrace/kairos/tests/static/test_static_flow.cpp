@@ -81,6 +81,26 @@ int main() {
   KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));
   KZ_CHECK(why.find("not the address of a table") != std::string::npos);
 
+  // the image cut at the image budget (marker leaves, static_facts.md 5j): the walk fails and the reason names the cut.
+  // A record marker `.list...` is not an entry nested under .list (has_prefix_entries leaves markers out).
+  m.object_images["cfg"] = {img("cfg", ".p0", KZ_IMAGE_KIND_INT, "", 7), img("cfg", ".list...", KZ_IMAGE_KIND_NONCONST, "<image truncated>")};
+  KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));
+  KZ_CHECK_EQ(why, std::string("the field .list of cfg was not read: the static image of cfg was cut at the image budget there (cfg.list...)"));
+  // a field after the cut (`.a...` covers it): the same reason
+  m.object_images["cfg"] = {img("cfg", ".p0", KZ_IMAGE_KIND_INT, "", 7), img("cfg", ".a...", KZ_IMAGE_KIND_NONCONST, "<image truncated>")};
+  KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));
+  KZ_CHECK_EQ(why, std::string("the field .list is not in the static image of cfg, which was cut at the image budget (cfg.a...): the field has no "
+                               "initializer or is in the part that was not read"));
+  // the table cut before its terminator (array marker [...])
+  m.object_images["cfg"] = {img("cfg", ".list", KZ_IMAGE_KIND_ADDR, "list")};
+  m.object_images["list"] = {img("list", "[0]", KZ_IMAGE_KIND_ADDR, "mod_a"), img("list", "[...]", KZ_IMAGE_KIND_NONCONST, "<image truncated>")};
+  KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));
+  KZ_CHECK(why.find("no null element ends the table list in its static image, which was cut at the image budget (list[...])") != std::string::npos);
+  // no marker: the reasons as before
+  m.object_images["cfg"] = {img("cfg", ".p0", KZ_IMAGE_KIND_INT, "", 7)};
+  KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));
+  KZ_CHECK_EQ(why, std::string("the field .list has no initializer in cfg (it is zero or not constant)"));
+
   // the object has no initializer in the closed program
   walk.root_object = "missing";
   KZ_CHECK(!resolve_table_walk(m, walk, &elements, &trip, &why));

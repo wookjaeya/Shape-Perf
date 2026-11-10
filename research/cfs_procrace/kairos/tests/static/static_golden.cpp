@@ -78,6 +78,9 @@ const std::vector<Case>& cases() {
       {"lockpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kPathSections, true},
       {"relpaths_np", "relpaths.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
       {"relsound_np", "relsound.c", {"--targets-rule", "R-T1,R-T2"}, kRelationSections, true, true},
+      // the static image budget (static_facts.md 5j): marker leaves and the flag image-truncated at --image-budget 4, all
+      // five cases of imgbudget.c together; the two counts are in BASIS, which goldens leave out (test_static_cli checks them)
+      {"imgbudget_np", "imgbudget.c", {"--image-budget", "4"}, kFlowSections, true},
   };
   return all;
 }

@@ -19,8 +19,9 @@
 #                    again, hooks whose targets are not complete, a callback of a function without a body, unresolved
 #                    calls of the child, an entry from a union member of a static table, hooks set through a cast lvalue
 #                    of the variable, a copy of the pointer to it or the pointer an array decays to); deepcond.c (a condition more than 200
-#                    levels deep) and imgbudget.c (the budget of the static image: marker leaves, exact fit, the two counts) are
-#                    read by test_static_cli only
+#                    levels deep) is read by test_static_cli only; imgbudget.c (the budget of the static image: marker leaves,
+#                    exact fit, the two counts) is read by test_static_cli (the counts, one case at a time) and by
+#                    imgbudget_np (--no-profile --image-budget 4: the leaves and flags of the five cases together)
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
@@ -47,7 +48,7 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
 set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
-    relations_np lockpaths_np relpaths_np relsound_np)
+    relations_np lockpaths_np relpaths_np relsound_np imgbudget_np)
 foreach(kz_name IN LISTS kz_fixtures)
   add_test(NAME static_fixture_compile_${kz_name}
     COMMAND ${CMAKE_C_COMPILER} -std=c99 -pedantic -Wall -Wextra -Werror -c ${kz_fixture_dir}/${kz_name}.c -o ${CMAKE_CURRENT_BINARY_DIR}/${kz_name}.fixture.o)

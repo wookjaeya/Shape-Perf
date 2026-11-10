@@ -677,3 +677,139 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
   - §4 T1–T6의 입력: `T_RV4/status.txt`의 `step count PASS`와 `T_RV4/count/summary.txt`, tsv 일곱(T/와 바이트 동일, §14.4). 계수 스크립트는 PASS·PARTIAL을 찍지 않는다 [F]. 판정은 사람이 그 근거 줄을 읽은 것이다.
 - 줄 인용: 드라이버의 81줄 뒤는 이 정정으로 옮겨졌다. `c4fe9db`의 줄을 인용한 곳(검증 지적의 `:220-308`, `:409-427`, `:652-669`)은 그 판의 파일로 읽는다.
 - 하지 않은 것: `all` 전체의 재실행(코드가 바뀐 단계만 돌렸다), RV3A P9·P10, 이미지 잘림 표시와 둘로 나눈 계수(Q12, 빌드가 든다).
+
+## 15. 정적 이미지의 잘림 표시와 두 계수: MC 제자리 재빌드와 `all` 재실행 (2026-11-10, RV3A §6.7 8b)
+
+- 성격: 도구 수정, 재빌드, 재실행 기록이다. 고친 것은 RV3A §5 (가)2(= §2.5 ①②, RV4 분석 §2 #6으로 고친 꼴)뿐이다. 예산 값(4096)과 등급 규칙, 조건 값은 바꾸지 않았다. cFS를 기동하지 않았다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC(`/home/user/work/merge-check/kz-llvm`) 하나다. 둘째 빌드 디렉터리는 만들지 않는다. 2a 도구(`db172b74`)는 PV 사본으로 남는다(§15.1).
+- 기록: 저장소 `records/step2a-20261110-8b/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8b/`(이하 `T_8B/`)다. T/와 `T_RV4/`에는 쓰지 않는다.
+
+### 15.0 바뀌어도 되는 것의 선언 (실행 전에 적음) [D]
+
+빌드와 재실행 전에 적었다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **golden**: 바뀌는 golden 파일은 없다. 까닭: (1) fixture의 정적 이미지는 객체마다 잎이 수십 개 아래라 4096에 닿지 않는다. (2) 고정 도구 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`). (3) 섹션·레코드 배치·열거형이 그대로라 `layout.golden`·`records.golden`·`tool_hash` golden도 그대로다. 새 golden 파일도 없다. 새 시험은 `test_static_cli`의 확인과 fixture `imgbudget.c`(컴파일 시험 하나 더함)다. 기존 확인 문자열은 고치지 않는다.
+- **프로필 추출 바이트 동일**(identity, V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 드라이버 허용표의 기존 항목만 바뀐다. basis: BASIS `front_end.build_identity`. facts: BASIS `extract.build_identity`·`extract.units_from`, HEADER `basis_sha256`·`sha256`. show 글: `extract.units_from` 한 줄. 이 모드의 BASIS는 걷기 상한을 적지 않는다(`static_facts.md` §5g). 그래서 새 계수는 여기 나오지 않는다.
+- **NP 출력**(`T_8B/<build>/NP` 대 T/와 `T_RV4/`):
+  - basis.kz: 머리의 `tool_sha256`과 파일 해시만 바뀐다(새 kz-static). 레코드는 같다. `front_end.build_identity`는 kz-core의 identity라(`source=` core) 바뀌지 않아야 한다 [I: lib/core를 고치지 않음]. basis.txt: 첫 줄 `basis <sha256>`.
+  - facts.kz: HEADER `basis_sha256`·`sha256`(부모 basis의 파일 해시). BASIS `extract.units_from`(basis 해시 앞 16자), `count.walk_bounds_hit`(끝에 두 항목이 붙음). `extract.build_identity`도 core identity라 같아야 한다 [I].
+  - facts.txt(show): 그 두 BASIS 줄.
+  - extract.txt: 첫 줄 `facts <sha256>`. relations.txt: 둘째 줄 `facts <sha256>`. 그 밖의 줄은 바이트 동일.
+  - relations.log, args.txt: 바이트 동일.
+- **판정 입력**(`count/summary.txt`와 tsv 일곱): 바이트 동일. T7(`twice`): 같은 실행 안에서 same.
+- **드라이버 비교**(identity, npsame, s5same, fixsame, fix2same, fix3same): 허용표는 고치지 않는다. 바뀌는 BASIS 항목은 기존 항목이 이미 이름 붙인다(npsame·s5same·fixsame의 `count.walk_bounds_hit`는 added, fix2same·fix3same은 changed `value`, `wb`). 그래서 PASS와 §14.4·§14.7의 변경 수가 그대로여야 한다.
+- **조건부**(측정이 생략을 보일 때만): 4096에서 `image_leaves_omitted`가 0이 아니고 그 객체가 직렬화되면, 그 객체의 GLOBAL_IMAGES(프로필 추출이면 STATIC_IMAGE) 표시 잎 행이 더해지고 그 객체 행의 `flags`에 `image-truncated`가 붙고 BASIS `count.global_images`가 바뀐다. 이것은 결함이 아니라 고친 동작이다. 그때만 허용표에 따로 인용한 블록을 더한다(기존 항목은 넓히지 않는다). relations가 그 행을 읽어 바뀌면 그대로 적는다.
+- **도구 해시**: kz-static은 바뀐다. kz·kz-dump·kz-rt-dump·kz-phi는 바뀌지 않아야 한다 [I]: `lib/llvm`을 링크하지 않고 `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않았다(`cmake/KzSourceIdentity.cmake:17-24`).
+
+### 15.1 손대기 전 [M]
+
+- MC의 네 도구 sha256이 PV 기록과 같다: kz-static `db172b74…`, kz `b254483e…`, kz-dump `05623054…`, kz-rt-dump `4390d4f1…`(`ORIGINAL_SHA256`·`ADDED_ORIGINAL_SHA256`, 넷 OK). 그래서 2a 도구는 PV 사본으로 남는다. PV 사본의 왕복 확인은 11-09 기록 그대로다(CK `rv4/pv/`).
+- 2a 도구의 소스: commit `76bcf6d`(tool_source `1ccee6ce`). 그 뒤 `kairos/`의 lib·tools·include·cmake·최상위 CMakeLists는 바뀌지 않았다. 손대기 전 HEAD는 `114f33b`, `kairos` 아래 미커밋 0줄이다. MC는 저장소의 `kairos/` 작업 트리를 읽는다(`CMAKE_HOME_DIRECTORY`). 기록: `pre_mc.txt`.
+
+### 15.2 코드 [F]
+
+- `lib/llvm/ast_tu.cpp`: `flatten_initializer`가 예산이 떨어진 곳에서 표시 잎을 둔다. 레코드·union 루프는 멤버마다 내려가기 전에 예산을 본다. 남은 멤버에 잎이 있으면 `경로.멤버...` 하나를 두고 멈춘다. 이른 반환 자리는 `경로...`를 둔다. 배열도 남은 원소(0 채움 행 포함)에 잎이 있을 때만 `경로[...]`를 둔다. 잎이 있는지는 새 함수 `image_has_leaf`·`members_have_leaf`가 같은 경우 나눔으로 본다. `read_global`이 객체마다 두 수를 센다.
+- `lib/llvm/model.hpp`: `Stats`에 `image_budget_exhausted`, `image_leaves_omitted`. 객체별 기록 `image_budget_objects`(객체 키 → 표시 잎 수).
+- `lib/llvm/serialize.cpp`: BASIS `count.walk_bounds_hit` 끝에 두 항목을 따로 적는다. 앞 다섯 항목의 글은 그대로다.
+- `tools/kz-static/cmd_extract.cpp`: `--verbose`면 예산을 다 쓴 객체마다 stderr 한 줄.
+- 바꾸지 않은 것: 예산 값 4096(`param.image_budget`), 소비자(`finalize.cpp`·`unroll.cpp`·`argflow.cpp`·basis table; RV3A §2.5 ③), 등급·조건 값, `include/`(schema 개정 11 그대로).
+- 문서: `kairos/docs/static_facts.md` §5j(표시 잎 경로 셋, 정확히 맞음, 두 계수의 뜻, 객체별 값, 소비자), §5c에 한 줄. `kairos/docs/schema.md` §19 끝에 8b 줄(개정 번호 그대로인 까닭, 옛 독자 규칙).
+- 시험: fixture `tests/static/fixtures/imgbudget.c`(사례 이름 없음)와 `test_static_cli`의 새 블록, 컴파일 시험 `static_fixture_compile_imgbudget`.
+- 규모: `git diff --stat -- kairos` 9 파일 +229/−13, 새 파일 하나.
+
+### 15.3 빌드 [M]
+
+- MC에서 제자리로 빌드했다. 대상: kz-static과 그것을 링크하거나 돌리는 시험 프로그램(static_golden, test_static_cli, test_static_expr·flow·recipe·gitrev·unroll·wrappers·link·elf32), kz_lint. `make -j4`, rc 0, 07:11:18Z–07:14:56Z. 링크된 것은 `libkz-llvm.a`, kz-static, 시험 프로그램 9개다(`make.log`). libkz-core identity는 `f6e3c7b4…` 그대로다.
+- 도구 해시:
+
+| 도구 | 전 | 뒤 |
+|---|---|---|
+| kz-static | `db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4` | `7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9` |
+| kz-static tool_sha256 / tool_source | `5e5d9e4e…` / `1ccee6ce…` | `add6cb73caf00d01634f85239d4e0ca66bd6f123a86ae6354cd0e2e05ebd491e` / `a1cc829a65aa16f09c8466fd1233bf8a009f2b9f29f55c59c874a203731c7771` |
+| kz | `b254483e…` | 같음 |
+| kz-dump | `05623054…` | 같음 |
+| kz-rt-dump | `4390d4f1…` | 같음 |
+| kz-phi | `7d34e6e2…` | 같음 |
+
+- §15.0의 예상대로 kz·kz-dump·kz-rt-dump·kz-phi는 다시 빌드되지 않았다.
+- 공간(`df -B1 /`): 앞 1,161,084,928 B, 가장 낮음 1,068,523,520 B(07:12:43Z), 뒤 1,163,042,816 B. MC는 3,553,803,254 B다. 기록: `post_mc.txt`, `df_build.log`.
+- 바이트 결정성(같은 commit의 두 빌드 비교, K9)은 이 방법으로 볼 수 없다. [U]로 남는다(RV4 분석 §6 Q12).
+
+### 15.4 시험 [M]
+
+- 전체 ctest: 238개, 통과 237, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, 종료 코드 77: 다른 컴파일러 빌드나 kz observe 실행이 없음). 237에서 하나 는 것은 `static_fixture_compile_imgbudget`이다. 라벨: static 44(전 43), golden 57, unit 84, runtime 66, lint 6, integration 4, instr 1, property 1(한 시험이 라벨을 여럿 가질 수 있다).
+- 옛 경로와 새 경로: `legacy-case` 라벨은 아직 없다(`ctest -N -L legacy-case` 0; RV3A O8은 8c다). 그래서 라벨로는 나눠 보이지 않는다. 이름 `phi_*`는 47개다. RV3A O8의 셈(옛 경로 51 = `phi_*` 47 + 넷)을 따르면 새 경로는 187이다 [I].
+- lint 6/6(`lint_case-ids` 포함). golden 파일은 하나도 바뀌지 않았다(`tests/static/data`, `tests/golden` 변경 없음). `static_golden_core_cpu1`도 통과했다.
+- `test_static_cli`가 fixture `imgbudget.c`의 다섯 경우를 `--image-budget 4`로 확인한다(각각, 그리고 함께; 기본 예산; `--verbose`가 facts를 바꾸지 않음). 기대값:
+
+| 경우 | 소진 | 표시 | 표시 잎 |
+|---|---|---|---|
+| 1 멤버가 예산보다 많은 구조체 | 1 | 1 | `img_wide.e...` |
+| 2 활성 멤버가 잘리는 union | 1 | 1 | `img_union.s.e...` |
+| 3 배열 안 구조체 | 1 | 2 | `img_points[1].y...`, `img_points[...]` |
+| 4 정확히 맞음(뒤에 잎 없는 배열 멤버) | 1 | 0 | 없음 |
+| 5 예산 안 | 0 | 0 | 없음 |
+| 함께 | 4 | 4 | 위 넷 |
+
+- 대조 [M]: 같은 fixture를 2a 도구(`db172b74`, PV 사본을 잠시 풀어 씀)로 읽으면 `img_wide`는 `.e`·`.f`가, `img_union`은 `.s.e`가 표시와 플래그 없이 빠진다. 배열의 `img_points[...]`만 표시된다(`fixture_old_new.txt`). RV3 §5.5의 결함을 fixture로 재현한 것이다.
+- 드라이버 단위 점검 6 / 6(`unit.txt`; 드라이버 `6e78820c…`는 고치지 않았다).
+
+### 15.5 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8b`. 07:16:44Z–07:21:42Z. 허용표는 내장 그대로다(새 블록 없음).
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: 저장소 `114f33b` 더하기 이 단계의 미커밋 변경이다(`T_8B/identity/identity.txt` 머리 `kairos_uncommitted_lines=390`). 그 diff는 `T_8B/identity/kairos.diff`(sha256 `15c0238f…`)로 남았고, 커밋한 변경과 같다(§15.9).
+- 드라이버 비교의 변경 수(changed / added / removed, c1_pre_tx · c1_post_tx · r2_core · c5_641 · c5_642)는 §14.4와 모두 같다:
+  - npsame 274/9574/115 · 274/9575/115 · 237/6002/71 · 182/2445/0 · 182/2454/0
+  - s5same 277/9574/115 · 277/9575/115 · 240/6002/71 · 185/2445/0 · 185/2454/0
+  - fixsame 278/171/115 · 278/171/115 · 241/126/71 · 186/38/6 · 186/38/6
+  - fix2same 275/169/115 · 275/169/115 · 238/124/71 · 183/36/6 · 183/36/6
+  - fix3same 92/166/115 · 92/166/115 · 91/121/71 · 8/36/6 · 8/36/6
+  - identity: basis 1/0/0, facts 4/0/0(여섯 경우 모두). show 글 판정 6개 PASS.
+- 프로필 추출의 바이트 동일(V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 위 identity 판정이다. 다른 것은 허용표의 기존 항목뿐이다.
+- 공간: 앞 1,164,120,064 B, 가장 낮음 938,950,656 B(07:20:13Z), 뒤 961,011,712 B. `T_8B/`는 202,207,238 B, 150 파일, `sha256.txt` 137줄. T/와 `T_RV4/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0).
+
+### 15.6 T/·`T_RV4/` 대비 [M]
+
+`compare_8b.py`(기록 디렉터리)가 빌드마다 컨테이너를 kz-dump로 섹션별로, 글 출력을 줄별로 비교했다. 214줄이다: same 82, same-but-declared 56, DIFF 76. 두 기준(T/, `T_RV4/`)의 결과는 같다. DIFF 76줄을 모두 읽었다.
+
+| 비교 | 결과 | §15.0과 |
+|---|---|---|
+| NP basis.kz (5 × 2) | 레코드 같음 | 맞음. `front_end.build_identity`도 같다(core identity) |
+| NP facts.kz (5 × 2) | BASIS `count.walk_bounds_hit`·`extract.units_from`, HEADER `basis_sha256`·parent만 다름 | 맞음. `extract.build_identity`는 같다 |
+| NP facts.txt (5 × 2) | 그 두 줄만 다름 | 맞음 |
+| NP extract.txt, NP2 extract.txt | `facts <sha256>` 줄만 다름 | 맞음 |
+| NP·NP2 relations.txt (10 × 2) | 둘째 줄 `facts <sha256>`만 다름 | 맞음 |
+| NP basis.txt | C1·R2는 첫 줄만, C5 둘은 다섯째 줄만 다름 | **선언이 틀렸다**: 선언은 "첫 줄"이라 했다. C5의 basis.txt는 앞에 전단 진단 요약 줄 넷(`… generated.`)이 있고 그 뒤에 `basis <sha256>` 줄이 온다. 다른 줄은 그 해시 줄이다 |
+| relations.log, args.txt | 바이트 동일 | 맞음 |
+| count/ tsv 일곱 | 바이트 동일 | 맞음 |
+| count/summary.txt | 다섯 줄만 다름 | **선언이 틀렸다**: 선언은 "바이트 동일"이라 했다. summary.txt는 빌드마다 facts.txt의 `count.walk_bounds_hit` 줄을 그대로 인용한다(`facts.txt:444` 등). 다른 다섯 줄이 그 인용이다. 나머지 줄은 같다 |
+| twice.txt | same 낱말 같음(해시는 facts를 따름) | 맞음 |
+| identity facts.kz (6 × 2) | BASIS `extract.units_from`, HEADER만 다름 | 맞음(허용표 항목과 같음) |
+| identity basis.kz | 레코드 같음 | 맞음 |
+| identity facts.txt, extract.txt, facts.dump.diff, show.diff | units_from 값, basis 해시, STRINGS crc32, facts 해시만 다름 | 맞음(그 해시가 든 줄) |
+
+- 사실 섹션 37개(BASIS 밖)의 레코드는 다섯 빌드에서 T/와 같다. GLOBAL_IMAGES·STATIC_IMAGE에 표시 잎 행이 없고 `image-truncated` 플래그도 없다. 그래서 §15.0의 조건부 항목은 쓰이지 않았다. 허용표에 블록을 더하지 않았다.
+- 선언의 두 틀림은 선언이 덮는 값(basis 해시 줄, `count.walk_bounds_hit`)이 다른 출력에 옮겨진 것이다. 새 차이는 아니다. 그래도 선언은 고치지 않고 이 표에 적는다(`declared_before_run.txt`가 실행 전 글이다).
+
+### 15.7 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/와 바이트 동일하다 [M]. summary.txt는 위 다섯 인용 줄만 다르다 [M]. 그래서 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553. §14.5와 같다. 다른 것은 없다.
+- T7의 새 해시(facts는 도구가 바뀌어 다르다; 둘째 실행과 바이트 동일): facts `c898f2dc…`, `4006157e…`, `b7418bdb…`, `6d1e9d5d…`, `746ae42a…`; relations `93503298…`, `86c563d7…`, `94ecde3f…`, `393cf7c5…`, `fff3e06f…`(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642 순; `twice_detail.txt`). relations의 해시가 다른 것은 둘째 줄의 facts 해시 때문이다(§15.6).
+- 등급 이름(`proven-impossible`)과 "불가"의 지위는 B8을 따른다. 이 단계는 등급 이름을 바꾸지 않았다.
+
+### 15.8 두 계수의 첫 측정 [M]
+
+- 빌드별(BASIS `count.walk_bounds_hit`, 프로필 없는 추출의 facts): 다섯 빌드 모두 `image_budget_exhausted` 0, `image_leaves_omitted` 0.
+- 객체별: 같은 basis와 같은 인자로 `--verbose`를 더해 다시 추출했다. 다섯 빌드와 identity 여섯 경우(프로필 추출) 모두 예산을 다 쓴 객체가 없다(줄 0). 다시 만든 facts는 `T_8B/`의 것과 바이트 동일했다(11개; `--verbose`는 facts를 바꾸지 않는다). 0이 아닌 객체가 없으므로 객체 목록은 비었다. 기록: `counters.txt`.
+- 읽기: 4096에서 이미지 걷기가 예산을 다 쓴 객체는 다섯 빌드에 없다. 정확히 맞은 객체도 없다. 그래서 RV3A §2.5의 "직렬화되지 않은 객체 안에서 잘림이 없었다는 것은 [U]"는 이 다섯 빌드에서 [M]으로 닫힌다(8b 도구로). 2a 도구도 같았다 [I: 코드]: 이번 수정은 예산이 0이 된 뒤의 표시만 바꾸고, 잎마다 예산을 쓰는 방식은 그대로다.
+- 덮는 범위: `read_global`이 걷는 객체(초기값이 있는 레코드·배열 전역)다. 스칼라 전역은 예산을 쓰지 않는다. basis의 table 항목(`read_unit_images`)은 세지 않는다. 같은 단위의 같은 객체를 같은 걷기로 읽으므로 같다 [I].
+
+### 15.9 남는 것
+
+- 커밋: 코드·시험·`kairos/docs`는 `fdea6a8`이다. 이 절과 기록은 그 다음 커밋이다(둘 다 "kz-static 8b:"). `git diff 114f33b fdea6a8 -- kairos`(새 fixture 파일 빼고)의 sha256이 빌드 때 남은 `T_8B/identity/kairos.diff`와 같다(`15c0238f…`) [M]. 커밋 뒤 `kairos` 아래 미커밋 변경은 없다 [M]. 그래서 `7ef1a28c`는 `fdea6a8`의 소스로 빌드한 것이다. fixture는 도구 identity 밖이다(`tests/`). push하지 않았다.
+- [U] 바이트 결정성(K9). 다른 경로의 빌드가 없다(Q12 (가)).
+- 하지 않은 것: 소비자 규칙(RV3A §2.5 ③, 잘린 이미지를 UNKNOWN으로), PD A3:173·부록 C:1009·S3:215의 근거 문구 바꾸기(§2.5 ⑤, §6.7 6의 문서 정정), 8c(O2·O8·O9·O12, `legacy-case` 라벨), E1(Q4), B8, B4, CM:42. RV3A §6.6 Q12·PD·STATUS의 상태 줄도 고치지 않았다.
+- `T_8B/`(202 MB)는 지우지 않았다. CM §5의 보존이 아니다. 보존 위치는 PI 답(PD D4) 뒤다.
+- 2a 도구는 MC에 없다. PV `kz-static.db172b74.xz`가 그 사본이다.

@@ -1,0 +1,38 @@
+# MC tools before the 8b rebuild (2026-11-10, 2026-11-10T07:03:09Z); sha256sum of the four, then the PV entries they must equal
+db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4  tools/kz-static/kz-static
+b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c  tools/kz/kz
+05623054296bbb993a66308c9fd8e710873f064e7672318e495eabba74fbaf43  tools/kz-dump/kz-dump
+4390d4f13b5bcae3145ddd4b3decb089790d18d6ebbdc3104de99beb66e5063a  runtime/kz-rt-dump
+7d34e6e20934c62b91f006c20712b7a096692b231d318257b096eb22dc68075f  tools/kz-phi/kz-phi
+# mtime
+2026-10-30 17:16:55.311987280 +0000 176646560 tools/kz-static/kz-static
+2026-10-30 16:43:03.281082304 +0000 75503864 tools/kz/kz
+2026-10-30 16:41:39.341084223 +0000 2514528 tools/kz-dump/kz-dump
+2026-10-29 07:31:59.427491407 +0000 3350272 runtime/kz-rt-dump
+2026-10-30 16:41:44.817084098 +0000 28644248 tools/kz-phi/kz-phi
+# check against PV ORIGINAL_SHA256 / ADDED_ORIGINAL_SHA256 (path prefix merge-check/kz-llvm/)
+OK   tools/kz-static/kz-static db172b74dc973de6 = PV db172b74dc973de6
+OK   tools/kz/kz b254483e25873902 = PV b254483e25873902
+OK   tools/kz-dump/kz-dump 05623054296bbb99 = PV 05623054296bbb99
+OK   runtime/kz-rt-dump 4390d4f13b5bcae3 = PV 4390d4f13b5bcae3
+# kz-phi is not in PV (not one of the four); recorded here only
+# kz-static --identity (before)
+tool=kz-static
+tool_sha256=5e5d9e4e7f19f96ee5ba29685ce72b47518ebad6269966a11c76bc2e20dfca99
+tool_source=1ccee6ce2ab0a6c2c0864cd0dc7731c351901f37d3d7293ccecc1e5c2a03771e
+core_source=f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+# MC CMakeCache: source dir and build type
+CMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+CMAKE_CXX_COMPILER:STRING=/usr/bin/g++
+KZ_BUILD_LLVM_TOOLS:BOOL=ON
+KZ_WERROR:BOOL=ON
+LLVM_DIR:UNINITIALIZED=/home/user/work/llvm-project/build/lib/cmake/llvm
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/user/Shape-Perf/research/cfs_procrace/kairos
+bc2f43b405fb16bfe8a12974af2be70ce2600dd43aa5550bff1c5600e1a996da  CMakeCache.txt
+181c55a0dbd99fcbc80d2a312239e9ffa09c53ddb1a2fcaa4e2155a8495833f0  tools/kz-static/CMakeFiles/kz-static.dir/flags.make
+# repository (the source the build reads is the working tree of kairos/)
+HEAD 114f33bf032350a2a34df5dbb9a8430ce4ce928a
+describe 114f33b
+kairos uncommitted lines: 0
+commit of the 2a tool source (tool_source 1ccee6ce, RV4A 2 #17): 76bcf6d; kairos/ lib, tools, include, cmake unchanged since:
+(empty line above = no change)

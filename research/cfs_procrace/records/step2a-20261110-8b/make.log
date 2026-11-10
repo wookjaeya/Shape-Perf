@@ -1,0 +1,93 @@
+-- LLVM 23.0.0git at /home/user/work/llvm-project/build/lib/cmake/llvm; Clang at /home/user/work/llvm-project/build/lib/cmake/clang
+-- libkz-core source identity f6e3c7b4c3def727444c25ee7071f11078a3969e9c2b4f1a578c7d7f0246d823
+-- Configuring done (3.6s)
+-- Generating done (3.6s)
+-- Build files have been written to: /home/user/work/merge-check/kz-llvm
+[ 50%] Built target kz-core
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/spec.cpp.o
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/finalize.cpp.o
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/model.cpp.o
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/wrappers.cpp.o
+[ 50%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/argflow.cpp.o
+[ 56%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/lockset.cpp.o
+[ 56%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/target_rules.cpp.o
+[ 56%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/serialize.cpp.o
+[ 62%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/unroll.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/basis.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_tu.cpp.o
+[ 68%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_fn.cpp.o
+[ 75%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_run.cpp.o
+[ 75%] Building CXX object lib/llvm/CMakeFiles/kz-llvm.dir/ast_basis.cpp.o
+[ 75%] Linking CXX static library libkz-llvm.a
+[ 93%] Built target kz-llvm
+[ 93%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_basis.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/main.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_extract.cpp.o
+[100%] Building CXX object tools/kz-static/CMakeFiles/kz-static.dir/cmd_show.cpp.o
+[100%] Linking CXX executable kz-static
+[100%] Built target kz-static
+[ 47%] Built target kz-core
+[ 88%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Built target static_golden
+[ 42%] Built target kz-core
+[ 52%] Built target kz-testsupport
+[ 89%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Building CXX object tests/static/CMakeFiles/test_static_cli.dir/test_static_cli.cpp.o
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp: In function 'int main(int, char**)':
+/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/static/test_static_cli.cpp:55:5: note: variable tracking size limit exceeded with '-fvar-tracking-assignments', retrying without
+   55 | int main(int argc, char** argv) {
+      |     ^~~~
+[100%] Linking CXX executable test_static_cli
+[100%] Built target test_static_cli
+[ 47%] Built target kz-core
+[ 58%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_expr.dir/test_static_expr.cpp.o
+[100%] Linking CXX executable test_static_expr
+[100%] Built target test_static_expr
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_flow.dir/test_static_flow.cpp.o
+[100%] Linking CXX executable test_static_flow
+[100%] Built target test_static_flow
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Linking CXX executable test_static_recipe
+[100%] Built target test_static_recipe
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Linking CXX executable test_static_gitrev
+[100%] Built target test_static_gitrev
+[ 47%] Built target kz-core
+[ 58%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_unroll.dir/test_static_unroll.cpp.o
+[100%] Linking CXX executable test_static_unroll
+[100%] Built target test_static_unroll
+[ 44%] Built target kz-core
+[ 55%] Built target kz-testsupport
+[ 94%] Built target kz-llvm
+[100%] Building CXX object tests/static/CMakeFiles/test_static_wrappers.dir/test_static_wrappers.cpp.o
+[100%] Linking CXX executable test_static_wrappers
+[100%] Built target test_static_wrappers
+[  0%] Built target kz_static_lazy_unused
+[  0%] Built target kz_static_whole_member
+[  0%] Built target kz_static_main_obj
+[ 44%] Built target kz-core
+[ 50%] Built target kz_static_lazy_used
+[ 61%] Built target kz-testsupport
+[100%] Built target kz-llvm
+[100%] Linking CXX executable test_static_link
+[100%] Built target test_static_link
+[ 42%] Built target kz-core
+[ 52%] Built target kz-testsupport
+[ 89%] Built target kz-llvm
+[ 94%] Built target kz-static
+[100%] Linking CXX executable test_static_elf32
+[100%] Built target test_static_elf32
+[100%] Built target kz_lint

@@ -1,0 +1,16 @@
+record=step2a-20261110-8b
+kind=text record of a code change, an in-place rebuild and a measurement run; not a bundle; no parts; not preserved in the CONFIG_MANAGEMENT 5 sense
+work=RV3A 6.7 step 8b: RV3A 5 (ga)2 = 2.5 (1)(2) as corrected by RV4A 2 #6 (marker leaves on the record and union paths, the counts image_budget_exhausted and image_leaves_omitted); PI answer 11-10 Q12 (ga), rebuild in place in MC; AR section 15
+build_dir=/home/user/work/merge-check/kz-llvm (MC; no second build directory)
+tool_before=kz-static db172b74dc973de6a7e9c5b75e7f6655d26574023d746741606f458df5e1ffc4 (= PV ORIGINAL_SHA256; source 76bcf6d, tool_source 1ccee6ce)
+tool_after=kz-static 7ef1a28c8fccc0e19553b55a5c7ad644777cf3866064ac4f6ea08cec84e44bf9 (tool_sha256 add6cb73caf00d01634f85239d4e0ca66bd6f123a86ae6354cd0e2e05ebd491e, tool_source a1cc829a65aa16f09c8466fd1233bf8a009f2b9f29f55c59c874a203731c7771, core_source f6e3c7b4 unchanged)
+unchanged=kz b254483e, kz-dump 05623054, kz-rt-dump 4390d4f1, kz-phi 7d34e6e2 (not rebuilt)
+source=working tree of kairos/ at HEAD 114f33b plus the uncommitted change of this step (tests_8b/identity/kairos.diff, 390 lines, sha256 15c0238f...); committed as fdea6a8 ("kz-static 8b:"); git diff 114f33b fdea6a8 -- kairos without the new fixture file has the same sha256 15c0238f...
+outputs=/home/user/work/redesign/step2a/tests_8b (outside the repository; 150 files, 202207238 bytes; not in T/)
+outputs_sha256_list=sha256.txt here (137 lines; sha256 737c062e75a07e371c3a111b9d5f70d18678c3e818c7bbc5714c57b3f2a8dd67)
+status_sha256=670730f908531a1319c8b7e590adc908533fe0fbb5a50a97a036f74a3cf0e5f2 (status.txt here)
+rc=make 0; ctest 238 tests, 0 failed, 1 skipped; unit checks 6 of 6; all 0 (ten steps PASS, no FAIL line)
+compared_with=T/ (/home/user/work/redesign/step2a/tests) and tests_rv4: compare_8b.tsv (AR 15.6)
+counts=image_budget_exhausted 0 and image_leaves_omitted 0 in each of the five builds; no object listed by --verbose in the five builds or the six identity cases (counters.txt)
+no cFS booted; nothing deleted except the scratch copies named in commands.txt; not pushed
+files=INFO.txt commands.txt pre_mc.txt post_mc.txt declared_before_run.txt unit.txt make.log ctest_full.log fixture_old_new.txt status.txt sha256.txt twice_detail.txt compare_8b.py compare_8b.tsv counters.txt df_build.log df_run.log

@@ -1,0 +1,23 @@
+# AR 15.0 as written before the build and the runs (2026-11-10T07:10:37Z); the lines of plan/step2a_results_20261030.md from the 15 heading to the end
+## 15. 정적 이미지의 잘림 표시와 두 계수: MC 제자리 재빌드와 `all` 재실행 (2026-11-10, RV3A §6.7 8b)
+
+- 성격: 도구 수정, 재빌드, 재실행 기록이다. 고친 것은 RV3A §5 (가)2(= §2.5 ①②, RV4 분석 §2 #6으로 고친 꼴)뿐이다. 예산 값(4096)과 등급 규칙, 조건 값은 바꾸지 않았다. cFS를 기동하지 않았다.
+- 근거: PI 답(11-10) "Q2는 지워도 돼, Q12는 MC 제자리 재빌드로 진행해". Q12 (가)다. 빌드 디렉터리는 MC(`/home/user/work/merge-check/kz-llvm`) 하나다. 둘째 빌드 디렉터리는 만들지 않는다. 2a 도구(`db172b74`)는 PV 사본으로 남는다(§15.1).
+- 기록: 저장소 `records/step2a-20261110-8b/`(텍스트만). 출력은 저장소 밖 `/home/user/work/redesign/step2a/tests_8b/`(이하 `T_8B/`)다. T/와 `T_RV4/`에는 쓰지 않는다.
+
+### 15.0 바뀌어도 되는 것의 선언 (실행 전에 적음) [D]
+
+빌드와 재실행 전에 적었다. 아래 밖의 차이는 결함으로 보고한다.
+
+- **golden**: 바뀌는 golden 파일은 없다. 까닭: (1) fixture의 정적 이미지는 객체마다 잎이 수십 개 아래라 4096에 닿지 않는다. (2) 고정 도구 golden은 BASIS를 뺀다(`tests/static/static_golden.cpp:42`). (3) 섹션·레코드 배치·열거형이 그대로라 `layout.golden`·`records.golden`·`tool_hash` golden도 그대로다. 새 golden 파일도 없다. 새 시험은 `test_static_cli`의 확인과 fixture `imgbudget.c`(컴파일 시험 하나 더함)다. 기존 확인 문자열은 고치지 않는다.
+- **프로필 추출 바이트 동일**(identity, V0·V2 × C1 pre tx·R2 core·C5 6.4.1, EB 대비): 드라이버 허용표의 기존 항목만 바뀐다. basis: BASIS `front_end.build_identity`. facts: BASIS `extract.build_identity`·`extract.units_from`, HEADER `basis_sha256`·`sha256`. show 글: `extract.units_from` 한 줄. 이 모드의 BASIS는 걷기 상한을 적지 않는다(`static_facts.md` §5g). 그래서 새 계수는 여기 나오지 않는다.
+- **NP 출력**(`T_8B/<build>/NP` 대 T/와 `T_RV4/`):
+  - basis.kz: 머리의 `tool_sha256`과 파일 해시만 바뀐다(새 kz-static). 레코드는 같다. `front_end.build_identity`는 kz-core의 identity라(`source=` core) 바뀌지 않아야 한다 [I: lib/core를 고치지 않음]. basis.txt: 첫 줄 `basis <sha256>`.
+  - facts.kz: HEADER `basis_sha256`·`sha256`(부모 basis의 파일 해시). BASIS `extract.units_from`(basis 해시 앞 16자), `count.walk_bounds_hit`(끝에 두 항목이 붙음). `extract.build_identity`도 core identity라 같아야 한다 [I].
+  - facts.txt(show): 그 두 BASIS 줄.
+  - extract.txt: 첫 줄 `facts <sha256>`. relations.txt: 둘째 줄 `facts <sha256>`. 그 밖의 줄은 바이트 동일.
+  - relations.log, args.txt: 바이트 동일.
+- **판정 입력**(`count/summary.txt`와 tsv 일곱): 바이트 동일. T7(`twice`): 같은 실행 안에서 same.
+- **드라이버 비교**(identity, npsame, s5same, fixsame, fix2same, fix3same): 허용표는 고치지 않는다. 바뀌는 BASIS 항목은 기존 항목이 이미 이름 붙인다(npsame·s5same·fixsame의 `count.walk_bounds_hit`는 added, fix2same·fix3same은 changed `value`, `wb`). 그래서 PASS와 §14.4·§14.7의 변경 수가 그대로여야 한다.
+- **조건부**(측정이 생략을 보일 때만): 4096에서 `image_leaves_omitted`가 0이 아니고 그 객체가 직렬화되면, 그 객체의 GLOBAL_IMAGES(프로필 추출이면 STATIC_IMAGE) 표시 잎 행이 더해지고 그 객체 행의 `flags`에 `image-truncated`가 붙고 BASIS `count.global_images`가 바뀐다. 이것은 결함이 아니라 고친 동작이다. 그때만 허용표에 따로 인용한 블록을 더한다(기존 항목은 넓히지 않는다). relations가 그 행을 읽어 바뀌면 그대로 적는다.
+- **도구 해시**: kz-static은 바뀐다. kz·kz-dump·kz-rt-dump·kz-phi는 바뀌지 않아야 한다 [I]: `lib/llvm`을 링크하지 않고 `include/`·`cmake/`·최상위 `CMakeLists.txt`를 고치지 않았다(`cmake/KzSourceIdentity.cmake:17-24`).

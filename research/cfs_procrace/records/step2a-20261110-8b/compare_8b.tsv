@@ -1,0 +1,215 @@
+# compare_8b.py: /home/user/work/redesign/step2a/tests_8b against /home/user/work/redesign/step2a/tests /home/user/work/redesign/step2a/tests_rv4; {'same': 82, 'DIFF': 76, 'same-but-declared': 56}
+same	tests c1_pre_tx NP/basis.kz	5 sections	-
+DIFF	tests c1_pre_tx NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a | parent[0] kind=basis role=1 sha256=a1717478f0099180acf691a9ee7441484e2917cb5a424} new {basis_sha256=9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6cb0bb27580c67b4dad8 | parent[0] kind=basis role=1 sha256=9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6}
+same-but-declared	tests c1_pre_tx NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests c1_pre_tx NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c1_pre_tx NP/basis.txt	differing lines 1 (declared)
+DIFF	tests c1_pre_tx NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests c1_pre_tx NP/relations.log	bytes
+same	tests c1_pre_tx NP/args.txt	bytes
+same-but-declared	tests c1_pre_tx NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c1_pre_tx NP2/extract.txt	differing lines 1 (declared)
+same	tests c1_post_tx NP/basis.kz	5 sections	-
+DIFF	tests c1_post_tx NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca | parent[0] kind=basis role=1 sha256=e427aaf2a642d16ad8a1dece87de6148799005e552f11} new {basis_sha256=d6407ad4cba7d4991a2ffe670a8edc3ab3bcde84268537ad3da83cf38151efa9 | parent[0] kind=basis role=1 sha256=d6407ad4cba7d4991a2ffe670a8edc3ab3bcde8426853}
+same-but-declared	tests c1_post_tx NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests c1_post_tx NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c1_post_tx NP/basis.txt	differing lines 1 (declared)
+DIFF	tests c1_post_tx NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests c1_post_tx NP/relations.log	bytes
+same	tests c1_post_tx NP/args.txt	bytes
+same-but-declared	tests c1_post_tx NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c1_post_tx NP2/extract.txt	differing lines 1 (declared)
+same	tests r2_core NP/basis.kz	5 sections	-
+DIFF	tests r2_core NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760 | parent[0] kind=basis role=1 sha256=70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d} new {basis_sha256=ecca8df30d0d5b09dc9654f337591d02f01e70e822b93656b1e219071de160cd | parent[0] kind=basis role=1 sha256=ecca8df30d0d5b09dc9654f337591d02f01e70e822b93}
+same-but-declared	tests r2_core NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests r2_core NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests r2_core NP/basis.txt	differing lines 1 (declared)
+DIFF	tests r2_core NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests r2_core NP/relations.log	bytes
+same	tests r2_core NP/args.txt	bytes
+same-but-declared	tests r2_core NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests r2_core NP2/extract.txt	differing lines 1 (declared)
+same	tests c5_641 NP/basis.kz	5 sections	-
+DIFF	tests c5_641 NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa | parent[0] kind=basis role=1 sha256=dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd} new {basis_sha256=2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4 | parent[0] kind=basis role=1 sha256=2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee}
+same-but-declared	tests c5_641 NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests c5_641 NP/relations.txt	differing lines 2 (declared)
+DIFF	tests c5_641 NP/basis.txt	differing lines 5; e.g. line 5: basis dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa -> basis 2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4
+DIFF	tests c5_641 NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests c5_641 NP/relations.log	bytes
+same	tests c5_641 NP/args.txt	bytes
+same-but-declared	tests c5_641 NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c5_641 NP2/extract.txt	differing lines 1 (declared)
+same	tests c5_642 NP/basis.kz	5 sections	-
+DIFF	tests c5_642 NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 | parent[0] kind=basis role=1 sha256=1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba945} new {basis_sha256=a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf | parent[0] kind=basis role=1 sha256=a73079a932927d5a18ba49f4172f30cca54c958a53e06}
+same-but-declared	tests c5_642 NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests c5_642 NP/relations.txt	differing lines 2 (declared)
+DIFF	tests c5_642 NP/basis.txt	differing lines 5; e.g. line 5: basis 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 -> basis a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf
+DIFF	tests c5_642 NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests c5_642 NP/relations.log	bytes
+same	tests c5_642 NP/args.txt	bytes
+same-but-declared	tests c5_642 NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests c5_642 NP2/extract.txt	differing lines 1 (declared)
+DIFF	tests count/summary.txt	bytes
+same	tests count/targets_rule.tsv	bytes
+same	tests count/summary.tsv	bytes
+same	tests count/burden.tsv	bytes
+same	tests count/against_s5.tsv	bytes
+same	tests count/against_fix1.tsv	bytes
+same	tests count/against_fix2.tsv	bytes
+same	tests count/against_fix3.tsv	bytes
+same	tests identity c1_pre_tx V0 basis.kz	5 sections	-
+DIFF	tests identity c1_pre_tx V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 | parent[0] kind=basis role=1 sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678} new {basis_sha256=56bef2c6192495a794594fd71c9a552da401b6e631a0a38c80e6bf55bbedc3be | parent[0] kind=basis role=1 sha256=56bef2c6192495a794594fd71c9a552da401b6e631a0a}
+same-but-declared	tests identity c1_pre_tx V0 extract.txt	differing lines 1 (declared)
+DIFF	tests identity c1_pre_tx V0 facts.txt	1 lines differ: extract.units_from
+same	tests identity c1_pre_tx V0 basis.dump.diff	bytes
+DIFF	tests identity c1_pre_tx V0 facts.dump.diff	bytes
+DIFF	tests identity c1_pre_tx V0 show.diff	bytes
+same	tests identity c1_pre_tx V0 args.txt	bytes
+same	tests identity c1_pre_tx V2 basis.kz	5 sections	-
+DIFF	tests identity c1_pre_tx V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 | parent[0] kind=basis role=1 sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa5} new {basis_sha256=126c52761536f48d44ee98dcdc256f25f4bb043e2814ba57ff0e136cdbf1a3cc | parent[0] kind=basis role=1 sha256=126c52761536f48d44ee98dcdc256f25f4bb043e2814b}
+same-but-declared	tests identity c1_pre_tx V2 extract.txt	differing lines 1 (declared)
+DIFF	tests identity c1_pre_tx V2 facts.txt	1 lines differ: extract.units_from
+same	tests identity c1_pre_tx V2 basis.dump.diff	bytes
+DIFF	tests identity c1_pre_tx V2 facts.dump.diff	bytes
+DIFF	tests identity c1_pre_tx V2 show.diff	bytes
+same	tests identity c1_pre_tx V2 args.txt	bytes
+same	tests identity r2_core V0 basis.kz	5 sections	-
+DIFF	tests identity r2_core V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 | parent[0] kind=basis role=1 sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55} new {basis_sha256=ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d54fc9de1fd8a1a95e95f | parent[0] kind=basis role=1 sha256=ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d5}
+same-but-declared	tests identity r2_core V0 extract.txt	differing lines 1 (declared)
+DIFF	tests identity r2_core V0 facts.txt	1 lines differ: extract.units_from
+same	tests identity r2_core V0 basis.dump.diff	bytes
+DIFF	tests identity r2_core V0 facts.dump.diff	bytes
+DIFF	tests identity r2_core V0 show.diff	bytes
+same	tests identity r2_core V0 args.txt	bytes
+same	tests identity r2_core V2 basis.kz	5 sections	-
+DIFF	tests identity r2_core V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa | parent[0] kind=basis role=1 sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b8} new {basis_sha256=cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d83ab79b74bc98d4d5b4 | parent[0] kind=basis role=1 sha256=cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d}
+same-but-declared	tests identity r2_core V2 extract.txt	differing lines 1 (declared)
+DIFF	tests identity r2_core V2 facts.txt	1 lines differ: extract.units_from
+same	tests identity r2_core V2 basis.dump.diff	bytes
+DIFF	tests identity r2_core V2 facts.dump.diff	bytes
+DIFF	tests identity r2_core V2 show.diff	bytes
+same	tests identity r2_core V2 args.txt	bytes
+same	tests identity c5_641 V0 basis.kz	5 sections	-
+DIFF	tests identity c5_641 V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 | parent[0] kind=basis role=1 sha256=33de0e1f01bc781cf49bc15e05d673388605746225635} new {basis_sha256=c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913b2aa9a58603ef99c93c | parent[0] kind=basis role=1 sha256=c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913}
+same-but-declared	tests identity c5_641 V0 extract.txt	differing lines 1 (declared)
+DIFF	tests identity c5_641 V0 facts.txt	1 lines differ: extract.units_from
+same	tests identity c5_641 V0 basis.dump.diff	bytes
+DIFF	tests identity c5_641 V0 facts.dump.diff	bytes
+DIFF	tests identity c5_641 V0 show.diff	bytes
+same	tests identity c5_641 V0 args.txt	bytes
+same	tests identity c5_641 V2 basis.kz	5 sections	-
+DIFF	tests identity c5_641 V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 | parent[0] kind=basis role=1 sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995f} new {basis_sha256=57473bb4609f67f918be9118da22cfe72b3bfc2c90e682681628b594f2065663 | parent[0] kind=basis role=1 sha256=57473bb4609f67f918be9118da22cfe72b3bfc2c90e68}
+DIFF	tests identity c5_641 V2 extract.txt	differing lines 3; e.g. line 3: facts e2da6643c538b2cc3288f8df55fd0077f0d923d6c7fd1cb5c760a9908c3e89ba -> facts 6219f233e5777c789b15675e12f950feca2a513c5190946bea04cdbeb57142f2
+DIFF	tests identity c5_641 V2 facts.txt	1 lines differ: extract.units_from
+same	tests identity c5_641 V2 basis.dump.diff	bytes
+DIFF	tests identity c5_641 V2 facts.dump.diff	bytes
+DIFF	tests identity c5_641 V2 show.diff	bytes
+same	tests identity c5_641 V2 args.txt	bytes
+same	tests twice.txt	verdict words
+same	tests_rv4 c1_pre_tx NP/basis.kz	5 sections	-
+DIFF	tests_rv4 c1_pre_tx NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=a1717478f0099180acf691a9ee7441484e2917cb5a4244fed308cf29f601397a | parent[0] kind=basis role=1 sha256=a1717478f0099180acf691a9ee7441484e2917cb5a424} new {basis_sha256=9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6cb0bb27580c67b4dad8 | parent[0] kind=basis role=1 sha256=9affc4bea00e2cdabfe3d2944c06039e715ee7f9d87c6}
+same-but-declared	tests_rv4 c1_pre_tx NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests_rv4 c1_pre_tx NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c1_pre_tx NP/basis.txt	differing lines 1 (declared)
+DIFF	tests_rv4 c1_pre_tx NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests_rv4 c1_pre_tx NP/relations.log	bytes
+same	tests_rv4 c1_pre_tx NP/args.txt	bytes
+same-but-declared	tests_rv4 c1_pre_tx NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c1_pre_tx NP2/extract.txt	differing lines 1 (declared)
+same	tests_rv4 c1_post_tx NP/basis.kz	5 sections	-
+DIFF	tests_rv4 c1_post_tx NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=e427aaf2a642d16ad8a1dece87de6148799005e552f11690bfb210947df881ca | parent[0] kind=basis role=1 sha256=e427aaf2a642d16ad8a1dece87de6148799005e552f11} new {basis_sha256=d6407ad4cba7d4991a2ffe670a8edc3ab3bcde84268537ad3da83cf38151efa9 | parent[0] kind=basis role=1 sha256=d6407ad4cba7d4991a2ffe670a8edc3ab3bcde8426853}
+same-but-declared	tests_rv4 c1_post_tx NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests_rv4 c1_post_tx NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c1_post_tx NP/basis.txt	differing lines 1 (declared)
+DIFF	tests_rv4 c1_post_tx NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests_rv4 c1_post_tx NP/relations.log	bytes
+same	tests_rv4 c1_post_tx NP/args.txt	bytes
+same-but-declared	tests_rv4 c1_post_tx NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c1_post_tx NP2/extract.txt	differing lines 1 (declared)
+same	tests_rv4 r2_core NP/basis.kz	5 sections	-
+DIFF	tests_rv4 r2_core NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d5324311e14e9bfa4760 | parent[0] kind=basis role=1 sha256=70d6e14a387f5886a7bcb5267f4a6f0f70cb424c1560d} new {basis_sha256=ecca8df30d0d5b09dc9654f337591d02f01e70e822b93656b1e219071de160cd | parent[0] kind=basis role=1 sha256=ecca8df30d0d5b09dc9654f337591d02f01e70e822b93}
+same-but-declared	tests_rv4 r2_core NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests_rv4 r2_core NP/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 r2_core NP/basis.txt	differing lines 1 (declared)
+DIFF	tests_rv4 r2_core NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests_rv4 r2_core NP/relations.log	bytes
+same	tests_rv4 r2_core NP/args.txt	bytes
+same-but-declared	tests_rv4 r2_core NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 r2_core NP2/extract.txt	differing lines 1 (declared)
+same	tests_rv4 c5_641 NP/basis.kz	5 sections	-
+DIFF	tests_rv4 c5_641 NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa | parent[0] kind=basis role=1 sha256=dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd} new {basis_sha256=2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4 | parent[0] kind=basis role=1 sha256=2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee}
+same-but-declared	tests_rv4 c5_641 NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests_rv4 c5_641 NP/relations.txt	differing lines 2 (declared)
+DIFF	tests_rv4 c5_641 NP/basis.txt	differing lines 5; e.g. line 5: basis dc6d70fa8b498b7cef594b5bc308560adc5bb4195cfcd525e2f01c7a3d73f9aa -> basis 2907ce70143b6a0e8f07b4b54ead167c143575b78d5ee449041d72b83803b3f4
+DIFF	tests_rv4 c5_641 NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests_rv4 c5_641 NP/relations.log	bytes
+same	tests_rv4 c5_641 NP/args.txt	bytes
+same-but-declared	tests_rv4 c5_641 NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c5_641 NP2/extract.txt	differing lines 1 (declared)
+same	tests_rv4 c5_642 NP/basis.kz	5 sections	-
+DIFF	tests_rv4 c5_642 NP/facts.kz	38 sections	BASIS changed count.walk_bounds_hit,extract.units_from; removed -; added -; HEADER ref {basis_sha256=1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 | parent[0] kind=basis role=1 sha256=1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba945} new {basis_sha256=a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf | parent[0] kind=basis role=1 sha256=a73079a932927d5a18ba49f4172f30cca54c958a53e06}
+same-but-declared	tests_rv4 c5_642 NP/extract.txt	differing lines 1 (declared)
+same-but-declared	tests_rv4 c5_642 NP/relations.txt	differing lines 2 (declared)
+DIFF	tests_rv4 c5_642 NP/basis.txt	differing lines 5; e.g. line 5: basis 1086270e1c6e68b91e9ca5f74ec795eb137e47b8ba9458a1f3536e89a96d7c92 -> basis a73079a932927d5a18ba49f4172f30cca54c958a53e06ecb2e786d0ddd83b6cf
+DIFF	tests_rv4 c5_642 NP/facts.txt	2 lines differ: count.walk_bounds_hit,extract.units_from
+same	tests_rv4 c5_642 NP/relations.log	bytes
+same	tests_rv4 c5_642 NP/args.txt	bytes
+same-but-declared	tests_rv4 c5_642 NP2/relations.txt	differing lines 2 (declared)
+same-but-declared	tests_rv4 c5_642 NP2/extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 count/summary.txt	bytes
+same	tests_rv4 count/targets_rule.tsv	bytes
+same	tests_rv4 count/summary.tsv	bytes
+same	tests_rv4 count/burden.tsv	bytes
+same	tests_rv4 count/against_s5.tsv	bytes
+same	tests_rv4 count/against_fix1.tsv	bytes
+same	tests_rv4 count/against_fix2.tsv	bytes
+same	tests_rv4 count/against_fix3.tsv	bytes
+same	tests_rv4 identity c1_pre_tx V0 basis.kz	5 sections	-
+DIFF	tests_rv4 identity c1_pre_tx V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678d42b2602d5b3f8b4a33 | parent[0] kind=basis role=1 sha256=d233b3920d4303627f70686ab351a7f5ad09c3cf79678} new {basis_sha256=56bef2c6192495a794594fd71c9a552da401b6e631a0a38c80e6bf55bbedc3be | parent[0] kind=basis role=1 sha256=56bef2c6192495a794594fd71c9a552da401b6e631a0a}
+same-but-declared	tests_rv4 identity c1_pre_tx V0 extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 identity c1_pre_tx V0 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity c1_pre_tx V0 basis.dump.diff	bytes
+DIFF	tests_rv4 identity c1_pre_tx V0 facts.dump.diff	bytes
+DIFF	tests_rv4 identity c1_pre_tx V0 show.diff	bytes
+same	tests_rv4 identity c1_pre_tx V0 args.txt	bytes
+same	tests_rv4 identity c1_pre_tx V2 basis.kz	5 sections	-
+DIFF	tests_rv4 identity c1_pre_tx V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa54ad724ea36a1deed0d9 | parent[0] kind=basis role=1 sha256=f3daeaee0d0339a49471ef3efd7daa3445c8d6cc7faa5} new {basis_sha256=126c52761536f48d44ee98dcdc256f25f4bb043e2814ba57ff0e136cdbf1a3cc | parent[0] kind=basis role=1 sha256=126c52761536f48d44ee98dcdc256f25f4bb043e2814b}
+same-but-declared	tests_rv4 identity c1_pre_tx V2 extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 identity c1_pre_tx V2 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity c1_pre_tx V2 basis.dump.diff	bytes
+DIFF	tests_rv4 identity c1_pre_tx V2 facts.dump.diff	bytes
+DIFF	tests_rv4 identity c1_pre_tx V2 show.diff	bytes
+same	tests_rv4 identity c1_pre_tx V2 args.txt	bytes
+same	tests_rv4 identity r2_core V0 basis.kz	5 sections	-
+DIFF	tests_rv4 identity r2_core V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55d69e97e56a334dddf19 | parent[0] kind=basis role=1 sha256=d4e74dbea8589182fe0bf85f639a8e0b0075857cb4a55} new {basis_sha256=ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d54fc9de1fd8a1a95e95f | parent[0] kind=basis role=1 sha256=ead985f09c379db6bf6b7f5d6f2b01a613da89eacb7d5}
+same-but-declared	tests_rv4 identity r2_core V0 extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 identity r2_core V0 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity r2_core V0 basis.dump.diff	bytes
+DIFF	tests_rv4 identity r2_core V0 facts.dump.diff	bytes
+DIFF	tests_rv4 identity r2_core V0 show.diff	bytes
+same	tests_rv4 identity r2_core V0 args.txt	bytes
+same	tests_rv4 identity r2_core V2 basis.kz	5 sections	-
+DIFF	tests_rv4 identity r2_core V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b821ab593e11756b462fa | parent[0] kind=basis role=1 sha256=efa325b26be1232d0de82501e4fc7e39690319150d2b8} new {basis_sha256=cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d83ab79b74bc98d4d5b4 | parent[0] kind=basis role=1 sha256=cf7a70307f60388e304ec4ce7e4f751b1766af9a4836d}
+same-but-declared	tests_rv4 identity r2_core V2 extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 identity r2_core V2 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity r2_core V2 basis.dump.diff	bytes
+DIFF	tests_rv4 identity r2_core V2 facts.dump.diff	bytes
+DIFF	tests_rv4 identity r2_core V2 show.diff	bytes
+same	tests_rv4 identity r2_core V2 args.txt	bytes
+same	tests_rv4 identity c5_641 V0 basis.kz	5 sections	-
+DIFF	tests_rv4 identity c5_641 V0 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=33de0e1f01bc781cf49bc15e05d673388605746225635b059938e86d84647608 | parent[0] kind=basis role=1 sha256=33de0e1f01bc781cf49bc15e05d673388605746225635} new {basis_sha256=c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913b2aa9a58603ef99c93c | parent[0] kind=basis role=1 sha256=c2d5fa5c3cefd3106dfc9f481aab01d4c5aeb37d83913}
+same-but-declared	tests_rv4 identity c5_641 V0 extract.txt	differing lines 1 (declared)
+DIFF	tests_rv4 identity c5_641 V0 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity c5_641 V0 basis.dump.diff	bytes
+DIFF	tests_rv4 identity c5_641 V0 facts.dump.diff	bytes
+DIFF	tests_rv4 identity c5_641 V0 show.diff	bytes
+same	tests_rv4 identity c5_641 V0 args.txt	bytes
+same	tests_rv4 identity c5_641 V2 basis.kz	5 sections	-
+DIFF	tests_rv4 identity c5_641 V2 facts.kz	21 sections	BASIS changed extract.units_from; removed -; added -; HEADER ref {basis_sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995fd599314893c00b69b81 | parent[0] kind=basis role=1 sha256=fef008e12c1c7317c4c64bf3bc2ec1b420c5d1197995f} new {basis_sha256=57473bb4609f67f918be9118da22cfe72b3bfc2c90e682681628b594f2065663 | parent[0] kind=basis role=1 sha256=57473bb4609f67f918be9118da22cfe72b3bfc2c90e68}
+DIFF	tests_rv4 identity c5_641 V2 extract.txt	differing lines 3; e.g. line 3: facts e2da6643c538b2cc3288f8df55fd0077f0d923d6c7fd1cb5c760a9908c3e89ba -> facts 6219f233e5777c789b15675e12f950feca2a513c5190946bea04cdbeb57142f2
+DIFF	tests_rv4 identity c5_641 V2 facts.txt	1 lines differ: extract.units_from
+same	tests_rv4 identity c5_641 V2 basis.dump.diff	bytes
+DIFF	tests_rv4 identity c5_641 V2 facts.dump.diff	bytes
+DIFF	tests_rv4 identity c5_641 V2 show.diff	bytes
+same	tests_rv4 identity c5_641 V2 args.txt	bytes
+same	tests_rv4 twice.txt	verdict words

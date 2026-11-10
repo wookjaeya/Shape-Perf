@@ -83,6 +83,8 @@ add_test(NAME static_golden_core_cpu1
   COMMAND static_golden core $<TARGET_FILE:kz-static> ${KZ_PROFILE_DIR} ${KZ_PROFILE_DIR}/basis/core-cpu1.kzb ${KZ_BUNDLE_ROOT}
           ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/work_core)
 set_tests_properties(static_golden_core_cpu1 PROPERTIES LABELS "static;golden;integration" SKIP_RETURN_CODE 77 TIMEOUT 600)
+# legacy-case (RV3A 6.3 O8): the profile-driven facts of the pinned core build with the case profile
+set_property(TEST static_golden_core_cpu1 APPEND PROPERTY LABELS legacy-case)
 
 # ---- unit tests ---------------------------------------------------------------------------------------------
 foreach(kz_name test_static_expr test_static_flow test_static_recipe test_static_gitrev test_static_unroll test_static_wrappers)

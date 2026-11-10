@@ -95,10 +95,10 @@ bool lookup(const Names (&table)[N], const std::string& name, uint32_t* v) {
 
 Status parse_slot(uint32_t line, const std::string& key, const std::string& val, kz::trace::SlotSpec* out) {
   // key = s0..s3 ; val = src:width:role
-  const size_t c1 = val.find(':');
-  const size_t c2 = c1 == std::string::npos ? c1 : val.find(':', c1 + 1);
-  if (c2 == std::string::npos) return err(line, key + ": a slot is <src>:<width>:<role>");
-  const std::string src = val.substr(0, c1), width = val.substr(c1 + 1, c2 - c1 - 1), role = val.substr(c2 + 1);
+  const size_t p1 = val.find(':');
+  const size_t p2 = p1 == std::string::npos ? p1 : val.find(':', p1 + 1);
+  if (p2 == std::string::npos) return err(line, key + ": a slot is <src>:<width>:<role>");
+  const std::string src = val.substr(0, p1), width = val.substr(p1 + 1, p2 - p1 - 1), role = val.substr(p2 + 1);
   out->slot = static_cast<uint8_t>(key[1] - '0');
   out->role = role;
   if (role.empty()) return err(line, key + ": a slot needs a role");

@@ -2,9 +2,9 @@
 // "Release").
 //
 // The supervisor runs the target command as its child and seizes it with PTRACE_SEIZE, with
-// PTRACE_O_TRACECLONE|FORK|VFORK|EXEC so that it follows the whole process tree down to the cFS
+// PTRACE_O_TRACECLONE|FORK|VFORK|EXEC so that it follows the whole process tree down to the target
 // application threads (the provider and the consumer are threads the core creates after the run
-// starts).  On every traced thread of the cFS process it arms the gate and release addresses as
+// starts).  On every traced thread of the target process it arms the gate and release addresses as
 // *hardware execution breakpoints* in the debug registers (DR0..DR3, set through PTRACE_POKEUSER):
 // the text on disk and in memory is never modified.  Only the thread that hits a gate is left
 // stopped (held); the others run.  A gate that carries a condition (the semaphore name at an
@@ -27,7 +27,7 @@
 // The addresses are given per declared binary as a file offset; the supervisor turns each into a
 // run-time address from /proc/<pid>/maps when the binary is mapped (the shared objects cf.so and
 // bp.so are mapped by the loader before the app task runs).  A process is relevant only if it maps
-// the primary binary (the cFS executable); other processes of the tree (the shell, setpriv, the
+// the primary binary (the target executable); other processes of the tree (the shell, setpriv, the
 // observer) are followed but never gated.
 #pragma once
 

@@ -22,11 +22,11 @@ struct TargetField {
   std::string origin;  // "profile loc NAME", "profile bind", "profile store pattern", "command line"
 };
 
-// A call whose parameters have roles (stamp / key / id / out), from an operation of the profile.
+// A call whose parameters have roles (stamp / key / id), from an operation of the profile.  The `out` role of a
+// parameter is not kept: nothing read it (static_facts.md 5k).
 struct OpInfo {
   std::string symbol;
   std::vector<uint8_t> roles;  // KZ_ARG_ROLE_* per parameter
-  std::vector<bool> out;       // parameter has the `out` role
   bool terminal = false;
   bool process_terminal = false;
   std::string origin;
@@ -51,7 +51,9 @@ struct ExtractSpec {
   std::vector<TargetField> fields;
   std::map<std::string, OpInfo> ops;  // by callee name
   std::set<std::string> delay_ops, spawn_ops, lock_ops, unlock_ops, terminal_ops;
-  std::set<std::string> poll_fns;     // functions that the profile names as poll loops
+  // functions that the profile names as poll loops (observe rules) or --poll-fn gives: the old path only, not consumed
+  // by the extraction; --poll-fn is recorded in BASIS as a hand-entered item (static_facts.md 5k)
+  std::set<std::string> poll_fns;
   std::map<std::string, DataFn> data_fns;
   std::vector<DeclaredItem> declared;  // hand-entered inputs, for the BASIS section and the report
   std::string profile_name, profile_revision;

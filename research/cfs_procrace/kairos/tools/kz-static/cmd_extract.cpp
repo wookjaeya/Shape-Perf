@@ -30,6 +30,8 @@ void add_declared(kzs::ExtractSpec* spec, const std::string& name, const std::st
 
 // What the command line adds to the profile's vocabulary.  Each entry is hand-entered: it is
 // recorded in the facts container with provenance tier `researcher` and counted in the report.
+// A target is recorded once, by its BASIS item `target.<Type>.<field> = command line` (serialize.cpp); it is no
+// declared item besides (static_facts.md 5k).
 bool add_cli_vocabulary(const Args& args, kzs::ExtractSpec* spec, std::string* err) {
   for (const std::string& t : args.many("--target")) {
     kzs::FieldRef f;
@@ -37,10 +39,7 @@ bool add_cli_vocabulary(const Args& args, kzs::ExtractSpec* spec, std::string* e
       *err = "--target expects Type.field, got " + t;
       return false;
     }
-    if (!spec->has_field(f)) {
-      spec->fields.push_back(kzs::TargetField{f, kCommandLine});
-      add_declared(spec, "target." + t, "extraction target");
-    }
+    if (!spec->has_field(f)) spec->fields.push_back(kzs::TargetField{f, kCommandLine});
   }
   struct Set {
     const char* option;
@@ -79,11 +78,14 @@ std::string summary_text(const kzs::Model& m, const kzs::ExtractSpec& spec, size
     const char* st = status != nullptr ? kz::enum_display(*status, l.status) : nullptr;
     os << "  location " << l.loc_type << "." << l.loc_field << "   writers " << l.n_writers << " (direct " << l.n_direct << ", data function " << l.n_data_fn << ", out-pointer " << l.n_outptr
        << ", initial values " << l.n_init << "), A-TYPE hits: untyped " << l.n_untyped << ", escape " << l.n_escape << ", cast " << l.n_cast << ", union " << l.n_union << ", unknown effect " << l.n_unknown << "  -> "
-       << (st != nullptr ? st : "?") << "\n";
+       << (!l.unknown_target.empty() ? "unknown-target (" + l.unknown_target + ")" : std::string(st != nullptr ? st : "?")) << "\n";
   }
+  // the command-line targets are hand-entered inputs too; they are recorded as targets, not as declared items
   size_t builtin = 0, cli = 0;
   for (const kzs::DeclaredItem& d : spec.declared) (d.origin == kCommandLine ? cli : builtin)++;
-  os << "  hand-entered inputs        " << spec.declared.size() << " (built-in " << (spec.no_profile ? "P0 table " : "data-function table ") << builtin << ", command line " << cli << ")\n";
+  for (const kzs::TargetField& t : spec.fields)
+    if (t.origin == kCommandLine) ++cli;
+  os << "  hand-entered inputs        " << builtin + cli << " (built-in " << (spec.no_profile ? "P0 table " : "data-function table ") << builtin << ", command line " << cli << ")\n";
   os << "  declared assumptions       " << m.assumptions.size() << " (static images of table-walk links that are not const)\n";
   return os.str();
 }
@@ -265,6 +267,11 @@ int cmd_extract(int argc, char** argv) {
   }
   ro.root = root;
   so.root = root;
+  // the reading options of the front end (CONFIG_MANAGEMENT 1): the resource directory in use and every extra argument
+  so.notes.push_back({"extract.resource_dir", ro.resource_dir.empty() ? std::string("none (no resource directory: the front end's own search)")
+                                                                      : ro.resource_dir + (args.has("--resource-dir") ? " (--resource-dir)" : " (the tool's built-in default; no --resource-dir)")});
+  if (ro.extra_args.empty()) so.notes.push_back({"extract.extra_arg", "none"});
+  for (size_t i = 0; i < ro.extra_args.size(); ++i) so.notes.push_back({"extract.extra_arg[" + std::to_string(i) + "]", ro.extra_args[i]});
 
   kzs::Model model;
   std::string error;

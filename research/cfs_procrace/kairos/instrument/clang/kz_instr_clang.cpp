@@ -1,6 +1,6 @@
 // kz_instr_clang.cpp -- kz-instr-clang, the Clang AST source-transformation connector of the instrumented
 // family (a candidate of stage C; SPEC rev 1.4 section 4.1 "Clang as a source transformer", section 5.12;
-// review IR section 5.2).  docs/instr_candidate_clang.md describes the rules and the C1/R2 fitness check.
+// review IR section 5.2).  docs/instr_candidate_clang.md describes the rules and the fitness check on two case builds.
 //
 //   kz-instr-clang --sites <logical.kzs> --db <compile_commands.json> [--db ...] [--exclude <text>]...
 //                  --map <from-prefix>=<to-prefix> [--map ...] --module <id>=<path-part>|* [--module ...]

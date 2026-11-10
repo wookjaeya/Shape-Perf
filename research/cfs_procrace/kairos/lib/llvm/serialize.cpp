@@ -980,6 +980,11 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("target." + t.field.type + "." + t.field.field, t.origin, from_profile ? KZ_POLICY_FROM_REFERENCE : by_rule ? KZ_POLICY_UNSET : KZ_POLICY_DECLARED,
          from_profile || by_rule ? KZ_NONE32 : prov_for(t.origin));
   }
+  // a command-line target no unit read declares (static_facts.md 5k): a finding of the tool, not an input
+  for (const LocFact& l : m.locs)
+    if (!l.unknown_target.empty())
+      item("unknown_target." + l.loc_type + "." + l.loc_field, "unknown-target: " + l.unknown_target + "; FACT_LOCS status unchecked (not writer-set-complete)",
+           KZ_POLICY_UNSET, KZ_NONE32);
   for (const DeclaredItem& d : spec.declared) item(d.name, d.value, KZ_POLICY_DECLARED, prov_for(d.origin));
   // the assumptions the extraction itself declared (counted in the report)
   for (const Model::Assumption& a : m.assumptions)

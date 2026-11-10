@@ -1356,6 +1356,66 @@ startup_script {
     KZ_CHECK(has(pr, "dependency: path A: 1 creator(s) of this partition in other actors"));
   }
 
+  // ---- 8c (RV3A 6.3 O2, O12): command-line targets no unit declares, the target recorded once, the reading options
+  {
+    const fs::path X = work / "8c";
+    fs::create_directories(X);
+    const std::string wc = fixtures + "/writers.c", tk = (X / "t.kz").string(), ok = (X / "ok.kz").string();
+    // O2: writers.c has a record Cell with a field id, and no record NoSuch_t or Slot; Cell has no field nofield
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) +
+                        " --target NoSuch_t.nofield --target Slot.nofield --target Cell.nofield -o " + q(tk) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "location NoSuch_t.nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, "
+                      "unknown effect 0  -> unknown-target (no record type NoSuch_t is defined in the units read)"));
+    KZ_CHECK(has(out, "location Slot.nofield   writers 0 "));
+    KZ_CHECK(has(out, "-> unknown-target (no record type Slot is defined in the units read)"));
+    KZ_CHECK(has(out, "-> unknown-target (the record type Cell has no field nofield in the units read)"));
+    KZ_CHECK(!has(out, "nofield   writers 0 (direct 0, data function 0, out-pointer 0, initial values 0), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
+                       "writer-set-complete"));
+    // the profile's target Cell.id is declared: its rule is the one it had
+    KZ_CHECK(has(out, "location Cell.id   writers "));
+    KZ_CHECK(!has(out, "Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> unknown"));
+    // the hand-entered count still counts the three targets
+    KZ_CHECK(has(out, "hand-entered inputs        15 (built-in data-function table 12, command line 3)"));
+    std::string sv;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(tk) + " --section basis --section locs", &sv), 0);
+    KZ_CHECK(has(sv, "unknown_target.NoSuch_t.nofield = unknown-target: no record type NoSuch_t is defined in the units read; FACT_LOCS status unchecked (not "
+                     "writer-set-complete)  (unset)"));
+    KZ_CHECK(has(sv, "unknown_target.Cell.nofield = unknown-target: the record type Cell has no field nofield in the units read; FACT_LOCS status unchecked"));
+    KZ_CHECK(!has(sv, "unknown_target.Cell.id"));
+    KZ_CHECK(has(sv, "  NoSuch_t.nofield unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Cell.nofield unchecked writers=0"));
+    KZ_CHECK(has(sv, "  Cell.id writer-set-complete writers="));
+    // O12: one BASIS record per command-line target (no `= extraction target` record besides), the reading options
+    KZ_CHECK(has(sv, "target.Slot.nofield = command line  (declared-assumption)"));
+    KZ_CHECK(!has(sv, "extraction target"));
+    KZ_CHECK(has(sv, "extract.resource_dir = "));
+    KZ_CHECK(has(sv, "extract.extra_arg = none  (unset)"));
+    KZ_CHECK(!has(sv, "extract.extra_arg[0]"));
+    // a declared command-line target keeps the rule; --resource-dir and --extra-arg are recorded as given
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.id --extra-arg -DKZ_8C_A=1 --extra-arg -Wall -o " +
+                        q(ok) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK(has(out, "Cell.id   writers 10 (direct 9, data function 1, out-pointer 0, initial values 5), A-TYPE hits: untyped 0, escape 0, cast 0, union 0, unknown effect 0  -> "
+                      "writer-set-complete"));
+    KZ_CHECK(!has(out, "unknown-target"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(ok) + " --section basis", &sv), 0);
+    KZ_CHECK(has(sv, "extract.extra_arg[0] = -DKZ_8C_A=1  (unset)"));
+    KZ_CHECK(has(sv, "extract.extra_arg[1] = -Wall  (unset)"));
+    KZ_CHECK(!has(sv, "extract.extra_arg = none"));
+    KZ_CHECK(!has(sv, "unknown_target."));
+    KZ_CHECK(has(sv, " (the tool's built-in default; no --resource-dir)  (unset)") || has(sv, "extract.resource_dir = none (no resource directory"));
+    // relations counts a command-line target once among the hand-entered vocabulary
+    KZ_CHECK_EQ(run(q(tool) + " extract --profile " + q(profile) + " --extended-facts --source " + q(wc) + " --root " + q(fixtures) + " --target Cell.nofield -o " +
+                        q((X / "rel.kz").string()) + " -- -std=c99 -pedantic",
+                    &out),
+                0);
+    KZ_CHECK_EQ(run(q(tool) + " relations " + q((X / "rel.kz").string()), &out), 0);
+    KZ_CHECK(has(out, "; hand-entered vocabulary on the command line: 1 items\n"));
+  }
+
   fs::remove_all(work);
   return kztest::finish("test_static_cli");
 }

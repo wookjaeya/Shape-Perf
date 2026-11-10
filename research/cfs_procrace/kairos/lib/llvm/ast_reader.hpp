@@ -90,6 +90,8 @@ class TuReader {
 
  private:
   void collect_typedefs();
+  // The targets this unit declares: Model::target_types_defined and target_fields_defined (static_facts.md 5k).
+  void note_declared_targets();
   void read_function(const clang::FunctionDecl* fd);
   void read_global(const clang::VarDecl* vd);
   void read_init_for_targets(const clang::VarDecl* vd);

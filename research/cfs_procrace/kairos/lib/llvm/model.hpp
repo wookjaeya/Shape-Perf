@@ -320,6 +320,9 @@ struct LocFact {
   uint32_t n_writers = 0, n_direct = 0, n_data_fn = 0, n_outptr = 0;
   uint32_t n_untyped = 0, n_escape = 0, n_cast = 0, n_union = 0, n_unknown = 0, n_init = 0, n_unresolved_indirect = 0;
   uint8_t status = KZ_LOC_STATUS_UNCHECKED;
+  // A command-line target whose record type or field no unit read declares (static_facts.md 5k): why; the status
+  // then stays unchecked (not writer-set-complete).  Empty for every other target.
+  std::string unknown_target;
 };
 
 // An out-pointer store inside a function: `*param = value` under a guard.
@@ -754,6 +757,10 @@ struct Model {
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer
   // object key -> the marker leaves of its image, for each object whose image walk used up the budget (0: an exact fit)
   std::map<std::string, uint32_t> image_budget_objects;
+  // The targets whose declaration a unit read has (static_facts.md 5k): the record type names among the target
+  // types that name a record definition, and the targets "Type.field" a field of such a record matches
+  // (TuReader::targets_of_field, the rule the writers are matched by).
+  std::set<std::string> target_types_defined, target_fields_defined;
   std::map<std::string, Pos> object_pos;
   std::map<std::string, std::string> object_tu;
   // Table walks to evaluate: loop key -> access path of the table in the loop.

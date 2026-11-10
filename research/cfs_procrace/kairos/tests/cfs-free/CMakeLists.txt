@@ -25,6 +25,8 @@ set_tests_properties(test_realrecord_derived PROPERTIES SKIP_RETURN_CODE 77)
 # sections) equals the replay of the record as written (F0 sections converted in memory).  Exits 77 when absent.
 add_test(NAME test_trace_neutral_real COMMAND test_trace_neutral ${CMAKE_SOURCE_DIR}/profiles/cfs-v7.0.1 ${CMAKE_SOURCE_DIR}/../env/logs/s1r2_p1.kzt)
 set_tests_properties(test_trace_neutral_real PROPERTIES SKIP_RETURN_CODE 77 LABELS unit)
+# legacy-case (RV3A 6.3 O8): the two tests above read the case profile and the development run record of the earlier path
+set_property(TEST test_realrecord_derived test_trace_neutral_real APPEND PROPERTY LABELS legacy-case)
 # An instrumented run: a kzrt-dump written by the runtime in this test (POSIX adapter, two threads), converted to the
 # neutral layer with a unit-test manifest and replayed on the mini profile.
 kz_add_unit_test(test_neutral_kzrt SOURCES test_neutral_kzrt.cpp LIBS kz-trace kz-testsupport kzrt-posix kzrt)

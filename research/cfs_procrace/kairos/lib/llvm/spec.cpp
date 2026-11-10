@@ -61,10 +61,7 @@ void spec_from_profile(const kz::phi::Profile& profile, ExtractSpec* spec) {
     OpInfo info;
     info.symbol = op.symbol.empty() ? op.name : op.symbol;
     info.origin = "profile op " + op.name;
-    for (const kz::phi::OpParam& p : op.params) {
-      info.roles.push_back(role_of(p.role));
-      info.out.push_back(p.role == "out");
-    }
+    for (const kz::phi::OpParam& p : op.params) info.roles.push_back(role_of(p.role));
     for (const kz::phi::ConjunctDecl& c : op.conjuncts) scan_pattern(spec, c.lp.pattern, info.origin);
     for (const kz::phi::EffectDecl& e : op.effects) scan_pattern(spec, e.lp.pattern, info.origin);
     if (op.terminal.present) {

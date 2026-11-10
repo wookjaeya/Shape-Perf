@@ -1,6 +1,9 @@
-# Case identifiers.  Engine code (include/, lib/ and tools/) must not contain any of them: knowledge
-# about a case or about the framework is data in profiles/<profile>/*.kzp or in a basis
-# record, with provenance.  profiles/ and tests/ may use them.
+# Case identifiers.  Engine code (include/, lib/ and tools/, and the C and C++ code files of probe/ and
+# instrument/ outside their tests/ directories) must not contain any of them: knowledge about a case or
+# about the framework is data in profiles/<profile>/*.kzp or in a basis record, with provenance.
+# profiles/ and tests/ may use them, and so may the scripts, site manifests and committed outputs of
+# probe/ and instrument/.  runtime/ is not scanned: its framework knowledge is the table of
+# docs/framework_layer.md.
 #
 #   word <phrase>   the phrase as consecutive name components, without regard to case.  Source
 #                   text is cut into components at '_', at a lower-case to upper-case step

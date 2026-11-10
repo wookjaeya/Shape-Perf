@@ -670,6 +670,14 @@ void finalize(Model* mp, const ExtractSpec& spec) {
     // it receives the address of the field.
     l.n_unresolved_indirect = R.indirect_unresolved;
     l.status = (l.n_untyped + l.n_escape + l.n_cast + l.n_union + l.n_unknown) > 0 ? KZ_LOC_STATUS_DISABLED : KZ_LOC_STATUS_COMPLETE;
+    // A command-line target that no unit read declares has no writer because it names nothing here, not because its
+    // writer set is complete: its status stays unchecked (static_facts.md 5k).  Targets of a profile or a rule keep
+    // the rule above.
+    if (tf.origin == "command line" && m.target_fields_defined.count(l.loc_type + "." + l.loc_field) == 0) {
+      l.status = KZ_LOC_STATUS_UNCHECKED;
+      l.unknown_target = m.target_types_defined.count(l.loc_type) == 0 ? "no record type " + l.loc_type + " is defined in the units read"
+                                                                      : "the record type " + l.loc_type + " has no field " + l.loc_field + " in the units read";
+    }
     m.locs.push_back(l);
   }
 

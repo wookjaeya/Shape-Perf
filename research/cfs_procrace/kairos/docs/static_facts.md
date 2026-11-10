@@ -499,6 +499,31 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 
 **시험** [M]: fixture `imgbudget.c`(사례 이름 없음)와 `test_static_cli` 의 이미지 예산 확인. `--image-budget 4` 로 다섯 경우를 따로(`-DIMG_CASE=1..5`), 그리고 함께 읽는다. 1 멤버가 예산보다 많은 구조체(표시 `.e...`, 소진 1, 표시 1). 2 활성 멤버가 잘리는 union(표시 `.s.e...`). 3 배열 안 구조체(표시 `[1].y...` 와 `[...]`, 소진 1, 표시 2). 4 정확히 맞음(뒤에 잎 없는 배열 멤버; 소진 1, 표시 0, 표시 잎 없음). 5 예산 안(둘 다 0). 기존 `argflow.c` 의 `--image-budget 1` 확인(`fx_slots[...]`)은 그대로다. 8b 수정 단계(2026-11-10): golden `static_golden_imgbudget_np`(`--no-profile --image-budget 4`, 다섯 경우 함께; 섹션 functions·argflow·paramflow·ptrfields·gimages)가 잎과 플래그를 행 단위로 고정한다. 두 계수는 BASIS 에 있다. golden 은 BASIS 를 뺀다(`tests/static/static_golden.cpp` 의 `kFactSections` 앞 주석: 도구 해시가 든다). 그래서 계수는 `test_static_cli` 가 본다. `test_static_cli` 는 C99 fixture 에 넣지 못하는 세 경우도 본다(소스를 시험 안에서 씀): 이름 없는 멤버의 표시(`an_rec....`, `an_rec..c...`), 덮어쓰는 지정자로 초기화한 배열의 상수 아닌 잎(`up_rec.s`), 잘린 이미지 위 table walk 의 이유 문장.
 
+## 5k. 없는 명령줄 대상, 대상 기록 하나, 읽기 옵션의 기록, 죽은 입력 (2026-11-10, 단계 2a 8c) [D][M]
+
+근거: `plan/RV3_REVIEW_ANALYSIS_20261105.md` §6.3 O2·O12. 결과는 `plan/step2a_results_20261030.md` §16. facts schema 는 개정 11 그대로다(섹션·레코드 배치·열거형 변화 없음).
+
+**없는 명령줄 대상(`unknown-target`)** [D]. 명령줄 `--target T.f` 의 선언을 읽은 단위에서 찾는다. 찾는 규칙은 writer 를 맞추는 규칙과 같다(`TuReader::targets_of_field`: 필드 이름이 같고, 그 필드가 든 레코드나 그것을 감싼 이름 없는 레코드의 태그·typedef 이름에 `T` 가 있음). 레코드 정의만 센다. 앞선 선언(불완전 형)은 세지 않는다.
+- 어느 단위에도 없으면 FACT_LOCS 상태는 `unchecked` 다. `writer-set-complete` 가 아니다. 수(writers 등)는 0 이다.
+- BASIS 에 `unknown_target.T.f` 한 항목을 둔다(정책 unset). 값은 까닭이다: "no record type T is defined in the units read" 또는 "the record type T has no field f in the units read".
+- extract 요약 줄은 `-> unknown-target (까닭)` 이다.
+- 새 열거형 값은 두지 않았다. `layout.golden` 이 열거형을 적는다. 그래서 새 값은 기존 golden 과 schema 개정을 바꾼다.
+- 소비자: `unchecked` 는 complete 가 아니다. 루프 규칙(`unroll.cpp`)과 옛 재생의 정적 닫힘(`lib/trace/static_closure.cpp`)은 complete 만 완전한 것으로 본다.
+- 프로필 대상(`loc`, `bind`, store pattern)과 규칙 대상(`--targets-rule`)에는 적용하지 않는다. 규칙 대상은 프로그램의 필드에서 고르므로 늘 선언이 있다. 프로필 대상에는 같은 결함이 남는다 [M]: fixture 프로필의 `loc Cell.id` 는 `Cell` 이 없는 fixture 다섯(atype, loops, outptr, relations, clobber)의 golden 에 행이 있다. 넷은 `writer-set-complete writers=0` 이다. 고치면 옛 경로 golden 다섯이 바뀐다. 그래서 이 판에서는 고치지 않았다.
+
+**명령줄 대상은 한 번 기록한다** [D]. 전에는 `target.T.f = command line` 과 `target.T.f = extraction target` 두 항목이었다. 이제 앞의 것 하나다(정책 declared-assumption, 출처 계층 researcher). 요약의 "hand-entered inputs" 수는 그대로다(명령줄 대상을 따로 센다). relations 의 "hand-entered vocabulary" 수는 대상을 한 번 센다. 전에는 두 번 셌다.
+
+**읽기 옵션의 기록** [D]. facts BASIS 에 두 가지를 둔다(정책 unset).
+- `extract.resource_dir`: 단위를 읽을 때 쓴 resource 디렉터리다. `--resource-dir` 가 없으면 도구에 내장된 기본값을 쓴다. 값은 그 경로와 "(the tool's built-in default; no --resource-dir)" 또는 "(--resource-dir)" 다. 둘 다 없으면 "none (…)" 이다.
+- `extract.extra_arg[i]`: `--extra-arg` 마다 하나, 준 차례대로. 없으면 `extract.extra_arg = none` 하나다.
+- basis 는 같은 값을 `front_end.arguments_added` 에 이미 적는다. 이제 extract 의 값도 facts 에서 되짚을 수 있다(CONFIG_MANAGEMENT §1).
+
+**죽은 입력** [D].
+- `OpInfo.out`(프로필 op 매개변수의 `out` 역할)은 지웠다. 채우기만 하고 읽는 곳이 없었다.
+- `poll_fns`(프로필 observe 규칙의 poll 함수, `--poll-fn`)는 옛 경로 전용이고 추출이 소비하지 않는다. 남겨 둔다. `--poll-fn` 은 BASIS 에 사람이 넣은 항목(`op.poll function.<이름>`)으로 기록될 뿐이다. 프로필 observe 규칙의 poll 함수는 프로필 해시에만 든다.
+
+**시험** [M]: `test_static_cli` 의 8c 블록. fixture `writers.c` 에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)이 `unknown-target` 이고, 프로필 대상 `Cell.id` 는 전과 같다. BASIS 의 `unknown_target.*`, 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음과 둘), relations 의 수 1 을 본다.
+
 ## 6. core-cpu1 결과 [M]
 
 `ctest -L static` 의 `static_golden_core_cpu1`(golden `tests/static/data/core_cpu1.golden`)이 basis → extract → 아래 수치를 매번 다시 만든다. 추출 시간은 이 VM 에서 약 4.5 초(한 번 측정, 비용 주장 아님).

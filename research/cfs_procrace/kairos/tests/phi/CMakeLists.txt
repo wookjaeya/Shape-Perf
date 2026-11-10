@@ -87,3 +87,9 @@ foreach(kz_pair "c1_pre_fail;281a941;rspec-281a941" "c1_post_retry;833fdbb;rspec
             ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_SOURCE_DIR}/traces)
   set_tests_properties(phi_golden_replay_${kz_case} PROPERTIES LABELS golden)
 endforeach()
+
+# legacy-case (RV3A 6.3 O8, PD E6): every test of this directory checks the case profiles and the replay of the
+# earlier path (Phi profiles, kz-phi, synthetic case traces).  They stay as regression tests of that path; the
+# label lets a report count them apart from the tests of the profile-free path: ctest -L legacy-case.
+get_property(kz_phi_tests DIRECTORY PROPERTY TESTS)
+set_property(TEST ${kz_phi_tests} APPEND PROPERTY LABELS legacy-case)

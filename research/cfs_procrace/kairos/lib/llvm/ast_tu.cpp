@@ -332,8 +332,40 @@ void TuReader::read_function(const FunctionDecl* fd) {
   if (!read_function_body(*this, fd)) ++model_->stats.functions_dedup;
 }
 
+void TuReader::note_declared_targets() {
+  if (spec_.fields.empty()) return;
+  std::set<std::string> types;
+  for (const TargetField& t : spec_.fields) types.insert(t.field.type);
+  for (const auto& entry : names) {
+    const RecordDecl* def = entry.first != nullptr ? entry.first->getDefinition() : nullptr;
+    if (def == nullptr) continue;
+    bool named = false;
+    for (const std::string& n : entry.second) {
+      const std::string bare = !n.empty() && n[0] == '\x01' ? n.substr(1) : n;
+      if (types.count(bare) != 0) {
+        model_->target_types_defined.insert(bare);
+        named = true;
+      }
+    }
+    if (!named) continue;
+    // the fields of the record and of the unnamed records inside it, which targets_of_field gives to it
+    std::vector<const RecordDecl*> todo = {def};
+    while (!todo.empty()) {
+      const RecordDecl* rd = todo.back();
+      todo.pop_back();
+      for (const FieldDecl* fd : rd->fields())
+        for (size_t i : targets_of_field(fd)) model_->target_fields_defined.insert(spec_.fields[i].field.type + "." + spec_.fields[i].field.field);
+      for (const Decl* d : rd->decls())
+        if (const auto* inner = dyn_cast<RecordDecl>(d))
+          if (inner->getIdentifier() == nullptr && inner->getTypedefNameForAnonDecl() == nullptr && inner->getDefinition() != nullptr)
+            todo.push_back(inner->getDefinition());
+    }
+  }
+}
+
 void TuReader::run() {
   collect_typedefs();
+  note_declared_targets();
   std::map<std::string, const VarDecl*> best;  // object key -> the declaration that defines it
   for (Decl* d : ctx_.getTranslationUnitDecl()->decls()) {
     if (const auto* fd = dyn_cast<FunctionDecl>(d)) {

@@ -1,1 +1,54 @@
 # declaration: sha256 of the AR lines from the 16 heading to the end, before the build = 8ada6603ecab0b38c8b5270f3605945925c087dbe3faf3398f98fa1b15aefdfa (2026-11-10T08:40:44Z; declared_before_build.txt here; committed before the build)
+# step2a-20261110-8c: commands, rc and free space (df -B1 /, bytes available)
+start: 2026-11-10T08:37:17Z (pre_mc.txt), free 667750400
+# <scratch> is this session's scratchpad directory (8c/); the scripts there are described here or copied here
+
+## 1. the four items checked against files (AR 16.1)
+lint case-ids on copies of probe/, instrument/, runtime/ (each copied as lib/; kz_lint of the 8b fix build) -> 178/5, 2128/73, 156/15 (as CK gaps/lint_*.txt)
+grep Cell kairos/tests/static/fixtures/*.c -> writers.c, derives.c only; the [locs] of atype, loops, outptr, relations golden: Cell.id writer-set-complete writers=0; clobber: DISABLED
+ctest -N in MC -> 239 tests (ctest_names_pre8c in <scratch>)
+
+## 2. the declaration before the build: AR 16.0 and 16.1, committed as 7cc970d (08:40Z; line 1 above)
+
+## 3. code, tests, lint, labels, docs (working tree); a snapshot of the working tree was committed as e261861 by the lead
+##    (stop hook, 08:44:42Z) while this stage was editing; the build used that tree; driver and docs committed as dde72e1
+lib/llvm/{ast_reader.hpp,ast_tu.cpp,model.hpp,finalize.cpp,serialize.cpp,spec.hpp,spec.cpp}, tools/kz-static/cmd_extract.cpp,
+probe/hold/supervisor.hpp, probe/plan/profile.cpp, instrument/clang/kz_instr_clang.cpp, tests/lint/{kz_lint.cpp,data/case_identifiers.txt},
+tests/{phi,static,cfs-free}/CMakeLists.txt, tests/static/test_static_cli.cpp, docs/{static_facts.md,schema.md,framework_layer.md},
+env/redesign/step2a_tests.sh (lines 1-80 unchanged)
+driver unit checks before the build (<scratch>/unit/unit_pre.txt): 6 of 6
+
+## 4. before touching MC (pre_mc.txt): the five tools equal the 8b fix post_mc.txt values (3c5dfc56 b254483e 05623054 4390d4f1 7d34e6e2)
+
+## 5. rebuild in place in MC (2026-11-10T08:48:00Z - 2026-11-10T08:50:55Z)
+cd MC && make -j4 all -> rc 0 (make.log; CMake re-ran: the tests CMakeLists and the identity files; the links: make.log, post_mc.txt)
+free: before 665710592 (08:48:00Z), lowest 587890688 (08:49:31Z), after 661958656 (08:50:55Z); df_build.log (watcher stops the build below 330000000; did not trigger)
+kz-instr-clang: object of a5d52a2's and of e261861's kz_instr_clang.cpp, same flags, one scratch path -> both 5b0f7e0a... (cmp equal); scratch removed
+
+## 6. full ctest (08:53:38Z - 08:53:59Z)
+ctest -j4 --output-on-failure -> ctest_full.log: 239 tests, 0 failed, 1 skipped (test_probe_anchor_reached), rc 0
+ctest -N -L legacy-case -> 51 (labels.txt); label time summary of the run: legacy-case 51, static 45, golden 58, unit 84, runtime 66, lint 6, integration 4, instr 1, property 1
+ctest -R '^test_probe_anchor_reached$' (08:55Z, for its LastTest.log entry: the skip reason; the earlier LastTest.log was replaced by a ctest -N)
+ctest -R '^(test_static_cli|lint_selftest|lint_case-ids)$' -V -> test_static_cli 719 checks passed; lint selftest 97 cases, 0 failed; lint case-ids clean
+git status -- kairos/tests/static/data kairos/tests/golden kairos/tests/phi/data -> no change
+
+## 7. widened lint and the three groups
+kz_lint case-ids <kairos> --data tests/lint/data -> clean, 30 code files of probe/ and instrument/ in the range (lint_widened.txt); planted check: the probe line is found, the instrument tests line is not
+python3 -I <scratch>/lintgroups.py (copied here) on the copies before and after -> lint_groups.txt
+
+## 8. unit checks of the driver
+TMPDIR=<scratch>/unit/tmp bash env/redesign/step2a_tests_unit.sh -> unit.txt, 6 of 6, rc 0 (driver ccbb26f8, unit a02e56a8, count 7d2ab6a8)
+
+## 9. the driver (2026-11-10T08:56:09Z - 2026-11-10T09:00:52Z)
+env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools \
+  bash R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c          -> rc 0, result all: PASS (status.txt); repo dde72e1, kairos_uncommitted_lines=0
+free: before 661561344 (08:56:09Z), lowest 437309440 (08:59:10Z), after 458305536 (09:00:52Z); df_run.log
+du -sb tests_8c -> 202212345; find -type f | wc -l -> 149; sha256.txt 136 lines (sha256 950eb651...)
+
+## 10. checks after the run
+(cd T/ && sha256sum -c --quiet sha256.txt) -> rc 0; tests_rv4 rc 0; tests_8b rc 0; tests_8b_fix rc 0; tests_8c rc 0
+python3 -I <scratch>/cmp/compare_8c.py MC/tools/kz-dump/kz-dump compare_8c.tsv tests_8c tests_8b_fix T/ tests_rv4
+  -> tests_8b_fix same 34 DIFF 115; T/ same 29 DIFF 108 only-in-new 12; tests_rv4 same 34 DIFF 115 (AR 16.7 reads every DIFF line against tests_8b_fix)
+summary.txt against tests_8b_fix with every facts.txt:<n> written as facts.txt:# -> 10 differing lines (the T7 lines); 29 lines differ only by facts.txt line numbers (+2)
+nothing deleted (free never below 300000000)
+end: free 457109504 (2026-11-10T09:09:24Z, before the last commit)

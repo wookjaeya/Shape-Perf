@@ -686,3 +686,11 @@ $R/env/redesign/extract_baseline.sh all            # inputs, run(28 추출), ext
 - 각 실행 디렉터리 `EB/<build>/<variant>/`에는 `basis.kz`, `basis.txt`, `basis.dump`, `facts.kz`, `facts.txt`(`kz-static show`), `extract.txt`, `args.txt`, `sha256.txt`가 있다.
 - 계수 결과는 `EB/count/`의 `summary.txt`와 TSV 21종(이번에 더한 것: `p0_check`, `variant_line_diff`, `vp_vs_v1`, `obs_points_rule_VP`, `obs_manifest_coverage_VP`, `static_roots_VP`), 줄 단위 비교 견본 `variant_line_diff.txt`, 평가용 조회 `eval_C1.txt`·`eval_R2.txt`·`eval_C5.txt`(VP·V3a 절을 끝에 더함)다. 비교 결과는 `EB/compare/compare.txt`다.
 - 시간(이 VM, 한 번, 비용 주장 아님): extract C1 약 4–6 s, R2 core 약 4–7 s, R2 all 약 8–12 s, C5 약 1.4–1.7 s. 계수 약 17 s.
+
+## 8. 단계 3 완료 기준에 더하는 수 (2026-11-10, RV3A §6.3 O9, 단계 2a 8c) [M]
+
+- 근거: RV3A §6.3 O9("세 묶음의 수를 AR·ED에 단계 3 완료 기준으로"). 잰 것은 `plan/step2a_results_20261030.md` §16.5, 기록은 `records/step2a-20261110-8c/lint_groups.txt`다. 이 절은 앞 절의 줄 번호를 바꾸지 않으려고 끝에 붙였다.
+- 셈: lint `case-ids`(규칙과 자료는 `kairos/tests/lint`)로 `probe/`·`instrument/`·`runtime/` 사본을 통째로 읽은 수다. 8c 뒤 합 2,451건이다(고치기 전 2,462).
+- 묶음 1, 단계 3이 만들어야 할 입력: `instrument/*/sites/*.kzs` 374건(6 파일)과 `profiles/*/instr/*.kzs`의 사이트(C1 37/38, R2 44, C5 33; §4.2). **완료 기준**: 규칙이 만든 관측점 manifest가 이 사이트를 함수 수준에서 덮는다. 그리고 사람이 고른 사이트 없이 새 호출자를 관측한다(§4.3 끝 항목). 덮지 못한 사이트는 이름과 까닭을 적는다.
+- 묶음 2, 프레임워크 지식: runtime OSAL 어댑터 75건(`kz_rt_osal.c` 56, `kz_rt_osal.h` 19; 부르는 함수 9개). 판·출처 표는 `kairos/docs/framework_layer.md`다. **완료 기준**: 단계 3이 쓰는 판마다 표에 행이 있다(지금 f34759d와 d2d877a; C5의 4.1.1은 아직 없음). 표 밖의 OSAL 호출은 0이다. runtime의 그 밖 코드 25건(ABI 이름과 주석)도 같은 표에서 다시 센다.
+- 묶음 3, 무해: 시험 77, 커밋된 변환 출력 763, 드라이버 1,125, 빌드 파일 12. 코드 파일의 주석·이름은 probe·instrument 0(8c에서 고침; 넓힌 lint 범위), runtime 25(묶음 2의 끝 항목). **완료 기준**: 단계 3·5의 드라이버가 옛 드라이버를 대체한 뒤 다시 센다. 넓힌 lint 범위(엔진과 probe·instrument 코드)의 위반은 0을 유지한다.

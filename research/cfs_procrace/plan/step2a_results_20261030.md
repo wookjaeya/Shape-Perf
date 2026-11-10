@@ -105,7 +105,7 @@
 
 | 확인 | 결과 | 근거 |
 |---|---|---|
-| 시험 | 237/237 통과(1개 건너뜀은 원래대로). 셋째 수정은 두 차례 모두 새 시험을 더하지 않고 기존 시험에 확인을 더했다: `test_static_cli` 583개(첫째 차례 541, 둘째 수정 515; 첫째 차례는 fixture `relsound.c`의 열한 경우 `wait_*` … `opn_*`, 이미지 키의 형 없는 저장 변형, 걷기 상한 24; 둘째 차례는 `relsound.c`의 열 경우 `recur_*` … `arrhook_*`, 두 단위의 헤더 `static` mutex, 두 행위자의 probe-create, `incomplete-source` 행, 상한 8·64), `test_static_wrappers` 512개. lint 6/6 | ctest 로그 |
+| 시험 | 237/237 통과(1개 건너뜀은 원래대로). 나눔(8c, §16.4): 2a 끝의 237 = 새 경로 186 + 옛 경로 51(`legacy-case`), 건너뜀 1(사유는 LastTest.log). 8c 뒤 239 = 새 188(추출 규칙 쪽 44, 컨테이너·직렬화·공통 기능 144) + 옛 51. 탐지 정확도의 시험 수가 아니다. 셋째 수정은 두 차례 모두 새 시험을 더하지 않고 기존 시험에 확인을 더했다: `test_static_cli` 583개(첫째 차례 541, 둘째 수정 515; 첫째 차례는 fixture `relsound.c`의 열한 경우 `wait_*` … `opn_*`, 이미지 키의 형 없는 저장 변형, 걷기 상한 24; 둘째 차례는 `relsound.c`의 열 경우 `recur_*` … `arrhook_*`, 두 단위의 헤더 `static` mutex, 두 행위자의 probe-create, `incomplete-source` 행, 상한 8·64), `test_static_wrappers` 512개. lint 6/6 | ctest 로그 |
 | golden | 셋째 수정 둘째 차례에서 바뀐 것: `layout.golden`·`records.golden`(열거형 항목 `incomplete-source`·`walk-bound`와 지문), `wrappers.golden`(fixture 트램펄린 호출의 `incomplete-source` 행), relations golden 넷(개정 5의 판·머리·전제; `relsound_np`: 새 경우의 행). 첫째 차례에서 바뀐 것: `tests/golden/data/layout.golden`·`records.golden`(FIELD_STATUS flag 항목 `array-element-stores-not-collected` 한 줄과 schema 지문), `lockset.golden`·`lockset_np.golden`(fixture `lockset.c`의 스칼라 배열 `fx_shared.tasks`가 두 규칙 DISABLED), relations golden 넷(`relations`, `relations_np`, `relpaths_np`: 개정 4의 머리 줄, `P0-unverified`, "불가" 문장과 `rests-on`, 뒤집힘 하나; `relsound_np`: 새 경우의 행). 다른 프로필 추출 golden(`writers` … `argflow`, `core_cpu1`)과 2a의 다른 프로필 없는 golden(`wrappers`, `flowfacts_np`, `argflow_np`, `lockpaths_np`)은 그대로다. 둘째 수정까지의 변화는 §10·§11과 같다 | `git diff 672cd31..HEAD -- kairos/tests` |
 | 프로필 추출(identity) | V0·V2 × C1 pre tx·R2 core·C5 6.4.1: basis 6섹션·facts 22섹션 가운데 CRC가 다른 것은 STRINGS뿐. 다른 레코드는 basis 1(`front_end.build_identity`), facts 3(`extract.build_identity`, parent basis 해시, `extract.units_from`). show 텍스트 차이 2줄 | `T/identity/identity.txt` |
 | 프로필 없는 추출, 옵션 없음(npsame, S4 대비) | C5 34개, C1 30개, R2 31개 섹션 레코드 같음. BASIS·P0_TABLE·FIELD_STATUS 다름(FIELD_STATUS는 셋째 수정의 배열 표시), C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS(셋째 수정 둘째 차례의 `incomplete-source`), C1의 AWAIT_L1 다름, LOCK_PATHS는 새 섹션(§2a) | `T/npsame/npsame.txt` |
@@ -992,3 +992,126 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 | O8 | `ctest -N` 237 중 옛 경로 51 | 51의 구성은 맞음 [M: `ctest -N`의 이름]. 전체는 지금 239다(8b·8b 수정에서 둘 더함). 그래서 새 경로는 188이다 | 라벨을 단다. AR·STATUS에는 잰 수를 적는다 |
 | O9 | 주석 11건 | 수는 맞음 [M: 사본 lint, probe 178/5·instrument 2128/73·runtime 156/15, CK와 같음]. 성격은 반만 맞다: 주석은 5건(`probe/hold/supervisor.hpp` 3, `instrument/clang/kz_instr_clang.cpp` 1줄 2건)이다. 6건은 `probe/plan/profile.cpp`의 지역 변수 `c1`·`c2`(콜론 위치)다. lint 자료가 "rename it"이라 한다(`tests/lint/data/case_identifiers.txt:13-14`) | 주석은 고쳐 쓰고 변수는 이름을 바꾼다. 줄 수는 그대로 둔다 |
 | O12 | `--resource-dir`·`--extra-arg` 기록 0, `target.*` 두 번, 죽은 입력 | 맞음 [F: `serialize.cpp:975-983`, `cmd_extract.cpp:36-43`; CK `h10.txt`의 `target.*` 두 쌍]. `--resource-dir`가 없어도 기본값이 쓰인다(`main.cpp:71-74`). basis는 그 값을 이미 적는다(`basis.cpp:406`, `front_end.arguments_added`) | facts에는 쓰인 값을 적는다(없음일 때만 none) |
+
+### 16.2 코드와 문서 [F]
+
+- 커밋: 선언 `7cc970d`(빌드 전). 코드·시험·lint·라벨·`kairos/docs`의 대부분은 `e261861`이다. 이 단계가 고치는 중에 lead가 작업 트리를 스냅숏으로 커밋했다(stop hook, 08:44:42Z, "WIP snapshot"). 빌드는 그 트리로 했다. 드라이버, `docs/framework_layer.md`, `docs/schema.md`의 문장 하나는 `dde72e1`이다(시험 뒤, 실행 전). 이 절과 기록은 그다음 커밋이다.
+- 규모: `git diff 7cc970d e261861 -- kairos` 19 파일 +204/−29. `e261861 → dde72e1` 3 파일 +86/−7(드라이버 +38/−6, 새 문서 `framework_layer.md` +47, `schema.md` +1/−1).
+- **O2**(`lib/llvm`):
+  - `ast_tu.cpp` `note_declared_targets`: 단위마다 `names`의 레코드 정의를 훑는다. 이름이 대상 형이면 그 필드와 안의 이름 없는 레코드의 필드를 `targets_of_field`로 맞춘다. `Model::target_types_defined`·`target_fields_defined`에 넣는다(`model.hpp`, `ast_reader.hpp`).
+  - `finalize.cpp`: 출처가 "command line"이고 선언이 없으면 상태를 `unchecked`로 두고 까닭을 `LocFact::unknown_target`에 적는다.
+  - `serialize.cpp`: 그런 대상마다 BASIS `unknown_target.<형>.<필드>`(정책 unset).
+  - `cmd_extract.cpp`: 요약 줄 `-> unknown-target (까닭)`.
+- **O12**: `cmd_extract.cpp`가 명령줄 대상의 둘째 기록(`add_declared(… "extraction target")`)을 더하지 않는다. "hand-entered inputs" 수는 명령줄 대상을 따로 더한다. BASIS `extract.resource_dir`·`extract.extra_arg[i]`(없으면 `extract.extra_arg = none`)를 notes로 더한다. `spec.hpp`·`spec.cpp`: `OpInfo.out`을 지웠다. `poll_fns`에 "옛 경로 전용, 미소비" 주석.
+- **O8**: `tests/phi/CMakeLists.txt`(디렉터리의 시험 48개), `tests/static/CMakeLists.txt`(`static_golden_core_cpu1`), `tests/cfs-free/CMakeLists.txt`(둘)에 `set_property(… APPEND PROPERTY LABELS legacy-case)`. 기존 라벨은 그대로다. `cmake/`와 최상위 `CMakeLists.txt`는 고치지 않았다(모든 도구 identity에 든다).
+- **O9**: `tests/lint/kz_lint.cpp`의 `case-ids` 범위에 `probe/`·`instrument/`의 C·C++ 코드 파일(`tests/` 밖)을 더했다. selftest 경우 다섯(걸려야 하는 넷, 걸리지 않아야 하는 하나). `data/case_identifiers.txt` 머리 글. 걸리던 11건: `probe/hold/supervisor.hpp` 주석 셋("cFS" → "target"), `instrument/clang/kz_instr_clang.cpp` 주석 하나("C1/R2" → "two case builds"), `probe/plan/profile.cpp`의 지역 변수 `c1`·`c2` → `p1`·`p2`(줄 넷, 6건). 파일마다 줄 수는 그대로다.
+- 시험: `test_static_cli`에 8c 블록(확인 33개). O2: `writers.c`에 없는 대상 셋(`NoSuch_t.nofield`, `Slot.nofield`, `Cell.nofield`)의 요약 줄, BASIS, FACT_LOCS `unchecked`; 프로필 대상 `Cell.id`는 그대로. O12: 대상 기록 하나, `extract.resource_dir`, `extract.extra_arg`(없음, 둘), relations의 "hand-entered vocabulary … 1 items".
+- 드라이버(`env/redesign/step2a_tests.sh`, sha256 `ccbb26f8…`; 1–80줄 그대로): 인용한 8c 블록(항목 7: identity-facts added 2, identity-facts.V2 removed 4, 비교 단계 다섯마다 added 2). 비교 함수가 변형(V0·V2)을 받는다. show 글 판정이 8c 줄(머리 둘, 더함 둘, 없앰 넷 또는 0)을 경우마다 정확히 요구한다(`show8c`). `STEP2A_ALLOW_TABLE`이면 0이다. 기존 항목은 고치지 않았다.
+- 문서: `docs/static_facts.md` §5k(새), `docs/schema.md` §19 끝에 8c 줄, `docs/framework_layer.md`(새, O9의 표).
+- 바꾸지 않은 것: `include/`(schema 개정 11 그대로, 열거형 그대로), golden 파일, 예산·등급·조건 값, 프로필 대상의 판정, relations 코드.
+
+### 16.3 빌드 [M]
+
+- MC 제자리 `make -j4 all`, rc 0, 08:48:00Z–08:50:55Z. 빌드 전 `make -n all`은 바뀐 것이 없었다(MC가 소스와 맞음). CMake가 다시 구성했다. libkz-core identity는 `f6e3c7b4…` 그대로다. 링크된 것: `kz_lint`, `kz-instr-clang`, `libkz-plan.a`, `libkz-hold.a`, kz, `libkz-llvm.a`, kz-static, 시험 프로그램(probe 8, hold·rtplan 2, static 9)(`make.log`).
+- 도구 해시:
+
+| 도구 | 전(8b 수정) | 뒤 |
+|---|---|---|
+| kz-static | `3c5dfc56293d69cd8bd05c1e75e7c0b5da7da559d54f5df4d7770ae6e0366cc2` | `ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326` |
+| kz-static tool_sha256 | `9b9189d1…` | `b61256c55c84f199a09a50727e36e59d7e1c968b2c71662f4564446877143d20` |
+| kz-static tool_source | `ae73a609…` | `c2da0fdc3be3e79995a5b767d2000a7c49a980b288afe02e9a114eff10016a46` |
+| kz | `b254483e25873902ec6408b1764c7e9b71238fe4c400e237ae49f88f55fc824c` | `931dd39c6bdbe12a3b38750a0350d8f1aac620dc3de8bf60bb0a72e272ba2248` |
+| kz tool_source | `8ef6d6d7…` | `caf58235d6b9d032685e0f5df7eb4c5f8cfcdaadd0e37457c897664fa4911141` |
+| kz-instr-clang | 기록 없음(mtime 10-29 07:32:41, 97,195,536 B) | `28db40172dbdb06faa0e607b9a494805b19768ca888e865d0a5c3859dab8bcaf`(같은 크기) |
+| kz_lint | — | `191d0da095e75736ecfdf0d790815fb219e6738281ee0bb7f310bc898dad50df` |
+| core_source | `f6e3c7b4…` | 같음 |
+| kz-dump / kz-rt-dump / kz-phi | `05623054` / `4390d4f1` / `7d34e6e2` | 같음(다시 빌드되지 않음) |
+
+- kz는 §16.0대로 바뀌었다. 바이너리가 새 identity를 담는다(grep 1). 크기는 같다(75,503,864 B).
+- kz-instr-clang: 선언은 "바이너리가 바뀌는지는 잰다"였다. 빌드 전 해시를 적지 않았다. 그래서 바이너리 수준은 [U]다. 대신 목적 파일을 쟀다 [M]: `a5d52a2`와 `e261861`의 `kz_instr_clang.cpp`(주석 한 줄만 다름)를 같은 플래그로 같은 임시 경로에서 컴파일하면 두 목적 파일이 바이트 동일하다(`5b0f7e0a…`). 그래서 링크한 바이너리도 같다고 본다 [I].
+- 소스: 빌드 시작 뒤 도구 identity의 파일(`lib`·`tools`·`include`·`cmake`·`CMakeLists.txt`·`probe`·`instrument`)은 바뀌지 않았다(`find -newer` 0). `git diff e261861 dde72e1`의 그 경로와 `tests`·`runtime`은 0줄이다. 그래서 `ab482eab`는 `e261861`(= `dde72e1`)의 도구 소스다 [M].
+- 공간(`df -B1 /`): 앞 665,710,592 B(08:48:00Z), 가장 낮음 587,890,688 B(08:49:31Z), 뒤 661,958,656 B(08:50:55Z). 기록: `pre_mc.txt`, `post_mc.txt`, `df_build.log`.
+- [U] 바이트 결정성(K9)은 그대로다.
+
+### 16.4 시험과 시험 수 [M]
+
+- 전체 ctest(08:53:38Z–08:53:59Z): 239개, 통과 238, 실패 0, 건너뜀 1(`test_probe_anchor_reached`, 사유는 LastTest.log). 새 시험 프로그램은 없다. `test_static_cli` 확인 719개(8b 수정 686, +33). `lint_selftest` 97 경우, 실패 0.
+- golden 파일은 하나도 바뀌지 않았다(`git diff a5d52a2 -- tests/static/data tests/golden/data tests/phi/data` 0, 새 파일 없음). 그래서 O2의 완료 기준("기존 golden 바이트 불변")이 섰다 [M].
+- `ctest -N -L legacy-case` = 51이다(`phi_*` 47, `test_phi_cli`, `static_golden_core_cpu1`, `test_realrecord_derived`, `test_trace_neutral_real`). O8의 완료 기준이 섰다 [M].
+- 시험 수의 나눔(`ctest -N -L`, 라벨 정확히 맞춤; `labels.txt`): 전체 239 = **새 경로 188 + 옛 경로 51(`legacy-case`)**, 건너뜀 1(사유는 LastTest.log). RV3A O8의 "186 + 51 = 237"은 11-05의 수다. 그 뒤 8b·8b 수정이 둘(`static_fixture_compile_imgbudget`, `static_golden_imgbudget_np`)을 더했다.
+  - 새 188 가운데 **추출 규칙 쪽(라벨 static) 44**: fixture 컴파일 확인 15(`static_fixture_compile_*`; fixture가 C99로 컴파일되는지), golden 20(`static_golden_*`), 단위·명령줄 시험 9(`test_static_*`).
+  - **컨테이너·직렬화·공통 기능 144**: runtime 66, unit 66(core·trace·probe·hold·predict 등), golden 8(layout, records, container 셋, render, tool_hash, probe golden), lint 6, integration 3, instr 1, property 1. 한 시험이 라벨을 여럿 가질 수 있어 이 합(151)은 144보다 7 크다. 라벨이 없는 시험은 없다.
+  - 이 수는 도구가 맞게 도는지 보는 시험의 수다. 탐지 정확도의 시험 수가 아니다.
+- ctest의 라벨 시간 요약은 unit을 84로 적는다. `ctest -N -L '^unit$'`는 87이다. 차이 3의 까닭은 찾지 않았다 [U]. 나눔은 `-N`의 수로 했다.
+- 드라이버 단위 점검 6/6(`unit.txt`, 드라이버 `ccbb26f8…`).
+
+### 16.5 lint와 세 묶음의 수 [M]
+
+- 넓힌 `lint_case-ids`: clean. 범위 안 `probe/`·`instrument/` 코드 파일은 30개다(`lint_widened.txt`). 심은 점검: 사본의 `probe/plan/profile.cpp`에 넣은 "C1"은 걸리고, `instrument/gcc/tests/`에 넣은 "R2"는 걸리지 않는다. O9의 완료 기준(넓힌 lint clean, 표)이 섰다. 표는 `kairos/docs/framework_layer.md`다.
+- 세 묶음(사본 lint, 디렉터리를 통째로 `lib/`로 복사해 읽음; `lint_groups.txt`, 규칙은 `lintgroups.py`):
+
+| 묶음 | 고치기 전 | 뒤 | 내용 |
+|---|---|---|---|
+| 1. 단계 3이 만들어야 할 입력 | 374 | 374 | `instrument/*/sites/*.kzs` 6 파일(수작업 사이트 manifest). 여기에 `profiles/*/instr/*.kzs`의 사이트(C1 37/38, R2 44, C5 33; ED:603, lint 범위 밖)가 더해진다 |
+| 2. 프레임워크 지식 | 75 | 75 | `runtime/src/kz_rt_osal.c` 56, `runtime/include/kz_rt_osal.h` 19. 부르는 OSAL 함수 9개. 표: `docs/framework_layer.md` |
+| 3. 무해 | 2,013 | 2,002 | 시험 77(instrument 32, runtime 45), 커밋된 변환 출력 763(`instrument/clang/out`), 드라이버 1,125(scripts: instrument 956, probe 169), 코드 파일의 주석·이름 36 → 25, 빌드 파일 12 |
+| 합 | 2,462 | 2,451 | probe 178 → 169, instrument 2,128 → 2,126, runtime 156 |
+
+  - 무해의 "코드 파일 36 → 25": 고친 11건(probe 9, instrument 2)이 빠졌다. 남은 25건은 runtime의 다른 코드다(`kz_rt.h` 9, `kz_rt_posix.h` 4, `kz_rt.c` 4, `kz_rt_dump.cpp` 2, manifest 6). 대부분 runtime ABI의 이름(`osal-internal` 문맥, OSAL id 열쇠, OSAL 시계)과 주석이다. runtime은 lint 범위 밖이다(O9). 그 이름도 프레임워크를 가리키므로 단계 3에서 묶음 2와 함께 본다 [I].
+  - CK의 셈과 다른 곳: CK는 시험을 72로 적었다(G09). 이 셈은 `tests/` 아래 모든 파일(CMakeLists, `.kzs`, 스크립트 포함)을 시험으로 셌다(77). 합은 CK와 같다(2,462).
+- 단계 3 완료 기준으로 쓰는 수(ED §8에도 적음): (1) 생성한 관측점 manifest가 묶음 1의 374행과 profiles manifest의 사이트를 함수 수준에서 덮는다. 사람이 고른 사이트 없이 새 호출자를 관측한다(ED §4.3). (2) 묶음 2의 75건은 `framework_layer.md`의 판·출처 행으로만 남는다. 판이 늘면 행을 더한다. (3) 묶음 3은 단계 3·5의 드라이버가 대체할 때 다시 센다. 엔진 코드(lint 범위)의 위반은 0을 유지한다.
+
+### 16.6 재실행 [M]
+
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c`. 08:56:09Z–09:00:52Z. 허용표는 내장(8c 블록 포함)이다.
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: `repo dde72e1…`, `kairos_uncommitted_lines=0`.
+- identity: 18 판정 모두 PASS. basis 1/0/0. facts는 C1 pre tx V2가 4/2/4, 다른 다섯 경우가 4/2/0이다. 8c 항목은 모두 "expected = found"다(added 2, V2의 removed 4·0·0). show 글: 여섯 경우 모두 `[basis]` 머리 2, 더함 2, 없앰은 C1 pre tx V2만 4.
+- 드라이버 비교의 변경 수(changed / added / removed): added만 빌드마다 2 많다. 나머지는 §14.4와 같다.
+  - npsame 274/9576/115 · 274/9577/115 · 237/6004/71 · 182/2447/0 · 182/2456/0
+  - s5same 277/9576/115 · 277/9577/115 · 240/6004/71 · 185/2447/0 · 185/2456/0
+  - fixsame 278/173/115 · 278/173/115 · 241/128/71 · 186/40/6 · 186/40/6
+  - fix2same 275/171/115 · 275/171/115 · 238/126/71 · 183/38/6 · 183/38/6
+  - fix3same 92/168/115 · 92/168/115 · 91/123/71 · 8/38/6 · 8/38/6
+- 새 BASIS 두 항목은 다섯 빌드 모두 같다: `extract.resource_dir = /home/user/work/llvm-project/build/lib/clang/23 (the tool's built-in default; no --resource-dir)`, `extract.extra_arg = none`. O12의 완료 기준(다섯 빌드 BASIS에 두 항목, 식별 시험 통과)이 섰다 [M].
+- identity의 명령줄 대상 넷은 모두 선언이 있었다. `unknown-target`·`unknown_target`은 어느 출력에도 없다(grep 0). FACT_LOCS는 EB와 같다 [M]. 조건부 항목은 쓰이지 않았다.
+- 공간: 앞 661,561,344 B(08:56:09Z), 가장 낮음 437,309,440 B(08:59:10Z), 뒤 458,305,536 B(09:00:52Z). `T_8C/`는 202,212,345 B, 149 파일, `sha256.txt` 136줄(sha256 `950eb651…`). T/, `T_RV4/`, `T_8B/`, `T_8BF/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0). 300 MB 아래로 가지 않아 아무것도 지우지 않았다.
+
+### 16.7 비교: 모든 파일, 가림 없음 [M]
+
+`compare_8c.py`(기록 디렉터리)는 8b 수정 단계의 `compare_8bfix.py`와 같다. 다른 것은 하나다: 글 파일의 차이를 덩이마다 모두 적는다. 결과 `compare_8c.tsv`:
+
+| 기준 | same | DIFF | 한쪽에만 |
+|---|---|---|---|
+| `T_8BF/` | 34 | 115 | 0 |
+| T/ | 29 | 108 | 12(T/ 뒤 드라이버가 더한 파일, §15.10.6과 같음) |
+| `T_RV4/` | 34 | 115 | 0 |
+
+- `T_8BF/` 대비 DIFF 115줄을 모두 읽었다. 아래 "선언의 틀림과 빠짐" 말고는 모두 §16.0에 든다:
+  - basis.kz 11(NP 5, identity 6): HEADER `tool_sha256`·`artifact_sha256`만.
+  - facts.kz 16(NP 5, NP2 5, identity 6): HEADER `tool_sha256`·`basis_sha256`·parent·`artifact_sha256`·컨테이너 크기. 섹션 줄: STRINGS·BASIS의 count·crc32, 다른 섹션의 crc32(NP: C1·C5 35줄, R2 37줄; identity 11–21줄). 레코드: BASIS뿐이다. `extract.units_from` changed, `extract.resource_dir`·`extract.extra_arg` added, C1 pre tx V2만 `target.*` 넷 removed. 다른 섹션의 레코드는 같다.
+  - 글: basis.txt 11(해시 줄), extract.txt 21(NP·NP2·npsame·identity의 `facts` 줄), relations.txt 10(2째 줄), facts.txt 11(`[basis]` 머리, `units_from` 줄과 그 뒤 두 줄; C1 pre tx V2는 넷이 빠짐), show.diff 6, facts.dump.diff 6, sha256.txt 12, twice.txt·twice_detail.txt(해시 줄), 드라이버 비교 글 다섯(옛 드라이버 줄의 BASIS 수, 항목 수, 8c 항목 줄, 판정 줄의 added 수), 실행 기록(`run.log`, `status.txt`, `identity.txt`), `count/summary.txt`.
+- same: args.txt 6+5, relations.log 10, count/ tsv 일곱, identity basis.dump.diff 6.
+- **선언의 틀림과 빠짐**(새 차이는 아님; 선언한 값이 다른 출력에 옮겨진 것). `declared_before_build.txt`는 고치지 않는다.
+  1. **틀림**: `count/summary.txt`. 선언은 "T7 줄 다섯만"이라 했다. 실제는 34줄이다. T7 줄 다섯(487–491)과, facts.txt의 줄 번호를 인용하는 29줄(50, 506–511, 514–519, 522–527, 530–534, 537–541)이다. BASIS가 두 줄 늘어 그 뒤 줄의 번호가 2씩 밀렸다. `facts.txt:<번호>`를 지우고 비교하면 T7의 10줄(옛·새)만 다르다. 444째 줄까지의 인용은 그대로다.
+  2. **빠짐**: identity의 `facts.dump.diff`와 `identity.txt`. 섹션 crc32 줄과 BASIS 레코드 줄의 차례 번호(`BASIS[i]`)가 바뀐다. 선언은 crc32 변화를 NP facts.kz에만 적었다. 같은 기작이다(§15.6 정정).
+  3. **빠짐**: 드라이버 비교 글의 "옛 드라이버" 줄. 그 줄이 BASIS의 레코드 수를 적는다. 선언은 "그 수의 줄"이라고만 했다.
+  4. **잰 것의 빠짐**: kz-instr-clang의 빌드 전 해시(§16.3).
+- T/·`T_RV4/` 대비: 레코드 수준의 차이는 BASIS `count.walk_bounds_hit`(8b)·`extract.units_from`과 8c의 두 항목, C1 pre tx V2의 `target.*` 넷뿐이다. count/ tsv 일곱은 바이트 동일하다.
+
+### 16.8 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/, `T_RV4/`, `T_8B/`, `T_8BF/`와 바이트 동일하다 [M]. 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553.
+- 두 계수(8b): 다섯 빌드 모두 0 그대로다(`count.walk_bounds_hit` 레코드가 `T_8BF/`와 같음).
+- T7의 새 해시(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642): facts `d38c584d…`, `ef473928…`, `570047ee…`, `26d6e29d…`, `2af5c345…`; relations `c2489e51…`, `493aa87d…`, `60a65e3b…`, `6c1047c8…`, `712d896a…`(`twice.txt`).
+- 등급 이름과 "불가"의 지위는 B8을 따른다. 바꾸지 않았다.
+
+### 16.9 남는 것
+
+- O2의 남는 결함: 프로필 대상(`loc`, `bind`, store pattern)에 선언이 없어도 `writer-set-complete`다(§16.1). fixture golden 다섯이 그 행을 담는다. 고치면 옛 경로 golden이 바뀐다. 그 결정은 B4·A6의 옛 경로 정리와 함께다. 하지 않았다.
+- O9의 남는 것: C5 판(OSAL 4.1.1)의 표 행(`framework_layer.md` §3). runtime의 그 밖 코드 25건의 정리(§16.5). `OS_TimeGetTotalNanoseconds` 본문 대조 [U].
+- [U] 바이트 결정성(K9). [U] kz-instr-clang 바이너리의 전후 동일성(목적 파일은 같음). [U] ctest 라벨 시간 요약의 unit 84와 `-N`의 87의 차이.
+- 하지 않은 것: E1(Q4), ③ 소비자 규칙(잘린 이미지를 UNKNOWN으로), PD A3:173·부록 C:1009·S3:215 문구, B8, B4, CM:42. RV3A §6.6 Q12·PD의 상태 줄은 고치지 않았다. push하지 않았다.
+- `T_8C/`(202 MB), `T_8BF/`, `T_8B/`는 지우지 않았다. CM §5의 보존이 아니다.
+- 커밋: 선언 `7cc970d`, 스냅숏 `e261861`(lead), 드라이버·문서 `dde72e1`, 이 절과 기록은 그다음 커밋이다(모두 "kz-static 8c:").

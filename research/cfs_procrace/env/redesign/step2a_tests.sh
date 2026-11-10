@@ -117,6 +117,9 @@ BUILDS=(c1_pre_tx c1_post_tx r2_core c5_641 c5_642)
 #   lp   the LOCK_PATHS section and its entry-release rows        arr  scalar array fields (FIELD_STATUS, AR §2a)
 #   inc  incomplete-source rows of resolved indirect calls and their unknown effect (CALL_TARGETS, LOCKSET,
 #        LOCK_OPS, AWAIT_L1, BASIS counts; AR §2a, third fix, second round)
+#   8c   step 8c (AR §16.0, declared and committed before the build; RV3A §6.3 O12): the BASIS records of the reading
+#        options (extract.resource_dir, extract.extra_arg) and the one record of a command-line target (its second
+#        record "= extraction target" removed).  A step name STEP.V0 or STEP.V2 (identity only) holds for that variant.
 FAIL=0
 SBAD=0
 CUR=-
@@ -219,6 +222,7 @@ import collections, os, re, sys
 # verdict against the table ALLOW below.  Exit 0 only when every differing record is named by an entry of the table
 # for STEP and every entry's count for BUILD is met exactly; exit 1 otherwise (and on an empty or cut dump).
 STEP, BUILD, A, B = sys.argv[1:5]
+VARIANT = sys.argv[5] if len(sys.argv) > 5 else ''
 BUILDS = ['c1_pre_tx', 'c1_post_tx', 'r2_core', 'c5_641', 'c5_642']
 # One line per entry: step, section, change (changed | added | removed), the expected number of records for each of
 # the five builds (- = the build is not in the step: expected 0), the reference (legend in the driver's comment), the
@@ -348,6 +352,17 @@ fix3same       LOCK_PATHS   removed 0    0    0    6    6    lp   - kind=entry-r
 fix3same       LOCK_PATHS   added   75   75   66   35   35   lp   - kind=entry-release
 fix3same       AWAIT_L1     changed 1    1    0    0    0    inc  flags flags=\{[^}]*unresolved-call
 fix3same       AWAIT_L1     changed 1    1    0    0    0    inc  flags,l1_mod_field,l1_mod_type flags=\{[^}]*unresolved-call
+# ---- step 8c (AR §16.0, committed as 7cc970d before the build; RV3A §6.3 O12).  Only these entries are new; no entry
+# above is changed.  The facts of every extraction get the two BASIS records of the reading options; the identity
+# case C1 pre tx V2, the only one with command-line targets (EB c1_pre_tx/V2/args.txt), loses the second record of
+# each of its four targets (EB c1_pre_tx/V2/facts.txt:25-28).
+identity-facts    BASIS     added   2    -    2    2    -    8c   - ^name="extract\.(resource_dir|extra_arg)"
+identity-facts.V2 BASIS     removed 4    -    0    0    -    8c   - ^name="target\.[^"]+" value="extraction target"
+npsame         BASIS        added   2    2    2    2    2    8c   - ^name="extract\.(resource_dir|extra_arg)"
+s5same         BASIS        added   2    2    2    2    2    8c   - ^name="extract\.(resource_dir|extra_arg)"
+fixsame        BASIS        added   2    2    2    2    2    8c   - ^name="extract\.(resource_dir|extra_arg)"
+fix2same       BASIS        added   2    2    2    2    2    8c   - ^name="extract\.(resource_dir|extra_arg)"
+fix3same       BASIS        added   2    2    2    2    2    8c   - ^name="extract\.(resource_dir|extra_arg)"
 '''
 TSRC = 'built-in'
 if os.environ.get('STEP2A_ALLOW_TABLE'):
@@ -448,7 +463,7 @@ for n, line in enumerate(ALLOW.split('\n'), 1):
     if (p[2] == 'changed') != (p[9] != '-') or not re.match(r'^(-|[\w<>]+(,[\w<>]+)*)$', p[9]):
         problems.append('table line %d: fields %s (changed: a comma list of field names; added, removed: -)' % (n, p[9]))
         continue
-    if p[0] != STEP:
+    if p[0] != STEP and (not VARIANT or p[0] != STEP + '.' + VARIANT):
         continue
     want = p[3 + BUILDS.index(BUILD)] if BUILD in BUILDS else '-'
     try:
@@ -533,8 +548,18 @@ same_as() {
   [ $SBAD -eq $n0 ]
 }
 
+# show8c BUILD VARIANT: the 8c lines the identity show text must have (AR §16.0): "[basis] head, added, removed".
+# With STEP2A_ALLOW_TABLE (the unit checks, whose stand-in tool writes no such line) there is none.
+show8c() {
+  if [ -n "${STEP2A_ALLOW_TABLE:-}" ]; then echo "0 0 0"; return; fi
+  case "$1/$2" in
+    c1_pre_tx/V2) echo "2 2 4" ;;
+    *) echo "2 2 0" ;;
+  esac
+}
+
 identity() {
-  local D=$OUT/identity n0=$SBAD now head kl idt et b v art A P X secs nsec nsec2 rec nd nu line
+  local D=$OUT/identity n0=$SBAD now head kl idt et b v art A P X secs nsec nsec2 rec nd nu nh na nr eh ea er line
   mkdir -p "$D" || { bad "mkdir $D"; return 1; }
   : > "$D/identity.txt" || bad "truncate $D/identity.txt"
   now=$(date -u +%FT%TZ) || bad "date"
@@ -579,7 +604,7 @@ identity() {
         printf '%s\n' "$line"
         grep '^[<>]   ' "$P.dump.diff" | cut -c1-400 | sed 's/^/    /' >> "$D/identity.txt"
         pipe_ok "~grep $P.dump.diff" "cut" "sed" -- "${PIPESTATUS[@]}"
-        compare_records "identity-$art" "$b" "$P.old.dump" "$P.new.dump" | sed "s/^/$b $v $art: /" | tee -a "$D/identity.txt"
+        compare_records "identity-$art" "$b" "$P.old.dump" "$P.new.dump" "$v" | sed "s/^/$b $v $art: /" | tee -a "$D/identity.txt"
         pipe_ok "$b $v $art: per-record comparison (see $D/identity.txt)" "sed" "tee $D/identity.txt" -- "${PIPESTATUS[@]}"
         rm -f "$P.old.dump" "$P.new.dump" "$P.old.heads" "$P.new.heads" "$P.heads.diff" "$P.crc" || bad "rm the dumps of $b $v $art"
       done
@@ -591,11 +616,18 @@ identity() {
       diff "$P/show.old" "$P/show.new" > "$P/show.diff"; rc_le $? 1 "diff of the show texts of $b $v"
       nd=$(grep -c '^[<>]' "$P/show.diff"); rc_le $? 1 "grep -c $P/show.diff"
       nu=$(grep -cE '^[<>]   extract\.units_from = basis [0-9a-f]+  \(unset\)$' "$P/show.diff"); rc_le $? 1 "grep -c $P/show.diff"
-      line="$b $v show text (build_identity line removed): diff lines $nd"
+      # step 8c (AR §16.0): the [basis] head (old and new), the two records of the reading options (added) and, in C1 pre
+      # tx V2, the four records "= extraction target" (removed); exact numbers per case (show8c), none under STEP2A_ALLOW_TABLE
+      read -r eh ea er <<< "$(show8c "$b" "$v")"
+      nh=$(grep -cE '^[<>] \[basis\] [0-9]+$' "$P/show.diff"); rc_le $? 1 "grep -c $P/show.diff"
+      na=$(grep -cE '^>   extract\.(resource_dir|extra_arg) = .*  \(unset\)$' "$P/show.diff"); rc_le $? 1 "grep -c $P/show.diff"
+      nr=$(grep -cE '^<   target\.[^ ]+ = extraction target  \(declared-assumption\)$' "$P/show.diff"); rc_le $? 1 "grep -c $P/show.diff"
+      line="$b $v show text (build_identity line removed): diff lines $nd (8c: [basis] head $nh, added $na, removed $nr)"
       printf '%s\n' "$line" >> "$D/identity.txt" || bad "write $D/identity.txt"
       printf '%s\n' "$line"
-      if [ "$nd" -eq 2 ] && [ "$nu" -eq 2 ]; then line="$b $v show text verdict: PASS (the differing lines are the extract.units_from line, 1 old and 1 new)"
-      else line="$b $v show text verdict: FAIL ($nd differing lines, $nu of them the extract.units_from line; expected 2 and 2)"; bad "$line"; fi
+      if [ "$nd" -eq $((2 + eh + ea + er)) ] && [ "$nu" -eq 2 ] && [ "$nh" -eq "$eh" ] && [ "$na" -eq "$ea" ] && [ "$nr" -eq "$er" ]; then
+        line="$b $v show text verdict: PASS (the differing lines are the extract.units_from line, 1 old and 1 new, and the 8c lines: [basis] head $nh, added $na, removed $nr)"
+      else line="$b $v show text verdict: FAIL ($nd differing lines, $nu of them the extract.units_from line, 8c lines $nh/$na/$nr; expected $((2 + eh + ea + er)), 2 and $eh/$ea/$er)"; bad "$line"; fi
       printf '%s\n' "$line" >> "$D/identity.txt" || bad "write $D/identity.txt"
       printf '%s\n' "$line"
       rm -f "$P/show.old" "$P/show.new" || bad "rm the show texts of $b $v"

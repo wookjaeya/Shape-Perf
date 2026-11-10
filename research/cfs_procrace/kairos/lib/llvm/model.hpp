@@ -752,6 +752,8 @@ struct Model {
 
   // Raw tables for the global phase.
   std::map<std::string, std::vector<ImageFact>> object_images;  // object key -> flattened initializer
+  // object key -> the marker leaves of its image, for each object whose image walk used up the budget (0: an exact fit)
+  std::map<std::string, uint32_t> image_budget_objects;
   std::map<std::string, Pos> object_pos;
   std::map<std::string, std::string> object_tu;
   // Table walks to evaluate: loop key -> access path of the table in the loop.
@@ -816,6 +818,10 @@ struct Model {
     // the copy chains of DERIVES cut at kDeriveDepth copies (reason walk-bound), and the expression texts stored in a
     // fact (LOOP_ITERS) cut at kEmitDepth levels ("..."): every mode; reported with the extended facts
     uint32_t derive_depth_cut = 0, text_depth_cut = 0;
+    // the static images (ReadOptions::image_budget leaves per object; every mode, reported with the extended facts):
+    // the objects whose walk ended with the budget used up (an exact fit included), and the marker leaves
+    // `<image truncated>` of the parts left out (one per array, record or union whose remaining members were not read)
+    uint32_t image_budget_exhausted = 0, image_leaves_omitted = 0;
   } stats;
 
   // Filled by finalize(): indices and the numbers of the report.

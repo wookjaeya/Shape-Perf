@@ -96,6 +96,11 @@ class TuReader {
   void flatten_initializer(const std::string& object_key, const std::string& path, clang::QualType t,
                            const clang::Expr* init, size_t* budget, std::vector<ImageFact>* out, const Pos& pos);
   void init_leaf(const std::string& object_key, const std::string& path, const clang::Expr* init, ImageFact* f);
+  // The budget of the static image: whether flatten_initializer, with budget left, would give `t` with `init` (or the
+  // members of `rd` from `from` on, read from `il`) a leaf; and the marker leaf `<image truncated>` of a part not read.
+  bool image_has_leaf(clang::QualType t, const clang::Expr* init);
+  bool members_have_leaf(const clang::RecordDecl* rd, const clang::InitListExpr* il, const clang::FieldDecl* from);
+  void image_truncated(const std::string& object_key, const std::string& path, std::vector<ImageFact>* out, const Pos& pos);
 
   clang::ASTContext& ctx_;
   const ExtractSpec& spec_;
@@ -105,6 +110,7 @@ class TuReader {
   std::map<clang::FileID, std::string> path_cache_;
   std::map<std::pair<const clang::RecordDecl*, size_t>, int> contain_cache_;
   std::map<std::string, uint32_t> ordinal_counter_;
+  uint32_t image_markers_ = 0;  // the marker leaves of the image being made (read_global)
 
   friend class FnWalker;
 };

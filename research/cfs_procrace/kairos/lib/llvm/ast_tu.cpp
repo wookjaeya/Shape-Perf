@@ -428,9 +428,73 @@ void TuReader::init_leaf(const std::string& object_key_, const std::string& path
   f->kind = KZ_IMAGE_KIND_NONCONST;
 }
 
+// The static image and its budget: every leaf takes one from the budget of the object (ReadOptions::image_budget;
+// a zero-fill row takes none).  A part of the initializer that is not read because the budget is used up, and that
+// would give a leaf, ends in one marker leaf `<image truncated>`: `path[...]` for the elements of an array from the
+// first one not read, `path.member...` for the members of a record or union from the first one not read, `path...`
+// for a whole part.  An exact fit (the last leaf takes the last of the budget and nothing that gives a leaf is left)
+// has no marker.  read_global counts both (count.walk_bounds_hit).
+bool TuReader::image_has_leaf(QualType t, const Expr* init) {
+  t = t.getCanonicalType();
+  if (init != nullptr) init = init->IgnoreParens();
+  const auto* il = init != nullptr ? dyn_cast<InitListExpr>(init) : nullptr;
+  if (const ArrayType* at = ctx_.getAsArrayType(t)) {
+    if (init != nullptr && isa<StringLiteral>(init->IgnoreParenCasts())) return true;
+    if (il == nullptr) return false;  // zero-filled
+    const QualType et = at->getElementType();
+    const auto* cat = dyn_cast<ConstantArrayType>(at);
+    const uint64_t n = cat != nullptr ? cat->getSize().getZExtValue() : il->getNumInits();
+    const uint64_t explicit_n = il->getNumInits();
+    if (n > explicit_n) return true;  // the zero-fill row
+    for (uint64_t i = 0; i < std::min<uint64_t>(n, explicit_n); ++i)
+      if (image_has_leaf(et, il->getInit(static_cast<unsigned>(i)))) return true;
+    return false;
+  }
+  if (const RecordType* rt = t->getAs<RecordType>()) {
+    const RecordDecl* rd = rt->getDecl()->getDefinition();
+    if (rd == nullptr) return false;
+    if (il == nullptr) return init != nullptr;
+    return members_have_leaf(rd, il, nullptr);
+  }
+  return true;  // a scalar or a pointer: one leaf
+}
+
+bool TuReader::members_have_leaf(const RecordDecl* rd, const InitListExpr* il, const FieldDecl* from) {
+  bool on = from == nullptr;
+  unsigned idx = 0;
+  for (const FieldDecl* fd : rd->fields()) {
+    if (fd->isUnnamedBitField()) continue;
+    if (fd == from) on = true;
+    if (rd->isUnion()) {
+      if (il->getInitializedFieldInUnion() != fd) continue;
+      return on && image_has_leaf(fd->getType(), il->getNumInits() > 0 ? il->getInit(0) : nullptr);
+    }
+    const Expr* sub = idx < il->getNumInits() ? il->getInit(idx) : nullptr;
+    ++idx;
+    if (on && image_has_leaf(fd->getType(), sub)) return true;
+  }
+  return false;
+}
+
+void TuReader::image_truncated(const std::string& object_key_, const std::string& path, std::vector<ImageFact>* out, const Pos& pos) {
+  ImageFact f;
+  f.object = object_key_;
+  f.path = path;
+  f.kind = KZ_IMAGE_KIND_NONCONST;
+  f.text = "<image truncated>";
+  f.pos = pos;
+  f.tu = main_file_;
+  out->push_back(f);
+  ++image_markers_;
+}
+
 void TuReader::flatten_initializer(const std::string& object_key_, const std::string& path, QualType t, const Expr* init,
                                    size_t* budget, std::vector<ImageFact>* out, const Pos& pos) {
-  if (*budget == 0) return;
+  if (*budget == 0) {
+    // the whole part is not read
+    if (image_has_leaf(t, init)) image_truncated(object_key_, path + "...", out, pos);
+    return;
+  }
   t = t.getCanonicalType();
   if (init != nullptr) init = init->IgnoreParens();
   const auto* il = init != nullptr ? dyn_cast<InitListExpr>(init) : nullptr;
@@ -451,14 +515,10 @@ void TuReader::flatten_initializer(const std::string& object_key_, const std::st
     const uint64_t explicit_n = il->getNumInits();
     for (uint64_t i = 0; i < std::min<uint64_t>(n, explicit_n); ++i) {
       if (*budget == 0) {
-        ImageFact f;
-        f.object = object_key_;
-        f.path = path + "[...]";
-        f.kind = KZ_IMAGE_KIND_NONCONST;
-        f.text = "<image truncated>";
-        f.pos = pos;
-        f.tu = main_file_;
-        out->push_back(f);
+        // the elements from i on (and the zero-filled rest) are not read
+        bool rest = n > explicit_n;
+        for (uint64_t j = i; !rest && j < std::min<uint64_t>(n, explicit_n); ++j) rest = image_has_leaf(et, il->getInit(static_cast<unsigned>(j)));
+        if (rest) image_truncated(object_key_, path + "[...]", out, pos);
         return;
       }
       flatten_initializer(object_key_, path + "[" + std::to_string(i) + "]", et, il->getInit(static_cast<unsigned>(i)), budget, out, pos);
@@ -493,6 +553,11 @@ void TuReader::flatten_initializer(const std::string& object_key_, const std::st
     unsigned idx = 0;
     for (const FieldDecl* fd : rd->fields()) {
       if (fd->isUnnamedBitField()) continue;
+      if (*budget == 0) {
+        // the members from fd on are not read
+        if (members_have_leaf(rd, il, fd)) image_truncated(object_key_, path + "." + fd->getNameAsString() + "...", out, pos);
+        return;
+      }
       if (rd->isUnion()) {
         const FieldDecl* active = il->getInitializedFieldInUnion();
         if (active != fd) continue;
@@ -640,7 +705,14 @@ void TuReader::read_global(const VarDecl* vd) {
     if (record_of(t) != nullptr || ctx_.getAsArrayType(t) != nullptr) {
       std::vector<ImageFact> img;
       size_t budget = opt_.image_budget;
+      image_markers_ = 0;
       flatten_initializer(key, "", t, vd->getInit(), &budget, &img, pos);
+      // the budget used up (an exact fit included) and the marker leaves of the parts left out, per object and in all
+      if (budget == 0) {
+        model_->image_budget_objects[key] = image_markers_;
+        ++model_->stats.image_budget_exhausted;
+        model_->stats.image_leaves_omitted += image_markers_;
+      }
       model_->object_images[key] = std::move(img);
     } else if (spec_.extended_facts && model_->object_scalar_images.count(key) == 0) {
       // F6: a scalar global's initializer as one leaf

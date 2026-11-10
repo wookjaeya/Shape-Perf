@@ -665,6 +665,99 @@ startup_script {
     KZ_CHECK(has(out, "fx_slots[...] non-constant at argflow.c:38:8 {image-truncated} reach={argument,pointer-field}"));
   }
 
+  // ---- the budget of the static image (imgbudget.c, --image-budget 4): a part of an initializer that has a leaf and is
+  // not read ends in one marker leaf "<image truncated>" (array path[...], record or union path.member..., the flag
+  // image-truncated on the object's GLOBAL_IMAGES rows), an exact fit has none; BASIS count.walk_bounds_hit gives the
+  // objects whose walk used up the budget (image_budget_exhausted, an exact fit included) and the marker leaves
+  // (image_leaves_omitted); --verbose names each such object.  The budget value is not changed (4096 by default).
+  {
+    const fs::path X = work / "imgbudget";
+    fs::create_directories(X);
+    const std::string src = fixtures + "/imgbudget.c";
+    std::string log;
+    // extract in the profile-free mode with --verbose (the per-object lines go to `log`); `flags` go to the front end
+    auto ex = [&](const std::string& opts, const std::string& dst, const std::string& flags = std::string()) {
+      return run(q(tool) + " extract --no-profile " + opts + " --verbose --source " + q(src) + " --root " + q(fixtures) + " -o " + q(dst) +
+                     " -- -std=c99 -pedantic" + flags,
+                 &log);
+    };
+    auto counts = [](unsigned exhausted, unsigned omitted) {
+      return "image_budget_exhausted " + std::to_string(exhausted) +
+             " objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted " + std::to_string(omitted) +
+             " marker leaves <image truncated> (parts with a leaf not read)";
+    };
+    // the view line of a GLOBAL_IMAGES row that starts with `head` (after the indent), or empty
+    auto row = [](const std::string& view, const std::string& head) {
+      const size_t at = view.find("\n  " + head);
+      if (at == std::string::npos) return std::string();
+      const size_t end = view.find('\n', at + 1);
+      return view.substr(at + 3, end == std::string::npos ? std::string::npos : end - at - 3);
+    };
+    struct Case {
+      int n;
+      unsigned exhausted, omitted;
+      std::vector<std::string> markers;  // marker rows (head up to the position)
+      std::vector<std::string> leaves;   // leaf rows that are read
+      std::vector<std::string> absent;   // heads of rows that must not be there
+      std::string verbose;               // the --verbose line ("" = no line for any object)
+    };
+    const std::vector<Case> cases = {
+        {1, 1, 1, {"img_wide.e... non-constant at imgbudget.c:18:16 {"}, {"img_wide.a int 1 ", "img_wide.d int 4 "}, {"img_wide.e ", "img_wide.f "},
+         "kz-static: static image of img_wide: budget 4 used up, marker leaves 1\n"},
+        {2, 1, 1, {"img_union.s.e... non-constant at imgbudget.c:33:16 {"}, {"img_union.s.a int 1 ", "img_union.s.d int 4 "}, {"img_union.s.e ", "img_union.x "},
+         "kz-static: static image of img_union: budget 4 used up, marker leaves 1\n"},
+        {3, 1, 2, {"img_points[1].y... non-constant at imgbudget.c:43:17 {", "img_points[...] non-constant at imgbudget.c:43:17 {"},
+         {"img_points[0].x int 1 ", "img_points[0].z int 3 ", "img_points[1].x int 4 "}, {"img_points[1].y ", "img_points[1].z ", "img_points[2]"},
+         "kz-static: static image of img_points: budget 4 used up, marker leaves 2\n"},
+        {4, 1, 0, {}, {"img_exact.a int 1 ", "img_exact.d int 4 "}, {"img_exact.rest"},
+         "kz-static: static image of img_exact: budget 4 used up, marker leaves 0 (an exact fit)\n"},
+        {5, 0, 0, {}, {"img_small.a int 1 ", "img_small.c int 3 "}, {}, ""},
+    };
+    for (const Case& c : cases) {
+      const std::string f = (X / ("case" + std::to_string(c.n) + ".kz")).string();
+      KZ_CHECK_EQ(ex("--image-budget 4", f, " -DIMG_CASE=" + std::to_string(c.n)), 0);
+      if (c.verbose.empty()) KZ_CHECK(!has(log, "static image of"));
+      else KZ_CHECK(has(log, c.verbose));
+      std::string view;
+      KZ_CHECK_EQ(run(q(tool) + " show " + q(f) + " --section gimages --section basis", &view), 0);
+      KZ_CHECK(has(view, counts(c.exhausted, c.omitted)));
+      for (const std::string& m : c.markers) KZ_CHECK(has(row(view, m), "image-truncated"));
+      if (c.markers.empty()) KZ_CHECK(!has(view, "image-truncated") && !has(view, "... non-constant"));
+      for (const std::string& l : c.leaves) {
+        KZ_CHECK(!row(view, l).empty());
+        KZ_CHECK(has(row(view, l), "image-truncated") == !c.markers.empty());  // the flag is on every row of the object
+      }
+      for (const std::string& a : c.absent) KZ_CHECK(row(view, a).empty());
+    }
+    // the five together: the sums, each marker in its place
+    const std::string fall = (X / "all.kz").string(), fdef = (X / "default.kz").string();
+    KZ_CHECK_EQ(ex("--image-budget 4", fall), 0);
+    std::string view;
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fall) + " --section gimages --section basis", &view), 0);
+    KZ_CHECK(has(view, "param.image_budget = 4 "));
+    KZ_CHECK(has(view, counts(4, 4)));
+    for (const Case& c : cases)
+      for (const std::string& m : c.markers) KZ_CHECK(has(row(view, m), "image-truncated"));
+    for (const char* o : {"img_wide: budget 4 used up, marker leaves 1\n", "img_union: budget 4 used up, marker leaves 1\n", "img_points: budget 4 used up, marker leaves 2\n",
+                          "img_exact: budget 4 used up, marker leaves 0 (an exact fit)\n"})
+      KZ_CHECK(has(log, std::string("kz-static: static image of ") + o));
+    KZ_CHECK(!has(log, "static image of img_small"));
+    // the default budget: nothing used up, no marker; the earlier items of count.walk_bounds_hit keep their text
+    KZ_CHECK_EQ(ex("", fdef), 0);
+    KZ_CHECK(!has(log, "static image of"));
+    KZ_CHECK_EQ(run(q(tool) + " show " + q(fdef) + " --section gimages --section basis", &view), 0);
+    KZ_CHECK(has(view, "param.image_budget = 4096 "));
+    KZ_CHECK(has(view, counts(0, 0)));
+    KZ_CHECK(has(view, "count.walk_bounds_hit = FACT_INIT walk 0 objects (no leaf read when it stopped: 0), function-value initializer nesting 0 initializers cut, "
+                       "expression depth 0 subexpressions cut, DERIVES copy chains 0 cut, LOOP_ITERS texts 0 cut, static images (param.image_budget): "));
+    KZ_CHECK(!has(view, "image-truncated"));
+    KZ_CHECK(!row(view, "img_wide.f int 6 ").empty() && !row(view, "img_points[2].z int 9 ").empty() && !row(view, "img_union.s.e int 5 ").empty());
+    // --verbose does not change the facts
+    const std::string fq = (X / "quiet.kz").string();
+    KZ_CHECK_EQ(run(q(tool) + " extract --no-profile --source " + q(src) + " --root " + q(fixtures) + " -o " + q(fq) + " -- -std=c99 -pedantic", &log), 0);
+    KZ_CHECK_EQ(read(fq), read(fdef));
+  }
+
   // ---- F5 and the target-independent rules (LOCK_OPS, LOCK_IDS, LOCKSET, FIELD_STATUS, AWAIT_L1; kz_facts.h revision 8) -
   // Written with the extended facts: off in the profile-driven mode without --extended-facts, the earlier sections unchanged
   // with it, the same rows in both modes and whatever the targets.  The old rules of FACT_LOCS and FACT_LOOPS are unchanged.

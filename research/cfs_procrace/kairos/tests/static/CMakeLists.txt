@@ -19,7 +19,8 @@
 #                    again, hooks whose targets are not complete, a callback of a function without a body, unresolved
 #                    calls of the child, an entry from a union member of a static table, hooks set through a cast lvalue
 #                    of the variable, a copy of the pointer to it or the pointer an array decays to); deepcond.c (a condition more than 200
-#                    levels deep) is read by test_static_cli only
+#                    levels deep) and imgbudget.c (the budget of the static image: marker leaves, exact fit, the two counts) are
+#                    read by test_static_cli only
 #   data/*.golden    the text view of the facts of each fixture and of the core executable
 #   test_static_*    unit tests of the parts that need no Clang (expression pool, flow graph, table
 #                    walks, recipe, commit reader, link set, command line, basis -> extract on a
@@ -44,7 +45,7 @@ set(kz_fixture_profile "${CMAKE_CURRENT_SOURCE_DIR}/profile")
 # ---- the fixtures are valid C99 for the compiler of the build -----------------------------------------
 # clobber.c writes past the end of an object on purpose (a fact the extractor must see); both
 # compilers reject that at -Werror, so it is read by kz-static but not compiled here.
-set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond)
+set(kz_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations relpaths relsound deepcond imgbudget)
 set(kz_golden_fixtures writers outptr derives loops spawn atype wrappers flowfacts argflow lockset relations clobber flowfacts_np argflow_np lockset_np
     relations_np lockpaths_np relpaths_np relsound_np)
 foreach(kz_name IN LISTS kz_fixtures)

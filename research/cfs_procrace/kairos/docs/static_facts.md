@@ -268,7 +268,7 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 - READ: 접근 경로가 포인터 필드를 지나는 READS 행(뿌리에 가장 가까운 단계). 같은 형·필드의 주소 쓰기 가운데 같은 뿌리이거나 필드 기반인 것이 후보다. RESOLVED = 후보 하나, 같은 뿌리, 쓰기가 읽기보다 프로그램 순서로 앞(`write-before-read`: 같은 함수에서는 쓰기가 읽기를 지배; 다른 함수이면 읽는 함수로 가는 **모든** 호출 경로가 쓰는 함수의, 쓰기가 지배하는 호출을 지난다; 거꾸로 따라가다 호출자 없는 함수, spawn 진입, 미해결 간접 호출이 있을 때 주소를 잡힌 함수에 닿으면 앞이 아니다; 정적 초기값은 늘 앞), 남은 다른 쓰기 0. 후보가 있지만 하나라도 어긋나면 MAY, 후보가 없으면 NEEDS field points-to 다. 첨자가 둘러싼 counted loop(정확한 횟수 또는 상한)의 유도 변수이면 원소 값 `elem` + k·`idx_step`(k < `idx_n`)을 적는다(`index-from-counted-loop`; 상한이면 `loop-may-exit-early`).
 - 형 있는 쓰기만 본다. 형 없는 포인터로의 저장과 본문 없는 코드의 쓰기는 배제하지 않는다(table walk 의 이미지 확인과 같은 한계).
 
-**F6 GLOBAL_IMAGES** [D]. ARGFLOW 의 `object` 와 PTR_FIELDS 의 대상·뿌리가 이름 붙인 전역마다, STATIC_IMAGE 와 같은 이미지 생성기(`flatten_initializer`, 같은 잎·종류·경로)로 만든 정적 초기값이다. table walk 와 무관하다. 스칼라 전역은 잎 하나, 초기값 없이 정의된 객체는 `zero-initialized` 한 행이다. 닫힌 프로그램 밖에 정의된 객체는 행이 없고 수만 센다. 잎이 매크로로 쓰였으면 거기 쓴 가장 바깥 매크로(`macro`)와 값의 첫 토큰이 쓰인 곳(spell 위치, 정의)을 적는다(시스템 헤더의 매크로는 적지 않는다). 잎이 레코드 필드이면 (`owner`, `field`)를 적고, 그 필드를 쓰거나 주소를 잡는 함수가 있으면 `field-written`(필드 기반), 그 형 레코드를 통째로 쓰면 `record-written`, 객체 자체를 쓰거나 주소를 잡으면 `object-written` 이다. 이 표시가 없으면 형 있는 쓰기로는 정적 값이 실행 중 값이다. 이미지 잎 수 상한(기존 4096, `--image-budget N`)은 레퍼런스가 정하지 않는 도구 매개변수다.
+**F6 GLOBAL_IMAGES** [D]. ARGFLOW 의 `object` 와 PTR_FIELDS 의 대상·뿌리가 이름 붙인 전역마다, STATIC_IMAGE 와 같은 이미지 생성기(`flatten_initializer`, 같은 잎·종류·경로)로 만든 정적 초기값이다. table walk 와 무관하다. 스칼라 전역은 잎 하나, 초기값 없이 정의된 객체는 `zero-initialized` 한 행이다. 닫힌 프로그램 밖에 정의된 객체는 행이 없고 수만 센다. 잎이 매크로로 쓰였으면 거기 쓴 가장 바깥 매크로(`macro`)와 값의 첫 토큰이 쓰인 곳(spell 위치, 정의)을 적는다(시스템 헤더의 매크로는 적지 않는다). 잎이 레코드 필드이면 (`owner`, `field`)를 적고, 그 필드를 쓰거나 주소를 잡는 함수가 있으면 `field-written`(필드 기반), 그 형 레코드를 통째로 쓰면 `record-written`, 객체 자체를 쓰거나 주소를 잡으면 `object-written` 이다. 이 표시가 없으면 형 있는 쓰기로는 정적 값이 실행 중 값이다. 이미지 잎 수 상한(기존 4096, `--image-budget N`)은 레퍼런스가 정하지 않는 도구 매개변수다. 예산이 떨어진 곳의 표시 잎과 두 계수는 §5j 다(2026-11-10).
 
 **시험** [M]: `static_golden_argflow`(고정 도구 프로필 + `--extended-facts`), `static_golden_argflow_np`(`--no-profile`; 둘의 새 섹션은 같다), fixture `argflow.c`, `test_static_cli` 의 F4·F6 확인(옵션 없으면 네 섹션이 없음, 있으면 기존 섹션 view·FACT_EXPRS 앞 행 동일, 상한과 이미지 예산의 기록·거부·효과).
 
@@ -462,6 +462,34 @@ spawn 연산 호출의 entry 인자는 함수 포인터 흐름 그래프로 해�
 **걷기 상한** [D]. 남은 고정 상한을 다시 찾아 둘을 더 기록했다: DERIVES 복사 사슬 8(`ast_fn.cpp` `kDeriveDepth`; 잘린 사슬은 이유 `walk-bound`, 전에는 `not-a-copy` 로 틀렸다)과 LOOP_ITERS 에 저장하는 식 텍스트의 깊이 64(`model.cpp` `kEmitDepth`; 더 깊은 부분은 `...`). 둘 다 BASIS `param.walk_bounds` 에 값을, `count.walk_bounds_hit` 에 걸린 수를 확장 사실과 함께 적는다. DERIVES 는 역할 있는 인자에만 나오므로 프로필 없는 추출에는 행이 없다. 두 상한도 4096·24 처럼 프로필 추출에서 작동하고 그 BASIS 는 기록하지 않는다(식별 시험 여섯 경우는 바이트 동일이므로 걸리지 않았다 [M]). 그래서 남은 고정 상한은 FACT_INIT 4096 노드, 함수 값 초기화자 중첩 6, 식 트리 깊이 24, DERIVES 사슬 8, LOOP_ITERS 텍스트 64, 그리고 S3 의 `--image-budget` 기본 4096 이다. 출력에만 쓰는 한계(텍스트 보기의 식 40 단계, PTR_FIELDS 원소 64)는 facts 를 바꾸지 않는다.
 
 **시험** [M]: fixture `relsound.c` 에 열 경우(`recur_*` 상호 재귀로 다시 들어가는 생성자, `memhook_*` memcpy 로 바꾼 전역 함수 포인터, `dlhook_*` cast lvalue 로 바꾼 멤버, `cbq_*` qsort 가 되부르는 함수의 해제, `unres_*` 자식의 미해결 호출이 닿는 주소 잡힌 함수, `unres2_*` 그 호출로만 닿는 읽기 함수, `img_*` union 멤버로 읽는 정적 이미지 entry, `varhook_*` cast lvalue 로 바꾼 전역 변수, `putcopy_*` 복사한 함수 포인터 포인터를 통한 저장, `arrhook_*` 첫 원소 포인터로 바뀐 함수 포인터 배열)와 `static_golden_relsound_np`. `test_static_cli` 가 그 등급과 `incomplete-source` 행, 두 단위가 포함하는 헤더의 `static` mutex(LOCK_IDS `not-static`, `undecidable`), 두 행위자가 도는 probe-create(짝으로 남음), 새 상한 둘의 기록을 본다.
+
+## 5j. 정적 이미지 예산의 잘림 표시와 두 계수 (2026-11-10, 단계 2a 8b) [D][M]
+
+근거: `plan/RV3_REVIEW_ANALYSIS_20261105.md` §2.5 ①②와 `plan/RV4_REVIEW_ANALYSIS_20261109.md` §2 #6(계수를 둘로 나눔). 결과는 `plan/step2a_results_20261030.md` §15. 예산 값은 바꾸지 않았다(기본 4096, `--image-budget N`; 레퍼런스가 정하지 않는 도구 매개변수). facts schema 는 개정 11 그대로다(섹션·레코드 배치·열거형 변화 없음; `docs/schema.md` §19).
+
+**예산** [D]. 정적 이미지(`flatten_initializer`)는 STATIC_IMAGE, GLOBAL_IMAGES, basis 의 table 항목이 쓴다. 객체마다 예산을 따로 받는다. 잎 하나가 예산 하나를 쓴다. 0 채움 행(`[k..n-1]`)은 예산을 쓰지 않는다.
+
+**잘림 표시 잎** [D]. 예산이 떨어져 읽지 않은 부분에 잎이 있었으면 그 자리에 표시 잎 하나를 둔다. 종류는 `non-constant`, 글은 `<image truncated>`, 위치는 객체의 정의다. 경로는 셋이다.
+- `경로[...]`: 배열에서 읽지 않은 첫 원소부터 끝까지(0 채움 행 포함). 전에도 있던 표시다.
+- `경로.멤버...`: 레코드·union 에서 읽지 않은 첫 멤버부터 끝까지. 새로 더했다. 전에는 이 부분이 표시 없이 빠졌다(RV3 §5.5).
+- `경로...`: 그 부분 전체. 예산 없이 걷기에 들어온 경우다(옛 판의 이른 반환 자리). 명령줄 예산은 1 이상이고(`--image-budget 0` 은 거부), 걷기는 배열 원소와 멤버마다 내려가기 전에 예산을 본다. 그래서 지금 경로로는 이 표시가 나오지 않는다 [I: 코드].
+- 표시는 잘린 단계마다 하나다. 배열 안 레코드가 잘리고 배열에도 원소가 남으면 둘이다(예: `pts[1].y...` 와 `pts[...]`).
+- 읽지 않은 부분에 잎이 없으면 표시를 두지 않는다(예: 초기값 없는 배열 멤버, 정의 없는 레코드). 배열도 같은 규칙이다. 전에는 배열에 원소가 남기만 하면 표시를 두었다. 다른 것은 남은 원소에 잎이 없는 드문 경우뿐이다.
+- GLOBAL_IMAGES 의 `image-truncated` 플래그는 기존 경로로 붙는다(`argflow.cpp`: 객체의 잎 가운데 표시 잎이 있으면 그 객체의 모든 행). 이제 레코드·union 의 잘림에도 붙는다.
+
+**정확히 맞음** [D]. 마지막 잎이 예산의 마지막을 쓰고 남은 부분에 잎이 없으면 표시가 없다. 빠진 것이 없다.
+
+**두 계수** [D]. `read_global` 이 객체마다 센다. 합은 BASIS `count.walk_bounds_hit` 끝의 두 항목이다(확장 사실을 쓰는 추출; 다른 상한의 수 뒤에 붙는다).
+- `image_budget_exhausted`: 걷기가 끝났을 때 예산이 0 인 객체의 수다. 정확히 맞은 객체도 든다. 그래서 이 수만으로는 잎이 빠졌는지 모른다. 보수적으로 "다 읽었는지 모름"으로 읽어도 된다.
+- `image_leaves_omitted`: 표시 잎의 수다. 0 이 아니면 실제로 빠진 부분이 있다. 빠진 잎의 수는 아니다(빠진 부분은 걷지 않는다).
+- 표시 잎이 있는 객체는 늘 `image_budget_exhausted` 에도 든다(예산은 다시 늘지 않는다).
+- 객체별 값은 모델의 `image_budget_objects`(객체 키 → 표시 잎 수)다. `extract --verbose` 는 그 객체마다 stderr 에 한 줄을 쓴다(`kz-static: static image of <키>: budget N used up, marker leaves k`). facts 에는 객체별 계수가 없다. 직렬화되는 객체(GLOBAL_IMAGES)는 표시 잎 행과 플래그로 드러난다.
+- 프로필 추출(옵션 없음)의 BASIS 는 다른 걷기 상한처럼 이 수를 적지 않는다(§5g). 표시 잎은 그 모드의 이미지에도 생긴다.
+- 프로필 없는 추출은 세 번 읽는다(첫째 읽기, 완전성 pass, 둘째 읽기). 계수와 `--verbose` 줄은 facts 를 만드는 둘째 읽기의 것이다.
+
+**소비자** [D]. table walk(`finalize.cpp`), 펼치기(`unroll.cpp`), PTR_FIELDS 정적 초기값(`argflow.cpp`), basis 의 table 항목은 이 판에서 고치지 않았다. 경로를 정확히 맞추는 조회(`find_entry`, 펼치기의 필드 조회)에서 표시 잎은 어느 멤버와도 맞지 않는다. 그래서 잘린 멤버는 전처럼 "이미지에 없음"이다. 앞부분 조회(`has_prefix_entries`)는 `경로.멤버...` 를 그 멤버의 중첩 항목으로 본다(배열 표시 `경로[...]` 와 같다). 그 walk 는 뒤에서 풀리지 않는다. 다를 수 있는 것은 이유 문장이다 [I: 코드]. basis 의 table 항목은 원소의 표시 잎을 그 원소의 글에 넣는다. 잘린 이미지를 UNKNOWN 으로 두는 소비자 규칙(RV3A §2.5 ③)은 하지 않았다.
+
+**시험** [M]: fixture `imgbudget.c`(사례 이름 없음)와 `test_static_cli` 의 이미지 예산 확인. `--image-budget 4` 로 다섯 경우를 따로(`-DIMG_CASE=1..5`), 그리고 함께 읽는다. 1 멤버가 예산보다 많은 구조체(표시 `.e...`, 소진 1, 표시 1). 2 활성 멤버가 잘리는 union(표시 `.s.e...`). 3 배열 안 구조체(표시 `[1].y...` 와 `[...]`, 소진 1, 표시 2). 4 정확히 맞음(뒤에 잎 없는 배열 멤버; 소진 1, 표시 0, 표시 잎 없음). 5 예산 안(둘 다 0). 기존 `argflow.c` 의 `--image-budget 1` 확인(`fx_slots[...]`)은 그대로다.
 
 ## 6. core-cpu1 결과 [M]
 

@@ -314,6 +314,12 @@ int cmd_extract(int argc, char** argv) {
 
   if (spec.extended_facts)
     for (const auto& [name, value] : basis_deviations) so.notes.push_back({"extract.basis_deviation[" + name + "]", value});
+  // --verbose: each object whose static image used up the budget, with its marker leaves (the sums are in BASIS
+  // count.walk_bounds_hit with the extended facts)
+  if (ro.verbose)
+    for (const auto& [key, markers] : model.image_budget_objects)
+      std::fprintf(stderr, "kz-static: static image of %s: budget %zu used up, marker leaves %u%s\n", key.c_str(), ro.image_budget, markers,
+                   markers == 0 ? " (an exact fit)" : "");
 
   kz::Bytes out;
   kz::Status s = kzs::serialize_facts(model, spec, so, &out);

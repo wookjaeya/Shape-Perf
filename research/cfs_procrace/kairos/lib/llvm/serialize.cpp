@@ -1025,7 +1025,10 @@ kz::Status serialize_facts(const Model& m, const ExtractSpec& spec, const Serial
     item("count.walk_bounds_hit",
          "FACT_INIT walk " + num(m.stats.init_budget_out) + " objects (no leaf read when it stopped: " + num(m.stats.init_budget_out_no_leaf) +
              "), function-value initializer nesting " + num(m.stats.fp_init_depth_cut) + " initializers cut, expression depth " + num(m.stats.expr_depth_cut) +
-             " subexpressions cut, DERIVES copy chains " + num(m.stats.derive_depth_cut) + " cut, LOOP_ITERS texts " + num(m.stats.text_depth_cut) + " cut",
+             " subexpressions cut, DERIVES copy chains " + num(m.stats.derive_depth_cut) + " cut, LOOP_ITERS texts " + num(m.stats.text_depth_cut) +
+             " cut, static images (param.image_budget): image_budget_exhausted " + num(m.stats.image_budget_exhausted) +
+             " objects (the walk ended with the budget used up, an exact fit included), image_leaves_omitted " + num(m.stats.image_leaves_omitted) +
+             " marker leaves <image truncated> (parts with a leaf not read)",
          KZ_POLICY_UNSET, KZ_NONE32);
     item("count.indirect_calls_incomplete",
          num(R.indirect_incomplete) + " (resolved, with a CALL_TARGETS row incomplete-source: a node the function value comes from holds values the flow "

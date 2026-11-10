@@ -258,3 +258,4 @@ test_trace_occ_match
 test_trace_replay_out
 test_trace_static_closure
 test_trace_symbols
+# correction (8c fix stage, 2026-11-10): ctest -N -L '^<label>$' also lists the fixture setup tests that the selected tests require. For unit that adds rt_end_kill, rt_end_normal and rt_end_segv (label runtime only; FIXTURES_REQUIRED of test_kzrt_recovered). So label unit is 84 (63 new + 21 legacy-case), not 87, and "others with label unit" is 63, not 66. The others' labels sum to 148, with 4 tests that carry two labels (three unit;integration, one unit;golden). The other lines above are right. Recount from the LABELS property: records/step2a-20261110-8cfix/labels.txt.

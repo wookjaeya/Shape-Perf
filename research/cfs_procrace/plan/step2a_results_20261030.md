@@ -105,7 +105,7 @@
 
 | 확인 | 결과 | 근거 |
 |---|---|---|
-| 시험 | 237/237 통과(1개 건너뜀은 원래대로). 나눔(8c, §16.4): 2a 끝의 237 = 새 경로 186 + 옛 경로 51(`legacy-case`), 건너뜀 1(사유는 LastTest.log). 8c 뒤 239 = 새 188(추출 규칙 쪽 44, 컨테이너·직렬화·공통 기능 144) + 옛 51. 탐지 정확도의 시험 수가 아니다. 셋째 수정은 두 차례 모두 새 시험을 더하지 않고 기존 시험에 확인을 더했다: `test_static_cli` 583개(첫째 차례 541, 둘째 수정 515; 첫째 차례는 fixture `relsound.c`의 열한 경우 `wait_*` … `opn_*`, 이미지 키의 형 없는 저장 변형, 걷기 상한 24; 둘째 차례는 `relsound.c`의 열 경우 `recur_*` … `arrhook_*`, 두 단위의 헤더 `static` mutex, 두 행위자의 probe-create, `incomplete-source` 행, 상한 8·64), `test_static_wrappers` 512개. lint 6/6 | ctest 로그 |
+| 시험 | 237/237 통과(1개 건너뜀은 원래대로). 나눔(8c, §16.4): 2a 끝의 237 = 새 경로 186 + 옛 경로 51(`legacy-case`), 건너뜀 1(사유: tracefs 없음, `records/step2a-20261110-8cfix/skip_reason.log`). 8c 뒤 239 = 새 188(추출 규칙 쪽 44, 컨테이너·직렬화·공통 기능 144) + 옛 51. 탐지 정확도의 시험 수가 아니다. 셋째 수정은 두 차례 모두 새 시험을 더하지 않고 기존 시험에 확인을 더했다: `test_static_cli` 583개(첫째 차례 541, 둘째 수정 515; 첫째 차례는 fixture `relsound.c`의 열한 경우 `wait_*` … `opn_*`, 이미지 키의 형 없는 저장 변형, 걷기 상한 24; 둘째 차례는 `relsound.c`의 열 경우 `recur_*` … `arrhook_*`, 두 단위의 헤더 `static` mutex, 두 행위자의 probe-create, `incomplete-source` 행, 상한 8·64), `test_static_wrappers` 512개. lint 6/6 | ctest 로그 |
 | golden | 셋째 수정 둘째 차례에서 바뀐 것: `layout.golden`·`records.golden`(열거형 항목 `incomplete-source`·`walk-bound`와 지문), `wrappers.golden`(fixture 트램펄린 호출의 `incomplete-source` 행), relations golden 넷(개정 5의 판·머리·전제; `relsound_np`: 새 경우의 행). 첫째 차례에서 바뀐 것: `tests/golden/data/layout.golden`·`records.golden`(FIELD_STATUS flag 항목 `array-element-stores-not-collected` 한 줄과 schema 지문), `lockset.golden`·`lockset_np.golden`(fixture `lockset.c`의 스칼라 배열 `fx_shared.tasks`가 두 규칙 DISABLED), relations golden 넷(`relations`, `relations_np`, `relpaths_np`: 개정 4의 머리 줄, `P0-unverified`, "불가" 문장과 `rests-on`, 뒤집힘 하나; `relsound_np`: 새 경우의 행). 다른 프로필 추출 golden(`writers` … `argflow`, `core_cpu1`)과 2a의 다른 프로필 없는 golden(`wrappers`, `flowfacts_np`, `argflow_np`, `lockpaths_np`)은 그대로다. 둘째 수정까지의 변화는 §10·§11과 같다 | `git diff 672cd31..HEAD -- kairos/tests` |
 | 프로필 추출(identity) | V0·V2 × C1 pre tx·R2 core·C5 6.4.1: basis 6섹션·facts 22섹션 가운데 CRC가 다른 것은 STRINGS뿐. 다른 레코드는 basis 1(`front_end.build_identity`), facts 3(`extract.build_identity`, parent basis 해시, `extract.units_from`). show 텍스트 차이 2줄 | `T/identity/identity.txt` |
 | 프로필 없는 추출, 옵션 없음(npsame, S4 대비) | C5 34개, C1 30개, R2 31개 섹션 레코드 같음. BASIS·P0_TABLE·FIELD_STATUS 다름(FIELD_STATUS는 셋째 수정의 배열 표시), C1·R2의 CALL_TARGETS·LOCKSET·LOCK_OPS(셋째 수정 둘째 차례의 `incomplete-source`), C1의 AWAIT_L1 다름, LOCK_PATHS는 새 섹션(§2a) | `T/npsame/npsame.txt` |
@@ -1172,3 +1172,113 @@ S5=/home/user/work/redesign/step2a/tests_s5 FIX1=/home/user/work/redesign/step2a
 | 16 | 긍정 확인이 프로필 대상 `Cell.id`를 씀 | 맞음 [F: `00_fixture.kzp:39`] | 시험: 프로필에 없는 선언된 대상 `Cell.aux`. 8c 블록의 주석을 고침 |
 
 - 버린 지적은 없다. #11은 덮은 호출을 좁혀 받았다. #1·#2의 코드 수정은 지적 자체가 "따로 선언"을 권한 대로 다음으로 미뤘다.
+
+### 16.10.2 코드와 문서 [F]
+
+- 커밋: 선언 `08a3632`(빌드 전). 코드·lint·문서와 시험의 대부분은 lead의 스냅숏 `1377957`이다. 첫 빌드가 시험의 지역 변수 하나(`-Werror=shadow`)에서 멈춰 그 한 줄을 고쳐 `90e423c`로 커밋했다(실행 전). 이 절과 기록은 그다음 커밋이다.
+- 규모(`git diff 1c5a093 90e423c`): `lib/llvm/finalize.cpp` +7/−5, `lib/llvm/spec.hpp` +3, `tools/kz-static/cmd_extract.cpp` +27/−4, `tests/lint/kz_lint.cpp` +18/−7, `tests/lint/data/case_identifiers.txt` +9/−6, `instrument/clang/CMakeLists.txt` +1/−1(주석), `tests/static/test_static_cli.cpp` +84/−6, `docs/static_facts.md` +14/−6, `docs/framework_layer.md` +3/−2, `docs/schema.md` +1, ED +1/−1.
+- **이유 글(지적 #2)**: "no record type T is found among the file-scope tags and typedef names of the units read". 둘째 글("the record type T has no field f in the units read")은 그대로다.
+- **프로필 대상과 같은 `--target`(지적 #5)**: `add_cli_vocabulary`가 같은 대상을 찾으면 `TargetField::command_line`을 단다. 새 기록은 더하지 않는다. `finalize`의 검사 조건이 출처 "command line" 또는 그 표시다.
+- **`extract.resource_dir`(지적 #4)**: `--extra-arg`의 `-resource-dir=X`와 `-resource-dir X`를 차례로 보고 마지막 것을 적는다. 값 꼴은 `X (--extra-arg -resource-dir, after and over the tool's: <도구의 값>)`이다.
+- **lint(지적 #6)**: 위 선언대로. `instrument/clang/CMakeLists.txt:15`의 "the C1 reference warning flags"를 "a case build's reference warning flags"로 고쳤다. selftest 다섯: 걸려야 하는 넷(`probe/plan/a.inc`, `probe/plan/a.ipp`, `instrument/gcc/CMakeLists.txt`, `instrument/llvm/gates.cmake`), 걸리지 않아야 하는 하나(`instrument/llvm/scripts/gates.cmake`, `probe/hold/tests/CMakeLists.txt`).
+- **시험**: 8c 수정 블록 — `Cell.aux`(프로필에 없는 선언된 명령줄 대상, `writers 2 … -> writer-set-complete`), `extract.resource_dir` 네 꼴(내장 기본값의 정확한 글, `--resource-dir`, `--extra-arg -resource-dir=`, 빈 값의 none), `Cell`이 없는 소스의 `--target Cell.id`(unknown-target, 기록은 `profile loc Cell.id`)와 중첩 태그 `Inner.ix`(unknown-target), `--target` 없는 `Cell.id`(프로필 규칙 그대로). 8c 블록: 이유 글 넷을 새 글로, `resource_dir` 확인 하나를 내장 기본값만으로, `Cell.id` 확인의 주석을 프로필 대상이라고.
+- **문서**: SF §5k(지적 #1–#5·#7·#13: 규칙 대상의 `<anonymous>`, 파일 범위만, `Unn.q`, 아홉 golden, 덮는 `-resource-dir`, 대조하지 않음, 상대 경로와 빈 값, 프로필 대상과 같은 `--target`, relations의 두 곳, 시험 문단). schema §19에 8c 수정 줄. `framework_layer.md` §2·§3(지적 #8·#15). ED §8 줄 안 정정(지적 #14). `tests/lint/data/case_identifiers.txt` 머리(지적 #6).
+- 바꾸지 않은 것: `include/`(schema 개정 11, 열거형 그대로), golden 파일, 드라이버와 허용표, 규칙 대상과 프로필에만 있는 대상의 판정, 이름 표(`collect_typedefs`), relations 코드, 예산·등급·조건 값.
+
+### 16.10.3 빌드 [M]
+
+- 손대기 전(`pre_mc.txt`, 09:49:35Z): 일곱 도구가 8c `post_mc.txt`와 같다. kz-instr-clang `28db4017…`도 이번에 적었다.
+- MC 제자리 `make -j4 all`. 첫째(09:49:51Z–09:52:26Z) rc 2: `test_static_cli.cpp:1430`의 지역 변수 `out`이 바깥 것을 가린다(`-Werror=shadow`). kz-static, kz_lint, `libkz-llvm.a`와 다른 static 시험은 이미 링크됐다. 그 줄을 고쳐 둘째(09:52:47Z–09:53:56Z) rc 0, `test_static_cli`만 링크했다(`make.log`). CMake가 다시 구성했다(`instrument/clang/CMakeLists.txt`). libkz-core identity `f6e3c7b4…` 그대로다.
+- 도구 해시:
+
+| 도구 | 전(8c) | 뒤 |
+|---|---|---|
+| kz-static | `ab482eab0fb34aa86e8a839ef35fa8207054ea4b28ff186f5c5079a1cd30b326` | `0024f192980dfbd93e4a662666239c3b4082fcb65f3bd5d25a19fbbfc06d2431` |
+| kz-static tool_sha256 | `b61256c5…` | `3b7de5b7d595d3c0f0042ea8e264d7865835dfa7cbc0524fcdcb2323ede43269` |
+| kz-static tool_source | `c2da0fdc…` | `bbd484360f2a56ad44a2aead276e4c4c9be1066994aee087a9fc08767ac19aab` |
+| kz_lint | `191d0da0…` | `b0f0d6a55153c8c76edb0f6592e1963c593c2b8298fc87ffca44e935d5c9650a` |
+| kz-instr-clang | `28db4017…` | 같음(다시 링크되지 않음) |
+| kz / kz-dump / kz-rt-dump / kz-phi | `931dd39c` / `05623054` / `4390d4f1` / `7d34e6e2` | 같음(다시 빌드되지 않음) |
+| core_source | `f6e3c7b4…` | 같음 |
+
+- 선언대로다. kz-instr-clang은 이번에 전후 해시가 같다 [M]. 그래서 §16.9의 [U] "kz-instr-clang 바이너리의 전후 동일성"은 8b 수정 → 8c 구간에 대해서는 그대로 [U]이고, 8c → 이 단계 구간은 [M]으로 같다.
+- 소스: 빌드 시작 뒤 도구 identity의 파일(`lib`·`tools`·`include`·`cmake`·`CMakeLists.txt`·`probe`·`instrument`·`runtime`)은 바뀌지 않았다(`find -newer` 0). `git diff 1377957 90e423c`의 그 경로는 0줄이다. 그래서 `0024f192`는 `1377957`(= `90e423c`)의 도구 소스다 [M].
+- 공간(`df -B1 /`): 앞 662,728,704 B(09:49:51Z), 가장 낮음 588,574,720 B(09:51:05Z), 뒤 661,970,944 B(09:53:56Z). 기록: `pre_mc.txt`, `post_mc.txt`, `df_build.log`.
+- [U] 바이트 결정성(K9)은 그대로다.
+
+### 16.10.4 시험 [M]
+
+- 전체 ctest(09:54:04Z–09:54:24Z): 239개, 통과 238, 실패 0, 건너뜀 1(`test_probe_anchor_reached`). 라벨 시간 요약: legacy-case 51, unit 84, runtime 66, static 45, golden 58, lint 6, integration 4, instr 1, property 1.
+- 건너뜀의 사유(지적 #11): `ctest -R '^test_probe_anchor_reached$' -V -O`로 `records/step2a-20261110-8cfix/skip_reason.log`에 적었다. 출력은 "observe: not root, no tracefs (KZ_TRACEFS) or no binary: the run part skipped", 확인 74개 통과, 종료 77(건너뜀). 이 기계는 root이고 tailjump 바이너리 둘이 있다. `/sys/kernel/tracing/uprobe_events`가 없고 `KZ_TRACEFS`가 비어 있다. 그래서 까닭은 tracefs가 없는 것이다 [M][F: `test_probe_anchor_reached.cpp:168-173`, `:250`].
+- `test_static_cli` 확인 752개(8c 719, +33). `lint_selftest` 102 경우, 실패 0. `lint_case-ids` clean(범위 안 37 파일, `lint_widened.txt`).
+- golden 파일은 하나도 바뀌지 않았다(`git diff 1c5a093 -- tests/static/data tests/golden/data tests/phi/data` 0, 새 파일 없음).
+- 라벨 수(`labels.txt`, `ctest --show-only=json-v1`의 LABELS): legacy-case 51, 새 경로 188 = static 44 + 나머지 144. 나머지 144의 라벨: runtime 66, unit 63, golden 8, lint 6, integration 3, instr 1, property 1. 합 148, 라벨 둘인 시험 넷(`test_hold_ptrace`·`test_hold_sequence`·`test_probe_observe` unit;integration, `test_probe_golden` golden;unit). unit 84 = 63 + 옛 21. `ctest -N -L '^unit$'`의 87은 fixture 준비 시험 셋(`rt_end_kill`·`rt_end_normal`·`rt_end_segv`, 라벨 runtime)을 더한 수다(지적 #10).
+- 드라이버 단위 점검 6/6(`unit.txt`, 드라이버 `ccbb26f8…` 그대로).
+- 작은 소스로 본 새 도구(`finding_checks.txt` 끝): `nest.c`의 `Inner.ix`는 새 이유 글, `rd.c`의 `extract.resource_dir`는 가짜 디렉터리와 "(--extra-arg -resource-dir, after and over the tool's: …)", `o2.c`의 `Cell.id`는 unknown-target이고 기록은 `profile loc Cell.id`다.
+
+### 16.10.5 재실행 [M]
+
+- 앞서 공간을 비웠다(§16.10.0, `pack.txt`): scratchpad의 scratch 사본 여덟(`v8b`, `fix3b`, `t7`, `v`, `T`, `s3`, `c5_642`, `verify3`; 793 파일, 226,922,496 B)을 xz로 묶었다(12.5 MB). 파일마다의 sha256을 압축본에서 스트림으로 다시 내어 같음을 본 뒤에 원본을 지웠다. 여유 448,630,784 → 662,777,856 B. 2a 로그(ctest 등)와 RD·EB·CK·PV·T/·빌드 트리·cFS 트리는 건드리지 않았다.
+- 명령: `env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools $R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c_fix`. 09:56:06Z–10:00:52Z. 허용표는 내장 그대로다.
+- rc: `all` 0, `result all: PASS`. 열 단계 모두 PASS, FAIL 줄 0. `twice` 다섯 빌드 모두 same.
+- 소스: `repo 90e423c…`, `kairos_uncommitted_lines=0`.
+- identity: 18 판정 모두 PASS. 변경 수는 `T_8C/`와 같다: basis 1/0/0, facts는 C1 pre tx V2가 4/2/4, 다른 다섯 경우가 4/2/0. show 글의 8c 줄도 같다. C1 pre tx V2의 프로필 대상과 같은 `--target` 셋은 선언이 있었다. FACT_LOCS와 BASIS가 그대로다(아래 비교). 조건 항목은 쓰이지 않았다.
+- 드라이버 비교 다섯의 출력 글은 `T_8C/`와 바이트 동일하다. 그래서 변경 수는 §16.6과 같다.
+- `unknown-target`·`unknown_target`은 어느 출력에도 없다(grep 0).
+- 공간: 앞 661,454,848 B(09:56:06Z), 가장 낮음 436,219,904 B(09:59:32Z), 뒤 458,211,328 B(10:00:52Z). `T_8CF/`는 202,212,496 B, 149 파일, `sha256.txt` 136줄(sha256 `e7949053…`). T/, `T_RV4/`, `T_8B/`, `T_8BF/`, `T_8C/`는 실행 뒤에도 제 `sha256.txt`와 맞는다(rc 0). 300 MB 아래로 가지 않았다.
+
+### 16.10.6 비교: 모든 파일, 가림 없음 [M]
+
+`compare_8cfix.py`(기록 디렉터리)는 `compare_8c.py`와 같다(머리 주석 두 줄만 다름). 결과 `compare_8cfix.tsv`:
+
+| 기준 | same | DIFF | 한쪽에만 |
+|---|---|---|---|
+| `T_8C/` | 39 | 110 | 0 |
+| `T_8BF/` | 34 | 115 | 0 |
+| T/ | 29 | 108 | 12(§16.7과 같음) |
+| `T_RV4/` | 34 | 115 | 0 |
+
+- `T_8C/` 대비 DIFF 110줄을 모두 읽었다. 모두 §16.10.0에 든다. 이번에는 선언의 틀림과 빠짐이 없다:
+  - basis.kz 11(NP 5, identity 6): HEADER `tool_sha256`·`artifact_sha256`만.
+  - facts.kz 16(NP 5, NP2 5, identity 6): HEADER `tool_sha256`·`basis_sha256`·parent·`artifact_sha256`, 섹션 줄은 STRINGS crc32 하나, 레코드는 BASIS `extract.units_from` 하나. 컨테이너 크기와 다른 섹션의 crc32·레코드는 같다.
+  - 글: basis.txt 11(해시 줄: NP C1·R2 1째, C5 5째; identity C1·R2 1째, C5 V0 5째, C5 V2 7째), extract.txt 21(`facts` 줄: 1째, identity C5 V2 3째), relations.txt 10(2째 줄), facts.txt 11(`extract.units_from` 한 줄), facts.dump.diff 6(넷: `basis_sha256`, parent, STRINGS crc32, `units_from`), show.diff 6(`units_from` 줄), `count/summary.txt` 1(487–491째 줄, T7 다섯), 디렉터리별 sha256.txt 11, 실행 기록(`run.log`, `status.txt`, `identity/identity.txt`, 최상위 `sha256.txt`), twice.txt·twice_detail.txt(해시 줄).
+  - `identity/identity.txt`: 머리(시각, `repo`, `tool_sha256`, `tool_source`)와 parent `sha256`·`units_from` 값이 든 줄뿐이다.
+- same 39: args.txt(NP 5, identity 6), relations.log 10, count/ tsv 일곱, 드라이버 비교 출력 다섯(npsame.txt … fix3same.txt), identity basis.dump.diff 6.
+- `T_8BF/`·T/·`T_RV4/` 대비: (같음/DIFF/한쪽, 파일)의 짝이 §16.7의 `compare_8c.tsv`와 하나도 다르지 않다 [M]. 그래서 그 기준들과의 차이는 §16.7과 같고, 값만 이 도구의 해시다.
+
+### 16.10.7 판정과 수
+
+- 판정 입력(tsv 일곱)이 T/, `T_RV4/`, `T_8B/`, `T_8BF/`, `T_8C/`와 바이트 동일하다 [M]. 판정은 그대로다 [I]: T1 PASS(개정 뒤 통과, "관계를 낸다"의 통과), T2 PARTIAL, T3 PARTIAL, T4 PASS(질의 수준), T5 PARTIAL, T6 PASS, T7 PASS.
+- 수(`burden.tsv`) [M]: `proven-impossible` 0 / 0 / 0 / 6 / 14, `not graded` 1 / 1 / 5 / 14 / 14, `undecidable` 318 / 318 / 254 / 147 / 147, `possible` 112 / 112 / 79 / 11 / 0. 행 431 / 431 / 338 / 178 / 175, 합 1,553.
+- 두 계수(8b): 다섯 빌드 모두 `image_budget_exhausted` 0, `image_leaves_omitted` 0이다.
+- T7의 새 해시(c1_pre_tx, c1_post_tx, r2_core, c5_641, c5_642): facts `0d7954fa…`, `821e3a9e…`, `6c7b7a3a…`, `e95bf36c…`, `c30e744f…`; relations `936cd6c8…`, `00b57eb2…`, `fc8ea8da…`, `1d4af508…`, `34ac45f1…`(`twice.txt`).
+- lint 세 묶음(`lint_groups.txt`, 사본): 합 2,451 → 2,450. 묶음 1 374, 묶음 2 75는 그대로다. 묶음 3의 빌드 파일이 12 → 11이다(`instrument/clang/CMakeLists.txt` 1 → 0; 남은 11은 `runtime/CMakeLists.txt`, lint 범위 밖). 묶음 3은 2,002 → 2,001이다.
+
+### 16.10.8 앞 절과 보고의 정정
+
+- §16.0(선언, 고치지 않음)의 정정 둘: (1) "`tests/golden/data/layout.golden:1889-1891`"은 1889–1892다(열거형 머리부터 DISABLED까지; 값만이면 1890–1892) (지적 #15). (2) O2 설계는 검사를 명령줄 대상에만 둔다. 규칙 대상(`--targets-rule`)도 빠진다는 것을 적지 않았다. SF §5k는 그 까닭을 "규칙 대상은 늘 선언이 있다"고 적었다. 틀렸다: 규칙 대상도 어느 레코드에도 맞지 않는 이름(`<anonymous>`)일 수 있다. 그래서 같은 결함이 규칙 대상에도 있다(지적 #1, §16.10.1).
+- §16.1 O2 행: "fixture 다섯(atype, loops, outptr, relations, clobber) … 넷은 writer-set-complete"는 틀렸다. 아홉이다: `[locs]`와 요약 줄이 writer-set-complete인 다섯(atype, loops, outptr, relations, spawn), 요약 줄만인 셋(argflow, flowfacts, lockset), DISABLED인 clobber. "옛 경로 golden 다섯이 바뀐다"는 "아홉 이상"이다(지적 #3·#9).
+- §16.4: "건너뜀 1(…, 사유는 LastTest.log)"의 그 파일에는 사유가 없다. 사유는 `skip_reason.log`다(§16.10.4). "unit 66(…)"은 63이다. "이 합(151)은 144보다 7 크다"는 "합 148, 겹침 4"다(라벨 둘인 시험 넷). "차이 3의 까닭은 찾지 않았다 [U]"는 [M]으로 풀렸다: `-N -L`이 fixture 준비 시험 셋을 끌어온다(지적 #10). `records/step2a-20261110-8c/labels.txt` 끝에 정정 주석을 더했다.
+- §16.7 "선언의 틀림과 빠짐"에 다섯째: identity 디렉터리의 basis.kz·facts.kz HEADER, basis.txt·extract.txt의 해시 줄(C5 V2는 7째, 3째), facts.txt의 BASIS 줄과 npsame/<b>/extract.txt 1째 줄(30 + 5줄)은 `T_8BF/` 대비로 선언되지 않았다. §16.0은 identity를 EB 대비 레코드 수와 show 글 수로만 적었다. "아래 말고는 모두 §16.0에 든다"는 그만큼 넘쳤다(지적 #12). `declared_before_build.txt`는 그대로다.
+- §16.0·§16.2·보고의 O12 정정: 명령줄 대상의 둘째 기록이 없어져 relations의 "hand-entered vocabulary on the command line" 수가 대상마다 2 → 1이 된다. 행마다의 layers 칸(`hand-entered:command-line(N items; …)`)도 같다. 2a 출력에는 보이지 않는다(relations는 명령줄 대상이 있는 identity facts에서 돌지 않음). §16.0에 없었고, 보고는 extract 요약의 수가 그대로라는 것만 적었다(지적 #13).
+- §16.9의 "O9의 남는 것: C5 판(OSAL 4.1.1)의 표 행"은 틀렸다. 4.1.1 열은 표에 이미 있다. 남은 것은 C5용 어댑터 항목이다(어댑터는 4.1.1 헤더와 맞지 않음) (지적 #14). ED §8은 줄 안에서 고쳤다.
+- §16.9의 [U] "ctest 라벨 시간 요약의 unit 84와 `-N`의 87의 차이"는 거둔다(위). §16.9의 O2 남는 결함 목록에 규칙 대상의 `<anonymous>`와 중첩·블록 태그를 더한다(§16.10.9).
+- `framework_layer.md`(이 단계의 새 파일이라 제자리에서 고침): `osal_id_t` 행은 두 갈래(`OSAL_OMIT_DEPRECATED`이면 `common_types.h:98-101`의 struct, 아니면 `:108`의 `uint32`; d2d877a도 같음)이고, `OS_time_t` f34759d는 `osapi-clock.h:45-48`이다(지적 #8·#15).
+- 8c 보고의 정정: (1) "four fixture goldens" → 아홉(위). (2) 테스트 주석 "a declared command-line target keeps the rule"의 `Cell.id`는 프로필 대상이다. 명령줄에만 있는 선언된 대상은 identity 실행만 덮었다. 이번에 `Cell.aux`를 더했다(지적 #16). (3) "unit = 84, while -N gives 87. I did not find the cause" → 위의 까닭. (4) "Still open: C5 rows for the OSAL table" → C5용 어댑터 항목.
+- AR §2(108째 줄)와 STATUS:61의 "사유는 LastTest.log"는 `skip_reason.log`를 가리키게 줄 안에서 고쳤다(줄 수 그대로).
+
+### 16.10.9 남는 것
+
+- O2의 남는 결함 셋. 모두 고치면 출력이 바뀌므로 따로 선언하고 빌드한다:
+  - 규칙 대상의 `<anonymous>`(지적 #1): 2a NP에 3/3/2/0/0개. writers 0으로 complete가 될 수 있다. 루프 행과 relations에는 닿지 않는다.
+  - 중첩·블록 태그(지적 #2): 이름 표에 없다. 명령줄 대상은 unknown-target(안전한 쪽), 프로필·규칙 대상은 complete가 될 수 있다.
+  - 프로필에만 있는 대상: 선언이 없어도 complete다. 고치면 옛 경로 golden 아홉 이상이 바뀐다. 결정은 B4·A6의 옛 경로 정리와 함께다.
+- `Unn.q`의 규칙(이름 없는 형의 멤버 안 필드를 감싼 레코드의 필드로 봄)은 writer 맞춤의 성질이다. 바꾸지 않았다.
+- `extract`는 읽기 옵션을 basis의 `front_end.arguments_added`와 대조하지 않는다. 문서에 적었다. 대조는 하지 않았다.
+- lint의 한계(문자열 이어 붙이기, 토큰 붙이기, 이스케이프, 정규식 항목의 대소문자, 앞 4 KiB의 NUL)는 data 머리에 적었다. 고치지 않았다.
+- O9의 남는 것: C5용 어댑터 항목, runtime의 그 밖 코드 25건, `OS_TimeGetTotalNanoseconds` 본문 대조 [U], `osal_id_t`의 실제 갈래 [U].
+- [U] 바이트 결정성(K9). [U] kz-instr-clang의 8b 수정 → 8c 구간(이번 구간은 같음 [M]).
+- 기존 문제(지적 밖): `kairos/tests/static/profile/00_fixture.kzp`의 `authored` 줄에 모델 식별자가 있다. 파일에 모델 식별자를 두지 않는 규칙에 어긋난다. fixture 프로필의 입력이라 고치면 프로필 해시와 그것을 적는 출력이 바뀐다. 이 단계에서는 고치지 않았다. lead가 정한다.
+- 하지 않은 것: E1(Q4), ③ 소비자 규칙, PD A3:173·부록 C:1009·S3:215 문구, B8, B4, CM:42. push하지 않았다.
+- `T_8CF/`(202 MB), `T_8C/`, `T_8BF/`, `T_8B/`는 지우지 않았다. CM §5의 보존이 아니다. scratchpad의 압축본 여덟은 그 자리에 둔다.
+- 커밋: 선언 `08a3632`, 스냅숏 `1377957`(lead), 시험 한 줄 `90e423c`, 이 절과 기록은 그다음 커밋이다(모두 "kz-static 8c/fix:").

@@ -1,0 +1,21 @@
+# test labels in MC after the 8c fix build, from ctest --show-only=json-v1 (the LABELS property of each test; no fixture setup test is pulled in)
+label static 45
+label golden 58
+label unit 84
+label runtime 66
+label lint 6
+label integration 4
+label instr 1
+label property 1
+label legacy-case 51
+all 239; legacy-case 51; new (not legacy-case) 188: label static 44, others 144
+  others with label runtime: 66
+  others with label unit: 63
+  others with label golden: 8
+  others with label lint: 6
+  others with label integration: 3
+  others with label instr: 1
+  others with label property: 1
+  sum of the others' labels 148; tests with two labels among the others: test_hold_ptrace (integration;unit), test_hold_sequence (integration;unit), test_probe_golden (golden;unit), test_probe_observe (integration;unit)
+legacy-case tests with label unit: 21
+# ctest -N -L '^unit$' lists 87 = label unit 84 + 3 fixture setup tests it pulls in: rt_end_kill, rt_end_normal, rt_end_segv (labels ['runtime']); test_kzrt_recovered (label unit) requires the fixtures rt_end_kill_dump, rt_end_normal_dump, rt_end_segv_dump

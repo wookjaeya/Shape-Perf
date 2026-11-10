@@ -1,0 +1,47 @@
+[HANDLER_VERBOSE_OUTPUT] 
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+
+UpdateCTestConfiguration  from :/home/user/work/merge-check/kz-llvm/DartConfiguration.tcl
+[HANDLER_OUTPUT] 
+Test project /home/user/work/merge-check/kz-llvm
+
+[HANDLER_VERBOSE_OUTPUT] 
+Constructing a list of tests
+
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 133
+[HANDLER_OUTPUT] 
+    Start 133: test_probe_anchor_reached
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+133: Test command: /home/user/work/merge-check/kz-llvm/tests/cfs-free/test_probe_anchor_reached "/home/user/work/merge-check/kz-llvm/tests/cfs-free/target_prog" "/home/user/work/merge-check/kz-llvm/tests/cfs-free/target_prog_dwarf4" "/home/user/work/merge-check/kz-llvm/tests/cfs-free/target_prog_alt" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free/target/target.kzp" "/home/user/Shape-Perf/research/cfs_procrace/kairos/tests/cfs-free/target/target_prog.c" "/home/user/Shape-Perf/research/cfs_procrace/kairos" "/home/user/work/merge-check/kz-llvm/tools/kz/kz" "/home/user/work/merge-check/kz-llvm/tests/cfs-free"
+
+133: Working Directory: /home/user/work/merge-check/kz-llvm/tests/cfs-free
+133: Test timeout computed to be: 300
+133: observe: not root, no tracefs (KZ_TRACEFS) or no binary: the run part skipped
+133: test_probe_anchor_reached: 74 checks passed
+[HANDLER_OUTPUT] 
+1/1 Test #133: test_probe_anchor_reached ........
+***Skipped   0.03 sec
+[HANDLER_VERBOSE_OUTPUT] 
+
+The following tests passed:
+
+	test_probe_anchor_reached
+[HANDLER_OUTPUT] 
+
+100% tests passed, 0 tests failed out of 1
+
+
+Label Time Summary:
+unit    =   0.03 sec*proc (1 test)
+
+Total Test time (real) =   0.04 sec
+
+The following tests did not run:
+	133 - test_probe_anchor_reached (Skipped)

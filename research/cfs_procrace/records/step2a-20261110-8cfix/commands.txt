@@ -1,3 +1,58 @@
 # declaration: sha256 of the AR lines from the 16.10 heading to the end, before the build = e37787c240b4070d9f572866858e70626d5e207a56f277a0de8fd70164a54544 (2026-11-10T09:47:30Z; declared_before_build.txt here; committed before the build)
 # step2a-20261110-8cfix: commands, rc and free space (df -B1 /, bytes available)
 start: 2026-11-10T09:47:30Z, free 448839680
+# <scratch> is this session's scratchpad directory (8cfix/); the scripts there are described here or copied here
+
+## 1. the 16 findings checked against files and outputs (AR 16.10.1), with the 8c tool ab482eab
+small C99 sources and their outputs: finding_checks.txt (rt.c, nest.c, blk.c, unn.c, o2.c, rd.c with a fake resource directory)
+grep 'target\.<anonymous>' tests_8c/<b>/NP/facts.txt -> 3 3 2 0 0; their lines only in sections argflow basis calls fstatus fwrites lockset locs outcalls reads returns writers; relations.txt 0
+grep -l 'Cell.id' kairos/tests/static/data/*.golden; grep -l Cell kairos/tests/static/fixtures/*.c -> nine goldens without a Cell fixture (AR 16.10.1 #3)
+ctest --show-only=json-v1 in MC -> labels (labels.txt); ctest -N -L '^unit$' -> 87 (84 + rt_end_kill, rt_end_normal, rt_end_segv)
+ctest -R '^test_probe_anchor_reached$' -V (8c tool) -> Skipped, rc 77 path: no tracefs; MC Testing/Temporary/LastTest.log unchanged by ctest -N (mtime 09:04Z)
+compare_8c.tsv: identity basis.kz/facts.kz/basis.txt/extract.txt/facts.txt 30 DIFF lines and npsame/<b>/extract.txt 5 against tests_8b_fix
+
+## 2. code, tests, lint, docs (working tree); the lead committed the working tree as 1377957 (stop hook, 09:45:53Z, pushed by someone else)
+lib/llvm/{spec.hpp,finalize.cpp}, tools/kz-static/cmd_extract.cpp, tests/lint/{kz_lint.cpp,data/case_identifiers.txt}, instrument/clang/CMakeLists.txt (comment),
+tests/static/test_static_cli.cpp, docs/{static_facts.md,schema.md,framework_layer.md}, plan/extraction_design_20261030.md (ED 8, one line)
+widened lint simulated on copies of the 37 files (as lib/, kz_lint 191d0da0): clean after the comment fix
+
+## 3. the declaration before the build: AR 16.10.0 and 16.10.1, committed as 08a3632 (09:47Z; line 1 above)
+
+## 4. free space (AR 16.10.0): pack.txt; eight scratch copies packed without loss, free 448630784 -> 662777856
+
+## 5. before touching MC (pre_mc.txt, 09:49:35Z): the seven tools equal the 8c post_mc.txt values (kz-instr-clang 28db4017 recorded this time)
+
+## 6. rebuild in place in MC
+cd MC && make -j4 all (09:49:51Z-09:52:26Z) -> rc 2: test_static_cli.cpp:1430 -Werror=shadow (a local 'out' in the new block); kz-static, kz_lint, libkz-llvm.a and the other static tests were linked
+the test fixed (std::string sv only), committed as 90e423c before the run
+cd MC && make -j4 all (09:52:47Z-09:53:56Z) -> rc 0; links test_static_cli only (make.log)
+CMake re-ran (instrument/clang/CMakeLists.txt); libkz-core identity f6e3c7b4 unchanged
+free: before 662728704 (09:49:51Z), lowest 588574720 (09:51:05Z), after 661970944 (09:53:56Z); df_build.log (watcher stops make below 330000000; did not trigger)
+find kairos/{lib,tools,include,cmake,CMakeLists.txt,probe,instrument,runtime} -newer <build start> -> 0; git diff 1377957 90e423c -- those paths -> 0 lines
+post_mc.txt: kz-static 0024f192 (tool_sha256 3b7de5b7, tool_source bbd48436), kz_lint b0f0d6a5; kz, kz-dump, kz-rt-dump, kz-phi, kz-instr-clang unchanged
+
+## 7. full ctest (09:54:04Z-09:54:24Z)
+ctest -j4 --output-on-failure -> ctest_full.log: 239 tests, 0 failed, 1 skipped (test_probe_anchor_reached), rc 0; label time summary: legacy-case 51, unit 84, runtime 66, static 45, golden 58
+ctest -R '^test_probe_anchor_reached$' -V -O records/step2a-20261110-8cfix/skip_reason.log -> Skipped; "observe: not root, no tracefs (KZ_TRACEFS) or no binary: the run part skipped" (this machine: euid 0, both tailjump binaries built, /sys/kernel/tracing/uprobe_events absent, KZ_TRACEFS not set)
+ctest -R '^(test_static_cli|lint_selftest|lint_case-ids)$' -V -> test_static_cli 752 checks passed; lint selftest 102 cases, 0 failed; lint case-ids clean
+git diff 1c5a093 -- kairos/tests/static/data kairos/tests/golden/data kairos/tests/phi/data -> 0; no new file there
+ctest --show-only=json-v1 -> labels.txt
+
+## 8. lint groups on copies (lint_groups.txt): total 2451 -> 2450 (instrument clang/CMakeLists.txt 1 -> 0)
+
+## 9. unit checks of the driver
+TMPDIR=<scratch>/unit/tmp bash env/redesign/step2a_tests_unit.sh -> unit.txt, 6 of 6, rc 0 (driver ccbb26f8, unit a02e56a8; the driver is not changed)
+
+## 10. the driver (2026-11-10T09:56:06Z - 2026-11-10T10:00:52Z)
+env -u STEP2A_ALLOW_TABLE -u STEP2A_RUNS -u STEP2A_OVERWRITE KZB=/home/user/work/merge-check/kz-llvm/tools \
+  bash R/env/redesign/step2a_tests.sh all /home/user/work/redesign/step2a/tests_8c_fix      -> rc 0, result all: PASS (status.txt); repo 90e423c, kairos_uncommitted_lines=0
+free: before 661454848 (09:56:06Z), lowest 436219904 (09:59:32Z), after 458211328 (10:00:52Z); df_run.log
+du -sb tests_8c_fix -> 202212496; find -type f | wc -l -> 149; sha256.txt 136 lines (sha256 e7949053...)
+
+## 11. checks after the run
+(cd T/ && sha256sum -c --quiet sha256.txt) -> rc 0; tests_rv4, tests_8b, tests_8b_fix, tests_8c, tests_8c_fix rc 0
+python3 -I compare_8cfix.py MC/tools/kz-dump/kz-dump compare_8cfix.tsv tests_8c_fix tests_8c tests_8b_fix T/ tests_rv4
+  -> tests_8c same 39 DIFF 110; tests_8b_fix same 34 DIFF 115; T/ same 29 DIFF 108 only-in-new 12; tests_rv4 same 34 DIFF 115
+  the (status, file) pairs against tests_8b_fix, T/ and tests_rv4 are those of compare_8c.tsv (0 differing pairs)
+grep unknown-target / unknown_target over tests_8c_fix *.txt -> 0
+nothing in RD, EB, CK, PV, T/ or a build tree deleted (free never below 300000000)

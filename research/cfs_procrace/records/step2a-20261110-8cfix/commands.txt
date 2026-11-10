@@ -56,3 +56,4 @@ python3 -I compare_8cfix.py MC/tools/kz-dump/kz-dump compare_8cfix.tsv tests_8c_
   the (status, file) pairs against tests_8b_fix, T/ and tests_rv4 are those of compare_8c.tsv (0 differing pairs)
 grep unknown-target / unknown_target over tests_8c_fix *.txt -> 0
 nothing in RD, EB, CK, PV, T/ or a build tree deleted (free never below 300000000)
+end: free 456429568 (2026-11-10T10:14:42Z, after the sync commit d7992fc)
